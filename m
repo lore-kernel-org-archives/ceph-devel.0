@@ -1,106 +1,220 @@
-From: yuxiang fang <abcdeffyx@gmail.com>
-Subject: Re: DBObjectMap::header_lock forcing filestore threads to be sequentail
-Date: Wed, 29 Nov 2017 12:46:16 +0800
-Message-ID: <CAOi4hNfDWAYHYpZMNPbF_ngQ6j=DV0ich68mtRA5iMdTRfax7Q@mail.gmail.com>
-References: <CAJACTueeM+yPph=1sA9YDEa_FB+7w7XObd8ZrzdU-qzvfiCPYA@mail.gmail.com>
- <CAJ4mKGaWZnm-cvTtXfPrteHnN0zAyHYyCfQ9vgL+-m1Kdo=EaA@mail.gmail.com> <CAJACTuf9i7d6Lbfgtqa_UYVGPZEU0jRdtucBo5jG-4ejjA6JXw@mail.gmail.com>
+From: xiaoyan li <wisher2003@gmail.com>
+Subject: Re: CDM for: pg log, pg info, and dup ops data storage
+Date: Wed, 29 Nov 2017 13:17:18 +0800
+Message-ID: <CAERxPZLxgfL=T8M9fB95pcr-oiZkA423B7jyDaafKJNSy_Xg=w@mail.gmail.com>
+References: <fad6dd2f-2d81-c05a-46a6-8dca32574e31@gmail.com>
+ <58231112-c4a0-9467-b139-4da070beb65a@gmail.com> <CAERxPZJccTJ3X7t6-O0FxCDiHekWX07MZcRZHQHMX1_Rr+=cSQ@mail.gmail.com>
+ <311fc115-343f-c38f-60f6-541c65fd0488@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pl0-f44.google.com ([209.85.160.44]:43538 "EHLO
-        mail-pl0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752651AbdK2Eqr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 23:46:47 -0500
-Received: by mail-pl0-f44.google.com with SMTP id x4so1367559plv.10
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 20:46:47 -0800 (PST)
-In-Reply-To: <CAJACTuf9i7d6Lbfgtqa_UYVGPZEU0jRdtucBo5jG-4ejjA6JXw@mail.gmail.com>
+Received: from mail-ot0-f175.google.com ([74.125.82.175]:35182 "EHLO
+        mail-ot0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750818AbdK2FRU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 00:17:20 -0500
+Received: by mail-ot0-f175.google.com with SMTP id q3so2038804oth.2
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 21:17:19 -0800 (PST)
+In-Reply-To: <311fc115-343f-c38f-60f6-541c65fd0488@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.a.nelson@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Xuehan
-
-Have a look at DBObjectMap::_lookup_map_header, it does things following:
-
-step 1. look up object header in memory cache, go step 2 if miss, or else return
-step 2. look up object header in leveldb, go step 3 if hit, or else
-return, that is code "db->get(HOBJECT_TO_SEQ, map_header_key(oid),
-&out);"
-step 3. add header to memory cache
-
-step 1 and step 3 is cpu intensive, and step 2 is I/O intensive.
-
-I think bottleneck is in step 2, you can watch cpu usage of filestore
-transaction apply threads to confirm it.
-
-So there are two solutions to improve it:
-1. promote cache hit ratio, avoid to inject too much objects that have
-omap k/v, maybe you can use xattr.
-2. speed up step 2, separate omap directory off osd directory and move
-leveldb to ssd by using filestore_omap_backend_path.
-
-thanks
-ivan from eisoo
-
-
-On Wed, Nov 29, 2017 at 11:11 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> Thanks, Greg and yuxiang:-)
->
-> We used mdtest on 70 nodes issuing "file creations" to cephfs to test
-> the maximum file creations that a cephfs instance with only one active
-> mds can do. During the test, we found that, even after the test, there
-> are still a lot of I/Os on the data pool, and the osd is under heavy
-> presure, just as shown in the attachment "apply_latency" and
-> "op_queue_ops". This should be caused by storing files' backtraces.
->
-> We also used gdbprof to probe the OSD, the result of which is in the
-> attachment "gdb.create.rocksdb.xfs.log". The result shows that the
-> major time of the execution of the OSD's filestore threads is spent on
-> waiting on the DBObjectMap::header_lock, and the only feasible actual
-> execution of filestore threads is adding the object header to
-> DBObjectMap::caches. Adding object headers would cause
-> DBObjectMap::caches to trim in which the cache's size has to computed
-> which is an O(N) operation in GNU STL list::size implementation. On
-> the other hand, adding object headers is protected by locking
-> "DBObjectMap::header_lock", and our configuration
-> "filestore_omap_header_cache_size" is 204800 which is very large and
-> would make the cache size computation take considerable time. So we
-> think it may be appropriate to move the adding object header operation
-> out of the locking field of  "DBObjectMap::header_lock", or maybe some
-> other mechanism of DBObjectMap::caches should be considered.
->
-> Thanks:-)
->
-> On 29 November 2017 at 06:59, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Tue, Nov 28, 2017 at 1:51 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>> Hi, everone.
->>>
->>> Recently, we did some stress tests on mds. We found that, when doing
->>> file creation test, the mdlog trim operations are very slow. After
->>> doing some debugging, we found that this could be due to execution of
->>> the OSD's filestore theads being forced to be nearly sequential. This
->>> can be found out in our result of gdbprof probing, which is attached
->>> with this email. In the gdbprof result, we can see that the most time
->>> consuming work of the filestore threads is the sizing of
->>> DBObjectMap::caches, and the reason of sequential execution of
->>> filestore threads is the locking of DBObjectMap::header_lock.
->>>
->>> After reading the corresponding source code, we found that
->>> MapHeaderLock is already doing the mutual exclusion of access of the
->>> omap object header. It seems that the locking of
->>> DBObjectMap::header_lock is not very necessary, or at least, it's not
->>> needed when adding the header to DBObjectMap::caches, which would lead
->>> to the sizing of the cache.
->>>
->>> Is this right?
+On Tue, Nov 21, 2017 at 9:53 PM, Mark Nelson <mark.a.nelson@gmail.com> wrote:
+> On 11/21/2017 02:25 AM, xiaoyan li wrote:
 >>
->> I'm a bit confused; can you explain exactly what you're testing and
->> exactly what you're measuring that leads you to think the mutexes are
->> overly expensive?
+>> Hi Mark,
 >>
->> Note that there's both a header_lock and a cache_lock; in a quick skim
->> they don't seem to be in gratuitous use (unless there are some disk
->> accesses hiding underneath the header_lock?) and the idea of them
->> being a performance bottleneck has not come up before.
->> -Greg
+>> My understanding about option 1 is to store pg logs(pg_log_entry_t) in
+>> allocated partition. And store pg_info_t and pg_log_t etc in RocksDB.
+>> Yes?
+>> Meanwhile, could you kindly help to clear the following concerns?
+>>
+>> 1. Does every pg have a ring buffer?  I suppose this is easier for
+>> every pg. Only when max_pg_log_entries changes, the buffer needs to
+>> change its size
+>
+> This is tricky.  For a KeyValueDB based solution, I think we'd want a per-pg
+> ring buffer, though Sage also proposed more or less leaving what we have now
+> in place but doing a similar thing by using fifo compaction with per-PG
+> column families in RocksDB.
+>
+> In the case where we write straight to disk, I think we'd want a series of
+> reference counted append-only logs that don't disappear until every PG has
+> released it.  In this case it wouldn't exactly be a ring buffer, but we'd
+> have one active log for all PGs to keep writes sequential.
+Sorry I don't understand why it is tricky to save pglogs per PG. For
+simple when write straight to disk, we can create BlueFS system on the
+disk. And then BlueStore creates folders per PG, and saves pglog into
+a file unit. Every file contains 100 pglog entries. When every time
+BlueStore stores new pglog entries into the latest file, if the file
+is full it closes the current file and create a new file. Meanwhile,
+if the number of the file is bigger than (total_max_pg_entries/100),
+it deletes the oldest file. This is a very raw idea.
+Anyway I am considering whether we need OSD to delete the pglogs when
+the pglogs are saved per PG.
+
+>
+>> 2. What for dup op entries for?
+>
+>
+> See: http://tracker.ceph.com/issues/20298
+>
+>> 3. Are the pg logs' and dup ops' insertion sequences same as their
+>> deletion sequences?
+>
+>
+> Per PG we can act like a FIFO afaik, but not over the set of all PGs on an
+> OSD.  Some PGs may be inactive and we need to keep those entries around even
+> when other active PGs are writing and deleting new ones. Josh is more
+> familiar with this code though so he may have additional information.
+>
+>
+>>
+>>
+>> On Mon, Oct 30, 2017 at 11:18 PM, Mark Nelson <mark.a.nelson@gmail.com>
+>> wrote:
+>>>
+>>> I forgot to mention, Josh also made the point that perhaps on NVMe we
+>>> don't
+>>> want to record pg log data at all.  Maybe the benefit of having the log
+>>> isn't worth the overhead!
+>>>
+>>> Mark
+>>>
+>>>
+>>> On 10/30/2017 09:51 AM, Mark Nelson wrote:
+>>>>
+>>>>
+>>>> Hi Folks,
+>>>>
+>>>> I had a really good conversation with Josh Durgin on Friday and I wanted
+>>>> to write it down before I forgot everything.  I figured I might as well
+>>>> post it here too since folks might be interested or come up with even
+>>>> better ideas.
+>>>>
+>>>> Background: Recently I've been looking into how much work RocksDB is
+>>>> doing in Bluestore dealing with the creation and deletion of pg log, pg
+>>>> info, and dup op key/value pairs.  Now that we are separating OMAP data
+>>>> into it's own column family, it is possible to look at OMAP statistics
+>>>> independently of bluestore metadata:
+>>>>
+>>>> - ~1 hour 4K random overwrites to RBD on 1 NVMe OSD
+>>>> - 128 PGs
+>>>> - stats are sloppy since they only appear every ~10 mins
+>>>> - [D] CF = onodes, etc
+>>>> - [M] CF = pglog/dup_ops/pginfo
+>>>> - [L] CF = defered IO
+>>>>
+>>>> First the default:
+>>>>
+>>>> min_pg_log_entries = 1500, trim = default, iops = 26.6K
+>>>>
+>>>> [D] CF - Size:  65.63MB, KeyIn:  22M, KeyDrop:  17M, Flush:  7.858GB
+>>>> [M] CF - Size: 118.09MB, KeyIn: 302M, KeyDrop: 269M, Flush: 15.847GB
+>>>> [L] CF - Size:   1.00MB, KeyIn: 181K, KeyDrop:  80K, Flush:  0.320GB
+>>>>
+>>>> With dup ops code path disabled by increasing the min pglog entries:
+>>>>
+>>>> min_pg_log_entries = 3000, trim = default iops = 28.3K
+>>>> [D] CF - Size:  23.13MB, KeyIn:  25M, KeyDrop:  19M, Flush:  8.762GB
+>>>> [M] CF - Size: 159.97MB, KeyIn: 202M, KeyDrop: 175M, Flush: 16.890GB
+>>>> [L] CF - Size:   0.86MB, KeyIn: 201K, KeyDrop:  89K, Flush:  0.355GB
+>>>>
+>>>> Notice the large drop in KeyIn and KeyDrop records!
+>>>>
+>>>> And now adding a hack to remove pginfo:
+>>>>
+>>>> min_pg_log_entries = 3000, trim = default, pginfo hack, iops = 27.8K
+>>>>
+>>>> [D] CF - Size:  23.15MB, KeyIn:  24M, KeyDrop:  19M, Flush:  8.662GB
+>>>> [M] CF - Size: 159.97MB, KeyIn: 162M, KeyDrop: 139M, Flush: 10.335GB
+>>>> [L] CF - Size:   1.39MB, KeyIn: 201K, KeyDrop:  89K, Flush:  0.355GB
+>>>>
+>>>> There's still 162M KeyIn and 139M keyDrop events for pglog remaining!
+>>>>
+>>>> So as a result of this I started thinking that there must be a better
+>>>> way to deal with this kind of data than constantly writing and deleting
+>>>> key/value pairs from the database, at least for dup ops and pg log.
+>>>> Based on my conversation with Josh it sounds like we are already reusing
+>>>> pginfo keys which might explain why hacking it out didn't result in a
+>>>> 33% drop in key inserts and deletes.
+>>>>
+>>>> For pg log and dup ops, my first thought was to simply create a simple
+>>>> on-disk ring-buffer for pglog and dup ops.  The idea being that instead
+>>>> of specifying a "min" and "max" number of pglog entries, the user would
+>>>> just assign a portion of the disk (in Bluestore perhaps a portion of the
+>>>> DB device) that would be reserved for the ring buffer and we'd fill it
+>>>> with as many pglog and dup op entries as we could.
+>>>>
+>>>> Josh keenly pointed out that we want to make sure that inactive PG logs
+>>>> don't get overwritten by active ones.  To deal with this, I proposed a
+>>>> modification: use a series of logs and reference count the per-pg links.
+>>>>   You'd never delete an old log until all references to it are removed.
+>>>> The problem here is that potentially if you had a lot of inactive PGs
+>>>> you could end up with pretty big space amplification.
+>>>>
+>>>> Advantages:
+>>>>
+>>>> 1) Avoid key creation/deletion
+>>>> 2) sequential appends only
+>>>> 3) Write once (no direct write amplification)
+>>>>
+>>>> Disadvantages:
+>>>>
+>>>> 1) potential for large space amp when PGs are inactive
+>>>> 2) lots of new code
+>>>> 3) potential for thrashing with the RocksDB WAL and other writes
+>>>>
+>>>> Josh pointed out another potential option: create a ring buffer in
+>>>> RocksDB with sequentially ordered keys.  The key names themselves are
+>>>> not particularly important: some prefix along with say an 8byte index.
+>>>> In this scenario we'd still end up writing to the WAL first and
+>>>> potentially compacting into an SST file, but the overhead should be less
+>>>> (far less?) than the current behavior.  We could also make it general
+>>>> enough that we could have per-pg ring buffers for pglog data and a
+>>>> global ringbuffer for dup-ops (which is sort of the best case scenario
+>>>> for both sitautions)
+>>>>
+>>>> Advantages:
+>>>>
+>>>> 1) Reuse the KeyValueDB interface (and all of the optimized RocksDB
+>>>> code!)
+>>>> 2) Still avoid new key creation/deletion
+>>>> 3) WAL writes are still sequentially laid out and compaction overhead
+>>>> may not be too bad
+>>>> 4) Shared WAL means less thrashing on spinning disks than multiple
+>>>> independent WALs.
+>>>> 4) Space amp potentially less bad than on-disk ring-buffer approach.
+>>>>
+>>>> Disadvantages:
+>>>>
+>>>> 1) still has compaction overhead
+>>>> 2) less control over what RocksDB does
+>>>> 3) shared WAL means implications for global KV traffic, even with
+>>>> independent column families.
+>>>>
+>>>> No matter what we do, I think we need to get away from the current
+>>>> behavior for pglog and dup ops.  Unless I'm missing something (and I
+>>>> could be!) I don't think we need to be creating and deleting keys
+>>>> constantly like we currently are doing.  I suspect that either of the
+>>>> above approaches would improve the situation dramatically.
+>>>>
+>>>> Mark
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>>
+>
+
+
+
+-- 
+Best wishes
+Lisa
