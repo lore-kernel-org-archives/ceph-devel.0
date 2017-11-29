@@ -1,85 +1,49 @@
-From: Kang Wang <beijingwangkang@gmail.com>
-Subject: Re: Question about ceph paxos implementation
-Date: Wed, 29 Nov 2017 14:54:21 +0800
-Message-ID: <C6E61660-A60B-4A6B-A4EA-E620D60144AD@gmail.com>
-References: <C3CABE81-22E1-4B8E-AA5A-22CEBF5D45A9@gmail.com>
- <alpine.DEB.2.11.1711271426100.28240@piezo.novalocal>
- <A3CDC94E-4353-45F1-86BF-9F334D499EB6@gmail.com>
- <alpine.DEB.2.11.1711281302400.19791@piezo.novalocal>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: Questions regarding mds early reply
+Date: Wed, 29 Nov 2017 16:33:45 +0800
+Message-ID: <CAAM7YAm4Dnzcc9uz-5iL9kaigoFbKjsZJjVP9J_LQX00zeia2w@mail.gmail.com>
+References: <CAEYCsVJCz4ecJNXyKLF0EyovJw8sLHwb_uzMBQaZVfasuuy+cw@mail.gmail.com>
+ <CAEYCsVJAamRkFeH_3St0dMybks97q09P4b-h0+nVrFNPy_c-BA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f41.google.com ([74.125.83.41]:33099 "EHLO
-        mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751537AbdK2Gy2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 01:54:28 -0500
-Received: by mail-pg0-f41.google.com with SMTP id g7so1105482pgs.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 22:54:28 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711281302400.19791@piezo.novalocal>
+Received: from mail-ot0-f175.google.com ([74.125.82.175]:32894 "EHLO
+        mail-ot0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbdK2Idq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 03:33:46 -0500
+Received: by mail-ot0-f175.google.com with SMTP id h9so2364631oti.0
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Nov 2017 00:33:46 -0800 (PST)
+In-Reply-To: <CAEYCsVJAamRkFeH_3St0dMybks97q09P4b-h0+nVrFNPy_c-BA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-You are right, Sage=20
+On Wed, Nov 29, 2017 at 10:15 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+> Hi,
+>
+>       When reading the early reply logical,  i am not very understand
+> why we can reply to the client before committing to journal?  Is there
+> anywhere the change get persisted or we rely on client-replay when MDS
+> failure happens?
 
-I have lost sight of that the uncommited_pn would be replaced by the new =
-accept_pn
-when uncommitted_value being re-proposed.
+Early reply is similar to the return of syscall on local filesystem.
+It only tells request initiator that mds has made the change to its
+cache. Later requests from the same client (request initiator) can
+read the change. Other clients can not read the change until the
+change get committed to journal.
 
-Thanks again and I rewrote the scenario for anyone who may have a same =
-question below.
-For simplicity, I used a increasing integer indicated pn,
-branket for commited value and parens for uncommited.
+>       If this is the case, what if the client also failed during this period?
+>
 
-
-1, m1 as the leader, and all node have the same last_commited at begin, =
-then m1 propose a new value =E2=80=982', which then be accept by m1 and =
-m3:
-m1:   [1, pn=3D123]   (2, pn=3D123)
-m2:   [1, pn=3D123]=20
-m3:   [1, pn=3D123]   (2, pn=3D123)
-m4:   [1, pn=3D123]=20
-m5:   [1, pn=3D123]  =09
-
-2, Unfortunatly, both m1 and m3 go down, and m2 become leader without =
-knowledge about the propse, and it propose a new value =E2=80=983'=20
-m1:   [1, pn=3D123]   (2, pn=3D123)  down=20
-m2:   [1, pn=3D123]   (3, pn=3D124)
-m3:   [1, pn=3D123]   (2, pn=3D123)  down
-m4:   [1, pn=3D123]=20
-m5:   [1, pn=3D123]=09
-
-3, Then m2 goes down before send anything to others, then m1, m3 =
-recovered and commit value =E2=80=982=E2=80=99 with the quorum m1, m3, =
-m4
-m1:   [1, pn=3D123]   [2, pn=3D125]=20
-m2:   [1, pn=3D123]   (3, pn=3D124)  down
-m3:   [1, pn=3D123]   (2, pn=3D125)=20
-m4:   [1, pn=3D123]   (2, pn=3D125)=20
-m5:   [1, pn=3D123]
-
-4, Before the commit message sent to others, m1 and m3 go down again. So =
-value =E2=80=983=E2=80=99 only commit on m1. Then m2 become leader once =
-more.
-m1:   [1, pn=3D123]   [2, pn=3D125]   down
-m2:   [1, pn=3D123]   (3, pn=3D124)
-m3:   [1, pn=3D123]   (2, pn=3D125)  down
-m4:   [1, pn=3D123]   (2, pn=3D125)=20
-m5:   [1, pn=3D123]
-
-5, Leader m2 see the uncommited value =E2=80=982=E2=80=99, with larger =
-pn than =E2=80=983', so it re-propse value =E2=80=982=E2=80=99 with a =
-newer pn
-m1:   [1, pn=3D123]   [2, pn=3D125]   down
-m2:   [1, pn=3D123]   [2, pn=3D126]
-m3:   [1, pn=3D123]   (2, pn=3D125)  down
-m4:   [1, pn=3D123]   [2, pn=3D126]=20
-m5:   [1, pn=3D123]   [2, pn=3D126]
+If both mds and client failed, the change gets lost. This does not
+compromise consistency because no other clients have seem the change.
 
 
-> On 28 Nov 2017, at 9:06 PM, Sage Weil <sage@newdream.net> wrote:
->=20
->=20
-
+>       Thanks for providing the hints.
+>
+> Xiaoxi
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
