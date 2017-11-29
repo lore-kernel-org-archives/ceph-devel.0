@@ -1,7 +1,7 @@
-From: Matt Benjamin <mbenjami@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
 Subject: Re: 12.2.2 Luminous validation status
-Date: Wed, 29 Nov 2017 16:11:46 -0500
-Message-ID: <CAKOnarkgAgS7o4rr2zRn3DEo473xzH0oG8icT_Yj6F+_bMwrJQ@mail.gmail.com>
+Date: Wed, 29 Nov 2017 13:14:19 -0800
+Message-ID: <CAMMFjmH+suoqXAnF=nvcPVN1kC=cU0nCizj-ewCYddzmcWzJeA@mail.gmail.com>
 References: <CAMMFjmH0-XbJ1P431bErnMS1BEaU3Ln9XhVMPbEte3ixm+YSzQ@mail.gmail.com>
  <9162c114-44ea-3153-fc3f-76fbd20e06b4@redhat.com> <CAMMFjmG_6UrMOEWmanz76GyGsJioFLt-ZAYRaYzQJ72LH2pRqA@mail.gmail.com>
  <87vai1ugkh.fsf@suse.com> <CAMMFjmGke9G7i2OLgBxQAdO+irkO7CXrT2zgKF1_KJnGPkE4yw@mail.gmail.com>
@@ -11,21 +11,25 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:41872 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753009AbdK2VLr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 16:11:47 -0500
-Received: by mail-it0-f42.google.com with SMTP id x28so5775548ita.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Nov 2017 13:11:47 -0800 (PST)
+Received: from mail-ot0-f181.google.com ([74.125.82.181]:42026 "EHLO
+        mail-ot0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752768AbdK2VOV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 16:14:21 -0500
+Received: by mail-ot0-f181.google.com with SMTP id i1so4306349oth.9
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Nov 2017 13:14:20 -0800 (PST)
 In-Reply-To: <CAMMFjmFGUaKq1NbAZHCVNBYd1_-xrh24yfhR_WdsQ9rMf4WxxA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, Abhishek Lekshmanan <abhishek@suse.com>, Josh Durgin <jdurgin@redhat.com>, Ilya Dryomov <idryomov@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Matt Benjamin <mbenjamin@redhat.com>, Casey Bodley <cbodley@redhat.com>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Josh Durgin <jdurgin@redhat.com>, Ilya Dryomov <idryomov@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Matt Benjamin <mbenjamin@redhat.com>, Casey Bodley <cbodley@redhat.com>
 
-approve
+Sorry for typo, should read:
 
-On Wed, Nov 29, 2017 at 4:05 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+fs - Patrick approved (IRC chat)
+
+rbd - Jason, one job still running, pls review/approve
+
+On Wed, Nov 29, 2017 at 1:05 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
 > Please see updates in the ticket http://tracker.ceph.com/issues/21830
 > Since this release is taking longer then usual (since 11/9/17) and we
 > have added several (many) commits on top of the initial RC, major
@@ -119,18 +123,3 @@ On Wed, Nov 29, 2017 at 4:05 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
 >> --
 >> Regards
 >> Kefu Chai
-
-
-
--- 
-
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
