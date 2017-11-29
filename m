@@ -1,136 +1,62 @@
-From: Igor Fedotov <ifedotov@suse.de>
-Subject: Re: metadata spill back onto block.slow before block.db filled up
-Date: Wed, 29 Nov 2017 13:15:10 +0300
-Message-ID: <adca6bbb-ffb0-78d0-1cc2-36dc286bf15c@suse.de>
-References: <CAKEPnAaF60ywk67KeZ4PkEcqKDqu8c_2_EjzSK_DqusDR2Fjog@mail.gmail.com>
- <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal>
- <fc7b7cd0-0b36-7bd7-0310-70cd9dcc1048@suse.de>
- <ceb00aa7-6229-362e-8234-4f7cbfc23cb2@gmail.com>
- <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
+From: Yoann Moulin <yoann.moulin-p8DiymsW2f8@public.gmane.org>
+Subject: Re: ceph-disk is now deprecated
+Date: Wed, 29 Nov 2017 13:51:09 +0100
+Message-ID: <ee27861a-0bcc-9035-9c5f-e807755eef3d@epfl.ch>
+References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:46185 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752681AbdK2KPP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 29 Nov 2017 05:15:15 -0500
-In-Reply-To: <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.a.nelson@gmail.com>, Sage Weil <sage@newdream.net>, shasha lu <lushasha08@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: fr-CH
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I've just updated the bug notes.
-
-Most probably the issue is caused by an already fixed bug in RocksDB,
-
-see 
-https://github.com/facebook/rocksdb/commit/65a9cd616876c7a1204e1a50990400e4e1f61d7e
-
-Hence the question is if we plan to backport the fix and how to arrange 
-that.
-
-Thanks,
-Igor
-
-On 11/28/2017 6:44 PM, Igor Fedotov wrote:
-> here it is
->
-> http://tracker.ceph.com/issues/22264
->
->
-> On 11/28/2017 6:37 PM, Mark Nelson wrote:
->> Looks like a bug guys! :)  Mind making a ticket in the tracker?
->>
->> Mark
->>
->> On 11/28/2017 07:39 AM, Igor Fedotov wrote:
->>> Looks like I can easily reproduce that (note slow_used_bytes):
->>>
->>>  "bluefs": {
->>>         "gift_bytes": 105906176,
->>>         "reclaim_bytes": 0,
->>>         "db_total_bytes": 4294959104,
->>>         "db_used_bytes": 76546048,
->>>         "wal_total_bytes": 1073737728,
->>>         "wal_used_bytes": 239075328,
->>>         "slow_total_bytes": 1179648000,
->>>         "slow_used_bytes": 63963136,
->>>         "num_files": 13,
->>>         "log_bytes": 2539520,
->>>         "log_compactions": 3,
->>>         "logged_bytes": 255176704,
->>>         "files_written_wal": 3,
->>>         "files_written_sst": 10,
->>>         "bytes_written_wal": 1932165189,
->>>         "bytes_written_sst": 340957748
->>>     },
->>>
->>>
->>> On 11/28/2017 4:17 PM, Sage Weil wrote:
->>>> Hi Shasha,
->>>>
->>>> On Tue, 28 Nov 2017, shasha lu wrote:
->>>>> Hi, Mark
->>>>> We test bluestore with 12.2.1.
->>>>> There are two host in our rgw cluster, each host contain 2 osds. The
->>>>> rgw pool size is 2.  Using a 5GB partition for db.wal, a 50GB SSD
->>>>> partition for block.db.
->>>>>
->>>>> # ceph --admin-daemon ceph-osd.1.asok config get rocksdb_db_paths
->>>>> {
->>>>>      "rocksdb_db_paths": "db,51002736640 db.slow,284999998054"
->>>>> }
->>>>>
->>>>> After writing about 400W 4k rgw objects, using ceph-bluestore-tool to
->>>>> export rocksdb file.
->>>>>
->>>>> # ceph-bluestore-tool bluefs-export --path /var/lib/ceph/osd/osd1
->>>>> --out-dir /tmp/osd1
->>>>> # cd /tmp/osd1
->>>>> # ls
->>>>> db  db.slow  db.wal
->>>>> # du -sh *
->>>>> 2.8G    db
->>>>> 809M    db.slow
->>>>> 439M    db.wal
->>>>>
->>>>> block.db partition have 50GB space, but it only contains ~3GB files.
->>>>> Then the metadata rolling over onto the db.slow.
->>>>> It seems that only L0-L2 files located in block.db. (L0 256M; L1 
->>>>> 256M;
->>>>> L2 2.5GB), L3 and higher level file located in db.slow.
->>>>>
->>>>> According to ceph docs, the metadata rolling over onto the db.slow
->>>>> only when block.db filled up. But in our env the block.db 
->>>>> partition is
->>>>> far from filled up.
->>>>> Did I make any mistakes?  Is there any additional options should be
->>>>> set to rocksdb?
->>>> You didn't make any mistakes--this should happen automatically.  It 
->>>> looks
->>>> like rocksdb isn't behaving as advertised.  I've opened
->>>> http://tracker.ceph.com/issues/22264 to track this.  We need to 
->>>> start by
->>>> reproducing the situation.
->>>>
->>>> My guess is that rocksdb is deciding that deciding that all of L3 
->>>> can't
->>>> fit on db and so it's putting all of L3 on db.slow?
->>>>
->>>> sage
->>>>
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe 
->>>> ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+TGUgMjcvMTEvMjAxNyDDoCAxNDozNiwgQWxmcmVkbyBEZXphIGEgw6ljcml0wqA6Cj4gRm9yIHRo
+ZSB1cGNvbWluZyBMdW1pbm91cyByZWxlYXNlICgxMi4yLjIpLCBjZXBoLWRpc2sgd2lsbCBiZQo+
+IG9mZmljaWFsbHkgaW4gJ2RlcHJlY2F0ZWQnIG1vZGUgKGJ1ZyBmaXhlcyBvbmx5KS4gQSBsYXJn
+ZSBiYW5uZXIgd2l0aAo+IGRlcHJlY2F0aW9uIGluZm9ybWF0aW9uIGhhcyBiZWVuIGFkZGVkLCB3
+aGljaCB3aWxsIHRyeSB0byByYWlzZQo+IGF3YXJlbmVzcy4KPiAKPiBXZSBhcmUgc3Ryb25nbHkg
+c3VnZ2VzdGluZyB1c2luZyBjZXBoLXZvbHVtZSBmb3IgbmV3IChhbmQgb2xkKSBPU0QKPiBkZXBs
+b3ltZW50cy4gVGhlIG9ubHkgY3VycmVudCBleGNlcHRpb25zIHRvIHRoaXMgYXJlIGVuY3J5cHRl
+ZCBPU0RzCj4gYW5kIEZyZWVCU0Qgc3lzdGVtcwo+IAo+IEVuY3J5cHRpb24gc3VwcG9ydCBpcyBw
+bGFubmVkIGFuZCB3aWxsIGJlIGNvbWluZyBzb29uIHRvIGNlcGgtdm9sdW1lLgo+IAo+IEEgZmV3
+IGl0ZW1zIHRvIGNvbnNpZGVyOgo+IAo+ICogY2VwaC1kaXNrIGlzIGV4cGVjdGVkIHRvIGJlIGZ1
+bGx5IHJlbW92ZWQgYnkgdGhlIE1pbWljIHJlbGVhc2UKPiAqIEV4aXN0aW5nIE9TRHMgYXJlIHN1
+cHBvcnRlZCBieSBjZXBoLXZvbHVtZS4gVGhleSBjYW4gYmUgInRha2VuIG92ZXIiIFswXQo+ICog
+Y2VwaC1hbnNpYmxlIGFscmVhZHkgZnVsbHkgc3VwcG9ydHMgY2VwaC12b2x1bWUgYW5kIHdpbGwg
+c29vbiBkZWZhdWx0IHRvIGl0Cj4gKiBjZXBoLWRlcGxveSBzdXBwb3J0IGlzIHBsYW5uZWQgYW5k
+IHNob3VsZCBiZSBmdWxseSBpbXBsZW1lbnRlZCBzb29uCj4gCj4gCj4gWzBdIGh0dHA6Ly9kb2Nz
+LmNlcGguY29tL2RvY3MvbWFzdGVyL2NlcGgtdm9sdW1lL3NpbXBsZS8KPiAtLQo+IFRvIHVuc3Vi
+c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
+dmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sCgpJcyB0aGF0IHBvc3NpYmxlIHRvIHVwZGF0ZSB0aGUgImFkZC1vci1y
+bS1vc2RzIiBkb2N1bWVudGF0aW9uIHRvIGhhdmUgYWxzbyB0aGUgcHJvY2VzcyB3aXRoIGNlcGgt
+dm9sdW1lLiBUaGF0IHdvdWxkIGhlbHAgdG8gdGhlIGFkb3B0aW9uLgoKaHR0cDovL2RvY3MuY2Vw
+aC5jb20vZG9jcy9tYXN0ZXIvcmFkb3Mvb3BlcmF0aW9ucy9hZGQtb3Itcm0tb3Nkcy8KClRoaXMg
+cGFnZSBzaG91bGQgYmUgdXBkYXRlZCBhcyB3ZWxsIHdpdGggY2VwaC12b2x1bWUgY29tbWFuZC4K
+Cmh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JhZG9zL29wZXJhdGlvbnMvYmx1ZXN0
+b3JlLW1pZ3JhdGlvbi8KCkRvY3VtZW50YXRpb24gKGF0IGxlYXN0IGZvciBtYXN0ZXIsIG1heWJl
+IGZvciBsdW1pbm91cykgc2hvdWxkIGtlZXAgYm90aCBvcHRpb25zIChjZXBoLWRpc2sgYW5kIGNl
+cGgtdm9sdW1lKSBidXQgd2l0aCBhIHdhcm5pbmcgbWVzc2FnZSB0bwplbmNvdXJhZ2UgcGVvcGxl
+IHRvIHVzZSBjZXBoLXZvbHVtZSBpbnN0ZWFkIG9mIGNlcGgtZGlzay4KCkkgYWdyZWUgd2l0aCBj
+b21tZW50cyBoZXJlIHRoYXQgc2F5IGNoYW5naW5nIHRoZSBzdGF0dXMgb2YgY2VwaC1kaXNrIGFz
+IGRlcHJlY2F0ZWQgaW4gYSBtaW5vciByZWxlYXNlIGlzIG5vdCB3aGF0IEkgZXhwZWN0IGZvciBh
+IHN0YWJsZSBzdG9yYWdlCnN5c3RlbXMgYnV0IEkgYWxzbyB1bmRlcnN0YW5kIHRoZSBuZWNlc3Np
+dHkgdG8gbW92ZSBmb3J3YXJkIHdpdGggY2VwaC12b2x1bWUgKGFuZCBibHVlc3RvcmUpLiBJIHRo
+aW5rIGtlZXBpbmcgY2VwaC1kaXNrIGluIG1pbWljIGlzIG5lY2Vzc2FyeSwKZXZlbiB0aG91Z2gg
+dGhlcmUgaXMgbm8gdXBkYXRlLCBqdXN0IGZvciBjb21wYXRpYmlsaXR5IHdpdGggb2xkIHNjcmlw
+dHMuCgotLSAKWW9hbm4gTW91bGluCkVQRkwgSUMtSVQKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vy
+c0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb20K
