@@ -1,155 +1,122 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: metadata spill back onto block.slow before block.db filled up
-Date: Wed, 29 Nov 2017 13:07:05 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1711291306231.19791@piezo.novalocal>
-References: <CAKEPnAaF60ywk67KeZ4PkEcqKDqu8c_2_EjzSK_DqusDR2Fjog@mail.gmail.com> <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal> <fc7b7cd0-0b36-7bd7-0310-70cd9dcc1048@suse.de> <ceb00aa7-6229-362e-8234-4f7cbfc23cb2@gmail.com> <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
- <adca6bbb-ffb0-78d0-1cc2-36dc286bf15c@suse.de>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: DBObjectMap::header_lock forcing filestore threads to be sequentail
+Date: Wed, 29 Nov 2017 07:25:45 -0800
+Message-ID: <CAJ4mKGb6TdZ4dzJs6AeBxGsp1asLSpFm8Q=i4ZHNy22kyGCOYg@mail.gmail.com>
+References: <CAJACTueeM+yPph=1sA9YDEa_FB+7w7XObd8ZrzdU-qzvfiCPYA@mail.gmail.com>
+ <CAJ4mKGaWZnm-cvTtXfPrteHnN0zAyHYyCfQ9vgL+-m1Kdo=EaA@mail.gmail.com>
+ <CAJACTuf9i7d6Lbfgtqa_UYVGPZEU0jRdtucBo5jG-4ejjA6JXw@mail.gmail.com> <CAOi4hNfDWAYHYpZMNPbF_ngQ6j=DV0ich68mtRA5iMdTRfax7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-448249132-1511960827=:19791"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:57115 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752403AbdK2NHI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 08:07:08 -0500
-In-Reply-To: <adca6bbb-ffb0-78d0-1cc2-36dc286bf15c@suse.de>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:42365 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932958AbdK2PZr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 10:25:47 -0500
+Received: by mail-io0-f176.google.com with SMTP id u42so4054756ioi.9
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Nov 2017 07:25:47 -0800 (PST)
+In-Reply-To: <CAOi4hNfDWAYHYpZMNPbF_ngQ6j=DV0ich68mtRA5iMdTRfax7Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@suse.de>
-Cc: Mark Nelson <mark.a.nelson@gmail.com>, shasha lu <lushasha08@gmail.com>, ceph-devel@vger.kernel.org
+To: yuxiang fang <abcdeffyx@gmail.com>
+Cc: Xuehan Xu <xxhdx1985126@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, Nov 28, 2017 at 8:46 PM, yuxiang fang <abcdeffyx@gmail.com> wrote:
+> Hi Xuehan
+>
+> Have a look at DBObjectMap::_lookup_map_header, it does things following:
+>
+> step 1. look up object header in memory cache, go step 2 if miss, or else return
+> step 2. look up object header in leveldb, go step 3 if hit, or else
+> return, that is code "db->get(HOBJECT_TO_SEQ, map_header_key(oid),
+> &out);"
+> step 3. add header to memory cache
+>
+> step 1 and step 3 is cpu intensive, and step 2 is I/O intensive.
+>
+> I think bottleneck is in step 2, you can watch cpu usage of filestore
+> transaction apply threads to confirm it.
+>
+> So there are two solutions to improve it:
+> 1. promote cache hit ratio, avoid to inject too much objects that have
+> omap k/v, maybe you can use xattr.
+> 2. speed up step 2, separate omap directory off osd directory and move
+> leveldb to ssd by using filestore_omap_backend_path.
 
---8323329-448249132-1511960827=:19791
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+I think your diagnosis is correct, but I'd like to see some less
+invasive methods for improving it.
 
-On Wed, 29 Nov 2017, Igor Fedotov wrote:
-> I've just updated the bug notes.
-> 
-> Most probably the issue is caused by an already fixed bug in RocksDB,
-> 
-> see
-> https://github.com/facebook/rocksdb/commit/65a9cd616876c7a1204e1a50990400e4e1f61d7e
-> 
-> Hence the question is if we plan to backport the fix and how to arrange that.
+I haven't spent much time looking at the code, but I think it ought to
+be possible to set up a different consistency mechanism which drops
+locks around IO while preventing concurrent access to the specific
+header in question, right?
 
-If you cna confirm the problem doesn't reproduce after cherry-picking that 
-commit, we can just do that for the luminous branch.
+Oh, and I presume the runtime efficiency of finding the cache size is
+not really an issue, but if it is that's easy to optimize away with a
+counter...
+-Greg
 
-For master, let's fast forward rocksdb past it?
-
-sage
-
-
-> 
-> Thanks,
-> Igor
-> 
-> On 11/28/2017 6:44 PM, Igor Fedotov wrote:
-> > here it is
-> > 
-> > http://tracker.ceph.com/issues/22264
-> > 
-> > 
-> > On 11/28/2017 6:37 PM, Mark Nelson wrote:
-> > > Looks like a bug guys! :)  Mind making a ticket in the tracker?
-> > > 
-> > > Mark
-> > > 
-> > > On 11/28/2017 07:39 AM, Igor Fedotov wrote:
-> > > > Looks like I can easily reproduce that (note slow_used_bytes):
-> > > > 
-> > > >  "bluefs": {
-> > > >         "gift_bytes": 105906176,
-> > > >         "reclaim_bytes": 0,
-> > > >         "db_total_bytes": 4294959104,
-> > > >         "db_used_bytes": 76546048,
-> > > >         "wal_total_bytes": 1073737728,
-> > > >         "wal_used_bytes": 239075328,
-> > > >         "slow_total_bytes": 1179648000,
-> > > >         "slow_used_bytes": 63963136,
-> > > >         "num_files": 13,
-> > > >         "log_bytes": 2539520,
-> > > >         "log_compactions": 3,
-> > > >         "logged_bytes": 255176704,
-> > > >         "files_written_wal": 3,
-> > > >         "files_written_sst": 10,
-> > > >         "bytes_written_wal": 1932165189,
-> > > >         "bytes_written_sst": 340957748
-> > > >     },
-> > > > 
-> > > > 
-> > > > On 11/28/2017 4:17 PM, Sage Weil wrote:
-> > > > > Hi Shasha,
-> > > > > 
-> > > > > On Tue, 28 Nov 2017, shasha lu wrote:
-> > > > > > Hi, Mark
-> > > > > > We test bluestore with 12.2.1.
-> > > > > > There are two host in our rgw cluster, each host contain 2 osds. The
-> > > > > > rgw pool size is 2.  Using a 5GB partition for db.wal, a 50GB SSD
-> > > > > > partition for block.db.
-> > > > > > 
-> > > > > > # ceph --admin-daemon ceph-osd.1.asok config get rocksdb_db_paths
-> > > > > > {
-> > > > > >      "rocksdb_db_paths": "db,51002736640 db.slow,284999998054"
-> > > > > > }
-> > > > > > 
-> > > > > > After writing about 400W 4k rgw objects, using ceph-bluestore-tool
-> > > > > > to
-> > > > > > export rocksdb file.
-> > > > > > 
-> > > > > > # ceph-bluestore-tool bluefs-export --path /var/lib/ceph/osd/osd1
-> > > > > > --out-dir /tmp/osd1
-> > > > > > # cd /tmp/osd1
-> > > > > > # ls
-> > > > > > db  db.slow  db.wal
-> > > > > > # du -sh *
-> > > > > > 2.8G    db
-> > > > > > 809M    db.slow
-> > > > > > 439M    db.wal
-> > > > > > 
-> > > > > > block.db partition have 50GB space, but it only contains ~3GB files.
-> > > > > > Then the metadata rolling over onto the db.slow.
-> > > > > > It seems that only L0-L2 files located in block.db. (L0 256M; L1
-> > > > > > 256M;
-> > > > > > L2 2.5GB), L3 and higher level file located in db.slow.
-> > > > > > 
-> > > > > > According to ceph docs, the metadata rolling over onto the db.slow
-> > > > > > only when block.db filled up. But in our env the block.db partition
-> > > > > > is
-> > > > > > far from filled up.
-> > > > > > Did I make any mistakes?  Is there any additional options should be
-> > > > > > set to rocksdb?
-> > > > > You didn't make any mistakes--this should happen automatically.  It
-> > > > > looks
-> > > > > like rocksdb isn't behaving as advertised.  I've opened
-> > > > > http://tracker.ceph.com/issues/22264 to track this.  We need to start
-> > > > > by
-> > > > > reproducing the situation.
-> > > > > 
-> > > > > My guess is that rocksdb is deciding that deciding that all of L3
-> > > > > can't
-> > > > > fit on db and so it's putting all of L3 on db.slow?
-> > > > > 
-> > > > > sage
-> > > > > 
-> > > > > -- 
-> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > > > in
-> > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > More majordomo info at http://vger.kernel.org/majordomo-info.html
-> > > > 
-> > 
-> > -- 
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-448249132-1511960827=:19791--
+>
+> thanks
+> ivan from eisoo
+>
+>
+> On Wed, Nov 29, 2017 at 11:11 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>> Thanks, Greg and yuxiang:-)
+>>
+>> We used mdtest on 70 nodes issuing "file creations" to cephfs to test
+>> the maximum file creations that a cephfs instance with only one active
+>> mds can do. During the test, we found that, even after the test, there
+>> are still a lot of I/Os on the data pool, and the osd is under heavy
+>> presure, just as shown in the attachment "apply_latency" and
+>> "op_queue_ops". This should be caused by storing files' backtraces.
+>>
+>> We also used gdbprof to probe the OSD, the result of which is in the
+>> attachment "gdb.create.rocksdb.xfs.log". The result shows that the
+>> major time of the execution of the OSD's filestore threads is spent on
+>> waiting on the DBObjectMap::header_lock, and the only feasible actual
+>> execution of filestore threads is adding the object header to
+>> DBObjectMap::caches. Adding object headers would cause
+>> DBObjectMap::caches to trim in which the cache's size has to computed
+>> which is an O(N) operation in GNU STL list::size implementation. On
+>> the other hand, adding object headers is protected by locking
+>> "DBObjectMap::header_lock", and our configuration
+>> "filestore_omap_header_cache_size" is 204800 which is very large and
+>> would make the cache size computation take considerable time. So we
+>> think it may be appropriate to move the adding object header operation
+>> out of the locking field of  "DBObjectMap::header_lock", or maybe some
+>> other mechanism of DBObjectMap::caches should be considered.
+>>
+>> Thanks:-)
+>>
+>> On 29 November 2017 at 06:59, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>> On Tue, Nov 28, 2017 at 1:51 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>>>> Hi, everone.
+>>>>
+>>>> Recently, we did some stress tests on mds. We found that, when doing
+>>>> file creation test, the mdlog trim operations are very slow. After
+>>>> doing some debugging, we found that this could be due to execution of
+>>>> the OSD's filestore theads being forced to be nearly sequential. This
+>>>> can be found out in our result of gdbprof probing, which is attached
+>>>> with this email. In the gdbprof result, we can see that the most time
+>>>> consuming work of the filestore threads is the sizing of
+>>>> DBObjectMap::caches, and the reason of sequential execution of
+>>>> filestore threads is the locking of DBObjectMap::header_lock.
+>>>>
+>>>> After reading the corresponding source code, we found that
+>>>> MapHeaderLock is already doing the mutual exclusion of access of the
+>>>> omap object header. It seems that the locking of
+>>>> DBObjectMap::header_lock is not very necessary, or at least, it's not
+>>>> needed when adding the header to DBObjectMap::caches, which would lead
+>>>> to the sizing of the cache.
+>>>>
+>>>> Is this right?
+>>>
+>>> I'm a bit confused; can you explain exactly what you're testing and
+>>> exactly what you're measuring that leads you to think the mutexes are
+>>> overly expensive?
+>>>
+>>> Note that there's both a header_lock and a cache_lock; in a quick skim
+>>> they don't seem to be in gratuitous use (unless there are some disk
+>>> accesses hiding underneath the header_lock?) and the idea of them
+>>> being a performance bottleneck has not come up before.
+>>> -Greg
