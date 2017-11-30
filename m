@@ -1,44 +1,57 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developers Monthly - December
-Date: Thu, 30 Nov 2017 15:35:44 -0200
-Message-ID: <20171130173544.GA9639@t460.local>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Re: dropping trusty
+Date: Thu, 30 Nov 2017 12:55:26 -0500
+Message-ID: <f3f4d84b-2df0-0b7d-65f1-074e4d308348@redhat.com>
+References: <alpine.DEB.2.11.1711301711470.12766@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:46862 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753693AbdK3Rz1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 30 Nov 2017 12:55:27 -0500
+In-Reply-To: <alpine.DEB.2.11.1711301711470.12766@piezo.novalocal>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Cc: ceph-users@ceph.com
 
-Hey Cephers,
+On 11/30/2017 12:21 PM, Sage Weil wrote:
+> We're talking about dropping trusty support for mimic due to the old 
+> compiler (incomplete C++11), hassle of using an updated toolchain, general 
+> desire to stop supporting old stuff, and lack of user objections to 
+> dropping it in the next release.
+> 
+> We would continue to build trusty packages for luminous and older 
+> releases, just not mimic going forward.
+> 
+> My question is whether we should drop all of the trusty installs on smithi 
+> and focus testing on xenial and centos.  I haven't seen any trusty related 
+> failures in half a year.  There were some kernel-related issues 6+ months 
+> ago that are resolved, and there is a valgrind issue with xenial that is 
+> making us do valgrind only on centos, but otherwise I don't recall any 
+> other problems.  I think the likelihood of a trusty-specific regression on 
+> luminous/jewel is low.  Note that we can still do install and smoke 
+> testing on VMs to ensure the packages work; we just wouldn't stress test.
+> 
+> Does this seem reasonable?  If so, we could reimage the trusty hosts 
+> immediately, right?
+> 
+> Am I missing anything?
+> 
 
-This is just a friendly reminder that the next Ceph Developer Montly
-meeting is coming up:
+Someone would need to prune through the qa dir and make sure nothing
+relies on trusty for tests.  We've gotten into a bind recently with the
+testing of FOG [1] where jobs are stuck in Waiting for a long time
+(tying up workers) because jobs are requesting Trusty.  We got close to
+having zero Trusty testnodes since the wip-fog branch has been reimaging
+baremetal testnodes on every job.
 
- http://wiki.ceph.com/Planning
+But other than that, yes, I can reimage the Trusty testnodes.  Once FOG
+is merged into teuthology master, we won't have to worry about this
+anymore since jobs will automatically reimage machines based on what
+distro they require.
 
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
-
- http://wiki.ceph.com/CDM_06-DEC-2017
-
-If you have questions or comments, please let us know.
-
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+[1] https://github.com/ceph/teuthology/compare/wip-fog
