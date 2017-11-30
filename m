@@ -1,55 +1,87 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] ceph: decease session->s_trim_caps only after caps get trimmed
-Date: Thu, 30 Nov 2017 15:53:58 +0800
-Message-ID: <20171130075358.7803-1-zyan@redhat.com>
+From: Li Wang <laurence.liwang@gmail.com>
+Subject: Re: About the "temperature histogram" of tier-agent
+Date: Thu, 30 Nov 2017 16:51:37 +0800
+Message-ID: <CAOsMsV2bmp1-Jdg0Ur+=oF+R=_9zjxw+hjODtN=wCz=VFaqnLQ@mail.gmail.com>
+References: <CAHMqkF7XOhzrQJODwOGnz-0Y8echtdQPEamcNL126w5ctW4+Xg@mail.gmail.com>
+ <alpine.DEB.2.11.1711281319000.2819@piezo.novalocal>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55494 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750890AbdK3HyG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 30 Nov 2017 02:54:06 -0500
+Received: from mail-qt0-f195.google.com ([209.85.216.195]:45627 "EHLO
+        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751031AbdK3Ivi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Nov 2017 03:51:38 -0500
+Received: by mail-qt0-f195.google.com with SMTP id g10so7782361qtj.12
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Nov 2017 00:51:38 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1711281319000.2819@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: jlayton@redhat.com, "Yan, Zheng" <zyan@redhat.com>, stable@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: mingxinliu@ubuntukylin.com, ceph-devel@vger.kernel.org, YuFan Chen <wiz.chen@gmail.com>
 
-d_prune_aliases() does not prune dentry that has non-zero reference
-count. If we want trim_caps() to trim 'N' caps, the first 'N' inodes
-in session->s_caps are all directories with child dentry, trim_caps()
-can fail to trim anything.
+Hi,
+  This makes sense, the variable name 'temp_upper' is really confusing
+which in fact does not count the number of hot objects. However, personally,
+I prefer use  temp_lower as follows,
 
-Cc: stable@vger.kernel.org
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- fs/ceph/mds_client.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+if (temp_lower >= agent_state->evict_effort)
+  return false;
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 80339e278ad8..da181acd4a61 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1490,16 +1490,20 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
- 	if ((used | wanted) & ~oissued & mine)
- 		goto out;   /* we need these caps */
- 
--	session->s_trim_caps--;
- 	if (oissued) {
- 		/* we aren't the only cap.. just remove us */
- 		__ceph_remove_cap(cap, true);
-+		session->s_trim_caps--;
- 	} else {
-+		int refs;
- 		/* try dropping referring dentries */
- 		spin_unlock(&ci->i_ceph_lock);
- 		d_prune_aliases(inode);
-+		refs = atomic_read(&inode->i_count);
-+		if (refs == 1)
-+			session->s_trim_caps--;
- 		dout("trim_caps_cb %p cap %p  pruned, count now %d\n",
--		     inode, cap, atomic_read(&inode->i_count));
-+		     inode, cap, refs);
- 		return 0;
- 	}
- 
--- 
-2.13.6
+Cheers,
+Li Wang
 
+2017-11-28 21:20 GMT+08:00 Sage Weil <sage@newdream.net>:
+> Hi MingXin, Li,
+>
+> Does the below make sense to you?
+>
+> Thanks!
+> sage
+>
+>
+> On Tue, 28 Nov 2017, YuFan Chen wrote:
+>
+>> Hi,
+>>
+>>    Before Jewel, the code uses "atime" to distinguish hot/cold data:
+>>
+>>           agent_estimate_atime_temp() calculates the distance.
+>>           It means colder data gets longer distance (larger value)
+>>
+>>
+>>    In Jewel, it changes to use temperature with weight.
+>>             So, colder data gets smaller value.
+>>
+>>     However, it still use the "old semantics" to determine evicting or not in
+>>            ReplicatedPG::agent_estimate_atime_temp();
+>>
+>>     if (1000000 - temp_upper >= agent_state->evict_effort)
+>>        return false;
+>>
+>>
+>>      if there is no misunderstanding, should it change to that:
+>>
+>> --- a/src/osd/ReplicatedPG.cc
+>> +++ b/src/osd/ReplicatedPG.cc
+>> @@ -12211,7 +12211,7 @@ bool
+>> ReplicatedPG::agent_maybe_evict(ObjectContextRef& obc, bool
+>> after_flush)
+>>      delete f;
+>>      *_dout << dendl;
+>>
+>> -    if (1000000 - temp_upper >= agent_state->evict_effort)
+>> +    if (temp_upper >= agent_state->evict_effort)
+>>        return false;
+>>    }
+>>
+>> Yu Fan
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
