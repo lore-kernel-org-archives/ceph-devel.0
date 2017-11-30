@@ -1,100 +1,151 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] ceph: drop negtive child dentries before try pruning
- inode's alias
-Date: Thu, 30 Nov 2017 09:37:41 -0500
-Message-ID: <1512052661.4132.4.camel@redhat.com>
-References: <20171130141259.8577-1-zyan@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Thu, 30 Nov 2017 14:38:38 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal> <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com> <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com> <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
+ <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com> <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com> <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f195.google.com ([209.85.220.195]:37457 "EHLO
-        mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750943AbdK3Oho (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Nov 2017 09:37:44 -0500
-Received: by mail-qk0-f195.google.com with SMTP id i130so9058736qke.4
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Nov 2017 06:37:44 -0800 (PST)
-In-Reply-To: <20171130141259.8577-1-zyan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48301 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751811AbdK3Oim (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 30 Nov 2017 09:38:42 -0500
+In-Reply-To: <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: kefu chai <tchaikov@gmail.com>, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, "kchai@redhat.com" <kchai@redhat.com>, James Page <james.page@ubuntu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 2017-11-30 at 22:12 +0800, Yan, Zheng wrote:
-> negtive child dentry holds reference on inode's alias, it makes
-> d_prune_aliases() do nothing.
+On Thu, 30 Nov 2017, Nathan Cutler wrote:
+> I thought we already agreed to drop Trusty in Mimic?
+
+I'm not sure we made any final decision, but I haven't seen anyone 
+complain this time around, so I'd say let's do it!
+
+sage
+
+
+> On 11/30/2017 11:15 AM, kefu chai wrote:
+> > On Wed, Nov 15, 2017 at 2:47 PM, kefu chai <tchaikov@gmail.com> wrote:
+> > > On Wed, Nov 15, 2017 at 6:04 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> > > > On Tue, Nov 14, 2017 at 5:49 AM, kefu chai <tchaikov@gmail.com> wrote:
+> > > > > On Mon, Nov 13, 2017 at 5:29 PM, kefu chai <tchaikov@gmail.com> wrote:
+> > > > > > On Sat, Nov 11, 2017 at 1:47 AM, Sage Weil <sweil@redhat.com> wrote:
+> > > > > > > We noticed a big performance regression when switching some code
+> > > > > > > to
+> > > > > > > use list::size() because although C++11 promizes that it is O(1),
+> > > > > > > some of
+> > > > > > > the libstdc++'s out there are still O(n).  This PR aims to fix
+> > > > > > > that
+> > > > > > > 
+> > > > > > >          https://github.com/ceph/ceph/pull/18863
+> > > > > > > 
+> > > > > > > by adding the various devtoolset packages as dependencies to pull
+> > > > > > > in
+> > > > > > > updated build toolchains.  For el7 that's
+> > > > > > > devtoolset-7-{binutils,gcc-c++}.
+> > > > > > > 
+> > > > > 
+> > > > > when running the binaries built using GCC 5.1 in an env where an old
+> > > > > libstdc++ (typically comes with GCC 4.8):
+> > > > > 
+> > > > > $ rados
+> > > > > rados: relocation error: /usr/lib/ceph/libceph-common.so.0: symbol
+> > > > > _ZTINSt8ios_base7failureB5cxx11E, version GLIBCXX_3.4.21 not defined
+> > > > > in file libstdc++.so.6 with link time reference
+> > > > > 
+> > > > > because libstdc++ introduced a new ABI which is incompatible with the
+> > > > > old one.
+> > > > > see
+> > > > > https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+> > > > > and
+> > > > > https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/ .
+> > > > > 
+> > > > > in other words, we need to either 1) link statically with libstdc++.so
+> > > > > or
+> > > > > 2) include it in librados2 on distros with GCC version less than 5.1.
+> > > > > because
+> > > > > ceph-osd (and other daemons packages) => ceph-base => ceph-common =>
+> > > > > python-rados => librados2.
+> > > > 
+> > > > For 1), what does that imply for packages' debuginfo sizes?
+> > > 
+> > > since we don't compile the source of libstdc++, i don't think this
+> > > will increase the size of debuginfo.
+> > > 
+> > > > 
+> > > > For 2), where would libstdc++.so ship in the filesystem? What does
+> > > > that mean for other applications that would load libstdc++.so and also
+> > > > link with ceph?
+> > > 
+> > > if we just statically link libceph-common against libstdc++, and let
+> > > daemons link againt libceph-common, the problem will be solved. that's
+> > > actually 2) but after a second thought, i think it's a better
+> > > approach. please note, the daemons are linked against libceph-common
+> > > statically. [OT] we could let daemon link libceph-common dynamically,
+> > > but the downside is that the daemon will need to depend on a client
+> > > side library: librados2. which is a little bit weird. but the upside
+> > > is: this will shrink the size of debug-info and the size of daemons,
+> > > as the daemon will not include ceph-common statically.
+> > 
+> > i just confirmed with the devtoolset maintainer offline, that the bits
+> > not included by
+> > the base libstdc++ will be statically linked into the binary. and i
+> > verified this behavior
+> > on centos7. but this is not true, when it comes to trusty.
+> > 
+> > 
+> > $ bin/rados
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `CXXABI_1.3.8' not found (required by bin/rados)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `CXXABI_1.3.8' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/librados.so.2)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.21' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/librados.so.2)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.22' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/librados.so.2)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `CXXABI_1.3.8' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libradosstriper.so.1)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.21' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libradosstriper.so.1)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.22' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libradosstriper.so.1)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `CXXABI_1.3.8' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.22' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.21' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+> > bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+> > `GLIBCXX_3.4.20' not found (required by
+> > /var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+> > 
+> > so, an obvious solution is to use "-static-libstdc++"[1] on trusty,
+> > libceph-common is a good candidate for where the libstdc++ is
+> > included. or just drop the support of it. thoughts?
+> > 
+> > ---
+> > [1] https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html
+> > 
 > 
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/mds_client.c | 43 ++++++++++++++++++++++++++++++++++++-------
->  1 file changed, 36 insertions(+), 7 deletions(-)
+> -- 
+> Nathan Cutler
+> Software Engineer Distributed Storage
+> SUSE LINUX, s.r.o.
+> Tel.: +420 284 084 037
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index da181acd4a61..9e7bb5fa9295 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1440,6 +1440,30 @@ static int __close_session(struct ceph_mds_client *mdsc,
->  	return request_close_session(mdsc, session);
->  }
->  
-> +static bool drop_negative_children(struct dentry *dentry)
-> +{
-> +	struct dentry *child;
-> +	bool all_negtive = true;
-> +
-> +	if (!d_is_dir(dentry))
-> +		goto out;
-> +
-> +	spin_lock(&dentry->d_lock);
-> +	list_for_each_entry(child, &dentry->d_subdirs, d_child) {
-> +		if (d_really_is_positive(child)) {
-> +			all_negtive = false;
-> +			break;
-> +		}
-> +	}
-> +	spin_unlock(&dentry->d_lock);
-> +
-> +	if (all_negtive)
-> +		shrink_dcache_parent(dentry);
-> +out:
-> +	dput(dentry);
-> +	return all_negtive;
-> +}
-> +
->  /*
->   * Trim old(er) caps.
->   *
-> @@ -1495,15 +1519,20 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
->  		__ceph_remove_cap(cap, true);
->  		session->s_trim_caps--;
->  	} else {
-> -		int refs;
-> +		struct dentry *dentry;
->  		/* try dropping referring dentries */
->  		spin_unlock(&ci->i_ceph_lock);
-> -		d_prune_aliases(inode);
-> -		refs = atomic_read(&inode->i_count);
-> -		if (refs == 1)
-> -			session->s_trim_caps--;
-> -		dout("trim_caps_cb %p cap %p  pruned, count now %d\n",
-> -		     inode, cap, refs);
-> +		dentry = d_find_any_alias(inode);
-> +		/* drop_negative_children() calls dput() */
-> +		if (dentry && drop_negative_children(dentry)) {
-> +			int refs;
-> +			d_prune_aliases(inode);
-> +			refs = atomic_read(&inode->i_count);
-> +			if (refs == 1)
-> +				session->s_trim_caps--;
-> +			dout("trim_caps_cb %p cap %p pruned, count now %d\n",
-> +			     inode, cap, refs);
-> +		}
->  		return 0;
->  	}
->  
-
-Would it be better to do this at the VFS layer? Dropping negative
-children when we're going to prune dentries for an inode seems like it
-ought to be done as a matter of course in d_prune_aliases.
-
--- 
-Jeff Layton <jlayton@redhat.com>
+> 
