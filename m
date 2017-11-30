@@ -1,184 +1,126 @@
-From: shasha lu <lushasha08@gmail.com>
-Subject: Re: metadata spill back onto block.slow before block.db filled up
-Date: Thu, 30 Nov 2017 17:40:40 +0800
-Message-ID: <CAKEPnAY6QFE_YDsFsDRafgc93rys=qNY57hrH6dr0UQjXd27PQ@mail.gmail.com>
-References: <CAKEPnAaF60ywk67KeZ4PkEcqKDqu8c_2_EjzSK_DqusDR2Fjog@mail.gmail.com>
- <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal> <fc7b7cd0-0b36-7bd7-0310-70cd9dcc1048@suse.de>
- <ceb00aa7-6229-362e-8234-4f7cbfc23cb2@gmail.com> <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
- <adca6bbb-ffb0-78d0-1cc2-36dc286bf15c@suse.de> <alpine.DEB.2.11.1711291306231.19791@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Thu, 30 Nov 2017 18:15:25 +0800
+Message-ID: <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
+ <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
+ <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
+ <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com> <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:38828 "EHLO
-        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751990AbdK3Jkl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Nov 2017 04:40:41 -0500
-Received: by mail-yw0-f176.google.com with SMTP id x199so2463339ywg.5
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Nov 2017 01:40:41 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711291306231.19791@piezo.novalocal>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:32915 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750849AbdK3KP1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Nov 2017 05:15:27 -0500
+Received: by mail-qt0-f178.google.com with SMTP id e2so8065361qti.0
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Nov 2017 02:15:26 -0800 (PST)
+In-Reply-To: <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Igor Fedotov <ifedotov@suse.de>, Mark Nelson <mark.a.nelson@gmail.com>, ceph-devel@vger.kernel.org
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com, "kchai@redhat.com" <kchai@redhat.com>, Nathan Cutler <ncutler@suse.com>, James Page <james.page@ubuntu.com>, Alfredo Deza <adeza@redhat.com>
 
-After cherry-picking that commit, the problem doesn't reproduce in our env.
-All L0-L3 files located in db now.  (L0 256M; L1 256M; L2 2.5G;  L3 25G)
-L4 250G, all of L4 can't fit on db, so it will put all of L4 on db.slow.
-
-ceph daemon osd.4 perf dump | grep bluefs -A 17
-    "bluefs": {
-        "gift_bytes": 0,
-        "reclaim_bytes": 0,
-        "db_total_bytes": 53687083008,
-        "db_used_bytes": 5341446144,
-        "wal_total_bytes": 5368705024,
-        "wal_used_bytes": 524288000,
-        "slow_total_bytes": 12000952320,
-        "slow_used_bytes": 0,
-        "num_files": 94,
-        "log_bytes": 3330048,
-        "log_compactions": 2,
-        "logged_bytes": 556756992,
-        "files_written_wal": 2,
-        "files_written_sst": 620,
-        "bytes_written_wal": 32516096174,
-        "bytes_written_sst": 38724761218
-    },
-
-The rocksdb of ceph master already cherry-picking that. But v12.2.1
-still have this problem.
-
-So the size of db should be well planed.  The size of db is 30GB or
-100GB make no difference. It will put all of L4 on db.slow.
-
-Shasha
-
-2017-11-29 21:07 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Wed, 29 Nov 2017, Igor Fedotov wrote:
->> I've just updated the bug notes.
+On Wed, Nov 15, 2017 at 2:47 PM, kefu chai <tchaikov@gmail.com> wrote:
+> On Wed, Nov 15, 2017 at 6:04 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+>> On Tue, Nov 14, 2017 at 5:49 AM, kefu chai <tchaikov@gmail.com> wrote:
+>>> On Mon, Nov 13, 2017 at 5:29 PM, kefu chai <tchaikov@gmail.com> wrote:
+>>>> On Sat, Nov 11, 2017 at 1:47 AM, Sage Weil <sweil@redhat.com> wrote:
+>>>>> We noticed a big performance regression when switching some code to
+>>>>> use list::size() because although C++11 promizes that it is O(1), some of
+>>>>> the libstdc++'s out there are still O(n).  This PR aims to fix that
+>>>>>
+>>>>>         https://github.com/ceph/ceph/pull/18863
+>>>>>
+>>>>> by adding the various devtoolset packages as dependencies to pull in
+>>>>> updated build toolchains.  For el7 that's devtoolset-7-{binutils,gcc-c++}.
+>>>>>
+>>>
+>>> when running the binaries built using GCC 5.1 in an env where an old
+>>> libstdc++ (typically comes with GCC 4.8):
+>>>
+>>> $ rados
+>>> rados: relocation error: /usr/lib/ceph/libceph-common.so.0: symbol
+>>> _ZTINSt8ios_base7failureB5cxx11E, version GLIBCXX_3.4.21 not defined
+>>> in file libstdc++.so.6 with link time reference
+>>>
+>>> because libstdc++ introduced a new ABI which is incompatible with the old one.
+>>> see https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+>>> and https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/ .
+>>>
+>>> in other words, we need to either 1) link statically with libstdc++.so or
+>>> 2) include it in librados2 on distros with GCC version less than 5.1. because
+>>> ceph-osd (and other daemons packages) => ceph-base => ceph-common =>
+>>> python-rados => librados2.
 >>
->> Most probably the issue is caused by an already fixed bug in RocksDB,
->>
->> see
->> https://github.com/facebook/rocksdb/commit/65a9cd616876c7a1204e1a50990400e4e1f61d7e
->>
->> Hence the question is if we plan to backport the fix and how to arrange that.
+>> For 1), what does that imply for packages' debuginfo sizes?
 >
-> If you cna confirm the problem doesn't reproduce after cherry-picking that
-> commit, we can just do that for the luminous branch.
->
-> For master, let's fast forward rocksdb past it?
->
-> sage
->
+> since we don't compile the source of libstdc++, i don't think this
+> will increase the size of debuginfo.
 >
 >>
->> Thanks,
->> Igor
->>
->> On 11/28/2017 6:44 PM, Igor Fedotov wrote:
->> > here it is
->> >
->> > http://tracker.ceph.com/issues/22264
->> >
->> >
->> > On 11/28/2017 6:37 PM, Mark Nelson wrote:
->> > > Looks like a bug guys! :)  Mind making a ticket in the tracker?
->> > >
->> > > Mark
->> > >
->> > > On 11/28/2017 07:39 AM, Igor Fedotov wrote:
->> > > > Looks like I can easily reproduce that (note slow_used_bytes):
->> > > >
->> > > >  "bluefs": {
->> > > >         "gift_bytes": 105906176,
->> > > >         "reclaim_bytes": 0,
->> > > >         "db_total_bytes": 4294959104,
->> > > >         "db_used_bytes": 76546048,
->> > > >         "wal_total_bytes": 1073737728,
->> > > >         "wal_used_bytes": 239075328,
->> > > >         "slow_total_bytes": 1179648000,
->> > > >         "slow_used_bytes": 63963136,
->> > > >         "num_files": 13,
->> > > >         "log_bytes": 2539520,
->> > > >         "log_compactions": 3,
->> > > >         "logged_bytes": 255176704,
->> > > >         "files_written_wal": 3,
->> > > >         "files_written_sst": 10,
->> > > >         "bytes_written_wal": 1932165189,
->> > > >         "bytes_written_sst": 340957748
->> > > >     },
->> > > >
->> > > >
->> > > > On 11/28/2017 4:17 PM, Sage Weil wrote:
->> > > > > Hi Shasha,
->> > > > >
->> > > > > On Tue, 28 Nov 2017, shasha lu wrote:
->> > > > > > Hi, Mark
->> > > > > > We test bluestore with 12.2.1.
->> > > > > > There are two host in our rgw cluster, each host contain 2 osds. The
->> > > > > > rgw pool size is 2.  Using a 5GB partition for db.wal, a 50GB SSD
->> > > > > > partition for block.db.
->> > > > > >
->> > > > > > # ceph --admin-daemon ceph-osd.1.asok config get rocksdb_db_paths
->> > > > > > {
->> > > > > >      "rocksdb_db_paths": "db,51002736640 db.slow,284999998054"
->> > > > > > }
->> > > > > >
->> > > > > > After writing about 400W 4k rgw objects, using ceph-bluestore-tool
->> > > > > > to
->> > > > > > export rocksdb file.
->> > > > > >
->> > > > > > # ceph-bluestore-tool bluefs-export --path /var/lib/ceph/osd/osd1
->> > > > > > --out-dir /tmp/osd1
->> > > > > > # cd /tmp/osd1
->> > > > > > # ls
->> > > > > > db  db.slow  db.wal
->> > > > > > # du -sh *
->> > > > > > 2.8G    db
->> > > > > > 809M    db.slow
->> > > > > > 439M    db.wal
->> > > > > >
->> > > > > > block.db partition have 50GB space, but it only contains ~3GB files.
->> > > > > > Then the metadata rolling over onto the db.slow.
->> > > > > > It seems that only L0-L2 files located in block.db. (L0 256M; L1
->> > > > > > 256M;
->> > > > > > L2 2.5GB), L3 and higher level file located in db.slow.
->> > > > > >
->> > > > > > According to ceph docs, the metadata rolling over onto the db.slow
->> > > > > > only when block.db filled up. But in our env the block.db partition
->> > > > > > is
->> > > > > > far from filled up.
->> > > > > > Did I make any mistakes?  Is there any additional options should be
->> > > > > > set to rocksdb?
->> > > > > You didn't make any mistakes--this should happen automatically.  It
->> > > > > looks
->> > > > > like rocksdb isn't behaving as advertised.  I've opened
->> > > > > http://tracker.ceph.com/issues/22264 to track this.  We need to start
->> > > > > by
->> > > > > reproducing the situation.
->> > > > >
->> > > > > My guess is that rocksdb is deciding that deciding that all of L3
->> > > > > can't
->> > > > > fit on db and so it's putting all of L3 on db.slow?
->> > > > >
->> > > > > sage
->> > > > >
->> > > > > --
->> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> > > > > in
->> > > > > the body of a message to majordomo@vger.kernel.org
->> > > > > More majordomo info at http://vger.kernel.org/majordomo-info.html
->> > > >
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+>> For 2), where would libstdc++.so ship in the filesystem? What does
+>> that mean for other applications that would load libstdc++.so and also
+>> link with ceph?
+>
+> if we just statically link libceph-common against libstdc++, and let
+> daemons link againt libceph-common, the problem will be solved. that's
+> actually 2) but after a second thought, i think it's a better
+> approach. please note, the daemons are linked against libceph-common
+> statically. [OT] we could let daemon link libceph-common dynamically,
+> but the downside is that the daemon will need to depend on a client
+> side library: librados2. which is a little bit weird. but the upside
+> is: this will shrink the size of debug-info and the size of daemons,
+> as the daemon will not include ceph-common statically.
+
+i just confirmed with the devtoolset maintainer offline, that the bits
+not included by
+the base libstdc++ will be statically linked into the binary. and i
+verified this behavior
+on centos7. but this is not true, when it comes to trusty.
+
+
+$ bin/rados
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`CXXABI_1.3.8' not found (required by bin/rados)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`CXXABI_1.3.8' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/librados.so.2)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.21' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/librados.so.2)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.22' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/librados.so.2)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`CXXABI_1.3.8' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libradosstriper.so.1)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.21' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libradosstriper.so.1)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.22' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libradosstriper.so.1)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`CXXABI_1.3.8' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.22' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.21' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+bin/rados: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version
+`GLIBCXX_3.4.20' not found (required by
+/var/ceph/ceph-ubuntu-14.04-kefu/build/lib/libceph-common.so.0)
+
+so, an obvious solution is to use "-static-libstdc++"[1] on trusty,
+libceph-common is a good candidate for where the libstdc++ is
+included. or just drop the support of it. thoughts?
+
+---
+[1] https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html
+
+-- 
+Regards
+Kefu Chai
