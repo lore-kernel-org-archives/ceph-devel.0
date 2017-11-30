@@ -1,57 +1,58 @@
-From: David Galloway <dgallowa@redhat.com>
-Subject: Re: dropping trusty
-Date: Thu, 30 Nov 2017 12:55:26 -0500
-Message-ID: <f3f4d84b-2df0-0b7d-65f1-074e4d308348@redhat.com>
-References: <alpine.DEB.2.11.1711301711470.12766@piezo.novalocal>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: =?UTF-8?Q?Re=3A_=E7=AD=94=E5=A4=8D=3A_osd=3A_fine=2Dgrained_statistics_for_object_?=
+        =?UTF-8?Q?space_usage?=
+Date: Thu, 30 Nov 2017 13:17:15 -0800
+Message-ID: <CAJ4mKGb8uFJ738YU9BKT3S3h7ePhVFbLkz+KyEQn+e2S8BbArQ@mail.gmail.com>
+References: <201711300849388246138@zte.com.cn> <alpine.DEB.2.11.1711300304240.8333@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46862 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753693AbdK3Rz1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 30 Nov 2017 12:55:27 -0500
-In-Reply-To: <alpine.DEB.2.11.1711301711470.12766@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-io0-f176.google.com ([209.85.223.176]:45519 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751168AbdK3VRR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Nov 2017 16:17:17 -0500
+Received: by mail-io0-f176.google.com with SMTP id e204so9031210iof.12
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Nov 2017 13:17:17 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1711300304240.8333@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Cc: ceph-users@ceph.com
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Igor Fedotov <ifedotov@suse.de>, Xie Xingguo <xie.xingguo@zte.com.cn>
 
-On 11/30/2017 12:21 PM, Sage Weil wrote:
-> We're talking about dropping trusty support for mimic due to the old 
-> compiler (incomplete C++11), hassle of using an updated toolchain, general 
-> desire to stop supporting old stuff, and lack of user objections to 
-> dropping it in the next release.
-> 
-> We would continue to build trusty packages for luminous and older 
-> releases, just not mimic going forward.
-> 
-> My question is whether we should drop all of the trusty installs on smithi 
-> and focus testing on xenial and centos.  I haven't seen any trusty related 
-> failures in half a year.  There were some kernel-related issues 6+ months 
-> ago that are resolved, and there is a valgrind issue with xenial that is 
-> making us do valgrind only on centos, but otherwise I don't recall any 
-> other problems.  I think the likelihood of a trusty-specific regression on 
-> luminous/jewel is low.  Note that we can still do install and smoke 
-> testing on VMs to ensure the packages work; we just wouldn't stress test.
-> 
-> Does this seem reasonable?  If so, we could reimage the trusty hosts 
-> immediately, right?
-> 
-> Am I missing anything?
-> 
+On Wed, Nov 29, 2017 at 7:06 PM Sage Weil <sweil@redhat.com> wrote:
+>
+> On Thu, 30 Nov 2017, xie.xingguo@zte.com.cn wrote:
+> > （My network connection seems to be problematic, resending :( ）
+> >
+> >   Anyway, I am + 1 for doing this in a more effective way (e.g., as Igor
+> > suggested).
+> >
+> >   The potential big challenge might be making the scrub-process happy,
+> > though!
+>
+> Would this be something like:
+>
+> 1- an object_info_t field like uint32_t allocated_size, which has been
+> incorporated into the pg summation, and
+>
+> 2- an ObjectStore method that returns the allocated size for an object?
+>
+> The challenge I see is that the new value (or delta) needs to be sorted
+> out at the transaction prepare time because the stat update is part of the
+> transaction, but we won't really know what the result is until bluestore
+> (or any other impl) does it's write preparation work.  :/
 
-Someone would need to prune through the qa dir and make sure nothing
-relies on trusty for tests.  We've gotten into a bind recently with the
-testing of FOG [1] where jobs are stuck in Waiting for a long time
-(tying up workers) because jobs are requesting Trusty.  We got close to
-having zero Trusty testnodes since the wip-fog branch has been reimaging
-baremetal testnodes on every job.
 
-But other than that, yes, I can reimage the Trusty testnodes.  Once FOG
-is merged into teuthology master, we won't have to worry about this
-anymore since jobs will automatically reimage machines based on what
-distro they require.
+It would take some doing but this might be a good time to start adding
+delayed work. We could get the stat updates as part of the objectstore
+callback and incorporate them into future disk ops, and part of the
+startup/replay process could be querying for stat updates to objects
+we haven’t committed yet.
 
-[1] https://github.com/ceph/teuthology/compare/wip-fog
+...except we don’t really have an OSD-level or pg replay phase any
+more, do we. Hrmm. And doing it in the transaction would require some
+sort of set-up/query phase to the transaction, then finalization and
+submission, which isn’t great since it impacts checksumming and other
+stuff (although *hopefully* not actual allocation).
+-Greg
