@@ -1,12 +1,13 @@
-From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: ceph-disk removal roadmap (was ceph-disk is now
+From: Peter Woodman <peter-SlCTtNaFtPRg9hUCZPvPmw@public.gmane.org>
+Subject: Re: ceph-disk removal roadmap (was ceph-disk is now
  deprecated)
-Date: Thu, 30 Nov 2017 11:25:03 -0500
-Message-ID: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA@mail.gmail.com>
+Date: Thu, 30 Nov 2017 16:35:37 +0000
+Message-ID: <CADfA06Tjkp70AwUr6oxx0fLaq3zNMAT0LvemeRq8irrhTDdUPA@mail.gmail.com>
+References: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============6678429167680194814=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -16,60 +17,211 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-VGhhbmtzIGFsbCBmb3IgeW91ciBmZWVkYmFjayBvbiBkZXByZWNhdGluZyBjZXBoLWRpc2ssIHdl
-IGFyZSB2ZXJ5CmV4Y2l0ZWQgdG8gYmUgYWJsZSB0byBtb3ZlIGZvcndhcmRzIG9uIGEgbXVjaCBt
-b3JlIHJvYnVzdCB0b29sIGFuZApwcm9jZXNzIGZvciBkZXBsb3lpbmcgYW5kIGhhbmRsaW5nIGFj
-dGl2YXRpb24gb2YgT1NEcywgcmVtb3ZpbmcgdGhlCmRlcGVuZGVuY3kgb24gVURFViB3aGljaCBo
-YXMgYmVlbiBhIHRyZW1lbmRvdXMgc291cmNlIG9mIGNvbnN0YW50Cmlzc3Vlcy4KCkluaXRpYWxs
-eSAoc2VlICJraWxsaW5nIGNlcGgtZGlzayIgdGhyZWFkIFswXSkgd2UgcGxhbm5lZCBmb3IgcmVt
-b3ZhbApvZiBNaW1pYywgYnV0IHdlIGRpZG4ndCB3YW50IHRvIGludHJvZHVjZSB0aGUgZGVwcmVj
-YXRpb24gd2FybmluZ3MgdXAKdW50aWwgd2UgaGFkIGFuIG91dCBmb3IgdGhvc2Ugd2hvIGhhZCBP
-U0RzIGRlcGxveWVkIGluIHByZXZpb3VzCnJlbGVhc2VzIHdpdGggY2VwaC1kaXNrICh3ZSBhcmUg
-bm93IGFibGUgdG8gaGFuZGxlIHRob3NlIGFzIHdlbGwpLgpUaGF0IGlzIHRoZSByZWFzb24gY2Vw
-aC12b2x1bWUsIGFsdGhvdWdoIHByZXNlbnQgc2luY2UgdGhlIGZpcnN0Ckx1bWlub3VzIHJlbGVh
-c2UsIGhhc24ndCBiZWVuIHB1c2hlZCBmb3J3YXJkIG11Y2guCgpOb3cgdGhhdCB3ZSBmZWVsIGxp
-a2Ugd2UgY2FuIGNvdmVyIGFsbW9zdCBhbGwgY2FzZXMsIHdlIHdvdWxkIHJlYWxseQpsaWtlIHRv
-IHNlZSBhIHdpZGVyIHVzYWdlIHNvIHRoYXQgd2UgY2FuIGltcHJvdmUgb24gaXNzdWVzL2V4cGVy
-aWVuY2UuCgpHaXZlbiB0aGF0IDEyLjIuMiBpcyBhbHJlYWR5IGluIHRoZSBwcm9jZXNzIG9mIGdl
-dHRpbmcgcmVsZWFzZWQsIHdlCmNhbid0IHVuZG8gdGhlIGRlcHJlY2F0aW9uIHdhcm5pbmdzIGZv
-ciB0aGF0IHZlcnNpb24sIGJ1dCB3ZSB3aWxsCnJlbW92ZSB0aGVtIGZvciAxMi4yLjMsIGFkZCB0
-aGVtIGJhY2sgYWdhaW4gaW4gTWltaWMsIHdoaWNoIHdpbGwgbWVhbgpjZXBoLWRpc2sgd2lsbCBi
-ZSBrZXB0IGFyb3VuZCBhIGJpdCBsb25nZXIsIGFuZCBmaW5hbGx5IGZ1bGx5IHJlbW92ZWQKYnkg
-Ti4KClRvIHJlY2FwOgoKKiBjZXBoLWRpc2sgZGVwcmVjYXRpb24gd2FybmluZ3Mgd2lsbCBzdGF5
-IGZvciAxMi4yLjIKKiBkZXByZWNhdGlvbiB3YXJuaW5ncyB3aWxsIGJlIHJlbW92ZWQgaW4gMTIu
-Mi4zIChhbmQgZnJvbSBhbGwgbGF0ZXIKTHVtaW5vdXMgcmVsZWFzZXMpCiogZGVwcmVjYXRpb24g
-d2FybmluZ3Mgd2lsbCBiZSBhZGRlZCBhZ2FpbiBpbiBjZXBoLWRpc2sgZm9yIGFsbCBNaW1pYyBy
-ZWxlYXNlcwoqIGNlcGgtZGlzayB3aWxsIG5vIGxvbmdlciBiZSBhdmFpbGFibGUgZm9yIHRoZSAn
-TicgcmVsZWFzZSwgYWxvbmcKd2l0aCB0aGUgVURFViBydWxlcwoKSSBiZWxpZXZlIHRoZXNlIGZv
-dXIgcG9pbnRzIGFkZHJlc3MgbW9zdCBvZiB0aGUgY29uY2VybnMgdm9pY2VkIGluCnRoaXMgdGhy
-ZWFkLCBhbmQgc2hvdWxkIGdpdmUgZW5vdWdoIHRpbWUgdG8gcG9ydCBjbHVzdGVycyBvdmVyIHRv
-CmNlcGgtdm9sdW1lLgoKWzBdIGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9waXBlcm1haWwvY2VwaC11
-c2Vycy1jZXBoLmNvbS8yMDE3LU9jdG9iZXIvMDIxMzU4Lmh0bWwKCk9uIFRodSwgTm92IDMwLCAy
-MDE3IGF0IDg6MjIgQU0sIERhbmllbCBCYXVtYW5uIDxkYW5pZWwuYmF1bWFubkBiZmguY2g+IHdy
-b3RlOgo+IE9uIDExLzMwLzE3IDE0OjA0LCBGYWJpYW4gR3LDvG5iaWNobGVyIHdyb3RlOgo+PiBw
-b2ludCBpcyAtIHlvdSBzaG91bGQgbm90IHB1cnBvc2VmdWxseSBhdHRlbXB0IHRvIGFubm95IHVz
-ZXJzIGFuZC9vcgo+PiBkb3duc3RyZWFtcyBieSBjaGFuZ2luZyBiZWhhdmlvdXIgaW4gdGhlIG1p
-ZGRsZSBvZiBhbiBMVFMgcmVsZWFzZSBjeWNsZSwKPgo+IGV4YWN0bHkuIHVwZ3JhZGluZyB0aGUg
-cGF0Y2ggbGV2ZWwgKHgueS56IHRvIHgueS56KzEpIHNob3VsZCBpbWhvIG5ldmVyCj4gaW50cm9k
-dWNlIGEgYmVoYXZpb3VyLWNoYW5nZSwgcmVnYXJkbGVzcyBpZiBpdCdzICJqdXN0IiBhZGRpbmcg
-bmV3Cj4gd2FybmluZ3Mgb3Igbm90Lgo+Cj4gdGhpcyBpcyBhIHN0YWJsZSB1cGRhdGUgd2UncmUg
-dGFsa2luZyBhYm91dCwgZXZlbiBtb3JlIHNvIHNpbmNlIGl0J3MgYW4KPiBMVFMgcmVsZWFzZS4g
-eW91IG5ldmVyIGtub3cgaG93IHBlb3BsZSB1c2Ugc3R1ZmYgKGUuZy4gYnkgcGFyc2luZyBzdHVw
-aWQKPiB0aGluZ3MpLCBzbyBzdWNoIGJlaGF2aW91ci1jaGFuZ2Ugd2lsbCBicmVhayBzdHVmZiBm
-b3IgKnNvbWUqIHBlb3BsZQo+IChncmFudGVkLCBtb3N0IGxpa2VseSBhIHJlYWxseSBsb3cgbnVt
-YmVyKS4KPgo+IG15IGV4cGVjdGlvbiB0byBhbiBzdGFibGUgcmVsZWFzZSBpcywgdGhhdCBpdCBz
-dGF5cywgbGl0ZXJhbGx5LCBzdGFibGUuCj4gdGhhdCdzIHRoZSB3aG9sZSBwb2ludCBvZiBoYXZp
-bmcgaXQgaW4gdGhlIGZpcnN0IHBsYWNlLiBvdGhlcndpc2Ugd2UKPiB3b3VsZCBhbGwgYmUgcnVu
-bmluZyBnaXQgc25hcHNob3RzIGFuZCB1cGRhdGUgcmFuZG9tbHkgdG8gbmV3ZXIgb25lcy4KPgo+
-IGFkZGluZyBkZXByZWNhdGlvbiBtZXNzYWdlcyBpbiBtaW1pYyBtYWtlcyBzZW5zZSwgYW5kIGdl
-dHRpbmcgcmlkIG9mCj4gaXQvbm90IHByb3ZpZGUgc3VwcG9ydCBmb3IgaXQgaW4gbWltaWMrMSBp
-cyByZWFzb25hYmxlLgo+Cj4gUmVnYXJkcywKPiBEYW5pZWwKPiBfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4g
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
-by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
-ZXBoLmNvbQo=
+--===============6678429167680194814==
+Content-Type: multipart/alternative; boundary="001a11c15a548fd6d7055f35d7c2"
+
+--001a11c15a548fd6d7055f35d7c2
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+how quickly are you planning to cut 12.2.3?
+
+On Thu, Nov 30, 2017 at 4:25 PM, Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+
+> Thanks all for your feedback on deprecating ceph-disk, we are very
+> excited to be able to move forwards on a much more robust tool and
+> process for deploying and handling activation of OSDs, removing the
+> dependency on UDEV which has been a tremendous source of constant
+> issues.
+>
+> Initially (see "killing ceph-disk" thread [0]) we planned for removal
+> of Mimic, but we didn't want to introduce the deprecation warnings up
+> until we had an out for those who had OSDs deployed in previous
+> releases with ceph-disk (we are now able to handle those as well).
+> That is the reason ceph-volume, although present since the first
+> Luminous release, hasn't been pushed forward much.
+>
+> Now that we feel like we can cover almost all cases, we would really
+> like to see a wider usage so that we can improve on issues/experience.
+>
+> Given that 12.2.2 is already in the process of getting released, we
+> can't undo the deprecation warnings for that version, but we will
+> remove them for 12.2.3, add them back again in Mimic, which will mean
+> ceph-disk will be kept around a bit longer, and finally fully removed
+> by N.
+>
+> To recap:
+>
+> * ceph-disk deprecation warnings will stay for 12.2.2
+> * deprecation warnings will be removed in 12.2.3 (and from all later
+> Luminous releases)
+> * deprecation warnings will be added again in ceph-disk for all Mimic
+> releases
+> * ceph-disk will no longer be available for the 'N' release, along
+> with the UDEV rules
+>
+> I believe these four points address most of the concerns voiced in
+> this thread, and should give enough time to port clusters over to
+> ceph-volume.
+>
+> [0] http://lists.ceph.com/pipermail/ceph-users-ceph.com/
+> 2017-October/021358.html
+>
+> On Thu, Nov 30, 2017 at 8:22 AM, Daniel Baumann <daniel.baumann-omB+W0Dpw2o@public.gmane.org>
+> wrote:
+> > On 11/30/17 14:04, Fabian Gr=C3=BCnbichler wrote:
+> >> point is - you should not purposefully attempt to annoy users and/or
+> >> downstreams by changing behaviour in the middle of an LTS release cycl=
+e,
+> >
+> > exactly. upgrading the patch level (x.y.z to x.y.z+1) should imho never
+> > introduce a behaviour-change, regardless if it's "just" adding new
+> > warnings or not.
+> >
+> > this is a stable update we're talking about, even more so since it's an
+> > LTS release. you never know how people use stuff (e.g. by parsing stupi=
+d
+> > things), so such behaviour-change will break stuff for *some* people
+> > (granted, most likely a really low number).
+> >
+> > my expection to an stable release is, that it stays, literally, stable.
+> > that's the whole point of having it in the first place. otherwise we
+> > would all be running git snapshots and update randomly to newer ones.
+> >
+> > adding deprecation messages in mimic makes sense, and getting rid of
+> > it/not provide support for it in mimic+1 is reasonable.
+> >
+> > Regards,
+> > Daniel
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+--001a11c15a548fd6d7055f35d7c2
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">how quickly are you planning to cut 12.2.3?</div><div clas=
+s=3D"gmail_extra"><br><div class=3D"gmail_quote">On Thu, Nov 30, 2017 at 4:=
+25 PM, Alfredo Deza <span dir=3D"ltr">&lt;<a href=3D"mailto:adeza-H+wXaHxf7aJhl2p70BpVqQ@public.gmane.org=
+m" target=3D"_blank">adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;</span> wrote:<br><blockquote =
+class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid=
+;padding-left:1ex">Thanks all for your feedback on deprecating ceph-disk, w=
+e are very<br>
+excited to be able to move forwards on a much more robust tool and<br>
+process for deploying and handling activation of OSDs, removing the<br>
+dependency on UDEV which has been a tremendous source of constant<br>
+issues.<br>
+<br>
+Initially (see &quot;killing ceph-disk&quot; thread [0]) we planned for rem=
+oval<br>
+of Mimic, but we didn&#39;t want to introduce the deprecation warnings up<b=
+r>
+until we had an out for those who had OSDs deployed in previous<br>
+releases with ceph-disk (we are now able to handle those as well).<br>
+That is the reason ceph-volume, although present since the first<br>
+Luminous release, hasn&#39;t been pushed forward much.<br>
+<br>
+Now that we feel like we can cover almost all cases, we would really<br>
+like to see a wider usage so that we can improve on issues/experience.<br>
+<br>
+Given that 12.2.2 is already in the process of getting released, we<br>
+can&#39;t undo the deprecation warnings for that version, but we will<br>
+remove them for 12.2.3, add them back again in Mimic, which will mean<br>
+ceph-disk will be kept around a bit longer, and finally fully removed<br>
+by N.<br>
+<br>
+To recap:<br>
+<br>
+* ceph-disk deprecation warnings will stay for 12.2.2<br>
+* deprecation warnings will be removed in 12.2.3 (and from all later<br>
+Luminous releases)<br>
+* deprecation warnings will be added again in ceph-disk for all Mimic relea=
+ses<br>
+* ceph-disk will no longer be available for the &#39;N&#39; release, along<=
+br>
+with the UDEV rules<br>
+<br>
+I believe these four points address most of the concerns voiced in<br>
+this thread, and should give enough time to port clusters over to<br>
+ceph-volume.<br>
+<br>
+[0] <a href=3D"http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-Oct=
+ober/021358.html" rel=3D"noreferrer" target=3D"_blank">http://lists.ceph.co=
+m/<wbr>pipermail/ceph-users-ceph.com/<wbr>2017-October/021358.html</a><br>
+<br>
+On Thu, Nov 30, 2017 at 8:22 AM, Daniel Baumann &lt;<a href=3D"mailto:danie=
+l.baumann-omB+W0Dpw2o@public.gmane.org">daniel.baumann-omB+W0Dpw2o@public.gmane.org</a>&gt; wrote:<br>
+&gt; On 11/30/17 14:04, Fabian Gr=C3=BCnbichler wrote:<br>
+&gt;&gt; point is - you should not purposefully attempt to annoy users and/=
+or<br>
+&gt;&gt; downstreams by changing behaviour in the middle of an LTS release =
+cycle,<br>
+&gt;<br>
+&gt; exactly. upgrading the patch level (x.y.z to x.y.z+1) should imho neve=
+r<br>
+&gt; introduce a behaviour-change, regardless if it&#39;s &quot;just&quot; =
+adding new<br>
+&gt; warnings or not.<br>
+&gt;<br>
+&gt; this is a stable update we&#39;re talking about, even more so since it=
+&#39;s an<br>
+&gt; LTS release. you never know how people use stuff (e.g. by parsing stup=
+id<br>
+&gt; things), so such behaviour-change will break stuff for *some* people<b=
+r>
+&gt; (granted, most likely a really low number).<br>
+&gt;<br>
+&gt; my expection to an stable release is, that it stays, literally, stable=
+.<br>
+&gt; that&#39;s the whole point of having it in the first place. otherwise =
+we<br>
+&gt; would all be running git snapshots and update randomly to newer ones.<=
+br>
+&gt;<br>
+&gt; adding deprecation messages in mimic makes sense, and getting rid of<b=
+r>
+&gt; it/not provide support for it in mimic+1 is reasonable.<br>
+&gt;<br>
+&gt; Regards,<br>
+&gt; Daniel<br>
+&gt; ______________________________<wbr>_________________<br>
+&gt; ceph-users mailing list<br>
+&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org=
+</a><br>
+&gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=
+=3D"noreferrer" target=3D"_blank">http://lists.ceph.com/<wbr>listinfo.cgi/c=
+eph-users-ceph.<wbr>com</a><br>
+______________________________<wbr>_________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/<wbr>listinfo.cgi/ceph-u=
+sers-ceph.<wbr>com</a><br>
+</blockquote></div><br></div>
+
+--001a11c15a548fd6d7055f35d7c2--
+
+--===============6678429167680194814==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============6678429167680194814==--
