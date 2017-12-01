@@ -1,167 +1,218 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Luminous v12.2.2 released
-Date: Fri, 01 Dec 2017 18:34:08 +0100
-Message-ID: <877eu6uzcf.fsf@suse.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: config on mons
+Date: Fri, 1 Dec 2017 17:53:12 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1712011720000.12766@piezo.novalocal>
+References: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal> <alpine.DEB.2.11.1711142208490.28240@piezo.novalocal> <CALe9h7ciU3ajzPTkh1iCC=+qdEdHbt3n97NCgQDgsML6cLUS2w@mail.gmail.com> <alpine.DEB.2.11.1711151318370.28240@piezo.novalocal>
+ <20171115171637.ycmpu4ovmp4laz5l@suse.com> <alpine.DEB.2.11.1711151855430.28240@piezo.novalocal> <CAJ4mKGYPa2_YoU54x95G5GAy9UQXP98gOEHqLwPeStgcKpJ0Pw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-542568382-1512150794=:12766"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:54843 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750768AbdLAReK (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Fri, 1 Dec 2017 12:34:10 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:53305 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751104AbdLARxO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 1 Dec 2017 12:53:14 -0500
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 6F8BA267FC
+        for <ceph-devel@vger.kernel.org>; Fri,  1 Dec 2017 17:53:14 +0000 (UTC)
+In-Reply-To: <CAJ4mKGYPa2_YoU54x95G5GAy9UQXP98gOEHqLwPeStgcKpJ0Pw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-We're glad to announce the second bugfix release of Luminous v12.2.x
-stable release series. It contains a range of bug fixes and a few
-features across Bluestore, CephFS, RBD & RGW. We recommend all the users
-of 12.2.x series update. 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-For more detailed information, see the blog[1] and the complete
-changelog[2]
+--8323329-542568382-1512150794=:12766
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-A big thank you to everyone for the continual feedback & bug
-reports we've received over this release cycle
+On Thu, 30 Nov 2017, Gregory Farnum wrote:
+> I'm resurrecting this thread since it wasn't clear a consensus was
+> reached, I was out on vacation while it was happening, and it doesn't
+> look like there's been much work done yet to render any discussion
+> obsolete.
 
-Notable Changes
----------------
-* Standby ceph-mgr daemons now redirect requests to the active messenger, easing
-  configuration for tools & users accessing the web dashboard, restful API, or
-  other ceph-mgr module services.
-* The prometheus module has several significant updates and improvements.
-* The new balancer module enables automatic optimization of CRUSH weights to
-  balance data across the cluster.
-* The ceph-volume tool has been updated to include support for BlueStore as well
-  as FileStore. The only major missing ceph-volume feature is dm-crypt support.
-* RGW's dynamic bucket index resharding is disabled in multisite environments,
-  as it can cause inconsistencies in replication of bucket indexes to remote
-  sites
+Thanks!
 
-Other Notable Changes
----------------------
-* build/ops: bump sphinx to 1.6 (issue#21717, pr#18167, Kefu Chai, Alfredo Deza)
-* build/ops: macros expanding in spec file comment (issue#22250, pr#19173, Ken Dreyer)
-* build/ops: python-numpy-devel build dependency for SUSE (issue#21176, pr#17692, Nathan Cutler)
-* build/ops: selinux: Allow getattr on lnk sysfs files (issue#21492, pr#18650, Boris Ranto)
-* build/ops: Ubuntu amd64 client can not discover the ubuntu arm64 ceph cluster (issue#19705, pr#18293, Kefu Chai)
-* core: buffer: fix ABI breakage by removing list _mempool member (issue#21573, pr#18491, Sage Weil)
-* core: Daemons(OSD, Mon…) exit abnormally at injectargs command (issue#21365, pr#17864, Yan Jun)
-* core: Disable messenger logging (debug ms = 0/0) for clients unless overridden (issue#21860, pr#18529, Jason Dillaman)
-* core: Improve OSD startup time by only scanning for omap corruption once (issue#21328, pr#17889, Luo Kexue, David Zafman)
-* core: upmap does not respect osd reweights (issue#21538, pr#18699, Theofilos Mouratidis)
-* dashboard: barfs on nulls where it expects numbers (issue#21570, pr#18728, John Spray)
-* dashboard: OSD list has servers and osds in arbitrary order (issue#21572, pr#18736, John Spray)
-* dashboard: the dashboard uses absolute links for filesystems and clients (issue#20568, pr#18737, Nick Erdmann)
-* filestore: set default readahead and compaction threads for rocksdb (issue#21505, pr#18234, Josh Durgin, Mark Nelson)
-* librbd: object map batch update might cause OSD suicide timeout (issue#21797, pr#18416, Jason Dillaman)
-* librbd: snapshots should be created/removed against data pool (issue#21567, pr#18336, Jason Dillaman)
-* mds: make sure snap inode’s last matches its parent dentry’s last (issue#21337, pr#17994, “Yan, Zheng”)
-* mds: sanitize mdsmap of removed pools (issue#21945, issue#21568, pr#18628, Patrick Donnelly)
-* mgr: bulk backport of ceph-mgr improvements (issue#21594, issue#17460,
-  issue#21197, issue#21158, issue#21593, pr#18675, Benjeman Meekhof,
-  Sage Weil, Jan Fajerski, John Spray, Kefu Chai, My Do, Spandan Kumar Sahu)
-* mgr: ceph-mgr gets process called “exe” after respawn (issue#21404, pr#18738, John Spray)
-* mgr: fix crashable DaemonStateIndex::get calls (issue#17737, pr#18412, John Spray)
-* mgr: key mismatch for mgr after upgrade from jewel to luminous(dev) (issue#20950, pr#18727, John Spray)
-* mgr: mgr status module uses base 10 units (issue#21189, issue#21752, pr#18257, John Spray, Yanhu Cao)
-* mgr: mgr[zabbix] float division by zero (issue#21518, pr#18734, John Spray)
-* mgr: Prometheus crash when update (issue#21253, pr#17867, John Spray)
-* mgr: prometheus module generates invalid output when counter names contain non-alphanum characters (issue#20899, pr#17868, John Spray, Jeremy H Austin)
-* mgr: Quieten scary RuntimeError from restful module on startup (issue#21292, pr#17866, John Spray)
-* mgr: Spurious ceph-mgr failovers during mon elections (issue#20629, pr#18726, John Spray)
-* mon: Client client.admin marked osd.2 out, after it was down for 1504627577 seconds (issue#21249, pr#17862, John Spray)
-* mon: DNS SRV default service name not used anymore (issue#21204, pr#17863, Kefu Chai)
-* mon/MgrMonitor: handle cmd descs to/from disk in the absence of active mgr (issue#21300, pr#18038, Joao Eduardo Luis)
-* mon/mgr: sync “mgr_command_descs”,”osd_metadata” and “mgr_metadata” prefixes to new mons (issue#21527, pr#18620, huanwen ren)
-* mon: osd feature checks with 0 up osds (issue#21471, issue#20751, pr#18364, Brad Hubbard, Sage Weil)
-* mon,osd: fix “pg ls {forced_backfill, backfilling}” (issue#21609, pr#18236, Kefu Chai)
-* mon/OSDMonitor: add option to fix up ruleset-* to crush-* for ec profiles (issue#22128, pr#18945, Sage Weil)
-* mon, osd: per pool space-full flag support (issue#21409, pr#17730, xie xingguo)
-* mon/PGMap: Fix %USED calculation (issue#22247, pr#19230, Xiaoxi Chen)
-* mon: update get_store_prefixes implementations (issue#21534, pr#18621, John Spray, huanwen ren)
-* msgr: messages/MOSDMap: do compat reencode of crush map, too (issue#21882, pr#18456, Sage Weil)
-* msgr: src/messages/MOSDMap: reencode OSDMap for older clients (issue#21660, pr#18140, Sage Weil)
-* os/bluestore/BlueFS: fix race with log flush during async log compaction (issue#21878, pr#18503, Sage Weil)
-* os/bluestore: fix another aio stall/deadlock (issue#21470, pr#18127, Sage Weil)
-* os/bluestore: fix SharedBlob unregistration (issue#22039, pr#18983, Sage Weil)
-* os/bluestore: handle compressed extents in blob unsharing checks (issue#21766, pr#18501, Sage Weil)
-* os/bluestore: replace 21089 repair with something online (instead of fsck) (issue#21089, pr#17734, Sage Weil)
-* os/bluestore: set bitmap freelist resolution to min_alloc_size (issue#21408, pr#18050, Sage Weil)
-* os/blueStore::umount will crash when the BlueStore is opened by start_kv_only() (issue#21624, pr#18750, Chang Liu)
-* osd: additional protection for out-of-bounds EC reads (issue#21629, pr#18413, Jason Dillaman)
-* osd: allow recovery preemption (issue#21613, pr#18025, Sage Weil)
-* osd: build_past_intervals_parallel: Ignore new partially created PGs (issue#21833, pr#18673, David Zafman)
-* osd: dump bluestore debug on shutdown if debug option is set (issue#21259, pr#18103, Sage Weil)
-* osd: make stat_bytes and stat_bytes_used counters PRIO_USEFUL (issue#21981, pr#18723, Yao Zongyou)
-* osd: make the PG’s SORTBITWISE assert a more generous shutdown (issue#20416, pr#18132, Greg Farnum)
-* osd: OSD metadata ‘backend_filestore_dev_node’ is unknown even for simple deployment (issue#20944, pr#17865, Sage Weil)
-* rbd: [cli] mirror getter commands will fail if mirroring has never been enabled (issue#21319, pr#17861, Jason Dillaman)
-* rbd: cls/journal: fixed possible infinite loop in expire_tags (issue#21956, pr#18626, Jason Dillaman)
-* rbd: cls/journal: possible infinite loop within tag_list class method (issue#21771, pr#18417, Jason Dillaman)
-* rbd: [rbd-mirror] asok hook names not updated when image is renamed (issue#20860, pr#17860, Mykola Golub)
-* rbd: [rbd-mirror] forced promotion can result in incorrect status (issue#21559, pr#18337, Jason Dillaman)
-* rbd: [rbd-mirror] peer cluster connections should filter out command line optionals (issue#21894, pr#18566, Jason Dillaman)
-* rgw: add support for Swift’s per storage policy statistics (issue#17932, issue#21506, pr#17835, Radoslaw Zarzynski, Casey Bodley)
-* rgw: add support for Swift’s reversed account listings (issue#21148, pr#17834, Radoslaw Zarzynski)
-* rgw: avoid logging keystone revocation failures when no keystone is configured (issue#21400, pr#18441, Abhishek Lekshmanan)
-* rgw: disable dynamic resharding in multisite enviorment (issue#21725, pr#18432, Orit Wasserman)
-* rgw: encryption: PutObj response does not include sse-kms headers (issue#21576, pr#18442, Casey Bodley)
-* rgw: encryption: reject requests that don’t provide all expected headers (issue#21581, pr#18429, Enming Zhang)
-* rgw: expose --sync-stats via admin api (issues#21301, pr#18439, Nathan Johnson)
-* rgw: failed CompleteMultipartUpload request does not release lock (issue#21596, pr#18430, Matt Benjamin)
-* rgw_file: set s->obj_size from bytes_written (issue#21940, pr#18599, Matt Benjamin)
-* rgw: fix a bug about inconsistent unit of comparison (issue#21590, pr#18438, gaosibei)
-* rgw: fix bilog entries on multipart complete (issue#21772, pr#18334, Casey Bodley)
-* rgw: fix error handling in ListBucketIndexesCR (issue#21735, pr#18591, Casey Bodley)
-* rgw: fix refcnt issues (issue#21819, pr#18539, baixueyu)
-* rgw: lc process only schdule the first item of lc objects (issue#21022, pr#17859, Shasha Lu)
-* rgw: list bucket which enable versioning get wrong result when user marker (issue#21500, pr#18569, yuliyang)
-* rgw: list_objects() honors end_marker regardless of namespace (issue#18977, pr#17832, Radoslaw Zarzynski)
-* rgw: Multipart upload may double the quota (issue#21586, pr#18435, Sibei Gao)
-* rgw: multisite: Get bucket location which is located in another zonegroup, will return 301 Moved Permanently (issue#21125, pr#17857, Shasha Lu)
-* rgw: multisite: race between sync of bucket and bucket instance metadata (issue#21990, pr#18767, Casey Bodley)
-* rgw: policy checks missing from Get/SetRequestPayment operations (issue#21389, pr#18440, Adam C. Emerson)
-* rgw: radosgw-admin usage show loops indefinitly (issue#21196, pr#18437, Mark Kogan)
-* rgw: rgw_file: explicit NFSv3 open() emulation (issue#21854, pr#18446, Matt Benjamin)
-* rgw: rgw_file: fix write error when the write offset overlaps (issue#21455, pr#18004, Yao Zongyou)
-* rgw: rgw file write error (issue#21455, pr#18433, Yao Zongyou)
-* rgw: s3:GetBucketCORS/s3:PutBucketCORS policy fails with 403 (issue#21578, pr#18444, Adam C. Emerson)
-* rgw: s3:GetBucketLocation bucket policy fails with 403 (issue#21582, pr#18443, Adam C. Emerson)
-* rgw: s3:GetBucketWebsite/PutBucketWebsite fails with 403 (issue#21597, pr#18445, Adam C. Emerson)
-* rgw: setxattrs call leads to different mtimes for bucket index and object (issue#21200, pr#17856, Abhishek Lekshmanan)
-* rgw: stop/join TokenCache revoke thread only if started (issue#21666, pr#18138, Karol Mroz)
-* rgw: string_view instance points to expired memory in PrefixableSignatureHelper (issue#21085, pr#17858, Radoslaw Zarzynski)
-* rgw: user creation can overwrite existing user even if different uid is given (issue#21685, pr#18436, Casey Bodley)
-* rgw: We cant’t get torrents if objects are encrypted using SSE-C (issue#21720, pr#18431, Zhang Shaowen)
-* rgw: wrong error message is returned when putting container with a name that is too long (issue#17938, issue#21169, issue#17935, issue#17934, issue#17936, pr#17811, Radoslaw Zarzynski)
-* rgw: zone compression type is not validated (issue#21775, pr#18434, Casey Bodley)
-* tools: ceph-disk create deprecation warnings (issue#22154, pr#18989, Alfredo Deza)
-* tools: ceph-disk: fix '--runtime' omission for ceph-osd service (issue#21498, pr#17914, Carl Xiong)
-* tools: ceph-disk flake8 test fails on very old, and very new, versions of flake8 (issue#22207, pr#19152, Nathan Cutler)
-* tools: ceph-disk: retry on OSError (issue#21728, pr#18189, Kefu Chai)
-* tools: ceph-disk: unlocks dmcrypted partitions when activating them (issue#20488, pr#18625, Kefu Chai, Felix Winterhalter)
-* tools: ceph-kvstore-tool does not call bluestore’s umount when exit (issue#21625, pr#18751, Chang Liu)
-* tools: ceph_monstore_tool: rebuild initial mgrmap also (issue#22266, pr#19240, Kefu Chai)
-* tools: ceph-objectstore-tool and ceph-bluestore-tool: backports from master (issue#21272, pr#17896, Sage Weil, David Zafman)
-* tools: ceph_volume_client: add get, put, and delete object interfaces (issue#21601, pr#18037, Ramana Raja)
-* tools: cli/crushtools/build.t sometimes fails in jenkins’ make check run (issue#21758, pr#18398, Kefu Chai, Sage Weil)
+> My inclination would be to shift the documentation and expectation to
+> using the central config service, but that we don't break anything
+> which users might already have. As long as we expose that daemons have
+> differing config values from the central service, ceph-mgr can be as
+> clever or dumb as it wants about handling that.
+
++1
+ 
+> By the same token, though, I don't think we need to take central
+> responsibility for removing or editing configs which aren't in the
+> central mon store. Doing that parsing is a pain in the butt and
+> presumably anybody who set up a real ceph.conf can manage to remove it
+> themselves.
+> One thing we could maybe do is identify the "local config" settings in
+> Nautilus (that is, stuff specifying specific disks and paths, or
+> otherwise necessary to make the daemon turn on) and offer a one-click
+> "delete the ceph.conf and replace it with the minimal set", but that
+> would just be a one-time option to make life better for upgraders, not
+> something we want to commit to.
+
+Yeah, I view this as TBD.  I want there to be *some* transition path but 
+I'm not sure how magic it should be.  Among other issues, daemons run as 
+user ceph and won't be able to overwrite /etc/ceph/ceph.conf (usually 
+owned by root), so... yeah.
 
 
-Getting Ceph
-------------
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-12.2.2.tar.gz
-* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
-* For ceph-deploy, see http://docs.ceph.com/docs/master/install/install-ceph-deploy
-* Release git sha1: cf0baeeeeba3b47f9427c6c97e2144b094b7e5ba
+> On Fri, Nov 10, 2017 at 7:30 AM, Sage Weil <sweil@redhat.com> wrote:
+> > Namely,
+> >
+> >  config/option = value               # like [global]
+> >  config/$type/option = value         # like [mon]
+> >  config/$type.$id/option = value     # like [mon.a]
+> 
+> I am finding this really difficult to work with. Do you expect for
+> users to manipulate this directly? I can imagine this being the
+> internal schema, but I hope the CLI commands and GUI are about setting
+> options on buckets which are pretty-printed in the "osd tree" command!
 
-[1]: http://ceph.com/releases/v12-2-2-luminous-released/
-[2]: http://docs.ceph.com/docs/master/_downloads/v12.2.2.txt
+The plan is to *store* these in config-key, but have a new, higher-level 
+CLI interface (ceph config ...) to them.  That interface would do the 
+validation to make sure you are not talking nonsense: verify 
+values are legal, config option exists, is not being set on a 
+daemon that doesn't care, isn't something that is ceph.conf-only, 
+etc.  It would also have the 'show' commands that would dump the running 
+config for a daemon and so on.
 
---
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG Nürnberg)
+> > There are two new things:
+> >
+> >  config/.../class:$classname/option = value
+> >
+> > For OSDs, this matches the device_class.  So you can do something like
+> >
+> >  config/osd/class:ssd/bluestore_cache_size = 10485760  # 10gb, woohoo!
+> >
+> > You can also match the crush location:
+> >
+> >  config/.../$crushtype:$crushvalue/option = value
+> >
+> > e.g.,
+> >
+> >  config/osd/rack:foo/debug_osd = 10    # hunting some issue
+> >
+> > This obviously makes sense for OSDs.  We can also make it makes sense for
+> > non-OSDs since everybody (clients and daemons) has a concept of
+> > crush_location that is a set of key/value pairs like "host=foo rack=bar"
+> > which match the CRUSH hierarchy.
+> 
+> I am not understanding this at all — I don't think we can have any
+> expectation that clients know where they are in relationship to the
+> CRUSH tree. Frequently they are not sharing any of the specified
+> resources, and they are much more likely to shift locations than OSDs
+> are. (eg, rbd running in compute boxes in different domains from the
+> storage nodes, possibly getting live migrated...)
+
+The idea is that *everyone* knows their hostname, which (if the CRUSH 
+hierarchy is populated) is enough to tell us the crush location.  
+Obviously some clients will be on hosts not in the map and won't 
+know--that's fine.  Generally daemons will be, or can be, if we make an 
+effort to place hosts that have mon/mgr/mds/rgw/etc daemons but not OSDs 
+in the map.
+
+But even if ignore that an only make it work for OSDs that's pretty 
+useful too.
+
+
+> On Mon, Nov 13, 2017 at 10:40 AM, John Spray <jspray@redhat.com> wrote:
+> > On Mon, Nov 13, 2017 at 6:20 PM, Kyle Bader <kyle.bader@gmail.com> wrote:
+> >> Configuration files are often driven by configuration management, with
+> >> previous versions stored in some kind of version control systems. We
+> >> should make sure that if configuration moves to the monitors that you
+> >> have some form of history and rollback capabilities. It might be worth
+> >> modeling it similar to network switch configuration shells, a la
+> >> Junos.
+> >>
+> >> * change configuration
+> >> * require commit configuration change
+> >> * ability to rollback N configuration changes
+> >> * ability to diff to configuration versions
+> >>
+> >> That way an admin can figure out when the last configuration change
+> >> was, what changed, and rollback if necessary.
+> >
+> > That is an extremely good idea.
+> >
+> > As a minimal thing, it should be pretty straightforward to implement a
+> > snapshot/rollback.
+> >
+> > I imagine many users today are not so disciplined as to version
+> > control their configs, but this is a good opportunity to push that as
+> > the norm by building it in.
+> 
+> I get the appeal of snapshotting, but I am definitely not convinced
+> this is something we should build directly into the monitors. Do you
+> have an implementation in mind?
+> It seems to me like this is something we can implement pretty easily
+> in ceph-mgr (either by restricting the snapshotting to mechanisms that
+> make changes via the manager, or by subscribing to config changes),
+> and that for admins using orchestration frameworks they already get
+> rollbackability from their own version control. Why not take advantage
+> of those easier development environments, which are easy to adjust
+> later if we find new requirements or issues?
+
+I have no good implementation ideas yet, so I'm just ignoring it for the 
+moment.  I think a ceph-based interface would be valuable, though.  Say,
+
+ ceph config checkpoint foo
+ ceph config set osd.0 debug_osd 20
+ ...
+ ceph config rollback foo
+
+or even
+
+ ceph config rollback foo osd.0   # just rollback osd.0's config
+
+Even a pretty basic implementation like encoding all of config/ in a map 
+and stuffing it into a config/checkpoint/foo key (compressed even?) would 
+be sufficient for that sort of thing.
+
+Alternatively, a complete config changelog/history could also support the 
+above and would let you do a 'ceph config history [osd.0]' type command 
+that tells you how the config has changed, and when, going backwards in 
+time.
+
+Of course, having all of that doesn't prevent you from using your 
+existing external tools to manage configs and history.  Perhaps a 'ceph 
+config import' type operation that takes a dump of everything 
+(efficiently) is appropriate for supporting that well.
+
+
+> On Tue, Nov 14, 2017 at 3:45 PM, John Spray <jspray@redhat.com> wrote:
+> > This comes back to our recurring discussion about whether a
+> > HEALTH_INFO level should exist: I'm increasingly of the opinion that
+> > when we run into things like this, it's nature's way of telling us
+> > that maybe our underlying model is weird (in this case, maybe we
+> > didn't need to have the concept of ephemeral configuration settings in
+> > the system at all).
+> >
+> > Maybe ephemeral config changes should be treated the same way I
+> > propose to treat local overrides: the daemon reports just that it has
+> > been overridden, and the GUI goes hands-off and does not attempt to
+> > communicate the story to the user "Well, you see, it's currently set
+> > to xyz until the next restart, at which point it will revert to abc,
+> > that is unless you have a local ceph.conf in which case...".
+> 
+> I'm with you on this — I don't think there's a reason for the central
+> config to distinguish between *kinds* of disagreement. We probably
+> want to expose which daemons are disagreeing on which options, but I'm
+> not seeing the utility of diagnosing *where* the disagreement was
+> injected.
+
+Having a active/not active on the mgr/mon seems fine; I think it's mostly 
+a matter of how much effort we want to invest in that interface.
+
+I plan to make the 'ceph daemon X config diff' show the complete story 
+(from the daemons perspective), indicating each source (default, conf, 
+mon, override) and value that is in play, along with the effective result.
+
+sage
+--8323329-542568382-1512150794=:12766--
