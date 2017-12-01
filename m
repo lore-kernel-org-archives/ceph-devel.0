@@ -1,72 +1,43 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Integers as String in osd_metadata (memory, rotational)
-Date: Fri, 1 Dec 2017 10:35:35 +0100 (CET)
-Message-ID: <1727800240.5825.1512120936215@ox.pcextreme.nl>
-References: <83609177.5513.1511867211100@ox.pcextreme.nl>
- <CALe9h7foTN+tfM4n07AwS6iOLzRyFOFi-NTLMMV1=_FPHVHamA@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: [ceph-users] ceph-disk removal roadmap (was ceph-disk is now deprecated)
+Date: Fri, 1 Dec 2017 07:45:47 -0500
+Message-ID: <CAC-Np1zskEabUd4HKC-DmHXmLqU6mSBdtirEDgs6qdv9O0ayjQ@mail.gmail.com>
+References: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA@mail.gmail.com>
+ <20171201081757.qwfo2lrhpmg77jgd@nora.maurer-it.com> <20171201082810.GH30636@shell.dmz.bit.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from se02-out.mail.pcextreme.nl ([185.66.251.201]:52101 "EHLO
-        se02-out.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751322AbdLAJfq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Dec 2017 04:35:46 -0500
-In-Reply-To: <CALe9h7foTN+tfM4n07AwS6iOLzRyFOFi-NTLMMV1=_FPHVHamA@mail.gmail.com>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:39113 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752337AbdLAMpt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Dec 2017 07:45:49 -0500
+Received: by mail-qt0-f180.google.com with SMTP id k19so12786113qtj.6
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Dec 2017 04:45:48 -0800 (PST)
+In-Reply-To: <20171201082810.GH30636@shell.dmz.bit.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Stefan Kooman <stefan@bit.nl>
+Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+On Fri, Dec 1, 2017 at 3:28 AM, Stefan Kooman <stefan@bit.nl> wrote:
+> Quoting Fabian Grünbichler (f.gruenbichler@proxmox.com):
+>> I think the above roadmap is a good compromise for all involved parties,
+>> and I hope we can use the remainder of Luminous to prepare for a
+>> seam- and painless transition to ceph-volume in time for the Mimic
+>> release, and then finally retire ceph-disk for good!
+>
+> Will the upcoming 12.2.2 release ship with a ceph-volume capable of
+> doing bluestore on top of LVM? Eager to use ceph-volume for that, and
+> skip entirely over ceph-disk and our manual osd prepare process ...
+
+Yes. I think that for 12.2.1 this was the case as well, in 12.2.2 is
+the default.
 
 
-> Op 28 november 2017 om 12:53 schreef John Spray <jspray@redhat.com>:
-> 
-> 
-> On Tue, Nov 28, 2017 at 11:06 AM, Wido den Hollander <wido@42on.com> wrote:
-> > Hi,
-> >
-> > Looking at 'ceph osd metadata' I see that we return a lot of values as Strings in the JSON instead of a Integer, for example:
-> >
-> > $ ceph osd metadata 2033
-> >
-> > {
-> >     "id": 2033,
-> >     "arch": "x86_64",
-> >     "journal_rotational": "0",
-> >     "mem_swap_kb": "1046524",
-> >     "mem_total_kb": "63641808",
-> >     "rotational": "1"
-> > }
-> >
-> > Looking at some code I found this:
-> >
-> > (*m)["mem_total_kb"] = std::to_string(size);
-> > (*pm)["rotational"] = store_is_rotational ? "1" : "0";
-> > (*pm)["journal_rotational"] = journal_is_rotational ? "1" : "0";
-> >
-> > Why can't we return a int/long there? Is it the internal JSON parser which can't handle it?
-> 
-> There are various places where we send metadata as map<string, string>
-> (in this instance, MOSDBoot), which is indeed kind of annoying --
-> converting them all to a JSON-ish structure would be a good thing.
-> 
-
-Yes, or at least have a difference between int and string.
-
-> I'm imagining a helper class that wraps boost::property_tree and slots
-> in everywhere we currently use map<string, string> for metadata.
-> 
-
-That is slightly out of my comfort zone. I wouldn't know where to start :-)
-
-Wido
-
-> John
-> 
-> > Otherwise I'll write a PR for this. Saves me casting the things to Integers again afterwards in Python.
-> >
-> > Wido
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Gr. Stefan
+>
+> --
+> | BIT BV  http://www.bit.nl/        Kamer van Koophandel 09090351
+> | GPG: 0xD14839C6                   +31 318 648 688 / info@bit.nl
