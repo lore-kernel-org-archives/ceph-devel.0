@@ -1,68 +1,67 @@
-From: kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Developers Monthly - October
-Date: Fri, 1 Dec 2017 13:00:04 +0800
-Message-ID: <CAJE9aOP7F=pcfq=zBOB302BpeYYHvnDctWD-EWdrn2gwjrPjTg@mail.gmail.com>
-References: <20170928030800.GB27915@oops.local>
- <20171004060209.GA12681@t460.local>
- <20171004161646.GA25159@t460.local>
- <CAJE9aONx09pTycU2ZXfqRNfbs7auxRHakb43mnBzwRQf+TSyBQ@mail.gmail.com>
- <20171106191231.GA4290@t460.local>
+From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler@proxmox.com>
+Subject: Re: ceph-disk removal roadmap (was ceph-disk is now deprecated)
+Date: Fri, 1 Dec 2017 09:17:57 +0100
+Message-ID: <20171201081757.qwfo2lrhpmg77jgd@nora.maurer-it.com>
+References: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20171106191231.GA4290-wGZc43OlCras1BDpvl8NfQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from proxmox-new.maurer-it.com ([212.186.127.180]:36179 "EHLO
+        proxmox-new.maurer-it.com" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1750921AbdLAISF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Dec 2017 03:18:05 -0500
+Content-Disposition: inline
+In-Reply-To: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 7, 2017 at 3:12 AM, Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Mon, Nov 06, 2017 at 09:54:41PM +0800, kefu chai wrote:
->> On Thu, Oct 5, 2017 at 12:16 AM, Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> > On Wed, Oct 04, 2017 at 03:02:09AM -0300, Leonardo Vaz wrote:
->> >> On Thu, Sep 28, 2017 at 12:08:00AM -0300, Leonardo Vaz wrote:
->> >> > Hey Cephers,
->> >> >
->> >> > This is just a friendly reminder that the next Ceph Developer Montly
->> >> > meeting is coming up:
->> >> >
->> >> >  http://wiki.ceph.com/Planning
->> >> >
->> >> > If you have work that you're doing that it a feature work, significant
->> >> > backports, or anything you would like to discuss with the core team,
->> >> > please add it to the following page:
->> >> >
->> >> >  http://wiki.ceph.com/CDM_04-OCT-2017
->> >> >
->> >> > If you have questions or comments, please let us know.
->> >>
->>
->> Leo,
->>
->> do we have a recording for the CDM in Oct?
->
-> We didn't record the CDM in October because some people were not able to
-> join us to discuss the topics and we ended having a very quick meeting
-> instead.
->
-> I have the video recording for the CDM we had on Nov 1st, however I need
-> to upload it. We are in Sydney for the OpenStack Summit and I'll be able
-> to do that later this week.
+On Thu, Nov 30, 2017 at 11:25:03AM -0500, Alfredo Deza wrote:
+> Thanks all for your feedback on deprecating ceph-disk, we are very
+> excited to be able to move forwards on a much more robust tool and
+> process for deploying and handling activation of OSDs, removing the
+> dependency on UDEV which has been a tremendous source of constant
+> issues.
+> 
+> Initially (see "killing ceph-disk" thread [0]) we planned for removal
+> of Mimic, but we didn't want to introduce the deprecation warnings up
+> until we had an out for those who had OSDs deployed in previous
+> releases with ceph-disk (we are now able to handle those as well).
+> That is the reason ceph-volume, although present since the first
+> Luminous release, hasn't been pushed forward much.
+> 
+> Now that we feel like we can cover almost all cases, we would really
+> like to see a wider usage so that we can improve on issues/experience.
+> 
+> Given that 12.2.2 is already in the process of getting released, we
+> can't undo the deprecation warnings for that version, but we will
+> remove them for 12.2.3, add them back again in Mimic, which will mean
+> ceph-disk will be kept around a bit longer, and finally fully removed
+> by N.
+> 
+> To recap:
+> 
+> * ceph-disk deprecation warnings will stay for 12.2.2
+> * deprecation warnings will be removed in 12.2.3 (and from all later
+> Luminous releases)
+> * deprecation warnings will be added again in ceph-disk for all Mimic releases
+> * ceph-disk will no longer be available for the 'N' release, along
+> with the UDEV rules
+> 
+> I believe these four points address most of the concerns voiced in
+> this thread, and should give enough time to port clusters over to
+> ceph-volume.
+> 
+> [0] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-October/021358.html
 
-Leo, thank you! could you update
-http://tracker.ceph.com/projects/ceph/wiki/Planning with the URL of
-the recording once you upload it?
+Thank you for listening to the feedback - I think most of us know the
+balance that needs to be struck between moving a project forward and
+decrufting a code base versus providing a stable enough interface for
+users is not always easy to find.
 
+I think the above roadmap is a good compromise for all involved parties,
+and I hope we can use the remainder of Luminous to prepare for a
+seam- and painless transition to ceph-volume in time for the Mimic
+release, and then finally retire ceph-disk for good!
 
--- 
-Regards
-Kefu Chai
