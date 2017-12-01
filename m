@@ -1,105 +1,116 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: ceph zstd not for bluestor due to performance
- reasons
-Date: Sun, 5 Nov 2017 07:51:12 +0100
-Message-ID: <ad66520f-6fd4-c281-a835-36bd845a8128@profihost.ag>
-References: <BD0427BB-F720-4746-82F9-E082D2396F56@profihost.ag>
- <alpine.DEB.2.11.1710251940520.22592@piezo.us.to>
- <5cf6f721-05ea-4e38-a6b9-04cff5d6aad3@profihost.ag>
- <alpine.DEB.2.11.1710261158070.22592@piezo.us.to>
- <e66d020b-2fba-92a3-fb0a-28236108d1bb@profihost.ag>
- <alpine.DEB.2.11.1711042010330.23234@piezo.novalocal>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] ceph: drop negtive child dentries before try pruning
+ inode's alias
+Date: Fri, 1 Dec 2017 09:07:40 +0800
+Message-ID: <CAAM7YAnrOKRuYh+gSvWePjRJ2DqVJnDcUQmPLU27oGETuUsvEA@mail.gmail.com>
+References: <20171130141259.8577-1-zyan@redhat.com> <1512052661.4132.4.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1711042010330.23234-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-Content-Language: de-DE
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ot0-f195.google.com ([74.125.82.195]:38617 "EHLO
+        mail-ot0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751125AbdLABHl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Nov 2017 20:07:41 -0500
+Received: by mail-ot0-f195.google.com with SMTP id p3so7793565oti.5
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Nov 2017 17:07:41 -0800 (PST)
+In-Reply-To: <1512052661.4132.4.camel@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>
 
-Hi Sage,
-
-this does not work for me.
->> What's needed to run only / just the unittest_compression test?
+On Thu, Nov 30, 2017 at 10:37 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Thu, 2017-11-30 at 22:12 +0800, Yan, Zheng wrote:
+>> negtive child dentry holds reference on inode's alias, it makes
+>> d_prune_aliases() do nothing.
+>>
+>> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+>> ---
+>>  fs/ceph/mds_client.c | 43 ++++++++++++++++++++++++++++++++++++-------
+>>  1 file changed, 36 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index da181acd4a61..9e7bb5fa9295 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -1440,6 +1440,30 @@ static int __close_session(struct ceph_mds_client *mdsc,
+>>       return request_close_session(mdsc, session);
+>>  }
+>>
+>> +static bool drop_negative_children(struct dentry *dentry)
+>> +{
+>> +     struct dentry *child;
+>> +     bool all_negtive = true;
+>> +
+>> +     if (!d_is_dir(dentry))
+>> +             goto out;
+>> +
+>> +     spin_lock(&dentry->d_lock);
+>> +     list_for_each_entry(child, &dentry->d_subdirs, d_child) {
+>> +             if (d_really_is_positive(child)) {
+>> +                     all_negtive = false;
+>> +                     break;
+>> +             }
+>> +     }
+>> +     spin_unlock(&dentry->d_lock);
+>> +
+>> +     if (all_negtive)
+>> +             shrink_dcache_parent(dentry);
+>> +out:
+>> +     dput(dentry);
+>> +     return all_negtive;
+>> +}
+>> +
+>>  /*
+>>   * Trim old(er) caps.
+>>   *
+>> @@ -1495,15 +1519,20 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
+>>               __ceph_remove_cap(cap, true);
+>>               session->s_trim_caps--;
+>>       } else {
+>> -             int refs;
+>> +             struct dentry *dentry;
+>>               /* try dropping referring dentries */
+>>               spin_unlock(&ci->i_ceph_lock);
+>> -             d_prune_aliases(inode);
+>> -             refs = atomic_read(&inode->i_count);
+>> -             if (refs == 1)
+>> -                     session->s_trim_caps--;
+>> -             dout("trim_caps_cb %p cap %p  pruned, count now %d\n",
+>> -                  inode, cap, refs);
+>> +             dentry = d_find_any_alias(inode);
+>> +             /* drop_negative_children() calls dput() */
+>> +             if (dentry && drop_negative_children(dentry)) {
+>> +                     int refs;
+>> +                     d_prune_aliases(inode);
+>> +                     refs = atomic_read(&inode->i_count);
+>> +                     if (refs == 1)
+>> +                             session->s_trim_caps--;
+>> +                     dout("trim_caps_cb %p cap %p pruned, count now %d\n",
+>> +                          inode, cap, refs);
+>> +             }
+>>               return 0;
+>>       }
+>>
 >
-> make unittest_compression && bin/unittest_compression
+> Would it be better to do this at the VFS layer? Dropping negative
+> children when we're going to prune dentries for an inode seems like it
+> ought to be done as a matter of course in d_prune_aliases.
 >
-> should do it!
 
-#:/build/ceph/src# make unittest_compression && bin/unittest_compression
-make: *** No rule to make target 'unittest_compression'.  Stop.
+I checked other users of d_prune_aliases. Some of them call
+d_invalidate/shrink_dcache_parent before calling d_prune_aliases, some
+of them only call d_prune_aliases for non-directory inode. It seems
+only ceph has this requirement (trim unused inodes so that MDS can
+trim corresponding objects from its cache)
 
-Stefan
+Regards
+Yan, Zheng
 
 
-Am 04.11.2017 um 21:10 schrieb Sage Weil:
-> On Sat, 4 Nov 2017, Stefan Priebe - Profihost AG wrote:
->> Hi Sage,
->>
->> Am 26.10.2017 um 13:58 schrieb Sage Weil:
->>> On Thu, 26 Oct 2017, Stefan Priebe - Profihost AG wrote:
->>>> Hi Sage,
->>>>
->>>> Am 25.10.2017 um 21:54 schrieb Sage Weil:
->>>>> On Wed, 25 Oct 2017, Stefan Priebe - Profihost AG wrote:
->>>>>> Hello,
->>>>>>
->>>>>> in the lumious release notes is stated that zstd is not supported by
->>>>>> bluestor due to performance reason. I'm wondering why btrfs instead
->>>>>> states that zstd is as fast as lz4 but compresses as good as zlib.
->>>>>>
->>>>>> Why is zlib than supported by bluestor? And why does btrfs / facebook
->>>>>> behave different?
->>>>>>
->>>>>> "BlueStore supports inline compression using zlib, snappy, or LZ4. (Ceph
->>>>>> also supports zstd for RGW compression but zstd is not recommended for
->>>>>> BlueStore for performance reasons.)"
->>>>>
->>>>> zstd will work but in our testing the performance wasn't great for 
->>>>> bluestore in particular.  The problem was that for each compression run 
->>>>> there is a relatively high start-up cost initializing the zstd 
->>>>> context/state (IIRC a memset of a huge memory buffer) that dominated the 
->>>>> execution time... primarily because bluestore is generally compressing 
->>>>> pretty small chunks of data at a time, not big buffers or streams.
->>>>>
->>>>> Take a look at unittest_compression timings on compressing 16KB buffers 
->>>>> (smaller than bluestore needs usually, but illustrated of the problem):
->>>>>
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/0
->>>>> [plugin zlib (zlib/isal)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/0 (294 ms)
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/1
->>>>> [plugin zlib (zlib/noisal)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/1 (1755 ms)
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/2
->>>>> [plugin snappy (snappy)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/2 (169 ms)
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/3
->>>>> [plugin zstd (zstd)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/3 (4528 ms)
->>>>>
->>>>> It's an order of magnitude slower than zlib or snappy, which probably 
->>>>> isn't acceptable--even if it is a bit smaller.
->>
->> i've fixed the zstd compression plugin to use reset stream instead of
->> initializing new objects.
->>
->> What's needed to run only / just the unittest_compression test?
-> 
-> make unittest_compression && bin/unittest_compression
-> 
-> should do it!
-> 
-> sage
-> 
+> --
+> Jeff Layton <jlayton@redhat.com>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
