@@ -1,115 +1,84 @@
-From: Li Wang <laurence.liwang@gmail.com>
-Subject: Re: About the "temperature histogram" of tier-agent
-Date: Fri, 1 Dec 2017 20:56:23 +0800
-Message-ID: <CAOsMsV1wuXE_mdvggCb7Yjk9WA+Qk31-cZnbzbRx2KfFk935qQ@mail.gmail.com>
-References: <CAHMqkF7XOhzrQJODwOGnz-0Y8echtdQPEamcNL126w5ctW4+Xg@mail.gmail.com>
- <alpine.DEB.2.11.1711281319000.2819@piezo.novalocal> <CAOsMsV2bmp1-Jdg0Ur+=oF+R=_9zjxw+hjODtN=wCz=VFaqnLQ@mail.gmail.com>
- <CAHMqkF5VckeHoMy2qhUR5M=ivzujGTaiAoutjW8LMjL7vQSxtQ@mail.gmail.com>
+From: Igor Fedotov <ifedotov@suse.de>
+Subject: =?UTF-8?Q?Re:_=e7=ad=94=e5=a4=8d:_osd:_fine-grained_statistics_for_?=
+ =?UTF-8?Q?object_space_usage?=
+Date: Fri, 1 Dec 2017 17:23:52 +0300
+Message-ID: <d277e426-90a4-593b-fdbd-8ba19919de43@suse.de>
+References: <201711300849388246138@zte.com.cn>
+ <alpine.DEB.2.11.1711300304240.8333@piezo.novalocal>
+ <CAJ4mKGb8uFJ738YU9BKT3S3h7ePhVFbLkz+KyEQn+e2S8BbArQ@mail.gmail.com>
+ <alpine.DEB.2.11.1711302125440.12766@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f194.google.com ([209.85.220.194]:44347 "EHLO
-        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752337AbdLAM4Y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Dec 2017 07:56:24 -0500
-Received: by mail-qk0-f194.google.com with SMTP id h19so12939033qkj.11
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Dec 2017 04:56:23 -0800 (PST)
-In-Reply-To: <CAHMqkF5VckeHoMy2qhUR5M=ivzujGTaiAoutjW8LMjL7vQSxtQ@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:41018 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753225AbdLAOX5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 1 Dec 2017 09:23:57 -0500
+In-Reply-To: <alpine.DEB.2.11.1711302125440.12766@piezo.novalocal>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: YuFan Chen <wiz.chen@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, mingxinliu@ubuntukylin.com
+To: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Xie Xingguo <xie.xingguo@zte.com.cn>
 
-Hi,
-  Would you please send a pr to fix this
+On 12/1/2017 12:27 AM, Sage Weil wrote:
+> On Thu, 30 Nov 2017, Gregory Farnum wrote:
+>> On Wed, Nov 29, 2017 at 7:06 PM Sage Weil <sweil@redhat.com> wrote:
+>>> On Thu, 30 Nov 2017, xie.xingguo@zte.com.cn wrote:
+>>>> （My network connection seems to be problematic, resending :( ）
+>>>>
+>>>>    Anyway, I am + 1 for doing this in a more effective way (e.g., as Igor
+>>>> suggested).
+>>>>
+>>>>    The potential big challenge might be making the scrub-process happy,
+>>>> though!
+>>> Would this be something like:
+>>>
+>>> 1- an object_info_t field like uint32_t allocated_size, which has been
+>>> incorporated into the pg summation, and
+>>>
+>>> 2- an ObjectStore method that returns the allocated size for an object?
+>>>
+>>> The challenge I see is that the new value (or delta) needs to be sorted
+>>> out at the transaction prepare time because the stat update is part of the
+>>> transaction, but we won't really know what the result is until bluestore
+>>> (or any other impl) does it's write preparation work.  :/
+>>
+>> It would take some doing but this might be a good time to start adding
+>> delayed work. We could get the stat updates as part of the objectstore
+>> callback and incorporate them into future disk ops, and part of the
+>> startup/replay process could be querying for stat updates to objects
+>> we haven’t committed yet.
+>>
+>> ...except we don’t really have an OSD-level or pg replay phase any
+>> more, do we. Hrmm. And doing it in the transaction would require some
+>> sort of set-up/query phase to the transaction, then finalization and
+>> submission, which isn’t great since it impacts checksumming and other
+>> stuff (although *hopefully* not actual allocation).
+> Hmm, and there is a larger problem here: we can't really make this
+> ObjectStore implementation specific because it may vary across OSDs (some
+> may be BlueStore, some may be FileStore).
+IMO first of all we should determine what parameter(s) would we track. 
+Object logical space usage (as we do now) or physical allocations or both.
+For logical space tracking it's probably not an issue to have uniform 
+results among different stores - FileStore replicates what we have at 
+OSD, BlueStore do the same on its own data structures.
+or physical allocation tracking we must handle different results from 
+different store types as they are really not the same. I.e. object 
+physical size (with 3 replications) should be  calculated as
+   size = size_rep1 + size_rep2 + size_rep3
+not
+   size = size_primary * 3
 
-Cheers,
-Li Wang
+Also wondering if mixed object store environments have any non-academic 
+value?
+> Even if we didn't have that issue, it constrains the ordering somewhat:
+> you would need to prepare and submit the local transaction (to get
+> the stat delta) before sending the replica writes.
+>
+> I think this sort of layer boundary crossing would make our lives very
+> difficult down the line.  :/
+>
+> sage
 
-2017-11-30 23:45 GMT+08:00 YuFan Chen <wiz.chen@gmail.com>:
-> Hi,
->   Yes, it really means the ranking level in a
->    'temperature' rating scale.
->   Using 'temp_lower' would be better.
->
-> Thanks.
->
-> Yufan Chen
->
->
-> Li Wang <laurence.liwang@gmail.com> =E6=96=BC 2017=E5=B9=B411=E6=9C=8830=
-=E6=97=A5 =E9=80=B1=E5=9B=9B =E4=B8=8B=E5=8D=884:51 =E5=AF=AB=E9=81=93=EF=
-=BC=9A
->>
->> Hi,
->>   This makes sense, the variable name 'temp_upper' is really confusing
->> which in fact does not count the number of hot objects. However,
->> personally,
->> I prefer use  temp_lower as follows,
->>
->> if (temp_lower >=3D agent_state->evict_effort)
->>   return false;
->>
->> Cheers,
->> Li Wang
->>
->> 2017-11-28 21:20 GMT+08:00 Sage Weil <sage@newdream.net>:
->> > Hi MingXin, Li,
->> >
->> > Does the below make sense to you?
->> >
->> > Thanks!
->> > sage
->> >
->> >
->> > On Tue, 28 Nov 2017, YuFan Chen wrote:
->> >
->> >> Hi,
->> >>
->> >>    Before Jewel, the code uses "atime" to distinguish hot/cold data:
->> >>
->> >>           agent_estimate_atime_temp() calculates the distance.
->> >>           It means colder data gets longer distance (larger value)
->> >>
->> >>
->> >>    In Jewel, it changes to use temperature with weight.
->> >>             So, colder data gets smaller value.
->> >>
->> >>     However, it still use the "old semantics" to determine evicting o=
-r
->> >> not in
->> >>            ReplicatedPG::agent_estimate_atime_temp();
->> >>
->> >>     if (1000000 - temp_upper >=3D agent_state->evict_effort)
->> >>        return false;
->> >>
->> >>
->> >>      if there is no misunderstanding, should it change to that:
->> >>
->> >> --- a/src/osd/ReplicatedPG.cc
->> >> +++ b/src/osd/ReplicatedPG.cc
->> >> @@ -12211,7 +12211,7 @@ bool
->> >> ReplicatedPG::agent_maybe_evict(ObjectContextRef& obc, bool
->> >> after_flush)
->> >>      delete f;
->> >>      *_dout << dendl;
->> >>
->> >> -    if (1000000 - temp_upper >=3D agent_state->evict_effort)
->> >> +    if (temp_upper >=3D agent_state->evict_effort)
->> >>        return false;
->> >>    }
->> >>
->> >> Yu Fan
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> >> in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
