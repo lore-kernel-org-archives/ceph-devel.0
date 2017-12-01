@@ -1,121 +1,47 @@
-From: YuFan Chen <wiz.chen@gmail.com>
-Subject: Re: About the "temperature histogram" of tier-agent
-Date: Fri, 1 Dec 2017 23:12:57 +0800
-Message-ID: <CAHMqkF7VNzAMXhDRDaQhmpSjWCM8PWUckzn_P+dKeh+G1F5cTA@mail.gmail.com>
-References: <CAHMqkF7XOhzrQJODwOGnz-0Y8echtdQPEamcNL126w5ctW4+Xg@mail.gmail.com>
- <alpine.DEB.2.11.1711281319000.2819@piezo.novalocal> <CAOsMsV2bmp1-Jdg0Ur+=oF+R=_9zjxw+hjODtN=wCz=VFaqnLQ@mail.gmail.com>
- <CAHMqkF5VckeHoMy2qhUR5M=ivzujGTaiAoutjW8LMjL7vQSxtQ@mail.gmail.com> <CAOsMsV1wuXE_mdvggCb7Yjk9WA+Qk31-cZnbzbRx2KfFk935qQ@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: [ceph-users] ceph-disk removal roadmap (was ceph-disk is now deprecated)
+Date: Fri, 1 Dec 2017 12:28:06 -0500
+Message-ID: <CAC-Np1yUZn8yE9==fidSwFp73JpwHyUR0isdbD5TFjz506n-ZQ@mail.gmail.com>
+References: <CAC-Np1zdwLALBE_eheCJ+bR_A4-Gway6fpv6smcQNjt-4=9RxA@mail.gmail.com>
+ <20171201081757.qwfo2lrhpmg77jgd@nora.maurer-it.com> <20171201082810.GH30636@shell.dmz.bit.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:41581 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750965AbdLAPM6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Dec 2017 10:12:58 -0500
-Received: by mail-it0-f65.google.com with SMTP id x28so2790434ita.0
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Dec 2017 07:12:58 -0800 (PST)
-In-Reply-To: <CAOsMsV1wuXE_mdvggCb7Yjk9WA+Qk31-cZnbzbRx2KfFk935qQ@mail.gmail.com>
+Received: from mail-qt0-f182.google.com ([209.85.216.182]:41345 "EHLO
+        mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750988AbdLAR2H (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Dec 2017 12:28:07 -0500
+Received: by mail-qt0-f182.google.com with SMTP id i40so13952269qti.8
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Dec 2017 09:28:07 -0800 (PST)
+In-Reply-To: <20171201082810.GH30636@shell.dmz.bit.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <laurence.liwang@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, mingxinliu@ubuntukylin.com
+To: Stefan Kooman <stefan@bit.nl>
+Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Okay. I will do it.
-
-Yufan Chen
-
-2017-12-01 20:56 GMT+08:00 Li Wang <laurence.liwang@gmail.com>:
-> Hi,
->   Would you please send a pr to fix this
+On Fri, Dec 1, 2017 at 3:28 AM, Stefan Kooman <stefan@bit.nl> wrote:
+> Quoting Fabian Grünbichler (f.gruenbichler@proxmox.com):
+>> I think the above roadmap is a good compromise for all involved parties,
+>> and I hope we can use the remainder of Luminous to prepare for a
+>> seam- and painless transition to ceph-volume in time for the Mimic
+>> release, and then finally retire ceph-disk for good!
 >
-> Cheers,
-> Li Wang
+> Will the upcoming 12.2.2 release ship with a ceph-volume capable of
+> doing bluestore on top of LVM?
+
+Yes, see the open pr for it (https://github.com/ceph/ceph-deploy/pull/455)
+
+> Eager to use ceph-volume for that, and
+> skip entirely over ceph-disk and our manual osd prepare process ...
+
+Now please note that the API will change in a non backwards compatible
+way, so a major release of ceph-deploy will
+be done after that is merged.
+
 >
-> 2017-11-30 23:45 GMT+08:00 YuFan Chen <wiz.chen@gmail.com>:
->> Hi,
->>   Yes, it really means the ranking level in a
->>    'temperature' rating scale.
->>   Using 'temp_lower' would be better.
->>
->> Thanks.
->>
->> Yufan Chen
->>
->>
->> Li Wang <laurence.liwang@gmail.com> =E6=96=BC 2017=E5=B9=B411=E6=9C=8830=
-=E6=97=A5 =E9=80=B1=E5=9B=9B =E4=B8=8B=E5=8D=884:51 =E5=AF=AB=E9=81=93=EF=
-=BC=9A
->>>
->>> Hi,
->>>   This makes sense, the variable name 'temp_upper' is really confusing
->>> which in fact does not count the number of hot objects. However,
->>> personally,
->>> I prefer use  temp_lower as follows,
->>>
->>> if (temp_lower >=3D agent_state->evict_effort)
->>>   return false;
->>>
->>> Cheers,
->>> Li Wang
->>>
->>> 2017-11-28 21:20 GMT+08:00 Sage Weil <sage@newdream.net>:
->>> > Hi MingXin, Li,
->>> >
->>> > Does the below make sense to you?
->>> >
->>> > Thanks!
->>> > sage
->>> >
->>> >
->>> > On Tue, 28 Nov 2017, YuFan Chen wrote:
->>> >
->>> >> Hi,
->>> >>
->>> >>    Before Jewel, the code uses "atime" to distinguish hot/cold data:
->>> >>
->>> >>           agent_estimate_atime_temp() calculates the distance.
->>> >>           It means colder data gets longer distance (larger value)
->>> >>
->>> >>
->>> >>    In Jewel, it changes to use temperature with weight.
->>> >>             So, colder data gets smaller value.
->>> >>
->>> >>     However, it still use the "old semantics" to determine evicting =
-or
->>> >> not in
->>> >>            ReplicatedPG::agent_estimate_atime_temp();
->>> >>
->>> >>     if (1000000 - temp_upper >=3D agent_state->evict_effort)
->>> >>        return false;
->>> >>
->>> >>
->>> >>      if there is no misunderstanding, should it change to that:
->>> >>
->>> >> --- a/src/osd/ReplicatedPG.cc
->>> >> +++ b/src/osd/ReplicatedPG.cc
->>> >> @@ -12211,7 +12211,7 @@ bool
->>> >> ReplicatedPG::agent_maybe_evict(ObjectContextRef& obc, bool
->>> >> after_flush)
->>> >>      delete f;
->>> >>      *_dout << dendl;
->>> >>
->>> >> -    if (1000000 - temp_upper >=3D agent_state->evict_effort)
->>> >> +    if (temp_upper >=3D agent_state->evict_effort)
->>> >>        return false;
->>> >>    }
->>> >>
->>> >> Yu Fan
->>> >> --
->>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->>> >> in
->>> >> the body of a message to majordomo@vger.kernel.org
->>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >>
->>> >>
->>> > --
->>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> > the body of a message to majordomo@vger.kernel.org
->>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Gr. Stefan
+>
+> --
+> | BIT BV  http://www.bit.nl/        Kamer van Koophandel 09090351
+> | GPG: 0xD14839C6                   +31 318 648 688 / info@bit.nl
