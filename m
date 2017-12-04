@@ -1,43 +1,178 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: mimic-dev1 branch for 13.0.1
-Date: Mon, 4 Dec 2017 17:57:56 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1712041459580.22619@piezo.novalocal>
+From: Lars Seipel <lars.seipel@h-da.de>
+Subject: Re: iSCSI gateway
+Date: Mon, 4 Dec 2017 19:37:12 +0100
+Message-ID: <20171204183712.GA26726@horsthansen.slrz.net>
+References: <CAMMWhM_uhhNM6rJvOpEQgCtegE+Tp8rMp00EW2z7s5egjjTbWw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature";
+        micalg=sha-256; boundary="KsGdsel6WgEHnImy"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44644 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751246AbdLDR56 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 4 Dec 2017 12:57:58 -0500
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 866A37F3F4
-        for <ceph-devel@vger.kernel.org>; Mon,  4 Dec 2017 17:57:58 +0000 (UTC)
-Received: from ovpn-112-42.rdu2.redhat.com (ovpn-112-42.rdu2.redhat.com [10.10.112.42])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 31F5A781F2
-        for <ceph-devel@vger.kernel.org>; Mon,  4 Dec 2017 17:57:58 +0000 (UTC)
+Received: from ironchief.h-da.de ([141.100.10.235]:22389 "EHLO
+        ironchief.h-da.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752065AbdLDSnS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Dec 2017 13:43:18 -0500
+Content-Disposition: inline
+In-Reply-To: <CAMMWhM_uhhNM6rJvOpEQgCtegE+Tp8rMp00EW2z7s5egjjTbWw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Marc Cote <marc.cote.mathieu@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
 
-I've pushed a mimic-dev1 branch and am kicking off a bunch of qa runs for 
-the 13.0.1 dev checkpoint release.  The goal here is to make sure these QA 
-runs are clean so that we don't have weeks and weeks of cleaning up our 
-testing debt at the end of the mimic cycle.  Yuri is on PTO right now so 
-it'll be up to the leads to drive these tests for now.
+--KsGdsel6WgEHnImy
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Overall for the rados suite I think we are in reasonably good shape, 
-but there are definitely some failures that we should clean up before 
-moving on.
+On Fri, Nov 24, 2017 at 11:29:12AM -0500, Marc Cote wrote:
+> Good day Ladies and Gentlemen,
+>=20
+>   We are embarking on the adventure of testing Ceph and iSCSI gateway
+> with Windows clients.
+>=20
+>   After many attempt, we keep running into issue after issue.  Is
+> there a white paper on a known tested setup with solid install
+> procedure, including the list of repo and the order (if needed).
+>=20
+> Right now we have been working on Luminous, should we go with Jewel?
 
-Please try to merge fixes directly into the mimic-dev1 branch (instead of 
-cherry-picking the fixes).  We will periodically merge mimic-dev1 back 
-into master, and also merge the eventual 13.0.1 release tag into master as 
-well.
+Nah, Luminous is the way to go here.
 
-Thanks!
-sage
+I started playing with the iSCSI gateway, too. It's certainly a quite
+bumpy road, at least for now.
 
+You should be able to get things running up to the point where you try
+to add RBD volumes to the gateways. This will fail with a "Kernel not
+supported" error message, caused by the running kernel not supporting
+the qfull_time_out attribute.
+
+While the Ceph docs state you need Linux 4.14+, the required patches
+never ended up in 4.14, as the author discovered an issue with them.
+Mike posted a new series to target-devel but they won't land in mainline
+before 4.16.
+
+I initially interpreted the "RHEL/CentOS 7.4; or Linux kernel v4.14 or
+newer" part as saying that the EL7 kernel had those patches
+applied/backported. Grepping through the big monolithic tarball
+contained within kernel-3.10.0-693.5.2.el7.src.rpm, that doesn't seem to
+be the case.
+
+I might have missed something (just started playing with the iSCSI
+stuff), but AFAICT the Ceph docs are simply incorrect on this matter.
+
+So, if you want to test the iSCSI gateway, the way forward is probably
+to pick up those TCMU kernel patches and start testing.
+
+What are you running your gateways on? EL7?
+
+--=20
+Lars Seipel
+IT-Services
+lars.seipel@h-da.de
+
+h_da
+Hochschule Darmstadt
+University of Applied Sciences
+fbi
+Fachbereich Informatik
+Department of Computer Science
+Sch=C3=B6fferstra=C3=9Fe 8b, D10/0.37
+D-64295 Darmstadt
+=E2=98=8E +49 6151 16-38423
+
+--KsGdsel6WgEHnImy
+Content-Type: application/x-pkcs7-signature
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Transfer-Encoding: base64
+
+MIISpQYJKoZIhvcNAQcCoIISljCCEpICAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0B
+BwGggg/QMIIFUDCCBDigAwIBAgIHF6QkdNLhcTANBgkqhkiG9w0BAQsFADBaMQswCQYDVQQG
+EwJERTETMBEGA1UEChMKREZOLVZlcmVpbjEQMA4GA1UECxMHREZOLVBLSTEkMCIGA1UEAxMb
+REZOLVZlcmVpbiBQQ0EgR2xvYmFsIC0gRzAxMB4XDTE0MDUyNzE0NTMyNFoXDTE5MDcwOTIz
+NTkwMFowezELMAkGA1UEBhMCREUxEjAQBgNVBAcTCURhcm1zdGFkdDEdMBsGA1UEChMUSG9j
+aHNjaHVsZSBEYXJtc3RhZHQxHTAbBgNVBAMTFEhvY2hzY2h1bGUgRGFybXN0YWR0MRowGAYJ
+KoZIhvcNAQkBFgtwa2lAaC1kYS5kZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+ALbT9wV599Dy8e73K9XS6fyaxiKuNbsakdZzTXkcFR7QcQjaMTgNZfx31DmxBY9tVxu/UvWD
+AhfdkLO1CwZnw0na4ivp2n9cIl6YyyxjuGq+RBpK93FtCQdjsGwgvBRp5snmlSvSECYsO38U
+M3vj61uU8PTICCgBWuDH2tL+mHJiv68Uiw2tKmuiBT0WzTSgDN85xO7RJN09OBAaW01yZGVx
+FC50ktN4KzwpsWbd5CGeb/41re2YoNHgw9gfyhECUchut3OkAMxkk1XCFIODNRrKNfjftFpk
+rTarUZ+N4JuG0CSzhRtAvxCbZDHcB90weWcc+igagFCk48bwa3y17w0CAwEAAaOCAfgwggH0
+MBIGA1UdEwEB/wQIMAYBAf8CAQEwDgYDVR0PAQH/BAQDAgEGMBEGA1UdIAQKMAgwBgYEVR0g
+ADAdBgNVHQ4EFgQUCg6EOG8E5k/3weiOFN0xelq80bQwHwYDVR0jBBgwFoAUSbfGz+g9H3/q
+RHsTKffxCnA+3mQwFgYDVR0RBA8wDYELcGtpQGgtZGEuZGUwgYgGA1UdHwSBgDB+MD2gO6A5
+hjdodHRwOi8vY2RwMS5wY2EuZGZuLmRlL2dsb2JhbC1yb290LWNhL3B1Yi9jcmwvY2Fjcmwu
+Y3JsMD2gO6A5hjdodHRwOi8vY2RwMi5wY2EuZGZuLmRlL2dsb2JhbC1yb290LWNhL3B1Yi9j
+cmwvY2FjcmwuY3JsMIHXBggrBgEFBQcBAQSByjCBxzAzBggrBgEFBQcwAYYnaHR0cDovL29j
+c3AucGNhLmRmbi5kZS9PQ1NQLVNlcnZlci9PQ1NQMEcGCCsGAQUFBzAChjtodHRwOi8vY2Rw
+MS5wY2EuZGZuLmRlL2dsb2JhbC1yb290LWNhL3B1Yi9jYWNlcnQvY2FjZXJ0LmNydDBHBggr
+BgEFBQcwAoY7aHR0cDovL2NkcDIucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9wdWIvY2Fj
+ZXJ0L2NhY2VydC5jcnQwDQYJKoZIhvcNAQELBQADggEBAB0i27QxBZUZ7E1PPhKiWXLLEQ1P
+GE84knPraI2Wb3rB7cBIJFCCp6CHzHQQOvqD2IfHuXsFkeADedumiNobVgSpQGLEgwd/Pc6S
+PCKktJ8LaeAq6li1cy5j8zTdFqTY3ZSmH5CKqqmV0bKStogmgNiJZXJZDJpSqUh/05jJnMr8
+39b9iVDQJ1KKQl2PrR3i24c3LeDHrWPlx3DEpMuiZX/LyjeTO6SISkBzG+G4Uz31qfD/RSWH
+lymA5Obg7MaKNYoXQDPkGty7Sfz+oThHKI9iv7CFyW41bHyWBesdOgBsF/eK/wY7AdbV8JqC
+PWjqc9zDE2aHBhW4aSDNok5ARg8wggTVMIIDvaADAgECAghQTsb1PRG0ZDANBgkqhkiG9w0B
+AQsFADBxMQswCQYDVQQGEwJERTEcMBoGA1UEChMTRGV1dHNjaGUgVGVsZWtvbSBBRzEfMB0G
+A1UECxMWVC1UZWxlU2VjIFRydXN0IENlbnRlcjEjMCEGA1UEAxMaRGV1dHNjaGUgVGVsZWtv
+bSBSb290IENBIDIwHhcNMTQwNzIyMTIwODI2WhcNMTkwNzA5MjM1OTAwWjBaMQswCQYDVQQG
+EwJERTETMBEGA1UEChMKREZOLVZlcmVpbjEQMA4GA1UECxMHREZOLVBLSTEkMCIGA1UEAxMb
+REZOLVZlcmVpbiBQQ0EgR2xvYmFsIC0gRzAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEA6ZvDZ4X5Da71jVTDllA1PWLpbkztlNcAW5UidNQg6zSP1uzAMQQLmYHiphTSUqAo
+I4SLdIkEXlvg4njBeMsWyyg1OXstkEXQ7aAAeny/Sg4bAMOG6VwrMRF7DPOCJEOMHDiLamgA
+mu7cT3ir0sYTm3at7t4m6O8Br3QPwQmi9mvOvdPNFDBP9eXjpMhim4IaAycwDQJlYE3t0Qkj
+KpY1WCfTdsZxtpAdxO3/NYZ9bzOz2w/FEcKKg6GUXUFr2NIQ9Uz9ylGs2b3vkoO72uuLFlZW
+Q8/h1RM9ph8nMM1JVNvJEzSacXXFbOqnC5j5IZ0nrz6jOTlIaoytyZn7wxLyvQIDAQABo4IB
+hjCCAYIwDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRJt8bP6D0ff+pEexMp9/EKcD7eZDAf
+BgNVHSMEGDAWgBQxw3kbuvVT1xfgiXotF2wKsyudMzASBgNVHRMBAf8ECDAGAQH/AgECMGIG
+A1UdIARbMFkwEQYPKwYBBAGBrSGCLAEBBAICMBEGDysGAQQBga0hgiwBAQQDADARBg8rBgEE
+AYGtIYIsAQEEAwEwDwYNKwYBBAGBrSGCLAEBBDANBgsrBgEEAYGtIYIsHjA+BgNVHR8ENzA1
+MDOgMaAvhi1odHRwOi8vcGtpMDMzNi50ZWxlc2VjLmRlL3JsL0RUX1JPT1RfQ0FfMi5jcmww
+eAYIKwYBBQUHAQEEbDBqMCwGCCsGAQUFBzABhiBodHRwOi8vb2NzcDAzMzYudGVsZXNlYy5k
+ZS9vY3NwcjA6BggrBgEFBQcwAoYuaHR0cDovL3BraTAzMzYudGVsZXNlYy5kZS9jcnQvRFRf
+Uk9PVF9DQV8yLmNlcjANBgkqhkiG9w0BAQsFAAOCAQEAYyAo/ZwhhnK+OUZZOTIlvKkBmw3M
+yn1BnIZtCm4ssxNZdbEzkhthJxb/w7LVNYL7hCoBSb1mu2YvssIGXW4/buMBWlvKQ2Nclbbh
+Macf1QdfTeZlgk4y+cN8ekvNTVx07iHydQLsUj7SyWrTkCNuSWc1vn9NVqTszC/Pt6GXqHI+
+ybxA1lqkCD3WvILDt7cyjrEsjmpttzUCGc/1OURYY6ckABCwu/xOr24vOLulV0k/2G5QbyyX
+ltwdRpplic+uzPLl2Z9Tsz6hL5Kp2AvGhB8Exuse6J99tXulAvEkxSRjETTMWpMgKnmIOiVC
+kKllO3yG0xIVIyn8LNrMOVtUFzCCBZ8wggSHoAMCAQICBxpf1Yl5AacwDQYJKoZIhvcNAQEL
+BQAwezELMAkGA1UEBhMCREUxEjAQBgNVBAcTCURhcm1zdGFkdDEdMBsGA1UEChMUSG9jaHNj
+aHVsZSBEYXJtc3RhZHQxHTAbBgNVBAMTFEhvY2hzY2h1bGUgRGFybXN0YWR0MRowGAYJKoZI
+hvcNAQkBFgtwa2lAaC1kYS5kZTAeFw0xNTExMDkwODIzMjFaFw0xODExMDgwODIzMjFaMFox
+CzAJBgNVBAYTAkRFMR0wGwYDVQQKDBRIb2Noc2NodWxlIERhcm1zdGFkdDEWMBQGA1UECwwN
+RmIgSW5mb3JtYXRpazEUMBIGA1UEAwwLTGFycyBTZWlwZWwwggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQC9yxxPP1nyqbcH31qC+AFgmNp79qQsytEXadw/MmVyJtCF3YyxQVB7
+pFuFfNNeb5DXc+c7f+joh9FhYi59FCmwFGb2VXkrej1QipnuF/Qm/2qgoLvc/wLfinAYqIXq
+7gl8+k41NFl0mozfsYos8kd4V8oVO1iK8PqAtQsVPg6ROfUEGxxom7dwOZUkd8MHiwFTb3no
+SxjU83BHZ4SHMF3IP55TNT1LwJd30kl/hMw+I50tO+OGhUJMoN8AhNtx6ITEV07Vo+VhV3qZ
+/b7jBn5c9PEzTx9l+Bc8AEYkrLncHguVtckhY2xumEoYIWu/YKzTPHfS/eblXMXDrJAFIbMl
+AgMBAAGjggJHMIICQzBABgNVHSAEOTA3MBEGDysGAQQBga0hgiwBAQQDBDARBg8rBgEEAYGt
+IYIsAgEEAwEwDwYNKwYBBAGBrSGCLAEBBDAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAdBgNV
+HSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwQwHQYDVR0OBBYEFO3jvdrfP+0KFhb2lpCdTMKm
+6tE6MB8GA1UdIwQYMBaAFAoOhDhvBOZP98HojhTdMXpavNG0MB4GA1UdEQQXMBWBE2xhcnMu
+c2VpcGVsQGgtZGEuZGUwgYsGA1UdHwSBgzCBgDA+oDygOoY4aHR0cDovL2NkcDEucGNhLmRm
+bi5kZS9ocy1kYXJtc3RhZHQtY2EvcHViL2NybC9jYWNybC5jcmwwPqA8oDqGOGh0dHA6Ly9j
+ZHAyLnBjYS5kZm4uZGUvaHMtZGFybXN0YWR0LWNhL3B1Yi9jcmwvY2FjcmwuY3JsMIHZBggr
+BgEFBQcBAQSBzDCByTAzBggrBgEFBQcwAYYnaHR0cDovL29jc3AucGNhLmRmbi5kZS9PQ1NQ
+LVNlcnZlci9PQ1NQMEgGCCsGAQUFBzAChjxodHRwOi8vY2RwMS5wY2EuZGZuLmRlL2hzLWRh
+cm1zdGFkdC1jYS9wdWIvY2FjZXJ0L2NhY2VydC5jcnQwSAYIKwYBBQUHMAKGPGh0dHA6Ly9j
+ZHAyLnBjYS5kZm4uZGUvaHMtZGFybXN0YWR0LWNhL3B1Yi9jYWNlcnQvY2FjZXJ0LmNydDAN
+BgkqhkiG9w0BAQsFAAOCAQEAU4e8F748sFpn2lSswqHsTOdyxr0xtQx5Wu1koZYSgZ0gsIzq
+Di6QOEGI56rdWflxSjTEt/iya2kyUJL5rzN/ikx/Y9iNll4bn9jk5mz6QS3mMx0EOixtrW4U
+dUirKjAS7Mwtl5qM1QIX3O3LTktnxoFd+Ob2S9//bO1iPYwcHjyuS4CE0FELF9eVrlOc9MXp
+vuFSIXeNfX17n/3hEjoUzKp0FxFHPMiF/tNLBsmEeP8x+KiC5/o3Em6RQLqbDbU0y7p1tBV5
+gronFf3xqnSklgOOYVoPQ0VvQfBwWD/owi+v5747rHZB9/VNlIecPwTjOBZNuQ79PkzaOQRj
+Y5qG5TGCApkwggKVAgEBMIGGMHsxCzAJBgNVBAYTAkRFMRIwEAYDVQQHEwlEYXJtc3RhZHQx
+HTAbBgNVBAoTFEhvY2hzY2h1bGUgRGFybXN0YWR0MR0wGwYDVQQDExRIb2Noc2NodWxlIERh
+cm1zdGFkdDEaMBgGCSqGSIb3DQEJARYLcGtpQGgtZGEuZGUCBxpf1Yl5AacwDQYJYIZIAWUD
+BAIBBQCggeQwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTcx
+MjA0MTgzNzEyWjAvBgkqhkiG9w0BCQQxIgQg9cMiZD5GeARlR5inXf95J2scIxsNxE8vdG32
+tYg1oT4weQYJKoZIhvcNAQkPMWwwajALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCG
+SAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAwBwYF
+Kw4DAgcwDQYIKoZIhvcNAwICASgwDQYJKoZIhvcNAQEBBQAEggEARnOItA5uyj9VaxW0xUMo
+ZfYKz3ku5wtIm+UNdKTm94uwCqIjMYVaK6lt/5ZlTruekSNMwGUFRZ4kUMKZVgA3rEQAJrby
+cbkCIqIuaEtpUDMMUALM/zsyJ2afTX/EXb6iJphyG6aMTdk35ZTpllMn/NLG98tGqkz2+Gw+
+/wpq7MHlTqc0gs8QnUCB2n8B2xb3UTDvGLpb28iUc0DHA11Si2XRkTiGDaQYmMB5TenHNxy0
+wVuTOkd7+Dq7r+3m9w8PA45v5va/WnxddnE8yMU1G9gIrk2cBAo40M8ypBTJDkc2I24cHR/u
+4trBH3uGh2LE4427Re4+xgHwT+PHNhWP9g==
+
+--KsGdsel6WgEHnImy--
