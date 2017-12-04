@@ -1,59 +1,76 @@
-From: Cary <dynamic.cary@gmail.com>
-Subject: Re: Upgrade from Jewel to Luminous. REQUIRE_JEWEL OSDMap
-Date: Mon, 4 Dec 2017 05:36:13 +0000
-Message-ID: <CADfZm8fjgE42ikdBBZ+44FL81EzaFyOd_Rp1D7B0Rj=-+escxQ@mail.gmail.com>
-References: <CADfZm8c9GKuedHA5x0n+2euhXbSqsFYxroimm-aw3Cc5Z00iXQ@mail.gmail.com>
- <alpine.DEB.2.11.1711280308100.19791@piezo.novalocal> <CADfZm8c1+OhDO36BjYSqLCe-US0Nmvhw87kyUWduc_5X3hL7Pg@mail.gmail.com>
- <alpine.DEB.2.11.1711281308100.19791@piezo.novalocal> <CADfZm8dYLvGOFhtCGp1twwJopz4rUDS1EKqLCxYE_or+RndCrg@mail.gmail.com>
- <alpine.DEB.2.11.1711281844430.19791@piezo.novalocal> <CADfZm8dOAUnSJxHRvpNng9iOBHg1kyCauXY=VNt6z-kduSYtwg@mail.gmail.com>
- <alpine.DEB.2.11.1711300049560.8333@piezo.novalocal> <CADfZm8dd-ew+1HMDeDy_O8ewu2+-PyAHuAJn-mGLfMx2ZWn=BQ@mail.gmail.com>
- <alpine.DEB.2.11.1711300309540.2819@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: [ceph-users] dropping trusty
+Date: Mon, 4 Dec 2017 14:12:47 +0800
+Message-ID: <CAJE9aOP_SXaXsS7DAjvyeNtOD9oK=NTt9j-pbQrCXeD6KwsbVQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1711301711470.12766@piezo.novalocal> <f3f4d84b-2df0-0b7d-65f1-074e4d308348@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:42838 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753102AbdLDFgO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Dec 2017 00:36:14 -0500
-Received: by mail-oi0-f47.google.com with SMTP id o64so10916551oia.9
-        for <ceph-devel@vger.kernel.org>; Sun, 03 Dec 2017 21:36:14 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711300309540.2819@piezo.novalocal>
+Received: from mail-qk0-f195.google.com ([209.85.220.195]:38351 "EHLO
+        mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752785AbdLDGMt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Dec 2017 01:12:49 -0500
+Received: by mail-qk0-f195.google.com with SMTP id z203so20136876qkb.5
+        for <ceph-devel@vger.kernel.org>; Sun, 03 Dec 2017 22:12:49 -0800 (PST)
+In-Reply-To: <f3f4d84b-2df0-0b7d-65f1-074e4d308348@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: David Galloway <dgallowa@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Sage,
-
- I accidentally upgraded one of my monitors to Mimic when installing
-the 9999 ebuild. That ebuild pulled the latest code from
-https://github.com/ceph/ceph.git which was Mimic. I uninstalled Mimic
-and installed Luminous 12.2.2. Then I was able to run "ceph osd set
-require_jewel_osds --yes-i-really-mean-it", and get my cluster to a
-healthy state running Luminous 12.2.1. I will update the rest of the
-cluster to Luminous 12.2.2 later.
-
- Thank you for you time and helping me with that!
-
-Cary
--Dynamic
-
-
-On Thu, Nov 30, 2017 at 3:10 AM, Sage Weil <sage@newdream.net> wrote:
-> On Thu, 30 Nov 2017, Cary wrote:
->> I believe I see what I was doing wrong. I had to run "ceph-osd set
->> require_jewel_osds --yes-i-really-mean-it"
+On Fri, Dec 1, 2017 at 1:55 AM, David Galloway <dgallowa@redhat.com> wrote:
+> On 11/30/2017 12:21 PM, Sage Weil wrote:
+>> We're talking about dropping trusty support for mimic due to the old
+>> compiler (incomplete C++11), hassle of using an updated toolchain, general
+>> desire to stop supporting old stuff, and lack of user objections to
+>> dropping it in the next release.
+>>
+>> We would continue to build trusty packages for luminous and older
+>> releases, just not mimic going forward.
+>>
+>> My question is whether we should drop all of the trusty installs on smithi
+>> and focus testing on xenial and centos.  I haven't seen any trusty related
+>> failures in half a year.  There were some kernel-related issues 6+ months
+>> ago that are resolved, and there is a valgrind issue with xenial that is
+>> making us do valgrind only on centos, but otherwise I don't recall any
+>> other problems.  I think the likelihood of a trusty-specific regression on
+>> luminous/jewel is low.  Note that we can still do install and smoke
+>> testing on VMs to ensure the packages work; we just wouldn't stress test.
+>>
+>> Does this seem reasonable?  If so, we could reimage the trusty hosts
+>> immediately, right?
+>>
+>> Am I missing anything?
+>>
 >
-> 'ceph osd set ...', not 'ceph-osd set ...'.
+> Someone would need to prune through the qa dir and make sure nothing
+> relies on trusty for tests.  We've gotten into a bind recently with the
+
+David, thanks for point out the direction. i removed the references to trusty
+and updated related bits in https://github.com/ceph/ceph/pull/19307.
+
+> testing of FOG [1] where jobs are stuck in Waiting for a long time
+> (tying up workers) because jobs are requesting Trusty.  We got close to
+> having zero Trusty testnodes since the wip-fog branch has been reimaging
+> baremetal testnodes on every job.
 >
->> This is the error I am getting now.
->> 2017-11-30 01:11:19.691 7fc171dbd5c0 -1 unrecognized arg set
->> src/tcmalloc.cc:284] Attempt to free invalid pointer 0x56262bacf4c0
->> *** Caught signal (Aborted) **
->> [...]
+> But other than that, yes, I can reimage the Trusty testnodes.  Once FOG
+> is merged into teuthology master, we won't have to worry about this
+> anymore since jobs will automatically reimage machines based on what
+> distro they require.
+
+since https://github.com/ceph/teuthology/pull/1126 is merged, could you help
+reimage the trusty test nodes?
+
 >
-> ...and that is an embarassing error from bad arguments on the command
-> line!
->
-> sage
->
+> [1] https://github.com/ceph/teuthology/compare/wip-fog
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+
+
+-- 
+Regards
+Kefu Chai
