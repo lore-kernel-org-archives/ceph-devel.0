@@ -1,212 +1,145 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 2/2] ceph: avoid dereferencing invalid pointer during
- cached readdir
-Date: Tue, 05 Dec 2017 06:31:46 -0500
-Message-ID: <1512473506.4125.7.camel@redhat.com>
-References: <20171205015135.12944-1-zyan@redhat.com>
-         <20171205015135.12944-2-zyan@redhat.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: Assertion failed while buildign manpages
+Date: Tue, 5 Dec 2017 07:32:57 -0500
+Message-ID: <CAC-Np1zj8s0pDFYb1CUm_S4JEnsZ6fWuysYotZPJfMXgTgdNJw@mail.gmail.com>
+References: <6899bf17-d2cd-8088-97fe-0a23d001b6dc@digiware.nl>
+ <CAC-Np1ynKuTVNqKncyPDHctSK88=7wXadSDb=wtaDRrbqNrPSw@mail.gmail.com> <e5fcda3e-b57a-e7d0-b94e-e3c81c89e799@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f193.google.com ([209.85.216.193]:39533 "EHLO
-        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751040AbdLELbt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 06:31:49 -0500
-Received: by mail-qt0-f193.google.com with SMTP id k19so28309092qtj.6
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 03:31:49 -0800 (PST)
-In-Reply-To: <20171205015135.12944-2-zyan@redhat.com>
+Received: from mail-qt0-f196.google.com ([209.85.216.196]:33855 "EHLO
+        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752035AbdLEMc7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 07:32:59 -0500
+Received: by mail-qt0-f196.google.com with SMTP id 33so223782qtv.1
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 04:32:58 -0800 (PST)
+In-Reply-To: <e5fcda3e-b57a-e7d0-b94e-e3c81c89e799@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 2017-12-05 at 09:51 +0800, Yan, Zheng wrote:
-> Readdir cache keeps array of dentry pointers in page cache. If any
-> dentry in readdir cache gets pruned, ceph_d_prune() disables readdir
-> cache for later readdir syscall. The problem is that ceph_d_prune()
-> ignores unhashed dentry. Ideally MDS should have already revoked
-> CEPH_CAP_FILE_SHARED (which also disables readdir cache) when dentry
-> gets unhashed. But if it is somehow MDS does not properly revoke
-> CEPH_CAP_FILE_SHARED and the unhashed dentry gets pruned later,
-> ceph_d_prune() will not disable readdir cache, later readdir may
-> reference invalid dentry pointer.
-> 
-> The fix is make ceph_d_prune() do extra check for unhashed dentry.
-> Disable readdir cache if the unhashed dentry is still referenced
-> by readdir cache.
-> 
-> Another fix in this patch is handle d_splice_alias(). If a dentry
-> gets spliced into new parent dentry, treat it as if it was pruned
-> (call ceph_d_prune() for it).
-> 
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/dir.c   | 46 +++++++++++++++++++++++++++++++++-------------
->  fs/ceph/inode.c | 40 ++++++++++++++++++++++++++++++++++------
->  2 files changed, 67 insertions(+), 19 deletions(-)
-> 
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 0a23a4d9fde8..793306f5352c 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -231,11 +231,17 @@ static int __dcache_readdir(struct file *file,  struct dir_context *ctx,
->  			goto out;
->  		}
->  
-> -		di = ceph_dentry(dentry);
->  		spin_lock(&dentry->d_lock);
-> -		if (di->lease_shared_gen == shared_gen &&
-> -		    d_really_is_positive(dentry) &&
-> -		    fpos_cmp(ctx->pos, di->offset) <= 0) {
-> +		di = ceph_dentry(dentry);
-> +		if (d_unhashed(dentry) ||
-> +		    d_really_is_negative(dentry) ||
-> +		    di->lease_shared_gen != shared_gen) {
-> +			spin_unlock(&dentry->d_lock);
-> +			dput(dentry);
-> +			err = -EAGAIN;
-> +			goto out;
-> +		}
-> +		if (fpos_cmp(ctx->pos, di->offset) <= 0) {
->  			emit_dentry = true;
->  		}
->  		spin_unlock(&dentry->d_lock);
-> @@ -1324,24 +1330,38 @@ static void ceph_d_release(struct dentry *dentry)
->   */
->  static void ceph_d_prune(struct dentry *dentry)
->  {
-> -	dout("ceph_d_prune %p\n", dentry);
-> +	struct inode *dir;
-> +	struct ceph_dentry_info *di;
-> +
-> +	dout("ceph_d_prune %pd %p\n", dentry, dentry);
->  
->  	/* do we have a valid parent? */
->  	if (IS_ROOT(dentry))
->  		return;
->  
-> -	/* if we are not hashed, we don't affect dir's completeness */
-> -	if (d_unhashed(dentry))
-> +	/* we hold d_lock, so d_parent is stable */
-> +	dir = d_inode(dentry->d_parent);
-> +	if (ceph_snap(dir) == CEPH_SNAPDIR)
->  		return;
->  
-> -	if (ceph_snap(d_inode(dentry->d_parent)) == CEPH_SNAPDIR)
-> +	/* who calls d_delete() should also disable dcache readdir */
-> +	if (d_really_is_negative(dentry))
->  		return;
->  
-> -	/*
-> -	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
-> -	 * cleared until d_release
-> -	 */
-> -	ceph_dir_clear_complete(d_inode(dentry->d_parent));
-> +	/* d_fsdata does not get cleared until d_release */
-> +	if (!d_unhashed(dentry)) {
-> +		ceph_dir_clear_complete(dir);
-> +		return;
-> +	}
-> +
-> +	/* Disable dcache readdir just in case that someone called d_drop()
-> +	 * or d_invalidate(), but MDS didn't revoke CEPH_CAP_FILE_SHARED
-> +	 * properly (dcache readdir is still enabled) */
-> +	di = ceph_dentry(dentry);
-> +	if (di->offset > 0 &&
-> +	    di->lease_shared_gen ==
-> +	    atomic64_read(&ceph_inode(dir)->i_shared_gen))
-> +		ceph_dir_clear_ordered(dir);
->  }
->  
->  /*
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index a9de83f012bf..01e5b460efb8 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1080,6 +1080,27 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in)
->  
->  	BUG_ON(d_inode(dn));
->  
-> +	if (S_ISDIR(in->i_mode)) {
-> +		/* If inode is directory, d_splice_alias() below will remove
-> +		 * 'realdn' from its origin parent. We need to ensure that
-> +		 * origin parent's readdir cache will not reference 'realdn'
-> +		 */
-> +		realdn = d_find_any_alias(in);
-> +		if (realdn) {
-> +			struct ceph_dentry_info *di = ceph_dentry(realdn);
-> +			spin_lock(&realdn->d_lock);
-> +
-> +			realdn->d_op->d_prune(realdn);
-> +
-> +			di->time = jiffies;
-> +			di->lease_shared_gen = 0;
-> +			di->offset = 0;
-> +
-> +			spin_unlock(&realdn->d_lock);
-> +			dput(realdn);
-> +		}
-> +	}
-> +
->  	/* dn must be unhashed */
->  	if (!d_unhashed(dn))
->  		d_drop(dn);
-> @@ -1295,8 +1316,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
->  		if (!rinfo->head->is_target) {
->  			dout("fill_trace null dentry\n");
->  			if (d_really_is_positive(dn)) {
-> -				ceph_dir_clear_ordered(dir);
->  				dout("d_delete %p\n", dn);
-> +				ceph_dir_clear_ordered(dir);
->  				d_delete(dn);
->  			} else if (have_lease) {
->  				if (d_unhashed(dn))
-> @@ -1323,7 +1344,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
->  			dout(" %p links to %p %llx.%llx, not %llx.%llx\n",
->  			     dn, d_inode(dn), ceph_vinop(d_inode(dn)),
->  			     ceph_vinop(in));
-> -			ceph_dir_clear_ordered(dir);
->  			d_invalidate(dn);
->  			have_lease = false;
->  		}
-> @@ -1573,9 +1593,19 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
->  		} else if (d_really_is_positive(dn) &&
->  			   (ceph_ino(d_inode(dn)) != tvino.ino ||
->  			    ceph_snap(d_inode(dn)) != tvino.snap)) {
-> +			struct ceph_dentry_info *di = ceph_dentry(dn);
->  			dout(" dn %p points to wrong inode %p\n",
->  			     dn, d_inode(dn));
-> -			__ceph_dir_clear_ordered(ci);
-> +
-> +			spin_lock(&dn->d_lock);
-> +			if (di->offset > 0 &&
-> +			    di->lease_shared_gen ==
-> +			    atomic64_read(&ci->i_shared_gen)) {
-> +				__ceph_dir_clear_ordered(ci);
-> +				di->offset = 0;
-> +			}
-> +			spin_unlock(&dn->d_lock);
-> +
->  			d_delete(dn);
->  			dput(dn);
->  			goto retry_lookup;
-> @@ -1600,9 +1630,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
->  				 &req->r_caps_reservation);
->  		if (ret < 0) {
->  			pr_err("fill_inode badness on %p\n", in);
-> -			if (d_really_is_positive(dn))
-> -				__ceph_dir_clear_ordered(ci);
-> -			else
-> +			if (d_really_is_negative(dn))
->  				iput(in);
->  			d_drop(dn);
->  			err = ret;
+On Tue, Dec 5, 2017 at 4:14 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 04/12/2017 21:31, Alfredo Deza wrote:
+>>
+>> On Mon, Dec 4, 2017 at 3:22 PM, Willem Jan Withagen <wjw@digiware.nl>
+>> wrote:
+>>>
+>>> Hi
+>>>
+>>> My FreeBSD-Jenkins complains about a failed assertion, but I'm blissfully
+>>> ignorant in this matter.
+>>> So perhaps somebody has hints to fix this.
+>>
+>>
+>> This looks pretty obscure, but the one thing I see different is that
+>> you are using a version of Sphinx that we don't
+>>
+>> We are pinned to 1.6.3 currently.
+>>
+>> The ceph-syn man page hasn't changed in a while, so maybe try bumping
+>> Sphinx?
+>
+>
+> I pinged the port-owner, and he is working on an update. But since lots of
+> packages depend on sphinx for the man-pages, other things need to be fixed
+> as well since it breaks building lots of other stuff.
+>
+> But it is the works, so for now I'll run Jenkins without building the
+> manpages.
 
+This turned out to be a problem introduced by my change updating the
+title on ceph-disk's man page:
 
-FWIW, I really hate how ceph keeps pointers to dentries without
-references and relies on all of this skulduggery to keep from
-dereferencing bogus ones. It all seems so dangerous.
+https://github.com/ceph/ceph/pull/19241/commits/bd00560c20caeeb1ded211cb81533280338014d1
 
-That said, I don't see anything wrong with this patch right offhand.
+This has since been reverted with
+https://github.com/ceph/ceph/pull/19325 and all builds are now passing
 
-Acked-by: Jeff Layton <jlayton@redhat.com>
+Plain asserts in Python aren't a good way to report errors, so it was
+very difficult to identify what made this break.
+
+Sorry for the misleading hint on version disparity there!
+>
+> --WjW
+>
+>
+>>
+>>>
+>>> --WjW
+>>>
+>>>
+>>> Build output:
+>>> Running Sphinx v1.4.8
+>>>
+>>> Exception occurred:
+>>>    File "conf.py", line 27, in _get_description
+>>> AssertionError
+>>> The full traceback has been saved in /tmp/sphinx-err-_Gk2q9.log, if you
+>>> want
+>>> to report the issue to the developers.
+>>> Please also report this if it was a user error, so that a better error
+>>> message can be provided next time.
+>>> A bug report can be filed in the tracker at
+>>> <https://github.com/sphinx-doc/sphinx/issues>. Thanks!
+>>> gmake[2]: *** [doc/man/CMakeFiles/manpages.dir/build.make:137:
+>>> doc/man/ceph-syn.8] Error 1
+>>>
+>>> The log file looks like:
+>>> # Sphinx version: 1.4.8
+>>> # Python version: 2.7.14 (CPython)
+>>> # Docutils version: 0.14
+>>> # Jinja2 version: 2.10
+>>> # Last messages:
+>>>
+>>> # Loaded extensions:
+>>> Traceback (most recent call last):
+>>>    File "/usr/local/lib/python2.7/site-packages/sphinx/cmdline.py", line
+>>> 243,
+>>> in main
+>>>      opts.warningiserror, opts.tags, opts.verbosity, opts.jobs)
+>>>    File "/usr/local/lib/python2.7/site-packages/sphinx/application.py",
+>>> line
+>>> 137, in __init__
+>>>      confoverrides or {}, self.tags)
+>>>    File "/usr/local/lib/python2.7/site-packages/sphinx/config.py", line
+>>> 287,
+>>> in __init__
+>>>      execfile_(filename, config)
+>>>    File "/usr/local/lib/python2.7/site-packages/sphinx/util/pycompat.py",
+>>> line 130, in execfile_
+>>>      exec_(code, _globals)
+>>>    File "/usr/local/lib/python2.7/site-packages/six.py", line 709, in
+>>> exec_
+>>>      exec("""exec _code_ in _globs_, _locs_""")
+>>>    File "<string>", line 1, in <module>
+>>>    File "conf.py", line 56, in <module>
+>>>    File "conf.py", line 47, in _get_manpages
+>>>    File "conf.py", line 27, in _get_description
+>>> AssertionError
+>>>
+>>> And the relevant piece of code:
+>>> def _get_description(fname, base):
+>>>      with open(fname) as f:
+>>>          one = None
+>>>          while True:
+>>>              line = f.readline().rstrip('\n')
+>>>              if not line:
+>>>                  continue
+>>>              if line.startswith(':') and line.endswith(':'):
+>>>                  continue
+>>>              one = line
+>>>              break
+>>>          two = f.readline().rstrip('\n')
+>>>          three = f.readline().rstrip('\n')
+>>>          assert one == three
+>>>          assert all(c=='=' for c in one)
+>>>          name, description = two.split('--', 1)
+>>> line 27:        assert name.strip() == base
+>>>          return description.strip()
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
