@@ -1,25 +1,25 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH 1/2] ceph: use atomic64_t for
- ceph_inode_info::i_shared_gen
-Date: Tue, 5 Dec 2017 21:36:58 +0800
-Message-ID: <CEA78145-F019-4016-B3DD-524CE1B9DAF3@redhat.com>
+Subject: Re: [PATCH 2/2] ceph: avoid dereferencing invalid pointer during
+ cached readdir
+Date: Tue, 5 Dec 2017 21:40:09 +0800
+Message-ID: <3D4832AB-FF89-4793-B4A4-1143441EE14D@redhat.com>
 References: <20171205015135.12944-1-zyan@redhat.com>
- <1512472318.4125.4.camel@redhat.com>
+ <20171205015135.12944-2-zyan@redhat.com> <1512473506.4125.7.camel@redhat.com>
 Mime-Version: 1.0 (Mac OS X Mail 11.1 \(3445.4.7\))
 Content-Type: text/plain;
         charset=utf-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33484 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:8430 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752909AbdLENhG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 5 Dec 2017 08:37:06 -0500
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        id S1752126AbdLENkP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 5 Dec 2017 08:40:15 -0500
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 3DC0F743
-        for <ceph-devel@vger.kernel.org>; Tue,  5 Dec 2017 13:37:06 +0000 (UTC)
-In-Reply-To: <1512472318.4125.4.camel@redhat.com>
+        by mx1.redhat.com (Postfix) with ESMTPS id A2317C0587FC
+        for <ceph-devel@vger.kernel.org>; Tue,  5 Dec 2017 13:40:15 +0000 (UTC)
+In-Reply-To: <1512473506.4125.7.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@redhat.com>
@@ -27,144 +27,199 @@ Cc: ceph-devel@vger.kernel.org
 
 
 
-> On 5 Dec 2017, at 19:11, Jeff Layton <jlayton@redhat.com> wrote:
+> On 5 Dec 2017, at 19:31, Jeff Layton <jlayton@redhat.com> wrote:
 > 
 > On Tue, 2017-12-05 at 09:51 +0800, Yan, Zheng wrote:
->> Avoid i_shared_gen overflow and allow accessing i_shared_gen without
->> holding i_ceph_lock (prepare for later patch)
+>> Readdir cache keeps array of dentry pointers in page cache. If any
+>> dentry in readdir cache gets pruned, ceph_d_prune() disables readdir
+>> cache for later readdir syscall. The problem is that ceph_d_prune()
+>> ignores unhashed dentry. Ideally MDS should have already revoked
+>> CEPH_CAP_FILE_SHARED (which also disables readdir cache) when dentry
+>> gets unhashed. But if it is somehow MDS does not properly revoke
+>> CEPH_CAP_FILE_SHARED and the unhashed dentry gets pruned later,
+>> ceph_d_prune() will not disable readdir cache, later readdir may
+>> reference invalid dentry pointer.
+>> 
+>> The fix is make ceph_d_prune() do extra check for unhashed dentry.
+>> Disable readdir cache if the unhashed dentry is still referenced
+>> by readdir cache.
+>> 
+>> Another fix in this patch is handle d_splice_alias(). If a dentry
+>> gets spliced into new parent dentry, treat it as if it was pruned
+>> (call ceph_d_prune() for it).
 >> 
 >> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 >> ---
->> fs/ceph/caps.c  |  2 +-
->> fs/ceph/dir.c   | 16 ++++++++--------
->> fs/ceph/inode.c |  4 ++--
->> fs/ceph/super.h |  5 +++--
->> 4 files changed, 14 insertions(+), 13 deletions(-)
+>> fs/ceph/dir.c   | 46 +++++++++++++++++++++++++++++++++-------------
+>> fs/ceph/inode.c | 40 ++++++++++++++++++++++++++++++++++------
+>> 2 files changed, 67 insertions(+), 19 deletions(-)
 >> 
->> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->> index 029cab713731..2b3c8b1c774c 100644
->> --- a/fs/ceph/caps.c
->> +++ b/fs/ceph/caps.c
->> @@ -498,7 +498,7 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
->> 	 */
->> 	if ((issued & CEPH_CAP_FILE_SHARED) != (had & CEPH_CAP_FILE_SHARED)) {
->> 		if (issued & CEPH_CAP_FILE_SHARED)
->> -			ci->i_shared_gen++;
->> +			atomic64_inc(&ci->i_shared_gen);
->> 		if (S_ISDIR(ci->vfs_inode.i_mode)) {
->> 			dout(" marking %p NOT complete\n", &ci->vfs_inode);
->> 			__ceph_dir_clear_complete(ci);
 >> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
->> index 64afa46b211f..0a23a4d9fde8 100644
+>> index 0a23a4d9fde8..793306f5352c 100644
 >> --- a/fs/ceph/dir.c
 >> +++ b/fs/ceph/dir.c
->> @@ -173,7 +173,7 @@ __dcache_find_get_entry(struct dentry *parent, u64 idx,
->>  * the MDS if/when the directory is modified).
->>  */
->> static int __dcache_readdir(struct file *file,  struct dir_context *ctx,
->> -			    u32 shared_gen)
->> +			    long long shared_gen)
->> {
->> 	struct ceph_file_info *fi = file->private_data;
->> 	struct dentry *parent = file->f_path.dentry;
->> @@ -184,7 +184,7 @@ static int __dcache_readdir(struct file *file,  struct dir_context *ctx,
->> 	u64 idx = 0;
->> 	int err = 0;
->> 
->> -	dout("__dcache_readdir %p v%u at %llx\n", dir, shared_gen, ctx->pos);
->> +	dout("__dcache_readdir %p v%llu at %llx\n", dir, (u64)shared_gen, ctx->pos);
->> 
->> 	/* search start position */
->> 	if (ctx->pos > 2) {
->> @@ -333,7 +333,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
->> 	    ceph_snap(inode) != CEPH_SNAPDIR &&
->> 	    __ceph_dir_is_complete_ordered(ci) &&
->> 	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
->> -		u32 shared_gen = ci->i_shared_gen;
->> +		long long shared_gen = atomic64_read(&ci->i_shared_gen);
->> 		spin_unlock(&ci->i_ceph_lock);
->> 		err = __dcache_readdir(file, ctx, shared_gen);
->> 		if (err != -EAGAIN)
->> @@ -751,7 +751,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
->> 			spin_unlock(&ci->i_ceph_lock);
->> 			dout(" dir %p complete, -ENOENT\n", dir);
->> 			d_add(dentry, NULL);
->> -			di->lease_shared_gen = ci->i_shared_gen;
->> +			di->lease_shared_gen = atomic64_read(&ci->i_shared_gen);
->> 			return NULL;
+>> @@ -231,11 +231,17 @@ static int __dcache_readdir(struct file *file,  struct dir_context *ctx,
+>> 			goto out;
 >> 		}
->> 		spin_unlock(&ci->i_ceph_lock);
->> @@ -1191,12 +1191,12 @@ static int dir_lease_is_valid(struct inode *dir, struct dentry *dentry)
->> 	int valid = 0;
 >> 
->> 	spin_lock(&ci->i_ceph_lock);
->> -	if (ci->i_shared_gen == di->lease_shared_gen)
->> +	if (atomic64_read(&ci->i_shared_gen) == di->lease_shared_gen)
->> 		valid = __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1);
->> 	spin_unlock(&ci->i_ceph_lock);
->> -	dout("dir_lease_is_valid dir %p v%u dentry %p v%u = %d\n",
->> -	     dir, (unsigned)ci->i_shared_gen, dentry,
->> -	     (unsigned)di->lease_shared_gen, valid);
->> +	dout("dir_lease_is_valid dir %p v%llu dentry %p v%llu = %d\n",
->> +	     dir, (u64)atomic64_read(&ci->i_shared_gen),
->> +	     dentry, (u64)di->lease_shared_gen, valid);
->> 	return valid;
+>> -		di = ceph_dentry(dentry);
+>> 		spin_lock(&dentry->d_lock);
+>> -		if (di->lease_shared_gen == shared_gen &&
+>> -		    d_really_is_positive(dentry) &&
+>> -		    fpos_cmp(ctx->pos, di->offset) <= 0) {
+>> +		di = ceph_dentry(dentry);
+>> +		if (d_unhashed(dentry) ||
+>> +		    d_really_is_negative(dentry) ||
+>> +		    di->lease_shared_gen != shared_gen) {
+>> +			spin_unlock(&dentry->d_lock);
+>> +			dput(dentry);
+>> +			err = -EAGAIN;
+>> +			goto out;
+>> +		}
+>> +		if (fpos_cmp(ctx->pos, di->offset) <= 0) {
+>> 			emit_dentry = true;
+>> 		}
+>> 		spin_unlock(&dentry->d_lock);
+>> @@ -1324,24 +1330,38 @@ static void ceph_d_release(struct dentry *dentry)
+>>  */
+>> static void ceph_d_prune(struct dentry *dentry)
+>> {
+>> -	dout("ceph_d_prune %p\n", dentry);
+>> +	struct inode *dir;
+>> +	struct ceph_dentry_info *di;
+>> +
+>> +	dout("ceph_d_prune %pd %p\n", dentry, dentry);
+>> 
+>> 	/* do we have a valid parent? */
+>> 	if (IS_ROOT(dentry))
+>> 		return;
+>> 
+>> -	/* if we are not hashed, we don't affect dir's completeness */
+>> -	if (d_unhashed(dentry))
+>> +	/* we hold d_lock, so d_parent is stable */
+>> +	dir = d_inode(dentry->d_parent);
+>> +	if (ceph_snap(dir) == CEPH_SNAPDIR)
+>> 		return;
+>> 
+>> -	if (ceph_snap(d_inode(dentry->d_parent)) == CEPH_SNAPDIR)
+>> +	/* who calls d_delete() should also disable dcache readdir */
+>> +	if (d_really_is_negative(dentry))
+>> 		return;
+>> 
+>> -	/*
+>> -	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
+>> -	 * cleared until d_release
+>> -	 */
+>> -	ceph_dir_clear_complete(d_inode(dentry->d_parent));
+>> +	/* d_fsdata does not get cleared until d_release */
+>> +	if (!d_unhashed(dentry)) {
+>> +		ceph_dir_clear_complete(dir);
+>> +		return;
+>> +	}
+>> +
+>> +	/* Disable dcache readdir just in case that someone called d_drop()
+>> +	 * or d_invalidate(), but MDS didn't revoke CEPH_CAP_FILE_SHARED
+>> +	 * properly (dcache readdir is still enabled) */
+>> +	di = ceph_dentry(dentry);
+>> +	if (di->offset > 0 &&
+>> +	    di->lease_shared_gen ==
+>> +	    atomic64_read(&ceph_inode(dir)->i_shared_gen))
+>> +		ceph_dir_clear_ordered(dir);
 >> }
 >> 
+>> /*
 >> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
->> index 666ad10e2b85..a9de83f012bf 100644
+>> index a9de83f012bf..01e5b460efb8 100644
 >> --- a/fs/ceph/inode.c
 >> +++ b/fs/ceph/inode.c
->> @@ -494,7 +494,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
->> 	ci->i_wrbuffer_ref = 0;
->> 	ci->i_wrbuffer_ref_head = 0;
->> 	atomic_set(&ci->i_filelock_ref, 0);
->> -	ci->i_shared_gen = 0;
->> +	atomic64_set(&ci->i_shared_gen, 0);
->> 	ci->i_rdcache_gen = 0;
->> 	ci->i_rdcache_revoking = 0;
+>> @@ -1080,6 +1080,27 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in)
 >> 
->> @@ -1041,7 +1041,7 @@ static void update_dentry_lease(struct dentry *dentry,
->> 	if (ceph_snap(dir) != CEPH_NOSNAP)
->> 		goto out_unlock;
+>> 	BUG_ON(d_inode(dn));
 >> 
->> -	di->lease_shared_gen = ceph_inode(dir)->i_shared_gen;
->> +	di->lease_shared_gen = atomic64_read(&ceph_inode(dir)->i_shared_gen);
->> 
->> 	if (duration == 0)
->> 		goto out_unlock;
->> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
->> index 2beeec07fa76..ec301fce2556 100644
->> --- a/fs/ceph/super.h
->> +++ b/fs/ceph/super.h
->> @@ -256,7 +256,8 @@ struct ceph_inode_xattr {
->>  */
->> struct ceph_dentry_info {
->> 	struct ceph_mds_session *lease_session;
->> -	u32 lease_gen, lease_shared_gen;
->> +	long long lease_shared_gen;
->> +	u32 lease_gen;
->> 	u32 lease_seq;
->> 	unsigned long lease_renew_after, lease_renew_from;
->> 	struct list_head lru;
->> @@ -353,7 +354,7 @@ struct ceph_inode_info {
->> 	int i_rd_ref, i_rdcache_ref, i_wr_ref, i_wb_ref;
->> 	int i_wrbuffer_ref, i_wrbuffer_ref_head;
->> 	atomic_t i_filelock_ref;
->> -	u32 i_shared_gen;       /* increment each time we get FILE_SHARED */
->> +	atomic64_t i_shared_gen;       /* increment each time we get FILE_SHARED */
->> 	u32 i_rdcache_gen;      /* incremented each time we get FILE_CACHE. */
->> 	u32 i_rdcache_revoking; /* RDCACHE gen to async invalidate, if any */
->> 
+>> +	if (S_ISDIR(in->i_mode)) {
+>> +		/* If inode is directory, d_splice_alias() below will remove
+>> +		 * 'realdn' from its origin parent. We need to ensure that
+>> +		 * origin parent's readdir cache will not reference 'realdn'
+>> +		 */
+>> +		realdn = d_find_any_alias(in);
+>> +		if (realdn) {
+>> +			struct ceph_dentry_info *di = ceph_dentry(realdn);
+>> +			spin_lock(&realdn->d_lock);
+>> +
+>> +			realdn->d_op->d_prune(realdn);
+>> +
+>> +			di->time = jiffies;
+>> +			di->lease_shared_gen = 0;
+>> +			di->offset = 0;
+>> +
+>> +			spin_unlock(&realdn->d_lock);
+>> +			dput(realdn);
+>> +		}
+>> +	}
+>> +
+>> 	/* dn must be unhashed */
+>> 	if (!d_unhashed(dn))
+>> 		d_drop(dn);
+>> @@ -1295,8 +1316,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+>> 		if (!rinfo->head->is_target) {
+>> 			dout("fill_trace null dentry\n");
+>> 			if (d_really_is_positive(dn)) {
+>> -				ceph_dir_clear_ordered(dir);
+>> 				dout("d_delete %p\n", dn);
+>> +				ceph_dir_clear_ordered(dir);
+>> 				d_delete(dn);
+>> 			} else if (have_lease) {
+>> 				if (d_unhashed(dn))
+>> @@ -1323,7 +1344,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+>> 			dout(" %p links to %p %llx.%llx, not %llx.%llx\n",
+>> 			     dn, d_inode(dn), ceph_vinop(d_inode(dn)),
+>> 			     ceph_vinop(in));
+>> -			ceph_dir_clear_ordered(dir);
+>> 			d_invalidate(dn);
+>> 			have_lease = false;
+>> 		}
+>> @@ -1573,9 +1593,19 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+>> 		} else if (d_really_is_positive(dn) &&
+>> 			   (ceph_ino(d_inode(dn)) != tvino.ino ||
+>> 			    ceph_snap(d_inode(dn)) != tvino.snap)) {
+>> +			struct ceph_dentry_info *di = ceph_dentry(dn);
+>> 			dout(" dn %p points to wrong inode %p\n",
+>> 			     dn, d_inode(dn));
+>> -			__ceph_dir_clear_ordered(ci);
+>> +
+>> +			spin_lock(&dn->d_lock);
+>> +			if (di->offset > 0 &&
+>> +			    di->lease_shared_gen ==
+>> +			    atomic64_read(&ci->i_shared_gen)) {
+>> +				__ceph_dir_clear_ordered(ci);
+>> +				di->offset = 0;
+>> +			}
+>> +			spin_unlock(&dn->d_lock);
+>> +
+>> 			d_delete(dn);
+>> 			dput(dn);
+>> 			goto retry_lookup;
+>> @@ -1600,9 +1630,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+>> 				 &req->r_caps_reservation);
+>> 		if (ret < 0) {
+>> 			pr_err("fill_inode badness on %p\n", in);
+>> -			if (d_really_is_positive(dn))
+>> -				__ceph_dir_clear_ordered(ci);
+>> -			else
+>> +			if (d_really_is_negative(dn))
+>> 				iput(in);
+>> 			d_drop(dn);
+>> 			err = ret;
 > 
-> Looks sane enough. Do we really think that i_shared_gen overflow is a
-> problem? Will we have the same problem with i_rdcache_gen?
 > 
+> FWIW, I really hate how ceph keeps pointers to dentries without
+> references and relies on all of this skulduggery to keep from
+> dereferencing bogus ones. It all seems so dangerous.
 
-shouldn’t be problem. I can change it to atomic_t
+I don’t like this neither. It has caused so many trouble.
 
-Regards
-Yan, Zheng
-
+> 
+> That said, I don't see anything wrong with this patch right offhand.
+> 
 > Acked-by: Jeff Layton <jlayton@redhat.com>
 
