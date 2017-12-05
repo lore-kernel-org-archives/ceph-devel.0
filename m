@@ -1,70 +1,53 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Assertion failed while buildign manpages
-Date: Tue, 5 Dec 2017 13:48:10 +0100
-Message-ID: <206aa921-d233-652a-1cf8-717ddf51add9@digiware.nl>
-References: <6899bf17-d2cd-8088-97fe-0a23d001b6dc@digiware.nl>
- <CAC-Np1ynKuTVNqKncyPDHctSK88=7wXadSDb=wtaDRrbqNrPSw@mail.gmail.com>
- <e5fcda3e-b57a-e7d0-b94e-e3c81c89e799@digiware.nl>
- <CAC-Np1zj8s0pDFYb1CUm_S4JEnsZ6fWuysYotZPJfMXgTgdNJw@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: better doc (and build) validation
+Date: Tue, 5 Dec 2017 08:31:09 -0500
+Message-ID: <CAC-Np1xfCMOD6fCeSvDZ9Wo1dGvtL816oicvBs94YarMNNcZAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:20176 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752149AbdLEMsO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 5 Dec 2017 07:48:14 -0500
-In-Reply-To: <CAC-Np1zj8s0pDFYb1CUm_S4JEnsZ6fWuysYotZPJfMXgTgdNJw@mail.gmail.com>
-Content-Language: nl
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:39068 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752608AbdLENbK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 08:31:10 -0500
+Received: by mail-qt0-f174.google.com with SMTP id k19so605765qtj.6
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 05:31:10 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 5-12-2017 13:32, Alfredo Deza wrote:
-> On Tue, Dec 5, 2017 at 4:14 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 04/12/2017 21:31, Alfredo Deza wrote:
->>>
->>> On Mon, Dec 4, 2017 at 3:22 PM, Willem Jan Withagen <wjw@digiware.nl>
->>> wrote:
->>>>
->>>> Hi
->>>>
->>>> My FreeBSD-Jenkins complains about a failed assertion, but I'm blissfully
->>>> ignorant in this matter.
->>>> So perhaps somebody has hints to fix this.
->>>
->>>
->>> This looks pretty obscure, but the one thing I see different is that
->>> you are using a version of Sphinx that we don't
->>>
->>> We are pinned to 1.6.3 currently.
->>>
->>> The ceph-syn man page hasn't changed in a while, so maybe try bumping
->>> Sphinx?
->>
->>
->> I pinged the port-owner, and he is working on an update. But since lots of
->> packages depend on sphinx for the man-pages, other things need to be fixed
->> as well since it breaks building lots of other stuff.
->>
->> But it is the works, so for now I'll run Jenkins without building the
->> manpages.
-> 
-> This turned out to be a problem introduced by my change updating the
-> title on ceph-disk's man page:
-> 
-> https://github.com/ceph/ceph/pull/19241/commits/bd00560c20caeeb1ded211cb81533280338014d1
-> 
-> This has since been reverted with
-> https://github.com/ceph/ceph/pull/19325 and all builds are now passing
-> 
-> Plain asserts in Python aren't a good way to report errors, so it was
-> very difficult to identify what made this break.
+It seems like we keep hitting catastrophic build errors with minor doc
+changes. The last one was introduced by a change I made to the
+ceph-disk man page that updated the title:
 
-Hi Alfredo,
+https://github.com/ceph/ceph/pull/19241/commits/bd00560c20caeeb1ded211cb81533280338014d1
 
-Right, I'll enable manapages again. And we'll see in the next build.
+That change builds correctly (!) and will render just fine, and it was
+merged after the docs build reported as successful.
 
-Thanx for the update,
---WjW
+However, this also made all subsequent binary builds break. This
+disconnect has caused similar issues in the past. At some point the
+docs build was completely broken for days, because there was no
+visibility from pull requests.
+
+To mitigate that, we now have the docs job building for every pull
+request, regardless if it is only editing rst files (because, yes, one
+can break the docs build with C++).
+
+This has helped a lot, but it still falls short because the binary
+build process for Ceph is different from how we build docs (including
+man pages). This is why a successful docs build in a PR can still
+break a binary build.
+
+There are a couple of things that could help:
+
+1) I don't entirely follow how CMake is building the man/doc pages,
+but a job that tries to replicate that path could catch these
+inconsistencies in PRs.
+
+2) Build binaries on every PR, and report them as status.
+
+I don't know enough of CMake to attempt #1, and #2 would cause
+contributors a lot of pain because it would involve having to push to
+ceph-ci.git always.
+
+I am open to any other ideas or suggestions here.
