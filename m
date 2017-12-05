@@ -1,62 +1,47 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: C++11, std::list::size(), and trusty
-Date: Tue, 5 Dec 2017 09:51:33 -0800
-Message-ID: <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
- <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
- <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
- <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
- <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
- <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
- <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
- <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
- <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
+Subject: Re: Could you resend the link to the pull request?
+Date: Tue, 5 Dec 2017 10:13:05 -0800
+Message-ID: <CAJ4mKGY=p061ZDvJP7e863RJ_JUhCZS-dTPjmBA+Cazr3tn=+g@mail.gmail.com>
+References: <CAFQ4geQPTh00fpO0Y6BoCx1zV5eLrFEphZKoO5krV4OHhPaq5w@mail.gmail.com>
+ <alpine.DEB.2.11.1712051635200.22619@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:34748 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751416AbdLERvf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 12:51:35 -0500
-Received: by mail-it0-f46.google.com with SMTP id m11so17763818iti.1
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 09:51:35 -0800 (PST)
-In-Reply-To: <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
+Received: from mail-it0-f48.google.com ([209.85.214.48]:39811 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752126AbdLESNH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 13:13:07 -0500
+Received: by mail-it0-f48.google.com with SMTP id 68so3661285ite.4
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 10:13:07 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1712051635200.22619@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: kefu chai <tchaikov@gmail.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ken Iizawa <kiizawa@ucsc.edu>, ohmyoungwon@gmail.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 5, 2017 at 8:58 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 5-12-2017 17:40, Adam C. Emerson wrote:
->>
->> On 05/12/2017, kefu chai wrote:
->>>
->>> once all trusty testnodes are re-imaged with xenial, i will try to
->>> remove the trusty build support on ceph/ceph-build. BTW, if we want to
->>> use gcc-7 on xenial, which ships GCC 5.3, we can apply the same fix on
->>> it also.
->>
->>
->> If we can get GCC-7 on Xenial and there's a way for people building
->> Ceph to get it without too much trouble, then I think we should use
->> GCC-7.
->>
->> In general, so long as they are reasonably gettable on our target
->> operating systems, I think we ought to target the latest stable
->> release stream of GCC and Clang.
-
-I was talking with Josh yesterday and he mentioned how newer C++
-releases have a less stable ABI and we often need to ship out
-libstdc++ with them. Would this change anything we care about?
-(I, like, super don't care. But I also don't really know anything about it.)
-
-
-> "somebody" dropped the Clang word. :)
+On Tue, Dec 5, 2017 at 8:39 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, 5 Dec 2017, Ken Iizawa wrote:
+>> I'm sorry, but I failed to save the link to the pull request you told
+>> me about in today's meeting.
+>> Could you resend the link?
 >
-> Dare I then suggest that some of the build be done against Clang whilest
-> building PRs also.
+> https://github.com/ceph/ceph/pull/15482
+>
+> There is a bunch of stuff in there, sorry.  What we really want is a rados
+> op that triggers promote_object().  We don't have that quite yet.
+>
+> Myoungwon, is that something you've looked at yet?  I'm thinking of a
+> rados op like TIER_PROMOTE (or something along those lines) that just
+> triggers a promotion if it is a redirect/chunked manifest, and is a no-op
+> otherwise.  (We could probably make it do something meaningful for a cache
+> tier too, but I don't think it's worth the effort.)
 
-I think we'd all love this. Maybe somebody with a vested interest in
-Clang working properly and recent experience mucking around with our
-build systems will submit a PR? :p
+Didn't we previously have something like that? All I see in the source
+now is a CACHE_EVICT|FLUSH|TRY_FLUSH (or some new? CACHE_PIN|UNPIN),
+but ops to control promotion/demotion were definitely on the drawing
+board at one point, and I thought it was implemented.
+
+Grepping through logs I do see we had a CEPH_OSD_RMW_FLAG_PROMOTE in
+2015, though that's later than I was thinking. Not sure if I'm just
+missing the right term to search for or if I'm making it up.
 -Greg
