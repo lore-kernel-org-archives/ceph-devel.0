@@ -1,53 +1,79 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Could you resend the link to the pull request?
-Date: Tue, 5 Dec 2017 18:19:47 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1712051818090.22619@piezo.novalocal>
-References: <CAFQ4geQPTh00fpO0Y6BoCx1zV5eLrFEphZKoO5krV4OHhPaq5w@mail.gmail.com> <alpine.DEB.2.11.1712051635200.22619@piezo.novalocal> <CAJ4mKGY=p061ZDvJP7e863RJ_JUhCZS-dTPjmBA+Cazr3tn=+g@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: better doc (and build) validation
+Date: Tue, 5 Dec 2017 15:27:40 -0500
+Message-ID: <CAC-Np1x9R9F5Y=X-HafVmQfzgCe67A6YmJ6GdCrdGHY62KZ4_w@mail.gmail.com>
+References: <CAC-Np1xfCMOD6fCeSvDZ9Wo1dGvtL816oicvBs94YarMNNcZAA@mail.gmail.com>
+ <CAJ4mKGaRMb3BZ4hF5smid5u9-UwsBgirdqG9uu3HMvvieW_6zw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37580 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752047AbdLESTt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 5 Dec 2017 13:19:49 -0500
-In-Reply-To: <CAJ4mKGY=p061ZDvJP7e863RJ_JUhCZS-dTPjmBA+Cazr3tn=+g@mail.gmail.com>
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:39088 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751463AbdLEU1m (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 15:27:42 -0500
+Received: by mail-qt0-f174.google.com with SMTP id k19so3899439qtj.6
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 12:27:41 -0800 (PST)
+In-Reply-To: <CAJ4mKGaRMb3BZ4hF5smid5u9-UwsBgirdqG9uu3HMvvieW_6zw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ken Iizawa <kiizawa@ucsc.edu>, ohmyoungwon@gmail.com, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 5 Dec 2017, Gregory Farnum wrote:
-> On Tue, Dec 5, 2017 at 8:39 AM, Sage Weil <sweil@redhat.com> wrote:
-> > On Tue, 5 Dec 2017, Ken Iizawa wrote:
-> >> I'm sorry, but I failed to save the link to the pull request you told
-> >> me about in today's meeting.
-> >> Could you resend the link?
-> >
-> > https://github.com/ceph/ceph/pull/15482
-> >
-> > There is a bunch of stuff in there, sorry.  What we really want is a rados
-> > op that triggers promote_object().  We don't have that quite yet.
-> >
-> > Myoungwon, is that something you've looked at yet?  I'm thinking of a
-> > rados op like TIER_PROMOTE (or something along those lines) that just
-> > triggers a promotion if it is a redirect/chunked manifest, and is a no-op
-> > otherwise.  (We could probably make it do something meaningful for a cache
-> > tier too, but I don't think it's worth the effort.)
-> 
-> Didn't we previously have something like that? All I see in the source
-> now is a CACHE_EVICT|FLUSH|TRY_FLUSH (or some new? CACHE_PIN|UNPIN),
-> but ops to control promotion/demotion were definitely on the drawing
-> board at one point, and I thought it was implemented.
-> 
-> Grepping through logs I do see we had a CEPH_OSD_RMW_FLAG_PROMOTE in
-> 2015, though that's later than I was thinking. Not sure if I'm just
-> missing the right term to search for or if I'm making it up.
+On Tue, Dec 5, 2017 at 12:44 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Tue, Dec 5, 2017 at 5:31 AM, Alfredo Deza <adeza@redhat.com> wrote:
+>> It seems like we keep hitting catastrophic build errors with minor doc
+>> changes. The last one was introduced by a change I made to the
+>> ceph-disk man page that updated the title:
+>>
+>> https://github.com/ceph/ceph/pull/19241/commits/bd00560c20caeeb1ded211cb81533280338014d1
+>>
+>> That change builds correctly (!) and will render just fine, and it was
+>> merged after the docs build reported as successful.
+>>
+>> However, this also made all subsequent binary builds break. This
+>> disconnect has caused similar issues in the past. At some point the
+>> docs build was completely broken for days, because there was no
+>> visibility from pull requests.
+>>
+>> To mitigate that, we now have the docs job building for every pull
+>> request, regardless if it is only editing rst files (because, yes, one
+>> can break the docs build with C++).
+>>
+>> This has helped a lot, but it still falls short because the binary
+>> build process for Ceph is different from how we build docs (including
+>> man pages). This is why a successful docs build in a PR can still
+>> break a binary build.
+>
+> Do we understand why it failed on the binary build but not the docs build?
+>
+> Seems like that would help us see if we can replicate any other issues.
 
-We never did.  The FLUSH/EVICT are the opposite (but roughly analogous) 
-operations for a cache tier sitting above (vs an archive tier sitting 
-below) the base tier, which are probably what you're thinking of? The 
-struggle has historically been to *avoid* promotion, not to trigger 
-promotion.
+It failed there because the man pages are generated differently, using
+a couple of ad-hoc helpers that try to ensure certain conditions. In
+this case, it was a Python
+utility (ceph/man/conf.py). It was trying to make sure that the title
+of the man page matched the name of the man page.
+I had added "[DEPRECATED]" to the ceph-disk title, which failed the assertion.
 
-sage
+But because the utilities use plain asserts, you don't get any of that
+rich error reporting, just that some value != some other value.
 
+Regardless, the reason is because the code paths are not the same, so
+we need to find a way to either make them the same, or try to report
+whatever code paths
+we need to touch for a PR.
+
+>
+>> There are a couple of things that could help:
+>>
+>> 1) I don't entirely follow how CMake is building the man/doc pages,
+>> but a job that tries to replicate that path could catch these
+>> inconsistencies in PRs.
+>>
+>> 2) Build binaries on every PR, and report them as status.
+>>
+>> I don't know enough of CMake to attempt #1, and #2 would cause
+>> contributors a lot of pain because it would involve having to push to
+>> ceph-ci.git always.
+>>
+>> I am open to any other ideas or suggestions here.
