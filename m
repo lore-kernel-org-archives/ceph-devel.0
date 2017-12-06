@@ -1,103 +1,75 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: better doc (and build) validation
-Date: Wed, 6 Dec 2017 15:44:21 +0800
-Message-ID: <CAJE9aONJJADPmGDee4LBr1vUeFgf0cfJRZV3SdSBaTivhKkHOg@mail.gmail.com>
-References: <CAC-Np1xfCMOD6fCeSvDZ9Wo1dGvtL816oicvBs94YarMNNcZAA@mail.gmail.com>
- <CAJ4mKGaRMb3BZ4hF5smid5u9-UwsBgirdqG9uu3HMvvieW_6zw@mail.gmail.com> <CAC-Np1x9R9F5Y=X-HafVmQfzgCe67A6YmJ6GdCrdGHY62KZ4_w@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Wed, 6 Dec 2017 10:05:37 +0100
+Message-ID: <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
+ <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
+ <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
+ <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
+ <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
+ <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
+ <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz>
+ <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
+ <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
+ <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com>
+ <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
+ <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:41195 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753102AbdLFHoX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Dec 2017 02:44:23 -0500
-Received: by mail-qt0-f170.google.com with SMTP id i40so6850982qti.8
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 23:44:22 -0800 (PST)
-In-Reply-To: <CAC-Np1x9R9F5Y=X-HafVmQfzgCe67A6YmJ6GdCrdGHY62KZ4_w@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:21647 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754301AbdLFJFi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 6 Dec 2017 04:05:38 -0500
+In-Reply-To: <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: kefu chai <tchaikov@gmail.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Wed, Dec 6, 2017 at 4:27 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> On Tue, Dec 5, 2017 at 12:44 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Tue, Dec 5, 2017 at 5:31 AM, Alfredo Deza <adeza@redhat.com> wrote:
->>> It seems like we keep hitting catastrophic build errors with minor doc
->>> changes. The last one was introduced by a change I made to the
->>> ceph-disk man page that updated the title:
+On 05/12/2017 18:51, Gregory Farnum wrote:
+> On Tue, Dec 5, 2017 at 8:58 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> On 5-12-2017 17:40, Adam C. Emerson wrote:
 >>>
->>> https://github.com/ceph/ceph/pull/19241/commits/bd00560c20caeeb1ded211cb81533280338014d1
+>>> On 05/12/2017, kefu chai wrote:
+>>>>
+>>>> once all trusty testnodes are re-imaged with xenial, i will try to
+>>>> remove the trusty build support on ceph/ceph-build. BTW, if we want to
+>>>> use gcc-7 on xenial, which ships GCC 5.3, we can apply the same fix on
+>>>> it also.
 >>>
->>> That change builds correctly (!) and will render just fine, and it was
->>> merged after the docs build reported as successful.
 >>>
->>> However, this also made all subsequent binary builds break. This
->>> disconnect has caused similar issues in the past. At some point the
->>> docs build was completely broken for days, because there was no
->>> visibility from pull requests.
+>>> If we can get GCC-7 on Xenial and there's a way for people building
+>>> Ceph to get it without too much trouble, then I think we should use
+>>> GCC-7.
 >>>
->>> To mitigate that, we now have the docs job building for every pull
->>> request, regardless if it is only editing rst files (because, yes, one
->>> can break the docs build with C++).
->>>
->>> This has helped a lot, but it still falls short because the binary
->>> build process for Ceph is different from how we build docs (including
-
-please note, the cmake building system builds all the artifacts we ship to
-our enduser. in addition to the binaries, it also builds and intalls scripts,
-documents, sample configurations, copyright, and more. it's more than
-merely a "binary build process". i'd call it a "build process". =)
-
->>> man pages). This is why a successful docs build in a PR can still
->>> break a binary build.
+>>> In general, so long as they are reasonably gettable on our target
+>>> operating systems, I think we ought to target the latest stable
+>>> release stream of GCC and Clang.
+> 
+> I was talking with Josh yesterday and he mentioned how newer C++
+> releases have a less stable ABI and we often need to ship out
+> libstdc++ with them. Would this change anything we care about?
+> (I, like, super don't care. But I also don't really know anything about it.)
+> 
+> 
+>> "somebody" dropped the Clang word. :)
 >>
->> Do we understand why it failed on the binary build but not the docs build?
->>
->> Seems like that would help us see if we can replicate any other issues.
->
-> It failed there because the man pages are generated differently, using
-> a couple of ad-hoc helpers that try to ensure certain conditions. In
-> this case, it was a Python
-> utility (ceph/man/conf.py). It was trying to make sure that the title
-> of the man page matched the name of the man page.
-> I had added "[DEPRECATED]" to the ceph-disk title, which failed the assertion.
->
-> But because the utilities use plain asserts, you don't get any of that
-> rich error reporting, just that some value != some other value.
->
-> Regardless, the reason is because the code paths are not the same, so
-> we need to find a way to either make them the same, or try to report
-> whatever code paths
-> we need to touch for a PR.
->
->>
->>> There are a couple of things that could help:
->>>
->>> 1) I don't entirely follow how CMake is building the man/doc pages,
->>> but a job that tries to replicate that path could catch these
->>> inconsistencies in PRs.
+>> Dare I then suggest that some of the build be done against Clang whilest
+>> building PRs also.
+> 
+> I think we'd all love this. Maybe somebody with a vested interest in
+> Clang working properly and recent experience mucking around with our
+> build systems will submit a PR? :p
 
-could you define "a job"? we have a target for building the man pages.
-"make manpages" will build all of them.
+Yeah, I know.... Put the code where your mouth is....
 
->>>
->>> 2) Build binaries on every PR, and report them as status.
+Uptill now I've avoided getting dragged into too much knowledge about 
+exactly this part. I'd be willing to deliver FreeBSD/Clang knowledge for 
+that. But unfortunately I do not have enough time to start digging into 
+this.
 
-yeah, i guess that's what "needs-qa" is for.
+--WjW
 
->>>
->>> I don't know enough of CMake to attempt #1, and #2 would cause
->>> contributors a lot of pain because it would involve having to push to
->>> ceph-ci.git always.
->>>
->>> I am open to any other ideas or suggestions here.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Regards
-Kefu Chai
