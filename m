@@ -1,67 +1,103 @@
-From: myoungwon oh <ohmyoungwon@gmail.com>
-Subject: Re: Could you resend the link to the pull request?
-Date: Wed, 6 Dec 2017 10:16:17 +0900
-Message-ID: <CAFNt83Ys9q9HYkAbFre6dESQW44yf8+Wemf3KNP+5GfzVRXBkQ@mail.gmail.com>
-References: <CAFQ4geQPTh00fpO0Y6BoCx1zV5eLrFEphZKoO5krV4OHhPaq5w@mail.gmail.com>
- <alpine.DEB.2.11.1712051635200.22619@piezo.novalocal> <CAJ4mKGY=p061ZDvJP7e863RJ_JUhCZS-dTPjmBA+Cazr3tn=+g@mail.gmail.com>
- <alpine.DEB.2.11.1712051818090.22619@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: better doc (and build) validation
+Date: Wed, 6 Dec 2017 15:44:21 +0800
+Message-ID: <CAJE9aONJJADPmGDee4LBr1vUeFgf0cfJRZV3SdSBaTivhKkHOg@mail.gmail.com>
+References: <CAC-Np1xfCMOD6fCeSvDZ9Wo1dGvtL816oicvBs94YarMNNcZAA@mail.gmail.com>
+ <CAJ4mKGaRMb3BZ4hF5smid5u9-UwsBgirdqG9uu3HMvvieW_6zw@mail.gmail.com> <CAC-Np1x9R9F5Y=X-HafVmQfzgCe67A6YmJ6GdCrdGHY62KZ4_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f170.google.com ([209.85.192.170]:45433 "EHLO
-        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753614AbdLFBQS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 20:16:18 -0500
-Received: by mail-pf0-f170.google.com with SMTP id u19so1529627pfa.12
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 17:16:18 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1712051818090.22619@piezo.novalocal>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:41195 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753102AbdLFHoX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Dec 2017 02:44:23 -0500
+Received: by mail-qt0-f170.google.com with SMTP id i40so6850982qti.8
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 23:44:22 -0800 (PST)
+In-Reply-To: <CAC-Np1x9R9F5Y=X-HafVmQfzgCe67A6YmJ6GdCrdGHY62KZ4_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ken Iizawa <kiizawa@ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi sage
+On Wed, Dec 6, 2017 at 4:27 AM, Alfredo Deza <adeza@redhat.com> wrote:
+> On Tue, Dec 5, 2017 at 12:44 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>> On Tue, Dec 5, 2017 at 5:31 AM, Alfredo Deza <adeza@redhat.com> wrote:
+>>> It seems like we keep hitting catastrophic build errors with minor doc
+>>> changes. The last one was introduced by a change I made to the
+>>> ceph-disk man page that updated the title:
+>>>
+>>> https://github.com/ceph/ceph/pull/19241/commits/bd00560c20caeeb1ded211cb81533280338014d1
+>>>
+>>> That change builds correctly (!) and will render just fine, and it was
+>>> merged after the docs build reported as successful.
+>>>
+>>> However, this also made all subsequent binary builds break. This
+>>> disconnect has caused similar issues in the past. At some point the
+>>> docs build was completely broken for days, because there was no
+>>> visibility from pull requests.
+>>>
+>>> To mitigate that, we now have the docs job building for every pull
+>>> request, regardless if it is only editing rst files (because, yes, one
+>>> can break the docs build with C++).
+>>>
+>>> This has helped a lot, but it still falls short because the binary
+>>> build process for Ceph is different from how we build docs (including
 
-I have worked on a rados op like TIER_PROMOTE (but, not finished yet)
-I will make it a PR according to your comment.
+please note, the cmake building system builds all the artifacts we ship to
+our enduser. in addition to the binaries, it also builds and intalls scripts,
+documents, sample configurations, copyright, and more. it's more than
+merely a "binary build process". i'd call it a "build process". =)
 
-Myoungwon
-SK Telecom
-
-
-2017-12-06 3:19 GMT+09:00 Sage Weil <sweil@redhat.com>:
-> On Tue, 5 Dec 2017, Gregory Farnum wrote:
->> On Tue, Dec 5, 2017 at 8:39 AM, Sage Weil <sweil@redhat.com> wrote:
->> > On Tue, 5 Dec 2017, Ken Iizawa wrote:
->> >> I'm sorry, but I failed to save the link to the pull request you told
->> >> me about in today's meeting.
->> >> Could you resend the link?
->> >
->> > https://github.com/ceph/ceph/pull/15482
->> >
->> > There is a bunch of stuff in there, sorry.  What we really want is a rados
->> > op that triggers promote_object().  We don't have that quite yet.
->> >
->> > Myoungwon, is that something you've looked at yet?  I'm thinking of a
->> > rados op like TIER_PROMOTE (or something along those lines) that just
->> > triggers a promotion if it is a redirect/chunked manifest, and is a no-op
->> > otherwise.  (We could probably make it do something meaningful for a cache
->> > tier too, but I don't think it's worth the effort.)
+>>> man pages). This is why a successful docs build in a PR can still
+>>> break a binary build.
 >>
->> Didn't we previously have something like that? All I see in the source
->> now is a CACHE_EVICT|FLUSH|TRY_FLUSH (or some new? CACHE_PIN|UNPIN),
->> but ops to control promotion/demotion were definitely on the drawing
->> board at one point, and I thought it was implemented.
+>> Do we understand why it failed on the binary build but not the docs build?
 >>
->> Grepping through logs I do see we had a CEPH_OSD_RMW_FLAG_PROMOTE in
->> 2015, though that's later than I was thinking. Not sure if I'm just
->> missing the right term to search for or if I'm making it up.
+>> Seems like that would help us see if we can replicate any other issues.
 >
-> We never did.  The FLUSH/EVICT are the opposite (but roughly analogous)
-> operations for a cache tier sitting above (vs an archive tier sitting
-> below) the base tier, which are probably what you're thinking of? The
-> struggle has historically been to *avoid* promotion, not to trigger
-> promotion.
+> It failed there because the man pages are generated differently, using
+> a couple of ad-hoc helpers that try to ensure certain conditions. In
+> this case, it was a Python
+> utility (ceph/man/conf.py). It was trying to make sure that the title
+> of the man page matched the name of the man page.
+> I had added "[DEPRECATED]" to the ceph-disk title, which failed the assertion.
 >
-> sage
+> But because the utilities use plain asserts, you don't get any of that
+> rich error reporting, just that some value != some other value.
 >
+> Regardless, the reason is because the code paths are not the same, so
+> we need to find a way to either make them the same, or try to report
+> whatever code paths
+> we need to touch for a PR.
+>
+>>
+>>> There are a couple of things that could help:
+>>>
+>>> 1) I don't entirely follow how CMake is building the man/doc pages,
+>>> but a job that tries to replicate that path could catch these
+>>> inconsistencies in PRs.
+
+could you define "a job"? we have a target for building the man pages.
+"make manpages" will build all of them.
+
+>>>
+>>> 2) Build binaries on every PR, and report them as status.
+
+yeah, i guess that's what "needs-qa" is for.
+
+>>>
+>>> I don't know enough of CMake to attempt #1, and #2 would cause
+>>> contributors a lot of pain because it would involve having to push to
+>>> ceph-ci.git always.
+>>>
+>>> I am open to any other ideas or suggestions here.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards
+Kefu Chai
