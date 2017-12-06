@@ -1,162 +1,67 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: =?UTF-8?Q?Re=3A_=E7=AD=94=E5=A4=8D=3A_osd=3A_fine=2Dgrained_statistics_for_object_?=
-        =?UTF-8?Q?space_usage?=
-Date: Tue, 5 Dec 2017 13:53:38 -0800
-Message-ID: <CAJ4mKGZQxziQX81J1btmEHxpRtkmMvMTBnD4pSxyO5Am=Pajbg@mail.gmail.com>
-References: <201711300849388246138@zte.com.cn> <alpine.DEB.2.11.1711300304240.8333@piezo.novalocal>
- <CAJ4mKGb8uFJ738YU9BKT3S3h7ePhVFbLkz+KyEQn+e2S8BbArQ@mail.gmail.com>
- <alpine.DEB.2.11.1711302125440.12766@piezo.novalocal> <d277e426-90a4-593b-fdbd-8ba19919de43@suse.de>
- <alpine.DEB.2.11.1712011427180.2819@piezo.novalocal> <bebb571e-2eab-48f3-0ea6-bb3470074a47@suse.de>
- <alpine.DEB.2.11.1712041424370.22619@piezo.novalocal> <CAJ4mKGa3RxHMrEWrZeMsYpMxYiVqiyrrFHO9_pGJJJ4kK970dw@mail.gmail.com>
- <72707128-ae25-2881-fd43-e8cd2b607d4e@suse.de> <CAJ4mKGYC5bbNhGG=AFPzV2MUxpoD-4xEAMK4=Q0sCCJu0uY0Xw@mail.gmail.com>
- <alpine.DEB.2.11.1712052123570.22619@piezo.novalocal>
+From: myoungwon oh <ohmyoungwon@gmail.com>
+Subject: Re: Could you resend the link to the pull request?
+Date: Wed, 6 Dec 2017 10:16:17 +0900
+Message-ID: <CAFNt83Ys9q9HYkAbFre6dESQW44yf8+Wemf3KNP+5GfzVRXBkQ@mail.gmail.com>
+References: <CAFQ4geQPTh00fpO0Y6BoCx1zV5eLrFEphZKoO5krV4OHhPaq5w@mail.gmail.com>
+ <alpine.DEB.2.11.1712051635200.22619@piezo.novalocal> <CAJ4mKGY=p061ZDvJP7e863RJ_JUhCZS-dTPjmBA+Cazr3tn=+g@mail.gmail.com>
+ <alpine.DEB.2.11.1712051818090.22619@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:41591 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752126AbdLEVxk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 16:53:40 -0500
-Received: by mail-it0-f53.google.com with SMTP id x28so4876363ita.0
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 13:53:40 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1712052123570.22619@piezo.novalocal>
+Received: from mail-pf0-f170.google.com ([209.85.192.170]:45433 "EHLO
+        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753614AbdLFBQS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Dec 2017 20:16:18 -0500
+Received: by mail-pf0-f170.google.com with SMTP id u19so1529627pfa.12
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 17:16:18 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1712051818090.22619@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Igor Fedotov <ifedotov@suse.de>, ceph-devel <ceph-devel@vger.kernel.org>, Xie Xingguo <xie.xingguo@zte.com.cn>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ken Iizawa <kiizawa@ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 5, 2017 at 1:35 PM, Sage Weil <sage@newdream.net> wrote:
+Hi sage
+
+I have worked on a rados op like TIER_PROMOTE (but, not finished yet)
+I will make it a PR according to your comment.
+
+Myoungwon
+SK Telecom
+
+
+2017-12-06 3:19 GMT+09:00 Sage Weil <sweil@redhat.com>:
 > On Tue, 5 Dec 2017, Gregory Farnum wrote:
->> On Tue, Dec 5, 2017 at 12:48 PM, Igor Fedotov <ifedotov@suse.de> wrote:
+>> On Tue, Dec 5, 2017 at 8:39 AM, Sage Weil <sweil@redhat.com> wrote:
+>> > On Tue, 5 Dec 2017, Ken Iizawa wrote:
+>> >> I'm sorry, but I failed to save the link to the pull request you told
+>> >> me about in today's meeting.
+>> >> Could you resend the link?
 >> >
+>> > https://github.com/ceph/ceph/pull/15482
 >> >
->> > On 12/5/2017 1:15 AM, Gregory Farnum wrote:
->> >>
->> >> On Mon, Dec 4, 2017 at 6:24 AM, Sage Weil <sweil@redhat.com> wrote:
->> >>>
->> >>> It's pretty straightforward to maintain collection-level metadata in the
->> >>> common case, but I don't see how we can *also* support an O(1) split
->> >>> operation.
->> >>
->> >> You're right we can't know the exact answer, but we already solve this
->> >> problem for PG object counts and things by doing a fuzzy estimate
->> >> (just dividing the PG values in two) until a scrub happens. I don't
->> >> think having to do the same here is a reason to avoid it entirely.
->
-> Oh, right, I forgot about that.
->
->> >>> This is why I suggested per-pool metadata.  Pool-level
->> >>> information will still let us roll things up into a 'ceph df' type
->> >>> summary
->> >>> of how well data in a particular pool is compressing, how sparse it is,
->> >>> and so on, which should be sufficient for capacity planning purposes.
->> >>> We'll also have per-OSD (by pool) information, which will tell us how
->> >>> efficient, e.g., FileStore vs BlueStore is for a given data set (pool).
->> >>>
->> >>> What we don't get is per-PG granularity.  I don't think this matters
->> >>> much,
->> >>> which a user doesn't really care about individual PGs anyway.
->> >>>
->> >>> We also don't get perfect accuracy when the cluster is degraded.  If
->> >>> one or more PGs in a pool is undergoing backfill or whatever, the
->> >>> OSD-level summations will be off.  We can *probably* figure out how to
->> >>> correct for that by scaling the result based on what we know about the PG
->> >>> recovery progress (e.g., how far along backfill on a PG is, and ignoring
->> >>> the log-based recovery as an insignificant).
->> >>
->> >> Users don't care much about per-PG granularity in general, but as you
->> >> note it breaks down in recovery. More than that, our *balancers* care
->> >> very much about exactly what's in each PG, don't they?
->
-> The balancer is hands-off if there is any recovery going on (and throttles
-> itself to limit the amount of misplaced/rebalancing).
-
-Even if the cluster's clean, if it doesn't know the sizes of PGs, it
-doesn't know which ones it should shift around, right? Right now I
-think it's just going on the summed logical HEAD object sizes, but
-there are obvious problems with that in some scenarios.
-
->> >>>> - PG instance at each OSD node retrieves collection statistics from OS
->> >>>> when
->> >>>> needed or tracks  it in RAM only.
->> >>>> - Two statistics reports  to be distinguished:
->> >>>>    a. Cluster-wide PG report - processing OSD retrieves statistics from
->> >>>> both
->> >>>> local and remote PGs and sums it on per-PG basis. E.g. total per-PG
->> >>>> physical
->> >>>> space usage can be obtained this way.
->> >>>>    b. OSD-wide PG report (or just simple OSD summary report) - OSD
->> >>>> collects PG
->> >>>> statistics from local PGs only. E.g. logical/physical space usage at
->> >>>> specific
->> >>>> OSD can be examined this way.
->> >>>
->> >>> ...and if we're talking about OSD-level stats, then I don't think any
->> >>> different update path is needed.  We would just statfs() to return a pool
->> >>> summation for each pool that exists on the OSD as well as the current
->> >>> osd_stat_t (or whatever it is).
->> >>>
->> >>> Does that seem reasonable?
->> >>
->> >> I'm saying it's a "replay" mechanism or a two-phase commit, but I
->> >> really don't think having delayed stat updates would take much doing.
->> >> We can modify our in-memory state as soon as the ObjectStore replies
->> >> back to us, and add a new "stats-persisted-thru" value to the pg_info.
->> >> On any subsequent writes, we update the pg stats according to what we
->> >> already know. Then on OSD boot, we compare that value to the last pg
->> >> write, and query any objects which changed in the unaccounted pg log
->> >> entries. It's a short, easy pass, right? And we're not talking new
->> >> blocking queues or anything.
+>> > There is a bunch of stuff in there, sorry.  What we really want is a rados
+>> > op that triggers promote_object().  We don't have that quite yet.
 >> >
->> > That's what I was thinking about too. Here is a very immature POC for this
->> > approach, seems doable so far:
->> >
->> > https://github.com/ceph/ceph/pull/19350
+>> > Myoungwon, is that something you've looked at yet?  I'm thinking of a
+>> > rados op like TIER_PROMOTE (or something along those lines) that just
+>> > triggers a promotion if it is a redirect/chunked manifest, and is a no-op
+>> > otherwise.  (We could probably make it do something meaningful for a cache
+>> > tier too, but I don't think it's worth the effort.)
 >>
->> To evaluate this usefully I think we'd need to see how these updates
->> get committed if the OSD crashes before they're persisted? I expect
->> that requires some kind of query interface...which, hrm, is actually a
->> little more complicated if this is the model.
->> I was just thinking we'd compare the on-disk allocation info for an
->> object to what we've persisted, but we actually only keep per-PG
->> stats, right? That's not great. :/
+>> Didn't we previously have something like that? All I see in the source
+>> now is a CACHE_EVICT|FLUSH|TRY_FLUSH (or some new? CACHE_PIN|UNPIN),
+>> but ops to control promotion/demotion were definitely on the drawing
+>> board at one point, and I thought it was implemented.
+>>
+>> Grepping through logs I do see we had a CEPH_OSD_RMW_FLAG_PROMOTE in
+>> 2015, though that's later than I was thinking. Not sure if I'm just
+>> missing the right term to search for or if I'm making it up.
 >
-> This direction makes me very nervous.
+> We never did.  The FLUSH/EVICT are the opposite (but roughly analogous)
+> operations for a cache tier sitting above (vs an archive tier sitting
+> below) the base tier, which are probably what you're thinking of? The
+> struggle has historically been to *avoid* promotion, not to trigger
+> promotion.
 >
-> Can we figure out what problem the complex approach solves that the simple
-> approach doesn't?
-
-Maybe you can explain more clearly how this would work. I'm not really
-seeing how to implement it efficiently in FileStore. Maybe maintain
-size summations for each collection, and update them whenever we do
-clones or truncate/append to files? But I think that would work just
-as well for exposing PG-level space stats. So maybe we should do that.
-
-
-> I think the values are something like:
+> sage
 >
->                           master     pool-proposal    2pc-pg-update
->  per-object sparseness      x             ?                ?
->  per-pg sparseness                                         x
->  per-pool sparseness                      x                x
->
-> I put ? because for a single object we can just query the backend with
-> a stat equivalent (like the fiemap ObjectStore method).  This is what,
-> say, rbd or cephfs would need to get a st_blocks value.
->
-> For a 'ceph df' column, the pool summation is what you need--not a pg
-> value.
->
-> Is there another user of this information I'm missing?
->
-> AFAICS the only real benefit to the 2pc complexity is a value that remains
-> perfectly accurate during backfill etc, whereas the pool-level summation
-> will drift slightly in that case.  Doesn't seem worth it to me?
-
-Hmm, it would also be great to resolve the "omaps don't count" thing,
-which I don't think we have any other solutions for right now? Not
-that this really helps much with that — we could add up the size of
-input keys and values, but I don't see any way to efficiently support
-omap deletes...
--Greg
