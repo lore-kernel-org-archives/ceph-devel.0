@@ -1,49 +1,87 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: C++11, std::list::size(), and trusty
-Date: Tue, 5 Dec 2017 23:23:28 +0100
-Message-ID: <8f12d8bb-53de-e3e7-902a-9bd49938edb3@suse.cz>
-References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
- <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
- <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
- <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
- <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
- <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
- <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz>
- <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
- <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
- <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: conditionalize build on branch using jenkins
+Date: Wed, 6 Dec 2017 15:18:57 +0800
+Message-ID: <CAJE9aOM-h17ErsTjqX-0RFKBqnZ4Lvkh4G5ajSGoUFaBaOf4LA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:42886 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752900AbdLEWXb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 5 Dec 2017 17:23:31 -0500
-In-Reply-To: <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com>
-Content-Language: en-US
+Received: from mail-qt0-f177.google.com ([209.85.216.177]:43205 "EHLO
+        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753226AbdLFHS7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Dec 2017 02:18:59 -0500
+Received: by mail-qt0-f177.google.com with SMTP id w10so6737667qtb.10
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Dec 2017 23:18:58 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, Sage Weil <sweil@redhat.com>, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/05/2017 05:40 PM, Adam C. Emerson wrote:
-> On 05/12/2017, kefu chai wrote:
->> once all trusty testnodes are re-imaged with xenial, i will try to
->> remove the trusty build support on ceph/ceph-build. BTW, if we want to
->> use gcc-7 on xenial, which ships GCC 5.3, we can apply the same fix on
->> it also.
-> 
-> If we can get GCC-7 on Xenial and there's a way for people building
-> Ceph to get it without too much trouble, then I think we should use
-> GCC-7.
-> 
-> In general, so long as they are reasonably gettable on our target
-> operating systems, I think we ought to target the latest stable
-> release stream of GCC and Clang.
+hey Alfredo and other Cephers,
 
-This sounds like it is edging towards requiring GCC-7 to build 
-master/Mimic? That seems kind of radical, but I don't see it posing any 
-problem for openSUSE or SLES since I'm already using GCC-7 to build 
-master/Mimic in OBS.
+i am trying to disable master,mimic-* and probably PRs targeting these
+branches building on trusty. otherwise the binaries built on trusty
+with the new GCC ABI will not be able to run on trusty installation
+without the new libstdc++ installed due to missing libstdc++ ABI
+symbols. for more context, please see the recent discussion thread in
+this mailing list, search "C++11, std::list_size(), and trusty"  for
+it.
 
-Nathan
+for example, if a branch is pushed to ceph/ceph-ci, jenkins will build
+it, and upload the built packages to chacra. even if all trusty
+testnodes are reimaged with xenial. we still want to make sure that
+people using trusty won't run into troubles if they want to use the
+packages built using our build infrastructure. so, we need to use the
+old toolchain to build jewel and luminous.
+
+so the status quo is:
+
+- jewel, luminous, mimic-dev* and master built on trusty are using GCC-7
+
+and the goal is to
+
+1. build jewel and luminous on trusty with the old GCC shipped with the distro
+2. do not build master, mimic-dev* branches on trusty
+
+the same applies to the branches targeting respective releases pushed
+to ceph/ceph-ci .
+
+but after digging around in ceph/ceph-build, i realized that probably we need:
+
+1. a naming convention for branches targeting jewel/luminous, like
+wip-fix-a-bug-luminous.
+
+this helps with solving goal #1: so we can skip the steps preparing
+the GCC-7 when setup pbuilder.
+
+this also helps with solving gobal #2: we have no way to tell if a wip
+branch is targeting which release without actually cloning it and
+looking at the source files or using "git describe". but typically,
+jenkins will not have access to the source files or the .git directory
+of a PR or a ceph-ci repo before the "ceph-*-setup" job. and i'd like
+to prevent jenkins from scheduling a job at the very beginning: so the
+only metadata at that phase is the "$GIT_BRANCH". that's why i suggest
+use a naming convention for these branches. so jenkins is able to
+identify them.
+
+2. we need to have a "combination-filter"[1] referencing the
+$GIT_BRANCH, like "!(["master", "mimic-dev1"].contains(branch) &&
+DIST=="trusty)". where "branch" is an axis, calculated using
+$GIT_BRANCH.
+
+i am not sure if #2 is a feasible approach. because i *think* the
+supported axises are setup when the jenkins-job-builder populate the
+yaml configuration files to jenkins. if that's the case, we cannot
+parameterize the "combination-filter" at run-time.
+
+
+any idea or comment would be appreciated!
+
+
+cheers,
+
+---
+[1] https://docs.openstack.org/infra/jenkins-job-builder/project_matrix.html
+
+
+-- 
+Regards
+Kefu Chai
