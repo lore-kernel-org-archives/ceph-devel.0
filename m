@@ -1,129 +1,55 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] ceph: drop negtive child dentries before try pruning
- inode's alias
-Date: Thu, 07 Dec 2017 15:42:02 -0500
-Message-ID: <1512679322.6576.1.camel@redhat.com>
-References: <20171130141259.8577-1-zyan@redhat.com>
-         <1512401111.4042.14.camel@redhat.com>
-         <CAOi1vP-OuzDLUBWpDz6O0yvGTg7LSweTUZpkjVbJg5aMCgmB3g@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: followup on CDM seastar discussion
+Date: Thu, 7 Dec 2017 15:10:20 -0800
+Message-ID: <CAJ4mKGatR36WNh5FB1ACWXgv2YARG_EKu-dZU=pB_CGEJfXadw@mail.gmail.com>
+References: <49cba3b7-1cc5-d04f-b1ce-9be66ecf5f9d@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:33937 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750779AbdLGUmE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Dec 2017 15:42:04 -0500
-Received: by mail-qt0-f194.google.com with SMTP id 33so21054715qtv.1
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Dec 2017 12:42:04 -0800 (PST)
-In-Reply-To: <CAOi1vP-OuzDLUBWpDz6O0yvGTg7LSweTUZpkjVbJg5aMCgmB3g@mail.gmail.com>
+Received: from mail-it0-f52.google.com ([209.85.214.52]:35606 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750978AbdLGXKV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Dec 2017 18:10:21 -0500
+Received: by mail-it0-f52.google.com with SMTP id f143so971057itb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Dec 2017 15:10:21 -0800 (PST)
+In-Reply-To: <49cba3b7-1cc5-d04f-b1ce-9be66ecf5f9d@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Thu, 2017-12-07 at 14:21 +0100, Ilya Dryomov wrote:
-> On Mon, Dec 4, 2017 at 4:25 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> > On Thu, 2017-11-30 at 22:12 +0800, Yan, Zheng wrote:
-> > > negtive child dentry holds reference on inode's alias, it makes
-> > > d_prune_aliases() do nothing.
-> > > 
-> > > Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> > > ---
-> > >  fs/ceph/mds_client.c | 43 ++++++++++++++++++++++++++++++++++++-------
-> > >  1 file changed, 36 insertions(+), 7 deletions(-)
-> > > 
-> > > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > > index da181acd4a61..9e7bb5fa9295 100644
-> > > --- a/fs/ceph/mds_client.c
-> > > +++ b/fs/ceph/mds_client.c
-> > > @@ -1440,6 +1440,30 @@ static int __close_session(struct ceph_mds_client *mdsc,
-> > >       return request_close_session(mdsc, session);
-> > >  }
-> > > 
-> > > +static bool drop_negative_children(struct dentry *dentry)
-> > > +{
-> > > +     struct dentry *child;
-> > > +     bool all_negtive = true;
-> > > +
-> > > +     if (!d_is_dir(dentry))
-> > > +             goto out;
-> > > +
-> > > +     spin_lock(&dentry->d_lock);
-> > > +     list_for_each_entry(child, &dentry->d_subdirs, d_child) {
-> > > +             if (d_really_is_positive(child)) {
-> > > +                     all_negtive = false;
-> > > +                     break;
-> > > +             }
-> > > +     }
-> > > +     spin_unlock(&dentry->d_lock);
-> > > +
-> > > +     if (all_negtive)
-> > > +             shrink_dcache_parent(dentry);
-> > > +out:
-> > > +     dput(dentry);
-> > 
-> > It's sort of nasty to drop the reference here. It makes it harder to
-> > track how that gets done when you acquire and drop references across a
-> > function boundary like this. There's also no reason for it since you
-> > always do it last here anyway.
-> > 
-> > It'd be nicer to just move that into the caller.
-> > 
-> > > +     return all_negtive;
-> > > +}
-> > > +
-> > >  /*
-> > >   * Trim old(er) caps.
-> > >   *
-> > > @@ -1495,15 +1519,20 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
-> > >               __ceph_remove_cap(cap, true);
-> > >               session->s_trim_caps--;
-> > >       } else {
-> > > -             int refs;
-> > > +             struct dentry *dentry;
-> > >               /* try dropping referring dentries */
-> > >               spin_unlock(&ci->i_ceph_lock);
-> > > -             d_prune_aliases(inode);
-> > > -             refs = atomic_read(&inode->i_count);
-> > > -             if (refs == 1)
-> > > -                     session->s_trim_caps--;
-> > > -             dout("trim_caps_cb %p cap %p  pruned, count now %d\n",
-> > > -                  inode, cap, refs);
-> > > +             dentry = d_find_any_alias(inode);
-> > > +             /* drop_negative_children() calls dput() */
-> > > +             if (dentry && drop_negative_children(dentry)) {
-> > > +                     int refs;
-> > > +                     d_prune_aliases(inode);
-> > > +                     refs = atomic_read(&inode->i_count);
-> > > +                     if (refs == 1)
-> > > +                             session->s_trim_caps--;
-> > > +                     dout("trim_caps_cb %p cap %p pruned, count now %d\n",
-> > > +                          inode, cap, refs);
-> > > +             }
-> > >               return 0;
-> > >       }
-> > > 
-> > 
-> > I think the rest looks fine though.
-> 
-> Hi Jeff, Zheng,
-> 
-> What is the status of this patch?  It is marked for stable in the
-> testing branch and Zheng force-pushed it two days ago, addressing
-> comments.  Jeff, can you take a look?
-> 
-> Zheng, negtive and all_negtive typos need fixing.
-> 
-> Also, would it make sense to merge these two patches ("ceph: decease
-> session->s_trim_caps only after caps get trimmed" and "ceph: drop
-> negtive child dentries before try pruning inode's alias") into one?
-> They seem to fix the same bug and the second almost entirely redoes the
-> first.
-> 
+On Wed, Dec 6, 2017 at 1:04 PM, Casey Bodley <cbodley@redhat.com> wrote:
+> Following up on today's CDM discussion about experimenting with seastar,
+> here is the branch I mentioned:
+> https://github.com/cbodley/ceph/commits/wip-seastar-msg
+>
+> The commit that integrates it into our cmake is
+> https://github.com/cbodley/ceph/commit/c897cd9b66977df633a4408f12c8d6b3fa4d45b4.
+> This doesn't add seastar as a submodule, but uses the pkg-config file
+> seastar.pc that's generated by their build process. When built with dpdk,
+> seastar includes all of the dpdk cflags and ldflags it uses, so we'll need
+> to reconcile those with our existing dpdk build.
+>
+> I also mentioned some work to integrate seastar with the c++ coroutines ts
+> (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4680.pdf) - see
+> https://groups.google.com/forum/#!msg/seastar-dev/tLvS7sx3ss4/_-P93HtsBgAJ
+> for that discussion.
 
+Huh, I see a statement in that discussion
+"There's a conflict between the reactor's model of single-use tasks,
+and reusable continuations."
 
-Yep, that one (56b5c1eed996) looks good to me.
+That sounds to me like even if we wanted to modify seastar to use a
+more sophisticated memory-allocation/futures-grouped-as-tasks model,
+it would not go well with how the project currently works. Anybody
+have any sophisticated insight there before we open up a dialogue with
+them?
+-Greg
 
--- 
-Jeff Layton <jlayton@redhat.com>
+>
+> Casey
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
