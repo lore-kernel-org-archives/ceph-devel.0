@@ -1,54 +1,173 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] ceph: don't set st_dev to 0 for stat(2)
-Date: Mon, 11 Dec 2017 06:59:47 -0500
-Message-ID: <1512993587.3326.5.camel@redhat.com>
-References: <20171211084758.3225-1-zyan@redhat.com>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: cephfs in kernel 4.9: NULL pointer deref
+Date: Mon, 11 Dec 2017 13:13:59 +0100
+Message-ID: <50304bd9-4d80-5665-ad24-7b547c70c085@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------264E8C48560FE3CCF1418928"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f193.google.com ([209.85.216.193]:43427 "EHLO
-        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752616AbdLKL7u (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Dec 2017 06:59:50 -0500
-Received: by mail-qt0-f193.google.com with SMTP id w10so37675941qtb.10
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Dec 2017 03:59:49 -0800 (PST)
-In-Reply-To: <20171211084758.3225-1-zyan@redhat.com>
+Received: from www1.m-privacy.de ([85.214.254.135]:42850 "EHLO
+        www1.m-privacy.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752955AbdLKMTR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Dec 2017 07:19:17 -0500
+Received: from localhost (localhost [127.0.0.1])
+        by www1.m-privacy.de (Postfix) with ESMTP id 3222424009C
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Dec 2017 13:14:08 +0100 (CET)
+Received: from www1.m-privacy.de ([127.0.0.1])
+ by localhost (www1.m-privacy.de [127.0.0.1]) (maiad, port 10024) with ESMTP
+ id 27496-06 for <ceph-devel@vger.kernel.org>;
+ Mon, 11 Dec 2017 13:14:01 +0100 (CET)
+Received: from gw.compuniverse.de (x55b3c996.dyn.telefonica.de [85.179.201.150])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client CN "gw.compuniverse.de", Issuer "gw.compuniverse.de" (not verified))
+        by www1.m-privacy.de (Postfix) with ESMTPSA id 534D124009B
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Dec 2017 13:14:01 +0100 (CET)
+Received: from [192.168.201.30] (tgham.compuniverse.de [192.168.201.30])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client did not present a certificate)
+        by gw.compuniverse.de (Postfix) with ESMTPS id 7C9598200D
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Dec 2017 13:14:00 +0100 (CET)
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 2017-12-11 at 16:47 +0800, Yan, Zheng wrote:
-> Zero st_dev confuses ls(1) code. it make 'ls -l' not print '+' sign
-> for file/directory with ACL.
-> 
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/inode.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index c6ec5aa46100..b5529b0b77a6 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -2244,7 +2244,7 @@ int ceph_getattr(const struct path *path, struct kstat *stat,
->  		if (ceph_snap(inode) != CEPH_NOSNAP)
->  			stat->dev = ceph_snap(inode);
->  		else
-> -			stat->dev = 0;
-> +			stat->dev = 1; /* the smallest snapid is 2 */
->  		if (S_ISDIR(inode->i_mode)) {
->  			if (ceph_test_mount_opt(ceph_sb_to_client(inode->i_sb),
->  						RBYTES))
+This is a multi-part message in MIME format.
+--------------264E8C48560FE3CCF1418928
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 
-This looks wrong to me.
+Hello Ceph folks,
 
-This should be getting filled out with the value of the sb->s_dev field
-in generic_fillattr. The right fix would be to ensure that that field
-ends up with something valid in it, and that should be happening when we
-call set_anon_super.
+when running latest Stable 64 Bit Google Chrome under Linux with home
+dirs on cephfs, I get the attached kernel trace and cephfs access hangs
+afterwards. Umounting cephfs no longer works, only a hard system reset
+helps. Since it only happens on cephfs, I hope to get some help here.
 
-I think we need to understand why that isn't happening here.
+Kernel versions tested are 4.9.67 and 4.9.68, each with RSBAC patched
+in. However, RSBAC does not touch these funktions. Since 4.9.68 just had
+a fix related to page_mkwrite(), it might be related. The trace can be
+reproduced with every start of Chrome, but we have not seen anything
+similar with other applications, e.g. Firefox. Ceph backend lives on xfs
+or btrfs on the same system, crash happens with both.
 
+Thanks for all your good work,
+
+Amon Ott
 -- 
-Jeff Layton <jlayton@redhat.com>
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Werner-Voß-Damm 62       Fax: +49 30 99296856
+12101 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Geschäftsführer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+
+
+--------------264E8C48560FE3CCF1418928
+Content-Type: text/plain; charset=UTF-8;
+ name="ceph-trace2"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="ceph-trace2"
+
+RGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY1MyBrZXJuZWw6IEJVRzogdW5hYmxl
+IHRvIGhhbmRsZSBrZXJuZWwgTlVMTCBwb2ludGVyIGRlcmVmZXJlbmNlIGF0ICAgICAgICAg
+ICAobnVsbCkKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY1NCBrZXJuZWw6IElQ
+OiBbPGZmZmZmZmZmODEyYWE1YTI+XSBqYmQyX19qb3VybmFsX3N0YXJ0KzB4MzgvMHgxYTIK
+RGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY1NSBrZXJuZWw6IFBHRCAwIApEZWMg
+MTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjU2IGtlcm5lbDoKRGVjIDExIDExOjU0OjQ3
+IHRna3ZtMTQgMDAwMDAwMDY1NyBrZXJuZWw6IE9vcHM6IDAwMDAgWyMxXSBQUkVFTVBUIFNN
+UApEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjU4IGtlcm5lbDogTW9kdWxlcyBs
+aW5rZWQgaW46IGNiYyBjZXBoIGxpYmNlcGggeGZzIGxpYmNyYzMyYyA4MTM5Y3AgbWlpIGlu
+dGVsX2FncCBpbnRlbF9ndHQgcGFycG9ydF9wYyBpMmNfcGlpeDQgYWdwZ2FydCBmbG9wcHkg
+YnV0dG9uIGV2ZGV2IHBhcnBvcnQgcnRjX2Ntb3MgaTJjX2NvcmUgdmlydGlvX25ldCB2aXJ0
+aW9fYmFsbG9vbgpEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjU5IGtlcm5lbDog
+Q1BVOiAxIFBJRDogNjY2MSBDb21tOiBUYXNrU2NoZWR1bGVyQmEgTm90IHRhaW50ZWQgNC45
+LjY4LXJzYmFjNjQgIzEKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY2MCBrZXJu
+ZWw6IEhhcmR3YXJlIG5hbWU6IFFFTVUgU3RhbmRhcmQgUEMgKGk0NDBGWCArIFBJSVgsIDE5
+OTYpLCBCSU9TIDEuNy41LTIwMTQwNTMxXzA4MzAzMC1nYW5kYWxmIDA0LzAxLzIwMTQKRGVj
+IDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY2MSBrZXJuZWw6IHRhc2s6IGZmZmY5NWM1
+ZjM3OTBiODAgdGFzay5zdGFjazogZmZmZjlhZDc0NjhhMDAwMApEZWMgMTEgMTE6NTQ6NDcg
+dGdrdm0xNCAwMDAwMDAwNjYyIGtlcm5lbDogUklQOiAwMDEwOls8ZmZmZmZmZmY4MTJhYTVh
+Mj5dICBbPGZmZmZmZmZmODEyYWE1YTI+XSBqYmQyX19qb3VybmFsX3N0YXJ0KzB4MzgvMHgx
+YTIKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY2MyBrZXJuZWw6IFJTUDogMDAx
+ODpmZmZmOWFkNzQ2OGEzOTAwICBFRkxBR1M6IDAwMDEwMjg2CkRlYyAxMSAxMTo1NDo0NyB0
+Z2t2bTE0IDAwMDAwMDA2NjQga2VybmVsOiBSQVg6IGZmZmY5NWM1ZjRjOWVlMDAgUkJYOiBm
+ZmZmOTVjNWYzYWE3NTQ4IFJDWDogMDAwMDAwMDAwMjQwMDA0MApEZWMgMTEgMTE6NTQ6NDcg
+dGdrdm0xNCAwMDAwMDAwNjY1IGtlcm5lbDogUkRYOiAwMDAwMDAwMDAwMDAwMDAwIFJTSTog
+MDAwMDAwMDAwMDAwMDAxNSBSREk6IGZmZmY5NWM1ZjU2NmMwMDAKRGVjIDExIDExOjU0OjQ3
+IHRna3ZtMTQgMDAwMDAwMDY2NiBrZXJuZWw6IFJCUDogZmZmZjk1YzVmNTY2YzAwMCBSMDg6
+IDAwMDAwMDAwMDAwMDAwMDIgUjA5OiAwMDAwMDAwMDAwMDAxNjdlCkRlYyAxMSAxMTo1NDo0
+NyB0Z2t2bTE0IDAwMDAwMDA2Njcga2VybmVsOiBSMTA6IDAwMDAwMDAwMDAwMDAwNDAgUjEx
+OiBmZmZmZjUzMmMxMDQ1YzQwIFIxMjogZmZmZmY1MzJjMTA0NWM0MApEZWMgMTEgMTE6NTQ6
+NDcgdGdrdm0xNCAwMDAwMDAwNjY4IGtlcm5lbDogUjEzOiBmZmZmOTVjNWYzYWE3NTIwIFIx
+NDogZmZmZjlhZDc0NjhhMzk5OCBSMTU6IGZmZmY5NWM1ZjNhYTc2YjgKRGVjIDExIDExOjU0
+OjQ3IHRna3ZtMTQgMDAwMDAwMDY2OSBrZXJuZWw6IEZTOiAgMDAwMDdmZDkyMTEyNDcwMCgw
+MDAwKSBHUzpmZmZmOTVjNWZjYzgwMDAwKDAwMDApIGtubEdTOjAwMDAwMDAwMDAwMDAwMDAK
+RGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY3MCBrZXJuZWw6IENTOiAgMDAxMCBE
+UzogMDAwMCBFUzogMDAwMCBDUjA6IDAwMDAwMDAwODAwNTAwMzMKRGVjIDExIDExOjU0OjQ3
+IHRna3ZtMTQgMDAwMDAwMDY3MSBrZXJuZWw6IENSMjogMDAwMDAwMDAwMDAwMDAwMCBDUjM6
+IDAwMDAwMDAwNzNlYzQwMDAgQ1I0OiAwMDAwMDAwMDAwMDAwNmUwCkRlYyAxMSAxMTo1NDo0
+NyB0Z2t2bTE0IDAwMDAwMDA2NzIga2VybmVsOiBTdGFjazoKRGVjIDExIDExOjU0OjQ3IHRn
+a3ZtMTQgMDAwMDAwMDY3MyBrZXJuZWw6IGMzNTA1MTI2ODlmN2IzN2QgZmZmZjk1YzVmM2Fh
+NzU0OCBjMzUwNTEyNjg5ZjdiMzdkIGZmZmY5NWM1ZjNhYTc1NDgKRGVjIDExIDExOjU0OjQ3
+IHRna3ZtMTQgMDAwMDAwMDY3NCBrZXJuZWw6IGZmZmY5NWM1YjM5YzQ5NTggZmZmZmY1MzJj
+MTA0NWM0MCBmZmZmZmZmZjgxMjY3MjljIGZmZmZmZmZmODEyNjAxYmEKRGVjIDExIDExOjU0
+OjQ3IHRna3ZtMTQgMDAwMDAwMDY3NSBrZXJuZWw6IGZmZmY5NWM1YjM5YzQ5NTggMDAwMDAw
+MDAwMDAwMDAwMCBjMzUwNTEyNjg5ZjdiMzdkIGZmZmZmNTMyYzEwNDVjNDAKRGVjIDExIDEx
+OjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY3NiBrZXJuZWw6IENhbGwgVHJhY2U6CkRlYyAxMSAx
+MTo1NDo0NyB0Z2t2bTE0IDAwMDAwMDA2Nzcga2VybmVsOiBbPGZmZmZmZmZmODEyNjcyOWM+
+XSA/IGV4dDRfcGFnZV9ta3dyaXRlKzB4MzA3LzB4NTJiCkRlYyAxMSAxMTo1NDo0NyB0Z2t2
+bTE0IDAwMDAwMDA2Nzgga2VybmVsOiBbPGZmZmZmZmZmODEyNjAxYmE+XSA/IF9leHQ0X2dl
+dF9ibG9jaysweGQ4LzB4ZDgKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY3OSBr
+ZXJuZWw6IFs8ZmZmZmZmZmY4MTE3ZmY3OD5dID8gZG9fcGFnZV9ta3dyaXRlKzB4NmUvMHhk
+OApEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjgwIGtlcm5lbDogWzxmZmZmZmZm
+ZjgxMTg1OWE2Pl0gPyBoYW5kbGVfbW1fZmF1bHQrMHg2ODYvMHhmOWIKRGVjIDExIDExOjU0
+OjQ3IHRna3ZtMTQgMDAwMDAwMDY4MSBrZXJuZWw6IFs8ZmZmZmZmZmY4MTFlYzliYj5dID8g
+bW50cHV0X25vX2V4cGlyZSsweDFmLzB4MjFlCkRlYyAxMSAxMTo1NDo0NyB0Z2t2bTE0IDAw
+MDAwMDA2ODIga2VybmVsOiBbPGZmZmZmZmZmODEwNGY1NjY+XSA/IF9fZG9fcGFnZV9mYXVs
+dCsweDIxZC8weDQ2NQpEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjgzIGtlcm5l
+bDogWzxmZmZmZmZmZjgxMWUxYjJjPl0gPyBkcHV0KzB4NGEvMHgyZjcKRGVjIDExIDExOjU0
+OjQ3IHRna3ZtMTQgMDAwMDAwMDY4NCBrZXJuZWw6IFs8ZmZmZmZmZmY4MTljMWJjMj5dID8g
+cGFnZV9mYXVsdCsweDIyLzB4MzAKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY4
+NSBrZXJuZWw6IFs8ZmZmZmZmZmY4MTMxY2FiYz5dID8gY29weV91c2VyX2dlbmVyaWNfc3Ry
+aW5nKzB4MmMvMHg0MApEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjg2IGtlcm5l
+bDogWzxmZmZmZmZmZjgxMzI3MGQ4Pl0gPyBjb3B5X3BhZ2VfdG9faXRlcisweDhjLzB4MmI4
+CkRlYyAxMSAxMTo1NDo0NyB0Z2t2bTE0IDAwMDAwMDA2ODcga2VybmVsOiBbPGZmZmZmZmZm
+ODExNTNlM2Y+XSA/IGdlbmVyaWNfZmlsZV9yZWFkX2l0ZXIrMHgyNmUvMHg4NDUKRGVjIDEx
+IDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY4OCBrZXJuZWw6IFs8ZmZmZmZmZmY4MTMxOGU1
+MT5dID8gdGltZXJxdWV1ZV9kZWwrMHgzMS8weDkwCkRlYyAxMSAxMTo1NDo0NyB0Z2t2bTE0
+IDAwMDAwMDA2ODkga2VybmVsOiBbPGZmZmZmZmZmYzA0MjZiN2I+XSA/IGNlcGhfcmVhZF9p
+dGVyKzB4Njk3LzB4YTMzIFtjZXBoXQpEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAw
+NjkwIGtlcm5lbDogWzxmZmZmZmZmZjgxMTBiZjQ4Pl0gPyBocnRpbWVyX2NhbmNlbCsweDIz
+LzB4NDEKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQgMDAwMDAwMDY5MSBrZXJuZWw6IFs8ZmZm
+ZmZmZmY4MTExZWU4NT5dID8gZnV0ZXhfd2FpdCsweDFjOC8weDI0ZApEZWMgMTEgMTE6NTQ6
+NDcgdGdrdm0xNCAwMDAwMDAwNjkyIGtlcm5lbDogWzxmZmZmZmZmZjgxMTFlYjJjPl0gPyBn
+ZXRfZnV0ZXhfa2V5KzB4MzJjLzB4MzlhCkRlYyAxMSAxMTo1NDo0NyB0Z2t2bTE0IDAwMDAw
+MDA2OTMga2VybmVsOiBbPGZmZmZmZmZmODExYzM5MTI+XSA/IF9fdmZzX3JlYWQrMHhlMC8w
+eDEzMApEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjk0IGtlcm5lbDogWzxmZmZm
+ZmZmZjgxMWM0M2ZiPl0gPyB2ZnNfcmVhZC5wYXJ0LjErMHg2Yy8weDEyMwpEZWMgMTEgMTE6
+NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjk1IGtlcm5lbDogWzxmZmZmZmZmZjgxMTg1YjUxPl0g
+PyBoYW5kbGVfbW1fZmF1bHQrMHg4MzEvMHhmOWIKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQg
+MDAwMDAwMDY5NiBrZXJuZWw6IFs8ZmZmZmZmZmY4MTFlOGY5OT5dID8gX19mZ2V0KzB4N2Uv
+MHhiZgpEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNjk3IGtlcm5lbDogWzxmZmZm
+ZmZmZjgxMWM2MDIwPl0gPyBTeVNfcmVhZCsweDRkLzB4YjUKRGVjIDExIDExOjU0OjQ3IHRn
+a3ZtMTQgMDAwMDAwMDY5OCBrZXJuZWw6IFs8ZmZmZmZmZmY4MTljMDU2MD5dID8gZW50cnlf
+U1lTQ0FMTF82NF9mYXN0cGF0aCsweDEzLzB4OTQKRGVjIDExIDExOjU0OjQ3IHRna3ZtMTQg
+MDAwMDAwMDY5OSBrZXJuZWw6IENvZGU6IDI4IDAwIDAwIDAwIDQ4IDg5IDQ0IDI0IDEwIDMx
+IGMwIDY1IDQ4IDhiIDA0IDI1IDgwIGM0IDAwIDAwIDQ4IDhiIDgwIGQwIDA2IDAwIDAwIDQ4
+IDg1IGZmIDc0IDMxIDQ4IDg5IGZkIDQ4IDg1IGMwIDc0IDM0IDQ4IDhiIDEwIDw0OD4gM2Ig
+M2EgNzUgMmEgODMgNDAgMTQgMDEgNDggOGIgNWMgMjQgMTAgNjUgNDggMzMgMWMgMjUgMjgg
+MDAgCkRlYyAxMSAxMTo1NDo0NyB0Z2t2bTE0IDAwMDAwMDA3MDAga2VybmVsOiBSSVAgIFs8
+ZmZmZmZmZmY4MTJhYTVhMj5dIGpiZDJfX2pvdXJuYWxfc3RhcnQrMHgzOC8weDFhMgpEZWMg
+MTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNzAxIGtlcm5lbDogUlNQIDxmZmZmOWFkNzQ2
+OGEzOTAwPgpEZWMgMTEgMTE6NTQ6NDcgdGdrdm0xNCAwMDAwMDAwNzAyIGtlcm5lbDogQ1Iy
+OiAwMDAwMDAwMDAwMDAwMDAwCkRlYyAxMSAxMTo1NDo0NyB0Z2t2bTE0IDAwMDAwMDA3MDMg
+a2VybmVsOiAtLS1bIGVuZCB0cmFjZSBlM2RiNzE2ZGZlYmI4OWFlIF0tLS0K
+--------------264E8C48560FE3CCF1418928--
