@@ -1,65 +1,120 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: cephfs in kernel 4.9: NULL pointer deref
-Date: Mon, 11 Dec 2017 14:14:44 +0100
-Message-ID: <22eeacaf-98cf-98ef-cd64-2e1e32da59e2@m-privacy.de>
-References: <50304bd9-4d80-5665-ad24-7b547c70c085@m-privacy.de>
- <CAAM7YAmh9TZx7griYS96q85dU=bP329tr+QQXDSfceg06fTiNg@mail.gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: cephfs quotas
+Date: Mon, 11 Dec 2017 16:52:06 +0000
+Message-ID: <87d13lryvd.fsf@suse.com>
+References: <20171018101122.pfz7e27l32e34b2f@jf_suse_laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www1.m-privacy.de ([85.214.254.135]:44294 "EHLO
-        www1.m-privacy.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751400AbdLKNOz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Dec 2017 08:14:55 -0500
-In-Reply-To: <CAAM7YAmh9TZx7griYS96q85dU=bP329tr+QQXDSfceg06fTiNg@mail.gmail.com>
-Content-Language: de-DE
+Received: from mx2.suse.de ([195.135.220.15]:50937 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752165AbdLKQwJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 11 Dec 2017 11:52:09 -0500
+In-Reply-To: <20171018101122.pfz7e27l32e34b2f@jf_suse_laptop> (Jan Fajerski's
+        message of "Wed, 18 Oct 2017 12:11:22 +0200")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Jan Fajerski <jfajerski@suse.com>
+Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
 
-Am 11.12.2017 um 13:48 schrieb Yan, Zheng:
-> On Mon, Dec 11, 2017 at 8:13 PM, Amon Ott <a.ott@m-privacy.de> wrote:
->> Hello Ceph folks,
->>
->> when running latest Stable 64 Bit Google Chrome under Linux with home
->> dirs on cephfs, I get the attached kernel trace and cephfs access hangs
->> afterwards. Umounting cephfs no longer works, only a hard system reset
->> helps. Since it only happens on cephfs, I hope to get some help here.
->>
->> Kernel versions tested are 4.9.67 and 4.9.68, each with RSBAC patched
->> in. However, RSBAC does not touch these funktions. Since 4.9.68 just had
->> a fix related to page_mkwrite(), it might be related. The trace can be
->> reproduced with every start of Chrome, but we have not seen anything
->> similar with other applications, e.g. Firefox. Ceph backend lives on xfs
->> or btrfs on the same system, crash happens with both.
->>
->> Thanks for all your good work,
-> 
-> it's likely caused by following code in ceph_read_iter()
-> 
-> current->journal_info = filp;
-> ret = generic_file_read_iter(iocb, to);
-> current->journal_info = NULL;
-> 
-> ceph set current->journal_info, which confuses ext4. I will try
-> writing a fix tomorrow.
+Hi,
 
-Thanks a lot! I can test the fix here.
+[ and sorry for hijacking this old thread! ]
 
-Amon Ott
+Here's a write-up of what I was saying earlier on the cephfs standup:
+
+Basically, by using the ceph branch wip-cephfs-quota-realm branch[1] the
+kernel client should have everything needed to implement client-side
+enforced quotas (just like the current fuse client).  That branch
+contains code that will create a new realm whenever a client sets a
+quota xattr, and the clients will be updated with this new realm.
+
+My first question would be: is there something on the kernel client to
+handle this realms (a snaprealm) that is still missing?  As far as I
+could understand from reading the code there's nothing missing -- it
+should be possible to walk through the realms hierarchy as the kernel
+client will always get the updated realms hierarchy from the MDS -- both
+for snapshots and for this new 'quota realms'.  Implementing a 'quota
+realms' PoC based on the RFC I sent out a few weeks ago shouldn't take
+too long.  Or is there something obvious that I'm missing?
+
+Now, the 2nd (big!) question is how to proceed.  Or, to be more clear,
+what are the expectations :-) My understanding was that John Spray would
+like to see a client-side quota enforcement as an initial step, and then
+have everything else added on top of it.  But I'm afraid that this would
+introduce complexity for future releases -- for example, if in the
+future we have a cluster-side enforced quotas (voucher-based or other),
+I guess that the kernel clients would be require to support both
+scenarios => maintenance burden.  Not to talk about clusters migration
+from different quotas implementations.
+
+My personal preference would be to stay away from client quotas.  That's
+obviously the best short-term solution but not necessarily the best in
+the long run.
+
+Thoughts?
+
+[1] https://github.com/ukernel/ceph/tree/wip-cephfs-quota-realm
+
+Cheers,
 -- 
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Werner-Voß-Damm 62       Fax: +49 30 99296856
-12101 Berlin             http://www.m-privacy.de
+Luis
 
-Amtsgericht Charlottenburg, HRB 84946
+Jan Fajerski <jfajerski@suse.com> writes:
 
-Geschäftsführer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
-
+> Hi list,
+> A while ago this list saw a little discussion about quota support for the cephfs
+> kernel client. The result was that instead of adding kernel support for the
+> current implementation, a new quota implementation would be the preferred
+> solution. Here we would like to propose such an implementation.
+>
+> The objective is to implement quotas such that the implementation scales well,
+> it can be implemented in ceph-fuse, the kernel client and libcephfs based
+> clients and are enforceable without relying on client cooperation. The latter
+> suggests that ceph daemon(s) must be involved in checking quota limits. We think
+> that an approach as described in "Quota Enforcement for High-Performance
+> Distributed Storage Systems" by Pollack et
+> al. (https://www.ssrc.ucsc.edu/pub/pollack07-msst.html) can provide a good
+> blueprint for such an implementation. This approach enforces quota limits with
+> the help of vouchers. At a very high level this system works by one or more
+> quota servers (in our case MDSs) issuing vouchers carrying (among other things)
+> an expiration timestamp, an amount, a uid and a (cryptographic) signature to
+> clients. An MDS can track how much space it has given out by tracking the
+> vouchers it issues. A client can spend these vouchers on OSDs by sending them
+> along with a write request. The OSD can verify a valid voucher by the
+> signature. It will deduct the amount of written data from the voucher and might
+> return the voucher if the voucher was not used up in full.  The client can
+> return the remaining amount or it can give it back to the MDS.  Client failures
+> and misbehaving clients are handled through a periodical reconciliation phase
+> where the MDSs and OSDs reconciles issued and used vouchers. Vouchers held by a
+> failed client can be detected by the expiration timestamp attached to the
+> vouchers. Any unused and invalid vouchers can be reclaimed by an MDS. Clients
+> that try to cheat by spending the same voucher on multiple OSDs are detected by
+> the uid of the voucher. This means that adversarial clients can exceed the
+> quota, but will be caught within a limited time period. The signature ensure
+> that clients can not fabricate valid vouchers.  For a much better and much more
+> detailed description please refer to the paper.
+>
+> This approach has been implemented in Ceph before as described here
+> http://drona.csa.iisc.ernet.in/~gopi/docs/amarnath-MSc.pdf. We could however not
+> find the source code for this and it seemingly didn't find its way in to the
+> current code base.
+> The virtues of a protocol like this are that it can scale well, since there is
+> no central entity that keeps a global state of the quotas, while still being
+> able to enforce (somewhat) hard quotas.
+> On the downside there is a protocol overhead that impacts performance. Research
+> and reports on implementations suggest that this overhead can be kept fairly
+> small though (2% performance penalty or less). Furthermore additional state must
+> be kept on MDSs, OSDs and clients. Such a solution also adds considerable
+> complexity to all involved components.
+>
+> We'd like to hear criticism and comments from the community, before a more
+> in-depth CDM discussion.
+>
+> Best,
+> Luis and Jan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
