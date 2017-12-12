@@ -1,133 +1,90 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: cephfs quotas
-Date: Tue, 12 Dec 2017 10:27:36 +0800
-Message-ID: <F5418457-9D67-4687-BE66-AF70650C9811@redhat.com>
-References: <20171018101122.pfz7e27l32e34b2f@jf_suse_laptop>
- <87d13lryvd.fsf@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.1 \(3445.4.7\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: cephfs in kernel 4.9: NULL pointer deref
+Date: Tue, 12 Dec 2017 11:09:49 +0800
+Message-ID: <CAAM7YA=3GGMd9Amz7M_8_gRTT4q_-+3X4GpZpz38umoXO7fsSg@mail.gmail.com>
+References: <50304bd9-4d80-5665-ad24-7b547c70c085@m-privacy.de>
+ <CAAM7YAmh9TZx7griYS96q85dU=bP329tr+QQXDSfceg06fTiNg@mail.gmail.com> <CAJ4mKGb5dCLTNaGLgU9GHU9H2H5=94G78GvAhyOHBHVV=Q33Og@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47254 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751123AbdLLC1o (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 11 Dec 2017 21:27:44 -0500
-In-Reply-To: <87d13lryvd.fsf@suse.com>
+Received: from mail-oi0-f50.google.com ([209.85.218.50]:40833 "EHLO
+        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752070AbdLLDJu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Dec 2017 22:09:50 -0500
+Received: by mail-oi0-f50.google.com with SMTP id w125so13095087oie.7
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Dec 2017 19:09:50 -0800 (PST)
+In-Reply-To: <CAJ4mKGb5dCLTNaGLgU9GHU9H2H5=94G78GvAhyOHBHVV=Q33Og@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Jan Fajerski <jfajerski@suse.com>, Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Amon Ott <a.ott@m-privacy.de>, ceph-devel <ceph-devel@vger.kernel.org>
+
+On Tue, Dec 12, 2017 at 2:32 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Mon, Dec 11, 2017 at 4:48 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+>> On Mon, Dec 11, 2017 at 8:13 PM, Amon Ott <a.ott@m-privacy.de> wrote:
+>>> Hello Ceph folks,
+>>>
+>>> when running latest Stable 64 Bit Google Chrome under Linux with home
+>>> dirs on cephfs, I get the attached kernel trace and cephfs access hangs
+>>> afterwards. Umounting cephfs no longer works, only a hard system reset
+>>> helps. Since it only happens on cephfs, I hope to get some help here.
+>>>
+>>> Kernel versions tested are 4.9.67 and 4.9.68, each with RSBAC patched
+>>> in. However, RSBAC does not touch these funktions. Since 4.9.68 just ha=
+d
+>>> a fix related to page_mkwrite(), it might be related. The trace can be
+>>> reproduced with every start of Chrome, but we have not seen anything
+>>> similar with other applications, e.g. Firefox. Ceph backend lives on xf=
+s
+>>> or btrfs on the same system, crash happens with both.
+>>>
+>>> Thanks for all your good work,
+>>
+>> it's likely caused by following code in ceph_read_iter()
+>>
+>> current->journal_info =3D filp;
+>> ret =3D generic_file_read_iter(iocb, to);
+>> current->journal_info =3D NULL;
+>>
+>> ceph set current->journal_info, which confuses ext4. I will try
+>> writing a fix tomorrow.
+>
+> I don't understand how Ceph code changing a ceph inode can confuse
+> ext4. Can you provide a little more background here?
+> -Greg
+>
+
+current is a macro that return pointer of task_struct. The code set
+current->journal_info, which tells ceph_readpages() that caller has
+already gotten Fcr caps. EXT4  uses current->journal_info to store its
+journal handle. In this case,  the buffer for read(2) is memory mapped
+to a ext4 file.  Copying data to read buffer triggers page fault, page
+fault handler calls ext4_page_mkwrite().
 
 
 
-> On 12 Dec 2017, at 00:52, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> Hi,
-> 
-> [ and sorry for hijacking this old thread! ]
-> 
-> Here's a write-up of what I was saying earlier on the cephfs standup:
-> 
-> Basically, by using the ceph branch wip-cephfs-quota-realm branch[1] the
-> kernel client should have everything needed to implement client-side
-> enforced quotas (just like the current fuse client).  That branch
-> contains code that will create a new realm whenever a client sets a
-> quota xattr, and the clients will be updated with this new realm.
-> 
-> My first question would be: is there something on the kernel client to
-> handle this realms (a snaprealm) that is still missing?  As far as I
-> could understand from reading the code there's nothing missing -- it
-> should be possible to walk through the realms hierarchy as the kernel
-> client will always get the updated realms hierarchy from the MDS -- both
-> for snapshots and for this new 'quota realms'.  Implementing a 'quota
-> realms' PoC based on the RFC I sent out a few weeks ago shouldn't take
-> too long.  Or is there something obvious that I'm missing?
-> 
-
-For maintaining realm hierarchy on kclient, nothing is missing.
-
-Regards
-Yan, Zheng
-
-> Now, the 2nd (big!) question is how to proceed.  Or, to be more clear,
-> what are the expectations :-) My understanding was that John Spray would
-> like to see a client-side quota enforcement as an initial step, and then
-> have everything else added on top of it.  But I'm afraid that this would
-> introduce complexity for future releases -- for example, if in the
-> future we have a cluster-side enforced quotas (voucher-based or other),
-> I guess that the kernel clients would be require to support both
-> scenarios => maintenance burden.  Not to talk about clusters migration
-> from different quotas implementations.
-> 
-> My personal preference would be to stay away from client quotas.  That's
-> obviously the best short-term solution but not necessarily the best in
-> the long run.
-> 
-> Thoughts?
-> 
-> [1] https://github.com/ukernel/ceph/tree/wip-cephfs-quota-realm
-> 
-> Cheers,
-> -- 
-> Luis
-> 
-> Jan Fajerski <jfajerski@suse.com> writes:
-> 
->> Hi list,
->> A while ago this list saw a little discussion about quota support for the cephfs
->> kernel client. The result was that instead of adding kernel support for the
->> current implementation, a new quota implementation would be the preferred
->> solution. Here we would like to propose such an implementation.
->> 
->> The objective is to implement quotas such that the implementation scales well,
->> it can be implemented in ceph-fuse, the kernel client and libcephfs based
->> clients and are enforceable without relying on client cooperation. The latter
->> suggests that ceph daemon(s) must be involved in checking quota limits. We think
->> that an approach as described in "Quota Enforcement for High-Performance
->> Distributed Storage Systems" by Pollack et
->> al. (https://www.ssrc.ucsc.edu/pub/pollack07-msst.html) can provide a good
->> blueprint for such an implementation. This approach enforces quota limits with
->> the help of vouchers. At a very high level this system works by one or more
->> quota servers (in our case MDSs) issuing vouchers carrying (among other things)
->> an expiration timestamp, an amount, a uid and a (cryptographic) signature to
->> clients. An MDS can track how much space it has given out by tracking the
->> vouchers it issues. A client can spend these vouchers on OSDs by sending them
->> along with a write request. The OSD can verify a valid voucher by the
->> signature. It will deduct the amount of written data from the voucher and might
->> return the voucher if the voucher was not used up in full.  The client can
->> return the remaining amount or it can give it back to the MDS.  Client failures
->> and misbehaving clients are handled through a periodical reconciliation phase
->> where the MDSs and OSDs reconciles issued and used vouchers. Vouchers held by a
->> failed client can be detected by the expiration timestamp attached to the
->> vouchers. Any unused and invalid vouchers can be reclaimed by an MDS. Clients
->> that try to cheat by spending the same voucher on multiple OSDs are detected by
->> the uid of the voucher. This means that adversarial clients can exceed the
->> quota, but will be caught within a limited time period. The signature ensure
->> that clients can not fabricate valid vouchers.  For a much better and much more
->> detailed description please refer to the paper.
->> 
->> This approach has been implemented in Ceph before as described here
->> http://drona.csa.iisc.ernet.in/~gopi/docs/amarnath-MSc.pdf. We could however not
->> find the source code for this and it seemingly didn't find its way in to the
->> current code base.
->> The virtues of a protocol like this are that it can scale well, since there is
->> no central entity that keeps a global state of the quotas, while still being
->> able to enforce (somewhat) hard quotas.
->> On the downside there is a protocol overhead that impacts performance. Research
->> and reports on implementations suggest that this overhead can be kept fairly
->> small though (2% performance penalty or less). Furthermore additional state must
->> be kept on MDSs, OSDs and clients. Such a solution also adds considerable
->> complexity to all involved components.
->> 
->> We'd like to hear criticism and comments from the community, before a more
->> in-depth CDM discussion.
->> 
->> Best,
->> Luis and Jan
+>>
+>> Regards
+>> Yan, Zheng
+>>
+>>>
+>>> Amon Ott
+>>> --
+>>> Dr. Amon Ott
+>>> m-privacy GmbH           Tel: +49 30 24342334
+>>> Werner-Vo=C3=9F-Damm 62       Fax: +49 30 99296856
+>>> 12101 Berlin             http://www.m-privacy.de
+>>>
+>>> Amtsgericht Charlottenburg, HRB 84946
+>>>
+>>> Gesch=C3=A4ftsf=C3=BChrer:
+>>>  Dipl.-Kfm. Holger Maczkowsky,
+>>>  Roman Maczkowsky
+>>>
+>>> GnuPG-Key-ID: 0x2DD3A649
+>>>
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
-
