@@ -1,53 +1,51 @@
-From: Milan Broz <mbroz@redhat.com>
-Subject: Re: LUKS encryption in OSDs (ceph-volume)
-Date: Wed, 13 Dec 2017 18:00:46 +0100
-Message-ID: <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
-References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
- <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
- <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
- <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: seastar starting points
+Date: Wed, 13 Dec 2017 12:06:28 -0500
+Message-ID: <3ecedee5-4369-5f9a-81df-bd2cc66efe9a@redhat.com>
+References: <alpine.DEB.2.11.1712131629430.2838@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41100 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753323AbdLMRAs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 13 Dec 2017 12:00:48 -0500
-In-Reply-To: <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal>
+Received: from mail-ot0-f172.google.com ([74.125.82.172]:35322 "EHLO
+        mail-ot0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753311AbdLMRGc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Dec 2017 12:06:32 -0500
+Received: by mail-ot0-f172.google.com with SMTP id q3so2555000oth.2
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Dec 2017 09:06:32 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1712131629430.2838@piezo.novalocal>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Alfredo Deza <adeza@redhat.com>
-Cc: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On 12/12/2017 09:47 PM, Sage Weil wrote:
-> On Tue, 12 Dec 2017, Alfredo Deza wrote:
->> On Tue, Dec 12, 2017 at 2:38 PM, Wyllys Ingersoll
->> <wyllys.ingersoll@keepertech.com> wrote:
->>> Its useful for legacy systems that installed with "plain" back when
->>> that was the only option. Since there is no easy migration path for
->>> re-keying an encrypted OSD to use a new encryption scheme, keeping
->>> support for legacy "plain" is still very useful and desirable.
->>
->> Yes, for sure we are going to support that legacy option. But for
->> *newly* created OSDs, I was looking forward to follow
->> the preferred way with LUKS only.
-> 
-> It's worth mentioning that the "new" way for new ceph-volume OSD 
-> deployments will also be using LVM, and (presumably?) allow layering 
-> dm-crypt on top of an LV--not just a PV or raw device.  So this is more a 
-> question of what, clean slate, we want to do to deploy dm-crypt when the 
-> end result that we're after is an LV to feed to bluestore or filestore.  
-> I'm not sure how/where LUKS fits in in the LVM world...
 
-I think LUKS fits in LVM world quite well.
+On 12/13/2017 11:34 AM, Sage Weil wrote:
+> We had a great chat yesterday with Avi Kivity @ Scylla about seastar in
+> ceph, and were talking about where to start...  One candidate was to carve
+> off the entire messenger and reimplement using seastar futures/promises.
 
-Standard Fedora (and most other distors as well) install stacks LVM over LUKS
-(so you activate only one encrypted device and then the partitioning is up to LVM.
-Also LVM metadata are then encrypted.)
+I shared a branch a while ago that started on such a messenger. I didn't 
+get very far in testing interop with existing Messengers, but the shape 
+is there and it includes a unit test that can echo a message between two 
+endpoints. See 
+https://github.com/cbodley/ceph/tree/wip-seastar-msg/src/crimson/
 
-You can of course stack LUKS over LV as well, but for example LV resize
-will be two-step operation (well, fsadm can automate it but it is still two-steps).
+> Another thought that is somewhat trivial but probably necessary and
+> smallish is the log/ framework.  This might be a good test case for the
+> legacy <-> seastar communications infrastructure.  It's all one-way, which
+> simplifies things a bit, and the implementation should be pretty
+> straightforward?
+>
+> I know we can't rely on the current debug stuff for
+> tracing/instrumentation, but I don't think teh need for a debug log is
+> going to go away.
+>
+> Another question is how the logger/perfcounters will need to change in a
+> seastar world.
 
-Milan
+Yeah, there's a lot in CephContext that will need work. Agreed that the 
+logging would be a good start, but the locking in md_config_t will be 
+problematic too.
+
+Casey
