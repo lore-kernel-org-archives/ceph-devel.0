@@ -1,339 +1,77 @@
-From: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: [PATCH] fs/*/Kconfig: drop links to 404-compliant
- http://acl.bestbits.at
-Date: Wed, 13 Dec 2017 12:14:54 +0100
-Message-ID: <20171213111454.GC23068@quack2.suse.cz>
-References: <20171213053825.10903-1-kilobyte@angband.pl>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: [PATCH] mm: save current->journal_info before calling
+ fault/page_mkwrite
+Date: Wed, 13 Dec 2017 14:53:55 +0100
+Message-ID: <17a0b877-fa5e-fb1d-aa6d-2390d792c6e6@m-privacy.de>
+References: <20171213035836.916-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20171213053825.10903-1-kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
-Cc: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Kara <jack-IBi9RG/b67k@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Andreas Dilger <adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org>, Eric Van Hensbergen <ericvh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ron Minnich <rminnich-4OHPYypu0djtX7QSmKvirg@public.gmane.org>, Latchesar Ionkov <lucho-OnYtXJJ0/fesTnJN9+BGXg@public.gmane.org>, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Chao Yu <yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from www1.m-privacy.de ([85.214.254.135]:60856 "EHLO
+        www1.m-privacy.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753130AbdLMNyH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Dec 2017 08:54:07 -0500
+In-Reply-To: <20171213035836.916-1-zyan@redhat.com>
+Content-Language: de-DE
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org
+Cc: akpm@linux-foundation.org, viro@zeniv.linux.org.uk, jlayton@redhat.com
 
-On Wed 13-12-17 06:38:25, Adam Borowski wrote:
-> This link is replicated in most filesystems' config stanzas.  Referring
-> to an archived version of that site is pointless as it mostly deals with
-> patches; user documentation is available elsewhere.
+Am 13.12.2017 um 04:58 schrieb Yan, Zheng:
+> We recently got an Oops report:
 > 
-> Signed-off-by: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
+> BUG: unable to handle kernel NULL pointer dereference at (null)
+> IP: jbd2__journal_start+0x38/0x1a2
+> [...]
+> Call Trace:
+>   ext4_page_mkwrite+0x307/0x52b
+>   _ext4_get_block+0xd8/0xd8
+>   do_page_mkwrite+0x6e/0xd8
+>   handle_mm_fault+0x686/0xf9b
+>   mntput_no_expire+0x1f/0x21e
+>   __do_page_fault+0x21d/0x465
+>   dput+0x4a/0x2f7
+>   page_fault+0x22/0x30
+>   copy_user_generic_string+0x2c/0x40
+>   copy_page_to_iter+0x8c/0x2b8
+>   generic_file_read_iter+0x26e/0x845
+>   timerqueue_del+0x31/0x90
+>   ceph_read_iter+0x697/0xa33 [ceph]
+>   hrtimer_cancel+0x23/0x41
+>   futex_wait+0x1c8/0x24d
+>   get_futex_key+0x32c/0x39a
+>   __vfs_read+0xe0/0x130
+>   vfs_read.part.1+0x6c/0x123
+>   handle_mm_fault+0x831/0xf9b
+>   __fget+0x7e/0xbf
+>   SyS_read+0x4d/0xb5
+> 
+> The reason is that page fault can happen when one filesystem copies
+> data from/to userspace, the filesystem may set current->journal_info.
+> If the userspace memory is mapped to a file on another filesystem,
+> the later filesystem may also want to use current->journal_info.
+> 
+> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 
-Looks good to me. You can add:
+Reported-and-tested-by: Amon Ott <a.ott@m-privacy.de>
 
-Acked-by: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
-	
-								Honza
+Thanks a lot for the patch! I have ported your patch to 4.9.68, tested
+and the bug seems fixed now.
 
-> ---
-> Sending this as one piece; if you guys would instead prefer this chopped
-> into tiny per-filesystem bits, please say so.
-> 
-> 
->  Documentation/filesystems/ext2.txt |  2 --
->  Documentation/filesystems/ext4.txt |  7 +++----
->  fs/9p/Kconfig                      |  3 ---
->  fs/Kconfig                         |  6 +-----
->  fs/btrfs/Kconfig                   |  3 ---
->  fs/ceph/Kconfig                    |  3 ---
->  fs/cifs/Kconfig                    | 15 +++++++--------
->  fs/ext2/Kconfig                    |  6 +-----
->  fs/ext4/Kconfig                    |  3 ---
->  fs/f2fs/Kconfig                    |  6 +-----
->  fs/hfsplus/Kconfig                 |  3 ---
->  fs/jffs2/Kconfig                   |  6 +-----
->  fs/jfs/Kconfig                     |  3 ---
->  fs/reiserfs/Kconfig                |  6 +-----
->  fs/xfs/Kconfig                     |  3 ---
->  15 files changed, 15 insertions(+), 60 deletions(-)
-> 
-> diff --git a/Documentation/filesystems/ext2.txt b/Documentation/filesystems/ext2.txt
-> index 55755395d3dc..81c0becab225 100644
-> --- a/Documentation/filesystems/ext2.txt
-> +++ b/Documentation/filesystems/ext2.txt
-> @@ -49,12 +49,10 @@ sb=n				Use alternate superblock at this location.
->  
->  user_xattr			Enable "user." POSIX Extended Attributes
->  				(requires CONFIG_EXT2_FS_XATTR).
-> -				See also http://acl.bestbits.at
->  nouser_xattr			Don't support "user." extended attributes.
->  
->  acl				Enable POSIX Access Control Lists support
->  				(requires CONFIG_EXT2_FS_POSIX_ACL).
-> -				See also http://acl.bestbits.at
->  noacl				Don't support POSIX ACLs.
->  
->  nobh				Do not attach buffer_heads to file pagecache.
-> diff --git a/Documentation/filesystems/ext4.txt b/Documentation/filesystems/ext4.txt
-> index 75236c0c2ac2..8cd63e16f171 100644
-> --- a/Documentation/filesystems/ext4.txt
-> +++ b/Documentation/filesystems/ext4.txt
-> @@ -202,15 +202,14 @@ inode_readahead_blks=n	This tuning parameter controls the maximum
->  			the buffer cache.  The default value is 32 blocks.
->  
->  nouser_xattr		Disables Extended User Attributes.  See the
-> -			attr(5) manual page and http://acl.bestbits.at/
-> -			for more information about extended attributes.
-> +			attr(5) manual page for more information about
-> +			extended attributes.
->  
->  noacl			This option disables POSIX Access Control List
->  			support. If ACL support is enabled in the kernel
->  			configuration (CONFIG_EXT4_FS_POSIX_ACL), ACL is
->  			enabled by default on mount. See the acl(5) manual
-> -			page and http://acl.bestbits.at/ for more information
-> -			about acl.
-> +			page for more information about acl.
->  
->  bsddf		(*)	Make 'df' act like BSD.
->  minixdf			Make 'df' act like Minix.
-> diff --git a/fs/9p/Kconfig b/fs/9p/Kconfig
-> index 6489e1fc1afd..11045d8e356a 100644
-> --- a/fs/9p/Kconfig
-> +++ b/fs/9p/Kconfig
-> @@ -25,9 +25,6 @@ config 9P_FS_POSIX_ACL
->  	  POSIX Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  endif
-> diff --git a/fs/Kconfig b/fs/Kconfig
-> index 7aee6d699fd6..0ed56752f208 100644
-> --- a/fs/Kconfig
-> +++ b/fs/Kconfig
-> @@ -167,17 +167,13 @@ config TMPFS_POSIX_ACL
->  	  files for sound to work properly.  In short, if you're not sure,
->  	  say Y.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  config TMPFS_XATTR
->  	bool "Tmpfs extended attributes"
->  	depends on TMPFS
->  	default n
->  	help
->  	  Extended attributes are name:value pairs associated with inodes by
-> -	  the kernel or by users (see the attr(5) manual page, or visit
-> -	  <http://acl.bestbits.at/> for details).
-> +	  the kernel or by users (see the attr(5) manual page for details).
->  
->  	  Currently this enables support for the trusted.* and
->  	  security.* namespaces.
-> diff --git a/fs/btrfs/Kconfig b/fs/btrfs/Kconfig
-> index 2e558227931a..273351ee4c46 100644
-> --- a/fs/btrfs/Kconfig
-> +++ b/fs/btrfs/Kconfig
-> @@ -38,9 +38,6 @@ config BTRFS_FS_POSIX_ACL
->  	  POSIX Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config BTRFS_FS_CHECK_INTEGRITY
-> diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
-> index 264e9bf83ff3..52095f473464 100644
-> --- a/fs/ceph/Kconfig
-> +++ b/fs/ceph/Kconfig
-> @@ -34,7 +34,4 @@ config CEPH_FS_POSIX_ACL
->  	  POSIX Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
-> diff --git a/fs/cifs/Kconfig b/fs/cifs/Kconfig
-> index d5b2e12b5d02..e73d25f4b97a 100644
-> --- a/fs/cifs/Kconfig
-> +++ b/fs/cifs/Kconfig
-> @@ -108,14 +108,13 @@ config CIFS_XATTR
->          depends on CIFS
->          help
->            Extended attributes are name:value pairs associated with inodes by
-> -          the kernel or by users (see the attr(5) manual page, or visit
-> -          <http://acl.bestbits.at/> for details).  CIFS maps the name of
-> -          extended attributes beginning with the user namespace prefix
-> -          to SMB/CIFS EAs. EAs are stored on Windows servers without the
-> -          user namespace prefix, but their names are seen by Linux cifs clients
-> -          prefaced by the user namespace prefix. The system namespace
-> -          (used by some filesystems to store ACLs) is not supported at
-> -          this time.
-> +          the kernel or by users (see the attr(5) manual page for details).
-> +          CIFS maps the name of extended attributes beginning with the user
-> +          namespace prefix to SMB/CIFS EAs.  EAs are stored on Windows
-> +          servers without the user namespace prefix, but their names are
-> +          seen by Linux cifs clients prefaced by the user namespace prefix.
-> +          The system namespace (used by some filesystems to store ACLs) is
-> +          not supported at this time.
->  
->            If unsure, say Y.
->  
-> diff --git a/fs/ext2/Kconfig b/fs/ext2/Kconfig
-> index c634874e12d9..894e4c53d1d2 100644
-> --- a/fs/ext2/Kconfig
-> +++ b/fs/ext2/Kconfig
-> @@ -13,8 +13,7 @@ config EXT2_FS_XATTR
->  	depends on EXT2_FS
->  	help
->  	  Extended attributes are name:value pairs associated with inodes by
-> -	  the kernel or by users (see the attr(5) manual page, or visit
-> -	  <http://acl.bestbits.at/> for details).
-> +	  the kernel or by users (see the attr(5) manual page for details).
->  
->  	  If unsure, say N.
->  
-> @@ -26,9 +25,6 @@ config EXT2_FS_POSIX_ACL
->  	  Posix Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the Posix ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config EXT2_FS_SECURITY
-> diff --git a/fs/ext4/Kconfig b/fs/ext4/Kconfig
-> index 73b850f5659c..a453cc87082b 100644
-> --- a/fs/ext4/Kconfig
-> +++ b/fs/ext4/Kconfig
-> @@ -82,9 +82,6 @@ config EXT4_FS_POSIX_ACL
->  	  POSIX Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config EXT4_FS_SECURITY
-> diff --git a/fs/f2fs/Kconfig b/fs/f2fs/Kconfig
-> index 378c221d68a9..9a20ef42fadd 100644
-> --- a/fs/f2fs/Kconfig
-> +++ b/fs/f2fs/Kconfig
-> @@ -35,8 +35,7 @@ config F2FS_FS_XATTR
->  	default y
->  	help
->  	  Extended attributes are name:value pairs associated with inodes by
-> -	  the kernel or by users (see the attr(5) manual page, or visit
-> -	  <http://acl.bestbits.at/> for details).
-> +	  the kernel or by users (see the attr(5) manual page for details).
->  
->  	  If unsure, say N.
->  
-> @@ -49,9 +48,6 @@ config F2FS_FS_POSIX_ACL
->  	  Posix Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config F2FS_FS_SECURITY
-> diff --git a/fs/hfsplus/Kconfig b/fs/hfsplus/Kconfig
-> index 24bc20fd42f7..7cc8b4acf66a 100644
-> --- a/fs/hfsplus/Kconfig
-> +++ b/fs/hfsplus/Kconfig
-> @@ -20,9 +20,6 @@ config HFSPLUS_FS_POSIX_ACL
->  	  POSIX Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  It needs to understand that POSIX ACLs are treated only under
->  	  Linux. POSIX ACLs doesn't mean something under Mac OS X.
->  	  Mac OS X beginning with version 10.4 ("Tiger") support NFSv4 ACLs,
-> diff --git a/fs/jffs2/Kconfig b/fs/jffs2/Kconfig
-> index d8bb6c411e96..ad850c5bf2ca 100644
-> --- a/fs/jffs2/Kconfig
-> +++ b/fs/jffs2/Kconfig
-> @@ -68,8 +68,7 @@ config JFFS2_FS_XATTR
->  	default n
->  	help
->  	  Extended attributes are name:value pairs associated with inodes by
-> -	  the kernel or by users (see the attr(5) manual page, or visit
-> -	  <http://acl.bestbits.at/> for details).
-> +	  the kernel or by users (see the attr(5) manual page for details).
->  
->  	  If unsure, say N.
->  
-> @@ -82,9 +81,6 @@ config JFFS2_FS_POSIX_ACL
->  	  Posix Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the Posix ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config JFFS2_FS_SECURITY
-> diff --git a/fs/jfs/Kconfig b/fs/jfs/Kconfig
-> index 57cef19951db..851de78fdabb 100644
-> --- a/fs/jfs/Kconfig
-> +++ b/fs/jfs/Kconfig
-> @@ -16,9 +16,6 @@ config JFS_POSIX_ACL
->  	  Posix Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the Posix ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config JFS_SECURITY
-> diff --git a/fs/reiserfs/Kconfig b/fs/reiserfs/Kconfig
-> index 7cd46666ba2c..86e71c0caf48 100644
-> --- a/fs/reiserfs/Kconfig
-> +++ b/fs/reiserfs/Kconfig
-> @@ -57,8 +57,7 @@ config REISERFS_FS_XATTR
->  	depends on REISERFS_FS
->  	help
->  	  Extended attributes are name:value pairs associated with inodes by
-> -	  the kernel or by users (see the attr(5) manual page, or visit
-> -	  <http://acl.bestbits.at/> for details).
-> +	  the kernel or by users (see the attr(5) manual page for details).
->  
->  	  If unsure, say N.
->  
-> @@ -70,9 +69,6 @@ config REISERFS_FS_POSIX_ACL
->  	  Posix Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the Posix ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N
->  
->  config REISERFS_FS_SECURITY
-> diff --git a/fs/xfs/Kconfig b/fs/xfs/Kconfig
-> index f42fcf1b5465..46bcf0e649f5 100644
-> --- a/fs/xfs/Kconfig
-> +++ b/fs/xfs/Kconfig
-> @@ -48,9 +48,6 @@ config XFS_POSIX_ACL
->  	  POSIX Access Control Lists (ACLs) support permissions for users and
->  	  groups beyond the owner/group/world scheme.
->  
-> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
-> -	  Linux website <http://acl.bestbits.at/>.
-> -
->  	  If you don't know what Access Control Lists are, say N.
->  
->  config XFS_RT
-> -- 
-> 2.15.1
-> 
-> 
+Amon Ott
 -- 
-Jan Kara <jack-IBi9RG/b67k@public.gmane.org>
-SUSE Labs, CR
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Werner-Voß-Damm 62       Fax: +49 30 99296856
+12101 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Geschäftsführer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+
