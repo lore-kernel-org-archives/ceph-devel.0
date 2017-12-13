@@ -1,66 +1,42 @@
-From: Florian Margaine <florian@platform.sh>
-Subject: [PATCH] rbd: reacquire lock should update lock owner client id
-Date: Wed, 13 Dec 2017 16:43:59 +0100
-Message-ID: <87tvwumy4g.fsf@platform.sh>
+From: Sage Weil <sweil@redhat.com>
+Subject: seastar starting points
+Date: Wed, 13 Dec 2017 16:34:27 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1712131629430.2838@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-        micalg=pgp-sha256; protocol="application/pgp-signature"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:40645 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751916AbdLMPoD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Dec 2017 10:44:03 -0500
-Received: by mail-wr0-f196.google.com with SMTP id q9so2485895wre.7
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Dec 2017 07:44:03 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:44356 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752811AbdLMQe2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 13 Dec 2017 11:34:28 -0500
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id B19C649007
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Dec 2017 16:34:28 +0000 (UTC)
+Received: from ovpn-112-42.rdu2.redhat.com (ovpn-112-42.rdu2.redhat.com [10.10.112.42])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 681357D91A
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Dec 2017 16:34:28 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+We had a great chat yesterday with Avi Kivity @ Scylla about seastar in 
+ceph, and were talking about where to start...  One candidate was to carve 
+off the entire messenger and reimplement using seastar futures/promises.
 
-Otherwise, future operations on this RBD using exclusive-lock are
-going to require the lock from a non-existent client id.
+Another thought that is somewhat trivial but probably necessary and 
+smallish is the log/ framework.  This might be a good test case for the 
+legacy <-> seastar communications infrastructure.  It's all one-way, which 
+simplifies things a bit, and the implementation should be pretty 
+straightforward?
 
-This ports commit 475dda114a7e25b43dc9066b9808a64fc0c6dc89 from librbd
-to krbd.
+I know we can't rely on the current debug stuff for 
+tracing/instrumentation, but I don't think teh need for a debug log is 
+going to go away.
 
-Signed-off-by: Florian Margaine <florian@platform.sh>
-=2D--
- drivers/block/rbd.c | 1 +
- 1 file changed, 1 insertion(+)
+Another question is how the logger/perfcounters will need to change in a 
+seastar world.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index adc877dfef5c..4e2acf9c81af 100644
-=2D-- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3884,6 +3884,7 @@ static void rbd_reacquire_lock(struct rbd_device *rbd=
-_dev)
- 					   &rbd_dev->lock_dwork, 0);
- 	} else {
- 		strcpy(rbd_dev->lock_cookie, cookie);
-+		queue_work(rbd_dev->task_wq, &rbd_dev->acquired_lock_work);
- 	}
- }
-=20
-=2D-=20
-2.14.3
+sage
 
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEEWcDV2nrrM20UJL9WhD9tdT2UlyoFAloxSr8ACgkQhD9tdT2U
-lyrxIQf+M/xxGhCPQVr1+nxxJvNcMqLEa6uC9fdwqxWmHLvDZRApihJQdAUue1OD
-BvMHw4mH5UUkfZxW0unEkiLkWLtg5pSatBIHOeJrcaCgwPKwRy1PJqLre3dYy8nA
-39DpXoPnBl7XHNQahK7RxuEP/YV5UAdhJeRUOajxxj4TZ3YmkfdbuQzGeOsEM3/A
-phOXku3VpDnGF3fOvGobb7qS3GWA4Ppt0coonEaW8NPHrXJxsa1GD79PCOsgD/Ry
-iCyE+cmoVMRo1E0uQIJRh0FzEMangZMCuj9DrqhK3wOzFjWLQI3pTJWTusA/soIR
-hXx+BIbMh9u5GC07tAxURodQvly2GA==
-=IojP
------END PGP SIGNATURE-----
---=-=-=--
