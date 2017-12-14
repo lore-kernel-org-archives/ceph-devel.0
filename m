@@ -1,173 +1,72 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: measure performance / latency in blustore
-Date: Thu, 14 Dec 2017 14:02:38 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1712141401550.2838@piezo.novalocal>
-References: <71b773a4-18a1-c206-2fe4-83b51cdf368c@profihost.ag> <231b2674-d2b6-b66a-ae29-72c0f2a7f1a0@profihost.ag> <alpine.DEB.2.11.1712141221340.2838@piezo.novalocal> <ad0d5df9-e75e-e4ea-6344-61f584e32dbf@profihost.ag>
+From: Blair Bethwaite <blair.bethwaite@gmail.com>
+Subject: Re: Ceph Manager brag module
+Date: Fri, 15 Dec 2017 01:08:30 +1100
+Message-ID: <CA+z5DsxiAAEyN8kBis80ZjvJP+8JYOE9bnDv+prYW4UCgQYFjw@mail.gmail.com>
+References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:53391 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751011AbdLNOCl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Dec 2017 09:02:41 -0500
-In-Reply-To: <ad0d5df9-e75e-e4ea-6344-61f584e32dbf@profihost.ag>
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:36447 "EHLO
+        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752710AbdLNOIv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Dec 2017 09:08:51 -0500
+Received: by mail-qt0-f171.google.com with SMTP id a16so8073889qtj.3
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Dec 2017 06:08:51 -0800 (PST)
+In-Reply-To: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, lvaz@redhat.com
 
-On Thu, 14 Dec 2017, Stefan Priebe - Profihost AG wrote:
-> 
-> Am 14.12.2017 um 13:22 schrieb Sage Weil:
-> > On Thu, 14 Dec 2017, Stefan Priebe - Profihost AG wrote:
-> >> Hello,
-> >>
-> >> Am 21.11.2017 um 11:06 schrieb Stefan Priebe - Profihost AG:
-> >>> Hello,
-> >>>
-> >>> to measure performance / latency for filestore we used:
-> >>> filestore:apply_latency
-> >>> filestore:commitcycle_latency
-> >>> filestore:journal_latency
-> >>> filestore:queue_transaction_latency_avg
-> >>>
-> >>> What are the correct ones for bluestore?
-> >>
-> >> really nobody? Does nobody track the latency under bluestore?
-> > 
-> > I forget the long names off the top of my head, but the interesting 
-> > latency measures are marked with a low priority and come up (with a wide 
-> > terminal) when you do 'ceph daemonperf osd.N'. You can see the metrics, 
-> > pririties, and descriptions with 'ceph daemon osd.N perf schema'.
-> 
-> uhuh very long list. Any idea which ones are relevant?
-> 
-> ceph daemon osd.8 perf dump
+Nice idea.
 
-If you do 'perf schema' you'll see a 'priority' property that calls out 
-the important ones.  That's how the daemonperf command decides which ones 
-to show (based on terminal width and priorities).
+I definitely agree that the submission mechanism needs to support HTTP
+proxies. I imagine many (most?) ceph-mgr daemons are on private
+networks, and not everyone has NAT.
 
-sage
-
-
- > 
-> shows me a lot of stuff and even a lot of wait or latancy values.
-> 
-> ceph daemon osd.8 perf dump | egrep "wait|lat"
->         "kv_flush_lat": {
->         "kv_commit_lat": {
->         "kv_lat": {
->         "state_prepare_lat": {
->         "state_aio_wait_lat": {
->         "state_io_done_lat": {
->         "state_kv_queued_lat": {
->         "state_kv_commiting_lat": {
->         "state_kv_done_lat": {
->         "state_deferred_queued_lat": {
->         "state_deferred_aio_wait_lat": {
->         "state_deferred_cleanup_lat": {
->         "state_finishing_lat": {
->         "state_done_lat": {
->         "throttle_lat": {
->         "submit_lat": {
->         "commit_lat": {
->         "read_lat": {
->         "read_onode_meta_lat": {
->         "read_wait_aio_lat": {
->         "compress_lat": {
->         "decompress_lat": {
->         "csum_lat": {
->         "complete_latency": {
->         "complete_latency": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "op_latency": {
->         "op_process_latency": {
->         "op_prepare_latency": {
->         "op_r_latency": {
->         "op_r_process_latency": {
->         "op_r_prepare_latency": {
->         "op_w_latency": {
->         "op_w_process_latency": {
->         "op_w_prepare_latency": {
->         "op_rw_latency": {
->         "op_rw_process_latency": {
->         "op_rw_prepare_latency": {
->         "op_before_queue_op_lat": {
->         "op_before_dequeue_op_lat": {
->         "subop_latency": {
->         "subop_w_latency": {
->         "subop_pull_latency": {
->         "subop_push_latency": {
->         "osd_tier_flush_lat": {
->         "osd_tier_promote_lat": {
->         "osd_tier_r_lat": {
->         "initial_latency": {
->         "started_latency": {
->         "reset_latency": {
->         "start_latency": {
->         "primary_latency": {
->         "peering_latency": {
->         "backfilling_latency": {
->         "waitremotebackfillreserved_latency": {
->         "waitlocalbackfillreserved_latency": {
->         "notbackfilling_latency": {
->         "repnotrecovering_latency": {
->         "repwaitrecoveryreserved_latency": {
->         "repwaitbackfillreserved_latency": {
->         "reprecovering_latency": {
->         "activating_latency": {
->         "waitlocalrecoveryreserved_latency": {
->         "waitremoterecoveryreserved_latency": {
->         "recovering_latency": {
->         "recovered_latency": {
->         "clean_latency": {
->         "active_latency": {
->         "replicaactive_latency": {
->         "stray_latency": {
->         "getinfo_latency": {
->         "getlog_latency": {
->         "waitactingchange_latency": {
->         "incomplete_latency": {
->         "down_latency": {
->         "getmissing_latency": {
->         "waitupthru_latency": {
->         "notrecovering_latency": {
->         "get_latency": {
->         "submit_latency": {
->         "submit_sync_latency": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
->         "wait": {
-> 
-> Stefan
+On 14 December 2017 at 20:24, Wido den Hollander <wido@42on.com> wrote:
+> Hi,
+>
+> After discussing with Sage I started to work [0] on a 'brag' module for Ceph
+> Manager.
+>
+> The intention of this module is to send (after a opt-in!) statistics about a
+> Ceph cluster back to the project every few days.
+>
+> My intention is to include:
+>
+> - fsid (as identifier)
+> - number of MONs
+> - number of OSDs
+> - FileStore / BlueStore
+> - number of pools / PGs
+> - data used in bytes
+> - data free
+> - number of objects,
+> - version(s)
+>
+> A admin can also say that the report is allowed to be 'public' where you can
+> then visit (for example) https://brag.ceph.com/public/<fsid> and show off
+> your Ceph cluster.
+>
+> You could then add a description and we could compile top lists about Ceph
+> systems.
+>
+> How do people think about this? Would this be interesting?
+>
+> I would try to convince most of my customers to send this information back
+> to the project. The more information we get, the better Ceph can become.
+>
+> Wido
+>
+> [0]: https://github.com/wido/ceph/commits/mgr-brag
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+
+
+-- 
+Cheers,
+~Blairo
