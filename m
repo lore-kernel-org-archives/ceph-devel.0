@@ -1,115 +1,330 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] mm: save/restore current->journal_info in handle_mm_fault
-Date: Thu, 14 Dec 2017 17:53:14 +0100
-Message-ID: <20171214165314.GB1930@quack2.suse.cz>
-References: <20171214105527.5885-1-zyan@redhat.com>
- <20171214134338.GA1474@quack2.suse.cz>
- <CAAM7YA=ThWbBpOe1wgeYjGt3ogr9kT6uy3UpqSn94XqbhjOHJw@mail.gmail.com>
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH] fs/*/Kconfig: drop links to 404-compliant
+ http://acl.bestbits.at
+Date: Thu, 14 Dec 2017 11:54:35 -0800
+Message-ID: <20171214195435.GD35234@jaegeuk-macbookpro.roam.corp.google.com>
+References: <20171213053825.10903-1-kilobyte@angband.pl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <reiserfs-devel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAAM7YA=ThWbBpOe1wgeYjGt3ogr9kT6uy3UpqSn94XqbhjOHJw@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Jan Kara <jack@suse.cz>, "Yan, Zheng" <zyan@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-ext4@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Al Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, stable@vger.kernel.org
+In-Reply-To: <20171213053825.10903-1-kilobyte@angband.pl>
+Sender: reiserfs-devel-owner@vger.kernel.org
+To: Adam Borowski <kilobyte@angband.pl>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.com>, Jonathan Corbet <corbet@lwn.net>, linux-ext4@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, David Sterba <dsterba@suse.com>, linux-btrfs@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Chao Yu <yuchao0@huawei.com>, linux-f2fs-devel@lists.sourceforge.net, David Woodhouse <dwmw2@infradead.org>, linux-mtd@lists.infradead.
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu 14-12-17 22:30:26, Yan, Zheng wrote:
-> On Thu, Dec 14, 2017 at 9:43 PM, Jan Kara <jack@suse.cz> wrote:
-> > On Thu 14-12-17 18:55:27, Yan, Zheng wrote:
-> >> We recently got an Oops report:
-> >>
-> >> BUG: unable to handle kernel NULL pointer dereference at (null)
-> >> IP: jbd2__journal_start+0x38/0x1a2
-> >> [...]
-> >> Call Trace:
-> >>   ext4_page_mkwrite+0x307/0x52b
-> >>   _ext4_get_block+0xd8/0xd8
-> >>   do_page_mkwrite+0x6e/0xd8
-> >>   handle_mm_fault+0x686/0xf9b
-> >>   mntput_no_expire+0x1f/0x21e
-> >>   __do_page_fault+0x21d/0x465
-> >>   dput+0x4a/0x2f7
-> >>   page_fault+0x22/0x30
-> >>   copy_user_generic_string+0x2c/0x40
-> >>   copy_page_to_iter+0x8c/0x2b8
-> >>   generic_file_read_iter+0x26e/0x845
-> >>   timerqueue_del+0x31/0x90
-> >>   ceph_read_iter+0x697/0xa33 [ceph]
-> >>   hrtimer_cancel+0x23/0x41
-> >>   futex_wait+0x1c8/0x24d
-> >>   get_futex_key+0x32c/0x39a
-> >>   __vfs_read+0xe0/0x130
-> >>   vfs_read.part.1+0x6c/0x123
-> >>   handle_mm_fault+0x831/0xf9b
-> >>   __fget+0x7e/0xbf
-> >>   SyS_read+0x4d/0xb5
-> >>
-> >> ceph_read_iter() uses current->journal_info to pass context info to
-> >> ceph_readpages(). Because ceph_readpages() needs to know if its caller
-> >> has already gotten capability of using page cache (distinguish read
-> >> from readahead/fadvise). ceph_read_iter() set current->journal_info,
-> >> then calls generic_file_read_iter().
-> >>
-> >> In above Oops, page fault happened when copying data to userspace.
-> >> Page fault handler called ext4_page_mkwrite(). Ext4 code read
-> >> current->journal_info and assumed it is journal handle.
-> >>
-> >> I checked other filesystems, btrfs probably suffers similar problem
-> >> for its readpage. (page fault happens when write() copies data from
-> >> userspace memory and the memory is mapped to a file in btrfs.
-> >> verify_parent_transid() can be called during readpage)
-> >>
-> >> Cc: stable@vger.kernel.org
-> >> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> >
-> > I agree with the analysis but the patch is too ugly too live. Ceph just
-> > should not be abusing current->journal_info for passing information between
-> > two random functions or when it does a hackery like this, it should just
-> > make sure the pieces hold together. Poluting generic code to accommodate
-> > this hack in Ceph is not acceptable. Also bear in mind there are likely
-> > other code paths (e.g. memory reclaim) which could recurse into another
-> > filesystem confusing it with non-NULL current->journal_info in the same
-> > way.
+On 12/13, Adam Borowski wrote:
+> This link is replicated in most filesystems' config stanzas.  Referring
+> to an archived version of that site is pointless as it mostly deals with
+> patches; user documentation is available elsewhere.
 > 
-> But ...
+> Signed-off-by: Adam Borowski <kilobyte@angband.pl>
+> ---
+> Sending this as one piece; if you guys would instead prefer this chopped
+> into tiny per-filesystem bits, please say so.
 > 
-> some filesystem set journal_info in its write_begin(), then clear it
-> in write_end(). If buffer for write is mapped to another filesystem,
-> current->journal can leak to the later filesystem's page_readpage().
-> The later filesystem may read current->journal and treat it as its own
-> journal handle.  Besides, most filesystem's vm fault handle is
-> filemap_fault(), filemap also may tigger memory reclaim.
-
-Did you really observe this? Because write path uses
-iov_iter_copy_from_user_atomic() which does not allow page faults to
-happen. All page faulting happens in iov_iter_fault_in_readable() before
-->write_begin() is called. And the recursion problems like you mention
-above are exactly the reason why things are done in a more complicated way
-like this.
-
-> >
-> > In this particular case I'm not sure why does ceph pass 'filp' into
-> > readpage() / readpages() handler when it already gets that pointer as part
-> > of arguments...
 > 
-> It actually a flag which tells ceph_readpages() if its caller is
-> ceph_read_iter or readahead/fadvise/madvise. because when there are
-> multiple clients read/write a file a the same time, page cache should
-> be disabled.
+>  Documentation/filesystems/ext2.txt |  2 --
+>  Documentation/filesystems/ext4.txt |  7 +++----
+>  fs/9p/Kconfig                      |  3 ---
+>  fs/Kconfig                         |  6 +-----
+>  fs/btrfs/Kconfig                   |  3 ---
+>  fs/ceph/Kconfig                    |  3 ---
+>  fs/cifs/Kconfig                    | 15 +++++++--------
+>  fs/ext2/Kconfig                    |  6 +-----
+>  fs/ext4/Kconfig                    |  3 ---
+>  fs/f2fs/Kconfig                    |  6 +-----
 
-I'm not sure I understand the reasoning properly but from what you say
-above it rather seems the 'hint' should be stored in the inode (or possibly
-struct file)?
+Acked-by: Jaegeuk Kim <jaegeuk@kernel.org>
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+>  fs/hfsplus/Kconfig                 |  3 ---
+>  fs/jffs2/Kconfig                   |  6 +-----
+>  fs/jfs/Kconfig                     |  3 ---
+>  fs/reiserfs/Kconfig                |  6 +-----
+>  fs/xfs/Kconfig                     |  3 ---
+>  15 files changed, 15 insertions(+), 60 deletions(-)
+> 
+> diff --git a/Documentation/filesystems/ext2.txt b/Documentation/filesystems/ext2.txt
+> index 55755395d3dc..81c0becab225 100644
+> --- a/Documentation/filesystems/ext2.txt
+> +++ b/Documentation/filesystems/ext2.txt
+> @@ -49,12 +49,10 @@ sb=n				Use alternate superblock at this location.
+>  
+>  user_xattr			Enable "user." POSIX Extended Attributes
+>  				(requires CONFIG_EXT2_FS_XATTR).
+> -				See also http://acl.bestbits.at
+>  nouser_xattr			Don't support "user." extended attributes.
+>  
+>  acl				Enable POSIX Access Control Lists support
+>  				(requires CONFIG_EXT2_FS_POSIX_ACL).
+> -				See also http://acl.bestbits.at
+>  noacl				Don't support POSIX ACLs.
+>  
+>  nobh				Do not attach buffer_heads to file pagecache.
+> diff --git a/Documentation/filesystems/ext4.txt b/Documentation/filesystems/ext4.txt
+> index 75236c0c2ac2..8cd63e16f171 100644
+> --- a/Documentation/filesystems/ext4.txt
+> +++ b/Documentation/filesystems/ext4.txt
+> @@ -202,15 +202,14 @@ inode_readahead_blks=n	This tuning parameter controls the maximum
+>  			the buffer cache.  The default value is 32 blocks.
+>  
+>  nouser_xattr		Disables Extended User Attributes.  See the
+> -			attr(5) manual page and http://acl.bestbits.at/
+> -			for more information about extended attributes.
+> +			attr(5) manual page for more information about
+> +			extended attributes.
+>  
+>  noacl			This option disables POSIX Access Control List
+>  			support. If ACL support is enabled in the kernel
+>  			configuration (CONFIG_EXT4_FS_POSIX_ACL), ACL is
+>  			enabled by default on mount. See the acl(5) manual
+> -			page and http://acl.bestbits.at/ for more information
+> -			about acl.
+> +			page for more information about acl.
+>  
+>  bsddf		(*)	Make 'df' act like BSD.
+>  minixdf			Make 'df' act like Minix.
+> diff --git a/fs/9p/Kconfig b/fs/9p/Kconfig
+> index 6489e1fc1afd..11045d8e356a 100644
+> --- a/fs/9p/Kconfig
+> +++ b/fs/9p/Kconfig
+> @@ -25,9 +25,6 @@ config 9P_FS_POSIX_ACL
+>  	  POSIX Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  endif
+> diff --git a/fs/Kconfig b/fs/Kconfig
+> index 7aee6d699fd6..0ed56752f208 100644
+> --- a/fs/Kconfig
+> +++ b/fs/Kconfig
+> @@ -167,17 +167,13 @@ config TMPFS_POSIX_ACL
+>  	  files for sound to work properly.  In short, if you're not sure,
+>  	  say Y.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  config TMPFS_XATTR
+>  	bool "Tmpfs extended attributes"
+>  	depends on TMPFS
+>  	default n
+>  	help
+>  	  Extended attributes are name:value pairs associated with inodes by
+> -	  the kernel or by users (see the attr(5) manual page, or visit
+> -	  <http://acl.bestbits.at/> for details).
+> +	  the kernel or by users (see the attr(5) manual page for details).
+>  
+>  	  Currently this enables support for the trusted.* and
+>  	  security.* namespaces.
+> diff --git a/fs/btrfs/Kconfig b/fs/btrfs/Kconfig
+> index 2e558227931a..273351ee4c46 100644
+> --- a/fs/btrfs/Kconfig
+> +++ b/fs/btrfs/Kconfig
+> @@ -38,9 +38,6 @@ config BTRFS_FS_POSIX_ACL
+>  	  POSIX Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config BTRFS_FS_CHECK_INTEGRITY
+> diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
+> index 264e9bf83ff3..52095f473464 100644
+> --- a/fs/ceph/Kconfig
+> +++ b/fs/ceph/Kconfig
+> @@ -34,7 +34,4 @@ config CEPH_FS_POSIX_ACL
+>  	  POSIX Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+> diff --git a/fs/cifs/Kconfig b/fs/cifs/Kconfig
+> index d5b2e12b5d02..e73d25f4b97a 100644
+> --- a/fs/cifs/Kconfig
+> +++ b/fs/cifs/Kconfig
+> @@ -108,14 +108,13 @@ config CIFS_XATTR
+>          depends on CIFS
+>          help
+>            Extended attributes are name:value pairs associated with inodes by
+> -          the kernel or by users (see the attr(5) manual page, or visit
+> -          <http://acl.bestbits.at/> for details).  CIFS maps the name of
+> -          extended attributes beginning with the user namespace prefix
+> -          to SMB/CIFS EAs. EAs are stored on Windows servers without the
+> -          user namespace prefix, but their names are seen by Linux cifs clients
+> -          prefaced by the user namespace prefix. The system namespace
+> -          (used by some filesystems to store ACLs) is not supported at
+> -          this time.
+> +          the kernel or by users (see the attr(5) manual page for details).
+> +          CIFS maps the name of extended attributes beginning with the user
+> +          namespace prefix to SMB/CIFS EAs.  EAs are stored on Windows
+> +          servers without the user namespace prefix, but their names are
+> +          seen by Linux cifs clients prefaced by the user namespace prefix.
+> +          The system namespace (used by some filesystems to store ACLs) is
+> +          not supported at this time.
+>  
+>            If unsure, say Y.
+>  
+> diff --git a/fs/ext2/Kconfig b/fs/ext2/Kconfig
+> index c634874e12d9..894e4c53d1d2 100644
+> --- a/fs/ext2/Kconfig
+> +++ b/fs/ext2/Kconfig
+> @@ -13,8 +13,7 @@ config EXT2_FS_XATTR
+>  	depends on EXT2_FS
+>  	help
+>  	  Extended attributes are name:value pairs associated with inodes by
+> -	  the kernel or by users (see the attr(5) manual page, or visit
+> -	  <http://acl.bestbits.at/> for details).
+> +	  the kernel or by users (see the attr(5) manual page for details).
+>  
+>  	  If unsure, say N.
+>  
+> @@ -26,9 +25,6 @@ config EXT2_FS_POSIX_ACL
+>  	  Posix Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the Posix ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config EXT2_FS_SECURITY
+> diff --git a/fs/ext4/Kconfig b/fs/ext4/Kconfig
+> index 73b850f5659c..a453cc87082b 100644
+> --- a/fs/ext4/Kconfig
+> +++ b/fs/ext4/Kconfig
+> @@ -82,9 +82,6 @@ config EXT4_FS_POSIX_ACL
+>  	  POSIX Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config EXT4_FS_SECURITY
+> diff --git a/fs/f2fs/Kconfig b/fs/f2fs/Kconfig
+> index 378c221d68a9..9a20ef42fadd 100644
+> --- a/fs/f2fs/Kconfig
+> +++ b/fs/f2fs/Kconfig
+> @@ -35,8 +35,7 @@ config F2FS_FS_XATTR
+>  	default y
+>  	help
+>  	  Extended attributes are name:value pairs associated with inodes by
+> -	  the kernel or by users (see the attr(5) manual page, or visit
+> -	  <http://acl.bestbits.at/> for details).
+> +	  the kernel or by users (see the attr(5) manual page for details).
+>  
+>  	  If unsure, say N.
+>  
+> @@ -49,9 +48,6 @@ config F2FS_FS_POSIX_ACL
+>  	  Posix Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config F2FS_FS_SECURITY
+> diff --git a/fs/hfsplus/Kconfig b/fs/hfsplus/Kconfig
+> index 24bc20fd42f7..7cc8b4acf66a 100644
+> --- a/fs/hfsplus/Kconfig
+> +++ b/fs/hfsplus/Kconfig
+> @@ -20,9 +20,6 @@ config HFSPLUS_FS_POSIX_ACL
+>  	  POSIX Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  It needs to understand that POSIX ACLs are treated only under
+>  	  Linux. POSIX ACLs doesn't mean something under Mac OS X.
+>  	  Mac OS X beginning with version 10.4 ("Tiger") support NFSv4 ACLs,
+> diff --git a/fs/jffs2/Kconfig b/fs/jffs2/Kconfig
+> index d8bb6c411e96..ad850c5bf2ca 100644
+> --- a/fs/jffs2/Kconfig
+> +++ b/fs/jffs2/Kconfig
+> @@ -68,8 +68,7 @@ config JFFS2_FS_XATTR
+>  	default n
+>  	help
+>  	  Extended attributes are name:value pairs associated with inodes by
+> -	  the kernel or by users (see the attr(5) manual page, or visit
+> -	  <http://acl.bestbits.at/> for details).
+> +	  the kernel or by users (see the attr(5) manual page for details).
+>  
+>  	  If unsure, say N.
+>  
+> @@ -82,9 +81,6 @@ config JFFS2_FS_POSIX_ACL
+>  	  Posix Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the Posix ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config JFFS2_FS_SECURITY
+> diff --git a/fs/jfs/Kconfig b/fs/jfs/Kconfig
+> index 57cef19951db..851de78fdabb 100644
+> --- a/fs/jfs/Kconfig
+> +++ b/fs/jfs/Kconfig
+> @@ -16,9 +16,6 @@ config JFS_POSIX_ACL
+>  	  Posix Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the Posix ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config JFS_SECURITY
+> diff --git a/fs/reiserfs/Kconfig b/fs/reiserfs/Kconfig
+> index 7cd46666ba2c..86e71c0caf48 100644
+> --- a/fs/reiserfs/Kconfig
+> +++ b/fs/reiserfs/Kconfig
+> @@ -57,8 +57,7 @@ config REISERFS_FS_XATTR
+>  	depends on REISERFS_FS
+>  	help
+>  	  Extended attributes are name:value pairs associated with inodes by
+> -	  the kernel or by users (see the attr(5) manual page, or visit
+> -	  <http://acl.bestbits.at/> for details).
+> +	  the kernel or by users (see the attr(5) manual page for details).
+>  
+>  	  If unsure, say N.
+>  
+> @@ -70,9 +69,6 @@ config REISERFS_FS_POSIX_ACL
+>  	  Posix Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the Posix ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config REISERFS_FS_SECURITY
+> diff --git a/fs/xfs/Kconfig b/fs/xfs/Kconfig
+> index f42fcf1b5465..46bcf0e649f5 100644
+> --- a/fs/xfs/Kconfig
+> +++ b/fs/xfs/Kconfig
+> @@ -48,9 +48,6 @@ config XFS_POSIX_ACL
+>  	  POSIX Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N.
+>  
+>  config XFS_RT
+> -- 
+> 2.15.1
