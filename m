@@ -1,115 +1,46 @@
-From: Lenz Grimmer <lenz@grimmer.com>
-Subject: Re: Ceph Manager brag module
-Date: Thu, 14 Dec 2017 12:44:39 +0100
-Message-ID: <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
-References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: measure performance / latency in blustore
+Date: Thu, 14 Dec 2017 12:22:54 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1712141221340.2838@piezo.novalocal>
+References: <71b773a4-18a1-c206-2fe4-83b51cdf368c@profihost.ag>
+ <231b2674-d2b6-b66a-ae29-72c0f2a7f1a0@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.mailbox.org ([80.241.60.212]:53898 "EHLO mx1.mailbox.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752247AbdLNLos (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 14 Dec 2017 06:44:48 -0500
-In-Reply-To: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: lvaz@redhat.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <231b2674-d2b6-b66a-ae29-72c0f2a7f1a0-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h
-Content-Type: multipart/mixed; boundary="T5iD6RTw5Dkx2kKpBdedg5cRbgwgKWOX9";
- protected-headers="v1"
-From: Lenz Grimmer <lenz@grimmer.com>
-To: ceph-devel@vger.kernel.org
-Cc: lvaz@redhat.com
-Message-ID: <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
-Subject: Re: Ceph Manager brag module
-References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
-In-Reply-To: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
+On Thu, 14 Dec 2017, Stefan Priebe - Profihost AG wrote:
+> Hello,
+> 
+> Am 21.11.2017 um 11:06 schrieb Stefan Priebe - Profihost AG:
+> > Hello,
+> > 
+> > to measure performance / latency for filestore we used:
+> > filestore:apply_latency
+> > filestore:commitcycle_latency
+> > filestore:journal_latency
+> > filestore:queue_transaction_latency_avg
+> > 
+> > What are the correct ones for bluestore?
+> 
+> really nobody? Does nobody track the latency under bluestore?
 
---T5iD6RTw5Dkx2kKpBdedg5cRbgwgKWOX9
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+I forget the long names off the top of my head, but the interesting 
+latency measures are marked with a low priority and come up (with a wide 
+terminal) when you do 'ceph daemonperf osd.N'. You can see the metrics, 
+pririties, and descriptions with 'ceph daemon osd.N perf schema'.
 
-Hey Wido,
-
-On 12/14/2017 10:24 AM, Wido den Hollander wrote:
-
-> After discussing with Sage I started to work [0] on a 'brag' module for=
-
-> Ceph Manager.
-
-Nice!
-
-> The intention of this module is to send (after a opt-in!) statistics
-> about a Ceph cluster back to the project every few days.
->=20
-> My intention is to include:
->=20
-> - fsid (as identifier)
-> - number of MONs
-> - number of OSDs
-> - FileStore / BlueStore
-> - number of pools / PGs
-> - data used in bytes
-> - data free
-> - number of objects,
-> - version(s)
-
-Not sure if that could actually be extracted, but how about "Services
-enabled", e.g. "RGW", "CephFS" or "RBD", with some additional insight
-(e.g. how many RBDs/buckets)?
-
-I think it would be valuable to obtain some (optional) insight into what
-that cluster is actually used for.
-
-> A admin can also say that the report is allowed to be 'public' where yo=
-u
-> can then visit (for example) https://brag.ceph.com/public/<fsid> and
-> show off your Ceph cluster.
->=20
-> You could then add a description and we could compile top lists about
-> Ceph systems.
->=20
-> How do people think about this? Would this be interesting?
-
-Absolutely. One challenge I can see here (in addition to users actually
-enabling it) is networking - I'd assume that many customers have
-restricted their networks, so the MGR cannot easily establish an
-outgoing connection without going through a proxy or before the admin
-has poked a hole into the firewall. This might require configuration
-options or corresponding documentation.
-
-> I would try to convince most of my customers to send this information
-> back to the project. The more information we get, the better Ceph can
-> become.
->=20
-> Wido
->=20
-> [0]: https://github.com/wido/ceph/commits/mgr-brag
-
-Nice work!
-
-Lenz
-
-
---T5iD6RTw5Dkx2kKpBdedg5cRbgwgKWOX9--
-
---Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iG8EARECAC8WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWjJkKBEcbGVuekBncmlt
-bWVyLmNvbQAKCRBJUOEqsnKR8og0AJ9MjI/51X7PG+Y2qaQQ5WkYkjcCZACfdcVR
-1CRU2+2/97domQiEYi5fy5Q=
-=1jwI
------END PGP SIGNATURE-----
-
---Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h--
+sage
