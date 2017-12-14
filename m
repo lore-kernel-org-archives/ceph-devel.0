@@ -1,60 +1,41 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH] mm: save current->journal_info before calling
- fault/page_mkwrite
-Date: Wed, 13 Dec 2017 18:30:22 -0800
-Message-ID: <20171213183022.adce31de7c5e704b4315e472@linux-foundation.org>
-References: <20171213035836.916-1-zyan@redhat.com>
-	<20171213165923.0ea4eb3e996b7d8bf1fff72f@linux-foundation.org>
-	<91E1F854-7CE7-4E98-BA87-7E4E55243109@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <91E1F854-7CE7-4E98-BA87-7E4E55243109@redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, viro@zeniv.linux.org.uk, jlayton@redhat.com, linux-mm@kvack.org
+From: "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] fs/*/Kconfig: drop links to 404-compliant
+ http://acl.bestbits.at
+Date: Thu, 14 Dec 2017 14:34:27 +0800
+Message-ID: <7C5A4F68-5893-4EC7-99D6-8235C8DA1381@redhat.com>
+References: <20171213053825.10903-1-kilobyte@angband.pl>
+Mime-Version: 1.0 (Mac OS X Mail 11.1 \(3445.4.7\))
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171213053825.10903-1-kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
+Cc: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-fsdevel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jan Kara <jack-IBi9RG/b67k@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Andreas Dilger <adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org>, Eric Van Hensbergen <ericvh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ron Minnich <rminnich-4OHPYypu0djtX7QSmKvirg@public.gmane.org>, Latchesar Ionkov <lucho-OnYtXJJ0/fesTnJN9+BGXg@public.gmane.org>, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Chao Yu <yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 14 Dec 2017 10:20:18 +0800 "Yan, Zheng" <zyan@redhat.com> wrote:
 
-> >> +	/*
-> >> +	 * If the fault happens during write_iter() copies data from
-> >> +	 * userspace, filesystem may have set current->journal_info.
-> >> +	 * If the userspace memory is mapped to a file on another
-> >> +	 * filesystem, fault handler of the later filesystem may want
-> >> +	 * to access/modify current->journal_info.
-> >> +	 */
-> >> +	current->journal_info = NULL;
-> >> 	ret = vma->vm_ops->fault(vmf);
-> >> +	/* Restore original journal_info */
-> >> +	current->journal_info = old_journal_info;
-> >> 	if (unlikely(ret & (VM_FAULT_ERROR | VM_FAULT_NOPAGE | VM_FAULT_RETRY |
-> >> 			    VM_FAULT_DONE_COW)))
-> >> 		return ret;
-> > 
-> > Can you explain why you chose these two sites?  Rather than, for
-> > example, way up in handle_mm_fault()?
+
+> On 13 Dec 2017, at 13:38, Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org> wrote:
 > 
-> I think they are the only two places that code can enter another filesystem
-
-hm.  Maybe.  At this point in time.  I'm feeling that doing the
-save/restore at the highest level is better.  It's cheap.
-
-> > 
-> > It's hard to believe that a fault handler will alter ->journal_info if
-> > it is handling a read fault, so perhaps we only need to do this for a
-> > write fault?  Although such an optimization probably isn't worthwhile. 
-> > The whole thing is only about three instructions.
+> This link is replicated in most filesystems' config stanzas.  Referring
+> to an archived version of that site is pointless as it mostly deals with
+> patches; user documentation is available elsewhere.
 > 
-> ceph uses current->journal_info for both read/write operations. I think btrfs also read current->journal_info during read-only operation. (I mentioned this in my previous reply)
+> Signed-off-by: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
+> ---
+> Sending this as one piece; if you guys would instead prefer this chopped
+> into tiny per-filesystem bits, please say so.
+> 
+> 
+> Documentation/filesystems/ext2.txt |  2 --
+> Documentation/filesystems/ext4.txt |  7 +++----
+> fs/9p/Kconfig                      |  3 ---
+> fs/Kconfig                         |  6 +-----
+> fs/btrfs/Kconfig                   |  3 ---
+> fs/ceph/Kconfig                    |  3 —
 
-Quite a lot of filesystems use ->journal_info.  Arguably it should be
-the fs's responsibility to restore the old journal_info value after
-having used it.  But that's a ton of changes :(
+Ceph bits looks good.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Acked-by:  Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
