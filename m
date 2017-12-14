@@ -1,64 +1,163 @@
-From: Milan Broz <mbroz@redhat.com>
-Subject: Re: LUKS encryption in OSDs (ceph-volume)
-Date: Thu, 14 Dec 2017 14:49:58 +0100
-Message-ID: <9236362e-435d-2ee0-3a4e-ffd8083ee008@redhat.com>
-References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
- <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
- <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
- <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal>
- <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
- <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
- <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: measure performance / latency in blustore
+Date: Thu, 14 Dec 2017 14:59:45 +0100
+Message-ID: <ad0d5df9-e75e-e4ea-6344-61f584e32dbf@profihost.ag>
+References: <71b773a4-18a1-c206-2fe4-83b51cdf368c@profihost.ag>
+ <231b2674-d2b6-b66a-ae29-72c0f2a7f1a0@profihost.ag>
+ <alpine.DEB.2.11.1712141221340.2838@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37218 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751029AbdLNNuA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 14 Dec 2017 08:50:00 -0500
-In-Reply-To: <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
-Content-Language: en-US
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:61202 "EHLO
+        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751084AbdLNN7r (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Dec 2017 08:59:47 -0500
+In-Reply-To: <alpine.DEB.2.11.1712141221340.2838@piezo.novalocal>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/14/2017 02:17 PM, Alfredo Deza wrote:
->>> Standard Fedora (and most other distors as well) install stacks LVM over LUKS
->>> (so you activate only one encrypted device and then the partitioning is up to LVM.
->>> Also LVM metadata are then encrypted.)
+
+Am 14.12.2017 um 13:22 schrieb Sage Weil:
+> On Thu, 14 Dec 2017, Stefan Priebe - Profihost AG wrote:
+>> Hello,
+>>
+>> Am 21.11.2017 um 11:06 schrieb Stefan Priebe - Profihost AG:
+>>> Hello,
+>>>
+>>> to measure performance / latency for filestore we used:
+>>> filestore:apply_latency
+>>> filestore:commitcycle_latency
+>>> filestore:journal_latency
+>>> filestore:queue_transaction_latency_avg
+>>>
+>>> What are the correct ones for bluestore?
+>>
+>> really nobody? Does nobody track the latency under bluestore?
 > 
-> That is a very important distinction (encrypted LVM metadata) and why
-> we don't want to go that route: we rely heavily on LVM metadata where
-> we store the
-> information about the OSD to be later queried. That metadata must be
-> available without decryption.
+> I forget the long names off the top of my head, but the interesting 
+> latency measures are marked with a low priority and come up (with a wide 
+> terminal) when you do 'ceph daemonperf osd.N'. You can see the metrics, 
+> pririties, and descriptions with 'ceph daemon osd.N perf schema'.
 
-LUKS2 allows you to store store your JSON data to LUKS header.
-For the identification of OSD or whatever you need it is even simpler.
+uhuh very long list. Any idea which ones are relevant?
 
->> The problem I see is that we frequently carve up a single phsycial device
->> across lots of OSDs (usually for the journal or wal/db), and the key
->> management is currently structured around OSDs, not devices.  We can
->> either (1) switch it all around so the key management is based on physical
->> devices instead of OSDs, or (2) carve the physical device into raw LVs,
->> dm-crypt those, and then consume the result.
-> 
-> #2 here is my preference. Lets not switch key management around. I
-> don't know how things like dmcache
-> (which is made up of several physical devices) would work for option #1.
+ceph daemon osd.8 perf dump
 
-I currently lost overview what is Ceph doing, but for unlocking
-of crypt device - LUKS2 allows you to store passphrase to kernel keyring
-(in advance) and then device is unlocked automatically.
-(It needs to configure a "token" for metadata - in the case of keyring
-it is just name in keyring.)
+shows me a lot of stuff and even a lot of wait or latancy values.
 
-Maybe it can simplify your key management in future with LUKS.
+ceph daemon osd.8 perf dump | egrep "wait|lat"
+        "kv_flush_lat": {
+        "kv_commit_lat": {
+        "kv_lat": {
+        "state_prepare_lat": {
+        "state_aio_wait_lat": {
+        "state_io_done_lat": {
+        "state_kv_queued_lat": {
+        "state_kv_commiting_lat": {
+        "state_kv_done_lat": {
+        "state_deferred_queued_lat": {
+        "state_deferred_aio_wait_lat": {
+        "state_deferred_cleanup_lat": {
+        "state_finishing_lat": {
+        "state_done_lat": {
+        "throttle_lat": {
+        "submit_lat": {
+        "commit_lat": {
+        "read_lat": {
+        "read_onode_meta_lat": {
+        "read_wait_aio_lat": {
+        "compress_lat": {
+        "decompress_lat": {
+        "csum_lat": {
+        "complete_latency": {
+        "complete_latency": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "op_latency": {
+        "op_process_latency": {
+        "op_prepare_latency": {
+        "op_r_latency": {
+        "op_r_process_latency": {
+        "op_r_prepare_latency": {
+        "op_w_latency": {
+        "op_w_process_latency": {
+        "op_w_prepare_latency": {
+        "op_rw_latency": {
+        "op_rw_process_latency": {
+        "op_rw_prepare_latency": {
+        "op_before_queue_op_lat": {
+        "op_before_dequeue_op_lat": {
+        "subop_latency": {
+        "subop_w_latency": {
+        "subop_pull_latency": {
+        "subop_push_latency": {
+        "osd_tier_flush_lat": {
+        "osd_tier_promote_lat": {
+        "osd_tier_r_lat": {
+        "initial_latency": {
+        "started_latency": {
+        "reset_latency": {
+        "start_latency": {
+        "primary_latency": {
+        "peering_latency": {
+        "backfilling_latency": {
+        "waitremotebackfillreserved_latency": {
+        "waitlocalbackfillreserved_latency": {
+        "notbackfilling_latency": {
+        "repnotrecovering_latency": {
+        "repwaitrecoveryreserved_latency": {
+        "repwaitbackfillreserved_latency": {
+        "reprecovering_latency": {
+        "activating_latency": {
+        "waitlocalrecoveryreserved_latency": {
+        "waitremoterecoveryreserved_latency": {
+        "recovering_latency": {
+        "recovered_latency": {
+        "clean_latency": {
+        "active_latency": {
+        "replicaactive_latency": {
+        "stray_latency": {
+        "getinfo_latency": {
+        "getlog_latency": {
+        "waitactingchange_latency": {
+        "incomplete_latency": {
+        "down_latency": {
+        "getmissing_latency": {
+        "waitupthru_latency": {
+        "notrecovering_latency": {
+        "get_latency": {
+        "submit_latency": {
+        "submit_sync_latency": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
+        "wait": {
 
-(LUKS2 is already in Fedora rawhide and in some experimental repos of other distros.
-It need some time to be widely used and I know it will need some fixes - but in principle
-things mentioned above already work.)
-
-Milan
+Stefan
