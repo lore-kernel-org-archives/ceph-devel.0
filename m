@@ -1,96 +1,128 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: LUKS encryption in OSDs (ceph-volume)
-Date: Thu, 14 Dec 2017 08:17:56 -0500
-Message-ID: <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
-References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
- <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
- <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
- <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal> <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
- <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH] mm: save/restore current->journal_info in handle_mm_fault
+Date: Thu, 14 Dec 2017 14:30:41 +0100
+Message-ID: <20171214133041.GO16951@dhcp22.suse.cz>
+References: <20171214105527.5885-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:41092 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752023AbdLNNR5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Dec 2017 08:17:57 -0500
-Received: by mail-qk0-f182.google.com with SMTP id 84so6151765qks.8
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Dec 2017 05:17:57 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Milan Broz <mbroz@redhat.com>, Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20171214105527.5885-1-zyan@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mm@kvack.org, akpm@linux-foundation.org, viro@zeniv.linux.org.uk, jlayton@redhat.com, stable@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Dec 13, 2017 at 12:36 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Wed, 13 Dec 2017, Milan Broz wrote:
->> On 12/12/2017 09:47 PM, Sage Weil wrote:
->> > On Tue, 12 Dec 2017, Alfredo Deza wrote:
->> >> On Tue, Dec 12, 2017 at 2:38 PM, Wyllys Ingersoll
->> >> <wyllys.ingersoll@keepertech.com> wrote:
->> >>> Its useful for legacy systems that installed with "plain" back when
->> >>> that was the only option. Since there is no easy migration path for
->> >>> re-keying an encrypted OSD to use a new encryption scheme, keeping
->> >>> support for legacy "plain" is still very useful and desirable.
->> >>
->> >> Yes, for sure we are going to support that legacy option. But for
->> >> *newly* created OSDs, I was looking forward to follow
->> >> the preferred way with LUKS only.
->> >
->> > It's worth mentioning that the "new" way for new ceph-volume OSD
->> > deployments will also be using LVM, and (presumably?) allow layering
->> > dm-crypt on top of an LV--not just a PV or raw device.  So this is more a
->> > question of what, clean slate, we want to do to deploy dm-crypt when the
->> > end result that we're after is an LV to feed to bluestore or filestore.
->> > I'm not sure how/where LUKS fits in in the LVM world...
->>
->> I think LUKS fits in LVM world quite well.
->>
->> Standard Fedora (and most other distors as well) install stacks LVM over LUKS
->> (so you activate only one encrypted device and then the partitioning is up to LVM.
->> Also LVM metadata are then encrypted.)
+On Thu 14-12-17 18:55:27, Yan, Zheng wrote:
+> We recently got an Oops report:
+> 
+> BUG: unable to handle kernel NULL pointer dereference at (null)
+> IP: jbd2__journal_start+0x38/0x1a2
+> [...]
+> Call Trace:
+>   ext4_page_mkwrite+0x307/0x52b
+>   _ext4_get_block+0xd8/0xd8
+>   do_page_mkwrite+0x6e/0xd8
+>   handle_mm_fault+0x686/0xf9b
+>   mntput_no_expire+0x1f/0x21e
+>   __do_page_fault+0x21d/0x465
+>   dput+0x4a/0x2f7
+>   page_fault+0x22/0x30
+>   copy_user_generic_string+0x2c/0x40
+>   copy_page_to_iter+0x8c/0x2b8
+>   generic_file_read_iter+0x26e/0x845
+>   timerqueue_del+0x31/0x90
+>   ceph_read_iter+0x697/0xa33 [ceph]
+>   hrtimer_cancel+0x23/0x41
+>   futex_wait+0x1c8/0x24d
+>   get_futex_key+0x32c/0x39a
+>   __vfs_read+0xe0/0x130
+>   vfs_read.part.1+0x6c/0x123
+>   handle_mm_fault+0x831/0xf9b
+>   __fget+0x7e/0xbf
+>   SyS_read+0x4d/0xb5
+> 
+> ceph_read_iter() uses current->journal_info to pass context info to
+> ceph_readpages(). Because ceph_readpages() needs to know if its caller
+> has already gotten capability of using page cache (distinguish read
+> from readahead/fadvise). ceph_read_iter() set current->journal_info,
+> then calls generic_file_read_iter().
+> 
+> In above Oops, page fault happened when copying data to userspace.
+> Page fault handler called ext4_page_mkwrite(). Ext4 code read
+> current->journal_info and assumed it is journal handle.
+> 
+> I checked other filesystems, btrfs probably suffers similar problem
+> for its readpage. (page fault happens when write() copies data from
+> userspace memory and the memory is mapped to a file in btrfs.
+> verify_parent_transid() can be called during readpage)
+> 
+> Cc: stable@vger.kernel.org
+> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 
-That is a very important distinction (encrypted LVM metadata) and why
-we don't want to go that route: we rely heavily on LVM metadata where
-we store the
-information about the OSD to be later queried. That metadata must be
-available without decryption.
+I am not an FS expert so (ab)using journal_info for unrelated purposes
+might be acceptable in general but hooking into the generic PF path like
+this is just too ugly to live. Can this be limited to a FS code so that
+not everybody has to pay additional cycles? With a big fat warning that
+(ab)users might want to find a better way to comunicate their internal
+stuff.
 
->>
->> You can of course stack LUKS over LV as well, but for example LV resize
->> will be two-step operation (well, fsadm can automate it but it is still two-steps).
+> ---
+>  mm/memory.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+> 
+> diff --git a/mm/memory.c b/mm/memory.c
+> index a728bed16c20..db2a50233c49 100644
+> --- a/mm/memory.c
+> +++ b/mm/memory.c
+> @@ -4044,6 +4044,7 @@ int handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
+>  		unsigned int flags)
+>  {
+>  	int ret;
+> +	void *old_journal_info;
+>  
+>  	__set_current_state(TASK_RUNNING);
+>  
+> @@ -4065,11 +4066,24 @@ int handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
+>  	if (flags & FAULT_FLAG_USER)
+>  		mem_cgroup_oom_enable();
+>  
+> +	/*
+> +	 * Fault can happen when filesystem A's read_iter()/write_iter()
+> +	 * copies data to/from userspace. Filesystem A may have set
+> +	 * current->journal_info. If the userspace memory is MAP_SHARED
+> +	 * mapped to a file in filesystem B, we later may call filesystem
+> +	 * B's vm operation. Filesystem B may also want to read/set
+> +	 * current->journal_info.
+> +	 */
+> +	old_journal_info = current->journal_info;
+> +	current->journal_info = NULL;
+> +
+>  	if (unlikely(is_vm_hugetlb_page(vma)))
+>  		ret = hugetlb_fault(vma->vm_mm, vma, address, flags);
+>  	else
+>  		ret = __handle_mm_fault(vma, address, flags);
+>  
+> +	current->journal_info = old_journal_info;
+> +
+>  	if (flags & FAULT_FLAG_USER) {
+>  		mem_cgroup_oom_disable();
+>  		/*
+> -- 
+> 2.13.6
+> 
+> --
+> To unsubscribe, send a message with 'unsubscribe linux-mm' in
+> the body to majordomo@kvack.org.  For more info on Linux MM,
+> see: http://www.linux-mm.org/ .
+> Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
 
-Right, this is what we are thinking to do.
+-- 
+Michal Hocko
+SUSE Labs
 
->
-> The problem I see is that we frequently carve up a single phsycial device
-> across lots of OSDs (usually for the journal or wal/db), and the key
-> management is currently structured around OSDs, not devices.  We can
-> either (1) switch it all around so the key management is based on physical
-> devices instead of OSDs, or (2) carve the physical device into raw LVs,
-> dm-crypt those, and then consume the result.
-
-#2 here is my preference. Lets not switch key management around. I
-don't know how things like dmcache
-(which is made up of several physical devices) would work for option #1.
-
->
-> We don't really have a need to resize devices, generally, so that's
-> probably not an issue... but I wonder if (1) is going to be an
-> easier/smaller change to make this work.  It maps more directly onto the
-> threat model (a lost *device*) and probably also avoids some DM layers,
-> and so ought to be slightly faster?
-
-#1 would involve extra work for anything that is not a single device
-though right?
-
-On the ceph-volume side of things, there wouldn't be any overhead for
-#2 other than implementing the encryption.
-
-If #1 means we encrypt the physical device, then that makes LVM
-metadata encyrpted which wouldn't work for ceph-volume.
-
-LVM would be fine with #2 with lost disks too, I don't think that model changes.
-
->
-> sage
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
