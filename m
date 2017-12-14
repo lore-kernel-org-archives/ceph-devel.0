@@ -1,51 +1,51 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
-Subject: Snap trim queue length issues
-Date: Thu, 14 Dec 2017 15:36:35 +0100
-Message-ID: <82009aab-6b20-ef21-9bbd-76fddf84e0a3@corp.ovh.com>
+From: Andrew Schoen <aschoen@redhat.com>
+Subject: Re: LUKS encryption in OSDs (ceph-volume)
+Date: Thu, 14 Dec 2017 08:58:51 -0600
+Message-ID: <CAEPMp+5mx57spPOBPtx6VpOJca=zpQ2MCumvBJwY7a5bH9HH=w@mail.gmail.com>
+References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
+ <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
+ <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
+ <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal> <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 1.mo301.mail-out.ovh.net ([137.74.110.64]:46533 "EHLO
-        1.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752355AbdLNOgi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Dec 2017 09:36:38 -0500
-Content-Language: en-US
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:42638 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752506AbdLNO7c (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Dec 2017 09:59:32 -0500
+Received: by mail-qk0-f170.google.com with SMTP id a71so6541476qkc.9
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Dec 2017 06:59:32 -0800 (PST)
+In-Reply-To: <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Milan Broz <mbroz@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Alfredo Deza <adeza@redhat.com>, Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+>> It's worth mentioning that the "new" way for new ceph-volume OSD
+>> deployments will also be using LVM, and (presumably?) allow layering
+>> dm-crypt on top of an LV--not just a PV or raw device.  So this is more a
+>> question of what, clean slate, we want to do to deploy dm-crypt when the
+>> end result that we're after is an LV to feed to bluestore or filestore.
+>> I'm not sure how/where LUKS fits in in the LVM world...
+>
+> I think LUKS fits in LVM world quite well.
+>
+> Standard Fedora (and most other distors as well) install stacks LVM over LUKS
+> (so you activate only one encrypted device and then the partitioning is up to LVM.
+> Also LVM metadata are then encrypted.)
+>
+> You can of course stack LUKS over LV as well, but for example LV resize
+> will be two-step operation (well, fsadm can automate it but it is still two-steps).
 
-We recently ran into low disk space issues on our clusters, and it wasn't 
-because of actual data. On those affected clusters we're hosting VMs and 
-volumes, so naturally there are snapshots involved. For some time, we 
-observed increased disk space usage that we couldn't explain, as there was 
-discrepancy between  what Ceph reported and actual space used on disks. We 
-finally found out that snap trim queues were both long and not getting any 
-shorter, and decreasing snap trim sleep and increasing max concurrent snap 
-trims helped reversing the trend - we're safe now.
-The problem is, we haven't been aware of this issue for some time, and 
-there's no easy (and fast[1]) way to check this. I made a pull request[2] 
-that makes snap trim queue lengths available to monitoring tools
-and also generates health warning when things go out of control, so an admin 
-can act before hell breaks loose.
+Would this be the only downside to LUKS on LVM? This approach is nice
+for ceph-volume
+because we need to be able to encrypt anything given to us, which is
+often times a LV.
 
-My question is, how many Jewel users would be interested in a such feature? 
-There's a lot of changes between Luminous and Jewel, and it's not going to 
-be a straight backport, but it's not a big patch either, so I won't mind 
-doing it myself. But having some support from users would be helpful in 
-pushing this into next Jewel release.
-
-Thanks!
+The LVM on LUKS approach also makes it more difficult to expand the
+underlying vgs and span
+lvs across many disks. If I'm understanding correctly.
 
 
-[1] one of our guys hacked a bash oneliner that printed out snap trim queue 
-lengths for all pgs, but full run takes over an hour to complete on a 
-cluster with over 20k pgs...
-[2] https://github.com/ceph/ceph/pull/19520
-
--- 
-Piotr Dałek
-piotr.dalek@corp.ovh.com
-https://www.ovh.com/us/
+Thanks,
+Andrew
