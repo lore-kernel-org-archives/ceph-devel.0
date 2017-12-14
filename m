@@ -1,57 +1,40 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: seastar starting points
-Date: Wed, 13 Dec 2017 13:10:06 -0500
-Message-ID: <20171213181006.GC7704@ultraspiritum.eng.arb.redhat.com>
-References: <alpine.DEB.2.11.1712131629430.2838@piezo.novalocal>
- <6e5bf1ee-14bc-8b12-9e8b-ba9304271853@gmail.com>
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH] fs/*/Kconfig: drop links to 404-compliant
+ http://acl.bestbits.at
+Date: Thu, 14 Dec 2017 01:44:28 +0100
+Message-ID: <20171214004428.GF3553@twin.jikos.cz>
+References: <20171213053825.10903-1-kilobyte@angband.pl>
+Reply-To: dsterba@suse.cz
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36086 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752584AbdLMSKH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 13 Dec 2017 13:10:07 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-f2fs-devel-bounces@lists.sourceforge.net>
 Content-Disposition: inline
-In-Reply-To: <6e5bf1ee-14bc-8b12-9e8b-ba9304271853@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.a.nelson@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+In-Reply-To: <20171213053825.10903-1-kilobyte@angband.pl>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/options/linux-f2fs-devel>,
+ <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-f2fs-devel>
+List-Post: <mailto:linux-f2fs-devel@lists.sourceforge.net>
+List-Help: <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
+ <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
+To: Adam Borowski <kilobyte@angband.pl>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Dave Kleikamp <shaggy@kernel.org>, jfs-discussion@lists.sourceforge.net, Andreas Dilger <adilger.kernel@dilger.ca>, linux-xfs@vger.kernel.org, linux-cifs@vger.kernel.org, Sage Weil <sage@redhat.com>, Jonathan Corbet <corbet@lwn.net>, v9fs-developer@lists.sourceforge.net, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, reiserfs-devel@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, linux-mtd@lists.infradead.org, David Sterba <dsterba@suse.com>, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Theodore Ts'o <tytso@mit.edu>, "Darrick J. Wong" <darrick.wong@oracle.com>, linux-f2fs-devel@lists.sourceforge.net, Steve French <sfrench@samba.org>, Jan Kara <jack@suse.com>, linux-fsdevel@vger.kernel.org, Ron Minnich <rminnich@sandia.gov>
+List-Id: ceph-devel.vger.kernel.org
 
-On 13/12/2017, Mark Nelson wrote:
-[snip]
-> That's really exciting!  Josh and Greg mentioned in standup that we wouldn't
-> use the seastar memory allocator at all.  Would it be
-> difficult/counterproductive to carve out some memory that seastar could
-> manage itself while using tcmalloc or whatever for the posix side?
+On Wed, Dec 13, 2017 at 06:38:25AM +0100, Adam Borowski wrote:
+> This link is replicated in most filesystems' config stanzas.  Referring
+> to an archived version of that site is pointless as it mostly deals with
+> patches; user documentation is available elsewhere.
+> 
+> Signed-off-by: Adam Borowski <kilobyte@angband.pl>
+> ---
 
-Since the Seastar allocator gets a bunch of memory up-front and
-divides it between cores they can do allocations and frees with no
-lock contention or system calls. It's pretty fast and we almost
-certainly want it, eventually.
+>  fs/btrfs/Kconfig                   |  3 ---
 
-It also has backpressure so we can know to throw things out of cache
-more aggressively when we're starting to use lots of memory.
+Acked-by: David Sterba <dsterba@suse.com>
 
-So we should plan to turn it on after integration, and maybe run some
-tests with it on so eventually we can use it without breaking the
-world.
-
-> It seems to me like seastar's desire override new/delete isn't really a good
-> long term solution for anyone.
-
-It's unfortunate. It has the nice property that you can just write in
-normal looking C++, instead of replacing all your news with something
-like new (seastar_alloc) something_t(whatever); or passing allocators
-into all your containers.
-
-But it makes cooperation really hard.
-
-(in some ways it makes code-sharing easier, though. Stuff that's
-independent of threading and synchronization can just new and delete
-and make containers without modification.)
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@OFTC, Actinic@Freenode
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+------------------------------------------------------------------------------
+Check out the vibrant tech community on one of the world's most
+engaging tech sites, Slashdot.org! http://sdm.link/slashdot
