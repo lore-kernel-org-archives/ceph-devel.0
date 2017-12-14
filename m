@@ -1,104 +1,115 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] mm: save/restore current->journal_info in handle_mm_fault
-Date: Thu, 14 Dec 2017 18:55:27 +0800
-Message-ID: <20171214105527.5885-1-zyan@redhat.com>
-Return-path: <owner-linux-mm@kvack.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mm@kvack.org, akpm@linux-foundation.org
-Cc: viro@zeniv.linux.org.uk, jlayton@redhat.com, "Yan, Zheng" <zyan@redhat.com>, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Lenz Grimmer <lenz@grimmer.com>
+Subject: Re: Ceph Manager brag module
+Date: Thu, 14 Dec 2017 12:44:39 +0100
+Message-ID: <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
+References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.mailbox.org ([80.241.60.212]:53898 "EHLO mx1.mailbox.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752247AbdLNLos (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Dec 2017 06:44:48 -0500
+In-Reply-To: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: lvaz@redhat.com
 
-We recently got an Oops report:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h
+Content-Type: multipart/mixed; boundary="T5iD6RTw5Dkx2kKpBdedg5cRbgwgKWOX9";
+ protected-headers="v1"
+From: Lenz Grimmer <lenz@grimmer.com>
+To: ceph-devel@vger.kernel.org
+Cc: lvaz@redhat.com
+Message-ID: <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
+Subject: Re: Ceph Manager brag module
+References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
+In-Reply-To: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
 
-BUG: unable to handle kernel NULL pointer dereference at (null)
-IP: jbd2__journal_start+0x38/0x1a2
-[...]
-Call Trace:
-  ext4_page_mkwrite+0x307/0x52b
-  _ext4_get_block+0xd8/0xd8
-  do_page_mkwrite+0x6e/0xd8
-  handle_mm_fault+0x686/0xf9b
-  mntput_no_expire+0x1f/0x21e
-  __do_page_fault+0x21d/0x465
-  dput+0x4a/0x2f7
-  page_fault+0x22/0x30
-  copy_user_generic_string+0x2c/0x40
-  copy_page_to_iter+0x8c/0x2b8
-  generic_file_read_iter+0x26e/0x845
-  timerqueue_del+0x31/0x90
-  ceph_read_iter+0x697/0xa33 [ceph]
-  hrtimer_cancel+0x23/0x41
-  futex_wait+0x1c8/0x24d
-  get_futex_key+0x32c/0x39a
-  __vfs_read+0xe0/0x130
-  vfs_read.part.1+0x6c/0x123
-  handle_mm_fault+0x831/0xf9b
-  __fget+0x7e/0xbf
-  SyS_read+0x4d/0xb5
+--T5iD6RTw5Dkx2kKpBdedg5cRbgwgKWOX9
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-ceph_read_iter() uses current->journal_info to pass context info to
-ceph_readpages(). Because ceph_readpages() needs to know if its caller
-has already gotten capability of using page cache (distinguish read
-from readahead/fadvise). ceph_read_iter() set current->journal_info,
-then calls generic_file_read_iter().
+Hey Wido,
 
-In above Oops, page fault happened when copying data to userspace.
-Page fault handler called ext4_page_mkwrite(). Ext4 code read
-current->journal_info and assumed it is journal handle.
+On 12/14/2017 10:24 AM, Wido den Hollander wrote:
 
-I checked other filesystems, btrfs probably suffers similar problem
-for its readpage. (page fault happens when write() copies data from
-userspace memory and the memory is mapped to a file in btrfs.
-verify_parent_transid() can be called during readpage)
+> After discussing with Sage I started to work [0] on a 'brag' module for=
 
-Cc: stable@vger.kernel.org
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- mm/memory.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+> Ceph Manager.
 
-diff --git a/mm/memory.c b/mm/memory.c
-index a728bed16c20..db2a50233c49 100644
---- a/mm/memory.c
-+++ b/mm/memory.c
-@@ -4044,6 +4044,7 @@ int handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
- 		unsigned int flags)
- {
- 	int ret;
-+	void *old_journal_info;
- 
- 	__set_current_state(TASK_RUNNING);
- 
-@@ -4065,11 +4066,24 @@ int handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
- 	if (flags & FAULT_FLAG_USER)
- 		mem_cgroup_oom_enable();
- 
-+	/*
-+	 * Fault can happen when filesystem A's read_iter()/write_iter()
-+	 * copies data to/from userspace. Filesystem A may have set
-+	 * current->journal_info. If the userspace memory is MAP_SHARED
-+	 * mapped to a file in filesystem B, we later may call filesystem
-+	 * B's vm operation. Filesystem B may also want to read/set
-+	 * current->journal_info.
-+	 */
-+	old_journal_info = current->journal_info;
-+	current->journal_info = NULL;
-+
- 	if (unlikely(is_vm_hugetlb_page(vma)))
- 		ret = hugetlb_fault(vma->vm_mm, vma, address, flags);
- 	else
- 		ret = __handle_mm_fault(vma, address, flags);
- 
-+	current->journal_info = old_journal_info;
-+
- 	if (flags & FAULT_FLAG_USER) {
- 		mem_cgroup_oom_disable();
- 		/*
--- 
-2.13.6
+Nice!
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> The intention of this module is to send (after a opt-in!) statistics
+> about a Ceph cluster back to the project every few days.
+>=20
+> My intention is to include:
+>=20
+> - fsid (as identifier)
+> - number of MONs
+> - number of OSDs
+> - FileStore / BlueStore
+> - number of pools / PGs
+> - data used in bytes
+> - data free
+> - number of objects,
+> - version(s)
+
+Not sure if that could actually be extracted, but how about "Services
+enabled", e.g. "RGW", "CephFS" or "RBD", with some additional insight
+(e.g. how many RBDs/buckets)?
+
+I think it would be valuable to obtain some (optional) insight into what
+that cluster is actually used for.
+
+> A admin can also say that the report is allowed to be 'public' where yo=
+u
+> can then visit (for example) https://brag.ceph.com/public/<fsid> and
+> show off your Ceph cluster.
+>=20
+> You could then add a description and we could compile top lists about
+> Ceph systems.
+>=20
+> How do people think about this? Would this be interesting?
+
+Absolutely. One challenge I can see here (in addition to users actually
+enabling it) is networking - I'd assume that many customers have
+restricted their networks, so the MGR cannot easily establish an
+outgoing connection without going through a proxy or before the admin
+has poked a hole into the firewall. This might require configuration
+options or corresponding documentation.
+
+> I would try to convince most of my customers to send this information
+> back to the project. The more information we get, the better Ceph can
+> become.
+>=20
+> Wido
+>=20
+> [0]: https://github.com/wido/ceph/commits/mgr-brag
+
+Nice work!
+
+Lenz
+
+
+--T5iD6RTw5Dkx2kKpBdedg5cRbgwgKWOX9--
+
+--Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iG8EARECAC8WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWjJkKBEcbGVuekBncmlt
+bWVyLmNvbQAKCRBJUOEqsnKR8og0AJ9MjI/51X7PG+Y2qaQQ5WkYkjcCZACfdcVR
+1CRU2+2/97domQiEYi5fy5Q=
+=1jwI
+-----END PGP SIGNATURE-----
+
+--Jls7lKPm442EJdVxmNUgPQ3k0O4ekGT1h--
