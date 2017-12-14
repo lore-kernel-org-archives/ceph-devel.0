@@ -1,55 +1,55 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Ceph Manager brag module
-Date: Thu, 14 Dec 2017 10:24:24 +0100
-Message-ID: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
+From: Chao Yu <yuchao0@huawei.com>
+Subject: Re: [PATCH] fs/*/Kconfig: drop links to 404-compliant
+ http://acl.bestbits.at
+Date: Thu, 14 Dec 2017 18:39:40 +0800
+Message-ID: <8b0816ac-186e-77ec-68d9-d28e90d0d5d1@huawei.com>
+References: <20171213053825.10903-1-kilobyte@angband.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from se07-out.mail.pcextreme.nl ([185.107.227.76]:42304 "EHLO
-        se07-out.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750737AbdLNJYf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 14 Dec 2017 04:24:35 -0500
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <20171213053825.10903-1-kilobyte@angband.pl>
 Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: lvaz@redhat.com
+Sender: linux-ext4-owner@vger.kernel.org
+To: Adam Borowski <kilobyte@angband.pl>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.com>, Jonathan Corbet <corbet@lwn.net>, linux-ext4@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, David Sterba <dsterba@suse.com>, linux-btrfs@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.netDavid
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On 2017/12/13 13:38, Adam Borowski wrote:
+> This link is replicated in most filesystems' config stanzas.  Referring
+> to an archived version of that site is pointless as it mostly deals with
+> patches; user documentation is available elsewhere.
+> 
+> Signed-off-by: Adam Borowski <kilobyte@angband.pl>
 
-After discussing with Sage I started to work [0] on a 'brag' module for 
-Ceph Manager.
+[skip]
 
-The intention of this module is to send (after a opt-in!) statistics 
-about a Ceph cluster back to the project every few days.
+> diff --git a/fs/f2fs/Kconfig b/fs/f2fs/Kconfig
+> index 378c221d68a9..9a20ef42fadd 100644
+> --- a/fs/f2fs/Kconfig
+> +++ b/fs/f2fs/Kconfig
+> @@ -35,8 +35,7 @@ config F2FS_FS_XATTR
+>  	default y
+>  	help
+>  	  Extended attributes are name:value pairs associated with inodes by
+> -	  the kernel or by users (see the attr(5) manual page, or visit
+> -	  <http://acl.bestbits.at/> for details).
+> +	  the kernel or by users (see the attr(5) manual page for details).
+>  
+>  	  If unsure, say N.
+>  
+> @@ -49,9 +48,6 @@ config F2FS_FS_POSIX_ACL
+>  	  Posix Access Control Lists (ACLs) support permissions for users and
+>  	  groups beyond the owner/group/world scheme.
+>  
+> -	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> -	  Linux website <http://acl.bestbits.at/>.
+> -
+>  	  If you don't know what Access Control Lists are, say N
+>  
+>  config F2FS_FS_SECURITY
 
-My intention is to include:
+Looks good to me.
 
-- fsid (as identifier)
-- number of MONs
-- number of OSDs
-- FileStore / BlueStore
-- number of pools / PGs
-- data used in bytes
-- data free
-- number of objects,
-- version(s)
+Acked-by: Chao Yu <yuchao0@huawei.com>
 
-A admin can also say that the report is allowed to be 'public' where you 
-can then visit (for example) https://brag.ceph.com/public/<fsid> and 
-show off your Ceph cluster.
-
-You could then add a description and we could compile top lists about 
-Ceph systems.
-
-How do people think about this? Would this be interesting?
-
-I would try to convince most of my customers to send this information 
-back to the project. The more information we get, the better Ceph can 
-become.
-
-Wido
-
-[0]: https://github.com/wido/ceph/commits/mgr-brag
+Thanks,
