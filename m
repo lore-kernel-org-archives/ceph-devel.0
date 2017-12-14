@@ -1,141 +1,96 @@
-From: Kai Wagner <kwagner@suse.com>
-Subject: Re: Ceph Manager brag module
-Date: Thu, 14 Dec 2017 14:04:03 +0100
-Message-ID: <fbeeadf5-4976-d543-ac1d-f553a12a40e0@suse.com>
-References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
- <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: LUKS encryption in OSDs (ceph-volume)
+Date: Thu, 14 Dec 2017 08:17:56 -0500
+Message-ID: <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
+References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
+ <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
+ <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
+ <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal> <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
+ <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="FqP1d2Oq0LxFNIqSSKmtvEtGVHKpThCvj"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:41438 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751297AbdLNNER (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Thu, 14 Dec 2017 08:04:17 -0500
-In-Reply-To: <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:41092 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752023AbdLNNR5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Dec 2017 08:17:57 -0500
+Received: by mail-qk0-f182.google.com with SMTP id 84so6151765qks.8
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Dec 2017 05:17:57 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lenz Grimmer <lenz@grimmer.com>, ceph-devel@vger.kernel.org
-Cc: lvaz@redhat.com
+To: Sage Weil <sweil@redhat.com>
+Cc: Milan Broz <mbroz@redhat.com>, Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---FqP1d2Oq0LxFNIqSSKmtvEtGVHKpThCvj
-Content-Type: multipart/mixed; boundary="mu6jmh6VmKM10EBGc7MFKOXKwmCkDAs3t";
- protected-headers="v1"
-From: Kai Wagner <kwagner@suse.com>
-To: Lenz Grimmer <lenz@grimmer.com>, ceph-devel@vger.kernel.org
-Cc: lvaz@redhat.com
-Message-ID: <fbeeadf5-4976-d543-ac1d-f553a12a40e0@suse.com>
-Subject: Re: Ceph Manager brag module
-References: <92f9a34b-65ef-0441-10a0-1112ffadb87f@42on.com>
- <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
-In-Reply-To: <c55c2c37-22cc-543a-5950-b48add10bbb7@grimmer.com>
-
---mu6jmh6VmKM10EBGc7MFKOXKwmCkDAs3t
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Content-Language: en-US
-
-Hi Wido,
-
-
-On 14.12.2017 12:44, Lenz Grimmer wrote:
-> Hey Wido,
->
-> On 12/14/2017 10:24 AM, Wido den Hollander wrote:
->
->> After discussing with Sage I started to work [0] on a 'brag' module fo=
-r
->> Ceph Manager.
-> Nice!
-+1 great idea!
->> The intention of this module is to send (after a opt-in!) statistics
->> about a Ceph cluster back to the project every few days.
+On Wed, Dec 13, 2017 at 12:36 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Wed, 13 Dec 2017, Milan Broz wrote:
+>> On 12/12/2017 09:47 PM, Sage Weil wrote:
+>> > On Tue, 12 Dec 2017, Alfredo Deza wrote:
+>> >> On Tue, Dec 12, 2017 at 2:38 PM, Wyllys Ingersoll
+>> >> <wyllys.ingersoll@keepertech.com> wrote:
+>> >>> Its useful for legacy systems that installed with "plain" back when
+>> >>> that was the only option. Since there is no easy migration path for
+>> >>> re-keying an encrypted OSD to use a new encryption scheme, keeping
+>> >>> support for legacy "plain" is still very useful and desirable.
+>> >>
+>> >> Yes, for sure we are going to support that legacy option. But for
+>> >> *newly* created OSDs, I was looking forward to follow
+>> >> the preferred way with LUKS only.
+>> >
+>> > It's worth mentioning that the "new" way for new ceph-volume OSD
+>> > deployments will also be using LVM, and (presumably?) allow layering
+>> > dm-crypt on top of an LV--not just a PV or raw device.  So this is more a
+>> > question of what, clean slate, we want to do to deploy dm-crypt when the
+>> > end result that we're after is an LV to feed to bluestore or filestore.
+>> > I'm not sure how/where LUKS fits in in the LVM world...
 >>
->> My intention is to include:
+>> I think LUKS fits in LVM world quite well.
 >>
->> - fsid (as identifier)
->> - number of MONs
->> - number of OSDs
->> - FileStore / BlueStore
->> - number of pools / PGs
->> - data used in bytes
->> - data free
->> - number of objects,
->> - version(s)
-> Not sure if that could actually be extracted, but how about "Services
-> enabled", e.g. "RGW", "CephFS" or "RBD", with some additional insight
-> (e.g. how many RBDs/buckets)?
+>> Standard Fedora (and most other distors as well) install stacks LVM over LUKS
+>> (so you activate only one encrypted device and then the partitioning is up to LVM.
+>> Also LVM metadata are then encrypted.)
+
+That is a very important distinction (encrypted LVM metadata) and why
+we don't want to go that route: we rely heavily on LVM metadata where
+we store the
+information about the OSD to be later queried. That metadata must be
+available without decryption.
+
+>>
+>> You can of course stack LUKS over LV as well, but for example LV resize
+>> will be two-step operation (well, fsadm can automate it but it is still two-steps).
+
+Right, this is what we are thinking to do.
+
 >
-> I think it would be valuable to obtain some (optional) insight into wha=
-t
-> that cluster is actually used for.
-Two things. It would be really nice if the user could specify which of
-those options they're willing to share, so these should be configurable.
+> The problem I see is that we frequently carve up a single phsycial device
+> across lots of OSDs (usually for the journal or wal/db), and the key
+> management is currently structured around OSDs, not devices.  We can
+> either (1) switch it all around so the key management is based on physical
+> devices instead of OSDs, or (2) carve the physical device into raw LVs,
+> dm-crypt those, and then consume the result.
 
-Another thing I would like to add here is "performance" of the overall
-cluster in general. So iop's/throughput/latency and so on. This way a
-user could also check how the performance of their cluster evolved over
-time.
+#2 here is my preference. Lets not switch key management around. I
+don't know how things like dmcache
+(which is made up of several physical devices) would work for option #1.
 
-Pretty nifty example: After a user upgraded their cluster to the newest
-release was their a big performance win or drop maybe caused by this
-update? This would be really helpful for everyone.
 >
->> A admin can also say that the report is allowed to be 'public' where y=
-ou
->> can then visit (for example) https://brag.ceph.com/public/<fsid> and
->> show off your Ceph cluster.
->>
->> You could then add a description and we could compile top lists about
->> Ceph systems.
->>
->> How do people think about this? Would this be interesting?
-> Absolutely. One challenge I can see here (in addition to users actually=
+> We don't really have a need to resize devices, generally, so that's
+> probably not an issue... but I wonder if (1) is going to be an
+> easier/smaller change to make this work.  It maps more directly onto the
+> threat model (a lost *device*) and probably also avoids some DM layers,
+> and so ought to be slightly faster?
 
-> enabling it) is networking - I'd assume that many customers have
-> restricted their networks, so the MGR cannot easily establish an
-> outgoing connection without going through a proxy or before the admin
-> has poked a hole into the firewall. This might require configuration
-> options or corresponding documentation.
-That true indeed, but I think customers who are willing to send reports
-don't have a problem to route or open this port within their firewall.
->> I would try to convince most of my customers to send this information
->> back to the project. The more information we get, the better Ceph can
->> become.
->>
->> Wido
->>
->> [0]: https://github.com/wido/ceph/commits/mgr-brag
-> Nice work!
+#1 would involve extra work for anything that is not a single device
+though right?
+
+On the ceph-volume side of things, there wouldn't be any overhead for
+#2 other than implementing the encryption.
+
+If #1 means we encrypt the physical device, then that makes LVM
+metadata encyrpted which wouldn't work for ceph-volume.
+
+LVM would be fine with #2 with lost disks too, I don't think that model changes.
+
 >
-> Lenz
->
-
---=20
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
-, HRB 21284 (AG N=C3=BCrnberg)
-
-
-
---mu6jmh6VmKM10EBGc7MFKOXKwmCkDAs3t--
-
---FqP1d2Oq0LxFNIqSSKmtvEtGVHKpThCvj
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEcBAEBCAAGBQJaMnbDAAoJEB6MkVYW48RucrYH/R2DfV4DxV6tWSAEKjOMRKcC
-E4eTjUgXyCUriOlm6BBTX9cCX9x6UTnu9kobSwXHcrbJKC8DzBoIP9A70YWszOa/
-JvfMPd8diX7CboKREvAILLkdRUWH2s7S0hrMV5yhMZv7/EtUJnVm6/wKJG53tmf2
-iWNcL6/kKaXWZGKCBaYe6EAi/oc2EQY4hKB+KM8J7akljXPi4YPYvjraT3CxIB9c
-9vI4V0zouLIJQnkG9ag8OYmgn4hVWECCmrOJGcfj+Q2HDj6v5PwVj+wpqeddzUC6
-qBpYFvaOECN3j8aZ3I9Bl2mSpmtduAfRfXCDyNM5PVhWbGjH4HjhBHoHSsMccJw=
-=RCOU
------END PGP SIGNATURE-----
-
---FqP1d2Oq0LxFNIqSSKmtvEtGVHKpThCvj--
+> sage
