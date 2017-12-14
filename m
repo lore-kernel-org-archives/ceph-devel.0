@@ -1,120 +1,64 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] mm: save/restore current->journal_info in handle_mm_fault
-Date: Thu, 14 Dec 2017 14:43:38 +0100
-Message-ID: <20171214134338.GA1474@quack2.suse.cz>
-References: <20171214105527.5885-1-zyan@redhat.com>
+From: Milan Broz <mbroz@redhat.com>
+Subject: Re: LUKS encryption in OSDs (ceph-volume)
+Date: Thu, 14 Dec 2017 14:49:58 +0100
+Message-ID: <9236362e-435d-2ee0-3a4e-ffd8083ee008@redhat.com>
+References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
+ <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
+ <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
+ <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal>
+ <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
+ <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
+ <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20171214105527.5885-1-zyan@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mm@kvack.org, akpm@linux-foundation.org, viro@zeniv.linux.org.uk, jlayton@redhat.com, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:37218 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751029AbdLNNuA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Dec 2017 08:50:00 -0500
+In-Reply-To: <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, Sage Weil <sweil@redhat.com>
+Cc: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu 14-12-17 18:55:27, Yan, Zheng wrote:
-> We recently got an Oops report:
+On 12/14/2017 02:17 PM, Alfredo Deza wrote:
+>>> Standard Fedora (and most other distors as well) install stacks LVM over LUKS
+>>> (so you activate only one encrypted device and then the partitioning is up to LVM.
+>>> Also LVM metadata are then encrypted.)
 > 
-> BUG: unable to handle kernel NULL pointer dereference at (null)
-> IP: jbd2__journal_start+0x38/0x1a2
-> [...]
-> Call Trace:
->   ext4_page_mkwrite+0x307/0x52b
->   _ext4_get_block+0xd8/0xd8
->   do_page_mkwrite+0x6e/0xd8
->   handle_mm_fault+0x686/0xf9b
->   mntput_no_expire+0x1f/0x21e
->   __do_page_fault+0x21d/0x465
->   dput+0x4a/0x2f7
->   page_fault+0x22/0x30
->   copy_user_generic_string+0x2c/0x40
->   copy_page_to_iter+0x8c/0x2b8
->   generic_file_read_iter+0x26e/0x845
->   timerqueue_del+0x31/0x90
->   ceph_read_iter+0x697/0xa33 [ceph]
->   hrtimer_cancel+0x23/0x41
->   futex_wait+0x1c8/0x24d
->   get_futex_key+0x32c/0x39a
->   __vfs_read+0xe0/0x130
->   vfs_read.part.1+0x6c/0x123
->   handle_mm_fault+0x831/0xf9b
->   __fget+0x7e/0xbf
->   SyS_read+0x4d/0xb5
-> 
-> ceph_read_iter() uses current->journal_info to pass context info to
-> ceph_readpages(). Because ceph_readpages() needs to know if its caller
-> has already gotten capability of using page cache (distinguish read
-> from readahead/fadvise). ceph_read_iter() set current->journal_info,
-> then calls generic_file_read_iter().
-> 
-> In above Oops, page fault happened when copying data to userspace.
-> Page fault handler called ext4_page_mkwrite(). Ext4 code read
-> current->journal_info and assumed it is journal handle.
-> 
-> I checked other filesystems, btrfs probably suffers similar problem
-> for its readpage. (page fault happens when write() copies data from
-> userspace memory and the memory is mapped to a file in btrfs.
-> verify_parent_transid() can be called during readpage)
-> 
-> Cc: stable@vger.kernel.org
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+> That is a very important distinction (encrypted LVM metadata) and why
+> we don't want to go that route: we rely heavily on LVM metadata where
+> we store the
+> information about the OSD to be later queried. That metadata must be
+> available without decryption.
 
-I agree with the analysis but the patch is too ugly too live. Ceph just
-should not be abusing current->journal_info for passing information between
-two random functions or when it does a hackery like this, it should just
-make sure the pieces hold together. Poluting generic code to accommodate
-this hack in Ceph is not acceptable. Also bear in mind there are likely
-other code paths (e.g. memory reclaim) which could recurse into another
-filesystem confusing it with non-NULL current->journal_info in the same
-way.
+LUKS2 allows you to store store your JSON data to LUKS header.
+For the identification of OSD or whatever you need it is even simpler.
 
-In this particular case I'm not sure why does ceph pass 'filp' into
-readpage() / readpages() handler when it already gets that pointer as part
-of arguments...
-
-								Honza
-
-> diff --git a/mm/memory.c b/mm/memory.c
-> index a728bed16c20..db2a50233c49 100644
-> --- a/mm/memory.c
-> +++ b/mm/memory.c
-> @@ -4044,6 +4044,7 @@ int handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
->  		unsigned int flags)
->  {
->  	int ret;
-> +	void *old_journal_info;
->  
->  	__set_current_state(TASK_RUNNING);
->  
-> @@ -4065,11 +4066,24 @@ int handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
->  	if (flags & FAULT_FLAG_USER)
->  		mem_cgroup_oom_enable();
->  
-> +	/*
-> +	 * Fault can happen when filesystem A's read_iter()/write_iter()
-> +	 * copies data to/from userspace. Filesystem A may have set
-> +	 * current->journal_info. If the userspace memory is MAP_SHARED
-> +	 * mapped to a file in filesystem B, we later may call filesystem
-> +	 * B's vm operation. Filesystem B may also want to read/set
-> +	 * current->journal_info.
-> +	 */
-> +	old_journal_info = current->journal_info;
-> +	current->journal_info = NULL;
-> +
->  	if (unlikely(is_vm_hugetlb_page(vma)))
->  		ret = hugetlb_fault(vma->vm_mm, vma, address, flags);
->  	else
->  		ret = __handle_mm_fault(vma, address, flags);
->  
-> +	current->journal_info = old_journal_info;
-> +
->  	if (flags & FAULT_FLAG_USER) {
->  		mem_cgroup_oom_disable();
->  		/*
-> -- 
-> 2.13.6
+>> The problem I see is that we frequently carve up a single phsycial device
+>> across lots of OSDs (usually for the journal or wal/db), and the key
+>> management is currently structured around OSDs, not devices.  We can
+>> either (1) switch it all around so the key management is based on physical
+>> devices instead of OSDs, or (2) carve the physical device into raw LVs,
+>> dm-crypt those, and then consume the result.
 > 
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+> #2 here is my preference. Lets not switch key management around. I
+> don't know how things like dmcache
+> (which is made up of several physical devices) would work for option #1.
+
+I currently lost overview what is Ceph doing, but for unlocking
+of crypt device - LUKS2 allows you to store passphrase to kernel keyring
+(in advance) and then device is unlocked automatically.
+(It needs to configure a "token" for metadata - in the case of keyring
+it is just name in keyring.)
+
+Maybe it can simplify your key management in future with LUKS.
+
+(LUKS2 is already in Fedora rawhide and in some experimental repos of other distros.
+It need some time to be widely used and I know it will need some fixes - but in principle
+things mentioned above already work.)
+
+Milan
