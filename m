@@ -1,35 +1,61 @@
-From: Mike A <mike.almateia@gmail.com>
-Subject: Bluestore and jemalloc
-Date: Fri, 15 Dec 2017 12:48:41 +0300
-Message-ID: <42631468-7CF3-4BBC-8984-24756D6F930F@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f44.google.com ([209.85.215.44]:39185 "EHLO
-        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756000AbdLOJsp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Dec 2017 04:48:45 -0500
-Received: by mail-lf0-f44.google.com with SMTP id 6so1271187lfa.6
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Dec 2017 01:48:45 -0800 (PST)
-Received: from [172.20.10.3] ([213.87.155.170])
-        by smtp.gmail.com with ESMTPSA id d1sm1146092ljf.66.2017.12.15.01.48.43
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 15 Dec 2017 01:48:43 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] mm: save/restore current->journal_info in handle_mm_fault
+Date: Fri, 15 Dec 2017 11:33:48 +0100
+Message-ID: <20171215103348.GB7419@quack2.suse.cz>
+References: <20171214105527.5885-1-zyan@redhat.com>
+ <20171214134338.GA1474@quack2.suse.cz>
+ <CAAM7YA=ThWbBpOe1wgeYjGt3ogr9kT6uy3UpqSn94XqbhjOHJw@mail.gmail.com>
+ <20171214165314.GB1930@quack2.suse.cz>
+ <CAAM7YA=aKMgyi67nwamzNj82nhmsWoUPXWGuXxiMx2Ay1vZK3Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <CAAM7YA=aKMgyi67nwamzNj82nhmsWoUPXWGuXxiMx2Ay1vZK3Q@mail.gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Jan Kara <jack@suse.cz>, "Yan, Zheng" <zyan@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-ext4@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Al Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, stable@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hello!
+On Fri 15-12-17 09:17:42, Yan, Zheng wrote:
+> On Fri, Dec 15, 2017 at 12:53 AM, Jan Kara <jack@suse.cz> wrote:
+> >> >
+> >> > In this particular case I'm not sure why does ceph pass 'filp' into
+> >> > readpage() / readpages() handler when it already gets that pointer as part
+> >> > of arguments...
+> >>
+> >> It actually a flag which tells ceph_readpages() if its caller is
+> >> ceph_read_iter or readahead/fadvise/madvise. because when there are
+> >> multiple clients read/write a file a the same time, page cache should
+> >> be disabled.
+> >
+> > I'm not sure I understand the reasoning properly but from what you say
+> > above it rather seems the 'hint' should be stored in the inode (or possibly
+> > struct file)?
+> >
+> 
+> The capability of using page cache is hold by the process who got it.
+> ceph_read_iter() first gets the capability, calls
+> generic_file_read_iter(), then release the capability. The capability
+> can not be easily stored in inode or file because it can be revoked by
+> server any time if caller does not hold it
 
-After fix this issue http://tracker.ceph.com/issues/20557 Ceph is still =
-working with jemalloc? Or it=E2=80=99s not possible right now only after =
-will be fix a issue in rocksdb?
+OK, understood. But using storage in task_struct (such as journal_info) is
+problematic as it has hard to fix recursion issues as the bug you're trying
+to fix shows (it is difficult to track down all the paths that can recurse
+into another filesystem which will clobber the stored info). So either you
+have to come up with some scheme to safely use current->journal_info (by
+somehow tracking owner as Andreas suggests) and convert all users to it or
+you have to come up with some scheme propagating the information through
+the inode / file->private_data and use it in Ceph.
 
-I have a work to create a cluster based on nvme disks with jemalloc =
-enabled configuration. Now I'm worried jemalloc support in ceph about.
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
 
-=E2=80=94=20
-Mike, runs!=
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
