@@ -1,67 +1,77 @@
-From: Milan Broz <mbroz@redhat.com>
-Subject: Re: LUKS encryption in OSDs (ceph-volume)
-Date: Fri, 15 Dec 2017 15:31:37 +0100
-Message-ID: <b24fc539-96af-c466-178c-9e349276886f@redhat.com>
-References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
- <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
- <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
- <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal>
- <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
- <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
- <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
- <9236362e-435d-2ee0-3a4e-ffd8083ee008@redhat.com>
- <CAC-Np1zD9wYKyz50CQm=ouphSW_+=EJtDktQ3mTqJSpGfTz=cw@mail.gmail.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Snap trim queue length issues
+Date: Fri, 15 Dec 2017 14:58:04 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1712151454030.2838@piezo.novalocal>
+References: <82009aab-6b20-ef21-9bbd-76fddf84e0a3@corp.ovh.com>
+ <CAN-Gep+JEdr1V8B42YTy0rZzFM8B0TwHRqTs8WjrjcQm8tFgHA@mail.gmail.com>
+ <81eabcfe-59b1-70c9-4f4f-2abbc86b9456@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2094118088-1513349886=:2838"
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <81eabcfe-59b1-70c9-4f4f-2abbc86b9456-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-2094118088-1513349886=:2838
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 15 Dec 2017, Piotr Dałek wrote:
+> On 17-12-14 05:31 PM, David Turner wrote:
+> > I've tracked this in a much more manual way.  I would grab a random subset
+> > [..]
+> > 
+> > This was all on a Hammer cluster.  The changes to the snap trimming queues
+> > going into the main osd thread made it so that our use case was not viable
+> > on Jewel until changes to Jewel that happened after I left.  It's exciting
+> > that this will actually be a reportable value from the cluster.
+> > 
+> > Sorry that this story doesn't really answer your question, except to say
+> > that people aware of this problem likely have a work around for it.  However
+> > I'm certain that a lot more clusters are impacted by this than are aware of
+> > it and being able to quickly see that would be beneficial to troubleshooting
+> > problems.  Backporting would be nice.  I run a few Jewel clusters that have
+> > some VM's and it would be nice to see how well the cluster handle snap
+> > trimming.  But they are much less critical on how much snapshots they do.
+> 
+> Thanks for your response, it pretty much confirms what I though:
+> - users aware of issue have their own hacks that don't need to be efficient or
+> convenient.
+> - users unaware of issue are, well, unaware and at risk of serious service
+> disruption once disk space is all used up.
+> 
+> Hopefully it'll be convincing enough for devs. ;)
+
+Your PR looks great!  I commented with a nit on the format of the warning 
+itself.
+
+I expect this is trivial to backport to luminous; it will need to be 
+partially reimplemented for jewel (with some care around the pg_stat_t and 
+a different check for the jewel-style health checks).
+
+sage
+--8323329-2094118088-1513349886=:2838
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59864 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755800AbdLOObk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 15 Dec 2017 09:31:40 -0500
-In-Reply-To: <CAC-Np1zD9wYKyz50CQm=ouphSW_+=EJtDktQ3mTqJSpGfTz=cw@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ondrej Kozina <okozina@redhat.com>
+Content-Disposition: inline
 
-On 12/14/2017 03:00 PM, Alfredo Deza wrote:
-> On Thu, Dec 14, 2017 at 8:49 AM, Milan Broz <mbroz@redhat.com> wrote:
->> On 12/14/2017 02:17 PM, Alfredo Deza wrote:
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
->> I currently lost overview what is Ceph doing, but for unlocking
->> of crypt device - LUKS2 allows you to store passphrase to kernel keyring
->> (in advance) and then device is unlocked automatically.
->> (It needs to configure a "token" for metadata - in the case of keyring
->> it is just name in keyring.)
-> 
-> Do you have docs that explain this bit in detail? We were just going
-> to do what was done already by ceph-disk, that differs a lot from the
-> kernel keyring
-> workflow.
-
-We have some example and I plan to write some short blog regarding keyring use.
-But the best would be to talk directly to Ondra Kozina (cc) who wrote this keyring
-part of the code and can help you to understand what is possible.
-
->> Maybe it can simplify your key management in future with LUKS.
->>
->> (LUKS2 is already in Fedora rawhide and in some experimental repos of other distros.
->> It need some time to be widely used and I know it will need some fixes - but in principle
->> things mentioned above already work.)
-> 
-> That is a big gotcha though, we would need 100% availability in the
-> distros/versions we support at release time (around April-May 2018)
-
-Yes, I think we should stick with LUKS1 for now.
-But we can plan something more simple with LUKS2 in the future.
- 
-> Are you leaning towards encrypting the physical devices over
-> encrypting LVs ? I'm not seeing any risks so far in just going the lv
-> encryption route (yet)
-
-See other mail - both works, if it makes more sense to use LUKS on top, that's ok.
-
-Milan
-
+--8323329-2094118088-1513349886=:2838--
