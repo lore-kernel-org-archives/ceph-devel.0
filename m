@@ -1,60 +1,59 @@
-From: Mark Nelson <mark.a.nelson@gmail.com>
-Subject: Re: Bluestore and jemalloc
-Date: Fri, 15 Dec 2017 11:03:41 -0600
-Message-ID: <d5141320-08d5-d4c7-9cc3-c6271d27bb4f@gmail.com>
-References: <42631468-7CF3-4BBC-8984-24756D6F930F@gmail.com>
- <alpine.DEB.2.11.1712151527090.2838@piezo.novalocal>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: seastar starting points
+Date: Fri, 15 Dec 2017 12:07:37 -0500
+Message-ID: <b9159d8a-d810-b2c2-f6a6-f9d2554ea7af@redhat.com>
+References: <alpine.DEB.2.11.1712131629430.2838@piezo.novalocal>
+ <0ebd9a80-e838-7a4f-81ee-f206f9c575ef@suse.com>
+ <fc7d157d-6117-ab89-606c-656a9fa1585e@redhat.com>
+ <CAJ4mKGYCJuxhKrdZT8L4o3Ya8yCdyCfqWyU3wMdwV5wWgdA8Pw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:40380 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755853AbdLORDo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Dec 2017 12:03:44 -0500
-Received: by mail-it0-f41.google.com with SMTP id f190so20423897ita.5
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Dec 2017 09:03:43 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1712151527090.2838@piezo.novalocal>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:34165 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756067AbdLORHk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Dec 2017 12:07:40 -0500
+Received: by mail-qk0-f174.google.com with SMTP id d66so11176778qkg.1
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Dec 2017 09:07:40 -0800 (PST)
+In-Reply-To: <CAJ4mKGYCJuxhKrdZT8L4o3Ya8yCdyCfqWyU3wMdwV5wWgdA8Pw@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Mike A <mike.almateia@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Haomai Wang <haomai@xsky.com>
 
 
 
-On 12/15/2017 09:29 AM, Sage Weil wrote:
-> On Fri, 15 Dec 2017, Mike A wrote:
->> Hello!
+On 12/15/2017 11:01 AM, Gregory Farnum wrote:
+> On Wed, Dec 13, 2017 at 5:31 PM, Casey Bodley <cbodley@redhat.com> wrote:
+>> On 12/13/2017 11:42 AM, Ricardo Dias wrote:
+>>>
+>>>
+>>> On 13-12-2017 16:34, Sage Weil wrote:
+>>>> We had a great chat yesterday with Avi Kivity @ Scylla about seastar in
+>>>> ceph, and were talking about where to start...  One candidate was to
+>>>> carve
+>>>> off the entire messenger and reimplement using seastar futures/promises.
+>>>
+>>> I don't think it's a good idea to start with the messenger since we are
+>>> currently making a lot of changes to implement the new V2 protocol.
 >>
->> After fix this issue http://tracker.ceph.com/issues/20557 Ceph is still
->> working with jemalloc? Or it’s not possible right now only after will be
->> fix a issue in rocksdb?
->>
->> I have a work to create a cluster based on nvme disks with jemalloc
->> enabled configuration. Now I'm worried jemalloc support in ceph about.
-> 
-> I'm not sure about the current status of the bug: I don't know why
-> jemalloc and rocksdb were not working together, and I'm not sure whether
-> the fix is simple (build option?) or more complex.
-> 
-> It's also not clear whether jemalloc is going to be helpful or that this
-> is important.  jemalloc was much better than tcmalloc with
-> SimpleMessenger, but the default is now AsyncMessenger and there wasn't
-> much of a delta.
+>> This seastar messenger would only be used by the seastar-osd. The existing
+>> messengers will still be used by everything else, so your work there is
+>> valuable and shouldn't be impacted by the seastar project. Whether a new
+>> messenger would want to target this v2 protocol from the start (and ignore
+>> backward compatibility with v1 messengers) is an open question.
+> I haven't dived into the code with an eye towards doing this (although
+> I think Josh is about to), but the existing AsyncMessenger is already
+> integrated with DPDK and relies on a state machine with thread pools
+> dispatching messages independently. I'm pretty sure we'll be adapting
+> that rather than writing another messenger from scratch. ;)
 
-For reference, here's the initial allocator tests from back then:
+Cool. I haven't read through AsyncMessenger in-depth, so I wasn't sure 
+how much of it we could reuse. I think it's important to have separate 
+Messenger/Connection interfaces that expose futures to the application 
+though. And ideally we'd be able to call into dpdk from seastar threads 
+without requiring a separate thread pool.
 
-https://drive.google.com/open?id=0B2gTBZrkrnpZek0zWlE5aVVuRlk
-
-And a comparison of simple vs async for tcmalloc and jemalloc under some 
-of the worst case scenarios from that time period:
-
-https://drive.google.com/open?id=0B2gTBZrkrnpZS1Q4VktjZkhrNHc
-
-> 
-> Either way, jemalloc is a runtime option, so either it works or it
-> doesn't, but the fix is to restart the daemons--there's no risk.
-> 
-> sage
-> 
+Haomai, have you put any thought into how this could work?
