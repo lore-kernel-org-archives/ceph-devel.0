@@ -1,84 +1,65 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: "No space left on device" when doing massive directory deletion.
-Date: Mon, 18 Dec 2017 15:09:03 +0800
-Message-ID: <CAAM7YA=3m59=mKP6ARjn83mB4wF=xPD-bvt399hQ4Dpg7AwoFA@mail.gmail.com>
-References: <CAJACTufKA2fyLY-Y6nTJmgRyWMJC+SUaXZ1iVLNGDdMxogoniQ@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: Snap trim queue length issues
+Date: Mon, 18 Dec 2017 09:52:11 +0100
+Message-ID: <c445ca1f-f7f5-9930-a69f-4e0d04307a87@corp.ovh.com>
+References: <82009aab-6b20-ef21-9bbd-76fddf84e0a3@corp.ovh.com>
+ <CAN-Gep+JEdr1V8B42YTy0rZzFM8B0TwHRqTs8WjrjcQm8tFgHA@mail.gmail.com>
+ <81eabcfe-59b1-70c9-4f4f-2abbc86b9456@corp.ovh.com>
+ <alpine.DEB.2.11.1712151454030.2838@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:34257 "EHLO
-        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757743AbdLRHJE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Dec 2017 02:09:04 -0500
-Received: by mail-oi0-f50.google.com with SMTP id u193so9971226oie.1
-        for <ceph-devel@vger.kernel.org>; Sun, 17 Dec 2017 23:09:04 -0800 (PST)
-In-Reply-To: <CAJACTufKA2fyLY-Y6nTJmgRyWMJC+SUaXZ1iVLNGDdMxogoniQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1712151454030.2838-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Dec 18, 2017 at 12:47 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> Hi, everyone.
->
-> Recently, when we were doing a massive directory deletion test in
-> which totally 7 million directories are to be removed, we found that
-> the client occasionally receive "ENOSPC" errors while there were still
-> plenty of spare space in the underlying cephfs space. Having read some
-> related source codes, we found that the reason may be that the "STRAY"
-> directories are never fragmented, and when doing our test, the number
-> of stray directories in some of these "STRAY" dirs might reach the
-> limit "mds_bal_fragment_size_max". So we modified the level of output
-> in "Server::check_fragment_space" to 0 and did the test again. And
-> when clients received "ENOSPC", we found lots of logs as the
-> following:
->
-> 2017-12-18 12:22:31.370524 7f6672fff700  0 mds.0.server fragment [dir
-> 0x603 ~mds0/stray3/ [2,head] auth pv=17728973 v=17497895
-> cv=17019435/17019435 ap=80055+160110+160110 state=1610645506|complete
-> f(v7 m2017-12-18 12:08:23.017000 55429=0+55429) n(v7 rc2017-12-18
-> 12:08:51.473000 55429=0+55429) hs=55429+121382,ss=0+0 dirty=96756 |
-> child=1 sticky=1 dirty=1 waiter=0 authpin=1 0x7f66652b1080] size
-> exceeds 100000 (ENOSPC)
-> 2017-12-18 12:22:31.370769 7f6672fff700  0 mds.0.server fragment [dir
-> 0x603 ~mds0/stray3/ [2,head] auth pv=17728973 v=17497895
-> cv=17019435/17019435 ap=80055+160110+160110 state=1610645506|complete
-> f(v7 m2017-12-18 12:08:23.017000 55429=0+55429) n(v7 rc2017-12-18
-> 12:08:51.473000 55429=0+55429) hs=55429+121382,ss=0+0 dirty=96756 |
-> child=1 sticky=1 dirty=1 waiter=0 authpin=1 0x7f66652b1080] size
-> exceeds 100000 (ENOSPC)
-> 2017-12-18 12:22:31.370836 7f6672fff700  0 mds.0.server fragment [dir
-> 0x603 ~mds0/stray3/ [2,head] auth pv=17728973 v=17497895
-> cv=17019435/17019435 ap=80055+160110+160110 state=1610645506|complete
-> f(v7 m2017-12-18 12:08:23.017000 55429=0+55429) n(v7 rc2017-12-18
-> 12:08:51.473000 55429=0+55429) hs=55429+121382,ss=0+0 dirty=96756 |
-> child=1 sticky=1 dirty=1 waiter=0 authpin=1 0x7f66652b1080] size
-> exceeds 100000 (ENOSPC)
-> 2017-12-18 12:22:31.370907 7f6672fff700  0 mds.0.server fragment [dir
-> 0x603 ~mds0/stray3/ [2,head] auth pv=17728973 v=17497895
-> cv=17019435/17019435 ap=80055+160110+160110 state=1610645506|complete
-> f(v7 m2017-12-18 12:08:23.017000 55429=0+55429) n(v7 rc2017-12-18
-> 12:08:51.473000 55429=0+55429) hs=55429+121382,ss=0+0 dirty=96756 |
-> child=1 sticky=1 dirty=1 waiter=0 authpin=1 0x7f66652b1080] size
-> exceeds 100000 (ENOSPC)
-> 2017-12-18 12:22:31.370968 7f6672fff700  0 mds.0.server fragment [dir
-> 0x603 ~mds0/stray3/ [2,head] auth pv=17728973 v=17497895
-> cv=17019435/17019435 ap=80055+160110+160110 state=1610645506|complete
-> f(v7 m2017-12-18 12:08:23.017000 55429=0+55429) n(v7 rc2017-12-18
-> 12:08:51.473000 55429=0+55429) hs=55429+121382,ss=0+0 dirty=96756 |
-> child=1 sticky=1 dirty=1 waiter=0 authpin=1 0x7f66652b1080] size
-> exceeds 100000 (ENOSPC)
->
->
-> It seems that our guest is right. Is this by design?
-
-You are right and this is by design. are you using jewel release?  In
-luminous release, we introduced purge queue. This issue is unlikely to
-happen.
-
->
-> Thanks:-)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gMTctMTItMTUgMDM6NTggUE0sIFNhZ2UgV2VpbCB3cm90ZToKPiBPbiBGcmksIDE1IERlYyAy
+MDE3LCBQaW90ciBEYcWCZWsgd3JvdGU6Cj4+IE9uIDE3LTEyLTE0IDA1OjMxIFBNLCBEYXZpZCBU
+dXJuZXIgd3JvdGU6Cj4+PiBJJ3ZlIHRyYWNrZWQgdGhpcyBpbiBhIG11Y2ggbW9yZSBtYW51YWwg
+d2F5LsKgIEkgd291bGQgZ3JhYiBhIHJhbmRvbSBzdWJzZXQKPj4+IFsuLl0KPj4+Cj4+PiBUaGlz
+IHdhcyBhbGwgb24gYSBIYW1tZXIgY2x1c3Rlci7CoCBUaGUgY2hhbmdlcyB0byB0aGUgc25hcCB0
+cmltbWluZyBxdWV1ZXMKPj4+IGdvaW5nIGludG8gdGhlIG1haW4gb3NkIHRocmVhZCBtYWRlIGl0
+IHNvIHRoYXQgb3VyIHVzZSBjYXNlIHdhcyBub3QgdmlhYmxlCj4+PiBvbiBKZXdlbCB1bnRpbCBj
+aGFuZ2VzIHRvIEpld2VsIHRoYXQgaGFwcGVuZWQgYWZ0ZXIgSSBsZWZ0LsKgIEl0J3MgZXhjaXRp
+bmcKPj4+IHRoYXQgdGhpcyB3aWxsIGFjdHVhbGx5IGJlIGEgcmVwb3J0YWJsZSB2YWx1ZSBmcm9t
+IHRoZSBjbHVzdGVyLgo+Pj4KPj4+IFNvcnJ5IHRoYXQgdGhpcyBzdG9yeSBkb2Vzbid0IHJlYWxs
+eSBhbnN3ZXIgeW91ciBxdWVzdGlvbiwgZXhjZXB0IHRvIHNheQo+Pj4gdGhhdCBwZW9wbGUgYXdh
+cmUgb2YgdGhpcyBwcm9ibGVtIGxpa2VseSBoYXZlIGEgd29yayBhcm91bmQgZm9yIGl0LsKgIEhv
+d2V2ZXIKPj4+IEknbSBjZXJ0YWluIHRoYXQgYSBsb3QgbW9yZSBjbHVzdGVycyBhcmUgaW1wYWN0
+ZWQgYnkgdGhpcyB0aGFuIGFyZSBhd2FyZSBvZgo+Pj4gaXQgYW5kIGJlaW5nIGFibGUgdG8gcXVp
+Y2tseSBzZWUgdGhhdCB3b3VsZCBiZSBiZW5lZmljaWFsIHRvIHRyb3VibGVzaG9vdGluZwo+Pj4g
+cHJvYmxlbXMuwqAgQmFja3BvcnRpbmcgd291bGQgYmUgbmljZS7CoCBJIHJ1biBhIGZldyBKZXdl
+bCBjbHVzdGVycyB0aGF0IGhhdmUKPj4+IHNvbWUgVk0ncyBhbmQgaXQgd291bGQgYmUgbmljZSB0
+byBzZWUgaG93IHdlbGwgdGhlIGNsdXN0ZXIgaGFuZGxlIHNuYXAKPj4+IHRyaW1taW5nLsKgIEJ1
+dCB0aGV5IGFyZSBtdWNoIGxlc3MgY3JpdGljYWwgb24gaG93IG11Y2ggc25hcHNob3RzIHRoZXkg
+ZG8uCj4+Cj4+IFRoYW5rcyBmb3IgeW91ciByZXNwb25zZSwgaXQgcHJldHR5IG11Y2ggY29uZmly
+bXMgd2hhdCBJIHRob3VnaDoKPj4gLSB1c2VycyBhd2FyZSBvZiBpc3N1ZSBoYXZlIHRoZWlyIG93
+biBoYWNrcyB0aGF0IGRvbid0IG5lZWQgdG8gYmUgZWZmaWNpZW50IG9yCj4+IGNvbnZlbmllbnQu
+Cj4+IC0gdXNlcnMgdW5hd2FyZSBvZiBpc3N1ZSBhcmUsIHdlbGwsIHVuYXdhcmUgYW5kIGF0IHJp
+c2sgb2Ygc2VyaW91cyBzZXJ2aWNlCj4+IGRpc3J1cHRpb24gb25jZSBkaXNrIHNwYWNlIGlzIGFs
+bCB1c2VkIHVwLgo+Pgo+PiBIb3BlZnVsbHkgaXQnbGwgYmUgY29udmluY2luZyBlbm91Z2ggZm9y
+IGRldnMuIDspCj4gCj4gWW91ciBQUiBsb29rcyBncmVhdCEgIEkgY29tbWVudGVkIHdpdGggYSBu
+aXQgb24gdGhlIGZvcm1hdCBvZiB0aGUgd2FybmluZwo+IGl0c2VsZi4KCkkganVzdCBhZHJlc3Nl
+ZCB0aGUgY29tbWVudHMuCgo+IEkgZXhwZWN0IHRoaXMgaXMgdHJpdmlhbCB0byBiYWNrcG9ydCB0
+byBsdW1pbm91czsgaXQgd2lsbCBuZWVkIHRvIGJlCj4gcGFydGlhbGx5IHJlaW1wbGVtZW50ZWQg
+Zm9yIGpld2VsICh3aXRoIHNvbWUgY2FyZSBhcm91bmQgdGhlIHBnX3N0YXRfdCBhbmQKPiBhIGRp
+ZmZlcmVudCBjaGVjayBmb3IgdGhlIGpld2VsLXN0eWxlIGhlYWx0aCBjaGVja3MpLgoKWWVhaCwg
+dGhhdCdzIHdoeSBJIGV4cGVjdGVkIHNvbWUgcmVzaXN0YW5jZSBoZXJlIGFuZCBhc2tlZCBmb3Ig
+Y29tbWVudHMuIEkgCnJlYWxseSBkb24ndCBtaW5kIHJlaW1wbGVtZW50aW5nIHRoaXMsIGl0J3Mg
+bm90IGEgYmlnIGRlYWwuCgotLSAKUGlvdHIgRGHFgmVrCnBpb3RyLmRhbGVrQGNvcnAub3ZoLmNv
+bQpodHRwczovL3d3dy5vdmguY29tL3VzLwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3Rz
+LmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
+ZXBoLmNvbQo=
