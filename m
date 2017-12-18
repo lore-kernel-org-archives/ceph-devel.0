@@ -1,68 +1,77 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC v2 PATCH 0/4] ceph: kernel client cephfs quota support
-Date: Mon, 18 Dec 2017 15:38:58 +0000
-Message-ID: <20171218153902.7455-1-lhenriques@suse.com>
+From: Ondrej Kozina <okozina@redhat.com>
+Subject: Re: LUKS encryption in OSDs (ceph-volume)
+Date: Mon, 18 Dec 2017 16:57:18 +0100
+Message-ID: <7b341eae-f63c-0b74-f017-6c945c5d7f2b@redhat.com>
+References: <CAC-Np1z_Kv1sSBzPXvsiQ7GubioSwQZnMMtuJL4Z3SUXR2L1fg@mail.gmail.com>
+ <CAGbvivL=5WdKJbKtt=KO98v86EQZb3Nz+p=zLKusxbMv+_u0ig@mail.gmail.com>
+ <CAC-Np1xymbq6taouoMZB7F_LKv5ZUq04zpeKgda3DtoZ+RVJ1A@mail.gmail.com>
+ <alpine.DEB.2.11.1712122045010.25542@piezo.novalocal>
+ <d89ffab5-73bd-063f-238f-d664a4ad6206@redhat.com>
+ <alpine.DEB.2.11.1712131732290.2838@piezo.novalocal>
+ <CAC-Np1ysivJO9K5+VxgAeLCGrYw83akMHtU0xruD12_36zmLkA@mail.gmail.com>
+ <9236362e-435d-2ee0-3a4e-ffd8083ee008@redhat.com>
+ <CAC-Np1zD9wYKyz50CQm=ouphSW_+=EJtDktQ3mTqJSpGfTz=cw@mail.gmail.com>
+ <b24fc539-96af-c466-178c-9e349276886f@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:33677 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:33502 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752987AbdLRPjN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 18 Dec 2017 10:39:13 -0500
+        id S934498AbdLRP5U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 18 Dec 2017 10:57:20 -0500
+In-Reply-To: <b24fc539-96af-c466-178c-9e349276886f@redhat.com>
+Content-Language: en-MW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>, Luis Henriques <lhenriques@suse.com>
+To: Milan Broz <mbroz@redhat.com>, Alfredo Deza <adeza@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-A cephfs-specific quota implementation has been available in the
-user-space fuse client for a while.  This quota implementation allows an
-administrator to restrict the number of bytes and/or the number of files
-in a filesystem subtree.  This quota implementation, however, is
-supported at the client-level only, which means that cooperation is
-required between different clients accessing the system.
+On 12/15/2017 03:31 PM, Milan Broz wrote:
+> On 12/14/2017 03:00 PM, Alfredo Deza wrote:
+>> On Thu, Dec 14, 2017 at 8:49 AM, Milan Broz <mbroz@redhat.com> wrote:
+>>> On 12/14/2017 02:17 PM, Alfredo Deza wrote:
+> 
+>>> I currently lost overview what is Ceph doing, but for unlocking
+>>> of crypt device - LUKS2 allows you to store passphrase to kernel keyring
+>>> (in advance) and then device is unlocked automatically.
+>>> (It needs to configure a "token" for metadata - in the case of keyring
+>>> it is just name in keyring.)
+>>
+>> Do you have docs that explain this bit in detail? We were just going
+>> to do what was done already by ceph-disk, that differs a lot from the
+>> kernel keyring
+>> workflow.
 
-This obviously assumes that all clients are trusted entities and will
-respect the quotas, preventing users from exceeding the quota limits.
-Since the kernel client doesn't support quotas, it has not been possible
-to use it in a cluster where quotas are a requirement.
+I'll describe briefly the process for cryptsetup cli only, but you may 
+achieve same using cryptsetup library as well. For reference here's the 
+api docs: https://gitlab.com/cryptsetup/cryptsetup/wikis/API/index.html
 
-This patchset is an RFC that adds kernel client support for cephfs
-quotas as it is currently implemented in the ceph fuse client.  Note
-however that this patchset is not yet feature complete, as it only
-implements the max_files quota (max_bytes is still missing).
+In general kernel keyring activation's an extension for easier LUKS2 
+device unlocking.
 
-** Changes since v1 **
+Let's say you have LUKS2 device with keyslot 1 on /dev/sdx.
 
-Instead of trying to do a reverse path walk to find the "quota realm"
-for a given directory, this patchset is now using snaprealms.  Thus, for
-testing it, a modified MDS is required:
+Add keyring token to LUKS2 header:
+cryptsetup token add /dev/sdx --key-description my_key_name -S 1
 
-  https://github.com/ukernel/ceph/tree/wip-cephfs-quota-realm
+(The token itself will contain only the key description and reference to 
+keyslot(s) it may be used with. It's stored in jsom metadata area of 
+LUKS2 header in plain text)
 
-This modified MDS creates a snaprealm when a quota is set in a
-directory.  This means that a client needs only to walk up the snaprealm
-hierarchy to find a directory that has quotas instead of doing the full
-reverse path walking.
+When you activate LUKS2 with such token it does following:
 
-Note however that this requires an extra patch that adds a seqlock (1st
-patch in series) to detect changes in the snaprealm hierarchy.
+1) It'll try to activate the device using passphrase retrieved from 
+kernel key described by "my_key_name" (kernel key type "user")
 
-Luis Henriques (4):
-  ceph: add seqlock for snaprealm hierarchy change detection
-  ceph: quota: add initial infrastructure to support cephfs quotas
-  ceph: quotas: support for ceph.quota.max_files
-  ceph: quota: don't allow cross-quota renames
+2) Only if step 1) fails (i.e. no such key in keyring or passphrase is 
+wrong), the command will ask for passphrase the usual way.
 
- fs/ceph/Makefile                   |   2 +-
- fs/ceph/dir.c                      |  16 +++
- fs/ceph/file.c                     |   4 +-
- fs/ceph/inode.c                    |   6 ++
- fs/ceph/mds_client.c               |  23 +++++
- fs/ceph/mds_client.h               |   2 +
- fs/ceph/quota.c                    | 197 +++++++++++++++++++++++++++++++++++++
- fs/ceph/snap.c                     |  45 +++++++--
- fs/ceph/super.h                    |  12 +++
- fs/ceph/xattr.c                    |  44 +++++++++
- include/linux/ceph/ceph_features.h |   3 +-
- include/linux/ceph/ceph_fs.h       |  17 ++++
- 12 files changed, 362 insertions(+), 9 deletions(-)
- create mode 100644 fs/ceph/quota.c
+So as long as "my_key_name" is reachable from calling process, user 
+doesn't have to input passphrase every time he wants to unlock the device.
 
+In fact kernel keyring in this particular case is just another source 
+for passphrase just like key files stored in fs.
+
+Regards
+O.
