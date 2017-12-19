@@ -1,132 +1,177 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: Add dmclock QoS client calls to librados -- request for comments
-Date: Mon, 18 Dec 2017 14:04:23 -0500
-Message-ID: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [RFC v2 PATCH 1/4] ceph: add seqlock for snaprealm hierarchy
+ change detection
+Date: Tue, 19 Dec 2017 17:22:43 +0800
+Message-ID: <CAAM7YAmwdoEp+SHtnN7ubRaDRcO9U=XZMa5vCbZL+FtEsvBbrQ@mail.gmail.com>
+References: <20171218153902.7455-1-lhenriques@suse.com> <20171218153902.7455-2-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:38569 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1760252AbdLRTEZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Dec 2017 14:04:25 -0500
-Received: by mail-qk0-f182.google.com with SMTP id z203so19650067qkb.5
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Dec 2017 11:04:24 -0800 (PST)
-Content-Language: en-US
+Received: from mail-ot0-f194.google.com ([74.125.82.194]:35294 "EHLO
+        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761441AbdLSJWo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Dec 2017 04:22:44 -0500
+Received: by mail-ot0-f194.google.com with SMTP id q3so16209082oth.2
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Dec 2017 01:22:44 -0800 (PST)
+In-Reply-To: <20171218153902.7455-2-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Luis Henriques <lhenriques@suse.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>
 
-We are asking the Ceph community to provide their thoughts on this
-draft proposal for expanding the librados API with calls that would
-allow clients to specify QoS (quality of service) parameters for
-their operations.
+On Mon, Dec 18, 2017 at 11:38 PM, Luis Henriques <lhenriques@suse.com> wrote:
+> It is possible to receive an update to the snaprealms hierarchy from an
+> MDS while walking through this hierarchy.  This patch adds a mechanism
+> similar to the one used in dcache to detect renames in lookups.  A new
+> seqlock is used to allow a retry in case a change has occurred while
+> walking through the snaprealms.
+>
+> Link: http://tracker.ceph.com/issues/22372
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+>  fs/ceph/snap.c  | 45 +++++++++++++++++++++++++++++++++++++++------
+>  fs/ceph/super.h |  2 ++
+>  2 files changed, 41 insertions(+), 6 deletions(-)
+>
+> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+> index 8a2ca41e4b97..8b9d6c7c0df4 100644
+> --- a/fs/ceph/snap.c
+> +++ b/fs/ceph/snap.c
+> @@ -54,6 +54,25 @@
+>   * console).
+>   */
+>
+> +/*
+> + * While walking through the snaprealm hierarchy it is possible that
+> + * this hierarchy is updated (for ex, when a different client moves
+> + * directories around).  snaprealm_lock isn't supposed to prevent this
+> + * but, just like the rename_lock in dcache, to detect that this has
+> + * happen so that a lookup can be retried.
+> + *
+> + * Here's a typical usage pattern for this lock:
+> + *
+> + * retry:
+> + *     seq = read_seqbegin(&snaprealm_lock);
+> + *     realm = ci->i_snap_realm;
+> + *     ceph_get_snap_realm(mdsc, realm);
+> + *     ... do stuff ...
+> + *     ceph_put_snap_realm(mdsc, realm);
+> + *     if (read_seqretry(&snaprealm_lock, seq))
+> + *             goto retry;
+> + */
 
-We have an on-going effort to provide Ceph users with more options to
-manage QoS. With the release of Luminous we introduced access to a
-prototype of the mclock QoS algorithm for queuing operations by class
-of operation and either differentiating clients or treating them as a
-unit. Although not yet integrated, the library we're using supports
-dmClock, a distributed version of mClock. Both are documented in
-_mClock: Handling Throughput Variability for Hypervisor IO Scheduling_
-by Gulati, Merchant, and Varman 2010.
+A seq lock is not enough for protecting snaprealm hierarchy walk.  The
+code may access snaprealm that has been freed by other thread. If we
+really want to use seq lock here, we need to use kfree_rcu to free
+snaprealm data structure and use rcu_read_lock to protect the
+hierarchy walk code.
 
-In order to offer greater flexibility, we'd like to move forward with
-providing clients with the ability to use different QoS parameters. We
-are keeping our options open w.r.t. the ultimate set of algorithm(s)
-we'll use. The mClock/dmClock algorithm allows a "client", which we
-can interpret broadly, to set a minimum ops/sec (reservation) and a
-maximum ops/sec (limit). Furthermore a "client" can also define a
-weight (a.k.a.  priority), which is a scalar value to determine
-relative weighting.
+> +DEFINE_SEQLOCK(snaprealm_lock);
+>
+>  /*
+>   * increase ref count for the realm
+> @@ -81,10 +100,12 @@ void ceph_get_snap_realm(struct ceph_mds_client *mdsc,
+>  static void __insert_snap_realm(struct rb_root *root,
+>                                 struct ceph_snap_realm *new)
+>  {
+> -       struct rb_node **p = &root->rb_node;
+> +       struct rb_node **p;
+>         struct rb_node *parent = NULL;
+>         struct ceph_snap_realm *r = NULL;
+>
+> +       write_seqlock(&snaprealm_lock);
+> +       p  = &root->rb_node;
+>         while (*p) {
+>                 parent = *p;
+>                 r = rb_entry(parent, struct ceph_snap_realm, node);
+> @@ -98,6 +119,7 @@ static void __insert_snap_realm(struct rb_root *root,
+>
+>         rb_link_node(&new->node, parent, p);
+>         rb_insert_color(&new->node, root);
+> +       write_sequnlock(&snaprealm_lock);
+>  }
 
-We think reservation, limit, and weight are sufficiently generic that
-we'd be able to use or adapt them other QoS algorithms we may try or
-use in the future.
+Adding/removing snaprealm to/from mdsc->snap_realms do not directly
+change snaprealm hierarchy.  The places that change snaprealm
+hierarchy should be adjust_snap_realm_parent() and the code block in
+ceph_handle_snap() that handle CEPH_SNAP_OP_SPLIT.
 
-[To give you a sense of how broadly we can interpret "client", we
-currently have code that interprets classes of operations (e.g.,
-background replication or background snap-trimming) as a client.]
+The code block in ceph_handle_snap() that handle CEPH_SNAP_OP_SPLIT
+may require lots of cpu cycles, not suitable for seq lock.
 
-== Units ==
+>
+>  /*
+> @@ -136,9 +158,14 @@ static struct ceph_snap_realm *ceph_create_snap_realm(
+>  static struct ceph_snap_realm *__lookup_snap_realm(struct ceph_mds_client *mdsc,
+>                                                    u64 ino)
+>  {
+> -       struct rb_node *n = mdsc->snap_realms.rb_node;
+> -       struct ceph_snap_realm *r;
+> -
+> +       struct rb_node *n;
+> +       struct ceph_snap_realm *realm, *r;
+> +       unsigned seq;
+> +
+> +retry:
+> +       realm = NULL;
+> +       seq = read_seqbegin(&snaprealm_lock);
+> +       n = mdsc->snap_realms.rb_node;
+>         while (n) {
+>                 r = rb_entry(n, struct ceph_snap_realm, node);
+>                 if (ino < r->ino)
+> @@ -147,10 +174,14 @@ static struct ceph_snap_realm *__lookup_snap_realm(struct ceph_mds_client *mdsc,
+>                         n = n->rb_right;
+>                 else {
+>                         dout("lookup_snap_realm %llx %p\n", r->ino, r);
+> -                       return r;
+> +                       realm = r;
+> +                       break;
+>                 }
+>         }
+> -       return NULL;
+> +
+> +       if (read_seqretry(&snaprealm_lock, seq))
+> +               goto retry;
+> +       return realm;
+>  }
 
-One key difference we're considering, however, is changing the unit
-that reservations and limits are expressed in from ops/sec to
-something more appropriate for Ceph. Operations have payloads of
-different sizes and will therefore take different amounts of time, and
-that should be factored in. We might refer to this as the "cost" of
-the operation. And the cost is not linear with the size of the
-payload. For example, a write of 4 MB might only take 20 times as long
-as a write of 4 KB even though the sizes differ by a factor of
-1000. Using cost would allow us to, for example, achieve a fairer
-prioritization of a client doing many small writes against a client
-that's doing a few larger writes.
+caller of __lookup_snap_realm() should hold mdsc->snap_rwsem, no need
+to use seq lock.
 
-One proposed formula to translate one op into cost would be something
-along the lines of:
+>
+>  struct ceph_snap_realm *ceph_lookup_snap_realm(struct ceph_mds_client *mdsc,
+> @@ -174,7 +205,9 @@ static void __destroy_snap_realm(struct ceph_mds_client *mdsc,
+>  {
+>         dout("__destroy_snap_realm %p %llx\n", realm, realm->ino);
+>
+> +       write_seqlock(&snaprealm_lock);
+>         rb_erase(&realm->node, &mdsc->snap_realms);
+> +       write_sequnlock(&snaprealm_lock);
+>
+>         if (realm->parent) {
+>                 list_del_init(&realm->child_item);
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 2beeec07fa76..6474e8d875b7 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -760,6 +760,8 @@ static inline int default_congestion_kb(void)
+>
+>
+>  /* snap.c */
+> +extern seqlock_t snaprealm_lock;
+> +
+>  struct ceph_snap_realm *ceph_lookup_snap_realm(struct ceph_mds_client *mdsc,
+>                                                u64 ino);
+>  extern void ceph_get_snap_realm(struct ceph_mds_client *mdsc,
+> --
 
-    cost_units = a + b * log(payload_size)
+For the above reason, I think we'd better not to introduce the new seq
+lock. Just read lock mdsc->snap_rwsem when walking the snaprealm
+hierarchy.
 
-where a and b would have to be chosen or tuned based on the storage
-back-end.
+Regards
+Yan, Zheng
 
-And that gets us to the units for defining reservation and limit --
-cost_units per unit of time. Typically these are floating point
-values, however we do not use floating point types in librados calls
-because qemu, when calling into librbd, does not save and restore the
-cpu's floating point mode.
-
-There are two ways of getting appropriate ranges of values given that
-we need to use integral types for cost_units per unit of time. One is
-a large time unit in the denominator, such as minutes or even
-hours. That would leave us with cost_units per minute. We are unsure
-that the strange unit is the best approach and your feedback would be
-appreciated.
-
-A standard alternative would be to use a standard time unit, such as
-seconds, but integers as fixed-point values. So a floating-point value
-in cost_units per second would be multiplied by, say, 1000 and rounded
-to get the corresponding integer value.
-
-== librados Additions ==
-
-The basic idea is that one would be able to create (and destroy) qos
-profiles and then associate a profile with an ioctx. Ops on the ioctx
-would use the qos profile associated with it.
-
-typedef void* rados_qos_profile_t; // opaque
-
-// parameters uint64_t in cost_units per time unit as discussed above
-profile1 = rados_qos_profile_create(reservation, weight, limit);
-
-rados_ioctx_set_qos_profile(ioctx3, profile1);
-
-...
-// ops to ioctx3 would now use the specified profile
-...
-
-// use the profile just for a particular operation
-rados_write_op_set_qos_prefile(op1, profile1);
-
-rados_ioctx_set_qos_profile(ioctx3, NULL); // set to default profile
-
-rados_qos_profile_destroy(profile1);
-
-== MOSDOp and MOSDOpReply Changes ==
-
-Because the qos_profile would be managed by the ioctx, MOSDOps sent
-via that ioctx would include the reservation, weight, and limit. At
-this point we think this would be better than keeping the profiles on
-the back-end, although it increases the MOSDOp data structure by about
-128 bits.
-
-The MOSDOp type already contains dmclock's delta and rho parameters
-and MOSDOpReply already contains the dmclock phase indicator due to
-prior work. Given that we're moving towards using cost_unit per
-time_unit rather than ops per sec, perhaps we should also include the
-calculated cost in the MOSDOpReply.
-
-== Conclusion ==
-
-So that's what we're thinking about and your own thoughts and feedback
-would be appreciated. Thanks!
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
