@@ -1,48 +1,161 @@
-From: Matt Benjamin <mbenjami@redhat.com>
-Subject: Re: seastar starting points
-Date: Tue, 19 Dec 2017 10:41:52 -0500
-Message-ID: <CAKOnarkNj3CXHsbEcxDtrzsWiHtFHZoYV=SkSVQKVYgLM=oS+w@mail.gmail.com>
-References: <alpine.DEB.2.11.1712131629430.2838@piezo.novalocal>
- <0ebd9a80-e838-7a4f-81ee-f206f9c575ef@suse.com> <fc7d157d-6117-ab89-606c-656a9fa1585e@redhat.com>
- <CAJ4mKGYCJuxhKrdZT8L4o3Ya8yCdyCfqWyU3wMdwV5wWgdA8Pw@mail.gmail.com> <b9159d8a-d810-b2c2-f6a6-f9d2554ea7af@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Add dmclock QoS client calls to librados -- request for
+ comments
+Date: Tue, 19 Dec 2017 16:13:09 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1712191606210.24928@piezo.novalocal>
+References: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f44.google.com ([209.85.214.44]:40236 "EHLO
-        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753494AbdLSPlz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Dec 2017 10:41:55 -0500
-Received: by mail-it0-f44.google.com with SMTP id f190so3231214ita.5
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Dec 2017 07:41:54 -0800 (PST)
-In-Reply-To: <b9159d8a-d810-b2c2-f6a6-f9d2554ea7af@redhat.com>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:53295 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750801AbdLSQNM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Dec 2017 11:13:12 -0500
+In-Reply-To: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Haomai Wang <haomai@xsky.com>
+To: "J. Eric Ivancich" <ivancich@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi folks,
+Hi Eric,
 
-On Fri, Dec 15, 2017 at 12:07 PM, Casey Bodley <cbodley@redhat.com> wrote:
-> I think it's important to have separate
-> Messenger/Connection interfaces that expose futures to the application
-> though. And ideally we'd be able to call into dpdk from seastar threads
-> without requiring a separate thread pool.
->
+On Mon, 18 Dec 2017, J. Eric Ivancich wrote:
+> We are asking the Ceph community to provide their thoughts on this
+> draft proposal for expanding the librados API with calls that would
+> allow clients to specify QoS (quality of service) parameters for
+> their operations.
+> 
+> We have an on-going effort to provide Ceph users with more options to
+> manage QoS. With the release of Luminous we introduced access to a
+> prototype of the mclock QoS algorithm for queuing operations by class
+> of operation and either differentiating clients or treating them as a
+> unit. Although not yet integrated, the library we're using supports
+> dmClock, a distributed version of mClock. Both are documented in
+> _mClock: Handling Throughput Variability for Hypervisor IO Scheduling_
+> by Gulati, Merchant, and Varman 2010.
+> 
+> In order to offer greater flexibility, we'd like to move forward with
+> providing clients with the ability to use different QoS parameters. We
+> are keeping our options open w.r.t. the ultimate set of algorithm(s)
+> we'll use. The mClock/dmClock algorithm allows a "client", which we
+> can interpret broadly, to set a minimum ops/sec (reservation) and a
+> maximum ops/sec (limit). Furthermore a "client" can also define a
+> weight (a.k.a.  priority), which is a scalar value to determine
+> relative weighting.
+> 
+> We think reservation, limit, and weight are sufficiently generic that
+> we'd be able to use or adapt them other QoS algorithms we may try or
+> use in the future.
+> 
+> [To give you a sense of how broadly we can interpret "client", we
+> currently have code that interprets classes of operations (e.g.,
+> background replication or background snap-trimming) as a client.]
+> 
+> == Units ==
+> 
+> One key difference we're considering, however, is changing the unit
+> that reservations and limits are expressed in from ops/sec to
+> something more appropriate for Ceph. Operations have payloads of
+> different sizes and will therefore take different amounts of time, and
+> that should be factored in. We might refer to this as the "cost" of
+> the operation. And the cost is not linear with the size of the
+> payload. For example, a write of 4 MB might only take 20 times as long
+> as a write of 4 KB even though the sizes differ by a factor of
+> 1000. Using cost would allow us to, for example, achieve a fairer
+> prioritization of a client doing many small writes against a client
+> that's doing a few larger writes.
+> 
+> One proposed formula to translate one op into cost would be something
+> along the lines of:
+> 
+>     cost_units = a + b * log(payload_size)
+> 
+> where a and b would have to be chosen or tuned based on the storage
+> back-end.
+> 
+> And that gets us to the units for defining reservation and limit --
+> cost_units per unit of time. Typically these are floating point
+> values, however we do not use floating point types in librados calls
+> because qemu, when calling into librbd, does not save and restore the
+> cpu's floating point mode.
+> 
+> There are two ways of getting appropriate ranges of values given that
+> we need to use integral types for cost_units per unit of time. One is
+> a large time unit in the denominator, such as minutes or even
+> hours. That would leave us with cost_units per minute. We are unsure
+> that the strange unit is the best approach and your feedback would be
+> appreciated.
+> 
+> A standard alternative would be to use a standard time unit, such as
+> seconds, but integers as fixed-point values. So a floating-point value
+> in cost_units per second would be multiplied by, say, 1000 and rounded
+> to get the corresponding integer value.
 
-Pretty much this.  Implementing a distinct Messenger seems better for
-isolation, as well.
+I think if payload_size above is bytes, then any reasonable value for 
+cost_units will be a non-tiny integer, and we won't need floating point, 
+right?  E.g., a 4KB write would be (at a minimum) 10, but probably larger 
+if a and b >= 1.  That would let us keep seconds as the time base?
 
-Matt
+> == librados Additions ==
+> 
+> The basic idea is that one would be able to create (and destroy) qos
+> profiles and then associate a profile with an ioctx. Ops on the ioctx
+> would use the qos profile associated with it.
+> 
+> typedef void* rados_qos_profile_t; // opaque
+> 
+> // parameters uint64_t in cost_units per time unit as discussed above
+> profile1 = rados_qos_profile_create(reservation, weight, limit);
+> 
+> rados_ioctx_set_qos_profile(ioctx3, profile1);
+> 
+> ...
+> // ops to ioctx3 would now use the specified profile
+> ...
+> 
+> // use the profile just for a particular operation
+> rados_write_op_set_qos_prefile(op1, profile1);
+> 
+> rados_ioctx_set_qos_profile(ioctx3, NULL); // set to default profile
+> 
+> rados_qos_profile_destroy(profile1);
 
--- 
+I would s/destroy/release/, as the profile will be implicitly 
+reference counted (with a ref consumed by the ioctx that is pointing to 
+it).
 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+It might be useful to add a rados_qos_profile_get_id(handle) that returns 
+the client-local integer id that we're using to identify the profile.  
+This isn't really useful for the application per se, but it will be 
+helpful for debugging purposes perhaps?
 
-http://www.redhat.com/en/technologies/storage
+> == MOSDOp and MOSDOpReply Changes ==
+> 
+> Because the qos_profile would be managed by the ioctx, MOSDOps sent
+> via that ioctx would include the reservation, weight, and limit. At
+> this point we think this would be better than keeping the profiles on
+> the back-end, although it increases the MOSDOp data structure by about
+> 128 bits.
+> 
+> The MOSDOp type already contains dmclock's delta and rho parameters
+> and MOSDOpReply already contains the dmclock phase indicator due to
+> prior work. Given that we're moving towards using cost_unit per
+> time_unit rather than ops per sec, perhaps we should also include the
+> calculated cost in the MOSDOpReply.
 
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
+Good idea!
+
+sage
+
+
+> 
+> == Conclusion ==
+> 
+> So that's what we're thinking about and your own thoughts and feedback
+> would be appreciated. Thanks!
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
