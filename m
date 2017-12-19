@@ -1,25 +1,30 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Add dmclock QoS client calls to librados -- request for
- comments
-Date: Tue, 19 Dec 2017 16:13:09 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1712191606210.24928@piezo.novalocal>
+From: Mark Nelson <mark.a.nelson@gmail.com>
+Subject: Re: Add dmclock QoS client calls to librados -- request for comments
+Date: Tue, 19 Dec 2017 11:45:01 -0600
+Message-ID: <c694bf64-3d09-6ea7-e8c9-c7a84ef660c6@gmail.com>
 References: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:53295 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750801AbdLSQNM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Dec 2017 11:13:12 -0500
+Received: from mail-io0-f174.google.com ([209.85.223.174]:46737 "EHLO
+        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750769AbdLSRpD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Dec 2017 12:45:03 -0500
+Received: by mail-io0-f174.google.com with SMTP id x129so14456021iod.13
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Dec 2017 09:45:03 -0800 (PST)
 In-Reply-To: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "J. Eric Ivancich" <ivancich@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "J. Eric Ivancich" <ivancich@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi Eric,
 
-On Mon, 18 Dec 2017, J. Eric Ivancich wrote:
+This is pretty dense! :) (I have the same problem with emails 
+sometimes).  responses inline.
+
+On 12/18/2017 01:04 PM, J. Eric Ivancich wrote:
 > We are asking the Ceph community to provide their thoughts on this
 > draft proposal for expanding the librados API with calls that would
 > allow clients to specify QoS (quality of service) parameters for
@@ -64,14 +69,50 @@ On Mon, 18 Dec 2017, J. Eric Ivancich wrote:
 > 1000. Using cost would allow us to, for example, achieve a fairer
 > prioritization of a client doing many small writes against a client
 > that's doing a few larger writes.
+
+Getting away from ops/s is a good idea imho, and I generally agree here.
+
 > 
 > One proposed formula to translate one op into cost would be something
 > along the lines of:
 > 
->     cost_units = a + b * log(payload_size)
+>      cost_units = a + b * log(payload_size)
 > 
 > where a and b would have to be chosen or tuned based on the storage
 > back-end.
+
+I guess the idea is that we can generally approximate the curve of both 
+HDDs and solid state storage with this formula by tweaking a and b? 
+I've got a couple of concerns:
+
+1) I don't think most users are going to get a and b right.  If anything 
+I suspect we'll end up with a couple of competing values for HDD and 
+SSDs that people will just copy/paste from each other or the mailing 
+list.  I'd much rather that we had hdd/ssd defaults like we do for other 
+options in ceph that get us in the right ballparks and get set 
+automatically based on the disk type.
+
+2) log() is kind of expensive.  It's not *that* bad, but it's enough 
+that for small NVMe read ops we could start to see it show up in profiles.
+
+http://nicolas.limare.net/pro/notes/2014/12/16_math_speed/
+
+I suspect it might be a good idea to pre-compute the cost_units for the 
+first 64k (or whatever) payload_sizes, especially if that value is 
+64bit.  It would take minimal memory and I could see it becoming more 
+important as flash becomes more common (especially on ARM and similar CPUs).
+
+3) If there were an easy way to express it, it might be nice to just 
+give advanced users the option to write their own function here as an 
+override vs the defaults. ie (not real numbers):
+
+notreal_qos_cost_unit_algorithm = ""
+notreal_qos_cost_unit_algorithm_ssd = "1024 + 0.25*log(payload_size)"
+notreal_qos_cost_unit_algorithm_hdd = "64 + 32*log(payload_size)"
+
+I think this is cleaner than needing to specify hdd_a, hdd_b, ssd_a, 
+ssd_b on nodes with mixed HDD/flash OSDs.
+
 > 
 > And that gets us to the units for defining reservation and limit --
 > cost_units per unit of time. Typically these are floating point
@@ -91,11 +132,10 @@ On Mon, 18 Dec 2017, J. Eric Ivancich wrote:
 > in cost_units per second would be multiplied by, say, 1000 and rounded
 > to get the corresponding integer value.
 
-I think if payload_size above is bytes, then any reasonable value for 
-cost_units will be a non-tiny integer, and we won't need floating point, 
-right?  E.g., a 4KB write would be (at a minimum) 10, but probably larger 
-if a and b >= 1.  That would let us keep seconds as the time base?
+In the 2nd scenario it's just a question of how we handle it internally 
+right?
 
+> 
 > == librados Additions ==
 > 
 > The basic idea is that one would be able to create (and destroy) qos
@@ -119,16 +159,7 @@ if a and b >= 1.  That would let us keep seconds as the time base?
 > rados_ioctx_set_qos_profile(ioctx3, NULL); // set to default profile
 > 
 > rados_qos_profile_destroy(profile1);
-
-I would s/destroy/release/, as the profile will be implicitly 
-reference counted (with a ref consumed by the ioctx that is pointing to 
-it).
-
-It might be useful to add a rados_qos_profile_get_id(handle) that returns 
-the client-local integer id that we're using to identify the profile.  
-This isn't really useful for the application per se, but it will be 
-helpful for debugging purposes perhaps?
-
+> 
 > == MOSDOp and MOSDOpReply Changes ==
 > 
 > Because the qos_profile would be managed by the ioctx, MOSDOps sent
@@ -143,10 +174,8 @@ helpful for debugging purposes perhaps?
 > time_unit rather than ops per sec, perhaps we should also include the
 > calculated cost in the MOSDOpReply.
 
-Good idea!
-
-sage
-
+Does it change things at all if we have fast per-calculated values of 
+cost_unit available for a given payload size?
 
 > 
 > == Conclusion ==
@@ -157,5 +186,4 @@ sage
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 > 
