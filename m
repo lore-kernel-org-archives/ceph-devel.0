@@ -1,59 +1,114 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: coming in boost 1.66
-Date: Tue, 19 Dec 2017 13:56:22 -0500
-Message-ID: <23b03cec-760d-5e32-2232-dfa6b90396f0@redhat.com>
-References: <07a75940-72c6-8510-459b-4f4a0ad43d4b@redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: dashboard in mimic
+Date: Wed, 20 Dec 2017 10:55:42 +0000
+Message-ID: <CALe9h7eOv-P35oJT5L2T+CmOe=VTw6V3yBHB0LUK_-ojyeKKCw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f176.google.com ([209.85.216.176]:42805 "EHLO
-        mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751063AbdLSS4Z (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Dec 2017 13:56:25 -0500
-Received: by mail-qt0-f176.google.com with SMTP id g9so25435828qth.9
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Dec 2017 10:56:25 -0800 (PST)
-Received: from [10.17.151.126] ([12.118.3.106])
-        by smtp.gmail.com with ESMTPSA id r9sm10115933qtf.82.2017.12.19.10.56.23
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 19 Dec 2017 10:56:23 -0800 (PST)
-In-Reply-To: <07a75940-72c6-8510-459b-4f4a0ad43d4b@redhat.com>
-Content-Language: en-US
+Received: from mail-wr0-f169.google.com ([209.85.128.169]:39581 "EHLO
+        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754681AbdLTK4E (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Dec 2017 05:56:04 -0500
+Received: by mail-wr0-f169.google.com with SMTP id a41so21875293wra.6
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Dec 2017 02:56:03 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+
+Hi all,
+
+There have been some discussions about making big additions to the
+dashboard module (the web gui that runs in ceph-mgr), so as a couple
+of people have suggested, let's have a mailing list thread about it!
+
+This is a bit wordy so I've written it more like a document than an
+email, see below.  It's a very broad topic, so what I've written here
+is far from complete.  We're still at the point of discussion, there's
+no UI code being written so far for any of the stuff that I mention
+below.
+
+Cheers,
+John
 
 
-On 11/27/2017 11:03 AM, Casey Bodley wrote:
-> There are a couple of interesting changes in the upcoming boost 1.66 
-> release, based on the work-in-progress release notes: 
-> http://www.boost.org/users/history/in_progress.html
->
-> - the Beast library was accepted into boost earlier this year, and 
-> 1.66 will be its first release. We're currently including it in a 
-> submodule, so we'll need to come up with a strategy to transition.
-> - the Asio library is getting "interface changes to reflect the 
-> Networking TS" (which is awesome!) but we might see some compilation 
-> failures in radosgw as a result.
->
-> Now that we have the tooling to build specific boost versions, how do 
-> people feel about forcing the update to 1.66 once we've got it tested? 
-> This could avoid the extra work needed to a) maintain the beast 
-> submodule alongside boost's, and b) work around any hypothetical api 
-> breakage in asio. Once 1.66 is out, we'll have a better idea how much 
-> work that actually requires, but I wanted to float the idea ahead of 
-> time.
->
-> Casey
 
-Boost 1.66 was released yesterday! The boost::beast changes were minimal 
-(only one function name changed), but the changes to boost::asio were 
-extensive and necessitated major changes to my PR for librados bindings 
-at https://github.com/ceph/ceph/pull/19054. So I'm still proposing that 
-we pin our boost dependency at 1.66 to avoid #ifdefs and build hackery 
-to continue supporting earlier versions. That PR includes the cmake 
-changes to do this, though I'm happy to pull those into a separate PR if 
-necessary.
+What?
+=====
 
-Casey
+Extend the dashboard module to provide management of the cluster, in
+addition to monitoring.  This would potentially include anything you
+can currently do with the Ceph CLI, plus additional functionality like
+calling out to a container framework to spawn additional daemons.
+
+The idea is to wrap things up into friendlier higher-level operations,
+rather than just having buttons for the existing CLI operations.
+Example workflows of interest:
+ - a CephFS page where you can click "New Filesystem", and the pools
+and MDS daemons will all be created for you.
+ - similarly for RGW: ability to enable RGW and control the number of
+gateway daemons
+ - driving OSD additional/retirement, and also format conversions
+(e.g. filestore->bluestore)
+
+Some of the functionality would depend on how Ceph is being run:
+especially, anything that detects devices and starts/stops physical
+services would depend on an environment that provides that (such as
+Kubenetes).
+
+Why build it in?
+============
+
+Historically, Ceph management UIs were usually doing lots of non-Ceph
+work too, configuring the underlying OS and hardware as well as the
+Ceph cluster itself.  Consequently, it often made sense build the user
+interface into an external tool/framework that already knew how to do
+all that labour-intensive infrastructure stuff, rather than trying to
+reinvent it for a Ceph-specific management tool.
+
+As some of us are moving towards running Ceph in container
+environments like Kubernetes, the hardware/OS piece is increasingly
+taken care of for us.  The container platform provides a simpler way
+to discover and use hosts and block devices, which we can use directly
+from Ceph (or from the ceph dashboard).
+
+What about external UIs?
+====================
+
+Building more UI functionality into Ceph should not get in the way of
+integrating with any external tools/projects.  It should actually
+benefit those projects: as we connect up functionality into the
+dashboard module, those same ceph-mgr/python code paths can easily be
+connected to REST endpoints in the restful module.
+
+The work to actually expose the REST bits will probably still fall on
+the people who really want/need that functionality, but it should be a
+very lightweight task for things where the functionality already
+exists in the dashboard.
+
+Currently modules are somewhat isolated from one another, but I've
+recently added an inter-module RPC interface so that we can have
+better sharing of state -- the idea is to have some common things like
+a table of long-running-jobs that would be shared between the
+dashboard and restful modules.
+
+Security
+======
+
+The dashboard is currently completely read-only: that's convenient
+because it makes it less scary to run it over unencrypted http and/or
+without login (or in practice, leaving https/login as an exercise to
+the sysadmin).  When administrative functionality is added, we'll need
+some sort of login, and https too.
+
+The https part can probably be done in the same way as the restful
+module: require a user-generated certificate (i.e. for their proper
+domain) by default, but also provide a helper for the adventurous user
+to run with a self-signed cert if they want to.
+
+The login part could be as simple as creating users/passwords using a
+CLI and just prompting for them in the GUI, or we could also have some
+GUI functionality for managing users.  I wouldn't want to go too far
+with the latter: if someone has complex requirements then it's
+generally better to be plugging into some external user database.
+
+It would still be very nice to retain the read only mode as an option of course.
