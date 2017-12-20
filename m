@@ -1,180 +1,73 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH v3 2/3] ceph: quotas: support for ceph.quota.max_files
-Date: Wed, 20 Dec 2017 15:18:40 +0000
-Message-ID: <20171220151841.22355-3-lhenriques@suse.com>
-References: <20171220151841.22355-1-lhenriques@suse.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: coming in boost 1.66
+Date: Wed, 20 Dec 2017 15:50:30 -0500
+Message-ID: <e2e0c6c0-9bc5-a5a4-f8bb-a766e5f3dcb3@redhat.com>
+References: <07a75940-72c6-8510-459b-4f4a0ad43d4b@redhat.com>
+ <23b03cec-760d-5e32-2232-dfa6b90396f0@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:33885 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755227AbdLTPSq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 20 Dec 2017 10:18:46 -0500
-In-Reply-To: <20171220151841.22355-1-lhenriques@suse.com>
+Received: from mail-qt0-f172.google.com ([209.85.216.172]:33708 "EHLO
+        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754428AbdLTUud (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Dec 2017 15:50:33 -0500
+Received: by mail-qt0-f172.google.com with SMTP id e2so30009836qti.0
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Dec 2017 12:50:32 -0800 (PST)
+Received: from [10.17.151.126] ([12.118.3.106])
+        by smtp.gmail.com with ESMTPSA id q63sm5357648qke.41.2017.12.20.12.50.30
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 20 Dec 2017 12:50:31 -0800 (PST)
+In-Reply-To: <23b03cec-760d-5e32-2232-dfa6b90396f0@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>, Luis Henriques <lhenriques@suse.com>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-This patch adds support for the max_files quota.  It hooks into all the
-ceph functions that add new filesystem objects that need to be checked
-against the quota limits.  When these limits are hit, -EDQUOT is returned.
 
-Note that we're not checking quotas on ceph_link().  ceph_link doesn't
-really create a new inode,  and since the MDS doesn't update the directory
-statistics when a new (hard) link is created (only with symlinks), they
-are not accounted as a new file.
+On 12/19/2017 01:56 PM, Casey Bodley wrote:
+>
+> On 11/27/2017 11:03 AM, Casey Bodley wrote:
+>> There are a couple of interesting changes in the upcoming boost 1.66 
+>> release, based on the work-in-progress release notes: 
+>> http://www.boost.org/users/history/in_progress.html
+>>
+>> - the Beast library was accepted into boost earlier this year, and 
+>> 1.66 will be its first release. We're currently including it in a 
+>> submodule, so we'll need to come up with a strategy to transition.
+>> - the Asio library is getting "interface changes to reflect the 
+>> Networking TS" (which is awesome!) but we might see some compilation 
+>> failures in radosgw as a result.
+>>
+>> Now that we have the tooling to build specific boost versions, how do 
+>> people feel about forcing the update to 1.66 once we've got it 
+>> tested? This could avoid the extra work needed to a) maintain the 
+>> beast submodule alongside boost's, and b) work around any 
+>> hypothetical api breakage in asio. Once 1.66 is out, we'll have a 
+>> better idea how much work that actually requires, but I wanted to 
+>> float the idea ahead of time.
+>>
+>> Casey
+>
+> Boost 1.66 was released yesterday! The boost::beast changes were 
+> minimal (only one function name changed), but the changes to 
+> boost::asio were extensive and necessitated major changes to my PR for 
+> librados bindings at https://github.com/ceph/ceph/pull/19054. So I'm 
+> still proposing that we pin our boost dependency at 1.66 to avoid 
+> #ifdefs and build hackery to continue supporting earlier versions. 
+> That PR includes the cmake changes to do this, though I'm happy to 
+> pull those into a separate PR if necessary.
+>
+> Casey
 
-Link: http://tracker.ceph.com/issues/22372
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/dir.c   | 11 +++++++++
- fs/ceph/file.c  |  4 +++-
- fs/ceph/quota.c | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/super.h |  1 +
- 4 files changed, 84 insertions(+), 1 deletion(-)
+It looks like part of updating the default boost version in cmake is to 
+mirror that boost tarball on download.ceph.com (iirc this was because of 
+sourceforge downtime). Could someone with access please upload a copy of 
+https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2 
+so that it's available under download.ceph.com/qa/? You can see 
+https://github.com/ceph/ceph/pull/19054/files#r157844349 for the 
+relevant cmake logic.
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 8a5266699b67..66550d92b1ac 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -818,6 +818,9 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return -EROFS;
- 
-+	if (ceph_quota_is_max_files_exceeded(dir))
-+		return -EDQUOT;
-+
- 	err = ceph_pre_init_acls(dir, &mode, &acls);
- 	if (err < 0)
- 		return err;
-@@ -871,6 +874,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return -EROFS;
- 
-+	if (ceph_quota_is_max_files_exceeded(dir))
-+		return -EDQUOT;
-+
- 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
- 	if (IS_ERR(req)) {
-@@ -920,6 +926,11 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 		goto out;
- 	}
- 
-+	if (ceph_quota_is_max_files_exceeded(dir)) {
-+		err = -EDQUOT;
-+		goto out;
-+	}
-+
- 	mode |= S_IFDIR;
- 	err = ceph_pre_init_acls(dir, &mode, &acls);
- 	if (err < 0)
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 5c17125f45c7..5a77a66e3d6b 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -371,7 +371,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	struct ceph_mds_request *req;
- 	struct dentry *dn;
- 	struct ceph_acls_info acls = {};
--       int mask;
-+	int mask;
- 	int err;
- 
- 	dout("atomic_open %p dentry %p '%pd' %s flags %d mode 0%o\n",
-@@ -382,6 +382,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 		return -ENAMETOOLONG;
- 
- 	if (flags & O_CREAT) {
-+		if (ceph_quota_is_max_files_exceeded(dir))
-+			return -EDQUOT;
- 		err = ceph_pre_init_acls(dir, &mode, &acls);
- 		if (err < 0)
- 			return err;
-diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-index 7bde6e85b609..06b3268f8f7f 100644
---- a/fs/ceph/quota.c
-+++ b/fs/ceph/quota.c
-@@ -61,3 +61,72 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
- 
- 	iput(inode);
- }
-+
-+enum quota_check_op {
-+	QUOTA_CHECK_MAX_FILES_OP /* check quota max_files limit */
-+};
-+
-+/*
-+ * check_quota_exceeded() will walk up the snaprealm hierarchy and, for each
-+ * realm, it will execute quota check operation defined by the 'op' parameter.
-+ * The snaprealm walk is interrupted if the quota check detects that the quota
-+ * is exceeded or if the root inode is reached.
-+ */
-+static bool check_quota_exceeded(struct inode *inode, enum quota_check_op op,
-+				 loff_t size)
-+{
-+	struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
-+	struct ceph_inode_info *ci;
-+	struct ceph_snap_realm *realm, *next;
-+	struct ceph_vino vino;
-+	struct inode *ino;
-+	u64 max = 0, rvalue = 0;
-+	bool quota_exceeded = false, is_root = false;
-+
-+	WARN_ON(!S_ISDIR(inode->i_mode));
-+
-+	down_read(&mdsc->snap_rwsem);
-+	realm = ceph_inode(inode)->i_snap_realm;
-+	ceph_get_snap_realm(mdsc, realm);
-+	while (realm) {
-+		vino.ino = realm->ino;
-+		vino.snap = CEPH_NOSNAP;
-+		ino = ceph_find_inode(inode->i_sb, vino);
-+		if (!ino) {
-+			pr_warn("Failed to find inode for %llu\n", vino.ino);
-+			break;
-+		}
-+		ci = ceph_inode(ino);
-+		switch(op) {
-+		case QUOTA_CHECK_MAX_FILES_OP:
-+			spin_lock(&ci->i_ceph_lock);
-+			max = ci->i_max_files;
-+			rvalue = ci->i_rfiles + ci->i_rsubdirs;
-+			is_root = (ci->i_vino.ino == CEPH_INO_ROOT);
-+			spin_unlock(&ci->i_ceph_lock);
-+			quota_exceeded = (max && (rvalue >= max));
-+			break;
-+		default:
-+			/* Shouldn't happen */
-+			pr_warn("Invalid quota check op (%d)\n", op);
-+			is_root = true; /* Just break the loop */
-+		}
-+		iput(ino);
-+
-+		if (quota_exceeded || is_root)
-+			break;
-+		next = realm->parent;
-+		ceph_get_snap_realm(mdsc, next);
-+		ceph_put_snap_realm(mdsc, realm);
-+		realm = next;
-+	}
-+	ceph_put_snap_realm(mdsc, realm);
-+	up_read(&mdsc->snap_rwsem);
-+
-+	return quota_exceeded;
-+}
-+
-+bool ceph_quota_is_max_files_exceeded(struct inode *inode)
-+{
-+	return check_quota_exceeded(inode, QUOTA_CHECK_MAX_FILES_OP, 0);
-+}
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index f998b7f076cf..20197e29a7f0 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1026,5 +1026,6 @@ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
- extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
- 			      struct ceph_mds_session *session,
- 			      struct ceph_msg *msg);
-+extern bool ceph_quota_is_max_files_exceeded(struct inode *inode);
- 
- #endif /* _FS_CEPH_SUPER_H */
+Thanks,
+Casey
