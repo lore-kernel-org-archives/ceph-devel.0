@@ -1,34 +1,25 @@
-From: "Sandra Younes" <mamg7610885@angel.ocn.ne.jp>
-Subject: Re: Distress Call Please don't ignore
-Date: Thu, 21 Dec 2017 00:50:12 +0200
-Message-ID: <201712202250.vBKMo85J035698@mf-smf-ucb018.ocn.ad.jp>
-Reply-To: <tdavalvse@gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Static Analysis
+Date: Thu, 21 Dec 2017 09:54:42 +1000
+Message-ID: <CAF-wwdFVKwM+6h=2ZUq6ySqt3cy2zw+GpfXWjpPJfibzcfMgEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="Windows-1251"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mbkd0109.ocn.ad.jp ([153.149.230.10]:59897 "EHLO
-        mbkd0109.ocn.ad.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755838AbdLTXZc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Dec 2017 18:25:32 -0500
+Received: from mail-io0-f177.google.com ([209.85.223.177]:35373 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755846AbdLTXyn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Dec 2017 18:54:43 -0500
+Received: by mail-io0-f177.google.com with SMTP id 14so12664571iou.2
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Dec 2017 15:54:43 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Good Day,
+Latest static analyser results are up on  http://people.redhat.com/bhubbard/
 
-Forgive my indignation if this message comes to you as a surprise and may offend your personality for contacting you without your prior consent and writing through this channel.
+Weekly Fedora Copr builds are at
+https://copr.fedorainfracloud.org/coprs/badone/ceph-weeklies/build/689485/
 
-I came across your name and contact on the course of my personal searching when i was searching for a foreign reliable partner. I was assured of your capability and reliability after going true your profile.
-
-I'm (Miss. Sandra) from Benghazi libya, My father of blessed memory by name late General Abdel Fattah Younes who was shot death by Islamist-linked militia within the anti-Gaddafi forces on 28th July, 2011 and after two days later my mother with my two brothers was killed one early morning by the rebels as result of civil war that is going on in my country Libya, then after the burial of my parents, my uncles conspired and sold my father's properties and left nothing for me. On a faithful morning, I opened my father's briefcase and discover a document which he has deposited ($6.250M USD) in a bank in a Turkish Bank which has a small branch in Canada with my name as the legitimate/next of kin. Meanwhile i have located the bank,and have also discussed the possiblity of transfering the fund. M
- y father left a clause to the bank that i must introduce a trusted foreign partner who would be my trustee to help me invest this fund; hence the need for your assistance,i request that you be my t
-rustee and assist me in e
-
-You will also be responsible for the investment and management of the fund for me and also you will help me get a good school where i will further my education.
-I agreed to give you 40% of the $6.250M once the transfer is done. this is my true life story, I will be glad to receive your respond soonest for more details to enable us start and champion the transfer less than 14 banking days as i was informed by the bank manager.
-
-Thanks for giving me your attention,
-
-Yours sincerely,
-Miss. Sandra Younes
+-- 
+Cheers,
+Brad
