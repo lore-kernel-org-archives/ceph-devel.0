@@ -1,114 +1,340 @@
-From: John Spray <jspray@redhat.com>
-Subject: dashboard in mimic
-Date: Wed, 20 Dec 2017 10:55:42 +0000
-Message-ID: <CALe9h7eOv-P35oJT5L2T+CmOe=VTw6V3yBHB0LUK_-ojyeKKCw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH v3 1/3] ceph: quota: add initial infrastructure to support cephfs quotas
+Date: Wed, 20 Dec 2017 15:18:39 +0000
+Message-ID: <20171220151841.22355-2-lhenriques@suse.com>
+References: <20171220151841.22355-1-lhenriques@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:39581 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754681AbdLTK4E (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Dec 2017 05:56:04 -0500
-Received: by mail-wr0-f169.google.com with SMTP id a41so21875293wra.6
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Dec 2017 02:56:03 -0800 (PST)
+Received: from mx2.suse.de ([195.135.220.15]:33877 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754846AbdLTPSq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 20 Dec 2017 10:18:46 -0500
+In-Reply-To: <20171220151841.22355-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>, Luis Henriques <lhenriques@suse.com>
 
-Hi all,
+This patch adds the infrastructure required to support cephfs quotas as it
+is currently implemented in the ceph fuse client.  Cephfs quotas can be
+set on any directory, and can restrict the number of bytes or the number
+of files stored beneath that point in the directory hierarchy.
 
-There have been some discussions about making big additions to the
-dashboard module (the web gui that runs in ceph-mgr), so as a couple
-of people have suggested, let's have a mailing list thread about it!
+Quotas are set using the extended attributes 'ceph.quota.max_files' and
+'ceph.quota.max_bytes', and can be removed by setting these attributes to
+'0'.
 
-This is a bit wordy so I've written it more like a document than an
-email, see below.  It's a very broad topic, so what I've written here
-is far from complete.  We're still at the point of discussion, there's
-no UI code being written so far for any of the stuff that I mention
-below.
+Link: http://tracker.ceph.com/issues/22372
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/Makefile                   |  2 +-
+ fs/ceph/inode.c                    |  6 ++++
+ fs/ceph/mds_client.c               | 23 ++++++++++++++
+ fs/ceph/mds_client.h               |  2 ++
+ fs/ceph/quota.c                    | 63 ++++++++++++++++++++++++++++++++++++++
+ fs/ceph/super.h                    |  8 +++++
+ fs/ceph/xattr.c                    | 44 ++++++++++++++++++++++++++
+ include/linux/ceph/ceph_features.h |  3 +-
+ include/linux/ceph/ceph_fs.h       | 17 ++++++++++
+ 9 files changed, 166 insertions(+), 2 deletions(-)
+ create mode 100644 fs/ceph/quota.c
 
-Cheers,
-John
-
-
-
-What?
-=====
-
-Extend the dashboard module to provide management of the cluster, in
-addition to monitoring.  This would potentially include anything you
-can currently do with the Ceph CLI, plus additional functionality like
-calling out to a container framework to spawn additional daemons.
-
-The idea is to wrap things up into friendlier higher-level operations,
-rather than just having buttons for the existing CLI operations.
-Example workflows of interest:
- - a CephFS page where you can click "New Filesystem", and the pools
-and MDS daemons will all be created for you.
- - similarly for RGW: ability to enable RGW and control the number of
-gateway daemons
- - driving OSD additional/retirement, and also format conversions
-(e.g. filestore->bluestore)
-
-Some of the functionality would depend on how Ceph is being run:
-especially, anything that detects devices and starts/stops physical
-services would depend on an environment that provides that (such as
-Kubenetes).
-
-Why build it in?
-============
-
-Historically, Ceph management UIs were usually doing lots of non-Ceph
-work too, configuring the underlying OS and hardware as well as the
-Ceph cluster itself.  Consequently, it often made sense build the user
-interface into an external tool/framework that already knew how to do
-all that labour-intensive infrastructure stuff, rather than trying to
-reinvent it for a Ceph-specific management tool.
-
-As some of us are moving towards running Ceph in container
-environments like Kubernetes, the hardware/OS piece is increasingly
-taken care of for us.  The container platform provides a simpler way
-to discover and use hosts and block devices, which we can use directly
-from Ceph (or from the ceph dashboard).
-
-What about external UIs?
-====================
-
-Building more UI functionality into Ceph should not get in the way of
-integrating with any external tools/projects.  It should actually
-benefit those projects: as we connect up functionality into the
-dashboard module, those same ceph-mgr/python code paths can easily be
-connected to REST endpoints in the restful module.
-
-The work to actually expose the REST bits will probably still fall on
-the people who really want/need that functionality, but it should be a
-very lightweight task for things where the functionality already
-exists in the dashboard.
-
-Currently modules are somewhat isolated from one another, but I've
-recently added an inter-module RPC interface so that we can have
-better sharing of state -- the idea is to have some common things like
-a table of long-running-jobs that would be shared between the
-dashboard and restful modules.
-
-Security
-======
-
-The dashboard is currently completely read-only: that's convenient
-because it makes it less scary to run it over unencrypted http and/or
-without login (or in practice, leaving https/login as an exercise to
-the sysadmin).  When administrative functionality is added, we'll need
-some sort of login, and https too.
-
-The https part can probably be done in the same way as the restful
-module: require a user-generated certificate (i.e. for their proper
-domain) by default, but also provide a helper for the adventurous user
-to run with a self-signed cert if they want to.
-
-The login part could be as simple as creating users/passwords using a
-CLI and just prompting for them in the GUI, or we could also have some
-GUI functionality for managing users.  I wouldn't want to go too far
-with the latter: if someone has complex requirements then it's
-generally better to be plugging into some external user database.
-
-It would still be very nice to retain the read only mode as an option of course.
+diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
+index 174f5709e508..a699e320393f 100644
+--- a/fs/ceph/Makefile
++++ b/fs/ceph/Makefile
+@@ -6,7 +6,7 @@
+ obj-$(CONFIG_CEPH_FS) += ceph.o
+ 
+ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
+-	export.o caps.o snap.o xattr.o \
++	export.o caps.o snap.o xattr.o quota.o \
+ 	mds_client.o mdsmap.o strings.o ceph_frag.o \
+ 	debugfs.o
+ 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index ab81652198c4..8a0ba96e105d 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -441,6 +441,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	atomic64_set(&ci->i_complete_seq[1], 0);
+ 	ci->i_symlink = NULL;
+ 
++	ci->i_max_bytes = 0;
++	ci->i_max_files = 0;
++
+ 	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
+ 	RCU_INIT_POINTER(ci->i_layout.pool_ns, NULL);
+ 
+@@ -790,6 +793,9 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	inode->i_rdev = le32_to_cpu(info->rdev);
+ 	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
+ 
++	ci->i_max_bytes = iinfo->max_bytes;
++	ci->i_max_files = iinfo->max_files;
++
+ 	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
+ 	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
+ 		inode->i_mode = le32_to_cpu(info->mode);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 1b468250e947..2290056d13fc 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -100,6 +100,26 @@ static int parse_reply_info_in(void **p, void *end,
+ 	} else
+ 		info->inline_version = CEPH_INLINE_NONE;
+ 
++	if (features & CEPH_FEATURE_MDS_QUOTA) {
++		u8 struct_v, struct_compat;
++		u32 struct_len;
++
++		/*
++		 * both struct_v and struct_compat are expected to be >= 1
++		 */
++		ceph_decode_8_safe(p, end, struct_v, bad);
++		ceph_decode_8_safe(p, end, struct_compat, bad);
++		if (!struct_v || !struct_compat)
++			goto bad;
++		ceph_decode_32_safe(p, end, struct_len, bad);
++		ceph_decode_need(p, end, struct_len, bad);
++		ceph_decode_64_safe(p, end, info->max_bytes, bad);
++		ceph_decode_64_safe(p, end, info->max_files, bad);
++	} else {
++		info->max_bytes = 0;
++		info->max_files = 0;
++	}
++
+ 	info->pool_ns_len = 0;
+ 	info->pool_ns_data = NULL;
+ 	if (features & CEPH_FEATURE_FS_FILE_LAYOUT_V2) {
+@@ -4064,6 +4084,9 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+ 	case CEPH_MSG_CLIENT_LEASE:
+ 		handle_lease(mdsc, s, msg);
+ 		break;
++	case CEPH_MSG_CLIENT_QUOTA:
++		ceph_handle_quota(mdsc, s, msg);
++		break;
+ 
+ 	default:
+ 		pr_err("received unknown message type %d %s\n", type,
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 837ac4b087a0..7af576733948 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -49,6 +49,8 @@ struct ceph_mds_reply_info_in {
+ 	char *inline_data;
+ 	u32 pool_ns_len;
+ 	char *pool_ns_data;
++	u64 max_bytes;
++	u64 max_files;
+ };
+ 
+ struct ceph_mds_reply_dir_entry {
+diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+new file mode 100644
+index 000000000000..7bde6e85b609
+--- /dev/null
++++ b/fs/ceph/quota.c
+@@ -0,0 +1,63 @@
++/*
++ * quota.c - CephFS quota
++ *
++ * Copyright (C) 2017 SUSE
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "super.h"
++#include "mds_client.h"
++
++void ceph_handle_quota(struct ceph_mds_client *mdsc,
++		       struct ceph_mds_session *session,
++		       struct ceph_msg *msg)
++{
++	struct super_block *sb = mdsc->fsc->sb;
++	struct ceph_mds_quota *h = msg->front.iov_base;
++	struct ceph_vino vino;
++	struct inode *inode;
++	struct ceph_inode_info *ci;
++
++	if (msg->front.iov_len != sizeof(*h)) {
++		pr_err("ceph_handle_quota corrupt message mds%d len %d\n",
++		       session->s_mds, (int)msg->front.iov_len);
++		ceph_msg_dump(msg);
++		return;
++	}
++
++	/* lookup inode */
++	vino.ino = le64_to_cpu(h->ino);
++	vino.snap = CEPH_NOSNAP;
++	inode = ceph_find_inode(sb, vino);
++	if (!inode) {
++		pr_warn("Failed to find inode %llu\n", vino.ino);
++		return;
++	}
++	ci = ceph_inode(inode);
++
++	mutex_lock(&session->s_mutex);
++	session->s_seq++;
++	mutex_unlock(&session->s_mutex);
++
++	spin_lock(&ci->i_ceph_lock);
++	ci->i_rbytes = le64_to_cpu(h->rbytes);
++	ci->i_rfiles = le64_to_cpu(h->rfiles);
++	ci->i_rsubdirs = le64_to_cpu(h->rsubdirs);
++	ci->i_max_bytes = le64_to_cpu(h->max_bytes);
++	ci->i_max_files = le64_to_cpu(h->max_files);
++	spin_unlock(&ci->i_ceph_lock);
++
++	iput(inode);
++}
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 2beeec07fa76..f998b7f076cf 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -309,6 +309,9 @@ struct ceph_inode_info {
+ 	u64 i_rbytes, i_rfiles, i_rsubdirs;
+ 	u64 i_files, i_subdirs;
+ 
++	/* quotas */
++	u64 i_max_bytes, i_max_files;
++
+ 	struct rb_root i_fragtree;
+ 	int i_fragtree_nsplits;
+ 	struct mutex i_fragtree_mutex;
+@@ -1019,4 +1022,9 @@ extern int ceph_locks_to_pagelist(struct ceph_filelock *flocks,
+ extern int ceph_fs_debugfs_init(struct ceph_fs_client *client);
+ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
+ 
++/* quota.c */
++extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
++			      struct ceph_mds_session *session,
++			      struct ceph_msg *msg);
++
+ #endif /* _FS_CEPH_SUPER_H */
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index e1c4e0b12b4c..cfc3028be0fa 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -224,6 +224,31 @@ static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
+ 			(long)ci->i_rctime.tv_nsec);
+ }
+ 
++/* quotas */
++
++static bool ceph_vxattrcb_quota_exists(struct ceph_inode_info *ci)
++{
++	return (ci->i_max_files || ci->i_max_bytes);
++}
++
++static size_t ceph_vxattrcb_quota(struct ceph_inode_info *ci, char *val,
++				  size_t size)
++{
++	return snprintf(val, size, "max_bytes=%llu max_files=%llu",
++			ci->i_max_bytes, ci->i_max_files);
++}
++
++static size_t ceph_vxattrcb_quota_max_bytes(struct ceph_inode_info *ci,
++					    char *val, size_t size)
++{
++	return snprintf(val, size, "%llu", ci->i_max_bytes);
++}
++
++static size_t ceph_vxattrcb_quota_max_files(struct ceph_inode_info *ci,
++					    char *val, size_t size)
++{
++	return snprintf(val, size, "%llu", ci->i_max_files);
++}
+ 
+ #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
+ #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
+@@ -247,6 +272,15 @@ static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
+ 		.hidden = true,			\
+ 		.exists_cb = ceph_vxattrcb_layout_exists,	\
+ 	}
++#define XATTR_QUOTA_FIELD(_type, _name)					\
++	{								\
++		.name = CEPH_XATTR_NAME(_type, _name),			\
++		.name_size = sizeof (CEPH_XATTR_NAME(_type, _name)),	\
++		.getxattr_cb = ceph_vxattrcb_ ## _type ## _ ## _name,	\
++		.readonly = false,					\
++		.hidden = true,						\
++		.exists_cb = ceph_vxattrcb_quota_exists,		\
++	}
+ 
+ static struct ceph_vxattr ceph_dir_vxattrs[] = {
+ 	{
+@@ -270,6 +304,16 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
+ 	XATTR_NAME_CEPH(dir, rsubdirs),
+ 	XATTR_NAME_CEPH(dir, rbytes),
+ 	XATTR_NAME_CEPH(dir, rctime),
++	{
++		.name = "ceph.quota",
++		.name_size = sizeof("ceph.quota"),
++		.getxattr_cb = ceph_vxattrcb_quota,
++		.readonly = false,
++		.hidden = true,
++		.exists_cb = ceph_vxattrcb_quota_exists,
++	},
++	XATTR_QUOTA_FIELD(quota, max_bytes),
++	XATTR_QUOTA_FIELD(quota, max_files),
+ 	{ .name = NULL, 0 }	/* Required table terminator */
+ };
+ static size_t ceph_dir_vxattrs_name_size;	/* total size of all names */
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index 59042d5ac520..6acd46c36271 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -209,7 +209,8 @@ DEFINE_CEPH_FEATURE_DEPRECATED(63, 1, RESERVED_BROKEN, LUMINOUS) // client-facin
+ 	 CEPH_FEATURE_SERVER_JEWEL |		\
+ 	 CEPH_FEATURE_MON_STATEFUL_SUB |	\
+ 	 CEPH_FEATURE_CRUSH_TUNABLES5 |		\
+-	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING)
++	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING |	\
++	 CEPH_FEATURE_MDS_QUOTA)
+ 
+ #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+ 	(CEPH_FEATURE_NOSRCADDR |	 \
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 88dd51381aaf..98bdcc0eda3f 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -134,6 +134,7 @@ struct ceph_dir_layout {
+ #define CEPH_MSG_CLIENT_LEASE           0x311
+ #define CEPH_MSG_CLIENT_SNAP            0x312
+ #define CEPH_MSG_CLIENT_CAPRELEASE      0x313
++#define CEPH_MSG_CLIENT_QUOTA		0x314
+ 
+ /* pool ops */
+ #define CEPH_MSG_POOLOP_REPLY           48
+@@ -807,4 +808,20 @@ struct ceph_mds_snap_realm {
+ } __attribute__ ((packed));
+ /* followed by my snap list, then prior parent snap list */
+ 
++/*
++ * quotas
++ */
++struct ceph_mds_quota {
++	__le64 ino;		/* ino */
++	struct ceph_timespec rctime;
++	__le64 rbytes;		/* dir stats */
++	__le64 rfiles;
++	__le64 rsubdirs;
++	__u8 struct_v;		/* compat */
++	__u8 struct_compat;
++	__le32 struct_len;
++	__le64 max_bytes;	/* quota max. bytes */
++	__le64 max_files;	/* quota max. files */
++} __attribute__ ((packed));
++
+ #endif
