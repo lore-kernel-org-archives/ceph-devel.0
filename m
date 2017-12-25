@@ -1,118 +1,60 @@
-From: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
-Subject: RGW CreateBucket: AWS vs RGW, 200/409 responses
-Date: Mon, 25 Dec 2017 06:28:01 +0000
-Message-ID: <robbat2-20171225T061012-699561209Z@orbis-terrarum.net>
-References: <20171225035236.EF60F81000ED@webmail.sinamail.sina.com.cn>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Mon, 25 Dec 2017 22:43:27 +0800
+Message-ID: <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
+ <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
+ <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
+ <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
+ <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
+ <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
+ <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
+ <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
+ <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
+ <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
+ <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl> <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8434950916325065947=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20171225035236.EF60F81000ED-2RFepEojUI2gQzYKMK1YzK/p1tWXv8elb9TvmfFkwKk@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:44277 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752210AbdLYOn2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Dec 2017 09:43:28 -0500
+Received: by mail-qt0-f180.google.com with SMTP id m59so42890662qte.11
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Dec 2017 06:43:28 -0800 (PST)
+In-Reply-To: <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xuehan Xu <xxhdx1985126@gmail.com>
+Cc: Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
+On Sat, Dec 23, 2017 at 5:46 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+> Hi, everyone.
+>
+> I'm using CentOS 7 with devtoolset-7 to build ceph. However, I found
+> that the list::size() in my ceph executables is still counting the
+> number of nodes. It's so odd, I googled it, and found that this may
+> have something to do with _GLIBCXX_USE_CXX11_ABI. But even if I
+> explicitly set _GLIBCXX_USE_CXX11_ABI to 1 when building ceph, the
+> problem remains. It seems that _GLIBCXX_USE_CXX11_ABI is set to 0 by
+> gcc no matter how I build the source code, even with
+> -D_GLIBCXX_USE_CXX11_ABI=1.
 
---===============8434950916325065947==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="BtNCO5h84ExDStzY"
-Content-Disposition: inline
+Xuehan, thanks for testing!
 
+turns out the gcc-7 in devtoolset is compiled with
+"--with-default-libstdcxx-abi=gcc4-compatible", see the output of "g++
+-v", so it is using "_GLIBCXX_USE_CXX11_ABI=0", you can by checking
+/opt/rh/devtoolset-7/root/usr/include/c++/7/x86_64-redhat-linux/bits/c++config.h
+.
 
---BtNCO5h84ExDStzY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+in other words, we still need https://github.com/ceph/ceph/pull/18755.
 
-On Mon, Dec 25, 2017 at 11:52:36AM +0800, QR wrote:
-> Is anyone know the reason that ERR_BUCKET_EXISTS is modified to zero?
-> Thanks.
-This comes down to arguing about AWS S3 CreateBucket behavior if the
-bucket already existed and was owned by you (plus which region it is in
-vs where the request was made to).
-AWS S3 us-east-1: returns 200 OK
-AWS S3 other regions: return 409 Conflict: BucketAlreadyOwnedByYou
+>
+>
+> Does anyone have any clue? Thanks:-)
+>
 
-RGW implements the 200-OK behavior, which is why the return is modified
-to zero (ret=3D=3D0 -> HTTP 200 OK).
-
-I created issue 17398 a year ago to discuss it:
-http://tracker.ceph.com/issues/17398
-
-I see recently that issue 22279 was created for the same thing, with an
-attached PR, but the same discussion.
-http://tracker.ceph.com/issues/22279
-https://github.com/ceph/ceph/pull/19249
-
-Yehuda's opinion is that the 200-OK behavior is better, because
-CreateBucket should be an idempotent operation.
-
-My opinion is that the 409-BucketAlreadyOwnedByYou behavior is better,
-because the CreateBucket annoyingly is actually two operations:
-(CreateBucket, SetBucketACL).
-If the bucket does already exist, but the ACLs you pass in bucket
-creation are NOT the same as the existing bucket ACLs, what should
-happen?
-- Skip creation, skip ACLs? 200-OK response is dangerously misleading here.
-- Skip creation, replace ACLs? This is going to overwrite the existing
-  ACLs, rather than modify them.
-- Do nothing and issue a warning about ACL mismatch? Annoying in that
-  we're diverging more from AWS behavior.
-
-AWS S3 went to 409-BucketAlreadyOwnedByYou for a reason. They've never
-stated exactly why, but I believe their choice makes sense.
-
---=20
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Asst. Treasurer
-E-Mail   : robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
-
---BtNCO5h84ExDStzY
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
-
-iQKTBAEBCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlpAmnFfFIAAAAAALgAo
-aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
-RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
-JsQkdw//dTiOV/dVXKBzsozul9BSlUEo/It58D/2lxopP89xN91vDJw1fY8tCrFz
-QRO8cp5NoiNXuAc6DCBFwqciVsWCBuuZMkGI9dhaqDR8GedI9MyjX55EryKDnPud
-A64OiLhW1AncOXcnKTPOuWStPo+J9RxafteYBmawwjPH8MW9DSY68Uz6R8UMybDj
-Xw/I025sOCeN64iVpdCBukm3FH8DfLVe70SNAFNKG7hZJEsbgfxZyrh9goc8TJBU
-hpMi/LvR/oG6HXE6a/QcUNmX1thiVWi8JQIeIDLkD8fZgwOtq9RPYFu2SufKZm0p
-vKzw4QuzMpAFoGc5sIMrgOdmFPjpvkU5MTFXfLbdm1AYw/tPUQsOP11qSoSdFplw
-OWFPc5PHbBb4vH8IwdBnK5PBhwd+cPdAwLpOU5dX5/elGf4B3b7lyYC/FvQXWRns
-0PFgY4XajscAGhvdBoQBKkX3wQeWvRXAD75OHOLzW7DYNZKBjxtJpHsO+PuKjT83
-Pemnd9t2+8duq6P44FvinTupa6bcwv7BRM8+OnQy8N5gMG/GJ4FOlhV0dKSDLFRw
-Yzesifo5xa7fiCthIKv5J2RHoDQ3Jx24zBKZB1MkCok0fSLolmFIhQ/ApLZBMiIT
-ezrbDBqmodjNHO7rAHlZBkvGO1zARR8nZrUghmq5zLvyPhMdYKs=
-=sLVP
------END PGP SIGNATURE-----
-
---BtNCO5h84ExDStzY--
-
---===============8434950916325065947==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============8434950916325065947==--
+-- 
+Regards
+Kefu Chai
