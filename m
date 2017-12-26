@@ -1,82 +1,93 @@
-From: Zhi Zhang <zhang.david2011-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Bluestore: inaccurate disk usage statistics problem?
-Date: Tue, 26 Dec 2017 11:25:41 +0800
-Message-ID: <CAGkCoNLOPOKX3iO1QOTp4wyUN7=q-7VuamBxYyC9t9kvtTV-=g@mail.gmail.com>
+From: Xuehan Xu <xxhdx1985126@gmail.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Tue, 26 Dec 2017 14:35:19 +0800
+Message-ID: <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
+ <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
+ <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
+ <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
+ <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
+ <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
+ <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
+ <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
+ <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
+ <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
+ <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl> <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
+ <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com> <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ot0-f193.google.com ([74.125.82.193]:46355 "EHLO
+        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750924AbdLZGfU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Dec 2017 01:35:20 -0500
+Received: by mail-ot0-f193.google.com with SMTP id v40so19934431ote.13
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Dec 2017 22:35:20 -0800 (PST)
+In-Reply-To: <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi,
+Thanks for your reply, kefu:-)
 
-We recently started to test bluestore with huge amount of small files
-(only dozens of bytes per file). We have 22 OSDs in a test cluster
-using ceph-12.2.1 with 2 replicas and each OSD disk is 2TB size. After
-we wrote about 150 million files through cephfs, we found each OSD
-disk usage reported by "ceph osd df" was more than 40%, which meant
-more than 800GB was used for each disk, but the actual total file size
-was only about 5.2 GB, which was reported by "ceph df" and also
-calculated by ourselves.
+I checked /opt/rh/devtoolset-7/root/usr/include/c++/7/x86_64-redhat-linux/bits/c++config.h,
+and saw the following configuration:
 
-The test is ongoing. I wonder whether the cluster would report OSD
-full after we wrote about 300 million files, however the actual total
-file size would be far far less than the disk usage. I will update the
-result when the test is done.
+# define _GLIBCXX_USE_DUAL_ABI 0
 
-My question is, whether the disk usage statistics in bluestore is
-inaccurate, or the padding, alignment stuff or something else in
-bluestore wastes the disk space?
+#if ! _GLIBCXX_USE_DUAL_ABI
+// Ignore any pre-defined value of _GLIBCXX_USE_CXX11_ABI
+# undef _GLIBCXX_USE_CXX11_ABI
+#endif
 
-Thanks!
+#ifndef _GLIBCXX_USE_CXX11_ABI
+# define _GLIBCXX_USE_CXX11_ABI 0
+#endif
 
-$ ceph osd df
-ID CLASS WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE  VAR  PGS
- 0   hdd 1.49728  1.00000  1862G   853G  1009G 45.82 1.00 110
- 1   hdd 1.69193  1.00000  1862G   807G  1054G 43.37 0.94 105
- 2   hdd 1.81929  1.00000  1862G   811G  1051G 43.57 0.95 116
- 3   hdd 2.00700  1.00000  1862G   839G  1023G 45.04 0.98 122
- 4   hdd 2.06334  1.00000  1862G   886G   976G 47.58 1.03 130
- 5   hdd 1.99051  1.00000  1862G   856G  1006G 45.95 1.00 118
- 6   hdd 1.67519  1.00000  1862G   881G   981G 47.32 1.03 114
- 7   hdd 1.81929  1.00000  1862G   874G   988G 46.94 1.02 120
- 8   hdd 2.08881  1.00000  1862G   885G   976G 47.56 1.03 130
- 9   hdd 1.64265  1.00000  1862G   852G  1010G 45.78 0.99 106
-10   hdd 1.81929  1.00000  1862G   873G   989G 46.88 1.02 109
-11   hdd 2.20041  1.00000  1862G   915G   947G 49.13 1.07 131
-12   hdd 1.45694  1.00000  1862G   874G   988G 46.94 1.02 110
-13   hdd 2.03847  1.00000  1862G   821G  1041G 44.08 0.96 113
-14   hdd 1.53812  1.00000  1862G   810G  1052G 43.50 0.95 112
-15   hdd 1.52914  1.00000  1862G   874G   988G 46.94 1.02 111
-16   hdd 1.99176  1.00000  1862G   810G  1052G 43.51 0.95 114
-17   hdd 1.81929  1.00000  1862G   841G  1021G 45.16 0.98 119
-18   hdd 1.70901  1.00000  1862G   831G  1031G 44.61 0.97 113
-19   hdd 1.67519  1.00000  1862G   875G   987G 47.02 1.02 115
-20   hdd 2.03847  1.00000  1862G   864G   998G 46.39 1.01 115
-21   hdd 2.18794  1.00000  1862G   920G   942G 49.39 1.07 127
-                    TOTAL 40984G 18861G 22122G 46.02
+It seems that no matter how we config MAKEFILE or CMakeFile,
+_GLIBCXX_USE_CXX11_ABI would always be 0 under the circumstance.
+So I think https://github.com/ceph/ceph/pull/18755 is still needed.
 
-$ ceph df
-GLOBAL:
-    SIZE       AVAIL      RAW USED     %RAW USED
-    40984G     22122G       18861G         46.02
-POOLS:
-    NAME                ID     USED      %USED     MAX AVAIL     OBJECTS
-    cephfs_metadata     5       160M         0         6964G         77342
-    cephfs_data         6      5193M      0.04         6964G     151292669
+Is this right?
 
-
-Regards,
-Zhi Zhang (David)
-Contact: zhang.david2011-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-              zhangz.david-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org
+On 26 December 2017 at 00:38, kefu chai <tchaikov@gmail.com> wrote:
+> On Mon, Dec 25, 2017 at 10:43 PM, kefu chai <tchaikov@gmail.com> wrote:
+>> On Sat, Dec 23, 2017 at 5:46 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>>> Hi, everyone.
+>>>
+>>> I'm using CentOS 7 with devtoolset-7 to build ceph. However, I found
+>>> that the list::size() in my ceph executables is still counting the
+>>> number of nodes. It's so odd, I googled it, and found that this may
+>>> have something to do with _GLIBCXX_USE_CXX11_ABI. But even if I
+>>> explicitly set _GLIBCXX_USE_CXX11_ABI to 1 when building ceph, the
+>>> problem remains. It seems that _GLIBCXX_USE_CXX11_ABI is set to 0 by
+>>> gcc no matter how I build the source code, even with
+>>> -D_GLIBCXX_USE_CXX11_ABI=1.
+>>
+>> Xuehan, thanks for testing!
+>>
+>> turns out the gcc-7 in devtoolset is compiled with
+>> "--with-default-libstdcxx-abi=gcc4-compatible", see the output of "g++
+>> -v", so it is using "_GLIBCXX_USE_CXX11_ABI=0", you can by checking
+>> /opt/rh/devtoolset-7/root/usr/include/c++/7/x86_64-redhat-linux/bits/c++config.h
+>> .
+>>
+>> in other words, we still need https://github.com/ceph/ceph/pull/18755.
+>
+>
+> hmm, probably not.
+>
+>  add_definitions(-D_GLIBCXX_USE_CXX11_ABI=1)
+>
+> and
+>
+>  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fabi-version=0")
+>
+> might help. I will give it a try tomorrow.
+>
+>
+>
+> --
+> Regards
+> Kefu Chai
