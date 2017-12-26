@@ -1,79 +1,98 @@
-From: "Robin H. Johnson" <robbat2@gentoo.org>
-Subject: Re: RGW RFC: Multiple-Data-Pool Support for a Bucket
-Date: Tue, 26 Dec 2017 19:00:23 +0000
-Message-ID: <robbat2-20171226T185704-299365896Z@orbis-terrarum.net>
-References: <CAFZHTOYnOQgVsmsGXPL8dBwA-_Gc5q3fZ5V1CjfzRtQbs=tvgg@mail.gmail.com>
-Reply-To: ceph-devel@vger.kernel.org
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] Bluestore: inaccurate disk usage statistics
+ problem?
+Date: Tue, 26 Dec 2017 22:36:56 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1712261717190.14302@piezo.novalocal>
+References: <CAGkCoNLOPOKX3iO1QOTp4wyUN7=q-7VuamBxYyC9t9kvtTV-=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="bg08WKrSYDhXBjb5"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:60504 "EHLO smtp.gentoo.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751266AbdLZTA0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 26 Dec 2017 14:00:26 -0500
-Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA (128/128 bits))
-        (No client certificate requested)
-        by smtp.gentoo.org (Postfix) with ESMTPS id DD212341640
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Dec 2017 19:00:25 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CAFZHTOYnOQgVsmsGXPL8dBwA-_Gc5q3fZ5V1CjfzRtQbs=tvgg@mail.gmail.com>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:37906 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751122AbdLZWg7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Dec 2017 17:36:59 -0500
+In-Reply-To: <CAGkCoNLOPOKX3iO1QOTp4wyUN7=q-7VuamBxYyC9t9kvtTV-=g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Zhi Zhang <zhang.david2011@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
+On Tue, 26 Dec 2017, Zhi Zhang wrote:
+> Hi,
+> 
+> We recently started to test bluestore with huge amount of small files
+> (only dozens of bytes per file). We have 22 OSDs in a test cluster
+> using ceph-12.2.1 with 2 replicas and each OSD disk is 2TB size. After
+> we wrote about 150 million files through cephfs, we found each OSD
+> disk usage reported by "ceph osd df" was more than 40%, which meant
+> more than 800GB was used for each disk, but the actual total file size
+> was only about 5.2 GB, which was reported by "ceph df" and also
+> calculated by ourselves.
+> 
+> The test is ongoing. I wonder whether the cluster would report OSD
+> full after we wrote about 300 million files, however the actual total
+> file size would be far far less than the disk usage. I will update the
+> result when the test is done.
+> 
+> My question is, whether the disk usage statistics in bluestore is
+> inaccurate, or the padding, alignment stuff or something else in
+> bluestore wastes the disk space?
 
---bg08WKrSYDhXBjb5
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Bluestore isn't making any attempt to optimize for small files, so a 
+one byte file will consume min_alloc_size (64kb on HDD, 16kb on SSD, 
+IIRC).
 
-On Tue, Dec 26, 2017 at 09:48:26AM +0800, Jeegn Chen wrote:
-> In the daily use of Ceph RGW cluster, we find some pain points when
-> using current one-bucket-one-data-pool implementation.
-> I guess one-bucket-multiple-data-pools may help (See the appended
-> detailed proposal).
-> What do you think?
-Overall I like
+It probably wouldn't be too difficult to add an "inline" data for small 
+objects feature that puts small objects in rocksdb...
 
-Queries/concerns:
-- How would this interact w/ the bucket policy lifecycle code?
-- How would this interact w/ existing placement policy in bucket
-  creation?
-- At the rgw-admin layer, what tooling should exist to migrate objects
-  between pools for a given bucket?
+sage
 
---=20
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Asst. Treasurer
-E-Mail   : robbat2@gentoo.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
-
---bg08WKrSYDhXBjb5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
-
-iQKTBAEBCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlpCnEZfFIAAAAAALgAo
-aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
-RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
-JsSNOQ/+JlaISjiFZJwgPkHbQNiRlgUxfLfxjzdmBWkRaO5NsrySn0zFhPohfew9
-ZXTUpF/nhdQJw0yh1W6lSfZnUuG//ipZrzA8fAKA31M9YClzOnEAvnM7B37St6As
-ZkS2Tsuro2kFn7A+2XHMvn9Simp5Dtbol8deCopYupxMMtHSvLyRpLHldUs6Yj67
-6/xFIN0/QUgVhokClZvS7zkOMKnBAoS9rFA94A2tRn5zT4JLzYv+fl4XOaAeNLoK
-eGdjMdTL9rhpvKxTz80F5Okr0b4eOBoJVrYgI+M27UX/i6Si0GQ4U1jqdvpoUgmX
-Sw7z/r1hqnFrcdw09ePoeGIKnykVaoxgjHIEx+if9Ov7SO0e7GdnzsTJoohqQfXe
-YqCaCYMYtCJ85GLZVsrhI1/Ci75vkngKjuOB007s6zTblc5sKMbbHIDjS89jm52G
-sMd6dKBSmYAZeRrLgEvmXuJoIGOhtYCobhGl8+QQqxfxGSYaAoVXgcRCMky2bwqS
-BqfaWJ6mk1hm7wOZ6QPeG8HM1MG48ECA58BB5U5PTP2wAsu2lUOjDUD6NT4eceoz
-AQD85oe9lVXhdQyj6zVNHI0x1YKgnyqcynSBZuE1q3r5Jazu+xOam21C9GZcXlHS
-Noj8H95U7oa+JbiUEp2fQRixa8QIQB9iYj8nFtlbCkPm1K9jYRA=
-=skMy
------END PGP SIGNATURE-----
-
---bg08WKrSYDhXBjb5--
+> 
+> Thanks!
+> 
+> $ ceph osd df
+> ID CLASS WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE  VAR  PGS
+>  0   hdd 1.49728  1.00000  1862G   853G  1009G 45.82 1.00 110
+>  1   hdd 1.69193  1.00000  1862G   807G  1054G 43.37 0.94 105
+>  2   hdd 1.81929  1.00000  1862G   811G  1051G 43.57 0.95 116
+>  3   hdd 2.00700  1.00000  1862G   839G  1023G 45.04 0.98 122
+>  4   hdd 2.06334  1.00000  1862G   886G   976G 47.58 1.03 130
+>  5   hdd 1.99051  1.00000  1862G   856G  1006G 45.95 1.00 118
+>  6   hdd 1.67519  1.00000  1862G   881G   981G 47.32 1.03 114
+>  7   hdd 1.81929  1.00000  1862G   874G   988G 46.94 1.02 120
+>  8   hdd 2.08881  1.00000  1862G   885G   976G 47.56 1.03 130
+>  9   hdd 1.64265  1.00000  1862G   852G  1010G 45.78 0.99 106
+> 10   hdd 1.81929  1.00000  1862G   873G   989G 46.88 1.02 109
+> 11   hdd 2.20041  1.00000  1862G   915G   947G 49.13 1.07 131
+> 12   hdd 1.45694  1.00000  1862G   874G   988G 46.94 1.02 110
+> 13   hdd 2.03847  1.00000  1862G   821G  1041G 44.08 0.96 113
+> 14   hdd 1.53812  1.00000  1862G   810G  1052G 43.50 0.95 112
+> 15   hdd 1.52914  1.00000  1862G   874G   988G 46.94 1.02 111
+> 16   hdd 1.99176  1.00000  1862G   810G  1052G 43.51 0.95 114
+> 17   hdd 1.81929  1.00000  1862G   841G  1021G 45.16 0.98 119
+> 18   hdd 1.70901  1.00000  1862G   831G  1031G 44.61 0.97 113
+> 19   hdd 1.67519  1.00000  1862G   875G   987G 47.02 1.02 115
+> 20   hdd 2.03847  1.00000  1862G   864G   998G 46.39 1.01 115
+> 21   hdd 2.18794  1.00000  1862G   920G   942G 49.39 1.07 127
+>                     TOTAL 40984G 18861G 22122G 46.02
+> 
+> $ ceph df
+> GLOBAL:
+>     SIZE       AVAIL      RAW USED     %RAW USED
+>     40984G     22122G       18861G         46.02
+> POOLS:
+>     NAME                ID     USED      %USED     MAX AVAIL     OBJECTS
+>     cephfs_metadata     5       160M         0         6964G         77342
+>     cephfs_data         6      5193M      0.04         6964G     151292669
+> 
+> 
+> Regards,
+> Zhi Zhang (David)
+> Contact: zhang.david2011@gmail.com
+>               zhangz.david@outlook.com
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
