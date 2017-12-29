@@ -1,104 +1,203 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Thu, 28 Dec 2017 01:57:26 +0000 (UTC)
-Message-ID: <5a444f8636125_7dc973330566d0@ss1435.mail>
+From: Jeegn Chen <jeegnchen@gmail.com>
+Subject: Re: RGW RFC: Multiple-Data-Pool Support for a Bucket
+Date: Fri, 29 Dec 2017 11:08:45 +0800
+Message-ID: <CAFZHTOYwnOy6y4hL9mqEdcmxhmBsHWrX2eDZxsrwq-Ly21eT=g@mail.gmail.com>
+References: <CAFZHTOYnOQgVsmsGXPL8dBwA-_Gc5q3fZ5V1CjfzRtQbs=tvgg@mail.gmail.com>
+ <CAOi4hNcp6b-r2OqrExCoxNyBv9HtwivCm1xm+Jh=xu1_YJA3ZQ@mail.gmail.com>
+ <CAFZHTOYrJ0VdjrU5Yne3ZKL1Go0Hb8uJ3Xdzk8NPkwJwPrdueA@mail.gmail.com> <CAOi4hNc5Romj5BMJgp6W=OOoW_08b27PDHoymu+00Ok_Mq14xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o1.hv1nn.shared.sendgrid.net ([167.89.100.169]:50221 "EHLO
-        o1.hv1nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752670AbdL1B51 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 27 Dec 2017 20:57:27 -0500
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0008p1sjc2.sendgrid.net (SG) with ESMTP id YiWt8QCDR0Ggizquz3czMw
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Dec 2017 01:57:26.267 +0000 (UTC)
+Received: from mail-pl0-f42.google.com ([209.85.160.42]:39732 "EHLO
+        mail-pl0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754700AbdL2DIq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Dec 2017 22:08:46 -0500
+Received: by mail-pl0-f42.google.com with SMTP id bi12so22262973plb.6
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Dec 2017 19:08:46 -0800 (PST)
+In-Reply-To: <CAOi4hNc5Romj5BMJgp6W=OOoW_08b27PDHoymu+00Ok_Mq14xA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: yuxiang fang <abcdeffyx@gmail.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+The failure domain of the pools is out of control of RGW. Admins can
+create the pools in the way their prefer. This proposal just give more
+flexibility and possibility.
 
-Hi,
+I think multiple pools support may just be a experimental start. If it
+works stably in production area, we may even extend it to support
+STORAGE CLASS (The same bucket have objects in different pools
+according to the STORAGE CLASS) in S3  in the future and then
+leveraging lifecycle to move objects between different STORAGE CLASS
+may also be possible (of course, more careful design may be needed
+make the new complexity elegant).
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+Thanks,
+Jeegn
 
-3 new defect(s) introduced to ceph found with Coverity Scan.
-5 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 3 of 3 defect(s)
-
-
-** CID 1426995:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1426995:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/librbd/trash_watcher/Types.cc: 72 in librbd::trash_watcher::NotifyMessage::encode(ceph::buffer::list &) const()
-66     }
-67     
-68     void UnknownPayload::dump(Formatter *f) const {
-69     }
-70     
-71     void NotifyMessage::encode(bufferlist& bl) const {
->>>     CID 1426995:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-72       ENCODE_START(1, 1, bl);
-73       boost::apply_visitor(watcher::util::EncodePayloadVisitor(bl), payload);
-74       ENCODE_FINISH(bl);
-75     }
-76     
-77     void NotifyMessage::decode(bufferlist::iterator& iter) {
-
-** CID 1426996:  Error handling issues  (UNCAUGHT_EXCEPT)
-/home/brad/working/src/ceph/src/librbd/internal.cc: 994 in librbd::rename(librados::IoCtx &, const char *, const char *)::boost_se_guard_t_994::~boost_se_guard_t_994()()
-
-
-________________________________________________________________________________________________________
-*** CID 1426996:  Error handling issues  (UNCAUGHT_EXCEPT)
-/home/brad/working/src/ceph/src/librbd/internal.cc: 994 in librbd::rename(librados::IoCtx &, const char *, const char *)::boost_se_guard_t_994::~boost_se_guard_t_994()()
-988         ImageCtx *ictx = new ImageCtx(srcname, "", "", io_ctx, false);
-989         int r = ictx->state->open(false);
-990         if (r < 0) {
-991           lderr(cct) << "error opening source image: " << cpp_strerror(r) << dendl;
-992           return r;
-993         }
->>>     CID 1426996:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     An exception of type "ceph::buffer::end_of_buffer" is thrown but the throw list "throw()" doesn't allow it to be thrown. This will cause a call to unexpected() which usually calls terminate().
-994         BOOST_SCOPE_EXIT((ictx)) {
-995           ictx->state->close();
-996         } BOOST_SCOPE_EXIT_END
-997     
-998         return ictx->operations->rename(dstname);
-999       }
-
-** CID 1426997:  Error handling issues  (UNCAUGHT_EXCEPT)
-/home/brad/working/src/ceph/src/tools/rbd_mirror/PoolReplayer.cc: 187 in rbd::mirror::<unnamed>::PoolReplayerAdminSocketHook::~PoolReplayerAdminSocketHook()()
-
-
-________________________________________________________________________________________________________
-*** CID 1426997:  Error handling issues  (UNCAUGHT_EXCEPT)
-/home/brad/working/src/ceph/src/tools/rbd_mirror/PoolReplayer.cc: 187 in rbd::mirror::<unnamed>::PoolReplayerAdminSocketHook::~PoolReplayerAdminSocketHook()()
-181                                            "release rbd mirror leader " + name);
-182         if (r == 0) {
-183           commands[command] = new LeaderReleaseCommand(pool_replayer);
-184         }
-185       }
-186     
->>>     CID 1426997:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     An exception of type "_ZN5boost16exception_detail10clone_implINS0_19error_info_injectorINSt8ios_base7failureB5cxx11EEEEE" is thrown but the throw list "throw()" doesn't allow it to be thrown. This will cause a call to unexpected() which usually calls terminate().
-187       ~PoolReplayerAdminSocketHook() override {
-188         for (Commands::const_iterator i = commands.begin(); i != commands.end();
-189     	 ++i) {
-190           (void)admin_socket->unregister_command(i->first);
-191           delete i->second;
-192         }
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GMWy0YeE5eJH0rPzK6A-2BTFQSvV2yEgiPICHbqweeYATl-2FI-2BaZcSqixT7Y5Tx5dSFWyhe5blkK8i6NAFaL5qRqoHtDgYlzD-2BIQmuBRVGIiy0KeDk-2FP0xngE3vJfz00ghRHd-2BFWinQWCK2Iq1bKjeWN54gOs0R8TkrfRDVNksqKRg88ovleS6D6KHfK2bcepN4E-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9OVG2ZVnjrgThgf5hX3GVEkIxvBX-2BorwRZfOftSp7HPfCifRGGak1MlgNFVd3IIPA-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GMWy0YeE5eJH0rPzK6A-2BTFQSvV2yEgiPICHbqweeYATknZ8oYX4VBVrwSHvtIAlxsc7okjveriAFolv-2Bh5XswQjjrv5SCc3cHvB9LPXYbLNds5AxAGi-2BQEGaxZy-2Bw-2FC-2BKfD1TS8B237lxhjeseHwWun8HAwGOyq4f293YKtLFdtXbAbTdAhSlNPTPvhsfBYP4-3D
-
+2017-12-27 15:51 GMT+08:00 yuxiang fang <abcdeffyx@gmail.com>:
+> Hi Jeegn
+>
+> Seems a bit rigor.
+> thanks
+> ivan from eisoo
+>
+>
+> On Wed, Dec 27, 2017 at 2:50 PM, Jeegn Chen <jeegnchen@gmail.com> wrote:
+>> Hi Ivan,
+>>
+>> In the use case, we expected the Pool A and Pool B have different sets
+>> of OSDs and different sets of hosts or racks are even recommended.
+>>
+>> Thanks,
+>> Jeegn
+>>
+>> 2017-12-27 14:01 GMT+08:00 yuxiang fang <abcdeffyx@gmail.com>:
+>>> Hi Jeegn
+>>>
+>>> It seems that new nodes have to be added to the same failure domain of
+>>> Pool B, otherwise we can't expand the capacity.
+>>> Then Pool B will be affected by recovery of Pool A, they are different
+>>> Pools logically but distributed in same failure domain.
+>>>
+>>> thanks
+>>> ivan from eisoo
+>>>
+>>>
+>>> On Tue, Dec 26, 2017 at 9:48 AM, Jeegn Chen <jeegnchen@gmail.com> wrote:
+>>>> Hi all,
+>>>>
+>>>> In the daily use of Ceph RGW cluster, we find some pain points when
+>>>> using current one-bucket-one-data-pool implementation.
+>>>> I guess one-bucket-multiple-data-pools may help (See the appended
+>>>> detailed proposal).
+>>>> What do you think?
+>>>>
+>>>>
+>>>>  https://etherpad.net/p/multiple-data-pool-support-for-a-bucket
+>>>>
+>>>> # **Multiple Data Pool Support for a Bucket**
+>>>>
+>>>> ##
+>>>>
+>>>> ## Motivation
+>>>>
+>>>> Currently, a bucket in RGW only has a single data pool (extra data
+>>>> pool is just a temporary storage for in-progressing multipart meta
+>>>> data, which is not in our consideration). The major pain points here
+>>>> are:
+>>>>
+>>>> - When the data pool is out of storage and we have to expand it, we
+>>>> either have to tolerate the performance penalty due to high recovery
+>>>> IO or have to wait for a long time for the rebalance to complete(This
+>>>> situation is especially true when the original cluster is relatively
+>>>> small and the expansion usually means doubling the size).
+>>>>
+>>>>
+>>>> - Although the new nodes increase the storage capacity, they also
+>>>> reduce the average PG number per OSD, which may make the data
+>>>> distribution uneven. To address this ,we either have to reweight or
+>>>> have to increase the PG number, which means another data movement.
+>>>>
+>>>> If a bucket can have multiple data pools and switch between them, the
+>>>> maintenance may be easier:
+>>>>
+>>>> - The cluster admin can simply add new nodes, create another data pool
+>>>> and then make buckets write to the new pool. Thus no rebalance is
+>>>> needed and in turn the expansion is quick and almost has no observable
+>>>> impact on the bucket user.
+>>>>
+>>>>
+>>>> - Say a bucket have 2 data pools: Pool A and Pool B. Some maintence is
+>>>> needed for the nodes of both pools. The admin can make write operation
+>>>> go to Pool B (read cannot be switched since data is not moved),
+>>>> operate the nodes of Pool A, then switch the write IO back to Pool A,
+>>>> goes on to operates the nodes of Pool B, so that the maintenance
+>>>> operations may be carried out without high write IO interference and
+>>>> in turn the risk and difficulties are reduced.
+>>>>
+>>>> ## Design
+>>>>
+>>>> "Multiple Data Pool" is borrowed from CephFS. Any directory in CephFS
+>>>> can have its data pool and the data pool can be replaced any time.
+>>>> After the data pool switch, the new file written to the directory is
+>>>> persisted into the new pool while the old file in the previous pool is
+>>>> still accessible since metadata in meta pool has the correct
+>>>> reference.
+>>>>
+>>>> The major idea to support multiple data pool for a bucket is
+>>>>
+>>>> - Reuse the the existing data_pool to store the head, which always has
+>>>> 0 size but keeps the manifest referring to the data part in another
+>>>> pool.
+>>>>
+>>>>
+>>>> - Add a new concept tail_pool, which is used to store the data except the heads.
+>>>>
+>>>>
+>>>> - The data_pool of a bucket (now only has the heads, is in fact a
+>>>> metadata pool or a head pool) should not be changed but the bucket can
+>>>> switch between different tail_pools.
+>>>>
+>>>> ### Change in RGWZonePlacementInfo
+>>>>
+>>>> - Add a new field data_layout_type to RGWZonePlacementInfo. The
+>>>> default value for data_layout_type is 0 (name it as UNIFIED), which
+>>>> means current implementation. Let's use value 1 (name it as SPLITTED)
+>>>> for Multiple Data Pool Support.
+>>>>
+>>>>
+>>>> - Add a new field tail_pools, which is a list of pool names.
+>>>>
+>>>>
+>>>> - Add a new field current_tail_pool, which is one of the pool names in
+>>>> tail_pools.
+>>>>
+>>>> ###
+>>>>
+>>>> ### Change in Object Head
+>>>>
+>>>> Add a new xattr usr.rgw.tail_pool, which refer to the pool where the
+>>>> tail parts of the object reside.
+>>>>
+>>>> ### Change in Multipart Meta Object
+>>>>
+>>>> Add a new xattr usr.rgw.tail_pool, which refer to the pool where the
+>>>> multiparts of the object reside. This value should be decided in
+>>>> InitMulitpart and be followed by other operations against the same
+>>>> upload ID of the same object.
+>>>>
+>>>> ### Change in Write Operations
+>>>>
+>>>> If a bucket's data_layout_type is SPLITTED (and has no
+>>>> explicit_placment), only write 0-size head (including
+>>>> usr.rgw.tail_pool and all other xattrs) to data_pool and persist the
+>>>> tail in current_tail_pool.
+>>>>
+>>>> For efficiency, it is recommended to use replicated pool on SSD as data_pool.
+>>>>
+>>>> ### Change in Read Operations
+>>>>
+>>>> If a bucket's data_layout_type is SPLITTED (and has no
+>>>> explicit_placment), read the tail parts according to usr.rgw.tail_pool
+>>>> in the head.
+>>>>
+>>>> ###
+>>>>
+>>>> ### Change in GC
+>>>>
+>>>> If a bucket's data_layout_type is SPLITTED (and has no
+>>>> explicit_placment), the correct user.rgw.tail_pool should be record in
+>>>> GC list as well so that GC thread can remove tail parts correctly.
+>>>>
+>>>> ### Change in radosgw-admin
+>>>>
+>>>> Need new commands to modify and show modified RGWZonePlacementInfo(Add
+>>>> new pool to tail_pools, change current_tail_pool and so on)
+>>>>
+>>>> Thanks,
+>>>> Jeegn
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
