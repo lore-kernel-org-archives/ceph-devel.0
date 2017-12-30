@@ -1,27 +1,38 @@
-From: Loretta Robles <Loretta.Robles@hci.utah.edu>
-Subject: RE: ATTENTION!!!
-Date: Sat, 30 Dec 2017 00:28:56 +0000
-Message-ID: <35D4F79A8B8138489F38DE5CF6200454E572AB2F__30644.22628745$1514594422$gmane$org@HCI-EX-MB2.hci.utah.edu>
-References: <35D4F79A8B8138489F38DE5CF6200454E570015C@HCI-EX-MB2.hci.utah.edu>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Moving to Boost 1.66 on FreeBSD
+Date: Sat, 30 Dec 2017 01:47:09 +0100
+Message-ID: <17cd45dd-8540-ae51-b042-70df9ab32f3f@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ipo7.cc.utah.edu ([155.97.144.42]:56546 "EHLO ipo7.cc.utah.edu"
+Received: from smtp.digiware.nl ([176.74.240.9]:18715 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750709AbdL3AlD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 29 Dec 2017 19:41:03 -0500
-In-Reply-To: <35D4F79A8B8138489F38DE5CF6200454E570015C@HCI-EX-MB2.hci.utah.edu>
-Content-Language: en-US
+        id S1750815AbdL3ArJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 29 Dec 2017 19:47:09 -0500
+Received: from [192.168.11.152] (unknown [192.168.11.152])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 91D942E44C
+        for <ceph-devel@vger.kernel.org>; Sat, 30 Dec 2017 01:47:07 +0100 (CET)
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loretta Robles <Loretta.Robles@hci.utah.edu>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+Hi
 
-________________________________
-From: Loretta Robles
-Sent: Friday, December 29, 2017 1:01 PM
-To: Loretta Robles
-Subject: ATTENTION!!!
+I know that we are going to phase out the old Beast lib, and go for the 
+Beast implementation that is in 1.66... Or at least that is what I seem 
+te remember from some messages on the list that I responded too.
 
-You have been randomly selected for a donation. Contact soriz4040@gmail.com for claims.
+Now FreeBSD is running tests to see what ports will not build when the 
+default is upped to 1.66, and needless to say is that my v12.2.{0,1,2} 
+ceph port fails. :(
+
+So how far are we in this process?
+
+And how big would the breakage be if v12.2.x would be build against a 1.66?
+First errors while building are about Boost::asio.
+
+--WjW
