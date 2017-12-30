@@ -1,29 +1,27 @@
-From: maxwell miller <gk.maring@gmail.com>
-Subject: Questions about Tier evict
-Date: Fri, 29 Dec 2017 16:50:12 +0800
-Message-ID: <CAOvCcb4YPEx8u4wpuSkzraKKMK4vQf9FmiQCZQioYYgaMRYg2A@mail.gmail.com>
+From: Loretta Robles <Loretta.Robles@hci.utah.edu>
+Subject: RE: ATTENTION!!!
+Date: Sat, 30 Dec 2017 00:28:56 +0000
+Message-ID: <35D4F79A8B8138489F38DE5CF6200454E572AB2F__30644.22628745$1514594422$gmane$org@HCI-EX-MB2.hci.utah.edu>
+References: <35D4F79A8B8138489F38DE5CF6200454E570015C@HCI-EX-MB2.hci.utah.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f172.google.com ([209.85.213.172]:39550 "EHLO
-        mail-yb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754932AbdL2IuN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Dec 2017 03:50:13 -0500
-Received: by mail-yb0-f172.google.com with SMTP id f201so3784591ybg.6
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Dec 2017 00:50:13 -0800 (PST)
+Received: from ipo7.cc.utah.edu ([155.97.144.42]:56546 "EHLO ipo7.cc.utah.edu"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750709AbdL3AlD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 29 Dec 2017 19:41:03 -0500
+In-Reply-To: <35D4F79A8B8138489F38DE5CF6200454E570015C@HCI-EX-MB2.hci.utah.edu>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loretta Robles <Loretta.Robles@hci.utah.edu>
 
-Hi,
 
-      After reading Ceph Tier logical,  I wonder what would happen if
-flush_mode = FLUSH_MODE_IDLE, evict_mode = EVICT_MODE_SOME and all the
-low-temperature objects are dirty?  Would agent do an infinite evict
-cycle without evicting anything?
+________________________________
+From: Loretta Robles
+Sent: Friday, December 29, 2017 1:01 PM
+To: Loretta Robles
+Subject: ATTENTION!!!
 
-      If so, could we trigger agent_maybe_flush in agent_maybe_evict?
-
-      Thanks for providing the hints.
-
-Hanjie Zhou
+You have been randomly selected for a donation. Contact soriz4040@gmail.com for claims.
