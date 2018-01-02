@@ -1,80 +1,52 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Moving to 1.66 Boost
-Date: Tue, 2 Jan 2018 18:11:46 +0100
-Message-ID: <3d5eb231-4688-fa9c-1daa-02a19e8de30c@digiware.nl>
-References: <b4b3abf8-d7db-7037-a589-38c9563f078c@digiware.nl>
- <CAJE9aOMaKpOyy180hSV39eebnpWShWHE821qT00WmYXgnqbFxw@mail.gmail.com>
- <326bc270-7ccd-947d-a0e5-57bf44f93d37@digiware.nl>
- <210a83ee-b767-54fc-fea9-2ef3decaff1c@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Tue, 2 Jan 2018 17:31:11 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1801021722370.8186@piezo.novalocal>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal> <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal> <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
+ <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl> <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com> <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl>
+ <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com> <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com> <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com> <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com>
+ <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com> <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com> <CAJE9aOMLUUM=ja+L7QCLmuDsTGZtvRBNJ+RmoWRW=O2sCsjRMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:46888 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:60324 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750968AbeABRLs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 2 Jan 2018 12:11:48 -0500
-In-Reply-To: <210a83ee-b767-54fc-fea9-2ef3decaff1c@redhat.com>
-Content-Language: en-US
+        id S1751390AbeABRbO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 2 Jan 2018 12:31:14 -0500
+In-Reply-To: <CAJE9aOMLUUM=ja+L7QCLmuDsTGZtvRBNJ+RmoWRW=O2sCsjRMw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, kefu chai <tchaikov@gmail.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Ken Dreyer <kdreyer@redhat.com>, Xuehan Xu <xxhdx1985126@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Nathan Cutler <ncutler@suse.cz>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On 2-1-2018 17:13, Casey Bodley wrote:
+On Tue, 2 Jan 2018, kefu chai wrote:
+> On Tue, Jan 2, 2018 at 11:28 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> > On Tue, Dec 26, 2017 at 4:24 AM, kefu chai <tchaikov@gmail.com> wrote:
+> >> right. unless we swing our own homebrew gcc-7.
+> >
+> > Can we ask the devtoolset maintainers to change this option?
+> >
+> > I imagine they would be interested in this type of feedback from the field.
 > 
-> 
-> On 01/01/2018 06:13 AM, Willem Jan Withagen wrote:
->> On 31/12/2017 06:30, kefu chai wrote:
->>> + ceph-devl
->>>
->>> On Wed, Dec 27, 2017 at 5:47 PM, Willem Jan Withagen
->>> <wjw@digiware.nl> wrote:
->>>> Hi Kefu,
->>>>
->>>> In FreeBSD the portmanager of Boost wants to move to 1.66, and so
->>>> normally
->>>> they do a test run on all 33.000 ports to see what breaks.
->>>>
->>>> Now one of the things that breaks is Ceph, but i a way I do not
->>>> understand...
->>>>
->>>> When linking ceph-common references to the /usr/local/lib/libboost_*.so
->>>> files on Boost 1.65 are now replaced by -lBoost::thread invocations
->>>> 1.66??
->>>
->>> could you pastebin the error message? Boost::thread is the library
->>> name. but I
->>> don't think it can be passed to the linker. if you see this in the
->>> command line,
->>> something is wrong.
->>
->> It was the now traditional problem that a CMake upgrade does not run
->> in sync with Boost upgrades. Took quite some runs, but now FreeBSD
->> ports is at 12.2.2, and in preparation on the 1.66 Boost release it
->> builds without Beast by execluding WITH_RADOSGW_BEAST_FRONTEND.
->>
->> Which will be switched back on once the 1.66 Beast works with v12.2.2.
->>
-> 
-> Okay, thanks. The rgw/beast changes for boost 1.66 are staged in
-> https://github.com/ceph/ceph/pull/19054. If there are delays in merging
-> that, I'm happy to pull them into a separate pr. And thanks for pointing
-> out that we'll need to backport those pieces for luminous.
+> https://git.centos.org/blob/rpms!devtoolset-7-gcc.git/2e5ef6c7934d4417e095855478736742b35bd0af/SPECS!gcc.spec#L1026
 
-Right,
+For reference,
 
-If that/backporting is possible, then I can switch Beast back on for
-Luminous. And everything comes back into sync...
+```
+  # Force the old ABI unconditionally, the new one does not work in the
+  # libstdc++_nonshared.a model against RHEL 6/7 libstdc++.so.6.
+  sed -i -e 's/\(define[[:blank:]]*_GLIBCXX_USE_DUAL_ABI[[:blank:]]*\)1/\10/' $f
+```
 
-The WITH_RADOSGW_BEAST_FRONTEND switch made it very convenient to let
-FreeBSD (prepare to) move to 1.66 without Ceph package building being
-disabled. And now everybody can do "its thing(tm)" without blocking
-dependencies.
+> I think we need to think about this before sending any inquiries to them.
 
-When I have a bit more time and #19054 is not merged by then, I'll take
-a stab at it.
+The problem I see is that it is impossible to write/build many native 
+C++11 (or 14 or 17) apps with the toolchain since the old ABI precludes 
+O(1) std::list.  
 
-Thanx,
---WjW
+If I'm following the _nonshared thing, it's a feature that lets you build 
+with teh new toolchain but deploy on systems with much older libstdc++ 
+installed (new symbols are statically instead of dynamically linked).  
+Is the problem with the "dual ABI" feature?
 
-
+sage
