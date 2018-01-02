@@ -1,36 +1,49 @@
-From: Jan Fajerski <jfajerski@suse.com>
-Subject: formatting bytes and object counts in ceph status ouput
-Date: Tue, 2 Jan 2018 11:43:03 +0100
-Message-ID: <20180102104303.hr4ohy2dkxapj6id@jf_suse_laptop>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: formatting bytes and object counts in ceph status
+ ouput
+Date: Tue, 2 Jan 2018 11:51:41 +0100
+Message-ID: <f5e949e1-5d84-6fca-55d5-f7d1f6013f71@corp.ovh.com>
+References: <20180102104303.hr4ohy2dkxapj6id@jf_suse_laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:60694 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752117AbeABKng (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 2 Jan 2018 05:43:36 -0500
-Content-Disposition: inline
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Ceph-Users <ceph-users@ceph.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20180102104303.hr4ohy2dkxapj6id@jf_suse_laptop>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi lists,
-Currently the ceph status output formats all numbers with binary unit prefixes, 
-i.e. 1MB equals 1048576 bytes and an object count of 1M equals 1048576 objects.  
-I received a bug report from a user that printing object counts with a base 2 
-multiplier is confusing (I agree) so I opened a bug and 
-https://github.com/ceph/ceph/pull/19117.
-In the PR discussion a couple of questions arose that I'd like to get some 
-opinions on:
-- Should we print binary unit prefixes (MiB, GiB, ...) since that would be 
-  technically correct?
-- Should counters (like object counts) be formatted with a base 10 multiplier or 
-  a multiplier woth base 2?
-
-My proposal would be to both use binary unit prefixes and use base 10 
-multipliers for counters. I think this aligns with user expectations as well as 
-the relevant standard(s?).
-
-Best,
-Jan
+T24gMTgtMDEtMDIgMTE6NDMgQU0sIEphbiBGYWplcnNraSB3cm90ZToKPiBIaSBsaXN0cywKPiBD
+dXJyZW50bHkgdGhlIGNlcGggc3RhdHVzIG91dHB1dCBmb3JtYXRzIGFsbCBudW1iZXJzIHdpdGgg
+YmluYXJ5IHVuaXQgCj4gcHJlZml4ZXMsIGkuZS4gMU1CIGVxdWFscyAxMDQ4NTc2IGJ5dGVzIGFu
+ZCBhbiBvYmplY3QgY291bnQgb2YgMU0gZXF1YWxzIAo+IDEwNDg1NzYgb2JqZWN0cy4gSSByZWNl
+aXZlZCBhIGJ1ZyByZXBvcnQgZnJvbSBhIHVzZXIgdGhhdCBwcmludGluZyBvYmplY3QgCj4gY291
+bnRzIHdpdGggYSBiYXNlIDIgbXVsdGlwbGllciBpcyBjb25mdXNpbmcgKEkgYWdyZWUpIHNvIEkg
+b3BlbmVkIGEgYnVnIGFuZCAKPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTkx
+MTcuCj4gSW4gdGhlIFBSIGRpc2N1c3Npb24gYSBjb3VwbGUgb2YgcXVlc3Rpb25zIGFyb3NlIHRo
+YXQgSSdkIGxpa2UgdG8gZ2V0IHNvbWUgCj4gb3BpbmlvbnMgb246Cj4gLSBTaG91bGQgd2UgcHJp
+bnQgYmluYXJ5IHVuaXQgcHJlZml4ZXMgKE1pQiwgR2lCLCAuLi4pIHNpbmNlIHRoYXQgd291bGQg
+YmUgCj4gIMKgdGVjaG5pY2FsbHkgY29ycmVjdD8KCisxCgo+IC0gU2hvdWxkIGNvdW50ZXJzIChs
+aWtlIG9iamVjdCBjb3VudHMpIGJlIGZvcm1hdHRlZCB3aXRoIGEgYmFzZSAxMCAKPiBtdWx0aXBs
+aWVyIG9yIMKgYSBtdWx0aXBsaWVyIHdvdGggYmFzZSAyPwoKKzEKCj4gTXkgcHJvcG9zYWwgd291
+bGQgYmUgdG8gYm90aCB1c2UgYmluYXJ5IHVuaXQgcHJlZml4ZXMgYW5kIHVzZSBiYXNlIDEwIAo+
+IG11bHRpcGxpZXJzIGZvciBjb3VudGVycy4gSSB0aGluayB0aGlzIGFsaWducyB3aXRoIHVzZXIg
+ZXhwZWN0YXRpb25zIGFzIHdlbGwgCj4gYXMgdGhlIHJlbGV2YW50IHN0YW5kYXJkKHM/KS4KCk1v
+c3QgdXNlcnMgZXhwZWN0IHRoYXQgbm9uLXNpemUgY291bnRlcnMgLSBsaWtlIG9iamVjdCBjb3Vu
+dHMgLSB1c2UgYmFzZS0xMCwgCmFuZCBzaXplIGNvdW50ZXJzIHVzZSBiYXNlLTIgdW5pdHMuIENl
+cGgncyAic3RhbmRhcmQiIG9mIHVzaW5nIGJhc2UtMiAKZXZlcnl3aGVyZSB3YXMgY29uZnVzaW5n
+IGZvciBtZSBhcyB3ZWxsIGluaXRpYWxseSwgYnV0IEkgZ290IHVzZWQgdG8gdGhhdC4uLiAKU3Rp
+bGwsIHdvdWxkbid0IG1pbmQgaWYgdGhhdCB3b3VsZCBnZXQgc29ydGVkIG91dCBvbmNlIGFuZCBm
+b3IgYWxsLgoKLS0gClBpb3RyIERhxYJlawpwaW90ci5kYWxla0Bjb3JwLm92aC5jb20KaHR0cHM6
+Ly93d3cub3ZoLmNvbS91cy8KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
