@@ -1,7 +1,7 @@
-From: Ken Dreyer <kdreyer@redhat.com>
+From: kefu chai <tchaikov@gmail.com>
 Subject: Re: C++11, std::list::size(), and trusty
-Date: Tue, 2 Jan 2018 08:28:45 -0700
-Message-ID: <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
+Date: Tue, 2 Jan 2018 23:45:07 +0800
+Message-ID: <CAJE9aOMLUUM=ja+L7QCLmuDsTGZtvRBNJ+RmoWRW=O2sCsjRMw@mail.gmail.com>
 References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
  <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
  <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
@@ -15,27 +15,35 @@ References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
  <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl> <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
  <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com>
  <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com>
- <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com> <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com>
+ <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com>
+ <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com> <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f50.google.com ([209.85.213.50]:34876 "EHLO
-        mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751263AbeABP2q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 10:28:46 -0500
-Received: by mail-vk0-f50.google.com with SMTP id o73so18042394vkd.2
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 07:28:46 -0800 (PST)
-In-Reply-To: <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com>
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:34785 "EHLO
+        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750775AbeABPpJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 10:45:09 -0500
+Received: by mail-qt0-f171.google.com with SMTP id 33so63077880qtv.1
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 07:45:09 -0800 (PST)
+In-Reply-To: <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
+To: Ken Dreyer <kdreyer@redhat.com>
 Cc: Xuehan Xu <xxhdx1985126@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 26, 2017 at 4:24 AM, kefu chai <tchaikov@gmail.com> wrote:
-> right. unless we swing our own homebrew gcc-7.
+On Tue, Jan 2, 2018 at 11:28 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> On Tue, Dec 26, 2017 at 4:24 AM, kefu chai <tchaikov@gmail.com> wrote:
+>> right. unless we swing our own homebrew gcc-7.
+>
+> Can we ask the devtoolset maintainers to change this option?
+>
+> I imagine they would be interested in this type of feedback from the field.
 
-Can we ask the devtoolset maintainers to change this option?
+https://git.centos.org/blob/rpms!devtoolset-7-gcc.git/2e5ef6c7934d4417e095855478736742b35bd0af/SPECS!gcc.spec#L1026
 
-I imagine they would be interested in this type of feedback from the field.
+I think we need to think about this before sending any inquiries to them.
 
-- Ken
+-- 
+Regards
+Kefu Chai
