@@ -1,49 +1,70 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: C++11, std::list::size(), and trusty
-Date: Tue, 2 Jan 2018 23:45:07 +0800
-Message-ID: <CAJE9aOMLUUM=ja+L7QCLmuDsTGZtvRBNJ+RmoWRW=O2sCsjRMw@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
- <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
- <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
- <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
- <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
- <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
- <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
- <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
- <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
- <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
- <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl> <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
- <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com>
- <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com>
- <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com>
- <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com> <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: Moving to 1.66 Boost
+Date: Tue, 2 Jan 2018 11:13:24 -0500
+Message-ID: <210a83ee-b767-54fc-fea9-2ef3decaff1c@redhat.com>
+References: <b4b3abf8-d7db-7037-a589-38c9563f078c@digiware.nl>
+ <CAJE9aOMaKpOyy180hSV39eebnpWShWHE821qT00WmYXgnqbFxw@mail.gmail.com>
+ <326bc270-7ccd-947d-a0e5-57bf44f93d37@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:34785 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750775AbeABPpJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 10:45:09 -0500
-Received: by mail-qt0-f171.google.com with SMTP id 33so63077880qtv.1
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 07:45:09 -0800 (PST)
-In-Reply-To: <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
+Received: from mail-ot0-f196.google.com ([74.125.82.196]:41362 "EHLO
+        mail-ot0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750982AbeABQN1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 11:13:27 -0500
+Received: by mail-ot0-f196.google.com with SMTP id q39so37444205otb.8
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 08:13:27 -0800 (PST)
+In-Reply-To: <326bc270-7ccd-947d-a0e5-57bf44f93d37@digiware.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Xuehan Xu <xxhdx1985126@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>, kefu chai <tchaikov@gmail.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 2, 2018 at 11:28 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> On Tue, Dec 26, 2017 at 4:24 AM, kefu chai <tchaikov@gmail.com> wrote:
->> right. unless we swing our own homebrew gcc-7.
+
+
+On 01/01/2018 06:13 AM, Willem Jan Withagen wrote:
+> On 31/12/2017 06:30, kefu chai wrote:
+>> + ceph-devl
+>>
+>> On Wed, Dec 27, 2017 at 5:47 PM, Willem Jan Withagen 
+>> <wjw@digiware.nl> wrote:
+>>> Hi Kefu,
+>>>
+>>> In FreeBSD the portmanager of Boost wants to move to 1.66, and so 
+>>> normally
+>>> they do a test run on all 33.000 ports to see what breaks.
+>>>
+>>> Now one of the things that breaks is Ceph, but i a way I do not
+>>> understand...
+>>>
+>>> When linking ceph-common references to the /usr/local/lib/libboost_*.so
+>>> files on Boost 1.65 are now replaced by -lBoost::thread invocations 
+>>> 1.66??
+>>
+>> could you pastebin the error message? Boost::thread is the library 
+>> name. but I
+>> don't think it can be passed to the linker. if you see this in the
+>> command line,
+>> something is wrong.
 >
-> Can we ask the devtoolset maintainers to change this option?
+> It was the now traditional problem that a CMake upgrade does not run 
+> in sync with Boost upgrades. Took quite some runs, but now FreeBSD 
+> ports is at 12.2.2, and in preparation on the 1.66 Boost release it 
+> builds without Beast by execluding WITH_RADOSGW_BEAST_FRONTEND.
 >
-> I imagine they would be interested in this type of feedback from the field.
+> Which will be switched back on once the 1.66 Beast works with v12.2.2.
+>
 
-https://git.centos.org/blob/rpms!devtoolset-7-gcc.git/2e5ef6c7934d4417e095855478736742b35bd0af/SPECS!gcc.spec#L1026
+Okay, thanks. The rgw/beast changes for boost 1.66 are staged in 
+https://github.com/ceph/ceph/pull/19054. If there are delays in merging 
+that, I'm happy to pull them into a separate pr. And thanks for pointing 
+out that we'll need to backport those pieces for luminous.
 
-I think we need to think about this before sending any inquiries to them.
+> --WjW
+>
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
--- 
-Regards
-Kefu Chai
