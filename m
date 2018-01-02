@@ -1,49 +1,113 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-Subject: Re: formatting bytes and object counts in ceph status
- ouput
-Date: Tue, 2 Jan 2018 11:51:41 +0100
-Message-ID: <f5e949e1-5d84-6fca-55d5-f7d1f6013f71@corp.ovh.com>
-References: <20180102104303.hr4ohy2dkxapj6id@jf_suse_laptop>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Re: RGW RFC: Multiple-Data-Pool Support for a Bucket
+Date: Tue, 2 Jan 2018 09:05:12 -0500
+Message-ID: <CAKOnar=nkN42gCcfiYh=4HW_MPi=_gVwBMDG=zDWmqFP5PXJKA@mail.gmail.com>
+References: <CAFZHTOYnOQgVsmsGXPL8dBwA-_Gc5q3fZ5V1CjfzRtQbs=tvgg@mail.gmail.com>
+ <robbat2-20171226T185704-299365896Z@orbis-terrarum.net> <CAFZHTObqvWL2DG4TGKW=Q4ja5S7bhxh6g-ApmstAX5=tAkUZ5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20180102104303.hr4ohy2dkxapj6id@jf_suse_laptop>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36723 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751479AbeABOFN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 09:05:13 -0500
+Received: by mail-io0-f171.google.com with SMTP id i143so28909876ioa.3
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 06:05:13 -0800 (PST)
+In-Reply-To: <CAFZHTObqvWL2DG4TGKW=Q4ja5S7bhxh6g-ApmstAX5=tAkUZ5A@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jeegn Chen <jeegnchen@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-T24gMTgtMDEtMDIgMTE6NDMgQU0sIEphbiBGYWplcnNraSB3cm90ZToKPiBIaSBsaXN0cywKPiBD
-dXJyZW50bHkgdGhlIGNlcGggc3RhdHVzIG91dHB1dCBmb3JtYXRzIGFsbCBudW1iZXJzIHdpdGgg
-YmluYXJ5IHVuaXQgCj4gcHJlZml4ZXMsIGkuZS4gMU1CIGVxdWFscyAxMDQ4NTc2IGJ5dGVzIGFu
-ZCBhbiBvYmplY3QgY291bnQgb2YgMU0gZXF1YWxzIAo+IDEwNDg1NzYgb2JqZWN0cy4gSSByZWNl
-aXZlZCBhIGJ1ZyByZXBvcnQgZnJvbSBhIHVzZXIgdGhhdCBwcmludGluZyBvYmplY3QgCj4gY291
-bnRzIHdpdGggYSBiYXNlIDIgbXVsdGlwbGllciBpcyBjb25mdXNpbmcgKEkgYWdyZWUpIHNvIEkg
-b3BlbmVkIGEgYnVnIGFuZCAKPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTkx
-MTcuCj4gSW4gdGhlIFBSIGRpc2N1c3Npb24gYSBjb3VwbGUgb2YgcXVlc3Rpb25zIGFyb3NlIHRo
-YXQgSSdkIGxpa2UgdG8gZ2V0IHNvbWUgCj4gb3BpbmlvbnMgb246Cj4gLSBTaG91bGQgd2UgcHJp
-bnQgYmluYXJ5IHVuaXQgcHJlZml4ZXMgKE1pQiwgR2lCLCAuLi4pIHNpbmNlIHRoYXQgd291bGQg
-YmUgCj4gIMKgdGVjaG5pY2FsbHkgY29ycmVjdD8KCisxCgo+IC0gU2hvdWxkIGNvdW50ZXJzIChs
-aWtlIG9iamVjdCBjb3VudHMpIGJlIGZvcm1hdHRlZCB3aXRoIGEgYmFzZSAxMCAKPiBtdWx0aXBs
-aWVyIG9yIMKgYSBtdWx0aXBsaWVyIHdvdGggYmFzZSAyPwoKKzEKCj4gTXkgcHJvcG9zYWwgd291
-bGQgYmUgdG8gYm90aCB1c2UgYmluYXJ5IHVuaXQgcHJlZml4ZXMgYW5kIHVzZSBiYXNlIDEwIAo+
-IG11bHRpcGxpZXJzIGZvciBjb3VudGVycy4gSSB0aGluayB0aGlzIGFsaWducyB3aXRoIHVzZXIg
-ZXhwZWN0YXRpb25zIGFzIHdlbGwgCj4gYXMgdGhlIHJlbGV2YW50IHN0YW5kYXJkKHM/KS4KCk1v
-c3QgdXNlcnMgZXhwZWN0IHRoYXQgbm9uLXNpemUgY291bnRlcnMgLSBsaWtlIG9iamVjdCBjb3Vu
-dHMgLSB1c2UgYmFzZS0xMCwgCmFuZCBzaXplIGNvdW50ZXJzIHVzZSBiYXNlLTIgdW5pdHMuIENl
-cGgncyAic3RhbmRhcmQiIG9mIHVzaW5nIGJhc2UtMiAKZXZlcnl3aGVyZSB3YXMgY29uZnVzaW5n
-IGZvciBtZSBhcyB3ZWxsIGluaXRpYWxseSwgYnV0IEkgZ290IHVzZWQgdG8gdGhhdC4uLiAKU3Rp
-bGwsIHdvdWxkbid0IG1pbmQgaWYgdGhhdCB3b3VsZCBnZXQgc29ydGVkIG91dCBvbmNlIGFuZCBm
-b3IgYWxsLgoKLS0gClBpb3RyIERhxYJlawpwaW90ci5kYWxla0Bjb3JwLm92aC5jb20KaHR0cHM6
-Ly93d3cub3ZoLmNvbS91cy8KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Hi,
+
+inline
+
+On Tue, Dec 26, 2017 at 11:44 PM, Jeegn Chen <jeegnchen@gmail.com> wrote:
+> Hi Robin
+>
+> Reply in inline.
+>
+> Thanks,
+> Jeegn
+>
+> 2017-12-27 3:00 GMT+08:00 Robin H. Johnson <robbat2@gentoo.org>:
+>> On Tue, Dec 26, 2017 at 09:48:26AM +0800, Jeegn Chen wrote:
+>>> In the daily use of Ceph RGW cluster, we find some pain points when
+>>> using current one-bucket-one-data-pool implementation.
+>>> I guess one-bucket-multiple-data-pools may help (See the appended
+>>> detailed proposal).
+>>> What do you think?
+>> Overall I like
+>>
+>> Queries/concerns:
+>> - How would this interact w/ the bucket policy lifecycle code?
+> [Jeegn]: My understanding is that current lifecycle code will list all
+> objects in a bucket and delete the out-of-date object. Only the
+> deletion logic is related, which is covered by GC-related change.
+>
+>> - How would this interact w/ existing placement policy in bucket
+>>   creation?
+> [Jeegn]: The multiple-pool-support needs data_layout_type in
+> RGWZonePlacementInfo to have value SPLITTED (new) while the default
+> value of data_layout_type is UNIFIED(old). So the existing bucket
+> placement is assumed to have UNIFIED in data_layout_type . To enable
+> this functionality, the admin need to create the new placement policy
+> with  SPLITTED data_layout_type set explicitly. Only the bucket
+> created from SPLITTED placement policy will follow the new behavior
+> pattern.
+
+SINGLE_POOL and SPLIT_POOL?
+
+As Yehuda notes, there are fields related to tail placement in
+RGWObjManifest.  I wasn't aware that they were unused, or no longer
+used.  I've had a degree of concern for a while about the mix of
+complexity of representation and some assumptions in RGWObjManifest as
+it is.  I felt a tingle of danger around the idea of adding a new
+object attribute to deal with placement as a one-off, as well.  If
+only for the benefit of clarity and cleanup, I think it would be
+beneficial to try to think a few moves ahead on where logical and
+physical placement are going, how they eventually interact with
+storage class (as Robin noted here), and maybe simplification and
+removal of bits of old design dead-ends from the code.
+
+>
+>> - At the rgw-admin layer, what tooling should exist to migrate objects
+>>   between pools for a given bucket?
+> [Jeegn]: I don't expect the objects to be migrated between pools.Old
+> objects uploaded before the tail_pool switch will remain in the
+> original pool until they are deleted explicitly, which is the same
+> behavior in CephFS.
+
+I think I agree with Robin. It seems like that kind of tooling support
+would increase robustness and long-term serviceability.
+
+Matt
+
+>
+>>
+>> --
+>> Robin Hugh Johnson
+>> Gentoo Linux: Dev, Infra Lead, Foundation Asst. Treasurer
+>> E-Mail   : robbat2@gentoo.org
+>> GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+>> GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
