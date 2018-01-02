@@ -1,129 +1,41 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: Re: Add dmclock QoS client calls to librados -- request for comments
-Date: Tue, 2 Jan 2018 10:26:23 -0500
-Message-ID: <89DF14E1-2E9A-49C2-A468-119ED38D7696@redhat.com>
-References: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com> <alpine.DEB.2.11.1712191606210.24928@piezo.novalocal>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Tue, 2 Jan 2018 08:28:45 -0700
+Message-ID: <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
+ <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
+ <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com>
+ <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
+ <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
+ <CAJE9aOP82bHGPuhmLeqFLg8PxenCskbO5PC7ymd5g7+zrFtvKA@mail.gmail.com>
+ <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
+ <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
+ <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
+ <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
+ <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl> <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
+ <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com>
+ <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com>
+ <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com> <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:36479 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751047AbeABP0X (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 10:26:23 -0500
-Received: by mail-io0-f181.google.com with SMTP id i143so29141199ioa.3
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 07:26:23 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1712191606210.24928@piezo.novalocal>
+Received: from mail-vk0-f50.google.com ([209.85.213.50]:34876 "EHLO
+        mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751263AbeABP2q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jan 2018 10:28:46 -0500
+Received: by mail-vk0-f50.google.com with SMTP id o73so18042394vkd.2
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jan 2018 07:28:46 -0800 (PST)
+In-Reply-To: <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Xuehan Xu <xxhdx1985126@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+On Tue, Dec 26, 2017 at 4:24 AM, kefu chai <tchaikov@gmail.com> wrote:
+> right. unless we swing our own homebrew gcc-7.
 
-> On Dec 19, 2017, at 11:13 AM, Sage Weil <sage@newdream.net> wrote:
-> 
-> Hi Eric,
-> 
-> On Mon, 18 Dec 2017, J. Eric Ivancich wrote:
->> == Units ==
->> 
->> One key difference we're considering, however, is changing the unit
->> that reservations and limits are expressed in from ops/sec to
->> something more appropriate for Ceph. Operations have payloads of
->> different sizes and will therefore take different amounts of time, and
->> that should be factored in. We might refer to this as the "cost" of
->> the operation. And the cost is not linear with the size of the
->> payload. For example, a write of 4 MB might only take 20 times as long
->> as a write of 4 KB even though the sizes differ by a factor of
->> 1000. Using cost would allow us to, for example, achieve a fairer
->> prioritization of a client doing many small writes against a client
->> that's doing a few larger writes.
->> 
->> One proposed formula to translate one op into cost would be something
->> along the lines of:
->> 
->>    cost_units = a + b * log(payload_size)
->> 
->> where a and b would have to be chosen or tuned based on the storage
->> back-end.
->> 
->> And that gets us to the units for defining reservation and limit --
->> cost_units per unit of time. Typically these are floating point
->> values, however we do not use floating point types in librados calls
->> because qemu, when calling into librbd, does not save and restore the
->> cpu's floating point mode.
->> 
->> There are two ways of getting appropriate ranges of values given that
->> we need to use integral types for cost_units per unit of time. One is
->> a large time unit in the denominator, such as minutes or even
->> hours. That would leave us with cost_units per minute. We are unsure
->> that the strange unit is the best approach and your feedback would be
->> appreciated.
->> 
->> A standard alternative would be to use a standard time unit, such as
->> seconds, but integers as fixed-point values. So a floating-point value
->> in cost_units per second would be multiplied by, say, 1000 and rounded
->> to get the corresponding integer value.
-> 
-> I think if payload_size above is bytes, then any reasonable value for 
-> cost_units will be a non-tiny integer, and we won't need floating point, 
-> right?  E.g., a 4KB write would be (at a minimum) 10, but probably larger 
-> if a and b >= 1.  That would let us keep seconds as the time base?
+Can we ask the devtoolset maintainers to change this option?
 
-Very good point! As long as the cost is greater than 10 (maybe even much greater than 10) a reservation or limit as low as 1 would be small, and we can avoid both odd time unit denominators and fixed-point and still achieve low settings.
+I imagine they would be interested in this type of feedback from the field.
 
->> == librados Additions ==
->> 
->> The basic idea is that one would be able to create (and destroy) qos
->> profiles and then associate a profile with an ioctx. Ops on the ioctx
->> would use the qos profile associated with it.
->> 
->> typedef void* rados_qos_profile_t; // opaque
->> 
->> // parameters uint64_t in cost_units per time unit as discussed above
->> profile1 = rados_qos_profile_create(reservation, weight, limit);
->> 
->> rados_ioctx_set_qos_profile(ioctx3, profile1);
->> 
->> ...
->> // ops to ioctx3 would now use the specified profile
->> ...
->> 
->> // use the profile just for a particular operation
->> rados_write_op_set_qos_prefile(op1, profile1);
->> 
->> rados_ioctx_set_qos_profile(ioctx3, NULL); // set to default profile
->> 
->> rados_qos_profile_destroy(profile1);
-> 
-> I would s/destroy/release/, as the profile will be implicitly 
-> reference counted (with a ref consumed by the ioctx that is pointing to 
-> it).
-> 
-> It might be useful to add a rados_qos_profile_get_id(handle) that returns 
-> the client-local integer id that we're using to identify the profile.  
-> This isn't really useful for the application per se, but it will be 
-> helpful for debugging purposes perhaps?
-
-Both sound good.
-
->> == MOSDOp and MOSDOpReply Changes ==
->> 
->> Because the qos_profile would be managed by the ioctx, MOSDOps sent
->> via that ioctx would include the reservation, weight, and limit. At
->> this point we think this would be better than keeping the profiles on
->> the back-end, although it increases the MOSDOp data structure by about
->> 128 bits.
->> 
->> The MOSDOp type already contains dmclock's delta and rho parameters
->> and MOSDOpReply already contains the dmclock phase indicator due to
->> prior work. Given that we're moving towards using cost_unit per
->> time_unit rather than ops per sec, perhaps we should also include the
->> calculated cost in the MOSDOpReply.
-> 
-> Good idea!
-
-Thank you,
-
-Eric
-
+- Ken
