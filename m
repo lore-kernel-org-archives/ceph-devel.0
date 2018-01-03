@@ -1,94 +1,56 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: C++11, std::list::size(), and trusty
-Date: Wed, 3 Jan 2018 22:53:15 +0800
-Message-ID: <CAJE9aON3xV+C=VQuuwQxEG9auVmjnRa25RopDFo_UAHfXboPig@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
- <18fc68af-faef-3c4c-2f7d-4779ffda67a0@suse.cz> <alpine.DEB.2.11.1711301438010.8333@piezo.novalocal>
- <CAJE9aOPdtb0-u3N5ngtq9GrJG2pOMSpyOwtFa_nzgR79S9M7GQ@mail.gmail.com>
- <20171205164018.GA10722@ultraspiritum.eng.arb.redhat.com> <417b0d54-5ab2-4569-45fc-683c8c17826a@digiware.nl>
- <CAJ4mKGYxEeGKFonx_UBbYMiTcPh-4yGt8VuryoBFSQCbj8Pz-A@mail.gmail.com>
- <05f1ef85-e307-7c6b-17be-dbebe43dc824@digiware.nl> <CAJACTufEmyB_r0HKdF_CZH1kSC+e4gkxpJJPjn=mu-stFJkdhQ@mail.gmail.com>
- <CAJE9aOM2-G9sewdUchUrxHosRp17RUSS_CvzV1b4N7qPdRvV8w@mail.gmail.com>
- <CAJE9aOOOOROXmPXcwHJo_31-qdt9HmFdcpHuGZMarncfTpGOQA@mail.gmail.com>
- <CAJACTudfCvShHvZJAAZvqnCDifyR7NoEF__xsd+wRek-xW0jGA@mail.gmail.com>
- <CAJE9aOMeKX++y9+ktEN=ZJ=zua1zCVuMSdmV=ZCBUF_kp2qcBw@mail.gmail.com>
- <CALqRxCyhG6DrkpmoHQbS5TyATEXnwogSq5S5yPdcEKFAMiiq4Q@mail.gmail.com>
- <CAJE9aOMLUUM=ja+L7QCLmuDsTGZtvRBNJ+RmoWRW=O2sCsjRMw@mail.gmail.com> <alpine.DEB.2.11.1801021722370.8186@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: SMART disk monitoring
+Date: Wed, 3 Jan 2018 16:37:00 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1801031632370.8186@piezo.novalocal>
+References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal> <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com> <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com> <20171112171653.q7dn7bw52ijltb3q@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:36999 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752300AbeACOxR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jan 2018 09:53:17 -0500
-Received: by mail-qt0-f196.google.com with SMTP id f2so2367447qtj.4
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jan 2018 06:53:16 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801021722370.8186@piezo.novalocal>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:41696 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750912AbeACQhD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jan 2018 11:37:03 -0500
+In-Reply-To: <20171112171653.q7dn7bw52ijltb3q@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, Xuehan Xu <xxhdx1985126@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Nathan Cutler <ncutler@suse.cz>, ceph-maintainers@ceph.com, Alfredo Deza <adeza@redhat.com>, James Page <james.page@ubuntu.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Lars Marowsky-Bree <lmb@suse.com>
+Cc: yaarit@gmail.com, ceph-devel@vger.kernel.org
 
-On Wed, Jan 3, 2018 at 1:31 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 2 Jan 2018, kefu chai wrote:
->> On Tue, Jan 2, 2018 at 11:28 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
->> > On Tue, Dec 26, 2017 at 4:24 AM, kefu chai <tchaikov@gmail.com> wrote:
->> >> right. unless we swing our own homebrew gcc-7.
->> >
->> > Can we ask the devtoolset maintainers to change this option?
->> >
->> > I imagine they would be interested in this type of feedback from the field.
->>
->> https://git.centos.org/blob/rpms!devtoolset-7-gcc.git/2e5ef6c7934d4417e095855478736742b35bd0af/SPECS!gcc.spec#L1026
->
-> For reference,
->
-> ```
->   # Force the old ABI unconditionally, the new one does not work in the
->   # libstdc++_nonshared.a model against RHEL 6/7 libstdc++.so.6.
->   sed -i -e 's/\(define[[:blank:]]*_GLIBCXX_USE_DUAL_ABI[[:blank:]]*\)1/\10/' $f
-> ```
->
->> I think we need to think about this before sending any inquiries to them.
->
-> The problem I see is that it is impossible to write/build many native
-> C++11 (or 14 or 17) apps with the toolchain since the old ABI precludes
-> O(1) std::list.
+On Sun, 12 Nov 2017, Lars Marowsky-Bree wrote:
+> On 2017-11-10T22:36:46, Yaarit Hatuka <yaarit@gmail.com> wrote:
+> 
+> > Many thanks! I'm very excited to join Ceph's outstanding community!
+> > I'm looking forward to working on this challenging project, and I'm
+> > very grateful for the opportunity to be guided by Sage.
+> 
+> That's all excellent news!
+> 
+> Can we discuss though if/how this belongs into ceph-osd? Given that this
+> can (and is) already collected via smartmon, either via prometheus or, I
+> assume, collectd as well? Does this really need to be added to the OSD
+> code?
 
-i sort of agree with you. but i think we can still use C++11 (and
-probably 14 or 17)
-with the old ABI. see
-https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+Hi Lars,
 
-<quote>
-the choice of ABI to use is independent of the -std option used to
-compile your code
-</quote>
+Yaarit is taking a look at this now and the smartmon.sh collector for 
+prometheus looks a bit janky:
 
-in other words, if we rely on the O(1) std::list and copy-on-write
-string, then, yes,
-we cannot write/build apps using this toolchain.
+1) It seems like you have to set up a cron job to write the current smart 
+output to a text file in a directory somewhere, and then prometheus will 
+scrape it when polled.[1]
 
->
-> If I'm following the _nonshared thing, it's a feature that lets you build
-> with teh new toolchain but deploy on systems with much older libstdc++
-> installed (new symbols are statically instead of dynamically linked).
-> Is the problem with the "dual ABI" feature?
+2) smartmon.sh[2] is a shortish pile of bash that collects only a handful 
+of fields by parsing smartctl output.
 
-i think so. also by inspecting
-https://git.centos.org/blob/rpms!devtoolset-7-gcc.git/c7/SOURCES!gcc7-libstdc++-compat.patch,
-libstdc++_nonshared.a includes lots of C++98 and C++11 symbols. in the
-case of list::size(), it is completely implemented in the header file.
-but probably there are also some pieces of libstdc++ implemented in
-the source files. in that case, it would be difficult to include both
-ABIs a class, std::basic_string<> for example, in the same .a file.
-because they are conditionalized by the "_GLIBCXX_USE_CXX11_ABI" macro
-at build time. and they are both in the namespace of std::__cxx11
-namespace.
+The second piece will hopefully improve once the JSON output mode for 
+smartctl is completed (that is in progress upstream in smartmontools).  
+But the first part seems awkward, and doesn't look like it would work out 
+of the box.  Are you guys currently collecting SMART data?  If so, how did 
+you automate/simplify the setup?
 
-will drop a mail to SCLs asking for more info on this.
+Thanks!
+sage
 
 
--- 
-Regards
-Kefu Chai
+[1] https://github.com/prometheus/node_exporter#textfile-collector
+[2] https://github.com/prometheus/node_exporter/edit/master/text_collector_examples/smartmon.sh
