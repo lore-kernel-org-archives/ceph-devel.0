@@ -1,71 +1,146 @@
-From: Kyle Bader <kyle.bader@gmail.com>
-Subject: Re: SMART disk monitoring
-Date: Wed, 3 Jan 2018 09:28:54 -0800
-Message-ID: <CAFMfnwqnknmuWnHZWY1K5Tzi1f=PF+mzXoYBx21AHKvvAR5THQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal>
- <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
- <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
- <20171112171653.q7dn7bw52ijltb3q@suse.com> <alpine.DEB.2.11.1801031632370.8186@piezo.novalocal>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Add dmclock QoS client calls to librados -- request for comments
+Date: Wed, 3 Jan 2018 11:26:22 -0800
+Message-ID: <CAJ4mKGYsmKiWkeWjnB4VqGDP+s=xCt2xq5Wu9vrVPRF9heT7nA@mail.gmail.com>
+References: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:41122 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750873AbeACR24 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jan 2018 12:28:56 -0500
-Received: by mail-yw0-f178.google.com with SMTP id f1so803920ywd.8
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jan 2018 09:28:55 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801031632370.8186@piezo.novalocal>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:41123 "EHLO
+        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750945AbeACT0Y (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jan 2018 14:26:24 -0500
+Received: by mail-io0-f170.google.com with SMTP id f6so3158231ioh.8
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Jan 2018 11:26:23 -0800 (PST)
+In-Reply-To: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Lars Marowsky-Bree <lmb@suse.com>, yaarit@gmail.com, ceph-devel@vger.kernel.org
+To: "J. Eric Ivancich" <ivancich@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I seem to recall a batch of hardware in one of the early clusters that
-had issues with repeated polling of smart data, IO would pause for a
-few seconds. This might explain why they are writing out a daily cron
-script and polling a results file instead of repeatedly polling the
-actual devices.
+On Mon, Dec 18, 2017 at 11:04 AM, J. Eric Ivancich <ivancich@redhat.com> wrote:
+> We are asking the Ceph community to provide their thoughts on this
+> draft proposal for expanding the librados API with calls that would
+> allow clients to specify QoS (quality of service) parameters for
+> their operations.
+>
+> We have an on-going effort to provide Ceph users with more options to
+> manage QoS. With the release of Luminous we introduced access to a
+> prototype of the mclock QoS algorithm for queuing operations by class
+> of operation and either differentiating clients or treating them as a
+> unit. Although not yet integrated, the library we're using supports
+> dmClock, a distributed version of mClock. Both are documented in
+> _mClock: Handling Throughput Variability for Hypervisor IO Scheduling_
+> by Gulati, Merchant, and Varman 2010.
+>
+> In order to offer greater flexibility, we'd like to move forward with
+> providing clients with the ability to use different QoS parameters. We
+> are keeping our options open w.r.t. the ultimate set of algorithm(s)
+> we'll use. The mClock/dmClock algorithm allows a "client", which we
+> can interpret broadly, to set a minimum ops/sec (reservation) and a
+> maximum ops/sec (limit). Furthermore a "client" can also define a
+> weight (a.k.a.  priority), which is a scalar value to determine
+> relative weighting.
+>
+> We think reservation, limit, and weight are sufficiently generic that
+> we'd be able to use or adapt them other QoS algorithms we may try or
+> use in the future.
+>
+> [To give you a sense of how broadly we can interpret "client", we
+> currently have code that interprets classes of operations (e.g.,
+> background replication or background snap-trimming) as a client.]
+>
+> == Units ==
+>
+> One key difference we're considering, however, is changing the unit
+> that reservations and limits are expressed in from ops/sec to
+> something more appropriate for Ceph. Operations have payloads of
+> different sizes and will therefore take different amounts of time, and
+> that should be factored in. We might refer to this as the "cost" of
+> the operation. And the cost is not linear with the size of the
+> payload. For example, a write of 4 MB might only take 20 times as long
+> as a write of 4 KB even though the sizes differ by a factor of
+> 1000. Using cost would allow us to, for example, achieve a fairer
+> prioritization of a client doing many small writes against a client
+> that's doing a few larger writes.
+>
+> One proposed formula to translate one op into cost would be something
+> along the lines of:
+>
+>     cost_units = a + b * log(payload_size)
+>
+> where a and b would have to be chosen or tuned based on the storage
+> back-end.
+>
+> And that gets us to the units for defining reservation and limit --
+> cost_units per unit of time. Typically these are floating point
+> values, however we do not use floating point types in librados calls
+> because qemu, when calling into librbd, does not save and restore the
+> cpu's floating point mode.
+>
+> There are two ways of getting appropriate ranges of values given that
+> we need to use integral types for cost_units per unit of time. One is
+> a large time unit in the denominator, such as minutes or even
+> hours. That would leave us with cost_units per minute. We are unsure
+> that the strange unit is the best approach and your feedback would be
+> appreciated.
+>
+> A standard alternative would be to use a standard time unit, such as
+> seconds, but integers as fixed-point values. So a floating-point value
+> in cost_units per second would be multiplied by, say, 1000 and rounded
+> to get the corresponding integer value.
+>
+> == librados Additions ==
+>
+> The basic idea is that one would be able to create (and destroy) qos
+> profiles and then associate a profile with an ioctx. Ops on the ioctx
+> would use the qos profile associated with it.
+>
+> typedef void* rados_qos_profile_t; // opaque
+>
+> // parameters uint64_t in cost_units per time unit as discussed above
+> profile1 = rados_qos_profile_create(reservation, weight, limit);
+>
+> rados_ioctx_set_qos_profile(ioctx3, profile1);
+>
+> ...
+> // ops to ioctx3 would now use the specified profile
+> ...
+>
+> // use the profile just for a particular operation
+> rados_write_op_set_qos_prefile(op1, profile1);
+>
+> rados_ioctx_set_qos_profile(ioctx3, NULL); // set to default profile
+>
+> rados_qos_profile_destroy(profile1);
 
-On Wed, Jan 3, 2018 at 8:37 AM, Sage Weil <sage@newdream.net> wrote:
-> On Sun, 12 Nov 2017, Lars Marowsky-Bree wrote:
->> On 2017-11-10T22:36:46, Yaarit Hatuka <yaarit@gmail.com> wrote:
->>
->> > Many thanks! I'm very excited to join Ceph's outstanding community!
->> > I'm looking forward to working on this challenging project, and I'm
->> > very grateful for the opportunity to be guided by Sage.
->>
->> That's all excellent news!
->>
->> Can we discuss though if/how this belongs into ceph-osd? Given that this
->> can (and is) already collected via smartmon, either via prometheus or, I
->> assume, collectd as well? Does this really need to be added to the OSD
->> code?
+Oh, one more thing I noticed. It's not clear to me from this interface
+if it's possible to use the same profile across more than one ioctx
+and have them share a common reservation. Or will it just be a
+configuration struct that the IoCtx uses to set up its internal
+tracking state, and then they run independently even if reused?
+-Greg
+
+
 >
-> Hi Lars,
+> == MOSDOp and MOSDOpReply Changes ==
 >
-> Yaarit is taking a look at this now and the smartmon.sh collector for
-> prometheus looks a bit janky:
+> Because the qos_profile would be managed by the ioctx, MOSDOps sent
+> via that ioctx would include the reservation, weight, and limit. At
+> this point we think this would be better than keeping the profiles on
+> the back-end, although it increases the MOSDOp data structure by about
+> 128 bits.
 >
-> 1) It seems like you have to set up a cron job to write the current smart
-> output to a text file in a directory somewhere, and then prometheus will
-> scrape it when polled.[1]
+> The MOSDOp type already contains dmclock's delta and rho parameters
+> and MOSDOpReply already contains the dmclock phase indicator due to
+> prior work. Given that we're moving towards using cost_unit per
+> time_unit rather than ops per sec, perhaps we should also include the
+> calculated cost in the MOSDOpReply.
 >
-> 2) smartmon.sh[2] is a shortish pile of bash that collects only a handful
-> of fields by parsing smartctl output.
+> == Conclusion ==
 >
-> The second piece will hopefully improve once the JSON output mode for
-> smartctl is completed (that is in progress upstream in smartmontools).
-> But the first part seems awkward, and doesn't look like it would work out
-> of the box.  Are you guys currently collecting SMART data?  If so, how did
-> you automate/simplify the setup?
->
-> Thanks!
-> sage
->
->
-> [1] https://github.com/prometheus/node_exporter#textfile-collector
-> [2] https://github.com/prometheus/node_exporter/edit/master/text_collector_examples/smartmon.sh
+> So that's what we're thinking about and your own thoughts and feedback
+> would be appreciated. Thanks!
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
