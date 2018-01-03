@@ -1,73 +1,55 @@
-From: Jan Fajerski <jfajerski@suse.com>
+From: Lars Marowsky-Bree <lmb@suse.com>
 Subject: Re: SMART disk monitoring
-Date: Wed, 3 Jan 2018 21:36:56 +0100
-Message-ID: <20180103203501.kvmekeaq2ya6w3u3@jf_suse_laptop>
+Date: Wed, 3 Jan 2018 23:44:45 +0100
+Message-ID: <20180103224445.4gimkspvts73simj@suse.com>
 References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal>
  <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
  <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
  <20171112171653.q7dn7bw52ijltb3q@suse.com>
  <alpine.DEB.2.11.1801031632370.8186@piezo.novalocal>
+ <20180103203501.kvmekeaq2ya6w3u3@jf_suse_laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:38233 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751246AbeACUhR (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Wed, 3 Jan 2018 15:37:17 -0500
+Received: from mx2.suse.de ([195.135.220.15]:37788 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750928AbeACWoy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 3 Jan 2018 17:44:54 -0500
 Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1801031632370.8186@piezo.novalocal>
+In-Reply-To: <20180103203501.kvmekeaq2ya6w3u3@jf_suse_laptop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Lars Marowsky-Bree <lmb@suse.com>, yaarit@gmail.com, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>, yaarit@gmail.com, ceph-devel@vger.kernel.org
 
-On Wed, Jan 03, 2018 at 04:37:00PM +0000, Sage Weil wrote:
->On Sun, 12 Nov 2017, Lars Marowsky-Bree wrote:
->> On 2017-11-10T22:36:46, Yaarit Hatuka <yaarit@gmail.com> wrote:
->>
->> > Many thanks! I'm very excited to join Ceph's outstanding community!
->> > I'm looking forward to working on this challenging project, and I'm
->> > very grateful for the opportunity to be guided by Sage.
->>
->> That's all excellent news!
->>
->> Can we discuss though if/how this belongs into ceph-osd? Given that this
->> can (and is) already collected via smartmon, either via prometheus or, I
->> assume, collectd as well? Does this really need to be added to the OSD
->> code?
->
->Hi Lars,
->
->Yaarit is taking a look at this now and the smartmon.sh collector for
->prometheus looks a bit janky:
->
->1) It seems like you have to set up a cron job to write the current smart
->output to a text file in a directory somewhere, and then prometheus will
->scrape it when polled.[1]
->
->2) smartmon.sh[2] is a shortish pile of bash that collects only a handful
->of fields by parsing smartctl output.
->
->The second piece will hopefully improve once the JSON output mode for
->smartctl is completed (that is in progress upstream in smartmontools).
->But the first part seems awkward, and doesn't look like it would work out
->of the box.  Are you guys currently collecting SMART data?  If so, how did
->you automate/simplify the setup?
-We do collect SMART data with the mechanism described above. We use salt to 
-setup up a cronjob (though say a systemd timer would also work) that runs
-smartmon.sh > node_exporter/text_collector_dir/file.
-It does not work out of the box, but that is how the node_exporter is meant to 
-be extended afaiu.
->
->Thanks!
->sage
->
->
->[1] https://github.com/prometheus/node_exporter#textfile-collector
->[2] https://github.com/prometheus/node_exporter/edit/master/text_collector_examples/smartmon.sh
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+On 2018-01-03T21:36:56, Jan Fajerski <jfajerski@suse.com> wrote:
+
+> We do collect SMART data with the mechanism described above. We use salt to
+> setup up a cronjob (though say a systemd timer would also work) that runs
+> smartmon.sh > node_exporter/text_collector_dir/file.
+> It does not work out of the box, but that is how the node_exporter is meant
+> to be extended afaiu.
+
+I could see this being more neatly handled by having a smarter exporter
+that pulls data on-demand on scrape, and then manage the intervals
+accordingly via that mechanism, but that'd be inefficient with multiple
+Prometheus instances scraping (which is a common setup).
+
+I'd prefer if we got JSON directly out of smartctl, of course. But even
+ceph-osd would probably only do periodic scrapes for the above
+reasons.
+
+Unless you want ceph-osd to take direct action, I'm not sure there's a
+need for it to handle this internally.
+
+Also, how would it handle things like devices shared between OSDs, e.g.,
+the WAL/journals? That's better handled via an outside scheduler.
+
+
+Regards,
+    Lars
+
+-- 
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+"Experience is the name everyone gives to their mistakes." -- Oscar Wilde
+
