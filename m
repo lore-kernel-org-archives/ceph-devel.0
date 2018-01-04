@@ -1,127 +1,113 @@
-From: Sergey Malinin <hell-cDpxXvEWlHVBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: data cleaup/disposal process
-Date: Thu, 4 Jan 2018 13:19:07 +0000
-Message-ID: <DB6P190MB0327E4A22662575074B54549FF1F0@DB6P190MB0327.EURP190.PROD.OUTLOOK.COM>
-References: <CANA9Uk5w5j4ax7aPZF-ybA55zVcELn00zExMEbwS1jUtA_CA-w@mail.gmail.com>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Fwd: aio poll, io_pgetevents and a new in-kernel poll API
+Date: Thu, 4 Jan 2018 08:28:11 -0500
+Message-ID: <CAKOnarnWD3sEuQKeKtGzuh-HuvuRgHs49u0WX78ZUp8fyicp4A@mail.gmail.com>
+References: <20180104080043.14506-1-hch@lst.de> <846305254.12.1515072390525.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2542923721121961209=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk5w5j4ax7aPZF-ybA55zVcELn00zExMEbwS1jUtA_CA-w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:40933 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752372AbeADN2N (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jan 2018 08:28:13 -0500
+Received: by mail-io0-f171.google.com with SMTP id v30so2204547iov.7
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jan 2018 05:28:13 -0800 (PST)
+In-Reply-To: <846305254.12.1515072390525.JavaMail.root@thunderbeast.private.linuxbox.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
---===============2542923721121961209==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_DB6P190MB0327E4A22662575074B54549FF1F0DB6P190MB0327EURP_"
+For folks not subscribed to linux-aio (most?)
 
---_000_DB6P190MB0327E4A22662575074B54549FF1F0DB6P190MB0327EURP_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Matt
 
-http://cephnotes.ksperis.com/blog/2014/07/04/remove-big-rbd-image
+---------- Forwarded message ----------
+From: Matt W. Benjamin <matt@cohortfs.com>
+Date: Thu, Jan 4, 2018 at 8:26 AM
+Subject: Fwd: aio poll, io_pgetevents and a new in-kernel poll API
+To: mbenjamin <mbenjamin@redhat.com>
 
-________________________________
-From: ceph-users <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org> on behalf of M Ranga S=
-wami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sent: Thursday, January 4, 2018 3:55:27 PM
-To: ceph-users; ceph-devel
-Subject: [ceph-users] data cleaup/disposal process
 
-Hello,
-In Ceph, is the way to cleanup data before deleting an image?
 
-Means wipe the data with '0' before deleting an image.
+----- Forwarded Message -----
+From: "Christoph Hellwig" <hch@lst.de>
+To: viro@zeniv.linux.org.uk
+Cc: "Avi Kivity" <avi@scylladb.com>, linux-aio@kvack.org,
+linux-fsdevel@vger.kernel.org, netdev@vger.kernel.org,
+linux-kernel@vger.kernel.org
+Sent: Thursday, January 4, 2018 3:00:12 AM
+Subject: aio poll, io_pgetevents and a new in-kernel poll API
 
-Please let me know if you have any suggestions here.
+Hi all,
 
-Thanks
-Swami
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+this series adds support for the IOCB_CMD_POLL operation to poll for the
+readyness of file descriptors using the aio subsystem.  The API is based
+on patches that existed in RHAS2.1 and RHEL3, which means it already is
+supported by libaio.  To implement the poll support efficiently new
+methods to poll are introduced in struct file_operations:  get_poll_head
+and poll_mask.  The first one returns a wait_queue_head to wait on
+(lifetime is bound by the file), and the second does a non-blocking
+check for the POLL* events.  This allows aio poll to work without
+any additional context switches, unlike epoll.
 
---_000_DB6P190MB0327E4A22662575074B54549FF1F0DB6P190MB0327EURP_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+To make the interface fully useful a new io_pgetevents system call is
+added, which atomically saves and restores the signal mask over the
+io_pgetevents system call.  It it the logical equivalent to pselect and
+ppoll for io_pgetevents.
 
-<html>
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
->
-<meta name=3D"Generator" content=3D"Microsoft Exchange Server">
-<!-- converted from text --><style><!-- .EmailQuote { margin-left: 1pt; pad=
-ding-left: 4pt; border-left: #800000 2px solid; } --></style>
-</head>
-<body>
-<div>
-<div id=3D"x_compose-container" itemscope=3D"" itemtype=3D"https://schema.o=
-rg/EmailMessage" style=3D"direction:ltr">
-<span itemprop=3D"creator" itemscope=3D"" itemtype=3D"https://schema.org/Or=
-ganization"><span itemprop=3D"name"></span></span>
-<div>
-<div>
-<div style=3D"direction:ltr">http://cephnotes.ksperis.com/blog/2014/07/04/r=
-emove-big-rbd-image</div>
-</div>
-<div><br>
-</div>
-<div class=3D"x_acompli_signature"></div>
-</div>
-</div>
-<hr tabindex=3D"-1" style=3D"display:inline-block; width:98%">
-<div id=3D"x_divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif" =
-color=3D"#000000" style=3D"font-size:11pt"><b>From:</b> ceph-users &lt;ceph=
--users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt; on behalf of M Ranga Swami Reddy &lt;swam=
-ireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&gt;<br>
-<b>Sent:</b> Thursday, January 4, 2018 3:55:27 PM<br>
-<b>To:</b> ceph-users; ceph-devel<br>
-<b>Subject:</b> [ceph-users] data cleaup/disposal process</font>
-<div>&nbsp;</div>
-</div>
-</div>
-<font size=3D"2"><span style=3D"font-size:11pt;">
-<div class=3D"PlainText">Hello,<br>
-In Ceph, is the way to cleanup data before deleting an image?<br>
-<br>
-Means wipe the data with '0' before deleting an image.<br>
-<br>
-Please let me know if you have any suggestions here.<br>
-<br>
-Thanks<br>
-Swami<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com">http://l=
-ists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-</div>
-</span></font>
-</body>
-</html>
+The corresponding libaio changes for io_pgetevents support and
+documentation, as well as a test case will be posted in a separate
+series.
 
---_000_DB6P190MB0327E4A22662575074B54549FF1F0DB6P190MB0327EURP_--
+The changes were sponsored by Scylladb, and improve performance
+of the seastar framework up to 10%, while also removing the need
+for a privileged SCHED_FIFO epoll listener thread.
 
---===============2542923721121961209==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+The patches are on top of Als __poll_t annoations, so I've also
+prepared a git branch on top of those here:
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+    git://git.infradead.org/users/hch/vfs.git aio-poll
 
---===============2542923721121961209==--
+Gitweb:
+
+    http://git.infradead.org/users/hch/vfs.git/shortlog/refs/heads/aio-poll
+
+Libaio changes:
+
+    http://git.infradead.org/users/hch/libaio.git/shortlog/refs/heads/aio-poll
+
+Seastar changes:
+
+    https://github.com/avikivity/seastar/commits/aio
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-aio' in
+the body to majordomo@kvack.org.  For more info on Linux AIO,
+see: http://www.kvack.org/aio/
+Don't email: <a href=mailto:"aart@kvack.org">aart@kvack.org</a>
+
+--
+Matt Benjamin
+CohortFS, LLC.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://cohortfs.com
+
+tel.  734-761-4689
+fax.  734-769-8938
+cel.  734-216-5309
+
+
+-- 
+
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
