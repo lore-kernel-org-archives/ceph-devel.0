@@ -1,49 +1,115 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: master / mimic-dev1 deb build broken on ceph/ceph-ci
-Date: Thu, 4 Jan 2018 14:30:12 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1801041429290.8186@piezo.novalocal>
-References: <CAJE9aOPsGdqDEZFFxwYJ2SRgqOPSkYmC5px5yKyMkvYw0GsP3Q@mail.gmail.com>
+From: Igor Fedotov <ifedotov-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: Bluestore: inaccurate disk usage statistics
+ problem?
+Date: Thu, 4 Jan 2018 17:42:54 +0300
+Message-ID: <d7e5294f-d746-6a6b-ac09-250dc6592778@suse.de>
+References: <CAGkCoNLOPOKX3iO1QOTp4wyUN7=q-7VuamBxYyC9t9kvtTV-=g@mail.gmail.com>
+ <1c3dd39a-5e0c-9fcf-5502-8a94c899b6cb@suse.de>
+ <alpine.DEB.2.11.1801041424450.24931@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:55382 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753110AbeADOaP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jan 2018 09:30:15 -0500
-In-Reply-To: <CAJE9aOPsGdqDEZFFxwYJ2SRgqOPSkYmC5px5yKyMkvYw0GsP3Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1801041424450.24931-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 4 Jan 2018, kefu chai wrote:
-> hi guys,
-> 
-> as you may notice that we recently switched our toolchain on xenial to
-> gcc-7. to enable the built executables to run on old systems without
-> the new libstdc++ runtime, they should be linked against libstdc++
-> statically. but the master and mimic-dev1 branches fail to do so.
-> that's why the built packages will refuse to install with error
-> messages like:
-> 
-> ceph-test : Depends: libradosstriper1 but it is not going to be installed
->              Depends: libstdc++6 (>= 6) but 5.4.0-6ubuntu1~16.04.5 is
-> to be installed
-> 
-> 
-> https://github.com/ceph/ceph/pull/19763 is posted to address this
-> issue. but before it is merged, please include it for testing your
-> debian packages in sepia.
-> 
-> the centos-7 build is not impacted by this issue, as it use DTS-7, and
-> DTS-7's ld script links the stdc++_nonshared.a for us by default.
-> 
-> sorry for the inconvenience =(
-
-Thanks for sorting it out!
-
-By the way, v13.0.1 is tagged and mimic-dev1 branch is merged into master 
-and removed.
-
-Thanks, everyone!
-sage
+Ck9uIDEvNC8yMDE4IDU6MjcgUE0sIFNhZ2UgV2VpbCB3cm90ZToKPiBPbiBUaHUsIDQgSmFuIDIw
+MTgsIElnb3IgRmVkb3RvdiB3cm90ZToKPj4gQWRkaXRpb25hbCBpc3N1ZSB3aXRoIHRoZSBkaXNr
+IHVzYWdlIHN0YXRpc3RpY3MgSSd2ZSBqdXN0IHJlYWxpemVkIGlzIHRoYXQKPj4gQmx1ZVN0b3Jl
+J3Mgc3RhdGZzIGNhbGwgcmVwb3J0cyB0b3RhbCBkaXNrIHNwYWNlIGFzCj4+Cj4+ICDCoCBibG9j
+ayBkZXZpY2UgdG90YWwgc3BhY2UgKyBEQiBkZXZpY2UgdG90YWwgc3BhY2UKPj4KPj4gd2hpbGUg
+YXZhaWxhYmxlIHNwYWNlIGlzIG1lYXN1cmVkIGFzCj4+Cj4+ICDCoCBibG9jayBkZXZpY2UncyBm
+cmVlIHNwYWNlICsgYmx1ZWZzIGZyZWUgc3BhY2UgYXQgYmxvY2sgZGV2aWNlIC0KPj4gYmx1ZXN0
+b3JlX2JsdWVmc19mcmVlIHBhcmFtCj4+Cj4+Cj4+IFRoaXMgcmVzdWx0cyBpbiBoaWdoZXIgdXNl
+ZCBzcGFjZSB2YWx1ZSAoYXMgYXZhaWxhYmxlIHNwYWNlIGF0IERCwqAgZGV2aWNlCj4+IGlzbid0
+IHRha2VuIGludG8gYWNjb3VudCkgYW5kIG9kZCByZXN1bHRzIHdoZW4gY2x1c3RlciBpcyAoYWxt
+b3N0KSBlbXB0eS4KPiBJc24ndCAiYmx1ZWZzIGZyZWUgc3BhY2UgYXQgYmxvY2sgZGV2aWNlIiB0
+aGUgc2FtZSBhcyB0aGUgZGIgZGV2aWNlIGZyZWU/Ckkgc3VwcG9zZSAtIE5vLiBMb29rcyBsaWtl
+IEJsdWVmcyByZXBvcnRzIGZyZWUgc3BhY2Ugb24gcGVyLWRldmljZSBiYXNpczoKdWludDY0X3Qg
+Qmx1ZUZTOjpnZXRfZnJlZSh1bnNpZ25lZCBpZCkKewogwqAgc3RkOjpsb2NrX2d1YXJkPHN0ZDo6
+bXV0ZXg+IGwobG9jayk7CiDCoCBhc3NlcnQoaWQgPCBhbGxvYy5zaXplKCkpOwogwqAgcmV0dXJu
+IGFsbG9jW2lkXS0+Z2V0X2ZyZWUoKTsKfQpoZW5jZSBibHVlZnMtPmdldF9mcmVlKGJsdWVmc19z
+aGFyZWRfYmRldikgZnJvbSBzdGF0ZnMgcmV0dXJucyBibHVlZnMgCmZyZWUgc3BhY2UgYXQgYmxv
+Y2sgZGV2aWNlIG9ubHkuCj4gKEFjdHVhbGx5LCBibHVlZnMgbWF5IGluY2x1ZGUgcGFydCBvZiBt
+YWluIGRldmljZSB0b28sIGJ1dCB0aGF0IHdvdWxkIGFsc28KPiBiZSByZXBvcnRlZCBhcyBwYXJ0
+IG9mIGJsdWVmcyBmcmVlIHNwYWNlLikKPgo+IHNhZ2UKPgo+PiBJTU8gd2Ugc2hvdWxkbid0IHVz
+ZcKgIERCIGRldmljZSBmb3IgdG90YWwgc3BhY2UgY2FsY3VsYXRpb24uCj4+Cj4+IFNhZ2UsIHdo
+YXQgZG8geW91IHRoaW5rPwo+Pgo+PiBUaGFua3MsCj4+Cj4+IElnb3IKPj4KPj4KPj4KPj4gT24g
+MTIvMjYvMjAxNyA2OjI1IEFNLCBaaGkgWmhhbmcgd3JvdGU6Cj4+PiBIaSwKPj4+Cj4+PiBXZSBy
+ZWNlbnRseSBzdGFydGVkIHRvIHRlc3QgYmx1ZXN0b3JlIHdpdGggaHVnZSBhbW91bnQgb2Ygc21h
+bGwgZmlsZXMKPj4+IChvbmx5IGRvemVucyBvZiBieXRlcyBwZXIgZmlsZSkuIFdlIGhhdmUgMjIg
+T1NEcyBpbiBhIHRlc3QgY2x1c3Rlcgo+Pj4gdXNpbmcgY2VwaC0xMi4yLjEgd2l0aCAyIHJlcGxp
+Y2FzIGFuZCBlYWNoIE9TRCBkaXNrIGlzIDJUQiBzaXplLiBBZnRlcgo+Pj4gd2Ugd3JvdGUgYWJv
+dXQgMTUwIG1pbGxpb24gZmlsZXMgdGhyb3VnaCBjZXBoZnMsIHdlIGZvdW5kIGVhY2ggT1NECj4+
+PiBkaXNrIHVzYWdlIHJlcG9ydGVkIGJ5ICJjZXBoIG9zZCBkZiIgd2FzIG1vcmUgdGhhbiA0MCUs
+IHdoaWNoIG1lYW50Cj4+PiBtb3JlIHRoYW4gODAwR0Igd2FzIHVzZWQgZm9yIGVhY2ggZGlzaywg
+YnV0IHRoZSBhY3R1YWwgdG90YWwgZmlsZSBzaXplCj4+PiB3YXMgb25seSBhYm91dCA1LjIgR0Is
+IHdoaWNoIHdhcyByZXBvcnRlZCBieSAiY2VwaCBkZiIgYW5kIGFsc28KPj4+IGNhbGN1bGF0ZWQg
+Ynkgb3Vyc2VsdmVzLgo+Pj4KPj4+IFRoZSB0ZXN0IGlzIG9uZ29pbmcuIEkgd29uZGVyIHdoZXRo
+ZXIgdGhlIGNsdXN0ZXIgd291bGQgcmVwb3J0IE9TRAo+Pj4gZnVsbCBhZnRlciB3ZSB3cm90ZSBh
+Ym91dCAzMDAgbWlsbGlvbiBmaWxlcywgaG93ZXZlciB0aGUgYWN0dWFsIHRvdGFsCj4+PiBmaWxl
+IHNpemUgd291bGQgYmUgZmFyIGZhciBsZXNzIHRoYW4gdGhlIGRpc2sgdXNhZ2UuIEkgd2lsbCB1
+cGRhdGUgdGhlCj4+PiByZXN1bHQgd2hlbiB0aGUgdGVzdCBpcyBkb25lLgo+Pj4KPj4+IE15IHF1
+ZXN0aW9uIGlzLCB3aGV0aGVyIHRoZSBkaXNrIHVzYWdlIHN0YXRpc3RpY3MgaW4gYmx1ZXN0b3Jl
+IGlzCj4+PiBpbmFjY3VyYXRlLCBvciB0aGUgcGFkZGluZywgYWxpZ25tZW50IHN0dWZmIG9yIHNv
+bWV0aGluZyBlbHNlIGluCj4+PiBibHVlc3RvcmUgd2FzdGVzIHRoZSBkaXNrIHNwYWNlPwo+Pj4K
+Pj4+IFRoYW5rcyEKPj4+Cj4+PiAkIGNlcGggb3NkIGRmCj4+PiBJRCBDTEFTUyBXRUlHSFQgIFJF
+V0VJR0hUIFNJWkUgICBVU0UgICAgQVZBSUwgICVVU0UgIFZBUiAgUEdTCj4+PiAgICAwICAgaGRk
+IDEuNDk3MjggIDEuMDAwMDAgIDE4NjJHICAgODUzRyAgMTAwOUcgNDUuODIgMS4wMCAxMTAKPj4+
+ICAgIDEgICBoZGQgMS42OTE5MyAgMS4wMDAwMCAgMTg2MkcgICA4MDdHICAxMDU0RyA0My4zNyAw
+Ljk0IDEwNQo+Pj4gICAgMiAgIGhkZCAxLjgxOTI5ICAxLjAwMDAwICAxODYyRyAgIDgxMUcgIDEw
+NTFHIDQzLjU3IDAuOTUgMTE2Cj4+PiAgICAzICAgaGRkIDIuMDA3MDAgIDEuMDAwMDAgIDE4NjJH
+ICAgODM5RyAgMTAyM0cgNDUuMDQgMC45OCAxMjIKPj4+ICAgIDQgICBoZGQgMi4wNjMzNCAgMS4w
+MDAwMCAgMTg2MkcgICA4ODZHICAgOTc2RyA0Ny41OCAxLjAzIDEzMAo+Pj4gICAgNSAgIGhkZCAx
+Ljk5MDUxICAxLjAwMDAwICAxODYyRyAgIDg1NkcgIDEwMDZHIDQ1Ljk1IDEuMDAgMTE4Cj4+PiAg
+ICA2ICAgaGRkIDEuNjc1MTkgIDEuMDAwMDAgIDE4NjJHICAgODgxRyAgIDk4MUcgNDcuMzIgMS4w
+MyAxMTQKPj4+ICAgIDcgICBoZGQgMS44MTkyOSAgMS4wMDAwMCAgMTg2MkcgICA4NzRHICAgOTg4
+RyA0Ni45NCAxLjAyIDEyMAo+Pj4gICAgOCAgIGhkZCAyLjA4ODgxICAxLjAwMDAwICAxODYyRyAg
+IDg4NUcgICA5NzZHIDQ3LjU2IDEuMDMgMTMwCj4+PiAgICA5ICAgaGRkIDEuNjQyNjUgIDEuMDAw
+MDAgIDE4NjJHICAgODUyRyAgMTAxMEcgNDUuNzggMC45OSAxMDYKPj4+IDEwICAgaGRkIDEuODE5
+MjkgIDEuMDAwMDAgIDE4NjJHICAgODczRyAgIDk4OUcgNDYuODggMS4wMiAxMDkKPj4+IDExICAg
+aGRkIDIuMjAwNDEgIDEuMDAwMDAgIDE4NjJHICAgOTE1RyAgIDk0N0cgNDkuMTMgMS4wNyAxMzEK
+Pj4+IDEyICAgaGRkIDEuNDU2OTQgIDEuMDAwMDAgIDE4NjJHICAgODc0RyAgIDk4OEcgNDYuOTQg
+MS4wMiAxMTAKPj4+IDEzICAgaGRkIDIuMDM4NDcgIDEuMDAwMDAgIDE4NjJHICAgODIxRyAgMTA0
+MUcgNDQuMDggMC45NiAxMTMKPj4+IDE0ICAgaGRkIDEuNTM4MTIgIDEuMDAwMDAgIDE4NjJHICAg
+ODEwRyAgMTA1MkcgNDMuNTAgMC45NSAxMTIKPj4+IDE1ICAgaGRkIDEuNTI5MTQgIDEuMDAwMDAg
+IDE4NjJHICAgODc0RyAgIDk4OEcgNDYuOTQgMS4wMiAxMTEKPj4+IDE2ICAgaGRkIDEuOTkxNzYg
+IDEuMDAwMDAgIDE4NjJHICAgODEwRyAgMTA1MkcgNDMuNTEgMC45NSAxMTQKPj4+IDE3ICAgaGRk
+IDEuODE5MjkgIDEuMDAwMDAgIDE4NjJHICAgODQxRyAgMTAyMUcgNDUuMTYgMC45OCAxMTkKPj4+
+IDE4ICAgaGRkIDEuNzA5MDEgIDEuMDAwMDAgIDE4NjJHICAgODMxRyAgMTAzMUcgNDQuNjEgMC45
+NyAxMTMKPj4+IDE5ICAgaGRkIDEuNjc1MTkgIDEuMDAwMDAgIDE4NjJHICAgODc1RyAgIDk4N0cg
+NDcuMDIgMS4wMiAxMTUKPj4+IDIwICAgaGRkIDIuMDM4NDcgIDEuMDAwMDAgIDE4NjJHICAgODY0
+RyAgIDk5OEcgNDYuMzkgMS4wMSAxMTUKPj4+IDIxICAgaGRkIDIuMTg3OTQgIDEuMDAwMDAgIDE4
+NjJHICAgOTIwRyAgIDk0MkcgNDkuMzkgMS4wNyAxMjcKPj4+ICAgICAgICAgICAgICAgICAgICAg
+ICBUT1RBTCA0MDk4NEcgMTg4NjFHIDIyMTIyRyA0Ni4wMgo+Pj4KPj4+ICQgY2VwaCBkZgo+Pj4g
+R0xPQkFMOgo+Pj4gICAgICAgU0laRSAgICAgICBBVkFJTCAgICAgIFJBVyBVU0VEICAgICAlUkFX
+IFVTRUQKPj4+ICAgICAgIDQwOTg0RyAgICAgMjIxMjJHICAgICAgIDE4ODYxRyAgICAgICAgIDQ2
+LjAyCj4+PiBQT09MUzoKPj4+ICAgICAgIE5BTUUgICAgICAgICAgICAgICAgSUQgICAgIFVTRUQg
+ICAgICAlVVNFRCAgICAgTUFYIEFWQUlMICAgICBPQkpFQ1RTCj4+PiAgICAgICBjZXBoZnNfbWV0
+YWRhdGEgICAgIDUgICAgICAgMTYwTSAgICAgICAgIDAgICAgICAgICA2OTY0RyAgICAgICAgIDc3
+MzQyCj4+PiAgICAgICBjZXBoZnNfZGF0YSAgICAgICAgIDYgICAgICA1MTkzTSAgICAgIDAuMDQg
+ICAgICAgICA2OTY0RyAgICAgMTUxMjkyNjY5Cj4+Pgo+Pj4KPj4+IFJlZ2FyZHMsCj4+PiBaaGkg
+WmhhbmcgKERhdmlkKQo+Pj4gQ29udGFjdDogemhhbmcuZGF2aWQyMDExQGdtYWlsLmNvbQo+Pj4g
+ICAgICAgICAgICAgICAgIHpoYW5nei5kYXZpZEBvdXRsb29rLmNvbQo+Pj4gLS0KPj4+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiBpbgo+Pj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcKPj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+PiAtLQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJv
+ZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpv
+cmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
+Cj4+CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
+LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
