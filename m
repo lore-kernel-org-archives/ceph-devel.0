@@ -1,238 +1,342 @@
-From: Byung Su Park <pbs1108@gmail.com>
-Subject: Re: Add dmclock QoS client calls to librados -- request for comments
-Date: Fri, 5 Jan 2018 13:35:49 +0900
-Message-ID: <CAKk8r1AZ0TS3Q1EScSTzfxBFFscqMcCi00VTyO+fYO6C7p34PQ@mail.gmail.com>
-References: <bbba2b97-46cd-132d-59bf-a7e5c4bc387e@redhat.com>
- <c694bf64-3d09-6ea7-e8c9-c7a84ef660c6@gmail.com> <A411C74D-32E5-4C3F-B983-14B43920464F@redhat.com>
- <CAJe5RNo-7AtjZzHsm-C1bP8VX2KMz=Awb1yjPwEXLF2LSHqEgg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH v4 1/6] ceph: quota: add initial infrastructure to support cephfs quotas
+Date: Fri,  5 Jan 2018 10:47:18 +0000
+Message-ID: <20180105104723.16202-2-lhenriques@suse.com>
+References: <20180105104723.16202-1-lhenriques@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:33855 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751640AbeAEEfv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jan 2018 23:35:51 -0500
-Received: by mail-io0-f176.google.com with SMTP id q188so4506684iod.1
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jan 2018 20:35:51 -0800 (PST)
-In-Reply-To: <CAJe5RNo-7AtjZzHsm-C1bP8VX2KMz=Awb1yjPwEXLF2LSHqEgg@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:36316 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751012AbeAEKrf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 5 Jan 2018 05:47:35 -0500
+In-Reply-To: <20180105104723.16202-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "J. Eric Ivancich" <ivancich@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mark.a.nelson@gmail.com>, KIM TAEWOONG <taewoong.kim@sk.com>, =?UTF-8?B?67CV67OR7IiY?= <bspark8@sk.com>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>, Luis Henriques <lhenriques@suse.com>
 
-Hi Eric,
+This patch adds the infrastructure required to support cephfs quotas as it
+is currently implemented in the ceph fuse client.  Cephfs quotas can be
+set on any directory, and can restrict the number of bytes or the number
+of files stored beneath that point in the directory hierarchy.
 
-2018-01-03 22:43 GMT+09:00 =EA=B9=80=ED=83=9C=EC=9B=85 <isis1054@gmail.com>=
-:
->
-> 2018-01-03 0:11 GMT+09:00 J. Eric Ivancich <ivancich@redhat.com>:
-> >
-> > Thanks, Mark, for those thoughts.
-> >
-> > > On Dec 19, 2017, at 12:45 PM, Mark Nelson <mark.a.nelson@gmail.com> w=
-rote:
-> > >
-> > > On 12/18/2017 01:04 PM, J. Eric Ivancich wrote:
-> > >> =3D=3D Units =3D=3D
-> > >> One key difference we're considering, however, is changing the unit
-> > >> that reservations and limits are expressed in from ops/sec to
-> > >> something more appropriate for Ceph. Operations have payloads of
-> > >> different sizes and will therefore take different amounts of time, a=
-nd
-> > >> that should be factored in. We might refer to this as the "cost" of
-> > >> the operation. And the cost is not linear with the size of the
-> > >> payload. For example, a write of 4 MB might only take 20 times as lo=
-ng
-> > >> as a write of 4 KB even though the sizes differ by a factor of
-> > >> 1000. Using cost would allow us to, for example, achieve a fairer
-> > >> prioritization of a client doing many small writes against a client
-> > >> that's doing a few larger writes.
-> > >
-> > > Getting away from ops/s is a good idea imho, and I generally agree he=
-re.
-> >
-> > Cool!
-> >
-> > >> One proposed formula to translate one op into cost would be somethin=
-g
-> > >> along the lines of:
-> > >>     cost_units =3D a + b * log(payload_size)
-> > >> where a and b would have to be chosen or tuned based on the storage
-> > >> back-end.
-> > >
-> > > I guess the idea is that we can generally approximate the curve of bo=
-th HDDs and solid state storage with this formula by tweaking a and b? I've=
- got a couple of concerns:
-> >
-> > That=E2=80=99s correct.
-> >
-> > > 1) I don't think most users are going to get a and b right.  If anyth=
-ing I suspect we'll end up with a couple of competing values for HDD and SS=
-Ds that people will just copy/paste from each other or the mailing list.  I=
-'d much rather that we had hdd/ssd defaults like we do for other options in=
- ceph that get us in the right ballparks and get set automatically based on=
- the disk type.
-> >
-> > I agree; best to have sensible defaults.
-> >
-> > > 2) log() is kind of expensive.  It's not *that* bad, but it's enough =
-that for small NVMe read ops we could start to see it show up in profiles.
-> > >
-> > > http://nicolas.limare.net/pro/notes/2014/12/16_math_speed/
-> > >
-> > > I suspect it might be a good idea to pre-compute the cost_units for t=
-he first 64k (or whatever) payload_sizes, especially if that value is 64bit=
-.  It would take minimal memory and I could see it becoming more important =
-as flash becomes more common (especially on ARM and similar CPUs).
-> >
-> > I agree. Rounding to the nearest kb and then doing a table look-up is l=
-ikely the right way to go and then only doing the full calculation when nec=
-essary. We could even consider pre-computing the values for powers-of-2-kb =
-(e.g., 1k, 2k, 4k, 8k, 16k, =E2=80=A6. 128k, 256k, =E2=80=A6) and rounding =
-each payload to the next highest, assuming it=E2=80=99s not problematic to =
-treat, say, 20k, 25k, and 30k as having the same cost (i.e., same as 32k). =
-Or use a combination of the two approaches =E2=80=94 linear table for small=
-er payloads and exponential table for the larger payloads.
->
-> Pre-computation to make the cost table seems a good idea. I think that
-> makes us able to use more complicated formulas because the computation
-> is needed only when it is necessary.
-> I wonder if the log function is really needed. In past tests performed
-> on my environment, the cost seemed to be linear to the request size,
-> not log function.
-> According to my observation, the larger the size, the stronger the
-> linearity. Maybe it could be depended on the environment.
-> To cover these various environments, we could change the formula like bel=
-ow.
-> cost_units =3D a + b * payload_size + c * log(d * payload_size)
-> I'm not sure which term should be removed at this time. The exact form
-> of the formula should be considered with more tests.
->
+Quotas are set using the extended attributes 'ceph.quota.max_files' and
+'ceph.quota.max_bytes', and can be removed by setting these attributes to
+'0'.
 
-In addition to Taewoong's opinion, the environment in which the I/O
-cost increases linearly with payload_size is the SSD based Ceph
-cluster.
-We also think that we need to add predefined differential values b1
-and b2 for I/O type (read/write) when calculating I/O cost.
-For I/O cost modeling, the following paper can be referred to.
-(https://people.ucsc.edu/~hlitz/papers/reflex.pdf)
+Link: http://tracker.ceph.com/issues/22372
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/Makefile                   |  2 +-
+ fs/ceph/inode.c                    |  6 ++++
+ fs/ceph/mds_client.c               | 23 ++++++++++++++
+ fs/ceph/mds_client.h               |  2 ++
+ fs/ceph/quota.c                    | 65 ++++++++++++++++++++++++++++++++++++++
+ fs/ceph/super.h                    |  8 +++++
+ fs/ceph/xattr.c                    | 44 ++++++++++++++++++++++++++
+ include/linux/ceph/ceph_features.h |  3 +-
+ include/linux/ceph/ceph_fs.h       | 17 ++++++++++
+ 9 files changed, 168 insertions(+), 2 deletions(-)
+ create mode 100644 fs/ceph/quota.c
 
-> >
-> > > 3) If there were an easy way to express it, it might be nice to just =
-give advanced users the option to write their own function here as an overr=
-ide vs the defaults. ie (not real numbers):
-> > >
-> > > notreal_qos_cost_unit_algorithm =3D ""
-> > > notreal_qos_cost_unit_algorithm_ssd =3D "1024 + 0.25*log(payload_size=
-)"
-> > > notreal_qos_cost_unit_algorithm_hdd =3D "64 + 32*log(payload_size)"
-> > >
-> > > I think this is cleaner than needing to specify hdd_a, hdd_b, ssd_a, =
-ssd_b on nodes with mixed HDD/flash OSDs.
-> >
-> > I=E2=80=99m inclined to go with the more simple implementation, at leas=
-t for the first take, but certainly open to the more general implementation=
- that you suggest.
-> >
-> > >> And that gets us to the units for defining reservation and limit --
-> > >> cost_units per unit of time. Typically these are floating point
-> > >> values, however we do not use floating point types in librados calls
-> > >> because qemu, when calling into librbd, does not save and restore th=
-e
-> > >> cpu's floating point mode.
-> > >> There are two ways of getting appropriate ranges of values given tha=
-t
-> > >> we need to use integral types for cost_units per unit of time. One i=
-s
-> > >> a large time unit in the denominator, such as minutes or even
-> > >> hours. That would leave us with cost_units per minute. We are unsure
-> > >> that the strange unit is the best approach and your feedback would b=
-e
-> > >> appreciated.
-> > >> A standard alternative would be to use a standard time unit, such as
-> > >> seconds, but integers as fixed-point values. So a floating-point val=
-ue
-> > >> in cost_units per second would be multiplied by, say, 1000 and round=
-ed
-> > >> to get the corresponding integer value.
-> > >
-> > > In the 2nd scenario it's just a question of how we handle it internal=
-ly right?
-> >
-> > The client calling into librados would have to do the conversion of flo=
-ating-point into fixed-point. I=E2=80=99ll reply to Sage=E2=80=99s reply to=
- this thread next, but I think he makes a good point that the number of cos=
-t units for typical payload sizes will be (much?) larger than 1, so we migh=
-t be able to use seconds as are time unit *and* avoid fixed-point math. In =
-other words, I=E2=80=99m now thinking that the caller would simply need to =
-round to an integral value *if* they started with a floating point value.
-> >
-> > >> =3D=3D librados Additions =3D=3D
-> > >> The basic idea is that one would be able to create (and destroy) qos
-> > >> profiles and then associate a profile with an ioctx. Ops on the ioct=
-x
-> > >> would use the qos profile associated with it.
-> > >> typedef void* rados_qos_profile_t; // opaque
-> > >> // parameters uint64_t in cost_units per time unit as discussed abov=
-e
-> > >> profile1 =3D rados_qos_profile_create(reservation, weight, limit);
-> > >> rados_ioctx_set_qos_profile(ioctx3, profile1);
-> > >> ...
-> > >> // ops to ioctx3 would now use the specified profile
-> > >> ...
-> > >> // use the profile just for a particular operation
-> > >> rados_write_op_set_qos_prefile(op1, profile1);
-> > >> rados_ioctx_set_qos_profile(ioctx3, NULL); // set to default profile
-> > >> rados_qos_profile_destroy(profile1);
-> > >> =3D=3D MOSDOp and MOSDOpReply Changes =3D=3D
-> > >> Because the qos_profile would be managed by the ioctx, MOSDOps sent
-> > >> via that ioctx would include the reservation, weight, and limit. At
-> > >> this point we think this would be better than keeping the profiles o=
-n
-> > >> the back-end, although it increases the MOSDOp data structure by abo=
-ut
-> > >> 128 bits.
-> > >> The MOSDOp type already contains dmclock's delta and rho parameters
-> > >> and MOSDOpReply already contains the dmclock phase indicator due to
-> > >> prior work. Given that we're moving towards using cost_unit per
-> > >> time_unit rather than ops per sec, perhaps we should also include th=
-e
-> > >> calculated cost in the MOSDOpReply.
-
-Currently, the architecture you suggest is I/O cost calculation and
-profiling on the client side.
-I would like to hear more about why you think about client side
-implementation rather than server side implementation.
-
-As we already know, the dmClock algorithm already controls the degree
-of request using the delta/rho on the client side and the fair cost
-estimate for each different size/type of IO is required on the server
-side.
-I'd have to think about calculating I/O costs on the server side at least o=
-nce.
-
-Thank you.
-
-> > >
-> > > Does it change things at all if we have fast per-calculated values of=
- cost_unit available for a given payload size?
-> >
-> > No, that wouldn=E2=80=99t change anything. This value will help the new=
- piece in librados that handles dmclock correctly apportion the work done b=
-y each server to ensure fairness across servers. When using =E2=80=9Cops=E2=
-=80=9D the value was 1. With cost units it gets a little more complex. This=
- would all be internal to librados and the client wouldn=E2=80=99t have to =
-deal with this value.
-> >
-> > Eric
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
+index 174f5709e508..a699e320393f 100644
+--- a/fs/ceph/Makefile
++++ b/fs/ceph/Makefile
+@@ -6,7 +6,7 @@
+ obj-$(CONFIG_CEPH_FS) += ceph.o
+ 
+ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
+-	export.o caps.o snap.o xattr.o \
++	export.o caps.o snap.o xattr.o quota.o \
+ 	mds_client.o mdsmap.o strings.o ceph_frag.o \
+ 	debugfs.o
+ 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index ab81652198c4..8a0ba96e105d 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -441,6 +441,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	atomic64_set(&ci->i_complete_seq[1], 0);
+ 	ci->i_symlink = NULL;
+ 
++	ci->i_max_bytes = 0;
++	ci->i_max_files = 0;
++
+ 	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
+ 	RCU_INIT_POINTER(ci->i_layout.pool_ns, NULL);
+ 
+@@ -790,6 +793,9 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	inode->i_rdev = le32_to_cpu(info->rdev);
+ 	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
+ 
++	ci->i_max_bytes = iinfo->max_bytes;
++	ci->i_max_files = iinfo->max_files;
++
+ 	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
+ 	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
+ 		inode->i_mode = le32_to_cpu(info->mode);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 1b468250e947..2290056d13fc 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -100,6 +100,26 @@ static int parse_reply_info_in(void **p, void *end,
+ 	} else
+ 		info->inline_version = CEPH_INLINE_NONE;
+ 
++	if (features & CEPH_FEATURE_MDS_QUOTA) {
++		u8 struct_v, struct_compat;
++		u32 struct_len;
++
++		/*
++		 * both struct_v and struct_compat are expected to be >= 1
++		 */
++		ceph_decode_8_safe(p, end, struct_v, bad);
++		ceph_decode_8_safe(p, end, struct_compat, bad);
++		if (!struct_v || !struct_compat)
++			goto bad;
++		ceph_decode_32_safe(p, end, struct_len, bad);
++		ceph_decode_need(p, end, struct_len, bad);
++		ceph_decode_64_safe(p, end, info->max_bytes, bad);
++		ceph_decode_64_safe(p, end, info->max_files, bad);
++	} else {
++		info->max_bytes = 0;
++		info->max_files = 0;
++	}
++
+ 	info->pool_ns_len = 0;
+ 	info->pool_ns_data = NULL;
+ 	if (features & CEPH_FEATURE_FS_FILE_LAYOUT_V2) {
+@@ -4064,6 +4084,9 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+ 	case CEPH_MSG_CLIENT_LEASE:
+ 		handle_lease(mdsc, s, msg);
+ 		break;
++	case CEPH_MSG_CLIENT_QUOTA:
++		ceph_handle_quota(mdsc, s, msg);
++		break;
+ 
+ 	default:
+ 		pr_err("received unknown message type %d %s\n", type,
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 837ac4b087a0..7af576733948 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -49,6 +49,8 @@ struct ceph_mds_reply_info_in {
+ 	char *inline_data;
+ 	u32 pool_ns_len;
+ 	char *pool_ns_data;
++	u64 max_bytes;
++	u64 max_files;
+ };
+ 
+ struct ceph_mds_reply_dir_entry {
+diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+new file mode 100644
+index 000000000000..1b69d8365ec2
+--- /dev/null
++++ b/fs/ceph/quota.c
+@@ -0,0 +1,65 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * quota.c - CephFS quota
++ *
++ * Copyright (C) 2017-2018 SUSE
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "super.h"
++#include "mds_client.h"
++
++void ceph_handle_quota(struct ceph_mds_client *mdsc,
++		       struct ceph_mds_session *session,
++		       struct ceph_msg *msg)
++{
++	struct super_block *sb = mdsc->fsc->sb;
++	struct ceph_mds_quota *h = msg->front.iov_base;
++	struct ceph_vino vino;
++	struct inode *inode;
++	struct ceph_inode_info *ci;
++
++	if (msg->front.iov_len != sizeof(*h)) {
++		pr_err("%s corrupt message mds%d len %d\n", __func__,
++		       session->s_mds, (int)msg->front.iov_len);
++		ceph_msg_dump(msg);
++		return;
++	}
++
++	/* increment msg sequence number */
++	mutex_lock(&session->s_mutex);
++	session->s_seq++;
++	mutex_unlock(&session->s_mutex);
++
++	/* lookup inode */
++	vino.ino = le64_to_cpu(h->ino);
++	vino.snap = CEPH_NOSNAP;
++	inode = ceph_find_inode(sb, vino);
++	if (!inode) {
++		pr_warn("Failed to find inode %llu\n", vino.ino);
++		return;
++	}
++	ci = ceph_inode(inode);
++
++	spin_lock(&ci->i_ceph_lock);
++	ci->i_rbytes = le64_to_cpu(h->rbytes);
++	ci->i_rfiles = le64_to_cpu(h->rfiles);
++	ci->i_rsubdirs = le64_to_cpu(h->rsubdirs);
++	ci->i_max_bytes = le64_to_cpu(h->max_bytes);
++	ci->i_max_files = le64_to_cpu(h->max_files);
++	spin_unlock(&ci->i_ceph_lock);
++
++	iput(inode);
++}
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 2beeec07fa76..f998b7f076cf 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -309,6 +309,9 @@ struct ceph_inode_info {
+ 	u64 i_rbytes, i_rfiles, i_rsubdirs;
+ 	u64 i_files, i_subdirs;
+ 
++	/* quotas */
++	u64 i_max_bytes, i_max_files;
++
+ 	struct rb_root i_fragtree;
+ 	int i_fragtree_nsplits;
+ 	struct mutex i_fragtree_mutex;
+@@ -1019,4 +1022,9 @@ extern int ceph_locks_to_pagelist(struct ceph_filelock *flocks,
+ extern int ceph_fs_debugfs_init(struct ceph_fs_client *client);
+ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
+ 
++/* quota.c */
++extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
++			      struct ceph_mds_session *session,
++			      struct ceph_msg *msg);
++
+ #endif /* _FS_CEPH_SUPER_H */
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index e1c4e0b12b4c..7e72348639e4 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -224,6 +224,31 @@ static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
+ 			(long)ci->i_rctime.tv_nsec);
+ }
+ 
++/* quotas */
++
++static bool ceph_vxattrcb_quota_exists(struct ceph_inode_info *ci)
++{
++	return (ci->i_max_files || ci->i_max_bytes);
++}
++
++static size_t ceph_vxattrcb_quota(struct ceph_inode_info *ci, char *val,
++				  size_t size)
++{
++	return snprintf(val, size, "max_bytes=%llu max_files=%llu",
++			ci->i_max_bytes, ci->i_max_files);
++}
++
++static size_t ceph_vxattrcb_quota_max_bytes(struct ceph_inode_info *ci,
++					    char *val, size_t size)
++{
++	return snprintf(val, size, "%llu", ci->i_max_bytes);
++}
++
++static size_t ceph_vxattrcb_quota_max_files(struct ceph_inode_info *ci,
++					    char *val, size_t size)
++{
++	return snprintf(val, size, "%llu", ci->i_max_files);
++}
+ 
+ #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
+ #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
+@@ -247,6 +272,15 @@ static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
+ 		.hidden = true,			\
+ 		.exists_cb = ceph_vxattrcb_layout_exists,	\
+ 	}
++#define XATTR_QUOTA_FIELD(_type, _name)					\
++	{								\
++		.name = CEPH_XATTR_NAME(_type, _name),			\
++		.name_size = sizeof(CEPH_XATTR_NAME(_type, _name)),	\
++		.getxattr_cb = ceph_vxattrcb_ ## _type ## _ ## _name,	\
++		.readonly = false,					\
++		.hidden = true,						\
++		.exists_cb = ceph_vxattrcb_quota_exists,		\
++	}
+ 
+ static struct ceph_vxattr ceph_dir_vxattrs[] = {
+ 	{
+@@ -270,6 +304,16 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
+ 	XATTR_NAME_CEPH(dir, rsubdirs),
+ 	XATTR_NAME_CEPH(dir, rbytes),
+ 	XATTR_NAME_CEPH(dir, rctime),
++	{
++		.name = "ceph.quota",
++		.name_size = sizeof("ceph.quota"),
++		.getxattr_cb = ceph_vxattrcb_quota,
++		.readonly = false,
++		.hidden = true,
++		.exists_cb = ceph_vxattrcb_quota_exists,
++	},
++	XATTR_QUOTA_FIELD(quota, max_bytes),
++	XATTR_QUOTA_FIELD(quota, max_files),
+ 	{ .name = NULL, 0 }	/* Required table terminator */
+ };
+ static size_t ceph_dir_vxattrs_name_size;	/* total size of all names */
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index 59042d5ac520..6acd46c36271 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -209,7 +209,8 @@ DEFINE_CEPH_FEATURE_DEPRECATED(63, 1, RESERVED_BROKEN, LUMINOUS) // client-facin
+ 	 CEPH_FEATURE_SERVER_JEWEL |		\
+ 	 CEPH_FEATURE_MON_STATEFUL_SUB |	\
+ 	 CEPH_FEATURE_CRUSH_TUNABLES5 |		\
+-	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING)
++	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING |	\
++	 CEPH_FEATURE_MDS_QUOTA)
+ 
+ #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+ 	(CEPH_FEATURE_NOSRCADDR |	 \
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 88dd51381aaf..98bdcc0eda3f 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -134,6 +134,7 @@ struct ceph_dir_layout {
+ #define CEPH_MSG_CLIENT_LEASE           0x311
+ #define CEPH_MSG_CLIENT_SNAP            0x312
+ #define CEPH_MSG_CLIENT_CAPRELEASE      0x313
++#define CEPH_MSG_CLIENT_QUOTA		0x314
+ 
+ /* pool ops */
+ #define CEPH_MSG_POOLOP_REPLY           48
+@@ -807,4 +808,20 @@ struct ceph_mds_snap_realm {
+ } __attribute__ ((packed));
+ /* followed by my snap list, then prior parent snap list */
+ 
++/*
++ * quotas
++ */
++struct ceph_mds_quota {
++	__le64 ino;		/* ino */
++	struct ceph_timespec rctime;
++	__le64 rbytes;		/* dir stats */
++	__le64 rfiles;
++	__le64 rsubdirs;
++	__u8 struct_v;		/* compat */
++	__u8 struct_compat;
++	__le32 struct_len;
++	__le64 max_bytes;	/* quota max. bytes */
++	__le64 max_files;	/* quota max. files */
++} __attribute__ ((packed));
++
+ #endif
