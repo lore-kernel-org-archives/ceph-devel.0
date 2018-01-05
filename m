@@ -1,342 +1,191 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH v4 1/6] ceph: quota: add initial infrastructure to support cephfs quotas
-Date: Fri,  5 Jan 2018 10:47:18 +0000
-Message-ID: <20180105104723.16202-2-lhenriques@suse.com>
+Subject: [PATCH v4 2/6] ceph: quota: support for ceph.quota.max_files
+Date: Fri,  5 Jan 2018 10:47:19 +0000
+Message-ID: <20180105104723.16202-3-lhenriques@suse.com>
 References: <20180105104723.16202-1-lhenriques@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:36316 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:36320 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751012AbeAEKrf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 5 Jan 2018 05:47:35 -0500
+        id S1750927AbeAEKrg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 5 Jan 2018 05:47:36 -0500
 In-Reply-To: <20180105104723.16202-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>, Luis Henriques <lhenriques@suse.com>
 
-This patch adds the infrastructure required to support cephfs quotas as it
-is currently implemented in the ceph fuse client.  Cephfs quotas can be
-set on any directory, and can restrict the number of bytes or the number
-of files stored beneath that point in the directory hierarchy.
+This patch adds support for the max_files quota.  It hooks into all the
+ceph functions that add new filesystem objects that need to be checked
+against the quota limits.  When these limits are hit, -EDQUOT is returned.
 
-Quotas are set using the extended attributes 'ceph.quota.max_files' and
-'ceph.quota.max_bytes', and can be removed by setting these attributes to
-'0'.
+Note that we're not checking quotas on ceph_link().  ceph_link doesn't
+really create a new inode,  and since the MDS doesn't update the directory
+statistics when a new (hard) link is created (only with symlinks), they
+are not accounted as a new file.
 
 Link: http://tracker.ceph.com/issues/22372
 Signed-off-by: Luis Henriques <lhenriques@suse.com>
 ---
- fs/ceph/Makefile                   |  2 +-
- fs/ceph/inode.c                    |  6 ++++
- fs/ceph/mds_client.c               | 23 ++++++++++++++
- fs/ceph/mds_client.h               |  2 ++
- fs/ceph/quota.c                    | 65 ++++++++++++++++++++++++++++++++++++++
- fs/ceph/super.h                    |  8 +++++
- fs/ceph/xattr.c                    | 44 ++++++++++++++++++++++++++
- include/linux/ceph/ceph_features.h |  3 +-
- include/linux/ceph/ceph_fs.h       | 17 ++++++++++
- 9 files changed, 168 insertions(+), 2 deletions(-)
- create mode 100644 fs/ceph/quota.c
+ fs/ceph/dir.c   | 11 ++++++++
+ fs/ceph/file.c  |  4 ++-
+ fs/ceph/quota.c | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/super.h |  1 +
+ 4 files changed, 95 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-index 174f5709e508..a699e320393f 100644
---- a/fs/ceph/Makefile
-+++ b/fs/ceph/Makefile
-@@ -6,7 +6,7 @@
- obj-$(CONFIG_CEPH_FS) += ceph.o
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 8a5266699b67..66550d92b1ac 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -818,6 +818,9 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+ 	if (ceph_snap(dir) != CEPH_NOSNAP)
+ 		return -EROFS;
  
- ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
--	export.o caps.o snap.o xattr.o \
-+	export.o caps.o snap.o xattr.o quota.o \
- 	mds_client.o mdsmap.o strings.o ceph_frag.o \
- 	debugfs.o
- 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index ab81652198c4..8a0ba96e105d 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -441,6 +441,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 	atomic64_set(&ci->i_complete_seq[1], 0);
- 	ci->i_symlink = NULL;
- 
-+	ci->i_max_bytes = 0;
-+	ci->i_max_files = 0;
++	if (ceph_quota_is_max_files_exceeded(dir))
++		return -EDQUOT;
 +
- 	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
- 	RCU_INIT_POINTER(ci->i_layout.pool_ns, NULL);
+ 	err = ceph_pre_init_acls(dir, &mode, &acls);
+ 	if (err < 0)
+ 		return err;
+@@ -871,6 +874,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	if (ceph_snap(dir) != CEPH_NOSNAP)
+ 		return -EROFS;
  
-@@ -790,6 +793,9 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
- 	inode->i_rdev = le32_to_cpu(info->rdev);
- 	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
- 
-+	ci->i_max_bytes = iinfo->max_bytes;
-+	ci->i_max_files = iinfo->max_files;
++	if (ceph_quota_is_max_files_exceeded(dir))
++		return -EDQUOT;
 +
- 	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
- 	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
- 		inode->i_mode = le32_to_cpu(info->mode);
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 1b468250e947..2290056d13fc 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -100,6 +100,26 @@ static int parse_reply_info_in(void **p, void *end,
- 	} else
- 		info->inline_version = CEPH_INLINE_NONE;
+ 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+@@ -920,6 +926,11 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 		goto out;
+ 	}
  
-+	if (features & CEPH_FEATURE_MDS_QUOTA) {
-+		u8 struct_v, struct_compat;
-+		u32 struct_len;
-+
-+		/*
-+		 * both struct_v and struct_compat are expected to be >= 1
-+		 */
-+		ceph_decode_8_safe(p, end, struct_v, bad);
-+		ceph_decode_8_safe(p, end, struct_compat, bad);
-+		if (!struct_v || !struct_compat)
-+			goto bad;
-+		ceph_decode_32_safe(p, end, struct_len, bad);
-+		ceph_decode_need(p, end, struct_len, bad);
-+		ceph_decode_64_safe(p, end, info->max_bytes, bad);
-+		ceph_decode_64_safe(p, end, info->max_files, bad);
-+	} else {
-+		info->max_bytes = 0;
-+		info->max_files = 0;
++	if (ceph_quota_is_max_files_exceeded(dir)) {
++		err = -EDQUOT;
++		goto out;
 +	}
 +
- 	info->pool_ns_len = 0;
- 	info->pool_ns_data = NULL;
- 	if (features & CEPH_FEATURE_FS_FILE_LAYOUT_V2) {
-@@ -4064,6 +4084,9 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
- 	case CEPH_MSG_CLIENT_LEASE:
- 		handle_lease(mdsc, s, msg);
- 		break;
-+	case CEPH_MSG_CLIENT_QUOTA:
-+		ceph_handle_quota(mdsc, s, msg);
-+		break;
+ 	mode |= S_IFDIR;
+ 	err = ceph_pre_init_acls(dir, &mode, &acls);
+ 	if (err < 0)
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 5c17125f45c7..5a77a66e3d6b 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -371,7 +371,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	struct ceph_mds_request *req;
+ 	struct dentry *dn;
+ 	struct ceph_acls_info acls = {};
+-       int mask;
++	int mask;
+ 	int err;
  
- 	default:
- 		pr_err("received unknown message type %d %s\n", type,
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 837ac4b087a0..7af576733948 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -49,6 +49,8 @@ struct ceph_mds_reply_info_in {
- 	char *inline_data;
- 	u32 pool_ns_len;
- 	char *pool_ns_data;
-+	u64 max_bytes;
-+	u64 max_files;
- };
+ 	dout("atomic_open %p dentry %p '%pd' %s flags %d mode 0%o\n",
+@@ -382,6 +382,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		return -ENAMETOOLONG;
  
- struct ceph_mds_reply_dir_entry {
+ 	if (flags & O_CREAT) {
++		if (ceph_quota_is_max_files_exceeded(dir))
++			return -EDQUOT;
+ 		err = ceph_pre_init_acls(dir, &mode, &acls);
+ 		if (err < 0)
+ 			return err;
 diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-new file mode 100644
-index 000000000000..1b69d8365ec2
---- /dev/null
+index 1b69d8365ec2..cf1c78c4a4d2 100644
+--- a/fs/ceph/quota.c
 +++ b/fs/ceph/quota.c
-@@ -0,0 +1,65 @@
-+// SPDX-License-Identifier: GPL-2.0
+@@ -63,3 +63,83 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
+ 
+ 	iput(inode);
+ }
++
++enum quota_check_op {
++	QUOTA_CHECK_MAX_FILES_OP	/* check quota max_files limit */
++};
++
 +/*
-+ * quota.c - CephFS quota
-+ *
-+ * Copyright (C) 2017-2018 SUSE
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2
-+ * of the License, or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ * check_quota_exceeded() will walk up the snaprealm hierarchy and, for each
++ * realm, it will execute quota check operation defined by the 'op' parameter.
++ * The snaprealm walk is interrupted if the quota check detects that the quota
++ * is exceeded or if the root inode is reached.
 + */
-+
-+#include "super.h"
-+#include "mds_client.h"
-+
-+void ceph_handle_quota(struct ceph_mds_client *mdsc,
-+		       struct ceph_mds_session *session,
-+		       struct ceph_msg *msg)
++static bool check_quota_exceeded(struct inode *inode, enum quota_check_op op,
++				 loff_t delta)
 +{
-+	struct super_block *sb = mdsc->fsc->sb;
-+	struct ceph_mds_quota *h = msg->front.iov_base;
-+	struct ceph_vino vino;
-+	struct inode *inode;
++	struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
 +	struct ceph_inode_info *ci;
++	struct ceph_snap_realm *realm, *next;
++	struct ceph_vino vino;
++	struct inode *in;
++	u64 max, rvalue;
++	bool is_root;
++	bool exceeded = false;
 +
-+	if (msg->front.iov_len != sizeof(*h)) {
-+		pr_err("%s corrupt message mds%d len %d\n", __func__,
-+		       session->s_mds, (int)msg->front.iov_len);
-+		ceph_msg_dump(msg);
-+		return;
++	down_read(&mdsc->snap_rwsem);
++	realm = ceph_inode(inode)->i_snap_realm;
++	ceph_get_snap_realm(mdsc, realm);
++	while (realm) {
++		vino.ino = realm->ino;
++		vino.snap = CEPH_NOSNAP;
++		in = ceph_find_inode(inode->i_sb, vino);
++		if (!in) {
++			pr_warn("Failed to find inode for %llu\n", vino.ino);
++			break;
++		}
++		ci = ceph_inode(in);
++		spin_lock(&ci->i_ceph_lock);
++		if (op == QUOTA_CHECK_MAX_FILES_OP) {
++			max = ci->i_max_files;
++			rvalue = ci->i_rfiles + ci->i_rsubdirs;
++		}
++		is_root = (ci->i_vino.ino == CEPH_INO_ROOT);
++		spin_unlock(&ci->i_ceph_lock);
++		switch (op) {
++		case QUOTA_CHECK_MAX_FILES_OP:
++			exceeded = (max && (rvalue >= max));
++			break;
++		default:
++			/* Shouldn't happen */
++			pr_warn("Invalid quota check op (%d)\n", op);
++			exceeded = true; /* Just break the loop */
++		}
++		iput(in);
++
++		if (is_root || exceeded)
++			break;
++		next = realm->parent;
++		ceph_get_snap_realm(mdsc, next);
++		ceph_put_snap_realm(mdsc, realm);
++		realm = next;
 +	}
++	ceph_put_snap_realm(mdsc, realm);
++	up_read(&mdsc->snap_rwsem);
 +
-+	/* increment msg sequence number */
-+	mutex_lock(&session->s_mutex);
-+	session->s_seq++;
-+	mutex_unlock(&session->s_mutex);
++	return exceeded;
++}
 +
-+	/* lookup inode */
-+	vino.ino = le64_to_cpu(h->ino);
-+	vino.snap = CEPH_NOSNAP;
-+	inode = ceph_find_inode(sb, vino);
-+	if (!inode) {
-+		pr_warn("Failed to find inode %llu\n", vino.ino);
-+		return;
-+	}
-+	ci = ceph_inode(inode);
++/*
++ * ceph_quota_is_max_files_exceeded - check if we can create a new file
++ * @inode:	directory where a new file is being created
++ *
++ * This functions returns true is max_files quota allows a new file to be
++ * created.  It is necessary to walk through the snaprealm hierarchy (until the
++ * FS root) to check all realms with quotas set.
++ */
++bool ceph_quota_is_max_files_exceeded(struct inode *inode)
++{
++	WARN_ON(!S_ISDIR(inode->i_mode));
 +
-+	spin_lock(&ci->i_ceph_lock);
-+	ci->i_rbytes = le64_to_cpu(h->rbytes);
-+	ci->i_rfiles = le64_to_cpu(h->rfiles);
-+	ci->i_rsubdirs = le64_to_cpu(h->rsubdirs);
-+	ci->i_max_bytes = le64_to_cpu(h->max_bytes);
-+	ci->i_max_files = le64_to_cpu(h->max_files);
-+	spin_unlock(&ci->i_ceph_lock);
-+
-+	iput(inode);
++	return check_quota_exceeded(inode, QUOTA_CHECK_MAX_FILES_OP, 0);
 +}
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 2beeec07fa76..f998b7f076cf 100644
+index f998b7f076cf..20197e29a7f0 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -309,6 +309,9 @@ struct ceph_inode_info {
- 	u64 i_rbytes, i_rfiles, i_rsubdirs;
- 	u64 i_files, i_subdirs;
+@@ -1026,5 +1026,6 @@ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
+ extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
+ 			      struct ceph_mds_session *session,
+ 			      struct ceph_msg *msg);
++extern bool ceph_quota_is_max_files_exceeded(struct inode *inode);
  
-+	/* quotas */
-+	u64 i_max_bytes, i_max_files;
-+
- 	struct rb_root i_fragtree;
- 	int i_fragtree_nsplits;
- 	struct mutex i_fragtree_mutex;
-@@ -1019,4 +1022,9 @@ extern int ceph_locks_to_pagelist(struct ceph_filelock *flocks,
- extern int ceph_fs_debugfs_init(struct ceph_fs_client *client);
- extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
- 
-+/* quota.c */
-+extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
-+			      struct ceph_mds_session *session,
-+			      struct ceph_msg *msg);
-+
  #endif /* _FS_CEPH_SUPER_H */
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index e1c4e0b12b4c..7e72348639e4 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -224,6 +224,31 @@ static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
- 			(long)ci->i_rctime.tv_nsec);
- }
- 
-+/* quotas */
-+
-+static bool ceph_vxattrcb_quota_exists(struct ceph_inode_info *ci)
-+{
-+	return (ci->i_max_files || ci->i_max_bytes);
-+}
-+
-+static size_t ceph_vxattrcb_quota(struct ceph_inode_info *ci, char *val,
-+				  size_t size)
-+{
-+	return snprintf(val, size, "max_bytes=%llu max_files=%llu",
-+			ci->i_max_bytes, ci->i_max_files);
-+}
-+
-+static size_t ceph_vxattrcb_quota_max_bytes(struct ceph_inode_info *ci,
-+					    char *val, size_t size)
-+{
-+	return snprintf(val, size, "%llu", ci->i_max_bytes);
-+}
-+
-+static size_t ceph_vxattrcb_quota_max_files(struct ceph_inode_info *ci,
-+					    char *val, size_t size)
-+{
-+	return snprintf(val, size, "%llu", ci->i_max_files);
-+}
- 
- #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
- #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
-@@ -247,6 +272,15 @@ static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
- 		.hidden = true,			\
- 		.exists_cb = ceph_vxattrcb_layout_exists,	\
- 	}
-+#define XATTR_QUOTA_FIELD(_type, _name)					\
-+	{								\
-+		.name = CEPH_XATTR_NAME(_type, _name),			\
-+		.name_size = sizeof(CEPH_XATTR_NAME(_type, _name)),	\
-+		.getxattr_cb = ceph_vxattrcb_ ## _type ## _ ## _name,	\
-+		.readonly = false,					\
-+		.hidden = true,						\
-+		.exists_cb = ceph_vxattrcb_quota_exists,		\
-+	}
- 
- static struct ceph_vxattr ceph_dir_vxattrs[] = {
- 	{
-@@ -270,6 +304,16 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
- 	XATTR_NAME_CEPH(dir, rsubdirs),
- 	XATTR_NAME_CEPH(dir, rbytes),
- 	XATTR_NAME_CEPH(dir, rctime),
-+	{
-+		.name = "ceph.quota",
-+		.name_size = sizeof("ceph.quota"),
-+		.getxattr_cb = ceph_vxattrcb_quota,
-+		.readonly = false,
-+		.hidden = true,
-+		.exists_cb = ceph_vxattrcb_quota_exists,
-+	},
-+	XATTR_QUOTA_FIELD(quota, max_bytes),
-+	XATTR_QUOTA_FIELD(quota, max_files),
- 	{ .name = NULL, 0 }	/* Required table terminator */
- };
- static size_t ceph_dir_vxattrs_name_size;	/* total size of all names */
-diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-index 59042d5ac520..6acd46c36271 100644
---- a/include/linux/ceph/ceph_features.h
-+++ b/include/linux/ceph/ceph_features.h
-@@ -209,7 +209,8 @@ DEFINE_CEPH_FEATURE_DEPRECATED(63, 1, RESERVED_BROKEN, LUMINOUS) // client-facin
- 	 CEPH_FEATURE_SERVER_JEWEL |		\
- 	 CEPH_FEATURE_MON_STATEFUL_SUB |	\
- 	 CEPH_FEATURE_CRUSH_TUNABLES5 |		\
--	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING)
-+	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING |	\
-+	 CEPH_FEATURE_MDS_QUOTA)
- 
- #define CEPH_FEATURES_REQUIRED_DEFAULT   \
- 	(CEPH_FEATURE_NOSRCADDR |	 \
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index 88dd51381aaf..98bdcc0eda3f 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -134,6 +134,7 @@ struct ceph_dir_layout {
- #define CEPH_MSG_CLIENT_LEASE           0x311
- #define CEPH_MSG_CLIENT_SNAP            0x312
- #define CEPH_MSG_CLIENT_CAPRELEASE      0x313
-+#define CEPH_MSG_CLIENT_QUOTA		0x314
- 
- /* pool ops */
- #define CEPH_MSG_POOLOP_REPLY           48
-@@ -807,4 +808,20 @@ struct ceph_mds_snap_realm {
- } __attribute__ ((packed));
- /* followed by my snap list, then prior parent snap list */
- 
-+/*
-+ * quotas
-+ */
-+struct ceph_mds_quota {
-+	__le64 ino;		/* ino */
-+	struct ceph_timespec rctime;
-+	__le64 rbytes;		/* dir stats */
-+	__le64 rfiles;
-+	__le64 rsubdirs;
-+	__u8 struct_v;		/* compat */
-+	__u8 struct_compat;
-+	__le32 struct_len;
-+	__le64 max_bytes;	/* quota max. bytes */
-+	__le64 max_files;	/* quota max. files */
-+} __attribute__ ((packed));
-+
- #endif
