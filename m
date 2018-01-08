@@ -1,85 +1,61 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: Moving to 1.66 Boost
-Date: Mon, 8 Jan 2018 17:15:02 -0500
-Message-ID: <a56a37c5-0137-a27a-980d-11b2e09437ef@redhat.com>
-References: <b4b3abf8-d7db-7037-a589-38c9563f078c@digiware.nl>
- <CAJE9aOMaKpOyy180hSV39eebnpWShWHE821qT00WmYXgnqbFxw@mail.gmail.com>
- <326bc270-7ccd-947d-a0e5-57bf44f93d37@digiware.nl>
- <210a83ee-b767-54fc-fea9-2ef3decaff1c@redhat.com>
- <3d5eb231-4688-fa9c-1daa-02a19e8de30c@digiware.nl>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH] rbd: set max_segments to USHRT_MAX
+Date: Mon, 8 Jan 2018 17:35:50 -0600
+Message-ID: <adc1a943-2532-d878-6706-cddb4adebc1f@ieee.org>
+References: <1515437475-25789-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:42769 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757064AbeAHWPF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 17:15:05 -0500
-Received: by mail-qt0-f196.google.com with SMTP id g9so15558367qth.9
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Jan 2018 14:15:05 -0800 (PST)
-In-Reply-To: <3d5eb231-4688-fa9c-1daa-02a19e8de30c@digiware.nl>
+Received: from mail-io0-f194.google.com ([209.85.223.194]:34059 "EHLO
+        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756802AbeAHXfw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 18:35:52 -0500
+Received: by mail-io0-f194.google.com with SMTP id q188so16529748iod.1
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Jan 2018 15:35:52 -0800 (PST)
+In-Reply-To: <1515437475-25789-1-git-send-email-idryomov@gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>, kefu chai <tchaikov@gmail.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
+On 01/08/2018 12:51 PM, Ilya Dryomov wrote:
+> Commit d3834fefcfe5 ("rbd: bump queue_max_segments") bumped
+> max_segments (unsigned short) to max_hw_sectors (unsigned int).
+> max_hw_sectors is set to the number of 512-byte sectors in an object
+> and overflows unsigned short for 32M (largest possible) objects, making
+> the block layer resort to handing us single segment (i.e. single page
+> or even smaller) bios in that case.
+> 
+> Cc: stable@vger.kernel.org
+> Fixes: d3834fefcfe5 ("rbd: bump queue_max_segments")
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
+Is it OK for max_segments to be bigger than max_hw_sectors?
 
-On 01/02/2018 12:11 PM, Willem Jan Withagen wrote:
-> On 2-1-2018 17:13, Casey Bodley wrote:
->>
->> On 01/01/2018 06:13 AM, Willem Jan Withagen wrote:
->>> On 31/12/2017 06:30, kefu chai wrote:
->>>> + ceph-devl
->>>>
->>>> On Wed, Dec 27, 2017 at 5:47 PM, Willem Jan Withagen
->>>> <wjw@digiware.nl> wrote:
->>>>> Hi Kefu,
->>>>>
->>>>> In FreeBSD the portmanager of Boost wants to move to 1.66, and so
->>>>> normally
->>>>> they do a test run on all 33.000 ports to see what breaks.
->>>>>
->>>>> Now one of the things that breaks is Ceph, but i a way I do not
->>>>> understand...
->>>>>
->>>>> When linking ceph-common references to the /usr/local/lib/libboost_*.so
->>>>> files on Boost 1.65 are now replaced by -lBoost::thread invocations
->>>>> 1.66??
->>>> could you pastebin the error message? Boost::thread is the library
->>>> name. but I
->>>> don't think it can be passed to the linker. if you see this in the
->>>> command line,
->>>> something is wrong.
->>> It was the now traditional problem that a CMake upgrade does not run
->>> in sync with Boost upgrades. Took quite some runs, but now FreeBSD
->>> ports is at 12.2.2, and in preparation on the 1.66 Boost release it
->>> builds without Beast by execluding WITH_RADOSGW_BEAST_FRONTEND.
->>>
->>> Which will be switched back on once the 1.66 Beast works with v12.2.2.
->>>
->> Okay, thanks. The rgw/beast changes for boost 1.66 are staged in
->> https://github.com/ceph/ceph/pull/19054. If there are delays in merging
->> that, I'm happy to pull them into a separate pr. And thanks for pointing
->> out that we'll need to backport those pieces for luminous.
-> Right,
->
-> If that/backporting is possible, then I can switch Beast back on for
-> Luminous. And everything comes back into sync...
->
-> The WITH_RADOSGW_BEAST_FRONTEND switch made it very convenient to let
-> FreeBSD (prepare to) move to 1.66 without Ceph package building being
-> disabled. And now everybody can do "its thing(tm)" without blocking
-> dependencies.
->
-> When I have a bit more time and #19054 is not merged by then, I'll take
-> a stab at it.
->
-> Thanx,
-> --WjW
->
->
+I didn't investigate but the question occurred to me, since you're
+fixing max_segments regardless of segment size, but not doing that
+to the other limits being set.
 
-The boost 1.66 changes merged into master. I've prepared a backport for 
-luminous at https://github.com/ceph/ceph/pull/19848 which pulls in all 
-the extra beast frontend stuff that targets v1.66.
+If that is not a problem:
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> ---
+>  drivers/block/rbd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index f40050c97bb3..0bda823a90ca 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -4381,7 +4381,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+>  	segment_size = rbd_obj_bytes(&rbd_dev->header);
+>  	blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
+>  	q->limits.max_sectors = queue_max_hw_sectors(q);
+> -	blk_queue_max_segments(q, segment_size / SECTOR_SIZE);
+> +	blk_queue_max_segments(q, USHRT_MAX);
+>  	blk_queue_max_segment_size(q, segment_size);
+>  	blk_queue_io_min(q, segment_size);
+>  	blk_queue_io_opt(q, segment_size);
+> 
+
