@@ -1,47 +1,82 @@
 From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
-Subject: Re: mon config storage (config-key vs config)
-Date: Mon, 8 Jan 2018 09:51:02 +0100
-Message-ID: <3f6e4a31-a0e5-d0c6-7b28-ee501081139c@corp.ovh.com>
-References: <alpine.DEB.2.11.1801052100410.24931@piezo.novalocal>
+Subject: Re: mon config update
+Date: Mon, 8 Jan 2018 10:02:21 +0100
+Message-ID: <2b36d420-2646-4955-24ae-ed4a3688c094@corp.ovh.com>
+References: <alpine.DEB.2.11.1801051716570.24931@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 11.mo302.mail-out.ovh.net ([37.187.190.78]:34847 "EHLO
-        11.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755998AbeAHIvB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 03:51:01 -0500
-In-Reply-To: <alpine.DEB.2.11.1801052100410.24931@piezo.novalocal>
+Received: from 10.mo301.mail-out.ovh.net ([137.74.110.73]:45309 "EHLO
+        10.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755969AbeAHJCU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 04:02:20 -0500
+In-Reply-To: <alpine.DEB.2.11.1801051716570.24931@piezo.novalocal>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On 18-01-05 10:13 PM, Sage Weil wrote:
-> This brings up another longstanding issue: most of our config options have
-> a daemon type prefix in the name, e.g. osd_objectstore, mds_cache_size, or
-> (more confusingly) things like mon_osd_full_ratio and
-> osd_crush_chooseleaf_type (both mon options that affect the mon's initial
-> OSDMap creation only).  Is there a way we can realistically rename some of
-> these options, perhaps as part of the ceph.conf -> mon config transition?
-> Then we would end up with configs more like
+On 18-01-05 06:35 PM, Sage Weil wrote:
+> My mon-based config branch is coming together.  The last bit I did was the
+> CLI commands to set and show config.  It didn't come out quite like I
+> expected it would.  Here's what there is:
 > 
->   mon/crush_chooseleaf_type = foo
->   mon/initial_osd_full_ratio = ...
->   mds/cache_size = ...
->   osd/objectstore = bluestore
+> config dump                                     Show all configuration option(s)
+> config get <who> {<key>}                        Show configuration option(s) for an entity
+> config rm <who> <name>                          Clear a configuration option for one or more
+>                                                   entities
+> config set <who> <name> <value>                 Cet a configuration option for one or more
+>                                                   entities
+> config show <who>                               Show running configuration
 > 
-> and so on.
+> The show command is the oddball here: it reports what the *daemon* reports
+> as the running config, which includes other inputs (conf file, overrides,
+> etc.), while the 'get' and 'dump' are just what the mon stores.  I wonder
+> if there is a better command than 'show'?  Maybe 'running' or 'active' or
+> 'report' or something?
 
-Maybe it's worth implementing some sort of automatic renaming and outputting 
-deprecation warnings? I imagine it'd be easier for everyone if both forms 
-would work just fine, but the old form would spew a bunch of warnings, like
+Shouldn't "config get <key>" work like a subset of "config show" (output a 
+specified <key> from daemon's running config)? Or, have "config show" accept 
+specific key. Both are fine for with me.
 
-* WARNING: "osd objectstore" is deprecated, you should change your config to 
-use "osd/objectstore" instead.
+> A sample from my vstart cluster (vstart is only putting some of its
+> options in the mon so far, so this shows both conf and mon as sources):
+> 
+> gnit:build (wip-config) 11:28 AM $ bin/ceph config dump
+> WHO    MASK OPTION                                VALUE
+> global      crush_chooseleaf_type                 0
+> global      mon_pg_warn_min_per_osd               3
+> global      osd_pool_default_min_size             1
+> global      osd_pool_default_size                 1
+> mds         mds_debug_auth_pins                   true
+> mds         mds_debug_frag                        true
+> mds         mds_debug_subtrees                    true
+> mon         mon_allow_pool_deletes                true
+> [..]
+> gnit:build (wip-config) 11:33 AM $ bin/ceph config get osd.0
+> WHO    MASK      OPTION                    VALUE
+> global           crush_chooseleaf_type     0
+> osd    class:ssd debug_bluestore           0/0
+> osd    host:gnit debug_filestore           20/20
+> global host:gnit debug_monc                15/15
+> osd.0            debug_osd                 33/33
+> global           mon_pg_warn_min_per_osd   3
+> osd              osd_copyfrom_max_chunk    524288
+> osd              osd_debug_misdirected_ops true
+> osd              osd_debug_op_order        true
+> global           osd_pool_default_min_size 1
+> global           osd_pool_default_size     1
+> osd              osd_scrub_load_threshold  2000
+> 
+> (osd.0 is an ssd)
+> 
+> Thoughts?
 
-Warnings always annoy admins and they'll clean them up eventually, the other 
-benefit is that the sky won't fall for anybody upgrading to new config.
+I assume that this will support json output.
+Wouldn't mind having a "changeable in runtime" column in these outputs. I 
+know it's semi-reliable, but it's still better than experimenting or 
+searching for it in code (which may be difficult for non-devs).
 
 -- 
 Piotr Dałek
