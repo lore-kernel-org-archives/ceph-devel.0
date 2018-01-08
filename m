@@ -1,84 +1,130 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
-Subject: Re: mon config update
-Date: Mon, 8 Jan 2018 10:02:21 +0100
-Message-ID: <2b36d420-2646-4955-24ae-ed4a3688c094@corp.ovh.com>
-References: <alpine.DEB.2.11.1801051716570.24931@piezo.novalocal>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH v4 0/6] ceph: kernel client cephfs quota support
+Date: Mon, 8 Jan 2018 20:55:35 +0800
+Message-ID: <CAAM7YAm7kON+OqrBMccyDSMi6Jkm3qSLN=O0KPCjOuO+jUQojg@mail.gmail.com>
+References: <20180105104723.16202-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 10.mo301.mail-out.ovh.net ([137.74.110.73]:45309 "EHLO
-        10.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755969AbeAHJCU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 04:02:20 -0500
-In-Reply-To: <alpine.DEB.2.11.1801051716570.24931@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-ot0-f193.google.com ([74.125.82.193]:34316 "EHLO
+        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756068AbeAHMzg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 07:55:36 -0500
+Received: by mail-ot0-f193.google.com with SMTP id p16so6482010otf.1
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Jan 2018 04:55:36 -0800 (PST)
+In-Reply-To: <20180105104723.16202-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Luis Henriques <lhenriques@suse.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>
 
-On 18-01-05 06:35 PM, Sage Weil wrote:
-> My mon-based config branch is coming together.  The last bit I did was the
-> CLI commands to set and show config.  It didn't come out quite like I
-> expected it would.  Here's what there is:
-> 
-> config dump                                     Show all configuration option(s)
-> config get <who> {<key>}                        Show configuration option(s) for an entity
-> config rm <who> <name>                          Clear a configuration option for one or more
->                                                   entities
-> config set <who> <name> <value>                 Cet a configuration option for one or more
->                                                   entities
-> config show <who>                               Show running configuration
-> 
-> The show command is the oddball here: it reports what the *daemon* reports
-> as the running config, which includes other inputs (conf file, overrides,
-> etc.), while the 'get' and 'dump' are just what the mon stores.  I wonder
-> if there is a better command than 'show'?  Maybe 'running' or 'active' or
-> 'report' or something?
+On Fri, Jan 5, 2018 at 6:47 PM, Luis Henriques <lhenriques@suse.com> wrote:
+> A cephfs-specific quota implementation has been available in the
+> user-space fuse client for a while.  This quota implementation allows an
+> administrator to restrict the number of bytes and/or the number of files
+> in a filesystem subtree.  This quota implementation, however, is
+> supported at the client-level only, which means that cooperation is
+> required between different clients accessing the system.
+>
+> This obviously assumes that all clients are trusted entities and will
+> respect the quotas, preventing users from exceeding the quota limits.
+> Since the kernel client doesn't support quotas, it has not been possible
+> to use it in a cluster where quotas are a requirement.
+>
+> This patchset adds kernel client support for cephfs quotas as it is
+> currently implemented in the ceph fuse client.  Note however that it
+> relies on some still-to-be-merged changes to the MDS (see below,
+> "Changes since v1" for details).
+>
+> For further details on CephFS quota, see [1].
+>
+> [1] http://docs.ceph.com/docs/master/cephfs/quota/
+>
+> ** Changes since v3 **
+>
+> - Rework after review from Yan, Zheng:
+>   * ceph_handle_quota(): Always increment message sequence number, even
+>     if inode isn't in cache
+>   * renamed inode variables ino -> in
+>   * get_quota_realm() now returns a ceph_snap_realm instead of
+>     ceph_inode_info
+>
+> - Updated quota.c copyright and added SPDX identifier
+>
+> - Added max_bytes quota implementation
+>
+> - Updated Documentation/filesystems/ceph.txt to include reference to
+>   quota; also documented added a few more comments to the code.
+>
+> ** Changes since v2 **
+>
+> Rework after review from Yan, Zheng:
+>
+> - Dropped patch 0001 ("ceph: add seqlock for snaprealm hierarchy change
+>   detection") and use mdsc->snap_rwsem for walking the snaprealm
+>   hierarchy instead of adding a seqlock.  This means that patches 0003
+>   and 0004 needed to be reworked.
+>
+> - Added a NULL check in ceph_handle_quota() after the inode lookup with
+>   ceph_find_inode().
+>
+> ** Changes since v1 **
+>
+> Instead of trying to do a reverse path walk to find the "quota realm"
+> for a given directory, this patchset is now using snaprealms.  Thus, for
+> testing it, a modified MDS is required:
+>
+>   https://github.com/ukernel/ceph/tree/wip-cephfs-quota-realm
+>
+> This modified MDS creates a snaprealm when a quota is set in a
+> directory.  This means that a client needs only to walk up the snaprealm
+> hierarchy to find a directory that has quotas instead of doing the full
+> reverse path walking.
+>
+> Note however that this requires an extra patch that adds a seqlock (1st
+> patch in series) to detect changes in the snaprealm hierarchy.
+>
+> Luis Henriques (6):
+>   ceph: quota: add initial infrastructure to support cephfs quotas
+>   ceph: quota: support for ceph.quota.max_files
+>   ceph: quota: don't allow cross-quota renames
+>   ceph: quota: support for ceph.quota.max_bytes
+>   ceph: quota: update MDS when max_bytes is approaching
+>   ceph: quota: add quotas to the in-tree cephfs documentation
+>
+>  Documentation/filesystems/ceph.txt |  12 ++
+>  fs/ceph/Makefile                   |   2 +-
+>  fs/ceph/dir.c                      |  16 +++
+>  fs/ceph/file.c                     |  21 ++-
+>  fs/ceph/inode.c                    |  10 ++
+>  fs/ceph/mds_client.c               |  23 ++++
+>  fs/ceph/mds_client.h               |   2 +
+>  fs/ceph/quota.c                    | 276 +++++++++++++++++++++++++++++++++++++
+>  fs/ceph/super.h                    |  14 ++
+>  fs/ceph/xattr.c                    |  44 ++++++
+>  include/linux/ceph/ceph_features.h |   3 +-
+>  include/linux/ceph/ceph_fs.h       |  17 +++
+>  12 files changed, 437 insertions(+), 3 deletions(-)
+>  create mode 100644 fs/ceph/quota.c
+>
+Hi Luis.
 
-Shouldn't "config get <key>" work like a subset of "config show" (output a 
-specified <key> from daemon's running config)? Or, have "config show" accept 
-specific key. Both are fine for with me.
+This series looks good. I will add them to our testing branch if my
+local test goes well.
 
-> A sample from my vstart cluster (vstart is only putting some of its
-> options in the mon so far, so this shows both conf and mon as sources):
-> 
-> gnit:build (wip-config) 11:28 AM $ bin/ceph config dump
-> WHO    MASK OPTION                                VALUE
-> global      crush_chooseleaf_type                 0
-> global      mon_pg_warn_min_per_osd               3
-> global      osd_pool_default_min_size             1
-> global      osd_pool_default_size                 1
-> mds         mds_debug_auth_pins                   true
-> mds         mds_debug_frag                        true
-> mds         mds_debug_subtrees                    true
-> mon         mon_allow_pool_deletes                true
-> [..]
-> gnit:build (wip-config) 11:33 AM $ bin/ceph config get osd.0
-> WHO    MASK      OPTION                    VALUE
-> global           crush_chooseleaf_type     0
-> osd    class:ssd debug_bluestore           0/0
-> osd    host:gnit debug_filestore           20/20
-> global host:gnit debug_monc                15/15
-> osd.0            debug_osd                 33/33
-> global           mon_pg_warn_min_per_osd   3
-> osd              osd_copyfrom_max_chunk    524288
-> osd              osd_debug_misdirected_ops true
-> osd              osd_debug_op_order        true
-> global           osd_pool_default_min_size 1
-> global           osd_pool_default_size     1
-> osd              osd_scrub_load_threshold  2000
-> 
-> (osd.0 is an ssd)
-> 
-> Thoughts?
+I also wish to do some optimization (incremental patches) to the code
 
-I assume that this will support json output.
-Wouldn't mind having a "changeable in runtime" column in these outputs. I 
-know it's semi-reliable, but it's still better than experimenting or 
-searching for it in code (which may be difficult for non-devs).
+1. avoid quota check if there is no quota in the filesystem. we can
+use a variable to tracker how many snaprealm have quota enabled.
+2. save inode pointer  (not increase inode's reference count) in
+ceph_snap_realm data structure. so we can avoid calling
+ceph_find_inode() in check_quota_exceeded()
 
--- 
-Piotr Dałek
-piotr.dalek@corp.ovh.com
-https://www.ovh.com/us/
+Regards
+Yan, Zheng
+
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
