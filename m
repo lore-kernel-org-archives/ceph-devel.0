@@ -1,78 +1,47 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: importance of steps when adding osds
-Date: Mon, 8 Jan 2018 14:28:53 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1801081422450.24931@piezo.novalocal>
-References: <CAE63xUMo=98kD8V4kj7Oh=0eyhRnH35mAJpM8t7kAiSq3WQn3A@mail.gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH v4 0/6] ceph: kernel client cephfs quota support
+Date: Mon, 08 Jan 2018 15:00:59 +0000
+Message-ID: <87wp0stmxg.fsf@hermes.olymp>
+References: <20180105104723.16202-1-lhenriques@suse.com>
+        <CAAM7YAm7kON+OqrBMccyDSMi6Jkm3qSLN=O0KPCjOuO+jUQojg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:54470 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755406AbeAHO24 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jan 2018 09:28:56 -0500
-In-Reply-To: <CAE63xUMo=98kD8V4kj7Oh=0eyhRnH35mAJpM8t7kAiSq3WQn3A@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:45771 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932121AbeAHPBH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 8 Jan 2018 10:01:07 -0500
+In-Reply-To: <CAAM7YAm7kON+OqrBMccyDSMi6Jkm3qSLN=O0KPCjOuO+jUQojg@mail.gmail.com>
+        (Zheng Yan's message of "Mon, 8 Jan 2018 20:55:35 +0800")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ugis <ugis22@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>
 
-Hi Ugis,
+"Yan, Zheng" <ukernel@gmail.com> writes:
 
-On Mon, 8 Jan 2018, Ugis wrote:
-> Hi,
-> 
-> Suggestion first: ceph.com  site could have some best practice rules
-> for adding new OSDs. Googling regarding this topic reveals that people
-> have questions like:
-> - may I add serveral OSDSs at once?
+> On Fri, Jan 5, 2018 at 6:47 PM, Luis Henriques <lhenriques@suse.com> wrote:
+<snip>
+> Hi Luis.
+>
+> This series looks good. I will add them to our testing branch if my
+> local test goes well.
 
-Yes
+Awesome, thanks a lot for your review.  Please let me know if you find
+any issues during testing.
 
-> - may I completely change crushmap online so that pgs get completely relocated?
+>
+> I also wish to do some optimization (incremental patches) to the code
+>
+> 1. avoid quota check if there is no quota in the filesystem. we can
+> use a variable to tracker how many snaprealm have quota enabled.
+> 2. save inode pointer  (not increase inode's reference count) in
+> ceph_snap_realm data structure. so we can avoid calling
+> ceph_find_inode() in check_quota_exceeded()
 
-Yes
+Yeah, these changes seem to make sense.  I'll have a look at them and
+see what I can come up with.
 
-> - what config parameters help to reduce backfill load?
-
-osd_max_backfill (default: 1) controls how many concurrent backfill (or 
-recovery) operations an OSD will work on concurrently.  (It is actually 2x 
-this value, since we track recoveries for with teh OSD is primary 
-separately from those for which it is a replica participant; this is to 
-avoid deadlock in our relatively simplistic approach to reservation.)
-
-Suggestions for where this type of summary info would fit into the docs 
-structure would be helpful!
-
-> Until that still have this theoretical question on CRUSH algorithm.
-> We have ceph cluster with 5 osd hosts, CRUSH rule orders ceph to put
-> replicas one copy per host.
-> 
-> If we add 2 osds simultaneously in different hosts - how CRUSH
-> guarantees that some existing pg that now should be located on those
-> new 2 osds does not get unavailable? Should be something with epochs I
-> suppose?
-> 
-> Have found thread mentioning that people have tested completely
-> remapping pgs http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-July/019577.html
-> Still it is not clear what are the theoretical constraints on adding
-> bunches of OSDs (except backfill load). For example if pg gets
-> relocated several times in a row(in case osds get added not waiting
-> degradation to resolve) - how long that chain of previously allocated
-> pgs can be?
-
-The key thing to keep in mind here is that CRUSH only tells us where 
-things "should" be as of a given point in time.  RADOS is responsible for 
-keeping track of where things are and have been recently, and making a 
-safe migration to the desired location.  Generally speaking the amount of 
-history it will remember is unbounded--you could feed the cluster a 
-million CRUSH map changes faster than it can move data and it won't stop 
-you.  In theory, the amount of state that has to be tracked is bounded by 
-the size of the cluster... in the truly degenerate case it will think that 
-every PG existed at some point on every other OSD.  In practice (as of 
-luminous) the amount of state needed to is very small due to the recent 
-PastIntervals work (see this blog for some more background if you're 
-interested: 
-http://ceph.com/community/new-luminous-pg-overdose-protection/)
-
-Hope that helps!
-sage
+Cheers,
+-- 
+Luis
