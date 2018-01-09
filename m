@@ -1,36 +1,25 @@
-From: Jesse Williamson <jwilliamson@suse.de>
-Subject: Re: shuffle_random removed in C++17 on FreeBSD/Clang??
-Date: Tue, 9 Jan 2018 13:22:31 -0800 (PST)
-Message-ID: <alpine.LSU.2.21.1801091319520.27069@smaug>
-References: <478f46a2-3cd9-ab94-6437-8f6de05f2c25@digiware.nl>
+From: Wenji Li <keenite@gmail.com>
+Subject: Please add me in the ceph developer mail list
+Date: Tue, 9 Jan 2018 16:42:52 -0700
+Message-ID: <CAH4iYnNwT-qd37wPK+qs001iGyJ57nFM_mKx=_5BmWp78x1VUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:36432 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751690AbeAIVV7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 9 Jan 2018 16:21:59 -0500
-In-Reply-To: <478f46a2-3cd9-ab94-6437-8f6de05f2c25@digiware.nl>
+Received: from mail-io0-f173.google.com ([209.85.223.173]:46343 "EHLO
+        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932186AbeAIXnd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jan 2018 18:43:33 -0500
+Received: by mail-io0-f173.google.com with SMTP id z130so20391650ioe.13
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Jan 2018 15:43:33 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, 9 Jan 2018, Willem Jan Withagen wrote:
+Dear Sir/Madam,
 
-Hi Willem,
+I am a Computer Science P.h.D student in ASU, who are very interested
+in Ceph project. I am also trying to do some search about Ceph. Please
+add me to the developer mail list. Thanks!
 
-> As a consequence of the move to C++17 I'm running into this problem.
-
-std::random_shuffle() was deprecated in C++14 and removed in C++17. Use 
-std::shuffle().
-
-The process is:
-
-0) make a random device (ie. std::random_device)
-1) make a distribution associated with that device (ie. std::mt19937)
-2) shuffle!
-
-I hope that helps,
-
--Jesse
+BR,
+-Wenji
