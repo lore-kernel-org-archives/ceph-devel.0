@@ -1,79 +1,48 @@
-From: kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: C++17 and C++ ABI on master
-Date: Tue, 9 Jan 2018 21:46:55 +0800
-Message-ID: <CAJE9aOMBa3DmDUKPGjVobiFNspif94zv2t-zjcRO8RjSRC=2xg@mail.gmail.com>
-References: <20180108214425.GA10545@ultraspiritum.eng.arb.redhat.com>
- <alpine.DEB.2.11.1801082213050.24931@piezo.novalocal>
+From: Igor Fedotov <ifedotov@suse.de>
+Subject: Excessive fragmentation in BlueStore allocators
+Date: Tue, 9 Jan 2018 18:22:44 +0300
+Message-ID: <627697e6-13cd-48b3-f256-0a2b9cec1379@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1801082213050.24931-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: The Esoteric Order of the Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, The Exoteric Order of the Squid Cybernetic <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:35819 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932736AbeAIPWr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 9 Jan 2018 10:22:47 -0500
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 17A8FACAE
+        for <ceph-devel@vger.kernel.org>; Tue,  9 Jan 2018 15:22:46 +0000 (UTC)
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 9, 2018 at 6:14 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> On Mon, 8 Jan 2018, Adam C. Emerson wrote:
->> Good day,
->>
->> I've just merged some changs into master that set us up to compile
->> with C++17. This will require a reasonably new compiler to build
->> master.
->
-> Yay!
->
->> Due to a change in how 'noexcept' is handled (it is now part of the type
->> signature of a function), mangled symbol names of noexcept functions are
->> different, so if you have custom clients using the C++ libraries, you may
->> need to recompile.
->>
->> Do not worry, there should be no change to the C ABI. Any C clients
->> should be unaffected.
->
-> I added cards to the backlog for libradospp, librbdpp, and libcephfspp.
+Hi Cephers,
 
-librados and librdb are a little bit complicated. most part of its C++
-API is implemented using its C API and underlying RadosClient. but
-there are couple C functions, which are implemented using librados'
-public C++ interface. for example, IoCtx::from_rados_ioctx_t() is used
-by rados_lock_exclusive(). the same applies to librbd. so we need to
-decouple the C and C++ API so that they do not depend on each other. i
-have a wip branch at
-https://github.com/tchaikov/ceph/tree/wip-librados-cxx, in case anyone
-would like to take a look. or, we can go with another route: to hide
-all the C++ symbols in librados. and expose all C and C++ symbols in
-its C++ counterpart. this turns this problem a symbol visibility
-problem. but the downside of this solution is that we will have two
-copies of APIs in each compiled library.
+Some of us have been observing this issue for a while, see:
 
-> Anybody out there interested in working on that?  libcephfspp might be the
-> one to start with since it doesn't depend on librados and is a much
-> simpler API.
+https://github.com/ceph/ceph/pull/18494
 
-libcephfs is a pure C API. so i think there is no need to split out a
-C++ library from it.
+http://tracker.ceph.com/issues/22510
 
->
-> sage
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+And still no perfect solution has been suggested.
 
+Here is another trivial one that's probably is far from being ideal. But 
+we has to deal with the issue somehow as it might cause real failures 
+with customers.
 
+The idea is to restrict 'hint' advance within some store space region 
+('unprotected area'), e.g. 80% of the store.
+Once hint value jumps out of that space on hint advance - it's reset to 
+the zero. Allocations from the 'protected' area (rest 20%) are still 
+allowed but limited to the case when 'unprotected' area is unable to 
+serve the request. This is achieved automatically by starting the looku
+This way sequential allocations we now benefit from are still available 
+most of the time. And space for large continuous allocations is much 
+less utilized and hence is better preserved too.
 
--- 
-Regards
-Kefu Chai
+What do you think?
+
+Thanks,
+Igor
