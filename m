@@ -1,62 +1,44 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH v4 0/6] ceph: kernel client cephfs quota support
-Date: Wed, 10 Jan 2018 14:08:38 +0800
-Message-ID: <CAAM7YA=N8W9aOfq=Y7Jd1NgGY3TxbMfSNShNKccqe3Hyewt4Qw@mail.gmail.com>
-References: <20180105104723.16202-1-lhenriques@suse.com> <CAAM7YAm7kON+OqrBMccyDSMi6Jkm3qSLN=O0KPCjOuO+jUQojg@mail.gmail.com>
- <87lgh7ndwb.fsf@hermes.olymp>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: shuffle_random removed in C++17 on FreeBSD/Clang??
+Date: Wed, 10 Jan 2018 09:58:53 +0100
+Message-ID: <d0072085-afed-1bfa-875a-b1ee8f3ef40b@digiware.nl>
+References: <478f46a2-3cd9-ab94-6437-8f6de05f2c25@digiware.nl>
+ <alpine.LSU.2.21.1801091319520.27069@smaug>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f193.google.com ([74.125.82.193]:38195 "EHLO
-        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933327AbeAJGIj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jan 2018 01:08:39 -0500
-Received: by mail-ot0-f193.google.com with SMTP id h2so13408406oti.5
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Jan 2018 22:08:39 -0800 (PST)
-In-Reply-To: <87lgh7ndwb.fsf@hermes.olymp>
+Received: from smtp.digiware.nl ([176.74.240.9]:59106 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S964809AbeAJI6z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 10 Jan 2018 03:58:55 -0500
+In-Reply-To: <alpine.LSU.2.21.1801091319520.27069@smaug>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Henriques <lhenriques@suse.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Jan Fajerski <jfajerski@suse.com>
+To: Jesse Williamson <jwilliamson@suse.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 10, 2018 at 1:24 AM, Luis Henriques <lhenriques@suse.com> wrote:
-> "Yan, Zheng" <ukernel@gmail.com> writes:
->
->> I also wish to do some optimization (incremental patches) to the code
->>
->> 1. avoid quota check if there is no quota in the filesystem. we can
->> use a variable to tracker how many snaprealm have quota enabled.
->
-> I was thinking this should probably be an atomic64_t in struct
-> ceph_mds_client.  Does this make sense?
->
-yes
+On 09/01/2018 22:22, Jesse Williamson wrote:
+> On Tue, 9 Jan 2018, Willem Jan Withagen wrote:
+> 
+> Hi Willem,
+> 
+>> As a consequence of the move to C++17 I'm running into this problem.
+> 
+> std::random_shuffle() was deprecated in C++14 and removed in C++17. Use 
+> std::shuffle().
+> 
+> The process is:
+> 
+> 0) make a random device (ie. std::random_device)
+> 1) make a distribution associated with that device (ie. std::mt19937)
+> 2) shuffle!
+
+Yup,
+That was what I found as well.
+PR was submitted.
+
+--WjW
 
 
-> Also, it would probably make sense to have the following functions as
-> inline, defined in super.h:
->
->  ceph_quota_is_max_files_exceeded
->  ceph_quota_is_max_bytes_exceeded
->  ceph_quota_is_max_bytes_approaching
->
-> This way they could simply check the mdsc and return immediately if the
-> counter is 0.
->
->> 2. save inode pointer  (not increase inode's reference count) in
->> ceph_snap_realm data structure. so we can avoid calling
->> ceph_find_inode() in check_quota_exceeded()
->
-> Would you like me to work on v5 to include these changes, or would you
-> rather keep v4 and simply have 2 extra patches on top implementing these
-> optimisations?
-
-I'd like to keep v2 and have extra patches
-
-Regards
-Yan, Zheng
-
->
-> Cheers,
-> --
-> Luis
