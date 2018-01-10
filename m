@@ -1,45 +1,39 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: [Ceph-maintainers] can we stop packaging sysvinit scripts?
-Date: Wed, 10 Jan 2018 08:05:24 -0700
-Message-ID: <CALqRxCz=nU8dL2euhwQ25Try3G0z6ECf9d0WFrTDdNy=DpTtRQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1801101440550.24931@piezo.novalocal>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Emergency Infra Maintenance due to Meltdown
+Date: Wed, 10 Jan 2018 10:49:12 -0500
+Message-ID: <6f60d2fd-004d-d7b7-1898-eb091c9c0853@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:38581 "EHLO
-        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751765AbeAJPF0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jan 2018 10:05:26 -0500
-Received: by mail-vk0-f49.google.com with SMTP id l63so11707367vke.5
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jan 2018 07:05:26 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801101440550.24931@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:57462 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S965376AbeAJPtN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 10 Jan 2018 10:49:13 -0500
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 3D78F780F1
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jan 2018 15:49:13 +0000 (UTC)
+Received: from [10.10.126.19] (ovpn-126-19.rdu2.redhat.com [10.10.126.19])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0CF9D80E64
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jan 2018 15:49:12 +0000 (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm good with dropping them.
+With the release of patched kernels for CentOS and Ubuntu, I'm going to
+be updating kernels and rebooting hosts.
 
-On Wed, Jan 10, 2018 at 7:44 AM, Sage Weil <sweil@redhat.com> wrote:
-> We've had systemd unit files for several releases now and all major
-> distros are using systemd by default.  Can we stop packaging the sysvinit
-> scripts?
->
-> I realize that Debian allows you to switch init systems... do any users
-> actually do this?  Is it required that debs include the sysvinit scripts
-> or is there some glue that lets packages avoid maintaining sysvinit
-> scripts?
->
-> I ask because the init scripts are one of the few remainining bits that
-> use the ceph-conf utility, which I would like to deprecate (and eventually
-> remove).  It parses local config files but we are migrating this to the
-> mon.  We could make ceph-conf pull configs from the mon but I would
-> like to simplify if possible!
->
-> Thanks-
-> sage
->
-> _______________________________________________
-> Ceph-maintainers mailing list
-> Ceph-maintainers@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-maintainers-ceph.com
+This includes hosts like download.ceph.com, tracker, docs as well as
+resources in the Sepia lab.
+
+I'll try to keep this as non-disruptive as possible but will likely need
+to pause the Sepia queue for an hour or two to get everything up to date.
+
+-- 
+David Galloway
+Systems Administrator, RDU
+Ceph Engineering
+IRC: dgalloway
