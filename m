@@ -1,59 +1,34 @@
-From: Bassam Tabbara <bassam@tabbara.com>
-Subject: Re: CSI (container storage interface)
-Date: Wed, 10 Jan 2018 14:29:39 -0800
-Message-ID: <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com>
-References: <alpine.DEB.2.11.1801101842180.17779@piezo.novalocal>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: mon config storage (config-key vs config)
+Date: Wed, 10 Jan 2018 16:15:35 -0800 (PST)
+Message-ID: <alpine.LSU.2.21.1801101615130.27069@smaug>
+References: <alpine.DEB.2.11.1801052100410.24931@piezo.novalocal> <3f6e4a31-a0e5-d0c6-7b28-ee501081139c@corp.ovh.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="0-1865287107-1515629739=:27069"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:45487 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752146AbeAJW3l (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jan 2018 17:29:41 -0500
-Received: by mail-pg0-f42.google.com with SMTP id c194so806094pga.12
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jan 2018 14:29:41 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801101842180.17779@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:59957 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753169AbeAKAPD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 10 Jan 2018 19:15:03 -0500
+In-Reply-To: <3f6e4a31-a0e5-d0c6-7b28-ee501081139c@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Steve LeonTang <Steve.LeonTang@Quantum.com>
+To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Excellent! Excited to see this work starting.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Could we please get a blueprint/design on ceph-csi written down and =
-reviewed?
+--0-1865287107-1515629739=:27069
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8BIT
 
-There are a lot of different topics to consider here around secret =
-management, user-mode vs. kernel, etc. that might be better sorted in a =
-design doc vs. in PR reviews.
+On Mon, 8 Jan 2018, Piotr Dałek wrote:
 
-(cc=E2=80=99ing steve that offered to help)
+> * WARNING: "osd objectstore" is deprecated, you should change your config to 
+> use "osd/objectstore" instead.
 
-> On Jan 10, 2018, at 10:45 AM, Sage Weil <sweil@redhat.com> wrote:
->=20
-> Development has kicked off on a CSI driver for Ceph (RBD initially; =
-CephFS=20
-> will follow).  See
->=20
-> 	https://github.com/ceph/ceph-csi
-> 	https://github.com/ceph/ceph-csi/pulls
->=20
-> CSI is a generic provisioning (and attachment) interface for container=20=
+If there is a 1:1 correspondence between names, I like this idea.
 
-> orchestration platforms, including Kubernetes and Mesos.
->=20
-> 	https://github.com/container-storage-interface/spec
->=20
-> In the kubernetes context, this will /eventually/ replace the in-tree =
-RBD=20
-> and CephFS volume drivers, as well as Rook's flex volume plugin.
->=20
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-Jesse
+--0-1865287107-1515629739=:27069--
