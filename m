@@ -1,72 +1,107 @@
-From: Huamin Chen <hchen@redhat.com>
+From: Steve LeonTang <Steve.LeonTang@Quantum.com>
 Subject: Re: CSI (container storage interface)
-Date: Thu, 11 Jan 2018 13:42:09 -0500
-Message-ID: <CAD-gW=nyuuJ7GeYJPjsH5x4wPXWZbs28X1H16RidU0TOntp6gQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1801101842180.17779@piezo.novalocal> <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com>
+Date: Thu, 11 Jan 2018 18:53:56 +0000
+Message-ID: <6CCAF364-7C23-492B-A8FA-39DECEF9D009@quantum.com>
+References: <alpine.DEB.2.11.1801101842180.17779@piezo.novalocal>
+ <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com>
+ <CAD-gW=nyuuJ7GeYJPjsH5x4wPXWZbs28X1H16RidU0TOntp6gQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f173.google.com ([74.125.82.173]:39834 "EHLO
-        mail-ot0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932483AbeAKSmK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jan 2018 13:42:10 -0500
-Received: by mail-ot0-f173.google.com with SMTP id 37so2931505otv.6
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Jan 2018 10:42:10 -0800 (PST)
-In-Reply-To: <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com>
+Received: from mail-by2nam03on0061.outbound.protection.outlook.com ([104.47.42.61]:36500
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933305AbeAKSx7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 11 Jan 2018 13:53:59 -0500
+In-Reply-To: <CAD-gW=nyuuJ7GeYJPjsH5x4wPXWZbs28X1H16RidU0TOntp6gQ@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <48C3CF515D0CA349B80964C8CEC04D7F@namprd14.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bassam Tabbara <bassam@tabbara.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Steve LeonTang <Steve.LeonTang@quantum.com>
+To: Huamin Chen <hchen@redhat.com>, Bassam Tabbara <bassam@tabbara.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-(resending, previous reply bounced back)
-
-Hi Bassam,
-
-Thanks for the suggestions.
-
-Having a CSI repo is a great first step. Now Serguei is putting up a
-prototype as PR #1. It mirrors the current k8s in tree rbd volume
-plugin.
-
-Since the project just starts, there is no formal meetings and process
-management. Since not every contributor here use Ceph tracker, I
-propose to use github issues for issue and bug tracking, feature
-request, and assignment so we can track topics like krbd/nbd, cephfs
-and fuse.
-
-On Wed, Jan 10, 2018 at 5:29 PM, Bassam Tabbara <bassam@tabbara.com> wrote:
-> Excellent! Excited to see this work starting.
->
-> Could we please get a blueprint/design on ceph-csi written down and reviewed?
->
-> There are a lot of different topics to consider here around secret management, user-mode vs. kernel, etc. that might be better sorted in a design doc vs. in PR reviews.
->
-> (cc’ing steve that offered to help)
->
->> On Jan 10, 2018, at 10:45 AM, Sage Weil <sweil@redhat.com> wrote:
->>
->> Development has kicked off on a CSI driver for Ceph (RBD initially; CephFS
->> will follow).  See
->>
->>       https://github.com/ceph/ceph-csi
->>       https://github.com/ceph/ceph-csi/pulls
->>
->> CSI is a generic provisioning (and attachment) interface for container
->> orchestration platforms, including Kubernetes and Mesos.
->>
->>       https://github.com/container-storage-interface/spec
->>
->> In the kubernetes context, this will /eventually/ replace the in-tree RBD
->> and CephFS volume drivers, as well as Rook's flex volume plugin.
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgSHVhbWluLA0KDQpTZXJndWVpIG1lbnRpb24gdGhhdCB0aGUgY3VycmVudCBlZmZvcnQgaXMg
+dG8gZ2V0IGNlcGgtY3NpIGRyaXZlciB0byBiZSBmZWF0dXJlIGNvbXBhdGlibGUgd2l0aCB0aGUg
+aW4tdHJlZSBSQkQgcGx1Z2luIGluIEs4cy4gSG93ZXZlciwgZG9pbmcgdGhpcyB3aWxsIG5vdCBi
+ZW5lZml0IFJvb2suIFRoZXJlIGFyZSBsb3RzIG9mIGdhcHMgaW4gdGhlIGN1cnJlbnQgUkJEIGlt
+cGxlbWVudGF0aW9uIHN1Y2ggYXMgdXNlci9zZWNyZXQgbWFuYWdlbWVudCwgdXBkYXRlIG9mIG1v
+bml0b3JpbmcgZW5kcG9pbnRzIGFuZCBST1ggc3VwcG9ydCB0byBuYW1lIGEgZmV3LiBXaGljaCBp
+cyB0aGUgcmVhc29uIFJvb2sgZXhwbG9yZWQgdG8gdXNpbmcgYSBGbGV4dm9sdW1lLg0KDQpXaGF0
+IGlzIHRoZSBzdHJhdGVneSBvZiBjZXBoLWNzaSBhcm91bmQgYWxzbyBzdXBwb3J0aW5nIFJvb2vi
+gJlzIG5lZWRzPw0KDQpPbiAxLzExLzE4LCAxMDo0MiBBTSwgIkh1YW1pbiBDaGVuIiA8aGNoZW5A
+cmVkaGF0LmNvbT4gd3JvdGU6DQoNCiAgICAocmVzZW5kaW5nLCBwcmV2aW91cyByZXBseSBib3Vu
+Y2VkIGJhY2spDQoNCiAgICBIaSBCYXNzYW0sDQoNCiAgICBUaGFua3MgZm9yIHRoZSBzdWdnZXN0
+aW9ucy4NCg0KICAgIEhhdmluZyBhIENTSSByZXBvIGlzIGEgZ3JlYXQgZmlyc3Qgc3RlcC4gTm93
+IFNlcmd1ZWkgaXMgcHV0dGluZyB1cCBhDQogICAgcHJvdG90eXBlIGFzIFBSICMxLiBJdCBtaXJy
+b3JzIHRoZSBjdXJyZW50IGs4cyBpbiB0cmVlIHJiZCB2b2x1bWUNCiAgICBwbHVnaW4uDQoNCiAg
+ICBTaW5jZSB0aGUgcHJvamVjdCBqdXN0IHN0YXJ0cywgdGhlcmUgaXMgbm8gZm9ybWFsIG1lZXRp
+bmdzIGFuZCBwcm9jZXNzDQogICAgbWFuYWdlbWVudC4gU2luY2Ugbm90IGV2ZXJ5IGNvbnRyaWJ1
+dG9yIGhlcmUgdXNlIENlcGggdHJhY2tlciwgSQ0KICAgIHByb3Bvc2UgdG8gdXNlIGdpdGh1YiBp
+c3N1ZXMgZm9yIGlzc3VlIGFuZCBidWcgdHJhY2tpbmcsIGZlYXR1cmUNCiAgICByZXF1ZXN0LCBh
+bmQgYXNzaWdubWVudCBzbyB3ZSBjYW4gdHJhY2sgdG9waWNzIGxpa2Uga3JiZC9uYmQsIGNlcGhm
+cw0KICAgIGFuZCBmdXNlLg0KDQogICAgT24gV2VkLCBKYW4gMTAsIDIwMTggYXQgNToyOSBQTSwg
+QmFzc2FtIFRhYmJhcmEgPGJhc3NhbUB0YWJiYXJhLmNvbT4gd3JvdGU6DQogICAgPiBFeGNlbGxl
+bnQhIEV4Y2l0ZWQgdG8gc2VlIHRoaXMgd29yayBzdGFydGluZy4NCiAgICA+DQogICAgPiBDb3Vs
+ZCB3ZSBwbGVhc2UgZ2V0IGEgYmx1ZXByaW50L2Rlc2lnbiBvbiBjZXBoLWNzaSB3cml0dGVuIGRv
+d24gYW5kIHJldmlld2VkPw0KICAgID4NCiAgICA+IFRoZXJlIGFyZSBhIGxvdCBvZiBkaWZmZXJl
+bnQgdG9waWNzIHRvIGNvbnNpZGVyIGhlcmUgYXJvdW5kIHNlY3JldCBtYW5hZ2VtZW50LCB1c2Vy
+LW1vZGUgdnMuIGtlcm5lbCwgZXRjLiB0aGF0IG1pZ2h0IGJlIGJldHRlciBzb3J0ZWQgaW4gYSBk
+ZXNpZ24gZG9jIHZzLiBpbiBQUiByZXZpZXdzLg0KICAgID4NCiAgICA+IChjY+KAmWluZyBzdGV2
+ZSB0aGF0IG9mZmVyZWQgdG8gaGVscCkNCiAgICA+DQogICAgPj4gT24gSmFuIDEwLCAyMDE4LCBh
+dCAxMDo0NSBBTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCiAgICA+Pg0K
+ICAgID4+IERldmVsb3BtZW50IGhhcyBraWNrZWQgb2ZmIG9uIGEgQ1NJIGRyaXZlciBmb3IgQ2Vw
+aCAoUkJEIGluaXRpYWxseTsgQ2VwaEZTDQogICAgPj4gd2lsbCBmb2xsb3cpLiAgU2VlDQogICAg
+Pj4NCiAgICA+PiAgICAgICBodHRwczovL25hMDEuc2FmZWxpbmtzLnByb3RlY3Rpb24ub3V0bG9v
+ay5jb20vP3VybD1odHRwcyUzQSUyRiUyRmdpdGh1Yi5jb20lMkZjZXBoJTJGY2VwaC1jc2kmZGF0
+YT0wMiU3QzAxJTdDU3RldmUuTGVvblRhbmclNDBxdWFudHVtLmNvbSU3QzMwNGIxZGNmOTEzODQy
+NTI3YTQyMDhkNTU5MjMwNjI0JTdDMzIyYTEzNWYxNGZiNGQ3MmFlZGUxMjIyNzIxMzRhZTAlN0Mx
+JTdDMCU3QzYzNjUxMjkyOTMyNTkwODQwNyZzZGF0YT0lMkJiTjJwaFZmUTUlMkJRSkN3R3lwSCUy
+Qk5vNEpLdUgxeG1iaUxsOTlrbThhWWJvJTNEJnJlc2VydmVkPTANCiAgICA+PiAgICAgICBodHRw
+czovL25hMDEuc2FmZWxpbmtzLnByb3RlY3Rpb24ub3V0bG9vay5jb20vP3VybD1odHRwcyUzQSUy
+RiUyRmdpdGh1Yi5jb20lMkZjZXBoJTJGY2VwaC1jc2klMkZwdWxscyZkYXRhPTAyJTdDMDElN0NT
+dGV2ZS5MZW9uVGFuZyU0MHF1YW50dW0uY29tJTdDMzA0YjFkY2Y5MTM4NDI1MjdhNDIwOGQ1NTky
+MzA2MjQlN0MzMjJhMTM1ZjE0ZmI0ZDcyYWVkZTEyMjI3MjEzNGFlMCU3QzElN0MwJTdDNjM2NTEy
+OTI5MzI1OTA4NDA3JnNkYXRhPVhyOVZXaElpJTJGbE4lMkZ3REF6eE9aVTFsajJyVSUyRnl3RDVV
+OWREMGxIdXZJbWclM0QmcmVzZXJ2ZWQ9MA0KICAgID4+DQogICAgPj4gQ1NJIGlzIGEgZ2VuZXJp
+YyBwcm92aXNpb25pbmcgKGFuZCBhdHRhY2htZW50KSBpbnRlcmZhY2UgZm9yIGNvbnRhaW5lcg0K
+ICAgID4+IG9yY2hlc3RyYXRpb24gcGxhdGZvcm1zLCBpbmNsdWRpbmcgS3ViZXJuZXRlcyBhbmQg
+TWVzb3MuDQogICAgPj4NCiAgICA+PiAgICAgICBodHRwczovL25hMDEuc2FmZWxpbmtzLnByb3Rl
+Y3Rpb24ub3V0bG9vay5jb20vP3VybD1odHRwcyUzQSUyRiUyRmdpdGh1Yi5jb20lMkZjb250YWlu
+ZXItc3RvcmFnZS1pbnRlcmZhY2UlMkZzcGVjJmRhdGE9MDIlN0MwMSU3Q1N0ZXZlLkxlb25UYW5n
+JTQwcXVhbnR1bS5jb20lN0MzMDRiMWRjZjkxMzg0MjUyN2E0MjA4ZDU1OTIzMDYyNCU3QzMyMmEx
+MzVmMTRmYjRkNzJhZWRlMTIyMjcyMTM0YWUwJTdDMSU3QzAlN0M2MzY1MTI5MjkzMjU5MDg0MDcm
+c2RhdGE9OEtnVjNadVVYNyUyQmRYeEpwb2Uyc3oxSU5vZEVvTnpFRlZveEE3UGVmWGVRJTNEJnJl
+c2VydmVkPTANCiAgICA+Pg0KICAgID4+IEluIHRoZSBrdWJlcm5ldGVzIGNvbnRleHQsIHRoaXMg
+d2lsbCAvZXZlbnR1YWxseS8gcmVwbGFjZSB0aGUgaW4tdHJlZSBSQkQNCiAgICA+PiBhbmQgQ2Vw
+aEZTIHZvbHVtZSBkcml2ZXJzLCBhcyB3ZWxsIGFzIFJvb2sncyBmbGV4IHZvbHVtZSBwbHVnaW4u
+DQogICAgPj4NCiAgICA+PiBzYWdlDQogICAgPj4gLS0NCiAgICA+PiBUbyB1bnN1YnNjcmliZSBm
+cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4N
+CiAgICA+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
+Zw0KICAgID4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHBzOi8vbmEwMS5zYWZlbGlua3Mu
+cHJvdGVjdGlvbi5vdXRsb29rLmNvbS8/dXJsPWh0dHAlM0ElMkYlMkZ2Z2VyLmtlcm5lbC5vcmcl
+MkZtYWpvcmRvbW8taW5mby5odG1sJmRhdGE9MDIlN0MwMSU3Q1N0ZXZlLkxlb25UYW5nJTQwcXVh
+bnR1bS5jb20lN0MzMDRiMWRjZjkxMzg0MjUyN2E0MjA4ZDU1OTIzMDYyNCU3QzMyMmExMzVmMTRm
+YjRkNzJhZWRlMTIyMjcyMTM0YWUwJTdDMSU3QzAlN0M2MzY1MTI5MjkzMjU5MDg0MDcmc2RhdGE9
+QzdtSW5MQnhjSUZuZUNzTmdJd3A5SzY2Qm9WMjM4eThCUGM5bTNwNGQzVSUzRCZyZXNlcnZlZD0w
+DQogICAgPg0KICAgID4gLS0NCiAgICA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KICAgID4gdGhlIGJvZHkg
+b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCiAgICA+IE1vcmUgbWFq
+b3Jkb21vIGluZm8gYXQgIGh0dHBzOi8vbmEwMS5zYWZlbGlua3MucHJvdGVjdGlvbi5vdXRsb29r
+LmNvbS8/dXJsPWh0dHAlM0ElMkYlMkZ2Z2VyLmtlcm5lbC5vcmclMkZtYWpvcmRvbW8taW5mby5o
+dG1sJmRhdGE9MDIlN0MwMSU3Q1N0ZXZlLkxlb25UYW5nJTQwcXVhbnR1bS5jb20lN0MzMDRiMWRj
+ZjkxMzg0MjUyN2E0MjA4ZDU1OTIzMDYyNCU3QzMyMmExMzVmMTRmYjRkNzJhZWRlMTIyMjcyMTM0
+YWUwJTdDMSU3QzAlN0M2MzY1MTI5MjkzMjU5MDg0MDcmc2RhdGE9QzdtSW5MQnhjSUZuZUNzTmdJ
+d3A5SzY2Qm9WMjM4eThCUGM5bTNwNGQzVSUzRCZyZXNlcnZlZD0wDQoNCg0KVGhlIGluZm9ybWF0
+aW9uIGNvbnRhaW5lZCBpbiB0aGlzIHRyYW5zbWlzc2lvbiBtYXkgYmUgY29uZmlkZW50aWFsLiBB
+bnkgZGlzY2xvc3VyZSwgY29weWluZywgb3IgZnVydGhlciBkaXN0cmlidXRpb24gb2YgY29uZmlk
+ZW50aWFsIGluZm9ybWF0aW9uIGlzIG5vdCBwZXJtaXR0ZWQgdW5sZXNzIHN1Y2ggcHJpdmlsZWdl
+IGlzIGV4cGxpY2l0bHkgZ3JhbnRlZCBpbiB3cml0aW5nIGJ5IFF1YW50dW0uIFF1YW50dW0gcmVz
+ZXJ2ZXMgdGhlIHJpZ2h0IHRvIGhhdmUgZWxlY3Ryb25pYyBjb21tdW5pY2F0aW9ucywgaW5jbHVk
+aW5nIGVtYWlsIGFuZCBhdHRhY2htZW50cywgc2VudCBhY3Jvc3MgaXRzIG5ldHdvcmtzIGZpbHRl
+cmVkIHRocm91Z2ggc2VjdXJpdHkgc29mdHdhcmUgcHJvZ3JhbXMgYW5kIHJldGFpbiBzdWNoIG1l
+c3NhZ2VzIGluIG9yZGVyIHRvIGNvbXBseSB3aXRoIGFwcGxpY2FibGUgZGF0YSBzZWN1cml0eSBh
+bmQgcmV0ZW50aW9uIHJlcXVpcmVtZW50cy4gUXVhbnR1bSBpcyBub3QgcmVzcG9uc2libGUgZm9y
+IHRoZSBwcm9wZXIgYW5kIGNvbXBsZXRlIHRyYW5zbWlzc2lvbiBvZiB0aGUgc3Vic3RhbmNlIG9m
+IHRoaXMgY29tbXVuaWNhdGlvbiBvciBmb3IgYW55IGRlbGF5IGluIGl0cyByZWNlaXB0Lg0K
