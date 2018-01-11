@@ -1,113 +1,89 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: CSI (container storage interface)
-Date: Thu, 11 Jan 2018 19:28:05 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1801111924360.24931@piezo.novalocal>
-References: <alpine.DEB.2.11.1801101842180.17779@piezo.novalocal> <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com> <CAD-gW=nyuuJ7GeYJPjsH5x4wPXWZbs28X1H16RidU0TOntp6gQ@mail.gmail.com> <6CCAF364-7C23-492B-A8FA-39DECEF9D009@quantum.com>
- <CAD-gW=ma1UZSQSasPvCZQypHhV6jxbFhzoVbbGQan_jdpUJpSA@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: Luminous - replace old target-weight tree from osdmap with mgr
+ balancer
+Date: Thu, 11 Jan 2018 20:54:12 +0100
+Message-ID: <e9729df5-09d1-3a2a-31c4-f3e4909d3717@profihost.ag>
+References: <602f839b-6927-2c53-dbb5-baee02569105@profihost.ag>
+ <alpine.DEB.2.11.1801102123260.8186@piezo.novalocal>
+ <e638d77d-104f-a224-579b-a960fab90732@profihost.ag>
+ <alpine.DEB.2.11.1801102151470.8186@piezo.novalocal>
+ <c4e77c5b-91bb-9924-db51-0f30a37b1b21@profihost.ag>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1720758876-1515698880=:24931"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:60513 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754530AbeAKT2I (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jan 2018 14:28:08 -0500
-In-Reply-To: <CAD-gW=ma1UZSQSasPvCZQypHhV6jxbFhzoVbbGQan_jdpUJpSA@mail.gmail.com>
-Content-ID: <alpine.DEB.2.11.1801111928020.24931@piezo.novalocal>
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:50051 "EHLO
+        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932557AbeAKTyP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 11 Jan 2018 14:54:15 -0500
+In-Reply-To: <c4e77c5b-91bb-9924-db51-0f30a37b1b21@profihost.ag>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Huamin Chen <hchen@redhat.com>
-Cc: Steve LeonTang <Steve.LeonTang@quantum.com>, "Serguei Bezverkhi (sbezverk)" <sbezverk@cisco.com>, Bassam Tabbara <bassam@tabbara.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Sage,
 
---8323329-1720758876-1515698880=:24931
-Content-Type: TEXT/PLAIN; CHARSET=ISO-8859-7
-Content-Transfer-Encoding: 8BIT
-Content-ID: <alpine.DEB.2.11.1801111928021.24931@piezo.novalocal>
+this did not work like expected. I tested it in another smaller cluster
+and it resulted in about 6% misplaced objects.
 
-On Thu, 11 Jan 2018, Huamin Chen wrote:
-> Hi Steve,
+Any ideas?
+
+Stefan
+Am 11.01.2018 um 08:09 schrieb Stefan Priebe - Profihost AG:HI
+> Thanks! Can this be done while still having jewel clients?
 > 
-> Let's come up with the feature list through github issues. It is also
-> beneficial to get us up to speed with Rook features.
-
-Yeah.  My hope is that ceph-csi can replace both the in-tree code and rook 
-flexvolume driver by satisfying all of rook's (and others') requirements.
-
-Thanks!
-sage
-
-
+> Stefan
 > 
-> Thanks
+> Excuse my typo sent from my mobile phone.
 > 
-> Huamin
+> Am 10.01.2018 um 22:56 schrieb Sage Weil <sage@newdream.net
+> <mailto:sage@newdream.net>>:
 > 
-> On Thu, Jan 11, 2018 at 1:53 PM, Steve LeonTang
-> <Steve.LeonTang@quantum.com> wrote:
-> > Hi Huamin,
-> >
-> > Serguei mention that the current effort is to get ceph-csi driver to be feature compatible with the in-tree RBD plugin in K8s. However, doing this will not benefit Rook. There are lots of gaps in the current RBD implementation such as user/secret management, update of monitoring endpoints and ROX support to name a few. Which is the reason Rook explored to using a Flexvolume.
-> >
-> > What is the strategy of ceph-csi around also supporting Rook¢s needs?
-> >
-> > On 1/11/18, 10:42 AM, "Huamin Chen" <hchen@redhat.com> wrote:
-> >
-> >     (resending, previous reply bounced back)
-> >
-> >     Hi Bassam,
-> >
-> >     Thanks for the suggestions.
-> >
-> >     Having a CSI repo is a great first step. Now Serguei is putting up a
-> >     prototype as PR #1. It mirrors the current k8s in tree rbd volume
-> >     plugin.
-> >
-> >     Since the project just starts, there is no formal meetings and process
-> >     management. Since not every contributor here use Ceph tracker, I
-> >     propose to use github issues for issue and bug tracking, feature
-> >     request, and assignment so we can track topics like krbd/nbd, cephfs
-> >     and fuse.
-> >
-> >     On Wed, Jan 10, 2018 at 5:29 PM, Bassam Tabbara <bassam@tabbara.com> wrote:
-> >     > Excellent! Excited to see this work starting.
-> >     >
-> >     > Could we please get a blueprint/design on ceph-csi written down and reviewed?
-> >     >
-> >     > There are a lot of different topics to consider here around secret management, user-mode vs. kernel, etc. that might be better sorted in a design doc vs. in PR reviews.
-> >     >
-> >     > (cc¢ing steve that offered to help)
-> >     >
-> >     >> On Jan 10, 2018, at 10:45 AM, Sage Weil <sweil@redhat.com> wrote:
-> >     >>
-> >     >> Development has kicked off on a CSI driver for Ceph (RBD initially; CephFS
-> >     >> will follow).  See
-> >     >>
-> >     >>       https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fgithub.com%2Fceph%2Fceph-csi&data=02%7C01%7CSteve.LeonTang%40quantum.com%7C304b1dcf913842527a4208d559230624%7C322a135f14fb4d72aede122272134ae0%7C1%7C0%7C636512929325908407&sdata=%2BbN2phVfQ5%2BQJCwGypH%2BNo4JKuH1xmbiLl99km8aYbo%3D&reserved=0
-> >     >>       https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fgithub.com%2Fceph%2Fceph-csi%2Fpulls&data=02%7C01%7CSteve.LeonTang%40quantum.com%7C304b1dcf913842527a4208d559230624%7C322a135f14fb4d72aede122272134ae0%7C1%7C0%7C636512929325908407&sdata=Xr9VWhIi%2FlN%2FwDAzxOZU1lj2rU%2FywD5U9dD0lHuvImg%3D&reserved=0
-> >     >>
-> >     >> CSI is a generic provisioning (and attachment) interface for container
-> >     >> orchestration platforms, including Kubernetes and Mesos.
-> >     >>
-> >     >>       https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fgithub.com%2Fcontainer-storage-interface%2Fspec&data=02%7C01%7CSteve.LeonTang%40quantum.com%7C304b1dcf913842527a4208d559230624%7C322a135f14fb4d72aede122272134ae0%7C1%7C0%7C636512929325908407&sdata=8KgV3ZuUX7%2BdXxJpoe2sz1INodEoNzEFVoxA7PefXeQ%3D&reserved=0
-> >     >>
-> >     >> In the kubernetes context, this will /eventually/ replace the in-tree RBD
-> >     >> and CephFS volume drivers, as well as Rook's flex volume plugin.
-> >     >>
-> >     >> sage
-> >     >> --
-> >     >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >     >> the body of a message to majordomo@vger.kernel.org
-> >     >> More majordomo info at  https://na01.safelinks.protection.outlook.com/?url=http%3A%2F%2Fvger.kernel.org%2Fmajordomo-info.html&data=02%7C01%7CSteve.LeonTang%40quantum.com%7C304b1dcf913842527a4208d559230624%7C322a135f14fb4d72aede122272134ae0%7C1%7C0%7C636512929325908407&sdata=C7mInLBxcIFneCsNgIwp9K66BoV238y8BPc9m3p4d3U%3D&reserved=0
-> >     >
-> >     > --
-> >     > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >     > the body of a message to majordomo@vger.kernel.org
-> >     > More majordomo info at  https://na01.safelinks.protection.outlook.com/?url=http%3A%2F%2Fvger.kernel.org%2Fmajordomo-info.html&data=02%7C01%7CSteve.LeonTang%40quantum.com%7C304b1dcf913842527a4208d559230624%7C322a135f14fb4d72aede122272134ae0%7C1%7C0%7C636512929325908407&sdata=C7mInLBxcIFneCsNgIwp9K66BoV238y8BPc9m3p4d3U%3D&reserved=0
-> >
-> >
-> > The information contained in this transmission may be confidential. Any disclosure, copying, or further distribution of confidential information is not permitted unless such privilege is explicitly granted in writing by Quantum. Quantum reserves the right to have electronic communications, including email and attachments, sent across its networks filtered through security software programs and retain such messages in order to comply with applicable data security and retention requirements. Quantum is not responsible for the proper and complete transmission of the substance of this communication or for any delay in its receipt.
-> 
-> 
---8323329-1720758876-1515698880=:24931--
+>> On Wed, 10 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>> Am 10.01.2018 um 22:23 schrieb Sage Weil:
+>>>> On Wed, 10 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>> k,
+>>>>>
+>>>>> in the past we used the python crush optimize tool to reweight the osd
+>>>>> usage - it inserted a 2nd tree with $hostname-target-weight as
+>>>>> hostnames.
+>>>>
+>>>> Can you attach a 'ceph osd crush tree' (or partial output) so I can see
+>>>> what you mean?
+>>>
+>>> Sure - attached.
+>>
+>> Got it
+>>
+>>>>> Now the quesions are:
+>>>>> 1.) can we remove the tree? How?
+>>>>> 2.) Can we do this now or only after all clients are running Luminous?
+>>>>> 3.) is it enought to enable the mgr balancer module?
+>>
+>> First,
+>>
+>> ceph osd crush weight-set create-compat
+>>
+>> then for each osd,
+>> ceph osd crush weight-set reweight-compat <osd> <optimized-weight>
+>> ceph osd crush reweight <osd> <target-weight>
+>>
+>> That won't move any data but will keep your current optimized weights in
+>> the compat weight-set where they belong.
+>>
+>> Then you can remove the *-target-weight buckets. Â For each osd,
+>>
+>> ceph osd crush rm <osd> <ancestor>-target-weight
+>>
+>> and then for each remaining bucket
+>>
+>> ceph osd crush rm <foo>-target-weight
+>>
+>> Finally, turn on the balancer (or test it to see what it it wants to do
+>> with the optimize command.)
+>>
+>> HTH!
+>> sage
