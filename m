@@ -1,102 +1,92 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Luminous - replace old target-weight tree from osdmap with mgr
- balancer
-Date: Thu, 11 Jan 2018 14:55:31 +0100
-Message-ID: <44510780-9cf7-d062-086c-d7a35eeb2605@profihost.ag>
-References: <602f839b-6927-2c53-dbb5-baee02569105@profihost.ag>
- <alpine.DEB.2.11.1801102123260.8186@piezo.novalocal>
- <e638d77d-104f-a224-579b-a960fab90732@profihost.ag>
- <alpine.DEB.2.11.1801102151470.8186@piezo.novalocal>
- <D75F8583-C067-4AD2-AEED-2C6903B08C8D@profihost.ag>
- <alpine.DEB.2.11.1801111245500.24931@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: mon config update
+Date: Thu, 11 Jan 2018 15:10:58 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1801111509180.20939@piezo.novalocal>
+References: <alpine.DEB.2.11.1801051716570.24931@piezo.novalocal> <2b36d420-2646-4955-24ae-ed4a3688c094@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1358594043-1515683469=:20939"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:59078 "EHLO
-        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932387AbeAKNzd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 11 Jan 2018 08:55:33 -0500
-In-Reply-To: <alpine.DEB.2.11.1801111245500.24931@piezo.novalocal>
-Content-Language: de-DE
+Received: from tragedy.dreamhost.com ([66.33.205.236]:45142 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752804AbeAKPLK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jan 2018 10:11:10 -0500
+In-Reply-To: <2b36d420-2646-4955-24ae-ed4a3688c094@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Am 11.01.2018 um 13:46 schrieb Sage Weil:
-> On Thu, 11 Jan 2018, Stefan Priebe - Profihost AG wrote:
->> Thanks! Can this be done while still having jewel clients?
-> 
-> Yeah.  If I'm understanding your crush dump properly, the *-target-weight 
-> part of the tree isn't doing anything except acting as a place for your 
-> custom tool to store the target weights.  Removing this wont' change 
-> anything at all.  And the compat weight-set is called 'compat' because it 
-> is backwards compatible with old clients.  :)
+--8323329-1358594043-1515683469=:20939
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
-Thank! It's the tool from Loic - i haven't seen him here for a long time.
+On Mon, 8 Jan 2018, Piotr Dałek wrote:
+> Wouldn't mind having a "changeable in runtime" column in these outputs. I know
+> it's semi-reliable, but it's still better than experimenting or searching for
+> it in code (which may be difficult for non-devs).
 
-See:
-http://crush.readthedocs.io/en/latest/
+Several parts of this.
 
-Greets,
-Stefan
+1. 'config help'
 
+$ bin/ceph config help debug_osd
+debug_osd - Debug level for osd
+  (std::string, advanced)
+  Default: 1/5
+  Can update at runtime: true
 
-> sage
-> 
->>
->> Stefan
->>
->> Excuse my typo sent from my mobile phone.
->>
->>> Am 10.01.2018 um 22:56 schrieb Sage Weil <sage@newdream.net>:
->>>
->>>> On Wed, 10 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>> Am 10.01.2018 um 22:23 schrieb Sage Weil:
->>>>>> On Wed, 10 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>> k,
->>>>>>
->>>>>> in the past we used the python crush optimize tool to reweight the osd
->>>>>> usage - it inserted a 2nd tree with $hostname-target-weight as hostnames.
->>>>>
->>>>> Can you attach a 'ceph osd crush tree' (or partial output) so I can see 
->>>>> what you mean?
->>>>
->>>> Sure - attached.
->>>
->>> Got it
->>>
->>>>>> Now the quesions are:
->>>>>> 1.) can we remove the tree? How?
->>>>>> 2.) Can we do this now or only after all clients are running Luminous?
->>>>>> 3.) is it enought to enable the mgr balancer module?
->>>
->>> First,
->>>
->>> ceph osd crush weight-set create-compat
->>>
->>> then for each osd,
->>> ceph osd crush weight-set reweight-compat <osd> <optimized-weight>
->>> ceph osd crush reweight <osd> <target-weight>
->>>
->>> That won't move any data but will keep your current optimized weights in 
->>> the compat weight-set where they belong.
->>>
->>> Then you can remove the *-target-weight buckets.  For each osd,
->>>
->>> ceph osd crush rm <osd> <ancestor>-target-weight
->>>
->>> and then for each remaining bucket
->>>
->>> ceph osd crush rm <foo>-target-weight
->>>
->>> Finally, turn on the balancer (or test it to see what it it wants to do 
->>> with the optimize command.)
->>>
->>> HTH!
->>> sage
->>
+(also in the JSON dump).
+
+2. 'config dump' and 'config get' have a new "RW" column (suggestions for 
+a better short column name are welcome!):
+
+$ bin/ceph config get osd.0
+WHO    MASK LEVEL     OPTION                    VALUE  RW
+osd         advanced  debug_bdev                20/20  Y
+osd         advanced  debug_bluefs              20/20  Y
+osd         advanced  debug_bluestore           30/30  Y
+osd         advanced  debug_filestore           20/20  Y
+osd         advanced  debug_journal             20/20  Y
+osd         advanced  debug_ms                  1/1    Y
+global      advanced  mon_pg_warn_min_per_osd   3      Y
+osd         advanced  osd_copyfrom_max_chunk    524288 Y
+global      advanced  osd_crush_chooseleaf_type 0      Y
+osd         developer osd_debug_misdirected_ops true   Y
+osd         developer osd_debug_op_order        true   Y
+osd.0       advanced  osd_objectstore           foo
+
+3. We obviously need to improve the is_safe() implementation to make this 
+more accurate.  My current plan is add annotations for if the option can 
+update at runtime, only takes effect at startup, at daemon creation time, 
+or cluster creation time.  In most cases the guess is right, so hopefully 
+not too many annotations will be needed.
+
+4. The 'config show' now indicates if a setting the mon tried to set
+failed to take effect:
+
+$ bin/ceph config show osd.0
+NAME                      VALUE     SOURCE  OVERRIDES IGNORES
+...
+osd_journal_size          100       file
+osd_objectstore           bluestore file              mon
+osd_pool_default_min_size 1         mon
+osd_pool_default_size     1         mon
+...
+
+The IGNORES column is meant to make sense next to SOURCE and OVERRIDES.
+For example, mon_data source is mon, overrides nothing, but ignores 'mon'.
+In reality, the only value IGNORES will currently ever have is 'mon',
+since trying to do e.g. 'ceph daemon ... config set ...' will error out
+without setting anything so you never get into a conflicting state. In
+principle we could eventually show soenthing else here if there is a
+setting that is forced based on on-disk state (e.g., osd_objectstore) that
+might conflict with a setting that only works at daemon creation time.
+In reality we just ignore setting in that case; I'm not sure if it would
+make sense to show it here (or would it?).
+
+sage
+
+--8323329-1358594043-1515683469=:20939--
