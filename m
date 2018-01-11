@@ -1,36 +1,72 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.15-rc8
-Date: Thu, 11 Jan 2018 18:10:27 +0100
-Message-ID: <1515690627-4084-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Huamin Chen <hchen@redhat.com>
+Subject: Re: CSI (container storage interface)
+Date: Thu, 11 Jan 2018 13:42:09 -0500
+Message-ID: <CAD-gW=nyuuJ7GeYJPjsH5x4wPXWZbs28X1H16RidU0TOntp6gQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1801101842180.17779@piezo.novalocal> <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ot0-f173.google.com ([74.125.82.173]:39834 "EHLO
+        mail-ot0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932483AbeAKSmK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jan 2018 13:42:10 -0500
+Received: by mail-ot0-f173.google.com with SMTP id 37so2931505otv.6
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Jan 2018 10:42:10 -0800 (PST)
+In-Reply-To: <B03A147C-24FA-415D-9C74-A3821725AEEE@tabbara.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Bassam Tabbara <bassam@tabbara.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Steve LeonTang <Steve.LeonTang@quantum.com>
 
-Hi Linus,
+(resending, previous reply bounced back)
 
-The following changes since commit b2cd1df66037e7c4697c7e40496bf7e4a5e16a2d:
+Hi Bassam,
 
-  Linux 4.15-rc7 (2018-01-07 14:22:41 -0800)
+Thanks for the suggestions.
 
-are available in the git repository at:
+Having a CSI repo is a great first step. Now Serguei is putting up a
+prototype as PR #1. It mirrors the current k8s in tree rbd volume
+plugin.
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.15-rc8
+Since the project just starts, there is no formal meetings and process
+management. Since not every contributor here use Ceph tracker, I
+propose to use github issues for issue and bug tracking, feature
+request, and assignment so we can track topics like krbd/nbd, cephfs
+and fuse.
 
-for you to fetch changes up to 21acdf45f4958135940f0b4767185cf911d4b010:
-
-  rbd: set max_segments to USHRT_MAX (2018-01-09 17:40:48 +0100)
-
-----------------------------------------------------------------
-Two rbd fixes for 4.12 and 4.2 issues respectively, marked for stable.
-
-----------------------------------------------------------------
-Florian Margaine (1):
-      rbd: reacquire lock should update lock owner client id
-
-Ilya Dryomov (1):
-      rbd: set max_segments to USHRT_MAX
-
- drivers/block/rbd.c | 18 ++++++++++++------
- 1 file changed, 12 insertions(+), 6 deletions(-)
+On Wed, Jan 10, 2018 at 5:29 PM, Bassam Tabbara <bassam@tabbara.com> wrote:
+> Excellent! Excited to see this work starting.
+>
+> Could we please get a blueprint/design on ceph-csi written down and reviewed?
+>
+> There are a lot of different topics to consider here around secret management, user-mode vs. kernel, etc. that might be better sorted in a design doc vs. in PR reviews.
+>
+> (cc’ing steve that offered to help)
+>
+>> On Jan 10, 2018, at 10:45 AM, Sage Weil <sweil@redhat.com> wrote:
+>>
+>> Development has kicked off on a CSI driver for Ceph (RBD initially; CephFS
+>> will follow).  See
+>>
+>>       https://github.com/ceph/ceph-csi
+>>       https://github.com/ceph/ceph-csi/pulls
+>>
+>> CSI is a generic provisioning (and attachment) interface for container
+>> orchestration platforms, including Kubernetes and Mesos.
+>>
+>>       https://github.com/container-storage-interface/spec
+>>
+>> In the kubernetes context, this will /eventually/ replace the in-tree RBD
+>> and CephFS volume drivers, as well as Rook's flex volume plugin.
+>>
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
