@@ -1,92 +1,36 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: mon config update
-Date: Thu, 11 Jan 2018 15:10:58 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1801111509180.20939@piezo.novalocal>
-References: <alpine.DEB.2.11.1801051716570.24931@piezo.novalocal> <2b36d420-2646-4955-24ae-ed4a3688c094@corp.ovh.com>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1358594043-1515683469=:20939"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:45142 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752804AbeAKPLK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jan 2018 10:11:10 -0500
-In-Reply-To: <2b36d420-2646-4955-24ae-ed4a3688c094@corp.ovh.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>
-Cc: ceph-devel@vger.kernel.org
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 4.15-rc8
+Date: Thu, 11 Jan 2018 18:10:27 +0100
+Message-ID: <1515690627-4084-1-git-send-email-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Linus,
 
---8323329-1358594043-1515683469=:20939
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+The following changes since commit b2cd1df66037e7c4697c7e40496bf7e4a5e16a2d:
 
-On Mon, 8 Jan 2018, Piotr Dałek wrote:
-> Wouldn't mind having a "changeable in runtime" column in these outputs. I know
-> it's semi-reliable, but it's still better than experimenting or searching for
-> it in code (which may be difficult for non-devs).
+  Linux 4.15-rc7 (2018-01-07 14:22:41 -0800)
 
-Several parts of this.
+are available in the git repository at:
 
-1. 'config help'
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.15-rc8
 
-$ bin/ceph config help debug_osd
-debug_osd - Debug level for osd
-  (std::string, advanced)
-  Default: 1/5
-  Can update at runtime: true
+for you to fetch changes up to 21acdf45f4958135940f0b4767185cf911d4b010:
 
-(also in the JSON dump).
+  rbd: set max_segments to USHRT_MAX (2018-01-09 17:40:48 +0100)
 
-2. 'config dump' and 'config get' have a new "RW" column (suggestions for 
-a better short column name are welcome!):
+----------------------------------------------------------------
+Two rbd fixes for 4.12 and 4.2 issues respectively, marked for stable.
 
-$ bin/ceph config get osd.0
-WHO    MASK LEVEL     OPTION                    VALUE  RW
-osd         advanced  debug_bdev                20/20  Y
-osd         advanced  debug_bluefs              20/20  Y
-osd         advanced  debug_bluestore           30/30  Y
-osd         advanced  debug_filestore           20/20  Y
-osd         advanced  debug_journal             20/20  Y
-osd         advanced  debug_ms                  1/1    Y
-global      advanced  mon_pg_warn_min_per_osd   3      Y
-osd         advanced  osd_copyfrom_max_chunk    524288 Y
-global      advanced  osd_crush_chooseleaf_type 0      Y
-osd         developer osd_debug_misdirected_ops true   Y
-osd         developer osd_debug_op_order        true   Y
-osd.0       advanced  osd_objectstore           foo
+----------------------------------------------------------------
+Florian Margaine (1):
+      rbd: reacquire lock should update lock owner client id
 
-3. We obviously need to improve the is_safe() implementation to make this 
-more accurate.  My current plan is add annotations for if the option can 
-update at runtime, only takes effect at startup, at daemon creation time, 
-or cluster creation time.  In most cases the guess is right, so hopefully 
-not too many annotations will be needed.
+Ilya Dryomov (1):
+      rbd: set max_segments to USHRT_MAX
 
-4. The 'config show' now indicates if a setting the mon tried to set
-failed to take effect:
-
-$ bin/ceph config show osd.0
-NAME                      VALUE     SOURCE  OVERRIDES IGNORES
-...
-osd_journal_size          100       file
-osd_objectstore           bluestore file              mon
-osd_pool_default_min_size 1         mon
-osd_pool_default_size     1         mon
-...
-
-The IGNORES column is meant to make sense next to SOURCE and OVERRIDES.
-For example, mon_data source is mon, overrides nothing, but ignores 'mon'.
-In reality, the only value IGNORES will currently ever have is 'mon',
-since trying to do e.g. 'ceph daemon ... config set ...' will error out
-without setting anything so you never get into a conflicting state. In
-principle we could eventually show soenthing else here if there is a
-setting that is forced based on on-disk state (e.g., osd_objectstore) that
-might conflict with a setting that only works at daemon creation time.
-In reality we just ignore setting in that case; I'm not sure if it would
-make sense to show it here (or would it?).
-
-sage
-
---8323329-1358594043-1515683469=:20939--
+ drivers/block/rbd.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
