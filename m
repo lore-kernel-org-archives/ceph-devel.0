@@ -1,224 +1,352 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Luminous - replace old target-weight tree from osdmap with mgr
- balancer
-Date: Thu, 11 Jan 2018 21:59:00 +0100
-Message-ID: <aa0940bf-dfc4-24e9-63ed-0966fc47226b@profihost.ag>
-References: <602f839b-6927-2c53-dbb5-baee02569105@profihost.ag>
- <alpine.DEB.2.11.1801102123260.8186@piezo.novalocal>
- <e638d77d-104f-a224-579b-a960fab90732@profihost.ag>
- <alpine.DEB.2.11.1801102151470.8186@piezo.novalocal>
- <c4e77c5b-91bb-9924-db51-0f30a37b1b21@profihost.ag>
- <e9729df5-09d1-3a2a-31c4-f3e4909d3717@profihost.ag>
- <alpine.DEB.2.11.1801111958450.24931@piezo.novalocal>
- <0a407489-849e-98cd-2a7c-ffe7626407cf@profihost.ag>
- <alpine.DEB.2.11.1801112008180.24931@piezo.novalocal>
- <4106bc21-f5e4-5270-1a34-fba328560da6@profihost.ag>
- <975b88ed-7f7b-7762-2e9f-a94aa7d13aee@profihost.ag>
- <alpine.DEB.2.11.1801112037090.24931@piezo.novalocal>
+From: Sage Weil <sage@redhat.com>
+Subject: mon config commands
+Date: Thu, 11 Jan 2018 21:21:55 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1801112044230.23413@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:33479 "EHLO
-        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932472AbeAKU7D (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 11 Jan 2018 15:59:03 -0500
-In-Reply-To: <alpine.DEB.2.11.1801112037090.24931@piezo.novalocal>
-Content-Language: de-DE
+Received: from mx1.redhat.com ([209.132.183.28]:37026 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932193AbeAKVV4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 11 Jan 2018 16:21:56 -0500
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 9D3B78B114
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Jan 2018 21:21:56 +0000 (UTC)
+Received: from piezo.us.to (ovpn-112-43.rdu2.redhat.com [10.10.112.43])
+        by smtp.corp.redhat.com (Postfix) with SMTP id 1E63F909B
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Jan 2018 21:21:55 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+
+Hi everyone,
+
+Here's the current state of the mon config commands for mimic.  These are 
+pretty close to being "done" so please review carefully!
+
+config assimilate-conf                  Assimilate options from a conf, and 
+                                         return a new, minimal conf file
+config dump                             Show all configuration option(s)
+config get <who> {<key>}                Show configuration option(s) for an 
+                                         entity
+config help <key>                       Describe a configuration option
+config rm <who> <name>                  Clear a configuration option for one or 
+                                         more entities
+config set <who> <name> <value>         Cet a configuration option for one or 
+                                         more entities
+config show <who> {<key>}               Show running configuration
+config show-with-defaults <who>         Show running configuration (including 
+                                         compiled-in defaults)
+---
+
+First, let's dump everything:
+
+$ bin/ceph config dump
+WHO    MASK LEVEL     OPTION                         VALUE  RO 
+global      advanced  mon_pg_warn_min_per_osd        3         
+global      advanced  osd_crush_chooseleaf_type      0         
+global      advanced  osd_pool_default_min_size      1         
+global      advanced  osd_pool_default_size          1         
+mds         advanced  debug_mds                      20/20     
+mds         advanced  debug_mgrc                     20/20     
+mds         advanced  debug_monc                     20/20     
+mds         advanced  debug_ms                       1/1       
+mds         developer mds_debug_auth_pins            true      
+mds         developer mds_debug_frag                 true      
+mds         developer mds_debug_scatterstat          true      
+mds         developer mds_debug_subtrees             true      
+mds         developer mds_verify_scatter             true      
+mgr         advanced  debug_mgr                      20/20     
+mgr         advanced  debug_mon                      20/20     
+mgr         advanced  debug_monc                     20/20     
+mgr         advanced  debug_ms                       1/1       
+mon         unknown   mon_allow_pool_deletes         true   *  
+mon         advanced  mon_data_avail_crit            1         
+mon         advanced  mon_data_avail_warn            2         
+...
+
+Note the one RO item here is also 'unknown'.. that's because it's not a 
+valid config option (there's no 's').. it was injected directly into 
+config-key.
+
+For a single daemon,
+
+gnit:build (wip-config) 02:47 PM $ bin/ceph config get mon.a
+WHO    MASK LEVEL    OPTION                         VALUE RO 
+mon         unknown  mon_allow_pool_deletes         true  *  
+mon         advanced mon_data_avail_crit            1        
+mon         advanced mon_data_avail_warn            2        
+mon         advanced mon_osd_reporter_subtree_level osd      
+global      advanced mon_pg_warn_min_per_osd        3        
+global      advanced osd_crush_chooseleaf_type      0        
+global      advanced osd_pool_default_min_size      1        
+global      advanced osd_pool_default_size          1        
+
+If I try to set something that can't be changed at runtime (say, ms_type), 
+you get:
+
+gnit:build (wip-config) 02:47 PM $ bin/ceph config set mon.a ms_type 
+simple
+gnit:build (wip-config) 02:48 PM $ bin/ceph config get mon.a
+WHO    MASK LEVEL    OPTION                         VALUE  RO 
+mon         unknown  mon_allow_pool_deletes         true   *  
+mon         advanced mon_data_avail_crit            1         
+mon         advanced mon_data_avail_warn            2         
+mon         advanced mon_osd_reporter_subtree_level osd       
+global      advanced mon_pg_warn_min_per_osd        3         
+mon.a       advanced ms_type                        simple *  
+global      advanced osd_crush_chooseleaf_type      0         
+global      advanced osd_pool_default_min_size      1         
+global      advanced osd_pool_default_size          1         
+
+You can then see this by checking the *running* config (this is what the 
+daemon has reported as it's actually config to the manager):
+
+gnit:build (wip-config) 02:48 PM $ bin/ceph config show mon.a
+NAME                                                       VALUE                                              SOURCE  OVERRIDES IGNORES 
+admin_socket                                               /tmp/ceph-asok.GBZTV0/$name.asok                   file                      
+chdir                                                                                                         file                      
+debug_auth                                                 20/20                                              file                      
+debug_mgrc                                                 20/20                                              file                      
+debug_mon                                                  20/20                                              file                      
+debug_ms                                                   1/1                                                file                      
+debug_paxos                                                20/20                                              file                      
+enable_experimental_unrecoverable_data_corrupting_features *                                                  file                      
+erasure_code_dir                                           /home/sage/src/ceph6/build/lib                     file                      
+filestore_fd_cache_size                                    32                                                 file                      
+heartbeat_file                                             /home/sage/src/ceph6/build/out/$name.heartbeat     file                      
+leveldb_block_size                                         65536                                              default                   
+leveldb_cache_size                                         536870912                                          default                   
+leveldb_compression                                        0                                                  default                   
+leveldb_log                                                                                                   default                   
+leveldb_write_buffer_size                                  33554432                                           default                   
+lockdep                                                    1                                                  file                      
+log_file                                                   /home/sage/src/ceph6/build/out/$name.log           file                      
+mgr_initial_modules                                        restful status dashboard balancer                  file                      
+mon_cluster_log_file                                       /home/sage/src/ceph6/build/out/cluster.mon.$id.log file                      
+mon_data                                                   /home/sage/src/ceph6/build/dev/mon.a               file                      
+mon_data_avail_crit                                        1                                                  mon                       
+mon_data_avail_warn                                        2                                                  mon                       
+mon_osd_backfillfull_ratio                                 0.99                                               file                      
+mon_osd_full_ratio                                         0.99                                               file                      
+mon_osd_nearfull_ratio                                     0.99                                               file                      
+mon_osd_reporter_subtree_level                             osd                                                mon                       
+mon_pg_warn_min_per_osd                                    3                                                  mon                       
+ms_type                                                    async+posix                                        default           mon     
+osd_crush_chooseleaf_type                                  0                                                  mon                       
+osd_failsafe_full_ratio                                    0.99                                               file                      
+osd_pool_default_min_size                                  1                                                  mon                       
+osd_pool_default_size                                      1                                                  mon                       
+pid_file                                                   /home/sage/src/ceph6/build/out/mon.a.pid           cmdline file              
+plugin_dir                                                 /home/sage/src/ceph6/build/lib                     file                      
+run_dir                                                    /home/sage/src/ceph6/build/out                     file                      
+
+(sorry for the wide table)
+
+A few things to note: SOURCE can be any of default, file, mon, env, 
+cmdline, or override.  You'll notice that ms_type SOURCE is 'default' and 
+IGNORES is 'mon', because the daemon is ignoring the mon value--this 
+option can only be set during startup.
+
+Similarly, if I try to override something else manually,
+
+gnit:build (wip-config) 02:50 PM $ bin/ceph daemon mon.a config set mon_data_avail_warn 3
+{
+    "success": ""
+}
+gnit:build (wip-config) 02:50 PM $ bin/ceph config show mon.a
+NAME                                                       VALUE                                              SOURCE   OVERRIDES IGNORES 
+...
+mon_data_avail_warn                                        3                                                  override mon               
+...
+
+we see that the currently value is an override, and OVERRIDES the mon 
+value.  As far as I can tel this is a pretty complete view of what is 
+going on.  The JSON form has a bit more info, like what the mon value that 
+was override was:
+
+...
+    {
+        "name": "mon_data_avail_warn",
+        "value": "3",
+        "source": "override",
+        "overrides": [
+            {
+                "source": "mon",
+                "value": "2"
+            }
+        ]
+    },
+...
+
+Anyway, moving on...
+
+You can also 'get' and 'show' specific values, making this useful from a 
+script:
+
+gnit:build (wip-config) 02:52 PM $ bin/ceph config get mon.a ms_type
+simple
+gnit:build (wip-config) 02:52 PM $ bin/ceph config show mon.a ms_type
+async+posix
+
+This will return valid results for defaults, too:
+
+gnit:build (wip-config) 02:52 PM $ bin/ceph config show mon.a osd_data
+/var/lib/ceph/osd/$cluster-$id
+
+...although the result has not has substitutions processed yet (should 
+it?).
+
+You can get help:
+
+gnit:build (wip-config) 02:54 PM $ bin/ceph config help 
+bluestore_cache_size
+bluestore_cache_size - Cache size (in bytes) for BlueStore
+  (uint64_t, advanced)
+  Default: 0
+  Can update at runtime: true
+
+This includes data and metadata cached by BlueStore as well as memory devoted to rocksdb's cache(s).
+
+I mostly hate how the above looks, BTW--suggestions welcome!  In JSON 
+form,
+
+gnit:build (wip-config) 02:54 PM $ bin/ceph config help bluestore_cache_size -f json-pretty
+
+{
+    "name": "bluestore_cache_size",
+    "type": "uint64_t",
+    "level": "advanced",
+    "desc": "Cache size (in bytes) for BlueStore",
+    "long_desc": "This includes data and metadata cached by BlueStore as 
+well as memory devoted to rocksdb's cache(s).",
+    "default": 0,
+    "daemon_default": "",
+    "tags": [],
+    "services": [],
+    "see_also": [],
+    "min": "",
+    "max": "",
+    "can_update_at_runtime": true
+}
+
+The 'config set' has basic validation:
+
+gnit:build (wip-config) 03:07 PM $ bin/ceph config set osd.0 foo bar
+Error EINVAL: unrecognized config option 'foo'
+gnit:build (wip-config) 03:07 PM $ bin/ceph config set osd.0 osd_tier_default_cache_mode bar
+Error EINVAL: error parsing value: 'bar' is not one of the permitted values: none, writeback, forward, readonly, readforward, readproxy, proxy
+gnit:build (wip-config) 03:08 PM $ bin/ceph config set osd.0 
+osd_tier_default_cache_mode writeback
+
+and you can clear an option:
+
+gnit:build (wip-config) 03:08 PM $ bin/ceph config get mon.a
+WHO    MASK LEVEL    OPTION                         VALUE  RO 
+mon         unknown  mon_allow_pool_deletes         true   *  
+mon         advanced mon_data_avail_crit            1         
+mon         advanced mon_data_avail_warn            2         
+mon         advanced mon_osd_reporter_subtree_level osd       
+global      advanced mon_pg_warn_min_per_osd        3         
+mon.a       advanced ms_type                        simple *  
+global      advanced osd_crush_chooseleaf_type      0         
+global      advanced osd_pool_default_min_size      1         
+global      advanced osd_pool_default_size          1         
+gnit:build (wip-config) 03:08 PM $ bin/ceph config rm mon.a ms_type
+gnit:build (wip-config) 03:09 PM $ bin/ceph config get mon.a
+WHO    MASK LEVEL    OPTION                         VALUE RO 
+mon         unknown  mon_allow_pool_deletes         true  *  
+mon         advanced mon_data_avail_crit            1        
+mon         advanced mon_data_avail_warn            2        
+mon         advanced mon_osd_reporter_subtree_level osd      
+global      advanced mon_pg_warn_min_per_osd        3        
+global      advanced osd_crush_chooseleaf_type      0        
+global      advanced osd_pool_default_min_size      1        
+global      advanced osd_pool_default_size          1        
 
 
-Am 11.01.2018 um 21:37 schrieb Sage Weil:
-> On Thu, 11 Jan 2018, Stefan Priebe - Profihost AG wrote:
->> OK it wasn't the balancer.
->>
->> It happens after executing all the reweight und crush compat commands:
->>
->> An even on a much bigger cluster it's 6% again. Some rounding issue? I
->> migrated with a script so it's not a typo.
-> 
-> Maybe.. can you narrow down which command it is?  I'm guessing that one of 
-> the 'ceph osd crush weight-set reweight-compat ...' commands does it, but 
-> it would be nice to confirm whether it is a rounding issue or if something 
-> is broken!
+The last one is 'assimilate-conf' and is meant to help transition from 
+a ceph.conf world to a mon config world.  This is a vstart cluster, so all 
+of the paths are all wonky and there's lots of specialness that you 
+wouldn't see in the real world.  It still imports most stuff:
 
-Yes i'll try.
+gnit:build (wip-config) 03:09 PM $ wc -l ceph.conf
+115 ceph.conf
+gnit:build (wip-config) 03:09 PM $ bin/ceph config assimilate-conf -i ceph.conf -o new.conf
+2018-01-11 15:09:55.390 7f5a3cff9700 -1 set_mon_vals failed to set admin_socket = /tmp/ceph-asok.GBZTV0/$name.$pid.asok: Configuration option 'admin_socket' may not be modified at runtime
 
-At least the crushmap looks very weird after executing all commands.
-You'll find the decodec one here:
-https://pastebin.com/raw/LjjAcww4
+(That warning appears because the CLI process observed the config change 
+as it happened, and isn't able to update the admin_socket setting at 
+runtime.)
 
-Stefan
+What's left is stuff flagged NO_MON_CONFIG or unrecognized as a valid 
+option:
 
-> 
-> sage
-> 
->  > 
->> Stefan
->>
->> Am 11.01.2018 um 21:21 schrieb Stefan Priebe - Profihost AG:
->>> Hi,
->>>
->>> Am 11.01.2018 um 21:10 schrieb Sage Weil:
->>>> On Thu, 11 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>> Am 11.01.2018 um 20:58 schrieb Sage Weil:
->>>>>> On Thu, 11 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>> Hi Sage,
->>>>>>>
->>>>>>> this did not work like expected. I tested it in another smaller cluster
->>>>>>> and it resulted in about 6% misplaced objects.
->>>>>>
->>>>>> Can you narrow down at what stage the misplaced objects happened?
->>>>>
->>>>> ouch i saw this:
->>>>> # ceph balancer status
->>>>> {
->>>>>     "active": true,
->>>>>     "plans": [
->>>>>         "auto_2018-01-11_19:52:28"
->>>>>     ],
->>>>>     "mode": "crush-compat"
->>>>> }
->>>>>
->>>>> so might it be the balancer beeing executed while i was modifying the tree?
->>>>> Can i stop it and reexecute it manually?
->>>>
->>>> You can always 'ceph balancer off'.  And I probably wouldn't turn it on 
->>>> until after you've cleaned this up because it will balance with the 
->>>> current weights being the 'target' weights (when in your case they're not 
->>>> (yet)).
->>>>
->>>> To manually see what the balancer would do you can
->>>>
->>>>  ceph balancer optimize foo
->>>>  ceph balancer show foo
->>>>  ceph balancer eval foo   # (see numerical analysis)
->>>>
->>>> and if it looks good
->>>>
->>>>  ceph balancer execute foo
->>>>
->>>> to actually apply the changes.
->>>
->>> ok thanks but it seems there are still leftovers somewhere:
->>> [expo-office-node1 ~]# ceph balancer optimize stefan
->>> Error EINVAL: Traceback (most recent call last):
->>>   File "/usr/lib/ceph/mgr/balancer/module.py", line 303, in handle_command
->>>     self.optimize(plan)
->>>   File "/usr/lib/ceph/mgr/balancer/module.py", line 596, in optimize
->>>     return self.do_crush_compat(plan)
->>>   File "/usr/lib/ceph/mgr/balancer/module.py", line 658, in do_crush_compat
->>>     orig_ws = self.get_compat_weight_set_weights()
->>>   File "/usr/lib/ceph/mgr/balancer/module.py", line 837, in
->>> get_compat_weight_set_weights
->>>     raise RuntimeError('could not find bucket %s' % b['bucket_id'])
->>> RuntimeError: could not find bucket -6
->>>
->>> [expo-office-node1 ~]# ceph osd tree
->>> ID CLASS WEIGHT   TYPE NAME                  STATUS REWEIGHT PRI-AFF
->>> -1       14.55957 root default
->>> -4        3.63989     host expo-office-node1
->>>  8   ssd  0.90997         osd.8                  up  1.00000 1.00000
->>>  9   ssd  0.90997         osd.9                  up  1.00000 1.00000
->>> 10   ssd  0.90997         osd.10                 up  1.00000 1.00000
->>> 11   ssd  0.90997         osd.11                 up  1.00000 1.00000
->>> -2        3.63989     host expo-office-node2
->>>  0   ssd  0.90997         osd.0                  up  1.00000 1.00000
->>>  1   ssd  0.90997         osd.1                  up  1.00000 1.00000
->>>  2   ssd  0.90997         osd.2                  up  1.00000 1.00000
->>>  3   ssd  0.90997         osd.3                  up  1.00000 1.00000
->>> -3        3.63989     host expo-office-node3
->>>  4   ssd  0.90997         osd.4                  up  1.00000 1.00000
->>>  5   ssd  0.90997         osd.5                  up  1.00000 1.00000
->>>  6   ssd  0.90997         osd.6                  up  1.00000 1.00000
->>>  7   ssd  0.90997         osd.7                  up  1.00000 1.00000
->>> -5        3.63989     host expo-office-node4
->>> 12   ssd  0.90997         osd.12                 up  1.00000 1.00000
->>> 13   ssd  0.90997         osd.13                 up  1.00000 1.00000
->>> 14   ssd  0.90997         osd.14                 up  1.00000 1.00000
->>> 15   ssd  0.90997         osd.15                 up  1.00000 1.00000
->>>
->>>
->>> Stefan
->>>
->>>> sage
->>>>
->>>>
->>>>>
->>>>>>
->>>>>> sage
->>>>>>
->>>>>>>
->>>>>>> Any ideas?
->>>>>>>
->>>>>>> Stefan
->>>>>>> Am 11.01.2018 um 08:09 schrieb Stefan Priebe - Profihost AG:HI
->>>>>>>> Thanks! Can this be done while still having jewel clients?
->>>>>>>>
->>>>>>>> Stefan
->>>>>>>>
->>>>>>>> Excuse my typo sent from my mobile phone.
->>>>>>>>
->>>>>>>> Am 10.01.2018 um 22:56 schrieb Sage Weil <sage@newdream.net
->>>>>>>> <mailto:sage@newdream.net>>:
->>>>>>>>
->>>>>>>>> On Wed, 10 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>> Am 10.01.2018 um 22:23 schrieb Sage Weil:
->>>>>>>>>>> On Wed, 10 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>> k,
->>>>>>>>>>>>
->>>>>>>>>>>> in the past we used the python crush optimize tool to reweight the osd
->>>>>>>>>>>> usage - it inserted a 2nd tree with $hostname-target-weight as
->>>>>>>>>>>> hostnames.
->>>>>>>>>>>
->>>>>>>>>>> Can you attach a 'ceph osd crush tree' (or partial output) so I can see
->>>>>>>>>>> what you mean?
->>>>>>>>>>
->>>>>>>>>> Sure - attached.
->>>>>>>>>
->>>>>>>>> Got it
->>>>>>>>>
->>>>>>>>>>>> Now the quesions are:
->>>>>>>>>>>> 1.) can we remove the tree? How?
->>>>>>>>>>>> 2.) Can we do this now or only after all clients are running Luminous?
->>>>>>>>>>>> 3.) is it enought to enable the mgr balancer module?
->>>>>>>>>
->>>>>>>>> First,
->>>>>>>>>
->>>>>>>>> ceph osd crush weight-set create-compat
->>>>>>>>>
->>>>>>>>> then for each osd,
->>>>>>>>> ceph osd crush weight-set reweight-compat <osd> <optimized-weight>
->>>>>>>>> ceph osd crush reweight <osd> <target-weight>
->>>>>>>>>
->>>>>>>>> That won't move any data but will keep your current optimized weights in
->>>>>>>>> the compat weight-set where they belong.
->>>>>>>>>
->>>>>>>>> Then you can remove the *-target-weight buckets.  For each osd,
->>>>>>>>>
->>>>>>>>> ceph osd crush rm <osd> <ancestor>-target-weight
->>>>>>>>>
->>>>>>>>> and then for each remaining bucket
->>>>>>>>>
->>>>>>>>> ceph osd crush rm <foo>-target-weight
->>>>>>>>>
->>>>>>>>> Finally, turn on the balancer (or test it to see what it it wants to do
->>>>>>>>> with the optimize command.)
->>>>>>>>>
->>>>>>>>> HTH!
->>>>>>>>> sage
->>>>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+gnit:build (wip-config) 03:09 PM $ wc -l new.conf
+46 new.conf
+gnit:build (wip-config) 03:10 PM $ cat new.conf
+
+[client]
+        keyring = /home/sage/src/ceph6/build/keyring
+
+[client.vstart.sh]
+        num_mds = 0
+        num_mgr = 1
+        num_mon = 1
+        num_osd = 1
+        num_rgw = 0
+
+[global]
+        fsid = 9dbd93f7-635a-4734-bc29-448a2305af7f
+        lockdep = true
+        mon_osd_backfillfull_ratio = .99
+        mon_osd_full_ratio = .99
+        mon_osd_nearfull_ratio = .99
+
+[mds]
+        chdir = 
+        mds_data = /home/sage/src/ceph6/build/dev/mds.$id
+
+[mgr]
+        chdir = 
+        mgr_data = /home/sage/src/ceph6/build/dev/mgr.$id
+
+[mgr.x]
+        host = gnit
+
+[mon]
+        chdir = 
+        mgr_initial_modules = restful status dashboard balancer
+
+[mon.a]
+        host = gnit
+        mon_addr = 127.0.0.1:40948
+        mon_data = /home/sage/src/ceph6/build/dev/mon.a
+
+[osd]
+        chdir = 
+        osd_class_tmp = out
+        osd_data = /home/sage/src/ceph6/build/dev/osd$id
+        osd_journal = /home/sage/src/ceph6/build/dev/osd$id/journal
+
+[osd.0]
+        host = gnit
+
+This command isn't as smart as it maybe could be.  It doesn't try to do 
+anything clever for ceph.conf's with conflicting values from different 
+hosts... so if host A has debug_ms=1 and host B has debug_ms=2, the mon 
+will keep whichever was imported last.  In general, though, if the config 
+options are restricted to [type.id] per-daemon sections then things will 
+work just fine.
+
+We *could* have tools try to look at the result in the mon and simplify or 
+rearrange, by (for example) moving osd-specific options under [osd] so 
+that they don't pollute other daemons' configs.  I leave this to future 
+work...
+
+Anyway, please let me know if there is anything ugly or unintuitive or 
+wrong here.  If this looks sane I'll finally write up the docs!
+
+sage
