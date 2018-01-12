@@ -1,54 +1,62 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] rbd: reacquire lock should update lock owner client id
-Date: Fri, 12 Jan 2018 08:37:45 +0100
-Message-ID: <CAOi1vP8NQitSsX+9PkB7RNwvY+g=XKOQ5AEnjFBSugdCSeO7pw@mail.gmail.com>
-References: <87tvwumy4g.fsf@platform.sh>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: can we stop packaging sysvinit scripts?
+Date: Fri, 12 Jan 2018 08:41:47 +0100
+Message-ID: <3e2796b5-0208-f350-1b40-8812185aa35d@m-privacy.de>
+References: <alpine.DEB.2.11.1801101440550.24931@piezo.novalocal>
+ <b6b69060-2424-5404-cdf0-4ca019ec9ead@m-privacy.de>
+ <CALqRxCzvTa2o5Q9U9jWCQ4ebhSL36rRy59DcwKi9L7mFdgYD0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:46796 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750714AbeALHhp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jan 2018 02:37:45 -0500
-Received: by mail-io0-f194.google.com with SMTP id z130so4838453ioe.13
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Jan 2018 23:37:45 -0800 (PST)
-In-Reply-To: <87tvwumy4g.fsf@platform.sh>
+Received: from www1.m-privacy.de ([85.214.254.135]:48314 "EHLO
+        www1.m-privacy.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752841AbeALHl6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jan 2018 02:41:58 -0500
+In-Reply-To: <CALqRxCzvTa2o5Q9U9jWCQ4ebhSL36rRy59DcwKi9L7mFdgYD0w@mail.gmail.com>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Margaine <florian@platform.sh>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com
 
-On Wed, Dec 13, 2017 at 4:43 PM, Florian Margaine <florian@platform.sh> wrote:
-> Otherwise, future operations on this RBD using exclusive-lock are
-> going to require the lock from a non-existent client id.
->
-> This ports commit 475dda114a7e25b43dc9066b9808a64fc0c6dc89 from librbd
-> to krbd.
->
-> Signed-off-by: Florian Margaine <florian@platform.sh>
-> ---
->  drivers/block/rbd.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index adc877dfef5c..4e2acf9c81af 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3884,6 +3884,7 @@ static void rbd_reacquire_lock(struct rbd_device *rbd_dev)
->                                            &rbd_dev->lock_dwork, 0);
->         } else {
->                 strcpy(rbd_dev->lock_cookie, cookie);
-> +               queue_work(rbd_dev->task_wq, &rbd_dev->acquired_lock_work);
->         }
->  }
+Am 12.01.2018 um 00:40 schrieb Ken Dreyer:
+> On Wed, Jan 10, 2018 at 9:18 AM, Amon Ott <a.ott@m-privacy.de> wrote:
+>> We would really appreciate having the init scripts around for a long
+>> while, as we are not willing to use systemd on our servers for security
+>> reasons. Please do not drop them.
+> 
+> I'm curious, what init system are you using?
 
-Hi Florian,
+Still sysvinit. I just do not like the idea of one complex user space
+daemon like systemd controlling most of the system, whose complexity
+makes severe security problems likely. So we stick with separate small
+programs and mandatorily assign individual and limited access control
+rights to them with RSBAC.
 
-Just wanted to let you know that this patch has been merged into 4.15,
-with a minor modification:
+Think of the regular nightmare with anti malware software deep in the
+system, which repeatedly opened up the whole system remotely in the
+past, and you get the idea. We do not trust malware scanners and
+strictly limit their abilities to a simple "read a file and decide, we
+do the rest as we please".
 
-    https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=edd8ca8015800b354453b891d38960f3a474b7e4
+IMO, access control must be done in the kernel and security needs small
+components in user space with limited functionality, following the good
+old KISS principle. Then you have full control and can limit the
+consequences of misbehaving programs.
 
-Thanks,
+Amon Ott
+-- 
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Werner-Voß-Damm 62       Fax: +49 30 99296856
+12101 Berlin             http://www.m-privacy.de
 
-                Ilya
+Amtsgericht Charlottenburg, HRB 84946
+
+Geschäftsführer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+
