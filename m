@@ -1,107 +1,123 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: killing onreadable completions
-Date: Fri, 12 Jan 2018 15:09:34 -0800
-Message-ID: <CAJ4mKGaWH-shsF-VNqPo89d25-k_5dsgNv7E085BPciu9XUdUQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1801122137190.8186@piezo.novalocal>
+Subject: Re: mon config commands
+Date: Fri, 12 Jan 2018 15:17:51 -0800
+Message-ID: <CAJ4mKGbpTo_B3XghsLHzXki_RhCLbikiRKcw9bGV6TpPCFxEqw@mail.gmail.com>
+References: <alpine.DEB.2.11.1801112044230.23413@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:41102 "EHLO
+Received: from mail-it0-f45.google.com ([209.85.214.45]:46647 "EHLO
         mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965260AbeALXJg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jan 2018 18:09:36 -0500
-Received: by mail-it0-f45.google.com with SMTP id b77so10888642itd.0
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Jan 2018 15:09:36 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801122137190.8186@piezo.novalocal>
+        with ESMTP id S965236AbeALXRw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jan 2018 18:17:52 -0500
+Received: by mail-it0-f45.google.com with SMTP id c16so10877625itc.5
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Jan 2018 15:17:52 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1801112044230.23413@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Sage Weil <sage@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jan 12, 2018 at 1:37 PM, Sage Weil <sweil@redhat.com> wrote:
-> A dream of mine is to kill off the onreadable callback in ObjectStore
-> completely.  This is *mostly* a non-issue with BlueStore with a few
-> exceptions (creates/deletes still need a flush before they are visible to
-> collection_list()), but because FileStore has no in-memory cache/state
-> about it's changes it is a long way from being possible.
->
-> My thinking recently has been that at some point we'll reach a point where
-> we care more about OSD code simplicity than FileStore performance
-> (presumably at some point after we move a bunch of users over to
-> BlueStore) and then we implement some kludge in FileStore to hide
-> this.
->
-> Today I was looking at a weird ECBackend issue and it looks like there
-> we're still doing dual acks for commit and readable... all in order to
-> make sure that a read that follows a write will order properly (even on
-> replicas).  That means double the messages over the wire to track
-> something that can be done with a simple map of in-filght objects in
-> memory.  But instead of implementing that just in ECBackend, implementing
-> the same thing in FileStore would kill 100 birds with one stone.
+The rest looks good, but I don't understand this thing about "RO"
+values at all. Based on what's here, it represents options that aren't
+live yet, but will be on reboot?
 
-Can you elucidate on what's happening with ECBackend? I'd assume part
-of the complexity is about maintaining the cache that lets us pipeline
-writes that overlap, and I don't quite see how what you're discussing
-would work with that.
-...and, actually, now that I think about it I'm not entirely sure the
-bluestore semantics would work for ec overwrite pools without this
-overlay? What are the rules again?
+On Thu, Jan 11, 2018 at 1:21 PM, Sage Weil <sage@redhat.com> wrote:
+> If I try to set something that can't be changed at runtime (say, ms_type),
+> you get:
+>
+> gnit:build (wip-config) 02:47 PM $ bin/ceph config set mon.a ms_type
+> simple
+> gnit:build (wip-config) 02:48 PM $ bin/ceph config get mon.a
+> WHO    MASK LEVEL    OPTION                         VALUE  RO
+> mon         unknown  mon_allow_pool_deletes         true   *
+> mon         advanced mon_data_avail_crit            1
+> mon         advanced mon_data_avail_warn            2
+> mon         advanced mon_osd_reporter_subtree_level osd
+> global      advanced mon_pg_warn_min_per_osd        3
+> mon.a       advanced ms_type                        simple *
+> global      advanced osd_crush_chooseleaf_type      0
+> global      advanced osd_pool_default_min_size      1
+> global      advanced osd_pool_default_size          1
+>
+> You can then see this by checking the *running* config (this is what the
+> daemon has reported as it's actually config to the manager):
+>
+> gnit:build (wip-config) 02:48 PM $ bin/ceph config show mon.a
+> NAME                                                       VALUE                                              SOURCE  OVERRIDES IGNORES
+> admin_socket                                               /tmp/ceph-asok.GBZTV0/$name.asok                   file
+> chdir                                                                                                         file
+> debug_auth                                                 20/20                                              file
+> debug_mgrc                                                 20/20                                              file
+> debug_mon                                                  20/20                                              file
+> debug_ms                                                   1/1                                                file
+> debug_paxos                                                20/20                                              file
+> enable_experimental_unrecoverable_data_corrupting_features *                                                  file
+> erasure_code_dir                                           /home/sage/src/ceph6/build/lib                     file
+> filestore_fd_cache_size                                    32                                                 file
+> heartbeat_file                                             /home/sage/src/ceph6/build/out/$name.heartbeat     file
+> leveldb_block_size                                         65536                                              default
+> leveldb_cache_size                                         536870912                                          default
+> leveldb_compression                                        0                                                  default
+> leveldb_log                                                                                                   default
+> leveldb_write_buffer_size                                  33554432                                           default
+> lockdep                                                    1                                                  file
+> log_file                                                   /home/sage/src/ceph6/build/out/$name.log           file
+> mgr_initial_modules                                        restful status dashboard balancer                  file
+> mon_cluster_log_file                                       /home/sage/src/ceph6/build/out/cluster.mon.$id.log file
+> mon_data                                                   /home/sage/src/ceph6/build/dev/mon.a               file
+> mon_data_avail_crit                                        1                                                  mon
+> mon_data_avail_warn                                        2                                                  mon
+> mon_osd_backfillfull_ratio                                 0.99                                               file
+> mon_osd_full_ratio                                         0.99                                               file
+> mon_osd_nearfull_ratio                                     0.99                                               file
+> mon_osd_reporter_subtree_level                             osd                                                mon
+> mon_pg_warn_min_per_osd                                    3                                                  mon
+> ms_type                                                    async+posix                                        default           mon
+> osd_crush_chooseleaf_type                                  0                                                  mon
+> osd_failsafe_full_ratio                                    0.99                                               file
+> osd_pool_default_min_size                                  1                                                  mon
+> osd_pool_default_size                                      1                                                  mon
+> pid_file                                                   /home/sage/src/ceph6/build/out/mon.a.pid           cmdline file
+> plugin_dir                                                 /home/sage/src/ceph6/build/lib                     file
+> run_dir                                                    /home/sage/src/ceph6/build/out                     file
+>
+> (sorry for the wide table)
+>
+> A few things to note: SOURCE can be any of default, file, mon, env,
+> cmdline, or override.  You'll notice that ms_type SOURCE is 'default' and
+> IGNORES is 'mon', because the daemon is ignoring the mon value--this
+> option can only be set during startup.
 
->
-> The naive concept is that when you queue_transaction, we put an item in
-> hash tale in the Sequencer indicating a write is in flight for all oids
-> referenced by the Transaction.  When we complete, we remove it from the
-> hash map.  Probably unordered_map<ghobject_t,int> where it's just a
-> counter.  Then, on read ops, we do a wait_for_object(oid) that waits for
-> that count to be zero.  This is basically what the ECBackend-specific fix
-> would need to do in order to get rid of the messages over the wire (and
-> that trade-off is a no-brainer).
->
-> For ReplicatedPG, it's less obvious, since we already have per-object
-> state in memory that is tracking in-flight requests.  The naive filestore
-> implementation adds a hash map insert and removal + plus some lookups for
-> read ops with the allocation of the callback, and queueing and executing
-> the callback on io apply/completion.  Not sure that's a win for the
-> simple implementation.
->
-> But: what if we make the tracking super lightweight and efficient?  I'm
-> thinking this, in the OpSequencer:
->
->  std::atomic<int> inflight_by_hash[128];
->
-> where we hash the object id and increment the atomic slot in appropriate
-> slot, then decrement on completion.  That's basically 0 overhead for
-> tracking in the write path.  And for the read path, we just test the slot
-> and (if it's 0) proceed.  If it's not zero, we take the OpSequencer lock
-> and do a more traditional cond wait on the condition (the write path is
-> already taking the qlock on completion so it can signal as needed).
->
-> This is probabilistic, meaning that if you have a lot of IO in flight on a
-> sequencer (== PG) when you issue a read you might wait for an unrelated
-> object you don't need to, but with low probability.  We can tune the size
-> of the counter vector to balance that probability (and long-tail read
-> latencies in mixed read/write workloads) with memory usage (and I guess L1
-> misses that might slow down flash read workloads a bit).
+I also don't get how one mon having a different setting means that all
+mons are marked as ignoring it.
 
-So you're...trying to optimize the memory allocation pattern here,
-instead of just maintaining a red-black tree? :)
-If that's the case, it seems like maintaining a hash map with
-preallocated in-place objects (except for collisions, I suppose) is a
-better choice — it won't take many unneeded delays to cancel out any
-increase in memory allocator efficiency! (If you're worried about the
-names not fitting, we can store the raw pgid; that has a lot less
-chance of colliding than a simple %128. Or have a spillover struct for
-longer object names.)
+Putting them right next to each other also makes it clear in my mind
+that people are going to be confused about "config get" versus "config
+show". Perhaps it should be "get_stored" and "show_running" or
+something? I don't like those names, but they need to be clearer. And
+now I've got a new feature request: a command that outputs the
+difference between those two. Or perhaps that goes through *all* the
+configs and dumps any daemons whose running config differs from their
+stored ones.
+
+On Fri, Jan 12, 2018 at 10:57 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Fri, 12 Jan 2018, Alfredo Deza wrote:
+>> On Thu, Jan 11, 2018 at 4:21 PM, Sage Weil <sage@redhat.com> wrote:
+>> > Hi everyone,
+>> >
+>> > Here's the current state of the mon config commands for mimic.  These are
+>> > pretty close to being "done" so please review carefully!
+>> >
+>> > config assimilate-conf                  Assimilate options from a conf, and
+>> >                                          return a new, minimal conf file
+>>
+>> I think this would still be fine as `config assimilate`. The `-conf`
+>> reads a bit redundant, and it wouldn't be terribly obscure to leave it
+>> as plain `assimilate`
+>
+> Works for me  :)
+
+Count me as a vote for "assimilate-conf" over "assimilate".
+Specificity is easier to search for help on, and easier to understand.
 -Greg
-
->
-> In return, we completely eliminate the ObjectStore onreadable callback
-> infrastructure and all of the grossness in OSD that uses it.
->
-> What do you think?
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
