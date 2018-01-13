@@ -1,92 +1,65 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Re: mon config commands
-Date: Fri, 12 Jan 2018 16:05:32 -0800
-Message-ID: <CAKPXa=YRLEB_desJGZRfQi=nCspELDNUU17JPNeaSeurECxerg@mail.gmail.com>
-References: <alpine.DEB.2.11.1801112044230.23413@piezo.novalocal>
- <CAJ4mKGbpTo_B3XghsLHzXki_RhCLbikiRKcw9bGV6TpPCFxEqw@mail.gmail.com> <alpine.DEB.2.11.1801122349160.24931@piezo.novalocal>
+From: Leonardo Vaz <lvaz@redhat.com>
+Subject: Cephalocon 2018 APAC
+Date: Fri, 12 Jan 2018 23:04:35 -0200
+Message-ID: <20180113010435.GA26611@t460.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f174.google.com ([74.125.82.174]:36725 "EHLO
-        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965360AbeAMAFd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jan 2018 19:05:33 -0500
-Received: by mail-ot0-f174.google.com with SMTP id w4so6457472otg.3
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Jan 2018 16:05:33 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801122349160.24931@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:60946 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S965469AbeAMBEi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 12 Jan 2018 20:04:38 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Community <community@ceph.org>, Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jan 12, 2018 at 3:56 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 12 Jan 2018, Gregory Farnum wrote:
->> The rest looks good, but I don't understand this thing about "RO"
->> values at all. Based on what's here, it represents options that aren't
->> live yet, but will be on reboot?
->
-> These are options that can't change at runtime, so they need a daemon
-> restart. (Or, in some cases, they only matter at osd or cluster creation
-> time.)  In reality, we have an enum of (cluster_create, daemon_create,
-> startup, runtime) for each option for when it can take effect.
-> Generally the question for the user, though, is "can i set this value
-> now and have it take effect".  If it's flagged as RO, then they can set it
-> via the mon, but then 'config show' will then show 'mon' under IGNORES
-> because it's something we can't change at runtime.
+Hey Cephers,
 
-It would be nice to throw Error during set command, because it would
-let admin/user know it didn't work,
-A silent return in my view is still confusing and not many would
-understand to rerun show and check
-mon.a       advanced ms_type                        simple *
+As many of you know, we've just announced the Cephalocon APAC 2018
+which happens on Beijing on March 22 and 23 at the JW Marriott Hotel,
+as well the Call for Proposals, that is acceptig talks until January
+31, 2018.
 
->
->> On Thu, Jan 11, 2018 at 1:21 PM, Sage Weil <sage@redhat.com> wrote:
->> > gnit:build (wip-config) 02:48 PM $ bin/ceph config show mon.a
->> > NAME                                                       VALUE                                              SOURCE  OVERRIDES IGNORES
-> ...
->> > ms_type                                                    async+posix                                        default           mon
-> ...
->> >
->> > (sorry for the wide table)
->> >
->> > A few things to note: SOURCE can be any of default, file, mon, env,
->> > cmdline, or override.  You'll notice that ms_type SOURCE is 'default' and
->> > IGNORES is 'mon', because the daemon is ignoring the mon value--this
->> > option can only be set during startup.
->>
->> I also don't get how one mon having a different setting means that all
->> mons are marked as ignoring it.
->
-> This is saying that 'mon.a' (who we just 'show'ed) is ignoring the
-> mon-managed config.  If mon.b was restarted and we did a show it would...
-> well it would also say the same thing since  mon's don't fetch the
-> mon-stored config before startup.  (Not sure if we should implement that
-> or not.)
->
-> Is that what you're asking?
->
->> Putting them right next to each other also makes it clear in my mind
->> that people are going to be confused about "config get" versus "config
->> show". Perhaps it should be "get_stored" and "show_running" or
->> something? I don't like those names, but they need to be clearer.
->
-> I don't really like 'show' either.  'show-running'?  'running'?  I like
-> 'get' though.
->
->> And now I've got a new feature request: a command that outputs the
->> difference between those two. Or perhaps that goes through *all* the
->> configs and dumps any daemons whose running config differs from their
->> stored ones.
->
-> 'show' already shows you this information via the OVERRIDES and IGNORES
-> columns.
->
-> Oh, you mean that shows *only* the mismatch for the daemon or
-> cluster...
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is a project we've been working for a long time now and that we
+unfortunately had to cancel in 2017 due several reasons. Fortunately
+this community is made by people driven by a great passion for this
+project and a brave group of volunteers in China decided to pursue
+the challenge and organize the very first Cephalocon the world will
+see!
+
+Having the Cephalacon happening in China will allow us to reach the
+vibrant community of contributors, users and companies which have
+been helping this project to grow fast, and develop a closer
+relationship with them. This will bring a lot of benefits for Ceph
+project and also provide a great experience to everyone joining us at
+the conference.
+
+At the moment we have a lot of work to be done, including help the
+organization team in Beijing on tasks like finding Sponsors (we have
+around 70% of all sponsorship packages sold so far, but we need to work
+in order to meet the goal and have the conference expenses covered),
+provide the travel information (visas, flights, hotels etc) and
+obviously promoting the event so we can reach more people and have a
+great attendance.
+
+The team in Beijing is working with a local company called DoIT which
+created a website[2] containing details about the conference and this
+information is being progressively synced to Ceph.com so we will have
+a lot of changes and announcements on upcoming weeks.
+
+If you have any questions about the conference feel free to contact me
+through this email, IRC (Lvaz on OFTC and Freenode) or on any social
+media channel use by Ceph. I will be happy to answer to all questions.
+
+Kindest regards,
+
+Leo
+
+[1] https://ceph.com/cephalocon
+[2] http://cephalocon.doit.com.cn/index_en.html
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
