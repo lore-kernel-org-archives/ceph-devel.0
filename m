@@ -1,53 +1,89 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+From: Casey Bodley <cbodley@redhat.com>
 Subject: Re: seastar temporary_buffer/packet and ceph::buffer
-Date: Mon, 15 Jan 2018 18:13:26 +0100
-Message-ID: <20180115171326.GB10256@mailware>
+Date: Mon, 15 Jan 2018 12:19:43 -0500
+Message-ID: <09fac638-bae8-c04a-8ad0-6d6be3d4d335@redhat.com>
 References: <CAJE9aOPqAWTatC6sp-_00+w_MPVW52b+1TGL9LS0vc0y+iJq8Q@mail.gmail.com>
- <CAJE9aOPs8KPYQRprJ_iFcTGnkafnSkY_yswc5YennZox7-P1BA@mail.gmail.com>
- <20180115170427.GA10256@mailware>
- <CAJE9aOMh5PUphVUrXc7YpHCjym2aBM9pJ7_5pAg4N4g7eggJWQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:43952 "EHLO predictor.org.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755035AbeAORN1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 15 Jan 2018 12:13:27 -0500
-Content-Disposition: inline
-In-Reply-To: <CAJE9aOMh5PUphVUrXc7YpHCjym2aBM9pJ7_5pAg4N4g7eggJWQ@mail.gmail.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:40141 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932872AbeAORTq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jan 2018 12:19:46 -0500
+Received: by mail-qk0-f176.google.com with SMTP id d18so17661638qke.7
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Jan 2018 09:19:46 -0800 (PST)
+In-Reply-To: <CAJE9aOPqAWTatC6sp-_00+w_MPVW52b+1TGL9LS0vc0y+iJq8Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>
+To: kefu chai <tchaikov@gmail.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 16, 2018 at 01:09:57AM +0800, kefu chai wrote:
-> On Tue, Jan 16, 2018 at 1:04 AM, Piotr Dałek <branch@predictor.org.pl> wrote:
-> > On Tue, Jan 16, 2018 at 12:53:22AM +0800, kefu chai wrote:
-> >> On Mon, Jan 15, 2018 at 11:49 PM, kefu chai <tchaikov@gmail.com> wrote:
-> >> > [..]
-> >> > i am preparing a change to prototype this approach. the downside of it is:
-> >> >
-> >> > - we need to include a placeholder structure in buffer.h for
-> >> > seastar::tempoary_buffer<char>. and cast it to
-> >> > seastar::tempoary_buffer<char> in buffer.cc . otherwise we need to
-> >> > include seastar headers in librados.
-> >>
-> >> - we cannot store the crc map along with the raw class anymore. this
-> >> might be a show stopper.
-> >
-> > https://github.com/ceph/ceph/pull/18906
-> > There, already fixed it.
-> 
-> Piotr, thanks for point me to this PR. but i am evaluating the pros
-> and cons of the change, which tries to replace buffer::raw with
-> seastar::temporary_buffer, and use the latter in buffer::ptr as a
-> member variable.
+Hi Kefu, thanks for your feedback on this!
 
-And I'm pointing out that there's no need to worry about crc map anymore,
-because it's gone.
+To add some context for the list, I had commented on Kefu's denc pr at 
+https://github.com/ceph/ceph/pull/19662#issuecomment-355602713 about 
+integrating ceph encode/decode with buffer types from other frameworks, 
+using the seastar types as an example (seastar::temporary_buffer is a 
+buffer segment with ownership semantics, so shares a lot in common with 
+ceph::bufferptr).
 
--- 
-Piotr Dałek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
+My approach in the seastar messenger added buffer conversions either by 
+wrapping the seastar::temporary_buffer inside of a raw buffer type, or 
+by wrapping our ceph::bufferptr inside a seastar::temporary_buffer's 
+deleter object. So the conversions in both directions cost an allocation.
+
+On 01/15/2018 10:49 AM, kefu chai wrote:
+> hey Casey,
+>
+>
+> i've been thinking about how to better integrate
+> seastar::temporary_buffer and seastar::packet into our denc and
+> messenger subsystems based on your wip-seastar-msg branch.
+>
+> as you pointed out to me that
+>
+>> the conversions between ceph::buffer::ptr and seastar::temporary_buffer in https://github.com/cbodley/ceph/tree/wip-seastar-msg/ work, but they cost an allocation in both directions (seastar::make_object_deleter() has to allocate for type erasure).
+> and just like ceph::buffer::ptr, seastar::temporary_buffer also
+> manages the life cycle of the underlying memory chunk using refcount.
+> it's a waste to do the refcounting for the same mem chunk twice in the
+> same application.
+>
+> if we want to avoid the overhead of duplicated refcounting and
+> allocation in the conversion to and from ceph::buffer::ptr, i think,
+> we need to allocate the temporary_buffer along with buffer::ptr. in
+> other words, to include seastar::temporary_buffer as a member variable
+> in ceph::buffer:ptr.
+>
+> i am preparing a change to prototype this approach. the downside of it is:
+>
+> - we need to include a placeholder structure in buffer.h for
+> seastar::tempoary_buffer<char>. and cast it to
+> seastar::tempoary_buffer<char> in buffer.cc . otherwise we need to
+> include seastar headers in librados.
+>
+> cheers,
+>
+>
+
+Interesting, I hadn't thought about adding it as a member of bufferptr. 
+That would be add some size overhead for non-seastar buffers though, 
+unless we were able to reuse that for all raw buffer types. I agree that 
+we want to be careful about dependencies, though, so I was really hoping 
+to avoid this kind of coupling. I'd really prefer not to have any of our 
+common libraries depend on seastar, and only link it directly to the 
+targets that need it.
+
+My initial idea was that, if we were able to refactor denc in terms of 
+some generic buffer concept, we'd be able to use ceph's encode/decode on 
+external buffer types without the need to convert to/from bufferlist in 
+the first place. That would allow us to support seastar's buffer types, 
+and also extend support to other types like boost::asio's buffer 
+concepts as well.
+
+So my comment on your pr was asking more about specific features that 
+denc requires from bufferlist, so that we could start to generalize them 
+in a way that doesn't have bufferlist baked in.
+
+Thanks,
+Casey
