@@ -1,45 +1,92 @@
 From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: seastar temporary_buffer/packet and ceph::buffer
-Date: Mon, 15 Jan 2018 15:48:09 -0500
-Message-ID: <c9f8184e-6c5c-fbee-6977-6497f67e578f@redhat.com>
-References: <CAJE9aOPqAWTatC6sp-_00+w_MPVW52b+1TGL9LS0vc0y+iJq8Q@mail.gmail.com>
- <09fac638-bae8-c04a-8ad0-6d6be3d4d335@redhat.com>
- <CAKOnar=wKu2WdhTeaJ-17BbTnDvM6_2CbsNjKdc0FiMBsHV-Vg@mail.gmail.com>
+Subject: Re: Use of C++17 memory_resource and mempools
+Date: Mon, 15 Jan 2018 17:01:01 -0500
+Message-ID: <5151a0e6-1781-388f-32db-d7a5e466b458@redhat.com>
+References: <CA+2bHPbpW21ava_8Kz6xPTHjt9Ls54q49-LEr2ZayBanBdTJjw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:38524 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750714AbeAOUsM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jan 2018 15:48:12 -0500
-Received: by mail-qk0-f173.google.com with SMTP id j185so18401547qkc.5
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Jan 2018 12:48:12 -0800 (PST)
-In-Reply-To: <CAKOnar=wKu2WdhTeaJ-17BbTnDvM6_2CbsNjKdc0FiMBsHV-Vg@mail.gmail.com>
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:44204 "EHLO
+        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750740AbeAOWBF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jan 2018 17:01:05 -0500
+Received: by mail-oi0-f42.google.com with SMTP id g128so9253869oib.11
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Jan 2018 14:01:04 -0800 (PST)
+In-Reply-To: <CA+2bHPbpW21ava_8Kz6xPTHjt9Ls54q49-LEr2ZayBanBdTJjw@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjami@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
 
-On 01/15/2018 02:30 PM, Matt Benjamin wrote:
-> It's the buffer::raw class that abstracts foreign buffer
-> representations now, is it now? A mechanism to allow seastar to
-> single-allocate a composite buffer::raw and temporary_buffer<char>
-> seems possible to imagine.
+On 01/15/2018 12:47 PM, Patrick Donnelly wrote:
+> I've been going through the MDS cache objects moving referenced
+> containers into the mempools to improve accuracy of cache size. This
+> is being tracked in:
 >
-> Matt
+> http://tracker.ceph.com/issues/21402
+>
+> One issue I've found is that any method which takes a container
+> argument needs special handling when the container we sometimes pass
+> is part of the mempool. For example, CDir::_committed  [2] will need
+> to copy the contents of the lists referenced in
+> CDir::waiting_for_commit [3] in order to call MDSRank::queue_waiters
+> [1]. This is because the types will no longer match:
+>
+> CDir.h:
+>
+> mempool::mds_co::compact_map<version_t,
+> mempool::mds_co::list<MDSInternalContextBase*> > waiting_for_commit;
+>
+> (the list values would be passed to queue_waiters:)
+>
+> versus:
+>
+> MDSRank.h:
+>
+> void queue_waiters(list<MDSInternalContextBase*>& ls)
+>
+> Namely, we have
+>
+> std::list<MDSInternalContextBase*>
+>
+> and
+>
+> mempool::mds_co::list<MDSInternalContextBase*> aka
+> std::list<MDSInternalContextBase*,
+> mempool::mds_co::pool_allocator<MDSInternalContextBase*>>
+>
+> Apparently the new way to work around this problem where the templated
+> allocator does not match is to embed the allocator in the object. This
+> is done using the std::memory_resource [4] in C++17. So instead of:
+>
+> void queue_waiters(list<MDSInternalContextBase*>& ls)
+>
+> we would have:
+>
+> void queue_waiters(std::pmr::list<MDSInternalContextBase*>& ls)
+>
+> All of the callers of MDSRank::queue_waiters would also need updated
+> to use either std::pmr::list or the MDSCacheObject's
+> mempool::mds_co::list.
+>
+> Does anyone have any plans or opinions on using this with our mempool
+> infrastructure? My understanding is that this is still experimental
+> with the latest gcc, so this isn't something to be done today but may
+> we should develop code with this in mind.
+>
+> [1] https://github.com/ceph/ceph/blob/aab2defacae9e0885e08b399f15b20c495b59d99/src/mds/MDSRank.h#L287
+> [2] https://github.com/ceph/ceph/blob/aab2defacae9e0885e08b399f15b20c495b59d99/src/mds/CDir.cc#L2407
+> [3] https://github.com/ceph/ceph/blob/aab2defacae9e0885e08b399f15b20c495b59d99/src/mds/CDir.h#L632
+> [4] http://en.cppreference.com/w/cpp/memory/memory_resource
+>
 
-Thanks Matt. I think that's effectively what I did with 
-https://github.com/cbodley/ceph/commit/67ae06e488c50a6102c66d34b942ff207493ffd6. 
-It allocates a buffer::raw subclass that stores temporary_buffer<char> 
-as a member. The raw allocation here is the same one we'd see with any 
-other buffer type, so I was mistaken in thinking of this as extra 
-overhead. The allocation in the other direction is effectively seastar's 
-version of this same abstraction. So I think these conversions are fine 
-as they are.
+Hi Patrick,
 
-I do still think there are wins in generalizing denc to avoid these 
-conversions, but we'll have to explore whether it's worth the extra 
-complexity.
+I agree that polymorphic allocators sound perfect for this. That's 
+unfortunate that it's not available in libstdc++ yet, according to 
+https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html#table.cxx17_status. 
+We should keep an eye on that.
+
+Casey
