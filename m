@@ -1,80 +1,93 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: seastar temporary_buffer/packet and ceph::buffer
-Date: Tue, 16 Jan 2018 17:15:33 -0500
-Message-ID: <1559cb3f-5e78-eed0-1a97-cfca8b1aad19@redhat.com>
-References: <CAJE9aOPqAWTatC6sp-_00+w_MPVW52b+1TGL9LS0vc0y+iJq8Q@mail.gmail.com>
- <09fac638-bae8-c04a-8ad0-6d6be3d4d335@redhat.com>
- <CAKOnar=wKu2WdhTeaJ-17BbTnDvM6_2CbsNjKdc0FiMBsHV-Vg@mail.gmail.com>
- <c9f8184e-6c5c-fbee-6977-6497f67e578f@redhat.com>
- <CAJE9aOPuguVg4hDkV8vL0GNffRJw0zSbH0aLy4Tb2oVopCy8bg@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
+ FAILED assert(r == -2)
+Date: Tue, 16 Jan 2018 14:24:39 -0800
+Message-ID: <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com>
+References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:40704 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750750AbeAPWPg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jan 2018 17:15:36 -0500
-Received: by mail-qk0-f173.google.com with SMTP id d18so22894456qke.7
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jan 2018 14:15:36 -0800 (PST)
-In-Reply-To: <CAJE9aOPuguVg4hDkV8vL0GNffRJw0zSbH0aLy4Tb2oVopCy8bg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-it0-f50.google.com ([209.85.214.50]:34155 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750772AbeAPWYl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jan 2018 17:24:41 -0500
+Received: by mail-it0-f50.google.com with SMTP id m11so12871957iti.1
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jan 2018 14:24:41 -0800 (PST)
+In-Reply-To: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Matt Benjamin <mbenjami@redhat.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-On 01/16/2018 06:26 AM, kefu chai wrote:
-> On Tue, Jan 16, 2018 at 4:48 AM, Casey Bodley <cbodley@redhat.com> wrote:
->> On 01/15/2018 02:30 PM, Matt Benjamin wrote:
->>> It's the buffer::raw class that abstracts foreign buffer
->>> representations now, is it now? A mechanism to allow seastar to
->>> single-allocate a composite buffer::raw and temporary_buffer<char>
->>> seems possible to imagine.
->>>
->>> Matt
->>
->> Thanks Matt. I think that's effectively what I did with
->> https://github.com/cbodley/ceph/commit/67ae06e488c50a6102c66d34b942ff207493ffd6.
->> It allocates a buffer::raw subclass that stores temporary_buffer<char> as a
->> member. The raw allocation here is the same one we'd see with any other
->> buffer type, so I was mistaken in thinking of this as extra overhead. The
->> allocation in the other direction is effectively seastar's version of this
->> same abstraction. So I think these conversions are fine as they are.
->>
->> I do still think there are wins in generalizing denc to avoid these
->> conversions, but we'll have to explore whether it's worth the extra
->> complexity.
-> i see. is https://github.com/tchaikov/ceph/tree/wip-seastar-msg
-> something more close to what you are thinking about?
+On Mon, Jan 15, 2018 at 5:23 PM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
+> Hello,
 >
+> currently one of my clusters is missing a whole pg due to all 3 osds
+> being down.
+>
+> All of them fail with:
+>     0> 2018-01-16 02:05:33.353293 7f944dbfe700 -1
+> /build/ceph/src/osd/SnapMapper.cc: In function 'void
+> SnapMapper::add_oid(const hobject_t&, const std::set<snapid_t>&,
+> MapCacher::Transaction<std::basic_string<char>, ceph::buffer::list>*)'
+> thread 7f944dbfe700 time 2018-01-16 02:05:33.349946
+> /build/ceph/src/osd/SnapMapper.cc: 246: FAILED assert(r == -2)
+>
+>  ceph version 12.2.2-93-gd6da8d7
+> (d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x102) [0x561f9ff0b1e2]
+>  2: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
+> std::less<snapid_t>, std::allocator<snapid_t> > const&,
+> MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
+> [0x561f9fb76f3b]
+>  3: (PG::update_snap_map(std::vector<pg_log_entry_t,
+> std::allocator<pg_log_entry_t> > const&,
+> ObjectStore::Transaction&)+0x38f) [0x561f9fa0ae3f]
+>  4: (PG::append_log(std::vector<pg_log_entry_t,
+> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
+> ObjectStore::Transaction&, bool)+0x538) [0x561f9fa31018]
+>  5: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
+> std::allocator<pg_log_entry_t> > const&,
+> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
+> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x561f9fb25d64]
+>  6: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
+> [0x561f9fc314b2]
+>  7:
+> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
+> [0x561f9fc374f4]
+>  8: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+> [0x561f9fb5cf10]
+>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+> ThreadPool::TPHandle&)+0x77b) [0x561f9fac91eb]
+>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+> [0x561f9f955bc7]
+>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+> const&)+0x57) [0x561f9fbcd947]
+>  12: (OSD::ShardedOpWQ::_process(unsigned int,
+> ceph::heartbeat_handle_d*)+0x108c) [0x561f9f984d1c]
+>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+> [0x561f9ff10e6d]
+>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561f9ff12e30]
+>  15: (()+0x8064) [0x7f949afcb064]
+>  16: (clone()+0x6d) [0x7f949a0bf62d]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
 
-Dear Kefu, you are a wizard. That looks like a great start!
+By the time it gets there, something else has gone wrong. The OSD is
+adding a snapid/object pair to its "SnapMapper", and discovering that
+there are already entries (which it thinks there shouldn't be).
 
-I'm guessing that segmented buffers will be the hard part - we might 
-look to the boost::asio buffer concepts for some ideas there?
+You'll need to post more of a log, along with background, if anybody's
+going to diagnose it: is there cache tiering on the cluster? What is
+this pool used for? Were there other errors on this PG in the past?
 
-they have const and non-const sequences:
-http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/ConstBufferSequence.html
-http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/MutableBufferSequence.html
-
-and a dynamic/resizable sequence:
-http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/DynamicBuffer.htm
-
-Boost has lots of built-in adapters for array/vector/string types:
-http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/buffer.html
-
-If we could find a way to use those concepts directly, we'd get those 
-built-in types for free, and it should be easy to adapt other types like 
-those from seastar.
-
-DynamicBuffer::prepare() looks like a natural way to do the append part 
-on encode, but it returns a MutableBufferSequence so is not guaranteed 
-to be contiguous. Can you remind me where we really depend on contiguous 
-buffers? Is it just that some types set need_contiguous=false because we 
-haven't yet implemented logic for segmented buffers, or are there cases 
-where implementing that logic is actually intractable?
-
-Thanks,
-Casey
+I also notice a separate email about deleting the data; I don't have
+any experience with this but you'd probably have to export the PG
+using ceph-objectstore-tool and then find a way to delete the object
+out of it. I see options to remove both an object and
+"remove-clone-metadata" on a particular ID, but I've not used any of
+them myself.
+-Greg
