@@ -1,72 +1,81 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: killing onreadable completions
-Date: Mon, 15 Jan 2018 18:12:25 -0800
-Message-ID: <CAJ4mKGYTbO73xuYdbYmjewVQa=eZ=yKztJWjkO==EmBp5QvDYg@mail.gmail.com>
-References: <alpine.DEB.2.11.1801122137190.8186@piezo.novalocal>
- <CAJ4mKGaWH-shsF-VNqPo89d25-k_5dsgNv7E085BPciu9XUdUQ@mail.gmail.com> <alpine.DEB.2.11.1801122342020.24931@piezo.novalocal>
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Day Germany 2018
+Date: Tue, 16 Jan 2018 03:51:53 -0200
+Message-ID: <CAB0WNshjxgZZAKRy-AaB57cYuDhV9pOgnaLc6toZgs026ufoLg@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============4442762521930287893=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-Community <ceph-community-Qp0mS5GaXlQ@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============4442762521930287893==
+Content-Type: multipart/alternative; boundary="001a1141dc30f5c1bf0562de5397"
+
+--001a1141dc30f5c1bf0562de5397
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:44976 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750812AbeAPCM0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jan 2018 21:12:26 -0500
-Received: by mail-io0-f169.google.com with SMTP id k18so15111231ioc.11
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Jan 2018 18:12:26 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1801122342020.24931@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Jan 12, 2018 at 3:48 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 12 Jan 2018, Gregory Farnum wrote:
->> On Fri, Jan 12, 2018 at 1:37 PM, Sage Weil <sweil@redhat.com> wrote:
->> > A dream of mine is to kill off the onreadable callback in ObjectStore
->> > completely.  This is *mostly* a non-issue with BlueStore with a few
->> > exceptions (creates/deletes still need a flush before they are visible to
->> > collection_list()), but because FileStore has no in-memory cache/state
->> > about it's changes it is a long way from being possible.
->> >
->> > My thinking recently has been that at some point we'll reach a point where
->> > we care more about OSD code simplicity than FileStore performance
->> > (presumably at some point after we move a bunch of users over to
->> > BlueStore) and then we implement some kludge in FileStore to hide
->> > this.
->> >
->> > Today I was looking at a weird ECBackend issue and it looks like there
->> > we're still doing dual acks for commit and readable... all in order to
->> > make sure that a read that follows a write will order properly (even on
->> > replicas).  That means double the messages over the wire to track
->> > something that can be done with a simple map of in-filght objects in
->> > memory.  But instead of implementing that just in ECBackend, implementing
->> > the same thing in FileStore would kill 100 birds with one stone.
->>
->> Can you elucidate on what's happening with ECBackend? I'd assume part
->> of the complexity is about maintaining the cache that lets us pipeline
->> writes that overlap, and I don't quite see how what you're discussing
->> would work with that.
->> ...and, actually, now that I think about it I'm not entirely sure the
->> bluestore semantics would work for ec overwrite pools without this
->> overlay? What are the rules again?
->
-> ECBackend is sending messages for both commit and onreadable on sub
-> writes, and not completing the write until both are done.  I come up with
-> any reason why it would be doing that... except to make sure that on a
-> read the previous writes have first applied.  I don't think this is
-> related to the cache per se; it's just that any read needs to wait for
-> prior writes to apply before proceeding.
->
-> (The bug I'm fixing is only peripherally related to this; I just noticed
-> that it would go away if we didn't have the onreadable callbacks at all
-> and got off on this tangent...)
+Hey Cephers!
 
-I looked at this briefly today and you're definitely correct; we don't
-need the double acks for ECBackend internals except due to
-read-after-write ordering. It devotes a lot more code to correctly
-invoking any callbacks that might have been sent in as part of
-submit_transaction() than it does to worrying about whether an op's
-result is visible yet (the one place it does so is key, of course, but
-easily dropped if we know our local storage backend will just give us
-back an up-to-date look at whatever we ask for).
--Greg
+We are proud to announce our first Ceph Day in 2018 which happens on
+February 7 at the Deutsche Telekom AG Office in Darmstadt (25 km South from
+Frankfurt Airport).
+
+The conference schedule[1] is being finished and the registration is
+already in progress[2].
+
+If you're in Europe, join us at the Ceph Day Germany!
+
+Mit freundlichen Gr=C3=BC=C3=9Fen,
+
+Leo
+
+[1] https://ceph.com/cephdays/germany/
+[2] https://cephdaygermany.eventbrite.com/
+
+--=20
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
+
+--001a1141dc30f5c1bf0562de5397
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hey Cephers!<br><br>We are proud to announce our first Cep=
+h Day in 2018 which happens on February 7 at the Deutsche Telekom AG Office=
+ in Darmstadt (25 km South from Frankfurt Airport).<br><br>The conference s=
+chedule[1] is being finished and the registration is already in progress[2]=
+.<br><br>If you&#39;re in Europe, join us at the Ceph Day Germany!<br>=C2=
+=A0=C2=A0=C2=A0 <br>Mit freundlichen Gr=C3=BC=C3=9Fen,<br><br>Leo<br><br>[1=
+] <a href=3D"https://ceph.com/cephdays/germany/">https://ceph.com/cephdays/=
+germany/</a><br>[2] <a href=3D"https://cephdaygermany.eventbrite.com/">http=
+s://cephdaygermany.eventbrite.com/</a><br><br>-- <br><div class=3D"gmail_si=
+gnature"><div dir=3D"ltr"><div><div dir=3D"ltr"><div dir=3D"ltr">Leonardo V=
+az</div><div dir=3D"ltr">Ceph Community Manager</div><div dir=3D"ltr">Open =
+Source and Standards Team</div></div></div></div></div>
+</div>
+
+--001a1141dc30f5c1bf0562de5397--
+
+--===============4442762521930287893==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============4442762521930287893==--
