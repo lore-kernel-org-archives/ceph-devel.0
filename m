@@ -1,49 +1,60 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
-Subject: Re: Porting snap trim queue check to Luminous
-Date: Tue, 16 Jan 2018 11:41:04 +0100
-Message-ID: <73225e82-f3a5-1e93-c8ac-cd44e2334809@corp.ovh.com>
-References: <6258c4a1-3fa1-3627-1e47-cde2bcb4742e@corp.ovh.com>
- <alpine.DEB.2.11.1801151901450.24931@piezo.novalocal>
+From: Xuehan Xu <xxhdx1985126@gmail.com>
+Subject: Re: client isn't responding to mclientcaps
+Date: Tue, 16 Jan 2018 19:11:00 +0800
+Message-ID: <CAJACTuePdZLQOOAGn+wEro-Rp5+KG0V-a9M-RXVofotefTo53Q@mail.gmail.com>
+References: <CAJACTucim=9i_xOaVo-sJ7VuFEeTaK-hZvrqqrsKH7TpL0WK8g@mail.gmail.com>
+ <CAF-wwdEe7t6gvkyxDrYgorM-fBkYpSYRdO8s0niNQWhvZMn3NQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 10.mo301.mail-out.ovh.net ([137.74.110.73]:51478 "EHLO
-        10.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750852AbeAPKlH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jan 2018 05:41:07 -0500
-In-Reply-To: <alpine.DEB.2.11.1801151901450.24931@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-oi0-f67.google.com ([209.85.218.67]:43081 "EHLO
+        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751335AbeAPLLB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jan 2018 06:11:01 -0500
+Received: by mail-oi0-f67.google.com with SMTP id t16so10313246oif.10
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jan 2018 03:11:01 -0800 (PST)
+In-Reply-To: <CAF-wwdEe7t6gvkyxDrYgorM-fBkYpSYRdO8s0niNQWhvZMn3NQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Brad Hubbard <bhubbard@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 18-01-15 08:02 PM, Sage Weil wrote:
-> On Mon, 15 Jan 2018, Piotr Dałek wrote:
->> With Mimic, there are a new fields added to pg_stat_t: "state" and
->> "purged_snaps". My snap trim queue check
->> (https://github.com/ceph/ceph/pull/19520) adds one more field
->> ("snaptrimq_len") and it is positioned quite unfortunately - AFTER those two,
->> meaning that I can't add it without adding the other two. Knowing that Mimic
->> is not out, there are three options:
+On 16 January 2018 at 18:23, Brad Hubbard <bhubbard@redhat.com> wrote:
+> On Tue, Jan 16, 2018 at 7:06 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>> Hi, everyone.
 >>
->> 1 - Backport just
->> https://github.com/ceph/ceph/pull/19520/commits/dc7781cf17d11cb09067656cb25c0d710ab60d71
->> that adds snap_trimq_len field to "pg query" command and leave out the rest.
->> That's not entirely satisfying from my perspective, but it's still a little
->> step forward.
->> 2 - Fill "state" and "purged snaps" with dummy data in Luminous, but that can
->> screw up upgrades from Luminous to Mimic.
->> 3 - Reorder fields in master/Mimic and add snaptrimq_len before state and
->> purged snaps. Probably no impact as Mimic is not out yet.
-> 
-> I think #3 is fine!
+>> In our online cephfs, we occasionally encounter the error "Client.
+>> isn't responding to mclientcaps", the client kernel we are using is
+>> centos's "3.10.0-514". Due to the massive deployment of our clients,
+>> it's difficult to update kernels, which means we can not confirm
+>> whether the error is the result of a relative older kernel or some
+>> kind of unresolved bug. Is there any way that we can find all the
+>> related bugs issued before? If we can, we believe it should be helpful
+>> for us to locate the cause of the problem
+>
+> You can start with the following search.
+>
+> http://tracker.ceph.com/projects/rbd/search?utf8=%E2%9C%93&q=mclientcaps&scope=all&all_words=&all_words=1&titles_only=&issues=1&attachments=0&options=0&commit=Submit
+>
+> Which will probably lead you here...
+>
+> http://tracker.ceph.com/issues/11482
+>
+> Since you didn't mention your ceph cluster version I have no way of
+> knowing whether you have the patch for that issue or not.
+>
+>>
+>> Thanks:-)
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Cheers,
+> Brad
+Thanks, Brad:-)
 
-I just pushed a PR (https://github.com/ceph/ceph/pull/19965) that does just 
-that. Once that gets merged I can port snap trim queue check to Luminous.
-
--- 
-Piotr Dałek
-piotr.dalek@corp.ovh.com
-https://www.ovh.com/us/
+We are using Luminous 12.2.1:-)
