@@ -1,89 +1,96 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: c++17: compilation failures with cryptopp (when cmake -DWITH_NSS=OFF)
-Date: Wed, 17 Jan 2018 11:33:18 -0800
-Message-ID: <CAJ4mKGbmw7dSpeY7nU=w7SoquOq0=r6qmtC9RopwpQRyaNNN5g@mail.gmail.com>
-References: <0e6e3365-714d-0752-db17-6b823185451a@redhat.com>
+From: Huamin Chen <hchen@redhat.com>
+Subject: Re: REST API Client
+Date: Wed, 17 Jan 2018 15:30:32 -0500
+Message-ID: <CAD-gW==OXoa0pYVwZo6X8gOb--BYoCsSDiaYzPdNBE2-WtjFLw@mail.gmail.com>
+References: <CAD-gW==8X416nALGMunjXdjxsWCE+qRDm9+YfYUZ047mT4FrQw@mail.gmail.com>
+ <CA+aFP1Dd1t3oNiME0wmF4bnAHGMqEuC+1AfBWGMDe1=J34HaUg@mail.gmail.com>
+ <CAD-gW==DjR1Ndu+0s+ep_jshcgtHQVf8sJuEmm1K_82CkRxGtQ@mail.gmail.com> <CALe9h7coXaYcXZyAgx0O5PVyGVJsB0=0T7OPjo-RJbSTQ8fMbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:37489 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932142AbeAQTdU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jan 2018 14:33:20 -0500
-Received: by mail-io0-f169.google.com with SMTP id f89so14056498ioj.4
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Jan 2018 11:33:20 -0800 (PST)
-In-Reply-To: <0e6e3365-714d-0752-db17-6b823185451a@redhat.com>
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:36814 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753282AbeAQUad (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jan 2018 15:30:33 -0500
+Received: by mail-oi0-f68.google.com with SMTP id w135so14100959oie.3
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Jan 2018 12:30:33 -0800 (PST)
+In-Reply-To: <CALe9h7coXaYcXZyAgx0O5PVyGVJsB0=0T7OPjo-RJbSTQ8fMbw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Jason Dillaman <dillaman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 17, 2018 at 10:36 AM, Casey Bodley <cbodley@redhat.com> wrote:
-> I'm trying to pick up Adam's crypto rework branch
-> (https://github.com/ceph/ceph/pull/14498), and found that our cryptopp
-> implementation was broken with the switch to c++17. Cryptopp adds a 'typedef
-> unsigned char byte' to the global namespace that conflicts with std::byte
-> whenever 'using namespace std' is present (which is almost everywhere in
-> ceph).
->
-> I've been able to fix some parts of the codebase by shuffling around the
-> #include order for ceph_crypto.h to get it above any other ceph headers. For
-> radosgw, though, it's included by rgw_common.h and pulled into every source
-> file. I worry that if I go through and fix everything so it builds, it will
-> just break again without regular testing.
->
-> Do we know of anyone that still relies on this cryptopp implementation? It
-> doesn't look like we use it in any of our packaging.
+Dockerfile is here
+https://github.com/ceph/ceph-csi/blob/master/deploy/docker/Dockerfile
 
-Searching through my mail we discussed removing cryptopp in summer
-2016 (subject "remove cryptopp support?"), and it looks like we only
-kept it in because it was easy and Matt and Marcus didn't like going
-all-in on NSS.
+Here is a breakdown:
 
-But I think the only reason we ever had cryptopp was because it was an
-easier library to program against, and once we had the NSS
-implementation we shifted to it thanks to the certifications involved.
-And I'm not seeing any real references to it in the last several years
-in our archives. So I think you should just zap it away. :)
--Greg
+- rbd CSI container image is 403MB
+- rbd CSI binary is 35MB
+- centos:7 container image is 203MB
+- ceph-common and dependency is about 160MB
 
+On Wed, Jan 17, 2018 at 12:09 PM, John Spray <jspray@redhat.com> wrote:
+> On Wed, Jan 17, 2018 at 3:48 PM, Huamin Chen <hchen@redhat.com> wrote:
+>> On Wed, Jan 17, 2018 at 9:17 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>> On Wed, Jan 17, 2018 at 8:47 AM, Huamin Chen <hchen@redhat.com> wrote:
+>>>> Hi,
+>>>>
+>>>> I am thinking of using Ceph REST API tclient o remove rbd cli
+>>>> dependency from Kubernetes and rbd CSI driver.
+>>>>
+>>>> The potential work flow is
+>>>> - for rbd map, use sysfs
+>>>
+>>> Why re-implement the wheel? I think the rbd CLI is a good fit for this
+>>> use-case. Especially when you consider that the CSI driver should
+>>> eventually support not only krbd, but nbd and tcmu-based block device
+>>> drivers. These are all being unified via new "rbd device map
+>>> --device-type <XYZ>" / "rbd device unmap" CLI commands to provide a
+>>> unified interface [1].
+>>>
+>>
+>> The reason is to slim down the driver container. If CSI driver doesn't
+>> use rbd cli, then we don't need to install ceph-common.
 >
+> Out of curiousity, how big is the image today with just the minimal
+> dependencies of librbd?
 >
-> Example compilation failure:
+> John
 >
-> In file included from /usr/include/cryptopp/iterhash.h:4:0,
->                  from /usr/include/cryptopp/md5.h:4,
->                  from /home/cbodley/ceph/src/common/ceph_crypto.h:15,
->                  from /home/cbodley/ceph/src/common/ceph_context.cc:27:
-> /usr/include/cryptopp/cryptlib.h:523:28: error: reference to ‘byte’ is
-> ambiguous
->   virtual void SetKey(const byte *key, size_t length, const NameValuePairs
-> &params = g_nullNameValuePairs);
-> ^~~~
-> In file included from /usr/include/cryptopp/cryptlib.h:86:0,
->                  from /usr/include/cryptopp/iterhash.h:4,
->                  from /usr/include/cryptopp/md5.h:4,
->                  from /home/cbodley/ceph/src/common/ceph_crypto.h:15,
->                  from /home/cbodley/ceph/src/common/ceph_context.cc:27:
-> /usr/include/cryptopp/config.h:172:23: note: candidates are: typedef
-> unsigned char byte
->  typedef unsigned char byte;  // put in global namespace to avoid ambiguity
-> with other byte typedefs
-> ^~~~
-> In file included from
-> /home/cbodley/ceph/build/boost/include/boost/config/compiler/gcc.hpp:165:0,
->                  from
-> /home/cbodley/ceph/build/boost/include/boost/config.hpp:39,
->                  from
-> /home/cbodley/ceph/build/boost/include/boost/algorithm/string/std_containers_traits.hpp:18,
->                  from
-> /home/cbodley/ceph/build/boost/include/boost/algorithm/string.hpp:18,
->                  from /home/cbodley/ceph/src/common/ceph_context.cc:21:
-> /usr/include/c++/7/cstddef:64:14: note:                 enum class std::byte
->    enum class byte : unsigned char {};
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> But you are right, nbd and other drivers are still something to consider.
+>>
+>>
+>>>> - use REST API client for rbd status, rbd create and rm
+>>>>
+>>>> Questions: Does current Ceph REST server support these rbd calls? Has
+>>>> anybody already worked on Golang client?
+>>>
+>>> Not to my knowledge. Assuming you keep the rbd CLI which will bring
+>>> with it the librados2 and librbd1 shared libraries, any reason to not
+>>> just directly use / expand the Ceph golang API [2]?
+>>>
+>>>> I found some early work on python client [1] but so far no work on
+>>>> golang client. If I missed it, please let me know.
+>>>>
+>>>>
+>>>> 1. https://github.com/dmsimard/python-cephclient
+>>>>
+>>>> Thanks
+>>>>
+>>>> Huamin
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>> [1] https://github.com/ceph/ceph/pull/19711
+>>> [2] https://github.com/ceph/go-ceph
+>>>
+>>> --
+>>> Jason
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
