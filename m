@@ -1,19 +1,19 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
  FAILED assert(r == -2)
-Date: Wed, 17 Jan 2018 08:43:46 +0100
-Message-ID: <1d5aacc3-5a99-fc53-5f97-555020333f16@profihost.ag>
+Date: Wed, 17 Jan 2018 13:07:07 +0100
+Message-ID: <d1684448-0ff9-5e09-5e10-effbf9e75d68@profihost.ag>
 References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
  <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:53960 "EHLO
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:49230 "EHLO
         cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750953AbeAQHns (ORCPT
+        by vger.kernel.org with ESMTP id S1752693AbeAQMHI (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 17 Jan 2018 02:43:48 -0500
+        Wed, 17 Jan 2018 07:07:08 -0500
 In-Reply-To: <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com>
 Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
@@ -21,75 +21,9 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,
+Hi,
 
-if i export the pg and try to reimport it - ceph-object-tool crashes with:
-
-Importing pgid 3.80e
-Write #3:7010005d:::rbd_data.e60f906b8b4567.000000000000dcf4:head#
-snapset afdd4=[afdd4]:{}
-Write #3:701002ed:::rbd_data.f9c2596b8b4567.000000000000c5e1:b0de1#
-Write #3:701002ed:::rbd_data.f9c2596b8b4567.000000000000c5e1:head#
-snapset b0de1=[b0de1]:{b0de1=[b0de1]}
-Write #3:70100587:::rbd_data.13649df6b8b4567.000000000000a666:head#
-snapset ad7de=[]:{}
-Write #3:70100a0c:::rbd_data.8aceeb6b8b4567.0000000000001fc0:head#
-snapset b0362=[]:{}
-Write #3:70100cdb:::rbd_data.c1b6676b8b4567.0000000000023316:head#
-snapset 9fb49=[]:{}
-Write #3:70100de8:::rbd_data.89d7f56b8b4567.0000000000004ffa:b0ca9#
-/build/ceph/src/osd/SnapMapper.cc: In function 'void
-SnapMapper::add_oid(const hobject_t&, const std::set<snapid_t>&,
-MapCacher::Transaction<std::basic_string<char>, ceph::buffer::list>*)'
-thread 7fbda9926280 time 2018-01-17 08:42:50.490570
-/build/ceph/src/osd/SnapMapper.cc: 246: FAILED assert(r == -2)
- ceph version 12.2.2-93-gd6da8d7
-(d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x102) [0x7fbd9fe07802]
- 2: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
-std::less<snapid_t>, std::allocator<snapid_t> > const&,
-MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
-[0x55de1ca2c4ab]
- 3: (get_attrs(ObjectStore*, coll_t, ghobject_t,
-ObjectStore::Transaction*, ceph::buffer::list&, OSDriver&,
-SnapMapper&)+0x467) [0x55de1c7af867]
- 4: (ObjectStoreTool::get_object(ObjectStore*, coll_t,
-ceph::buffer::list&, OSDMap&, bool*, ObjectStore::Sequencer&)+0x8a9)
-[0x55de1c7b0d79]
- 5: (ObjectStoreTool::do_import(ObjectStore*, OSDSuperblock&, bool,
-std::string, ObjectStore::Sequencer&)+0x1417) [0x55de1c7b5077]
- 6: (main()+0x3a89) [0x55de1c704689]
- 7: (__libc_start_main()+0xf5) [0x7fbd9d2afb45]
- 8: (()+0x3450a0) [0x55de1c7a20a0]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-*** Caught signal (Aborted) **
- in thread 7fbda9926280 thread_name:ceph-objectstor
- ceph version 12.2.2-93-gd6da8d7
-(d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
- 1: (()+0x91853c) [0x55de1cd7553c]
- 2: (()+0xf890) [0x7fbd9e6b1890]
- 3: (gsignal()+0x37) [0x7fbd9d2c3067]
- 4: (abort()+0x148) [0x7fbd9d2c4448]
- 5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x27f) [0x7fbd9fe0797f]
- 6: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
-std::less<snapid_t>, std::allocator<snapid_t> > const&,
-MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
-[0x55de1ca2c4ab]
- 7: (get_attrs(ObjectStore*, coll_t, ghobject_t,
-ObjectStore::Transaction*, ceph::buffer::list&, OSDriver&,
-SnapMapper&)+0x467) [0x55de1c7af867]
- 8: (ObjectStoreTool::get_object(ObjectStore*, coll_t,
-ceph::buffer::list&, OSDMap&, bool*, ObjectStore::Sequencer&)+0x8a9)
-[0x55de1c7b0d79]
- 9: (ObjectStoreTool::do_import(ObjectStore*, OSDSuperblock&, bool,
-std::string, ObjectStore::Sequencer&)+0x1417) [0x55de1c7b5077]
- 10: (main()+0x3a89) [0x55de1c704689]
- 11: (__libc_start_main()+0xf5) [0x7fbd9d2afb45]
- 12: (()+0x3450a0) [0x55de1c7a20a0]
-Aborted
+i there any chance to fix this instead of removing manually all the clones?
 
 Stefan
 
