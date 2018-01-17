@@ -1,124 +1,141 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
- FAILED assert(r == -2)
-Date: Wed, 17 Jan 2018 14:28:51 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1801171426290.24931@piezo.novalocal>
-References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag> <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com> <d1684448-0ff9-5e09-5e10-effbf9e75d68@profihost.ag>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: seastar temporary_buffer/packet and ceph::buffer
+Date: Wed, 17 Jan 2018 23:42:03 +0800
+Message-ID: <CAJE9aONCBh2X4W_kyUX52XXBMt2Uie3yu0umewLk=5Jo6gjU9g@mail.gmail.com>
+References: <CAJE9aOPqAWTatC6sp-_00+w_MPVW52b+1TGL9LS0vc0y+iJq8Q@mail.gmail.com>
+ <09fac638-bae8-c04a-8ad0-6d6be3d4d335@redhat.com> <CAKOnar=wKu2WdhTeaJ-17BbTnDvM6_2CbsNjKdc0FiMBsHV-Vg@mail.gmail.com>
+ <c9f8184e-6c5c-fbee-6977-6497f67e578f@redhat.com> <CAJE9aOPuguVg4hDkV8vL0GNffRJw0zSbH0aLy4Tb2oVopCy8bg@mail.gmail.com>
+ <1559cb3f-5e78-eed0-1a97-cfca8b1aad19@redhat.com> <CAJE9aOMsghaR_Q5odM3ETNx=w4_hG9a_WAuiQX1AFuAwgaQdfA@mail.gmail.com>
+ <CAKOnarkAqHY2bz5nmQbkf3=-sKpuNqbmd9MDgtV7KN1KTN=7jA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38546 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752491AbeAQO25 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 17 Jan 2018 09:28:57 -0500
-In-Reply-To: <d1684448-0ff9-5e09-5e10-effbf9e75d68@profihost.ag>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:35275 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753712AbeAQPmF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jan 2018 10:42:05 -0500
+Received: by mail-qk0-f193.google.com with SMTP id w1so25760523qka.2
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Jan 2018 07:42:05 -0800 (PST)
+In-Reply-To: <CAKOnarkAqHY2bz5nmQbkf3=-sKpuNqbmd9MDgtV7KN1KTN=7jA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjami@redhat.com>
+Cc: Casey Bodley <cbodley@redhat.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
-> Hi,
-> 
-> i there any chance to fix this instead of removing manually all the clones?
+On Wed, Jan 17, 2018 at 9:13 PM, Matt Benjamin <mbenjami@redhat.com> wrote:
+> On Wed, Jan 17, 2018 at 7:53 AM, kefu chai <tchaikov@gmail.com> wrote:
+>>
+>>  i think it could be feasible to come up with some generic adapter to
+>> use these concepts, but we might need to focus on some typical use
+>> cases. for example, to encode and write a MOSDOpReply:
+>>
+>> assuming that we want to encode it into multiple temporary buffers and
+>> send them using a seastar::packet. the MOSDOpReply struct has a field
+>> of vector<OSDOp>, and OSDOp in turn has "bufferlist outdata;" in it.
+>> for a read op, apparently, we want to avoid memcpy. if the underlying
+>> read(store) returns a bufferlist, the encoder should be able to
+>> shallow copy the bufferlist and encapsulate it in a fragment with a
+>> customized deleter or just a temporary_buffer. if we want to avoid the
+>> conversion from buffer::list to seastar::packet, probably we should
+>> generalize the appender so it
+>
+> Yes, we'd like to avoid such copies.
+>
+>>
+>> - is able to manage the life cycle of the buffers in bufferlist being
+>> encoded. i.e. should flush current temporary_buffer, and translate all
+>> buffer::ptr to seastar::temporary_buffer, then append them to the
+>> output seastar::packet
+>> - just writes to the local temporary_buffer directly when encoding
+>> other kinds of objects.
+>>
+>> so, i don't think we can have a very generic appender if we want to be
+>> efficient. but we can define one which works for certain output type.
+>> in this example, it's seastar::packet.
+>
+> That sounds right to me.
+>
+>>
+>>>
+>>> DynamicBuffer::prepare() looks like a natural way to do the append part on
+>>> encode, but it returns a MutableBufferSequence so is not guaranteed to be
+>>> contiguous. Can you remind me where we really depend on contiguous buffers?
+>>
+>> IIRC, we don't really depend on contiguous buffers. but we do expect
+>> that the buffer we are manipulating is continuous, so we can have the
+>> opportunity to optimize the dencoder:
+>>
+>> - encoding: it's a noticeable overhead to check the underlying buffer
+>> boundary when writing to a buffer. that's why we introduced the
+>> appender to facilitate the encoding. see [1]
+>
+> This is kind of surprising.
 
-I believe you can avoid the immediate problem and get the PG up by 
-commenting out the assert.  set_snaps() will overwrite the object->snap 
-list mapping.
+forgot to mention, preallocated buffer also avoid the possible
+overhead to allocate multiple new buffers  when encoding progresses.
 
-The problem is you'll probably still a stray snapid -> object mapping, so 
-when snaptrimming runs you might end up with a PG in the snaptrim_error 
-state that won't trim (although from a quick look at the code it won't 
-crash).  I'd probably remove the assert and deal with that if/when it 
-happens.
-
-I'm adding a ticket to relax these asserts for production but keep them 
-enabled for qa.  This isn't something that needs to take down the OSD!
-
-sage
-
-
- > 
-
-> Stefan
-> 
-> Am 16.01.2018 um 23:24 schrieb Gregory Farnum:
-> > On Mon, Jan 15, 2018 at 5:23 PM, Stefan Priebe - Profihost AG
-> > <s.priebe@profihost.ag> wrote:
-> >> Hello,
-> >>
-> >> currently one of my clusters is missing a whole pg due to all 3 osds
-> >> being down.
-> >>
-> >> All of them fail with:
-> >>     0> 2018-01-16 02:05:33.353293 7f944dbfe700 -1
-> >> /build/ceph/src/osd/SnapMapper.cc: In function 'void
-> >> SnapMapper::add_oid(const hobject_t&, const std::set<snapid_t>&,
-> >> MapCacher::Transaction<std::basic_string<char>, ceph::buffer::list>*)'
-> >> thread 7f944dbfe700 time 2018-01-16 02:05:33.349946
-> >> /build/ceph/src/osd/SnapMapper.cc: 246: FAILED assert(r == -2)
-> >>
-> >>  ceph version 12.2.2-93-gd6da8d7
-> >> (d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
-> >>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> >> const*)+0x102) [0x561f9ff0b1e2]
-> >>  2: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
-> >> std::less<snapid_t>, std::allocator<snapid_t> > const&,
-> >> MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
-> >> [0x561f9fb76f3b]
-> >>  3: (PG::update_snap_map(std::vector<pg_log_entry_t,
-> >> std::allocator<pg_log_entry_t> > const&,
-> >> ObjectStore::Transaction&)+0x38f) [0x561f9fa0ae3f]
-> >>  4: (PG::append_log(std::vector<pg_log_entry_t,
-> >> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
-> >> ObjectStore::Transaction&, bool)+0x538) [0x561f9fa31018]
-> >>  5: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
-> >> std::allocator<pg_log_entry_t> > const&,
-> >> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
-> >> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x561f9fb25d64]
-> >>  6: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
-> >> [0x561f9fc314b2]
-> >>  7:
-> >> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
-> >> [0x561f9fc374f4]
-> >>  8: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
-> >> [0x561f9fb5cf10]
-> >>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
-> >> ThreadPool::TPHandle&)+0x77b) [0x561f9fac91eb]
-> >>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
-> >> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
-> >> [0x561f9f955bc7]
-> >>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
-> >> const&)+0x57) [0x561f9fbcd947]
-> >>  12: (OSD::ShardedOpWQ::_process(unsigned int,
-> >> ceph::heartbeat_handle_d*)+0x108c) [0x561f9f984d1c]
-> >>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
-> >> [0x561f9ff10e6d]
-> >>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561f9ff12e30]
-> >>  15: (()+0x8064) [0x7f949afcb064]
-> >>  16: (clone()+0x6d) [0x7f949a0bf62d]
-> >>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> >> needed to interpret this.
-> > 
-> > By the time it gets there, something else has gone wrong. The OSD is
-> > adding a snapid/object pair to its "SnapMapper", and discovering that
-> > there are already entries (which it thinks there shouldn't be).
-> > 
-> > You'll need to post more of a log, along with background, if anybody's
-> > going to diagnose it: is there cache tiering on the cluster? What is
-> > this pool used for? Were there other errors on this PG in the past?
-> > 
-> > I also notice a separate email about deleting the data; I don't have
-> > any experience with this but you'd probably have to export the PG
-> > using ceph-objectstore-tool and then find a way to delete the object
-> > out of it. I see options to remove both an object and
-> > "remove-clone-metadata" on a particular ID, but I've not used any of
-> > them myself.
-> > -Greg
-> > 
+>
+>> - decoding: for the similar reason, it's more performant to just read
+>> a contiguous buffer than reading from a segmented one. in other words,
+>> if we can ensure a the bufferlist being decoded has only a single raw
+>> buffer, why bother checking the boundary?
+>
+> Is that likely?  If the decoding case is from seastar, isn't the
+> incoming data likely to be in the form of several mbufs?
+>
+>>
+>> if we want to encode object into the mutable buffers returned
+>> DynamicBuffer::prepare(), we need to check x.size() when writing to
+>> x.data() and move on to the next one if current buffer chunk is too
+>> small.
+>>
+>> --
+>> [1] https://www.spinics.net/lists/ceph-devel/msg32608.html
+>>
+>>
+>>> Is it just that some types set need_contiguous=false because we haven't yet
+>>> implemented logic for segmented buffers, or are there cases where
+>>> implementing that logic is actually intractable?
+>>
+>> "need_contiguous" trait was added to the denc for the case where the
+>> buffer being decoded are large objects and they could be segmented.
+>> these objects are read from bluestore. but i think we would expand the
+>> case to the large message if we rebuild/flatten the segmented buffer,
+>> the overhead of reallocating the buffer and memcpy calls offsets the
+>> performance improvement we achieve by avoiding the bound check and
+>> simpler logic. before that, we always do the rebuild before decoding a
+>> buffer::list::iterator.
+>
+> That's what I would have expected.
+>
+>>
+>>>
+>>> Thanks,
+>>> Casey
+>>
+>>
+>>
+>> --
+>> Regards
+>> Kefu Chai
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-821-5101
+> fax.  734-769-8938
+> cel.  734-216-5309
+
+
+
+-- 
+Regards
+Kefu Chai
