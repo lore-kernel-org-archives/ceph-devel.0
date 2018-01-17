@@ -1,84 +1,180 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: REST API Client
-Date: Wed, 17 Jan 2018 17:09:40 +0000
-Message-ID: <CALe9h7coXaYcXZyAgx0O5PVyGVJsB0=0T7OPjo-RJbSTQ8fMbw@mail.gmail.com>
-References: <CAD-gW==8X416nALGMunjXdjxsWCE+qRDm9+YfYUZ047mT4FrQw@mail.gmail.com>
- <CA+aFP1Dd1t3oNiME0wmF4bnAHGMqEuC+1AfBWGMDe1=J34HaUg@mail.gmail.com> <CAD-gW==DjR1Ndu+0s+ep_jshcgtHQVf8sJuEmm1K_82CkRxGtQ@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
+ FAILED assert(r == -2)
+Date: Wed, 17 Jan 2018 19:28:44 +0100
+Message-ID: <8e353d25-47e8-181f-0dc5-cea0f64cbb36@profihost.ag>
+References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
+ <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com>
+ <d1684448-0ff9-5e09-5e10-effbf9e75d68@profihost.ag>
+ <alpine.DEB.2.11.1801171426290.24931@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:36240 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750969AbeAQRKC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jan 2018 12:10:02 -0500
-Received: by mail-wr0-f174.google.com with SMTP id d9so19666865wre.3
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Jan 2018 09:10:01 -0800 (PST)
-In-Reply-To: <CAD-gW==DjR1Ndu+0s+ep_jshcgtHQVf8sJuEmm1K_82CkRxGtQ@mail.gmail.com>
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:53549 "EHLO
+        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753240AbeAQS2q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 17 Jan 2018 13:28:46 -0500
+In-Reply-To: <alpine.DEB.2.11.1801171426290.24931@piezo.novalocal>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Huamin Chen <hchen@redhat.com>
-Cc: Jason Dillaman <dillaman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 17, 2018 at 3:48 PM, Huamin Chen <hchen@redhat.com> wrote:
-> On Wed, Jan 17, 2018 at 9:17 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> On Wed, Jan 17, 2018 at 8:47 AM, Huamin Chen <hchen@redhat.com> wrote:
->>> Hi,
->>>
->>> I am thinking of using Ceph REST API tclient o remove rbd cli
->>> dependency from Kubernetes and rbd CSI driver.
->>>
->>> The potential work flow is
->>> - for rbd map, use sysfs
->>
->> Why re-implement the wheel? I think the rbd CLI is a good fit for this
->> use-case. Especially when you consider that the CSI driver should
->> eventually support not only krbd, but nbd and tcmu-based block device
->> drivers. These are all being unified via new "rbd device map
->> --device-type <XYZ>" / "rbd device unmap" CLI commands to provide a
->> unified interface [1].
->>
->
-> The reason is to slim down the driver container. If CSI driver doesn't
-> use rbd cli, then we don't need to install ceph-common.
+Hi Sage,
 
-Out of curiousity, how big is the image today with just the minimal
-dependencies of librbd?
+this gives me another crash while that pg is recovering:
 
-John
+     0> 2018-01-17 19:25:09.328935 7f48f8fff700 -1
+/build/ceph/src/osd/PrimaryLogPG.cc: In function 'virtual void
+PrimaryLogPG::on_l
+ocal_recover(const hobject_t&, const ObjectRecoveryInfo&,
+ObjectContextRef, bool, ObjectStore::Transaction*)' thread 7f48f8fff700 ti
+me 2018-01-17 19:25:09.322287
+/build/ceph/src/osd/PrimaryLogPG.cc: 358: FAILED assert(p !=
+recovery_info.ss.clone_snaps.end())
 
->
-> But you are right, nbd and other drivers are still something to consider.
->
->
->>> - use REST API client for rbd status, rbd create and rm
->>>
->>> Questions: Does current Ceph REST server support these rbd calls? Has
->>> anybody already worked on Golang client?
+ ceph version 12.2.2-94-g92923ef
+(92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x102) [0x55addb5eb1f2]
+ 2: (PrimaryLogPG::on_local_recover(hobject_t const&, ObjectRecoveryInfo
+const&, std::shared_ptr<ObjectContext>, bool,
+ObjectStore::Transaction*)+0x11f0) [0x55addb1957a0]
+ 3: (ReplicatedBackend::handle_push(pg_shard_t, PushOp const&,
+PushReplyOp*, ObjectStore::Transaction*)+0x31d) [0x55addb3071ed]
+ 4: (ReplicatedBackend::_do_push(boost::intrusive_ptr<OpRequest>)+0x18f)
+[0x55addb30748f]
+ 5:
+(ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2d1)
+[0x55addb317531]
+ 6: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+[0x55addb23cf10]
+ 7: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+ThreadPool::TPHandle&)+0x77b) [0x55addb1a91eb]
+ 8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+[0x55addb035bc7]
+ 9: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+const&)+0x57) [0x55addb2ad957]
+ 10: (OSD::ShardedOpWQ::_process(unsigned int,
+ceph::heartbeat_handle_d*)+0x108c) [0x55addb064d1c]
+ 11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+[0x55addb5f0e7d]
+ 12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55addb5f2e40]
+ 13: (()+0x8064) [0x7f4955b68064]
+ 14: (clone()+0x6d) [0x7f4954c5c62d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
+
+Greets,
+Stefan
+
+Am 17.01.2018 um 15:28 schrieb Sage Weil:
+> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>> Hi,
 >>
->> Not to my knowledge. Assuming you keep the rbd CLI which will bring
->> with it the librados2 and librbd1 shared libraries, any reason to not
->> just directly use / expand the Ceph golang API [2]?
+>> i there any chance to fix this instead of removing manually all the clones?
+> 
+> I believe you can avoid the immediate problem and get the PG up by 
+> commenting out the assert.  set_snaps() will overwrite the object->snap 
+> list mapping.
+> 
+> The problem is you'll probably still a stray snapid -> object mapping, so 
+> when snaptrimming runs you might end up with a PG in the snaptrim_error 
+> state that won't trim (although from a quick look at the code it won't 
+> crash).  I'd probably remove the assert and deal with that if/when it 
+> happens.
+> 
+> I'm adding a ticket to relax these asserts for production but keep them 
+> enabled for qa.  This isn't something that needs to take down the OSD!
+> 
+> sage
+> 
+> 
+>  > 
+> 
+>> Stefan
 >>
->>> I found some early work on python client [1] but so far no work on
->>> golang client. If I missed it, please let me know.
+>> Am 16.01.2018 um 23:24 schrieb Gregory Farnum:
+>>> On Mon, Jan 15, 2018 at 5:23 PM, Stefan Priebe - Profihost AG
+>>> <s.priebe@profihost.ag> wrote:
+>>>> Hello,
+>>>>
+>>>> currently one of my clusters is missing a whole pg due to all 3 osds
+>>>> being down.
+>>>>
+>>>> All of them fail with:
+>>>>     0> 2018-01-16 02:05:33.353293 7f944dbfe700 -1
+>>>> /build/ceph/src/osd/SnapMapper.cc: In function 'void
+>>>> SnapMapper::add_oid(const hobject_t&, const std::set<snapid_t>&,
+>>>> MapCacher::Transaction<std::basic_string<char>, ceph::buffer::list>*)'
+>>>> thread 7f944dbfe700 time 2018-01-16 02:05:33.349946
+>>>> /build/ceph/src/osd/SnapMapper.cc: 246: FAILED assert(r == -2)
+>>>>
+>>>>  ceph version 12.2.2-93-gd6da8d7
+>>>> (d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
+>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>> const*)+0x102) [0x561f9ff0b1e2]
+>>>>  2: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
+>>>> std::less<snapid_t>, std::allocator<snapid_t> > const&,
+>>>> MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
+>>>> [0x561f9fb76f3b]
+>>>>  3: (PG::update_snap_map(std::vector<pg_log_entry_t,
+>>>> std::allocator<pg_log_entry_t> > const&,
+>>>> ObjectStore::Transaction&)+0x38f) [0x561f9fa0ae3f]
+>>>>  4: (PG::append_log(std::vector<pg_log_entry_t,
+>>>> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
+>>>> ObjectStore::Transaction&, bool)+0x538) [0x561f9fa31018]
+>>>>  5: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
+>>>> std::allocator<pg_log_entry_t> > const&,
+>>>> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
+>>>> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x561f9fb25d64]
+>>>>  6: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
+>>>> [0x561f9fc314b2]
+>>>>  7:
+>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
+>>>> [0x561f9fc374f4]
+>>>>  8: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>>>> [0x561f9fb5cf10]
+>>>>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>>>> ThreadPool::TPHandle&)+0x77b) [0x561f9fac91eb]
+>>>>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+>>>> [0x561f9f955bc7]
+>>>>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>>>> const&)+0x57) [0x561f9fbcd947]
+>>>>  12: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>> ceph::heartbeat_handle_d*)+0x108c) [0x561f9f984d1c]
+>>>>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+>>>> [0x561f9ff10e6d]
+>>>>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561f9ff12e30]
+>>>>  15: (()+0x8064) [0x7f949afcb064]
+>>>>  16: (clone()+0x6d) [0x7f949a0bf62d]
+>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>> needed to interpret this.
 >>>
+>>> By the time it gets there, something else has gone wrong. The OSD is
+>>> adding a snapid/object pair to its "SnapMapper", and discovering that
+>>> there are already entries (which it thinks there shouldn't be).
 >>>
->>> 1. https://github.com/dmsimard/python-cephclient
+>>> You'll need to post more of a log, along with background, if anybody's
+>>> going to diagnose it: is there cache tiering on the cluster? What is
+>>> this pool used for? Were there other errors on this PG in the past?
 >>>
->>> Thanks
+>>> I also notice a separate email about deleting the data; I don't have
+>>> any experience with this but you'd probably have to export the PG
+>>> using ceph-objectstore-tool and then find a way to delete the object
+>>> out of it. I see options to remove both an object and
+>>> "remove-clone-metadata" on a particular ID, but I've not used any of
+>>> them myself.
+>>> -Greg
 >>>
->>> Huamin
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> [1] https://github.com/ceph/ceph/pull/19711
->> [2] https://github.com/ceph/go-ceph
->>
 >> --
->> Jason
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
