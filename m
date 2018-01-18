@@ -1,8 +1,8 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
  FAILED assert(r == -2)
-Date: Thu, 18 Jan 2018 09:08:25 +0100
-Message-ID: <28f90497-df9f-f628-835b-c6c75a752f66@profihost.ag>
+Date: Thu, 18 Jan 2018 13:02:32 +0100
+Message-ID: <fa5a9c1e-441f-bb06-07eb-a311f41b2ff6@profihost.ag>
 References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
  <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com>
  <d1684448-0ff9-5e09-5e10-effbf9e75d68@profihost.ag>
@@ -15,11 +15,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:49187 "EHLO
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:42966 "EHLO
         cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750762AbeARII1 (ORCPT
+        by vger.kernel.org with ESMTP id S1755276AbeARMCe (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 Jan 2018 03:08:27 -0500
+        Thu, 18 Jan 2018 07:02:34 -0500
 In-Reply-To: <alpine.DEB.2.11.1801171856230.24931@piezo.novalocal>
 Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
@@ -29,35 +29,50 @@ Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-deve
 
 Hi,
 
-it also crashes in (marked with HERE):
+OK the cluster has now fully recovered the only problem is now that i
+can't enable scrubs as they fail with:
+     0> 2018-01-18 13:00:54.843076 7fbd253ff700 -1
+/build/ceph/src/osd/SnapMapper.cc: In function 'int
+SnapMapper::get_snaps(const h
+object_t&, SnapMapper::object_snaps*)' thread 7fbd253ff700 time
+2018-01-18 13:00:54.840396
+/build/ceph/src/osd/SnapMapper.cc: 154: FAILED assert(!out->snaps.empty())
 
-int SnapMapper::get_snaps(
-  const hobject_t &oid,
-  object_snaps *out)
-{
-  assert(check(oid));
-  set<string> keys;
-  map<string, bufferlist> got;
-  keys.insert(to_object_key(oid));
-  int r = backend.get_keys(keys, &got);
-  if (r < 0)
-    return r;
-  if (got.empty())
-    return -ENOENT;
-  if (out) {
-    bufferlist::iterator bp = got.begin()->second.begin();
-    ::decode(*out, bp);
-    dout(20) << __func__ << " " << oid << " " << out->snaps << dendl;
-    assert(!out->snaps.empty());            ########### HERE ###########
-  } else {
-    dout(20) << __func__ << " " << oid << " (out == NULL)" << dendl;
-  }
-  return 0;
-}
+ ceph version 12.2.2-94-g92923ef
+(92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x102) [0x5561ce28d1f2]
+ 2: (SnapMapper::get_snaps(hobject_t const&,
+SnapMapper::object_snaps*)+0x46b) [0x5561cdef755b]
+ 3: (SnapMapper::get_snaps(hobject_t const&, std::set<snapid_t,
+std::less<snapid_t>, std::allocator<snapid_t> >*)+0xd7) [0x5561cdef7
+697]
+ 4: (PG::_scan_snaps(ScrubMap&)+0x692) [0x5561cdd8ad22]
+ 5: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
+unsigned int, ThreadPool::TPHandle&)+0x22f) [0x5561cdd8bc5f]
+ 6: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>,
+ThreadPool::TPHandle&)+0x624) [0x5561cdd8c584]
+ 7: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+ThreadPool::TPHandle&)+0x8b6) [0x5561cde4b326]
+ 8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+[0x5561cdcd7bc7]
+ 9: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+const&)+0x57) [0x5561cdf4f957]
+ 10: (OSD::ShardedOpWQ::_process(unsigned int,
+ceph::heartbeat_handle_d*)+0x108c) [0x5561cdd06d1c]
+ 11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+[0x5561ce292e7d]
+ 12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x5561ce294e40]
+ 13: (()+0x8064) [0x7fbd70d86064]
+ 14: (clone()+0x6d) [0x7fbd6fe7a62d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
 
-is it save to comment that assert?
 
+Greets,
 Stefan
+
 Am 17.01.2018 um 19:56 schrieb Sage Weil:
 > On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
 >>
