@@ -1,8 +1,8 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
  FAILED assert(r == -2)
-Date: Thu, 18 Jan 2018 21:01:22 +0100
-Message-ID: <dbcb06de-b54f-4613-9953-f364408ada41@profihost.ag>
+Date: Thu, 18 Jan 2018 23:17:30 +0100
+Message-ID: <03f7184d-82f6-56f0-2c45-5dcb0738288c@profihost.ag>
 References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
  <CAJ4mKGYOzVdhBPT+ZEa92czYb5aYznxWPR-_rr=yCLdg1bVhbQ@mail.gmail.com>
  <d1684448-0ff9-5e09-5e10-effbf9e75d68@profihost.ag>
@@ -19,11 +19,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:28640 "EHLO
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:36614 "EHLO
         cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754915AbeARUBZ (ORCPT
+        by vger.kernel.org with ESMTP id S1750718AbeARWRd (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 Jan 2018 15:01:25 -0500
+        Thu, 18 Jan 2018 17:17:33 -0500
 In-Reply-To: <alpine.DEB.2.11.1801181424040.8186@piezo.novalocal>
 Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
@@ -31,15 +31,63 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-OK hopefully last one.
+mhm it doesn't seem to have something todo with deep scrubs and disk i/o
+even in scrubs produce the following log and signal (there were no slow
+requests or other impacts it just got aborted after the monitor set it
+to down):
 
-If i unset nodeep-scrub it immediatly starts around 19-22 deep scrubs
-which then results in massive slow requests and even OSDs marked as
-down. is there any way to limit this?
+   -20> 2018-01-18 23:05:45.717224 7fb955fff700  0 --
+10.255.0.88:6801/18362 >> 10.255.0.92:6813/25732 conn(0x7fb8f5d90000 :-1
+s=STA
+TE_CONNECTING_WAIT_CONNECT_REPLY_AUTH pgs=48 cs=1
+l=0).handle_connect_reply connect got RESETSESSION
+   -19> 2018-01-18 23:05:45.717289 7fb955fff700  0 --
+10.255.0.88:6801/18362 >> 10.255.0.86:6813/29823 conn(0x7fb91e668000
+:6801 s=S
+TATE_CONNECTING_WAIT_CONNECT_REPLY_AUTH pgs=105 cs=1
+l=0).handle_connect_reply connect got RESETSESSION
+   -18> 2018-01-18 23:05:48.021476 7fb92a3f6700  0 log_channel(cluster)
+log [WRN] : Monitor daemon marked osd.16 down, but it is sti
+ll running
+   -17> 2018-01-18 23:05:48.021484 7fb92a3f6700  0 log_channel(cluster)
+log [DBG] : map e924379 wrongly marked me down at e924378
+     0> 2018-01-18 23:07:53.251128 7fb90cbff700 -1 *** Caught signal
+(Aborted) **
+ in thread 7fb90cbff700 thread_name:tp_osd_tp
+
+ ceph version 12.2.2-94-g92923ef
+(92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+ 1: (()+0xa4433c) [0x55fa1e2c033c]
+ 2: (()+0xf890) [0x7fb959c00890]
+ 3: (pthread_cond_wait()+0xbf) [0x7fb959bfd04f]
+ 4: (ObjectStore::apply_transactions(ObjectStore::Sequencer*,
+std::vector<ObjectStore::Transaction,
+std::allocator<ObjectStore::Transaction> >&, Context*)+0x254)
+[0x55fa1e07fd54]
+ 5: (ObjectStore::apply_transaction(ObjectStore::Sequencer*,
+ObjectStore::Transaction&&, Context*)+0x5c) [0x55fa1ddaeb2c]
+ 6: (PG::_scan_snaps(ScrubMap&)+0x8f7) [0x55fa1de00fa7]
+ 7: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
+unsigned int, ThreadPool::TPHandle&)+0x22f) [0x55fa1de01c7f]
+ 8: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>,
+ThreadPool::TPHandle&)+0x624) [0x55fa1de025a4]
+ 9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+ThreadPool::TPHandle&)+0x8b6) [0x55fa1dec1766]
+ 10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+[0x55fa1dd4dbc7]
+ 11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+const&)+0x57) [0x55fa1dfc5eb7]
+ 12: (OSD::ShardedOpWQ::_process(unsigned int,
+ceph::heartbeat_handle_d*)+0x108c) [0x55fa1dd7cd1c]
+ 13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+[0x55fa1e3093bd]
+ 14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55fa1e30b380]
+ 15: (()+0x8064) [0x7fb959bf9064]
+ 16: (clone()+0x6d) [0x7fb958ced62d]
 
 Greets,
 Stefan
-
 
 Am 18.01.2018 um 15:24 schrieb Sage Weil:
 > On Thu, 18 Jan 2018, Stefan Priebe - Profihost AG wrote:
