@@ -1,152 +1,86 @@
 From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: seastar temporary_buffer/packet and ceph::buffer
-Date: Thu, 18 Jan 2018 11:35:18 -0500
-Message-ID: <fd5159ca-e27f-6a09-4835-5b8bcb5f0bf5@redhat.com>
-References: <CAJE9aOPqAWTatC6sp-_00+w_MPVW52b+1TGL9LS0vc0y+iJq8Q@mail.gmail.com>
- <09fac638-bae8-c04a-8ad0-6d6be3d4d335@redhat.com>
- <CAKOnar=wKu2WdhTeaJ-17BbTnDvM6_2CbsNjKdc0FiMBsHV-Vg@mail.gmail.com>
- <c9f8184e-6c5c-fbee-6977-6497f67e578f@redhat.com>
- <CAJE9aOPuguVg4hDkV8vL0GNffRJw0zSbH0aLy4Tb2oVopCy8bg@mail.gmail.com>
- <1559cb3f-5e78-eed0-1a97-cfca8b1aad19@redhat.com>
- <CAJE9aOMsghaR_Q5odM3ETNx=w4_hG9a_WAuiQX1AFuAwgaQdfA@mail.gmail.com>
+Subject: Re: questions about multisite sync qos
+Date: Thu, 18 Jan 2018 12:12:24 -0500
+Message-ID: <95c1ffdd-f03f-de0f-5561-6756d6a824af@redhat.com>
+References: <CAEv+sP4NsCGJFKAx_0e+VmXqNv5ENVPXJT3_BW9Uvz=Mp7JpQw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:46470 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753406AbeARQfV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jan 2018 11:35:21 -0500
-Received: by mail-qt0-f178.google.com with SMTP id o35so21554650qtj.13
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Jan 2018 08:35:21 -0800 (PST)
-In-Reply-To: <CAJE9aOMsghaR_Q5odM3ETNx=w4_hG9a_WAuiQX1AFuAwgaQdfA@mail.gmail.com>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:34458 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753975AbeARRM1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jan 2018 12:12:27 -0500
+Received: by mail-oi0-f49.google.com with SMTP id a70so16209322oib.1
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Jan 2018 09:12:27 -0800 (PST)
+In-Reply-To: <CAEv+sP4NsCGJFKAx_0e+VmXqNv5ENVPXJT3_BW9Uvz=Mp7JpQw@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Matt Benjamin <mbenjami@redhat.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Tianshan Qu <qutianshan@gmail.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
+Hi, (and cc ceph-devel)
 
-On 01/17/2018 07:53 AM, kefu chai wrote:
-> On Wed, Jan 17, 2018 at 6:15 AM, Casey Bodley <cbodley@redhat.com> wrote:
->> On 01/16/2018 06:26 AM, kefu chai wrote:
->>> On Tue, Jan 16, 2018 at 4:48 AM, Casey Bodley <cbodley@redhat.com> wrote:
->>>> On 01/15/2018 02:30 PM, Matt Benjamin wrote:
->>>>> It's the buffer::raw class that abstracts foreign buffer
->>>>> representations now, is it now? A mechanism to allow seastar to
->>>>> single-allocate a composite buffer::raw and temporary_buffer<char>
->>>>> seems possible to imagine.
->>>>>
->>>>> Matt
->>>>
->>>> Thanks Matt. I think that's effectively what I did with
->>>>
->>>> https://github.com/cbodley/ceph/commit/67ae06e488c50a6102c66d34b942ff207493ffd6.
->>>> It allocates a buffer::raw subclass that stores temporary_buffer<char> as
->>>> a
->>>> member. The raw allocation here is the same one we'd see with any other
->>>> buffer type, so I was mistaken in thinking of this as extra overhead. The
->>>> allocation in the other direction is effectively seastar's version of
->>>> this
->>>> same abstraction. So I think these conversions are fine as they are.
->>>>
->>>> I do still think there are wins in generalizing denc to avoid these
->>>> conversions, but we'll have to explore whether it's worth the extra
->>>> complexity.
->>> i see. is https://github.com/tchaikov/ceph/tree/wip-seastar-msg
->>> something more close to what you are thinking about?
->>>
->> Dear Kefu, you are a wizard. That looks like a great start!
->>
->> I'm guessing that segmented buffers will be the hard part - we might look to
->> the boost::asio buffer concepts for some ideas there?
->>
->> they have const and non-const sequences:
->> http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/ConstBufferSequence.html
->> http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/MutableBufferSequence.html
->>
->> and a dynamic/resizable sequence:
->> http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/DynamicBuffer.htm
->>
->> Boost has lots of built-in adapters for array/vector/string types:
->> http://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio/reference/buffer.html
->>
->> If we could find a way to use those concepts directly, we'd get those
->> built-in types for free, and it should be easy to adapt other types like
->> those from seastar.
->   i think it could be feasible to come up with some generic adapter to
-> use these concepts, but we might need to focus on some typical use
-> cases. for example, to encode and write a MOSDOpReply:
+On 01/18/2018 12:32 AM, Tianshan Qu wrote:
+> Hi:
 >
-> assuming that we want to encode it into multiple temporary buffers and
-> send them using a seastar::packet. the MOSDOpReply struct has a field
-> of vector<OSDOp>, and OSDOp in turn has "bufferlist outdata;" in it.
-> for a read op, apparently, we want to avoid memcpy. if the underlying
-> read(store) returns a bufferlist, the encoder should be able to
-> shallow copy the bufferlist and encapsulate it in a fragment with a
-> customized deleter or just a temporary_buffer. if we want to avoid the
-> conversion from buffer::list to seastar::packet, probably we should
-> generalize the appender so it
+> Do we have any design about control the sync process?
 >
-> - is able to manage the life cycle of the buffers in bufferlist being
-> encoded. i.e. should flush current temporary_buffer, and translate all
-> buffer::ptr to seastar::temporary_buffer, then append them to the
-> output seastar::packet
-> - just writes to the local temporary_buffer directly when encoding
-> other kinds of objects.
+> For now we have 128 data log shards, with at most 20 bucket shards
+> concurrent and 20 objects each. My considers:
 >
-> so, i don't think we can have a very generic appender if we want to be
-> efficient. but we can define one which works for certain output type.
-> in this example, it's seastar::packet.
+> 1.The oldest data maybe lagging, if 20 bucket shards has continuous
+> data, it will always do the sync.
+> A solution is sync 1k objects each time, and then back into a list
+> type waiting queue will simply fix the problem.
+>
+> 2.We may need a bucket level priority sync, some data maybe hot some
+> maybe cold, so the hot one should be first, and maybe a configurable
+> policy.
+> still with the queue and control the sync objects number with
+> different priority, will somehow archive the goal.
 
-That example helps a lot. The asio buffer concepts aren't a good fit 
-here because they don't capture our zero-copy requirements or any of the 
-ownership/sharing stuff that goes along with that.
+The 'datalog notify' feature offers some help to prioritize the hot 
+bucket shards. RGWDataNotifier will periodically broadcast a datalog 
+notify message to other zones telling them which shards have changed 
+recently. Then RGWDataSyncShardCR::incremental_sync() will start sync 
+for those shards under /* process out of band updates */. These 
+out-of-band updates (along with the error retries) are allowed to exceed 
+the 20-shard spawn_window, though we do wait until we're under that 
+window again before checking for new notifications.
 
-I really like how your approach only pays for the 
-bufferptr->temporary_buffer conversions where we actually need that 
-sharing, and not in the common encode case.
+So you're right that there's still potential for starvation if we get 20 
+bucket shards that are continuously busy, and I think it's a good idea 
+to add a ~1000 object limit to bucket sync. We could use something 
+similar to the error_repo to queue these unfinished buckets for later, 
+but there are still some problems we'd have to solve there:
 
->> DynamicBuffer::prepare() looks like a natural way to do the append part on
->> encode, but it returns a MutableBufferSequence so is not guaranteed to be
->> contiguous. Can you remind me where we really depend on contiguous buffers?
-> IIRC, we don't really depend on contiguous buffers. but we do expect
-> that the buffer we are manipulating is continuous, so we can have the
-> opportunity to optimize the dencoder:
->
-> - encoding: it's a noticeable overhead to check the underlying buffer
-> boundary when writing to a buffer. that's why we introduced the
-> appender to facilitate the encoding. see [1]
-> - decoding: for the similar reason, it's more performant to just read
-> a contiguous buffer than reading from a segmented one. in other words,
-> if we can ensure a the bufferlist being decoded has only a single raw
-> buffer, why bother checking the boundary?
->
-> if we want to encode object into the mutable buffers returned
-> DynamicBuffer::prepare(), we need to check x.size() when writing to
-> x.data() and move on to the next one if current buffer chunk is too
-> small.
->
-> --
-> [1] https://www.spinics.net/lists/ceph-devel/msg32608.html
+- How to schedule/prioritize between the different datalog sources 
+(datalog notify, error_repo, datalog, and unfinished buckets)?
+- If this is a queue with a timestamp as the index, can we prevent 
+duplicate entries?
+- Can we remove a bucket shard from this queue if we processed it 
+through another source (like 'datalog notify') already?
+- Can we make any guarantees about bounds on its size?
 
-Okay, thanks Kefu. I had managed to forget most of that.
+> 3.Another observation is list bucket bilogs will eat all connections
+> another side in small cluster, as rocksdb is busy with list, each
+> connection will stuck much time. Adjust the config will easy the
+> problem, but if we have some global control with cmd can adjust that
+> will be better,  and I think RGWDataSyncEnv is a good place to do the
+> work.
 
->
->> Is it just that some types set need_contiguous=false because we haven't yet
->> implemented logic for segmented buffers, or are there cases where
->> implementing that logic is actually intractable?
-> "need_contiguous" trait was added to the denc for the case where the
-> buffer being decoded are large objects and they could be segmented.
-> these objects are read from bluestore. but i think we would expand the
-> case to the large message if we rebuild/flatten the segmented buffer,
-> the overhead of reallocating the buffer and memcpy calls offsets the
-> performance improvement we achieve by avoiding the bound check and
-> simpler logic. before that, we always do the rebuild before decoding a
-> buffer::list::iterator.
->
->> Thanks,
->> Casey
->
->
+Are you referring to the frontend threads being saturated with sync 
+requests? That is definitely an issue, and it's one thing that we're 
+trying to solve with the beast frontend. It also gives us the ability to 
+do some qos, which could provide some fairness between sync and normal 
+client requests.
+
+Outside of the frontend, there's also more that we could do in multisite 
+to share/reuse/throttle these sync connections instead of generating a 
+new one for each request.
+
+> Any advice will be appreciated.
+> Thank you!
 
