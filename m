@@ -1,68 +1,53 @@
-From: Blaine Gardner <blaine.gardner@suse.com>
-Subject: MDS modules and containers
-Date: Fri, 19 Jan 2018 08:03:24 -0700
-Message-ID: <2798364c-e952-74c6-7140-7458f9730afc@suse.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: opentracing
+Date: Fri, 19 Jan 2018 19:52:13 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1801191944190.24931@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.provo.novell.com ([137.65.250.81]:60935 "EHLO
-        smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754542AbeASPD3 (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Fri, 19 Jan 2018 10:03:29 -0500
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:51904 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756071AbeASTwP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 19 Jan 2018 14:52:15 -0500
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 0ED5CC047B65
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Jan 2018 19:52:15 +0000 (UTC)
+Received: from ovpn-112-18.rdu2.redhat.com (ovpn-112-18.rdu2.redhat.com [10.10.112.18])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id A421060BE3
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Jan 2018 19:52:14 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: rdias@suse.com
 
-I've been talking with some of my colleagues about the manager and 
-manager modules, and I have concerns that the manager might become 
-bloated over time. I understand the need to have high-performant access 
-to the cluster via C++ bindings, and I think that design decision makes 
-sense.
+I think we need to take a step back and reconsider our approach to 
+tracing.  Thus far, it has been an ad hoc combination of our 
+home-brew debug logs and a few lttng tracepoints.  We have some initial 
+integration of blkin tracepoints as well, but I'm not sure if anyone has 
+actually used them.
 
-I'm starting to see that there is a trend, however, and I'd like to talk 
-about how we might realign to something better before there are too many 
-modules. As an example, there are several manager modules which run 
-their own web server. The dashboard, for instance, as well as the 
-prometheus exporter, among others.
+I'm looking at opentracing.io (see e.g. 
+http://opentracing.io/documentation/) and this looks like a more viable 
+path forward since it is not tied to specific tracing tools and is being 
+adopted by CNCF projects.  There's also the new Jaeger tool that is (from 
+what I gather) a newer dapper/zipkin type tool that will presumably be 
+usable if we go this path.
 
-When I consider the manager in containerized contexts, the manager 
-container might be running 5 web servers, and that feels rather wrong. I 
-have a few thoughts for how this might be improved. Specifically, I've 
-been thinking that manager modules can probably be broken into 3 
-different paradigms.
+I was on a call recently with a partner and they mentioned that their tool 
+would consume tracepoints via opentracing tracepoints and that one of the 
+key features was that it would sample instead of pulling an exhaustive 
+trace.  (From what I gather this is outside of the opentracing library in 
+the application, though--it's up to the tracer to sample or not to 
+sample.)
 
-1. Modules that collect information from the Ceph cluster and then send 
-inputs to the cluster based on some automatic logic and that have 
-sensitive time constraints. These modules make sense to be run alongside 
-the manager.
+One of the looming features that we'd like to work on now that the mgr is 
+in place is a 'rados top' or 'rbd top' like function that samples requests 
+at the OSDs (or clients?) to build an aggregate view of the top consumers 
+of ops in the cluster.  I'm wondering whether it makes sense to build this 
+sort of functionality on top of generic tracepoints instead of our own 
+purpose-built instrumentation.
 
-2. Modules that collect a large amount of information from the cluster 
-at once which is then consumed by the user. This would be like the 
-Prometheus exporter. It can benefit from fast access to the cluster for 
-gathering the data, but, at the end of the day, the information is 
-consumed by the user, and the information is already subject to network 
-latencies. It makes sense to run the data collection alongside the 
-manager, but the rest of the application I don't think belongs.
+Is there anyone who is interested in heading this effort/investigation up?
 
-3. Modules that collect information from the cluster to display to the 
-user. This would be something like the dashboard. Most of the 
-interaction users will have with these applications are bound by network 
-speeds, and I don't think it makes sense to have them running alongside 
-the manager when they could just as easily run in a separate container. 
-It would make more sense to me to implement a REST API for the 
-information the dashboard wishes to display and have the dashboard call 
-the API to get/put the information.
-
-Ricardo Dias has suggested that in addition to REST APIs, it might also 
-be worth considering an RPC interface. With this, perhaps modules from 
-paradigm #2 could live completely separate rather than parially separate.
-
-I think these things are worth discussing before the manager becomes 
-bloated with modules, both in lines of code, as well as system resources.
-
-Thanks!
-Blaine
+sage
