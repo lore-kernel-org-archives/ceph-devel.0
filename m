@@ -1,71 +1,56 @@
-From: Ricardo Dias <rdias@suse.com>
-Subject: Re: debugging mgr python modules
-Date: Tue, 23 Jan 2018 07:30:43 +0000
-Message-ID: <60075fa9-f114-649c-b49b-217087f33e89@suse.com>
-References: <822b6122-c866-f6b6-42e5-6913dbef0744@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: =?gb2312?B?zNW2rLas?= <tdd21151186@gmail.com>
+Subject: Message decode issue
+Date: Tue, 23 Jan 2018 16:25:36 +0800
+Message-ID: <1240D552-284C-4C9C-A114-BFAE7F537D95@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
+Content-Type: text/plain; charset=gb2312
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:45831 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750760AbeAWHbO (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 23 Jan 2018 02:31:14 -0500
-In-Reply-To: <822b6122-c866-f6b6-42e5-6913dbef0744@suse.com>
-Content-Language: en-US
+Received: from mail-io0-f172.google.com ([209.85.223.172]:37560 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbeAWIZl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jan 2018 03:25:41 -0500
+Received: by mail-io0-f172.google.com with SMTP id f89so53728ioj.4
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Jan 2018 00:25:41 -0800 (PST)
+Received: from [127.0.0.1] ([104.207.157.57])
+        by smtp.gmail.com with ESMTPSA id z84sm9276949ioi.23.2018.01.23.00.25.38
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 23 Jan 2018 00:25:40 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Serong <tserong@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
+Dear Cephers,
 
+below is a piece of code in Message::decode_message:
+```
+// m->header.version, if non-zero, should be populated with the
+  // newest version of the encoding the code supports.  If set, check
+  // it against compat_version.
+  if (m->get_header().version &&
+      m->get_header().version < header.compat_version) {
+    if (cct) {
+      ldout(cct, 0) << "will not decode message of type " << type
+                    << " version " << header.version
+                    << " because compat_version " << =
+header.compat_version
+                    << " > supported version " << =
+m->get_header().version << dendl;
+      if (cct->_conf->ms_die_on_bad_msg)
+        ceph_abort();
+    }  =20
+    m->put();
+    return 0;
+  }
+```
+I know it=A1=AFs checking the compatibility of the incoming message.
+but, i think it=A1=AFs not sufficient, it only checked if the coming =
+message=A1=AFs compat_version is bigger than our version (if it=A1=AFs =
+true, the message is not supported)
+it should also check if the comming message=A1=AFs version  is smaller =
+than our compat_version, right ?
+please correct me if i=A1=AFm wrong.
 
-On 23-01-2018 00:38, Tim Serong wrote:
-> Hi All,
-> 
-> Right now, if you want to debug an mgr python module, you're pretty much
-> restricted to dumping interesting stuff to log files, right?
-> 
-> What about if you wanted to run an interactive python debugger?
-> 
-> I had two half-formed ideas for this.  One is that apparently there's
-> something called prdb, which could theoretically be loaded in an mgr
-> module to enable remote debugging over a socket (although
-> https://pypi.python.org/pypi/rpdb/ says it reroutes stdout and stdin,
-> which I assume might not work given mgr is already eating those -- not
-> sure, haven't had a chance to try it yet).
-
-Even without having the stdout/err it's very useful to be able to stop 
-execution at breakpoints and do a step-by-step execution. I think it 
-should be easy to make prdb to work with ceph-mgr plugins. Thanks for 
-the research.
-
-> 
-> The second idea was to create a python wrapper which provides a stub
-> implementation of the pieces that ceph-mgr exposes from C++ land
-> (ceph_state, etc.).  This would expose some fake cluster state, much as
-> the minion sim thing did in calamari.  Then you could (somehow) load/run
-> a mgr python module completely outside mgr to experimentally poke at it.
->   Having typed all that out  now, I suspect this might be a PITA to
-> maintain and be ultimately less useful for live debugging that the first
-> half-formed idea, although it might be interesting for unit testing.
-
-I think this idea is also very useful but for a different use-case like 
-unit/functional testing without having to start a Ceph cluster.
-This way we could add unit tests to the ceph-mgr plugins and run them 
-along with the already existing tests.
-
-> 
-> Any thoughts on whether any of the above is worth pursuing?
-> 
-> Thanks,
-> 
-> Tim
-> 
-
--- 
-Ricardo Dias
-Senior Software Engineer - Storage Team
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284
-(AG Nürnberg)
+Regards,
+Dongdong=
