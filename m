@@ -1,40 +1,66 @@
-From: Rubab Syed <rubab.syed21@gmail.com>
-Subject: Adding units to performance counters and configuration setting browser
-Date: Tue, 23 Jan 2018 03:12:14 +0500
-Message-ID: <CAPP7jAU-H5663h9svv3H1LjSLymi+W3aPzqd=Ysa3ukjgDO9Ow@mail.gmail.com>
+From: Tim Serong <tserong@suse.com>
+Subject: debugging mgr python modules
+Date: Tue, 23 Jan 2018 11:38:00 +1100
+Message-ID: <822b6122-c866-f6b6-42e5-6913dbef0744@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed;
+ boundary="------------721990CC54A84BF10677B6B4"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:42920 "EHLO
-        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751026AbeAVWMR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jan 2018 17:12:17 -0500
-Received: by mail-lf0-f45.google.com with SMTP id q17so12546419lfa.9
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Jan 2018 14:12:16 -0800 (PST)
+Received: from smtp.nue.novell.com ([195.135.221.5]:33964 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751239AbeAWAiL (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Mon, 22 Jan 2018 19:38:11 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: John Spray <jspray@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+This is a multi-part message in MIME format.
+--------------721990CC54A84BF10677B6B4
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 
-Currently, performance counters in Ceph don't indicate whether they
-are just generic counts (e.g. number of requests), or something with a
-unit (e.g. number of bytes).
+Hi All,
 
-I am working on a feature to add the support for units in our code
-base so that sense and visualization of quantities can be improved
-(from command line as well as from dashboard). For performance
-counters browser [1], we are adding bytes/non-bytes units and for
-configuration setting browser [2], bytes/non-bytes as well as time.
+Right now, if you want to debug an mgr python module, you're pretty much
+restricted to dumping interesting stuff to log files, right?
 
-If you guys would like to have some additional units that might be
-helpful, feel free to reply to this thread. All suggestions are
-welcome.
+What about if you wanted to run an interactive python debugger?
 
-Regards,
-Rubab
+I had two half-formed ideas for this.  One is that apparently there's
+something called prdb, which could theoretically be loaded in an mgr
+module to enable remote debugging over a socket (although
+https://pypi.python.org/pypi/rpdb/ says it reroutes stdout and stdin,
+which I assume might not work given mgr is already eating those -- not
+sure, haven't had a chance to try it yet).
 
+The second idea was to create a python wrapper which provides a stub
+implementation of the pieces that ceph-mgr exposes from C++ land
+(ceph_state, etc.).  This would expose some fake cluster state, much as
+the minion sim thing did in calamari.  Then you could (somehow) load/run
+a mgr python module completely outside mgr to experimentally poke at it.
+ Having typed all that out  now, I suspect this might be a PITA to
+maintain and be ultimately less useful for live debugging that the first
+half-formed idea, although it might be interesting for unit testing.
 
-[1] https://github.com/ceph/ceph/pull/19922
-[2] https://github.com/ceph/ceph/pull/20043
+Any thoughts on whether any of the above is worth pursuing?
+
+Thanks,
+
+Tim
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
+
+--------------721990CC54A84BF10677B6B4
+Content-Type: text/x-vcard;
+ name="tserong.vcf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="tserong.vcf"
+
+bnVsbA==
+--------------721990CC54A84BF10677B6B4--
