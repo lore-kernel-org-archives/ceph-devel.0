@@ -1,96 +1,71 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: [ceph-users] ghost degraded objects
-Date: Mon, 22 Jan 2018 17:38:13 -0800
-Message-ID: <a21fc9c4-058e-3905-019f-32e2f0c715b9@redhat.com>
-References: <CAE63xUN4+fzJFjEOwKU-gXjqk+=8=gugU97V2xA4fx9oBrwvUQ@mail.gmail.com>
- <alpine.DEB.2.11.1801191309430.24931@piezo.novalocal>
+From: Ricardo Dias <rdias@suse.com>
+Subject: Re: debugging mgr python modules
+Date: Tue, 23 Jan 2018 07:30:43 +0000
+Message-ID: <60075fa9-f114-649c-b49b-217087f33e89@suse.com>
+References: <822b6122-c866-f6b6-42e5-6913dbef0744@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50288 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751336AbeAWBiO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 22 Jan 2018 20:38:14 -0500
-In-Reply-To: <alpine.DEB.2.11.1801191309430.24931@piezo.novalocal>
+Received: from smtp.nue.novell.com ([195.135.221.5]:45831 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbeAWHbO (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Tue, 23 Jan 2018 02:31:14 -0500
+In-Reply-To: <822b6122-c866-f6b6-42e5-6913dbef0744@suse.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Ugis <ugis22@gmail.com>
-Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Tim Serong <tserong@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
-Yes, the pending backport for what we have so far is in 
-https://github.com/ceph/ceph/pull/20055
 
-With this changes a backfill caused by marking an osd out has the 
-results as shown:
+On 23-01-2018 00:38, Tim Serong wrote:
+> Hi All,
+> 
+> Right now, if you want to debug an mgr python module, you're pretty much
+> restricted to dumping interesting stuff to log files, right?
+> 
+> What about if you wanted to run an interactive python debugger?
+> 
+> I had two half-formed ideas for this.  One is that apparently there's
+> something called prdb, which could theoretically be loaded in an mgr
+> module to enable remote debugging over a socket (although
+> https://pypi.python.org/pypi/rpdb/ says it reroutes stdout and stdin,
+> which I assume might not work given mgr is already eating those -- not
+> sure, haven't had a chance to try it yet).
 
+Even without having the stdout/err it's very useful to be able to stop 
+execution at breakpoints and do a step-by-step execution. I think it 
+should be easy to make prdb to work with ceph-mgr plugins. Thanks for 
+the research.
 
-     health: HEALTH_WARN
-             115/600 objects misplaced (19.167%)
+> 
+> The second idea was to create a python wrapper which provides a stub
+> implementation of the pieces that ceph-mgr exposes from C++ land
+> (ceph_state, etc.).  This would expose some fake cluster state, much as
+> the minion sim thing did in calamari.  Then you could (somehow) load/run
+> a mgr python module completely outside mgr to experimentally poke at it.
+>   Having typed all that out  now, I suspect this might be a PITA to
+> maintain and be ultimately less useful for live debugging that the first
+> half-formed idea, although it might be interesting for unit testing.
 
-...
-   data:
-     pools:   1 pools, 1 pgs
-     objects: 200 objects, 310 kB
-     usage:   173 GB used, 126 GB / 299 GB avail
-     pgs:     115/600 objects misplaced (19.167%)
-              1 active+remapped+backfilling
+I think this idea is also very useful but for a different use-case like 
+unit/functional testing without having to start a Ceph cluster.
+This way we could add unit tests to the ceph-mgr plugins and run them 
+along with the already existing tests.
 
-David
+> 
+> Any thoughts on whether any of the above is worth pursuing?
+> 
+> Thanks,
+> 
+> Tim
+> 
 
-
-On 1/19/18 5:14 AM, Sage Weil wrote:
-> On Fri, 19 Jan 2018, Ugis wrote:
->> Running Luminous 12.2.2, noticed strange behavior lately.
->> When for example setting "ceph osd out X" closer to the reballancing
->> end "degraded" objects still show up, but in "pgs:" section of ceph -s
->> no degraded pgs are still recovering, just ramapped and no degraded
->> pgs can be found in "ceph pg dump"
->>
->>    health: HEALTH_WARN
->>              355767/30286841 objects misplaced (1.175%)
->>              Degraded data redundancy: 28/30286841 objects degraded
->> (0.000%), 96 pgs unclean
->>
->>    services:
->>      ...
->>      osd: 38 osds: 38 up, 37 in; 96 remapped pgs
->>
->>    data:
->>      pools:   19 pools, 4176 pgs
->>      objects: 9859k objects, 39358 GB
->>      usage:   114 TB used, 120 TB / 234 TB avail
->>      pgs:     28/30286841 objects degraded (0.000%)
->>               355767/30286841 objects misplaced (1.175%)
->>               4080 active+clean
->>               81   active+remapped+backfilling
->>               15   active+remapped+backfill_wait
->>
->>
->> Where those 28 degraded objects come from?
-> There aren't actually degraded objects.. in this case it's just
-> misreporting that there are.
->
-> This is a known issue in luminous.  Shortly after release we noticed the
-> problem and David has been working on several changes to the stats
-> calculation to improve the reporting, but those changes have not been
-> backported (and aren't quite complete, either--getting a truly accurate
-> number there is nontrivial in some cases it turns out).
->
->> In such cases usually when backfilling is done degraded objects also
->> disappear, but normally degraded objects should fix before remapped
->> ones by priority.
-> Yes.
->
-> It's unfortunately a scary warning (there shouldn't be degraded
-> objects... and generally speaking aren't) that understandably alarms
-> users.  We hope to have this sorted out soon!
->
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
+-- 
+Ricardo Dias
+Senior Software Engineer - Storage Team
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
+HRB 21284
+(AG Nürnberg)
