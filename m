@@ -1,60 +1,44 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Message decode issue
-Date: Tue, 23 Jan 2018 09:30:28 +0100
-Message-ID: <CAJ4mKGYin9Z9zmmfvFAdrT_eL2+FB6Rw0bhHSQ_885gAg+FyvQ@mail.gmail.com>
-References: <1240D552-284C-4C9C-A114-BFAE7F537D95@gmail.com>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: opentracing
+Date: Tue, 23 Jan 2018 01:37:01 -0800 (PST)
+Message-ID: <alpine.LSU.2.21.1801230122000.27813@smaug>
+References: <alpine.DEB.2.11.1801191944190.24931@piezo.novalocal> <CALe9h7fUidu=qYc9WYG3i9NKdOwHwSX-YiMOMF5zNtXGjGdu8A@mail.gmail.com> <01bcff94-1575-4d11-c8ee-4e9611f94cc9@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:42489 "EHLO
-        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750934AbeAWIaa (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jan 2018 03:30:30 -0500
-Received: by mail-io0-f180.google.com with SMTP id 25so55527ioj.9
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Jan 2018 00:30:30 -0800 (PST)
-In-Reply-To: <1240D552-284C-4C9C-A114-BFAE7F537D95@gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:49265 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751161AbeAWJg1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 Jan 2018 04:36:27 -0500
+In-Reply-To: <01bcff94-1575-4d11-c8ee-4e9611f94cc9@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6Zm25Yas5Yas?= <tdd21151186@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mohamad Gebai <mgebai@suse.de>
+Cc: John Spray <jspray@redhat.com>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 23, 2018 at 9:25 AM, 陶冬冬 <tdd21151186@gmail.com> wrote:
-> Dear Cephers,
->
-> below is a piece of code in Message::decode_message:
-> ```
-> // m->header.version, if non-zero, should be populated with the
->   // newest version of the encoding the code supports.  If set, check
->   // it against compat_version.
->   if (m->get_header().version &&
->       m->get_header().version < header.compat_version) {
->     if (cct) {
->       ldout(cct, 0) << "will not decode message of type " << type
->                     << " version " << header.version
->                     << " because compat_version " << header.compat_version
->                     << " > supported version " << m->get_header().version << dendl;
->       if (cct->_conf->ms_die_on_bad_msg)
->         ceph_abort();
->     }
->     m->put();
->     return 0;
->   }
-> ```
-> I know it’s checking the compatibility of the incoming message.
-> but, i think it’s not sufficient, it only checked if the coming message’s compat_version is bigger than our version (if it’s true, the message is not supported)
-> it should also check if the comming message’s version  is smaller than our compat_version, right ?
+On Mon, 22 Jan 2018, Mohamad Gebai wrote:
 
-No. A message older than us may still be understandable by us. Many of
-the message decode functions branch to deal with older messages, and
-we have a lot of code to communicate with older message types to older
-daemons.
--Greg
+> made. For debug logs, we currently use plain text logging, which is the
+> simplest mechanism, but it's not very efficient.
 
-> please correct me if i’m wrong.
->
-> Regards,
-> Dongdong--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Absolutely.
+
+> could move to compact binary format such as CTF [3]. This would make
+
+I've neither seen nor used CTF before, but it certainly looks like it 
+heads in the right direction, if we want to continue using this kind of 
+"traditional" logging.
+
+> complexity. However, it could be that instrumenting the code according
+> to the specification is enough, and let the user take care of plugging
+> their tracer and infrastructure to it. I'm happy to do more research and
+> see how this can be used in Ceph.
+
+My thought here is that larger users /will/ be willing to do this. They 
+might even buy something like Splunk for exactly this situation. I wonder 
+if that's the division: smaller Ceph users who might prefer traditional 
+logs, vs. large clusters for whom this is a useful investment?
+
+Interested in hearing about what you learn. :-)
+
+-Jesse
