@@ -1,207 +1,36 @@
-From: Zhi Zhang <zhang.david2011@gmail.com>
-Subject: [PATCH] ceph: try to allocate enough memory for reserved caps
-Date: Wed, 24 Jan 2018 18:53:00 +0800
-Message-ID: <1516791180-16881-1-git-send-email-zhang.david2011@gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: OSD recovery priority ?
+Date: Wed, 24 Jan 2018 12:17:36 +0100
+Message-ID: <2721061c-b583-7ea5-8b44-b1d80aa58700@corp.ovh.com>
+References: <CAL2-6bLEx-C3H_7x+JGpJUzP=BTcL5TELi4RjVaf+q7FPms+uw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:34579 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932953AbeAXKxV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jan 2018 05:53:21 -0500
-Received: by mail-pg0-f67.google.com with SMTP id r19so2425541pgn.1
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Jan 2018 02:53:21 -0800 (PST)
+Received: from 1.mo302.mail-out.ovh.net ([137.74.110.74]:56017 "EHLO
+        1.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932992AbeAXLRj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jan 2018 06:17:39 -0500
+In-Reply-To: <CAL2-6bLEx-C3H_7x+JGpJUzP=BTcL5TELi4RjVaf+q7FPms+uw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, zyan@redhat.com
-Cc: Zhi Zhang <zhang.david2011@gmail.com>
+To: Vincent Godin <vince.mlist@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-ceph_reserve_caps may not reserve enough caps under high memory
-pressure, but it saved the needed caps number that expected to
-be reserved. When getting caps, crash would happen due to number
-mismatch.
+On 18-01-24 10:54 AM, Vincent Godin wrote:
+> I have a cluster in recovery state and i notice that few pgs are only
+> hold bye one OSD and a lot hold by two OSDs (pool configured with size
+> =3 & min=1). After few days, i'm surprised to see that the few pgs
+> hold only by one OSD are still there. It seems there is no high
+> priority for pg in critical state (1 on 3) compare to those in warn
+> state (2 on 3). Am i wrong or could it be a near feature ?
+> My Cluster is in Jewel 10.2.6
 
-Now we will try to trim more caps when failing to allocate memory
-for caps need to be reserved, then try again. If still failing to
-allocate memory, return ENOMEM.
+http://docs.ceph.com/docs/master/release-notes/#v10-2-7-jewel
+https://github.com/ceph/ceph/pull/13232 might be closest to what you need. 
+You'd still need to bump up min_size to 2, though.
 
-Signed-off-by: Zhi Zhang <zhang.david2011@gmail.com>
----
- fs/ceph/caps.c       | 62 +++++++++++++++++++++++++++++++++++++++++++++-------
- fs/ceph/mds_client.c | 24 ++++++++++++++------
- fs/ceph/mds_client.h |  3 +++
- fs/ceph/super.h      |  2 +-
- 4 files changed, 75 insertions(+), 16 deletions(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index a14b2c9..c25941b 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -154,13 +154,19 @@ void ceph_adjust_min_caps(struct ceph_mds_client *mdsc, int delta)
- 	spin_unlock(&mdsc->caps_list_lock);
- }
- 
--void ceph_reserve_caps(struct ceph_mds_client *mdsc,
-+/*
-+ * Called under mdsc->mutex.
-+ */
-+int ceph_reserve_caps(struct ceph_mds_client *mdsc,
- 		      struct ceph_cap_reservation *ctx, int need)
- {
--	int i;
-+	int i, j;
- 	struct ceph_cap *cap;
- 	int have;
- 	int alloc = 0;
-+	int max_caps;
-+	bool trimmed = false;
-+	struct ceph_mds_session *s;
- 	LIST_HEAD(newcaps);
- 
- 	dout("reserve caps ctx=%p need=%d\n", ctx, need);
-@@ -179,16 +185,38 @@ void ceph_reserve_caps(struct ceph_mds_client *mdsc,
- 	spin_unlock(&mdsc->caps_list_lock);
- 
- 	for (i = have; i < need; i++) {
-+retry:
- 		cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
--		if (!cap)
--			break;
-+		if (!cap) {
-+			if (!trimmed) {
-+				for (j = 0; j < mdsc->max_sessions; j++) {
-+					s = __ceph_lookup_mds_session(mdsc, j);
-+					if (!s)
-+						continue;
-+					mutex_unlock(&mdsc->mutex);
-+
-+					// trim needed caps to free memory
-+					mutex_lock(&s->s_mutex);
-+					max_caps = s->s_nr_caps - (need - i);
-+					ceph_trim_caps(mdsc, s, max_caps);
-+					mutex_unlock(&s->s_mutex);
-+
-+					ceph_put_mds_session(s);
-+					mutex_lock(&mdsc->mutex);
-+				}
-+				trimmed = true;
-+				goto retry;
-+			} else {
-+				pr_warn("reserve caps ctx=%p ENOMEM "
-+					"need=%d got=%d\n",
-+					ctx, need, have + alloc);
-+				goto out_nomem;
-+			}
-+		}
- 		list_add(&cap->caps_item, &newcaps);
- 		alloc++;
- 	}
--	/* we didn't manage to reserve as much as we needed */
--	if (have + alloc != need)
--		pr_warn("reserve caps ctx=%p ENOMEM need=%d got=%d\n",
--			ctx, need, have + alloc);
-+	BUG_ON(have + alloc != need);
- 
- 	spin_lock(&mdsc->caps_list_lock);
- 	mdsc->caps_total_count += alloc;
-@@ -204,6 +232,24 @@ void ceph_reserve_caps(struct ceph_mds_client *mdsc,
- 	dout("reserve caps ctx=%p %d = %d used + %d resv + %d avail\n",
- 	     ctx, mdsc->caps_total_count, mdsc->caps_use_count,
- 	     mdsc->caps_reserve_count, mdsc->caps_avail_count);
-+	return 0;
-+
-+out_nomem:
-+	while (!list_empty(&newcaps)) {
-+		cap = list_first_entry(&newcaps,
-+				struct ceph_cap, caps_item);
-+		list_del(&cap->caps_item);
-+		kmem_cache_free(ceph_cap_cachep, cap);
-+	}
-+
-+	spin_lock(&mdsc->caps_list_lock);
-+	mdsc->caps_avail_count += have;
-+	mdsc->caps_reserve_count -= have;
-+	BUG_ON(mdsc->caps_total_count != mdsc->caps_use_count +
-+					 mdsc->caps_reserve_count +
-+					 mdsc->caps_avail_count);
-+	spin_unlock(&mdsc->caps_list_lock);
-+	return -ENOMEM;
- }
- 
- int ceph_unreserve_caps(struct ceph_mds_client *mdsc,
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 1b46825..8d74472 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -604,10 +604,20 @@ static void __register_request(struct ceph_mds_client *mdsc,
- 			       struct ceph_mds_request *req,
- 			       struct inode *dir)
- {
-+	int ret = 0;
-+
- 	req->r_tid = ++mdsc->last_tid;
--	if (req->r_num_caps)
--		ceph_reserve_caps(mdsc, &req->r_caps_reservation,
--				  req->r_num_caps);
-+	if (req->r_num_caps) {
-+		ret = ceph_reserve_caps(mdsc, &req->r_caps_reservation,
-+					req->r_num_caps);
-+		if (ret) {
-+			pr_err("__register_request %p "
-+			       "failed to reserve caps: %d\n", req, ret);
-+			// set req->r_err to fail early from __do_request
-+			req->r_err = ret;
-+			return;
-+		}
-+	}
- 	dout("__register_request %p tid %lld\n", req, req->r_tid);
- 	ceph_mdsc_get_request(req);
- 	insert_request(&mdsc->request_tree, req);
-@@ -1545,9 +1555,9 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
- /*
-  * Trim session cap count down to some max number.
-  */
--static int trim_caps(struct ceph_mds_client *mdsc,
--		     struct ceph_mds_session *session,
--		     int max_caps)
-+int ceph_trim_caps(struct ceph_mds_client *mdsc,
-+		   struct ceph_mds_session *session,
-+		   int max_caps)
- {
- 	int trim_caps = session->s_nr_caps - max_caps;
- 
-@@ -2773,7 +2783,7 @@ static void handle_session(struct ceph_mds_session *session,
- 		break;
- 
- 	case CEPH_SESSION_RECALL_STATE:
--		trim_caps(mdsc, session, le32_to_cpu(h->max_caps));
-+		ceph_trim_caps(mdsc, session, le32_to_cpu(h->max_caps));
- 		break;
- 
- 	case CEPH_SESSION_FLUSHMSG:
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 837ac4b..71e3b78 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -444,4 +444,7 @@ extern void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc,
- extern void ceph_mdsc_open_export_target_sessions(struct ceph_mds_client *mdsc,
- 					  struct ceph_mds_session *session);
- 
-+extern int ceph_trim_caps(struct ceph_mds_client *mdsc,
-+			  struct ceph_mds_session *session,
-+			  int max_caps);
- #endif
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 2beeec0..e5fee4f 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -648,7 +648,7 @@ static inline int __ceph_caps_wanted(struct ceph_inode_info *ci)
- extern void ceph_caps_init(struct ceph_mds_client *mdsc);
- extern void ceph_caps_finalize(struct ceph_mds_client *mdsc);
- extern void ceph_adjust_min_caps(struct ceph_mds_client *mdsc, int delta);
--extern void ceph_reserve_caps(struct ceph_mds_client *mdsc,
-+extern int ceph_reserve_caps(struct ceph_mds_client *mdsc,
- 			     struct ceph_cap_reservation *ctx, int need);
- extern int ceph_unreserve_caps(struct ceph_mds_client *mdsc,
- 			       struct ceph_cap_reservation *ctx);
 -- 
-1.8.3.1
-
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
