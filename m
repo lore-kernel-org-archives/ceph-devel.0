@@ -1,218 +1,32 @@
-From: Zhi Zhang <zhang.david2011@gmail.com>
-Subject: [PATCH] ceph: try to allocate enough memory for reserved caps
-Date: Wed, 24 Jan 2018 10:58:32 +0800
-Message-ID: <CAGkCoNKp=0TqoxL9u3pFehuS2MkpSK0NDmNPrncYULKRMxxmMw@mail.gmail.com>
+From: denval re <redenval@gmail.com>
+Subject: How can rbd image qos take effect
+Date: Wed, 24 Jan 2018 12:23:06 +0800
+Message-ID: <CACGTc=E=dSdB4xWeWevqVu0Zwj1YZvP4XpLy=GOdWjnW6FaimA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:37947 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752055AbeAXC7N (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jan 2018 21:59:13 -0500
-Received: by mail-pf0-f194.google.com with SMTP id k19so1950062pfj.5
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Jan 2018 18:59:13 -0800 (PST)
+Received: from mail-io0-f180.google.com ([209.85.223.180]:34151 "EHLO
+        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932947AbeAXEXH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jan 2018 23:23:07 -0500
+Received: by mail-io0-f180.google.com with SMTP id c17so3397302iod.1
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Jan 2018 20:23:07 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Zheng Yan <zyan@redhat.com>
+To: dongsheng.yang@easystack.cn
+Cc: ceph-devel@vger.kernel.org
 
-ceph_reserve_caps may not reserve enough caps under high memory
-pressure, but it saved the needed caps number that expected to
-be reserved. When getting caps, crash would happen due to number
-mismatch.
+Hi,dongsheng (and cc ceph-devel)
 
-Now we will try to trim more caps when failing to allocate memory
-for caps need to be reserved, then try again. If still failing to
-allocate memory, return ENOMEM.
+I've updated my code with ceph master and compiled it, according to
+the description of pr ''rbd: implement image qos in tokenbucket
+algorithm",   using the command "rbd image-meta set test
+conf_rbd_qos_iops_limit IOPS" could  limit the R&W iops of rbd image.
 
-Signed-off-by: Zhi Zhang <zhang.david2011@gmail.com>
----
- fs/ceph/caps.c       | 62
-++++++++++++++++++++++++++++++++++++++++++++++++++++++--------
- fs/ceph/mds_client.c | 24 +++++++++++++++++-------
- fs/ceph/mds_client.h |  3 +++
- fs/ceph/super.h      |  2 +-
- 4 files changed, 75 insertions(+), 16 deletions(-)
+Then I use vstart.sh script to start my cluster, but using fio tool
+with rbd ioengine way to randwrite rbd image, there is no effect to
+limit IOPS with the above command, Is there something wrong with my
+operation or is there some other setting that must set?
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index a14b2c9..6784f59 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -154,13 +154,19 @@ void ceph_adjust_min_caps(struct ceph_mds_client
-*mdsc, int delta)
-        spin_unlock(&mdsc->caps_list_lock);
- }
-
--void ceph_reserve_caps(struct ceph_mds_client *mdsc,
-+/*
-+ * Called under mdsc->mutex.
-+ */
-+int ceph_reserve_caps(struct ceph_mds_client *mdsc,
-                      struct ceph_cap_reservation *ctx, int need)
- {
--       int i;
-+       int i, j;
-        struct ceph_cap *cap;
-        int have;
-        int alloc = 0;
-+       int max_caps;
-+       bool trimmed = false;
-+       struct ceph_mds_session *s;
-        LIST_HEAD(newcaps);
-
-        dout("reserve caps ctx=%p need=%d\n", ctx, need);
-@@ -179,16 +185,38 @@ void ceph_reserve_caps(struct ceph_mds_client *mdsc,
-        spin_unlock(&mdsc->caps_list_lock);
-
-        for (i = have; i < need; i++) {
-+retry:
-                cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
--               if (!cap)
--                       break;
-+               if (!cap) {
-+                       if (!trimmed) {
-+                               for (j = 0; j < mdsc->max_sessions; j++) {
-+                                       s = __ceph_lookup_mds_session(mdsc, j);
-+                                       if (!s)
-+                                               continue;
-+                                       mutex_unlock(&mdsc->mutex);
-+
-+                                       // trim needed caps to free memory
-+                                       mutex_lock(&s->s_mutex);
-+                                       max_caps = s->s_nr_caps - (need - i);
-+                                       ceph_trim_caps(mdsc, s, max_caps);
-+                                       mutex_unlock(&s->s_mutex);
-+
-+                                       ceph_put_mds_session(s);
-+                                       mutex_lock(&mdsc->mutex);
-+                               }
-+                               trimmed = true;
-+                               goto retry;
-+                       } else {
-+                               pr_warn("reserve caps ctx=%p ENOMEM "
-+                                       "need=%d got=%d\n",
-+                                       ctx, need, have + alloc);
-+                               goto out_nomem;
-+                       }
-+               }
-                list_add(&cap->caps_item, &newcaps);
-                alloc++;
-        }
--       /* we didn't manage to reserve as much as we needed */
--       if (have + alloc != need)
--               pr_warn("reserve caps ctx=%p ENOMEM need=%d got=%d\n",
--                       ctx, need, have + alloc);
-+       BUG_ON(have + alloc != need);
-
-        spin_lock(&mdsc->caps_list_lock);
-        mdsc->caps_total_count += alloc;
-@@ -204,6 +232,24 @@ void ceph_reserve_caps(struct ceph_mds_client *mdsc,
-        dout("reserve caps ctx=%p %d = %d used + %d resv + %d avail\n",
-             ctx, mdsc->caps_total_count, mdsc->caps_use_count,
-             mdsc->caps_reserve_count, mdsc->caps_avail_count);
-+       return 0;
-+
-+out_nomem:
-+       while (!list_empty(&newcaps)) {
-+               cap = list_first_entry(&newcaps,
-+                                       struct ceph_cap, caps_item);
-+               list_del(&cap->caps_item);
-+               kmem_cache_free(ceph_cap_cachep, cap);
-+       }
-+
-+       spin_lock(&mdsc->caps_list_lock);
-+       mdsc->caps_avail_count += have;
-+       mdsc->caps_reserve_count -= have;
-+       BUG_ON(mdsc->caps_total_count != mdsc->caps_use_count +
-+                                        mdsc->caps_reserve_count +
-+                                        mdsc->caps_avail_count);
-+       spin_unlock(&mdsc->caps_list_lock);
-+       return -ENOMEM;
- }
-
- int ceph_unreserve_caps(struct ceph_mds_client *mdsc,
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 1b46825..abc0375 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -604,10 +604,20 @@ static void __register_request(struct
-ceph_mds_client *mdsc,
-                               struct ceph_mds_request *req,
-                               struct inode *dir)
- {
-+       int ret = 0;
-+
-        req->r_tid = ++mdsc->last_tid;
--       if (req->r_num_caps)
--               ceph_reserve_caps(mdsc, &req->r_caps_reservation,
--                                 req->r_num_caps);
-+       if (req->r_num_caps) {
-+               ret = ceph_reserve_caps(mdsc, &req->r_caps_reservation,
-+                                       req->r_num_caps);
-+               if (ret) {
-+                       pr_err("__register_request %p "
-+                              "failed to reserve caps: %d\n", req, ret);
-+                       // set req->r_err to fail early from __do_request
-+                       req->r_err = ret;
-+                       return;
-+               }
-+       }
-        dout("__register_request %p tid %lld\n", req, req->r_tid);
-        ceph_mdsc_get_request(req);
-        insert_request(&mdsc->request_tree, req);
-@@ -1545,9 +1555,9 @@ static int trim_caps_cb(struct inode *inode,
-struct ceph_cap *cap, void *arg)
- /*
-  * Trim session cap count down to some max number.
-  */
--static int trim_caps(struct ceph_mds_client *mdsc,
--                    struct ceph_mds_session *session,
--                    int max_caps)
-+int ceph_trim_caps(struct ceph_mds_client *mdsc,
-+                   struct ceph_mds_session *session,
-+                   int max_caps)
- {
-        int trim_caps = session->s_nr_caps - max_caps;
-
-@@ -2773,7 +2783,7 @@ static void handle_session(struct
-ceph_mds_session *session,
-                break;
-
-        case CEPH_SESSION_RECALL_STATE:
--               trim_caps(mdsc, session, le32_to_cpu(h->max_caps));
-+               ceph_trim_caps(mdsc, session, le32_to_cpu(h->max_caps));
-                break;
-
-        case CEPH_SESSION_FLUSHMSG:
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 837ac4b..f9160f4 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -444,4 +444,7 @@ extern void ceph_mdsc_handle_fsmap(struct
-ceph_mds_client *mdsc,
- extern void ceph_mdsc_open_export_target_sessions(struct ceph_mds_client *mdsc,
-                                          struct ceph_mds_session *session);
-
-+extern int ceph_trim_caps(struct ceph_mds_client *mdsc,
-+                          struct ceph_mds_session *session,
-+                          int max_caps);
- #endif
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 2beeec0..e5fee4f 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -648,7 +648,7 @@ static inline int __ceph_caps_wanted(struct
-ceph_inode_info *ci)
- extern void ceph_caps_init(struct ceph_mds_client *mdsc);
- extern void ceph_caps_finalize(struct ceph_mds_client *mdsc);
- extern void ceph_adjust_min_caps(struct ceph_mds_client *mdsc, int delta);
--extern void ceph_reserve_caps(struct ceph_mds_client *mdsc,
-+extern int ceph_reserve_caps(struct ceph_mds_client *mdsc,
-                             struct ceph_cap_reservation *ctx, int need);
- extern int ceph_unreserve_caps(struct ceph_mds_client *mdsc,
-                               struct ceph_cap_reservation *ctx);
-
-
-Regards,
-Zhi Zhang (David)
-Contact: zhang.david2011@gmail.com
-              zhangz.david@outlook.com
+Any advice will be appreciated.
+Thank you!
