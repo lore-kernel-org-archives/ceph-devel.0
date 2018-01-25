@@ -1,7 +1,7 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Tech Talk Canceled
-Date: Thu, 25 Jan 2018 11:29:54 -0200
-Message-ID: <CAB0WNsinLPE8w7ukX6QWHd7rNuMsyu56xdvPjbEpzo_ZSdqaew@mail.gmail.com>
+Subject: Cephalocon APAC Call for Proposals
+Date: Thu, 25 Jan 2018 11:41:57 -0200
+Message-ID: <CAB0WNsjwVkBVZQcdLYWzzCswkFeyhY_+LiOkUQfFF63DK6EaSg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -15,17 +15,17 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-Community <ceph-community-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
 Hey Cephers,
 
-Sorry for the short notice, but the Ceph Tech Talk schedule for today
-(January 25th) has been canceled because a calendar conflict.
+This is a friendly reminder that the Call for Proposals for the
+Cephalocon APAC 2018[1] ends next Wednesday, January 31st.
 
-We will be posting the schedule for the upcoming Ceph Tech Talks here
-soon. If you have any interesting topic to talk about, feel free to
-contact me.
+ [1] http://cephalocon.doit.com.cn/guestreg_en.html
+
+If you haven't submitted your proposal so far, you still have time!
 
 Kindest regards,
 
