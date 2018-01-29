@@ -1,61 +1,74 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Missing prettytable during ceph-disk runs
-Date: Sun, 28 Jan 2018 18:46:32 +1000
-Message-ID: <CAF-wwdG8jEWX_u4UaDiJsO_GsR7Dwx4kthmXfVjL1tjwCtj5PQ@mail.gmail.com>
-References: <92db6d6a-420d-3f89-9631-8376b5d7d6a2@digiware.nl>
- <CAC-Np1y1hBFVnor9OhMxmj+xXZO5cnHvcQz6wAbjJ-7xhLhPBw@mail.gmail.com>
- <alpine.DEB.2.11.1706021539070.3646@piezo.novalocal> <5f1c8ae2-f112-4ae4-60c1-ed3f57274d44@digiware.nl>
+From: Andreas Calminder <andreas.calminder@klarna.com>
+Subject: Re: RGW bucket tagging
+Date: Mon, 29 Jan 2018 08:25:44 +0100
+Message-ID: <CAA1GxO2CbG=UR_4SKb4pV-j78ZG-nzjwaD+veqgx-RyQBryOSg@mail.gmail.com>
+References: <CAA1GxO07U6t_WQhHFur9BPjaaWhZoA1nGazffSB_1Nfjptetog@mail.gmail.com>
+ <CAKOnar=rwS6SKDDbAk6udCi8bJUD5pnM1g4ZSkH-VD4Edjo-rg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:45249 "EHLO
-        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751572AbeA1Iqe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Jan 2018 03:46:34 -0500
-Received: by mail-lf0-f42.google.com with SMTP id x196so5659887lfd.12
-        for <ceph-devel@vger.kernel.org>; Sun, 28 Jan 2018 00:46:34 -0800 (PST)
-In-Reply-To: <5f1c8ae2-f112-4ae4-60c1-ed3f57274d44@digiware.nl>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:43624 "EHLO
+        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751042AbeA2H0G (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jan 2018 02:26:06 -0500
+Received: by mail-lf0-f49.google.com with SMTP id o89so8397890lfg.10
+        for <ceph-devel@vger.kernel.org>; Sun, 28 Jan 2018 23:26:05 -0800 (PST)
+In-Reply-To: <CAKOnar=rwS6SKDDbAk6udCi8bJUD5pnM1g4ZSkH-VD4Edjo-rg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Sage Weil <sage@newdream.net>, Alfredo Deza <adeza@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjami@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>
 
-On Sat, Jun 3, 2017 at 2:01 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+Thanks for your reply Matt, I did some more poking around; you're
+right, there's no support for bucket tagging. Does anyone know if this
+feature will be implemented somewhere in the foreseeable future?
+
+Best regards,
+andreas
+
+On 26 January 2018 at 17:08, Matt Benjamin <mbenjami@redhat.com> wrote:
+> Hi Andreas,
 >
-
-Hi Willem,
-
-Sorry to bump an old thread but I was wondering if you could test
-something for me?
-
-> I have a soluution that works for me.
+> I think we don't support bucket tagging yet.  There is support for
+> object tagging, plus integration w/bucket policy and lifecycle.
 >
-> ceph-disk: add required py-module for tox-testing #15433
+> Abhishek, do you have anything to add here?
 >
-> It that is the way to follow, I do not know, because there are a zillion
-> place to add a requirement. And I just think this is the one.
-> Asuming that it also tells tox that prettytable is required durign
-> regular running.
-> But that is open for any better suggestions.
-
-Would you mind testing replacing "sitepackages=True" with
-"whitelist_externals = prettyprint".
-
-When "sitepackages=True" on fc27 and you already have python2-pytest
-and python2-coverage installed (as I currently do) the environment
-tries to use the system packages and fails horribly.
-
+> Matt
 >
-> Once you add this, you atleast need to run "make tests" to rebuild the
-> tox env.
-
-You should be able to just...
-
-$ rm ../src/ceph-disk/.tox -rf
-$ ctest -R ceph-disk --output-on-failure
-
-> --WjW
-
--- 
-Cheers,
-Brad
+> On Fri, Jan 26, 2018 at 9:47 AM, Andreas Calminder
+> <andreas.calminder@klarna.com> wrote:
+>> Hello,
+>> I'm evaluating the possibility of using tags for buckets in RGW, using
+>> boto3 s3.BucketTagging.put returns  client error and the rgw log
+>> throws a 400 and says: provided input did not specify location
+>> constraint correctly
+>>
+>> I figured it's most likely that I did something silly in the code,
+>> however before digging deeper I figured I should probably check if
+>> it's even supported in RGW, I found this:
+>> http://docs.ceph.com/docs/master/dev/radosgw/s3_compliance/
+>>
+>> Which says Bucket Tagging "?", So I suspect Bucket Tagging isn't
+>> supported? Any clarification or pointers appreciated here.
+>>
+>> Thanks!
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+>
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-821-5101
+> fax.  734-769-8938
+> cel.  734-216-5309
