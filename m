@@ -1,58 +1,433 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Moving RGW buckets under tenant namespaces
-Date: Tue, 30 Jan 2018 17:27:39 +0100
-Message-ID: <87po5rl3b8.fsf@suse.com>
+From: Maged Mokhtar <mmokhtar@petasan.org>
+Subject: Re: [PATCH] rbd: support v2 fancy striping
+Date: Tue, 30 Jan 2018 18:02:43 +0200
+Message-ID: <766f66a4b9962abcddea91014b8938b6@petasan.org>
+References: <62d856564262aee876e8d18b2d12d701.squirrel@host449.hostmonster.com>
+ <CAOi1vP-2LqrnDTLOEck0T3hgTaWCB2QtY54HNcmBTKL7JY3=cQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:60953 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751986AbeA3Q2E (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 30 Jan 2018 11:28:04 -0500
+Received: from gproxy6-pub.mail.unifiedlayer.com ([67.222.39.168]:56507 "EHLO
+        gproxy6-pub.mail.unifiedlayer.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752009AbeA3Qdd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 30 Jan 2018 11:33:33 -0500
+Received: from cmgw4 (unknown [10.0.90.85])
+        by gproxy6.mail.unifiedlayer.com (Postfix) with ESMTP id 7B5B51E0D02
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jan 2018 09:02:47 -0700 (MST)
+In-Reply-To: <CAOi1vP-2LqrnDTLOEck0T3hgTaWCB2QtY54HNcmBTKL7JY3=cQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-devel-owner@vger.kernel.org
 
+Hi Ilya,
 
-I was looking into moving buckets owned by a user under a tenant
-namespace; (a common usecase is in openstack installations where tenant
-namespaces are preferred with openstack keystone for eg.). Doing this
-manually with rados and radosgw-admin cli would involve something in the
-lines of:
+Glad you have already added this, i will wait for your changes and apply 
+them when done.
 
-1. Copying the user and user.buckets object under the users.uid pool with
-  the tenant$user name with rados cp which seems to preserve omaps
+Cheers
 
-2 radosgw-admin metadata get user:<uid> > uid.json # change uid to
-  reflect the tenant field
+Maged
 
-3 radosgw-admin metadata get bucket:<bucket-name> modifying the empty
-  tenant field with the tenant info; and owner to the tenant$user format
-  and finally metadata put bucket:tenant/<bucket-name>
+On 2018-01-30 15:28, Ilya Dryomov wrote:
 
-4 repeating the same metadata get/put for
-  bucket.instance 
-
-5 metadata rm user:<old-username> bucket:<old-bucket-name>
-  bucket.instance:<old-instance>
-
-6 radosgw-admin metadata put < modified-uid.json
-
-I'm not sure whether this covers all the bases or any other metadata is
-left behind? 
-
-Current RGW Bucket link/unlink does steps 2,3 and getting
-the ACLs right and correctly adding and removing the omap entries in the
-user.bucket object, though in the current form it would fail as
-version checks for a non existent object would fail. 
-
-Given these complexities would it also make sense supporting this in
-radosgw-admin? (with the caveat that we want no buckets or user
-metadata of the concerned user also modified during this time frame)
-
---
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG Nürnberg)
+> On Tue, Jan 30, 2018 at 12:27 AM, Maged Mokhtar <mmokhtar@petasan.org> 
+> wrote:
+> 
+>> Adds v2 fancy striping support to kernel rbd. Adds libceph striper.c 
+>> based
+>> on user space osdc/Striper.cc. Clone images are limited to have
+>> same striping layout as parents in order to simplify callback of 
+>> copyup
+>> requests and insure they are atomic. If they have different layout we 
+>> fail
+>> during image probe.
+>> 
+>> Signed-off-by: Maged Mokhtar <mmokhtar@petasan.org>
+>> ---
+>> drivers/block/rbd.c          |  131 ++++++++++++++++++---------------
+>> include/linux/ceph/striper.h |   34 ++++++++
+>> net/ceph/Makefile            |    2
+>> net/ceph/striper.c           |   81 ++++++++++++++++++++
+>> 4 files changed, 191 insertions(+), 57 deletions(-)
+>> 
+>> diff -urNp a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> --- a/drivers/block/rbd.c       2018-01-28 23:20:33.000000000 +0200
+>> +++ b/drivers/block/rbd.c       2018-01-29 22:23:18.755108873 +0200
+>> @@ -33,6 +33,7 @@
+>> #include <linux/ceph/mon_client.h>
+>> #include <linux/ceph/cls_lock_client.h>
+>> #include <linux/ceph/decode.h>
+>> +#include <linux/ceph/striper.h>
+>> #include <linux/parser.h>
+>> #include <linux/bsearch.h>
+>> 
+>> @@ -1231,27 +1232,6 @@ static void rbd_dev_mapping_clear(struct
+>> rbd_dev->mapping.features = 0;
+>> }
+>> 
+>> -static u64 rbd_segment_offset(struct rbd_device *rbd_dev, u64 offset)
+>> -{
+>> -       u64 segment_size = rbd_obj_bytes(&rbd_dev->header);
+>> -
+>> -       return offset & (segment_size - 1);
+>> -}
+>> -
+>> -static u64 rbd_segment_length(struct rbd_device *rbd_dev,
+>> -                               u64 offset, u64 length)
+>> -{
+>> -       u64 segment_size = rbd_obj_bytes(&rbd_dev->header);
+>> -
+>> -       offset &= segment_size - 1;
+>> -
+>> -       rbd_assert(length <= U64_MAX - offset);
+>> -       if (offset + length > segment_size)
+>> -               length = segment_size - offset;
+>> -
+>> -       return length;
+>> -}
+>> -
+>> /*
+>> * bio helpers
+>> */
+>> @@ -2427,9 +2407,15 @@ static int rbd_img_request_fill(struct r
+>> 
+>> while (resid) {
+>> struct ceph_osd_request *osd_req;
+>> -               u64 object_no = img_offset >> 
+>> rbd_dev->header.obj_order;
+>> -               u64 offset = rbd_segment_offset(rbd_dev, img_offset);
+>> -               u64 length = rbd_segment_length(rbd_dev, img_offset, 
+>> resid);
+>> +               u64 object_no;
+>> +               u64 offset;
+>> +               u64 length;
+>> +               struct stripe_extent ext;
+>> +
+>> +               
+>> get_stripe_extent(&rbd_dev->layout,img_offset,resid,&ext);
+>> +               object_no = ext.objectno;
+>> +               offset = ext.offset;
+>> +               length = ext.length;
+>> 
+>> obj_request = rbd_obj_request_create(type);
+>> if (!obj_request)
+>> @@ -2624,7 +2610,6 @@ out_err:
+>> * object request from the image request does not exist.
+>> *
+>> * A page array big enough to hold the returned data is allocated
+>> - * and supplied to rbd_img_request_fill() as the "data descriptor."
+>> * When the read completes, this page array will be transferred to
+>> * the original object request for the copyup operation.
+>> *
+>> @@ -2641,25 +2626,47 @@ static int rbd_img_obj_parent_read_full(
+>> u32 page_count;
+>> int result;
+>> 
+>> -       rbd_assert(rbd_dev->parent != NULL);
+>> +       struct rbd_obj_request *parent_obj_request = NULL;
+>> +       struct ceph_osd_request *osd_req;
+>> 
+>> -       /*
+>> -        * Determine the byte range covered by the object in the
+>> -        * child image to which the original request was to be sent.
+>> -        */
+>> -       img_offset = obj_request->img_offset - obj_request->offset;
+>> -       length = rbd_obj_bytes(&rbd_dev->header);
+>> +       rbd_assert(rbd_dev->parent != NULL);
+>> +       if (rbd_dev->header.stripe_count !=
+>> +           rbd_dev->parent->header.stripe_count ||
+>> +           rbd_dev->header.stripe_unit !=
+>> +           rbd_dev->parent->header.stripe_unit) {
+>> +               rbd_warn(rbd_dev,"Cannot perform parent full object 
+>> read due "
+>> +                        "to stripe mis-match\n");
+>> +               result = -EINVAL;
+>> +               goto out_err;
+>> +       }
+>> 
+>> /*
+>> * There is no defined parent data beyond the parent
+>> * overlap, so limit what we read at that boundary if
+>> * necessary.
+>> */
+>> -       if (img_offset + length > rbd_dev->parent_overlap) {
+>> -               rbd_assert(img_offset < rbd_dev->parent_overlap);
+>> -               length = rbd_dev->parent_overlap - img_offset;
+>> -       }
+>> 
+>> +       img_offset = get_object_start_offset(&rbd_dev->layout,
+>> +                                            obj_request->object_no);
+>> +       rbd_assert(img_offset < rbd_dev->parent_overlap);
+>> +       if (rbd_dev->parent_overlap < 
+>> get_object_end_offset(&rbd_dev->layout,
+>> +                                               
+>> obj_request->object_no)) {
+>> +               u64 diff = rbd_dev->parent_overlap - img_offset;
+>> +               u64 stripe_row_size = rbd_dev->header.stripe_unit *
+>> +                       rbd_dev->header.stripe_count;
+>> +               u64 rows = diff / stripe_row_size;
+>> +               u64 remain = diff - rows * stripe_row_size;
+>> +               length = rows * rbd_dev->header.stripe_unit;
+>> +               if (rbd_dev->header.stripe_unit < remain)
+>> +                       length = length + rbd_dev->header.stripe_unit;
+>> +               else
+>> +                       length = length + remain;
+>> +       }
+>> +       else {
+>> +               /* copy entire parent object */
+>> +               length = rbd_obj_bytes(&rbd_dev->header);
+>> +       }
+>> +
+>> /*
+>> * Allocate a page array big enough to receive the data read
+>> * from the parent.
+>> @@ -2678,9 +2685,27 @@ static int rbd_img_obj_parent_read_full(
+>> if (!parent_request)
+>> goto out_err;
+>> 
+>> -       result = rbd_img_request_fill(parent_request, 
+>> OBJ_REQUEST_PAGES, pages);
+>> -       if (result)
+>> +       parent_obj_request = 
+>> rbd_obj_request_create(OBJ_REQUEST_PAGES);
+>> +       if (!obj_request) {
+>> +               rbd_img_obj_request_del(parent_request, 
+>> parent_obj_request);
+>> goto out_err;
+>> +       }
+>> +       rbd_img_obj_request_add(parent_request, parent_obj_request);
+>> +       parent_obj_request->object_no = obj_request->object_no;
+>> +       parent_obj_request->offset = 0;
+>> +       parent_obj_request->length = length;
+>> +       parent_obj_request->pages = pages;
+>> +       page_count = (u32)calc_pages_for(0, length);
+>> +       parent_obj_request->page_count = page_count;
+>> +       osd_req = 
+>> rbd_osd_req_create(rbd_dev,OBJ_OP_READ,1,parent_obj_request);
+>> +       if (!osd_req) {
+>> +               rbd_img_obj_request_del(parent_request, 
+>> parent_obj_request);
+>> +               goto out_err;
+>> +       }
+>> +       parent_obj_request->osd_req = osd_req;
+>> +       parent_obj_request->callback = rbd_img_obj_callback;
+>> +       parent_obj_request->img_offset = img_offset;
+>> +       rbd_img_obj_request_fill(parent_obj_request, osd_req, 
+>> OBJ_OP_READ, 0);
+>> 
+>> parent_request->copyup_pages = pages;
+>> parent_request->copyup_page_count = page_count;
+>> @@ -5090,28 +5115,10 @@ static int rbd_dev_v2_striping_info(stru
+>> if (ret < size)
+>> return -ERANGE;
+>> 
+>> -       /*
+>> -        * We don't actually support the "fancy striping" feature
+>> -        * (STRIPINGV2) yet, but if the striping sizes are the
+>> -        * defaults the behavior is the same as before.  So find
+>> -        * out, and only fail if the image has non-default values.
+>> -        */
+>> -       ret = -EINVAL;
+>> obj_size = rbd_obj_bytes(&rbd_dev->header);
+>> p = &striping_info_buf;
+>> stripe_unit = ceph_decode_64(&p);
+>> -       if (stripe_unit != obj_size) {
+>> -               rbd_warn(rbd_dev, "unsupported stripe unit "
+>> -                               "(got %llu want %llu)",
+>> -                               stripe_unit, obj_size);
+>> -               return -EINVAL;
+>> -       }
+>> stripe_count = ceph_decode_64(&p);
+>> -       if (stripe_count != 1) {
+>> -               rbd_warn(rbd_dev, "unsupported stripe count "
+>> -                               "(got %llu want 1)", stripe_count);
+>> -               return -EINVAL;
+>> -       }
+>> rbd_dev->header.stripe_unit = stripe_unit;
+>> rbd_dev->header.stripe_count = stripe_count;
+>> 
+>> @@ -6090,6 +6097,18 @@ static int rbd_dev_image_probe(struct rb
+>> ret = rbd_dev_probe_parent(rbd_dev, depth);
+>> if (ret)
+>> goto err_out_probe;
+>> +
+>> +       if (rbd_dev->parent != NULL) {
+>> +               if (rbd_dev->header.stripe_count !=
+>> +                   rbd_dev->parent->header.stripe_count ||
+>> +                   rbd_dev->header.stripe_unit !=
+>> +                   rbd_dev->parent->header.stripe_unit) {
+>> +                       rbd_warn(rbd_dev,"Cannot map child image with 
+>> "
+>> +                                "different striping than parent");
+>> +                       ret = -EINVAL;
+>> +                       goto err_out_probe;
+>> +               }
+>> +       }
+>> 
+>> dout("discovered format %u image, header name is %s\n",
+>> rbd_dev->image_format, rbd_dev->header_oid.name);
+>> diff -urNp a/include/linux/ceph/striper.h 
+>> b/include/linux/ceph/striper.h
+>> --- a/include/linux/ceph/striper.h      1970-01-01 02:00:00.000000000 
+>> +0200
+>> +++ b/include/linux/ceph/striper.h      2018-01-29 22:23:18.755108873 
+>> +0200
+>> @@ -0,0 +1,34 @@
+>> +/* SPDX-License-Identifier: GPL-2.0 */
+>> +#ifndef _FS_CEPH_STRIPER_H
+>> +#define _FS_CEPH_STRIPER_H
+>> +
+>> +#include <linux/ceph/ceph_fs.h>
+>> +
+>> +struct ceph_file_layout;
+>> +
+>> +struct stripe_extent {
+>> +       u64     objectno;
+>> +       u64     offset;
+>> +       u64     length;
+>> +};
+>> +
+>> +/* Logical to Object address mapping */
+>> +void get_stripe_extent(struct ceph_file_layout *layout,u64 offset,
+>> +                       u64 len,struct stripe_extent *ext);
+>> +
+>> +/* Object to Logical address mapping */
+>> +u64 get_file_offset(struct ceph_file_layout *layout,u64 objectno,u64 
+>> off);
+>> +
+>> +static inline u64 get_object_start_offset(struct ceph_file_layout 
+>> *layout,
+>> +                                          u64 objectno)
+>> +{
+>> +       return get_file_offset(layout,objectno,0);
+>> +}
+>> +
+>> +static inline u64 get_object_end_offset(struct ceph_file_layout 
+>> *layout,
+>> +                                        u64 objectno)
+>> +{
+>> +       return get_file_offset(layout,objectno,layout->object_size);
+>> +}
+>> +
+>> +#endif
+>> diff -urNp a/net/ceph/Makefile b/net/ceph/Makefile
+>> --- a/net/ceph/Makefile 2018-01-28 23:20:33.000000000 +0200
+>> +++ b/net/ceph/Makefile 2018-01-29 22:23:18.755108873 +0200
+>> @@ -13,5 +13,5 @@ libceph-y := ceph_common.o messenger.o m
+>> crypto.o armor.o \
+>> auth_x.o \
+>> ceph_fs.o ceph_strings.o ceph_hash.o \
+>> -       pagevec.o snapshot.o string_table.o
+>> +       pagevec.o snapshot.o string_table.o striper.o
+>> 
+>> diff -urNp a/net/ceph/striper.c b/net/ceph/striper.c
+>> --- a/net/ceph/striper.c        1970-01-01 02:00:00.000000000 +0200
+>> +++ b/net/ceph/striper.c        2018-01-29 22:23:18.755108873 +0200
+>> @@ -0,0 +1,81 @@
+>> +// SPDX-License-Identifier: GPL-2.0
+>> +
+>> +#include <linux/ceph/messenger.h>
+>> +#include <linux/ceph/striper.h>
+>> +
+>> +/*
+>> + * Address mappings for striped objects
+>> + * Based on user space osdc/Striper.cc
+>> + */
+>> +
+>> +/* Logical to Object address, based on osdc/Striper.cc 
+>> file_to_extents() */
+>> +void get_stripe_extent(struct ceph_file_layout *layout,u64 offset,
+>> +                       u64 len,struct stripe_extent *ext)
+>> +{
+>> +       u64 object_size;
+>> +       u64 su;
+>> +       u64 stripe_count;
+>> +       u64 stripes_per_object;
+>> +       u64 blockno;
+>> +       u64 stripeno;
+>> +       u64 stripepos;
+>> +       u64 objectsetno;
+>> +       u64 objectno;
+>> +       u64 block_start;
+>> +       u64 block_off;
+>> +       u64 max;
+>> +
+>> +       object_size = layout->object_size;
+>> +       su = layout->stripe_unit;
+>> +       stripe_count = layout->stripe_count;
+>> +       stripes_per_object = object_size / su;
+>> +
+>> +       blockno = offset / su; /* which block */
+>> +       stripeno = blockno / stripe_count; /* which horizontal stripe 
+>> Y */
+>> +       stripepos = blockno % stripe_count; /* which object in object 
+>> set X */
+>> +       objectsetno = stripeno / stripes_per_object; /* which object 
+>> set */
+>> +       objectno = objectsetno * stripe_count + stripepos;  /* object 
+>> id */
+>> +
+>> +       // map range into object
+>> +       block_start = (stripeno % stripes_per_object) * su;
+>> +       block_off = offset % su;
+>> +       max = su - block_off;
+>> +
+>> +       ext->objectno = objectno;
+>> +       ext->offset = block_start + block_off;
+>> +       if (len > max)
+>> +               ext->length = max;
+>> +       else
+>> +               ext->length = len;
+>> +}
+>> +EXPORT_SYMBOL(get_stripe_extent);
+>> +
+>> +/* Object to Logical address, based on osdc/Striper.cc 
+>> extent_to_file() */
+>> +u64 get_file_offset(struct ceph_file_layout *layout,u64 objectno,u64 
+>> off)
+>> +{
+>> +       u64 object_size;
+>> +       u64 su;
+>> +       u64 stripe_count;
+>> +       u64 stripes_per_object;
+>> +       u64 stripepos;
+>> +       u64 objectsetno;
+>> +       u64 stripeno;
+>> +       u64 blockno;
+>> +       u64 off_in_block;
+>> +       u64 file_offset;
+>> +
+>> +       object_size = layout->object_size;
+>> +       su = layout->stripe_unit;
+>> +       stripe_count = layout->stripe_count;
+>> +       stripes_per_object = object_size / su;
+>> +       off_in_block = off % su;
+>> +
+>> +       stripepos = objectno % stripe_count;
+>> +       objectsetno = objectno / stripe_count;
+>> +       stripeno = off / su + objectsetno * stripes_per_object;
+>> +       blockno = stripeno * stripe_count + stripepos;
+>> +       file_offset = blockno * su + off_in_block;
+>> +
+>> +       return file_offset;
+>> +}
+>> +EXPORT_SYMBOL(get_file_offset);
+> 
+> Hi Maged,
+> 
+> I'm finishing up a full striping v2 (i.e. adjacent extents are merged
+> together, no same layout limitation, etc) right now.  It will be posted
+> to ceph-devel in the next week or two.
+> 
+> Thanks,
+> 
+> Ilya
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
