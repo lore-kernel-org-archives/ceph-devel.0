@@ -1,54 +1,54 @@
-From: TYLin <wooertim@gmail.com>
-Subject: cephe-tier forward mode hang in luminous
-Date: Tue, 30 Jan 2018 12:28:03 +0800
-Message-ID: <CA2ECFED-FE6E-4A8D-B444-DDA613EF1A51@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.0 \(3445.1.6\))
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: improving efficiency of syncfs
+Date: Tue, 30 Jan 2018 15:05:50 +0800
+Message-ID: <B0E2B060-6C05-4851-8B19-6B4AFA1F4509@redhat.com>
+References: <1517277750-144449-1-git-send-email-cgxu519@icloud.com>
+Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
 Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+        charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:36697 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752076AbeA3E2I (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jan 2018 23:28:08 -0500
-Received: by mail-pf0-f176.google.com with SMTP id 23so7606107pfp.3
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jan 2018 20:28:08 -0800 (PST)
-Received: from [192.168.80.71] (1-171-49-192.dynamic-ip.hinet.net. [1.171.49.192])
-        by smtp.gmail.com with ESMTPSA id x64sm18705930pgb.79.2018.01.29.20.28.06
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jan 2018 20:28:07 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:53754 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751476AbeA3HGA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 30 Jan 2018 02:06:00 -0500
+In-Reply-To: <1517277750-144449-1-git-send-email-cgxu519@icloud.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-Hi all,
-
-We found that cache-tier forward mode is hanging in luminous 12.2.1. It =
-seems that the client is keep sending request to cache-tier's osd and =
-the osd always replied redirect to client. This seems due to this patch:
-
-=
-https://github.com/ceph/ceph/commit/9adb68f5e206c167b97ec89935cbdaeb462173=
-d8#diff-847b3447bebb2f031678eef0a2aea60d
-
-I added =E2=80=9CCEPH_OSD_FLAG_IGNORE_OVERLAY=E2=80=9D to the op to =
-force it skips cache-tier when client got redirect reply and it seems to =
-work. Is there any potential issue of adding this flag here?
-
-in src/osdc/Objecter.cc
-void Objecter::handle_osd_op_reply(MOSDOpReply *m)
-{
-  =E2=80=A6
-  =E2=80=A6
-  if (m->is_redirect_reply()) {
-    =E2=80=A6
-    op->target.flags |=3D (CEPH_OSD_FLAG_REDIRECTED | =
-CEPH_OSD_FLAG_IGNORE_OVERLAY);
-    ...
-  }
-}=20
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: idryomov@gmail.com, sage@redhat.com, ceph-devel@vger.kernel.org
 
 
-Thanks,
-TY Lin=
+
+> On 30 Jan 2018, at 10:02, Chengguang Xu <cgxu519@icloud.com> wrote:
+> 
+> write_inode() could be called variety of reasons, in the case of syncfs(2)
+> there is no need to wait for flush getting completed in write_inode(),
+> ->sync_fs is for guaranteeing flush completion for all inodes at that point.
+> 
+> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+> ---
+> fs/ceph/caps.c | 2 +-
+> 1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index a14b2c9..fd6ce29 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -2160,7 +2160,7 @@ int ceph_write_inode(struct inode *inode, struct writeback_control *wbc)
+> 	u64 flush_tid;
+> 	int err = 0;
+> 	int dirty;
+> -	int wait = wbc->sync_mode == WB_SYNC_ALL;
+> +	int wait = (wbc->sync_mode == WB_SYNC_ALL && !wbc->for_sync);
+> 
+> 	dout("write_inode %p wait=%d\n", inode, wait);
+> 	if (wait) {
+> -- 
+> 1.8.3.1
+> 
+
+Applied, thanks
+
+Yan, Zheng
+
