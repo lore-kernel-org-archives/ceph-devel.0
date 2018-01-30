@@ -1,433 +1,727 @@
-From: Maged Mokhtar <mmokhtar@petasan.org>
-Subject: Re: [PATCH] rbd: support v2 fancy striping
-Date: Tue, 30 Jan 2018 18:02:43 +0200
-Message-ID: <766f66a4b9962abcddea91014b8938b6@petasan.org>
-References: <62d856564262aee876e8d18b2d12d701.squirrel@host449.hostmonster.com>
- <CAOi1vP-2LqrnDTLOEck0T3hgTaWCB2QtY54HNcmBTKL7JY3=cQ@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
+ FAILED assert(r == -2)
+Date: Tue, 30 Jan 2018 20:25:37 +0100
+Message-ID: <8189b813-054f-eec4-6772-1aab9cfeddcc@profihost.ag>
+References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
+ <alpine.DEB.2.11.1801171856230.24931@piezo.novalocal>
+ <28f90497-df9f-f628-835b-c6c75a752f66@profihost.ag>
+ <alpine.DEB.2.11.1801181314130.8186@piezo.novalocal>
+ <bed7d881-fa34-80fc-6611-99a5f43292fa@profihost.ag>
+ <alpine.DEB.2.11.1801181424040.8186@piezo.novalocal>
+ <8f1028e2-d322-0006-30c9-6f7f4922cb40@profihost.ag>
+ <alpine.DEB.2.11.1801192018060.24931@piezo.novalocal>
+ <bcac326d-8f5b-be5b-2ac5-d55573553e59@profihost.ag>
+ <alpine.DEB.2.11.1801212022230.24931@piezo.novalocal>
+ <ee4a5fa6-2765-5d84-4be5-b191869fcfda@profihost.ag>
+ <alpine.DEB.2.11.1801221430010.24931@piezo.novalocal>
+ <c7392c9a-699b-0405-2252-b4da25c3b700@profihost.ag>
+ <alpine.DEB.2.11.1801221900510.19576@piezo.novalocal>
+ <74816087-cf2c-ec8a-db40-ceebd1504b3c@profihost.ag>
+ <alpine.DEB.2.11.1801240006230.19576@piezo.novalocal>
+ <9358960a-3979-a0da-939e-4076f2975564@profihost.ag>
+ <alpine.DEB.2.11.1801241015330.19576@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gproxy6-pub.mail.unifiedlayer.com ([67.222.39.168]:56507 "EHLO
-        gproxy6-pub.mail.unifiedlayer.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752009AbeA3Qdd (ORCPT
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:38821 "EHLO
+        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752584AbeA3TZk (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 30 Jan 2018 11:33:33 -0500
-Received: from cmgw4 (unknown [10.0.90.85])
-        by gproxy6.mail.unifiedlayer.com (Postfix) with ESMTP id 7B5B51E0D02
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jan 2018 09:02:47 -0700 (MST)
-In-Reply-To: <CAOi1vP-2LqrnDTLOEck0T3hgTaWCB2QtY54HNcmBTKL7JY3=cQ@mail.gmail.com>
+        Tue, 30 Jan 2018 14:25:40 -0500
+In-Reply-To: <alpine.DEB.2.11.1801241015330.19576@piezo.novalocal>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-devel-owner@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Ilya,
+Hi Sage,
 
-Glad you have already added this, i will wait for your changes and apply 
-them when done.
+currently i'm still seeing those repair messages but only one every few
+hours so i can't reproduce this right now.
 
-Cheers
+Running an osd with debug osd = 20 for a whole day is not an option so
+i'll check whether those message get less and are may be solved by
+itself after another week.
 
-Maged
-
-On 2018-01-30 15:28, Ilya Dryomov wrote:
-
-> On Tue, Jan 30, 2018 at 12:27 AM, Maged Mokhtar <mmokhtar@petasan.org> 
-> wrote:
+Greets,
+Stefan
+Am 24.01.2018 um 11:16 schrieb Sage Weil:
+> On Wed, 24 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>> Hi Sage,
+>>
+>> Am 24.01.2018 um 01:07 schrieb Sage Weil:
+>>> On Tue, 23 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>
+>>>> Am 22.01.2018 um 20:01 schrieb Sage Weil:
+>>>>> On Mon, 22 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>> Hi Sage,
+>>>>>>
+>>>>>> thanks! That one fixed it! Now i'm just waiting if the log ever stops
+>>>>>> telling me:
+>>>>>> 2018-01-22 19:48:44.204004 osd.45 [ERR] osd.45 found snap mapper error
+>>>>>> on pg 3.33e oid
+>>>>>> 3:7cc2e79f:::rbd_data.52ab946b8b4567.00000000000043fb:b0d7c snaps in
+>>>>>> mapper: , oi: b0d7c...repaired
+>>>>>>
+>>>>>> Currently it seems it does an endless repair and never ends.
+>>>>>
+>>>>> On many objects or the same object?
+>>>>
+>>>> OK no it still does endless repair but the reason is it also repairs
+>>>> "newly" created snapshots.
+>>>>
+>>>> Example:
+>>>> 2018-01-23 21:46:47.609712 osd.32 [ERR] osd.32 found snap mapper error
+>>>> on pg 3.c70 oid
+>>>> 3:0e3ff478:::rbd_data.52ab946b8b4567.00000000000025b2:b0d7c snaps
+>>>> missing in mapper, should be: b0d7c...repaired
+>>>>
+>>>> rbd image 'vm-251-disk-1':
+>>>>         size 170 GB in 43520 objects
+>>>>         order 22 (4096 kB objects)
+>>>>         block_name_prefix: rbd_data.52ab946b8b4567
+>>>>         format: 2
+>>>>         features: layering
+>>>>         flags:
+>>>> SNAPID NAME                                   SIZE TIMESTAMP
+>>>> 726900 PVESNAP_cloud2-1394_vm_diff_20180123 170 GB Tue Jan 23 02:14:35 2018
+>>>>
+>>>> So this is a fresh snapshot which needs a repair?
+>>>
+>>> Aha!  That's a helpful clue.  Is there any chance you can crank up teh 
+>>> osd debug log on one OSD can catch one of these cases?  (We want to 
+>>> capture the clone being created, and also the scrub on the pg that follows 
+>>> and sees the mismatch).
+>>
+>> You mean debug_osd? How high must it be? And do we really need all log
+>> messages or might it be enough to change some of them to 0 in the source
+>> code - so they always log?
 > 
->> Adds v2 fancy striping support to kernel rbd. Adds libceph striper.c 
->> based
->> on user space osdc/Striper.cc. Clone images are limited to have
->> same striping layout as parents in order to simplify callback of 
->> copyup
->> requests and insure they are atomic. If they have different layout we 
->> fail
->> during image probe.
->> 
->> Signed-off-by: Maged Mokhtar <mmokhtar@petasan.org>
->> ---
->> drivers/block/rbd.c          |  131 ++++++++++++++++++---------------
->> include/linux/ceph/striper.h |   34 ++++++++
->> net/ceph/Makefile            |    2
->> net/ceph/striper.c           |   81 ++++++++++++++++++++
->> 4 files changed, 191 insertions(+), 57 deletions(-)
->> 
->> diff -urNp a/drivers/block/rbd.c b/drivers/block/rbd.c
->> --- a/drivers/block/rbd.c       2018-01-28 23:20:33.000000000 +0200
->> +++ b/drivers/block/rbd.c       2018-01-29 22:23:18.755108873 +0200
->> @@ -33,6 +33,7 @@
->> #include <linux/ceph/mon_client.h>
->> #include <linux/ceph/cls_lock_client.h>
->> #include <linux/ceph/decode.h>
->> +#include <linux/ceph/striper.h>
->> #include <linux/parser.h>
->> #include <linux/bsearch.h>
->> 
->> @@ -1231,27 +1232,6 @@ static void rbd_dev_mapping_clear(struct
->> rbd_dev->mapping.features = 0;
->> }
->> 
->> -static u64 rbd_segment_offset(struct rbd_device *rbd_dev, u64 offset)
->> -{
->> -       u64 segment_size = rbd_obj_bytes(&rbd_dev->header);
->> -
->> -       return offset & (segment_size - 1);
->> -}
->> -
->> -static u64 rbd_segment_length(struct rbd_device *rbd_dev,
->> -                               u64 offset, u64 length)
->> -{
->> -       u64 segment_size = rbd_obj_bytes(&rbd_dev->header);
->> -
->> -       offset &= segment_size - 1;
->> -
->> -       rbd_assert(length <= U64_MAX - offset);
->> -       if (offset + length > segment_size)
->> -               length = segment_size - offset;
->> -
->> -       return length;
->> -}
->> -
->> /*
->> * bio helpers
->> */
->> @@ -2427,9 +2407,15 @@ static int rbd_img_request_fill(struct r
->> 
->> while (resid) {
->> struct ceph_osd_request *osd_req;
->> -               u64 object_no = img_offset >> 
->> rbd_dev->header.obj_order;
->> -               u64 offset = rbd_segment_offset(rbd_dev, img_offset);
->> -               u64 length = rbd_segment_length(rbd_dev, img_offset, 
->> resid);
->> +               u64 object_no;
->> +               u64 offset;
->> +               u64 length;
->> +               struct stripe_extent ext;
->> +
->> +               
->> get_stripe_extent(&rbd_dev->layout,img_offset,resid,&ext);
->> +               object_no = ext.objectno;
->> +               offset = ext.offset;
->> +               length = ext.length;
->> 
->> obj_request = rbd_obj_request_create(type);
->> if (!obj_request)
->> @@ -2624,7 +2610,6 @@ out_err:
->> * object request from the image request does not exist.
->> *
->> * A page array big enough to hold the returned data is allocated
->> - * and supplied to rbd_img_request_fill() as the "data descriptor."
->> * When the read completes, this page array will be transferred to
->> * the original object request for the copyup operation.
->> *
->> @@ -2641,25 +2626,47 @@ static int rbd_img_obj_parent_read_full(
->> u32 page_count;
->> int result;
->> 
->> -       rbd_assert(rbd_dev->parent != NULL);
->> +       struct rbd_obj_request *parent_obj_request = NULL;
->> +       struct ceph_osd_request *osd_req;
->> 
->> -       /*
->> -        * Determine the byte range covered by the object in the
->> -        * child image to which the original request was to be sent.
->> -        */
->> -       img_offset = obj_request->img_offset - obj_request->offset;
->> -       length = rbd_obj_bytes(&rbd_dev->header);
->> +       rbd_assert(rbd_dev->parent != NULL);
->> +       if (rbd_dev->header.stripe_count !=
->> +           rbd_dev->parent->header.stripe_count ||
->> +           rbd_dev->header.stripe_unit !=
->> +           rbd_dev->parent->header.stripe_unit) {
->> +               rbd_warn(rbd_dev,"Cannot perform parent full object 
->> read due "
->> +                        "to stripe mis-match\n");
->> +               result = -EINVAL;
->> +               goto out_err;
->> +       }
->> 
->> /*
->> * There is no defined parent data beyond the parent
->> * overlap, so limit what we read at that boundary if
->> * necessary.
->> */
->> -       if (img_offset + length > rbd_dev->parent_overlap) {
->> -               rbd_assert(img_offset < rbd_dev->parent_overlap);
->> -               length = rbd_dev->parent_overlap - img_offset;
->> -       }
->> 
->> +       img_offset = get_object_start_offset(&rbd_dev->layout,
->> +                                            obj_request->object_no);
->> +       rbd_assert(img_offset < rbd_dev->parent_overlap);
->> +       if (rbd_dev->parent_overlap < 
->> get_object_end_offset(&rbd_dev->layout,
->> +                                               
->> obj_request->object_no)) {
->> +               u64 diff = rbd_dev->parent_overlap - img_offset;
->> +               u64 stripe_row_size = rbd_dev->header.stripe_unit *
->> +                       rbd_dev->header.stripe_count;
->> +               u64 rows = diff / stripe_row_size;
->> +               u64 remain = diff - rows * stripe_row_size;
->> +               length = rows * rbd_dev->header.stripe_unit;
->> +               if (rbd_dev->header.stripe_unit < remain)
->> +                       length = length + rbd_dev->header.stripe_unit;
->> +               else
->> +                       length = length + remain;
->> +       }
->> +       else {
->> +               /* copy entire parent object */
->> +               length = rbd_obj_bytes(&rbd_dev->header);
->> +       }
->> +
->> /*
->> * Allocate a page array big enough to receive the data read
->> * from the parent.
->> @@ -2678,9 +2685,27 @@ static int rbd_img_obj_parent_read_full(
->> if (!parent_request)
->> goto out_err;
->> 
->> -       result = rbd_img_request_fill(parent_request, 
->> OBJ_REQUEST_PAGES, pages);
->> -       if (result)
->> +       parent_obj_request = 
->> rbd_obj_request_create(OBJ_REQUEST_PAGES);
->> +       if (!obj_request) {
->> +               rbd_img_obj_request_del(parent_request, 
->> parent_obj_request);
->> goto out_err;
->> +       }
->> +       rbd_img_obj_request_add(parent_request, parent_obj_request);
->> +       parent_obj_request->object_no = obj_request->object_no;
->> +       parent_obj_request->offset = 0;
->> +       parent_obj_request->length = length;
->> +       parent_obj_request->pages = pages;
->> +       page_count = (u32)calc_pages_for(0, length);
->> +       parent_obj_request->page_count = page_count;
->> +       osd_req = 
->> rbd_osd_req_create(rbd_dev,OBJ_OP_READ,1,parent_obj_request);
->> +       if (!osd_req) {
->> +               rbd_img_obj_request_del(parent_request, 
->> parent_obj_request);
->> +               goto out_err;
->> +       }
->> +       parent_obj_request->osd_req = osd_req;
->> +       parent_obj_request->callback = rbd_img_obj_callback;
->> +       parent_obj_request->img_offset = img_offset;
->> +       rbd_img_obj_request_fill(parent_obj_request, osd_req, 
->> OBJ_OP_READ, 0);
->> 
->> parent_request->copyup_pages = pages;
->> parent_request->copyup_page_count = page_count;
->> @@ -5090,28 +5115,10 @@ static int rbd_dev_v2_striping_info(stru
->> if (ret < size)
->> return -ERANGE;
->> 
->> -       /*
->> -        * We don't actually support the "fancy striping" feature
->> -        * (STRIPINGV2) yet, but if the striping sizes are the
->> -        * defaults the behavior is the same as before.  So find
->> -        * out, and only fail if the image has non-default values.
->> -        */
->> -       ret = -EINVAL;
->> obj_size = rbd_obj_bytes(&rbd_dev->header);
->> p = &striping_info_buf;
->> stripe_unit = ceph_decode_64(&p);
->> -       if (stripe_unit != obj_size) {
->> -               rbd_warn(rbd_dev, "unsupported stripe unit "
->> -                               "(got %llu want %llu)",
->> -                               stripe_unit, obj_size);
->> -               return -EINVAL;
->> -       }
->> stripe_count = ceph_decode_64(&p);
->> -       if (stripe_count != 1) {
->> -               rbd_warn(rbd_dev, "unsupported stripe count "
->> -                               "(got %llu want 1)", stripe_count);
->> -               return -EINVAL;
->> -       }
->> rbd_dev->header.stripe_unit = stripe_unit;
->> rbd_dev->header.stripe_count = stripe_count;
->> 
->> @@ -6090,6 +6097,18 @@ static int rbd_dev_image_probe(struct rb
->> ret = rbd_dev_probe_parent(rbd_dev, depth);
->> if (ret)
->> goto err_out_probe;
->> +
->> +       if (rbd_dev->parent != NULL) {
->> +               if (rbd_dev->header.stripe_count !=
->> +                   rbd_dev->parent->header.stripe_count ||
->> +                   rbd_dev->header.stripe_unit !=
->> +                   rbd_dev->parent->header.stripe_unit) {
->> +                       rbd_warn(rbd_dev,"Cannot map child image with 
->> "
->> +                                "different striping than parent");
->> +                       ret = -EINVAL;
->> +                       goto err_out_probe;
->> +               }
->> +       }
->> 
->> dout("discovered format %u image, header name is %s\n",
->> rbd_dev->image_format, rbd_dev->header_oid.name);
->> diff -urNp a/include/linux/ceph/striper.h 
->> b/include/linux/ceph/striper.h
->> --- a/include/linux/ceph/striper.h      1970-01-01 02:00:00.000000000 
->> +0200
->> +++ b/include/linux/ceph/striper.h      2018-01-29 22:23:18.755108873 
->> +0200
->> @@ -0,0 +1,34 @@
->> +/* SPDX-License-Identifier: GPL-2.0 */
->> +#ifndef _FS_CEPH_STRIPER_H
->> +#define _FS_CEPH_STRIPER_H
->> +
->> +#include <linux/ceph/ceph_fs.h>
->> +
->> +struct ceph_file_layout;
->> +
->> +struct stripe_extent {
->> +       u64     objectno;
->> +       u64     offset;
->> +       u64     length;
->> +};
->> +
->> +/* Logical to Object address mapping */
->> +void get_stripe_extent(struct ceph_file_layout *layout,u64 offset,
->> +                       u64 len,struct stripe_extent *ext);
->> +
->> +/* Object to Logical address mapping */
->> +u64 get_file_offset(struct ceph_file_layout *layout,u64 objectno,u64 
->> off);
->> +
->> +static inline u64 get_object_start_offset(struct ceph_file_layout 
->> *layout,
->> +                                          u64 objectno)
->> +{
->> +       return get_file_offset(layout,objectno,0);
->> +}
->> +
->> +static inline u64 get_object_end_offset(struct ceph_file_layout 
->> *layout,
->> +                                        u64 objectno)
->> +{
->> +       return get_file_offset(layout,objectno,layout->object_size);
->> +}
->> +
->> +#endif
->> diff -urNp a/net/ceph/Makefile b/net/ceph/Makefile
->> --- a/net/ceph/Makefile 2018-01-28 23:20:33.000000000 +0200
->> +++ b/net/ceph/Makefile 2018-01-29 22:23:18.755108873 +0200
->> @@ -13,5 +13,5 @@ libceph-y := ceph_common.o messenger.o m
->> crypto.o armor.o \
->> auth_x.o \
->> ceph_fs.o ceph_strings.o ceph_hash.o \
->> -       pagevec.o snapshot.o string_table.o
->> +       pagevec.o snapshot.o string_table.o striper.o
->> 
->> diff -urNp a/net/ceph/striper.c b/net/ceph/striper.c
->> --- a/net/ceph/striper.c        1970-01-01 02:00:00.000000000 +0200
->> +++ b/net/ceph/striper.c        2018-01-29 22:23:18.755108873 +0200
->> @@ -0,0 +1,81 @@
->> +// SPDX-License-Identifier: GPL-2.0
->> +
->> +#include <linux/ceph/messenger.h>
->> +#include <linux/ceph/striper.h>
->> +
->> +/*
->> + * Address mappings for striped objects
->> + * Based on user space osdc/Striper.cc
->> + */
->> +
->> +/* Logical to Object address, based on osdc/Striper.cc 
->> file_to_extents() */
->> +void get_stripe_extent(struct ceph_file_layout *layout,u64 offset,
->> +                       u64 len,struct stripe_extent *ext)
->> +{
->> +       u64 object_size;
->> +       u64 su;
->> +       u64 stripe_count;
->> +       u64 stripes_per_object;
->> +       u64 blockno;
->> +       u64 stripeno;
->> +       u64 stripepos;
->> +       u64 objectsetno;
->> +       u64 objectno;
->> +       u64 block_start;
->> +       u64 block_off;
->> +       u64 max;
->> +
->> +       object_size = layout->object_size;
->> +       su = layout->stripe_unit;
->> +       stripe_count = layout->stripe_count;
->> +       stripes_per_object = object_size / su;
->> +
->> +       blockno = offset / su; /* which block */
->> +       stripeno = blockno / stripe_count; /* which horizontal stripe 
->> Y */
->> +       stripepos = blockno % stripe_count; /* which object in object 
->> set X */
->> +       objectsetno = stripeno / stripes_per_object; /* which object 
->> set */
->> +       objectno = objectsetno * stripe_count + stripepos;  /* object 
->> id */
->> +
->> +       // map range into object
->> +       block_start = (stripeno % stripes_per_object) * su;
->> +       block_off = offset % su;
->> +       max = su - block_off;
->> +
->> +       ext->objectno = objectno;
->> +       ext->offset = block_start + block_off;
->> +       if (len > max)
->> +               ext->length = max;
->> +       else
->> +               ext->length = len;
->> +}
->> +EXPORT_SYMBOL(get_stripe_extent);
->> +
->> +/* Object to Logical address, based on osdc/Striper.cc 
->> extent_to_file() */
->> +u64 get_file_offset(struct ceph_file_layout *layout,u64 objectno,u64 
->> off)
->> +{
->> +       u64 object_size;
->> +       u64 su;
->> +       u64 stripe_count;
->> +       u64 stripes_per_object;
->> +       u64 stripepos;
->> +       u64 objectsetno;
->> +       u64 stripeno;
->> +       u64 blockno;
->> +       u64 off_in_block;
->> +       u64 file_offset;
->> +
->> +       object_size = layout->object_size;
->> +       su = layout->stripe_unit;
->> +       stripe_count = layout->stripe_count;
->> +       stripes_per_object = object_size / su;
->> +       off_in_block = off % su;
->> +
->> +       stripepos = objectno % stripe_count;
->> +       objectsetno = objectno / stripe_count;
->> +       stripeno = off / su + objectsetno * stripes_per_object;
->> +       blockno = stripeno * stripe_count + stripepos;
->> +       file_offset = blockno * su + off_in_block;
->> +
->> +       return file_offset;
->> +}
->> +EXPORT_SYMBOL(get_file_offset);
+> It's just a lot of work to figure out which ones that would be.  If debug 
+> osd  = 20 isn't possible (even on a single OSD), then just the logging 
+> statements (ideally all of them) in SnapMapper.cc would be a good start.
 > 
-> Hi Maged,
+> sage
 > 
-> I'm finishing up a full striping v2 (i.e. adjacent extents are merged
-> together, no same layout limitation, etc) right now.  It will be posted
-> to ceph-devel in the next week or two.
 > 
-> Thanks,
-> 
-> Ilya
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> Greets,
+>> Stefan
+>>
+>>> Thanks!
+>>> sage
+>>>
+>>>
+>>>> Greets,
+>>>> Stefan
+>>>>
+>>>>>
+>>>>> sage
+>>>>>
+>>>>>>
+>>>>>> Greets,
+>>>>>> Stefan
+>>>>>> Am 22.01.2018 um 15:30 schrieb Sage Weil:
+>>>>>>> On Mon, 22 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>> Hi Sage,
+>>>>>>>>
+>>>>>>>> get_snaps returned the error as there are no snaps in the snapmapper. So
+>>>>>>>> it's OK to skip the assert.
+>>>>>>>>
+>>>>>>>> My biggest problem is now that i'm not able to run a scrub on all PGs to
+>>>>>>>> fix all those errors because in around 1-3% the osd seem to deadlock and
+>>>>>>>> needs to get killed to proceed.
+>>>>>>>
+>>>>>>> I believe this will fix it:
+>>>>>>>
+>>>>>>> https://github.com/liewegas/ceph/commit/wip-snapmapper
+>>>>>>>
+>>>>>>> Cherry-pick that and let me know?
+>>>>>>>
+>>>>>>> Thanks!
+>>>>>>> sage
+>>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>> The log output is always:
+>>>>>>>>     -3> 2018-01-22 14:02:41.725678 7f10025fe700  0 log_channel(cluster)
+>>>>>>>> log [WRN] : slow request 141.951820 seconds old, received at
+>>>>>>>>  2018-01-22 14:00:19.773706: osd_repop(client.142132381.0:1310126 3.a65
+>>>>>>>> e927921/927902 3:a65be829:::rbd_data.4fbc586b8b4567.00000000
+>>>>>>>> 00000157:head v 927921'526559757) currently commit_sent
+>>>>>>>>     -2> 2018-01-22 14:02:41.725679 7f10025fe700  0 log_channel(cluster)
+>>>>>>>> log [WRN] : slow request 141.643853 seconds old, received at
+>>>>>>>>  2018-01-22 14:00:20.081674: osd_repop(client.139148241.0:15454227 3.ff7
+>>>>>>>> e927921/927798 3:eff12952:::rbd_data.2494d06b8b4567.0000000
+>>>>>>>> 00000147d:head v 927921'29105383) currently commit_sent
+>>>>>>>>     -1> 2018-01-22 14:02:41.725684 7f10025fe700  0 log_channel(cluster)
+>>>>>>>> log [WRN] : slow request 141.313220 seconds old, received at
+>>>>>>>>  2018-01-22 14:00:20.412307: osd_repop(client.138984198.0:82792023 3.de6
+>>>>>>>> e927921/927725 3:67b9dc7d:::rbd_data.7750506b8b4567.0000000
+>>>>>>>> 000000aff:head v 927921'164552063) currently commit_sent
+>>>>>>>>      0> 2018-01-22 14:02:42.426910 7f0fc23fe700 -1 *** Caught signal
+>>>>>>>> (Aborted) **
+>>>>>>>>  in thread 7f0fc23fe700 thread_name:tp_osd_tp
+>>>>>>>>
+>>>>>>>>  ceph version 12.2.2-94-g92923ef
+>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+>>>>>>>>  1: (()+0xa4423c) [0x561d876ab23c]
+>>>>>>>>  2: (()+0xf890) [0x7f100b974890]
+>>>>>>>>  3: (pthread_cond_wait()+0xbf) [0x7f100b97104f]
+>>>>>>>>  4: (ObjectStore::apply_transactions(ObjectStore::Sequencer*,
+>>>>>>>> std::vector<ObjectStore::Transaction, std::allocator<ObjectStore::Tran
+>>>>>>>> saction> >&, Context*)+0x254) [0x561d8746ac54]
+>>>>>>>>  5: (ObjectStore::apply_transaction(ObjectStore::Sequencer*,
+>>>>>>>> ObjectStore::Transaction&&, Context*)+0x5c) [0x561d87199b2c]
+>>>>>>>>  6: (PG::_scan_snaps(ScrubMap&)+0x8f7) [0x561d871ebf77]
+>>>>>>>>  7: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
+>>>>>>>> unsigned int, ThreadPool::TPHandle&)+0x22f) [0x561d871ecc4f]
+>>>>>>>>  8: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>,
+>>>>>>>> ThreadPool::TPHandle&)+0x624) [0x561d871ed574]
+>>>>>>>>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>>>>>>>> ThreadPool::TPHandle&)+0x8b6) [0x561d872ac756]
+>>>>>>>>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+>>>>>>>> [0x561d87138bc7]
+>>>>>>>>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>>>>>>>> const&)+0x57) [0x561d873b0db7]
+>>>>>>>>  12: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x561d87167d1c]
+>>>>>>>>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+>>>>>>>> [0x561d876f42bd]
+>>>>>>>>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561d876f6280]
+>>>>>>>>  15: (()+0x8064) [0x7f100b96d064]
+>>>>>>>>  16: (clone()+0x6d) [0x7f100aa6162d]
+>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>>>> needed to interpret this.
+>>>>>>>>
+>>>>>>>> --- logging levels ---
+>>>>>>>>    0/ 5 none
+>>>>>>>>    0/ 0 lockdep
+>>>>>>>>    0/ 0 context
+>>>>>>>>    0/ 0 crush
+>>>>>>>>    0/ 0 mds
+>>>>>>>>    0/ 0 mds_balancer
+>>>>>>>>    0/ 0 mds_locker
+>>>>>>>>    0/ 0 mds_log
+>>>>>>>>    0/ 0 mds_log_expire
+>>>>>>>>    0/ 0 mds_migrator
+>>>>>>>>    0/ 0 buffer
+>>>>>>>>    0/ 0 timer
+>>>>>>>>    0/ 0 filer
+>>>>>>>>    0/ 1 striper
+>>>>>>>>    0/ 0 objecter
+>>>>>>>>    0/ 0 rados
+>>>>>>>>    0/ 0 rbd
+>>>>>>>>    0/ 5 rbd_mirror
+>>>>>>>>    0/ 5 rbd_replay
+>>>>>>>>    0/ 0 journaler
+>>>>>>>>    0/ 0 objectcacher
+>>>>>>>>    0/ 0 client
+>>>>>>>>    0/ 0 osd
+>>>>>>>>    0/ 0 optracker
+>>>>>>>>    0/ 0 objclass
+>>>>>>>>    0/ 0 filestore
+>>>>>>>>    0/ 0 journal
+>>>>>>>>    0/ 0 ms
+>>>>>>>>    0/ 0 mon
+>>>>>>>>    0/ 0 monc
+>>>>>>>>    0/ 0 paxos
+>>>>>>>>    0/ 0 tp
+>>>>>>>>    0/ 0 auth
+>>>>>>>>    1/ 5 crypto
+>>>>>>>>    0/ 0 finisher
+>>>>>>>>    1/ 1 reserver
+>>>>>>>>    0/ 0 heartbeatmap
+>>>>>>>>    0/ 0 perfcounter
+>>>>>>>>    0/ 0 rgw
+>>>>>>>>    1/10 civetweb
+>>>>>>>>    1/ 5 javaclient
+>>>>>>>>    0/ 0 asok
+>>>>>>>>    0/ 0 throttle
+>>>>>>>>    0/ 0 refs
+>>>>>>>>    1/ 5 xio
+>>>>>>>>    1/ 5 compressor
+>>>>>>>>    1/ 5 bluestore
+>>>>>>>>    1/ 5 bluefs
+>>>>>>>>    1/ 3 bdev
+>>>>>>>>    1/ 5 kstore
+>>>>>>>>    4/ 5 rocksdb
+>>>>>>>>    4/ 5 leveldb
+>>>>>>>>    4/ 5 memdb
+>>>>>>>>    1/ 5 kinetic
+>>>>>>>>    1/ 5 fuse
+>>>>>>>>    1/ 5 mgr
+>>>>>>>>    1/ 5 mgrc
+>>>>>>>>    1/ 5 dpdk
+>>>>>>>>    1/ 5 eventtrace
+>>>>>>>>   -2/-2 (syslog threshold)
+>>>>>>>>   -1/-1 (stderr threshold)
+>>>>>>>>   max_recent     10000
+>>>>>>>>   max_new         1000
+>>>>>>>>   log_file /var/log/ceph/ceph-osd.59.log
+>>>>>>>> --- end dump of recent events ---
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> Greets,
+>>>>>>>> Stefan
+>>>>>>>>
+>>>>>>>> Am 21.01.2018 um 21:27 schrieb Sage Weil:
+>>>>>>>>> On Fri, 19 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>> Hi Sage,
+>>>>>>>>>>
+>>>>>>>>>> thanks for your reply. I'll do this. What i still don't understand is
+>>>>>>>>>> the following and i hope you might have an idea:
+>>>>>>>>>> 1.) All the snaps mentioned here are fresh - i created them today
+>>>>>>>>>> running luminous? How can they be missing in snapmapper again?
+>>>>>>>>>
+>>>>>>>>> I'm not sure.  It might help if you can set debug_osd=1/10 (or 1/20) so 
+>>>>>>>>> that when you hit the crash we have some context as to what is going on.
+>>>>>>>>>
+>>>>>>>>> Did you track down which part of get_snaps() is returning the error?
+>>>>>>>>>
+>>>>>>>>>> 2.) How did this happen? The cluster was jewel and was updated to
+>>>>>>>>>> luminous when all this happened.
+>>>>>>>>>
+>>>>>>>>> Did this start right after the upgrade?
+>>>>>>>>>
+>>>>>>>>> I started a PR that relaxes some of these assertions so that they clean up 
+>>>>>>>>> instead (unless the debug option is enabled, for our regression testing), 
+>>>>>>>>> but I'm still unclear about what the inconsistency is... any loggin you 
+>>>>>>>>> can provide would help!
+>>>>>>>>>
+>>>>>>>>> Thanks-
+>>>>>>>>> sage
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> Greets,
+>>>>>>>>>> Stefan
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> Am 19.01.2018 um 21:19 schrieb Sage Weil:
+>>>>>>>>>>> I'm guessing it is coming from
+>>>>>>>>>>>
+>>>>>>>>>>>   object_snaps out;
+>>>>>>>>>>>   int r = get_snaps(oid, &out);
+>>>>>>>>>>>   if (r < 0)
+>>>>>>>>>>>     return r;
+>>>>>>>>>>>
+>>>>>>>>>>> in SnapMapper::update_snaps().  I would add a debug statement to to 
+>>>>>>>>>>> confirm that, and possibly also add debug lines to the various return 
+>>>>>>>>>>> points in get_snaps() so you can see why get_snaps is returning an error.
+>>>>>>>>>>>
+>>>>>>>>>>> I'm guessing the way to proceed is to warn but ignore the error, but it's 
+>>>>>>>>>>> hard to say without seeing what the inconsistency there is and whether we 
+>>>>>>>>>>> can tolerate it...
+>>>>>>>>>>>
+>>>>>>>>>>> sage
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> On Fri, 19 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>>>
+>>>>>>>>>>>> HI Sage,
+>>>>>>>>>>>>
+>>>>>>>>>>>> any ideas for this one sawing while doing a deep scrub:
+>>>>>>>>>>>>
+>>>>>>>>>>>>     -1> 2018-01-19 21:14:20.474287 7fbcdeffe700 -1 osd.5 pg_epoch:
+>>>>>>>>>>>> 925542 pg[3.306( v 925542'78349255 (925334'78347749,925542'78349255]
+>>>>>>>>>>>> local-lis/les=925503/925504 n=1752 ec=15/15 lis/c 925503/925503 les/c/f
+>>>>>>>>>>>> 925504/925517/0 925503/925503/925503) [75,31,5] r=2 lpr=925503 luod=0'0
+>>>>>>>>>>>> crt=925542'78349255 lcod 925542'78349254 active] _scan_snaps no head for
+>>>>>>>>>>>> 3:60c0267d:::rbd_data.103fdc6b8b4567.0000000000004c8e:b0ce7 (have MIN)
+>>>>>>>>>>>>
+>>>>>>>>>>>>      0> 2018-01-19 21:14:20.477650 7fbcd3bfe700 -1
+>>>>>>>>>>>> /build/ceph/src/osd/PG.cc: In function 'void PG::update_snap_map(const
+>>>>>>>>>>>> std::vector<pg_log_entry_t>&, ObjectStore::Transaction&)' thread
+>>>>>>>>>>>> 7fbcd3bfe700 time 2018-01-19 21:14:20.474752
+>>>>>>>>>>>> /build/ceph/src/osd/PG.cc: 3420: FAILED assert(r == 0)
+>>>>>>>>>>>>
+>>>>>>>>>>>>  ceph version 12.2.2-94-g92923ef
+>>>>>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>>>>>>>>> const*)+0x102) [0x55c0100d0372]
+>>>>>>>>>>>>  2: (PG::update_snap_map(std::vector<pg_log_entry_t,
+>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
+>>>>>>>>>>>> anObjectStore::Transaction&)+0x3a5) [0x55c00fbcfe35]
+>>>>>>>>>>>>  3: (PG::append_log(std::vector<pg_log_entry_t,
+>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
+>>>>>>>>>>>> ObjectStore::Transaction&, bool)+0x540) [0x55c00fbf5fc0]
+>>>>>>>>>>>>  4: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
+>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
+>>>>>>>>>>>> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
+>>>>>>>>>>>> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x55c00fceaeb4]
+>>>>>>>>>>>>  5: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
+>>>>>>>>>>>> [0x55c00fdf6642]
+>>>>>>>>>>>>  6:
+>>>>>>>>>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
+>>>>>>>>>>>> [0x55c00fdfc684]
+>>>>>>>>>>>>  7: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>>>>>>>>>>>> [0x55c00fd22030]
+>>>>>>>>>>>>  8: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>>>>>>>>>>>> ThreadPool::TPHandle&)+0x77b) [0x55c00fc8e33b]
+>>>>>>>>>>>>  9: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+>>>>>>>>>>>> [0x55c00fb1abc7]
+>>>>>>>>>>>>  10: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>>>>>>>>>>>> const&)+0x57) [0x55c00fd92ad7]
+>>>>>>>>>>>>  11: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x55c00fb49d1c]
+>>>>>>>>>>>>  12: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+>>>>>>>>>>>> [0x55c0100d5ffd]
+>>>>>>>>>>>>  13: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55c0100d7fc0]
+>>>>>>>>>>>>  14: (()+0x8064) [0x7fbd284fb064]
+>>>>>>>>>>>>  15: (clone()+0x6d) [0x7fbd275ef62d]
+>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>>>>>>>> needed to interpret this.
+>>>>>>>>>>>>
+>>>>>>>>>>>>
+>>>>>>>>>>>> Stefan
+>>>>>>>>>>>>
+>>>>>>>>>>>> Am 18.01.2018 um 15:24 schrieb Sage Weil:
+>>>>>>>>>>>>> On Thu, 18 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>>>>>> Hi Sage,
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Am 18.01.2018 um 14:16 schrieb Sage Weil:
+>>>>>>>>>>>>>>> On Thu, 18 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>>>>>>>> Hi,
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> it also crashes in (marked with HERE):
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> int SnapMapper::get_snaps(
+>>>>>>>>>>>>>>>>   const hobject_t &oid,
+>>>>>>>>>>>>>>>>   object_snaps *out)
+>>>>>>>>>>>>>>>> {
+>>>>>>>>>>>>>>>>   assert(check(oid));
+>>>>>>>>>>>>>>>>   set<string> keys;
+>>>>>>>>>>>>>>>>   map<string, bufferlist> got;
+>>>>>>>>>>>>>>>>   keys.insert(to_object_key(oid));
+>>>>>>>>>>>>>>>>   int r = backend.get_keys(keys, &got);
+>>>>>>>>>>>>>>>>   if (r < 0)
+>>>>>>>>>>>>>>>>     return r;
+>>>>>>>>>>>>>>>>   if (got.empty())
+>>>>>>>>>>>>>>>>     return -ENOENT;
+>>>>>>>>>>>>>>>>   if (out) {
+>>>>>>>>>>>>>>>>     bufferlist::iterator bp = got.begin()->second.begin();
+>>>>>>>>>>>>>>>>     ::decode(*out, bp);
+>>>>>>>>>>>>>>>>     dout(20) << __func__ << " " << oid << " " << out->snaps << dendl;
+>>>>>>>>>>>>>>>>     assert(!out->snaps.empty());            ########### HERE ###########
+>>>>>>>>>>>>>>>>   } else {
+>>>>>>>>>>>>>>>>     dout(20) << __func__ << " " << oid << " (out == NULL)" << dendl;
+>>>>>>>>>>>>>>>>   }
+>>>>>>>>>>>>>>>>   return 0;
+>>>>>>>>>>>>>>>> }
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> is it save to comment that assert?
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> I think so.  All of these asserts are just about ensuring the snapmapper 
+>>>>>>>>>>>>>>> state is consistent, and it's only purpose is to find snaps to trim.  
+>>>>>>>>>>>>>>> Since your snapmapper metadata is clearly not consistent, there isn't a 
+>>>>>>>>>>>>>>> whole lot of risk here.  You might want to set nosnaptrim for the time 
+>>>>>>>>>>>>>>> being so you don't get a surprise if trimming kicks in.  The next step is 
+>>>>>>>>>>>>>>> probably going to be to do a scrub and see what it finds, repairs, or 
+>>>>>>>>>>>>>>> can't repair.
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> snap trimming works fine i already trimmed and removed some snaps.
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> I was able to get the cluster into a state where all is backfilled. But
+>>>>>>>>>>>>>> enabling / doing deep-scrubs results into this one:
+>>>>>>>>>>>>>>      0> 2018-01-18 13:00:54.843076 7fbd253ff700 -1
+>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: In function 'int
+>>>>>>>>>>>>>> SnapMapper::get_snaps(const h
+>>>>>>>>>>>>>> object_t&, SnapMapper::object_snaps*)' thread 7fbd253ff700 time
+>>>>>>>>>>>>>> 2018-01-18 13:00:54.840396
+>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: 154: FAILED assert(!out->snaps.empty())
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> I think if you switch that assert to a warning it will repair...
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> sage
+>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>  ceph version 12.2.2-94-g92923ef
+>>>>>>>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+>>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>>>>>>>>>>> const*)+0x102) [0x5561ce28d1f2]
+>>>>>>>>>>>>>>  2: (SnapMapper::get_snaps(hobject_t const&,
+>>>>>>>>>>>>>> SnapMapper::object_snaps*)+0x46b) [0x5561cdef755b]
+>>>>>>>>>>>>>>  3: (SnapMapper::get_snaps(hobject_t const&, std::set<snapid_t,
+>>>>>>>>>>>>>> std::less<snapid_t>, std::allocator<snapid_t> >*)+0xd7) [0x5561cdef7
+>>>>>>>>>>>>>> 697]
+>>>>>>>>>>>>>>  4: (PG::_scan_snaps(ScrubMap&)+0x692) [0x5561cdd8ad22]
+>>>>>>>>>>>>>>  5: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
+>>>>>>>>>>>>>> unsigned int, ThreadPool::TPHandle&)+0x22f) [0x5561cdd8bc5f]
+>>>>>>>>>>>>>>  6: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>,
+>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x624) [0x5561cdd8c584]
+>>>>>>>>>>>>>>  7: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x8b6) [0x5561cde4b326]
+>>>>>>>>>>>>>>  8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+>>>>>>>>>>>>>> [0x5561cdcd7bc7]
+>>>>>>>>>>>>>>  9: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>>>>>>>>>>>>>> const&)+0x57) [0x5561cdf4f957]
+>>>>>>>>>>>>>>  10: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x5561cdd06d1c]
+>>>>>>>>>>>>>>  11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+>>>>>>>>>>>>>> [0x5561ce292e7d]
+>>>>>>>>>>>>>>  12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x5561ce294e40]
+>>>>>>>>>>>>>>  13: (()+0x8064) [0x7fbd70d86064]
+>>>>>>>>>>>>>>  14: (clone()+0x6d) [0x7fbd6fe7a62d]
+>>>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>>>>>>>>>> needed to interpret this.
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Greets,
+>>>>>>>>>>>>>> Stefan
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> sage
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Stefan
+>>>>>>>>>>>>>>>> Am 17.01.2018 um 19:56 schrieb Sage Weil:
+>>>>>>>>>>>>>>>>> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> Am 17.01.2018 um 19:48 schrieb Sage Weil:
+>>>>>>>>>>>>>>>>>>> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>>>>>>>>>>>> Hi Sage,
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>> this gives me another crash while that pg is recovering:
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>      0> 2018-01-17 19:25:09.328935 7f48f8fff700 -1
+>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/PrimaryLogPG.cc: In function 'virtual void
+>>>>>>>>>>>>>>>>>>>> PrimaryLogPG::on_l
+>>>>>>>>>>>>>>>>>>>> ocal_recover(const hobject_t&, const ObjectRecoveryInfo&,
+>>>>>>>>>>>>>>>>>>>> ObjectContextRef, bool, ObjectStore::Transaction*)' thread 7f48f8fff700 ti
+>>>>>>>>>>>>>>>>>>>> me 2018-01-17 19:25:09.322287
+>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/PrimaryLogPG.cc: 358: FAILED assert(p !=
+>>>>>>>>>>>>>>>>>>>> recovery_info.ss.clone_snaps.end())
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> Is this a cache tiering pool?
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> no normal 3 replica but the pg is degraded:
+>>>>>>>>>>>>>>>>>> ceph pg dump | grep 3.80e
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> 3.80e      1709                  0     1579         0       0 6183674368
+>>>>>>>>>>>>>>>>>> 10014    10014 active+undersized+degraded+remapped+backfill_wait
+>>>>>>>>>>>>>>>>>> 2018-01-17 19:42:55.840884  918403'70041375  918403:77171331 [50,54,86]
+>>>>>>>>>>>>>>>>>>        50       [39]             39  907737'69776430 2018-01-14
+>>>>>>>>>>>>>>>>>> 22:19:54.110864  907737'69776430 2018-01-14 22:19:54.110864
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Hrm, no real clues on teh root cause then.  Something like this will work 
+>>>>>>>>>>>>>>>>> around the current assert:
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> diff --git a/src/osd/PrimaryLogPG.cc b/src/osd/PrimaryLogPG.cc
+>>>>>>>>>>>>>>>>> index d42f3a401b..0f76134f74 100644
+>>>>>>>>>>>>>>>>> --- a/src/osd/PrimaryLogPG.cc
+>>>>>>>>>>>>>>>>> +++ b/src/osd/PrimaryLogPG.cc
+>>>>>>>>>>>>>>>>> @@ -372,8 +372,11 @@ void PrimaryLogPG::on_local_recover(
+>>>>>>>>>>>>>>>>>      set<snapid_t> snaps;
+>>>>>>>>>>>>>>>>>      dout(20) << " snapset " << recovery_info.ss << dendl;
+>>>>>>>>>>>>>>>>>      auto p = recovery_info.ss.clone_snaps.find(hoid.snap);
+>>>>>>>>>>>>>>>>> -    assert(p != recovery_info.ss.clone_snaps.end());  // hmm, should we warn?
+>>>>>>>>>>>>>>>>> -    snaps.insert(p->second.begin(), p->second.end());
+>>>>>>>>>>>>>>>>> +    if (p != recovery_info.ss.clone_snaps.end()) {
+>>>>>>>>>>>>>>>>> +      derr << __func__ << " no clone_snaps for " << hoid << dendl;
+>>>>>>>>>>>>>>>>> +    } else {
+>>>>>>>>>>>>>>>>> +      snaps.insert(p->second.begin(), p->second.end());
+>>>>>>>>>>>>>>>>> +    }
+>>>>>>>>>>>>>>>>>      dout(20) << " snaps " << snaps << dendl;
+>>>>>>>>>>>>>>>>>      snap_mapper.add_oid(
+>>>>>>>>>>>>>>>>>        recovery_info.soid,
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> Stefan
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> s
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>  ceph version 12.2.2-94-g92923ef
+>>>>>>>>>>>>>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
+>>>>>>>>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>>>>>>>>>>>>>>>>> const*)+0x102) [0x55addb5eb1f2]
+>>>>>>>>>>>>>>>>>>>>  2: (PrimaryLogPG::on_local_recover(hobject_t const&, ObjectRecoveryInfo
+>>>>>>>>>>>>>>>>>>>> const&, std::shared_ptr<ObjectContext>, bool,
+>>>>>>>>>>>>>>>>>>>> ObjectStore::Transaction*)+0x11f0) [0x55addb1957a0]
+>>>>>>>>>>>>>>>>>>>>  3: (ReplicatedBackend::handle_push(pg_shard_t, PushOp const&,
+>>>>>>>>>>>>>>>>>>>> PushReplyOp*, ObjectStore::Transaction*)+0x31d) [0x55addb3071ed]
+>>>>>>>>>>>>>>>>>>>>  4: (ReplicatedBackend::_do_push(boost::intrusive_ptr<OpRequest>)+0x18f)
+>>>>>>>>>>>>>>>>>>>> [0x55addb30748f]
+>>>>>>>>>>>>>>>>>>>>  5:
+>>>>>>>>>>>>>>>>>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2d1)
+>>>>>>>>>>>>>>>>>>>> [0x55addb317531]
+>>>>>>>>>>>>>>>>>>>>  6: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>>>>>>>>>>>>>>>>>>>> [0x55addb23cf10]
+>>>>>>>>>>>>>>>>>>>>  7: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>>>>>>>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x77b) [0x55addb1a91eb]
+>>>>>>>>>>>>>>>>>>>>  8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>>>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+>>>>>>>>>>>>>>>>>>>> [0x55addb035bc7]
+>>>>>>>>>>>>>>>>>>>>  9: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>>>>>>>>>>>>>>>>>>>> const&)+0x57) [0x55addb2ad957]
+>>>>>>>>>>>>>>>>>>>>  10: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x55addb064d1c]
+>>>>>>>>>>>>>>>>>>>>  11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+>>>>>>>>>>>>>>>>>>>> [0x55addb5f0e7d]
+>>>>>>>>>>>>>>>>>>>>  12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55addb5f2e40]
+>>>>>>>>>>>>>>>>>>>>  13: (()+0x8064) [0x7f4955b68064]
+>>>>>>>>>>>>>>>>>>>>  14: (clone()+0x6d) [0x7f4954c5c62d]
+>>>>>>>>>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>>>>>>>>>>>>>>>> needed to interpret this.
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>> Greets,
+>>>>>>>>>>>>>>>>>>>> Stefan
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>> Am 17.01.2018 um 15:28 schrieb Sage Weil:
+>>>>>>>>>>>>>>>>>>>>> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>>>>>>>>>>>>>> Hi,
+>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>> i there any chance to fix this instead of removing manually all the clones?
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>> I believe you can avoid the immediate problem and get the PG up by 
+>>>>>>>>>>>>>>>>>>>>> commenting out the assert.  set_snaps() will overwrite the object->snap 
+>>>>>>>>>>>>>>>>>>>>> list mapping.
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>> The problem is you'll probably still a stray snapid -> object mapping, so 
+>>>>>>>>>>>>>>>>>>>>> when snaptrimming runs you might end up with a PG in the snaptrim_error 
+>>>>>>>>>>>>>>>>>>>>> state that won't trim (although from a quick look at the code it won't 
+>>>>>>>>>>>>>>>>>>>>> crash).  I'd probably remove the assert and deal with that if/when it 
+>>>>>>>>>>>>>>>>>>>>> happens.
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>> I'm adding a ticket to relax these asserts for production but keep them 
+>>>>>>>>>>>>>>>>>>>>> enabled for qa.  This isn't something that needs to take down the OSD!
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>> sage
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>  > 
+>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>> Stefan
+>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>> Am 16.01.2018 um 23:24 schrieb Gregory Farnum:
+>>>>>>>>>>>>>>>>>>>>>>> On Mon, Jan 15, 2018 at 5:23 PM, Stefan Priebe - Profihost AG
+>>>>>>>>>>>>>>>>>>>>>>> <s.priebe@profihost.ag> wrote:
+>>>>>>>>>>>>>>>>>>>>>>>> Hello,
+>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>> currently one of my clusters is missing a whole pg due to all 3 osds
+>>>>>>>>>>>>>>>>>>>>>>>> being down.
+>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>> All of them fail with:
+>>>>>>>>>>>>>>>>>>>>>>>>     0> 2018-01-16 02:05:33.353293 7f944dbfe700 -1
+>>>>>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: In function 'void
+>>>>>>>>>>>>>>>>>>>>>>>> SnapMapper::add_oid(const hobject_t&, const std::set<snapid_t>&,
+>>>>>>>>>>>>>>>>>>>>>>>> MapCacher::Transaction<std::basic_string<char>, ceph::buffer::list>*)'
+>>>>>>>>>>>>>>>>>>>>>>>> thread 7f944dbfe700 time 2018-01-16 02:05:33.349946
+>>>>>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: 246: FAILED assert(r == -2)
+>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>  ceph version 12.2.2-93-gd6da8d7
+>>>>>>>>>>>>>>>>>>>>>>>> (d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
+>>>>>>>>>>>>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>>>>>>>>>>>>>>>>>>>>> const*)+0x102) [0x561f9ff0b1e2]
+>>>>>>>>>>>>>>>>>>>>>>>>  2: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
+>>>>>>>>>>>>>>>>>>>>>>>> std::less<snapid_t>, std::allocator<snapid_t> > const&,
+>>>>>>>>>>>>>>>>>>>>>>>> MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
+>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fb76f3b]
+>>>>>>>>>>>>>>>>>>>>>>>>  3: (PG::update_snap_map(std::vector<pg_log_entry_t,
+>>>>>>>>>>>>>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
+>>>>>>>>>>>>>>>>>>>>>>>> ObjectStore::Transaction&)+0x38f) [0x561f9fa0ae3f]
+>>>>>>>>>>>>>>>>>>>>>>>>  4: (PG::append_log(std::vector<pg_log_entry_t,
+>>>>>>>>>>>>>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
+>>>>>>>>>>>>>>>>>>>>>>>> ObjectStore::Transaction&, bool)+0x538) [0x561f9fa31018]
+>>>>>>>>>>>>>>>>>>>>>>>>  5: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
+>>>>>>>>>>>>>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
+>>>>>>>>>>>>>>>>>>>>>>>> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
+>>>>>>>>>>>>>>>>>>>>>>>> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x561f9fb25d64]
+>>>>>>>>>>>>>>>>>>>>>>>>  6: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
+>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fc314b2]
+>>>>>>>>>>>>>>>>>>>>>>>>  7:
+>>>>>>>>>>>>>>>>>>>>>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
+>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fc374f4]
+>>>>>>>>>>>>>>>>>>>>>>>>  8: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fb5cf10]
+>>>>>>>>>>>>>>>>>>>>>>>>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>>>>>>>>>>>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x77b) [0x561f9fac91eb]
+>>>>>>>>>>>>>>>>>>>>>>>>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>>>>>>>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
+>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9f955bc7]
+>>>>>>>>>>>>>>>>>>>>>>>>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>>>>>>>>>>>>>>>>>>>>>>>> const&)+0x57) [0x561f9fbcd947]
+>>>>>>>>>>>>>>>>>>>>>>>>  12: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>>>>>>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x561f9f984d1c]
+>>>>>>>>>>>>>>>>>>>>>>>>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
+>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9ff10e6d]
+>>>>>>>>>>>>>>>>>>>>>>>>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561f9ff12e30]
+>>>>>>>>>>>>>>>>>>>>>>>>  15: (()+0x8064) [0x7f949afcb064]
+>>>>>>>>>>>>>>>>>>>>>>>>  16: (clone()+0x6d) [0x7f949a0bf62d]
+>>>>>>>>>>>>>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>>>>>>>>>>>>>>>>>>>> needed to interpret this.
+>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>> By the time it gets there, something else has gone wrong. The OSD is
+>>>>>>>>>>>>>>>>>>>>>>> adding a snapid/object pair to its "SnapMapper", and discovering that
+>>>>>>>>>>>>>>>>>>>>>>> there are already entries (which it thinks there shouldn't be).
+>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>> You'll need to post more of a log, along with background, if anybody's
+>>>>>>>>>>>>>>>>>>>>>>> going to diagnose it: is there cache tiering on the cluster? What is
+>>>>>>>>>>>>>>>>>>>>>>> this pool used for? Were there other errors on this PG in the past?
+>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>> I also notice a separate email about deleting the data; I don't have
+>>>>>>>>>>>>>>>>>>>>>>> any experience with this but you'd probably have to export the PG
+>>>>>>>>>>>>>>>>>>>>>>> using ceph-objectstore-tool and then find a way to delete the object
+>>>>>>>>>>>>>>>>>>>>>>> out of it. I see options to remove both an object and
+>>>>>>>>>>>>>>>>>>>>>>> "remove-clone-metadata" on a particular ID, but I've not used any of
+>>>>>>>>>>>>>>>>>>>>>>> them myself.
+>>>>>>>>>>>>>>>>>>>>>>> -Greg
+>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>> --
+>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>>>
+>>>>>>>>>>>>
+>>>>>>>>>> --
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>
+>>>>>>
+>>>>
+>>>>
+>>
+>>
