@@ -1,248 +1,199 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: add newline to end of debug message format
-Date: Tue, 30 Jan 2018 17:24:34 +0800
-Message-ID: <4DFCF103-B6DC-4EA9-8641-28DB0C59E9D5@redhat.com>
-References: <1517300957-28459-1-git-send-email-cgxu519@icloud.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH 1/1] quota: report root dir quota usage in statfs
+Date: Tue, 30 Jan 2018 11:45:30 +0000
+Message-ID: <20180130114530.26266-2-lhenriques@suse.com>
+References: <20180130114530.26266-1-lhenriques@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56076 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:51640 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751642AbeA3JYl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 30 Jan 2018 04:24:41 -0500
-In-Reply-To: <1517300957-28459-1-git-send-email-cgxu519@icloud.com>
+        id S1751464AbeA3Lpe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 30 Jan 2018 06:45:34 -0500
+In-Reply-To: <20180130114530.26266-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chengguang Xu <cgxu519@icloud.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>, Luis Henriques <lhenriques@suse.com>
 
+This commit changes statfs default behaviour when reporting usage
+statistics.  Instead of using the overall filesystem usage, statfs now
+reports the quota for the filesystem root, if ceph.quota.max_bytes has
+been set for this inode.  If quota hasn't been set, it falls back to the
+old statfs behaviour.
 
+A new option is also added ('noquotadf') to disable this behaviour.
 
-> On 30 Jan 2018, at 16:29, Chengguang Xu <cgxu519@icloud.com> wrote:
-> 
-> Some of dout format do not include newline in the end,
-> fix for the files which are in fs/ceph and net/ceph directories,
-> and changing printk to dout for printing debug info in super.c
-> 
-> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
-> ---
-> fs/ceph/cache.c        |  2 +-
-> fs/ceph/dir.c          |  2 +-
-> fs/ceph/file.c         |  2 +-
-> fs/ceph/locks.c        | 20 ++++++++++----------
-> fs/ceph/mds_client.c   | 10 +++++-----
-> fs/ceph/super.c        |  2 +-
-> net/ceph/ceph_common.c |  2 +-
-> 7 files changed, 20 insertions(+), 20 deletions(-)
-> 
-> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-> index a3ab265..3781f72 100644
-> --- a/fs/ceph/cache.c
-> +++ b/fs/ceph/cache.c
-> @@ -190,7 +190,7 @@ static enum fscache_checkaux ceph_fscache_inode_check_aux(
-> 	if (memcmp(data, &aux, sizeof(aux)) != 0)
-> 		return FSCACHE_CHECKAUX_OBSOLETE;
-> 
-> -	dout("ceph inode 0x%p cached okay", ci);
-> +	dout("ceph inode 0x%p cached okay\n", ci);
-> 	return FSCACHE_CHECKAUX_OKAY;
-> }
-> 
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 8a52666..e7c95be 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -444,7 +444,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
-> 				fi->dir_ordered_count = req->r_dir_ordered_cnt;
-> 			}
-> 		} else {
-> -			dout("readdir !did_prepopulate");
-> +			dout("readdir !did_prepopulate\n");
-> 			/* disable readdir cache */
-> 			fi->readdir_cache_idx = -1;
-> 			/* preclude from marking dir complete */
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 5c17125..4795c7d 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -41,7 +41,7 @@ static __le32 ceph_flags_sys2wire(u32 flags)
-> #undef ceph_sys2wire
-> 
-> 	if (flags)
-> -		dout("unused open flags: %x", flags);
-> +		dout("unused open flags: %x\n", flags);
-> 
-> 	return cpu_to_le32(wire_flags);
-> }
-> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-> index 9e66f69..9dae2ec 100644
-> --- a/fs/ceph/locks.c
-> +++ b/fs/ceph/locks.c
-> @@ -95,7 +95,7 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
-> 	owner = secure_addr(fl->fl_owner);
-> 
-> 	dout("ceph_lock_message: rule: %d, op: %d, owner: %llx, pid: %llu, "
-> -	     "start: %llu, length: %llu, wait: %d, type: %d", (int)lock_type,
-> +	     "start: %llu, length: %llu, wait: %d, type: %d\n", (int)lock_type,
-> 	     (int)operation, owner, (u64)fl->fl_pid, fl->fl_start, length,
-> 	     wait, fl->fl_type);
-> 
-> @@ -132,7 +132,7 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
-> 	}
-> 	ceph_mdsc_put_request(req);
-> 	dout("ceph_lock_message: rule: %d, op: %d, pid: %llu, start: %llu, "
-> -	     "length: %llu, wait: %d, type: %d, err code %d", (int)lock_type,
-> +	     "length: %llu, wait: %d, type: %d, err code %d\n", (int)lock_type,
-> 	     (int)operation, (u64)fl->fl_pid, fl->fl_start,
-> 	     length, wait, fl->fl_type, err);
-> 	return err;
-> @@ -226,7 +226,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
-> 	if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
-> 		return -ENOLCK;
-> 
-> -	dout("ceph_lock, fl_owner: %p", fl->fl_owner);
-> +	dout("ceph_lock, fl_owner: %p\n", fl->fl_owner);
-> 
-> 	/* set wait bit as appropriate, then make command as Ceph expects it*/
-> 	if (IS_GETLK(cmd))
-> @@ -264,7 +264,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
-> 	err = ceph_lock_message(CEPH_LOCK_FCNTL, op, inode, lock_cmd, wait, fl);
-> 	if (!err) {
-> 		if (op == CEPH_MDS_OP_SETFILELOCK) {
-> -			dout("mds locked, locking locally");
-> +			dout("mds locked, locking locally\n");
-> 			err = posix_lock_file(file, fl, NULL);
-> 			if (err) {
-> 				/* undo! This should only happen if
-> @@ -272,7 +272,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
-> 				 * deadlock. */
-> 				ceph_lock_message(CEPH_LOCK_FCNTL, op, inode,
-> 						  CEPH_LOCK_UNLOCK, 0, fl);
-> -				dout("got %d on posix_lock_file, undid lock",
-> +				dout("got %d on posix_lock_file, undid lock\n",
-> 				     err);
-> 			}
-> 		}
-> @@ -294,7 +294,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
-> 	if (fl->fl_type & LOCK_MAND)
-> 		return -EOPNOTSUPP;
-> 
-> -	dout("ceph_flock, fl_file: %p", fl->fl_file);
-> +	dout("ceph_flock, fl_file: %p\n", fl->fl_file);
-> 
-> 	spin_lock(&ci->i_ceph_lock);
-> 	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
-> @@ -329,7 +329,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
-> 			ceph_lock_message(CEPH_LOCK_FLOCK,
-> 					  CEPH_MDS_OP_SETFILELOCK,
-> 					  inode, CEPH_LOCK_UNLOCK, 0, fl);
-> -			dout("got %d on locks_lock_file_wait, undid lock", err);
-> +			dout("got %d on locks_lock_file_wait, undid lock\n", err);
-> 		}
-> 	}
-> 	return err;
-> @@ -356,7 +356,7 @@ void ceph_count_locks(struct inode *inode, int *fcntl_count, int *flock_count)
-> 			++(*flock_count);
-> 		spin_unlock(&ctx->flc_lock);
-> 	}
-> -	dout("counted %d flock locks and %d fcntl locks",
-> +	dout("counted %d flock locks and %d fcntl locks\n",
-> 	     *flock_count, *fcntl_count);
-> }
-> 
-> @@ -384,7 +384,7 @@ static int lock_to_ceph_filelock(struct file_lock *lock,
-> 		cephlock->type = CEPH_LOCK_UNLOCK;
-> 		break;
-> 	default:
-> -		dout("Have unknown lock type %d", lock->fl_type);
-> +		dout("Have unknown lock type %d\n", lock->fl_type);
-> 		err = -EINVAL;
-> 	}
-> 
-> @@ -407,7 +407,7 @@ int ceph_encode_locks_to_buffer(struct inode *inode,
-> 	int seen_flock = 0;
-> 	int l = 0;
-> 
-> -	dout("encoding %d flock and %d fcntl locks", num_flock_locks,
-> +	dout("encoding %d flock and %d fcntl locks\n", num_flock_locks,
-> 	     num_fcntl_locks);
-> 
-> 	if (!ctx)
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 1b46825..731a856 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -384,7 +384,7 @@ static struct ceph_mds_session *get_session(struct ceph_mds_session *s)
-> 		     refcount_read(&s->s_ref)-1, refcount_read(&s->s_ref));
-> 		return s;
-> 	} else {
-> -		dout("mdsc get_session %p 0 -- FAIL", s);
-> +		dout("mdsc get_session %p 0 -- FAIL\n", s);
-> 		return NULL;
-> 	}
-> }
-> @@ -2518,10 +2518,10 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
-> 	 * Otherwise we just have to return an ESTALE
-> 	 */
-> 	if (result == -ESTALE) {
-> -		dout("got ESTALE on request %llu", req->r_tid);
-> +		dout("got ESTALE on request %llu\n", req->r_tid);
-> 		req->r_resend_mds = -1;
-> 		if (req->r_direct_mode != USE_AUTH_MDS) {
-> -			dout("not using auth, setting for that now");
-> +			dout("not using auth, setting for that now\n");
-> 			req->r_direct_mode = USE_AUTH_MDS;
-> 			__do_request(mdsc, req);
-> 			mutex_unlock(&mdsc->mutex);
-> @@ -2529,13 +2529,13 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
-> 		} else  {
-> 			int mds = __choose_mds(mdsc, req);
-> 			if (mds >= 0 && mds != req->r_session->s_mds) {
-> -				dout("but auth changed, so resending");
-> +				dout("but auth changed, so resending\n");
-> 				__do_request(mdsc, req);
-> 				mutex_unlock(&mdsc->mutex);
-> 				goto out;
-> 			}
-> 		}
-> -		dout("have to return ESTALE on request %llu", req->r_tid);
-> +		dout("have to return ESTALE on request %llu\n", req->r_tid);
-> 	}
-> 
-> 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index a62d2a9..5ec5eef 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -318,7 +318,7 @@ static int parse_fsopt_token(char *c, void *private)
-> 		break;
-> 	case Opt_poolperm:
-> 		fsopt->flags &= ~CEPH_MOUNT_OPT_NOPOOLPERM;
-> -		printk ("pool perm");
-> +		dout("pool perm\n");
-> 		break;
-> 	case Opt_nopoolperm:
-> 		fsopt->flags |= CEPH_MOUNT_OPT_NOPOOLPERM;
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 1e492ef..14ee3bf 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -217,7 +217,7 @@ static int parse_fsid(const char *str, struct ceph_fsid *fsid)
-> 
-> 	if (i == 16)
-> 		err = 0;
-> -	dout("parse_fsid ret %d got fsid %pU", err, fsid);
-> +	dout("parse_fsid ret %d got fsid %pU\n", err, fsid);
-> 	return err;
-> }
-> 
-> -- 
-> 1.8.3.1
-> 
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ Documentation/filesystems/ceph.txt |  4 +++
+ fs/ceph/quota.c                    | 56 ++++++++++++++++++++++++++++++++++++++
+ fs/ceph/super.c                    | 22 +++++++++++++--
+ fs/ceph/super.h                    |  3 ++
+ 4 files changed, 82 insertions(+), 3 deletions(-)
 
-Applied, thanks
-
-Yan, Zheng
-
+diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesystems/ceph.txt
+index 094772481263..d7f011ddc150 100644
+--- a/Documentation/filesystems/ceph.txt
++++ b/Documentation/filesystems/ceph.txt
+@@ -149,6 +149,10 @@ Mount Options
+   noasyncreaddir
+ 	Do not use the dcache as above for readdir.
+ 
++  noquotadf
++        Report overall filesystem usage in statfs instead of using the root
++        directory quota.
++
+ More Information
+ ================
+ 
+diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+index 588744b4665f..242bfa5c0539 100644
+--- a/fs/ceph/quota.c
++++ b/fs/ceph/quota.c
+@@ -18,6 +18,8 @@
+  * along with this program; if not, see <http://www.gnu.org/licenses/>.
+  */
+ 
++#include <linux/statfs.h>
++
+ #include "super.h"
+ #include "mds_client.h"
+ 
+@@ -303,3 +305,57 @@ bool ceph_quota_is_max_bytes_approaching(struct inode *inode, loff_t newsize)
+ 	return check_quota_exceeded(inode, QUOTA_CHECK_MAX_BYTES_APPROACHING_OP,
+ 				    (newsize - size));
+ }
++
++/*
++ * ceph_quota_update_statfs - if root has quota update statfs with quota status
++ * @fsc:	filesystem client instance
++ * @buf:	statfs to update
++ *
++ * If the mounted filesystem root has max_bytes quota set, update the filesystem
++ * statistics with the quota status.
++ *
++ * This function returns true if the stats have been updated, false otherwise.
++ */
++bool ceph_quota_update_statfs(struct ceph_fs_client *fsc, struct kstatfs *buf)
++{
++	struct ceph_mds_client *mdsc = fsc->mdsc;
++	struct ceph_inode_info *ci;
++	struct ceph_snap_realm *realm;
++	struct inode *in;
++	u64 total = 0, used, free;
++	bool is_updated = false;
++
++	down_read(&mdsc->snap_rwsem);
++	realm = get_quota_realm(mdsc, d_inode(fsc->sb->s_root));
++	up_read(&mdsc->snap_rwsem);
++	if (!realm)
++		return false;
++
++	spin_lock(&realm->inodes_with_caps_lock);
++	in = realm->inode ? igrab(realm->inode) : NULL;
++	spin_unlock(&realm->inodes_with_caps_lock);
++	if (in) {
++		ci = ceph_inode(in);
++		spin_lock(&ci->i_ceph_lock);
++		if (ci->i_max_bytes) {
++			total = ci->i_max_bytes >> CEPH_BLOCK_SHIFT;
++			used = ci->i_rbytes >> CEPH_BLOCK_SHIFT;
++			/* It is possible for a quota to be exceeded.
++			 * Report 'zero' in that case
++			 */
++			free = total > used ? total - used : 0;
++		}
++		spin_unlock(&ci->i_ceph_lock);
++		if (total) {
++			buf->f_blocks = total;
++			buf->f_bfree = free;
++			buf->f_bavail = free;
++			is_updated = true;
++		}
++		iput(in);
++	}
++	ceph_put_snap_realm(mdsc, realm);
++
++	return is_updated;
++}
++
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 9b4929420c13..93421afc4125 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -76,9 +76,18 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	 */
+ 	buf->f_bsize = 1 << CEPH_BLOCK_SHIFT;
+ 	buf->f_frsize = 1 << CEPH_BLOCK_SHIFT;
+-	buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
+-	buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
+-	buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
++
++	/*
++	 * By default use root quota for stats; fallback to overall filesystem
++	 * usage if using 'noquotadf' mount option or if the root dir doesn't
++	 * have max_bytes quota set.
++	 */
++	if (fsc->mount_options->flags & CEPH_MOUNT_OPT_NOQUOTADF ||
++	    !ceph_quota_update_statfs(fsc, buf)) {
++		buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
++		buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
++		buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
++	}
+ 
+ 	buf->f_files = le64_to_cpu(st.num_objects);
+ 	buf->f_ffree = -1;
+@@ -151,6 +160,7 @@ enum {
+ 	Opt_acl,
+ #endif
+ 	Opt_noacl,
++	Opt_noquotadf,
+ };
+ 
+ static match_table_t fsopt_tokens = {
+@@ -187,6 +197,7 @@ static match_table_t fsopt_tokens = {
+ 	{Opt_acl, "acl"},
+ #endif
+ 	{Opt_noacl, "noacl"},
++	{Opt_noquotadf, "noquotadf"},
+ 	{-1, NULL}
+ };
+ 
+@@ -328,6 +339,9 @@ static int parse_fsopt_token(char *c, void *private)
+ 	case Opt_norequire_active_mds:
+ 		fsopt->flags |= CEPH_MOUNT_OPT_MOUNTWAIT;
+ 		break;
++	case Opt_noquotadf:
++		fsopt->flags |= CEPH_MOUNT_OPT_NOQUOTADF;
++		break;
+ #ifdef CONFIG_CEPH_FS_POSIX_ACL
+ 	case Opt_acl:
+ 		fsopt->sb_flags |= SB_POSIXACL;
+@@ -517,6 +531,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 	}
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
+ 		seq_puts(m, ",nopoolperm");
++	if (fsopt->flags & CEPH_MOUNT_OPT_NOQUOTADF)
++		seq_puts(m, ",noquotadf");
+ 
+ #ifdef CONFIG_CEPH_FS_POSIX_ACL
+ 	if (fsopt->sb_flags & SB_POSIXACL)
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 92d189074008..60ed9399fe73 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -39,6 +39,7 @@
+ #define CEPH_MOUNT_OPT_FSCACHE         (1<<10) /* use fscache */
+ #define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission check */
+ #define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<12) /* mount waits if no mds is up */
++#define CEPH_MOUNT_OPT_NOQUOTADF       (1<<13) /* no root dir quota in statfs */
+ 
+ #define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
+ 
+@@ -1111,5 +1112,7 @@ extern bool ceph_quota_is_max_bytes_exceeded(struct inode *inode,
+ 					     loff_t newlen);
+ extern bool ceph_quota_is_max_bytes_approaching(struct inode *inode,
+ 						loff_t newlen);
++extern bool ceph_quota_update_statfs(struct ceph_fs_client *fsc,
++				     struct kstatfs *buf);
+ 
+ #endif /* _FS_CEPH_SUPER_H */
