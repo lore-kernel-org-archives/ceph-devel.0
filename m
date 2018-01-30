@@ -1,36 +1,58 @@
-From: sbezverk <sbezverk@gmail.com>
-Subject: CSI Ceph support for mounting a volume on same node  by multiple
- workloads
-Date: Tue, 30 Jan 2018 08:56:42 -0500
-Message-ID: <9F12F1D1-AECD-448C-988E-8836FB568195@gmail.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
+Subject: Moving RGW buckets under tenant namespaces
+Date: Tue, 30 Jan 2018 17:27:39 +0100
+Message-ID: <87po5rl3b8.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:40719 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751932AbeA3N4r (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jan 2018 08:56:47 -0500
-Received: by mail-qt0-f196.google.com with SMTP id s39so17273321qth.7
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jan 2018 05:56:47 -0800 (PST)
-Received: from [10.117.94.148] ([173.38.117.91])
-        by smtp.gmail.com with ESMTPSA id z140sm9158387qkb.51.2018.01.30.05.56.45
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 30 Jan 2018 05:56:46 -0800 (PST)
+Received: from smtp.nue.novell.com ([195.135.221.5]:60953 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751986AbeA3Q2E (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Tue, 30 Jan 2018 11:28:04 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Apologies for wide distribution. It concerns only folks interested in running CEPH CSI plugin in kubernetes or other COs.
- 
-Currently CSI spec explicitly disallow attaching  same volume on the same node by multiple workloads (pods). It looks like a limitation, as kubernetes already supports this functionality.
-There is issue filed at CSI Spec repo and we need your help if you need this feature in CSI spec. Please share in  the issue your use cases and/or express if you need this feature in CSI. It will help us to re-evaluate previous decision to not allow this feature.
-Here is the link to the issue;
-https://github.com/container-storage-interface/spec/issues/178
- 
-Thank you
-Serguei
 
+I was looking into moving buckets owned by a user under a tenant
+namespace; (a common usecase is in openstack installations where tenant
+namespaces are preferred with openstack keystone for eg.). Doing this
+manually with rados and radosgw-admin cli would involve something in the
+lines of:
 
+1. Copying the user and user.buckets object under the users.uid pool with
+  the tenant$user name with rados cp which seems to preserve omaps
+
+2 radosgw-admin metadata get user:<uid> > uid.json # change uid to
+  reflect the tenant field
+
+3 radosgw-admin metadata get bucket:<bucket-name> modifying the empty
+  tenant field with the tenant info; and owner to the tenant$user format
+  and finally metadata put bucket:tenant/<bucket-name>
+
+4 repeating the same metadata get/put for
+  bucket.instance 
+
+5 metadata rm user:<old-username> bucket:<old-bucket-name>
+  bucket.instance:<old-instance>
+
+6 radosgw-admin metadata put < modified-uid.json
+
+I'm not sure whether this covers all the bases or any other metadata is
+left behind? 
+
+Current RGW Bucket link/unlink does steps 2,3 and getting
+the ACLs right and correctly adding and removing the omap entries in the
+user.bucket object, though in the current form it would fail as
+version checks for a non existent object would fail. 
+
+Given these complexities would it also make sense supporting this in
+radosgw-admin? (with the caveat that we want no buckets or user
+metadata of the concerned user also modified during this time frame)
+
+--
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
+HRB 21284 (AG Nürnberg)
