@@ -1,43 +1,51 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH 0/1] quota: report root dir quota usage in statfs
-Date: Tue, 30 Jan 2018 11:45:29 +0000
-Message-ID: <20180130114530.26266-1-lhenriques@suse.com>
+From: Chengguang Xu <cgxu519@icloud.com>
+Subject: Adding more checks for fscache options
+Date: Tue, 30 Jan 2018 21:17:25 +0800
+Message-ID: <8299B0B2-B1B2-4C85-A1FC-4C15740F32FA@icloud.com>
+Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
+Content-Type: text/plain; charset=gb2312
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:51631 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751451AbeA3Lpd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 30 Jan 2018 06:45:33 -0500
+Received: from pv33p36im-asmtp001.me.com ([17.142.213.62]:17891 "EHLO
+        pv33p36im-asmtp001.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751950AbeA3NRx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jan 2018 08:17:53 -0500
+Received: from process-dkim-sign-daemon.pv33p36im-asmtp001.me.com by
+ pv33p36im-asmtp001.me.com
+ (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
+ 2017)) id <0P3D00700E7T4Q00@pv33p36im-asmtp001.me.com> for
+ ceph-devel@vger.kernel.org; Tue, 30 Jan 2018 13:17:39 +0000 (GMT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>, Luis Henriques <lhenriques@suse.com>
+To: "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Following this email I'm sending a patch that modifies the statfs
-behaviour in cephfs kernel client so that, by default, it shows the
-quota statistics for the root directory instead of the overall
-filesystem usage.
+Hi Zheng, Ilya
 
-I'm sending this patch as an RFC because:
+Recently I=A1=AFve just tested some mount option of cephfs and found =
+though
+fscache kernel module was disabled but when I specified -o fsc to =
+mount.ceph
+there is no any indication of warning or failure.
 
- * I'm not sure people really want to have this behaviour -- this is the
-   default for the ceph-fuse client, so I just wanted to have a similar
-   behaviour in the kernel client.
- * Showing quota usage by default may not be the correct option,
-   although (again!) this is what the ceph-fuse client does.
+I think it may cause enduser's misunderstanding of fscache function,=20
+so I plan to add extra checks to parsing fscache related options in =
+kernel side.=20
 
-Anyway, there's also a new mount option ('noquotadf') to revert to the
-old statfs even if the root dir has max_bytes set.
+There are two approaches as below, could you tell me which will be =
+better?
 
-Just for reference, this statfs behaviour was added to the ceph-fuse
-client by commit b6d2b6d1a519 ("client: report root's quota in
-statfs").
+If we get conflict condition about fscache.
 
-Luis Henriques (1):
-  quota: report root dir quota usage for statfs by default
+A. Print error message && Exit mount immediately
 
- Documentation/filesystems/ceph.txt |  4 +++
- fs/ceph/quota.c                    | 56 ++++++++++++++++++++++++++++++++++++++
- fs/ceph/super.c                    | 22 +++++++++++++--
- fs/ceph/super.h                    |  3 ++
- 4 files changed, 82 insertions(+), 3 deletions(-)
+B. Only print error message but continue mount process.
+
+
+
+
+Thanks,
+Chengguang.
+
+
 
