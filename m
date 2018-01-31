@@ -1,12 +1,12 @@
 From: jlayton@poochiereds.net
-Subject: [nfs-ganesha RFC PATCH 2/6] SAL: add new try_lift_grace recovery operation
-Date: Wed, 31 Jan 2018 09:12:15 -0500
-Message-ID: <20180131141219.16929-3-jlayton@poochiereds.net>
+Subject: [nfs-ganesha RFC PATCH 3/6] SAL: add nodeid config value to RADOS_KV section
+Date: Wed, 31 Jan 2018 09:12:16 -0500
+Message-ID: <20180131141219.16929-4-jlayton@poochiereds.net>
 References: <20180131141219.16929-1-jlayton@poochiereds.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:47296 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:47300 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753184AbeAaOMZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S1753256AbeAaOMZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Wed, 31 Jan 2018 09:12:25 -0500
 In-Reply-To: <20180131141219.16929-1-jlayton@poochiereds.net>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -15,144 +15,112 @@ To: nfs-ganesha-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@redhat.com>
 
-When running in a clustered environment, we can't just lift the grace
-period once the local machine is ready. We must instead wait until no
-other cluster nodes still need it.
+The global "clustered" configuration value is true by default. Its only
+meaning is as an indicator of whether the g_nodeid value is valid, and
+that value is only used in the recovery backends.
 
-Add a new can_lift_grace op, and use that to do extra vetting before
-allowing the local grace period to be lifted. If it returns true, then
-we can go ahead and lift the grace period.
+The g_nodeid however, is almost always zero. The only exception is when
+GPFS creates an export, at which point it'll ask the cluster about its
+nodeid and set the value. That value is apparently never zero.
 
-Change-Id: Ic8060a083ac9d8581d78357ab7f1351793625264
+My suspicion is that the intersection of people using the RADOS recovery
+backends with GPFS is probably quite small.
+
+Allow the admin to set a nodeid value in the RADOS_KV configuration
+block.  This value defaults to UINT32_MAX which will make the RADOS_KV
+store act as non-clustered by default (using the hostname as the basis
+of the OID name).
+
+With this, the RADOS recovery backends will just ignore the "clustered"
+config option.
+
+Change-Id: I03fedc53f35aa54475a4045375d6b38964a72545
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- src/SAL/nfs4_recovery.c              | 27 ++++++++++++++++++++++++---
- src/SAL/recovery/recovery_fs.c       |  1 +
- src/SAL/recovery/recovery_fs_ng.c    |  1 +
- src/SAL/recovery/recovery_rados_kv.c |  1 +
- src/SAL/recovery/recovery_rados_ng.c |  1 +
- src/include/sal_functions.h          |  2 ++
- 6 files changed, 30 insertions(+), 3 deletions(-)
+ src/SAL/recovery/recovery_rados.h    | 2 ++
+ src/SAL/recovery/recovery_rados_kv.c | 6 ++++--
+ src/SAL/recovery/recovery_rados_ng.c | 4 ++--
+ src/config_samples/config.txt        | 2 ++
+ src/doc/man/ganesha-core-config.rst  | 4 ++++
+ 5 files changed, 14 insertions(+), 4 deletions(-)
 
-diff --git a/src/SAL/nfs4_recovery.c b/src/SAL/nfs4_recovery.c
-index 06b3e0ab77e5..619352f02575 100644
---- a/src/SAL/nfs4_recovery.c
-+++ b/src/SAL/nfs4_recovery.c
-@@ -196,12 +196,31 @@ bool nfs_in_grace(void)
- 	return atomic_fetch_time_t(&current_grace);
- }
- 
-+/**
-+ * @brief Determine whether we can lift the grace period
-+ *
-+ * @retval true if so
-+ * @retval false if not
-+ *
-+ * In a clustered environment, we must take care not to lift the grace period
-+ * until it's no longer needed cluster-wide. Try to lift the grace period, and
-+ * return true or false depending on whether it succeeded.
-+ *
-+ * In the case of a single host, we always assume that the grace period can
-+ * be lifted.
-+ */
-+bool simple_try_lift_grace(void)
-+{
-+	return true;
-+}
-+
- void nfs_try_lift_grace(void)
- {
- 	bool in_grace = true;
- 	int32_t rc_count = 0;
- 	time_t current = atomic_fetch_time_t(&current_grace);
- 
-+	/* Already lifted? Just return */
- 	if (!current)
- 		return;
- 
-@@ -223,9 +242,11 @@ void nfs_try_lift_grace(void)
- 	 * try to do it.
- 	 */
- 	if (!in_grace) {
--		PTHREAD_MUTEX_lock(&grace_mutex);
--		nfs_lift_grace_locked(current);
--		PTHREAD_MUTEX_unlock(&grace_mutex);
-+		if (recovery_backend->try_lift_grace()) {
-+			PTHREAD_MUTEX_lock(&grace_mutex);
-+			nfs_lift_grace_locked(current);
-+			PTHREAD_MUTEX_unlock(&grace_mutex);
-+		}
- 	}
- }
- 
-diff --git a/src/SAL/recovery/recovery_fs.c b/src/SAL/recovery/recovery_fs.c
-index fe8cdcd7e171..fc1e3429d3f3 100644
---- a/src/SAL/recovery/recovery_fs.c
-+++ b/src/SAL/recovery/recovery_fs.c
-@@ -784,6 +784,7 @@ struct nfs4_recovery_backend fs_backend = {
- 	.add_clid = fs_add_clid,
- 	.rm_clid = fs_rm_clid,
- 	.add_revoke_fh = fs_add_revoke_fh,
-+	.try_lift_grace = simple_try_lift_grace,
+diff --git a/src/SAL/recovery/recovery_rados.h b/src/SAL/recovery/recovery_rados.h
+index 16aae1315220..b2eda0019938 100644
+--- a/src/SAL/recovery/recovery_rados.h
++++ b/src/SAL/recovery/recovery_rados.h
+@@ -37,6 +37,8 @@ struct rados_kv_parameter {
+ 	char *userid;
+ 	/** Pool for client info */
+ 	char *pool;
++	/** Node ID for this cluster node */
++	uint32_t nodeid;
  };
+ extern struct rados_kv_parameter rados_kv_param;
  
- void fs_backend_init(struct nfs4_recovery_backend **backend)
-diff --git a/src/SAL/recovery/recovery_fs_ng.c b/src/SAL/recovery/recovery_fs_ng.c
-index 2e7b2968dbf3..4b11d58128f4 100644
---- a/src/SAL/recovery/recovery_fs_ng.c
-+++ b/src/SAL/recovery/recovery_fs_ng.c
-@@ -377,6 +377,7 @@ static struct nfs4_recovery_backend fs_ng_backend = {
- 	.add_clid = fs_add_clid,
- 	.rm_clid = fs_rm_clid,
- 	.add_revoke_fh = fs_add_revoke_fh,
-+	.try_lift_grace = simple_try_lift_grace,
- };
- 
- void fs_ng_backend_init(struct nfs4_recovery_backend **backend)
 diff --git a/src/SAL/recovery/recovery_rados_kv.c b/src/SAL/recovery/recovery_rados_kv.c
-index 55f0a25e182c..bb6f70c76b41 100644
+index bb6f70c76b41..bd0ecbf0e5ee 100644
 --- a/src/SAL/recovery/recovery_rados_kv.c
 +++ b/src/SAL/recovery/recovery_rados_kv.c
-@@ -601,6 +601,7 @@ struct nfs4_recovery_backend rados_kv_backend = {
- 	.add_clid = rados_kv_add_clid,
- 	.rm_clid = rados_kv_rm_clid,
- 	.add_revoke_fh = rados_kv_add_revoke_fh,
-+	.try_lift_grace = simple_try_lift_grace,
+@@ -32,6 +32,8 @@ static struct config_item rados_kv_params[] = {
+ 		       rados_kv_parameter, userid),
+ 	CONF_ITEM_STR("pool", 1, MAXPATHLEN, DEFAULT_POOL,
+ 		       rados_kv_parameter, pool),
++	CONF_ITEM_UI32("nodeid", 0, UINT32_MAX, UINT32_MAX,
++			rados_kv_parameter, nodeid),
+ 	CONFIG_EOL
  };
  
- void rados_kv_backend_init(struct nfs4_recovery_backend **backend)
+@@ -350,8 +352,8 @@ void rados_kv_init(void)
+ 	int ret;
+ 	char host[NI_MAXHOST];
+ 
+-	if (nfs_param.core_param.clustered) {
+-		snprintf(host, sizeof(host), "node%d", g_nodeid);
++	if (rados_kv_param.nodeid != UINT32_MAX) {
++		snprintf(host, sizeof(host), "node%d", rados_kv_param.nodeid);
+ 	} else {
+ 		ret = gethostname(host, sizeof(host));
+ 		if (ret) {
 diff --git a/src/SAL/recovery/recovery_rados_ng.c b/src/SAL/recovery/recovery_rados_ng.c
-index 7e71812df48d..91b2b5ff0837 100644
+index 91b2b5ff0837..5c26542ba0c8 100644
 --- a/src/SAL/recovery/recovery_rados_ng.c
 +++ b/src/SAL/recovery/recovery_rados_ng.c
-@@ -318,6 +318,7 @@ struct nfs4_recovery_backend rados_ng_backend = {
- 	.add_clid = rados_ng_add_clid,
- 	.rm_clid = rados_ng_rm_clid,
- 	.add_revoke_fh = rados_ng_add_revoke_fh,
-+	.try_lift_grace = simple_try_lift_grace,
- };
+@@ -117,8 +117,8 @@ static void rados_ng_init(void)
+ 	char host[NI_MAXHOST];
+ 	rados_write_op_t op;
  
- void rados_ng_backend_init(struct nfs4_recovery_backend **backend)
-diff --git a/src/include/sal_functions.h b/src/include/sal_functions.h
-index 4ae9826a55cc..259d911254a9 100644
---- a/src/include/sal_functions.h
-+++ b/src/include/sal_functions.h
-@@ -967,6 +967,7 @@ void blocked_lock_polling(struct fridgethr_context *ctx);
+-	if (nfs_param.core_param.clustered) {
+-		snprintf(host, sizeof(host), "node%d", g_nodeid);
++	if (rados_kv_param.nodeid != UINT32_MAX) {
++		snprintf(host, sizeof(host), "node%d", rados_kv_param.nodeid);
+ 	} else {
+ 		ret = gethostname(host, sizeof(host));
+ 		if (ret) {
+diff --git a/src/config_samples/config.txt b/src/config_samples/config.txt
+index d30c65fbc926..26459d4afca3 100644
+--- a/src/config_samples/config.txt
++++ b/src/config_samples/config.txt
+@@ -730,6 +730,8 @@ RADOS_KV {}
  
- void nfs_start_grace(nfs_grace_start_t *gsp);
- bool nfs_in_grace(void);
-+bool simple_try_lift_grace(void);
- void nfs_try_lift_grace(void);
- void nfs4_add_clid(nfs_client_id_t *);
- void nfs4_rm_clid(nfs_client_id_t *);
-@@ -1012,6 +1013,7 @@ struct nfs4_recovery_backend {
- 	void (*add_clid)(nfs_client_id_t *);
- 	void (*rm_clid)(nfs_client_id_t *);
- 	void (*add_revoke_fh)(nfs_client_id_t *, nfs_fh4 *);
-+	bool (*try_lift_grace)(void);
- };
+ 	pool(string, no default)
  
- void fs_backend_init(struct nfs4_recovery_backend **);
++	nodeid(uint32, default UINT32_MAX)
++
+ RADOS_URLS {}
+ --------
+ 
+diff --git a/src/doc/man/ganesha-core-config.rst b/src/doc/man/ganesha-core-config.rst
+index 75b84cbc8c9b..8c76106568da 100644
+--- a/src/doc/man/ganesha-core-config.rst
++++ b/src/doc/man/ganesha-core-config.rst
+@@ -305,3 +305,7 @@ userid(path, no default)
+ 
+ pool(string, no default)
+     Pool for client info.
++
++nodeid(uint32, range 0 to UINT32_MAX, default UINT32_MAX)
++    The nodeid value for this cluster node. Defaults to UINT32_MAX which is a
++    special value meaning "non-clustered".
 -- 
 2.14.3
 
