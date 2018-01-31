@@ -1,74 +1,45 @@
-From: Chengguang Xu <cgxu519@icloud.com>
-Subject: Re: Adding more checks for fscache options
-Date: Wed, 31 Jan 2018 09:49:56 +0800
-Message-ID: <FC60E345-F706-4F70-AD1F-3A4E4F37527A@icloud.com>
-References: <8299B0B2-B1B2-4C85-A1FC-4C15740F32FA@icloud.com>
- <CAOi1vP__sp1uZZHPGKDFLFJOGq5Qv=ROzikRWmiHrCg-po+3Kg@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain; charset=gb2312
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pv33p36im-asmtp002.me.com ([17.142.213.63]:23086 "EHLO
-        pv33p36im-asmtp002.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752142AbeAaBuH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jan 2018 20:50:07 -0500
-Received: from process-dkim-sign-daemon.pv33p36im-asmtp002.me.com by
- pv33p36im-asmtp002.me.com
- (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
- 2017)) id <0P3E00E00D0E2D00@pv33p36im-asmtp002.me.com> for
- ceph-devel@vger.kernel.org; Wed, 31 Jan 2018 01:50:06 +0000 (GMT)
-In-reply-to: <CAOi1vP__sp1uZZHPGKDFLFJOGq5Qv=ROzikRWmiHrCg-po+3Kg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Subject: [PATCH] libceph: use 64-bit arithmetic instead of 32-bit
+Date: Tue, 30 Jan 2018 23:29:48 -0600
+Message-ID: <20180131052948.GA16419@embeddedgus>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>
+Cc: ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Ilya
+Cast objsetno to u64 in order to give the compiler complete
+information about the proper arithmetic to use. Notice
+that this variable is used in a context that expects an
+expression of type u64 (64 bits, unsigned).
 
-I looked at nfs code of option parsing and found nfs is the same as =
-ceph,
-but in 9P fscache related options are carefully surrounded by =
-CONFIG_9P_FSCACHE,
-if you agree this I=A1=AFll make a patch to handle this in ceph.
+The expression objsetno * sc + stripepos is currently
+being evaluated using 32-bit arithmetic.
 
+In general, the use of incorrect arithmetic has security
+implications.
 
+Addresses-Coverity-ID: 200686
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+---
+ net/ceph/osdmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks,
-Chengguang.
-
-
-
-> =D4=DA 2018=C4=EA1=D4=C230=C8=D5=A3=AC=CF=C2=CE=E79:39=A3=ACIlya =
-Dryomov <idryomov@gmail.com> =D0=B4=B5=C0=A3=BA
->=20
-> On Tue, Jan 30, 2018 at 2:17 PM, Chengguang Xu <cgxu519@icloud.com> =
-wrote:
->> Hi Zheng, Ilya
->>=20
->> Recently I=A1=AFve just tested some mount option of cephfs and found =
-though
->> fscache kernel module was disabled but when I specified -o fsc to =
-mount.ceph
->> there is no any indication of warning or failure.
->>=20
->> I think it may cause enduser's misunderstanding of fscache function,
->> so I plan to add extra checks to parsing fscache related options in =
-kernel side.
->>=20
->> There are two approaches as below, could you tell me which will be =
-better?
->>=20
->> If we get conflict condition about fscache.
->>=20
->> A. Print error message && Exit mount immediately
->>=20
->> B. Only print error message but continue mount process.
->=20
-> Hi Chengguang,
->=20
-> I'd look at and follow nfs behaviour here.
->=20
-> Thanks,
->=20
->                Ilya
-
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 0da27c6..58dc965 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -2183,7 +2183,7 @@ int ceph_calc_file_object_mapping(struct ceph_file_layout *layout,
+ 	stripepos = bl % sc;
+ 	objsetno = stripeno / su_per_object;
+ 
+-	*ono = objsetno * sc + stripepos;
++	*ono = (u64)objsetno * sc + stripepos;
+ 	dout("objset %u * sc %u = ono %u\n", objsetno, sc, (unsigned int)*ono);
+ 
+ 	/* *oxoff = *off % layout->fl_stripe_unit;  # offset in su */
+-- 
+2.7.4
