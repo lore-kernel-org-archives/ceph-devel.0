@@ -1,56 +1,56 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [RFC PATCH 1/1] quota: report root dir quota usage in statfs
-Date: Wed, 31 Jan 2018 09:38:58 +0000
-Message-ID: <20180131093858.zlu6nf7x3lps5t2n@hermes.olymp>
-References: <20180130114530.26266-1-lhenriques@suse.com>
- <20180130114530.26266-2-lhenriques@suse.com>
- <76B7F300-DCB5-434A-944F-3EA6BFF03E72@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: use 64-bit arithmetic instead of 32-bit
+Date: Wed, 31 Jan 2018 10:39:09 +0100
+Message-ID: <CAOi1vP_weac6BzPbpcqAiaC1Mfxr-83=3XKLpv8+aZCsPGObAw@mail.gmail.com>
+References: <20180131052948.GA16419@embeddedgus>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:57940 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753554AbeAaJi6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 31 Jan 2018 04:38:58 -0500
-Content-Disposition: inline
-In-Reply-To: <76B7F300-DCB5-434A-944F-3EA6BFF03E72@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180131052948.GA16419@embeddedgus>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jan 31, 2018 at 03:00:51PM +0800, Yan, Zheng wrote:
-> > +	if (fsc->mount_options->flags & CEPH_MOUNT_OPT_NOQUOTADF ||
-> 
->  if ((fsc->mount_options->flags & CEPH_MOUNT_OPT_NOQUOTADF) ||
+On Wed, Jan 31, 2018 at 6:29 AM, Gustavo A. R. Silva
+<gustavo@embeddedor.com> wrote:
+> Cast objsetno to u64 in order to give the compiler complete
+> information about the proper arithmetic to use. Notice
+> that this variable is used in a context that expects an
+> expression of type u64 (64 bits, unsigned).
+>
+> The expression objsetno * sc + stripepos is currently
+> being evaluated using 32-bit arithmetic.
+>
+> In general, the use of incorrect arithmetic has security
+> implications.
+>
+> Addresses-Coverity-ID: 200686
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+> ---
+>  net/ceph/osdmap.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 0da27c6..58dc965 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -2183,7 +2183,7 @@ int ceph_calc_file_object_mapping(struct ceph_file_layout *layout,
+>         stripepos = bl % sc;
+>         objsetno = stripeno / su_per_object;
+>
+> -       *ono = objsetno * sc + stripepos;
+> +       *ono = (u64)objsetno * sc + stripepos;
+>         dout("objset %u * sc %u = ono %u\n", objsetno, sc, (unsigned int)*ono);
+>
+>         /* *oxoff = *off % layout->fl_stripe_unit;  # offset in su */
 
-Ok, fair enough.
+Hi Gustavo,
 
-> > +	    !ceph_quota_update_statfs(fsc, buf)) {
-> > +		buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
-> > +		buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-> > +		buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-> > +	}
-> > 
-> > 	buf->f_files = le64_to_cpu(st.num_objects);
-> > 	buf->f_ffree = -1;
-> > @@ -151,6 +160,7 @@ enum {
-> > 	Opt_acl,
-> > #endif
-> > 	Opt_noacl,
-> > +	Opt_noquotadf,
-> 
-> please also add quotadf option  
+This (and other u32/u64 issues in this function, is this the only
+warning?) is fixed in my striping v2 work branch.  I wasn't going to
+push that patch separately, but I guess I should post it.
 
-Hmm.. ok.  Since the default behaviour (with this patch) is to show
-quota stats when running 'df' I assumed this wouldn't be required.  But
-yeah, I guess I can add an option that explicitly does a
+Thanks,
 
-	fsopt->flags &= ~CEPH_MOUNT_OPT_NOQUOTADF;
-
-I'll send out a v2.
-
-Cheers,
---
-Luís
+                Ilya
