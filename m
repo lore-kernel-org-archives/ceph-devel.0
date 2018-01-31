@@ -1,206 +1,47 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH v2 1/1] quota: report root dir quota usage in statfs
-Date: Wed, 31 Jan 2018 10:53:13 +0000
-Message-ID: <20180131105313.24802-2-lhenriques@suse.com>
-References: <20180131105313.24802-1-lhenriques@suse.com>
+From: Leonardo Vaz <lvaz@redhat.com>
+Subject: Re: Cephalocon APAC Call for Proposals
+Date: Wed, 31 Jan 2018 09:46:42 -0200
+Message-ID: <CAB0WNsjHqfNre1je-buMRub8_Zr8H7YuYMysbPvEecX+gr64hw@mail.gmail.com>
+References: <CAB0WNsjwVkBVZQcdLYWzzCswkFeyhY_+LiOkUQfFF63DK6EaSg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:38012 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752337AbeAaKxS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 31 Jan 2018 05:53:18 -0500
-In-Reply-To: <20180131105313.24802-1-lhenriques@suse.com>
+Received: from mail-ot0-f174.google.com ([74.125.82.174]:35170 "EHLO
+        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753311AbeAaLqo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jan 2018 06:46:44 -0500
+Received: by mail-ot0-f174.google.com with SMTP id a2so1726132otf.2
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Jan 2018 03:46:43 -0800 (PST)
+In-Reply-To: <CAB0WNsjwVkBVZQcdLYWzzCswkFeyhY_+LiOkUQfFF63DK6EaSg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>, Luis Henriques <lhenriques@suse.com>
+To: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-Community <ceph-community@ceph.com>
 
-This commit changes statfs default behaviour when reporting usage
-statistics.  Instead of using the overall filesystem usage, statfs now
-reports the quota for the filesystem root, if ceph.quota.max_bytes has
-been set for this inode.  If quota hasn't been set, it falls back to the
-old statfs behaviour.
+On Thu, Jan 25, 2018 at 11:41 AM, Leonardo Vaz <lvaz@redhat.com> wrote:
+> Hey Cephers,
+>
+> This is a friendly reminder that the Call for Proposals for the
+> Cephalocon APAC 2018[1] ends next Wednesday, January 31st.
+>
+>  [1] http://cephalocon.doit.com.cn/guestreg_en.html
+>
+> If you haven't submitted your proposal so far, you still have time!
 
-A new mount option is also added ('noquotadf') to disable this behaviour.
+Hi all,
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- Documentation/filesystems/ceph.txt |  4 +++
- fs/ceph/quota.c                    | 56 ++++++++++++++++++++++++++++++++++++++
- fs/ceph/super.c                    | 29 ++++++++++++++++++--
- fs/ceph/super.h                    |  3 ++
- 4 files changed, 89 insertions(+), 3 deletions(-)
+Today is the last day for the Cephalocon Call for Proposals and I had
+a feedback from some people that the submit button seems not to be
+working properly on the form.
 
-diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesystems/ceph.txt
-index 094772481263..d7f011ddc150 100644
---- a/Documentation/filesystems/ceph.txt
-+++ b/Documentation/filesystems/ceph.txt
-@@ -149,6 +149,10 @@ Mount Options
-   noasyncreaddir
- 	Do not use the dcache as above for readdir.
- 
-+  noquotadf
-+        Report overall filesystem usage in statfs instead of using the root
-+        directory quota.
-+
- More Information
- ================
- 
-diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-index 588744b4665f..242bfa5c0539 100644
---- a/fs/ceph/quota.c
-+++ b/fs/ceph/quota.c
-@@ -18,6 +18,8 @@
-  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-  */
- 
-+#include <linux/statfs.h>
-+
- #include "super.h"
- #include "mds_client.h"
- 
-@@ -303,3 +305,57 @@ bool ceph_quota_is_max_bytes_approaching(struct inode *inode, loff_t newsize)
- 	return check_quota_exceeded(inode, QUOTA_CHECK_MAX_BYTES_APPROACHING_OP,
- 				    (newsize - size));
- }
-+
-+/*
-+ * ceph_quota_update_statfs - if root has quota update statfs with quota status
-+ * @fsc:	filesystem client instance
-+ * @buf:	statfs to update
-+ *
-+ * If the mounted filesystem root has max_bytes quota set, update the filesystem
-+ * statistics with the quota status.
-+ *
-+ * This function returns true if the stats have been updated, false otherwise.
-+ */
-+bool ceph_quota_update_statfs(struct ceph_fs_client *fsc, struct kstatfs *buf)
-+{
-+	struct ceph_mds_client *mdsc = fsc->mdsc;
-+	struct ceph_inode_info *ci;
-+	struct ceph_snap_realm *realm;
-+	struct inode *in;
-+	u64 total = 0, used, free;
-+	bool is_updated = false;
-+
-+	down_read(&mdsc->snap_rwsem);
-+	realm = get_quota_realm(mdsc, d_inode(fsc->sb->s_root));
-+	up_read(&mdsc->snap_rwsem);
-+	if (!realm)
-+		return false;
-+
-+	spin_lock(&realm->inodes_with_caps_lock);
-+	in = realm->inode ? igrab(realm->inode) : NULL;
-+	spin_unlock(&realm->inodes_with_caps_lock);
-+	if (in) {
-+		ci = ceph_inode(in);
-+		spin_lock(&ci->i_ceph_lock);
-+		if (ci->i_max_bytes) {
-+			total = ci->i_max_bytes >> CEPH_BLOCK_SHIFT;
-+			used = ci->i_rbytes >> CEPH_BLOCK_SHIFT;
-+			/* It is possible for a quota to be exceeded.
-+			 * Report 'zero' in that case
-+			 */
-+			free = total > used ? total - used : 0;
-+		}
-+		spin_unlock(&ci->i_ceph_lock);
-+		if (total) {
-+			buf->f_blocks = total;
-+			buf->f_bfree = free;
-+			buf->f_bavail = free;
-+			is_updated = true;
-+		}
-+		iput(in);
-+	}
-+	ceph_put_snap_realm(mdsc, realm);
-+
-+	return is_updated;
-+}
-+
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 9b4929420c13..5062d52f161e 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -76,9 +76,18 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	 */
- 	buf->f_bsize = 1 << CEPH_BLOCK_SHIFT;
- 	buf->f_frsize = 1 << CEPH_BLOCK_SHIFT;
--	buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
--	buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
--	buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-+
-+	/*
-+	 * By default use root quota for stats; fallback to overall filesystem
-+	 * usage if using 'noquotadf' mount option or if the root dir doesn't
-+	 * have max_bytes quota set.
-+	 */
-+	if ((fsc->mount_options->flags & CEPH_MOUNT_OPT_NOQUOTADF) ||
-+	    !ceph_quota_update_statfs(fsc, buf)) {
-+		buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
-+		buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-+		buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-+	}
- 
- 	buf->f_files = le64_to_cpu(st.num_objects);
- 	buf->f_ffree = -1;
-@@ -151,6 +160,8 @@ enum {
- 	Opt_acl,
- #endif
- 	Opt_noacl,
-+	Opt_quotadf,
-+	Opt_noquotadf,
- };
- 
- static match_table_t fsopt_tokens = {
-@@ -187,6 +198,8 @@ static match_table_t fsopt_tokens = {
- 	{Opt_acl, "acl"},
- #endif
- 	{Opt_noacl, "noacl"},
-+	{Opt_quotadf, "quotadf"},
-+	{Opt_noquotadf, "noquotadf"},
- 	{-1, NULL}
- };
- 
-@@ -328,6 +341,12 @@ static int parse_fsopt_token(char *c, void *private)
- 	case Opt_norequire_active_mds:
- 		fsopt->flags |= CEPH_MOUNT_OPT_MOUNTWAIT;
- 		break;
-+	case Opt_quotadf:
-+		fsopt->flags &= ~CEPH_MOUNT_OPT_NOQUOTADF;
-+		break;
-+	case Opt_noquotadf:
-+		fsopt->flags |= CEPH_MOUNT_OPT_NOQUOTADF;
-+		break;
- #ifdef CONFIG_CEPH_FS_POSIX_ACL
- 	case Opt_acl:
- 		fsopt->sb_flags |= SB_POSIXACL;
-@@ -517,6 +536,10 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
- 	}
- 	if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
- 		seq_puts(m, ",nopoolperm");
-+	if (fsopt->flags & CEPH_MOUNT_OPT_NOQUOTADF)
-+		seq_puts(m, ",noquotadf");
-+	else
-+		seq_puts(m, ",quotadf");
- 
- #ifdef CONFIG_CEPH_FS_POSIX_ACL
- 	if (fsopt->sb_flags & SB_POSIXACL)
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 92d189074008..60ed9399fe73 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -39,6 +39,7 @@
- #define CEPH_MOUNT_OPT_FSCACHE         (1<<10) /* use fscache */
- #define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission check */
- #define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<12) /* mount waits if no mds is up */
-+#define CEPH_MOUNT_OPT_NOQUOTADF       (1<<13) /* no root dir quota in statfs */
- 
- #define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
- 
-@@ -1111,5 +1112,7 @@ extern bool ceph_quota_is_max_bytes_exceeded(struct inode *inode,
- 					     loff_t newlen);
- extern bool ceph_quota_is_max_bytes_approaching(struct inode *inode,
- 						loff_t newlen);
-+extern bool ceph_quota_update_statfs(struct ceph_fs_client *fsc,
-+				     struct kstatfs *buf);
- 
- #endif /* _FS_CEPH_SUPER_H */
+Since the January 31st ends officially at the Midnight of last world's
+timezone (Hawaii) I'll be accepting the proposals sent to this email
+until the 5 am (EST) of February 1st.
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
