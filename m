@@ -1,56 +1,49 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: use 64-bit arithmetic instead of 32-bit
-Date: Wed, 31 Jan 2018 10:39:09 +0100
-Message-ID: <CAOi1vP_weac6BzPbpcqAiaC1Mfxr-83=3XKLpv8+aZCsPGObAw@mail.gmail.com>
-References: <20180131052948.GA16419@embeddedgus>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180131052948.GA16419@embeddedgus>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <garsilva@embeddedor.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH v2 0/1] quota: report root dir quota usage in statfs
+Date: Wed, 31 Jan 2018 10:53:12 +0000
+Message-ID: <20180131105313.24802-1-lhenriques@suse.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:38007 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751816AbeAaKxR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 31 Jan 2018 05:53:17 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>, Luis Henriques <lhenriques@suse.com>
 
-On Wed, Jan 31, 2018 at 6:29 AM, Gustavo A. R. Silva
-<gustavo@embeddedor.com> wrote:
-> Cast objsetno to u64 in order to give the compiler complete
-> information about the proper arithmetic to use. Notice
-> that this variable is used in a context that expects an
-> expression of type u64 (64 bits, unsigned).
->
-> The expression objsetno * sc + stripepos is currently
-> being evaluated using 32-bit arithmetic.
->
-> In general, the use of incorrect arithmetic has security
-> implications.
->
-> Addresses-Coverity-ID: 200686
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
-> ---
->  net/ceph/osdmap.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 0da27c6..58dc965 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -2183,7 +2183,7 @@ int ceph_calc_file_object_mapping(struct ceph_file_layout *layout,
->         stripepos = bl % sc;
->         objsetno = stripeno / su_per_object;
->
-> -       *ono = objsetno * sc + stripepos;
-> +       *ono = (u64)objsetno * sc + stripepos;
->         dout("objset %u * sc %u = ono %u\n", objsetno, sc, (unsigned int)*ono);
->
->         /* *oxoff = *off % layout->fl_stripe_unit;  # offset in su */
+Following this email I'm sending a patch that modifies the statfs
+behaviour in cephfs kernel client so that, by default, it shows the
+quota statistics for the root directory instead of the overall
+filesystem usage.
 
-Hi Gustavo,
+I'm sending this patch as an RFC because:
 
-This (and other u32/u64 issues in this function, is this the only
-warning?) is fixed in my striping v2 work branch.  I wasn't going to
-push that patch separately, but I guess I should post it.
+ * I'm not sure people really want to have this behaviour -- this is the
+   default for the ceph-fuse client, so I just wanted to have a similar
+   behaviour in the kernel client.
+ * Showing quota usage by default may not be the correct option,
+   although (again!) this is what the ceph-fuse client does.
 
-Thanks,
+Anyway, there's also a new mount option ('noquotadf') to revert to the
+old statfs even if the root dir has max_bytes set.
 
-                Ilya
+Just for reference, this statfs behaviour was added to the ceph-fuse
+client by commit b6d2b6d1a519 ("client: report root's quota in
+statfs").
+
+** Changes since v1 **
+
+- Rework after review from Yan, Zheng:
+  * Added '()' to expression
+  * Added an extra 'quotadf' mount option
+
+Luis Henriques (1):
+  quota: report root dir quota usage in statfs
+
+ Documentation/filesystems/ceph.txt |  4 +++
+ fs/ceph/quota.c                    | 56 ++++++++++++++++++++++++++++++++++++++
+ fs/ceph/super.c                    | 29 ++++++++++++++++++--
+ fs/ceph/super.h                    |  3 ++
+ 4 files changed, 89 insertions(+), 3 deletions(-)
+
