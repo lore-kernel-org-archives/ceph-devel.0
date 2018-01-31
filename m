@@ -1,47 +1,66 @@
-From: Leonardo Vaz <lvaz@redhat.com>
-Subject: Re: Cephalocon APAC Call for Proposals
-Date: Wed, 31 Jan 2018 09:46:42 -0200
-Message-ID: <CAB0WNsjHqfNre1je-buMRub8_Zr8H7YuYMysbPvEecX+gr64hw@mail.gmail.com>
-References: <CAB0WNsjwVkBVZQcdLYWzzCswkFeyhY_+LiOkUQfFF63DK6EaSg@mail.gmail.com>
+From: "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+Subject: Re: [PATCH] libceph: use 64-bit arithmetic instead of 32-bit
+Date: Wed, 31 Jan 2018 06:02:53 -0600
+Message-ID: <20180131060253.Horde.vxLJv9n9JFz_lxqApXvdkZX@gator4166.hostgator.com>
+References: <20180131052948.GA16419@embeddedgus>
+ <CAOi1vP_weac6BzPbpcqAiaC1Mfxr-83=3XKLpv8+aZCsPGObAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f174.google.com ([74.125.82.174]:35170 "EHLO
-        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753311AbeAaLqo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jan 2018 06:46:44 -0500
-Received: by mail-ot0-f174.google.com with SMTP id a2so1726132otf.2
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Jan 2018 03:46:43 -0800 (PST)
-In-Reply-To: <CAB0WNsjwVkBVZQcdLYWzzCswkFeyhY_+LiOkUQfFF63DK6EaSg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-Community <ceph-community@ceph.com>
+Content-Type: text/plain; charset=utf-8; format=flowed; DelSp=Yes
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP_weac6BzPbpcqAiaC1Mfxr-83=3XKLpv8+aZCsPGObAw@mail.gmail.com>
+Content-Disposition: inline
+Sender: netdev-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Gustavo A. R. Silva" <gustavo@embeddedor.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Jan 25, 2018 at 11:41 AM, Leonardo Vaz <lvaz@redhat.com> wrote:
-> Hey Cephers,
+Hello Ilya,
+
+Quoting Ilya Dryomov <idryomov@gmail.com>:
+
+> On Wed, Jan 31, 2018 at 6:29 AM, Gustavo A. R. Silva
+> <gustavo@embeddedor.com> wrote:
+>> Cast objsetno to u64 in order to give the compiler complete
+>> information about the proper arithmetic to use. Notice
+>> that this variable is used in a context that expects an
+>> expression of type u64 (64 bits, unsigned).
+>>
+>> The expression objsetno * sc + stripepos is currently
+>> being evaluated using 32-bit arithmetic.
+>>
+>> In general, the use of incorrect arithmetic has security
+>> implications.
+>>
+>> Addresses-Coverity-ID: 200686
+>> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+>> ---
+>>  net/ceph/osdmap.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+>> index 0da27c6..58dc965 100644
+>> --- a/net/ceph/osdmap.c
+>> +++ b/net/ceph/osdmap.c
+>> @@ -2183,7 +2183,7 @@ int ceph_calc_file_object_mapping(struct  
+>> ceph_file_layout *layout,
+>>         stripepos = bl % sc;
+>>         objsetno = stripeno / su_per_object;
+>>
+>> -       *ono = objsetno * sc + stripepos;
+>> +       *ono = (u64)objsetno * sc + stripepos;
+>>         dout("objset %u * sc %u = ono %u\n", objsetno, sc,  
+>> (unsigned int)*ono);
+>>
+>>         /* *oxoff = *off % layout->fl_stripe_unit;  # offset in su */
 >
-> This is a friendly reminder that the Call for Proposals for the
-> Cephalocon APAC 2018[1] ends next Wednesday, January 31st.
+> Hi Gustavo,
 >
->  [1] http://cephalocon.doit.com.cn/guestreg_en.html
+> This (and other u32/u64 issues in this function, is this the only
+> warning?) is fixed in my striping v2 work branch.  I wasn't going to
+> push that patch separately, but I guess I should post it.
 >
-> If you haven't submitted your proposal so far, you still have time!
 
-Hi all,
+Yeah, this was the only one warning reported by Coverity in this  
+particular module.
 
-Today is the last day for the Cephalocon Call for Proposals and I had
-a feedback from some people that the submit button seems not to be
-working properly on the form.
-
-Since the January 31st ends officially at the Midnight of last world's
-timezone (Hawaii) I'll be accepting the proposals sent to this email
-until the 5 am (EST) of February 1st.
-
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+Thanks
