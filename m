@@ -1,60 +1,46 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: [ceph-users] Luminous 12.2.3 release date?
-Date: Wed, 31 Jan 2018 10:45:18 -0500
-Message-ID: <559205dd-6a54-c9f9-5623-0736cf475824@redhat.com>
-References: <6016e4d0-5a52-466f-1573-ecd0844b3ec5@42on.com>
- <CALe9h7ciamCzNhJCfzNLbdvtPUEo4X6LQuMt_mCc+Yfj8M9S0w@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Better anticipation for minor releases
+Date: Wed, 31 Jan 2018 12:46:40 -0500
+Message-ID: <CAC-Np1yBwYUMBiS1tg=9CaJsgEkQJZazP43HzSKT=bR=eof=Uw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:44588 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753266AbeAaPpV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jan 2018 10:45:21 -0500
-Received: by mail-qt0-f175.google.com with SMTP id l20so22319409qtj.11
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Jan 2018 07:45:21 -0800 (PST)
-In-Reply-To: <CALe9h7ciamCzNhJCfzNLbdvtPUEo4X6LQuMt_mCc+Yfj8M9S0w@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:33533 "EHLO
+        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753512AbeAaRql (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jan 2018 12:46:41 -0500
+Received: by mail-qk0-f181.google.com with SMTP id i141so15812358qke.0
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Jan 2018 09:46:41 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Wido den Hollander <wido@42on.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+Hi Abhishek,
 
+For almost every minor release we have, there is a cloud of
+uncertainty where nobody really knows when the release will be cut.
 
-On 01/31/2018 07:12 AM, John Spray wrote:
-> (taking to ceph-devel)
->
-> I've done a pass of the luminous backports for mgr and made sure the
-> ones I think are important are merged.  There were a few ugly bugs in
-> there, so I would quite like a 12.2.3 release soon too.
->
-> Anyone else have fixes they're waiting for?
+Most of the time there is an email (or series of emails) that trigger
+the conversation of "are we now ready to cut a release?", where leads
+respond what backports are still pending, or if there are test suites
+that aren't really in the clear.
 
-yeah, rgw bug fixes have been piling up too. i'd love to see a release soon
+For minor releases a mix of a time-based schedule with a set of each
+lead's group of passing tests, would be a nice way to predict when we
+can start having the conversation of cutting a release.
 
-> John
->
-> On Tue, Jan 30, 2018 at 9:35 AM, Wido den Hollander <wido@42on.com> wrote:
->> Hi,
->>
->> Is there a ETA yet for 12.2.3? Looking at the tracker there aren't that many
->> outstanding issues: http://tracker.ceph.com/projects/ceph/roadmap
->>
->> On Github we have more outstanding PRs though for the Luminous milestone:
->> https://github.com/ceph/ceph/milestone/10
->>
->> Are we expecting 12.2.3 in Feb? I'm asking because there are some Mgr
->> related fixes I'm backporting now for a few people which are in 12.2.3.
->>
->> Wido
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It isn't a one-shot fix, but would certainly improve everyone who
+wants/needs a new release and can't get any clues as to what that may
+be.
 
+Something like:
+
+* Minor releases every 6 weeks
+* subset of test suites passing from each lead
+
+Would be a good way to start. If we can get that initial release path,
+it would be possible to start thinking about what "gating" really
+means for our releases (since we don't really have any sort of gating
+today)
+
+What do you think?
