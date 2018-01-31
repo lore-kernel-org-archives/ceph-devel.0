@@ -1,30 +1,25 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Better anticipation for minor releases
-Date: Wed, 31 Jan 2018 12:35:23 -0700
-Message-ID: <CALqRxCzXcd7hSMRK7TfS-N+RjaVvLTRBLbtqG4bXU_ZWkOkX7A@mail.gmail.com>
-References: <CAC-Np1yBwYUMBiS1tg=9CaJsgEkQJZazP43HzSKT=bR=eof=Uw@mail.gmail.com>
- <4173fd50ca3d6d4e4f691f116b425397@suse.com>
+From: Abhishek <abhishek@suse.com>
+Subject: Critical PRs needed for 12.2.3 Luminous
+Date: Wed, 31 Jan 2018 21:05:55 +0100
+Message-ID: <98c4c73b609b9278013e46213a79efdd@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f41.google.com ([209.85.213.41]:42970 "EHLO
-        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751410AbeAaTfY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jan 2018 14:35:24 -0500
-Received: by mail-vk0-f41.google.com with SMTP id t4so9765358vkb.9
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Jan 2018 11:35:24 -0800 (PST)
-In-Reply-To: <4173fd50ca3d6d4e4f691f116b425397@suse.com>
+Received: from mx2.suse.de ([195.135.220.15]:37152 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751326AbeAaUF5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 31 Jan 2018 15:05:57 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek <abhishek@suse.com>
-Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-devel-owner@vger.kernel.org, Nathan Cutler <ncutler@suse.cz>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, John Spray <jspray@redhat.com>
 
-On Wed, Jan 31, 2018 at 12:25 PM, Abhishek <abhishek@suse.com> wrote:
-> If we approximately stop accepting new PRs at the third week, ask leads at
-> beginning of week 4 and go through only critical PRs for week 4; and go to
-> QE in week5,6 we might be able to somewhat get to a more scheduled minor
-> releases.
->
-> Brickbats and suggestions ?:)
+Are there any critical PRs we need for 12.2.3 that isn't already merged 
+(anything with a luminous-batch-1/wip-yuri* labels are already ongoing 
+qe runs), if so can you please reply in this thread so that we can 
+prioritize this for QE and hopefully go for final approvals next week.
 
-That sounds great to me!
+Thanks
+Abhishek
