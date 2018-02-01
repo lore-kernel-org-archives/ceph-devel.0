@@ -1,220 +1,417 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [RFC PATCH v2 1/1] quota: report root dir quota usage in statfs
-Date: Thu, 1 Feb 2018 11:55:55 +0800
-Message-ID: <43CEC96F-8592-4268-AB9A-F3B352FF3DC6@redhat.com>
-References: <20180131105313.24802-1-lhenriques@suse.com>
- <20180131105313.24802-2-lhenriques@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Fwd: Build failed in Jenkins: ceph-master #1732
+Date: Thu, 1 Feb 2018 10:19:39 +0100
+Message-ID: <f0846f5e-d8d4-2c3c-3b8b-dec7375e4ec6@digiware.nl>
+References: <436047127.48.1517471296783.JavaMail.jenkins@cephdev.digiware.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37020 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:31640 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750866AbeBAD4B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 31 Jan 2018 22:56:01 -0500
-In-Reply-To: <20180131105313.24802-2-lhenriques@suse.com>
+        id S1751628AbeBAJTn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Feb 2018 04:19:43 -0500
+In-Reply-To: <436047127.48.1517471296783.JavaMail.jenkins@cephdev.digiware.nl>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Henriques <lhenriques@suse.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>
+
+Hi Casey,
+
+Current testing is broken on FreeBSD in unittest_log:
+[==========] Running 15 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 15 tests from Log
+[ RUN      ] Log.Simple
+[       OK ] Log.Simple (31 ms)
+[ RUN      ] Log.ReuseBad
+
+Where you fixed some trouble.
+Any suggestions where to look how to fix this on FreeBSD?
+
+Thanx,
+--WjW
 
 
 
-> On 31 Jan 2018, at 18:53, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> This commit changes statfs default behaviour when reporting usage
-> statistics.  Instead of using the overall filesystem usage, statfs now
-> reports the quota for the filesystem root, if ceph.quota.max_bytes has
-> been set for this inode.  If quota hasn't been set, it falls back to the
-> old statfs behaviour.
-> 
-> A new mount option is also added ('noquotadf') to disable this behaviour.
-> 
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
-> Documentation/filesystems/ceph.txt |  4 +++
-> fs/ceph/quota.c                    | 56 ++++++++++++++++++++++++++++++++++++++
-> fs/ceph/super.c                    | 29 ++++++++++++++++++--
-> fs/ceph/super.h                    |  3 ++
-> 4 files changed, 89 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesystems/ceph.txt
-> index 094772481263..d7f011ddc150 100644
-> --- a/Documentation/filesystems/ceph.txt
-> +++ b/Documentation/filesystems/ceph.txt
-> @@ -149,6 +149,10 @@ Mount Options
->   noasyncreaddir
-> 	Do not use the dcache as above for readdir.
-> 
-> +  noquotadf
-> +        Report overall filesystem usage in statfs instead of using the root
-> +        directory quota.
-> +
-> More Information
-> ================
-> 
-> diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-> index 588744b4665f..242bfa5c0539 100644
-> --- a/fs/ceph/quota.c
-> +++ b/fs/ceph/quota.c
-> @@ -18,6 +18,8 @@
->  * along with this program; if not, see <http://www.gnu.org/licenses/>.
->  */
-> 
-> +#include <linux/statfs.h>
-> +
-> #include "super.h"
-> #include "mds_client.h"
-> 
-> @@ -303,3 +305,57 @@ bool ceph_quota_is_max_bytes_approaching(struct inode *inode, loff_t newsize)
-> 	return check_quota_exceeded(inode, QUOTA_CHECK_MAX_BYTES_APPROACHING_OP,
-> 				    (newsize - size));
-> }
-> +
-> +/*
-> + * ceph_quota_update_statfs - if root has quota update statfs with quota status
-> + * @fsc:	filesystem client instance
-> + * @buf:	statfs to update
-> + *
-> + * If the mounted filesystem root has max_bytes quota set, update the filesystem
-> + * statistics with the quota status.
-> + *
-> + * This function returns true if the stats have been updated, false otherwise.
-> + */
-> +bool ceph_quota_update_statfs(struct ceph_fs_client *fsc, struct kstatfs *buf)
-> +{
-> +	struct ceph_mds_client *mdsc = fsc->mdsc;
-> +	struct ceph_inode_info *ci;
-> +	struct ceph_snap_realm *realm;
-> +	struct inode *in;
-> +	u64 total = 0, used, free;
-> +	bool is_updated = false;
-> +
-> +	down_read(&mdsc->snap_rwsem);
-> +	realm = get_quota_realm(mdsc, d_inode(fsc->sb->s_root));
-> +	up_read(&mdsc->snap_rwsem);
-> +	if (!realm)
-> +		return false;
-> +
-> +	spin_lock(&realm->inodes_with_caps_lock);
-> +	in = realm->inode ? igrab(realm->inode) : NULL;
-> +	spin_unlock(&realm->inodes_with_caps_lock);
-> +	if (in) {
-> +		ci = ceph_inode(in);
-> +		spin_lock(&ci->i_ceph_lock);
-> +		if (ci->i_max_bytes) {
-> +			total = ci->i_max_bytes >> CEPH_BLOCK_SHIFT;
-> +			used = ci->i_rbytes >> CEPH_BLOCK_SHIFT;
-> +			/* It is possible for a quota to be exceeded.
-> +			 * Report 'zero' in that case
-> +			 */
-> +			free = total > used ? total - used : 0;
-> +		}
-> +		spin_unlock(&ci->i_ceph_lock);
-> +		if (total) {
-> +			buf->f_blocks = total;
-> +			buf->f_bfree = free;
-> +			buf->f_bavail = free;
-> +			is_updated = true;
-> +		}
-> +		iput(in);
-> +	}
-> +	ceph_put_snap_realm(mdsc, realm);
-> +
-> +	return is_updated;
-> +}
-> +
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 9b4929420c13..5062d52f161e 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -76,9 +76,18 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
-> 	 */
-> 	buf->f_bsize = 1 << CEPH_BLOCK_SHIFT;
-> 	buf->f_frsize = 1 << CEPH_BLOCK_SHIFT;
-> -	buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
-> -	buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-> -	buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-> +
-> +	/*
-> +	 * By default use root quota for stats; fallback to overall filesystem
-> +	 * usage if using 'noquotadf' mount option or if the root dir doesn't
-> +	 * have max_bytes quota set.
-> +	 */
-> +	if ((fsc->mount_options->flags & CEPH_MOUNT_OPT_NOQUOTADF) ||
-> +	    !ceph_quota_update_statfs(fsc, buf)) {
-> +		buf->f_blocks = le64_to_cpu(st.kb) >> (CEPH_BLOCK_SHIFT-10);
-> +		buf->f_bfree = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-> +		buf->f_bavail = le64_to_cpu(st.kb_avail) >> (CEPH_BLOCK_SHIFT-10);
-> +	}
-> 
-> 	buf->f_files = le64_to_cpu(st.num_objects);
-> 	buf->f_ffree = -1;
-> @@ -151,6 +160,8 @@ enum {
-> 	Opt_acl,
-> #endif
-> 	Opt_noacl,
-> +	Opt_quotadf,
-> +	Opt_noquotadf,
-> };
-> 
-> static match_table_t fsopt_tokens = {
-> @@ -187,6 +198,8 @@ static match_table_t fsopt_tokens = {
-> 	{Opt_acl, "acl"},
-> #endif
-> 	{Opt_noacl, "noacl"},
-> +	{Opt_quotadf, "quotadf"},
-> +	{Opt_noquotadf, "noquotadf"},
-> 	{-1, NULL}
-> };
-> 
-> @@ -328,6 +341,12 @@ static int parse_fsopt_token(char *c, void *private)
-> 	case Opt_norequire_active_mds:
-> 		fsopt->flags |= CEPH_MOUNT_OPT_MOUNTWAIT;
-> 		break;
-> +	case Opt_quotadf:
-> +		fsopt->flags &= ~CEPH_MOUNT_OPT_NOQUOTADF;
-> +		break;
-> +	case Opt_noquotadf:
-> +		fsopt->flags |= CEPH_MOUNT_OPT_NOQUOTADF;
-> +		break;
-> #ifdef CONFIG_CEPH_FS_POSIX_ACL
-> 	case Opt_acl:
-> 		fsopt->sb_flags |= SB_POSIXACL;
-> @@ -517,6 +536,10 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
-> 	}
-> 	if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
-> 		seq_puts(m, ",nopoolperm");
-> +	if (fsopt->flags & CEPH_MOUNT_OPT_NOQUOTADF)
-> +		seq_puts(m, ",noquotadf");
-> +	else
-> +		seq_puts(m, ",quotadf");
-> 
-> #ifdef CONFIG_CEPH_FS_POSIX_ACL
-> 	if (fsopt->sb_flags & SB_POSIXACL)
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 92d189074008..60ed9399fe73 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -39,6 +39,7 @@
-> #define CEPH_MOUNT_OPT_FSCACHE         (1<<10) /* use fscache */
-> #define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission check */
-> #define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<12) /* mount waits if no mds is up */
-> +#define CEPH_MOUNT_OPT_NOQUOTADF       (1<<13) /* no root dir quota in statfs */
-> 
-> #define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
-> 
-> @@ -1111,5 +1112,7 @@ extern bool ceph_quota_is_max_bytes_exceeded(struct inode *inode,
-> 					     loff_t newlen);
-> extern bool ceph_quota_is_max_bytes_approaching(struct inode *inode,
-> 						loff_t newlen);
-> +extern bool ceph_quota_update_statfs(struct ceph_fs_client *fsc,
-> +				     struct kstatfs *buf);
-> 
-> #endif /* _FS_CEPH_SUPER_H */
+-------- Forwarded Message --------
+Subject: Build failed in Jenkins: ceph-master #1732
+Date: Thu, 1 Feb 2018 08:48:11 +0100 (CET)
+From: jenkins@digiware.nl
+Reply-To: jenkins@digiware.nl
+To: wjw@digiware.nl
 
-Applied, thanks
+See 
+<http://cephdev.digiware.nl:8180/jenkins/job/ceph-master/1732/display/redirect?page=changes>
 
-Yan, Zheng
+Changes:
 
+[dillaman] osd/OSDMap: expose require_min_compat_client variable
+
+[dillaman] librados: getter for min compatible client versions
+
+[xie.xingguo] mgr/balancer: pool-specific optimization support
+
+[ncutler] build/ops: rpm: fix _defined_if_python2_absent conditional
+
+[cbodley] test/log: add failing unit test for reuse of bad stream
+
+[xie.xingguo] pybind/mgr/balancer: re-initialize everything on 
+instantiating a new
+
+[tone.zhang] cmake: fix libcephfs-test.jar build failure
+
+[xie.xingguo] pybind/mgr/balancer: do not dirty compat_ws on error out
+
+[xie.xingguo] pybind/mgr/balancer: fix sanity check against minimal pg 
+numbers per
+
+[guzhongyan] common/pick_address: wrong prefix_len in pick_iface() With 
+prefix_len
+
+[kchai] crushtool: add --add-bucket
+
+[kchai] crushtool: add --move
+
+[kchai] crush/CrushWrapper: lower log level of check_item_loc()
+
+[kchai] test/cli/crushtool: add test for --add-bucket and --move
+
+[cbodley] log: clear thread-local stream's ios flags on reuse
+
+------------------------------------------
+[...truncated 3.67 MB...]
+         Start 125: unittest_osd_types
+         Start 126: unittest_ecbackend
+111/145 Test #125: unittest_osd_types ......................   Passed 
+1.37 sec
+         Start 127: unittest_osdscrub
+112/145 Test #126: unittest_ecbackend ......................   Passed 
+3.97 sec
+         Start 128: unittest_pglog
+113/145 Test #127: unittest_osdscrub .......................   Passed 
+4.22 sec
+         Start 129: unittest_hitset
+114/145 Test #129: unittest_hitset .........................   Passed 
+1.38 sec
+         Start 130: unittest_osd_osdcap
+115/145 Test #130: unittest_osd_osdcap .....................   Passed 
+2.94 sec
+         Start 131: unittest_extent_cache
+116/145 Test #131: unittest_extent_cache ...................   Passed 
+1.38 sec
+117/145 Test #105: unittest_erasure_code_shec_thread .......   Passed 
+62.12 sec
+         Start 132: unittest_pg_transaction
+         Start 133: unittest_ec_transaction
+118/145 Test #133: unittest_ec_transaction .................   Passed 
+1.13 sec
+119/145 Test #132: unittest_pg_transaction .................   Passed 
+1.34 sec
+         Start 134: unittest_mclock_op_class_queue
+         Start 135: unittest_mclock_client_queue
+120/145 Test   #7: unittest_bufferlist.sh ..................   Passed 
+115.11 sec
+121/145 Test #128: unittest_pglog ..........................   Passed 
+12.17 sec
+         Start 136: test_ceph_daemon.py
+         Start 137: test_ceph_argparse.py
+122/145 Test   #6: smoke.sh ................................***Failed 
+117.17 sec
+123/145 Test #136: test_ceph_daemon.py .....................   Passed 
+1.33 sec
+         Start 138: unittest_rgw_bencode
+         Start 139: unittest_rgw_period_history
+124/145 Test #139: unittest_rgw_period_history .............   Passed 
+0.41 sec
+125/145 Test  #25: unittest_bufferlist .....................   Passed 
+114.27 sec
+126/145 Test #138: unittest_rgw_bencode ....................   Passed 
+0.52 sec
+127/145 Test #135: unittest_mclock_client_queue ............   Passed 
+5.26 sec
+         Start 140: unittest_rgw_compression
+         Start 141: unittest_http_manager
+         Start 142: unittest_rgw_crypto
+         Start 143: unittest_rgw_iam_policy
+128/145 Test #141: unittest_http_manager ...................   Passed 
+0.73 sec
+129/145 Test #134: unittest_mclock_op_class_queue ..........   Passed 
+8.10 sec
+         Start 144: unittest_rgw_string
+         Start 145: unittest_rbd_mirror
+130/145 Test #143: unittest_rgw_iam_policy .................   Passed 
+2.59 sec
+131/145 Test #144: unittest_rgw_string .....................   Passed 
+2.09 sec
+132/145 Test #142: unittest_rgw_crypto .....................   Passed 
+5.68 sec
+133/145 Test   #4: test_objectstore_memstore.sh ............   Passed 
+131.79 sec
+134/145 Test #140: unittest_rgw_compression ................   Passed 
+12.66 sec
+135/145 Test #137: test_ceph_argparse.py ...................   Passed 
+68.73 sec
+136/145 Test #145: unittest_rbd_mirror .....................   Passed 
+142.61 sec
+137/145 Test #117: ceph_test_object_map ....................   Passed 
+209.75 sec
+138/145 Test   #3: run-cli-tests ...........................   Passed 
+283.66 sec
+139/145 Test  #91: check-generated.sh ......................   Passed 
+313.51 sec
+140/145 Test   #2: rbd-ggate.sh ............................   Passed 
+486.54 sec
+141/145 Test  #92: readable.sh .............................   Passed 
+481.21 sec
+142/145 Test #123: safe-to-destroy.sh ......................   Passed 
+491.42 sec
+143/145 Test   #8: run-tox-ceph-disk .......................   Passed 
+625.87 sec
+144/145 Test #104: unittest_erasure_code_shec_all ..........   Passed 
+612.66 sec
+145/145 Test   #1: run-rbd-unit-tests.sh ...................   Passed 
+832.62 sec
+
+99% tests passed, 2 tests failed out of 145
+
+Total Test time (real) = 833.07 sec
+
+The following tests FAILED:
+	  6 - smoke.sh (Failed)
+	 17 - unittest_log (SEGFAULT)
+Errors while running CTest
++ RETEST=1
+
+echo "Testing result, retest: = " $RETEST
++ echo 'Testing result, retest: = ' 1
+Testing result, retest: =  1
+
+if [ $RETEST -eq 1 ]; then
+     # make sure no leftovers are there
+     killall ceph-osd || true
+     killall ceph-mgr || true
+     killall ceph-mds || true
+     killall ceph-mon || true
+     rm -rf td/* src/test/td/* || true
+     ctest --output-on-failure --rerun-failed
+fi
++ [ 1 -eq 1 ]
++ killall ceph-osd
+No matching processes belonging to you were found
++ true
++ killall ceph-mgr
+No matching processes belonging to you were found
++ true
++ killall ceph-mds
+No matching processes belonging to you were found
++ true
++ killall ceph-mon
+No matching processes belonging to you were found
++ true
++ rm -rf 'td/*' 'src/test/td/*'
++ ctest --output-on-failure --rerun-failed
+Test project /home/jenkins/workspace/ceph-master/build
+     Start  6: smoke.sh
+1/2 Test  #6: smoke.sh .........................   Passed  156.86 sec
+     Start 17: unittest_log
+2/2 Test #17: unittest_log .....................***Exception: SegFault 
+0.36 sec
+2018-02-01 08:48:08.309 800ae1000 -1 did not load config file, using 
+default settings.
+2018-02-01 08:48:08.309 800ae1000 -1 Errors while parsing config file!
+2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+/etc/ceph/ceph.conf: (2) No such file or directory
+2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+~/.ceph/ceph.conf: (2) No such file or directory
+2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open ceph.conf: 
+(2) No such file or directory
+2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+/usr/local/etc/ceph/ceph.conf: (2) No such file or directory
+2018-02-01 08:48:08.319 800ae1000 -1 Errors while parsing config file!
+2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+/etc/ceph/ceph.conf: (2) No such file or directory
+2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+~/.ceph/ceph.conf: (2) No such file or directory
+2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open ceph.conf: 
+(2) No such file or directory
+2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+/usr/local/etc/ceph/ceph.conf: (2) No such file or directory
+[==========] Running 15 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 15 tests from Log
+[ RUN      ] Log.Simple
+[       OK ] Log.Simple (1 ms)
+[ RUN      ] Log.ReuseBad
+*** Caught signal (Segmentation fault) **
+  in thread 800ae1000 thread_name:
+  ceph version Development (no_version) mimic (dev)
+  1: <ceph::BackTrace::BackTrace(int)+0x6c> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_log
+  2: <handle_fatal_signal(int)+0xcf> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_log
+  3: <pthread_sigmask()+0x536> at /lib/libthr.so.3
+2018-02-01 08:48:08.339 800ae1000 -1 *** Caught signal (Segmentation 
+fault) **
+  in thread 800ae1000 thread_name:
+
+  ceph version Development (no_version) mimic (dev)
+  1: <ceph::BackTrace::BackTrace(int)+0x6c> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_log
+  2: <handle_fatal_signal(int)+0xcf> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_log
+  3: <pthread_sigmask()+0x536> at /lib/libthr.so.3
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
+
+--- begin dump of recent events ---
+    -30> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perfcounters_dump hook 0x800afe250
+    -29> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command 1 hook 0x800afe250
+    -28> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perf dump hook 0x800afe250
+    -27> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perfcounters_schema hook 0x800afe250
+    -26> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perf histogram dump hook 0x800afe250
+    -25> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command 2 hook 0x800afe250
+    -24> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perf schema hook 0x800afe250
+    -23> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perf histogram schema hook 0x800afe250
+    -22> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command perf reset hook 0x800afe250
+    -21> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command config show hook 0x800afe250
+    -20> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command config help hook 0x800afe250
+    -19> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command config set hook 0x800afe250
+    -18> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command config get hook 0x800afe250
+    -17> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command config diff hook 0x800afe250
+    -16> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command config diff get hook 0x800afe250
+    -15> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command log flush hook 0x800afe250
+    -14> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command log dump hook 0x800afe250
+    -13> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command log reopen hook 0x800afe250
+    -12> 2018-02-01 08:48:08.309 800ae1000  5 asok(0x800d41000) 
+register_command dump_mempools hook 0x800da4488
+    -11> 2018-02-01 08:48:08.309 800ae1000 -1 did not load config file, 
+using default settings.
+    -10> 2018-02-01 08:48:08.309 800ae1000 -1 Errors while parsing 
+config file!
+     -9> 2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+/etc/ceph/ceph.conf: (2) No such file or directory
+     -8> 2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+~/.ceph/ceph.conf: (2) No such file or directory
+     -7> 2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+ceph.conf: (2) No such file or directory
+     -6> 2018-02-01 08:48:08.309 800ae1000 -1 parse_file: cannot open 
+/usr/local/etc/ceph/ceph.conf: (2) No such file or directory
+     -5> 2018-02-01 08:48:08.319 800ae1000 -1 Errors while parsing 
+config file!
+     -4> 2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+/etc/ceph/ceph.conf: (2) No such file or directory
+     -3> 2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+~/.ceph/ceph.conf: (2) No such file or directory
+     -2> 2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+ceph.conf: (2) No such file or directory
+     -1> 2018-02-01 08:48:08.319 800ae1000 -1 parse_file: cannot open 
+/usr/local/etc/ceph/ceph.conf: (2) No such file or directory
+      0> 2018-02-01 08:48:08.339 800ae1000 -1 *** Caught signal 
+(Segmentation fault) **
+  in thread 800ae1000 thread_name:
+
+  ceph version Development (no_version) mimic (dev)
+  1: <ceph::BackTrace::BackTrace(int)+0x6c> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_log
+  2: <handle_fatal_signal(int)+0xcf> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_log
+  3: <pthread_sigmask()+0x536> at /lib/libthr.so.3
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
+
+--- logging levels ---
+    0/ 5 none
+    0/ 1 lockdep
+    0/ 1 context
+    1/ 1 crush
+    1/ 5 mds
+    1/ 5 mds_balancer
+    1/ 5 mds_locker
+    1/ 5 mds_log
+    1/ 5 mds_log_expire
+    1/ 5 mds_migrator
+    0/ 1 buffer
+    0/ 1 timer
+    0/ 1 filer
+    0/ 1 striper
+    0/ 1 objecter
+    0/ 5 rados
+    0/ 5 rbd
+    0/ 5 rbd_mirror
+    0/ 5 rbd_replay
+    0/ 5 journaler
+    0/ 5 objectcacher
+    0/ 5 client
+    1/ 5 osd
+    0/ 5 optracker
+    0/ 5 objclass
+    1/ 3 filestore
+    1/ 3 journal
+    0/ 0 ms
+    1/ 5 mon
+    0/10 monc
+    1/ 5 paxos
+    0/ 5 tp
+    1/ 5 auth
+    1/ 5 crypto
+    1/ 1 finisher
+    1/ 1 reserver
+    1/ 5 heartbeatmap
+    1/ 5 perfcounter
+    1/ 5 rgw
+    1/ 5 rgw_sync
+    1/10 civetweb
+    1/ 5 javaclient
+    1/ 5 asok
+    1/ 1 throttle
+    0/ 0 refs
+    1/ 5 xio
+    1/ 5 compressor
+    1/ 5 bluestore
+    1/ 5 bluefs
+    1/ 3 bdev
+    1/ 5 kstore
+    4/ 5 rocksdb
+    4/ 5 leveldb
+    4/ 5 memdb
+    1/ 5 kinetic
+    1/ 5 fuse
+    1/ 5 mgr
+    1/ 5 mgrc
+    1/ 5 dpdk
+    1/ 5 eventtrace
+   -2/-2 (syslog threshold)
+   99/99 (stderr threshold)
+   max_recent       500
+   max_new         1000
+   log_file --- end dump of recent events ---
+
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) = 157.24 sec
+
+The following tests FAILED:
+	 17 - unittest_log (SEGFAULT)
+Errors while running CTest
+Build step 'Execute shell' marked build as failure
