@@ -1,8 +1,8 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
  FAILED assert(r == -2)
-Date: Fri, 2 Feb 2018 22:54:07 +0100
-Message-ID: <45c00e41-e8f4-5366-96af-c103f85a3d5b@profihost.ag>
+Date: Sat, 3 Feb 2018 22:07:19 +0100
+Message-ID: <9768deb9-a9d6-7ed4-0f93-c86827aba367@profihost.ag>
 References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
  <alpine.DEB.2.11.1801171856230.24931@piezo.novalocal>
  <28f90497-df9f-f628-835b-c6c75a752f66@profihost.ag>
@@ -25,10 +25,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:51315 "EHLO
+Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:62922 "EHLO
         cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751544AbeBBVyK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Feb 2018 16:54:10 -0500
+        by vger.kernel.org with ESMTP id S1753854AbeBCVHW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Feb 2018 16:07:22 -0500
 In-Reply-To: <alpine.DEB.2.11.1802022102290.15996@piezo.novalocal>
 Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
@@ -36,6 +36,7 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, n.fahldieck@profihost.ag
 
+Hi Sage,
 
 Am 02.02.2018 um 22:05 schrieb Sage Weil:
 > On Fri, 2 Feb 2018, Stefan Priebe - Profihost AG wrote:
@@ -107,9 +108,12 @@ Am 02.02.2018 um 22:05 schrieb Sage Weil:
 > came from. Since you were seeing this on new snaps/clones, though, I'm 
 > hoping we won't end up in that situation!
 
+thanks. New version is running. Is looking through ceph.log enough? Or
+are those only printed to the corresponding osd log?
 
-compiling - it's late here. Will update tomorrow. Thanks again!
-
+Greets,
+Stefan
+> 
 > Thanks!
 > sage
 > 
