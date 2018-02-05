@@ -1,115 +1,39 @@
-From: Chengguang Xu <cgxu519@icloud.com>
-Subject: Re: [PATCH 1/2] ceph: avoid NULL pointer dereference in
- ceph_crypto_key_destroy()
-Date: Mon, 05 Feb 2018 21:40:11 +0800
-Message-ID: <1A67A945-18DF-414F-954E-D1F6A813844F@icloud.com>
-References: <1517738929-229785-1-git-send-email-cgxu519@icloud.com>
- <CAOi1vP8bFvd5OjC+whKQMSaLV46YyErF5DA-Q4udzWpFuCk7Dw@mail.gmail.com>
- <EA91EF3C-968A-4277-A887-2FD6E22A1030@icloud.com>
- <CAOi1vP_edS5MRhO0tJo6Zg9t4M-7yJY+1J-kOzS4pg02EwtNOQ@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain; charset=gb2312
-Content-Transfer-Encoding: quoted-printable
+From: Andrew Schoen <aschoen@redhat.com>
+Subject: Re: Better anticipation for minor releases
+Date: Mon, 5 Feb 2018 09:28:02 -0600
+Message-ID: <CAEPMp+4mVJd6155ZykTUmrgupLAvoLFEPUTBLVY26Hk+anXogA@mail.gmail.com>
+References: <CAC-Np1yBwYUMBiS1tg=9CaJsgEkQJZazP43HzSKT=bR=eof=Uw@mail.gmail.com>
+ <4173fd50ca3d6d4e4f691f116b425397@suse.com> <CAC-Np1xbgABOgjDoYpPrDUvX7hOn3U-AD-YF-LpRsbjAfEPi6g@mail.gmail.com>
+ <bfc90180-334b-519b-cf2c-db13b33abff2@suse.cz> <CALqRxCzxBuihz6FTtFq4oROmgstnh79uB8F-iosameNo4+7SOQ@mail.gmail.com>
+ <robbat2-20180202T195241-795645967Z@orbis-terrarum.net> <b0e75bc4-e7da-db16-ddb3-bb70df281699@suse.cz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pv33p36im-asmtp002.me.com ([17.142.213.63]:28878 "EHLO
-        pv33p36im-asmtp002.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752855AbeBENkX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Feb 2018 08:40:23 -0500
-Received: from process-dkim-sign-daemon.pv33p36im-asmtp002.me.com by
- pv33p36im-asmtp002.me.com
- (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
- 2017)) id <0P3O00500IFCWB00@pv33p36im-asmtp002.me.com> for
- ceph-devel@vger.kernel.org; Mon, 05 Feb 2018 13:40:21 +0000 (GMT)
-In-reply-to: <CAOi1vP_edS5MRhO0tJo6Zg9t4M-7yJY+1J-kOzS4pg02EwtNOQ@mail.gmail.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:42129 "EHLO
+        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752920AbeBEP2o (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Feb 2018 10:28:44 -0500
+Received: by mail-qk0-f175.google.com with SMTP id f68so12718966qke.9
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Feb 2018 07:28:43 -0800 (PST)
+In-Reply-To: <b0e75bc4-e7da-db16-ddb3-bb70df281699@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: "Robin H. Johnson" <robbat2@gentoo.org>, Ken Dreyer <kdreyer@redhat.com>, Alfredo Deza <adeza@redhat.com>, Abhishek <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Yeah, you are right, I misread that bit. Should I resend second patch?
+>>
+>> Thought:
+>> - Tag or branch a candidate commit for going INTO the QE phase, say
+>>    v12.2.3-rcX.
+>> - Run QE on that tag.
+>> - If QE passes entirely, create final tag at same commit as rc tag.
+>
+>
+> That assumes it's possible the release tooling supports releasing something
+> other than the tip of a branch (i.e. a SHA1 or tag), though, right?
 
-Thanks,
-Chengguang.
+I'm pretty sure we have support to build from a tag. The build system
+might need a few tweaks, but I think it'd be doable and worth the
+effort.
 
-
-> =D4=DA 2018=C4=EA2=D4=C25=C8=D5=A3=AC=CF=C2=CE=E79:11=A3=ACIlya =
-Dryomov <idryomov@gmail.com> =D0=B4=B5=C0=A3=BA
->=20
-> On Mon, Feb 5, 2018 at 1:06 PM, Chengguang Xu <cgxu519@icloud.com> =
-wrote:
->>=20
->>=20
->> Thanks,
->> Chengguang.
->>=20
->>=20
->>=20
->>> =D4=DA 2018=C4=EA2=D4=C25=C8=D5=A3=AC=CF=C2=CE=E77:51=A3=ACIlya =
-Dryomov <idryomov@gmail.com> =D0=B4=B5=C0=A3=BA
->>>=20
->>> On Sun, Feb 4, 2018 at 11:08 AM, Chengguang Xu <cgxu519@icloud.com> =
-wrote:
->>>> There are many reasons of failure from get_secret(),
->>>> so it's necessary to add a check before calling =
-crypto_free_skcipher()
->>>> in case of NULL pointer dereference.
->>>>=20
->>>> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
->>>> ---
->>>> net/ceph/crypto.c | 6 ++++--
->>>> 1 file changed, 4 insertions(+), 2 deletions(-)
->>>>=20
->>>> diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
->>>> index bf9d079..bb1dc2d 100644
->>>> --- a/net/ceph/crypto.c
->>>> +++ b/net/ceph/crypto.c
->>>> @@ -136,8 +136,10 @@ void ceph_crypto_key_destroy(struct =
-ceph_crypto_key *key)
->>>>       if (key) {
->>>>               kfree(key->key);
->>>>               key->key =3D NULL;
->>>> -               crypto_free_skcipher(key->tfm);
->>>> -               key->tfm =3D NULL;
->>>> +               if (key->tfm) {
->>>> +                       crypto_free_skcipher(key->tfm);
->>>> +                       key->tfm =3D NULL;
->>>> +               }
->>>>       }
->>>> }
->>>=20
->>> Hi Chengguang,
->>>=20
->>> crypto_free_skcipher() can handle a NULL pointer just fine:
->>>=20
->>>   void crypto_destroy_tfm(void *mem, struct crypto_tfm *tfm)
->>>   {
->>>           struct crypto_alg *alg;
->>>=20
->>>           if (unlikely(!mem))
->>>                   return;
->>=20
->> Hi Ilya,
->>=20
->> How about crypto_skcipher_tfm() in below call stack?
->>=20
->> ceph_crypto_key_destroy() -> crypto_free_skcipher() -> =
-crypto_destroy_tfm() -> crypto_skcipher_tfm()
->>=20
->> static inline struct crypto_tfm *crypto_skcipher_tfm(
->>        struct crypto_skcipher *tfm)
->> {
->>        return &tfm->base;
->> }
->=20
-> That's an address-of, not a dereference.  When tfm is NULL, the result
-> is the offset of base in crypto_skcipher.
->=20
-> Thanks,
->=20
->                Ilya
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Andrew
