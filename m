@@ -1,69 +1,82 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Re: Better anticipation for minor releases
-Date: Mon, 5 Feb 2018 13:45:28 -0800
-Message-ID: <97787B31-9FEE-4FAE-9720-289D23F0AF2A@redhat.com>
-References: <CAC-Np1yBwYUMBiS1tg=9CaJsgEkQJZazP43HzSKT=bR=eof=Uw@mail.gmail.com>
- <4173fd50ca3d6d4e4f691f116b425397@suse.com>
- <CAC-Np1xbgABOgjDoYpPrDUvX7hOn3U-AD-YF-LpRsbjAfEPi6g@mail.gmail.com>
- <bfc90180-334b-519b-cf2c-db13b33abff2@suse.cz>
- <CALqRxCzxBuihz6FTtFq4oROmgstnh79uB8F-iosameNo4+7SOQ@mail.gmail.com>
- <robbat2-20180202T195241-795645967Z@orbis-terrarum.net>
- <b0e75bc4-e7da-db16-ddb3-bb70df281699@suse.cz>
- <CAEPMp+4mVJd6155ZykTUmrgupLAvoLFEPUTBLVY26Hk+anXogA@mail.gmail.com>
- <alpine.DEB.2.11.1802051529210.24931@piezo.novalocal>
- <CALqRxCwD199oo-=TGsnNgy5vLAaFyD2sqqX2YSjtJx9AVZtLQg@mail.gmail.com>
- <alpine.DEB.2.11.1802051624220.15996@piezo.novalocal>
- <8a320a2d-71a2-84e3-79c0-1839c4cd7391@suse.cz>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Chengguang Xu <cgxu519@icloud.com>
+Subject: [PATCH] ceph: avoid memory leak when specifying same option several
+ times
+Date: Tue, 06 Feb 2018 08:25:55 +0800
+Message-ID: <1517876755-46814-1-git-send-email-cgxu519@icloud.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f175.google.com ([74.125.82.175]:39538 "EHLO
-        mail-ot0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752015AbeBEVpb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Feb 2018 16:45:31 -0500
-Received: by mail-ot0-f175.google.com with SMTP id f18so4261528otf.6
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Feb 2018 13:45:31 -0800 (PST)
-In-Reply-To: <8a320a2d-71a2-84e3-79c0-1839c4cd7391@suse.cz>
+Received: from mr11p00im-asmtp001.me.com ([17.110.69.252]:20042 "EHLO
+        mr11p00im-asmtp001.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752038AbeBFA0c (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Feb 2018 19:26:32 -0500
+Received: from process-dkim-sign-daemon.mr11p00im-asmtp001.me.com by
+ mr11p00im-asmtp001.me.com
+ (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
+ 2017)) id <0P3P00O00CM0K200@mr11p00im-asmtp001.me.com> for
+ ceph-devel@vger.kernel.org; Tue, 06 Feb 2018 00:26:07 +0000 (GMT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Sage Weil <sage@newdream.net>, Ken Dreyer <kdreyer@redhat.com>, Andrew Schoen <aschoen@redhat.com>, "Robin H. Johnson" <robbat2@gentoo.org>, Alfredo Deza <adeza@redhat.com>, Abhishek <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, idryomov@gmail.com, Chengguang Xu <cgxu519@icloud.com>
 
+When parsing string option, in order to avoid memory leak we need to
+carefully free it first in case of specifying same option several times.
 
+Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+---
+ fs/ceph/super.c        | 2 ++
+ net/ceph/ceph_common.c | 7 +++++++
+ 2 files changed, 9 insertions(+)
 
-> On Feb 5, 2018, at 1:20 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> 
->> Git branches remove any concern for
->> "races".  If someone pushed 100 commits to luminous, just create a
->> different branch with exactly the commit(s) you *do* want and build from
->> that.  After everything is confirmed built, good, and tagged, push and
->> merge it back into the luminous stream.
-> 
-> Sage makes a good point here, but I don't agree with the "remove any concern for races" part. In practice, I'm envisioning that it would work like this (substitute "jewel", "mimic" etc. for luminous):
-> 
-> 1. release preparation phase begins
-> 2. lots of PRs/commits are merged into luminous
-> 3. release preparation phase ends with declaration of a "release candidate" SHA1
-> 4. a luminous-rc branch is created from this SHA1
-> 5. QE phase begins
-> 6. all QE work takes place in luminous-rc
-> 7. any QE-related fixes are merged into luminous-rc
-> 8. QE phase ends with declaration of a "release" SHA1 which is (almost - see below) guaranteed to be the tip of luminous-rc
-> 9. tag/build phase begins
-> 10. tag is applied to, and packages built from, tip of luminous-rc (as usual, except luminous-rc instead of luminous)
-> 11. tag/build phase ends - point release is out
-> 12. luminous-rc is merged into luminous
-> 
-> Granted, this does eliminate racing PRs in luminous, but it's still possible for something to get merged into luminous-rc after step 8 and before step 11, so the problem doesn't go away - it just gets less likely.
-For me this just looks like a communication issue or someone not fully understanding the process is trying to push to rc during end phase, the release lead can ensure this doesn’t happen or one can freeze/lock the branch during step 8 so that no further commits are possible.
-
-
-> 
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index a62d2a9..bfc85b2 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -225,6 +225,7 @@ static int parse_fsopt_token(char *c, void *private)
+ 			return -ENOMEM;
+ 		break;
+ 	case Opt_mds_namespace:
++		kfree(fsopt->mds_namespace);
+ 		fsopt->mds_namespace = kstrndup(argstr[0].from,
+ 						argstr[0].to-argstr[0].from,
+ 						GFP_KERNEL);
+@@ -232,6 +233,7 @@ static int parse_fsopt_token(char *c, void *private)
+ 			return -ENOMEM;
+ 		break;
+ 	case Opt_fscache_uniq:
++		kfree(fsopt->fscache_uniq);
+ 		fsopt->fscache_uniq = kstrndup(argstr[0].from,
+ 					       argstr[0].to-argstr[0].from,
+ 					       GFP_KERNEL);
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 5c036d2..cdb5b69 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -418,11 +418,15 @@ struct ceph_options *
+ 				opt->flags |= CEPH_OPT_FSID;
+ 			break;
+ 		case Opt_name:
++			kfree(opt->name);
+ 			opt->name = kstrndup(argstr[0].from,
+ 					      argstr[0].to-argstr[0].from,
+ 					      GFP_KERNEL);
+ 			break;
+ 		case Opt_secret:
++			ceph_crypto_key_destroy(opt->key);
++			kfree(opt->key);
++
+ 		        opt->key = kzalloc(sizeof(*opt->key), GFP_KERNEL);
+ 			if (!opt->key) {
+ 				err = -ENOMEM;
+@@ -433,6 +437,9 @@ struct ceph_options *
+ 				goto out;
+ 			break;
+ 		case Opt_key:
++			ceph_crypto_key_destroy(opt->key);
++			kfree(opt->key);
++
+ 		        opt->key = kzalloc(sizeof(*opt->key), GFP_KERNEL);
+ 			if (!opt->key) {
+ 				err = -ENOMEM;
+-- 
+1.8.3.1
 
