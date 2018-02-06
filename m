@@ -1,69 +1,102 @@
-From: =?gb2312?B?zNW2rLas?= <tdd21151186@gmail.com>
-Subject: v12.2.2 bluestore crash
-Date: Tue, 6 Feb 2018 11:15:19 +0800
-Message-ID: <53259473-2A66-468D-9A9F-1F5797A6B000@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
+From: Xuehan Xu <xxhdx1985126@gmail.com>
+Subject: LOCK_SYNC_MIX state makes "getattr" operations extremely slow when
+ there are lots of clients issue writes or reads to the same file
+Date: Tue, 6 Feb 2018 12:19:13 +0800
+Message-ID: <CAJACTudeJCqQiEOxuSxfFsH2KdnSeors-6cCvx9jh-Nn8u6huA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f49.google.com ([74.125.83.49]:43065 "EHLO
-        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750999AbeBFDPW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Feb 2018 22:15:22 -0500
-Received: by mail-pg0-f49.google.com with SMTP id f6so530817pgs.10
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Feb 2018 19:15:22 -0800 (PST)
-Received: from [127.0.0.1] ([104.207.157.57])
-        by smtp.gmail.com with ESMTPSA id y1sm15347922pge.78.2018.02.05.19.15.21
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 05 Feb 2018 19:15:21 -0800 (PST)
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:46473 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752132AbeBFETO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Feb 2018 23:19:14 -0500
+Received: by mail-oi0-f54.google.com with SMTP id x21so402260oie.13
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Feb 2018 20:19:14 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Dear Cephers,
+Hi, everyone.
 
+Recently, in our online Luminous Cephfs clusters, we found that there
+are occasionally lots of slow requests:
 
-crash stack:
-c/os/bluestore/BlueStore.cc: 6661: FAILED assert(r =3D=3D 0)
-```
- ceph version 12.2.2 (cf0baeeeeba3b47f9427c6c97e2144b094b7e5ba) luminous =
-(stable)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char =
-const*)+0x110) [0x55cc7bf20550]
- 2: (BlueStore::_do_read(BlueStore::Collection*, =
-boost::intrusive_ptr<BlueStore::Onode>, unsigned long, unsigned long, =
-ceph::buffer::list&, unsigned int)+0x1e50) [0x55cc7bdeb360]
- 3: (BlueStore::read(boost::intrusive_ptr<ObjectStore::CollectionImpl>&, =
-ghobject_t const&, unsigned long, unsigned long, ceph::buffer::list&, =
-unsigned int)+0x61a) [0x55cc7bdec50a]
- 4: (ReplicatedBackend::be_deep_scrub(hobject_t const&, unsigned int, =
-ScrubMap::object&, ThreadPool::TPHandle&)+0x247) [0x55cc7bc5e697]
- 5: (PGBackend::be_scan_list(ScrubMap&, std::vector<hobject_t, =
-std::allocator<hobject_t> > const&, bool, unsigned int, =
-ThreadPool::TPHandle&)+0x290) [0x55cc7bb99720]
- 6: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool, =
-unsigned int, ThreadPool::TPHandle&)+0x215) [0x55cc7ba47825]
- 7: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>, =
-ThreadPool::TPHandle&)+0x5e6) [0x55cc7ba48116]
- 8: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&, =
-ThreadPool::TPHandle&)+0x720) [0x55cc7bb05110]
- 9: (OSD::dequeue_op(boost::intrusive_ptr<PG>, =
-boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f9) =
-[0x55cc7b98f899]
- 10: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest> =
-const&)+0x57) [0x55cc7bc07897]
- 11: (OSD::ShardedOpWQ::_process(unsigned int, =
-ceph::heartbeat_handle_d*)+0xfce) [0x55cc7b9bd43e]
- 12: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x839) =
-[0x55cc7bf26069]
- 13: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) =
-[0x55cc7bf28000]
- 14: (()+0x7e25) [0x7f6de7a08e25]
- 15: (clone()+0x6d) [0x7f6de6afc34d]
+2018-01-16 15:16:53.233925 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : 49 slow requests, 5 included below; oldest blocked for >
+89.995722 secs
+2018-01-16 15:16:53.233934 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 39.966171 seconds old, received at 2018-01-16
+15:16:13.267686: client_request(client.4925109:3759 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.176343 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:53.233938 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 39.949899 seconds old, received at 2018-01-16
+15:16:13.283958: client_request(client.4925109:3772 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.193343 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:53.233942 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 39.899975 seconds old, received at 2018-01-16
+15:16:13.333882: client_request(client.4925109:3785 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.242344 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:53.233946 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 39.965588 seconds old, received at 2018-01-16
+15:16:13.268269: client_request(client.4925109:3760 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.177343 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:53.233949 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 39.964976 seconds old, received at 2018-01-16
+15:16:13.268881: client_request(client.4925109:3761 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.178343 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:58.233997 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : 49 slow requests, 5 included below; oldest blocked for >
+94.995785 secs
+2018-01-16 15:16:58.234006 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 60.080351 seconds old, received at 2018-01-16
+15:15:58.153569: client_request(client.4925109:3742 getattr pAsLsXsFs
+#0x10000003e7d 2018-01-16 15:15:58.062900 caller_uid=99,
+caller_gid=99{}) currently failed to rdlock, waiting
+2018-01-16 15:16:58.234010 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 44.929603 seconds old, received at 2018-01-16
+15:16:13.304317: client_request(client.4925109:3778 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.213344 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:58.234014 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 44.964894 seconds old, received at 2018-01-16
+15:16:13.269026: client_request(client.4925109:3762 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.178343 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:58.234017 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 44.948258 seconds old, received at 2018-01-16
+15:16:13.285662: client_request(client.4925109:3773 getattr pAsLsXsFs
+#0x10000000fcf 2018-01-16 15:16:13.194343 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
+2018-01-16 15:16:58.234020 7fa59f7fe700  0 log_channel(cluster) log
+[WRN] : slow request 44.817911 seconds old, received at 2018-01-16
+15:16:13.416009: client_request(client.4925109:3796 getattr pAsLsXsFs
+#0x10000000fe0 2018-01-16 15:16:13.325347 caller_uid=33,
+caller_gid=33{}) currently failed to rdlock, waiting
 
-could anyone please help to take a look, why would this happen ?
-currently, this osd keep crashes because of this assertion failure.
+Our use case is like this:
+       There are one client issuing writes to a file while tens of
+other clients issue reads and stat to the same file.
 
-Regards,
-Dongdong=
+After a series of test, we found that these slow requests are all
+"getattr" operations, and they are all blocked by CInode::filelock in
+LOCK_SYNC_MIX state in which rdlock cannot be acquired. Further
+analysis showed that, in our use case, due tothe writing client's
+continuous "wants"  of CEPH_CAP_GWR   , nearly every "getattr"
+operation's finish would lead to the inode's filelock go into
+LOCK_SYNC_MIX state in which the mds must wait for all clients holding
+caps other than the allowed "rwl" to release their unallowed caps and
+blocks all requests to acquire "rdlock" of the inode's filelock. Due
+to the massive number of reading clients, the wait could lasts for
+about 950ms, which means, for every 950 ms, there can nearly be only
+one getattr operation gets finished.
+
+Why must the acquisition of "rdlock" of an inode's filelock be blocked
+when the inode's filelock is in LOCK_SYNC_MIX state? And why must the
+mds wait for all clients to release their unallowed caps?
+
+Thanks:-)
