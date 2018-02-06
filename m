@@ -1,91 +1,92 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: v12.2.2 bluestore crash
-Date: Tue, 6 Feb 2018 12:59:42 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1802061258090.24931@piezo.novalocal>
-References: <53259473-2A66-468D-9A9F-1F5797A6B000@gmail.com> <CABbLZY1DgF1Z7ubZaR8TPMFqZQkS=HP4XUv=7WtaSW23hkgLqA@mail.gmail.com> <30CAE375-C819-4565-9C64-9B321DAE9E23@gmail.com>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-441869025-1517921984=:24931"
+From: Chengguang Xu <cgxu519@icloud.com>
+Subject: [PATCH v2] ceph: minor cleanups of showing options
+Date: Tue, 06 Feb 2018 21:54:21 +0800
+Message-ID: <1517925261-50747-1-git-send-email-cgxu519@icloud.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:39706 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753115AbeBFM7q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Feb 2018 07:59:46 -0500
-In-Reply-To: <30CAE375-C819-4565-9C64-9B321DAE9E23@gmail.com>
+Received: from mr11p00im-asmtp003.me.com ([17.110.69.254]:30377 "EHLO
+        mr11p00im-asmtp003.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751988AbeBFNzd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Feb 2018 08:55:33 -0500
+Received: from process-dkim-sign-daemon.mr11p00im-asmtp003.me.com by
+ mr11p00im-asmtp003.me.com
+ (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
+ 2017)) id <0P3Q00900CW2H100@mr11p00im-asmtp003.me.com> for
+ ceph-devel@vger.kernel.org; Tue, 06 Feb 2018 13:54:57 +0000 (GMT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-2022-JP?Q?=1B$BF+E=5FE=5F=1B=28J?= <tdd21151186@gmail.com>
-Cc: Varada Kari <varada.kari@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, idryomov@gmail.com, Chengguang Xu <cgxu519@icloud.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Minor cleanups of showing options for mount and client.
 
---8323329-441869025-1517921984=:24931
-Content-Type: TEXT/PLAIN; charset=gb2312
-Content-Transfer-Encoding: 8BIT
+Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+---
+Changes since v1:
+- Do not change comma seqence in ceph_print_client_options()
+ because there is another caller from different path.
 
-On Tue, 6 Feb 2018, 陶冬冬 wrote:
-> Thanks Varada, i didn’t find any useful message
+ fs/ceph/super.c        | 13 ++-----------
+ net/ceph/ceph_common.c |  3 +++
+ 2 files changed, 5 insertions(+), 11 deletions(-)
 
-Yeah, it looks like it's probably EIO but it's surprising you don't see 
-anything in dmesg output.
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index bfc85b2..7f1e212 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -489,21 +489,12 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ {
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(root->d_sb);
+ 	struct ceph_mount_options *fsopt = fsc->mount_options;
+-	size_t pos;
+ 	int ret;
+ 
+-	/* a comma between MNT/MS and client options */
+-	seq_putc(m, ',');
+-	pos = m->count;
+-
+ 	ret = ceph_print_client_options(m, fsc->client);
+ 	if (ret)
+ 		return ret;
+ 
+-	/* retract our comma if no client options */
+-	if (m->count == pos)
+-		m->count--;
+-
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_DIRSTAT)
+ 		seq_puts(m, ",dirstat");
+ 	if ((fsopt->flags & CEPH_MOUNT_OPT_RBYTES))
+@@ -514,7 +505,7 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 		seq_puts(m, ",nodcache");
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
+ 		if (fsopt->fscache_uniq)
+-			seq_printf(m, ",fsc=%s", fsopt->fscache_uniq);
++			seq_show_option(m, "fsc", fsopt->fscache_uniq);
+ 		else
+ 			seq_puts(m, ",fsc");
+ 	}
+@@ -529,7 +520,7 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ #endif
+ 
+ 	if (fsopt->mds_namespace)
+-		seq_printf(m, ",mds_namespace=%s", fsopt->mds_namespace);
++		seq_show_option(m, "mds_namespace", fsopt->mds_namespace);
+ 	if (fsopt->wsize)
+ 		seq_printf(m, ",wsize=%d", fsopt->wsize);
+ 	if (fsopt->rsize != CEPH_MAX_READ_SIZE)
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index cdb5b69..3f30636 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -545,6 +545,9 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client)
+ 	struct ceph_options *opt = client->options;
+ 	size_t pos = m->count;
+ 
++	if (m->count)
++		seq_putc(m, ',');
++
+ 	if (opt->name) {
+ 		seq_puts(m, "name=");
+ 		seq_escape(m, opt->name, ", \t\n\\");
+-- 
+1.8.3.1
 
-There were several patches to master that improve the error reporting 
-and propagation so that EIO reaches the OSD (which will allow scrub to 
-do a repair).  Adding them to the queue for 12.2.3!
-
-I would let your cluster heal around this OSD (if it hasn't already).  
-Then either wipe and reprosivion it, or wait for 12.2.3 and we 
-can see if it is handled more gracefully.
-
-Thanks!
-sage
-
-
-> 
-> > 在 2018年2月6日，下午1:43，Varada Kari <varada.kari@gmail.com> 写道：
-> > 
-> > Seems you are not able to read from disk. Could you kern.log and
-> > syslog for any disk errors?
-> > 
-> > Varada
-> > 
-> > On Tue, Feb 6, 2018 at 8:45 AM, 陶冬冬 <tdd21151186@gmail.com> wrote:
-> >> Dear Cephers,
-> >> 
-> >> 
-> >> crash stack:
-> >> c/os/bluestore/BlueStore.cc: 6661: FAILED assert(r == 0)
-> >> ```
-> >> ceph version 12.2.2 (cf0baeeeeba3b47f9427c6c97e2144b094b7e5ba) luminous (stable)
-> >> 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x110) [0x55cc7bf20550]
-> >> 2: (BlueStore::_do_read(BlueStore::Collection*, boost::intrusive_ptr<BlueStore::Onode>, unsigned long, unsigned long, ceph::buffer::list&, unsigned int)+0x1e50) [0x55cc7bdeb360]
-> >> 3: (BlueStore::read(boost::intrusive_ptr<ObjectStore::CollectionImpl>&, ghobject_t const&, unsigned long, unsigned long, ceph::buffer::list&, unsigned int)+0x61a) [0x55cc7bdec50a]
-> >> 4: (ReplicatedBackend::be_deep_scrub(hobject_t const&, unsigned int, ScrubMap::object&, ThreadPool::TPHandle&)+0x247) [0x55cc7bc5e697]
-> >> 5: (PGBackend::be_scan_list(ScrubMap&, std::vector<hobject_t, std::allocator<hobject_t> > const&, bool, unsigned int, ThreadPool::TPHandle&)+0x290) [0x55cc7bb99720]
-> >> 6: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool, unsigned int, ThreadPool::TPHandle&)+0x215) [0x55cc7ba47825]
-> >> 7: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x5e6) [0x55cc7ba48116]
-> >> 8: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&, ThreadPool::TPHandle&)+0x720) [0x55cc7bb05110]
-> >> 9: (OSD::dequeue_op(boost::intrusive_ptr<PG>, boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f9) [0x55cc7b98f899]
-> >> 10: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest> const&)+0x57) [0x55cc7bc07897]
-> >> 11: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0xfce) [0x55cc7b9bd43e]
-> >> 12: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x839) [0x55cc7bf26069]
-> >> 13: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55cc7bf28000]
-> >> 14: (()+0x7e25) [0x7f6de7a08e25]
-> >> 15: (clone()+0x6d) [0x7f6de6afc34d]
-> >> 
-> >> could anyone please help to take a look, why would this happen ?
-> >> currently, this osd keep crashes because of this assertion failure.
-> >> 
-> >> Regards,
-> >> Dongdong--
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-441869025-1517921984=:24931--
