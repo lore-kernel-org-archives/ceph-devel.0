@@ -1,48 +1,35 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developer Monthly - February 2018
-Date: Wed, 7 Feb 2018 08:37:40 -0200
-Message-ID: <CAB0WNsgMA+vS7vnjgM1Nvr6u-UrOOy=qmVt7_uXxWBL85M=bOg@mail.gmail.com>
+From: Theofilos Mouratidis <mtheofilos@gmail.com>
+Subject: RadosGW cache ldap auth
+Date: Wed, 7 Feb 2018 11:43:09 +0100
+Message-ID: <CA+9pRwQKvWT615YsfUoYE-iU+JPHjAt77+ZjCh7PaSH=FJyqoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:39776 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753853AbeBGKnK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Feb 2018 05:43:10 -0500
+Received: by mail-qt0-f170.google.com with SMTP id f4so556911qtj.6
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Feb 2018 02:43:10 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hey Cephers,
+Hello cephers,
 
-This is just a friendly reminder that the next Ceph Developer Montly
-meeting is coming up:
+In CERN, we would like to use the ldap authentication of the S3/Swift
+radosgw api, for its.
+features. I did some tests and I found out that for every request by
+the same user,
+the radosgw redirects the authentication to the ldap server. In case
+this goes public,
+it might cause a DDOS to the ldap server. We would kindly ask for it
+to be implemented.
+If this is not feasible right now, can you point us the way to create
+a PR for this?
 
- http://wiki.ceph.com/Planning
+(Some change around "/src/rgw/librgw.cc:528", use rocksdb?)
 
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
-
- http://wiki.ceph.com/CDM_07-FEB-2018
-
-This edition happens on EMEA friendly hours (12:30 EST) and we will
-use the following Bluejeans URL for the video conference:
-
- https://bluejeans.com/9290089010/
-
-If you have questions or comments, please let us know.
-
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+Thanks,
+Theofilos Mouratidis
+Storage Group, CERN
