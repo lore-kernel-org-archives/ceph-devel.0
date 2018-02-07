@@ -1,53 +1,58 @@
-From: Ali Maredia <amaredia@redhat.com>
-Subject: S3 Tests in Boto3 Update
-Date: Wed, 7 Feb 2018 17:13:45 -0500 (EST)
-Message-ID: <813438902.2239780.1518041625773.JavaMail.zimbra@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: Luminous v12.2.3 approvals
+Date: Wed, 7 Feb 2018 14:57:32 -0800
+Message-ID: <CAMMFjmG2GGqy-K4dowBtcGETOGoWUZfuC_91U0C8FvrE+Azurg@mail.gmail.com>
+References: <87vafa2frf.fsf@suse.com> <CA+2bHPbrdPrmFqbg_c_tUO-arf7fa91bpDCxtnw7y7D72CAMtA@mail.gmail.com>
+ <CAMMFjmFAggpL+7XpOjSCJGzpzDo9KbADh_C8=emMVOEjTceMFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34948 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750726AbeBGWNq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 7 Feb 2018 17:13:46 -0500
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id DAF4E8E3E7
-        for <ceph-devel@vger.kernel.org>; Wed,  7 Feb 2018 22:13:45 +0000 (UTC)
-Received: from colo-mx.corp.redhat.com (colo-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.21])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id D21E25C66F
-        for <ceph-devel@vger.kernel.org>; Wed,  7 Feb 2018 22:13:45 +0000 (UTC)
-Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
-        by colo-mx.corp.redhat.com (Postfix) with ESMTP id CB5DC4A46B
-        for <ceph-devel@vger.kernel.org>; Wed,  7 Feb 2018 22:13:45 +0000 (UTC)
+Received: from mail-pl0-f50.google.com ([209.85.160.50]:42734 "EHLO
+        mail-pl0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750767AbeBGW5d (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Feb 2018 17:57:33 -0500
+Received: by mail-pl0-f50.google.com with SMTP id 11-v6so977482plc.9
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Feb 2018 14:57:33 -0800 (PST)
+In-Reply-To: <CAMMFjmFAggpL+7XpOjSCJGzpzDo9KbADh_C8=emMVOEjTceMFA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, John Spray <jspray@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Sage Weil <sage@redhat.com>
 
-Hello Cephers,
+OK I see no PRs in the queue left =>
+https://github.com/ceph/ceph/labels/luminous-batch-1
+(https://github.com/ceph/ceph/pull/20338 is waiting for approval/merge
+by Yehuda)
 
-Over the past month and change I have been working porting the existing S3 tests (written in Boto2) over to the Boto3.
+Abhishek, waiting for dev leads final approval and confirmation that
+no PRs left and "go ahead" from you to start formal QE validation.
 
-This was due to many factors including:
-- bugs in boto2
-- testing V4 auth and V2 auth being easier to do in boto3
-- Boto3 being official Amazon API, with up to date bug fixes and correct behavior
+Thx
+YuriW
 
-I've ported over many tests and laid the ground work for new tests to be written very easily in boto3.
-
-There are two notable pieces of work that still need to get done:
-1. Changing the s3test teuthology job to use the boto3 tests
-2. Write (~150) new tests that will enable the boto3 test coverage to be the same as what is already tested in boto2 in teuthology. 
-
-If anyone is interested in helping out in porting the remaining tests or has ideas for new tests please reach out to me. 
-
-Adding tests are a great way for newcomers to Ceph to get involved! 
-
-Also here is a link to my pull request for s3-tests.
-
-https://github.com/ceph/s3-tests/pull/210
-
-Best,
-
-Ali
+On Tue, Feb 6, 2018 at 12:31 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> Patrick
+>
+> Ack testing those
+>
+> On Tue, Feb 6, 2018 at 10:10 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+>> On Tue, Feb 6, 2018 at 9:24 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>>> These are the current list of PRs currently undergoing/waiting QE for Luminous v12.2.3
+>>> https://github.com/ceph/ceph/labels/luminous-batch-1
+>>>
+>>> Assuming teuthology is happy with these, leads, are we ready to cut
+>>> 12.2.3 or are there more PRs that we need to wait for?
+>>
+>> For CephFS:
+>>
+>> https://github.com/ceph/ceph/pull/20339
+>> https://github.com/ceph/ceph/pull/20340
+>> https://github.com/ceph/ceph/pull/20341
+>> https://github.com/ceph/ceph/pull/20342
+>> https://github.com/ceph/ceph/pull/20300
+>> https://github.com/ceph/ceph/pull/20249
+>> https://github.com/ceph/ceph/pull/20256
+>> https://github.com/ceph/ceph/pull/20299
+>>
+>> --
+>> Patrick Donnelly
