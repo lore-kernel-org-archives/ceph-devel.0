@@ -1,45 +1,50 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: Luminous v12.2.3 approvals
-Date: Tue, 6 Feb 2018 12:31:38 -0800
-Message-ID: <CAMMFjmFAggpL+7XpOjSCJGzpzDo9KbADh_C8=emMVOEjTceMFA@mail.gmail.com>
-References: <87vafa2frf.fsf@suse.com> <CA+2bHPbrdPrmFqbg_c_tUO-arf7fa91bpDCxtnw7y7D72CAMtA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Chengguang Xu <cgxu519@icloud.com>
+Subject: [PATCH] ceph: keep consistent semantic in fscache related option
+ combination
+Date: Wed, 07 Feb 2018 10:27:06 +0800
+Message-ID: <1517970426-39663-1-git-send-email-cgxu519@icloud.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:40578 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751632AbeBFUbj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Feb 2018 15:31:39 -0500
-Received: by mail-pf0-f176.google.com with SMTP id a14so1131846pfi.7
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Feb 2018 12:31:39 -0800 (PST)
-In-Reply-To: <CA+2bHPbrdPrmFqbg_c_tUO-arf7fa91bpDCxtnw7y7D72CAMtA@mail.gmail.com>
+Received: from mr11p00im-asmtp004.me.com ([17.110.69.135]:34075 "EHLO
+        mr11p00im-asmtp004.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752537AbeBGC1k (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Feb 2018 21:27:40 -0500
+Received: from process-dkim-sign-daemon.mr11p00im-asmtp004.me.com by
+ mr11p00im-asmtp004.me.com
+ (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
+ 2017)) id <0P3R00100BY2TG00@mr11p00im-asmtp004.me.com> for
+ ceph-devel@vger.kernel.org; Wed, 07 Feb 2018 02:27:33 +0000 (GMT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, John Spray <jspray@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Sage Weil <sage@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, idryomov@gmail.com, Chengguang Xu <cgxu519@icloud.com>
 
-Patrick
+When specifying multiple fscache related options, the result isn't always
+the same as option order, this fix will keep strict consistent meaning
+by order.
 
-Ack testing those
+Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+---
+ fs/ceph/super.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-On Tue, Feb 6, 2018 at 10:10 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
-> On Tue, Feb 6, 2018 at 9:24 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
->> These are the current list of PRs currently undergoing/waiting QE for Luminous v12.2.3
->> https://github.com/ceph/ceph/labels/luminous-batch-1
->>
->> Assuming teuthology is happy with these, leads, are we ready to cut
->> 12.2.3 or are there more PRs that we need to wait for?
->
-> For CephFS:
->
-> https://github.com/ceph/ceph/pull/20339
-> https://github.com/ceph/ceph/pull/20340
-> https://github.com/ceph/ceph/pull/20341
-> https://github.com/ceph/ceph/pull/20342
-> https://github.com/ceph/ceph/pull/20300
-> https://github.com/ceph/ceph/pull/20249
-> https://github.com/ceph/ceph/pull/20256
-> https://github.com/ceph/ceph/pull/20299
->
-> --
-> Patrick Donnelly
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 7f1e212..e654005 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -314,9 +314,13 @@ static int parse_fsopt_token(char *c, void *private)
+ 		break;
+ 	case Opt_fscache:
+ 		fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
++		kfree(fsopt->fscache_uniq);
++		fsopt->fscache_uniq = NULL;
+ 		break;
+ 	case Opt_nofscache:
+ 		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
++		kfree(fsopt->fscache_uniq);
++		fsopt->fscache_uniq = NULL;
+ 		break;
+ 	case Opt_poolperm:
+ 		fsopt->flags &= ~CEPH_MOUNT_OPT_NOPOOLPERM;
+-- 
+1.8.3.1
+
