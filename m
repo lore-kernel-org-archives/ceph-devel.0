@@ -1,203 +1,131 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: measure performance / latency in blustore
-Date: Wed, 7 Feb 2018 15:07:26 +0100
-Message-ID: <decfb113-e799-6b65-71d2-f2a79b04f2da@profihost.ag>
-References: <71b773a4-18a1-c206-2fe4-83b51cdf368c@profihost.ag>
- <231b2674-d2b6-b66a-ae29-72c0f2a7f1a0@profihost.ag>
- <alpine.DEB.2.11.1712141221340.2838@piezo.novalocal>
- <ad0d5df9-e75e-e4ea-6344-61f584e32dbf@profihost.ag>
- <alpine.DEB.2.11.1712141401550.2838@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: seastar and 'tame reactor'
+Date: Thu, 8 Feb 2018 00:01:06 +0800
+Message-ID: <CAJE9aOOq+HAWZOec0TnSqXFqUx7GD=XgCByh8HFV9Rb8L8qc2A@mail.gmail.com>
+References: <d0f50268-72bb-1196-7ce9-0b9e21808ffb@redhat.com> <5b32056c-c6f7-a1c4-d07a-ae04557b59cf@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:59768 "EHLO
-        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753796AbeBGOH2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Feb 2018 09:07:28 -0500
-In-Reply-To: <alpine.DEB.2.11.1712141401550.2838@piezo.novalocal>
-Content-Language: de-DE
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:39729 "EHLO
+        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932101AbeBGQBI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Feb 2018 11:01:08 -0500
+Received: by mail-qk0-f180.google.com with SMTP id d72so1691745qkc.6
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Feb 2018 08:01:08 -0800 (PST)
+In-Reply-To: <5b32056c-c6f7-a1c4-d07a-ae04557b59cf@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Casey Bodley <cbodley@redhat.com>, Adam Emerson <aemerson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
-
-Am 14.12.2017 um 15:02 schrieb Sage Weil:
-> On Thu, 14 Dec 2017, Stefan Priebe - Profihost AG wrote:
+On Wed, Jan 31, 2018 at 6:32 AM, Josh Durgin <jdurgin@redhat.com> wrote:
+> [adding ceph-devel]
+>
+> On 01/30/2018 01:56 PM, Casey Bodley wrote:
 >>
->> Am 14.12.2017 um 13:22 schrieb Sage Weil:
->>> On Thu, 14 Dec 2017, Stefan Priebe - Profihost AG wrote:
->>>> Hello,
->>>>
->>>> Am 21.11.2017 um 11:06 schrieb Stefan Priebe - Profihost AG:
->>>>> Hello,
->>>>>
->>>>> to measure performance / latency for filestore we used:
->>>>> filestore:apply_latency
->>>>> filestore:commitcycle_latency
->>>>> filestore:journal_latency
->>>>> filestore:queue_transaction_latency_avg
->>>>>
->>>>> What are the correct ones for bluestore?
->>>>
->>>> really nobody? Does nobody track the latency under bluestore?
->>>
->>> I forget the long names off the top of my head, but the interesting 
->>> latency measures are marked with a low priority and come up (with a wide 
->>> terminal) when you do 'ceph daemonperf osd.N'. You can see the metrics, 
->>> pririties, and descriptions with 'ceph daemon osd.N perf schema'.
+>> Hey Josh,
 >>
->> uhuh very long list. Any idea which ones are relevant?
->>
->> ceph daemon osd.8 perf dump
-> 
-> If you do 'perf schema' you'll see a 'priority' property that calls out 
-> the important ones.  That's how the daemonperf command decides which ones 
-> to show (based on terminal width and priorities).
-> 
-> sage
-
-So i would start using:
-        "throttle_lat": {
-            "type": 5,
-            "priority": 10
-        "submit_lat": {
-            "type": 5,
-            "priority": 10
-        "commit_lat": {
-            "type": 5,
-            "priority": 10
-        "read_lat": {
-            "type": 5,
-            "priority": 10
-
-But i'm not able to find any hints about those values and their meaning.
-
-Greets,
-Stefan
-
-
-> 
-> 
->  > 
->> shows me a lot of stuff and even a lot of wait or latancy values.
->>
->> ceph daemon osd.8 perf dump | egrep "wait|lat"
->>         "kv_flush_lat": {
->>         "kv_commit_lat": {
->>         "kv_lat": {
->>         "state_prepare_lat": {
->>         "state_aio_wait_lat": {
->>         "state_io_done_lat": {
->>         "state_kv_queued_lat": {
->>         "state_kv_commiting_lat": {
->>         "state_kv_done_lat": {
->>         "state_deferred_queued_lat": {
->>         "state_deferred_aio_wait_lat": {
->>         "state_deferred_cleanup_lat": {
->>         "state_finishing_lat": {
->>         "state_done_lat": {
->>         "throttle_lat": {
->>         "submit_lat": {
->>         "commit_lat": {
->>         "read_lat": {
->>         "read_onode_meta_lat": {
->>         "read_wait_aio_lat": {
->>         "compress_lat": {
->>         "decompress_lat": {
->>         "csum_lat": {
->>         "complete_latency": {
->>         "complete_latency": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "op_latency": {
->>         "op_process_latency": {
->>         "op_prepare_latency": {
->>         "op_r_latency": {
->>         "op_r_process_latency": {
->>         "op_r_prepare_latency": {
->>         "op_w_latency": {
->>         "op_w_process_latency": {
->>         "op_w_prepare_latency": {
->>         "op_rw_latency": {
->>         "op_rw_process_latency": {
->>         "op_rw_prepare_latency": {
->>         "op_before_queue_op_lat": {
->>         "op_before_dequeue_op_lat": {
->>         "subop_latency": {
->>         "subop_w_latency": {
->>         "subop_pull_latency": {
->>         "subop_push_latency": {
->>         "osd_tier_flush_lat": {
->>         "osd_tier_promote_lat": {
->>         "osd_tier_r_lat": {
->>         "initial_latency": {
->>         "started_latency": {
->>         "reset_latency": {
->>         "start_latency": {
->>         "primary_latency": {
->>         "peering_latency": {
->>         "backfilling_latency": {
->>         "waitremotebackfillreserved_latency": {
->>         "waitlocalbackfillreserved_latency": {
->>         "notbackfilling_latency": {
->>         "repnotrecovering_latency": {
->>         "repwaitrecoveryreserved_latency": {
->>         "repwaitbackfillreserved_latency": {
->>         "reprecovering_latency": {
->>         "activating_latency": {
->>         "waitlocalrecoveryreserved_latency": {
->>         "waitremoterecoveryreserved_latency": {
->>         "recovering_latency": {
->>         "recovered_latency": {
->>         "clean_latency": {
->>         "active_latency": {
->>         "replicaactive_latency": {
->>         "stray_latency": {
->>         "getinfo_latency": {
->>         "getlog_latency": {
->>         "waitactingchange_latency": {
->>         "incomplete_latency": {
->>         "down_latency": {
->>         "getmissing_latency": {
->>         "waitupthru_latency": {
->>         "notrecovering_latency": {
->>         "get_latency": {
->>         "submit_latency": {
->>         "submit_sync_latency": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>         "wait": {
->>
->> Stefan
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> I heard you mention in the call yesterday that you're looking into this
+>> part of seastar integration. I was just reading through the relevant code
+>> over the weekend, and wanted to compare notes:
 >>
 >>
+>> in seastar, all cross-core communication goes through lockfree spsc
+>> queues, which are encapsulated by 'class smp_message_queue' in
+>> core/reactor.hh. all of these queues (smp::_qs) are allocated on startup in
+>> smp::configure(). early in reactor::run() (which is effectively each seastar
+>> thread's entrypoint), it registers a smp_poller to poll all of the queues
+>> directed at that cpu
+>>
+>> what we need is a way to inject messages into each seastar reactor from
+>> arbitrary/external threads. our requirements are very similar to
+
+i think we will have a sharded<osd::PublicService> on each core. in
+each instance of PublicService, we will be listening and serving
+requests from external clients of cluster. the same applies to
+sharded<osd::ClusterService>, which will be responsible for serving
+the requests from its peers in the cluster. the control flow of a
+typical OSD read request from a public RADOS client will look like:
+
+1. the TCP connection is accepted by one of the listening
+sharded<osd::PublicService>.
+2. decode the message
+3. osd encapsulates the request in the message as a future, and submit
+it to another core after hashing the involved pg # to the core #.
+something like (in pseudo code):
+  engine().submit_to(osdmap_shard, [] {
+    return get_newer_osdmap(m->epoch);
+    // need to figure out how to reference a "osdmap service" in seastar.
+  }).then([] (auto osdmap) {
+    submit_to(pg_to_shard(m->ops.op.pg, [] {
+      return pg.do_ops(m->ops);
+    });
+  });
+4. the core serving the involved pg (i.e. pg service) will dequeue
+this request, and use read_dma() call to delegate the aio request to
+the core maintaining the io queue.
+5. once the aio completes, the PublicService will continue on, with
+the then() block. it will send the response back to client.
+
+so question is: why do we need a mpsc queue? the nr_core*nr_core spsc
+is good enough for us, i think.
+
+>> smp_message_queue's, with a few exceptions:
+>>
+>> -each seastar reactor should be the single consumer of a multi-producer
+>> queue, and poll on that as well
+>
+>
+> Yes, this is what I was thinking too, maybe a boost::lockfree::queue
+>
+>> -the submit() function would return void instead of a future (which
+>> removes the need for a lot of other stuff, like the _completions queue,
+>> async_work_item::_promise, etc)
+>>
+>> figuring out how to factor this stuff out of smp_message_queue cleanly is
+>> the hard part i guess
+>
+>
+> I was thinking it could start off as a separate implementation, but
+> hadn't looked too closely at sharing pieces of it.
+>
+>> in terms of startup, it could be allocated as a static array similar to
+>> smp::_qs (except it would be dimensioned by [smp::count] instead of
+>> [smp::count][smp::count]). then a new function could be added alongside
+>> smp::submit_to() that submits to the given cpu's external queue (and also
+>> returns void). this stuff should probably be disabled by default, and only
+>> turned on if enabled in configuration
+>
+>
+> ++
+>
+>> for a super simple unit test, you could spawn an external thread that does
+>> something like this:
+>>
+>> std::mutex mutex;
+>> std::condition_variable cond;
+>> std::atomic<int> completions = 0;
+>> // submit a message to each reactor
+>> for (int i = 0; i < smp::count; i++) {
+>>    smp::external_submit_to(i, [&] { ++completions; cond.notify_one(); });
+>> }
+>> // wait for all completions
+>> std::unique_lock lock(mutex);
+>> cond.wait(lock, [&] { return completions == smp::count; });
+>
+>
+> Yeah, this looks like a nice example.
+>
+>> Sorry that I've been slow to help with this - keep me posted?
+>
+>
+> No worries, I've been slow about this too - I've asked Kefu to look at
+> it this morning, so I'm sure he'll have some more thoughts soon.
+>
+> Josh
+
+
+
+-- 
+Regards
+Kefu Chai
