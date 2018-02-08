@@ -1,44 +1,61 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Luminous v12.2.3 approvals
-Date: Thu, 8 Feb 2018 18:41:05 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1802081840140.24931@piezo.novalocal>
-References: <87vafa2frf.fsf@suse.com> <0471458e-4805-ebef-910e-e497c3173f6f@redhat.com> <87k1vn30h5.fsf@suse.com> <alpine.DEB.2.11.1802081656290.15996@piezo.novalocal> <CAEPMp+7dszOCNALdSGpFpLdxTjFB-yEOCJf6kAMSnShZZuzGAQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Douglas Fuller <dfuller@redhat.com>
+Subject: Re: Translating raw capacity to real data capacity in statfs
+Date: Thu, 8 Feb 2018 14:03:21 -0500
+Message-ID: <B1A3AABC-9D9A-4BAC-B94D-B85BD96A8B7C@redhat.com>
+References: <D738D819-6452-41E3-AEED-D0EF5EB5B689@icloud.com>
+ <CAAM7YA=41Zx2PT=_Rc2UY61NSUZUEp_cgP3abLuHFBioPMu-fg@mail.gmail.com>
+ <alpine.DEB.2.11.1802081309540.15996@piezo.novalocal>
+Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:37198 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751094AbeBHSlP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Feb 2018 13:41:15 -0500
-In-Reply-To: <CAEPMp+7dszOCNALdSGpFpLdxTjFB-yEOCJf6kAMSnShZZuzGAQ@mail.gmail.com>
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:42985 "EHLO
+        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751544AbeBHTDY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Feb 2018 14:03:24 -0500
+Received: by mail-yw0-f175.google.com with SMTP id u17so3373121ywg.9
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Feb 2018 11:03:24 -0800 (PST)
+Received: from douglass-mbp-2.lan (96-33-254-202.static.kgpt.tn.charter.com. [96.33.254.202])
+        by smtp.gmail.com with ESMTPSA id c13sm219183ywm.74.2018.02.08.11.03.22
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 08 Feb 2018 11:03:22 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1802081309540.15996@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Schoen <aschoen@redhat.com>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, John Spray <jspray@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 8 Feb 2018, Andrew Schoen wrote:
-> On Thu, Feb 8, 2018 at 10:56 AM, Sage Weil <sweil@redhat.com> wrote:
-> > On Thu, 8 Feb 2018, Abhishek Lekshmanan wrote:
-> >> Josh Durgin <jdurgin@redhat.com> writes:
-> >>
-> >> > On 02/06/2018 09:24 AM, Abhishek Lekshmanan wrote:
-> >> >> These are the current list of PRs currently undergoing/waiting QE for Luminous v12.2.3
-> >> >> https://github.com/ceph/ceph/labels/luminous-batch-1
-> >> >>
-> >> >> Assuming teuthology is happy with these, leads, are we ready to cut
-> >> >> 12.2.3 or are there more PRs that we need to wait for?
-> >>
-> >> Sage, John, Patrick, Yehuda/Matt, are we good to handover to QE?
-> >
-> > I think so!
-> > sage
+
+
+> On Feb 8, 2018, at 8:11 AM, Sage Weil <sage@newdream.net> wrote:
 > 
-> Sage, do you think this will get in? https://github.com/ceph/ceph/pull/19939
+> On Thu, 8 Feb 2018, Yan, Zheng wrote:
+>> On Thu, Feb 8, 2018 at 10:47 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
+>>> Hi Cepher,
+>>> 
+>>> Current statfs(2) in ceph kernel client provides raw capacity information of total/used/avail,
+>>> but in the point of view of filesystem I think we actually more willing to see real data capacity instead of raw.
+>>> 
+>>> So I have a suggestion to translate raw capacity to real data capacity, it can be simply implemented by
+>>> taking advantage of num.object_copies, the result may be not very accurate but still having reference significance.
+>>> 
+>> 
+>> It's not that simple when there are multiple data pools.
 > 
-> ceph-volume's --crush-device-class flag now depends on that PR.
+> I seem to remember someone (Doug or Jeff?) working on a patch that would 
+> adjust the statfs result for a given directory based on the data pool and 
+> the usual "max avail" style calculation that 'ceph df' uses per pool 
+> (which is based on replication/ec multiplier and most-full osd)…?
 
-I addressed Kefu's test concern and pushed a built to test against master.  
-If we include it in .3 it'd be last minute; inclined to wait and get .3 
-testing going!
+I did that in: https://github.com/ceph/ceph/pull/16378 . This only works for the case where the filesystem uses a single data pool. In other cases, it falls back to the old behavior.
 
-sage
+Cheers,
+—Doug
+
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
