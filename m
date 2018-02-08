@@ -1,59 +1,66 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Translating raw capacity to real data capacity in statfs
-Date: Thu, 8 Feb 2018 19:06:13 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1802081903170.15996@piezo.novalocal>
-References: <D738D819-6452-41E3-AEED-D0EF5EB5B689@icloud.com> <CAAM7YA=41Zx2PT=_Rc2UY61NSUZUEp_cgP3abLuHFBioPMu-fg@mail.gmail.com> <alpine.DEB.2.11.1802081309540.15996@piezo.novalocal> <CE91B764-C317-4585-AFB3-F10EF7979FF1@redhat.com>
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: Re: Luminous v12.2.3 approvals
+Date: Thu, 8 Feb 2018 21:18:24 +0100
+Message-ID: <CAEw75dP-K4xZYNVFe+onT3XqORvdRg38M4bKdvttmPtdqGH3qw@mail.gmail.com>
+References: <87vafa2frf.fsf@suse.com> <0471458e-4805-ebef-910e-e497c3173f6f@redhat.com>
+ <87k1vn30h5.fsf@suse.com> <alpine.DEB.2.11.1802081656290.15996@piezo.novalocal>
+ <CAEPMp+7dszOCNALdSGpFpLdxTjFB-yEOCJf6kAMSnShZZuzGAQ@mail.gmail.com> <alpine.DEB.2.11.1802081840140.24931@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-261011653-1518116775=:15996"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:55104 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751988AbeBHTGQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Feb 2018 14:06:16 -0500
-In-Reply-To: <CE91B764-C317-4585-AFB3-F10EF7979FF1@redhat.com>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:45264 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752568AbeBHUSZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Feb 2018 15:18:25 -0500
+Received: by mail-io0-f178.google.com with SMTP id p188so7125241ioe.12
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Feb 2018 12:18:25 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1802081840140.24931@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Douglas Fuller <dfuller@redhat.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Chengguang Xu <cgxu519@icloud.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Andrew Schoen <aschoen@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, John Spray <jspray@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Thu, Feb 8, 2018 at 7:41 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Thu, 8 Feb 2018, Andrew Schoen wrote:
+>> On Thu, Feb 8, 2018 at 10:56 AM, Sage Weil <sweil@redhat.com> wrote:
+>> > On Thu, 8 Feb 2018, Abhishek Lekshmanan wrote:
+>> >> Josh Durgin <jdurgin@redhat.com> writes:
+>> >>
+>> >> > On 02/06/2018 09:24 AM, Abhishek Lekshmanan wrote:
+>> >> >> These are the current list of PRs currently undergoing/waiting QE for Luminous v12.2.3
+>> >> >> https://github.com/ceph/ceph/labels/luminous-batch-1
+>> >> >>
+>> >> >> Assuming teuthology is happy with these, leads, are we ready to cut
+>> >> >> 12.2.3 or are there more PRs that we need to wait for?
+>> >>
+>> >> Sage, John, Patrick, Yehuda/Matt, are we good to handover to QE?
+>> >
+>> > I think so!
+>> > sage
+>>
+>> Sage, do you think this will get in? https://github.com/ceph/ceph/pull/19939
+>>
+>> ceph-volume's --crush-device-class flag now depends on that PR.
+>
+> I addressed Kefu's test concern and pushed a built to test against master.
+> If we include it in .3 it'd be last minute; inclined to wait and get .3
+> testing going!
 
---8323329-261011653-1518116775=:15996
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Great! Yuri this means that we can start final round of QE on luminous,
+I've pushed to luminous-rc in ceph/ceph with the current tip of luminous at
 
-On Thu, 8 Feb 2018, Douglas Fuller wrote:
-> > On Feb 8, 2018, at 8:11 AM, Sage Weil <sage@newdream.net> wrote:
-> > 
-> > On Thu, 8 Feb 2018, Yan, Zheng wrote:
-> >> On Thu, Feb 8, 2018 at 10:47 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
-> >>> Hi Cepher,
-> >>> 
-> >>> Current statfs(2) in ceph kernel client provides raw capacity information of total/used/avail,
-> >>> but in the point of view of filesystem I think we actually more willing to see real data capacity instead of raw.
-> >>> 
-> >>> So I have a suggestion to translate raw capacity to real data capacity, it can be simply implemented by
-> >>> taking advantage of num.object_copies, the result may be not very accurate but still having reference significance.
-> >>> 
-> >> 
-> >> It's not that simple when there are multiple data pools.
-> > 
-> > I seem to remember someone (Doug or Jeff?) working on a patch that would 
-> > adjust the statfs result for a given directory based on the data pool and 
-> > the usual "max avail" style calculation that 'ceph df' uses per pool 
-> > (which is based on replication/ec multiplier and most-full osd)…?
-> 
-> I did that in: https://github.com/ceph/ceph/pull/16378 
-> <https://github.com/ceph/ceph/pull/16378> . This only works for the case 
-> where the filesystem uses a single data pool. In other cases, it falls 
-> back to the old behavior.
+22c6b1d3d6bbc7ee466fddd3af13bcdb7f0c9a55
 
-FWIW, statfs(2) takes a path and fstatfs(2) takes an fd, so at least the 
-user-facing API should be able to handle it.  And in the kernel the statfs 
-call super_operations takes a dentry.  So it should be possible to do 
-this?
 
-sage
 
---8323329-261011653-1518116775=:15996--
+Best,
+Abhishek
+
+
+
+
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
