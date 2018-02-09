@@ -1,41 +1,33 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
 Subject: Re: Build failed in Jenkins: ceph-master #1762
-Date: Fri, 9 Feb 2018 18:52:24 -0500
-Message-ID: <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
+Date: Fri, 9 Feb 2018 15:56:17 -0800
+Message-ID: <CA+2bHPbDUo=5Xhga0DEAjhd5YAOc8R2sU-Nn87tM3i1EYe9V2g@mail.gmail.com>
 References: <333349266.59.1518165404718.JavaMail.jenkins@cephdev.digiware.nl>
- <36698607-d1d7-fe7d-c887-a7190b548791@digiware.nl>
- <CAJ4mKGbpTJWwwc1=JH_jvDxyQSyaW2BhQBR=TVo9pQEVKdrASA@mail.gmail.com>
- <CA+2bHPbmztw1jg8e33Wwo+N7_1PKyNke_7o7eNJKqBZEJpOfag@mail.gmail.com>
+ <36698607-d1d7-fe7d-c887-a7190b548791@digiware.nl> <CAJ4mKGbpTJWwwc1=JH_jvDxyQSyaW2BhQBR=TVo9pQEVKdrASA@mail.gmail.com>
+ <CA+2bHPbmztw1jg8e33Wwo+N7_1PKyNke_7o7eNJKqBZEJpOfag@mail.gmail.com> <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:34882 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753073AbeBIXwZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 9 Feb 2018 18:52:25 -0500
-Content-Disposition: inline
-In-Reply-To: <CA+2bHPbmztw1jg8e33Wwo+N7_1PKyNke_7o7eNJKqBZEJpOfag@mail.gmail.com>
+Received: from mail-qt0-f196.google.com ([209.85.216.196]:41432 "EHLO
+        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752521AbeBIX4s (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Feb 2018 18:56:48 -0500
+Received: by mail-qt0-f196.google.com with SMTP id a9so6088827qtj.8
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Feb 2018 15:56:48 -0800 (PST)
+In-Reply-To: <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 09/02/2018, Patrick Donnelly wrote:
-> Perhaps it is deduced because inode_t is now templated and has a
-> default template argument?
+On Fri, Feb 9, 2018 at 3:52 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
+>> Also, wouldn't "inode_t bar()" be more appropriate than "inode_t
+>> bar{}"? Or does the former not work?
+>
+> inode_t bar() runs into The Most Vexing Parse:
+>
+> https://en.wikipedia.org/wiki/Most_vexing_parse
 
-Yes! Pre C++17 we would have had to use inode_t<> everywhere. Now G++
-and Clang are both doing class template argument deduction, but Clang
-is doing it /slightly wrong/.
-
-> Also, wouldn't "inode_t bar()" be more appropriate than "inode_t
-> bar{}"? Or does the former not work?
-
-inode_t bar() runs into The Most Vexing Parse:
-
-https://en.wikipedia.org/wiki/Most_vexing_parse
+Ah, I've seen and been confused by that before. Thanks for the link!
 
 -- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@OFTC, Actinic@Freenode
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+Patrick Donnelly
