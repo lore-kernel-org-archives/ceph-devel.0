@@ -1,79 +1,45 @@
-From: Abhishek <abhishek@suse.com>
-Subject: Re: Luminous v12.2.3 approvals
-Date: Thu, 08 Feb 2018 22:55:36 +0100
-Message-ID: <a4bebcfbb8534f24cd81a661991af9ad@suse.com>
-References: <87vafa2frf.fsf@suse.com>
- <0471458e-4805-ebef-910e-e497c3173f6f@redhat.com> <87k1vn30h5.fsf@suse.com>
- <alpine.DEB.2.11.1802081656290.15996@piezo.novalocal>
- <CAEPMp+7dszOCNALdSGpFpLdxTjFB-yEOCJf6kAMSnShZZuzGAQ@mail.gmail.com>
- <alpine.DEB.2.11.1802081840140.24931@piezo.novalocal>
- <CAEw75dP-K4xZYNVFe+onT3XqORvdRg38M4bKdvttmPtdqGH3qw@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Build failed in Jenkins: ceph-master #1758
+Date: Fri, 9 Feb 2018 11:36:13 +0800
+Message-ID: <CAJE9aONEDL0GBJMD+pA4GHQf9-Kjc8D9A0n5o4G3bCKLU3U2QA@mail.gmail.com>
+References: <1275455898.55.1518102782484.JavaMail.jenkins@cephdev.digiware.nl> <dfc202fa-e5d3-1d3f-99be-86eb87a20dd9@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:53390 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752126AbeBHVzh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Feb 2018 16:55:37 -0500
-In-Reply-To: <CAEw75dP-K4xZYNVFe+onT3XqORvdRg38M4bKdvttmPtdqGH3qw@mail.gmail.com>
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:37530 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752392AbeBIDgP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Feb 2018 22:36:15 -0500
+Received: by mail-qt0-f174.google.com with SMTP id s27so8988427qts.4
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Feb 2018 19:36:14 -0800 (PST)
+In-Reply-To: <dfc202fa-e5d3-1d3f-99be-86eb87a20dd9@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, Andrew Schoen <aschoen@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, John Spray <jspray@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 2018-02-08 21:18, Abhishek L wrote:
-> On Thu, Feb 8, 2018 at 7:41 PM, Sage Weil <sweil@redhat.com> wrote:
->> On Thu, 8 Feb 2018, Andrew Schoen wrote:
->>> On Thu, Feb 8, 2018 at 10:56 AM, Sage Weil <sweil@redhat.com> wrote:
->>> > On Thu, 8 Feb 2018, Abhishek Lekshmanan wrote:
->>> >> Josh Durgin <jdurgin@redhat.com> writes:
->>> >>
->>> >> > On 02/06/2018 09:24 AM, Abhishek Lekshmanan wrote:
->>> >> >> These are the current list of PRs currently undergoing/waiting QE for Luminous v12.2.3
->>> >> >> https://github.com/ceph/ceph/labels/luminous-batch-1
->>> >> >>
->>> >> >> Assuming teuthology is happy with these, leads, are we ready to cut
->>> >> >> 12.2.3 or are there more PRs that we need to wait for?
->>> >>
->>> >> Sage, John, Patrick, Yehuda/Matt, are we good to handover to QE?
->>> >
->>> > I think so!
->>> > sage
->>> 
->>> Sage, do you think this will get in? 
->>> https://github.com/ceph/ceph/pull/19939
->>> 
->>> ceph-volume's --crush-device-class flag now depends on that PR.
->> 
->> I addressed Kefu's test concern and pushed a built to test against 
->> master.
->> If we include it in .3 it'd be last minute; inclined to wait and get 
->> .3
->> testing going!
-> 
-> Great! Yuri this means that we can start final round of QE on luminous,
-> I've pushed to luminous-rc in ceph/ceph with the current tip of 
-> luminous at
-> 
-> 22c6b1d3d6bbc7ee466fddd3af13bcdb7f0c9a55
-> 
+On Thu, Feb 8, 2018 at 11:19 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi Kefu,
+>
+> Clang complains since your commit:
+> https://github.com/ceph/ceph/commit/0e0d0cd8d1adee998109c2714ed04f43b3212d7e
+>
+> about:
+> /home/jenkins/workspace/ceph-master/src/test/librados/lock.cc:24:33:
+> error: no template named 'invoke_result_t' in namespace 'std'
+>          typename Return = std::invoke_result_t<Func, Args...>>
+>                            ~~~~~^
+> 1 error generated.
+> gmake[2]: ***
+> [src/test/librados/CMakeFiles/ceph_test_rados_api_lock.dir/build.make:63:
+> src/test/librados/CMakeFiles/ceph_test_rados_api_lock.dir/lock.cc.o] Error 1
+>
+> Suggestions on how to fix this?
+>
 
-We're not yet ready for moving to the rc approach yet, so Luminous 
-branch shall be deemed frozen until release. Please avoid any merges to 
-Luminous branch
+could you give a spin of https://github.com/ceph/ceph/pull/20379 ?
+sorry for the inconvenience.
 
-Best,
-Abhishek
-
-> 
-> 
-> 
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
->> in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-- 
+Regards
+Kefu Chai
