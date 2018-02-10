@@ -1,119 +1,45 @@
-From: Chengguang Xu <cgxu519@icloud.com>
-Subject: [PATCH] ceph: change permission for readonly debugfs entries
-Date: Sat, 10 Feb 2018 14:18:06 +0800
-Message-ID: <1518243486-215336-1-git-send-email-cgxu519@icloud.com>
+From: Mark Meyers <MarkMeyers.MMY@gmail.com>
+Subject: Can I omit acquire_locks in getattr handler of mds?
+Date: Sat, 10 Feb 2018 08:15:45 +0000 (UTC)
+Message-ID: <2073248911.84014.1518250545543@mail.yahoo.com>
+References: <2073248911.84014.1518250545543.ref@mail.yahoo.com>
+Reply-To: Mark Meyers <MarkMeyers.MMY@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mr11p00im-asmtp004.me.com ([17.110.69.135]:58257 "EHLO
-        mr11p00im-asmtp004.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751047AbeBJGSQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Feb 2018 01:18:16 -0500
-Received: from process-dkim-sign-daemon.mr11p00im-asmtp004.me.com by
- mr11p00im-asmtp004.me.com
- (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
- 2017)) id <0P3X002007E4VQ00@mr11p00im-asmtp004.me.com> for
- ceph-devel@vger.kernel.org; Sat, 10 Feb 2018 06:18:16 +0000 (GMT)
+Received: from sonic310-48.consmr.mail.ne1.yahoo.com ([66.163.186.229]:38592
+        "EHLO sonic310-48.consmr.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750775AbeBJITz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 10 Feb 2018 03:19:55 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, idryomov@gmail.com, Chengguang Xu <cgxu519@icloud.com>
+To: Ceph-users <ceph-users@ceph.com>, "ceph-devel@lists.ceph.com" <ceph-devel@lists.ceph.com>, Ceph-devel <ceph-devel@vger.kernel.org>
 
-Remove write permission for debugfs entries which only have readonly function.
+I found ls command costs extremely long time (form 30s to 3mins).
+So I tried to remove acquire_locks in mds's getattr handler: handle_clinet_getattr.
+Everything looks just good:
+First, the size of files get updated in time.
+Second, the read and write to file from clinets works ok.
 
-Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
----
- fs/ceph/debugfs.c  |  8 ++++----
- net/ceph/debugfs.c | 10 +++++-----
- 2 files changed, 9 insertions(+), 9 deletions(-)
+So, please, can I just omiit acquire_locks in mds getattr handler?(if client request doesn't requier or have Fwb caps)
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 644def8..abdf98d 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -260,7 +260,7 @@ int ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 		goto out;
- 
- 	fsc->debugfs_mdsmap = debugfs_create_file("mdsmap",
--					0600,
-+					0400,
- 					fsc->client->debugfs_dir,
- 					fsc,
- 					&mdsmap_show_fops);
-@@ -268,7 +268,7 @@ int ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 		goto out;
- 
- 	fsc->debugfs_mds_sessions = debugfs_create_file("mds_sessions",
--					0600,
-+					0400,
- 					fsc->client->debugfs_dir,
- 					fsc,
- 					&mds_sessions_show_fops);
-@@ -276,7 +276,7 @@ int ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 		goto out;
- 
- 	fsc->debugfs_mdsc = debugfs_create_file("mdsc",
--						0600,
-+						0400,
- 						fsc->client->debugfs_dir,
- 						fsc,
- 						&mdsc_show_fops);
-@@ -292,7 +292,7 @@ int ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 		goto out;
- 
- 	fsc->debugfs_dentry_lru = debugfs_create_file("dentry_lru",
--					0600,
-+					0400,
- 					fsc->client->debugfs_dir,
- 					fsc,
- 					&dentry_lru_show_fops);
-diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-index 1eef680..0ef0f32 100644
---- a/net/ceph/debugfs.c
-+++ b/net/ceph/debugfs.c
-@@ -418,7 +418,7 @@ int ceph_debugfs_client_init(struct ceph_client *client)
- 		goto out;
- 
- 	client->monc.debugfs_file = debugfs_create_file("monc",
--						      0600,
-+						      0400,
- 						      client->debugfs_dir,
- 						      client,
- 						      &monc_show_fops);
-@@ -426,7 +426,7 @@ int ceph_debugfs_client_init(struct ceph_client *client)
- 		goto out;
- 
- 	client->osdc.debugfs_file = debugfs_create_file("osdc",
--						      0600,
-+						      0400,
- 						      client->debugfs_dir,
- 						      client,
- 						      &osdc_show_fops);
-@@ -434,7 +434,7 @@ int ceph_debugfs_client_init(struct ceph_client *client)
- 		goto out;
- 
- 	client->debugfs_monmap = debugfs_create_file("monmap",
--					0600,
-+					0400,
- 					client->debugfs_dir,
- 					client,
- 					&monmap_show_fops);
-@@ -442,7 +442,7 @@ int ceph_debugfs_client_init(struct ceph_client *client)
- 		goto out;
- 
- 	client->debugfs_osdmap = debugfs_create_file("osdmap",
--					0600,
-+					0400,
- 					client->debugfs_dir,
- 					client,
- 					&osdmap_show_fops);
-@@ -450,7 +450,7 @@ int ceph_debugfs_client_init(struct ceph_client *client)
- 		goto out;
- 
- 	client->debugfs_options = debugfs_create_file("client_options",
--					0600,
-+					0400,
- 					client->debugfs_dir,
- 					client,
- 					&client_options_show_fops);
--- 
-1.8.3.1
+Code:
 
+diff -- git a/src/mds/Server.cc n/src/mds/Server.cc
+
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -3021,7 +3021,10 @@ void Server::handler_client_getattr(MDRequestRef& mdr, bool is_lookup)
+    if ((mask & CEPH_CAP_FILE_SHARED) && (issued & CEPH_CAP_FILE_EXCL) == 0) rdlocks.insert(&ref->filelock);
+    if ((mask & CEPH_CAP_XATTR_SHARED) && (issued & CEPH_CAP_XATTR_EXCL) == 0) rdlocks.insert(&ref->xattrlock);
+-   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
++   dout(20) << __func__ << " mask " << ccap_string(mask) << " issued " << 
+ccap_string(issued) << " " << !is_lookup << " ." << dendl;
++   if(!(mask & CEPH_CAP_FILE_WR) && !(mask & CEPH_CAP_FILE_BUFFER) && !(issued & CEPH_CAP_FILE_WR) && !(iissued & CEPH_CAP_FILE_BUFFER) && !is_lookup)      
++     dout(10) << "no Fw/b in mask " << ccap_string(mask) << " or issued " << ccap_string(issued) << " " << !is_lookup << " ." << dendl;+   else if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+      return;
+
+
+    if (!check_access(mdr, ref, MAY_READ))
