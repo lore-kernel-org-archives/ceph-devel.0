@@ -1,45 +1,42 @@
-From: Mark Meyers <MarkMeyers.MMY@gmail.com>
-Subject: Can I omit acquire_locks in getattr handler of mds?
-Date: Sat, 10 Feb 2018 08:15:45 +0000 (UTC)
-Message-ID: <2073248911.84014.1518250545543@mail.yahoo.com>
-References: <2073248911.84014.1518250545543.ref@mail.yahoo.com>
-Reply-To: Mark Meyers <MarkMeyers.MMY@gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Build failed in Jenkins: ceph-master #1762
+Date: Sat, 10 Feb 2018 12:55:25 +0100
+Message-ID: <ca253fea-b6e8-4fe1-a929-5641b3111790@digiware.nl>
+References: <333349266.59.1518165404718.JavaMail.jenkins@cephdev.digiware.nl>
+ <36698607-d1d7-fe7d-c887-a7190b548791@digiware.nl>
+ <CAJ4mKGbpTJWwwc1=JH_jvDxyQSyaW2BhQBR=TVo9pQEVKdrASA@mail.gmail.com>
+ <CA+2bHPbmztw1jg8e33Wwo+N7_1PKyNke_7o7eNJKqBZEJpOfag@mail.gmail.com>
+ <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sonic310-48.consmr.mail.ne1.yahoo.com ([66.163.186.229]:38592
-        "EHLO sonic310-48.consmr.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750775AbeBJITz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 10 Feb 2018 03:19:55 -0500
+Received: from smtp.digiware.nl ([176.74.240.9]:45946 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750832AbeBJLza (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 10 Feb 2018 06:55:30 -0500
+In-Reply-To: <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-users <ceph-users@ceph.com>, "ceph-devel@lists.ceph.com" <ceph-devel@lists.ceph.com>, Ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I found ls command costs extremely long time (form 30s to 3mins).
-So I tried to remove acquire_locks in mds's getattr handler: handle_clinet_getattr.
-Everything looks just good:
-First, the size of files get updated in time.
-Second, the read and write to file from clinets works ok.
+On 10-2-2018 00:52, Adam C. Emerson wrote:
+> On 09/02/2018, Patrick Donnelly wrote:
+>> Perhaps it is deduced because inode_t is now templated and has a
+>> default template argument?
+> 
+> Yes! Pre C++17 we would have had to use inode_t<> everywhere. Now G++
+> and Clang are both doing class template argument deduction, but Clang
+> is doing it /slightly wrong/.
 
-So, please, can I just omiit acquire_locks in mds getattr handler?(if client request doesn't requier or have Fwb caps)
+That would warrant a bug-report, but I'm not all to good into C++ let 
+alone the subtile diffs with all new features.
+And it looks like it is a known issue in Clang:
+https://clang.llvm.org/cxx_dr_status.html, issue 271.
 
-Code:
+The auto building for Jenkins returned back to normal thru the night.
+So I'll have to see what things of the local patches are needed.
+But my guess is that HEAD just builds.
 
-diff -- git a/src/mds/Server.cc n/src/mds/Server.cc
-
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -3021,7 +3021,10 @@ void Server::handler_client_getattr(MDRequestRef& mdr, bool is_lookup)
-    if ((mask & CEPH_CAP_FILE_SHARED) && (issued & CEPH_CAP_FILE_EXCL) == 0) rdlocks.insert(&ref->filelock);
-    if ((mask & CEPH_CAP_XATTR_SHARED) && (issued & CEPH_CAP_XATTR_EXCL) == 0) rdlocks.insert(&ref->xattrlock);
--   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
-+   dout(20) << __func__ << " mask " << ccap_string(mask) << " issued " << 
-ccap_string(issued) << " " << !is_lookup << " ." << dendl;
-+   if(!(mask & CEPH_CAP_FILE_WR) && !(mask & CEPH_CAP_FILE_BUFFER) && !(issued & CEPH_CAP_FILE_WR) && !(iissued & CEPH_CAP_FILE_BUFFER) && !is_lookup)      
-+     dout(10) << "no Fw/b in mask " << ccap_string(mask) << " or issued " << ccap_string(issued) << " " << !is_lookup << " ." << dendl;+   else if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
-      return;
-
-
-    if (!check_access(mdr, ref, MAY_READ))
+--WjW
