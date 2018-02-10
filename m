@@ -1,42 +1,62 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Build failed in Jenkins: ceph-master #1762
-Date: Sat, 10 Feb 2018 12:55:25 +0100
-Message-ID: <ca253fea-b6e8-4fe1-a929-5641b3111790@digiware.nl>
-References: <333349266.59.1518165404718.JavaMail.jenkins@cephdev.digiware.nl>
- <36698607-d1d7-fe7d-c887-a7190b548791@digiware.nl>
- <CAJ4mKGbpTJWwwc1=JH_jvDxyQSyaW2BhQBR=TVo9pQEVKdrASA@mail.gmail.com>
- <CA+2bHPbmztw1jg8e33Wwo+N7_1PKyNke_7o7eNJKqBZEJpOfag@mail.gmail.com>
- <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Can I omit acquire_locks in getattr handler of mds?
+Date: Sat, 10 Feb 2018 17:53:57 +0000
+Message-ID: <CALe9h7c=zUm5GLnKoXCX1atAnu4d6doOcFHJU=mVYna4VHzU7g@mail.gmail.com>
+References: <2073248911.84014.1518250545543.ref@mail.yahoo.com> <2073248911.84014.1518250545543@mail.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:45946 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750832AbeBJLza (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 10 Feb 2018 06:55:30 -0500
-In-Reply-To: <20180209235223.GA8943@ultraspiritum.eng.arb.redhat.com>
-Content-Language: nl
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:55119 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751055AbeBJRyT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Feb 2018 12:54:19 -0500
+Received: by mail-wm0-f51.google.com with SMTP id i186so2845500wmi.4
+        for <ceph-devel@vger.kernel.org>; Sat, 10 Feb 2018 09:54:19 -0800 (PST)
+In-Reply-To: <2073248911.84014.1518250545543@mail.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Meyers <MarkMeyers.MMY@gmail.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-On 10-2-2018 00:52, Adam C. Emerson wrote:
-> On 09/02/2018, Patrick Donnelly wrote:
->> Perhaps it is deduced because inode_t is now templated and has a
->> default template argument?
-> 
-> Yes! Pre C++17 we would have had to use inode_t<> everywhere. Now G++
-> and Clang are both doing class template argument deduction, but Clang
-> is doing it /slightly wrong/.
+(cut down CC list to ceph-devel)
 
-That would warrant a bug-report, but I'm not all to good into C++ let 
-alone the subtile diffs with all new features.
-And it looks like it is a known issue in Clang:
-https://clang.llvm.org/cxx_dr_status.html, issue 271.
+If you skip taking locks, then you will be serving the client stale
+metadata, and breaking the ordinary consistency rules for POSIX file
+IO.  That might be what you want if you have a special application and
+you want a specially hacked MDS to run it faster, but if you are
+running an application that expects a filesystem to behave correctly
+then it would be hard to predict the ways in which it could break.
 
-The auto building for Jenkins returned back to normal thru the night.
-So I'll have to see what things of the local patches are needed.
-But my guess is that HEAD just builds.
+John
 
---WjW
+On Sat, Feb 10, 2018 at 8:15 AM, Mark Meyers <MarkMeyers.MMY@gmail.com> wrote:
+> I found ls command costs extremely long time (form 30s to 3mins).
+> So I tried to remove acquire_locks in mds's getattr handler: handle_clinet_getattr.
+> Everything looks just good:
+> First, the size of files get updated in time.
+> Second, the read and write to file from clinets works ok.
+>
+> So, please, can I just omiit acquire_locks in mds getattr handler?(if client request doesn't requier or have Fwb caps)
+>
+> Code:
+>
+> diff -- git a/src/mds/Server.cc n/src/mds/Server.cc
+>
+> --- a/src/mds/Server.cc
+> +++ b/src/mds/Server.cc
+> @@ -3021,7 +3021,10 @@ void Server::handler_client_getattr(MDRequestRef& mdr, bool is_lookup)
+>     if ((mask & CEPH_CAP_FILE_SHARED) && (issued & CEPH_CAP_FILE_EXCL) == 0) rdlocks.insert(&ref->filelock);
+>     if ((mask & CEPH_CAP_XATTR_SHARED) && (issued & CEPH_CAP_XATTR_EXCL) == 0) rdlocks.insert(&ref->xattrlock);
+> -   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+> +   dout(20) << __func__ << " mask " << ccap_string(mask) << " issued " <<
+> ccap_string(issued) << " " << !is_lookup << " ." << dendl;
+> +   if(!(mask & CEPH_CAP_FILE_WR) && !(mask & CEPH_CAP_FILE_BUFFER) && !(issued & CEPH_CAP_FILE_WR) && !(iissued & CEPH_CAP_FILE_BUFFER) && !is_lookup)
+> +     dout(10) << "no Fw/b in mask " << ccap_string(mask) << " or issued " << ccap_string(issued) << " " << !is_lookup << " ." << dendl;+   else if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+>       return;
+>
+>
+>     if (!check_access(mdr, ref, MAY_READ))
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
