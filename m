@@ -1,63 +1,73 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: LOCK_SYNC_MIX state makes "getattr" operations extremely slow
- when there are lots of clients issue writes or reads to the same file
-Date: Mon, 12 Feb 2018 07:42:52 -0800
-Message-ID: <CAJ4mKGapADYxUckAjFHHOXroFFvbYwW1XXEc2xQ1bao6PEOoWg@mail.gmail.com>
-References: <CAJACTudeJCqQiEOxuSxfFsH2KdnSeors-6cCvx9jh-Nn8u6huA@mail.gmail.com>
- <CAAM7YA=_+WQc+_y9ukX68DPzFBUotEcGXny1BvuHekvs_Q1kXQ@mail.gmail.com>
- <CAJACTud5FdaoybJ7W_CTQCRqZVBghHMwqGbsSyX3SZEpOvmN+A@mail.gmail.com>
- <CAJACTucSQM8hrCfj0aY4nsVhyFeB+PwxHGOfwxao5tnqxwDTtg@mail.gmail.com>
- <CAJACTucKaWvtAKKnPQVQ3EhkeEXTncJgFu2uJ6V2T0NBpkqqqg@mail.gmail.com> <CAAM7YA=pvgX2ty0B=FDsixp_A52rfvKVt2FUp-D8jJEK8z1V8A@mail.gmail.com>
+Subject: Re: Can I omit acquire_locks in getattr handler of mds?
+Date: Mon, 12 Feb 2018 07:43:53 -0800
+Message-ID: <CAJ4mKGbjHjGYMaFa_Xcy3R3YNcfL7DpUEB3rLdJ1QHTNrSPMbw@mail.gmail.com>
+References: <2073248911.84014.1518250545543.ref@mail.yahoo.com>
+ <2073248911.84014.1518250545543@mail.yahoo.com> <CALe9h7c=zUm5GLnKoXCX1atAnu4d6doOcFHJU=mVYna4VHzU7g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:45697 "EHLO
-        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753159AbeBLPmx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Feb 2018 10:42:53 -0500
-Received: by mail-io0-f180.google.com with SMTP id p188so17681427ioe.12
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Feb 2018 07:42:53 -0800 (PST)
-In-Reply-To: <CAAM7YA=pvgX2ty0B=FDsixp_A52rfvKVt2FUp-D8jJEK8z1V8A@mail.gmail.com>
+Received: from mail-it0-f66.google.com ([209.85.214.66]:50888 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753075AbeBLPnz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Feb 2018 10:43:55 -0500
+Received: by mail-it0-f66.google.com with SMTP id x128so7183800ite.0
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Feb 2018 07:43:54 -0800 (PST)
+In-Reply-To: <CALe9h7c=zUm5GLnKoXCX1atAnu4d6doOcFHJU=mVYna4VHzU7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Xuehan Xu <xxhdx1985126@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Mark Meyers <MarkMeyers.MMY@gmail.com>, Ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 5, 2018 at 11:09 PM, Yan, Zheng <ukernel@gmail.com> wrote:
-> On Tue, Feb 6, 2018 at 2:55 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>>>
->>>> Thanks, Zheng Yan:-)
->>>>
->>>> In our case, there is only one client want the "Fw" capability, most
->>>> of the clients just needs "Fscr". However, as LOCK_MIX state allows
->>>> only "Frwl", CInode::filelock had to wait in LOCK_SYNC_MIX state for
->>>> those tens of READ clients to release "Fsc" caps, which led to the
->>>> long wait and inefficient processing of getattr requests. We think
->>>> waiting for clients to release "Fsc" in this case might not be
->>>> necessary, is this right?
->>>
->>> Oh, sorry, in our case, the transition of CInode::filelock's state
->>> from LOCK_SYNC to LOCK_SYNC_MIX is done in the "finish" phase of a
->>> getattr request when there are clients who want the "Fw" cap at the
->>> time. So I think, this should be the mds waiting for READ clients to
->>> release "Fsc" so that it can issue "Fw" to the writing client.
->>
->> And, since "Fw" is still not issued to the writing client yet in the
->> LOCK_SYNC_MIX state, it seems that getattr requests should be
->> processed instead of blocked in this state, is this right?
->
-> this will starve writer if there are lots of getattr
-
-I've been following this discussion casually and am a bit confused.
-The Client will happily send off an explicit getattr request if it
-doesn't have enough capabilities to answer it locally.
-
-Is the problem here that the MDS is not answering all pending
-CEPH_MDS_OP_GETATTR requests in one go? (Which I suppose it doesn't
-really have a way of doing, if they haven't all been processed into
-interior pending locks — but I think they should have gotten there if
-caps are being recalled?)
-Or are the clients for some reason requesting capabilities instead of
-the single getattr message?
+Even more than that, the locks also control metadata trimming and
+things. You might actually crash the server, not "merely" get
+inconsistent results back!
 -Greg
+
+On Sat, Feb 10, 2018 at 9:53 AM, John Spray <jspray@redhat.com> wrote:
+> (cut down CC list to ceph-devel)
+>
+> If you skip taking locks, then you will be serving the client stale
+> metadata, and breaking the ordinary consistency rules for POSIX file
+> IO.  That might be what you want if you have a special application and
+> you want a specially hacked MDS to run it faster, but if you are
+> running an application that expects a filesystem to behave correctly
+> then it would be hard to predict the ways in which it could break.
+>
+> John
+>
+> On Sat, Feb 10, 2018 at 8:15 AM, Mark Meyers <MarkMeyers.MMY@gmail.com> wrote:
+>> I found ls command costs extremely long time (form 30s to 3mins).
+>> So I tried to remove acquire_locks in mds's getattr handler: handle_clinet_getattr.
+>> Everything looks just good:
+>> First, the size of files get updated in time.
+>> Second, the read and write to file from clinets works ok.
+>>
+>> So, please, can I just omiit acquire_locks in mds getattr handler?(if client request doesn't requier or have Fwb caps)
+>>
+>> Code:
+>>
+>> diff -- git a/src/mds/Server.cc n/src/mds/Server.cc
+>>
+>> --- a/src/mds/Server.cc
+>> +++ b/src/mds/Server.cc
+>> @@ -3021,7 +3021,10 @@ void Server::handler_client_getattr(MDRequestRef& mdr, bool is_lookup)
+>>     if ((mask & CEPH_CAP_FILE_SHARED) && (issued & CEPH_CAP_FILE_EXCL) == 0) rdlocks.insert(&ref->filelock);
+>>     if ((mask & CEPH_CAP_XATTR_SHARED) && (issued & CEPH_CAP_XATTR_EXCL) == 0) rdlocks.insert(&ref->xattrlock);
+>> -   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+>> +   dout(20) << __func__ << " mask " << ccap_string(mask) << " issued " <<
+>> ccap_string(issued) << " " << !is_lookup << " ." << dendl;
+>> +   if(!(mask & CEPH_CAP_FILE_WR) && !(mask & CEPH_CAP_FILE_BUFFER) && !(issued & CEPH_CAP_FILE_WR) && !(iissued & CEPH_CAP_FILE_BUFFER) && !is_lookup)
+>> +     dout(10) << "no Fw/b in mask " << ccap_string(mask) << " or issued " << ccap_string(issued) << " " << !is_lookup << " ." << dendl;+   else if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+>>       return;
+>>
+>>
+>>     if (!check_access(mdr, ref, MAY_READ))
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
