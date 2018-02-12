@@ -1,84 +1,71 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2] ceph: minor cleanups of showing options
-Date: Mon, 12 Feb 2018 16:58:38 +0100
-Message-ID: <CAOi1vP9NOTMNVZgGvAf1OHXX4Ew+u67p3oUqqJsHXAD+BkotYw@mail.gmail.com>
-References: <1517925261-50747-1-git-send-email-cgxu519@icloud.com>
+From: Mike Christie <mchristi@redhat.com>
+Subject: Re: Supporting CEPH with VMware
+Date: Mon, 12 Feb 2018 12:27:30 -0600
+Message-ID: <5A81DC92.3090307@redhat.com>
+References: <20180212091834.A111.48078FD1@solarcom.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:46730 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932878AbeBLP6j (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Feb 2018 10:58:39 -0500
-Received: by mail-io0-f179.google.com with SMTP id k80so6398571ioe.13
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Feb 2018 07:58:39 -0800 (PST)
-In-Reply-To: <1517925261-50747-1-git-send-email-cgxu519@icloud.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:49798 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752003AbeBLS1b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Feb 2018 13:27:31 -0500
+In-Reply-To: <20180212091834.A111.48078FD1@solarcom.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chengguang Xu <cgxu519@icloud.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>
+To: Marat A Akhmetianov <vmm@solarcom.ch>, ceph-devel@vger.kernel.org
 
-On Tue, Feb 6, 2018 at 2:54 PM, Chengguang Xu <cgxu519@icloud.com> wrote:
-> Minor cleanups of showing options for mount and client.
->
-> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
-> ---
-> Changes since v1:
-> - Do not change comma seqence in ceph_print_client_options()
->  because there is another caller from different path.
->
->  fs/ceph/super.c        | 13 ++-----------
->  net/ceph/ceph_common.c |  3 +++
->  2 files changed, 5 insertions(+), 11 deletions(-)
->
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index bfc85b2..7f1e212 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -489,21 +489,12 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->  {
->         struct ceph_fs_client *fsc = ceph_sb_to_client(root->d_sb);
->         struct ceph_mount_options *fsopt = fsc->mount_options;
-> -       size_t pos;
->         int ret;
->
-> -       /* a comma between MNT/MS and client options */
-> -       seq_putc(m, ',');
-> -       pos = m->count;
-> -
->         ret = ceph_print_client_options(m, fsc->client);
->         if (ret)
->                 return ret;
->
-> -       /* retract our comma if no client options */
-> -       if (m->count == pos)
-> -               m->count--;
-> -
->         if (fsopt->flags & CEPH_MOUNT_OPT_DIRSTAT)
->                 seq_puts(m, ",dirstat");
->         if ((fsopt->flags & CEPH_MOUNT_OPT_RBYTES))
-> @@ -514,7 +505,7 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->                 seq_puts(m, ",nodcache");
->         if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
->                 if (fsopt->fscache_uniq)
-> -                       seq_printf(m, ",fsc=%s", fsopt->fscache_uniq);
-> +                       seq_show_option(m, "fsc", fsopt->fscache_uniq);
->                 else
->                         seq_puts(m, ",fsc");
->         }
-> @@ -529,7 +520,7 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->  #endif
->
->         if (fsopt->mds_namespace)
-> -               seq_printf(m, ",mds_namespace=%s", fsopt->mds_namespace);
-> +               seq_show_option(m, "mds_namespace", fsopt->mds_namespace);
->         if (fsopt->wsize)
->                 seq_printf(m, ",wsize=%d", fsopt->wsize);
->         if (fsopt->rsize != CEPH_MAX_READ_SIZE)
+On 02/12/2018 12:18 AM, Marat A Akhmetianov wrote:
+> Hi.
+> 
+> I recently asked VMware Support if they officially support CEPH as a Storage. They told us no, but we can ask CEPH team if you are supporting CEPH with VMware solutions. 
+> 
+> So, I have several questions:
+> 1) Does CEPH officially support VMware?
 
-I don't think changing the way commas work is worth it.  If you resend
-just the seq_printf -> seq_show_option bits, I'll take that patch.
+It does for iscsi, but there are limitations.
 
-Thanks,
+1. We do not yet support distributed PGRs, so the common setup of using
+windows clustering in vmware VMs, is not supported.
 
-                Ilya
+2. There is a issue with vsphere HA when sharing a LUN between multiple
+VMs and one loses their primary connection, but other VMs using the LUN
+do not:
+
+https://github.com/open-iscsi/tcmu-runner/issues/341
+
+Setup instructions are here:
+
+http://docs.ceph.com/docs/master/rbd/iscsi-initiator-esx/
+
+> 2) What use cases for CEPH as a Storage are the best for VMware: NFS or iSCSI? 	
+
+For iscsi, it is currently non initiator side HA type of workloads due
+to the issues mentioned in #1.
+
+> 3) Does CEPH with iSCSI work with VMware ESXi 6.0 and VMFS5 or only with ESXi 6.5 and VMFS6 (I found the link here that CEPH only supports ESXi 6.5 http://docs.ceph.com/docs/master/rbd/iscsi-target-cli/)?
+
+Like the doc says 6.5 and vmfs 6.
+
+
+> 4) Does iSCSI use case has the problem with 'Abort Task' loop that can cause targets to be restarted and some VMs crashing (here is the link http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-October/013610.html)?
+> 
+
+With ESXi 6.5 and vmfs 6 and using the config options described in the docs
+http://docs.ceph.com/docs/master/rbd/iscsi-requirements/
+http://docs.ceph.com/docs/master/rbd/iscsi-initiator-esx/
+and using gwcli then we have not seen it.
+
+However, we are hitting the CAW/ATS as heartbeat related hang mentioned
+on the target-devel list a while back:
+https://www.spinics.net/lists/target-devel/msg12071.html
+
+tcmu-runner issue for the same issue
+https://github.com/open-iscsi/tcmu-runner/issues/315.
+
+Internally, when using the ceph offloaded ATS/CAW feature or using the
+esx side VMFS3/UseATSForHBOnVMFS5 workaround we have not seen the issue.
+However, all the needed pieces for the offload feature are only in ceph
+v13 and up, and our QE team has not completed testing the offload
+feature with vmware yet.
