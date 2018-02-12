@@ -1,831 +1,1018 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Ceph Luminous - pg is down due to src/osd/SnapMapper.cc: 246:
- FAILED assert(r == -2)
-Date: Mon, 12 Feb 2018 12:58:54 +0100
-Message-ID: <87644c12-981a-f39d-c744-6073c3beb82c@profihost.ag>
-References: <a02d6d40-e4e7-5f9a-0f9a-b3939f376c70@profihost.ag>
- <28f90497-df9f-f628-835b-c6c75a752f66@profihost.ag>
- <alpine.DEB.2.11.1801181314130.8186@piezo.novalocal>
- <bed7d881-fa34-80fc-6611-99a5f43292fa@profihost.ag>
- <alpine.DEB.2.11.1801181424040.8186@piezo.novalocal>
- <8f1028e2-d322-0006-30c9-6f7f4922cb40@profihost.ag>
- <alpine.DEB.2.11.1801192018060.24931@piezo.novalocal>
- <bcac326d-8f5b-be5b-2ac5-d55573553e59@profihost.ag>
- <alpine.DEB.2.11.1801212022230.24931@piezo.novalocal>
- <ee4a5fa6-2765-5d84-4be5-b191869fcfda@profihost.ag>
- <alpine.DEB.2.11.1801221430010.24931@piezo.novalocal>
- <c7392c9a-699b-0405-2252-b4da25c3b700@profihost.ag>
- <alpine.DEB.2.11.1801221900510.19576@piezo.novalocal>
- <4f670be1-e730-f07c-c1c4-7be8e7ffce85@profihost.ag>
- <alpine.DEB.2.11.1802021923110.15996@piezo.novalocal>
- <0db57db6-8542-70ae-07d3-beb061a1a66c@profihost.ag>
- <alpine.DEB.2.11.1802022102290.15996@piezo.novalocal>
- <0edbd7e3-9607-4009-c475-237f514446e6@profihost.ag>
+From: kbuild test robot <fengguang.wu@intel.com>
+Subject: [ceph-client:wip-fancy-striping-testing 32/54]
+ drivers//block/rbd.c:1628:1: warning: control reaches end of non-void
+ function
+Date: Mon, 12 Feb 2018 20:56:45 +0800
+Message-ID: <201802122038.XXAcOEZF%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="yrj/dFKFPuw6o+aM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:40378 "EHLO
-        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932519AbeBLL65 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Feb 2018 06:58:57 -0500
-In-Reply-To: <0edbd7e3-9607-4009-c475-237f514446e6@profihost.ag>
-Content-Language: de-DE
+Received: from mga04.intel.com ([192.55.52.120]:48635 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933519AbeBLM4u (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Feb 2018 07:56:50 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, n.fahldieck@profihost.ag
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: kbuild-all@01.org, ceph-devel@vger.kernel.org
 
-Hi Sage,
 
-did you had any time to look at the logs?
+--yrj/dFKFPuw6o+aM
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Stefan
+tree:   https://github.com/ceph/ceph-client.git wip-fancy-striping-testing
+head:   d1166a1858df30a8f52bfca85fdc56e14aef3033
+commit: 46904a4e44ad096cbfaa77a5ad9934b996616995 [32/54] rbd: new request handling code
+config: cris-allmodconfig (attached as .config)
+compiler: cris-linux-gcc (GCC) 7.2.0
+reproduce:
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        git checkout 46904a4e44ad096cbfaa77a5ad9934b996616995
+        # save the attached .config to linux build tree
+        make.cross ARCH=cris 
 
-Am 05.02.2018 um 14:39 schrieb Stefan Priebe - Profihost AG:
-> Hi Sage,
-> 
-> Am 02.02.2018 um 22:05 schrieb Sage Weil:
->> On Fri, 2 Feb 2018, Stefan Priebe - Profihost AG wrote:
->>> Am 02.02.2018 um 20:28 schrieb Sage Weil:
->>>> On Fri, 2 Feb 2018, Stefan Priebe - Profihost AG wrote:
->>>>> Hi Sage,
->>>>>
->>>>> some days ago i reverted to stock luminous with
->>>>> https://github.com/liewegas/ceph/commit/e6a04446d21689ae131b0b683b4d76c7c30d8e6a
->>>>> +
->>>>> https://github.com/liewegas/ceph/commit/e17493bdffd7b9a349f377e7877fac741221edfa
->>>>> on top. I scrubbed and deep-scrubbed all pgs before and no errors were
->>>>> found.
->>>>>
->>>>> this worked fine until the ceph balancer runned and started remapping
->>>>> some pgs.
->>>>>
->>>>> This again trigged this assert:
->>>>>
->>>>> /build/ceph/src/osd/SnapMapper.cc: In function 'int
->>>>> SnapMapper::get_snaps(const hobject_t&, SnapMapper::object_snaps*)'
->>>>> thread 7f4289bff700 time 2018-02-02 17:46:33.249579
->>>>> /build/ceph/src/osd/SnapMapper.cc: 154: FAILED assert(!out->snaps.empty())
->>>>>
->>>>> Any idea how to fix it?
->>>>
->>>> Cheap workaround is to comment out that assert.  I'm still tryign to sort 
->>>
->>> Yes i did but i feel unconforable with it as the snapmapper value is
->>> still wrong.
->>>
->>>> out how this happened, though.  Not sure if you shared this already, but:
->>>> - bluestore or filestore?
->>>
->>> As i first reported it only filestore. Now also some bluestore OSDs.
->>>
->>>> - no cache tiering, right?  nowhere on the cluster?
->>> Yes and Yes. Never used cache tiering at all.
->>>
->>>> It looks like the SnapMapper entry with an empty snaps vector came in via 
->>>> add_oid() (update_oid() asserts if the new_snaps is empty; add_oid() 
->>>> doesn't have that check).  There are a few place it could come from, 
->>>> including the on_local_recover() call and the update_snap_map() call.  
->>>> That last one is interesting because it pulls the snaps for a new clone 
->>>> out of the pg log entry.. maybe those aren't getting populated properly.
->>>
->>> Is it also possible that they got corrupted in the past and now ceph is
->>> unable to detect it and repair it with a scrub or deep scrub?
->>>
->>>> Can you confirm that all of the OSDs on the cluster are running the
->>>> latest?  (ceph versions).
->>>
->>> Yes they do - i always check this after each update and i rechecked it
->>> again.
->>
->> Ok thanks!
->>
->> I pushed a branch wip-snapmapper-debug to github.com/liewegas/ceph that 
->> has those commits above plus another one that adds debug messages in the 
->> various places that the empty snap vectors might be coming from.
->>
->> This won't help it get past the rebalance issue you hit above, but 
->> hopefully it will trigger when you create a new clone so we can see how 
->> this is happening.
->>
->> If we need to, I think we can ignore the assert (by commenting it out), 
->> but one downside there is that we'll see my warnings pop up when 
->> recovering those objects so we won't be able to tell where they really 
->> came from. Since you were seeing this on new snaps/clones, though, I'm 
->> hoping we won't end up in that situation!
-> 
-> the biggest part of the logs is now this stuff:
-> 2018-02-05 07:56:32.712366 7fb6893ff700  0 log_channel(cluster) log
-> [DBG] : 3.740 scrub ok
-> 2018-02-05 08:00:16.033843 7fb68a7fe700 -1 osd.0 pg_epoch: 945191
-> pg[3.bbf( v 945191'63020848 (945191'63019283,945191'63020848]
-> local-lis/les=944620/944621 n=1612 ec=15/15 lis/c 944620/944620 les/c/f
-> 944621/944621/937357 944620/944620/944507) [51,54,0] r=2 lpr=944620
-> luod=0'0 crt=945191'63020848 lcod 945191'63020847 active] _scan_snaps no
-> head for 3:fdd87083:::rbd_data.67b0ee6b8b4567.00000000000103a1:b0d77
-> (have MIN)
-> 2018-02-05 08:00:42.123804 7fb6833ff700 -1 osd.0 pg_epoch: 945191
-> pg[3.bbf( v 945191'63020901 (945191'63019383,945191'63020901]
-> local-lis/les=944620/944621 n=1612 ec=15/15 lis/c 944620/944620 les/c/f
-> 944621/944621/937357 944620/944620/944507) [51,54,0] r=2 lpr=944620
-> luod=0'0 crt=945191'63020901 lcod 945191'63020900 active] _scan_snaps no
-> head for 3:fddb41cc:::rbd_data.9772fb6b8b4567.0000000000000380:b0d9f
-> (have MIN)
-> 2018-02-05 08:03:49.583574 7fb687bfe700 -1 osd.0 pg_epoch: 945191
-> pg[3.caa( v 945191'52090546 (945191'52088948,945191'52090546]
-> local-lis/les=944694/944695 n=1709 ec=15/15 lis/c 944694/944694 les/c/f
-> 944695/944697/937357 944694/944694/944653) [70,0,93] r=1 lpr=944694
-> luod=0'0 crt=945191'52090546 lcod 945191'52090545 active] _scan_snaps no
-> head for 3:5530360d:::rbd_data.52a6596b8b4567.0000000000000929:b0d55
-> (have MIN)
-> 2018-02-05 08:03:50.432394 7fb687bfe700 -1 osd.0 pg_epoch: 945191
-> pg[3.caa( v 945191'52090549 (945191'52089048,945191'52090549]
-> local-lis/les=944694/944695 n=1709 ec=15/15 lis/c 944694/944694 les/c/f
-> 944695/944697/937357 944694/944694/944653) [70,0,93] r=1 lpr=944694
-> luod=0'0 crt=945191'52090549 lcod 945191'52090548 active] _scan_snaps no
-> head for 3:553243fa:::rbd_data.67b0ee6b8b4567.0000000000009956:b0d77
-> (have MIN)
-> 2018-02-05 08:03:52.523643 7fb687bfe700 -1 osd.0 pg_epoch: 945191
-> pg[3.caa( v 945191'52090549 (945191'52089048,945191'52090549]
-> local-lis/les=944694/944695 n=1709 ec=15/15 lis/c 944694/944694 les/c/f
-> 944695/944697/937357 944694/944694/944653) [70,0,93] r=1 lpr=944694
-> luod=0'0 crt=945191'52090549 lcod 945191'52090548 active] _scan_snaps no
-> head for 3:5536f170:::rbd_data.c1a3d66b8b4567.000000000000b729:b0dc5
-> (have MIN)
-> 2018-02-05 08:03:55.471369 7fb687bfe700 -1 osd.0 pg_epoch: 945191
-> pg[3.caa( v 945191'52090549 (945191'52089048,945191'52090549]
-> local-lis/les=944694/944695 n=1709 ec=15/15 lis/c 944694/944694 les/c/f
-> 944695/944697/937357 944694/944694/944653) [70,0,93] r=1 lpr=944694
-> luod=0'0 crt=945191'52090549 lcod 945191'52090548 active] _scan_snaps no
-> head for 3:553d2114:::rbd_data.154a9e6b8b4567.0000000000001ea1:b0e4e
-> (have MIN)
-> 2018-02-05 08:08:55.440715 7fb687bfe700 -1 osd.0 pg_epoch: 945191
-> pg[3.7aa( v 945191'144763900 (945191'144762311,945191'144763900]
-> local-lis/les=944522/944523 n=1761 ec=15/15 lis/c 944522/944522 les/c/f
-> 944523/944551/937357 944522/944522/944522) [39,37,0] r=2 lpr=944522
-> luod=0'0 crt=945191'144763900 lcod 945191'144763899 active] _scan_snaps
-> no head for 3:55e14d0f:::rbd_data.67b0ee6b8b4567.00000000000025f2:b0d77
-> (have MIN)
-> 2018-02-05 08:09:09.295844 7fb68efff700 -1 osd.0 pg_epoch: 945191
-> pg[3.7aa( v 945191'144763970 (945191'144762411,945191'144763970]
-> local-lis/les=944522/944523 n=1761 ec=15/15 lis/c 944522/944522 les/c/f
-> 944523/944551/937357 944522/944522/944522) [39,37,0] r=2 lpr=944522
-> luod=0'0 crt=945191'144763970 lcod 945191'144763969 active] _scan_snaps
-> no head for 3:55e2d7a9:::rbd_data.e40a416b8b4567.000000000000576f:b0df3
-> (have MIN)
-> 2018-02-05 08:09:26.285493 7fb68efff700 -1 osd.0 pg_epoch: 945191
-> pg[3.7aa( v 945191'144764043 (945191'144762511,945191'144764043]
-> local-lis/les=944522/944523 n=1762 ec=15/15 lis/c 944522/944522 les/c/f
-> 944523/944551/937357 944522/944522/944522) [39,37,0] r=2 lpr=944522
-> luod=0'0 crt=945191'144764043 lcod 945191'144764042 active] _scan_snaps
-> no head for 3:55e4cbad:::rbd_data.163e9c96b8b4567.000000000000202d:b0d42
-> (have MIN)
-> 2018-02-05 08:10:36.490452 7fb687bfe700 -1 osd.0 pg_epoch: 945191
-> pg[3.7aa( v 945191'144764243 (945191'144762711,945191'144764243]
-> local-lis/les=944522/944523 n=1762 ec=15/15 lis/c 944522/944522 les/c/f
-> 944523/944551/937357 944522/944522/944522) [39,37,0] r=2 lpr=944522
-> luod=0'0 crt=945191'144764243 lcod 945191'144764242 active] _scan_snaps
-> no head for 3:55ece3c3:::rbd_data.e60f906b8b4567.00000000000000de:b0dd7
-> (have MIN)
-> 
-> Found nothing else in the looks until now. Should i search for more OSDs
-> or is this already something we should consider?
-> 
-> Stefan
-> 
->> Thanks!
->> sage
->>
->>
->>
->>  > 
->>> Stefan
->>>
->>>
->>>>>
->>>>> Greets,
->>>>> Stefan
->>>>>
->>>>> Am 22.01.2018 um 20:01 schrieb Sage Weil:
->>>>>> On Mon, 22 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>> Hi Sage,
->>>>>>>
->>>>>>> thanks! That one fixed it! Now i'm just waiting if the log ever stops
->>>>>>> telling me:
->>>>>>> 2018-01-22 19:48:44.204004 osd.45 [ERR] osd.45 found snap mapper error
->>>>>>> on pg 3.33e oid
->>>>>>> 3:7cc2e79f:::rbd_data.52ab946b8b4567.00000000000043fb:b0d7c snaps in
->>>>>>> mapper: , oi: b0d7c...repaired
->>>>>>>
->>>>>>> Currently it seems it does an endless repair and never ends.
->>>>>>
->>>>>> On many objects or the same object?
->>>>>>
->>>>>> sage
->>>>>>
->>>>>>>
->>>>>>> Greets,
->>>>>>> Stefan
->>>>>>> Am 22.01.2018 um 15:30 schrieb Sage Weil:
->>>>>>>> On Mon, 22 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>> Hi Sage,
->>>>>>>>>
->>>>>>>>> get_snaps returned the error as there are no snaps in the snapmapper. So
->>>>>>>>> it's OK to skip the assert.
->>>>>>>>>
->>>>>>>>> My biggest problem is now that i'm not able to run a scrub on all PGs to
->>>>>>>>> fix all those errors because in around 1-3% the osd seem to deadlock and
->>>>>>>>> needs to get killed to proceed.
->>>>>>>>
->>>>>>>> I believe this will fix it:
->>>>>>>>
->>>>>>>> https://github.com/liewegas/ceph/commit/wip-snapmapper
->>>>>>>>
->>>>>>>> Cherry-pick that and let me know?
->>>>>>>>
->>>>>>>> Thanks!
->>>>>>>> sage
->>>>>>>>
->>>>>>>>
->>>>>>>>>
->>>>>>>>> The log output is always:
->>>>>>>>>     -3> 2018-01-22 14:02:41.725678 7f10025fe700  0 log_channel(cluster)
->>>>>>>>> log [WRN] : slow request 141.951820 seconds old, received at
->>>>>>>>>  2018-01-22 14:00:19.773706: osd_repop(client.142132381.0:1310126 3.a65
->>>>>>>>> e927921/927902 3:a65be829:::rbd_data.4fbc586b8b4567.00000000
->>>>>>>>> 00000157:head v 927921'526559757) currently commit_sent
->>>>>>>>>     -2> 2018-01-22 14:02:41.725679 7f10025fe700  0 log_channel(cluster)
->>>>>>>>> log [WRN] : slow request 141.643853 seconds old, received at
->>>>>>>>>  2018-01-22 14:00:20.081674: osd_repop(client.139148241.0:15454227 3.ff7
->>>>>>>>> e927921/927798 3:eff12952:::rbd_data.2494d06b8b4567.0000000
->>>>>>>>> 00000147d:head v 927921'29105383) currently commit_sent
->>>>>>>>>     -1> 2018-01-22 14:02:41.725684 7f10025fe700  0 log_channel(cluster)
->>>>>>>>> log [WRN] : slow request 141.313220 seconds old, received at
->>>>>>>>>  2018-01-22 14:00:20.412307: osd_repop(client.138984198.0:82792023 3.de6
->>>>>>>>> e927921/927725 3:67b9dc7d:::rbd_data.7750506b8b4567.0000000
->>>>>>>>> 000000aff:head v 927921'164552063) currently commit_sent
->>>>>>>>>      0> 2018-01-22 14:02:42.426910 7f0fc23fe700 -1 *** Caught signal
->>>>>>>>> (Aborted) **
->>>>>>>>>  in thread 7f0fc23fe700 thread_name:tp_osd_tp
->>>>>>>>>
->>>>>>>>>  ceph version 12.2.2-94-g92923ef
->>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
->>>>>>>>>  1: (()+0xa4423c) [0x561d876ab23c]
->>>>>>>>>  2: (()+0xf890) [0x7f100b974890]
->>>>>>>>>  3: (pthread_cond_wait()+0xbf) [0x7f100b97104f]
->>>>>>>>>  4: (ObjectStore::apply_transactions(ObjectStore::Sequencer*,
->>>>>>>>> std::vector<ObjectStore::Transaction, std::allocator<ObjectStore::Tran
->>>>>>>>> saction> >&, Context*)+0x254) [0x561d8746ac54]
->>>>>>>>>  5: (ObjectStore::apply_transaction(ObjectStore::Sequencer*,
->>>>>>>>> ObjectStore::Transaction&&, Context*)+0x5c) [0x561d87199b2c]
->>>>>>>>>  6: (PG::_scan_snaps(ScrubMap&)+0x8f7) [0x561d871ebf77]
->>>>>>>>>  7: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
->>>>>>>>> unsigned int, ThreadPool::TPHandle&)+0x22f) [0x561d871ecc4f]
->>>>>>>>>  8: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>,
->>>>>>>>> ThreadPool::TPHandle&)+0x624) [0x561d871ed574]
->>>>>>>>>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
->>>>>>>>> ThreadPool::TPHandle&)+0x8b6) [0x561d872ac756]
->>>>>>>>>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
->>>>>>>>> [0x561d87138bc7]
->>>>>>>>>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
->>>>>>>>> const&)+0x57) [0x561d873b0db7]
->>>>>>>>>  12: (OSD::ShardedOpWQ::_process(unsigned int,
->>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x561d87167d1c]
->>>>>>>>>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
->>>>>>>>> [0x561d876f42bd]
->>>>>>>>>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561d876f6280]
->>>>>>>>>  15: (()+0x8064) [0x7f100b96d064]
->>>>>>>>>  16: (clone()+0x6d) [0x7f100aa6162d]
->>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>>>>>>> needed to interpret this.
->>>>>>>>>
->>>>>>>>> --- logging levels ---
->>>>>>>>>    0/ 5 none
->>>>>>>>>    0/ 0 lockdep
->>>>>>>>>    0/ 0 context
->>>>>>>>>    0/ 0 crush
->>>>>>>>>    0/ 0 mds
->>>>>>>>>    0/ 0 mds_balancer
->>>>>>>>>    0/ 0 mds_locker
->>>>>>>>>    0/ 0 mds_log
->>>>>>>>>    0/ 0 mds_log_expire
->>>>>>>>>    0/ 0 mds_migrator
->>>>>>>>>    0/ 0 buffer
->>>>>>>>>    0/ 0 timer
->>>>>>>>>    0/ 0 filer
->>>>>>>>>    0/ 1 striper
->>>>>>>>>    0/ 0 objecter
->>>>>>>>>    0/ 0 rados
->>>>>>>>>    0/ 0 rbd
->>>>>>>>>    0/ 5 rbd_mirror
->>>>>>>>>    0/ 5 rbd_replay
->>>>>>>>>    0/ 0 journaler
->>>>>>>>>    0/ 0 objectcacher
->>>>>>>>>    0/ 0 client
->>>>>>>>>    0/ 0 osd
->>>>>>>>>    0/ 0 optracker
->>>>>>>>>    0/ 0 objclass
->>>>>>>>>    0/ 0 filestore
->>>>>>>>>    0/ 0 journal
->>>>>>>>>    0/ 0 ms
->>>>>>>>>    0/ 0 mon
->>>>>>>>>    0/ 0 monc
->>>>>>>>>    0/ 0 paxos
->>>>>>>>>    0/ 0 tp
->>>>>>>>>    0/ 0 auth
->>>>>>>>>    1/ 5 crypto
->>>>>>>>>    0/ 0 finisher
->>>>>>>>>    1/ 1 reserver
->>>>>>>>>    0/ 0 heartbeatmap
->>>>>>>>>    0/ 0 perfcounter
->>>>>>>>>    0/ 0 rgw
->>>>>>>>>    1/10 civetweb
->>>>>>>>>    1/ 5 javaclient
->>>>>>>>>    0/ 0 asok
->>>>>>>>>    0/ 0 throttle
->>>>>>>>>    0/ 0 refs
->>>>>>>>>    1/ 5 xio
->>>>>>>>>    1/ 5 compressor
->>>>>>>>>    1/ 5 bluestore
->>>>>>>>>    1/ 5 bluefs
->>>>>>>>>    1/ 3 bdev
->>>>>>>>>    1/ 5 kstore
->>>>>>>>>    4/ 5 rocksdb
->>>>>>>>>    4/ 5 leveldb
->>>>>>>>>    4/ 5 memdb
->>>>>>>>>    1/ 5 kinetic
->>>>>>>>>    1/ 5 fuse
->>>>>>>>>    1/ 5 mgr
->>>>>>>>>    1/ 5 mgrc
->>>>>>>>>    1/ 5 dpdk
->>>>>>>>>    1/ 5 eventtrace
->>>>>>>>>   -2/-2 (syslog threshold)
->>>>>>>>>   -1/-1 (stderr threshold)
->>>>>>>>>   max_recent     10000
->>>>>>>>>   max_new         1000
->>>>>>>>>   log_file /var/log/ceph/ceph-osd.59.log
->>>>>>>>> --- end dump of recent events ---
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> Greets,
->>>>>>>>> Stefan
->>>>>>>>>
->>>>>>>>> Am 21.01.2018 um 21:27 schrieb Sage Weil:
->>>>>>>>>> On Fri, 19 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>> Hi Sage,
->>>>>>>>>>>
->>>>>>>>>>> thanks for your reply. I'll do this. What i still don't understand is
->>>>>>>>>>> the following and i hope you might have an idea:
->>>>>>>>>>> 1.) All the snaps mentioned here are fresh - i created them today
->>>>>>>>>>> running luminous? How can they be missing in snapmapper again?
->>>>>>>>>>
->>>>>>>>>> I'm not sure.  It might help if you can set debug_osd=1/10 (or 1/20) so 
->>>>>>>>>> that when you hit the crash we have some context as to what is going on.
->>>>>>>>>>
->>>>>>>>>> Did you track down which part of get_snaps() is returning the error?
->>>>>>>>>>
->>>>>>>>>>> 2.) How did this happen? The cluster was jewel and was updated to
->>>>>>>>>>> luminous when all this happened.
->>>>>>>>>>
->>>>>>>>>> Did this start right after the upgrade?
->>>>>>>>>>
->>>>>>>>>> I started a PR that relaxes some of these assertions so that they clean up 
->>>>>>>>>> instead (unless the debug option is enabled, for our regression testing), 
->>>>>>>>>> but I'm still unclear about what the inconsistency is... any loggin you 
->>>>>>>>>> can provide would help!
->>>>>>>>>>
->>>>>>>>>> Thanks-
->>>>>>>>>> sage
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> Greets,
->>>>>>>>>>> Stefan
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> Am 19.01.2018 um 21:19 schrieb Sage Weil:
->>>>>>>>>>>> I'm guessing it is coming from
->>>>>>>>>>>>
->>>>>>>>>>>>   object_snaps out;
->>>>>>>>>>>>   int r = get_snaps(oid, &out);
->>>>>>>>>>>>   if (r < 0)
->>>>>>>>>>>>     return r;
->>>>>>>>>>>>
->>>>>>>>>>>> in SnapMapper::update_snaps().  I would add a debug statement to to 
->>>>>>>>>>>> confirm that, and possibly also add debug lines to the various return 
->>>>>>>>>>>> points in get_snaps() so you can see why get_snaps is returning an error.
->>>>>>>>>>>>
->>>>>>>>>>>> I'm guessing the way to proceed is to warn but ignore the error, but it's 
->>>>>>>>>>>> hard to say without seeing what the inconsistency there is and whether we 
->>>>>>>>>>>> can tolerate it...
->>>>>>>>>>>>
->>>>>>>>>>>> sage
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> On Fri, 19 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>>
->>>>>>>>>>>>> HI Sage,
->>>>>>>>>>>>>
->>>>>>>>>>>>> any ideas for this one sawing while doing a deep scrub:
->>>>>>>>>>>>>
->>>>>>>>>>>>>     -1> 2018-01-19 21:14:20.474287 7fbcdeffe700 -1 osd.5 pg_epoch:
->>>>>>>>>>>>> 925542 pg[3.306( v 925542'78349255 (925334'78347749,925542'78349255]
->>>>>>>>>>>>> local-lis/les=925503/925504 n=1752 ec=15/15 lis/c 925503/925503 les/c/f
->>>>>>>>>>>>> 925504/925517/0 925503/925503/925503) [75,31,5] r=2 lpr=925503 luod=0'0
->>>>>>>>>>>>> crt=925542'78349255 lcod 925542'78349254 active] _scan_snaps no head for
->>>>>>>>>>>>> 3:60c0267d:::rbd_data.103fdc6b8b4567.0000000000004c8e:b0ce7 (have MIN)
->>>>>>>>>>>>>
->>>>>>>>>>>>>      0> 2018-01-19 21:14:20.477650 7fbcd3bfe700 -1
->>>>>>>>>>>>> /build/ceph/src/osd/PG.cc: In function 'void PG::update_snap_map(const
->>>>>>>>>>>>> std::vector<pg_log_entry_t>&, ObjectStore::Transaction&)' thread
->>>>>>>>>>>>> 7fbcd3bfe700 time 2018-01-19 21:14:20.474752
->>>>>>>>>>>>> /build/ceph/src/osd/PG.cc: 3420: FAILED assert(r == 0)
->>>>>>>>>>>>>
->>>>>>>>>>>>>  ceph version 12.2.2-94-g92923ef
->>>>>>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
->>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->>>>>>>>>>>>> const*)+0x102) [0x55c0100d0372]
->>>>>>>>>>>>>  2: (PG::update_snap_map(std::vector<pg_log_entry_t,
->>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
->>>>>>>>>>>>> anObjectStore::Transaction&)+0x3a5) [0x55c00fbcfe35]
->>>>>>>>>>>>>  3: (PG::append_log(std::vector<pg_log_entry_t,
->>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
->>>>>>>>>>>>> ObjectStore::Transaction&, bool)+0x540) [0x55c00fbf5fc0]
->>>>>>>>>>>>>  4: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
->>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
->>>>>>>>>>>>> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
->>>>>>>>>>>>> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x55c00fceaeb4]
->>>>>>>>>>>>>  5: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
->>>>>>>>>>>>> [0x55c00fdf6642]
->>>>>>>>>>>>>  6:
->>>>>>>>>>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
->>>>>>>>>>>>> [0x55c00fdfc684]
->>>>>>>>>>>>>  7: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
->>>>>>>>>>>>> [0x55c00fd22030]
->>>>>>>>>>>>>  8: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
->>>>>>>>>>>>> ThreadPool::TPHandle&)+0x77b) [0x55c00fc8e33b]
->>>>>>>>>>>>>  9: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
->>>>>>>>>>>>> [0x55c00fb1abc7]
->>>>>>>>>>>>>  10: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
->>>>>>>>>>>>> const&)+0x57) [0x55c00fd92ad7]
->>>>>>>>>>>>>  11: (OSD::ShardedOpWQ::_process(unsigned int,
->>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x55c00fb49d1c]
->>>>>>>>>>>>>  12: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
->>>>>>>>>>>>> [0x55c0100d5ffd]
->>>>>>>>>>>>>  13: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55c0100d7fc0]
->>>>>>>>>>>>>  14: (()+0x8064) [0x7fbd284fb064]
->>>>>>>>>>>>>  15: (clone()+0x6d) [0x7fbd275ef62d]
->>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>>>>>>>>>>> needed to interpret this.
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>> Stefan
->>>>>>>>>>>>>
->>>>>>>>>>>>> Am 18.01.2018 um 15:24 schrieb Sage Weil:
->>>>>>>>>>>>>> On Thu, 18 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>>>>> Hi Sage,
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>> Am 18.01.2018 um 14:16 schrieb Sage Weil:
->>>>>>>>>>>>>>>> On Thu, 18 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>>>>>>> Hi,
->>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>> it also crashes in (marked with HERE):
->>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>> int SnapMapper::get_snaps(
->>>>>>>>>>>>>>>>>   const hobject_t &oid,
->>>>>>>>>>>>>>>>>   object_snaps *out)
->>>>>>>>>>>>>>>>> {
->>>>>>>>>>>>>>>>>   assert(check(oid));
->>>>>>>>>>>>>>>>>   set<string> keys;
->>>>>>>>>>>>>>>>>   map<string, bufferlist> got;
->>>>>>>>>>>>>>>>>   keys.insert(to_object_key(oid));
->>>>>>>>>>>>>>>>>   int r = backend.get_keys(keys, &got);
->>>>>>>>>>>>>>>>>   if (r < 0)
->>>>>>>>>>>>>>>>>     return r;
->>>>>>>>>>>>>>>>>   if (got.empty())
->>>>>>>>>>>>>>>>>     return -ENOENT;
->>>>>>>>>>>>>>>>>   if (out) {
->>>>>>>>>>>>>>>>>     bufferlist::iterator bp = got.begin()->second.begin();
->>>>>>>>>>>>>>>>>     ::decode(*out, bp);
->>>>>>>>>>>>>>>>>     dout(20) << __func__ << " " << oid << " " << out->snaps << dendl;
->>>>>>>>>>>>>>>>>     assert(!out->snaps.empty());            ########### HERE ###########
->>>>>>>>>>>>>>>>>   } else {
->>>>>>>>>>>>>>>>>     dout(20) << __func__ << " " << oid << " (out == NULL)" << dendl;
->>>>>>>>>>>>>>>>>   }
->>>>>>>>>>>>>>>>>   return 0;
->>>>>>>>>>>>>>>>> }
->>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>> is it save to comment that assert?
->>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>> I think so.  All of these asserts are just about ensuring the snapmapper 
->>>>>>>>>>>>>>>> state is consistent, and it's only purpose is to find snaps to trim.  
->>>>>>>>>>>>>>>> Since your snapmapper metadata is clearly not consistent, there isn't a 
->>>>>>>>>>>>>>>> whole lot of risk here.  You might want to set nosnaptrim for the time 
->>>>>>>>>>>>>>>> being so you don't get a surprise if trimming kicks in.  The next step is 
->>>>>>>>>>>>>>>> probably going to be to do a scrub and see what it finds, repairs, or 
->>>>>>>>>>>>>>>> can't repair.
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>> snap trimming works fine i already trimmed and removed some snaps.
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>> I was able to get the cluster into a state where all is backfilled. But
->>>>>>>>>>>>>>> enabling / doing deep-scrubs results into this one:
->>>>>>>>>>>>>>>      0> 2018-01-18 13:00:54.843076 7fbd253ff700 -1
->>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: In function 'int
->>>>>>>>>>>>>>> SnapMapper::get_snaps(const h
->>>>>>>>>>>>>>> object_t&, SnapMapper::object_snaps*)' thread 7fbd253ff700 time
->>>>>>>>>>>>>>> 2018-01-18 13:00:54.840396
->>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: 154: FAILED assert(!out->snaps.empty())
->>>>>>>>>>>>>>
->>>>>>>>>>>>>> I think if you switch that assert to a warning it will repair...
->>>>>>>>>>>>>>
->>>>>>>>>>>>>> sage
->>>>>>>>>>>>>>
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>  ceph version 12.2.2-94-g92923ef
->>>>>>>>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
->>>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->>>>>>>>>>>>>>> const*)+0x102) [0x5561ce28d1f2]
->>>>>>>>>>>>>>>  2: (SnapMapper::get_snaps(hobject_t const&,
->>>>>>>>>>>>>>> SnapMapper::object_snaps*)+0x46b) [0x5561cdef755b]
->>>>>>>>>>>>>>>  3: (SnapMapper::get_snaps(hobject_t const&, std::set<snapid_t,
->>>>>>>>>>>>>>> std::less<snapid_t>, std::allocator<snapid_t> >*)+0xd7) [0x5561cdef7
->>>>>>>>>>>>>>> 697]
->>>>>>>>>>>>>>>  4: (PG::_scan_snaps(ScrubMap&)+0x692) [0x5561cdd8ad22]
->>>>>>>>>>>>>>>  5: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
->>>>>>>>>>>>>>> unsigned int, ThreadPool::TPHandle&)+0x22f) [0x5561cdd8bc5f]
->>>>>>>>>>>>>>>  6: (PG::replica_scrub(boost::intrusive_ptr<OpRequest>,
->>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x624) [0x5561cdd8c584]
->>>>>>>>>>>>>>>  7: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
->>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x8b6) [0x5561cde4b326]
->>>>>>>>>>>>>>>  8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->>>>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
->>>>>>>>>>>>>>> [0x5561cdcd7bc7]
->>>>>>>>>>>>>>>  9: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
->>>>>>>>>>>>>>> const&)+0x57) [0x5561cdf4f957]
->>>>>>>>>>>>>>>  10: (OSD::ShardedOpWQ::_process(unsigned int,
->>>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x5561cdd06d1c]
->>>>>>>>>>>>>>>  11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
->>>>>>>>>>>>>>> [0x5561ce292e7d]
->>>>>>>>>>>>>>>  12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x5561ce294e40]
->>>>>>>>>>>>>>>  13: (()+0x8064) [0x7fbd70d86064]
->>>>>>>>>>>>>>>  14: (clone()+0x6d) [0x7fbd6fe7a62d]
->>>>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>>>>>>>>>>>>> needed to interpret this.
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>> Greets,
->>>>>>>>>>>>>>> Stefan
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>> sage
->>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>> Stefan
->>>>>>>>>>>>>>>>> Am 17.01.2018 um 19:56 schrieb Sage Weil:
->>>>>>>>>>>>>>>>>> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>> Am 17.01.2018 um 19:48 schrieb Sage Weil:
->>>>>>>>>>>>>>>>>>>> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>>>>>>>>>>> Hi Sage,
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>> this gives me another crash while that pg is recovering:
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>      0> 2018-01-17 19:25:09.328935 7f48f8fff700 -1
->>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/PrimaryLogPG.cc: In function 'virtual void
->>>>>>>>>>>>>>>>>>>>> PrimaryLogPG::on_l
->>>>>>>>>>>>>>>>>>>>> ocal_recover(const hobject_t&, const ObjectRecoveryInfo&,
->>>>>>>>>>>>>>>>>>>>> ObjectContextRef, bool, ObjectStore::Transaction*)' thread 7f48f8fff700 ti
->>>>>>>>>>>>>>>>>>>>> me 2018-01-17 19:25:09.322287
->>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/PrimaryLogPG.cc: 358: FAILED assert(p !=
->>>>>>>>>>>>>>>>>>>>> recovery_info.ss.clone_snaps.end())
->>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>> Is this a cache tiering pool?
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>> no normal 3 replica but the pg is degraded:
->>>>>>>>>>>>>>>>>>> ceph pg dump | grep 3.80e
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>> 3.80e      1709                  0     1579         0       0 6183674368
->>>>>>>>>>>>>>>>>>> 10014    10014 active+undersized+degraded+remapped+backfill_wait
->>>>>>>>>>>>>>>>>>> 2018-01-17 19:42:55.840884  918403'70041375  918403:77171331 [50,54,86]
->>>>>>>>>>>>>>>>>>>        50       [39]             39  907737'69776430 2018-01-14
->>>>>>>>>>>>>>>>>>> 22:19:54.110864  907737'69776430 2018-01-14 22:19:54.110864
->>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>> Hrm, no real clues on teh root cause then.  Something like this will work 
->>>>>>>>>>>>>>>>>> around the current assert:
->>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>> diff --git a/src/osd/PrimaryLogPG.cc b/src/osd/PrimaryLogPG.cc
->>>>>>>>>>>>>>>>>> index d42f3a401b..0f76134f74 100644
->>>>>>>>>>>>>>>>>> --- a/src/osd/PrimaryLogPG.cc
->>>>>>>>>>>>>>>>>> +++ b/src/osd/PrimaryLogPG.cc
->>>>>>>>>>>>>>>>>> @@ -372,8 +372,11 @@ void PrimaryLogPG::on_local_recover(
->>>>>>>>>>>>>>>>>>      set<snapid_t> snaps;
->>>>>>>>>>>>>>>>>>      dout(20) << " snapset " << recovery_info.ss << dendl;
->>>>>>>>>>>>>>>>>>      auto p = recovery_info.ss.clone_snaps.find(hoid.snap);
->>>>>>>>>>>>>>>>>> -    assert(p != recovery_info.ss.clone_snaps.end());  // hmm, should we warn?
->>>>>>>>>>>>>>>>>> -    snaps.insert(p->second.begin(), p->second.end());
->>>>>>>>>>>>>>>>>> +    if (p != recovery_info.ss.clone_snaps.end()) {
->>>>>>>>>>>>>>>>>> +      derr << __func__ << " no clone_snaps for " << hoid << dendl;
->>>>>>>>>>>>>>>>>> +    } else {
->>>>>>>>>>>>>>>>>> +      snaps.insert(p->second.begin(), p->second.end());
->>>>>>>>>>>>>>>>>> +    }
->>>>>>>>>>>>>>>>>>      dout(20) << " snaps " << snaps << dendl;
->>>>>>>>>>>>>>>>>>      snap_mapper.add_oid(
->>>>>>>>>>>>>>>>>>        recovery_info.soid,
->>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>> Stefan
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>> s
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>  ceph version 12.2.2-94-g92923ef
->>>>>>>>>>>>>>>>>>>>> (92923ef323d32d8321e86703ce1f9016f19472fb) luminous (stable)
->>>>>>>>>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->>>>>>>>>>>>>>>>>>>>> const*)+0x102) [0x55addb5eb1f2]
->>>>>>>>>>>>>>>>>>>>>  2: (PrimaryLogPG::on_local_recover(hobject_t const&, ObjectRecoveryInfo
->>>>>>>>>>>>>>>>>>>>> const&, std::shared_ptr<ObjectContext>, bool,
->>>>>>>>>>>>>>>>>>>>> ObjectStore::Transaction*)+0x11f0) [0x55addb1957a0]
->>>>>>>>>>>>>>>>>>>>>  3: (ReplicatedBackend::handle_push(pg_shard_t, PushOp const&,
->>>>>>>>>>>>>>>>>>>>> PushReplyOp*, ObjectStore::Transaction*)+0x31d) [0x55addb3071ed]
->>>>>>>>>>>>>>>>>>>>>  4: (ReplicatedBackend::_do_push(boost::intrusive_ptr<OpRequest>)+0x18f)
->>>>>>>>>>>>>>>>>>>>> [0x55addb30748f]
->>>>>>>>>>>>>>>>>>>>>  5:
->>>>>>>>>>>>>>>>>>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2d1)
->>>>>>>>>>>>>>>>>>>>> [0x55addb317531]
->>>>>>>>>>>>>>>>>>>>>  6: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
->>>>>>>>>>>>>>>>>>>>> [0x55addb23cf10]
->>>>>>>>>>>>>>>>>>>>>  7: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
->>>>>>>>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x77b) [0x55addb1a91eb]
->>>>>>>>>>>>>>>>>>>>>  8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->>>>>>>>>>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
->>>>>>>>>>>>>>>>>>>>> [0x55addb035bc7]
->>>>>>>>>>>>>>>>>>>>>  9: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
->>>>>>>>>>>>>>>>>>>>> const&)+0x57) [0x55addb2ad957]
->>>>>>>>>>>>>>>>>>>>>  10: (OSD::ShardedOpWQ::_process(unsigned int,
->>>>>>>>>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x55addb064d1c]
->>>>>>>>>>>>>>>>>>>>>  11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
->>>>>>>>>>>>>>>>>>>>> [0x55addb5f0e7d]
->>>>>>>>>>>>>>>>>>>>>  12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55addb5f2e40]
->>>>>>>>>>>>>>>>>>>>>  13: (()+0x8064) [0x7f4955b68064]
->>>>>>>>>>>>>>>>>>>>>  14: (clone()+0x6d) [0x7f4954c5c62d]
->>>>>>>>>>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>>>>>>>>>>>>>>>>>>> needed to interpret this.
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>> Greets,
->>>>>>>>>>>>>>>>>>>>> Stefan
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>> Am 17.01.2018 um 15:28 schrieb Sage Weil:
->>>>>>>>>>>>>>>>>>>>>> On Wed, 17 Jan 2018, Stefan Priebe - Profihost AG wrote:
->>>>>>>>>>>>>>>>>>>>>>> Hi,
->>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>> i there any chance to fix this instead of removing manually all the clones?
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>> I believe you can avoid the immediate problem and get the PG up by 
->>>>>>>>>>>>>>>>>>>>>> commenting out the assert.  set_snaps() will overwrite the object->snap 
->>>>>>>>>>>>>>>>>>>>>> list mapping.
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>> The problem is you'll probably still a stray snapid -> object mapping, so 
->>>>>>>>>>>>>>>>>>>>>> when snaptrimming runs you might end up with a PG in the snaptrim_error 
->>>>>>>>>>>>>>>>>>>>>> state that won't trim (although from a quick look at the code it won't 
->>>>>>>>>>>>>>>>>>>>>> crash).  I'd probably remove the assert and deal with that if/when it 
->>>>>>>>>>>>>>>>>>>>>> happens.
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>> I'm adding a ticket to relax these asserts for production but keep them 
->>>>>>>>>>>>>>>>>>>>>> enabled for qa.  This isn't something that needs to take down the OSD!
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>> sage
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>  > 
->>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>> Stefan
->>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>> Am 16.01.2018 um 23:24 schrieb Gregory Farnum:
->>>>>>>>>>>>>>>>>>>>>>>> On Mon, Jan 15, 2018 at 5:23 PM, Stefan Priebe - Profihost AG
->>>>>>>>>>>>>>>>>>>>>>>> <s.priebe@profihost.ag> wrote:
->>>>>>>>>>>>>>>>>>>>>>>>> Hello,
->>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>> currently one of my clusters is missing a whole pg due to all 3 osds
->>>>>>>>>>>>>>>>>>>>>>>>> being down.
->>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>> All of them fail with:
->>>>>>>>>>>>>>>>>>>>>>>>>     0> 2018-01-16 02:05:33.353293 7f944dbfe700 -1
->>>>>>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: In function 'void
->>>>>>>>>>>>>>>>>>>>>>>>> SnapMapper::add_oid(const hobject_t&, const std::set<snapid_t>&,
->>>>>>>>>>>>>>>>>>>>>>>>> MapCacher::Transaction<std::basic_string<char>, ceph::buffer::list>*)'
->>>>>>>>>>>>>>>>>>>>>>>>> thread 7f944dbfe700 time 2018-01-16 02:05:33.349946
->>>>>>>>>>>>>>>>>>>>>>>>> /build/ceph/src/osd/SnapMapper.cc: 246: FAILED assert(r == -2)
->>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>  ceph version 12.2.2-93-gd6da8d7
->>>>>>>>>>>>>>>>>>>>>>>>> (d6da8d77a4b2220e6bdd61e4bdd911a9cd91946c) luminous (stable)
->>>>>>>>>>>>>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->>>>>>>>>>>>>>>>>>>>>>>>> const*)+0x102) [0x561f9ff0b1e2]
->>>>>>>>>>>>>>>>>>>>>>>>>  2: (SnapMapper::add_oid(hobject_t const&, std::set<snapid_t,
->>>>>>>>>>>>>>>>>>>>>>>>> std::less<snapid_t>, std::allocator<snapid_t> > const&,
->>>>>>>>>>>>>>>>>>>>>>>>> MapCacher::Transaction<std::string, ceph::buffer::list>*)+0x64b)
->>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fb76f3b]
->>>>>>>>>>>>>>>>>>>>>>>>>  3: (PG::update_snap_map(std::vector<pg_log_entry_t,
->>>>>>>>>>>>>>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
->>>>>>>>>>>>>>>>>>>>>>>>> ObjectStore::Transaction&)+0x38f) [0x561f9fa0ae3f]
->>>>>>>>>>>>>>>>>>>>>>>>>  4: (PG::append_log(std::vector<pg_log_entry_t,
->>>>>>>>>>>>>>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&, eversion_t, eversion_t,
->>>>>>>>>>>>>>>>>>>>>>>>> ObjectStore::Transaction&, bool)+0x538) [0x561f9fa31018]
->>>>>>>>>>>>>>>>>>>>>>>>>  5: (PrimaryLogPG::log_operation(std::vector<pg_log_entry_t,
->>>>>>>>>>>>>>>>>>>>>>>>> std::allocator<pg_log_entry_t> > const&,
->>>>>>>>>>>>>>>>>>>>>>>>> boost::optional<pg_hit_set_history_t> const&, eversion_t const&,
->>>>>>>>>>>>>>>>>>>>>>>>> eversion_t const&, bool, ObjectStore::Transaction&)+0x64) [0x561f9fb25d64]
->>>>>>>>>>>>>>>>>>>>>>>>>  6: (ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)+0xa92)
->>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fc314b2]
->>>>>>>>>>>>>>>>>>>>>>>>>  7:
->>>>>>>>>>>>>>>>>>>>>>>>> (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2a4)
->>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fc374f4]
->>>>>>>>>>>>>>>>>>>>>>>>>  8: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
->>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9fb5cf10]
->>>>>>>>>>>>>>>>>>>>>>>>>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
->>>>>>>>>>>>>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x77b) [0x561f9fac91eb]
->>>>>>>>>>>>>>>>>>>>>>>>>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->>>>>>>>>>>>>>>>>>>>>>>>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f7)
->>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9f955bc7]
->>>>>>>>>>>>>>>>>>>>>>>>>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
->>>>>>>>>>>>>>>>>>>>>>>>> const&)+0x57) [0x561f9fbcd947]
->>>>>>>>>>>>>>>>>>>>>>>>>  12: (OSD::ShardedOpWQ::_process(unsigned int,
->>>>>>>>>>>>>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x108c) [0x561f9f984d1c]
->>>>>>>>>>>>>>>>>>>>>>>>>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x88d)
->>>>>>>>>>>>>>>>>>>>>>>>> [0x561f9ff10e6d]
->>>>>>>>>>>>>>>>>>>>>>>>>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x561f9ff12e30]
->>>>>>>>>>>>>>>>>>>>>>>>>  15: (()+0x8064) [0x7f949afcb064]
->>>>>>>>>>>>>>>>>>>>>>>>>  16: (clone()+0x6d) [0x7f949a0bf62d]
->>>>>>>>>>>>>>>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>>>>>>>>>>>>>>>>>>>>>>> needed to interpret this.
->>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>> By the time it gets there, something else has gone wrong. The OSD is
->>>>>>>>>>>>>>>>>>>>>>>> adding a snapid/object pair to its "SnapMapper", and discovering that
->>>>>>>>>>>>>>>>>>>>>>>> there are already entries (which it thinks there shouldn't be).
->>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>> You'll need to post more of a log, along with background, if anybody's
->>>>>>>>>>>>>>>>>>>>>>>> going to diagnose it: is there cache tiering on the cluster? What is
->>>>>>>>>>>>>>>>>>>>>>>> this pool used for? Were there other errors on this PG in the past?
->>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>> I also notice a separate email about deleting the data; I don't have
->>>>>>>>>>>>>>>>>>>>>>>> any experience with this but you'd probably have to export the PG
->>>>>>>>>>>>>>>>>>>>>>>> using ceph-objectstore-tool and then find a way to delete the object
->>>>>>>>>>>>>>>>>>>>>>>> out of it. I see options to remove both an object and
->>>>>>>>>>>>>>>>>>>>>>>> "remove-clone-metadata" on a particular ID, but I've not used any of
->>>>>>>>>>>>>>>>>>>>>>>> them myself.
->>>>>>>>>>>>>>>>>>>>>>>> -Greg
->>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>> --
->>>>>>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>> --
->>>>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>> --
->>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>> --
->>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>> --
->>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>
->>>>>>>>>>>>> --
->>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>> --
->>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>
->>>>>>>
->>>>>
->>>>>
->>>
->>>
+All warnings (new ones prefixed by >>):
+
+   drivers//block/rbd.c: In function 'rbd_img_is_write':
+>> drivers//block/rbd.c:1628:1: warning: control reaches end of non-void function [-Wreturn-type]
+    }
+    ^
+   drivers//block/rbd.c: In function '__rbd_obj_handle_request':
+   drivers//block/rbd.c:3334:1: warning: control reaches end of non-void function [-Wreturn-type]
+    }
+    ^
+   drivers//block/rbd.c: In function 'rbd_obj_handle_write':
+   drivers//block/rbd.c:3309:1: warning: control reaches end of non-void function [-Wreturn-type]
+    }
+    ^
+   At top level:
+   drivers//block/rbd.c:1750:13: warning: 'rbd_osd_call_callback' defined but not used [-Wunused-function]
+    static void rbd_osd_call_callback(struct rbd_obj_request *obj_request)
+                ^~~~~~~~~~~~~~~~~~~~~
+   drivers//block/rbd.c:1744:13: warning: 'rbd_osd_stat_callback' defined but not used [-Wunused-function]
+    static void rbd_osd_stat_callback(struct rbd_obj_request *obj_request)
+                ^~~~~~~~~~~~~~~~~~~~~
+   drivers//block/rbd.c:1725:13: warning: 'rbd_osd_discard_callback' defined but not used [-Wunused-function]
+    static void rbd_osd_discard_callback(struct rbd_obj_request *obj_request)
+                ^~~~~~~~~~~~~~~~~~~~~~~~
+   drivers//block/rbd.c:1713:13: warning: 'rbd_osd_write_callback' defined but not used [-Wunused-function]
+    static void rbd_osd_write_callback(struct rbd_obj_request *obj_request)
+                ^~~~~~~~~~~~~~~~~~~~~~
+   drivers//block/rbd.c:1689:13: warning: 'rbd_osd_read_callback' defined but not used [-Wunused-function]
+    static void rbd_osd_read_callback(struct rbd_obj_request *obj_request)
+                ^~~~~~~~~~~~~~~~~~~~~
+   drivers//block/rbd.c: In function 'rbd_obj_read_from_parent':
+>> drivers//block/rbd.c:2971:5: warning: 'ret' may be used uninitialized in this function [-Wmaybe-uninitialized]
+     if (ret) {
+        ^
+
+vim +1628 drivers//block/rbd.c
+
+  1616	
+  1617	static bool rbd_img_is_write(struct rbd_img_request *img_req)
+  1618	{
+  1619		switch (rbd_img_request_op_type(img_req)) {
+  1620		case OBJ_OP_READ:
+  1621			return false;
+  1622		case OBJ_OP_WRITE:
+  1623		case OBJ_OP_DISCARD:
+  1624			return true;
+  1625		default:
+  1626			rbd_assert(0);
+  1627		}
+> 1628	}
+  1629	
+  1630	static void
+  1631	rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
+  1632	{
+  1633		u64 xferred = obj_request->xferred;
+  1634		u64 length = obj_request->length;
+  1635	
+  1636		dout("%s: obj %p img %p result %d %llu/%llu\n", __func__,
+  1637			obj_request, obj_request->img_request, obj_request->result,
+  1638			xferred, length);
+  1639		/*
+  1640		 * ENOENT means a hole in the image.  We zero-fill the entire
+  1641		 * length of the request.  A short read also implies zero-fill
+  1642		 * to the end of the request.  An error requires the whole
+  1643		 * length of the request to be reported finished with an error
+  1644		 * to the block layer.  In each case we update the xferred
+  1645		 * count to indicate the whole request was satisfied.
+  1646		 */
+  1647		rbd_assert(obj_request->type != OBJ_REQUEST_NODATA);
+  1648		if (obj_request->result == -ENOENT) {
+  1649			if (obj_request->type == OBJ_REQUEST_BIO)
+  1650				zero_bios(&obj_request->bio_pos, 0, length);
+  1651			else
+  1652				zero_bvecs(&obj_request->bvec_pos, 0, length);
+  1653			obj_request->result = 0;
+  1654		} else if (xferred < length && !obj_request->result) {
+  1655			if (obj_request->type == OBJ_REQUEST_BIO)
+  1656				zero_bios(&obj_request->bio_pos, xferred,
+  1657					  length - xferred);
+  1658			else
+  1659				zero_bvecs(&obj_request->bvec_pos, xferred,
+  1660					   length - xferred);
+  1661		}
+  1662		obj_request->xferred = length;
+  1663		obj_request_done_set(obj_request);
+  1664	}
+  1665	
+  1666	static void rbd_obj_request_complete(struct rbd_obj_request *obj_request)
+  1667	{
+  1668		dout("%s: obj %p cb %p\n", __func__, obj_request,
+  1669			obj_request->callback);
+  1670		obj_request->callback(obj_request);
+  1671	}
+  1672	
+  1673	static void rbd_obj_request_error(struct rbd_obj_request *obj_request, int err)
+  1674	{
+  1675		obj_request->result = err;
+  1676		obj_request->xferred = 0;
+  1677		/*
+  1678		 * kludge - mirror rbd_obj_request_submit() to match a put in
+  1679		 * rbd_img_obj_callback()
+  1680		 */
+  1681		if (obj_request_img_data_test(obj_request)) {
+  1682			WARN_ON(obj_request->callback != rbd_img_obj_callback);
+  1683			rbd_img_request_get(obj_request->img_request);
+  1684		}
+  1685		obj_request_done_set(obj_request);
+  1686		rbd_obj_request_complete(obj_request);
+  1687	}
+  1688	
+  1689	static void rbd_osd_read_callback(struct rbd_obj_request *obj_request)
+  1690	{
+  1691		struct rbd_img_request *img_request = NULL;
+  1692		struct rbd_device *rbd_dev = NULL;
+  1693		bool layered = false;
+  1694	
+  1695		if (obj_request_img_data_test(obj_request)) {
+  1696			img_request = obj_request->img_request;
+  1697			layered = img_request && img_request_layered_test(img_request);
+  1698			rbd_dev = img_request->rbd_dev;
+  1699		}
+  1700	
+  1701		dout("%s: obj %p img %p result %d %llu/%llu\n", __func__,
+  1702			obj_request, img_request, obj_request->result,
+  1703			obj_request->xferred, obj_request->length);
+  1704		if (layered && obj_request->result == -ENOENT &&
+  1705				obj_request->img_offset < rbd_dev->parent_overlap)
+  1706			rbd_img_parent_read(obj_request);
+  1707		else if (img_request)
+  1708			rbd_img_obj_request_read_callback(obj_request);
+  1709		else
+  1710			obj_request_done_set(obj_request);
+  1711	}
+  1712	
+> 1713	static void rbd_osd_write_callback(struct rbd_obj_request *obj_request)
+  1714	{
+  1715		dout("%s: obj %p result %d %llu\n", __func__, obj_request,
+  1716			obj_request->result, obj_request->length);
+  1717		/*
+  1718		 * There is no such thing as a successful short write.  Set
+  1719		 * it to our originally-requested length.
+  1720		 */
+  1721		obj_request->xferred = obj_request->length;
+  1722		obj_request_done_set(obj_request);
+  1723	}
+  1724	
+
+---
+0-DAY kernel test infrastructure                Open Source Technology Center
+https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+
+--yrj/dFKFPuw6o+aM
+Content-Type: application/gzip
+Content-Disposition: attachment; filename=".config.gz"
+Content-Transfer-Encoding: base64
+
+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
+5r4CAA==
+
+--yrj/dFKFPuw6o+aM--
