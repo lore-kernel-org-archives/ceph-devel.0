@@ -1,46 +1,31 @@
-From: Chengguang Xu <cgxu519@icloud.com>
-Subject: osdmap consistency during incremental applying in kernel client
-Date: Mon, 12 Feb 2018 12:05:51 +0800
-Message-ID: <302D379F-727B-489C-B257-633CF16577C8@icloud.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Content-Type: text/plain; charset=gb2312
-Content-Transfer-Encoding: quoted-printable
+From: Marat A Akhmetianov <vmm@solarcom.ch>
+Subject: Supporting CEPH with VMware
+Date: Mon, 12 Feb 2018 09:18:35 +0300
+Message-ID: <20180212091834.A111.48078FD1@solarcom.ch>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pv33p36im-asmtp001.me.com ([17.142.213.62]:60707 "EHLO
-        pv33p36im-asmtp001.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932477AbeBLEF6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Feb 2018 23:05:58 -0500
-Received: from process-dkim-sign-daemon.pv33p36im-asmtp001.me.com by
- pv33p36im-asmtp001.me.com
- (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
- 2017)) id <0P4000A00R3JZN00@pv33p36im-asmtp001.me.com> for
- ceph-devel@vger.kernel.org; Mon, 12 Feb 2018 04:05:55 +0000 (GMT)
-Received: from icloud.com ([127.0.0.1]) by pv33p36im-asmtp001.me.com
- (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
- 2017)) with ESMTPSA id <0P4000I5LRDR1O20@pv33p36im-asmtp001.me.com> for
- ceph-devel@vger.kernel.org; Mon, 12 Feb 2018 04:05:54 +0000 (GMT)
+Received: from mail.solarcom.ch ([46.28.201.70]:38228 "EHLO mail.solarcom.ch"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750783AbeBLGfd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Feb 2018 01:35:33 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi All,
+Hi.
 
-In ceph kernel client, osdmap_apply_incremental() can fail by failing of
-allocation memory in many places, in this case, current osdmap can not
-keep consistency after applying failure.=20
+I recently asked VMware Support if they officially support CEPH as a Storage. They told us no, but we can ask CEPH team if you are supporting CEPH with VMware solutions. 
 
-I=A1=AFm not sure how much impact will be caused by this kind of =
-inconsistency
-but for safety it=A1=AFs better to keep osdmap consistency all the time =
-even
-failing from incremental applying.=20
+So, I have several questions:
+1) Does CEPH officially support VMware?
+2) What use cases for CEPH as a Storage are the best for VMware: NFS or iSCSI? 	
+3) Does CEPH with iSCSI work with VMware ESXi 6.0 and VMFS5 or only with ESXi 6.5 and VMFS6 (I found the link here that CEPH only supports ESXi 6.5 http://docs.ceph.com/docs/master/rbd/iscsi-target-cli/)?
+4) Does iSCSI use case has the problem with 'Abort Task' loop that can cause targets to be restarted and some VMs crashing (here is the link http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-October/013610.html)?
 
-I=A1=AFm trying to make some patches to fix this issue, but first of all =
-please
-let me know what do you think for this, I would be grateful if you could
-share some ideas with me.
+Thank you.
+-- 
+Marat A Akhmetianov <vmm@solarcom.ch>
+Solar Communications GmbH
 
-
-
-Thanks,
-Chengguang.
