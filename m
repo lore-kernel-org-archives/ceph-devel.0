@@ -1,31 +1,43 @@
-From: Marat A Akhmetianov <vmm@solarcom.ch>
-Subject: Supporting CEPH with VMware
-Date: Mon, 12 Feb 2018 09:18:35 +0300
-Message-ID: <20180212091834.A111.48078FD1@solarcom.ch>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: osdmap consistency during incremental applying in kernel client
+Date: Mon, 12 Feb 2018 10:37:53 +0100
+Message-ID: <CAOi1vP9j=hBeZ73oguLBuXp-YDE5tk3h=HU5_MDJgOxY300kFQ@mail.gmail.com>
+References: <302D379F-727B-489C-B257-633CF16577C8@icloud.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.solarcom.ch ([46.28.201.70]:38228 "EHLO mail.solarcom.ch"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750783AbeBLGfd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Feb 2018 01:35:33 -0500
+Received: from mail-io0-f177.google.com ([209.85.223.177]:32792 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932480AbeBLJhy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Feb 2018 04:37:54 -0500
+Received: by mail-io0-f177.google.com with SMTP id n7so16621375iob.0
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Feb 2018 01:37:54 -0800 (PST)
+In-Reply-To: <302D379F-727B-489C-B257-633CF16577C8@icloud.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi.
+On Mon, Feb 12, 2018 at 5:05 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
+> Hi All,
+>
+> In ceph kernel client, osdmap_apply_incremental() can fail by failing of
+> allocation memory in many places, in this case, current osdmap can not
+> keep consistency after applying failure.
+>
+> I=E2=80=99m not sure how much impact will be caused by this kind of incon=
+sistency
+> but for safety it=E2=80=99s better to keep osdmap consistency all the tim=
+e even
+> failing from incremental applying.
 
-I recently asked VMware Support if they officially support CEPH as a Storage. They told us no, but we can ask CEPH team if you are supporting CEPH with VMware solutions. 
+Hi Chengguang,
 
-So, I have several questions:
-1) Does CEPH officially support VMware?
-2) What use cases for CEPH as a Storage are the best for VMware: NFS or iSCSI? 	
-3) Does CEPH with iSCSI work with VMware ESXi 6.0 and VMFS5 or only with ESXi 6.5 and VMFS6 (I found the link here that CEPH only supports ESXi 6.5 http://docs.ceph.com/docs/master/rbd/iscsi-target-cli/)?
-4) Does iSCSI use case has the problem with 'Abort Task' loop that can cause targets to be restarted and some VMs crashing (here is the link http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-October/013610.html)?
+Well, in practice those are rather small allocations, so if you see any
+of them failing, the system is likely in deep trouble.  In theory it is
+a valid point though.
 
-Thank you.
--- 
-Marat A Akhmetianov <vmm@solarcom.ch>
-Solar Communications GmbH
+Thanks,
 
+                Ilya
