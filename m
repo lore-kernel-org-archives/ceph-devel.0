@@ -1,47 +1,32 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: use seq_show_option for string type options
-Date: Tue, 13 Feb 2018 10:45:43 +0100
-Message-ID: <CAOi1vP9pT2GSpOqULvrUiACZ-tAdh8bHXASyDEfqrcsyaUTFXA@mail.gmail.com>
-References: <1518485459-199037-1-git-send-email-cgxu519@icloud.com>
+Subject: wip-fancy-striping in ceph/ceph-client
+Date: Tue, 13 Feb 2018 10:58:56 +0100
+Message-ID: <CAOi1vP-4_gmH2DqL2EN2_MkLju3frqBkbun7P=U=HrMUMLnOgw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f68.google.com ([209.85.214.68]:39968 "EHLO
-        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934243AbeBMJpo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 04:45:44 -0500
-Received: by mail-it0-f68.google.com with SMTP id v186so4896278itc.5
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 01:45:44 -0800 (PST)
-In-Reply-To: <1518485459-199037-1-git-send-email-cgxu519@icloud.com>
+Received: from mail-io0-f179.google.com ([209.85.223.179]:40364 "EHLO
+        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933955AbeBMJ66 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 04:58:58 -0500
+Received: by mail-io0-f179.google.com with SMTP id t22so20664130ioa.7
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 01:58:57 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chengguang Xu <cgxu519@icloud.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Alex Elder <elder@linaro.org>, David Disseldorp <ddiss@suse.de>, Maged Mokhtar <mmokhtar@petasan.org>
 
-On Tue, Feb 13, 2018 at 2:30 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
-> Using seq_show_option to replace seq_printf for string type options.
->
-> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
-> ---
->  fs/ceph/super.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index a62d2a9..d8a33ad 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -512,7 +512,7 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->                 seq_puts(m, ",nodcache");
->         if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
->                 if (fsopt->fscache_uniq)
-> -                       seq_printf(m, ",fsc=%s", fsopt->fscache_uniq);
-> +                       seq_show_option(m, "fsc", fsopt->fscache_uniq);
->                 else
->                         seq_puts(m, ",fsc");
+Hello,
 
-Hi Chengguang,
+I've pushed wip-fancy-striping with my striping v2 patches.  I didn't
+want to patch bomb the list and opened a dummy PR for feedback:
 
-seq_show_option() should be able to handle !fsopt->fscache_uniq?
+  https://github.com/ceph/ceph-client/pull/19
+
+As this is a full striping v2 implementation with adjacent extent
+merging and no limitations on parent layouts, the patch set is very
+invasive -- it's basically a rewrite of the entire I/O path.  Any
+review comments and testing cycles would be greatly appreciated!
 
 Thanks,
 
