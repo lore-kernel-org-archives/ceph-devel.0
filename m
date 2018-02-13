@@ -1,120 +1,149 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: wip-fancy-striping in ceph/ceph-client
-Date: Tue, 13 Feb 2018 17:24:09 +0100
-Message-ID: <CAOi1vP98H_ZAH9zmOBCDfmWRQnapSeuum0-RsaDuNxg7g+RpCQ@mail.gmail.com>
-References: <CAOi1vP-4_gmH2DqL2EN2_MkLju3frqBkbun7P=U=HrMUMLnOgw@mail.gmail.com>
- <47566385-f84b-6bdb-45ee-afc1b9a015c1@linaro.org>
+From: Lenz Grimmer <lgrimmer@suse.com>
+Subject: Re: Building dashboard_v2
+Date: Tue, 13 Feb 2018 17:32:51 +0100
+Message-ID: <875f7a8e-18e9-aae6-4dc3-3c590647f2e2@suse.com>
+References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="msLaanGJJs2QmSIlcvr55B2idwPkwkbyW"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:40146 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933927AbeBMQYL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 11:24:11 -0500
-Received: by mail-it0-f49.google.com with SMTP id v186so6262960itc.5
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 08:24:10 -0800 (PST)
-In-Reply-To: <47566385-f84b-6bdb-45ee-afc1b9a015c1@linaro.org>
+Received: from mx2.suse.de ([195.135.220.15]:39269 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S965181AbeBMQc4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Feb 2018 11:32:56 -0500
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 534BEAE63
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 16:32:55 +0000 (UTC)
+In-Reply-To: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@linaro.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, David Disseldorp <ddiss@suse.de>, Maged Mokhtar <mmokhtar@petasan.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 13, 2018 at 4:05 PM, Alex Elder <elder@linaro.org> wrote:
-> On 02/13/2018 03:58 AM, Ilya Dryomov wrote:
->> Hello,
->>
->> I've pushed wip-fancy-striping with my striping v2 patches.  I didn't
->> want to patch bomb the list and opened a dummy PR for feedback:
->>
->>   https://github.com/ceph/ceph-client/pull/19
->>
->> As this is a full striping v2 implementation with adjacent extent
->> merging and no limitations on parent layouts, the patch set is very
->> invasive -- it's basically a rewrite of the entire I/O path.  Any
->> review comments and testing cycles would be greatly appreciated!
->
-> This looks like a nice improvement.  I think the bio improvements
-> from Kent Overstreet shortly after I finished working on this stuff,
-> and some of this might have been enabled by that work.  Some of the
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--msLaanGJJs2QmSIlcvr55B2idwPkwkbyW
+Content-Type: multipart/mixed; boundary="flNqwgkhCaDuPlCPJDo9ZBhGBbweLmfHc";
+ protected-headers="v1"
+From: Lenz Grimmer <lgrimmer@suse.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Message-ID: <875f7a8e-18e9-aae6-4dc3-3c590647f2e2@suse.com>
+Subject: Re: Building dashboard_v2
+References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
+In-Reply-To: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
 
-Yeah, all of the new iterator stuff is based on Kent's immutable
-bio_vecs work.
+--flNqwgkhCaDuPlCPJDo9ZBhGBbweLmfHc
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-> multiqueue work helps too.  Regardless, I won't say I've formally
-> reviewed it but it looks really good to me, improves things beyond
-> just adding the fancy striping functionality.
->
-> I'm only scanning through them right now.  Here are a few simple things:
-> - Very nice cleanup in  __ceph_calc_file_object_mapping()
-> - I don't like the ({ zero_bvec(&bv); }) in zero_bios.  It looks wrong,
->   but the real problem is the way ceph_bio_iter_advance_step() is defined.
->   The caller shouldn't (have to) assume the existence of a symbol having
->   a particular name.  I'm not sure how this advance step macro will be
->   used elsewhere but can you just supply a function that operates on
->   bio_vec pointer instead (possibly null)?  I think that may be the only
->   reason you need a macro for pass-by-name, so doing this might allow this
->   to become an inline function instead.  (I see later that this code got
->   affected; maybe the problem goes away?)
+Hi John,
 
-These macros were private to rbd.c and weren't supposed to be used
-anywhere else.  I pulled them into messenger.h during last minute
-refactoring, because they ended up being not rbd specific after all.
-ceph_bvec_iter in particular might be used in the filesystem, which
-also needs a fully-featured striping implementation.
+thanks for the feedback!
 
-Here is a more advanced example, from copy_bio_bvecs():
+On 02/13/2018 04:29 PM, John Spray wrote:
 
-        ceph_bio_iter_advance_step(it, bytes, ({
-                obj_req->bvec_pos.bvecs[obj_req->bvec_idx++] = bv;
-                obj_req->bvec_pos.iter.bi_size += bv.bv_len;
-        }));
+> Having just built the awesome new dashboard code
+> (https://github.com/ceph/ceph/pull/20103) in my dev environment for
+> the first time, I'll share my notes...
+>=20
+> When building on Ubuntu 16.04, which does not have a recent enough
+> node.js for the build -- had to get one from an external source.  It
+> looks like Fedora and EPEL do have more recent ones.  Not sure if
+> there is a sufficiently trusted third party Ubuntu repo to add to
+> install_deps.sh.
 
-It could certainly take a (struct bio_vec *bv, void *arg) function
-instead, but I'm not sure if it's that much better or how good a job
-gcc would do in that case.
+There are some hints on how to get a recent version of Node.js installed
+on Ubuntu, using either an upstream PPA or nvm:
 
-> - I'm not sure why OBJ_REQUEST_PAGES was used for stat requests.
-> - Are CEPH_MSG_DATA_BVECS dependent on CONFIG_BLOCK?  (Though I always
->   wondered what system might ever be configured without it.)
+https://www.digitalocean.com/community/tutorials/how-to-install-node-js-o=
+n-ubuntu-16-04
 
-No.  struct bio_vec is a big misnomer -- it has nothing to do with
-bios.  It should be struct part_of_page or something like that.
 
-> - I think you should (have) split "rbd: new request handling code" into
->   several patches.  I wanted to see the non-image requests going away
->   separately, or the opportunistic write in a stat, for example.
+> My fedora 26 machine had a sufficiently recent node/npm, so building
+> there was simpler.  Just had to install the python2-bcrypt package (in
+> addition to what is already covered in install_deps).
 
-The opportunistic write is what let non-image requests go -- it's just
-a side effect, not an actual change.  There is no good way to split
-that commit into smaller pieces, at least not without adding a bunch of
-new callback based code and then removing it in the next commit.
+Good to know. Most of the developers currently working on the Dashboard
+v2 use a Docker build environment based on this:
 
-> - I like the state machine, and you simplified a lot with that commit.
-> - It's nice to complete all image requests at once rather than having to
->   do so in order.
-> - Generally I didn't work through the new fancy striping code; too fancy
->   for a quick review.
+https://github.com/ricardoasmarques/ceph-dev-docker/
 
-:-)
+> The frontend build only takes 25 seconds, which I think is pretty
+> good.  The resulting dist/ dir is 18M at the moment, which is very
+> similar to the existing dashboard static files size.  I would suggest
+> we can decrease that a bit by restricting the font formats included:
+> by default we're getting eog/svg/ttf output, but we probably only need
+> WOFF.
 
-> - Nice to see more use of multiple ops in an OSD request.  As I recall
->   the way it's implemented is pretty limited; I wanted to generalize it
->   but never got that far.
+We'll take a look at that, to check what the "production" build will
+include.
 
-It's fine for regular OSD ops, but issues crop up when you try to
-combine multiple method call ops.
+> I didn't need a virtualenv or any pip-installed things to run the
+> dashboard in development (presumably would have needed that to run
+> unit tests on the backend python code).
+>=20
+> Detailed notes below.
+>=20
+>=20
+> On Ubuntu 16.04 (aka senta04)
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Had to symlink /usr/bin/nodejs to /usr/bin/node (one of the
+> dependencies depends on it)
 
-> - I think the reference counting between parent and child images was
->   done safely, but I'm glad you were able to reason away the need for
->   some of it.
->
-> I'd love to give this a much deeper review but it'll take a full day
-> at some point and I don't have that right now.  (I've already used
-> time I probably can't afford...)  I can probably make time though if
-> you think it's final.
+Yes, that's a common annoyance on Ubuntu - you can install the package
+"nodejs-legacy" to create that symlink automatically.
 
-It's final.  I'd definitely appreciate a deeper review.
+> The distro comes with node 4.2.6.  The dashboard_v2 code requires node
+>> =3D 6.9.0 (per tmelo) -- that isn't being explicitly checked, so if
+> your node is old then you just get a nasty syntax error during "npm
+> run build".
+>=20
+> Angular CLI depends on node >=3D 6.9.0 and npm >=3D 3 (according to its=
+ README).
+>=20
+> Repo with a more recent node is here:
+> curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+> This is linked from the nodejs official page, but I have no idea of
+> provenance beyond that.
+>=20
+> If you had already tried "npm run build" with an older node before
+> installing the newer one, do a "npm rebuild node-sass" after
+> installing the new node before trying to build dashboard frontend
+> again.
+>=20
+> Had to install python-bcrypt.
+>=20
+> Fedora 26 (aka my laptop)
+> =3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> This distro appears to come with node 6.12.
+>=20
+> dnf install python2-bcrypt
 
-Thanks,
+Thanks for the notes! I'll see if I can incorporate some of that into
+the README/HACKING documents included in that directory.
 
-                Ilya
+Lenz
+
+--=20
+SUSE Linux GmbH - Maxfeldstr. 5 - 90409 Nuernberg (Germany)
+GF:Felix Imend=C3=B6rffer,Jane Smithard,Graham Norton,HRB 21284 (AG N=C3=BC=
+rnberg)
+
+
+--flNqwgkhCaDuPlCPJDo9ZBhGBbweLmfHc--
+
+--msLaanGJJs2QmSIlcvr55B2idwPkwkbyW
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iF0EARECAB0WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWoMTMwAKCRBJUOEqsnKR
+8o2dAJ0UJEisrqhLhV2axYND63ALShwfKwCfcpTOjWiO15PomwWKolA7rxMk7+k=
+=FXlj
+-----END PGP SIGNATURE-----
+
+--msLaanGJJs2QmSIlcvr55B2idwPkwkbyW--
