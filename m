@@ -1,67 +1,49 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: use seq_show_option for string type options
-Date: Tue, 13 Feb 2018 12:52:00 +0100
-Message-ID: <CAOi1vP-JETNP4ou77tnDGMf4APUy8rgNF7V5Efk5Hijj_nK5YQ@mail.gmail.com>
-References: <1518485459-199037-1-git-send-email-cgxu519@icloud.com>
- <CAOi1vP9pT2GSpOqULvrUiACZ-tAdh8bHXASyDEfqrcsyaUTFXA@mail.gmail.com> <E32473B2-E7B8-4058-8FCF-CB72BCEF1EEB@icloud.com>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [RFC PATCH] Samba RADOS service registration
+Date: Tue, 13 Feb 2018 13:29:41 +0100
+Message-ID: <20180213132941.0208a8b2@suse.de>
+References: <20180213022540.5f9686b7@suse.de>
+        <CALe9h7dPuDOtY06RPXJ2u5wkT=j8S6D1PkwgfByuQ8y3cuP9Fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:43935 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934583AbeBMLwB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 06:52:01 -0500
-Received: by mail-io0-f194.google.com with SMTP id 72so20967074iom.10
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 03:52:00 -0800 (PST)
-In-Reply-To: <E32473B2-E7B8-4058-8FCF-CB72BCEF1EEB@icloud.com>
+Received: from mx2.suse.de ([195.135.220.15]:37418 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S935182AbeBMM3n (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Feb 2018 07:29:43 -0500
+In-Reply-To: <CALe9h7dPuDOtY06RPXJ2u5wkT=j8S6D1PkwgfByuQ8y3cuP9Fg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chengguang Xu <cgxu519@icloud.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samba Technical <samba-technical@lists.samba.org>
 
-On Tue, Feb 13, 2018 at 11:55 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
->
->> =E5=9C=A8 2018=E5=B9=B42=E6=9C=8813=E6=97=A5=EF=BC=8C=E4=B8=8B=E5=8D=885=
-:45=EF=BC=8CIlya Dryomov <idryomov@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
->>
->> On Tue, Feb 13, 2018 at 2:30 AM, Chengguang Xu <cgxu519@icloud.com> wrot=
-e:
->>> Using seq_show_option to replace seq_printf for string type options.
->>>
->>> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
->>> ---
->>> fs/ceph/super.c | 4 ++--
->>> 1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
->>> index a62d2a9..d8a33ad 100644
->>> --- a/fs/ceph/super.c
->>> +++ b/fs/ceph/super.c
->>> @@ -512,7 +512,7 @@ static int ceph_show_options(struct seq_file *m, st=
-ruct dentry *root)
->>>                seq_puts(m, ",nodcache");
->>>        if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
->>>                if (fsopt->fscache_uniq)
->>> -                       seq_printf(m, ",fsc=3D%s", fsopt->fscache_uniq)=
-;
->>> +                       seq_show_option(m, "fsc", fsopt->fscache_uniq);
->>>                else
->>>                        seq_puts(m, ",fsc");
->>
->> Hi Chengguang,
->>
->> seq_show_option() should be able to handle !fsopt->fscache_uniq?
->
-> Hi Ilya
->
-> Sorry, I don=E2=80=99t get your point here.
+Thanks for the feedback everyone...
 
-I think it can be just
+On Tue, 13 Feb 2018 11:07:44 +0000, John Spray wrote:
 
-    if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE)
-            seq_show_option(m, "fsc", fsopt->fscache_uniq);
+> On Tue, Feb 13, 2018 at 1:25 AM, David Disseldorp <ddiss@suse.de> wrote:
+...
+> > I'd like to (at the very least) pack the CephFS backed share names and
+> > paths into the service registration.  
+> 
+> Echoing back the share configuration probably isn't a good use of this
+> interface -- the idea is for service daemons to register just enough
+> information about themselves to report on their existence, location
+> and health.
 
-Thanks,
+Okay, I'll keep it simple then, and just use the Ceph global instance id
+and daemon name (smbd) for now.
 
-                Ilya
+> In the case of nfs-ganesha, we're moving toward having the option of
+> consuming its share configuration from a central place like a RADOS
+> object, rather than from a local text config file -- in that model, a
+> UI can go look at the configuration directly rather than having the
+> daemon report it back.  This is kind of a Ceph-ized version of the way
+> a lot of new projects are storing their configuration in etcd.
+
+Interesting. The same should be possible for Samba when we eventually
+have a Ceph key-value store backend for Samba's dbwrap, and then use
+Registry configuration.
+
+Cheers, David
