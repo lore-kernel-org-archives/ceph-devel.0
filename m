@@ -1,83 +1,83 @@
-From: Alex Elder <elder@linaro.org>
-Subject: Re: wip-fancy-striping in ceph/ceph-client
-Date: Tue, 13 Feb 2018 09:05:45 -0600
-Message-ID: <47566385-f84b-6bdb-45ee-afc1b9a015c1@linaro.org>
-References: <CAOi1vP-4_gmH2DqL2EN2_MkLju3frqBkbun7P=U=HrMUMLnOgw@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Building dashboard_v2
+Date: Tue, 13 Feb 2018 15:29:56 +0000
+Message-ID: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:44648 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965037AbeBMPFs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 10:05:48 -0500
-Received: by mail-io0-f171.google.com with SMTP id z6so21554677iob.11
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 07:05:48 -0800 (PST)
-In-Reply-To: <CAOi1vP-4_gmH2DqL2EN2_MkLju3frqBkbun7P=U=HrMUMLnOgw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:36375 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933440AbeBMPaS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 10:30:18 -0500
+Received: by mail-wr0-f170.google.com with SMTP id y3so19009025wrh.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 07:30:18 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: David Disseldorp <ddiss@suse.de>, Maged Mokhtar <mmokhtar@petasan.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 02/13/2018 03:58 AM, Ilya Dryomov wrote:
-> Hello,
-> 
-> I've pushed wip-fancy-striping with my striping v2 patches.  I didn't
-> want to patch bomb the list and opened a dummy PR for feedback:
-> 
->   https://github.com/ceph/ceph-client/pull/19
-> 
-> As this is a full striping v2 implementation with adjacent extent
-> merging and no limitations on parent layouts, the patch set is very
-> invasive -- it's basically a rewrite of the entire I/O path.  Any
-> review comments and testing cycles would be greatly appreciated!
+Hi folks,
 
-This looks like a nice improvement.  I think the bio improvements
-from Kent Overstreet shortly after I finished working on this stuff,
-and some of this might have been enabled by that work.  Some of the
-multiqueue work helps too.  Regardless, I won't say I've formally
-reviewed it but it looks really good to me, improves things beyond
-just adding the fancy striping functionality.
+Having just built the awesome new dashboard code
+(https://github.com/ceph/ceph/pull/20103) in my dev environment for
+the first time, I'll share my notes...
 
-I'm only scanning through them right now.  Here are a few simple things:
-- Very nice cleanup in  __ceph_calc_file_object_mapping()
-- I don't like the ({ zero_bvec(&bv); }) in zero_bios.  It looks wrong,
-  but the real problem is the way ceph_bio_iter_advance_step() is defined.
-  The caller shouldn't (have to) assume the existence of a symbol having
-  a particular name.  I'm not sure how this advance step macro will be
-  used elsewhere but can you just supply a function that operates on
-  bio_vec pointer instead (possibly null)?  I think that may be the only
-  reason you need a macro for pass-by-name, so doing this might allow this
-  to become an inline function instead.  (I see later that this code got
-  affected; maybe the problem goes away?)
-- I'm not sure why OBJ_REQUEST_PAGES was used for stat requests.
-- Are CEPH_MSG_DATA_BVECS dependent on CONFIG_BLOCK?  (Though I always
-  wondered what system might ever be configured without it.)
-- I think you should (have) split "rbd: new request handling code" into
-  several patches.  I wanted to see the non-image requests going away
-  separately, or the opportunistic write in a stat, for example.
-- I like the state machine, and you simplified a lot with that commit.
-- It's nice to complete all image requests at once rather than having to
-  do so in order.
-- Generally I didn't work through the new fancy striping code; too fancy
-  for a quick review.
-- Nice to see more use of multiple ops in an OSD request.  As I recall
-  the way it's implemented is pretty limited; I wanted to generalize it
-  but never got that far.
-- I think the reference counting between parent and child images was
-  done safely, but I'm glad you were able to reason away the need for
-  some of it.
+When building on Ubuntu 16.04, which does not have a recent enough
+node.js for the build -- had to get one from an external source.  It
+looks like Fedora and EPEL do have more recent ones.  Not sure if
+there is a sufficiently trusted third party Ubuntu repo to add to
+install_deps.sh.
 
-I'd love to give this a much deeper review but it'll take a full day
-at some point and I don't have that right now.  (I've already used
-time I probably can't afford...)  I can probably make time though if
-you think it's final.  
+My fedora 26 machine had a sufficiently recent node/npm, so building
+there was simpler.  Just had to install the python2-bcrypt package (in
+addition to what is already covered in install_deps).
 
-					-Alex
+The frontend build only takes 25 seconds, which I think is pretty
+good.  The resulting dist/ dir is 18M at the moment, which is very
+similar to the existing dashboard static files size.  I would suggest
+we can decrease that a bit by restricting the font formats included:
+by default we're getting eog/svg/ttf output, but we probably only need
+WOFF.
 
-> Thanks,
-> 
->                 Ilya
-> 
+I didn't need a virtualenv or any pip-installed things to run the
+dashboard in development (presumably would have needed that to run
+unit tests on the backend python code).
 
+Detailed notes below.
+
+Cheers,
+John
+
+
+
+
+On Ubuntu 16.04 (aka senta04)
+=============
+
+Had to symlink /usr/bin/nodejs to /usr/bin/node (one of the
+dependencies depends on it)
+
+The distro comes with node 4.2.6.  The dashboard_v2 code requires node
+>= 6.9.0 (per tmelo) -- that isn't being explicitly checked, so if
+your node is old then you just get a nasty syntax error during "npm
+run build".
+
+Angular CLI depends on node >= 6.9.0 and npm >= 3 (according to its README).
+
+Repo with a more recent node is here:
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+This is linked from the nodejs official page, but I have no idea of
+provenance beyond that.
+
+If you had already tried "npm run build" with an older node before
+installing the newer one, do a "npm rebuild node-sass" after
+installing the new node before trying to build dashboard frontend
+again.
+
+Had to install python-bcrypt.
+
+Fedora 26 (aka my laptop)
+========
+
+This distro appears to come with node 6.12.
+
+dnf install python2-bcrypt
