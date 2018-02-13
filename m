@@ -1,39 +1,44 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: seastar and 'tame reactor'
-Date: Tue, 13 Feb 2018 21:35:00 +0800
-Message-ID: <CAJE9aOOiSAtgRb9s2G6qGyGhpp-RJ3s7eqRx5d6Ki6mhaWhkRw@mail.gmail.com>
-References: <d0f50268-72bb-1196-7ce9-0b9e21808ffb@redhat.com>
- <5b32056c-c6f7-a1c4-d07a-ae04557b59cf@redhat.com> <CAJE9aOOq+HAWZOec0TnSqXFqUx7GD=XgCByh8HFV9Rb8L8qc2A@mail.gmail.com>
- <9e6bc174-c6b3-a37e-abd5-b96d572d1d1b@redhat.com> <CAJ4mKGa6XzhQmK3JkAL3FtnuXDMf2uy1oheQxEL8kcdukSKssw@mail.gmail.com>
- <CAJE9aOO0=VKuqH=7x4M-uNJcK2j4VhTG+-=KAqZn7OkNZGLvfA@mail.gmail.com> <CAKOnar=HjUfq5WDZtqjKC=Wyj1oK0454wszpukSmFf0L46gZsw@mail.gmail.com>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: Samba Ceph dbwrap backend
+Date: Tue, 13 Feb 2018 14:43:29 +0100
+Message-ID: <20180213144329.19a94a4e@suse.de>
+References: <20180213022540.5f9686b7@suse.de>
+        <CALe9h7dPuDOtY06RPXJ2u5wkT=j8S6D1PkwgfByuQ8y3cuP9Fg@mail.gmail.com>
+        <20180213132941.0208a8b2@suse.de>
+        <20180213124838.y2jmrppzpjgsdagb@sernet.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:33411 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964776AbeBMNfB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 08:35:01 -0500
-Received: by mail-qt0-f171.google.com with SMTP id d8so3614008qtm.0
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 05:35:01 -0800 (PST)
-In-Reply-To: <CAKOnar=HjUfq5WDZtqjKC=Wyj1oK0454wszpukSmFf0L46gZsw@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:40253 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S964792AbeBMNnc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Feb 2018 08:43:32 -0500
+In-Reply-To: <20180213124838.y2jmrppzpjgsdagb@sernet.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjami@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Casey Bodley <cbodley@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Adam Emerson <aemerson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Volker Lendecke <Volker.Lendecke@SerNet.DE>
+Cc: ceph-devel@vger.kernel.org, Samba Technical <samba-technical@lists.samba.org>
 
-On Mon, Feb 12, 2018 at 11:55 PM, Matt Benjamin <mbenjami@redhat.com> wrote:
-> How does tame reactor induce more OSD sessions (@greg);  @kefu, in't
-> the hybrid model another way of saying, tame reactor?  The intuition
+On Tue, 13 Feb 2018 13:48:38 +0100, Volker Lendecke wrote:
 
-i just realized that it is =)
+> > Interesting. The same should be possible for Samba when we eventually
+> > have a Ceph key-value store backend for Samba's dbwrap, and then use
+> > Registry configuration.  
+> 
+> Is there API docs around for this key-value store?
 
-> I've had to this point is that the interfacing here is essentially
-> similar to making seastar interact with anything else, including
-> frameworks (disks, memory devices) that it absolutely wants to and
-> must.
->
+There are a few different possible approaches to take, the simplest
+would probably be to use Ceph omap directly, which is documented at:
+http://docs.ceph.com/docs/master/rados/api/librados/
 
+Locking and transactions would need to be layered atop this, possibly via
+a separate Samba Object Class[1] running on the Ceph OSDs.
 
--- 
-Regards
-Kefu Chai
+All theoretical at this stage unfortunately, but I hope to get some time
+to work on it in the future.
+
+Cheers, David
+
+[1] Ceph Object Classes (slide 28)
+https://www.slideshare.net/sageweil1/20150311-vault15-librados
