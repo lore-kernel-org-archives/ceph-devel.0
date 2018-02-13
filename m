@@ -1,51 +1,39 @@
-From: Volker Lendecke <Volker.Lendecke@SerNet.DE>
-Subject: Re: [RFC PATCH] Samba RADOS service registration
-Date: Tue, 13 Feb 2018 13:48:38 +0100
-Message-ID: <20180213124838.y2jmrppzpjgsdagb@sernet.de>
-References: <20180213022540.5f9686b7@suse.de>
- <CALe9h7dPuDOtY06RPXJ2u5wkT=j8S6D1PkwgfByuQ8y3cuP9Fg@mail.gmail.com>
- <20180213132941.0208a8b2@suse.de>
-Reply-To: Volker.Lendecke@SerNet.DE
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: seastar and 'tame reactor'
+Date: Tue, 13 Feb 2018 21:35:00 +0800
+Message-ID: <CAJE9aOOiSAtgRb9s2G6qGyGhpp-RJ3s7eqRx5d6Ki6mhaWhkRw@mail.gmail.com>
+References: <d0f50268-72bb-1196-7ce9-0b9e21808ffb@redhat.com>
+ <5b32056c-c6f7-a1c4-d07a-ae04557b59cf@redhat.com> <CAJE9aOOq+HAWZOec0TnSqXFqUx7GD=XgCByh8HFV9Rb8L8qc2A@mail.gmail.com>
+ <9e6bc174-c6b3-a37e-abd5-b96d572d1d1b@redhat.com> <CAJ4mKGa6XzhQmK3JkAL3FtnuXDMf2uy1oheQxEL8kcdukSKssw@mail.gmail.com>
+ <CAJE9aOO0=VKuqH=7x4M-uNJcK2j4VhTG+-=KAqZn7OkNZGLvfA@mail.gmail.com> <CAKOnar=HjUfq5WDZtqjKC=Wyj1oK0454wszpukSmFf0L46gZsw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.sernet.de ([185.199.217.2]:54370 "EHLO mail.SerNet.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935174AbeBMNSF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Feb 2018 08:18:05 -0500
-Content-Disposition: inline
-In-Reply-To: <20180213132941.0208a8b2@suse.de>
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:33411 "EHLO
+        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964776AbeBMNfB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 08:35:01 -0500
+Received: by mail-qt0-f171.google.com with SMTP id d8so3614008qtm.0
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 05:35:01 -0800 (PST)
+In-Reply-To: <CAKOnar=HjUfq5WDZtqjKC=Wyj1oK0454wszpukSmFf0L46gZsw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: ceph-devel@vger.kernel.org, Samba Technical <samba-technical@lists.samba.org>
+To: Matt Benjamin <mbenjami@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Casey Bodley <cbodley@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Adam Emerson <aemerson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 13, 2018 at 01:29:41PM +0100, David Disseldorp via samba-technical wrote:
-> > In the case of nfs-ganesha, we're moving toward having the option of
-> > consuming its share configuration from a central place like a RADOS
-> > object, rather than from a local text config file -- in that model, a
-> > UI can go look at the configuration directly rather than having the
-> > daemon report it back.  This is kind of a Ceph-ized version of the way
-> > a lot of new projects are storing their configuration in etcd.
-> 
-> Interesting. The same should be possible for Samba when we eventually
-> have a Ceph key-value store backend for Samba's dbwrap, and then use
-> Registry configuration.
+On Mon, Feb 12, 2018 at 11:55 PM, Matt Benjamin <mbenjami@redhat.com> wrote:
+> How does tame reactor induce more OSD sessions (@greg);  @kefu, in't
+> the hybrid model another way of saying, tame reactor?  The intuition
 
-Is there API docs around for this key-value store?
+i just realized that it is =)
 
-Thanks,
+> I've had to this point is that the interfacing here is essentially
+> similar to making seastar interact with anything else, including
+> frameworks (disks, memory devices) that it absolutely wants to and
+> must.
+>
 
-Volker
 
 -- 
-Besuchen Sie die verinice.XP 2018 in Berlin,
-Anwenderkonferenz für Informationssicherheit
-vom 21.-23.03.2018 im Sofitel Kurfürstendamm
-Info & Anmeldung hier: http://veriniceXP.org
-
-SerNet GmbH, Bahnhofsallee 1b, 37081 Göttingen
-phone: +49-551-370000-0, fax: +49-551-370000-9
-AG Göttingen, HRB 2816, GF: Dr. Johannes Loxen
-http://www.sernet.de, mailto:kontakt@sernet.de
+Regards
+Kefu Chai
