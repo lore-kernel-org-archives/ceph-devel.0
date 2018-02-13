@@ -1,31 +1,77 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Building dashboard_v2
-Date: Tue, 13 Feb 2018 13:35:34 -0700
-Message-ID: <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
-References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: 12.2.3 QE Luminous validation status
+Date: Tue, 13 Feb 2018 13:36:54 -0800
+Message-ID: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:46202 "EHLO
-        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965858AbeBMUfg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 15:35:36 -0500
-Received: by mail-vk0-f47.google.com with SMTP id e125so11590709vkh.13
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 12:35:35 -0800 (PST)
-In-Reply-To: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
+Received: from mail-pg0-f45.google.com ([74.125.83.45]:39319 "EHLO
+        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965749AbeBMVg4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Feb 2018 16:36:56 -0500
+Received: by mail-pg0-f45.google.com with SMTP id w17so796552pgv.6
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Feb 2018 13:36:55 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, Karol Mroz <KMroz@suse.com>, Patrick Donnelly <pdonnell@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>
 
-On Tue, Feb 13, 2018 at 8:29 AM, John Spray <jspray@redhat.com> wrote:
-> Not sure if
-> there is a sufficiently trusted third party Ubuntu repo to add to
-> install_deps.sh.
+Details of this release summarized here
+http://tracker.ceph.com/issues/22665#note-4
 
-Instead of adding another repository dependency, we could not build
-the dashboard on Xenial, and target Ubuntu >= 18.04 for that.
+The following suites included:
 
-https://packages.ubuntu.com/bionic/nodejs
+rados
+rgw
+rbd
+krbd
+fs
+kcephfs
+multimds
+knfs
+hadoop - EXCLUDED
+samba - EXCLUDED
+ceph-deploy
+ceph-disk
+upgrade/client-upgrade-hammer (luminous)
+upgrade/client-upgrade-kraken (luminous)
+upgrade/client-upgrade-jewel (luminous)
+upgrade/jewel-x (luminous)
+upgrade/kraken-x (luminous)
+upgrade/luminous-x (master) - EXCLUDED
+powercycle
+ceph-ansible
+ceph-volume
+(please speak up if something is missing)
 
-- Ken
+Please see all details in the ticket and add comments in the tracker.
+
+Seeking approval from the dev leads.
+
+Issues:
+
+rados - passed, Josh pls confirm approval.
+
+rgw - Casey, Abhishek - do we want to ad//merge
+https://github.com/ceph/ceph/pull/20407 ?
+
+rbd, krbd - approved by Jason
+
+fs, kcephfs, multimds - approved by Patrick
+
+knfs - pending review/approval from Jeff (http://tracker.ceph.com/issues/22995)
+
+ceph-deploy - approved by Vasu
+
+upgrade/client-upgrade-kraken - Nathan, do/can we include your fix
+into this release ?
+
+upgrade/kraken-x (luminous) - some jobs still rerunning
+
+upgrade/luminous-x (master) - Sage you to exclude this suite for now?
+
+ceph-volume - pending approval from  Alfredo, Andrew
+
+Pls reply
+
+Thx
+YuriW
