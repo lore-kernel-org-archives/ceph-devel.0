@@ -1,95 +1,80 @@
-From: Abhishek <abhishek@suse.com>
-Subject: Re: 12.2.3 QE Luminous validation status
-Date: Wed, 14 Feb 2018 12:00:04 +0100
-Message-ID: <f974c18b4ad913359a935acfb72737c5@suse.com>
-References: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
+From: Lenz Grimmer <lgrimmer@suse.com>
+Subject: Disabling the "old" dashboard in the dashboard v2 pull request?
+Date: Wed, 14 Feb 2018 12:44:54 +0100
+Message-ID: <8dfb4e57-8413-8fa1-6712-2ed31a8ba6a1@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:33870 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:36260 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S967114AbeBNLAG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Feb 2018 06:00:06 -0500
-In-Reply-To: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
+        id S967448AbeBNLo5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Feb 2018 06:44:57 -0500
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 5813EAAF1
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Feb 2018 11:44:55 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, Karol Mroz <KMroz@suse.com>, Patrick Donnelly <pdonnell@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-devel-owner@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 2018-02-13 22:36, Yuri Weinstein wrote:
-> Details of this release summarized here
-> http://tracker.ceph.com/issues/22665#note-4
-> 
-> The following suites included:
-> 
-> rados
-> rgw
-> rbd
-> krbd
-> fs
-> kcephfs
-> multimds
-> knfs
-> hadoop - EXCLUDED
-> samba - EXCLUDED
-> ceph-deploy
-> ceph-disk
-> upgrade/client-upgrade-hammer (luminous)
-> upgrade/client-upgrade-kraken (luminous)
-> upgrade/client-upgrade-jewel (luminous)
-> upgrade/jewel-x (luminous)
-> upgrade/kraken-x (luminous)
-> upgrade/luminous-x (master) - EXCLUDED
-> powercycle
-> ceph-ansible
-> ceph-volume
-> (please speak up if something is missing)
-> 
-> Please see all details in the ticket and add comments in the tracker.
-> 
-> Seeking approval from the dev leads.
-> 
-> Issues:
-> 
-> rados - passed, Josh pls confirm approval.
-> 
-> rgw - Casey, Abhishek - do we want to ad//merge
-> https://github.com/ceph/ceph/pull/20407 ?
-> 
-> rbd, krbd - approved by Jason
-> 
-> fs, kcephfs, multimds - approved by Patrick
-> 
-> knfs - pending review/approval from Jeff 
-> (http://tracker.ceph.com/issues/22995)
-> 
-> ceph-deploy - approved by Vasu
-> 
-> upgrade/client-upgrade-kraken - Nathan, do/can we include your fix
-> into this release ?
-> 
-> upgrade/kraken-x (luminous) - some jobs still rerunning
-> 
-> upgrade/luminous-x (master) - Sage you to exclude this suite for now?
-> 
-> ceph-volume - pending approval from  Alfredo, Andrew
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5
+Content-Type: multipart/mixed; boundary="zdSBXENmSdrB7WWkB81h0uolaTO8Wik3c";
+ protected-headers="v1"
+From: Lenz Grimmer <lgrimmer@suse.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Message-ID: <8dfb4e57-8413-8fa1-6712-2ed31a8ba6a1@suse.com>
+Subject: Disabling the "old" dashboard in the dashboard v2 pull request?
 
-Alfredo mentioned he's working on a critical fix that needs to go in for
-12.2.3, waiting for merge + approval
+--zdSBXENmSdrB7WWkB81h0uolaTO8Wik3c
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-PS. for some reason replies to this thread from my email always failed. 
-Hopefully we don't get multiple copies of the same message.
+Hi,
 
-> 
-> Pls reply
-> 
-> Thx
-> YuriW
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+this question came up during our dashboard v2 sync call yesterday. The
+first milestone for dashboard v2 is reaching feature parity with the
+existing dashboard that is currently included in Luminous and master.
 
+Once this point has been reached, we would like to submit our initial PR
+against master for inclusion into the Mimic release.
+
+Should this PR also take care of removing the existing dashboard code
+and introduce dashboard v2 as the replacement? Currently, we develop the
+code in parallel to the existing dashboard, using "dashboard_v2" as the
+directory name and namespace in several places.
+
+It would be much easier for us if we could start using the "dashboard"
+namespace right away, rather than replacing that string in many places
+after the PR was merged and we decided to retire the original dashboard.
+
+Are there any objections/concerns about aiming at replacing the original
+dashboard with the initial v2 submission?
+
+Thanks,
+
+Lenz
+
+--=20
+SUSE Linux GmbH - Maxfeldstr. 5 - 90409 Nuernberg (Germany)
+GF:Felix Imend=C3=B6rffer,Jane Smithard,Graham Norton,HRB 21284 (AG N=C3=BC=
+rnberg)
+
+
+--zdSBXENmSdrB7WWkB81h0uolaTO8Wik3c--
+
+--Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iF0EARECAB0WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWoQhNgAKCRBJUOEqsnKR
+8t1xAJ9Wml5EtyQOpGHSDrWFY7f6eNXeBACeML7uL8fOJHQwDhNBRjLcLbgOMLs=
+=2JFX
+-----END PGP SIGNATURE-----
+
+--Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5--
