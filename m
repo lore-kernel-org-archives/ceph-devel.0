@@ -1,76 +1,95 @@
-From: Kai Wagner <kwagner@suse.com>
-Subject: Re: Building dashboard_v2
-Date: Wed, 14 Feb 2018 10:05:07 +0100
-Message-ID: <3ec0a5d7-6a4a-9323-5488-5ff8d371333c@suse.com>
-References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
- <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
- <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
- <829ca7ca-8d40-adb0-d4ad-bd608a3fe351@suse.com>
+From: Abhishek <abhishek@suse.com>
+Subject: Re: 12.2.3 QE Luminous validation status
+Date: Wed, 14 Feb 2018 12:00:04 +0100
+Message-ID: <f974c18b4ad913359a935acfb72737c5@suse.com>
+References: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="iMGQhRfrGFip56QhnfquQnLKzn4EGhdJ8"
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:51875 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:33870 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934695AbeBNJFO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Feb 2018 04:05:14 -0500
-In-Reply-To: <829ca7ca-8d40-adb0-d4ad-bd608a3fe351@suse.com>
+        id S967114AbeBNLAG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Feb 2018 06:00:06 -0500
+In-Reply-To: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lenz Grimmer <lgrimmer@suse.com>, Ken Dreyer <kdreyer@redhat.com>, John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, Karol Mroz <KMroz@suse.com>, Patrick Donnelly <pdonnell@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-devel-owner@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---iMGQhRfrGFip56QhnfquQnLKzn4EGhdJ8
-Content-Type: multipart/mixed; boundary="4pr2IStiPX8BIKABZWDNfahXOmcTRHdsc";
- protected-headers="v1"
-From: Kai Wagner <kwagner@suse.com>
-To: Lenz Grimmer <lgrimmer@suse.com>, Ken Dreyer <kdreyer@redhat.com>,
- John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-Message-ID: <3ec0a5d7-6a4a-9323-5488-5ff8d371333c@suse.com>
-Subject: Re: Building dashboard_v2
-References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
- <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
- <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
- <829ca7ca-8d40-adb0-d4ad-bd608a3fe351@suse.com>
-In-Reply-To: <829ca7ca-8d40-adb0-d4ad-bd608a3fe351@suse.com>
+On 2018-02-13 22:36, Yuri Weinstein wrote:
+> Details of this release summarized here
+> http://tracker.ceph.com/issues/22665#note-4
+> 
+> The following suites included:
+> 
+> rados
+> rgw
+> rbd
+> krbd
+> fs
+> kcephfs
+> multimds
+> knfs
+> hadoop - EXCLUDED
+> samba - EXCLUDED
+> ceph-deploy
+> ceph-disk
+> upgrade/client-upgrade-hammer (luminous)
+> upgrade/client-upgrade-kraken (luminous)
+> upgrade/client-upgrade-jewel (luminous)
+> upgrade/jewel-x (luminous)
+> upgrade/kraken-x (luminous)
+> upgrade/luminous-x (master) - EXCLUDED
+> powercycle
+> ceph-ansible
+> ceph-volume
+> (please speak up if something is missing)
+> 
+> Please see all details in the ticket and add comments in the tracker.
+> 
+> Seeking approval from the dev leads.
+> 
+> Issues:
+> 
+> rados - passed, Josh pls confirm approval.
+> 
+> rgw - Casey, Abhishek - do we want to ad//merge
+> https://github.com/ceph/ceph/pull/20407 ?
+> 
+> rbd, krbd - approved by Jason
+> 
+> fs, kcephfs, multimds - approved by Patrick
+> 
+> knfs - pending review/approval from Jeff 
+> (http://tracker.ceph.com/issues/22995)
+> 
+> ceph-deploy - approved by Vasu
+> 
+> upgrade/client-upgrade-kraken - Nathan, do/can we include your fix
+> into this release ?
+> 
+> upgrade/kraken-x (luminous) - some jobs still rerunning
+> 
+> upgrade/luminous-x (master) - Sage you to exclude this suite for now?
+> 
+> ceph-volume - pending approval from  Alfredo, Andrew
 
---4pr2IStiPX8BIKABZWDNfahXOmcTRHdsc
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Content-Language: en-US
+Alfredo mentioned he's working on a critical fix that needs to go in for
+12.2.3, waiting for merge + approval
 
-Valid point indeed. Thanks
+PS. for some reason replies to this thread from my email always failed. 
+Hopefully we don't get multiple copies of the same message.
 
+> 
+> Pls reply
+> 
+> Thx
+> YuriW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-On 02/14/2018 09:54 AM, Lenz Grimmer wrote:
-> The Dashboard v2 does not have any run-time dependencies on Node.JS.
-
---=20
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
-, HRB 21284 (AG N=C3=BCrnberg)
-
-
-
---4pr2IStiPX8BIKABZWDNfahXOmcTRHdsc--
-
---iMGQhRfrGFip56QhnfquQnLKzn4EGhdJ8
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJag/vDAAoJEB6MkVYW48RuNXEH/29xWG4AiE68iMe5PtVaW863
-SjTMkCUl8SuY61j/4pMnJtmY/N5Mo2fIpcPrlRKpwD0G6tP/tBH0ZsoEZsrKNrzs
-b+6z8y1GVRIOZbfUDTTXVhKcEP0SjLMwD3HmZj7Pq9oCsVTzV5tWwOJ9UUZNi8UG
-zO3xAuTtAvfmDF6KqVOvXwUQFdNsooocqNd9u+A6fkob+7HNf3HETQZHp+0WXtsX
-sDy61Pggxf8ra5eyBc0BbufkL2u+gImwvlKBE+wpL+vBTz94i3m9cQB7xIJvHoak
-YCOTxcZGKwmf1ToULw+rzChlewwpBq2bjFnJuzN7J7ibOJ7KHS6ZCEcgKMmPH5g=
-=0Gmg
------END PGP SIGNATURE-----
-
---iMGQhRfrGFip56QhnfquQnLKzn4EGhdJ8--
