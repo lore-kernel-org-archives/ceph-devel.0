@@ -1,89 +1,93 @@
-From: Kai Wagner <kwagner@suse.com>
+From: Lenz Grimmer <lgrimmer@suse.com>
 Subject: Re: Building dashboard_v2
-Date: Wed, 14 Feb 2018 07:24:25 +0100
-Message-ID: <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
+Date: Wed, 14 Feb 2018 09:54:05 +0100
+Message-ID: <829ca7ca-8d40-adb0-d4ad-bd608a3fe351@suse.com>
 References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
  <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
+ <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
+Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="pUcEkMF69d62XqC31dNXkXiLkfHwKMlNA"
+ boundary="mGhYYFgdctWanKrlnNAPqFTvGSXaqCuk4"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:40147 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:51106 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752585AbeBNGY3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Feb 2018 01:24:29 -0500
-In-Reply-To: <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
+        id S1754257AbeBNIyL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Feb 2018 03:54:11 -0500
+In-Reply-To: <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, John Spray <jspray@redhat.com>
+To: Kai Wagner <kwagner@suse.com>, Ken Dreyer <kdreyer@redhat.com>, John Spray <jspray@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---pUcEkMF69d62XqC31dNXkXiLkfHwKMlNA
-Content-Type: multipart/mixed; boundary="dK4UgJahjmbyMGdFl4a0BBtRHx7chTIuW";
+--mGhYYFgdctWanKrlnNAPqFTvGSXaqCuk4
+Content-Type: multipart/mixed; boundary="7wC3UZawLK7ZK7xxs40RRVYpHUvXSuZyN";
  protected-headers="v1"
-From: Kai Wagner <kwagner@suse.com>
-To: Ken Dreyer <kdreyer@redhat.com>, John Spray <jspray@redhat.com>
+From: Lenz Grimmer <lgrimmer@suse.com>
+To: Kai Wagner <kwagner@suse.com>, Ken Dreyer <kdreyer@redhat.com>,
+ John Spray <jspray@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
-Message-ID: <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
+Message-ID: <829ca7ca-8d40-adb0-d4ad-bd608a3fe351@suse.com>
 Subject: Re: Building dashboard_v2
 References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
  <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
-In-Reply-To: <CALqRxCy37KJeaFn5Zq-vYByKonPXOFZ_ETGoaYo2fGH8GZiCKg@mail.gmail.com>
+ <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
+In-Reply-To: <c01bb9d0-72d2-d0e9-9acf-492ef1a98b71@suse.com>
 
---dK4UgJahjmbyMGdFl4a0BBtRHx7chTIuW
+--7wC3UZawLK7ZK7xxs40RRVYpHUvXSuZyN
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
 Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
+On 02/14/2018 07:24 AM, Kai Wagner wrote:
 
+> On 02/13/2018 09:35 PM, Ken Dreyer wrote:
+>=20
+>> On Tue, Feb 13, 2018 at 8:29 AM, John Spray <jspray@redhat.com>=20
+>> wrote:
+>>=20
+>>> Not sure if there is a sufficiently trusted third party Ubuntu=20
+>>> repo to add to install_deps.sh.
+>>=20
+>> Instead of adding another repository dependency, we could not
+>> build the dashboard on Xenial, and target Ubuntu >=3D 18.04 for
+>> that.
+>>=20
+>> https://packages.ubuntu.com/bionic/nodejs
+>=20
+> You're right, but we should make sure to at least support 16.04 as=20
+> well. Lot's of folks won't be updating their underlaying OS=20
+> immediately after it's released and also it's not officially=20
+> released, so we should support the latest LTS release in my mind.
 
-On 02/13/2018 09:35 PM, Ken Dreyer wrote:
-> On Tue, Feb 13, 2018 at 8:29 AM, John Spray <jspray@redhat.com> wrote:
->> Not sure if
->> there is a sufficiently trusted third party Ubuntu repo to add to
->> install_deps.sh.
-> Instead of adding another repository dependency, we could not build
-> the dashboard on Xenial, and target Ubuntu >=3D 18.04 for that.
->
-> https://packages.ubuntu.com/bionic/nodejs
-You're right, but we should make sure to at least support 16.04 as well.
-Lot's of folks won't be updating their underlaying OS immediately after
-it's released and also it's not officially released, so we should
-support the latest LTS release in my mind.
->
-> - Ken
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+I think we need to differentiate between the platforms/version we
+support for *building* the UI code vs *running* it. The current
+discussion is about the availability of the required development
+toolchain for a given platform.
+
+The Dashboard v2 does not have any run-time dependencies on Node.JS.
+
+Lenz
 
 --=20
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
-, HRB 21284 (AG N=C3=BCrnberg)
+SUSE Linux GmbH - Maxfeldstr. 5 - 90409 Nuernberg (Germany)
+GF:Felix Imend=C3=B6rffer,Jane Smithard,Graham Norton,HRB 21284 (AG N=C3=BC=
+rnberg)
 
 
+--7wC3UZawLK7ZK7xxs40RRVYpHUvXSuZyN--
 
---dK4UgJahjmbyMGdFl4a0BBtRHx7chTIuW--
-
---pUcEkMF69d62XqC31dNXkXiLkfHwKMlNA
+--mGhYYFgdctWanKrlnNAPqFTvGSXaqCuk4
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
 
-iQEcBAEBCAAGBQJag9YZAAoJEB6MkVYW48RuB9UIAIvY7jJ/V23TNmhR+jcPsZDy
-yUtWiKBH1QLW7RRL7YIW5JemutAoddrKjxrP7UIvIfFHOSbpQ43B3WPfq0D7vUgN
-YJDGPXPljb5vb7dPeEbNAWvP1XPJApTwZUv3DWLVMwMDQxJkqgiMHEi+qP0DVVJR
-4wzeB0uSOcewAADeVXLrSVHX3/nKTdQdZUDKbRV6WFFzynYefpNyowrk2s5I8Piv
-3SsKCqMuFIWwmzwUtl2dyTkOcZYdWOD2hbZ9x8H9OMHRmsJ64ivMiV9vBW0i9hE/
-59G4is5Btbyb5azkQq8FsB3DDqazoQJcT/iEw53/Mgqll9sY/eWkdwogdYZixgQ=
-=x/CX
+iF0EARECAB0WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWoP5LQAKCRBJUOEqsnKR
+8vBaAJ9SZd/oO8L52BPhhkHm9cVXPYlxKwCfYBnMvO6T5JELxTA0Is3IoxNVJBE=
+=STGT
 -----END PGP SIGNATURE-----
 
---pUcEkMF69d62XqC31dNXkXiLkfHwKMlNA--
+--mGhYYFgdctWanKrlnNAPqFTvGSXaqCuk4--
