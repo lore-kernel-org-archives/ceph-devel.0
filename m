@@ -1,80 +1,83 @@
-From: Lenz Grimmer <lgrimmer@suse.com>
-Subject: Disabling the "old" dashboard in the dashboard v2 pull request?
-Date: Wed, 14 Feb 2018 12:44:54 +0100
-Message-ID: <8dfb4e57-8413-8fa1-6712-2ed31a8ba6a1@suse.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5"
+From: Chengguang Xu <cgxu519@icloud.com>
+Subject: Re: [PATCH] ceph: use seq_show_option for string type options
+Date: Wed, 14 Feb 2018 22:09:11 +0800
+Message-ID: <4B12D238-1885-42ED-B006-8DB6F7852E37@icloud.com>
+References: <1518485459-199037-1-git-send-email-cgxu519@icloud.com>
+ <CAOi1vP9pT2GSpOqULvrUiACZ-tAdh8bHXASyDEfqrcsyaUTFXA@mail.gmail.com>
+ <E32473B2-E7B8-4058-8FCF-CB72BCEF1EEB@icloud.com>
+ <CAOi1vP-JETNP4ou77tnDGMf4APUy8rgNF7V5Efk5Hijj_nK5YQ@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
+Content-Type: text/plain; charset=gb2312
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:36260 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S967448AbeBNLo5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Feb 2018 06:44:57 -0500
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 5813EAAF1
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Feb 2018 11:44:55 +0000 (UTC)
+Received: from pv33p36im-asmtp001.me.com ([17.142.213.62]:37277 "EHLO
+        pv33p36im-asmtp001.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030256AbeBNOJT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Feb 2018 09:09:19 -0500
+Received: from process-dkim-sign-daemon.pv33p36im-asmtp001.me.com by
+ pv33p36im-asmtp001.me.com
+ (Oracle Communications Messaging Server 8.0.1.2.20170607 64bit (built Jun  7
+ 2017)) id <0P4500C008E1PI00@pv33p36im-asmtp001.me.com> for
+ ceph-devel@vger.kernel.org; Wed, 14 Feb 2018 14:09:18 +0000 (GMT)
+In-reply-to: <CAOi1vP-JETNP4ou77tnDGMf4APUy8rgNF7V5Efk5Hijj_nK5YQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5
-Content-Type: multipart/mixed; boundary="zdSBXENmSdrB7WWkB81h0uolaTO8Wik3c";
- protected-headers="v1"
-From: Lenz Grimmer <lgrimmer@suse.com>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Message-ID: <8dfb4e57-8413-8fa1-6712-2ed31a8ba6a1@suse.com>
-Subject: Disabling the "old" dashboard in the dashboard v2 pull request?
 
---zdSBXENmSdrB7WWkB81h0uolaTO8Wik3c
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+> =D4=DA 2018=C4=EA2=D4=C213=C8=D5=A3=AC=CF=C2=CE=E77:52=A3=ACIlya =
+Dryomov <idryomov@gmail.com> =D0=B4=B5=C0=A3=BA
+>=20
+> On Tue, Feb 13, 2018 at 11:55 AM, Chengguang Xu <cgxu519@icloud.com> =
+wrote:
+>>=20
+>>> =D4=DA 2018=C4=EA2=D4=C213=C8=D5=A3=AC=CF=C2=CE=E75:45=A3=ACIlya =
+Dryomov <idryomov@gmail.com> =D0=B4=B5=C0=A3=BA
+>>>=20
+>>> On Tue, Feb 13, 2018 at 2:30 AM, Chengguang Xu <cgxu519@icloud.com> =
+wrote:
+>>>> Using seq_show_option to replace seq_printf for string type =
+options.
+>>>>=20
+>>>> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+>>>> ---
+>>>> fs/ceph/super.c | 4 ++--
+>>>> 1 file changed, 2 insertions(+), 2 deletions(-)
+>>>>=20
+>>>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>>>> index a62d2a9..d8a33ad 100644
+>>>> --- a/fs/ceph/super.c
+>>>> +++ b/fs/ceph/super.c
+>>>> @@ -512,7 +512,7 @@ static int ceph_show_options(struct seq_file =
+*m, struct dentry *root)
+>>>>               seq_puts(m, ",nodcache");
+>>>>       if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
+>>>>               if (fsopt->fscache_uniq)
+>>>> -                       seq_printf(m, ",fsc=3D%s", =
+fsopt->fscache_uniq);
+>>>> +                       seq_show_option(m, "fsc", =
+fsopt->fscache_uniq);
+>>>>               else
+>>>>                       seq_puts(m, ",fsc");
+>>>=20
+>>> Hi Chengguang,
+>>>=20
+>>> seq_show_option() should be able to handle !fsopt->fscache_uniq?
+>>=20
+>> Hi Ilya
+>>=20
+>> Sorry, I don=A1=AFt get your point here.
+>=20
+> I think it can be just
+>=20
+>    if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE)
+>            seq_show_option(m, "fsc", fsopt->fscache_uniq);
 
-Hi,
-
-this question came up during our dashboard v2 sync call yesterday. The
-first milestone for dashboard v2 is reaching feature parity with the
-existing dashboard that is currently included in Luminous and master.
-
-Once this point has been reached, we would like to submit our initial PR
-against master for inclusion into the Mimic release.
-
-Should this PR also take care of removing the existing dashboard code
-and introduce dashboard v2 as the replacement? Currently, we develop the
-code in parallel to the existing dashboard, using "dashboard_v2" as the
-directory name and namespace in several places.
-
-It would be much easier for us if we could start using the "dashboard"
-namespace right away, rather than replacing that string in many places
-after the PR was merged and we decided to retire the original dashboard.
-
-Are there any objections/concerns about aiming at replacing the original
-dashboard with the initial v2 submission?
+Yes, it can work well in this case, I=A1=AFll resend revised version.
 
 Thanks,
-
-Lenz
-
---=20
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 Nuernberg (Germany)
-GF:Felix Imend=C3=B6rffer,Jane Smithard,Graham Norton,HRB 21284 (AG N=C3=BC=
-rnberg)
+Chengguang.=20
 
 
---zdSBXENmSdrB7WWkB81h0uolaTO8Wik3c--
 
---Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iF0EARECAB0WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWoQhNgAKCRBJUOEqsnKR
-8t1xAJ9Wml5EtyQOpGHSDrWFY7f6eNXeBACeML7uL8fOJHQwDhNBRjLcLbgOMLs=
-=2JFX
------END PGP SIGNATURE-----
-
---Zc1kIKKOTteAcu0LHY8AXCObRrpOXRDh5--
