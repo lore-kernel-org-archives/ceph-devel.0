@@ -1,86 +1,40 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: 12.2.3 QE Luminous validation status
-Date: Thu, 15 Feb 2018 12:57:42 -0500
-Message-ID: <CA+aFP1Ah1EBqyeCBVOZNCymNK+-qU_zzON3Er1j5fe=R5oONDQ@mail.gmail.com>
-References: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
- <1518632155.13566.22.camel@redhat.com> <CAMMFjmFrssPwEx_9YGkeJsW941YHsNin9+Tdua8FtAgJJd=7wg@mail.gmail.com>
- <CA+aFP1B5qOcpWY+KD8Qm2RNX=mCimAhAf0eFT-T4ruGj6P2WhQ@mail.gmail.com> <CAMMFjmFpiWRP1Kgb_E6q7O1YUmhfS_7LPZyfJ-aBMahuRMkH3g@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Jeff Layton <jlayton@samba.org>
+Subject: Re: [PATCH v2] Samba RADOS service registration
+Date: Thu, 15 Feb 2018 13:09:45 -0500
+Message-ID: <1518718185.4086.45.camel@samba.org>
+References: <20180213022540.5f9686b7@suse.de>
+         <20180213202727.77175e21@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:44036 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1165981AbeBOR5n (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Feb 2018 12:57:43 -0500
-Received: by mail-yw0-f172.google.com with SMTP id l34so311737ywk.11
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Feb 2018 09:57:43 -0800 (PST)
-In-Reply-To: <CAMMFjmFpiWRP1Kgb_E6q7O1YUmhfS_7LPZyfJ-aBMahuRMkH3g@mail.gmail.com>
+Received: from hr2.samba.org ([144.76.82.148]:63708 "EHLO hr2.samba.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1163370AbeBOSJt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Feb 2018 13:09:49 -0500
+In-Reply-To: <20180213202727.77175e21@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Jeff Layton <jlayton@redhat.com>, Sage Weil <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, Karol Mroz <KMroz@suse.com>, Patrick Donnelly <pdonnell@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, ceph-qe-team <ceph-qe-team@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>
+To: David Disseldorp <ddiss@suse.de>, Samba Technical <samba-technical@lists.samba.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks -- just looks like that test needs the same blacklist applied
-that PR 20053 performed on the other kraken-x upgrade test (or we just
-fix the broken builders for kraken so the broken test can be yanked).
-
-On Thu, Feb 15, 2018 at 12:33 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> Jason
+On Tue, 2018-02-13 at 20:27 +0100, David Disseldorp wrote:
 >
-> http://pulpito.ceph.com/yuriw-2018-02-13_21:14:53-upgrade:kraken-x-luminous-distro-basic-smithi/
->
->
-> On Thu, Feb 15, 2018 at 8:58 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> Yuri,
->>
->> On Thu, Feb 15, 2018 at 11:55 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
->>> Outstanding issues:
->>>
->>> upgrade/kraken-x => http://tracker.ceph.com/issues/22740 assuming
->>> Jason, Sage approve
->>
->> Do you have a link to the associated failed test run? I would have
->> expected this to have been fixed indirectly by
->> https://github.com/ceph/ceph/pull/20053 as a workaround for the broken
->> kraken builders.
->>
->>> knfs => http://tracker.ceph.com/issues/22995 Sage pls approve.
->>>
->>> Abhishek, Alfredo - assuming all agreed and Sage approves, we can
->>> publish 12.2.3 any time.
->>>
->>> Thx
->>> YuriW
->>>
->>> On Wed, Feb 14, 2018 at 10:15 AM, Jeff Layton <jlayton@redhat.com> wrote:
->>>> On Tue, 2018-02-13 at 13:36 -0800, Yuri Weinstein wrote:
->>>>
->>>>>
->>>>> knfs - pending review/approval from Jeff (http://tracker.ceph.com/issues/22995)
->>>>>
->>>>
->>>> Ok, I've flogged it about as far as I can. The problem is that we see
->>>> OSD_DOWN in the logs after they run. It doesn't seem to have crashed --
->>>> it just goes unresponsive to pings for a little while.
->>>>
->>>> That's about as far as I can carry it -- at this point it'd be nice to
->>>> have someone with more familiarity with the OSD code take a look and see
->>>> what they can tell.
->>>>
->>>> FWIW, these tests seem to routinely fail on smithi, but we have at least
->>>> one run on OVH hosts that passed. This leads be to believe that it's
->>>> something specific to smithi: flaky hw maybe? or possibly load related?
->>>>
->>>> --
->>>> Jeff Layton <jlayton@redhat.com>
->>
->>
->>
->> --
->> Jason
+> +	instance_guid = rados_get_instance_id(state->cluster);
+> +
+> +	ret = ceph_service_instance_gen(instance_buf, sizeof(instance_buf),
+> +					daemon, instance_guid);
+> +	if (ret < 0) {
+> +		goto out_mem_free;
+> +	}
+> +
+> +	DBG_DEBUG("registering as %s with %s Ceph cluster\n", instance_buf,
+> +		  (cluster_name != NULL ? cluster_name : "default"));
+> +
+> +	ret = rados_service_register(state->cluster, "samba", instance_buf, "");
 
-
-
+IIUC, if the program (samba in this case) dies, and then is restarted
+(maybe host reboots?), it'll get a new instance_guid, right? Or am I
+misunderstanding what rados_get_instance_id will return here?
 -- 
-Jason
+Jeff Layton <jlayton@samba.org>
