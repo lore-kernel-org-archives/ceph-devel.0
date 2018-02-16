@@ -1,97 +1,88 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: 12.2.3 QE Luminous validation status
-Date: Thu, 15 Feb 2018 17:22:02 -0800
-Message-ID: <CAMMFjmEAmOcGZuyqiS_Xypz03O2f7bpUWpN=rH2CYoXGEsmzyQ@mail.gmail.com>
-References: <CAMMFjmHppXYtqbUA7a6DE3g2fH_pF60BzMtKPhW6y1uVGru0Nw@mail.gmail.com>
- <1518632155.13566.22.camel@redhat.com> <CAMMFjmFrssPwEx_9YGkeJsW941YHsNin9+Tdua8FtAgJJd=7wg@mail.gmail.com>
- <CA+aFP1B5qOcpWY+KD8Qm2RNX=mCimAhAf0eFT-T4ruGj6P2WhQ@mail.gmail.com>
- <CAMMFjmFpiWRP1Kgb_E6q7O1YUmhfS_7LPZyfJ-aBMahuRMkH3g@mail.gmail.com> <CA+aFP1Ah1EBqyeCBVOZNCymNK+-qU_zzON3Er1j5fe=R5oONDQ@mail.gmail.com>
+From: Kai Wagner <kwagner@suse.com>
+Subject: Re: Building dashboard_v2
+Date: Fri, 16 Feb 2018 07:24:09 +0100
+Message-ID: <0c2f6305-1e43-62ca-4c60-aefcb7a8e4ed@suse.com>
+References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
+ <1419a76e-dc93-ab50-6c74-27efd1bcf4fe@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="C3j9ScuHH8u2ROjVL1efa7vFm5bCof3sx"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f47.google.com ([74.125.83.47]:41752 "EHLO
-        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757057AbeBPBWD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Feb 2018 20:22:03 -0500
-Received: by mail-pg0-f47.google.com with SMTP id t4so1222685pgp.8
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Feb 2018 17:22:03 -0800 (PST)
-In-Reply-To: <CA+aFP1Ah1EBqyeCBVOZNCymNK+-qU_zzON3Er1j5fe=R5oONDQ@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:54799 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753254AbeBPGYM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 16 Feb 2018 01:24:12 -0500
+In-Reply-To: <1419a76e-dc93-ab50-6c74-27efd1bcf4fe@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dillaman, Jason" <dillaman@redhat.com>
-Cc: Jeff Layton <jlayton@redhat.com>, Sage Weil <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, Karol Mroz <KMroz@suse.com>, Patrick Donnelly <pdonnell@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, ceph-qe-team <ceph-qe-team@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>
+To: Ricardo Dias <rdias@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: John Spray <jspray@redhat.com>
 
-Outstanding issues remaining:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--C3j9ScuHH8u2ROjVL1efa7vFm5bCof3sx
+Content-Type: multipart/mixed; boundary="UlKFflbjCk4vcnnlXaEz7UNWAhsOpmM47";
+ protected-headers="v1"
+From: Kai Wagner <kwagner@suse.com>
+To: Ricardo Dias <rdias@suse.com>,
+ Ceph Development <ceph-devel@vger.kernel.org>
+Cc: John Spray <jspray@redhat.com>
+Message-ID: <0c2f6305-1e43-62ca-4c60-aefcb7a8e4ed@suse.com>
+Subject: Re: Building dashboard_v2
+References: <CALe9h7fAMGtsami7ov_=yMY4EUuh2QqRmqQidikEi6dWvgEm3g@mail.gmail.com>
+ <1419a76e-dc93-ab50-6c74-27efd1bcf4fe@suse.com>
+In-Reply-To: <1419a76e-dc93-ab50-6c74-27efd1bcf4fe@suse.com>
 
-upgrade/kraken-x => http://tracker.ceph.com/issues/22740 fixed by
-https://github.com/ceph/ceph/pull/20451 (thanks for clues Jason!),
-Abhishek assigned to you for merge
+--UlKFflbjCk4vcnnlXaEz7UNWAhsOpmM47
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-US
 
-knfs => http://tracker.ceph.com/issues/22995 Sage pls approve.
+Hey,
+
+I tested the build on ubuntu-16.04 and 18.04 without any problems.
+
+Well done!
+
+Kai
 
 
-
-On Thu, Feb 15, 2018 at 9:57 AM, Jason Dillaman <jdillama@redhat.com> wrote:
-> Thanks -- just looks like that test needs the same blacklist applied
-> that PR 20053 performed on the other kraken-x upgrade test (or we just
-> fix the broken builders for kraken so the broken test can be yanked).
+On 02/14/2018 05:34 PM, Ricardo Dias wrote:
+> Hi,
 >
-> On Thu, Feb 15, 2018 at 12:33 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
->> Jason
->>
->> http://pulpito.ceph.com/yuriw-2018-02-13_21:14:53-upgrade:kraken-x-luminous-distro-basic-smithi/
->>
->>
->> On Thu, Feb 15, 2018 at 8:58 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>> Yuri,
->>>
->>> On Thu, Feb 15, 2018 at 11:55 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
->>>> Outstanding issues:
->>>>
->>>> upgrade/kraken-x => http://tracker.ceph.com/issues/22740 assuming
->>>> Jason, Sage approve
->>>
->>> Do you have a link to the associated failed test run? I would have
->>> expected this to have been fixed indirectly by
->>> https://github.com/ceph/ceph/pull/20053 as a workaround for the broken
->>> kraken builders.
->>>
->>>> knfs => http://tracker.ceph.com/issues/22995 Sage pls approve.
->>>>
->>>> Abhishek, Alfredo - assuming all agreed and Sage approves, we can
->>>> publish 12.2.3 any time.
->>>>
->>>> Thx
->>>> YuriW
->>>>
->>>> On Wed, Feb 14, 2018 at 10:15 AM, Jeff Layton <jlayton@redhat.com> wrote:
->>>>> On Tue, 2018-02-13 at 13:36 -0800, Yuri Weinstein wrote:
->>>>>
->>>>>>
->>>>>> knfs - pending review/approval from Jeff (http://tracker.ceph.com/issues/22995)
->>>>>>
->>>>>
->>>>> Ok, I've flogged it about as far as I can. The problem is that we see
->>>>> OSD_DOWN in the logs after they run. It doesn't seem to have crashed --
->>>>> it just goes unresponsive to pings for a little while.
->>>>>
->>>>> That's about as far as I can carry it -- at this point it'd be nice to
->>>>> have someone with more familiarity with the OSD code take a look and see
->>>>> what they can tell.
->>>>>
->>>>> FWIW, these tests seem to routinely fail on smithi, but we have at least
->>>>> one run on OVH hosts that passed. This leads be to believe that it's
->>>>> something specific to smithi: flaky hw maybe? or possibly load related?
->>>>>
->>>>> --
->>>>> Jeff Layton <jlayton@redhat.com>
->>>
->>>
->>>
->>> --
->>> Jason
+> The PR https://github.com/openattic/ceph/pull/91 updates
+> install-deps.sh script to install the development dependencies
+> required by dashboard_v2.
 >
+> Since I can only test this in openSUSE based distros in a reliable way
+> I ask if there are some volunteers that can test this in other distros.=
+
 >
->
-> --
-> Jason
+> Thanks,=20
+
+--=20
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
+, HRB 21284 (AG N=C3=BCrnberg)
+
+
+
+--UlKFflbjCk4vcnnlXaEz7UNWAhsOpmM47--
+
+--C3j9ScuHH8u2ROjVL1efa7vFm5bCof3sx
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJahnkJAAoJEB6MkVYW48RuWJwH/R6y/6E1ErjklxZWtVmCsXcc
+YTXLlA2T1nl19ciOzoNs4qpF3I7zXRhmSLIvwGYlQbbV0eXPtmKnFB+/SUcG6h8/
+qsS4wZ5MmpwP80DIu71bsbo5TMazPIYcDo5oh0BOVCHWV03Nud+K8n2brng+aw48
+Bc9l82iVFsEeXADfwEb5kZFnf+kUBgCTZnMrgfZpXNYqhFip57YsqFzeFQQhyJOj
+pyQiT3LQf0bgINR0+OtcG9jLvuya8p/VAjBezOJ2Y9fDt99Bb7F69Q559vxJHneU
+Rh3afpj4voZ2mvYIKtlC9UH3N1U1hmhl8F9gKsv08FRU7R8WwYT0YeZ/qk1/iMk=
+=hhhh
+-----END PGP SIGNATURE-----
+
+--C3j9ScuHH8u2ROjVL1efa7vFm5bCof3sx--
