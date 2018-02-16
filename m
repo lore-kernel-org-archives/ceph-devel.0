@@ -1,72 +1,70 @@
-From: Maged Mokhtar <mmokhtar@petasan.org>
-Subject: Re: wip-fancy-striping in ceph/ceph-client
-Date: Fri, 16 Feb 2018 18:30:11 +0200
-Message-ID: <acdbe5717d29dccdb7dae03696204886@petasan.org>
-References: <CAOi1vP-4_gmH2DqL2EN2_MkLju3frqBkbun7P=U=HrMUMLnOgw@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: LOCK_SYNC_MIX state makes "getattr" operations extremely slow
+ when there are lots of clients issue writes or reads to the same file
+Date: Fri, 16 Feb 2018 15:53:51 -0800
+Message-ID: <CAJ4mKGaMnDS6aCT9Go0KwnH-m5Lmi+9b3cSNAd_Dv2D6hmO3aw@mail.gmail.com>
+References: <CAJACTudeJCqQiEOxuSxfFsH2KdnSeors-6cCvx9jh-Nn8u6huA@mail.gmail.com>
+ <CAAM7YA=_+WQc+_y9ukX68DPzFBUotEcGXny1BvuHekvs_Q1kXQ@mail.gmail.com>
+ <CAJACTud5FdaoybJ7W_CTQCRqZVBghHMwqGbsSyX3SZEpOvmN+A@mail.gmail.com>
+ <CAJACTucSQM8hrCfj0aY4nsVhyFeB+PwxHGOfwxao5tnqxwDTtg@mail.gmail.com>
+ <CAJACTucKaWvtAKKnPQVQ3EhkeEXTncJgFu2uJ6V2T0NBpkqqqg@mail.gmail.com>
+ <CAAM7YA=pvgX2ty0B=FDsixp_A52rfvKVt2FUp-D8jJEK8z1V8A@mail.gmail.com>
+ <CAJ4mKGapADYxUckAjFHHOXroFFvbYwW1XXEc2xQ1bao6PEOoWg@mail.gmail.com> <CAJACTuf7XgxiY0kF2y9b__F5AThHefD-4Zzu89-jc96ZgVc_EQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gproxy1-pub.mail.unifiedlayer.com ([69.89.25.95]:59604 "EHLO
-        outbound-ss-1812.hostmonster.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1755551AbeBPQvE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Feb 2018 11:51:04 -0500
-Received: from cmgw3 (cmgw4 [10.0.90.84])
-        by gproxy1.mail.unifiedlayer.com (Postfix) with ESMTP id 63588175B74
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Feb 2018 09:30:15 -0700 (MST)
-In-Reply-To: <CAOi1vP-4_gmH2DqL2EN2_MkLju3frqBkbun7P=U=HrMUMLnOgw@mail.gmail.com>
+Received: from mail-io0-f175.google.com ([209.85.223.175]:44067 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750824AbeBPXxw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Feb 2018 18:53:52 -0500
+Received: by mail-io0-f175.google.com with SMTP id z6so5826618iob.11
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Feb 2018 15:53:52 -0800 (PST)
+In-Reply-To: <CAJACTuf7XgxiY0kF2y9b__F5AThHefD-4Zzu89-jc96ZgVc_EQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@linaro.org>, David Disseldorp <ddiss@suse.de>
+To: Xuehan Xu <xxhdx1985126@gmail.com>
+Cc: "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 2018-02-13 11:58, Ilya Dryomov wrote:
+On Mon, Feb 12, 2018 at 6:06 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>> I've been following this discussion casually and am a bit confused.
+>> The Client will happily send off an explicit getattr request if it
+>> doesn't have enough capabilities to answer it locally.
+>>
+>> Is the problem here that the MDS is not answering all pending
+>> CEPH_MDS_OP_GETATTR requests in one go? (Which I suppose it doesn't
+>> really have a way of doing, if they haven't all been processed into
+>> interior pending locks — but I think they should have gotten there if
+>> caps are being recalled?)
+>> Or are the clients for some reason requesting capabilities instead of
+>> the single getattr message?
+>> -Greg
+>
+> Hi, Greg.
+>
+> In our case, the mds does answer each CEPH_MDS_OP_GETATTR request
+> seperately, even when there caps are recalled. According to our mds
+> log, when the caps are recalled, all of these CEPH_MDS_OP_GETATTR
+> requests are added to the waiter queue, and when the filelock goes
+> into a stable state, they would be dispatched to be reprocessed one by
+> one. However, as there are writing clients that want "Fw", the very
+> first CEPH_MDS_OP_GETATTR request of those in the waiter queue would,
+> again, turn the filelock into LOCK_SYNC_MIX state which would blocked
+> all remaining CEPH_MDS_OP_GETATTR requests to get processed.
 
-> Hello,
-> 
-> I've pushed wip-fancy-striping with my striping v2 patches.  I didn't
-> want to patch bomb the list and opened a dummy PR for feedback:
-> 
-> https://github.com/ceph/ceph-client/pull/19
-> 
-> As this is a full striping v2 implementation with adjacent extent
-> merging and no limitations on parent layouts, the patch set is very
-> invasive -- it's basically a rewrite of the entire I/O path.  Any
-> review comments and testing cycles would be greatly appreciated!
-> 
-> Thanks,
-> 
-> Ilya
+Hmm, that makes some sense but is sad. I think to resolve this we’d
+need the MDS to recognize “repetitions” of the same op type that can
+be serviced in a single lock operation for essentially no extra
+(locking) cost, but I’m not sure how we’d integrate that with the
+capability locking going on.
+I guess that when we do locking operations, if they are a single
+request and don't involve giving the client caps, maybe we could stick
+stick any requests that require the same set of locks on a shared data
+structure? And then run through them all when we get granted locks and
+reply to those requests? That may not involve any real fairness
+tradeoffs, as long as we're careful to only do stuff that doesn't
+require extra effort (beyond queueing up the message send).
 
-Hi Ilya,
-
-I looked at the patches, it is not a small change but is very nicely 
-done. i was surprised since even though you added complex feature 
-support, the new code is less (in rbd.c) and is clearer. The different 
-fill from functions and different osd request creation functions is a 
-very clean design.
-
-If i may say any minor/cosmetic comments:
-
-Out of all the old code i was happy to see removed, the only thing i 
-would "miss" is the obj_requests list in the rbd_img_request struct. It 
-is not needed now, but i tend to think it is logical to have a place to 
-find all osd requests for a particular top block layer request. it maybe 
-just a warm a and fuzzy feeling to have this control, but it could be 
-useful for debugging or if in the future we think of implementing a task 
-abort operation and need to find the osd inflight ops in a quick way.
-
-Another cosmetic thing, i tend to think the new object <-> file extent 
-conversion be placed in a separate new file rather than osdmap.c
-
-I would not be able to do full test any time soon, but i do intend to do 
-some manual testing of basic functionality next week. i have in mind 
-writing data pattern with each value repeating the size of stripe unit 
-and doing a mix of read/write interchangeably between rbd and librbd, i 
-would also test copyup functionality in clones. I will let you know if i 
-do find any issues.
-
-Cheers
-Maged
+But I haven't looked at the data structures enough lately to have any
+idea if something like this is really feasible.
+-Greg
