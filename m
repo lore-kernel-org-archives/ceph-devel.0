@@ -1,70 +1,79 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: LOCK_SYNC_MIX state makes "getattr" operations extremely slow
- when there are lots of clients issue writes or reads to the same file
-Date: Fri, 16 Feb 2018 15:53:51 -0800
-Message-ID: <CAJ4mKGaMnDS6aCT9Go0KwnH-m5Lmi+9b3cSNAd_Dv2D6hmO3aw@mail.gmail.com>
-References: <CAJACTudeJCqQiEOxuSxfFsH2KdnSeors-6cCvx9jh-Nn8u6huA@mail.gmail.com>
- <CAAM7YA=_+WQc+_y9ukX68DPzFBUotEcGXny1BvuHekvs_Q1kXQ@mail.gmail.com>
- <CAJACTud5FdaoybJ7W_CTQCRqZVBghHMwqGbsSyX3SZEpOvmN+A@mail.gmail.com>
- <CAJACTucSQM8hrCfj0aY4nsVhyFeB+PwxHGOfwxao5tnqxwDTtg@mail.gmail.com>
- <CAJACTucKaWvtAKKnPQVQ3EhkeEXTncJgFu2uJ6V2T0NBpkqqqg@mail.gmail.com>
- <CAAM7YA=pvgX2ty0B=FDsixp_A52rfvKVt2FUp-D8jJEK8z1V8A@mail.gmail.com>
- <CAJ4mKGapADYxUckAjFHHOXroFFvbYwW1XXEc2xQ1bao6PEOoWg@mail.gmail.com> <CAJACTuf7XgxiY0kF2y9b__F5AThHefD-4Zzu89-jc96ZgVc_EQ@mail.gmail.com>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Re: bi-directional cloud sync
+Date: Fri, 16 Feb 2018 20:21:08 -0500
+Message-ID: <CAKOnarmWwnrcjFQiFGzABK-uCTSK9rRBeDsaeZz6BK=ULFUfKQ@mail.gmail.com>
+References: <CADRKj5T2xOW3Lyb+vxtm6E09GtyCZPMQCdWHSDqph2Y9FwMmeA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:44067 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750824AbeBPXxw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Feb 2018 18:53:52 -0500
-Received: by mail-io0-f175.google.com with SMTP id z6so5826618iob.11
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Feb 2018 15:53:52 -0800 (PST)
-In-Reply-To: <CAJACTuf7XgxiY0kF2y9b__F5AThHefD-4Zzu89-jc96ZgVc_EQ@mail.gmail.com>
+Received: from mail-it0-f45.google.com ([209.85.214.45]:34928 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750948AbeBQBVJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Feb 2018 20:21:09 -0500
+Received: by mail-it0-f45.google.com with SMTP id v194so3412352itb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Feb 2018 17:21:09 -0800 (PST)
+In-Reply-To: <CADRKj5T2xOW3Lyb+vxtm6E09GtyCZPMQCdWHSDqph2Y9FwMmeA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Casey Bodley <cbodley@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, "Weil, Sage" <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Orit Wasserman <owasserm@redhat.com>
 
-On Mon, Feb 12, 2018 at 6:06 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> I've been following this discussion casually and am a bit confused.
->> The Client will happily send off an explicit getattr request if it
->> doesn't have enough capabilities to answer it locally.
->>
->> Is the problem here that the MDS is not answering all pending
->> CEPH_MDS_OP_GETATTR requests in one go? (Which I suppose it doesn't
->> really have a way of doing, if they haven't all been processed into
->> interior pending locks — but I think they should have gotten there if
->> caps are being recalled?)
->> Or are the clients for some reason requesting capabilities instead of
->> the single getattr message?
->> -Greg
+Hi,
+
+On Fri, Feb 16, 2018 at 8:16 PM, Yehuda Sadeh-Weinraub
+<yehuda@redhat.com> wrote:
+> Now that the sync-to-the-cloud work is almost complete, I was thinking
+> a bit and did some research about bi-directional sync. The big
+> difficulty I had with the syncing from the cloud process is the need
+> to rework the whole data sync paths where we identify changes. These
+> are quite complicated, and these kind of changes are quite a big
+> project. I'm not quite sure now that this is needed.
+> What I think we could do in a relatively easy (and less risky) way is
+> that instead of embedding a new mechanism within the sync logic, we
+> can create a module that turns upstream cloud changes into the
+> existing rgw logs: that is, data log, and bucket index logs (no
+> metadata log needed).
+
+This is clean, but naively seems to induce a lot of transient OMAP i/o?
+
+ In this way we break the problem into two
+> separate issues, where one of the issues is already solved. The
+> ingesting rgw could then do the same work it is doing with regular
+> zones (fetching these logs, and pulling the data from a remote
+> endpoint) -- albeit with various slight changes that are required
+> since we can't have some of the special apis that we created to assist
+> us.
+> We'll need to see how these could be replaced and what will be the
+> trade offs, but we'll need to do that anyway with any solution.
+> The changes discovery module that will turn remote cloud changes into
+> local logs could do it by either polling the remote endpoints, or (for
+> S3 for example) could use buckets notifications mechanism.
+
+If AWS makes this efficient, sounds reasonable.
+
+ It will
+> build its local changes logs by setting new entries on them according
+> to the changes it identifies. The radosgw zone that will sync from the
+> cloud will have two endpoints one that will be used to fetch the the
+> logs, and another one that will be used to sync in the data.
+> I'm a bit simplifying it, there are a few more issues there, but
+> that's the gist of it.
 >
-> Hi, Greg.
+> Any thoughts?
 >
-> In our case, the mds does answer each CEPH_MDS_OP_GETATTR request
-> seperately, even when there caps are recalled. According to our mds
-> log, when the caps are recalled, all of these CEPH_MDS_OP_GETATTR
-> requests are added to the waiter queue, and when the filelock goes
-> into a stable state, they would be dispatched to be reprocessed one by
-> one. However, as there are writing clients that want "Fw", the very
-> first CEPH_MDS_OP_GETATTR request of those in the waiter queue would,
-> again, turn the filelock into LOCK_SYNC_MIX state which would blocked
-> all remaining CEPH_MDS_OP_GETATTR requests to get processed.
+> Yehuda
 
-Hmm, that makes some sense but is sad. I think to resolve this we’d
-need the MDS to recognize “repetitions” of the same op type that can
-be serviced in a single lock operation for essentially no extra
-(locking) cost, but I’m not sure how we’d integrate that with the
-capability locking going on.
-I guess that when we do locking operations, if they are a single
-request and don't involve giving the client caps, maybe we could stick
-stick any requests that require the same set of locks on a shared data
-structure? And then run through them all when we get granted locks and
-reply to those requests? That may not involve any real fairness
-tradeoffs, as long as we're careful to only do stuff that doesn't
-require extra effort (beyond queueing up the message send).
+Matt
 
-But I haven't looked at the data structures enough lately to have any
-idea if something like this is really feasible.
--Greg
+-- 
+
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
