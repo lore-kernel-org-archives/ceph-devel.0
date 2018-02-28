@@ -1,64 +1,57 @@
-From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Subject: Luminous v12.2.4 released
-Date: Wed, 28 Feb 2018 16:46:07 +0100
-Message-ID: <87a7vtdsn4.fsf@suse.com>
+From: Dan Mick <dmick-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Developer Monthly - March 2018
+Date: Wed, 28 Feb 2018 14:44:09 -0800
+Message-ID: <0883251f-543d-077f-edc6-82c50ee5d533@redhat.com>
+References: <CAB0WNshkJ6LRpPxt1hPkgfjEgEaJSDvsPH7mVfQE-mpoZSEKfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAB0WNshkJ6LRpPxt1hPkgfjEgEaJSDvsPH7mVfQE-mpoZSEKfA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-ClRoaXMgaXMgdGhlIGZvdXJ0aCBidWdmaXggcmVsZWFzZSBvZiBMdW1pbm91cyB2MTIuMi54IGxv
-bmcgdGVybSBzdGFibGUKcmVsZWFzZSBzZXJpZXMuIFRoaXMgd2FzIHByaW1hcmlseSBpbnRlbmRl
-ZCB0byBmaXggYSBmZXcgYnVpbGQsCmNlcGgtdm9sdW1lL2NlcGgtZGlzayBpc3N1ZXMgZnJvbSAx
-Mi4yLjMgYW5kIGEgZmV3IFJHVyBpc3N1ZXMuIFdlCnJlY29tbWVuZCBhbGwgdGhlIHVzZXJzIG9m
-IDEyLjIueCBzZXJpZXMgdG8gdXBkYXRlLiBBIGZ1bGwgY2hhbmdlbG9nIGlzCmFsc28gcHVibGlz
-aGVkIGF0IHRoZSBvZmZpY2lhbCByZWxlYXNlIGJsb2cgYXQKaHR0cHM6Ly9jZXBoLmNvbS9yZWxl
-YXNlcy92MTItMi00LWx1bWlub3VzLXJlbGVhc2VkLwoKTm90YWJsZSBDaGFuZ2VzCi0tLS0tLS0t
-LS0tLS0tLQoqIGNtYWtlOiBjaGVjayBib290c3RyYXAuc2ggaW5zdGVhZCBiZWZvcmUgZG93bmxv
-YWRpbmcgYm9vc3QgKGlzc3VlIzIzMDcxLCBwciMyMDUxNSwgS2VmdSBDaGFpKQoqIGNvcmU6IEJh
-Y2twb3J0IG9mIGNhY2hlIG1hbmlwdWxhdGlvbjogaXNzdWVzICMyMjYwMyBhbmQgIzIyNjA0IChp
-c3N1ZSMyMjYwNCwgaXNzdWUjMjI2MDMsIHByIzIwMzUzLCBBZGFtIEMuIEVtZXJzb24pCiogY29y
-ZTogU25hcHNldCBpbmNvbnNpc3RlbmN5IGlzIGRldGVjdGVkIHdpdGggaXRzIG93biBlcnJvciAo
-aXNzdWUjMjI5OTYsIHByIzIwNTAxLCBEYXZpZCBaYWZtYW4pCiogdG9vbHM6IGNlcGgtb2JqZWN0
-c3RvcmUtdG9vbDogIiRPQkogZ2V0LW9tYXBoZHIiIGFuZCAiJE9CSiBsaXN0LW9tYXAiIHNjYW4g
-YWxsIHBncyBpbnN0ZWFkIG9mIHVzaW5nIHNwZWNpZmljIHBnIChpc3N1ZSMyMTMyNywgcHIjMjAy
-ODMsIERhdmlkIFphZm1hbikKKiBjZXBoLXZvbHVtZTogd2FybiBvbiBtaXggb2YgZmlsZXN0b3Jl
-IGFuZCBibHVlc3RvcmUgZmxhZ3MgKGlzc3VlIzIzMDAzLCBwciMyMDU2OCwgQWxmcmVkbyBEZXph
-KQoqIGNlcGgtdm9sdW1lOiBhZGRzIHN1cHBvcnQgdG8gemFwIGVuY3J5cHRlZCBkZXZpY2VzIChp
-c3N1ZSMyMjg3OCwgcHIjMjA1NDUsIEFuZHJldyBTY2hvZW4pCiogY2VwaC12b2x1bWU6IGxvZyB0
-aGUgY3VycmVudCBydW5uaW5nIGNvbW1hbmQgZm9yIGVhc2llciBkZWJ1Z2dpbmcgKGlzc3VlIzIz
-MDA0LCBwciMyMDU5NywgQW5kcmV3IFNjaG9lbikKKiBjb3JlOiBsYXN0LXN0YXQtc2VxIHJldHVy
-bnMgMCBiZWNhdXNlIG9zZCBzdGF0cyBhcmUgY2xlYXJlZCAoaXNzdWUjMjMwOTMsIHByIzIwNTQ4
-LCBTYWdlIFdlaWwsIERhdmlkIFphZm1hbikKKiByZ3c6ICBtYWtlIGluaXQgZW52IG1ldGhvZHMg
-cmV0dXJuIGFuIGVycm9yIChpc3N1ZSMyMzAzOSwgcHIjMjA1NjQsIEFiaGlzaGVrIExla3NobWFu
-YW4pCiogcmd3OiBVUkwtZGVjb2RlIFMzIGFuZCBTd2lmdCBvYmplY3QtY29weSBVUkxzIChpc3N1
-ZSMyMjEyMSwgaXNzdWUjMjI3MjksIHByIzIwMjM2LCBNYWxjb2xtIExlZSwgTWF0dCBCZW5qYW1p
-bikKKiByZ3c6IHBhcnNlIG9sZCByZ3dfb2JqIHdpdGggbmFtZXNwYWNlIGNvcnJlY3RseSAoaXNz
-dWUjMjI5ODIsIHByIzIwNTY2LCBZZWh1ZGEgU2FkZWgpCiogcmd3OiByZXR1cm4gdmFsaWQgTG9j
-YXRpb24gZWxlbWVudCwgQ29tcGxldGVNdWx0aXBhcnRVcGxvYWQgKGlzc3VlIzIyNjU1LCBwciMy
-MDI2NiwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHVzZSBleHBsaWNpdCBpbmRleCBwb29sIHBsYWNl
-bWVudCAoaXNzdWUjMjI5MjgsIHByIzIwNTY1LCBZZWh1ZGEgU2FkZWgpCiogdG9vbHM6IGNlcGgt
-ZGlzazogdjEyLjIuMiB1bmFibGUgdG8gY3JlYXRlIGJsdWVzdG9yZSBvc2QgdXNpbmcgY2VwaC1k
-aXNrIChpc3N1ZSMyMjM1NCwgcHIjMjA1NjMsIEtlZnUgQ2hhaSkKCkdldHRpbmcgQ2VwaAotLS0t
-LS0tLS0tLS0KKiBHaXQgYXQgZ2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGguZ2l0CiogVGFyYmFs
-bCBhdCBodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vdGFyYmFsbHMvY2VwaC0xMi4yLjQudGFyLmd6
-CiogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvaW5z
-dGFsbC9nZXQtcGFja2FnZXMvCiogRm9yIGNlcGgtZGVwbG95LCBzZWUgaHR0cDovL2RvY3MuY2Vw
-aC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9pbnN0YWxsLWNlcGgtZGVwbG95CiogUmVsZWFzZSBn
-aXQgc2hhMTogNTIwODVkNTI0OWE4MGM1ZjUxMjFhNzZkNjI4ODQyOWYzNWU0ZTc3YgoKLS0gCkFi
-aGlzaGVrIExla3NobWFuYW4KU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVy
-LCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLApIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykK
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KQ2VwaC1hbm5v
-dW5jZSBtYWlsaW5nIGxpc3QKQ2VwaC1hbm5vdW5jZUBsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
-dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtYW5ub3VuY2UtY2VwaC5jb20K
+Would anyone else appreciate a Google Calendar invitation for the CDMs?
+Seems like a natural.
+
+On 02/27/2018 09:37 PM, Leonardo Vaz wrote:
+> Hey Cephers,
+> 
+> This is just a friendly reminder that the next Ceph Developer Monthly
+> meeting is coming up:
+> 
+>  http://wiki.ceph.com/Planning
+> 
+> If you have work that you're doing that it a feature work, significant
+> backports, or anything you would like to discuss with the core team,
+> please add it to the following page:
+> 
+>  http://wiki.ceph.com/CDM_07-MAR-2018
+> 
+> This edition happens on APAC friendly hours (21:00 EST) and we will
+> use the following Bluejeans URL for the video conference:
+> 
+>  https://bluejeans.com/9290089010/
+> 
+> If you have questions or comments, please let us know.
+> 
+> Kindest regards,
+> 
+> Leo
+> 
+
+
+-- 
+Dan Mick
+Red Hat, Inc.
+Ceph docs: http://ceph.com/docs
