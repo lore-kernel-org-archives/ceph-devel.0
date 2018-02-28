@@ -1,69 +1,64 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: ceph mgr balancer bad distribution
-Date: Wed, 28 Feb 2018 14:59:55 +0100
-Message-ID: <f8725c11-a083-2f05-dc0d-5d2a5517534e@profihost.ag>
-References: <1ac5678e-ec95-3ab6-38bf-bdb889e1cd23@profihost.ag>
- <CABZ+qqmgOb459reQ2=MkhQLBho_O5AM8OA=0PuUQ1Zz=uGrMpA@mail.gmail.com>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: Luminous v12.2.4 released
+Date: Wed, 28 Feb 2018 16:46:07 +0100
+Message-ID: <87a7vtdsn4.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqmgOb459reQ2=MkhQLBho_O5AM8OA=0PuUQ1Zz=uGrMpA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: de-DE
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
+List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Am 28.02.2018 um 13:58 schrieb Dan van der Ster:
-> Hi Stefan,
-> 
-> Which balancer mode are you using? crush-compat scores using a mix of
-> nobjects, npgs, and size. It's doing pretty well over here as long as
-> you have a relatively small number of empty PGs.
->
-> I believe that upmap uses nPGs only, and I haven't tested it enough
-> yet to know if it actually improves things.
-> 
-> Also, did you only run one iteration of the balancer? It only moves up
-> to 5% of objects each iteration, so it can take several to fully
-> balance things.
-
-crush-compat mode
-
-Yes only one iteration but i set max_misplaced to 20%:
-    "mgr/balancer/max_misplaced": "20.00",
-
-> 
-> -- dan
-> 
-> 
-> On Wed, Feb 28, 2018 at 1:47 PM, Stefan Priebe - Profihost AG
-> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->> Hello,
->>
->> with jewel we always used the python crush optimizer which gave us a
->> pretty good distribution fo the used space.
->>
->> Since luminous we're using the included ceph mgr balancer but the
->> distribution is far from perfect and much worse than the old method.
->>
->> Is there any way to tune the mgr balancer?
->>
->> Currently after a balance we still have:
->> 75% to 92% disk usage which is pretty unfair
->>
->> Greets,
->> Stefan
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ClRoaXMgaXMgdGhlIGZvdXJ0aCBidWdmaXggcmVsZWFzZSBvZiBMdW1pbm91cyB2MTIuMi54IGxv
+bmcgdGVybSBzdGFibGUKcmVsZWFzZSBzZXJpZXMuIFRoaXMgd2FzIHByaW1hcmlseSBpbnRlbmRl
+ZCB0byBmaXggYSBmZXcgYnVpbGQsCmNlcGgtdm9sdW1lL2NlcGgtZGlzayBpc3N1ZXMgZnJvbSAx
+Mi4yLjMgYW5kIGEgZmV3IFJHVyBpc3N1ZXMuIFdlCnJlY29tbWVuZCBhbGwgdGhlIHVzZXJzIG9m
+IDEyLjIueCBzZXJpZXMgdG8gdXBkYXRlLiBBIGZ1bGwgY2hhbmdlbG9nIGlzCmFsc28gcHVibGlz
+aGVkIGF0IHRoZSBvZmZpY2lhbCByZWxlYXNlIGJsb2cgYXQKaHR0cHM6Ly9jZXBoLmNvbS9yZWxl
+YXNlcy92MTItMi00LWx1bWlub3VzLXJlbGVhc2VkLwoKTm90YWJsZSBDaGFuZ2VzCi0tLS0tLS0t
+LS0tLS0tLQoqIGNtYWtlOiBjaGVjayBib290c3RyYXAuc2ggaW5zdGVhZCBiZWZvcmUgZG93bmxv
+YWRpbmcgYm9vc3QgKGlzc3VlIzIzMDcxLCBwciMyMDUxNSwgS2VmdSBDaGFpKQoqIGNvcmU6IEJh
+Y2twb3J0IG9mIGNhY2hlIG1hbmlwdWxhdGlvbjogaXNzdWVzICMyMjYwMyBhbmQgIzIyNjA0IChp
+c3N1ZSMyMjYwNCwgaXNzdWUjMjI2MDMsIHByIzIwMzUzLCBBZGFtIEMuIEVtZXJzb24pCiogY29y
+ZTogU25hcHNldCBpbmNvbnNpc3RlbmN5IGlzIGRldGVjdGVkIHdpdGggaXRzIG93biBlcnJvciAo
+aXNzdWUjMjI5OTYsIHByIzIwNTAxLCBEYXZpZCBaYWZtYW4pCiogdG9vbHM6IGNlcGgtb2JqZWN0
+c3RvcmUtdG9vbDogIiRPQkogZ2V0LW9tYXBoZHIiIGFuZCAiJE9CSiBsaXN0LW9tYXAiIHNjYW4g
+YWxsIHBncyBpbnN0ZWFkIG9mIHVzaW5nIHNwZWNpZmljIHBnIChpc3N1ZSMyMTMyNywgcHIjMjAy
+ODMsIERhdmlkIFphZm1hbikKKiBjZXBoLXZvbHVtZTogd2FybiBvbiBtaXggb2YgZmlsZXN0b3Jl
+IGFuZCBibHVlc3RvcmUgZmxhZ3MgKGlzc3VlIzIzMDAzLCBwciMyMDU2OCwgQWxmcmVkbyBEZXph
+KQoqIGNlcGgtdm9sdW1lOiBhZGRzIHN1cHBvcnQgdG8gemFwIGVuY3J5cHRlZCBkZXZpY2VzIChp
+c3N1ZSMyMjg3OCwgcHIjMjA1NDUsIEFuZHJldyBTY2hvZW4pCiogY2VwaC12b2x1bWU6IGxvZyB0
+aGUgY3VycmVudCBydW5uaW5nIGNvbW1hbmQgZm9yIGVhc2llciBkZWJ1Z2dpbmcgKGlzc3VlIzIz
+MDA0LCBwciMyMDU5NywgQW5kcmV3IFNjaG9lbikKKiBjb3JlOiBsYXN0LXN0YXQtc2VxIHJldHVy
+bnMgMCBiZWNhdXNlIG9zZCBzdGF0cyBhcmUgY2xlYXJlZCAoaXNzdWUjMjMwOTMsIHByIzIwNTQ4
+LCBTYWdlIFdlaWwsIERhdmlkIFphZm1hbikKKiByZ3c6ICBtYWtlIGluaXQgZW52IG1ldGhvZHMg
+cmV0dXJuIGFuIGVycm9yIChpc3N1ZSMyMzAzOSwgcHIjMjA1NjQsIEFiaGlzaGVrIExla3NobWFu
+YW4pCiogcmd3OiBVUkwtZGVjb2RlIFMzIGFuZCBTd2lmdCBvYmplY3QtY29weSBVUkxzIChpc3N1
+ZSMyMjEyMSwgaXNzdWUjMjI3MjksIHByIzIwMjM2LCBNYWxjb2xtIExlZSwgTWF0dCBCZW5qYW1p
+bikKKiByZ3c6IHBhcnNlIG9sZCByZ3dfb2JqIHdpdGggbmFtZXNwYWNlIGNvcnJlY3RseSAoaXNz
+dWUjMjI5ODIsIHByIzIwNTY2LCBZZWh1ZGEgU2FkZWgpCiogcmd3OiByZXR1cm4gdmFsaWQgTG9j
+YXRpb24gZWxlbWVudCwgQ29tcGxldGVNdWx0aXBhcnRVcGxvYWQgKGlzc3VlIzIyNjU1LCBwciMy
+MDI2NiwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHVzZSBleHBsaWNpdCBpbmRleCBwb29sIHBsYWNl
+bWVudCAoaXNzdWUjMjI5MjgsIHByIzIwNTY1LCBZZWh1ZGEgU2FkZWgpCiogdG9vbHM6IGNlcGgt
+ZGlzazogdjEyLjIuMiB1bmFibGUgdG8gY3JlYXRlIGJsdWVzdG9yZSBvc2QgdXNpbmcgY2VwaC1k
+aXNrIChpc3N1ZSMyMjM1NCwgcHIjMjA1NjMsIEtlZnUgQ2hhaSkKCkdldHRpbmcgQ2VwaAotLS0t
+LS0tLS0tLS0KKiBHaXQgYXQgZ2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGguZ2l0CiogVGFyYmFs
+bCBhdCBodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vdGFyYmFsbHMvY2VwaC0xMi4yLjQudGFyLmd6
+CiogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvaW5z
+dGFsbC9nZXQtcGFja2FnZXMvCiogRm9yIGNlcGgtZGVwbG95LCBzZWUgaHR0cDovL2RvY3MuY2Vw
+aC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9pbnN0YWxsLWNlcGgtZGVwbG95CiogUmVsZWFzZSBn
+aXQgc2hhMTogNTIwODVkNTI0OWE4MGM1ZjUxMjFhNzZkNjI4ODQyOWYzNWU0ZTc3YgoKLS0gCkFi
+aGlzaGVrIExla3NobWFuYW4KU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVy
+LCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLApIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykK
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KQ2VwaC1hbm5v
+dW5jZSBtYWlsaW5nIGxpc3QKQ2VwaC1hbm5vdW5jZUBsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
+dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtYW5ub3VuY2UtY2VwaC5jb20K
