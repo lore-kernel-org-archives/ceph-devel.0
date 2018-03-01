@@ -1,24 +1,14 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: ceph mgr balancer bad distribution
-Date: Thu, 1 Mar 2018 13:12:04 +0100
-Message-ID: <CABZ+qq=xs5CYAXn55JEGbA4OSZayGdvbFnpwDz7AZDa0A0T2aQ@mail.gmail.com>
-References: <1ac5678e-ec95-3ab6-38bf-bdb889e1cd23@profihost.ag>
- <b5d774be-a2e2-b57c-d201-b5df71868d49@profihost.ag>
- <CABZ+qqnQ+GrhRR7+9GmuzBA3STfwmtSzfMpSU2tPZWocMGHB8A@mail.gmail.com>
- <da7136f6-cc57-0b28-428c-ccaaef34dfa7@profihost.ag>
- <CABZ+qqmONpy74yXqr7e_zt_24aaxcFomPrwz0Mu2ncf0gYW3Ng@mail.gmail.com>
- <3b2c1d04-c7bd-1906-6239-b783e4fd585a@profihost.ag>
- <CABZ+qqkKVsdr+Tch=ZOrpzbbSdmWo-eOdCspWxCRSTnK=buEFQ@mail.gmail.com>
- <bea62c27-0faf-1b47-ca1e-9577e98ec6b1@profihost.ag>
- <CABZ+qqnRwQa8Jrg9=DPc5VnzqG4cjq0RvdhfFG74NgLMs_4EwQ@mail.gmail.com>
- <CABZ+qqmUPsiUDQV4kkHAWN0v=fCosaaHs0dGvXDaKUGKC7v9=g@mail.gmail.com>
- <CABZ+qqm-gMs9COEg2TVfNwEhVja8mGox00=0y5wQB7Z2QoSjSQ@mail.gmail.com>
- <3d244da6-25c2-b6d8-d4c2-a6a28b897509@profihost.ag>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [Ceph-announce] Luminous v12.2.4 released
+Date: Thu, 01 Mar 2018 13:20:21 +0100
+Message-ID: <87efl4j8ca.fsf@suse.com>
+References: <87a7vtdsn4.fsf@suse.com>
+ <CAOKRQaM7XPJSbgpbh+ED4uMJO9EqufPAsS3GLDcEt0g_XPYtHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <3d244da6-25c2-b6d8-d4c2-a6a28b897509-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+In-Reply-To: <CAOKRQaM7XPJSbgpbh+ED4uMJO9EqufPAsS3GLDcEt0g_XPYtHA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -28,16 +18,66 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, spandankumarsahu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+To: Jaroslaw Owsiewski <jaroslaw.owsiewski-62t04+iTtibVItvQsEIGlw@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Mar 1, 2018 at 1:08 PM, Stefan Priebe - Profihost AG
-<s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
-> nice thanks will try that soon.
->
-> Can you tell me how to change the log lever to info for the balancer module?
-
-debug mgr = 4/5
-
--- dan
+SmFyb3NsYXcgT3dzaWV3c2tpIDxqYXJvc2xhdy5vd3NpZXdza2lAYWxsZWdyby5wbD4gd3JpdGVz
+OgoKPiBXaGF0IGFib3V0IHRoaXM6IGh0dHBzOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMjIw
+MTUjY2hhbmdlLTEwNTk4NyA/CgpTdGlsbCBoYXMgdG8gd2FpdCBmb3IgMTIuMi41IHVuZm9ydHVu
+YXRlbHkuIFdlIG9ubHkgaGFkIHNvbWUgY3JpdGljYWwKYnVpbGQvY2VwaC1kaXNrIGFuZCB3aGF0
+ZXZlciBwcnMgaGFkIGFscmVhZHkgcGFzc2VkIFFFIHBvc3QgMTIuMi4zIGluCjEyLjIuNC4gIAo+
+Cj4gUmVnYXJkcwo+Cj4gLS0gCj4gSmFyZWsKPgo+IDIwMTgtMDItMjggMTY6NDYgR01UKzAxOjAw
+IEFiaGlzaGVrIExla3NobWFuYW4gPGFiaGlzaGVrQHN1c2UuY29tPjoKPgo+Pgo+PiBUaGlzIGlz
+IHRoZSBmb3VydGggYnVnZml4IHJlbGVhc2Ugb2YgTHVtaW5vdXMgdjEyLjIueCBsb25nIHRlcm0g
+c3RhYmxlCj4+IHJlbGVhc2Ugc2VyaWVzLiBUaGlzIHdhcyBwcmltYXJpbHkgaW50ZW5kZWQgdG8g
+Zml4IGEgZmV3IGJ1aWxkLAo+PiBjZXBoLXZvbHVtZS9jZXBoLWRpc2sgaXNzdWVzIGZyb20gMTIu
+Mi4zIGFuZCBhIGZldyBSR1cgaXNzdWVzLiBXZQo+PiByZWNvbW1lbmQgYWxsIHRoZSB1c2VycyBv
+ZiAxMi4yLnggc2VyaWVzIHRvIHVwZGF0ZS4gQSBmdWxsIGNoYW5nZWxvZyBpcwo+PiBhbHNvIHB1
+Ymxpc2hlZCBhdCB0aGUgb2ZmaWNpYWwgcmVsZWFzZSBibG9nIGF0Cj4+IGh0dHBzOi8vY2VwaC5j
+b20vcmVsZWFzZXMvdjEyLTItNC1sdW1pbm91cy1yZWxlYXNlZC8KPj4KPj4gTm90YWJsZSBDaGFu
+Z2VzCj4+IC0tLS0tLS0tLS0tLS0tLQo+PiAqIGNtYWtlOiBjaGVjayBib290c3RyYXAuc2ggaW5z
+dGVhZCBiZWZvcmUgZG93bmxvYWRpbmcgYm9vc3QgKGlzc3VlIzIzMDcxLAo+PiBwciMyMDUxNSwg
+S2VmdSBDaGFpKQo+PiAqIGNvcmU6IEJhY2twb3J0IG9mIGNhY2hlIG1hbmlwdWxhdGlvbjogaXNz
+dWVzICMyMjYwMyBhbmQgIzIyNjA0Cj4+IChpc3N1ZSMyMjYwNCwgaXNzdWUjMjI2MDMsIHByIzIw
+MzUzLCBBZGFtIEMuIEVtZXJzb24pCj4+ICogY29yZTogU25hcHNldCBpbmNvbnNpc3RlbmN5IGlz
+IGRldGVjdGVkIHdpdGggaXRzIG93biBlcnJvciAoaXNzdWUjMjI5OTYsCj4+IHByIzIwNTAxLCBE
+YXZpZCBaYWZtYW4pCj4+ICogdG9vbHM6IGNlcGgtb2JqZWN0c3RvcmUtdG9vbDogIiRPQkogZ2V0
+LW9tYXBoZHIiIGFuZCAiJE9CSiBsaXN0LW9tYXAiCj4+IHNjYW4gYWxsIHBncyBpbnN0ZWFkIG9m
+IHVzaW5nIHNwZWNpZmljIHBnIChpc3N1ZSMyMTMyNywgcHIjMjAyODMsIERhdmlkCj4+IFphZm1h
+bikKPj4gKiBjZXBoLXZvbHVtZTogd2FybiBvbiBtaXggb2YgZmlsZXN0b3JlIGFuZCBibHVlc3Rv
+cmUgZmxhZ3MgKGlzc3VlIzIzMDAzLAo+PiBwciMyMDU2OCwgQWxmcmVkbyBEZXphKQo+PiAqIGNl
+cGgtdm9sdW1lOiBhZGRzIHN1cHBvcnQgdG8gemFwIGVuY3J5cHRlZCBkZXZpY2VzIChpc3N1ZSMy
+Mjg3OCwKPj4gcHIjMjA1NDUsIEFuZHJldyBTY2hvZW4pCj4+ICogY2VwaC12b2x1bWU6IGxvZyB0
+aGUgY3VycmVudCBydW5uaW5nIGNvbW1hbmQgZm9yIGVhc2llciBkZWJ1Z2dpbmcKPj4gKGlzc3Vl
+IzIzMDA0LCBwciMyMDU5NywgQW5kcmV3IFNjaG9lbikKPj4gKiBjb3JlOiBsYXN0LXN0YXQtc2Vx
+IHJldHVybnMgMCBiZWNhdXNlIG9zZCBzdGF0cyBhcmUgY2xlYXJlZAo+PiAoaXNzdWUjMjMwOTMs
+IHByIzIwNTQ4LCBTYWdlIFdlaWwsIERhdmlkIFphZm1hbikKPj4gKiByZ3c6ICBtYWtlIGluaXQg
+ZW52IG1ldGhvZHMgcmV0dXJuIGFuIGVycm9yIChpc3N1ZSMyMzAzOSwgcHIjMjA1NjQsCj4+IEFi
+aGlzaGVrIExla3NobWFuYW4pCj4+ICogcmd3OiBVUkwtZGVjb2RlIFMzIGFuZCBTd2lmdCBvYmpl
+Y3QtY29weSBVUkxzIChpc3N1ZSMyMjEyMSwgaXNzdWUjMjI3MjksCj4+IHByIzIwMjM2LCBNYWxj
+b2xtIExlZSwgTWF0dCBCZW5qYW1pbikKPj4gKiByZ3c6IHBhcnNlIG9sZCByZ3dfb2JqIHdpdGgg
+bmFtZXNwYWNlIGNvcnJlY3RseSAoaXNzdWUjMjI5ODIsIHByIzIwNTY2LAo+PiBZZWh1ZGEgU2Fk
+ZWgpCj4+ICogcmd3OiByZXR1cm4gdmFsaWQgTG9jYXRpb24gZWxlbWVudCwgQ29tcGxldGVNdWx0
+aXBhcnRVcGxvYWQKPj4gKGlzc3VlIzIyNjU1LCBwciMyMDI2NiwgTWF0dCBCZW5qYW1pbikKPj4g
+KiByZ3c6IHVzZSBleHBsaWNpdCBpbmRleCBwb29sIHBsYWNlbWVudCAoaXNzdWUjMjI5MjgsIHBy
+IzIwNTY1LCBZZWh1ZGEKPj4gU2FkZWgpCj4+ICogdG9vbHM6IGNlcGgtZGlzazogdjEyLjIuMiB1
+bmFibGUgdG8gY3JlYXRlIGJsdWVzdG9yZSBvc2QgdXNpbmcgY2VwaC1kaXNrCj4+IChpc3N1ZSMy
+MjM1NCwgcHIjMjA1NjMsIEtlZnUgQ2hhaSkKPj4KPj4gR2V0dGluZyBDZXBoCj4+IC0tLS0tLS0t
+LS0tLQo+PiAqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5naXQKPj4gKiBUYXJi
+YWxsIGF0IGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBoLTEyLjIuNC50YXIu
+Z3oKPj4gKiBGb3IgcGFja2FnZXMsIHNlZSBodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rl
+ci9pbnN0YWxsL2dldC1wYWNrYWdlcy8KPj4gKiBGb3IgY2VwaC1kZXBsb3ksIHNlZSBodHRwOi8v
+ZG9jcy5jZXBoLmNvbS9kb2NzLwo+PiBtYXN0ZXIvaW5zdGFsbC9pbnN0YWxsLWNlcGgtZGVwbG95
+Cj4+ICogUmVsZWFzZSBnaXQgc2hhMTogNTIwODVkNTI0OWE4MGM1ZjUxMjFhNzZkNjI4ODQyOWYz
+NWU0ZTc3Ygo+Pgo+PiAtLQo+PiBBYmhpc2hlayBMZWtzaG1hbmFuCj4+IFNVU0UgTGludXggR21i
+SCwgR0Y6IEZlbGl4IEltZW5kw7ZyZmZlciwgSmFuZSBTbWl0aGFyZCwgR3JhaGFtIE5vcnRvbiwK
+Pj4gSFJCIDIxMjg0IChBRyBOw7xybmJlcmcpCj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCj4+IENlcGgtYW5ub3VuY2UgbWFpbGluZyBsaXN0Cj4+IENl
+cGgtYW5ub3VuY2VAbGlzdHMuY2VwaC5jb20KPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
+bmZvLmNnaS9jZXBoLWFubm91bmNlLWNlcGguY29tCj4+CgotLSAKQWJoaXNoZWsgTGVrc2htYW5h
+bgpTVVNFIExpbnV4IEdtYkgsIEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEphbmUgU21pdGhhcmQs
+IEdyYWhhbSBOb3J0b24sCkhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQpfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApj
+ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
+Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
