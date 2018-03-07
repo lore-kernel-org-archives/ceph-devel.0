@@ -1,29 +1,14 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: ceph mgr balancer bad distribution
-Date: Sat, 3 Mar 2018 21:04:15 +0100
-Message-ID: <9de46661-98b4-112b-2603-d8100478225a@profihost.ag>
-References: <1ac5678e-ec95-3ab6-38bf-bdb889e1cd23@profihost.ag>
- <b5d774be-a2e2-b57c-d201-b5df71868d49@profihost.ag>
- <CABZ+qqnQ+GrhRR7+9GmuzBA3STfwmtSzfMpSU2tPZWocMGHB8A@mail.gmail.com>
- <da7136f6-cc57-0b28-428c-ccaaef34dfa7@profihost.ag>
- <CABZ+qqmONpy74yXqr7e_zt_24aaxcFomPrwz0Mu2ncf0gYW3Ng@mail.gmail.com>
- <3b2c1d04-c7bd-1906-6239-b783e4fd585a@profihost.ag>
- <CABZ+qqkKVsdr+Tch=ZOrpzbbSdmWo-eOdCspWxCRSTnK=buEFQ@mail.gmail.com>
- <bea62c27-0faf-1b47-ca1e-9577e98ec6b1@profihost.ag>
- <CABZ+qqnRwQa8Jrg9=DPc5VnzqG4cjq0RvdhfFG74NgLMs_4EwQ@mail.gmail.com>
- <CABZ+qqmUPsiUDQV4kkHAWN0v=fCosaaHs0dGvXDaKUGKC7v9=g@mail.gmail.com>
- <CABZ+qqm-gMs9COEg2TVfNwEhVja8mGox00=0y5wQB7Z2QoSjSQ@mail.gmail.com>
- <3d244da6-25c2-b6d8-d4c2-a6a28b897509@profihost.ag>
- <CABZ+qq=xs5CYAXn55JEGbA4OSZayGdvbFnpwDz7AZDa0A0T2aQ@mail.gmail.com>
- <88BB07AB-D6C8-4106-953F-2131E56081BD@profihost.ag>
- <CABZ+qqkdAHvkLv0q8ysDhjx+dHC_TCYrcQT9Nv_ddLt0krGzgg@mail.gmail.com>
- <173aba9e-16ae-c9d6-3afa-2c25683b0dbe@profihost.ag>
+From: Wei Jin <wjin.cn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: No more Luminous packages for Debian Jessie ??
+Date: Wed, 7 Mar 2018 20:10:36 +0800
+Message-ID: <CAPpSHbVQzzgvYeKbVAA+sNk=2SAuKv8ffqtC55Acv3TEWyd4Bg@mail.gmail.com>
+References: <04488ac1-45c5-972a-cc39-6461353cdc49@coppint.com>
+ <12c1d6a7-0e55-9572-86ec-c6ec4ad8ce0d@coppint.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <173aba9e-16ae-c9d6-3afa-2c25683b0dbe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Content-Language: de-DE
+In-Reply-To: <12c1d6a7-0e55-9572-86ec-c6ec4ad8ce0d-BrxIz9bn5ipBDgjK7y7TUQ@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -33,70 +18,37 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, spandankumarsahu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+To: Florent B <florent-BrxIz9bn5ipBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Same issue here.
+Will Ceph community support Debian Jessie in the future?
 
-Am 02.03.2018 um 21:21 schrieb Stefan Priebe - Profihost AG:
-> Hi,
-> 
-> Am 02.03.2018 um 14:29 schrieb Dan van der Ster:
->> On Fri, Mar 2, 2018 at 10:12 AM, Stefan Priebe - Profihost AG
->> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->>> Thanks! Your patch works great!
+On Mon, Mar 5, 2018 at 6:33 PM, Florent B <florent-BrxIz9bn5ipBDgjK7y7TUQ@public.gmane.org> wrote:
+> Jessie is no more supported ??
+> https://download.ceph.com/debian-luminous/dists/jessie/main/binary-amd64/Packages
+> only contains ceph-deploy package !
+>
+>
+> On 28/02/2018 10:24, Florent B wrote:
+>> Hi,
 >>
->> Cool! I plan to add one more feature to allow operators to switch off
->> components of the score function. Currently, by only changing the key
->> to 'bytes', we aren't able to fully balance things because at some
->> point the pgs score gets too suboptimal and the overall score reaches
->> a min value.
-> 
-> OK great but it still works perfectly for my clusters. 2%-3% difference
-> for all OSDs.
-
-ok i had another cluster - where this seems to happen. It just says
-Failed to find further optimization but the bytes difference is 12%.
-
->>> The only problem I still see is that the
->>> balancer kicks in even when the old optimize has not finished. It seems it
->>> only evaluated the degraded of value. But while remapping it can happen that
->>> none are degraded but a lot are still misplaced.
->>>
->>> I think the balancer should evaluate the ceph health status as well.
+>> Since yesterday, the "ceph-luminous" repository does not contain any
+>> package for Debian Jessie.
 >>
->> I guess this point is debatable. On our clusters we use max_misplaced
->> = 0.01 and set the begin_hour end_hour to daytime hours so that by the
->> late evening, every day, the cluster is back to HEALTH_OK.
-> 
-> ah OK. Is it true that the begin_time and end_time is GMT and not local
-> time? Can we change this as it makes configuration of monitoring systems
-> impossible - time changes also with summer and winter time.
-
-Sorry at least in my case this works fine.
-
-> 
-> Greets,
-> Stefan
-> 
->> Cheers, Dan
+>> Is it expected ?
 >>
->>> Stefan
->>>
->>> Excuse my typo sent from my mobile phone.
->>>
->>> Am 01.03.2018 um 13:12 schrieb Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>:
->>>
->>> On Thu, Mar 1, 2018 at 1:08 PM, Stefan Priebe - Profihost AG
->>> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->>>
->>> nice thanks will try that soon.
->>>
->>>
->>> Can you tell me how to change the log lever to info for the balancer module?
->>>
->>>
->>> debug mgr = 4/5
->>>
->>> -- dan
+>> Thank you.
+>>
+>> Florent
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
