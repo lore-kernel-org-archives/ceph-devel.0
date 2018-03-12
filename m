@@ -1,76 +1,55 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH] rbd: Remove VLA usage
-Date: Sat, 10 Mar 2018 07:24:24 -0800
-Message-ID: <CAGXu5j+Suz=mkXm9W=OXjkXU5nRBrkKc=cdYsJ0nYu2Ba-qN_w@mail.gmail.com>
-References: <744974f1-d9b3-9fc1-621d-f4b5d3e806b6@spiers.me>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: "Tobin C. Harding" <me@tobin.cc>
+Subject: [PATCH] rbd: Remove VLA stack usage
+Date: Mon, 12 Mar 2018 15:49:40 +1100
+Message-ID: <1520830180-25452-1-git-send-email-me@tobin.cc>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <744974f1-d9b3-9fc1-621d-f4b5d3e806b6@spiers.me>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kyle Spiers <kyle@spiers.me>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
+Cc: "Tobin C. Harding" <me@tobin.cc>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-hardening@lists.openwall.com, Tycho Andersen <tycho@tycho.ws>, Kees Cook <keescook@chromium.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Mar 9, 2018 at 9:14 PM, Kyle Spiers <kyle@spiers.me> wrote:
-> From 4198ebe2e8058ff676d8e2f993d8806d6ca29c11 Mon Sep 17 00:00:00 2001
-> From: Kyle Spiers <kyle@spiers.me>
-> Date: Fri, 9 Mar 2018 12:34:15 -0800
-> Subject: [PATCH] rbd: Remove VLA usage
->
-> As part of the effort to remove VLAs from the kernel[1], this moves
-> the literal values into the stack array calculation instead of using a
-> variable for the sizing. The resulting size can be found from
-> sizeof(buf).
->
-> [1] https://lkml.org/lkml/2018/3/7/621
->
-> Signed-off-by: Kyle Spiers <kyle@spiers.me>
+The kernel would like to have all stack VLA usage removed[1].  Here the
+array is declared using a variable that is declared using a constant
+statement but the compiler still emits a warning.  We can clear the
+warning bu using the constant statement directly.  In place of later
+usage of the size variable we can use the ARRAY_SIZE() macro.
 
-Thanks!
+Use constant statement to declare array.
 
-Reviewed-by: Kees Cook <keescook@chromium.org>
+[1]: https://lkml.org/lkml/2018/3/7/621
 
--Kees
+Signed-off-by: Tobin C. Harding <me@tobin.cc>
+---
+ drivers/block/rbd.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
->
-> ---
->  drivers/block/rbd.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 8e40da0..0e94e1f 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3100,8 +3100,8 @@ static int __rbd_notify_op_lock(struct rbd_device
-> *rbd_dev,
->  {
->      struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
->      struct rbd_client_id cid = rbd_get_cid(rbd_dev);
-> -    int buf_size = 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN;
-> -    char buf[buf_size];
-> +    char buf[4 + 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN];
-> +    int buf_size = sizeof(buf);
->      void *p = buf;
->
->      dout("%s rbd_dev %p notify_op %d\n", __func__, rbd_dev, notify_op);
-> @@ -3619,8 +3619,8 @@ static void __rbd_acknowledge_notify(struct
-> rbd_device *rbd_dev,
->                       u64 notify_id, u64 cookie, s32 *result)
->  {
->      struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-> -    int buf_size = 4 + CEPH_ENCODING_START_BLK_LEN;
-> -    char buf[buf_size];
-> +    char buf[4 + CEPH_ENCODING_START_BLK_LEN];
-> +    int buf_size = sizeof(buf);
->      int ret;
->
->      if (result) {
-> -- 2.7.4
->
-
-
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 0016170cde0a..927ecd9a2511 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3100,20 +3100,19 @@ static int __rbd_notify_op_lock(struct rbd_device *rbd_dev,
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_client_id cid = rbd_get_cid(rbd_dev);
+-	int buf_size = 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN;
+-	char buf[buf_size];
++	char buf[4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN];
+ 	void *p = buf;
+ 
+ 	dout("%s rbd_dev %p notify_op %d\n", __func__, rbd_dev, notify_op);
+ 
+ 	/* encode *LockPayload NotifyMessage (op + ClientId) */
+-	ceph_start_encoding(&p, 2, 1, buf_size - CEPH_ENCODING_START_BLK_LEN);
++	ceph_start_encoding(&p, 2, 1, ARRAY_SIZE(buf) - CEPH_ENCODING_START_BLK_LEN);
+ 	ceph_encode_32(&p, notify_op);
+ 	ceph_encode_64(&p, cid.gid);
+ 	ceph_encode_64(&p, cid.handle);
+ 
+ 	return ceph_osdc_notify(osdc, &rbd_dev->header_oid,
+-				&rbd_dev->header_oloc, buf, buf_size,
++				&rbd_dev->header_oloc, buf, ARRAY_SIZE(buf),
+ 				RBD_NOTIFY_TIMEOUT, preply_pages, preply_len);
+ }
+ 
 -- 
-Kees Cook
-Pixel Security
+2.7.4
