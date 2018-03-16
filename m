@@ -1,37 +1,50 @@
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH] ceph: only dirty ITER_IOVEC pages for direct read
-Date: Thu, 15 Mar 2018 20:40:18 -0700
-Message-ID: <20180316034018.GA1120@zzz.localdomain>
-References: <20180316033212.30543-1-zyan@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <bounce-debian-kernel=glddk-debian-kernel=m.gmane.org@lists.debian.org>
-Content-Disposition: inline
-In-Reply-To: <20180316033212.30543-1-zyan@redhat.com>
-Resent-Message-ID: <Hd6aywyUE2B.A.gEF.VC0qaB@bendel>
-List-URL: <https://lists.debian.org/debian-kernel/>
-List-Post: <mailto:debian-kernel@lists.debian.org>
-List-Help: <mailto:debian-kernel-request@lists.debian.org?subject=help>
-List-Subscribe: <mailto:debian-kernel-request@lists.debian.org?subject=subscribe>
-List-Unsubscribe: <mailto:debian-kernel-request@lists.debian.org?subject=unsubscribe>
-List-Archive: https://lists.debian.org/msgid-search/20180316034018.GA1120@zzz.localdomain
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org, debian-kernel@lists.debian.org, kaipeng94@gmail.com, syzkaller@googlegroups.com
+From: Kyle Spiers <kyle@spiers.me>
+Subject: [PATCH v2] rbd: Remove VLA usage
+Date: Thu, 15 Mar 2018 21:32:43 -0700
+Message-ID: <1521174763-13282-1-git-send-email-kyle@spiers.me>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: idryomov@gmail.com
+Cc: sage@redhat.com, elder@kernel.org, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, me@tobin.cc, Kyle Spiers <kyle@spiers.me>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Yan,
+As part of the effort to remove VLAs from the kernel[1], this moves
+the literal values into the stack array calculation instead of using a
+variable for the sizing. The resulting size can be found from
+sizeof(buf).
 
-On Fri, Mar 16, 2018 at 11:32:12AM +0800, Yan, Zheng wrote:
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/file.c | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
-> 
+[1] https://lkml.org/lkml/2018/3/7/621
 
-Fixes for use-after-free bugs should be marked for stable.  The commit message
-should also explain what is being fixed, exactly.  Mentioning that this bug was
-found by syzkaller would also be useful, since people are looking out for those.
+Signed-off-by: Kyle Spiers <kyle@spiers.me>
+---
+ drivers/block/rbd.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-Thanks,
-
-Eric
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 8e40da0..0e94e1f 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3100,8 +3100,8 @@ static int __rbd_notify_op_lock(struct rbd_device *rbd_dev,
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_client_id cid = rbd_get_cid(rbd_dev);
+-	int buf_size = 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN;
+-	char buf[buf_size];
++	char buf[4 + 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN];
++	int buf_size = sizeof(buf)
+ 	void *p = buf;
+ 
+ 	dout("%s rbd_dev %p notify_op %d\n", __func__, rbd_dev, notify_op);
+@@ -3619,8 +3619,8 @@ static void __rbd_acknowledge_notify(struct rbd_device *rbd_dev,
+ 				     u64 notify_id, u64 cookie, s32 *result)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+-	int buf_size = 4 + CEPH_ENCODING_START_BLK_LEN;
+-	char buf[buf_size];
++	char buf[4 + CEPH_ENCODING_START_BLK_LEN];
++	int buf_size = sizeof(buf);
+ 	int ret;
+ 
+ 	if (result) {
+-- 
+2.7.4
