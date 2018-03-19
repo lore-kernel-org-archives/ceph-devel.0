@@ -1,39 +1,37 @@
-From: KAMEI Hitoshi <hitoshi.kamei.xm@hitachi.com>
-Subject: [PATCH 0/2] rbd: thick-provision image support
-Date: Mon, 19 Mar 2018 21:00:33 +0900
-Message-ID: <5AAFA661.60103@hitachi.com>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] rbd: fix spelling mistake: "reregisteration" -> "re-registration"
+Date: Mon, 19 Mar 2018 13:33:10 +0000
+Message-ID: <20180319133310.4251-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: idryomov@gmail.com, sage@redhat.com, elder@kernel.org, ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-This patch series adds the thick-provision image support to
-/drivers/block/rbd.c relating to https://github.com/ceph/ceph/pull/18317.
-The rbd will not issue the discard operation to thick-provision
-images, if applied.
+From: Colin Ian King <colin.king@canonical.com>
 
-The rbd should not discard any allocated blocks of thick-provision
-image to ensure writing data to rbd images. So this patch
-prevents from discarding allocated blocks on thick-provision
-image.
+Trivial fix to spelling mistake in rdb_warn message text
 
-This patch series creates sysfs file to manipulate thick-provision
-status. If users write "1" to /sys/bus/rbd/devices/<dev-id>/thick,
-then the image is changed to thick-provision image. And if users
-write "0" to it, then the image is changed to thin-provision
-image. I will add the code changing status for the rbd map command.
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Hitoshi Kamei (2):
-  rbd: RBD_DEV_FLAG_THICK rbd_dev_flags bit
-  rbd: add 'thick' sysfs rbd device attribute
-
- Documentation/ABI/testing/sysfs-bus-rbd |  6 ++++++
- drivers/block/rbd.c                     | 37 +++++++++++++++++++++++++++++++++
- 2 files changed, 43 insertions(+)
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 1e03b04819c8..7b97240ff15e 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3887,7 +3887,7 @@ static void rbd_reregister_watch(struct work_struct *work)
+ 
+ 	ret = rbd_dev_refresh(rbd_dev);
+ 	if (ret)
+-		rbd_warn(rbd_dev, "reregisteration refresh failed: %d", ret);
++		rbd_warn(rbd_dev, "re-registration refresh failed: %d", ret);
+ }
+ 
+ /*
 -- 
 2.15.1
