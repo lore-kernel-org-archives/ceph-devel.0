@@ -1,47 +1,46 @@
-From: Dongsheng Yang <dongsheng.yang@easystack.cn>
-Subject: Re: [PATCH] rbd: fix spelling mistake: "reregisteration" ->
- "re-registration"
-Date: Tue, 20 Mar 2018 18:35:01 +0800
-Message-ID: <5AB0E3D5.6090301@easystack.cn>
-References: <20180319133310.4251-1-colin.king@canonical.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 0/2] rbd: thick-provision image support
+Date: Tue, 20 Mar 2018 15:06:49 +0100
+Message-ID: <CAOi1vP8qz9GeP0Beypq1N8XFwzkPieEE1Qf6gJafPnngjNG86g@mail.gmail.com>
+References: <5AAFA661.60103@hitachi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180319133310.4251-1-colin.king@canonical.com>
+In-Reply-To: <5AAFA661.60103@hitachi.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Colin King <colin.king@canonical.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+To: KAMEI Hitoshi <hitoshi.kamei.xm@hitachi.com>
+Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Colin,
-
-On 03/19/2018 09:33 PM, Colin King wrote:
-> From: Colin Ian King <colin.king@canonical.com>
+On Mon, Mar 19, 2018 at 1:00 PM, KAMEI Hitoshi
+<hitoshi.kamei.xm@hitachi.com> wrote:
+> This patch series adds the thick-provision image support to
+> /drivers/block/rbd.c relating to https://github.com/ceph/ceph/pull/18317.
+> The rbd will not issue the discard operation to thick-provision
+> images, if applied.
 >
-> Trivial fix to spelling mistake in rdb_warn message text
+> The rbd should not discard any allocated blocks of thick-provision
+> image to ensure writing data to rbd images. So this patch
+> prevents from discarding allocated blocks on thick-provision
+> image.
 >
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
-> ---
->   drivers/block/rbd.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 1e03b04819c8..7b97240ff15e 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3887,7 +3887,7 @@ static void rbd_reregister_watch(struct work_struct *work)
->   
->   	ret = rbd_dev_refresh(rbd_dev);
->   	if (ret)
-> -		rbd_warn(rbd_dev, "reregisteration refresh failed: %d", ret);
-> +		rbd_warn(rbd_dev, "re-registration refresh failed: %d", ret);
+> This patch series creates sysfs file to manipulate thick-provision
+> status. If users write "1" to /sys/bus/rbd/devices/<dev-id>/thick,
+> then the image is changed to thick-provision image. And if users
+> write "0" to it, then the image is changed to thin-provision
+> image. I will add the code changing status for the rbd map command.
 
-Hmmm, I am not sure is that a spelling mistake, because the function 
-name is rbd_reregister_watch().
+Hi Hitoshi,
 
-Thanx
-Yang
->   }
->   
->   /*
+I think it should be a map time option -- e.g. rbd map -o thick.
+I don't see any reason for allowing tweaking this setting on a mapped
+image.
+
+I looked through https://github.com/ceph/ceph/pull/18317 and I don't
+see an equivalent functionality there.  rbd_discard_on_zeroed_write_same
+set to false makes the actual zeroes go on the wire, but I don't see
+anything for ignoring discard requests.  Can you point me at that?
+
+Thanks,
+
+                Ilya
