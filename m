@@ -1,64 +1,46 @@
-From: =?iso-2022-jp?B?GyRCNTUwZj9OO1YbKEIgLyBLQU1FSRskQiEkGyhCSElUT1NISQ==?=
+From: =?utf-8?B?5LqA5LqV5LuB5b+XIC8gS0FNRUnvvIxISVRPU0hJ?=
         <hitoshi.kamei.xm@hitachi.com>
-Subject: RE: Re: [PATCH 1/2] rbd: RBD_DEV_FLAG_THICK rbd_dev_flags bit
-Date: Thu, 22 Mar 2018 11:57:27 +0000
-Message-ID: <C8603108370B1949BF3CC7742DDE5D35B8B39FD9@GSjpTKYDCembx31.service.hitachi.net>
-References: <5AAFA682.2080901@hitachi.com> <5AB0E4F3.8090108@easystack.cn>
+Subject: RE: Re: [PATCH 0/2] rbd: thick-provision image support
+Date: Thu, 22 Mar 2018 11:58:38 +0000
+Message-ID: <C8603108370B1949BF3CC7742DDE5D35B8B39FF8@GSjpTKYDCembx31.service.hitachi.net>
+References: <5AAFA661.60103@hitachi.com>
+ <CAOi1vP8qz9GeP0Beypq1N8XFwzkPieEE1Qf6gJafPnngjNG86g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5AB0E4F3.8090108@easystack.cn>
+In-Reply-To: <CAOi1vP8qz9GeP0Beypq1N8XFwzkPieEE1Qf6gJafPnngjNG86g@mail.gmail.com>
 Content-Language: ja-JP
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dongsheng Yang <dongsheng.yang@easystack.cn>, "idryomov@gmail.com" <idryomov@gmail.com>, "sage@redhat.com" <sage@redhat.com>, "elder@kernel.org" <elder@kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Yang, 
-
-> I am not sure is this the best way for this case, what about adding an option in "rbd map -o thick rbd/test"?
-
-I will add such option to the rbd map command to manipulate image settings. So, the end-user
-do not change the settings directly via sysfs file.
-
->	@@ -4011,6 +4012,15 @@ static void rbd_queue_workfn(struct work_struct *work)
->	 		goto err;
->	 	}
->	
->	+	/* Ignore/skip discard requests for thick-provision image */
->
-> Just ignore? or return -EOPNOTSUPP? 
-
-Thanks, I think -EOPNOTSUPP is better because user programs cannot know
-the result of requested operation when the kernel rbd driver ignores
-discard request. The result of requested operation when the kernel rbd driver
-ignores discard requests, which probably misleads the user programs.
-
-> In addition, we should not ignore the REQ_OP_WRITE_ZEROES.
-
-Relating to the above, the return code of REQ_OP_WRITE_ZEROS request
-is also -EOPNOTSUPP instead of ignoring. I think the result of
--EOPNOTSUPP is also better for this request because the kernel
-rbd driver can expect that user programs write zero data by itself.
-
->	+	spin_lock_irq(&rbd_dev->lock);
->	+	if (!strncmp(buf, "1", size))
->	+		set_bit(RBD_DEV_FLAG_THICK, &rbd_dev->flags);
->	+	else if (!strncmp(buf, "0", size))
->	+		clear_bit(RBD_DEV_FLAG_THICK, &rbd_dev->flags);
-> else ?
-
-I will add the warning message in else case.
-	
->	 static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
->	 static DEVICE_ATTR(parent, S_IRUGO, rbd_parent_show, NULL);
->	+static DEVICE_ATTR(thick, 0644, rbd_thick_show, rbd_thick_store);
-> maybe S_IRUGO | S_IWUGO?
-
-I will change the code by using the flags.
-
-Regards,
-
--- 
-Hitoshi Kamei
+SGkgSWx5YSwgDQoNCj4gSSB0aGluayBpdCBzaG91bGQgYmUgYSBtYXAgdGltZSBvcHRpb24gLS0g
+ZS5nLiByYmQgbWFwIC1vIHRoaWNrLg0KPiBJIGRvbid0IHNlZSBhbnkgcmVhc29uIGZvciBhbGxv
+d2luZyB0d2Vha2luZyB0aGlzIHNldHRpbmcgb24gYSBtYXBwZWQgaW1hZ2UuDQoNCkkgd2lsbCBh
+ZGQgc3VjaCBvcHRpb24gdG8gcmJkIG1hcCBjb21tYW5kLiBUaGUgbW9kaWZpZWQgcmJkIGNvbW1h
+bmQNCndpdGggdGhlIG9wdGlvbiB3cml0ZXMgIjEiIHRvIHN5c2ZzIGZpbGUgdG8gZGlzYWJsZSBk
+aXNjYXJkIG9wZXJhdGlvbiBhdA0KcnVuLXRpbWUuIEFuZCwgd2hlbiB1c2VyIHByb2dyYW1zIGlz
+c3VlIGRpc2NhcmQgcmVxdWVzdCB0byBhbiBpbWFnZQ0Kd2l0aCB0aGUgb3B0aW9uLCB0aGUgcGF0
+Y2hlZCBrZXJuZWwgcmJkIGRyaXZlciBpZ25vcmVzIHRoZSBkaXNjYXJkDQpyZXF1ZXN0Lg0KDQpD
+dXJyZW50IGtlcm5lbCByYmQgZHJpdmVyIGFsd2F5cyBkaXNjYXJkcyBhbGxvY2F0ZWQgYmxvY2tz
+IG9uIGFuIGltYWdlDQp3aGVuIHVzZXIgcHJvZ3JhbXMgaXNzdWUgZGlzY2FyZCBvcGVyYXRpb24u
+IEZvciBleGFtcGxlLCB3aGVuIGFuIHJiZCBpbWFnZQ0KaXMgZm9ybWF0dGVkIGJ5IG1rZnMueGZz
+LCB0aGUgbWtmcy54ZnMgaXNzdWVzIGRpc2NhcmQgcmVxdWVzdCBhbmQgdGhlIA0Ka2VybmVsIHJi
+ZCBkcml2ZXIgZGlzY2FyZHMgYWxsb2NhdGVkIGJsb2Nrcy4gSG93ZXZlciwgdGhlIGtlcm5lbCBy
+YmQgZHJpdmVyDQpzaG91bGQga2VlcCBhbGwgYmxvY2tzIG9mIHRoaWNrL2Z1bGx5IHByb3Zpc2lv
+bmVkIGltYWdlLiBUaGlzIHBhdGNoIGFsbG93cw0KdGhlIGtlcm5lbCByYmQgZHJpdmVyIHRvIGln
+bm9yZSBkaXNjYXJkIHJlcXVlc3QgZm9yIHRoaWNrL2Z1bGx5IHByb3Zpc2lvbmVkDQppbWFnZS4N
+Cg0KPiBJIGxvb2tlZCB0aHJvdWdoIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8x
+ODMxNyBhbmQgSSBkb24ndA0KPiBzZWUgYW4gZXF1aXZhbGVudCBmdW5jdGlvbmFsaXR5IHRoZXJl
+LiAgcmJkX2Rpc2NhcmRfb25femVyb2VkX3dyaXRlX3NhbWUNCj4gc2V0IHRvIGZhbHNlIG1ha2Vz
+IHRoZSBhY3R1YWwgemVyb2VzIGdvIG9uIHRoZSB3aXJlLCBidXQgSSBkb24ndCBzZWUNCj4gYW55
+dGhpbmcgZm9yIGlnbm9yaW5nIGRpc2NhcmQgcmVxdWVzdHMuICBDYW4geW91IHBvaW50IG1lIGF0
+IHRoYXQ/DQoNCkFzIEphc29uIHNhaWQsIHRoZXJlIGlzIG5vdCBjdXJyZW50bHkgYW4gb3B0aW9u
+IGluIGxpYnJiZC4gQW5kIHRoZSByYmQNCmNvbW1hbmQgYWxzbyBkb2VzIG5vdCBoYXZlIGFueSBv
+cHRpb25zIGZvciB0aGlzIHBhdGNoLiBJIHdpbGwgYWRkIHRoZSBvcHRpb24NCnRvIHJiZCBtYXAg
+Y29tbWFuZCBpbiB0aGUgbmV4dCBzdGVwLg0KDQpBbmQsIHRoZSByZWFzb24gd2h5IHRoZSBwcmV2
+aW91cyBlbWFpbCByZWZlcnMgdG8gdGhlIFVSTCBpcyB0aGF0IHRoaXMgcGF0Y2gNCnNlcmllcyBp
+cyByZWxhdGVkIHRvIHRoZSB0aGljay9mdWxseSBwcm92aXNpb25lZCBpbWFnZSBkZXNjcmliZWQg
+YWJvdmUuDQoNClJlZ2FyZHMsDQoNCi0tIA0KSGl0b3NoaSBLYW1laQ0KDQo=
