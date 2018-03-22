@@ -1,46 +1,30 @@
-From: =?utf-8?B?5LqA5LqV5LuB5b+XIC8gS0FNRUnvvIxISVRPU0hJ?=
+From: =?iso-2022-jp?B?GyRCNTUwZj9OO1YbKEIgLyBLQU1FSRskQiEkGyhCSElUT1NISQ==?=
         <hitoshi.kamei.xm@hitachi.com>
-Subject: RE: Re: [PATCH 0/2] rbd: thick-provision image support
+Subject: RE: [PATCH 2/2] rbd: add 'thick' sysfs rbd device attribute
 Date: Thu, 22 Mar 2018 11:58:38 +0000
-Message-ID: <C8603108370B1949BF3CC7742DDE5D35B8B39FF8@GSjpTKYDCembx31.service.hitachi.net>
-References: <5AAFA661.60103@hitachi.com>
- <CAOi1vP8qz9GeP0Beypq1N8XFwzkPieEE1Qf6gJafPnngjNG86g@mail.gmail.com>
+Message-ID: <C8603108370B1949BF3CC7742DDE5D35B8B39FFD@GSjpTKYDCembx31.service.hitachi.net>
+References: <5AAFA69E.2050007@hitachi.com>
+ <20180320151510.GA13059@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP8qz9GeP0Beypq1N8XFwzkPieEE1Qf6gJafPnngjNG86g@mail.gmail.com>
+In-Reply-To: <20180320151510.GA13059@infradead.org>
 Content-Language: ja-JP
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: "idryomov@gmail.com" <idryomov@gmail.com>, "sage@redhat.com" <sage@redhat.com>, "elder@kernel.org" <elder@kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SGkgSWx5YSwgDQoNCj4gSSB0aGluayBpdCBzaG91bGQgYmUgYSBtYXAgdGltZSBvcHRpb24gLS0g
-ZS5nLiByYmQgbWFwIC1vIHRoaWNrLg0KPiBJIGRvbid0IHNlZSBhbnkgcmVhc29uIGZvciBhbGxv
-d2luZyB0d2Vha2luZyB0aGlzIHNldHRpbmcgb24gYSBtYXBwZWQgaW1hZ2UuDQoNCkkgd2lsbCBh
-ZGQgc3VjaCBvcHRpb24gdG8gcmJkIG1hcCBjb21tYW5kLiBUaGUgbW9kaWZpZWQgcmJkIGNvbW1h
-bmQNCndpdGggdGhlIG9wdGlvbiB3cml0ZXMgIjEiIHRvIHN5c2ZzIGZpbGUgdG8gZGlzYWJsZSBk
-aXNjYXJkIG9wZXJhdGlvbiBhdA0KcnVuLXRpbWUuIEFuZCwgd2hlbiB1c2VyIHByb2dyYW1zIGlz
-c3VlIGRpc2NhcmQgcmVxdWVzdCB0byBhbiBpbWFnZQ0Kd2l0aCB0aGUgb3B0aW9uLCB0aGUgcGF0
-Y2hlZCBrZXJuZWwgcmJkIGRyaXZlciBpZ25vcmVzIHRoZSBkaXNjYXJkDQpyZXF1ZXN0Lg0KDQpD
-dXJyZW50IGtlcm5lbCByYmQgZHJpdmVyIGFsd2F5cyBkaXNjYXJkcyBhbGxvY2F0ZWQgYmxvY2tz
-IG9uIGFuIGltYWdlDQp3aGVuIHVzZXIgcHJvZ3JhbXMgaXNzdWUgZGlzY2FyZCBvcGVyYXRpb24u
-IEZvciBleGFtcGxlLCB3aGVuIGFuIHJiZCBpbWFnZQ0KaXMgZm9ybWF0dGVkIGJ5IG1rZnMueGZz
-LCB0aGUgbWtmcy54ZnMgaXNzdWVzIGRpc2NhcmQgcmVxdWVzdCBhbmQgdGhlIA0Ka2VybmVsIHJi
-ZCBkcml2ZXIgZGlzY2FyZHMgYWxsb2NhdGVkIGJsb2Nrcy4gSG93ZXZlciwgdGhlIGtlcm5lbCBy
-YmQgZHJpdmVyDQpzaG91bGQga2VlcCBhbGwgYmxvY2tzIG9mIHRoaWNrL2Z1bGx5IHByb3Zpc2lv
-bmVkIGltYWdlLiBUaGlzIHBhdGNoIGFsbG93cw0KdGhlIGtlcm5lbCByYmQgZHJpdmVyIHRvIGln
-bm9yZSBkaXNjYXJkIHJlcXVlc3QgZm9yIHRoaWNrL2Z1bGx5IHByb3Zpc2lvbmVkDQppbWFnZS4N
-Cg0KPiBJIGxvb2tlZCB0aHJvdWdoIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8x
-ODMxNyBhbmQgSSBkb24ndA0KPiBzZWUgYW4gZXF1aXZhbGVudCBmdW5jdGlvbmFsaXR5IHRoZXJl
-LiAgcmJkX2Rpc2NhcmRfb25femVyb2VkX3dyaXRlX3NhbWUNCj4gc2V0IHRvIGZhbHNlIG1ha2Vz
-IHRoZSBhY3R1YWwgemVyb2VzIGdvIG9uIHRoZSB3aXJlLCBidXQgSSBkb24ndCBzZWUNCj4gYW55
-dGhpbmcgZm9yIGlnbm9yaW5nIGRpc2NhcmQgcmVxdWVzdHMuICBDYW4geW91IHBvaW50IG1lIGF0
-IHRoYXQ/DQoNCkFzIEphc29uIHNhaWQsIHRoZXJlIGlzIG5vdCBjdXJyZW50bHkgYW4gb3B0aW9u
-IGluIGxpYnJiZC4gQW5kIHRoZSByYmQNCmNvbW1hbmQgYWxzbyBkb2VzIG5vdCBoYXZlIGFueSBv
-cHRpb25zIGZvciB0aGlzIHBhdGNoLiBJIHdpbGwgYWRkIHRoZSBvcHRpb24NCnRvIHJiZCBtYXAg
-Y29tbWFuZCBpbiB0aGUgbmV4dCBzdGVwLg0KDQpBbmQsIHRoZSByZWFzb24gd2h5IHRoZSBwcmV2
-aW91cyBlbWFpbCByZWZlcnMgdG8gdGhlIFVSTCBpcyB0aGF0IHRoaXMgcGF0Y2gNCnNlcmllcyBp
-cyByZWxhdGVkIHRvIHRoZSB0aGljay9mdWxseSBwcm92aXNpb25lZCBpbWFnZSBkZXNjcmliZWQg
-YWJvdmUuDQoNClJlZ2FyZHMsDQoNCi0tIA0KSGl0b3NoaSBLYW1laQ0KDQo=
+> The normal storage term would be fully provisioned, not 'thick'
+
+The rbd command, which is user mode program, uses "thick-provision".
+If the kernel rbd driver uses "fully provisioned", then the rbd command
+should use "fully provisioned" too. 
+
+What do you think, Jason?
+
+Regards,
+
+-- 
+Hitoshi Kamei
