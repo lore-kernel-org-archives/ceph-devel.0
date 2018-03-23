@@ -1,128 +1,211 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Re: [PATCH 1/2] rbd: RBD_DEV_FLAG_THICK rbd_dev_flags bit
-Date: Fri, 23 Mar 2018 10:34:01 +0100
-Message-ID: <CAOi1vP_7La=nCs71wG3=HbYLaxM3uBFytv8pjGJLuR_uuB0GLg@mail.gmail.com>
-References: <5AAFA682.2080901@hitachi.com> <5AB0E4F3.8090108@easystack.cn>
- <C8603108370B1949BF3CC7742DDE5D35B8B39FD9@GSjpTKYDCembx31.service.hitachi.net>
- <CAOi1vP8eLcc6u-XhpSu33+3eDygy3Mp+_tJXT7ygdwsnUs-RmQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="001a113ee646dd9c370568111fa5"
+From: Joe Perches <joe@perches.com>
+Subject: [PATCH 0/4] net: drivers/net: Use octal permissions
+Date: Fri, 23 Mar 2018 15:54:35 -0700
+Message-ID: <cover.1521845235.git.joe@perches.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP8eLcc6u-XhpSu33+3eDygy3Mp+_tJXT7ygdwsnUs-RmQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?5LqA5LqV5LuB5b+XIC8gS0FNRUnvvIxISVRPU0hJ?= <hitoshi.kamei.xm@hitachi.com>
-Cc: Dongsheng Yang <dongsheng.yang@easystack.cn>, "sage@redhat.com" <sage@redhat.com>, "elder@kernel.org" <elder@kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: netdev@vger.kernel.org, linux-can@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nios2-dev@lists.rocketboards.org, linuxppc-dev@lists.ozlabs.org, intel-wired-lan@lists.osuosl.org, linux-rdma@vger.kernel.org, linux-hams@vger.kernel.org, devel@linuxdriverproject.org, linux-wpan@vger.kernel.org, linux-ppp@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, wcn36xx@lists.infradead.org, xen-devel@lists.xenproject.org, bridge@lists.linux-foundation.org, ceph-devel@vger.kernel.org, linux-decnet-user@lists.sourceforge.net, netfilter-devel@vger.kernel.org, coreteam@netfilter.org, linux-afs@lists.infradead.org, linux-sctp@vger.kernel.org, linux-nfs@vger.kernel.org, linux-x25@vger.kernel.org, linux-mediatek@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org, oss-drivers@netronome.com, brcm80211-dev-list.pdl@broadcom.com, brcm80211-dev-list@cypress.com, linux-bluetooth@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
---001a113ee646dd9c370568111fa5
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Using octal and not symbolic permissions is preferred by many as
+more readable.
 
-On Fri, Mar 23, 2018 at 10:31 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Thu, Mar 22, 2018 at 12:57 PM, =E4=BA=80=E4=BA=95=E4=BB=81=E5=BF=97 / =
-KAMEI=EF=BC=8CHITOSHI
-> <hitoshi.kamei.xm@hitachi.com> wrote:
->> Hi Yang,
->>
->>> I am not sure is this the best way for this case, what about adding an =
-option in "rbd map -o thick rbd/test"?
->>
->> I will add such option to the rbd map command to manipulate image settin=
-gs. So, the end-user
->> do not change the settings directly via sysfs file.
->>
->>>       @@ -4011,6 +4012,15 @@ static void rbd_queue_workfn(struct work_s=
-truct *work)
->>>                       goto err;
->>>               }
->>>
->>>       +       /* Ignore/skip discard requests for thick-provision image=
- */
->>>
->>> Just ignore? or return -EOPNOTSUPP?
->>
->> Thanks, I think -EOPNOTSUPP is better because user programs cannot know
->> the result of requested operation when the kernel rbd driver ignores
->> discard request. The result of requested operation when the kernel rbd d=
-river
->> ignores discard requests, which probably misleads the user programs.
->>
->>> In addition, we should not ignore the REQ_OP_WRITE_ZEROES.
->>
->> Relating to the above, the return code of REQ_OP_WRITE_ZEROS request
->> is also -EOPNOTSUPP instead of ignoring. I think the result of
->> -EOPNOTSUPP is also better for this request because the kernel
->> rbd driver can expect that user programs write zero data by itself.
->
-> REQ_OP_WRITE_ZEROES should continue to work, we just need to make
-> sure it never issues truncates or deletes and instead writes zeroes
-> explicitly.
->
-> I think we should be explicit about the fact that discard is not
-> supported instead of accepting the discard request and failing it in
-> rbd_queue_workfn().  Attached patch is what I have in mind.
+https://lkml.org/lkml/2016/8/2/1945
 
-Now with the patch.
+Rather than getting these piecemeal, just do them all.
+Done with checkpatch and some typing.
 
-Thanks,
+Joe Perches (4):
+  ethernet: Use octal not symbolic permissions
+  wireless: Use octal not symbolic permissions
+  net: Use octal not symbolic permissions
+  drivers/net: Use octal not symbolic permissions
 
-                Ilya
+ drivers/net/bonding/bond_procfs.c                  |   2 +-
+ drivers/net/bonding/bond_sysfs.c                   |  73 +++++++-------
+ drivers/net/bonding/bond_sysfs_slave.c             |   4 +-
+ drivers/net/caif/caif_serial.c                     |  32 +++---
+ drivers/net/caif/caif_spi.c                        |  16 +--
+ drivers/net/caif/caif_virtio.c                     |  16 +--
+ drivers/net/can/at91_can.c                         |   3 +-
+ drivers/net/can/cc770/cc770.c                      |   4 +-
+ drivers/net/can/cc770/cc770_isa.c                  |  16 +--
+ drivers/net/can/grcan.c                            |   4 +-
+ drivers/net/can/janz-ican3.c                       |   6 +-
+ drivers/net/can/sja1000/sja1000_isa.c              |  14 +--
+ drivers/net/can/softing/softing_main.c             |   4 +-
+ drivers/net/can/spi/mcp251x.c                      |   2 +-
+ drivers/net/can/usb/esd_usb2.c                     |   6 +-
+ drivers/net/can/vcan.c                             |   2 +-
+ drivers/net/ethernet/8390/apne.c                   |   2 +-
+ drivers/net/ethernet/8390/lib8390.c                |   2 +-
+ drivers/net/ethernet/8390/ne.c                     |   2 +-
+ drivers/net/ethernet/8390/ne2k-pci.c               |   2 +-
+ drivers/net/ethernet/8390/smc-ultra.c              |   2 +-
+ drivers/net/ethernet/8390/stnic.c                  |   2 +-
+ drivers/net/ethernet/8390/wd.c                     |   2 +-
+ drivers/net/ethernet/altera/altera_tse_main.c      |   6 +-
+ drivers/net/ethernet/amd/xgbe/xgbe-drv.c           |  10 +-
+ drivers/net/ethernet/amd/xgbe/xgbe-main.c          |   2 +-
+ drivers/net/ethernet/broadcom/bnx2.c               |   2 +-
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c   |  12 +--
+ drivers/net/ethernet/broadcom/sb1250-mac.c         |  10 +-
+ drivers/net/ethernet/broadcom/tg3.c                |   6 +-
+ drivers/net/ethernet/brocade/bna/bnad.c            |   2 +-
+ drivers/net/ethernet/brocade/bna/bnad_debugfs.c    |  10 +-
+ drivers/net/ethernet/cavium/thunder/nicvf_main.c   |   2 +-
+ drivers/net/ethernet/chelsio/cxgb3/cxgb3_main.c    |   6 +-
+ drivers/net/ethernet/chelsio/cxgb4/cxgb4_debugfs.c | 112 ++++++++++-----------
+ .../net/ethernet/chelsio/cxgb4vf/cxgb4vf_main.c    |  10 +-
+ drivers/net/ethernet/ec_bhf.c                      |   2 +-
+ drivers/net/ethernet/emulex/benet/be_main.c        |   6 +-
+ drivers/net/ethernet/ibm/ehea/ehea_main.c          |   7 +-
+ drivers/net/ethernet/ibm/ibmveth.c                 |   2 +-
+ drivers/net/ethernet/intel/igb/igb_hwmon.c         |   2 +-
+ drivers/net/ethernet/intel/ixgbe/ixgbe_sysfs.c     |   2 +-
+ drivers/net/ethernet/marvell/mvneta.c              |   8 +-
+ drivers/net/ethernet/marvell/skge.c                |   2 +-
+ drivers/net/ethernet/marvell/sky2.c                |   2 +-
+ drivers/net/ethernet/mellanox/mlx4/main.c          |  16 +--
+ drivers/net/ethernet/mellanox/mlxsw/core_hwmon.c   |  10 +-
+ drivers/net/ethernet/myricom/myri10ge/myri10ge.c   |  32 +++---
+ .../net/ethernet/netronome/nfp/nfp_net_debugfs.c   |   6 +-
+ .../net/ethernet/qlogic/netxen/netxen_nic_main.c   |  14 +--
+ drivers/net/ethernet/qlogic/qlcnic/qlcnic_sysfs.c  |  30 +++---
+ drivers/net/ethernet/qualcomm/qca_debug.c          |   2 +-
+ drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c    |   4 +-
+ drivers/net/ethernet/sfc/mcdi_mon.c                |   2 +-
+ drivers/net/ethernet/stmicro/stmmac/stmmac_main.c  |  26 ++---
+ drivers/net/ethernet/sun/niu.c                     |  10 +-
+ drivers/net/hamradio/bpqether.c                    |   3 +-
+ drivers/net/hamradio/yam.c                         |   2 +-
+ drivers/net/hyperv/netvsc_drv.c                    |   4 +-
+ drivers/net/ieee802154/at86rf230.c                 |   2 +-
+ drivers/net/phy/spi_ks8995.c                       |   2 +-
+ drivers/net/ppp/ppp_generic.c                      |   2 +-
+ drivers/net/ppp/pppoe.c                            |   2 +-
+ drivers/net/usb/cdc_ncm.c                          |  12 +--
+ drivers/net/usb/hso.c                              |   8 +-
+ drivers/net/wireless/ath/ath5k/base.c              |   6 +-
+ drivers/net/wireless/ath/ath5k/debug.c             |  37 ++-----
+ drivers/net/wireless/ath/ath5k/sysfs.c             |   8 +-
+ drivers/net/wireless/ath/ath6kl/debug.c            |  43 ++++----
+ drivers/net/wireless/ath/ath9k/common-debug.c      |   9 +-
+ drivers/net/wireless/ath/ath9k/common-spectral.c   |  10 +-
+ drivers/net/wireless/ath/ath9k/debug.c             |  40 ++++----
+ drivers/net/wireless/ath/ath9k/debug_sta.c         |   6 +-
+ drivers/net/wireless/ath/ath9k/dfs_debug.c         |   4 +-
+ drivers/net/wireless/ath/ath9k/htc_drv_debug.c     |  16 +--
+ drivers/net/wireless/ath/ath9k/tx99.c              |   4 +-
+ drivers/net/wireless/ath/carl9170/debug.c          |   8 +-
+ drivers/net/wireless/ath/carl9170/main.c           |   4 +-
+ drivers/net/wireless/ath/wcn36xx/debug.c           |   5 +-
+ .../wireless/broadcom/brcm80211/brcmfmac/common.c  |   6 +-
+ .../wireless/broadcom/brcm80211/brcmsmac/debug.c   |   2 +-
+ .../broadcom/brcm80211/brcmsmac/mac80211_if.c      |   2 +-
+ drivers/net/wireless/cisco/airo.c                  |   6 +-
+ drivers/net/wireless/intel/ipw2x00/ipw2100.c       |  29 +++---
+ drivers/net/wireless/intel/ipw2x00/ipw2200.c       |  51 ++++------
+ drivers/net/wireless/intel/ipw2x00/libipw_module.c |   2 +-
+ drivers/net/wireless/intel/iwlegacy/3945-mac.c     |  35 +++----
+ drivers/net/wireless/intel/iwlegacy/4965-mac.c     |  19 ++--
+ drivers/net/wireless/intel/iwlegacy/4965-rs.c      |   8 +-
+ drivers/net/wireless/intel/iwlegacy/common.c       |   4 +-
+ drivers/net/wireless/intel/iwlegacy/debug.c        |  58 ++++++-----
+ drivers/net/wireless/intel/iwlwifi/dvm/debugfs.c   |  78 +++++++-------
+ drivers/net/wireless/intel/iwlwifi/dvm/rs.c        |  16 +--
+ drivers/net/wireless/intel/iwlwifi/fw/debugfs.c    |   2 +-
+ drivers/net/wireless/intel/iwlwifi/iwl-drv.c       |  43 ++++----
+ .../net/wireless/intel/iwlwifi/mvm/debugfs-vif.c   |  40 +++-----
+ drivers/net/wireless/intel/iwlwifi/mvm/debugfs.c   | 110 ++++++++++----------
+ drivers/net/wireless/intel/iwlwifi/mvm/ops.c       |   6 +-
+ drivers/net/wireless/intel/iwlwifi/mvm/rs.c        |  12 +--
+ drivers/net/wireless/intel/iwlwifi/pcie/trans.c    |  12 +--
+ drivers/net/wireless/intersil/p54/main.c           |   2 +-
+ drivers/net/wireless/mediatek/mt76/debugfs.c       |  10 +-
+ .../net/wireless/mediatek/mt76/mt76x2_debugfs.c    |   8 +-
+ drivers/net/wireless/mediatek/mt7601u/debugfs.c    |  16 ++-
+ drivers/net/wireless/ralink/rt2x00/rt2500usb.c     |   2 +-
+ drivers/net/wireless/ralink/rt2x00/rt2800pci.c     |   2 +-
+ drivers/net/wireless/ralink/rt2x00/rt2800soc.c     |   2 +-
+ drivers/net/wireless/ralink/rt2x00/rt2800usb.c     |   2 +-
+ drivers/net/wireless/ralink/rt2x00/rt2x00debug.c   |  64 ++++++------
+ drivers/net/wireless/ralink/rt2x00/rt61pci.c       |   2 +-
+ drivers/net/wireless/ralink/rt2x00/rt73usb.c       |   2 +-
+ drivers/net/wireless/ray_cs.c                      |   8 +-
+ drivers/net/wireless/st/cw1200/debug.c             |   6 +-
+ drivers/net/wireless/st/cw1200/main.c              |   2 +-
+ drivers/net/wireless/ti/wl18xx/main.c              |  27 +++--
+ drivers/net/wireless/ti/wlcore/main.c              |   8 +-
+ drivers/net/wireless/ti/wlcore/sdio.c              |   2 +-
+ drivers/net/wireless/ti/wlcore/sysfs.c             |   7 +-
+ drivers/net/xen-netback/xenbus.c                   |   4 +-
+ drivers/net/xen-netfront.c                         |   6 +-
+ net/8021q/vlanproc.c                               |   6 +-
+ net/appletalk/atalk_proc.c                         |   8 +-
+ net/atm/atm_sysfs.c                                |  12 +--
+ net/atm/clip.c                                     |   2 +-
+ net/atm/lec.c                                      |   2 +-
+ net/atm/proc.c                                     |   2 +-
+ net/ax25/af_ax25.c                                 |   6 +-
+ net/bluetooth/rfcomm/tty.c                         |   4 +-
+ net/bridge/br_sysfs_br.c                           |   2 +-
+ net/bridge/br_sysfs_if.c                           |  36 +++----
+ net/can/af_can.c                                   |   2 +-
+ net/can/gw.c                                       |   2 +-
+ net/ceph/ceph_common.c                             |   2 +-
+ net/core/net-procfs.c                              |   6 +-
+ net/core/net-sysfs.c                               |  12 +--
+ net/core/sock.c                                    |   2 +-
+ net/decnet/af_decnet.c                             |   2 +-
+ net/decnet/dn_dev.c                                |   2 +-
+ net/decnet/dn_neigh.c                              |   2 +-
+ net/decnet/dn_route.c                              |   2 +-
+ net/dns_resolver/dns_key.c                         |   2 +-
+ net/ipv4/arp.c                                     |   2 +-
+ net/ipv4/fib_trie.c                                |   6 +-
+ net/ipv4/igmp.c                                    |   4 +-
+ net/ipv4/ipconfig.c                                |   2 +-
+ net/ipv4/netfilter/ipt_CLUSTERIP.c                 |   2 +-
+ net/ipv4/ping.c                                    |   2 +-
+ net/ipv4/proc.c                                    |   6 +-
+ net/ipv4/raw.c                                     |   2 +-
+ net/ipv4/route.c                                   |   4 +-
+ net/ipv4/tcp_ipv4.c                                |   2 +-
+ net/ipv4/udp.c                                     |   2 +-
+ net/ipv6/addrconf.c                                |   2 +-
+ net/ipv6/anycast.c                                 |   2 +-
+ net/ipv6/ip6_flowlabel.c                           |   2 +-
+ net/ipv6/mcast.c                                   |   4 +-
+ net/ipv6/proc.c                                    |   6 +-
+ net/ipv6/raw.c                                     |   2 +-
+ net/ipv6/route.c                                   |   2 +-
+ net/kcm/kcmproc.c                                  |   4 +-
+ net/l2tp/l2tp_ppp.c                                |   2 +-
+ net/llc/llc_proc.c                                 |   4 +-
+ net/mac80211/rc80211_minstrel.c                    |   2 +-
+ net/mac80211/rc80211_minstrel_debugfs.c            |   8 +-
+ net/mac80211/rc80211_minstrel_ht_debugfs.c         |   8 +-
+ net/netfilter/nf_conntrack_netbios_ns.c            |   2 +-
+ net/netfilter/nf_conntrack_snmp.c                  |   2 +-
+ net/netfilter/nf_conntrack_standalone.c            |   2 +-
+ net/netfilter/nf_log.c                             |   2 +-
+ net/netfilter/nf_synproxy_core.c                   |   2 +-
+ net/netfilter/xt_IDLETIMER.c                       |   2 +-
+ net/netfilter/xt_recent.c                          |   4 +-
+ net/netrom/af_netrom.c                             |   6 +-
+ net/rose/af_rose.c                                 |   8 +-
+ net/rxrpc/af_rxrpc.c                               |   2 +-
+ net/sctp/proc.c                                    |  16 +--
+ net/sunrpc/auth_gss/svcauth_gss.c                  |   2 +-
+ net/sunrpc/cache.c                                 |  10 +-
+ net/sunrpc/debugfs.c                               |   6 +-
+ net/sunrpc/rpc_pipe.c                              |  42 ++++----
+ net/wireless/wext-proc.c                           |   2 +-
+ net/x25/x25_proc.c                                 |  12 +--
+ net/xfrm/xfrm_proc.c                               |   2 +-
+ 183 files changed, 906 insertions(+), 969 deletions(-)
 
---001a113ee646dd9c370568111fa5
-Content-Type: text/x-patch; charset="US-ASCII"; name="0001-rbd-notrim-map-option.patch"
-Content-Disposition: attachment; filename="0001-rbd-notrim-map-option.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_jf3r0ohl0
-
-RnJvbSAxZGI0MDUzNjYzNzFjYjEyZTUxODI4MTVjMDZmNmY0OTFhZjRiNjNjIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBJbHlhIERyeW9tb3YgPGlkcnlvbW92QGdtYWlsLmNvbT4KRGF0
-ZTogRnJpLCAyMyBNYXIgMjAxOCAwOToxNDo0NyArMDEwMApTdWJqZWN0OiBbUEFUQ0hdIHJiZDog
-bm90cmltIG1hcCBvcHRpb24KCkFkZCBhbiBvcHRpb24gdG8gdHVybiBvZmYgZGlzY2FyZCBhbmQg
-d3JpdGUgemVyb2VzIG9mZmxvYWQgc3VwcG9ydCB0bwphdm9pZCBkZXByb3Zpc2lvbmluZyBhIGZ1
-bGx5IHByb3Zpc2lvbmVkIGltYWdlLiAgV2hlbiBlbmFibGVkLCBkaXNjYXJkCnJlcXVlc3RzIHdp
-bGwgZmFpbCB3aXRoIC1FT1BOT1RTVVBQLCB3cml0ZSB6ZXJvZXMgcmVxdWVzdHMgd2lsbCBmYWxs
-CmJhY2sgdG8gbWFudWFsbHkgemVyb2luZy4KClNpZ25lZC1vZmYtYnk6IElseWEgRHJ5b21vdiA8
-aWRyeW9tb3ZAZ21haWwuY29tPgotLS0KIGRyaXZlcnMvYmxvY2svcmJkLmMgfCAxOSArKysrKysr
-KysrKysrKy0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMTQgaW5zZXJ0aW9ucygrKSwgNSBkZWxldGlv
-bnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL2Jsb2NrL3JiZC5jIGIvZHJpdmVycy9ibG9jay9y
-YmQuYwppbmRleCAxYTkwZTVkZDc0NzAuLmRiZTQ0MGE2NTMxZSAxMDA2NDQKLS0tIGEvZHJpdmVy
-cy9ibG9jay9yYmQuYworKysgYi9kcml2ZXJzL2Jsb2NrL3JiZC5jCkBAIC03MzMsNiArNzMzLDcg
-QEAgZW51bSB7CiAJT3B0X3JlYWRfd3JpdGUsCiAJT3B0X2xvY2tfb25fcmVhZCwKIAlPcHRfZXhj
-bHVzaXZlLAorCU9wdF9ub3RyaW0sCiAJT3B0X2VycgogfTsKIApAQCAtNzQ2LDYgKzc0Nyw3IEBA
-IHN0YXRpYyBtYXRjaF90YWJsZV90IHJiZF9vcHRzX3Rva2VucyA9IHsKIAl7T3B0X3JlYWRfd3Jp
-dGUsICJydyJ9LAkJLyogQWx0ZXJuYXRlIHNwZWxsaW5nICovCiAJe09wdF9sb2NrX29uX3JlYWQs
-ICJsb2NrX29uX3JlYWQifSwKIAl7T3B0X2V4Y2x1c2l2ZSwgImV4Y2x1c2l2ZSJ9LAorCXtPcHRf
-bm90cmltLCAibm90cmltIn0sCiAJe09wdF9lcnIsIE5VTEx9CiB9OwogCkBAIC03NTQsMTIgKzc1
-NiwxNCBAQCBzdHJ1Y3QgcmJkX29wdGlvbnMgewogCWJvb2wJcmVhZF9vbmx5OwogCWJvb2wJbG9j
-a19vbl9yZWFkOwogCWJvb2wJZXhjbHVzaXZlOworCWJvb2wJdHJpbTsKIH07CiAKICNkZWZpbmUg
-UkJEX1FVRVVFX0RFUFRIX0RFRkFVTFQJQkxLREVWX01BWF9SUQogI2RlZmluZSBSQkRfUkVBRF9P
-TkxZX0RFRkFVTFQJZmFsc2UKICNkZWZpbmUgUkJEX0xPQ0tfT05fUkVBRF9ERUZBVUxUIGZhbHNl
-CiAjZGVmaW5lIFJCRF9FWENMVVNJVkVfREVGQVVMVAlmYWxzZQorI2RlZmluZSBSQkRfVFJJTV9E
-RUZBVUxUCXRydWUKIAogc3RhdGljIGludCBwYXJzZV9yYmRfb3B0c190b2tlbihjaGFyICpjLCB2
-b2lkICpwcml2YXRlKQogewpAQCAtODAxLDYgKzgwNSw5IEBAIHN0YXRpYyBpbnQgcGFyc2VfcmJk
-X29wdHNfdG9rZW4oY2hhciAqYywgdm9pZCAqcHJpdmF0ZSkKIAljYXNlIE9wdF9leGNsdXNpdmU6
-CiAJCXJiZF9vcHRzLT5leGNsdXNpdmUgPSB0cnVlOwogCQlicmVhazsKKwljYXNlIE9wdF9ub3Ry
-aW06CisJCXJiZF9vcHRzLT50cmltID0gZmFsc2U7CisJCWJyZWFrOwogCWRlZmF1bHQ6CiAJCS8q
-IGxpYmNlcGggcHJpbnRzICJiYWQgb3B0aW9uIiBtc2cgKi8KIAkJcmV0dXJuIC1FSU5WQUw7CkBA
-IC0zOTQwLDExICszOTQ3LDEyIEBAIHN0YXRpYyBpbnQgcmJkX2luaXRfZGlzayhzdHJ1Y3QgcmJk
-X2RldmljZSAqcmJkX2RldikKIAlibGtfcXVldWVfaW9fbWluKHEsIG9ianNldF9ieXRlcyk7CiAJ
-YmxrX3F1ZXVlX2lvX29wdChxLCBvYmpzZXRfYnl0ZXMpOwogCi0JLyogZW5hYmxlIHRoZSBkaXNj
-YXJkIHN1cHBvcnQgKi8KLQlxdWV1ZV9mbGFnX3NldF91bmxvY2tlZChRVUVVRV9GTEFHX0RJU0NB
-UkQsIHEpOwotCXEtPmxpbWl0cy5kaXNjYXJkX2dyYW51bGFyaXR5ID0gb2Jqc2V0X2J5dGVzOwot
-CWJsa19xdWV1ZV9tYXhfZGlzY2FyZF9zZWN0b3JzKHEsIG9ianNldF9ieXRlcyA+PiBTRUNUT1Jf
-U0hJRlQpOwotCWJsa19xdWV1ZV9tYXhfd3JpdGVfemVyb2VzX3NlY3RvcnMocSwgb2Jqc2V0X2J5
-dGVzID4+IFNFQ1RPUl9TSElGVCk7CisJaWYgKHJiZF9kZXYtPm9wdHMtPnRyaW0pIHsKKwkJcXVl
-dWVfZmxhZ19zZXRfdW5sb2NrZWQoUVVFVUVfRkxBR19ESVNDQVJELCBxKTsKKwkJcS0+bGltaXRz
-LmRpc2NhcmRfZ3JhbnVsYXJpdHkgPSBvYmpzZXRfYnl0ZXM7CisJCWJsa19xdWV1ZV9tYXhfZGlz
-Y2FyZF9zZWN0b3JzKHEsIG9ianNldF9ieXRlcyA+PiBTRUNUT1JfU0hJRlQpOworCQlibGtfcXVl
-dWVfbWF4X3dyaXRlX3plcm9lc19zZWN0b3JzKHEsIG9ianNldF9ieXRlcyA+PiBTRUNUT1JfU0hJ
-RlQpOworCX0KIAogCWlmICghY2VwaF90ZXN0X29wdChyYmRfZGV2LT5yYmRfY2xpZW50LT5jbGll
-bnQsIE5PQ1JDKSkKIAkJcS0+YmFja2luZ19kZXZfaW5mby0+Y2FwYWJpbGl0aWVzIHw9IEJESV9D
-QVBfU1RBQkxFX1dSSVRFUzsKQEAgLTUxNzAsNiArNTE3OCw3IEBAIHN0YXRpYyBpbnQgcmJkX2Fk
-ZF9wYXJzZV9hcmdzKGNvbnN0IGNoYXIgKmJ1ZiwKIAlyYmRfb3B0cy0+cXVldWVfZGVwdGggPSBS
-QkRfUVVFVUVfREVQVEhfREVGQVVMVDsKIAlyYmRfb3B0cy0+bG9ja19vbl9yZWFkID0gUkJEX0xP
-Q0tfT05fUkVBRF9ERUZBVUxUOwogCXJiZF9vcHRzLT5leGNsdXNpdmUgPSBSQkRfRVhDTFVTSVZF
-X0RFRkFVTFQ7CisJcmJkX29wdHMtPnRyaW0gPSBSQkRfVFJJTV9ERUZBVUxUOwogCiAJY29wdHMg
-PSBjZXBoX3BhcnNlX29wdGlvbnMob3B0aW9ucywgbW9uX2FkZHJzLAogCQkJCQltb25fYWRkcnMg
-KyBtb25fYWRkcnNfc2l6ZSAtIDEsCi0tIAoyLjQuMwoK
---001a113ee646dd9c370568111fa5--
+-- 
+2.15.0
