@@ -1,34 +1,88 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fix for 4.16-rc8
-Date: Fri, 30 Mar 2018 15:48:59 +0200
-Message-ID: <1522417739-26858-1-git-send-email-idryomov@gmail.com>
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Subject: [PATCH] rbd: remove VLA usage
+Date: Fri, 30 Mar 2018 14:17:59 -0500
+Message-ID: <20180330191759.GA18176@embeddedgus>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>
+Cc: ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+In preparation to enabling -Wvla, remove the use of stack VLA.
 
-The following changes since commit 3eb2ce825ea1ad89d20f7a3b5780df850e4be274:
+In this particular case, variable buf_size is replaced with a constant
+expression that can be computed at preprocessing time. This avoids two
+VLA warnings. Also, as a consequence of the mentioned change, some code
+was slightly refactored.
 
-  Linux 4.16-rc7 (2018-03-25 12:44:30 -1000)
+The use of stack Variable Length Arrays needs to be avoided, as they
+can be a vector for stack exhaustion, which can be both a runtime bug
+or a security flaw. Also, in general, as code evolves it is easy to
+lose track of how big a VLA can get. Thus, we can end up having runtime
+failures that are hard to debug.
 
-are available in the git repository at:
+Also, fixed as part of the directive to remove all VLAs from
+the kernel: https://lkml.org/lkml/2018/3/7/621
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.16-rc8
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+---
+ drivers/block/rbd.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
 
-for you to fetch changes up to 85784f9395987a422fa04263e7c0fb13da11eb5c:
-
-  ceph: only dirty ITER_IOVEC pages for direct read (2018-03-30 11:17:48 +0200)
-
-----------------------------------------------------------------
-A fix for a dio-enabled loop on ceph deadlock from Zheng, marked for
-stable.
-
-----------------------------------------------------------------
-Yan, Zheng (1):
-      ceph: only dirty ITER_IOVEC pages for direct read
-
- fs/ceph/file.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 1e03b04..5133122 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3091,20 +3091,20 @@ static int __rbd_notify_op_lock(struct rbd_device *rbd_dev,
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_client_id cid = rbd_get_cid(rbd_dev);
+-	int buf_size = 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN;
+-	char buf[buf_size];
++	char buf[4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN];
+ 	void *p = buf;
+ 
+ 	dout("%s rbd_dev %p notify_op %d\n", __func__, rbd_dev, notify_op);
+ 
+ 	/* encode *LockPayload NotifyMessage (op + ClientId) */
+-	ceph_start_encoding(&p, 2, 1, buf_size - CEPH_ENCODING_START_BLK_LEN);
++	ceph_start_encoding(&p, 2, 1,
++			    sizeof(buf) - CEPH_ENCODING_START_BLK_LEN);
+ 	ceph_encode_32(&p, notify_op);
+ 	ceph_encode_64(&p, cid.gid);
+ 	ceph_encode_64(&p, cid.handle);
+ 
+ 	return ceph_osdc_notify(osdc, &rbd_dev->header_oid,
+-				&rbd_dev->header_oloc, buf, buf_size,
++				&rbd_dev->header_oloc, buf, sizeof(buf),
+ 				RBD_NOTIFY_TIMEOUT, preply_pages, preply_len);
+ }
+ 
+@@ -3610,19 +3610,18 @@ static void __rbd_acknowledge_notify(struct rbd_device *rbd_dev,
+ 				     u64 notify_id, u64 cookie, s32 *result)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+-	int buf_size = 4 + CEPH_ENCODING_START_BLK_LEN;
+-	char buf[buf_size];
++	char buf[4 + CEPH_ENCODING_START_BLK_LEN];
++	int buf_size = 0;
+ 	int ret;
+ 
+ 	if (result) {
+ 		void *p = buf;
+ 
++		buf_size = sizeof(buf);
+ 		/* encode ResponseMessage */
+ 		ceph_start_encoding(&p, 1, 1,
+ 				    buf_size - CEPH_ENCODING_START_BLK_LEN);
+ 		ceph_encode_32(&p, *result);
+-	} else {
+-		buf_size = 0;
+ 	}
+ 
+ 	ret = ceph_osdc_notify_ack(osdc, &rbd_dev->header_oid,
+-- 
+2.7.4
