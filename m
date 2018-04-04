@@ -1,48 +1,63 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developer Monthly - April 2018
-Date: Tue, 3 Apr 2018 21:28:19 -0300
-Message-ID: <CAB0WNsh0dn5af2Xjv+Jb-iUCuWu3Eo+s87f0_PJ77a8=UFti0g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] rbd: add missing return statements
+Date: Wed,  4 Apr 2018 11:49:22 +0200
+Message-ID: <20180404094931.2345742-1-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>
+Cc: Arnd Bergmann <arnd@arndb.de>, Jason Dillaman <dillaman@redhat.com>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hey Cephers,
+A new set of warnings appeared in next-20180403 in some configurations
+when gcc cannot see that rbd_assert(0) leads to an unreachable code
+path:
 
-This is just a friendly reminder that the next Ceph Developer Montly
-meeting is coming up:
+drivers/block/rbd.c: In function 'rbd_img_is_write':
+drivers/block/rbd.c:1397:1: error: control reaches end of non-void function [-Werror=return-type]
+drivers/block/rbd.c: In function '__rbd_obj_handle_request':
+drivers/block/rbd.c:2499:1: error: control reaches end of non-void function [-Werror=return-type]
+drivers/block/rbd.c: In function 'rbd_obj_handle_write':
+drivers/block/rbd.c:2471:1: error: control reaches end of non-void function [-Werror=return-type]
 
- http://wiki.ceph.com/Planning
+To work around this, we can add a return statement to each of these
+cases. An alternative would be to remove the unlikely() annotation
+in rbd_assert(), or to just use BUG()/BUG_ON() directly. This adds the
+return statements, guessing what the most reasonable behavior
+would be.
 
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
+Fixes: 3da691bf4366 ("rbd: new request handling code")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/block/rbd.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
- http://wiki.ceph.com/CDM_04-APR-2018
-
-This edition happens on EMEA friendly hours (12:30 EST) and we will
-use the following Bluejeans URL for the video conference:
-
- https://bluejeans.com/376400604/
-
-If you have questions or comments, please let us know.
-
-Kindest regards,
-
-Leo
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 07dc5419bd63..9445a71a9cd6 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1394,6 +1394,7 @@ static bool rbd_img_is_write(struct rbd_img_request *img_req)
+ 	default:
+ 		rbd_assert(0);
+ 	}
++	return false;
+ }
+ 
+ static void rbd_obj_handle_request(struct rbd_obj_request *obj_req);
+@@ -2468,6 +2469,7 @@ static bool rbd_obj_handle_write(struct rbd_obj_request *obj_req)
+ 	default:
+ 		rbd_assert(0);
+ 	}
++	return true;
+ }
+ 
+ /*
+@@ -2496,6 +2498,7 @@ static bool __rbd_obj_handle_request(struct rbd_obj_request *obj_req)
+ 	default:
+ 		rbd_assert(0);
+ 	}
++	return true;
+ }
+ 
+ static void rbd_obj_end_request(struct rbd_obj_request *obj_req)
 -- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+2.9.0
