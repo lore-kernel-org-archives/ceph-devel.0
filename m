@@ -1,108 +1,48 @@
-From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Subject: Re: [PATCH] rbd: remove VLA usage
-Date: Fri, 30 Mar 2018 15:34:39 -0500
-Message-ID: <0e56a59e-6dbe-a4c9-f761-e7e7d63db297@embeddedor.com>
-References: <20180330191759.GA18176@embeddedgus>
- <CAOi1vP8jzp9s4Qj9rBf90eU1TVY9C3W8ezThUXcSHUOX-B=pQg@mail.gmail.com>
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Developer Monthly - April 2018
+Date: Tue, 3 Apr 2018 21:28:19 -0300
+Message-ID: <CAB0WNsh0dn5af2Xjv+Jb-iUCuWu3Eo+s87f0_PJ77a8=UFti0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP8jzp9s4Qj9rBf90eU1TVY9C3W8ezThUXcSHUOX-B=pQg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
+Hey Cephers,
 
+This is just a friendly reminder that the next Ceph Developer Montly
+meeting is coming up:
 
-On 03/30/2018 03:29 PM, Ilya Dryomov wrote:
-> On Fri, Mar 30, 2018 at 9:17 PM, Gustavo A. R. Silva
-> <gustavo@embeddedor.com> wrote:
->> In preparation to enabling -Wvla, remove the use of stack VLA.
->>
->> In this particular case, variable buf_size is replaced with a constant
->> expression that can be computed at preprocessing time. This avoids two
->> VLA warnings. Also, as a consequence of the mentioned change, some code
->> was slightly refactored.
->>
->> The use of stack Variable Length Arrays needs to be avoided, as they
->> can be a vector for stack exhaustion, which can be both a runtime bug
->> or a security flaw. Also, in general, as code evolves it is easy to
->> lose track of how big a VLA can get. Thus, we can end up having runtime
->> failures that are hard to debug.
->>
->> Also, fixed as part of the directive to remove all VLAs from
->> the kernel: https://lkml.org/lkml/2018/3/7/621
->>
->> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
->> ---
->>   drivers/block/rbd.c | 15 +++++++--------
->>   1 file changed, 7 insertions(+), 8 deletions(-)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index 1e03b04..5133122 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -3091,20 +3091,20 @@ static int __rbd_notify_op_lock(struct rbd_device *rbd_dev,
->>   {
->>          struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
->>          struct rbd_client_id cid = rbd_get_cid(rbd_dev);
->> -       int buf_size = 4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN;
->> -       char buf[buf_size];
->> +       char buf[4 + 8 + 8 + CEPH_ENCODING_START_BLK_LEN];
->>          void *p = buf;
->>
->>          dout("%s rbd_dev %p notify_op %d\n", __func__, rbd_dev, notify_op);
->>
->>          /* encode *LockPayload NotifyMessage (op + ClientId) */
->> -       ceph_start_encoding(&p, 2, 1, buf_size - CEPH_ENCODING_START_BLK_LEN);
->> +       ceph_start_encoding(&p, 2, 1,
->> +                           sizeof(buf) - CEPH_ENCODING_START_BLK_LEN);
->>          ceph_encode_32(&p, notify_op);
->>          ceph_encode_64(&p, cid.gid);
->>          ceph_encode_64(&p, cid.handle);
->>
->>          return ceph_osdc_notify(osdc, &rbd_dev->header_oid,
->> -                               &rbd_dev->header_oloc, buf, buf_size,
->> +                               &rbd_dev->header_oloc, buf, sizeof(buf),
->>                                  RBD_NOTIFY_TIMEOUT, preply_pages, preply_len);
->>   }
->>
->> @@ -3610,19 +3610,18 @@ static void __rbd_acknowledge_notify(struct rbd_device *rbd_dev,
->>                                       u64 notify_id, u64 cookie, s32 *result)
->>   {
->>          struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
->> -       int buf_size = 4 + CEPH_ENCODING_START_BLK_LEN;
->> -       char buf[buf_size];
->> +       char buf[4 + CEPH_ENCODING_START_BLK_LEN];
->> +       int buf_size = 0;
->>          int ret;
->>
->>          if (result) {
->>                  void *p = buf;
->>
->> +               buf_size = sizeof(buf);
->>                  /* encode ResponseMessage */
->>                  ceph_start_encoding(&p, 1, 1,
->>                                      buf_size - CEPH_ENCODING_START_BLK_LEN);
->>                  ceph_encode_32(&p, *result);
->> -       } else {
->> -               buf_size = 0;
->>          }
->>
->>          ret = ceph_osdc_notify_ack(osdc, &rbd_dev->header_oid,
-> 
-> Already fixed:
-> 
->    https://github.com/ceph/ceph-client/commit/2474e77e75215a3cad3b652d2f55ba5b123cb119
-> 
+ http://wiki.ceph.com/Planning
 
-Oh, that's great.
+If you have work that you're doing that it a feature work, significant
+backports, or anything you would like to discuss with the core team,
+please add it to the following page:
 
-Good to know. :)
+ http://wiki.ceph.com/CDM_04-APR-2018
 
-Thanks
---
-Gustavo
+This edition happens on EMEA friendly hours (12:30 EST) and we will
+use the following Bluejeans URL for the video conference:
+
+ https://bluejeans.com/376400604/
+
+If you have questions or comments, please let us know.
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
