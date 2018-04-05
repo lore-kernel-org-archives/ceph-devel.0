@@ -1,74 +1,90 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] [v2] rbd: avoid Wreturn-type warnings
-Date: Wed, 4 Apr 2018 15:10:26 +0200
-Message-ID: <CAOi1vP8KMoSKuw87wBJkAe5ke8Vb0jQ4qeizdX5jrfaChxNCCg@mail.gmail.com>
-References: <20180404125345.4008862-1-arnd@arndb.de>
+From: Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org>
+Subject: Ceph Dashboard IRC Channel
+Date: Thu, 5 Apr 2018 08:52:07 +0200
+Message-ID: <a82995e3-a368-f76c-26f3-a1d064206100@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180404125345.4008862-1-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, Jason Dillaman <dillaman@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============4102027607768979773=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Apr 4, 2018 at 2:53 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> A new set of warnings appeared in next-20180403 in some configurations
-> when gcc cannot see that rbd_assert(0) leads to an unreachable code
-> path:
->
-> drivers/block/rbd.c: In function 'rbd_img_is_write':
-> drivers/block/rbd.c:1397:1: error: control reaches end of non-void function [-Werror=return-type]
-> drivers/block/rbd.c: In function '__rbd_obj_handle_request':
-> drivers/block/rbd.c:2499:1: error: control reaches end of non-void function [-Werror=return-type]
-> drivers/block/rbd.c: In function 'rbd_obj_handle_write':
-> drivers/block/rbd.c:2471:1: error: control reaches end of non-void function [-Werror=return-type]
->
-> As the rbd_assert() here shows has no extra information beyond the verbose
-> BUG(), we can simply use BUG() directly in its place.  This is reliably
-> detected as not returning on any architecture, since it doesn't depend
-> on the unlikely() comparison that confused gcc.
->
-> Fixes: 3da691bf4366 ("rbd: new request handling code")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  drivers/block/rbd.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 07dc5419bd63..5f7f4d4b78a8 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1392,7 +1392,7 @@ static bool rbd_img_is_write(struct rbd_img_request *img_req)
->         case OBJ_OP_DISCARD:
->                 return true;
->         default:
-> -               rbd_assert(0);
-> +               BUG();
->         }
->  }
->
-> @@ -2466,7 +2466,7 @@ static bool rbd_obj_handle_write(struct rbd_obj_request *obj_req)
->                 }
->                 return false;
->         default:
-> -               rbd_assert(0);
-> +               BUG();
->         }
->  }
->
-> @@ -2494,7 +2494,7 @@ static bool __rbd_obj_handle_request(struct rbd_obj_request *obj_req)
->                 }
->                 return false;
->         default:
-> -               rbd_assert(0);
-> +               BUG();
->         }
->  }
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--===============4102027607768979773==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature";
+ boundary="J0kzTPFQNKgqaBXsvTU4LlGB35EwZfNWQ"
 
-Applied.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--J0kzTPFQNKgqaBXsvTU4LlGB35EwZfNWQ
+Content-Type: multipart/mixed; boundary="RIjHhzqjLVDY3Gq4A5RLqpyGYAsRtNbtA";
+ protected-headers="v1"
+From: Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org>
+To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Message-ID: <a82995e3-a368-f76c-26f3-a1d064206100-IBi9RG/b67k@public.gmane.org>
+Subject: Ceph Dashboard IRC Channel
+
+--RIjHhzqjLVDY3Gq4A5RLqpyGYAsRtNbtA
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-US
+
+Hi all,
+
+we've created a new #ceph-dashboard channel on OFTC to talk about all
+the related dashboard functionalities and developments. This means that
+the old "openattic" channel on Freenode is just for openATTIC and
+everything new regarding the mgr module will now be discussed in the new
+channel on OFTC.
 
 Thanks,
 
-                Ilya
+Kai
+
+--=20
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
+, HRB 21284 (AG N=C3=BCrnberg)
+
+
+
+--RIjHhzqjLVDY3Gq4A5RLqpyGYAsRtNbtA--
+
+--J0kzTPFQNKgqaBXsvTU4LlGB35EwZfNWQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCgAdFiEEIUhTiREAT2TdVpPQHoyRVhbjxG4FAlrFx5cACgkQHoyRVhbj
+xG7Uwwf+PUrWRSPxSs3/cWOW7glGXvRMnD+jgKMmaAyBxrC90yp4iHfXSI/8KRsJ
+rFWGJP2KdJ4ENx8M1qH/6jBzOxD2VPMTywERyJWpO9o8jWV2rqBDsYrYL+3uWOOJ
+6Bzp9yUKcxLco/1KsxF4m6/2ONijqJdxu5m13kSK4uiv7RacU2lv4VHpqbu9Xbr/
+xHKte3n/bOZNIg1/HIPgG040NImLo2P5g5S2HsCmCcy6zoSHhgxFEYEyid44qUhy
+gLlyPvQZQ4zYm9VXVs6JD4SqxNGqkWzPMnNIi6/uVVonWJSjJ37vH8lYUFPXIHvD
+XRADRrIpb1KLHfLf3jUnVMtyoKEWTg==
+=QqQg
+-----END PGP SIGNATURE-----
+
+--J0kzTPFQNKgqaBXsvTU4LlGB35EwZfNWQ--
+
+--===============4102027607768979773==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============4102027607768979773==--
