@@ -1,9 +1,10 @@
-From: Lenz Grimmer <lgrimmer-IBi9RG/b67k@public.gmane.org>
-Subject: Ceph Dashboard v2 update
-Date: Mon, 9 Apr 2018 14:55:03 +0200
-Message-ID: <8f5efafa-33e1-3f79-9985-973e71ff4024@suse.com>
+From: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: cephfs snapshot format upgrade
+Date: Tue, 10 Apr 2018 20:44:58 +0800
+Message-ID: <CAAM7YAnaiG6sTcQ=O7Sg36kq9u=APfOffBY4aY4OjWCGtfTNGQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1221992827346786255=="
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -14,75 +15,35 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============1221992827346786255==
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="hKneadEz2Uc8sjiAxNJy3MzCQk2VSpT5w"
+Hello
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---hKneadEz2Uc8sjiAxNJy3MzCQk2VSpT5w
-Content-Type: multipart/mixed; boundary="BCMFrHvFxkZUj1MZCQnKqqxF3KVsgsD2U";
- protected-headers="v1"
-From: Lenz Grimmer <lgrimmer-IBi9RG/b67k@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>,
- ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Message-ID: <8f5efafa-33e1-3f79-9985-973e71ff4024-IBi9RG/b67k@public.gmane.org>
-Subject: Ceph Dashboard v2 update
+To simplify snapshot handling in multiple active mds setup, we changed
+format of snaprealm in mimic dev.
+https://github.com/ceph/ceph/pull/16779.
 
---BCMFrHvFxkZUj1MZCQnKqqxF3KVsgsD2U
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+The new version mds can handle old format snaprealm in single active
+setup. It also can convert old format snaprealm to the new format when
+snaprealm is modified. The problem is that new version mds can not
+properly handle old format snaprealm in multiple active setup. It may
+crash when it encounter old format snaprealm. For existing filesystem
+with snapshots, upgrading mds to mimic seems to be no problem at first
+glance. But if user later enables multiple active mds,  mds may
+crashes continuously. No easy way to switch back to single acitve mds.
 
-Hi all,
+I don't have clear idea how to handle this situation. I can think of a
+few options.
 
-a month has passed since the Dashboard v2 was merged into the master
-branch, so I thought it might be helpful to write a summary/update (with
-screenshots) of what we've been up to since then:
+1. Forbid multiple active before all old snapshots are deleted or
+before all snaprealms are converted to new format. Format conversion
+requires traversing while whole filesystem tree.  Not easy to
+implement.
 
-  https://www.openattic.org/posts/ceph-dashboard-v2-update/
-
-Let us know what you think!
-
-Cheers,
-
-Lenz
-
---=20
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 Nuernberg (Germany)
-GF:Felix Imend=C3=B6rffer,Jane Smithard,Graham Norton,HRB 21284 (AG N=C3=BC=
-rnberg)
+2. Ask user to delete all old snapshots before upgrading to mimic,
+make mds just ignore old format snaprealms.
 
 
---BCMFrHvFxkZUj1MZCQnKqqxF3KVsgsD2U--
-
---hKneadEz2Uc8sjiAxNJy3MzCQk2VSpT5w
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iFwEARECAB0WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCWstipwAKCRBJUOEqsnKR
-8nLGAJ9N0gciJxSfh2MJwYeYCrd/OCC3rQCY7dpLU/hmEttvZ+qXP1arOnlcnA==
-=Ax9M
------END PGP SIGNATURE-----
-
---hKneadEz2Uc8sjiAxNJy3MzCQk2VSpT5w--
-
---===============1221992827346786255==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1221992827346786255==--
+Regards
+Yan, Zheng
