@@ -1,7 +1,7 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: cephfs snapshot format upgrade
-Date: Tue, 10 Apr 2018 12:34:14 -0700
-Message-ID: <CAJ4mKGaKcU6uSLhrT1xRUdmPo7ux7EyX1h6G1N95mWqokudkyQ@mail.gmail.com>
+Date: Tue, 10 Apr 2018 16:04:34 -0700
+Message-ID: <CA+2bHPa-HFqbzT5OKuUGPWFefSWm2g4tjvNxJeAd00iWnay8Qg@mail.gmail.com>
 References: <CAAM7YAnaiG6sTcQ=O7Sg36kq9u=APfOffBY4aY4OjWCGtfTNGQ@mail.gmail.com>
  <CALe9h7fDviOKe6x4=yOP_DM1L=sNXNrWdM3OaavMS+wLdEQHGQ@mail.gmail.com>
 Mime-Version: 1.0
@@ -60,14 +60,6 @@ On Tue, Apr 10, 2018 at 5:54 AM, John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@publi
 > before enabling certain features?  So we'd then have a
 > "latest_scrubbed_version >= mimic" test before enabling multiple
 > active daemons.
-
-Don't we have a (recursive!) last_scrub_[stamp|version] on all
-directories? There's not (yet) a mechanism for associating that with
-specific data versions like you describe here, but for a one-time
-upgrade with unsupported features I don't think we need anything too
-sophisticated.
--Greg
-
 >
 > For this particular situation, we'd also need to protect against
 > people who had enabled multimds and snapshots experimentally, with an
@@ -75,20 +67,11 @@ sophisticated.
 >  ((ever_allowed_features & CEPH_MDSMAP_ALLOW_SNAPS) &&
 > (allows_multimds() || in.size() >1)) && latest_scrubbed_version <
 > mimic
->
-> John
->
->> 2. Ask user to delete all old snapshots before upgrading to mimic,
->> make mds just ignore old format snaprealms.
->>
->>
->> Regards
->> Yan, Zheng
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+This sounds like the right approach to me. The mons should also be
+capable of performing the same test and raising a health error that
+pre-Mimic MDSs must be started and the number of actives be reduced to
+1.
+
+-- 
+Patrick Donnelly
