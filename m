@@ -1,31 +1,47 @@
-From: Martin Palma <martin-0Gz4coKHHX0@public.gmane.org>
-Subject: CephFS get directory size without mounting the fs
-Date: Wed, 18 Apr 2018 09:17:30 +0200
-Message-ID: <CANMxC7DuEZCp8iHZbDA=rMK5hsZVah0Mrs0+7Pm1=mXERsw7tg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: CEPH list <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 4.17-rc2
+Date: Wed, 18 Apr 2018 16:52:20 +0200
+Message-ID: <1524063140-28502-1-git-send-email-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hello,
+Hi Linus,
 
-Is it possible to get directory/file layout information (size, pool)
-of a CephFS directory directly from a metadata server without the need
-to mount the fs? Or better through the restful plugin...
+The following changes since commit 60cc43fc888428bb2f18f08997432d426a243338:
 
-When mounted I can get infos about the directory/file layout using the
-getfattr command...
+  Linux 4.17-rc1 (2018-04-15 18:24:20 -0700)
 
-Best,
-Martin
+are available in the git repository at:
+
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.17-rc2
+
+for you to fetch changes up to d93605407af34eb0b7eb8aff6b1eae2cde3cdd22:
+
+  rbd: notrim map option (2018-04-16 09:38:40 +0200)
+
+----------------------------------------------------------------
+A couple of follow-up patches for -rc1 changes in rbd, support for
+a timeout on waiting for the acquisition of exclusive lock and a fix
+for uninitialized memory access in CephFS, marked for stable.
+
+----------------------------------------------------------------
+Arnd Bergmann (1):
+      rbd: avoid Wreturn-type warnings
+
+Dongsheng Yang (1):
+      rbd: support timeout in rbd_wait_state_locked()
+
+Ilya Dryomov (3):
+      rbd: refactor rbd_wait_state_locked()
+      rbd: adjust queue limits for "fancy" striping
+      rbd: notrim map option
+
+Yan, Zheng (1):
+      ceph: always update atime/mtime/ctime for new inode
+
+ drivers/block/rbd.c | 101 +++++++++++++++++++++++++++++++++++-----------------
+ fs/ceph/inode.c     |  10 ++++--
+ 2 files changed, 76 insertions(+), 35 deletions(-)
