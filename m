@@ -1,47 +1,44 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.17-rc2
-Date: Wed, 18 Apr 2018 16:52:20 +0200
-Message-ID: <1524063140-28502-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Cephalocon APAC 2018 report, videos and slides
+Date: Tue, 24 Apr 2018 12:30:19 -0300
+Message-ID: <CAB0WNsjn+hz0AfcvUJxT2y6fu3UbBYBpTZkiXsPio1mOfqtf5g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-Community <ceph-community-Qp0mS5GaXlQ@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+Hi,
 
-The following changes since commit 60cc43fc888428bb2f18f08997432d426a243338:
+Last night I posted the Cephalocon 2018 conference report on the Ceph
+blog[1], published the video recordings from the sessions on
+YouTube[2] and the slide decks on Slideshare[3].
 
-  Linux 4.17-rc1 (2018-04-15 18:24:20 -0700)
+[1] https://ceph.com/community/cephalocon-apac-2018-report/
+[2] https://www.youtube.com/playlist?list=PLrBUGiINAakNgeLvjald7NcWps_yDCblr
+[3] https://www.slideshare.net/Inktank_Ceph/tag/cephalocon-apac-2018
 
-are available in the git repository at:
+I'd like to take the opportunity to apologize for the lots of posts on
+Twitter and Google+ about the video uploads last night. Seems that
+even I disabled the checkbox to make posts announcing the new uploads
+on social media YouTube decided to post it anyway. Sorry for the
+inconvenience.
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.17-rc2
+Kindest regards,
 
-for you to fetch changes up to d93605407af34eb0b7eb8aff6b1eae2cde3cdd22:
+Leo
 
-  rbd: notrim map option (2018-04-16 09:38:40 +0200)
-
-----------------------------------------------------------------
-A couple of follow-up patches for -rc1 changes in rbd, support for
-a timeout on waiting for the acquisition of exclusive lock and a fix
-for uninitialized memory access in CephFS, marked for stable.
-
-----------------------------------------------------------------
-Arnd Bergmann (1):
-      rbd: avoid Wreturn-type warnings
-
-Dongsheng Yang (1):
-      rbd: support timeout in rbd_wait_state_locked()
-
-Ilya Dryomov (3):
-      rbd: refactor rbd_wait_state_locked()
-      rbd: adjust queue limits for "fancy" striping
-      rbd: notrim map option
-
-Yan, Zheng (1):
-      ceph: always update atime/mtime/ctime for new inode
-
- drivers/block/rbd.c | 101 +++++++++++++++++++++++++++++++++++-----------------
- fs/ceph/inode.c     |  10 ++++--
- 2 files changed, 76 insertions(+), 35 deletions(-)
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
