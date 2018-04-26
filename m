@@ -1,7 +1,7 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developer Monthly - May 2018
-Date: Thu, 26 Apr 2018 02:09:43 -0300
-Message-ID: <CAB0WNsgojSXWZyzUk7bOVSEyi_TdiqhE5-DVVqrRm4uX-vv=+A@mail.gmail.com>
+Subject: Ceph Tech Talk canceled
+Date: Thu, 26 Apr 2018 13:22:03 -0300
+Message-ID: <CAB0WNsjorp9HBmuCVV7oONsub_i2d90Y3hgPaznxjkTyjnT03Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -20,27 +20,8 @@ List-Id: ceph-devel.vger.kernel.org
 
 Hey Cephers,
 
-This is just a friendly reminder that the next Ceph Developer Monthly
-meeting is coming up:
-
- http://wiki.ceph.com/Planning
-
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
-
- http://wiki.ceph.com/CDM_02-MAY-2018
-
-This edition happens on APAC friendly hours (21:00 EST) and we will
-use the following Bluejeans URL for the video conference:
-
- https://redhat.bluejeans.com/376400604
-
-The meeting details are also available on Ceph Community Calendar:
-
- https://calendar.google.com/calendar/b/1?cid=OXRzOWM3bHQ3dTF2aWMyaWp2dnFxbGZwbzBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ
-
-If you have questions or comments, please let us know.
+Sorry for the short notice, but the Ceph Tech Talk schedule for today
+(Thursday, April 26) has been canceled due lack of topic.
 
 Kindest regards,
 
