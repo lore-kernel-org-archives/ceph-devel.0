@@ -1,7 +1,7 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Tech Talk canceled
-Date: Thu, 26 Apr 2018 13:22:03 -0300
-Message-ID: <CAB0WNsjorp9HBmuCVV7oONsub_i2d90Y3hgPaznxjkTyjnT03Q@mail.gmail.com>
+Subject: Ceph Performance Weekly - April 26th 2018
+Date: Thu, 26 Apr 2018 14:26:06 -0300
+Message-ID: <CAB0WNsid1K+mPUSGegnXdz9rLswf5341huT_urrV=A9RY6rBVA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -15,13 +15,15 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hey Cephers,
+Hi Cephers,
 
-Sorry for the short notice, but the Ceph Tech Talk schedule for today
-(Thursday, April 26) has been canceled due lack of topic.
+In case you missed the Ceph Performance Weekly of April 26th 2018, it
+is now up on our YouTube Channel:
+
+  https://youtu.be/I_TxLKiYLCw
 
 Kindest regards,
 
