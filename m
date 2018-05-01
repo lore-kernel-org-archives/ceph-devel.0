@@ -1,12 +1,12 @@
-From: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
-Subject: Re: Ceph User Survey 2018
-Date: Tue, 1 May 2018 03:32:46 +0000
-Message-ID: <robbat2-20180501T033137-558506783Z@orbis-terrarum.net>
-References: <CAB0WNshQA1ZxddN+=Ga3g759Ci63CKv8BZUa0i41O42uynP8_Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6316928689075920840=="
+From: Sergey Malinin <hell-cDpxXvEWlHVBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: v12.2.5 Luminous released
+Date: Wed, 2 May 2018 02:00:35 +0300
+Message-ID: <A6F9650E-892D-49F6-A080-50934DD7F28E@newmail.com>
+References: <df92623921805e9bb0eca521a170091f@suse.com>
+Mime-Version: 1.0 (Mac OS X Mail 11.3 \(3445.6.18\))
+Content-Type: multipart/mixed; boundary="===============8509076653935737755=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAB0WNshQA1ZxddN+=Ga3g759Ci63CKv8BZUa0i41O42uynP8_Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <df92623921805e9bb0eca521a170091f-IBi9RG/b67k@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -16,74 +16,58 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-Community <ceph-community-Qp0mS5GaXlQ@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Abhishek <abhishek-IBi9RG/b67k@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
 
---===============6316928689075920840==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="82evfD9Ogz2JrdWZ"
-Content-Disposition: inline
+--===============8509076653935737755==
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_0501C48C-D05D-44EB-BC7D-67707DD02E8C"
 
 
---82evfD9Ogz2JrdWZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+--Apple-Mail=_0501C48C-D05D-44EB-BC7D-67707DD02E8C
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=us-ascii
 
-On Mon, Apr 30, 2018 at 11:39:11PM -0300, Leonardo Vaz wrote:
-> Hey Cephers!
+Useless due to http://tracker.ceph.com/issues/22102 =
+<http://tracker.ceph.com/issues/22102>
+
+
+> On 24.04.2018, at 23:29, Abhishek <abhishek-IBi9RG/b67k@public.gmane.org> wrote:
 >=20
-> We just announced the 2018 edition of Ceph user Survey:
->=20
->  https://www.surveymonkey.com/r/ceph2018
->=20
-> It will be accepting answers until May 15th and the results will be
-> published on the project website.
->=20
-> Please consider to contribute, your feedback is very important to us!
-Some of the wording needs improvement. First you ask how many clusters,
-then you ask questions about a cluster singular (capacity, servers,
-osds).
+> We're glad to announce the fifth bugfix release of Luminous v12.2.x =
+long term stable
 
-Should the latter be total over all clusters, or of some specific
-cluster?
 
---=20
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Treasurer
-E-Mail   : robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+--Apple-Mail=_0501C48C-D05D-44EB-BC7D-67707DD02E8C
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=us-ascii
 
---82evfD9Ogz2JrdWZ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dus-ascii"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D"">Useless due to&nbsp;<a =
+href=3D"http://tracker.ceph.com/issues/22102" =
+class=3D"">http://tracker.ceph.com/issues/22102</a><div class=3D""><br =
+class=3D""><div><br class=3D""><blockquote type=3D"cite" class=3D""><div =
+class=3D"">On 24.04.2018, at 23:29, Abhishek &lt;<a =
+href=3D"mailto:abhishek-IBi9RG/b67k@public.gmane.org" class=3D"">abhishek-IBi9RG/b67k@public.gmane.org</a>&gt; =
+wrote:</div><br class=3D"Apple-interchange-newline"><div class=3D""><span =
+style=3D"caret-color: rgb(0, 0, 0); font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant-caps: normal; font-weight: =
+normal; letter-spacing: normal; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; float: none; =
+display: inline !important;" class=3D"">We're glad to announce the fifth =
+bugfix release of Luminous v12.2.x long term =
+stable</span></div></blockquote></div><br class=3D""></div></body></html>=
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
+--Apple-Mail=_0501C48C-D05D-44EB-BC7D-67707DD02E8C--
 
-iQKTBAEBCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlrn391fFIAAAAAALgAo
-aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
-RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
-JsQV0xAAtq3CrdeXen2Jam7Kv9+3DQnEBUUetoAyfZj/aDu87Jtq62tufrJsrhMU
-WI4EBPST2tdcBooZyS3yxR5b+CgMvAZrmtCsp9tuEvgCEe8Zn/+LqXvH/BAAC2SJ
-3D0UrO62qS7mEE41QZq8kc4sw7Y2wDlv33AKujK2ENzpbRrRMwHjlzzejajumogd
-lZ0tTqV9p4TWb3wMm2qJvopCjkGnw34gNavd9KKywRPh4e3CfovjwW+FiDQH+B4+
-z42fG1APBeJ8o7Lj1aTvLdGJEs8Lm60qrg+YAcm/fxlFztQizY12o/ao30PqYzIG
-iWLzLnlIbVpvh9m//R1qvJ3tkjf2OovW5ZmiwgRTry0P7Pwr89hoL9DDi8hdtItE
-a+ZMsvsUFcfC1n9uerWhJeP07uTtSPbKjER0Yk6IfrVLnXK+KAGZ7UlN9sE3eWjC
-BmL63tIzbNaPB9PqP+qpt+FQ3H4b35E9khLT3WNYACPVUcH8kPChKwHOowxyEPyL
-yAlu4IS4i8TIMhY0dfpICwzwHIqpVtCthD5v4zDwtf328ET8bjGlUzFcvn4qlidM
-O2hbr0+Zmlk1o08tf2guxcOBY5CuEk2EhVzlxV4KZd9Kp6DgAFpe3EjYkUfOo/Uj
-E2E/53vNMER5qYXaP8QDpdigqvhYiGaVibVfzA93qcocCGOMaEw=
-=i5Di
------END PGP SIGNATURE-----
-
---82evfD9Ogz2JrdWZ--
-
---===============6316928689075920840==
+--===============8509076653935737755==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -94,4 +78,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============6316928689075920840==--
+--===============8509076653935737755==--
