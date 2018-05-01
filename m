@@ -1,41 +1,39 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.17-rc3
-Date: Fri, 27 Apr 2018 16:51:32 +0200
-Message-ID: <1524840692-30949-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph User Survey 2018
+Date: Mon, 30 Apr 2018 23:39:11 -0300
+Message-ID: <CAB0WNshQA1ZxddN+=Ga3g759Ci63CKv8BZUa0i41O42uynP8_Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-Community <ceph-community-Qp0mS5GaXlQ@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+Hey Cephers!
 
-The following changes since commit 6d08b06e67cd117f6992c46611dfb4ce267cd71e:
+We just announced the 2018 edition of Ceph user Survey:
 
-  Linux 4.17-rc2 (2018-04-22 19:20:09 -0700)
+ https://www.surveymonkey.com/r/ceph2018
 
-are available in the git repository at:
+It will be accepting answers until May 15th and the results will be
+published on the project website.
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.17-rc3
+Please consider to contribute, your feedback is very important to us!
 
-for you to fetch changes up to 9c55ad1c214d9f8c4594ac2c3fa392c1c32431a7:
+Kindest regards,
 
-  libceph: validate con->state at the top of try_write() (2018-04-26 17:39:08 +0200)
+Leo
 
-----------------------------------------------------------------
-A CephFS quota follow-up and fixes for two older issues in the
-messenger layer, marked for stable.
-
-----------------------------------------------------------------
-Ilya Dryomov (3):
-      libceph: un-backoff on tick when we have a authenticated session
-      libceph: reschedule a tick in finish_hunting()
-      libceph: validate con->state at the top of try_write()
-
-Yan, Zheng (1):
-      ceph: check if mds create snaprealm when setting quota
-
- fs/ceph/xattr.c       | 28 +++++++++++++++++++++++++---
- net/ceph/messenger.c  |  7 +++++++
- net/ceph/mon_client.c | 14 +++++++++++---
- 3 files changed, 43 insertions(+), 6 deletions(-)
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
