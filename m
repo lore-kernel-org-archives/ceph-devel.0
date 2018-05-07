@@ -1,12 +1,13 @@
-From: "Marc Roos" <M.Roos-yG4tGvGIC004hcxptnrGZodd74u8MsAO@public.gmane.org>
+From: Reed Dier <reed.dier-uHprvc9sRvVBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: Show and Tell: Grafana cluster dashboard
-Date: Mon, 7 May 2018 10:06:09 +0200
-Message-ID: <8374.54902143708$1525699425@news.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Date: Mon, 7 May 2018 09:53:25 -0500
+Message-ID: <6A5C4896-0EFA-4F2E-8963-2DFA7D78C48D@focusvq.com>
+References: <"H000007100119c41.1525680369.sx.f1-outsourcing.eu*"@MHS>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <"H000007100119c41.1525680369.sx.f1-outsourcing.eu*"@MHS>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -16,47 +17,49 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, jfajerski <jfajerski-IBi9RG/b67k@public.gmane.org>
-Cc: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: jfajerski <jfajerski-IBi9RG/b67k@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-
-Looks nice 
-
-- I rather have some dashboards with collectd/influxdb.
-- Take into account bigger tv/screens eg 65" uhd. I am putting more 
-stats on them than viewing them locally in a webbrowser.
-- What is to be considered most important to have on your ceph 
-dashboard? As a newbie I find it difficult to determine what is 
-important to monitor.
-- Maybe also some docs on what metrics you have taken and argumentation 
-on how you used them (could be usefull if one wants to modify the 
-dashboard for some other backend)
-
-Ceph performance counters description.
-https://access.redhat.com/documentation/en/red-hat-ceph-storage/1.3/paged/administration-guide/chapter-9-performance-counters
-
-
------Original Message-----
-From: Jan Fajerski [mailto:jfajerski-IBi9RG/b67k@public.gmane.org] 
-Sent: maandag 7 mei 2018 12:32
-To: ceph-devel
-Cc: ceph-users
-Subject: [ceph-users] Show and Tell: Grafana cluster dashboard
-
-Hi all,
-I'd like to request comments and feedback about a Grafana dashboard for 
-Ceph cluster monitoring.
-
-https://youtu.be/HJquM127wMY
-
-https://github.com/ceph/ceph/pull/21850
-
-The goal is to eventually have a set of default dashboards in the Ceph 
-repository that offer decent monitoring for clusters of various (maybe 
-even all) sizes and applications, or at least serve as a starting point 
-for customizations.
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+SeKAmWxsICsxIG9uIEluZmx1eERCIHJhdGhlciB0aGFuIFByb21ldGhldXMsIHRob3VnaCBJIHRo
+aW5rIGhhdmluZyBhIHZlcnNpb24gZm9yIGVhY2ggaW5mcmFzdHJ1Y3R1cmUgcGF0aCB3b3VsZCBi
+ZSBiZXN0LgpJ4oCZbSBzdXJlIHBsZW50eSBoZXJlIGhhdmUgZXhpc3RpbmcgSW5mbHV4REIgaW5m
+cmFzdHJ1Y3R1cmUgYXMgdGhlaXIgVFNEQiBvZiBjaG9pY2UsIGFuZCBtb3ZpbmcgdG8gUHJvbWV0
+aGV1cyB3b3VsZCBiZSBsZXNzIGFkdmFudGFnZW91cy4KCkNvbnZlcnNlbHksIEnigJltIHN1cmUg
+YWxsIG9mIHRoZSBQcm9tZXRoZXVzIGZvbGtzIHdvdWxkIGJlIGxlc3MgaW5jbGluZWQgdG8gbW92
+ZSB0byBJbmZsdXhEQiBmb3IgVFNEQiwgc28gSSB0aGluayBzdXBwb3J0aW5nIGJvdGggcGF0aHMg
+d291bGQgYmUgdGhlIGJlc3QgY2hvaWNlLgoKUmVlZAoKPiBPbiBNYXkgNywgMjAxOCwgYXQgMzow
+NiBBTSwgTWFyYyBSb29zIDxNLlJvb3NAZjEtb3V0c291cmNpbmcuZXU+IHdyb3RlOgo+IAo+IAo+
+IExvb2tzIG5pY2UgCj4gCj4gLSBJIHJhdGhlciBoYXZlIHNvbWUgZGFzaGJvYXJkcyB3aXRoIGNv
+bGxlY3RkL2luZmx1eGRiLgo+IC0gVGFrZSBpbnRvIGFjY291bnQgYmlnZ2VyIHR2L3NjcmVlbnMg
+ZWcgNjUiIHVoZC4gSSBhbSBwdXR0aW5nIG1vcmUgCj4gc3RhdHMgb24gdGhlbSB0aGFuIHZpZXdp
+bmcgdGhlbSBsb2NhbGx5IGluIGEgd2ViYnJvd3Nlci4KPiAtIFdoYXQgaXMgdG8gYmUgY29uc2lk
+ZXJlZCBtb3N0IGltcG9ydGFudCB0byBoYXZlIG9uIHlvdXIgY2VwaCAKPiBkYXNoYm9hcmQ/IEFz
+IGEgbmV3YmllIEkgZmluZCBpdCBkaWZmaWN1bHQgdG8gZGV0ZXJtaW5lIHdoYXQgaXMgCj4gaW1w
+b3J0YW50IHRvIG1vbml0b3IuCj4gLSBNYXliZSBhbHNvIHNvbWUgZG9jcyBvbiB3aGF0IG1ldHJp
+Y3MgeW91IGhhdmUgdGFrZW4gYW5kIGFyZ3VtZW50YXRpb24gCj4gb24gaG93IHlvdSB1c2VkIHRo
+ZW0gKGNvdWxkIGJlIHVzZWZ1bGwgaWYgb25lIHdhbnRzIHRvIG1vZGlmeSB0aGUgCj4gZGFzaGJv
+YXJkIGZvciBzb21lIG90aGVyIGJhY2tlbmQpCj4gCj4gQ2VwaCBwZXJmb3JtYW5jZSBjb3VudGVy
+cyBkZXNjcmlwdGlvbi4KPiBodHRwczovL2FjY2Vzcy5yZWRoYXQuY29tL2RvY3VtZW50YXRpb24v
+ZW4vcmVkLWhhdC1jZXBoLXN0b3JhZ2UvMS4zL3BhZ2VkL2FkbWluaXN0cmF0aW9uLWd1aWRlL2No
+YXB0ZXItOS1wZXJmb3JtYW5jZS1jb3VudGVycwo+IAo+IAo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tCj4gRnJvbTogSmFuIEZhamVyc2tpIFttYWlsdG86amZhamVyc2tpQHN1c2UuY29tXSAK
+PiBTZW50OiBtYWFuZGFnIDcgbWVpIDIwMTggMTI6MzIKPiBUbzogY2VwaC1kZXZlbAo+IENjOiBj
+ZXBoLXVzZXJzCj4gU3ViamVjdDogW2NlcGgtdXNlcnNdIFNob3cgYW5kIFRlbGw6IEdyYWZhbmEg
+Y2x1c3RlciBkYXNoYm9hcmQKPiAKPiBIaSBhbGwsCj4gSSdkIGxpa2UgdG8gcmVxdWVzdCBjb21t
+ZW50cyBhbmQgZmVlZGJhY2sgYWJvdXQgYSBHcmFmYW5hIGRhc2hib2FyZCBmb3IgCj4gQ2VwaCBj
+bHVzdGVyIG1vbml0b3JpbmcuCj4gCj4gaHR0cHM6Ly95b3V0dS5iZS9ISnF1TTEyN3dNWQo+IAo+
+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8yMTg1MAo+IAo+IFRoZSBnb2FsIGlz
+IHRvIGV2ZW50dWFsbHkgaGF2ZSBhIHNldCBvZiBkZWZhdWx0IGRhc2hib2FyZHMgaW4gdGhlIENl
+cGggCj4gcmVwb3NpdG9yeSB0aGF0IG9mZmVyIGRlY2VudCBtb25pdG9yaW5nIGZvciBjbHVzdGVy
+cyBvZiB2YXJpb3VzIChtYXliZSAKPiBldmVuIGFsbCkgc2l6ZXMgYW5kIGFwcGxpY2F0aW9ucywg
+b3IgYXQgbGVhc3Qgc2VydmUgYXMgYSBzdGFydGluZyBwb2ludCAKPiBmb3IgY3VzdG9taXphdGlv
+bnMuCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBj
+ZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPiAKPiAK
+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgt
+dXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9s
+aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQoKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
+IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
+dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
