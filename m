@@ -1,15 +1,17 @@
 From: Casey Bodley <cbodley-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [swift][ironic][ceph][radosgw] radosgw
  "support" in python-swiftclient droped for ocata and above
-Date: Wed, 9 May 2018 11:40:47 -0400
-Message-ID: <4125568e-af78-15ea-d664-749db5ce3d63@redhat.com>
+Date: Wed, 9 May 2018 17:10:12 -0400
+Message-ID: <a11273d3-49ad-8434-2e9f-6525721d4f5e@redhat.com>
 References: <20180509152244.75ihypuvaxqv7cw6@gentoo.org>
+ <4125568e-af78-15ea-d664-749db5ce3d63@redhat.com>
 Reply-To: "OpenStack Development Mailing List \(not for usage questions\)"
  <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5690600611864871679=="
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <openstack-dev-bounces-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20180509152244.75ihypuvaxqv7cw6-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
+In-Reply-To: <4125568e-af78-15ea-d664-749db5ce3d63-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.openstack.org/cgi-bin/mailman/options/openstack-dev>,
  <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
@@ -20,126 +22,46 @@ List-Subscribe: <http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-d
  <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Errors-To: openstack-dev-bounces-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org
 To: "OpenStack Development Mailing List (not for usage questions)" <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>, Matthew Thode <prometheanfire-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Marcus Watts <mwatts-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---===============5690600611864871679==
-Content-Type: multipart/alternative;
- boundary="------------568922E56EA3CF9750EAF7BD"
-Content-Language: en-US
-
-This is a multi-part message in MIME format.
---------------568922E56EA3CF9750EAF7BD
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-
-
-On 05/09/2018 11:22 AM, Matthew Thode wrote:
-> python-swiftclient prior to 3.2.0 seemed to incidentally support radosgw
-> tempurls.  That is, there was no official support, but it still worked.
->
-> In 3.2.0 (specifically the linked commit(s)) tempurls were validated to
-> require /v1/account/container/object, which does not work with radosgw
-> as it expects /v1/container/object.  This means that radosgw tempurls
-> fail to work, which further means that radosgw will stop working for
-> things like ironic.
->
-> I can see the point that swiftclient should not care about ceph not
-> fully implementing the swift spec and not supporting the radosgw url
-> syntax, but it seems like a step back.  If this is not fixed then things
-> like ironic will not work with radosgw for Ocata and above (as that's
-> when this change was made).  We'd need to wait for either ceph to fix
-> this and support the account part of the url (probably just dropping it)
-> or have people fork python-swiftclient to 'fix' it.
->
-> I'm not sure what the right answer is...
->
-> https://github.com/openstack/python-swiftclient/commit/4c955751d340a8f71a2eebdb3c58d90b36874a66
-> https://github.com/openstack/ironic/blob/214b694f05d200ac1e2ce6db631546f2831c01f7/ironic/common/glance_service/v2/image_service.py#L152-L185
->
-> https://bugs.launchpad.net/ironic/+bug/1747384
->
->
->
-> __________________________________________________________________________
-> OpenStack Development Mailing List (not for usage questions)
-> Unsubscribe: OpenStack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject:unsubscribe
-> http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
-
-Thanks for raising the issue. Radosgw does have a config option 
-'rgw_swift_account_in_url' to expect this url format, though it defaults 
-to false and I'm not 100% sure that it applies correctly to tempurls.
-
---------------568922E56EA3CF9750EAF7BD
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: 7bit
-
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  </head>
-  <body text="#000000" bgcolor="#FFFFFF">
-    <br>
-    <div class="moz-cite-prefix">On 05/09/2018 11:22 AM, Matthew Thode
-      wrote:<br>
-    </div>
-    <blockquote type="cite"
-      cite="mid:20180509152244.75ihypuvaxqv7cw6-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org">
-      <pre wrap="">python-swiftclient prior to 3.2.0 seemed to incidentally support radosgw
-tempurls.  That is, there was no official support, but it still worked.
-
-In 3.2.0 (specifically the linked commit(s)) tempurls were validated to
-require /v1/account/container/object, which does not work with radosgw
-as it expects /v1/container/object.  This means that radosgw tempurls
-fail to work, which further means that radosgw will stop working for
-things like ironic.
-
-I can see the point that swiftclient should not care about ceph not
-fully implementing the swift spec and not supporting the radosgw url
-syntax, but it seems like a step back.  If this is not fixed then things
-like ironic will not work with radosgw for Ocata and above (as that's
-when this change was made).  We'd need to wait for either ceph to fix
-this and support the account part of the url (probably just dropping it)
-or have people fork python-swiftclient to 'fix' it.
-
-I'm not sure what the right answer is...
-
-<a class="moz-txt-link-freetext" href="https://github.com/openstack/python-swiftclient/commit/4c955751d340a8f71a2eebdb3c58d90b36874a66">https://github.com/openstack/python-swiftclient/commit/4c955751d340a8f71a2eebdb3c58d90b36874a66</a>
-<a class="moz-txt-link-freetext" href="https://github.com/openstack/ironic/blob/214b694f05d200ac1e2ce6db631546f2831c01f7/ironic/common/glance_service/v2/image_service.py#L152-L185">https://github.com/openstack/ironic/blob/214b694f05d200ac1e2ce6db631546f2831c01f7/ironic/common/glance_service/v2/image_service.py#L152-L185</a>
-
-<a class="moz-txt-link-freetext" href="https://bugs.launchpad.net/ironic/+bug/1747384">https://bugs.launchpad.net/ironic/+bug/1747384</a>
-
-</pre>
-      <br>
-      <fieldset class="mimeAttachmentHeader"></fieldset>
-      <br>
-      <pre wrap="">__________________________________________________________________________
-OpenStack Development Mailing List (not for usage questions)
-Unsubscribe: <a class="moz-txt-link-abbreviated" href="mailto:OpenStack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject:unsubscribe">OpenStack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject:unsubscribe</a>
-<a class="moz-txt-link-freetext" href="http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev">http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev</a>
-</pre>
-    </blockquote>
-    <br>
-    Thanks for raising the issue. Radosgw does have a config option
-    'rgw_swift_account_in_url' to expect this url format, though it
-    defaults to false and I'm not 100% sure that it applies correctly to
-    tempurls.<br>
-  </body>
-</html>
-
---------------568922E56EA3CF9750EAF7BD--
-
-
---===============5690600611864871679==
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: base64
-Content-Disposition: inline
-
+Ck9uIDA1LzA5LzIwMTggMTE6NDAgQU0sIENhc2V5IEJvZGxleSB3cm90ZToKPgo+IE9uIDA1LzA5
+LzIwMTggMTE6MjIgQU0sIE1hdHRoZXcgVGhvZGUgd3JvdGU6Cj4+IHB5dGhvbi1zd2lmdGNsaWVu
+dCBwcmlvciB0byAzLjIuMCBzZWVtZWQgdG8gaW5jaWRlbnRhbGx5IHN1cHBvcnQgcmFkb3Nndwo+
+PiB0ZW1wdXJscy4gIFRoYXQgaXMsIHRoZXJlIHdhcyBubyBvZmZpY2lhbCBzdXBwb3J0LCBidXQg
+aXQgc3RpbGwgd29ya2VkLgo+Pgo+PiBJbiAzLjIuMCAoc3BlY2lmaWNhbGx5IHRoZSBsaW5rZWQg
+Y29tbWl0KHMpKSB0ZW1wdXJscyB3ZXJlIHZhbGlkYXRlZCB0bwo+PiByZXF1aXJlIC92MS9hY2Nv
+dW50L2NvbnRhaW5lci9vYmplY3QsIHdoaWNoIGRvZXMgbm90IHdvcmsgd2l0aCByYWRvc2d3Cj4+
+IGFzIGl0IGV4cGVjdHMgL3YxL2NvbnRhaW5lci9vYmplY3QuICBUaGlzIG1lYW5zIHRoYXQgcmFk
+b3NndyB0ZW1wdXJscwo+PiBmYWlsIHRvIHdvcmssIHdoaWNoIGZ1cnRoZXIgbWVhbnMgdGhhdCBy
+YWRvc2d3IHdpbGwgc3RvcCB3b3JraW5nIGZvcgo+PiB0aGluZ3MgbGlrZSBpcm9uaWMuCj4+Cj4+
+IEkgY2FuIHNlZSB0aGUgcG9pbnQgdGhhdCBzd2lmdGNsaWVudCBzaG91bGQgbm90IGNhcmUgYWJv
+dXQgY2VwaCBub3QKPj4gZnVsbHkgaW1wbGVtZW50aW5nIHRoZSBzd2lmdCBzcGVjIGFuZCBub3Qg
+c3VwcG9ydGluZyB0aGUgcmFkb3NndyB1cmwKPj4gc3ludGF4LCBidXQgaXQgc2VlbXMgbGlrZSBh
+IHN0ZXAgYmFjay4gIElmIHRoaXMgaXMgbm90IGZpeGVkIHRoZW4gdGhpbmdzCj4+IGxpa2UgaXJv
+bmljIHdpbGwgbm90IHdvcmsgd2l0aCByYWRvc2d3IGZvciBPY2F0YSBhbmQgYWJvdmUgKGFzIHRo
+YXQncwo+PiB3aGVuIHRoaXMgY2hhbmdlIHdhcyBtYWRlKS4gIFdlJ2QgbmVlZCB0byB3YWl0IGZv
+ciBlaXRoZXIgY2VwaCB0byBmaXgKPj4gdGhpcyBhbmQgc3VwcG9ydCB0aGUgYWNjb3VudCBwYXJ0
+IG9mIHRoZSB1cmwgKHByb2JhYmx5IGp1c3QgZHJvcHBpbmcgaXQpCj4+IG9yIGhhdmUgcGVvcGxl
+IGZvcmsgcHl0aG9uLXN3aWZ0Y2xpZW50IHRvICdmaXgnIGl0Lgo+Pgo+PiBJJ20gbm90IHN1cmUg
+d2hhdCB0aGUgcmlnaHQgYW5zd2VyIGlzLi4uCj4+Cj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9vcGVu
+c3RhY2svcHl0aG9uLXN3aWZ0Y2xpZW50L2NvbW1pdC80Yzk1NTc1MWQzNDBhOGY3MWEyZWViZGIz
+YzU4ZDkwYjM2ODc0YTY2Cj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9vcGVuc3RhY2svaXJvbmljL2Js
+b2IvMjE0YjY5NGYwNWQyMDBhYzFlMmNlNmRiNjMxNTQ2ZjI4MzFjMDFmNy9pcm9uaWMvY29tbW9u
+L2dsYW5jZV9zZXJ2aWNlL3YyL2ltYWdlX3NlcnZpY2UucHkjTDE1Mi1MMTg1Cj4+Cj4+IGh0dHBz
+Oi8vYnVncy5sYXVuY2hwYWQubmV0L2lyb25pYy8rYnVnLzE3NDczODQKPj4KPj4KPj4KPj4gX19f
 X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KT3BlblN0YWNrIERldmVsb3BtZW50IE1haWxpbmcgTGlzdCAobm90
-IGZvciB1c2FnZSBxdWVzdGlvbnMpClVuc3Vic2NyaWJlOiBPcGVuU3RhY2stZGV2LXJlcXVlc3RA
-bGlzdHMub3BlbnN0YWNrLm9yZz9zdWJqZWN0OnVuc3Vic2NyaWJlCmh0dHA6Ly9saXN0cy5vcGVu
-c3RhY2sub3JnL2NnaS1iaW4vbWFpbG1hbi9saXN0aW5mby9vcGVuc3RhY2stZGV2Cg==
-
---===============5690600611864871679==--
+X19fX19fX19fX19fX18KPj4gT3BlblN0YWNrIERldmVsb3BtZW50IE1haWxpbmcgTGlzdCAobm90
+IGZvciB1c2FnZSBxdWVzdGlvbnMpCj4+IFVuc3Vic2NyaWJlOk9wZW5TdGFjay1kZXYtcmVxdWVz
+dEBsaXN0cy5vcGVuc3RhY2sub3JnP3N1YmplY3Q6dW5zdWJzY3JpYmUKPj4gaHR0cDovL2xpc3Rz
+Lm9wZW5zdGFjay5vcmcvY2dpLWJpbi9tYWlsbWFuL2xpc3RpbmZvL29wZW5zdGFjay1kZXYKPgo+
+IFRoYW5rcyBmb3IgcmFpc2luZyB0aGUgaXNzdWUuIFJhZG9zZ3cgZG9lcyBoYXZlIGEgY29uZmln
+IG9wdGlvbiAKPiAncmd3X3N3aWZ0X2FjY291bnRfaW5fdXJsJyB0byBleHBlY3QgdGhpcyB1cmwg
+Zm9ybWF0LCB0aG91Z2ggaXQgCj4gZGVmYXVsdHMgdG8gZmFsc2UgYW5kIEknbSBub3QgMTAwJSBz
+dXJlIHRoYXQgaXQgYXBwbGllcyBjb3JyZWN0bHkgdG8gCj4gdGVtcHVybHMuCgpNYXJjdXMgV2F0
+dHMgY29uZmlybWVkIHRoYXQgdGhpcyBkb2VzIHdvcmsgd2l0aCB0ZW1wdXJsLgoKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KT3BlblN0YWNrIERldmVsb3BtZW50IE1haWxpbmcgTGlzdCAobm90IGZvciB1c2Fn
+ZSBxdWVzdGlvbnMpClVuc3Vic2NyaWJlOiBPcGVuU3RhY2stZGV2LXJlcXVlc3RAbGlzdHMub3Bl
+bnN0YWNrLm9yZz9zdWJqZWN0OnVuc3Vic2NyaWJlCmh0dHA6Ly9saXN0cy5vcGVuc3RhY2sub3Jn
+L2NnaS1iaW4vbWFpbG1hbi9saXN0aW5mby9vcGVuc3RhY2stZGV2Cg==
