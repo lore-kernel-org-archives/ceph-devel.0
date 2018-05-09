@@ -1,98 +1,98 @@
-From: Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org>
-Subject: Re: Show and Tell: Grafana cluster dashboard
-Date: Tue, 8 May 2018 07:21:04 +0200
-Message-ID: <b461c88c-9789-9a17-e67d-a4913c15466f@suse.com>
-References: <"H000007100119c41.1525680369.sx.f1-outsourcing.eu*"@MHS>
- <6A5C4896-0EFA-4F2E-8963-2DFA7D78C48D@focusvq.com>
+From: Matthew Thode <prometheanfire-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
+Subject: [swift][ironic][ceph][radosgw] radosgw "support" in
+ python-swiftclient droped for ocata and above
+Date: Wed, 9 May 2018 10:22:44 -0500
+Message-ID: <20180509152244.75ihypuvaxqv7cw6@gentoo.org>
+Reply-To: "OpenStack Development Mailing List \(not for usage questions\)"
+ <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8757245930312256700=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <6A5C4896-0EFA-4F2E-8963-2DFA7D78C48D-uHprvc9sRvVBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Reed Dier <reed.dier-uHprvc9sRvVBDgjK7y7TUQ@public.gmane.org>, jfajerski <jfajerski-IBi9RG/b67k@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Content-Type: multipart/mixed; boundary="===============7125860115322700976=="
+Return-path: <openstack-dev-bounces-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.openstack.org/cgi-bin/mailman/options/openstack-dev>,
+ <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.openstack.org/pipermail/openstack-dev/>
+List-Post: <mailto:openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev>,
+ <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Errors-To: openstack-dev-bounces-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org
+To: openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============8757245930312256700==
+
+--===============7125860115322700976==
 Content-Type: multipart/signed; micalg=pgp-sha512;
- protocol="application/pgp-signature";
- boundary="blI0JiU5PoSF6RML3zLTZ7tTV7LABM0Iq"
+	protocol="application/pgp-signature"; boundary="mnd6rvx5aqpam7jn"
+Content-Disposition: inline
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---blI0JiU5PoSF6RML3zLTZ7tTV7LABM0Iq
-Content-Type: multipart/mixed; boundary="vigrUpzltbA6rgVG5XC6JU603j3S9DdyI";
- protected-headers="v1"
-From: Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org>
-To: Reed Dier <reed.dier-uHprvc9sRvVBDgjK7y7TUQ@public.gmane.org>, jfajerski <jfajerski-IBi9RG/b67k@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-Message-ID: <b461c88c-9789-9a17-e67d-a4913c15466f-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [ceph-users] Show and Tell: Grafana cluster dashboard
-References: <"H000007100119c41.1525680369.sx.f1-outsourcing.eu*"@MHS>
- <6A5C4896-0EFA-4F2E-8963-2DFA7D78C48D-uHprvc9sRvVBDgjK7y7TUQ@public.gmane.org>
-In-Reply-To: <6A5C4896-0EFA-4F2E-8963-2DFA7D78C48D-uHprvc9sRvVBDgjK7y7TUQ@public.gmane.org>
 
---vigrUpzltbA6rgVG5XC6JU603j3S9DdyI
-Content-Type: text/plain; charset=utf-8
+--mnd6rvx5aqpam7jn
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
-Content-Language: en-US
 
-Looks very good. Is it anyhow possible to display the reason why a
-cluster is in an error or warning state? Thinking about the output from
-ceph -s if this could by shown in case there's a failure. I think this
-will not be provided by default but wondering if it's possible to add.
+python-swiftclient prior to 3.2.0 seemed to incidentally support radosgw
+tempurls.  That is, there was no official support, but it still worked.
 
-Kai
+In 3.2.0 (specifically the linked commit(s)) tempurls were validated to
+require /v1/account/container/object, which does not work with radosgw
+as it expects /v1/container/object.  This means that radosgw tempurls
+fail to work, which further means that radosgw will stop working for
+things like ironic.
 
-On 05/07/2018 04:53 PM, Reed Dier wrote:
-> I think supporting both paths would be the best choice.
-That's the way we should go. Supporting both or in general as much as
-possible (try to be generic)
+I can see the point that swiftclient should not care about ceph not
+fully implementing the swift spec and not supporting the radosgw url
+syntax, but it seems like a step back.  If this is not fixed then things
+like ironic will not work with radosgw for Ocata and above (as that's
+when this change was made).  We'd need to wait for either ceph to fix
+this and support the account part of the url (probably just dropping it)
+or have people fork python-swiftclient to 'fix' it.
+
+I'm not sure what the right answer is...
+
+https://github.com/openstack/python-swiftclient/commit/4c955751d340a8f71a2e=
+ebdb3c58d90b36874a66
+https://github.com/openstack/ironic/blob/214b694f05d200ac1e2ce6db631546f283=
+1c01f7/ironic/common/glance_service/v2/image_service.py#L152-L185
+
+https://bugs.launchpad.net/ironic/+bug/1747384
 
 --=20
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
-, HRB 21284 (AG N=C3=BCrnberg)
+Matthew Thode (prometheanfire)
 
-
-
---vigrUpzltbA6rgVG5XC6JU603j3S9DdyI--
-
---blI0JiU5PoSF6RML3zLTZ7tTV7LABM0Iq
+--mnd6rvx5aqpam7jn
 Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAEBCgAdFiEEIUhTiREAT2TdVpPQHoyRVhbjxG4FAlrxM8AACgkQHoyRVhbj
-xG5BSwgAlrJTeC9A+3K0Vf9r/GoZZBl1Sq08OjrcwEgHKOMcOVB8kieCCeCkfctq
-DmszhoUhw90eUb1FqZyrGKicgOCXJle3DBZ1UqEp6UxjmNZPCi4ye3Ng/Z0OB47W
-aNVIjonq6lALH9bxAV2hAd74O/vF9YfW4AYHt1UrL5i8XlnxmSt7sem6FApVI0vL
-vv9IJ3b23xER8qaVp2b7WwT7c0vGGTe1q7cr0AWVk+5hnyFmrNPOy/yhX/8YWBNy
-UNNu4FR5sv/1VllyqU49MWmkkA6/4lqHDf2HPJV+afLO5fa9WhFRXUqvvwWPQwxw
-Zl4k2tsrB07wYQY+gst3MuFKLoAknA==
-=8TAQ
+iQIzBAABCgAdFiEExFR3cOKGRpGbcMHPZKN76q4ZpOgFAlrzEkMACgkQZKN76q4Z
+pOju0g/9FBoQ5d+9fpr9NSkXIGSGz8MqHf1A58zcJO152cCzRuSf/mzwcdE2r5a+
+I/SA6FzQw53ic39oaBn6JCGcvRQitd/OTvezLBbHjuWlWBslg8/XC0p/TuwwwKUh
+rXJ5eF0+ltx6ikrwGoi26C6T6gQtM/GRet9R/oDWjvktMqU08eix9mp3MG3OjtRg
+rxf198nsiKswmPDDxkEpFFwJOwpjRrH2/g7L8M6HuvlVd1KocaGON7gxx/3LeKqW
+x3AeXJend5LCmR41WiuR+JoGsV3hCFqacbdh0uyMHb6eFVVQFZCmJmJaGDCKV0RO
+9BfYFIUUwqfVYZIkeiFSCzDtp3GbTluj6yoT00eQnl4pEUNfe+PxtsoBIQg2/P86
+WWrghvSAmKjgt3XJ/SWaBNKFj0ofP69159SzI/rN0oBWuHhwPV8mfkEiA5rp9BQb
+cA2UAQALtyiwIQujCj7eD02HvrutONxIWk4rmvSpUH+sgxVA7maJuTKqYiH6s7YB
+ChApU7u3NruC89XNx/hlHlPAeyex+eMh3qb4nCSGLbx3ECAy+yvlaBNTdOuv/TyT
+2NVDVcYHXWgs2ARuyU2lqDPIB3Dme9dnSxoxQg9plypE+cIeTvapdalJOFVcR+KZ
+vqOiUKesatiQRbH1emF7GSK1fcDglM3kTgB8A6CVnyUgyW9NgvM=
+=opqD
 -----END PGP SIGNATURE-----
 
---blI0JiU5PoSF6RML3zLTZ7tTV7LABM0Iq--
+--mnd6rvx5aqpam7jn--
 
---===============8757245930312256700==
-Content-Type: text/plain; charset="us-ascii"
+
+--===============7125860115322700976==
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Content-Disposition: inline
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KT3BlblN0YWNrIERldmVsb3BtZW50IE1haWxpbmcgTGlzdCAobm90
+IGZvciB1c2FnZSBxdWVzdGlvbnMpClVuc3Vic2NyaWJlOiBPcGVuU3RhY2stZGV2LXJlcXVlc3RA
+bGlzdHMub3BlbnN0YWNrLm9yZz9zdWJqZWN0OnVuc3Vic2NyaWJlCmh0dHA6Ly9saXN0cy5vcGVu
+c3RhY2sub3JnL2NnaS1iaW4vbWFpbG1hbi9saXN0aW5mby9vcGVuc3RhY2stZGV2Cg==
 
---===============8757245930312256700==--
+--===============7125860115322700976==--
