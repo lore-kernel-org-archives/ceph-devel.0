@@ -1,14 +1,16 @@
-From: =?UTF-8?Q?Marc_Sch=c3=b6chlin?= <ms-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: RBD Cache and rbd-nbd
-Date: Fri, 11 May 2018 09:59:11 +0200
-Message-ID: <de7be619-2da0-7f4f-08cf-aafb80bffeb9@256bit.org>
+Date: Fri, 11 May 2018 11:02:27 -0400
+Message-ID: <CA+aFP1Dn-yVRwTt7Wfj2HX+56FUPzJwYD5+us8ESLPvZ9EjHCw@mail.gmail.com>
 References: <f57c4834-517e-0c0e-7496-831689327bac@256bit.org>
  <CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg@mail.gmail.com>
+ <de7be619-2da0-7f4f-08cf-aafb80bffeb9@256bit.org>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1476726105933875711=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <de7be619-2da0-7f4f-08cf-aafb80bffeb9-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,265 +20,90 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: =?UTF-8?Q?Marc_Sch=C3=B6chlin?= <ms-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---===============1476726105933875711==
-Content-Type: multipart/alternative;
- boundary="------------CEDDA74766016631194C9E50"
-Content-Language: en-US
-
-This is a multi-part message in MIME format.
---------------CEDDA74766016631194C9E50
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hello Jason,
-
-thanks for your response.
-
-
-Am 10.05.2018 um 21:18 schrieb Jason Dillaman:
-
->> If i configure caches like described at
->> http://docs.ceph.com/docs/luminous/rbd/rbd-config-ref/, are there dedi=
-cated
->> caches per rbd-nbd/krbd device or is there a only a single cache area.=
-
-> The librbd cache is per device, but if you aren't performing direct
-> IOs to the device, you would also have the unified Linux pagecache on
-> top of all the devices.
-XENServer directly utilizes nbd devices which are connected in my
-understanding by blkback (dom-0) and blkfront (dom-U) to the virtual
-machines.
-In my understanding pagecache is only part of the game if i use data on
-mounted filesystems (VFS usage).
-Therefore it would be a good thing to use rbd cache for rbd-nbd (/dev/nbd=
-X).
->> How can i identify the rbd cache with the tools provided by the operat=
-ing
->> system?
-> Identify how? You can enable the admin sockets and use "ceph
-> --admin-deamon config show" to display the in-use settings.
-
-Ah ok, i discovered that i can gather configuration settings by executing=
-:
-(xen_test is the identity of the xen rbd_nbd user)
-
-ceph --id xen_test --admin-daemon
-/var/run/ceph/ceph-client.xen_test.asok config show | less -p rbd_cache
-
-Sorry, my question was a bit unprecice: I was searching for usage
-statistics of the rbd cache.
-Is there also a possibility to gather rbd_cache usage statistics as a
-source of verification for optimizing the cache settings?
-
-Due to the fact that a rbd cache is created for every device, i assume
-that the rbd cache simply part of the rbd-nbd process memory.
-
-
->> Can you provide some hints how to about adequate cache settings for a =
-write
->> intensive environment (70% write, 30% read)?
->> Is it a good idea to specify a huge rbd cache of 1 GB with a max dirty=
- age
->> of 10 seconds?
-> The librbd cache is really only useful for sequential read-ahead and
-> for small writes (assuming writeback is enabled). Assuming you aren't
-> using direct IO, I'd suspect your best performance would be to disable
-> the librbd cache and rely on the Linux pagecache to work its magic.
-As described, xenserver directly utilizes the nbd devices.
-
-Our typical workload is originated over 70 percent in database write
-operations in the virtual machines.
-Therefore collecting write operations with rbd cache and writing them in
-chunks to ceph might be a good thing.
-A higher limit for "rbd cache max dirty" might be a adequate here.
-At the other side our read workload typically reads huge files in
-sequential manner.
-
-Therefore it might be useful to do start with a configuration like that:
-
-rbd cache size =3D 64MB
-rbd cache max dirty =3D 48MB
-rbd cache target dirty =3D 32MB
-rbd cache max dirty age =3D 10
-
-What is the strategy of librbd to write data to the storage from
-rbd_cache if "rbd cache max dirty =3D 48MB" is reached?
-Is there a reduction of io operations (merging of ios) compared to the
-granularity of writes of my virtual machines?
-
-Additionally, i would do no non-default settings for readahead on nbd
-level to have the possibility to configure this at operating system
-level of the vms.
-
-Our operating systems in the virtual machines use currently a readahead
-of 256 (256*512 =3D 128KB).
-=46rom my point of view it would be a good thing for sequential reads in
-big files to increase readahead to a higher value.
-We haven't changed the default rbd object size of 4MB - nevertheless it
-might be a good thing to increase the readahead to 1024 (=3D512KB) to
-decrease read requests by factor of 4for sequential reads.
-
-What do you think about this?
-
-Regards
-Marc
-
-
---------------CEDDA74766016631194C9E50
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: 8bit
-
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  </head>
-  <body text="#000000" bgcolor="#FFFFFF">
-    <p>Hello Jason,</p>
-    <p>thanks for your response.<br>
-    </p>
-    <br>
-    <div class="moz-cite-prefix">Am 10.05.2018 um 21:18 schrieb Jason
-      Dillaman:<br>
-    </div>
-    <br>
-    <blockquote type="cite"
-cite="mid:CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org">
-      <pre wrap="">
-</pre>
-      <blockquote type="cite">
-        <pre wrap="">If i configure caches like described at
-<a class="moz-txt-link-freetext" href="http://docs.ceph.com/docs/luminous/rbd/rbd-config-ref/">http://docs.ceph.com/docs/luminous/rbd/rbd-config-ref/</a>, are there dedicated
-caches per rbd-nbd/krbd device or is there a only a single cache area.
-</pre>
-      </blockquote>
-      <pre wrap="">
-The librbd cache is per device, but if you aren't performing direct
-IOs to the device, you would also have the unified Linux pagecache on
-top of all the devices.</pre>
-    </blockquote>
-    XENServer directly utilizes nbd devices which are connected in my
-    understanding by blkback (dom-0) and blkfront (dom-U) to the virtual
-    machines.<br>
-    In my understanding pagecache is only part of the game if i use data
-    on mounted filesystems (VFS usage).<br>
-    Therefore it would be a good thing to use rbd cache for rbd-nbd
-    (/dev/nbdX).<br>
-    <blockquote type="cite"
-cite="mid:CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org">
-      <blockquote type="cite">
-        <pre wrap="">How can i identify the rbd cache with the tools provided by the operating
-system?
-</pre>
-      </blockquote>
-      <pre wrap="">
-Identify how? You can enable the admin sockets and use "ceph
---admin-deamon config show" to display the in-use settings.</pre>
-    </blockquote>
-    <br>
-    Ah ok, i discovered that i can gather configuration settings by
-    executing:<br>
-    (xen_test is the identity of the xen rbd_nbd user)<br>
-    <tt><br>
-      ceph --id xen_test --admin-daemon
-      /var/run/ceph/ceph-client.xen_test.asok config show | less -p
-      rbd_cache<br>
-      <br>
-    </tt>Sorry, my question was a bit unprecice: I was searching for
-    usage statistics of the rbd cache.<tt><br>
-    </tt>Is there also a possibility to gather rbd_cache usage
-    statistics as a source of verification for optimizing the cache
-    settings?<tt><br>
-      <br>
-    </tt>Due to the fact that a rbd cache is created for every device, i
-    assume that the rbd cache simply part of the rbd-nbd process memory.<tt><br>
-      <br>
-      <br>
-    </tt>
-    <blockquote type="cite"
-cite="mid:CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org">
-      <blockquote type="cite">
-        <pre wrap="">Can you provide some hints how to about adequate cache settings for a write
-intensive environment (70% write, 30% read)?
-Is it a good idea to specify a huge rbd cache of 1 GB with a max dirty age
-of 10 seconds?
-</pre>
-      </blockquote>
-      <pre wrap="">
-The librbd cache is really only useful for sequential read-ahead and
-for small writes (assuming writeback is enabled). Assuming you aren't
-using direct IO, I'd suspect your best performance would be to disable
-the librbd cache and rely on the Linux pagecache to work its magic.
-</pre>
-    </blockquote>
-    As described, xenserver directly utilizes the nbd devices.<br>
-    <br>
-    Our typical workload is originated over 70 percent in database write
-    operations in the virtual machines.<br>
-    Therefore collecting write operations with rbd cache and writing
-    them in chunks to ceph might be a good thing.<br>
-    A higher limit for "rbd cache max dirty" might be a adequate here.<br>
-    At the other side our read workload typically reads huge files in
-    sequential manner.<br>
-    <br>
-    Therefore it might be useful to do start with a configuration like
-    that:<br>
-    <p><tt class="docutils literal"><span class="pre">rbd</span> <span
-          class="pre">cache</span> <span class="pre">size = 64MB<br>
-        </span></tt><tt class="docutils literal"><span class="pre">rbd</span>
-        <span class="pre">cache</span> <span class="pre">max</span> <span
-          class="pre">dirty = 48MB<br>
-          rbd cache target dirty = 32MB<br>
-          rbd cache max dirty age = 10<br>
-        </span></tt></p>
-    <p>What is the strategy of librbd to write data to the storage from
-      rbd_cache if "rbd cache max dirty = 48MB" is reached?<br>
-      Is there a reduction of io operations (merging of ios) compared to
-      the granularity of writes of my virtual machines?<br>
-    </p>
-    <p><span class="docutils literal"><span class="pre">Additionally, i
-          would do no non-default settings for readahead on nbd level to
-          have the possibility to configure this at operating system
-          level of the vms.</span></span></p>
-    <p><span class="docutils literal"><span class="pre">Our operating
-          systems in the virtual machines use currently a readahead of
-          256 (256*512 = 128KB).<br>
-          From my point of view it would be a good thing for sequential
-          reads in big files to increase readahead to a higher value.<br>
-          We haven't changed the default rbd object size of 4MB -
-          nevertheless it might be a good thing to increase </span></span><span
-        class="docutils literal"><span class="pre">the readahead to 1024
-          (=512KB) to decrease read requests by factor of 4</span></span><span
-        class="docutils literal"><span class="pre"></span></span><span
-        class="docutils literal"><span class="pre"> for sequential
-          reads.</span></span><tt class="docutils literal"><span
-          class="pre"><br>
-        </span></tt></p>
-    <p><span class="docutils literal"><span class="pre">What do you
-          think about this</span></span><tt class="docutils literal"><span
-          class="pre">?<br>
-        </span></tt></p>
-    Regards<br>
-    Marc<br>
-    <br>
-  </body>
-</html>
-
---------------CEDDA74766016631194C9E50--
-
---===============1476726105933875711==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1476726105933875711==--
+T24gRnJpLCBNYXkgMTEsIDIwMTggYXQgMzo1OSBBTSwgTWFyYyBTY2jDtmNobGluIDxtc0AyNTZi
+aXQub3JnPiB3cm90ZToKPiBIZWxsbyBKYXNvbiwKPgo+IHRoYW5rcyBmb3IgeW91ciByZXNwb25z
+ZS4KPgo+Cj4gQW0gMTAuMDUuMjAxOCB1bSAyMToxOCBzY2hyaWViIEphc29uIERpbGxhbWFuOgo+
+Cj4gSWYgaSBjb25maWd1cmUgY2FjaGVzIGxpa2UgZGVzY3JpYmVkIGF0Cj4gaHR0cDovL2RvY3Mu
+Y2VwaC5jb20vZG9jcy9sdW1pbm91cy9yYmQvcmJkLWNvbmZpZy1yZWYvLCBhcmUgdGhlcmUgZGVk
+aWNhdGVkCj4gY2FjaGVzIHBlciByYmQtbmJkL2tyYmQgZGV2aWNlIG9yIGlzIHRoZXJlIGEgb25s
+eSBhIHNpbmdsZSBjYWNoZSBhcmVhLgo+Cj4gVGhlIGxpYnJiZCBjYWNoZSBpcyBwZXIgZGV2aWNl
+LCBidXQgaWYgeW91IGFyZW4ndCBwZXJmb3JtaW5nIGRpcmVjdAo+IElPcyB0byB0aGUgZGV2aWNl
+LCB5b3Ugd291bGQgYWxzbyBoYXZlIHRoZSB1bmlmaWVkIExpbnV4IHBhZ2VjYWNoZSBvbgo+IHRv
+cCBvZiBhbGwgdGhlIGRldmljZXMuCj4KPiBYRU5TZXJ2ZXIgZGlyZWN0bHkgdXRpbGl6ZXMgbmJk
+IGRldmljZXMgd2hpY2ggYXJlIGNvbm5lY3RlZCBpbiBteQo+IHVuZGVyc3RhbmRpbmcgYnkgYmxr
+YmFjayAoZG9tLTApIGFuZCBibGtmcm9udCAoZG9tLVUpIHRvIHRoZSB2aXJ0dWFsCj4gbWFjaGlu
+ZXMuCj4gSW4gbXkgdW5kZXJzdGFuZGluZyBwYWdlY2FjaGUgaXMgb25seSBwYXJ0IG9mIHRoZSBn
+YW1lIGlmIGkgdXNlIGRhdGEgb24KPiBtb3VudGVkIGZpbGVzeXN0ZW1zIChWRlMgdXNhZ2UpLgo+
+IFRoZXJlZm9yZSBpdCB3b3VsZCBiZSBhIGdvb2QgdGhpbmcgdG8gdXNlIHJiZCBjYWNoZSBmb3Ig
+cmJkLW5iZCAoL2Rldi9uYmRYKS4KCkkgY2Fubm90IHNwZWFrIGZvciBYZW4sIGJ1dCBpbiBnZW5l
+cmFsIElPIHRvIGEgYmxvY2sgZGV2aWNlIHdpbGwgaGl0CnRoZSBwYWdlY2FjaGUgdW5sZXNzIHRo
+ZSBJTyBvcGVyYXRpb24gaXMgZmxhZ2dlZCBhcyBkaXJlY3QgKGUuZy4KT19ESVJFQ1QpIHRvIGJ5
+cGFzcyB0aGUgcGFnZWNhY2hlIGFuZCBkaXJlY3RseSBzZW5kIGl0IHRvIHRoZSBibG9jawpkZXZp
+Y2UuCgo+IEhvdyBjYW4gaSBpZGVudGlmeSB0aGUgcmJkIGNhY2hlIHdpdGggdGhlIHRvb2xzIHBy
+b3ZpZGVkIGJ5IHRoZSBvcGVyYXRpbmcKPiBzeXN0ZW0/Cj4KPiBJZGVudGlmeSBob3c/IFlvdSBj
+YW4gZW5hYmxlIHRoZSBhZG1pbiBzb2NrZXRzIGFuZCB1c2UgImNlcGgKPiAtLWFkbWluLWRlYW1v
+biBjb25maWcgc2hvdyIgdG8gZGlzcGxheSB0aGUgaW4tdXNlIHNldHRpbmdzLgo+Cj4KPiBBaCBv
+aywgaSBkaXNjb3ZlcmVkIHRoYXQgaSBjYW4gZ2F0aGVyIGNvbmZpZ3VyYXRpb24gc2V0dGluZ3Mg
+YnkgZXhlY3V0aW5nOgo+ICh4ZW5fdGVzdCBpcyB0aGUgaWRlbnRpdHkgb2YgdGhlIHhlbiByYmRf
+bmJkIHVzZXIpCj4KPiBjZXBoIC0taWQgeGVuX3Rlc3QgLS1hZG1pbi1kYWVtb24gL3Zhci9ydW4v
+Y2VwaC9jZXBoLWNsaWVudC54ZW5fdGVzdC5hc29rCj4gY29uZmlnIHNob3cgfCBsZXNzIC1wIHJi
+ZF9jYWNoZQo+Cj4gU29ycnksIG15IHF1ZXN0aW9uIHdhcyBhIGJpdCB1bnByZWNpY2U6IEkgd2Fz
+IHNlYXJjaGluZyBmb3IgdXNhZ2Ugc3RhdGlzdGljcwo+IG9mIHRoZSByYmQgY2FjaGUuCj4gSXMg
+dGhlcmUgYWxzbyBhIHBvc3NpYmlsaXR5IHRvIGdhdGhlciByYmRfY2FjaGUgdXNhZ2Ugc3RhdGlz
+dGljcyBhcyBhIHNvdXJjZQo+IG9mIHZlcmlmaWNhdGlvbiBmb3Igb3B0aW1pemluZyB0aGUgY2Fj
+aGUgc2V0dGluZ3M/CgpZb3UgY2FuIHJ1biAicGVyZiBkdW1wIiBpbnN0ZWFkIG9mICJjb25maWcg
+c2hvdyIgdG8gZHVtcCBvdXQgdGhlCmN1cnJlbnQgcGVyZm9ybWFuY2UgY291bnRlcnMuIFRoZXJl
+IGFyZSBzb21lIHN0YXRzIGZyb20gdGhlIGluLW1lbW9yeQpjYWNoZSBpbmNsdWRlZCBpbiB0aGVy
+ZS4KCj4gRHVlIHRvIHRoZSBmYWN0IHRoYXQgYSByYmQgY2FjaGUgaXMgY3JlYXRlZCBmb3IgZXZl
+cnkgZGV2aWNlLCBpIGFzc3VtZSB0aGF0Cj4gdGhlIHJiZCBjYWNoZSBzaW1wbHkgcGFydCBvZiB0
+aGUgcmJkLW5iZCBwcm9jZXNzIG1lbW9yeS4KCkNvcnJlY3QuCgo+Cj4gQ2FuIHlvdSBwcm92aWRl
+IHNvbWUgaGludHMgaG93IHRvIGFib3V0IGFkZXF1YXRlIGNhY2hlIHNldHRpbmdzIGZvciBhIHdy
+aXRlCj4gaW50ZW5zaXZlIGVudmlyb25tZW50ICg3MCUgd3JpdGUsIDMwJSByZWFkKT8KPiBJcyBp
+dCBhIGdvb2QgaWRlYSB0byBzcGVjaWZ5IGEgaHVnZSByYmQgY2FjaGUgb2YgMSBHQiB3aXRoIGEg
+bWF4IGRpcnR5IGFnZQo+IG9mIDEwIHNlY29uZHM/CgpEZXBlbmRzIG9uIHlvdXIgd29ya2xvYWQg
+YW5kIHlvdXIgdGVzdGluZyByZXN1bHRzLiBJIHN1c3BlY3QgYQpkYXRhYmFzZSBvbiB0b3Agb2Yg
+UkJEIGlzIGdvaW5nIHRvIGRvIGl0cyBvd24gcmVhZCBjYWNoaW5nIGFuZCB3aWxsIGJlCmlzc3Vp
+bmcgbG90cyBvZiBmbHVzaCBjYWxscyB0byB0aGUgYmxvY2sgZGV2aWNlLCBwb3RlbnRpYWxseSBu
+ZWdhdGluZwp0aGUgbmVlZCBmb3IgYSBsYXJnZSBjYWNoZS4KCj4gVGhlIGxpYnJiZCBjYWNoZSBp
+cyByZWFsbHkgb25seSB1c2VmdWwgZm9yIHNlcXVlbnRpYWwgcmVhZC1haGVhZCBhbmQKPiBmb3Ig
+c21hbGwgd3JpdGVzIChhc3N1bWluZyB3cml0ZWJhY2sgaXMgZW5hYmxlZCkuIEFzc3VtaW5nIHlv
+dSBhcmVuJ3QKPiB1c2luZyBkaXJlY3QgSU8sIEknZCBzdXNwZWN0IHlvdXIgYmVzdCBwZXJmb3Jt
+YW5jZSB3b3VsZCBiZSB0byBkaXNhYmxlCj4gdGhlIGxpYnJiZCBjYWNoZSBhbmQgcmVseSBvbiB0
+aGUgTGludXggcGFnZWNhY2hlIHRvIHdvcmsgaXRzIG1hZ2ljLgo+Cj4gQXMgZGVzY3JpYmVkLCB4
+ZW5zZXJ2ZXIgZGlyZWN0bHkgdXRpbGl6ZXMgdGhlIG5iZCBkZXZpY2VzLgo+Cj4gT3VyIHR5cGlj
+YWwgd29ya2xvYWQgaXMgb3JpZ2luYXRlZCBvdmVyIDcwIHBlcmNlbnQgaW4gZGF0YWJhc2Ugd3Jp
+dGUKPiBvcGVyYXRpb25zIGluIHRoZSB2aXJ0dWFsIG1hY2hpbmVzLgo+IFRoZXJlZm9yZSBjb2xs
+ZWN0aW5nIHdyaXRlIG9wZXJhdGlvbnMgd2l0aCByYmQgY2FjaGUgYW5kIHdyaXRpbmcgdGhlbSBp
+bgo+IGNodW5rcyB0byBjZXBoIG1pZ2h0IGJlIGEgZ29vZCB0aGluZy4KPiBBIGhpZ2hlciBsaW1p
+dCBmb3IgInJiZCBjYWNoZSBtYXggZGlydHkiIG1pZ2h0IGJlIGEgYWRlcXVhdGUgaGVyZS4KPiBB
+dCB0aGUgb3RoZXIgc2lkZSBvdXIgcmVhZCB3b3JrbG9hZCB0eXBpY2FsbHkgcmVhZHMgaHVnZSBm
+aWxlcyBpbiBzZXF1ZW50aWFsCj4gbWFubmVyLgo+Cj4gVGhlcmVmb3JlIGl0IG1pZ2h0IGJlIHVz
+ZWZ1bCB0byBkbyBzdGFydCB3aXRoIGEgY29uZmlndXJhdGlvbiBsaWtlIHRoYXQ6Cj4KPiByYmQg
+Y2FjaGUgc2l6ZSA9IDY0TUIKPiByYmQgY2FjaGUgbWF4IGRpcnR5ID0gNDhNQgo+IHJiZCBjYWNo
+ZSB0YXJnZXQgZGlydHkgPSAzMk1CCj4gcmJkIGNhY2hlIG1heCBkaXJ0eSBhZ2UgPSAxMAo+Cj4g
+V2hhdCBpcyB0aGUgc3RyYXRlZ3kgb2YgbGlicmJkIHRvIHdyaXRlIGRhdGEgdG8gdGhlIHN0b3Jh
+Z2UgZnJvbSByYmRfY2FjaGUKPiBpZiAicmJkIGNhY2hlIG1heCBkaXJ0eSA9IDQ4TUIiIGlzIHJl
+YWNoZWQ/Cj4gSXMgdGhlcmUgYSByZWR1Y3Rpb24gb2YgaW8gb3BlcmF0aW9ucyAobWVyZ2luZyBv
+ZiBpb3MpIGNvbXBhcmVkIHRvIHRoZQo+IGdyYW51bGFyaXR5IG9mIHdyaXRlcyBvZiBteSB2aXJ0
+dWFsIG1hY2hpbmVzPwoKSWYgdGhlIGNhY2hlIGlzIGZ1bGwsIGluY29taW5nIElPIHdpbGwgYmUg
+c3RhbGxlZCBhcyB0aGUgZGlydHkgYml0cwphcmUgd3JpdHRlbiBiYWNrIHRvIHRoZSBiYWNraW5n
+IFJCRCBpbWFnZSB0byBtYWtlIHJvb20gYXZhaWxhYmxlIGZvcgp0aGUgbmV3IElPIHJlcXVlc3Qu
+Cgo+IEFkZGl0aW9uYWxseSwgaSB3b3VsZCBkbyBubyBub24tZGVmYXVsdCBzZXR0aW5ncyBmb3Ig
+cmVhZGFoZWFkIG9uIG5iZCBsZXZlbAo+IHRvIGhhdmUgdGhlIHBvc3NpYmlsaXR5IHRvIGNvbmZp
+Z3VyZSB0aGlzIGF0IG9wZXJhdGluZyBzeXN0ZW0gbGV2ZWwgb2YgdGhlCj4gdm1zLgo+Cj4gT3Vy
+IG9wZXJhdGluZyBzeXN0ZW1zIGluIHRoZSB2aXJ0dWFsIG1hY2hpbmVzIHVzZSBjdXJyZW50bHkg
+YSByZWFkYWhlYWQgb2YKPiAyNTYgKDI1Nio1MTIgPSAxMjhLQikuCj4gRnJvbSBteSBwb2ludCBv
+ZiB2aWV3IGl0IHdvdWxkIGJlIGEgZ29vZCB0aGluZyBmb3Igc2VxdWVudGlhbCByZWFkcyBpbiBi
+aWcKPiBmaWxlcyB0byBpbmNyZWFzZSByZWFkYWhlYWQgdG8gYSBoaWdoZXIgdmFsdWUuCj4gV2Ug
+aGF2ZW4ndCBjaGFuZ2VkIHRoZSBkZWZhdWx0IHJiZCBvYmplY3Qgc2l6ZSBvZiA0TUIgLSBuZXZl
+cnRoZWxlc3MgaXQKPiBtaWdodCBiZSBhIGdvb2QgdGhpbmcgdG8gaW5jcmVhc2UgdGhlIHJlYWRh
+aGVhZCB0byAxMDI0ICg9NTEyS0IpIHRvIGRlY3JlYXNlCj4gcmVhZCByZXF1ZXN0cyBieSBmYWN0
+b3Igb2YgNCBmb3Igc2VxdWVudGlhbCByZWFkcy4KPgo+IFdoYXQgZG8geW91IHRoaW5rIGFib3V0
+IHRoaXM/CgpEZXBlbmRzIG9uIHlvdXIgd29ya2xvYWQuCgo+IFJlZ2FyZHMKPiBNYXJjCj4KCgoK
+LS0gCkphc29uCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
+L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
