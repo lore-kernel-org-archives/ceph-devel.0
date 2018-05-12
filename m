@@ -1,164 +1,120 @@
 From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH 0/6] Transition vfs to 64-bit timestamps
-Date: Fri, 11 May 2018 21:59:15 -0700
-Message-ID: <20180512045921.18311-1-deepa.kernel@gmail.com>
+Subject: [PATCH 3/6] ceph: make inode time prints to be long long
+Date: Fri, 11 May 2018 21:59:18 -0700
+Message-ID: <20180512045921.18311-4-deepa.kernel@gmail.com>
+References: <20180512045921.18311-1-deepa.kernel@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180512045921.18311-1-deepa.kernel@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: viro@zeniv.linux.org.uk, tglx@linutronix.de
-Cc: arnd@arndb.de, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org, andreas.dilger@intel.com, anton@tuxera.com, balbi@kernel.org, bfields@fieldses.org, ceph-devel@vger.kernel.org, darrick.wong@oracle.com, dhowells@redhat.com, dsterba@suse.com, dwmw2@infradead.org, hch@lst.de, hirofumi@mail.parknet.co.jp, hubcap@omnibond.com, jack@suse.com, jaegeuk@kernel.org, jaharkes@cs.cmu.edu, jslaby@suse.com, keescook@chromium.org, mark@fasheh.com, miklos@szeredi.hu, nico@linaro.org, reiserfs-devel@vger.kernel.org, richard@nod.at, sage@redhat.com, sfrench@samba.org, swhiteho@redhat.com, tj@kernel.org, trond.myklebust@primarydata.com, tytso@mit.edu, zyan@redhat.com
+Cc: arnd@arndb.de, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org, zyan@redhat.com, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-The series aims to switch vfs timestamps to use
-struct timespec64. Currently vfs uses struct timespec,
-which is not y2038 safe.
+Subsequent patches in the series convert inode timestamps
+to use struct timespec64 instead of struct timespec as
+part of solving the y2038 problem.
 
-The series involves the following:
-1. Add vfs helper functions for supporting struct timepec64 timestamps.
-2. Cast prints of vfs timestamps to avoid warnings after the switch.
-3. Simplify code using vfs timestamps so that the actual
-   replacement becomes easy.
-4. Convert vfs timestamps to use struct timespec64 using a script.
-   This is a flag day patch.
+Convert these print formats to use long long types to
+avoid warnings and errors on conversion.
 
-I've tried to keep the conversions with the script simple, to
-aid in the reviews. I've kept all the internal filesystem data
-structures and function signatures the same.
+Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: zyan@redhat.com
+Cc: ceph-devel@vger.kernel.org
+---
+ fs/ceph/inode.c | 42 +++++++++++++++++++++---------------------
+ 1 file changed, 21 insertions(+), 21 deletions(-)
 
-Next steps:
-1. Convert APIs that can handle timespec64, instead of converting
-   timestamps at the boundaries.
-2. Update internal data structures to avoid timestamp conversions.
-
-Deepa Dinamani (6):
-  fs: add timespec64_truncate()
-  lustre: Use long long type to print inode time
-  ceph: make inode time prints to be long long
-  fs: nfs: get rid of memcpys for inode times
-  udf: Simplify calls to udf_disk_stamp_to_time
-  vfs: change inode times to use struct timespec64
-
- .../staging/lustre/lustre/llite/llite_lib.c   | 12 +--
- drivers/staging/lustre/lustre/lmv/lmv_obd.c   |  7 +-
- drivers/staging/lustre/lustre/mdc/mdc_reint.c |  6 +-
- drivers/staging/lustre/lustre/obdclass/obdo.c |  6 +-
- drivers/tty/tty_io.c                          | 15 +++-
- drivers/usb/gadget/function/f_fs.c            |  2 +-
- fs/adfs/inode.c                               |  7 +-
- fs/afs/fsclient.c                             |  2 +-
- fs/attr.c                                     | 14 +--
- fs/bad_inode.c                                |  2 +-
- fs/btrfs/file.c                               |  6 +-
- fs/btrfs/inode.c                              |  8 +-
- fs/btrfs/ioctl.c                              |  4 +-
- fs/btrfs/root-tree.c                          |  4 +-
- fs/btrfs/transaction.c                        |  2 +-
- fs/ceph/addr.c                                | 12 +--
- fs/ceph/cache.c                               |  4 +-
- fs/ceph/caps.c                                |  6 +-
- fs/ceph/file.c                                |  6 +-
- fs/ceph/inode.c                               | 86 ++++++++++---------
- fs/ceph/mds_client.c                          |  7 +-
- fs/ceph/snap.c                                |  6 +-
- fs/cifs/cache.c                               |  4 +-
- fs/cifs/fscache.c                             |  8 +-
- fs/cifs/inode.c                               | 26 +++---
- fs/coda/coda_linux.c                          | 12 +--
- fs/configfs/inode.c                           | 12 +--
- fs/cramfs/inode.c                             |  2 +-
- fs/ext4/ext4.h                                | 34 +++++---
- fs/ext4/ialloc.c                              |  4 +-
- fs/ext4/namei.c                               |  2 +-
- fs/f2fs/f2fs.h                                | 10 ++-
- fs/f2fs/file.c                                | 12 +--
- fs/f2fs/inode.c                               | 12 +--
- fs/f2fs/namei.c                               |  4 +-
- fs/fat/inode.c                                | 20 +++--
- fs/fat/namei_msdos.c                          | 21 +++--
- fs/fat/namei_vfat.c                           | 22 +++--
- fs/fuse/inode.c                               |  2 +-
- fs/gfs2/dir.c                                 |  6 +-
- fs/gfs2/glops.c                               |  4 +-
- fs/hfs/inode.c                                |  4 +-
- fs/hfsplus/inode.c                            | 12 +--
- fs/hostfs/hostfs_kern.c                       |  6 +-
- fs/inode.c                                    | 58 +++++++++----
- fs/jffs2/dir.c                                | 18 ++--
- fs/jffs2/file.c                               |  2 +-
- fs/jffs2/fs.c                                 | 12 +--
- fs/kernfs/dir.c                               |  4 +-
- fs/kernfs/inode.c                             |  8 +-
- fs/locks.c                                    |  2 +-
- fs/nfs/callback_proc.c                        |  4 +-
- fs/nfs/fscache-index.c                        |  4 +-
- fs/nfs/fscache.c                              | 12 +--
- fs/nfs/inode.c                                | 39 +++++----
- fs/nfs/nfs2xdr.c                              | 25 +++---
- fs/nfs/nfs3xdr.c                              |  8 +-
- fs/nfs/nfs4xdr.c                              |  7 +-
- fs/nfsd/blocklayout.c                         |  8 +-
- fs/nfsd/nfs3xdr.c                             | 14 +--
- fs/nfsd/nfs4xdr.c                             |  7 +-
- fs/nfsd/nfsxdr.c                              |  2 +-
- fs/ntfs/inode.c                               | 30 +++----
- fs/ocfs2/dlmglue.c                            | 20 +++--
- fs/ocfs2/file.c                               |  6 +-
- fs/orangefs/inode.c                           |  2 +-
- fs/orangefs/orangefs-kernel.h                 |  2 +-
- fs/overlayfs/inode.c                          |  2 +-
- fs/overlayfs/overlayfs.h                      |  2 +-
- fs/proc/uptime.c                              |  2 +-
- fs/pstore/inode.c                             |  2 +-
- fs/reiserfs/namei.c                           |  2 +-
- fs/reiserfs/xattr.c                           |  4 +-
- fs/ubifs/dir.c                                |  4 +-
- fs/ubifs/file.c                               | 23 ++---
- fs/ubifs/ubifs.h                              |  2 +-
- fs/udf/ialloc.c                               |  4 +-
- fs/udf/inode.c                                | 59 +++++++------
- fs/udf/super.c                                | 16 ++--
- fs/udf/udfdecl.h                              |  4 +-
- fs/udf/udftime.c                              |  9 +-
- fs/xfs/xfs_inode.c                            |  2 +-
- fs/xfs/xfs_iops.c                             |  2 +-
- fs/xfs/xfs_trans_inode.c                      |  2 +-
- include/linux/fs.h                            | 24 +++---
- include/linux/stat.h                          |  8 +-
- 86 files changed, 522 insertions(+), 408 deletions(-)
-
-
-base-commit: 1c25af77721fa388cb01b2afc7fbe4f1f98685fd
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index ae056927080d..676065a1ea62 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -671,18 +671,18 @@ void ceph_fill_file_time(struct inode *inode, int issued,
+ 		      CEPH_CAP_XATTR_EXCL)) {
+ 		if (ci->i_version == 0 ||
+ 		    timespec_compare(ctime, &inode->i_ctime) > 0) {
+-			dout("ctime %ld.%09ld -> %ld.%09ld inc w/ cap\n",
+-			     inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
+-			     ctime->tv_sec, ctime->tv_nsec);
++			dout("ctime %lld.%09ld -> %lld.%09ld inc w/ cap\n",
++			     (long long)inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
++			     (long long)ctime->tv_sec, ctime->tv_nsec);
+ 			inode->i_ctime = *ctime;
+ 		}
+ 		if (ci->i_version == 0 ||
+ 		    ceph_seq_cmp(time_warp_seq, ci->i_time_warp_seq) > 0) {
+ 			/* the MDS did a utimes() */
+-			dout("mtime %ld.%09ld -> %ld.%09ld "
++			dout("mtime %lld.%09ld -> %lld.%09ld "
+ 			     "tw %d -> %d\n",
+-			     inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
+-			     mtime->tv_sec, mtime->tv_nsec,
++			     (long long)inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
++			     (long long)mtime->tv_sec, mtime->tv_nsec,
+ 			     ci->i_time_warp_seq, (int)time_warp_seq);
+ 
+ 			inode->i_mtime = *mtime;
+@@ -691,17 +691,17 @@ void ceph_fill_file_time(struct inode *inode, int issued,
+ 		} else if (time_warp_seq == ci->i_time_warp_seq) {
+ 			/* nobody did utimes(); take the max */
+ 			if (timespec_compare(mtime, &inode->i_mtime) > 0) {
+-				dout("mtime %ld.%09ld -> %ld.%09ld inc\n",
+-				     inode->i_mtime.tv_sec,
++				dout("mtime %lld.%09ld -> %lld.%09ld inc\n",
++				     (long long)inode->i_mtime.tv_sec,
+ 				     inode->i_mtime.tv_nsec,
+-				     mtime->tv_sec, mtime->tv_nsec);
++				     (long long)mtime->tv_sec, mtime->tv_nsec);
+ 				inode->i_mtime = *mtime;
+ 			}
+ 			if (timespec_compare(atime, &inode->i_atime) > 0) {
+-				dout("atime %ld.%09ld -> %ld.%09ld inc\n",
+-				     inode->i_atime.tv_sec,
++				dout("atime %lld.%09ld -> %lld.%09ld inc\n",
++				     (long long)inode->i_atime.tv_sec,
+ 				     inode->i_atime.tv_nsec,
+-				     atime->tv_sec, atime->tv_nsec);
++				     (long long)atime->tv_sec, atime->tv_nsec);
+ 				inode->i_atime = *atime;
+ 			}
+ 		} else if (issued & CEPH_CAP_FILE_EXCL) {
+@@ -2015,9 +2015,9 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ 	}
+ 
+ 	if (ia_valid & ATTR_ATIME) {
+-		dout("setattr %p atime %ld.%ld -> %ld.%ld\n", inode,
+-		     inode->i_atime.tv_sec, inode->i_atime.tv_nsec,
+-		     attr->ia_atime.tv_sec, attr->ia_atime.tv_nsec);
++		dout("setattr %p atime %lld.%ld -> %lld.%ld\n", inode,
++		     (long long)inode->i_atime.tv_sec, inode->i_atime.tv_nsec,
++		     (long long)attr->ia_atime.tv_sec, attr->ia_atime.tv_nsec);
+ 		if (issued & CEPH_CAP_FILE_EXCL) {
+ 			ci->i_time_warp_seq++;
+ 			inode->i_atime = attr->ia_atime;
+@@ -2037,9 +2037,9 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ 		}
+ 	}
+ 	if (ia_valid & ATTR_MTIME) {
+-		dout("setattr %p mtime %ld.%ld -> %ld.%ld\n", inode,
+-		     inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
+-		     attr->ia_mtime.tv_sec, attr->ia_mtime.tv_nsec);
++		dout("setattr %p mtime %lld.%ld -> %lld.%ld\n", inode,
++		     (long long)inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
++		     (long long)attr->ia_mtime.tv_sec, attr->ia_mtime.tv_nsec);
+ 		if (issued & CEPH_CAP_FILE_EXCL) {
+ 			ci->i_time_warp_seq++;
+ 			inode->i_mtime = attr->ia_mtime;
+@@ -2082,9 +2082,9 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ 	if (ia_valid & ATTR_CTIME) {
+ 		bool only = (ia_valid & (ATTR_SIZE|ATTR_MTIME|ATTR_ATIME|
+ 					 ATTR_MODE|ATTR_UID|ATTR_GID)) == 0;
+-		dout("setattr %p ctime %ld.%ld -> %ld.%ld (%s)\n", inode,
+-		     inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
+-		     attr->ia_ctime.tv_sec, attr->ia_ctime.tv_nsec,
++		dout("setattr %p ctime %lld.%ld -> %lld.%ld (%s)\n", inode,
++		     (long long)inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
++		     (long long)attr->ia_ctime.tv_sec, attr->ia_ctime.tv_nsec,
+ 		     only ? "ctime only" : "ignored");
+ 		if (only) {
+ 			/*
 -- 
 2.17.0
-
-CC: andreas.dilger@intel.com
-Cc: <anton@tuxera.com>
-Cc: <balbi@kernel.org>
-Cc: <bfields@fieldses.org>
-Cc: ceph-devel@vger.kernel.org
-Cc: <darrick.wong@oracle.com>
-Cc: <dhowells@redhat.com>
-Cc: <dsterba@suse.com>
-Cc: <dwmw2@infradead.org>
-Cc: <hch@lst.de>
-Cc: <hirofumi@mail.parknet.co.jp>
-Cc: <hubcap@omnibond.com>
-Cc: <jack@suse.com>
-Cc: jack@suse.com
-Cc: <jaegeuk@kernel.org>
-Cc: <jaharkes@cs.cmu.edu>
-Cc: <jslaby@suse.com>
-Cc: <keescook@chromium.org>
-Cc: <mark@fasheh.com>
-Cc: <miklos@szeredi.hu>
-Cc: <nico@linaro.org>
-Cc: <reiserfs-devel@vger.kernel.org>
-Cc: <richard@nod.at>
-Cc: <sage@redhat.com>
-Cc: <sfrench@samba.org>
-Cc: <swhiteho@redhat.com>
-Cc: <tj@kernel.org>
-Cc: <trond.myklebust@primarydata.com>
-Cc: trond.myklebust@primarydata.com
-Cc: <tytso@mit.edu>
-Cc: <viro@zeniv.linux.org.uk>
-Cc: zyan@redhat.com
