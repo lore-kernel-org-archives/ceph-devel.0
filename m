@@ -1,120 +1,83 @@
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH 3/6] ceph: make inode time prints to be long long
-Date: Fri, 11 May 2018 21:59:18 -0700
-Message-ID: <20180512045921.18311-4-deepa.kernel@gmail.com>
-References: <20180512045921.18311-1-deepa.kernel@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180512045921.18311-1-deepa.kernel@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: viro@zeniv.linux.org.uk, tglx@linutronix.de
-Cc: arnd@arndb.de, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org, zyan@redhat.com, ceph-devel@vger.kernel.org
+From: =?UTF-8?Q?Marc_Sch=c3=b6chlin?= <ms-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
+Subject: Re: RBD Cache and rbd-nbd
+Date: Mon, 14 May 2018 09:15:14 +0200
+Message-ID: <74367bd7-d96f-6dfd-427a-ff74662b90bc@256bit.org>
+References: <f57c4834-517e-0c0e-7496-831689327bac@256bit.org>
+ <CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg@mail.gmail.com>
+ <de7be619-2da0-7f4f-08cf-aafb80bffeb9@256bit.org>
+ <CA+aFP1Dn-yVRwTt7Wfj2HX+56FUPzJwYD5+us8ESLPvZ9EjHCw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+aFP1Dn-yVRwTt7Wfj2HX+56FUPzJwYD5+us8ESLPvZ9EjHCw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Subsequent patches in the series convert inode timestamps
-to use struct timespec64 instead of struct timespec as
-part of solving the y2038 problem.
-
-Convert these print formats to use long long types to
-avoid warnings and errors on conversion.
-
-Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: zyan@redhat.com
-Cc: ceph-devel@vger.kernel.org
----
- fs/ceph/inode.c | 42 +++++++++++++++++++++---------------------
- 1 file changed, 21 insertions(+), 21 deletions(-)
-
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index ae056927080d..676065a1ea62 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -671,18 +671,18 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 		      CEPH_CAP_XATTR_EXCL)) {
- 		if (ci->i_version == 0 ||
- 		    timespec_compare(ctime, &inode->i_ctime) > 0) {
--			dout("ctime %ld.%09ld -> %ld.%09ld inc w/ cap\n",
--			     inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
--			     ctime->tv_sec, ctime->tv_nsec);
-+			dout("ctime %lld.%09ld -> %lld.%09ld inc w/ cap\n",
-+			     (long long)inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
-+			     (long long)ctime->tv_sec, ctime->tv_nsec);
- 			inode->i_ctime = *ctime;
- 		}
- 		if (ci->i_version == 0 ||
- 		    ceph_seq_cmp(time_warp_seq, ci->i_time_warp_seq) > 0) {
- 			/* the MDS did a utimes() */
--			dout("mtime %ld.%09ld -> %ld.%09ld "
-+			dout("mtime %lld.%09ld -> %lld.%09ld "
- 			     "tw %d -> %d\n",
--			     inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
--			     mtime->tv_sec, mtime->tv_nsec,
-+			     (long long)inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
-+			     (long long)mtime->tv_sec, mtime->tv_nsec,
- 			     ci->i_time_warp_seq, (int)time_warp_seq);
- 
- 			inode->i_mtime = *mtime;
-@@ -691,17 +691,17 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 		} else if (time_warp_seq == ci->i_time_warp_seq) {
- 			/* nobody did utimes(); take the max */
- 			if (timespec_compare(mtime, &inode->i_mtime) > 0) {
--				dout("mtime %ld.%09ld -> %ld.%09ld inc\n",
--				     inode->i_mtime.tv_sec,
-+				dout("mtime %lld.%09ld -> %lld.%09ld inc\n",
-+				     (long long)inode->i_mtime.tv_sec,
- 				     inode->i_mtime.tv_nsec,
--				     mtime->tv_sec, mtime->tv_nsec);
-+				     (long long)mtime->tv_sec, mtime->tv_nsec);
- 				inode->i_mtime = *mtime;
- 			}
- 			if (timespec_compare(atime, &inode->i_atime) > 0) {
--				dout("atime %ld.%09ld -> %ld.%09ld inc\n",
--				     inode->i_atime.tv_sec,
-+				dout("atime %lld.%09ld -> %lld.%09ld inc\n",
-+				     (long long)inode->i_atime.tv_sec,
- 				     inode->i_atime.tv_nsec,
--				     atime->tv_sec, atime->tv_nsec);
-+				     (long long)atime->tv_sec, atime->tv_nsec);
- 				inode->i_atime = *atime;
- 			}
- 		} else if (issued & CEPH_CAP_FILE_EXCL) {
-@@ -2015,9 +2015,9 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
- 	}
- 
- 	if (ia_valid & ATTR_ATIME) {
--		dout("setattr %p atime %ld.%ld -> %ld.%ld\n", inode,
--		     inode->i_atime.tv_sec, inode->i_atime.tv_nsec,
--		     attr->ia_atime.tv_sec, attr->ia_atime.tv_nsec);
-+		dout("setattr %p atime %lld.%ld -> %lld.%ld\n", inode,
-+		     (long long)inode->i_atime.tv_sec, inode->i_atime.tv_nsec,
-+		     (long long)attr->ia_atime.tv_sec, attr->ia_atime.tv_nsec);
- 		if (issued & CEPH_CAP_FILE_EXCL) {
- 			ci->i_time_warp_seq++;
- 			inode->i_atime = attr->ia_atime;
-@@ -2037,9 +2037,9 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
- 		}
- 	}
- 	if (ia_valid & ATTR_MTIME) {
--		dout("setattr %p mtime %ld.%ld -> %ld.%ld\n", inode,
--		     inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
--		     attr->ia_mtime.tv_sec, attr->ia_mtime.tv_nsec);
-+		dout("setattr %p mtime %lld.%ld -> %lld.%ld\n", inode,
-+		     (long long)inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
-+		     (long long)attr->ia_mtime.tv_sec, attr->ia_mtime.tv_nsec);
- 		if (issued & CEPH_CAP_FILE_EXCL) {
- 			ci->i_time_warp_seq++;
- 			inode->i_mtime = attr->ia_mtime;
-@@ -2082,9 +2082,9 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
- 	if (ia_valid & ATTR_CTIME) {
- 		bool only = (ia_valid & (ATTR_SIZE|ATTR_MTIME|ATTR_ATIME|
- 					 ATTR_MODE|ATTR_UID|ATTR_GID)) == 0;
--		dout("setattr %p ctime %ld.%ld -> %ld.%ld (%s)\n", inode,
--		     inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
--		     attr->ia_ctime.tv_sec, attr->ia_ctime.tv_nsec,
-+		dout("setattr %p ctime %lld.%ld -> %lld.%ld (%s)\n", inode,
-+		     (long long)inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
-+		     (long long)attr->ia_ctime.tv_sec, attr->ia_ctime.tv_nsec,
- 		     only ? "ctime only" : "ignored");
- 		if (only) {
- 			/*
--- 
-2.17.0
+SGVsbG8gSmFzb24sCgptYW55IHRoYW5rcyBmb3IgeW91ciBpbmZvcm1hdGl2ZSByZXNwb25zZSEK
+CkFtIDExLjA1LjIwMTggdW0gMTc6MDIgc2NocmllYiBKYXNvbiBEaWxsYW1hbjoKPiBJIGNhbm5v
+dCBzcGVhayBmb3IgWGVuLCBidXQgaW4gZ2VuZXJhbCBJTyB0byBhIGJsb2NrIGRldmljZSB3aWxs
+IGhpdAo+IHRoZSBwYWdlY2FjaGUgdW5sZXNzIHRoZSBJTyBvcGVyYXRpb24gaXMgZmxhZ2dlZCBh
+cyBkaXJlY3QgKGUuZy4KPiBPX0RJUkVDVCkgdG8gYnlwYXNzIHRoZSBwYWdlY2FjaGUgYW5kIGRp
+cmVjdGx5IHNlbmQgaXQgdG8gdGhlIGJsb2NrCj4gZGV2aWNlLgpTdXJlLCBidXQgaXQgc2VlbXMg
+dGhhdCB4ZW5zZXJ2ZXIganVzdCBmb3J3YXJkcyBpbyBmcm9tIHZpcnR1YWwgbWFjaGluZXMKKHZt
+OiBibGtmcm9udCwgZG9tLTA6IGJsa2JhY2spIHRvIHRoZSBuZGIgZGV2aWNlIGluIGRvbS0wLgo+
+PiBTb3JyeSwgbXkgcXVlc3Rpb24gd2FzIGEgYml0IHVucHJlY2ljZTogSSB3YXMgc2VhcmNoaW5n
+IGZvciB1c2FnZSBzdGF0aXN0aWNzCj4+IG9mIHRoZSByYmQgY2FjaGUuCj4+IElzIHRoZXJlIGFs
+c28gYSBwb3NzaWJpbGl0eSB0byBnYXRoZXIgcmJkX2NhY2hlIHVzYWdlIHN0YXRpc3RpY3MgYXMg
+YSBzb3VyY2UKPj4gb2YgdmVyaWZpY2F0aW9uIGZvciBvcHRpbWl6aW5nIHRoZSBjYWNoZSBzZXR0
+aW5ncz8KPiBZb3UgY2FuIHJ1biAicGVyZiBkdW1wIiBpbnN0ZWFkIG9mICJjb25maWcgc2hvdyIg
+dG8gZHVtcCBvdXQgdGhlCj4gY3VycmVudCBwZXJmb3JtYW5jZSBjb3VudGVycy4gVGhlcmUgYXJl
+IHNvbWUgc3RhdHMgZnJvbSB0aGUgaW4tbWVtb3J5Cj4gY2FjaGUgaW5jbHVkZWQgaW4gdGhlcmUu
+CkdyZWF0LCBpIHdhcyBub3QgYXdhcmUgb2YgdGhhdC4KVGhlcmUgYXJlIHJlYWxseSBhIGxvdCBv
+ZiBzdGF0aXN0aWNzIHdoaWNoIG1pZ2h0IGJlIHVzZWZ1bCBmb3IgYW5hbHl6aW5nCndoYXRzIGdv
+aW5nIG9uIG9yIGlmIHRoZSBvcHRpbWl6YXRpb25zIGltcHJvdmUgdGhlIHBlcmZvcm1hbmNlIG9m
+IG91cgpzeXN0ZW1zLgo+PiBDYW4geW91IHByb3ZpZGUgc29tZSBoaW50cyBob3cgdG8gYWJvdXQg
+YWRlcXVhdGUgY2FjaGUgc2V0dGluZ3MgZm9yIGEgd3JpdGUKPj4gaW50ZW5zaXZlIGVudmlyb25t
+ZW50ICg3MCUgd3JpdGUsIDMwJSByZWFkKT8KPj4gSXMgaXQgYSBnb29kIGlkZWEgdG8gc3BlY2lm
+eSBhIGh1Z2UgcmJkIGNhY2hlIG9mIDEgR0Igd2l0aCBhIG1heCBkaXJ0eSBhZ2UKPj4gb2YgMTAg
+c2Vjb25kcz8KPiBEZXBlbmRzIG9uIHlvdXIgd29ya2xvYWQgYW5kIHlvdXIgdGVzdGluZyByZXN1
+bHRzLiBJIHN1c3BlY3QgYQo+IGRhdGFiYXNlIG9uIHRvcCBvZiBSQkQgaXMgZ29pbmcgdG8gZG8g
+aXRzIG93biByZWFkIGNhY2hpbmcgYW5kIHdpbGwgYmUKPiBpc3N1aW5nIGxvdHMgb2YgZmx1c2gg
+Y2FsbHMgdG8gdGhlIGJsb2NrIGRldmljZSwgcG90ZW50aWFsbHkgbmVnYXRpbmcKPiB0aGUgbmVl
+ZCBmb3IgYSBsYXJnZSBjYWNoZS4KClN1cmUsIHJlZHVjaW5nIGZsdXNoZXMgd2l0aCB0aGUgYWNj
+ZXB0YW5jZSBvZiBhIGRlZ3JhZGVkIGxldmVsIG9mCnJlbGlhYmlsaXR5IHNlZW1zIHRvIGJlIG9u
+ZSBpbXBvcnQga2V5IGZvciBpbXByb3ZlZCBwZXJmb3JtYW5jZS4KCj4+Cj4+IE91ciB0eXBpY2Fs
+IHdvcmtsb2FkIGlzIG9yaWdpbmF0ZWQgb3ZlciA3MCBwZXJjZW50IGluIGRhdGFiYXNlIHdyaXRl
+Cj4+IG9wZXJhdGlvbnMgaW4gdGhlIHZpcnR1YWwgbWFjaGluZXMuCj4+IFRoZXJlZm9yZSBjb2xs
+ZWN0aW5nIHdyaXRlIG9wZXJhdGlvbnMgd2l0aCByYmQgY2FjaGUgYW5kIHdyaXRpbmcgdGhlbSBp
+bgo+PiBjaHVua3MgdG8gY2VwaCBtaWdodCBiZSBhIGdvb2QgdGhpbmcuCj4+IEEgaGlnaGVyIGxp
+bWl0IGZvciAicmJkIGNhY2hlIG1heCBkaXJ0eSIgbWlnaHQgYmUgYSBhZGVxdWF0ZSBoZXJlLgo+
+PiBBdCB0aGUgb3RoZXIgc2lkZSBvdXIgcmVhZCB3b3JrbG9hZCB0eXBpY2FsbHkgcmVhZHMgaHVn
+ZSBmaWxlcyBpbiBzZXF1ZW50aWFsCj4+IG1hbm5lci4KPj4KPj4gVGhlcmVmb3JlIGl0IG1pZ2h0
+IGJlIHVzZWZ1bCB0byBkbyBzdGFydCB3aXRoIGEgY29uZmlndXJhdGlvbiBsaWtlIHRoYXQ6Cj4+
+Cj4+IHJiZCBjYWNoZSBzaXplID0gNjRNQgo+PiByYmQgY2FjaGUgbWF4IGRpcnR5ID0gNDhNQgo+
+PiByYmQgY2FjaGUgdGFyZ2V0IGRpcnR5ID0gMzJNQgo+PiByYmQgY2FjaGUgbWF4IGRpcnR5IGFn
+ZSA9IDEwCj4+Cj4+IFdoYXQgaXMgdGhlIHN0cmF0ZWd5IG9mIGxpYnJiZCB0byB3cml0ZSBkYXRh
+IHRvIHRoZSBzdG9yYWdlIGZyb20gcmJkX2NhY2hlCj4+IGlmICJyYmQgY2FjaGUgbWF4IGRpcnR5
+ID0gNDhNQiIgaXMgcmVhY2hlZD8KPj4gSXMgdGhlcmUgYSByZWR1Y3Rpb24gb2YgaW8gb3BlcmF0
+aW9ucyAobWVyZ2luZyBvZiBpb3MpIGNvbXBhcmVkIHRvIHRoZQo+PiBncmFudWxhcml0eSBvZiB3
+cml0ZXMgb2YgbXkgdmlydHVhbCBtYWNoaW5lcz8KPiBJZiB0aGUgY2FjaGUgaXMgZnVsbCwgaW5j
+b21pbmcgSU8gd2lsbCBiZSBzdGFsbGVkIGFzIHRoZSBkaXJ0eSBiaXRzCj4gYXJlIHdyaXR0ZW4g
+YmFjayB0byB0aGUgYmFja2luZyBSQkQgaW1hZ2UgdG8gbWFrZSByb29tIGF2YWlsYWJsZSBmb3IK
+PiB0aGUgbmV3IElPIHJlcXVlc3QuClN1cmUsIGkgd2lsbCBoYXZlIGEgbG9vayBhdCB0aGUgc3Rh
+dGlzdGljcyBhbmQgdGhlIHRocm91Z2hwdXQuCklzIHRoZXJlIGFueSBjb25zb2xpZGF0aW9uIG9m
+IHdyaXRlIHJlcXVlc3RzIGluIHJiZCBjYWNoZT8KCkV4YW1wbGU6CklmIGEgdm0gd3JpdGVzIHNt
+YWxsIGlvLXJlcXVlc3RzIHRvIHRoZSBuZGIgZGV2aWNlIHdpdGggYmVsb25nIHRvIHRoZQpzYW1l
+IHJhZG9zIG9iamVjdCAtIGRvZXMgbGlicmJkIGNvbnNvbGxpZGF0ZSB0aGVzZSByZXF1ZXN0cyB0
+b8KgIGEgc2luZ2xlCmNlcGggaW8/CldoYXQgc3RyYXRlZ2llcyBkb2VzIGxpYnJkIHVzZSBmb3Ig
+dGhhdD8KClJlZ2FyZHMKTWFyYwoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
+b20K
