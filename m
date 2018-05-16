@@ -1,90 +1,33 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RBD Cache and rbd-nbd
-Date: Mon, 14 May 2018 05:33:00 -0700
-Message-ID: <CA+aFP1B8ruWjjbLgUM0nQw0erV9XDkEKCaqY1Xs_qXd+miV1GQ@mail.gmail.com>
-References: <f57c4834-517e-0c0e-7496-831689327bac@256bit.org>
- <CA+aFP1BYyE-opsc8eLH79A8EK-2N0cv_qjah788dKdOYLx7ZYg@mail.gmail.com>
- <de7be619-2da0-7f4f-08cf-aafb80bffeb9@256bit.org>
- <CA+aFP1Dn-yVRwTt7Wfj2HX+56FUPzJwYD5+us8ESLPvZ9EjHCw@mail.gmail.com>
- <74367bd7-d96f-6dfd-427a-ff74662b90bc@256bit.org>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <74367bd7-d96f-6dfd-427a-ff74662b90bc-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?Q?Marc_Sch=C3=B6chlin?= <ms-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+From: Christoph Hellwig <hch@lst.de>
+Subject: vm_fault_t conversion, for real
+Date: Wed, 16 May 2018 07:43:34 +0200
+Message-ID: <20180516054348.15950-1-hch@lst.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Souptick Joarder <jrdr.linux@gmail.com>, Matthew Wilcox <willy@infradead.org>
+Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-kernel@vger.kernel.org, devel@lists.orangefs.org, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, ocfs2-devel@oss.oracle.com, linux-mtd@lists.infradead.org, dri-devel@lists.freedesktop.org, lustre-devel@lists.lustre.org, linux-arm-kernel@lists.infradead.org, linux-s390@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gTW9uLCBNYXkgMTQsIDIwMTggYXQgMTI6MTUgQU0sIE1hcmMgU2Now7ZjaGxpbiA8bXNAMjU2
-Yml0Lm9yZz4gd3JvdGU6Cj4gSGVsbG8gSmFzb24sCj4KPiBtYW55IHRoYW5rcyBmb3IgeW91ciBp
-bmZvcm1hdGl2ZSByZXNwb25zZSEKPgo+IEFtIDExLjA1LjIwMTggdW0gMTc6MDIgc2NocmllYiBK
-YXNvbiBEaWxsYW1hbjoKPj4gSSBjYW5ub3Qgc3BlYWsgZm9yIFhlbiwgYnV0IGluIGdlbmVyYWwg
-SU8gdG8gYSBibG9jayBkZXZpY2Ugd2lsbCBoaXQKPj4gdGhlIHBhZ2VjYWNoZSB1bmxlc3MgdGhl
-IElPIG9wZXJhdGlvbiBpcyBmbGFnZ2VkIGFzIGRpcmVjdCAoZS5nLgo+PiBPX0RJUkVDVCkgdG8g
-YnlwYXNzIHRoZSBwYWdlY2FjaGUgYW5kIGRpcmVjdGx5IHNlbmQgaXQgdG8gdGhlIGJsb2NrCj4+
-IGRldmljZS4KPiBTdXJlLCBidXQgaXQgc2VlbXMgdGhhdCB4ZW5zZXJ2ZXIganVzdCBmb3J3YXJk
-cyBpbyBmcm9tIHZpcnR1YWwgbWFjaGluZXMKPiAodm06IGJsa2Zyb250LCBkb20tMDogYmxrYmFj
-aykgdG8gdGhlIG5kYiBkZXZpY2UgaW4gZG9tLTAuCj4+PiBTb3JyeSwgbXkgcXVlc3Rpb24gd2Fz
-IGEgYml0IHVucHJlY2ljZTogSSB3YXMgc2VhcmNoaW5nIGZvciB1c2FnZSBzdGF0aXN0aWNzCj4+
-PiBvZiB0aGUgcmJkIGNhY2hlLgo+Pj4gSXMgdGhlcmUgYWxzbyBhIHBvc3NpYmlsaXR5IHRvIGdh
-dGhlciByYmRfY2FjaGUgdXNhZ2Ugc3RhdGlzdGljcyBhcyBhIHNvdXJjZQo+Pj4gb2YgdmVyaWZp
-Y2F0aW9uIGZvciBvcHRpbWl6aW5nIHRoZSBjYWNoZSBzZXR0aW5ncz8KPj4gWW91IGNhbiBydW4g
-InBlcmYgZHVtcCIgaW5zdGVhZCBvZiAiY29uZmlnIHNob3ciIHRvIGR1bXAgb3V0IHRoZQo+PiBj
-dXJyZW50IHBlcmZvcm1hbmNlIGNvdW50ZXJzLiBUaGVyZSBhcmUgc29tZSBzdGF0cyBmcm9tIHRo
-ZSBpbi1tZW1vcnkKPj4gY2FjaGUgaW5jbHVkZWQgaW4gdGhlcmUuCj4gR3JlYXQsIGkgd2FzIG5v
-dCBhd2FyZSBvZiB0aGF0Lgo+IFRoZXJlIGFyZSByZWFsbHkgYSBsb3Qgb2Ygc3RhdGlzdGljcyB3
-aGljaCBtaWdodCBiZSB1c2VmdWwgZm9yIGFuYWx5emluZwo+IHdoYXRzIGdvaW5nIG9uIG9yIGlm
-IHRoZSBvcHRpbWl6YXRpb25zIGltcHJvdmUgdGhlIHBlcmZvcm1hbmNlIG9mIG91cgo+IHN5c3Rl
-bXMuCj4+PiBDYW4geW91IHByb3ZpZGUgc29tZSBoaW50cyBob3cgdG8gYWJvdXQgYWRlcXVhdGUg
-Y2FjaGUgc2V0dGluZ3MgZm9yIGEgd3JpdGUKPj4+IGludGVuc2l2ZSBlbnZpcm9ubWVudCAoNzAl
-IHdyaXRlLCAzMCUgcmVhZCk/Cj4+PiBJcyBpdCBhIGdvb2QgaWRlYSB0byBzcGVjaWZ5IGEgaHVn
-ZSByYmQgY2FjaGUgb2YgMSBHQiB3aXRoIGEgbWF4IGRpcnR5IGFnZQo+Pj4gb2YgMTAgc2Vjb25k
-cz8KPj4gRGVwZW5kcyBvbiB5b3VyIHdvcmtsb2FkIGFuZCB5b3VyIHRlc3RpbmcgcmVzdWx0cy4g
-SSBzdXNwZWN0IGEKPj4gZGF0YWJhc2Ugb24gdG9wIG9mIFJCRCBpcyBnb2luZyB0byBkbyBpdHMg
-b3duIHJlYWQgY2FjaGluZyBhbmQgd2lsbCBiZQo+PiBpc3N1aW5nIGxvdHMgb2YgZmx1c2ggY2Fs
-bHMgdG8gdGhlIGJsb2NrIGRldmljZSwgcG90ZW50aWFsbHkgbmVnYXRpbmcKPj4gdGhlIG5lZWQg
-Zm9yIGEgbGFyZ2UgY2FjaGUuCj4KPiBTdXJlLCByZWR1Y2luZyBmbHVzaGVzIHdpdGggdGhlIGFj
-Y2VwdGFuY2Ugb2YgYSBkZWdyYWRlZCBsZXZlbCBvZgo+IHJlbGlhYmlsaXR5IHNlZW1zIHRvIGJl
-IG9uZSBpbXBvcnQga2V5IGZvciBpbXByb3ZlZCBwZXJmb3JtYW5jZS4KPgo+Pj4KPj4+IE91ciB0
-eXBpY2FsIHdvcmtsb2FkIGlzIG9yaWdpbmF0ZWQgb3ZlciA3MCBwZXJjZW50IGluIGRhdGFiYXNl
-IHdyaXRlCj4+PiBvcGVyYXRpb25zIGluIHRoZSB2aXJ0dWFsIG1hY2hpbmVzLgo+Pj4gVGhlcmVm
-b3JlIGNvbGxlY3Rpbmcgd3JpdGUgb3BlcmF0aW9ucyB3aXRoIHJiZCBjYWNoZSBhbmQgd3JpdGlu
-ZyB0aGVtIGluCj4+PiBjaHVua3MgdG8gY2VwaCBtaWdodCBiZSBhIGdvb2QgdGhpbmcuCj4+PiBB
-IGhpZ2hlciBsaW1pdCBmb3IgInJiZCBjYWNoZSBtYXggZGlydHkiIG1pZ2h0IGJlIGEgYWRlcXVh
-dGUgaGVyZS4KPj4+IEF0IHRoZSBvdGhlciBzaWRlIG91ciByZWFkIHdvcmtsb2FkIHR5cGljYWxs
-eSByZWFkcyBodWdlIGZpbGVzIGluIHNlcXVlbnRpYWwKPj4+IG1hbm5lci4KPj4+Cj4+PiBUaGVy
-ZWZvcmUgaXQgbWlnaHQgYmUgdXNlZnVsIHRvIGRvIHN0YXJ0IHdpdGggYSBjb25maWd1cmF0aW9u
-IGxpa2UgdGhhdDoKPj4+Cj4+PiByYmQgY2FjaGUgc2l6ZSA9IDY0TUIKPj4+IHJiZCBjYWNoZSBt
-YXggZGlydHkgPSA0OE1CCj4+PiByYmQgY2FjaGUgdGFyZ2V0IGRpcnR5ID0gMzJNQgo+Pj4gcmJk
-IGNhY2hlIG1heCBkaXJ0eSBhZ2UgPSAxMAo+Pj4KPj4+IFdoYXQgaXMgdGhlIHN0cmF0ZWd5IG9m
-IGxpYnJiZCB0byB3cml0ZSBkYXRhIHRvIHRoZSBzdG9yYWdlIGZyb20gcmJkX2NhY2hlCj4+PiBp
-ZiAicmJkIGNhY2hlIG1heCBkaXJ0eSA9IDQ4TUIiIGlzIHJlYWNoZWQ/Cj4+PiBJcyB0aGVyZSBh
-IHJlZHVjdGlvbiBvZiBpbyBvcGVyYXRpb25zIChtZXJnaW5nIG9mIGlvcykgY29tcGFyZWQgdG8g
-dGhlCj4+PiBncmFudWxhcml0eSBvZiB3cml0ZXMgb2YgbXkgdmlydHVhbCBtYWNoaW5lcz8KPj4g
-SWYgdGhlIGNhY2hlIGlzIGZ1bGwsIGluY29taW5nIElPIHdpbGwgYmUgc3RhbGxlZCBhcyB0aGUg
-ZGlydHkgYml0cwo+PiBhcmUgd3JpdHRlbiBiYWNrIHRvIHRoZSBiYWNraW5nIFJCRCBpbWFnZSB0
-byBtYWtlIHJvb20gYXZhaWxhYmxlIGZvcgo+PiB0aGUgbmV3IElPIHJlcXVlc3QuCj4gU3VyZSwg
-aSB3aWxsIGhhdmUgYSBsb29rIGF0IHRoZSBzdGF0aXN0aWNzIGFuZCB0aGUgdGhyb3VnaHB1dC4K
-PiBJcyB0aGVyZSBhbnkgY29uc29saWRhdGlvbiBvZiB3cml0ZSByZXF1ZXN0cyBpbiByYmQgY2Fj
-aGU/Cj4KPiBFeGFtcGxlOgo+IElmIGEgdm0gd3JpdGVzIHNtYWxsIGlvLXJlcXVlc3RzIHRvIHRo
-ZSBuZGIgZGV2aWNlIHdpdGggYmVsb25nIHRvIHRoZQo+IHNhbWUgcmFkb3Mgb2JqZWN0IC0gZG9l
-cyBsaWJyYmQgY29uc29sbGlkYXRlIHRoZXNlIHJlcXVlc3RzIHRvICBhIHNpbmdsZQo+IGNlcGgg
-aW8/Cj4gV2hhdCBzdHJhdGVnaWVzIGRvZXMgbGlicmQgdXNlIGZvciB0aGF0PwoKVGhlIGxpYnJi
-ZCBjYWNoZSB3aWxsIGNvbnNvbGlkYXRlIHNlcXVlbnRpYWwgZGlydHkgZXh0ZW50cyB3aXRoaW4g
-dGhlCnNhbWUgb2JqZWN0LCBidXQgaXQgZG9lcyBub3QgY29uc29saWRhdGUgYWxsIGRpcnR5IGV4
-dGVudHMgd2l0aGluIHRoZQpzYW1lIG9iamVjdCB0byB0aGUgc2FtZSB3cml0ZSByZXF1ZXN0LgoK
-PiBSZWdhcmRzCj4gTWFyYwo+CgoKCi0tIApKYXNvbgpfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
-QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
-c2Vycy1jZXBoLmNvbQo=
+Hi all,
+
+this series tries to actually turn vm_fault_t into a type that can be
+typechecked and checks the fallout instead of sprinkling random
+annotations without context.
+
+The first one fixes a real bug in orangefs, the second and third fix
+mismatched existing vm_fault_t annotations on the same function, the
+fourth removes an unused export that was in the chain.  The remainder
+until the last one do some not quite trivial conversions, and the last
+one does the trivial mass annotation and flips vm_fault_t to a __bitwise
+unsigned int - the unsigned means we also get plain compiler type
+checking for the new ->fault signature even without sparse.
+
+This has survived an x86 allyesconfig build, and got a SUCCESS from the
+buildbot that I don't really trust - I'm pretty sure there are bits
+and pieces hiding in other architectures that it hasn't caught up to.
+
+The sparse annotations are manuall verified for the core MM code and
+a few other interesting bits (e.g. DAX and the x86 fault code)
+
+The series is against linux-next as of 2018/05/15 to make sure any
+annotations in subsystem trees are picked up.
