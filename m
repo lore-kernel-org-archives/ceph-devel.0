@@ -1,41 +1,48 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 14/14] mm: turn on vm_fault_t type checking
-Date: Wed, 16 May 2018 19:34:45 +0200
-Message-ID: <20180516173445.GA6088@lst.de>
-References: <20180516054348.15950-1-hch@lst.de>
- <20180516054348.15950-15-hch@lst.de> <20180516150829.GA4904@magnolia>
-Mime-Version: 1.0
+From: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Too many objects per pg than average: deadlock
+ situation
+Date: Sun, 20 May 2018 23:28:17 +0300
+Message-ID: <34562966-FC71-4194-9605-9ECB79BDA513@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 11.3 \(3445.6.18\))
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-Content-Disposition: inline
-In-Reply-To: <20180516150829.GA4904@magnolia>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-s390@vger.kernel.org, linux-btrfs@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org, Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org, ocfs2-devel@oss.oracle.com, Souptick Joarder <jrdr.linux@gmail.com>, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, Christoph Hellwig <hch@lst.de>, devel@lists.orangefs.org, lustre-devel@lists.lustre.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gV2VkLCBNYXkgMTYsIDIwMTggYXQgMDg6MDg6MjlBTSAtMDcwMCwgRGFycmljayBKLiBXb25n
-IHdyb3RlOgo+IFVoLCB3ZSdyZSBjaGFuZ2luZyBmdW5jdGlvbiBzaWduYXR1cmVzIC9hbmQvIHJl
-ZGVmaW5pbmluZyB2bV9mYXVsdF90Pwo+IEFsbCBpbiB0aGUgc2FtZSA5MEsgcGF0Y2g/Cj4gCj4g
-SSAvd2FzLyBleHBlY3RpbmcgYSBzZXJpZXMgb2YgImNvbnZlcnQgWFhYWFggYW5kIGFsbCBjYWxs
-ZXJzL3VzZXJzIgo+IHBhdGNoZXMgZm9sbG93ZWQgYnkgYSB0cml2aWFsIG9uZSB0byBzd2l0Y2gg
-dGhlIGRlZmluaXRpb24sIG5vdCBhIGdpYW50Cj4gcGlsZSBvZiBjaGFuZ2UuICBGV0lXIEkgZG9u
-J3QgbWluZCBzbyBtdWNoIGlmIHlvdSBtYWtlIGEgcGF0Y2gKPiBjb250YWluaW5nIGEgY2hhbmdl
-IGZvciBzb21lIHN1cGVyLWNvbW1vbiBwcmltaXRpdmUgYW5kIGEgaG9qaWxsaW9uCj4gbGl0dGxl
-IGRpZmYgaHVua3MgdHJlZS13aWRlLCBidXQgb25seSBvbmUgbG9naWNhbCBjaGFuZ2UgYXQgYSB0
-aW1lIGZvciBhCj4gYmlnIHBhdGNoLCBwbGVhc2UuLi4KPiAKPiBJIHF1aXRlIHByZWZlciBzZWVp
-bmcgdGhlIHdob2xlIHNlcmllcyBmcm9tIHN0YXJ0IHRvIGZpbmlzaCBhbGwgcGFja2FnZWQKPiB1
-cCBpbiBvbmUgc2VyaWVzLCBidXQgd293IHRoaXMgd2FzIG92ZXJ3aGVsbWluZy4gOi8KCkFub3Ro
-ZXIgdm90ZSB0byBzcGxpdCB0aGUgY2hhbmdlIG9mIHRoZSB0eXBlZGVmLCBvayBJIGdldCB0aGUg
-bWVzc2FnZS4uCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpo
-dHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaS1kZXZlbAo=
+SGVsbG8hCgpJbiBvdXIgY2x1c3Rlciwgd2Ugc2VlIGEgZGVhZGxvY2sgc2l0dWF0aW9uLgpUaGlz
+IGlzIGEgc3RhbmRhcmQgY2x1c3RlciBmb3IgYW4gT3BlblN0YWNrIHdpdGhvdXQgYSBSYWRvc0dX
+LCB3ZSBoYXZlIGEgc3RhbmRhcmQgYmxvY2sgYWNjZXNzIHBvb2xzIGFuZCBvbmUgZm9yIG1ldHJp
+Y3MgZnJvbSBhIGdub2NjaGkuClRoZSBhbW91bnQgb2YgZGF0YSBpbiB0aGUgZ25vY2NoaSBwb29s
+IGlzIHNtYWxsLCBidXQgb2JqZWN0cyBhcmUganVzdCBhIGxvdC4KCldoZW4gcGxhbm5pbmcgYSBk
+aXN0cmlidXRpb24gb2YgUEcgYmV0d2VlbiBwb29scywgdGhlIFBHIGFyZSBkaXN0cmlidXRlZCBk
+ZXBlbmRpbmcgb24gdGhlIGVzdGltYXRlZCBkYXRhIHNpemUgb2YgZWFjaCBwb29sLiBDb3JyZXNw
+b25kaW5nbHksIGFzIHN1Z2dlc3RlZCBieSBwZ2NhbGMgZm9yIHRoZSBnbm9jY2hpIHBvb2wsIGl0
+IGlzIG5lY2Vzc2FyeSB0byBhbGxvY2F0ZSBhIGxpdHRsZSBQRyBxdWFudGl0eS4KCkFzIGEgcmVz
+dWx0LCB0aGUgY2x1c3RlciBpcyBjb25zdGFudGx5IGhhbmdpbmcgd2l0aCB0aGUgZXJyb3IgIjEg
+cG9vbHMgaGF2ZSBtYW55IG1vcmUgb2JqZWN0cyBwZXIgcGcgdGhhbiBhdmVyYWdlIiBhbmQgdGhp
+cyBpcyB1bmRlcnN0YW5kYWJsZTogdGhlIGdub2NjaGkgcHJvZHVjZXMgYSBsb3Qgb2Ygc21hbGwg
+b2JqZWN0cyBhbmQgaW4gY29tcGFyaXNvbiB3aXRoIHRoZSByZXN0IG9mIHBvb2xzIGl0IGlzIHRl
+bnMgdGltZXMgbGFyZ2VyLgoKQW5kIGhlcmUgd2UgYXJlIGF0IGEgZGVhZGxvY2s6CjEuIFdlIGNh
+biBub3QgaW5jcmVhc2UgdGhlIGFtb3VudCBvZiBQRyBvbiB0aGUgZ25vY2NoaSBwb29sLCBzaW5j
+ZSBpdCBpcyB2ZXJ5IHNtYWxsIGluIGRhdGEgc2l6ZQoyLiBFdmVuIGlmIHdlIGluY3JlYXNlIHRo
+ZSBudW1iZXIgb2YgUEcgLSB3ZSBjYW4gY3Jvc3MgdGhlIHJlY29tbWVuZGVkIDIwMCBQR3MgbGlt
+aXQgZm9yIGVhY2ggT1NEIGluIGNsdXN0ZXIKMy4gQ29uc3RhbnRseSBob2xkaW5nIHRoZSBjbHVz
+dGVyIGluIHRoZSBIRUFMVEhfV0FSTiBtb2RlIGlzIGEgYmFkIGlkZWEKNC4gV2UgY2FuIHNldCB0
+aGUgcGFyYW1ldGVyICJtb24gcGcgd2FybiBtYXggb2JqZWN0IHNrZXciLCBidXQgd2UgZG8gbm90
+IGtub3cgaG93IHRoZSBDZXBoIHdpbGwgd29yayB3aGVuIHRoZXJlIGlzIG9uZSBwb29sIHdpdGgg
+YSBodWdlIG9iamVjdCAvIHBvb2wgcmF0aW8KClRoZXJlIGlzIG5vIG9idmlvdXMgc29sdXRpb24u
+CgpIb3cgdG8gc29sdmUgdGhpcyBwcm9ibGVtIGNvcnJlY3RseT8K4oCUIApNaWtlLCBydW5zIQpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
