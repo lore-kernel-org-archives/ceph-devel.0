@@ -1,55 +1,44 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Too many objects per pg than average: deadlock
- situation
-Date: Sun, 20 May 2018 23:05:17 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1805202303591.2133@piezo.novalocal>
-References: <34562966-FC71-4194-9605-9ECB79BDA513@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <34562966-FC71-4194-9605-9ECB79BDA513-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] ceph: fix st_nlink stat for directories
+Date: Mon, 21 May 2018 10:27:29 +0100
+Message-ID: <20180521092729.17470-1-lhenriques@suse.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Sun, 20 May 2018, Mike A wrote:
-> Hello!
-> 
-> In our cluster, we see a deadlock situation.
-> This is a standard cluster for an OpenStack without a RadosGW, we have a standard block access pools and one for metrics from a gnocchi.
-> The amount of data in the gnocchi pool is small, but objects are just a lot.
-> 
-> When planning a distribution of PG between pools, the PG are distributed depending on the estimated data size of each pool. Correspondingly, as suggested by pgcalc for the gnocchi pool, it is necessary to allocate a little PG quantity.
-> 
-> As a result, the cluster is constantly hanging with the error "1 pools have many more objects per pg than average" and this is understandable: the gnocchi produces a lot of small objects and in comparison with the rest of pools it is tens times larger.
-> 
-> And here we are at a deadlock:
-> 1. We can not increase the amount of PG on the gnocchi pool, since it is very small in data size
-> 2. Even if we increase the number of PG - we can cross the recommended 200 PGs limit for each OSD in cluster
-> 3. Constantly holding the cluster in the HEALTH_WARN mode is a bad idea
-> 4. We can set the parameter "mon pg warn max object skew", but we do not know how the Ceph will work when there is one pool with a huge object / pool ratio
-> 
-> There is no obvious solution.
-> 
-> How to solve this problem correctly?
+Currently, calling stat on a cephfs directory returns 1 for st_nlink.
+This behaviour has recently changed in the fuse client, as some
+applications seem to expect this value to be either 0 (if it's
+unlinked) or 2 + number of subdirectories.  This behaviour was changed
+in the fuse client with commit 67c7e4619188 ("client: use common
+interp of st_nlink for dirs").
 
-As a workaround, I'd just increase the skew option to make the warning go 
-away.
+This patch modifies the kernel client to have a similar behaviour.
 
-It seems to me like the underlying problem is that we're looking at object 
-count vs pg count, but ignoring the object sizes.  Unfortunately it's a 
-bit awkward to fix because we don't have a way to quantify the size of 
-omap objects via the stats (currently).  So for now, just adjust the skew 
-value enough to make the warning go away!
+Link: https://tracker.ceph.com/issues/23873
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/inode.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-sage
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index aa7c5a4ff137..6ad66ef8fd66 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -2288,6 +2288,14 @@ int ceph_getattr(const struct path *path, struct kstat *stat,
+ 				stat->size = ci->i_files + ci->i_subdirs;
+ 			stat->blocks = 0;
+ 			stat->blksize = 65536;
++			/*
++			 * Some applications rely on the number of st_nlink
++			 * value on directories to be either 0 (if unlinked)
++			 * or 2 + number of subdirectories.
++			 */
++			if (stat->nlink == 1)
++				/* '.' + '..' + subdirs */
++				stat->nlink = 1 + 1 + ci->i_subdirs;
+ 		}
+ 	}
+ 	return err;
