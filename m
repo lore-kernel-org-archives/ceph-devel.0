@@ -1,58 +1,64 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: fix st_nlink stat for directories
-Date: Mon, 21 May 2018 21:04:23 +0800
-Message-ID: <F5370214-6FE9-475F-A4EF-60A477A733B4@redhat.com>
-References: <20180521092729.17470-1-lhenriques@suse.com>
+From: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Too many objects per pg than average: deadlock
+ situation
+Date: Mon, 21 May 2018 22:07:29 +0300
+Message-ID: <73D53B89-F1EE-40FD-8817-FC9E4693AB9B@gmail.com>
+References: <34562966-FC71-4194-9605-9ECB79BDA513@gmail.com>
+ <alpine.DEB.2.11.1805202303591.2133@piezo.novalocal>
 Mime-Version: 1.0 (Mac OS X Mail 11.3 \(3445.6.18\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180521092729.17470-1-lhenriques@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1805202303591.2133-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-
-
-> On May 21, 2018, at 17:27, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> Currently, calling stat on a cephfs directory returns 1 for st_nlink.
-> This behaviour has recently changed in the fuse client, as some
-> applications seem to expect this value to be either 0 (if it's
-> unlinked) or 2 + number of subdirectories.  This behaviour was changed
-> in the fuse client with commit 67c7e4619188 ("client: use common
-> interp of st_nlink for dirs").
-> 
-> This patch modifies the kernel client to have a similar behaviour.
-> 
-> Link: https://tracker.ceph.com/issues/23873
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
-> fs/ceph/inode.c | 8 ++++++++
-> 1 file changed, 8 insertions(+)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index aa7c5a4ff137..6ad66ef8fd66 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -2288,6 +2288,14 @@ int ceph_getattr(const struct path *path, struct kstat *stat,
-> 				stat->size = ci->i_files + ci->i_subdirs;
-> 			stat->blocks = 0;
-> 			stat->blksize = 65536;
-> +			/*
-> +			 * Some applications rely on the number of st_nlink
-> +			 * value on directories to be either 0 (if unlinked)
-> +			 * or 2 + number of subdirectories.
-> +			 */
-> +			if (stat->nlink == 1)
-> +				/* '.' + '..' + subdirs */
-> +				stat->nlink = 1 + 1 + ci->i_subdirs;
-> 		}
-> 	}
-> 	return err;
-
-Applied, thanks.
-
-Yan, Zheng
+SGVsbG8sCgo+IDIxINC80LDRjyAyMDE4INCzLiwg0LIgMjowNSwgU2FnZSBXZWlsIDxzYWdlQG5l
+d2RyZWFtLm5ldD4g0L3QsNC/0LjRgdCw0Lso0LApOgo+IAo+IE9uIFN1biwgMjAgTWF5IDIwMTgs
+IE1pa2UgQSB3cm90ZToKPj4gSGVsbG8hCj4+IAo+PiBJbiBvdXIgY2x1c3Rlciwgd2Ugc2VlIGEg
+ZGVhZGxvY2sgc2l0dWF0aW9uLgo+PiBUaGlzIGlzIGEgc3RhbmRhcmQgY2x1c3RlciBmb3IgYW4g
+T3BlblN0YWNrIHdpdGhvdXQgYSBSYWRvc0dXLCB3ZSBoYXZlIGEgc3RhbmRhcmQgYmxvY2sgYWNj
+ZXNzIHBvb2xzIGFuZCBvbmUgZm9yIG1ldHJpY3MgZnJvbSBhIGdub2NjaGkuCj4+IFRoZSBhbW91
+bnQgb2YgZGF0YSBpbiB0aGUgZ25vY2NoaSBwb29sIGlzIHNtYWxsLCBidXQgb2JqZWN0cyBhcmUg
+anVzdCBhIGxvdC4KPj4gCj4+IFdoZW4gcGxhbm5pbmcgYSBkaXN0cmlidXRpb24gb2YgUEcgYmV0
+d2VlbiBwb29scywgdGhlIFBHIGFyZSBkaXN0cmlidXRlZCBkZXBlbmRpbmcgb24gdGhlIGVzdGlt
+YXRlZCBkYXRhIHNpemUgb2YgZWFjaCBwb29sLiBDb3JyZXNwb25kaW5nbHksIGFzIHN1Z2dlc3Rl
+ZCBieSBwZ2NhbGMgZm9yIHRoZSBnbm9jY2hpIHBvb2wsIGl0IGlzIG5lY2Vzc2FyeSB0byBhbGxv
+Y2F0ZSBhIGxpdHRsZSBQRyBxdWFudGl0eS4KPj4gCj4+IEFzIGEgcmVzdWx0LCB0aGUgY2x1c3Rl
+ciBpcyBjb25zdGFudGx5IGhhbmdpbmcgd2l0aCB0aGUgZXJyb3IgIjEgcG9vbHMgaGF2ZSBtYW55
+IG1vcmUgb2JqZWN0cyBwZXIgcGcgdGhhbiBhdmVyYWdlIiBhbmQgdGhpcyBpcyB1bmRlcnN0YW5k
+YWJsZTogdGhlIGdub2NjaGkgcHJvZHVjZXMgYSBsb3Qgb2Ygc21hbGwgb2JqZWN0cyBhbmQgaW4g
+Y29tcGFyaXNvbiB3aXRoIHRoZSByZXN0IG9mIHBvb2xzIGl0IGlzIHRlbnMgdGltZXMgbGFyZ2Vy
+Lgo+PiAKPj4gQW5kIGhlcmUgd2UgYXJlIGF0IGEgZGVhZGxvY2s6Cj4+IDEuIFdlIGNhbiBub3Qg
+aW5jcmVhc2UgdGhlIGFtb3VudCBvZiBQRyBvbiB0aGUgZ25vY2NoaSBwb29sLCBzaW5jZSBpdCBp
+cyB2ZXJ5IHNtYWxsIGluIGRhdGEgc2l6ZQo+PiAyLiBFdmVuIGlmIHdlIGluY3JlYXNlIHRoZSBu
+dW1iZXIgb2YgUEcgLSB3ZSBjYW4gY3Jvc3MgdGhlIHJlY29tbWVuZGVkIDIwMCBQR3MgbGltaXQg
+Zm9yIGVhY2ggT1NEIGluIGNsdXN0ZXIKPj4gMy4gQ29uc3RhbnRseSBob2xkaW5nIHRoZSBjbHVz
+dGVyIGluIHRoZSBIRUFMVEhfV0FSTiBtb2RlIGlzIGEgYmFkIGlkZWEKPj4gNC4gV2UgY2FuIHNl
+dCB0aGUgcGFyYW1ldGVyICJtb24gcGcgd2FybiBtYXggb2JqZWN0IHNrZXciLCBidXQgd2UgZG8g
+bm90IGtub3cgaG93IHRoZSBDZXBoIHdpbGwgd29yayB3aGVuIHRoZXJlIGlzIG9uZSBwb29sIHdp
+dGggYSBodWdlIG9iamVjdCAvIHBvb2wgcmF0aW8KPj4gCj4+IFRoZXJlIGlzIG5vIG9idmlvdXMg
+c29sdXRpb24uCj4+IAo+PiBIb3cgdG8gc29sdmUgdGhpcyBwcm9ibGVtIGNvcnJlY3RseT8KPiAK
+PiBBcyBhIHdvcmthcm91bmQsIEknZCBqdXN0IGluY3JlYXNlIHRoZSBza2V3IG9wdGlvbiB0byBt
+YWtlIHRoZSB3YXJuaW5nIGdvIAo+IGF3YXkuCj4gCj4gSXQgc2VlbXMgdG8gbWUgbGlrZSB0aGUg
+dW5kZXJseWluZyBwcm9ibGVtIGlzIHRoYXQgd2UncmUgbG9va2luZyBhdCBvYmplY3QgCj4gY291
+bnQgdnMgcGcgY291bnQsIGJ1dCBpZ25vcmluZyB0aGUgb2JqZWN0IHNpemVzLiAgVW5mb3J0dW5h
+dGVseSBpdCdzIGEgCj4gYml0IGF3a3dhcmQgdG8gZml4IGJlY2F1c2Ugd2UgZG9uJ3QgaGF2ZSBh
+IHdheSB0byBxdWFudGlmeSB0aGUgc2l6ZSBvZiAKPiBvbWFwIG9iamVjdHMgdmlhIHRoZSBzdGF0
+cyAoY3VycmVudGx5KS4gIFNvIGZvciBub3csIGp1c3QgYWRqdXN0IHRoZSBza2V3IAo+IHZhbHVl
+IGVub3VnaCB0byBtYWtlIHRoZSB3YXJuaW5nIGdvIGF3YXkhCj4gCj4gc2FnZQoKT2suCkl0IHNl
+ZW1zIHRoYXQgaW5jcmVhc2UgdGhpcyBjb25maWcgb3B0aW9uLCBpcyB0aGUgb25seSBhY2NlcHRh
+YmxlIG9wdGlvbi4KClRoYW5rIQoK4oCUIApNaWtlLCBydW5zIQpfX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kv
+Y2VwaC11c2Vycy1jZXBoLmNvbQo=
