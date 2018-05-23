@@ -1,15 +1,15 @@
-From: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Subject: Re: Too many objects per pg than average: deadlock
  situation
-Date: Wed, 23 May 2018 23:28:02 +0300
-Message-ID: <7690C1F1-5C98-4FA2-BD4A-24375F474951@gmail.com>
+Date: Wed, 23 May 2018 20:35:27 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1805232034250.31613@piezo.novalocal>
 References: <34562966-FC71-4194-9605-9ECB79BDA513@gmail.com>
  <alpine.DEB.2.11.1805202303591.2133@piezo.novalocal>
-Mime-Version: 1.0 (Mac OS X Mail 11.3 \(3445.6.18\))
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ <7690C1F1-5C98-4FA2-BD4A-24375F474951@gmail.com>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-959468156-1527107729=:31613"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1805202303591.2133-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+In-Reply-To: <7690C1F1-5C98-4FA2-BD4A-24375F474951-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,46 +19,71 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+To: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGVsbG8KCj4gMjEg0LzQsNGPIDIwMTgg0LMuLCDQsiAyOjA1LCBTYWdlIFdlaWwgPHNhZ2VAbmV3
-ZHJlYW0ubmV0PiDQvdCw0L/QuNGB0LDQuyjQsCk6Cj4gCj4gT24gU3VuLCAyMCBNYXkgMjAxOCwg
-TWlrZSBBIHdyb3RlOgo+PiBIZWxsbyEKPj4gCj4+IEluIG91ciBjbHVzdGVyLCB3ZSBzZWUgYSBk
-ZWFkbG9jayBzaXR1YXRpb24uCj4+IFRoaXMgaXMgYSBzdGFuZGFyZCBjbHVzdGVyIGZvciBhbiBP
-cGVuU3RhY2sgd2l0aG91dCBhIFJhZG9zR1csIHdlIGhhdmUgYSBzdGFuZGFyZCBibG9jayBhY2Nl
-c3MgcG9vbHMgYW5kIG9uZSBmb3IgbWV0cmljcyBmcm9tIGEgZ25vY2NoaS4KPj4gVGhlIGFtb3Vu
-dCBvZiBkYXRhIGluIHRoZSBnbm9jY2hpIHBvb2wgaXMgc21hbGwsIGJ1dCBvYmplY3RzIGFyZSBq
-dXN0IGEgbG90Lgo+PiAKPj4gV2hlbiBwbGFubmluZyBhIGRpc3RyaWJ1dGlvbiBvZiBQRyBiZXR3
-ZWVuIHBvb2xzLCB0aGUgUEcgYXJlIGRpc3RyaWJ1dGVkIGRlcGVuZGluZyBvbiB0aGUgZXN0aW1h
-dGVkIGRhdGEgc2l6ZSBvZiBlYWNoIHBvb2wuIENvcnJlc3BvbmRpbmdseSwgYXMgc3VnZ2VzdGVk
-IGJ5IHBnY2FsYyBmb3IgdGhlIGdub2NjaGkgcG9vbCwgaXQgaXMgbmVjZXNzYXJ5IHRvIGFsbG9j
-YXRlIGEgbGl0dGxlIFBHIHF1YW50aXR5Lgo+PiAKPj4gQXMgYSByZXN1bHQsIHRoZSBjbHVzdGVy
-IGlzIGNvbnN0YW50bHkgaGFuZ2luZyB3aXRoIHRoZSBlcnJvciAiMSBwb29scyBoYXZlIG1hbnkg
-bW9yZSBvYmplY3RzIHBlciBwZyB0aGFuIGF2ZXJhZ2UiIGFuZCB0aGlzIGlzIHVuZGVyc3RhbmRh
-YmxlOiB0aGUgZ25vY2NoaSBwcm9kdWNlcyBhIGxvdCBvZiBzbWFsbCBvYmplY3RzIGFuZCBpbiBj
-b21wYXJpc29uIHdpdGggdGhlIHJlc3Qgb2YgcG9vbHMgaXQgaXMgdGVucyB0aW1lcyBsYXJnZXIu
-Cj4+IAo+PiBBbmQgaGVyZSB3ZSBhcmUgYXQgYSBkZWFkbG9jazoKPj4gMS4gV2UgY2FuIG5vdCBp
-bmNyZWFzZSB0aGUgYW1vdW50IG9mIFBHIG9uIHRoZSBnbm9jY2hpIHBvb2wsIHNpbmNlIGl0IGlz
-IHZlcnkgc21hbGwgaW4gZGF0YSBzaXplCj4+IDIuIEV2ZW4gaWYgd2UgaW5jcmVhc2UgdGhlIG51
-bWJlciBvZiBQRyAtIHdlIGNhbiBjcm9zcyB0aGUgcmVjb21tZW5kZWQgMjAwIFBHcyBsaW1pdCBm
-b3IgZWFjaCBPU0QgaW4gY2x1c3Rlcgo+PiAzLiBDb25zdGFudGx5IGhvbGRpbmcgdGhlIGNsdXN0
-ZXIgaW4gdGhlIEhFQUxUSF9XQVJOIG1vZGUgaXMgYSBiYWQgaWRlYQo+PiA0LiBXZSBjYW4gc2V0
-IHRoZSBwYXJhbWV0ZXIgIm1vbiBwZyB3YXJuIG1heCBvYmplY3Qgc2tldyIsIGJ1dCB3ZSBkbyBu
-b3Qga25vdyBob3cgdGhlIENlcGggd2lsbCB3b3JrIHdoZW4gdGhlcmUgaXMgb25lIHBvb2wgd2l0
-aCBhIGh1Z2Ugb2JqZWN0IC8gcG9vbCByYXRpbwo+PiAKPj4gVGhlcmUgaXMgbm8gb2J2aW91cyBz
-b2x1dGlvbi4KPj4gCj4+IEhvdyB0byBzb2x2ZSB0aGlzIHByb2JsZW0gY29ycmVjdGx5Pwo+IAo+
-IEFzIGEgd29ya2Fyb3VuZCwgSSdkIGp1c3QgaW5jcmVhc2UgdGhlIHNrZXcgb3B0aW9uIHRvIG1h
-a2UgdGhlIHdhcm5pbmcgZ28gCj4gYXdheS4KPiAKPiBJdCBzZWVtcyB0byBtZSBsaWtlIHRoZSB1
-bmRlcmx5aW5nIHByb2JsZW0gaXMgdGhhdCB3ZSdyZSBsb29raW5nIGF0IG9iamVjdCAKPiBjb3Vu
-dCB2cyBwZyBjb3VudCwgYnV0IGlnbm9yaW5nIHRoZSBvYmplY3Qgc2l6ZXMuICBVbmZvcnR1bmF0
-ZWx5IGl0J3MgYSAKPiBiaXQgYXdrd2FyZCB0byBmaXggYmVjYXVzZSB3ZSBkb24ndCBoYXZlIGEg
-d2F5IHRvIHF1YW50aWZ5IHRoZSBzaXplIG9mIAo+IG9tYXAgb2JqZWN0cyB2aWEgdGhlIHN0YXRz
-IChjdXJyZW50bHkpLiAgU28gZm9yIG5vdywganVzdCBhZGp1c3QgdGhlIHNrZXcgCj4gdmFsdWUg
-ZW5vdWdoIHRvIG1ha2UgdGhlIHdhcm5pbmcgZ28gYXdheSEKPiAKPiBzYWdlCgpUaGlzIHNpdHVh
-dGlvbiBjYW4gc29tZWhvdyBuZWdhdGl2ZWx5IGFmZmVjdCB0aGUgd29yayBvZiB0aGUgY2x1c3Rl
-cj8KCuKAlCAKTWlrZSwgcnVucyEKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBo
-LmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
-b20K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-959468156-1527107729=:31613
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Wed, 23 May 2018, Mike A wrote:
+> Hello
+> 
+> > 21 мая 2018 г., в 2:05, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> написал(а):
+> > 
+> > On Sun, 20 May 2018, Mike A wrote:
+> >> Hello!
+> >> 
+> >> In our cluster, we see a deadlock situation.
+> >> This is a standard cluster for an OpenStack without a RadosGW, we have a standard block access pools and one for metrics from a gnocchi.
+> >> The amount of data in the gnocchi pool is small, but objects are just a lot.
+> >> 
+> >> When planning a distribution of PG between pools, the PG are distributed depending on the estimated data size of each pool. Correspondingly, as suggested by pgcalc for the gnocchi pool, it is necessary to allocate a little PG quantity.
+> >> 
+> >> As a result, the cluster is constantly hanging with the error "1 pools have many more objects per pg than average" and this is understandable: the gnocchi produces a lot of small objects and in comparison with the rest of pools it is tens times larger.
+> >> 
+> >> And here we are at a deadlock:
+> >> 1. We can not increase the amount of PG on the gnocchi pool, since it is very small in data size
+> >> 2. Even if we increase the number of PG - we can cross the recommended 200 PGs limit for each OSD in cluster
+> >> 3. Constantly holding the cluster in the HEALTH_WARN mode is a bad idea
+> >> 4. We can set the parameter "mon pg warn max object skew", but we do not know how the Ceph will work when there is one pool with a huge object / pool ratio
+> >> 
+> >> There is no obvious solution.
+> >> 
+> >> How to solve this problem correctly?
+> > 
+> > As a workaround, I'd just increase the skew option to make the warning go 
+> > away.
+> > 
+> > It seems to me like the underlying problem is that we're looking at object 
+> > count vs pg count, but ignoring the object sizes.  Unfortunately it's a 
+> > bit awkward to fix because we don't have a way to quantify the size of 
+> > omap objects via the stats (currently).  So for now, just adjust the skew 
+> > value enough to make the warning go away!
+> > 
+> > sage
+> 
+> This situation can somehow negatively affect the work of the cluster?
+
+Eh, you'll end up with a PG count that is possibly suboptimal.  You'd have 
+to work pretty hard to notice any difference, though.  I wouldn't worry 
+about it.
+
+sage
+
+--8323329-959468156-1527107729=:31613
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-959468156-1527107729=:31613--
