@@ -1,7 +1,7 @@
 From: Joe Perches <joe@perches.com>
 Subject: Re: [PATCH] block drivers/block: Use octal not symbolic permissions
-Date: Wed, 23 May 2018 14:41:30 -0700
-Message-ID: <cd46916c876eb552579a5c91b62780c315dd67f8.camel@perches.com>
+Date: Wed, 23 May 2018 15:35:31 -0700
+Message-ID: <56ee8810463b6c537ca0c10c9f82e6d922acd1f1.camel@perches.com>
 References: <5e97a292c1ba38a6b5a0caa271d85dc3de1b2aa7.1527105857.git.joe@perches.com>
          <6bf44255-145f-bf14-e254-860731ff9296@kernel.dk>
 Mime-Version: 1.0
@@ -32,27 +32,11 @@ On Wed, 2018-05-23 at 15:27 -0600, Jens Axboe wrote:
 > 
 > Honestly, I see this as pretty needless churn.
 
-It's just for consistency and the ability to highlight
-somewhat unusual permissions uses like just 0400.
+btw:
 
-Apply it at your leisure or ignore it.
+There is currently a mixture of symbolic and octal
+permissions uses in block and drivers/block
 
-btw: Joshua Morris' email address is bouncing.
-Maybe it should be removed from MAINTAINERS.
----
- MAINTAINERS | 1 -
- 1 file changed, 1 deletion(-)
+ie: 94 octal and 146 symbolic uses.
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 9051a9ca24a2..0d546a10d0b9 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -5598,7 +5598,6 @@ F:	drivers/base/firmware_loader/
- F:	include/linux/firmware.h
- 
- FLASH ADAPTER DRIVER (IBM Flash Adapter 900GB Full Height PCI Flash
-Card)
--M:	Joshua Morris <josh.h.morris@us.ibm.com>
- M:	Philip Kelleher <pjk1939@linux.vnet.ibm.com>
- S:	Maintained
- F:	drivers/block/rsxx/
+If this is applied, all would become octal.
