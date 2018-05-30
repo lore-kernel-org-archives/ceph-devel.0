@@ -1,152 +1,145 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] ceph: fix use-after-free in ceph_statfs
-Date: Tue, 29 May 2018 19:26:57 +0800
-Message-ID: <CAAM7YAkYikGvHTiyBOiVVD6pT4hVXLpyB-paHSbgYkp2gDPSJA@mail.gmail.com>
-References: <20180528173740.26491-1-lhenriques@suse.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [GIT PULL] Transition vfs to 64-bit timestamps
+Date: Wed, 30 May 2018 17:16:53 +0200
+Message-ID: <CAK8P3a1_qJRALkxxb1uPnEaf8T5LsL0N1LbDUqxOr4SUDhPk1g@mail.gmail.com>
+References: <20180525233528.GA371@deepa-ubuntu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180528173740.26491-1-lhenriques@suse.com>
+In-Reply-To: <20180525233528.GA371@deepa-ubuntu>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, y2038 Mailman List <y2038@lists.linaro.org>, Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, "Dilger, Andreas" <andreas.dilger@intel.com>, anton@tuxera.com, Felipe Balbi <balbi@kernel.org>, "J. Bruce Fields" <bfields@fieldses.org>, ceph-devel <ceph-devel@vger.kernel.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, David Howells <dhowells@redhat.com>, David Sterba <dsterba@suse.com>, David Woodhouse <dwmw2@infradead.org>, Christoph Hellwig <hch@lst.de>, OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Mike Marshall <hubcap@omnibond.com>, Jan Kara <jack@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, May 29, 2018 at 1:37 AM, Luis Henriques <lhenriques@suse.com> wrote:
-> KASAN found an UAF in ceph_statfs.  This was a one-off bug but looking at
-> the code it looks like the monmap access needs to be protected as it can
-> be modified while we're accessing it.  Fix this by protecting the access
-> with the monc->mutex.
->
-> [  234.282067] BUG: KASAN: use-after-free in ceph_statfs+0x21d/0x2c0
-> [  234.284109] Read of size 8 at addr ffff88006844f2e0 by task trinity-c5/304
->
-> [  234.287646] CPU: 0 PID: 304 Comm: trinity-c5 Not tainted 4.17.0-rc6+ #172
-> [  234.289831] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.0.0-prebuilt.qemu-project.org 04/01/2014
-> [  234.292220] Call Trace:
-> [  234.292576]  dump_stack+0xa5/0x11b
-> [  234.293091]  ? show_regs_print_info+0x5/0x5
-> [  234.293663]  ? kmsg_dump_rewind+0x118/0x118
-> [  234.294258]  ? ceph_statfs+0x21d/0x2c0
-> [  234.294762]  print_address_description+0x73/0x2b0
-> [  234.295387]  ? ceph_statfs+0x21d/0x2c0
-> [  234.295923]  kasan_report+0x243/0x360
-> [  234.296445]  ceph_statfs+0x21d/0x2c0
-> [  234.296944]  ? ceph_umount_begin+0x80/0x80
-> [  234.297514]  ? kmem_cache_alloc+0xdf/0x1a0
-> [  234.298092]  statfs_by_dentry+0x79/0xb0
-> [  234.298801]  vfs_statfs+0x28/0x110
-> [  234.299398]  user_statfs+0x8c/0xe0
-> [  234.299915]  ? vfs_statfs+0x110/0x110
-> [  234.300469]  ? __fdget_raw+0x10/0x10
-> [  234.301163]  __se_sys_statfs+0x5d/0xa0
-> [  234.301872]  ? user_statfs+0xe0/0xe0
-> [  234.302566]  ? mutex_unlock+0x1d/0x40
-> [  234.303186]  ? __x64_sys_statfs+0x20/0x30
-> [  234.303880]  do_syscall_64+0xee/0x290
-> [  234.304488]  ? syscall_return_slowpath+0x1c0/0x1c0
-> [  234.305316]  ? page_fault+0x1e/0x30
-> [  234.305938]  ? syscall_return_slowpath+0x13c/0x1c0
-> [  234.306746]  ? prepare_exit_to_usermode+0xdb/0x140
-> [  234.307530]  ? syscall_trace_enter+0x330/0x330
-> [  234.308198]  ? __put_user_4+0x1c/0x30
-> [  234.308738]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
-> [  234.309477] RIP: 0033:0x7fb9b45fc229
-> [  234.310007] RSP: 002b:00007ffeedbd29a8 EFLAGS: 00000246 ORIG_RAX: 0000000000000089
-> [  234.311068] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007fb9b45fc229
-> [  234.312105] RDX: 4400d4d4d4d4d4d4 RSI: 00007fb9b4b98000 RDI: 0000558bf5900d90
-> [  234.313179] RBP: 00007fb9b4caf000 R08: 0000000000000000 R09: 0036363636363636
-> [  234.314146] R10: 00000000000000b8 R11: 0000000000000246 R12: 0000000000000089
-> [  234.315127] R13: 00007fb9b4caf048 R14: 00007fb9b4cd9ad8 R15: 00007fb9b4caf000
->
-> [  234.316370] Allocated by task 130:
-> [  234.316945]  __kmalloc+0x124/0x210
-> [  234.317484]  ceph_monmap_decode+0x1c1/0x400
-> [  234.318008]  dispatch+0x113/0xd20
-> [  234.318380]  ceph_con_workfn+0xa7e/0x44e0
-> [  234.318837]  process_one_work+0x5f0/0xa30
-> [  234.319296]  worker_thread+0x184/0xa70
-> [  234.319715]  kthread+0x1a0/0x1c0
-> [  234.320083]  ret_from_fork+0x35/0x40
->
-> [  234.320676] Freed by task 130:
-> [  234.321039]  kfree+0xb8/0x210
-> [  234.321385]  dispatch+0x15a/0xd20
-> [  234.321766]  ceph_con_workfn+0xa7e/0x44e0
-> [  234.322244]  process_one_work+0x5f0/0xa30
-> [  234.322668]  worker_thread+0x184/0xa70
-> [  234.323067]  kthread+0x1a0/0x1c0
-> [  234.323531]  ret_from_fork+0x35/0x40
->
-> [  234.324401] The buggy address belongs to the object at ffff88006844f2e0
->                 which belongs to the cache kmalloc-192 of size 192
-> [  234.325786] The buggy address is located 0 bytes inside of
->                 192-byte region [ffff88006844f2e0, ffff88006844f3a0)
-> [  234.326876] The buggy address belongs to the page:
-> [  234.327576] page:ffffea0001a11380 count:1 mapcount:0 mapping:0000000000000000 index:0x0 compound_mapcount: 0
-> [  234.329493] flags: 0x4000000000008100(slab|head)
-> [  234.330396] raw: 4000000000008100 0000000000000000 0000000000000000 00000001000f000f
-> [  234.331882] raw: ffffea0001a4d4a0 ffffea00018a3720 ffff88006d002a40 0000000000000000
-> [  234.332947] page dumped because: kasan: bad access detected
->
-> [  234.334227] Memory state around the buggy address:
-> [  234.335074]  ffff88006844f180: 00 fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-> [  234.336296]  ffff88006844f200: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-> [  234.337549] >ffff88006844f280: fc fc fc fc fc fc fc fc fc fc fc fc fb fb fb fb
-> [  234.338713]                                                        ^
-> [  234.339787]  ffff88006844f300: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
-> [  234.341011]  ffff88006844f380: fb fb fb fb fc fc fc fc fc fc fc fc fc fc fc fc
-> [  234.342177] ==================================================================
-> [  234.343394] Disabling lock debugging due to kernel taint
->
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
->  fs/ceph/super.c | 11 +++++++----
->  1 file changed, 7 insertions(+), 4 deletions(-)
->
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index b33082e6878f..9c788e59fc04 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -45,7 +45,7 @@ static void ceph_put_super(struct super_block *s)
->  static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
->  {
->         struct ceph_fs_client *fsc = ceph_inode_to_client(d_inode(dentry));
-> -       struct ceph_monmap *monmap = fsc->client->monc.monmap;
-> +       struct ceph_mon_client *monc = &fsc->client->monc;
->         struct ceph_statfs st;
->         u64 fsid;
->         int err;
-> @@ -58,7 +58,7 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
->         }
->
->         dout("statfs\n");
-> -       err = ceph_monc_do_statfs(&fsc->client->monc, data_pool, &st);
-> +       err = ceph_monc_do_statfs(monc, data_pool, &st);
->         if (err < 0)
->                 return err;
->
-> @@ -94,8 +94,11 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
->         buf->f_namelen = NAME_MAX;
->
->         /* Must convert the fsid, for consistent values across arches */
-> -       fsid = le64_to_cpu(*(__le64 *)(&monmap->fsid)) ^
-> -              le64_to_cpu(*((__le64 *)&monmap->fsid + 1));
-> +       mutex_lock(&monc->mutex);
-> +       fsid = le64_to_cpu(*(__le64 *)(&monc->monmap->fsid)) ^
-> +              le64_to_cpu(*((__le64 *)&monc->monmap->fsid + 1));
-> +       mutex_unlock(&monc->mutex);
-> +
->         buf->f_fsid.val[0] = fsid & 0xffffffff;
->         buf->f_fsid.val[1] = fsid >> 32;
->
+On Sat, May 26, 2018 at 1:35 AM, Deepa Dinamani <deepa.kernel@gmail.com> wrote:
 
+> The flag patch applies cleanly. I've not seen the timestamps
+> update logic change often. The series applies cleanly on 4.17-rc6
+> and linux-next tip (top commit: next-20180517).
 
-Applied, thanks
+It just stopped applying cleanly against the latest linux-next tree, due to
+a conflict against two patches from the overlayfs-next tree:
 
-Yan, Zheng
+b2a285e1dc5d ("Revert "vfs: update ovl inode before relatime check"")
+681b186a012d ("Revert "ovl: fix relatime for directories"")
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+After the conflict resolution below, it works fine again. Not sure what the
+best merge strategy would be, at least the bit in ovl_file_accessed()
+isn't obvious enough.
+
+       Arnd
+
+diff --cc fs/inode.c
+index 6404639e2491,9fe1f941be02..195b974e7a77
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@@ -1635,10 -1681,11 +1635,10 @@@ static int update_time(struct inode *in
+   *    This function automatically handles read only file systems and media,
+   *    as well as the "noatime" flag and inode specific "noatime" markers.
+   */
+ -bool __atime_needs_update(const struct path *path, struct inode *inode,
+ -                        bool rcu)
+ +bool atime_needs_update(const struct path *path, struct inode *inode)
+  {
+        struct vfsmount *mnt = path->mnt;
+-       struct timespec now;
++       struct timespec64 now;
+
+        if (inode->i_flags & S_NOATIME)
+                return false;
+@@@ -1661,10 -1708,10 +1661,14 @@@
+
+        now = current_time(inode);
+
+ -      if (!relatime_need_update(mnt, inode, now))
+-       if (!relatime_need_update(path, inode,
+timespec64_to_timespec(now), rcu))
+++      if (!relatime_need_update(mnt, inode, timespec64_to_timespec(now)))
+                return false;
+
+-       if (timespec_equal(&inode->i_atime, &now))
++       if (timespec64_equal(&inode->i_atime, &now))
+                return false;
+
+        return true;
+@@@ -1674,9 -1721,9 +1678,9 @@@ void touch_atime(const struct path *pat
+  {
+        struct vfsmount *mnt = path->mnt;
+        struct inode *inode = d_inode(path->dentry);
+-       struct timespec now;
++       struct timespec64 now;
+
+ -      if (!__atime_needs_update(path, inode, false))
+ +      if (!atime_needs_update(path, inode))
+                return;
+
+        if (!sb_start_write_trylock(inode->i_sb))
+diff --cc fs/overlayfs/inode.c
+index e31d64206a01,d7cca60f28e6..e0bb217c01e2
+--- a/fs/overlayfs/inode.c
++++ b/fs/overlayfs/inode.c
+@@ -169,8 +169,8 @@ static void ovl_file_accessed(struct file *file)
+        if (!upperinode)
+                return;
+
+ -       if ((!timespec_equal(&inode->i_mtime, &upperinode->i_mtime) ||
+ -            !timespec_equal(&inode->i_ctime, &upperinode->i_ctime))) {
+ +       if ((!timespec64_equal(&inode->i_mtime, &upperinode->i_mtime) ||
+ +            !timespec64_equal(&inode->i_ctime, &upperinode->i_ctime))) {
+                inode->i_mtime = upperinode->i_mtime;
+                inode->i_ctime = upperinode->i_ctime;
+        }
+@@@ -439,7 -384,39 +439,7 @@@ struct posix_acl *ovl_get_acl(struct in
+        return acl;
+  }
+
+- int ovl_update_time(struct inode *inode, struct timespec *ts, int flags)
+ -static bool ovl_open_need_copy_up(struct dentry *dentry, int flags)
+ -{
+ -      /* Copy up of disconnected dentry does not set upper alias */
+ -      if (ovl_dentry_upper(dentry) &&
+ -          (ovl_dentry_has_upper_alias(dentry) ||
+ -           (dentry->d_flags & DCACHE_DISCONNECTED)))
+ -              return false;
+ -
+ -      if (special_file(d_inode(dentry)->i_mode))
+ -              return false;
+ -
+ -      if (!(OPEN_FMODE(flags) & FMODE_WRITE) && !(flags & O_TRUNC))
+ -              return false;
+ -
+ -      return true;
+ -}
+ -
+ -int ovl_open_maybe_copy_up(struct dentry *dentry, unsigned int file_flags)
+ -{
+ -      int err = 0;
+ -
+ -      if (ovl_open_need_copy_up(dentry, file_flags)) {
+ -              err = ovl_want_write(dentry);
+ -              if (!err) {
+ -                      err = ovl_copy_up_flags(dentry, file_flags);
+ -                      ovl_drop_write(dentry);
+ -              }
+ -      }
+ -
+ -      return err;
+ -}
+ -
++ int ovl_update_time(struct inode *inode, struct timespec64 *ts, int flags)
+  {
+        if (flags & S_ATIME) {
+                struct ovl_fs *ofs = inode->i_sb->s_fs_info;
+diff --cc fs/overlayfs/overlayfs.h
+index 93c84929d422,9fe10247f9d4..8477d9e4b4fe
+--- a/fs/overlayfs/overlayfs.h
++++ b/fs/overlayfs/overlayfs.h
+@@@ -356,18 -330,10 +356,18 @@@ int ovl_xattr_get(struct dentry *dentry
+                  void *value, size_t size);
+  ssize_t ovl_listxattr(struct dentry *dentry, char *list, size_t size);
+  struct posix_acl *ovl_get_acl(struct inode *inode, int type);
+- int ovl_update_time(struct inode *inode, struct timespec *ts, int flags);
+ -int ovl_open_maybe_copy_up(struct dentry *dentry, unsigned int file_flags);
++ int ovl_update_time(struct inode *inode, struct timespec64 *ts, int flags);
+  bool ovl_is_private_xattr(const char *name);
