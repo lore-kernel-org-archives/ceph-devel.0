@@ -1,7 +1,7 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Problems while sending email to Ceph mailings
-Date: Fri, 1 Jun 2018 16:47:32 -0300
-Message-ID: <CAB0WNsjhDWxvR585TbL4YvGnH6EpNHnRLcj3k6gsgNR3h2rwew@mail.gmail.com>
+Subject: Ceph Developer Monthly - June 2018
+Date: Fri, 1 Jun 2018 16:56:49 -0300
+Message-ID: <CAB0WNshbvxK-SJ+SP6i2MV4tH3=56ZL0tF3V_KU1MS4+JEfWpw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -15,25 +15,32 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Hey Cephers,
 
-Some of our community members reported problems while sending email to
-mailings hosted by Ceph project.
+This is just a friendly reminder that the next Ceph Developer Monthly
+meeting is coming up:
 
-We reported the problem to the host company and it's happening because
-some changes on DNS records done some time ago, and they're working to
-fix it.
+ http://wiki.ceph.com/Planning
 
-The issue happens to all mailings (except ceph-devel which is hosted
-by vger.kernel.org) and a workaround is to update the mail address
-from <mailing>@ceph.com to <mailing>@lists.ceph.com.
+If you have work that you're doing that it a feature work, significant
+backports, or anything you would like to discuss with the core team,
+please add it to the following page:
 
-The email addresses are also documented on our website:
+ http://wiki.ceph.com/CDM_06-JUN-2018
 
-   https://ceph.com/irc/#mailing-lists
+This edition happens on NA/EMEAC friendly hours (12:30 EST) and we
+will use the following Bluejeans URL for the video conference:
+
+ https://redhat.bluejeans.com/376400604
+
+The meeting details are also available on Ceph Community Calendar:
+
+ https://calendar.google.com/calendar/b/1?cid=OXRzOWM3bHQ3dTF2aWMyaWp2dnFxbGZwbzBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ
+
+If you have questions or comments, please let us know.
 
 Kindest regards,
 
