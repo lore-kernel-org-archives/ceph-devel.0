@@ -1,10 +1,10 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Call For Papers coordination pad
-Date: Wed, 30 May 2018 16:17:33 -0700
-Message-ID: <CAJ4mKGbdV9OdTC4QBiUrgPxAOUqcT5mdb9GTV1sRjU=kEmDZfA@mail.gmail.com>
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Problems while sending email to Ceph mailings
+Date: Fri, 1 Jun 2018 16:47:32 -0300
+Message-ID: <CAB0WNsjhDWxvR585TbL4YvGnH6EpNHnRLcj3k6gsgNR3h2rwew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -15,29 +15,31 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-U2hvcnQgdmVyc2lvbjogaHR0cHM6Ly9wYWQuY2VwaC5jb20vcC9jZnAtY29vcmRpbmF0aW9uIGlz
-IGEgc3BhY2UgZm9yCnlvdSB0byBzaGFyZSB0YWxrcyB5b3UndmUgc3VibWl0dGVkIHRvIGNvbmZl
-cmVuY2VzLCBpZiB5b3Ugd2FudCB0byBsZXQKb3RoZXIgQ2VwaCBjb21tdW5pdHkgbWVtYmVycyBr
-bm93IHdoYXQgdG8gbG9vayBmb3IgYW5kIGF2b2lkCmR1cGxpY2F0aW5nIHRvcGljcy4KCkxvbmdl
-ciB2ZXJzaW9uOiBJIGFuZCBhIHRlYW1tYXRlIGFsbW9zdCBkdXBsaWNhdGVkIGEgdGFsayB0b3Bp
-YyAoZm9yCnRoZSB1cGNvbWluZyBodHRwczovL21vdW50cG9pbnQuaW8g4oCUIGNoZWNrIGl0IG91
-dCEpIGFuZCByZWFsaXplZCB0aGVyZQp3YXMgbm8gZXN0YWJsaXNoZWQgd2F5IGZvciB1cyB0byBj
-b29yZGluYXRlIHRoaXMuIE90aGVyIHBlb3BsZSBoYXZlCnBvaW50ZWQgb3V0IHNpbWlsYXIgcHJv
-YmxlbXMgaW4gdGhlIHBhc3QuIFNvLCBieSB0aGUgcG93ZXIgdmVzdGVkIGluCm1lIGJ5IHRoZSBw
-b3dlciBvZiBkb2luZyB0aGluZ3MgYW5kIGhhdmluZyBTYWdlIHNheSAidGhhdCdzIGEgZ29vZApp
-ZGVhIiwgSSBjcmVhdGVkIGh0dHBzOi8vcGFkLmNlcGguY29tL3AvY2ZwLWNvb3JkaW5hdGlvbi4g
-VXNlIHRoYXQKc3BhY2UgdG8gY29vcmRpbmF0ZS4gSSd2ZSBwcm92aWRlZCBhIHRlbXBsYXRlIGZv
-ciBjb25mZXJlbmNlcyBhcm91bmQKdGFsayBpZGVhcyBhbmQgYWN0dWFsIHN1Ym1pc3Npb25zLCBi
-dXQgcGxlYXNlIGZlZWwgZnJlZSB0byBqb3QgZG93bgpvdGhlciBub3RlcyBhcm91bmQgdGhvc2Us
-IGFkZCBuZXcgY29uZmVyZW5jZXMgeW91IGtub3cgYWJvdXQgKGV2ZW4gaWYKeW91IGFyZW4ndCBz
-dWJtaXR0aW5nIGEgdGFsayB5b3Vyc2VsZiksIGFuZCBnZW5lcmFsbHkgdXNlIHRoYXQKZXRoZXJw
-YWQgYXMgYSBjb21tdW5pdHkgcmVzb3VyY2UuCgpJJ2xsIHRyeSB0byBrZWVwIGl0IHVwLXRvLWRh
-dGUgYXMgY29uZmVyZW5jZXMgYWdlIG91dCwgYnV0IG9idmlvdXNseQppdCdzIG9ubHkgaGVscGZ1
-bCBpZiBwZW9wbGUgYWN0dWFsbHkgcHV0IHN0dWZmIHRoZXJlLiBTbyBnbyBmb3J0aCBhbmQKd3Jp
-dGUsIGRlYXIgY29tbXVuaXR5ISA6KQotR3JlZwpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
-cy1jZXBoLmNvbQo=
+Hi,
+
+Some of our community members reported problems while sending email to
+mailings hosted by Ceph project.
+
+We reported the problem to the host company and it's happening because
+some changes on DNS records done some time ago, and they're working to
+fix it.
+
+The issue happens to all mailings (except ceph-devel which is hosted
+by vger.kernel.org) and a workaround is to update the mail address
+from <mailing>@ceph.com to <mailing>@lists.ceph.com.
+
+The email addresses are also documented on our website:
+
+   https://ceph.com/irc/#mailing-lists
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
