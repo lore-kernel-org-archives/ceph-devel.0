@@ -1,136 +1,89 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Ceph Mimic on Debian 9 Stretch
-Date: Wed, 13 Jun 2018 12:36:50 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1806131206580.22590@piezo.novalocal>
-References: <CAKme9egBfDKvrS6dgm1JxK3S47xoeFm7vTy07qZ+er6deYhXcg@mail.gmail.com>
- <alpine.DEB.2.11.1806041830480.22723@piezo.novalocal>
- <20180613113616.hbow3e4bcrrsg7ax@nora.maurer-it.com>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-971470460-1528893412=:22590"
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20180613113616.hbow3e4bcrrsg7ax-aVfaTQcAavps8ZkLLAvlZtBPR1lH4CV8@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?ISO-8859-15?Q?Fabian_Gr=FCnbichler?= <f.gruenbichler-YTcQvvOqK21BDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, Charles Alva <charlesalva-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 4.18-rc1
+Date: Thu, 14 Jun 2018 12:57:34 +0200
+Message-ID: <1528973854-12563-1-git-send-email-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Linus,
 
---8323329-971470460-1528893412=:22590
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
+The following changes since commit 29dcea88779c856c7dc92040a0c01233263101d4:
 
-Hi Fabian,
+  Linux 4.17 (2018-06-03 14:15:21 -0700)
 
-On Wed, 13 Jun 2018, Fabian Grünbichler wrote:
-> On Mon, Jun 04, 2018 at 06:39:08PM +0000, Sage Weil wrote:
-> > [adding ceph-maintainers]
-> 
-> [and ceph-devel]
-> 
-> > 
-> > On Mon, 4 Jun 2018, Charles Alva wrote:
-> > > Hi Guys,
-> > > 
-> > > When will the Ceph Mimic packages for Debian Stretch released? I could not
-> > > find the packages even after changing the sources.list.
-> > 
-> > The problem is that we're now using c++17, which requires a newer gcc 
-> > than stretch or jessie provide, and Debian does not provide backports of 
-> > the newer gcc packages.  We currently can't build the latest Ceph for 
-> > those releases.
-> 
-> IMHO this is backwards. if you want to support distro X you should take
-> care to not need toolchain features that are not included in distro X.
+are available in the git repository at:
 
-Well, I thought we did.  When we were making the C++17 decision we 
-verified that we could do builds on Ubuntu and CentOS using a newer 
-compiler toolchain.  My assumption was that since both of these distros 
-had backports that pretty much everyone did.  Clearly I was wrong.
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.18-rc1
 
-> [...]
-> effectively this means the current Xenial builds are about as safe and
-> production-ready as doing your own gcc backports for Stretch - i.e., not
-> very.
+for you to fetch changes up to 23edca864951250af845a11da86bb3ea63522ed2:
 
-I missed this nuance as well.
+  rbd: flush rbd_dev->watch_dwork after watch is unregistered (2018-06-04 20:46:02 +0200)
 
-> > We'd love to build for stretch, but until there is a newer gcc for that 
-> > distro it's not possible.  We could build packages for 'testing', but I'm 
-> > not sure if those will be usable on stretch.
-> 
-> saying you'd love to build for a distro, while effectively making sure a
-> build according to that distro's release policies is impossible without
-> major effort by someone else does strike me as a bit of a hollow
-> statement. in the end this is a further nail in the coffin of upstream
-> support for the Debian(-based) distros, with only the latest (1.5 months
-> old!) Ubuntu LTS being properly supported.
+----------------------------------------------------------------
+The main piece is a set of libceph changes that revamps how OSD
+requests are aborted, improving CephFS ENOSPC handling and making
+"umount -f" actually work (Zheng and myself).  The rest is mostly
+mount option handling cleanups from Chengguang and assorted fixes
+from Zheng, Luis and Dongsheng.
 
-I think we need to be clear about the use of the term "support" here.  I 
-was careful to say we'd like to *build* for Debian, but I'm not sure what 
-organizations out there are offering formal *support* for any of the 
-ceph.com packages (in the sense of providing technical support for bug 
-escalations or any guarantees around stability etc).  This incident is 
-perhaps an indication that those organizations should become more involved 
-in the upstream development and decision-making process.
+----------------------------------------------------------------
+Chengguang Xu (5):
+      libceph, rbd: add error handling for osd_req_op_cls_init()
+      ceph: fix alignment of rasize
+      ceph: strengthen rsize/wsize/readdir_max_bytes validation
+      ceph: show ino32 if the value is different with default
+      ceph: update description of some mount options
 
-> I hope we find some way to support Mimic+ for Stretch without requiring
-> a backport of gcc-7+, although it unfortunately seems unlikely at this
-> point.
+Dongsheng Yang (1):
+      rbd: flush rbd_dev->watch_dwork after watch is unregistered
 
-It is not practical to reverse the dependency on C++17.  A lot of C++17 
-code has already made it into the tree, and the use of projects that 
-require it (notably Seastar) is a *big* part of our plans going forward to 
-improve performance on flash devices.
+Ilya Dryomov (13):
+      libceph: get rid of more_kvec in try_write()
+      libceph: use MSG_TRUNC for discarding received bytes
+      ceph: show wsize only if non-default
+      libceph: introduce ceph_osdc_abort_requests()
+      libceph: no need to call flush_workqueue() before destruction
+      libceph: move more code into __complete_request()
+      libceph: defer __complete_request() to a workqueue
+      libceph: use for_each_request() in ceph_osdc_abort_on_full()
+      libceph: don't warn if req->r_abort_on_full is set
+      libceph: avoid a use-after-free during map check
+      libceph: don't abort reads in ceph_osdc_abort_on_full()
+      libceph: make abort_on_full a per-osdc setting
+      libceph: allocate the locator string with GFP_NOFAIL
 
-Again, I would still like to provide these builds.  If the requirement to 
-do so is a high level of assurance that the backported compiler used is 
-solid and the resulting builds have been tested, then that will take some 
-additional effort--at a minimum, adding stretch to the set of OSes that we 
-test in the sepia lab.  This is probably not that much work, TBH, but 
-does require someone who cares to become engaged in the testing effort.  
-There are daily and weekly standups you can join, and of course 
-discussions take place on IRC (#sepia) and over email (ceph-devel and 
-ceph-maintainers).
+Luis Henriques (2):
+      ceph: fix st_nlink stat for directories
+      ceph: fix use-after-free in ceph_statfs()
 
-The immediate practical issue/question, IIRC, is simply for someone to 
-verify whether a build using the debian testing version of gcc will 
-produce a package that can be installed without additional dependencies on 
-stretch.  Or maybe this question was already answered and a backport is 
-definitely needed.  Regardless, it seems to me like the compiler version 
-in testing would be an appropriate choice for a gcc backport to stretch.
+Yan, Zheng (10):
+      ceph: use bit flags to define vxattr attributes
+      ceph: always get rstat from auth mds
+      ceph: update i_files/i_subdirs only when Fs cap is issued
+      ceph: define argument structure for handle_cap_grant
+      ceph: handle the new nfiles/nsubdirs fields in cap message
+      ceph: support file lock on directory
+      ceph: abort osd requests on force umount
+      ceph: flush pending works before shutdown super
+      ceph: fix wrong check for the case of updating link count
+      ceph: prevent i_version from going back
 
-One final note: we didn't move to C++17 for no reason: we did so because 
-it is difficult to move the Ceph project forward without taking advantage 
-of the new language features.  It took us a *long* time to get to C++11 
-because of paranoia around distro support, but we finally realized that we 
-could move more quickly if we rely on the compiler backports available in 
-most distros (tho clearly not as many as we thought!).  I wish we had 
-moved much sooner with C++11, and I still think this was the right 
-decision with respect to C++17.  I'm sorry that this has caused problems 
-with Debian, but I think with your (or someone's) help we can mitigate the 
-damage with testing.
-
-Thanks!
-sage
---8323329-971470460-1528893412=:22590
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---8323329-971470460-1528893412=:22590--
+ Documentation/filesystems/ceph.txt |   8 +-
+ drivers/block/rbd.c                |  11 +-
+ fs/ceph/addr.c                     |   1 -
+ fs/ceph/caps.c                     | 160 ++++++++++++++++-----------
+ fs/ceph/dir.c                      |   2 +
+ fs/ceph/file.c                     |   1 -
+ fs/ceph/inode.c                    |  67 +++++++-----
+ fs/ceph/super.c                    |  35 ++++--
+ fs/ceph/xattr.c                    |  60 ++++++-----
+ include/linux/ceph/ceph_fs.h       |   1 +
+ include/linux/ceph/osd_client.h    |   8 +-
+ include/linux/ceph/osdmap.h        |   8 +-
+ net/ceph/messenger.c               |  31 ++----
+ net/ceph/osd_client.c              | 216 ++++++++++++++++++++++---------------
+ net/ceph/osdmap.c                  |  19 ++--
+ 15 files changed, 372 insertions(+), 256 deletions(-)
