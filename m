@@ -1,7 +1,7 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: CentOS Dojo at CERN
-Date: Tue, 19 Jun 2018 17:23:33 -0300
-Message-ID: <CAB0WNsi9SukhVURzXh2h1YozrCKeBRfkohpK99yDkhqsJASAzw@mail.gmail.com>
+Subject: Ceph Tech Talk Calendar
+Date: Tue, 19 Jun 2018 20:47:47 -0300
+Message-ID: <CAB0WNsiuVM9833=X1ZjUTN8GxiXBrqR4EcMWgLF2yS6GJ-ZqpA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -18,15 +18,20 @@ Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 To: Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hey Cephers,
+Hi Cephers,
 
-We will join our friends from OpenStack and CentOS projects at CERN in
-Geneva on October 19th for the CentOS Dojo:
+We created the following etherpad to organize the calendar for the
+future Ceph Tech Talks.
 
-   https://blog.centos.org/2018/05/cern-dojo-october-19th-2018/
+For the Ceph Tech Talk of June 28th our fellow George Mihaiescu will
+tell us how Ceph is being used on cancer research at OICR (Ontario
+Institute for Cancer Research).
 
-The call for papers is currently open and more details about the event
-are available on the URL above.
+If you're interested to contribute, please choose one of the available
+dates, add the topic you want to present and your name (or feel free
+to contact me).
+
+  https://pad.ceph.com/p/ceph-tech-talks-2018
 
 Kindest regards,
 
