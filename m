@@ -1,50 +1,49 @@
-From: Ilya Dryomov <idryomov@gmail.com>
+From: Allen <allen.lkml@gmail.com>
 Subject: Re: [PATCH] ceph: use ktime_get_real_seconds()
-Date: Wed, 20 Jun 2018 14:33:01 +0200
-Message-ID: <CAOi1vP9Aa9xb2RD7ahE=jOj8nvOX936oVyp6rkKHV8tknF_1Kg@mail.gmail.com>
+Date: Wed, 20 Jun 2018 20:12:25 +0530
+Message-ID: <CAOMdWS+BHKbRUJ91_S4dtv9ZYUEYdD3Yev+9drR+3nsiGu7f9A@mail.gmail.com>
 References: <1529488801-22093-1-git-send-email-allen.lkml@gmail.com>
+ <CAOi1vP9Aa9xb2RD7ahE=jOj8nvOX936oVyp6rkKHV8tknF_1Kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529488801-22093-1-git-send-email-allen.lkml@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: allen.lkml@gmail.com
-Cc: netdev <netdev@vger.kernel.org>, "David S. Miller" <davem@davemloft.net>, linux-kernel@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, y2038@lists.linaro.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
+In-Reply-To: <CAOi1vP9Aa9xb2RD7ahE=jOj8nvOX936oVyp6rkKHV8tknF_1Kg@mail.gmail.com>
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: idryomov@gmail.com
+Cc: y2038@lists.linaro.org, netdev@vger.kernel.org, ceph-devel@vger.kernel.org, David Miller <davem@davemloft.net>, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jun 20, 2018 at 12:00 PM Allen Pais <allen.lkml@gmail.com> wrote:
->
-> Use ktime_get_real_seconds() as get_seconds() is deprecated.
->
-> Signed-off-by: Allen Pais <allen.lkml@gmail.com>
-> ---
->  net/ceph/auth_x.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
->
-> diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-> index 2f4a1ba..99561c2 100644
-> --- a/net/ceph/auth_x.c
-> +++ b/net/ceph/auth_x.c
-> @@ -154,7 +154,7 @@ static int process_one_ticket(struct ceph_auth_client *ac,
->         void **ptp;
->         struct ceph_crypto_key new_session_key = { 0 };
->         struct ceph_buffer *new_ticket_blob;
-> -       unsigned long new_expires, new_renew_after;
-> +       u32 new_expires, new_renew_after;
->         u64 new_secret_id;
->         int ret;
->
-> @@ -191,9 +191,9 @@ static int process_one_ticket(struct ceph_auth_client *ac,
->
->         ceph_decode_timespec(&validity, dp);
->         dp += sizeof(struct ceph_timespec);
-> -       new_expires = get_seconds() + validity.tv_sec;
-> +       new_expires = (u32)ktime_get_real_seconds() + validity.tv_sec;
-
-Why the change to u32 and this cast?  If the type has to change,
-wouldn't time64_t make more sense?  ktime_get_real_seconds() returns
-time64_t, after all.
-
-Thanks,
-
-                Ilya
+PiA+Cj4gPiBVc2Uga3RpbWVfZ2V0X3JlYWxfc2Vjb25kcygpIGFzIGdldF9zZWNvbmRzKCkgaXMg
+ZGVwcmVjYXRlZC4KPiA+Cj4gPiBTaWduZWQtb2ZmLWJ5OiBBbGxlbiBQYWlzIDxhbGxlbi5sa21s
+QGdtYWlsLmNvbT4KPiA+IC0tLQo+ID4gIG5ldC9jZXBoL2F1dGhfeC5jIHwgMTAgKysrKystLS0t
+LQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pCj4g
+Pgo+ID4gZGlmZiAtLWdpdCBhL25ldC9jZXBoL2F1dGhfeC5jIGIvbmV0L2NlcGgvYXV0aF94LmMK
+PiA+IGluZGV4IDJmNGExYmEuLjk5NTYxYzIgMTAwNjQ0Cj4gPiAtLS0gYS9uZXQvY2VwaC9hdXRo
+X3guYwo+ID4gKysrIGIvbmV0L2NlcGgvYXV0aF94LmMKPiA+IEBAIC0xNTQsNyArMTU0LDcgQEAg
+c3RhdGljIGludCBwcm9jZXNzX29uZV90aWNrZXQoc3RydWN0IGNlcGhfYXV0aF9jbGllbnQgKmFj
+LAo+ID4gICAgICAgICB2b2lkICoqcHRwOwo+ID4gICAgICAgICBzdHJ1Y3QgY2VwaF9jcnlwdG9f
+a2V5IG5ld19zZXNzaW9uX2tleSA9IHsgMCB9Owo+ID4gICAgICAgICBzdHJ1Y3QgY2VwaF9idWZm
+ZXIgKm5ld190aWNrZXRfYmxvYjsKPiA+IC0gICAgICAgdW5zaWduZWQgbG9uZyBuZXdfZXhwaXJl
+cywgbmV3X3JlbmV3X2FmdGVyOwo+ID4gKyAgICAgICB1MzIgbmV3X2V4cGlyZXMsIG5ld19yZW5l
+d19hZnRlcjsKPiA+ICAgICAgICAgdTY0IG5ld19zZWNyZXRfaWQ7Cj4gPiAgICAgICAgIGludCBy
+ZXQ7Cj4gPgo+ID4gQEAgLTE5MSw5ICsxOTEsOSBAQCBzdGF0aWMgaW50IHByb2Nlc3Nfb25lX3Rp
+Y2tldChzdHJ1Y3QgY2VwaF9hdXRoX2NsaWVudCAqYWMsCj4gPgo+ID4gICAgICAgICBjZXBoX2Rl
+Y29kZV90aW1lc3BlYygmdmFsaWRpdHksIGRwKTsKPiA+ICAgICAgICAgZHAgKz0gc2l6ZW9mKHN0
+cnVjdCBjZXBoX3RpbWVzcGVjKTsKPiA+IC0gICAgICAgbmV3X2V4cGlyZXMgPSBnZXRfc2Vjb25k
+cygpICsgdmFsaWRpdHkudHZfc2VjOwo+ID4gKyAgICAgICBuZXdfZXhwaXJlcyA9ICh1MzIpa3Rp
+bWVfZ2V0X3JlYWxfc2Vjb25kcygpICsgdmFsaWRpdHkudHZfc2VjOwo+Cj4gV2h5IHRoZSBjaGFu
+Z2UgdG8gdTMyIGFuZCB0aGlzIGNhc3Q/ICBJZiB0aGUgdHlwZSBoYXMgdG8gY2hhbmdlLAo+IHdv
+dWxkbid0IHRpbWU2NF90IG1ha2UgbW9yZSBzZW5zZT8gIGt0aW1lX2dldF9yZWFsX3NlY29uZHMo
+KSByZXR1cm5zCj4gdGltZTY0X3QsIGFmdGVyIGFsbC4KPgoKIFJpZ2h0LiBJJ2xsIGRyb3AgdGhl
+IGNhc3QgYW5kIHNlbmQgb3V0IFYyLgoKLSBBbGxlbgpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpZMjAzOCBtYWlsaW5nIGxpc3QKWTIwMzhAbGlzdHMubGlu
+YXJvLm9yZwpodHRwczovL2xpc3RzLmxpbmFyby5vcmcvbWFpbG1hbi9saXN0aW5mby95MjAzOAo=
