@@ -1,49 +1,33 @@
-From: Allen <allen.lkml@gmail.com>
-Subject: Re: [PATCH] ceph: use ktime_get_real_seconds()
-Date: Wed, 20 Jun 2018 20:12:25 +0530
-Message-ID: <CAOMdWS+BHKbRUJ91_S4dtv9ZYUEYdD3Yev+9drR+3nsiGu7f9A@mail.gmail.com>
-References: <1529488801-22093-1-git-send-email-allen.lkml@gmail.com>
- <CAOi1vP9Aa9xb2RD7ahE=jOj8nvOX936oVyp6rkKHV8tknF_1Kg@mail.gmail.com>
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [Important] Ceph Developer Monthly of July 2018
+Date: Wed, 20 Jun 2018 11:46:22 -0300
+Message-ID: <CAB0WNsijQnCCfopDmFp6QPWuNZHeSNwa0YK6mf7xQ1w7WwoNsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-In-Reply-To: <CAOi1vP9Aa9xb2RD7ahE=jOj8nvOX936oVyp6rkKHV8tknF_1Kg@mail.gmail.com>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: idryomov@gmail.com
-Cc: y2038@lists.linaro.org, netdev@vger.kernel.org, ceph-devel@vger.kernel.org, David Miller <davem@davemloft.net>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-PiA+Cj4gPiBVc2Uga3RpbWVfZ2V0X3JlYWxfc2Vjb25kcygpIGFzIGdldF9zZWNvbmRzKCkgaXMg
-ZGVwcmVjYXRlZC4KPiA+Cj4gPiBTaWduZWQtb2ZmLWJ5OiBBbGxlbiBQYWlzIDxhbGxlbi5sa21s
-QGdtYWlsLmNvbT4KPiA+IC0tLQo+ID4gIG5ldC9jZXBoL2F1dGhfeC5jIHwgMTAgKysrKystLS0t
-LQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pCj4g
-Pgo+ID4gZGlmZiAtLWdpdCBhL25ldC9jZXBoL2F1dGhfeC5jIGIvbmV0L2NlcGgvYXV0aF94LmMK
-PiA+IGluZGV4IDJmNGExYmEuLjk5NTYxYzIgMTAwNjQ0Cj4gPiAtLS0gYS9uZXQvY2VwaC9hdXRo
-X3guYwo+ID4gKysrIGIvbmV0L2NlcGgvYXV0aF94LmMKPiA+IEBAIC0xNTQsNyArMTU0LDcgQEAg
-c3RhdGljIGludCBwcm9jZXNzX29uZV90aWNrZXQoc3RydWN0IGNlcGhfYXV0aF9jbGllbnQgKmFj
-LAo+ID4gICAgICAgICB2b2lkICoqcHRwOwo+ID4gICAgICAgICBzdHJ1Y3QgY2VwaF9jcnlwdG9f
-a2V5IG5ld19zZXNzaW9uX2tleSA9IHsgMCB9Owo+ID4gICAgICAgICBzdHJ1Y3QgY2VwaF9idWZm
-ZXIgKm5ld190aWNrZXRfYmxvYjsKPiA+IC0gICAgICAgdW5zaWduZWQgbG9uZyBuZXdfZXhwaXJl
-cywgbmV3X3JlbmV3X2FmdGVyOwo+ID4gKyAgICAgICB1MzIgbmV3X2V4cGlyZXMsIG5ld19yZW5l
-d19hZnRlcjsKPiA+ICAgICAgICAgdTY0IG5ld19zZWNyZXRfaWQ7Cj4gPiAgICAgICAgIGludCBy
-ZXQ7Cj4gPgo+ID4gQEAgLTE5MSw5ICsxOTEsOSBAQCBzdGF0aWMgaW50IHByb2Nlc3Nfb25lX3Rp
-Y2tldChzdHJ1Y3QgY2VwaF9hdXRoX2NsaWVudCAqYWMsCj4gPgo+ID4gICAgICAgICBjZXBoX2Rl
-Y29kZV90aW1lc3BlYygmdmFsaWRpdHksIGRwKTsKPiA+ICAgICAgICAgZHAgKz0gc2l6ZW9mKHN0
-cnVjdCBjZXBoX3RpbWVzcGVjKTsKPiA+IC0gICAgICAgbmV3X2V4cGlyZXMgPSBnZXRfc2Vjb25k
-cygpICsgdmFsaWRpdHkudHZfc2VjOwo+ID4gKyAgICAgICBuZXdfZXhwaXJlcyA9ICh1MzIpa3Rp
-bWVfZ2V0X3JlYWxfc2Vjb25kcygpICsgdmFsaWRpdHkudHZfc2VjOwo+Cj4gV2h5IHRoZSBjaGFu
-Z2UgdG8gdTMyIGFuZCB0aGlzIGNhc3Q/ICBJZiB0aGUgdHlwZSBoYXMgdG8gY2hhbmdlLAo+IHdv
-dWxkbid0IHRpbWU2NF90IG1ha2UgbW9yZSBzZW5zZT8gIGt0aW1lX2dldF9yZWFsX3NlY29uZHMo
-KSByZXR1cm5zCj4gdGltZTY0X3QsIGFmdGVyIGFsbC4KPgoKIFJpZ2h0LiBJJ2xsIGRyb3AgdGhl
-IGNhc3QgYW5kIHNlbmQgb3V0IFYyLgoKLSBBbGxlbgpfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXwpZMjAzOCBtYWlsaW5nIGxpc3QKWTIwMzhAbGlzdHMubGlu
-YXJvLm9yZwpodHRwczovL2xpc3RzLmxpbmFyby5vcmcvbWFpbG1hbi9saXN0aW5mby95MjAzOAo=
+Hi Cephers,
+
+Due the July 4th holiday in US we are postponing the Ceph Developer
+Monthly meeting to July 11th.
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
