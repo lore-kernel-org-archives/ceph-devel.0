@@ -1,22 +1,66 @@
-From: Allen <allen.lkml@gmail.com>
-Subject: Re: [Y2038] [PATCH] ceph: use ktime_get_real_seconds()
-Date: Thu, 21 Jun 2018 11:11:15 +0530
-Message-ID: <CAOMdWSLtRLE4OnZGjXy+d7i5kO7CRPv0U=yM6dWjR1-iiJ09aw@mail.gmail.com>
-References: <1529488801-22093-1-git-send-email-allen.lkml@gmail.com> <CAK8P3a17ui5QuvPzgWmQby0zVcxSKpU_0hbB7_Gdt6i39oo5hQ@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH 2/5] ceph: stop using current_kernel_time()
+Date: Thu, 21 Jun 2018 20:29:28 +0800
+Message-ID: <CAAM7YAk1WB_aVUbOdEMhNUYRNAVT-eq9vE3x2H5yr-hjja7qEg@mail.gmail.com>
+References: <20180620155101.57685-1-arnd@arndb.de> <20180620155101.57685-2-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a17ui5QuvPzgWmQby0zVcxSKpU_0hbB7_Gdt6i39oo5hQ@mail.gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: arnd@arndb.de
-Cc: netdev@vger.kernel.org, y2038@lists.linaro.org, ceph-devel@vger.kernel.org, David Miller <davem@davemloft.net>, linux-kernel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180620155101.57685-2-arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Zheng Yan <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, y2038 Mailman List <y2038@lists.linaro.org>, ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>, Chengguang Xu <cgxu519@gmx.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-> > Signed-off-by: Allen Pais <allen.lkml@gmail.com>
+On Wed, Jun 20, 2018 at 11:52 PM Arnd Bergmann <arnd@arndb.de> wrote:
 >
-> I have done a similar patch and will post it soon along with the rest of the
-> ceph y2038 series. Please have a look at "ceph: use timespec64 in for
-> keepalive" and comment if you see something that I missed.
+> ceph_mdsc_create_request() is one of the last callers of the
+> deprecated current_kernel_time() as well as timespec_trunc().
+>
+> This changes it to use the timespec64 based interfaces instead,
+> though we still need to convert the result until we are ready to
+> change over req->r_stamp.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  fs/ceph/mds_client.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index dc8bc664a871..69c839316a7a 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -1779,6 +1779,7 @@ struct ceph_mds_request *
+>  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>  {
+>         struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
+> +       struct timespec64 ts;
+>
+>         if (!req)
+>                 return ERR_PTR(-ENOMEM);
+> @@ -1797,7 +1798,9 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>         init_completion(&req->r_safe_completion);
+>         INIT_LIST_HEAD(&req->r_unsafe_item);
+>
+> -       req->r_stamp = timespec_trunc(current_kernel_time(), mdsc->fsc->sb->s_time_gran);
+> +       ktime_get_coarse_real_ts64(&ts);
+> +       req->r_stamp = timespec64_to_timespec(timespec64_trunc(ts,
+> +                                               mdsc->fsc->sb->s_time_gran));
 >
 
-Oh Okay. Thank you Arnd.
+does current_time() internally uses ktime_get_coarse_real_ts64()?  If
+not,  granularity difference may cause problem. see commit
+56199016e8672feb7b903eda003a863d5bf2b8c4 for more information
+
+Regards
+Yan, Zheng
+
+>         req->r_op = op;
+>         req->r_direct_mode = mode;
+> --
+> 2.9.0
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
