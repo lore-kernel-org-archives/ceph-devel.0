@@ -1,66 +1,99 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH 2/5] ceph: stop using current_kernel_time()
-Date: Thu, 21 Jun 2018 20:29:28 +0800
-Message-ID: <CAAM7YAk1WB_aVUbOdEMhNUYRNAVT-eq9vE3x2H5yr-hjja7qEg@mail.gmail.com>
-References: <20180620155101.57685-1-arnd@arndb.de> <20180620155101.57685-2-arnd@arndb.de>
+From: Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org>
+Subject: Re: CentOS Dojo at CERN
+Date: Thu, 21 Jun 2018 14:41:39 +0200
+Message-ID: <8d5d1fe0-1fc1-fc73-237e-79a072c3383b@suse.com>
+References: <CAB0WNsi9SukhVURzXh2h1YozrCKeBRfkohpK99yDkhqsJASAzw@mail.gmail.com>
+ <CABZ+qqntWZWS1JgvBRTuKpC2+DyJFEfaNa9EhbK3+Q-VH_kvWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180620155101.57685-2-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Zheng Yan <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, y2038 Mailman List <y2038@lists.linaro.org>, ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>, Chengguang Xu <cgxu519@gmx.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============7366607788448880182=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CABZ+qqntWZWS1JgvBRTuKpC2+DyJFEfaNa9EhbK3+Q-VH_kvWg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>, Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jun 20, 2018 at 11:52 PM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> ceph_mdsc_create_request() is one of the last callers of the
-> deprecated current_kernel_time() as well as timespec_trunc().
->
-> This changes it to use the timespec64 based interfaces instead,
-> though we still need to convert the result until we are ready to
-> change over req->r_stamp.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  fs/ceph/mds_client.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index dc8bc664a871..69c839316a7a 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1779,6 +1779,7 @@ struct ceph_mds_request *
->  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
->  {
->         struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
-> +       struct timespec64 ts;
->
->         if (!req)
->                 return ERR_PTR(-ENOMEM);
-> @@ -1797,7 +1798,9 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
->         init_completion(&req->r_safe_completion);
->         INIT_LIST_HEAD(&req->r_unsafe_item);
->
-> -       req->r_stamp = timespec_trunc(current_kernel_time(), mdsc->fsc->sb->s_time_gran);
-> +       ktime_get_coarse_real_ts64(&ts);
-> +       req->r_stamp = timespec64_to_timespec(timespec64_trunc(ts,
-> +                                               mdsc->fsc->sb->s_time_gran));
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--===============7366607788448880182==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature";
+ boundary="6O0CHs2MIWgB3LjUoC71xb0RJJdS4Fqfo"
 
-does current_time() internally uses ktime_get_coarse_real_ts64()?  If
-not,  granularity difference may cause problem. see commit
-56199016e8672feb7b903eda003a863d5bf2b8c4 for more information
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--6O0CHs2MIWgB3LjUoC71xb0RJJdS4Fqfo
+Content-Type: multipart/mixed; boundary="YJTjCKdqjwuAgxbEREgtX0xtcqssBjB3a";
+ protected-headers="v1"
+From: Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org>
+To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>, Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>,
+ "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>,
+ ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Message-ID: <8d5d1fe0-1fc1-fc73-237e-79a072c3383b-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [ceph-users] CentOS Dojo at CERN
+References: <CAB0WNsi9SukhVURzXh2h1YozrCKeBRfkohpK99yDkhqsJASAzw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+ <CABZ+qqntWZWS1JgvBRTuKpC2+DyJFEfaNa9EhbK3+Q-VH_kvWg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CABZ+qqntWZWS1JgvBRTuKpC2+DyJFEfaNa9EhbK3+Q-VH_kvWg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 
-Regards
-Yan, Zheng
+--YJTjCKdqjwuAgxbEREgtX0xtcqssBjB3a
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-US
 
->         req->r_op = op;
->         req->r_direct_mode = mode;
-> --
-> 2.9.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 20.06.2018 17:39, Dan van der Ster wrote:
+> And BTW, if you can't make it to this event we're in the early days of
+> planning a dedicated Ceph + OpenStack Days at CERN around May/June
+> 2019.
+> More news on that later...
+Will that be during a CERN maintenance window?
+
+*that would raise my interest dramatically :-)*
+
+Kai
+
+--=20
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
+, HRB 21284 (AG N=C3=BCrnberg)
+
+
+
+--YJTjCKdqjwuAgxbEREgtX0xtcqssBjB3a--
+
+--6O0CHs2MIWgB3LjUoC71xb0RJJdS4Fqfo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCgAdFiEEIUhTiREAT2TdVpPQHoyRVhbjxG4FAlsrnQMACgkQHoyRVhbj
+xG5MYgf+Kzf0M0aG0Gdwtr79CaSbM5L2t3viLEfe04c76guKO0RYTJhTVIWZO/Te
+e5+26yWVX5adwtKCdydovnL5AAYCicZTewo8jvxeBeUoELohr/909d4zDpJrLaF2
+ytzL/6egXDkg1uOmUI0CRHw9HxQ1ervsTlLO9+9THYf2uwD3mKoBT7CvkO6kt0rk
+GPTLGllUdO5/fMqJ4OpDHq5mOt+7JyCPGmSak0INQrEU8fUWofT6dxa9n8VErmJA
+Jt6hiEtjaa5+WYOozOgPsi//XXw3gzUVPZGW8Nl5VzkM/QWZyj2fQM2ffLoTgWaQ
+PxF6t+7bEdTTeyKumWvfqcFgIXBAsg==
+=gNv4
+-----END PGP SIGNATURE-----
+
+--6O0CHs2MIWgB3LjUoC71xb0RJJdS4Fqfo--
+
+--===============7366607788448880182==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============7366607788448880182==--
