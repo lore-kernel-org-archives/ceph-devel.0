@@ -1,42 +1,63 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: CentOS Dojo at CERN
-Date: Thu, 21 Jun 2018 14:44:01 +0200
-Message-ID: <CABZ+qqkxh3hJLOqEp0hv8OnmjgHf2JW_gRSdmM5yyfFfXMFJ=Q@mail.gmail.com>
-References: <CAB0WNsi9SukhVURzXh2h1YozrCKeBRfkohpK99yDkhqsJASAzw@mail.gmail.com>
- <CABZ+qqntWZWS1JgvBRTuKpC2+DyJFEfaNa9EhbK3+Q-VH_kvWg@mail.gmail.com>
- <8d5d1fe0-1fc1-fc73-237e-79a072c3383b@suse.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/5] ceph: stop using current_kernel_time()
+Date: Thu, 21 Jun 2018 16:53:20 +0200
+Message-ID: <CAK8P3a1bXLXmjGf1Yx6JXbc4-Z8DjkZPZkfvesvjFXq3jw11NQ@mail.gmail.com>
+References: <20180620155101.57685-1-arnd@arndb.de> <20180620155101.57685-2-arnd@arndb.de>
+ <CAAM7YAk1WB_aVUbOdEMhNUYRNAVT-eq9vE3x2H5yr-hjja7qEg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <8d5d1fe0-1fc1-fc73-237e-79a072c3383b-IBi9RG/b67k@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: kwagner-IBi9RG/b67k@public.gmane.org
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAAM7YAk1WB_aVUbOdEMhNUYRNAVT-eq9vE3x2H5yr-hjja7qEg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Zheng Yan <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, y2038 Mailman List <y2038@lists.linaro.org>, ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>, Chengguang Xu <cgxu519@gmx.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gVGh1LCBKdW4gMjEsIDIwMTggYXQgMjo0MSBQTSBLYWkgV2FnbmVyIDxrd2FnbmVyQHN1c2Uu
-Y29tPiB3cm90ZToKPgo+IE9uIDIwLjA2LjIwMTggMTc6MzksIERhbiB2YW4gZGVyIFN0ZXIgd3Jv
-dGU6Cj4gPiBBbmQgQlRXLCBpZiB5b3UgY2FuJ3QgbWFrZSBpdCB0byB0aGlzIGV2ZW50IHdlJ3Jl
-IGluIHRoZSBlYXJseSBkYXlzIG9mCj4gPiBwbGFubmluZyBhIGRlZGljYXRlZCBDZXBoICsgT3Bl
-blN0YWNrIERheXMgYXQgQ0VSTiBhcm91bmQgTWF5L0p1bmUKPiA+IDIwMTkuCj4gPiBNb3JlIG5l
-d3Mgb24gdGhhdCBsYXRlci4uLgo+IFdpbGwgdGhhdCBiZSBkdXJpbmcgYSBDRVJOIG1haW50ZW5h
-bmNlIHdpbmRvdz8KPgo+ICp0aGF0IHdvdWxkIHJhaXNlIG15IGludGVyZXN0IGRyYW1hdGljYWxs
-eSA6LSkqCgpZZXMsIDIwMTkgaXMgYSBkdXJpbmcgdGhlIGxvbmcgc2h1dGRvd24gMjoKaHR0cHM6
-Ly9saGMtY29tbWlzc2lvbmluZy53ZWIuY2Vybi5jaC9saGMtY29tbWlzc2lvbmluZy9zY2hlZHVs
-ZS9MSEMtbG9uZy10ZXJtLmh0bQoKUGFydCBvZiB0aGUgIm1vcmUgbmV3cyBvbiB0aGF0IGxhdGVy
-IiBpcyB0aGF0IHdlJ3JlIHRyeWluZyB0bwp1bmRlcnN0YW5kIGlmIHdlJ2xsIGJlIGJlIGFibGUg
-dG8gZ28gdW5kZXJncm91bmQuLi4KCi0tIGRhbgoKCgo+Cj4gS2FpCj4KPiAtLQo+IFNVU0UgTGlu
-dXggR21iSCwgR0Y6IEZlbGl4IEltZW5kw7ZyZmZlciwgSmFuZSBTbWl0aGFyZCwgR3JhaGFtIE5v
-cnRvbiwgSFJCIDIxMjg0IChBRyBOw7xybmJlcmcpCj4KPgpfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVz
-ZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbQo=
+On Thu, Jun 21, 2018 at 2:29 PM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Wed, Jun 20, 2018 at 11:52 PM Arnd Bergmann <arnd@arndb.de> wrote:
+>>
+>> ceph_mdsc_create_request() is one of the last callers of the
+>> deprecated current_kernel_time() as well as timespec_trunc().
+>>
+>> This changes it to use the timespec64 based interfaces instead,
+>> though we still need to convert the result until we are ready to
+>> change over req->r_stamp.
+>>
+>> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+>> ---
+>>  fs/ceph/mds_client.c | 5 ++++-
+>>  1 file changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index dc8bc664a871..69c839316a7a 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -1779,6 +1779,7 @@ struct ceph_mds_request *
+>>  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>>  {
+>>         struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
+>> +       struct timespec64 ts;
+>>
+>>         if (!req)
+>>                 return ERR_PTR(-ENOMEM);
+>> @@ -1797,7 +1798,9 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>>         init_completion(&req->r_safe_completion);
+>>         INIT_LIST_HEAD(&req->r_unsafe_item);
+>>
+>> -       req->r_stamp = timespec_trunc(current_kernel_time(), mdsc->fsc->sb->s_time_gran);
+>> +       ktime_get_coarse_real_ts64(&ts);
+>> +       req->r_stamp = timespec64_to_timespec(timespec64_trunc(ts,
+>> +                                               mdsc->fsc->sb->s_time_gran));
+>>
+>
+> does current_time() internally uses ktime_get_coarse_real_ts64()?  If
+> not,  granularity difference may cause problem. see commit
+> 56199016e8672feb7b903eda003a863d5bf2b8c4 for more information
+
+Yes, current_time() is based on current_kernel_time64(), which calls
+ktime_get_coarse_real_ts64(). I'm in the process of removing both
+current_kernel_time() and current_kernel_time64() in favor
+of ktime_get_coarse_real_ts64() for consistency. The resolution
+is unchanged here.
+
+       Arnd
