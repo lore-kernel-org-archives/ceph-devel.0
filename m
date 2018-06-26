@@ -1,48 +1,152 @@
-From: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
-Subject: Re: CentOS Dojo at CERN
-Date: Fri, 22 Jun 2018 14:21:46 +0200
-Message-ID: <d1a491f7-9781-c29f-4f9f-e263a370744b@digiware.nl>
-References: <CAB0WNsi9SukhVURzXh2h1YozrCKeBRfkohpK99yDkhqsJASAzw@mail.gmail.com>
- <CABZ+qqntWZWS1JgvBRTuKpC2+DyJFEfaNa9EhbK3+Q-VH_kvWg@mail.gmail.com>
- <8d5d1fe0-1fc1-fc73-237e-79a072c3383b@suse.com>
- <CABZ+qqkxh3hJLOqEp0hv8OnmjgHf2JW_gRSdmM5yyfFfXMFJ=Q@mail.gmail.com>
+From: Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
+Subject: Re: [PATCH 1/3] selinux: make dentry_init_security() return security
+ module name
+Date: Tue, 26 Jun 2018 09:28:51 -0400
+Message-ID: <e5248747-8aa0-8dcf-8c3c-74d02171be2a@tycho.nsa.gov>
+References: <20180626084306.27511-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqkxh3hJLOqEp0hv8OnmjgHf2JW_gRSdmM5yyfFfXMFJ=Q@mail.gmail.com>
-Content-Language: nl
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>, kwagner-IBi9RG/b67k@public.gmane.org
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <selinux-bounces-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
+In-Reply-To: <20180626084306.27511-1-zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+List-Post: <mailto:selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
+List-Help: <mailto:selinux-request-+05T5uksL2qpZYMLLGbcSA@public.gmane.org?subject=help>
+Errors-To: selinux-bounces-+05T5uksL2qpZYMLLGbcSA@public.gmane.org
+Sender: "Selinux" <selinux-bounces-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
+To: "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, SELinux <selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 21-6-2018 14:44, Dan van der Ster wrote:
-> On Thu, Jun 21, 2018 at 2:41 PM Kai Wagner <kwagner-IBi9RG/b67k@public.gmane.org> wrote:
->>
->> On 20.06.2018 17:39, Dan van der Ster wrote:
->>> And BTW, if you can't make it to this event we're in the early days of
->>> planning a dedicated Ceph + OpenStack Days at CERN around May/June
->>> 2019.
->>> More news on that later...
->> Will that be during a CERN maintenance window?
->>
->> *that would raise my interest dramatically :-)*
-> 
-> Yes, 2019 is a during the long shutdown 2:
-> https://lhc-commissioning.web.cern.ch/lhc-commissioning/schedule/LHC-long-term.htm
-> 
-> Part of the "more news on that later" is that we're trying to
-> understand if we'll be be able to go underground...
+On 06/26/2018 04:43 AM, Yan, Zheng wrote:
+> This is preparation for CephFS security label. CephFS's implementation uses
+> dentry_init_security() to get security context before inode is created,
+> then sends open/mkdir/mknod request to MDS, together with security xattr
+> "security.<security module name>"
 
-+1
+Can you describe how your approach compares to the NFSv4 labeling support, and why it requires
+exporting this information from this hook when NFSv4 did not?
 
---WjW
+> 
+> Signed-off-by: "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  fs/nfs/nfs4proc.c         | 3 ++-
+>  include/linux/lsm_hooks.h | 4 ++--
+>  include/linux/security.h  | 9 +++++----
+>  security/security.c       | 7 ++++---
+>  security/selinux/hooks.c  | 8 ++++++--
+>  5 files changed, 19 insertions(+), 12 deletions(-)
+> 
+> diff --git a/fs/nfs/nfs4proc.c b/fs/nfs/nfs4proc.c
+> index 6dd146885da9..d18a5fb7aec3 100644
+> --- a/fs/nfs/nfs4proc.c
+> +++ b/fs/nfs/nfs4proc.c
+> @@ -122,7 +122,8 @@ nfs4_label_init_security(struct inode *dir, struct dentry *dentry,
+>  		return NULL;
+>  
+>  	err = security_dentry_init_security(dentry, sattr->ia_mode,
+> -				&dentry->d_name, (void **)&label->label, &label->len);
+> +				&dentry->d_name,  NULL,
+> +				(void **)&label->label, &label->len);
+>  	if (err == 0)
+>  		return label;
+>  
+> diff --git a/include/linux/lsm_hooks.h b/include/linux/lsm_hooks.h
+> index 8f1131c8dd54..e176c2032bdc 100644
+> --- a/include/linux/lsm_hooks.h
+> +++ b/include/linux/lsm_hooks.h
+> @@ -1476,8 +1476,8 @@ union security_list_options {
+>  					unsigned long *set_kern_flags);
+>  	int (*sb_parse_opts_str)(char *options, struct security_mnt_opts *opts);
+>  	int (*dentry_init_security)(struct dentry *dentry, int mode,
+> -					const struct qstr *name, void **ctx,
+> -					u32 *ctxlen);
+> +					const struct qstr *name, const char **label,
+
+Seems like "label" could be confusing given that it means something else in the NFSv4 code,
+and what is actually being provided here is the xattr name suffix.
+
+> +					void **ctx, u32 *ctxlen);
+>  	int (*dentry_create_files_as)(struct dentry *dentry, int mode,
+>  					struct qstr *name,
+>  					const struct cred *old,
+> diff --git a/include/linux/security.h b/include/linux/security.h
+> index 63030c85ee19..df2d73998c64 100644
+> --- a/include/linux/security.h
+> +++ b/include/linux/security.h
+> @@ -246,8 +246,9 @@ int security_sb_clone_mnt_opts(const struct super_block *oldsb,
+>  				unsigned long *set_kern_flags);
+>  int security_sb_parse_opts_str(char *options, struct security_mnt_opts *opts);
+>  int security_dentry_init_security(struct dentry *dentry, int mode,
+> -					const struct qstr *name, void **ctx,
+> -					u32 *ctxlen);
+> +					const struct qstr *name,
+> +					const char **label,
+> +					void **ctx, u32 *ctxlen);
+>  int security_dentry_create_files_as(struct dentry *dentry, int mode,
+>  					struct qstr *name,
+>  					const struct cred *old,
+> @@ -609,8 +610,8 @@ static inline void security_inode_free(struct inode *inode)
+>  static inline int security_dentry_init_security(struct dentry *dentry,
+>  						 int mode,
+>  						 const struct qstr *name,
+> -						 void **ctx,
+> -						 u32 *ctxlen)
+> +						 const char **label,
+> +						 void **ctx, u32 *ctxlen)
+>  {
+>  	return -EOPNOTSUPP;
+>  }
+> diff --git a/security/security.c b/security/security.c
+> index 68f46d849abe..69818d46aa28 100644
+> --- a/security/security.c
+> +++ b/security/security.c
+> @@ -450,11 +450,12 @@ void security_inode_free(struct inode *inode)
+>  }
+>  
+>  int security_dentry_init_security(struct dentry *dentry, int mode,
+> -					const struct qstr *name, void **ctx,
+> -					u32 *ctxlen)
+> +					const struct qstr *name,
+> +					const char **label,
+> +					void **ctx, u32 *ctxlen)
+>  {
+>  	return call_int_hook(dentry_init_security, -EOPNOTSUPP, dentry, mode,
+> -				name, ctx, ctxlen);
+> +				name, label, ctx, ctxlen);
+>  }
+>  EXPORT_SYMBOL(security_dentry_init_security);
+>  
+> diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
+> index 2b5ee5fbd652..eca3879d9357 100644
+> --- a/security/selinux/hooks.c
+> +++ b/security/selinux/hooks.c
+> @@ -2985,8 +2985,9 @@ static void selinux_inode_free_security(struct inode *inode)
+>  }
+>  
+>  static int selinux_dentry_init_security(struct dentry *dentry, int mode,
+> -					const struct qstr *name, void **ctx,
+> -					u32 *ctxlen)
+> +					const struct qstr *name,
+> +					const char **label,
+> +					void **ctx, u32 *ctxlen)
+>  {
+>  	u32 newsid;
+>  	int rc;
+> @@ -2998,6 +2999,9 @@ static int selinux_dentry_init_security(struct dentry *dentry, int mode,
+>  	if (rc)
+>  		return rc;
+>  
+> +	if (label)
+> +		*label = XATTR_SELINUX_SUFFIX;
+> +
+>  	return security_sid_to_context(&selinux_state, newsid, (char **)ctx,
+>  				       ctxlen);
+>  }
+> 
+
+_______________________________________________
+Selinux mailing list
+Selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org
+To unsubscribe, send email to Selinux-leave-+05T5uksL2pAGbPMOrvdOA@public.gmane.org
+To get help, send an email containing "help" to Selinux-request-+05T5uksL2pAGbPMOrvdOA@public.gmane.org
