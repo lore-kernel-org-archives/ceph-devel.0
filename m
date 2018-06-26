@@ -1,152 +1,118 @@
-From: Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
-Subject: Re: [PATCH 1/3] selinux: make dentry_init_security() return security
- module name
-Date: Tue, 26 Jun 2018 09:28:51 -0400
-Message-ID: <e5248747-8aa0-8dcf-8c3c-74d02171be2a@tycho.nsa.gov>
+From: "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/3] selinux: make dentry_init_security() return
+ security module name
+Date: Tue, 26 Jun 2018 23:32:33 +0800
+Message-ID: <B3E18856-E7BC-4015-9DEA-0E4B647BE208@redhat.com>
 References: <20180626084306.27511-1-zyan@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+ <e5248747-8aa0-8dcf-8c3c-74d02171be2a@tycho.nsa.gov>
+Mime-Version: 1.0 (Mac OS X Mail 11.4 \(3445.8.2\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <selinux-bounces-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
-In-Reply-To: <20180626084306.27511-1-zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <e5248747-8aa0-8dcf-8c3c-74d02171be2a-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
 List-Post: <mailto:selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
 List-Help: <mailto:selinux-request-+05T5uksL2qpZYMLLGbcSA@public.gmane.org?subject=help>
 Errors-To: selinux-bounces-+05T5uksL2qpZYMLLGbcSA@public.gmane.org
 Sender: "Selinux" <selinux-bounces-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
-To: "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, SELinux <selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
+To: Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
+Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, SELinux <selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 06/26/2018 04:43 AM, Yan, Zheng wrote:
-> This is preparation for CephFS security label. CephFS's implementation uses
-> dentry_init_security() to get security context before inode is created,
-> then sends open/mkdir/mknod request to MDS, together with security xattr
-> "security.<security module name>"
-
-Can you describe how your approach compares to the NFSv4 labeling support, and why it requires
-exporting this information from this hook when NFSv4 did not?
-
-> 
-> Signed-off-by: "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  fs/nfs/nfs4proc.c         | 3 ++-
->  include/linux/lsm_hooks.h | 4 ++--
->  include/linux/security.h  | 9 +++++----
->  security/security.c       | 7 ++++---
->  security/selinux/hooks.c  | 8 ++++++--
->  5 files changed, 19 insertions(+), 12 deletions(-)
-> 
-> diff --git a/fs/nfs/nfs4proc.c b/fs/nfs/nfs4proc.c
-> index 6dd146885da9..d18a5fb7aec3 100644
-> --- a/fs/nfs/nfs4proc.c
-> +++ b/fs/nfs/nfs4proc.c
-> @@ -122,7 +122,8 @@ nfs4_label_init_security(struct inode *dir, struct dentry *dentry,
->  		return NULL;
->  
->  	err = security_dentry_init_security(dentry, sattr->ia_mode,
-> -				&dentry->d_name, (void **)&label->label, &label->len);
-> +				&dentry->d_name,  NULL,
-> +				(void **)&label->label, &label->len);
->  	if (err == 0)
->  		return label;
->  
-> diff --git a/include/linux/lsm_hooks.h b/include/linux/lsm_hooks.h
-> index 8f1131c8dd54..e176c2032bdc 100644
-> --- a/include/linux/lsm_hooks.h
-> +++ b/include/linux/lsm_hooks.h
-> @@ -1476,8 +1476,8 @@ union security_list_options {
->  					unsigned long *set_kern_flags);
->  	int (*sb_parse_opts_str)(char *options, struct security_mnt_opts *opts);
->  	int (*dentry_init_security)(struct dentry *dentry, int mode,
-> -					const struct qstr *name, void **ctx,
-> -					u32 *ctxlen);
-> +					const struct qstr *name, const char **label,
-
-Seems like "label" could be confusing given that it means something else in the NFSv4 code,
-and what is actually being provided here is the xattr name suffix.
-
-> +					void **ctx, u32 *ctxlen);
->  	int (*dentry_create_files_as)(struct dentry *dentry, int mode,
->  					struct qstr *name,
->  					const struct cred *old,
-> diff --git a/include/linux/security.h b/include/linux/security.h
-> index 63030c85ee19..df2d73998c64 100644
-> --- a/include/linux/security.h
-> +++ b/include/linux/security.h
-> @@ -246,8 +246,9 @@ int security_sb_clone_mnt_opts(const struct super_block *oldsb,
->  				unsigned long *set_kern_flags);
->  int security_sb_parse_opts_str(char *options, struct security_mnt_opts *opts);
->  int security_dentry_init_security(struct dentry *dentry, int mode,
-> -					const struct qstr *name, void **ctx,
-> -					u32 *ctxlen);
-> +					const struct qstr *name,
-> +					const char **label,
-> +					void **ctx, u32 *ctxlen);
->  int security_dentry_create_files_as(struct dentry *dentry, int mode,
->  					struct qstr *name,
->  					const struct cred *old,
-> @@ -609,8 +610,8 @@ static inline void security_inode_free(struct inode *inode)
->  static inline int security_dentry_init_security(struct dentry *dentry,
->  						 int mode,
->  						 const struct qstr *name,
-> -						 void **ctx,
-> -						 u32 *ctxlen)
-> +						 const char **label,
-> +						 void **ctx, u32 *ctxlen)
->  {
->  	return -EOPNOTSUPP;
->  }
-> diff --git a/security/security.c b/security/security.c
-> index 68f46d849abe..69818d46aa28 100644
-> --- a/security/security.c
-> +++ b/security/security.c
-> @@ -450,11 +450,12 @@ void security_inode_free(struct inode *inode)
->  }
->  
->  int security_dentry_init_security(struct dentry *dentry, int mode,
-> -					const struct qstr *name, void **ctx,
-> -					u32 *ctxlen)
-> +					const struct qstr *name,
-> +					const char **label,
-> +					void **ctx, u32 *ctxlen)
->  {
->  	return call_int_hook(dentry_init_security, -EOPNOTSUPP, dentry, mode,
-> -				name, ctx, ctxlen);
-> +				name, label, ctx, ctxlen);
->  }
->  EXPORT_SYMBOL(security_dentry_init_security);
->  
-> diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
-> index 2b5ee5fbd652..eca3879d9357 100644
-> --- a/security/selinux/hooks.c
-> +++ b/security/selinux/hooks.c
-> @@ -2985,8 +2985,9 @@ static void selinux_inode_free_security(struct inode *inode)
->  }
->  
->  static int selinux_dentry_init_security(struct dentry *dentry, int mode,
-> -					const struct qstr *name, void **ctx,
-> -					u32 *ctxlen)
-> +					const struct qstr *name,
-> +					const char **label,
-> +					void **ctx, u32 *ctxlen)
->  {
->  	u32 newsid;
->  	int rc;
-> @@ -2998,6 +2999,9 @@ static int selinux_dentry_init_security(struct dentry *dentry, int mode,
->  	if (rc)
->  		return rc;
->  
-> +	if (label)
-> +		*label = XATTR_SELINUX_SUFFIX;
-> +
->  	return security_sid_to_context(&selinux_state, newsid, (char **)ctx,
->  				       ctxlen);
->  }
-> 
-
-_______________________________________________
-Selinux mailing list
-Selinux-+05T5uksL2qpZYMLLGbcSA@public.gmane.org
-To unsubscribe, send email to Selinux-leave-+05T5uksL2pAGbPMOrvdOA@public.gmane.org
-To get help, send an email containing "help" to Selinux-request-+05T5uksL2pAGbPMOrvdOA@public.gmane.org
+Cgo+IE9uIEp1biAyNiwgMjAxOCwgYXQgMjE6MjgsIFN0ZXBoZW4gU21hbGxleSA8c2RzQHR5Y2hv
+Lm5zYS5nb3Y+IHdyb3RlOgo+IAo+IE9uIDA2LzI2LzIwMTggMDQ6NDMgQU0sIFlhbiwgWmhlbmcg
+d3JvdGU6Cj4+IFRoaXMgaXMgcHJlcGFyYXRpb24gZm9yIENlcGhGUyBzZWN1cml0eSBsYWJlbC4g
+Q2VwaEZTJ3MgaW1wbGVtZW50YXRpb24gdXNlcwo+PiBkZW50cnlfaW5pdF9zZWN1cml0eSgpIHRv
+IGdldCBzZWN1cml0eSBjb250ZXh0IGJlZm9yZSBpbm9kZSBpcyBjcmVhdGVkLAo+PiB0aGVuIHNl
+bmRzIG9wZW4vbWtkaXIvbWtub2QgcmVxdWVzdCB0byBNRFMsIHRvZ2V0aGVyIHdpdGggc2VjdXJp
+dHkgeGF0dHIKPj4gInNlY3VyaXR5LjxzZWN1cml0eSBtb2R1bGUgbmFtZT4iCj4gCj4gQ2FuIHlv
+dSBkZXNjcmliZSBob3cgeW91ciBhcHByb2FjaCBjb21wYXJlcyB0byB0aGUgTkZTdjQgbGFiZWxp
+bmcgc3VwcG9ydCwgYW5kIHdoeSBpdCByZXF1aXJlcwo+IGV4cG9ydGluZyB0aGlzIGluZm9ybWF0
+aW9uIGZyb20gdGhpcyBob29rIHdoZW4gTkZTdjQgZGlkIG5vdD8KCk5GUyBjbGllbnQgb25seSBz
+dXBwb3J0IHNpbmdsZSBzZWN1cml0eSBsYWJlbCwgaXQgcGFzc2VzIHVubmFtZWQgc2VjdXJpdHkg
+Y29udGV4dCB0byBORlNELiBORlNECnN0b3JlcyB0aGUgc2VjdXJpdHkgY29udGV4dCBieSBjYWxs
+aW5nIHNlY3VyaXR5X2lub2RlX3NldHNlY2N0eCgpLiAgRm9yIHNlbGludXgsIHRoZSBzZWN1cml0
+eSBjb250ZXh0CmlzIHN0b3JlZCBpbiB4YXR0ciDigJhzZWN1cml0eS5zZWxpbnV44oCZLiAKCkNl
+cGhGUyBkb2VzIG5vdCBleHBvcnRzIG90aGVyIGZpbGVzeXN0ZW1zLiBTbyBJdCdzIGlycmVsZXZh
+bnQgdG8gQ2VwaEZTIHdoaWNoIHNlY3VyaXR5IG1vZHVsZSBpcwplbmFibGVkIG9uIHRoZSBob3N0
+IHRoYXQgcnVucyBjZXBoLW1kcyAoY291bnRlcnBhcnQgb2YgTkZTRCkgCgpSZWdhcmRzCllhbiwg
+WmhlbmcKCj4+IAo+PiBTaWduZWQtb2ZmLWJ5OiAiWWFuLCBaaGVuZyIgPHp5YW5AcmVkaGF0LmNv
+bT4KPj4gLS0tCj4+IGZzL25mcy9uZnM0cHJvYy5jICAgICAgICAgfCAzICsrLQo+PiBpbmNsdWRl
+L2xpbnV4L2xzbV9ob29rcy5oIHwgNCArKy0tCj4+IGluY2x1ZGUvbGludXgvc2VjdXJpdHkuaCAg
+fCA5ICsrKysrLS0tLQo+PiBzZWN1cml0eS9zZWN1cml0eS5jICAgICAgIHwgNyArKysrLS0tCj4+
+IHNlY3VyaXR5L3NlbGludXgvaG9va3MuYyAgfCA4ICsrKysrKy0tCj4+IDUgZmlsZXMgY2hhbmdl
+ZCwgMTkgaW5zZXJ0aW9ucygrKSwgMTIgZGVsZXRpb25zKC0pCj4+IAo+PiBkaWZmIC0tZ2l0IGEv
+ZnMvbmZzL25mczRwcm9jLmMgYi9mcy9uZnMvbmZzNHByb2MuYwo+PiBpbmRleCA2ZGQxNDY4ODVk
+YTkuLmQxOGE1ZmI3YWVjMyAxMDA2NDQKPj4gLS0tIGEvZnMvbmZzL25mczRwcm9jLmMKPj4gKysr
+IGIvZnMvbmZzL25mczRwcm9jLmMKPj4gQEAgLTEyMiw3ICsxMjIsOCBAQCBuZnM0X2xhYmVsX2lu
+aXRfc2VjdXJpdHkoc3RydWN0IGlub2RlICpkaXIsIHN0cnVjdCBkZW50cnkgKmRlbnRyeSwKPj4g
+CQlyZXR1cm4gTlVMTDsKPj4gCj4+IAllcnIgPSBzZWN1cml0eV9kZW50cnlfaW5pdF9zZWN1cml0
+eShkZW50cnksIHNhdHRyLT5pYV9tb2RlLAo+PiAtCQkJCSZkZW50cnktPmRfbmFtZSwgKHZvaWQg
+KiopJmxhYmVsLT5sYWJlbCwgJmxhYmVsLT5sZW4pOwo+PiArCQkJCSZkZW50cnktPmRfbmFtZSwg
+IE5VTEwsCj4+ICsJCQkJKHZvaWQgKiopJmxhYmVsLT5sYWJlbCwgJmxhYmVsLT5sZW4pOwo+PiAJ
+aWYgKGVyciA9PSAwKQo+PiAJCXJldHVybiBsYWJlbDsKPj4gCj4+IGRpZmYgLS1naXQgYS9pbmNs
+dWRlL2xpbnV4L2xzbV9ob29rcy5oIGIvaW5jbHVkZS9saW51eC9sc21faG9va3MuaAo+PiBpbmRl
+eCA4ZjExMzFjOGRkNTQuLmUxNzZjMjAzMmJkYyAxMDA2NDQKPj4gLS0tIGEvaW5jbHVkZS9saW51
+eC9sc21faG9va3MuaAo+PiArKysgYi9pbmNsdWRlL2xpbnV4L2xzbV9ob29rcy5oCj4+IEBAIC0x
+NDc2LDggKzE0NzYsOCBAQCB1bmlvbiBzZWN1cml0eV9saXN0X29wdGlvbnMgewo+PiAJCQkJCXVu
+c2lnbmVkIGxvbmcgKnNldF9rZXJuX2ZsYWdzKTsKPj4gCWludCAoKnNiX3BhcnNlX29wdHNfc3Ry
+KShjaGFyICpvcHRpb25zLCBzdHJ1Y3Qgc2VjdXJpdHlfbW50X29wdHMgKm9wdHMpOwo+PiAJaW50
+ICgqZGVudHJ5X2luaXRfc2VjdXJpdHkpKHN0cnVjdCBkZW50cnkgKmRlbnRyeSwgaW50IG1vZGUs
+Cj4+IC0JCQkJCWNvbnN0IHN0cnVjdCBxc3RyICpuYW1lLCB2b2lkICoqY3R4LAo+PiAtCQkJCQl1
+MzIgKmN0eGxlbik7Cj4+ICsJCQkJCWNvbnN0IHN0cnVjdCBxc3RyICpuYW1lLCBjb25zdCBjaGFy
+ICoqbGFiZWwsCj4gCj4gU2VlbXMgbGlrZSAibGFiZWwiIGNvdWxkIGJlIGNvbmZ1c2luZyBnaXZl
+biB0aGF0IGl0IG1lYW5zIHNvbWV0aGluZyBlbHNlIGluIHRoZSBORlN2NCBjb2RlLAo+IGFuZCB3
+aGF0IGlzIGFjdHVhbGx5IGJlaW5nIHByb3ZpZGVkIGhlcmUgaXMgdGhlIHhhdHRyIG5hbWUgc3Vm
+Zml4Lgo+IAo+PiArCQkJCQl2b2lkICoqY3R4LCB1MzIgKmN0eGxlbik7Cj4+IAlpbnQgKCpkZW50
+cnlfY3JlYXRlX2ZpbGVzX2FzKShzdHJ1Y3QgZGVudHJ5ICpkZW50cnksIGludCBtb2RlLAo+PiAJ
+CQkJCXN0cnVjdCBxc3RyICpuYW1lLAo+PiAJCQkJCWNvbnN0IHN0cnVjdCBjcmVkICpvbGQsCj4+
+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L3NlY3VyaXR5LmggYi9pbmNsdWRlL2xpbnV4L3Nl
+Y3VyaXR5LmgKPj4gaW5kZXggNjMwMzBjODVlZTE5Li5kZjJkNzM5OThjNjQgMTAwNjQ0Cj4+IC0t
+LSBhL2luY2x1ZGUvbGludXgvc2VjdXJpdHkuaAo+PiArKysgYi9pbmNsdWRlL2xpbnV4L3NlY3Vy
+aXR5LmgKPj4gQEAgLTI0Niw4ICsyNDYsOSBAQCBpbnQgc2VjdXJpdHlfc2JfY2xvbmVfbW50X29w
+dHMoY29uc3Qgc3RydWN0IHN1cGVyX2Jsb2NrICpvbGRzYiwKPj4gCQkJCXVuc2lnbmVkIGxvbmcg
+KnNldF9rZXJuX2ZsYWdzKTsKPj4gaW50IHNlY3VyaXR5X3NiX3BhcnNlX29wdHNfc3RyKGNoYXIg
+Km9wdGlvbnMsIHN0cnVjdCBzZWN1cml0eV9tbnRfb3B0cyAqb3B0cyk7Cj4+IGludCBzZWN1cml0
+eV9kZW50cnlfaW5pdF9zZWN1cml0eShzdHJ1Y3QgZGVudHJ5ICpkZW50cnksIGludCBtb2RlLAo+
+PiAtCQkJCQljb25zdCBzdHJ1Y3QgcXN0ciAqbmFtZSwgdm9pZCAqKmN0eCwKPj4gLQkJCQkJdTMy
+ICpjdHhsZW4pOwo+PiArCQkJCQljb25zdCBzdHJ1Y3QgcXN0ciAqbmFtZSwKPj4gKwkJCQkJY29u
+c3QgY2hhciAqKmxhYmVsLAo+PiArCQkJCQl2b2lkICoqY3R4LCB1MzIgKmN0eGxlbik7Cj4+IGlu
+dCBzZWN1cml0eV9kZW50cnlfY3JlYXRlX2ZpbGVzX2FzKHN0cnVjdCBkZW50cnkgKmRlbnRyeSwg
+aW50IG1vZGUsCj4+IAkJCQkJc3RydWN0IHFzdHIgKm5hbWUsCj4+IAkJCQkJY29uc3Qgc3RydWN0
+IGNyZWQgKm9sZCwKPj4gQEAgLTYwOSw4ICs2MTAsOCBAQCBzdGF0aWMgaW5saW5lIHZvaWQgc2Vj
+dXJpdHlfaW5vZGVfZnJlZShzdHJ1Y3QgaW5vZGUgKmlub2RlKQo+PiBzdGF0aWMgaW5saW5lIGlu
+dCBzZWN1cml0eV9kZW50cnlfaW5pdF9zZWN1cml0eShzdHJ1Y3QgZGVudHJ5ICpkZW50cnksCj4+
+IAkJCQkJCSBpbnQgbW9kZSwKPj4gCQkJCQkJIGNvbnN0IHN0cnVjdCBxc3RyICpuYW1lLAo+PiAt
+CQkJCQkJIHZvaWQgKipjdHgsCj4+IC0JCQkJCQkgdTMyICpjdHhsZW4pCj4+ICsJCQkJCQkgY29u
+c3QgY2hhciAqKmxhYmVsLAo+PiArCQkJCQkJIHZvaWQgKipjdHgsIHUzMiAqY3R4bGVuKQo+PiB7
+Cj4+IAlyZXR1cm4gLUVPUE5PVFNVUFA7Cj4+IH0KPj4gZGlmZiAtLWdpdCBhL3NlY3VyaXR5L3Nl
+Y3VyaXR5LmMgYi9zZWN1cml0eS9zZWN1cml0eS5jCj4+IGluZGV4IDY4ZjQ2ZDg0OWFiZS4uNjk4
+MThkNDZhYTI4IDEwMDY0NAo+PiAtLS0gYS9zZWN1cml0eS9zZWN1cml0eS5jCj4+ICsrKyBiL3Nl
+Y3VyaXR5L3NlY3VyaXR5LmMKPj4gQEAgLTQ1MCwxMSArNDUwLDEyIEBAIHZvaWQgc2VjdXJpdHlf
+aW5vZGVfZnJlZShzdHJ1Y3QgaW5vZGUgKmlub2RlKQo+PiB9Cj4+IAo+PiBpbnQgc2VjdXJpdHlf
+ZGVudHJ5X2luaXRfc2VjdXJpdHkoc3RydWN0IGRlbnRyeSAqZGVudHJ5LCBpbnQgbW9kZSwKPj4g
+LQkJCQkJY29uc3Qgc3RydWN0IHFzdHIgKm5hbWUsIHZvaWQgKipjdHgsCj4+IC0JCQkJCXUzMiAq
+Y3R4bGVuKQo+PiArCQkJCQljb25zdCBzdHJ1Y3QgcXN0ciAqbmFtZSwKPj4gKwkJCQkJY29uc3Qg
+Y2hhciAqKmxhYmVsLAo+PiArCQkJCQl2b2lkICoqY3R4LCB1MzIgKmN0eGxlbikKPj4gewo+PiAJ
+cmV0dXJuIGNhbGxfaW50X2hvb2soZGVudHJ5X2luaXRfc2VjdXJpdHksIC1FT1BOT1RTVVBQLCBk
+ZW50cnksIG1vZGUsCj4+IC0JCQkJbmFtZSwgY3R4LCBjdHhsZW4pOwo+PiArCQkJCW5hbWUsIGxh
+YmVsLCBjdHgsIGN0eGxlbik7Cj4+IH0KPj4gRVhQT1JUX1NZTUJPTChzZWN1cml0eV9kZW50cnlf
+aW5pdF9zZWN1cml0eSk7Cj4+IAo+PiBkaWZmIC0tZ2l0IGEvc2VjdXJpdHkvc2VsaW51eC9ob29r
+cy5jIGIvc2VjdXJpdHkvc2VsaW51eC9ob29rcy5jCj4+IGluZGV4IDJiNWVlNWZiZDY1Mi4uZWNh
+Mzg3OWQ5MzU3IDEwMDY0NAo+PiAtLS0gYS9zZWN1cml0eS9zZWxpbnV4L2hvb2tzLmMKPj4gKysr
+IGIvc2VjdXJpdHkvc2VsaW51eC9ob29rcy5jCj4+IEBAIC0yOTg1LDggKzI5ODUsOSBAQCBzdGF0
+aWMgdm9pZCBzZWxpbnV4X2lub2RlX2ZyZWVfc2VjdXJpdHkoc3RydWN0IGlub2RlICppbm9kZSkK
+Pj4gfQo+PiAKPj4gc3RhdGljIGludCBzZWxpbnV4X2RlbnRyeV9pbml0X3NlY3VyaXR5KHN0cnVj
+dCBkZW50cnkgKmRlbnRyeSwgaW50IG1vZGUsCj4+IC0JCQkJCWNvbnN0IHN0cnVjdCBxc3RyICpu
+YW1lLCB2b2lkICoqY3R4LAo+PiAtCQkJCQl1MzIgKmN0eGxlbikKPj4gKwkJCQkJY29uc3Qgc3Ry
+dWN0IHFzdHIgKm5hbWUsCj4+ICsJCQkJCWNvbnN0IGNoYXIgKipsYWJlbCwKPj4gKwkJCQkJdm9p
+ZCAqKmN0eCwgdTMyICpjdHhsZW4pCj4+IHsKPj4gCXUzMiBuZXdzaWQ7Cj4+IAlpbnQgcmM7Cj4+
+IEBAIC0yOTk4LDYgKzI5OTksOSBAQCBzdGF0aWMgaW50IHNlbGludXhfZGVudHJ5X2luaXRfc2Vj
+dXJpdHkoc3RydWN0IGRlbnRyeSAqZGVudHJ5LCBpbnQgbW9kZSwKPj4gCWlmIChyYykKPj4gCQly
+ZXR1cm4gcmM7Cj4+IAo+PiArCWlmIChsYWJlbCkKPj4gKwkJKmxhYmVsID0gWEFUVFJfU0VMSU5V
+WF9TVUZGSVg7Cj4+ICsKPj4gCXJldHVybiBzZWN1cml0eV9zaWRfdG9fY29udGV4dCgmc2VsaW51
+eF9zdGF0ZSwgbmV3c2lkLCAoY2hhciAqKiljdHgsCj4+IAkJCQkgICAgICAgY3R4bGVuKTsKPj4g
+fQo+PiAKPiAKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+XwpTZWxpbnV4IG1haWxpbmcgbGlzdApTZWxpbnV4QHR5Y2hvLm5zYS5nb3YKVG8gdW5zdWJzY3Jp
+YmUsIHNlbmQgZW1haWwgdG8gU2VsaW51eC1sZWF2ZUB0eWNoby5uc2EuZ292LgpUbyBnZXQgaGVs
+cCwgc2VuZCBhbiBlbWFpbCBjb250YWluaW5nICJoZWxwIiB0byBTZWxpbnV4LXJlcXVlc3RAdHlj
+aG8ubnNhLmdvdi4=
