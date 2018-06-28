@@ -1,16 +1,11 @@
-From: "Kamble, Nitin A" <Nitin.Kamble-Iz5qeGvAONRWk0Htik3J/w@public.gmane.org>
-Subject: Re: RDMA support in Ceph
-Date: Thu, 28 Jun 2018 16:11:51 +0000
-Message-ID: <C728961B-A09A-416F-812D-192B6DBC74BB@TERADATA.COM>
-References: <D8055114-E5C1-4600-A6AC-E8E026841A25@TERADATA.COM>
- <CAJE9aOPobPTpM2MJfOJ+hTeoAiQS5gs4vG8e1OMdzKisqeTSHw@mail.gmail.com>
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Tech Talk Jun 2018
+Date: Thu, 28 Jun 2018 13:15:35 -0300
+Message-ID: <CAB0WNsjy9OioKdyq0gMcxP=pgREjc-2+RMCJ5y0pDkBK23gejg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAJE9aOPobPTpM2MJfOJ+hTeoAiQS5gs4vG8e1OMdzKisqeTSHw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Content-ID: <DC7C2591679E0A4D9888A3A217B9C8BA-8CTV+zlJiDmcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,33 +15,24 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: The Esoteric Order of the Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-DQoNCu+7v09uIDYvMjgvMTgsIDEyOjExIEFNLCAia2VmdSBjaGFpIiA8dGNoYWlrb3ZAZ21haWwu
-Y29tPiB3cm90ZToNCiAgICA+IFdoYXQgaXMgdGhlIHN0YXRlIG9mIHRoZSBSRE1BIGNvZGUgaW4g
-dGhlIENlcGggTHVtaW5vdXMgYW5kIGxhdGVyIHJlbGVhc2VzPw0KICAgIA0KICAgIGluIENlcGgs
-IHRoZSBSRE1BIHN1cHBvcnQgaGFzIGJlZW4gY29uc3RhbnRseSB3b3JrZWQgb24uIHhpbyBtZXNz
-ZW5nZXINCiAgICBzdXBwb3J0IHdhcyBhZGRlZCA0IHllYXJzIGFnbywgYnV0IGkgZG9uJ3QgdGhp
-bmsgaXQncyBtYWludGFpbmVkDQogICAgYW55bW9yZS4gYW5kIGFzeW5jIG1lc3NlbmdlciB3YXMg
-SUIgcHJvdG9jb2wgc3VwcG9ydC4gaSB0aGluayB0aGF0J3MNCiAgICB3aGF0IHlvdSB3YW50ZWQg
-dG8gdHJ5IG91dC4gcmVjZW50bHksIHdlIGFkZGVkIHRoZSBpV0FSUCBzdXBwb3J0IHRvDQogICAg
-dGhlIGFzeW5jIG1lc3Nlbmdlciwgc2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVs
-bC8yMDI5Ny4gdGhhdA0KICAgIGNoYW5nZSBhbHNvIGJyb3VnaHQgYmV0dGVyIGNvbm5lY3Rpb24g
-bWFuYWdlbWVudCBieSB1c2luZyByZG1hLWNtIHRvDQogICAgQ2VwaC4gYW5kIGkgYmVsaWV2ZSB0
-byBnZXQgUkRNQSBzdXBwb3J0IHdlIHNob3VsZCBoYXZlDQogICAgaHR0cHM6Ly9naXRodWIuY29t
-L2NlcGgvY2VwaC9wdWxsLzE0NjgxLCB3aGljaCBpcyBzdGlsbCBwZW5kaW5nIG9uDQogICAgcmV2
-aWV3Lg0KICAgID4NCiAgICA+IFdoZW4gd2lsbCBpdCBiZSBwcm9kdWN0aW9uIHJlYWR5Pw0KICAg
-IHRoZSBSRE1BIHN1cHBvcnQgaW4gQ2VwaCBpcyBjb21wbGV0ZWx5IGRyaXZlbiBieSBvdXIgY29t
-bXVuaXR5LiBhbmQgd2UNCiAgICBkb24ndCBoYXZlIHRoZSBoYXJkd2FyZSAoTklDKSBmb3IgdGVz
-dGluZyBSb0NFdjIvaVdBUlAsIG5vdCB0byBtZW50aW9uDQogICAgSUIuIHNvIGkgY2FuIGhhcmRs
-eSB0ZWxsIGZyb20gdGhlIG1haW50YWluZXIncyBwZXJzcGVjdGl2ZS4NCiAgICA+IFsxXTogaHR0
-cHM6Ly9jb21tdW5pdHkubWVsbGFub3guY29tL2RvY3MvRE9DLTI3MjENCiAgICAtLSANCiAgICBS
-ZWdhcmRzDQogICAgS2VmdSBDaGFpDQogICAgDQpIaSBLZWZ1LA0KICBUaGFua3MgZm9yIHRoZSBk
-ZXRhaWxlZCBleHBsYW5hdGlvbi4gTG9va3MgbGlrZSwgd2Ugd2lsbCBoYXZlIHRvIHdhaXQgZm9y
-IGZldyANCnJlbGVhc2VzIHRvIGdldCBhIHN1cHBvcnRlZCBhbmQgcHJvZHVjdGlvbiByZWFkeSBS
-RE1BIHN1cHBvcnQgaW4gY2VwaC4NCg0KVGhhbmtzLA0KTml0aW4NCg0KDQpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlz
-dApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
-by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Hey Cephers!
+
+The Ceph Tech Talk of June starts in about 50 minutes and on this
+edition George Mihaiuescu will talk about Ceph used on Cancer Research
+at OIRC.
+
+Please check the URL below for the meeting details:
+
+  https://ceph.com/ceph-tech-talks/
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
