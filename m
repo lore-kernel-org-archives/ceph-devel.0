@@ -1,38 +1,33 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Tech Talk Jun 2018
-Date: Thu, 28 Jun 2018 13:15:35 -0300
-Message-ID: <CAB0WNsjy9OioKdyq0gMcxP=pgREjc-2+RMCJ5y0pDkBK23gejg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fix for 4.18-rc3
+Date: Fri, 29 Jun 2018 16:49:57 +0200
+Message-ID: <20180629144957.32584-1-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hey Cephers!
+Hi Linus,
 
-The Ceph Tech Talk of June starts in about 50 minutes and on this
-edition George Mihaiuescu will talk about Ceph used on Cancer Research
-at OIRC.
+The following changes since commit 7daf201d7fe8334e2d2364d4e8ed3394ec9af819:
 
-Please check the URL below for the meeting details:
+  Linux 4.18-rc2 (2018-06-24 20:54:29 +0800)
 
-  https://ceph.com/ceph-tech-talks/
+are available in the Git repository at:
 
-Kindest regards,
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.18-rc3
 
-Leo
+for you to fetch changes up to 8b8f53af1ed9df88a4c0fbfdf3db58f62060edf3:
 
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+  ceph: fix dentry leak in splice_dentry() (2018-06-26 18:42:44 +0200)
+
+----------------------------------------------------------------
+A trivial dentry leak fix from Zheng.
+
+----------------------------------------------------------------
+Yan, Zheng (1):
+      ceph: fix dentry leak in splice_dentry()
+
+ fs/ceph/inode.c | 1 +
+ 1 file changed, 1 insertion(+)
