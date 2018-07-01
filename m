@@ -1,14 +1,11 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [Ceph-community] Ceph Tech Talk Calendar
-Date: Sat, 30 Jun 2018 08:56:00 -0300
-Message-ID: <CAB0WNsgpfbBOWOmqvG0NN6LpsxiqR5gaXAN1C69AKdKQ6kZQ+Q@mail.gmail.com>
-References: <CAB0WNsiuVM9833=X1ZjUTN8GxiXBrqR4EcMWgLF2yS6GJ-ZqpA@mail.gmail.com>
- <f2525a7b-f0ab-3c37-a7e1-be217763ee2d@suse.com>
+Subject: Ceph Community Newsletter (June 2018)
+Date: Sat, 30 Jun 2018 23:09:31 -0300
+Message-ID: <CAB0WNshCcMyJUELgkXO5gNHLw8sLsq+k9hnFCdW9Oj_r-MsBCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <f2525a7b-f0ab-3c37-a7e1-be217763ee2d-IBi9RG/b67k@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,40 +15,20 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Lenz Grimmer <lgrimmer-IBi9RG/b67k@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gV2VkLCBKdW4gMjAsIDIwMTggYXQgMTE6NTIgQU0sIExlbnogR3JpbW1lciA8bGdyaW1tZXJA
-c3VzZS5jb20+IHdyb3RlOgo+IEhpIExlbywKPgo+IE9uIDA2LzIwLzIwMTggMDE6NDcgQU0sIExl
-b25hcmRvIFZheiB3cm90ZToKPgo+PiBXZSBjcmVhdGVkIHRoZSBmb2xsb3dpbmcgZXRoZXJwYWQg
-dG8gb3JnYW5pemUgdGhlIGNhbGVuZGFyIGZvciB0aGUKPj4gZnV0dXJlIENlcGggVGVjaCBUYWxr
-cy4KPj4KPj4gRm9yIHRoZSBDZXBoIFRlY2ggVGFsayBvZiBKdW5lIDI4dGggb3VyIGZlbGxvdyBH
-ZW9yZ2UgTWloYWllc2N1IHdpbGwKPj4gdGVsbCB1cyBob3cgQ2VwaCBpcyBiZWluZyB1c2VkIG9u
-IGNhbmNlciByZXNlYXJjaCBhdCBPSUNSIChPbnRhcmlvCj4+IEluc3RpdHV0ZSBmb3IgQ2FuY2Vy
-IFJlc2VhcmNoKS4KPj4KPj4gSWYgeW91J3JlIGludGVyZXN0ZWQgdG8gY29udHJpYnV0ZSwgcGxl
-YXNlIGNob29zZSBvbmUgb2YgdGhlIGF2YWlsYWJsZQo+PiBkYXRlcywgYWRkIHRoZSB0b3BpYyB5
-b3Ugd2FudCB0byBwcmVzZW50IGFuZCB5b3VyIG5hbWUgKG9yIGZlZWwgZnJlZQo+PiB0byBjb250
-YWN0IG1lKS4KPj4KPj4gICBodHRwczovL3BhZC5jZXBoLmNvbS9wL2NlcGgtdGVjaC10YWxrcy0y
-MDE4Cj4KPiBIbW0uIElNSE8sIGFuIEV0aGVycGFkIGlzIHNvbWV3aGF0IHRvbyB2b2xhdGlsZSBm
-b3IgdGhpcyBraW5kIG9mCj4gaW5mb3JtYXRpb24sIGJ1dCBpdCBvZiBjb3Vyc2UgbWFrZXMgaXQg
-ZWFzaWVyIGZvciBvdGhlcnMgdG8gc3VibWl0Cj4gcHJvcG9zYWxzLgoKWWVhaCwgdGhhdCB3YXMg
-dGhlIGdvYWwgd2hlbiBJIGNyZWF0ZWQgdGhlIGV0aGVycGFkIExlbnouCgo+IElmIG1haW50YWlu
-aW5nIHRoaXMgb24gaHR0cHM6Ly9jZXBoLmNvbS9jZXBoLXRlY2gtdGFsa3MvIGlzIHRvbwo+IGRp
-ZmZpY3VsdCwgd291bGQgaXQgbWFrZSBzZW5zZSB0byB1c2UgdGhlIFdpa2kgZm9yIHRoaXMgaW5z
-dGVhZD8KClN1cmUsIGFmdGVyIHdlIGhhdmUgdGhlIHRhbGtzIGFkZGVkIHRvIHRoZSBldGhlcnBh
-ZCB3ZSBjYW4gbW92ZSB0aGVtCnRvIHRoZSBwYWdlLgoKPiBJbiBhbnkgY2FzZSwgdGhlIHBhZ2Ug
-YXQgd2hpY2ggdGhpcyBpbmZvcm1hdGlvbiBpcyBjb2xsZWN0ZWQgc2hvdWxkIGJlCj4gbGlua2Vk
-IGZyb20gcHJvbWluZW50IHBsYWNlcywgZS5nLiBjZXBoLmNvbS9jb21tdW5pdHkgb3IKPiBodHRw
-czovL3RyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMvY2VwaC93aWtpL0NvbW11bml0eQoKQWJzb2x1
-dGVseSwKClRoYW5rcyBmb3IgdGhlIGZlZWRiYWNrIQoKR3LDvMOfZSwKCkxlbwoKPiBUaGFua3Ms
-Cj4KPiBMZW56Cj4KPiAtLQo+IFNVU0UgTGludXggR21iSCAtIE1heGZlbGRzdHIuIDUgLSA5MDQw
-OSBOdWVybmJlcmcgKEdlcm1hbnkpCj4gR0Y6RmVsaXggSW1lbmTDtnJmZmVyLEphbmUgU21pdGhh
-cmQsR3JhaGFtIE5vcnRvbixIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykKPgo+Cj4gX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBDZXBoLWNvbW11bml0eSBt
-YWlsaW5nIGxpc3QKPiBDZXBoLWNvbW11bml0eUBsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC1jb21tdW5pdHktY2VwaC5jb20KPgoKCgotLSAK
-TGVvbmFyZG8gVmF6CkNlcGggQ29tbXVuaXR5IE1hbmFnZXIKT3BlbiBTb3VyY2UgYW5kIFN0YW5k
-YXJkcyBUZWFtCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
-L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+Hey Cephers,
+
+The Ceph Community Newsletter of June 2018 has been published:
+
+  https://ceph.com/newsletter/ceph-community-june-2018/
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
