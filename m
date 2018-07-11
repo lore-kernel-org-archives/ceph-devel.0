@@ -1,10 +1,13 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developer Monthly - July 2018
-Date: Tue, 3 Jul 2018 13:53:42 -0300
-Message-ID: <CAB0WNsi1-pAUPnRqtfLX-Bv9BsT237_LpYkrxgz_iX++agrRcg@mail.gmail.com>
+From: =?UTF-8?Q?Marc_Sch=c3=b6chlin?= <ms-aJA5TdoZkU0dnm+yROfE0A@public.gmane.org>
+Subject: KPIs for Ceph/OSD client latency / deepscrub latency
+ overhead
+Date: Wed, 11 Jul 2018 17:50:57 +0200
+Message-ID: <5b5dcca8-9f82-e785-885a-20d74c6a81a7@256bit.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6143039419794354055=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -14,93 +17,70 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph-Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============6143039419794354055==
-Content-Type: multipart/alternative; boundary="00000000000020e27105701b28ae"
-
---00000000000020e27105701b28ae
-Content-Type: text/plain; charset="UTF-8"
-
-Hey Cephers,
-
-This is just a friendly reminder that the next Ceph Developer Monthly
-meeting is coming up:
-
- http://wiki.ceph.com/Planning
-
-Important: Due the July 4th holiday in US we are postponing the Ceph
-Developer Monthly meeting to July 11th.
-
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
-
- http://wiki.ceph.com/CDM_11-JUN-2018
-
-This edition happens on APAC friendly hours (21:00 EST) and we will use the
-following Bluejeans URL for the video conference:
-
- https://redhat.bluejeans.com/376400604
-
-The meeting details are also available on Ceph Community Calendar:
-
-
-https://calendar.google.com/calendar/b/1?cid=OXRzOWM3bHQ3dTF2aWMyaWp2dnFxbGZwbzBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ
-
-If you have questions or comments, please let us know.
-
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
-
---00000000000020e27105701b28ae
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>Hey Cephers,</div><div><br></div><div>This is just a =
-friendly reminder that the next Ceph Developer Monthly meeting is coming up=
-:</div><div><br></div><div>=C2=A0<a href=3D"http://wiki.ceph.com/Planning">=
-http://wiki.ceph.com/Planning</a></div><div><br></div><div>Important: Due t=
-he July 4th holiday in US we are postponing the Ceph Developer Monthly meet=
-ing to July 11th.</div><div><br></div><div>If you have work that you&#39;re=
- doing that it a feature work, significant backports, or anything you would=
- like to discuss with the core team,</div><div>please add it to the followi=
-ng page:</div><div><br></div><div>=C2=A0<a href=3D"http://wiki.ceph.com/CDM=
-_11-JUN-2018">http://wiki.ceph.com/CDM_11-JUN-2018</a></div><div><br></div>=
-<div>This edition happens on APAC friendly hours (21:00 EST) and we will us=
-e the following Bluejeans URL for the video conference:</div><div><br></div=
-><div>=C2=A0<a href=3D"https://redhat.bluejeans.com/376400604">https://redh=
-at.bluejeans.com/376400604</a></div><div><br></div><div>The meeting details=
- are also available on Ceph Community Calendar:</div><div><br></div><div>=
-=C2=A0<a href=3D"https://calendar.google.com/calendar/b/1?cid=3DOXRzOWM3bHQ=
-3dTF2aWMyaWp2dnFxbGZwbzBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ">https://calend=
-ar.google.com/calendar/b/1?cid=3DOXRzOWM3bHQ3dTF2aWMyaWp2dnFxbGZwbzBAZ3JvdX=
-AuY2FsZW5kYXIuZ29vZ2xlLmNvbQ</a></div><div><br></div><div>If you have quest=
-ions or comments, please let us know.</div><div><br></div><div>Kindest rega=
-rds,</div><div><br></div><div>Leo</div><div><br></div>-- <br><div class=3D"=
-gmail_signature"><div dir=3D"ltr"><div><div dir=3D"ltr"><div dir=3D"ltr">Le=
-onardo Vaz</div><div dir=3D"ltr">Ceph Community Manager</div><div dir=3D"lt=
-r">Open Source and Standards Team</div></div></div></div></div>
-</div>
-
---00000000000020e27105701b28ae--
-
---===============6143039419794354055==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============6143039419794354055==--
+SGVsbG8gY2VwaC11c2VycyBhbmQgY2VwaC1kZXZlbCBsaXN0LAoKd2UgZ290IGluIHByb2R1Y3Rp
+b24gd2l0aCBvdXIgbmV3IHNoaW55IGx1bWlub3VzICgxMi4yLjUpIGNsdXN0ZXIuClRoaXMgY2x1
+c3RlciBydW5zIFNTRCBhbmQgSEREIGJhc2VkIE9TRCBwb29scy4KClRvIGVuc3VyZSB0aGUgc2Vy
+dmljZSBxdWFsaXR5IG9mIHRoZSBjbHVzdGVyIGFuZCB0byBoYXZlIGEgYmFzZWxpbmUgZm9yCmNs
+aWVudCBsYXRlbmN5IG9wdGltaXphdGlvbiAoaS5lLiBpbiB0aGUgYXJlYSBvZiBkZWVwc2NydWIg
+b3B0aW1pemF0aW9uKQp3ZSB3b3VsZCBsaWtlIHRvIGhhdmUgc3RhdGlzdGljcyBhYm91dCB0aGUg
+Y2xpZW50IGludGVyYWN0aW9uIGxhdGVuY3kgb2YKb3VyIGNsdXN0ZXIuCgpXaGljaCBtZWFzdXJl
+cyBjYW4gYmUgc3VpdGFibGUgdG8gZ2V0IHN1Y2ggYSAiYWdncmVnYXRlZCBieQpkZXZpY2VfY2xh
+c3MiIGF2ZXJhZ2UgbGF0ZW5jeSBLUEk/CkFsc28gYSBwZXJjZW50aWxlIHJhbmsgd291bGQgYmUg
+Z3JlYXQgKCUgYW1vdW50IG9mIHJlcXVlc3RzIHNlcnZpY2VkIGJ5wqAKPCA1bXMswqAgJSBhbW91
+bnQgb2YgcmVxdWVzdHMgc2VydmljZWQgYnnCoCA8IDIwbXMsICUgYW1vdW50IG9mIHJlcXVlc3Rz
+CnNlcnZpY2VkIGJ5wqAgPCA1MG1zLCAuLi4pCgpUaGUgZm9sbG93aW5nIGNvbW1hbmQgcHJvdmlk
+ZXMgYSBvdmVydmlldyBvdmVyIHRoZSBjb21taXQgbGF0ZW5jeSBvZiB0aGUKb3NkcyBidXQgbm8g
+YXZlcmFnZSBsYXRlbmN5IGFuZCBubyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgZGV2aWNlX2NsYXNz
+LgoKY2VwaCBvc2QgcGVyZiAtZiBqc29uLXByZXR0eQoKewrCoMKgwqAgIm9zZF9wZXJmX2luZm9z
+IjogWwrCoMKgwqDCoMKgwqDCoCB7CsKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgImlkIjogNzEsCsKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqAgInBlcmZfc3RhdHMiOiB7CsKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoCAiY29tbWl0X2xhdGVuY3lfbXMiOiAyLArCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqAgImFwcGx5X2xhdGVuY3lfbXMiOiAwCsKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgfQrC
+oMKgwqDCoMKgwqDCoCB9LArCoMKgwqDCoMKgwqDCoCB7CsKgwqDCoMKgwqDCoMKgwqDCoMKgwqAg
+ImlkIjogNzAsCsKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgInBlcmZfc3RhdHMiOiB7CsKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAiY29tbWl0X2xhdGVuY3lfbXMiOiAzLArCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqAgImFwcGx5X2xhdGVuY3lfbXMiOiAwCsKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqAgfQoKRGV2aWNlIGNsYXNzIGluZm9ybWF0aW9uIGNhbiBiZSBleHRyYWN0ZWQgb2Yg
+ImNlcGggZGYgLWYganNvbi1wcmV0dHkiLgoKQnV0IGJ1aWxkaW5nIGF2ZXJhZ2VzIG9mIGF2ZXJh
+Z2VzIG5vdCBzZWVtcyB0byBiZSBhIGdvb2QgdGhpbmcgLi4uLiA6LSkKCkl0IHNlZW1zIHRoYXQg
+aSBjYW4gZ2V0IG1vcmUgZGV0YWlsZWQgaW5mb3JtYXRpb24gdXNpbmcgdGhlICJjZXBoIGRhZW1v
+bgpvc2QuPG5yPiBwZXJmIGhpc3RvZ3JhbSBkdW1wIiBjb21tYW5kLgpUaGlzIHNlZW1zIHRvIGRl
+bGl2ZXIgdGhlIHBlcmNlbnRpbGUgcmFuayBpbmZvcm1hdGlvbiBpbiBhIGdvb2QgZGV0YWlsCmxl
+dmVsLgooaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9sdW1pbm91cy9kZXYvcGVyZl9oaXN0b2dy
+YW1zLykKCk15IHF1ZXN0aW9uczoKCkFyZSB0aGVyZSB0b29scyB0byBhbmFseXplIGFuZCBhZ2dy
+ZWdhdGUgdGhlc2UgbWVhc3VyZXMgZm9yIGEgZ3JvdXAgb2YgT1NEcz8KCldoaWNoIG1lYXN1cmVz
+IHNob3VsZCBpIHVzZSBhcyBhIGJhc2VsaW5lIGZvciBjbGllbnQgbGF0ZW5jeSBvcHRpbWl6YXRp
+b24/CgpXaGF0IGlzIHRoZSB0aW1lIGhvcml6b24gb2YgdGhlc2UgbWVhc3VyZXM/CgpJIHNvbWV0
+aW1lcyBzZWUgbWVzc2FnZXMgbGlrZSB0aGlzIGluIG15IGxvZy4KVGhpcyBzZWVtcyB0byBiZSBz
+b3VyY2VkIGluIGRlZXAgc2NydWJiaW5nLiBIb3cgY2FuIGZpbmQgdGhlCnNvdXJjZS9zb2x1dGlv
+biBvZiB0aGlzIHByb2JsZW0/CgoyMDE4LTA3LTExIDE2OjU4OjU1LjA2NDQ5NyBtb24uY2VwaC1t
+b24tczQzIFtJTkZdIENsdXN0ZXIgaXMgbm93IGhlYWx0aHkKMjAxOC0wNy0xMSAxNjo1OToxNS4x
+NDEyMTQgbW9uLmNlcGgtbW9uLXM0MyBbV1JOXSBIZWFsdGggY2hlY2sgZmFpbGVkOiA0CnNsb3cg
+cmVxdWVzdHMgYXJlIGJsb2NrZWQgPiAzMiBzZWMgKFJFUVVFU1RfU0xPVykKMjAxOC0wNy0xMSAx
+Njo1OToyNS4wMzc3MDcgbW9uLmNlcGgtbW9uLXM0MyBbV1JOXSBIZWFsdGggY2hlY2sgdXBkYXRl
+OiA5CnNsb3cgcmVxdWVzdHMgYXJlIGJsb2NrZWQgPiAzMiBzZWMgKFJFUVVFU1RfU0xPVykKMjAx
+OC0wNy0xMSAxNjo1OTozMC4wMzgwMDEgbW9uLmNlcGgtbW9uLXM0MyBbV1JOXSBIZWFsdGggY2hl
+Y2sgdXBkYXRlOgoyMyBzbG93IHJlcXVlc3RzIGFyZSBibG9ja2VkID4gMzIgc2VjIChSRVFVRVNU
+X1NMT1cpCjIwMTgtMDctMTEgMTY6NTk6MzUuMjEwOTAwIG1vbi5jZXBoLW1vbi1zNDMgW1dSTl0g
+SGVhbHRoIGNoZWNrIHVwZGF0ZToKMjcgc2xvdyByZXF1ZXN0cyBhcmUgYmxvY2tlZCA+IDMyIHNl
+YyAoUkVRVUVTVF9TTE9XKQoyMDE4LTA3LTExIDE2OjU5OjQ1LjAzODcxOCBtb24uY2VwaC1tb24t
+czQzIFtXUk5dIEhlYWx0aCBjaGVjayB1cGRhdGU6CjI5IHNsb3cgcmVxdWVzdHMgYXJlIGJsb2Nr
+ZWQgPiAzMiBzZWMgKFJFUVVFU1RfU0xPVykKMjAxOC0wNy0xMSAxNjo1OTo1MC4wMzg5NTUgbW9u
+LmNlcGgtbW9uLXM0MyBbV1JOXSBIZWFsdGggY2hlY2sgdXBkYXRlOgozOSBzbG93IHJlcXVlc3Rz
+IGFyZSBibG9ja2VkID4gMzIgc2VjIChSRVFVRVNUX1NMT1cpCjIwMTgtMDctMTEgMTY6NTk6NTUu
+MjgxMjc5IG1vbi5jZXBoLW1vbi1zNDMgW1dSTl0gSGVhbHRoIGNoZWNrIHVwZGF0ZToKNDQgc2xv
+dyByZXF1ZXN0cyBhcmUgYmxvY2tlZCA+IDMyIHNlYyAoUkVRVUVTVF9TTE9XKQoyMDE4LTA3LTEx
+IDE3OjAwOjAwLjAwMDEyMSBtb24uY2VwaC1tb24tczQzIFtXUk5dIG92ZXJhbGwgSEVBTFRIX1dB
+Uk4gMTIKc2xvdyByZXF1ZXN0cyBhcmUgYmxvY2tlZCA+IDMyIHNlYwoyMDE4LTA3LTExIDE3OjAw
+OjA1LjAzOTY3NyBtb24uY2VwaC1tb24tczQzIFtXUk5dIEhlYWx0aCBjaGVjayB1cGRhdGU6CjEy
+IHNsb3cgcmVxdWVzdHMgYXJlIGJsb2NrZWQgPiAzMiBzZWMgKFJFUVVFU1RfU0xPVykKMjAxOC0w
+Ny0xMSAxNzowMDowOS4zMjk4OTcgbW9uLmNlcGgtbW9uLXM0MyBbSU5GXSBIZWFsdGggY2hlY2sg
+Y2xlYXJlZDoKUkVRVUVTVF9TTE9XICh3YXM6IDEyIHNsb3cgcmVxdWVzdHMgYXJlIGJsb2NrZWQg
+PiAzMiBzZWMpCjIwMTgtMDctMTEgMTc6MDA6MDkuMzI5OTE5IG1vbi5jZXBoLW1vbi1zNDMgW0lO
+Rl0gQ2x1c3RlciBpcyBub3cgaGVhbHRoeQoKUmVnYXJkcwpNYXJjCgoKX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
+Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
