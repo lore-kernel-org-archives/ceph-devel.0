@@ -1,11 +1,16 @@
-From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Subject: v10.2.11 Jewel released
-Date: Wed, 11 Jul 2018 18:46:29 +0200
-Message-ID: <87a7qxbtzu.fsf@suse.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Luminous 12.2.6 release date?
+Date: Wed, 11 Jul 2018 17:48:10 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1807111747410.15688@piezo.novalocal>
+References: <20180710080734.GG14320@PC-198>
+ <CABZ+qq=zF-EfytsGr=FJCx8u3Q6jKwviE70onHWGdHi8ysxxWw@mail.gmail.com>
+ <alpine.DEB.2.11.1807111458550.15696@piezo.novalocal>
+ <CALqRxCwvbNA5YyBtMck399U2Wwa5rs-y7gwVj99wZt9sWmgtaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CALqRxCwvbNA5YyBtMck399U2Wwa5rs-y7gwVj99wZt9sWmgtaw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,54 +20,58 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+To: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-CldlJ3JlIGdsYWQgdG8gYW5ub3VuY2UgdjEwLjIuMTEgcmVsZWFzZSBvZiB0aGUgSmV3ZWwgc3Rh
-YmxlIHJlbGVhc2UKc2VyaWVzLiBUaGlzIHBvaW50IHJlbGVhc2VzIGJyaW5ncyBhIG51bWJlciBv
-ZiBpbXBvcnRhbnQgYnVnZml4ZXMgYW5kCmhhcyBhIGZldyBpbXBvcnRhbnQgc2VjdXJpdHkgZml4
-ZXMuIFRoaXMgaXMgbW9zdCBsaWtlbHkgZ29pbmcgdG8gYmUgdGhlCmZpbmFsIEpld2VsIHJlbGVh
-c2UgKHNoaW5lIG9uIHlvdSBjcmF6eSBkaWFtb25kKS4gV2UgdGhhbmsgZXZlcnlvbmUgaW4KdGhl
-IGNvbW11bml0eSBmb3IgY29udHJpYnV0aW5nIHRvd2FyZHMgdGhpcyByZWxlYXNlIGFuZCBwYXJ0
-aWN1bGFybHkKd2FudCB0byB0aGFuayBOYXRoYW4gYW5kIFl1cmkgZm9yIHRoZWlyIHJlbGVudGxl
-c3MgZWZmb3J0cyBpbgpiYWNrcG9ydGluZyBhbmQgdGVzdGluZyB0aGlzIHJlbGVhc2UuCgpXZSBy
-ZWNvbW1lbmQgdGhhdCBhbGwgSmV3ZWwgMTAuMi54IHVzZXJzIHVwZ3JhZGUuCgpOb3RhYmxlIENo
-YW5nZXMKLS0tLS0tLS0tLS0tLS0tCgoqIENWRSAyMDE4LTExMjg6IGF1dGg6IGNlcGh4IGF1dGhv
-cml6ZXIgc3ViamVjdCB0byByZXBsYXkgYXR0YWNrIChpc3N1ZSMyNDgzNiBodHRwOi8vdHJhY2tl
-ci5jZXBoLmNvbS9pc3N1ZXMvMjQ4MzYsIFNhZ2UgV2VpbCkKCiogQ1ZFIDIwMTgtMTEyOTogYXV0
-aDogY2VwaHggc2lnbmF0dXJlIGNoZWNrIGlzIHdlYWsgKGlzc3VlIzI0ODM3IGh0dHA6Ly90cmFj
-a2VyLmNlcGguY29tL2lzc3Vlcy8yNDgzNywgU2FnZSBXZWlsKQoKKiBDVkUgMjAxOC0xMDg2MTog
-bW9uOiBhdXRoIGNoZWNrcyBub3QgY29ycmVjdCBmb3IgcG9vbCBvcHMgKGlzc3VlIzI0ODM4IGh0
-dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8yNDgzOCwgSmFzb24gRGlsbGFtYW4pCgoqIFRo
-ZSBSQkQgQyBBUEkncyByYmRfZGlzY2FyZCBtZXRob2QgYW5kIHRoZSBDKysgQVBJJ3MgSW1hZ2U6
-OmRpc2NhcmQgbWV0aG9kCiAgbm93IGVuZm9yY2UgYSBtYXhpbXVtIGxlbmd0aCBvZiAyR0IuIFRo
-aXMgcmVzdHJpY3Rpb24gcHJldmVudHMgb3ZlcmZsb3cgb2YKICB0aGUgcmVzdWx0IGNvZGUuCgoq
-IE5ldyBPU0RzIHdpbGwgbm93IHVzZSByb2Nrc2RiIGZvciBvbWFwIGRhdGEgYnkgZGVmYXVsdCwg
-cmF0aGVyIHRoYW4KICBsZXZlbGRiLiBvbWFwIGlzIHVzZWQgYnkgUkdXIGJ1Y2tldCBpbmRleGVz
-IGFuZCBDZXBoRlMgZGlyZWN0b3JpZXMsCiAgYW5kIHdoZW4gYSBzaW5nbGUgbGV2ZWxkYiBncm93
-cyB0byAxMHMgb2YgR0Igd2l0aCBhIGhpZ2ggd3JpdGUgb3IKICBkZWxldGUgd29ya2xvYWQsIGl0
-IGNhbiBsZWFkIHRvIGhpZ2ggbGF0ZW5jeSB3aGVuIGxldmVsZGIncwogIHNpbmdsZS10aHJlYWRl
-ZCBjb21wYWN0aW9uIGNhbm5vdCBrZWVwIHVwLiByb2Nrc2RiIHN1cHBvcnRzIG11bHRpcGxlCiAg
-dGhyZWFkcyBmb3IgY29tcGFjdGlvbiwgd2hpY2ggYXZvaWRzIHRoaXMgcHJvYmxlbS4KCiogVGhl
-IENlcGhGUyBjbGllbnQgbm93IGNhdGNoZXMgZmFpbHVyZXMgdG8gY2xlYXIgZGVudHJpZXMgZHVy
-aW5nIHN0YXJ0dXAKICBhbmQgcmVmdXNlcyB0byBzdGFydCBhcyBjb25zaXN0ZW5jeSBhbmQgdW50
-cmltbWFibGUgY2FjaGUgaXNzdWVzIG1heQogIGRldmVsb3AuIFRoZSBuZXcgb3B0aW9uIGNsaWVu
-dF9kaWVfb25fZmFpbGVkX2RlbnRyeV9pbnZhbGlkYXRlIChkZWZhdWx0OgogIHRydWUpIG1heSBi
-ZSB0dXJuZWQgb2ZmIHRvIGFsbG93IHRoZSBjbGllbnQgdG8gcHJvY2VlZCAoZGFuZ2Vyb3VzISku
-CgoqIEluIDEwLjIuMTAgYW5kIGVhcmxpZXIgcmVsZWFzZXMsIGtleXJpbmcgY2FwcyB3ZXJlIG5v
-dCBjaGVja2VkIGZvciB2YWxpZGl0eSwKICBzbyB0aGUgY2FwcyBzdHJpbmcgY291bGQgYmUgYW55
-dGhpbmcuIEFzIG9mIDEwLjIuMTEsIGNhcHMgc3RyaW5ncyBhcmUKICB2YWxpZGF0ZWQgYW5kIHBy
-b3ZpZGluZyBhIGtleXJpbmcgd2l0aCBhbiBpbnZhbGlkIGNhcHMgc3RyaW5nIHRvLCBlLmcuLAog
-ICJjZXBoIGF1dGggYWRkIiB3aWxsIHJlc3VsdCBpbiBhbiBlcnJvci4KClRoZSBjaGFuZ2Vsb2cg
-YW5kIHRoZSBmdWxsIHJlbGVhc2Ugbm90ZXMgYXJlIGF0IHRoZSByZWxlYXNlIGJsb2cgZW50cnkK
-YXQgaHR0cHM6Ly9jZXBoLmNvbS9yZWxlYXNlcy92MTAtMi0xMS1qZXdlbC1yZWxlYXNlZC8KCkdl
-dHRpbmcgQ2VwaAotLS0tLS0tLS0tLS0KKiBHaXQgYXQgZ2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2Nl
-cGguZ2l0CiogVGFyYmFsbCBhdCBodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vdGFyYmFsbHMvY2Vw
-aC0xMC4yLjExLnRhci5negoqIEZvciBwYWNrYWdlcywgc2VlIGh0dHA6Ly9kb2NzLmNlcGguY29t
-L2RvY3MvbWFzdGVyL2luc3RhbGwvZ2V0LXBhY2thZ2VzLwoqIFJlbGVhc2UgZ2l0IHNoYTE6IGU0
-YjA2MWI0N2YwN2Y1ODNjOTJhMDUwZDllODRiMTgxM2EzNTY3MWUKCgpCZXN0LApBYmhpc2hlawoK
-LS0KU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRoYXJk
-LCBHcmFoYW0gTm9ydG9uLApIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
-Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Wed, 11 Jul 2018, Ken Dreyer wrote:
+> Sage, does http://tracker.ceph.com/issues/24597 cover the full problem
+> you're describing?
+
+Yeah.  I've added some detail to that bug.  Working on fixing our rados 
+test suite to reproduce the issue.
+
+sage
+
+
+> 
+> - Ken
+> 
+> On Wed, Jul 11, 2018 at 9:40 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> > Please hold off on upgrading.  We discovered a regression (in 12.2.5
+> > actually) but the triggering event is OSD restarts or other peering
+> > combined with RGW workloads on EC pools, so unnecessary OSD restarts
+> > should be avoided with 12.2.5 until we have is sorted out.
+> >
+> > sage
+> >
+> >
+> > On Wed, 11 Jul 2018, Dan van der Ster wrote:
+> >
+> >> And voila, I see the 12.2.6 rpms were released overnight.
+> >>
+> >> Waiting here for an announcement before upgrading.
+> >>
+> >> -- dan
+> >>
+> >> On Tue, Jul 10, 2018 at 10:08 AM Sean Purdy <s.purdy-jbg8n7S37wnmujpSeSYe3g@public.gmane.org> wrote:
+> >> >
+> >> > While we're at it, is there a release date for 12.2.6?  It fixes a reshard/versioning bug for us.
+> >> >
+> >> > Sean
+> >> > _______________________________________________
+> >> > ceph-users mailing list
+> >> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> _______________________________________________
+> >> ceph-users mailing list
+> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >>
+> >>
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
