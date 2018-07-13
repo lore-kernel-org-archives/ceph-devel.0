@@ -1,82 +1,116 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH 5/5] ceph: use 64-bit timespec for r_stamp
-Date: Fri, 13 Jul 2018 22:18:38 +0200
-Message-ID: <20180713201923.3200799-5-arnd@arndb.de>
-References: <20180713201923.3200799-1-arnd@arndb.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180713201923.3200799-1-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>
-Cc: y2038@lists.linaro.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Jeff Layton <jlayton@redhat.com>, Luis Henriques <lhenriques@suse.com>, Deepa Dinamani <deepa.kernel@gmail.com>, linux-kernel@vger.kernel.org
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: IMPORTANT: broken luminous 12.2.6 release in repo,
+ do not upgrade
+Date: Fri, 13 Jul 2018 23:24:56 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1807132300580.15688@piezo.novalocal>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
+List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-The ceph_mds_request stamp still uses the deprecated timespec structure,
-this converts it over as well.
+Hi everyone,
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- fs/ceph/inode.c      | 2 +-
- fs/ceph/mds_client.c | 7 +++----
- fs/ceph/mds_client.h | 2 +-
- 3 files changed, 5 insertions(+), 6 deletions(-)
+tl;dr:  Please avoid the 12.2.6 packages that are currently present on 
+download.ceph.com.  We will have a 12.2.7 published ASAP (probably 
+Monday).
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 715a6f2a4613..d62f65f2875d 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2136,7 +2136,7 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
- 		req->r_inode_drop = release;
- 		req->r_args.setattr.mask = cpu_to_le32(mask);
- 		req->r_num_caps = 1;
--		req->r_stamp = timespec64_to_timespec(attr->ia_ctime);
-+		req->r_stamp = attr->ia_ctime;
- 		err = ceph_mdsc_do_request(mdsc, NULL, req);
- 	}
- 	dout("setattr %p result=%d (%s locally, %d remote)\n", inode, err,
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 580644b04737..09142d309912 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1799,8 +1799,7 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
- 	INIT_LIST_HEAD(&req->r_unsafe_item);
- 
- 	ktime_get_coarse_real_ts64(&ts);
--	req->r_stamp = timespec64_to_timespec(timespec64_trunc(ts,
--						mdsc->fsc->sb->s_time_gran));
-+	req->r_stamp = timespec64_trunc(ts, mdsc->fsc->sb->s_time_gran);
- 
- 	req->r_op = op;
- 	req->r_direct_mode = mode;
-@@ -2097,7 +2096,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
- 	/* time stamp */
- 	{
- 		struct ceph_timespec ts;
--		ceph_encode_timespec(&ts, &req->r_stamp);
-+		ceph_encode_timespec64(&ts, &req->r_stamp);
- 		ceph_encode_copy(&p, &ts, sizeof(ts));
- 	}
- 
-@@ -2190,7 +2189,7 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 		p = msg->front.iov_base + req->r_request_release_offset;
- 		{
- 			struct ceph_timespec ts;
--			ceph_encode_timespec(&ts, &req->r_stamp);
-+			ceph_encode_timespec64(&ts, &req->r_stamp);
- 			ceph_encode_copy(&p, &ts, sizeof(ts));
- 		}
- 
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 2ec3b5b35067..80a7523e1523 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -229,7 +229,7 @@ struct ceph_mds_request {
- 	int r_fmode;        /* file mode, if expecting cap */
- 	kuid_t r_uid;
- 	kgid_t r_gid;
--	struct timespec r_stamp;
-+	struct timespec64 r_stamp;
- 
- 	/* for choosing which mds to send this request to */
- 	int r_direct_mode;
--- 
-2.9.0
+If you do not use bluestore or erasure-coded pools, none of the issues 
+affect you.
+
+
+Details:
+
+We built 12.2.6 and pushed it to the repos Wednesday, but as that was 
+happening realized there was a potentially dangerous regression in 
+12.2.5[1] that an upgrade might exacerbate.  While we sorted that issue 
+out, several people noticed the updated version in the repo and 
+upgraded.  That turned up two other regressions[2][3].  We have fixes for 
+those, but are working on an additional fix to make the damage from [3] 
+be transparently repaired.
+
+
+More details:
+
+-- [1] http://tracker.ceph.com/issues/24597 --
+
+This is actually a regression in 12.2.5 that affects erasure-coded pools.  
+If there are (1) normal erasure code writes, and simultanously (2) erasure 
+code writes that result in rados returning an error (for example, a delete 
+of a non-existent object, which commonly happens when rgw is doing garbage 
+collection), and (3) OSDs that are somewhat heavily loaded and then 
+restart, then the bug might incorrectly roll-forward the in-progress EC 
+operations.  When the PG repeers this results in an OSD crash like
+
+src/os/filestore/FileStore.cc: 5524: FAILED assert(0 == "ERROR: source must exist")
+
+It seems to affect filestore and busy clusters with this specific 
+workload.  The OSDs recover once restarted.  However, it is also unclear 
+whether it damages the objects in question.  For this reason, please avoid 
+unnecessary OSD restarts if you are running 12.2.5 or 12.2.6.  When we 
+release 12.2.7, we will have an upgrade procedure in the release notes 
+that quiesces RADOS IO to minimize the probability that this bug will 
+affect you.
+
+If you do not have erasure-coded pools, this bug does not affect you.
+
+
+-- [2] https://tracker.ceph.com/issues/24903 --
+
+ceph-volume has had a bug for a while that leaves the 
+/var/lib/ceph/osd/*/block.db or block.wal symlinks for bluestore OSDs 
+owned by root:root.  This didn't matter because bluestore was ignoring 
+these symlinks and using an internally stored value instead.
+
+Both of these were fixed/changed in 12.2.6.  However, after upgrading and 
+restarting, the symlink is still present in the /var/lib/ceph/osd/*/ 
+tmpfs and the OSD won't restart.  Rerunning ceph-volume will fix it, as 
+will manually chown -h ceph:ceph /var/lib/ceph/osd/*/block*, or a reboot.  
+
+12.2.7 has a packaging fix to fixed this up on upgrade so there is no 
+disruption.
+
+If you do not run bluestore, this bug does not affect you.
+
+
+-- [3] https://tracker.ceph.com/issues/23871 --
+
+We modified the OSD recently to avoid storing full-object CRCs when 
+bluestore is in use because those CRCs are redundant.  There was a bug in 
+this code that was later fixed in master.  This code was backported to 
+luminous, but the follow-on fix was missed.  The result is that a sequence 
+of
+
+- running 12.2.5
+- deep-scrub (updates stored whole-object crc)
+- upgrade to 12.2.6
+- writefull to existing (on 12.2.6) fails to clear the whole-object crc
+- read of full object -> crc mismatch
+
+which leads to an (incorrect) EIO error.  We have fixed the original 
+problem by backporting the missing fix.  However, users who mistakenly 
+installed 12.2.6 may have many objects with a mismatched whole-object crc.
+
+We are currently working on a fix to ignore the whole-object CRC if the 
+same conditions are met that make us skip them entirely (i.e., running 
+bluestore), and to clear/repair them on scrub.  Once this is done, we'll 
+push out 12.2.7.
+
+If you do not run bluestore, this bug does no affect you.
+
+We don't have an easy workaround for this one at the moment, 
+unfortunately.
+
+
+Exciting week!  Thanks everyone,
+sage
