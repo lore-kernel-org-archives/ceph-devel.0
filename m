@@ -1,116 +1,63 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: IMPORTANT: broken luminous 12.2.6 release in repo,
- do not upgrade
-Date: Fri, 13 Jul 2018 23:24:56 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1807132300580.15688@piezo.novalocal>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH 2/5] ceph: stop using current_kernel_time()
+Date: Mon, 16 Jul 2018 08:46:01 +0800
+Message-ID: <CAAM7YA=a00DHGm3CrGVy=tQm+7OBFYT1rmKY9wamVCYt0gqJKA@mail.gmail.com>
+References: <20180713201923.3200799-1-arnd@arndb.de>
+ <20180713201923.3200799-2-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
+In-Reply-To: <20180713201923.3200799-2-arnd@arndb.de>
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Jeff Layton <jlayton@redhat.com>, Sage Weil <sage@redhat.com>, y2038 Mailman List <y2038@lists.linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Zheng Yan <zyan@redhat.com>, Chengguang Xu <cgxu519@gmx.com>, Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi everyone,
-
-tl;dr:  Please avoid the 12.2.6 packages that are currently present on 
-download.ceph.com.  We will have a 12.2.7 published ASAP (probably 
-Monday).
-
-If you do not use bluestore or erasure-coded pools, none of the issues 
-affect you.
-
-
-Details:
-
-We built 12.2.6 and pushed it to the repos Wednesday, but as that was 
-happening realized there was a potentially dangerous regression in 
-12.2.5[1] that an upgrade might exacerbate.  While we sorted that issue 
-out, several people noticed the updated version in the repo and 
-upgraded.  That turned up two other regressions[2][3].  We have fixes for 
-those, but are working on an additional fix to make the damage from [3] 
-be transparently repaired.
-
-
-More details:
-
--- [1] http://tracker.ceph.com/issues/24597 --
-
-This is actually a regression in 12.2.5 that affects erasure-coded pools.  
-If there are (1) normal erasure code writes, and simultanously (2) erasure 
-code writes that result in rados returning an error (for example, a delete 
-of a non-existent object, which commonly happens when rgw is doing garbage 
-collection), and (3) OSDs that are somewhat heavily loaded and then 
-restart, then the bug might incorrectly roll-forward the in-progress EC 
-operations.  When the PG repeers this results in an OSD crash like
-
-src/os/filestore/FileStore.cc: 5524: FAILED assert(0 == "ERROR: source must exist")
-
-It seems to affect filestore and busy clusters with this specific 
-workload.  The OSDs recover once restarted.  However, it is also unclear 
-whether it damages the objects in question.  For this reason, please avoid 
-unnecessary OSD restarts if you are running 12.2.5 or 12.2.6.  When we 
-release 12.2.7, we will have an upgrade procedure in the release notes 
-that quiesces RADOS IO to minimize the probability that this bug will 
-affect you.
-
-If you do not have erasure-coded pools, this bug does not affect you.
-
-
--- [2] https://tracker.ceph.com/issues/24903 --
-
-ceph-volume has had a bug for a while that leaves the 
-/var/lib/ceph/osd/*/block.db or block.wal symlinks for bluestore OSDs 
-owned by root:root.  This didn't matter because bluestore was ignoring 
-these symlinks and using an internally stored value instead.
-
-Both of these were fixed/changed in 12.2.6.  However, after upgrading and 
-restarting, the symlink is still present in the /var/lib/ceph/osd/*/ 
-tmpfs and the OSD won't restart.  Rerunning ceph-volume will fix it, as 
-will manually chown -h ceph:ceph /var/lib/ceph/osd/*/block*, or a reboot.  
-
-12.2.7 has a packaging fix to fixed this up on upgrade so there is no 
-disruption.
-
-If you do not run bluestore, this bug does not affect you.
-
-
--- [3] https://tracker.ceph.com/issues/23871 --
-
-We modified the OSD recently to avoid storing full-object CRCs when 
-bluestore is in use because those CRCs are redundant.  There was a bug in 
-this code that was later fixed in master.  This code was backported to 
-luminous, but the follow-on fix was missed.  The result is that a sequence 
-of
-
-- running 12.2.5
-- deep-scrub (updates stored whole-object crc)
-- upgrade to 12.2.6
-- writefull to existing (on 12.2.6) fails to clear the whole-object crc
-- read of full object -> crc mismatch
-
-which leads to an (incorrect) EIO error.  We have fixed the original 
-problem by backporting the missing fix.  However, users who mistakenly 
-installed 12.2.6 may have many objects with a mismatched whole-object crc.
-
-We are currently working on a fix to ignore the whole-object CRC if the 
-same conditions are met that make us skip them entirely (i.e., running 
-bluestore), and to clear/repair them on scrub.  Once this is done, we'll 
-push out 12.2.7.
-
-If you do not run bluestore, this bug does no affect you.
-
-We don't have an easy workaround for this one at the moment, 
-unfortunately.
-
-
-Exciting week!  Thanks everyone,
-sage
+VGhlIGNlcGhmcyBwYXJ0IChwYXRjaCAyfjUpIGxvb2tzIGdvb2QgZm9yIG1lLgoKUmVnYXJkcwpZ
+YW4sIFpoZW5nCgoKT24gU2F0LCBKdWwgMTQsIDIwMTggYXQgNDoyMSBBTSBBcm5kIEJlcmdtYW5u
+IDxhcm5kQGFybmRiLmRlPiB3cm90ZToKPgo+IGNlcGhfbWRzY19jcmVhdGVfcmVxdWVzdCgpIGlz
+IG9uZSBvZiB0aGUgbGFzdCBjYWxsZXJzIG9mIHRoZQo+IGRlcHJlY2F0ZWQgY3VycmVudF9rZXJu
+ZWxfdGltZSgpIGFzIHdlbGwgYXMgdGltZXNwZWNfdHJ1bmMoKS4KPgo+IFRoaXMgY2hhbmdlcyBp
+dCB0byB1c2UgdGhlIHRpbWVzcGVjNjQgYmFzZWQgaW50ZXJmYWNlcyBpbnN0ZWFkLAo+IHRob3Vn
+aCB3ZSBzdGlsbCBuZWVkIHRvIGNvbnZlcnQgdGhlIHJlc3VsdCB1bnRpbCB3ZSBhcmUgcmVhZHkg
+dG8KPiBjaGFuZ2Ugb3ZlciByZXEtPnJfc3RhbXAuCj4KPiBUaGUgb3V0cHV0IG9mIHRoZSB0d28g
+ZnVuY3Rpb25zLCBrdGltZV9nZXRfY29hcnNlX3JlYWxfdHM2NCgpIGFuZAo+IGN1cnJlbnRfa2Vy
+bmVsX3RpbWUoKSBpcyB0aGUgc2FtZSBjb2Fyc2UtZ3JhbnVsYXIgdGltZXN0YW1wLAo+IHRoZSBv
+bmx5IGRpZmZlcmVuY2UgaGVyZSBpcyB0aGF0IGt0aW1lX2dldF9jb2Fyc2VfcmVhbF90czY0KCkK
+PiBkb2Vzbid0IG92ZXJmbG93IGluIDIwMzguCj4KPiBTaWduZWQtb2ZmLWJ5OiBBcm5kIEJlcmdt
+YW5uIDxhcm5kQGFybmRiLmRlPgo+IC0tLQo+IHYyOiBhZGQgY2xhcmlmaWNhdGlvbiB0aGF0IHRo
+aXMgaXMgdGhlIHNhbWUgdGltZXN0YW1wCj4gLS0tCj4gIGZzL2NlcGgvbWRzX2NsaWVudC5jIHwg
+NSArKysrLQo+ICAxIGZpbGUgY2hhbmdlZCwgNCBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0p
+Cj4KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9tZHNfY2xpZW50LmMgYi9mcy9jZXBoL21kc19jbGll
+bnQuYwo+IGluZGV4IGRjOGJjNjY0YTg3MS4uNjljODM5MzE2YTdhIDEwMDY0NAo+IC0tLSBhL2Zz
+L2NlcGgvbWRzX2NsaWVudC5jCj4gKysrIGIvZnMvY2VwaC9tZHNfY2xpZW50LmMKPiBAQCAtMTc3
+OSw2ICsxNzc5LDcgQEAgc3RydWN0IGNlcGhfbWRzX3JlcXVlc3QgKgo+ICBjZXBoX21kc2NfY3Jl
+YXRlX3JlcXVlc3Qoc3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywgaW50IG9wLCBpbnQgbW9k
+ZSkKPiAgewo+ICAgICAgICAgc3RydWN0IGNlcGhfbWRzX3JlcXVlc3QgKnJlcSA9IGt6YWxsb2Mo
+c2l6ZW9mKCpyZXEpLCBHRlBfTk9GUyk7Cj4gKyAgICAgICBzdHJ1Y3QgdGltZXNwZWM2NCB0czsK
+Pgo+ICAgICAgICAgaWYgKCFyZXEpCj4gICAgICAgICAgICAgICAgIHJldHVybiBFUlJfUFRSKC1F
+Tk9NRU0pOwo+IEBAIC0xNzk3LDcgKzE3OTgsOSBAQCBjZXBoX21kc2NfY3JlYXRlX3JlcXVlc3Qo
+c3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywgaW50IG9wLCBpbnQgbW9kZSkKPiAgICAgICAg
+IGluaXRfY29tcGxldGlvbigmcmVxLT5yX3NhZmVfY29tcGxldGlvbik7Cj4gICAgICAgICBJTklU
+X0xJU1RfSEVBRCgmcmVxLT5yX3Vuc2FmZV9pdGVtKTsKPgo+IC0gICAgICAgcmVxLT5yX3N0YW1w
+ID0gdGltZXNwZWNfdHJ1bmMoY3VycmVudF9rZXJuZWxfdGltZSgpLCBtZHNjLT5mc2MtPnNiLT5z
+X3RpbWVfZ3Jhbik7Cj4gKyAgICAgICBrdGltZV9nZXRfY29hcnNlX3JlYWxfdHM2NCgmdHMpOwo+
+ICsgICAgICAgcmVxLT5yX3N0YW1wID0gdGltZXNwZWM2NF90b190aW1lc3BlYyh0aW1lc3BlYzY0
+X3RydW5jKHRzLAo+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIG1kc2MtPmZzYy0+c2ItPnNfdGltZV9ncmFuKSk7Cj4KPiAgICAgICAgIHJlcS0+cl9vcCA9
+IG9wOwo+ICAgICAgICAgcmVxLT5yX2RpcmVjdF9tb2RlID0gbW9kZTsKPiAtLQo+IDIuOS4wCj4K
+PiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
+YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
+a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fClkyMDM4IG1haWxpbmcgbGlzdApZMjAzOEBsaXN0cy5saW5h
+cm8ub3JnCmh0dHBzOi8vbGlzdHMubGluYXJvLm9yZy9tYWlsbWFuL2xpc3RpbmZvL3kyMDM4Cg==
