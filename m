@@ -1,10 +1,14 @@
-From: Will Zhao <zhao6305-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: config ceph with rdma error
-Date: Wed, 18 Jul 2018 14:20:32 +0800
-Message-ID: <CAGOEmcMqLK=VPXdQw6PM8Y8+dgwPnNE9ivc2F7aBnfeE5++QTg@mail.gmail.com>
+From: Oliver Freyermuth <freyermuth-PRwTpj6vllKyLsESG3L8NIQuADTiUCJX@public.gmane.org>
+Subject: Re: v12.2.7 Luminous released
+Date: Wed, 18 Jul 2018 13:33:35 +0200
+Message-ID: <d8e1d1f4-b6ca-2f6b-09b3-8a6757c71105@physik.uni-bonn.de>
+References: <87tvox968t.fsf@suse.com> <20180717182419.GA1559@shell.dmz.bit.nl>
+ <alpine.DEB.2.11.1807171838180.15696@piezo.novalocal>
+ <MEAPR01MB3333E2C456B441629674B2BE81530@MEAPR01MB3333.ausprd01.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8448657214022512654=="
+Content-Type: multipart/mixed; boundary="===============7620251567298232587=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <MEAPR01MB3333E2C456B441629674B2BE81530-6Cj2JuxXxgYyJjs6S75NOcNU+h3Mz0HLvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -14,1349 +18,287 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linh Vu <vul-keaFvQtjc6i7NGdpmJTKYQ@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Stefan Kooman <stefan-68+x73Hep80@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Peter Wienemann <wienemann-PRwTpj6vllKyLsESG3L8NIQuADTiUCJX@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, "ceph-announce-Qp0mS5GaXlQ@public.gmane.org" <ceph-announce-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============8448657214022512654==
-Content-Type: multipart/alternative; boundary="00000000000012f957057140104a"
+This is a cryptographically signed message in MIME format.
 
---00000000000012f957057140104a
-Content-Type: text/plain; charset="UTF-8"
+--===============7620251567298232587==
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256; boundary="------------ms020700020605090803060605"
 
-Hi all:
+This is a cryptographically signed message in MIME format.
 
-
-
-By following the instructions:
-
-(https://community.mellanox.com/docs/DOC-2721)
-
-(https://community.mellanox.com/docs/DOC-2693)
-
-(http://hwchiu.com/2017-05-03-ceph-with-rdma.html)
-
-
-
-I'm trying to configure CEPH with RDMA feature on environments as follows:
-
-
-
-CentOS Linux release 7.2.1511 (Core)
-
-MLNX_OFED_LINUX-4.4-1.0.0.0:
-
-Mellanox Technologies MT27500 Family [ConnectX-3]
-
-
-
-rping works between all nodes and add these lines to ceph.conf to enable
-RDMA:
-
-
-
-public_network = 10.10.121.0/24
-
-cluster_network = 10.10.121.0/24
-
-ms_type = async+rdma
-
-ms_async_rdma_device_name = mlx4_0
-
-ms_async_rdma_port_num = 2
-
-
-
-IB network is using 10.10.121.0/24 addresses and "ibdev2netdev" command
-shows port 2 is up.
-
-Error occurs when running "ceph-deploy --overwrite-conf mon
-create-initial", ceph-deploy log details:
-
-
-
-[2018-07-12 17:53:48,943][ceph_deploy.conf][DEBUG ] found configuration
-file at: /home/user1/.cephdeploy.conf
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ] Invoked (1.5.37):
-/usr/bin/ceph-deploy --overwrite-conf mon create-initial
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ] ceph-deploy options:
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ]
-username                      : None
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ]
-verbose                       : False
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ]
-overwrite_conf                : True
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ]
-subcommand                    : create-initial
-
-[2018-07-12 17:53:48,944][ceph_deploy.cli][INFO  ]  quiet
-              : False
-
-[2018-07-12 17:53:48,945][ceph_deploy.cli][INFO  ]
-cd_conf                       : <ceph_deploy.conf.cephdeploy.Conf object at
-0x27e6210>
-
-[2018-07-12 17:53:48,945][ceph_deploy.cli][INFO  ]
-cluster                       : ceph
-
-[2018-07-12 17:53:48,945][ceph_deploy.cli][INFO  ]
-func                          : <function mon at 0x2a7d2a8>
-
-[2018-07-12 17:53:48,945][ceph_deploy.cli][INFO  ]
-ceph_conf                     : None
-
-[2018-07-12 17:53:48,945][ceph_deploy.cli][INFO  ]
-default_release               : False
-
-[2018-07-12 17:53:48,945][ceph_deploy.cli][INFO  ]
-keyrings                      : None
-
-[2018-07-12 17:53:48,947][ceph_deploy.mon][DEBUG ] Deploying mon, cluster
-ceph hosts node1
-
-[2018-07-12 17:53:48,947][ceph_deploy.mon][DEBUG ] detecting platform for
-host node1 ...
-
-[2018-07-12 17:53:49,005][node1][DEBUG ] connection detected need for sudo
-
-[2018-07-12 17:53:49,039][node1][DEBUG ] connected to host: node1
-
-[2018-07-12 17:53:49,040][node1][DEBUG ] detect platform information from
-remote host
-
-[2018-07-12 17:53:49,073][node1][DEBUG ] detect machine type
-
-[2018-07-12 17:53:49,078][node1][DEBUG ] find the location of an executable
-
-[2018-07-12 17:53:49,079][ceph_deploy.mon][INFO  ] distro info: CentOS
-Linux 7.2.1511 Core
-
-[2018-07-12 17:53:49,079][node1][DEBUG ] determining if provided host has
-same hostname in remote
-
-[2018-07-12 17:53:49,079][node1][DEBUG ] get remote short hostname
-
-[2018-07-12 17:53:49,080][node1][DEBUG ] deploying mon to node1
-
-[2018-07-12 17:53:49,080][node1][DEBUG ] get remote short hostname
-
-[2018-07-12 17:53:49,081][node1][DEBUG ] remote hostname: node1
-
-[2018-07-12 17:53:49,083][node1][DEBUG ] write cluster configuration to
-/etc/ceph/{cluster}.conf
-
-[2018-07-12 17:53:49,084][node1][DEBUG ] create the mon path if it does not
-exist
-
-[2018-07-12 17:53:49,085][node1][DEBUG ] checking for done path:
-/var/lib/ceph/mon/ceph-node1/done
-
-[2018-07-12 17:53:49,085][node1][DEBUG ] create a done file to avoid
-re-doing the mon deployment
-
-[2018-07-12 17:53:49,086][node1][DEBUG ] create the init path if it does
-not exist
-
-[2018-07-12 17:53:49,089][node1][INFO  ] Running command: sudo systemctl
-enable ceph.target
-
-[2018-07-12 17:53:49,365][node1][INFO  ] Running command: sudo systemctl
-enable ceph-mon@node1
-
-[2018-07-12 17:53:49,588][node1][INFO  ] Running command: sudo systemctl
-start ceph-mon@node1
-
-[2018-07-12 17:53:51,762][node1][INFO  ] Running command: sudo ceph
---cluster=ceph --admin-daemon /var/run/ceph/ceph-mon.node1.asok mon_status
-
-[2018-07-12 17:53:51,979][node1][DEBUG ]
-********************************************************************************
-
-[2018-07-12 17:53:51,979][node1][DEBUG ] status for monitor: mon.node1
-
-[2018-07-12 17:53:51,980][node1][DEBUG ] {
-
-[2018-07-12 17:53:51,980][node1][DEBUG ]   "election_epoch": 3,
-
-[2018-07-12 17:53:51,980][node1][DEBUG ]   "extra_probe_peers": [],
-
-[2018-07-12 17:53:51,980][node1][DEBUG ]   "feature_map": {
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]     "mon": {
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]       "group": {
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]         "features":
-"0x1ffddff8eea4fffb",
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]         "num": 1,
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]         "release": "luminous"
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]       }
-
-[2018-07-12 17:53:51,981][node1][DEBUG ]     }
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]   },
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]   "features": {
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]     "quorum_con":
-"2305244844532236283",
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]     "quorum_mon": [
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]       "kraken",
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]       "luminous"
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]     ],
-
-[2018-07-12 17:53:51,982][node1][DEBUG ]     "required_con":
-"153140804152475648",
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]     "required_mon": [
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]       "kraken",
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]       "luminous"
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]     ]
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]   },
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]   "monmap": {
-
-[2018-07-12 17:53:51,983][node1][DEBUG ]     "created": "2018-07-12
-17:41:24.243749",
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]     "epoch": 1,
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]     "features": {
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]       "optional": [],
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]       "persistent": [
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]         "kraken",
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]         "luminous"
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]       ]
-
-[2018-07-12 17:53:51,984][node1][DEBUG ]     },
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]     "fsid":
-"9317bc6a-ea20-4376-a390-52afa0b81353",
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]     "modified": "2018-07-12
-17:41:24.243749",
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]     "mons": [
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]       {
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]         "addr": "
-10.10.121.25:6789/0",
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]         "name": "node1",
-
-[2018-07-12 17:53:51,985][node1][DEBUG ]         "public_addr": "
-10.10.121.25:6789/0",
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]         "rank": 0
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]       }
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]     ]
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]   },
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]   "name": "node1",
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]   "outside_quorum": [],
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]   "quorum": [
-
-[2018-07-12 17:53:51,986][node1][DEBUG ]     0
-
-[2018-07-12 17:53:51,987][node1][DEBUG ]   ],
-
-[2018-07-12 17:53:51,987][node1][DEBUG ]   "rank": 0,
-
-[2018-07-12 17:53:51,987][node1][DEBUG ]   "state": "leader",
-
-[2018-07-12 17:53:51,987][node1][DEBUG ]   "sync_provider": []
-
-[2018-07-12 17:53:51,987][node1][DEBUG ] }
-
-[2018-07-12 17:53:51,987][node1][DEBUG ]
-********************************************************************************
-
-[2018-07-12 17:53:51,987][node1][INFO  ] monitor: mon.node1 is running
-
-[2018-07-12 17:53:51,989][node1][INFO  ] Running command: sudo ceph
---cluster=ceph --admin-daemon /var/run/ceph/ceph-mon.node1.asok mon_status
-
-[2018-07-12 17:53:52,156][ceph_deploy.mon][INFO  ] processing monitor
-mon.node1
-
-[2018-07-12 17:53:52,194][node1][DEBUG ] connection detected need for sudo
-
-[2018-07-12 17:53:52,230][node1][DEBUG ] connected to host: node1
-
-[2018-07-12 17:53:52,231][node1][DEBUG ] detect platform information from
-remote host
-
-[2018-07-12 17:53:52,265][node1][DEBUG ] detect machine type
-
-[2018-07-12 17:53:52,270][node1][DEBUG ] find the location of an executable
-
-[2018-07-12 17:53:52,273][node1][INFO  ] Running command: sudo ceph
---cluster=ceph --admin-daemon /var/run/ceph/ceph-mon.node1.asok mon_status
-
-[2018-07-12 17:53:52,439][ceph_deploy.mon][INFO  ] mon.node1 monitor has
-reached quorum!
-
-[2018-07-12 17:53:52,440][ceph_deploy.mon][INFO  ] all initial monitors are
-running and have formed quorum
-
-[2018-07-12 17:53:52,440][ceph_deploy.mon][INFO  ] Running gatherkeys...
-
-[2018-07-12 17:53:52,441][ceph_deploy.gatherkeys][INFO  ] Storing keys in
-temp directory /tmp/tmp8bdYT6
-
-[2018-07-12 17:53:52,477][node1][DEBUG ] connection detected need for sudo
-
-[2018-07-12 17:53:52,510][node1][DEBUG ] connected to host: node1
-
-[2018-07-12 17:53:52,511][node1][DEBUG ] detect platform information from
-remote host
-
-[2018-07-12 17:53:52,552][node1][DEBUG ] detect machine type
-
-[2018-07-12 17:53:52,558][node1][DEBUG ] get remote short hostname
-
-[2018-07-12 17:53:52,559][node1][DEBUG ] fetch remote file
-
-[2018-07-12 17:53:52,562][node1][INFO  ] Running command: sudo
-/usr/bin/ceph --connect-timeout=25 --cluster=ceph
---admin-daemon=/var/run/ceph/ceph-mon.node1.asok mon_status
-
-[2018-07-12 17:53:52,731][node1][INFO  ] Running command: sudo
-/usr/bin/ceph --connect-timeout=25 --cluster=ceph --name mon.
---keyring=/var/lib/ceph/mon/ceph-node1/keyring auth get client.admin
-
-[2018-07-12 17:54:18,059][node1][ERROR ] "ceph auth get-or-create for
-keytype admin returned 1
-
-[2018-07-12 17:54:18,059][node1][DEBUG ] Cluster connection interrupted or
-timed out
-
-[2018-07-12 17:54:18,059][node1][ERROR ] Failed to return 'admin' key from
-host node1
-
-[2018-07-12 17:54:18,059][ceph_deploy.gatherkeys][ERROR ] Failed to connect
-to host:node1
-
-[2018-07-12 17:54:18,060][ceph_deploy.gatherkeys][INFO  ] Destroy temp
-directory /tmp/tmp8bdYT6
-
-[2018-07-12 17:54:18,060][ceph_deploy][ERROR ] RuntimeError: Failed to
-connect any mon
-
-
-
-ceph-mon service is up but cannot be connected to reach, "ceph -s" also
-returns same types of error:
-
-
-
-2018-07-13 10:44:21.169536 7fa570d4e700  0 monclient(hunting): authenticate
-timed out after 300
-
-2018-07-13 10:44:21.169579 7fa570d4e700  0 librados: client.admin
-authentication error (110) Connection timed out
-
-[errno 110] error connecting to the cluster
-
-
-
-I'am running the ceph version 12.2.4 luminous stable, do you guys have any
-suggestion about this issue?
-
-
-
-Thx
-
---00000000000012f957057140104a
-Content-Type: text/html; charset="UTF-8"
+--------------ms020700020605090803060605
+Content-Type: text/plain; charset=windows-1252
+Content-Language: en-GB
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">Hi al=
-l:=C2=A0<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">By fo=
-llowing the instructions:<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">(<a h=
-ref=3D"https://community.mellanox.com/docs/DOC-2721" style=3D"color:rgb(5,9=
-9,193);text-decoration:underline">https://community.mellanox.com/docs/DOC-2=
-721</a>)<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">(<a h=
-ref=3D"https://community.mellanox.com/docs/DOC-2693" style=3D"color:rgb(5,9=
-9,193);text-decoration:underline">https://community.mellanox.com/docs/DOC-2=
-693</a>)<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">(<a h=
-ref=3D"http://hwchiu.com/2017-05-03-ceph-with-rdma.html" style=3D"color:rgb=
-(5,99,193);text-decoration:underline">http://hwchiu.com/2017-05-03-ceph-wit=
-h-rdma.html</a>)<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">I&#39=
-;m trying to configure CEPH with RDMA
-feature on environments as follows:<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">CentO=
-S Linux release 7.2.1511 (Core)<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">MLNX_=
-OFED_LINUX-4.4-1.0.0.0:<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">Mella=
-nox Technologies MT27500 Family
-[ConnectX-3]<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">rping=
- works between all nodes and add these
-lines to ceph.conf to enable RDMA:<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">public_network =3D
-<a href=3D"http://10.10.121.0/24">10.10.121.0/24</a><span></span></span></p=
->
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">cluster_network =3D
-<a href=3D"http://10.10.121.0/24">10.10.121.0/24</a><span></span></span></p=
->
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">ms_type =3D async+rdma<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">ms_async_rdma_device_name
-=3D mlx4_0<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">ms_async_rdma_port_num
-=3D 2</span><span lang=3D"EN-US"><span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">IB ne=
-twork is using <a href=3D"http://10.10.121.0/24">10.10.121.0/24</a>
-addresses and &quot;ibdev2netdev&quot; command shows port 2 is up. <span></=
-span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">Error=
- occurs when running &quot;ceph-deploy
---overwrite-conf mon create-initial&quot;, ceph-deploy log details:<span></=
-span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,943][ceph_deploy.conf][DEBUG ] found configuration file at:
-/home/user1/.cephdeploy.conf<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ] Invoked (1.5.37):
-/usr/bin/ceph-deploy --overwrite-conf mon create-initial<span></span></span=
-></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ] ceph-deploy options:<span></spa=
-n></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-username=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: None<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-verbose=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: False<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-overwrite_conf=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: True<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-subcommand=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: create-initial<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,944][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-quiet=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0:
-False<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,945][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-cd_conf=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: &lt;ceph_deploy.conf.cephdeploy.Conf object at 0x27e6210&gt;<span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,945][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-cluster=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: ceph<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,945][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-func=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0
-: &lt;function mon at 0x2a7d2a8&gt;<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,945][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0 ceph_conf=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: None<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,945][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-default_release=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0
-: False<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,945][ceph_deploy.cli][INFO=C2=A0 ]=C2=A0
-keyrings=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-: None<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,947][ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts no=
-de1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:48,947][ceph_deploy.mon][DEBUG ] detecting platform for host node1 ..=
-.<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,005][node1][DEBUG ] connection detected need for sudo<span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,039][node1][DEBUG ] connected to host: node1 <span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,040][node1][DEBUG ] detect platform information from remote host<s=
-pan></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,073][node1][DEBUG ] detect machine type<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,078][node1][DEBUG ] find the location of an executable<span></span=
-></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12 17:53:49,079][ceph_deploy.mon][INFO=
-=C2=A0
-] distro info: CentOS Linux 7.2.1511 Core<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,079][node1][DEBUG ] determining if provided host has same hostname=
- in
-remote<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,079][node1][DEBUG ] get remote short hostname<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12 17:53:49,080][node1][DEBUG
-] deploying mon to node1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,080][node1][DEBUG ] get remote short hostname<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,081][node1][DEBUG ] remote hostname: node1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,083][node1][DEBUG ] write cluster configuration to /etc/ceph/{clus=
-ter}.conf<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,084][node1][DEBUG ] create the mon path if it does not exist<span>=
-</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,085][node1][DEBUG ] checking for done path:
-/var/lib/ceph/mon/ceph-node1/done<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,085][node1][DEBUG ] create a done file to avoid re-doing the mon
-deployment<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,086][node1][DEBUG ] create the init path if it does not exist<span=
-></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,089][node1][INFO=C2=A0 ] Running command: sudo systemctl enable
-ceph.target<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,365][node1][INFO=C2=A0 ] Running command: sudo systemctl enable
-ceph-mon@node1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:49,588][node1][INFO=C2=A0 ] Running command: sudo systemctl start
-ceph-mon@node1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,762][node1][INFO=C2=A0 ] Running command: sudo ceph --cluster=3Dce=
-ph
---admin-daemon /var/run/ceph/ceph-mon.node1.asok mon_status<span></span></s=
-pan></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,979][node1][DEBUG ]
-***************************************************************************=
-*****<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,979][node1][DEBUG ] status for monitor: mon.node1<span></span></sp=
-an></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,980][node1][DEBUG ] {<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,980][node1][DEBUG ]=C2=A0=C2=A0 &quot;election_epoch&quot;: 3, <sp=
-an></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,980][node1][DEBUG ]=C2=A0=C2=A0 &quot;extra_probe_peers&quot;: [],=
- <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,980][node1][DEBUG ]=C2=A0=C2=A0 &quot;feature_map&quot;: {<span></=
-span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;mon&quot;: {<spa=
-n></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;group&quot;: {<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;features&quot;: &quot;0x1ffddff8eea4fffb&quot;, <span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;num&quot;: 1, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;release&quot;: &quot;luminous&quot;<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }<span></s=
-pan></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,981][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 }<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0 }, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0 &quot;features&quot;: {<span></spa=
-n></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;quorum_con&quot;=
-:
-&quot;2305244844532236283&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;quorum_mon&quot;=
-: [<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;kraken&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;luminous&quot;<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 ], <span></span></span=
-></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,982][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;required_con&quo=
-t;:
-&quot;153140804152475648&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;required_mon&quo=
-t;:
-[<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;kraken&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;luminous&quot;<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 ]<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0 }, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0 &quot;monmap&quot;: {<span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,983][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;created&quot;:
-&quot;2018-07-12 17:41:24.243749&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;epoch&quot;: 1, =
-<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;features&quot;: =
-{<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;optional&quot;: [], <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-&quot;persistent&quot;: [<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;kraken&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;luminous&quot;<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ]<span></s=
-pan></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,984][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 }, <span></span></span=
-></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12 17:53:51,985][node1][DEBUG
-]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;fsid&quot;:
-&quot;9317bc6a-ea20-4376-a390-52afa0b81353&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,985][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;modified&quot;:
-&quot;2018-07-12 17:41:24.243749&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,985][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 &quot;mons&quot;: [<sp=
-an></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,985][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 {<span></s=
-pan></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,985][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;addr&quot;: &quot;<a href=3D"http://10.10.121.25:6789/0">10.10.121.25=
-:6789/0</a>&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,985][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;name&quot;: &quot;node1&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,985][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;public_addr&quot;: &quot;<a href=3D"http://10.10.121.25:6789/0">10.10=
-.121.25:6789/0</a>&quot;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-&quot;rank&quot;: 0<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }<span></s=
-pan></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 ]<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0 }, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0 &quot;name&quot;: &quot;node1&quot=
-;, <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0 &quot;outside_quorum&quot;: [], <s=
-pan></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0 &quot;quorum&quot;: [<span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,986][node1][DEBUG ]=C2=A0=C2=A0=C2=A0=C2=A0 0<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][DEBUG ]=C2=A0=C2=A0 ], <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][DEBUG ]=C2=A0=C2=A0 &quot;rank&quot;: 0, <span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][DEBUG ]=C2=A0=C2=A0 &quot;state&quot;: &quot;leader&qu=
-ot;,
-<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][DEBUG ]=C2=A0=C2=A0 &quot;sync_provider&quot;: []<span=
-></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][DEBUG ] }<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][DEBUG ]
-***************************************************************************=
-*****<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,987][node1][INFO=C2=A0 ] monitor: mon.node1 is running<span></span=
-></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:51,989][node1][INFO=C2=A0 ] Running command: sudo ceph --cluster=3Dce=
-ph
---admin-daemon /var/run/ceph/ceph-mon.node1.asok mon_status<span></span></s=
-pan></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,156][ceph_deploy.mon][INFO=C2=A0 ] processing monitor mon.node1<sp=
-an></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,194][node1][DEBUG ] connection detected need for sudo<span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12 17:53:52,230][node1][DEBUG
-] connected to host: node1 <span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,231][node1][DEBUG ] detect platform information from remote host<s=
-pan></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,265][node1][DEBUG ] detect machine type<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,270][node1][DEBUG ] find the location of an executable<span></span=
-></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,273][node1][INFO=C2=A0 ] Running command: sudo ceph --cluster=3Dce=
-ph
---admin-daemon /var/run/ceph/ceph-mon.node1.asok mon_status<span></span></s=
-pan></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,439][ceph_deploy.mon][INFO=C2=A0 ] mon.node1 monitor has reached
-quorum!<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,440][ceph_deploy.mon][INFO=C2=A0 ] all initial monitors are runnin=
-g
-and have formed quorum<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,440][ceph_deploy.mon][INFO=C2=A0 ] Running gatherkeys...<span></sp=
-an></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,441][ceph_deploy.gatherkeys][INFO=C2=A0 ] Storing keys in temp
-directory /tmp/tmp8bdYT6<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,477][node1][DEBUG ] connection detected need for sudo<span></span>=
-</span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,510][node1][DEBUG ] connected to host: node1 <span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,511][node1][DEBUG ] detect platform information from remote host<s=
-pan></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,552][node1][DEBUG ] detect machine type<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,558][node1][DEBUG ] get remote short hostname<span></span></span><=
-/p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,559][node1][DEBUG ] fetch remote file<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,562][node1][INFO=C2=A0 ] Running command: sudo /usr/bin/ceph --con=
-nect-timeout=3D25
---cluster=3Dceph --admin-daemon=3D/var/run/ceph/ceph-mon.node1.asok mon_sta=
-tus<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:53:52,731][node1][INFO=C2=A0 ] Running command: sudo /usr/bin/ceph
---connect-timeout=3D25 --cluster=3Dceph --name mon.
---keyring=3D/var/lib/ceph/mon/ceph-node1/keyring auth get client.admin<span=
-></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:54:18,059][node1][ERROR ] &quot;ceph auth get-or-create for keytype admi=
-n
-returned 1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:54:18,059][node1][DEBUG ] Cluster connection interrupted or timed out<sp=
-an></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:54:18,059][node1][ERROR ] Failed to return &#39;admin&#39; key from host=
- node1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:54:18,059][ceph_deploy.gatherkeys][ERROR ] Failed to connect to host:nod=
-e1<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:54:18,060][ceph_deploy.gatherkeys][INFO=C2=A0 ] Destroy temp directory
-/tmp/tmp8bdYT6<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[2018-07-12
-17:54:18,060][ceph_deploy][ERROR ] RuntimeError: Failed to connect any mon<=
-span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">ceph-=
-mon service is up but cannot be
-connected to reach, &quot;ceph -s&quot; also returns same types of error:<s=
-pan></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">2018-07-13
-10:44:21.169536 7fa570d4e700=C2=A0 0 monclient(hunting): authenticate timed=
- out
-after 300<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">2018-07-13
-10:44:21.169579 7fa570d4e700=C2=A0 0 librados: client.admin authentication
-error (110) Connection timed out<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US" style=
-=3D"color:rgb(127,127,127)">[errno 110] error
-connecting to the cluster<span></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">I&#39=
-;am running the ceph version 12.2.4
-luminous stable, do you guys have any suggestion about this issue?<span></s=
-pan></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US">Thx<s=
-pan></span></span></p>
-
-<p class=3D"MsoNormal" style=3D"margin:0cm 0cm 0.0001pt;text-align:justify;=
-font-size:10.5pt;font-family:Calibri,sans-serif"><span lang=3D"EN-US"><span=
->=C2=A0</span></span></p>
-
-
-
-
-<br></div>
-
---00000000000012f957057140104a--
-
---===============8448657214022512654==
+Also many thanks from my side!=20
+
+Am 18.07.2018 um 03:04 schrieb Linh Vu:
+> Thanks for all your hard work in putting out the fixes so quickly! :)
+>=20
+> We have a cluster on 12.2.5 with Bluestore and EC pool but for CephFS, =
+not RGW. In the release notes, it says RGW is a risk especially the garba=
+ge collection, and the recommendation is to either pause IO or disable RG=
+W garbage collection.=A0
+>=20
+>=20
+> In our case with CephFS, not RGW, is it a lot less risky to perform the=
+ upgrade to 12.2.7 without the need to pause IO?=A0
+>=20
+>=20
+> What does pause IO do? Do current sessions just get queued up and IO re=
+sume normally with no problem after unpausing?=20
+
+That's my understanding, pause blocks any reads and writes. If the proces=
+ses accessing CephFS do not have any wallclock-related timeout handlers, =
+they should be fine IMHO.=20
+I'm unsure how NFS Ganesha=20
+But indeed I have the very same question - we also have a pure CephFS clu=
+ster, without RGW, EC-pool-backed, on 12.2.5. Should we pause IO during u=
+pgrade?=20
+
+I wonder whether it is risky / unrisky to upgrade without pausing I/O?=20
+The update notes in the blog do not state whether a pure CephFS setup is =
+affected.=20
+
+Cheers,
+	Oliver
+
+>=20
+>=20
+> If we have to pause IO, is it better to do=A0something like: pause IO, =
+restart OSDs on one node, unpause IO - repeated for all the nodes involve=
+d in the EC pool?=A0
+>=20
+>=20
+> Regards,
+>=20
+> Linh
+>=20
+> -----------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------
+> *From:* ceph-users <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org> on behalf of Sag=
+e Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+> *Sent:* Wednesday, 18 July 2018 4:42:41 AM
+> *To:* Stefan Kooman
+> *Cc:* ceph-announce-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-maintain=
+ers-Qp0mS5GaXlQ@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org
+> *Subject:* Re: [ceph-users] v12.2.7 Luminous released
+> =A0
+> On Tue, 17 Jul 2018, Stefan Kooman wrote:
+>> Quoting Abhishek Lekshmanan (abhishek-IBi9RG/b67k@public.gmane.org):
+>>
+>> > *NOTE* The v12.2.5 release has a potential data corruption issue wit=
+h
+>> > erasure coded pools. If you ran v12.2.5 with erasure coding, please =
+see
+> ^^^^^^^^^^^^^^^^^^^
+>> > below.
+>>
+>> < snip >
+>>
+>> > Upgrading from v12.2.5 or v12.2.6
+>> > ---------------------------------
+>> >
+>> > If you used v12.2.5 or v12.2.6 in combination with erasure coded
+> ^^^^^^^^^^^^^
+>> > pools, there is a small risk of corruption under certain workloads.
+>> > Specifically, when:
+>>
+>> < snip >
+>>
+>> One section mentions Luminous clusters _with_ EC pools specifically, t=
+he other
+>> section mentions Luminous clusters running 12.2.5.
+>=20
+> I think they both do?
+>=20
+>> I might be misreading this, but to make things clear for current Ceph
+>> Luminous 12.2.5 users. Is the following statement correct?
+>>
+>> If you do _NOT_ use EC in your 12.2.5 cluster (only replicated pools),=
+ there is
+>> no need to quiesce IO (ceph osd pause).
+>=20
+> Correct.
+>=20
+>> http://docs.ceph.com/docs/master/releases/luminous/#upgrading-from-oth=
+er-versions
+>> If your cluster did not run v12.2.5 or v12.2.6 then none of the above
+>> issues apply to you and you should upgrade normally.
+>>
+>> ^^ Above section would indicate all 12.2.5 luminous clusters.
+>=20
+> The intent here is to clarify that any cluster running 12.2.4 or
+> older can upgrade without reading carefully. If the cluster
+> does/did run 12.2.5 or .6, then read carefully because it may (or may n=
+ot)
+> be affected.
+>=20
+> Does that help? Any suggested revisions to the wording in the release
+> notes that make it clearer are welcome!
+>=20
+> Thanks-
+> sage
+>=20
+>=20
+>>
+>> Please clarify,
+>>
+>> Thanks,
+>>
+>> Stefan
+>>
+>> --
+>> | BIT BV http://www.bit.nl/ Kamer van Koophandel 09090351
+>> | GPG: 0xD14839C6 +31 318 648 688 / info-68+x73Hep80@public.gmane.org
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>=20
+>=20
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>=20
+
+
+
+--------------ms020700020605090803060605
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0BBwEAAKCC
+EIowggTVMIIDvaADAgECAghQTsb1PRG0ZDANBgkqhkiG9w0BAQsFADBxMQswCQYDVQQGEwJE
+RTEcMBoGA1UEChMTRGV1dHNjaGUgVGVsZWtvbSBBRzEfMB0GA1UECxMWVC1UZWxlU2VjIFRy
+dXN0IENlbnRlcjEjMCEGA1UEAxMaRGV1dHNjaGUgVGVsZWtvbSBSb290IENBIDIwHhcNMTQw
+NzIyMTIwODI2WhcNMTkwNzA5MjM1OTAwWjBaMQswCQYDVQQGEwJERTETMBEGA1UEChMKREZO
+LVZlcmVpbjEQMA4GA1UECxMHREZOLVBLSTEkMCIGA1UEAxMbREZOLVZlcmVpbiBQQ0EgR2xv
+YmFsIC0gRzAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6ZvDZ4X5Da71jVTD
+llA1PWLpbkztlNcAW5UidNQg6zSP1uzAMQQLmYHiphTSUqAoI4SLdIkEXlvg4njBeMsWyyg1
+OXstkEXQ7aAAeny/Sg4bAMOG6VwrMRF7DPOCJEOMHDiLamgAmu7cT3ir0sYTm3at7t4m6O8B
+r3QPwQmi9mvOvdPNFDBP9eXjpMhim4IaAycwDQJlYE3t0QkjKpY1WCfTdsZxtpAdxO3/NYZ9
+bzOz2w/FEcKKg6GUXUFr2NIQ9Uz9ylGs2b3vkoO72uuLFlZWQ8/h1RM9ph8nMM1JVNvJEzSa
+cXXFbOqnC5j5IZ0nrz6jOTlIaoytyZn7wxLyvQIDAQABo4IBhjCCAYIwDgYDVR0PAQH/BAQD
+AgEGMB0GA1UdDgQWBBRJt8bP6D0ff+pEexMp9/EKcD7eZDAfBgNVHSMEGDAWgBQxw3kbuvVT
+1xfgiXotF2wKsyudMzASBgNVHRMBAf8ECDAGAQH/AgECMGIGA1UdIARbMFkwEQYPKwYBBAGB
+rSGCLAEBBAICMBEGDysGAQQBga0hgiwBAQQDADARBg8rBgEEAYGtIYIsAQEEAwEwDwYNKwYB
+BAGBrSGCLAEBBDANBgsrBgEEAYGtIYIsHjA+BgNVHR8ENzA1MDOgMaAvhi1odHRwOi8vcGtp
+MDMzNi50ZWxlc2VjLmRlL3JsL0RUX1JPT1RfQ0FfMi5jcmwweAYIKwYBBQUHAQEEbDBqMCwG
+CCsGAQUFBzABhiBodHRwOi8vb2NzcDAzMzYudGVsZXNlYy5kZS9vY3NwcjA6BggrBgEFBQcw
+AoYuaHR0cDovL3BraTAzMzYudGVsZXNlYy5kZS9jcnQvRFRfUk9PVF9DQV8yLmNlcjANBgkq
+hkiG9w0BAQsFAAOCAQEAYyAo/ZwhhnK+OUZZOTIlvKkBmw3Myn1BnIZtCm4ssxNZdbEzkhth
+Jxb/w7LVNYL7hCoBSb1mu2YvssIGXW4/buMBWlvKQ2NclbbhMacf1QdfTeZlgk4y+cN8ekvN
+TVx07iHydQLsUj7SyWrTkCNuSWc1vn9NVqTszC/Pt6GXqHI+ybxA1lqkCD3WvILDt7cyjrEs
+jmpttzUCGc/1OURYY6ckABCwu/xOr24vOLulV0k/2G5QbyyXltwdRpplic+uzPLl2Z9Tsz6h
+L5Kp2AvGhB8Exuse6J99tXulAvEkxSRjETTMWpMgKnmIOiVCkKllO3yG0xIVIyn8LNrMOVtU
+FzCCBZgwggSAoAMCAQICBxekJLPtcY4wDQYJKoZIhvcNAQELBQAwWjELMAkGA1UEBhMCREUx
+EzARBgNVBAoTCkRGTi1WZXJlaW4xEDAOBgNVBAsTB0RGTi1QS0kxJDAiBgNVBAMTG0RGTi1W
+ZXJlaW4gUENBIEdsb2JhbCAtIEcwMTAeFw0xNDA1MjcxNDU0MjdaFw0xOTA3MDkyMzU5MDBa
+MIG6MQswCQYDVQQGEwJERTEcMBoGA1UECBMTTm9yZHJoZWluLVdlc3RmYWxlbjENMAsGA1UE
+BxMEQm9ubjEaMBgGA1UEChMRVW5pdmVyc2l0YWV0IEJvbm4xHzAdBgNVBAsTFkhvY2hzY2h1
+bHJlY2hlbnplbnRydW0xHTAbBgNVBAMTFFVuaXZlcnNpdGFldCBCb25uIENBMSIwIAYJKoZI
+hvcNAQkBFhNjYWFkbWluQHVuaS1ib25uLmRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEAkmUpoQytKXOFQLXlt6x0jkrPOGGoYSENdtfd5Jpvgao+ODpn7TPbPrG70N8oinhS
+YQaqwE7ehB5aNsHZQZD8MMDl7hRkSH10xNabQLzKK1IzxA5/JqFH5ypFBVqDmh4xIi5f8ERk
+ABXEpOf55mdekMJwbOvz3Q6mqQ1jt8uSQo+tF2NPee6+kPWWqKURzPYcWjsQJl8enZ7u1BHz
+TwUvZ1c5/j9geG6jnM1SlAKqhkw8KvKxUNZm+WgY1Eq+r/GQR+qlLTTAWn1goKBIOfPba42a
+WRZyf5MpS6YQPO3cVIjKkaQfh5WG2i8/jJkGn2o0DIpXyr7EtV0hZjVU3nfXrwIDAQABo4IC
+ADCCAfwwEgYDVR0TAQH/BAgwBgEB/wIBATAOBgNVHQ8BAf8EBAMCAQYwEQYDVR0gBAowCDAG
+BgRVHSAAMB0GA1UdDgQWBBTrN9Dr14QuRp4S07MY243lguRopzAfBgNVHSMEGDAWgBRJt8bP
+6D0ff+pEexMp9/EKcD7eZDAeBgNVHREEFzAVgRNjYWFkbWluQHVuaS1ib25uLmRlMIGIBgNV
+HR8EgYAwfjA9oDugOYY3aHR0cDovL2NkcDEucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9w
+dWIvY3JsL2NhY3JsLmNybDA9oDugOYY3aHR0cDovL2NkcDIucGNhLmRmbi5kZS9nbG9iYWwt
+cm9vdC1jYS9wdWIvY3JsL2NhY3JsLmNybDCB1wYIKwYBBQUHAQEEgcowgccwMwYIKwYBBQUH
+MAGGJ2h0dHA6Ly9vY3NwLnBjYS5kZm4uZGUvT0NTUC1TZXJ2ZXIvT0NTUDBHBggrBgEFBQcw
+AoY7aHR0cDovL2NkcDEucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9wdWIvY2FjZXJ0L2Nh
+Y2VydC5jcnQwRwYIKwYBBQUHMAKGO2h0dHA6Ly9jZHAyLnBjYS5kZm4uZGUvZ2xvYmFsLXJv
+b3QtY2EvcHViL2NhY2VydC9jYWNlcnQuY3J0MA0GCSqGSIb3DQEBCwUAA4IBAQDlFylCpSEM
+49LqfmHcYSA25DnXWQC7iRlmnNK3uA5zozZa7HCgcxBxdNH/GXxJHfAaUs8kCgQRNhDnhd2p
+ldhcdOUL7XAFumOD6/9nOuBuJe984ydrWmHL2mKtEp+c+jjEczIGJDyMX3lIvy7J2Amj5SdF
+lljiGQ/QOP18/gVsVIKSHjqdslRuzgwEv9s2YQNzVwiwRjYwtqWpJQenFDNeDkOkgI3y6v/D
+8ZkRuwiH3IYGGvSkeHCierB0kIppahFZqVcd4EuXeiSPita+2q3PF5QOvRSRK7qcKgNgInwf
+o4TrJq6ymoPTnL5SvSHln/mum8BNNrAUmOpwVZhDi9YJMIIGETCCBPmgAwIBAgIHG6w7KfsB
+9TANBgkqhkiG9w0BAQsFADCBujELMAkGA1UEBhMCREUxHDAaBgNVBAgTE05vcmRyaGVpbi1X
+ZXN0ZmFsZW4xDTALBgNVBAcTBEJvbm4xGjAYBgNVBAoTEVVuaXZlcnNpdGFldCBCb25uMR8w
+HQYDVQQLExZIb2Noc2NodWxyZWNoZW56ZW50cnVtMR0wGwYDVQQDExRVbml2ZXJzaXRhZXQg
+Qm9ubiBDQTEiMCAGCSqGSIb3DQEJARYTY2FhZG1pbkB1bmktYm9ubi5kZTAeFw0xNjA3MTgx
+MTI5MzBaFw0xOTA3MDkyMzU5MDBaMIGQMQswCQYDVQQGEwJERTEcMBoGA1UECAwTTm9yZHJo
+ZWluLVdlc3RmYWxlbjENMAsGA1UEBwwEQm9ubjE4MDYGA1UECgwvUmhlaW5pc2NoZSBGcmll
+ZHJpY2gtV2lsaGVsbXMtVW5pdmVyc2l0YWV0IEJvbm4xGjAYBgNVBAMMEU9saXZlciBGcmV5
+ZXJtdXRoMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6a1YHUpB6WiOyNU59Xe5
+Z++/GeKLIPiB6vbFrjVFNIAlg5zWHpqewAEk4N92m0sTdHU1ocXwmPlK4rOua5AT1ZSs11pr
+XH/fL0Wm9JJpCflZuRRcYA+zi+usET6mqflRPfil5ICC7ZCuFi6lMIZoEhrJbbu9o/cuAN/e
+id9DuHt8Gp/feGJzBNA0l5ZjizLendzixNI+Kn147KssRotMhjGdO4MJ3AduPahJ3QM9pMNk
+fKj1pJJ0btoiHoT8Oi6KJx7J5T/qaTl9FURjDCaqRF5XCnkHCx2yFbvK6jYCjmrOoMq/VdU4
+PS6j2I2w9C6K5mCgXjeRrfNPqoDK7kn6nwIDAQABo4ICQjCCAj4wQAYDVR0gBDkwNzARBg8r
+BgEEAYGtIYIsAQEEAwUwEQYPKwYBBAGBrSGCLAIBBAMBMA8GDSsGAQQBga0hgiwBAQQwCQYD
+VR0TBAIwADAOBgNVHQ8BAf8EBAMCBeAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwME
+MB0GA1UdDgQWBBQLsi+Tp4LWlSQaZyVEJgvpLq9+OjAfBgNVHSMEGDAWgBTrN9Dr14QuRp4S
+07MY243lguRopzAoBgNVHREEITAfgR1mcmV5ZXJtdXRoQHBoeXNpay51bmktYm9ubi5kZTCB
+gQYDVR0fBHoweDA6oDigNoY0aHR0cDovL2NkcDEucGNhLmRmbi5kZS91bmktYm9ubi1jYS9w
+dWIvY3JsL2NhY3JsLmNybDA6oDigNoY0aHR0cDovL2NkcDIucGNhLmRmbi5kZS91bmktYm9u
+bi1jYS9wdWIvY3JsL2NhY3JsLmNybDCB0QYIKwYBBQUHAQEEgcQwgcEwMwYIKwYBBQUHMAGG
+J2h0dHA6Ly9vY3NwLnBjYS5kZm4uZGUvT0NTUC1TZXJ2ZXIvT0NTUDBEBggrBgEFBQcwAoY4
+aHR0cDovL2NkcDEucGNhLmRmbi5kZS91bmktYm9ubi1jYS9wdWIvY2FjZXJ0L2NhY2VydC5j
+cnQwRAYIKwYBBQUHMAKGOGh0dHA6Ly9jZHAyLnBjYS5kZm4uZGUvdW5pLWJvbm4tY2EvcHVi
+L2NhY2VydC9jYWNlcnQuY3J0MA0GCSqGSIb3DQEBCwUAA4IBAQA+5K1isTxmWTmGb6QNVDQp
+thzyzFlmQ49CPAoxP0tN2fJRHwmUmTfQaTXJ32sqYFuHb/tGl+IJKzutHGm6BLxtmkOr6Cfn
+K4JEnxZc6xFSb1p2vmK2b0pmepzgH9VxiPRsEpqLpUvSJNfUyT2++9PKHnCDo/Q8c/Ajrq1A
+9A9BGriCELW/SbWm7LT8EsXEddHKc9OM29tlZde5kRTqNU7EsxotPdG2HfHSn+D2YQwU3aBv
+e46kr8lQhddJ2IVT7W9Tieszv0TsANr7DS9K8fXIu4oWFo25h48kl6fttP3vYJOaQqKUrRdY
+j1+3zmjbfE4BzjWCMWZTumroU/2HKfBeMYIEgzCCBH8CAQEwgcYwgboxCzAJBgNVBAYTAkRF
+MRwwGgYDVQQIExNOb3JkcmhlaW4tV2VzdGZhbGVuMQ0wCwYDVQQHEwRCb25uMRowGAYDVQQK
+ExFVbml2ZXJzaXRhZXQgQm9ubjEfMB0GA1UECxMWSG9jaHNjaHVscmVjaGVuemVudHJ1bTEd
+MBsGA1UEAxMUVW5pdmVyc2l0YWV0IEJvbm4gQ0ExIjAgBgkqhkiG9w0BCQEWE2NhYWRtaW5A
+dW5pLWJvbm4uZGUCBxusOyn7AfUwDQYJYIZIAWUDBAIBBQCgggKNMBgGCSqGSIb3DQEJAzEL
+BgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTE4MDcxODExMzMzNVowLwYJKoZIhvcNAQkE
+MSIEIPRKWD3b+T3bl3zDFsLsxWXYJz1j28v/3OXHEPV6jVrgMGwGCSqGSIb3DQEJDzFfMF0w
+CwYJYIZIAWUDBAEqMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAw
+DQYIKoZIhvcNAwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwgdcGCSsGAQQBgjcQBDGB
+yTCBxjCBujELMAkGA1UEBhMCREUxHDAaBgNVBAgTE05vcmRyaGVpbi1XZXN0ZmFsZW4xDTAL
+BgNVBAcTBEJvbm4xGjAYBgNVBAoTEVVuaXZlcnNpdGFldCBCb25uMR8wHQYDVQQLExZIb2No
+c2NodWxyZWNoZW56ZW50cnVtMR0wGwYDVQQDExRVbml2ZXJzaXRhZXQgQm9ubiBDQTEiMCAG
+CSqGSIb3DQEJARYTY2FhZG1pbkB1bmktYm9ubi5kZQIHG6w7KfsB9TCB2QYLKoZIhvcNAQkQ
+AgsxgcmggcYwgboxCzAJBgNVBAYTAkRFMRwwGgYDVQQIExNOb3JkcmhlaW4tV2VzdGZhbGVu
+MQ0wCwYDVQQHEwRCb25uMRowGAYDVQQKExFVbml2ZXJzaXRhZXQgQm9ubjEfMB0GA1UECxMW
+SG9jaHNjaHVscmVjaGVuemVudHJ1bTEdMBsGA1UEAxMUVW5pdmVyc2l0YWV0IEJvbm4gQ0Ex
+IjAgBgkqhkiG9w0BCQEWE2NhYWRtaW5AdW5pLWJvbm4uZGUCBxusOyn7AfUwDQYJKoZIhvcN
+AQEBBQAEggEAA5Z7HzZarXNqZTX/iUGf/SpcBsEhuMEzJPn2BQlgBrFPxbzUWxDGVqtRUZAe
+o5AwI0QveAynjbyAPLsDzGO6OFs+7ewX4g/P8qHxZ017/J1kfaLjp8cWx+MtzVRUviD/dOgb
+ddYdGqbJvRCnugFA4RWxjzRxuNTXHrECN9eLJhh9cNTAaUpZPz6+Y6sLP+GU05RrgLEuRK0Z
+cUh6I1ONBjwZhuqXwRYOVSeNi1SypfbnyyK3eazDv3s45ItKbMiJ1PxP+NNSILkQ8WIngdxW
+ZAzsgDK+I5xzcDmwxKMvXPUQws7KSGRF7lRpruI5wSzXeUb2ob26vWqDcmb/sGx24AAAAAAA
+AA==
+--------------ms020700020605090803060605--
+
+--===============7620251567298232587==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -1367,4 +309,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============8448657214022512654==--
+--===============7620251567298232587==--
