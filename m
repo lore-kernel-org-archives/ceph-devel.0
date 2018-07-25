@@ -1,58 +1,99 @@
-From: Neil Horman <nhorman@tuxdriver.com>
-Subject: Re: [PATCH PATCH net-next 08/18] sctp: whitespace fixes
-Date: Wed, 25 Jul 2018 08:59:49 -0400
-Message-ID: <20180725125949.GB3622@hmswarspite.think-freely.org>
-References: <20180724192918.31165-1-sthemmin@microsoft.com>
- <20180724192918.31165-9-sthemmin@microsoft.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: download.ceph.com repository changes
+Date: Wed, 25 Jul 2018 14:20:01 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1807251407550.15688@piezo.novalocal>
+References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180724192918.31165-9-sthemmin@microsoft.com>
-Sender: netdev-owner@vger.kernel.org
-To: Stephen Hemminger <stephen@networkplumber.org>
-Cc: davem@davemloft.net, ericvh@gmail.com, rminnich@sandia.gov, lucho@ionkov.net, ralf@linux-mips.org, jreuter@yaina.de, pablo@netfilter.org, kadlec@blackhole.kfki.hu, fw@strlen.de, alex.aring@gmail.com, stefan@datenfreihafen.org, kuznet@ms2.inr.ac.ru, yoshfuji@linux-ipv6.org, johannes@sipsolutions.net, jhs@mojatatu.com, xiyou.wangcong@gmail.com, jiri@resnulli.us, vyasevich@gmail.com, marcelo.leitner@gmail.com, trond.myklebust@hammerspace.com, anna.schumaker@netapp.com, steffen.klassert@secunet.com, herbert@gondor.apana.org.au, netdev@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-hams@vger.kernel.org, ceph-devel@vger.kernel.org, linux-decnet-user@lists.sourceforge.net, netfilter-devel@vger.kernel.org, coreteam@netfilter.org, linux-wpan@vger.kernel.org, linux-s390
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Jul 24, 2018 at 12:29:08PM -0700, Stephen Hemminger wrote:
-> Remove blank line at EOF and trailing whitespace.
+On Tue, 24 Jul 2018, Alfredo Deza wrote:
+> Hi all,
 > 
-> Signed-off-by: Stephen Hemminger <stephen@networkplumber.org>
-> ---
->  net/sctp/Kconfig         | 4 ++--
->  net/sctp/sm_sideeffect.c | 1 -
->  2 files changed, 2 insertions(+), 3 deletions(-)
+> After the 12.2.6 release went out, we've been thinking on better ways
+> to remove a version from our repositories to prevent users from
+> upgrading/installing a known bad release.
 > 
-> diff --git a/net/sctp/Kconfig b/net/sctp/Kconfig
-> index c740b189d4ba..950ecf6e7439 100644
-> --- a/net/sctp/Kconfig
-> +++ b/net/sctp/Kconfig
-> @@ -41,8 +41,8 @@ config SCTP_DBG_OBJCNT
->  	bool "SCTP: Debug object counts"
->  	depends on PROC_FS
->  	help
-> -	  If you say Y, this will enable debugging support for counting the 
-> -	  type of objects that are currently allocated.  This is useful for 
-> +	  If you say Y, this will enable debugging support for counting the
-> +	  type of objects that are currently allocated.  This is useful for
->  	  identifying memory leaks. This debug information can be viewed by
->  	  'cat /proc/net/sctp/sctp_dbg_objcnt'
->  
-> diff --git a/net/sctp/sm_sideeffect.c b/net/sctp/sm_sideeffect.c
-> index 298112ca8c06..85d393090238 100644
-> --- a/net/sctp/sm_sideeffect.c
-> +++ b/net/sctp/sm_sideeffect.c
-> @@ -1827,4 +1827,3 @@ static int sctp_cmd_interpreter(enum sctp_event event_type,
->  	error = -ENOMEM;
->  	goto out;
->  }
-> -
-> -- 
-> 2.18.0
+> The way our repos are structured today means every single version of
+> the release is included in the repository. That is, for Luminous,
+> every 12.x.x version of the binaries is in the same repo. This is true
+> for both RPM and DEB repositories.
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sctp" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> However, the DEB repos don't allow pinning to a given version because
+> our tooling (namely reprepro) doesn't construct the repositories in a
+> way that this is allowed. For RPM repos this is fine, and version
+> pinning works.
 > 
-Acked-by: Neil Horman <nhorman@tuxdriver.com>
+> To remove a bad version we have to proposals (and would like to hear
+> ideas on other possibilities), one that would involve symlinks and the
+> other one which purges the known bad version from our repos.
+> 
+> *Symlinking*
+> When releasing we would have a "previous" and "latest" symlink that
+> would get updated as versions move forward. It would require
+> separation of versions at the URL level (all versions would no longer
+> be available in one repo).
+> 
+> The URL structure would then look like:
+> 
+>     debian/luminous/12.2.3/
+>     debian/luminous/previous/  (points to 12.2.5)
+>     debian/luminous/latest/   (points to 12.2.7)
+> 
+> Caveats: the url structure would change from debian-luminous/ to
+> prevent breakage, and the versions would be split. For RPMs it would
+> mean a regression if someone is used to pinning, for example pinning
+> to 12.2.2 wouldn't be possible using the same url.
+> 
+> Pros: Faster release times, less need to move packages around, and
+> easier to remove a bad version
+
+I think the core question is: how many users use or depend on the 
+version-pinning features with RPMs.  The symlinking path is easy to 
+implement but breaks that ability... you have to change the repo URL to 
+pin to a release.
+
+(Nobody is doing version pinning with debs because our reprepro repos 
+don't support it.)
+
+In the future we can always move to the multi-version repos and maintain 
+the per-version repos in parallel, right?
+
+Thanks!
+sage
+
+
+
+> 
+> 
+> *Single version removal*
+> Our tooling would need to go and remove the known bad version from the
+> repository, which would require to rebuild the repository again, so
+> that the metadata is updated with the difference in the binaries.
+> 
+> Caveats: time intensive process, almost like cutting a new release
+> which takes about a day (and sometimes longer). Error prone since the
+> process wouldn't be the same (one off, just when a version needs to be
+> removed)
+> 
+> Pros: all urls for download.ceph.com and its structure are kept the same.
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
