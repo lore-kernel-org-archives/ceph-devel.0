@@ -1,12 +1,14 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: download.ceph.com repository changes
-Date: Wed, 25 Jul 2018 14:20:01 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1807251407550.15688@piezo.novalocal>
+From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler-YTcQvvOqK21BDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [Ceph-maintainers] download.ceph.com repository
+ changes
+Date: Fri, 27 Jul 2018 09:28:42 +0200
+Message-ID: <20180727072842.nm7a4f7yujw46gea@nora.maurer-it.com>
 References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
 In-Reply-To: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -21,7 +23,7 @@ To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 24 Jul 2018, Alfredo Deza wrote:
+On Tue, Jul 24, 2018 at 10:38:43AM -0400, Alfredo Deza wrote:
 > Hi all,
 > 
 > After the 12.2.6 release went out, we've been thinking on better ways
@@ -37,6 +39,13 @@ On Tue, 24 Jul 2018, Alfredo Deza wrote:
 > our tooling (namely reprepro) doesn't construct the repositories in a
 > way that this is allowed. For RPM repos this is fine, and version
 > pinning works.
+
+If you mean that reprepo does not support referencing multiple versions
+of packages in the Packages file, there is a patched fork that does
+(that seems well-supported):
+
+https://github.com/profitbricks/reprepro
+
 > 
 > To remove a bad version we have to proposals (and would like to hear
 > ideas on other possibilities), one that would involve symlinks and the
@@ -61,23 +70,6 @@ On Tue, 24 Jul 2018, Alfredo Deza wrote:
 > 
 > Pros: Faster release times, less need to move packages around, and
 > easier to remove a bad version
-
-I think the core question is: how many users use or depend on the 
-version-pinning features with RPMs.  The symlinking path is easy to 
-implement but breaks that ability... you have to change the repo URL to 
-pin to a release.
-
-(Nobody is doing version pinning with debs because our reprepro repos 
-don't support it.)
-
-In the future we can always move to the multi-version repos and maintain 
-the per-version repos in parallel, right?
-
-Thanks!
-sage
-
-
-
 > 
 > 
 > *Single version removal*
@@ -89,11 +81,23 @@ sage
 > which takes about a day (and sometimes longer). Error prone since the
 > process wouldn't be the same (one off, just when a version needs to be
 > removed)
-> 
+
+I am not involved in this process, but that seems like something is
+wrong somewhere. You keep all the binary debs on the public mirror, so
+"retracting" a broken latest one should just consist of:
+
+- deleting the .deb files of the broken release
+- regenerating the Packages*, Content* and *Release* metadata files
+
+The former should be quasi-instant, the latter takes a bit (ceph
+packages are quite big, especially the ones containing debug symbols,
+and they need to be hashed multiple times), but nowhere near a day.
+
+If you keep the "old" metadata files around, both steps should be almost
+instant:
+- delete broken .deb files
+- revert (expensive) metadata files to previous snapshot
+
 > Pros: all urls for download.ceph.com and its structure are kept the same.
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
-> 
+
+that is quite a big pro, IMHO.
