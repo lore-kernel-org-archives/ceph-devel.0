@@ -1,15 +1,15 @@
-From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler-YTcQvvOqK21BDgjK7y7TUQ@public.gmane.org>
+From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [Ceph-maintainers] download.ceph.com repository
  changes
-Date: Fri, 27 Jul 2018 09:28:42 +0200
-Message-ID: <20180727072842.nm7a4f7yujw46gea@nora.maurer-it.com>
+Date: Fri, 27 Jul 2018 08:06:53 -0400
+Message-ID: <CAC-Np1w7OJ8_RUNSadCkquUqmgEbKS_vF_5uj1TcmXNmAkuKKQ@mail.gmail.com>
 References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
+ <20180727072842.nm7a4f7yujw46gea@nora.maurer-it.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20180727072842.nm7a4f7yujw46gea-aVfaTQcAavps8ZkLLAvlZtBPR1lH4CV8@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,85 +19,76 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Jul 24, 2018 at 10:38:43AM -0400, Alfredo Deza wrote:
-> Hi all,
-> 
-> After the 12.2.6 release went out, we've been thinking on better ways
-> to remove a version from our repositories to prevent users from
-> upgrading/installing a known bad release.
-> 
-> The way our repos are structured today means every single version of
-> the release is included in the repository. That is, for Luminous,
-> every 12.x.x version of the binaries is in the same repo. This is true
-> for both RPM and DEB repositories.
-> 
-> However, the DEB repos don't allow pinning to a given version because
-> our tooling (namely reprepro) doesn't construct the repositories in a
-> way that this is allowed. For RPM repos this is fine, and version
-> pinning works.
-
-If you mean that reprepo does not support referencing multiple versions
-of packages in the Packages file, there is a patched fork that does
-(that seems well-supported):
-
-https://github.com/profitbricks/reprepro
-
-> 
-> To remove a bad version we have to proposals (and would like to hear
-> ideas on other possibilities), one that would involve symlinks and the
-> other one which purges the known bad version from our repos.
-> 
-> *Symlinking*
-> When releasing we would have a "previous" and "latest" symlink that
-> would get updated as versions move forward. It would require
-> separation of versions at the URL level (all versions would no longer
-> be available in one repo).
-> 
-> The URL structure would then look like:
-> 
->     debian/luminous/12.2.3/
->     debian/luminous/previous/  (points to 12.2.5)
->     debian/luminous/latest/   (points to 12.2.7)
-> 
-> Caveats: the url structure would change from debian-luminous/ to
-> prevent breakage, and the versions would be split. For RPMs it would
-> mean a regression if someone is used to pinning, for example pinning
-> to 12.2.2 wouldn't be possible using the same url.
-> 
-> Pros: Faster release times, less need to move packages around, and
-> easier to remove a bad version
-> 
-> 
-> *Single version removal*
-> Our tooling would need to go and remove the known bad version from the
-> repository, which would require to rebuild the repository again, so
-> that the metadata is updated with the difference in the binaries.
-> 
-> Caveats: time intensive process, almost like cutting a new release
-> which takes about a day (and sometimes longer). Error prone since the
-> process wouldn't be the same (one off, just when a version needs to be
-> removed)
-
-I am not involved in this process, but that seems like something is
-wrong somewhere. You keep all the binary debs on the public mirror, so
-"retracting" a broken latest one should just consist of:
-
-- deleting the .deb files of the broken release
-- regenerating the Packages*, Content* and *Release* metadata files
-
-The former should be quasi-instant, the latter takes a bit (ceph
-packages are quite big, especially the ones containing debug symbols,
-and they need to be hashed multiple times), but nowhere near a day.
-
-If you keep the "old" metadata files around, both steps should be almost
-instant:
-- delete broken .deb files
-- revert (expensive) metadata files to previous snapshot
-
-> Pros: all urls for download.ceph.com and its structure are kept the same.
-
-that is quite a big pro, IMHO.
+T24gRnJpLCBKdWwgMjcsIDIwMTggYXQgMzoyOCBBTSwgRmFiaWFuIEdyw7xuYmljaGxlcgo8Zi5n
+cnVlbmJpY2hsZXJAcHJveG1veC5jb20+IHdyb3RlOgo+IE9uIFR1ZSwgSnVsIDI0LCAyMDE4IGF0
+IDEwOjM4OjQzQU0gLTA0MDAsIEFsZnJlZG8gRGV6YSB3cm90ZToKPj4gSGkgYWxsLAo+Pgo+PiBB
+ZnRlciB0aGUgMTIuMi42IHJlbGVhc2Ugd2VudCBvdXQsIHdlJ3ZlIGJlZW4gdGhpbmtpbmcgb24g
+YmV0dGVyIHdheXMKPj4gdG8gcmVtb3ZlIGEgdmVyc2lvbiBmcm9tIG91ciByZXBvc2l0b3JpZXMg
+dG8gcHJldmVudCB1c2VycyBmcm9tCj4+IHVwZ3JhZGluZy9pbnN0YWxsaW5nIGEga25vd24gYmFk
+IHJlbGVhc2UuCj4+Cj4+IFRoZSB3YXkgb3VyIHJlcG9zIGFyZSBzdHJ1Y3R1cmVkIHRvZGF5IG1l
+YW5zIGV2ZXJ5IHNpbmdsZSB2ZXJzaW9uIG9mCj4+IHRoZSByZWxlYXNlIGlzIGluY2x1ZGVkIGlu
+IHRoZSByZXBvc2l0b3J5LiBUaGF0IGlzLCBmb3IgTHVtaW5vdXMsCj4+IGV2ZXJ5IDEyLngueCB2
+ZXJzaW9uIG9mIHRoZSBiaW5hcmllcyBpcyBpbiB0aGUgc2FtZSByZXBvLiBUaGlzIGlzIHRydWUK
+Pj4gZm9yIGJvdGggUlBNIGFuZCBERUIgcmVwb3NpdG9yaWVzLgo+Pgo+PiBIb3dldmVyLCB0aGUg
+REVCIHJlcG9zIGRvbid0IGFsbG93IHBpbm5pbmcgdG8gYSBnaXZlbiB2ZXJzaW9uIGJlY2F1c2UK
+Pj4gb3VyIHRvb2xpbmcgKG5hbWVseSByZXByZXBybykgZG9lc24ndCBjb25zdHJ1Y3QgdGhlIHJl
+cG9zaXRvcmllcyBpbiBhCj4+IHdheSB0aGF0IHRoaXMgaXMgYWxsb3dlZC4gRm9yIFJQTSByZXBv
+cyB0aGlzIGlzIGZpbmUsIGFuZCB2ZXJzaW9uCj4+IHBpbm5pbmcgd29ya3MuCj4KPiBJZiB5b3Ug
+bWVhbiB0aGF0IHJlcHJlcG8gZG9lcyBub3Qgc3VwcG9ydCByZWZlcmVuY2luZyBtdWx0aXBsZSB2
+ZXJzaW9ucwo+IG9mIHBhY2thZ2VzIGluIHRoZSBQYWNrYWdlcyBmaWxlLCB0aGVyZSBpcyBhIHBh
+dGNoZWQgZm9yayB0aGF0IGRvZXMKPiAodGhhdCBzZWVtcyB3ZWxsLXN1cHBvcnRlZCk6Cj4KPiBo
+dHRwczovL2dpdGh1Yi5jb20vcHJvZml0YnJpY2tzL3JlcHJlcHJvCj4KPj4KPj4gVG8gcmVtb3Zl
+IGEgYmFkIHZlcnNpb24gd2UgaGF2ZSB0byBwcm9wb3NhbHMgKGFuZCB3b3VsZCBsaWtlIHRvIGhl
+YXIKPj4gaWRlYXMgb24gb3RoZXIgcG9zc2liaWxpdGllcyksIG9uZSB0aGF0IHdvdWxkIGludm9s
+dmUgc3ltbGlua3MgYW5kIHRoZQo+PiBvdGhlciBvbmUgd2hpY2ggcHVyZ2VzIHRoZSBrbm93biBi
+YWQgdmVyc2lvbiBmcm9tIG91ciByZXBvcy4KPj4KPj4gKlN5bWxpbmtpbmcqCj4+IFdoZW4gcmVs
+ZWFzaW5nIHdlIHdvdWxkIGhhdmUgYSAicHJldmlvdXMiIGFuZCAibGF0ZXN0IiBzeW1saW5rIHRo
+YXQKPj4gd291bGQgZ2V0IHVwZGF0ZWQgYXMgdmVyc2lvbnMgbW92ZSBmb3J3YXJkLiBJdCB3b3Vs
+ZCByZXF1aXJlCj4+IHNlcGFyYXRpb24gb2YgdmVyc2lvbnMgYXQgdGhlIFVSTCBsZXZlbCAoYWxs
+IHZlcnNpb25zIHdvdWxkIG5vIGxvbmdlcgo+PiBiZSBhdmFpbGFibGUgaW4gb25lIHJlcG8pLgo+
+Pgo+PiBUaGUgVVJMIHN0cnVjdHVyZSB3b3VsZCB0aGVuIGxvb2sgbGlrZToKPj4KPj4gICAgIGRl
+Ymlhbi9sdW1pbm91cy8xMi4yLjMvCj4+ICAgICBkZWJpYW4vbHVtaW5vdXMvcHJldmlvdXMvICAo
+cG9pbnRzIHRvIDEyLjIuNSkKPj4gICAgIGRlYmlhbi9sdW1pbm91cy9sYXRlc3QvICAgKHBvaW50
+cyB0byAxMi4yLjcpCj4+Cj4+IENhdmVhdHM6IHRoZSB1cmwgc3RydWN0dXJlIHdvdWxkIGNoYW5n
+ZSBmcm9tIGRlYmlhbi1sdW1pbm91cy8gdG8KPj4gcHJldmVudCBicmVha2FnZSwgYW5kIHRoZSB2
+ZXJzaW9ucyB3b3VsZCBiZSBzcGxpdC4gRm9yIFJQTXMgaXQgd291bGQKPj4gbWVhbiBhIHJlZ3Jl
+c3Npb24gaWYgc29tZW9uZSBpcyB1c2VkIHRvIHBpbm5pbmcsIGZvciBleGFtcGxlIHBpbm5pbmcK
+Pj4gdG8gMTIuMi4yIHdvdWxkbid0IGJlIHBvc3NpYmxlIHVzaW5nIHRoZSBzYW1lIHVybC4KPj4K
+Pj4gUHJvczogRmFzdGVyIHJlbGVhc2UgdGltZXMsIGxlc3MgbmVlZCB0byBtb3ZlIHBhY2thZ2Vz
+IGFyb3VuZCwgYW5kCj4+IGVhc2llciB0byByZW1vdmUgYSBiYWQgdmVyc2lvbgo+Pgo+Pgo+PiAq
+U2luZ2xlIHZlcnNpb24gcmVtb3ZhbCoKPj4gT3VyIHRvb2xpbmcgd291bGQgbmVlZCB0byBnbyBh
+bmQgcmVtb3ZlIHRoZSBrbm93biBiYWQgdmVyc2lvbiBmcm9tIHRoZQo+PiByZXBvc2l0b3J5LCB3
+aGljaCB3b3VsZCByZXF1aXJlIHRvIHJlYnVpbGQgdGhlIHJlcG9zaXRvcnkgYWdhaW4sIHNvCj4+
+IHRoYXQgdGhlIG1ldGFkYXRhIGlzIHVwZGF0ZWQgd2l0aCB0aGUgZGlmZmVyZW5jZSBpbiB0aGUg
+YmluYXJpZXMuCj4+Cj4+IENhdmVhdHM6IHRpbWUgaW50ZW5zaXZlIHByb2Nlc3MsIGFsbW9zdCBs
+aWtlIGN1dHRpbmcgYSBuZXcgcmVsZWFzZQo+PiB3aGljaCB0YWtlcyBhYm91dCBhIGRheSAoYW5k
+IHNvbWV0aW1lcyBsb25nZXIpLiBFcnJvciBwcm9uZSBzaW5jZSB0aGUKPj4gcHJvY2VzcyB3b3Vs
+ZG4ndCBiZSB0aGUgc2FtZSAob25lIG9mZiwganVzdCB3aGVuIGEgdmVyc2lvbiBuZWVkcyB0byBi
+ZQo+PiByZW1vdmVkKQo+Cj4gSSBhbSBub3QgaW52b2x2ZWQgaW4gdGhpcyBwcm9jZXNzLCBidXQg
+dGhhdCBzZWVtcyBsaWtlIHNvbWV0aGluZyBpcwo+IHdyb25nIHNvbWV3aGVyZS4gWW91IGtlZXAg
+YWxsIHRoZSBiaW5hcnkgZGVicyBvbiB0aGUgcHVibGljIG1pcnJvciwgc28KPiAicmV0cmFjdGlu
+ZyIgYSBicm9rZW4gbGF0ZXN0IG9uZSBzaG91bGQganVzdCBjb25zaXN0IG9mOgo+Cj4gLSBkZWxl
+dGluZyB0aGUgLmRlYiBmaWxlcyBvZiB0aGUgYnJva2VuIHJlbGVhc2UKPiAtIHJlZ2VuZXJhdGlu
+ZyB0aGUgUGFja2FnZXMqLCBDb250ZW50KiBhbmQgKlJlbGVhc2UqIG1ldGFkYXRhIGZpbGVzCj4K
+PiBUaGUgZm9ybWVyIHNob3VsZCBiZSBxdWFzaS1pbnN0YW50LCB0aGUgbGF0dGVyIHRha2VzIGEg
+Yml0IChjZXBoCj4gcGFja2FnZXMgYXJlIHF1aXRlIGJpZywgZXNwZWNpYWxseSB0aGUgb25lcyBj
+b250YWluaW5nIGRlYnVnIHN5bWJvbHMsCj4gYW5kIHRoZXkgbmVlZCB0byBiZSBoYXNoZWQgbXVs
+dGlwbGUgdGltZXMpLCBidXQgbm93aGVyZSBuZWFyIGEgZGF5LgoKVGhlIHJlbGVhc2UgcHJvY2Vz
+cyBpbnZvbHZlcyBhIGJpdCBtb3JlIHRoYW4gdGhpcy4gT3VyIHJlcG9zaXRvcmllcwphcmUgY3Jl
+YXRlZCBmcm9tIHNjcmF0Y2ggZnJvbSBhIHNldCBvZiBiaW5hcmllcy4gIlJlbW92aW5nIiBhIGJp
+bmFyeQpuZWVkcyB0byBiZSBkb25lIGF0IHRoZSBsZXZlbCBvZiB0aGUgc2VydmljZSB0aGF0IHN0
+b3JlcyB0aGVtLCBhbmQKdGhlbiB0aGUgcmVwb3NpdG9yaWVzIG5lZWQgdG8gYmUgcmVjcmVhdGVk
+LiBUaGV5IHRoZW4gbmVlZCB0byBiZQpwdWxsZWQgaW4KZm9yIHNpZ25pbmcsIGFuZCB0aGVuIHB1
+c2hlZCBvdXQgdG8gZG93bmxvYWQuY2VwaC5jb20uCgpUaGF0IHBhcnQgZG9lc24ndCB0YWtlIGEg
+ZGF5LCBidXQgaXQgZG9lcyB0YWtlIGEgZmV3IGhvdXJzLgoKPgo+IElmIHlvdSBrZWVwIHRoZSAi
+b2xkIiBtZXRhZGF0YSBmaWxlcyBhcm91bmQsIGJvdGggc3RlcHMgc2hvdWxkIGJlIGFsbW9zdAo+
+IGluc3RhbnQ6Cj4gLSBkZWxldGUgYnJva2VuIC5kZWIgZmlsZXMKPiAtIHJldmVydCAoZXhwZW5z
+aXZlKSBtZXRhZGF0YSBmaWxlcyB0byBwcmV2aW91cyBzbmFwc2hvdAo+Cj4+IFByb3M6IGFsbCB1
+cmxzIGZvciBkb3dubG9hZC5jZXBoLmNvbSBhbmQgaXRzIHN0cnVjdHVyZSBhcmUga2VwdCB0aGUg
+c2FtZS4KPgo+IHRoYXQgaXMgcXVpdGUgYSBiaWcgcHJvLCBJTUhPLgo+Cl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
+CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
+LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
