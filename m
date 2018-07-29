@@ -1,18 +1,19 @@
-From: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
+From: Vasu Kulkarni <vakulkar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: HELP! --> CLUSER DOWN (was "v13.2.1 Mimic
  released")
-Date: Sun, 29 Jul 2018 03:02:44 +0200
-Message-ID: <trinity-ac10e367-ef5e-458d-b5aa-d1d671b3a5c7-1532826164122@3c-app-gmx-bs02>
+Date: Sat, 28 Jul 2018 18:15:07 -0700
+Message-ID: <CAKPXa=ZLDi17fnf5gq0RfGPp_RGoFWQ7EutbqPuJ7OoJte=G_w@mail.gmail.com>
 References: <alpine.DEB.2.11.1807271924250.15688@piezo.novalocal>
  <086B2EB1-4349-4694-856C-ECA50FBF6211@godaddy.com>
  <trinity-977054d3-80b8-4be9-9a69-009e8b25c718-1532789176388@3c-app-gmx-bs12>
  <422702b2-35c6-413e-bb9f-506921ccb3fc@email.android.com>
  <trinity-331a4fa8-ed1e-4a06-8e8f-0b2519cf5904-1532813725473@3c-app-gmx-bs14>
+ <trinity-ac10e367-ef5e-458d-b5aa-d1d671b3a5c7-1532826164122@3c-app-gmx-bs02>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <trinity-331a4fa8-ed1e-4a06-8e8f-0b2519cf5904-1532813725473@3c-app-gmx-bs14>
+In-Reply-To: <trinity-ac10e367-ef5e-458d-b5aa-d1d671b3a5c7-1532826164122@3c-app-gmx-bs02>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -22,43 +23,66 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SGF2ZSB5b3UgZ3V5cyBjaGFuZ2VkIHNvbWV0aGluZyB3aXRoIHRoZSBzeXN0ZW1jdGwgc3RhcnR1
-cCBvZiB0aGUgT1NEcz8KCkkndmUgc3RvcHBlZCBhbmQgZGlzYWJsZWQgYWxsIHRoZSBPU0RzIG9u
-IGFsbCBteSBob3N0cyB2aWEgInN5c3RlbWN0bCBzdG9wfGRpc2FibGUgY2VwaC1vc2QudGFyZ2V0
-IiBhbmQgcmVib290ZWQgYWxsIHRoZSBub2Rlcy4gRXZlcnl0aGluZyBsb29rIGp1c3QgdGhlIHNh
-bWUuClRoZSBJIHN0YXJ0ZWQgYWxsIHRoZSBPU0QgZGFlbW9ucyBvbmUgYWZ0ZXIgdGhlIG90aGVy
-IHZpYSB0aGUgQ0xJIHdpdGggIi91c3IvYmluL2NlcGgtb3NkIC1mIC0tY2x1c3RlciBjZXBoIC0t
-aWQgJE5SIC0tc2V0dXNlciBjZXBoIC0tc2V0Z3JvdXAgY2VwaCA+IC90bXAvb3NkLiR7TlJ9Lmxv
-ZyAyPiYxICYgIiBhbmQgbm93IGV2ZXJ5dGhpbmcgKG9rLCBiZXNpZGUgdGhlIFpBQkJJWCBtZ3Ig
-bW9kdWxlPyE/KSBzZWVtcyB0byB3b3JrIDp8CgoKICBjbHVzdGVyOgogICAgaWQ6ICAgICAyYTkx
-OTMzOC00ZTQ0LTQ1NGYtYmY0NS1lOTRhMDFjMmE1ZTYKICAgIGhlYWx0aDogSEVBTFRIX1dBUk4K
-ICAgICAgICAgICAgRmFpbGVkIHRvIHNlbmQgZGF0YSB0byBaYWJiaXgKCiAgc2VydmljZXM6CiAg
-ICBtb246IDMgZGFlbW9ucywgcXVvcnVtIHNkczIwLHNkczIxLHNkczIyCiAgICBtZ3I6IHNkczIy
-KGFjdGl2ZSksIHN0YW5kYnlzOiBzZHMyMCwgc2RzMjEKICAgIG9zZDogMTggb3NkczogMTggdXAs
-IDE4IGluCiAgICByZ3c6IDQgZGFlbW9ucyBhY3RpdmUKCiAgZGF0YToKICAgIHBvb2xzOiAgIDI1
-IHBvb2xzLCAxMzkwIHBncwogICAgb2JqZWN0czogMi41NSBrIG9iamVjdHMsIDMuNCBHaUIKICAg
-IHVzYWdlOiAgIDI2IEdpQiB1c2VkLCA4LjggVGlCIC8gOC44IFRpQiBhdmFpbAogICAgcGdzOiAg
-ICAgMTM5MCBhY3RpdmUrY2xlYW4KCiAgaW86CiAgICBjbGllbnQ6ICAgMTEgS2lCL3MgcmQsIDEw
-IG9wL3MgcmQsIDAgb3AvcyB3cgoKQW55IGhpbnRzPwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQrCoAoKR2VzZW5k
-ZXQ6wqBTYW1zdGFnLCAyOC4gSnVsaSAyMDE4IHVtIDIzOjM1IFVocgpWb246wqBjZXBoLm5vdmlj
-ZUBoYWJtYWxuZWZyYWdlLmRlCkFuOsKgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PgpD
-YzrCoGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20sIGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-CkJldHJlZmY6wqBSZTogW2NlcGgtdXNlcnNdIEhFTFAhIC0tPiBDTFVTRVIgRE9XTiAod2FzICJ2
-MTMuMi4xIE1pbWljIHJlbGVhc2VkIikKSGkgU2FnZS4KClN1cmUuIEFueSBzcGVjaWZpYyBPU0Qo
-cykgbG9nKHMpP8KgT3IganVzdCBhbnk/CgpHZXNlbmRldDrCoFNhbXN0YWcsIDI4LiBKdWxpIDIw
-MTggdW0gMTY6NDkgVWhyClZvbjrCoCJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4KQW46
-wqBjZXBoLm5vdmljZUBoYWJtYWxuZWZyYWdlLmRlLCBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
-LCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwpCZXRyZWZmOsKgUmU6IFtjZXBoLXVzZXJzXSBI
-RUxQISAtLT4gQ0xVU0VSIERPV04gKHdhcyAidjEzLjIuMSBNaW1pYyByZWxlYXNlZCIpCgpDYW4g
-eW91IGluY2x1ZGUgbW9yZSBvciB5b3VyIG9zZCBsb2cgZmlsZT8KwqAKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
-Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20K
+On Sat, Jul 28, 2018 at 6:02 PM,  <ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org> wrote:
+> Have you guys changed something with the systemctl startup of the OSDs?
+I think there is some kind of systemd issue hidden in mimic,
+https://tracker.ceph.com/issues/25004
+
+>
+> I've stopped and disabled all the OSDs on all my hosts via "systemctl stop|disable ceph-osd.target" and rebooted all the nodes. Everything look just the same.
+> The I started all the OSD daemons one after the other via the CLI with "/usr/bin/ceph-osd -f --cluster ceph --id $NR --setuser ceph --setgroup ceph > /tmp/osd.${NR}.log 2>&1 & " and now everything (ok, beside the ZABBIX mgr module?!?) seems to work :|
+>
+>
+>   cluster:
+>     id:     2a919338-4e44-454f-bf45-e94a01c2a5e6
+>     health: HEALTH_WARN
+>             Failed to send data to Zabbix
+>
+>   services:
+>     mon: 3 daemons, quorum sds20,sds21,sds22
+>     mgr: sds22(active), standbys: sds20, sds21
+>     osd: 18 osds: 18 up, 18 in
+>     rgw: 4 daemons active
+>
+>   data:
+>     pools:   25 pools, 1390 pgs
+>     objects: 2.55 k objects, 3.4 GiB
+>     usage:   26 GiB used, 8.8 TiB / 8.8 TiB avail
+>     pgs:     1390 active+clean
+>
+>   io:
+>     client:   11 KiB/s rd, 10 op/s rd, 0 op/s wr
+>
+> Any hints?
+>
+> ----------------------------------------------------------------------
+>
+>
+> Gesendet: Samstag, 28. Juli 2018 um 23:35 Uhr
+> Von: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
+> An: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Betreff: Re: [ceph-users] HELP! --> CLUSER DOWN (was "v13.2.1 Mimic released")
+> Hi Sage.
+>
+> Sure. Any specific OSD(s) log(s)? Or just any?
+>
+> Gesendet: Samstag, 28. Juli 2018 um 16:49 Uhr
+> Von: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+> An: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Betreff: Re: [ceph-users] HELP! --> CLUSER DOWN (was "v13.2.1 Mimic released")
+>
+> Can you include more or your osd log file?
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
