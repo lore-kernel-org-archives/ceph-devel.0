@@ -1,15 +1,11 @@
-From: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [Ceph-maintainers] download.ceph.com repository
- changes
-Date: Mon, 30 Jul 2018 11:36:55 -0600
-Message-ID: <CALqRxCw4x9B2xqik28Z+A1tk+N7eg0UAgBgx1exhLeVeQVkggw@mail.gmail.com>
-References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
- <20180727072842.nm7a4f7yujw46gea@nora.maurer-it.com>
+From: Will Zhao <zhao6305-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: is there any filesystem like wrapper that dont need to
+ map and mount rbd ?
+Date: Wed, 1 Aug 2018 15:33:33 +0800
+Message-ID: <CAGOEmcONNKGJo+kuT=AmAmJgbr8r9SnnG0po66_cEX=0HKv9WA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============7193895235617341642=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20180727072842.nm7a4f7yujw46gea-aVfaTQcAavps8ZkLLAvlZtBPR1lH4CV8@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,36 +15,52 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gRnJpLCBKdWwgMjcsIDIwMTggYXQgMToyOCBBTSwgRmFiaWFuIEdyw7xuYmljaGxlcgo8Zi5n
-cnVlbmJpY2hsZXJAcHJveG1veC5jb20+IHdyb3RlOgo+IE9uIFR1ZSwgSnVsIDI0LCAyMDE4IGF0
-IDEwOjM4OjQzQU0gLTA0MDAsIEFsZnJlZG8gRGV6YSB3cm90ZToKPj4gSGkgYWxsLAo+Pgo+PiBB
-ZnRlciB0aGUgMTIuMi42IHJlbGVhc2Ugd2VudCBvdXQsIHdlJ3ZlIGJlZW4gdGhpbmtpbmcgb24g
-YmV0dGVyIHdheXMKPj4gdG8gcmVtb3ZlIGEgdmVyc2lvbiBmcm9tIG91ciByZXBvc2l0b3JpZXMg
-dG8gcHJldmVudCB1c2VycyBmcm9tCj4+IHVwZ3JhZGluZy9pbnN0YWxsaW5nIGEga25vd24gYmFk
-IHJlbGVhc2UuCj4+Cj4+IFRoZSB3YXkgb3VyIHJlcG9zIGFyZSBzdHJ1Y3R1cmVkIHRvZGF5IG1l
-YW5zIGV2ZXJ5IHNpbmdsZSB2ZXJzaW9uIG9mCj4+IHRoZSByZWxlYXNlIGlzIGluY2x1ZGVkIGlu
-IHRoZSByZXBvc2l0b3J5LiBUaGF0IGlzLCBmb3IgTHVtaW5vdXMsCj4+IGV2ZXJ5IDEyLngueCB2
-ZXJzaW9uIG9mIHRoZSBiaW5hcmllcyBpcyBpbiB0aGUgc2FtZSByZXBvLiBUaGlzIGlzIHRydWUK
-Pj4gZm9yIGJvdGggUlBNIGFuZCBERUIgcmVwb3NpdG9yaWVzLgo+Pgo+PiBIb3dldmVyLCB0aGUg
-REVCIHJlcG9zIGRvbid0IGFsbG93IHBpbm5pbmcgdG8gYSBnaXZlbiB2ZXJzaW9uIGJlY2F1c2UK
-Pj4gb3VyIHRvb2xpbmcgKG5hbWVseSByZXByZXBybykgZG9lc24ndCBjb25zdHJ1Y3QgdGhlIHJl
-cG9zaXRvcmllcyBpbiBhCj4+IHdheSB0aGF0IHRoaXMgaXMgYWxsb3dlZC4gRm9yIFJQTSByZXBv
-cyB0aGlzIGlzIGZpbmUsIGFuZCB2ZXJzaW9uCj4+IHBpbm5pbmcgd29ya3MuCj4KPiBJZiB5b3Ug
-bWVhbiB0aGF0IHJlcHJlcG8gZG9lcyBub3Qgc3VwcG9ydCByZWZlcmVuY2luZyBtdWx0aXBsZSB2
-ZXJzaW9ucwo+IG9mIHBhY2thZ2VzIGluIHRoZSBQYWNrYWdlcyBmaWxlLCB0aGVyZSBpcyBhIHBh
-dGNoZWQgZm9yayB0aGF0IGRvZXMKPiAodGhhdCBzZWVtcyB3ZWxsLXN1cHBvcnRlZCk6Cj4KPiBo
-dHRwczovL2dpdGh1Yi5jb20vcHJvZml0YnJpY2tzL3JlcHJlcHJvCgpUaGFua3MgZm9yIHRoaXMg
-bGluay4gVGhhdCdzIGdyZWF0IHRvIGtub3cgc29tZW9uZSdzIHdvcmtpbmcgb24gdGhpcy4KCldo
-YXQncyB0aGUgc3RhdHVzIG9mIG1lcmdpbmcgdGhhdCBiYWNrIGludG8gdGhlIG1haW4gcmVwcmVw
-cm8gY29kZSwgb3IKZWxzZSBzaGlwcGluZyB0aGF0IGZvcmsgYXMgdGhlIG5ldyByZXByZXBybyBw
-YWNrYWdlIGluIERlYmlhbiAvClVidW50dT8gVGhlIENlcGggcHJvamVjdCBjb3VsZCBlbmQgdXAg
-cmVzcG9uc2libGUgZm9yIG1haW50YWluaW5nIHRoYXQKcmVwcmVwcm8gZm9yayBpZiB0aGUgbWFp
-biBVYnVudHUgY29tbXVuaXR5IGRvZXMgbm90IHBpY2sgaXQgdXAgOikgVGhlCmZvcmsgaXMgc2V2
-ZXJhbCB5ZWFycyBvbGQsIGFuZCB0aGUgbGF0ZXN0IHVwZGF0ZSBvbgpodHRwczovL2J1Z3MuZGVi
-aWFuLm9yZy9jZ2ktYmluL2J1Z3JlcG9ydC5jZ2k/YnVnPTU3MDYyMyB3YXMgb3ZlciBhCnllYXIg
-YWdvLgoKLSBLZW4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+--===============7193895235617341642==
+Content-Type: multipart/alternative; boundary="000000000000ef9c8105725ab6e7"
+
+--000000000000ef9c8105725ab6e7
+Content-Type: text/plain; charset="UTF-8"
+
+Hi:
+   I want to use ceph rbd, because it shows better performance. But I dont
+like kernal module and isci target process. So  here is my requirments:
+   I dont want to map it and mount it ,   But I still want to use some
+filesystem like api, or at least I can write multiple files to the rbd
+volume and read them back later. This means I just need librbd api to
+oprate the volume through network.
+   I wonder if there is anyone who have done this , wrap librbd api to
+provide a very simple filesystem like api ?   Or I can do this through
+orther way ?  Thanks for giving me any advice.
+
+--000000000000ef9c8105725ab6e7
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hi:<div>=C2=A0 =C2=A0I want to use ceph rbd, because it sh=
+ows better performance. But I dont like kernal module and isci target proce=
+ss. So=C2=A0 here is my requirments:</div><div>=C2=A0 =C2=A0I dont want to =
+map it and mount it ,=C2=A0 =C2=A0But I still want to use some filesystem l=
+ike api, or at least I can write multiple files to the rbd volume and read =
+them back later. This means I just need librbd api to oprate the volume thr=
+ough network.=C2=A0</div><div>=C2=A0 =C2=A0I wonder if there is anyone who =
+have done this , wrap librbd api to provide a very simple filesystem like a=
+pi ?=C2=A0 =C2=A0Or I can do this through orther way ?=C2=A0 Thanks for giv=
+ing me any advice.=C2=A0 =C2=A0</div></div>
+
+--000000000000ef9c8105725ab6e7--
+
+--===============7193895235617341642==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============7193895235617341642==--
