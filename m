@@ -1,45 +1,43 @@
-From: YueHaibing <yuehaibing@huawei.com>
-Subject: [PATCH net-next] crush: fix using plain integer as NULL warning
-Date: Wed, 8 Aug 2018 19:52:57 +0800
-Message-ID: <20180808115257.6088-1-yuehaibing@huawei.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: removing auids and auid-based cephx capabilities
+Date: Wed, 8 Aug 2018 20:33:43 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1808082028510.22275@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: davem@davemloft.net, idryomov@gmail.com
-Cc: linux-kernel@vger.kernel.org, netdev@vger.kernel.org, zyan@redhat.com, sage@redhat.com, ceph-devel@vger.kernel.org, YueHaibing <yuehaibing@huawei.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Fixes the following sparse warning:
-net/ceph/crush/mapper.c:517:76: warning: Using plain integer as NULL pointer
-net/ceph/crush/mapper.c:728:68: warning: Using plain integer as NULL pointer
+There is an undocumented part of the cephx authentication framework called 
+the 'auid' (auth uid) that assigns an integer identifier to cephx users 
+and to rados pools and allows you to craft cephx capabilities that apply 
+to those pools.  This is leftover infrastructure from an ancient time in 
+which RGW buckets mapped 1:1 to rados pools (pre-argonaut!) and it was 
+expected the cephx capabilities would line up with that.
 
-Signed-off-by: YueHaibing <yuehaibing@huawei.com>
----
- net/ceph/crush/mapper.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Although in theory parts of the auid infrastructure might work and be in 
+use, it is undocumented, untested, and a messy artifact in the code.  I'd 
+like to remove it.
 
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 417df67..3f323ed 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -514,7 +514,7 @@ static int crush_choose_firstn(const struct crush_map *map,
- 						in, work->work[-1-in->id],
- 						x, r,
- 						(choose_args ?
--						 &choose_args[-1-in->id] : 0),
-+						 &choose_args[-1-in->id] : NULL),
- 						outpos);
- 				if (item >= map->max_devices) {
- 					dprintk("   bad item %d\n", item);
-@@ -725,7 +725,7 @@ static void crush_choose_indep(const struct crush_map *map,
- 					in, work->work[-1-in->id],
- 					x, r,
- 					(choose_args ?
--					 &choose_args[-1-in->id] : 0),
-+					 &choose_args[-1-in->id] : NULL),
- 					outpos);
- 				if (item >= map->max_devices) {
- 					dprintk("   bad item %d\n", item);
--- 
-2.7.0
+***
+
+  If you are using auid-based cephx capabilities, now is the time to tell 
+  us!  Or, if you know of any reason we should keep it around, now is 
+  the time to speak up.
+
+  Otherwise we will remove it!
+
+***
+
+Thanks!
+sage
