@@ -1,11 +1,12 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: removing auids and auid-based cephx capabilities
-Date: Wed, 8 Aug 2018 20:33:43 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1808082028510.22275@piezo.novalocal>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: RBD image "lightweight snapshots"
+Date: Thu, 9 Aug 2018 15:01:50 +0200
+Message-ID: <45c564fb-63ed-af46-851b-6467649ae56d@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,29 +16,33 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-There is an undocumented part of the cephx authentication framework called 
-the 'auid' (auth uid) that assigns an integer identifier to cephx users 
-and to rados pools and allows you to craft cephx capabilities that apply 
-to those pools.  This is leftover infrastructure from an ancient time in 
-which RGW buckets mapped 1:1 to rados pools (pre-argonaut!) and it was 
-expected the cephx capabilities would line up with that.
-
-Although in theory parts of the auid infrastructure might work and be in 
-use, it is undocumented, untested, and a messy artifact in the code.  I'd 
-like to remove it.
-
-***
-
-  If you are using auid-based cephx capabilities, now is the time to tell 
-  us!  Or, if you know of any reason we should keep it around, now is 
-  the time to speak up.
-
-  Otherwise we will remove it!
-
-***
-
-Thanks!
-sage
+SGVsbG8sCgpBdCBPVkggd2UncmUgaGVhdmlseSB1dGlsaXppbmcgc25hcHNob3RzIGZvciBvdXIg
+YmFja3VwIHN5c3RlbS4gV2UgdGhpbmsgCnRoZXJlJ3MgYW4gaW50ZXJlc3Rpbmcgb3B0aW1pemF0
+aW9uIG9wcG9ydHVuaXR5IHJlZ2FyZGluZyBzbmFwc2hvdHMgSSdkIGxpa2UgCnRvIGRpc2N1c3Mg
+aGVyZS4KClRoZSBpZGVhIGlzIHRvIGludHJvZHVjZSBhIGNvbmNlcHQgb2YgYSAibGlnaHR3ZWln
+aHQiIHNuYXBzaG90cyAtIHN1Y2ggCnNuYXBzaG90IHdvdWxkIG5vdCBjb250YWluIGRhdGEgYnV0
+IG9ubHkgdGhlIGluZm9ybWF0aW9uIGFib3V0IHdoYXQgaGFzIApjaGFuZ2VkIG9uIHRoZSBpbWFn
+ZSBzaW5jZSBpdCB3YXMgY3JlYXRlZCAoc28gYmFzaWNhbGx5IG9ubHkgdGhlIG9iamVjdCBtYXAg
+CnBhcnQgb2Ygc25hcHNob3RzKS4KCk91ciBiYWNrdXAgc29sdXRpb24gKHdoaWNoIHNlZW1zIHRv
+IGJlIGEgcHJldHR5IGNvbW1vbiBwcmFjdGljZSkgaXMgYXMgZm9sbG93czoKCjEuIENyZWF0ZSBz
+bmFwc2hvdCBvZiB0aGUgaW1hZ2Ugd2Ugd2FudCB0byBiYWNrdXAKMi4gSWYgdGhlcmUncyBhIHBy
+ZXZpb3VzIGJhY2t1cCBzbmFwc2hvdCwgZXhwb3J0IGRpZmYgYW5kIGFwcGx5IGl0IG9uIHRoZSAK
+YmFja3VwIGltYWdlCjMuIElmIHRoZXJlJ3Mgbm8gb2xkZXIgc25hcHNob3QsIGp1c3QgZG8gYSBm
+dWxsIGJhY2t1cCBvZiBpbWFnZQoKVGhpcyBpbnRyb2R1Y2VzIG9uZSBiaWcgaXNzdWU6IGl0IGVu
+Zm9yY2VzIENPVyBzbmFwc2hvdCBvbiBpbWFnZSwgbWVhbmluZyAKdGhhdCBvcmlnaW5hbCBpbWFn
+ZSBhY2Nlc3MgbGF0ZW5jaWVzIGFuZCBjb25zdW1lZCBzcGFjZSBpbmNyZWFzZXMuIAoiTGlnaHR3
+ZWlnaHQiIHNuYXBzaG90cyB3b3VsZCByZW1vdmUgdGhlc2UgaW5lZmZpY2llbmNpZXMgLSBubyBD
+T1cgCnBlcmZvcm1hbmNlIGFuZCBzdG9yYWdlIG92ZXJoZWFkLgoKQXQgZmlyc3QgZ2xhbmNlLCBp
+dCBzZWVtcyBsaWtlIGl0IGNvdWxkIGJlIGltcGxlbWVudGVkIGFzIGV4dGVuc2lvbiB0byAKY3Vy
+cmVudCBSQkQgc25hcHNob3Qgc3lzdGVtLCBsZWF2aW5nIG91dCB0aGUgbWFjaGluZXJ5IHJlcXVp
+cmVkIGZvciAKY29weS1vbi13cml0ZS4gSW4gdGhlb3J5IGl0IGNvdWxkIGV2ZW4gY28tZXhpc3Qg
+d2l0aCByZWd1bGFyIHNuYXBzaG90cy4gClJlbW92YWwgb2YgdGhlc2UgImxpZ2h0d2VpZ2h0IiBz
+bmFwc2hvdHMgd291bGQgYmUgaW5zdGFudCAob3IgbmVhciBpbnN0YW50KS4KClNvIHdoYXQgZG8g
+b3RoZXJzIHRoaW5rIGFib3V0IHRoaXM/CgotLSAKUGlvdHIgRGHFgmVrCnBpb3RyLmRhbGVrQGNv
+cnAub3ZoLmNvbQpodHRwczovL3d3dy5vdmhjbG91ZC5jb20KX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11
+c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2Nl
+cGgtdXNlcnMtY2VwaC5jb20K
