@@ -1,13 +1,16 @@
 From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: removing auids and auid-based cephx capabilities
-Date: Fri, 10 Aug 2018 09:14:41 -0700
-Message-ID: <CAJ4mKGbeLxSaUFpNsO2d7=mZctBz1JjdMFg9V4ozYBGh60qdYg@mail.gmail.com>
-References: <alpine.DEB.2.11.1808082028510.22275@piezo.novalocal>
+Subject: Re: RBD image "lightweight snapshots"
+Date: Fri, 10 Aug 2018 09:24:34 -0700
+Message-ID: <CAJ4mKGacWb=DsN2WeSeyGbSb3QzWoFccXws4H7VBDgBsGw72Eg@mail.gmail.com>
+References: <45c564fb-63ed-af46-851b-6467649ae56d@corp.ovh.com>
+ <alpine.DEB.2.11.1808091311360.15688@piezo.novalocal>
+ <cdc2a3bb-d3aa-0208-503a-e37c8bb3ed5d@ieee.org>
+ <d0c3e492-24da-5188-1a5a-72bc74dac4c9@sadziu.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1808082028510.22275-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+In-Reply-To: <d0c3e492-24da-5188-1a5a-72bc74dac4c9-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,34 +20,63 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?UTF-8?Q?Pawe=C5=82_Sadowsk?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
+Cc: Alex Elder <elder-EkmVulN54Sk@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Aug 8, 2018 at 1:33 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> There is an undocumented part of the cephx authentication framework called
-> the 'auid' (auth uid) that assigns an integer identifier to cephx users
-> and to rados pools and allows you to craft cephx capabilities that apply
-> to those pools.  This is leftover infrastructure from an ancient time in
-> which RGW buckets mapped 1:1 to rados pools (pre-argonaut!) and it was
-> expected the cephx capabilities would line up with that.
->
-> Although in theory parts of the auid infrastructure might work and be in
-> use, it is undocumented, untested, and a messy artifact in the code.  I'd
-> like to remove it.
->
-> ***
->
->   If you are using auid-based cephx capabilities, now is the time to tell
->   us!  Or, if you know of any reason we should keep it around, now is
->   the time to speak up.
->
->   Otherwise we will remove it!
->
-> ***
-
-I used to be very proud of this code, but +1. I don't know of any
-users who *could* be using it (much less are) and it really doesn't
-make any sense in our current security architecture even if it might
-function.
--Greg
+T24gRnJpLCBBdWcgMTAsIDIwMTggYXQgNDo1MyBBTSwgUGF3ZcWCIFNhZG93c2sgPGNlcGhAc2Fk
+eml1LnBsPiB3cm90ZToKPiBPbiAwOC8wOS8yMDE4IDA0OjM5IFBNLCBBbGV4IEVsZGVyIHdyb3Rl
+Ogo+PiBPbiAwOC8wOS8yMDE4IDA4OjE1IEFNLCBTYWdlIFdlaWwgd3JvdGU6Cj4+PiBPbiBUaHUs
+IDkgQXVnIDIwMTgsIFBpb3RyIERhxYJlayB3cm90ZToKPj4+PiBIZWxsbywKPj4+Pgo+Pj4+IEF0
+IE9WSCB3ZSdyZSBoZWF2aWx5IHV0aWxpemluZyBzbmFwc2hvdHMgZm9yIG91ciBiYWNrdXAgc3lz
+dGVtLiBXZSB0aGluawo+Pj4+IHRoZXJlJ3MgYW4gaW50ZXJlc3Rpbmcgb3B0aW1pemF0aW9uIG9w
+cG9ydHVuaXR5IHJlZ2FyZGluZyBzbmFwc2hvdHMgSSdkIGxpa2UKPj4+PiB0byBkaXNjdXNzIGhl
+cmUuCj4+Pj4KPj4+PiBUaGUgaWRlYSBpcyB0byBpbnRyb2R1Y2UgYSBjb25jZXB0IG9mIGEgImxp
+Z2h0d2VpZ2h0IiBzbmFwc2hvdHMgLSBzdWNoCj4+Pj4gc25hcHNob3Qgd291bGQgbm90IGNvbnRh
+aW4gZGF0YSBidXQgb25seSB0aGUgaW5mb3JtYXRpb24gYWJvdXQgd2hhdCBoYXMKPj4+PiBjaGFu
+Z2VkIG9uIHRoZSBpbWFnZSBzaW5jZSBpdCB3YXMgY3JlYXRlZCAoc28gYmFzaWNhbGx5IG9ubHkg
+dGhlIG9iamVjdCBtYXAKPj4+PiBwYXJ0IG9mIHNuYXBzaG90cykuCj4+Pj4KPj4+PiBPdXIgYmFj
+a3VwIHNvbHV0aW9uICh3aGljaCBzZWVtcyB0byBiZSBhIHByZXR0eSBjb21tb24gcHJhY3RpY2Up
+IGlzIGFzCj4+Pj4gZm9sbG93czoKPj4+Pgo+Pj4+IDEuIENyZWF0ZSBzbmFwc2hvdCBvZiB0aGUg
+aW1hZ2Ugd2Ugd2FudCB0byBiYWNrdXAKPj4+PiAyLiBJZiB0aGVyZSdzIGEgcHJldmlvdXMgYmFj
+a3VwIHNuYXBzaG90LCBleHBvcnQgZGlmZiBhbmQgYXBwbHkgaXQgb24gdGhlCj4+Pj4gYmFja3Vw
+IGltYWdlCj4+Pj4gMy4gSWYgdGhlcmUncyBubyBvbGRlciBzbmFwc2hvdCwganVzdCBkbyBhIGZ1
+bGwgYmFja3VwIG9mIGltYWdlCj4+Pj4KPj4+PiBUaGlzIGludHJvZHVjZXMgb25lIGJpZyBpc3N1
+ZTogaXQgZW5mb3JjZXMgQ09XIHNuYXBzaG90IG9uIGltYWdlLCBtZWFuaW5nIHRoYXQKPj4+PiBv
+cmlnaW5hbCBpbWFnZSBhY2Nlc3MgbGF0ZW5jaWVzIGFuZCBjb25zdW1lZCBzcGFjZSBpbmNyZWFz
+ZXMuICJMaWdodHdlaWdodCIKPj4+PiBzbmFwc2hvdHMgd291bGQgcmVtb3ZlIHRoZXNlIGluZWZm
+aWNpZW5jaWVzIC0gbm8gQ09XIHBlcmZvcm1hbmNlIGFuZCBzdG9yYWdlCj4+Pj4gb3ZlcmhlYWQu
+Cj4+Pgo+Pj4gVGhlIHNuYXBzaG90IGluIDEgd291bGQgYmUgbGlnaHR3ZWlnaHQgeW91IG1lYW4/
+ICBBbmQgeW91J2QgZG8gdGhlIGJhY2t1cAo+Pj4gc29tZSAoc2hvcnQpIHRpbWUgbGF0ZXIgYmFz
+ZWQgb24gYSBkaWZmIHdpdGggY2hhbmdlZCBleHRlbnRzPwo+Pj4KPj4+IEknbSBwcmV0dHkgc3Vy
+ZSB0aGlzIHdpbGwgZXhwb3J0IGEgZ2FyYmFnZSBpbWFnZS4gIEkgbWVhbiwgaXQgd2lsbCB1c3Vh
+bGx5Cj4+PiBiZSBub24tZ2FyYmFnZSwgYnV0IHRoZSByZXN1bHQgd29uJ3QgYmUgY3Jhc2ggY29u
+c2lzdGVudCwgYW5kIGluIHNvbWUKPj4+IChtYW55PykgY2FzZXMgd29uJ3QgYmUgdXNhYmxlLgo+
+Pj4KPj4+IENvbnNpZGVyOgo+Pj4KPj4+IC0gdGFrZSByZWZlcmVuY2Ugc25hcHNob3QKPj4+IC0g
+YmFjayB1cCB0aGlzIGltYWdlIChhc3N1bWUgZm9yIG5vdyBpdCBpcyBwZXJmZWN0KQo+Pj4gLSB3
+cml0ZSBBIHRvIGxvY2F0aW9uIDEKPj4+IC0gdGFrZSBsaWdodHdlaWdodCBzbmFwc2hvdAo+Pj4g
+LSB3cml0ZSBCIHRvIGxvY2F0aW9uIDEKPj4+IC0gYmFja3VwIHByb2Nlc3MgY29waWUgbG9jYXRp
+b24gMSAoQikgdG8gdGFyZ2V0Cj4KPiBUaGUgd2F5IEkgKHdlKSBzZWUgaXQgd29ya2luZyBpcyBh
+IGJpdCBkaWZmZXJlbnQ6Cj4gIC0gdGFrZSBzbmFwc2hvdCAoMSkKPiAgLSBkYXRhIHdyaXRlIG1p
+Z2h0IG9jY3VyLCBpdCdzIG9rIC0gQ29XIGtpY2tzIGluIGhlcmUgdG8gcHJlc2VydmUgZGF0YQo+
+ICAtIGV4cG9ydCBkYXRhCj4gIC0gY29udmVydCBzbmFwc2hvdCAoMSkgdG8gYSBsaWdodHdlaWdo
+dCBvbmUgKG5vdCBjcmVhdGUgbmV3KToKPiAgICAqIGZyb20gbm93IG9uIGp1c3QgcmVtZW1iZXIg
+d2hpY2ggYmxvY2tzIGhhcyBiZWVuIG1vZGlmaWVkIGluc3RlYWQKPiAgICAgIG9mIGRvaW5nIENv
+Vwo+ICAgICogeW91IGNhbiBnZXQgcmlkIG9uIHByZXZpb3VzbHkgQ29XIGRhdGEgYmxvY2tzICh0
+aGV5J3ZlIGJlZW4KPiAgICAgIGV4cG9ydGVkIGFscmVhZHkpCj4gIC0gbW9yZSB3cml0ZXMKPiAg
+LSB0YWtlIHNuYXBzaG90ICgyKQo+ICAtIGV4cG9ydCBkaWZmIC0gb25seSBibG9ja3MgbW9kaWZp
+ZWQgc2luY2Ugc25hcCAoMSkKPiAgLSBjb252ZXJ0IHNuYXBzaG90ICgyKSB0byBhIGxpZ2h0d2Vp
+Z2h0IG9uZQo+ICAtIC4uLgo+Cj4KPiBUaGF0IHdheSBJIGRvbid0IHNlZSBhIHBsYWNlIGZvciBk
+YXRhIGNvcnJ1cHRpb24uIE9mIGNvdXJzZSB0aGlzIGhhcwo+IHNvbWUgZHJhd2JhY2tzIC0geW91
+IGNhbid0IHJvbGxiYWNrL2V4cG9ydCBkYXRhIGZyb20gc3VjaCBsaWdodHdlaWdodAo+IHNuYXBz
+aG90IGFueW1vcmUuIEJ1dCBvbiB0aGUgb3RoZXIgaGFuZCB3ZSBhcmUgcmVkdWNpbmcgbmVlZCBm
+b3IgQ29XIC0KPiBhbmQgdGhhdCdzIHRoZSBtYWluIGdvYWwgd2l0aCB0aGlzIGlkZWEuIEluc3Rl
+YWQgb2YgbWFraW5nIENvVyB+YWxsIHRoZQo+IHRpbWUgaXQncyBuZWVkZWQgb25seSBmb3IgdGhl
+IHRpbWUgb2YgZXhwb3J0aW5nIGltYWdlL21vZGlmaWVkIGJsb2Nrcy4KCldoYXQncyB0aGUgYWR2
+YW50YWdlIG9mIHJlbWVtYmVyaW5nIHRoZSBibG9ja3MgY2hhbmdlZCBmb3IgYQoibGlnaHR3ZWln
+aHQgc25hcHNob3QiIG9uY2UgdGhlIGFjdHVhbCBkYXRhIGRpZmYgaXMgbm8gbG9uZ2VyIHRoZXJl
+PwpJcyB0aGVyZSBhIG1lYW5pbmdmdWwgZGlmZmVyZW5jZSBiZXR3ZWVuIHRoaXMgYW5kIGp1c3Qg
+aW1tZWRpYXRlbHkKZGVsZXRpbmcgYSBzbmFwc2hvdCBhZnRlciBkb2luZyB0aGUgZXhwb3J0Pwot
+R3JlZwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
+LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
