@@ -1,53 +1,127 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH net-next] crush: fix using plain integer as NULL warning
-Date: Fri, 10 Aug 2018 12:59:43 +0200
-Message-ID: <CAOi1vP-Vg8qoMe12OzTOwVaGgzU4GP2wBdhGyEV67Rd4edKVFw@mail.gmail.com>
-References: <20180808115257.6088-1-yuehaibing@huawei.com>
+From: =?UTF-8?Q?Pawe=c5=82_Sadowsk?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
+Subject: RBD image "lightweight snapshots"
+Date: Fri, 10 Aug 2018 13:53:19 +0200
+Message-ID: <d0c3e492-24da-5188-1a5a-72bc74dac4c9@sadziu.pl>
+References: <45c564fb-63ed-af46-851b-6467649ae56d@corp.ovh.com>
+ <alpine.DEB.2.11.1808091311360.15688@piezo.novalocal>
+ <cdc2a3bb-d3aa-0208-503a-e37c8bb3ed5d@ieee.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180808115257.6088-1-yuehaibing@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: yuehaibing@huawei.com
-Cc: "David S. Miller" <davem@davemloft.net>, linux-kernel@vger.kernel.org, netdev <netdev@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <cdc2a3bb-d3aa-0208-503a-e37c8bb3ed5d-EkmVulN54Sk@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alex Elder <elder-EkmVulN54Sk@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Aug 8, 2018 at 1:53 PM YueHaibing <yuehaibing@huawei.com> wrote:
->
-> Fixes the following sparse warning:
-> net/ceph/crush/mapper.c:517:76: warning: Using plain integer as NULL pointer
-> net/ceph/crush/mapper.c:728:68: warning: Using plain integer as NULL pointer
->
-> Signed-off-by: YueHaibing <yuehaibing@huawei.com>
-> ---
->  net/ceph/crush/mapper.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> index 417df67..3f323ed 100644
-> --- a/net/ceph/crush/mapper.c
-> +++ b/net/ceph/crush/mapper.c
-> @@ -514,7 +514,7 @@ static int crush_choose_firstn(const struct crush_map *map,
->                                                 in, work->work[-1-in->id],
->                                                 x, r,
->                                                 (choose_args ?
-> -                                                &choose_args[-1-in->id] : 0),
-> +                                                &choose_args[-1-in->id] : NULL),
->                                                 outpos);
->                                 if (item >= map->max_devices) {
->                                         dprintk("   bad item %d\n", item);
-> @@ -725,7 +725,7 @@ static void crush_choose_indep(const struct crush_map *map,
->                                         in, work->work[-1-in->id],
->                                         x, r,
->                                         (choose_args ?
-> -                                        &choose_args[-1-in->id] : 0),
-> +                                        &choose_args[-1-in->id] : NULL),
->                                         outpos);
->                                 if (item >= map->max_devices) {
->                                         dprintk("   bad item %d\n", item);
-
-Applied.
-
-Thanks,
-
-                Ilya
+T24gMDgvMDkvMjAxOCAwNDozOSBQTSwgQWxleCBFbGRlciB3cm90ZToKPiBPbiAwOC8wOS8yMDE4
+IDA4OjE1IEFNLCBTYWdlIFdlaWwgd3JvdGU6Cj4+IE9uIFRodSwgOSBBdWcgMjAxOCwgUGlvdHIg
+RGHFgmVrIHdyb3RlOgo+Pj4gSGVsbG8sCj4+Pgo+Pj4gQXQgT1ZIIHdlJ3JlIGhlYXZpbHkgdXRp
+bGl6aW5nIHNuYXBzaG90cyBmb3Igb3VyIGJhY2t1cCBzeXN0ZW0uIFdlIHRoaW5rCj4+PiB0aGVy
+ZSdzIGFuIGludGVyZXN0aW5nIG9wdGltaXphdGlvbiBvcHBvcnR1bml0eSByZWdhcmRpbmcgc25h
+cHNob3RzIEknZCBsaWtlCj4+PiB0byBkaXNjdXNzIGhlcmUuCj4+Pgo+Pj4gVGhlIGlkZWEgaXMg
+dG8gaW50cm9kdWNlIGEgY29uY2VwdCBvZiBhICJsaWdodHdlaWdodCIgc25hcHNob3RzIC0gc3Vj
+aAo+Pj4gc25hcHNob3Qgd291bGQgbm90IGNvbnRhaW4gZGF0YSBidXQgb25seSB0aGUgaW5mb3Jt
+YXRpb24gYWJvdXQgd2hhdCBoYXMKPj4+IGNoYW5nZWQgb24gdGhlIGltYWdlIHNpbmNlIGl0IHdh
+cyBjcmVhdGVkIChzbyBiYXNpY2FsbHkgb25seSB0aGUgb2JqZWN0IG1hcAo+Pj4gcGFydCBvZiBz
+bmFwc2hvdHMpLgo+Pj4KPj4+IE91ciBiYWNrdXAgc29sdXRpb24gKHdoaWNoIHNlZW1zIHRvIGJl
+IGEgcHJldHR5IGNvbW1vbiBwcmFjdGljZSkgaXMgYXMKPj4+IGZvbGxvd3M6Cj4+Pgo+Pj4gMS4g
+Q3JlYXRlIHNuYXBzaG90IG9mIHRoZSBpbWFnZSB3ZSB3YW50IHRvIGJhY2t1cAo+Pj4gMi4gSWYg
+dGhlcmUncyBhIHByZXZpb3VzIGJhY2t1cCBzbmFwc2hvdCwgZXhwb3J0IGRpZmYgYW5kIGFwcGx5
+IGl0IG9uIHRoZQo+Pj4gYmFja3VwIGltYWdlCj4+PiAzLiBJZiB0aGVyZSdzIG5vIG9sZGVyIHNu
+YXBzaG90LCBqdXN0IGRvIGEgZnVsbCBiYWNrdXAgb2YgaW1hZ2UKPj4+Cj4+PiBUaGlzIGludHJv
+ZHVjZXMgb25lIGJpZyBpc3N1ZTogaXQgZW5mb3JjZXMgQ09XIHNuYXBzaG90IG9uIGltYWdlLCBt
+ZWFuaW5nIHRoYXQKPj4+IG9yaWdpbmFsIGltYWdlIGFjY2VzcyBsYXRlbmNpZXMgYW5kIGNvbnN1
+bWVkIHNwYWNlIGluY3JlYXNlcy4gIkxpZ2h0d2VpZ2h0Igo+Pj4gc25hcHNob3RzIHdvdWxkIHJl
+bW92ZSB0aGVzZSBpbmVmZmljaWVuY2llcyAtIG5vIENPVyBwZXJmb3JtYW5jZSBhbmQgc3RvcmFn
+ZQo+Pj4gb3ZlcmhlYWQuCj4+Cj4+IFRoZSBzbmFwc2hvdCBpbiAxIHdvdWxkIGJlIGxpZ2h0d2Vp
+Z2h0IHlvdSBtZWFuPyAgQW5kIHlvdSdkIGRvIHRoZSBiYWNrdXAgCj4+IHNvbWUgKHNob3J0KSB0
+aW1lIGxhdGVyIGJhc2VkIG9uIGEgZGlmZiB3aXRoIGNoYW5nZWQgZXh0ZW50cz8KPj4KPj4gSSdt
+IHByZXR0eSBzdXJlIHRoaXMgd2lsbCBleHBvcnQgYSBnYXJiYWdlIGltYWdlLiAgSSBtZWFuLCBp
+dCB3aWxsIHVzdWFsbHkgCj4+IGJlIG5vbi1nYXJiYWdlLCBidXQgdGhlIHJlc3VsdCB3b24ndCBi
+ZSBjcmFzaCBjb25zaXN0ZW50LCBhbmQgaW4gc29tZSAKPj4gKG1hbnk/KSBjYXNlcyB3b24ndCBi
+ZSB1c2FibGUuCj4+Cj4+IENvbnNpZGVyOgo+Pgo+PiAtIHRha2UgcmVmZXJlbmNlIHNuYXBzaG90
+Cj4+IC0gYmFjayB1cCB0aGlzIGltYWdlIChhc3N1bWUgZm9yIG5vdyBpdCBpcyBwZXJmZWN0KQo+
+PiAtIHdyaXRlIEEgdG8gbG9jYXRpb24gMQo+PiAtIHRha2UgbGlnaHR3ZWlnaHQgc25hcHNob3QK
+Pj4gLSB3cml0ZSBCIHRvIGxvY2F0aW9uIDEKPj4gLSBiYWNrdXAgcHJvY2VzcyBjb3BpZSBsb2Nh
+dGlvbiAxIChCKSB0byB0YXJnZXQKClRoZSB3YXkgSSAod2UpIHNlZSBpdCB3b3JraW5nIGlzIGEg
+Yml0IGRpZmZlcmVudDoKIC0gdGFrZSBzbmFwc2hvdCAoMSkKIC0gZGF0YSB3cml0ZSBtaWdodCBv
+Y2N1ciwgaXQncyBvayAtIENvVyBraWNrcyBpbiBoZXJlIHRvIHByZXNlcnZlIGRhdGEKIC0gZXhw
+b3J0IGRhdGEKIC0gY29udmVydCBzbmFwc2hvdCAoMSkgdG8gYSBsaWdodHdlaWdodCBvbmUgKG5v
+dCBjcmVhdGUgbmV3KToKICAgKiBmcm9tIG5vdyBvbiBqdXN0IHJlbWVtYmVyIHdoaWNoIGJsb2Nr
+cyBoYXMgYmVlbiBtb2RpZmllZCBpbnN0ZWFkCiAgICAgb2YgZG9pbmcgQ29XCiAgICogeW91IGNh
+biBnZXQgcmlkIG9uIHByZXZpb3VzbHkgQ29XIGRhdGEgYmxvY2tzICh0aGV5J3ZlIGJlZW4KICAg
+ICBleHBvcnRlZCBhbHJlYWR5KQogLSBtb3JlIHdyaXRlcwogLSB0YWtlIHNuYXBzaG90ICgyKQog
+LSBleHBvcnQgZGlmZiAtIG9ubHkgYmxvY2tzIG1vZGlmaWVkIHNpbmNlIHNuYXAgKDEpCiAtIGNv
+bnZlcnQgc25hcHNob3QgKDIpIHRvIGEgbGlnaHR3ZWlnaHQgb25lCiAtIC4uLgoKClRoYXQgd2F5
+IEkgZG9uJ3Qgc2VlIGEgcGxhY2UgZm9yIGRhdGEgY29ycnVwdGlvbi4gT2YgY291cnNlIHRoaXMg
+aGFzCnNvbWUgZHJhd2JhY2tzIC0geW91IGNhbid0IHJvbGxiYWNrL2V4cG9ydCBkYXRhIGZyb20g
+c3VjaCBsaWdodHdlaWdodApzbmFwc2hvdCBhbnltb3JlLiBCdXQgb24gdGhlIG90aGVyIGhhbmQg
+d2UgYXJlIHJlZHVjaW5nIG5lZWQgZm9yIENvVyAtCmFuZCB0aGF0J3MgdGhlIG1haW4gZ29hbCB3
+aXRoIHRoaXMgaWRlYS4gSW5zdGVhZCBvZiBtYWtpbmcgQ29XIH5hbGwgdGhlCnRpbWUgaXQncyBu
+ZWVkZWQgb25seSBmb3IgdGhlIHRpbWUgb2YgZXhwb3J0aW5nIGltYWdlL21vZGlmaWVkIGJsb2Nr
+cy4KCj4+IFRoYXQncyB0aGUgd3JvbmcgZGF0YS4gIE1heWJlIHRoYXQgY2hhbmdlIGlzIGhhcm1s
+ZXNzLCBidXQgbWF5YmUgbG9jYXRpb24gCj4+IDEgYmVsb25ncyB0byB0aGUgZmlsZXN5c3RlbSBq
+b3VybmFsLCBhbmQgeW91IGhhdmUgc29tZSByZWNvcmRzIHRoYXQgbm93IAo+PiByZWZlcmVuY2Ug
+bG9jYXRpb24gMTAgdGhhdCBhcyBhbiBBLWVyYSB2YWx1ZSwgb3IgaGF2ZW4ndCBiZWVuIHdyaXR0
+ZW4gYXQgCj4+IGFsbCB5ZXQsIGFuZCBub3cgeW91ciBmaWxlIHN5c3RlbSBqb3VybmFsIHdvbid0
+IHJlcGxheSBhbmQgeW91IGNhbid0IAo+PiBtb3VudC4uLgo+IAo+IEZvcmdpdmUgbWUgaWYgSSdt
+IG1pc3VuZGVyc3RhbmRpbmc7IHRoaXMganVzdCBjYXVnaHQgbXkgYXR0ZW50aW9uLgo+IAo+IFRo
+ZSBnb2FsIGhlcmUgc2VlbXMgdG8gYmUgdG8gcmVkdWNlIHRoZSBzdG9yYWdlIG5lZWRlZCB0byBk
+byBiYWNrdXBzIG9mIGFuCj4gUkJEIGltYWdlLCBhbmQgSSB0aGluayB0aGVyZSdzIHNvbWV0aGlu
+ZyB0byB0aGF0LgoKU3RvcmFnZSByZWR1Y3Rpb24gaXMgb25seSBzaWRlIGVmZmVjdCBoZXJlLiBX
+ZSB3YW50IHRvIGdldCByaWQgb2YgQ29XIGFzCm11Y2ggYXMgcG9zc2libGUuIEluIGFuIGV4YW1w
+bGUgLSB3ZSBhcmUgZG9pbmcgc25hcHNob3QgZXZlcnkgMjRoIC0gdGhpcwptZWFucyB0aGF0IGV2
+ZXJ5IDI0aCB3ZSB3aWxsIHN0YXJ0IGRvaW5nIENvVyBmcm9tIHRoZSBiZWdpbm5pbmcgb24gZXZl
+cnkKaW1hZ2UuIFRoaXMgaGFzIGJpZyBpbXBhY3Qgb24gYSBjbHVzdGVyIGxhdGVuY3kKCkFzIGZv
+ciB0aGUgc3RvcmFnZSBuZWVkLCB3aXRoIDI0aCBiYWNrdXAgcGVyaW9kIHdlIHNlZSBhIHNwYWNl
+IHVzYWdlCmluY3JlYXNlIGJ5IGFib3V0IDUlIG9uIG91ciBjbHVzdGVycy4gQnV0IHRoaXMgY2xl
+YXJseSBkZXBlbmRzIG9uIGNsaWVudAp0cmFmZmljLgoKPiBUaGlzIHNlZW1zIHRvIGJlIG5vIGRp
+ZmZlcmVudCBmcm9tIGFueSBvdGhlciBpbmNyZW1lbnRhbCBiYWNrdXAgc2NoZW1lLiAgSXQncwo+
+IGxheWVyZWQsIGFuZCBpdCdzIHVsdGltYXRlbHkgYmFzZWQgb24gYW4gImVwb2NoIiBjb21wbGV0
+ZSBiYWNrdXAgaW1hZ2UgKHdoYXQKPiB5b3UgY2FsbCB0aGUgcmVmZXJlbmNlIHNuYXBzaG90KS4K
+PiAKPiBJZiB5b3UncmUgdXNpbmcgdGhhdCBtb2RlbCwgaXQgd291bGQgYmUgdXNlZnVsIHRvIGJl
+IGFibGUgdG8gYmFjayB1cCBvbmx5Cj4gdGhlIGRhdGEgcHJlc2VudCBpbiBhIHNlY29uZCBzbmFw
+c2hvdCB0aGF0J3MgdGhlIGNoaWxkIG9mIHRoZSByZWZlcmVuY2UKPiBzbmFwc2hvdC4gIChBbmQg
+c28gb24sIHdpdGggc25hcHNob3QgMiBidWlsZGluZyBvbiBzbmFwc2hvdCAxLCBldGMuKQo+IFJC
+RCBpbnRlcm5hbGx5ICprbm93cyogdGhpcyBpbmZvcm1hdGlvbiwgYnV0IEknbSBub3Qgc3VyZSBo
+b3cgKG9yIHdoZXRoZXIpCj4gaXQncyBmb3JtYWxseSBleHBvc2VkLgo+IAo+IFJlc3RvcmluZyBh
+biBpbWFnZSBpbiB0aGlzIHNjaGVtZSByZXF1aXJlcyByZXN0b3JpbmcgdGhlIGVwb2NoLCB0aGVu
+IHRoZQo+IGluY3JlbWVudGFscywgaW4gb3JkZXIuICBUaGUgY29zdCB0byByZXN0b3JlIGlzIGhp
+Z2hlciwgYnV0IHRoZSBjb3N0Cj4gb2YgaW5jcmVtZW50YWwgYmFja3VwcyBpcyBzaWduaWZpY2Fu
+dGx5IHNtYWxsZXIgdGhhbiBkb2luZyBmdWxsIG9uZXMuCgpJdCBkZXBlbmRzIGhvdyB3ZSB3aWxs
+IHN0b3JlIGV4cG9ydGVkIGRhdGEuIFdlIG1pZ2h0IGp1c3Qgd2FudCB0byBtZXJnZQphbGwgZGlm
+ZnMgaW50byBiYXNlIGltYWdlIHJpZ2h0IGFmdGVyIGV4cG9ydCB0byBrZWVwIG9ubHkgc2luZ2xl
+IGNvcHkuCkJ1dCB0aGF0IGlzIG91dCBvZiBzY29wZSBvZiBtYWluIHRvcGljIGhlcmUsIElNSE8u
+Cgo+IEknbSBub3Qgc3VyZSBob3cgdGhlICJsaWdodHdlaWdodCIgc25hcHNob3Qgd291bGQgd29y
+ayB0aG91Z2guICBXaXRob3V0Cj4gcmVmZXJlbmNlcyB0byBvYmplY3RzIHRoZXJlJ3Mgbm8gZ3Vh
+cmFudGVlIHRoZSBkYXRhIHRha2VuIGF0IHRoZSB0aW1lIG9mCj4gdGhlIHNuYXBzaG90IHN0aWxs
+IGV4aXN0cyB3aGVuIHlvdSB3YW50IHRvIGJhY2sgaXQgdXAuCj4gCj4gCQkJCQktQWxleAo+IAo+
+Pgo+PiBzYWdlCj4+ICAKPj4+IEF0IGZpcnN0IGdsYW5jZSwgaXQgc2VlbXMgbGlrZSBpdCBjb3Vs
+ZCBiZSBpbXBsZW1lbnRlZCBhcyBleHRlbnNpb24gdG8gY3VycmVudAo+Pj4gUkJEIHNuYXBzaG90
+IHN5c3RlbSwgbGVhdmluZyBvdXQgdGhlIG1hY2hpbmVyeSByZXF1aXJlZCBmb3IgY29weS1vbi13
+cml0ZS4gSW4KPj4+IHRoZW9yeSBpdCBjb3VsZCBldmVuIGNvLWV4aXN0IHdpdGggcmVndWxhciBz
+bmFwc2hvdHMuIFJlbW92YWwgb2YgdGhlc2UKPj4+ICJsaWdodHdlaWdodCIgc25hcHNob3RzIHdv
+dWxkIGJlIGluc3RhbnQgKG9yIG5lYXIgaW5zdGFudCkuCj4+Pgo+Pj4gU28gd2hhdCBkbyBvdGhl
+cnMgdGhpbmsgYWJvdXQgdGhpcz8KPj4+Cj4+PiAtLSAKPj4+IFBpb3RyIERhxYJlawo+Pj4gcGlv
+dHIuZGFsZWtAY29ycC5vdmguY29tCj4+PiBodHRwczovL3d3dy5vdmhjbG91ZC5jb20KPj4+IC0t
+Cj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
+Y3JpYmUgY2VwaC1kZXZlbCIgaW4KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnCj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdl
+ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPj4+Cj4gCj4gLS0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
+Zwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
+b21vLWluZm8uaHRtbAo+IAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
