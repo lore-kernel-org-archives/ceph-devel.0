@@ -1,18 +1,14 @@
-From: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
-Subject: Re: RBD image "lightweight snapshots"
-Date: Sat, 11 Aug 2018 07:56:53 +0200
-Message-ID: <9251af62-3bcc-6645-4ee0-a30cee3aa1ff@sadziu.pl>
-References: <45c564fb-63ed-af46-851b-6467649ae56d@corp.ovh.com>
- <alpine.DEB.2.11.1808091311360.15688@piezo.novalocal>
- <cdc2a3bb-d3aa-0208-503a-e37c8bb3ed5d@ieee.org>
- <d0c3e492-24da-5188-1a5a-72bc74dac4c9@sadziu.pl>
- <CAJ4mKGacWb=DsN2WeSeyGbSb3QzWoFccXws4H7VBDgBsGw72Eg@mail.gmail.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: removing auids and auid-based cephx capabilities
+Date: Sat, 11 Aug 2018 18:39:56 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1808111835420.15696@piezo.novalocal>
+References: <alpine.DEB.2.11.1808082028510.22275@piezo.novalocal>
+ <CAJ4mKGbeLxSaUFpNsO2d7=mZctBz1JjdMFg9V4ozYBGh60qdYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAJ4mKGacWb=DsN2WeSeyGbSb3QzWoFccXws4H7VBDgBsGw72Eg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <CAJ4mKGbeLxSaUFpNsO2d7=mZctBz1JjdMFg9V4ozYBGh60qdYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -23,76 +19,68 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 To: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Alex Elder <elder-EkmVulN54Sk@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gMDgvMTAvMjAxOCAwNjoyNCBQTSwgR3JlZ29yeSBGYXJudW0gd3JvdGU6Cj4gT24gRnJpLCBB
-dWcgMTAsIDIwMTggYXQgNDo1MyBBTSwgUGF3ZcWCIFNhZG93c2sgPGNlcGhAc2Fkeml1LnBsPiB3
-cm90ZToKPj4gT24gMDgvMDkvMjAxOCAwNDozOSBQTSwgQWxleCBFbGRlciB3cm90ZToKPj4+IE9u
-IDA4LzA5LzIwMTggMDg6MTUgQU0sIFNhZ2UgV2VpbCB3cm90ZToKPj4+PiBPbiBUaHUsIDkgQXVn
-IDIwMTgsIFBpb3RyIERhxYJlayB3cm90ZToKPj4+Pj4gSGVsbG8sCj4+Pj4+Cj4+Pj4+IEF0IE9W
-SCB3ZSdyZSBoZWF2aWx5IHV0aWxpemluZyBzbmFwc2hvdHMgZm9yIG91ciBiYWNrdXAgc3lzdGVt
-LiBXZSB0aGluawo+Pj4+PiB0aGVyZSdzIGFuIGludGVyZXN0aW5nIG9wdGltaXphdGlvbiBvcHBv
-cnR1bml0eSByZWdhcmRpbmcgc25hcHNob3RzIEknZCBsaWtlCj4+Pj4+IHRvIGRpc2N1c3MgaGVy
-ZS4KPj4+Pj4KPj4+Pj4gVGhlIGlkZWEgaXMgdG8gaW50cm9kdWNlIGEgY29uY2VwdCBvZiBhICJs
-aWdodHdlaWdodCIgc25hcHNob3RzIC0gc3VjaAo+Pj4+PiBzbmFwc2hvdCB3b3VsZCBub3QgY29u
-dGFpbiBkYXRhIGJ1dCBvbmx5IHRoZSBpbmZvcm1hdGlvbiBhYm91dCB3aGF0IGhhcwo+Pj4+PiBj
-aGFuZ2VkIG9uIHRoZSBpbWFnZSBzaW5jZSBpdCB3YXMgY3JlYXRlZCAoc28gYmFzaWNhbGx5IG9u
-bHkgdGhlIG9iamVjdCBtYXAKPj4+Pj4gcGFydCBvZiBzbmFwc2hvdHMpLgo+Pj4+Pgo+Pj4+PiBP
-dXIgYmFja3VwIHNvbHV0aW9uICh3aGljaCBzZWVtcyB0byBiZSBhIHByZXR0eSBjb21tb24gcHJh
-Y3RpY2UpIGlzIGFzCj4+Pj4+IGZvbGxvd3M6Cj4+Pj4+Cj4+Pj4+IDEuIENyZWF0ZSBzbmFwc2hv
-dCBvZiB0aGUgaW1hZ2Ugd2Ugd2FudCB0byBiYWNrdXAKPj4+Pj4gMi4gSWYgdGhlcmUncyBhIHBy
-ZXZpb3VzIGJhY2t1cCBzbmFwc2hvdCwgZXhwb3J0IGRpZmYgYW5kIGFwcGx5IGl0IG9uIHRoZQo+
-Pj4+PiBiYWNrdXAgaW1hZ2UKPj4+Pj4gMy4gSWYgdGhlcmUncyBubyBvbGRlciBzbmFwc2hvdCwg
-anVzdCBkbyBhIGZ1bGwgYmFja3VwIG9mIGltYWdlCj4+Pj4+Cj4+Pj4+IFRoaXMgaW50cm9kdWNl
-cyBvbmUgYmlnIGlzc3VlOiBpdCBlbmZvcmNlcyBDT1cgc25hcHNob3Qgb24gaW1hZ2UsIG1lYW5p
-bmcgdGhhdAo+Pj4+PiBvcmlnaW5hbCBpbWFnZSBhY2Nlc3MgbGF0ZW5jaWVzIGFuZCBjb25zdW1l
-ZCBzcGFjZSBpbmNyZWFzZXMuICJMaWdodHdlaWdodCIKPj4+Pj4gc25hcHNob3RzIHdvdWxkIHJl
-bW92ZSB0aGVzZSBpbmVmZmljaWVuY2llcyAtIG5vIENPVyBwZXJmb3JtYW5jZSBhbmQgc3RvcmFn
-ZQo+Pj4+PiBvdmVyaGVhZC4KPj4+PiBUaGUgc25hcHNob3QgaW4gMSB3b3VsZCBiZSBsaWdodHdl
-aWdodCB5b3UgbWVhbj8gIEFuZCB5b3UnZCBkbyB0aGUgYmFja3VwCj4+Pj4gc29tZSAoc2hvcnQp
-IHRpbWUgbGF0ZXIgYmFzZWQgb24gYSBkaWZmIHdpdGggY2hhbmdlZCBleHRlbnRzPwo+Pj4+Cj4+
-Pj4gSSdtIHByZXR0eSBzdXJlIHRoaXMgd2lsbCBleHBvcnQgYSBnYXJiYWdlIGltYWdlLiAgSSBt
-ZWFuLCBpdCB3aWxsIHVzdWFsbHkKPj4+PiBiZSBub24tZ2FyYmFnZSwgYnV0IHRoZSByZXN1bHQg
-d29uJ3QgYmUgY3Jhc2ggY29uc2lzdGVudCwgYW5kIGluIHNvbWUKPj4+PiAobWFueT8pIGNhc2Vz
-IHdvbid0IGJlIHVzYWJsZS4KPj4+Pgo+Pj4+IENvbnNpZGVyOgo+Pj4+Cj4+Pj4gLSB0YWtlIHJl
-ZmVyZW5jZSBzbmFwc2hvdAo+Pj4+IC0gYmFjayB1cCB0aGlzIGltYWdlIChhc3N1bWUgZm9yIG5v
-dyBpdCBpcyBwZXJmZWN0KQo+Pj4+IC0gd3JpdGUgQSB0byBsb2NhdGlvbiAxCj4+Pj4gLSB0YWtl
-IGxpZ2h0d2VpZ2h0IHNuYXBzaG90Cj4+Pj4gLSB3cml0ZSBCIHRvIGxvY2F0aW9uIDEKPj4+PiAt
-IGJhY2t1cCBwcm9jZXNzIGNvcGllIGxvY2F0aW9uIDEgKEIpIHRvIHRhcmdldAo+PiBUaGUgd2F5
-IEkgKHdlKSBzZWUgaXQgd29ya2luZyBpcyBhIGJpdCBkaWZmZXJlbnQ6Cj4+ICAgLSB0YWtlIHNu
-YXBzaG90ICgxKQo+PiAgIC0gZGF0YSB3cml0ZSBtaWdodCBvY2N1ciwgaXQncyBvayAtIENvVyBr
-aWNrcyBpbiBoZXJlIHRvIHByZXNlcnZlIGRhdGEKPj4gICAtIGV4cG9ydCBkYXRhCj4+ICAgLSBj
-b252ZXJ0IHNuYXBzaG90ICgxKSB0byBhIGxpZ2h0d2VpZ2h0IG9uZSAobm90IGNyZWF0ZSBuZXcp
-Ogo+PiAgICAgKiBmcm9tIG5vdyBvbiBqdXN0IHJlbWVtYmVyIHdoaWNoIGJsb2NrcyBoYXMgYmVl
-biBtb2RpZmllZCBpbnN0ZWFkCj4+ICAgICAgIG9mIGRvaW5nIENvVwo+PiAgICAgKiB5b3UgY2Fu
-IGdldCByaWQgb24gcHJldmlvdXNseSBDb1cgZGF0YSBibG9ja3MgKHRoZXkndmUgYmVlbgo+PiAg
-ICAgICBleHBvcnRlZCBhbHJlYWR5KQo+PiAgIC0gbW9yZSB3cml0ZXMKPj4gICAtIHRha2Ugc25h
-cHNob3QgKDIpCj4+ICAgLSBleHBvcnQgZGlmZiAtIG9ubHkgYmxvY2tzIG1vZGlmaWVkIHNpbmNl
-IHNuYXAgKDEpCj4+ICAgLSBjb252ZXJ0IHNuYXBzaG90ICgyKSB0byBhIGxpZ2h0d2VpZ2h0IG9u
-ZQo+PiAgIC0gLi4uCj4+Cj4+Cj4+IFRoYXQgd2F5IEkgZG9uJ3Qgc2VlIGEgcGxhY2UgZm9yIGRh
-dGEgY29ycnVwdGlvbi4gT2YgY291cnNlIHRoaXMgaGFzCj4+IHNvbWUgZHJhd2JhY2tzIC0geW91
-IGNhbid0IHJvbGxiYWNrL2V4cG9ydCBkYXRhIGZyb20gc3VjaCBsaWdodHdlaWdodAo+PiBzbmFw
-c2hvdCBhbnltb3JlLiBCdXQgb24gdGhlIG90aGVyIGhhbmQgd2UgYXJlIHJlZHVjaW5nIG5lZWQg
-Zm9yIENvVyAtCj4+IGFuZCB0aGF0J3MgdGhlIG1haW4gZ29hbCB3aXRoIHRoaXMgaWRlYS4gSW5z
-dGVhZCBvZiBtYWtpbmcgQ29XIH5hbGwgdGhlCj4+IHRpbWUgaXQncyBuZWVkZWQgb25seSBmb3Ig
-dGhlIHRpbWUgb2YgZXhwb3J0aW5nIGltYWdlL21vZGlmaWVkIGJsb2Nrcy4KPiBXaGF0J3MgdGhl
-IGFkdmFudGFnZSBvZiByZW1lbWJlcmluZyB0aGUgYmxvY2tzIGNoYW5nZWQgZm9yIGEKPiAibGln
-aHR3ZWlnaHQgc25hcHNob3QiIG9uY2UgdGhlIGFjdHVhbCBkYXRhIGRpZmYgaXMgbm8gbG9uZ2Vy
-IHRoZXJlPwo+IElzIHRoZXJlIGEgbWVhbmluZ2Z1bCBkaWZmZXJlbmNlIGJldHdlZW4gdGhpcyBh
-bmQganVzdCBpbW1lZGlhdGVseQo+IGRlbGV0aW5nIGEgc25hcHNob3QgYWZ0ZXIgZG9pbmcgdGhl
-IGV4cG9ydD8KPiAtR3JlZwoKQWR2YW50YWdlIGlzIHRoYXQgd2hlbiBJIG5lZWQgdG8gZXhwb3J0
-IGRpZmYgSSBrbm93IHdoaWNoIGJsb2NrcyBjaGFuZ2VkLAp3aXRob3V0IGNoZWNraW5nIChyZWFk
-aW5nKSBvdGhlcnMgc28gSSBjYW4ganVzdCBleHBvcnQgdGhlbSBmb3IgYmFja3VwLgpJZiBpIGRl
-bGV0ZSBzbmFwc2hvdCBhZnRlciBleHBvcnQsIG5leHQgdGltZSBJJ2xsIGhhdmUgdG8gcmVhZCB3
-aG9sZSBpbWFnZQphZ2FpbiAtIG5vIHBvc3NpYmlsaXR5IHRvIGRvIGRpZmZlcmVudGlhbCBiYWNr
-dXAuCgpCdXQgYXMgU2FnZSB3cm90ZSwgd2UgYXJlIGRvaW5nIHRoaXMgb24gRmlsZXN0b3JlLiBJ
-IGRvbid0IGtub3cgaG93IEJsdWVzdG9yZQp3b3JrcyB3aXRoIHNuYXBzaG90cyAoYXJlIHdob2xl
-IDRNQiBjaHVua3MgY29waWVkIG9yIG9ubHkgYXJlYSBvZiBjdXJyZW50IHdyaXRlKQpzbyBwZXJm
-b3JtYW5jZSBtaWdodCBiZSBtdWNoIGJldHRlciAtIG5lZWQgdG8gdGVzdCBpdC4KCk91ciBtYWlu
-IGdvYWwgd2l0aCB0aGlzIGlkZWEgaXMgdG8gaW1wcm92ZSBwZXJmb3JtYW5jZSBpbiBjYXNlIHdo
-ZXJlIGFsbCBpbWFnZXMKaGF2ZSBhdCBsZWFzdCBvbmUgc25hcHNob3QgdGFrZW4gZXZlcnkgKmJh
-Y2t1cCBwZXJpb2QqICgyNGggb3IgbG93ZXIpLgoKLS0gClBTCgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kv
-Y2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Fri, 10 Aug 2018, Gregory Farnum wrote:
+> On Wed, Aug 8, 2018 at 1:33 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> > There is an undocumented part of the cephx authentication framework called
+> > the 'auid' (auth uid) that assigns an integer identifier to cephx users
+> > and to rados pools and allows you to craft cephx capabilities that apply
+> > to those pools.  This is leftover infrastructure from an ancient time in
+> > which RGW buckets mapped 1:1 to rados pools (pre-argonaut!) and it was
+> > expected the cephx capabilities would line up with that.
+> >
+> > Although in theory parts of the auid infrastructure might work and be in
+> > use, it is undocumented, untested, and a messy artifact in the code.  I'd
+> > like to remove it.
+> >
+> > ***
+> >
+> >   If you are using auid-based cephx capabilities, now is the time to tell
+> >   us!  Or, if you know of any reason we should keep it around, now is
+> >   the time to speak up.
+> >
+> >   Otherwise we will remove it!
+> >
+> > ***
+> 
+> I used to be very proud of this code, but +1. I don't know of any
+> users who *could* be using it (much less are) and it really doesn't
+> make any sense in our current security architecture even if it might
+> function.
+
+Two questions so far:
+
+1) I marked the librados calls that take aui deprecated, but I can wire 
+them up to still work.  For example, if you call pool_create_with_auid it 
+can still create a pool.  Alternatively, I can make those calls now return 
+EOPNOTSUPP.  That could break some wayward librados user, though.  
+Similarly, there are calls to get and set the pool auid.  Currently I have 
+converted to no-ops, but they could also return an error instead.  
+Thoughts?
+
+2) The rados cli has a 'mkpool' command that works like 'rados mkpool 
+<poolname> [auid [crush-rule]]'.  The ordering means I can't just drop 
+auid.  So, I could ignore the auid argument, or change the calling 
+convention completely.
+
+Or, we could remove the command completely and let people use 'ceph osd 
+pool create' for this.  This is my preference!  In fact, there are 
+several commands I'd suggest killing at the same time:
+
+"   mkpool <pool-name> [123[ 4]]     create pool <pool-name>'\n"
+"                                    [with auid 123[and using crush rule 
+4]]\n"
+"   cppool <pool-name> <dest-pool>   copy content of a pool\n"
+"   rmpool <pool-name> [<pool-name> --yes-i-really-really-mean-it]\n"
+"                                    remove pool <pool-name>'\n"
+"   purge <pool-name> --yes-i-really-really-mean-it\n"
+"                                    remove all objects from pool 
+<pool-name> without removing it\n"
+
+cppool is an imcomplete implementation anyway (doesn't preserve snaps, 
+for example; prabably doesn't do omap either?).  The others just scare me.
+
+Thoughts?
+sage
