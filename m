@@ -1,16 +1,19 @@
-From: Adam Tygart <mozes-OYTqUY/oFF8@public.gmane.org>
-Subject: Re: removing auids and auid-based cephx capabilities
-Date: Sat, 11 Aug 2018 15:51:19 -0500
-Message-ID: <CA+iB1e6qqY5i=TDm66PCcTHFjaQtc-dQBqtoJO2a964sD6C2KA@mail.gmail.com>
-References: <alpine.DEB.2.11.1808082028510.22275@piezo.novalocal>
- <CAJ4mKGbeLxSaUFpNsO2d7=mZctBz1JjdMFg9V4ozYBGh60qdYg@mail.gmail.com>
- <alpine.DEB.2.11.1808111835420.15696@piezo.novalocal>
-Reply-To: mozes-OYTqUY/oFF8@public.gmane.org
+From: Bartosz Rabiega <bartosz.rabiega-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: RBD image "lightweight snapshots"
+Date: Mon, 13 Aug 2018 12:22:34 +0200
+Message-ID: <8a8833e3-d25b-6768-d464-38b26bbda729@corp.ovh.com>
+References: <45c564fb-63ed-af46-851b-6467649ae56d@corp.ovh.com>
+ <alpine.DEB.2.11.1808091311360.15688@piezo.novalocal>
+ <cdc2a3bb-d3aa-0208-503a-e37c8bb3ed5d@ieee.org>
+ <d0c3e492-24da-5188-1a5a-72bc74dac4c9@sadziu.pl>
+ <CAJ4mKGacWb=DsN2WeSeyGbSb3QzWoFccXws4H7VBDgBsGw72Eg@mail.gmail.com>
+ <9251af62-3bcc-6645-4ee0-a30cee3aa1ff@sadziu.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1808111835420.15696-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+In-Reply-To: <9251af62-3bcc-6645-4ee0-a30cee3aa1ff-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,97 +23,109 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>, Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Alex Elder <elder-EkmVulN54Sk@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-I don't care what happens to most of these rados commands, and I've
-never used the auid "functionality", but I have found the rados purge
-command quite useful when testing different rados level applications.
-
-Run a rados-level application test. Whoops it didn't do what you
-wanted, purge and start over. It is significantly faster than
-alternative of looping through a 'rados ls' and issuing 'rados rm' for
-every object. Sure I could delete the pool and recreate one with the
-same name, but that seems wasteful. Enabling pool deletion in the
-monitors, allocating new pool ids, causing the mass re-peering of
-placement groups, making sure the all of the per-pool settings exactly
-match what you had before. It gets tedious.
-
-If the code-path for a purge is different on the server-side, perhaps
-there could be an additional permission to let the cephx user perform
-a purge. At least then it is protected from the casual (ab)user.
-
-Just my two cents.
-
---
-Adam
-
-On Sat, Aug 11, 2018 at 1:39 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> On Fri, 10 Aug 2018, Gregory Farnum wrote:
->> On Wed, Aug 8, 2018 at 1:33 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->> > There is an undocumented part of the cephx authentication framework called
->> > the 'auid' (auth uid) that assigns an integer identifier to cephx users
->> > and to rados pools and allows you to craft cephx capabilities that apply
->> > to those pools.  This is leftover infrastructure from an ancient time in
->> > which RGW buckets mapped 1:1 to rados pools (pre-argonaut!) and it was
->> > expected the cephx capabilities would line up with that.
->> >
->> > Although in theory parts of the auid infrastructure might work and be in
->> > use, it is undocumented, untested, and a messy artifact in the code.  I'd
->> > like to remove it.
->> >
->> > ***
->> >
->> >   If you are using auid-based cephx capabilities, now is the time to tell
->> >   us!  Or, if you know of any reason we should keep it around, now is
->> >   the time to speak up.
->> >
->> >   Otherwise we will remove it!
->> >
->> > ***
->>
->> I used to be very proud of this code, but +1. I don't know of any
->> users who *could* be using it (much less are) and it really doesn't
->> make any sense in our current security architecture even if it might
->> function.
->
-> Two questions so far:
->
-> 1) I marked the librados calls that take aui deprecated, but I can wire
-> them up to still work.  For example, if you call pool_create_with_auid it
-> can still create a pool.  Alternatively, I can make those calls now return
-> EOPNOTSUPP.  That could break some wayward librados user, though.
-> Similarly, there are calls to get and set the pool auid.  Currently I have
-> converted to no-ops, but they could also return an error instead.
-> Thoughts?
->
-> 2) The rados cli has a 'mkpool' command that works like 'rados mkpool
-> <poolname> [auid [crush-rule]]'.  The ordering means I can't just drop
-> auid.  So, I could ignore the auid argument, or change the calling
-> convention completely.
->
-> Or, we could remove the command completely and let people use 'ceph osd
-> pool create' for this.  This is my preference!  In fact, there are
-> several commands I'd suggest killing at the same time:
->
-> "   mkpool <pool-name> [123[ 4]]     create pool <pool-name>'\n"
-> "                                    [with auid 123[and using crush rule
-> 4]]\n"
-> "   cppool <pool-name> <dest-pool>   copy content of a pool\n"
-> "   rmpool <pool-name> [<pool-name> --yes-i-really-really-mean-it]\n"
-> "                                    remove pool <pool-name>'\n"
-> "   purge <pool-name> --yes-i-really-really-mean-it\n"
-> "                                    remove all objects from pool
-> <pool-name> without removing it\n"
->
-> cppool is an imcomplete implementation anyway (doesn't preserve snaps,
-> for example; prabably doesn't do omap either?).  The others just scare me.
->
-> Thoughts?
-> sage
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+CgpPbiAwOC8xMS8yMDE4IDA3OjU2IEFNLCBQYXdlxYIgU2Fkb3dza2kgd3JvdGU6Cj4gT24gMDgv
+MTAvMjAxOCAwNjoyNCBQTSwgR3JlZ29yeSBGYXJudW0gd3JvdGU6Cj4+IE9uIEZyaSwgQXVnIDEw
+LCAyMDE4IGF0IDQ6NTMgQU0sIFBhd2XFgiBTYWRvd3NrIDxjZXBoQHNhZHppdS5wbD4gd3JvdGU6
+Cj4+PiBPbiAwOC8wOS8yMDE4IDA0OjM5IFBNLCBBbGV4IEVsZGVyIHdyb3RlOgo+Pj4+IE9uIDA4
+LzA5LzIwMTggMDg6MTUgQU0sIFNhZ2UgV2VpbCB3cm90ZToKPj4+Pj4gT24gVGh1LCA5IEF1ZyAy
+MDE4LCBQaW90ciBEYcWCZWsgd3JvdGU6Cj4+Pj4+PiBIZWxsbywKPj4+Pj4+Cj4+Pj4+PiBBdCBP
+Vkggd2UncmUgaGVhdmlseSB1dGlsaXppbmcgc25hcHNob3RzIGZvciBvdXIgYmFja3VwIHN5c3Rl
+bS4gCj4+Pj4+PiBXZSB0aGluawo+Pj4+Pj4gdGhlcmUncyBhbiBpbnRlcmVzdGluZyBvcHRpbWl6
+YXRpb24gb3Bwb3J0dW5pdHkgcmVnYXJkaW5nIAo+Pj4+Pj4gc25hcHNob3RzIEknZCBsaWtlCj4+
+Pj4+PiB0byBkaXNjdXNzIGhlcmUuCj4+Pj4+Pgo+Pj4+Pj4gVGhlIGlkZWEgaXMgdG8gaW50cm9k
+dWNlIGEgY29uY2VwdCBvZiBhICJsaWdodHdlaWdodCIgc25hcHNob3RzIC0gCj4+Pj4+PiBzdWNo
+Cj4+Pj4+PiBzbmFwc2hvdCB3b3VsZCBub3QgY29udGFpbiBkYXRhIGJ1dCBvbmx5IHRoZSBpbmZv
+cm1hdGlvbiBhYm91dCAKPj4+Pj4+IHdoYXQgaGFzCj4+Pj4+PiBjaGFuZ2VkIG9uIHRoZSBpbWFn
+ZSBzaW5jZSBpdCB3YXMgY3JlYXRlZCAoc28gYmFzaWNhbGx5IG9ubHkgdGhlIAo+Pj4+Pj4gb2Jq
+ZWN0IG1hcAo+Pj4+Pj4gcGFydCBvZiBzbmFwc2hvdHMpLgo+Pj4+Pj4KPj4+Pj4+IE91ciBiYWNr
+dXAgc29sdXRpb24gKHdoaWNoIHNlZW1zIHRvIGJlIGEgcHJldHR5IGNvbW1vbiBwcmFjdGljZSkg
+Cj4+Pj4+PiBpcyBhcwo+Pj4+Pj4gZm9sbG93czoKPj4+Pj4+Cj4+Pj4+PiAxLiBDcmVhdGUgc25h
+cHNob3Qgb2YgdGhlIGltYWdlIHdlIHdhbnQgdG8gYmFja3VwCj4+Pj4+PiAyLiBJZiB0aGVyZSdz
+IGEgcHJldmlvdXMgYmFja3VwIHNuYXBzaG90LCBleHBvcnQgZGlmZiBhbmQgYXBwbHkgCj4+Pj4+
+PiBpdCBvbiB0aGUKPj4+Pj4+IGJhY2t1cCBpbWFnZQo+Pj4+Pj4gMy4gSWYgdGhlcmUncyBubyBv
+bGRlciBzbmFwc2hvdCwganVzdCBkbyBhIGZ1bGwgYmFja3VwIG9mIGltYWdlCj4+Pj4+Pgo+Pj4+
+Pj4gVGhpcyBpbnRyb2R1Y2VzIG9uZSBiaWcgaXNzdWU6IGl0IGVuZm9yY2VzIENPVyBzbmFwc2hv
+dCBvbiBpbWFnZSwgCj4+Pj4+PiBtZWFuaW5nIHRoYXQKPj4+Pj4+IG9yaWdpbmFsIGltYWdlIGFj
+Y2VzcyBsYXRlbmNpZXMgYW5kIGNvbnN1bWVkIHNwYWNlIGluY3JlYXNlcy4gCj4+Pj4+PiAiTGln
+aHR3ZWlnaHQiCj4+Pj4+PiBzbmFwc2hvdHMgd291bGQgcmVtb3ZlIHRoZXNlIGluZWZmaWNpZW5j
+aWVzIC0gbm8gQ09XIHBlcmZvcm1hbmNlIAo+Pj4+Pj4gYW5kIHN0b3JhZ2UKPj4+Pj4+IG92ZXJo
+ZWFkLgo+Pj4+PiBUaGUgc25hcHNob3QgaW4gMSB3b3VsZCBiZSBsaWdodHdlaWdodCB5b3UgbWVh
+bj/CoCBBbmQgeW91J2QgZG8gdGhlIAo+Pj4+PiBiYWNrdXAKPj4+Pj4gc29tZSAoc2hvcnQpIHRp
+bWUgbGF0ZXIgYmFzZWQgb24gYSBkaWZmIHdpdGggY2hhbmdlZCBleHRlbnRzPwo+Pj4+Pgo+Pj4+
+PiBJJ20gcHJldHR5IHN1cmUgdGhpcyB3aWxsIGV4cG9ydCBhIGdhcmJhZ2UgaW1hZ2UuwqAgSSBt
+ZWFuLCBpdCB3aWxsIAo+Pj4+PiB1c3VhbGx5Cj4+Pj4+IGJlIG5vbi1nYXJiYWdlLCBidXQgdGhl
+IHJlc3VsdCB3b24ndCBiZSBjcmFzaCBjb25zaXN0ZW50LCBhbmQgaW4gc29tZQo+Pj4+PiAobWFu
+eT8pIGNhc2VzIHdvbid0IGJlIHVzYWJsZS4KPj4+Pj4KPj4+Pj4gQ29uc2lkZXI6Cj4+Pj4+Cj4+
+Pj4+IC0gdGFrZSByZWZlcmVuY2Ugc25hcHNob3QKPj4+Pj4gLSBiYWNrIHVwIHRoaXMgaW1hZ2Ug
+KGFzc3VtZSBmb3Igbm93IGl0IGlzIHBlcmZlY3QpCj4+Pj4+IC0gd3JpdGUgQSB0byBsb2NhdGlv
+biAxCj4+Pj4+IC0gdGFrZSBsaWdodHdlaWdodCBzbmFwc2hvdAo+Pj4+PiAtIHdyaXRlIEIgdG8g
+bG9jYXRpb24gMQo+Pj4+PiAtIGJhY2t1cCBwcm9jZXNzIGNvcGllIGxvY2F0aW9uIDEgKEIpIHRv
+IHRhcmdldAo+Pj4gVGhlIHdheSBJICh3ZSkgc2VlIGl0IHdvcmtpbmcgaXMgYSBiaXQgZGlmZmVy
+ZW50Ogo+Pj4gwqAgLSB0YWtlIHNuYXBzaG90ICgxKQo+Pj4gwqAgLSBkYXRhIHdyaXRlIG1pZ2h0
+IG9jY3VyLCBpdCdzIG9rIC0gQ29XIGtpY2tzIGluIGhlcmUgdG8gcHJlc2VydmUgCj4+PiBkYXRh
+Cj4+PiDCoCAtIGV4cG9ydCBkYXRhCj4+PiDCoCAtIGNvbnZlcnQgc25hcHNob3QgKDEpIHRvIGEg
+bGlnaHR3ZWlnaHQgb25lIChub3QgY3JlYXRlIG5ldyk6Cj4+PiDCoMKgwqAgKiBmcm9tIG5vdyBv
+biBqdXN0IHJlbWVtYmVyIHdoaWNoIGJsb2NrcyBoYXMgYmVlbiBtb2RpZmllZCBpbnN0ZWFkCj4+
+PiDCoMKgwqDCoMKgIG9mIGRvaW5nIENvVwo+Pj4gwqDCoMKgICogeW91IGNhbiBnZXQgcmlkIG9u
+IHByZXZpb3VzbHkgQ29XIGRhdGEgYmxvY2tzICh0aGV5J3ZlIGJlZW4KPj4+IMKgwqDCoMKgwqAg
+ZXhwb3J0ZWQgYWxyZWFkeSkKPj4+IMKgIC0gbW9yZSB3cml0ZXMKPj4+IMKgIC0gdGFrZSBzbmFw
+c2hvdCAoMikKPj4+IMKgIC0gZXhwb3J0IGRpZmYgLSBvbmx5IGJsb2NrcyBtb2RpZmllZCBzaW5j
+ZSBzbmFwICgxKQo+Pj4gwqAgLSBjb252ZXJ0IHNuYXBzaG90ICgyKSB0byBhIGxpZ2h0d2VpZ2h0
+IG9uZQo+Pj4gwqAgLSAuLi4KPj4+Cj4+Pgo+Pj4gVGhhdCB3YXkgSSBkb24ndCBzZWUgYSBwbGFj
+ZSBmb3IgZGF0YSBjb3JydXB0aW9uLiBPZiBjb3Vyc2UgdGhpcyBoYXMKPj4+IHNvbWUgZHJhd2Jh
+Y2tzIC0geW91IGNhbid0IHJvbGxiYWNrL2V4cG9ydCBkYXRhIGZyb20gc3VjaCBsaWdodHdlaWdo
+dAo+Pj4gc25hcHNob3QgYW55bW9yZS4gQnV0IG9uIHRoZSBvdGhlciBoYW5kIHdlIGFyZSByZWR1
+Y2luZyBuZWVkIGZvciBDb1cgLQo+Pj4gYW5kIHRoYXQncyB0aGUgbWFpbiBnb2FsIHdpdGggdGhp
+cyBpZGVhLiBJbnN0ZWFkIG9mIG1ha2luZyBDb1cgfmFsbCB0aGUKPj4+IHRpbWUgaXQncyBuZWVk
+ZWQgb25seSBmb3IgdGhlIHRpbWUgb2YgZXhwb3J0aW5nIGltYWdlL21vZGlmaWVkIGJsb2Nrcy4K
+Pj4gV2hhdCdzIHRoZSBhZHZhbnRhZ2Ugb2YgcmVtZW1iZXJpbmcgdGhlIGJsb2NrcyBjaGFuZ2Vk
+IGZvciBhCj4+ICJsaWdodHdlaWdodCBzbmFwc2hvdCIgb25jZSB0aGUgYWN0dWFsIGRhdGEgZGlm
+ZiBpcyBubyBsb25nZXIgdGhlcmU/Cj4+IElzIHRoZXJlIGEgbWVhbmluZ2Z1bCBkaWZmZXJlbmNl
+IGJldHdlZW4gdGhpcyBhbmQganVzdCBpbW1lZGlhdGVseQo+PiBkZWxldGluZyBhIHNuYXBzaG90
+IGFmdGVyIGRvaW5nIHRoZSBleHBvcnQ/Cj4+IC1HcmVnCj4KPiBBZHZhbnRhZ2UgaXMgdGhhdCB3
+aGVuIEkgbmVlZCB0byBleHBvcnQgZGlmZiBJIGtub3cgd2hpY2ggYmxvY2tzIGNoYW5nZWQsCj4g
+d2l0aG91dCBjaGVja2luZyAocmVhZGluZykgb3RoZXJzIHNvIEkgY2FuIGp1c3QgZXhwb3J0IHRo
+ZW0gZm9yIGJhY2t1cC4KPiBJZiBpIGRlbGV0ZSBzbmFwc2hvdCBhZnRlciBleHBvcnQsIG5leHQg
+dGltZSBJJ2xsIGhhdmUgdG8gcmVhZCB3aG9sZSAKPiBpbWFnZQo+IGFnYWluIC0gbm8gcG9zc2li
+aWxpdHkgdG8gZG8gZGlmZmVyZW50aWFsIGJhY2t1cC4KPgo+IEJ1dCBhcyBTYWdlIHdyb3RlLCB3
+ZSBhcmUgZG9pbmcgdGhpcyBvbiBGaWxlc3RvcmUuIEkgZG9uJ3Qga25vdyBob3cgCj4gQmx1ZXN0
+b3JlCj4gd29ya3Mgd2l0aCBzbmFwc2hvdHMgKGFyZSB3aG9sZSA0TUIgY2h1bmtzIGNvcGllZCBv
+ciBvbmx5IGFyZWEgb2YgCj4gY3VycmVudCB3cml0ZSkKPiBzbyBwZXJmb3JtYW5jZSBtaWdodCBi
+ZSBtdWNoIGJldHRlciAtIG5lZWQgdG8gdGVzdCBpdC4KPgo+IE91ciBtYWluIGdvYWwgd2l0aCB0
+aGlzIGlkZWEgaXMgdG8gaW1wcm92ZSBwZXJmb3JtYW5jZSBpbiBjYXNlIHdoZXJlIAo+IGFsbCBp
+bWFnZXMKPiBoYXZlIGF0IGxlYXN0IG9uZSBzbmFwc2hvdCB0YWtlbiBldmVyeSAqYmFja3VwIHBl
+cmlvZCogKDI0aCBvciBsb3dlcikuCj4KClRoZSBhY3R1YWwgYWR2YW50YWdlIGxpZXMgaW4ga2Vl
+cGluZyBDT1cgYXQgbWluaW11bS4KCkFzc3VtaW5nIHRoYXQgeW91IHdhbnQgdG8gZG8gZGlmZmVy
+ZW50aWFsIGJhY2t1cHMgZXZlcnkgMjRoLgoKV2l0aCBub3JtYWwgc25hcHNob3RzOgoxLiBDcmVh
+dGUgc25hcHNob3QgQSwgZG8gZnVsbCBpbWFnZSBleHBvcnQsIHRha2VzIDNoCjIuIFR5cGljYWwg
+Y2xpZW50IElPLCBhbGwgd3JpdGVzIGFyZSBDT1cgZm9yIDI0aAozLiBBZnRlciAyNGggQ3JlYXRl
+IHNuYXBzaG90IEIsIGFuZCBkbyBleHBvcnQgZGlmZiAoQSAtPiBCKSwgdGFrZXMgMC41aAo0LiBS
+ZW1vdmUgc25hcHNob3QgQSwgYXMgaXQncyBubyBsb25nZXIgbmVlZGVkCjUuIFR5cGljYWwgY2xp
+ZW50IElPLCBhbGwgd3JpdGVzIGFyZSBDT1cgZm9yIDI0aAo2LiBBZnRlciAyNGggQ3JlYXRlIHNu
+YXBzaG90IEMsIGFuZCBkbyBleHBvcnQgZGlmZiAoQiAtPiBDKSwgdGFrZXMgMC41aAo3LiBSZW1v
+dmUgc25hcHNob3QgQiwgYXMgaXQncyBubyBsb25nZXIgbmVlZGVkCjguIFR5cGljYWwgY2xpZW50
+IElPLCBhbGwgd3JpdGVzIGFyZSBDT1cgZm9yIDI0aAoKU2ltcGxpZmllZCBlc3RpbWF0aW9uOgpD
+T1cgZG9uZSBmb3Igd3JpdGVzIGFsbCB0aGUgdGltZSBzaW5jZSBzbmFwc2hvdCBBID0gNzJoIG9m
+IENPVwoKV2l0aCAnbGlnaHR3ZWlnaHQnIHNuYXBzaG90cwoxLiBDcmVhdGUgc25hcHNob3QgQSwg
+ZG8gZnVsbCBpbWFnZSBleHBvcnQsIHRha2VzIDNoCjIuIENvbnZlcnQgc25hcHNob3QgQSB0byBs
+aWdodHdlaWdodAozLiBUeXBpY2FsIGNsaWVudCBJTywgQ09XIHdhcyBkb25lIGZvciAzaCBvbmx5
+CjQuIEFmdGVyIDI0aCBDcmVhdGUgc25hcHNob3QgQiwgYW5kIGRvIGV4cG9ydCBkaWZmIChBIC0+
+IEIpLCB0YWtlcyAwLjVoCjUuIFJlbW92ZSBzbmFwc2hvdCBBLCBhcyBpdCdzIG5vIGxvbmdlciBu
+ZWVkZWQKNi4gQ29udmVydCBzbmFwc2hvdCBCIHRvIGxpZ2h0d2VpZ2h0CjcuIFR5cGljYWwgY2xp
+ZW50IElPLCBDT1cgd2FzIGRvbmUgb25seSBmb3IgMC41aAo4LiBBZnRlciAyNGggQ3JlYXRlIHNu
+YXBzaG90IEMsIGFuZCBkbyBleHBvcnQgZGlmZiAoQiAtPiBDKSwgdGFrZXMgMC41aAo5LiBSZW1v
+dmUgc25hcHNob3QgQiwgYXMgaXQncyBubyBsb25nZXIgbmVlZGVkCjEwLiBDb252ZXJ0IHNuYXBz
+aG90IEMgdG8gbGlnaHR3ZWlnaHQKMTEuIFR5cGljYWwgY2xpZW50IElPLCBhbGwgd3JpdGVzIGFy
+ZSBDT1cgZm9yIDAuNWgKClNpbXBsaWZpZWQgZXN0aW1hdGlvbjoKQ09XIGRvbmUgZm9yIGZ1bGwg
+c25hcHNob3QgbGlmZXNwYW4gLSAzaCArIDAuNWggKyAwLjVoID0gNGggb2YgQ09XCgpUaGUgbG9u
+Z2VyIGl0IGxhc3RzIHRoZSBiaWdnZXIgdGhlIGFkdmFudGFnZS4KSSdtIG5vdCBzdXJlIGhvdyBz
+bWFydCBDT1cgd2l0aCBibHVlc3RvcmUgaXMgYnV0IHN0aWxsIGZvciBzdWNoIHVzZSBjYXNlIAon
+bGlnaHR3ZWlnaHQnIHNuYXBzaG90cyB3b3VsZCBwcm9iYWJseSBnaXZlIG11Y2ggc2F2aW5ncyAo
+Q09XIG92ZXJoZWFkIAooQ1BVICsgc3RvcmFnZSBJTykuCgpCYXJ0b3N6IFJhYmllZ2EKX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWls
+aW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20v
+bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
