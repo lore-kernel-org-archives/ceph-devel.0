@@ -1,19 +1,17 @@
-From: Bartosz Rabiega <bartosz.rabiega-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: RBD image "lightweight snapshots"
-Date: Mon, 13 Aug 2018 12:22:34 +0200
-Message-ID: <8a8833e3-d25b-6768-d464-38b26bbda729@corp.ovh.com>
+Date: Mon, 13 Aug 2018 11:20:48 -0400
+Message-ID: <CA+aFP1CH2nFwox5W9LJhNgJiqVu52mMLqUFVh0KisxHNKhsoKA@mail.gmail.com>
 References: <45c564fb-63ed-af46-851b-6467649ae56d@corp.ovh.com>
  <alpine.DEB.2.11.1808091311360.15688@piezo.novalocal>
  <cdc2a3bb-d3aa-0208-503a-e37c8bb3ed5d@ieee.org>
- <d0c3e492-24da-5188-1a5a-72bc74dac4c9@sadziu.pl>
- <CAJ4mKGacWb=DsN2WeSeyGbSb3QzWoFccXws4H7VBDgBsGw72Eg@mail.gmail.com>
- <9251af62-3bcc-6645-4ee0-a30cee3aa1ff@sadziu.pl>
+ <27efd295-8a87-94ea-aa77-fcaee4e5f250@sadziu.pl>
+ <alpine.DEB.2.11.1808101222580.15696@piezo.novalocal>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============4579442002212223468=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <9251af62-3bcc-6645-4ee0-a30cee3aa1ff-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <alpine.DEB.2.11.1808101222580.15696-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -23,109 +21,514 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>, Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Alex Elder <elder-EkmVulN54Sk@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: pawel.sadowski-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Alex Elder <elder-EkmVulN54Sk@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-CgpPbiAwOC8xMS8yMDE4IDA3OjU2IEFNLCBQYXdlxYIgU2Fkb3dza2kgd3JvdGU6Cj4gT24gMDgv
-MTAvMjAxOCAwNjoyNCBQTSwgR3JlZ29yeSBGYXJudW0gd3JvdGU6Cj4+IE9uIEZyaSwgQXVnIDEw
-LCAyMDE4IGF0IDQ6NTMgQU0sIFBhd2XFgiBTYWRvd3NrIDxjZXBoQHNhZHppdS5wbD4gd3JvdGU6
-Cj4+PiBPbiAwOC8wOS8yMDE4IDA0OjM5IFBNLCBBbGV4IEVsZGVyIHdyb3RlOgo+Pj4+IE9uIDA4
-LzA5LzIwMTggMDg6MTUgQU0sIFNhZ2UgV2VpbCB3cm90ZToKPj4+Pj4gT24gVGh1LCA5IEF1ZyAy
-MDE4LCBQaW90ciBEYcWCZWsgd3JvdGU6Cj4+Pj4+PiBIZWxsbywKPj4+Pj4+Cj4+Pj4+PiBBdCBP
-Vkggd2UncmUgaGVhdmlseSB1dGlsaXppbmcgc25hcHNob3RzIGZvciBvdXIgYmFja3VwIHN5c3Rl
-bS4gCj4+Pj4+PiBXZSB0aGluawo+Pj4+Pj4gdGhlcmUncyBhbiBpbnRlcmVzdGluZyBvcHRpbWl6
-YXRpb24gb3Bwb3J0dW5pdHkgcmVnYXJkaW5nIAo+Pj4+Pj4gc25hcHNob3RzIEknZCBsaWtlCj4+
-Pj4+PiB0byBkaXNjdXNzIGhlcmUuCj4+Pj4+Pgo+Pj4+Pj4gVGhlIGlkZWEgaXMgdG8gaW50cm9k
-dWNlIGEgY29uY2VwdCBvZiBhICJsaWdodHdlaWdodCIgc25hcHNob3RzIC0gCj4+Pj4+PiBzdWNo
-Cj4+Pj4+PiBzbmFwc2hvdCB3b3VsZCBub3QgY29udGFpbiBkYXRhIGJ1dCBvbmx5IHRoZSBpbmZv
-cm1hdGlvbiBhYm91dCAKPj4+Pj4+IHdoYXQgaGFzCj4+Pj4+PiBjaGFuZ2VkIG9uIHRoZSBpbWFn
-ZSBzaW5jZSBpdCB3YXMgY3JlYXRlZCAoc28gYmFzaWNhbGx5IG9ubHkgdGhlIAo+Pj4+Pj4gb2Jq
-ZWN0IG1hcAo+Pj4+Pj4gcGFydCBvZiBzbmFwc2hvdHMpLgo+Pj4+Pj4KPj4+Pj4+IE91ciBiYWNr
-dXAgc29sdXRpb24gKHdoaWNoIHNlZW1zIHRvIGJlIGEgcHJldHR5IGNvbW1vbiBwcmFjdGljZSkg
-Cj4+Pj4+PiBpcyBhcwo+Pj4+Pj4gZm9sbG93czoKPj4+Pj4+Cj4+Pj4+PiAxLiBDcmVhdGUgc25h
-cHNob3Qgb2YgdGhlIGltYWdlIHdlIHdhbnQgdG8gYmFja3VwCj4+Pj4+PiAyLiBJZiB0aGVyZSdz
-IGEgcHJldmlvdXMgYmFja3VwIHNuYXBzaG90LCBleHBvcnQgZGlmZiBhbmQgYXBwbHkgCj4+Pj4+
-PiBpdCBvbiB0aGUKPj4+Pj4+IGJhY2t1cCBpbWFnZQo+Pj4+Pj4gMy4gSWYgdGhlcmUncyBubyBv
-bGRlciBzbmFwc2hvdCwganVzdCBkbyBhIGZ1bGwgYmFja3VwIG9mIGltYWdlCj4+Pj4+Pgo+Pj4+
-Pj4gVGhpcyBpbnRyb2R1Y2VzIG9uZSBiaWcgaXNzdWU6IGl0IGVuZm9yY2VzIENPVyBzbmFwc2hv
-dCBvbiBpbWFnZSwgCj4+Pj4+PiBtZWFuaW5nIHRoYXQKPj4+Pj4+IG9yaWdpbmFsIGltYWdlIGFj
-Y2VzcyBsYXRlbmNpZXMgYW5kIGNvbnN1bWVkIHNwYWNlIGluY3JlYXNlcy4gCj4+Pj4+PiAiTGln
-aHR3ZWlnaHQiCj4+Pj4+PiBzbmFwc2hvdHMgd291bGQgcmVtb3ZlIHRoZXNlIGluZWZmaWNpZW5j
-aWVzIC0gbm8gQ09XIHBlcmZvcm1hbmNlIAo+Pj4+Pj4gYW5kIHN0b3JhZ2UKPj4+Pj4+IG92ZXJo
-ZWFkLgo+Pj4+PiBUaGUgc25hcHNob3QgaW4gMSB3b3VsZCBiZSBsaWdodHdlaWdodCB5b3UgbWVh
-bj/CoCBBbmQgeW91J2QgZG8gdGhlIAo+Pj4+PiBiYWNrdXAKPj4+Pj4gc29tZSAoc2hvcnQpIHRp
-bWUgbGF0ZXIgYmFzZWQgb24gYSBkaWZmIHdpdGggY2hhbmdlZCBleHRlbnRzPwo+Pj4+Pgo+Pj4+
-PiBJJ20gcHJldHR5IHN1cmUgdGhpcyB3aWxsIGV4cG9ydCBhIGdhcmJhZ2UgaW1hZ2UuwqAgSSBt
-ZWFuLCBpdCB3aWxsIAo+Pj4+PiB1c3VhbGx5Cj4+Pj4+IGJlIG5vbi1nYXJiYWdlLCBidXQgdGhl
-IHJlc3VsdCB3b24ndCBiZSBjcmFzaCBjb25zaXN0ZW50LCBhbmQgaW4gc29tZQo+Pj4+PiAobWFu
-eT8pIGNhc2VzIHdvbid0IGJlIHVzYWJsZS4KPj4+Pj4KPj4+Pj4gQ29uc2lkZXI6Cj4+Pj4+Cj4+
-Pj4+IC0gdGFrZSByZWZlcmVuY2Ugc25hcHNob3QKPj4+Pj4gLSBiYWNrIHVwIHRoaXMgaW1hZ2Ug
-KGFzc3VtZSBmb3Igbm93IGl0IGlzIHBlcmZlY3QpCj4+Pj4+IC0gd3JpdGUgQSB0byBsb2NhdGlv
-biAxCj4+Pj4+IC0gdGFrZSBsaWdodHdlaWdodCBzbmFwc2hvdAo+Pj4+PiAtIHdyaXRlIEIgdG8g
-bG9jYXRpb24gMQo+Pj4+PiAtIGJhY2t1cCBwcm9jZXNzIGNvcGllIGxvY2F0aW9uIDEgKEIpIHRv
-IHRhcmdldAo+Pj4gVGhlIHdheSBJICh3ZSkgc2VlIGl0IHdvcmtpbmcgaXMgYSBiaXQgZGlmZmVy
-ZW50Ogo+Pj4gwqAgLSB0YWtlIHNuYXBzaG90ICgxKQo+Pj4gwqAgLSBkYXRhIHdyaXRlIG1pZ2h0
-IG9jY3VyLCBpdCdzIG9rIC0gQ29XIGtpY2tzIGluIGhlcmUgdG8gcHJlc2VydmUgCj4+PiBkYXRh
-Cj4+PiDCoCAtIGV4cG9ydCBkYXRhCj4+PiDCoCAtIGNvbnZlcnQgc25hcHNob3QgKDEpIHRvIGEg
-bGlnaHR3ZWlnaHQgb25lIChub3QgY3JlYXRlIG5ldyk6Cj4+PiDCoMKgwqAgKiBmcm9tIG5vdyBv
-biBqdXN0IHJlbWVtYmVyIHdoaWNoIGJsb2NrcyBoYXMgYmVlbiBtb2RpZmllZCBpbnN0ZWFkCj4+
-PiDCoMKgwqDCoMKgIG9mIGRvaW5nIENvVwo+Pj4gwqDCoMKgICogeW91IGNhbiBnZXQgcmlkIG9u
-IHByZXZpb3VzbHkgQ29XIGRhdGEgYmxvY2tzICh0aGV5J3ZlIGJlZW4KPj4+IMKgwqDCoMKgwqAg
-ZXhwb3J0ZWQgYWxyZWFkeSkKPj4+IMKgIC0gbW9yZSB3cml0ZXMKPj4+IMKgIC0gdGFrZSBzbmFw
-c2hvdCAoMikKPj4+IMKgIC0gZXhwb3J0IGRpZmYgLSBvbmx5IGJsb2NrcyBtb2RpZmllZCBzaW5j
-ZSBzbmFwICgxKQo+Pj4gwqAgLSBjb252ZXJ0IHNuYXBzaG90ICgyKSB0byBhIGxpZ2h0d2VpZ2h0
-IG9uZQo+Pj4gwqAgLSAuLi4KPj4+Cj4+Pgo+Pj4gVGhhdCB3YXkgSSBkb24ndCBzZWUgYSBwbGFj
-ZSBmb3IgZGF0YSBjb3JydXB0aW9uLiBPZiBjb3Vyc2UgdGhpcyBoYXMKPj4+IHNvbWUgZHJhd2Jh
-Y2tzIC0geW91IGNhbid0IHJvbGxiYWNrL2V4cG9ydCBkYXRhIGZyb20gc3VjaCBsaWdodHdlaWdo
-dAo+Pj4gc25hcHNob3QgYW55bW9yZS4gQnV0IG9uIHRoZSBvdGhlciBoYW5kIHdlIGFyZSByZWR1
-Y2luZyBuZWVkIGZvciBDb1cgLQo+Pj4gYW5kIHRoYXQncyB0aGUgbWFpbiBnb2FsIHdpdGggdGhp
-cyBpZGVhLiBJbnN0ZWFkIG9mIG1ha2luZyBDb1cgfmFsbCB0aGUKPj4+IHRpbWUgaXQncyBuZWVk
-ZWQgb25seSBmb3IgdGhlIHRpbWUgb2YgZXhwb3J0aW5nIGltYWdlL21vZGlmaWVkIGJsb2Nrcy4K
-Pj4gV2hhdCdzIHRoZSBhZHZhbnRhZ2Ugb2YgcmVtZW1iZXJpbmcgdGhlIGJsb2NrcyBjaGFuZ2Vk
-IGZvciBhCj4+ICJsaWdodHdlaWdodCBzbmFwc2hvdCIgb25jZSB0aGUgYWN0dWFsIGRhdGEgZGlm
-ZiBpcyBubyBsb25nZXIgdGhlcmU/Cj4+IElzIHRoZXJlIGEgbWVhbmluZ2Z1bCBkaWZmZXJlbmNl
-IGJldHdlZW4gdGhpcyBhbmQganVzdCBpbW1lZGlhdGVseQo+PiBkZWxldGluZyBhIHNuYXBzaG90
-IGFmdGVyIGRvaW5nIHRoZSBleHBvcnQ/Cj4+IC1HcmVnCj4KPiBBZHZhbnRhZ2UgaXMgdGhhdCB3
-aGVuIEkgbmVlZCB0byBleHBvcnQgZGlmZiBJIGtub3cgd2hpY2ggYmxvY2tzIGNoYW5nZWQsCj4g
-d2l0aG91dCBjaGVja2luZyAocmVhZGluZykgb3RoZXJzIHNvIEkgY2FuIGp1c3QgZXhwb3J0IHRo
-ZW0gZm9yIGJhY2t1cC4KPiBJZiBpIGRlbGV0ZSBzbmFwc2hvdCBhZnRlciBleHBvcnQsIG5leHQg
-dGltZSBJJ2xsIGhhdmUgdG8gcmVhZCB3aG9sZSAKPiBpbWFnZQo+IGFnYWluIC0gbm8gcG9zc2li
-aWxpdHkgdG8gZG8gZGlmZmVyZW50aWFsIGJhY2t1cC4KPgo+IEJ1dCBhcyBTYWdlIHdyb3RlLCB3
-ZSBhcmUgZG9pbmcgdGhpcyBvbiBGaWxlc3RvcmUuIEkgZG9uJ3Qga25vdyBob3cgCj4gQmx1ZXN0
-b3JlCj4gd29ya3Mgd2l0aCBzbmFwc2hvdHMgKGFyZSB3aG9sZSA0TUIgY2h1bmtzIGNvcGllZCBv
-ciBvbmx5IGFyZWEgb2YgCj4gY3VycmVudCB3cml0ZSkKPiBzbyBwZXJmb3JtYW5jZSBtaWdodCBi
-ZSBtdWNoIGJldHRlciAtIG5lZWQgdG8gdGVzdCBpdC4KPgo+IE91ciBtYWluIGdvYWwgd2l0aCB0
-aGlzIGlkZWEgaXMgdG8gaW1wcm92ZSBwZXJmb3JtYW5jZSBpbiBjYXNlIHdoZXJlIAo+IGFsbCBp
-bWFnZXMKPiBoYXZlIGF0IGxlYXN0IG9uZSBzbmFwc2hvdCB0YWtlbiBldmVyeSAqYmFja3VwIHBl
-cmlvZCogKDI0aCBvciBsb3dlcikuCj4KClRoZSBhY3R1YWwgYWR2YW50YWdlIGxpZXMgaW4ga2Vl
-cGluZyBDT1cgYXQgbWluaW11bS4KCkFzc3VtaW5nIHRoYXQgeW91IHdhbnQgdG8gZG8gZGlmZmVy
-ZW50aWFsIGJhY2t1cHMgZXZlcnkgMjRoLgoKV2l0aCBub3JtYWwgc25hcHNob3RzOgoxLiBDcmVh
-dGUgc25hcHNob3QgQSwgZG8gZnVsbCBpbWFnZSBleHBvcnQsIHRha2VzIDNoCjIuIFR5cGljYWwg
-Y2xpZW50IElPLCBhbGwgd3JpdGVzIGFyZSBDT1cgZm9yIDI0aAozLiBBZnRlciAyNGggQ3JlYXRl
-IHNuYXBzaG90IEIsIGFuZCBkbyBleHBvcnQgZGlmZiAoQSAtPiBCKSwgdGFrZXMgMC41aAo0LiBS
-ZW1vdmUgc25hcHNob3QgQSwgYXMgaXQncyBubyBsb25nZXIgbmVlZGVkCjUuIFR5cGljYWwgY2xp
-ZW50IElPLCBhbGwgd3JpdGVzIGFyZSBDT1cgZm9yIDI0aAo2LiBBZnRlciAyNGggQ3JlYXRlIHNu
-YXBzaG90IEMsIGFuZCBkbyBleHBvcnQgZGlmZiAoQiAtPiBDKSwgdGFrZXMgMC41aAo3LiBSZW1v
-dmUgc25hcHNob3QgQiwgYXMgaXQncyBubyBsb25nZXIgbmVlZGVkCjguIFR5cGljYWwgY2xpZW50
-IElPLCBhbGwgd3JpdGVzIGFyZSBDT1cgZm9yIDI0aAoKU2ltcGxpZmllZCBlc3RpbWF0aW9uOgpD
-T1cgZG9uZSBmb3Igd3JpdGVzIGFsbCB0aGUgdGltZSBzaW5jZSBzbmFwc2hvdCBBID0gNzJoIG9m
-IENPVwoKV2l0aCAnbGlnaHR3ZWlnaHQnIHNuYXBzaG90cwoxLiBDcmVhdGUgc25hcHNob3QgQSwg
-ZG8gZnVsbCBpbWFnZSBleHBvcnQsIHRha2VzIDNoCjIuIENvbnZlcnQgc25hcHNob3QgQSB0byBs
-aWdodHdlaWdodAozLiBUeXBpY2FsIGNsaWVudCBJTywgQ09XIHdhcyBkb25lIGZvciAzaCBvbmx5
-CjQuIEFmdGVyIDI0aCBDcmVhdGUgc25hcHNob3QgQiwgYW5kIGRvIGV4cG9ydCBkaWZmIChBIC0+
-IEIpLCB0YWtlcyAwLjVoCjUuIFJlbW92ZSBzbmFwc2hvdCBBLCBhcyBpdCdzIG5vIGxvbmdlciBu
-ZWVkZWQKNi4gQ29udmVydCBzbmFwc2hvdCBCIHRvIGxpZ2h0d2VpZ2h0CjcuIFR5cGljYWwgY2xp
-ZW50IElPLCBDT1cgd2FzIGRvbmUgb25seSBmb3IgMC41aAo4LiBBZnRlciAyNGggQ3JlYXRlIHNu
-YXBzaG90IEMsIGFuZCBkbyBleHBvcnQgZGlmZiAoQiAtPiBDKSwgdGFrZXMgMC41aAo5LiBSZW1v
-dmUgc25hcHNob3QgQiwgYXMgaXQncyBubyBsb25nZXIgbmVlZGVkCjEwLiBDb252ZXJ0IHNuYXBz
-aG90IEMgdG8gbGlnaHR3ZWlnaHQKMTEuIFR5cGljYWwgY2xpZW50IElPLCBhbGwgd3JpdGVzIGFy
-ZSBDT1cgZm9yIDAuNWgKClNpbXBsaWZpZWQgZXN0aW1hdGlvbjoKQ09XIGRvbmUgZm9yIGZ1bGwg
-c25hcHNob3QgbGlmZXNwYW4gLSAzaCArIDAuNWggKyAwLjVoID0gNGggb2YgQ09XCgpUaGUgbG9u
-Z2VyIGl0IGxhc3RzIHRoZSBiaWdnZXIgdGhlIGFkdmFudGFnZS4KSSdtIG5vdCBzdXJlIGhvdyBz
-bWFydCBDT1cgd2l0aCBibHVlc3RvcmUgaXMgYnV0IHN0aWxsIGZvciBzdWNoIHVzZSBjYXNlIAon
-bGlnaHR3ZWlnaHQnIHNuYXBzaG90cyB3b3VsZCBwcm9iYWJseSBnaXZlIG11Y2ggc2F2aW5ncyAo
-Q09XIG92ZXJoZWFkIAooQ1BVICsgc3RvcmFnZSBJTykuCgpCYXJ0b3N6IFJhYmllZ2EKX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWls
-aW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20v
-bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+--===============4579442002212223468==
+Content-Type: multipart/alternative; boundary="000000000000072026057352a4e5"
+
+--000000000000072026057352a4e5
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Fri, Aug 10, 2018 at 8:29 AM Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+
+> On Fri, 10 Aug 2018, Pawe=C5=82 Sadowski wrote:
+> > On 08/09/2018 04:39 PM, Alex Elder wrote:
+> > > On 08/09/2018 08:15 AM, Sage Weil wrote:
+> > >> On Thu, 9 Aug 2018, Piotr Da=C5=82ek wrote:
+> > >>> Hello,
+> > >>>
+> > >>> At OVH we're heavily utilizing snapshots for our backup system. We
+> think
+> > >>> there's an interesting optimization opportunity regarding snapshots
+> I'd like
+> > >>> to discuss here.
+> > >>>
+> > >>> The idea is to introduce a concept of a "lightweight" snapshots -
+> such
+> > >>> snapshot would not contain data but only the information about what
+> has
+> > >>> changed on the image since it was created (so basically only the
+> object map
+> > >>> part of snapshots).
+> > >>>
+> > >>> Our backup solution (which seems to be a pretty common practice) is
+> as
+> > >>> follows:
+> > >>>
+> > >>> 1. Create snapshot of the image we want to backup
+> > >>> 2. If there's a previous backup snapshot, export diff and apply it
+> on the
+> > >>> backup image
+> > >>> 3. If there's no older snapshot, just do a full backup of image
+> > >>>
+> > >>> This introduces one big issue: it enforces COW snapshot on image,
+> meaning that
+> > >>> original image access latencies and consumed space increases.
+> "Lightweight"
+> > >>> snapshots would remove these inefficiencies - no COW performance an=
+d
+> storage
+> > >>> overhead.
+> > >>
+> > >> The snapshot in 1 would be lightweight you mean?  And you'd do the
+> backup
+> > >> some (short) time later based on a diff with changed extents?
+> > >>
+> > >> I'm pretty sure this will export a garbage image.  I mean, it will
+> usually
+> > >> be non-garbage, but the result won't be crash consistent, and in som=
+e
+> > >> (many?) cases won't be usable.
+> > >>
+> > >> Consider:
+> > >>
+> > >> - take reference snapshot
+> > >> - back up this image (assume for now it is perfect)
+> > >> - write A to location 1
+> > >> - take lightweight snapshot
+> > >> - write B to location 1
+> > >> - backup process copie location 1 (B) to target
+> >
+> > The way I (we) see it working is a bit different:
+> >  - take snapshot (1)
+> >  - data write might occur, it's ok - CoW kicks in here to preserve data
+> >  - export data
+> >  - convert snapshot (1) to a lightweight one (not create new):
+> >    * from now on just remember which blocks has been modified instead
+> >      of doing CoW
+> >    * you can get rid on previously CoW data blocks (they've been
+> >      exported already)
+> >  - more writes
+> >  - take snapshot (2)
+> >  - export diff - only blocks modified since snap (1)
+> >  - convert snapshot (2) to a lightweight one
+> >  - ...
+> >
+> >
+> > That way I don't see a place for data corruption. Of course this has
+> > some drawbacks - you can't rollback/export data from such lightweight
+> > snapshot anymore. But on the other hand we are reducing need for CoW -
+> > and that's the main goal with this idea. Instead of making CoW ~all the
+> > time it's needed only for the time of exporting image/modified blocks.
+>
+> Ok, so this is a bit different.  I'm a bit fuzzy still on how the
+> 'lightweight' (1) snapshot will be implemented, but basically I think
+> you just mean saving on its storage overhead, but keeping enough metadata
+> to make a fully consistent (2) for the purposes of the backup.
+>
+> Maybe Jason has a better idea for how this would work in practice?  I
+> haven't thought about the RBD snapshots in a while (not above the rados
+> layer at least).
+>
+
+The 'fast-diff' object map already tracks updated objects since a snapshot
+was taken, so I think such an approach would just require deleting the
+RADOS self-managed snapshot when converting to "lightweight" mode and then
+just using the existing "--whole-object" option for "rbd export-diff" to
+utilize the 'fast-diff' object map for calculating deltas instead of
+relying on RADOS snap diffs.
+
+If you don't mind getting your hands dirty writing a little Python code to
+invoke "remove_self_managed_snap" using the snap id provided by "rbd snap
+ls", you should be able to test it out now. If it were to be incorporated
+into RBD core, I think it would need some sanity checks to ensure it relies
+on 'fast-diff' when handling a lightweight snapshot. However, I would also
+be interested to know if bluestore alleviates a lot of your latency
+concerns given that it attempts to redirect-on-write by updating metadata
+instead of copy-on-write.
+
+
+> > >> That's the wrong data.  Maybe that change is harmless, but maybe
+> location
+> > >> 1 belongs to the filesystem journal, and you have some records that
+> now
+> > >> reference location 10 that as an A-era value, or haven't been writte=
+n
+> at
+> > >> all yet, and now your file system journal won't replay and you can't
+> > >> mount...
+> > >
+> > > Forgive me if I'm misunderstanding; this just caught my attention.
+> > >
+> > > The goal here seems to be to reduce the storage needed to do backups
+> of an
+> > > RBD image, and I think there's something to that.
+> >
+> > Storage reduction is only side effect here. We want to get rid of CoW a=
+s
+> > much as possible. In an example - we are doing snapshot every 24h - thi=
+s
+> > means that every 24h we will start doing CoW from the beginning on ever=
+y
+> > image. This has big impact on a cluster latency
+> >
+> > As for the storage need, with 24h backup period we see a space usage
+> > increase by about 5% on our clusters. But this clearly depends on clien=
+t
+> > traffic.
+>
+> One thing to keep in mind here is that the CoW/clone overheard goes *way*
+> down with BlueStore.  On FileStore we are literally blocking to make
+> a copy of each 4MB object.  With BlueStore there is a bit of metadata
+> overhead for the tracking but it is doing CoW at the lowest layer.
+>
+> Lightweight snapshots might be a big win for FileStore but that advantage
+> will mostly evaporate once you repave the OSDs.
+>
+> sage
+>
+>
+> > > This seems to be no different from any other incremental backup
+> scheme.  It's
+> > > layered, and it's ultimately based on an "epoch" complete backup imag=
+e
+> (what
+> > > you call the reference snapshot).
+> > >
+> > > If you're using that model, it would be useful to be able to back up
+> only
+> > > the data present in a second snapshot that's the child of the referen=
+ce
+> > > snapshot.  (And so on, with snapshot 2 building on snapshot 1, etc.)
+> > > RBD internally *knows* this information, but I'm not sure how (or
+> whether)
+> > > it's formally exposed.
+> > >
+> > > Restoring an image in this scheme requires restoring the epoch, then
+> the
+> > > incrementals, in order.  The cost to restore is higher, but the cost
+> > > of incremental backups is significantly smaller than doing full ones.
+> >
+> > It depends how we will store exported data. We might just want to merge
+> > all diffs into base image right after export to keep only single copy.
+> > But that is out of scope of main topic here, IMHO.
+> >
+> > > I'm not sure how the "lightweight" snapshot would work though.  Witho=
+ut
+> > > references to objects there's no guarantee the data taken at the time
+> of
+> > > the snapshot still exists when you want to back it up.
+> > >
+> > >                                     -Alex
+> > >
+> > >>
+> > >> sage
+> > >>
+> > >>> At first glance, it seems like it could be implemented as extension
+> to current
+> > >>> RBD snapshot system, leaving out the machinery required for
+> copy-on-write. In
+> > >>> theory it could even co-exist with regular snapshots. Removal of
+> these
+> > >>> "lightweight" snapshots would be instant (or near instant).
+> > >>>
+> > >>> So what do others think about this?
+> > >>>
+> > >>> --
+> > >>> Piotr Da=C5=82ek
+> > >>> piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org
+> > >>> https://www.ovhcloud.com
+> > >>> --
+> > >>> To unsubscribe from this list: send the line "unsubscribe
+> ceph-devel" in
+> > >>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>>
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in
+> > > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> >
+> > _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+
+--=20
+Jason
+
+--000000000000072026057352a4e5
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_quote"><div dir=3D"ltr">On Fri, Aug 10=
+, 2018 at 8:29 AM Sage Weil &lt;<a href=3D"mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">sage@n=
+ewdream.net</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex">On Fri, 10 Aug 2018, Pawe=C5=82 Sadowski wrote:<br>
+&gt; On 08/09/2018 04:39 PM, Alex Elder wrote:<br>
+&gt; &gt; On 08/09/2018 08:15 AM, Sage Weil wrote:<br>
+&gt; &gt;&gt; On Thu, 9 Aug 2018, Piotr Da=C5=82ek wrote:<br>
+&gt; &gt;&gt;&gt; Hello,<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; At OVH we&#39;re heavily utilizing snapshots for our back=
+up system. We think<br>
+&gt; &gt;&gt;&gt; there&#39;s an interesting optimization opportunity regar=
+ding snapshots I&#39;d like<br>
+&gt; &gt;&gt;&gt; to discuss here.<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; The idea is to introduce a concept of a &quot;lightweight=
+&quot; snapshots - such<br>
+&gt; &gt;&gt;&gt; snapshot would not contain data but only the information =
+about what has<br>
+&gt; &gt;&gt;&gt; changed on the image since it was created (so basically o=
+nly the object map<br>
+&gt; &gt;&gt;&gt; part of snapshots).<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; Our backup solution (which seems to be a pretty common pr=
+actice) is as<br>
+&gt; &gt;&gt;&gt; follows:<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; 1. Create snapshot of the image we want to backup<br>
+&gt; &gt;&gt;&gt; 2. If there&#39;s a previous backup snapshot, export diff=
+ and apply it on the<br>
+&gt; &gt;&gt;&gt; backup image<br>
+&gt; &gt;&gt;&gt; 3. If there&#39;s no older snapshot, just do a full backu=
+p of image<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; This introduces one big issue: it enforces COW snapshot o=
+n image, meaning that<br>
+&gt; &gt;&gt;&gt; original image access latencies and consumed space increa=
+ses. &quot;Lightweight&quot;<br>
+&gt; &gt;&gt;&gt; snapshots would remove these inefficiencies - no COW perf=
+ormance and storage<br>
+&gt; &gt;&gt;&gt; overhead.<br>
+&gt; &gt;&gt;<br>
+&gt; &gt;&gt; The snapshot in 1 would be lightweight you mean?=C2=A0 And yo=
+u&#39;d do the backup <br>
+&gt; &gt;&gt; some (short) time later based on a diff with changed extents?=
+<br>
+&gt; &gt;&gt;<br>
+&gt; &gt;&gt; I&#39;m pretty sure this will export a garbage image.=C2=A0 I=
+ mean, it will usually <br>
+&gt; &gt;&gt; be non-garbage, but the result won&#39;t be crash consistent,=
+ and in some <br>
+&gt; &gt;&gt; (many?) cases won&#39;t be usable.<br>
+&gt; &gt;&gt;<br>
+&gt; &gt;&gt; Consider:<br>
+&gt; &gt;&gt;<br>
+&gt; &gt;&gt; - take reference snapshot<br>
+&gt; &gt;&gt; - back up this image (assume for now it is perfect)<br>
+&gt; &gt;&gt; - write A to location 1<br>
+&gt; &gt;&gt; - take lightweight snapshot<br>
+&gt; &gt;&gt; - write B to location 1<br>
+&gt; &gt;&gt; - backup process copie location 1 (B) to target<br>
+&gt; <br>
+&gt; The way I (we) see it working is a bit different:<br>
+&gt;=C2=A0 - take snapshot (1)<br>
+&gt;=C2=A0 - data write might occur, it&#39;s ok - CoW kicks in here to pre=
+serve data<br>
+&gt;=C2=A0 - export data<br>
+&gt;=C2=A0 - convert snapshot (1) to a lightweight one (not create new):<br=
+>
+&gt;=C2=A0 =C2=A0 * from now on just remember which blocks has been modifie=
+d instead<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 of doing CoW<br>
+&gt;=C2=A0 =C2=A0 * you can get rid on previously CoW data blocks (they&#39=
+;ve been<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 exported already)<br>
+&gt;=C2=A0 - more writes<br>
+&gt;=C2=A0 - take snapshot (2)<br>
+&gt;=C2=A0 - export diff - only blocks modified since snap (1)<br>
+&gt;=C2=A0 - convert snapshot (2) to a lightweight one<br>
+&gt;=C2=A0 - ...<br>
+&gt; <br>
+&gt; <br>
+&gt; That way I don&#39;t see a place for data corruption. Of course this h=
+as<br>
+&gt; some drawbacks - you can&#39;t rollback/export data from such lightwei=
+ght<br>
+&gt; snapshot anymore. But on the other hand we are reducing need for CoW -=
+<br>
+&gt; and that&#39;s the main goal with this idea. Instead of making CoW ~al=
+l the<br>
+&gt; time it&#39;s needed only for the time of exporting image/modified blo=
+cks.<br>
+<br>
+Ok, so this is a bit different.=C2=A0 I&#39;m a bit fuzzy still on how the =
+<br>
+&#39;lightweight&#39; (1) snapshot will be implemented, but basically I thi=
+nk <br>
+you just mean saving on its storage overhead, but keeping enough metadata <=
+br>
+to make a fully consistent (2) for the purposes of the backup.<br>
+<br>
+Maybe Jason has a better idea for how this would work in practice?=C2=A0 I =
+<br>
+haven&#39;t thought about the RBD snapshots in a while (not above the rados=
+ <br>
+layer at least).<br></blockquote><div><br></div><div>The &#39;fast-diff&#39=
+; object map already tracks updated objects since a snapshot was taken, so =
+I think such an approach would just require deleting the RADOS self-managed=
+ snapshot when converting to &quot;lightweight&quot; mode and then just usi=
+ng the existing &quot;--whole-object&quot; option for &quot;rbd export-diff=
+&quot; to utilize the &#39;fast-diff&#39; object map for calculating deltas=
+ instead of relying on RADOS snap diffs.</div><div><br></div><div>If you do=
+n&#39;t mind getting your hands dirty writing a little Python code to invok=
+e &quot;remove_self_managed_snap&quot; using the snap id provided by &quot;=
+rbd snap ls&quot;, you should be able to test it out now. If it were to be =
+incorporated into RBD core, I think it would need some sanity checks to ens=
+ure it relies on &#39;fast-diff&#39; when handling a lightweight snapshot. =
+However, I would also be interested to know if bluestore alleviates a lot o=
+f your latency concerns given that it attempts to redirect-on-write by upda=
+ting metadata instead of copy-on-write.<br></div><div><br></div><blockquote=
+ class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px so=
+lid rgb(204,204,204);padding-left:1ex">
+<br>
+&gt; &gt;&gt; That&#39;s the wrong data.=C2=A0 Maybe that change is harmles=
+s, but maybe location <br>
+&gt; &gt;&gt; 1 belongs to the filesystem journal, and you have some record=
+s that now <br>
+&gt; &gt;&gt; reference location 10 that as an A-era value, or haven&#39;t =
+been written at <br>
+&gt; &gt;&gt; all yet, and now your file system journal won&#39;t replay an=
+d you can&#39;t <br>
+&gt; &gt;&gt; mount...<br>
+&gt; &gt; <br>
+&gt; &gt; Forgive me if I&#39;m misunderstanding; this just caught my atten=
+tion.<br>
+&gt; &gt; <br>
+&gt; &gt; The goal here seems to be to reduce the storage needed to do back=
+ups of an<br>
+&gt; &gt; RBD image, and I think there&#39;s something to that.<br>
+&gt; <br>
+&gt; Storage reduction is only side effect here. We want to get rid of CoW =
+as<br>
+&gt; much as possible. In an example - we are doing snapshot every 24h - th=
+is<br>
+&gt; means that every 24h we will start doing CoW from the beginning on eve=
+ry<br>
+&gt; image. This has big impact on a cluster latency<br>
+&gt; <br>
+&gt; As for the storage need, with 24h backup period we see a space usage<b=
+r>
+&gt; increase by about 5% on our clusters. But this clearly depends on clie=
+nt<br>
+&gt; traffic.<br>
+<br>
+One thing to keep in mind here is that the CoW/clone overheard goes *way* <=
+br>
+down with BlueStore.=C2=A0 On FileStore we are literally blocking to make <=
+br>
+a copy of each 4MB object.=C2=A0 With BlueStore there is a bit of metadata =
+<br>
+overhead for the tracking but it is doing CoW at the lowest layer.<br>
+<br>
+Lightweight snapshots might be a big win for FileStore but that advantage <=
+br>
+will mostly evaporate once you repave the OSDs.<br>
+<br>
+sage<br>
+<br>
+<br>
+&gt; &gt; This seems to be no different from any other incremental backup s=
+cheme.=C2=A0 It&#39;s<br>
+&gt; &gt; layered, and it&#39;s ultimately based on an &quot;epoch&quot; co=
+mplete backup image (what<br>
+&gt; &gt; you call the reference snapshot).<br>
+&gt; &gt; <br>
+&gt; &gt; If you&#39;re using that model, it would be useful to be able to =
+back up only<br>
+&gt; &gt; the data present in a second snapshot that&#39;s the child of the=
+ reference<br>
+&gt; &gt; snapshot.=C2=A0 (And so on, with snapshot 2 building on snapshot =
+1, etc.)<br>
+&gt; &gt; RBD internally *knows* this information, but I&#39;m not sure how=
+ (or whether)<br>
+&gt; &gt; it&#39;s formally exposed.<br>
+&gt; &gt; <br>
+&gt; &gt; Restoring an image in this scheme requires restoring the epoch, t=
+hen the<br>
+&gt; &gt; incrementals, in order.=C2=A0 The cost to restore is higher, but =
+the cost<br>
+&gt; &gt; of incremental backups is significantly smaller than doing full o=
+nes.<br>
+&gt; <br>
+&gt; It depends how we will store exported data. We might just want to merg=
+e<br>
+&gt; all diffs into base image right after export to keep only single copy.=
+<br>
+&gt; But that is out of scope of main topic here, IMHO.<br>
+&gt; <br>
+&gt; &gt; I&#39;m not sure how the &quot;lightweight&quot; snapshot would w=
+ork though.=C2=A0 Without<br>
+&gt; &gt; references to objects there&#39;s no guarantee the data taken at =
+the time of<br>
+&gt; &gt; the snapshot still exists when you want to back it up.<br>
+&gt; &gt; <br>
+&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0-Alex<br>
+&gt; &gt; <br>
+&gt; &gt;&gt;<br>
+&gt; &gt;&gt; sage<br>
+&gt; &gt;&gt;=C2=A0 <br>
+&gt; &gt;&gt;&gt; At first glance, it seems like it could be implemented as=
+ extension to current<br>
+&gt; &gt;&gt;&gt; RBD snapshot system, leaving out the machinery required f=
+or copy-on-write. In<br>
+&gt; &gt;&gt;&gt; theory it could even co-exist with regular snapshots. Rem=
+oval of these<br>
+&gt; &gt;&gt;&gt; &quot;lightweight&quot; snapshots would be instant (or ne=
+ar instant).<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; So what do others think about this?<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; -- <br>
+&gt; &gt;&gt;&gt; Piotr Da=C5=82ek<br>
+&gt; &gt;&gt;&gt; <a href=3D"mailto:piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org" target=3D"_bl=
+ank">piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org</a><br>
+&gt; &gt;&gt;&gt; <a href=3D"https://www.ovhcloud.com" rel=3D"noreferrer" t=
+arget=3D"_blank">https://www.ovhcloud.com</a><br>
+&gt; &gt;&gt;&gt; --<br>
+&gt; &gt;&gt;&gt; To unsubscribe from this list: send the line &quot;unsubs=
+cribe ceph-devel&quot; in<br>
+&gt; &gt;&gt;&gt; the body of a message to <a href=3D"mailto:majordomo@vger=
+.kernel.org" target=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+&gt; &gt;&gt;&gt; More majordomo info at=C2=A0 <a href=3D"http://vger.kerne=
+l.org/majordomo-info.html" rel=3D"noreferrer" target=3D"_blank">http://vger=
+.kernel.org/majordomo-info.html</a><br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt; <br>
+&gt; &gt; --<br>
+&gt; &gt; To unsubscribe from this list: send the line &quot;unsubscribe ce=
+ph-devel&quot; in<br>
+&gt; &gt; the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TasMV2rI37PzA@public.gmane.org=
+org" target=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+&gt; &gt; More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/ma=
+jordomo-info.html" rel=3D"noreferrer" target=3D"_blank">http://vger.kernel.=
+org/majordomo-info.html</a><br>
+&gt; &gt; <br>
+&gt; <br>
+&gt; _______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
+ists.ceph.com</a><br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
+ceph.com</a><br>
+</blockquote></div><br clear=3D"all"><div><br></div>-- <br><div dir=3D"ltr"=
+ class=3D"gmail_signature"><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div=
+>Jason</div></div></div></div></div></div></div>
+
+--000000000000072026057352a4e5--
+
+--===============4579442002212223468==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============4579442002212223468==--
