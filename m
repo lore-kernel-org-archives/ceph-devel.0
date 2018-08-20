@@ -1,16 +1,15 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
 Subject: Re: ceph balancer: further optimizations?
-Date: Mon, 20 Aug 2018 22:29:31 +0200
-Message-ID: <242d9bd7-a6fb-683c-112d-72d45b085383@profihost.ag>
+Date: Mon, 20 Aug 2018 22:38:12 +0200
+Message-ID: <CABZ+qqnBTRJ0_owutqb57sM_+Ag9OZPd=g1Fq-9Q2+cJ3ddi3w@mail.gmail.com>
 References: <c83c7687-90da-bfbb-3d17-5af8bb897334@profihost.ag>
  <alpine.DEB.2.11.1808201951330.7272@piezo.novalocal>
- <CAN-GepJiVxAwPMdS+EPDhUkDpF0sB+J4GBpFaYJ-5bz2pOhnCQ@mail.gmail.com>
+ <95be32e6-a609-9e0f-1f75-dfcd3f876150@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAN-GepJiVxAwPMdS+EPDhUkDpF0sB+J4GBpFaYJ-5bz2pOhnCQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: de-DE
+In-Reply-To: <95be32e6-a609-9e0f-1f75-dfcd3f876150-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,44 +19,70 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-CkFtIDIwLjA4LjIwMTggdW0gMjI6MTMgc2NocmllYiBEYXZpZCBUdXJuZXI6Cj4gWW91IG1pZ2h0
-IGp1c3QgaGF2ZSB0b28gbXVjaCBkYXRhIHBlciBQRy7CoCBJZiBhIHNpbmdsZSBQRyBjYW4gYWNj
-b3VudAo+IGZvciA0JSBvZiB5b3VyIE9TRCwgdGhlbiA5JSBkaWZmZXJlbmNlIGluIHVzZWQgc3Bh
-Y2Ugb24geW91ciBPU0RzIGlzCj4gY2F1c2VkIGJ5IGFuIE9TRCBoYXZpbmcgb25seSAyIG1vcmUg
-UEdzIHRoYW4gYW5vdGhlciBPU0QuwqAgSWYgeW91IGRvCj4gaGF2ZSB2ZXJ5IGxhcmdlIFBHcywg
-aW5jcmVhc2luZyB5b3VyIFBHIGNvdW50IGluIHRob3NlIHBvb2xzIHNob3VsZAo+IGltcHJvdmUg
-eW91ciBkYXRhIGRpc3RyaWJ1dGlvbi4KCjQzODQgcGdzCjkxIG9zZHMKM3ggcmVwbGljYXRpb24K
-CjQzODQgLyA5MSAqIDMgPT4gfiAxNTAgcGdzIHdoaWNoIHNlZW1zIHRvIGJlIGV2ZW4gdG9vIG11
-Y2ggLSBhdCBsZWFzdAp0aGUgZG9jIHNheXMgYXJvdW5kIDEwMCBwZ3MgLyBvc2QuCgo+IAo+IE9u
-IE1vbiwgQXVnIDIwLCAyMDE4IGF0IDM6NTkgUE0gU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5l
-dAo+IDxtYWlsdG86c2FnZUBuZXdkcmVhbS5uZXQ+PiB3cm90ZToKPiAKPiAgICAgT24gTW9uLCAy
-MCBBdWcgMjAxOCwgU3RlZmFuIFByaWViZSAtIFByb2ZpaG9zdCBBRyB3cm90ZToKPiAgICAgPiBI
-ZWxsbywKPiAgICAgPgo+ICAgICA+IHNpbmNlIGxvaWMgc2VlbXMgdG8gaGF2ZSBsZWZ0IGNlcGgg
-ZGV2ZWxvcG1lbnQgYW5kIGhpcyB3dW5kZXJmdWwgY3J1c2gKPiAgICAgPiBvcHRpbWl6YXRpb24g
-dG9vbCBpc24nVCB3b3JraW5nIGFueW1vcmUgaSdtIHRyeWluZyB0byBnZXQgYSBnb29kCj4gICAg
-ID4gZGlzdHJpYnV0aW9uIHdpdGggdGhlIGNlcGggYmFsYW5jZXIuCj4gICAgID4KPiAgICAgPiBT
-YWRseSBpdCBkb2VzIG5vdCB3b3JrIGFzIGdvb2QgYXMgaSB3YW50Lgo+ICAgICA+Cj4gICAgID4g
-IyBjZXBoIG9zZCBkZiB8IHNvcnQgLWs4Cj4gICAgID4KPiAgICAgPiBzaG93IDc1IHRvIDgzJSBV
-c2FnZSB3aGljaCBpcyA4JSBkaWZmZXJlbmNlIHdoaWNoIGlzIHRvbyBtdWNoIGZvciBtZS4KPiAg
-ICAgPiBJJ20gb3B0aW1pemF0aW9uIGJ5IGJ5dGVzLgo+ICAgICA+Cj4gICAgID4gIyBjZXBoIGJh
-bGFuY2VyIGV2YWwKPiAgICAgPiBjdXJyZW50IGNsdXN0ZXIgc2NvcmUgMC4wMDU0MjAgKGxvd2Vy
-IGlzIGJldHRlcikKPiAgICAgPgo+ICAgICA+ICMgY2VwaCBiYWxhbmNlciBldmFsICRPUFRfTkFN
-RQo+ICAgICA+IHBsYW4gc3ByaWViZV8yMDE4LTA4LTIwXzE5OjM2IGZpbmFsIHNjb3JlIDAuMDA1
-NDU2IChsb3dlciBpcyBiZXR0ZXIpCj4gICAgID4KPiAgICAgPiBJJ20gdW5hYmxlIHRvIG9wdGlt
-aXplIGZ1cnRoZXIgOy0oIElzIHRoZXJlIGFueSBjaGFuY2UgdG8gb3B0aW1pemUKPiAgICAgPiBm
-dXJ0aGVyIGV2ZW4gaW4gY2FzZSBvZiBtb3JlIHJlYmVsYW5jaW5nPwo+IAo+ICAgICBUaGUgc2Nv
-cmluZyB0aGF0IHRoZSBiYWxhbmNlciBtb2R1bGUgaXMgZG9pbmcgaXMgY3VycmVudGx5IGEgaHli
-cmlkCj4gICAgIG9mIHBnCj4gICAgIGNvdW50LCBieXRlcywgYW5kIG9iamVjdCBjb3VudC7CoCBQ
-aWNraW5nIGEgc2luZ2xlIG1ldHJpYyBtaWdodCBoZWxwCj4gICAgIGEgYml0Cj4gICAgIChhcyB0
-aG9zZSAzIHRoaW5ncyBhcmUgbm90IGFsd2F5cyBwZXJmZWN0bHkgYWxpZ25lZCkuCj4gCj4gICAg
-IHMKPiAgICAgX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
-PiAgICAgY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiAgICAgY2VwaC11c2Vyc0BsaXN0cy5jZXBo
-LmNvbSA8bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+Cj4gICAgIGh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IApfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
-aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Mon, Aug 20, 2018 at 10:19 PM Stefan Priebe - Profihost AG
+<s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
+>
+>
+> Am 20.08.2018 um 21:52 schrieb Sage Weil:
+> > On Mon, 20 Aug 2018, Stefan Priebe - Profihost AG wrote:
+> >> Hello,
+> >>
+> >> since loic seems to have left ceph development and his wunderful crush
+> >> optimization tool isn'T working anymore i'm trying to get a good
+> >> distribution with the ceph balancer.
+> >>
+> >> Sadly it does not work as good as i want.
+> >>
+> >> # ceph osd df | sort -k8
+> >>
+> >> show 75 to 83% Usage which is 8% difference which is too much for me.
+> >> I'm optimization by bytes.
+> >>
+> >> # ceph balancer eval
+> >> current cluster score 0.005420 (lower is better)
+> >>
+> >> # ceph balancer eval $OPT_NAME
+> >> plan spriebe_2018-08-20_19:36 final score 0.005456 (lower is better)
+> >>
+> >> I'm unable to optimize further ;-( Is there any chance to optimize
+> >> further even in case of more rebelancing?
+> >
+> > The scoring that the balancer module is doing is currently a hybrid of pg
+> > count, bytes, and object count.  Picking a single metric might help a bit
+> > (as those 3 things are not always perfectly aligned).
+>
+> Hi,
+>
+> ok i found a bug in the balancer code which seems to be present in all
+> releases.
+>
+>  861                     best_ws = next_ws
+>  862                     best_ow = next_ow
+>
+>
+> should be:
+>
+>  861                     best_ws = copy.deepcopy(next_ws)
+>  862                     best_ow = copy.deepcopy(next_ow)
+>
+> otherwise it does not use the best but the last.
+
+Interesting... does that change improve things?
+
+Also, if most of your data is in one pool you can try ceph balancer
+eval <pool-name>
+
+-- dan
+
+>
+> I'm also using this one:
+> https://github.com/ceph/ceph/pull/20665/commits/c161a74ad6cf006cd9b33b40fd7705b67c170615
+>
+> to optimize by bytes only.
+>
+> Greets,
+> Stefan
