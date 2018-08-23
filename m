@@ -1,53 +1,137 @@
-From: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
-Subject: Re: mgr/dashboard: backporting Ceph Dashboard v2 to
- Luminous
-Date: Thu, 23 Aug 2018 13:06:49 +0200
-Message-ID: <eb63858d-51e4-2cf4-a264-6a9f74b740a0@digiware.nl>
-References: <CAE8CVBBRng2Bp+FZNKc+ocH+GD=YtPNa6rFG7T+N_x3L=MVZ9g@mail.gmail.com>
- <ba0d2586-865a-fcdb-5f8a-85755de7107d@digiware.nl>
- <CAE8CVBATwGPmqHmdV2sSMyB5BCHD8XuiOg0AxXKX-GK_WpxkrA@mail.gmail.com>
- <CAN-Gep+P2AeHs8q+3Af1YDNbUGA4ceVYL=-Za_anrzg2xDa9vA@mail.gmail.com>
- <89b3285e-b5d7-4eba-1c34-df39354ae5f4@suse.com>
- <72fa2792-6257-36ae-aec2-357a5d452f6c@digiware.nl>
- <CAE8CVBCkfzGg9sFEZZtMqTWY51sof1=mVq0CA378i0PiVsmdtw@mail.gmail.com>
+From: syzbot <syzbot+8ab6f1042021b4eed062@syzkaller.appspotmail.com>
+Subject: KASAN: use-after-free Read in ceph_destroy_options
+Date: Thu, 23 Aug 2018 07:35:03 -0700
+Message-ID: <0000000000002a37a205741b2ae1@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAE8CVBCkfzGg9sFEZZtMqTWY51sof1=mVq0CA378i0PiVsmdtw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-GB
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ernesto Puerta <epuertat-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: ceph-devel@vger.kernel.org, davem@davemloft.net, idryomov@gmail.com, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, sage@redhat.com, syzkaller-bugs@googlegroups.com, zyan@redhat.com
 List-Id: ceph-devel.vger.kernel.org
 
-On 23/08/2018 12:47, Ernesto Puerta wrote:
+Hello,
 
-> @Willem, given your comments come from a technical ground, let's
-> address those technically. As you say, dashboard_v2 is already in
-> Mimic and will be soon in Nautilus when released, so for FreeBSD the
-> issue will anyhow be there. Let's look for a technical solution (both
-> short and long-term): shall we have meeting to handle the FreeBSD
-> specifics?
+syzbot found the following crash on:
 
-I have bit more time than that...
-Usually I start makeing a port once the release is stable, so in this 
-case 14.2.x. Becaue the FreeBSD users that like to live dangerously 
-usually can also build their own source from the repo.
+HEAD commit:    cc3d190b12b3 Add linux-next specific files for 20180822
+git tree:       linux-next
+console output: https://syzkaller.appspot.com/x/log.txt?x=107d322e400000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=ce7f661707bc9904
+dashboard link: https://syzkaller.appspot.com/bug?extid=8ab6f1042021b4eed062
+compiler:       gcc (GCC) 8.0.1 20180413 (experimental)
 
-But you right, one day I need to bite the bullit.
+Unfortunately, I don't have any reproducer for this crash yet.
 
-ATM I'm contemplating all kinds of scenarios to make it workable for all 
-participants: devs, porters, users. And I haven't really found the 
-golden egg.
-So yes, lets take it private and talk.
+IMPORTANT: if you fix the bug, please add the following tag to the commit:
+Reported-by: syzbot+8ab6f1042021b4eed062@syzkaller.appspotmail.com
 
---WjW
+==================================================================
+BUG: KASAN: use-after-free in ceph_destroy_options+0xe0/0x110  
+net/ceph/ceph_common.c:289
+Read of size 8 at addr ffff8801d8f4dd50 by task syz-executor2/7977
+
+CPU: 0 PID: 7977 Comm: syz-executor2 Not tainted 4.18.0-next-20180822+ #45
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS  
+Google 01/01/2011
+Call Trace:
+  __dump_stack lib/dump_stack.c:77 [inline]
+  dump_stack+0x1c9/0x2b4 lib/dump_stack.c:113
+  print_address_description+0x6c/0x20b mm/kasan/report.c:256
+  kasan_report_error mm/kasan/report.c:354 [inline]
+  kasan_report.cold.7+0x242/0x30d mm/kasan/report.c:412
+  __asan_report_load8_noabort+0x14/0x20 mm/kasan/report.c:433
+  ceph_destroy_options+0xe0/0x110 net/ceph/ceph_common.c:289
+  ceph_mount+0xeab/0x1cc0 fs/ceph/super.c:1047
+  legacy_get_tree+0x131/0x460 fs/fs_context.c:732
+  vfs_get_tree+0x1cb/0x5c0 fs/super.c:1746
+  do_new_mount fs/namespace.c:2627 [inline]
+  do_mount+0x6f9/0x1e30 fs/namespace.c:2951
+  ksys_mount+0x12d/0x140 fs/namespace.c:3167
+  __do_sys_mount fs/namespace.c:3181 [inline]
+  __se_sys_mount fs/namespace.c:3178 [inline]
+  __x64_sys_mount+0xbe/0x150 fs/namespace.c:3178
+  do_syscall_64+0x1b9/0x820 arch/x86/entry/common.c:290
+  entry_SYSCALL_64_after_hwframe+0x49/0xbe
+RIP: 0033:0x457089
+Code: fd b4 fb ff c3 66 2e 0f 1f 84 00 00 00 00 00 66 90 48 89 f8 48 89 f7  
+48 89 d6 48 89 ca 4d 89 c2 4d 89 c8 4c 8b 4c 24 08 0f 05 <48> 3d 01 f0 ff  
+ff 0f 83 cb b4 fb ff c3 66 2e 0f 1f 84 00 00 00 00
+RSP: 002b:00007fae7dd45c78 EFLAGS: 00000246 ORIG_RAX: 00000000000000a5
+RAX: ffffffffffffffda RBX: 00007fae7dd466d4 RCX: 0000000000457089
+RDX: 0000000020000080 RSI: 0000000020000040 RDI: 0000000020000000
+RBP: 00000000009300a0 R08: 00000000200000c0 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00000000ffffffff
+R13: 00000000004d2750 R14: 00000000004c7bdf R15: 0000000000000000
+
+Allocated by task 7977:
+  save_stack+0x43/0xd0 mm/kasan/kasan.c:448
+  set_track mm/kasan/kasan.c:460 [inline]
+  kasan_kmalloc+0xc4/0xe0 mm/kasan/kasan.c:553
+  kmem_cache_alloc_trace+0x152/0x730 mm/slab.c:3620
+  kmalloc include/linux/slab.h:513 [inline]
+  kzalloc include/linux/slab.h:707 [inline]
+  ceph_parse_options+0xfe/0x1230 net/ceph/ceph_common.c:355
+  parse_mount_options fs/ceph/super.c:491 [inline]
+  ceph_mount+0x4b9/0x1cc0 fs/ceph/super.c:1036
+  legacy_get_tree+0x131/0x460 fs/fs_context.c:732
+  vfs_get_tree+0x1cb/0x5c0 fs/super.c:1746
+  do_new_mount fs/namespace.c:2627 [inline]
+  do_mount+0x6f9/0x1e30 fs/namespace.c:2951
+  ksys_mount+0x12d/0x140 fs/namespace.c:3167
+  __do_sys_mount fs/namespace.c:3181 [inline]
+  __se_sys_mount fs/namespace.c:3178 [inline]
+  __x64_sys_mount+0xbe/0x150 fs/namespace.c:3178
+  do_syscall_64+0x1b9/0x820 arch/x86/entry/common.c:290
+  entry_SYSCALL_64_after_hwframe+0x49/0xbe
+
+Freed by task 7977:
+  save_stack+0x43/0xd0 mm/kasan/kasan.c:448
+  set_track mm/kasan/kasan.c:460 [inline]
+  __kasan_slab_free+0x11a/0x170 mm/kasan/kasan.c:521
+  kasan_slab_free+0xe/0x10 mm/kasan/kasan.c:528
+  __cache_free mm/slab.c:3498 [inline]
+  kfree+0xd9/0x210 mm/slab.c:3813
+  ceph_destroy_options+0xd4/0x110 net/ceph/ceph_common.c:295
+  ceph_destroy_client+0x139/0x1a0 net/ceph/ceph_common.c:680
+  create_fs_client fs/ceph/super.c:677 [inline]
+  ceph_mount+0xf6e/0x1cc0 fs/ceph/super.c:1043
+  legacy_get_tree+0x131/0x460 fs/fs_context.c:732
+  vfs_get_tree+0x1cb/0x5c0 fs/super.c:1746
+  do_new_mount fs/namespace.c:2627 [inline]
+  do_mount+0x6f9/0x1e30 fs/namespace.c:2951
+  ksys_mount+0x12d/0x140 fs/namespace.c:3167
+  __do_sys_mount fs/namespace.c:3181 [inline]
+  __se_sys_mount fs/namespace.c:3178 [inline]
+  __x64_sys_mount+0xbe/0x150 fs/namespace.c:3178
+  do_syscall_64+0x1b9/0x820 arch/x86/entry/common.c:290
+  entry_SYSCALL_64_after_hwframe+0x49/0xbe
+
+The buggy address belongs to the object at ffff8801d8f4dc80
+  which belongs to the cache kmalloc-256 of size 256
+The buggy address is located 208 bytes inside of
+  256-byte region [ffff8801d8f4dc80, ffff8801d8f4dd80)
+The buggy address belongs to the page:
+page:ffffea000763d340 count:1 mapcount:0 mapping:ffff8801dac007c0 index:0x0
+flags: 0x2fffc0000000100(slab)
+raw: 02fffc0000000100 ffffea0006c0e448 ffffea00072ca688 ffff8801dac007c0
+raw: 0000000000000000 ffff8801d8f4d000 000000010000000c 0000000000000000
+page dumped because: kasan: bad access detected
+
+Memory state around the buggy address:
+  ffff8801d8f4dc00: fb fb fb fb fb fb fb fb fc fc fc fc fc fc fc fc
+  ffff8801d8f4dc80: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+> ffff8801d8f4dd00: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+                                                  ^
+  ffff8801d8f4dd80: fc fc fc fc fc fc fc fc fb fb fb fb fb fb fb fb
+  ffff8801d8f4de00: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+==================================================================
+
+
+---
+This bug is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
+
+syzbot will keep track of this bug report. See:
+https://goo.gl/tpsmEJ#bug-status-tracking for how to communicate with  
+syzbot.
