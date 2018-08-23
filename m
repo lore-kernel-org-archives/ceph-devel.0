@@ -1,8 +1,8 @@
 From: Adrien Gillard <gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Unexpected behaviour after monitors upgrade from
  Jewel to Luminous
-Date: Thu, 23 Aug 2018 21:57:13 +0200
-Message-ID: <CADyh3SiDpYBnVnackpvMxaDXQ10RB365OP9A5f2MT9Qpir==Og@mail.gmail.com>
+Date: Thu, 23 Aug 2018 22:04:18 +0200
+Message-ID: <CADyh3Sj=KWf2Y5f-hX0mj=rnYXRj-Ns5ZycLZScMDmtscEYnug@mail.gmail.com>
 References: <CADyh3SjQkQC7U_ThSOW=XntJz+DmyoLZy7B33bM=6ADO54Xrdg@mail.gmail.com>
  <CAJ4mKGYY9ET48vzavGzUL6-zPYYFEiD9Bs+hC_96=LcBNJba=g@mail.gmail.com>
  <CADyh3SiFuRc-CN33wy_5ZpW1bFns7w3bWjXdBLgKwbLZxfqcNA@mail.gmail.com>
@@ -11,10 +11,12 @@ References: <CADyh3SjQkQC7U_ThSOW=XntJz+DmyoLZy7B33bM=6ADO54Xrdg@mail.gmail.com>
  <CADyh3Sh_mw5nOBNDUMt+8xuNF-qk+M-nOkSb2_2urV+4M4jhcw@mail.gmail.com>
  <CADyh3Sj9LZBFQ2vBge73xLAKrApooKt_heytUzhHU9QqizApgg@mail.gmail.com>
  <CAJ4mKGYFO8f6KxP7=0Ve8QhPo=Qr96vh3rpBguj1oJEqjZqnPg@mail.gmail.com>
+ <CADyh3SiDpYBnVnackpvMxaDXQ10RB365OP9A5f2MT9Qpir==Og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6547778545265758568=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAJ4mKGYFO8f6KxP7=0Ve8QhPo=Qr96vh3rpBguj1oJEqjZqnPg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CADyh3SiDpYBnVnackpvMxaDXQ10RB365OP9A5f2MT9Qpir==Og-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -24,880 +26,342 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============6547778545265758568==
-Content-Type: multipart/alternative; boundary="000000000000fc766105741faa11"
-
---000000000000fc766105741faa11
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-We are running CentOS 7.5 with upstream Ceph packages, no remote syslog,
-just default local logging.
-
-After looking a bit deeper into pprof, --alloc_space seems to represent
-allocations that happened since the program started which goes along with
-the quick deallocation of the memory. --inuse_space (the default) indicates
-allocation at collection. std::_Rb_tree::_M_copy uses the most memory here
-but I have other samples (well, most of the others actually) where
-ceph::logging::Log::create_entry has the lead.
-I will look at the admin socket.
-
-I'm adding ceph-devel, as someone might have a clue as to how to better
-intepret these results.
-
-Thank you for keeping up with this :)
-
-
-On Thu, Aug 23, 2018 at 6:58 PM Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> On Thu, Aug 23, 2018 at 8:42 AM Adrien Gillard <gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> wrote:
->
->> With a bit of profiling, it seems all the memory is allocated to
->> ceph::logging::Log::create_entry (see below)
->>
->> Shoould this be normal ? Is it because some OSDs are down and it logs th=
-e
->> results of its osd_ping  ?
->>
->
-> Hmm, is that where the memory is actually *staying* or was it merely
-> allocated and then quickly deallocated? If you have debugging turned on t=
-he
-> volume of log output can be quite large, but it's a small amount kept
-> resident in memory at a time. Given that you don't seem to have any logs
-> over level 5 (except monc at 10) that does seem like a very strange ratio=
-,
-> though.
->
-> Generally log messages are put into a circular buffer and then removed,
-> and if the buffer gets full the thread trying to log just gets blocked. I=
-'m
-> not sure how you could get very large arbitrary amounts of data like that=
-.
-> Are you using syslog or something? I don't think that should do it, but
-> that's all I can imagine.
-> That or somehow the upgrade has broken the way the OSD releases memory
-> back to the OS. Have you looked at the heap stats available through the
-> admin socket? What distro are you running and what's the source of your
-> packages?
-> -Greg
->
->
->>
->> The debug level of the OSD is below also.
->>
->> Thanks,
->>
->> Adrien
->>
->>  $ pprof /usr/bin/ceph-osd osd.36.profile.0042-first.heap
->> Using local file /usr/bin/ceph-osd.
->> Using local file osd.36.profile.0042-first.heap.
->> Welcome to pprof!  For help, type 'help'.
->> (pprof) top
->> Total: 2468.0 MB
->>    519.5  21.0%  21.0%   1000.4  40.5% std::_Rb_tree::_M_copy
->>    481.0  19.5%  40.5%    481.0  19.5% std::_Rb_tree::_M_create_node
->>    384.3  15.6%  56.1%    384.3  15.6%
->> std::_Rb_tree::_M_emplace_hint_unique
->>    374.0  15.2%  71.3%    374.0  15.2%
->> ceph::buffer::create_aligned_in_mempool
->>    305.6  12.4%  83.6%    305.6  12.4% ceph::logging::Log::create_entry
->>    217.3   8.8%  92.4%    220.2   8.9% std::vector::_M_emplace_back_aux
->>    114.4   4.6%  97.1%    115.6   4.7% ceph::buffer::list::append@a51900
->>     21.4   0.9%  98.0%    210.0   8.5% OSD::heartbeat
->>     21.2   0.9%  98.8%     21.2   0.9% std::string::_Rep::_S_create
->>      4.7   0.2%  99.0%    266.2  10.8% AsyncConnection::send_message
->> (pprof)
->>
->>
->>  $ pprof /usr/bin/ceph-osd --alloc_space osd.36.profile.0042-first.heap
->> Using local file /usr/bin/ceph-osd.
->> Using local file osd.36.profile.0042.heap.
->> Welcome to pprof!  For help, type 'help'.
->> (pprof) top
->> Total: 16519.3 MB
->>  11915.7  72.1%  72.1%  11915.7  72.1% ceph::logging::Log::create_entry
->>    745.0   4.5%  76.6%    745.0   4.5% std::string::_Rep::_S_create
->>    716.9   4.3%  81.0%    716.9   4.3%
->> ceph::buffer::create_aligned_in_mempool
->>    700.2   4.2%  85.2%    703.8   4.3% std::vector::_M_emplace_back_aux
->>    671.9   4.1%  89.3%    671.9   4.1%
->> std::_Rb_tree::_M_emplace_hint_unique
->>    557.8   3.4%  92.7%   1075.2   6.5% std::_Rb_tree::_M_copy
->>    517.4   3.1%  95.8%    517.4   3.1% std::_Rb_tree::_M_create_node
->>    468.2   2.8%  98.6%    469.6   2.8% ceph::buffer::list::append@a51900
->>    122.8   0.7%  99.4%    122.8   0.7% ceph::buffer::list::append@a51d20
->>     33.3   0.2%  99.6%   7042.7  42.6% OSD::heartbeat
->> (pprof)
->>
->>
->>  $ ceph --admin-daemon /var/run/ceph/ceph-osd.36.asok config show | grep
->> debug
->>     "debug_none": "0/5",
->>     "debug_lockdep": "0/1",
->>     "debug_context": "0/1",
->>     "debug_crush": "1/1",
->>     "debug_mds": "1/5",
->>     "debug_mds_balancer": "1/5",
->>     "debug_mds_locker": "1/5",
->>     "debug_mds_log": "1/5",
->>     "debug_mds_log_expire": "1/5",
->>     "debug_mds_migrator": "1/5",
->>     "debug_buffer": "0/1",
->>     "debug_timer": "0/1",
->>     "debug_filer": "0/1",
->>     "debug_striper": "0/1",
->>     "debug_objecter": "0/1",
->>     "debug_rados": "0/5",
->>     "debug_rbd": "0/5",
->>     "debug_rbd_mirror": "0/5",
->>     "debug_rbd_replay": "0/5",
->>     "debug_journaler": "0/5",
->>     "debug_objectcacher": "0/5",
->>     "debug_client": "0/5",
->>     "debug_osd": "0/0",
->>     "debug_optracker": "0/5",
->>     "debug_objclass": "0/5",
->>     "debug_filestore": "0/0",
->>     "debug_journal": "0/0",
->>     "debug_ms": "0/5",
->>     "debug_mon": "1/5",
->>     "debug_monc": "0/10",
->>     "debug_paxos": "1/5",
->>     "debug_tp": "0/5",
->>     "debug_auth": "1/5",
->>     "debug_crypto": "1/5",
->>     "debug_finisher": "1/1",
->>     "debug_reserver": "1/1",
->>     "debug_heartbeatmap": "1/5",
->>     "debug_perfcounter": "1/5",
->>     "debug_rgw": "1/5",
->>     "debug_civetweb": "1/10",
->>     "debug_javaclient": "1/5",
->>     "debug_asok": "1/5",
->>     "debug_throttle": "1/1",
->>     "debug_refs": "0/0",
->>     "debug_xio": "1/5",
->>     "debug_compressor": "1/5",
->>     "debug_bluestore": "1/5",
->>     "debug_bluefs": "1/5",
->>     "debug_bdev": "1/3",
->>     "debug_kstore": "1/5",
->>     "debug_rocksdb": "4/5",
->>     "debug_leveldb": "4/5",
->>     "debug_memdb": "4/5",
->>     "debug_kinetic": "1/5",
->>     "debug_fuse": "1/5",
->>     "debug_mgr": "1/5",
->>     "debug_mgrc": "1/5",
->>     "debug_dpdk": "1/5",
->>     "debug_eventtrace": "1/5",
->>
->>
->> On Thu, Aug 23, 2018 at 4:27 PM Adrien Gillard <gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org=
->
->> wrote:
->>
->>> After upgrading to luminous, we see the exact same behaviour, with OSDs
->>> eating as much as 80/90 GB of memory.
->>>
->>> We'll try some memory profiling but at this point we're a bit lost. Is
->>> there any specific logs that could help us ?
->>>
->>> On Thu, Aug 23, 2018 at 2:34 PM Adrien Gillard <gillard.adrien-Re5JQEeQqe8@public.gmane.org=
-m>
->>> wrote:
->>>
->>>> Well after a few hours, still nothing new in the behaviour. With half
->>>> of the OSDs (so 6 per host)  up and peering and the nodown flag set to
->>>> limit the creation of new maps, all the memory is consumed and OSDs ge=
-t
->>>> killed by OOM killer.
->>>> We observe a lot of threads being created for each OSDs (roughly
->>>> between 500 and 900). As there is around 200 pg per osd, does this see=
-m a
->>>> lot to you ? We see tons being created each second, most probably to
->>>> replace the threads that time out or disappear with the osd processes.
->>>>
->>>> We are preparing to upgrade the OSDs to Luminous.
->>>>
->>>> On Thu, Aug 23, 2018 at 4:05 AM Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>>> wrote:
->>>>
->>>>>
->>>>>
->>>>> On Wed, Aug 22, 2018 at 6:02 PM Adrien Gillard <
->>>>> gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>>>
->>>>>> We 'paused' the cluster early in our investigation to avoid
->>>>>> unnecessary IO.
->>>>>> We also set the nodown flag but the OOM rate was really sustained an=
-d
->>>>>> we got servers that stopped responding from time to time, so we deci=
-ded to
->>>>>> lower the number of OSDs up and let them peer.
->>>>>>
->>>>>
->>>>> Right but this often also means that they need to deal with changing
->>>>> intervals or trying to set up recovery and things, plus the change in=
- which
->>>>> OSDs are up creates new maps that need to be processed. If you set =
-=E2=80=9Cnodown=E2=80=9D
->>>>> you can incrementally bring up OSDs while doing a better job of throt=
-tling
->>>>> the map creation process and preventing a bunch of new IO when/if the=
-y OOM.
->>>>>
->>>>>
->>>>> I don't know if it is the best solution but it is the middle of the
->>>>>> night here, so we'll see tomorrow morning and ponder the completion =
-of the
->>>>>> upgrade.
->>>>>>
->>>>>> I agree with you Greg, it does not make sense. The cluster was
->>>>>> running great for around 6 hours after the mons upgrade...
->>>>>>
->>>>>> Finally, regarding the cache-tiering, I know it is not used a lot no=
-r
->>>>>> will it be maintained over time. One of the main goal of the luminou=
-s
->>>>>> upgrade is to remove it completely and switch to ec rbd.
->>>>>>
->>>>>> Thank you for your inputs !
->>>>>>
->>>>>>
->>>>>> On Wed, Aug 22, 2018 at 11:57 PM Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>>>>> wrote:
->>>>>>
->>>>>>> On Wed, Aug 22, 2018 at 6:35 AM Adrien Gillard <
->>>>>>> gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>>>>>
->>>>>>>> Hi everyone,
->>>>>>>>
->>>>>>>> We have a hard time figuring out a behaviour encountered after
->>>>>>>> upgrading the monitors of one of our cluster from Jewel to Luminou=
-s
->>>>>>>> yesterday.
->>>>>>>>
->>>>>>>> The cluster is composed of 14 OSDs hosts (2xE5-2640 v3 and 64 GB o=
-f
->>>>>>>> RAM), each containing 12x4TB OSD with journals on DC grade SSDs). =
-The
->>>>>>>> cluster was installed in Infernalis and upgraded to Jewel. We main=
-ly use it
->>>>>>>> for RBD with a cache tier in front of an EC pool.
->>>>>>>>
->>>>>>>> We started the upgrade from Jewel 10.2.10 to Luminous 12.2.7
->>>>>>>> yesterday afternoon with the monitors and the provisionning of the=
- MGR. We
->>>>>>>> were planning on upgrading the OSD servers today.
->>>>>>>> All went well until the cluster received the following commands, a
->>>>>>>> few hours after the upgrade :
->>>>>>>>
->>>>>>>> ceph osd pool set pool-cache-01 target_max_bytes 0
->>>>>>>> ceph osd pool set pool-cache-02 target_max_bytes 0
->>>>>>>>
->>>>>>>> (The context here is that we use this cluster for backups and set
->>>>>>>> target_max_bytes to 0 to stop the flush and give maximum ressource=
-s to the
->>>>>>>> backups IOs)
->>>>>>>>
->>>>>>>> Below is an extract from the logs of one of the monitors.
->>>>>>>> The cluster started exchanging a lot over the cluster network,
->>>>>>>> apparently backfill/recovery and multiple Gbits/s, in an amount wh=
-ich we've
->>>>>>>> never seen before. Due to some network uplinks sub-sizing, the tra=
-ffic
->>>>>>>> could not be handled well and this lead to OSDs crashing.
->>>>>>>>
->>>>>>>
->>>>>>> This really doesn't make a ton of sense =E2=80=94 you're saying tha=
-t by
->>>>>>> telling the cluster to *stop* doing flushing IO, everything went ba=
-d? In
->>>>>>> terms of root causing the issue you'll obviously want to focus on t=
-hat,
->>>>>>> although it may or may not be helpful in recovering things at this =
-point.
->>>>>>>
->>>>>>> Do keep in mind that users running cache-tiering are increasingly
->>>>>>> uncommon, and while we still test it we aren't expanding that cover=
-age and
->>>>>>> would really like to remove and replace that functionality, so you'=
-re out
->>>>>>> on the far edge of things here. :/
->>>>>>>
->>>>>>> Finally, if you're still experiencing OOM issues, you may want to
->>>>>>> set the "nodown" flag =E2=80=94 that will prevent OSDs being marked=
- down, which
->>>>>>> obviously will stall IO and peering if they go down anyway, but wil=
-l
->>>>>>> prevent spamming map updates that cause the cluster to OOM again.
->>>>>>> -Greg
->>>>>>>
->>>>>>>
->>>>>>>>
->>>>>>>> At the moment we are still investigating the logs to try to
->>>>>>>> understand what happened exactly. The cluster is down. When we res=
-tart the
->>>>>>>> OSDs, PG start activating and peering but at some point all the RA=
-M and
->>>>>>>> swap of the servers is consumed and OSDs crash.
->>>>>>>> I tried to set the ovious cluster parameters
->>>>>>>> (osd_recovery_max_active=3D1, osd_recovery_threads=3D1, osd_max_ba=
-ckfills=3D1)
->>>>>>>> and norecover, nobackfill, but when the OSDs start, we still see 4=
- or 5
->>>>>>>> Gbits/s over the cluster network.
->>>>>>>>
->>>>>>>> We are currently reconfiguring the network to try to remove the
->>>>>>>> bandwith problem and are preparing to add more RAM to the servers.
->>>>>>>>
->>>>>>>> But still, I have a couple of questions :
->>>>>>>>
->>>>>>>>  - Has anyone encoutered the issue we have with the cache ? Or hav=
-e
->>>>>>>> a possible explanation ?
->>>>>>>>  - Is it normal to observe so much traffic on the cluster network
->>>>>>>> when the PG are activating / peering with norecover and nobackfill=
- set ?
->>>>>>>>
->>>>>>>> Thank you for reading and for your input !
->>>>>>>>
->>>>>>>>
->>>>>>>> 2018-08-21 21:05:02.766969 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB use=
-d, 225 TB
->>>>>>>> / 611 TB avail; 298 MB/s rd, 212 MB/s wr, 456 op/s
->>>>>>>> 2018-08-21 21:05:03.805124 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB use=
-d, 225 TB
->>>>>>>> / 611 TB avail; 296 MB/s rd, 193 MB/s wr, 433 op/s
->>>>>>>> 2018-08-21 21:05:03.870690 7f10d83cc700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader) e6 handle_command
->>>>>>>> mon_command({"var": "target_max_bytes", "prefix": "osd pool set", =
-"pool":
->>>>>>>> "pool-cache-02", "val": "0"} v 0
->>>>>>>> ) v1
->>>>>>>> 2018-08-21 21:05:03.870749 7f10d83cc700  0 log_channel(audit) log
->>>>>>>> [INF] : from=3D'client.146529236 -' entity=3D'client.admin' cmd=3D=
-[{"var":
->>>>>>>> "target_max_bytes", "prefix": "osd pool set", "pool": "pool-cache-=
-02
->>>>>>>> ", "val": "0"}]: dispatch
->>>>>>>> 2018-08-21 21:05:03.913663 7f10d83cc700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader) e6 handle_command
->>>>>>>> mon_command({"prefix": "osd pool stats", "format": "json"} v 0) v1
->>>>>>>> 2018-08-21 21:05:03.913745 7f10d83cc700  0 log_channel(audit) log
->>>>>>>> [DBG] : from=3D'client.? 10.25.25.3:0/4101432770'
->>>>>>>> entity=3D'client.admin' cmd=3D[{"prefix": "osd pool stats", "forma=
-t": "json"}]:
->>>>>>>> dispatch
->>>>>>>> 2018-08-21 21:05:04.042835 7f10d83cc700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader) e6 handle_command
->>>>>>>> mon_command({"var": "target_max_bytes", "prefix": "osd pool set", =
-"pool":
->>>>>>>> "pool-cache-01", "val": "0"} v 0
->>>>>>>> ) v1
->>>>>>>> 2018-08-21 21:05:04.042894 7f10d83cc700  0 log_channel(audit) log
->>>>>>>> [INF] : from=3D'client.146565481 -' entity=3D'client.admin' cmd=3D=
-[{"var":
->>>>>>>> "target_max_bytes", "prefix": "osd pool set", "pool": "pool-cache-=
-01
->>>>>>>> ", "val": "0"}]: dispatch
->>>>>>>> 2018-08-21 21:05:04.813217 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB use=
-d, 225 TB
->>>>>>>> / 611 TB avail; 271 MB/s rd, 181 MB/s wr, 415 op/s
->>>>>>>> 2018-08-21 21:05:04.821486 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114693 e114693: 168
->>>>>>>> total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:04.821711 7f10de377700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114693 crush map has
->>>>>>>> features 432365734501548032, adjusting msgr requires
->>>>>>>> 2018-08-21 21:05:04.823032 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114693 create_pending
->>>>>>>> setting backfillfull_ratio =3D 0.9
->>>>>>>> 2018-08-21 21:05:04.823156 7f10de377700  0 log_channel(audit) log
->>>>>>>> [INF] : from=3D'client.146529236 -' entity=3D'client.admin' cmd=3D=
-'[{"var":
->>>>>>>> "target_max_bytes", "prefix": "osd pool set", "pool": "pool-cache-=
-0
->>>>>>>> 2", "val": "0"}]': finished
->>>>>>>> 2018-08-21 21:05:04.823280 7f10de377700  0 log_channel(audit) log
->>>>>>>> [INF] : from=3D'client.146565481 -' entity=3D'client.admin' cmd=3D=
-'[{"var":
->>>>>>>> "target_max_bytes", "prefix": "osd pool set", "pool": "pool-cache-=
-0
->>>>>>>> 1", "val": "0"}]': finished
->>>>>>>> 2018-08-21 21:05:04.825528 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [DBG] : osdmap e114693: 168 total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:04.844932 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB use=
-d, 225 TB
->>>>>>>> / 611 TB avail; 275 MB/s rd, 192 MB/s wr, 429 op/s
->>>>>>>> 2018-08-21 21:05:05.873682 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 187 peering, 6021 active+clean; 261 TB dat=
-a, 385 TB
->>>>>>>> used, 225 TB / 611 TB avail; 220 MB/s rd, 188 MB/s wr, 383
->>>>>>>> op/s
->>>>>>>> 2018-08-21 21:05:05.895414 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114694 e114694: 168
->>>>>>>> total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:05.895721 7f10de377700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114694 crush map has
->>>>>>>> features 432365734501548032, adjusting msgr requires
->>>>>>>> 2018-08-21 21:05:05.905473 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114694 create_pending
->>>>>>>> setting backfillfull_ratio =3D 0.9
->>>>>>>> 2018-08-21 21:05:05.940729 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [DBG] : osdmap e114694: 168 total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:05.947921 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 204 peering, 6004 active+clean; 261 TB dat=
-a, 385 TB
->>>>>>>> used, 225 TB / 611 TB avail; 201 MB/s rd, 200 MB/s wr, 355
->>>>>>>> op/s
->>>>>>>> 2018-08-21 21:05:06.912752 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114695 e114695: 168
->>>>>>>> total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:06.913104 7f10de377700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114695 crush map has
->>>>>>>> features 432365734501548032, adjusting msgr requires
->>>>>>>> 2018-08-21 21:05:06.928521 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114695 create_pending
->>>>>>>> setting backfillfull_ratio =3D 0.9
->>>>>>>> 2018-08-21 21:05:06.968793 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [DBG] : osdmap e114695: 168 total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:07.001112 7f10d93ce700  1 heartbeat_map
->>>>>>>> reset_timeout 'Monitor::cpu_tp thread 0x7f10d93ce700' had timed ou=
-t after 0
->>>>>>>> 2018-08-21 21:05:07.004274 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 12 unknown, 114 remapped+peering, 5 activa=
-ting, 481
->>>>>>>> peering, 5596 active+clean; 261 TB data, 385 TB used, 225 T
->>>>>>>> B / 611 TB avail; 177 MB/s rd, 173 MB/s wr, 317 op/s
->>>>>>>> 2018-08-21 21:05:07.025200 7f10d8bcd700  1 heartbeat_map
->>>>>>>> reset_timeout 'Monitor::cpu_tp thread 0x7f10d8bcd700' had timed ou=
-t after 0
->>>>>>>> 2018-08-21 21:05:07.948138 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114696 e114696: 168
->>>>>>>> total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:07.948487 7f10de377700  0
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114696 crush map has
->>>>>>>> features 432365734501548032, adjusting msgr requires
->>>>>>>> 2018-08-21 21:05:07.965671 7f10de377700  1
->>>>>>>> mon.clb-cph-frpar2-mon-01@0(leader).osd e114696 create_pending
->>>>>>>> setting backfillfull_ratio =3D 0.9
->>>>>>>> 2018-08-21 21:05:08.007585 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [DBG] : osdmap e114696: 168 total, 168 up, 168 in
->>>>>>>> 2018-08-21 21:05:08.052153 7f10de377700  0 log_channel(cluster) lo=
-g
->>>>>>>> [INF] : pgmap 6208 pgs: 46 activating+remapped, 15 unknown, 305
->>>>>>>> remapped+peering, 11 activating, 697 peering, 8 active+remapped+ba=
-ckfil
->>>>>>>> ling, 5126 active+clean; 261 TB data, 385 TB used, 225 TB / 611 TB
->>>>>>>> avail; 115 MB/s rd, 182 MB/s wr, 292 op/s; 26681/519327262 objects
->>>>>>>> misplaced (0.005%); 4856 kB/s, 3 objects/s recovering
->>>>>>>>
->>>>>>>> _______________________________________________
->>>>>>>> ceph-users mailing list
->>>>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>>>
->>>>>>>
-
---000000000000fc766105741faa11
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>We are running CentOS 7.5 with upstream Ceph packages=
-, no remote syslog, just default local logging.</div><div><br></div><div>Af=
-ter looking a bit deeper into pprof, --alloc_space seems to represent alloc=
-ations that happened since the program started which goes along with the qu=
-ick deallocation of the memory. --inuse_space (the default) indicates alloc=
-ation at collection. std::_Rb_tree::_M_copy uses the most memory here but I=
- have other samples (well, most of the others actually) where ceph::logging=
-::Log::create_entry has the lead.</div><div>I will look at the admin socket=
-.</div><div><br></div><div>I&#39;m adding ceph-devel, as someone might have=
- a clue as to how to better intepret these results.</div><div><br></div>Tha=
-nk you for keeping up with this :)<div><br></div></div><br><div class=3D"gm=
-ail_quote"><div dir=3D"ltr">On Thu, Aug 23, 2018 at 6:58 PM Gregory Farnum =
-&lt;<a href=3D"mailto:gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:=
-<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;bord=
-er-left:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr">On Thu, Aug 23, 2=
-018 at 8:42 AM Adrien Gillard &lt;<a href=3D"mailto:gillard.adrien-Re5JQEeQqe8@public.gmane.org=
-m" target=3D"_blank">gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br><div class=
-=3D"gmail_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8=
-ex;border-left:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr">With a bit=
- of profiling, it seems all the memory is allocated to=C2=A0 ceph::logging:=
-:Log::create_entry (see below)<div><br></div><div>Shoould this be normal ? =
-Is it because some OSDs are down and it logs the results of its osd_ping=C2=
-=A0 ?</div></div></blockquote><div><br></div><div>Hmm, is that where the me=
-mory is actually *staying* or was it merely allocated and then quickly deal=
-located? If you have debugging turned on the volume of log output can be qu=
-ite large, but it&#39;s a small amount kept resident in memory at a time. G=
-iven that you don&#39;t seem to have any logs over level 5 (except monc at =
-10) that does seem like a very strange ratio, though.</div><div><br></div><=
-div>Generally log messages are put into a circular buffer and then removed,=
- and if the buffer gets full the thread trying to log just gets blocked. I&=
-#39;m not sure how you could get very large arbitrary amounts of data like =
-that. Are you using syslog or something? I don&#39;t think that should do i=
-t, but that&#39;s all I can imagine.</div><div>That or somehow the upgrade =
-has broken the way the OSD releases memory back to the OS. Have you looked =
-at the heap stats available through the admin socket? What distro are you r=
-unning and what&#39;s the source of your packages?</div><div>-Greg</div><di=
-v>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;=
-border-left:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr"><div><br></di=
-v><div>The debug level of the OSD is below also.</div><div><br></div><div>T=
-hanks,</div><div><br></div><div>Adrien<br><div><br></div><div><div>=C2=A0$ =
-pprof /usr/bin/ceph-osd osd.36.profile.0042-first.heap</div><div>Using loca=
-l file /usr/bin/ceph-osd.</div><div>Using local file osd.36.profile.0042-fi=
-rst.heap.</div><div>Welcome to pprof!=C2=A0 For help, type &#39;help&#39;.<=
-/div><div>(pprof) top</div><div>Total: 2468.0 MB</div><div>=C2=A0 =C2=A0519=
-.5=C2=A0 21.0%=C2=A0 21.0%=C2=A0 =C2=A01000.4=C2=A0 40.5% std::_Rb_tree::_M=
-_copy</div><div>=C2=A0 =C2=A0481.0=C2=A0 19.5%=C2=A0 40.5%=C2=A0 =C2=A0 481=
-.0=C2=A0 19.5% std::_Rb_tree::_M_create_node</div><div>=C2=A0 =C2=A0384.3=
-=C2=A0 15.6%=C2=A0 56.1%=C2=A0 =C2=A0 384.3=C2=A0 15.6% std::_Rb_tree::_M_e=
-mplace_hint_unique</div><div>=C2=A0 =C2=A0374.0=C2=A0 15.2%=C2=A0 71.3%=C2=
-=A0 =C2=A0 374.0=C2=A0 15.2% ceph::buffer::create_aligned_in_mempool</div><=
-div>=C2=A0 =C2=A0305.6=C2=A0 12.4%=C2=A0 83.6%=C2=A0 =C2=A0 305.6=C2=A0 12.=
-4% ceph::logging::Log::create_entry</div><div>=C2=A0 =C2=A0217.3=C2=A0 =C2=
-=A08.8%=C2=A0 92.4%=C2=A0 =C2=A0 220.2=C2=A0 =C2=A08.9% std::vector::_M_emp=
-lace_back_aux</div><div>=C2=A0 =C2=A0114.4=C2=A0 =C2=A04.6%=C2=A0 97.1%=C2=
-=A0 =C2=A0 115.6=C2=A0 =C2=A04.7% ceph::buffer::list::append@a51900</div><d=
-iv>=C2=A0 =C2=A0 21.4=C2=A0 =C2=A00.9%=C2=A0 98.0%=C2=A0 =C2=A0 210.0=C2=A0=
- =C2=A08.5% OSD::heartbeat</div><div>=C2=A0 =C2=A0 21.2=C2=A0 =C2=A00.9%=C2=
-=A0 98.8%=C2=A0 =C2=A0 =C2=A021.2=C2=A0 =C2=A00.9% std::string::_Rep::_S_cr=
-eate</div><div>=C2=A0 =C2=A0 =C2=A04.7=C2=A0 =C2=A00.2%=C2=A0 99.0%=C2=A0 =
-=C2=A0 266.2=C2=A0 10.8% AsyncConnection::send_message</div><div>(pprof)</d=
-iv></div><div><br></div><div><br></div><div><div>=C2=A0$ pprof /usr/bin/cep=
-h-osd --alloc_space osd.36.profile.0042-first.heap</div><div>Using local fi=
-le /usr/bin/ceph-osd.</div><div>Using local file osd.36.profile.0042.heap.<=
-/div><div>Welcome to pprof!=C2=A0 For help, type &#39;help&#39;.</div><div>=
-(pprof) top</div><div>Total: 16519.3 MB</div><div>=C2=A011915.7=C2=A0 72.1%=
-=C2=A0 72.1%=C2=A0 11915.7=C2=A0 72.1% ceph::logging::Log::create_entry</di=
-v><div>=C2=A0 =C2=A0745.0=C2=A0 =C2=A04.5%=C2=A0 76.6%=C2=A0 =C2=A0 745.0=
-=C2=A0 =C2=A04.5% std::string::_Rep::_S_create</div><div>=C2=A0 =C2=A0716.9=
-=C2=A0 =C2=A04.3%=C2=A0 81.0%=C2=A0 =C2=A0 716.9=C2=A0 =C2=A04.3% ceph::buf=
-fer::create_aligned_in_mempool</div><div>=C2=A0 =C2=A0700.2=C2=A0 =C2=A04.2=
-%=C2=A0 85.2%=C2=A0 =C2=A0 703.8=C2=A0 =C2=A04.3% std::vector::_M_emplace_b=
-ack_aux</div><div>=C2=A0 =C2=A0671.9=C2=A0 =C2=A04.1%=C2=A0 89.3%=C2=A0 =C2=
-=A0 671.9=C2=A0 =C2=A04.1% std::_Rb_tree::_M_emplace_hint_unique</div><div>=
-=C2=A0 =C2=A0557.8=C2=A0 =C2=A03.4%=C2=A0 92.7%=C2=A0 =C2=A01075.2=C2=A0 =
-=C2=A06.5% std::_Rb_tree::_M_copy</div><div>=C2=A0 =C2=A0517.4=C2=A0 =C2=A0=
-3.1%=C2=A0 95.8%=C2=A0 =C2=A0 517.4=C2=A0 =C2=A03.1% std::_Rb_tree::_M_crea=
-te_node</div><div>=C2=A0 =C2=A0468.2=C2=A0 =C2=A02.8%=C2=A0 98.6%=C2=A0 =C2=
-=A0 469.6=C2=A0 =C2=A02.8% ceph::buffer::list::append@a51900</div><div>=C2=
-=A0 =C2=A0122.8=C2=A0 =C2=A00.7%=C2=A0 99.4%=C2=A0 =C2=A0 122.8=C2=A0 =C2=
-=A00.7% ceph::buffer::list::append@a51d20</div><div>=C2=A0 =C2=A0 33.3=C2=
-=A0 =C2=A00.2%=C2=A0 99.6%=C2=A0 =C2=A07042.7=C2=A0 42.6% OSD::heartbeat</d=
-iv><div>(pprof)</div></div><div><br></div></div><div><br></div><div><div>=
-=C2=A0$ ceph --admin-daemon /var/run/ceph/ceph-osd.36.asok config show | gr=
-ep debug</div><div>=C2=A0 =C2=A0 &quot;debug_none&quot;: &quot;0/5&quot;,</=
-div><div>=C2=A0 =C2=A0 &quot;debug_lockdep&quot;: &quot;0/1&quot;,</div><di=
-v>=C2=A0 =C2=A0 &quot;debug_context&quot;: &quot;0/1&quot;,</div><div>=C2=
-=A0 =C2=A0 &quot;debug_crush&quot;: &quot;1/1&quot;,</div><div>=C2=A0 =C2=
-=A0 &quot;debug_mds&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;d=
-ebug_mds_balancer&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;deb=
-ug_mds_locker&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_m=
-ds_log&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_mds_log_=
-expire&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_mds_migr=
-ator&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_buffer&quo=
-t;: &quot;0/1&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_timer&quot;: &quot=
-;0/1&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_filer&quot;: &quot;0/1&quot=
-;,</div><div>=C2=A0 =C2=A0 &quot;debug_striper&quot;: &quot;0/1&quot;,</div=
-><div>=C2=A0 =C2=A0 &quot;debug_objecter&quot;: &quot;0/1&quot;,</div><div>=
-=C2=A0 =C2=A0 &quot;debug_rados&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =
-=C2=A0 &quot;debug_rbd&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quo=
-t;debug_rbd_mirror&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;de=
-bug_rbd_replay&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_=
-journaler&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_objec=
-tcacher&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_client&=
-quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_osd&quot;: &quo=
-t;0/0&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_optracker&quot;: &quot;0/5=
-&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_objclass&quot;: &quot;0/5&quot;=
-,</div><div>=C2=A0 =C2=A0 &quot;debug_filestore&quot;: &quot;0/0&quot;,</di=
-v><div>=C2=A0 =C2=A0 &quot;debug_journal&quot;: &quot;0/0&quot;,</div><div>=
-=C2=A0 =C2=A0 &quot;debug_ms&quot;: &quot;0/5&quot;,</div><div>=C2=A0 =C2=
-=A0 &quot;debug_mon&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;d=
-ebug_monc&quot;: &quot;0/10&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_paxo=
-s&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_tp&quot;: &qu=
-ot;0/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_auth&quot;: &quot;1/5&quo=
-t;,</div><div>=C2=A0 =C2=A0 &quot;debug_crypto&quot;: &quot;1/5&quot;,</div=
-><div>=C2=A0 =C2=A0 &quot;debug_finisher&quot;: &quot;1/1&quot;,</div><div>=
-=C2=A0 =C2=A0 &quot;debug_reserver&quot;: &quot;1/1&quot;,</div><div>=C2=A0=
- =C2=A0 &quot;debug_heartbeatmap&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =
-=C2=A0 &quot;debug_perfcounter&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=
-=A0 &quot;debug_rgw&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;d=
-ebug_civetweb&quot;: &quot;1/10&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_=
-javaclient&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_asok=
-&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_throttle&quot;=
-: &quot;1/1&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_refs&quot;: &quot;0/=
-0&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_xio&quot;: &quot;1/5&quot;,</d=
-iv><div>=C2=A0 =C2=A0 &quot;debug_compressor&quot;: &quot;1/5&quot;,</div><=
-div>=C2=A0 =C2=A0 &quot;debug_bluestore&quot;: &quot;1/5&quot;,</div><div>=
-=C2=A0 =C2=A0 &quot;debug_bluefs&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =
-=C2=A0 &quot;debug_bdev&quot;: &quot;1/3&quot;,</div><div>=C2=A0 =C2=A0 &qu=
-ot;debug_kstore&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug=
-_rocksdb&quot;: &quot;4/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_leveld=
-b&quot;: &quot;4/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_memdb&quot;: =
-&quot;4/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_kinetic&quot;: &quot;1=
-/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;debug_fuse&quot;: &quot;1/5&quot;,<=
-/div><div>=C2=A0 =C2=A0 &quot;debug_mgr&quot;: &quot;1/5&quot;,</div><div>=
-=C2=A0 =C2=A0 &quot;debug_mgrc&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=
-=A0 &quot;debug_dpdk&quot;: &quot;1/5&quot;,</div><div>=C2=A0 =C2=A0 &quot;=
-debug_eventtrace&quot;: &quot;1/5&quot;,</div></div><div><br></div></div><b=
-r><div class=3D"gmail_quote"><div dir=3D"ltr">On Thu, Aug 23, 2018 at 4:27 =
-PM Adrien Gillard &lt;<a href=3D"mailto:gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D=
-"_blank">gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=
-=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
-ing-left:1ex"><div dir=3D"ltr">After upgrading to luminous, we see the exac=
-t same behaviour, with OSDs eating as much as 80/90 GB of memory.<div><br><=
-/div><div>We&#39;ll try some memory profiling but at this point we&#39;re a=
- bit lost. Is there any specific logs that could help us ?</div></div><br><=
-div class=3D"gmail_quote"><div dir=3D"ltr">On Thu, Aug 23, 2018 at 2:34 PM =
-Adrien Gillard &lt;<a href=3D"mailto:gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_b=
-lank">gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D=
-"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding=
--left:1ex"><div dir=3D"ltr">Well after a few hours, still nothing new in th=
-e behaviour. With half of the OSDs (so 6 per host)=C2=A0 up and peering and=
- the nodown flag set to limit the creation of new maps, all the memory is c=
-onsumed and OSDs get killed by OOM killer.<div>We observe a lot of threads =
-being created for each OSDs (roughly between 500 and 900). As there is arou=
-nd 200 pg per osd, does this seem a lot to you ? We see tons being created =
-each second, most probably to replace the threads that time out or disappea=
-r with the osd processes.</div><div><br></div><div>We are preparing to upgr=
-ade the OSDs to Luminous.</div></div><br><div class=3D"gmail_quote"><div di=
-r=3D"ltr">On Thu, Aug 23, 2018 at 4:05 AM Gregory Farnum &lt;<a href=3D"mai=
-lto:gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:=
-<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;bord=
-er-left:1px #ccc solid;padding-left:1ex"><div><br></div><div><br><div class=
-=3D"gmail_quote"><div dir=3D"ltr">On Wed, Aug 22, 2018 at 6:02 PM Adrien Gi=
-llard &lt;<a href=3D"mailto:gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">gil=
-lard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D"gmail_qu=
-ote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex=
-"><div dir=3D"ltr">We &#39;paused&#39; the cluster early in our investigati=
-on to avoid unnecessary IO.=C2=A0<div>We also set the nodown flag but the O=
-OM rate was really sustained and we got servers that stopped responding fro=
-m time to time, so we decided to lower the number of OSDs up and let them p=
-eer.=C2=A0</div></div></blockquote><div dir=3D"auto"><br></div><div dir=3D"=
-auto">Right but this often also means that they need to deal with changing =
-intervals or trying to set up recovery and things, plus the change in which=
- OSDs are up creates new maps that need to be processed. If you set =E2=80=
-=9Cnodown=E2=80=9D you can incrementally bring up OSDs while doing a better=
- job of throttling the map creation process and preventing a bunch of new I=
-O when/if they OOM.</div><div dir=3D"auto"><br></div><div dir=3D"auto"><br>=
-</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-l=
-eft:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr"><div></div><div>I don=
-&#39;t know if it is the best solution but it is the middle of the night he=
-re, so we&#39;ll see tomorrow morning and ponder the completion of the upgr=
-ade.</div><div><br></div><div>I agree with you Greg, it does not make sense=
-. The cluster was running great for around 6 hours after the mons upgrade..=
-.</div><div><br></div><div>Finally, regarding the cache-tiering, I know it =
-is not used a lot nor will it be maintained over time. One of the main goal=
- of the luminous upgrade is to remove it completely and switch to ec rbd.</=
-div><div><br></div><div>Thank you for your inputs !</div><div><br></div></d=
-iv><br><div class=3D"gmail_quote"><div dir=3D"ltr">On Wed, Aug 22, 2018 at =
-11:57 PM Gregory Farnum &lt;<a href=3D"mailto:gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D=
-"_blank">gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D"gm=
-ail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-le=
-ft:1ex"><div dir=3D"ltr">On Wed, Aug 22, 2018 at 6:35 AM Adrien Gillard &lt=
-;<a href=3D"mailto:gillard.adrien-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">gillard.adri=
-en-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br><div class=3D"gmail_quote"><blockquote class=
-=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
-ing-left:1ex"><div dir=3D"ltr">Hi everyone,<div><br></div><div>We have a ha=
-rd time figuring out a behaviour encountered after upgrading the monitors o=
-f one of our cluster from Jewel to Luminous yesterday.</div><div><br></div>=
-<div>The cluster is composed of 14 OSDs hosts (2xE5-2640 v3 and 64 GB of RA=
-M), each containing 12x4TB OSD with journals on DC grade SSDs). The cluster=
- was installed in Infernalis and upgraded to Jewel. We mainly use it for RB=
-D with a cache tier in front of an EC pool.</div><div><br></div><div>We sta=
-rted the upgrade from Jewel 10.2.10 to Luminous 12.2.7 yesterday afternoon =
-with the monitors and the provisionning of the MGR. We were planning on upg=
-rading the OSD servers today.</div><div>All went well until the cluster rec=
-eived the following commands, a few hours after the upgrade :</div><div><br=
-></div><div>ceph osd pool set pool-cache-01 target_max_bytes 0</div><div>ce=
-ph osd pool set pool-cache-02 target_max_bytes 0=C2=A0=C2=A0<br></div><div>=
-<br></div><div>(The context here is that we use this cluster for backups an=
-d set target_max_bytes to 0 to stop the flush and give maximum ressources t=
-o the backups IOs)</div><div><br></div><div>Below is an extract from the lo=
-gs of one of the monitors.<br></div><div>The cluster started exchanging a l=
-ot over the cluster network, apparently backfill/recovery and multiple Gbit=
-s/s, in an amount which we&#39;ve never seen before. Due to some network up=
-links sub-sizing, the traffic could not be handled well and this lead to OS=
-Ds crashing.=C2=A0</div></div></blockquote><div><br></div><div>This really =
-doesn&#39;t make a ton of sense =E2=80=94 you&#39;re saying that by telling=
- the cluster to *stop* doing flushing IO, everything went bad? In terms of =
-root causing the issue you&#39;ll obviously want to focus on that, although=
- it may or may not be helpful in recovering things at this point.</div><div=
-><br></div><div>Do keep in mind that users running cache-tiering are increa=
-singly uncommon, and while we still test it we aren&#39;t expanding that co=
-verage and would really like to remove and replace that functionality, so y=
-ou&#39;re out on the far edge of things here. :/</div><div><br></div><div>F=
-inally, if you&#39;re still experiencing OOM issues, you may want to set th=
-e &quot;nodown&quot; flag =E2=80=94 that will prevent OSDs being marked dow=
-n, which obviously will stall IO and peering if they go down anyway, but wi=
-ll prevent spamming map updates that cause the cluster to OOM again.</div><=
-div>-Greg</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"=
-margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div dir=3D"=
-ltr"><div><br></div><div>At the moment we are still investigating the logs =
-to try to understand what happened exactly. The cluster is down. When we re=
-start the OSDs, PG start activating and peering but at some point all the R=
-AM and swap of the servers is consumed and OSDs crash.</div><div>I tried to=
- set the ovious cluster parameters (osd_recovery_max_active=3D1, osd_recove=
-ry_threads=3D1, osd_max_backfills=3D1) and norecover, nobackfill, but when =
-the OSDs start, we still see 4 or 5 Gbits/s over the cluster network.</div>=
-<div><br></div><div>We are currently reconfiguring the network to try to re=
-move the bandwith problem and are preparing to add more RAM to the servers.=
-</div><div><br></div><div>But still, I have a couple of questions :</div><d=
-iv><br></div><div>=C2=A0- Has anyone encoutered the issue we have with the =
-cache ? Or have a possible explanation ?</div><div>=C2=A0- Is it normal to =
-observe so much traffic on the cluster network when the PG are activating /=
- peering with norecover and nobackfill set ?</div><div><br></div><div>Thank=
- you for reading and for your input !</div><div>=C2=A0</div><div><br></div>=
-<div><div>2018-08-21 21:05:02.766969 7f10de377700=C2=A0 0 log_channel(clust=
-er) log [INF] : pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB used=
-, 225 TB / 611 TB avail; 298 MB/s rd, 212 MB/s wr, 456 op/s</div><div>2018-=
-08-21 21:05:03.805124 7f10de377700=C2=A0 0 log_channel(cluster) log [INF] :=
- pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB used, 225 TB / 611 =
-TB avail; 296 MB/s rd, 193 MB/s wr, 433 op/s</div><div>2018-08-21 21:05:03.=
-870690 7f10d83cc700=C2=A0 0 mon.clb-cph-frpar2-mon-01@0(leader) e6 handle_c=
-ommand mon_command({&quot;var&quot;: &quot;target_max_bytes&quot;, &quot;pr=
-efix&quot;: &quot;osd pool set&quot;, &quot;pool&quot;: &quot;pool-cache-02=
-&quot;, &quot;val&quot;: &quot;0&quot;} v 0</div><div>) v1</div><div>2018-0=
-8-21 21:05:03.870749 7f10d83cc700=C2=A0 0 log_channel(audit) log [INF] : fr=
-om=3D&#39;client.146529236 -&#39; entity=3D&#39;client.admin&#39; cmd=3D[{&=
-quot;var&quot;: &quot;target_max_bytes&quot;, &quot;prefix&quot;: &quot;osd=
- pool set&quot;, &quot;pool&quot;: &quot;pool-cache-02</div><div>&quot;, &q=
-uot;val&quot;: &quot;0&quot;}]: dispatch</div><div>2018-08-21 21:05:03.9136=
-63 7f10d83cc700=C2=A0 0 mon.clb-cph-frpar2-mon-01@0(leader) e6 handle_comma=
-nd mon_command({&quot;prefix&quot;: &quot;osd pool stats&quot;, &quot;forma=
-t&quot;: &quot;json&quot;} v 0) v1</div><div>2018-08-21 21:05:03.913745 7f1=
-0d83cc700=C2=A0 0 log_channel(audit) log [DBG] : from=3D&#39;client.? <a hr=
-ef=3D"http://10.25.25.3:0/4101432770" target=3D"_blank">10.25.25.3:0/410143=
-2770</a>&#39; entity=3D&#39;client.admin&#39; cmd=3D[{&quot;prefix&quot;: &=
-quot;osd pool stats&quot;, &quot;format&quot;: &quot;json&quot;}]: dispatch=
-</div><div>2018-08-21 21:05:04.042835 7f10d83cc700=C2=A0 0 mon.clb-cph-frpa=
-r2-mon-01@0(leader) e6 handle_command mon_command({&quot;var&quot;: &quot;t=
-arget_max_bytes&quot;, &quot;prefix&quot;: &quot;osd pool set&quot;, &quot;=
-pool&quot;: &quot;pool-cache-01&quot;, &quot;val&quot;: &quot;0&quot;} v 0<=
-/div><div>) v1</div><div>2018-08-21 21:05:04.042894 7f10d83cc700=C2=A0 0 lo=
-g_channel(audit) log [INF] : from=3D&#39;client.146565481 -&#39; entity=3D&=
-#39;client.admin&#39; cmd=3D[{&quot;var&quot;: &quot;target_max_bytes&quot;=
-, &quot;prefix&quot;: &quot;osd pool set&quot;, &quot;pool&quot;: &quot;poo=
-l-cache-01</div><div>&quot;, &quot;val&quot;: &quot;0&quot;}]: dispatch</di=
-v><div>2018-08-21 21:05:04.813217 7f10de377700=C2=A0 0 log_channel(cluster)=
- log [INF] : pgmap 6208 pgs: 6208 active+clean; 261 TB data, 385 TB used, 2=
-25 TB / 611 TB avail; 271 MB/s rd, 181 MB/s wr, 415 op/s</div><div>2018-08-=
-21 21:05:04.821486 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(leader)=
-.osd e114693 e114693: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:=
-04.821711 7f10de377700=C2=A0 0 mon.clb-cph-frpar2-mon-01@0(leader).osd e114=
-693 crush map has features 432365734501548032, adjusting msgr requires</div=
-><div>2018-08-21 21:05:04.823032 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mo=
-n-01@0(leader).osd e114693 create_pending setting backfillfull_ratio =3D 0.=
-9</div><div>2018-08-21 21:05:04.823156 7f10de377700=C2=A0 0 log_channel(aud=
-it) log [INF] : from=3D&#39;client.146529236 -&#39; entity=3D&#39;client.ad=
-min&#39; cmd=3D&#39;[{&quot;var&quot;: &quot;target_max_bytes&quot;, &quot;=
-prefix&quot;: &quot;osd pool set&quot;, &quot;pool&quot;: &quot;pool-cache-=
-0</div><div>2&quot;, &quot;val&quot;: &quot;0&quot;}]&#39;: finished</div><=
-div>2018-08-21 21:05:04.823280 7f10de377700=C2=A0 0 log_channel(audit) log =
-[INF] : from=3D&#39;client.146565481 -&#39; entity=3D&#39;client.admin&#39;=
- cmd=3D&#39;[{&quot;var&quot;: &quot;target_max_bytes&quot;, &quot;prefix&q=
-uot;: &quot;osd pool set&quot;, &quot;pool&quot;: &quot;pool-cache-0</div><=
-div>1&quot;, &quot;val&quot;: &quot;0&quot;}]&#39;: finished</div><div>2018=
--08-21 21:05:04.825528 7f10de377700=C2=A0 0 log_channel(cluster) log [DBG] =
-: osdmap e114693: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:04.8=
-44932 7f10de377700=C2=A0 0 log_channel(cluster) log [INF] : pgmap 6208 pgs:=
- 6208 active+clean; 261 TB data, 385 TB used, 225 TB / 611 TB avail; 275 MB=
-/s rd, 192 MB/s wr, 429 op/s</div><div>2018-08-21 21:05:05.873682 7f10de377=
-700=C2=A0 0 log_channel(cluster) log [INF] : pgmap 6208 pgs: 187 peering, 6=
-021 active+clean; 261 TB data, 385 TB used, 225 TB / 611 TB avail; 220 MB/s=
- rd, 188 MB/s wr, 383</div><div>op/s</div><div>2018-08-21 21:05:05.895414 7=
-f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(leader).osd e114694 e114694=
-: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:05.895721 7f10de3777=
-00=C2=A0 0 mon.clb-cph-frpar2-mon-01@0(leader).osd e114694 crush map has fe=
-atures 432365734501548032, adjusting msgr requires</div><div>2018-08-21 21:=
-05:05.905473 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(leader).osd e=
-114694 create_pending setting backfillfull_ratio =3D 0.9</div><div>2018-08-=
-21 21:05:05.940729 7f10de377700=C2=A0 0 log_channel(cluster) log [DBG] : os=
-dmap e114694: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:05.94792=
-1 7f10de377700=C2=A0 0 log_channel(cluster) log [INF] : pgmap 6208 pgs: 204=
- peering, 6004 active+clean; 261 TB data, 385 TB used, 225 TB / 611 TB avai=
-l; 201 MB/s rd, 200 MB/s wr, 355</div><div>op/s</div><div>2018-08-21 21:05:=
-06.912752 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(leader).osd e114=
-695 e114695: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:06.913104=
- 7f10de377700=C2=A0 0 mon.clb-cph-frpar2-mon-01@0(leader).osd e114695 crush=
- map has features 432365734501548032, adjusting msgr requires</div><div>201=
-8-08-21 21:05:06.928521 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(le=
-ader).osd e114695 create_pending setting backfillfull_ratio =3D 0.9</div><d=
-iv>2018-08-21 21:05:06.968793 7f10de377700=C2=A0 0 log_channel(cluster) log=
- [DBG] : osdmap e114695: 168 total, 168 up, 168 in</div><div>2018-08-21 21:=
-05:07.001112 7f10d93ce700=C2=A0 1 heartbeat_map reset_timeout &#39;Monitor:=
-:cpu_tp thread 0x7f10d93ce700&#39; had timed out after 0</div><div>2018-08-=
-21 21:05:07.004274 7f10de377700=C2=A0 0 log_channel(cluster) log [INF] : pg=
-map 6208 pgs: 12 unknown, 114 remapped+peering, 5 activating, 481 peering, =
-5596 active+clean; 261 TB data, 385 TB used, 225 T</div><div>B / 611 TB ava=
-il; 177 MB/s rd, 173 MB/s wr, 317 op/s</div><div>2018-08-21 21:05:07.025200=
- 7f10d8bcd700=C2=A0 1 heartbeat_map reset_timeout &#39;Monitor::cpu_tp thre=
-ad 0x7f10d8bcd700&#39; had timed out after 0</div><div>2018-08-21 21:05:07.=
-948138 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(leader).osd e114696=
- e114696: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:07.948487 7f=
-10de377700=C2=A0 0 mon.clb-cph-frpar2-mon-01@0(leader).osd e114696 crush ma=
-p has features 432365734501548032, adjusting msgr requires</div><div>2018-0=
-8-21 21:05:07.965671 7f10de377700=C2=A0 1 mon.clb-cph-frpar2-mon-01@0(leade=
-r).osd e114696 create_pending setting backfillfull_ratio =3D 0.9</div><div>=
-2018-08-21 21:05:08.007585 7f10de377700=C2=A0 0 log_channel(cluster) log [D=
-BG] : osdmap e114696: 168 total, 168 up, 168 in</div><div>2018-08-21 21:05:=
-08.052153 7f10de377700=C2=A0 0 log_channel(cluster) log [INF] : pgmap 6208 =
-pgs: 46 activating+remapped, 15 unknown, 305 remapped+peering, 11 activatin=
-g, 697 peering, 8 active+remapped+backfil</div><div>ling, 5126 active+clean=
-; 261 TB data, 385 TB used, 225 TB / 611 TB avail; 115 MB/s rd, 182 MB/s wr=
-, 292 op/s; 26681/519327262 objects misplaced (0.005%); 4856 kB/s, 3 object=
-s/s recovering</div></div><div><br></div></div>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
-ists.ceph.com</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-</blockquote></div></div>
-</blockquote></div>
-</blockquote></div></div>
-</blockquote></div>
-</blockquote></div>
-</blockquote></div>
-</blockquote></div></div>
-</blockquote></div>
-
---000000000000fc766105741faa11--
-
---===============6547778545265758568==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============6547778545265758568==--
+U2VuZGluZyBiYWNrLCBmb3Jnb3QgdGhlIHBsYWluIHRleHQgZm9yIGNlcGgtZGV2ZWwuCgpTb3Jy
+eSBhYm91dCB0aGF0LgoKT24gVGh1LCBBdWcgMjMsIDIwMTggYXQgOTo1NyBQTSBBZHJpZW4gR2ls
+bGFyZCA8Z2lsbGFyZC5hZHJpZW5AZ21haWwuY29tPiB3cm90ZToKPgo+IFdlIGFyZSBydW5uaW5n
+IENlbnRPUyA3LjUgd2l0aCB1cHN0cmVhbSBDZXBoIHBhY2thZ2VzLCBubyByZW1vdGUgc3lzbG9n
+LCBqdXN0IGRlZmF1bHQgbG9jYWwgbG9nZ2luZy4KPgo+IEFmdGVyIGxvb2tpbmcgYSBiaXQgZGVl
+cGVyIGludG8gcHByb2YsIC0tYWxsb2Nfc3BhY2Ugc2VlbXMgdG8gcmVwcmVzZW50IGFsbG9jYXRp
+b25zIHRoYXQgaGFwcGVuZWQgc2luY2UgdGhlIHByb2dyYW0gc3RhcnRlZCB3aGljaCBnb2VzIGFs
+b25nIHdpdGggdGhlIHF1aWNrIGRlYWxsb2NhdGlvbiBvZiB0aGUgbWVtb3J5LiAtLWludXNlX3Nw
+YWNlICh0aGUgZGVmYXVsdCkgaW5kaWNhdGVzIGFsbG9jYXRpb24gYXQgY29sbGVjdGlvbi4gc3Rk
+OjpfUmJfdHJlZTo6X01fY29weSB1c2VzIHRoZSBtb3N0IG1lbW9yeSBoZXJlIGJ1dCBJIGhhdmUg
+b3RoZXIgc2FtcGxlcyAod2VsbCwgbW9zdCBvZiB0aGUgb3RoZXJzIGFjdHVhbGx5KSB3aGVyZSBj
+ZXBoOjpsb2dnaW5nOjpMb2c6OmNyZWF0ZV9lbnRyeSBoYXMgdGhlIGxlYWQuCj4gSSB3aWxsIGxv
+b2sgYXQgdGhlIGFkbWluIHNvY2tldC4KPgo+IEknbSBhZGRpbmcgY2VwaC1kZXZlbCwgYXMgc29t
+ZW9uZSBtaWdodCBoYXZlIGEgY2x1ZSBhcyB0byBob3cgdG8gYmV0dGVyIGludGVwcmV0IHRoZXNl
+IHJlc3VsdHMuCj4KPiBUaGFuayB5b3UgZm9yIGtlZXBpbmcgdXAgd2l0aCB0aGlzIDopCj4KPgo+
+IE9uIFRodSwgQXVnIDIzLCAyMDE4IGF0IDY6NTggUE0gR3JlZ29yeSBGYXJudW0gPGdmYXJudW1A
+cmVkaGF0LmNvbT4gd3JvdGU6Cj4+Cj4+IE9uIFRodSwgQXVnIDIzLCAyMDE4IGF0IDg6NDIgQU0g
+QWRyaWVuIEdpbGxhcmQgPGdpbGxhcmQuYWRyaWVuQGdtYWlsLmNvbT4gd3JvdGU6Cj4+Pgo+Pj4g
+V2l0aCBhIGJpdCBvZiBwcm9maWxpbmcsIGl0IHNlZW1zIGFsbCB0aGUgbWVtb3J5IGlzIGFsbG9j
+YXRlZCB0byAgY2VwaDo6bG9nZ2luZzo6TG9nOjpjcmVhdGVfZW50cnkgKHNlZSBiZWxvdykKPj4+
+Cj4+PiBTaG9vdWxkIHRoaXMgYmUgbm9ybWFsID8gSXMgaXQgYmVjYXVzZSBzb21lIE9TRHMgYXJl
+IGRvd24gYW5kIGl0IGxvZ3MgdGhlIHJlc3VsdHMgb2YgaXRzIG9zZF9waW5nICA/Cj4+Cj4+Cj4+
+IEhtbSwgaXMgdGhhdCB3aGVyZSB0aGUgbWVtb3J5IGlzIGFjdHVhbGx5ICpzdGF5aW5nKiBvciB3
+YXMgaXQgbWVyZWx5IGFsbG9jYXRlZCBhbmQgdGhlbiBxdWlja2x5IGRlYWxsb2NhdGVkPyBJZiB5
+b3UgaGF2ZSBkZWJ1Z2dpbmcgdHVybmVkIG9uIHRoZSB2b2x1bWUgb2YgbG9nIG91dHB1dCBjYW4g
+YmUgcXVpdGUgbGFyZ2UsIGJ1dCBpdCdzIGEgc21hbGwgYW1vdW50IGtlcHQgcmVzaWRlbnQgaW4g
+bWVtb3J5IGF0IGEgdGltZS4gR2l2ZW4gdGhhdCB5b3UgZG9uJ3Qgc2VlbSB0byBoYXZlIGFueSBs
+b2dzIG92ZXIgbGV2ZWwgNSAoZXhjZXB0IG1vbmMgYXQgMTApIHRoYXQgZG9lcyBzZWVtIGxpa2Ug
+YSB2ZXJ5IHN0cmFuZ2UgcmF0aW8sIHRob3VnaC4KPj4KPj4gR2VuZXJhbGx5IGxvZyBtZXNzYWdl
+cyBhcmUgcHV0IGludG8gYSBjaXJjdWxhciBidWZmZXIgYW5kIHRoZW4gcmVtb3ZlZCwgYW5kIGlm
+IHRoZSBidWZmZXIgZ2V0cyBmdWxsIHRoZSB0aHJlYWQgdHJ5aW5nIHRvIGxvZyBqdXN0IGdldHMg
+YmxvY2tlZC4gSSdtIG5vdCBzdXJlIGhvdyB5b3UgY291bGQgZ2V0IHZlcnkgbGFyZ2UgYXJiaXRy
+YXJ5IGFtb3VudHMgb2YgZGF0YSBsaWtlIHRoYXQuIEFyZSB5b3UgdXNpbmcgc3lzbG9nIG9yIHNv
+bWV0aGluZz8gSSBkb24ndCB0aGluayB0aGF0IHNob3VsZCBkbyBpdCwgYnV0IHRoYXQncyBhbGwg
+SSBjYW4gaW1hZ2luZS4KPj4gVGhhdCBvciBzb21laG93IHRoZSB1cGdyYWRlIGhhcyBicm9rZW4g
+dGhlIHdheSB0aGUgT1NEIHJlbGVhc2VzIG1lbW9yeSBiYWNrIHRvIHRoZSBPUy4gSGF2ZSB5b3Ug
+bG9va2VkIGF0IHRoZSBoZWFwIHN0YXRzIGF2YWlsYWJsZSB0aHJvdWdoIHRoZSBhZG1pbiBzb2Nr
+ZXQ/IFdoYXQgZGlzdHJvIGFyZSB5b3UgcnVubmluZyBhbmQgd2hhdCdzIHRoZSBzb3VyY2Ugb2Yg
+eW91ciBwYWNrYWdlcz8KPj4gLUdyZWcKPj4KPj4+Cj4+Pgo+Pj4gVGhlIGRlYnVnIGxldmVsIG9m
+IHRoZSBPU0QgaXMgYmVsb3cgYWxzby4KPj4+Cj4+PiBUaGFua3MsCj4+Pgo+Pj4gQWRyaWVuCj4+
+Pgo+Pj4gICQgcHByb2YgL3Vzci9iaW4vY2VwaC1vc2Qgb3NkLjM2LnByb2ZpbGUuMDA0Mi1maXJz
+dC5oZWFwCj4+PiBVc2luZyBsb2NhbCBmaWxlIC91c3IvYmluL2NlcGgtb3NkLgo+Pj4gVXNpbmcg
+bG9jYWwgZmlsZSBvc2QuMzYucHJvZmlsZS4wMDQyLWZpcnN0LmhlYXAuCj4+PiBXZWxjb21lIHRv
+IHBwcm9mISAgRm9yIGhlbHAsIHR5cGUgJ2hlbHAnLgo+Pj4gKHBwcm9mKSB0b3AKPj4+IFRvdGFs
+OiAyNDY4LjAgTUIKPj4+ICAgIDUxOS41ICAyMS4wJSAgMjEuMCUgICAxMDAwLjQgIDQwLjUlIHN0
+ZDo6X1JiX3RyZWU6Ol9NX2NvcHkKPj4+ICAgIDQ4MS4wICAxOS41JSAgNDAuNSUgICAgNDgxLjAg
+IDE5LjUlIHN0ZDo6X1JiX3RyZWU6Ol9NX2NyZWF0ZV9ub2RlCj4+PiAgICAzODQuMyAgMTUuNiUg
+IDU2LjElICAgIDM4NC4zICAxNS42JSBzdGQ6Ol9SYl90cmVlOjpfTV9lbXBsYWNlX2hpbnRfdW5p
+cXVlCj4+PiAgICAzNzQuMCAgMTUuMiUgIDcxLjMlICAgIDM3NC4wICAxNS4yJSBjZXBoOjpidWZm
+ZXI6OmNyZWF0ZV9hbGlnbmVkX2luX21lbXBvb2wKPj4+ICAgIDMwNS42ICAxMi40JSAgODMuNiUg
+ICAgMzA1LjYgIDEyLjQlIGNlcGg6OmxvZ2dpbmc6OkxvZzo6Y3JlYXRlX2VudHJ5Cj4+PiAgICAy
+MTcuMyAgIDguOCUgIDkyLjQlICAgIDIyMC4yICAgOC45JSBzdGQ6OnZlY3Rvcjo6X01fZW1wbGFj
+ZV9iYWNrX2F1eAo+Pj4gICAgMTE0LjQgICA0LjYlICA5Ny4xJSAgICAxMTUuNiAgIDQuNyUgY2Vw
+aDo6YnVmZmVyOjpsaXN0OjphcHBlbmRAYTUxOTAwCj4+PiAgICAgMjEuNCAgIDAuOSUgIDk4LjAl
+ICAgIDIxMC4wICAgOC41JSBPU0Q6OmhlYXJ0YmVhdAo+Pj4gICAgIDIxLjIgICAwLjklICA5OC44
+JSAgICAgMjEuMiAgIDAuOSUgc3RkOjpzdHJpbmc6Ol9SZXA6Ol9TX2NyZWF0ZQo+Pj4gICAgICA0
+LjcgICAwLjIlICA5OS4wJSAgICAyNjYuMiAgMTAuOCUgQXN5bmNDb25uZWN0aW9uOjpzZW5kX21l
+c3NhZ2UKPj4+IChwcHJvZikKPj4+Cj4+Pgo+Pj4gICQgcHByb2YgL3Vzci9iaW4vY2VwaC1vc2Qg
+LS1hbGxvY19zcGFjZSBvc2QuMzYucHJvZmlsZS4wMDQyLWZpcnN0LmhlYXAKPj4+IFVzaW5nIGxv
+Y2FsIGZpbGUgL3Vzci9iaW4vY2VwaC1vc2QuCj4+PiBVc2luZyBsb2NhbCBmaWxlIG9zZC4zNi5w
+cm9maWxlLjAwNDIuaGVhcC4KPj4+IFdlbGNvbWUgdG8gcHByb2YhICBGb3IgaGVscCwgdHlwZSAn
+aGVscCcuCj4+PiAocHByb2YpIHRvcAo+Pj4gVG90YWw6IDE2NTE5LjMgTUIKPj4+ICAxMTkxNS43
+ICA3Mi4xJSAgNzIuMSUgIDExOTE1LjcgIDcyLjElIGNlcGg6OmxvZ2dpbmc6OkxvZzo6Y3JlYXRl
+X2VudHJ5Cj4+PiAgICA3NDUuMCAgIDQuNSUgIDc2LjYlICAgIDc0NS4wICAgNC41JSBzdGQ6OnN0
+cmluZzo6X1JlcDo6X1NfY3JlYXRlCj4+PiAgICA3MTYuOSAgIDQuMyUgIDgxLjAlICAgIDcxNi45
+ICAgNC4zJSBjZXBoOjpidWZmZXI6OmNyZWF0ZV9hbGlnbmVkX2luX21lbXBvb2wKPj4+ICAgIDcw
+MC4yICAgNC4yJSAgODUuMiUgICAgNzAzLjggICA0LjMlIHN0ZDo6dmVjdG9yOjpfTV9lbXBsYWNl
+X2JhY2tfYXV4Cj4+PiAgICA2NzEuOSAgIDQuMSUgIDg5LjMlICAgIDY3MS45ICAgNC4xJSBzdGQ6
+Ol9SYl90cmVlOjpfTV9lbXBsYWNlX2hpbnRfdW5pcXVlCj4+PiAgICA1NTcuOCAgIDMuNCUgIDky
+LjclICAgMTA3NS4yICAgNi41JSBzdGQ6Ol9SYl90cmVlOjpfTV9jb3B5Cj4+PiAgICA1MTcuNCAg
+IDMuMSUgIDk1LjglICAgIDUxNy40ICAgMy4xJSBzdGQ6Ol9SYl90cmVlOjpfTV9jcmVhdGVfbm9k
+ZQo+Pj4gICAgNDY4LjIgICAyLjglICA5OC42JSAgICA0NjkuNiAgIDIuOCUgY2VwaDo6YnVmZmVy
+OjpsaXN0OjphcHBlbmRAYTUxOTAwCj4+PiAgICAxMjIuOCAgIDAuNyUgIDk5LjQlICAgIDEyMi44
+ICAgMC43JSBjZXBoOjpidWZmZXI6Omxpc3Q6OmFwcGVuZEBhNTFkMjAKPj4+ICAgICAzMy4zICAg
+MC4yJSAgOTkuNiUgICA3MDQyLjcgIDQyLjYlIE9TRDo6aGVhcnRiZWF0Cj4+PiAocHByb2YpCj4+
+Pgo+Pj4KPj4+ICAkIGNlcGggLS1hZG1pbi1kYWVtb24gL3Zhci9ydW4vY2VwaC9jZXBoLW9zZC4z
+Ni5hc29rIGNvbmZpZyBzaG93IHwgZ3JlcCBkZWJ1Zwo+Pj4gICAgICJkZWJ1Z19ub25lIjogIjAv
+NSIsCj4+PiAgICAgImRlYnVnX2xvY2tkZXAiOiAiMC8xIiwKPj4+ICAgICAiZGVidWdfY29udGV4
+dCI6ICIwLzEiLAo+Pj4gICAgICJkZWJ1Z19jcnVzaCI6ICIxLzEiLAo+Pj4gICAgICJkZWJ1Z19t
+ZHMiOiAiMS81IiwKPj4+ICAgICAiZGVidWdfbWRzX2JhbGFuY2VyIjogIjEvNSIsCj4+PiAgICAg
+ImRlYnVnX21kc19sb2NrZXIiOiAiMS81IiwKPj4+ICAgICAiZGVidWdfbWRzX2xvZyI6ICIxLzUi
+LAo+Pj4gICAgICJkZWJ1Z19tZHNfbG9nX2V4cGlyZSI6ICIxLzUiLAo+Pj4gICAgICJkZWJ1Z19t
+ZHNfbWlncmF0b3IiOiAiMS81IiwKPj4+ICAgICAiZGVidWdfYnVmZmVyIjogIjAvMSIsCj4+PiAg
+ICAgImRlYnVnX3RpbWVyIjogIjAvMSIsCj4+PiAgICAgImRlYnVnX2ZpbGVyIjogIjAvMSIsCj4+
+PiAgICAgImRlYnVnX3N0cmlwZXIiOiAiMC8xIiwKPj4+ICAgICAiZGVidWdfb2JqZWN0ZXIiOiAi
+MC8xIiwKPj4+ICAgICAiZGVidWdfcmFkb3MiOiAiMC81IiwKPj4+ICAgICAiZGVidWdfcmJkIjog
+IjAvNSIsCj4+PiAgICAgImRlYnVnX3JiZF9taXJyb3IiOiAiMC81IiwKPj4+ICAgICAiZGVidWdf
+cmJkX3JlcGxheSI6ICIwLzUiLAo+Pj4gICAgICJkZWJ1Z19qb3VybmFsZXIiOiAiMC81IiwKPj4+
+ICAgICAiZGVidWdfb2JqZWN0Y2FjaGVyIjogIjAvNSIsCj4+PiAgICAgImRlYnVnX2NsaWVudCI6
+ICIwLzUiLAo+Pj4gICAgICJkZWJ1Z19vc2QiOiAiMC8wIiwKPj4+ICAgICAiZGVidWdfb3B0cmFj
+a2VyIjogIjAvNSIsCj4+PiAgICAgImRlYnVnX29iamNsYXNzIjogIjAvNSIsCj4+PiAgICAgImRl
+YnVnX2ZpbGVzdG9yZSI6ICIwLzAiLAo+Pj4gICAgICJkZWJ1Z19qb3VybmFsIjogIjAvMCIsCj4+
+PiAgICAgImRlYnVnX21zIjogIjAvNSIsCj4+PiAgICAgImRlYnVnX21vbiI6ICIxLzUiLAo+Pj4g
+ICAgICJkZWJ1Z19tb25jIjogIjAvMTAiLAo+Pj4gICAgICJkZWJ1Z19wYXhvcyI6ICIxLzUiLAo+
+Pj4gICAgICJkZWJ1Z190cCI6ICIwLzUiLAo+Pj4gICAgICJkZWJ1Z19hdXRoIjogIjEvNSIsCj4+
+PiAgICAgImRlYnVnX2NyeXB0byI6ICIxLzUiLAo+Pj4gICAgICJkZWJ1Z19maW5pc2hlciI6ICIx
+LzEiLAo+Pj4gICAgICJkZWJ1Z19yZXNlcnZlciI6ICIxLzEiLAo+Pj4gICAgICJkZWJ1Z19oZWFy
+dGJlYXRtYXAiOiAiMS81IiwKPj4+ICAgICAiZGVidWdfcGVyZmNvdW50ZXIiOiAiMS81IiwKPj4+
+ICAgICAiZGVidWdfcmd3IjogIjEvNSIsCj4+PiAgICAgImRlYnVnX2NpdmV0d2ViIjogIjEvMTAi
+LAo+Pj4gICAgICJkZWJ1Z19qYXZhY2xpZW50IjogIjEvNSIsCj4+PiAgICAgImRlYnVnX2Fzb2si
+OiAiMS81IiwKPj4+ICAgICAiZGVidWdfdGhyb3R0bGUiOiAiMS8xIiwKPj4+ICAgICAiZGVidWdf
+cmVmcyI6ICIwLzAiLAo+Pj4gICAgICJkZWJ1Z194aW8iOiAiMS81IiwKPj4+ICAgICAiZGVidWdf
+Y29tcHJlc3NvciI6ICIxLzUiLAo+Pj4gICAgICJkZWJ1Z19ibHVlc3RvcmUiOiAiMS81IiwKPj4+
+ICAgICAiZGVidWdfYmx1ZWZzIjogIjEvNSIsCj4+PiAgICAgImRlYnVnX2JkZXYiOiAiMS8zIiwK
+Pj4+ICAgICAiZGVidWdfa3N0b3JlIjogIjEvNSIsCj4+PiAgICAgImRlYnVnX3JvY2tzZGIiOiAi
+NC81IiwKPj4+ICAgICAiZGVidWdfbGV2ZWxkYiI6ICI0LzUiLAo+Pj4gICAgICJkZWJ1Z19tZW1k
+YiI6ICI0LzUiLAo+Pj4gICAgICJkZWJ1Z19raW5ldGljIjogIjEvNSIsCj4+PiAgICAgImRlYnVn
+X2Z1c2UiOiAiMS81IiwKPj4+ICAgICAiZGVidWdfbWdyIjogIjEvNSIsCj4+PiAgICAgImRlYnVn
+X21ncmMiOiAiMS81IiwKPj4+ICAgICAiZGVidWdfZHBkayI6ICIxLzUiLAo+Pj4gICAgICJkZWJ1
+Z19ldmVudHRyYWNlIjogIjEvNSIsCj4+Pgo+Pj4KPj4+IE9uIFRodSwgQXVnIDIzLCAyMDE4IGF0
+IDQ6MjcgUE0gQWRyaWVuIEdpbGxhcmQgPGdpbGxhcmQuYWRyaWVuQGdtYWlsLmNvbT4gd3JvdGU6
+Cj4+Pj4KPj4+PiBBZnRlciB1cGdyYWRpbmcgdG8gbHVtaW5vdXMsIHdlIHNlZSB0aGUgZXhhY3Qg
+c2FtZSBiZWhhdmlvdXIsIHdpdGggT1NEcyBlYXRpbmcgYXMgbXVjaCBhcyA4MC85MCBHQiBvZiBt
+ZW1vcnkuCj4+Pj4KPj4+PiBXZSdsbCB0cnkgc29tZSBtZW1vcnkgcHJvZmlsaW5nIGJ1dCBhdCB0
+aGlzIHBvaW50IHdlJ3JlIGEgYml0IGxvc3QuIElzIHRoZXJlIGFueSBzcGVjaWZpYyBsb2dzIHRo
+YXQgY291bGQgaGVscCB1cyA/Cj4+Pj4KPj4+PiBPbiBUaHUsIEF1ZyAyMywgMjAxOCBhdCAyOjM0
+IFBNIEFkcmllbiBHaWxsYXJkIDxnaWxsYXJkLmFkcmllbkBnbWFpbC5jb20+IHdyb3RlOgo+Pj4+
+Pgo+Pj4+PiBXZWxsIGFmdGVyIGEgZmV3IGhvdXJzLCBzdGlsbCBub3RoaW5nIG5ldyBpbiB0aGUg
+YmVoYXZpb3VyLiBXaXRoIGhhbGYgb2YgdGhlIE9TRHMgKHNvIDYgcGVyIGhvc3QpICB1cCBhbmQg
+cGVlcmluZyBhbmQgdGhlIG5vZG93biBmbGFnIHNldCB0byBsaW1pdCB0aGUgY3JlYXRpb24gb2Yg
+bmV3IG1hcHMsIGFsbCB0aGUgbWVtb3J5IGlzIGNvbnN1bWVkIGFuZCBPU0RzIGdldCBraWxsZWQg
+YnkgT09NIGtpbGxlci4KPj4+Pj4gV2Ugb2JzZXJ2ZSBhIGxvdCBvZiB0aHJlYWRzIGJlaW5nIGNy
+ZWF0ZWQgZm9yIGVhY2ggT1NEcyAocm91Z2hseSBiZXR3ZWVuIDUwMCBhbmQgOTAwKS4gQXMgdGhl
+cmUgaXMgYXJvdW5kIDIwMCBwZyBwZXIgb3NkLCBkb2VzIHRoaXMgc2VlbSBhIGxvdCB0byB5b3Ug
+PyBXZSBzZWUgdG9ucyBiZWluZyBjcmVhdGVkIGVhY2ggc2Vjb25kLCBtb3N0IHByb2JhYmx5IHRv
+IHJlcGxhY2UgdGhlIHRocmVhZHMgdGhhdCB0aW1lIG91dCBvciBkaXNhcHBlYXIgd2l0aCB0aGUg
+b3NkIHByb2Nlc3Nlcy4KPj4+Pj4KPj4+Pj4gV2UgYXJlIHByZXBhcmluZyB0byB1cGdyYWRlIHRo
+ZSBPU0RzIHRvIEx1bWlub3VzLgo+Pj4+Pgo+Pj4+PiBPbiBUaHUsIEF1ZyAyMywgMjAxOCBhdCA0
+OjA1IEFNIEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+IHdyb3RlOgo+Pj4+Pj4K
+Pj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4gT24gV2VkLCBBdWcgMjIsIDIwMTggYXQgNjowMiBQTSBBZHJp
+ZW4gR2lsbGFyZCA8Z2lsbGFyZC5hZHJpZW5AZ21haWwuY29tPiB3cm90ZToKPj4+Pj4+Pgo+Pj4+
+Pj4+IFdlICdwYXVzZWQnIHRoZSBjbHVzdGVyIGVhcmx5IGluIG91ciBpbnZlc3RpZ2F0aW9uIHRv
+IGF2b2lkIHVubmVjZXNzYXJ5IElPLgo+Pj4+Pj4+IFdlIGFsc28gc2V0IHRoZSBub2Rvd24gZmxh
+ZyBidXQgdGhlIE9PTSByYXRlIHdhcyByZWFsbHkgc3VzdGFpbmVkIGFuZCB3ZSBnb3Qgc2VydmVy
+cyB0aGF0IHN0b3BwZWQgcmVzcG9uZGluZyBmcm9tIHRpbWUgdG8gdGltZSwgc28gd2UgZGVjaWRl
+ZCB0byBsb3dlciB0aGUgbnVtYmVyIG9mIE9TRHMgdXAgYW5kIGxldCB0aGVtIHBlZXIuCj4+Pj4+
+Pgo+Pj4+Pj4KPj4+Pj4+IFJpZ2h0IGJ1dCB0aGlzIG9mdGVuIGFsc28gbWVhbnMgdGhhdCB0aGV5
+IG5lZWQgdG8gZGVhbCB3aXRoIGNoYW5naW5nIGludGVydmFscyBvciB0cnlpbmcgdG8gc2V0IHVw
+IHJlY292ZXJ5IGFuZCB0aGluZ3MsIHBsdXMgdGhlIGNoYW5nZSBpbiB3aGljaCBPU0RzIGFyZSB1
+cCBjcmVhdGVzIG5ldyBtYXBzIHRoYXQgbmVlZCB0byBiZSBwcm9jZXNzZWQuIElmIHlvdSBzZXQg
+4oCcbm9kb3du4oCdIHlvdSBjYW4gaW5jcmVtZW50YWxseSBicmluZyB1cCBPU0RzIHdoaWxlIGRv
+aW5nIGEgYmV0dGVyIGpvYiBvZiB0aHJvdHRsaW5nIHRoZSBtYXAgY3JlYXRpb24gcHJvY2VzcyBh
+bmQgcHJldmVudGluZyBhIGJ1bmNoIG9mIG5ldyBJTyB3aGVuL2lmIHRoZXkgT09NLgo+Pj4+Pj4K
+Pj4+Pj4+Cj4+Pj4+Pj4gSSBkb24ndCBrbm93IGlmIGl0IGlzIHRoZSBiZXN0IHNvbHV0aW9uIGJ1
+dCBpdCBpcyB0aGUgbWlkZGxlIG9mIHRoZSBuaWdodCBoZXJlLCBzbyB3ZSdsbCBzZWUgdG9tb3Jy
+b3cgbW9ybmluZyBhbmQgcG9uZGVyIHRoZSBjb21wbGV0aW9uIG9mIHRoZSB1cGdyYWRlLgo+Pj4+
+Pj4+Cj4+Pj4+Pj4gSSBhZ3JlZSB3aXRoIHlvdSBHcmVnLCBpdCBkb2VzIG5vdCBtYWtlIHNlbnNl
+LiBUaGUgY2x1c3RlciB3YXMgcnVubmluZyBncmVhdCBmb3IgYXJvdW5kIDYgaG91cnMgYWZ0ZXIg
+dGhlIG1vbnMgdXBncmFkZS4uLgo+Pj4+Pj4+Cj4+Pj4+Pj4gRmluYWxseSwgcmVnYXJkaW5nIHRo
+ZSBjYWNoZS10aWVyaW5nLCBJIGtub3cgaXQgaXMgbm90IHVzZWQgYSBsb3Qgbm9yIHdpbGwgaXQg
+YmUgbWFpbnRhaW5lZCBvdmVyIHRpbWUuIE9uZSBvZiB0aGUgbWFpbiBnb2FsIG9mIHRoZSBsdW1p
+bm91cyB1cGdyYWRlIGlzIHRvIHJlbW92ZSBpdCBjb21wbGV0ZWx5IGFuZCBzd2l0Y2ggdG8gZWMg
+cmJkLgo+Pj4+Pj4+Cj4+Pj4+Pj4gVGhhbmsgeW91IGZvciB5b3VyIGlucHV0cyAhCj4+Pj4+Pj4K
+Pj4+Pj4+Pgo+Pj4+Pj4+IE9uIFdlZCwgQXVnIDIyLCAyMDE4IGF0IDExOjU3IFBNIEdyZWdvcnkg
+RmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+IHdyb3RlOgo+Pj4+Pj4+Pgo+Pj4+Pj4+PiBPbiBX
+ZWQsIEF1ZyAyMiwgMjAxOCBhdCA2OjM1IEFNIEFkcmllbiBHaWxsYXJkIDxnaWxsYXJkLmFkcmll
+bkBnbWFpbC5jb20+IHdyb3RlOgo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+IEhpIGV2ZXJ5b25lLAo+Pj4+
+Pj4+Pj4KPj4+Pj4+Pj4+IFdlIGhhdmUgYSBoYXJkIHRpbWUgZmlndXJpbmcgb3V0IGEgYmVoYXZp
+b3VyIGVuY291bnRlcmVkIGFmdGVyIHVwZ3JhZGluZyB0aGUgbW9uaXRvcnMgb2Ygb25lIG9mIG91
+ciBjbHVzdGVyIGZyb20gSmV3ZWwgdG8gTHVtaW5vdXMgeWVzdGVyZGF5Lgo+Pj4+Pj4+Pj4KPj4+
+Pj4+Pj4+IFRoZSBjbHVzdGVyIGlzIGNvbXBvc2VkIG9mIDE0IE9TRHMgaG9zdHMgKDJ4RTUtMjY0
+MCB2MyBhbmQgNjQgR0Igb2YgUkFNKSwgZWFjaCBjb250YWluaW5nIDEyeDRUQiBPU0Qgd2l0aCBq
+b3VybmFscyBvbiBEQyBncmFkZSBTU0RzKS4gVGhlIGNsdXN0ZXIgd2FzIGluc3RhbGxlZCBpbiBJ
+bmZlcm5hbGlzIGFuZCB1cGdyYWRlZCB0byBKZXdlbC4gV2UgbWFpbmx5IHVzZSBpdCBmb3IgUkJE
+IHdpdGggYSBjYWNoZSB0aWVyIGluIGZyb250IG9mIGFuIEVDIHBvb2wuCj4+Pj4+Pj4+Pgo+Pj4+
+Pj4+Pj4gV2Ugc3RhcnRlZCB0aGUgdXBncmFkZSBmcm9tIEpld2VsIDEwLjIuMTAgdG8gTHVtaW5v
+dXMgMTIuMi43IHllc3RlcmRheSBhZnRlcm5vb24gd2l0aCB0aGUgbW9uaXRvcnMgYW5kIHRoZSBw
+cm92aXNpb25uaW5nIG9mIHRoZSBNR1IuIFdlIHdlcmUgcGxhbm5pbmcgb24gdXBncmFkaW5nIHRo
+ZSBPU0Qgc2VydmVycyB0b2RheS4KPj4+Pj4+Pj4+IEFsbCB3ZW50IHdlbGwgdW50aWwgdGhlIGNs
+dXN0ZXIgcmVjZWl2ZWQgdGhlIGZvbGxvd2luZyBjb21tYW5kcywgYSBmZXcgaG91cnMgYWZ0ZXIg
+dGhlIHVwZ3JhZGUgOgo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+IGNlcGggb3NkIHBvb2wgc2V0IHBvb2wt
+Y2FjaGUtMDEgdGFyZ2V0X21heF9ieXRlcyAwCj4+Pj4+Pj4+PiBjZXBoIG9zZCBwb29sIHNldCBw
+b29sLWNhY2hlLTAyIHRhcmdldF9tYXhfYnl0ZXMgMAo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+IChUaGUg
+Y29udGV4dCBoZXJlIGlzIHRoYXQgd2UgdXNlIHRoaXMgY2x1c3RlciBmb3IgYmFja3VwcyBhbmQg
+c2V0IHRhcmdldF9tYXhfYnl0ZXMgdG8gMCB0byBzdG9wIHRoZSBmbHVzaCBhbmQgZ2l2ZSBtYXhp
+bXVtIHJlc3NvdXJjZXMgdG8gdGhlIGJhY2t1cHMgSU9zKQo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+IEJl
+bG93IGlzIGFuIGV4dHJhY3QgZnJvbSB0aGUgbG9ncyBvZiBvbmUgb2YgdGhlIG1vbml0b3JzLgo+
+Pj4+Pj4+Pj4gVGhlIGNsdXN0ZXIgc3RhcnRlZCBleGNoYW5naW5nIGEgbG90IG92ZXIgdGhlIGNs
+dXN0ZXIgbmV0d29yaywgYXBwYXJlbnRseSBiYWNrZmlsbC9yZWNvdmVyeSBhbmQgbXVsdGlwbGUg
+R2JpdHMvcywgaW4gYW4gYW1vdW50IHdoaWNoIHdlJ3ZlIG5ldmVyIHNlZW4gYmVmb3JlLiBEdWUg
+dG8gc29tZSBuZXR3b3JrIHVwbGlua3Mgc3ViLXNpemluZywgdGhlIHRyYWZmaWMgY291bGQgbm90
+IGJlIGhhbmRsZWQgd2VsbCBhbmQgdGhpcyBsZWFkIHRvIE9TRHMgY3Jhc2hpbmcuCj4+Pj4+Pj4+
+Cj4+Pj4+Pj4+Cj4+Pj4+Pj4+IFRoaXMgcmVhbGx5IGRvZXNuJ3QgbWFrZSBhIHRvbiBvZiBzZW5z
+ZSDigJQgeW91J3JlIHNheWluZyB0aGF0IGJ5IHRlbGxpbmcgdGhlIGNsdXN0ZXIgdG8gKnN0b3Aq
+IGRvaW5nIGZsdXNoaW5nIElPLCBldmVyeXRoaW5nIHdlbnQgYmFkPyBJbiB0ZXJtcyBvZiByb290
+IGNhdXNpbmcgdGhlIGlzc3VlIHlvdSdsbCBvYnZpb3VzbHkgd2FudCB0byBmb2N1cyBvbiB0aGF0
+LCBhbHRob3VnaCBpdCBtYXkgb3IgbWF5IG5vdCBiZSBoZWxwZnVsIGluIHJlY292ZXJpbmcgdGhp
+bmdzIGF0IHRoaXMgcG9pbnQuCj4+Pj4+Pj4+Cj4+Pj4+Pj4+IERvIGtlZXAgaW4gbWluZCB0aGF0
+IHVzZXJzIHJ1bm5pbmcgY2FjaGUtdGllcmluZyBhcmUgaW5jcmVhc2luZ2x5IHVuY29tbW9uLCBh
+bmQgd2hpbGUgd2Ugc3RpbGwgdGVzdCBpdCB3ZSBhcmVuJ3QgZXhwYW5kaW5nIHRoYXQgY292ZXJh
+Z2UgYW5kIHdvdWxkIHJlYWxseSBsaWtlIHRvIHJlbW92ZSBhbmQgcmVwbGFjZSB0aGF0IGZ1bmN0
+aW9uYWxpdHksIHNvIHlvdSdyZSBvdXQgb24gdGhlIGZhciBlZGdlIG9mIHRoaW5ncyBoZXJlLiA6
+Lwo+Pj4+Pj4+Pgo+Pj4+Pj4+PiBGaW5hbGx5LCBpZiB5b3UncmUgc3RpbGwgZXhwZXJpZW5jaW5n
+IE9PTSBpc3N1ZXMsIHlvdSBtYXkgd2FudCB0byBzZXQgdGhlICJub2Rvd24iIGZsYWcg4oCUIHRo
+YXQgd2lsbCBwcmV2ZW50IE9TRHMgYmVpbmcgbWFya2VkIGRvd24sIHdoaWNoIG9idmlvdXNseSB3
+aWxsIHN0YWxsIElPIGFuZCBwZWVyaW5nIGlmIHRoZXkgZ28gZG93biBhbnl3YXksIGJ1dCB3aWxs
+IHByZXZlbnQgc3BhbW1pbmcgbWFwIHVwZGF0ZXMgdGhhdCBjYXVzZSB0aGUgY2x1c3RlciB0byBP
+T00gYWdhaW4uCj4+Pj4+Pj4+IC1HcmVnCj4+Pj4+Pj4+Cj4+Pj4+Pj4+Pgo+Pj4+Pj4+Pj4KPj4+
+Pj4+Pj4+IEF0IHRoZSBtb21lbnQgd2UgYXJlIHN0aWxsIGludmVzdGlnYXRpbmcgdGhlIGxvZ3Mg
+dG8gdHJ5IHRvIHVuZGVyc3RhbmQgd2hhdCBoYXBwZW5lZCBleGFjdGx5LiBUaGUgY2x1c3RlciBp
+cyBkb3duLiBXaGVuIHdlIHJlc3RhcnQgdGhlIE9TRHMsIFBHIHN0YXJ0IGFjdGl2YXRpbmcgYW5k
+IHBlZXJpbmcgYnV0IGF0IHNvbWUgcG9pbnQgYWxsIHRoZSBSQU0gYW5kIHN3YXAgb2YgdGhlIHNl
+cnZlcnMgaXMgY29uc3VtZWQgYW5kIE9TRHMgY3Jhc2guCj4+Pj4+Pj4+PiBJIHRyaWVkIHRvIHNl
+dCB0aGUgb3Zpb3VzIGNsdXN0ZXIgcGFyYW1ldGVycyAob3NkX3JlY292ZXJ5X21heF9hY3RpdmU9
+MSwgb3NkX3JlY292ZXJ5X3RocmVhZHM9MSwgb3NkX21heF9iYWNrZmlsbHM9MSkgYW5kIG5vcmVj
+b3Zlciwgbm9iYWNrZmlsbCwgYnV0IHdoZW4gdGhlIE9TRHMgc3RhcnQsIHdlIHN0aWxsIHNlZSA0
+IG9yIDUgR2JpdHMvcyBvdmVyIHRoZSBjbHVzdGVyIG5ldHdvcmsuCj4+Pj4+Pj4+Pgo+Pj4+Pj4+
+Pj4gV2UgYXJlIGN1cnJlbnRseSByZWNvbmZpZ3VyaW5nIHRoZSBuZXR3b3JrIHRvIHRyeSB0byBy
+ZW1vdmUgdGhlIGJhbmR3aXRoIHByb2JsZW0gYW5kIGFyZSBwcmVwYXJpbmcgdG8gYWRkIG1vcmUg
+UkFNIHRvIHRoZSBzZXJ2ZXJzLgo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+IEJ1dCBzdGlsbCwgSSBoYXZl
+IGEgY291cGxlIG9mIHF1ZXN0aW9ucyA6Cj4+Pj4+Pj4+Pgo+Pj4+Pj4+Pj4gIC0gSGFzIGFueW9u
+ZSBlbmNvdXRlcmVkIHRoZSBpc3N1ZSB3ZSBoYXZlIHdpdGggdGhlIGNhY2hlID8gT3IgaGF2ZSBh
+IHBvc3NpYmxlIGV4cGxhbmF0aW9uID8KPj4+Pj4+Pj4+ICAtIElzIGl0IG5vcm1hbCB0byBvYnNl
+cnZlIHNvIG11Y2ggdHJhZmZpYyBvbiB0aGUgY2x1c3RlciBuZXR3b3JrIHdoZW4gdGhlIFBHIGFy
+ZSBhY3RpdmF0aW5nIC8gcGVlcmluZyB3aXRoIG5vcmVjb3ZlciBhbmQgbm9iYWNrZmlsbCBzZXQg
+Pwo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+IFRoYW5rIHlvdSBmb3IgcmVhZGluZyBhbmQgZm9yIHlvdXIg
+aW5wdXQgIQo+Pj4+Pj4+Pj4KPj4+Pj4+Pj4+Cj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjAy
+Ljc2Njk2OSA3ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9nIFtJTkZdIDog
+cGdtYXAgNjIwOCBwZ3M6IDYyMDggYWN0aXZlK2NsZWFuOyAyNjEgVEIgZGF0YSwgMzg1IFRCIHVz
+ZWQsIDIyNSBUQiAvIDYxMSBUQiBhdmFpbDsgMjk4IE1CL3MgcmQsIDIxMiBNQi9zIHdyLCA0NTYg
+b3Avcwo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowMy44MDUxMjQgN2YxMGRlMzc3NzAwICAw
+IGxvZ19jaGFubmVsKGNsdXN0ZXIpIGxvZyBbSU5GXSA6IHBnbWFwIDYyMDggcGdzOiA2MjA4IGFj
+dGl2ZStjbGVhbjsgMjYxIFRCIGRhdGEsIDM4NSBUQiB1c2VkLCAyMjUgVEIgLyA2MTEgVEIgYXZh
+aWw7IDI5NiBNQi9zIHJkLCAxOTMgTUIvcyB3ciwgNDMzIG9wL3MKPj4+Pj4+Pj4+IDIwMTgtMDgt
+MjEgMjE6MDU6MDMuODcwNjkwIDdmMTBkODNjYzcwMCAgMCBtb24uY2xiLWNwaC1mcnBhcjItbW9u
+LTAxQDAobGVhZGVyKSBlNiBoYW5kbGVfY29tbWFuZCBtb25fY29tbWFuZCh7InZhciI6ICJ0YXJn
+ZXRfbWF4X2J5dGVzIiwgInByZWZpeCI6ICJvc2QgcG9vbCBzZXQiLCAicG9vbCI6ICJwb29sLWNh
+Y2hlLTAyIiwgInZhbCI6ICIwIn0gdiAwCj4+Pj4+Pj4+PiApIHYxCj4+Pj4+Pj4+PiAyMDE4LTA4
+LTIxIDIxOjA1OjAzLjg3MDc0OSA3ZjEwZDgzY2M3MDAgIDAgbG9nX2NoYW5uZWwoYXVkaXQpIGxv
+ZyBbSU5GXSA6IGZyb209J2NsaWVudC4xNDY1MjkyMzYgLScgZW50aXR5PSdjbGllbnQuYWRtaW4n
+IGNtZD1beyJ2YXIiOiAidGFyZ2V0X21heF9ieXRlcyIsICJwcmVmaXgiOiAib3NkIHBvb2wgc2V0
+IiwgInBvb2wiOiAicG9vbC1jYWNoZS0wMgo+Pj4+Pj4+Pj4gIiwgInZhbCI6ICIwIn1dOiBkaXNw
+YXRjaAo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowMy45MTM2NjMgN2YxMGQ4M2NjNzAwICAw
+IG1vbi5jbGItY3BoLWZycGFyMi1tb24tMDFAMChsZWFkZXIpIGU2IGhhbmRsZV9jb21tYW5kIG1v
+bl9jb21tYW5kKHsicHJlZml4IjogIm9zZCBwb29sIHN0YXRzIiwgImZvcm1hdCI6ICJqc29uIn0g
+diAwKSB2MQo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowMy45MTM3NDUgN2YxMGQ4M2NjNzAw
+ICAwIGxvZ19jaGFubmVsKGF1ZGl0KSBsb2cgW0RCR10gOiBmcm9tPSdjbGllbnQuPyAxMC4yNS4y
+NS4zOjAvNDEwMTQzMjc3MCcgZW50aXR5PSdjbGllbnQuYWRtaW4nIGNtZD1beyJwcmVmaXgiOiAi
+b3NkIHBvb2wgc3RhdHMiLCAiZm9ybWF0IjogImpzb24ifV06IGRpc3BhdGNoCj4+Pj4+Pj4+PiAy
+MDE4LTA4LTIxIDIxOjA1OjA0LjA0MjgzNSA3ZjEwZDgzY2M3MDAgIDAgbW9uLmNsYi1jcGgtZnJw
+YXIyLW1vbi0wMUAwKGxlYWRlcikgZTYgaGFuZGxlX2NvbW1hbmQgbW9uX2NvbW1hbmQoeyJ2YXIi
+OiAidGFyZ2V0X21heF9ieXRlcyIsICJwcmVmaXgiOiAib3NkIHBvb2wgc2V0IiwgInBvb2wiOiAi
+cG9vbC1jYWNoZS0wMSIsICJ2YWwiOiAiMCJ9IHYgMAo+Pj4+Pj4+Pj4gKSB2MQo+Pj4+Pj4+Pj4g
+MjAxOC0wOC0yMSAyMTowNTowNC4wNDI4OTQgN2YxMGQ4M2NjNzAwICAwIGxvZ19jaGFubmVsKGF1
+ZGl0KSBsb2cgW0lORl0gOiBmcm9tPSdjbGllbnQuMTQ2NTY1NDgxIC0nIGVudGl0eT0nY2xpZW50
+LmFkbWluJyBjbWQ9W3sidmFyIjogInRhcmdldF9tYXhfYnl0ZXMiLCAicHJlZml4IjogIm9zZCBw
+b29sIHNldCIsICJwb29sIjogInBvb2wtY2FjaGUtMDEKPj4+Pj4+Pj4+ICIsICJ2YWwiOiAiMCJ9
+XTogZGlzcGF0Y2gKPj4+Pj4+Pj4+IDIwMTgtMDgtMjEgMjE6MDU6MDQuODEzMjE3IDdmMTBkZTM3
+NzcwMCAgMCBsb2dfY2hhbm5lbChjbHVzdGVyKSBsb2cgW0lORl0gOiBwZ21hcCA2MjA4IHBnczog
+NjIwOCBhY3RpdmUrY2xlYW47IDI2MSBUQiBkYXRhLCAzODUgVEIgdXNlZCwgMjI1IFRCIC8gNjEx
+IFRCIGF2YWlsOyAyNzEgTUIvcyByZCwgMTgxIE1CL3Mgd3IsIDQxNSBvcC9zCj4+Pj4+Pj4+PiAy
+MDE4LTA4LTIxIDIxOjA1OjA0LjgyMTQ4NiA3ZjEwZGUzNzc3MDAgIDEgbW9uLmNsYi1jcGgtZnJw
+YXIyLW1vbi0wMUAwKGxlYWRlcikub3NkIGUxMTQ2OTMgZTExNDY5MzogMTY4IHRvdGFsLCAxNjgg
+dXAsIDE2OCBpbgo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowNC44MjE3MTEgN2YxMGRlMzc3
+NzAwICAwIG1vbi5jbGItY3BoLWZycGFyMi1tb24tMDFAMChsZWFkZXIpLm9zZCBlMTE0NjkzIGNy
+dXNoIG1hcCBoYXMgZmVhdHVyZXMgNDMyMzY1NzM0NTAxNTQ4MDMyLCBhZGp1c3RpbmcgbXNnciBy
+ZXF1aXJlcwo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowNC44MjMwMzIgN2YxMGRlMzc3NzAw
+ICAxIG1vbi5jbGItY3BoLWZycGFyMi1tb24tMDFAMChsZWFkZXIpLm9zZCBlMTE0NjkzIGNyZWF0
+ZV9wZW5kaW5nIHNldHRpbmcgYmFja2ZpbGxmdWxsX3JhdGlvID0gMC45Cj4+Pj4+Pj4+PiAyMDE4
+LTA4LTIxIDIxOjA1OjA0LjgyMzE1NiA3ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoYXVkaXQp
+IGxvZyBbSU5GXSA6IGZyb209J2NsaWVudC4xNDY1MjkyMzYgLScgZW50aXR5PSdjbGllbnQuYWRt
+aW4nIGNtZD0nW3sidmFyIjogInRhcmdldF9tYXhfYnl0ZXMiLCAicHJlZml4IjogIm9zZCBwb29s
+IHNldCIsICJwb29sIjogInBvb2wtY2FjaGUtMAo+Pj4+Pj4+Pj4gMiIsICJ2YWwiOiAiMCJ9XSc6
+IGZpbmlzaGVkCj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA0LjgyMzI4MCA3ZjEwZGUzNzc3
+MDAgIDAgbG9nX2NoYW5uZWwoYXVkaXQpIGxvZyBbSU5GXSA6IGZyb209J2NsaWVudC4xNDY1NjU0
+ODEgLScgZW50aXR5PSdjbGllbnQuYWRtaW4nIGNtZD0nW3sidmFyIjogInRhcmdldF9tYXhfYnl0
+ZXMiLCAicHJlZml4IjogIm9zZCBwb29sIHNldCIsICJwb29sIjogInBvb2wtY2FjaGUtMAo+Pj4+
+Pj4+Pj4gMSIsICJ2YWwiOiAiMCJ9XSc6IGZpbmlzaGVkCj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIx
+OjA1OjA0LjgyNTUyOCA3ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9nIFtE
+QkddIDogb3NkbWFwIGUxMTQ2OTM6IDE2OCB0b3RhbCwgMTY4IHVwLCAxNjggaW4KPj4+Pj4+Pj4+
+IDIwMTgtMDgtMjEgMjE6MDU6MDQuODQ0OTMyIDdmMTBkZTM3NzcwMCAgMCBsb2dfY2hhbm5lbChj
+bHVzdGVyKSBsb2cgW0lORl0gOiBwZ21hcCA2MjA4IHBnczogNjIwOCBhY3RpdmUrY2xlYW47IDI2
+MSBUQiBkYXRhLCAzODUgVEIgdXNlZCwgMjI1IFRCIC8gNjExIFRCIGF2YWlsOyAyNzUgTUIvcyBy
+ZCwgMTkyIE1CL3Mgd3IsIDQyOSBvcC9zCj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA1Ljg3
+MzY4MiA3ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9nIFtJTkZdIDogcGdt
+YXAgNjIwOCBwZ3M6IDE4NyBwZWVyaW5nLCA2MDIxIGFjdGl2ZStjbGVhbjsgMjYxIFRCIGRhdGEs
+IDM4NSBUQiB1c2VkLCAyMjUgVEIgLyA2MTEgVEIgYXZhaWw7IDIyMCBNQi9zIHJkLCAxODggTUIv
+cyB3ciwgMzgzCj4+Pj4+Pj4+PiBvcC9zCj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA1Ljg5
+NTQxNCA3ZjEwZGUzNzc3MDAgIDEgbW9uLmNsYi1jcGgtZnJwYXIyLW1vbi0wMUAwKGxlYWRlciku
+b3NkIGUxMTQ2OTQgZTExNDY5NDogMTY4IHRvdGFsLCAxNjggdXAsIDE2OCBpbgo+Pj4+Pj4+Pj4g
+MjAxOC0wOC0yMSAyMTowNTowNS44OTU3MjEgN2YxMGRlMzc3NzAwICAwIG1vbi5jbGItY3BoLWZy
+cGFyMi1tb24tMDFAMChsZWFkZXIpLm9zZCBlMTE0Njk0IGNydXNoIG1hcCBoYXMgZmVhdHVyZXMg
+NDMyMzY1NzM0NTAxNTQ4MDMyLCBhZGp1c3RpbmcgbXNnciByZXF1aXJlcwo+Pj4+Pj4+Pj4gMjAx
+OC0wOC0yMSAyMTowNTowNS45MDU0NzMgN2YxMGRlMzc3NzAwICAxIG1vbi5jbGItY3BoLWZycGFy
+Mi1tb24tMDFAMChsZWFkZXIpLm9zZCBlMTE0Njk0IGNyZWF0ZV9wZW5kaW5nIHNldHRpbmcgYmFj
+a2ZpbGxmdWxsX3JhdGlvID0gMC45Cj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA1Ljk0MDcy
+OSA3ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9nIFtEQkddIDogb3NkbWFw
+IGUxMTQ2OTQ6IDE2OCB0b3RhbCwgMTY4IHVwLCAxNjggaW4KPj4+Pj4+Pj4+IDIwMTgtMDgtMjEg
+MjE6MDU6MDUuOTQ3OTIxIDdmMTBkZTM3NzcwMCAgMCBsb2dfY2hhbm5lbChjbHVzdGVyKSBsb2cg
+W0lORl0gOiBwZ21hcCA2MjA4IHBnczogMjA0IHBlZXJpbmcsIDYwMDQgYWN0aXZlK2NsZWFuOyAy
+NjEgVEIgZGF0YSwgMzg1IFRCIHVzZWQsIDIyNSBUQiAvIDYxMSBUQiBhdmFpbDsgMjAxIE1CL3Mg
+cmQsIDIwMCBNQi9zIHdyLCAzNTUKPj4+Pj4+Pj4+IG9wL3MKPj4+Pj4+Pj4+IDIwMTgtMDgtMjEg
+MjE6MDU6MDYuOTEyNzUyIDdmMTBkZTM3NzcwMCAgMSBtb24uY2xiLWNwaC1mcnBhcjItbW9uLTAx
+QDAobGVhZGVyKS5vc2QgZTExNDY5NSBlMTE0Njk1OiAxNjggdG90YWwsIDE2OCB1cCwgMTY4IGlu
+Cj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA2LjkxMzEwNCA3ZjEwZGUzNzc3MDAgIDAgbW9u
+LmNsYi1jcGgtZnJwYXIyLW1vbi0wMUAwKGxlYWRlcikub3NkIGUxMTQ2OTUgY3J1c2ggbWFwIGhh
+cyBmZWF0dXJlcyA0MzIzNjU3MzQ1MDE1NDgwMzIsIGFkanVzdGluZyBtc2dyIHJlcXVpcmVzCj4+
+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA2LjkyODUyMSA3ZjEwZGUzNzc3MDAgIDEgbW9uLmNs
+Yi1jcGgtZnJwYXIyLW1vbi0wMUAwKGxlYWRlcikub3NkIGUxMTQ2OTUgY3JlYXRlX3BlbmRpbmcg
+c2V0dGluZyBiYWNrZmlsbGZ1bGxfcmF0aW8gPSAwLjkKPj4+Pj4+Pj4+IDIwMTgtMDgtMjEgMjE6
+MDU6MDYuOTY4NzkzIDdmMTBkZTM3NzcwMCAgMCBsb2dfY2hhbm5lbChjbHVzdGVyKSBsb2cgW0RC
+R10gOiBvc2RtYXAgZTExNDY5NTogMTY4IHRvdGFsLCAxNjggdXAsIDE2OCBpbgo+Pj4+Pj4+Pj4g
+MjAxOC0wOC0yMSAyMTowNTowNy4wMDExMTIgN2YxMGQ5M2NlNzAwICAxIGhlYXJ0YmVhdF9tYXAg
+cmVzZXRfdGltZW91dCAnTW9uaXRvcjo6Y3B1X3RwIHRocmVhZCAweDdmMTBkOTNjZTcwMCcgaGFk
+IHRpbWVkIG91dCBhZnRlciAwCj4+Pj4+Pj4+PiAyMDE4LTA4LTIxIDIxOjA1OjA3LjAwNDI3NCA3
+ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9nIFtJTkZdIDogcGdtYXAgNjIw
+OCBwZ3M6IDEyIHVua25vd24sIDExNCByZW1hcHBlZCtwZWVyaW5nLCA1IGFjdGl2YXRpbmcsIDQ4
+MSBwZWVyaW5nLCA1NTk2IGFjdGl2ZStjbGVhbjsgMjYxIFRCIGRhdGEsIDM4NSBUQiB1c2VkLCAy
+MjUgVAo+Pj4+Pj4+Pj4gQiAvIDYxMSBUQiBhdmFpbDsgMTc3IE1CL3MgcmQsIDE3MyBNQi9zIHdy
+LCAzMTcgb3Avcwo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowNy4wMjUyMDAgN2YxMGQ4YmNk
+NzAwICAxIGhlYXJ0YmVhdF9tYXAgcmVzZXRfdGltZW91dCAnTW9uaXRvcjo6Y3B1X3RwIHRocmVh
+ZCAweDdmMTBkOGJjZDcwMCcgaGFkIHRpbWVkIG91dCBhZnRlciAwCj4+Pj4+Pj4+PiAyMDE4LTA4
+LTIxIDIxOjA1OjA3Ljk0ODEzOCA3ZjEwZGUzNzc3MDAgIDEgbW9uLmNsYi1jcGgtZnJwYXIyLW1v
+bi0wMUAwKGxlYWRlcikub3NkIGUxMTQ2OTYgZTExNDY5NjogMTY4IHRvdGFsLCAxNjggdXAsIDE2
+OCBpbgo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowNy45NDg0ODcgN2YxMGRlMzc3NzAwICAw
+IG1vbi5jbGItY3BoLWZycGFyMi1tb24tMDFAMChsZWFkZXIpLm9zZCBlMTE0Njk2IGNydXNoIG1h
+cCBoYXMgZmVhdHVyZXMgNDMyMzY1NzM0NTAxNTQ4MDMyLCBhZGp1c3RpbmcgbXNnciByZXF1aXJl
+cwo+Pj4+Pj4+Pj4gMjAxOC0wOC0yMSAyMTowNTowNy45NjU2NzEgN2YxMGRlMzc3NzAwICAxIG1v
+bi5jbGItY3BoLWZycGFyMi1tb24tMDFAMChsZWFkZXIpLm9zZCBlMTE0Njk2IGNyZWF0ZV9wZW5k
+aW5nIHNldHRpbmcgYmFja2ZpbGxmdWxsX3JhdGlvID0gMC45Cj4+Pj4+Pj4+PiAyMDE4LTA4LTIx
+IDIxOjA1OjA4LjAwNzU4NSA3ZjEwZGUzNzc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9n
+IFtEQkddIDogb3NkbWFwIGUxMTQ2OTY6IDE2OCB0b3RhbCwgMTY4IHVwLCAxNjggaW4KPj4+Pj4+
+Pj4+IDIwMTgtMDgtMjEgMjE6MDU6MDguMDUyMTUzIDdmMTBkZTM3NzcwMCAgMCBsb2dfY2hhbm5l
+bChjbHVzdGVyKSBsb2cgW0lORl0gOiBwZ21hcCA2MjA4IHBnczogNDYgYWN0aXZhdGluZytyZW1h
+cHBlZCwgMTUgdW5rbm93biwgMzA1IHJlbWFwcGVkK3BlZXJpbmcsIDExIGFjdGl2YXRpbmcsIDY5
+NyBwZWVyaW5nLCA4IGFjdGl2ZStyZW1hcHBlZCtiYWNrZmlsCj4+Pj4+Pj4+PiBsaW5nLCA1MTI2
+IGFjdGl2ZStjbGVhbjsgMjYxIFRCIGRhdGEsIDM4NSBUQiB1c2VkLCAyMjUgVEIgLyA2MTEgVEIg
+YXZhaWw7IDExNSBNQi9zIHJkLCAxODIgTUIvcyB3ciwgMjkyIG9wL3M7IDI2NjgxLzUxOTMyNzI2
+MiBvYmplY3RzIG1pc3BsYWNlZCAoMC4wMDUlKTsgNDg1NiBrQi9zLCAzIG9iamVjdHMvcyByZWNv
+dmVyaW5nCj4+Pj4+Pj4+Pgo+Pj4+Pj4+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KPj4+Pj4+Pj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+Pj4+
+Pj4+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+Pj4+Pj4+PiBodHRwOi8vbGlzdHMuY2Vw
+aC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2Vw
+aC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dp
+L2NlcGgtdXNlcnMtY2VwaC5jb20K
