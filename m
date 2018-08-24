@@ -1,14 +1,16 @@
-From: Lenz Grimmer <lgrimmer-IBi9RG/b67k@public.gmane.org>
+From: Ernesto Puerta <epuertat-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Reminder: bi-weekly dashboard sync call today
  (15:00 CET)
-Date: Fri, 24 Aug 2018 16:38:04 +0200
-Message-ID: <0c4e6287-856a-8d40-9fe8-5d22d7515d7c@suse.com>
+Date: Fri, 24 Aug 2018 16:51:53 +0200
+Message-ID: <CAE8CVBCVNc3dEJBGL9xacsDCF+pPguhsjeL6R_A8iTePJT_7fA@mail.gmail.com>
 References: <93528d37-1748-7aa7-a450-f3eb2edf8935@suse.com>
  <fa06da80-babb-afe6-6565-cc172b0bf6b4@suse.com>
+ <0c4e6287-856a-8d40-9fe8-5d22d7515d7c@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1643174074692315152=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <fa06da80-babb-afe6-6565-cc172b0bf6b4-IBi9RG/b67k@public.gmane.org>
+In-Reply-To: <0c4e6287-856a-8d40-9fe8-5d22d7515d7c-IBi9RG/b67k@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,102 +20,42 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Lenz Grimmer <lgrimmer-IBi9RG/b67k@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============1643174074692315152==
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Q9njS6T9mBjEpwcG9q64dBQM5eshg9PRt"
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Q9njS6T9mBjEpwcG9q64dBQM5eshg9PRt
-Content-Type: multipart/mixed; boundary="0JblpMqNGBGZrhOuxA6tmdSeEShEeOlpB";
- protected-headers="v1"
-From: Lenz Grimmer <lgrimmer-IBi9RG/b67k@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>,
- ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Message-ID: <0c4e6287-856a-8d40-9fe8-5d22d7515d7c-IBi9RG/b67k@public.gmane.org>
-Subject: Re: Reminder: bi-weekly dashboard sync call today (15:00 CET)
-References: <93528d37-1748-7aa7-a450-f3eb2edf8935-IBi9RG/b67k@public.gmane.org>
- <fa06da80-babb-afe6-6565-cc172b0bf6b4-IBi9RG/b67k@public.gmane.org>
-In-Reply-To: <fa06da80-babb-afe6-6565-cc172b0bf6b4-IBi9RG/b67k@public.gmane.org>
-
---0JblpMqNGBGZrhOuxA6tmdSeEShEeOlpB
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-
-On 08/24/2018 02:00 PM, Lenz Grimmer wrote:
-
-> On 08/24/2018 10:59 AM, Lenz Grimmer wrote:
->=20
->> JFYI, the team working on the Ceph Manager Dashboard has a bi-weekly
->> conference call that discusses the ongoing development and gives an
->> update on recent improvements/features.
->>
->> Today, we plan to give a demo of the new dashboard landing page (See
->> https://tracker.ceph.com/issues/24573 and
->> https://github.com/ceph/ceph/pull/23568 for details) and the
->> implementation of the "RBD trash" functionality in the UI
->> (http://tracker.ceph.com/issues/24272 and
->> https://github.com/ceph/ceph/pull/23351)
->>
->> The meeting takes places every second Friday at 15:00 CET at this URL:=
-
->>
->>   https://bluejeans.com/150063190
->=20
-> My apologies, I picked an incorrect meeting URL - this is the correct o=
-ne:
->=20
->   https://bluejeans.com/470119167/
->=20
-> Sorry for the confusion.
-
-Thanks to everyone who participated. We actually moved to yet another
-different BlueJeans session in order to be able to record it...
-
-For those of you who missed it, here's a recording:
-
-https://bluejeans.com/s/HXnam
-
-Have a nice weekend!
-
-Lenz
-
---=20
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 Nuernberg (Germany)
-GF:Felix Imend=C3=B6rffer,Jane Smithard,Graham Norton,HRB 21284 (AG N=C3=BC=
-rnberg)
-
-
---0JblpMqNGBGZrhOuxA6tmdSeEShEeOlpB--
-
---Q9njS6T9mBjEpwcG9q64dBQM5eshg9PRt
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iF0EARECAB0WIQRwnM6QdoQNrjll2jdJUOEqsnKR8gUCW4AYTAAKCRBJUOEqsnKR
-8sTKAJ47RrC7/FbfCWNPwzUpmRw9PJ++xACfVO392agUtv1WC9sLiiBTP+nhMBw=
-=wr29
------END PGP SIGNATURE-----
-
---Q9njS6T9mBjEpwcG9q64dBQM5eshg9PRt--
-
---===============1643174074692315152==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1643174074692315152==--
+TXkgbWlzdGFrZSwgTGVuei4gVGhhdCByZWNvcmRpbmcgaXMganVzdCB0aGUgNyBtaW51dGVzIG9m
+IGZ1biBiZWZvcmUKZXZlcnlvbmUgam9pbmVkLgoKVGhpcyBpcyB0aGUgcHJvcGVyIG9uZSAofjEg
+aG91cik6IGh0dHBzOi8vYmx1ZWplYW5zLmNvbS9zL0hVb2ZFCgpFcm5lc3RvCgpFUk5FU1RPIFBV
+RVJUQQoKU0VOSU9SIFNPRlRXQVJFIEVOR0lORUVSLCBDRVBIIFImRAoKUmVkIEhhdAoKCgpPbiBG
+cmksIEF1ZyAyNCwgMjAxOCBhdCA0OjM4IFBNIExlbnogR3JpbW1lciA8bGdyaW1tZXJAc3VzZS5j
+b20+IHdyb3RlOgo+Cj4gT24gMDgvMjQvMjAxOCAwMjowMCBQTSwgTGVueiBHcmltbWVyIHdyb3Rl
+Ogo+Cj4gPiBPbiAwOC8yNC8yMDE4IDEwOjU5IEFNLCBMZW56IEdyaW1tZXIgd3JvdGU6Cj4gPgo+
+ID4+IEpGWUksIHRoZSB0ZWFtIHdvcmtpbmcgb24gdGhlIENlcGggTWFuYWdlciBEYXNoYm9hcmQg
+aGFzIGEgYmktd2Vla2x5Cj4gPj4gY29uZmVyZW5jZSBjYWxsIHRoYXQgZGlzY3Vzc2VzIHRoZSBv
+bmdvaW5nIGRldmVsb3BtZW50IGFuZCBnaXZlcyBhbgo+ID4+IHVwZGF0ZSBvbiByZWNlbnQgaW1w
+cm92ZW1lbnRzL2ZlYXR1cmVzLgo+ID4+Cj4gPj4gVG9kYXksIHdlIHBsYW4gdG8gZ2l2ZSBhIGRl
+bW8gb2YgdGhlIG5ldyBkYXNoYm9hcmQgbGFuZGluZyBwYWdlIChTZWUKPiA+PiBodHRwczovL3Ry
+YWNrZXIuY2VwaC5jb20vaXNzdWVzLzI0NTczIGFuZAo+ID4+IGh0dHBzOi8vZ2l0aHViLmNvbS9j
+ZXBoL2NlcGgvcHVsbC8yMzU2OCBmb3IgZGV0YWlscykgYW5kIHRoZQo+ID4+IGltcGxlbWVudGF0
+aW9uIG9mIHRoZSAiUkJEIHRyYXNoIiBmdW5jdGlvbmFsaXR5IGluIHRoZSBVSQo+ID4+IChodHRw
+Oi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMjQyNzIgYW5kCj4gPj4gaHR0cHM6Ly9naXRodWIu
+Y29tL2NlcGgvY2VwaC9wdWxsLzIzMzUxKQo+ID4+Cj4gPj4gVGhlIG1lZXRpbmcgdGFrZXMgcGxh
+Y2VzIGV2ZXJ5IHNlY29uZCBGcmlkYXkgYXQgMTU6MDAgQ0VUIGF0IHRoaXMgVVJMOgo+ID4+Cj4g
+Pj4gICBodHRwczovL2JsdWVqZWFucy5jb20vMTUwMDYzMTkwCj4gPgo+ID4gTXkgYXBvbG9naWVz
+LCBJIHBpY2tlZCBhbiBpbmNvcnJlY3QgbWVldGluZyBVUkwgLSB0aGlzIGlzIHRoZSBjb3JyZWN0
+IG9uZToKPiA+Cj4gPiAgIGh0dHBzOi8vYmx1ZWplYW5zLmNvbS80NzAxMTkxNjcvCj4gPgo+ID4g
+U29ycnkgZm9yIHRoZSBjb25mdXNpb24uCj4KPiBUaGFua3MgdG8gZXZlcnlvbmUgd2hvIHBhcnRp
+Y2lwYXRlZC4gV2UgYWN0dWFsbHkgbW92ZWQgdG8geWV0IGFub3RoZXIKPiBkaWZmZXJlbnQgQmx1
+ZUplYW5zIHNlc3Npb24gaW4gb3JkZXIgdG8gYmUgYWJsZSB0byByZWNvcmQgaXQuLi4KPgo+IEZv
+ciB0aG9zZSBvZiB5b3Ugd2hvIG1pc3NlZCBpdCwgaGVyZSdzIGEgcmVjb3JkaW5nOgo+Cj4gaHR0
+cHM6Ly9ibHVlamVhbnMuY29tL3MvSFhuYW0KPgo+IEhhdmUgYSBuaWNlIHdlZWtlbmQhCj4KPiBM
+ZW56Cj4KPiAtLQo+IFNVU0UgTGludXggR21iSCAtIE1heGZlbGRzdHIuIDUgLSA5MDQwOSBOdWVy
+bmJlcmcgKEdlcm1hbnkpCj4gR0Y6RmVsaXggSW1lbmTDtnJmZmVyLEphbmUgU21pdGhhcmQsR3Jh
+aGFtIE5vcnRvbixIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykKPgo+IF9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
+bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlz
+dHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
+LWNlcGguY29tCg==
