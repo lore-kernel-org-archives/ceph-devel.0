@@ -1,217 +1,231 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: v12.2.8 Luminous released
-Date: Wed, 5 Sep 2018 16:20:52 +0200
-Message-ID: <CABZ+qqm3jredRJUOgy+HuZkYRjZn2yHrFmToVx4xr4UGJhmAtw@mail.gmail.com>
-References: <87h8j5rzs6.fsf@suse.com>
+From: Danielle Womboldt <dwombold-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Save the date: Ceph Day Berlin - November 12th
+Date: Tue, 4 Sep 2018 16:34:02 -0500
+Message-ID: <CANJK=mZDuFP4D=r5F-7hXPg0gvtjSz32c6TSRca-RQZNZBcU1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <87h8j5rzs6.fsf-IBi9RG/b67k@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+Content-Type: multipart/mixed; boundary="===============1261998249116517075=="
+Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
+List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-VGhhbmtzIGZvciB0aGUgcmVsZWFzZSEKCldlJ3ZlIHVwZGF0ZWQgc29tZSB0ZXN0IGNsdXN0ZXJz
-IChyYmQsIGNlcGhmcykgYW5kIGl0IGxvb2tzIGdvb2Qgc28gZmFyLgoKLS0gZGFuCgoKT24gVHVl
-LCBTZXAgNCwgMjAxOCBhdCA2OjMwIFBNIEFiaGlzaGVrIExla3NobWFuYW4gPGFiaGlzaGVrQHN1
-c2UuY29tPiB3cm90ZToKPgo+Cj4gV2UncmUgZ2xhZCB0byBhbm5vdW5jZSB0aGUgbmV4dCBwb2lu
-dCByZWxlYXNlIGluIHRoZSBMdW1pbm91cyB2MTIuMi5YCj4gc3RhYmxlIHJlbGVhc2Ugc2VyaWVz
-LiBUaGlzIHJlbGVhc2UgY29udGFpbnMgYSByYW5nZSBvZiBidWdmaXhlcyBhbmQKPiBzdGFiaWxp
-dHkgaW1wcm92ZW1lbnRzIGFjcm9zcyBhbGwgdGhlIGNvbXBvbmVudHMgb2YgY2VwaC4gRm9yIGRl
-dGFpbGVkCj4gcmVsZWFzZSBub3RlcyB3aXRoIGxpbmtzIHRvIHRyYWNrZXIgaXNzdWVzIGFuZCBw
-dWxsIHJlcXVlc3RzLCByZWZlciB0bwo+IHRoZSBibG9nIHBvc3QgYXQgaHR0cDovL2NlcGguY29t
-L3JlbGVhc2VzL3YxMi0yLTgtcmVsZWFzZWQvCj4KPiBVcGdyYWRlIE5vdGVzIGZyb20gcHJldmlv
-dXMgbHVtaW5vdXMgcmVsZWFzZXMKPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0KPgo+IFdoZW4gdXBncmFkaW5nIGZyb20gdjEyLjIuNSBvciB2MTIuMi42IHBs
-ZWFzZSBub3RlIHRoYXQgdXBncmFkZSBjYXZlYXRzIGZyb20KPiAxMi4yLjUgd2lsbCBhcHBseSB0
-byBhbnkgX25ld2VyXyBsdW1pbm91cyB2ZXJzaW9uIGluY2x1ZGluZyAxMi4yLjguIFBsZWFzZSBy
-ZWFkCj4gdGhlIG5vdGVzIGF0IGh0dHBzOi8vY2VwaC5jb20vcmVsZWFzZXMvMTItMi03LWx1bWlu
-b3VzLXJlbGVhc2VkLyN1cGdyYWRpbmctZnJvbS12MTItMi02Cj4KPiBGb3IgdGhlIGNsdXN0ZXIg
-dGhhdCBpbnN0YWxsZWQgdGhlIGJyb2tlbiAxMi4yLjYgcmVsZWFzZSwgMTIuMi43IGZpeGVkIHRo
-ZQo+IHJlZ3Jlc3Npb24gYW5kIGludHJvZHVjZWQgYSB3b3JrYXJvdW5kIG9wdGlvbiBgb3NkIGRp
-c3RydXN0IGRhdGEgZGlnZXN0ID0gdHJ1ZWAsCj4gYnV0IDEyLjIuNyBjbHVzdGVycyBzdGlsbCBn
-ZW5lcmF0ZWQgaGVhbHRoIHdhcm5pbmdzIGxpa2UgOjoKPgo+ICAgW0VSUl0gMTEuMjg4IHNoYXJk
-IDIwNzogc29pZAo+ICAgMTE6MTE1NWMzMzI6OjpyYmRfZGF0YS4yMDdkY2UyMzhlMWYyOS4wMDAw
-MDAwMDAwMDAwNTI3OmhlYWQgZGF0YV9kaWdlc3QKPiAgIDB4Yzg5OTdhNWIgIT0gZGF0YV9kaWdl
-c3QgMHgyY2ExNTg1Mwo+Cj4KPiAxMi4yLjggaW1wcm92ZXMgdGhlIGRlZXAgc2NydWIgY29kZSB0
-byBhdXRvbWF0aWNhbGx5IHJlcGFpciB0aGVzZQo+IGluY29uc2lzdGVuY2llcy4gT25jZSB0aGUg
-ZW50aXJlIGNsdXN0ZXIgaGFzIGJlZW4gdXBncmFkZWQgYW5kIHRoZW4gZnVsbHkgZGVlcAo+IHNj
-cnViYmVkLCBhbmQgYWxsIHN1Y2ggaW5jb25zaXN0ZW5jaWVzIGFyZSByZXNvbHZlZDsgaXQgd2ls
-bCBiZSBzYWZlIHRvIGRpc2FibGUKPiB0aGUgYG9zZCBkaXN0cnVzdCBkYXRhIGRpZ2VzdCA9IHRy
-dWVgIHdvcmthcm91bmQgb3B0aW9uLgo+Cj4gQ2hhbmdlbG9nCj4gLS0tLS0tLS0tCj4gKiBibHVl
-c3RvcmU6IHNldCBjb3JyZWN0bHkgc2hhcmQgZm9yIGV4aXN0ZWQgQ29sbGVjdGlvbiAoaXNzdWUj
-MjQ3NjEsIHByIzIyODYwLCBKaWFucGVuZyBNYSkKPiAqIGJ1aWxkL29wczogQm9vc3Qgc3lzdGVt
-IGxpYnJhcnkgaXMgbm8gbG9uZ2VyIHJlcXVpcmVkIHRvIGNvbXBpbGUgYW5kIGxpbmsgZXhhbXBs
-ZSBsaWJyYWRvcyBwcm9ncmFtIChpc3N1ZSMyNTA1NCwgcHIjMjMyMDIsIE5hdGhhbiBDdXRsZXIp
-Cj4gKiBidWlsZC9vcHM6IEJyaW5nIGJhY2sgZGlmZiAteSBmb3Igbm9uLUZyZWVCU0QgKGlzc3Vl
-IzI0Mzk2LCBpc3N1ZSMyMTY2NCwgcHIjMjI4NDgsIFNhZ2UgV2VpbCwgRGF2aWQgWmFmbWFuKQo+
-ICogYnVpbGQvb3BzOiBpbnN0YWxsLWRlcHMuc2ggZmFpbHMgb24gbmV3ZXN0IG9wZW5TVVNFIExl
-YXAgKGlzc3VlIzI1MDY0LCBwciMyMzE3OSwgS3lyIFNoYXRza3l5KQo+ICogYnVpbGQvb3BzOiBN
-aW1pYyBidWlsZCBmYWlscyB3aXRoIC1EV0lUSF9SQURPU0dXPTAgKGlzc3VlIzI0NDM3LCBwciMy
-Mjg2NCwgRGFuIE1pY2spCj4gKiBidWlsZC9vcHM6IG9yZGVyIHJiZG1hcC5zZXJ2aWNlIGJlZm9y
-ZSByZW1vdGUtZnMtcHJlLnRhcmdldCAoaXNzdWUjMjQ3MTMsIHByIzIyODQ0LCBJbHlhIERyeW9t
-b3YpCj4gKiBidWlsZC9vcHM6IHJwbTogc2lsZW5jZSBvc2QgYmxvY2sgY2hvd24gKGlzc3VlIzI1
-MTUyLCBwciMyMzMxMywgRGFuIHZhbiBkZXIgU3RlcikKPiAqIGNlcGhmcy1qb3VybmFsLXRvb2w6
-IEZpeCBwdXJnaW5nIHdoZW4gaW1wb3J0aW5nIGFuIHplcm8tbGVuZ3RoIGpvdXJuYWwgKGlzc3Vl
-IzI0MjM5LCBwciMyMjk4MCwgeXVwZW5nIGNoZW4sIHpob25neWFuIGd1KQo+ICogY2VwaGZzOiBN
-RFNNb25pdG9yOiB1bmNvbW1pdHRlZCBzdGF0ZSBleHBvc2VkIHRvIGNsaWVudHMvbWRzcyAoaXNz
-dWUjMjM3NjgsIHByIzIzMDEzLCBQYXRyaWNrIERvbm5lbGx5KQo+ICogY2VwaC1mdXNlIG1vdW50
-IGZhaWxlZCBiZWNhdXNlIG5vIG1kcyAoaXNzdWUjMjIyMDUsIHByIzIyODk1LCBsaXlhbikKPiAq
-IGNlcGgtdm9sdW1lIGFkZCBhIF9fcmVsZWFzZV9fIHN0cmluZywgdG8gaGVscCB2ZXJzaW9uLWNv
-bmRpdGlvbmFsIGNhbGxzIChpc3N1ZSMyNTE3MCwgcHIjMjMzMzEsIEFsZnJlZG8gRGV6YSkKPiAq
-IGNlcGgtdm9sdW1lOiBhZGRzIHRlc3QgZm9yIGBjZXBoLXZvbHVtZSBsdm0gbGlzdCAvZGV2L3Nk
-YWAgKGlzc3VlIzI0Nzg0LCBpc3N1ZSMyNDk1NywgcHIjMjMzNTAsIEFuZHJldyBTY2hvZW4pCj4g
-KiBjZXBoLXZvbHVtZTogZG8gbm90IHVzZSBzdGRpbiBpbiBsdW1pbm91cyAoaXNzdWUjMjUxNzMs
-IGlzc3VlIzIzMjYwLCBwciMyMzM2NywgQWxmcmVkbyBEZXphKQo+ICogY2VwaC12b2x1bWUgZW5h
-YmxlIHRoZSBjZXBoLW9zZCBkdXJpbmcgbHZtIGFjdGl2YXRpb24gKGlzc3VlIzI0MTUyLCBwciMy
-MzM5NCwgRGFuIHZhbiBkZXIgU3RlciwgQWxmcmVkbyBEZXphKQo+ICogY2VwaC12b2x1bWUgZXhw
-YW5kIG9uIHRoZSBMVk0gQVBJIHRvIGNyZWF0ZSBtdWx0aXBsZSBMVnMgYXQgZGlmZmVyZW50IHNp
-emVzIChpc3N1ZSMyNDAyMCwgcHIjMjMzOTUsIEFsZnJlZG8gRGV6YSkKPiAqIGNlcGgtdm9sdW1l
-IGx2bS5hY3RpdmF0ZSBjb25kaXRpb25hbCBtb24tY29uZmlnIG9uIHByaW1lLW9zZC1kaXIgKGlz
-c3VlIzI1MjE2LCBwciMyMzM5NywgQWxmcmVkbyBEZXphKQo+ICogY2VwaC12b2x1bWUgbHZtLmJh
-dGNoIHJlbW92ZSBub24tZXhpc3RlbnQgc3lzX2FwaSBwcm9wZXJ0eSAoaXNzdWUjMzQzMTAsIHBy
-IzIzODExLCBBbGZyZWRvIERlemEpCj4gKiBjZXBoLXZvbHVtZSBsdm0ubGlzdGluZyBvbmx5IGlu
-Y2x1ZGUgZGV2aWNlcyBpZiB0aGV5IGV4aXN0IChpc3N1ZSMyNDk1MiwgcHIjMjMxNTAsIEFsZnJl
-ZG8gRGV6YSkKPiAqIGNlcGgtdm9sdW1lOiBwcm9jZXNzLmNhbGwgd2l0aCBzdGRpbiBpbiBQeXRo
-b24gMyBmaXggKGlzc3VlIzI0OTkzLCBwciMyMzIzOCwgQWxmcmVkbyBEZXphKQo+ICogY2VwaC12
-b2x1bWU6IFBWb2x1bWVzLmdldCgpIHNob3VsZCByZXR1cm4gb25lIFBWIHdoZW4gdXNpbmcgbmFt
-ZSBvciB1dWlkIChpc3N1ZSMyNDc4NCwgcHIjMjMzMjksIEFuZHJldyBTY2hvZW4pCj4gKiBjZXBo
-LXZvbHVtZTogcmVmdXNlIHRvIHphcCBtYXBwZXIgZGV2aWNlcyAoaXNzdWUjMjQ1MDQsIHByIzIz
-Mzc0LCBBbmRyZXcgU2Nob2VuKQo+ICogY2VwaC12b2x1bWU6IHRlc3RzLmZ1bmN0aW9uYWwgaW5o
-ZXJpdCBTU0hfQVJHUyBmcm9tIGFuc2libGUgKGlzc3VlIzM0MzExLCBwciMyMzgxMywgQWxmcmVk
-byBEZXphKQo+ICogY2VwaC12b2x1bWUgdGVzdHMvZnVuY3Rpb25hbCBydW4gbHZtIGxpc3QgYWZ0
-ZXIgT1NEIHByb3Zpc2lvbmluZyAoaXNzdWUjMjQ5NjEsIHByIzIzMTQ3LCBBbGZyZWRvIERlemEp
-Cj4gKiBjZXBoLXZvbHVtZTogdW5tb3VudCBsdnMgY29ycmVjdGx5IGJlZm9yZSB6YXBwaW5nIChp
-c3N1ZSMyNDc5NiwgcHIjMjMxMjgsIEFuZHJldyBTY2hvZW4pCj4gKiBjZXBoLXZvbHVtZTogdXBk
-YXRlIGJhdGNoIGRvY3VtZW50YXRpb24gdG8gZXhwbGFpbiBmaWxlc3RvcmUgc3RyYXRlZ2llcyAo
-aXNzdWUjMzQzMDksIHByIzIzODI1LCBBbGZyZWRvIERlemEpCj4gKiBjaGFuZ2UgZGVmYXVsdCBm
-aWxlc3RvcmVfbWVyZ2VfdGhyZXNob2xkIHRvIC0xMCAoaXNzdWUjMjQ2ODYsIHByIzIyODE0LCBE
-b3VnbGFzIEZ1bGxlcikKPiAqIGNsaWVudDogYWRkIGluc3QgdG8gYXNvayBzdGF0dXMgb3V0cHV0
-IChpc3N1ZSMyNDcyNCwgcHIjMjMxMDcsIFBhdHJpY2sgRG9ubmVsbHkpCj4gKiBjbGllbnQ6IGZp
-eHVwIHBhcmFsbGVsIGNhbGxzIHRvIGNlcGhfbGxfbG9va3VwX2lub2RlKCkgaW4gTkZTIEZBU0wg
-KGlzc3VlIzIyNjgzLCBwciMyMzAxMiwgaHVhbndlbiByZW4pCj4gKiBjbGllbnQ6IGluY3JlYXNl
-IHZlcmJvc2l0eSBsZXZlbCBmb3IgbG9nIG1lc3NhZ2VzIGluIGhlbHBlciBtZXRob2RzIChpc3N1
-ZSMyMTAxNCwgcHIjMjMwMTQsIFJpc2hhYmggRGF2ZSkKPiAqIGNsaWVudDogIHVwZGF0ZSBpbm9k
-ZSBmaWVsZHMgYWNjb3JkaW5nIHRvIGlzc3VlZCBjYXBzIChpc3N1ZSMyNDI2OSwgcHIjMjI3ODMs
-ICJZYW4sIFpoZW5nIikKPiAqIGNvbW1vbjogQWJvcnQgaW4gT1NETWFwOjpkZWNvZGUoKSBkdXJp
-bmcgcWEvc3RhbmRhbG9uZS9lcmFzdXJlLWNvZGUvdGVzdC1lcmFzdXJlLWVpby5zaCAoaXNzdWUj
-MjM0OTIsIHByIzIzMDI1LCBTYWdlIFdlaWwpCj4gKiBjb21tb24vRGVjYXlDb3VudGVyOiBzZXQg
-bGFzdF9kZWNheSB0byBjdXJyZW50IHRpbWUgd2hlbiBkZWNvZGluZyBkZWNheSBjb3VudGVyIChp
-c3N1ZSMyNDQ0MCwgcHIjMjI3NzksIFpoaSBaaGFuZykKPiAqIGRvYzogY2VwaC1ibHVlc3RvcmUt
-dG9vbCBtYW5wYWdlIG5vdCBnZXR0aW5nIHJlbmRlcmVkIGNvcnJlY3RseSAoaXNzdWUjMjQ4MDAs
-IHByIzIzMTc3LCBOYXRoYW4gQ3V0bGVyKQo+ICogZmlsZXN0b3JlOiBhZGQgcGdpZCBpbiBmaWxl
-c3RvcmUgcGcgZGlyIHNwbGl0IGxvZyBtZXNzYWdlIChpc3N1ZSMyNDg3OCwgcHIjMjM0NTQsIFZp
-a2h5YXQgVW1yYW8pCj4gKiBsZXQgImNlcGggc3RhdHVzIiB1c2UgYmFzZSAxMCB3aGVuIHByaW50
-aW5nIG51bWJlcnMgbm90IHNpemVzIChpc3N1ZSMyMjA5NSwgcHIjMjI2ODAsIEphbiBGYWplcnNr
-aSwgS2VmdSBDaGFpKQo+ICogbGlicmFkb3M6IGZpeCBidWZmZXIgb3ZlcmZsb3cgZm9yIGFpb19l
-eGVjIHB5dGhvbiBiaW5kaW5nIChpc3N1ZSMyMzk2NCwgcHIjMjI3MDgsIEFsZWtzZWkgR3V0aWtv
-dikKPiAqIGxpYnJiZDogZm9yY2UgJ2ludmFsaWQgb2JqZWN0IG1hcCcgZmxhZyBvbi1kaXNrIHVw
-ZGF0ZSAoaXNzdWUjMjQ0MzQsIHByIzIyNzUzLCBNeWtvbGEgR29sdWIpCj4gKiBsaWJyYmQ6IHV0
-aWxpemUgdGhlIGpvdXJuYWwgZGlzYWJsZWQgcG9saWN5IHdoZW4gcmVtb3ZpbmcgaW1hZ2VzIChp
-c3N1ZSMyMzUxMiwgcHIjMjM1OTUsIEphc29uIERpbGxhbWFuKQo+ICogbWRzOiBkb24ndCByZXBv
-cnQgc2xvdyByZXF1ZXN0IGZvciBibG9ja2VkIGZpbGVsb2NrIHJlcXVlc3QgKGlzc3VlIzIyNDI4
-LCBwciMyMjc4MiwgIllhbiwgWmhlbmciKQo+ICogbWRzOiBkdW1wIHJlY2VudCBldmVudHMgb24g
-cmVzcGF3biAoaXNzdWUjMjQ4NTMsIHByIzIzMjEzLCBQYXRyaWNrIERvbm5lbGx5KQo+ICogbWRz
-OiBoYW5kbGUgZGlzY29udGludW91cyBtZHNtYXAgKGlzc3VlIzI0ODU2LCBwciMyMzE2OSwgIllh
-biwgWmhlbmciKQo+ICogbWRzOiBpbmNyZWFzZSBkZWJ1ZyBsZXZlbCBmb3IgZHJvcHBlZCBjbGll
-bnQgY2FwIG1zZyAoaXNzdWUjMjQ4NTUsIHByIzIzMjE0LCBQYXRyaWNrIERvbm5lbGx5KQo+ICog
-bWRzOiBsb3cgd3Jsb2NrIGVmZmljaWVuY3kgZHVlIHRvIGRpcmZyYWdzIHRyYXZlcnNhbCAoaXNz
-dWUjMjQ0NjcsIHByIzIyODg1LCBYdWVoYW4gWHUpCj4gKiBtZHM6IHByaW50IG1kc21hcCBwcm9j
-ZXNzZWQgYXQgbG93IGRlYnVnIGxldmVsIChpc3N1ZSMyNDg1MiwgcHIjMjMyMTIsIFBhdHJpY2sg
-RG9ubmVsbHkpCj4gKiBtZHM6IHNjcnViIGRvZXNuJ3QgYWx3YXlzIHJldHVybiBKU09OIHJlc3Vs
-dHMgKGlzc3VlIzIzOTU4LCBwciMyMzIyMiwgVmVua3kgU2hhbmthcikKPiAqIG1kczogdW5zZXQg
-ZGVsZXRlZCB2YXJzIGluIHNodXRkb3duX3Bhc3MgKGlzc3VlIzIzNzY2LCBwciMyMzAxNSwgUGF0
-cmljayBEb25uZWxseSkKPiAqIG1ncjogYWRkIHVuaXRzIHRvIHBlcmZvcm1hbmNlIGNvdW50ZXJz
-IChpc3N1ZSMyMjc0NywgcHIjMjMyNjYsIEVybmVzdG8gUHVlcnRhLCBSdWJhYiBTeWVkKQo+ICog
-bWdyOiBjZXBoIG9zZCBzYWZlLXRvLWRlc3Ryb3kgY3Jhc2hlcyB0aGUgbWdyIChpc3N1ZSMyMzI0
-OSwgcHIjMjI4MDYsIFNhZ2UgV2VpbCkKPiAqIG1nci9NZ3JDbGllbnQ6IFByb3RlY3QgZGFlbW9u
-X2hlYWx0aF9tZXRyaWNzIChpc3N1ZSMyMzM1MiwgcHIjMjM0NTksIEtqZXRpbCBKb2VyZ2Vuc2Vu
-LCBCcmFkIEh1YmJhcmQpCj4gKiBtb246IEFkZCBvcHRpb24gdG8gdmlldyBJUCBhZGRyZXNzZXMg
-b2YgY2xpZW50cyBpbiBvdXRwdXQgb2YgJ2NlcGggZmVhdHVyZXMnIChpc3N1ZSMyMTMxNSwgcHIj
-MjI3NzMsIFBhdWwgRW1tZXJpY2gpCj4gKiBtb24vSGVhbHRoTW9uaXRvcjogZG8gbm90IHNlbmQg
-TU1vbkhlYWx0aENoZWNrcyB0byBwcmUtbHVtaW5vdXMgbW9uIChpc3N1ZSMyNDQ4MSwgcHIjMjI2
-NTUsIFNhZ2UgV2VpbCkKPiAqIG9zL2JsdWVzdG9yZTogZml4IGZsdXNoX2NvbW1pdCBsb2NraW5n
-IChpc3N1ZSMyMTQ4MCwgcHIjMjI5MDQsIFNhZ2UgV2VpbCkKPiAqIG9zL2JsdWVzdG9yZTogZml4
-IGluY29tcGxldGUgZmF1bHR5IHJhbmdlIG1hcmtpbmcgd2hlbiBkb2luZyBjb21wcmVzc2lvbiAo
-aXNzdWUjMjE0ODAsIHByIzIyOTA5LCBJZ29yIEZlZG90b3YpCj4gKiBvcy9ibHVlc3RvcmU6IGZp
-eCByYWNlcyBvbiBTaGFyZWRCbG9iOjpjb2xsIGluIH5TaGFyZWRCbG9iIChpc3N1ZSMyNDg1OSwg
-cHIjMjMwNjQsIFJhZG9zbGF3IFphcnp5bnNraSkKPiAqIG9zZGM6IEZpeCB0aGUgd3JvbmcgQnVm
-ZmVySGVhZCBvZmZzZXQgKGlzc3VlIzI0NDg0LCBwciMyMjg2NSwgZG9uZ2RvbmcgdGFvKQo+ICog
-b3NkOiBkb19zcGFyc2VfcmVhZCgpOiBWZXJpZnkgY2hlY2tzdW0gZWFybGllciBzbyB3ZSB3aWxs
-IHRyeSB0byByZXBhaXIgYW5kIG1pc3NlZCBiYWNrcG9ydCAoaXNzdWUjMjQ4NzUsIHByIzIzMzc5
-LCB4aWUgeGluZ2d1bywgRGF2aWQgWmFmbWFuKQo+ICogb3NkOiBldGVybmFsIHN0dWNrIFBHIGlu
-ICd1bmZvdW5kX3JlY292ZXJ5JyAoaXNzdWUjMjQzNzMsIHByIzIyNTQ2LCBTYWdlIFdlaWwpCj4g
-KiBvc2Q6IG1heSBnZXQgZW1wdHkgaW5mbyBhdCByZWNvdmVyeSAoaXNzdWUjMjQ1ODgsIHByIzIy
-ODYyLCBTYWdlIFdlaWwpCj4gKiBvc2QvT1NETWFwOiBDUlVTSF9UVU5BQkxFUzUgYWRkZWQgaW4g
-amV3ZWwsIG5vdCBrcmFrZW4gKGlzc3VlIzI1MDU3LCBwciMyMzIyNywgU2FnZSBXZWlsKQo+ICog
-b3NkL1Nlc3Npb246IGZpeCBpbnZhbGlkIGl0ZXJhdG9yIGRlcmVmZXJlbmNlIGluIFNlc3NvaW46
-OmhhdmVfYmFja29mZigpIChpc3N1ZSMyNDQ4NiwgcHIjMjI3MjksIFNhZ2UgV2VpbCkKPiAqIHBq
-ZDogY2Q6IHRvbyBtYW55IGFyZ3VtZW50cyAoaXNzdWUjMjQzMDcsIHByIzIyODgzLCBOZWhhIE9q
-aGEpCj4gKiBQdXJnZVF1ZXVlIHNvbWV0aW1lcyBpZ25vcmVzIEpvdXJuYWxlciBlcnJvcnMgKGlz
-c3VlIzI0NTMzLCBwciMyMjgxMSwgSm9obiBTcHJheSkKPiAqIHB5YmluZDogcHliaW5kL21nci9t
-Z3JfbW9kdWxlOiBtYWtlIHJhZG9zIGhhbmRsZSBhdmFpbGFibGUgdG8gYWxsIG1vZHVsZXMgKGlz
-c3VlIzI0Nzg4LCBpc3N1ZSMyNTEwMiwgcHIjMjMyMzUsIEVybmVzdG8gUHVlcnRhLCBTYWdlIFdl
-aWwpCj4gKiBweWJpbmQ6IFB5dGhvbiBiaW5kaW5ncyB1c2UgaXRlcml0ZW1zIG1ldGhvZCB3aGlj
-aCBpcyBub3QgUHl0aG9uIDMgY29tcGF0aWJsZSAoaXNzdWUjMjQ3NzksIHByIzIyOTE4LCBOYXRo
-YW4gQ3V0bGVyLCBLZWZ1IENoYWkpCj4gKiBweWJpbmQ6IHJhZG9zLnB5eDogbWFrZSBhbGwgZXhj
-ZXB0aW9ucyBhY2NlcHQga2V5d29yZCBhcmd1bWVudHMgKGlzc3VlIzI0MDMzLCBwciMyMjk3OSwg
-UmlzaGFiaCBEYXZlKQo+ICogcmJkOiBmaXggaXNzdWVzIGluIElFQyB1bml0IGhhbmRsaW5nIChp
-c3N1ZSMyNjkyNywgaXNzdWUjMjY5MjgsIHByIzIzNzc2LCBKYXNvbiBEaWxsYW1hbikKPiAqIHJl
-cGVhdGVkIGV2aWN0aW9uIG9mIGlkbGUgY2xpZW50IHVudGlsIHNvbWUgSU8gaGFwcGVucyAoaXNz
-dWUjMjQwNTIsIHByIzIyNzgwLCAiWWFuLCBaaGVuZyIpCj4gKiByZ3c6IGFkZCBjdXJsX2xvd19z
-cGVlZF9saW1pdCBhbmQgY3VybF9sb3dfc3BlZWRfdGltZSBjb25maWcgdG8gYXZvaWQgdGhlIHRo
-cmVhZCBoYW5ncyBpbiBkYXRhIHN5bmMgKGlzc3VlIzI1MDE5LCBwciMyMzE0NCwgTWFyayBLb2dh
-biwgWmhhbmcgU2hhb3dlbikKPiAqIHJndzogYWRkIHVuaXQgdGVzdCBmb3IgY2xzIGJpIGxpc3Qg
-Y29tbWFuZCAoaXNzdWUjMjQ0ODMsIHByIzIyODQ2LCBPcml0IFdhc3Nlcm1hbiwgWGlueWluZyBT
-b25nKQo+ICogcmd3OiBkbyBub3QgaWdub3JlIEVFWElTVCBpbiBSR1dQdXRPYmo6OmV4ZWN1dGUg
-KGlzc3VlIzIyNzkwLCBwciMyMzIwNywgTWF0dCBCZW5qYW1pbikKPiAqIHJndzogZmFpbCB0byBy
-ZWNvdmVyIGluZGV4IGZyb20gY3Jhc2ggbHVtaW5vdXMgYmFja3BvcnQgKGlzc3VlIzI0NjQwLCBp
-c3N1ZSMyNDI4MCwgcHIjMjMxMzAsIFRpYW5zaGFuIFF1KQo+ICogcmd3OiBmaXggZ2MgbWF5IGNh
-dXNlIGEgbGFyZ2UgbnVtYmVyIG9mIHJlYWQgdHJhZmZpYyAoaXNzdWUjMjQ3NjcsIHByIzIyOTg0
-LCBYaW4gTGlhbykKPiAqIHJndzogZml4IHRoZSBidWcgb2YgcmFkb3dndy1hZG1pbiB6b25lZ3Jv
-dXAgc2V0IHJlcXVpcmVzIHJlYWxtIChpc3N1ZSMyMTU4MywgcHIjMjI3NjcsIGx2c2hhbmNodW4p
-Cj4gKiByZ3c6IGhhdmUgYSBjb25maWd1cmFibGUgYXV0aGVudGljYXRpb24gb3JkZXIgKGlzc3Vl
-IzIzMDg5LCBwciMyMzUwMSwgQWJoaXNoZWsgTGVrc2htYW5hbikKPiAqIHJndzogaW5kZXggY29t
-cGxldGUgbWlzcyB6b25lc190cmFjZSBzZXQgKGlzc3VlIzI0NTkwLCBwciMyMjgyMCwgVGlhbnNo
-YW4gUXUpCj4gKiByZ3c6IEludmFsaWQgQWNjZXNzLUNvbnRyb2wtUmVxdWVzdC1SZXF1ZXN0IG1h
-eSBieXBhc3MgdmFsaWRhdGVfY29yc19ydWxlX21ldGhvZCAoaXNzdWUjMjQyMjMsIHByIzIyOTM0
-LCBKZWVnbiBDaGVuKQo+ICogcmd3OiBtZXRhIGFuZCBkYXRhIG5vdGlmeSB0aHJlYWQgbWlzcyBz
-dG9wIGNyIG1hbmFnZXIgKGlzc3VlIzI0NTg5LCBwciMyMjgyMiwgVGlhbnNoYW4gUXUpCj4gKiBy
-Z3ctbXVsdGlzaXRlOiBlbmRsZXNzIGxvb3AgaW4gUkdXQnVja2V0U2hhcmRJbmNyZW1lbnRhbFN5
-bmNDUiAoaXNzdWUjMjQ2MDMsIHByIzIyODE3LCBjZmFueikKPiAqIHJndyBwZXJmb3JtYW5jZSBy
-ZWdyZXNzaW9uIGZvciBsdW1pbm91cyAxMi4yLjQgKGlzc3VlIzIzMzc5LCBwciMyMjkzMCwgTWFy
-ayBLb2dhbikKPiAqIHJndzogcmFkb2d3LWFkbWluIHJlc2hhcmQgc3RhdHVzIGNvbW1hbmQgc2hv
-dWxkIHByaW50IHRleHQgZm9yIHJlc2hhcuKApiAoaXNzdWUjMjMyNTcsIHByIzIzMDE5LCBPcml0
-IFdhc3Nlcm1hbikKPiAqIHJndzogInJhZG9zZ3ctYWRtaW4gb2JqZWN0cyBleHBpcmUiIGFsd2F5
-cyByZXR1cm5zIG9rIGV2ZW4gaWYgdGhlIHByb+KApiAoaXNzdWUjMjQ1OTIsIHByIzIzMDAwLCBa
-aGFuZyBTaGFvd2VuKQo+ICogcmd3OiByZXF1aXJlIC0teWVzLWktcmVhbGx5LW1lYW4taXQgdG8g
-cnVuIHJhZG9zZ3ctYWRtaW4gb3JwaGFucyBmaW5kIChpc3N1ZSMyNDE0NiwgcHIjMjI5ODUsIE1h
-dHQgQmVuamFtaW4pCj4gKiByZ3c6IFJFU1QgYWRtaW4gbWV0YWRhdGEgQVBJIHBhZ2luZyBmYWls
-dXJlIGJ1Y2tldCAmIGJ1Y2tldC5pbnN0YW5jZTogSW52YWxpZEFyZ3VtZW50IChpc3N1ZSMyMzA5
-OSwgcHIjMjI5MzIsIE1hdHQgQmVuamFtaW4pCj4gKiByZ3c6IHNldCBjciBzdGF0ZSBpZiBhaW9f
-cmVhZCBlcnIgcmV0dXJuIGluIFJHV0Nsb25lTWV0YUxvZ0Nvcm91dGluZSAoaXNzdWUjMjQ1NjYs
-IHByIzIyOTQyLCBUaWFuc2hhbiBRdSkKPiAqIHNwZGs6IGZpeCBjZXBoLW9zZCBjcmFzaCB3aGVu
-IGFjdGl2YXRlIFNQREsgKGlzc3VlIzI0MzcxLCBwciMyMjY4NiwgdG9uZS16aGFuZykKPiAqIHRv
-b2xzL2NlcGgtb2JqZWN0c3RvcmUtdG9vbDogc3BsaXQgZmlsZXN0b3JlIGRpcmVjdG9yaWVzIG9m
-ZmxpbmUgdG8gdGFyZ2V0IGhhc2ggbGV2ZWwgKGlzc3VlIzIxMzY2LCBwciMyMzQxOCwgWmhpIFpo
-YW5nKQo+Cj4gR2V0dGluZyBjZXBoOgo+IC0tLS0tLS0tLS0tLQo+ICogR2l0IGF0IGdpdDovL2dp
-dGh1Yi5jb20vY2VwaC9jZXBoLmdpdAo+ICogVGFyYmFsbCBhdCBodHRwOi8vZG93bmxvYWQuY2Vw
-aC5jb20vdGFyYmFsbHMvY2VwaC0xMi4yLjgudGFyLmd6Cj4gKiBGb3IgcGFja2FnZXMsIHNlZSBo
-dHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2dldC1wYWNrYWdlcy8KPiAq
-IFJlbGVhc2UgZ2l0IHNoYTE6IGFlNjk5NjE1YmFjNTM0ZWE0OTZlZTk2NWFjNjE5MmNiN2UwZTA3
-YzAKPgo+Cj4gLS0KPiBBYmhpc2hlayBMZWtzaG1hbmFuCj4gU1VTRSBMaW51eCBHbWJILCBHRjog
-RmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLAo+IEhSQiAy
-MTI4NCAoQUcgTsO8cm5iZXJnKQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
-Y29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
-bQo=
+--===============1261998249116517075==
+Content-Type: multipart/alternative; boundary="000000000000b150e00575126ab4"
+
+--000000000000b150e00575126ab4
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+*We=E2=80=99re bringing Ceph to you, conveniently co-located with OpenStack=
+ Summit
+Berlin! Join Ceph experts, our customers and partners, and active members
+of the Ceph community in a full-day event all about Ceph. You=E2=80=99ll he=
+ar from
+key members of the development community, storage industry experts, and
+users who are already transforming their storage with Ceph.Where: CityCube
+BerlinWhen: November 12, 2018Register now!
+<https://ceph.com/cephdays/ceph-day-berlin/>You=E2=80=99ll learn about: - T=
+he
+basics and history of Ceph- The current status of the Ceph project-
+Insights into joining and evolving within the Ceph community- Best
+practices for using Ceph- Technical details of Ceph components- Current
+integrations and use casesWe=E2=80=99ll fill your day with learning and you=
+r
+evening with a cocktail hour during which you can network with other
+attendees and chat with all the speakers.Space is limited, so sign up now
+<https://ceph.com/cephdays/ceph-day-berlin/>!*You can sign up for the
+separate Ceph Day prior to OpenStack Summit via the site even if you do not
+take the chance to register for the main conference. CFP will also be going
+out soon. If you have any questions please contact Danielle Womboldt at
+dwombold-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org <dwombold-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> or Mike Perez at
+miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>. Sponsored by:[image:
+Logo_RH_CMYK_Default.jpg]*
+
+--000000000000b150e00575126ab4
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><b style=3D"font-weight:normal" id=3D"gmail-docs-internal-=
+guid-1ffd2e57-7fff-59b0-b66f-5cebb62fc385"><p dir=3D"ltr" style=3D"line-hei=
+ght:1.44;margin-top:0pt;margin-bottom:4pt"><br></p><p dir=3D"ltr" style=3D"=
+line-height:1.44;margin-top:0pt;margin-bottom:4pt"><span style=3D"font-size=
+:11pt;font-family:Arial;color:rgb(0,0,0);background-color:rgb(255,255,255);=
+font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;=
+vertical-align:baseline;white-space:pre-wrap"><img src=3D"https://lh4.googl=
+eusercontent.com/IGvEIR3fQv_1_bMw-2LA7nUri3zVYLmuCItk_U6rxL9G5sH3sDecJWdAm7=
+UCjB-XxrOlbABFjZdIcm0FLhd2Ldrpv-QWUSm1fp1-HScxeaw9ENDNMK2grYW1sZt9EhorYg7qB=
+kLO" width=3D"624" height=3D"92" style=3D"border: none; transform: rotate(0=
+rad);"></span></p><br><p dir=3D"ltr" style=3D"line-height:1.44;margin-top:0=
+pt;margin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color=
+:rgb(34,34,34);background-color:rgb(255,255,255);font-weight:400;font-style=
+:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;wh=
+ite-space:pre-wrap">We=E2=80=99re bringing Ceph to you, conveniently co-loc=
+ated with OpenStack Summit Berlin! Join Ceph experts, our customers and par=
+tners, and active members of the Ceph community in a full-day event all abo=
+ut Ceph. You=E2=80=99ll hear from key members of the development community,=
+ storage industry experts, and users who are already transforming their sto=
+rage with Ceph.</span></p><br><p dir=3D"ltr" style=3D"line-height:1.44;marg=
+in-top:0pt;margin-bottom:4pt"><span style=3D"font-size:11pt;font-family:Ari=
+al;color:rgb(0,0,0);background-color:rgb(255,255,255);font-weight:700;font-=
+style:normal;font-variant:normal;text-decoration:none;vertical-align:baseli=
+ne;white-space:pre-wrap">Where:</span><span style=3D"font-size:11pt;font-fa=
+mily:Arial;color:rgb(0,0,0);background-color:rgb(255,255,255);font-weight:4=
+00;font-style:normal;font-variant:normal;text-decoration:none;vertical-alig=
+n:baseline;white-space:pre-wrap"> CityCube Berlin</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><span style=3D"=
+font-size:11pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb(2=
+55,255,255);font-weight:700;font-style:normal;font-variant:normal;text-deco=
+ration:none;vertical-align:baseline;white-space:pre-wrap">When: </span><spa=
+n style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);background-=
+color:rgb(255,255,255);font-weight:400;font-style:normal;font-variant:norma=
+l;text-decoration:none;vertical-align:baseline;white-space:pre-wrap">Novemb=
+er 12, 2018</span></p><br><p dir=3D"ltr" style=3D"line-height:1.44;margin-t=
+op:0pt;margin-bottom:0pt"><a href=3D"https://ceph.com/cephdays/ceph-day-ber=
+lin/" style=3D"text-decoration:none"><span style=3D"font-size:11pt;font-fam=
+ily:Arial;color:rgb(17,85,204);background-color:rgb(255,255,255);font-weigh=
+t:700;font-style:normal;font-variant:normal;text-decoration:underline;verti=
+cal-align:baseline;white-space:pre-wrap">Register now!</span></a></p><br><p=
+ dir=3D"ltr" style=3D"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><s=
+pan style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);backgroun=
+d-color:rgb(255,255,255);font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre-wrap">You=
+=E2=80=99ll learn about:</span></p><br><ul style=3D"margin-top:0pt;margin-b=
+ottom:0pt"><li dir=3D"ltr" style=3D"list-style-type:disc;font-size:11pt;fon=
+t-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);font-w=
+eight:400;font-style:normal;font-variant:normal;text-decoration:none;vertic=
+al-align:baseline;white-space:pre;margin-left:11pt"><p dir=3D"ltr" style=3D=
+"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><span style=3D"font-siz=
+e:11pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,2=
+55);font-weight:400;font-style:normal;font-variant:normal;text-decoration:n=
+one;vertical-align:baseline;white-space:pre-wrap">The basics and history of=
+ Ceph</span></p></li><li dir=3D"ltr" style=3D"list-style-type:disc;font-siz=
+e:11pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,2=
+55);font-weight:400;font-style:normal;font-variant:normal;text-decoration:n=
+one;vertical-align:baseline;white-space:pre;margin-left:11pt"><p dir=3D"ltr=
+" style=3D"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><span style=
+=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);background-color:r=
+gb(255,255,255);font-weight:400;font-style:normal;font-variant:normal;text-=
+decoration:none;vertical-align:baseline;white-space:pre-wrap">The current s=
+tatus of the Ceph project</span></p></li><li dir=3D"ltr" style=3D"list-styl=
+e-type:disc;font-size:11pt;font-family:Arial;color:rgb(34,34,34);background=
+-color:rgb(255,255,255);font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;margin-left=
+:11pt"><p dir=3D"ltr" style=3D"line-height:1.44;margin-top:0pt;margin-botto=
+m:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);=
+background-color:rgb(255,255,255);font-weight:400;font-style:normal;font-va=
+riant:normal;text-decoration:none;vertical-align:baseline;white-space:pre-w=
+rap">Insights into joining and evolving within the Ceph community</span></p=
+></li><li dir=3D"ltr" style=3D"list-style-type:disc;font-size:11pt;font-fam=
+ily:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);font-weight=
+:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-al=
+ign:baseline;white-space:pre;margin-left:11pt"><p dir=3D"ltr" style=3D"line=
+-height:1.44;margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11p=
+t;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);f=
+ont-weight:400;font-style:normal;font-variant:normal;text-decoration:none;v=
+ertical-align:baseline;white-space:pre-wrap">Best practices for using Ceph<=
+/span></p></li><li dir=3D"ltr" style=3D"list-style-type:disc;font-size:11pt=
+;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);fo=
+nt-weight:400;font-style:normal;font-variant:normal;text-decoration:none;ve=
+rtical-align:baseline;white-space:pre;margin-left:11pt"><p dir=3D"ltr" styl=
+e=3D"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><span style=3D"font=
+-size:11pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,2=
+55,255);font-weight:400;font-style:normal;font-variant:normal;text-decorati=
+on:none;vertical-align:baseline;white-space:pre-wrap">Technical details of =
+Ceph components</span></p></li><li dir=3D"ltr" style=3D"list-style-type:dis=
+c;font-size:11pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb=
+(255,255,255);font-weight:400;font-style:normal;font-variant:normal;text-de=
+coration:none;vertical-align:baseline;white-space:pre;margin-left:11pt"><p =
+dir=3D"ltr" style=3D"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><sp=
+an style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);background=
+-color:rgb(255,255,255);font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre-wrap">Curre=
+nt integrations and use cases</span></p></li></ul><br><p dir=3D"ltr" style=
+=3D"line-height:1.44;margin-top:0pt;margin-bottom:0pt"><span style=3D"font-=
+size:11pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,25=
+5,255);font-weight:400;font-style:normal;font-variant:normal;text-decoratio=
+n:none;vertical-align:baseline;white-space:pre-wrap">We=E2=80=99ll fill you=
+r day with learning and your evening with a cocktail hour during which you =
+can network with other attendees and chat with all the speakers.</span></p>=
+<br><p dir=3D"ltr" style=3D"line-height:1.44;margin-top:0pt;margin-bottom:0=
+pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);bac=
+kground-color:rgb(255,255,255);font-weight:400;font-style:normal;font-varia=
+nt:normal;text-decoration:none;vertical-align:baseline;white-space:pre-wrap=
+">Space is limited, so</span><a href=3D"https://ceph.com/cephdays/ceph-day-=
+berlin/" style=3D"text-decoration:none"><span style=3D"font-size:11pt;font-=
+family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);font-wei=
+ght:400;font-style:normal;font-variant:normal;text-decoration:none;vertical=
+-align:baseline;white-space:pre-wrap"> </span><span style=3D"font-size:11pt=
+;font-family:Arial;color:rgb(17,85,204);background-color:rgb(255,255,255);f=
+ont-weight:700;font-style:normal;font-variant:normal;text-decoration:underl=
+ine;vertical-align:baseline;white-space:pre-wrap">sign up now</span></a><sp=
+an style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,34);background=
+-color:rgb(255,255,255);font-weight:700;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre-wrap">!</sp=
+an></p><br><p dir=3D"ltr" style=3D"line-height:1.44;margin-top:0pt;margin-b=
+ottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(34,34,=
+34);background-color:rgb(255,255,255);font-weight:700;font-style:normal;fon=
+t-variant:normal;text-decoration:none;vertical-align:baseline;white-space:p=
+re-wrap">*</span><span style=3D"font-size:11pt;font-family:Arial;color:rgb(=
+34,34,34);background-color:rgb(255,255,255);font-weight:400;font-style:norm=
+al;font-variant:normal;text-decoration:none;vertical-align:baseline;white-s=
+pace:pre-wrap">You can sign up for the separate Ceph Day prior to OpenStack=
+ Summit via the site even if you do not take the chance to register for the=
+ main conference. CFP will also be going out soon. If you have any question=
+s please contact Danielle Womboldt at <a href=3D"mailto:dwombold-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org=
+">dwombold-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a> or Mike Perez at <a href=3D"mailto:miperez@redhat=
+.com">miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>. </span></p><br><p dir=3D"ltr" style=3D"line-h=
+eight:2.304;margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt=
+;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);fo=
+nt-weight:400;font-style:normal;font-variant:normal;text-decoration:none;ve=
+rtical-align:baseline;white-space:pre-wrap">Sponsored by:</span></p><br><p =
+dir=3D"ltr" style=3D"line-height:2.304;margin-top:0pt;margin-bottom:0pt"><s=
+pan style=3D"font-size:10pt;font-family:Arial;color:rgb(34,34,34);backgroun=
+d-color:rgb(255,255,255);font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre-wrap"><img=
+ alt=3D"Logo_RH_CMYK_Default.jpg" src=3D"https://lh6.googleusercontent.com/=
+JevM223YOoMOhnex_8iWVSnPOzYu4-r_mLzdaCQoS6byl_dxlFaYGdNIeYQY8mXVmMoVDe0zJDQ=
+mcgOyb1tzzmPID9vAbyrD5WNScER6e2eQAaL61goF9-2oL2YNcKKte6Ktlyom" width=3D"212=
+" height=3D"68" style=3D"border: none; transform: rotate(0rad);"></span></p=
+><p dir=3D"ltr" style=3D"line-height:2.304;margin-top:0pt;margin-bottom:0pt=
+"><span style=3D"font-size:10pt;font-family:Arial;color:rgb(34,34,34);backg=
+round-color:rgb(255,255,255);font-weight:400;font-style:normal;font-variant=
+:normal;text-decoration:none;vertical-align:baseline;white-space:pre-wrap">=
+<img src=3D"https://lh6.googleusercontent.com/Yh37u_N3C0qVI9oUPIYPTeBN7o2cZ=
+eC9HmIZVo4QDJJAJogCPtcgHBZ3m0sz18iZn2bEN6igUigBZCFvPyUEiDzNoI3sV3c7KbmWpCXJ=
+jW_DCnKjxbrSaA5OUXHQx01lUOrsyByo" width=3D"195" height=3D"91" style=3D"bord=
+er: none; transform: rotate(0rad);"></span></p><p dir=3D"ltr" style=3D"line=
+-height:2.304;margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:10=
+pt;font-family:Arial;color:rgb(34,34,34);background-color:rgb(255,255,255);=
+font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;=
+vertical-align:baseline;white-space:pre-wrap"><span id=3D"gmail-docs-intern=
+al-guid-1ffd2e57-7fff-59b0-b66f-5cebb62fc385" style=3D"font-family:arial,sa=
+ns-serif;font-size:small"><img src=3D"https://lh4.googleusercontent.com/j0q=
+BQw0PVCZATkXahojlmtRt20O92aP7wPxa4KYP3_rH47YcgSRgy43lus2tix6fCh-iYrHrBxNaKD=
+mbXLdl3Ny3KlVDEALBYA0Lno_Pkd0jhF1r16OcX0EUxXTyqta8bDYfsMtY" width=3D"235" h=
+eight=3D"83" style=3D"border: none; transform: rotate(0rad); margin-right: =
+0px;"></span></span></p><br><br></b><div><br></div>
+</div>
+
+--000000000000b150e00575126ab4--
+
+--===============1261998249116517075==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Ceph-announce mailing list
+Ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com
+
+--===============1261998249116517075==--
