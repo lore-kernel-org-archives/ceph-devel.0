@@ -1,9 +1,9 @@
 From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Day at University of Santa Cruz - September 19
-Date: Tue, 11 Sep 2018 15:50:01 -0700
-Message-ID: <20180911225001.GA1356@redhat.com>
+Subject: Ceph Day in Berlin - November 12 - CFP now open
+Date: Tue, 11 Sep 2018 15:52:16 -0700
+Message-ID: <20180911225216.GB1356@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7830149175842933048=="
+Content-Type: multipart/mixed; boundary="===============0771475001256429801=="
 Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
  <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -19,59 +19,61 @@ Cc: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
 
---===============7830149175842933048==
+--===============0771475001256429801==
 Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="0F1p//8PRICkK4MW"
+	protocol="application/pgp-signature"; boundary="qlTNgmc+xy1dBmNv"
 Content-Disposition: inline
 
 
---0F1p//8PRICkK4MW
+--qlTNgmc+xy1dBmNv
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
 Hey all,
 
-Just a reminder that Ceph Day at UCSC Silicon Valley campus is coming this
-September 19. This is a great opportunity to hear various use cases around
-Ceph, and have discussions with various contributors in the community.
+The call for presentations is now open for Ceph Day in Berlin November 12!
 
-Potentially we'll be hearing a presentation from the university that helped
-Sage with his research to start it all, and how Ceph enables Genomic
-research at the campus today!
+https://ceph.formstack.com/forms/ceph_day_berlin_cfp
 
-Registration is up and the schedule is posted:
+Deadline is October 5th 11:59 UTC
 
-https://ceph.com/cephdays/ceph-day-silicon-valley-university-santa-cruz-sil=
-icon-valley-campus/
+Registration and other information for the event:
+
+https://ceph.com/cephdays/ceph-day-berlin/
+
+We are happy to be working with the OpenStack Foundation in providing a Ceph
+Day at the same venue that the OpenStack Summit will be taking place. You do
+need to purchase a Ceph Day pass even if you have a Full access pass for the
+OpenStack summit.
 
 --=20
 Mike Perez (thingee)
 
---0F1p//8PRICkK4MW
+--qlTNgmc+xy1dBmNv
 Content-Type: application/pgp-signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQIcBAABCAAGBQJbmEaZAAoJEPWgME7Ah9fJVTEP/20uGwxACCiYHjtiw4/1mVKc
-+EYyEirSfuk7rHPWGOyZrcX8WMxOUTaUbwPnkGPgqCx3sndsc1M3WU4Zg+mdOw1/
-vbBhkWwoXX9P1QoB7qS/Kq4dczK38IIHg8qyNEBMpOYzbOLB7aI1lE0Zf5Y4sQ+t
-mbpIAdO5wdJFPd73sSCiwsBFBrFyQA95AI3qgTSY2blyel89HbyY/55JEOiKEZL5
-+Ldjaix1Y+smXhbvIsd3JVwOL/RYbcY0g3s0IVyo7sfVHn/FyA9j+hxkb/ECCICq
-t8bed4Z/zwDUwrMcyQac879XUiefEKFs5bCbX9IThXpG6kzYuqogo7d6Vlopu25/
-HuECSUgqhCrWSiciNMOoQAlg8ultL3TtvhQ6RyPD97BVfqLroxHPA35oN1YSvr/y
-/FoFYf/fOIQerLbpV+Y93TGONBU+1KNKpTCLeJHyvYuHRUrh3Q2osy5M6QSJg7ZG
-tiCrN4ESSM1QqIMLG0xWU54Ii0MBi8tyWfOcYaA62aelUiV4MHvs3zsLjq5nF21H
-yIbaoaB23aHEkVYGkwjt26jMoy5w8zzpjk86TLzsofPR58GDJUIDNLYGq/ReFLbJ
-ThUtlJSbb/AFrmB9vgdQ/g2WYqeQW/nypQxeiWm43FMAk1eRNH8/JCFdoASkmONm
-dgvW9JqDcPoyxgleDzt5
-=bX2t
+iQIcBAABCAAGBQJbmEcgAAoJEPWgME7Ah9fJQboP/RuagqrFnB7aeELRLOYlHXr6
+DUCGj01WYhpI5t3NgD8FdvCKwmTUpeHYHzAOOWpcFvPt3sLr/pJNV0S7C4DR9fa4
+6l2jmEZAvOHUmgP7le/+hF6oIHZtTdQFm+Qg0M4r0QwG8VUnxnEkoPyIGYZ2yHXJ
+O1JzIFZ93EAauWq564+wgtmwxjORJKFeWTcGU+JG+bDKPDtRWr9QfrsdpjrJ/drH
+WkhT3Bnw5oxagQSN3AIGkgnCdI+xq9G5UUjdqo6noUCVP8hTcjcWIDR8SoHOd8Sj
+YqQkBrxvBYISM3NdqCBG1jrdUfx7rCgZiemjvPhaT3y//+i/qMRtCCZdtRgIIolX
+1AzMhb59grob0S95CzpdBKyvNvGqDwv9GmsaGdTv4nlECYgR1HWgkWTKokl29vpP
+gwahKwHa5us8qjul6crlmFh4MrGCRH5f86zTB2t2TxE9VqVoB3CwLSwqFiNy3V8i
+SACHxbfxi0SDdc49wxyorxweC89rBgBJNW5NIrTaaTPZ2UJ5Ks46wahZOcpdHJf5
+7ruy+vVp0uZxEnFW3HMQg+yurkBCnHdTuHkLuXuTjw+EF3QjxYwF5XnTYSwulggY
+ZpzDr0lgOFs01QPg/At7VV5cUecdaIoT7RIvIWpnJn5DOtShorN/AGpgNO5L3JBr
+ZTwpmJdxg6BOpGKD4NEh
+=KHEX
 -----END PGP SIGNATURE-----
 
---0F1p//8PRICkK4MW--
+--qlTNgmc+xy1dBmNv--
 
---===============7830149175842933048==
+--===============0771475001256429801==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -82,4 +84,4 @@ Ceph-announce mailing list
 Ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com
 
---===============7830149175842933048==--
+--===============0771475001256429801==--
