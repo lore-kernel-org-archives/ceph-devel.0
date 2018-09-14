@@ -1,16 +1,10 @@
-From: kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: can we drop support of centos/rhel 7.4?
-Date: Fri, 14 Sep 2018 22:27:44 +0800
-Message-ID: <CAJE9aOMWJi6Kvm6=gAVx-58=0DipJGaWF1HH7s6pGKPEG=xCnA@mail.gmail.com>
-References: <CAJE9aONakRfTc_ghzj_6wie4CcnD6KNMgMHtaZMbK5LbiLyn7A@mail.gmail.com>
- <CALe9h7cNdS2wffQLO2Gsud3xY7fA5KhfUUKWvDDXGMWYPGhpiA@mail.gmail.com>
- <CAN-GepL6d3foa62i7NDuwjUS51hAnu_mrntPqyMKTS9bwqPH3Q@mail.gmail.com>
- <CALe9h7dPckkK2smbQugbnHa9p92nPju6voP3s24dMkUUmFoheg@mail.gmail.com>
+From: Bruno Carvalho <brunowcs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: monitor metrics ceph subsystems
+Date: Fri, 14 Sep 2018 14:39:14 -0300
+Message-ID: <CAL040-jOa-ryp9C5A20pphX9WfcD8iJg=3VfOpLsJPoeceMgXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============6211887725025345370=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CALe9h7dPckkK2smbQugbnHa9p92nPju6voP3s24dMkUUmFoheg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,126 +14,79 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: The Esoteric Order of the Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, The Esoteric Order of the Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Sep 14, 2018 at 10:07 PM John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
-> On Fri, Sep 14, 2018 at 2:26 PM David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> > Release dates
-> > RHEL 7.4 - July 2017
-> > Luminous 12.2.0 - August 2017
-> > CentOS 7.4 - September 2017
-> > RHEL 7.5 - April 2018
-> > CentOS 7.5 - May 2018
-> > Mimic 13.2.0 - June 2018
-> >
-> > In the world of sysadmins it takes time to let new releases/OS's simmer before beginning to test them let alone upgrading to them. It is not possible to tell all companies that use CentOS that we have to move to a new OS upgrade 5 months after it is released. We are still testing if CentOS 7.5 works in our infrastructure in general let alone being up and running on it. The kernel upgrades alone are a big change now to mention the obvious package version changes. We don't even have the OK to install it in staging. Once we do, and we have the time to start testing it, ...among our other tasks, we can start regression testing our use case in staging before thinking about upgrading prod.
-> >
-> > That time frame isn't really so bad if everything is working great for ceph, but what if we're waiting on 12.2.9 and 13.2.2 for a bugfix that's giving us grief? Now we are not only dealing with the bugs, but now we have to regression test an OS upgrade, update our package management, and make sure our new deployments will have this version... And then we can start regression testing the new release that hopefully fixes the bugs we're dealing with...
+--===============6211887725025345370==
+Content-Type: multipart/alternative; boundary="000000000000112d920575d84e74"
 
-Yeah, David, I hear you =) i just wanted to explorer all options
-before working on a workaround on Ceph side.
+--000000000000112d920575d84e74
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
->
-> From the comments on http://tracker.ceph.com/issues/35969, I think
-> Kefu is still proposing to work around this in Ceph's build (i.e. to
-> fix this so that our packages still work on centOS 7.4).
+Hi Cepher, I=C2=B4m creating a dashboard with grafana more advanced with ma=
+ny
+metrics de latency e suboperations for share in community.
 
-True, that's the plan A prime. =)
+Where I can read more about AsyncMessenger::Worker-(0-3), WBThrottle,
+throttle-*,
+mutex*  , there is some documentation more details about metrics and your
+sub systems.
 
->
-> Ideally, distros maintain ABI compatibility such that the packages we
-> test on one minor version will also work on another -- that hasn't
-> happened in the 7.4->7.5 transition for gperftools.  That's annoying,
-> but it's also kind of a special case, and we hopefully won't encounter
-> issues like this particularly frequently within a major release.  If
-> we move away from using 7.4 for the main build/test cycle, that
-> doesn't mean we wouldn't also be accepting fixes to keep it working on
-> older releases (although it of course relies on someone noticing
-> if/when it breaks).
->
-> > What about backporting the API standards to the CentOS 7.4 version of gperftools-libs?
+There is  more "DESCRIPTION" details or diagram about sub systems the
+Cluster Ceph?
 
-we was trying to asking the downstream maintainers to update
-gperftools-libs in latest CentOS. i guess that's why we have 2.6 in
-CentOS 7.5. =D anyway, no worries, i will fix this issue on Ceph as i
-proposed in http://tracker.ceph.com/issues/35969 .
-
-> >
-> > I've noticed little package issues like this in the past, but assumed that was because most development was done on Ubuntu instead of RHEL. We had to set our repos to a newer version of CentOS than we were running or willing to upgrade to just for a single package we needed. If y'all are really thinking of only supporting/testing the latest dot release of the latest major version of RHEL, then you might have just given me the fuel to be able to finally convince my company into allowing us to be the first application in 9,000 servers to not run CentOS. I've been trying to get them to allow it for a while because of the previous package issues, but I hadn't put much effort into it because I thought/hoped those problems might be behind us...
-> >
-> > Do y'all not test ceph on 7.3 right now? This email thread really might be enough to get us off of CentOS for Ceph.
->
-> There is a set of permutations in qa/distros, used in
-> qa/suites/buildpackages/ -- I'm not sure exactly what's run when
-> though (possibly some only at release time?), perhaps someone more
-> familiar with exactly what tests are run before a release could chime
-> in.
-
-by looking at the qa/ directory, i found that supported-random-distro%
-a very popular facet:
-
-- master (nautilus in future):
-https://github.com/ceph/ceph/tree/master/qa/distros/supported-random-distro%24
--- centos 7.4, rhel 7.5, ubuntu {18.04, 16.04}
-- mimic: https://github.com/ceph/ceph/tree/mimic/qa/distros/supported-random-distro%24
--- centos 7.4, rhel 7.5, ubuntu {18.04, 16.04}
-- luminous: https://github.com/ceph/ceph/tree/luminous/qa/distros/supported
--- centos 7.4, , ubuntu {14.04, 16.04}
-
->
-> John
->
-> >
-> > On Fri, Sep 14, 2018, 5:49 AM John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> >>
-> >> On Fri, Sep 14, 2018 at 3:48 AM kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >> >
-> >> > hi ceph-{maintainers,users,developers},
-> >> >
-> >> > recently, i ran into an issue[0] which popped up when we build Ceph on
-> >> > centos 7.5, but test it on centos 7.4. as we know, the gperftools-libs
-> >> > package provides the tcmalloc allocator shared library, but centos 7.4
-> >> > and centos 7.5 ship different version of gperftools-{devel,libs}. the
-> >> > former ships 2.4, and the latter 2.6.1.
-> >> >
-> >> > the crux is that the tcmalloc in gperftools 2.6.1 implements more
-> >> > standard compliant C++ APIs, which were missing in gperftools 2.4.
-> >> > that's why we have failures like:
-> >> >
-> >> > ceph-osd: symbol lookup error: ceph-osd: undefined symbol: _ZdaPvm
-> >> >
-> >> > when testing Ceph on centos 7.4.
-> >> >
-> >> > my question is: is it okay to drop the support of centos/rhel 7.4? so
-> >> > we will solely build and test the supported Ceph releases (luminous,
-> >> > mimic) on 7.5 ?
-> >>
-> >> My preference would be to target the latest minor release (i.e. 7.5)
-> >> of the major release.  We don't test on CentOS 7.1, 7.2 etc, so I
-> >> don't think we need to give 7.4 any special treatment.
-> >>
-> >> John
-> >>
-> >> >
-> >> > thanks,
-> >> >
-> >> > --
-> >> > [0] http://tracker.ceph.com/issues/35969
-> >> >
-> >> > --
-> >> > Regards
-> >> > Kefu Chai
-> >> _______________________________________________
-> >> ceph-users mailing list
-> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+https://github.com/intelsdi-x/snap-plugin-collector-ceph/blob/master/OSD_PE=
+RFCNT.md
 
 
 
--- 
-Regards
-Kefu Chai
+*tks,*
+
+
+*Bruno Carvalho*
+
+--000000000000112d920575d84e74
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div>Hi Cepher, I=C2=B4m=
+ creating a dashboard with grafana more advanced with many metrics de laten=
+cy e suboperations for share in community.</div><div><br></div><div>Where I=
+ can read more about=C2=A0<span style=3D"color:rgb(36,41,46);font-family:-a=
+pple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-se=
+rif,&quot;Apple Color Emoji&quot;,&quot;Segoe UI Emoji&quot;,&quot;Segoe UI=
+ Symbol&quot;;font-size:16px">AsyncMessenger::Worker-(0-3),=C2=A0</span><sp=
+an style=3D"color:rgb(36,41,46);font-family:-apple-system,BlinkMacSystemFon=
+t,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif,&quot;Apple Color Emoji&q=
+uot;,&quot;Segoe UI Emoji&quot;,&quot;Segoe UI Symbol&quot;;font-size:16px"=
+>WBThrottle,=C2=A0</span><span style=3D"background-color:rgb(246,248,250);c=
+olor:rgb(36,41,46);font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe=
+ UI&quot;,Helvetica,Arial,sans-serif,&quot;Apple Color Emoji&quot;,&quot;Se=
+goe UI Emoji&quot;,&quot;Segoe UI Symbol&quot;;font-size:16px">throttle-*, =
+mutex*=C2=A0 ,=C2=A0</span>there is some documentation more details about m=
+etrics and your sub systems.</div><div><br></div><div>There is=C2=A0 more &=
+quot;DESCRIPTION&quot; details or diagram about sub systems the Cluster Cep=
+h?</div><div><br></div><div><a href=3D"https://github.com/intelsdi-x/snap-p=
+lugin-collector-ceph/blob/master/OSD_PERFCNT.md">https://github.com/intelsd=
+i-x/snap-plugin-collector-ceph/blob/master/OSD_PERFCNT.md</a></div><div><di=
+v dir=3D"ltr" class=3D"gmail_signature"><div dir=3D"ltr"><div dir=3D"ltr"><=
+div><div><br><span style=3D"color:rgb(102,102,102)"><b><i>tks,<br><br></i><=
+/b></span></div><span style=3D"color:rgb(102,102,102)"><b><i>Bruno Carvalho=
+<br><br></i></b></span></div><span style=3D"color:rgb(102,102,102)"><b><i><=
+span></span></i></b></span></div></div></div></div></div></div></div>
+
+--000000000000112d920575d84e74--
+
+--===============6211887725025345370==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============6211887725025345370==--
