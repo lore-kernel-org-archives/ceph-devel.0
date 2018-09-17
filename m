@@ -1,61 +1,138 @@
-From: Jonathan Cameron <jonathan.cameron-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 05/17] compat_ioctl: move more drivers to
- generic_compat_ioctl_ptrarg
-Date: Mon, 17 Sep 2018 10:33:48 +0100
-Message-ID: <20180917103348.00003f31@huawei.com>
-References: <20180912150142.157913-1-arnd@arndb.de>
- <20180912151134.436719-1-arnd@arndb.de>
+From: Jeffrey Zhang <zhang.lei.fly-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Is there any way for ceph-osd to control the max fds?
+Date: Mon, 17 Sep 2018 20:39:32 +0800
+Message-ID: <CAATxhGf8Qz8NdfgAsVgaXqumRLVPtgGu=sZqcmb7ZSSUB6N4CQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-In-Reply-To: <20180912151134.436719-1-arnd-r2nGTMty4D4@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, platform-driver-x86-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, qat-linux-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, amd-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-mm-sig-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org
+Content-Type: multipart/mixed; boundary="===============5303856424398110826=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 12 Sep 2018 17:08:52 +0200
-Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+--===============5303856424398110826==
+Content-Type: multipart/alternative; boundary="00000000000039f3a0057610790a"
 
-> The .ioctl and .compat_ioctl file operations have the same prototype so
-> they can both point to the same function, which works great almost all
-> the time when all the commands are compatible.
-> 
-> One exception is the s390 architecture, where a compat pointer is only
-> 31 bit wide, and converting it into a 64-bit pointer requires calling
-> compat_ptr(). Most drivers here will ever run in s390, but since we now
-> have a generic helper for it, it's easy enough to use it consistently.
-> 
-> I double-checked all these drivers to ensure that all ioctl arguments
-> are used as pointers or are ignored, but are not interpreted as integer
-> values.
-> 
-> Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-> ---
+--00000000000039f3a0057610790a
+Content-Type: text/plain; charset="UTF-8"
 
-For IIO part.
+In one env, which is deployed through container, i found the ceph-osd always
+be suicide due to "error (24) Too many open files"
 
-Acked-by: Jonathan Cameron <Jonathan.Cameron-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Then i increased the LimitNOFILE for the container from 65k to 655k, which
+could fix the issue.
+But the FDs increase all the time. now the max number is around 155k. I
+am afraid
+it will increase forever.
 
-Thanks,
-> diff --git a/drivers/iio/industrialio-core.c b/drivers/iio/industrialio-core.c
-> index a062cfddc5af..22844b94b0e9 100644
-> --- a/drivers/iio/industrialio-core.c
-> +++ b/drivers/iio/industrialio-core.c
-> @@ -1630,7 +1630,7 @@ static const struct file_operations iio_buffer_fileops = {
->  	.owner = THIS_MODULE,
->  	.llseek = noop_llseek,
->  	.unlocked_ioctl = iio_ioctl,
-> -	.compat_ioctl = iio_ioctl,
-> +	.compat_ioctl = generic_compat_ioctl_ptrarg,
->  };
->  
+I also found there is a option `max_open_files`, but it seems only used for
+upstart scripts at OS level, and the default value is
+16384 now[2]. whereas if you are using systemd, it will never load from the
+`max_open_files` options and fixed to 1048576 in default[1].
+So i guess if the ceph-osd live long enough, it will still read the OS
+level strict and suicide at the end.
+
+So here is the question
+1. since almost all os distro already moved to systemd, so max_open_files
+is uselss now.
+2. is there any mechanism that ceph-osd could release some fds?
+
+
+[0]
+https://github.com/ceph/ceph/commit/16c603b26f3d7dfcf0028e17fe3c04d94a434387
+[1] https://github.com/ceph/ceph/commit/8453a89
+[2]
+https://github.com/ceph/ceph/commit/672c56b18de3b02606e47013edfc2e8b679d8797
+
+
+
+-- 
+Regards,
+Jeffrey Zhang
+Blog: http://xcodest.me
+
+--00000000000039f3a0057610790a
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div di=
+r=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_default">In=
+ one env, which is deployed through container, i found the ceph-osd always<=
+/div><div class=3D"gmail_default">be suicide due to &quot;error (24) Too ma=
+ny open files<span style=3D"font-family:arial,helvetica,sans-serif;font-siz=
+e:small;color:rgb(0,0,0)">&quot;</span><br></div><div class=3D"gmail_defaul=
+t"><span style=3D"font-family:arial,helvetica,sans-serif;font-size:small;co=
+lor:rgb(0,0,0)"><br></span></div><div class=3D"gmail_default"><font color=
+=3D"#000000" face=3D"arial, helvetica, sans-serif">Then i increased the Lim=
+itNOFILE for the container from 65k to 655k, which could fix the issue.</fo=
+nt></div><div class=3D"gmail_default"><font color=3D"#000000" face=3D"arial=
+, helvetica, sans-serif">But the FDs increase all the time. now the max num=
+ber is around 155k. I am=C2=A0afraid</font></div><div class=3D"gmail_defaul=
+t"><font color=3D"#000000" face=3D"arial, helvetica, sans-serif">it will in=
+crease forever.=C2=A0</font></div><div class=3D"gmail_default"><font color=
+=3D"#000000" face=3D"arial, helvetica, sans-serif"><br></font></div><div cl=
+ass=3D"gmail_default"><font color=3D"#000000" face=3D"arial, helvetica, san=
+s-serif">I also found there is a option `max_open_files`, but it seems only=
+ used for upstart scripts at OS level, and the default value is</font></div=
+><div class=3D"gmail_default"><font color=3D"#000000" face=3D"arial, helvet=
+ica, sans-serif">16384 now[2]. whereas if you are using systemd, it will ne=
+ver load from the `max_open_files` options and fixed to 1048576 in default[=
+1].</font></div><div class=3D"gmail_default"><font color=3D"#000000" face=
+=3D"arial, helvetica, sans-serif">So i guess if the ceph-osd live long enou=
+gh, it will still read the OS level strict and suicide at the end.</font></=
+div><div class=3D"gmail_default"><font color=3D"#000000" face=3D"arial, hel=
+vetica, sans-serif"><br></font></div><div class=3D"gmail_default"><font col=
+or=3D"#000000" face=3D"arial, helvetica, sans-serif">So here is the questio=
+n</font></div><div class=3D"gmail_default">1. since almost all os distro al=
+ready moved to systemd, so max_open_files is uselss now.</div><div class=3D=
+"gmail_default">2. is there any mechanism that ceph-osd could release some =
+fds?</div><div class=3D"gmail_default"><font color=3D"#000000" face=3D"aria=
+l, helvetica, sans-serif"><br></font></div><div class=3D"gmail_default"><fo=
+nt color=3D"#000000" face=3D"arial, helvetica, sans-serif"><br></font></div=
+><div class=3D"gmail_default"><font color=3D"#000000" face=3D"arial, helvet=
+ica, sans-serif">[0]=C2=A0<a href=3D"https://github.com/ceph/ceph/commit/16=
+c603b26f3d7dfcf0028e17fe3c04d94a434387">https://github.com/ceph/ceph/commit=
+/16c603b26f3d7dfcf0028e17fe3c04d94a434387</a></font></div><div class=3D"gma=
+il_default"><font color=3D"#000000" face=3D"arial, helvetica, sans-serif">[=
+1]=C2=A0<a href=3D"https://github.com/ceph/ceph/commit/8453a89">https://git=
+hub.com/ceph/ceph/commit/8453a89</a></font></div><div class=3D"gmail_defaul=
+t"><font color=3D"#000000" face=3D"arial, helvetica, sans-serif">[2]=C2=A0<=
+a href=3D"https://github.com/ceph/ceph/commit/672c56b18de3b02606e47013edfc2=
+e8b679d8797">https://github.com/ceph/ceph/commit/672c56b18de3b02606e47013ed=
+fc2e8b679d8797</a></font></div><div class=3D"gmail_default"><span style=3D"=
+font-family:arial,helvetica,sans-serif;font-size:small;color:rgb(0,0,0)"><b=
+r></span></div><div class=3D"gmail_default" style=3D"font-family:arial,helv=
+etica,sans-serif;font-size:small">=C2=A0</div><div><br></div>-- <br><div di=
+r=3D"ltr" class=3D"gmail_signature"><div dir=3D"ltr"><div><div dir=3D"ltr">=
+<div><div dir=3D"ltr"><div><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"lt=
+r"><div><span style=3D"font-size:13px;border-collapse:collapse"><font face=
+=3D"arial, helvetica, sans-serif">Regards,</font></span></div><div><span st=
+yle=3D"font-size:13px;border-collapse:collapse"><font face=3D"arial, helvet=
+ica, sans-serif">Jeffrey Zhang</font></span></div><div><font face=3D"arial,=
+ helvetica, sans-serif"><span style=3D"font-size:12.8px">Blog:=C2=A0</span>=
+<a href=3D"http://xcodest.me/" style=3D"font-size:12.8px" target=3D"_blank"=
+>http://xcodest.me</a></font><font face=3D"monospace, monospace"><br></font=
+></div></div></div></div></div></div></div></div></div></div></div></div></=
+div></div></div></div></div></div>
+
+--00000000000039f3a0057610790a--
+
+--===============5303856424398110826==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============5303856424398110826==--
