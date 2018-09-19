@@ -1,51 +1,96 @@
-From: Jason Gunthorpe <jgg@ziepe.ca>
-Subject: Re: [PATCH v2 05/17] compat_ioctl: move more drivers to
- generic_compat_ioctl_ptrarg
-Date: Tue, 18 Sep 2018 11:59:52 -0600
-Message-ID: <20180918175952.GJ11367@ziepe.ca>
-References: <20180912150142.157913-1-arnd@arndb.de>
- <20180912151134.436719-1-arnd@arndb.de>
- <20180914203506.GE35251@wrath>
- <20180914205748.GC19965@ZenIV.linux.org.uk>
- <20180918175108.GF35251@wrath>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Kees Cook <keescook@chromium.org>
+Subject: [PATCH crypto-next 08/23] libceph: Remove VLA usage of skcipher
+Date: Tue, 18 Sep 2018 19:10:45 -0700
+Message-ID: <20180919021100.3380-9-keescook@chromium.org>
+References: <20180919021100.3380-1-keescook@chromium.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180918175108.GF35251@wrath>
+In-Reply-To: <20180919021100.3380-1-keescook@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Darren Hart <dvhart@infradead.org>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, linux-fsdevel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "David S. Miller" <davem@davemloft.net>, devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org, qat-linux@intel.com, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, linaro-mm-sig@lists.linaro.org, amd-gfx@lists.freedesktop.org, linux-input@vger.kernel.org, linux-iio@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvdimm@lists.01.org, linux-nvme@lists.infradead.org, linux-pci@vger.kernel.org, platform-driver-x86@vger.kernel.org, linux-remoteproc@vger.kernel.org, sparclinux@vger.kernel.org, linux-scsi@vger.kernel.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, linuxppc-d
+To: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: Kees Cook <keescook@chromium.org>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Eric Biggers <ebiggers@google.com>, linux-crypto <linux-crypto@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Sep 18, 2018 at 10:51:08AM -0700, Darren Hart wrote:
-> On Fri, Sep 14, 2018 at 09:57:48PM +0100, Al Viro wrote:
-> > On Fri, Sep 14, 2018 at 01:35:06PM -0700, Darren Hart wrote:
-> >  
-> > > Acked-by: Darren Hart (VMware) <dvhart@infradead.org>
-> > > 
-> > > As for a longer term solution, would it be possible to init fops in such
-> > > a way that the compat_ioctl call defaults to generic_compat_ioctl_ptrarg
-> > > so we don't have to duplicate this boilerplate for every ioctl fops
-> > > structure?
-> > 
-> > 	Bad idea, that...  Because several years down the road somebody will add
-> > an ioctl that takes an unsigned int for argument.  Without so much as looking
-> > at your magical mystery macro being used to initialize file_operations.
-> 
-> Fair, being explicit in the declaration as it is currently may be
-> preferable then.
+In the quest to remove all stack VLA usage from the kernel[1], this
+replaces struct crypto_skcipher and SKCIPHER_REQUEST_ON_STACK() usage
+with struct crypto_sync_skcipher and SYNC_SKCIPHER_REQUEST_ON_STACK(),
+which uses a fixed stack size.
 
-It would be much cleaner and safer if you could arrange things to add
-something like this to struct file_operations:
+[1] https://lkml.kernel.org/r/CA+55aFzCG-zNmZwX4A2FQpadafLfEzK6CC=qPXydAacU1RqZWA@mail.gmail.com
 
-  long (*ptr_ioctl) (struct file *, unsigned int, void __user *);
+Cc: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>
+Cc: Sage Weil <sage@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Signed-off-by: Kees Cook <keescook@chromium.org>
+---
+ net/ceph/crypto.c | 12 ++++++------
+ net/ceph/crypto.h |  2 +-
+ 2 files changed, 7 insertions(+), 7 deletions(-)
 
-Where the core code automatically converts the unsigned long to the
-void __user * as appropriate.
-
-Then it just works right always and the compiler will help address
-Al's concern down the road.
-
-Cheers,
-Jason
+diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+index 02172c408ff2..5d6724cee38f 100644
+--- a/net/ceph/crypto.c
++++ b/net/ceph/crypto.c
+@@ -46,9 +46,9 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
+ 		goto fail;
+ 	}
+ 
+-	/* crypto_alloc_skcipher() allocates with GFP_KERNEL */
++	/* crypto_alloc_sync_skcipher() allocates with GFP_KERNEL */
+ 	noio_flag = memalloc_noio_save();
+-	key->tfm = crypto_alloc_skcipher("cbc(aes)", 0, CRYPTO_ALG_ASYNC);
++	key->tfm = crypto_alloc_sync_skcipher("cbc(aes)", 0, 0);
+ 	memalloc_noio_restore(noio_flag);
+ 	if (IS_ERR(key->tfm)) {
+ 		ret = PTR_ERR(key->tfm);
+@@ -56,7 +56,7 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
+ 		goto fail;
+ 	}
+ 
+-	ret = crypto_skcipher_setkey(key->tfm, key->key, key->len);
++	ret = crypto_sync_skcipher_setkey(key->tfm, key->key, key->len);
+ 	if (ret)
+ 		goto fail;
+ 
+@@ -136,7 +136,7 @@ void ceph_crypto_key_destroy(struct ceph_crypto_key *key)
+ 	if (key) {
+ 		kfree(key->key);
+ 		key->key = NULL;
+-		crypto_free_skcipher(key->tfm);
++		crypto_free_sync_skcipher(key->tfm);
+ 		key->tfm = NULL;
+ 	}
+ }
+@@ -216,7 +216,7 @@ static void teardown_sgtable(struct sg_table *sgt)
+ static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
+ 			  void *buf, int buf_len, int in_len, int *pout_len)
+ {
+-	SKCIPHER_REQUEST_ON_STACK(req, key->tfm);
++	SYNC_SKCIPHER_REQUEST_ON_STACK(req, key->tfm);
+ 	struct sg_table sgt;
+ 	struct scatterlist prealloc_sg;
+ 	char iv[AES_BLOCK_SIZE] __aligned(8);
+@@ -232,7 +232,7 @@ static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
+ 		return ret;
+ 
+ 	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
+-	skcipher_request_set_tfm(req, key->tfm);
++	skcipher_request_set_sync_tfm(req, key->tfm);
+ 	skcipher_request_set_callback(req, 0, NULL, NULL);
+ 	skcipher_request_set_crypt(req, sgt.sgl, sgt.sgl, crypt_len, iv);
+ 
+diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
+index bb45c7d43739..96ef4d860bc9 100644
+--- a/net/ceph/crypto.h
++++ b/net/ceph/crypto.h
+@@ -13,7 +13,7 @@ struct ceph_crypto_key {
+ 	struct ceph_timespec created;
+ 	int len;
+ 	void *key;
+-	struct crypto_skcipher *tfm;
++	struct crypto_sync_skcipher *tfm;
+ };
+ 
+ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
+-- 
+2.17.1
