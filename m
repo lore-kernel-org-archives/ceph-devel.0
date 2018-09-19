@@ -1,96 +1,78 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: [PATCH crypto-next 08/23] libceph: Remove VLA usage of skcipher
-Date: Tue, 18 Sep 2018 19:10:45 -0700
-Message-ID: <20180919021100.3380-9-keescook@chromium.org>
-References: <20180919021100.3380-1-keescook@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180919021100.3380-1-keescook@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: Kees Cook <keescook@chromium.org>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Eric Biggers <ebiggers@google.com>, linux-crypto <linux-crypto@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Is there any way for ceph-osd to control the max
+ fds?
+Date: Wed, 19 Sep 2018 06:49:23 -0700
+Message-ID: <CAJ4mKGZX_XCVeFXNssJz_hFFvFWE5RWuz5CBusuc1uhoZy-CVA@mail.gmail.com>
+References: <CAATxhGf8Qz8NdfgAsVgaXqumRLVPtgGu=sZqcmb7ZSSUB6N4CQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAATxhGf8Qz8NdfgAsVgaXqumRLVPtgGu=sZqcmb7ZSSUB6N4CQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Jeffrey Zhang <zhang.lei.fly-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-In the quest to remove all stack VLA usage from the kernel[1], this
-replaces struct crypto_skcipher and SKCIPHER_REQUEST_ON_STACK() usage
-with struct crypto_sync_skcipher and SYNC_SKCIPHER_REQUEST_ON_STACK(),
-which uses a fixed stack size.
+On Mon, Sep 17, 2018 at 5:39 AM, Jeffrey Zhang <zhang.lei.fly-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> In one env, which is deployed through container, i found the ceph-osd always
+> be suicide due to "error (24) Too many open files"
+>
+> Then i increased the LimitNOFILE for the container from 65k to 655k, which
+> could fix the issue.
+> But the FDs increase all the time. now the max number is around 155k. I am
+> afraid
+> it will increase forever.
+>
+> I also found there is a option `max_open_files`, but it seems only used for
+> upstart scripts at OS level, and the default value is
+> 16384 now[2]. whereas if you are using systemd, it will never load from the
+> `max_open_files` options and fixed to 1048576 in default[1].
+> So i guess if the ceph-osd live long enough, it will still read the OS level
+> strict and suicide at the end.
+>
+> So here is the question
+> 1. since almost all os distro already moved to systemd, so max_open_files is
+> uselss now.
+> 2. is there any mechanism that ceph-osd could release some fds?
 
-[1] https://lkml.kernel.org/r/CA+55aFzCG-zNmZwX4A2FQpadafLfEzK6CC=qPXydAacU1RqZWA@mail.gmail.com
+If an OSD actually hits its file limits it just sort of stops; we
+don't have mechanisms to trim them down through the whole process.
+This is because we need a socket descriptor for every connection
+(which you can consider to be every client, plus a monitor and
+manager, plus a multiple on the number of OSD peers it has), plus the
+files open (which mostly only applies to FileStore and there's a
+config, defaults to 1024 I think).
+155k is large but I've seen that number before. In systemd we just set
+it to 1 million at this point, which has not come up as a limit for
+anybody yet. :)
+-Greg
 
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sage@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Signed-off-by: Kees Cook <keescook@chromium.org>
----
- net/ceph/crypto.c | 12 ++++++------
- net/ceph/crypto.h |  2 +-
- 2 files changed, 7 insertions(+), 7 deletions(-)
-
-diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-index 02172c408ff2..5d6724cee38f 100644
---- a/net/ceph/crypto.c
-+++ b/net/ceph/crypto.c
-@@ -46,9 +46,9 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
- 		goto fail;
- 	}
- 
--	/* crypto_alloc_skcipher() allocates with GFP_KERNEL */
-+	/* crypto_alloc_sync_skcipher() allocates with GFP_KERNEL */
- 	noio_flag = memalloc_noio_save();
--	key->tfm = crypto_alloc_skcipher("cbc(aes)", 0, CRYPTO_ALG_ASYNC);
-+	key->tfm = crypto_alloc_sync_skcipher("cbc(aes)", 0, 0);
- 	memalloc_noio_restore(noio_flag);
- 	if (IS_ERR(key->tfm)) {
- 		ret = PTR_ERR(key->tfm);
-@@ -56,7 +56,7 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
- 		goto fail;
- 	}
- 
--	ret = crypto_skcipher_setkey(key->tfm, key->key, key->len);
-+	ret = crypto_sync_skcipher_setkey(key->tfm, key->key, key->len);
- 	if (ret)
- 		goto fail;
- 
-@@ -136,7 +136,7 @@ void ceph_crypto_key_destroy(struct ceph_crypto_key *key)
- 	if (key) {
- 		kfree(key->key);
- 		key->key = NULL;
--		crypto_free_skcipher(key->tfm);
-+		crypto_free_sync_skcipher(key->tfm);
- 		key->tfm = NULL;
- 	}
- }
-@@ -216,7 +216,7 @@ static void teardown_sgtable(struct sg_table *sgt)
- static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
- 			  void *buf, int buf_len, int in_len, int *pout_len)
- {
--	SKCIPHER_REQUEST_ON_STACK(req, key->tfm);
-+	SYNC_SKCIPHER_REQUEST_ON_STACK(req, key->tfm);
- 	struct sg_table sgt;
- 	struct scatterlist prealloc_sg;
- 	char iv[AES_BLOCK_SIZE] __aligned(8);
-@@ -232,7 +232,7 @@ static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
- 		return ret;
- 
- 	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
--	skcipher_request_set_tfm(req, key->tfm);
-+	skcipher_request_set_sync_tfm(req, key->tfm);
- 	skcipher_request_set_callback(req, 0, NULL, NULL);
- 	skcipher_request_set_crypt(req, sgt.sgl, sgt.sgl, crypt_len, iv);
- 
-diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
-index bb45c7d43739..96ef4d860bc9 100644
---- a/net/ceph/crypto.h
-+++ b/net/ceph/crypto.h
-@@ -13,7 +13,7 @@ struct ceph_crypto_key {
- 	struct ceph_timespec created;
- 	int len;
- 	void *key;
--	struct crypto_skcipher *tfm;
-+	struct crypto_sync_skcipher *tfm;
- };
- 
- int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
--- 
-2.17.1
+>
+>
+> [0]
+> https://github.com/ceph/ceph/commit/16c603b26f3d7dfcf0028e17fe3c04d94a434387
+> [1] https://github.com/ceph/ceph/commit/8453a89
+> [2]
+> https://github.com/ceph/ceph/commit/672c56b18de3b02606e47013edfc2e8b679d8797
+>
+>
+>
+> --
+> Regards,
+> Jeffrey Zhang
+> Blog: http://xcodest.me
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
