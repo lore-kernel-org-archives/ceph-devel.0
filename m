@@ -1,14 +1,16 @@
-From: Maged Mokhtar <mmokhtar-6jkX1og9WkpAfugRpC6u6w@public.gmane.org>
-Subject: Re: CRUSH puzzle: step weighted-take
-Date: Thu, 27 Sep 2018 21:50:07 +0200
-Message-ID: <005bdde7-f206-1405-8255-05025c6d0734@petasan.org>
-References: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w@mail.gmail.com>
+From: by morphin <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Mimic cluster is offline and not healing
+Date: Thu, 27 Sep 2018 23:52:16 +0300
+Message-ID: <CAE-AtHo2UVSFcMHMXszSPJXs=BRKb0PELzryMyu4LVEv910pQQ@mail.gmail.com>
+References: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA@mail.gmail.com>
+ <20180927131043.GB17567@shell.dmz.bit.nl>
+ <CAE-AtHodr9iaGF3vhkrv+J8mHsYk384Ni8MpbMvW6Xg_Tdw4GQ@mail.gmail.com>
+ <CAE-AtHpGLZu5ygyw0sLkOcB3mt-0pLfcLZiPKYuptDLAafy7uw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <CAE-AtHpGLZu5ygyw0sLkOcB3mt-0pLfcLZiPKYuptDLAafy7uw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,99 +20,79 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-
-
-On 27/09/18 17:18, Dan van der Ster wrote:
-> Dear Ceph friends,
->
-> I have a CRUSH data migration puzzle and wondered if someone could
-> think of a clever solution.
->
-> Consider an osd tree like this:
->
->    -2       4428.02979     room 0513-R-0050
->   -72        911.81897         rack RA01
->    -4        917.27899         rack RA05
->    -6        917.25500         rack RA09
->    -9        786.23901         rack RA13
->   -14        895.43903         rack RA17
->   -65       1161.16003     room 0513-R-0060
->   -71        578.76001         ipservice S513-A-IP38
->   -70        287.56000             rack BA09
->   -80        291.20001             rack BA10
->   -76        582.40002         ipservice S513-A-IP63
->   -75        291.20001             rack BA11
->   -78        291.20001             rack BA12
->
-> In the beginning, for reasons that are not important, we created two pools:
->    * poolA chooses room=0513-R-0050 then replicates 3x across the racks.
->    * poolB chooses room=0513-R-0060, replicates 2x across the
-> ipservices, then puts a 3rd replica in room 0513-R-0050.
->
-> For clarity, here is the crush rule for poolB:
->          type replicated
->          min_size 1
->          max_size 10
->          step take 0513-R-0060
->          step chooseleaf firstn 2 type ipservice
->          step emit
->          step take 0513-R-0050
->          step chooseleaf firstn -2 type rack
->          step emit
->
-> Now to the puzzle.
-> For reasons that are not important, we now want to change the rule for
-> poolB to put all three 3 replicas in room 0513-R-0060.
-> And we need to do this in a way which is totally non-disruptive
-> (latency-wise) to the users of either pools. (These are both *very*
-> active RBD pools).
->
-> I see two obvious ways to proceed:
->    (1) simply change the rule for poolB to put a third replica on any
-> osd in room 0513-R-0060. I'm afraid though that this would involve way
-> too many concurrent backfills, cluster-wide, even with
-> osd_max_backfills=1.
->    (2) change poolB size to 2, then change the crush rule to that from
-> (1), then reset poolB size to 3. This would risk data availability
-> during the time that the pool is size=2, and also risks that every osd
-> in room 0513-R-0050 would be too busy deleting for some indeterminate
-> time period (10s of minutes, I expect).
->
-> So I would probably exclude those two approaches.
->
-> Conceptually what I'd like to be able to do is a gradual migration,
-> which if I may invent some syntax on the fly...
->
-> Instead of
->         step take 0513-R-0050
-> do
->         step weighted-take 99 0513-R-0050 1 0513-R-0060
->
-> That is, 99% of the time take room 0513-R-0050 for the 3rd copies, 1%
-> of the time take room 0513-R-0060.
-> With a mechanism like that, we could gradually adjust those "step
-> weighted-take" lines until 100% of the 3rd copies were in 0513-R-0060.
->
-> I have a feeling that something equivalent to that is already possible
-> with weight-sets or some other clever crush trickery.
-> Any ideas?
->
-> Best Regards,
->
-> Dan
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-would it be possible in your case to create a parent datacenter bucket 
-to hold both rooms and assign their relative weights there, then for the 
-third replica do a step take to this parent bucket ? its not elegant but 
-may do the trick.
-The suggested step weighted-take would be more flexible as it can be 
-changed on a replica level, but i do not know if you can do this with 
-existing code.
-
-Maged
+R29vZCBuZXdzLi4uIDopCgpBZnRlciBJIHRyaWVkIGV2ZXJ5dGhpbmcuIEkgZGVjaWRlIHRvIHJl
+LWNyZWF0ZSBteSBNT05zIGZyb20gT1NEJ3MgYW5kCkkgdXNlZCB0aGUgc2NyaXB0OgpodHRwczov
+L3Bhc3RlLnVidW50dS5jb20vcC9yTk1QZE1QaFQ1LwoKQW5kIGl0IHdvcmtlZCEhIQpJIHRoaW5r
+IHdoZW4gMiBzZXJ2ZXIgY3Jhc2hlZCBhbmQgY29tZSBiYWNrIHNhbWUgdGltZSBzb21lIGhvdyBN
+T04ncwpjb25mdXNlZCBhbmQgdGhlIG1hcHMganVzdCBjb3JydXB0ZWQuCkFmdGVyIHJlLWNyZWF0
+aW9uIGFsbCB0aGUgTU9OcyB3YXMgaGF2ZSB0aGUgc2FtZSBtYXAgc28gaXQgd29ya2VkLgpCdXQg
+c3RpbGwgSSBkb250IGtub3cgaG93IHRvIGhlbGwgdGhlIG1vbnMgY2FuIGNhdXNlIGVuZGxlc3Mg
+JTk1IEkvTyA/Pz8KVGhpcyBhIGJ1ZyBhbnl3YXkgYW5kIGlmIHlvdSBkb250IHdhbnQgdG8gbGVh
+dmUgdGhlIHByb2JsZW0gdGhlbiBkbwpub3QgImVuYWJsZSIgeW91ciBtb25zLiBKdXN0IHN0YXJ0
+IHRoZW0gbWFudWFsISBBbm90aGVyIHRvdWdoIGxlc3Nvbi4KCmNlcGggLXM6IGh0dHBzOi8vcGFz
+dGUudWJ1bnR1LmNvbS9wL20zaEZGMjJqTTkvCgpBcyB5b3UgY2FuIHNlZSBiZWxvdyBzb21lIG9m
+IHRoZSBPU0RzIGFyZSBzdGlsbCBkb3duLiBBbmQgd2hlbiBJIHN0YXJ0CnRoZW0gdGhleSBkb250
+IHN0YXJ0LgpDaGVjayBzdGFydCBsb2c6IGh0dHBzOi8vcGFzdGUudWJ1bnR1LmNvbS9wL1pKUUc0
+a2hkYngvCkRlYnVnIGxvZzogaHR0cHM6Ly9wYXN0ZS51YnVudHUuY29tL3AvSjNKeUdTaEh5bS8K
+CldoYXQgd2UgY2FuIGRvIGZvciB0aGUgcHJvYmxlbT8KV2hhdCBpcyB0aGUgY2F1c2Ugb2YgdGhl
+IHByb2JsZW0/CgpUaGFuayB5b3UgZXZlcnlvbmUuIFlvdSBoZWxwZWQgbWUgYSBsb3QhIDopCj4K
+PiBJIHRoaW5rIEkgbWlnaHQgZmluZCBzb21ldGhpbmcuCj4gV2hlbiBJIHN0YXJ0IGFuIE9TRCBp
+dHMgbWFraW5nIEhpZ2ggSS9PICBhcm91bmQgJTk1IGFuZCB0aGUgb3RoZXIgT1NEcwo+IGFyZSBh
+bHNvIHRyaWdnZXJlZCBhbmQgYWx0b2dldGhlciB0aGV5IG1ha2Ugc2FtZSB0aGUgSS9PLiBUaGlz
+IGlzIHRydWUKPiBldmVuIGlmIHdoZW4gSSBzZXQgbm91cCBmbGFnLiBTbyBhbGwgdGhlIE9TRHMg
+YXJlIG1ha2luZyBoaWdoIEkvTyB3aGVuCj4gZXZlciBhbiBPU0Qgc3RhcnRzLgo+Cj4gSSB0aGlu
+ayB0aGlzIGlzIHRvbyBtdWNoLiBJIGhhdmUgMTY4IE9TRCBhbmQgd2hlbiBJIHN0YXJ0IHRoZW0g
+T1NEIEkvTwo+IGpvYiBuZXZlciBmaW5pc2hlcy4gSSBsZXQgdGhlIGNsdXN0ZXIgZm9yIDcwIGhv
+dXJzIGFuZCB0aGUgaGlnaCBJL08KPiBuZXZlciBmaW5pc2hlZCBhdCBhbGwuCj4KPiBXZSdyZSB0
+cnlpbmcgdG8gc3RhcnQgT1NEJ3MgaG9zdCBieSBob3N0IGFuZCB3YWl0IGZvciBzZXR0bGVtZW50
+IGJ1dAo+IGl0IHRha2VzIHRvbyBtdWNoIHRpbWUuCj4gT1NEIGNhbiBub3QgZXZlbiBhbnN3ZXIg
+ImNlcGggdGVsbCBvc2QuMTU4IHZlcnNpb24iLiBTbyBpZiBpdCBiZWNvbWVzCj4gc28gYnVzeSBh
+bmQgdGhpcyBzZWVtcyB0byBiZSBhIGxvb3Agc2luY2UgYW5vdGhlciBPU0Qgc3RhcnR1cCB0cmln
+Z2Vycwo+IG90aGVyIE9TRCBJL08uCj4KPiBTbyBJIGRlYnVnIGl0IGFuZCBJIGhvcGUgdGhpcyBj
+YW4gYmUgZXhhbWluZWQuCj4KPiBUaGlzIGlzIGRlYnVnPTIwIE9TRCBsb2cgOgo+IEZ1bGwgbG9n
+OiAgaHR0cHM6Ly93d3cuZHJvcGJveC5jb20vcy9wd3pxZWFqbHNkd2FvaTEvY2VwaC1vc2QuOTAu
+bG9nP2RsPTAKPiBMZXNzIGxvZzogT25seSB0aGUgbGFzdCBwYXJ0IGJlZm9yZSB0aGUgaGlnaCBJ
+L08gaXMgZmluaXNoZWQ6Cj4gaHR0cHM6Ly9wYXN0ZS51YnVudHUuY29tL3AvN1pmd0g4Q0JDNS8K
+PiBTdHJhY2UgLWYgLVAgb3NkOwo+IC0gV2hlbiBJIHN0YXJ0IHRoZSBvc2Q6IGh0dHBzOi8vcGFz
+dGUudWJ1bnR1LmNvbS9wLzhuMmtUdnduRzYvCj4gLSBBZnRlciBJL08gaXMgZmluaXNoZWQ6IGh0
+dHBzOi8vcGFzdGUudWJ1bnR1LmNvbS9wLzRzR2ZqN0JmNGMvCj4KPiBOb3cgc29tZSBwZW9wbGUg
+aW4gSVJDIHNheXMgdGhpcyBpcyBhIGJ1ZywgdHJ5IFVidW50dSBhbmQgbmV3IENlcGgKPiByZXBv
+IG1heWJlIGl0IHdpbGwgaGVscC4gSSBhZ3JlZSB3aXRoIHRoZW0gYW5kIEkgd2lsbCBnaXZlIGEg
+c2hvdC4KPiBXaGF0IGRvIHlvdSB0aGluaz8KPiBieSBtb3JwaGluIDxtb3JwaGlud2l0aHlvdUBn
+bWFpbC5jb20+LCAyNyBFeWwgMjAxOCBQZXIsIDE2OjI3Cj4gdGFyaWhpbmRlIMWfdW51IHlhemTE
+sToKPiA+Cj4gPiBJIHNob3VsZCBub3QgaGF2ZSBjbGllbnQgSS9PIHJpZ2h0IG5vdy4gQWxsIG9m
+IG15IFZNcyBhcmUgZG93biByaWdodAo+ID4gbm93LiBUaGVyZSBpcyBvbmx5IGEgc2luZ2xlIHBv
+b2wuCj4gPgo+ID4gSGVyZSBpcyBteSBjcnVzaCBtYXA6IGh0dHBzOi8vcGFzdGUudWJ1bnR1LmNv
+bS9wL1o5RzVoU2RxQ1IvCj4gPgo+ID4gQ2x1c3RlciBkb2VzIG5vdCByZWNvdmVyLiBBZnRlciBz
+dGFydGluZyBPU0RzIHdpdGggdGhlIHNwZWNpZmllZAo+ID4gZmxhZ3MsIE9TRCB1cCBjb3VudCBk
+cm9wcyBmcm9tIDE2OCB0byA1MCB3aXRoIGluIDI0IGhvdXJzLgo+ID4gU3RlZmFuIEtvb21hbiA8
+c3RlZmFuQGJpdC5ubD4sIDI3IEV5bCAyMDE4IFBlciwgMTY6MTAgdGFyaWhpbmRlIMWfdW51IHlh
+emTEsToKPiA+ID4KPiA+ID4gUXVvdGluZyBieSBtb3JwaGluIChtb3JwaGlud2l0aHlvdUBnbWFp
+bC5jb20pOgo+ID4gPiA+IEFmdGVyIDcyIGhvdXJzIEkgYmVsaWV2ZSB3ZSBtYXkgaGl0IGEgYnVn
+LiBBbnkgaGVscCB3b3VsZCBiZSBncmVhdGx5Cj4gPiA+ID4gYXBwcmVjaWF0ZWQuCj4gPiA+Cj4g
+PiA+IElzIGl0IGZlYXNpYmxlIGZvciB5b3UgdG8gc3RvcCBhbGwgY2xpZW50IElPIHRvIHRoZSBD
+ZXBoIGNsdXN0ZXI/IEF0Cj4gPiA+IGxlYXN0IHVudGlsIGl0IHN0YWJpbGl6ZXMgYWdhaW4uICJj
+ZXBoIG9zZCBwYXVzZSIgd291bGQgZG8gdGhlIHRyaWNrCj4gPiA+IChjZXBoIG9zZCB1bnBhdXNl
+IHdvdWxkIHVuc2V0IGl0KS4KPiA+ID4KPiA+ID4gV2hhdCBraW5kIG9mIHdvcmtsb2FkIGFyZSB5
+b3UgcnVubmluZyBvbiB0aGUgY2x1c3Rlcj8gSG93IGRvZXMgeW91cgo+ID4gPiBjcnVzaCBtYXAg
+bG9va3MgbGlrZSAoY2VwaCBvc2QgZ2V0Y3J1c2htYXAgLW8gIC90bXAvY3J1c2hfcmF3Owo+ID4g
+PiBjcnVzaHRvb2wgLWQgL3RtcC9jcnVzaF9yYXcgLW8gL3RtcC9jcnVzaF9lZGl0KT8KPiA+ID4K
+PiA+ID4gSSBoYXZlIHNlZW4gYSAodGVzdCkgQ2VwaCBjbHVzdGVyICJoZWFsaW5nIiBpdHNlbGYg
+dG8gdGhlIHBvaW50IHRoZXJlIHdhcwo+ID4gPiBub3RoaW5nIGxlZnQgdG8gcmVjb3ZlciBvbi4g
+SW4gKnRoYXQqIGNhc2UgdGhlIGRpc2tzIHdlcmUgb3ZlcmJvb2tlZAo+ID4gPiAobXVsdGlwbGUg
+T1NEcyBwZXIgcGh5c2ljYWwgZGlzaykgLi4uIFRoZSBmbGFncyB5b3Ugc2V0IChub29vdXQsIG5v
+ZG93biwKPiA+ID4gbm9iYWNrZmlsbCwgbm9yZWNvdmVyLCBub3NjcnViLCBldGMuLCBldGMuKSBo
+ZWxwZWQgdG8gZ2V0IGl0IHRvIHJlY292ZXIKPiA+ID4gYWdhaW4uIEkgd291bGQgdHJ5IHRvIGdl
+dCBhbGwgT1NEcyBvbmxpbmUgYWdhaW4gKGFuZCBtYW51YWxseSBrZWVwIHRoZW0KPiA+ID4gdXAg
+LyByZXN0YXJ0IHRoZW0sIGJlY2F1c2UgeW91IGhhdmUgc2V0IG5vZG93bikuCj4gPiA+Cj4gPiA+
+IERvZXMgdGhlIGNsdXN0ZXIgcmVjb3ZlciBhdCBhbGw/Cj4gPiA+Cj4gPiA+IEdyLiBTdGVmYW4K
+PiA+ID4KPiA+ID4gLS0KPiA+ID4gfCBCSVQgQlYgIGh0dHA6Ly93d3cuYml0Lm5sLyAgICAgICAg
+S2FtZXIgdmFuIEtvb3BoYW5kZWwgMDkwOTAzNTEKPiA+ID4gfCBHUEc6IDB4RDE0ODM5QzYgICAg
+ICAgICAgICAgICAgICAgKzMxIDMxOCA2NDggNjg4IC8gaW5mb0BiaXQubmwKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
