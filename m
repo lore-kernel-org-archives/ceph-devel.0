@@ -1,13 +1,15 @@
-From: Luis Periquito <periquito-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: CRUSH puzzle: step weighted-take
-Date: Thu, 27 Sep 2018 17:33:49 +0100
-Message-ID: <CACx0BdPEebcwKH6LU-BSosAJw3Yd_Dsgfn6=N1j=7vvqUP2fow@mail.gmail.com>
-References: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w@mail.gmail.com>
+From: by morphin <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Mimic cluster is offline and not healing
+Date: Thu, 27 Sep 2018 21:38:35 +0300
+Message-ID: <CAE-AtHpGLZu5ygyw0sLkOcB3mt-0pLfcLZiPKYuptDLAafy7uw@mail.gmail.com>
+References: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA@mail.gmail.com>
+ <20180927131043.GB17567@shell.dmz.bit.nl>
+ <CAE-AtHodr9iaGF3vhkrv+J8mHsYk384Ni8MpbMvW6Xg_Tdw4GQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAE-AtHodr9iaGF3vhkrv+J8mHsYk384Ni8MpbMvW6Xg_Tdw4GQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,105 +19,60 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-I think your objective is to move the data without anyone else
-noticing. What I usually do is reduce the priority of the recovery
-process as much as possible. Do note this will make the recovery take
-a looong time, and will also make recovery from failures slow...
-ceph tell osd.* injectargs '--osd_recovery_sleep 0.9'
-ceph tell osd.* injectargs '--osd-max-backfills 1'
-ceph tell osd.* injectargs '--osd-recovery-op-priority 1'
-ceph tell osd.* injectargs '--osd-client-op-priority 63'
-ceph tell osd.* injectargs '--osd-recovery-max-active 1'
-ceph tell osd.* injectargs '--osd_recovery_max_chunk 524288'
-
-I would also assume you have set osd_scrub_during_recovery to false.
-
-
-
-On Thu, Sep 27, 2018 at 4:19 PM Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
->
-> Dear Ceph friends,
->
-> I have a CRUSH data migration puzzle and wondered if someone could
-> think of a clever solution.
->
-> Consider an osd tree like this:
->
->   -2       4428.02979     room 0513-R-0050
->  -72        911.81897         rack RA01
->   -4        917.27899         rack RA05
->   -6        917.25500         rack RA09
->   -9        786.23901         rack RA13
->  -14        895.43903         rack RA17
->  -65       1161.16003     room 0513-R-0060
->  -71        578.76001         ipservice S513-A-IP38
->  -70        287.56000             rack BA09
->  -80        291.20001             rack BA10
->  -76        582.40002         ipservice S513-A-IP63
->  -75        291.20001             rack BA11
->  -78        291.20001             rack BA12
->
-> In the beginning, for reasons that are not important, we created two pools:
->   * poolA chooses room=0513-R-0050 then replicates 3x across the racks.
->   * poolB chooses room=0513-R-0060, replicates 2x across the
-> ipservices, then puts a 3rd replica in room 0513-R-0050.
->
-> For clarity, here is the crush rule for poolB:
->         type replicated
->         min_size 1
->         max_size 10
->         step take 0513-R-0060
->         step chooseleaf firstn 2 type ipservice
->         step emit
->         step take 0513-R-0050
->         step chooseleaf firstn -2 type rack
->         step emit
->
-> Now to the puzzle.
-> For reasons that are not important, we now want to change the rule for
-> poolB to put all three 3 replicas in room 0513-R-0060.
-> And we need to do this in a way which is totally non-disruptive
-> (latency-wise) to the users of either pools. (These are both *very*
-> active RBD pools).
->
-> I see two obvious ways to proceed:
->   (1) simply change the rule for poolB to put a third replica on any
-> osd in room 0513-R-0060. I'm afraid though that this would involve way
-> too many concurrent backfills, cluster-wide, even with
-> osd_max_backfills=1.
->   (2) change poolB size to 2, then change the crush rule to that from
-> (1), then reset poolB size to 3. This would risk data availability
-> during the time that the pool is size=2, and also risks that every osd
-> in room 0513-R-0050 would be too busy deleting for some indeterminate
-> time period (10s of minutes, I expect).
->
-> So I would probably exclude those two approaches.
->
-> Conceptually what I'd like to be able to do is a gradual migration,
-> which if I may invent some syntax on the fly...
->
-> Instead of
->        step take 0513-R-0050
-> do
->        step weighted-take 99 0513-R-0050 1 0513-R-0060
->
-> That is, 99% of the time take room 0513-R-0050 for the 3rd copies, 1%
-> of the time take room 0513-R-0060.
-> With a mechanism like that, we could gradually adjust those "step
-> weighted-take" lines until 100% of the 3rd copies were in 0513-R-0060.
->
-> I have a feeling that something equivalent to that is already possible
-> with weight-sets or some other clever crush trickery.
-> Any ideas?
->
-> Best Regards,
->
-> Dan
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+SSB0aGluayBJIG1pZ2h0IGZpbmQgc29tZXRoaW5nLgpXaGVuIEkgc3RhcnQgYW4gT1NEIGl0cyBt
+YWtpbmcgSGlnaCBJL08gIGFyb3VuZCAlOTUgYW5kIHRoZSBvdGhlciBPU0RzCmFyZSBhbHNvIHRy
+aWdnZXJlZCBhbmQgYWx0b2dldGhlciB0aGV5IG1ha2Ugc2FtZSB0aGUgSS9PLiBUaGlzIGlzIHRy
+dWUKZXZlbiBpZiB3aGVuIEkgc2V0IG5vdXAgZmxhZy4gU28gYWxsIHRoZSBPU0RzIGFyZSBtYWtp
+bmcgaGlnaCBJL08gd2hlbgpldmVyIGFuIE9TRCBzdGFydHMuCgpJIHRoaW5rIHRoaXMgaXMgdG9v
+IG11Y2guIEkgaGF2ZSAxNjggT1NEIGFuZCB3aGVuIEkgc3RhcnQgdGhlbSBPU0QgSS9PCmpvYiBu
+ZXZlciBmaW5pc2hlcy4gSSBsZXQgdGhlIGNsdXN0ZXIgZm9yIDcwIGhvdXJzIGFuZCB0aGUgaGln
+aCBJL08KbmV2ZXIgZmluaXNoZWQgYXQgYWxsLgoKV2UncmUgdHJ5aW5nIHRvIHN0YXJ0IE9TRCdz
+IGhvc3QgYnkgaG9zdCBhbmQgd2FpdCBmb3Igc2V0dGxlbWVudCBidXQKaXQgdGFrZXMgdG9vIG11
+Y2ggdGltZS4KT1NEIGNhbiBub3QgZXZlbiBhbnN3ZXIgImNlcGggdGVsbCBvc2QuMTU4IHZlcnNp
+b24iLiBTbyBpZiBpdCBiZWNvbWVzCnNvIGJ1c3kgYW5kIHRoaXMgc2VlbXMgdG8gYmUgYSBsb29w
+IHNpbmNlIGFub3RoZXIgT1NEIHN0YXJ0dXAgdHJpZ2dlcnMKb3RoZXIgT1NEIEkvTy4KClNvIEkg
+ZGVidWcgaXQgYW5kIEkgaG9wZSB0aGlzIGNhbiBiZSBleGFtaW5lZC4KClRoaXMgaXMgZGVidWc9
+MjAgT1NEIGxvZyA6CkZ1bGwgbG9nOiAgaHR0cHM6Ly93d3cuZHJvcGJveC5jb20vcy9wd3pxZWFq
+bHNkd2FvaTEvY2VwaC1vc2QuOTAubG9nP2RsPTAKTGVzcyBsb2c6IE9ubHkgdGhlIGxhc3QgcGFy
+dCBiZWZvcmUgdGhlIGhpZ2ggSS9PIGlzIGZpbmlzaGVkOgpodHRwczovL3Bhc3RlLnVidW50dS5j
+b20vcC83WmZ3SDhDQkM1LwpTdHJhY2UgLWYgLVAgb3NkOwotIFdoZW4gSSBzdGFydCB0aGUgb3Nk
+OiBodHRwczovL3Bhc3RlLnVidW50dS5jb20vcC84bjJrVHZ3bkc2LwotIEFmdGVyIEkvTyBpcyBm
+aW5pc2hlZDogaHR0cHM6Ly9wYXN0ZS51YnVudHUuY29tL3AvNHNHZmo3QmY0Yy8KCk5vdyBzb21l
+IHBlb3BsZSBpbiBJUkMgc2F5cyB0aGlzIGlzIGEgYnVnLCB0cnkgVWJ1bnR1IGFuZCBuZXcgQ2Vw
+aApyZXBvIG1heWJlIGl0IHdpbGwgaGVscC4gSSBhZ3JlZSB3aXRoIHRoZW0gYW5kIEkgd2lsbCBn
+aXZlIGEgc2hvdC4KV2hhdCBkbyB5b3UgdGhpbms/CmJ5IG1vcnBoaW4gPG1vcnBoaW53aXRoeW91
+QGdtYWlsLmNvbT4sIDI3IEV5bCAyMDE4IFBlciwgMTY6MjcKdGFyaWhpbmRlIMWfdW51IHlhemTE
+sToKPgo+IEkgc2hvdWxkIG5vdCBoYXZlIGNsaWVudCBJL08gcmlnaHQgbm93LiBBbGwgb2YgbXkg
+Vk1zIGFyZSBkb3duIHJpZ2h0Cj4gbm93LiBUaGVyZSBpcyBvbmx5IGEgc2luZ2xlIHBvb2wuCj4K
+PiBIZXJlIGlzIG15IGNydXNoIG1hcDogaHR0cHM6Ly9wYXN0ZS51YnVudHUuY29tL3AvWjlHNWhT
+ZHFDUi8KPgo+IENsdXN0ZXIgZG9lcyBub3QgcmVjb3Zlci4gQWZ0ZXIgc3RhcnRpbmcgT1NEcyB3
+aXRoIHRoZSBzcGVjaWZpZWQKPiBmbGFncywgT1NEIHVwIGNvdW50IGRyb3BzIGZyb20gMTY4IHRv
+IDUwIHdpdGggaW4gMjQgaG91cnMuCj4gU3RlZmFuIEtvb21hbiA8c3RlZmFuQGJpdC5ubD4sIDI3
+IEV5bCAyMDE4IFBlciwgMTY6MTAgdGFyaWhpbmRlIMWfdW51IHlhemTEsToKPiA+Cj4gPiBRdW90
+aW5nIGJ5IG1vcnBoaW4gKG1vcnBoaW53aXRoeW91QGdtYWlsLmNvbSk6Cj4gPiA+IEFmdGVyIDcy
+IGhvdXJzIEkgYmVsaWV2ZSB3ZSBtYXkgaGl0IGEgYnVnLiBBbnkgaGVscCB3b3VsZCBiZSBncmVh
+dGx5Cj4gPiA+IGFwcHJlY2lhdGVkLgo+ID4KPiA+IElzIGl0IGZlYXNpYmxlIGZvciB5b3UgdG8g
+c3RvcCBhbGwgY2xpZW50IElPIHRvIHRoZSBDZXBoIGNsdXN0ZXI/IEF0Cj4gPiBsZWFzdCB1bnRp
+bCBpdCBzdGFiaWxpemVzIGFnYWluLiAiY2VwaCBvc2QgcGF1c2UiIHdvdWxkIGRvIHRoZSB0cmlj
+awo+ID4gKGNlcGggb3NkIHVucGF1c2Ugd291bGQgdW5zZXQgaXQpLgo+ID4KPiA+IFdoYXQga2lu
+ZCBvZiB3b3JrbG9hZCBhcmUgeW91IHJ1bm5pbmcgb24gdGhlIGNsdXN0ZXI/IEhvdyBkb2VzIHlv
+dXIKPiA+IGNydXNoIG1hcCBsb29rcyBsaWtlIChjZXBoIG9zZCBnZXRjcnVzaG1hcCAtbyAgL3Rt
+cC9jcnVzaF9yYXc7Cj4gPiBjcnVzaHRvb2wgLWQgL3RtcC9jcnVzaF9yYXcgLW8gL3RtcC9jcnVz
+aF9lZGl0KT8KPiA+Cj4gPiBJIGhhdmUgc2VlbiBhICh0ZXN0KSBDZXBoIGNsdXN0ZXIgImhlYWxp
+bmciIGl0c2VsZiB0byB0aGUgcG9pbnQgdGhlcmUgd2FzCj4gPiBub3RoaW5nIGxlZnQgdG8gcmVj
+b3ZlciBvbi4gSW4gKnRoYXQqIGNhc2UgdGhlIGRpc2tzIHdlcmUgb3ZlcmJvb2tlZAo+ID4gKG11
+bHRpcGxlIE9TRHMgcGVyIHBoeXNpY2FsIGRpc2spIC4uLiBUaGUgZmxhZ3MgeW91IHNldCAobm9v
+b3V0LCBub2Rvd24sCj4gPiBub2JhY2tmaWxsLCBub3JlY292ZXIsIG5vc2NydWIsIGV0Yy4sIGV0
+Yy4pIGhlbHBlZCB0byBnZXQgaXQgdG8gcmVjb3Zlcgo+ID4gYWdhaW4uIEkgd291bGQgdHJ5IHRv
+IGdldCBhbGwgT1NEcyBvbmxpbmUgYWdhaW4gKGFuZCBtYW51YWxseSBrZWVwIHRoZW0KPiA+IHVw
+IC8gcmVzdGFydCB0aGVtLCBiZWNhdXNlIHlvdSBoYXZlIHNldCBub2Rvd24pLgo+ID4KPiA+IERv
+ZXMgdGhlIGNsdXN0ZXIgcmVjb3ZlciBhdCBhbGw/Cj4gPgo+ID4gR3IuIFN0ZWZhbgo+ID4KPiA+
+IC0tCj4gPiB8IEJJVCBCViAgaHR0cDovL3d3dy5iaXQubmwvICAgICAgICBLYW1lciB2YW4gS29v
+cGhhbmRlbCAwOTA5MDM1MQo+ID4gfCBHUEc6IDB4RDE0ODM5QzYgICAgICAgICAgICAgICAgICAg
+KzMxIDMxOCA2NDggNjg4IC8gaW5mb0BiaXQubmwKX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20K
