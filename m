@@ -1,11 +1,14 @@
-From: by morphin <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Mimic cluster is offline and not healing
-Date: Thu, 27 Sep 2018 15:19:08 +0300
-Message-ID: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA@mail.gmail.com>
+From: Stefan Kooman <stefan-68+x73Hep80@public.gmane.org>
+Subject: Re: Mimic cluster is offline and not healing
+Date: Thu, 27 Sep 2018 15:10:43 +0200
+Message-ID: <20180927131043.GB17567@shell.dmz.bit.nl>
+References: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,67 +18,33 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: by morphin <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGVsbG8sCgpJIGFtIHdyaXRpbmcgdGhpcyBlLW1haWwgYWJvdXQgYW4gaW5jaWRlbnQgdGhhdCBo
-YXMgc3RhcnRlZCBsYXN0IHdlZWtlbmQuClRoZXJlIHNlZW1zIHRvIHNvbWV0aGluZyB3cm9uZyB3
-aXRoIG15IGUtbWFpbC4gU29tZSBvZiBteSBlLW1haWxzIGRpZApub3QgcmVhY2gtb3V0LiBTbyBJ
-IGRlY2lkZWQgdG8gc3RhcnQgYW4gbmV3IHRocmVhZCBoZXJlIGFuZCBzdGFydCBmcm9tCmJlZ2lu
-aW5nLgpPbmUgY2FuIGZpbmQgdGhlIGVtYWlsIHJlbGF0ZWQgZS1tYWlsIHRocmVhZAooaHR0cDov
-L2xpc3RzLmNlcGguY29tL3BpcGVybWFpbC9jZXBoLWNvbW11bml0eS1jZXBoLmNvbS8yMDE4LVNl
-cHRlbWJlci8wMDAyOTIuaHRtbCkuCgpXZSBoYXZlIGEgY2x1c3RlciB3aXRoIDI4IHNlcnZlcnMg
-YW5kIDE2OCBPU0RzLiBPU0RzIGFyZSBibHVzdG9yZSBvbgpOTC1TQVMgKG5vbiBTTVIpIGFuZCBX
-QUwrREIgaXMgTnZNRS4gTXkgZGlzdHJvIGlzIEFyY2hsaW51eC4KCkxhc3Qgd2Vla2VuZCBJIGhh
-dmUgdXBncmFkZWQgZnJvbSAxMi4yLjQgdG8gMTMuMi4xLiBBbmQgY2x1c3RlciBkaWQKbm90IHN0
-YXJ0IHNpbmNlIE9TRHMgd2VyZSBzdHVjayBpbiBib290aW5nIHN0YXRlLiBTYWdlIGhlbHBlZCBt
-ZSBhYm91dAppdCAodGhhbmtzISkgYnkgY3JlYXRpbmcgTU9OcyBzdG9yZS5kYiBmcm9tIE9TRHMg
-dmlhIGNlcGgtb2JqZWN0LXRvb2wuCkF0IGZpcnN0IGV2ZXJ5dGhpbmcgd2FzIHBlcmZlY3QuCgpI
-b3dldmVyIHR3byBkYXlzIGxhdGVyIEkgaGFkIGFuIG1vc3QgdW5mb3J0dW5hdGUgYWNjaWRlbnQu
-IDcgb2YgbXkKc2VydmVycyBjcmFzaGVkIGF0IHRoZSBzYW1lIHRpbWUuIFdoZW4gdGhleSBjYW1l
-IHVwIGNsdXN0ZXIgd2FzIGluCkhFQUxUSF9FUlIgc3RhdGUuIDIgb2YgdGhvc2Ugc2VydmVycyB3
-ZXJlIE1PTnMgKEkgaGF2ZSAzIHRvdGFsKS4KCknigJl2ZSBiZWVuIHdvcmtpbmcgZm9yIDNkYXlz
-IGNvbGxlY3RpbmcgYW5kIHRlc3RpbmcuIEJ1dCBJIGNvdWxkIG5vdAptYWtlIGFueSBwcm9ncmVz
-cy4KCkZpcnN0IG9mIGFsbCBJ4oCZdmUgZG91YmxlIGNoZWNrZWQgT1MgaGVhbHRoLCBuZXR3b3Jr
-IGhlYWx0aCwgZGlzawpoZWFsdGggYW5kIHRoZXkgaGF2ZSBubyBwcm9ibGVtLiBUaGVuIG15IGZ1
-cnRoZXIgaW52ZXN0aWdhdGlvbiByZXN1bHRzCmFyZSB0aGVzZToKSSBoYXZlIHJiZCBwb29sLiBU
-aGVyZSBpcyAzM1RCIG9mIFZNIGRhdGEuCkFzIHNvb24gYXMgT1NEIHN0YXJ0cyBpdCBtYWtlcyBs
-b3RzIG9mIEkvTyBvbiBibHVzdG9yZSBkaXNrcyAoTkwtU0FTKS4KVGhpcyBtYWtlcyBPU0QgbmVh
-ciB1bnJlc3BvbnNpdmUuIFl1IGNhbuKAmXQgZXZlbiBpbmplY3RhcmdzLgpDbHVzdGVyIGRvZXMg
-bm90IHNldHRsZS4gSSBsZWZ0IGl0IGFsb25lIGZvciAyNCBob3VyIGJ1dCBPU0QgdXAgY291bnQK
-ZHJvcHBlZCB0byB+NTAuCk9TRHMgYXJlIGxvZ2luZyB0b28gbXVjaCBzbG93IHJlcXVlc3QuCk9T
-RHMgYXJlIGxvZ2luZyBsb3RzIG9mIGhlYXJ0YmVhdCBtZXNzYWdlcy4gQW5kIGV2ZW50dWFsbHkg
-dGhleSBhcmUKbWFya2VkIGFzIGRvd24uCgpMYXRlc3QgY2x1c3RlciBzdGF0dXM6IGh0dHBzOi8v
-cGFzdGUudWJ1bnR1LmNvbS9wL0JoQ0htVk5ac1gvCkNlcGguY29uZiA6IGh0dHBzOi8vcGFzdGUu
-dWJ1bnR1LmNvbS9wL0Z0WTlnZnBuY04vClNhbXBsZSBPU0QgbG9nOiBodHRwczovL3Bhc3RlLnVi
-dW50dS5jb20vcC9ac3FwY1FWUnNqLwpNb24gbG9nOiBodHRwczovL3Bhc3RlLnVidW50dS5jb20v
-cC85VDhRdE1ZWldULwpJL08gdXRpbGl6YXRpb24gb24gZGlza3M6IGh0dHBzOi8vcGFzdGUudWJ1
-bnR1LmNvbS9wL21yQ1RLWXBCWlIvCgoKClNPIEkgdGhpbmsgbXkgcHJvYmxlbSBpcyByZWFsbHkg
-d2VpcmQuIFNvbWVob3cgcG9vbCBjYW5ub3QgaGVhbCBpdHNlbGYuCgpPU0RzIG1ha2UgJTk1IGRp
-c2sgSS9PIHV0aWxpemF0aW9uIGFuZCBwZWVyaW5nIGlzIHdheSB0b28gc2xvdy4uIFRoZQpPU0Qg
-SS9PIGRpZG50IGVuZCBhZnRlciA3MiBob3Vycy4KCkJlY2F1c2Ugb2YgdGhlIGhpZ2ggSS9PIE9T
-RCdzIGNhbnQgZ2V0IGFuIGFuc3dlciBmcm9tIG90aGVyIE9TRCdzIGFuZApjb21wbGFpbnMgdG8g
-dGhlIG1vbml0b3IuIE1vbml0b3IgbWFya2luZyB0aGVtICJkb3duIiBidXQgSSBzZWUgT1NEJ3MK
-c3RpbGwgcnVubmluZy4KCkZvciBleGFtcGxlIHRoZSAiY2VwaCAtcyIgY29tbWFuZCBzYXlzIDUw
-IE9TRCBpcyB1cCBidXQgSSBzZWUgMTUzIG9zZApwcm9jZXNzIHJ1bm5pbmcgYXQgYmFja2dyb3Vu
-ZCBhbmQgdHJ5aW5nIHRvIHJlYWNoIG90aGVyIE9TRCdzLiBTbyBpdAppcyB2ZXJ5IGNvbmZ1c2lu
-ZyBhbmQgY2VydGFpbmx5IG5vdCBwcm9ncmVzc2luZy4KCldlJ3JlIHRyeWluZyBldmVyeSBwb3Nz
-aWJsZSBzdHJhdGVneS4gTm93IHdlIHN0b3BwZWQgT1NEcy4gVGhlbiB3ZQpzdGFydCBvbmUgT1NE
-IGF0IGEgdGltZSB3aXRoIGEgc2VydmVyLiBGaXJzdCB3ZSBzdGFydCwgd2FpdCBmb3IgT1NEIHRv
-CmZpbmlzaCBJL08gdGhhbiBtb3ZlIHRoZSBuZXh0IE9TRCBpbiB0aGUgc2FtZSBzZXJ2ZXIuIFdl
-IGZpZ3VyZWQtb3V0CnRoYXQgZXZlbiBpZiB0aGUgZmlyc3QgT1NEcyBJL08gaXMgZmluaXNoZWQg
-c2Vjb25kIE9TRCB0cmlnZ2VycyBpdAphZ2Fpbi4gU28gd2hlbiB3ZSBzdGFydGVkIHRoZSBmaW5h
-bCBzaXR4aCBPU0QsIHRoZSByZXN0IG9mIGZpdmUgT1NEcwpkaWQgJjk1IEkvTyB0b28uIEFuZCBm
-aXJzdCBPU0QgSS9PIGZpbmlzaGVkIGluIDggbWludXRlcy4gQnV0IHNpeHRoCk9TRCBJL08gZmlu
-aXNoZWQgaW4gMzQgbWludXRlcyEKClRoZW4gd2UgbW92ZWQgdGhlIG5leHQgc2VydmVyLiBBcyBz
-b29uIGFzIHdlIHN0YXJ0ZWQgdGhpcyBzZXJ2ZXJzIE9TRAp0aGUgcHJldmlvdXNseSBmaW5pc2hl
-ZCBPU0Qgc3RhcnRlZCB0byBkbyBJL08gYWdhaW4uIFNvIHdlIGdhaW5lZApub3RoaW5nLgoKTm93
-IHdlIGFyZSBwbGFpbmluZyB0byBzZXQgbm91cCwgdGhlbiBzdGFydCBhbGwgMTY4IE9TRHMgYW5k
-IHRoZW4KdW5zZXQgbm91cC4gTWF5YmUgdGhpcyB3aWxsIHByZXZlbnQgT1NEcyB0byBtYWtlIEkv
-TyBvdmVyIGFuZCBvdmVyCmFnYWluLgoKQWZ0ZXIgNzIgaG91cnMgSSBiZWxpZXZlIHdlIG1heSBo
-aXQgYSBidWcuIEFueSBoZWxwIHdvdWxkIGJlIGdyZWF0bHkKYXBwcmVjaWF0ZWQuCgpXZSdyZSBv
-biBJUkMgNy8yNC4gVGhhbmtzIHRvOiBCZTpFbCwgcGVldGF1cjIsIGRlZ3JlYXNlciwgVGkgYW5k
-IEljZVBpYy4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
-Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8v
-bGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Quoting by morphin (morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org):
+> After 72 hours I believe we may hit a bug. Any help would be greatly
+> appreciated.
+
+Is it feasible for you to stop all client IO to the Ceph cluster? At
+least until it stabilizes again. "ceph osd pause" would do the trick
+(ceph osd unpause would unset it). 
+
+What kind of workload are you running on the cluster? How does your
+crush map looks like (ceph osd getcrushmap -o  /tmp/crush_raw; 
+crushtool -d /tmp/crush_raw -o /tmp/crush_edit)?
+
+I have seen a (test) Ceph cluster "healing" itself to the point there was
+nothing left to recover on. In *that* case the disks were overbooked
+(multiple OSDs per physical disk) ... The flags you set (nooout, nodown,
+nobackfill, norecover, noscrub, etc., etc.) helped to get it to recover
+again. I would try to get all OSDs online again (and manually keep them
+up / restart them, because you have set nodown).
+
+Does the cluster recover at all?
+
+Gr. Stefan
+
+-- 
+| BIT BV  http://www.bit.nl/        Kamer van Koophandel 09090351
+| GPG: 0xD14839C6                   +31 318 648 688 / info-68+x73Hep80@public.gmane.org
