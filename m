@@ -1,14 +1,14 @@
-From: Stefan Kooman <stefan-68+x73Hep80@public.gmane.org>
+From: by morphin <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Mimic cluster is offline and not healing
-Date: Thu, 27 Sep 2018 15:10:43 +0200
-Message-ID: <20180927131043.GB17567@shell.dmz.bit.nl>
+Date: Thu, 27 Sep 2018 16:27:20 +0300
+Message-ID: <CAE-AtHodr9iaGF3vhkrv+J8mHsYk384Ni8MpbMvW6Xg_Tdw4GQ@mail.gmail.com>
 References: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA@mail.gmail.com>
+ <20180927131043.GB17567@shell.dmz.bit.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAE-AtHqSpX09gnAfgXt1=nmyLKuvjgMMn+qKaiZ0nOUKwEARrA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20180927131043.GB17567-VkyGEX2O1ez1kYbDYJMsfg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,33 +18,36 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: by morphin <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: stefan-68+x73Hep80@public.gmane.org
 Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Quoting by morphin (morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org):
-> After 72 hours I believe we may hit a bug. Any help would be greatly
-> appreciated.
-
-Is it feasible for you to stop all client IO to the Ceph cluster? At
-least until it stabilizes again. "ceph osd pause" would do the trick
-(ceph osd unpause would unset it). 
-
-What kind of workload are you running on the cluster? How does your
-crush map looks like (ceph osd getcrushmap -o  /tmp/crush_raw; 
-crushtool -d /tmp/crush_raw -o /tmp/crush_edit)?
-
-I have seen a (test) Ceph cluster "healing" itself to the point there was
-nothing left to recover on. In *that* case the disks were overbooked
-(multiple OSDs per physical disk) ... The flags you set (nooout, nodown,
-nobackfill, norecover, noscrub, etc., etc.) helped to get it to recover
-again. I would try to get all OSDs online again (and manually keep them
-up / restart them, because you have set nodown).
-
-Does the cluster recover at all?
-
-Gr. Stefan
-
--- 
-| BIT BV  http://www.bit.nl/        Kamer van Koophandel 09090351
-| GPG: 0xD14839C6                   +31 318 648 688 / info-68+x73Hep80@public.gmane.org
+SSBzaG91bGQgbm90IGhhdmUgY2xpZW50IEkvTyByaWdodCBub3cuIEFsbCBvZiBteSBWTXMgYXJl
+IGRvd24gcmlnaHQKbm93LiBUaGVyZSBpcyBvbmx5IGEgc2luZ2xlIHBvb2wuCgpIZXJlIGlzIG15
+IGNydXNoIG1hcDogaHR0cHM6Ly9wYXN0ZS51YnVudHUuY29tL3AvWjlHNWhTZHFDUi8KCkNsdXN0
+ZXIgZG9lcyBub3QgcmVjb3Zlci4gQWZ0ZXIgc3RhcnRpbmcgT1NEcyB3aXRoIHRoZSBzcGVjaWZp
+ZWQKZmxhZ3MsIE9TRCB1cCBjb3VudCBkcm9wcyBmcm9tIDE2OCB0byA1MCB3aXRoIGluIDI0IGhv
+dXJzLgpTdGVmYW4gS29vbWFuIDxzdGVmYW5AYml0Lm5sPiwgMjcgRXlsIDIwMTggUGVyLCAxNjox
+MCB0YXJpaGluZGUgxZ91bnUgeWF6ZMSxOgo+Cj4gUXVvdGluZyBieSBtb3JwaGluIChtb3JwaGlu
+d2l0aHlvdUBnbWFpbC5jb20pOgo+ID4gQWZ0ZXIgNzIgaG91cnMgSSBiZWxpZXZlIHdlIG1heSBo
+aXQgYSBidWcuIEFueSBoZWxwIHdvdWxkIGJlIGdyZWF0bHkKPiA+IGFwcHJlY2lhdGVkLgo+Cj4g
+SXMgaXQgZmVhc2libGUgZm9yIHlvdSB0byBzdG9wIGFsbCBjbGllbnQgSU8gdG8gdGhlIENlcGgg
+Y2x1c3Rlcj8gQXQKPiBsZWFzdCB1bnRpbCBpdCBzdGFiaWxpemVzIGFnYWluLiAiY2VwaCBvc2Qg
+cGF1c2UiIHdvdWxkIGRvIHRoZSB0cmljawo+IChjZXBoIG9zZCB1bnBhdXNlIHdvdWxkIHVuc2V0
+IGl0KS4KPgo+IFdoYXQga2luZCBvZiB3b3JrbG9hZCBhcmUgeW91IHJ1bm5pbmcgb24gdGhlIGNs
+dXN0ZXI/IEhvdyBkb2VzIHlvdXIKPiBjcnVzaCBtYXAgbG9va3MgbGlrZSAoY2VwaCBvc2QgZ2V0
+Y3J1c2htYXAgLW8gIC90bXAvY3J1c2hfcmF3Owo+IGNydXNodG9vbCAtZCAvdG1wL2NydXNoX3Jh
+dyAtbyAvdG1wL2NydXNoX2VkaXQpPwo+Cj4gSSBoYXZlIHNlZW4gYSAodGVzdCkgQ2VwaCBjbHVz
+dGVyICJoZWFsaW5nIiBpdHNlbGYgdG8gdGhlIHBvaW50IHRoZXJlIHdhcwo+IG5vdGhpbmcgbGVm
+dCB0byByZWNvdmVyIG9uLiBJbiAqdGhhdCogY2FzZSB0aGUgZGlza3Mgd2VyZSBvdmVyYm9va2Vk
+Cj4gKG11bHRpcGxlIE9TRHMgcGVyIHBoeXNpY2FsIGRpc2spIC4uLiBUaGUgZmxhZ3MgeW91IHNl
+dCAobm9vb3V0LCBub2Rvd24sCj4gbm9iYWNrZmlsbCwgbm9yZWNvdmVyLCBub3NjcnViLCBldGMu
+LCBldGMuKSBoZWxwZWQgdG8gZ2V0IGl0IHRvIHJlY292ZXIKPiBhZ2Fpbi4gSSB3b3VsZCB0cnkg
+dG8gZ2V0IGFsbCBPU0RzIG9ubGluZSBhZ2FpbiAoYW5kIG1hbnVhbGx5IGtlZXAgdGhlbQo+IHVw
+IC8gcmVzdGFydCB0aGVtLCBiZWNhdXNlIHlvdSBoYXZlIHNldCBub2Rvd24pLgo+Cj4gRG9lcyB0
+aGUgY2x1c3RlciByZWNvdmVyIGF0IGFsbD8KPgo+IEdyLiBTdGVmYW4KPgo+IC0tCj4gfCBCSVQg
+QlYgIGh0dHA6Ly93d3cuYml0Lm5sLyAgICAgICAgS2FtZXIgdmFuIEtvb3BoYW5kZWwgMDkwOTAz
+NTEKPiB8IEdQRzogMHhEMTQ4MzlDNiAgICAgICAgICAgICAgICAgICArMzEgMzE4IDY0OCA2ODgg
+LyBpbmZvQGJpdC5ubApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0
+dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
