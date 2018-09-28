@@ -1,14 +1,14 @@
 From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
 Subject: Re: CRUSH puzzle: step weighted-take
-Date: Fri, 28 Sep 2018 08:59:27 +0200
-Message-ID: <CABZ+qqm9yiM+prxZxG36nDCggNfn0zZyYn-mv8Kam_b+HwLvgw@mail.gmail.com>
+Date: Fri, 28 Sep 2018 09:02:38 +0200
+Message-ID: <CABZ+qq=LgcMKJxvxg0fa9x-gNAR18Yviou5XiriLCOfnEj+w0w@mail.gmail.com>
 References: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w@mail.gmail.com>
- <CACx0BdPEebcwKH6LU-BSosAJw3Yd_Dsgfn6=N1j=7vvqUP2fow@mail.gmail.com>
+ <005bdde7-f206-1405-8255-05025c6d0734@petasan.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CACx0BdPEebcwKH6LU-BSosAJw3Yd_Dsgfn6=N1j=7vvqUP2fow-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <005bdde7-f206-1405-8255-05025c6d0734-6jkX1og9WkpAfugRpC6u6w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,36 +18,15 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Luis Periquito <periquito-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: mmokhtar-6jkX1og9WkpAfugRpC6u6w@public.gmane.org
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Sep 27, 2018 at 6:34 PM Luis Periquito <periquito-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->
-> I think your objective is to move the data without anyone else
-> noticing. What I usually do is reduce the priority of the recovery
-> process as much as possible. Do note this will make the recovery take
-> a looong time, and will also make recovery from failures slow...
-> ceph tell osd.* injectargs '--osd_recovery_sleep 0.9'
-> ceph tell osd.* injectargs '--osd-max-backfills 1'
-> ceph tell osd.* injectargs '--osd-recovery-op-priority 1'
-> ceph tell osd.* injectargs '--osd-client-op-priority 63'
-> ceph tell osd.* injectargs '--osd-recovery-max-active 1'
-> ceph tell osd.* injectargs '--osd_recovery_max_chunk 524288'
->
-> I would also assume you have set osd_scrub_during_recovery to false.
->
-
-Thanks Luis -- that will definitely be how we backfill if we go that
-route. However I would prefer to avoid one big massive change that
-takes a long time to complete.
-
-- dan
-
+On Thu, Sep 27, 2018 at 9:57 PM Maged Mokhtar <mmokhtar-6jkX1og9WkpAfugRpC6u6w@public.gmane.org> wrote:
 >
 >
-> On Thu, Sep 27, 2018 at 4:19 PM Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
-> >
+>
+> On 27/09/18 17:18, Dan van der Ster wrote:
 > > Dear Ceph friends,
 > >
 > > I have a CRUSH data migration puzzle and wondered if someone could
@@ -55,35 +34,35 @@ takes a long time to complete.
 > >
 > > Consider an osd tree like this:
 > >
-> >   -2       4428.02979     room 0513-R-0050
-> >  -72        911.81897         rack RA01
-> >   -4        917.27899         rack RA05
-> >   -6        917.25500         rack RA09
-> >   -9        786.23901         rack RA13
-> >  -14        895.43903         rack RA17
-> >  -65       1161.16003     room 0513-R-0060
-> >  -71        578.76001         ipservice S513-A-IP38
-> >  -70        287.56000             rack BA09
-> >  -80        291.20001             rack BA10
-> >  -76        582.40002         ipservice S513-A-IP63
-> >  -75        291.20001             rack BA11
-> >  -78        291.20001             rack BA12
+> >    -2       4428.02979     room 0513-R-0050
+> >   -72        911.81897         rack RA01
+> >    -4        917.27899         rack RA05
+> >    -6        917.25500         rack RA09
+> >    -9        786.23901         rack RA13
+> >   -14        895.43903         rack RA17
+> >   -65       1161.16003     room 0513-R-0060
+> >   -71        578.76001         ipservice S513-A-IP38
+> >   -70        287.56000             rack BA09
+> >   -80        291.20001             rack BA10
+> >   -76        582.40002         ipservice S513-A-IP63
+> >   -75        291.20001             rack BA11
+> >   -78        291.20001             rack BA12
 > >
 > > In the beginning, for reasons that are not important, we created two pools:
-> >   * poolA chooses room=0513-R-0050 then replicates 3x across the racks.
-> >   * poolB chooses room=0513-R-0060, replicates 2x across the
+> >    * poolA chooses room=0513-R-0050 then replicates 3x across the racks.
+> >    * poolB chooses room=0513-R-0060, replicates 2x across the
 > > ipservices, then puts a 3rd replica in room 0513-R-0050.
 > >
 > > For clarity, here is the crush rule for poolB:
-> >         type replicated
-> >         min_size 1
-> >         max_size 10
-> >         step take 0513-R-0060
-> >         step chooseleaf firstn 2 type ipservice
-> >         step emit
-> >         step take 0513-R-0050
-> >         step chooseleaf firstn -2 type rack
-> >         step emit
+> >          type replicated
+> >          min_size 1
+> >          max_size 10
+> >          step take 0513-R-0060
+> >          step chooseleaf firstn 2 type ipservice
+> >          step emit
+> >          step take 0513-R-0050
+> >          step chooseleaf firstn -2 type rack
+> >          step emit
 > >
 > > Now to the puzzle.
 > > For reasons that are not important, we now want to change the rule for
@@ -93,11 +72,11 @@ takes a long time to complete.
 > > active RBD pools).
 > >
 > > I see two obvious ways to proceed:
-> >   (1) simply change the rule for poolB to put a third replica on any
+> >    (1) simply change the rule for poolB to put a third replica on any
 > > osd in room 0513-R-0060. I'm afraid though that this would involve way
 > > too many concurrent backfills, cluster-wide, even with
 > > osd_max_backfills=1.
-> >   (2) change poolB size to 2, then change the crush rule to that from
+> >    (2) change poolB size to 2, then change the crush rule to that from
 > > (1), then reset poolB size to 3. This would risk data availability
 > > during the time that the pool is size=2, and also risks that every osd
 > > in room 0513-R-0050 would be too busy deleting for some indeterminate
@@ -109,9 +88,9 @@ takes a long time to complete.
 > > which if I may invent some syntax on the fly...
 > >
 > > Instead of
-> >        step take 0513-R-0050
+> >         step take 0513-R-0050
 > > do
-> >        step weighted-take 99 0513-R-0050 1 0513-R-0060
+> >         step weighted-take 99 0513-R-0050 1 0513-R-0060
 > >
 > > That is, 99% of the time take room 0513-R-0050 for the 3rd copies, 1%
 > > of the time take room 0513-R-0060.
@@ -129,3 +108,30 @@ takes a long time to complete.
 > > ceph-users mailing list
 > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> would it be possible in your case to create a parent datacenter bucket
+> to hold both rooms and assign their relative weights there, then for the
+> third replica do a step take to this parent bucket ? its not elegant but
+> may do the trick.
+
+Hey, that might work! both rooms are already in the default root:
+
+  -1       5589.18994 root default
+  -2       4428.02979     room 0513-R-0050
+ -65       1161.16003     room 0513-R-0060
+ -71        578.76001         ipservice S513-A-IP38
+ -76        582.40002         ipservice S513-A-IP63
+
+so I'll play with a test pool and weighting down room 0513-R-0060 to
+see if this can work.
+
+Thanks!
+
+-- dan
+
+> The suggested step weighted-take would be more flexible as it can be
+> changed on a replica level, but i do not know if you can do this with
+> existing code.
+>
+> Maged
+>
+>
