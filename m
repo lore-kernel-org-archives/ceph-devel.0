@@ -1,242 +1,133 @@
-From: Ioana Ciornei <ioana.ciornei@nxp.com>
-Subject: [PATCH] driver core: device: add BUS_ATTR_WO macro
-Date: Mon,  1 Oct 2018 18:32:52 +0300
-Message-ID: <1538407972-9340-1-git-send-email-ioana.ciornei@nxp.com>
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: CRUSH puzzle: step weighted-take
+Date: Mon, 1 Oct 2018 11:09:31 -0700
+Message-ID: <CAJ4mKGYFAgbu0fW_zy7stR5YU7ERG0=jWciFYMmDG_sfZAbUwg@mail.gmail.com>
+References: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w@mail.gmail.com>
+ <005bdde7-f206-1405-8255-05025c6d0734@petasan.org>
+ <CABZ+qq=LgcMKJxvxg0fa9x-gNAR18Yviou5XiriLCOfnEj+w0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: gregkh@linuxfoundation.org, idryomov@gmail.com, sage@redhat.com, elder@kernel.org, jth@kernel.org, benh@kernel.crashing.org
-Cc: linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-scsi@vger.kernel.org, Ioana Ciornei <ioana.ciornei@nxp.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CABZ+qq=LgcMKJxvxg0fa9x-gNAR18Yviou5XiriLCOfnEj+w0w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Add BUS_ATTR_WO macro to make it easier to add attributes without
-auditing the mode settings. Also, use the newly added macro where
-appropriate.
-
-Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
----
- arch/powerpc/platforms/pseries/ibmebus.c | 12 ++++----
- drivers/block/rbd.c                      | 48 ++++++++++++++++----------------
- drivers/scsi/fcoe/fcoe_sysfs.c           |  4 +--
- drivers/scsi/fcoe/fcoe_transport.c       | 10 +++----
- include/linux/device.h                   |  2 ++
- include/scsi/libfcoe.h                   |  8 +++---
- 6 files changed, 43 insertions(+), 41 deletions(-)
-
-diff --git a/arch/powerpc/platforms/pseries/ibmebus.c b/arch/powerpc/platforms/pseries/ibmebus.c
-index c7c1140..c75006c 100644
---- a/arch/powerpc/platforms/pseries/ibmebus.c
-+++ b/arch/powerpc/platforms/pseries/ibmebus.c
-@@ -261,8 +261,8 @@ static char *ibmebus_chomp(const char *in, size_t count)
- 	return out;
- }
- 
--static ssize_t ibmebus_store_probe(struct bus_type *bus,
--				   const char *buf, size_t count)
-+static ssize_t probe_store(struct bus_type *bus,
-+			   const char *buf, size_t count)
- {
- 	struct device_node *dn = NULL;
- 	struct device *dev;
-@@ -298,10 +298,10 @@ static ssize_t ibmebus_store_probe(struct bus_type *bus,
- 		return rc;
- 	return count;
- }
--static BUS_ATTR(probe, 0200, NULL, ibmebus_store_probe);
-+static BUS_ATTR_WO(probe);
- 
--static ssize_t ibmebus_store_remove(struct bus_type *bus,
--				    const char *buf, size_t count)
-+static ssize_t remove_store(struct bus_type *bus,
-+			    const char *buf, size_t count)
- {
- 	struct device *dev;
- 	char *path;
-@@ -325,7 +325,7 @@ static ssize_t ibmebus_store_remove(struct bus_type *bus,
- 		return -ENODEV;
- 	}
- }
--static BUS_ATTR(remove, 0200, NULL, ibmebus_store_remove);
-+static BUS_ATTR_WO(remove);
- 
- static struct attribute *ibmbus_bus_attrs[] = {
- 	&bus_attr_probe.attr,
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 73ed5f3..703d875 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -428,14 +428,14 @@ enum rbd_dev_flags {
- module_param(single_major, bool, 0444);
- MODULE_PARM_DESC(single_major, "Use a single major number for all rbd devices (default: true)");
- 
--static ssize_t rbd_add(struct bus_type *bus, const char *buf,
--		       size_t count);
--static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
--			  size_t count);
--static ssize_t rbd_add_single_major(struct bus_type *bus, const char *buf,
--				    size_t count);
--static ssize_t rbd_remove_single_major(struct bus_type *bus, const char *buf,
--				       size_t count);
-+static ssize_t add_store(struct bus_type *bus, const char *buf,
-+			 size_t count);
-+static ssize_t remove_store(struct bus_type *bus, const char *buf,
-+			    size_t count);
-+static ssize_t add_single_major_store(struct bus_type *bus, const char *buf,
-+				      size_t count);
-+static ssize_t remove_single_major_store(struct bus_type *bus, const char *buf,
-+					 size_t count);
- static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth);
- 
- static int rbd_dev_id_to_minor(int dev_id)
-@@ -469,10 +469,10 @@ static ssize_t rbd_supported_features_show(struct bus_type *bus, char *buf)
- 	return sprintf(buf, "0x%llx\n", RBD_FEATURES_SUPPORTED);
- }
- 
--static BUS_ATTR(add, 0200, NULL, rbd_add);
--static BUS_ATTR(remove, 0200, NULL, rbd_remove);
--static BUS_ATTR(add_single_major, 0200, NULL, rbd_add_single_major);
--static BUS_ATTR(remove_single_major, 0200, NULL, rbd_remove_single_major);
-+static BUS_ATTR_WO(add);
-+static BUS_ATTR_WO(remove);
-+static BUS_ATTR_WO(add_single_major);
-+static BUS_ATTR_WO(remove_single_major);
- static BUS_ATTR(supported_features, 0444, rbd_supported_features_show, NULL);
- 
- static struct attribute *rbd_bus_attrs[] = {
-@@ -5930,9 +5930,9 @@ static ssize_t do_rbd_add(struct bus_type *bus,
- 	goto out;
- }
- 
--static ssize_t rbd_add(struct bus_type *bus,
--		       const char *buf,
--		       size_t count)
-+static ssize_t add_store(struct bus_type *bus,
-+			 const char *buf,
-+			 size_t count)
- {
- 	if (single_major)
- 		return -EINVAL;
-@@ -5940,9 +5940,9 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	return do_rbd_add(bus, buf, count);
- }
- 
--static ssize_t rbd_add_single_major(struct bus_type *bus,
--				    const char *buf,
--				    size_t count)
-+static ssize_t add_single_major_store(struct bus_type *bus,
-+				      const char *buf,
-+				      size_t count)
- {
- 	return do_rbd_add(bus, buf, count);
- }
-@@ -6046,9 +6046,9 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
- 	return count;
- }
- 
--static ssize_t rbd_remove(struct bus_type *bus,
--			  const char *buf,
--			  size_t count)
-+static ssize_t remove_store(struct bus_type *bus,
-+			    const char *buf,
-+			    size_t count)
- {
- 	if (single_major)
- 		return -EINVAL;
-@@ -6056,9 +6056,9 @@ static ssize_t rbd_remove(struct bus_type *bus,
- 	return do_rbd_remove(bus, buf, count);
- }
- 
--static ssize_t rbd_remove_single_major(struct bus_type *bus,
--				       const char *buf,
--				       size_t count)
-+static ssize_t remove_single_major_store(struct bus_type *bus,
-+					 const char *buf,
-+					 size_t count)
- {
- 	return do_rbd_remove(bus, buf, count);
- }
-diff --git a/drivers/scsi/fcoe/fcoe_sysfs.c b/drivers/scsi/fcoe/fcoe_sysfs.c
-index 5c8310b..3c23b26 100644
---- a/drivers/scsi/fcoe/fcoe_sysfs.c
-+++ b/drivers/scsi/fcoe/fcoe_sysfs.c
-@@ -671,8 +671,8 @@ static void fcoe_fcf_device_release(struct device *dev)
- 	.release = fcoe_fcf_device_release,
- };
- 
--static BUS_ATTR(ctlr_create, S_IWUSR, NULL, fcoe_ctlr_create_store);
--static BUS_ATTR(ctlr_destroy, S_IWUSR, NULL, fcoe_ctlr_destroy_store);
-+static BUS_ATTR_WO(ctlr_create);
-+static BUS_ATTR_WO(ctlr_destroy);
- 
- static struct attribute *fcoe_bus_attrs[] = {
- 	&bus_attr_ctlr_create.attr,
-diff --git a/drivers/scsi/fcoe/fcoe_transport.c b/drivers/scsi/fcoe/fcoe_transport.c
-index f4909cd..7789141 100644
---- a/drivers/scsi/fcoe/fcoe_transport.c
-+++ b/drivers/scsi/fcoe/fcoe_transport.c
-@@ -754,8 +754,8 @@ static int libfcoe_device_notification(struct notifier_block *notifier,
- 	return NOTIFY_OK;
- }
- 
--ssize_t fcoe_ctlr_create_store(struct bus_type *bus,
--			       const char *buf, size_t count)
-+ssize_t ctlr_create_store(struct bus_type *bus,
-+			  const char *buf, size_t count)
- {
- 	struct net_device *netdev = NULL;
- 	struct fcoe_transport *ft = NULL;
-@@ -817,8 +817,8 @@ ssize_t fcoe_ctlr_create_store(struct bus_type *bus,
- 	return count;
- }
- 
--ssize_t fcoe_ctlr_destroy_store(struct bus_type *bus,
--				const char *buf, size_t count)
-+ssize_t ctlr_destroy_store(struct bus_type *bus,
-+			   const char *buf, size_t count)
- {
- 	int rc = -ENODEV;
- 	struct net_device *netdev = NULL;
-@@ -855,7 +855,7 @@ ssize_t fcoe_ctlr_destroy_store(struct bus_type *bus,
- 	mutex_unlock(&ft_mutex);
- 	return rc;
- }
--EXPORT_SYMBOL(fcoe_ctlr_destroy_store);
-+EXPORT_SYMBOL(ctlr_destroy_store);
- 
- /**
-  * fcoe_transport_create() - Create a fcoe interface
-diff --git a/include/linux/device.h b/include/linux/device.h
-index 8f88254..767cf19 100644
---- a/include/linux/device.h
-+++ b/include/linux/device.h
-@@ -55,6 +55,8 @@ struct bus_attribute {
- 	struct bus_attribute bus_attr_##_name = __ATTR_RW(_name)
- #define BUS_ATTR_RO(_name) \
- 	struct bus_attribute bus_attr_##_name = __ATTR_RO(_name)
-+#define BUS_ATTR_WO(_name) \
-+	struct bus_attribute bus_attr_##_name = __ATTR_WO(_name)
- 
- extern int __must_check bus_create_file(struct bus_type *,
- 					struct bus_attribute *);
-diff --git a/include/scsi/libfcoe.h b/include/scsi/libfcoe.h
-index cb8a273..f58388c 100644
---- a/include/scsi/libfcoe.h
-+++ b/include/scsi/libfcoe.h
-@@ -405,10 +405,10 @@ struct fcoe_netdev_mapping {
- int fcoe_transport_detach(struct fcoe_transport *ft);
- 
- /* sysfs store handler for ctrl_control interface */
--ssize_t fcoe_ctlr_create_store(struct bus_type *bus,
--			       const char *buf, size_t count);
--ssize_t fcoe_ctlr_destroy_store(struct bus_type *bus,
--				const char *buf, size_t count);
-+ssize_t ctlr_create_store(struct bus_type *bus,
-+			  const char *buf, size_t count);
-+ssize_t ctlr_destroy_store(struct bus_type *bus,
-+			   const char *buf, size_t count);
- 
- #endif /* _LIBFCOE_H */
- 
--- 
-1.9.1
+T24gRnJpLCBTZXAgMjgsIDIwMTggYXQgMTI6MDMgQU0gRGFuIHZhbiBkZXIgU3RlciA8ZGFuQHZh
+bmRlcnN0ZXIuY29tPiB3cm90ZToKPgo+IE9uIFRodSwgU2VwIDI3LCAyMDE4IGF0IDk6NTcgUE0g
+TWFnZWQgTW9raHRhciA8bW1va2h0YXJAcGV0YXNhbi5vcmc+IHdyb3RlOgo+ID4KPiA+Cj4gPgo+
+ID4gT24gMjcvMDkvMTggMTc6MTgsIERhbiB2YW4gZGVyIFN0ZXIgd3JvdGU6Cj4gPiA+IERlYXIg
+Q2VwaCBmcmllbmRzLAo+ID4gPgo+ID4gPiBJIGhhdmUgYSBDUlVTSCBkYXRhIG1pZ3JhdGlvbiBw
+dXp6bGUgYW5kIHdvbmRlcmVkIGlmIHNvbWVvbmUgY291bGQKPiA+ID4gdGhpbmsgb2YgYSBjbGV2
+ZXIgc29sdXRpb24uCj4gPiA+Cj4gPiA+IENvbnNpZGVyIGFuIG9zZCB0cmVlIGxpa2UgdGhpczoK
+PiA+ID4KPiA+ID4gICAgLTIgICAgICAgNDQyOC4wMjk3OSAgICAgcm9vbSAwNTEzLVItMDA1MAo+
+ID4gPiAgIC03MiAgICAgICAgOTExLjgxODk3ICAgICAgICAgcmFjayBSQTAxCj4gPiA+ICAgIC00
+ICAgICAgICA5MTcuMjc4OTkgICAgICAgICByYWNrIFJBMDUKPiA+ID4gICAgLTYgICAgICAgIDkx
+Ny4yNTUwMCAgICAgICAgIHJhY2sgUkEwOQo+ID4gPiAgICAtOSAgICAgICAgNzg2LjIzOTAxICAg
+ICAgICAgcmFjayBSQTEzCj4gPiA+ICAgLTE0ICAgICAgICA4OTUuNDM5MDMgICAgICAgICByYWNr
+IFJBMTcKPiA+ID4gICAtNjUgICAgICAgMTE2MS4xNjAwMyAgICAgcm9vbSAwNTEzLVItMDA2MAo+
+ID4gPiAgIC03MSAgICAgICAgNTc4Ljc2MDAxICAgICAgICAgaXBzZXJ2aWNlIFM1MTMtQS1JUDM4
+Cj4gPiA+ICAgLTcwICAgICAgICAyODcuNTYwMDAgICAgICAgICAgICAgcmFjayBCQTA5Cj4gPiA+
+ICAgLTgwICAgICAgICAyOTEuMjAwMDEgICAgICAgICAgICAgcmFjayBCQTEwCj4gPiA+ICAgLTc2
+ICAgICAgICA1ODIuNDAwMDIgICAgICAgICBpcHNlcnZpY2UgUzUxMy1BLUlQNjMKPiA+ID4gICAt
+NzUgICAgICAgIDI5MS4yMDAwMSAgICAgICAgICAgICByYWNrIEJBMTEKPiA+ID4gICAtNzggICAg
+ICAgIDI5MS4yMDAwMSAgICAgICAgICAgICByYWNrIEJBMTIKPiA+ID4KPiA+ID4gSW4gdGhlIGJl
+Z2lubmluZywgZm9yIHJlYXNvbnMgdGhhdCBhcmUgbm90IGltcG9ydGFudCwgd2UgY3JlYXRlZCB0
+d28gcG9vbHM6Cj4gPiA+ICAgICogcG9vbEEgY2hvb3NlcyByb29tPTA1MTMtUi0wMDUwIHRoZW4g
+cmVwbGljYXRlcyAzeCBhY3Jvc3MgdGhlIHJhY2tzLgo+ID4gPiAgICAqIHBvb2xCIGNob29zZXMg
+cm9vbT0wNTEzLVItMDA2MCwgcmVwbGljYXRlcyAyeCBhY3Jvc3MgdGhlCj4gPiA+IGlwc2Vydmlj
+ZXMsIHRoZW4gcHV0cyBhIDNyZCByZXBsaWNhIGluIHJvb20gMDUxMy1SLTAwNTAuCj4gPiA+Cj4g
+PiA+IEZvciBjbGFyaXR5LCBoZXJlIGlzIHRoZSBjcnVzaCBydWxlIGZvciBwb29sQjoKPiA+ID4g
+ICAgICAgICAgdHlwZSByZXBsaWNhdGVkCj4gPiA+ICAgICAgICAgIG1pbl9zaXplIDEKPiA+ID4g
+ICAgICAgICAgbWF4X3NpemUgMTAKPiA+ID4gICAgICAgICAgc3RlcCB0YWtlIDA1MTMtUi0wMDYw
+Cj4gPiA+ICAgICAgICAgIHN0ZXAgY2hvb3NlbGVhZiBmaXJzdG4gMiB0eXBlIGlwc2VydmljZQo+
+ID4gPiAgICAgICAgICBzdGVwIGVtaXQKPiA+ID4gICAgICAgICAgc3RlcCB0YWtlIDA1MTMtUi0w
+MDUwCj4gPiA+ICAgICAgICAgIHN0ZXAgY2hvb3NlbGVhZiBmaXJzdG4gLTIgdHlwZSByYWNrCj4g
+PiA+ICAgICAgICAgIHN0ZXAgZW1pdAo+ID4gPgo+ID4gPiBOb3cgdG8gdGhlIHB1enpsZS4KPiA+
+ID4gRm9yIHJlYXNvbnMgdGhhdCBhcmUgbm90IGltcG9ydGFudCwgd2Ugbm93IHdhbnQgdG8gY2hh
+bmdlIHRoZSBydWxlIGZvcgo+ID4gPiBwb29sQiB0byBwdXQgYWxsIHRocmVlIDMgcmVwbGljYXMg
+aW4gcm9vbSAwNTEzLVItMDA2MC4KPiA+ID4gQW5kIHdlIG5lZWQgdG8gZG8gdGhpcyBpbiBhIHdh
+eSB3aGljaCBpcyB0b3RhbGx5IG5vbi1kaXNydXB0aXZlCj4gPiA+IChsYXRlbmN5LXdpc2UpIHRv
+IHRoZSB1c2VycyBvZiBlaXRoZXIgcG9vbHMuIChUaGVzZSBhcmUgYm90aCAqdmVyeSoKPiA+ID4g
+YWN0aXZlIFJCRCBwb29scykuCj4gPiA+Cj4gPiA+IEkgc2VlIHR3byBvYnZpb3VzIHdheXMgdG8g
+cHJvY2VlZDoKPiA+ID4gICAgKDEpIHNpbXBseSBjaGFuZ2UgdGhlIHJ1bGUgZm9yIHBvb2xCIHRv
+IHB1dCBhIHRoaXJkIHJlcGxpY2Egb24gYW55Cj4gPiA+IG9zZCBpbiByb29tIDA1MTMtUi0wMDYw
+LiBJJ20gYWZyYWlkIHRob3VnaCB0aGF0IHRoaXMgd291bGQgaW52b2x2ZSB3YXkKPiA+ID4gdG9v
+IG1hbnkgY29uY3VycmVudCBiYWNrZmlsbHMsIGNsdXN0ZXItd2lkZSwgZXZlbiB3aXRoCj4gPiA+
+IG9zZF9tYXhfYmFja2ZpbGxzPTEuCj4gPiA+ICAgICgyKSBjaGFuZ2UgcG9vbEIgc2l6ZSB0byAy
+LCB0aGVuIGNoYW5nZSB0aGUgY3J1c2ggcnVsZSB0byB0aGF0IGZyb20KPiA+ID4gKDEpLCB0aGVu
+IHJlc2V0IHBvb2xCIHNpemUgdG8gMy4gVGhpcyB3b3VsZCByaXNrIGRhdGEgYXZhaWxhYmlsaXR5
+Cj4gPiA+IGR1cmluZyB0aGUgdGltZSB0aGF0IHRoZSBwb29sIGlzIHNpemU9MiwgYW5kIGFsc28g
+cmlza3MgdGhhdCBldmVyeSBvc2QKPiA+ID4gaW4gcm9vbSAwNTEzLVItMDA1MCB3b3VsZCBiZSB0
+b28gYnVzeSBkZWxldGluZyBmb3Igc29tZSBpbmRldGVybWluYXRlCj4gPiA+IHRpbWUgcGVyaW9k
+ICgxMHMgb2YgbWludXRlcywgSSBleHBlY3QpLgo+ID4gPgo+ID4gPiBTbyBJIHdvdWxkIHByb2Jh
+Ymx5IGV4Y2x1ZGUgdGhvc2UgdHdvIGFwcHJvYWNoZXMuCj4gPiA+Cj4gPiA+IENvbmNlcHR1YWxs
+eSB3aGF0IEknZCBsaWtlIHRvIGJlIGFibGUgdG8gZG8gaXMgYSBncmFkdWFsIG1pZ3JhdGlvbiwK
+PiA+ID4gd2hpY2ggaWYgSSBtYXkgaW52ZW50IHNvbWUgc3ludGF4IG9uIHRoZSBmbHkuLi4KPiA+
+ID4KPiA+ID4gSW5zdGVhZCBvZgo+ID4gPiAgICAgICAgIHN0ZXAgdGFrZSAwNTEzLVItMDA1MAo+
+ID4gPiBkbwo+ID4gPiAgICAgICAgIHN0ZXAgd2VpZ2h0ZWQtdGFrZSA5OSAwNTEzLVItMDA1MCAx
+IDA1MTMtUi0wMDYwCj4gPiA+Cj4gPiA+IFRoYXQgaXMsIDk5JSBvZiB0aGUgdGltZSB0YWtlIHJv
+b20gMDUxMy1SLTAwNTAgZm9yIHRoZSAzcmQgY29waWVzLCAxJQo+ID4gPiBvZiB0aGUgdGltZSB0
+YWtlIHJvb20gMDUxMy1SLTAwNjAuCj4gPiA+IFdpdGggYSBtZWNoYW5pc20gbGlrZSB0aGF0LCB3
+ZSBjb3VsZCBncmFkdWFsbHkgYWRqdXN0IHRob3NlICJzdGVwCj4gPiA+IHdlaWdodGVkLXRha2Ui
+IGxpbmVzIHVudGlsIDEwMCUgb2YgdGhlIDNyZCBjb3BpZXMgd2VyZSBpbiAwNTEzLVItMDA2MC4K
+PiA+ID4KPiA+ID4gSSBoYXZlIGEgZmVlbGluZyB0aGF0IHNvbWV0aGluZyBlcXVpdmFsZW50IHRv
+IHRoYXQgaXMgYWxyZWFkeSBwb3NzaWJsZQo+ID4gPiB3aXRoIHdlaWdodC1zZXRzIG9yIHNvbWUg
+b3RoZXIgY2xldmVyIGNydXNoIHRyaWNrZXJ5Lgo+ID4gPiBBbnkgaWRlYXM/Cj4gPiA+Cj4gPiA+
+IEJlc3QgUmVnYXJkcywKPiA+ID4KPiA+ID4gRGFuCj4gPiA+IF9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gPiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
+Cj4gPiA+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiA+ID4gaHR0cDovL2xpc3RzLmNlcGgu
+Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gPiB3b3VsZCBpdCBiZSBwb3Nz
+aWJsZSBpbiB5b3VyIGNhc2UgdG8gY3JlYXRlIGEgcGFyZW50IGRhdGFjZW50ZXIgYnVja2V0Cj4g
+PiB0byBob2xkIGJvdGggcm9vbXMgYW5kIGFzc2lnbiB0aGVpciByZWxhdGl2ZSB3ZWlnaHRzIHRo
+ZXJlLCB0aGVuIGZvciB0aGUKPiA+IHRoaXJkIHJlcGxpY2EgZG8gYSBzdGVwIHRha2UgdG8gdGhp
+cyBwYXJlbnQgYnVja2V0ID8gaXRzIG5vdCBlbGVnYW50IGJ1dAo+ID4gbWF5IGRvIHRoZSB0cmlj
+ay4KPgo+IEhleSwgdGhhdCBtaWdodCB3b3JrISBib3RoIHJvb21zIGFyZSBhbHJlYWR5IGluIHRo
+ZSBkZWZhdWx0IHJvb3Q6Cj4KPiAgIC0xICAgICAgIDU1ODkuMTg5OTQgcm9vdCBkZWZhdWx0Cj4g
+ICAtMiAgICAgICA0NDI4LjAyOTc5ICAgICByb29tIDA1MTMtUi0wMDUwCj4gIC02NSAgICAgICAx
+MTYxLjE2MDAzICAgICByb29tIDA1MTMtUi0wMDYwCj4gIC03MSAgICAgICAgNTc4Ljc2MDAxICAg
+ICAgICAgaXBzZXJ2aWNlIFM1MTMtQS1JUDM4Cj4gIC03NiAgICAgICAgNTgyLjQwMDAyICAgICAg
+ICAgaXBzZXJ2aWNlIFM1MTMtQS1JUDYzCj4KPiBzbyBJJ2xsIHBsYXkgd2l0aCBhIHRlc3QgcG9v
+bCBhbmQgd2VpZ2h0aW5nIGRvd24gcm9vbSAwNTEzLVItMDA2MCB0bwo+IHNlZSBpZiB0aGlzIGNh
+biB3b3JrLgoKSSBkb24ndCB0aGluayB0aGlzIHdpbGwgd29yayDigJQgaXQgd2lsbCBwcm9iYWJs
+eSBjaGFuZ2UgdGhlIHNlZWQgdGhhdAppcyB1c2VkIGFuZCBtZWFuIHRoYXQgdGhlIHJ1bGUgdHJp
+ZXMgdG8gbW92ZSAqZXZlcnl0aGluZyosIG5vdCBqdXN0CnRoZSB0aGlyZCBQRyByZXBsaWNhcy4g
+QnV0IHBlcmhhcHMgSSdtIG1pc3Rha2VuIGFib3V0IHRoZSBkZXRhaWxzIG9mCnRoaXMgbWVjaGFu
+aWMuLi4KClRoZSBjcnVzaCB3ZWlnaHRlZC10YWtlIGlzIGludGVyZXN0aW5nLCBidXQgSSdtIG5v
+dCBzdXJlIEkgd291bGQgd2FudAp0byBkbyBzb21ldGhpbmcgcHJvYmFiaWxpc3RpYyBsaWtlIHRo
+YXQgaW4gdGhpcyBzaXR1YXRpb24uIFdoYXQgd2UndmUKZGlzY3Vzc2VkIGJlZm9yZSDigJQgYnV0
+ICpub3QqIGltcGxlbWVudGVkIG9yIGV2ZW4gc2NoZWR1bGVkLCBzYWRseSBmb3IKeW91IGhlcmUg
+4oCUIGlzIGhhdmluZyBtdWx0aXBsZSBDUlVTSCAiZXBvY2hzIiBhY3RpdmUgYXQgdGhlIHNhbWUg
+dGltZSwKYW5kIGxldHRpbmcgdGhlIE9TRE1hcCBzcGVjaWZ5IGEgcGcgYXMgdGhlIGNyb3Nzb3Zl
+ciBwb2ludCBmcm9tIG9uZQpDUlVTSCBlcG9jaCB0byB0aGUgbmV4dC4gKEFtb25nIG90aGVyIHRo
+aW5ncywgdGhpcyB3b3VsZCBsZXQgdXMKZmluYWxseSBsaW1pdCB0aGUgbnVtYmVyIG9mIGJhY2tm
+aWxscyBpbiBwcm9ncmVzcyBhdCB0aGUgY2x1c3RlcgpsZXZlbCEpCgpJJ20gbGVzcyBmYW1pbGlh
+ciB3aXRoIHRoZSB3ZWlnaHQtc2V0IG1lY2hhbmlzbSwgc28geW91IG1pZ2h0IGhhdmUgYQpjaGFu
+Y2UgdGhlcmU/IE1vc3RseSB0aG91Z2ggdGhpcyBpcyBqdXN0IG5vdCBzb21ldGhpbmcgUkFET1Mg
+aXMgc2V0IHVwCnRvIGRvLCBiZWNhdXNlIHdlIGV4cGVjdCB0aGUgY2x1c3RlciB0byBiZSBhYmxl
+IHRvIGhhbmRsZSB0aGUgYmFja2ZpbGwKeW91IHRocm93IGF0IGl0LCBvbmNlIHRoZSBwZXItT1NE
+IGNvbmZpZyBpcyBjb3JyZWN0LiAoSXQgaGFzIGJlY29tZQpjbGVhciB0aGF0IHRoZSBwZXItT1NE
+IGNvbmZpZ3MgbmVlZCB0byBkbyBhIGJldHRlciBwcmlvcml0aXphdGlvbiBqb2IKaWYgdGhhdCdz
+IGV2ZXIgZ29pbmcgdG8gd29yaywgb3IgbWF5YmUgd2UncmUganVzdCBjb21wbGV0ZWx5IHdyb25n
+CmFueXdheS4gQnV0IG9idmlvdXNseSBpdCB0YWtlcyBtb3JlIHRpbWUgdG8gY2hhbmdlIHRoZSBh
+cmNoaXRlY3R1cmUKYW5kIHRoZSBjb2RlIHRvIGhhbmRsZSBpdCB0aGFuIHRvIGp1c3QgaWRlbnRp
+ZnkgdGhlcmUncyBhIHByb2JsZW0uKQoqc2lnaCoKLUdyZWcKCj4KPiBUaGFua3MhCj4KPiAtLSBk
+YW4KPgo+ID4gVGhlIHN1Z2dlc3RlZCBzdGVwIHdlaWdodGVkLXRha2Ugd291bGQgYmUgbW9yZSBm
+bGV4aWJsZSBhcyBpdCBjYW4gYmUKPiA+IGNoYW5nZWQgb24gYSByZXBsaWNhIGxldmVsLCBidXQg
+aSBkbyBub3Qga25vdyBpZiB5b3UgY2FuIGRvIHRoaXMgd2l0aAo+ID4gZXhpc3RpbmcgY29kZS4K
+PiA+Cj4gPiBNYWdlZAo+ID4KPiA+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlz
+dHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
