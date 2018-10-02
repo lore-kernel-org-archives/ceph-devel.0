@@ -1,65 +1,160 @@
-From: Ioana Ciornei <ioana.ciornei@nxp.com>
-Subject: RE: [PATCH] driver core: device: add BUS_ATTR_WO macro
-Date: Tue, 2 Oct 2018 09:43:35 +0000
-Message-ID: <HE1PR0401MB236354F325B7A56355068E35E0E80@HE1PR0401MB2363.eurprd04.prod.outlook.com>
-References: <1538407972-9340-1-git-send-email-ioana.ciornei@nxp.com>
- <20181001210804.GA24332@kroah.com>
+From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
+Subject: Re: CRUSH puzzle: step weighted-take
+Date: Tue, 2 Oct 2018 12:02:37 +0200
+Message-ID: <CABZ+qqk7sbneqfJnqvQFR83-AVV_Sg5wPNBY_oZ+Tf0_r37jww@mail.gmail.com>
+References: <CABZ+qqmMiGSF3g-WR9TLTUAxwdK3aCt0wq+ku5XWzukp0tJ04w@mail.gmail.com>
+ <005bdde7-f206-1405-8255-05025c6d0734@petasan.org>
+ <CABZ+qq=LgcMKJxvxg0fa9x-gNAR18Yviou5XiriLCOfnEj+w0w@mail.gmail.com>
+ <CAJ4mKGYFAgbu0fW_zy7stR5YU7ERG0=jWciFYMmDG_sfZAbUwg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181001210804.GA24332@kroah.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Greg KH <gregkh@linuxfoundation.org>
-Cc: "idryomov@gmail.com" <idryomov@gmail.com>, "sage@redhat.com" <sage@redhat.com>, "elder@kernel.org" <elder@kernel.org>, "jth@kernel.org" <jth@kernel.org>, "benh@kernel.crashing.org" <benh@kernel.crashing.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAJ4mKGYFAgbu0fW_zy7stR5YU7ERG0=jWciFYMmDG_sfZAbUwg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-> > Add BUS_ATTR_WO macro to make it easier to add attributes without
-> > auditing the mode settings. Also, use the newly added macro where
-> > appropriate.
-> >
-> > Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
-> > ---
-> >  arch/powerpc/platforms/pseries/ibmebus.c | 12 ++++----
-> >  drivers/block/rbd.c                      | 48 ++++++++++++++++--------=
---------
-> >  drivers/scsi/fcoe/fcoe_sysfs.c           |  4 +--
-> >  drivers/scsi/fcoe/fcoe_transport.c       | 10 +++----
-> >  include/linux/device.h                   |  2 ++
-> >  include/scsi/libfcoe.h                   |  8 +++---
-> >  6 files changed, 43 insertions(+), 41 deletions(-)
->=20
-> Nice!  This duplicates a lot of the work I did back in July but have not =
-pushed out
-> very far due to the other things that ended up happening around that time=
-:
-> 	https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core.git/l=
-og/?h=3Dbus_cleanup=20
->=20
-> As the patch series seen at that link shows, you can do this in more plac=
-es than
-> just what you did here.
->=20
-> Either way, you should break this up into the individual patches, like I =
-did or you
-> can take my patches if you want.  Getting the BUS_ATTR_WO() macro added i=
-s
-> good to do now, and then you can go and hit up all of the different subsy=
-stems
-> that should be converted over to it.
-
-I can of course split my patch into individual ones and resubmit them, but =
-as you already have the entire patch set ready, I feel like we can just pus=
-h those. I looked through your changes and it seems like you covered all th=
-e subsystems. Please let me know if there is something else I should do.
-
-My intention here was to first add the _WO attribute so that afterwards I c=
-an add a new bus attribute in the fsl-mc bus.
-
-Ioana
-
->=20
-> thanks,
->=20
-> greg k-h
+T24gTW9uLCBPY3QgMSwgMjAxOCBhdCA4OjA5IFBNIEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJl
+ZGhhdC5jb20+IHdyb3RlOgo+Cj4gT24gRnJpLCBTZXAgMjgsIDIwMTggYXQgMTI6MDMgQU0gRGFu
+IHZhbiBkZXIgU3RlciA8ZGFuQHZhbmRlcnN0ZXIuY29tPiB3cm90ZToKPiA+Cj4gPiBPbiBUaHUs
+IFNlcCAyNywgMjAxOCBhdCA5OjU3IFBNIE1hZ2VkIE1va2h0YXIgPG1tb2todGFyQHBldGFzYW4u
+b3JnPiB3cm90ZToKPiA+ID4KPiA+ID4KPiA+ID4KPiA+ID4gT24gMjcvMDkvMTggMTc6MTgsIERh
+biB2YW4gZGVyIFN0ZXIgd3JvdGU6Cj4gPiA+ID4gRGVhciBDZXBoIGZyaWVuZHMsCj4gPiA+ID4K
+PiA+ID4gPiBJIGhhdmUgYSBDUlVTSCBkYXRhIG1pZ3JhdGlvbiBwdXp6bGUgYW5kIHdvbmRlcmVk
+IGlmIHNvbWVvbmUgY291bGQKPiA+ID4gPiB0aGluayBvZiBhIGNsZXZlciBzb2x1dGlvbi4KPiA+
+ID4gPgo+ID4gPiA+IENvbnNpZGVyIGFuIG9zZCB0cmVlIGxpa2UgdGhpczoKPiA+ID4gPgo+ID4g
+PiA+ICAgIC0yICAgICAgIDQ0MjguMDI5NzkgICAgIHJvb20gMDUxMy1SLTAwNTAKPiA+ID4gPiAg
+IC03MiAgICAgICAgOTExLjgxODk3ICAgICAgICAgcmFjayBSQTAxCj4gPiA+ID4gICAgLTQgICAg
+ICAgIDkxNy4yNzg5OSAgICAgICAgIHJhY2sgUkEwNQo+ID4gPiA+ICAgIC02ICAgICAgICA5MTcu
+MjU1MDAgICAgICAgICByYWNrIFJBMDkKPiA+ID4gPiAgICAtOSAgICAgICAgNzg2LjIzOTAxICAg
+ICAgICAgcmFjayBSQTEzCj4gPiA+ID4gICAtMTQgICAgICAgIDg5NS40MzkwMyAgICAgICAgIHJh
+Y2sgUkExNwo+ID4gPiA+ICAgLTY1ICAgICAgIDExNjEuMTYwMDMgICAgIHJvb20gMDUxMy1SLTAw
+NjAKPiA+ID4gPiAgIC03MSAgICAgICAgNTc4Ljc2MDAxICAgICAgICAgaXBzZXJ2aWNlIFM1MTMt
+QS1JUDM4Cj4gPiA+ID4gICAtNzAgICAgICAgIDI4Ny41NjAwMCAgICAgICAgICAgICByYWNrIEJB
+MDkKPiA+ID4gPiAgIC04MCAgICAgICAgMjkxLjIwMDAxICAgICAgICAgICAgIHJhY2sgQkExMAo+
+ID4gPiA+ICAgLTc2ICAgICAgICA1ODIuNDAwMDIgICAgICAgICBpcHNlcnZpY2UgUzUxMy1BLUlQ
+NjMKPiA+ID4gPiAgIC03NSAgICAgICAgMjkxLjIwMDAxICAgICAgICAgICAgIHJhY2sgQkExMQo+
+ID4gPiA+ICAgLTc4ICAgICAgICAyOTEuMjAwMDEgICAgICAgICAgICAgcmFjayBCQTEyCj4gPiA+
+ID4KPiA+ID4gPiBJbiB0aGUgYmVnaW5uaW5nLCBmb3IgcmVhc29ucyB0aGF0IGFyZSBub3QgaW1w
+b3J0YW50LCB3ZSBjcmVhdGVkIHR3byBwb29sczoKPiA+ID4gPiAgICAqIHBvb2xBIGNob29zZXMg
+cm9vbT0wNTEzLVItMDA1MCB0aGVuIHJlcGxpY2F0ZXMgM3ggYWNyb3NzIHRoZSByYWNrcy4KPiA+
+ID4gPiAgICAqIHBvb2xCIGNob29zZXMgcm9vbT0wNTEzLVItMDA2MCwgcmVwbGljYXRlcyAyeCBh
+Y3Jvc3MgdGhlCj4gPiA+ID4gaXBzZXJ2aWNlcywgdGhlbiBwdXRzIGEgM3JkIHJlcGxpY2EgaW4g
+cm9vbSAwNTEzLVItMDA1MC4KPiA+ID4gPgo+ID4gPiA+IEZvciBjbGFyaXR5LCBoZXJlIGlzIHRo
+ZSBjcnVzaCBydWxlIGZvciBwb29sQjoKPiA+ID4gPiAgICAgICAgICB0eXBlIHJlcGxpY2F0ZWQK
+PiA+ID4gPiAgICAgICAgICBtaW5fc2l6ZSAxCj4gPiA+ID4gICAgICAgICAgbWF4X3NpemUgMTAK
+PiA+ID4gPiAgICAgICAgICBzdGVwIHRha2UgMDUxMy1SLTAwNjAKPiA+ID4gPiAgICAgICAgICBz
+dGVwIGNob29zZWxlYWYgZmlyc3RuIDIgdHlwZSBpcHNlcnZpY2UKPiA+ID4gPiAgICAgICAgICBz
+dGVwIGVtaXQKPiA+ID4gPiAgICAgICAgICBzdGVwIHRha2UgMDUxMy1SLTAwNTAKPiA+ID4gPiAg
+ICAgICAgICBzdGVwIGNob29zZWxlYWYgZmlyc3RuIC0yIHR5cGUgcmFjawo+ID4gPiA+ICAgICAg
+ICAgIHN0ZXAgZW1pdAo+ID4gPiA+Cj4gPiA+ID4gTm93IHRvIHRoZSBwdXp6bGUuCj4gPiA+ID4g
+Rm9yIHJlYXNvbnMgdGhhdCBhcmUgbm90IGltcG9ydGFudCwgd2Ugbm93IHdhbnQgdG8gY2hhbmdl
+IHRoZSBydWxlIGZvcgo+ID4gPiA+IHBvb2xCIHRvIHB1dCBhbGwgdGhyZWUgMyByZXBsaWNhcyBp
+biByb29tIDA1MTMtUi0wMDYwLgo+ID4gPiA+IEFuZCB3ZSBuZWVkIHRvIGRvIHRoaXMgaW4gYSB3
+YXkgd2hpY2ggaXMgdG90YWxseSBub24tZGlzcnVwdGl2ZQo+ID4gPiA+IChsYXRlbmN5LXdpc2Up
+IHRvIHRoZSB1c2VycyBvZiBlaXRoZXIgcG9vbHMuIChUaGVzZSBhcmUgYm90aCAqdmVyeSoKPiA+
+ID4gPiBhY3RpdmUgUkJEIHBvb2xzKS4KPiA+ID4gPgo+ID4gPiA+IEkgc2VlIHR3byBvYnZpb3Vz
+IHdheXMgdG8gcHJvY2VlZDoKPiA+ID4gPiAgICAoMSkgc2ltcGx5IGNoYW5nZSB0aGUgcnVsZSBm
+b3IgcG9vbEIgdG8gcHV0IGEgdGhpcmQgcmVwbGljYSBvbiBhbnkKPiA+ID4gPiBvc2QgaW4gcm9v
+bSAwNTEzLVItMDA2MC4gSSdtIGFmcmFpZCB0aG91Z2ggdGhhdCB0aGlzIHdvdWxkIGludm9sdmUg
+d2F5Cj4gPiA+ID4gdG9vIG1hbnkgY29uY3VycmVudCBiYWNrZmlsbHMsIGNsdXN0ZXItd2lkZSwg
+ZXZlbiB3aXRoCj4gPiA+ID4gb3NkX21heF9iYWNrZmlsbHM9MS4KPiA+ID4gPiAgICAoMikgY2hh
+bmdlIHBvb2xCIHNpemUgdG8gMiwgdGhlbiBjaGFuZ2UgdGhlIGNydXNoIHJ1bGUgdG8gdGhhdCBm
+cm9tCj4gPiA+ID4gKDEpLCB0aGVuIHJlc2V0IHBvb2xCIHNpemUgdG8gMy4gVGhpcyB3b3VsZCBy
+aXNrIGRhdGEgYXZhaWxhYmlsaXR5Cj4gPiA+ID4gZHVyaW5nIHRoZSB0aW1lIHRoYXQgdGhlIHBv
+b2wgaXMgc2l6ZT0yLCBhbmQgYWxzbyByaXNrcyB0aGF0IGV2ZXJ5IG9zZAo+ID4gPiA+IGluIHJv
+b20gMDUxMy1SLTAwNTAgd291bGQgYmUgdG9vIGJ1c3kgZGVsZXRpbmcgZm9yIHNvbWUgaW5kZXRl
+cm1pbmF0ZQo+ID4gPiA+IHRpbWUgcGVyaW9kICgxMHMgb2YgbWludXRlcywgSSBleHBlY3QpLgo+
+ID4gPiA+Cj4gPiA+ID4gU28gSSB3b3VsZCBwcm9iYWJseSBleGNsdWRlIHRob3NlIHR3byBhcHBy
+b2FjaGVzLgo+ID4gPiA+Cj4gPiA+ID4gQ29uY2VwdHVhbGx5IHdoYXQgSSdkIGxpa2UgdG8gYmUg
+YWJsZSB0byBkbyBpcyBhIGdyYWR1YWwgbWlncmF0aW9uLAo+ID4gPiA+IHdoaWNoIGlmIEkgbWF5
+IGludmVudCBzb21lIHN5bnRheCBvbiB0aGUgZmx5Li4uCj4gPiA+ID4KPiA+ID4gPiBJbnN0ZWFk
+IG9mCj4gPiA+ID4gICAgICAgICBzdGVwIHRha2UgMDUxMy1SLTAwNTAKPiA+ID4gPiBkbwo+ID4g
+PiA+ICAgICAgICAgc3RlcCB3ZWlnaHRlZC10YWtlIDk5IDA1MTMtUi0wMDUwIDEgMDUxMy1SLTAw
+NjAKPiA+ID4gPgo+ID4gPiA+IFRoYXQgaXMsIDk5JSBvZiB0aGUgdGltZSB0YWtlIHJvb20gMDUx
+My1SLTAwNTAgZm9yIHRoZSAzcmQgY29waWVzLCAxJQo+ID4gPiA+IG9mIHRoZSB0aW1lIHRha2Ug
+cm9vbSAwNTEzLVItMDA2MC4KPiA+ID4gPiBXaXRoIGEgbWVjaGFuaXNtIGxpa2UgdGhhdCwgd2Ug
+Y291bGQgZ3JhZHVhbGx5IGFkanVzdCB0aG9zZSAic3RlcAo+ID4gPiA+IHdlaWdodGVkLXRha2Ui
+IGxpbmVzIHVudGlsIDEwMCUgb2YgdGhlIDNyZCBjb3BpZXMgd2VyZSBpbiAwNTEzLVItMDA2MC4K
+PiA+ID4gPgo+ID4gPiA+IEkgaGF2ZSBhIGZlZWxpbmcgdGhhdCBzb21ldGhpbmcgZXF1aXZhbGVu
+dCB0byB0aGF0IGlzIGFscmVhZHkgcG9zc2libGUKPiA+ID4gPiB3aXRoIHdlaWdodC1zZXRzIG9y
+IHNvbWUgb3RoZXIgY2xldmVyIGNydXNoIHRyaWNrZXJ5Lgo+ID4gPiA+IEFueSBpZGVhcz8KPiA+
+ID4gPgo+ID4gPiA+IEJlc3QgUmVnYXJkcywKPiA+ID4gPgo+ID4gPiA+IERhbgo+ID4gPiA+IF9f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gPiA+ID4gY2Vw
+aC11c2VycyBtYWlsaW5nIGxpc3QKPiA+ID4gPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4g
+PiA+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
+Y29tCj4gPiA+IHdvdWxkIGl0IGJlIHBvc3NpYmxlIGluIHlvdXIgY2FzZSB0byBjcmVhdGUgYSBw
+YXJlbnQgZGF0YWNlbnRlciBidWNrZXQKPiA+ID4gdG8gaG9sZCBib3RoIHJvb21zIGFuZCBhc3Np
+Z24gdGhlaXIgcmVsYXRpdmUgd2VpZ2h0cyB0aGVyZSwgdGhlbiBmb3IgdGhlCj4gPiA+IHRoaXJk
+IHJlcGxpY2EgZG8gYSBzdGVwIHRha2UgdG8gdGhpcyBwYXJlbnQgYnVja2V0ID8gaXRzIG5vdCBl
+bGVnYW50IGJ1dAo+ID4gPiBtYXkgZG8gdGhlIHRyaWNrLgo+ID4KPiA+IEhleSwgdGhhdCBtaWdo
+dCB3b3JrISBib3RoIHJvb21zIGFyZSBhbHJlYWR5IGluIHRoZSBkZWZhdWx0IHJvb3Q6Cj4gPgo+
+ID4gICAtMSAgICAgICA1NTg5LjE4OTk0IHJvb3QgZGVmYXVsdAo+ID4gICAtMiAgICAgICA0NDI4
+LjAyOTc5ICAgICByb29tIDA1MTMtUi0wMDUwCj4gPiAgLTY1ICAgICAgIDExNjEuMTYwMDMgICAg
+IHJvb20gMDUxMy1SLTAwNjAKPiA+ICAtNzEgICAgICAgIDU3OC43NjAwMSAgICAgICAgIGlwc2Vy
+dmljZSBTNTEzLUEtSVAzOAo+ID4gIC03NiAgICAgICAgNTgyLjQwMDAyICAgICAgICAgaXBzZXJ2
+aWNlIFM1MTMtQS1JUDYzCj4gPgo+ID4gc28gSSdsbCBwbGF5IHdpdGggYSB0ZXN0IHBvb2wgYW5k
+IHdlaWdodGluZyBkb3duIHJvb20gMDUxMy1SLTAwNjAgdG8KPiA+IHNlZSBpZiB0aGlzIGNhbiB3
+b3JrLgo+Cj4gSSBkb24ndCB0aGluayB0aGlzIHdpbGwgd29yayDigJQgaXQgd2lsbCBwcm9iYWJs
+eSBjaGFuZ2UgdGhlIHNlZWQgdGhhdAo+IGlzIHVzZWQgYW5kIG1lYW4gdGhhdCB0aGUgcnVsZSB0
+cmllcyB0byBtb3ZlICpldmVyeXRoaW5nKiwgbm90IGp1c3QKPiB0aGUgdGhpcmQgUEcgcmVwbGlj
+YXMuIEJ1dCBwZXJoYXBzIEknbSBtaXN0YWtlbiBhYm91dCB0aGUgZGV0YWlscyBvZgo+IHRoaXMg
+bWVjaGFuaWMuLi4KPgoKSW5kZWVkLCBvc2RtYXB0b29sIGluZGljYXRlZCB0aGF0IHRoaXMgaXNu
+J3QgZ29pbmcgdG8gd29yayAtLSB0aGUKZmlyc3QgdHdvIHJlcGxpY2FzIHdlcmUgdGhlIHNhbWUg
+KGEsIGIpLCBidXQgdGhlIHRoaXJkIHJlcGxpY2Egd2FzCmFsd2F5cyAoYSkgYWdhaW4uLi4gc2Vl
+bXMgbGlrZSB0d28gIm92ZXJsYXBwaW5nIiBjaG9vc2VsZWFmcyBpbiB0aGUKc2FtZSBjcnVzaCBy
+dWxlIHdpbGwgY2hvb3NlIHRoZSBzYW1lIG9zZCA6KAoKPiBUaGUgY3J1c2ggd2VpZ2h0ZWQtdGFr
+ZSBpcyBpbnRlcmVzdGluZywgYnV0IEknbSBub3Qgc3VyZSBJIHdvdWxkIHdhbnQKPiB0byBkbyBz
+b21ldGhpbmcgcHJvYmFiaWxpc3RpYyBsaWtlIHRoYXQgaW4gdGhpcyBzaXR1YXRpb24uIFdoYXQg
+d2UndmUKPiBkaXNjdXNzZWQgYmVmb3JlIOKAlCBidXQgKm5vdCogaW1wbGVtZW50ZWQgb3IgZXZl
+biBzY2hlZHVsZWQsIHNhZGx5IGZvcgo+IHlvdSBoZXJlIOKAlCBpcyBoYXZpbmcgbXVsdGlwbGUg
+Q1JVU0ggImVwb2NocyIgYWN0aXZlIGF0IHRoZSBzYW1lIHRpbWUsCj4gYW5kIGxldHRpbmcgdGhl
+IE9TRE1hcCBzcGVjaWZ5IGEgcGcgYXMgdGhlIGNyb3Nzb3ZlciBwb2ludCBmcm9tIG9uZQo+IENS
+VVNIIGVwb2NoIHRvIHRoZSBuZXh0LiAoQW1vbmcgb3RoZXIgdGhpbmdzLCB0aGlzIHdvdWxkIGxl
+dCB1cwo+IGZpbmFsbHkgbGltaXQgdGhlIG51bWJlciBvZiBiYWNrZmlsbHMgaW4gcHJvZ3Jlc3Mg
+YXQgdGhlIGNsdXN0ZXIKPiBsZXZlbCEpCj4KPiBJJ20gbGVzcyBmYW1pbGlhciB3aXRoIHRoZSB3
+ZWlnaHQtc2V0IG1lY2hhbmlzbSwgc28geW91IG1pZ2h0IGhhdmUgYQo+IGNoYW5jZSB0aGVyZT8g
+TW9zdGx5IHRob3VnaCB0aGlzIGlzIGp1c3Qgbm90IHNvbWV0aGluZyBSQURPUyBpcyBzZXQgdXAK
+PiB0byBkbywgYmVjYXVzZSB3ZSBleHBlY3QgdGhlIGNsdXN0ZXIgdG8gYmUgYWJsZSB0byBoYW5k
+bGUgdGhlIGJhY2tmaWxsCj4geW91IHRocm93IGF0IGl0LCBvbmNlIHRoZSBwZXItT1NEIGNvbmZp
+ZyBpcyBjb3JyZWN0LiAoSXQgaGFzIGJlY29tZQo+IGNsZWFyIHRoYXQgdGhlIHBlci1PU0QgY29u
+ZmlncyBuZWVkIHRvIGRvIGEgYmV0dGVyIHByaW9yaXRpemF0aW9uIGpvYgo+IGlmIHRoYXQncyBl
+dmVyIGdvaW5nIHRvIHdvcmssIG9yIG1heWJlIHdlJ3JlIGp1c3QgY29tcGxldGVseSB3cm9uZwo+
+IGFueXdheS4gQnV0IG9idmlvdXNseSBpdCB0YWtlcyBtb3JlIHRpbWUgdG8gY2hhbmdlIHRoZSBh
+cmNoaXRlY3R1cmUKPiBhbmQgdGhlIGNvZGUgdG8gaGFuZGxlIGl0IHRoYW4gdG8ganVzdCBpZGVu
+dGlmeSB0aGVyZSdzIGEgcHJvYmxlbS4pCj4gKnNpZ2gqCgpJbiB0aGUgZW5kIHdlIGZvdW5kIGEg
+Z29vZCBzb2x1dGlvbiB1c2luZyB1cG1hcDoKCjEuIFdlIGNyZWF0ZWQgYSBuZXcgY3J1c2ggcnVs
+ZSB3aXRoIG91ciBkZXNpcmVkIHBsYWNlbWVudC4uLiB0aHJlZQpyZXBsaWNhcyBpbiByb29tIDA1
+MTMtUi0wMDYwLgoyLiBXZSB0b29rIGEgc25hcHNob3Qgb2YgdGhlIFBHIHVwIG1hcHBpbmdzLgoz
+LiBXZSBzZXQgbm9yZWJhbGFuY2UgdGhlbiBjaGFuZ2VkIHRoZSBjcnVzaCBydWxlIGZvciBvdXIg
+cG9vbEIgdG8gdGhlCm5ldyBydWxlLiAoUEdzIHJlLXBlZXJlZCwgd2l0aCBsb3RzIG9mIGRhdGEg
+bW92ZW1lbnQgcmVxdWlyZWQgYnV0Cm5vdGhpbmcgbW92aW5nIHlldCBkdWUgdG8gbm9yZWJhbGFu
+Y2UpLgo0LiBXZSB0aGVuIHVzZWQgYSBzY3JpcHQgd2hpY2ggdXNlcyBwZy11cG1hcC1pdGVtcyB0
+byBtYXAgZWFjaCBQRyBiYWNrCnRvIGl0cyBvcmlnaW5hbCBPU0RzLiAoVGhpcyBwdXQgdGhlIGNs
+dXN0ZXIgYmFjayBpbiBIRUFMVEhfT0spCjUuIFdlIG5vdyBoYXZlIGEgY3JvbiBqb2IgcmVtb3Zp
+bmcgMTAgb2YgdGhlIHBnLXVwbWFwLWl0ZW1zIHBlciB+MTUKbWludXRlcywgd2l0aCBkYXRhIHNs
+b3dseSBtb3ZpbmcgaW50byAwNTEzLVItMDA2MC4KClRoZSB1cG1hcHBpbmcgc2NyaXB0IGlzIGEg
+cm91Z2ggaW1wbGVtZW50YXRpb24gb2YgdGhlIGNlcGggb3NkIGNydXNoCiJmcmVlemUiIGlkZWEg
+cHJlc2VudGVkIGF0IHllIG9sZGUgQ0RNIEFwcmlsIDIwMTg6Cmh0dHBzOi8vcGFkLmNlcGguY29t
+L3AvY2VwaGFsb2Nvbi11c2FiaWxpdHktYnJhaW5zdG9ybWluZwpTZWVtcyB0byBiZSBxdWl0ZSB1
+c2VmdWwgaW4gdGhpcyBjYXNlLgoKLS0gRGFuCgoKPiAtR3JlZwo+Cj4gPgo+ID4gVGhhbmtzIQo+
+ID4KPiA+IC0tIGRhbgo+ID4KPiA+ID4gVGhlIHN1Z2dlc3RlZCBzdGVwIHdlaWdodGVkLXRha2Ug
+d291bGQgYmUgbW9yZSBmbGV4aWJsZSBhcyBpdCBjYW4gYmUKPiA+ID4gY2hhbmdlZCBvbiBhIHJl
+cGxpY2EgbGV2ZWwsIGJ1dCBpIGRvIG5vdCBrbm93IGlmIHlvdSBjYW4gZG8gdGhpcyB3aXRoCj4g
+PiA+IGV4aXN0aW5nIGNvZGUuCj4gPiA+Cj4gPiA+IE1hZ2VkCj4gPiA+Cj4gPiA+Cj4gPiBfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+ID4gY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKPiA+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiA+IGh0dHA6Ly9s
+aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcg
+bGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
