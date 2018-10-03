@@ -1,19 +1,18 @@
-From: =?utf-8?Q?G=C3=B6ktu=C4=9F_Y=C4=B1ld=C4=B1r=C4=B1m?=
- <goktug.yildirim-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Subject: Re: Mimic offline problem
-Date: Tue, 2 Oct 2018 23:53:29 +0200
-Message-ID: <E516BA34-165C-4542-B53D-B022B913874A@gmail.com>
+Date: Wed, 3 Oct 2018 03:14:41 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1810030311230.31802@piezo.novalocal>
 References: <4C31C6EC-573D-42AD-BC6C-F7F103DBEC16@gmail.com>
  <CAE-AtHrjekCcLmO7MUB86XG7VH+bBt6yJH+ZRe7Wnh3tKB8JWw@mail.gmail.com>
  <CANrNMwUaER4e97schGN+KnB_6aNF6SYpPEFvLD=qcpp1eeWEJg@mail.gmail.com>
  <44698713-3F6C-451D-B67B-2053D1B30557@gmail.com>
  <CANrNMwW-RiVxtUnjTrZpiRXi6k06LxaeqRCqbXiuwwjTStWBhA@mail.gmail.com>
  <F96A1781-7767-40A4-B814-C59C0CDD5E68@gmail.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ <E516BA34-165C-4542-B53D-B022B913874A@gmail.com>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-920813624-1538536483=:31802"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <F96A1781-7767-40A4-B814-C59C0CDD5E68-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <E516BA34-165C-4542-B53D-B022B913874A-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -23,134 +22,170 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?utf-8?Q?Darius_Kasparavi=C4=8Dius?= <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: =?UTF-8?Q?G=C3=B6ktu=C4=9F_Y=C4=B1ld=C4=B1r=C4=B1m?= <goktug.yildirim-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-QW55b25lIGhlYXJ0IGFib3V0IG9zZF9maW5kX2Jlc3RfaW5mb19pZ25vcmVfaGlzdG9yeV9sZXMg
-PSB0cnVlID8KSXMgdGhhdCBiZSB1c2VmdWxsIGhlcmU/IFRoZXJlIGlzIHN1Y2ggYSBsZXNzIGlu
-Zm9ybWF0aW9uIGFib3V0IGl0LgoKR29rdHVnIFlpbGRpcmltIDxnb2t0dWcueWlsZGlyaW1AZ21h
-aWwuY29tPiDFn3VubGFyxLEgeWF6ZMSxICgyIEVraSAyMDE4IDIyOjExKToKCj4gSGksCj4gCj4g
-SW5kZWVkIEkgbGVmdCBjZXBoLWRpc2sgdG8gZGVjaWRlIHRoZSB3YWwgYW5kIGRiIHBhcnRpdGlv
-bnMgd2hlbiBJIHJlYWQgc29tZXdoZXJlIHRoYXQgdGhhdCB3aWxsIGRvIHRoZSBwcm9wZXIgc2l6
-aW5nLiAKPiBGb3IgdGhlIGJsdXN0b3JlIGNhY2hlIHNpemUgSSBoYXZlIHBsZW50eSBvZiBSQU0u
-IEkgd2lsbCBpbmNyZWFzZSA4R0IgZm9yIGVhY2ggYW5kIGRlY2lkZSBhIG1vcmUgY2FsY3VsYXRl
-ZCBudW1iZXIgICAgYWZ0ZXIgY2x1c3RlciBzZXR0bGVzLgo+IAo+IEZvciB0aGUgb3NkIG1hcCBs
-b2FkaW5nIEnigJl2ZSBhbHNvIGZpZ3VyZWQgaXQgb3V0LiBBbmQgaXQgaXMgaW4gbG9vcC4gRm9y
-IHRoYXQgcmVhc29uIEkgc3RhcnRlZCBjbHVzdGVyIHdpdGggbm91cCBmbGFnIGFuZCB3YWl0ZWQg
-T1NEcyB0byByZWFjaCB0aGUgdXB0b2RhdGUgZXBvY2ggbnVtYmVyLiBBZnRlciB0aGF0IEkgdW5z
-ZXQgbm91cC4gQnV0IEkgZGlkIG5vdCBwYXkgYXR0ZW50aW9uIHRvIG1hbmFnZXIgbG9ncy4gTGV0
-IG1lIGNoZWNrIGl0LCB0aGFuayB5b3UhCj4gCj4gSSBhbSBub3QgZm9yY2luZyBqbWVsbGFjIG9y
-IGFueXRoaW5nIGVsc2UgcmVhbGx5LiBJIGhhdmUgYSB2ZXJ5IHN0YW5kYXJkIGluc3RhbGxhdGlv
-biBhbmQgbm8gdHdlYWtzIG9yIHR1bmluZ3MuIEFsbCB3ZSBhc2sgZm9yIHRoZSBzdGFiaWxpdHkg
-dmVyc3VzIHNwZWVkIGZyb20gdGhlIGJlZ2luaW5nLiBBbmQgaGVyZSB3ZSBhcmUgOi8KPiAKPj4g
-T24gMiBPY3QgMjAxOCwgYXQgMjE6NTMsIERhcml1cyBLYXNwYXJhdmnEjWl1cyA8ZGF6bmlzQGdt
-YWlsLmNvbT4gd3JvdGU6Cj4+IAo+PiBIaSwKPj4gCj4+IAo+PiBJIGNhbiBzZWUgc29tZSBpc3N1
-ZXMgZnJvbSB0aGUgb3NkIGxvZyBmaWxlLiBZb3UgaGF2ZSBhbiBleHRyZW1lbHkgbG93Cj4+IHNp
-emUgZGIgYW5kIHdhbCBwYXJ0aXRpb25zLiBPbmx5IDFHQiBmb3IgREIgYW5kIDU3Nk1CIGZvciB3
-YWwuIEkgd291bGQKPj4gcmVjb21tZW5kIGNyYW5raW5nIHVwIHJvY2tzZGIgY2FjaGUgc2l6ZSBh
-cyBtdWNoIGFzIHBvc3NpYmxlLiBJZiB5b3UKPj4gaGF2ZSBSQU0geW91IGNhbiBhbHNvIGluY3Jl
-YXNlIGJsdWVzdG9yZXMgY2FjaGUgc2l6ZSBmb3IgaGRkLiBEZWZhdWx0Cj4+IGlzIDFHQiBiZSBh
-cyBsaWJlcmFsIGFzIHlvdSBjYW4gd2l0aG91dCBnZXR0aW5nIE9PTSBraWxscy4gWW91IGFsc28K
-Pj4gaGF2ZSBsb3RzIG9mIG9zZCBtYXAgbG9hZGluZyBhbmQgZGVjb2RpbmcgaW4gdGhlIGxvZy4g
-QXJlIHlvdSBzdXJlIGFsbAo+PiBtb25pdG9ycy9tYW5hZ2Vycy9vc2RzIGFyZSB1cCB0byBkYXRl
-PyBQbHVzIG1ha2Ugc3VyZSB5b3UgYXJlbid0Cj4+IGZvcmNpbmcgamVtYWxsb2MgbG9hZGluZy4g
-SSBoYWQgYSBmdW5ueSBpbnRlcmFjdGlvbiBhZnRlciB1cGdyYWRpbmcgdG8KPj4gbWltaWMuCj4+
-IE9uIFR1ZSwgT2N0IDIsIDIwMTggYXQgOTowMiBQTSBHb2t0dWcgWWlsZGlyaW0KPj4gPGdva3R1
-Zy55aWxkaXJpbUBnbWFpbC5jb20+IHdyb3RlOgo+Pj4gCj4+PiBIZWxsbyBEYXJpdXMsCj4+PiAK
-Pj4+IFRoYW5rcyBmb3IgcmVwbHkhCj4+PiAKPj4+IFRoZSBtYWluIHByb2JsZW0gaXMgd2UgY2Fu
-IG5vdCBxdWVyeSBQR3MuIOKAnGNlcGggcGcgNjcuNTRmIHF1ZXJ54oCdIGRvZXMgc3R1Y2tzIGFu
-ZCB3YWl0IGZvcmV2ZXIgc2luY2UgT1NEIGlzIHVucmVzcG9uc2l2ZS4KPj4+IFdlIGFyZSBjZXJ0
-YWluIHRoYXQgT1NEIGdldHMgdW5yZXNwb25zaXZlIGFzIHNvb24gYXMgaXQgVVAuIEFuZCB3ZSBh
-cmUgY2VydGFpbiB0aGF0IE9TRCByZXNwb25kcyBhZ2FpbiBhZnRlciBpdHMgZGlzayB1dGlsaXph
-dGlvbiBzdG9wcy4KPj4+IAo+Pj4gU28gd2UgaGF2ZSBhIHNtYWxsIHRlc3QgbGlrZSB0aGF0Ogo+
-Pj4gKiBTdG9wIGFsbCBPU0RzICgxNjggb2YgdGhlbSkKPj4+ICogU3RhcnQgT1NEMS4gJTk1IG9z
-ZCBkaXNrIHV0aWxpemF0aW9uIGltbWVkaWF0ZWx5IHN0YXJ0cy4gSXQgdGFrZXMgOCBtaW5zIHRv
-IGZpbmlzaC4gT25seSBhZnRlciB0aGF0IOKAnGNlcGggcGcgNjcuNTRmIHF1ZXJ54oCdIHdvcmtz
-IQo+Pj4gKiBXaGlsZSBPU0QxIGlzIOKAnHVwIiBzdGFydCBPU0QyLiBBcyBzb29uIGFzIE9TRDIg
-c3RhcnRzIE9TRDEgJiBPU0QyIHN0YXJ0cyAlOTUgZGlzayB1dGlsaXphdGlvbi4gVGhpcyB0YWtl
-cyAxNyBtaW51dGVzIHRvIGZpbmlzaC4KPj4+ICogTm93IHN0YXJ0IE9TRDMgYW5kIGl0IGlzIHRo
-ZSBzYW1lLiBBbGwgT1NEcyBzdGFydCBoaWdoIEkvTyBhbmQgaXQgdGFrZXMgMjUgbWlucyB0byBz
-ZXR0bGUuCj4+PiAqIElmIHlvdSBoYXBwZW4gdG8gc3RhcnQgNSBvZiB0aGVtIGF0IHRoZSBzYW1l
-IGFsbCBvZiB0aGUgT1NEcyBzdGFydCBoaWdoIEkvTyBhZ2Fpbi4gQW5kIGl0IHRha2VzIDEgaG91
-ciB0byBmaW5pc2guCj4+PiAKPj4+IFNvIGluIHRoZSBsaWdodCBvZiB0aGVzZSBmaW5kaW5ncyB3
-ZSBmbGFnZ2VkIG5vdXAsIHN0YXJ0ZWQgYWxsIE9TRHMuIEF0IGZpcnN0IHRoZXJlIHdhcyBubyBJ
-L08uIEFmdGVyIDEwIG1pbnV0ZXMgd2UgdW5zZXQgbm91cC4gQWxsIG9mIDE2OCBPU0Qgc3RhcnRl
-ZCB0byBtYWtlIGhpZ2ggSS9PLiBBbmQgd2UgdGhvdWdodCB0aGF0IGlmIHdlIHdhaXQgbG9uZyBl
-bm91Z2ggaXQgd2lsbCBmaW5pc2ggJiBPU0RzIHdpbGwgYmUgcmVzcG9uc2l2ZSBhZ2Fpbi4gQWZ0
-ZXIgMjRob3VycyB0aGV5IGRpZCBub3QgYmVjYXVzZSBJL08gZGlkIG5vdCBmaW5pc2ggb3IgZXZl
-biBzbG93ZWQgZG93bi4KPj4+IE9uZSBjYW4gdGhpbmsgdGhhdCBpcyBhIGxvdCBvZiBkYXRhIHRo
-ZXJlIHRvIHNjYW4uIEJ1dCBpdCBpcyBqdXN0IDMzVEIuCj4+PiAKPj4+IFNvIGF0IHNob3J0IHdl
-IGRvbnQga25vdyB3aGljaCBQRyBpcyBzdHVjayBzbyB3ZSBjYW4gcmVtb3ZlIGl0Lgo+Pj4gCj4+
-PiBIb3dldmVyIHdlIG1ldCBhbiB3ZWlyZCB0aGluZyBoYWxmIGFuIGhvdXIgYWdvLiBXZSBleHBv
-cnRlZCB0aGUgc2FtZSBQRyBmcm9tIHR3byBkaWZmZXJlbnQgT1NEcy4gT25lIHdhcyA0LjJHQiBh
-bmQgdGhlIG90aGVyIGlzIDUwMEtCISBTbyB3ZSBkZWNpZGVkIHRvIGV4cG9ydCBhbGwgT1NEcyBm
-b3IgYmFja3VwLiBUaGVuIHdlIHdpbGwgZGVsZXRlIHN0cmFuZ2Ugc2l6ZWQgb25lcyBhbmQgc3Rh
-cnQgdGhlIGNsdXN0ZXIgYWxsIG92ZXIuIE1heWJlIHRoZW4gd2UgY291bGQgc29sdmUgdGhlIHN0
-dWNrZWQgb3IgdW5mb3VuZCBQR3MgYXMgeW91IGFkdmlzZS4KPj4+IAo+Pj4gQW55IHRob3VnaHQg
-d291bGQgYmUgZ3JlYXRseSBhcHByZWNpYXRlZC4KPj4+IAo+Pj4gCj4+Pj4gT24gMiBPY3QgMjAx
-OCwgYXQgMTg6MTYsIERhcml1cyBLYXNwYXJhdmnEjWl1cyA8ZGF6bmlzQGdtYWlsLmNvbT4gd3Jv
-dGU6Cj4+Pj4gCj4+Pj4gSGVsbG8sCj4+Pj4gCj4+Pj4gQ3VycmVudGx5IHlvdSBoYXZlIDE1IG9i
-amVjdHMgbWlzc2luZy4gSSB3b3VsZCByZWNvbW1lbmQgZmluZGluZyB0aGVtCj4+Pj4gYW5kIG1h
-a2luZyBiYWNrdXBzIG9mIHRoZW0uIERpdGNoIGFsbCBvdGhlciBvc2RzIHRoYXQgYXJlIGZhaWxp
-bmcgdG8KPj4+PiBzdGFydCBhbmQgY29uY2VudHJhdGUgb24gYnJpbmdpbmcgb25saW5lIHRob3Nl
-IHRoYXQgaGF2ZSBtaXNzaW5nCj4+Pj4gb2JqZWN0cy4gVGhlbiBzbG93bHkgdHVybiBvZmYgbm9k
-b3duIGFuZCBub291dCBvbiB0aGUgY2x1c3RlciBhbmQgc2VlCj4+Pj4gaWYgaXQgc3RhYmlsaXNl
-cy4gSWYgaXQgc3RhYmlsaXNlcyBsZWF2ZSB0aGVzZSBzZXR0aW5nIGlmIG5vdCB0dXJuCj4+Pj4g
-dGhlbSBiYWNrIG9uLgo+Pj4+IE5vdyBnZXQgc29tZSBvZiB0aGUgcGcncyB0aGF0IGFyZSBibG9j
-a2VkIGFuZCBxdWVycnkgdGhlIHBncyB0byBjaGVjawo+Pj4+IHdoeSB0aGV5IGFyZSBibG9ja2Vk
-LiBUcnkgcmVtb3ZpbmcgYXMgbXVjaCBibG9ja3MgYXMgcG9zc2libGUgYW5kIHRoZW4KPj4+PiBy
-ZW1vdmUgdGhlIG5vcmViYWxhbmNlL25vcmVjb3ZlcnkgZmxhZ3MgYW5kIHNlZSBpZiBpdCBzdGFy
-dHMgdG8gZml4Cj4+Pj4gaXRzZWxmLiBPbiBUdWUsIE9jdCAyLCAyMDE4IGF0IDU6MTQgUE0gYnkg
-bW9ycGhpbgo+Pj4+IDxtb3JwaGlud2l0aHlvdUBnbWFpbC5jb20+IHdyb3RlOgo+Pj4+PiAKPj4+
-Pj4gT25lIG9mIGNlcGggZXhwZXJ0cyBpbmRpY2F0ZWQgdGhhdCBibHVlc3RvcmUgaXMgc29tZXdo
-YXQgcHJldmlldyB0ZWNoCj4+Pj4+IChhcyBmb3IgUmVkaGF0KS4KPj4+Pj4gU28gaXQgY291bGQg
-YmUgYmVzdCB0byBjaGVja291dCBibHVlc3RvcmUgYW5kIHJvY2tzZGIuIFRoZXJlIGFyZSBzb21l
-Cj4+Pj4+IHRvb2xzIHRvIGNoZWNrIGhlYWx0aCBhbmQgYWxzbyByZXBhaXIuIEJ1dCB0aGVyZSBh
-cmUgbGltaXRlZAo+Pj4+PiBkb2N1bWVudGF0aW9uLgo+Pj4+PiBBbnlvbmUgd2hvIGhhcyBleHBl
-cmluY2Ugd2l0aCBpdD8KPj4+Pj4gQW55b25lIGxlYWQvaGVscCB0byBhIHByb3BlciBjaGVjayB3
-b3VsZCBiZSBncmVhdC4KPj4+Pj4gR29rdHVnIFlpbGRpcmltIDxnb2t0dWcueWlsZGlyaW1AZ21h
-aWwuY29tPiwgMSBFa2kgMjAxOCBQenQsIDIyOjU1Cj4+Pj4+IHRhcmloaW5kZSDFn3VudSB5YXpk
-xLE6Cj4+Pj4+PiAKPj4+Pj4+IEhpIGFsbCwKPj4+Pj4+IAo+Pj4+Pj4gV2UgaGF2ZSByZWNlbnRs
-eSB1cGdyYWRlZCBmcm9tIGx1bWlub3VzIHRvIG1pbWljLiBJdOKAmXMgYmVlbiA2IGRheXMgc2lu
-Y2UgdGhpcyBjbHVzdGVyIGlzIG9mZmxpbmUuIFRoZSBsb25nIHNob3J0IHN0b3J5IGlzIGhlcmU6
-IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9waXBlcm1haWwvY2VwaC11c2Vycy1jZXBoLmNvbS8yMDE4
-LVNlcHRlbWJlci8wMzAwNzguaHRtbAo+Pj4+Pj4gCj4+Pj4+PiBJ4oCZdmUgYWxzbyBDQ+KAmWVk
-IGRldmVsb3BlcnMgc2luY2UgSSBiZWxpZXZlIHRoaXMgaXMgYSBidWcuIElmIHRoaXMgaXMgbm90
-IHRvIGNvcnJlY3Qgd2F5IEkgYXBvbG9neSBhbmQgcGxlYXNlIGxldCBtZSBrbm93Lgo+Pj4+Pj4g
-Cj4+Pj4+PiBGb3IgdGhlIDYgZGF5cyBsb3RzIG9mIHRoaW5nIGhhcHBlbmVkIGFuZCB0aGVyZSB3
-ZXJlIHNvbWUgb3V0Y29tZXMgYWJvdXQgdGhlIHByb2JsZW0uIFNvbWUgb2YgdGhlbSB3YXMgbWlz
-anVkZ2VkIGFuZCBzb21lIG9mIHRoZW0gYXJlIG5vdCBsb29rZWQgZGVlcGVyLgo+Pj4+Pj4gSG93
-ZXZlciB0aGUgbW9zdCBjZXJ0YWluIGRpYWdub3NpcyBpcyB0aGlzOiBlYWNoIE9TRCBjYXVzZXMg
-dmVyeSBoaWdoIGRpc2sgSS9PIHRvIGl0cyBibHVlc3RvcmUgZGlzayAoV0FMIGFuZCBEQiBhcmUg
-ZmluZSkuIEFmdGVyIHRoYXQgT1NEcyBiZWNvbWUgdW5yZXNwb25zaXZlIG9yIHZlcnkgdmVyeSBs
-ZXNzIHJlc3BvbnNpdmUuIEZvciBleGFtcGxlICJjZXBoIHRlbGwgb3NkLnggdmVyc2lvbuKAnSBz
-dHVja3MgbGlrZSBmb3IgZXZlci4KPj4+Pj4+IAo+Pj4+Pj4gU28gZHVlIHRvIHVucmVzcG9uc2l2
-ZSBPU0RzIGNsdXN0ZXIgZG9lcyBub3Qgc2V0dGxlLiBUaGlzIGlzIG91ciBwcm9ibGVtIQo+Pj4+
-Pj4gCj4+Pj4+PiBUaGlzIGlzIHRoZSBvbmUgd2UgYXJlIHZlcnkgc3VyZSBvZi4gQnV0IHdlIGFy
-ZSBub3Qgc3VyZSBvZiB0aGUgcmVhc29uLgo+Pj4+Pj4gCj4+Pj4+PiBIZXJlIGlzIHRoZSBsYXRl
-c3QgY2VwaCBzdGF0dXM6Cj4+Pj4+PiBodHRwczovL3Bhc3RlLnVidW50dS5jb20vcC8yRHlaNVlx
-UGpoLy4KPj4+Pj4+IAo+Pj4+Pj4gVGhpcyBpcyB0aGUgc3RhdHVzIGFmdGVyIHdlIHN0YXJ0ZWQg
-YWxsIG9mIHRoZSBPU0RzIDI0IGhvdXJzIGFnby4KPj4+Pj4+IFNvbWUgb2YgdGhlIE9TRHMgYXJl
-IG5vdCBzdGFydGVkLiBIb3dldmVyIGl0IGRpZG50IG1ha2UgYW55IGRpZmZlcmVuY2Ugd2hlbiBh
-bGwgb2YgdGhlbSB3YXMgb25saW5lLgo+Pj4+Pj4gCj4+Pj4+PiBIZXJlIGlzIHRoZSBkZWJ1Zz0y
-MCBsb2cgb2YgYW4gT1NEIHdoaWNoIGlzIHNhbWUgZm9yIGFsbCBvdGhlcnM6Cj4+Pj4+PiBodHRw
-czovL3Bhc3RlLnVidW50dS5jb20vcC84bjJrVHZ3bkc2Lwo+Pj4+Pj4gQXMgd2UgZmlndXJlIG91
-dCB0aGVyZSBpcyBhIGxvb3AgcGF0dGVybi4gSSBhbSBzdXJlIGl0IHdvbnQgY2F1Z2h0IGZyb20g
-ZXllLgo+Pj4+Pj4gCj4+Pj4+PiBUaGlzIHRoZSBmdWxsIGxvZyB0aGUgc2FtZSBPU0QuCj4+Pj4+
-PiBodHRwczovL3d3dy5kcm9wYm94LmNvbS9zL3B3enFlYWpsc2R3YW9pMS9jZXBoLW9zZC45MC5s
-b2c/ZGw9MAo+Pj4+Pj4gCj4+Pj4+PiBIZXJlIGlzIHRoZSBzdHJhY2Ugb2YgdGhlIHNhbWUgT1NE
-IHByb2Nlc3M6Cj4+Pj4+PiBodHRwczovL3Bhc3RlLnVidW50dS5jb20vcC84bjJrVHZ3bkc2Lwo+
-Pj4+Pj4gCj4+Pj4+PiBSZWNlbnRseSB3ZSBoZWFyIG1vcmUgdG8gdXByYWRlIG1pbWljLiBJIGhv
-cGUgbm9uZSBnZXQgaHVydHMgYXMgd2UgZG8uIEkgYW0gc3VyZSB3ZSBoYXZlIGRvbmUgbG90cyBv
-ZiBtaXN0YWtlcyB0byBsZXQgdGhpcyBoYXBwZW5pbmcuIEFuZCB0aGlzIHNpdHVhdGlvbiBtYXkg
-YmUgYSBleGFtcGxlIGZvciBvdGhlciB1c2VyIGFuZCBjb3VsZCBiZSBhIHBvdGVudGlhbCBidWcg
-Zm9yIGNlcGggZGV2ZWxvcGVyLgo+Pj4+Pj4gCj4+Pj4+PiBBbnkgaGVscCB0byBmaWd1cmUgb3V0
-IHdoYXQgaXMgZ29pbmcgb24gd291bGQgYmUgZ3JlYXQuCj4+Pj4+PiAKPj4+Pj4+IEJlc3QgUmVn
-YXJkcywKPj4+Pj4+IEdva3R1ZyBZaWxkaXJpbQo+Pj4+PiBfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwo+Pj4+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+
-Pj4+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+Pj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNv
-bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pj4gCj4gCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
-LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-920813624-1538536483=:31802
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+osd_find_best_info_ignore_history_les is a dangerous option and you should 
+only use it in very specific circumstances when directed by a developer.  
+In such cases it will allow a stuck PG to peer.  But you're not getting to 
+that point...you're seeing some sort of resource exhaustion.
+
+The noup trick works when OSDs are way behind on maps and all need to 
+catch up.  The way to tell if they are behind is by looking at the 'ceph 
+daemon osd.NNN status' output and comparing to the latest OSDMap epoch tha 
+t the mons have.  Were they really caught up when you unset noup?
+
+I'm just catching up and haven't read the whole thread but I haven't seen 
+anything that explains why teh OSDs are dong lots of disk IO.  Catching up 
+on maps could explain it but not why they wouldn't peer once they were all 
+marked up...
+
+sage
+
+
+On Tue, 2 Oct 2018, Göktuğ Yıldırım wrote:
+
+> Anyone heart about osd_find_best_info_ignore_history_les = true ?
+> Is that be usefull here? There is such a less information about it.
+> 
+> Goktug Yildirim <goktug.yildirim-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> şunları yazdı (2 Eki 2018 22:11):
+> 
+> > Hi,
+> > 
+> > Indeed I left ceph-disk to decide the wal and db partitions when I read somewhere that that will do the proper sizing. 
+> > For the blustore cache size I have plenty of RAM. I will increase 8GB for each and decide a more calculated number    after cluster settles.
+> > 
+> > For the osd map loading I’ve also figured it out. And it is in loop. For that reason I started cluster with noup flag and waited OSDs to reach the uptodate epoch number. After that I unset noup. But I did not pay attention to manager logs. Let me check it, thank you!
+> > 
+> > I am not forcing jmellac or anything else really. I have a very standard installation and no tweaks or tunings. All we ask for the stability versus speed from the begining. And here we are :/
+> > 
+> >> On 2 Oct 2018, at 21:53, Darius Kasparavičius <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >> 
+> >> Hi,
+> >> 
+> >> 
+> >> I can see some issues from the osd log file. You have an extremely low
+> >> size db and wal partitions. Only 1GB for DB and 576MB for wal. I would
+> >> recommend cranking up rocksdb cache size as much as possible. If you
+> >> have RAM you can also increase bluestores cache size for hdd. Default
+> >> is 1GB be as liberal as you can without getting OOM kills. You also
+> >> have lots of osd map loading and decoding in the log. Are you sure all
+> >> monitors/managers/osds are up to date? Plus make sure you aren't
+> >> forcing jemalloc loading. I had a funny interaction after upgrading to
+> >> mimic.
+> >> On Tue, Oct 2, 2018 at 9:02 PM Goktug Yildirim
+> >> <goktug.yildirim-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >>> 
+> >>> Hello Darius,
+> >>> 
+> >>> Thanks for reply!
+> >>> 
+> >>> The main problem is we can not query PGs. “ceph pg 67.54f query” does stucks and wait forever since OSD is unresponsive.
+> >>> We are certain that OSD gets unresponsive as soon as it UP. And we are certain that OSD responds again after its disk utilization stops.
+> >>> 
+> >>> So we have a small test like that:
+> >>> * Stop all OSDs (168 of them)
+> >>> * Start OSD1. %95 osd disk utilization immediately starts. It takes 8 mins to finish. Only after that “ceph pg 67.54f query” works!
+> >>> * While OSD1 is “up" start OSD2. As soon as OSD2 starts OSD1 & OSD2 starts %95 disk utilization. This takes 17 minutes to finish.
+> >>> * Now start OSD3 and it is the same. All OSDs start high I/O and it takes 25 mins to settle.
+> >>> * If you happen to start 5 of them at the same all of the OSDs start high I/O again. And it takes 1 hour to finish.
+> >>> 
+> >>> So in the light of these findings we flagged noup, started all OSDs. At first there was no I/O. After 10 minutes we unset noup. All of 168 OSD started to make high I/O. And we thought that if we wait long enough it will finish & OSDs will be responsive again. After 24hours they did not because I/O did not finish or even slowed down.
+> >>> One can think that is a lot of data there to scan. But it is just 33TB.
+> >>> 
+> >>> So at short we dont know which PG is stuck so we can remove it.
+> >>> 
+> >>> However we met an weird thing half an hour ago. We exported the same PG from two different OSDs. One was 4.2GB and the other is 500KB! So we decided to export all OSDs for backup. Then we will delete strange sized ones and start the cluster all over. Maybe then we could solve the stucked or unfound PGs as you advise.
+> >>> 
+> >>> Any thought would be greatly appreciated.
+> >>> 
+> >>> 
+> >>>> On 2 Oct 2018, at 18:16, Darius Kasparavičius <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >>>> 
+> >>>> Hello,
+> >>>> 
+> >>>> Currently you have 15 objects missing. I would recommend finding them
+> >>>> and making backups of them. Ditch all other osds that are failing to
+> >>>> start and concentrate on bringing online those that have missing
+> >>>> objects. Then slowly turn off nodown and noout on the cluster and see
+> >>>> if it stabilises. If it stabilises leave these setting if not turn
+> >>>> them back on.
+> >>>> Now get some of the pg's that are blocked and querry the pgs to check
+> >>>> why they are blocked. Try removing as much blocks as possible and then
+> >>>> remove the norebalance/norecovery flags and see if it starts to fix
+> >>>> itself. On Tue, Oct 2, 2018 at 5:14 PM by morphin
+> >>>> <morphinwithyou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >>>>> 
+> >>>>> One of ceph experts indicated that bluestore is somewhat preview tech
+> >>>>> (as for Redhat).
+> >>>>> So it could be best to checkout bluestore and rocksdb. There are some
+> >>>>> tools to check health and also repair. But there are limited
+> >>>>> documentation.
+> >>>>> Anyone who has experince with it?
+> >>>>> Anyone lead/help to a proper check would be great.
+> >>>>> Goktug Yildirim <goktug.yildirim-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, 1 Eki 2018 Pzt, 22:55
+> >>>>> tarihinde şunu yazdı:
+> >>>>>> 
+> >>>>>> Hi all,
+> >>>>>> 
+> >>>>>> We have recently upgraded from luminous to mimic. It’s been 6 days since this cluster is offline. The long short story is here: http://lists.ceph.com/pipermail/ceph-users-ceph.com/2018-September/030078.html
+> >>>>>> 
+> >>>>>> I’ve also CC’ed developers since I believe this is a bug. If this is not to correct way I apology and please let me know.
+> >>>>>> 
+> >>>>>> For the 6 days lots of thing happened and there were some outcomes about the problem. Some of them was misjudged and some of them are not looked deeper.
+> >>>>>> However the most certain diagnosis is this: each OSD causes very high disk I/O to its bluestore disk (WAL and DB are fine). After that OSDs become unresponsive or very very less responsive. For example "ceph tell osd.x version” stucks like for ever.
+> >>>>>> 
+> >>>>>> So due to unresponsive OSDs cluster does not settle. This is our problem!
+> >>>>>> 
+> >>>>>> This is the one we are very sure of. But we are not sure of the reason.
+> >>>>>> 
+> >>>>>> Here is the latest ceph status:
+> >>>>>> https://paste.ubuntu.com/p/2DyZ5YqPjh/.
+> >>>>>> 
+> >>>>>> This is the status after we started all of the OSDs 24 hours ago.
+> >>>>>> Some of the OSDs are not started. However it didnt make any difference when all of them was online.
+> >>>>>> 
+> >>>>>> Here is the debug=20 log of an OSD which is same for all others:
+> >>>>>> https://paste.ubuntu.com/p/8n2kTvwnG6/
+> >>>>>> As we figure out there is a loop pattern. I am sure it wont caught from eye.
+> >>>>>> 
+> >>>>>> This the full log the same OSD.
+> >>>>>> https://www.dropbox.com/s/pwzqeajlsdwaoi1/ceph-osd.90.log?dl=0
+> >>>>>> 
+> >>>>>> Here is the strace of the same OSD process:
+> >>>>>> https://paste.ubuntu.com/p/8n2kTvwnG6/
+> >>>>>> 
+> >>>>>> Recently we hear more to uprade mimic. I hope none get hurts as we do. I am sure we have done lots of mistakes to let this happening. And this situation may be a example for other user and could be a potential bug for ceph developer.
+> >>>>>> 
+> >>>>>> Any help to figure out what is going on would be great.
+> >>>>>> 
+> >>>>>> Best Regards,
+> >>>>>> Goktug Yildirim
+> >>>>> _______________________________________________
+> >>>>> ceph-users mailing list
+> >>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >>> 
+> > 
+> 
+> 
+--8323329-920813624-1538536483=:31802
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-920813624-1538536483=:31802--
