@@ -1,53 +1,77 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: use an enum instead of 'static const' to define constants
-Date: Mon, 8 Oct 2018 18:00:19 +0200
-Message-ID: <CAOi1vP-bQR6aEbmyxUGtxTQACUbT2iEXr5Ld3w0p04_NWWxXuQ@mail.gmail.com>
-References: <20181005161845.959919-1-arnd@arndb.de> <CAOi1vP8Wy0DjEWBWh05iSx-RJS41hTc1rs2TXdz_1mcNpf68Dg@mail.gmail.com>
- <CAK8P3a0xpFdKC0AtBDC9UvMfwpx3HTbAdio4ApmYhrb2FakK9g@mail.gmail.com>
+From: Paul Emmerich <paul.emmerich-iZXOWb+A65A@public.gmane.org>
+Subject: Re: Don't upgrade to 13.2.2 if you use cephfs
+Date: Mon, 8 Oct 2018 18:18:32 +0200
+Message-ID: <CAD9yTbFJANP=XkApSMgd-QKHS5SFaANoFD7WDQzsEX6Yx8qgRQ@mail.gmail.com>
+References: <CAAM7YAnkjiujm8dqgeG6uOhPGL+ccC71Q0F15-ez=4Qgj6Fomw@mail.gmail.com>
+ <28a7ec84-864a-8f61-a223-b307217919ce@gmail.com>
+ <CAGG0Mq0XB=+y5xhfKQcAdbHtDTEzN64OZ8UjN-g9kQ7BqJ4WBg@mail.gmail.com>
+ <CAAM7YAnev9fK8rGyCYHLa_a9+0cjY178pL2h8_-Oc8LwZh+O9g@mail.gmail.com>
+ <CAGG0Mq0Nkbrexry9VLFw+GYgimkajquy1fF7EyST3mEHY1a7WQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a0xpFdKC0AtBDC9UvMfwpx3HTbAdio4ApmYhrb2FakK9g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Greg KH <gregkh@linuxfoundation.org>, pombredanne@nexb.com, Luis Henriques <lhenriques@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAGG0Mq0Nkbrexry9VLFw+GYgimkajquy1fF7EyST3mEHY1a7WQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Daniel Carrasco <d.carrasco-RJazjCFaYHwAvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 8, 2018 at 5:37 PM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On Mon, Oct 8, 2018 at 4:23 PM Ilya Dryomov <idryomov@gmail.com> wrote:
-> > On Fri, Oct 5, 2018 at 6:18 PM Arnd Bergmann <arnd@arndb.de> wrote:
-> > > @@ -71,7 +71,7 @@
-> > >   * This ensures that no two versions who have different meanings for
-> > >   * the bit ever speak to each other.
-> > >   */
-> > > -
-> > > +enum ceph_features {
-> > >  DEFINE_CEPH_FEATURE( 0, 1, UID)
-> > >  DEFINE_CEPH_FEATURE( 1, 1, NOSRCADDR)
-> > >  DEFINE_CEPH_FEATURE_RETIRED( 2, 1, MONCLOCKCHECK, JEWEL, LUMINOUS)
-> > > @@ -170,13 +170,13 @@ DEFINE_CEPH_FEATURE(61, 1, CEPHX_V2)             // *do not share this bit*
-> > >
-> > >  DEFINE_CEPH_FEATURE(62, 1, RESERVED)           // do not use; used as a sentinal
-> > >  DEFINE_CEPH_FEATURE_DEPRECATED(63, 1, RESERVED_BROKEN, LUMINOUS) // client-facing
-> > > -
-> > > +};
-> >
-> > I don't particularly like this because it looks like lower constants
-> > are actually ints and the rest are unsigned longs, even though they all
-> > have ULL suffixes.  The standard seems to require that enum constants
-> > be representable as ints, is the non-pedantic behaviour documented
-> > somewhere?
->
-> I had not realized that this is a gcc extension, or that it behaves slightly
-> differently from the standard C++ behavior that apparently adopted a
-> saner variant (all values in an enum have the same type).
->
-> How about we just add a __maybe_unused to DEFINE_CEPH_FEATURE
-> then to shut up the warning?
-
-Fine with me.
-
-Thanks,
-
-                Ilya
+RG9lcyB0aGlzIG9ubHkgYWZmZWN0IHVwZ3JhZGVkIENlcGhGUyBkZXBsb3ltZW50cz8gQSBmcmVz
+aCAxMy4yLjIKc2hvdWxkIHdvcmsgZmluZSBpZiBJJ20gaW50ZXJwcmV0aW5nIHRoaXMgYnVnIGNv
+cnJlY3RseT8KClBhdWwKCkFtIE1vLiwgOC4gT2t0LiAyMDE4IHVtIDExOjUzIFVociBzY2hyaWVi
+IERhbmllbCBDYXJyYXNjbwo8ZC5jYXJyYXNjb0BpMnRpYy5jb20+Ogo+Cj4KPgo+IEVsIGx1bi4s
+IDggb2N0LiAyMDE4IDU6NDQsIFlhbiwgWmhlbmcgPHVrZXJuZWxAZ21haWwuY29tPiBlc2NyaWJp
+w7M6Cj4+Cj4+IE9uIE1vbiwgT2N0IDgsIDIwMTggYXQgMTE6MzQgQU0gRGFuaWVsIENhcnJhc2Nv
+IDxkLmNhcnJhc2NvQGkydGljLmNvbT4gd3JvdGU6Cj4+ID4KPj4gPiBJJ3ZlIGdvdCBzZXZlcmFs
+IHByb2JsZW1zIG9uIDEyLjIuOCB0b28uIEFsbCBteSBzdGFuZGJ5IE1EUyB1c2VzIGEgbG90IG9m
+IG1lbW9yeSAod2hpbGUgYWN0aXZlIHVzZXMgbm9ybWFsIG1lbW9yeSksIGFuZCBJJ20gcmVjZWl2
+aW5nIGEgbG90IG9mIHNsb3cgTURTIG1lc3NhZ2VzIChjYXVzaW5nIHRoZSB3ZWJwYWdlIHRvIGZy
+ZWV6ZSBhbmQgZmFpbCB1bnRpbCBNRFMgYXJlIHJlc3RhcnRlZCkuLi4gRmluYWxseSBJIGhhZCB0
+byBjb3B5IHRoZSBlbnRpcmUgc2l0ZSB0byBEUkJEIGFuZCB1c2UgTkZTIHRvIHNvbHZlIGFsbCBw
+cm9ibGVtcy4uLgo+PiA+Cj4+Cj4+IHdhcyBzdGFuZGJ5LXJlcGxheSBlbmFibGVkPwo+Cj4KPiBJ
+J3ZlIHRyaWVkIGJvdGggYW5kIEkndmUgc2VlbiBtb3JlIGxlc3MgdGhlIHNhbWUgYmVoYXZpb3Is
+IG1heWJlIGxlc3Mgd2hlbiBpcyBub3QgaW4gcmVwbGF5IG1vZGUuCj4KPiBBbnl3YXksIHdlJ3Zl
+IGRlYWN0aXZhdGVkIENlcGhGUyBmb3Igbm93IHRoZXJlLiBJJ2xsIHRyeSB3aXRoIG9sZGVyIHZl
+cnNpb25zIG9uIGEgdGVzdCBlbnZpcm9ubWVudAo+Cj4+Cj4+ID4gRWwgbHVuLiwgOCBvY3QuIDIw
+MTggYSBsYXMgNToyMSwgQWxleCBMaXR2YWsgKDxhbGV4YW5kZXIudi5saXR2YWtAZ21haWwuY29t
+PikgZXNjcmliacOzOgo+PiA+Pgo+PiA+PiBIb3cgaXMgdGhpcyBub3QgYW4gZW1lcmdlbmN5IGFu
+bm91bmNlbWVudD8gIEFsc28gSSB3b25kZXIgaWYgSSBjYW4KPj4gPj4gZG93bmdyYWRlIGF0IGFs
+bCA/ICBJIGFtIHVzaW5nIGNlcGggd2l0aCBkb2NrZXIgZGVwbG95ZWQgd2l0aAo+PiA+PiBjZXBo
+LWFuc2libGUuICBJIHdvbmRlciBpZiBJIHNob3VsZCBwdXNoIGRvd25ncmFkZSBvciBiYXNpY2Fs
+bHkgd2FpdCBmb3IKPj4gPj4gdGhlIGZpeC4gIEkgYmVsaWV2ZSwgYSBmaXggbmVlZHMgdG8gYmUg
+cHJvdmlkZWQuCj4+ID4+Cj4+ID4+IFRoYW5rIHlvdSwKPj4gPj4KPj4gPj4gT24gMTAvNy8yMDE4
+IDk6MzAgUE0sIFlhbiwgWmhlbmcgd3JvdGU6Cj4+ID4+ID4gVGhlcmUgaXMgYSBidWcgaW4gdjEz
+LjIuMiBtZHMsIHdoaWNoIGNhdXNlcyBkZWNvZGluZyBwdXJnZSBxdWV1ZSB0bwo+PiA+PiA+IGZh
+aWwuIElmIG1kcyBpcyBhbHJlYWR5IGluIGRhbWFnZWQgc3RhdGUsIHBsZWFzZSBkb3duZ3JhZGUg
+bWRzIHRvCj4+ID4+ID4gMTMuMi4xLCB0aGVuIHJ1biAnY2VwaCBtZHMgcmVwYWlyZWQgZnNfbmFt
+ZTpkYW1hZ2VkX3JhbmsnIC4KPj4gPj4gPgo+PiA+PiA+IFNvcnJ5IGZvciBhbGwgdGhlIHRyb3Vi
+bGUgSSBjYXVzZWQuCj4+ID4+ID4gWWFuLCBaaGVuZwo+PiA+PiA+Cj4+ID4+Cj4+ID4+Cj4+ID4+
+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+ID4+IGNl
+cGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+ID4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4g
+Pj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
+Cj4+ID4KPj4gPgo+PiA+Cj4+ID4gLS0KPj4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwo+PiA+Cj4+ID4gICAgICAgRGFuaWVsIENhcnJhc2NvIE1hcsOtbgo+PiA+
+ICAgICAgIEluZ2VuaWVyw61hIHBhcmEgbGEgSW5ub3ZhY2nDs24gaTJUSUMsIFMuTC4KPj4gPiAg
+ICAgICBUbGY6ICArMzQgOTExIDEyIDMyIDg0IEV4dDogMjIzCj4+ID4gICAgICAgd3d3LmkydGlj
+LmNvbQo+PiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+ID4g
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPj4gPiBjZXBo
+LXVzZXJzIG1haWxpbmcgbGlzdAo+PiA+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4gPiBo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPgo+
+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xp
+c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCgoKCi0tClBhdWwg
+RW1tZXJpY2gKCkxvb2tpbmcgZm9yIGhlbHAgd2l0aCB5b3VyIENlcGggY2x1c3Rlcj8gQ29udGFj
+dCB1cyBhdCBodHRwczovL2Nyb2l0LmlvCgpjcm9pdCBHbWJICkZyZXNlbml1c3N0ci4gMzFoCjgx
+MjQ3IE3DvG5jaGVuCnd3dy5jcm9pdC5pbwpUZWw6ICs0OSA4OSAxODk2NTg1IDkwCl9fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGlu
+ZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
