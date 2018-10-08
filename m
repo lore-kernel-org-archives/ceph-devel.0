@@ -1,19 +1,13 @@
-From: Alex Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Don't upgrade to 13.2.2 if you use cephfs
-Date: Mon, 8 Oct 2018 11:31:56 -0500
-Message-ID: <e2aca4c4-7580-ffad-2521-d551aa5e9c59@gmail.com>
+Date: Mon, 8 Oct 2018 09:50:59 -0700
+Message-ID: <CA+2bHPZSnFA=GS4eWGO9-zx_tgc+gz3UwXdB748BPs0jSWMmFw@mail.gmail.com>
 References: <CAAM7YAnkjiujm8dqgeG6uOhPGL+ccC71Q0F15-ez=4Qgj6Fomw@mail.gmail.com>
- <28a7ec84-864a-8f61-a223-b307217919ce@gmail.com>
- <CAGG0Mq0XB=+y5xhfKQcAdbHtDTEzN64OZ8UjN-g9kQ7BqJ4WBg@mail.gmail.com>
- <CAAM7YAnev9fK8rGyCYHLa_a9+0cjY178pL2h8_-Oc8LwZh+O9g@mail.gmail.com>
- <CAGG0Mq0Nkbrexry9VLFw+GYgimkajquy1fF7EyST3mEHY1a7WQ@mail.gmail.com>
- <CAD9yTbFJANP=XkApSMgd-QKHS5SFaANoFD7WDQzsEX6Yx8qgRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAD9yTbFJANP=XkApSMgd-QKHS5SFaANoFD7WDQzsEX6Yx8qgRQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <CAAM7YAnkjiujm8dqgeG6uOhPGL+ccC71Q0F15-ez=4Qgj6Fomw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -23,69 +17,27 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Zheng Yan <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-ClRoaXMgaXMgd291bGQgYmUgYSBxdWVzdGlvbiBJIGhhZCBzaW5jZSBaaGVuZyBwb3N0ZWQgdGhl
-IHByb2JsZW0uICBJIApyZWNlbnRseSBwdXJnZWQgYSBicmFuZCBuZXcgY2x1c3RlciBiZWNhdXNl
-IEkgbmVlZGVkIHRvIGNoYW5nZSBkZWZhdWx0IApXQUwvREIgc2V0dGluZ3Mgb24gYWxsIE9TRHMg
-aW4gY29sbG9jYXRlIHNjZW5hcmlvLiAgSSBkZWNpZGVkIHRvICBqdW1wIAp0byAxMy4yLjIgcmF0
-aGVyIHRoZW4gdXBncmFkZSBmcm9tIDEzLjIuMS4gIE5vdyBJIHdvbmRlciBpZiBJIGFtIHN0aWxs
-IAppbiB0cm91YmxlLgoKQWxzbywgc2hvdWxkbid0IHRoZSBtZXNzYWdlIHRvIHVzZXJzIGJlIGxl
-c3Mgc3VidGxlICggLi4uIGZpeCBpIGNvbWluZyAKLi4uKSBhcyB0aGlzIHNlZW0gdG8gYmUgYSBw
-cm9kdWN0aW9uIGFmZmVjdGluZyBpc3N1ZSBmb3Igc29tZS4KCk9uIDEwLzgvMjAxOCAxMToxOCBB
-TSwgUGF1bCBFbW1lcmljaCB3cm90ZToKPiBEb2VzIHRoaXMgb25seSBhZmZlY3QgdXBncmFkZWQg
-Q2VwaEZTIGRlcGxveW1lbnRzPyBBIGZyZXNoIDEzLjIuMgo+IHNob3VsZCB3b3JrIGZpbmUgaWYg
-SSdtIGludGVycHJldGluZyB0aGlzIGJ1ZyBjb3JyZWN0bHk/Cj4gCj4gUGF1bAo+IAo+IEFtIE1v
-LiwgOC4gT2t0LiAyMDE4IHVtIDExOjUzIFVociBzY2hyaWViIERhbmllbCBDYXJyYXNjbwo+IDxk
-LmNhcnJhc2NvQGkydGljLmNvbT46Cj4+Cj4+Cj4+Cj4+IEVsIGx1bi4sIDggb2N0LiAyMDE4IDU6
-NDQsIFlhbiwgWmhlbmcgPHVrZXJuZWxAZ21haWwuY29tPiBlc2NyaWJpw7M6Cj4+Pgo+Pj4gT24g
-TW9uLCBPY3QgOCwgMjAxOCBhdCAxMTozNCBBTSBEYW5pZWwgQ2FycmFzY28gPGQuY2FycmFzY29A
-aTJ0aWMuY29tPiB3cm90ZToKPj4+Pgo+Pj4+IEkndmUgZ290IHNldmVyYWwgcHJvYmxlbXMgb24g
-MTIuMi44IHRvby4gQWxsIG15IHN0YW5kYnkgTURTIHVzZXMgYSBsb3Qgb2YgbWVtb3J5ICh3aGls
-ZSBhY3RpdmUgdXNlcyBub3JtYWwgbWVtb3J5KSwgYW5kIEknbSByZWNlaXZpbmcgYSBsb3Qgb2Yg
-c2xvdyBNRFMgbWVzc2FnZXMgKGNhdXNpbmcgdGhlIHdlYnBhZ2UgdG8gZnJlZXplIGFuZCBmYWls
-IHVudGlsIE1EUyBhcmUgcmVzdGFydGVkKS4uLiBGaW5hbGx5IEkgaGFkIHRvIGNvcHkgdGhlIGVu
-dGlyZSBzaXRlIHRvIERSQkQgYW5kIHVzZSBORlMgdG8gc29sdmUgYWxsIHByb2JsZW1zLi4uCj4+
-Pj4KPj4+Cj4+PiB3YXMgc3RhbmRieS1yZXBsYXkgZW5hYmxlZD8KPj4KPj4KPj4gSSd2ZSB0cmll
-ZCBib3RoIGFuZCBJJ3ZlIHNlZW4gbW9yZSBsZXNzIHRoZSBzYW1lIGJlaGF2aW9yLCBtYXliZSBs
-ZXNzIHdoZW4gaXMgbm90IGluIHJlcGxheSBtb2RlLgo+Pgo+PiBBbnl3YXksIHdlJ3ZlIGRlYWN0
-aXZhdGVkIENlcGhGUyBmb3Igbm93IHRoZXJlLiBJJ2xsIHRyeSB3aXRoIG9sZGVyIHZlcnNpb25z
-IG9uIGEgdGVzdCBlbnZpcm9ubWVudAo+Pgo+Pj4KPj4+PiBFbCBsdW4uLCA4IG9jdC4gMjAxOCBh
-IGxhcyA1OjIxLCBBbGV4IExpdHZhayAoPGFsZXhhbmRlci52LmxpdHZha0BnbWFpbC5jb20+KSBl
-c2NyaWJpw7M6Cj4+Pj4+Cj4+Pj4+IEhvdyBpcyB0aGlzIG5vdCBhbiBlbWVyZ2VuY3kgYW5ub3Vu
-Y2VtZW50PyAgQWxzbyBJIHdvbmRlciBpZiBJIGNhbgo+Pj4+PiBkb3duZ3JhZGUgYXQgYWxsID8g
-IEkgYW0gdXNpbmcgY2VwaCB3aXRoIGRvY2tlciBkZXBsb3llZCB3aXRoCj4+Pj4+IGNlcGgtYW5z
-aWJsZS4gIEkgd29uZGVyIGlmIEkgc2hvdWxkIHB1c2ggZG93bmdyYWRlIG9yIGJhc2ljYWxseSB3
-YWl0IGZvcgo+Pj4+PiB0aGUgZml4LiAgSSBiZWxpZXZlLCBhIGZpeCBuZWVkcyB0byBiZSBwcm92
-aWRlZC4KPj4+Pj4KPj4+Pj4gVGhhbmsgeW91LAo+Pj4+Pgo+Pj4+PiBPbiAxMC83LzIwMTggOToz
-MCBQTSwgWWFuLCBaaGVuZyB3cm90ZToKPj4+Pj4+IFRoZXJlIGlzIGEgYnVnIGluIHYxMy4yLjIg
-bWRzLCB3aGljaCBjYXVzZXMgZGVjb2RpbmcgcHVyZ2UgcXVldWUgdG8KPj4+Pj4+IGZhaWwuIElm
-IG1kcyBpcyBhbHJlYWR5IGluIGRhbWFnZWQgc3RhdGUsIHBsZWFzZSBkb3duZ3JhZGUgbWRzIHRv
-Cj4+Pj4+PiAxMy4yLjEsIHRoZW4gcnVuICdjZXBoIG1kcyByZXBhaXJlZCBmc19uYW1lOmRhbWFn
-ZWRfcmFuaycgLgo+Pj4+Pj4KPj4+Pj4+IFNvcnJ5IGZvciBhbGwgdGhlIHRyb3VibGUgSSBjYXVz
-ZWQuCj4+Pj4+PiBZYW4sIFpoZW5nCj4+Pj4+Pgo+Pj4+Pgo+Pj4+Pgo+Pj4+PiBfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+Pj4+PiBjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdAo+Pj4+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+Pj4+IGh0dHA6Ly9s
-aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pj4+Cj4+Pj4K
-Pj4+Pgo+Pj4+IC0tCj4+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KPj4+Pgo+Pj4+ICAgICAgICBEYW5pZWwgQ2FycmFzY28gTWFyw61uCj4+Pj4gICAgICAgIElu
-Z2VuaWVyw61hIHBhcmEgbGEgSW5ub3ZhY2nDs24gaTJUSUMsIFMuTC4KPj4+PiAgICAgICAgVGxm
-OiAgKzM0IDkxMSAxMiAzMiA4NCBFeHQ6IDIyMwo+Pj4+ICAgICAgICB3d3cuaTJ0aWMuY29tCj4+
-Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPj4+PiBfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+Pj4+IGNlcGgtdXNlcnMg
-bWFpbGluZyBsaXN0Cj4+Pj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+Pj4+IGh0dHA6Ly9s
-aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pgo+PiBfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+PiBjZXBoLXVzZXJz
-IG1haWxpbmcgbGlzdAo+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+IGh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IAo+IAo+IAo+IC0t
-Cj4gUGF1bCBFbW1lcmljaAo+IAo+IExvb2tpbmcgZm9yIGhlbHAgd2l0aCB5b3VyIENlcGggY2x1
-c3Rlcj8gQ29udGFjdCB1cyBhdCBodHRwczovL2Nyb2l0LmlvCj4gCj4gY3JvaXQgR21iSAo+IEZy
-ZXNlbml1c3N0ci4gMzFoCj4gODEyNDcgTcO8bmNoZW4KPiB3d3cuY3JvaXQuaW8KPiBUZWw6ICs0
-OSA4OSAxODk2NTg1IDkwCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2Vw
-aC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20KPiAKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
-Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
++ceph-announce
+
+On Sun, Oct 7, 2018 at 7:30 PM Yan, Zheng <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> There is a bug in v13.2.2 mds, which causes decoding purge queue to
+> fail. If mds is already in damaged state, please downgrade mds to
+> 13.2.1, then run 'ceph mds repaired fs_name:damaged_rank' .
+>
+> Sorry for all the trouble I caused.
+> Yan, Zheng
+
+This issue is being tracked here: http://tracker.ceph.com/issues/36346
+
+The problem was caused by a backport of the wrong commit which
+unfortunately was not caught. The backport was not done to Luminous;
+only Mimic 13.2.2 is affected. New deployments on 13.2.2 are also
+affected but do not require immediate action. A procedure for handling
+upgrades of fresh deployments from 13.2.2 to 13.2.3 will be included
+in the release notes for 13.2.3.
+-- 
+Patrick Donnelly
