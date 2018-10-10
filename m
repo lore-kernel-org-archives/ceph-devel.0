@@ -1,46 +1,37 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: only allow punch hole mode in fallocate
-Date: Wed, 10 Oct 2018 13:46:59 +0200
-Message-ID: <CAOi1vP_YxCbb1aP=imNt6uJfEn18+kbG273mKW6A_+qQTnTA6A@mail.gmail.com>
-References: <20181009175428.18543-1-lhenriques@suse.com> <CAAM7YAno0s5Z21jagvnFbQdkkwMOYadZG9trPvs4WKZLRLkLxg@mail.gmail.com>
- <CAOi1vP_HmqS3xgAdYSpQYhRg-2q6mhHEaRpQW2+-UyJs9K1UsQ@mail.gmail.com> <87sh1evyii.fsf@suse.com>
+From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Does anyone use interactive CLI mode?
+Date: Wed, 10 Oct 2018 15:19:55 +0100
+Message-ID: <CALe9h7c5kJudfsQ6Vf_vczUG0CeoN8=dxznC=92RamBvxD9u0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87sh1evyii.fsf@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Oct 10, 2018 at 1:19 PM Luis Henriques <lhenriques@suse.com> wrote:
->
-> Ilya Dryomov <idryomov@gmail.com> writes:
->
-> > On Wed, Oct 10, 2018 at 6:21 AM Yan, Zheng <ukernel@gmail.com> wrote:
-> >>
-> >> On Wed, Oct 10, 2018 at 1:54 AM Luis Henriques <lhenriques@suse.com> wrote:
->
-> <snip>
->
-> >> Applied, thanks
-> >
-> > I don't think it should go to stable kernels.  Strictly speaking it's
-> > a behaviour change -- it's been this way for many years and, unless you
-> > are close to ENOSPC, it's sort of appears to work.  I'll take off the
-> > stable tag unless I hear objections.
->
-> Right, it can in fact break applications that rely on the previous
-> (bogus) behaviour.  But it can also be claimed that it *will* break
-> applications anyway with an updated kernel, so backporting it to older
-> kernels will just allow a consistent behaviour.
->
-> Anyway, I'm OK either way.  But if you drop the stable tag make sure you
-> also remove the 'Fixes:' tag as I believe the stable folks will still
-> pick this patch if it includes a valid SHA1 in it.
+Hi all,
 
-Yeah, we've run into this in the past.
+Since time immemorial, the Ceph CLI has had a mode where when run with
+no arguments, you just get an interactive prompt that lets you run
+commands without "ceph" at the start.
 
-Thanks,
+I recently discovered that we actually broke this in Mimic[1], and it
+seems that nobody noticed!
 
-                Ilya
+So the question is: does anyone actually use this feature?  It's not
+particularly expensive to maintain, but it might be nice to have one
+less path through the code if this is entirely unused.
+
+Cheers,
+John
+
+1. https://github.com/ceph/ceph/pull/24521
