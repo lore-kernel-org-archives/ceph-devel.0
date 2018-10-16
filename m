@@ -1,156 +1,55 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 1/4] Revert "ceph: fix dentry leak in splice_dentry()"
-Date: Mon, 15 Oct 2018 09:03:47 -0400
-Message-ID: <3b39857038179aa348d0a32e65c796fa9fa04dbe.camel@redhat.com>
-References: <20180928094355.6049-1-zyan@redhat.com>
-         <0622199f309f919edd8106281330076003c1adef.camel@redhat.com>
-         <81230312-9653-4BD5-A207-2D1DC14797DC@redhat.com>
-         <c43b550e85a3139a9b75be2551ab1b1b870ac7a0.camel@redhat.com>
-         <52E534BE-7431-41FC-BEC9-C687E09697B8@redhat.com>
-         <7a464618d92a1f588dace811977910e75809c581.camel@redhat.com>
-         <EB2EBE7E-92A8-4683-8976-6C5A726B1541@redhat.com>
+From: Greg KH <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH] driver core: device: add BUS_ATTR_WO macro
+Date: Tue, 16 Oct 2018 12:48:14 +0200
+Message-ID: <20181016104814.GA4768@kroah.com>
+References: <1538407972-9340-1-git-send-email-ioana.ciornei@nxp.com>
+ <20181001210804.GA24332@kroah.com>
+ <HE1PR0401MB236354F325B7A56355068E35E0E80@HE1PR0401MB2363.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <EB2EBE7E-92A8-4683-8976-6C5A726B1541@redhat.com>
-Sender: stable-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, idryomov@redhat.com, stable@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <HE1PR0401MB236354F325B7A56355068E35E0E80@HE1PR0401MB2363.eurprd04.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ioana Ciornei <ioana.ciornei@nxp.com>
+Cc: "idryomov@gmail.com" <idryomov@gmail.com>, "sage@redhat.com" <sage@redhat.com>, "elder@kernel.org" <elder@kernel.org>, "jth@kernel.org" <jth@kernel.org>, "benh@kernel.crashing.org" <benh@kernel.crashing.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 2018-10-15 at 20:37 +0800, Yan, Zheng wrote:
-> > On Oct 15, 2018, at 19:29, Jeff Layton <jlayton@redhat.com> wrote:
+On Tue, Oct 02, 2018 at 09:43:35AM +0000, Ioana Ciornei wrote:
+> > > Add BUS_ATTR_WO macro to make it easier to add attributes without
+> > > auditing the mode settings. Also, use the newly added macro where
+> > > appropriate.
+> > >
+> > > Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
+> > > ---
+> > >  arch/powerpc/platforms/pseries/ibmebus.c | 12 ++++----
+> > >  drivers/block/rbd.c                      | 48 ++++++++++++++++----------------
+> > >  drivers/scsi/fcoe/fcoe_sysfs.c           |  4 +--
+> > >  drivers/scsi/fcoe/fcoe_transport.c       | 10 +++----
+> > >  include/linux/device.h                   |  2 ++
+> > >  include/scsi/libfcoe.h                   |  8 +++---
+> > >  6 files changed, 43 insertions(+), 41 deletions(-)
 > > 
-> > On Mon, 2018-10-15 at 09:58 +0800, Yan, Zheng wrote:
-> > > > On Oct 12, 2018, at 18:56, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > 
-> > > > On Fri, 2018-10-12 at 10:39 +0800, Yan, Zheng wrote:
-> > > > > > On Oct 11, 2018, at 22:49, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > > > 
-> > > > > > On Fri, 2018-09-28 at 17:43 +0800, Yan, Zheng wrote:
-> > > > > > > This reverts commit 8b8f53af1ed9df88a4c0fbfdf3db58f62060edf3.
-> > > > > > > 
-> > > > > > > splice_dentry() is used by three places. For two places, req->r_dentry
-> > > > > > > is passed to splice_dentry(). In the case of error, req->r_dentry does
-> > > > > > > not get updated. So splice_dentry() should not drop reference.
-> > > > > > > 
-> > > > > > > Cc: stable@vger.kernel.org #4.18
-> > > > > > > Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> > > > > > > ---
-> > > > > > > fs/ceph/inode.c | 1 -
-> > > > > > > 1 file changed, 1 deletion(-)
-> > > > > > > 
-> > > > > > > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> > > > > > > index c6bbb7aa99e4..375924b2bc86 100644
-> > > > > > > --- a/fs/ceph/inode.c
-> > > > > > > +++ b/fs/ceph/inode.c
-> > > > > > > @@ -1140,7 +1140,6 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in)
-> > > > > > > 	if (IS_ERR(realdn)) {
-> > > > > > > 		pr_err("splice_dentry error %ld %p inode %p ino %llx.%llx\n",
-> > > > > > > 		       PTR_ERR(realdn), dn, in, ceph_vinop(in));
-> > > > > > > -		dput(dn);
-> > > > > > > 		dn = realdn; /* note realdn contains the error */
-> > > > > > > 		goto out;
-> > > > > > > 	} else if (realdn) {
-> > > > > > 
-> > > > > > This might be ok, buI have some real concerns about splice_dentry and
-> > > > > > its callers -- particularly ceph_fill_trace:
-> > > > > > 
-> > > > > > We hold a reference to dn on entry to splice_dentry. We then call
-> > > > > > d_splice_alias and get back an error, and now we don't put the old
-> > > > > > dentry.
-> > > > > > 
-> > > > > > Fine -- we have to then expect the caller to do it. Unfortunately, the
-> > > > > > callers in ceph_fill_trace do this:
-> > > > > > 
-> > > > > >                      dn = splice_dentry(dn, in);                             
-> > > > > >                      if (IS_ERR(dn)) {                                       
-> > > > > >                              err = PTR_ERR(dn);                              
-> > > > > >                              goto done;                                      
-> > > > > >                      }                                                       
-> > > > > >                      req->r_dentry = dn;  /* may have spliced */
-> > > > > > 
-> > > > > > The old value of dn gets clobbered once that comes back with an ERR_PTR.
-> > > > > > I guess we could claim that r_dentry will still be set to the old value
-> > > > > > at that point and that it would get cleaned up when it gets cleaned up. 
-> > > > > > 
-> > > > > > But...I see this higher up in ceph_fill_trace at the end of the
-> > > > > > CEPH_MFS_OP_RENAME condition block:
-> > > > > > 
-> > > > > >      dn = req->r_old_dentry;  /* use old_dentry */
-> > > > > > 
-> > > > > > So now I'm worried about the case where the splice succeeds. ISTM that
-> > > > > > "dn" can represent either r_dentry or r_old_dentry at the point where
-> > > > > > splice_dentry gets called, but we only ever reset the value of r_dentry
-> > > > > > there.
-> > > > > > 
-> > > > > > If dn == r_old_dentry at the time that splice_dentry is called, and then
-> > > > > > that succeeds, we'll end up leaking the reference to r_dentry and then
-> > > > > > doing an overput on r_old_dentry.
-> > > > > > 
-> > > > > 
-> > > > > Good catch
-> > > > > 
-> > > > > > I think it might help to establish clear "ownership" of the dentry
-> > > > > > references throughout that function. Consider zeroing out r_dentry and
-> > > > > > r_old_dentry at the time that you set the local variables? That might
-> > > > > > make this whole thing less fragile.
-> > > > > 
-> > > > > Before the function return, we need to set req->r_dentry again. This will introduce duplicated code because there are several ‘goto’ in the function. How about following change.
-> > > > > 
-> > > > > 
-> > > > > -                       dn = req->r_old_dentry;  /* use old_dentry */
-> > > > > +                       /* swap r_dentry and r_old_dentry */
-> > > > > +                       req->r_dentry = req->r_old_dentry;
-> > > > > +                       req->r_old_dentry = dn;
-> > > > > +                       dn = req->r_dentry;
-> > > > > 
-> > > > 
-> > > > Why do we need to reset r_dentry? I don't see where it gets used after
-> > > > ceph_fill_trace returns, so I gather we're just resetting it to clean up
-> > > > the references? Your proposed fix looks like it would fix that bug. It
-> > > > will mean that the values in the req will change but maybe that's ok.
-> > > > 
-> > > 
-> > > It’s used by ceph_finish_lookup
-> > > 
+> > Nice!  This duplicates a lot of the work I did back in July but have not pushed out
+> > very far due to the other things that ended up happening around that time:
+> > 	https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core.git/log/?h=bus_cleanup 
 > > 
-> > In that case, it might be bad idea to overwrite the value of r_dentry
-> > with the r_old_dentry pointer? 
+> > As the patch series seen at that link shows, you can do this in more places than
+> > just what you did here.
+> > 
+> > Either way, you should break this up into the individual patches, like I did or you
+> > can take my patches if you want.  Getting the BUS_ATTR_WO() macro added is
+> > good to do now, and then you can go and hit up all of the different subsystems
+> > that should be converted over to it.
 > 
-> ceph_finish_lookup() is not used in the rename case ;)
+> I can of course split my patch into individual ones and resubmit them, but as you already have the entire patch set ready, I feel like we can just push those. I looked through your changes and it seems like you covered all the subsystems. Please let me know if there is something else I should do.
 > 
-> 
+> My intention here was to first add the _WO attribute so that afterwards I can add a new bus attribute in the fsl-mc bus.
 
-Ok, but still...I worry about this sort of special-casing, as it can
-lead to people making incorrect assumptions later. I think it would be
-best to just take a dentry ref for "dn" and just put it before it goes
-out of scope.
+Ok, I've queued up the patch that adds the _WO attribute now, so that
+you should be able to use this after 4.20-rc1.  I'll work on getting my
+other patches merged in that series at that time as well.
 
-At the very least, if you are going to override r_dentry like this,
-please add a comment explaining why it's safe to do this in the rename case.
+thanks,
 
-> > 
-> > > 
-> > > > Another idea might be to just keep an extra reference to "dn", and not
-> > > > reset r_dentry and r_old_dentry? It's a bit more code, but it might be a
-> > > > cleaner fix, long-term.
-> > > 
-> > > I will check, Thanks
-> > > 
-> > > Yan, Zheng
-> > > 
-> > > > -- 
-> > > > Jeff Layton <jlayton@redhat.com>
-> > > 
-> > > 
-> > 
-> > -- 
-> > Jeff Layton <jlayton@redhat.com>
-> > 
-> 
-> 
-
--- 
-Jeff Layton <jlayton@redhat.com>
+greg k-h
