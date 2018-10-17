@@ -1,14 +1,15 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+From: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Don't upgrade to 13.2.2 if you use cephfs
-Date: Wed, 17 Oct 2018 20:05:17 +0200 (CEST)
-Message-ID: <2069832196.68127.1539799517911.JavaMail.zimbra@oxygem.tv>
+Date: Wed, 17 Oct 2018 11:09:41 -0700
+Message-ID: <CA+2bHPbjyFtjDiQ9hPH53NpogNMGcNP1_1qhb5iDuSEhSyyz9g@mail.gmail.com>
 References: <CAAM7YAnkjiujm8dqgeG6uOhPGL+ccC71Q0F15-ez=4Qgj6Fomw@mail.gmail.com>
  <CA+2bHPZSnFA=GS4eWGO9-zx_tgc+gz3UwXdB748BPs0jSWMmFw@mail.gmail.com>
+ <2069832196.68127.1539799517911.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+2bHPZSnFA=GS4eWGO9-zx_tgc+gz3UwXdB748BPs0jSWMmFw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <2069832196.68127.1539799517911.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,35 +19,23 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGksCgpJcyBpdCBwb3NzaWJsZSB0byBoYXZlIG1vcmUgaW5mb3Mgb3IgYW5ub3VuY2UgYWJvdXQg
-dGhpcyBwcm9ibGVtID8KCkknbSBjdXJyZW50bHkgd2FpdGluZyB0byBtaWdyYXRlIGZyb20gbHVt
-aW5pb3VzIHRvIG1pbWljLCAoSSBuZWVkIG5ldyBxdW90YSBmZWF0dXJlIGZvciBjZXBoZnMpCgpp
-cyBpdCBzYWZlIHRvIHVwZ3JhZGUgdG8gMTMuMi4yID8gIAoKb3IgYmV0dGVyIHRvIHdhaXQgdG8g
-MTMuMi4zID8gb3IgaW5zdGFsbCAxMy4yLjEgZm9yIG5vdyA/CgotLQpBbGV4YW5kcmUKCi0tLS0t
-IE1haWwgb3JpZ2luYWwgLS0tLS0KRGU6ICJQYXRyaWNrIERvbm5lbGx5IiA8cGRvbm5lbGxAcmVk
-aGF0LmNvbT4Kw4A6ICJaaGVuZyBZYW4iIDx1a2VybmVsQGdtYWlsLmNvbT4KQ2M6ICJjZXBoLWRl
-dmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20+LCBjZXBoLWFubm91bmNlQGxpc3RzLmNlcGguY29tCkVudm95w6k6
-IEx1bmRpIDggT2N0b2JyZSAyMDE4IDE4OjUwOjU5Ck9iamV0OiBSZTogW2NlcGgtdXNlcnNdIERv
-bid0IHVwZ3JhZGUgdG8gMTMuMi4yIGlmIHlvdSB1c2UgY2VwaGZzCgorY2VwaC1hbm5vdW5jZSAK
-Ck9uIFN1biwgT2N0IDcsIDIwMTggYXQgNzozMCBQTSBZYW4sIFpoZW5nIDx1a2VybmVsQGdtYWls
-LmNvbT4gd3JvdGU6IAo+IFRoZXJlIGlzIGEgYnVnIGluIHYxMy4yLjIgbWRzLCB3aGljaCBjYXVz
-ZXMgZGVjb2RpbmcgcHVyZ2UgcXVldWUgdG8gCj4gZmFpbC4gSWYgbWRzIGlzIGFscmVhZHkgaW4g
-ZGFtYWdlZCBzdGF0ZSwgcGxlYXNlIGRvd25ncmFkZSBtZHMgdG8gCj4gMTMuMi4xLCB0aGVuIHJ1
-biAnY2VwaCBtZHMgcmVwYWlyZWQgZnNfbmFtZTpkYW1hZ2VkX3JhbmsnIC4gCj4gCj4gU29ycnkg
-Zm9yIGFsbCB0aGUgdHJvdWJsZSBJIGNhdXNlZC4gCj4gWWFuLCBaaGVuZyAKClRoaXMgaXNzdWUg
-aXMgYmVpbmcgdHJhY2tlZCBoZXJlOiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMzYz
-NDYgCgpUaGUgcHJvYmxlbSB3YXMgY2F1c2VkIGJ5IGEgYmFja3BvcnQgb2YgdGhlIHdyb25nIGNv
-bW1pdCB3aGljaCAKdW5mb3J0dW5hdGVseSB3YXMgbm90IGNhdWdodC4gVGhlIGJhY2twb3J0IHdh
-cyBub3QgZG9uZSB0byBMdW1pbm91czsgCm9ubHkgTWltaWMgMTMuMi4yIGlzIGFmZmVjdGVkLiBO
-ZXcgZGVwbG95bWVudHMgb24gMTMuMi4yIGFyZSBhbHNvIAphZmZlY3RlZCBidXQgZG8gbm90IHJl
-cXVpcmUgaW1tZWRpYXRlIGFjdGlvbi4gQSBwcm9jZWR1cmUgZm9yIGhhbmRsaW5nIAp1cGdyYWRl
-cyBvZiBmcmVzaCBkZXBsb3ltZW50cyBmcm9tIDEzLjIuMiB0byAxMy4yLjMgd2lsbCBiZSBpbmNs
-dWRlZCAKaW4gdGhlIHJlbGVhc2Ugbm90ZXMgZm9yIDEzLjIuMy4gCi0tIApQYXRyaWNrIERvbm5l
-bGx5IAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
-aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
-dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Wed, Oct 17, 2018 at 11:05 AM Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org> wrote:
+>
+> Hi,
+>
+> Is it possible to have more infos or announce about this problem ?
+>
+> I'm currently waiting to migrate from luminious to mimic, (I need new quota feature for cephfs)
+>
+> is it safe to upgrade to 13.2.2 ?
+>
+> or better to wait to 13.2.3 ? or install 13.2.1 for now ?
+
+Upgrading to 13.2.1 would be safe.
+
+-- 
+Patrick Donnelly
