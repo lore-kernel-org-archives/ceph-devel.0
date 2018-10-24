@@ -1,47 +1,44 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
 Subject: Re: [PATCH 1/4] Revert "ceph: fix dentry leak in splice_dentry()"
-Date: Wed, 24 Oct 2018 11:47:25 +0800
-Message-ID: <CAAM7YA=wNqoZbGhHG-Dhb+m9md+haveRXBvpXz2eWcdWBLfOaQ@mail.gmail.com>
-References: <20180928094355.6049-1-zyan@redhat.com> <0622199f309f919edd8106281330076003c1adef.camel@redhat.com>
- <81230312-9653-4BD5-A207-2D1DC14797DC@redhat.com> <c43b550e85a3139a9b75be2551ab1b1b870ac7a0.camel@redhat.com>
- <52E534BE-7431-41FC-BEC9-C687E09697B8@redhat.com> <7a464618d92a1f588dace811977910e75809c581.camel@redhat.com>
- <EB2EBE7E-92A8-4683-8976-6C5A726B1541@redhat.com> <3b39857038179aa348d0a32e65c796fa9fa04dbe.camel@redhat.com>
- <CAOi1vP9XDHB3YEmoFMAHM7kOhbc9cFPAYcoT2qRsOqP38ojwVg@mail.gmail.com>
+Date: Wed, 24 Oct 2018 06:50:17 -0400
+Message-ID: <b894f07bdb19596ee7513882999cd462fb9e5949.camel@redhat.com>
+References: <20180928094355.6049-1-zyan@redhat.com>
+         <0622199f309f919edd8106281330076003c1adef.camel@redhat.com>
+         <81230312-9653-4BD5-A207-2D1DC14797DC@redhat.com>
+         <c43b550e85a3139a9b75be2551ab1b1b870ac7a0.camel@redhat.com>
+         <52E534BE-7431-41FC-BEC9-C687E09697B8@redhat.com>
+         <7a464618d92a1f588dace811977910e75809c581.camel@redhat.com>
+         <EB2EBE7E-92A8-4683-8976-6C5A726B1541@redhat.com>
+         <3b39857038179aa348d0a32e65c796fa9fa04dbe.camel@redhat.com>
+         <CAAM7YAnKvoEA+QGYZuvcK6W93ZBqLbFLnX3YN8zV2Pgs4S0ZLA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP9XDHB3YEmoFMAHM7kOhbc9cFPAYcoT2qRsOqP38ojwVg@mail.gmail.com>
+In-Reply-To: <CAAM7YAnKvoEA+QGYZuvcK6W93ZBqLbFLnX3YN8zV2Pgs4S0ZLA@mail.gmail.com>
 Sender: stable-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Jeff Layton <jlayton@redhat.com>, Zheng Yan <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, idryomov@redhat.com, stable@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Zheng Yan <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, idryomov@redhat.com, stable@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Oct 23, 2018 at 10:36 PM Ilya Dryomov <idryomov@gmail.com> wrote:
->
-> On Mon, Oct 15, 2018 at 3:04 PM Jeff Layton <jlayton@redhat.com> wrote:
+On Wed, 2018-10-24 at 14:24 +0800, Yan, Zheng wrote:
+> On Mon, Oct 15, 2018 at 9:05 PM Jeff Layton <jlayton@redhat.com> wrote:
 > >
 > > On Mon, 2018-10-15 at 20:37 +0800, Yan, Zheng wrote:
 > > > > On Oct 15, 2018, at 19:29, Jeff Layton <jlayton@redhat.com> wrote:
 > > > >
 > > > > On Mon, 2018-10-15 at 09:58 +0800, Yan, Zheng wrote:
-> > > > > > On Oct 12, 2018, at 18:56, Jeff Layton <jlayton@redhat.com> wro=
-te:
+> > > > > > On Oct 12, 2018, at 18:56, Jeff Layton <jlayton@redhat.com> wrote:
 > > > > > >
 > > > > > > On Fri, 2018-10-12 at 10:39 +0800, Yan, Zheng wrote:
-> > > > > > > > On Oct 11, 2018, at 22:49, Jeff Layton <jlayton@redhat.com>=
- wrote:
+> > > > > > > > On Oct 11, 2018, at 22:49, Jeff Layton <jlayton@redhat.com> wrote:
 > > > > > > > >
 > > > > > > > > On Fri, 2018-09-28 at 17:43 +0800, Yan, Zheng wrote:
-> > > > > > > > > This reverts commit 8b8f53af1ed9df88a4c0fbfdf3db58f62060e=
-df3.
+> > > > > > > > > This reverts commit 8b8f53af1ed9df88a4c0fbfdf3db58f62060edf3.
 > > > > > > > > >
-> > > > > > > > > splice_dentry() is used by three places. For two places, =
-req->r_dentry
-> > > > > > > > > is passed to splice_dentry(). In the case of error, req->=
-r_dentry does
-> > > > > > > > > not get updated. So splice_dentry() should not drop refer=
-ence.
+> > > > > > > > > splice_dentry() is used by three places. For two places, req->r_dentry
+> > > > > > > > > is passed to splice_dentry(). In the case of error, req->r_dentry does
+> > > > > > > > > not get updated. So splice_dentry() should not drop reference.
 > > > > > > > > >
 > > > > > > > > > Cc: stable@vger.kernel.org #4.18
 > > > > > > > > > Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
@@ -53,107 +50,78 @@ ence.
 > > > > > > > > > index c6bbb7aa99e4..375924b2bc86 100644
 > > > > > > > > > --- a/fs/ceph/inode.c
 > > > > > > > > > +++ b/fs/ceph/inode.c
-> > > > > > > > > @@ -1140,7 +1140,6 @@ static struct dentry *splice_dentry=
-(struct dentry *dn, struct inode *in)
+> > > > > > > > > @@ -1140,7 +1140,6 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in)
 > > > > > > > > >   if (IS_ERR(realdn)) {
-> > > > > > > > >           pr_err("splice_dentry error %ld %p inode %p ino=
- %llx.%llx\n",
-> > > > > > > > >                  PTR_ERR(realdn), dn, in, ceph_vinop(in))=
-;
+> > > > > > > > >           pr_err("splice_dentry error %ld %p inode %p ino %llx.%llx\n",
+> > > > > > > > >                  PTR_ERR(realdn), dn, in, ceph_vinop(in));
 > > > > > > > > > -         dput(dn);
-> > > > > > > > >           dn =3D realdn; /* note realdn contains the erro=
-r */
+> > > > > > > > >           dn = realdn; /* note realdn contains the error */
 > > > > > > > > >           goto out;
 > > > > > > > > >   } else if (realdn) {
 > > > > > > > >
-> > > > > > > > This might be ok, buI have some real concerns about splice_=
-dentry and
+> > > > > > > > This might be ok, buI have some real concerns about splice_dentry and
 > > > > > > > > its callers -- particularly ceph_fill_trace:
 > > > > > > > >
-> > > > > > > > We hold a reference to dn on entry to splice_dentry. We the=
-n call
-> > > > > > > > d_splice_alias and get back an error, and now we don't put =
-the old
+> > > > > > > > We hold a reference to dn on entry to splice_dentry. We then call
+> > > > > > > > d_splice_alias and get back an error, and now we don't put the old
 > > > > > > > > dentry.
 > > > > > > > >
-> > > > > > > > Fine -- we have to then expect the caller to do it. Unfortu=
-nately, the
+> > > > > > > > Fine -- we have to then expect the caller to do it. Unfortunately, the
 > > > > > > > > callers in ceph_fill_trace do this:
 > > > > > > > >
-> > > > > > > >                      dn =3D splice_dentry(dn, in);
-> > > > > > > >                      if (IS_ERR(dn)) {
-> > > > > > > >                              err =3D PTR_ERR(dn);
-> > > > > > > >                              goto done;
-> > > > > > > >                      }
-> > > > > > > >                      req->r_dentry =3D dn;  /* may have spl=
-iced */
+> > > > > > > >                      dn = splice_dentry(dn, in);                            
+> > > > > > > >                      if (IS_ERR(dn)) {                                      
+> > > > > > > >                              err = PTR_ERR(dn);                            
+> > > > > > > >                              goto done;                                    
+> > > > > > > >                      }                                                      
+> > > > > > > >                      req->r_dentry = dn;  /* may have spliced */
 > > > > > > > >
-> > > > > > > > The old value of dn gets clobbered once that comes back wit=
-h an ERR_PTR.
-> > > > > > > > I guess we could claim that r_dentry will still be set to t=
-he old value
-> > > > > > > > at that point and that it would get cleaned up when it gets=
- cleaned up.
+> > > > > > > > The old value of dn gets clobbered once that comes back with an ERR_PTR.
+> > > > > > > > I guess we could claim that r_dentry will still be set to the old value
+> > > > > > > > at that point and that it would get cleaned up when it gets cleaned up.
 > > > > > > > >
-> > > > > > > > But...I see this higher up in ceph_fill_trace at the end of=
- the
+> > > > > > > > But...I see this higher up in ceph_fill_trace at the end of the
 > > > > > > > > CEPH_MFS_OP_RENAME condition block:
 > > > > > > > >
-> > > > > > > >      dn =3D req->r_old_dentry;  /* use old_dentry */
+> > > > > > > >      dn = req->r_old_dentry;  /* use old_dentry */
 > > > > > > > >
-> > > > > > > > So now I'm worried about the case where the splice succeeds=
-. ISTM that
-> > > > > > > > "dn" can represent either r_dentry or r_old_dentry at the p=
-oint where
-> > > > > > > > splice_dentry gets called, but we only ever reset the value=
- of r_dentry
+> > > > > > > > So now I'm worried about the case where the splice succeeds. ISTM that
+> > > > > > > > "dn" can represent either r_dentry or r_old_dentry at the point where
+> > > > > > > > splice_dentry gets called, but we only ever reset the value of r_dentry
 > > > > > > > > there.
 > > > > > > > >
-> > > > > > > > If dn =3D=3D r_old_dentry at the time that splice_dentry is=
- called, and then
-> > > > > > > > that succeeds, we'll end up leaking the reference to r_dent=
-ry and then
+> > > > > > > > If dn == r_old_dentry at the time that splice_dentry is called, and then
+> > > > > > > > that succeeds, we'll end up leaking the reference to r_dentry and then
 > > > > > > > > doing an overput on r_old_dentry.
 > > > > > > > >
 > > > > > > >
 > > > > > > > Good catch
 > > > > > > >
-> > > > > > > > I think it might help to establish clear "ownership" of the=
- dentry
-> > > > > > > > references throughout that function. Consider zeroing out r=
-_dentry and
-> > > > > > > > r_old_dentry at the time that you set the local variables? =
-That might
+> > > > > > > > I think it might help to establish clear "ownership" of the dentry
+> > > > > > > > references throughout that function. Consider zeroing out r_dentry and
+> > > > > > > > r_old_dentry at the time that you set the local variables? That might
 > > > > > > > > make this whole thing less fragile.
 > > > > > > >
-> > > > > > > Before the function return, we need to set req->r_dentry agai=
-n. This will introduce duplicated code because there are several =E2=80=98g=
-oto=E2=80=99 in the function. How about following change.
+> > > > > > > Before the function return, we need to set req->r_dentry again. This will introduce duplicated code because there are several ‘goto’ in the function. How about following change.
 > > > > > > >
 > > > > > > >
-> > > > > > > -                       dn =3D req->r_old_dentry;  /* use old=
-_dentry */
+> > > > > > > -                       dn = req->r_old_dentry;  /* use old_dentry */
 > > > > > > > +                       /* swap r_dentry and r_old_dentry */
-> > > > > > > +                       req->r_dentry =3D req->r_old_dentry;
-> > > > > > > +                       req->r_old_dentry =3D dn;
-> > > > > > > +                       dn =3D req->r_dentry;
+> > > > > > > +                       req->r_dentry = req->r_old_dentry;
+> > > > > > > +                       req->r_old_dentry = dn;
+> > > > > > > +                       dn = req->r_dentry;
 > > > > > > >
 > > > > > >
-> > > > > > Why do we need to reset r_dentry? I don't see where it gets use=
-d after
-> > > > > > ceph_fill_trace returns, so I gather we're just resetting it to=
- clean up
-> > > > > > the references? Your proposed fix looks like it would fix that =
-bug. It
-> > > > > > will mean that the values in the req will change but maybe that=
-'s ok.
+> > > > > > Why do we need to reset r_dentry? I don't see where it gets used after
+> > > > > > ceph_fill_trace returns, so I gather we're just resetting it to clean up
+> > > > > > the references? Your proposed fix looks like it would fix that bug. It
+> > > > > > will mean that the values in the req will change but maybe that's ok.
 > > > > > >
 > > > > >
-> > > > > It=E2=80=99s used by ceph_finish_lookup
+> > > > > It’s used by ceph_finish_lookup
 > > > > >
 > > > >
-> > > > In that case, it might be bad idea to overwrite the value of r_dent=
-ry
+> > > > In that case, it might be bad idea to overwrite the value of r_dentry
 > > > > with the r_old_dentry pointer?
 > > >
 > > > ceph_finish_lookup() is not used in the rename case ;)
@@ -164,23 +132,187 @@ ry
 > > lead to people making incorrect assumptions later. I think it would be
 > > best to just take a dentry ref for "dn" and just put it before it goes
 > > out of scope.
+> 
+> how about below patch. let splice_dentry() to update req->r_dentry.
+> 
+> 
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index e8ce4e66bc47..739737f4e0e1 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -1106,8 +1106,9 @@ static void update_dentry_lease(struct dentry *dentry,
+>   * splice a dentry to an inode.
+>   * caller must hold directory i_mutex for this to be safe.
+>   */
+> -static struct dentry *splice_dentry(struct dentry *dn, struct inode *in)
+> +static int splice_dentry(struct dentry **pdn, struct inode *in)
+> {
+> +	struct dentry *dn = *pdn;
+>  	struct dentry *realdn;
+>  
+>  	BUG_ON(d_inode(dn));
+> @@ -1140,28 +1141,23 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in)
+>  	if (IS_ERR(realdn)) {
+>  		pr_err("splice_dentry error %ld %p inode %p ino %llx.%llx\n",
+>  		       PTR_ERR(realdn), dn, in, ceph_vinop(in));
+> -		dn = realdn;
+> -		/*
+> -		 * Caller should release 'dn' in the case of error.
+> -		 * If 'req->r_dentry' is passed to this function,
+> -		 * caller should leave 'req->r_dentry' untouched.
+> -		 */
+> -		goto out;
+> -	} else if (realdn) {
+> +		return PTR_ERR(realdn);
+> +	}
+> +
+> +	if (realdn) {
+>  		dout("dn %p (%d) spliced with %p (%d) "
+>  		     "inode %p ino %llx.%llx\n",
+>  		     dn, d_count(dn),
+>  		     realdn, d_count(realdn),
+>  		     d_inode(realdn), ceph_vinop(d_inode(realdn)));
+>  		dput(dn);
+> -		dn = realdn;
+> +		*pdn = realdn;
+>  	} else {
+>  		BUG_ON(!ceph_dentry(dn));
+>  		dout("dn %p attached to %p ino %llx.%llx\n",
+>  		     dn, d_inode(dn), ceph_vinop(d_inode(dn)));
+>  	}
+> -out:
+> -	return dn;
+> +	return 0;
+>  }
+>  
+>  /*
+> @@ -1348,7 +1344,10 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+>  			dout("dn %p gets new offset %lld\n", req->r_old_dentry,
+>  			     ceph_dentry(req->r_old_dentry)->offset);
+>  
+> -			dn = req->r_old_dentry;  /* use old_dentry */
+> +			/* swap r_dentry and r_old_dentry */
+> +			req->r_dentry = req->r_old_dentry;
+> +			req->r_old_dentry = dn;
+> +			dn = req->r_dentry;
+
+I think the above deserves a comment explaining why this is safe to do
+for rename ops.
+
+>  		}
+>  
+>  		/* null dentry? */
+> @@ -1373,12 +1372,10 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+>  		if (d_really_is_negative(dn)) {
+>  			ceph_dir_clear_ordered(dir);
+>  			ihold(in);
+> -			dn = splice_dentry(dn, in);
+> -			if (IS_ERR(dn)) {
+> -				err = PTR_ERR(dn);
+> +			err = splice_dentry(&req->r_dentry, in);
+> +			if (err < 0)
+>  				goto done;
+> -			}
+> -			req->r_dentry = dn;  /* may have spliced */
+> +			dn = req->r_dentry;  /* may have spliced */
+>  		} else if (d_really_is_positive(dn) && d_inode(dn) != in) {
+>  			dout(" %p links to %p %llx.%llx, not %llx.%llx\n",
+>  			     dn, d_inode(dn), ceph_vinop(d_inode(dn)),
+> @@ -1398,22 +1395,18 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+>  	} else if ((req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+>  		    req->r_op == CEPH_MDS_OP_MKSNAP) &&
+>  		   !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
+> -		struct dentry *dn = req->r_dentry;
+>  		struct inode *dir = req->r_parent;
+>  
+>  		/* fill out a snapdir LOOKUPSNAP dentry */
+> -		BUG_ON(!dn);
+>  		BUG_ON(!dir);
+>  		BUG_ON(ceph_snap(dir) != CEPH_SNAPDIR);
+> -		dout(" linking snapped dir %p to dn %p\n", in, dn);
+> +		BUG_ON(!req->r_dentry);
+> +		dout(" linking snapped dir %p to dn %p\n", in, req->r_dentry);
+>  		ceph_dir_clear_ordered(dir);
+>  		ihold(in);
+> -		dn = splice_dentry(dn, in);
+> -		if (IS_ERR(dn)) {
+> -			err = PTR_ERR(dn);
+> +		err = splice_dentry(&req->r_dentry, in);
+> +		if (err < 0)
+>  			goto done;
+> -		}
+> -		req->r_dentry = dn;  /* may have spliced */
+>  	} else if (rinfo->head->is_dentry) {
+>  		struct ceph_vino *ptvino = NULL;
+>  
+> @@ -1677,8 +1670,6 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+>  		}
+>  
+>  		if (d_really_is_negative(dn)) {
+> -			struct dentry *realdn;
+> -
+>  			if (ceph_security_xattr_deadlock(in)) {
+>  				dout(" skip splicing dn %p to inode %p"
+>  				     " (security xattr deadlock)\n", dn, in);
+> @@ -1687,13 +1678,9 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+>  				goto next_item;
+>  			}
+>  
+> -			realdn = splice_dentry(dn, in);
+> -			if (IS_ERR(realdn)) {
+> -				err = PTR_ERR(realdn);
+> -				d_drop(dn);
+> +			err = splice_dentry(&dn, in);
+> +			if (err < 0)
+>  				goto next_item;
+> -			}
+> -			dn = realdn;
+>  		}
+>  
+>  		ceph_dentry(dn)->offset = rde->offset;
+> @@ -1709,8 +1696,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+>  				err = ret;
+>  		}
+>  next_item:
+> -		if (dn)
+> -			dput(dn);
+> +		dput(dn);
+>  	}
+>  out:
+>  	if (err == 0 && skipped == 0) {
+> 
+
+The rest seems to be ok.
+
+> 
 > >
 > > At the very least, if you are going to override r_dentry like this,
-> > please add a comment explaining why it's safe to do this in the rename =
-case.
->
-> Hi Zheng,
->
-> What is the status here?  This patch has missed 4.19, do you have a new
-> version pending somewhere?
->
-> Thanks,
+> > please add a comment explaining why it's safe to do this in the rename case.
+> >
+> > > >
+> > > > >
+> > > > > > Another idea might be to just keep an extra reference to "dn", and not
+> > > > > > reset r_dentry and r_old_dentry? It's a bit more code, but it might be a
+> > > > > > cleaner fix, long-term.
+> > > > >
+> > > > > I will check, Thanks
+> > > > >
+> > > > > Yan, Zheng
+> > > > >
+> > > > > > --
+> > > > > > Jeff Layton <jlayton@redhat.com>
+> > > > >
+> > > > >
+> > > >
+> > > > --
+> > > > Jeff Layton <jlayton@redhat.com>
+> > > >
+> > >
+> > >
+> >
+> > --
+> > Jeff Layton <jlayton@redhat.com>
+> >
 
-I'd like to get this patch and patch "ceph: fix dentry leak in
-ceph_readdir_prepopulate" upstreamed. (use other patch to do cleanup)
-
-Regards
-Yan, Zheng
-
->
->                 Ilya
+-- 
+Jeff Layton <jlayton@redhat.com>
