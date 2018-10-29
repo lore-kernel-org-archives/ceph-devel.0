@@ -1,11 +1,14 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Upcoming CFPs and conferences of interest
-Date: Thu, 25 Oct 2018 15:28:18 -0700
-Message-ID: <CAJ4mKGZrL3YMDgZP8nY8AOLxYpfLfaJUstTVHQimwSBT4okyJA@mail.gmail.com>
+From: kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: librados3
+Date: Mon, 29 Oct 2018 19:42:39 +0800
+Message-ID: <CAJE9aOMbnu94-WB3zFB_yRLNZwHOk5AgbhsNip1H2e8XThYsZA@mail.gmail.com>
+References: <CAJE9aOP2RWH-rZe6MiXehTo0t2ZuMFOkGgv2OUDoSKghnyFG-Q@mail.gmail.com>
+ <CA+aFP1AofvSYEyMcu9Bt46chbBpLCBL-JTyC7h-7H+SvZ2oyRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+aFP1AofvSYEyMcu9Bt46chbBpLCBL-JTyC7h-7H+SvZ2oyRA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,38 +18,87 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: The Esoteric Order of the Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hey all, several of these conferences have been mentioned on the list
-but I wanted to draw your attention to them in aggregate.
++ ceph-user for more inputs in hope to get more inputs from librados
+and librbd 's C++ interfaces.
 
-The CFPs of interest I know about are gathered in
-https://pad.ceph.com/p/cfp-coordination (and that etherpad is open for
-edits from anybody!).
-In particular:
-* Closing tomorrow, DevConf.cz is a Red Hat-affiliated tech conference
-in Brno in late January. I've submitted a couple of talks and we're
-hoping to get a Ceph BoF, so feel free to come join us if you're
-nearby and submit your own talks!
+On Wed, Oct 24, 2018 at 1:34 AM Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>
+> On Tue, Oct 23, 2018 at 11:38 AM kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >
+> > we plan to introduce some non-backward-compatible changes[0] in
+> > librados in the coming nautilus release. to be specific, these changes
+> > are not API/ABI compatible with existing librados2. so i think it's
+> > time to bump up the soversion of librados from 2 to 3.  as bumping up
+> > soversion is a major change in the life cycle of a library, i think we
+> > will expect following changes:
+> >
+> > 0. piggyback more non-backward-compatible changes listed in
+> > https://pad.ceph.com/p/librados3 in this change, so we can have less
+> > soversion bump up.
+> > 1. in nautilus, librados3 and librados3-{dev,devel} will be packaged
+> > instead, librados2* will be maintained in LTS releases.
+>
+> Just note that this is going to have a potential ripple effect on
+> non-Ceph packages that use librbd1 if they are also (incorrectly)
+> specifying a dependency on librados2 [1].
+>
+> > 2. we will have separated C++ and C API librados after this change. so
+> > librados3 will only provide the C API of librados, the C++ API will be
+> > offered by libradospp, (the name may vary if you suggest a better
+> > one). and they will be versioned and packaged separately, and will not
+> > depend on each other. a PR is posted to do this, see [1]
+>
+> Do we have a good idea and/or list about who uses the librados C++
+> API? I seem to vaguely recall perhaps one or so external users. If
+> librgw/RGW and librbd eventually switch over to something similar to
+> the API being worked on by Adam [2] and if there are no external users
+> of the C++ API, should we take the time now to kill all the legacy C++
+> API methods prior to the release of Nautilus?
+>
+> > 3. in order to enable user to install librados2 and librados3 at the
+> > same time, libceph-common.so will be versioned since nautilus.
+> > libceph-common.so is an internal shared library used by ceph
+> > libraries, tools and daemons. librados depends on libceph-common.
+> > 4. some executables/libraries' dependencies will be updated
+> > accordingly . for instance, librbd will depend on libradospp.
+> >
+> > if this model works fine, i guess we probably could expand it to librbd.
+>
+> It would be interesting to get a feel for who (if anyone) actually
+> uses the librbd C++ interface before heading down that path. AFAIK,
+> it's probably really only the rbd CLI tool -- and that's basically for
+> the convenience of C++-style containers. If it's not being used by
+> anyone else, perhaps our time could be better spent deprecating the
+> library for external use to focus our development and maintanence
+> efforts on the C (and wrapped-C) interface.
+>
+> > any concerns?
+> >
+> > BTW, we discussed this topic last year the same time, see
+> > https://www.spinics.net/lists/ceph-devel/msg38830.html =)
+> >
+> > ---
+> > [0] for instance, https://github.com/ceph/ceph/pull/24498
+> > [1] https://github.com/ceph/ceph/pull/24616
+> > [2] a trello card for librados3:
+> > https://trello.com/c/pmRkawYV/165-librados3-api-update-cleanup
+> >
+> > --
+> > Regards
+> > Kefu Chai
+>
+> [1] https://src.fedoraproject.org/rpms/qemu/blob/f29/f/qemu.spec#_192
+> [2] https://github.com/ceph/ceph/pull/16715
+>
+> --
+> Jason
 
-* Closing October 31, the SoCal Linux Expo will be held in Pasadena,
-California in March. I haven't been in a couple years but will
-hopefully have a Ceph Intro talk.
 
-* Closing November 15, the new Linux Vault conf will be in Boston in
-February! This in past years has had a good selection of talks on
-software-defined storage and should be made much stronger by being
-colocated with FAST; I'm quite excited.
 
-* Closing November 25, the SDS room at FOSDEM, Brussels in February.
-I've never actually been here but I've heard good things.
-
-Please consider submitting to these and other CFPs to help spread
-knowledge about deploying and developing Ceph, in addition to
-attending the conferences themselves.
-Plus, update the cfp-coordination etherpad so we don't have too many
-duplicated talk subjects at any one conference and people know where
-they can go to see Ceph presentations. :)
-Thanks!
--Greg
+-- 
+Regards
+Kefu Chai
