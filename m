@@ -1,134 +1,99 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: librados3
-Date: Mon, 29 Oct 2018 08:05:38 -0400
-Message-ID: <CA+aFP1BYHhMDQ=_Q7i27bqU5D8FZWTssQW8oCPtjdw_npTqSgQ@mail.gmail.com>
-References: <CAJE9aOP2RWH-rZe6MiXehTo0t2ZuMFOkGgv2OUDoSKghnyFG-Q@mail.gmail.com>
- <CA+aFP1AofvSYEyMcu9Bt46chbBpLCBL-JTyC7h-7H+SvZ2oyRA@mail.gmail.com>
- <CAJE9aOMbnu94-WB3zFB_yRLNZwHOk5AgbhsNip1H2e8XThYsZA@mail.gmail.com>
- <ecc135ed-8155-11a1-e398-37e30b985897@42on.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <ecc135ed-8155-11a1-e398-37e30b985897-fspyXLx8qC4@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 4.20-rc1
+Date: Wed, 31 Oct 2018 18:44:25 +0100
+Message-ID: <20181031174425.27372-1-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 29, 2018 at 7:48 AM Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
-> On 10/29/18 12:42 PM, kefu chai wrote:
-> > + ceph-user for more inputs in hope to get more inputs from librados
-> > and librbd 's C++ interfaces.
-> >
-> > On Wed, Oct 24, 2018 at 1:34 AM Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> >>
-> >> On Tue, Oct 23, 2018 at 11:38 AM kefu chai <tchaikov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >>>
-> >>> we plan to introduce some non-backward-compatible changes[0] in
-> >>> librados in the coming nautilus release. to be specific, these changes
-> >>> are not API/ABI compatible with existing librados2. so i think it's
-> >>> time to bump up the soversion of librados from 2 to 3.  as bumping up
-> >>> soversion is a major change in the life cycle of a library, i think we
-> >>> will expect following changes:
-> >>>
-> >>> 0. piggyback more non-backward-compatible changes listed in
-> >>> https://pad.ceph.com/p/librados3 in this change, so we can have less
-> >>> soversion bump up.
-> >>> 1. in nautilus, librados3 and librados3-{dev,devel} will be packaged
-> >>> instead, librados2* will be maintained in LTS releases.
-> >>
-> >> Just note that this is going to have a potential ripple effect on
-> >> non-Ceph packages that use librbd1 if they are also (incorrectly)
-> >> specifying a dependency on librados2 [1].
-> >>
-> >>> 2. we will have separated C++ and C API librados after this change. so
-> >>> librados3 will only provide the C API of librados, the C++ API will be
-> >>> offered by libradospp, (the name may vary if you suggest a better
-> >>> one). and they will be versioned and packaged separately, and will not
-> >>> depend on each other. a PR is posted to do this, see [1]
-> >>
-> >> Do we have a good idea and/or list about who uses the librados C++
-> >> API? I seem to vaguely recall perhaps one or so external users. If
-> >> librgw/RGW and librbd eventually switch over to something similar to
-> >> the API being worked on by Adam [2] and if there are no external users
-> >> of the C++ API, should we take the time now to kill all the legacy C++
-> >> API methods prior to the release of Nautilus?
-> >>
->
-> I know various users who use librados through phprados (PHP) and the
-> rados-java (Java) bindings.
->
-> Those bindings will need to be updated as well.
->
-> Qemu and libvirt both mainly use librbd, but they use a very small part
-> of librados to initiate the connection and set configuration values.
+Hi Linus,
 
-These should all be using the C API which isn't changing. We would
-like to take inventory of who uses the librados/librbd C++ APIs
-outside of the core Ceph project.
+The following changes since commit 84df9525b0c27f3ebc2ebb1864fa62a97fdedb7d:
 
-> >>> 3. in order to enable user to install librados2 and librados3 at the
-> >>> same time, libceph-common.so will be versioned since nautilus.
-> >>> libceph-common.so is an internal shared library used by ceph
-> >>> libraries, tools and daemons. librados depends on libceph-common.
-> >>> 4. some executables/libraries' dependencies will be updated
-> >>> accordingly . for instance, librbd will depend on libradospp.
-> >>>
-> >>> if this model works fine, i guess we probably could expand it to librbd.
-> >>
-> >> It would be interesting to get a feel for who (if anyone) actually
-> >> uses the librbd C++ interface before heading down that path. AFAIK,
-> >> it's probably really only the rbd CLI tool -- and that's basically for
-> >> the convenience of C++-style containers. If it's not being used by
-> >> anyone else, perhaps our time could be better spent deprecating the
-> >> library for external use to focus our development and maintanence
-> >> efforts on the C (and wrapped-C) interface.
-> >>
->
-> Again, don't forget Qemu/KVM and libvirt who both are very heavy users
-> of librbd
->
-> Wido
->
-> >>> any concerns?
-> >>>
-> >>> BTW, we discussed this topic last year the same time, see
-> >>> https://www.spinics.net/lists/ceph-devel/msg38830.html =)
-> >>>
-> >>> ---
-> >>> [0] for instance, https://github.com/ceph/ceph/pull/24498
-> >>> [1] https://github.com/ceph/ceph/pull/24616
-> >>> [2] a trello card for librados3:
-> >>> https://trello.com/c/pmRkawYV/165-librados3-api-update-cleanup
-> >>>
-> >>> --
-> >>> Regards
-> >>> Kefu Chai
-> >>
-> >> [1] https://src.fedoraproject.org/rpms/qemu/blob/f29/f/qemu.spec#_192
-> >> [2] https://github.com/ceph/ceph/pull/16715
-> >>
-> >> --
-> >> Jason
-> >
-> >
-> >
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+  Linux 4.19 (2018-10-22 07:37:37 +0100)
 
+are available in the Git repository at:
 
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc1
 
--- 
-Jason
+for you to fetch changes up to ea4cdc548e5e74a529cdd1aea885d74b4aa8f1b3:
+
+  ceph: new mount option to disable usage of copy-from op (2018-10-22 10:28:24 +0200)
+
+----------------------------------------------------------------
+The highlights are:
+
+- a series that fixes some old memory allocation issues in libceph
+  (myself).  We no longer allocate memory in places where allocation
+  failures cannot be handled and BUG when the allocation fails.
+
+- support for copy_file_range() syscall (Luis Henriques).  If size and
+  alignment conditions are met, it leverages RADOS copy-from operation.
+  Otherwise, a local copy is performed.
+
+- a patch that reduces memory requirement of ceph_sync_read() from the
+  size of the entire read to the size of one object (Zheng Yan).
+
+- fallocate() syscall is now restricted to FALLOC_FL_PUNCH_HOLE (Luis
+  Henriques)
+
+----------------------------------------------------------------
+Chengguang Xu (3):
+      ceph: reset cap hold timeout only for requeued inode
+      rbd: add __init/__exit annotations
+      ceph: check snap first in ceph_set_acl()
+
+Ilya Dryomov (12):
+      libceph: bump CEPH_MSG_MAX_DATA_LEN
+      libceph: osd_req_op_cls_init() doesn't need to take opcode
+      libceph: introduce ceph_pagelist_alloc()
+      libceph: don't consume a ref on pagelist in ceph_msg_data_add_pagelist()
+      libceph: no need to call osd_req_opcode_valid() in osd_req_encode_op()
+      ceph: num_ops is off by one in ceph_aio_retry_work()
+      libceph: enable fallback to ceph_msg_new() in ceph_msgpool_get()
+      libceph: assign cookies in linger_submit()
+      libceph: introduce alloc_watch_request()
+      libceph, rbd, ceph: move ceph_osdc_alloc_messages() calls
+      libceph: preallocate message data items
+      libceph: check reply num_data_items in setup_request_data()
+
+Luis Henriques (5):
+      ceph: only allow punch hole mode in fallocate
+      ceph: add non-blocking parameter to ceph_try_get_caps()
+      libceph: support the RADOS copy-from operation
+      ceph: support copy_file_range file operation
+      ceph: new mount option to disable usage of copy-from op
+
+Xuehan Xu (1):
+      ceph: set timeout conditionally in __cap_delay_requeue
+
+Yan, Zheng (4):
+      Revert "ceph: fix dentry leak in splice_dentry()"
+      ceph: fix dentry leak in ceph_readdir_prepopulate
+      ceph: check if LOOKUPNAME request was aborted when filling trace
+      ceph: refactor ceph_sync_read()
+
+ Documentation/filesystems/ceph.txt |   5 +
+ drivers/block/rbd.c                |  28 +-
+ fs/ceph/acl.c                      |  13 +-
+ fs/ceph/addr.c                     |   2 +-
+ fs/ceph/caps.c                     |  21 +-
+ fs/ceph/file.c                     | 573 +++++++++++++++++++++++++++----------
+ fs/ceph/inode.c                    |  13 +-
+ fs/ceph/mds_client.c               |   9 +-
+ fs/ceph/super.c                    |  13 +
+ fs/ceph/super.h                    |   3 +-
+ fs/ceph/xattr.c                    |   3 +-
+ include/linux/ceph/libceph.h       |   8 +-
+ include/linux/ceph/messenger.h     |  24 +-
+ include/linux/ceph/msgpool.h       |  11 +-
+ include/linux/ceph/osd_client.h    |  22 +-
+ include/linux/ceph/pagelist.h      |  11 +-
+ include/linux/ceph/rados.h         |  28 ++
+ net/ceph/messenger.c               | 107 +++----
+ net/ceph/msgpool.c                 |  27 +-
+ net/ceph/osd_client.c              | 363 +++++++++++++++++------
+ net/ceph/pagelist.c                |  20 ++
+ 21 files changed, 900 insertions(+), 404 deletions(-)
