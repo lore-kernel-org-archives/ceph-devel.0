@@ -1,41 +1,33 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.20-rc2
-Date: Fri,  9 Nov 2018 17:47:55 +0100
-Message-ID: <20181109164755.13100-1-idryomov@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [GIT PULL] Ceph fixes for 4.20-rc2
+Date: Fri, 9 Nov 2018 16:31:18 -0600
+Message-ID: <CAHk-=wjSArODWM+seBzUGRFgtfMWjorFsna_Ftb8XYW55fab0Q@mail.gmail.com>
+References: <20181109164755.13100-1-idryomov@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181109164755.13100-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Linux List Kernel Mailing <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Fri, Nov 9, 2018 at 10:48 AM Ilya Dryomov <idryomov@gmail.com> wrote:
+>
+> Two CephFS fixes (copy_file_range and quota) and a small feature bit
+> cleanup.
 
-The following changes since commit 651022382c7f8da46cb4872a545ee1da6d097d2a:
+.. I'm doing a few final manual "pulled" ack emails just to let people
+know that I'll be stopping them, because Konstantin's pr-tracker-bot
+automation should now be in place if the message is cc'd to lkml.
 
-  Linux 4.20-rc1 (2018-11-04 15:37:52 -0800)
+NOTE! It's currently only lkml, afaik, so other people who don't cc
+lkml for their pulls won't get the automation, but I also won't be
+looking at "which lists were cc'd", so I won't be doing the manual
+ones.
 
-are available in the Git repository at:
+And if you want to use lkml but don't want to see the automated "it
+has been merged" emails, there's opt-out too. I know some people hate
+getting automated emails.
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc2
-
-for you to fetch changes up to 23c625ce3065e40c933a4239efb9b11f1194a343:
-
-  libceph: assume argonaut on the server side (2018-11-08 17:51:11 +0100)
-
-----------------------------------------------------------------
-Two CephFS fixes (copy_file_range and quota) and a small feature bit
-cleanup.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      libceph: assume argonaut on the server side
-
-Luis Henriques (2):
-      ceph: add destination file data sync before doing any remote copy
-      ceph: quota: fix null pointer dereference in quota check
-
- fs/ceph/file.c                     | 11 +++++++++--
- fs/ceph/mds_client.c               | 12 +++---------
- fs/ceph/quota.c                    |  3 ++-
- include/linux/ceph/ceph_features.h |  8 +-------
- 4 files changed, 15 insertions(+), 19 deletions(-)
+             Linus
