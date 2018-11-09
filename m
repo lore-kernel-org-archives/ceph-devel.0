@@ -1,54 +1,41 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: quota: fix null pointer dereference in quota check
-Date: Tue, 6 Nov 2018 21:00:09 +0800
-Message-ID: <3AD4F375-E9DE-485D-B2DA-A938AC4A3F0C@redhat.com>
-References: <20181101065318.2cylxol6d444nzeu@kili.mountain>
- <20181105110052.31759-1-lhenriques@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 12.1 \(3445.101.1\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 4.20-rc2
+Date: Fri,  9 Nov 2018 17:47:55 +0100
+Message-ID: <20181109164755.13100-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181105110052.31759-1-lhenriques@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Dan Carpenter <dan.carpenter@oracle.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
+Hi Linus,
 
+The following changes since commit 651022382c7f8da46cb4872a545ee1da6d097d2a:
 
-> On Nov 5, 2018, at 19:00, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> This patch fixes a possible null pointer dereference in
-> check_quota_exceeded, detected by the static checker smatch, with the
-> following warning:
-> 
->    fs/ceph/quota.c:240 check_quota_exceeded()
->     error: we previously assumed 'realm' could be null (see line 188)
-> 
-> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Link: https://lkml.kernel.org/n/20181101065318.2cylxol6d444nzeu@kili.mountain
-> Fixes: b7a2921765cf ("ceph: quota: support for ceph.quota.max_files")
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
-> fs/ceph/quota.c | 3 ++-
-> 1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-> index 32d4f13784ba..03f4d24db8fe 100644
-> --- a/fs/ceph/quota.c
-> +++ b/fs/ceph/quota.c
-> @@ -237,7 +237,8 @@ static bool check_quota_exceeded(struct inode *inode, enum quota_check_op op,
-> 		ceph_put_snap_realm(mdsc, realm);
-> 		realm = next;
-> 	}
-> -	ceph_put_snap_realm(mdsc, realm);
-> +	if (realm)
-> +		ceph_put_snap_realm(mdsc, realm);
-> 	up_read(&mdsc->snap_rwsem);
-> 
-> 	return exceeded;
+  Linux 4.20-rc1 (2018-11-04 15:37:52 -0800)
 
-Applied, thanks.
+are available in the Git repository at:
 
-Yan, Zheng
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc2
+
+for you to fetch changes up to 23c625ce3065e40c933a4239efb9b11f1194a343:
+
+  libceph: assume argonaut on the server side (2018-11-08 17:51:11 +0100)
+
+----------------------------------------------------------------
+Two CephFS fixes (copy_file_range and quota) and a small feature bit
+cleanup.
+
+----------------------------------------------------------------
+Ilya Dryomov (1):
+      libceph: assume argonaut on the server side
+
+Luis Henriques (2):
+      ceph: add destination file data sync before doing any remote copy
+      ceph: quota: fix null pointer dereference in quota check
+
+ fs/ceph/file.c                     | 11 +++++++++--
+ fs/ceph/mds_client.c               | 12 +++---------
+ fs/ceph/quota.c                    |  3 ++-
+ include/linux/ceph/ceph_features.h |  8 +-------
+ 4 files changed, 15 insertions(+), 19 deletions(-)
