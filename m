@@ -1,24 +1,80 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph fixes for 4.20-rc2
-Date: Fri, 09 Nov 2018 22:45:01 +0000
-Message-ID: <20181109224501.28605.43055.pr-tracker-bot-d757a3b01e72368176c5ee580ea17f8c2d185cd7@pdx-korg-gitolite-1.ci.codeaurora.org>
-References: <20181109164755.13100-1-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181109164755.13100-1-idryomov@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Kees Meijs <kees-FaqLbeXgz6Y@public.gmane.org>
+Subject: Re: Upgrade to Infernalis: OSDs crash all the time
+Date: Mon, 12 Nov 2018 08:50:13 +0100
+Message-ID: <ea16f676-f6da-96b8-ff4a-79eb5e358786@nefos.nl>
+References: <fa796ffa-d063-2e77-0c4a-2bbe901accd6@nefos.nl>
+ <CAN-GepKV9VMkYt2j2mbRae2PO7pWq65sUVvHP45C=jv=z_RDJw@mail.gmail.com>
+ <fcc0b5de-4a2b-1fb3-5f07-cf6acebcc3f3@nefos.nl>
+ <1b7b4d91-21fd-17a5-30c1-c22f718fdf68@nefos.nl>
+ <caec2c32-7ae8-0ea8-a5a1-390b364ef0d3@nefos.nl>
+ <c101f732-8b59-ce5d-957c-c5eca0379950@nefos.nl>
+ <ee562e7e-9f0f-00fe-a240-26b56e2938d3@nefos.nl>
+ <CAN-GepKMpOft-65XYQghfdjEv6tfqSNsDzK9-w0-8B1+_Mz_Sg@mail.gmail.com>
+ <3936c6de-33d3-d9fc-2b59-518d59a2198e@nefos.nl>
+ <76224774-5f2c-a3f0-86e3-88dec6c7b3fd@nefos.nl>
+ <cbff197f-15eb-d977-d609-f344cd1e3df9@nefos.nl>
+ <0f122091-55d2-a8f8-139e-d3fa3f92c755@nefos.nl>
+ <90f425e9-5518-d513-8f90-cdaac8fe3e73@nefos.nl>
+ <CAN-GepLKVqYkR2FSF5AQWrKKY2C4rZFUdeE_MA8PUbLgQdFqUA@mail.gmail.com>
+ <a9267f1e-fc64-0b76-b704-1f05465f46c4@nefos.nl>
+ <CAD9yTbGetZyMZe_yuoZgZ=e6HsJtB2jbwumP=O_zEL2p3-DhfA@mail.gmail.com>
+ <CAN-GepL2V11nv4Msi0j4d0u-aEOcRYo04aOAWZXOd1KQoQNOwA@mail.gmail.com>
+ <94b58666-a649-4b82-2448-418c56bbfdee@nefos.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <94b58666-a649-4b82-2448-418c56bbfdee-FaqLbeXgz6Y@public.gmane.org>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-The pull request you sent on Fri,  9 Nov 2018 17:47:55 +0100:
-
-> https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc2
-
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/d757a3b01e72368176c5ee580ea17f8c2d185cd7
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+SGkgbGlzdCwKCkJldHdlZW4gY3Jhc2hlcyB3ZSB3ZXJlIGFibGUgdG8gYWxsb3cgdGhlIGNsdXN0
+ZXIgdG8gYmFja2ZpbGwgYXMgbXVjaCBhcyAKcG9zc2libGUgKGFsbCBtb25pdG9ycyBJbmZlcm5h
+bGlzLCBPU0RzIGJlaW5nIEhhbW1lciBhZ2FpbikuCgpMZWZ0b3ZlciBQR3Mgd291bGRuJ3QgYmFj
+a2ZpbGwgdW50aWwgd2UgcmVtb3ZlZCBmaWxlcyBzdWNoIGFzOgoKPiA4LjBNIC1ydy1yLS1yLS0g
+MSByb290IHJvb3QgOC4wTSBBdWcgMjQgMjM6NTYgCj4gdGVtcFx1My5iZFx1MFx1MTYxNzU0MTdc
+dTI3MThfX2hlYWRfMDAwMDAwQkRfX2ZmZmZmZmZmZmZmZmZmZmIKPiA4LjBNIC1ydy1yLS1yLS0g
+MSByb290IHJvb3QgOC4wTSBBdWcgMjggMDU6NTEgCj4gdGVtcFx1My5iZFx1MFx1MTYxNzU0MTdc
+dTM5OTJfX2hlYWRfMDAwMDAwQkRfX2ZmZmZmZmZmZmZmZmZmZmIKPiA4LjBNIC1ydy1yLS1yLS0g
+MSByb290IHJvb3QgOC4wTSBBdWcgMzAgMDM6NDAgCj4gdGVtcFx1My5iZFx1MFx1MTYxNzU0MTdc
+dTQ1MjFfX2hlYWRfMDAwMDAwQkRfX2ZmZmZmZmZmZmZmZmZmZmIKPiA4LjBNIC1ydy1yLS1yLS0g
+MSByb290IHJvb3QgOC4wTSBBdWcgMzEgMDM6NDYgCj4gdGVtcFx1My5iZFx1MFx1MTYxNzU0MTdc
+dTQ4MTdfX2hlYWRfMDAwMDAwQkRfX2ZmZmZmZmZmZmZmZmZmZmIKPiA4LjBNIC1ydy1yLS1yLS0g
+MSByb290IHJvb3QgOC4wTSBTZXDCoCA1IDE5OjQ0IAo+IHRlbXBcdTMuYmRcdTBcdTE2MTc1NDE3
+XHU2MjUyX19oZWFkXzAwMDAwMEJEX19mZmZmZmZmZmZmZmZmZmZiCj4gOC4wTSAtcnctci0tci0t
+IDEgcm9vdCByb290IDguME0gU2VwwqAgNiAxNDo0NCAKPiB0ZW1wXHUzLmJkXHUwXHUxNjE3NTQx
+N1x1NjU5M19faGVhZF8wMDAwMDBCRF9fZmZmZmZmZmZmZmZmZmZmYgo+IDguME0gLXJ3LXItLXIt
+LSAxIHJvb3Qgcm9vdCA4LjBNIFNlcMKgIDcgMTA6MjEgCj4gdGVtcFx1My5iZFx1MFx1MTYxNzU0
+MTdcdTY4NzBfX2hlYWRfMDAwMDAwQkRfX2ZmZmZmZmZmZmZmZmZmZmIKClJlc3RhcnRpbmcgdGhl
+IGdpdmVuIE9TRCBkaWRuJ3Qgc2VlbSBuZWNlc3Nhcnk7IGJhY2tmaWxsaW5nIHN0YXJ0ZWQgdG8g
+CndvcmsgYW5kIGF0IHNvbWUgcG9pbnQgZW5vdWdoIHJlcGxpY2FzIHdlcmUgYXZhaWxhYmxlIGZv
+ciBlYWNoIFBHLgoKRmluYWxseSBkZWVwIHNjcnViYmluZyByZXBhaXJlZCB0aGUgaW5jb25zaXN0
+ZW50IFBHcyBhdXRvbWFnaWNhbGx5IGFuZCAKd2UgYXJyaXZlZCBhdCBIRUFMVEhfT0sgYWdhaW4h
+CgpDYXNlIGNsb3NlZDogdXAgdG8gSmV3ZWwuCgpGb3IgZXZlcnlvbmUgaW52b2x2ZWQ6IGEgYmln
+LCBiaWcgYW5kIGV2ZW4gYmlnZ2VyIHRoYW5rIHlvdSBmb3IgYWxsIApwb2ludGVycyBhbmQgc3Vw
+cG9ydCEKClJlZ2FyZHMsCktlZXMKCk9uIDEwLTA5LTE4IDE2OjQzLCBLZWVzIE1laWpzIHdyb3Rl
+Ogo+IEEgbGl0dGxlIHVwZGF0ZTogbWVhbndoaWxlIHdlIGFkZGVkIGEgbmV3IG5vZGUgY29uc2lz
+dGluZyBvZiBIYW1tZXIgT1NEcwo+IHRvIGVuc3VyZSBzdWZmaWNpZW50IGNsdXN0ZXIgY2FwYWNp
+dHkuCj4KPiBUaGUgdXBncmFkZWQgbm9kZSB3aXRoIEluZmVybmFsaXMgT1NEcyBpcyBjb21wbGV0
+ZWx5IHJlbW92ZWQgZnJvbSB0aGUKPiBDUlVTSCBtYXAgYW5kIHRoZSBPU0RzIHJlbW92ZWQgKG9i
+dmlvdXNseSB3ZSBkaWRuJ3Qgd2lwZSB0aGUgZGlza3MgeWV0KS4KPgo+IEF0IHRoZSBtb21lbnQg
+d2UncmUgc3RpbGwgcnVubmluZyB1c2luZyBmbGFncwo+IG5vb3V0LG5vYmFja2ZpbGwsbm9zY3J1
+Yixub2RlZXAtc2NydWIuIEFsdGhvdWdoIG5vdyBvbmx5IEhhbW1lciBPU0RzCj4gcmVzaWRlLCB3
+ZSBzdGlsbCBleHBlcmllbmNlIE9TRCBjcmFzaGVzIG9uIGJhY2tmaWxsaW5nIHNvIHdlJ3JlIHVu
+YWJsZQo+IHRvIGFjaGlldmUgSEVBTFRIX09LIHN0YXRlLgo+Cj4gVXNpbmcgZGVidWcgMjAgbGV2
+ZWwgd2UncmUgKG1vc3RseSBteSBjb3dvcmtlciBXaWxsZW0gSmFuIGlzKSBmaWd1cmluZwo+IG91
+dCB3aHkgdGhlIGNyYXNoZXMgaGFwcGVuIGV4YWN0bHkuIEhvcGVmdWxseSB3ZSdsbCBmaWd1cmUg
+aXQgb3V0Lgo+Cj4gVG8gYmUgY29udGludWVkLi4uCgpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQo=
