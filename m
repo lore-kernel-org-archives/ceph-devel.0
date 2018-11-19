@@ -1,52 +1,36 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.18 35/59] ceph: quota: fix null pointer dereference in quota check
-Date: Wed, 14 Nov 2018 17:23:07 -0500
-Message-ID: <20181114222335.99339-35-sashal@kernel.org>
-References: <20181114222335.99339-1-sashal@kernel.org>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: Fwd: what are the potential risks of mixed cluster
+ and client ms_type
+Date: Mon, 19 Nov 2018 07:54:06 +0100
+Message-ID: <0411d970-e662-bc5e-fe5f-40b5d107ba2e@corp.ovh.com>
+References: <CAMrPN_+Pc2y9e_0Dn01XLZZW09HVsbF0pzKbwBTpfCgapzWqag@mail.gmail.com>
+ <CAMrPN_+M18MVvNdMr0RadPE56F+7T2y4ZwPS9Rof9bbdQYCxhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181114222335.99339-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: stable@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAMrPN_+M18MVvNdMr0RadPE56F+7T2y4ZwPS9Rof9bbdQYCxhQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Honggang(Joseph) Yang" <eagle.rtlinux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: Luis Henriques <lhenriques@suse.com>
-
-[ Upstream commit 71f2cc64d027d712f29bf8d09d3e123302d5f245 ]
-
-This patch fixes a possible null pointer dereference in
-check_quota_exceeded, detected by the static checker smatch, with the
-following warning:
-
-   fs/ceph/quota.c:240 check_quota_exceeded()
-    error: we previously assumed 'realm' could be null (see line 188)
-
-Fixes: b7a2921765cf ("ceph: quota: support for ceph.quota.max_files")
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
-Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- fs/ceph/quota.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-index 242bfa5c0539..47cc6f41d100 100644
---- a/fs/ceph/quota.c
-+++ b/fs/ceph/quota.c
-@@ -237,7 +237,8 @@ static bool check_quota_exceeded(struct inode *inode, enum quota_check_op op,
- 		ceph_put_snap_realm(mdsc, realm);
- 		realm = next;
- 	}
--	ceph_put_snap_realm(mdsc, realm);
-+	if (realm)
-+		ceph_put_snap_realm(mdsc, realm);
- 	up_read(&mdsc->snap_rwsem);
- 
- 	return exceeded;
--- 
-2.17.1
+T24gMjAxOC0xMS0xOSA1OjA1IGEubS4sIEhvbmdnYW5nKEpvc2VwaCkgWWFuZyB3cm90ZToKPiBo
+ZWxsbywKPiAKPiBPdXIgY2x1c3RlciBzaWRlIG1zX3R5cGUgaXMgYXN5bmMsIHdoaWxlIGNsaWVu
+dCBzaWRlIG1zX3R5cGUgaXMKPiBzaW1wbGUuIEkgd2FudCB0byBrbm93IGlmIHRoaXMgaXMgYSBw
+cm9wZXIgd2F5IHRvIHVzZSwgd2hhdCBhcmUgdGhlCj4gcG90ZW50aWFsIHJpc2tzPwoKTm9uZSBp
+ZiBDZXBoIGRvZXNuJ3QgY29tcGxhaW4gYWJvdXQgYXN5bmMgbWVzc2VuZ2VyIGJlaW5nIGV4cGVy
+aW1lbnRhbCAtIApib3RoIG1lc3NlbmdlcnMgdXNlIHRoZSBzYW1lIHByb3RvY29sLgoKLS0gClBp
+b3RyIERhxYJlawpwaW90ci5kYWxla0Bjb3JwLm92aC5jb20KaHR0cHM6Ly93d3cub3ZoY2xvdWQu
+Y29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgt
+dXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3Rz
+LmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
