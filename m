@@ -1,33 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fix for 4.20-rc4
-Date: Fri, 23 Nov 2018 19:49:19 +0100
-Message-ID: <20181123184919.10675-1-idryomov@gmail.com>
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fix for 4.20-rc4
+Date: Fri, 23 Nov 2018 19:30:01 +0000
+Message-ID: <20181123193001.17450.37717.pr-tracker-bot@pdx-korg-gitolite-1.ci.codeaurora.org>
+References: <20181123184919.10675-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181123184919.10675-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Fri, 23 Nov 2018 19:49:19 +0100:
 
-The following changes since commit 9ff01193a20d391e8dbce4403dd5ef87c7eaaca6:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc4
 
-  Linux 4.20-rc3 (2018-11-18 13:33:44 -0800)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/7c98a42618271210c60b79128b220107d35938d9
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc4
-
-for you to fetch changes up to 7e241f647dc7087a0401418a187f3f5b527cc690:
-
-  libceph: fall back to sendmsg for slab pages (2018-11-19 17:59:47 +0100)
-
-----------------------------------------------------------------
-A messenger fix, marked for stable.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      libceph: fall back to sendmsg for slab pages
-
- net/ceph/messenger.c | 12 +++++++++---
- 1 file changed, 9 insertions(+), 3 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
