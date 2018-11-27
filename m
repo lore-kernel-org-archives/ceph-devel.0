@@ -1,53 +1,61 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH V2] libceph: fix use after free
-Date: Tue, 27 Nov 2018 11:17:26 +0100
-Message-ID: <CAOi1vP8Ff9HLF_v93RwyW4LwQ5jYPWPaZhqBgx9FsxmXH6M4AQ@mail.gmail.com>
-References: <1543310472-31861-1-git-send-email-bianpan2016@163.com>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: Luminous v12.2.10 released
+Date: Tue, 27 Nov 2018 15:50:16 +0100
+Message-ID: <87y39e4lsn.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1543310472-31861-1-git-send-email-bianpan2016@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: bianpan2016@163.com
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
+List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Nov 27, 2018 at 10:22 AM Pan Bian <bianpan2016@163.com> wrote:
->
-> The function ceph_monc_handle_map calls kfree(old) to free the old
-> monitor map, old points to monc->monmap. However, after that, it reads
-> monc->monmap->epoch and passes it to __ceph_monc_got_map. This will
-> result in a use-after-free bug. The patch moves the free operation after
-> the call to __ceph_monc_got_map.
->
-> Fixes: 82dcabad750 ("libceph: revamp subs code, switch to SUBSCRIBE2 protocol")
->
-> Signed-off-by: Pan Bian <bianpan2016@163.com>
-> ---
-> V2: correct the format of the tag Fixes
-> ---
->  net/ceph/mon_client.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 18deb3d..05ef5aa 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -478,9 +478,10 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
->         }
->
->         client->monc.monmap = monmap;
-
-monc->monmap is assigned here.  It's not obvious, but monc->monmap and
-client->monc.monmap is the same pointer.
-
-> -       kfree(old);
->
->         __ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monc->monmap->epoch);
-
-ceph_monmap_decode() returns the new map, kfree() frees the old map.
-I don't see a use-after-free here.
-
-Thanks,
-
-                Ilya
+CldlJ3JlIGhhcHB5IHRvIGFubm91bmNlIHRoZSB0ZW50aCBidWcgZml4IHJlbGVhc2Ugb2YgdGhl
+IEx1bWlub3VzCnYxMi4yLnggbG9uZyB0ZXJtIHN0YWJsZSByZWxlYXNlIHNlcmllcy4gVGhlIHBy
+ZXZpb3VzIHJlbGVhc2UsIHYxMi4yLjksCmludHJvZHVjZWQgdGhlIFBHIGhhcmQtbGltaXQgcGF0
+Y2hlcyB3aGljaCB3ZXJlIGZvdW5kIHRvIGNhdXNlIGFuIGlzc3VlCmluIGNlcnRhaW4gdXBncmFk
+ZSBzY2VuYXJpb3MsIGFuZCB0aGlzIHJlbGVhc2Ugd2FzIGV4cGVkaXRlZCB0byByZXZlcnQKdGhv
+c2UgcGF0Y2hlcy4gSWYgeW91IGFscmVhZHkgc3VjY2Vzc2Z1bGx5IHVwZ3JhZGVkIHRvIHYxMi4y
+LjksIHlvdQpzaG91bGQgKipub3QqKiB1cGdyYWRlIHRvIHYxMi4yLjEwLCBidXQgcmF0aGVyICoq
+d2FpdCoqIGZvciBhIHJlbGVhc2UgaW4Kd2hpY2ggaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNz
+dWVzLzM2Njg2IGlzIGFkZHJlc3NlZC4gQWxsIG90aGVyIHVzZXJzCmFyZSBlbmNvdXJhZ2VkIHRv
+IHVwZ3JhZGUgdG8gdGhpcyByZWxlYXNlLgoKTm90YWJsZSBDaGFuZ2VzCi0tLS0tLS0tLS0tLS0t
+LQoKKiBUaGlzIHJlbGVhc2UgcmV2ZXJ0cyB0aGUgUEcgaGFyZC1saW1pdCBwYXRjaGVzIGFkZGVk
+IGluIHYxMi4yLjkgaW4gd2hpY2gsCiAgYSBwYXJ0aWFsIHVwZ3JhZGUgZHVyaW5nIGEgcmVjb3Zl
+cnkvYmFja2ZpbGwsIGNhbiBjYXVzZSB0aGUgb3NkcyBvbiB0aGUKICBwcmV2aW91cyB2ZXJzaW9u
+LCB0byBmYWlsIHdpdGggYXNzZXJ0KHRyaW1fdG8gPD0gaW5mby5sYXN0X2NvbXBsZXRlKS4gVGhl
+CiAgd29ya2Fyb3VuZCBmb3IgdXNlcnMgaXMgdG8gdXBncmFkZSBhbmQgcmVzdGFydCBhbGwgT1NE
+cyB0byBhIHZlcnNpb24gd2l0aCB0aGUKICBwZyBoYXJkIGxpbWl0LCBvciBvbmx5IHVwZ3JhZGUg
+d2hlbiBhbGwgUEdzIGFyZSBhY3RpdmUrY2xlYW4uCgogIFNlZSBhbHNvOiBodHRwOi8vdHJhY2tl
+ci5jZXBoLmNvbS9pc3N1ZXMvMzY2ODYKCiAgQXMgbWVudGlvbmVkIGFib3ZlIGlmIHlvdSd2ZSBz
+dWNjZXNzZnVsbHkgdXBncmFkZWQgdG8gdjEyLjIuOSBETyBOT1QKICB1cGdyYWRlIHRvIHYxMi4y
+LjEwIHVudGlsIHRoZSBsaW5rZWQgdHJhY2tlciBpc3N1ZSBoYXMgYmVlbiBmaXhlZC4KCiogVGhl
+IGJsdWVzdG9yZV9jYWNoZV8qIG9wdGlvbnMgYXJlIG5vIGxvbmdlciBuZWVkZWQuIFRoZXkgYXJl
+IHJlcGxhY2VkCiAgYnkgb3NkX21lbW9yeV90YXJnZXQsIGRlZmF1bHRpbmcgdG8gNEdCLiBCbHVl
+U3RvcmUgd2lsbCBleHBhbmQKICBhbmQgY29udHJhY3QgaXRzIGNhY2hlIHRvIGF0dGVtcHQgdG8g
+c3RheSB3aXRoaW4gdGhpcwogIGxpbWl0LiBVc2VycyB1cGdyYWRpbmcgc2hvdWxkIG5vdGUgdGhp
+cyBpcyBhIGhpZ2hlciBkZWZhdWx0CiAgdGhhbiB0aGUgcHJldmlvdXMgYmx1ZXN0b3JlX2NhY2hl
+X3NpemUgb2YgMUdCLCBzbyBPU0RzIHVzaW5nCiAgQmx1ZVN0b3JlIHdpbGwgdXNlIG1vcmUgbWVt
+b3J5IGJ5IGRlZmF1bHQuCgogIEZvciBtb3JlIGRldGFpbHMsIHNlZSBCbHVlU3RvcmUgZG9jc1sx
+XQoKCkZvciB0aGUgY29tcGxldGUgcmVsZWFzZSBub3RlcyB3aXRoIGNoYW5nZWxvZywgcGxlYXNl
+IGNoZWNrIG91dCB0aGUKcmVsZWFzZSBibG9nIGVudHJ5IGF0OgpodHRwOi8vY2VwaC5jb20vcmVs
+ZWFzZXMvdjEyLTItMTAtbHVtaW5vdXMtcmVsZWFzZWQKCkdldHRpbmcgY2VwaDoKLS0tLS0tLS0t
+LS0tCiogR2l0IGF0IGdpdDovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdAoqIFRhcmJhbGwgYXQg
+aHR0cDovL2Rvd25sb2FkLmNlcGguY29tL3RhcmJhbGxzL2NlcGgtMTIuMi4xMC50YXIuZ3oKKiBG
+b3IgcGFja2FnZXMsIHNlZSBodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxs
+L2dldC1wYWNrYWdlcy8KKiBSZWxlYXNlIGdpdCBzaGExOiAxNzc5MTU3NjRiNzUyODA0MTk0OTM3
+NDgyYTM5ZTk1ZTBjYTNkZTk0CgoKWzFdOiBodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rl
+ci9yYWRvcy9jb25maWd1cmF0aW9uL2JsdWVzdG9yZS1jb25maWctcmVmLyNjYWNoZS1zaXplCgot
+LQpBYmhpc2hlayBMZWtzaG1hbmFuClNVU0UgTGludXggR21iSCwgR0Y6IEZlbGl4IEltZW5kw7Zy
+ZmZlciwgSmFuZSBTbWl0aGFyZCwgR3JhaGFtIE5vcnRvbiwKSFJCIDIxMjg0IChBRyBOw7xybmJl
+cmcpCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkNlcGgt
+YW5ub3VuY2UgbWFpbGluZyBsaXN0CkNlcGgtYW5ub3VuY2VAbGlzdHMuY2VwaC5jb20KaHR0cDov
+L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLWFubm91bmNlLWNlcGguY29tCg==
