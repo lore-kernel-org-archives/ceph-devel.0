@@ -1,190 +1,81 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH 2/2] fs: Don't open-code lru_to_page
-Date: Fri, 30 Nov 2018 17:11:39 +0800
-Message-ID: <CAAM7YA==GN5epC5BZYVmcXuyZp-reVi+_MdhDrgcOjnVwME6zA@mail.gmail.com>
-References: <20181129075301.29087-1-nborisov@suse.com> <20181129075301.29087-2-nborisov@suse.com>
+From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: CentOS Dojo at Oak Ridge, Tennessee CFP is now open!
+Date: Mon, 3 Dec 2018 14:26:40 -0800
+Message-ID: <20181203222531.GA14291@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181129075301.29087-2-nborisov@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: nborisov@suse.com
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, David Howells <dhowells@redhat.com>, Chris Mason <clm@fb.com>, josef@toxicpanda.com, David Sterba <dsterba@suse.com>, Zheng Yan <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, sfrench@samba.org, Theodore Ts'o <tytso@mit.edu>, adilger.kernel@dilger.ca, mark@fasheh.com, jlbec@evilplan.org, hubcap@omnibond.com, martin@omnibond.com, Andrew Morton <akpm@linux-foundation.org>, rppt@linux.vnet.ibm.com, willy@infradead.org, rdunlap@infradead.org, yuehaibing@huawei.com, shakeelb@google.com, dan.j.williams@intel.com, mhocko@suse.com, linux-afs@lists.infradead.org, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-cifs@vger.kernel.org, samba-technical@
+Content-Type: multipart/mixed; boundary="===============6820135157955194573=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Nov 29, 2018 at 3:56 PM Nikolay Borisov <nborisov@suse.com> wrote:
->
-> There are a bunch of filesystems which essentially open-code lru_to_page
-> helper. Change them to using the helper. No functional changes.
->
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> ---
->
-> Since this is a mostly mechanical change I've actually batched all of them in
-> a single patch.
->
->  fs/afs/file.c        | 5 +++--
->  fs/btrfs/extent_io.c | 2 +-
->  fs/ceph/addr.c       | 5 ++---
->  fs/cifs/file.c       | 3 ++-
->  fs/ext4/readpage.c   | 2 +-
->  fs/ocfs2/aops.c      | 3 ++-
->  fs/orangefs/inode.c  | 2 +-
->  mm/swap.c            | 2 +-
->  8 files changed, 13 insertions(+), 11 deletions(-)
->
-> diff --git a/fs/afs/file.c b/fs/afs/file.c
-> index d6bc3f5d784b..323ae9912203 100644
-> --- a/fs/afs/file.c
-> +++ b/fs/afs/file.c
-> @@ -17,6 +17,7 @@
->  #include <linux/writeback.h>
->  #include <linux/gfp.h>
->  #include <linux/task_io_accounting_ops.h>
-> +#include <linux/mm.h>
->  #include "internal.h"
->
->  static int afs_file_mmap(struct file *file, struct vm_area_struct *vma);
-> @@ -441,7 +442,7 @@ static int afs_readpages_one(struct file *file, struct address_space *mapping,
->         /* Count the number of contiguous pages at the front of the list.  Note
->          * that the list goes prev-wards rather than next-wards.
->          */
-> -       first = list_entry(pages->prev, struct page, lru);
-> +       first = lru_to_page(pages);
->         index = first->index + 1;
->         n = 1;
->         for (p = first->lru.prev; p != pages; p = p->prev) {
-> @@ -473,7 +474,7 @@ static int afs_readpages_one(struct file *file, struct address_space *mapping,
->          * page at the end of the file.
->          */
->         do {
-> -               page = list_entry(pages->prev, struct page, lru);
-> +               page = lru_to_page(pages);
->                 list_del(&page->lru);
->                 index = page->index;
->                 if (add_to_page_cache_lru(page, mapping, index,
-> diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
-> index 19f4b8fd654f..8332c5f4b1c3 100644
-> --- a/fs/btrfs/extent_io.c
-> +++ b/fs/btrfs/extent_io.c
-> @@ -4104,7 +4104,7 @@ int extent_readpages(struct address_space *mapping, struct list_head *pages,
->         u64 prev_em_start = (u64)-1;
->
->         for (page_idx = 0; page_idx < nr_pages; page_idx++) {
-> -               page = list_entry(pages->prev, struct page, lru);
-> +               page = lru_to_page(pages);
->
->                 prefetchw(&page->flags);
->                 list_del(&page->lru);
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 8eade7a993c1..5d0c05e288cc 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -306,7 +306,7 @@ static int start_read(struct inode *inode, struct ceph_rw_context *rw_ctx,
->         struct ceph_osd_client *osdc =
->                 &ceph_inode_to_client(inode)->client->osdc;
->         struct ceph_inode_info *ci = ceph_inode(inode);
-> -       struct page *page = list_entry(page_list->prev, struct page, lru);
-> +       struct page *page = lru_to_page(page_list);
->         struct ceph_vino vino;
->         struct ceph_osd_request *req;
->         u64 off;
-> @@ -333,8 +333,7 @@ static int start_read(struct inode *inode, struct ceph_rw_context *rw_ctx,
->                         if (got)
->                                 ceph_put_cap_refs(ci, got);
->                         while (!list_empty(page_list)) {
-> -                               page = list_entry(page_list->prev,
-> -                                                 struct page, lru);
-> +                               page = lru_to_page(page_list);
->                                 list_del(&page->lru);
->                                 put_page(page);
->                         }
 
-For the ceph patch
+--===============6820135157955194573==
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="61jdw2sOBCFtR2d/"
+Content-Disposition: inline
 
-Acked-by:: "Yan, Zheng" <zyan@redhat.com
 
-> diff --git a/fs/cifs/file.c b/fs/cifs/file.c
-> index 74c33d5fafc8..b16a4d887d17 100644
-> --- a/fs/cifs/file.c
-> +++ b/fs/cifs/file.c
-> @@ -33,6 +33,7 @@
->  #include <linux/mount.h>
->  #include <linux/slab.h>
->  #include <linux/swap.h>
-> +#include <linux/mm.h>
->  #include <asm/div64.h>
->  #include "cifsfs.h"
->  #include "cifspdu.h"
-> @@ -3975,7 +3976,7 @@ readpages_get_pages(struct address_space *mapping, struct list_head *page_list,
->
->         INIT_LIST_HEAD(tmplist);
->
-> -       page = list_entry(page_list->prev, struct page, lru);
-> +       page = lru_to_page(page_list);
->
->         /*
->          * Lock the page and put it in the cache. Since no one else
-> diff --git a/fs/ext4/readpage.c b/fs/ext4/readpage.c
-> index f461d75ac049..6aa282ee455a 100644
-> --- a/fs/ext4/readpage.c
-> +++ b/fs/ext4/readpage.c
-> @@ -128,7 +128,7 @@ int ext4_mpage_readpages(struct address_space *mapping,
->
->                 prefetchw(&page->flags);
->                 if (pages) {
-> -                       page = list_entry(pages->prev, struct page, lru);
-> +                       page = lru_to_page(pages);
->                         list_del(&page->lru);
->                         if (add_to_page_cache_lru(page, mapping, page->index,
->                                   readahead_gfp_mask(mapping)))
-> diff --git a/fs/ocfs2/aops.c b/fs/ocfs2/aops.c
-> index eb1ce30412dc..832c1759a09a 100644
-> --- a/fs/ocfs2/aops.c
-> +++ b/fs/ocfs2/aops.c
-> @@ -30,6 +30,7 @@
->  #include <linux/quotaops.h>
->  #include <linux/blkdev.h>
->  #include <linux/uio.h>
-> +#include <linux/mm.h>
->
->  #include <cluster/masklog.h>
->
-> @@ -397,7 +398,7 @@ static int ocfs2_readpages(struct file *filp, struct address_space *mapping,
->          * Check whether a remote node truncated this file - we just
->          * drop out in that case as it's not worth handling here.
->          */
-> -       last = list_entry(pages->prev, struct page, lru);
-> +       last = lru_to_page(pages);
->         start = (loff_t)last->index << PAGE_SHIFT;
->         if (start >= i_size_read(inode))
->                 goto out_unlock;
-> diff --git a/fs/orangefs/inode.c b/fs/orangefs/inode.c
-> index fe53381b26b1..f038235c64bd 100644
-> --- a/fs/orangefs/inode.c
-> +++ b/fs/orangefs/inode.c
-> @@ -77,7 +77,7 @@ static int orangefs_readpages(struct file *file,
->         for (page_idx = 0; page_idx < nr_pages; page_idx++) {
->                 struct page *page;
->
-> -               page = list_entry(pages->prev, struct page, lru);
-> +               page = lru_to_page(pages);
->                 list_del(&page->lru);
->                 if (!add_to_page_cache(page,
->                                        mapping,
-> diff --git a/mm/swap.c b/mm/swap.c
-> index aa483719922e..20b9e9d99652 100644
-> --- a/mm/swap.c
-> +++ b/mm/swap.c
-> @@ -126,7 +126,7 @@ void put_pages_list(struct list_head *pages)
->         while (!list_empty(pages)) {
->                 struct page *victim;
->
-> -               victim = list_entry(pages->prev, struct page, lru);
-> +               victim = lru_to_page(pages);
->                 list_del(&victim->lru);
->                 put_page(victim);
->         }
-> --
-> 2.17.1
->
+--61jdw2sOBCFtR2d/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hey Cephers!
+
+Just wanted to give a heads up on the CentOS Dojo at Oak Ridge, Tennessee on
+Tuesday, April 16th, 2019.
+
+The CFP is now open, and I would like to encourage our community to participate
+if you can make the trip. Talks involving deploying Ceph with the community
+Ceph Ansible playbooks would make a great topic as an example.
+
+https://wiki.centos.org/Events/Dojo/ORNL2019
+
+--
+Mike Perez (thingee)
+Ceph Community Manager, Red Hat
+
+--61jdw2sOBCFtR2d/
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAABCAAGBQJcBa2gAAoJEPWgME7Ah9fJNvoQAJuu2ev6VwusHFfxfU2yVsQY
+wRvTQ6Q3aji/u6O1AdiH/SbWdEeImgK12yZw6Et/KlWVSZia4/2j9p0vHDV50r7R
+08z3Dfnrvi66K+K+TmRW/5ukPHvS7QxwWyqAyYuyqcv66BH0wO40mPwSwYpHuqby
+V9tQd6zsknckSCgkFKyoUW3u1ybwdL2n8eMM27NGa7PS2ZBl4YC1xO7kOGfAtgdd
+dV4P2/gXItoxTyy4sRc1J5dUoPcEUiKE6buApjP0rO60b6J769LaiwA6qTS5rET6
+sguBYzAecb+BbaA90hasTfUkIxAOT5mtNMKhrWw7nDNx3Yc55enu8Y7XYyYQXxOk
+jd7RRY5u32UiGcrmJ2wyvlVMxMyPldhFQECHKP7pebE4TZrCZyxu2Ln+K3WpJPZ0
+kjmJvPSHUz7ikaieg3u5Xvthc3eQAYOEVYX/npOV8jTXmT74bRjfy5/CKNNBr/Ka
+SPbnU5vZaesD/tQ9I1+6nPaQe3MVibwgijDVGygFRtbQTHyW2jlH59Y3tNA+I7oa
+F4h+PW/c8OR4gOugb6uty7dfKcDW0zeS8x8DfPBN5kY4w49C+R60Y4Y7O5qG3ik4
+k+7AJ28L9PfbnDjiDkrN8Aas1Z+ITObNuZ+PTUe+9Hh5e5wBeJPIH1UXaMINOFnH
+1nFsITLQ87uOqbOxiOxi
+=JOcs
+-----END PGP SIGNATURE-----
+
+--61jdw2sOBCFtR2d/--
+
+--===============6820135157955194573==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============6820135157955194573==--
