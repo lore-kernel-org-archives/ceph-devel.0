@@ -1,65 +1,50 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [ceph-users] Cephalocon Barcelona 2019 CFP now
- open!
-Date: Mon, 10 Dec 2018 17:19:36 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1812101718030.7431@piezo.novalocal>
+From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Cephalocon Barcelona 2019 CFP now open!
+Date: Mon, 10 Dec 2018 12:56:43 -0800
+Message-ID: <CAFFUGJf5RVhVuKei5z1NXZ+ZPdi-5XC=Acpp0mKVQUqTBM2Z5A@mail.gmail.com>
 References: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
  <178a26e8-2a43-65c4-ed26-18c39793b6eb@42on.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-411125696-1544462378=:7431"
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <178a26e8-2a43-65c4-ed26-18c39793b6eb-fspyXLx8qC4@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: wido-fspyXLx8qC4@public.gmane.org
 Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-411125696-1544462378=:7431
-Content-Type: TEXT/PLAIN; charset=windows-1252
-Content-Transfer-Encoding: 8BIT
-
-On Mon, 10 Dec 2018, Wido den Hollander wrote:
-> On 12/10/18 5:00 PM, Mike Perez wrote:
-> > Hello everyone!
-> > 
-> > It gives me great pleasure to announce the CFP for Cephalocon Barcelona
-> > 2019 is now open [1]!
-> > 
-> > Cephalocon Barcelona aims to bring together more than 800 technologists
-> > and adopters from across the globe to showcase Ceph’s history and its
-> > future, demonstrate real-world applications, and highlight vendor
-> > solutions. Join us in Barcelona, Spain on 19-20 May 2019 for our second
-> > international conference event.
-> > 
-> 
-> Just to check: May 19th is a Sunday and the 20th a Monday. I'm assuming
-> that is correct?
-
-Yep.  KubeCon / CloudNativeCon is Tues-Thurs, so for a 2 day colocated 
-event it has to be Sun+Mon (or Fri+Sat).
-
-It's gonna be worth it!  :)
-sage
---8323329-411125696-1544462378=:7431
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Ceph-announce mailing list
-Ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com
-
---8323329-411125696-1544462378=:7431--
+T24gTW9uLCBEZWMgMTAsIDIwMTggYXQgODowNSBBTSBXaWRvIGRlbiBIb2xsYW5kZXIgPHdpZG9A
+NDJvbi5jb20+IHdyb3RlOgo+Cj4KPgo+IE9uIDEyLzEwLzE4IDU6MDAgUE0sIE1pa2UgUGVyZXog
+d3JvdGU6Cj4gPiBIZWxsbyBldmVyeW9uZSEKPiA+Cj4gPiBJdCBnaXZlcyBtZSBncmVhdCBwbGVh
+c3VyZSB0byBhbm5vdW5jZSB0aGUgQ0ZQIGZvciBDZXBoYWxvY29uIEJhcmNlbG9uYQo+ID4gMjAx
+OSBpcyBub3cgb3BlbiBbMV0hCj4gPgo+ID4gQ2VwaGFsb2NvbiBCYXJjZWxvbmEgYWltcyB0byBi
+cmluZyB0b2dldGhlciBtb3JlIHRoYW4gODAwIHRlY2hub2xvZ2lzdHMKPiA+IGFuZCBhZG9wdGVy
+cyBmcm9tIGFjcm9zcyB0aGUgZ2xvYmUgdG8gc2hvd2Nhc2UgQ2VwaOKAmXMgaGlzdG9yeSBhbmQg
+aXRzCj4gPiBmdXR1cmUsIGRlbW9uc3RyYXRlIHJlYWwtd29ybGQgYXBwbGljYXRpb25zLCBhbmQg
+aGlnaGxpZ2h0IHZlbmRvcgo+ID4gc29sdXRpb25zLiBKb2luIHVzIGluIEJhcmNlbG9uYSwgU3Bh
+aW4gb24gMTktMjAgTWF5IDIwMTkgZm9yIG91ciBzZWNvbmQKPiA+IGludGVybmF0aW9uYWwgY29u
+ZmVyZW5jZSBldmVudC4KPiA+Cj4KPiBKdXN0IHRvIGNoZWNrOiBNYXkgMTl0aCBpcyBhIFN1bmRh
+eSBhbmQgdGhlIDIwdGggYSBNb25kYXkuIEknbSBhc3N1bWluZwo+IHRoYXQgaXMgY29ycmVjdD8K
+Pgo+IFdpZG8KPgo+ID4gQ0ZQIGNsb3NlcyBGcmlkYXksIEZlYnJ1YXJ5IDEgYXQgMTE6NTkgcG0g
+UFNULgo+ID4KPiA+IFdlIHdpbGwgYWdhaW4gaGF2ZSBhIHNlbGVjdGlvbiBjb21taXR0ZWUgdGhh
+dCB3aWxsIGxvb2sgb3ZlciB0aGUKPiA+IHByZXNlbnRhdGlvbnMgZm9yIHF1YWxpdHkgY29udGVu
+dCBmb3IgdGhlIGNvbW11bml0eS4gSWYgeW91IGhhdmUgYW55Cj4gPiBxdWVzdGlvbnMsIHBsZWFz
+ZSBsZXQgbWUga25vdy4KPiA+Cj4gPiBbMV0gLSBodHRwczovL2NlcGguY29tL2NlcGhhbG9jb24v
+YmFyY2Vsb25hLTIwMTkvCj4gPgo+ID4gLS0KPiA+Cj4gPiBNaWtlIFBlcmV6ICh0aGluZ2VlKQo+
+ID4KPiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4g
+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+
+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
+Cj4gPgoKSSBoYXZlIGNvbnRhY3RlZCB0aGUgTGludXggRm91bmRhdGlvbiB0byBnZXQgdGhpcyBj
+b3JyZWN0ZWQuIFRoYW5rcwoKLS0gCk1pa2UgUGVyZXogKHRoaW5nZWUpCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
+CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
+LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
