@@ -1,49 +1,101 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: make 'nocopyfrom' a default mount option
-Date: Mon, 10 Dec 2018 12:14:11 +0100
-Message-ID: <CAOi1vP87vHcjmUXxzQAOuhrPrB==em9tXAocgfRsSWo5M3jtXw@mail.gmail.com>
-References: <20181210102312.31364-1-lhenriques@suse.com>
+From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Cephalocon Barcelona 2019 CFP now open!
+Date: Mon, 10 Dec 2018 08:00:00 -0800
+Message-ID: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181210102312.31364-1-lhenriques@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============2923559877439095728=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Dec 10, 2018 at 11:23 AM Luis Henriques <lhenriques@suse.com> wrote:
->
-> Since we found a problem with the 'copy-from' operation after objects have
-> been truncated, offloading object copies to OSDs should be discouraged
-> until the issue is fixed.
->
-> Thus, this patch adds the 'nocopyfrom' mount option to the default mount
-> options which effectily means that remote copies won't be done in
-> copy_file_range unless they are explicitly enabled at mount time.
->
-> Link: https://tracker.ceph.com/issues/37378
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
->  fs/ceph/super.h | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index c005a5400f2e..79a265ba9200 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -42,7 +42,9 @@
->  #define CEPH_MOUNT_OPT_NOQUOTADF       (1<<13) /* no root dir quota in statfs */
->  #define CEPH_MOUNT_OPT_NOCOPYFROM      (1<<14) /* don't use RADOS 'copy-from' op */
->
-> -#define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
-> +#define CEPH_MOUNT_OPT_DEFAULT                 \
-> +       (CEPH_MOUNT_OPT_DCACHE |                \
-> +        CEPH_MOUNT_OPT_NOCOPYFROM)
->
->  #define ceph_set_mount_opt(fsc, opt) \
->         (fsc)->mount_options->flags |= CEPH_MOUNT_OPT_##opt;
+--===============2923559877439095728==
+Content-Type: multipart/alternative; boundary="5c0e3137_643c9869_20c"
 
-Thanks Luis, I'll pick it up for 4.20.
+--5c0e3137_643c9869_20c
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
 
-                Ilya
+Hello everyone=21
+
+It gives me great pleasure to announce the C=46P for Cephalocon Barcelona=
+ 2019 is now open =5B1=5D=21
+
+Cephalocon Barcelona aims to bring together more than 800 technologists a=
+nd adopters from across the globe to showcase Ceph=E2=80=99s history and =
+its future, demonstrate real-world applications, and highlight vendor sol=
+utions. Join us in Barcelona, Spain on 19-20 May 2019 for our second inte=
+rnational conference event.
+
+C=46P closes =46riday, =46ebruary 1 at 11:59 pm PST.
+
+We will again have a selection committee that will look over the presenta=
+tions for quality content for the community. If you have any questions, p=
+lease let me know.
+
+=5B1=5D - https://ceph.com/cephalocon/barcelona-2019/
+
+--
+
+Mike Perez (thingee)
+
+--5c0e3137_643c9869_20c
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
+
+<html xmlns=3D=22http://www.w3.org/1999/xhtml=22>
+<head>
+<title></title>
+</head>
+<body>
+<div name=3D=22messageBodySection=22>Hello everyone=21<br />
+<br />
+It gives me great pleasure to announce the C=46P for Cephalocon Barcelona=
+ 2019 is now open =5B1=5D=21<br />
+<br />
+Cephalocon Barcelona aims to bring together more than 800 technologists a=
+nd adopters from across the globe to showcase Ceph=E2=80=99s history and =
+its future, demonstrate real-world applications, and highlight vendor sol=
+utions. Join us in Barcelona, Spain on 19-20 May 2019 for our second inte=
+rnational conference event.<br />
+<br />
+C=46P closes =46riday, =46ebruary 1 at 11:59 pm PST.<br />
+<br />
+We will again have a selection committee that will look over the presenta=
+tions for quality content for the community. If you have any questions, p=
+lease let me know.<br />
+<br />
+=5B1=5D - https://ceph.com/cephalocon/barcelona-2019/<br />
+<br />
+--<br /></div>
+<div name=3D=22messageSignatureSection=22><br />
+Mike Perez (thingee)</div>
+<div name=3D=22messageReplySection=22></div>
+</body>
+</html>
+
+--5c0e3137_643c9869_20c--
+
+--===============2923559877439095728==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============2923559877439095728==--
