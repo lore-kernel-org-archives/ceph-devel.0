@@ -1,77 +1,71 @@
-From: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Deploying an Active/Active NFS Cluster over
- CephFS
-Date: Wed, 12 Dec 2018 09:06:28 -0500
-Message-ID: <9588a67aa6c13bd24eb7619debf1015aa9ce334c.camel@redhat.com>
-References: <e37575905d14e9342bcecb8445ad730d57b4d713.camel@redhat.com>
- <CACo-D_Dew2bTznRTb_=2cjo6R705p+oy7N=sJ-uyw_E1230gqg@mail.gmail.com>
+From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
+Subject: Re: Luminous v12.2.10 released
+Date: Wed, 12 Dec 2018 17:03:11 +0100
+Message-ID: <CABZ+qqmTR9iE==GXGK1mxj_CCBQKSBtkL3WChv4UGQ_zHNo0pA@mail.gmail.com>
+References: <87y39e4lsn.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <nfs-ganesha-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <CACo-D_Dew2bTznRTb_=2cjo6R705p+oy7N=sJ-uyw_E1230gqg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/options/nfs-ganesha-devel>,
- <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=nfs-ganesha-devel>
-List-Post: <mailto:nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/nfs-ganesha-devel>,
- <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: nfs-ganesha-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: David C <dcsysengineer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, "support-E4mK9TgJ1uitWBMMcue2L4aCUm+kVXi4@public.gmane.org" <support-E4mK9TgJ1uitWBMMcue2L4aCUm+kVXi4@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <87y39e4lsn.fsf-IBi9RG/b67k@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This list has been deprecated. Please subscribe to the new devel list at lists.nfs-ganesha.org.
-The main thing is that luminous does not have some of the new recovery
-interfaces in nautilus:
-
-A ganesha server acts as a Ceph client and any state held by it (opens,
-locks, etc) is tied to the ceph client session. When a ganesha restarts,
-the new instance of the server will need to reacquire some subset of the
-caps it held before, but to the Ceph MDS, it just looks like another
-client.
-
-So, we end up having to wait around until the old session times out
-before we can acquire some of those caps. That timeout is around 60s and
-that can eat heavily into the NFS grace period (which is usually about
-90-120s). During that time, stateful operations performed by the clients
-(opens, locks, etc.) will stall.
-
-In nautilus we've added a way to tag a session with a particular unique
-ID so that when the server is resurrected it can ask the MDS to cancel
-the old session immediately. That allows us to get back to business
-quicker.
-
-Luminous may work but (at best) you'll end up with longer recovery
-times. At worst, you could end up with NFS state recovery failures if
-the interlocking timeouts didn't work out cleanly.
-
--- Jeff
-
-On Wed, 2018-12-12 at 13:35 +0000, David C wrote:
-> Hi Jeff
-> 
-> Many thanks for this! Looking forward to testing it out. 
-> 
-> Could you elaborate a bit on why Nautilus is recommended for this set-up please. Would attempting this with a Luminous cluster be a non-starter? 
-> 
-> 
-> 
-> On Wed, 12 Dec 2018, 12:16 Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> > (Sorry for the duplicate email to ganesha lists, but I wanted to widen
-> > it to include the ceph lists)
-> > 
-> > In response to some cries for help over IRC, I wrote up this blog post
-> > the other day, which discusses how to set up parallel serving over
-> > CephFS:
-> > 
-> >     https://jtlayton.wordpress.com/2018/12/10/deploying-an-active-active-nfs-cluster-over-cephfs/
-> > 
-> > Feel free to comment if you have questions. We may be want to eventually
-> > turn this into a document in the ganesha or ceph trees as well.
-> > 
-> > Cheers!
-
--- 
-Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+SGV5IEFiaGlzaGVrLAoKV2UganVzdCBub3RpY2VkIHRoYXQgdGhlIGRlYnVnaW5mbyBpcyBtaXNz
+aW5nIGZvciAxMi4yLjEwOgpodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vcnBtLWx1bWlub3VzL2Vs
+Ny94ODZfNjQvY2VwaC1kZWJ1Z2luZm8tMTIuMi4xMC0wLmVsNy54ODZfNjQucnBtCgpEaWQgc29t
+ZXRoaW5nIGJyZWFrIGluIHRoZSBwdWJsaXNoaW5nPwoKQ2hlZXJzLCBEYW4KCk9uIFR1ZSwgTm92
+IDI3LCAyMDE4IGF0IDM6NTAgUE0gQWJoaXNoZWsgTGVrc2htYW5hbiA8YWJoaXNoZWtAc3VzZS5j
+b20+IHdyb3RlOgo+Cj4KPiBXZSdyZSBoYXBweSB0byBhbm5vdW5jZSB0aGUgdGVudGggYnVnIGZp
+eCByZWxlYXNlIG9mIHRoZSBMdW1pbm91cwo+IHYxMi4yLnggbG9uZyB0ZXJtIHN0YWJsZSByZWxl
+YXNlIHNlcmllcy4gVGhlIHByZXZpb3VzIHJlbGVhc2UsIHYxMi4yLjksCj4gaW50cm9kdWNlZCB0
+aGUgUEcgaGFyZC1saW1pdCBwYXRjaGVzIHdoaWNoIHdlcmUgZm91bmQgdG8gY2F1c2UgYW4gaXNz
+dWUKPiBpbiBjZXJ0YWluIHVwZ3JhZGUgc2NlbmFyaW9zLCBhbmQgdGhpcyByZWxlYXNlIHdhcyBl
+eHBlZGl0ZWQgdG8gcmV2ZXJ0Cj4gdGhvc2UgcGF0Y2hlcy4gSWYgeW91IGFscmVhZHkgc3VjY2Vz
+c2Z1bGx5IHVwZ3JhZGVkIHRvIHYxMi4yLjksIHlvdQo+IHNob3VsZCAqKm5vdCoqIHVwZ3JhZGUg
+dG8gdjEyLjIuMTAsIGJ1dCByYXRoZXIgKip3YWl0KiogZm9yIGEgcmVsZWFzZSBpbgo+IHdoaWNo
+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8zNjY4NiBpcyBhZGRyZXNzZWQuIEFsbCBv
+dGhlciB1c2Vycwo+IGFyZSBlbmNvdXJhZ2VkIHRvIHVwZ3JhZGUgdG8gdGhpcyByZWxlYXNlLgo+
+Cj4gTm90YWJsZSBDaGFuZ2VzCj4gLS0tLS0tLS0tLS0tLS0tCj4KPiAqIFRoaXMgcmVsZWFzZSBy
+ZXZlcnRzIHRoZSBQRyBoYXJkLWxpbWl0IHBhdGNoZXMgYWRkZWQgaW4gdjEyLjIuOSBpbiB3aGlj
+aCwKPiAgIGEgcGFydGlhbCB1cGdyYWRlIGR1cmluZyBhIHJlY292ZXJ5L2JhY2tmaWxsLCBjYW4g
+Y2F1c2UgdGhlIG9zZHMgb24gdGhlCj4gICBwcmV2aW91cyB2ZXJzaW9uLCB0byBmYWlsIHdpdGgg
+YXNzZXJ0KHRyaW1fdG8gPD0gaW5mby5sYXN0X2NvbXBsZXRlKS4gVGhlCj4gICB3b3JrYXJvdW5k
+IGZvciB1c2VycyBpcyB0byB1cGdyYWRlIGFuZCByZXN0YXJ0IGFsbCBPU0RzIHRvIGEgdmVyc2lv
+biB3aXRoIHRoZQo+ICAgcGcgaGFyZCBsaW1pdCwgb3Igb25seSB1cGdyYWRlIHdoZW4gYWxsIFBH
+cyBhcmUgYWN0aXZlK2NsZWFuLgo+Cj4gICBTZWUgYWxzbzogaHR0cDovL3RyYWNrZXIuY2VwaC5j
+b20vaXNzdWVzLzM2Njg2Cj4KPiAgIEFzIG1lbnRpb25lZCBhYm92ZSBpZiB5b3UndmUgc3VjY2Vz
+c2Z1bGx5IHVwZ3JhZGVkIHRvIHYxMi4yLjkgRE8gTk9UCj4gICB1cGdyYWRlIHRvIHYxMi4yLjEw
+IHVudGlsIHRoZSBsaW5rZWQgdHJhY2tlciBpc3N1ZSBoYXMgYmVlbiBmaXhlZC4KPgo+ICogVGhl
+IGJsdWVzdG9yZV9jYWNoZV8qIG9wdGlvbnMgYXJlIG5vIGxvbmdlciBuZWVkZWQuIFRoZXkgYXJl
+IHJlcGxhY2VkCj4gICBieSBvc2RfbWVtb3J5X3RhcmdldCwgZGVmYXVsdGluZyB0byA0R0IuIEJs
+dWVTdG9yZSB3aWxsIGV4cGFuZAo+ICAgYW5kIGNvbnRyYWN0IGl0cyBjYWNoZSB0byBhdHRlbXB0
+IHRvIHN0YXkgd2l0aGluIHRoaXMKPiAgIGxpbWl0LiBVc2VycyB1cGdyYWRpbmcgc2hvdWxkIG5v
+dGUgdGhpcyBpcyBhIGhpZ2hlciBkZWZhdWx0Cj4gICB0aGFuIHRoZSBwcmV2aW91cyBibHVlc3Rv
+cmVfY2FjaGVfc2l6ZSBvZiAxR0IsIHNvIE9TRHMgdXNpbmcKPiAgIEJsdWVTdG9yZSB3aWxsIHVz
+ZSBtb3JlIG1lbW9yeSBieSBkZWZhdWx0Lgo+Cj4gICBGb3IgbW9yZSBkZXRhaWxzLCBzZWUgQmx1
+ZVN0b3JlIGRvY3NbMV0KPgo+Cj4gRm9yIHRoZSBjb21wbGV0ZSByZWxlYXNlIG5vdGVzIHdpdGgg
+Y2hhbmdlbG9nLCBwbGVhc2UgY2hlY2sgb3V0IHRoZQo+IHJlbGVhc2UgYmxvZyBlbnRyeSBhdDoK
+PiBodHRwOi8vY2VwaC5jb20vcmVsZWFzZXMvdjEyLTItMTAtbHVtaW5vdXMtcmVsZWFzZWQKPgo+
+IEdldHRpbmcgY2VwaDoKPiAtLS0tLS0tLS0tLS0KPiAqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29t
+L2NlcGgvY2VwaC5naXQKPiAqIFRhcmJhbGwgYXQgaHR0cDovL2Rvd25sb2FkLmNlcGguY29tL3Rh
+cmJhbGxzL2NlcGgtMTIuMi4xMC50YXIuZ3oKPiAqIEZvciBwYWNrYWdlcywgc2VlIGh0dHA6Ly9k
+b2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL2luc3RhbGwvZ2V0LXBhY2thZ2VzLwo+ICogUmVsZWFz
+ZSBnaXQgc2hhMTogMTc3OTE1NzY0Yjc1MjgwNDE5NDkzNzQ4MmEzOWU5NWUwY2EzZGU5NAo+Cj4K
+PiBbMV06IGh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JhZG9zL2NvbmZpZ3VyYXRp
+b24vYmx1ZXN0b3JlLWNvbmZpZy1yZWYvI2NhY2hlLXNpemUKPgo+IC0tCj4gQWJoaXNoZWsgTGVr
+c2htYW5hbgo+IFNVU0UgTGludXggR21iSCwgR0Y6IEZlbGl4IEltZW5kw7ZyZmZlciwgSmFuZSBT
+bWl0aGFyZCwgR3JhaGFtIE5vcnRvbiwKPiBIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykKX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWls
+aW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20v
+bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
