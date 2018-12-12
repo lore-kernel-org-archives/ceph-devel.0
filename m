@@ -1,50 +1,36 @@
-From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Cephalocon Barcelona 2019 CFP now open!
-Date: Mon, 10 Dec 2018 12:56:43 -0800
-Message-ID: <CAFFUGJf5RVhVuKei5z1NXZ+ZPdi-5XC=Acpp0mKVQUqTBM2Z5A@mail.gmail.com>
-References: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
- <178a26e8-2a43-65c4-ed26-18c39793b6eb@42on.com>
+From: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Deploying an Active/Active NFS Cluster over
+ CephFS
+Date: Wed, 12 Dec 2018 07:13:08 -0500
+Message-ID: <e37575905d14e9342bcecb8445ad730d57b4d713.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <178a26e8-2a43-65c4-ed26-18c39793b6eb-fspyXLx8qC4@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: wido-fspyXLx8qC4@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <nfs-ganesha-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/options/nfs-ganesha-devel>,
+ <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=nfs-ganesha-devel>
+List-Post: <mailto:nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/nfs-ganesha-devel>,
+ <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: nfs-ganesha-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Ganesha NFS List <nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "support-E4mK9TgJ1uitWBMMcue2L4aCUm+kVXi4@public.gmane.org" <support-E4mK9TgJ1uitWBMMcue2L4aCUm+kVXi4@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gTW9uLCBEZWMgMTAsIDIwMTggYXQgODowNSBBTSBXaWRvIGRlbiBIb2xsYW5kZXIgPHdpZG9A
-NDJvbi5jb20+IHdyb3RlOgo+Cj4KPgo+IE9uIDEyLzEwLzE4IDU6MDAgUE0sIE1pa2UgUGVyZXog
-d3JvdGU6Cj4gPiBIZWxsbyBldmVyeW9uZSEKPiA+Cj4gPiBJdCBnaXZlcyBtZSBncmVhdCBwbGVh
-c3VyZSB0byBhbm5vdW5jZSB0aGUgQ0ZQIGZvciBDZXBoYWxvY29uIEJhcmNlbG9uYQo+ID4gMjAx
-OSBpcyBub3cgb3BlbiBbMV0hCj4gPgo+ID4gQ2VwaGFsb2NvbiBCYXJjZWxvbmEgYWltcyB0byBi
-cmluZyB0b2dldGhlciBtb3JlIHRoYW4gODAwIHRlY2hub2xvZ2lzdHMKPiA+IGFuZCBhZG9wdGVy
-cyBmcm9tIGFjcm9zcyB0aGUgZ2xvYmUgdG8gc2hvd2Nhc2UgQ2VwaOKAmXMgaGlzdG9yeSBhbmQg
-aXRzCj4gPiBmdXR1cmUsIGRlbW9uc3RyYXRlIHJlYWwtd29ybGQgYXBwbGljYXRpb25zLCBhbmQg
-aGlnaGxpZ2h0IHZlbmRvcgo+ID4gc29sdXRpb25zLiBKb2luIHVzIGluIEJhcmNlbG9uYSwgU3Bh
-aW4gb24gMTktMjAgTWF5IDIwMTkgZm9yIG91ciBzZWNvbmQKPiA+IGludGVybmF0aW9uYWwgY29u
-ZmVyZW5jZSBldmVudC4KPiA+Cj4KPiBKdXN0IHRvIGNoZWNrOiBNYXkgMTl0aCBpcyBhIFN1bmRh
-eSBhbmQgdGhlIDIwdGggYSBNb25kYXkuIEknbSBhc3N1bWluZwo+IHRoYXQgaXMgY29ycmVjdD8K
-Pgo+IFdpZG8KPgo+ID4gQ0ZQIGNsb3NlcyBGcmlkYXksIEZlYnJ1YXJ5IDEgYXQgMTE6NTkgcG0g
-UFNULgo+ID4KPiA+IFdlIHdpbGwgYWdhaW4gaGF2ZSBhIHNlbGVjdGlvbiBjb21taXR0ZWUgdGhh
-dCB3aWxsIGxvb2sgb3ZlciB0aGUKPiA+IHByZXNlbnRhdGlvbnMgZm9yIHF1YWxpdHkgY29udGVu
-dCBmb3IgdGhlIGNvbW11bml0eS4gSWYgeW91IGhhdmUgYW55Cj4gPiBxdWVzdGlvbnMsIHBsZWFz
-ZSBsZXQgbWUga25vdy4KPiA+Cj4gPiBbMV0gLSBodHRwczovL2NlcGguY29tL2NlcGhhbG9jb24v
-YmFyY2Vsb25hLTIwMTkvCj4gPgo+ID4gLS0KPiA+Cj4gPiBNaWtlIFBlcmV6ICh0aGluZ2VlKQo+
-ID4KPiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4g
-PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+
-ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
-Cj4gPgoKSSBoYXZlIGNvbnRhY3RlZCB0aGUgTGludXggRm91bmRhdGlvbiB0byBnZXQgdGhpcyBj
-b3JyZWN0ZWQuIFRoYW5rcwoKLS0gCk1pa2UgUGVyZXogKHRoaW5nZWUpCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
-LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+This list has been deprecated. Please subscribe to the new devel list at lists.nfs-ganesha.org.
+(Sorry for the duplicate email to ganesha lists, but I wanted to widen
+it to include the ceph lists)
+
+In response to some cries for help over IRC, I wrote up this blog post
+the other day, which discusses how to set up parallel serving over
+CephFS:
+
+    https://jtlayton.wordpress.com/2018/12/10/deploying-an-active-active-nfs-cluster-over-cephfs/
+
+Feel free to comment if you have questions. We may be want to eventually
+turn this into a document in the ganesha or ceph trees as well.
+
+Cheers!
+-- 
+Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
