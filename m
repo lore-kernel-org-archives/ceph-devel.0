@@ -1,79 +1,37 @@
-From: David Galloway <dgallowa-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Luminous v12.2.10 released
-Date: Wed, 12 Dec 2018 12:35:44 -0500
-Message-ID: <0374673b-901d-d0ee-693e-9e7199db300e@redhat.com>
-References: <87y39e4lsn.fsf@suse.com>
- <CABZ+qqmTR9iE==GXGK1mxj_CCBQKSBtkL3WChv4UGQ_zHNo0pA@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fix for 4.20-rc7
+Date: Fri, 14 Dec 2018 16:48:58 +0100
+Message-ID: <20181214154858.1155-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqmTR9iE==GXGK1mxj_CCBQKSBtkL3WChv4UGQ_zHNo0pA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGV5IERhbiwKClRoYW5rcyBmb3IgYnJpbmdpbmcgdGhpcyB0byBvdXIgYXR0ZW50aW9uLiAgTG9v
-a3MgbGlrZSBpdCBkaWQgZ2V0IGxlZnQKb3V0LiAgSSBqdXN0IHB1c2hlZCB0aGUgcGFja2FnZSBh
-bmQgYWRkZWQgYSBzdGVwIHRvIHRoZSByZWxlYXNlIHByb2Nlc3MKdG8gbWFrZSBzdXJlIHBhY2th
-Z2VzIGRvbid0IGdldCBza2lwcGVkIGFnYWluIGxpa2UgdGhhdC4KCi0gRGF2aWQKCk9uIDEyLzEy
-LzIwMTggMTE6MDMgQU0sIERhbiB2YW4gZGVyIFN0ZXIgd3JvdGU6Cj4gSGV5IEFiaGlzaGVrLAo+
-IAo+IFdlIGp1c3Qgbm90aWNlZCB0aGF0IHRoZSBkZWJ1Z2luZm8gaXMgbWlzc2luZyBmb3IgMTIu
-Mi4xMDoKPiBodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vcnBtLWx1bWlub3VzL2VsNy94ODZfNjQv
-Y2VwaC1kZWJ1Z2luZm8tMTIuMi4xMC0wLmVsNy54ODZfNjQucnBtCj4gCj4gRGlkIHNvbWV0aGlu
-ZyBicmVhayBpbiB0aGUgcHVibGlzaGluZz8KPiAKPiBDaGVlcnMsIERhbgo+IAo+IE9uIFR1ZSwg
-Tm92IDI3LCAyMDE4IGF0IDM6NTAgUE0gQWJoaXNoZWsgTGVrc2htYW5hbiA8YWJoaXNoZWtAc3Vz
-ZS5jb20+IHdyb3RlOgo+Pgo+Pgo+PiBXZSdyZSBoYXBweSB0byBhbm5vdW5jZSB0aGUgdGVudGgg
-YnVnIGZpeCByZWxlYXNlIG9mIHRoZSBMdW1pbm91cwo+PiB2MTIuMi54IGxvbmcgdGVybSBzdGFi
-bGUgcmVsZWFzZSBzZXJpZXMuIFRoZSBwcmV2aW91cyByZWxlYXNlLCB2MTIuMi45LAo+PiBpbnRy
-b2R1Y2VkIHRoZSBQRyBoYXJkLWxpbWl0IHBhdGNoZXMgd2hpY2ggd2VyZSBmb3VuZCB0byBjYXVz
-ZSBhbiBpc3N1ZQo+PiBpbiBjZXJ0YWluIHVwZ3JhZGUgc2NlbmFyaW9zLCBhbmQgdGhpcyByZWxl
-YXNlIHdhcyBleHBlZGl0ZWQgdG8gcmV2ZXJ0Cj4+IHRob3NlIHBhdGNoZXMuIElmIHlvdSBhbHJl
-YWR5IHN1Y2Nlc3NmdWxseSB1cGdyYWRlZCB0byB2MTIuMi45LCB5b3UKPj4gc2hvdWxkICoqbm90
-KiogdXBncmFkZSB0byB2MTIuMi4xMCwgYnV0IHJhdGhlciAqKndhaXQqKiBmb3IgYSByZWxlYXNl
-IGluCj4+IHdoaWNoIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8zNjY4NiBpcyBhZGRy
-ZXNzZWQuIEFsbCBvdGhlciB1c2Vycwo+PiBhcmUgZW5jb3VyYWdlZCB0byB1cGdyYWRlIHRvIHRo
-aXMgcmVsZWFzZS4KPj4KPj4gTm90YWJsZSBDaGFuZ2VzCj4+IC0tLS0tLS0tLS0tLS0tLQo+Pgo+
-PiAqIFRoaXMgcmVsZWFzZSByZXZlcnRzIHRoZSBQRyBoYXJkLWxpbWl0IHBhdGNoZXMgYWRkZWQg
-aW4gdjEyLjIuOSBpbiB3aGljaCwKPj4gICBhIHBhcnRpYWwgdXBncmFkZSBkdXJpbmcgYSByZWNv
-dmVyeS9iYWNrZmlsbCwgY2FuIGNhdXNlIHRoZSBvc2RzIG9uIHRoZQo+PiAgIHByZXZpb3VzIHZl
-cnNpb24sIHRvIGZhaWwgd2l0aCBhc3NlcnQodHJpbV90byA8PSBpbmZvLmxhc3RfY29tcGxldGUp
-LiBUaGUKPj4gICB3b3JrYXJvdW5kIGZvciB1c2VycyBpcyB0byB1cGdyYWRlIGFuZCByZXN0YXJ0
-IGFsbCBPU0RzIHRvIGEgdmVyc2lvbiB3aXRoIHRoZQo+PiAgIHBnIGhhcmQgbGltaXQsIG9yIG9u
-bHkgdXBncmFkZSB3aGVuIGFsbCBQR3MgYXJlIGFjdGl2ZStjbGVhbi4KPj4KPj4gICBTZWUgYWxz
-bzogaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzM2Njg2Cj4+Cj4+ICAgQXMgbWVudGlv
-bmVkIGFib3ZlIGlmIHlvdSd2ZSBzdWNjZXNzZnVsbHkgdXBncmFkZWQgdG8gdjEyLjIuOSBETyBO
-T1QKPj4gICB1cGdyYWRlIHRvIHYxMi4yLjEwIHVudGlsIHRoZSBsaW5rZWQgdHJhY2tlciBpc3N1
-ZSBoYXMgYmVlbiBmaXhlZC4KPj4KPj4gKiBUaGUgYmx1ZXN0b3JlX2NhY2hlXyogb3B0aW9ucyBh
-cmUgbm8gbG9uZ2VyIG5lZWRlZC4gVGhleSBhcmUgcmVwbGFjZWQKPj4gICBieSBvc2RfbWVtb3J5
-X3RhcmdldCwgZGVmYXVsdGluZyB0byA0R0IuIEJsdWVTdG9yZSB3aWxsIGV4cGFuZAo+PiAgIGFu
-ZCBjb250cmFjdCBpdHMgY2FjaGUgdG8gYXR0ZW1wdCB0byBzdGF5IHdpdGhpbiB0aGlzCj4+ICAg
-bGltaXQuIFVzZXJzIHVwZ3JhZGluZyBzaG91bGQgbm90ZSB0aGlzIGlzIGEgaGlnaGVyIGRlZmF1
-bHQKPj4gICB0aGFuIHRoZSBwcmV2aW91cyBibHVlc3RvcmVfY2FjaGVfc2l6ZSBvZiAxR0IsIHNv
-IE9TRHMgdXNpbmcKPj4gICBCbHVlU3RvcmUgd2lsbCB1c2UgbW9yZSBtZW1vcnkgYnkgZGVmYXVs
-dC4KPj4KPj4gICBGb3IgbW9yZSBkZXRhaWxzLCBzZWUgQmx1ZVN0b3JlIGRvY3NbMV0KPj4KPj4K
-Pj4gRm9yIHRoZSBjb21wbGV0ZSByZWxlYXNlIG5vdGVzIHdpdGggY2hhbmdlbG9nLCBwbGVhc2Ug
-Y2hlY2sgb3V0IHRoZQo+PiByZWxlYXNlIGJsb2cgZW50cnkgYXQ6Cj4+IGh0dHA6Ly9jZXBoLmNv
-bS9yZWxlYXNlcy92MTItMi0xMC1sdW1pbm91cy1yZWxlYXNlZAo+Pgo+PiBHZXR0aW5nIGNlcGg6
-Cj4+IC0tLS0tLS0tLS0tLQo+PiAqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5n
-aXQKPj4gKiBUYXJiYWxsIGF0IGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBo
-LTEyLjIuMTAudGFyLmd6Cj4+ICogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2VwaC5j
-b20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9nZXQtcGFja2FnZXMvCj4+ICogUmVsZWFzZSBnaXQgc2hh
-MTogMTc3OTE1NzY0Yjc1MjgwNDE5NDkzNzQ4MmEzOWU5NWUwY2EzZGU5NAo+Pgo+Pgo+PiBbMV06
-IGh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JhZG9zL2NvbmZpZ3VyYXRpb24vYmx1
-ZXN0b3JlLWNvbmZpZy1yZWYvI2NhY2hlLXNpemUKPj4KPj4gLS0KPj4gQWJoaXNoZWsgTGVrc2ht
-YW5hbgo+PiBTVVNFIExpbnV4IEdtYkgsIEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEphbmUgU21p
-dGhhcmQsIEdyYWhhbSBOb3J0b24sCj4+IEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQpfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxp
-bmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9s
-aXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Hi Linus,
+
+The following changes since commit 40e020c129cfc991e8ab4736d2665351ffd1468d:
+
+  Linux 4.20-rc6 (2018-12-09 15:31:00 -0800)
+
+are available in the Git repository at:
+
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.20-rc7
+
+for you to fetch changes up to 6f9718fe41c3a47e4362bddf145e2db6ad7d8e87:
+
+  ceph: make 'nocopyfrom' a default mount option (2018-12-11 18:22:17 +0100)
+
+----------------------------------------------------------------
+Luis discovered a problem with the new copyfrom offload on the server
+side.  Disable it for now.
+
+----------------------------------------------------------------
+Luis Henriques (1):
+      ceph: make 'nocopyfrom' a default mount option
+
+ fs/ceph/super.c | 4 ++--
+ fs/ceph/super.h | 4 +++-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
