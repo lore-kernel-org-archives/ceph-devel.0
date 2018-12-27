@@ -1,46 +1,51 @@
-From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: IRC channels now require registered and identified
- users
-Date: Tue, 18 Dec 2018 11:34:40 +0000
-Message-ID: <8cdb553c-67fc-a441-aea7-890d37e978fc@suse.de>
-References: <ce0a9512-e2cc-8eba-6c0e-226c8351bddf@suse.de>
- <CABZ+qqn+iR6j_kk_RsUastNvysbZzUqMRGHfa7P9x+rwCY4M1w@mail.gmail.com>
- <c1e28839-a3b5-61cf-28be-878a9e539e7e@suse.de>
+From: Myungho Jung <mhjungk@gmail.com>
+Subject: [PATCH] libceph: protect pending flags in ceph_con_keepalive()
+Date: Thu, 27 Dec 2018 11:08:45 -0800
+Message-ID: <20181227190842.GA19565@myunghoj-Precision-5530>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <c1e28839-a3b5-61cf-28be-878a9e539e7e-l3A5Bk7waGM@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On 12/18/2018 11:22 AM, Joao Eduardo Luis wrote:
-> On 12/18/2018 11:18 AM, Dan van der Ster wrote:
->> Hi Joao,
->>
->> Has that broken the Slack connection? I can't tell if its broken or
->> just quiet... last message on #ceph-devel was today at 1:13am.
-> 
-> Just quiet, it seems. Just tested it and the bridge is still working.
+con_flag_test_and_set() sets CON_FLAG_KEEPALIVE_PENDING and
+CON_FLAG_WRITE_PENDING flags without protection in ceph_con_keepalive().
+It triggers WARN_ON() in clear_standby() if the flags are set after
+con_fault() changes connection state to CON_STATE_STANDBY. Move
+con_flag_test_and_set() to be called before releasing the lock and store
+the condition to check after the critical section.
 
-Okay, turns out the ceph-ircslackbot user is not identified, and that
-makes it unable to send messages to the channel. This means the bridge
-is working in one direction only (irc to slack), and will likely break
-when/if the user leaves the channel (as it won't be able to get back in).
+Reported-by: syzbot+acdeb633f6211ccdf886@syzkaller.appspotmail.com
+Signed-off-by: Myungho Jung <mhjungk@gmail.com>
+---
+ net/ceph/messenger.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-I will figure out just how this works today. In the mean time, I've
-relaxed the requirement for registered/identified users so that the bot
-works again. It will be reactivated once this is addressed.
-
-  -Joao
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 2f126eff275d..e15da22d4f37 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -3216,12 +3216,16 @@ void ceph_msg_revoke_incoming(struct ceph_msg *msg)
+  */
+ void ceph_con_keepalive(struct ceph_connection *con)
+ {
++	bool pending;
++
+ 	dout("con_keepalive %p\n", con);
+ 	mutex_lock(&con->mutex);
+ 	clear_standby(con);
++	pending = (con_flag_test_and_set(con,
++					 CON_FLAG_KEEPALIVE_PENDING) == 0 &&
++		   con_flag_test_and_set(con, CON_FLAG_WRITE_PENDING) == 0);
+ 	mutex_unlock(&con->mutex);
+-	if (con_flag_test_and_set(con, CON_FLAG_KEEPALIVE_PENDING) == 0 &&
+-	    con_flag_test_and_set(con, CON_FLAG_WRITE_PENDING) == 0)
++	if (pending)
+ 		queue_con(con);
+ }
+ EXPORT_SYMBOL(ceph_con_keepalive);
+-- 
+2.17.1
