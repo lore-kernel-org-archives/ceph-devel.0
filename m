@@ -1,45 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] fs/ceph/addr.c: Convert to use vmf_error()
-Date: Sat, 5 Jan 2019 11:58:19 +0100
-Message-ID: <CAOi1vP_bgMmQyvm2Gd-oBY5kTZuQBMvj0xKyyzDecvhUfypXDw@mail.gmail.com>
-References: <20190104193029.GA15903@jordon-HP-15-Notebook-PC>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph updates for 4.21-rc1
+Date: Sat, 05 Jan 2019 22:15:01 +0000
+Message-ID: <20190105221501.6651.19179.pr-tracker-bot@pdx-korg-gitolite-1.ci.codeaurora.org>
+References: <20190103153926.15596-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190104193029.GA15903@jordon-HP-15-Notebook-PC>
+In-Reply-To: <20190103153926.15596-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Souptick Joarder <jrdr.linux@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org, willy@infradead.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Jan 4, 2019 at 8:26 PM Souptick Joarder <jrdr.linux@gmail.com> wrote:
->
-> This code is converted to use vmf_error().
->
-> Signed-off-by: Souptick Joarder <jrdr.linux@gmail.com>
-> ---
->  fs/ceph/addr.c | 5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 8eade7a..fa2a85d 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -1495,10 +1495,7 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
->                 if (err < 0 || off >= i_size_read(inode)) {
->                         unlock_page(page);
->                         put_page(page);
-> -                       if (err == -ENOMEM)
-> -                               ret = VM_FAULT_OOM;
-> -                       else
-> -                               ret = VM_FAULT_SIGBUS;
-> +                       ret = vmf_error(err);
->                         goto out_inline;
->                 }
->                 if (err < PAGE_SIZE)
+The pull request you sent on Thu,  3 Jan 2019 16:39:26 +0100:
 
-Applied.
+> https://github.com/ceph/ceph-client.git tags/ceph-for-4.21-rc1
 
-Thanks,
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/c7eaf342ecb164d79275a6c1c93aef19293a4aaf
 
-                Ilya
+Thank you!
+
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
