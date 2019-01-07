@@ -1,120 +1,85 @@
-From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Subject: v13.2.4 Mimic released
-Date: Mon, 07 Jan 2019 11:37:05 +0100
-Message-ID: <87pnt83ga6.fsf@suse.com>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: v13.2.4 Mimic released
+Date: Mon, 7 Jan 2019 16:10:09 +0100 (CET)
+Message-ID: <1637654245.3029503.1546873809792.JavaMail.zimbra@oxygem.tv>
+References: <87pnt83ga6.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2100813826019842651=="
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <87pnt83ga6.fsf-IBi9RG/b67k@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-announce <ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============2100813826019842651==
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha256; protocol="application/pgp-signature"
-
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-
-This is the fourth bugfix release of the Mimic v13.2.x long term stable
-release series. This release includes two security fixes atop of v13.2.3
-We recommend all users upgrade to this version. If you've already
-upgraded to v13.2.3, the same restrictions from v13.2.2->v13.2.3 apply
-here as well.
-
-Notable Changes
-=2D--------------
-
-* CVE-2018-16846: rgw: enforce bounds on max-keys/max-uploads/max-parts (`i=
-ssue#35994 <http://tracker.ceph.com/issues/35994>`_)
-* CVE-2018-14662: mon: limit caps allowed to access the config store
-
-Notable Changes in v13.2.3
-=2D--------------------------
-
-* The default memory utilization for the mons has been increased
-  somewhat.  Rocksdb now uses 512 MB of RAM by default, which should
-  be sufficient for small to medium-sized clusters; large clusters
-  should tune this up.  Also, the `mon_osd_cache_size` has been
-  increase from 10 OSDMaps to 500, which will translate to an
-  additional 500 MB to 1 GB of RAM for large clusters, and much less
-  for small clusters.
-
-* Ceph v13.2.2 includes a wrong backport, which may cause mds to go into
-  'damaged' state when upgrading Ceph cluster from previous version.
-  The bug is fixed in v13.2.3. If you are already running v13.2.2,
-  upgrading to v13.2.3 does not require special action.
-
-* The bluestore_cache_* options are no longer needed. They are replaced
-  by osd_memory_target, defaulting to 4GB. BlueStore will expand
-  and contract its cache to attempt to stay within this
-  limit. Users upgrading should note this is a higher default
-  than the previous bluestore_cache_size of 1GB, so OSDs using
-  BlueStore will use more memory by default.
-  For more details, see the `BlueStore docs <http://docs.ceph.com/docs/mimi=
-c/rados/configuration/bluestore-config-ref/#automatic-cache-sizing>`_.
-
-* This version contains an upgrade bug, http://tracker.ceph.com/issues/3668=
-6,
-  due to which upgrading during recovery/backfill can cause OSDs to fail. T=
-his
-  bug can be worked around, either by restarting all the OSDs after the upg=
-rade,
-  or by upgrading when all PGs are in "active+clean" state. If you have alr=
-eady
-  successfully upgraded to 13.2.2, this issue should not impact you. Going
-  forward, we are working on a clean upgrade path for this feature.
-
-
-For more details please refer to the release blog at
-https://ceph.com/releases/13-2-4-mimic-released/
-
-Getting ceph
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-13.2.4.tar.gz
-* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
-* Release git sha1: b10be4d44915a4d78a8e06aa31919e74927b142e
-
-=2D-=20
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG N=C3=BCrnberg)
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEEac9IOI7jdGxe1B8W+fBkHxtl7V8FAlwzK9EACgkQ+fBkHxtl
-7V9Q6gf8Dxds5fdEad3RtK5zDqa9H97fCpGoupv0sInOopJNT2VZcvGFHB6N+viq
-Vv8p+AII2J/juJ1rzbrlYzpP+BZbra4Q/5F9KPXz0gd0Cc0gJM8QlbgOhJVSaQZJ
-k1rs7UzNF595UCHKRxnrg/VV4gndV/qzw0d1rNRYM1eRQDA8ezNQIVv9IQ6HMYS8
-+2qolkUGgqLNAoKW6sIZNfqJC0igd7PHrXYR2R4EV8LPLwbgLHKk+DamZvCBAFP3
-lteqygq90p7XCqegIFU10hAXWAF3Juk2ySxQAdQYodCR0Yw3MWtTsTZzoxZ6B7MG
-yM5HEd8W/vBdIAgKaeYphmcfsjMIBQ==
-=jjrW
------END PGP SIGNATURE-----
---=-=-=--
-
---===============2100813826019842651==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Ceph-announce mailing list
-Ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com
-
---===============2100813826019842651==--
+SGksCgo+PiogQ2VwaCB2MTMuMi4yIGluY2x1ZGVzIGEgd3JvbmcgYmFja3BvcnQsIHdoaWNoIG1h
+eSBjYXVzZSBtZHMgdG8gZ28gaW50byAKPj4nZGFtYWdlZCcgc3RhdGUgd2hlbiB1cGdyYWRpbmcg
+Q2VwaCBjbHVzdGVyIGZyb20gcHJldmlvdXMgdmVyc2lvbi4gCj4+VGhlIGJ1ZyBpcyBmaXhlZCBp
+biB2MTMuMi4zLiBJZiB5b3UgYXJlIGFscmVhZHkgcnVubmluZyB2MTMuMi4yLCAKPj51cGdyYWRp
+bmcgdG8gdjEzLjIuMyBkb2VzIG5vdCByZXF1aXJlIHNwZWNpYWwgYWN0aW9uLiAKCkFueSBzcGVj
+aWFsIGFjdGlvbiBmb3IgdXBncmFkaW5nIGZyb20gMTMuMi4xID8KCgoKLS0tLS0gTWFpbCBvcmln
+aW5hbCAtLS0tLQpEZTogIkFiaGlzaGVrIExla3NobWFuYW4iIDxhYmhpc2hla0BzdXNlLmNvbT4K
+w4A6ICJjZXBoLWFubm91bmNlIiA8Y2VwaC1hbm5vdW5jZUBsaXN0cy5jZXBoLmNvbT4sICJjZXBo
+LXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sIGNlcGgtbWFpbnRhaW5lcnNAbGlz
+dHMuY2VwaC5jb20sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+CkVu
+dm95w6k6IEx1bmRpIDcgSmFudmllciAyMDE5IDExOjM3OjA1Ck9iamV0OiB2MTMuMi40IE1pbWlj
+IHJlbGVhc2VkCgpUaGlzIGlzIHRoZSBmb3VydGggYnVnZml4IHJlbGVhc2Ugb2YgdGhlIE1pbWlj
+IHYxMy4yLnggbG9uZyB0ZXJtIHN0YWJsZSAKcmVsZWFzZSBzZXJpZXMuIFRoaXMgcmVsZWFzZSBp
+bmNsdWRlcyB0d28gc2VjdXJpdHkgZml4ZXMgYXRvcCBvZiB2MTMuMi4zIApXZSByZWNvbW1lbmQg
+YWxsIHVzZXJzIHVwZ3JhZGUgdG8gdGhpcyB2ZXJzaW9uLiBJZiB5b3UndmUgYWxyZWFkeSAKdXBn
+cmFkZWQgdG8gdjEzLjIuMywgdGhlIHNhbWUgcmVzdHJpY3Rpb25zIGZyb20gdjEzLjIuMi0+djEz
+LjIuMyBhcHBseSAKaGVyZSBhcyB3ZWxsLiAKCk5vdGFibGUgQ2hhbmdlcyAKLS0tLS0tLS0tLS0t
+LS0tIAoKKiBDVkUtMjAxOC0xNjg0Njogcmd3OiBlbmZvcmNlIGJvdW5kcyBvbiBtYXgta2V5cy9t
+YXgtdXBsb2Fkcy9tYXgtcGFydHMgKGBpc3N1ZSMzNTk5NCA8aHR0cDovL3RyYWNrZXIuY2VwaC5j
+b20vaXNzdWVzLzM1OTk0PmBfKSAKKiBDVkUtMjAxOC0xNDY2MjogbW9uOiBsaW1pdCBjYXBzIGFs
+bG93ZWQgdG8gYWNjZXNzIHRoZSBjb25maWcgc3RvcmUgCgpOb3RhYmxlIENoYW5nZXMgaW4gdjEz
+LjIuMyAKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIAoKKiBUaGUgZGVmYXVsdCBtZW1vcnkg
+dXRpbGl6YXRpb24gZm9yIHRoZSBtb25zIGhhcyBiZWVuIGluY3JlYXNlZCAKc29tZXdoYXQuIFJv
+Y2tzZGIgbm93IHVzZXMgNTEyIE1CIG9mIFJBTSBieSBkZWZhdWx0LCB3aGljaCBzaG91bGQgCmJl
+IHN1ZmZpY2llbnQgZm9yIHNtYWxsIHRvIG1lZGl1bS1zaXplZCBjbHVzdGVyczsgbGFyZ2UgY2x1
+c3RlcnMgCnNob3VsZCB0dW5lIHRoaXMgdXAuIEFsc28sIHRoZSBgbW9uX29zZF9jYWNoZV9zaXpl
+YCBoYXMgYmVlbiAKaW5jcmVhc2UgZnJvbSAxMCBPU0RNYXBzIHRvIDUwMCwgd2hpY2ggd2lsbCB0
+cmFuc2xhdGUgdG8gYW4gCmFkZGl0aW9uYWwgNTAwIE1CIHRvIDEgR0Igb2YgUkFNIGZvciBsYXJn
+ZSBjbHVzdGVycywgYW5kIG11Y2ggbGVzcyAKZm9yIHNtYWxsIGNsdXN0ZXJzLiAKCiogQ2VwaCB2
+MTMuMi4yIGluY2x1ZGVzIGEgd3JvbmcgYmFja3BvcnQsIHdoaWNoIG1heSBjYXVzZSBtZHMgdG8g
+Z28gaW50byAKJ2RhbWFnZWQnIHN0YXRlIHdoZW4gdXBncmFkaW5nIENlcGggY2x1c3RlciBmcm9t
+IHByZXZpb3VzIHZlcnNpb24uIApUaGUgYnVnIGlzIGZpeGVkIGluIHYxMy4yLjMuIElmIHlvdSBh
+cmUgYWxyZWFkeSBydW5uaW5nIHYxMy4yLjIsIAp1cGdyYWRpbmcgdG8gdjEzLjIuMyBkb2VzIG5v
+dCByZXF1aXJlIHNwZWNpYWwgYWN0aW9uLiAKCiogVGhlIGJsdWVzdG9yZV9jYWNoZV8qIG9wdGlv
+bnMgYXJlIG5vIGxvbmdlciBuZWVkZWQuIFRoZXkgYXJlIHJlcGxhY2VkIApieSBvc2RfbWVtb3J5
+X3RhcmdldCwgZGVmYXVsdGluZyB0byA0R0IuIEJsdWVTdG9yZSB3aWxsIGV4cGFuZCAKYW5kIGNv
+bnRyYWN0IGl0cyBjYWNoZSB0byBhdHRlbXB0IHRvIHN0YXkgd2l0aGluIHRoaXMgCmxpbWl0LiBV
+c2VycyB1cGdyYWRpbmcgc2hvdWxkIG5vdGUgdGhpcyBpcyBhIGhpZ2hlciBkZWZhdWx0IAp0aGFu
+IHRoZSBwcmV2aW91cyBibHVlc3RvcmVfY2FjaGVfc2l6ZSBvZiAxR0IsIHNvIE9TRHMgdXNpbmcg
+CkJsdWVTdG9yZSB3aWxsIHVzZSBtb3JlIG1lbW9yeSBieSBkZWZhdWx0LiAKRm9yIG1vcmUgZGV0
+YWlscywgc2VlIHRoZSBgQmx1ZVN0b3JlIGRvY3MgPGh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3Mv
+bWltaWMvcmFkb3MvY29uZmlndXJhdGlvbi9ibHVlc3RvcmUtY29uZmlnLXJlZi8jYXV0b21hdGlj
+LWNhY2hlLXNpemluZz5gXy4gCgoqIFRoaXMgdmVyc2lvbiBjb250YWlucyBhbiB1cGdyYWRlIGJ1
+ZywgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzM2Njg2LCAKZHVlIHRvIHdoaWNoIHVw
+Z3JhZGluZyBkdXJpbmcgcmVjb3ZlcnkvYmFja2ZpbGwgY2FuIGNhdXNlIE9TRHMgdG8gZmFpbC4g
+VGhpcyAKYnVnIGNhbiBiZSB3b3JrZWQgYXJvdW5kLCBlaXRoZXIgYnkgcmVzdGFydGluZyBhbGwg
+dGhlIE9TRHMgYWZ0ZXIgdGhlIHVwZ3JhZGUsIApvciBieSB1cGdyYWRpbmcgd2hlbiBhbGwgUEdz
+IGFyZSBpbiAiYWN0aXZlK2NsZWFuIiBzdGF0ZS4gSWYgeW91IGhhdmUgYWxyZWFkeSAKc3VjY2Vz
+c2Z1bGx5IHVwZ3JhZGVkIHRvIDEzLjIuMiwgdGhpcyBpc3N1ZSBzaG91bGQgbm90IGltcGFjdCB5
+b3UuIEdvaW5nIApmb3J3YXJkLCB3ZSBhcmUgd29ya2luZyBvbiBhIGNsZWFuIHVwZ3JhZGUgcGF0
+aCBmb3IgdGhpcyBmZWF0dXJlLiAKCgpGb3IgbW9yZSBkZXRhaWxzIHBsZWFzZSByZWZlciB0byB0
+aGUgcmVsZWFzZSBibG9nIGF0IApodHRwczovL2NlcGguY29tL3JlbGVhc2VzLzEzLTItNC1taW1p
+Yy1yZWxlYXNlZC8gCgpHZXR0aW5nIGNlcGggCiogR2l0IGF0IGdpdDovL2dpdGh1Yi5jb20vY2Vw
+aC9jZXBoLmdpdCAKKiBUYXJiYWxsIGF0IGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxs
+cy9jZXBoLTEzLjIuNC50YXIuZ3ogCiogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2Vw
+aC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9nZXQtcGFja2FnZXMvIAoqIFJlbGVhc2UgZ2l0IHNo
+YTE6IGIxMGJlNGQ0NDkxNWE0ZDc4YThlMDZhYTMxOTE5ZTc0OTI3YjE0MmUgCgotLSAKQWJoaXNo
+ZWsgTGVrc2htYW5hbiAKU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBK
+YW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLCAKSFJCIDIxMjg0IChBRyBOw7xybmJlcmcpIAoK
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2Vw
+aC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
