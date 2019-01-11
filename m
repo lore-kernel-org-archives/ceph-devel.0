@@ -1,54 +1,47 @@
-From: Neha Ojha <nojha-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [Ceph-maintainers] v13.2.4 Mimic released
-Date: Tue, 8 Jan 2019 09:49:54 -0800
-Message-ID: <CAKn7kBnJZvD0XfjGYn0G1fT4AO4kju_-3Oaq-gCzNd9zhqUSMA@mail.gmail.com>
-References: <87pnt83ga6.fsf@suse.com>
- <1637654245.3029503.1546873809792.JavaMail.zimbra@oxygem.tv>
- <CA+2bHPZqCnm_QPwW8pt05ndzbLE=ypzJ65bmixGgLD1QFXC4cw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+2bHPZqCnm_QPwW8pt05ndzbLE=ypzJ65bmixGgLD1QFXC4cw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-announce <ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 5.0-rc2
+Date: Fri, 11 Jan 2019 18:02:26 +0100
+Message-ID: <20190111170226.19872-1-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-When upgrading from 13.2.1 to 13.2.4, you should be careful about
-http://tracker.ceph.com/issues/36686. It might be worth considering
-the workaround mentioned here:
-https://github.com/ceph/ceph/blob/master/doc/releases/mimic.rst#v1322-mimic.
+Hi Linus,
 
-Thanks,
-Neha
+The following changes since commit bfeffd155283772bbe78c6a05dec7c0128ee500c:
 
-On Tue, Jan 8, 2019 at 9:42 AM Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
-> On Mon, Jan 7, 2019 at 7:10 AM Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> > Hi,
-> >
-> > >>* Ceph v13.2.2 includes a wrong backport, which may cause mds to go into
-> > >>'damaged' state when upgrading Ceph cluster from previous version.
-> > >>The bug is fixed in v13.2.3. If you are already running v13.2.2,
-> > >>upgrading to v13.2.3 does not require special action.
-> >
-> > Any special action for upgrading from 13.2.1 ?
->
-> No special actions for CephFS are required for the upgrade.
->
-> --
-> Patrick Donnelly
-> _______________________________________________
-> Ceph-maintainers mailing list
-> Ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-maintainers-ceph.com
+  Linux 5.0-rc1 (2019-01-06 17:08:20 -0800)
+
+are available in the Git repository at:
+
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.0-rc2
+
+for you to fetch changes up to 85f5a4d666fd9be73856ed16bb36c5af5b406b29:
+
+  rbd: don't return 0 on unmap if RBD_DEV_FLAG_REMOVING is set (2019-01-10 09:45:09 +0100)
+
+----------------------------------------------------------------
+A patch to allow setting abort_on_full and a fix for an old "rbd unmap"
+edge case, marked for stable.
+
+----------------------------------------------------------------
+Dongsheng Yang (1):
+      libceph: allow setting abort_on_full for rbd
+
+Ilya Dryomov (1):
+      rbd: don't return 0 on unmap if RBD_DEV_FLAG_REMOVING is set
+
+Souptick Joarder (1):
+      ceph: use vmf_error() in ceph_filemap_fault()
+
+ drivers/block/rbd.c             |  9 ++++-----
+ fs/ceph/addr.c                  |  5 +----
+ fs/ceph/super.c                 |  4 ++--
+ include/linux/ceph/libceph.h    |  6 ++++--
+ include/linux/ceph/osd_client.h |  1 -
+ net/ceph/ceph_common.c          | 11 ++++++++++-
+ net/ceph/debugfs.c              |  2 +-
+ net/ceph/osd_client.c           |  4 ++--
+ 8 files changed, 24 insertions(+), 18 deletions(-)
