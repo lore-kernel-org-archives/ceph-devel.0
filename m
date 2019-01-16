@@ -1,13 +1,11 @@
 From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: dropping python 2 for nautilus... go/no-go
-Date: Wed, 16 Jan 2019 09:24:50 -0800
-Message-ID: <CAFFUGJf7OCLZ7w-MgkQA55zP1Q4MMQBi+C7Bc-KgUuNiJV7N+g@mail.gmail.com>
-References: <alpine.DEB.2.11.1901161328370.15033@piezo.novalocal>
+Subject: Ceph Nautilus Release T-shirt Design
+Date: Wed, 16 Jan 2019 09:46:24 -0800
+Message-ID: <CAFFUGJdFsLF6fJZ-nR2RWqLj0vOpQMRcJqETwbc6EeQ7RW_bbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1901161328370.15033-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,47 +15,34 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-I spoke with Doug Hellmann who has been championing the goal inside of
-OpenStack [1].
+Hey everyone,
 
-According to Doug all major services in OpenStack should be supporting
-python 3.5 and 3.6. They have a goal in their current cycle, set for
-2019-04-10 [2], to make python 3 the default in tests [3].
+We're getting close to the release of Ceph Nautilus, and I wanted to
+start the discussion of our next shirt!
 
-[1] - https://governance.openstack.org/tc/goals/pike/python35.html
-[2] - https://releases.openstack.org/
-[3] - https://governance.openstack.org/tc/goals/stein/python3-first.html
+It looks like in the past we've used common works from Wikipedia pages.
+
+https://en.wikipedia.org/wiki/Nautilus
+
+I thought it would be fun to see who in our community would like to
+contribute to the next design. If we don't have any designers we can
+also gather images and I can get something worked on that the
+community can provide feedback on.
+
+Lenz has provided this image that is currently being used for the 404
+page of the dashboard:
+
+https://github.com/ceph/ceph/blob/master/src/pybind/mgr/dashboard/frontend/src/assets/1280px-Nautilus_Octopus.jpg
+
+I'm waiting to hear back from our vendor of how much notice they would
+need to have the design ready for print on demand through the ceph
+store
+
+https://www.proforma.com/sdscommunitystore
 
 --
 Mike Perez (thingee)
-
-On Wed, Jan 16, 2019 at 7:45 AM Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
-> Hi everyone,
->
-> This has come up several times before, but we need to make a final
-> decision.  Alfredo has a PR prepared that drops Python 2 support entirely
-> in master, which will mean nautilus is Python 3 only.
->
-> All of our distro targets (el7, bionic, xenial) include python 3, so that
-> isn't an issue.  However, it also means that users of python-rados,
-> python-rbd, and python-cephfs will need to be using python 3.
->
-> Python 2 is on its way out, and has been for years.  See
->
->         https://pythonclock.org/
->
-> If it don't kill it in Nautilus, we'll be doing it for Octopus.
->
-> Are there major python-{rbd,cephfs,rgw,rados} users that are still Python
-> 2 that we need to be worried about?  (OpenStack?)
->
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
