@@ -1,11 +1,13 @@
 From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Google Summer of Code / Outreachy Call for Projects
-Date: Thu, 17 Jan 2019 00:12:39 -0800
-Message-ID: <CAFFUGJf5gqjjbx2eB=fr5SGZn6xWQMr4HjZY7nEs1xPpz6VyuQ@mail.gmail.com>
+Subject: Re: Cephalocon Barcelona 2019 CFP now open!
+Date: Thu, 17 Jan 2019 00:15:24 -0800
+Message-ID: <CAFFUGJeG2HL90PYhnMcBLO-a1Oq0iPt4X132nUJhfwzt2F7=yA@mail.gmail.com>
+References: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,35 +17,31 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hello everyone,
-
-We're getting ready for the next round of Google Summer of Code and Outreachy.
-
-Ali Maredia and I will help organize the Ceph project for each program.
-
-We are looking to have project ideas for Google Summer of Code by
-February 4th as our project application deadline is due by February
-6th.
-
-https://ceph.com/contribute/gsoc2019/
-https://summerofcode.withgoogle.com/how-it-works/
-
-Outreachy applicants in mid-February through the end of March will
-begin selecting open source projects to work on and make small
-contributions. On April 12th we hope to have some projects set for
-Outreachy so we can start selecting applicants. End of May will begin
-the internships.
-
-https://www.outreachy.org/mentor/
-
-You can submit project ideas for both programs on this etherpad.
-https://pad.ceph.com/p/project-ideas
-
-Stay tuned for more updates.
-
---
-Mike Perez (thingee)
+SGVsbG8gZXZlcnlvbmUsCgpKdXN0IGEgcmVtaW5kZXIgdGhhdCB0aGUgZGVhZGxpbmUgZm9yIENl
+cGhhbG9jb24gQmFyY2Vsb25hIDIwMTkgQ0ZQIGlzCkZlYnJ1YXJ5IDEgYXQgMTE6NTkgcG0gUFNU
+LiBQbGVhc2UgZ2V0IHlvdXIgcHJvcG9zZWQgc2Vzc2lvbnMgaW4gc29vbgphcyBwb3NzaWJsZSBm
+b3Igb3VyIHNlbGVjdGlvbiBjb21taXR0ZWUgdG8gcmV2aWV3LiBUaGFua3MhCgpodHRwczovL2Nl
+cGguY29tL2NlcGhhbG9jb24vYmFyY2Vsb25hLTIwMTkvCmh0dHBzOi8vbGludXhmb3VuZGF0aW9u
+LnNtYXBwbHkuaW8vcHJvZy9jZXBoYWxvY29uXzIwMTkvCmh0dHBzOi8vcGFkLmNlcGguY29tL3Av
+Y2ZwLWNvb3JkaW5hdGlvbgoKCi0tCk1pa2UgUGVyZXogKHRoaW5nZWUpCgoKCk9uIE1vbiwgRGVj
+IDEwLCAyMDE4IGF0IDg6MDAgQU0gTWlrZSBQZXJleiA8bWlwZXJlekByZWRoYXQuY29tPiB3cm90
+ZToKPgo+IEhlbGxvIGV2ZXJ5b25lIQo+Cj4gSXQgZ2l2ZXMgbWUgZ3JlYXQgcGxlYXN1cmUgdG8g
+YW5ub3VuY2UgdGhlIENGUCBmb3IgQ2VwaGFsb2NvbiBCYXJjZWxvbmEgMjAxOSBpcyBub3cgb3Bl
+biBbMV0hCj4KPiBDZXBoYWxvY29uIEJhcmNlbG9uYSBhaW1zIHRvIGJyaW5nIHRvZ2V0aGVyIG1v
+cmUgdGhhbiA4MDAgdGVjaG5vbG9naXN0cyBhbmQgYWRvcHRlcnMgZnJvbSBhY3Jvc3MgdGhlIGds
+b2JlIHRvIHNob3djYXNlIENlcGjigJlzIGhpc3RvcnkgYW5kIGl0cyBmdXR1cmUsIGRlbW9uc3Ry
+YXRlIHJlYWwtd29ybGQgYXBwbGljYXRpb25zLCBhbmQgaGlnaGxpZ2h0IHZlbmRvciBzb2x1dGlv
+bnMuIEpvaW4gdXMgaW4gQmFyY2Vsb25hLCBTcGFpbiBvbiAxOS0yMCBNYXkgMjAxOSBmb3Igb3Vy
+IHNlY29uZCBpbnRlcm5hdGlvbmFsIGNvbmZlcmVuY2UgZXZlbnQuCj4KPiBDRlAgY2xvc2VzIEZy
+aWRheSwgRmVicnVhcnkgMSBhdCAxMTo1OSBwbSBQU1QuCj4KPiBXZSB3aWxsIGFnYWluIGhhdmUg
+YSBzZWxlY3Rpb24gY29tbWl0dGVlIHRoYXQgd2lsbCBsb29rIG92ZXIgdGhlIHByZXNlbnRhdGlv
+bnMgZm9yIHF1YWxpdHkgY29udGVudCBmb3IgdGhlIGNvbW11bml0eS4gSWYgeW91IGhhdmUgYW55
+IHF1ZXN0aW9ucywgcGxlYXNlIGxldCBtZSBrbm93Lgo+Cj4gWzFdIC0gaHR0cHM6Ly9jZXBoLmNv
+bS9jZXBoYWxvY29uL2JhcmNlbG9uYS0yMDE5Lwo+Cj4gLS0KPgo+IE1pa2UgUGVyZXogKHRoaW5n
+ZWUpCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgt
+dXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3Rz
+LmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
