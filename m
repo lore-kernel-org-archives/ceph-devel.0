@@ -1,62 +1,56 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH net-next] libceph, ceph: use struct_size() in kmalloc()
-Date: Thu, 17 Jan 2019 15:17:33 +0100
-Message-ID: <CAOi1vP_yWH2mhquFObC6VnUzNTzc7PX7tqA3RP=ci71BMm-gqA@mail.gmail.com>
-References: <20190115194153.GA9565@embeddedor>
+From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
+Subject: Re: Ceph Nautilus Release T-shirt Design
+Date: Fri, 18 Jan 2019 10:14:26 +1100
+Message-ID: <53a6ab5b-dc72-e786-d1ea-fdbb912e463c@suse.com>
+References: <CAFFUGJdFsLF6fJZ-nR2RWqLj0vOpQMRcJqETwbc6EeQ7RW_bbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190115194153.GA9565@embeddedor>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAFFUGJdFsLF6fJZ-nR2RWqLj0vOpQMRcJqETwbc6EeQ7RW_bbw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Jan 15, 2019 at 8:41 PM Gustavo A. R. Silva
-<gustavo@embeddedor.com> wrote:
->
-> One of the more common cases of allocation size calculations is finding
-> the size of a structure that has a zero-sized array at the end, along
-> with memory for some number of elements for that array. For example:
->
-> struct foo {
->     int stuff;
->     struct boo entry[];
-> };
->
-> instance = kmalloc(sizeof(struct foo) + count * sizeof(struct boo), GFP_KERNEL);
->
-> Instead of leaving these open-coded and prone to type mistakes, we can
-> now use the new struct_size() helper:
->
-> instance = kmalloc(struct_size(instance, entry, count), GFP_KERNEL);
->
-> This code was detected with the help of Coccinelle.
->
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
-> ---
->  net/ceph/osdmap.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 98c0ff3d6441..48a31dc9161c 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -495,9 +495,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
->                           / sizeof(struct crush_rule_step))
->                         goto bad;
->  #endif
-> -               r = c->rules[i] = kmalloc(sizeof(*r) +
-> -                                         yes*sizeof(struct crush_rule_step),
-> -                                         GFP_NOFS);
-> +               r = kmalloc(struct_size(r, steps, yes), GFP_NOFS);
-> +               c->rules[i] = r;
->                 if (r == NULL)
->                         goto badmem;
->                 dout(" rule %d is at %p\n", i, r);
+On 01/17/2019 04:46 AM, Mike Perez wrote:
+> Hey everyone,
+> 
+> We're getting close to the release of Ceph Nautilus, and I wanted to
+> start the discussion of our next shirt!
+> 
+> It looks like in the past we've used common works from Wikipedia pages.
+> 
+> https://en.wikipedia.org/wiki/Nautilus
+> 
+> I thought it would be fun to see who in our community would like to
+> contribute to the next design. If we don't have any designers we can
+> also gather images and I can get something worked on that the
+> community can provide feedback on.
+> 
+> Lenz has provided this image that is currently being used for the 404
+> page of the dashboard:
+> 
+> https://github.com/ceph/ceph/blob/master/src/pybind/mgr/dashboard/frontend/src/assets/1280px-Nautilus_Octopus.jpg
 
-Applied.
+Nautilus *shells* are somewhat iconic/well known/distinctive.  Maybe a
+variant of https://en.wikipedia.org/wiki/File:Nautilus_Section_cut.jpg
+would be interesting on a t-shirt?
 
-Thanks,
+Regards,
 
-                Ilya
+Tim
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong-IBi9RG/b67k@public.gmane.org
