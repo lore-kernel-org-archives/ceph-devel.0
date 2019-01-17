@@ -1,47 +1,62 @@
-From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Cephalocon Barcelona 2019 CFP now open!
-Date: Thu, 17 Jan 2019 00:15:24 -0800
-Message-ID: <CAFFUGJeG2HL90PYhnMcBLO-a1Oq0iPt4X132nUJhfwzt2F7=yA@mail.gmail.com>
-References: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH net-next] libceph, ceph: use struct_size() in kmalloc()
+Date: Thu, 17 Jan 2019 15:17:33 +0100
+Message-ID: <CAOi1vP_yWH2mhquFObC6VnUzNTzc7PX7tqA3RP=ci71BMm-gqA@mail.gmail.com>
+References: <20190115194153.GA9565@embeddedor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <3aa8afba-4c50-40e2-95a3-d0ad87290397@Spark>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190115194153.GA9565@embeddedor>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGVsbG8gZXZlcnlvbmUsCgpKdXN0IGEgcmVtaW5kZXIgdGhhdCB0aGUgZGVhZGxpbmUgZm9yIENl
-cGhhbG9jb24gQmFyY2Vsb25hIDIwMTkgQ0ZQIGlzCkZlYnJ1YXJ5IDEgYXQgMTE6NTkgcG0gUFNU
-LiBQbGVhc2UgZ2V0IHlvdXIgcHJvcG9zZWQgc2Vzc2lvbnMgaW4gc29vbgphcyBwb3NzaWJsZSBm
-b3Igb3VyIHNlbGVjdGlvbiBjb21taXR0ZWUgdG8gcmV2aWV3LiBUaGFua3MhCgpodHRwczovL2Nl
-cGguY29tL2NlcGhhbG9jb24vYmFyY2Vsb25hLTIwMTkvCmh0dHBzOi8vbGludXhmb3VuZGF0aW9u
-LnNtYXBwbHkuaW8vcHJvZy9jZXBoYWxvY29uXzIwMTkvCmh0dHBzOi8vcGFkLmNlcGguY29tL3Av
-Y2ZwLWNvb3JkaW5hdGlvbgoKCi0tCk1pa2UgUGVyZXogKHRoaW5nZWUpCgoKCk9uIE1vbiwgRGVj
-IDEwLCAyMDE4IGF0IDg6MDAgQU0gTWlrZSBQZXJleiA8bWlwZXJlekByZWRoYXQuY29tPiB3cm90
-ZToKPgo+IEhlbGxvIGV2ZXJ5b25lIQo+Cj4gSXQgZ2l2ZXMgbWUgZ3JlYXQgcGxlYXN1cmUgdG8g
-YW5ub3VuY2UgdGhlIENGUCBmb3IgQ2VwaGFsb2NvbiBCYXJjZWxvbmEgMjAxOSBpcyBub3cgb3Bl
-biBbMV0hCj4KPiBDZXBoYWxvY29uIEJhcmNlbG9uYSBhaW1zIHRvIGJyaW5nIHRvZ2V0aGVyIG1v
-cmUgdGhhbiA4MDAgdGVjaG5vbG9naXN0cyBhbmQgYWRvcHRlcnMgZnJvbSBhY3Jvc3MgdGhlIGds
-b2JlIHRvIHNob3djYXNlIENlcGjigJlzIGhpc3RvcnkgYW5kIGl0cyBmdXR1cmUsIGRlbW9uc3Ry
-YXRlIHJlYWwtd29ybGQgYXBwbGljYXRpb25zLCBhbmQgaGlnaGxpZ2h0IHZlbmRvciBzb2x1dGlv
-bnMuIEpvaW4gdXMgaW4gQmFyY2Vsb25hLCBTcGFpbiBvbiAxOS0yMCBNYXkgMjAxOSBmb3Igb3Vy
-IHNlY29uZCBpbnRlcm5hdGlvbmFsIGNvbmZlcmVuY2UgZXZlbnQuCj4KPiBDRlAgY2xvc2VzIEZy
-aWRheSwgRmVicnVhcnkgMSBhdCAxMTo1OSBwbSBQU1QuCj4KPiBXZSB3aWxsIGFnYWluIGhhdmUg
-YSBzZWxlY3Rpb24gY29tbWl0dGVlIHRoYXQgd2lsbCBsb29rIG92ZXIgdGhlIHByZXNlbnRhdGlv
-bnMgZm9yIHF1YWxpdHkgY29udGVudCBmb3IgdGhlIGNvbW11bml0eS4gSWYgeW91IGhhdmUgYW55
-IHF1ZXN0aW9ucywgcGxlYXNlIGxldCBtZSBrbm93Lgo+Cj4gWzFdIC0gaHR0cHM6Ly9jZXBoLmNv
-bS9jZXBoYWxvY29uL2JhcmNlbG9uYS0yMDE5Lwo+Cj4gLS0KPgo+IE1pa2UgUGVyZXogKHRoaW5n
-ZWUpCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgt
-dXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3Rz
-LmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On Tue, Jan 15, 2019 at 8:41 PM Gustavo A. R. Silva
+<gustavo@embeddedor.com> wrote:
+>
+> One of the more common cases of allocation size calculations is finding
+> the size of a structure that has a zero-sized array at the end, along
+> with memory for some number of elements for that array. For example:
+>
+> struct foo {
+>     int stuff;
+>     struct boo entry[];
+> };
+>
+> instance = kmalloc(sizeof(struct foo) + count * sizeof(struct boo), GFP_KERNEL);
+>
+> Instead of leaving these open-coded and prone to type mistakes, we can
+> now use the new struct_size() helper:
+>
+> instance = kmalloc(struct_size(instance, entry, count), GFP_KERNEL);
+>
+> This code was detected with the help of Coccinelle.
+>
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+> ---
+>  net/ceph/osdmap.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+>
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 98c0ff3d6441..48a31dc9161c 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -495,9 +495,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+>                           / sizeof(struct crush_rule_step))
+>                         goto bad;
+>  #endif
+> -               r = c->rules[i] = kmalloc(sizeof(*r) +
+> -                                         yes*sizeof(struct crush_rule_step),
+> -                                         GFP_NOFS);
+> +               r = kmalloc(struct_size(r, steps, yes), GFP_NOFS);
+> +               c->rules[i] = r;
+>                 if (r == NULL)
+>                         goto badmem;
+>                 dout(" rule %d is at %p\n", i, r);
+
+Applied.
+
+Thanks,
+
+                Ilya
