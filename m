@@ -1,30 +1,29 @@
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [patch 6/9] ceph: quota: Cleanup license mess
-Date: Fri, 18 Jan 2019 11:54:00 +0100 (CET)
-Message-ID: <alpine.DEB.2.21.1901181153310.1647@nanos.tec.linutronix.de>
-References: <20190117231416.111952141@linutronix.de> <20190117231501.346447710@linutronix.de> <CAOi1vP_zHqKvoqZ3Bupip3=Hcoy6fY4jEF-kf46-A0g4ZTNpcw@mail.gmail.com>
+From: Noah Watkins <nwatkins-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Today's DocuBetter meeting topic is... SEO
+Date: Fri, 18 Jan 2019 10:31:24 -0800
+Message-ID: <CAG0yoCkvkVpwAnrWa1hjRjMHAfGBZ5V9Gqx5TxyeyL4btDCPqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP_zHqKvoqZ3Bupip3=Hcoy6fY4jEF-kf46-A0g4ZTNpcw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@linuxfoundation.org>, Jonathan Corbet <corbet@lwn.net>, Luis Henriques <lhenriques@suse.com>, Jiri Kosina <jkosina@suse.cz>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Neha Ojha <nojha-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 18 Jan 2019, Ilya Dryomov wrote:
+We'll be discussing SEO for the Ceph documentation site today at the
+DocuBetter meeting. Currently when Googling or DuckDuckGoing for
+Ceph-related things you may see results from master, mimic, or what's
+a dumpling? The goal is figure out what sort of approach we can take
+to make these results more relevant. If you happen to know a bit about
+the topic of SEO please join and contribute to the conversation.
 
-> On Fri, Jan 18, 2019 at 12:15 AM Thomas Gleixner <tglx@linutronix.de> wrote:
-> >
-> > Precise and non-ambiguous license information is important. The recently
-> > added aegis header file has a SPDX license identifier, which is nice, but
-> 
-> Looks like cut-and-paste from crypto/aegis.h patch?
-
-Oops, sorry.
-
-> I'm changing this to say "recently added quota.c file".
-
-Thank you!
-
-      tglx
+Best,
+Noah
