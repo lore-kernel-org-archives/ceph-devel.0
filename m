@@ -1,73 +1,40 @@
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 6/9] ceph: quota: Cleanup license mess
-Date: Fri, 18 Jan 2019 00:14:22 +0100
-Message-ID: <20190117231501.346447710@linutronix.de>
-References: <20190117231416.111952141@linutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: LKML <linux-kernel@vger.kernel.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@linuxfoundation.org>, Jonathan Corbet <corbet@lwn.net>, Luis Henriques <lhenriques@suse.com>, Jiri Kosina <jkosina@suse.cz>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+From: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+Subject: Re: Ceph Nautilus Release T-shirt Design
+Date: Thu, 17 Jan 2019 16:07:09 -0800
+Message-ID: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
+References: <CAFFUGJdFsLF6fJZ-nR2RWqLj0vOpQMRcJqETwbc6EeQ7RW_bbw@mail.gmail.com>
+ <53a6ab5b-dc72-e786-d1ea-fdbb912e463c@suse.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <53a6ab5b-dc72-e786-d1ea-fdbb912e463c-IBi9RG/b67k@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Precise and non-ambiguous license information is important. The recently
-added aegis header file has a SPDX license identifier, which is nice, but
-at the same time it has a contradictionary license boiler plate text.
-
-  SPDX-License-Identifier: GPL-2.0
-
-versus 
-
-  * This program is free software; you can redistribute it and/or
-  * modify it under the terms of the GNU General Public License
-  * as published by the Free Software Foundation; either version 2
-  * of the License, or (at your option) any later version.
-
-Oh well.
-
-As the other ceph related files are licensed under the GPL v2 only, it's
-assumed that the SPDX id is correct and the boiler plate was randomly
-copied into that patch.
-
-Remove the boiler plate as it is wrong and even if correct it is redundant.
-
-Fixes: fb18a57568c2 ("ceph: quota: add initial infrastructure to support cephfs quotas")
-Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-Cc: Luis Henriques <lhenriques@suse.com>
-Cc: Jiri Kosina <jkosina@suse.cz>
-Cc: "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sage@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
----
-
-P.S.: This patch is part of a larger cleanup, but independent of other
-      patches and is intended to be picked up by the maintainer directly.
-
----
- fs/ceph/quota.c |   13 -------------
- 1 file changed, 13 deletions(-)
-
---- a/fs/ceph/quota.c
-+++ b/fs/ceph/quota.c
-@@ -3,19 +3,6 @@
-  * quota.c - CephFS quota
-  *
-  * Copyright (C) 2017-2018 SUSE
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License
-- * as published by the Free Software Foundation; either version 2
-- * of the License, or (at your option) any later version.
-- *
-- * This program is distributed in the hope that it will be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, see <http://www.gnu.org/licenses/>.
-  */
- 
- #include <linux/statfs.h>
+Pj4gTGVueiBoYXMgcHJvdmlkZWQgdGhpcyBpbWFnZSB0aGF0IGlzIGN1cnJlbnRseSBiZWluZyB1
+c2VkIGZvciB0aGUgNDA0Cj4+IHBhZ2Ugb2YgdGhlIGRhc2hib2FyZDoKPj4gCj4+IGh0dHBzOi8v
+Z2l0aHViLmNvbS9jZXBoL2NlcGgvYmxvYi9tYXN0ZXIvc3JjL3B5YmluZC9tZ3IvZGFzaGJvYXJk
+L2Zyb250ZW5kL3NyYy9hc3NldHMvMTI4MHB4LU5hdXRpbHVzX09jdG9wdXMuanBnCj4gCj4gTmF1
+dGlsdXMgKnNoZWxscyogYXJlIHNvbWV3aGF0IGljb25pYy93ZWxsIGtub3duL2Rpc3RpbmN0aXZl
+LiAgTWF5YmUgYQo+IHZhcmlhbnQgb2YgaHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvRmls
+ZTpOYXV0aWx1c19TZWN0aW9uX2N1dC5qcGcKPiB3b3VsZCBiZSBpbnRlcmVzdGluZyBvbiBhIHQt
+c2hpcnQ/CgpJIGFncmVlIHdpdGggVGltLiAgVCBzaGlydHMgd2l0aCBwaG90b3MgY2FuIGJlIHRy
+aWNreSwgaXTigJlzIGVhc3kgZm9yIHRoZW0gdG8gbG9vayBjaGVlc3kgYW5kIHRoZXkgZG9u4oCZ
+dCBhZ2Ugd2VsbC4KCkluIHRoZSBzYW1lIHZlaW4sIHNvbWV0aGluZyB3aXRoIGEgbG93ZXIgYml0
+LWRlcHRoIGFuZCBub3Qgbm9uLWNyb3NzLXNlY3Rpb24gbWlnaHQgYmUgc2xpZ2h0bHkgbW9yZSBy
+ZWNvZ25pemFibGU6CgpodHRwczovL3d3dy52ZWN0b3JzdG9jay5jb20vcm95YWx0eS1mcmVlLXZl
+Y3Rvci9uYXV0aWx1cy12ZWN0b3ItMjgwNjg0OAoKX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20K
