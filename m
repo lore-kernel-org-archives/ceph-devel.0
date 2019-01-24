@@ -1,36 +1,42 @@
-From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Cephalocon Barcelona 2019 Early Bird Registration Now
- Available!
-Date: Mon, 21 Jan 2019 08:45:25 -0800
-Message-ID: <CAFFUGJf27-kv=c_W9pWHSQrJQNEhDRMuAAK52PL2ZMz8M5V5kw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 5.0-rc4
+Date: Thu, 24 Jan 2019 16:49:58 +0100
+Message-ID: <20190124154958.8067-1-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hey everyone,
+Hi Linus,
 
-Cephalocon Barcelona 2019 early bird registration is now available
-through February 15th. After that rates go up, so please register now
-to lock in your discounted ticket.
+The following changes since commit 49a57857aeea06ca831043acbb0fa5e0f50602fd:
 
-https://ceph.com/cephalocon/barcelona-2019/
+  Linux 5.0-rc3 (2019-01-21 13:14:44 +1300)
 
-As a reminder, the CFP will close February 1st. If you need assistance
-with your presentation or have any questions, please reach out to
-events-whcRCuaqkMI@public.gmane.org Thank you!
+are available in the Git repository at:
 
---
-Mike Perez (thingee)
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.0-rc4
+
+for you to fetch changes up to 74827ee29565f86e2a64495a5e3e58d3371d74ee:
+
+  ceph: quota: cleanup license mess (2019-01-21 14:53:23 +0100)
+
+----------------------------------------------------------------
+A fix for a potential use-after-free, a patch to close a (mostly benign)
+race in the messenger and a licence clarification for quota.c.
+
+----------------------------------------------------------------
+Ilya Dryomov (1):
+      libceph: avoid KEEPALIVE_PENDING races in ceph_con_keepalive()
+
+Thomas Gleixner (1):
+      ceph: quota: cleanup license mess
+
+Yan, Zheng (1):
+      ceph: clear inode pointer when snap realm gets dropped by its inode
+
+ fs/ceph/caps.c       |  2 ++
+ fs/ceph/quota.c      | 13 -------------
+ net/ceph/messenger.c |  5 +++--
+ 3 files changed, 5 insertions(+), 15 deletions(-)
