@@ -1,42 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.0-rc4
-Date: Thu, 24 Jan 2019 16:49:58 +0100
-Message-ID: <20190124154958.8067-1-idryomov@gmail.com>
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fixes for 5.0-rc4
+Date: Thu, 24 Jan 2019 17:10:05 +0000
+Message-ID: <154834980520.21465.4439579297346781753.pr-tracker-bot@kernel.org>
+References: <20190124154958.8067-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190124154958.8067-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Thu, 24 Jan 2019 16:49:58 +0100:
 
-The following changes since commit 49a57857aeea06ca831043acbb0fa5e0f50602fd:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.0-rc4
 
-  Linux 5.0-rc3 (2019-01-21 13:14:44 +1300)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/22a89a6b88e6db7328292491f564b54b13cc15fb
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.0-rc4
-
-for you to fetch changes up to 74827ee29565f86e2a64495a5e3e58d3371d74ee:
-
-  ceph: quota: cleanup license mess (2019-01-21 14:53:23 +0100)
-
-----------------------------------------------------------------
-A fix for a potential use-after-free, a patch to close a (mostly benign)
-race in the messenger and a licence clarification for quota.c.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      libceph: avoid KEEPALIVE_PENDING races in ceph_con_keepalive()
-
-Thomas Gleixner (1):
-      ceph: quota: cleanup license mess
-
-Yan, Zheng (1):
-      ceph: clear inode pointer when snap realm gets dropped by its inode
-
- fs/ceph/caps.c       |  2 ++
- fs/ceph/quota.c      | 13 -------------
- net/ceph/messenger.c |  5 +++--
- 3 files changed, 5 insertions(+), 15 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
