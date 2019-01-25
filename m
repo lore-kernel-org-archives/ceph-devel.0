@@ -1,15 +1,16 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Subject: Re: ceph osd commit latency increase over time,
  until restart
-Date: Fri, 25 Jan 2019 09:49:02 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1901250948390.1384@piezo.novalocal>
+Date: Fri, 25 Jan 2019 11:06:51 +0100 (CET)
+Message-ID: <837655257.15253.1548410811958.JavaMail.zimbra@oxygem.tv>
 References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <387140705.12275.1548407699184.JavaMail.zimbra@oxygem.tv>
+ <alpine.DEB.2.11.1901250948390.1384@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <387140705.12275.1548407699184.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1901250948390.1384-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,50 +20,40 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Can you capture a perf top or perf record to see where teh CPU time is 
-going on one of the OSDs wth a high latency?
-
-Thanks!
-sage
-
-
-On Fri, 25 Jan 2019, Alexandre DERUMIER wrote:
-
-> 
-> Hi, 
-> 
-> I have a strange behaviour of my osd, on multiple clusters, 
-> 
-> All cluster are running mimic 13.2.1,bluestore, with ssd or nvme drivers, 
-> workload is rbd only, with qemu-kvm vms running with librbd + snapshot/rbd export-diff/snapshotdelete each day for backup 
-> 
-> When the osd are refreshly started, the commit latency is between 0,5-1ms. 
-> 
-> But overtime, this latency increase slowly (maybe around 1ms by day), until reaching crazy 
-> values like 20-200ms. 
-> 
-> Some example graphs:
-> 
-> http://odisoweb1.odiso.net/osdlatency1.png
-> http://odisoweb1.odiso.net/osdlatency2.png
-> 
-> All osds have this behaviour, in all clusters. 
-> 
-> The latency of physical disks is ok. (Clusters are far to be full loaded) 
-> 
-> And if I restart the osd, the latency come back to 0,5-1ms. 
-> 
-> That's remember me old tcmalloc bug, but maybe could it be a bluestore memory bug ? 
-> 
-> Any Hints for counters/logs to check ? 
-> 
-> 
-> Regards, 
-> 
-> Alexandre 
-> 
-> 
+Pj5DYW4geW91IGNhcHR1cmUgYSBwZXJmIHRvcCBvciBwZXJmIHJlY29yZCB0byBzZWUgd2hlcmUg
+dGVoIENQVSB0aW1lIGlzIAo+PmdvaW5nIG9uIG9uZSBvZiB0aGUgT1NEcyB3dGggYSBoaWdoIGxh
+dGVuY3k/CgpZZXMsIHN1cmUuIEknbGwgZG8gaXQgbmV4dCB3ZWVrIGFuZCBzZW5kIHJlc3VsdCB0
+byB0aGUgbWFpbGluZyBsaXN0LgoKVGhhbmtzIFNhZ2UgIQogCi0tLS0tIE1haWwgb3JpZ2luYWwg
+LS0tLS0KRGU6ICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4Kw4A6ICJhZGVydW1pZXIi
+IDxhZGVydW1pZXJAb2Rpc28uY29tPgpDYzogImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3Rz
+LmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4KRW52
+b3nDqTogVmVuZHJlZGkgMjUgSmFudmllciAyMDE5IDEwOjQ5OjAyCk9iamV0OiBSZTogY2VwaCBv
+c2QgY29tbWl0IGxhdGVuY3kgaW5jcmVhc2Ugb3ZlciB0aW1lLCB1bnRpbCByZXN0YXJ0CgpDYW4g
+eW91IGNhcHR1cmUgYSBwZXJmIHRvcCBvciBwZXJmIHJlY29yZCB0byBzZWUgd2hlcmUgdGVoIENQ
+VSB0aW1lIGlzIApnb2luZyBvbiBvbmUgb2YgdGhlIE9TRHMgd3RoIGEgaGlnaCBsYXRlbmN5PyAK
+ClRoYW5rcyEgCnNhZ2UgCgoKT24gRnJpLCAyNSBKYW4gMjAxOSwgQWxleGFuZHJlIERFUlVNSUVS
+IHdyb3RlOiAKCj4gCj4gSGksIAo+IAo+IEkgaGF2ZSBhIHN0cmFuZ2UgYmVoYXZpb3VyIG9mIG15
+IG9zZCwgb24gbXVsdGlwbGUgY2x1c3RlcnMsIAo+IAo+IEFsbCBjbHVzdGVyIGFyZSBydW5uaW5n
+IG1pbWljIDEzLjIuMSxibHVlc3RvcmUsIHdpdGggc3NkIG9yIG52bWUgZHJpdmVycywgCj4gd29y
+a2xvYWQgaXMgcmJkIG9ubHksIHdpdGggcWVtdS1rdm0gdm1zIHJ1bm5pbmcgd2l0aCBsaWJyYmQg
+KyBzbmFwc2hvdC9yYmQgZXhwb3J0LWRpZmYvc25hcHNob3RkZWxldGUgZWFjaCBkYXkgZm9yIGJh
+Y2t1cCAKPiAKPiBXaGVuIHRoZSBvc2QgYXJlIHJlZnJlc2hseSBzdGFydGVkLCB0aGUgY29tbWl0
+IGxhdGVuY3kgaXMgYmV0d2VlbiAwLDUtMW1zLiAKPiAKPiBCdXQgb3ZlcnRpbWUsIHRoaXMgbGF0
+ZW5jeSBpbmNyZWFzZSBzbG93bHkgKG1heWJlIGFyb3VuZCAxbXMgYnkgZGF5KSwgdW50aWwgcmVh
+Y2hpbmcgY3JhenkgCj4gdmFsdWVzIGxpa2UgMjAtMjAwbXMuIAo+IAo+IFNvbWUgZXhhbXBsZSBn
+cmFwaHM6IAo+IAo+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L29zZGxhdGVuY3kxLnBuZyAK
+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9vc2RsYXRlbmN5Mi5wbmcgCj4gCj4gQWxsIG9z
+ZHMgaGF2ZSB0aGlzIGJlaGF2aW91ciwgaW4gYWxsIGNsdXN0ZXJzLiAKPiAKPiBUaGUgbGF0ZW5j
+eSBvZiBwaHlzaWNhbCBkaXNrcyBpcyBvay4gKENsdXN0ZXJzIGFyZSBmYXIgdG8gYmUgZnVsbCBs
+b2FkZWQpIAo+IAo+IEFuZCBpZiBJIHJlc3RhcnQgdGhlIG9zZCwgdGhlIGxhdGVuY3kgY29tZSBi
+YWNrIHRvIDAsNS0xbXMuIAo+IAo+IFRoYXQncyByZW1lbWJlciBtZSBvbGQgdGNtYWxsb2MgYnVn
+LCBidXQgbWF5YmUgY291bGQgaXQgYmUgYSBibHVlc3RvcmUgbWVtb3J5IGJ1ZyA/IAo+IAo+IEFu
+eSBIaW50cyBmb3IgY291bnRlcnMvbG9ncyB0byBjaGVjayA/IAo+IAo+IAo+IFJlZ2FyZHMsIAo+
+IAo+IEFsZXhhbmRyZSAKPiAKPiAKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2Vw
+aC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
+Y29tCg==
