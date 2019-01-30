@@ -1,11 +1,16 @@
-From: Neha Ojha <nojha-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Docubetter: New Schedule
-Date: Fri, 25 Jan 2019 12:40:29 -0800
-Message-ID: <CAKn7kBmynMCA3wFRBepaO8UD7RY155qcJih8Oo7hN4eYb4v=RA@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: ceph osd commit latency increase over time,
+ until restart
+Date: Wed, 30 Jan 2019 08:33:19 +0100 (CET)
+Message-ID: <1548181710.219518.1548833599717.JavaMail.zimbra@oxygem.tv>
+References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
+ <387140705.12275.1548407699184.JavaMail.zimbra@oxygem.tv>
+ <alpine.DEB.2.11.1901250948390.1384@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1901250948390.1384-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,23 +20,43 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
-
-Starting February, Docubetter meetings will be held twice a month, on
-the second and fourth Wednesday of each month. We will alternate
-meeting times to ensure that all time zones have the opportunity to
-participate.
-
-Second Wednesday: 12:30 ET (starting February 13)
-Fourth Wednesday: 21:00 ET
-Meeting: https://bluejeans.com/908675367?src=calendarLink
-
-We will update the Ceph Community calendar to reflect the same.
-Our next topic of discussion is going to be search engine optimization
-for Ceph documentation.
-
-Thanks,
-Neha
+SGksCgpoZXJlIHNvbWUgbmV3IHJlc3VsdHMsCmRpZmZlcmVudCBvc2QvIGRpZmZlcmVudCBjbHVz
+dGVyCgpiZWZvcmUgb3NkIHJlc3RhcnQgbGF0ZW5jeSB3YXMgYmV0d2VlbiAyLTVtcwphZnRlciBv
+c2QgcmVzdGFydCBpcyBhcm91bmQgMS0xLjVtcwoKaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQv
+Y2VwaHBlcmYyL2JhZC50eHQgICgyLTVtcykKaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvY2Vw
+aHBlcmYyL29rLnR4dCAoMS0xLjVtcykKaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvY2VwaHBl
+cmYyL2RpZmYudHh0CgoKRnJvbSB3aGF0IEkgc2VlIGluIGRpZmYsIHRoZSBiaWdnZXN0IGRpZmZl
+cmVuY2UgaXMgaW4gdGNtYWxsb2MsIGJ1dCBtYXliZSBJJ20gd3JvbmcuCgooSSdtIHVzaW5nIHRj
+bWFsbG9jIDIuNS0yLjIpCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQpEZTogIlNhZ2UgV2Vp
+bCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PgrDgDogImFkZXJ1bWllciIgPGFkZXJ1bWllckBvZGlzby5j
+b20+CkNjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2VwaC1k
+ZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgpFbnZvecOpOiBWZW5kcmVkaSAyNSBK
+YW52aWVyIDIwMTkgMTA6NDk6MDIKT2JqZXQ6IFJlOiBjZXBoIG9zZCBjb21taXQgbGF0ZW5jeSBp
+bmNyZWFzZSBvdmVyIHRpbWUsIHVudGlsIHJlc3RhcnQKCkNhbiB5b3UgY2FwdHVyZSBhIHBlcmYg
+dG9wIG9yIHBlcmYgcmVjb3JkIHRvIHNlZSB3aGVyZSB0ZWggQ1BVIHRpbWUgaXMgCmdvaW5nIG9u
+IG9uZSBvZiB0aGUgT1NEcyB3dGggYSBoaWdoIGxhdGVuY3k/IAoKVGhhbmtzISAKc2FnZSAKCgpP
+biBGcmksIDI1IEphbiAyMDE5LCBBbGV4YW5kcmUgREVSVU1JRVIgd3JvdGU6IAoKPiAKPiBIaSwg
+Cj4gCj4gSSBoYXZlIGEgc3RyYW5nZSBiZWhhdmlvdXIgb2YgbXkgb3NkLCBvbiBtdWx0aXBsZSBj
+bHVzdGVycywgCj4gCj4gQWxsIGNsdXN0ZXIgYXJlIHJ1bm5pbmcgbWltaWMgMTMuMi4xLGJsdWVz
+dG9yZSwgd2l0aCBzc2Qgb3IgbnZtZSBkcml2ZXJzLCAKPiB3b3JrbG9hZCBpcyByYmQgb25seSwg
+d2l0aCBxZW11LWt2bSB2bXMgcnVubmluZyB3aXRoIGxpYnJiZCArIHNuYXBzaG90L3JiZCBleHBv
+cnQtZGlmZi9zbmFwc2hvdGRlbGV0ZSBlYWNoIGRheSBmb3IgYmFja3VwIAo+IAo+IFdoZW4gdGhl
+IG9zZCBhcmUgcmVmcmVzaGx5IHN0YXJ0ZWQsIHRoZSBjb21taXQgbGF0ZW5jeSBpcyBiZXR3ZWVu
+IDAsNS0xbXMuIAo+IAo+IEJ1dCBvdmVydGltZSwgdGhpcyBsYXRlbmN5IGluY3JlYXNlIHNsb3ds
+eSAobWF5YmUgYXJvdW5kIDFtcyBieSBkYXkpLCB1bnRpbCByZWFjaGluZyBjcmF6eSAKPiB2YWx1
+ZXMgbGlrZSAyMC0yMDBtcy4gCj4gCj4gU29tZSBleGFtcGxlIGdyYXBoczogCj4gCj4gaHR0cDov
+L29kaXNvd2ViMS5vZGlzby5uZXQvb3NkbGF0ZW5jeTEucG5nIAo+IGh0dHA6Ly9vZGlzb3dlYjEu
+b2Rpc28ubmV0L29zZGxhdGVuY3kyLnBuZyAKPiAKPiBBbGwgb3NkcyBoYXZlIHRoaXMgYmVoYXZp
+b3VyLCBpbiBhbGwgY2x1c3RlcnMuIAo+IAo+IFRoZSBsYXRlbmN5IG9mIHBoeXNpY2FsIGRpc2tz
+IGlzIG9rLiAoQ2x1c3RlcnMgYXJlIGZhciB0byBiZSBmdWxsIGxvYWRlZCkgCj4gCj4gQW5kIGlm
+IEkgcmVzdGFydCB0aGUgb3NkLCB0aGUgbGF0ZW5jeSBjb21lIGJhY2sgdG8gMCw1LTFtcy4gCj4g
+Cj4gVGhhdCdzIHJlbWVtYmVyIG1lIG9sZCB0Y21hbGxvYyBidWcsIGJ1dCBtYXliZSBjb3VsZCBp
+dCBiZSBhIGJsdWVzdG9yZSBtZW1vcnkgYnVnID8gCj4gCj4gQW55IEhpbnRzIGZvciBjb3VudGVy
+cy9sb2dzIHRvIGNoZWNrID8gCj4gCj4gCj4gUmVnYXJkcywgCj4gCj4gQWxleGFuZHJlIAo+IAo+
+IAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
