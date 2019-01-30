@@ -1,16 +1,18 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Subject: Re: ceph osd commit latency increase over time,
  until restart
-Date: Wed, 30 Jan 2019 13:33:23 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1901301331580.5535@piezo.novalocal>
+Date: Wed, 30 Jan 2019 14:45:09 +0100 (CET)
+Message-ID: <986643198.245013.1548855909082.JavaMail.zimbra@oxygem.tv>
 References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <387140705.12275.1548407699184.JavaMail.zimbra@oxygem.tv>
  <alpine.DEB.2.11.1901250948390.1384@piezo.novalocal>
  <1548181710.219518.1548833599717.JavaMail.zimbra@oxygem.tv>
+ <alpine.DEB.2.11.1901301331580.5535@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1661526346-1548855206=:5535"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1548181710.219518.1548833599717.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1901301331580.5535-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,113 +22,83 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1661526346-1548855206=:5535
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Wed, 30 Jan 2019, Alexandre DERUMIER wrote:
-> Hi,
-> 
-> here some new results,
-> different osd/ different cluster
-> 
-> before osd restart latency was between 2-5ms
-> after osd restart is around 1-1.5ms
-> 
-> http://odisoweb1.odiso.net/cephperf2/bad.txt  (2-5ms)
-> http://odisoweb1.odiso.net/cephperf2/ok.txt (1-1.5ms)
-> http://odisoweb1.odiso.net/cephperf2/diff.txt
-
-I don't see any smoking gun here... :/
-
-The main difference between a warm OSD and a cold one is that on startup 
-the bluestore cache is empty.  You might try setting the bluestore cache 
-size to something much smaller and see if that has an effect on the CPU 
-utilization?
-
-Note that this doesn't necessarily mean that's what you want.  Maybe the 
-reason why the CPU utilization is higher is because the cache is warm and 
-the OSD is serving more requests per second...
-
-sage
-
-
-
-> 
-> >From what I see in diff, the biggest difference is in tcmalloc, but maybe I'm wrong.
-> 
-> (I'm using tcmalloc 2.5-2.2)
-> 
-> 
-> ----- Mail original -----
-> De: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-> À: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> Cc: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Envoyé: Vendredi 25 Janvier 2019 10:49:02
-> Objet: Re: ceph osd commit latency increase over time, until restart
-> 
-> Can you capture a perf top or perf record to see where teh CPU time is 
-> going on one of the OSDs wth a high latency? 
-> 
-> Thanks! 
-> sage 
-> 
-> 
-> On Fri, 25 Jan 2019, Alexandre DERUMIER wrote: 
-> 
-> > 
-> > Hi, 
-> > 
-> > I have a strange behaviour of my osd, on multiple clusters, 
-> > 
-> > All cluster are running mimic 13.2.1,bluestore, with ssd or nvme drivers, 
-> > workload is rbd only, with qemu-kvm vms running with librbd + snapshot/rbd export-diff/snapshotdelete each day for backup 
-> > 
-> > When the osd are refreshly started, the commit latency is between 0,5-1ms. 
-> > 
-> > But overtime, this latency increase slowly (maybe around 1ms by day), until reaching crazy 
-> > values like 20-200ms. 
-> > 
-> > Some example graphs: 
-> > 
-> > http://odisoweb1.odiso.net/osdlatency1.png 
-> > http://odisoweb1.odiso.net/osdlatency2.png 
-> > 
-> > All osds have this behaviour, in all clusters. 
-> > 
-> > The latency of physical disks is ok. (Clusters are far to be full loaded) 
-> > 
-> > And if I restart the osd, the latency come back to 0,5-1ms. 
-> > 
-> > That's remember me old tcmalloc bug, but maybe could it be a bluestore memory bug ? 
-> > 
-> > Any Hints for counters/logs to check ? 
-> > 
-> > 
-> > Regards, 
-> > 
-> > Alexandre 
-> > 
-> > 
-> 
-> 
-> 
---8323329-1661526346-1548855206=:5535
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---8323329-1661526346-1548855206=:5535--
+Pj5JIGRvbid0IHNlZSBhbnkgc21va2luZyBndW4gaGVyZS4uLiA6LyAKCkkgbmVlZCB0byB0ZXN0
+IHRvIGNvbXBhcmUgd2hlbiBsYXRlbmN5IGFyZSBnb2luZyB2ZXJ5IGhpZ2gsIGJ1dCBJIG5lZWQg
+dG8gd2FpdCBtb3JlIGRheXMvd2Vla3MuCgoKPj5UaGUgbWFpbiBkaWZmZXJlbmNlIGJldHdlZW4g
+YSB3YXJtIE9TRCBhbmQgYSBjb2xkIG9uZSBpcyB0aGF0IG9uIHN0YXJ0dXAgCj4+dGhlIGJsdWVz
+dG9yZSBjYWNoZSBpcyBlbXB0eS4gWW91IG1pZ2h0IHRyeSBzZXR0aW5nIHRoZSBibHVlc3RvcmUg
+Y2FjaGUgCj4+c2l6ZSB0byBzb21ldGhpbmcgbXVjaCBzbWFsbGVyIGFuZCBzZWUgaWYgdGhhdCBo
+YXMgYW4gZWZmZWN0IG9uIHRoZSBDUFUgCj4+dXRpbGl6YXRpb24/IAoKSSB3aWxsIHRyeSB0byB0
+ZXN0LiBJIGFsc28gd29uZGVyIGlmIHRoZSBuZXcgYXV0byBtZW1vcnkgdHVuaW5nIGZyb20gTWFy
+ayBjb3VsZCBoZWxwIHRvbyA/CihJJ20gc3RpbGwgb24gbWltaWMgMTMuMi4xLCBwbGFubmluZyB0
+byB1cGRhdGUgdG8gMTMuMi41IG5leHQgbW9udGgpCgphbHNvLCBjb3VsZCBjaGVjayBzb21lIGJs
+dWVzdG9yZSByZWxhdGVkIGNvdW50ZXJzID8gKG9ub2Rlcywgcm9ja3NkYixibHVlc3RvcmUgY2Fj
+aGUuLi4uKQoKPj5Ob3RlIHRoYXQgdGhpcyBkb2Vzbid0IG5lY2Vzc2FyaWx5IG1lYW4gdGhhdCdz
+IHdoYXQgeW91IHdhbnQuIE1heWJlIHRoZSAKPj5yZWFzb24gd2h5IHRoZSBDUFUgdXRpbGl6YXRp
+b24gaXMgaGlnaGVyIGlzIGJlY2F1c2UgdGhlIGNhY2hlIGlzIHdhcm0gYW5kIAo+PnRoZSBPU0Qg
+aXMgc2VydmluZyBtb3JlIHJlcXVlc3RzIHBlciBzZWNvbmQuLi4gCgpXZWxsLCBjdXJyZW50bHks
+IHRoZSBzZXJ2ZXIgaXMgcmVhbGx5IHF1aWV0CgpEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3Jx
+bS9zICAgICByL3MgICAgIHcvcyAgICBya0IvcyAgICB3a0IvcyBhdmdycS1zeiBhdmdxdS1zeiAg
+IGF3YWl0IHJfYXdhaXQgd19hd2FpdCAgc3ZjdG0gICV1dGlsCm52bWUwbjEgICAgICAgICAgIDIs
+MDAgICA1MTUsMDAgICA0OCwwMCAxMTgyLDAwICAgMzA0LDAwIDExMjE2LDAwICAgIDE4LDczICAg
+ICAwLDAxICAgIDAsMDAgICAgMCwwMCAgICAwLDAwICAgMCwwMSAgIDEsMjAKCiVDcHUocyk6ICAx
+LDUgdXMsICAxLDAgc3ksICAwLDAgbmksIDk3LDIgaWQsICAwLDIgd2EsICAwLDAgaGksICAwLDEg
+c2ksICAwLDAgc3QKCkFuZCB0aGlzIGlzIG9ubHkgd2l0aCB3cml0ZXMsIG5vdCByZWFkcwoKCgot
+LS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCkRlOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5u
+ZXQ+CsOAOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4KQ2M6ICJjZXBoLXVzZXJz
+IiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmc+CkVudm95w6k6IE1lcmNyZWRpIDMwIEphbnZpZXIgMjAxOSAxNDozMzoy
+MwpPYmpldDogUmU6IGNlcGggb3NkIGNvbW1pdCBsYXRlbmN5IGluY3JlYXNlIG92ZXIgdGltZSwg
+dW50aWwgcmVzdGFydAoKT24gV2VkLCAzMCBKYW4gMjAxOSwgQWxleGFuZHJlIERFUlVNSUVSIHdy
+b3RlOiAKPiBIaSwgCj4gCj4gaGVyZSBzb21lIG5ldyByZXN1bHRzLCAKPiBkaWZmZXJlbnQgb3Nk
+LyBkaWZmZXJlbnQgY2x1c3RlciAKPiAKPiBiZWZvcmUgb3NkIHJlc3RhcnQgbGF0ZW5jeSB3YXMg
+YmV0d2VlbiAyLTVtcyAKPiBhZnRlciBvc2QgcmVzdGFydCBpcyBhcm91bmQgMS0xLjVtcyAKPiAK
+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9jZXBocGVyZjIvYmFkLnR4dCAoMi01bXMpIAo+
+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L2NlcGhwZXJmMi9vay50eHQgKDEtMS41bXMpIAo+
+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L2NlcGhwZXJmMi9kaWZmLnR4dCAKCkkgZG9uJ3Qg
+c2VlIGFueSBzbW9raW5nIGd1biBoZXJlLi4uIDovIAoKVGhlIG1haW4gZGlmZmVyZW5jZSBiZXR3
+ZWVuIGEgd2FybSBPU0QgYW5kIGEgY29sZCBvbmUgaXMgdGhhdCBvbiBzdGFydHVwIAp0aGUgYmx1
+ZXN0b3JlIGNhY2hlIGlzIGVtcHR5LiBZb3UgbWlnaHQgdHJ5IHNldHRpbmcgdGhlIGJsdWVzdG9y
+ZSBjYWNoZSAKc2l6ZSB0byBzb21ldGhpbmcgbXVjaCBzbWFsbGVyIGFuZCBzZWUgaWYgdGhhdCBo
+YXMgYW4gZWZmZWN0IG9uIHRoZSBDUFUgCnV0aWxpemF0aW9uPyAKCk5vdGUgdGhhdCB0aGlzIGRv
+ZXNuJ3QgbmVjZXNzYXJpbHkgbWVhbiB0aGF0J3Mgd2hhdCB5b3Ugd2FudC4gTWF5YmUgdGhlIApy
+ZWFzb24gd2h5IHRoZSBDUFUgdXRpbGl6YXRpb24gaXMgaGlnaGVyIGlzIGJlY2F1c2UgdGhlIGNh
+Y2hlIGlzIHdhcm0gYW5kIAp0aGUgT1NEIGlzIHNlcnZpbmcgbW9yZSByZXF1ZXN0cyBwZXIgc2Vj
+b25kLi4uIAoKc2FnZSAKCgoKPiAKPiA+RnJvbSB3aGF0IEkgc2VlIGluIGRpZmYsIHRoZSBiaWdn
+ZXN0IGRpZmZlcmVuY2UgaXMgaW4gdGNtYWxsb2MsIGJ1dCBtYXliZSBJJ20gd3JvbmcuIAo+IAo+
+IChJJ20gdXNpbmcgdGNtYWxsb2MgMi41LTIuMikgCj4gCj4gCj4gLS0tLS0gTWFpbCBvcmlnaW5h
+bCAtLS0tLSAKPiBEZTogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiAKPiDDgDogImFk
+ZXJ1bWllciIgPGFkZXJ1bWllckBvZGlzby5jb20+IAo+IENjOiAiY2VwaC11c2VycyIgPGNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJu
+ZWwub3JnPiAKPiBFbnZvecOpOiBWZW5kcmVkaSAyNSBKYW52aWVyIDIwMTkgMTA6NDk6MDIgCj4g
+T2JqZXQ6IFJlOiBjZXBoIG9zZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFzZSBvdmVyIHRpbWUsIHVu
+dGlsIHJlc3RhcnQgCj4gCj4gQ2FuIHlvdSBjYXB0dXJlIGEgcGVyZiB0b3Agb3IgcGVyZiByZWNv
+cmQgdG8gc2VlIHdoZXJlIHRlaCBDUFUgdGltZSBpcyAKPiBnb2luZyBvbiBvbmUgb2YgdGhlIE9T
+RHMgd3RoIGEgaGlnaCBsYXRlbmN5PyAKPiAKPiBUaGFua3MhIAo+IHNhZ2UgCj4gCj4gCj4gT24g
+RnJpLCAyNSBKYW4gMjAxOSwgQWxleGFuZHJlIERFUlVNSUVSIHdyb3RlOiAKPiAKPiA+IAo+ID4g
+SGksIAo+ID4gCj4gPiBJIGhhdmUgYSBzdHJhbmdlIGJlaGF2aW91ciBvZiBteSBvc2QsIG9uIG11
+bHRpcGxlIGNsdXN0ZXJzLCAKPiA+IAo+ID4gQWxsIGNsdXN0ZXIgYXJlIHJ1bm5pbmcgbWltaWMg
+MTMuMi4xLGJsdWVzdG9yZSwgd2l0aCBzc2Qgb3IgbnZtZSBkcml2ZXJzLCAKPiA+IHdvcmtsb2Fk
+IGlzIHJiZCBvbmx5LCB3aXRoIHFlbXUta3ZtIHZtcyBydW5uaW5nIHdpdGggbGlicmJkICsgc25h
+cHNob3QvcmJkIGV4cG9ydC1kaWZmL3NuYXBzaG90ZGVsZXRlIGVhY2ggZGF5IGZvciBiYWNrdXAg
+Cj4gPiAKPiA+IFdoZW4gdGhlIG9zZCBhcmUgcmVmcmVzaGx5IHN0YXJ0ZWQsIHRoZSBjb21taXQg
+bGF0ZW5jeSBpcyBiZXR3ZWVuIDAsNS0xbXMuIAo+ID4gCj4gPiBCdXQgb3ZlcnRpbWUsIHRoaXMg
+bGF0ZW5jeSBpbmNyZWFzZSBzbG93bHkgKG1heWJlIGFyb3VuZCAxbXMgYnkgZGF5KSwgdW50aWwg
+cmVhY2hpbmcgY3JhenkgCj4gPiB2YWx1ZXMgbGlrZSAyMC0yMDBtcy4gCj4gPiAKPiA+IFNvbWUg
+ZXhhbXBsZSBncmFwaHM6IAo+ID4gCj4gPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9vc2Rs
+YXRlbmN5MS5wbmcgCj4gPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9vc2RsYXRlbmN5Mi5w
+bmcgCj4gPiAKPiA+IEFsbCBvc2RzIGhhdmUgdGhpcyBiZWhhdmlvdXIsIGluIGFsbCBjbHVzdGVy
+cy4gCj4gPiAKPiA+IFRoZSBsYXRlbmN5IG9mIHBoeXNpY2FsIGRpc2tzIGlzIG9rLiAoQ2x1c3Rl
+cnMgYXJlIGZhciB0byBiZSBmdWxsIGxvYWRlZCkgCj4gPiAKPiA+IEFuZCBpZiBJIHJlc3RhcnQg
+dGhlIG9zZCwgdGhlIGxhdGVuY3kgY29tZSBiYWNrIHRvIDAsNS0xbXMuIAo+ID4gCj4gPiBUaGF0
+J3MgcmVtZW1iZXIgbWUgb2xkIHRjbWFsbG9jIGJ1ZywgYnV0IG1heWJlIGNvdWxkIGl0IGJlIGEg
+Ymx1ZXN0b3JlIG1lbW9yeSBidWcgPyAKPiA+IAo+ID4gQW55IEhpbnRzIGZvciBjb3VudGVycy9s
+b2dzIHRvIGNoZWNrID8gCj4gPiAKPiA+IAo+ID4gUmVnYXJkcywgCj4gPiAKPiA+IEFsZXhhbmRy
+ZSAKPiA+IAo+ID4gCj4gCj4gCj4gCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNl
+cGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
+LmNvbQo=
