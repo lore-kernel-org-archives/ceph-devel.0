@@ -1,18 +1,16 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Subject: Re: ceph osd commit latency increase over time,
  until restart
-Date: Wed, 30 Jan 2019 08:45:33 +0100
-Message-ID: <e81456d6-8361-5ca5-2b98-7a90948c0218@profihost.ag>
+Date: Wed, 30 Jan 2019 13:33:23 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1901301331580.5535@piezo.novalocal>
 References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <387140705.12275.1548407699184.JavaMail.zimbra@oxygem.tv>
  <alpine.DEB.2.11.1901250948390.1384@piezo.novalocal>
  <1548181710.219518.1548833599717.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1661526346-1548855206=:5535"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <1548181710.219518.1548833599717.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-Content-Language: de-DE
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -22,54 +20,113 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SGksCgpBbSAzMC4wMS4xOSB1bSAwODozMyBzY2hyaWViIEFsZXhhbmRyZSBERVJVTUlFUjoKPiBI
-aSwKPiAKPiBoZXJlIHNvbWUgbmV3IHJlc3VsdHMsCj4gZGlmZmVyZW50IG9zZC8gZGlmZmVyZW50
-IGNsdXN0ZXIKPiAKPiBiZWZvcmUgb3NkIHJlc3RhcnQgbGF0ZW5jeSB3YXMgYmV0d2VlbiAyLTVt
-cwo+IGFmdGVyIG9zZCByZXN0YXJ0IGlzIGFyb3VuZCAxLTEuNW1zCj4gCj4gaHR0cDovL29kaXNv
-d2ViMS5vZGlzby5uZXQvY2VwaHBlcmYyL2JhZC50eHQgICgyLTVtcykKPiBodHRwOi8vb2Rpc293
-ZWIxLm9kaXNvLm5ldC9jZXBocGVyZjIvb2sudHh0ICgxLTEuNW1zKQo+IGh0dHA6Ly9vZGlzb3dl
-YjEub2Rpc28ubmV0L2NlcGhwZXJmMi9kaWZmLnR4dAo+IAo+IEZyb20gd2hhdCBJIHNlZSBpbiBk
-aWZmLCB0aGUgYmlnZ2VzdCBkaWZmZXJlbmNlIGlzIGluIHRjbWFsbG9jLCBidXQgbWF5YmUgSSdt
-IHdyb25nLgo+IChJJ20gdXNpbmcgdGNtYWxsb2MgMi41LTIuMikKCmN1cnJlbnRseSBpJ20gaW4g
-dGhlIHByb2Nlc3Mgb2Ygc3dpdGNoaW5nIGJhY2sgZnJvbSBqZW1hbGxvYyB0byB0Y21hbGxvYwps
-aWtlIHN1Z2dlc3RlZC4gVGhpcyByZXBvcnQgbWFrZXMgbWUgYSBsaXR0bGUgbmVydm91cyBhYm91
-dCBteSBjaGFuZ2UuCgpBbHNvIGknbSBjdXJyZW50bHkgb25seSBtb25pdG9yaW5nIGxhdGVuY3kg
-Zm9yIGZpbGVzdG9yZSBvc2RzLiBXaGljaApleGFjdCB2YWx1ZXMgb3V0IG9mIHRoZSBkYWVtb24g
-ZG8geW91IHVzZSBmb3IgYmx1ZXN0b3JlPwoKSSB3b3VsZCBsaWtlIHRvIGNoZWNrIGlmIGkgc2Vl
-IHRoZSBzYW1lIGJlaGF2aW91ci4KCkdyZWV0cywKU3RlZmFuCgo+IAo+IC0tLS0tIE1haWwgb3Jp
-Z2luYWwgLS0tLS0KPiBEZTogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0Pgo+IMOAOiAi
-YWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4KPiBDYzogImNlcGgtdXNlcnMiIDxjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2Vy
-bmVsLm9yZz4KPiBFbnZvecOpOiBWZW5kcmVkaSAyNSBKYW52aWVyIDIwMTkgMTA6NDk6MDIKPiBP
-YmpldDogUmU6IGNlcGggb3NkIGNvbW1pdCBsYXRlbmN5IGluY3JlYXNlIG92ZXIgdGltZSwgdW50
-aWwgcmVzdGFydAo+IAo+IENhbiB5b3UgY2FwdHVyZSBhIHBlcmYgdG9wIG9yIHBlcmYgcmVjb3Jk
-IHRvIHNlZSB3aGVyZSB0ZWggQ1BVIHRpbWUgaXMgCj4gZ29pbmcgb24gb25lIG9mIHRoZSBPU0Rz
-IHd0aCBhIGhpZ2ggbGF0ZW5jeT8gCj4gCj4gVGhhbmtzISAKPiBzYWdlIAo+IAo+IAo+IE9uIEZy
-aSwgMjUgSmFuIDIwMTksIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZTogCj4gCj4+Cj4+IEhpLCAK
-Pj4KPj4gSSBoYXZlIGEgc3RyYW5nZSBiZWhhdmlvdXIgb2YgbXkgb3NkLCBvbiBtdWx0aXBsZSBj
-bHVzdGVycywgCj4+Cj4+IEFsbCBjbHVzdGVyIGFyZSBydW5uaW5nIG1pbWljIDEzLjIuMSxibHVl
-c3RvcmUsIHdpdGggc3NkIG9yIG52bWUgZHJpdmVycywgCj4+IHdvcmtsb2FkIGlzIHJiZCBvbmx5
-LCB3aXRoIHFlbXUta3ZtIHZtcyBydW5uaW5nIHdpdGggbGlicmJkICsgc25hcHNob3QvcmJkIGV4
-cG9ydC1kaWZmL3NuYXBzaG90ZGVsZXRlIGVhY2ggZGF5IGZvciBiYWNrdXAgCj4+Cj4+IFdoZW4g
-dGhlIG9zZCBhcmUgcmVmcmVzaGx5IHN0YXJ0ZWQsIHRoZSBjb21taXQgbGF0ZW5jeSBpcyBiZXR3
-ZWVuIDAsNS0xbXMuIAo+Pgo+PiBCdXQgb3ZlcnRpbWUsIHRoaXMgbGF0ZW5jeSBpbmNyZWFzZSBz
-bG93bHkgKG1heWJlIGFyb3VuZCAxbXMgYnkgZGF5KSwgdW50aWwgcmVhY2hpbmcgY3JhenkgCj4+
-IHZhbHVlcyBsaWtlIDIwLTIwMG1zLiAKPj4KPj4gU29tZSBleGFtcGxlIGdyYXBoczogCj4+Cj4+
-IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L29zZGxhdGVuY3kxLnBuZyAKPj4gaHR0cDovL29k
-aXNvd2ViMS5vZGlzby5uZXQvb3NkbGF0ZW5jeTIucG5nIAo+Pgo+PiBBbGwgb3NkcyBoYXZlIHRo
-aXMgYmVoYXZpb3VyLCBpbiBhbGwgY2x1c3RlcnMuIAo+Pgo+PiBUaGUgbGF0ZW5jeSBvZiBwaHlz
-aWNhbCBkaXNrcyBpcyBvay4gKENsdXN0ZXJzIGFyZSBmYXIgdG8gYmUgZnVsbCBsb2FkZWQpIAo+
-Pgo+PiBBbmQgaWYgSSByZXN0YXJ0IHRoZSBvc2QsIHRoZSBsYXRlbmN5IGNvbWUgYmFjayB0byAw
-LDUtMW1zLiAKPj4KPj4gVGhhdCdzIHJlbWVtYmVyIG1lIG9sZCB0Y21hbGxvYyBidWcsIGJ1dCBt
-YXliZSBjb3VsZCBpdCBiZSBhIGJsdWVzdG9yZSBtZW1vcnkgYnVnID8gCj4+Cj4+IEFueSBIaW50
-cyBmb3IgY291bnRlcnMvbG9ncyB0byBjaGVjayA/IAo+Pgo+Pgo+PiBSZWdhcmRzLCAKPj4KPj4g
-QWxleGFuZHJlIAo+Pgo+Pgo+IAo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tCj4gCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0
-cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-1661526346-1548855206=:5535
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Wed, 30 Jan 2019, Alexandre DERUMIER wrote:
+> Hi,
+> 
+> here some new results,
+> different osd/ different cluster
+> 
+> before osd restart latency was between 2-5ms
+> after osd restart is around 1-1.5ms
+> 
+> http://odisoweb1.odiso.net/cephperf2/bad.txt  (2-5ms)
+> http://odisoweb1.odiso.net/cephperf2/ok.txt (1-1.5ms)
+> http://odisoweb1.odiso.net/cephperf2/diff.txt
+
+I don't see any smoking gun here... :/
+
+The main difference between a warm OSD and a cold one is that on startup 
+the bluestore cache is empty.  You might try setting the bluestore cache 
+size to something much smaller and see if that has an effect on the CPU 
+utilization?
+
+Note that this doesn't necessarily mean that's what you want.  Maybe the 
+reason why the CPU utilization is higher is because the cache is warm and 
+the OSD is serving more requests per second...
+
+sage
+
+
+
+> 
+> >From what I see in diff, the biggest difference is in tcmalloc, but maybe I'm wrong.
+> 
+> (I'm using tcmalloc 2.5-2.2)
+> 
+> 
+> ----- Mail original -----
+> De: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+> À: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+> Cc: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Envoyé: Vendredi 25 Janvier 2019 10:49:02
+> Objet: Re: ceph osd commit latency increase over time, until restart
+> 
+> Can you capture a perf top or perf record to see where teh CPU time is 
+> going on one of the OSDs wth a high latency? 
+> 
+> Thanks! 
+> sage 
+> 
+> 
+> On Fri, 25 Jan 2019, Alexandre DERUMIER wrote: 
+> 
+> > 
+> > Hi, 
+> > 
+> > I have a strange behaviour of my osd, on multiple clusters, 
+> > 
+> > All cluster are running mimic 13.2.1,bluestore, with ssd or nvme drivers, 
+> > workload is rbd only, with qemu-kvm vms running with librbd + snapshot/rbd export-diff/snapshotdelete each day for backup 
+> > 
+> > When the osd are refreshly started, the commit latency is between 0,5-1ms. 
+> > 
+> > But overtime, this latency increase slowly (maybe around 1ms by day), until reaching crazy 
+> > values like 20-200ms. 
+> > 
+> > Some example graphs: 
+> > 
+> > http://odisoweb1.odiso.net/osdlatency1.png 
+> > http://odisoweb1.odiso.net/osdlatency2.png 
+> > 
+> > All osds have this behaviour, in all clusters. 
+> > 
+> > The latency of physical disks is ok. (Clusters are far to be full loaded) 
+> > 
+> > And if I restart the osd, the latency come back to 0,5-1ms. 
+> > 
+> > That's remember me old tcmalloc bug, but maybe could it be a bluestore memory bug ? 
+> > 
+> > Any Hints for counters/logs to check ? 
+> > 
+> > 
+> > Regards, 
+> > 
+> > Alexandre 
+> > 
+> > 
+> 
+> 
+> 
+--8323329-1661526346-1548855206=:5535
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-1661526346-1548855206=:5535--
