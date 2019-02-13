@@ -1,12 +1,13 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: RBD image format v1 EOL ...
-Date: Wed, 13 Feb 2019 13:36:53 -0500
-Message-ID: <CA+aFP1Dod_hwug_omfegFTERyiYmwa+3KDcBZsXcjR+B87YykQ@mail.gmail.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: RBD image format v1 EOL ...
+Date: Wed, 13 Feb 2019 11:14:41 -0800
+Message-ID: <CAJ4mKGbwF9BTTX=_NZSzTr7_2DNvahHe3fZuXcOVRNWtLa9uQQ@mail.gmail.com>
+References: <CA+aFP1Dod_hwug_omfegFTERyiYmwa+3KDcBZsXcjR+B87YykQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+aFP1Dod_hwug_omfegFTERyiYmwa+3KDcBZsXcjR+B87YykQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -16,25 +17,30 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Jason Dillaman <dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-For the future Ceph Octopus release, I would like to remove all
-remaining support for RBD image format v1 images baring any
-substantial pushback.
-
-The image format for new images has been defaulted to the v2 image
-format since Infernalis, the v1 format was officially deprecated in
-Jewel, and creation of new v1 images was prohibited starting with
-Mimic.
-
-The forthcoming Nautilus release will add a new image migration
-feature to help provide a low-impact conversion path forward for any
-legacy images in a cluster. The ability to migrate existing images off
-the v1 image format was the last known pain point that was highlighted
-the previous time I suggested removing support.
-
-Please let me know if anyone has any major objections or concerns.
-
-Thanks,
-Jason
+T24gV2VkLCBGZWIgMTMsIDIwMTkgYXQgMTA6MzcgQU0gSmFzb24gRGlsbGFtYW4gPGpkaWxsYW1h
+QHJlZGhhdC5jb20+IHdyb3RlOgo+Cj4gRm9yIHRoZSBmdXR1cmUgQ2VwaCBPY3RvcHVzIHJlbGVh
+c2UsIEkgd291bGQgbGlrZSB0byByZW1vdmUgYWxsCj4gcmVtYWluaW5nIHN1cHBvcnQgZm9yIFJC
+RCBpbWFnZSBmb3JtYXQgdjEgaW1hZ2VzIGJhcmluZyBhbnkKPiBzdWJzdGFudGlhbCBwdXNoYmFj
+ay4KPgo+IFRoZSBpbWFnZSBmb3JtYXQgZm9yIG5ldyBpbWFnZXMgaGFzIGJlZW4gZGVmYXVsdGVk
+IHRvIHRoZSB2MiBpbWFnZQo+IGZvcm1hdCBzaW5jZSBJbmZlcm5hbGlzLCB0aGUgdjEgZm9ybWF0
+IHdhcyBvZmZpY2lhbGx5IGRlcHJlY2F0ZWQgaW4KPiBKZXdlbCwgYW5kIGNyZWF0aW9uIG9mIG5l
+dyB2MSBpbWFnZXMgd2FzIHByb2hpYml0ZWQgc3RhcnRpbmcgd2l0aAo+IE1pbWljLgo+Cj4gVGhl
+IGZvcnRoY29taW5nIE5hdXRpbHVzIHJlbGVhc2Ugd2lsbCBhZGQgYSBuZXcgaW1hZ2UgbWlncmF0
+aW9uCj4gZmVhdHVyZSB0byBoZWxwIHByb3ZpZGUgYSBsb3ctaW1wYWN0IGNvbnZlcnNpb24gcGF0
+aCBmb3J3YXJkIGZvciBhbnkKPiBsZWdhY3kgaW1hZ2VzIGluIGEgY2x1c3Rlci4gVGhlIGFiaWxp
+dHkgdG8gbWlncmF0ZSBleGlzdGluZyBpbWFnZXMgb2ZmCj4gdGhlIHYxIGltYWdlIGZvcm1hdCB3
+YXMgdGhlIGxhc3Qga25vd24gcGFpbiBwb2ludCB0aGF0IHdhcyBoaWdobGlnaHRlZAo+IHRoZSBw
+cmV2aW91cyB0aW1lIEkgc3VnZ2VzdGVkIHJlbW92aW5nIHN1cHBvcnQuCgpXaGF0IGlzIHRoZSBp
+bWFnZSBtaWdyYXRpb24gcGF0aD8gSSB0aGluayBpZiB3ZeKAmXJlIGdvaW5nIHRvIHN0cmlwIG91
+dAp0aGUgYWJpbGl0eSB0byByZWFkIGRhdGEgdGhlbiB0aGUgY29udmVyc2lvbiBwcm9jZXNzIHNo
+b3VsZCBiZQphdXRvbWF0aWMtb24tYWNjZXNzLCBpZiB0aGF04oCZcyBwb3NzaWJsZS4uLgooQWxz
+bywgaXQncyBnZW5lcmFsbHkgZ29vZCBmb3IgdGhpbmdzIGxpa2UgdGhhdCB0byBwcm92aWRlIG1v
+cmUgdGhhbgpvbmUgcmVsZWFzZSdzIHdvcnRoIG9mIHVwZ3JhZGUtb3ZlcmxhcC4gRXNwZWNpYWxs
+eSBzaW5jZSB3ZSB3aWxsCnN1cHBvcnQgZ29pbmcgc3RyYWlnaHQgZnJvbSBNaW1pYyB0byBPY3Rv
+cHVzLikKLUdyZWcKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
