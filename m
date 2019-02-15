@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 14/27] libceph: avoid KEEPALIVE_PENDING races in ceph_con_keepalive()
-Date: Thu, 14 Feb 2019 21:14:11 -0500
-Message-ID: <20190215021424.178979-14-sashal@kernel.org>
-References: <20190215021424.178979-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 22/40] libceph: avoid KEEPALIVE_PENDING races in ceph_con_keepalive()
+Date: Thu, 14 Feb 2019 21:12:55 -0500
+Message-ID: <20190215021313.178476-22-sashal@kernel.org>
+References: <20190215021313.178476-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190215021424.178979-1-sashal@kernel.org>
+In-Reply-To: <20190215021313.178476-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
@@ -52,10 +52,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 5a8075d9f2e7..93eb606f7628 100644
+index f864807284d4..5fd222dc64b3 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -3186,9 +3186,10 @@ void ceph_con_keepalive(struct ceph_connection *con)
+@@ -3210,9 +3210,10 @@ void ceph_con_keepalive(struct ceph_connection *con)
  	dout("con_keepalive %p\n", con);
  	mutex_lock(&con->mutex);
  	clear_standby(con);
