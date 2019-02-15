@@ -1,17 +1,17 @@
-From: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
+From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
 Subject: Re: Ceph Nautilus Release T-shirt Design
-Date: Fri, 15 Feb 2019 11:40:22 +0100
-Message-ID: <789b6b9e-9d06-3a39-2ac3-485f148dd032@digiware.nl>
+Date: Fri, 15 Feb 2019 11:56:40 +0100
+Message-ID: <CABZ+qqkx2jibhuA=EP22Fwxb2=dr_JR0_tDeF0fKT3e7_n4YwQ@mail.gmail.com>
 References: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
  <H000007100130d1d.1547800766.sx.f1-outsourcing.eu*@MHS>
  <CAFFUGJcX+NE=JQpzJ1T7qRQKWMUS-JT0B8VMuErnLr9PRkMUgQ@mail.gmail.com>
  <CAOi1vP-dSDCeo7DziOrMyCTfP98jBnJzHtwAMA4msNp7SpoQnQ@mail.gmail.com>
+ <789b6b9e-9d06-3a39-2ac3-485f148dd032@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAOi1vP-dSDCeo7DziOrMyCTfP98jBnJzHtwAMA4msNp7SpoQnQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <789b6b9e-9d06-3a39-2ac3-485f148dd032-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -21,28 +21,40 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, aad <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
+Cc: aad <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 15/02/2019 10:39, Ilya Dryomov wrote:
-> On Fri, Feb 15, 2019 at 12:05 AM Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>
->> Hi Marc,
->>
->> You can see previous designs on the Ceph store:
->>
->> https://www.proforma.com/sdscommunitystore
-> 
-> Hi Mike,
-> 
-> This site stopped working during DevConf and hasn't been working since.
-> I think Greg has contacted some folks about this, but it would be great
-> if you could follow up because it's been a couple of weeks now...
+On Fri, Feb 15, 2019 at 11:40 AM Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org> wrote:
+>
+> On 15/02/2019 10:39, Ilya Dryomov wrote:
+> > On Fri, Feb 15, 2019 at 12:05 AM Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> >>
+> >> Hi Marc,
+> >>
+> >> You can see previous designs on the Ceph store:
+> >>
+> >> https://www.proforma.com/sdscommunitystore
+> >
+> > Hi Mike,
+> >
+> > This site stopped working during DevConf and hasn't been working since.
+> > I think Greg has contacted some folks about this, but it would be great
+> > if you could follow up because it's been a couple of weeks now...
+>
+> Ilya,
+>
+> The site is working for me.
+> It only does not contain the Nautilus shirts (yet)
 
-Ilya,
+I found in the past that the http redirection for www.proforma.com
+doesn't work from over here in Europe.
+If someone can post the redirection target then we can access it directly.
 
-The site is working for me.
-It only does not contain the Nautilus shirts (yet)
+-- dan
 
---WjW
+
+>
+> --WjW
+>
+>
