@@ -1,95 +1,112 @@
-From: Ira Weiny <ira.weiny@intel.com>
-Subject: Re: [PATCH V2 0/7] Add FOLL_LONGTERM to GUP fast and use it
-Date: Fri, 15 Feb 2019 10:29:36 -0800
-Message-ID: <20190215182935.GC26988@iweiny-DESK2.sc.intel.com>
-Reply-To: 20190211201643.7599-1-ira.weiny@intel.com
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Nautilus Release T-shirt Design
+Date: Fri, 15 Feb 2019 10:36:28 -0800
+Message-ID: <CAJ4mKGZ5ScHZ7=nKZ9idjYKvdHUCFXOtN_VOuZeq+NXRyarKrg@mail.gmail.com>
+References: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
+ <H000007100130d1d.1547800766.sx.f1-outsourcing.eu*@MHS>
+ <CAFFUGJcX+NE=JQpzJ1T7qRQKWMUS-JT0B8VMuErnLr9PRkMUgQ@mail.gmail.com>
+ <CAOi1vP-dSDCeo7DziOrMyCTfP98jBnJzHtwAMA4msNp7SpoQnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org, kvm-ppc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-sh@vger.kernel.org, sparclinux@vger.kernel.org, kvm@vger.kernel.org, linux-fpga@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-rdma@vger.kernel.org, linux-media@vger.kernel.org, linux-scsi@vger.kernel.org, devel@driverdev.osuosl.org, virtualization@lists.linux-foundation.org, netdev@vger.kernel.org, linux-fbdev@vger.kernel.org, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-mm@kvack.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com
+Content-Type: multipart/mixed; boundary="===============7094777788720548658=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAOi1vP-dSDCeo7DziOrMyCTfP98jBnJzHtwAMA4msNp7SpoQnQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-> NOTE: This series depends on my clean up patch to remove the write parameter
-> from gup_fast_permitted()[1]
-> 
-> HFI1, qib, and mthca, use get_user_pages_fast() due to it performance
-> advantages.  These pages can be held for a significant time.  But
-> get_user_pages_fast() does not protect against mapping of FS DAX pages.
-> 
-> Introduce FOLL_LONGTERM and use this flag in get_user_pages_fast() which
-> retains the performance while also adding the FS DAX checks.  XDP has also
-> shown interest in using this functionality.[2]
-> 
-> In addition we change get_user_pages() to use the new FOLL_LONGTERM flag and
-> remove the specialized get_user_pages_longterm call.
-> 
-> [1] https://lkml.org/lkml/2019/2/11/237
-> [2] https://lkml.org/lkml/2019/2/11/1789
+--===============7094777788720548658==
+Content-Type: multipart/alternative; boundary="000000000000397a260581f30e89"
 
-Any comments on this series?  I've touched a lot of subsystems which I think
-require review.
+--000000000000397a260581f30e89
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Ira
+On Fri, Feb 15, 2019 at 1:39 AM Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 
-> 
-> Ira Weiny (7):
->   mm/gup: Replace get_user_pages_longterm() with FOLL_LONGTERM
->   mm/gup: Change write parameter to flags in fast walk
->   mm/gup: Change GUP fast to use flags rather than a write 'bool'
->   mm/gup: Add FOLL_LONGTERM capability to GUP fast
->   IB/hfi1: Use the new FOLL_LONGTERM flag to get_user_pages_fast()
->   IB/qib: Use the new FOLL_LONGTERM flag to get_user_pages_fast()
->   IB/mthca: Use the new FOLL_LONGTERM flag to get_user_pages_fast()
-> 
->  arch/mips/mm/gup.c                          |  11 +-
->  arch/powerpc/kvm/book3s_64_mmu_hv.c         |   4 +-
->  arch/powerpc/kvm/e500_mmu.c                 |   2 +-
->  arch/powerpc/mm/mmu_context_iommu.c         |   4 +-
->  arch/s390/kvm/interrupt.c                   |   2 +-
->  arch/s390/mm/gup.c                          |  12 +-
->  arch/sh/mm/gup.c                            |  11 +-
->  arch/sparc/mm/gup.c                         |   9 +-
->  arch/x86/kvm/paging_tmpl.h                  |   2 +-
->  arch/x86/kvm/svm.c                          |   2 +-
->  drivers/fpga/dfl-afu-dma-region.c           |   2 +-
->  drivers/gpu/drm/via/via_dmablit.c           |   3 +-
->  drivers/infiniband/core/umem.c              |   5 +-
->  drivers/infiniband/hw/hfi1/user_pages.c     |   5 +-
->  drivers/infiniband/hw/mthca/mthca_memfree.c |   3 +-
->  drivers/infiniband/hw/qib/qib_user_pages.c  |   8 +-
->  drivers/infiniband/hw/qib/qib_user_sdma.c   |   2 +-
->  drivers/infiniband/hw/usnic/usnic_uiom.c    |   9 +-
->  drivers/media/v4l2-core/videobuf-dma-sg.c   |   6 +-
->  drivers/misc/genwqe/card_utils.c            |   2 +-
->  drivers/misc/vmw_vmci/vmci_host.c           |   2 +-
->  drivers/misc/vmw_vmci/vmci_queue_pair.c     |   6 +-
->  drivers/platform/goldfish/goldfish_pipe.c   |   3 +-
->  drivers/rapidio/devices/rio_mport_cdev.c    |   4 +-
->  drivers/sbus/char/oradax.c                  |   2 +-
->  drivers/scsi/st.c                           |   3 +-
->  drivers/staging/gasket/gasket_page_table.c  |   4 +-
->  drivers/tee/tee_shm.c                       |   2 +-
->  drivers/vfio/vfio_iommu_spapr_tce.c         |   3 +-
->  drivers/vfio/vfio_iommu_type1.c             |   3 +-
->  drivers/vhost/vhost.c                       |   2 +-
->  drivers/video/fbdev/pvr2fb.c                |   2 +-
->  drivers/virt/fsl_hypervisor.c               |   2 +-
->  drivers/xen/gntdev.c                        |   2 +-
->  fs/orangefs/orangefs-bufmap.c               |   2 +-
->  include/linux/mm.h                          |  17 +-
->  kernel/futex.c                              |   2 +-
->  lib/iov_iter.c                              |   7 +-
->  mm/gup.c                                    | 220 ++++++++++++--------
->  mm/gup_benchmark.c                          |   5 +-
->  mm/util.c                                   |   8 +-
->  net/ceph/pagevec.c                          |   2 +-
->  net/rds/info.c                              |   2 +-
->  net/rds/rdma.c                              |   3 +-
->  44 files changed, 232 insertions(+), 180 deletions(-)
-> 
-> -- 
-> 2.20.1
-> 
+> On Fri, Feb 15, 2019 at 12:05 AM Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> >
+> > Hi Marc,
+> >
+> > You can see previous designs on the Ceph store:
+> >
+> > https://www.proforma.com/sdscommunitystore
+>
+> Hi Mike,
+>
+> This site stopped working during DevConf and hasn't been working since.
+> I think Greg has contacted some folks about this, but it would be great
+> if you could follow up because it's been a couple of weeks now...
+
+
+That=E2=80=99s odd because we thought this was resolved by Monday, but I do=
+ see
+from the time stamps I was back in the USA when testing it. It must be
+geographical as Dan says... :/
+
+>
+>
+> Thanks,
+>
+>                 Ilya
+>
+
+--000000000000397a260581f30e89
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div><div>On Fri, Feb 15, 2019 at 1:39 AM Ilya Dryomov &lt;<a href=3D"mailt=
+o:idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<b=
+r></div></div><div><div><div class=3D"gmail_quote"></div></div></div><div><=
+blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px=
+ #ccc solid;padding-left:1ex">On Fri, Feb 15, 2019 at 12:05 AM Mike Perez &=
+lt;<a href=3D"mailto:miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">miperez@redhat.c=
+om</a>&gt; wrote:<br>
+&gt;<br>
+&gt; Hi Marc,<br>
+&gt;<br>
+&gt; You can see previous designs on the Ceph store:<br>
+&gt;<br>
+&gt; <a href=3D"https://www.proforma.com/sdscommunitystore" rel=3D"noreferr=
+er" target=3D"_blank">https://www.proforma.com/sdscommunitystore</a><br>
+<br>
+Hi Mike,<br>
+<br>
+This site stopped working during DevConf and hasn&#39;t been working since.=
+<br>
+I think Greg has contacted some folks about this, but it would be great<br>
+if you could follow up because it&#39;s been a couple of weeks now...</bloc=
+kquote><div dir=3D"auto"><br></div></div><div><div dir=3D"auto">That=E2=80=
+=99s odd because we thought this was resolved by Monday, but I do see from =
+the time stamps I was back in the USA when testing it. It must be geographi=
+cal as Dan says... :/</div><blockquote class=3D"gmail_quote" style=3D"margi=
+n:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><br>
+<br>
+Thanks,<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 Ilya<br>
+</blockquote>
+</div>
+
+--000000000000397a260581f30e89--
+
+--===============7094777788720548658==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============7094777788720548658==--
