@@ -1,8 +1,8 @@
 From: Igor Fedotov <ifedotov-l3A5Bk7waGM@public.gmane.org>
 Subject: Re: ceph osd commit latency increase over time,
  until restart
-Date: Fri, 15 Feb 2019 15:46:22 +0300
-Message-ID: <4566cd3c-39ef-975f-9f34-ee1b2a1ca552@suse.de>
+Date: Fri, 15 Feb 2019 15:47:57 +0300
+Message-ID: <f97b81e4-265d-cd8e-3053-321d988720c4@suse.de>
 References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <0ab7d2b9-3611-c380-cbf6-c39cec0e673d@suse.de>
  <1323366475.173629.1549292678511.JavaMail.zimbra@oxygem.tv>
@@ -13,7 +13,8 @@ References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <c26e0eca-1a1c-3354-bff6-4560e3aea4c5@suse.de>
  <1554220830.1076801.1550047328269.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4897656043153500787=="
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <1554220830.1076801.1550047328269.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
 Content-Language: en-US
@@ -26,3211 +27,1543 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---===============4897656043153500787==
-Content-Type: multipart/alternative;
- boundary="------------80F1686A3EED05D79162FAF8"
-Content-Language: en-US
-
-This is a multi-part message in MIME format.
---------------80F1686A3EED05D79162FAF8
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-
-Hi Alexander,
-
-I've read through your reports, nothing obvious so far.
-
-I can only see several times average latency increase for OSD write ops 
-(in seconds)
-
-0.002040060 (first hour) vs.
-
-0.002483516 (last 24 hours) vs.
-0.008382087 (last hour)
-
-subop_w_latency:
-0.000478934 (first hour) vs.
-0.000537956 (last 24 hours) vs.
-0.003073475 (last hour)
-
-and OSD read ops, osd_r_latency:
-
-0.000408595 (first hour)
-0.000709031 (24 hours)
-0.004979540 (last hour)
-   
-What's interesting is that such latency differences aren't observed at neither BlueStore level (any _lat params under "bluestore" section) nor rocksdb one.
-
-Which probably means that the issue is rather somewhere above BlueStore.
-
-Suggest to proceed with perf dumps collection to see if the picture stays the same.
-
-W.r.t. memory usage you observed I see nothing suspicious so far - No decrease in RSS report is a known artifact that seems to be safe.
-
-Thanks,
-Igor
-
-On 2/13/2019 11:42 AM, Alexandre DERUMIER wrote:
-> Hi Igor,
->
-> Thanks again for helping !
->
->
->
-> I have upgrade to last mimic this weekend, and with new autotune memory,
-> I have setup osd_memory_target to 8G.  (my nvme are 6TB)
->
->
-> I have done a lot of perf dump and mempool dump and ps of process to see rss memory at different hours,
-> here the reports for osd.0:
->
-> http://odisoweb1.odiso.net/perfanalysis/
->
->
-> osd has been started the 12-02-2019 at 08:00
->
-> first report after 1h running
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.perf.txt
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.dump_mempools.txt
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.ps.txt
->
->
->
-> report  after 24 before counter resets
->
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.perf.txt
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.dump_mempools.txt
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.ps.txt
->
-> report 1h after counter reset
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.perf.txt
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.dump_mempools.txt
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.ps.txt
->
->
->
->
-> I'm seeing the bluestore buffer bytes memory increasing up to 4G  around 12-02-2019 at 14:00
-> http://odisoweb1.odiso.net/perfanalysis/graphs2.png
-> Then after that, slowly decreasing.
->
->
-> Another strange thing,
-> I'm seeing total bytes at 5G at 12-02-2018.13:30
-> http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.13:30.dump_mempools.txt
-> Then is decreasing over time (around 3,7G this morning), but RSS is still at 8G
->
->
-> I'm graphing mempools counters too since yesterday, so I'll able to track them over time.
->
-> ----- Mail original -----
-> De: "Igor Fedotov" <ifedotov-l3A5Bk7waGM@public.gmane.org>
-> À: "Alexandre Derumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> Cc: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Envoyé: Lundi 11 Février 2019 12:03:17
-> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->
-> On 2/8/2019 6:57 PM, Alexandre DERUMIER wrote:
->> another mempool dump after 1h run. (latency ok)
->>
->> Biggest difference:
->>
->> before restart
->> -------------
->> "bluestore_cache_other": {
->> "items": 48661920,
->> "bytes": 1539544228
->> },
->> "bluestore_cache_data": {
->> "items": 54,
->> "bytes": 643072
->> },
->> (other caches seem to be quite low too, like bluestore_cache_other take all the memory)
->>
->>
->> After restart
->> -------------
->> "bluestore_cache_other": {
->> "items": 12432298,
->> "bytes": 500834899
->> },
->> "bluestore_cache_data": {
->> "items": 40084,
->> "bytes": 1056235520
->> },
->>
-> This is fine as cache is warming after restart and some rebalancing
-> between data and metadata might occur.
->
-> What relates to allocator and most probably to fragmentation growth is :
->
-> "bluestore_alloc": {
-> "items": 165053952,
-> "bytes": 165053952
-> },
->
-> which had been higher before the reset (if I got these dumps' order
-> properly)
->
-> "bluestore_alloc": {
-> "items": 210243456,
-> "bytes": 210243456
-> },
->
-> But as I mentioned - I'm not 100% sure this might cause such a huge
-> latency increase...
->
-> Do you have perf counters dump after the restart?
->
-> Could you collect some more dumps - for both mempool and perf counters?
->
-> So ideally I'd like to have:
->
-> 1) mempool/perf counters dumps after the restart (1hour is OK)
->
-> 2) mempool/perf counters dumps in 24+ hours after restart
->
-> 3) reset perf counters after 2), wait for 1 hour (and without OSD
-> restart) and dump mempool/perf counters again.
->
-> So we'll be able to learn both allocator mem usage growth and operation
-> latency distribution for the following periods:
->
-> a) 1st hour after restart
->
-> b) 25th hour.
->
->
-> Thanks,
->
-> Igor
->
->
->> full mempool dump after restart
->> -------------------------------
->>
->> {
->> "mempool": {
->> "by_pool": {
->> "bloom_filter": {
->> "items": 0,
->> "bytes": 0
->> },
->> "bluestore_alloc": {
->> "items": 165053952,
->> "bytes": 165053952
->> },
->> "bluestore_cache_data": {
->> "items": 40084,
->> "bytes": 1056235520
->> },
->> "bluestore_cache_onode": {
->> "items": 22225,
->> "bytes": 14935200
->> },
->> "bluestore_cache_other": {
->> "items": 12432298,
->> "bytes": 500834899
->> },
->> "bluestore_fsck": {
->> "items": 0,
->> "bytes": 0
->> },
->> "bluestore_txc": {
->> "items": 11,
->> "bytes": 8184
->> },
->> "bluestore_writing_deferred": {
->> "items": 5047,
->> "bytes": 22673736
->> },
->> "bluestore_writing": {
->> "items": 91,
->> "bytes": 1662976
->> },
->> "bluefs": {
->> "items": 1907,
->> "bytes": 95600
->> },
->> "buffer_anon": {
->> "items": 19664,
->> "bytes": 25486050
->> },
->> "buffer_meta": {
->> "items": 46189,
->> "bytes": 2956096
->> },
->> "osd": {
->> "items": 243,
->> "bytes": 3089016
->> },
->> "osd_mapbl": {
->> "items": 17,
->> "bytes": 214366
->> },
->> "osd_pglog": {
->> "items": 889673,
->> "bytes": 367160400
->> },
->> "osdmap": {
->> "items": 3803,
->> "bytes": 224552
->> },
->> "osdmap_mapping": {
->> "items": 0,
->> "bytes": 0
->> },
->> "pgmap": {
->> "items": 0,
->> "bytes": 0
->> },
->> "mds_co": {
->> "items": 0,
->> "bytes": 0
->> },
->> "unittest_1": {
->> "items": 0,
->> "bytes": 0
->> },
->> "unittest_2": {
->> "items": 0,
->> "bytes": 0
->> }
->> },
->> "total": {
->> "items": 178515204,
->> "bytes": 2160630547
->> }
->> }
->> }
->>
->> ----- Mail original -----
->> De: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->> À: "Igor Fedotov" <ifedotov-l3A5Bk7waGM@public.gmane.org>
->> Cc: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>, "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->> Envoyé: Vendredi 8 Février 2019 16:14:54
->> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>
->> I'm just seeing
->>
->> StupidAllocator::_aligned_len
->> and
->> btree::btree_iterator<btree::btree_node<btree::btree_map_params<unsigned long, unsigned long, std::less<unsigned long>, mempoo
->>
->> on 1 osd, both 10%.
->>
->> here the dump_mempools
->>
->> {
->> "mempool": {
->> "by_pool": {
->> "bloom_filter": {
->> "items": 0,
->> "bytes": 0
->> },
->> "bluestore_alloc": {
->> "items": 210243456,
->> "bytes": 210243456
->> },
->> "bluestore_cache_data": {
->> "items": 54,
->> "bytes": 643072
->> },
->> "bluestore_cache_onode": {
->> "items": 105637,
->> "bytes": 70988064
->> },
->> "bluestore_cache_other": {
->> "items": 48661920,
->> "bytes": 1539544228
->> },
->> "bluestore_fsck": {
->> "items": 0,
->> "bytes": 0
->> },
->> "bluestore_txc": {
->> "items": 12,
->> "bytes": 8928
->> },
->> "bluestore_writing_deferred": {
->> "items": 406,
->> "bytes": 4792868
->> },
->> "bluestore_writing": {
->> "items": 66,
->> "bytes": 1085440
->> },
->> "bluefs": {
->> "items": 1882,
->> "bytes": 93600
->> },
->> "buffer_anon": {
->> "items": 138986,
->> "bytes": 24983701
->> },
->> "buffer_meta": {
->> "items": 544,
->> "bytes": 34816
->> },
->> "osd": {
->> "items": 243,
->> "bytes": 3089016
->> },
->> "osd_mapbl": {
->> "items": 36,
->> "bytes": 179308
->> },
->> "osd_pglog": {
->> "items": 952564,
->> "bytes": 372459684
->> },
->> "osdmap": {
->> "items": 3639,
->> "bytes": 224664
->> },
->> "osdmap_mapping": {
->> "items": 0,
->> "bytes": 0
->> },
->> "pgmap": {
->> "items": 0,
->> "bytes": 0
->> },
->> "mds_co": {
->> "items": 0,
->> "bytes": 0
->> },
->> "unittest_1": {
->> "items": 0,
->> "bytes": 0
->> },
->> "unittest_2": {
->> "items": 0,
->> "bytes": 0
->> }
->> },
->> "total": {
->> "items": 260109445,
->> "bytes": 2228370845
->> }
->> }
->> }
->>
->>
->> and the perf dump
->>
->> root@ceph5-2:~# ceph daemon osd.4 perf dump
->> {
->> "AsyncMessenger::Worker-0": {
->> "msgr_recv_messages": 22948570,
->> "msgr_send_messages": 22561570,
->> "msgr_recv_bytes": 333085080271,
->> "msgr_send_bytes": 261798871204,
->> "msgr_created_connections": 6152,
->> "msgr_active_connections": 2701,
->> "msgr_running_total_time": 1055.197867330,
->> "msgr_running_send_time": 352.764480121,
->> "msgr_running_recv_time": 499.206831955,
->> "msgr_running_fast_dispatch_time": 130.982201607
->> },
->> "AsyncMessenger::Worker-1": {
->> "msgr_recv_messages": 18801593,
->> "msgr_send_messages": 18430264,
->> "msgr_recv_bytes": 306871760934,
->> "msgr_send_bytes": 192789048666,
->> "msgr_created_connections": 5773,
->> "msgr_active_connections": 2721,
->> "msgr_running_total_time": 816.821076305,
->> "msgr_running_send_time": 261.353228926,
->> "msgr_running_recv_time": 394.035587911,
->> "msgr_running_fast_dispatch_time": 104.012155720
->> },
->> "AsyncMessenger::Worker-2": {
->> "msgr_recv_messages": 18463400,
->> "msgr_send_messages": 18105856,
->> "msgr_recv_bytes": 187425453590,
->> "msgr_send_bytes": 220735102555,
->> "msgr_created_connections": 5897,
->> "msgr_active_connections": 2605,
->> "msgr_running_total_time": 807.186854324,
->> "msgr_running_send_time": 296.834435839,
->> "msgr_running_recv_time": 351.364389691,
->> "msgr_running_fast_dispatch_time": 101.215776792
->> },
->> "bluefs": {
->> "gift_bytes": 0,
->> "reclaim_bytes": 0,
->> "db_total_bytes": 256050724864,
->> "db_used_bytes": 12413042688,
->> "wal_total_bytes": 0,
->> "wal_used_bytes": 0,
->> "slow_total_bytes": 0,
->> "slow_used_bytes": 0,
->> "num_files": 209,
->> "log_bytes": 10383360,
->> "log_compactions": 14,
->> "logged_bytes": 336498688,
->> "files_written_wal": 2,
->> "files_written_sst": 4499,
->> "bytes_written_wal": 417989099783,
->> "bytes_written_sst": 213188750209
->> },
->> "bluestore": {
->> "kv_flush_lat": {
->> "avgcount": 26371957,
->> "sum": 26.734038497,
->> "avgtime": 0.000001013
->> },
->> "kv_commit_lat": {
->> "avgcount": 26371957,
->> "sum": 3397.491150603,
->> "avgtime": 0.000128829
->> },
->> "kv_lat": {
->> "avgcount": 26371957,
->> "sum": 3424.225189100,
->> "avgtime": 0.000129843
->> },
->> "state_prepare_lat": {
->> "avgcount": 30484924,
->> "sum": 3689.542105337,
->> "avgtime": 0.000121028
->> },
->> "state_aio_wait_lat": {
->> "avgcount": 30484924,
->> "sum": 509.864546111,
->> "avgtime": 0.000016725
->> },
->> "state_io_done_lat": {
->> "avgcount": 30484924,
->> "sum": 24.534052953,
->> "avgtime": 0.000000804
->> },
->> "state_kv_queued_lat": {
->> "avgcount": 30484924,
->> "sum": 3488.338424238,
->> "avgtime": 0.000114428
->> },
->> "state_kv_commiting_lat": {
->> "avgcount": 30484924,
->> "sum": 5660.437003432,
->> "avgtime": 0.000185679
->> },
->> "state_kv_done_lat": {
->> "avgcount": 30484924,
->> "sum": 7.763511500,
->> "avgtime": 0.000000254
->> },
->> "state_deferred_queued_lat": {
->> "avgcount": 26346134,
->> "sum": 666071.296856696,
->> "avgtime": 0.025281557
->> },
->> "state_deferred_aio_wait_lat": {
->> "avgcount": 26346134,
->> "sum": 1755.660547071,
->> "avgtime": 0.000066638
->> },
->> "state_deferred_cleanup_lat": {
->> "avgcount": 26346134,
->> "sum": 185465.151653703,
->> "avgtime": 0.007039558
->> },
->> "state_finishing_lat": {
->> "avgcount": 30484920,
->> "sum": 3.046847481,
->> "avgtime": 0.000000099
->> },
->> "state_done_lat": {
->> "avgcount": 30484920,
->> "sum": 13193.362685280,
->> "avgtime": 0.000432783
->> },
->> "throttle_lat": {
->> "avgcount": 30484924,
->> "sum": 14.634269979,
->> "avgtime": 0.000000480
->> },
->> "submit_lat": {
->> "avgcount": 30484924,
->> "sum": 3873.883076148,
->> "avgtime": 0.000127075
->> },
->> "commit_lat": {
->> "avgcount": 30484924,
->> "sum": 13376.492317331,
->> "avgtime": 0.000438790
->> },
->> "read_lat": {
->> "avgcount": 5873923,
->> "sum": 1817.167582057,
->> "avgtime": 0.000309361
->> },
->> "read_onode_meta_lat": {
->> "avgcount": 19608201,
->> "sum": 146.770464482,
->> "avgtime": 0.000007485
->> },
->> "read_wait_aio_lat": {
->> "avgcount": 13734278,
->> "sum": 2532.578077242,
->> "avgtime": 0.000184398
->> },
->> "compress_lat": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "decompress_lat": {
->> "avgcount": 1346945,
->> "sum": 26.227575896,
->> "avgtime": 0.000019471
->> },
->> "csum_lat": {
->> "avgcount": 28020392,
->> "sum": 149.587819041,
->> "avgtime": 0.000005338
->> },
->> "compress_success_count": 0,
->> "compress_rejected_count": 0,
->> "write_pad_bytes": 352923605,
->> "deferred_write_ops": 24373340,
->> "deferred_write_bytes": 216791842816,
->> "write_penalty_read_ops": 8062366,
->> "bluestore_allocated": 3765566013440,
->> "bluestore_stored": 4186255221852,
->> "bluestore_compressed": 39981379040,
->> "bluestore_compressed_allocated": 73748348928,
->> "bluestore_compressed_original": 165041381376,
->> "bluestore_onodes": 104232,
->> "bluestore_onode_hits": 71206874,
->> "bluestore_onode_misses": 1217914,
->> "bluestore_onode_shard_hits": 260183292,
->> "bluestore_onode_shard_misses": 22851573,
->> "bluestore_extents": 3394513,
->> "bluestore_blobs": 2773587,
->> "bluestore_buffers": 0,
->> "bluestore_buffer_bytes": 0,
->> "bluestore_buffer_hit_bytes": 62026011221,
->> "bluestore_buffer_miss_bytes": 995233669922,
->> "bluestore_write_big": 5648815,
->> "bluestore_write_big_bytes": 552502214656,
->> "bluestore_write_big_blobs": 12440992,
->> "bluestore_write_small": 35883770,
->> "bluestore_write_small_bytes": 223436965719,
->> "bluestore_write_small_unused": 408125,
->> "bluestore_write_small_deferred": 34961455,
->> "bluestore_write_small_pre_read": 34961455,
->> "bluestore_write_small_new": 514190,
->> "bluestore_txc": 30484924,
->> "bluestore_onode_reshard": 5144189,
->> "bluestore_blob_split": 60104,
->> "bluestore_extent_compress": 53347252,
->> "bluestore_gc_merged": 21142528,
->> "bluestore_read_eio": 0,
->> "bluestore_fragmentation_micros": 67
->> },
->> "finisher-defered_finisher": {
->> "queue_len": 0,
->> "complete_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "finisher-finisher-0": {
->> "queue_len": 0,
->> "complete_latency": {
->> "avgcount": 26625163,
->> "sum": 1057.506990951,
->> "avgtime": 0.000039718
->> }
->> },
->> "finisher-objecter-finisher-0": {
->> "queue_len": 0,
->> "complete_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.0::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.0::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.1::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.1::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.2::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.2::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.3::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.3::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.4::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.4::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.5::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.5::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.6::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.6::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.7::sdata_wait_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "mutex-OSDShard.7::shard_lock": {
->> "wait": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "objecter": {
->> "op_active": 0,
->> "op_laggy": 0,
->> "op_send": 0,
->> "op_send_bytes": 0,
->> "op_resend": 0,
->> "op_reply": 0,
->> "op": 0,
->> "op_r": 0,
->> "op_w": 0,
->> "op_rmw": 0,
->> "op_pg": 0,
->> "osdop_stat": 0,
->> "osdop_create": 0,
->> "osdop_read": 0,
->> "osdop_write": 0,
->> "osdop_writefull": 0,
->> "osdop_writesame": 0,
->> "osdop_append": 0,
->> "osdop_zero": 0,
->> "osdop_truncate": 0,
->> "osdop_delete": 0,
->> "osdop_mapext": 0,
->> "osdop_sparse_read": 0,
->> "osdop_clonerange": 0,
->> "osdop_getxattr": 0,
->> "osdop_setxattr": 0,
->> "osdop_cmpxattr": 0,
->> "osdop_rmxattr": 0,
->> "osdop_resetxattrs": 0,
->> "osdop_tmap_up": 0,
->> "osdop_tmap_put": 0,
->> "osdop_tmap_get": 0,
->> "osdop_call": 0,
->> "osdop_watch": 0,
->> "osdop_notify": 0,
->> "osdop_src_cmpxattr": 0,
->> "osdop_pgls": 0,
->> "osdop_pgls_filter": 0,
->> "osdop_other": 0,
->> "linger_active": 0,
->> "linger_send": 0,
->> "linger_resend": 0,
->> "linger_ping": 0,
->> "poolop_active": 0,
->> "poolop_send": 0,
->> "poolop_resend": 0,
->> "poolstat_active": 0,
->> "poolstat_send": 0,
->> "poolstat_resend": 0,
->> "statfs_active": 0,
->> "statfs_send": 0,
->> "statfs_resend": 0,
->> "command_active": 0,
->> "command_send": 0,
->> "command_resend": 0,
->> "map_epoch": 105913,
->> "map_full": 0,
->> "map_inc": 828,
->> "osd_sessions": 0,
->> "osd_session_open": 0,
->> "osd_session_close": 0,
->> "osd_laggy": 0,
->> "omap_wr": 0,
->> "omap_rd": 0,
->> "omap_del": 0
->> },
->> "osd": {
->> "op_wip": 0,
->> "op": 16758102,
->> "op_in_bytes": 238398820586,
->> "op_out_bytes": 165484999463,
->> "op_latency": {
->> "avgcount": 16758102,
->> "sum": 38242.481640842,
->> "avgtime": 0.002282029
->> },
->> "op_process_latency": {
->> "avgcount": 16758102,
->> "sum": 28644.906310687,
->> "avgtime": 0.001709316
->> },
->> "op_prepare_latency": {
->> "avgcount": 16761367,
->> "sum": 3489.856599934,
->> "avgtime": 0.000208208
->> },
->> "op_r": 6188565,
->> "op_r_out_bytes": 165484999463,
->> "op_r_latency": {
->> "avgcount": 6188565,
->> "sum": 4507.365756792,
->> "avgtime": 0.000728337
->> },
->> "op_r_process_latency": {
->> "avgcount": 6188565,
->> "sum": 942.363063429,
->> "avgtime": 0.000152274
->> },
->> "op_r_prepare_latency": {
->> "avgcount": 6188644,
->> "sum": 982.866710389,
->> "avgtime": 0.000158817
->> },
->> "op_w": 10546037,
->> "op_w_in_bytes": 238334329494,
->> "op_w_latency": {
->> "avgcount": 10546037,
->> "sum": 33160.719998316,
->> "avgtime": 0.003144377
->> },
->> "op_w_process_latency": {
->> "avgcount": 10546037,
->> "sum": 27668.702029030,
->> "avgtime": 0.002623611
->> },
->> "op_w_prepare_latency": {
->> "avgcount": 10548652,
->> "sum": 2499.688609173,
->> "avgtime": 0.000236967
->> },
->> "op_rw": 23500,
->> "op_rw_in_bytes": 64491092,
->> "op_rw_out_bytes": 0,
->> "op_rw_latency": {
->> "avgcount": 23500,
->> "sum": 574.395885734,
->> "avgtime": 0.024442378
->> },
->> "op_rw_process_latency": {
->> "avgcount": 23500,
->> "sum": 33.841218228,
->> "avgtime": 0.001440051
->> },
->> "op_rw_prepare_latency": {
->> "avgcount": 24071,
->> "sum": 7.301280372,
->> "avgtime": 0.000303322
->> },
->> "op_before_queue_op_lat": {
->> "avgcount": 57892986,
->> "sum": 1502.117718889,
->> "avgtime": 0.000025946
->> },
->> "op_before_dequeue_op_lat": {
->> "avgcount": 58091683,
->> "sum": 45194.453254037,
->> "avgtime": 0.000777984
->> },
->> "subop": 19784758,
->> "subop_in_bytes": 547174969754,
->> "subop_latency": {
->> "avgcount": 19784758,
->> "sum": 13019.714424060,
->> "avgtime": 0.000658067
->> },
->> "subop_w": 19784758,
->> "subop_w_in_bytes": 547174969754,
->> "subop_w_latency": {
->> "avgcount": 19784758,
->> "sum": 13019.714424060,
->> "avgtime": 0.000658067
->> },
->> "subop_pull": 0,
->> "subop_pull_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "subop_push": 0,
->> "subop_push_in_bytes": 0,
->> "subop_push_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "pull": 0,
->> "push": 2003,
->> "push_out_bytes": 5560009728,
->> "recovery_ops": 1940,
->> "loadavg": 118,
->> "buffer_bytes": 0,
->> "history_alloc_Mbytes": 0,
->> "history_alloc_num": 0,
->> "cached_crc": 0,
->> "cached_crc_adjusted": 0,
->> "missed_crc": 0,
->> "numpg": 243,
->> "numpg_primary": 82,
->> "numpg_replica": 161,
->> "numpg_stray": 0,
->> "numpg_removing": 0,
->> "heartbeat_to_peers": 10,
->> "map_messages": 7013,
->> "map_message_epochs": 7143,
->> "map_message_epoch_dups": 6315,
->> "messages_delayed_for_map": 0,
->> "osd_map_cache_hit": 203309,
->> "osd_map_cache_miss": 33,
->> "osd_map_cache_miss_low": 0,
->> "osd_map_cache_miss_low_avg": {
->> "avgcount": 0,
->> "sum": 0
->> },
->> "osd_map_bl_cache_hit": 47012,
->> "osd_map_bl_cache_miss": 1681,
->> "stat_bytes": 6401248198656,
->> "stat_bytes_used": 3777979072512,
->> "stat_bytes_avail": 2623269126144,
->> "copyfrom": 0,
->> "tier_promote": 0,
->> "tier_flush": 0,
->> "tier_flush_fail": 0,
->> "tier_try_flush": 0,
->> "tier_try_flush_fail": 0,
->> "tier_evict": 0,
->> "tier_whiteout": 1631,
->> "tier_dirty": 22360,
->> "tier_clean": 0,
->> "tier_delay": 0,
->> "tier_proxy_read": 0,
->> "tier_proxy_write": 0,
->> "agent_wake": 0,
->> "agent_skip": 0,
->> "agent_flush": 0,
->> "agent_evict": 0,
->> "object_ctx_cache_hit": 16311156,
->> "object_ctx_cache_total": 17426393,
->> "op_cache_hit": 0,
->> "osd_tier_flush_lat": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "osd_tier_promote_lat": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "osd_tier_r_lat": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "osd_pg_info": 30483113,
->> "osd_pg_fastinfo": 29619885,
->> "osd_pg_biginfo": 81703
->> },
->> "recoverystate_perf": {
->> "initial_latency": {
->> "avgcount": 243,
->> "sum": 6.869296500,
->> "avgtime": 0.028268709
->> },
->> "started_latency": {
->> "avgcount": 1125,
->> "sum": 13551384.917335850,
->> "avgtime": 12045.675482076
->> },
->> "reset_latency": {
->> "avgcount": 1368,
->> "sum": 1101.727799040,
->> "avgtime": 0.805356578
->> },
->> "start_latency": {
->> "avgcount": 1368,
->> "sum": 0.002014799,
->> "avgtime": 0.000001472
->> },
->> "primary_latency": {
->> "avgcount": 507,
->> "sum": 4575560.638823428,
->> "avgtime": 9024.774435549
->> },
->> "peering_latency": {
->> "avgcount": 550,
->> "sum": 499.372283616,
->> "avgtime": 0.907949606
->> },
->> "backfilling_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "waitremotebackfillreserved_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "waitlocalbackfillreserved_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "notbackfilling_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "repnotrecovering_latency": {
->> "avgcount": 1009,
->> "sum": 8975301.082274411,
->> "avgtime": 8895.243887288
->> },
->> "repwaitrecoveryreserved_latency": {
->> "avgcount": 420,
->> "sum": 99.846056520,
->> "avgtime": 0.237728706
->> },
->> "repwaitbackfillreserved_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "reprecovering_latency": {
->> "avgcount": 420,
->> "sum": 241.682764382,
->> "avgtime": 0.575435153
->> },
->> "activating_latency": {
->> "avgcount": 507,
->> "sum": 16.893347339,
->> "avgtime": 0.033320211
->> },
->> "waitlocalrecoveryreserved_latency": {
->> "avgcount": 199,
->> "sum": 672.335512769,
->> "avgtime": 3.378570415
->> },
->> "waitremoterecoveryreserved_latency": {
->> "avgcount": 199,
->> "sum": 213.536439363,
->> "avgtime": 1.073047433
->> },
->> "recovering_latency": {
->> "avgcount": 199,
->> "sum": 79.007696479,
->> "avgtime": 0.397023600
->> },
->> "recovered_latency": {
->> "avgcount": 507,
->> "sum": 14.000732748,
->> "avgtime": 0.027614857
->> },
->> "clean_latency": {
->> "avgcount": 395,
->> "sum": 4574325.900371083,
->> "avgtime": 11580.571899673
->> },
->> "active_latency": {
->> "avgcount": 425,
->> "sum": 4575107.630123680,
->> "avgtime": 10764.959129702
->> },
->> "replicaactive_latency": {
->> "avgcount": 589,
->> "sum": 8975184.499049954,
->> "avgtime": 15238.004242869
->> },
->> "stray_latency": {
->> "avgcount": 818,
->> "sum": 800.729455666,
->> "avgtime": 0.978886865
->> },
->> "getinfo_latency": {
->> "avgcount": 550,
->> "sum": 15.085667048,
->> "avgtime": 0.027428485
->> },
->> "getlog_latency": {
->> "avgcount": 546,
->> "sum": 3.482175693,
->> "avgtime": 0.006377611
->> },
->> "waitactingchange_latency": {
->> "avgcount": 39,
->> "sum": 35.444551284,
->> "avgtime": 0.908834648
->> },
->> "incomplete_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "down_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "getmissing_latency": {
->> "avgcount": 507,
->> "sum": 6.702129624,
->> "avgtime": 0.013219190
->> },
->> "waitupthru_latency": {
->> "avgcount": 507,
->> "sum": 474.098261727,
->> "avgtime": 0.935105052
->> },
->> "notrecovering_latency": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> },
->> "rocksdb": {
->> "get": 28320977,
->> "submit_transaction": 30484924,
->> "submit_transaction_sync": 26371957,
->> "get_latency": {
->> "avgcount": 28320977,
->> "sum": 325.900908733,
->> "avgtime": 0.000011507
->> },
->> "submit_latency": {
->> "avgcount": 30484924,
->> "sum": 1835.888692371,
->> "avgtime": 0.000060222
->> },
->> "submit_sync_latency": {
->> "avgcount": 26371957,
->> "sum": 1431.555230628,
->> "avgtime": 0.000054283
->> },
->> "compact": 0,
->> "compact_range": 0,
->> "compact_queue_merge": 0,
->> "compact_queue_len": 0,
->> "rocksdb_write_wal_time": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "rocksdb_write_memtable_time": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "rocksdb_write_delay_time": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> },
->> "rocksdb_write_pre_and_post_time": {
->> "avgcount": 0,
->> "sum": 0.000000000,
->> "avgtime": 0.000000000
->> }
->> }
->> }
->>
->> ----- Mail original -----
->> De: "Igor Fedotov" <ifedotov-l3A5Bk7waGM@public.gmane.org>
->> À: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->> Cc: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>, "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->> Envoyé: Mardi 5 Février 2019 18:56:51
->> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>
->> On 2/4/2019 6:40 PM, Alexandre DERUMIER wrote:
->>>>> but I don't see l_bluestore_fragmentation counter.
->>>>> (but I have bluestore_fragmentation_micros)
->>> ok, this is the same
->>>
->>> b.add_u64(l_bluestore_fragmentation, "bluestore_fragmentation_micros",
->>> "How fragmented bluestore free space is (free extents / max possible number of free extents) * 1000");
->>>
->>>
->>> Here a graph on last month, with bluestore_fragmentation_micros and latency,
->>>
->>> http://odisoweb1.odiso.net/latency_vs_fragmentation_micros.png
->> hmm, so fragmentation grows eventually and drops on OSD restarts, isn't
->> it? The same for other OSDs?
->>
->> This proves some issue with the allocator - generally fragmentation
->> might grow but it shouldn't reset on restart. Looks like some intervals
->> aren't properly merged in run-time.
->>
->> On the other side I'm not completely sure that latency degradation is
->> caused by that - fragmentation growth is relatively small - I don't see
->> how this might impact performance that high.
->>
->> Wondering if you have OSD mempool monitoring (dump_mempools command
->> output on admin socket) reports? Do you have any historic data?
->>
->> If not may I have current output and say a couple more samples with
->> 8-12 hours interval?
->>
->>
->> Wrt to backporting bitmap allocator to mimic - we haven't had such plans
->> before that but I'll discuss this at BlueStore meeting shortly.
->>
->>
->> Thanks,
->>
->> Igor
->>
->>> ----- Mail original -----
->>> De: "Alexandre Derumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->>> À: "Igor Fedotov" <ifedotov-l3A5Bk7waGM@public.gmane.org>
->>> Cc: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>, "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>> Envoyé: Lundi 4 Février 2019 16:04:38
->>> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>>
->>> Thanks Igor,
->>>
->>>>> Could you please collect BlueStore performance counters right after OSD
->>>>> startup and once you get high latency.
->>>>>
->>>>> Specifically 'l_bluestore_fragmentation' parameter is of interest.
->>> I'm already monitoring with
->>> "ceph daemon osd.x perf dump ", (I have 2months history will all counters)
->>>
->>> but I don't see l_bluestore_fragmentation counter.
->>>
->>> (but I have bluestore_fragmentation_micros)
->>>
->>>
->>>>> Also if you're able to rebuild the code I can probably make a simple
->>>>> patch to track latency and some other internal allocator's paramter to
->>>>> make sure it's degraded and learn more details.
->>> Sorry, It's a critical production cluster, I can't test on it :(
->>> But I have a test cluster, maybe I can try to put some load on it, and try to reproduce.
->>>
->>>
->>>
->>>>> More vigorous fix would be to backport bitmap allocator from Nautilus
->>>>> and try the difference...
->>> Any plan to backport it to mimic ? (But I can wait for Nautilus)
->>> perf results of new bitmap allocator seem very promising from what I've seen in PR.
->>>
->>>
->>>
->>> ----- Mail original -----
->>> De: "Igor Fedotov" <ifedotov-l3A5Bk7waGM@public.gmane.org>
->>> À: "Alexandre Derumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>, "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>, "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>> Cc: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>> Envoyé: Lundi 4 Février 2019 15:51:30
->>> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>>
->>> Hi Alexandre,
->>>
->>> looks like a bug in StupidAllocator.
->>>
->>> Could you please collect BlueStore performance counters right after OSD
->>> startup and once you get high latency.
->>>
->>> Specifically 'l_bluestore_fragmentation' parameter is of interest.
->>>
->>> Also if you're able to rebuild the code I can probably make a simple
->>> patch to track latency and some other internal allocator's paramter to
->>> make sure it's degraded and learn more details.
->>>
->>>
->>> More vigorous fix would be to backport bitmap allocator from Nautilus
->>> and try the difference...
->>>
->>>
->>> Thanks,
->>>
->>> Igor
->>>
->>>
->>> On 2/4/2019 5:17 PM, Alexandre DERUMIER wrote:
->>>> Hi again,
->>>>
->>>> I speak too fast, the problem has occured again, so it's not tcmalloc cache size related.
->>>>
->>>>
->>>> I have notice something using a simple "perf top",
->>>>
->>>> each time I have this problem (I have seen exactly 4 times the same behaviour),
->>>>
->>>> when latency is bad, perf top give me :
->>>>
->>>> StupidAllocator::_aligned_len
->>>> and
->>>> btree::btree_iterator<btree::btree_node<btree::btree_map_params<unsigned long, unsigned long, std::less<unsigned long>, mempoo
->>>> l::pool_allocator<(mempool::pool_index_t)1, std::pair<unsigned long const, unsigned long> >, 256> >, std::pair<unsigned long const, unsigned long>&, std::pair<unsigned long
->>>> const, unsigned long>*>::increment_slow()
->>>>
->>>> (around 10-20% time for both)
->>>>
->>>>
->>>> when latency is good, I don't see them at all.
->>>>
->>>>
->>>> I have used the Mark wallclock profiler, here the results:
->>>>
->>>> http://odisoweb1.odiso.net/gdbpmp-ok.txt
->>>>
->>>> http://odisoweb1.odiso.net/gdbpmp-bad.txt
->>>>
->>>>
->>>> here an extract of the thread with btree::btree_iterator && StupidAllocator::_aligned_len
->>>>
->>>>
->>>> + 100.00% clone
->>>> + 100.00% start_thread
->>>> + 100.00% ShardedThreadPool::WorkThreadSharded::entry()
->>>> + 100.00% ShardedThreadPool::shardedthreadpool_worker(unsigned int)
->>>> + 100.00% OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)
->>>> + 70.00% PGOpItem::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&, ThreadPool::TPHandle&)
->>>> | + 70.00% OSD::dequeue_op(boost::intrusive_ptr<PG>, boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)
->>>> | + 70.00% PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&, ThreadPool::TPHandle&)
->>>> | + 68.00% PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)
->>>> | | + 68.00% ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)
->>>> | | + 68.00% ReplicatedBackend::do_repop(boost::intrusive_ptr<OpRequest>)
->>>> | | + 67.00% non-virtual thunk to PrimaryLogPG::queue_transactions(std::vector<ObjectStore::Transaction, std::allocator<ObjectStore::Transaction> >&, boost::intrusive_ptr<OpRequest>)
->>>> | | | + 67.00% BlueStore::queue_transactions(boost::intrusive_ptr<ObjectStore::CollectionImpl>&, std::vector<ObjectStore::Transaction, std::allocator<ObjectStore::Transaction> >&, boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)
->>>> | | | + 66.00% BlueStore::_txc_add_transaction(BlueStore::TransContext*, ObjectStore::Transaction*)
->>>> | | | | + 66.00% BlueStore::_write(BlueStore::TransContext*, boost::intrusive_ptr<BlueStore::Collection>&, boost::intrusive_ptr<BlueStore::Onode>&, unsigned long, unsigned long, ceph::buffer::list&, unsigned int)
->>>> | | | | + 66.00% BlueStore::_do_write(BlueStore::TransContext*, boost::intrusive_ptr<BlueStore::Collection>&, boost::intrusive_ptr<BlueStore::Onode>, unsigned long, unsigned long, ceph::buffer::list&, unsigned int)
->>>> | | | | + 65.00% BlueStore::_do_alloc_write(BlueStore::TransContext*, boost::intrusive_ptr<BlueStore::Collection>, boost::intrusive_ptr<BlueStore::Onode>, BlueStore::WriteContext*)
->>>> | | | | | + 64.00% StupidAllocator::allocate(unsigned long, unsigned long, unsigned long, long, std::vector<bluestore_pextent_t, mempool::pool_allocator<(mempool::pool_index_t)4, bluestore_pextent_t> >*)
->>>> | | | | | | + 64.00% StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long*, unsigned int*)
->>>> | | | | | | + 34.00% btree::btree_iterator<btree::btree_node<btree::btree_map_params<unsigned long, unsigned long, std::less<unsigned long>, mempool::pool_allocator<(mempool::pool_index_t)1, std::pair<unsigned long const, unsigned long> >, 256> >, std::pair<unsigned long const, unsigned long>&, std::pair<unsigned long const, unsigned long>*>::increment_slow()
->>>> | | | | | | + 26.00% StupidAllocator::_aligned_len(interval_set<unsigned long, btree::btree_map<unsigned long, unsigned long, std::less<unsigned long>, mempool::pool_allocator<(mempool::pool_index_t)1, std::pair<unsigned long const, unsigned long> >, 256> >::iterator, unsigned long)
->>>>
->>>>
->>>>
->>>> ----- Mail original -----
->>>> De: "Alexandre Derumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->>>> À: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
->>>> Cc: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>>> Envoyé: Lundi 4 Février 2019 09:38:11
->>>> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>>>
->>>> Hi,
->>>>
->>>> some news:
->>>>
->>>> I have tried with different transparent hugepage values (madvise, never) : no change
->>>>
->>>> I have tried to increase bluestore_cache_size_ssd to 8G: no change
->>>>
->>>> I have tried to increase TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES to 256mb : it seem to help, after 24h I'm still around 1,5ms. (need to wait some more days to be sure)
->>>>
->>>>
->>>> Note that this behaviour seem to happen really faster (< 2 days) on my big nvme drives (6TB),
->>>> my others clusters user 1,6TB ssd.
->>>>
->>>> Currently I'm using only 1 osd by nvme (I don't have more than 5000iops by osd), but I'll try this week with 2osd by nvme, to see if it's helping.
->>>>
->>>>
->>>> BTW, does somebody have already tested ceph without tcmalloc, with glibc >= 2.26 (which have also thread cache) ?
->>>>
->>>>
->>>> Regards,
->>>>
->>>> Alexandre
->>>>
->>>>
->>>> ----- Mail original -----
->>>> De: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->>>> À: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
->>>> Cc: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>>> Envoyé: Mercredi 30 Janvier 2019 19:58:15
->>>> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>>>
->>>>>> Thanks. Is there any reason you monitor op_w_latency but not
->>>>>> op_r_latency but instead op_latency?
->>>>>>
->>>>>> Also why do you monitor op_w_process_latency? but not op_r_process_latency?
->>>> I monitor read too. (I have all metrics for osd sockets, and a lot of graphs).
->>>>
->>>> I just don't see latency difference on reads. (or they are very very small vs the write latency increase)
->>>>
->>>>
->>>>
->>>> ----- Mail original -----
->>>> De: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
->>>> À: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->>>> Cc: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>>> Envoyé: Mercredi 30 Janvier 2019 19:50:20
->>>> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>>>
->>>> Hi,
->>>>
->>>> Am 30.01.19 um 14:59 schrieb Alexandre DERUMIER:
->>>>> Hi Stefan,
->>>>>
->>>>>>> currently i'm in the process of switching back from jemalloc to tcmalloc
->>>>>>> like suggested. This report makes me a little nervous about my change.
->>>>> Well,I'm really not sure that it's a tcmalloc bug.
->>>>> maybe bluestore related (don't have filestore anymore to compare)
->>>>> I need to compare with bigger latencies
->>>>>
->>>>> here an example, when all osd at 20-50ms before restart, then after restart (at 21:15), 1ms
->>>>> http://odisoweb1.odiso.net/latencybad.png
->>>>>
->>>>> I observe the latency in my guest vm too, on disks iowait.
->>>>>
->>>>> http://odisoweb1.odiso.net/latencybadvm.png
->>>>>
->>>>>>> Also i'm currently only monitoring latency for filestore osds. Which
->>>>>>> exact values out of the daemon do you use for bluestore?
->>>>> here my influxdb queries:
->>>>>
->>>>> It take op_latency.sum/op_latency.avgcount on last second.
->>>>>
->>>>>
->>>>> SELECT non_negative_derivative(first("op_latency.sum"), 1s)/non_negative_derivative(first("op_latency.avgcount"),1s) FROM "ceph" WHERE "host" =~ /^([[host]])$/ AND "id" =~ /^([[osd]])$/ AND $timeFilter GROUP BY time($interval), "host", "id" fill(previous)
->>>>>
->>>>>
->>>>> SELECT non_negative_derivative(first("op_w_latency.sum"), 1s)/non_negative_derivative(first("op_w_latency.avgcount"),1s) FROM "ceph" WHERE "host" =~ /^([[host]])$/ AND collection='osd' AND "id" =~ /^([[osd]])$/ AND $timeFilter GROUP BY time($interval), "host", "id" fill(previous)
->>>>>
->>>>>
->>>>> SELECT non_negative_derivative(first("op_w_process_latency.sum"), 1s)/non_negative_derivative(first("op_w_process_latency.avgcount"),1s) FROM "ceph" WHERE "host" =~ /^([[host]])$/ AND collection='osd' AND "id" =~ /^([[osd]])$/ AND $timeFilter GROUP BY time($interval), "host", "id" fill(previous)
->>>> Thanks. Is there any reason you monitor op_w_latency but not
->>>> op_r_latency but instead op_latency?
->>>>
->>>> Also why do you monitor op_w_process_latency? but not op_r_process_latency?
->>>>
->>>> greets,
->>>> Stefan
->>>>
->>>>>
->>>>> ----- Mail original -----
->>>>> De: "Stefan Priebe, Profihost AG" <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
->>>>> À: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>, "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
->>>>> Cc: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>>>> Envoyé: Mercredi 30 Janvier 2019 08:45:33
->>>>> Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
->>>>>
->>>>> Hi,
->>>>>
->>>>> Am 30.01.19 um 08:33 schrieb Alexandre DERUMIER:
->>>>>> Hi,
->>>>>>
->>>>>> here some new results,
->>>>>> different osd/ different cluster
->>>>>>
->>>>>> before osd restart latency was between 2-5ms
->>>>>> after osd restart is around 1-1.5ms
->>>>>>
->>>>>> http://odisoweb1.odiso.net/cephperf2/bad.txt (2-5ms)
->>>>>> http://odisoweb1.odiso.net/cephperf2/ok.txt (1-1.5ms)
->>>>>> http://odisoweb1.odiso.net/cephperf2/diff.txt
->>>>>>
->>>>>>  From what I see in diff, the biggest difference is in tcmalloc, but maybe I'm wrong.
->>>>>> (I'm using tcmalloc 2.5-2.2)
->>>>> currently i'm in the process of switching back from jemalloc to tcmalloc
->>>>> like suggested. This report makes me a little nervous about my change.
->>>>>
->>>>> Also i'm currently only monitoring latency for filestore osds. Which
->>>>> exact values out of the daemon do you use for bluestore?
->>>>>
->>>>> I would like to check if i see the same behaviour.
->>>>>
->>>>> Greets,
->>>>> Stefan
->>>>>
->>>>>> ----- Mail original -----
->>>>>> De: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
->>>>>> À: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
->>>>>> Cc: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>>>>> Envoyé: Vendredi 25 Janvier 2019 10:49:02
->>>>>> Objet: Re: ceph osd commit latency increase over time, until restart
->>>>>>
->>>>>> Can you capture a perf top or perf record to see where teh CPU time is
->>>>>> going on one of the OSDs wth a high latency?
->>>>>>
->>>>>> Thanks!
->>>>>> sage
->>>>>>
->>>>>>
->>>>>> On Fri, 25 Jan 2019, Alexandre DERUMIER wrote:
->>>>>>
->>>>>>> Hi,
->>>>>>>
->>>>>>> I have a strange behaviour of my osd, on multiple clusters,
->>>>>>>
->>>>>>> All cluster are running mimic 13.2.1,bluestore, with ssd or nvme drivers,
->>>>>>> workload is rbd only, with qemu-kvm vms running with librbd + snapshot/rbd export-diff/snapshotdelete each day for backup
->>>>>>>
->>>>>>> When the osd are refreshly started, the commit latency is between 0,5-1ms.
->>>>>>>
->>>>>>> But overtime, this latency increase slowly (maybe around 1ms by day), until reaching crazy
->>>>>>> values like 20-200ms.
->>>>>>>
->>>>>>> Some example graphs:
->>>>>>>
->>>>>>> http://odisoweb1.odiso.net/osdlatency1.png
->>>>>>> http://odisoweb1.odiso.net/osdlatency2.png
->>>>>>>
->>>>>>> All osds have this behaviour, in all clusters.
->>>>>>>
->>>>>>> The latency of physical disks is ok. (Clusters are far to be full loaded)
->>>>>>>
->>>>>>> And if I restart the osd, the latency come back to 0,5-1ms.
->>>>>>>
->>>>>>> That's remember me old tcmalloc bug, but maybe could it be a bluestore memory bug ?
->>>>>>>
->>>>>>> Any Hints for counters/logs to check ?
->>>>>>>
->>>>>>>
->>>>>>> Regards,
->>>>>>>
->>>>>>> Alexandre
->>>>>>>
->>>>>>>
->>>>>> _______________________________________________
->>>>>> ceph-users mailing list
->>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>
->>
->>
->
->
->
-
---------------80F1686A3EED05D79162FAF8
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: 8bit
-
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  </head>
-  <body text="#000000" bgcolor="#FFFFFF">
-    <p>Hi Alexander,</p>
-    <p>I've read through your reports, nothing obvious so far.</p>
-    <p>I can only see several times average latency increase for OSD
-      write ops (in seconds)<br>
-    </p>
-    0.002040060 (first hour) vs.
-    <pre style="color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; overflow-wrap: break-word; white-space: pre-wrap;">0.002483516 (last 24 hours) vs. 
-0.008382087 (last hour)
-
-subop_w_latency:
-0.000478934 (first hour) vs.
-0.000537956 (last 24 hours) vs. 
-0.003073475 (last hour)
-
-and OSD read ops, osd_r_latency:
-
-0.000408595 (first hour)
-0.000709031 (24 hours)
-0.004979540 (last hour)
-  
-What's interesting is that such latency differences aren't observed at neither BlueStore level (any _lat params under "bluestore" section) nor rocksdb one.
-
-Which probably means that the issue is rather somewhere above BlueStore.
-
-Suggest to proceed with perf dumps collection to see if the picture stays the same.
-
-W.r.t. memory usage you observed I see nothing suspicious so far - No decrease in RSS report is a known artifact that seems to be safe.
-
-Thanks,
-Igor
-</pre>
-    <div class="moz-cite-prefix">On 2/13/2019 11:42 AM, Alexandre
-      DERUMIER wrote:<br>
-    </div>
-    <blockquote type="cite"
-      cite="mid:1554220830.1076801.1550047328269.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org">
-      <pre class="moz-quote-pre" wrap="">Hi Igor, 
-
-Thanks again for helping !
-
-
-
-I have upgrade to last mimic this weekend, and with new autotune memory,
-I have setup osd_memory_target to 8G.  (my nvme are 6TB)
-
-
-I have done a lot of perf dump and mempool dump and ps of process to see rss memory at different hours,
-here the reports for osd.0:
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/">http://odisoweb1.odiso.net/perfanalysis/</a>
-
-
-osd has been started the 12-02-2019 at 08:00
-
-first report after 1h running
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.perf.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.perf.txt</a>
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.dump_mempools.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.dump_mempools.txt</a>
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.ps.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.09:30.ps.txt</a>
-
-
-
-report  after 24 before counter resets
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.perf.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.perf.txt</a>
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.dump_mempools.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.dump_mempools.txt</a>
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.ps.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.08:00.ps.txt</a>
-
-report 1h after counter reset
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.perf.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.perf.txt</a>
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.dump_mempools.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.dump_mempools.txt</a>
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.ps.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.13-02-2018.09:00.ps.txt</a>
-
-
-
-
-I'm seeing the bluestore buffer bytes memory increasing up to 4G  around 12-02-2019 at 14:00
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/graphs2.png">http://odisoweb1.odiso.net/perfanalysis/graphs2.png</a>
-Then after that, slowly decreasing.
-
-
-Another strange thing,
-I'm seeing total bytes at 5G at 12-02-2018.13:30
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.13:30.dump_mempools.txt">http://odisoweb1.odiso.net/perfanalysis/osd.0.12-02-2018.13:30.dump_mempools.txt</a>
-Then is decreasing over time (around 3,7G this morning), but RSS is still at 8G
-
-
-I'm graphing mempools counters too since yesterday, so I'll able to track them over time.
-
------ Mail original -----
-De: "Igor Fedotov" <a class="moz-txt-link-rfc2396E" href="mailto:ifedotov-l3A5Bk7waGM@public.gmane.org">&lt;ifedotov-l3A5Bk7waGM@public.gmane.org&gt;</a>
-À: "Alexandre Derumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a>
-Cc: "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a>
-Envoyé: Lundi 11 Février 2019 12:03:17
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart
-
-On 2/8/2019 6:57 PM, Alexandre DERUMIER wrote: 
-</pre>
-      <blockquote type="cite">
-        <pre class="moz-quote-pre" wrap="">another mempool dump after 1h run. (latency ok) 
-
-Biggest difference: 
-
-before restart 
-------------- 
-"bluestore_cache_other": { 
-"items": 48661920, 
-"bytes": 1539544228 
-}, 
-"bluestore_cache_data": { 
-"items": 54, 
-"bytes": 643072 
-}, 
-(other caches seem to be quite low too, like bluestore_cache_other take all the memory) 
-
-
-After restart 
-------------- 
-"bluestore_cache_other": { 
-"items": 12432298, 
-"bytes": 500834899 
-}, 
-"bluestore_cache_data": { 
-"items": 40084, 
-"bytes": 1056235520 
-}, 
-
-</pre>
-      </blockquote>
-      <pre class="moz-quote-pre" wrap="">This is fine as cache is warming after restart and some rebalancing 
-between data and metadata might occur. 
-
-What relates to allocator and most probably to fragmentation growth is : 
-
-"bluestore_alloc": { 
-"items": 165053952, 
-"bytes": 165053952 
-}, 
-
-which had been higher before the reset (if I got these dumps' order 
-properly) 
-
-"bluestore_alloc": { 
-"items": 210243456, 
-"bytes": 210243456 
-}, 
-
-But as I mentioned - I'm not 100% sure this might cause such a huge 
-latency increase... 
-
-Do you have perf counters dump after the restart? 
-
-Could you collect some more dumps - for both mempool and perf counters? 
-
-So ideally I'd like to have: 
-
-1) mempool/perf counters dumps after the restart (1hour is OK) 
-
-2) mempool/perf counters dumps in 24+ hours after restart 
-
-3) reset perf counters after 2), wait for 1 hour (and without OSD 
-restart) and dump mempool/perf counters again. 
-
-So we'll be able to learn both allocator mem usage growth and operation 
-latency distribution for the following periods: 
-
-a) 1st hour after restart 
-
-b) 25th hour. 
-
-
-Thanks, 
-
-Igor 
-
-
-</pre>
-      <blockquote type="cite">
-        <pre class="moz-quote-pre" wrap="">full mempool dump after restart 
-------------------------------- 
-
-{ 
-"mempool": { 
-"by_pool": { 
-"bloom_filter": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"bluestore_alloc": { 
-"items": 165053952, 
-"bytes": 165053952 
-}, 
-"bluestore_cache_data": { 
-"items": 40084, 
-"bytes": 1056235520 
-}, 
-"bluestore_cache_onode": { 
-"items": 22225, 
-"bytes": 14935200 
-}, 
-"bluestore_cache_other": { 
-"items": 12432298, 
-"bytes": 500834899 
-}, 
-"bluestore_fsck": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"bluestore_txc": { 
-"items": 11, 
-"bytes": 8184 
-}, 
-"bluestore_writing_deferred": { 
-"items": 5047, 
-"bytes": 22673736 
-}, 
-"bluestore_writing": { 
-"items": 91, 
-"bytes": 1662976 
-}, 
-"bluefs": { 
-"items": 1907, 
-"bytes": 95600 
-}, 
-"buffer_anon": { 
-"items": 19664, 
-"bytes": 25486050 
-}, 
-"buffer_meta": { 
-"items": 46189, 
-"bytes": 2956096 
-}, 
-"osd": { 
-"items": 243, 
-"bytes": 3089016 
-}, 
-"osd_mapbl": { 
-"items": 17, 
-"bytes": 214366 
-}, 
-"osd_pglog": { 
-"items": 889673, 
-"bytes": 367160400 
-}, 
-"osdmap": { 
-"items": 3803, 
-"bytes": 224552 
-}, 
-"osdmap_mapping": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"pgmap": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"mds_co": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"unittest_1": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"unittest_2": { 
-"items": 0, 
-"bytes": 0 
-} 
-}, 
-"total": { 
-"items": 178515204, 
-"bytes": 2160630547 
-} 
-} 
-} 
-
------ Mail original ----- 
-De: "aderumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-À: "Igor Fedotov" <a class="moz-txt-link-rfc2396E" href="mailto:ifedotov-l3A5Bk7waGM@public.gmane.org">&lt;ifedotov-l3A5Bk7waGM@public.gmane.org&gt;</a> 
-Cc: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a>, "Mark Nelson" <a class="moz-txt-link-rfc2396E" href="mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a>, "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Vendredi 8 Février 2019 16:14:54 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-I'm just seeing 
-
-StupidAllocator::_aligned_len 
-and 
-btree::btree_iterator&lt;btree::btree_node&lt;btree::btree_map_params&lt;unsigned long, unsigned long, std::less&lt;unsigned long&gt;, mempoo 
-
-on 1 osd, both 10%. 
-
-here the dump_mempools 
-
-{ 
-"mempool": { 
-"by_pool": { 
-"bloom_filter": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"bluestore_alloc": { 
-"items": 210243456, 
-"bytes": 210243456 
-}, 
-"bluestore_cache_data": { 
-"items": 54, 
-"bytes": 643072 
-}, 
-"bluestore_cache_onode": { 
-"items": 105637, 
-"bytes": 70988064 
-}, 
-"bluestore_cache_other": { 
-"items": 48661920, 
-"bytes": 1539544228 
-}, 
-"bluestore_fsck": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"bluestore_txc": { 
-"items": 12, 
-"bytes": 8928 
-}, 
-"bluestore_writing_deferred": { 
-"items": 406, 
-"bytes": 4792868 
-}, 
-"bluestore_writing": { 
-"items": 66, 
-"bytes": 1085440 
-}, 
-"bluefs": { 
-"items": 1882, 
-"bytes": 93600 
-}, 
-"buffer_anon": { 
-"items": 138986, 
-"bytes": 24983701 
-}, 
-"buffer_meta": { 
-"items": 544, 
-"bytes": 34816 
-}, 
-"osd": { 
-"items": 243, 
-"bytes": 3089016 
-}, 
-"osd_mapbl": { 
-"items": 36, 
-"bytes": 179308 
-}, 
-"osd_pglog": { 
-"items": 952564, 
-"bytes": 372459684 
-}, 
-"osdmap": { 
-"items": 3639, 
-"bytes": 224664 
-}, 
-"osdmap_mapping": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"pgmap": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"mds_co": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"unittest_1": { 
-"items": 0, 
-"bytes": 0 
-}, 
-"unittest_2": { 
-"items": 0, 
-"bytes": 0 
-} 
-}, 
-"total": { 
-"items": 260109445, 
-"bytes": 2228370845 
-} 
-} 
-} 
-
-
-and the perf dump 
-
-root@ceph5-2:~# ceph daemon osd.4 perf dump 
-{ 
-"AsyncMessenger::Worker-0": { 
-"msgr_recv_messages": 22948570, 
-"msgr_send_messages": 22561570, 
-"msgr_recv_bytes": 333085080271, 
-"msgr_send_bytes": 261798871204, 
-"msgr_created_connections": 6152, 
-"msgr_active_connections": 2701, 
-"msgr_running_total_time": 1055.197867330, 
-"msgr_running_send_time": 352.764480121, 
-"msgr_running_recv_time": 499.206831955, 
-"msgr_running_fast_dispatch_time": 130.982201607 
-}, 
-"AsyncMessenger::Worker-1": { 
-"msgr_recv_messages": 18801593, 
-"msgr_send_messages": 18430264, 
-"msgr_recv_bytes": 306871760934, 
-"msgr_send_bytes": 192789048666, 
-"msgr_created_connections": 5773, 
-"msgr_active_connections": 2721, 
-"msgr_running_total_time": 816.821076305, 
-"msgr_running_send_time": 261.353228926, 
-"msgr_running_recv_time": 394.035587911, 
-"msgr_running_fast_dispatch_time": 104.012155720 
-}, 
-"AsyncMessenger::Worker-2": { 
-"msgr_recv_messages": 18463400, 
-"msgr_send_messages": 18105856, 
-"msgr_recv_bytes": 187425453590, 
-"msgr_send_bytes": 220735102555, 
-"msgr_created_connections": 5897, 
-"msgr_active_connections": 2605, 
-"msgr_running_total_time": 807.186854324, 
-"msgr_running_send_time": 296.834435839, 
-"msgr_running_recv_time": 351.364389691, 
-"msgr_running_fast_dispatch_time": 101.215776792 
-}, 
-"bluefs": { 
-"gift_bytes": 0, 
-"reclaim_bytes": 0, 
-"db_total_bytes": 256050724864, 
-"db_used_bytes": 12413042688, 
-"wal_total_bytes": 0, 
-"wal_used_bytes": 0, 
-"slow_total_bytes": 0, 
-"slow_used_bytes": 0, 
-"num_files": 209, 
-"log_bytes": 10383360, 
-"log_compactions": 14, 
-"logged_bytes": 336498688, 
-"files_written_wal": 2, 
-"files_written_sst": 4499, 
-"bytes_written_wal": 417989099783, 
-"bytes_written_sst": 213188750209 
-}, 
-"bluestore": { 
-"kv_flush_lat": { 
-"avgcount": 26371957, 
-"sum": 26.734038497, 
-"avgtime": 0.000001013 
-}, 
-"kv_commit_lat": { 
-"avgcount": 26371957, 
-"sum": 3397.491150603, 
-"avgtime": 0.000128829 
-}, 
-"kv_lat": { 
-"avgcount": 26371957, 
-"sum": 3424.225189100, 
-"avgtime": 0.000129843 
-}, 
-"state_prepare_lat": { 
-"avgcount": 30484924, 
-"sum": 3689.542105337, 
-"avgtime": 0.000121028 
-}, 
-"state_aio_wait_lat": { 
-"avgcount": 30484924, 
-"sum": 509.864546111, 
-"avgtime": 0.000016725 
-}, 
-"state_io_done_lat": { 
-"avgcount": 30484924, 
-"sum": 24.534052953, 
-"avgtime": 0.000000804 
-}, 
-"state_kv_queued_lat": { 
-"avgcount": 30484924, 
-"sum": 3488.338424238, 
-"avgtime": 0.000114428 
-}, 
-"state_kv_commiting_lat": { 
-"avgcount": 30484924, 
-"sum": 5660.437003432, 
-"avgtime": 0.000185679 
-}, 
-"state_kv_done_lat": { 
-"avgcount": 30484924, 
-"sum": 7.763511500, 
-"avgtime": 0.000000254 
-}, 
-"state_deferred_queued_lat": { 
-"avgcount": 26346134, 
-"sum": 666071.296856696, 
-"avgtime": 0.025281557 
-}, 
-"state_deferred_aio_wait_lat": { 
-"avgcount": 26346134, 
-"sum": 1755.660547071, 
-"avgtime": 0.000066638 
-}, 
-"state_deferred_cleanup_lat": { 
-"avgcount": 26346134, 
-"sum": 185465.151653703, 
-"avgtime": 0.007039558 
-}, 
-"state_finishing_lat": { 
-"avgcount": 30484920, 
-"sum": 3.046847481, 
-"avgtime": 0.000000099 
-}, 
-"state_done_lat": { 
-"avgcount": 30484920, 
-"sum": 13193.362685280, 
-"avgtime": 0.000432783 
-}, 
-"throttle_lat": { 
-"avgcount": 30484924, 
-"sum": 14.634269979, 
-"avgtime": 0.000000480 
-}, 
-"submit_lat": { 
-"avgcount": 30484924, 
-"sum": 3873.883076148, 
-"avgtime": 0.000127075 
-}, 
-"commit_lat": { 
-"avgcount": 30484924, 
-"sum": 13376.492317331, 
-"avgtime": 0.000438790 
-}, 
-"read_lat": { 
-"avgcount": 5873923, 
-"sum": 1817.167582057, 
-"avgtime": 0.000309361 
-}, 
-"read_onode_meta_lat": { 
-"avgcount": 19608201, 
-"sum": 146.770464482, 
-"avgtime": 0.000007485 
-}, 
-"read_wait_aio_lat": { 
-"avgcount": 13734278, 
-"sum": 2532.578077242, 
-"avgtime": 0.000184398 
-}, 
-"compress_lat": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"decompress_lat": { 
-"avgcount": 1346945, 
-"sum": 26.227575896, 
-"avgtime": 0.000019471 
-}, 
-"csum_lat": { 
-"avgcount": 28020392, 
-"sum": 149.587819041, 
-"avgtime": 0.000005338 
-}, 
-"compress_success_count": 0, 
-"compress_rejected_count": 0, 
-"write_pad_bytes": 352923605, 
-"deferred_write_ops": 24373340, 
-"deferred_write_bytes": 216791842816, 
-"write_penalty_read_ops": 8062366, 
-"bluestore_allocated": 3765566013440, 
-"bluestore_stored": 4186255221852, 
-"bluestore_compressed": 39981379040, 
-"bluestore_compressed_allocated": 73748348928, 
-"bluestore_compressed_original": 165041381376, 
-"bluestore_onodes": 104232, 
-"bluestore_onode_hits": 71206874, 
-"bluestore_onode_misses": 1217914, 
-"bluestore_onode_shard_hits": 260183292, 
-"bluestore_onode_shard_misses": 22851573, 
-"bluestore_extents": 3394513, 
-"bluestore_blobs": 2773587, 
-"bluestore_buffers": 0, 
-"bluestore_buffer_bytes": 0, 
-"bluestore_buffer_hit_bytes": 62026011221, 
-"bluestore_buffer_miss_bytes": 995233669922, 
-"bluestore_write_big": 5648815, 
-"bluestore_write_big_bytes": 552502214656, 
-"bluestore_write_big_blobs": 12440992, 
-"bluestore_write_small": 35883770, 
-"bluestore_write_small_bytes": 223436965719, 
-"bluestore_write_small_unused": 408125, 
-"bluestore_write_small_deferred": 34961455, 
-"bluestore_write_small_pre_read": 34961455, 
-"bluestore_write_small_new": 514190, 
-"bluestore_txc": 30484924, 
-"bluestore_onode_reshard": 5144189, 
-"bluestore_blob_split": 60104, 
-"bluestore_extent_compress": 53347252, 
-"bluestore_gc_merged": 21142528, 
-"bluestore_read_eio": 0, 
-"bluestore_fragmentation_micros": 67 
-}, 
-"finisher-defered_finisher": { 
-"queue_len": 0, 
-"complete_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"finisher-finisher-0": { 
-"queue_len": 0, 
-"complete_latency": { 
-"avgcount": 26625163, 
-"sum": 1057.506990951, 
-"avgtime": 0.000039718 
-} 
-}, 
-"finisher-objecter-finisher-0": { 
-"queue_len": 0, 
-"complete_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.0::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.0::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.1::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.1::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.2::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.2::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.3::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.3::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.4::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.4::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.5::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.5::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.6::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.6::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.7::sdata_wait_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"mutex-OSDShard.7::shard_lock": { 
-"wait": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"objecter": { 
-"op_active": 0, 
-"op_laggy": 0, 
-"op_send": 0, 
-"op_send_bytes": 0, 
-"op_resend": 0, 
-"op_reply": 0, 
-"op": 0, 
-"op_r": 0, 
-"op_w": 0, 
-"op_rmw": 0, 
-"op_pg": 0, 
-"osdop_stat": 0, 
-"osdop_create": 0, 
-"osdop_read": 0, 
-"osdop_write": 0, 
-"osdop_writefull": 0, 
-"osdop_writesame": 0, 
-"osdop_append": 0, 
-"osdop_zero": 0, 
-"osdop_truncate": 0, 
-"osdop_delete": 0, 
-"osdop_mapext": 0, 
-"osdop_sparse_read": 0, 
-"osdop_clonerange": 0, 
-"osdop_getxattr": 0, 
-"osdop_setxattr": 0, 
-"osdop_cmpxattr": 0, 
-"osdop_rmxattr": 0, 
-"osdop_resetxattrs": 0, 
-"osdop_tmap_up": 0, 
-"osdop_tmap_put": 0, 
-"osdop_tmap_get": 0, 
-"osdop_call": 0, 
-"osdop_watch": 0, 
-"osdop_notify": 0, 
-"osdop_src_cmpxattr": 0, 
-"osdop_pgls": 0, 
-"osdop_pgls_filter": 0, 
-"osdop_other": 0, 
-"linger_active": 0, 
-"linger_send": 0, 
-"linger_resend": 0, 
-"linger_ping": 0, 
-"poolop_active": 0, 
-"poolop_send": 0, 
-"poolop_resend": 0, 
-"poolstat_active": 0, 
-"poolstat_send": 0, 
-"poolstat_resend": 0, 
-"statfs_active": 0, 
-"statfs_send": 0, 
-"statfs_resend": 0, 
-"command_active": 0, 
-"command_send": 0, 
-"command_resend": 0, 
-"map_epoch": 105913, 
-"map_full": 0, 
-"map_inc": 828, 
-"osd_sessions": 0, 
-"osd_session_open": 0, 
-"osd_session_close": 0, 
-"osd_laggy": 0, 
-"omap_wr": 0, 
-"omap_rd": 0, 
-"omap_del": 0 
-}, 
-"osd": { 
-"op_wip": 0, 
-"op": 16758102, 
-"op_in_bytes": 238398820586, 
-"op_out_bytes": 165484999463, 
-"op_latency": { 
-"avgcount": 16758102, 
-"sum": 38242.481640842, 
-"avgtime": 0.002282029 
-}, 
-"op_process_latency": { 
-"avgcount": 16758102, 
-"sum": 28644.906310687, 
-"avgtime": 0.001709316 
-}, 
-"op_prepare_latency": { 
-"avgcount": 16761367, 
-"sum": 3489.856599934, 
-"avgtime": 0.000208208 
-}, 
-"op_r": 6188565, 
-"op_r_out_bytes": 165484999463, 
-"op_r_latency": { 
-"avgcount": 6188565, 
-"sum": 4507.365756792, 
-"avgtime": 0.000728337 
-}, 
-"op_r_process_latency": { 
-"avgcount": 6188565, 
-"sum": 942.363063429, 
-"avgtime": 0.000152274 
-}, 
-"op_r_prepare_latency": { 
-"avgcount": 6188644, 
-"sum": 982.866710389, 
-"avgtime": 0.000158817 
-}, 
-"op_w": 10546037, 
-"op_w_in_bytes": 238334329494, 
-"op_w_latency": { 
-"avgcount": 10546037, 
-"sum": 33160.719998316, 
-"avgtime": 0.003144377 
-}, 
-"op_w_process_latency": { 
-"avgcount": 10546037, 
-"sum": 27668.702029030, 
-"avgtime": 0.002623611 
-}, 
-"op_w_prepare_latency": { 
-"avgcount": 10548652, 
-"sum": 2499.688609173, 
-"avgtime": 0.000236967 
-}, 
-"op_rw": 23500, 
-"op_rw_in_bytes": 64491092, 
-"op_rw_out_bytes": 0, 
-"op_rw_latency": { 
-"avgcount": 23500, 
-"sum": 574.395885734, 
-"avgtime": 0.024442378 
-}, 
-"op_rw_process_latency": { 
-"avgcount": 23500, 
-"sum": 33.841218228, 
-"avgtime": 0.001440051 
-}, 
-"op_rw_prepare_latency": { 
-"avgcount": 24071, 
-"sum": 7.301280372, 
-"avgtime": 0.000303322 
-}, 
-"op_before_queue_op_lat": { 
-"avgcount": 57892986, 
-"sum": 1502.117718889, 
-"avgtime": 0.000025946 
-}, 
-"op_before_dequeue_op_lat": { 
-"avgcount": 58091683, 
-"sum": 45194.453254037, 
-"avgtime": 0.000777984 
-}, 
-"subop": 19784758, 
-"subop_in_bytes": 547174969754, 
-"subop_latency": { 
-"avgcount": 19784758, 
-"sum": 13019.714424060, 
-"avgtime": 0.000658067 
-}, 
-"subop_w": 19784758, 
-"subop_w_in_bytes": 547174969754, 
-"subop_w_latency": { 
-"avgcount": 19784758, 
-"sum": 13019.714424060, 
-"avgtime": 0.000658067 
-}, 
-"subop_pull": 0, 
-"subop_pull_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"subop_push": 0, 
-"subop_push_in_bytes": 0, 
-"subop_push_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"pull": 0, 
-"push": 2003, 
-"push_out_bytes": 5560009728, 
-"recovery_ops": 1940, 
-"loadavg": 118, 
-"buffer_bytes": 0, 
-"history_alloc_Mbytes": 0, 
-"history_alloc_num": 0, 
-"cached_crc": 0, 
-"cached_crc_adjusted": 0, 
-"missed_crc": 0, 
-"numpg": 243, 
-"numpg_primary": 82, 
-"numpg_replica": 161, 
-"numpg_stray": 0, 
-"numpg_removing": 0, 
-"heartbeat_to_peers": 10, 
-"map_messages": 7013, 
-"map_message_epochs": 7143, 
-"map_message_epoch_dups": 6315, 
-"messages_delayed_for_map": 0, 
-"osd_map_cache_hit": 203309, 
-"osd_map_cache_miss": 33, 
-"osd_map_cache_miss_low": 0, 
-"osd_map_cache_miss_low_avg": { 
-"avgcount": 0, 
-"sum": 0 
-}, 
-"osd_map_bl_cache_hit": 47012, 
-"osd_map_bl_cache_miss": 1681, 
-"stat_bytes": 6401248198656, 
-"stat_bytes_used": 3777979072512, 
-"stat_bytes_avail": 2623269126144, 
-"copyfrom": 0, 
-"tier_promote": 0, 
-"tier_flush": 0, 
-"tier_flush_fail": 0, 
-"tier_try_flush": 0, 
-"tier_try_flush_fail": 0, 
-"tier_evict": 0, 
-"tier_whiteout": 1631, 
-"tier_dirty": 22360, 
-"tier_clean": 0, 
-"tier_delay": 0, 
-"tier_proxy_read": 0, 
-"tier_proxy_write": 0, 
-"agent_wake": 0, 
-"agent_skip": 0, 
-"agent_flush": 0, 
-"agent_evict": 0, 
-"object_ctx_cache_hit": 16311156, 
-"object_ctx_cache_total": 17426393, 
-"op_cache_hit": 0, 
-"osd_tier_flush_lat": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"osd_tier_promote_lat": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"osd_tier_r_lat": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"osd_pg_info": 30483113, 
-"osd_pg_fastinfo": 29619885, 
-"osd_pg_biginfo": 81703 
-}, 
-"recoverystate_perf": { 
-"initial_latency": { 
-"avgcount": 243, 
-"sum": 6.869296500, 
-"avgtime": 0.028268709 
-}, 
-"started_latency": { 
-"avgcount": 1125, 
-"sum": 13551384.917335850, 
-"avgtime": 12045.675482076 
-}, 
-"reset_latency": { 
-"avgcount": 1368, 
-"sum": 1101.727799040, 
-"avgtime": 0.805356578 
-}, 
-"start_latency": { 
-"avgcount": 1368, 
-"sum": 0.002014799, 
-"avgtime": 0.000001472 
-}, 
-"primary_latency": { 
-"avgcount": 507, 
-"sum": 4575560.638823428, 
-"avgtime": 9024.774435549 
-}, 
-"peering_latency": { 
-"avgcount": 550, 
-"sum": 499.372283616, 
-"avgtime": 0.907949606 
-}, 
-"backfilling_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"waitremotebackfillreserved_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"waitlocalbackfillreserved_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"notbackfilling_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"repnotrecovering_latency": { 
-"avgcount": 1009, 
-"sum": 8975301.082274411, 
-"avgtime": 8895.243887288 
-}, 
-"repwaitrecoveryreserved_latency": { 
-"avgcount": 420, 
-"sum": 99.846056520, 
-"avgtime": 0.237728706 
-}, 
-"repwaitbackfillreserved_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"reprecovering_latency": { 
-"avgcount": 420, 
-"sum": 241.682764382, 
-"avgtime": 0.575435153 
-}, 
-"activating_latency": { 
-"avgcount": 507, 
-"sum": 16.893347339, 
-"avgtime": 0.033320211 
-}, 
-"waitlocalrecoveryreserved_latency": { 
-"avgcount": 199, 
-"sum": 672.335512769, 
-"avgtime": 3.378570415 
-}, 
-"waitremoterecoveryreserved_latency": { 
-"avgcount": 199, 
-"sum": 213.536439363, 
-"avgtime": 1.073047433 
-}, 
-"recovering_latency": { 
-"avgcount": 199, 
-"sum": 79.007696479, 
-"avgtime": 0.397023600 
-}, 
-"recovered_latency": { 
-"avgcount": 507, 
-"sum": 14.000732748, 
-"avgtime": 0.027614857 
-}, 
-"clean_latency": { 
-"avgcount": 395, 
-"sum": 4574325.900371083, 
-"avgtime": 11580.571899673 
-}, 
-"active_latency": { 
-"avgcount": 425, 
-"sum": 4575107.630123680, 
-"avgtime": 10764.959129702 
-}, 
-"replicaactive_latency": { 
-"avgcount": 589, 
-"sum": 8975184.499049954, 
-"avgtime": 15238.004242869 
-}, 
-"stray_latency": { 
-"avgcount": 818, 
-"sum": 800.729455666, 
-"avgtime": 0.978886865 
-}, 
-"getinfo_latency": { 
-"avgcount": 550, 
-"sum": 15.085667048, 
-"avgtime": 0.027428485 
-}, 
-"getlog_latency": { 
-"avgcount": 546, 
-"sum": 3.482175693, 
-"avgtime": 0.006377611 
-}, 
-"waitactingchange_latency": { 
-"avgcount": 39, 
-"sum": 35.444551284, 
-"avgtime": 0.908834648 
-}, 
-"incomplete_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"down_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"getmissing_latency": { 
-"avgcount": 507, 
-"sum": 6.702129624, 
-"avgtime": 0.013219190 
-}, 
-"waitupthru_latency": { 
-"avgcount": 507, 
-"sum": 474.098261727, 
-"avgtime": 0.935105052 
-}, 
-"notrecovering_latency": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-}, 
-"rocksdb": { 
-"get": 28320977, 
-"submit_transaction": 30484924, 
-"submit_transaction_sync": 26371957, 
-"get_latency": { 
-"avgcount": 28320977, 
-"sum": 325.900908733, 
-"avgtime": 0.000011507 
-}, 
-"submit_latency": { 
-"avgcount": 30484924, 
-"sum": 1835.888692371, 
-"avgtime": 0.000060222 
-}, 
-"submit_sync_latency": { 
-"avgcount": 26371957, 
-"sum": 1431.555230628, 
-"avgtime": 0.000054283 
-}, 
-"compact": 0, 
-"compact_range": 0, 
-"compact_queue_merge": 0, 
-"compact_queue_len": 0, 
-"rocksdb_write_wal_time": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"rocksdb_write_memtable_time": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"rocksdb_write_delay_time": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-}, 
-"rocksdb_write_pre_and_post_time": { 
-"avgcount": 0, 
-"sum": 0.000000000, 
-"avgtime": 0.000000000 
-} 
-} 
-} 
-
------ Mail original ----- 
-De: "Igor Fedotov" <a class="moz-txt-link-rfc2396E" href="mailto:ifedotov-l3A5Bk7waGM@public.gmane.org">&lt;ifedotov-l3A5Bk7waGM@public.gmane.org&gt;</a> 
-À: "aderumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-Cc: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a>, "Mark Nelson" <a class="moz-txt-link-rfc2396E" href="mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a>, "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Mardi 5 Février 2019 18:56:51 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-On 2/4/2019 6:40 PM, Alexandre DERUMIER wrote: 
-</pre>
-        <blockquote type="cite">
-          <blockquote type="cite">
-            <blockquote type="cite">
-              <pre class="moz-quote-pre" wrap="">but I don't see l_bluestore_fragmentation counter. 
-(but I have bluestore_fragmentation_micros) 
-</pre>
-            </blockquote>
-          </blockquote>
-          <pre class="moz-quote-pre" wrap="">ok, this is the same 
-
-b.add_u64(l_bluestore_fragmentation, "bluestore_fragmentation_micros", 
-"How fragmented bluestore free space is (free extents / max possible number of free extents) * 1000"); 
-
-
-Here a graph on last month, with bluestore_fragmentation_micros and latency, 
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/latency_vs_fragmentation_micros.png">http://odisoweb1.odiso.net/latency_vs_fragmentation_micros.png</a> 
-</pre>
-        </blockquote>
-        <pre class="moz-quote-pre" wrap="">hmm, so fragmentation grows eventually and drops on OSD restarts, isn't 
-it? The same for other OSDs? 
-
-This proves some issue with the allocator - generally fragmentation 
-might grow but it shouldn't reset on restart. Looks like some intervals 
-aren't properly merged in run-time. 
-
-On the other side I'm not completely sure that latency degradation is 
-caused by that - fragmentation growth is relatively small - I don't see 
-how this might impact performance that high. 
-
-Wondering if you have OSD mempool monitoring (dump_mempools command 
-output on admin socket) reports? Do you have any historic data? 
-
-If not may I have current output and say a couple more samples with 
-8-12 hours interval? 
-
-
-Wrt to backporting bitmap allocator to mimic - we haven't had such plans 
-before that but I'll discuss this at BlueStore meeting shortly. 
-
-
-Thanks, 
-
-Igor 
-
-</pre>
-        <blockquote type="cite">
-          <pre class="moz-quote-pre" wrap="">----- Mail original ----- 
-De: "Alexandre Derumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-À: "Igor Fedotov" <a class="moz-txt-link-rfc2396E" href="mailto:ifedotov-l3A5Bk7waGM@public.gmane.org">&lt;ifedotov-l3A5Bk7waGM@public.gmane.org&gt;</a> 
-Cc: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a>, "Mark Nelson" <a class="moz-txt-link-rfc2396E" href="mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a>, "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Lundi 4 Février 2019 16:04:38 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-Thanks Igor, 
-
-</pre>
-          <blockquote type="cite">
-            <blockquote type="cite">
-              <pre class="moz-quote-pre" wrap="">Could you please collect BlueStore performance counters right after OSD 
-startup and once you get high latency. 
-
-Specifically 'l_bluestore_fragmentation' parameter is of interest. 
-</pre>
-            </blockquote>
-          </blockquote>
-          <pre class="moz-quote-pre" wrap="">I'm already monitoring with 
-"ceph daemon osd.x perf dump ", (I have 2months history will all counters) 
-
-but I don't see l_bluestore_fragmentation counter. 
-
-(but I have bluestore_fragmentation_micros) 
-
-
-</pre>
-          <blockquote type="cite">
-            <blockquote type="cite">
-              <pre class="moz-quote-pre" wrap="">Also if you're able to rebuild the code I can probably make a simple 
-patch to track latency and some other internal allocator's paramter to 
-make sure it's degraded and learn more details. 
-</pre>
-            </blockquote>
-          </blockquote>
-          <pre class="moz-quote-pre" wrap="">Sorry, It's a critical production cluster, I can't test on it :( 
-But I have a test cluster, maybe I can try to put some load on it, and try to reproduce. 
-
-
-
-</pre>
-          <blockquote type="cite">
-            <blockquote type="cite">
-              <pre class="moz-quote-pre" wrap="">More vigorous fix would be to backport bitmap allocator from Nautilus 
-and try the difference... 
-</pre>
-            </blockquote>
-          </blockquote>
-          <pre class="moz-quote-pre" wrap="">Any plan to backport it to mimic ? (But I can wait for Nautilus) 
-perf results of new bitmap allocator seem very promising from what I've seen in PR. 
-
-
-
------ Mail original ----- 
-De: "Igor Fedotov" <a class="moz-txt-link-rfc2396E" href="mailto:ifedotov-l3A5Bk7waGM@public.gmane.org">&lt;ifedotov-l3A5Bk7waGM@public.gmane.org&gt;</a> 
-À: "Alexandre Derumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a>, "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a>, "Mark Nelson" <a class="moz-txt-link-rfc2396E" href="mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a> 
-Cc: "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Lundi 4 Février 2019 15:51:30 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-Hi Alexandre, 
-
-looks like a bug in StupidAllocator. 
-
-Could you please collect BlueStore performance counters right after OSD 
-startup and once you get high latency. 
-
-Specifically 'l_bluestore_fragmentation' parameter is of interest. 
-
-Also if you're able to rebuild the code I can probably make a simple 
-patch to track latency and some other internal allocator's paramter to 
-make sure it's degraded and learn more details. 
-
-
-More vigorous fix would be to backport bitmap allocator from Nautilus 
-and try the difference... 
-
-
-Thanks, 
-
-Igor 
-
-
-On 2/4/2019 5:17 PM, Alexandre DERUMIER wrote: 
-</pre>
-          <blockquote type="cite">
-            <pre class="moz-quote-pre" wrap="">Hi again, 
-
-I speak too fast, the problem has occured again, so it's not tcmalloc cache size related. 
-
-
-I have notice something using a simple "perf top", 
-
-each time I have this problem (I have seen exactly 4 times the same behaviour), 
-
-when latency is bad, perf top give me : 
-
-StupidAllocator::_aligned_len 
-and 
-btree::btree_iterator&lt;btree::btree_node&lt;btree::btree_map_params&lt;unsigned long, unsigned long, std::less&lt;unsigned long&gt;, mempoo 
-l::pool_allocator&lt;(mempool::pool_index_t)1, std::pair&lt;unsigned long const, unsigned long&gt; &gt;, 256&gt; &gt;, std::pair&lt;unsigned long const, unsigned long&gt;&amp;, std::pair&lt;unsigned long 
-const, unsigned long&gt;*&gt;::increment_slow() 
-
-(around 10-20% time for both) 
-
-
-when latency is good, I don't see them at all. 
-
-
-I have used the Mark wallclock profiler, here the results: 
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/gdbpmp-ok.txt">http://odisoweb1.odiso.net/gdbpmp-ok.txt</a> 
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/gdbpmp-bad.txt">http://odisoweb1.odiso.net/gdbpmp-bad.txt</a> 
-
-
-here an extract of the thread with btree::btree_iterator &amp;&amp; StupidAllocator::_aligned_len 
-
-
-+ 100.00% clone 
-+ 100.00% start_thread 
-+ 100.00% ShardedThreadPool::WorkThreadSharded::entry() 
-+ 100.00% ShardedThreadPool::shardedthreadpool_worker(unsigned int) 
-+ 100.00% OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*) 
-+ 70.00% PGOpItem::run(OSD*, OSDShard*, boost::intrusive_ptr&lt;PG&gt;&amp;, ThreadPool::TPHandle&amp;) 
-| + 70.00% OSD::dequeue_op(boost::intrusive_ptr&lt;PG&gt;, boost::intrusive_ptr&lt;OpRequest&gt;, ThreadPool::TPHandle&amp;) 
-| + 70.00% PrimaryLogPG::do_request(boost::intrusive_ptr&lt;OpRequest&gt;&amp;, ThreadPool::TPHandle&amp;) 
-| + 68.00% PGBackend::handle_message(boost::intrusive_ptr&lt;OpRequest&gt;) 
-| | + 68.00% ReplicatedBackend::_handle_message(boost::intrusive_ptr&lt;OpRequest&gt;) 
-| | + 68.00% ReplicatedBackend::do_repop(boost::intrusive_ptr&lt;OpRequest&gt;) 
-| | + 67.00% non-virtual thunk to PrimaryLogPG::queue_transactions(std::vector&lt;ObjectStore::Transaction, std::allocator&lt;ObjectStore::Transaction&gt; &gt;&amp;, boost::intrusive_ptr&lt;OpRequest&gt;) 
-| | | + 67.00% BlueStore::queue_transactions(boost::intrusive_ptr&lt;ObjectStore::CollectionImpl&gt;&amp;, std::vector&lt;ObjectStore::Transaction, std::allocator&lt;ObjectStore::Transaction&gt; &gt;&amp;, boost::intrusive_ptr&lt;TrackedOp&gt;, ThreadPool::TPHandle*) 
-| | | + 66.00% BlueStore::_txc_add_transaction(BlueStore::TransContext*, ObjectStore::Transaction*) 
-| | | | + 66.00% BlueStore::_write(BlueStore::TransContext*, boost::intrusive_ptr&lt;BlueStore::Collection&gt;&amp;, boost::intrusive_ptr&lt;BlueStore::Onode&gt;&amp;, unsigned long, unsigned long, ceph::buffer::list&amp;, unsigned int) 
-| | | | + 66.00% BlueStore::_do_write(BlueStore::TransContext*, boost::intrusive_ptr&lt;BlueStore::Collection&gt;&amp;, boost::intrusive_ptr&lt;BlueStore::Onode&gt;, unsigned long, unsigned long, ceph::buffer::list&amp;, unsigned int) 
-| | | | + 65.00% BlueStore::_do_alloc_write(BlueStore::TransContext*, boost::intrusive_ptr&lt;BlueStore::Collection&gt;, boost::intrusive_ptr&lt;BlueStore::Onode&gt;, BlueStore::WriteContext*) 
-| | | | | + 64.00% StupidAllocator::allocate(unsigned long, unsigned long, unsigned long, long, std::vector&lt;bluestore_pextent_t, mempool::pool_allocator&lt;(mempool::pool_index_t)4, bluestore_pextent_t&gt; &gt;*) 
-| | | | | | + 64.00% StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long*, unsigned int*) 
-| | | | | | + 34.00% btree::btree_iterator&lt;btree::btree_node&lt;btree::btree_map_params&lt;unsigned long, unsigned long, std::less&lt;unsigned long&gt;, mempool::pool_allocator&lt;(mempool::pool_index_t)1, std::pair&lt;unsigned long const, unsigned long&gt; &gt;, 256&gt; &gt;, std::pair&lt;unsigned long const, unsigned long&gt;&amp;, std::pair&lt;unsigned long const, unsigned long&gt;*&gt;::increment_slow() 
-| | | | | | + 26.00% StupidAllocator::_aligned_len(interval_set&lt;unsigned long, btree::btree_map&lt;unsigned long, unsigned long, std::less&lt;unsigned long&gt;, mempool::pool_allocator&lt;(mempool::pool_index_t)1, std::pair&lt;unsigned long const, unsigned long&gt; &gt;, 256&gt; &gt;::iterator, unsigned long) 
-
-
-
------ Mail original ----- 
-De: "Alexandre Derumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-À: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a> 
-Cc: "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Lundi 4 Février 2019 09:38:11 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-Hi, 
-
-some news: 
-
-I have tried with different transparent hugepage values (madvise, never) : no change 
-
-I have tried to increase bluestore_cache_size_ssd to 8G: no change 
-
-I have tried to increase TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES to 256mb : it seem to help, after 24h I'm still around 1,5ms. (need to wait some more days to be sure) 
-
-
-Note that this behaviour seem to happen really faster (&lt; 2 days) on my big nvme drives (6TB), 
-my others clusters user 1,6TB ssd. 
-
-Currently I'm using only 1 osd by nvme (I don't have more than 5000iops by osd), but I'll try this week with 2osd by nvme, to see if it's helping. 
-
-
-BTW, does somebody have already tested ceph without tcmalloc, with glibc &gt;= 2.26 (which have also thread cache) ? 
-
-
-Regards, 
-
-Alexandre 
-
-
------ Mail original ----- 
-De: "aderumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-À: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a> 
-Cc: "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Mercredi 30 Janvier 2019 19:58:15 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-</pre>
-            <blockquote type="cite">
-              <blockquote type="cite">
-                <pre class="moz-quote-pre" wrap="">Thanks. Is there any reason you monitor op_w_latency but not 
-op_r_latency but instead op_latency? 
-
-Also why do you monitor op_w_process_latency? but not op_r_process_latency? 
-</pre>
-              </blockquote>
-            </blockquote>
-            <pre class="moz-quote-pre" wrap="">I monitor read too. (I have all metrics for osd sockets, and a lot of graphs). 
-
-I just don't see latency difference on reads. (or they are very very small vs the write latency increase) 
-
-
-
------ Mail original ----- 
-De: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a> 
-À: "aderumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-Cc: "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a>, "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Mercredi 30 Janvier 2019 19:50:20 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-Hi, 
-
-Am 30.01.19 um 14:59 schrieb Alexandre DERUMIER: 
-</pre>
-            <blockquote type="cite">
-              <pre class="moz-quote-pre" wrap="">Hi Stefan, 
-
-</pre>
-              <blockquote type="cite">
-                <blockquote type="cite">
-                  <pre class="moz-quote-pre" wrap="">currently i'm in the process of switching back from jemalloc to tcmalloc 
-like suggested. This report makes me a little nervous about my change. 
-</pre>
-                </blockquote>
-              </blockquote>
-              <pre class="moz-quote-pre" wrap="">Well,I'm really not sure that it's a tcmalloc bug. 
-maybe bluestore related (don't have filestore anymore to compare) 
-I need to compare with bigger latencies 
-
-here an example, when all osd at 20-50ms before restart, then after restart (at 21:15), 1ms 
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/latencybad.png">http://odisoweb1.odiso.net/latencybad.png</a> 
-
-I observe the latency in my guest vm too, on disks iowait. 
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/latencybadvm.png">http://odisoweb1.odiso.net/latencybadvm.png</a> 
-
-</pre>
-              <blockquote type="cite">
-                <blockquote type="cite">
-                  <pre class="moz-quote-pre" wrap="">Also i'm currently only monitoring latency for filestore osds. Which 
-exact values out of the daemon do you use for bluestore? 
-</pre>
-                </blockquote>
-              </blockquote>
-              <pre class="moz-quote-pre" wrap="">here my influxdb queries: 
-
-It take op_latency.sum/op_latency.avgcount on last second. 
-
-
-SELECT non_negative_derivative(first("op_latency.sum"), 1s)/non_negative_derivative(first("op_latency.avgcount"),1s) FROM "ceph" WHERE "host" =~ /^([[host]])$/ AND "id" =~ /^([[osd]])$/ AND $timeFilter GROUP BY time($interval), "host", "id" fill(previous) 
-
-
-SELECT non_negative_derivative(first("op_w_latency.sum"), 1s)/non_negative_derivative(first("op_w_latency.avgcount"),1s) FROM "ceph" WHERE "host" =~ /^([[host]])$/ AND collection='osd' AND "id" =~ /^([[osd]])$/ AND $timeFilter GROUP BY time($interval), "host", "id" fill(previous) 
-
-
-SELECT non_negative_derivative(first("op_w_process_latency.sum"), 1s)/non_negative_derivative(first("op_w_process_latency.avgcount"),1s) FROM "ceph" WHERE "host" =~ /^([[host]])$/ AND collection='osd' AND "id" =~ /^([[osd]])$/ AND $timeFilter GROUP BY time($interval), "host", "id" fill(previous) 
-</pre>
-            </blockquote>
-            <pre class="moz-quote-pre" wrap="">Thanks. Is there any reason you monitor op_w_latency but not 
-op_r_latency but instead op_latency? 
-
-Also why do you monitor op_w_process_latency? but not op_r_process_latency? 
-
-greets, 
-Stefan 
-
-</pre>
-            <blockquote type="cite">
-              <pre class="moz-quote-pre" wrap="">
-
------ Mail original ----- 
-De: "Stefan Priebe, Profihost AG" <a class="moz-txt-link-rfc2396E" href="mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org">&lt;s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org&gt;</a> 
-À: "aderumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a>, "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a> 
-Cc: "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Mercredi 30 Janvier 2019 08:45:33 
-Objet: Re: [ceph-users] ceph osd commit latency increase over time, until restart 
-
-Hi, 
-
-Am 30.01.19 um 08:33 schrieb Alexandre DERUMIER: 
-</pre>
-              <blockquote type="cite">
-                <pre class="moz-quote-pre" wrap="">Hi, 
-
-here some new results, 
-different osd/ different cluster 
-
-before osd restart latency was between 2-5ms 
-after osd restart is around 1-1.5ms 
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/cephperf2/bad.txt">http://odisoweb1.odiso.net/cephperf2/bad.txt</a> (2-5ms) 
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/cephperf2/ok.txt">http://odisoweb1.odiso.net/cephperf2/ok.txt</a> (1-1.5ms) 
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/cephperf2/diff.txt">http://odisoweb1.odiso.net/cephperf2/diff.txt</a> 
-
-From what I see in diff, the biggest difference is in tcmalloc, but maybe I'm wrong. 
-(I'm using tcmalloc 2.5-2.2) 
-</pre>
-              </blockquote>
-              <pre class="moz-quote-pre" wrap="">currently i'm in the process of switching back from jemalloc to tcmalloc 
-like suggested. This report makes me a little nervous about my change. 
-
-Also i'm currently only monitoring latency for filestore osds. Which 
-exact values out of the daemon do you use for bluestore? 
-
-I would like to check if i see the same behaviour. 
-
-Greets, 
-Stefan 
-
-</pre>
-              <blockquote type="cite">
-                <pre class="moz-quote-pre" wrap="">----- Mail original ----- 
-De: "Sage Weil" <a class="moz-txt-link-rfc2396E" href="mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">&lt;sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org&gt;</a> 
-À: "aderumier" <a class="moz-txt-link-rfc2396E" href="mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">&lt;aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org&gt;</a> 
-Cc: "ceph-users" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">&lt;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt;</a>, "ceph-devel" <a class="moz-txt-link-rfc2396E" href="mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a> 
-Envoyé: Vendredi 25 Janvier 2019 10:49:02 
-Objet: Re: ceph osd commit latency increase over time, until restart 
-
-Can you capture a perf top or perf record to see where teh CPU time is 
-going on one of the OSDs wth a high latency? 
-
-Thanks! 
-sage 
-
-
-On Fri, 25 Jan 2019, Alexandre DERUMIER wrote: 
-
-</pre>
-                <blockquote type="cite">
-                  <pre class="moz-quote-pre" wrap="">Hi, 
-
-I have a strange behaviour of my osd, on multiple clusters, 
-
-All cluster are running mimic 13.2.1,bluestore, with ssd or nvme drivers, 
-workload is rbd only, with qemu-kvm vms running with librbd + snapshot/rbd export-diff/snapshotdelete each day for backup 
-
-When the osd are refreshly started, the commit latency is between 0,5-1ms. 
-
-But overtime, this latency increase slowly (maybe around 1ms by day), until reaching crazy 
-values like 20-200ms. 
-
-Some example graphs: 
-
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/osdlatency1.png">http://odisoweb1.odiso.net/osdlatency1.png</a> 
-<a class="moz-txt-link-freetext" href="http://odisoweb1.odiso.net/osdlatency2.png">http://odisoweb1.odiso.net/osdlatency2.png</a> 
-
-All osds have this behaviour, in all clusters. 
-
-The latency of physical disks is ok. (Clusters are far to be full loaded) 
-
-And if I restart the osd, the latency come back to 0,5-1ms. 
-
-That's remember me old tcmalloc bug, but maybe could it be a bluestore memory bug ? 
-
-Any Hints for counters/logs to check ? 
-
-
-Regards, 
-
-Alexandre 
-
-
-</pre>
-                </blockquote>
-                <pre class="moz-quote-pre" wrap="">_______________________________________________ 
-ceph-users mailing list 
-<a class="moz-txt-link-abbreviated" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a> 
-<a class="moz-txt-link-freetext" href="http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a> 
-
-</pre>
-              </blockquote>
-            </blockquote>
-          </blockquote>
-        </blockquote>
-        <pre class="moz-quote-pre" wrap="">
-
-
-</pre>
-      </blockquote>
-      <pre class="moz-quote-pre" wrap="">
-
-
-
-</pre>
-    </blockquote>
-  </body>
-</html>
-
---------------80F1686A3EED05D79162FAF8--
-
---===============4897656043153500787==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============4897656043153500787==--
+SGkgQWxleGFuZGVyLAoKSSd2ZSByZWFkIHRocm91Z2ggeW91ciByZXBvcnRzLCBub3RoaW5nIG9i
+dmlvdXMgc28gZmFyLgoKSSBjYW4gb25seSBzZWUgc2V2ZXJhbCB0aW1lcyBhdmVyYWdlIGxhdGVu
+Y3kgaW5jcmVhc2UgZm9yIE9TRCB3cml0ZSBvcHMgCihpbiBzZWNvbmRzKQowLjAwMjA0MDA2MCAo
+Zmlyc3QgaG91cikgdnMuCgowLjAwMjQ4MzUxNiAobGFzdCAyNCBob3VycykgdnMuCjAuMDA4Mzgy
+MDg3IChsYXN0IGhvdXIpCgpzdWJvcF93X2xhdGVuY3k6CjAuMDAwNDc4OTM0IChmaXJzdCBob3Vy
+KSB2cy4KMC4wMDA1Mzc5NTYgKGxhc3QgMjQgaG91cnMpIHZzLgowLjAwMzA3MzQ3NSAobGFzdCBo
+b3VyKQoKYW5kIE9TRCByZWFkIG9wcywgb3NkX3JfbGF0ZW5jeToKCjAuMDAwNDA4NTk1IChmaXJz
+dCBob3VyKQowLjAwMDcwOTAzMSAoMjQgaG91cnMpCjAuMDA0OTc5NTQwIChsYXN0IGhvdXIpCgpX
+aGF0J3MgaW50ZXJlc3RpbmcgaXMgdGhhdCBzdWNoIGxhdGVuY3kgZGlmZmVyZW5jZXMgYXJlbid0
+IG9ic2VydmVkIGF0IApuZWl0aGVyIEJsdWVTdG9yZSBsZXZlbCAoYW55IF9sYXQgcGFyYW1zIHVu
+ZGVyICJibHVlc3RvcmUiIHNlY3Rpb24pIG5vciAKcm9ja3NkYiBvbmUuCgpXaGljaCBwcm9iYWJs
+eSBtZWFucyB0aGF0IHRoZSBpc3N1ZSBpcyByYXRoZXIgc29tZXdoZXJlIGFib3ZlIEJsdWVTdG9y
+ZS4KClN1Z2dlc3QgdG8gcHJvY2VlZCB3aXRoIHBlcmYgZHVtcHMgY29sbGVjdGlvbiB0byBzZWUg
+aWYgdGhlIHBpY3R1cmUgCnN0YXlzIHRoZSBzYW1lLgoKVy5yLnQuIG1lbW9yeSB1c2FnZSB5b3Ug
+b2JzZXJ2ZWQgSSBzZWUgbm90aGluZyBzdXNwaWNpb3VzIHNvIGZhciAtIE5vIApkZWNyZWFzZSBp
+biBSU1MgcmVwb3J0IGlzIGEga25vd24gYXJ0aWZhY3QgdGhhdCBzZWVtcyB0byBiZSBzYWZlLgoK
+VGhhbmtzLApJZ29yCgpPbiAyLzEzLzIwMTkgMTE6NDIgQU0sIEFsZXhhbmRyZSBERVJVTUlFUiB3
+cm90ZToKID4gSGkgSWdvciwKID4KID4gVGhhbmtzIGFnYWluIGZvciBoZWxwaW5nICEKID4KID4K
+ID4KID4gSSBoYXZlIHVwZ3JhZGUgdG8gbGFzdCBtaW1pYyB0aGlzIHdlZWtlbmQsIGFuZCB3aXRo
+IG5ldyBhdXRvdHVuZSBtZW1vcnksCiA+IEkgaGF2ZSBzZXR1cCBvc2RfbWVtb3J5X3RhcmdldCB0
+byA4Ry7CoCAobXkgbnZtZSBhcmUgNlRCKQogPgogPgogPiBJIGhhdmUgZG9uZSBhIGxvdCBvZiBw
+ZXJmIGR1bXAgYW5kIG1lbXBvb2wgZHVtcCBhbmQgcHMgb2YgcHJvY2VzcyB0byAKc2VlIHJzcyBt
+ZW1vcnkgYXQgZGlmZmVyZW50IGhvdXJzLAogPiBoZXJlIHRoZSByZXBvcnRzIGZvciBvc2QuMDoK
+ID4KID4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5c2lzLwogPgogPgogPiBv
+c2QgaGFzIGJlZW4gc3RhcnRlZCB0aGUgMTItMDItMjAxOSBhdCAwODowMAogPgogPiBmaXJzdCBy
+ZXBvcnQgYWZ0ZXIgMWggcnVubmluZwogPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJm
+YW5hbHlzaXMvb3NkLjAuMTItMDItMjAxOC4wOTozMC5wZXJmLnR4dAogPiAKaHR0cDovL29kaXNv
+d2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5c2lzL29zZC4wLjEyLTAyLTIwMTguMDk6MzAuZHVtcF9t
+ZW1wb29scy50eHQKID4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5c2lzL29z
+ZC4wLjEyLTAyLTIwMTguMDk6MzAucHMudHh0CiA+CiA+CiA+CiA+IHJlcG9ydMKgIGFmdGVyIDI0
+IGJlZm9yZSBjb3VudGVyIHJlc2V0cwogPgogPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9w
+ZXJmYW5hbHlzaXMvb3NkLjAuMTMtMDItMjAxOC4wODowMC5wZXJmLnR4dAogPiAKaHR0cDovL29k
+aXNvd2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5c2lzL29zZC4wLjEzLTAyLTIwMTguMDg6MDAuZHVt
+cF9tZW1wb29scy50eHQKID4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5c2lz
+L29zZC4wLjEzLTAyLTIwMTguMDg6MDAucHMudHh0CiA+CiA+IHJlcG9ydCAxaCBhZnRlciBjb3Vu
+dGVyIHJlc2V0CiA+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L3BlcmZhbmFseXNpcy9vc2Qu
+MC4xMy0wMi0yMDE4LjA5OjAwLnBlcmYudHh0CiA+IApodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5l
+dC9wZXJmYW5hbHlzaXMvb3NkLjAuMTMtMDItMjAxOC4wOTowMC5kdW1wX21lbXBvb2xzLnR4dAog
+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJmYW5hbHlzaXMvb3NkLjAuMTMtMDItMjAx
+OC4wOTowMC5wcy50eHQKID4KID4KID4KID4KID4gSSdtIHNlZWluZyB0aGUgYmx1ZXN0b3JlIGJ1
+ZmZlciBieXRlcyBtZW1vcnkgaW5jcmVhc2luZyB1cCB0byA0R8KgIAphcm91bmQgMTItMDItMjAx
+OSBhdCAxNDowMAogPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJmYW5hbHlzaXMvZ3Jh
+cGhzMi5wbmcKID4gVGhlbiBhZnRlciB0aGF0LCBzbG93bHkgZGVjcmVhc2luZy4KID4KID4KID4g
+QW5vdGhlciBzdHJhbmdlIHRoaW5nLAogPiBJJ20gc2VlaW5nIHRvdGFsIGJ5dGVzIGF0IDVHIGF0
+IDEyLTAyLTIwMTguMTM6MzAKID4gCmh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L3BlcmZhbmFs
+eXNpcy9vc2QuMC4xMi0wMi0yMDE4LjEzOjMwLmR1bXBfbWVtcG9vbHMudHh0CiA+IFRoZW4gaXMg
+ZGVjcmVhc2luZyBvdmVyIHRpbWUgKGFyb3VuZCAzLDdHIHRoaXMgbW9ybmluZyksIGJ1dCBSU1Mg
+aXMgCnN0aWxsIGF0IDhHCiA+CiA+CiA+IEknbSBncmFwaGluZyBtZW1wb29scyBjb3VudGVycyB0
+b28gc2luY2UgeWVzdGVyZGF5LCBzbyBJJ2xsIGFibGUgdG8gCnRyYWNrIHRoZW0gb3ZlciB0aW1l
+LgogPgogPiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCiA+IERlOiAiSWdvciBGZWRvdG92IiA8
+aWZlZG90b3ZAc3VzZS5kZT4KID4gw4A6ICJBbGV4YW5kcmUgRGVydW1pZXIiIDxhZGVydW1pZXJA
+b2Rpc28uY29tPgogPiBDYzogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiwgImNlcGgt
+dXNlcnMiIAo8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+CiA+IEVudm95w6k6IEx1bmRpIDExIEbDqXZyaWVyIDIwMTkg
+MTI6MDM6MTcKID4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gY2VwaCBvc2QgY29tbWl0IGxhdGVu
+Y3kgaW5jcmVhc2Ugb3ZlciB0aW1lLCAKdW50aWwgcmVzdGFydAogPgogPiBPbiAyLzgvMjAxOSA2
+OjU3IFBNLCBBbGV4YW5kcmUgREVSVU1JRVIgd3JvdGU6CiA+PiBhbm90aGVyIG1lbXBvb2wgZHVt
+cCBhZnRlciAxaCBydW4uIChsYXRlbmN5IG9rKQogPj4KID4+IEJpZ2dlc3QgZGlmZmVyZW5jZToK
+ID4+CiA+PiBiZWZvcmUgcmVzdGFydAogPj4gLS0tLS0tLS0tLS0tLQogPj4gImJsdWVzdG9yZV9j
+YWNoZV9vdGhlciI6IHsKID4+ICJpdGVtcyI6IDQ4NjYxOTIwLAogPj4gImJ5dGVzIjogMTUzOTU0
+NDIyOAogPj4gfSwKID4+ICJibHVlc3RvcmVfY2FjaGVfZGF0YSI6IHsKID4+ICJpdGVtcyI6IDU0
+LAogPj4gImJ5dGVzIjogNjQzMDcyCiA+PiB9LAogPj4gKG90aGVyIGNhY2hlcyBzZWVtIHRvIGJl
+IHF1aXRlIGxvdyB0b28sIGxpa2UgYmx1ZXN0b3JlX2NhY2hlX290aGVyIAp0YWtlIGFsbCB0aGUg
+bWVtb3J5KQogPj4KID4+CiA+PiBBZnRlciByZXN0YXJ0CiA+PiAtLS0tLS0tLS0tLS0tCiA+PiAi
+Ymx1ZXN0b3JlX2NhY2hlX290aGVyIjogewogPj4gIml0ZW1zIjogMTI0MzIyOTgsCiA+PiAiYnl0
+ZXMiOiA1MDA4MzQ4OTkKID4+IH0sCiA+PiAiYmx1ZXN0b3JlX2NhY2hlX2RhdGEiOiB7CiA+PiAi
+aXRlbXMiOiA0MDA4NCwKID4+ICJieXRlcyI6IDEwNTYyMzU1MjAKID4+IH0sCiA+PgogPiBUaGlz
+IGlzIGZpbmUgYXMgY2FjaGUgaXMgd2FybWluZyBhZnRlciByZXN0YXJ0IGFuZCBzb21lIHJlYmFs
+YW5jaW5nCiA+IGJldHdlZW4gZGF0YSBhbmQgbWV0YWRhdGEgbWlnaHQgb2NjdXIuCiA+CiA+IFdo
+YXQgcmVsYXRlcyB0byBhbGxvY2F0b3IgYW5kIG1vc3QgcHJvYmFibHkgdG8gZnJhZ21lbnRhdGlv
+biBncm93dGggaXMgOgogPgogPiAiYmx1ZXN0b3JlX2FsbG9jIjogewogPiAiaXRlbXMiOiAxNjUw
+NTM5NTIsCiA+ICJieXRlcyI6IDE2NTA1Mzk1MgogPiB9LAogPgogPiB3aGljaCBoYWQgYmVlbiBo
+aWdoZXIgYmVmb3JlIHRoZSByZXNldCAoaWYgSSBnb3QgdGhlc2UgZHVtcHMnIG9yZGVyCiA+IHBy
+b3Blcmx5KQogPgogPiAiYmx1ZXN0b3JlX2FsbG9jIjogewogPiAiaXRlbXMiOiAyMTAyNDM0NTYs
+CiA+ICJieXRlcyI6IDIxMDI0MzQ1NgogPiB9LAogPgogPiBCdXQgYXMgSSBtZW50aW9uZWQgLSBJ
+J20gbm90IDEwMCUgc3VyZSB0aGlzIG1pZ2h0IGNhdXNlIHN1Y2ggYSBodWdlCiA+IGxhdGVuY3kg
+aW5jcmVhc2UuLi4KID4KID4gRG8geW91IGhhdmUgcGVyZiBjb3VudGVycyBkdW1wIGFmdGVyIHRo
+ZSByZXN0YXJ0PwogPgogPiBDb3VsZCB5b3UgY29sbGVjdCBzb21lIG1vcmUgZHVtcHMgLSBmb3Ig
+Ym90aCBtZW1wb29sIGFuZCBwZXJmIGNvdW50ZXJzPwogPgogPiBTbyBpZGVhbGx5IEknZCBsaWtl
+IHRvIGhhdmU6CiA+CiA+IDEpIG1lbXBvb2wvcGVyZiBjb3VudGVycyBkdW1wcyBhZnRlciB0aGUg
+cmVzdGFydCAoMWhvdXIgaXMgT0spCiA+CiA+IDIpIG1lbXBvb2wvcGVyZiBjb3VudGVycyBkdW1w
+cyBpbiAyNCsgaG91cnMgYWZ0ZXIgcmVzdGFydAogPgogPiAzKSByZXNldCBwZXJmIGNvdW50ZXJz
+IGFmdGVyIDIpLCB3YWl0IGZvciAxIGhvdXIgKGFuZCB3aXRob3V0IE9TRAogPiByZXN0YXJ0KSBh
+bmQgZHVtcCBtZW1wb29sL3BlcmYgY291bnRlcnMgYWdhaW4uCiA+CiA+IFNvIHdlJ2xsIGJlIGFi
+bGUgdG8gbGVhcm4gYm90aCBhbGxvY2F0b3IgbWVtIHVzYWdlIGdyb3d0aCBhbmQgb3BlcmF0aW9u
+CiA+IGxhdGVuY3kgZGlzdHJpYnV0aW9uIGZvciB0aGUgZm9sbG93aW5nIHBlcmlvZHM6CiA+CiA+
+IGEpIDFzdCBob3VyIGFmdGVyIHJlc3RhcnQKID4KID4gYikgMjV0aCBob3VyLgogPgogPgogPiBU
+aGFua3MsCiA+CiA+IElnb3IKID4KID4KID4+IGZ1bGwgbWVtcG9vbCBkdW1wIGFmdGVyIHJlc3Rh
+cnQKID4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KID4+CiA+PiB7CiA+PiAibWVt
+cG9vbCI6IHsKID4+ICJieV9wb29sIjogewogPj4gImJsb29tX2ZpbHRlciI6IHsKID4+ICJpdGVt
+cyI6IDAsCiA+PiAiYnl0ZXMiOiAwCiA+PiB9LAogPj4gImJsdWVzdG9yZV9hbGxvYyI6IHsKID4+
+ICJpdGVtcyI6IDE2NTA1Mzk1MiwKID4+ICJieXRlcyI6IDE2NTA1Mzk1MgogPj4gfSwKID4+ICJi
+bHVlc3RvcmVfY2FjaGVfZGF0YSI6IHsKID4+ICJpdGVtcyI6IDQwMDg0LAogPj4gImJ5dGVzIjog
+MTA1NjIzNTUyMAogPj4gfSwKID4+ICJibHVlc3RvcmVfY2FjaGVfb25vZGUiOiB7CiA+PiAiaXRl
+bXMiOiAyMjIyNSwKID4+ICJieXRlcyI6IDE0OTM1MjAwCiA+PiB9LAogPj4gImJsdWVzdG9yZV9j
+YWNoZV9vdGhlciI6IHsKID4+ICJpdGVtcyI6IDEyNDMyMjk4LAogPj4gImJ5dGVzIjogNTAwODM0
+ODk5CiA+PiB9LAogPj4gImJsdWVzdG9yZV9mc2NrIjogewogPj4gIml0ZW1zIjogMCwKID4+ICJi
+eXRlcyI6IDAKID4+IH0sCiA+PiAiYmx1ZXN0b3JlX3R4YyI6IHsKID4+ICJpdGVtcyI6IDExLAog
+Pj4gImJ5dGVzIjogODE4NAogPj4gfSwKID4+ICJibHVlc3RvcmVfd3JpdGluZ19kZWZlcnJlZCI6
+IHsKID4+ICJpdGVtcyI6IDUwNDcsCiA+PiAiYnl0ZXMiOiAyMjY3MzczNgogPj4gfSwKID4+ICJi
+bHVlc3RvcmVfd3JpdGluZyI6IHsKID4+ICJpdGVtcyI6IDkxLAogPj4gImJ5dGVzIjogMTY2Mjk3
+NgogPj4gfSwKID4+ICJibHVlZnMiOiB7CiA+PiAiaXRlbXMiOiAxOTA3LAogPj4gImJ5dGVzIjog
+OTU2MDAKID4+IH0sCiA+PiAiYnVmZmVyX2Fub24iOiB7CiA+PiAiaXRlbXMiOiAxOTY2NCwKID4+
+ICJieXRlcyI6IDI1NDg2MDUwCiA+PiB9LAogPj4gImJ1ZmZlcl9tZXRhIjogewogPj4gIml0ZW1z
+IjogNDYxODksCiA+PiAiYnl0ZXMiOiAyOTU2MDk2CiA+PiB9LAogPj4gIm9zZCI6IHsKID4+ICJp
+dGVtcyI6IDI0MywKID4+ICJieXRlcyI6IDMwODkwMTYKID4+IH0sCiA+PiAib3NkX21hcGJsIjog
+ewogPj4gIml0ZW1zIjogMTcsCiA+PiAiYnl0ZXMiOiAyMTQzNjYKID4+IH0sCiA+PiAib3NkX3Bn
+bG9nIjogewogPj4gIml0ZW1zIjogODg5NjczLAogPj4gImJ5dGVzIjogMzY3MTYwNDAwCiA+PiB9
+LAogPj4gIm9zZG1hcCI6IHsKID4+ICJpdGVtcyI6IDM4MDMsCiA+PiAiYnl0ZXMiOiAyMjQ1NTIK
+ID4+IH0sCiA+PiAib3NkbWFwX21hcHBpbmciOiB7CiA+PiAiaXRlbXMiOiAwLAogPj4gImJ5dGVz
+IjogMAogPj4gfSwKID4+ICJwZ21hcCI6IHsKID4+ICJpdGVtcyI6IDAsCiA+PiAiYnl0ZXMiOiAw
+CiA+PiB9LAogPj4gIm1kc19jbyI6IHsKID4+ICJpdGVtcyI6IDAsCiA+PiAiYnl0ZXMiOiAwCiA+
+PiB9LAogPj4gInVuaXR0ZXN0XzEiOiB7CiA+PiAiaXRlbXMiOiAwLAogPj4gImJ5dGVzIjogMAog
+Pj4gfSwKID4+ICJ1bml0dGVzdF8yIjogewogPj4gIml0ZW1zIjogMCwKID4+ICJieXRlcyI6IDAK
+ID4+IH0KID4+IH0sCiA+PiAidG90YWwiOiB7CiA+PiAiaXRlbXMiOiAxNzg1MTUyMDQsCiA+PiAi
+Ynl0ZXMiOiAyMTYwNjMwNTQ3CiA+PiB9CiA+PiB9CiA+PiB9CiA+PgogPj4gLS0tLS0gTWFpbCBv
+cmlnaW5hbCAtLS0tLQogPj4gRGU6ICJhZGVydW1pZXIiIDxhZGVydW1pZXJAb2Rpc28uY29tPgog
+Pj4gw4A6ICJJZ29yIEZlZG90b3YiIDxpZmVkb3RvdkBzdXNlLmRlPgogPj4gQ2M6ICJTdGVmYW4g
+UHJpZWJlLCBQcm9maWhvc3QgQUciIDxzLnByaWViZUBwcm9maWhvc3QuYWc+LCAiTWFyayAKTmVs
+c29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0
+PiwgCiJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVs
+IiAKPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgogPj4gRW52b3nDqTogVmVuZHJlZGkgOCBG
+w6l2cmllciAyMDE5IDE2OjE0OjU0CiA+PiBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9z
+ZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFzZSBvdmVyIHRpbWUsIAp1bnRpbCByZXN0YXJ0CiA+Pgog
+Pj4gSSdtIGp1c3Qgc2VlaW5nCiA+PgogPj4gU3R1cGlkQWxsb2NhdG9yOjpfYWxpZ25lZF9sZW4K
+ID4+IGFuZAogPj4gCmJ0cmVlOjpidHJlZV9pdGVyYXRvcjxidHJlZTo6YnRyZWVfbm9kZTxidHJl
+ZTo6YnRyZWVfbWFwX3BhcmFtczx1bnNpZ25lZCAKbG9uZywgdW5zaWduZWQgbG9uZywgc3RkOjps
+ZXNzPHVuc2lnbmVkIGxvbmc+LCBtZW1wb28KID4+CiA+PiBvbiAxIG9zZCwgYm90aCAxMCUuCiA+
+PgogPj4gaGVyZSB0aGUgZHVtcF9tZW1wb29scwogPj4KID4+IHsKID4+ICJtZW1wb29sIjogewog
+Pj4gImJ5X3Bvb2wiOiB7CiA+PiAiYmxvb21fZmlsdGVyIjogewogPj4gIml0ZW1zIjogMCwKID4+
+ICJieXRlcyI6IDAKID4+IH0sCiA+PiAiYmx1ZXN0b3JlX2FsbG9jIjogewogPj4gIml0ZW1zIjog
+MjEwMjQzNDU2LAogPj4gImJ5dGVzIjogMjEwMjQzNDU2CiA+PiB9LAogPj4gImJsdWVzdG9yZV9j
+YWNoZV9kYXRhIjogewogPj4gIml0ZW1zIjogNTQsCiA+PiAiYnl0ZXMiOiA2NDMwNzIKID4+IH0s
+CiA+PiAiYmx1ZXN0b3JlX2NhY2hlX29ub2RlIjogewogPj4gIml0ZW1zIjogMTA1NjM3LAogPj4g
+ImJ5dGVzIjogNzA5ODgwNjQKID4+IH0sCiA+PiAiYmx1ZXN0b3JlX2NhY2hlX290aGVyIjogewog
+Pj4gIml0ZW1zIjogNDg2NjE5MjAsCiA+PiAiYnl0ZXMiOiAxNTM5NTQ0MjI4CiA+PiB9LAogPj4g
+ImJsdWVzdG9yZV9mc2NrIjogewogPj4gIml0ZW1zIjogMCwKID4+ICJieXRlcyI6IDAKID4+IH0s
+CiA+PiAiYmx1ZXN0b3JlX3R4YyI6IHsKID4+ICJpdGVtcyI6IDEyLAogPj4gImJ5dGVzIjogODky
+OAogPj4gfSwKID4+ICJibHVlc3RvcmVfd3JpdGluZ19kZWZlcnJlZCI6IHsKID4+ICJpdGVtcyI6
+IDQwNiwKID4+ICJieXRlcyI6IDQ3OTI4NjgKID4+IH0sCiA+PiAiYmx1ZXN0b3JlX3dyaXRpbmci
+OiB7CiA+PiAiaXRlbXMiOiA2NiwKID4+ICJieXRlcyI6IDEwODU0NDAKID4+IH0sCiA+PiAiYmx1
+ZWZzIjogewogPj4gIml0ZW1zIjogMTg4MiwKID4+ICJieXRlcyI6IDkzNjAwCiA+PiB9LAogPj4g
+ImJ1ZmZlcl9hbm9uIjogewogPj4gIml0ZW1zIjogMTM4OTg2LAogPj4gImJ5dGVzIjogMjQ5ODM3
+MDEKID4+IH0sCiA+PiAiYnVmZmVyX21ldGEiOiB7CiA+PiAiaXRlbXMiOiA1NDQsCiA+PiAiYnl0
+ZXMiOiAzNDgxNgogPj4gfSwKID4+ICJvc2QiOiB7CiA+PiAiaXRlbXMiOiAyNDMsCiA+PiAiYnl0
+ZXMiOiAzMDg5MDE2CiA+PiB9LAogPj4gIm9zZF9tYXBibCI6IHsKID4+ICJpdGVtcyI6IDM2LAog
+Pj4gImJ5dGVzIjogMTc5MzA4CiA+PiB9LAogPj4gIm9zZF9wZ2xvZyI6IHsKID4+ICJpdGVtcyI6
+IDk1MjU2NCwKID4+ICJieXRlcyI6IDM3MjQ1OTY4NAogPj4gfSwKID4+ICJvc2RtYXAiOiB7CiA+
+PiAiaXRlbXMiOiAzNjM5LAogPj4gImJ5dGVzIjogMjI0NjY0CiA+PiB9LAogPj4gIm9zZG1hcF9t
+YXBwaW5nIjogewogPj4gIml0ZW1zIjogMCwKID4+ICJieXRlcyI6IDAKID4+IH0sCiA+PiAicGdt
+YXAiOiB7CiA+PiAiaXRlbXMiOiAwLAogPj4gImJ5dGVzIjogMAogPj4gfSwKID4+ICJtZHNfY28i
+OiB7CiA+PiAiaXRlbXMiOiAwLAogPj4gImJ5dGVzIjogMAogPj4gfSwKID4+ICJ1bml0dGVzdF8x
+IjogewogPj4gIml0ZW1zIjogMCwKID4+ICJieXRlcyI6IDAKID4+IH0sCiA+PiAidW5pdHRlc3Rf
+MiI6IHsKID4+ICJpdGVtcyI6IDAsCiA+PiAiYnl0ZXMiOiAwCiA+PiB9CiA+PiB9LAogPj4gInRv
+dGFsIjogewogPj4gIml0ZW1zIjogMjYwMTA5NDQ1LAogPj4gImJ5dGVzIjogMjIyODM3MDg0NQog
+Pj4gfQogPj4gfQogPj4gfQogPj4KID4+CiA+PiBhbmQgdGhlIHBlcmYgZHVtcAogPj4KID4+IHJv
+b3RAY2VwaDUtMjp+IyBjZXBoIGRhZW1vbiBvc2QuNCBwZXJmIGR1bXAKID4+IHsKID4+ICJBc3lu
+Y01lc3Nlbmdlcjo6V29ya2VyLTAiOiB7CiA+PiAibXNncl9yZWN2X21lc3NhZ2VzIjogMjI5NDg1
+NzAsCiA+PiAibXNncl9zZW5kX21lc3NhZ2VzIjogMjI1NjE1NzAsCiA+PiAibXNncl9yZWN2X2J5
+dGVzIjogMzMzMDg1MDgwMjcxLAogPj4gIm1zZ3Jfc2VuZF9ieXRlcyI6IDI2MTc5ODg3MTIwNCwK
+ID4+ICJtc2dyX2NyZWF0ZWRfY29ubmVjdGlvbnMiOiA2MTUyLAogPj4gIm1zZ3JfYWN0aXZlX2Nv
+bm5lY3Rpb25zIjogMjcwMSwKID4+ICJtc2dyX3J1bm5pbmdfdG90YWxfdGltZSI6IDEwNTUuMTk3
+ODY3MzMwLAogPj4gIm1zZ3JfcnVubmluZ19zZW5kX3RpbWUiOiAzNTIuNzY0NDgwMTIxLAogPj4g
+Im1zZ3JfcnVubmluZ19yZWN2X3RpbWUiOiA0OTkuMjA2ODMxOTU1LAogPj4gIm1zZ3JfcnVubmlu
+Z19mYXN0X2Rpc3BhdGNoX3RpbWUiOiAxMzAuOTgyMjAxNjA3CiA+PiB9LAogPj4gIkFzeW5jTWVz
+c2VuZ2VyOjpXb3JrZXItMSI6IHsKID4+ICJtc2dyX3JlY3ZfbWVzc2FnZXMiOiAxODgwMTU5MywK
+ID4+ICJtc2dyX3NlbmRfbWVzc2FnZXMiOiAxODQzMDI2NCwKID4+ICJtc2dyX3JlY3ZfYnl0ZXMi
+OiAzMDY4NzE3NjA5MzQsCiA+PiAibXNncl9zZW5kX2J5dGVzIjogMTkyNzg5MDQ4NjY2LAogPj4g
+Im1zZ3JfY3JlYXRlZF9jb25uZWN0aW9ucyI6IDU3NzMsCiA+PiAibXNncl9hY3RpdmVfY29ubmVj
+dGlvbnMiOiAyNzIxLAogPj4gIm1zZ3JfcnVubmluZ190b3RhbF90aW1lIjogODE2LjgyMTA3NjMw
+NSwKID4+ICJtc2dyX3J1bm5pbmdfc2VuZF90aW1lIjogMjYxLjM1MzIyODkyNiwKID4+ICJtc2dy
+X3J1bm5pbmdfcmVjdl90aW1lIjogMzk0LjAzNTU4NzkxMSwKID4+ICJtc2dyX3J1bm5pbmdfZmFz
+dF9kaXNwYXRjaF90aW1lIjogMTA0LjAxMjE1NTcyMAogPj4gfSwKID4+ICJBc3luY01lc3Nlbmdl
+cjo6V29ya2VyLTIiOiB7CiA+PiAibXNncl9yZWN2X21lc3NhZ2VzIjogMTg0NjM0MDAsCiA+PiAi
+bXNncl9zZW5kX21lc3NhZ2VzIjogMTgxMDU4NTYsCiA+PiAibXNncl9yZWN2X2J5dGVzIjogMTg3
+NDI1NDUzNTkwLAogPj4gIm1zZ3Jfc2VuZF9ieXRlcyI6IDIyMDczNTEwMjU1NSwKID4+ICJtc2dy
+X2NyZWF0ZWRfY29ubmVjdGlvbnMiOiA1ODk3LAogPj4gIm1zZ3JfYWN0aXZlX2Nvbm5lY3Rpb25z
+IjogMjYwNSwKID4+ICJtc2dyX3J1bm5pbmdfdG90YWxfdGltZSI6IDgwNy4xODY4NTQzMjQsCiA+
+PiAibXNncl9ydW5uaW5nX3NlbmRfdGltZSI6IDI5Ni44MzQ0MzU4MzksCiA+PiAibXNncl9ydW5u
+aW5nX3JlY3ZfdGltZSI6IDM1MS4zNjQzODk2OTEsCiA+PiAibXNncl9ydW5uaW5nX2Zhc3RfZGlz
+cGF0Y2hfdGltZSI6IDEwMS4yMTU3NzY3OTIKID4+IH0sCiA+PiAiYmx1ZWZzIjogewogPj4gImdp
+ZnRfYnl0ZXMiOiAwLAogPj4gInJlY2xhaW1fYnl0ZXMiOiAwLAogPj4gImRiX3RvdGFsX2J5dGVz
+IjogMjU2MDUwNzI0ODY0LAogPj4gImRiX3VzZWRfYnl0ZXMiOiAxMjQxMzA0MjY4OCwKID4+ICJ3
+YWxfdG90YWxfYnl0ZXMiOiAwLAogPj4gIndhbF91c2VkX2J5dGVzIjogMCwKID4+ICJzbG93X3Rv
+dGFsX2J5dGVzIjogMCwKID4+ICJzbG93X3VzZWRfYnl0ZXMiOiAwLAogPj4gIm51bV9maWxlcyI6
+IDIwOSwKID4+ICJsb2dfYnl0ZXMiOiAxMDM4MzM2MCwKID4+ICJsb2dfY29tcGFjdGlvbnMiOiAx
+NCwKID4+ICJsb2dnZWRfYnl0ZXMiOiAzMzY0OTg2ODgsCiA+PiAiZmlsZXNfd3JpdHRlbl93YWwi
+OiAyLAogPj4gImZpbGVzX3dyaXR0ZW5fc3N0IjogNDQ5OSwKID4+ICJieXRlc193cml0dGVuX3dh
+bCI6IDQxNzk4OTA5OTc4MywKID4+ICJieXRlc193cml0dGVuX3NzdCI6IDIxMzE4ODc1MDIwOQog
+Pj4gfSwKID4+ICJibHVlc3RvcmUiOiB7CiA+PiAia3ZfZmx1c2hfbGF0IjogewogPj4gImF2Z2Nv
+dW50IjogMjYzNzE5NTcsCiA+PiAic3VtIjogMjYuNzM0MDM4NDk3LAogPj4gImF2Z3RpbWUiOiAw
+LjAwMDAwMTAxMwogPj4gfSwKID4+ICJrdl9jb21taXRfbGF0IjogewogPj4gImF2Z2NvdW50Ijog
+MjYzNzE5NTcsCiA+PiAic3VtIjogMzM5Ny40OTExNTA2MDMsCiA+PiAiYXZndGltZSI6IDAuMDAw
+MTI4ODI5CiA+PiB9LAogPj4gImt2X2xhdCI6IHsKID4+ICJhdmdjb3VudCI6IDI2MzcxOTU3LAog
+Pj4gInN1bSI6IDM0MjQuMjI1MTg5MTAwLAogPj4gImF2Z3RpbWUiOiAwLjAwMDEyOTg0MwogPj4g
+fSwKID4+ICJzdGF0ZV9wcmVwYXJlX2xhdCI6IHsKID4+ICJhdmdjb3VudCI6IDMwNDg0OTI0LAog
+Pj4gInN1bSI6IDM2ODkuNTQyMTA1MzM3LAogPj4gImF2Z3RpbWUiOiAwLjAwMDEyMTAyOAogPj4g
+fSwKID4+ICJzdGF0ZV9haW9fd2FpdF9sYXQiOiB7CiA+PiAiYXZnY291bnQiOiAzMDQ4NDkyNCwK
+ID4+ICJzdW0iOiA1MDkuODY0NTQ2MTExLAogPj4gImF2Z3RpbWUiOiAwLjAwMDAxNjcyNQogPj4g
+fSwKID4+ICJzdGF0ZV9pb19kb25lX2xhdCI6IHsKID4+ICJhdmdjb3VudCI6IDMwNDg0OTI0LAog
+Pj4gInN1bSI6IDI0LjUzNDA1Mjk1MywKID4+ICJhdmd0aW1lIjogMC4wMDAwMDA4MDQKID4+IH0s
+CiA+PiAic3RhdGVfa3ZfcXVldWVkX2xhdCI6IHsKID4+ICJhdmdjb3VudCI6IDMwNDg0OTI0LAog
+Pj4gInN1bSI6IDM0ODguMzM4NDI0MjM4LAogPj4gImF2Z3RpbWUiOiAwLjAwMDExNDQyOAogPj4g
+fSwKID4+ICJzdGF0ZV9rdl9jb21taXRpbmdfbGF0IjogewogPj4gImF2Z2NvdW50IjogMzA0ODQ5
+MjQsCiA+PiAic3VtIjogNTY2MC40MzcwMDM0MzIsCiA+PiAiYXZndGltZSI6IDAuMDAwMTg1Njc5
+CiA+PiB9LAogPj4gInN0YXRlX2t2X2RvbmVfbGF0IjogewogPj4gImF2Z2NvdW50IjogMzA0ODQ5
+MjQsCiA+PiAic3VtIjogNy43NjM1MTE1MDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMjU0CiA+
+PiB9LAogPj4gInN0YXRlX2RlZmVycmVkX3F1ZXVlZF9sYXQiOiB7CiA+PiAiYXZnY291bnQiOiAy
+NjM0NjEzNCwKID4+ICJzdW0iOiA2NjYwNzEuMjk2ODU2Njk2LAogPj4gImF2Z3RpbWUiOiAwLjAy
+NTI4MTU1NwogPj4gfSwKID4+ICJzdGF0ZV9kZWZlcnJlZF9haW9fd2FpdF9sYXQiOiB7CiA+PiAi
+YXZnY291bnQiOiAyNjM0NjEzNCwKID4+ICJzdW0iOiAxNzU1LjY2MDU0NzA3MSwKID4+ICJhdmd0
+aW1lIjogMC4wMDAwNjY2MzgKID4+IH0sCiA+PiAic3RhdGVfZGVmZXJyZWRfY2xlYW51cF9sYXQi
+OiB7CiA+PiAiYXZnY291bnQiOiAyNjM0NjEzNCwKID4+ICJzdW0iOiAxODU0NjUuMTUxNjUzNzAz
+LAogPj4gImF2Z3RpbWUiOiAwLjAwNzAzOTU1OAogPj4gfSwKID4+ICJzdGF0ZV9maW5pc2hpbmdf
+bGF0IjogewogPj4gImF2Z2NvdW50IjogMzA0ODQ5MjAsCiA+PiAic3VtIjogMy4wNDY4NDc0ODEs
+CiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDk5CiA+PiB9LAogPj4gInN0YXRlX2RvbmVfbGF0Ijog
+ewogPj4gImF2Z2NvdW50IjogMzA0ODQ5MjAsCiA+PiAic3VtIjogMTMxOTMuMzYyNjg1MjgwLAog
+Pj4gImF2Z3RpbWUiOiAwLjAwMDQzMjc4MwogPj4gfSwKID4+ICJ0aHJvdHRsZV9sYXQiOiB7CiA+
+PiAiYXZnY291bnQiOiAzMDQ4NDkyNCwKID4+ICJzdW0iOiAxNC42MzQyNjk5NzksCiA+PiAiYXZn
+dGltZSI6IDAuMDAwMDAwNDgwCiA+PiB9LAogPj4gInN1Ym1pdF9sYXQiOiB7CiA+PiAiYXZnY291
+bnQiOiAzMDQ4NDkyNCwKID4+ICJzdW0iOiAzODczLjg4MzA3NjE0OCwKID4+ICJhdmd0aW1lIjog
+MC4wMDAxMjcwNzUKID4+IH0sCiA+PiAiY29tbWl0X2xhdCI6IHsKID4+ICJhdmdjb3VudCI6IDMw
+NDg0OTI0LAogPj4gInN1bSI6IDEzMzc2LjQ5MjMxNzMzMSwKID4+ICJhdmd0aW1lIjogMC4wMDA0
+Mzg3OTAKID4+IH0sCiA+PiAicmVhZF9sYXQiOiB7CiA+PiAiYXZnY291bnQiOiA1ODczOTIzLAog
+Pj4gInN1bSI6IDE4MTcuMTY3NTgyMDU3LAogPj4gImF2Z3RpbWUiOiAwLjAwMDMwOTM2MQogPj4g
+fSwKID4+ICJyZWFkX29ub2RlX21ldGFfbGF0IjogewogPj4gImF2Z2NvdW50IjogMTk2MDgyMDEs
+CiA+PiAic3VtIjogMTQ2Ljc3MDQ2NDQ4MiwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDc0ODUKID4+
+IH0sCiA+PiAicmVhZF93YWl0X2Fpb19sYXQiOiB7CiA+PiAiYXZnY291bnQiOiAxMzczNDI3OCwK
+ID4+ICJzdW0iOiAyNTMyLjU3ODA3NzI0MiwKID4+ICJhdmd0aW1lIjogMC4wMDAxODQzOTgKID4+
+IH0sCiA+PiAiY29tcHJlc3NfbGF0IjogewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAw
+LjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0sCiA+PiAiZGVjb21w
+cmVzc19sYXQiOiB7CiA+PiAiYXZnY291bnQiOiAxMzQ2OTQ1LAogPj4gInN1bSI6IDI2LjIyNzU3
+NTg5NiwKID4+ICJhdmd0aW1lIjogMC4wMDAwMTk0NzEKID4+IH0sCiA+PiAiY3N1bV9sYXQiOiB7
+CiA+PiAiYXZnY291bnQiOiAyODAyMDM5MiwKID4+ICJzdW0iOiAxNDkuNTg3ODE5MDQxLAogPj4g
+ImF2Z3RpbWUiOiAwLjAwMDAwNTMzOAogPj4gfSwKID4+ICJjb21wcmVzc19zdWNjZXNzX2NvdW50
+IjogMCwKID4+ICJjb21wcmVzc19yZWplY3RlZF9jb3VudCI6IDAsCiA+PiAid3JpdGVfcGFkX2J5
+dGVzIjogMzUyOTIzNjA1LAogPj4gImRlZmVycmVkX3dyaXRlX29wcyI6IDI0MzczMzQwLAogPj4g
+ImRlZmVycmVkX3dyaXRlX2J5dGVzIjogMjE2NzkxODQyODE2LAogPj4gIndyaXRlX3BlbmFsdHlf
+cmVhZF9vcHMiOiA4MDYyMzY2LAogPj4gImJsdWVzdG9yZV9hbGxvY2F0ZWQiOiAzNzY1NTY2MDEz
+NDQwLAogPj4gImJsdWVzdG9yZV9zdG9yZWQiOiA0MTg2MjU1MjIxODUyLAogPj4gImJsdWVzdG9y
+ZV9jb21wcmVzc2VkIjogMzk5ODEzNzkwNDAsCiA+PiAiYmx1ZXN0b3JlX2NvbXByZXNzZWRfYWxs
+b2NhdGVkIjogNzM3NDgzNDg5MjgsCiA+PiAiYmx1ZXN0b3JlX2NvbXByZXNzZWRfb3JpZ2luYWwi
+OiAxNjUwNDEzODEzNzYsCiA+PiAiYmx1ZXN0b3JlX29ub2RlcyI6IDEwNDIzMiwKID4+ICJibHVl
+c3RvcmVfb25vZGVfaGl0cyI6IDcxMjA2ODc0LAogPj4gImJsdWVzdG9yZV9vbm9kZV9taXNzZXMi
+OiAxMjE3OTE0LAogPj4gImJsdWVzdG9yZV9vbm9kZV9zaGFyZF9oaXRzIjogMjYwMTgzMjkyLAog
+Pj4gImJsdWVzdG9yZV9vbm9kZV9zaGFyZF9taXNzZXMiOiAyMjg1MTU3MywKID4+ICJibHVlc3Rv
+cmVfZXh0ZW50cyI6IDMzOTQ1MTMsCiA+PiAiYmx1ZXN0b3JlX2Jsb2JzIjogMjc3MzU4NywKID4+
+ICJibHVlc3RvcmVfYnVmZmVycyI6IDAsCiA+PiAiYmx1ZXN0b3JlX2J1ZmZlcl9ieXRlcyI6IDAs
+CiA+PiAiYmx1ZXN0b3JlX2J1ZmZlcl9oaXRfYnl0ZXMiOiA2MjAyNjAxMTIyMSwKID4+ICJibHVl
+c3RvcmVfYnVmZmVyX21pc3NfYnl0ZXMiOiA5OTUyMzM2Njk5MjIsCiA+PiAiYmx1ZXN0b3JlX3dy
+aXRlX2JpZyI6IDU2NDg4MTUsCiA+PiAiYmx1ZXN0b3JlX3dyaXRlX2JpZ19ieXRlcyI6IDU1MjUw
+MjIxNDY1NiwKID4+ICJibHVlc3RvcmVfd3JpdGVfYmlnX2Jsb2JzIjogMTI0NDA5OTIsCiA+PiAi
+Ymx1ZXN0b3JlX3dyaXRlX3NtYWxsIjogMzU4ODM3NzAsCiA+PiAiYmx1ZXN0b3JlX3dyaXRlX3Nt
+YWxsX2J5dGVzIjogMjIzNDM2OTY1NzE5LAogPj4gImJsdWVzdG9yZV93cml0ZV9zbWFsbF91bnVz
+ZWQiOiA0MDgxMjUsCiA+PiAiYmx1ZXN0b3JlX3dyaXRlX3NtYWxsX2RlZmVycmVkIjogMzQ5NjE0
+NTUsCiA+PiAiYmx1ZXN0b3JlX3dyaXRlX3NtYWxsX3ByZV9yZWFkIjogMzQ5NjE0NTUsCiA+PiAi
+Ymx1ZXN0b3JlX3dyaXRlX3NtYWxsX25ldyI6IDUxNDE5MCwKID4+ICJibHVlc3RvcmVfdHhjIjog
+MzA0ODQ5MjQsCiA+PiAiYmx1ZXN0b3JlX29ub2RlX3Jlc2hhcmQiOiA1MTQ0MTg5LAogPj4gImJs
+dWVzdG9yZV9ibG9iX3NwbGl0IjogNjAxMDQsCiA+PiAiYmx1ZXN0b3JlX2V4dGVudF9jb21wcmVz
+cyI6IDUzMzQ3MjUyLAogPj4gImJsdWVzdG9yZV9nY19tZXJnZWQiOiAyMTE0MjUyOCwKID4+ICJi
+bHVlc3RvcmVfcmVhZF9laW8iOiAwLAogPj4gImJsdWVzdG9yZV9mcmFnbWVudGF0aW9uX21pY3Jv
+cyI6IDY3CiA+PiB9LAogPj4gImZpbmlzaGVyLWRlZmVyZWRfZmluaXNoZXIiOiB7CiA+PiAicXVl
+dWVfbGVuIjogMCwKID4+ICJjb21wbGV0ZV9sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMCwK
+ID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0K
+ID4+IH0sCiA+PiAiZmluaXNoZXItZmluaXNoZXItMCI6IHsKID4+ICJxdWV1ZV9sZW4iOiAwLAog
+Pj4gImNvbXBsZXRlX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAyNjYyNTE2MywKID4+ICJz
+dW0iOiAxMDU3LjUwNjk5MDk1MSwKID4+ICJhdmd0aW1lIjogMC4wMDAwMzk3MTgKID4+IH0KID4+
+IH0sCiA+PiAiZmluaXNoZXItb2JqZWN0ZXItZmluaXNoZXItMCI6IHsKID4+ICJxdWV1ZV9sZW4i
+OiAwLAogPj4gImNvbXBsZXRlX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1
+bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfQogPj4gfSwK
+ID4+ICJtdXRleC1PU0RTaGFyZC4wOjpzZGF0YV93YWl0X2xvY2siOiB7CiA+PiAid2FpdCI6IHsK
+ID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZndGltZSI6
+IDAuMDAwMDAwMDAwCiA+PiB9CiA+PiB9LAogPj4gIm11dGV4LU9TRFNoYXJkLjA6OnNoYXJkX2xv
+Y2siOiB7CiA+PiAid2FpdCI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAw
+MDAwMDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9CiA+PiB9LAogPj4gIm11dGV4
+LU9TRFNoYXJkLjE6OnNkYXRhX3dhaXRfbG9jayI6IHsKID4+ICJ3YWl0IjogewogPj4gImF2Z2Nv
+dW50IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAw
+MDAKID4+IH0KID4+IH0sCiA+PiAibXV0ZXgtT1NEU2hhcmQuMTo6c2hhcmRfbG9jayI6IHsKID4+
+ICJ3YWl0IjogewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+
+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0KID4+IH0sCiA+PiAibXV0ZXgtT1NEU2hhcmQu
+Mjo6c2RhdGFfd2FpdF9sb2NrIjogewogPj4gIndhaXQiOiB7CiA+PiAiYXZnY291bnQiOiAwLAog
+Pj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfQog
+Pj4gfSwKID4+ICJtdXRleC1PU0RTaGFyZC4yOjpzaGFyZF9sb2NrIjogewogPj4gIndhaXQiOiB7
+CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2Z3RpbWUi
+OiAwLjAwMDAwMDAwMAogPj4gfQogPj4gfSwKID4+ICJtdXRleC1PU0RTaGFyZC4zOjpzZGF0YV93
+YWl0X2xvY2siOiB7CiA+PiAid2FpdCI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjog
+MC4wMDAwMDAwMDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9CiA+PiB9LAogPj4g
+Im11dGV4LU9TRFNoYXJkLjM6OnNoYXJkX2xvY2siOiB7CiA+PiAid2FpdCI6IHsKID4+ICJhdmdj
+b3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAw
+MDAwCiA+PiB9CiA+PiB9LAogPj4gIm11dGV4LU9TRFNoYXJkLjQ6OnNkYXRhX3dhaXRfbG9jayI6
+IHsKID4+ICJ3YWl0IjogewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAw
+MCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0KID4+IH0sCiA+PiAibXV0ZXgtT1NE
+U2hhcmQuNDo6c2hhcmRfbG9jayI6IHsKID4+ICJ3YWl0IjogewogPj4gImF2Z2NvdW50IjogMCwK
+ID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0K
+ID4+IH0sCiA+PiAibXV0ZXgtT1NEU2hhcmQuNTo6c2RhdGFfd2FpdF9sb2NrIjogewogPj4gIndh
+aXQiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2
+Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfQogPj4gfSwKID4+ICJtdXRleC1PU0RTaGFyZC41Ojpz
+aGFyZF9sb2NrIjogewogPj4gIndhaXQiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6
+IDAuMDAwMDAwMDAwLAogPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfQogPj4gfSwKID4+
+ICJtdXRleC1PU0RTaGFyZC42OjpzZGF0YV93YWl0X2xvY2siOiB7CiA+PiAid2FpdCI6IHsKID4+
+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZndGltZSI6IDAu
+MDAwMDAwMDAwCiA+PiB9CiA+PiB9LAogPj4gIm11dGV4LU9TRFNoYXJkLjY6OnNoYXJkX2xvY2si
+OiB7CiA+PiAid2FpdCI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAw
+MDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9CiA+PiB9LAogPj4gIm11dGV4LU9T
+RFNoYXJkLjc6OnNkYXRhX3dhaXRfbG9jayI6IHsKID4+ICJ3YWl0IjogewogPj4gImF2Z2NvdW50
+IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAK
+ID4+IH0KID4+IH0sCiA+PiAibXV0ZXgtT1NEU2hhcmQuNzo6c2hhcmRfbG9jayI6IHsKID4+ICJ3
+YWl0IjogewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJh
+dmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0KID4+IH0sCiA+PiAib2JqZWN0ZXIiOiB7CiA+PiAi
+b3BfYWN0aXZlIjogMCwKID4+ICJvcF9sYWdneSI6IDAsCiA+PiAib3Bfc2VuZCI6IDAsCiA+PiAi
+b3Bfc2VuZF9ieXRlcyI6IDAsCiA+PiAib3BfcmVzZW5kIjogMCwKID4+ICJvcF9yZXBseSI6IDAs
+CiA+PiAib3AiOiAwLAogPj4gIm9wX3IiOiAwLAogPj4gIm9wX3ciOiAwLAogPj4gIm9wX3JtdyI6
+IDAsCiA+PiAib3BfcGciOiAwLAogPj4gIm9zZG9wX3N0YXQiOiAwLAogPj4gIm9zZG9wX2NyZWF0
+ZSI6IDAsCiA+PiAib3Nkb3BfcmVhZCI6IDAsCiA+PiAib3Nkb3Bfd3JpdGUiOiAwLAogPj4gIm9z
+ZG9wX3dyaXRlZnVsbCI6IDAsCiA+PiAib3Nkb3Bfd3JpdGVzYW1lIjogMCwKID4+ICJvc2RvcF9h
+cHBlbmQiOiAwLAogPj4gIm9zZG9wX3plcm8iOiAwLAogPj4gIm9zZG9wX3RydW5jYXRlIjogMCwK
+ID4+ICJvc2RvcF9kZWxldGUiOiAwLAogPj4gIm9zZG9wX21hcGV4dCI6IDAsCiA+PiAib3Nkb3Bf
+c3BhcnNlX3JlYWQiOiAwLAogPj4gIm9zZG9wX2Nsb25lcmFuZ2UiOiAwLAogPj4gIm9zZG9wX2dl
+dHhhdHRyIjogMCwKID4+ICJvc2RvcF9zZXR4YXR0ciI6IDAsCiA+PiAib3Nkb3BfY21weGF0dHIi
+OiAwLAogPj4gIm9zZG9wX3JteGF0dHIiOiAwLAogPj4gIm9zZG9wX3Jlc2V0eGF0dHJzIjogMCwK
+ID4+ICJvc2RvcF90bWFwX3VwIjogMCwKID4+ICJvc2RvcF90bWFwX3B1dCI6IDAsCiA+PiAib3Nk
+b3BfdG1hcF9nZXQiOiAwLAogPj4gIm9zZG9wX2NhbGwiOiAwLAogPj4gIm9zZG9wX3dhdGNoIjog
+MCwKID4+ICJvc2RvcF9ub3RpZnkiOiAwLAogPj4gIm9zZG9wX3NyY19jbXB4YXR0ciI6IDAsCiA+
+PiAib3Nkb3BfcGdscyI6IDAsCiA+PiAib3Nkb3BfcGdsc19maWx0ZXIiOiAwLAogPj4gIm9zZG9w
+X290aGVyIjogMCwKID4+ICJsaW5nZXJfYWN0aXZlIjogMCwKID4+ICJsaW5nZXJfc2VuZCI6IDAs
+CiA+PiAibGluZ2VyX3Jlc2VuZCI6IDAsCiA+PiAibGluZ2VyX3BpbmciOiAwLAogPj4gInBvb2xv
+cF9hY3RpdmUiOiAwLAogPj4gInBvb2xvcF9zZW5kIjogMCwKID4+ICJwb29sb3BfcmVzZW5kIjog
+MCwKID4+ICJwb29sc3RhdF9hY3RpdmUiOiAwLAogPj4gInBvb2xzdGF0X3NlbmQiOiAwLAogPj4g
+InBvb2xzdGF0X3Jlc2VuZCI6IDAsCiA+PiAic3RhdGZzX2FjdGl2ZSI6IDAsCiA+PiAic3RhdGZz
+X3NlbmQiOiAwLAogPj4gInN0YXRmc19yZXNlbmQiOiAwLAogPj4gImNvbW1hbmRfYWN0aXZlIjog
+MCwKID4+ICJjb21tYW5kX3NlbmQiOiAwLAogPj4gImNvbW1hbmRfcmVzZW5kIjogMCwKID4+ICJt
+YXBfZXBvY2giOiAxMDU5MTMsCiA+PiAibWFwX2Z1bGwiOiAwLAogPj4gIm1hcF9pbmMiOiA4Mjgs
+CiA+PiAib3NkX3Nlc3Npb25zIjogMCwKID4+ICJvc2Rfc2Vzc2lvbl9vcGVuIjogMCwKID4+ICJv
+c2Rfc2Vzc2lvbl9jbG9zZSI6IDAsCiA+PiAib3NkX2xhZ2d5IjogMCwKID4+ICJvbWFwX3dyIjog
+MCwKID4+ICJvbWFwX3JkIjogMCwKID4+ICJvbWFwX2RlbCI6IDAKID4+IH0sCiA+PiAib3NkIjog
+ewogPj4gIm9wX3dpcCI6IDAsCiA+PiAib3AiOiAxNjc1ODEwMiwKID4+ICJvcF9pbl9ieXRlcyI6
+IDIzODM5ODgyMDU4NiwKID4+ICJvcF9vdXRfYnl0ZXMiOiAxNjU0ODQ5OTk0NjMsCiA+PiAib3Bf
+bGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDE2NzU4MTAyLAogPj4gInN1bSI6IDM4MjQyLjQ4
+MTY0MDg0MiwKID4+ICJhdmd0aW1lIjogMC4wMDIyODIwMjkKID4+IH0sCiA+PiAib3BfcHJvY2Vz
+c19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMTY3NTgxMDIsCiA+PiAic3VtIjogMjg2NDQu
+OTA2MzEwNjg3LAogPj4gImF2Z3RpbWUiOiAwLjAwMTcwOTMxNgogPj4gfSwKID4+ICJvcF9wcmVw
+YXJlX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAxNjc2MTM2NywKID4+ICJzdW0iOiAzNDg5
+Ljg1NjU5OTkzNCwKID4+ICJhdmd0aW1lIjogMC4wMDAyMDgyMDgKID4+IH0sCiA+PiAib3BfciI6
+IDYxODg1NjUsCiA+PiAib3Bfcl9vdXRfYnl0ZXMiOiAxNjU0ODQ5OTk0NjMsCiA+PiAib3Bfcl9s
+YXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogNjE4ODU2NSwKID4+ICJzdW0iOiA0NTA3LjM2NTc1
+Njc5MiwKID4+ICJhdmd0aW1lIjogMC4wMDA3MjgzMzcKID4+IH0sCiA+PiAib3Bfcl9wcm9jZXNz
+X2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiA2MTg4NTY1LAogPj4gInN1bSI6IDk0Mi4zNjMw
+NjM0MjksCiA+PiAiYXZndGltZSI6IDAuMDAwMTUyMjc0CiA+PiB9LAogPj4gIm9wX3JfcHJlcGFy
+ZV9sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogNjE4ODY0NCwKID4+ICJzdW0iOiA5ODIuODY2
+NzEwMzg5LAogPj4gImF2Z3RpbWUiOiAwLjAwMDE1ODgxNwogPj4gfSwKID4+ICJvcF93IjogMTA1
+NDYwMzcsCiA+PiAib3Bfd19pbl9ieXRlcyI6IDIzODMzNDMyOTQ5NCwKID4+ICJvcF93X2xhdGVu
+Y3kiOiB7CiA+PiAiYXZnY291bnQiOiAxMDU0NjAzNywKID4+ICJzdW0iOiAzMzE2MC43MTk5OTgz
+MTYsCiA+PiAiYXZndGltZSI6IDAuMDAzMTQ0Mzc3CiA+PiB9LAogPj4gIm9wX3dfcHJvY2Vzc19s
+YXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMTA1NDYwMzcsCiA+PiAic3VtIjogMjc2NjguNzAy
+MDI5MDMwLAogPj4gImF2Z3RpbWUiOiAwLjAwMjYyMzYxMQogPj4gfSwKID4+ICJvcF93X3ByZXBh
+cmVfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDEwNTQ4NjUyLAogPj4gInN1bSI6IDI0OTku
+Njg4NjA5MTczLAogPj4gImF2Z3RpbWUiOiAwLjAwMDIzNjk2NwogPj4gfSwKID4+ICJvcF9ydyI6
+IDIzNTAwLAogPj4gIm9wX3J3X2luX2J5dGVzIjogNjQ0OTEwOTIsCiA+PiAib3Bfcndfb3V0X2J5
+dGVzIjogMCwKID4+ICJvcF9yd19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMjM1MDAsCiA+
+PiAic3VtIjogNTc0LjM5NTg4NTczNCwKID4+ICJhdmd0aW1lIjogMC4wMjQ0NDIzNzgKID4+IH0s
+CiA+PiAib3BfcndfcHJvY2Vzc19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMjM1MDAsCiA+
+PiAic3VtIjogMzMuODQxMjE4MjI4LAogPj4gImF2Z3RpbWUiOiAwLjAwMTQ0MDA1MQogPj4gfSwK
+ID4+ICJvcF9yd19wcmVwYXJlX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAyNDA3MSwKID4+
+ICJzdW0iOiA3LjMwMTI4MDM3MiwKID4+ICJhdmd0aW1lIjogMC4wMDAzMDMzMjIKID4+IH0sCiA+
+PiAib3BfYmVmb3JlX3F1ZXVlX29wX2xhdCI6IHsKID4+ICJhdmdjb3VudCI6IDU3ODkyOTg2LAog
+Pj4gInN1bSI6IDE1MDIuMTE3NzE4ODg5LAogPj4gImF2Z3RpbWUiOiAwLjAwMDAyNTk0NgogPj4g
+fSwKID4+ICJvcF9iZWZvcmVfZGVxdWV1ZV9vcF9sYXQiOiB7CiA+PiAiYXZnY291bnQiOiA1ODA5
+MTY4MywKID4+ICJzdW0iOiA0NTE5NC40NTMyNTQwMzcsCiA+PiAiYXZndGltZSI6IDAuMDAwNzc3
+OTg0CiA+PiB9LAogPj4gInN1Ym9wIjogMTk3ODQ3NTgsCiA+PiAic3Vib3BfaW5fYnl0ZXMiOiA1
+NDcxNzQ5Njk3NTQsCiA+PiAic3Vib3BfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDE5Nzg0
+NzU4LAogPj4gInN1bSI6IDEzMDE5LjcxNDQyNDA2MCwKID4+ICJhdmd0aW1lIjogMC4wMDA2NTgw
+NjcKID4+IH0sCiA+PiAic3Vib3BfdyI6IDE5Nzg0NzU4LAogPj4gInN1Ym9wX3dfaW5fYnl0ZXMi
+OiA1NDcxNzQ5Njk3NTQsCiA+PiAic3Vib3Bfd19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50Ijog
+MTk3ODQ3NTgsCiA+PiAic3VtIjogMTMwMTkuNzE0NDI0MDYwLAogPj4gImF2Z3RpbWUiOiAwLjAw
+MDY1ODA2NwogPj4gfSwKID4+ICJzdWJvcF9wdWxsIjogMCwKID4+ICJzdWJvcF9wdWxsX2xhdGVu
+Y3kiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2
+Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfSwKID4+ICJzdWJvcF9wdXNoIjogMCwKID4+ICJzdWJv
+cF9wdXNoX2luX2J5dGVzIjogMCwKID4+ICJzdWJvcF9wdXNoX2xhdGVuY3kiOiB7CiA+PiAiYXZn
+Y291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2Z3RpbWUiOiAwLjAwMDAw
+MDAwMAogPj4gfSwKID4+ICJwdWxsIjogMCwKID4+ICJwdXNoIjogMjAwMywKID4+ICJwdXNoX291
+dF9ieXRlcyI6IDU1NjAwMDk3MjgsCiA+PiAicmVjb3Zlcnlfb3BzIjogMTk0MCwKID4+ICJsb2Fk
+YXZnIjogMTE4LAogPj4gImJ1ZmZlcl9ieXRlcyI6IDAsCiA+PiAiaGlzdG9yeV9hbGxvY19NYnl0
+ZXMiOiAwLAogPj4gImhpc3RvcnlfYWxsb2NfbnVtIjogMCwKID4+ICJjYWNoZWRfY3JjIjogMCwK
+ID4+ICJjYWNoZWRfY3JjX2FkanVzdGVkIjogMCwKID4+ICJtaXNzZWRfY3JjIjogMCwKID4+ICJu
+dW1wZyI6IDI0MywKID4+ICJudW1wZ19wcmltYXJ5IjogODIsCiA+PiAibnVtcGdfcmVwbGljYSI6
+IDE2MSwKID4+ICJudW1wZ19zdHJheSI6IDAsCiA+PiAibnVtcGdfcmVtb3ZpbmciOiAwLAogPj4g
+ImhlYXJ0YmVhdF90b19wZWVycyI6IDEwLAogPj4gIm1hcF9tZXNzYWdlcyI6IDcwMTMsCiA+PiAi
+bWFwX21lc3NhZ2VfZXBvY2hzIjogNzE0MywKID4+ICJtYXBfbWVzc2FnZV9lcG9jaF9kdXBzIjog
+NjMxNSwKID4+ICJtZXNzYWdlc19kZWxheWVkX2Zvcl9tYXAiOiAwLAogPj4gIm9zZF9tYXBfY2Fj
+aGVfaGl0IjogMjAzMzA5LAogPj4gIm9zZF9tYXBfY2FjaGVfbWlzcyI6IDMzLAogPj4gIm9zZF9t
+YXBfY2FjaGVfbWlzc19sb3ciOiAwLAogPj4gIm9zZF9tYXBfY2FjaGVfbWlzc19sb3dfYXZnIjog
+ewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAwCiA+PiB9LAogPj4gIm9zZF9tYXBfYmxf
+Y2FjaGVfaGl0IjogNDcwMTIsCiA+PiAib3NkX21hcF9ibF9jYWNoZV9taXNzIjogMTY4MSwKID4+
+ICJzdGF0X2J5dGVzIjogNjQwMTI0ODE5ODY1NiwKID4+ICJzdGF0X2J5dGVzX3VzZWQiOiAzNzc3
+OTc5MDcyNTEyLAogPj4gInN0YXRfYnl0ZXNfYXZhaWwiOiAyNjIzMjY5MTI2MTQ0LAogPj4gImNv
+cHlmcm9tIjogMCwKID4+ICJ0aWVyX3Byb21vdGUiOiAwLAogPj4gInRpZXJfZmx1c2giOiAwLAog
+Pj4gInRpZXJfZmx1c2hfZmFpbCI6IDAsCiA+PiAidGllcl90cnlfZmx1c2giOiAwLAogPj4gInRp
+ZXJfdHJ5X2ZsdXNoX2ZhaWwiOiAwLAogPj4gInRpZXJfZXZpY3QiOiAwLAogPj4gInRpZXJfd2hp
+dGVvdXQiOiAxNjMxLAogPj4gInRpZXJfZGlydHkiOiAyMjM2MCwKID4+ICJ0aWVyX2NsZWFuIjog
+MCwKID4+ICJ0aWVyX2RlbGF5IjogMCwKID4+ICJ0aWVyX3Byb3h5X3JlYWQiOiAwLAogPj4gInRp
+ZXJfcHJveHlfd3JpdGUiOiAwLAogPj4gImFnZW50X3dha2UiOiAwLAogPj4gImFnZW50X3NraXAi
+OiAwLAogPj4gImFnZW50X2ZsdXNoIjogMCwKID4+ICJhZ2VudF9ldmljdCI6IDAsCiA+PiAib2Jq
+ZWN0X2N0eF9jYWNoZV9oaXQiOiAxNjMxMTE1NiwKID4+ICJvYmplY3RfY3R4X2NhY2hlX3RvdGFs
+IjogMTc0MjYzOTMsCiA+PiAib3BfY2FjaGVfaGl0IjogMCwKID4+ICJvc2RfdGllcl9mbHVzaF9s
+YXQiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2
+Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfSwKID4+ICJvc2RfdGllcl9wcm9tb3RlX2xhdCI6IHsK
+ID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZndGltZSI6
+IDAuMDAwMDAwMDAwCiA+PiB9LAogPj4gIm9zZF90aWVyX3JfbGF0IjogewogPj4gImF2Z2NvdW50
+IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAK
+ID4+IH0sCiA+PiAib3NkX3BnX2luZm8iOiAzMDQ4MzExMywKID4+ICJvc2RfcGdfZmFzdGluZm8i
+OiAyOTYxOTg4NSwKID4+ICJvc2RfcGdfYmlnaW5mbyI6IDgxNzAzCiA+PiB9LAogPj4gInJlY292
+ZXJ5c3RhdGVfcGVyZiI6IHsKID4+ICJpbml0aWFsX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQi
+OiAyNDMsCiA+PiAic3VtIjogNi44NjkyOTY1MDAsCiA+PiAiYXZndGltZSI6IDAuMDI4MjY4NzA5
+CiA+PiB9LAogPj4gInN0YXJ0ZWRfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDExMjUsCiA+
+PiAic3VtIjogMTM1NTEzODQuOTE3MzM1ODUwLAogPj4gImF2Z3RpbWUiOiAxMjA0NS42NzU0ODIw
+NzYKID4+IH0sCiA+PiAicmVzZXRfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDEzNjgsCiA+
+PiAic3VtIjogMTEwMS43Mjc3OTkwNDAsCiA+PiAiYXZndGltZSI6IDAuODA1MzU2NTc4CiA+PiB9
+LAogPj4gInN0YXJ0X2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAxMzY4LAogPj4gInN1bSI6
+IDAuMDAyMDE0Nzk5LAogPj4gImF2Z3RpbWUiOiAwLjAwMDAwMTQ3MgogPj4gfSwKID4+ICJwcmlt
+YXJ5X2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiA1MDcsCiA+PiAic3VtIjogNDU3NTU2MC42
+Mzg4MjM0MjgsCiA+PiAiYXZndGltZSI6IDkwMjQuNzc0NDM1NTQ5CiA+PiB9LAogPj4gInBlZXJp
+bmdfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDU1MCwKID4+ICJzdW0iOiA0OTkuMzcyMjgz
+NjE2LAogPj4gImF2Z3RpbWUiOiAwLjkwNzk0OTYwNgogPj4gfSwKID4+ICJiYWNrZmlsbGluZ19s
+YXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+
+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0sCiA+PiAid2FpdHJlbW90ZWJhY2tmaWxscmVz
+ZXJ2ZWRfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAw
+MDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9LAogPj4gIndhaXRsb2NhbGJhY2tm
+aWxscmVzZXJ2ZWRfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4w
+MDAwMDAwMDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9LAogPj4gIm5vdGJhY2tm
+aWxsaW5nX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAw
+MDAwLAogPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfSwKID4+ICJyZXBub3RyZWNvdmVy
+aW5nX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAxMDA5LAogPj4gInN1bSI6IDg5NzUzMDEu
+MDgyMjc0NDExLAogPj4gImF2Z3RpbWUiOiA4ODk1LjI0Mzg4NzI4OAogPj4gfSwKID4+ICJyZXB3
+YWl0cmVjb3ZlcnlyZXNlcnZlZF9sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogNDIwLAogPj4g
+InN1bSI6IDk5Ljg0NjA1NjUyMCwKID4+ICJhdmd0aW1lIjogMC4yMzc3Mjg3MDYKID4+IH0sCiA+
+PiAicmVwd2FpdGJhY2tmaWxscmVzZXJ2ZWRfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDAs
+CiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9
+LAogPj4gInJlcHJlY292ZXJpbmdfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDQyMCwKID4+
+ICJzdW0iOiAyNDEuNjgyNzY0MzgyLAogPj4gImF2Z3RpbWUiOiAwLjU3NTQzNTE1MwogPj4gfSwK
+ID4+ICJhY3RpdmF0aW5nX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiA1MDcsCiA+PiAic3Vt
+IjogMTYuODkzMzQ3MzM5LAogPj4gImF2Z3RpbWUiOiAwLjAzMzMyMDIxMQogPj4gfSwKID4+ICJ3
+YWl0bG9jYWxyZWNvdmVyeXJlc2VydmVkX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAxOTks
+CiA+PiAic3VtIjogNjcyLjMzNTUxMjc2OSwKID4+ICJhdmd0aW1lIjogMy4zNzg1NzA0MTUKID4+
+IH0sCiA+PiAid2FpdHJlbW90ZXJlY292ZXJ5cmVzZXJ2ZWRfbGF0ZW5jeSI6IHsKID4+ICJhdmdj
+b3VudCI6IDE5OSwKID4+ICJzdW0iOiAyMTMuNTM2NDM5MzYzLAogPj4gImF2Z3RpbWUiOiAxLjA3
+MzA0NzQzMwogPj4gfSwKID4+ICJyZWNvdmVyaW5nX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQi
+OiAxOTksCiA+PiAic3VtIjogNzkuMDA3Njk2NDc5LAogPj4gImF2Z3RpbWUiOiAwLjM5NzAyMzYw
+MAogPj4gfSwKID4+ICJyZWNvdmVyZWRfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDUwNywK
+ID4+ICJzdW0iOiAxNC4wMDA3MzI3NDgsCiA+PiAiYXZndGltZSI6IDAuMDI3NjE0ODU3CiA+PiB9
+LAogPj4gImNsZWFuX2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAzOTUsCiA+PiAic3VtIjog
+NDU3NDMyNS45MDAzNzEwODMsCiA+PiAiYXZndGltZSI6IDExNTgwLjU3MTg5OTY3MwogPj4gfSwK
+ID4+ICJhY3RpdmVfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDQyNSwKID4+ICJzdW0iOiA0
+NTc1MTA3LjYzMDEyMzY4MCwKID4+ICJhdmd0aW1lIjogMTA3NjQuOTU5MTI5NzAyCiA+PiB9LAog
+Pj4gInJlcGxpY2FhY3RpdmVfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDU4OSwKID4+ICJz
+dW0iOiA4OTc1MTg0LjQ5OTA0OTk1NCwKID4+ICJhdmd0aW1lIjogMTUyMzguMDA0MjQyODY5CiA+
+PiB9LAogPj4gInN0cmF5X2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiA4MTgsCiA+PiAic3Vt
+IjogODAwLjcyOTQ1NTY2NiwKID4+ICJhdmd0aW1lIjogMC45Nzg4ODY4NjUKID4+IH0sCiA+PiAi
+Z2V0aW5mb19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogNTUwLAogPj4gInN1bSI6IDE1LjA4
+NTY2NzA0OCwKID4+ICJhdmd0aW1lIjogMC4wMjc0Mjg0ODUKID4+IH0sCiA+PiAiZ2V0bG9nX2xh
+dGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiA1NDYsCiA+PiAic3VtIjogMy40ODIxNzU2OTMsCiA+
+PiAiYXZndGltZSI6IDAuMDA2Mzc3NjExCiA+PiB9LAogPj4gIndhaXRhY3RpbmdjaGFuZ2VfbGF0
+ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDM5LAogPj4gInN1bSI6IDM1LjQ0NDU1MTI4NCwKID4+
+ICJhdmd0aW1lIjogMC45MDg4MzQ2NDgKID4+IH0sCiA+PiAiaW5jb21wbGV0ZV9sYXRlbmN5Ijog
+ewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1l
+IjogMC4wMDAwMDAwMDAKID4+IH0sCiA+PiAiZG93bl9sYXRlbmN5IjogewogPj4gImF2Z2NvdW50
+IjogMCwKID4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAK
+ID4+IH0sCiA+PiAiZ2V0bWlzc2luZ19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogNTA3LAog
+Pj4gInN1bSI6IDYuNzAyMTI5NjI0LAogPj4gImF2Z3RpbWUiOiAwLjAxMzIxOTE5MAogPj4gfSwK
+ID4+ICJ3YWl0dXB0aHJ1X2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiA1MDcsCiA+PiAic3Vt
+IjogNDc0LjA5ODI2MTcyNywKID4+ICJhdmd0aW1lIjogMC45MzUxMDUwNTIKID4+IH0sCiA+PiAi
+bm90cmVjb3ZlcmluZ19sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMCwKID4+ICJzdW0iOiAw
+LjAwMDAwMDAwMCwKID4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKID4+IH0KID4+IH0sCiA+PiAi
+cm9ja3NkYiI6IHsKID4+ICJnZXQiOiAyODMyMDk3NywKID4+ICJzdWJtaXRfdHJhbnNhY3Rpb24i
+OiAzMDQ4NDkyNCwKID4+ICJzdWJtaXRfdHJhbnNhY3Rpb25fc3luYyI6IDI2MzcxOTU3LAogPj4g
+ImdldF9sYXRlbmN5IjogewogPj4gImF2Z2NvdW50IjogMjgzMjA5NzcsCiA+PiAic3VtIjogMzI1
+LjkwMDkwODczMywKID4+ICJhdmd0aW1lIjogMC4wMDAwMTE1MDcKID4+IH0sCiA+PiAic3VibWl0
+X2xhdGVuY3kiOiB7CiA+PiAiYXZnY291bnQiOiAzMDQ4NDkyNCwKID4+ICJzdW0iOiAxODM1Ljg4
+ODY5MjM3MSwKID4+ICJhdmd0aW1lIjogMC4wMDAwNjAyMjIKID4+IH0sCiA+PiAic3VibWl0X3N5
+bmNfbGF0ZW5jeSI6IHsKID4+ICJhdmdjb3VudCI6IDI2MzcxOTU3LAogPj4gInN1bSI6IDE0MzEu
+NTU1MjMwNjI4LAogPj4gImF2Z3RpbWUiOiAwLjAwMDA1NDI4MwogPj4gfSwKID4+ICJjb21wYWN0
+IjogMCwKID4+ICJjb21wYWN0X3JhbmdlIjogMCwKID4+ICJjb21wYWN0X3F1ZXVlX21lcmdlIjog
+MCwKID4+ICJjb21wYWN0X3F1ZXVlX2xlbiI6IDAsCiA+PiAicm9ja3NkYl93cml0ZV93YWxfdGlt
+ZSI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZn
+dGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9LAogPj4gInJvY2tzZGJfd3JpdGVfbWVtdGFibGVfdGlt
+ZSI6IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZn
+dGltZSI6IDAuMDAwMDAwMDAwCiA+PiB9LAogPj4gInJvY2tzZGJfd3JpdGVfZGVsYXlfdGltZSI6
+IHsKID4+ICJhdmdjb3VudCI6IDAsCiA+PiAic3VtIjogMC4wMDAwMDAwMDAsCiA+PiAiYXZndGlt
+ZSI6IDAuMDAwMDAwMDAwCiA+PiB9LAogPj4gInJvY2tzZGJfd3JpdGVfcHJlX2FuZF9wb3N0X3Rp
+bWUiOiB7CiA+PiAiYXZnY291bnQiOiAwLAogPj4gInN1bSI6IDAuMDAwMDAwMDAwLAogPj4gImF2
+Z3RpbWUiOiAwLjAwMDAwMDAwMAogPj4gfQogPj4gfQogPj4gfQogPj4KID4+IC0tLS0tIE1haWwg
+b3JpZ2luYWwgLS0tLS0KID4+IERlOiAiSWdvciBGZWRvdG92IiA8aWZlZG90b3ZAc3VzZS5kZT4K
+ID4+IMOAOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4KID4+IENjOiAiU3RlZmFu
+IFByaWViZSwgUHJvZmlob3N0IEFHIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiwgIk1hcmsgCk5l
+bHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4sICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5l
+dD4sIAoiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2VwaC1kZXZl
+bCIgCjxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4KID4+IEVudm95w6k6IE1hcmRpIDUgRsOp
+dnJpZXIgMjAxOSAxODo1Njo1MQogPj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gY2VwaCBvc2Qg
+Y29tbWl0IGxhdGVuY3kgaW5jcmVhc2Ugb3ZlciB0aW1lLCAKdW50aWwgcmVzdGFydAogPj4KID4+
+IE9uIDIvNC8yMDE5IDY6NDAgUE0sIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZToKID4+Pj4+IGJ1
+dCBJIGRvbid0IHNlZSBsX2JsdWVzdG9yZV9mcmFnbWVudGF0aW9uIGNvdW50ZXIuCiA+Pj4+PiAo
+YnV0IEkgaGF2ZSBibHVlc3RvcmVfZnJhZ21lbnRhdGlvbl9taWNyb3MpCiA+Pj4gb2ssIHRoaXMg
+aXMgdGhlIHNhbWUKID4+PgogPj4+IGIuYWRkX3U2NChsX2JsdWVzdG9yZV9mcmFnbWVudGF0aW9u
+LCAiYmx1ZXN0b3JlX2ZyYWdtZW50YXRpb25fbWljcm9zIiwKID4+PiAiSG93IGZyYWdtZW50ZWQg
+Ymx1ZXN0b3JlIGZyZWUgc3BhY2UgaXMgKGZyZWUgZXh0ZW50cyAvIG1heCAKcG9zc2libGUgbnVt
+YmVyIG9mIGZyZWUgZXh0ZW50cykgKiAxMDAwIik7CiA+Pj4KID4+PgogPj4+IEhlcmUgYSBncmFw
+aCBvbiBsYXN0IG1vbnRoLCB3aXRoIGJsdWVzdG9yZV9mcmFnbWVudGF0aW9uX21pY3JvcyBhbmQg
+CmxhdGVuY3ksCiA+Pj4KID4+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9sYXRlbmN5X3Zz
+X2ZyYWdtZW50YXRpb25fbWljcm9zLnBuZwogPj4gaG1tLCBzbyBmcmFnbWVudGF0aW9uIGdyb3dz
+IGV2ZW50dWFsbHkgYW5kIGRyb3BzIG9uIE9TRCByZXN0YXJ0cywgaXNuJ3QKID4+IGl0PyBUaGUg
+c2FtZSBmb3Igb3RoZXIgT1NEcz8KID4+CiA+PiBUaGlzIHByb3ZlcyBzb21lIGlzc3VlIHdpdGgg
+dGhlIGFsbG9jYXRvciAtIGdlbmVyYWxseSBmcmFnbWVudGF0aW9uCiA+PiBtaWdodCBncm93IGJ1
+dCBpdCBzaG91bGRuJ3QgcmVzZXQgb24gcmVzdGFydC4gTG9va3MgbGlrZSBzb21lIGludGVydmFs
+cwogPj4gYXJlbid0IHByb3Blcmx5IG1lcmdlZCBpbiBydW4tdGltZS4KID4+CiA+PiBPbiB0aGUg
+b3RoZXIgc2lkZSBJJ20gbm90IGNvbXBsZXRlbHkgc3VyZSB0aGF0IGxhdGVuY3kgZGVncmFkYXRp
+b24gaXMKID4+IGNhdXNlZCBieSB0aGF0IC0gZnJhZ21lbnRhdGlvbiBncm93dGggaXMgcmVsYXRp
+dmVseSBzbWFsbCAtIEkgZG9uJ3Qgc2VlCiA+PiBob3cgdGhpcyBtaWdodCBpbXBhY3QgcGVyZm9y
+bWFuY2UgdGhhdCBoaWdoLgogPj4KID4+IFdvbmRlcmluZyBpZiB5b3UgaGF2ZSBPU0QgbWVtcG9v
+bCBtb25pdG9yaW5nIChkdW1wX21lbXBvb2xzIGNvbW1hbmQKID4+IG91dHB1dCBvbiBhZG1pbiBz
+b2NrZXQpIHJlcG9ydHM/IERvIHlvdSBoYXZlIGFueSBoaXN0b3JpYyBkYXRhPwogPj4KID4+IElm
+IG5vdCBtYXkgSSBoYXZlIGN1cnJlbnQgb3V0cHV0IGFuZCBzYXkgYSBjb3VwbGUgbW9yZSBzYW1w
+bGVzIHdpdGgKID4+IDgtMTIgaG91cnMgaW50ZXJ2YWw/CiA+PgogPj4KID4+IFdydCB0byBiYWNr
+cG9ydGluZyBiaXRtYXAgYWxsb2NhdG9yIHRvIG1pbWljIC0gd2UgaGF2ZW4ndCBoYWQgc3VjaCAK
+cGxhbnMKID4+IGJlZm9yZSB0aGF0IGJ1dCBJJ2xsIGRpc2N1c3MgdGhpcyBhdCBCbHVlU3RvcmUg
+bWVldGluZyBzaG9ydGx5LgogPj4KID4+CiA+PiBUaGFua3MsCiA+PgogPj4gSWdvcgogPj4KID4+
+PiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCiA+Pj4gRGU6ICJBbGV4YW5kcmUgRGVydW1pZXIi
+IDxhZGVydW1pZXJAb2Rpc28uY29tPgogPj4+IMOAOiAiSWdvciBGZWRvdG92IiA8aWZlZG90b3ZA
+c3VzZS5kZT4KID4+PiBDYzogIlN0ZWZhbiBQcmllYmUsIFByb2ZpaG9zdCBBRyIgPHMucHJpZWJl
+QHByb2ZpaG9zdC5hZz4sICJNYXJrIApOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5jb20+LCAiU2Fn
+ZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5uZXQ+LCAKImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxp
+c3RzLmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIAo8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+
+CiA+Pj4gRW52b3nDqTogTHVuZGkgNCBGw6l2cmllciAyMDE5IDE2OjA0OjM4CiA+Pj4gT2JqZXQ6
+IFJlOiBbY2VwaC11c2Vyc10gY2VwaCBvc2QgY29tbWl0IGxhdGVuY3kgaW5jcmVhc2Ugb3ZlciB0
+aW1lLCAKdW50aWwgcmVzdGFydAogPj4+CiA+Pj4gVGhhbmtzIElnb3IsCiA+Pj4KID4+Pj4+IENv
+dWxkIHlvdSBwbGVhc2UgY29sbGVjdCBCbHVlU3RvcmUgcGVyZm9ybWFuY2UgY291bnRlcnMgcmln
+aHQgCmFmdGVyIE9TRAogPj4+Pj4gc3RhcnR1cCBhbmQgb25jZSB5b3UgZ2V0IGhpZ2ggbGF0ZW5j
+eS4KID4+Pj4+CiA+Pj4+PiBTcGVjaWZpY2FsbHkgJ2xfYmx1ZXN0b3JlX2ZyYWdtZW50YXRpb24n
+IHBhcmFtZXRlciBpcyBvZiBpbnRlcmVzdC4KID4+PiBJJ20gYWxyZWFkeSBtb25pdG9yaW5nIHdp
+dGgKID4+PiAiY2VwaCBkYWVtb24gb3NkLnggcGVyZiBkdW1wICIsIChJIGhhdmUgMm1vbnRocyBo
+aXN0b3J5IHdpbGwgYWxsIApjb3VudGVycykKID4+PgogPj4+IGJ1dCBJIGRvbid0IHNlZSBsX2Js
+dWVzdG9yZV9mcmFnbWVudGF0aW9uIGNvdW50ZXIuCiA+Pj4KID4+PiAoYnV0IEkgaGF2ZSBibHVl
+c3RvcmVfZnJhZ21lbnRhdGlvbl9taWNyb3MpCiA+Pj4KID4+PgogPj4+Pj4gQWxzbyBpZiB5b3Un
+cmUgYWJsZSB0byByZWJ1aWxkIHRoZSBjb2RlIEkgY2FuIHByb2JhYmx5IG1ha2UgYSBzaW1wbGUK
+ID4+Pj4+IHBhdGNoIHRvIHRyYWNrIGxhdGVuY3kgYW5kIHNvbWUgb3RoZXIgaW50ZXJuYWwgYWxs
+b2NhdG9yJ3MgCnBhcmFtdGVyIHRvCiA+Pj4+PiBtYWtlIHN1cmUgaXQncyBkZWdyYWRlZCBhbmQg
+bGVhcm4gbW9yZSBkZXRhaWxzLgogPj4+IFNvcnJ5LCBJdCdzIGEgY3JpdGljYWwgcHJvZHVjdGlv
+biBjbHVzdGVyLCBJIGNhbid0IHRlc3Qgb24gaXQgOigKID4+PiBCdXQgSSBoYXZlIGEgdGVzdCBj
+bHVzdGVyLCBtYXliZSBJIGNhbiB0cnkgdG8gcHV0IHNvbWUgbG9hZCBvbiBpdCwgCmFuZCB0cnkg
+dG8gcmVwcm9kdWNlLgogPj4+CiA+Pj4KID4+PgogPj4+Pj4gTW9yZSB2aWdvcm91cyBmaXggd291
+bGQgYmUgdG8gYmFja3BvcnQgYml0bWFwIGFsbG9jYXRvciBmcm9tIApOYXV0aWx1cwogPj4+Pj4g
+YW5kIHRyeSB0aGUgZGlmZmVyZW5jZS4uLgogPj4+IEFueSBwbGFuIHRvIGJhY2twb3J0IGl0IHRv
+IG1pbWljID8gKEJ1dCBJIGNhbiB3YWl0IGZvciBOYXV0aWx1cykKID4+PiBwZXJmIHJlc3VsdHMg
+b2YgbmV3IGJpdG1hcCBhbGxvY2F0b3Igc2VlbSB2ZXJ5IHByb21pc2luZyBmcm9tIHdoYXQgCkkn
+dmUgc2VlbiBpbiBQUi4KID4+PgogPj4+CiA+Pj4KID4+PiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0t
+LS0tCiA+Pj4gRGU6ICJJZ29yIEZlZG90b3YiIDxpZmVkb3RvdkBzdXNlLmRlPgogPj4+IMOAOiAi
+QWxleGFuZHJlIERlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4sICJTdGVmYW4gUHJpZWJl
+LCAKUHJvZmlob3N0IEFHIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiwgIk1hcmsgTmVsc29uIiA8
+bW5lbHNvbkByZWRoYXQuY29tPgogPj4+IENjOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5u
+ZXQ+LCAiY2VwaC11c2VycyIgCjxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2
+ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4KID4+PiBFbnZvecOpOiBMdW5kaSA0IEbD
+qXZyaWVyIDIwMTkgMTU6NTE6MzAKID4+PiBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9z
+ZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFzZSBvdmVyIHRpbWUsIAp1bnRpbCByZXN0YXJ0CiA+Pj4K
+ID4+PiBIaSBBbGV4YW5kcmUsCiA+Pj4KID4+PiBsb29rcyBsaWtlIGEgYnVnIGluIFN0dXBpZEFs
+bG9jYXRvci4KID4+PgogPj4+IENvdWxkIHlvdSBwbGVhc2UgY29sbGVjdCBCbHVlU3RvcmUgcGVy
+Zm9ybWFuY2UgY291bnRlcnMgcmlnaHQgYWZ0ZXIgCk9TRAogPj4+IHN0YXJ0dXAgYW5kIG9uY2Ug
+eW91IGdldCBoaWdoIGxhdGVuY3kuCiA+Pj4KID4+PiBTcGVjaWZpY2FsbHkgJ2xfYmx1ZXN0b3Jl
+X2ZyYWdtZW50YXRpb24nIHBhcmFtZXRlciBpcyBvZiBpbnRlcmVzdC4KID4+PgogPj4+IEFsc28g
+aWYgeW91J3JlIGFibGUgdG8gcmVidWlsZCB0aGUgY29kZSBJIGNhbiBwcm9iYWJseSBtYWtlIGEg
+c2ltcGxlCiA+Pj4gcGF0Y2ggdG8gdHJhY2sgbGF0ZW5jeSBhbmQgc29tZSBvdGhlciBpbnRlcm5h
+bCBhbGxvY2F0b3IncyBwYXJhbXRlciB0bwogPj4+IG1ha2Ugc3VyZSBpdCdzIGRlZ3JhZGVkIGFu
+ZCBsZWFybiBtb3JlIGRldGFpbHMuCiA+Pj4KID4+PgogPj4+IE1vcmUgdmlnb3JvdXMgZml4IHdv
+dWxkIGJlIHRvIGJhY2twb3J0IGJpdG1hcCBhbGxvY2F0b3IgZnJvbSBOYXV0aWx1cwogPj4+IGFu
+ZCB0cnkgdGhlIGRpZmZlcmVuY2UuLi4KID4+PgogPj4+CiA+Pj4gVGhhbmtzLAogPj4+CiA+Pj4g
+SWdvcgogPj4+CiA+Pj4KID4+PiBPbiAyLzQvMjAxOSA1OjE3IFBNLCBBbGV4YW5kcmUgREVSVU1J
+RVIgd3JvdGU6CiA+Pj4+IEhpIGFnYWluLAogPj4+PgogPj4+PiBJIHNwZWFrIHRvbyBmYXN0LCB0
+aGUgcHJvYmxlbSBoYXMgb2NjdXJlZCBhZ2Fpbiwgc28gaXQncyBub3QgCnRjbWFsbG9jIGNhY2hl
+IHNpemUgcmVsYXRlZC4KID4+Pj4KID4+Pj4KID4+Pj4gSSBoYXZlIG5vdGljZSBzb21ldGhpbmcg
+dXNpbmcgYSBzaW1wbGUgInBlcmYgdG9wIiwKID4+Pj4KID4+Pj4gZWFjaCB0aW1lIEkgaGF2ZSB0
+aGlzIHByb2JsZW0gKEkgaGF2ZSBzZWVuIGV4YWN0bHkgNCB0aW1lcyB0aGUgCnNhbWUgYmVoYXZp
+b3VyKSwKID4+Pj4KID4+Pj4gd2hlbiBsYXRlbmN5IGlzIGJhZCwgcGVyZiB0b3AgZ2l2ZSBtZSA6
+CiA+Pj4+CiA+Pj4+IFN0dXBpZEFsbG9jYXRvcjo6X2FsaWduZWRfbGVuCiA+Pj4+IGFuZAogPj4+
+PiAKYnRyZWU6OmJ0cmVlX2l0ZXJhdG9yPGJ0cmVlOjpidHJlZV9ub2RlPGJ0cmVlOjpidHJlZV9t
+YXBfcGFyYW1zPHVuc2lnbmVkIApsb25nLCB1bnNpZ25lZCBsb25nLCBzdGQ6Omxlc3M8dW5zaWdu
+ZWQgbG9uZz4sIG1lbXBvbwogPj4+PiBsOjpwb29sX2FsbG9jYXRvcjwobWVtcG9vbDo6cG9vbF9p
+bmRleF90KTEsIHN0ZDo6cGFpcjx1bnNpZ25lZCAKbG9uZyBjb25zdCwgdW5zaWduZWQgbG9uZz4g
+PiwgMjU2PiA+LCBzdGQ6OnBhaXI8dW5zaWduZWQgbG9uZyBjb25zdCwgCnVuc2lnbmVkIGxvbmc+
+Jiwgc3RkOjpwYWlyPHVuc2lnbmVkIGxvbmcKID4+Pj4gY29uc3QsIHVuc2lnbmVkIGxvbmc+Kj46
+OmluY3JlbWVudF9zbG93KCkKID4+Pj4KID4+Pj4gKGFyb3VuZCAxMC0yMCUgdGltZSBmb3IgYm90
+aCkKID4+Pj4KID4+Pj4KID4+Pj4gd2hlbiBsYXRlbmN5IGlzIGdvb2QsIEkgZG9uJ3Qgc2VlIHRo
+ZW0gYXQgYWxsLgogPj4+PgogPj4+PgogPj4+PiBJIGhhdmUgdXNlZCB0aGUgTWFyayB3YWxsY2xv
+Y2sgcHJvZmlsZXIsIGhlcmUgdGhlIHJlc3VsdHM6CiA+Pj4+CiA+Pj4+IGh0dHA6Ly9vZGlzb3dl
+YjEub2Rpc28ubmV0L2dkYnBtcC1vay50eHQKID4+Pj4KID4+Pj4gaHR0cDovL29kaXNvd2ViMS5v
+ZGlzby5uZXQvZ2RicG1wLWJhZC50eHQKID4+Pj4KID4+Pj4KID4+Pj4gaGVyZSBhbiBleHRyYWN0
+IG9mIHRoZSB0aHJlYWQgd2l0aCBidHJlZTo6YnRyZWVfaXRlcmF0b3IgJiYgClN0dXBpZEFsbG9j
+YXRvcjo6X2FsaWduZWRfbGVuCiA+Pj4+CiA+Pj4+CiA+Pj4+ICsgMTAwLjAwJSBjbG9uZQogPj4+
+PiArIDEwMC4wMCUgc3RhcnRfdGhyZWFkCiA+Pj4+ICsgMTAwLjAwJSBTaGFyZGVkVGhyZWFkUG9v
+bDo6V29ya1RocmVhZFNoYXJkZWQ6OmVudHJ5KCkKID4+Pj4gKyAxMDAuMDAlIFNoYXJkZWRUaHJl
+YWRQb29sOjpzaGFyZGVkdGhyZWFkcG9vbF93b3JrZXIodW5zaWduZWQgaW50KQogPj4+PiArIDEw
+MC4wMCUgT1NEOjpTaGFyZGVkT3BXUTo6X3Byb2Nlc3ModW5zaWduZWQgaW50LCAKY2VwaDo6aGVh
+cnRiZWF0X2hhbmRsZV9kKikKID4+Pj4gKyA3MC4wMCUgUEdPcEl0ZW06OnJ1bihPU0QqLCBPU0RT
+aGFyZCosIGJvb3N0OjppbnRydXNpdmVfcHRyPFBHPiYsIApUaHJlYWRQb29sOjpUUEhhbmRsZSYp
+CiA+Pj4+IHwgKyA3MC4wMCUgT1NEOjpkZXF1ZXVlX29wKGJvb3N0OjppbnRydXNpdmVfcHRyPFBH
+PiwgCmJvb3N0OjppbnRydXNpdmVfcHRyPE9wUmVxdWVzdD4sIFRocmVhZFBvb2w6OlRQSGFuZGxl
+JikKID4+Pj4gfCArIDcwLjAwJSAKUHJpbWFyeUxvZ1BHOjpkb19yZXF1ZXN0KGJvb3N0OjppbnRy
+dXNpdmVfcHRyPE9wUmVxdWVzdD4mLCAKVGhyZWFkUG9vbDo6VFBIYW5kbGUmKQogPj4+PiB8ICsg
+NjguMDAlIFBHQmFja2VuZDo6aGFuZGxlX21lc3NhZ2UoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8T3BS
+ZXF1ZXN0PikKID4+Pj4gfCB8ICsgNjguMDAlIApSZXBsaWNhdGVkQmFja2VuZDo6X2hhbmRsZV9t
+ZXNzYWdlKGJvb3N0OjppbnRydXNpdmVfcHRyPE9wUmVxdWVzdD4pCiA+Pj4+IHwgfCArIDY4LjAw
+JSAKUmVwbGljYXRlZEJhY2tlbmQ6OmRvX3JlcG9wKGJvb3N0OjppbnRydXNpdmVfcHRyPE9wUmVx
+dWVzdD4pCiA+Pj4+IHwgfCArIDY3LjAwJSBub24tdmlydHVhbCB0aHVuayB0byAKUHJpbWFyeUxv
+Z1BHOjpxdWV1ZV90cmFuc2FjdGlvbnMoc3RkOjp2ZWN0b3I8T2JqZWN0U3RvcmU6OlRyYW5zYWN0
+aW9uLCAKc3RkOjphbGxvY2F0b3I8T2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uPiA+JiwgCmJvb3N0
+OjppbnRydXNpdmVfcHRyPE9wUmVxdWVzdD4pCiA+Pj4+IHwgfCB8ICsgNjcuMDAlIApCbHVlU3Rv
+cmU6OnF1ZXVlX3RyYW5zYWN0aW9ucyhib29zdDo6aW50cnVzaXZlX3B0cjxPYmplY3RTdG9yZTo6
+Q29sbGVjdGlvbkltcGw+JiwgCnN0ZDo6dmVjdG9yPE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbiwg
+CnN0ZDo6YWxsb2NhdG9yPE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbj4gPiYsIApib29zdDo6aW50
+cnVzaXZlX3B0cjxUcmFja2VkT3A+LCBUaHJlYWRQb29sOjpUUEhhbmRsZSopCiA+Pj4+IHwgfCB8
+ICsgNjYuMDAlIApCbHVlU3RvcmU6Ol90eGNfYWRkX3RyYW5zYWN0aW9uKEJsdWVTdG9yZTo6VHJh
+bnNDb250ZXh0KiwgCk9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbiopCiA+Pj4+IHwgfCB8IHwgKyA2
+Ni4wMCUgQmx1ZVN0b3JlOjpfd3JpdGUoQmx1ZVN0b3JlOjpUcmFuc0NvbnRleHQqLCAKYm9vc3Q6
+OmludHJ1c2l2ZV9wdHI8Qmx1ZVN0b3JlOjpDb2xsZWN0aW9uPiYsIApib29zdDo6aW50cnVzaXZl
+X3B0cjxCbHVlU3RvcmU6Ok9ub2RlPiYsIHVuc2lnbmVkIGxvbmcsIHVuc2lnbmVkIGxvbmcsIApj
+ZXBoOjpidWZmZXI6Omxpc3QmLCB1bnNpZ25lZCBpbnQpCiA+Pj4+IHwgfCB8IHwgKyA2Ni4wMCUg
+Qmx1ZVN0b3JlOjpfZG9fd3JpdGUoQmx1ZVN0b3JlOjpUcmFuc0NvbnRleHQqLCAKYm9vc3Q6Omlu
+dHJ1c2l2ZV9wdHI8Qmx1ZVN0b3JlOjpDb2xsZWN0aW9uPiYsIApib29zdDo6aW50cnVzaXZlX3B0
+cjxCbHVlU3RvcmU6Ok9ub2RlPiwgdW5zaWduZWQgbG9uZywgdW5zaWduZWQgbG9uZywgCmNlcGg6
+OmJ1ZmZlcjo6bGlzdCYsIHVuc2lnbmVkIGludCkKID4+Pj4gfCB8IHwgfCArIDY1LjAwJSAKQmx1
+ZVN0b3JlOjpfZG9fYWxsb2Nfd3JpdGUoQmx1ZVN0b3JlOjpUcmFuc0NvbnRleHQqLCAKYm9vc3Q6
+OmludHJ1c2l2ZV9wdHI8Qmx1ZVN0b3JlOjpDb2xsZWN0aW9uPiwgCmJvb3N0OjppbnRydXNpdmVf
+cHRyPEJsdWVTdG9yZTo6T25vZGU+LCBCbHVlU3RvcmU6OldyaXRlQ29udGV4dCopCiA+Pj4+IHwg
+fCB8IHwgfCArIDY0LjAwJSBTdHVwaWRBbGxvY2F0b3I6OmFsbG9jYXRlKHVuc2lnbmVkIGxvbmcs
+IAp1bnNpZ25lZCBsb25nLCB1bnNpZ25lZCBsb25nLCBsb25nLCBzdGQ6OnZlY3RvcjxibHVlc3Rv
+cmVfcGV4dGVudF90LCAKbWVtcG9vbDo6cG9vbF9hbGxvY2F0b3I8KG1lbXBvb2w6OnBvb2xfaW5k
+ZXhfdCk0LCBibHVlc3RvcmVfcGV4dGVudF90PiA+KikKID4+Pj4gfCB8IHwgfCB8IHwgKyA2NC4w
+MCUgU3R1cGlkQWxsb2NhdG9yOjphbGxvY2F0ZV9pbnQodW5zaWduZWQgbG9uZywgCnVuc2lnbmVk
+IGxvbmcsIGxvbmcsIHVuc2lnbmVkIGxvbmcqLCB1bnNpZ25lZCBpbnQqKQogPj4+PiB8IHwgfCB8
+IHwgfCArIDM0LjAwJSAKYnRyZWU6OmJ0cmVlX2l0ZXJhdG9yPGJ0cmVlOjpidHJlZV9ub2RlPGJ0
+cmVlOjpidHJlZV9tYXBfcGFyYW1zPHVuc2lnbmVkIApsb25nLCB1bnNpZ25lZCBsb25nLCBzdGQ6
+Omxlc3M8dW5zaWduZWQgbG9uZz4sIAptZW1wb29sOjpwb29sX2FsbG9jYXRvcjwobWVtcG9vbDo6
+cG9vbF9pbmRleF90KTEsIHN0ZDo6cGFpcjx1bnNpZ25lZCAKbG9uZyBjb25zdCwgdW5zaWduZWQg
+bG9uZz4gPiwgMjU2PiA+LCBzdGQ6OnBhaXI8dW5zaWduZWQgbG9uZyBjb25zdCwgCnVuc2lnbmVk
+IGxvbmc+Jiwgc3RkOjpwYWlyPHVuc2lnbmVkIGxvbmcgY29uc3QsIHVuc2lnbmVkIApsb25nPio+
+OjppbmNyZW1lbnRfc2xvdygpCiA+Pj4+IHwgfCB8IHwgfCB8ICsgMjYuMDAlIApTdHVwaWRBbGxv
+Y2F0b3I6Ol9hbGlnbmVkX2xlbihpbnRlcnZhbF9zZXQ8dW5zaWduZWQgbG9uZywgCmJ0cmVlOjpi
+dHJlZV9tYXA8dW5zaWduZWQgbG9uZywgdW5zaWduZWQgbG9uZywgc3RkOjpsZXNzPHVuc2lnbmVk
+IGxvbmc+LCAKbWVtcG9vbDo6cG9vbF9hbGxvY2F0b3I8KG1lbXBvb2w6OnBvb2xfaW5kZXhfdCkx
+LCBzdGQ6OnBhaXI8dW5zaWduZWQgCmxvbmcgY29uc3QsIHVuc2lnbmVkIGxvbmc+ID4sIDI1Nj4g
+Pjo6aXRlcmF0b3IsIHVuc2lnbmVkIGxvbmcpCiA+Pj4+CiA+Pj4+CiA+Pj4+CiA+Pj4+IC0tLS0t
+IE1haWwgb3JpZ2luYWwgLS0tLS0KID4+Pj4gRGU6ICJBbGV4YW5kcmUgRGVydW1pZXIiIDxhZGVy
+dW1pZXJAb2Rpc28uY29tPgogPj4+PiDDgDogIlN0ZWZhbiBQcmllYmUsIFByb2ZpaG9zdCBBRyIg
+PHMucHJpZWJlQHByb2ZpaG9zdC5hZz4KID4+Pj4gQ2M6ICJTYWdlIFdlaWwiIDxzYWdlQG5ld2Ry
+ZWFtLm5ldD4sICJjZXBoLXVzZXJzIiAKPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2Vw
+aC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgogPj4+PiBFbnZvecOpOiBMdW5k
+aSA0IEbDqXZyaWVyIDIwMTkgMDk6Mzg6MTEKID4+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10g
+Y2VwaCBvc2QgY29tbWl0IGxhdGVuY3kgaW5jcmVhc2Ugb3ZlciAKdGltZSwgdW50aWwgcmVzdGFy
+dAogPj4+PgogPj4+PiBIaSwKID4+Pj4KID4+Pj4gc29tZSBuZXdzOgogPj4+PgogPj4+PiBJIGhh
+dmUgdHJpZWQgd2l0aCBkaWZmZXJlbnQgdHJhbnNwYXJlbnQgaHVnZXBhZ2UgdmFsdWVzIChtYWR2
+aXNlLCAKbmV2ZXIpIDogbm8gY2hhbmdlCiA+Pj4+CiA+Pj4+IEkgaGF2ZSB0cmllZCB0byBpbmNy
+ZWFzZSBibHVlc3RvcmVfY2FjaGVfc2l6ZV9zc2QgdG8gOEc6IG5vIGNoYW5nZQogPj4+PgogPj4+
+PiBJIGhhdmUgdHJpZWQgdG8gaW5jcmVhc2UgVENNQUxMT0NfTUFYX1RPVEFMX1RIUkVBRF9DQUNI
+RV9CWVRFUyB0byAKMjU2bWIgOiBpdCBzZWVtIHRvIGhlbHAsIGFmdGVyIDI0aCBJJ20gc3RpbGwg
+YXJvdW5kIDEsNW1zLiAobmVlZCB0byB3YWl0IApzb21lIG1vcmUgZGF5cyB0byBiZSBzdXJlKQog
+Pj4+PgogPj4+PgogPj4+PiBOb3RlIHRoYXQgdGhpcyBiZWhhdmlvdXIgc2VlbSB0byBoYXBwZW4g
+cmVhbGx5IGZhc3RlciAoPCAyIGRheXMpIApvbiBteSBiaWcgbnZtZSBkcml2ZXMgKDZUQiksCiA+
+Pj4+IG15IG90aGVycyBjbHVzdGVycyB1c2VyIDEsNlRCIHNzZC4KID4+Pj4KID4+Pj4gQ3VycmVu
+dGx5IEknbSB1c2luZyBvbmx5IDEgb3NkIGJ5IG52bWUgKEkgZG9uJ3QgaGF2ZSBtb3JlIHRoYW4g
+CjUwMDBpb3BzIGJ5IG9zZCksIGJ1dCBJJ2xsIHRyeSB0aGlzIHdlZWsgd2l0aCAyb3NkIGJ5IG52
+bWUsIHRvIHNlZSBpZiAKaXQncyBoZWxwaW5nLgogPj4+PgogPj4+PgogPj4+PiBCVFcsIGRvZXMg
+c29tZWJvZHkgaGF2ZSBhbHJlYWR5IHRlc3RlZCBjZXBoIHdpdGhvdXQgdGNtYWxsb2MsIHdpdGgg
+CmdsaWJjID49IDIuMjYgKHdoaWNoIGhhdmUgYWxzbyB0aHJlYWQgY2FjaGUpID8KID4+Pj4KID4+
+Pj4KID4+Pj4gUmVnYXJkcywKID4+Pj4KID4+Pj4gQWxleGFuZHJlCiA+Pj4+CiA+Pj4+CiA+Pj4+
+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KID4+Pj4gRGU6ICJhZGVydW1pZXIiIDxhZGVydW1p
+ZXJAb2Rpc28uY29tPgogPj4+PiDDgDogIlN0ZWZhbiBQcmllYmUsIFByb2ZpaG9zdCBBRyIgPHMu
+cHJpZWJlQHByb2ZpaG9zdC5hZz4KID4+Pj4gQ2M6ICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFt
+Lm5ldD4sICJjZXBoLXVzZXJzIiAKPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2VwaC1k
+ZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgogPj4+PiBFbnZvecOpOiBNZXJjcmVk
+aSAzMCBKYW52aWVyIDIwMTkgMTk6NTg6MTUKID4+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10g
+Y2VwaCBvc2QgY29tbWl0IGxhdGVuY3kgaW5jcmVhc2Ugb3ZlciAKdGltZSwgdW50aWwgcmVzdGFy
+dAogPj4+PgogPj4+Pj4+IFRoYW5rcy4gSXMgdGhlcmUgYW55IHJlYXNvbiB5b3UgbW9uaXRvciBv
+cF93X2xhdGVuY3kgYnV0IG5vdAogPj4+Pj4+IG9wX3JfbGF0ZW5jeSBidXQgaW5zdGVhZCBvcF9s
+YXRlbmN5PwogPj4+Pj4+CiA+Pj4+Pj4gQWxzbyB3aHkgZG8geW91IG1vbml0b3Igb3Bfd19wcm9j
+ZXNzX2xhdGVuY3k/IGJ1dCBub3QgCm9wX3JfcHJvY2Vzc19sYXRlbmN5PwogPj4+PiBJIG1vbml0
+b3IgcmVhZCB0b28uIChJIGhhdmUgYWxsIG1ldHJpY3MgZm9yIG9zZCBzb2NrZXRzLCBhbmQgYSBs
+b3QgCm9mIGdyYXBocykuCiA+Pj4+CiA+Pj4+IEkganVzdCBkb24ndCBzZWUgbGF0ZW5jeSBkaWZm
+ZXJlbmNlIG9uIHJlYWRzLiAob3IgdGhleSBhcmUgdmVyeSAKdmVyeSBzbWFsbCB2cyB0aGUgd3Jp
+dGUgbGF0ZW5jeSBpbmNyZWFzZSkKID4+Pj4KID4+Pj4KID4+Pj4KID4+Pj4gLS0tLS0gTWFpbCBv
+cmlnaW5hbCAtLS0tLQogPj4+PiBEZTogIlN0ZWZhbiBQcmllYmUsIFByb2ZpaG9zdCBBRyIgPHMu
+cHJpZWJlQHByb2ZpaG9zdC5hZz4KID4+Pj4gw4A6ICJhZGVydW1pZXIiIDxhZGVydW1pZXJAb2Rp
+c28uY29tPgogPj4+PiBDYzogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiwgImNlcGgt
+dXNlcnMiIAo8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+CiA+Pj4+IEVudm95w6k6IE1lcmNyZWRpIDMwIEphbnZpZXIg
+MjAxOSAxOTo1MDoyMAogPj4+PiBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9zZCBjb21t
+aXQgbGF0ZW5jeSBpbmNyZWFzZSBvdmVyIAp0aW1lLCB1bnRpbCByZXN0YXJ0CiA+Pj4+CiA+Pj4+
+IEhpLAogPj4+PgogPj4+PiBBbSAzMC4wMS4xOSB1bSAxNDo1OSBzY2hyaWViIEFsZXhhbmRyZSBE
+RVJVTUlFUjoKID4+Pj4+IEhpIFN0ZWZhbiwKID4+Pj4+CiA+Pj4+Pj4+IGN1cnJlbnRseSBpJ20g
+aW4gdGhlIHByb2Nlc3Mgb2Ygc3dpdGNoaW5nIGJhY2sgZnJvbSBqZW1hbGxvYyB0byAKdGNtYWxs
+b2MKID4+Pj4+Pj4gbGlrZSBzdWdnZXN0ZWQuIFRoaXMgcmVwb3J0IG1ha2VzIG1lIGEgbGl0dGxl
+IG5lcnZvdXMgYWJvdXQgbXkgCmNoYW5nZS4KID4+Pj4+IFdlbGwsSSdtIHJlYWxseSBub3Qgc3Vy
+ZSB0aGF0IGl0J3MgYSB0Y21hbGxvYyBidWcuCiA+Pj4+PiBtYXliZSBibHVlc3RvcmUgcmVsYXRl
+ZCAoZG9uJ3QgaGF2ZSBmaWxlc3RvcmUgYW55bW9yZSB0byBjb21wYXJlKQogPj4+Pj4gSSBuZWVk
+IHRvIGNvbXBhcmUgd2l0aCBiaWdnZXIgbGF0ZW5jaWVzCiA+Pj4+PgogPj4+Pj4gaGVyZSBhbiBl
+eGFtcGxlLCB3aGVuIGFsbCBvc2QgYXQgMjAtNTBtcyBiZWZvcmUgcmVzdGFydCwgdGhlbiAKYWZ0
+ZXIgcmVzdGFydCAoYXQgMjE6MTUpLCAxbXMKID4+Pj4+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28u
+bmV0L2xhdGVuY3liYWQucG5nCiA+Pj4+PgogPj4+Pj4gSSBvYnNlcnZlIHRoZSBsYXRlbmN5IGlu
+IG15IGd1ZXN0IHZtIHRvbywgb24gZGlza3MgaW93YWl0LgogPj4+Pj4KID4+Pj4+IGh0dHA6Ly9v
+ZGlzb3dlYjEub2Rpc28ubmV0L2xhdGVuY3liYWR2bS5wbmcKID4+Pj4+CiA+Pj4+Pj4+IEFsc28g
+aSdtIGN1cnJlbnRseSBvbmx5IG1vbml0b3JpbmcgbGF0ZW5jeSBmb3IgZmlsZXN0b3JlIG9zZHMu
+IApXaGljaAogPj4+Pj4+PiBleGFjdCB2YWx1ZXMgb3V0IG9mIHRoZSBkYWVtb24gZG8geW91IHVz
+ZSBmb3IgYmx1ZXN0b3JlPwogPj4+Pj4gaGVyZSBteSBpbmZsdXhkYiBxdWVyaWVzOgogPj4+Pj4K
+ID4+Pj4+IEl0IHRha2Ugb3BfbGF0ZW5jeS5zdW0vb3BfbGF0ZW5jeS5hdmdjb3VudCBvbiBsYXN0
+IHNlY29uZC4KID4+Pj4+CiA+Pj4+PgogPj4+Pj4gU0VMRUNUIG5vbl9uZWdhdGl2ZV9kZXJpdmF0
+aXZlKGZpcnN0KCJvcF9sYXRlbmN5LnN1bSIpLCAKMXMpL25vbl9uZWdhdGl2ZV9kZXJpdmF0aXZl
+KGZpcnN0KCJvcF9sYXRlbmN5LmF2Z2NvdW50IiksMXMpIEZST00gImNlcGgiIApXSEVSRSAiaG9z
+dCIgPX4gL14oW1tob3N0XV0pJC8gQU5EICJpZCIgPX4gL14oW1tvc2RdXSkkLyBBTkQgJHRpbWVG
+aWx0ZXIgCkdST1VQIEJZIHRpbWUoJGludGVydmFsKSwgImhvc3QiLCAiaWQiIGZpbGwocHJldmlv
+dXMpCiA+Pj4+PgogPj4+Pj4KID4+Pj4+IFNFTEVDVCBub25fbmVnYXRpdmVfZGVyaXZhdGl2ZShm
+aXJzdCgib3Bfd19sYXRlbmN5LnN1bSIpLCAKMXMpL25vbl9uZWdhdGl2ZV9kZXJpdmF0aXZlKGZp
+cnN0KCJvcF93X2xhdGVuY3kuYXZnY291bnQiKSwxcykgRlJPTSAKImNlcGgiIFdIRVJFICJob3N0
+IiA9fiAvXihbW2hvc3RdXSkkLyBBTkQgY29sbGVjdGlvbj0nb3NkJyBBTkQgImlkIiA9fiAKL14o
+W1tvc2RdXSkkLyBBTkQgJHRpbWVGaWx0ZXIgR1JPVVAgQlkgdGltZSgkaW50ZXJ2YWwpLCAiaG9z
+dCIsICJpZCIgCmZpbGwocHJldmlvdXMpCiA+Pj4+PgogPj4+Pj4KID4+Pj4+IFNFTEVDVCBub25f
+bmVnYXRpdmVfZGVyaXZhdGl2ZShmaXJzdCgib3Bfd19wcm9jZXNzX2xhdGVuY3kuc3VtIiksIAox
+cykvbm9uX25lZ2F0aXZlX2Rlcml2YXRpdmUoZmlyc3QoIm9wX3dfcHJvY2Vzc19sYXRlbmN5LmF2
+Z2NvdW50IiksMXMpIApGUk9NICJjZXBoIiBXSEVSRSAiaG9zdCIgPX4gL14oW1tob3N0XV0pJC8g
+QU5EIGNvbGxlY3Rpb249J29zZCcgQU5EICJpZCIgCj1+IC9eKFtbb3NkXV0pJC8gQU5EICR0aW1l
+RmlsdGVyIEdST1VQIEJZIHRpbWUoJGludGVydmFsKSwgImhvc3QiLCAiaWQiIApmaWxsKHByZXZp
+b3VzKQogPj4+PiBUaGFua3MuIElzIHRoZXJlIGFueSByZWFzb24geW91IG1vbml0b3Igb3Bfd19s
+YXRlbmN5IGJ1dCBub3QKID4+Pj4gb3Bfcl9sYXRlbmN5IGJ1dCBpbnN0ZWFkIG9wX2xhdGVuY3k/
+CiA+Pj4+CiA+Pj4+IEFsc28gd2h5IGRvIHlvdSBtb25pdG9yIG9wX3dfcHJvY2Vzc19sYXRlbmN5
+PyBidXQgbm90IApvcF9yX3Byb2Nlc3NfbGF0ZW5jeT8KID4+Pj4KID4+Pj4gZ3JlZXRzLAogPj4+
+PiBTdGVmYW4KID4+Pj4KID4+Pj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KID4+Pj4+IERl
+OiAiU3RlZmFuIFByaWViZSwgUHJvZmlob3N0IEFHIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPgog
+Pj4+Pj4gw4A6ICJhZGVydW1pZXIiIDxhZGVydW1pZXJAb2Rpc28uY29tPiwgIlNhZ2UgV2VpbCIg
+CjxzYWdlQG5ld2RyZWFtLm5ldD4KID4+Pj4+IENjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20+LCAiY2VwaC1kZXZlbCIgCjxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zz4KID4+Pj4+IEVudm95w6k6IE1lcmNyZWRpIDMwIEphbnZpZXIgMjAxOSAwODo0NTozMwogPj4+
+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gY2VwaCBvc2QgY29tbWl0IGxhdGVuY3kgaW5jcmVh
+c2Ugb3ZlciAKdGltZSwgdW50aWwgcmVzdGFydAogPj4+Pj4KID4+Pj4+IEhpLAogPj4+Pj4KID4+
+Pj4+IEFtIDMwLjAxLjE5IHVtIDA4OjMzIHNjaHJpZWIgQWxleGFuZHJlIERFUlVNSUVSOgogPj4+
+Pj4+IEhpLAogPj4+Pj4+CiA+Pj4+Pj4gaGVyZSBzb21lIG5ldyByZXN1bHRzLAogPj4+Pj4+IGRp
+ZmZlcmVudCBvc2QvIGRpZmZlcmVudCBjbHVzdGVyCiA+Pj4+Pj4KID4+Pj4+PiBiZWZvcmUgb3Nk
+IHJlc3RhcnQgbGF0ZW5jeSB3YXMgYmV0d2VlbiAyLTVtcwogPj4+Pj4+IGFmdGVyIG9zZCByZXN0
+YXJ0IGlzIGFyb3VuZCAxLTEuNW1zCiA+Pj4+Pj4KID4+Pj4+PiBodHRwOi8vb2Rpc293ZWIxLm9k
+aXNvLm5ldC9jZXBocGVyZjIvYmFkLnR4dCAoMi01bXMpCiA+Pj4+Pj4gaHR0cDovL29kaXNvd2Vi
+MS5vZGlzby5uZXQvY2VwaHBlcmYyL29rLnR4dCAoMS0xLjVtcykKID4+Pj4+PiBodHRwOi8vb2Rp
+c293ZWIxLm9kaXNvLm5ldC9jZXBocGVyZjIvZGlmZi50eHQKID4+Pj4+PgogPj4+Pj4+IEZyb20g
+d2hhdCBJIHNlZSBpbiBkaWZmLCB0aGUgYmlnZ2VzdCBkaWZmZXJlbmNlIGlzIGluIHRjbWFsbG9j
+LCAKYnV0IG1heWJlIEknbSB3cm9uZy4KID4+Pj4+PiAoSSdtIHVzaW5nIHRjbWFsbG9jIDIuNS0y
+LjIpCiA+Pj4+PiBjdXJyZW50bHkgaSdtIGluIHRoZSBwcm9jZXNzIG9mIHN3aXRjaGluZyBiYWNr
+IGZyb20gamVtYWxsb2MgdG8gCnRjbWFsbG9jCiA+Pj4+PiBsaWtlIHN1Z2dlc3RlZC4gVGhpcyBy
+ZXBvcnQgbWFrZXMgbWUgYSBsaXR0bGUgbmVydm91cyBhYm91dCBteSAKY2hhbmdlLgogPj4+Pj4K
+ID4+Pj4+IEFsc28gaSdtIGN1cnJlbnRseSBvbmx5IG1vbml0b3JpbmcgbGF0ZW5jeSBmb3IgZmls
+ZXN0b3JlIG9zZHMuIFdoaWNoCiA+Pj4+PiBleGFjdCB2YWx1ZXMgb3V0IG9mIHRoZSBkYWVtb24g
+ZG8geW91IHVzZSBmb3IgYmx1ZXN0b3JlPwogPj4+Pj4KID4+Pj4+IEkgd291bGQgbGlrZSB0byBj
+aGVjayBpZiBpIHNlZSB0aGUgc2FtZSBiZWhhdmlvdXIuCiA+Pj4+PgogPj4+Pj4gR3JlZXRzLAog
+Pj4+Pj4gU3RlZmFuCiA+Pj4+PgogPj4+Pj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KID4+
+Pj4+PiBEZTogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PgogPj4+Pj4+IMOAOiAiYWRl
+cnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4KID4+Pj4+PiBDYzogImNlcGgtdXNlcnMiIDxj
+ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIAo8Y2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmc+CiA+Pj4+Pj4gRW52b3nDqTogVmVuZHJlZGkgMjUgSmFudmllciAyMDE5IDEw
+OjQ5OjAyCiA+Pj4+Pj4gT2JqZXQ6IFJlOiBjZXBoIG9zZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFz
+ZSBvdmVyIHRpbWUsIHVudGlsIApyZXN0YXJ0CiA+Pj4+Pj4KID4+Pj4+PiBDYW4geW91IGNhcHR1
+cmUgYSBwZXJmIHRvcCBvciBwZXJmIHJlY29yZCB0byBzZWUgd2hlcmUgdGVoIENQVSAKdGltZSBp
+cwogPj4+Pj4+IGdvaW5nIG9uIG9uZSBvZiB0aGUgT1NEcyB3dGggYSBoaWdoIGxhdGVuY3k/CiA+
+Pj4+Pj4KID4+Pj4+PiBUaGFua3MhCiA+Pj4+Pj4gc2FnZQogPj4+Pj4+CiA+Pj4+Pj4KID4+Pj4+
+PiBPbiBGcmksIDI1IEphbiAyMDE5LCBBbGV4YW5kcmUgREVSVU1JRVIgd3JvdGU6CiA+Pj4+Pj4K
+ID4+Pj4+Pj4gSGksCiA+Pj4+Pj4+CiA+Pj4+Pj4+IEkgaGF2ZSBhIHN0cmFuZ2UgYmVoYXZpb3Vy
+IG9mIG15IG9zZCwgb24gbXVsdGlwbGUgY2x1c3RlcnMsCiA+Pj4+Pj4+CiA+Pj4+Pj4+IEFsbCBj
+bHVzdGVyIGFyZSBydW5uaW5nIG1pbWljIDEzLjIuMSxibHVlc3RvcmUsIHdpdGggc3NkIG9yIApu
+dm1lIGRyaXZlcnMsCiA+Pj4+Pj4+IHdvcmtsb2FkIGlzIHJiZCBvbmx5LCB3aXRoIHFlbXUta3Zt
+IHZtcyBydW5uaW5nIHdpdGggbGlicmJkICsgCnNuYXBzaG90L3JiZCBleHBvcnQtZGlmZi9zbmFw
+c2hvdGRlbGV0ZSBlYWNoIGRheSBmb3IgYmFja3VwCiA+Pj4+Pj4+CiA+Pj4+Pj4+IFdoZW4gdGhl
+IG9zZCBhcmUgcmVmcmVzaGx5IHN0YXJ0ZWQsIHRoZSBjb21taXQgbGF0ZW5jeSBpcyAKYmV0d2Vl
+biAwLDUtMW1zLgogPj4+Pj4+PgogPj4+Pj4+PiBCdXQgb3ZlcnRpbWUsIHRoaXMgbGF0ZW5jeSBp
+bmNyZWFzZSBzbG93bHkgKG1heWJlIGFyb3VuZCAxbXMgYnkgCmRheSksIHVudGlsIHJlYWNoaW5n
+IGNyYXp5CiA+Pj4+Pj4+IHZhbHVlcyBsaWtlIDIwLTIwMG1zLgogPj4+Pj4+PgogPj4+Pj4+PiBT
+b21lIGV4YW1wbGUgZ3JhcGhzOgogPj4+Pj4+PgogPj4+Pj4+PiBodHRwOi8vb2Rpc293ZWIxLm9k
+aXNvLm5ldC9vc2RsYXRlbmN5MS5wbmcKID4+Pj4+Pj4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5u
+ZXQvb3NkbGF0ZW5jeTIucG5nCiA+Pj4+Pj4+CiA+Pj4+Pj4+IEFsbCBvc2RzIGhhdmUgdGhpcyBi
+ZWhhdmlvdXIsIGluIGFsbCBjbHVzdGVycy4KID4+Pj4+Pj4KID4+Pj4+Pj4gVGhlIGxhdGVuY3kg
+b2YgcGh5c2ljYWwgZGlza3MgaXMgb2suIChDbHVzdGVycyBhcmUgZmFyIHRvIGJlIApmdWxsIGxv
+YWRlZCkKID4+Pj4+Pj4KID4+Pj4+Pj4gQW5kIGlmIEkgcmVzdGFydCB0aGUgb3NkLCB0aGUgbGF0
+ZW5jeSBjb21lIGJhY2sgdG8gMCw1LTFtcy4KID4+Pj4+Pj4KID4+Pj4+Pj4gVGhhdCdzIHJlbWVt
+YmVyIG1lIG9sZCB0Y21hbGxvYyBidWcsIGJ1dCBtYXliZSBjb3VsZCBpdCBiZSBhIApibHVlc3Rv
+cmUgbWVtb3J5IGJ1ZyA/CiA+Pj4+Pj4+CiA+Pj4+Pj4+IEFueSBIaW50cyBmb3IgY291bnRlcnMv
+bG9ncyB0byBjaGVjayA/CiA+Pj4+Pj4+CiA+Pj4+Pj4+CiA+Pj4+Pj4+IFJlZ2FyZHMsCiA+Pj4+
+Pj4+CiA+Pj4+Pj4+IEFsZXhhbmRyZQogPj4+Pj4+PgogPj4+Pj4+PgogPj4+Pj4+IF9fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCiA+Pj4+Pj4gY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKID4+Pj4+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCiA+Pj4+Pj4g
+aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCiA+
+Pj4+Pj4KID4+CiA+CiA+CgpPbiAyLzEzLzIwMTkgMTE6NDIgQU0sIEFsZXhhbmRyZSBERVJVTUlF
+UiB3cm90ZToKPiBIaSBJZ29yLAo+Cj4gVGhhbmtzIGFnYWluIGZvciBoZWxwaW5nICEKPgo+Cj4K
+PiBJIGhhdmUgdXBncmFkZSB0byBsYXN0IG1pbWljIHRoaXMgd2Vla2VuZCwgYW5kIHdpdGggbmV3
+IGF1dG90dW5lIG1lbW9yeSwKPiBJIGhhdmUgc2V0dXAgb3NkX21lbW9yeV90YXJnZXQgdG8gOEcu
+ICAobXkgbnZtZSBhcmUgNlRCKQo+Cj4KPiBJIGhhdmUgZG9uZSBhIGxvdCBvZiBwZXJmIGR1bXAg
+YW5kIG1lbXBvb2wgZHVtcCBhbmQgcHMgb2YgcHJvY2VzcyB0byBzZWUgcnNzIG1lbW9yeSBhdCBk
+aWZmZXJlbnQgaG91cnMsCj4gaGVyZSB0aGUgcmVwb3J0cyBmb3Igb3NkLjA6Cj4KPiBodHRwOi8v
+b2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJmYW5hbHlzaXMvCj4KPgo+IG9zZCBoYXMgYmVlbiBzdGFy
+dGVkIHRoZSAxMi0wMi0yMDE5IGF0IDA4OjAwCj4KPiBmaXJzdCByZXBvcnQgYWZ0ZXIgMWggcnVu
+bmluZwo+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L3BlcmZhbmFseXNpcy9vc2QuMC4xMi0w
+Mi0yMDE4LjA5OjMwLnBlcmYudHh0Cj4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvcGVyZmFu
+YWx5c2lzL29zZC4wLjEyLTAyLTIwMTguMDk6MzAuZHVtcF9tZW1wb29scy50eHQKPiBodHRwOi8v
+b2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJmYW5hbHlzaXMvb3NkLjAuMTItMDItMjAxOC4wOTozMC5w
+cy50eHQKPgo+Cj4KPiByZXBvcnQgIGFmdGVyIDI0IGJlZm9yZSBjb3VudGVyIHJlc2V0cwo+Cj4g
+aHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5c2lzL29zZC4wLjEzLTAyLTIwMTgu
+MDg6MDAucGVyZi50eHQKPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJmYW5hbHlzaXMv
+b3NkLjAuMTMtMDItMjAxOC4wODowMC5kdW1wX21lbXBvb2xzLnR4dAo+IGh0dHA6Ly9vZGlzb3dl
+YjEub2Rpc28ubmV0L3BlcmZhbmFseXNpcy9vc2QuMC4xMy0wMi0yMDE4LjA4OjAwLnBzLnR4dAo+
+Cj4gcmVwb3J0IDFoIGFmdGVyIGNvdW50ZXIgcmVzZXQKPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNv
+Lm5ldC9wZXJmYW5hbHlzaXMvb3NkLjAuMTMtMDItMjAxOC4wOTowMC5wZXJmLnR4dAo+IGh0dHA6
+Ly9vZGlzb3dlYjEub2Rpc28ubmV0L3BlcmZhbmFseXNpcy9vc2QuMC4xMy0wMi0yMDE4LjA5OjAw
+LmR1bXBfbWVtcG9vbHMudHh0Cj4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQvcGVyZmFuYWx5
+c2lzL29zZC4wLjEzLTAyLTIwMTguMDk6MDAucHMudHh0Cj4KPgo+Cj4KPiBJJ20gc2VlaW5nIHRo
+ZSBibHVlc3RvcmUgYnVmZmVyIGJ5dGVzIG1lbW9yeSBpbmNyZWFzaW5nIHVwIHRvIDRHICBhcm91
+bmQgMTItMDItMjAxOSBhdCAxNDowMAo+IGh0dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L3BlcmZh
+bmFseXNpcy9ncmFwaHMyLnBuZwo+IFRoZW4gYWZ0ZXIgdGhhdCwgc2xvd2x5IGRlY3JlYXNpbmcu
+Cj4KPgo+IEFub3RoZXIgc3RyYW5nZSB0aGluZywKPiBJJ20gc2VlaW5nIHRvdGFsIGJ5dGVzIGF0
+IDVHIGF0IDEyLTAyLTIwMTguMTM6MzAKPiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9wZXJm
+YW5hbHlzaXMvb3NkLjAuMTItMDItMjAxOC4xMzozMC5kdW1wX21lbXBvb2xzLnR4dAo+IFRoZW4g
+aXMgZGVjcmVhc2luZyBvdmVyIHRpbWUgKGFyb3VuZCAzLDdHIHRoaXMgbW9ybmluZyksIGJ1dCBS
+U1MgaXMgc3RpbGwgYXQgOEcKPgo+Cj4gSSdtIGdyYXBoaW5nIG1lbXBvb2xzIGNvdW50ZXJzIHRv
+byBzaW5jZSB5ZXN0ZXJkYXksIHNvIEknbGwgYWJsZSB0byB0cmFjayB0aGVtIG92ZXIgdGltZS4K
+Pgo+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KPiBEZTogIklnb3IgRmVkb3RvdiIgPGlmZWRv
+dG92QHN1c2UuZGU+Cj4gw4A6ICJBbGV4YW5kcmUgRGVydW1pZXIiIDxhZGVydW1pZXJAb2Rpc28u
+Y29tPgo+IENjOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5uZXQ+LCAiY2VwaC11c2VycyIg
+PGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnPgo+IEVudm95w6k6IEx1bmRpIDExIEbDqXZyaWVyIDIwMTkgMTI6MDM6MTcK
+PiBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9zZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFz
+ZSBvdmVyIHRpbWUsIHVudGlsIHJlc3RhcnQKPgo+IE9uIDIvOC8yMDE5IDY6NTcgUE0sIEFsZXhh
+bmRyZSBERVJVTUlFUiB3cm90ZToKPj4gYW5vdGhlciBtZW1wb29sIGR1bXAgYWZ0ZXIgMWggcnVu
+LiAobGF0ZW5jeSBvaykKPj4KPj4gQmlnZ2VzdCBkaWZmZXJlbmNlOgo+Pgo+PiBiZWZvcmUgcmVz
+dGFydAo+PiAtLS0tLS0tLS0tLS0tCj4+ICJibHVlc3RvcmVfY2FjaGVfb3RoZXIiOiB7Cj4+ICJp
+dGVtcyI6IDQ4NjYxOTIwLAo+PiAiYnl0ZXMiOiAxNTM5NTQ0MjI4Cj4+IH0sCj4+ICJibHVlc3Rv
+cmVfY2FjaGVfZGF0YSI6IHsKPj4gIml0ZW1zIjogNTQsCj4+ICJieXRlcyI6IDY0MzA3Mgo+PiB9
+LAo+PiAob3RoZXIgY2FjaGVzIHNlZW0gdG8gYmUgcXVpdGUgbG93IHRvbywgbGlrZSBibHVlc3Rv
+cmVfY2FjaGVfb3RoZXIgdGFrZSBhbGwgdGhlIG1lbW9yeSkKPj4KPj4KPj4gQWZ0ZXIgcmVzdGFy
+dAo+PiAtLS0tLS0tLS0tLS0tCj4+ICJibHVlc3RvcmVfY2FjaGVfb3RoZXIiOiB7Cj4+ICJpdGVt
+cyI6IDEyNDMyMjk4LAo+PiAiYnl0ZXMiOiA1MDA4MzQ4OTkKPj4gfSwKPj4gImJsdWVzdG9yZV9j
+YWNoZV9kYXRhIjogewo+PiAiaXRlbXMiOiA0MDA4NCwKPj4gImJ5dGVzIjogMTA1NjIzNTUyMAo+
+PiB9LAo+Pgo+IFRoaXMgaXMgZmluZSBhcyBjYWNoZSBpcyB3YXJtaW5nIGFmdGVyIHJlc3RhcnQg
+YW5kIHNvbWUgcmViYWxhbmNpbmcKPiBiZXR3ZWVuIGRhdGEgYW5kIG1ldGFkYXRhIG1pZ2h0IG9j
+Y3VyLgo+Cj4gV2hhdCByZWxhdGVzIHRvIGFsbG9jYXRvciBhbmQgbW9zdCBwcm9iYWJseSB0byBm
+cmFnbWVudGF0aW9uIGdyb3d0aCBpcyA6Cj4KPiAiYmx1ZXN0b3JlX2FsbG9jIjogewo+ICJpdGVt
+cyI6IDE2NTA1Mzk1MiwKPiAiYnl0ZXMiOiAxNjUwNTM5NTIKPiB9LAo+Cj4gd2hpY2ggaGFkIGJl
+ZW4gaGlnaGVyIGJlZm9yZSB0aGUgcmVzZXQgKGlmIEkgZ290IHRoZXNlIGR1bXBzJyBvcmRlcgo+
+IHByb3Blcmx5KQo+Cj4gImJsdWVzdG9yZV9hbGxvYyI6IHsKPiAiaXRlbXMiOiAyMTAyNDM0NTYs
+Cj4gImJ5dGVzIjogMjEwMjQzNDU2Cj4gfSwKPgo+IEJ1dCBhcyBJIG1lbnRpb25lZCAtIEknbSBu
+b3QgMTAwJSBzdXJlIHRoaXMgbWlnaHQgY2F1c2Ugc3VjaCBhIGh1Z2UKPiBsYXRlbmN5IGluY3Jl
+YXNlLi4uCj4KPiBEbyB5b3UgaGF2ZSBwZXJmIGNvdW50ZXJzIGR1bXAgYWZ0ZXIgdGhlIHJlc3Rh
+cnQ/Cj4KPiBDb3VsZCB5b3UgY29sbGVjdCBzb21lIG1vcmUgZHVtcHMgLSBmb3IgYm90aCBtZW1w
+b29sIGFuZCBwZXJmIGNvdW50ZXJzPwo+Cj4gU28gaWRlYWxseSBJJ2QgbGlrZSB0byBoYXZlOgo+
+Cj4gMSkgbWVtcG9vbC9wZXJmIGNvdW50ZXJzIGR1bXBzIGFmdGVyIHRoZSByZXN0YXJ0ICgxaG91
+ciBpcyBPSykKPgo+IDIpIG1lbXBvb2wvcGVyZiBjb3VudGVycyBkdW1wcyBpbiAyNCsgaG91cnMg
+YWZ0ZXIgcmVzdGFydAo+Cj4gMykgcmVzZXQgcGVyZiBjb3VudGVycyBhZnRlciAyKSwgd2FpdCBm
+b3IgMSBob3VyIChhbmQgd2l0aG91dCBPU0QKPiByZXN0YXJ0KSBhbmQgZHVtcCBtZW1wb29sL3Bl
+cmYgY291bnRlcnMgYWdhaW4uCj4KPiBTbyB3ZSdsbCBiZSBhYmxlIHRvIGxlYXJuIGJvdGggYWxs
+b2NhdG9yIG1lbSB1c2FnZSBncm93dGggYW5kIG9wZXJhdGlvbgo+IGxhdGVuY3kgZGlzdHJpYnV0
+aW9uIGZvciB0aGUgZm9sbG93aW5nIHBlcmlvZHM6Cj4KPiBhKSAxc3QgaG91ciBhZnRlciByZXN0
+YXJ0Cj4KPiBiKSAyNXRoIGhvdXIuCj4KPgo+IFRoYW5rcywKPgo+IElnb3IKPgo+Cj4+IGZ1bGwg
+bWVtcG9vbCBkdW1wIGFmdGVyIHJlc3RhcnQKPj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLQo+Pgo+PiB7Cj4+ICJtZW1wb29sIjogewo+PiAiYnlfcG9vbCI6IHsKPj4gImJsb29tX2Zp
+bHRlciI6IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9LAo+PiAiYmx1ZXN0b3Jl
+X2FsbG9jIjogewo+PiAiaXRlbXMiOiAxNjUwNTM5NTIsCj4+ICJieXRlcyI6IDE2NTA1Mzk1Mgo+
+PiB9LAo+PiAiYmx1ZXN0b3JlX2NhY2hlX2RhdGEiOiB7Cj4+ICJpdGVtcyI6IDQwMDg0LAo+PiAi
+Ynl0ZXMiOiAxMDU2MjM1NTIwCj4+IH0sCj4+ICJibHVlc3RvcmVfY2FjaGVfb25vZGUiOiB7Cj4+
+ICJpdGVtcyI6IDIyMjI1LAo+PiAiYnl0ZXMiOiAxNDkzNTIwMAo+PiB9LAo+PiAiYmx1ZXN0b3Jl
+X2NhY2hlX290aGVyIjogewo+PiAiaXRlbXMiOiAxMjQzMjI5OCwKPj4gImJ5dGVzIjogNTAwODM0
+ODk5Cj4+IH0sCj4+ICJibHVlc3RvcmVfZnNjayI6IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVz
+IjogMAo+PiB9LAo+PiAiYmx1ZXN0b3JlX3R4YyI6IHsKPj4gIml0ZW1zIjogMTEsCj4+ICJieXRl
+cyI6IDgxODQKPj4gfSwKPj4gImJsdWVzdG9yZV93cml0aW5nX2RlZmVycmVkIjogewo+PiAiaXRl
+bXMiOiA1MDQ3LAo+PiAiYnl0ZXMiOiAyMjY3MzczNgo+PiB9LAo+PiAiYmx1ZXN0b3JlX3dyaXRp
+bmciOiB7Cj4+ICJpdGVtcyI6IDkxLAo+PiAiYnl0ZXMiOiAxNjYyOTc2Cj4+IH0sCj4+ICJibHVl
+ZnMiOiB7Cj4+ICJpdGVtcyI6IDE5MDcsCj4+ICJieXRlcyI6IDk1NjAwCj4+IH0sCj4+ICJidWZm
+ZXJfYW5vbiI6IHsKPj4gIml0ZW1zIjogMTk2NjQsCj4+ICJieXRlcyI6IDI1NDg2MDUwCj4+IH0s
+Cj4+ICJidWZmZXJfbWV0YSI6IHsKPj4gIml0ZW1zIjogNDYxODksCj4+ICJieXRlcyI6IDI5NTYw
+OTYKPj4gfSwKPj4gIm9zZCI6IHsKPj4gIml0ZW1zIjogMjQzLAo+PiAiYnl0ZXMiOiAzMDg5MDE2
+Cj4+IH0sCj4+ICJvc2RfbWFwYmwiOiB7Cj4+ICJpdGVtcyI6IDE3LAo+PiAiYnl0ZXMiOiAyMTQz
+NjYKPj4gfSwKPj4gIm9zZF9wZ2xvZyI6IHsKPj4gIml0ZW1zIjogODg5NjczLAo+PiAiYnl0ZXMi
+OiAzNjcxNjA0MDAKPj4gfSwKPj4gIm9zZG1hcCI6IHsKPj4gIml0ZW1zIjogMzgwMywKPj4gImJ5
+dGVzIjogMjI0NTUyCj4+IH0sCj4+ICJvc2RtYXBfbWFwcGluZyI6IHsKPj4gIml0ZW1zIjogMCwK
+Pj4gImJ5dGVzIjogMAo+PiB9LAo+PiAicGdtYXAiOiB7Cj4+ICJpdGVtcyI6IDAsCj4+ICJieXRl
+cyI6IDAKPj4gfSwKPj4gIm1kc19jbyI6IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+
+PiB9LAo+PiAidW5pdHRlc3RfMSI6IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9
+LAo+PiAidW5pdHRlc3RfMiI6IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9Cj4+
+IH0sCj4+ICJ0b3RhbCI6IHsKPj4gIml0ZW1zIjogMTc4NTE1MjA0LAo+PiAiYnl0ZXMiOiAyMTYw
+NjMwNTQ3Cj4+IH0KPj4gfQo+PiB9Cj4+Cj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KPj4g
+RGU6ICJhZGVydW1pZXIiIDxhZGVydW1pZXJAb2Rpc28uY29tPgo+PiDDgDogIklnb3IgRmVkb3Rv
+diIgPGlmZWRvdG92QHN1c2UuZGU+Cj4+IENjOiAiU3RlZmFuIFByaWViZSwgUHJvZmlob3N0IEFH
+IiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiwgIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQu
+Y29tPiwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiwgImNlcGgtdXNlcnMiIDxjZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2Vy
+bmVsLm9yZz4KPj4gRW52b3nDqTogVmVuZHJlZGkgOCBGw6l2cmllciAyMDE5IDE2OjE0OjU0Cj4+
+IE9iamV0OiBSZTogW2NlcGgtdXNlcnNdIGNlcGggb3NkIGNvbW1pdCBsYXRlbmN5IGluY3JlYXNl
+IG92ZXIgdGltZSwgdW50aWwgcmVzdGFydAo+Pgo+PiBJJ20ganVzdCBzZWVpbmcKPj4KPj4gU3R1
+cGlkQWxsb2NhdG9yOjpfYWxpZ25lZF9sZW4KPj4gYW5kCj4+IGJ0cmVlOjpidHJlZV9pdGVyYXRv
+cjxidHJlZTo6YnRyZWVfbm9kZTxidHJlZTo6YnRyZWVfbWFwX3BhcmFtczx1bnNpZ25lZCBsb25n
+LCB1bnNpZ25lZCBsb25nLCBzdGQ6Omxlc3M8dW5zaWduZWQgbG9uZz4sIG1lbXBvbwo+Pgo+PiBv
+biAxIG9zZCwgYm90aCAxMCUuCj4+Cj4+IGhlcmUgdGhlIGR1bXBfbWVtcG9vbHMKPj4KPj4gewo+
+PiAibWVtcG9vbCI6IHsKPj4gImJ5X3Bvb2wiOiB7Cj4+ICJibG9vbV9maWx0ZXIiOiB7Cj4+ICJp
+dGVtcyI6IDAsCj4+ICJieXRlcyI6IDAKPj4gfSwKPj4gImJsdWVzdG9yZV9hbGxvYyI6IHsKPj4g
+Iml0ZW1zIjogMjEwMjQzNDU2LAo+PiAiYnl0ZXMiOiAyMTAyNDM0NTYKPj4gfSwKPj4gImJsdWVz
+dG9yZV9jYWNoZV9kYXRhIjogewo+PiAiaXRlbXMiOiA1NCwKPj4gImJ5dGVzIjogNjQzMDcyCj4+
+IH0sCj4+ICJibHVlc3RvcmVfY2FjaGVfb25vZGUiOiB7Cj4+ICJpdGVtcyI6IDEwNTYzNywKPj4g
+ImJ5dGVzIjogNzA5ODgwNjQKPj4gfSwKPj4gImJsdWVzdG9yZV9jYWNoZV9vdGhlciI6IHsKPj4g
+Iml0ZW1zIjogNDg2NjE5MjAsCj4+ICJieXRlcyI6IDE1Mzk1NDQyMjgKPj4gfSwKPj4gImJsdWVz
+dG9yZV9mc2NrIjogewo+PiAiaXRlbXMiOiAwLAo+PiAiYnl0ZXMiOiAwCj4+IH0sCj4+ICJibHVl
+c3RvcmVfdHhjIjogewo+PiAiaXRlbXMiOiAxMiwKPj4gImJ5dGVzIjogODkyOAo+PiB9LAo+PiAi
+Ymx1ZXN0b3JlX3dyaXRpbmdfZGVmZXJyZWQiOiB7Cj4+ICJpdGVtcyI6IDQwNiwKPj4gImJ5dGVz
+IjogNDc5Mjg2OAo+PiB9LAo+PiAiYmx1ZXN0b3JlX3dyaXRpbmciOiB7Cj4+ICJpdGVtcyI6IDY2
+LAo+PiAiYnl0ZXMiOiAxMDg1NDQwCj4+IH0sCj4+ICJibHVlZnMiOiB7Cj4+ICJpdGVtcyI6IDE4
+ODIsCj4+ICJieXRlcyI6IDkzNjAwCj4+IH0sCj4+ICJidWZmZXJfYW5vbiI6IHsKPj4gIml0ZW1z
+IjogMTM4OTg2LAo+PiAiYnl0ZXMiOiAyNDk4MzcwMQo+PiB9LAo+PiAiYnVmZmVyX21ldGEiOiB7
+Cj4+ICJpdGVtcyI6IDU0NCwKPj4gImJ5dGVzIjogMzQ4MTYKPj4gfSwKPj4gIm9zZCI6IHsKPj4g
+Iml0ZW1zIjogMjQzLAo+PiAiYnl0ZXMiOiAzMDg5MDE2Cj4+IH0sCj4+ICJvc2RfbWFwYmwiOiB7
+Cj4+ICJpdGVtcyI6IDM2LAo+PiAiYnl0ZXMiOiAxNzkzMDgKPj4gfSwKPj4gIm9zZF9wZ2xvZyI6
+IHsKPj4gIml0ZW1zIjogOTUyNTY0LAo+PiAiYnl0ZXMiOiAzNzI0NTk2ODQKPj4gfSwKPj4gIm9z
+ZG1hcCI6IHsKPj4gIml0ZW1zIjogMzYzOSwKPj4gImJ5dGVzIjogMjI0NjY0Cj4+IH0sCj4+ICJv
+c2RtYXBfbWFwcGluZyI6IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9LAo+PiAi
+cGdtYXAiOiB7Cj4+ICJpdGVtcyI6IDAsCj4+ICJieXRlcyI6IDAKPj4gfSwKPj4gIm1kc19jbyI6
+IHsKPj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9LAo+PiAidW5pdHRlc3RfMSI6IHsK
+Pj4gIml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9LAo+PiAidW5pdHRlc3RfMiI6IHsKPj4g
+Iml0ZW1zIjogMCwKPj4gImJ5dGVzIjogMAo+PiB9Cj4+IH0sCj4+ICJ0b3RhbCI6IHsKPj4gIml0
+ZW1zIjogMjYwMTA5NDQ1LAo+PiAiYnl0ZXMiOiAyMjI4MzcwODQ1Cj4+IH0KPj4gfQo+PiB9Cj4+
+Cj4+Cj4+IGFuZCB0aGUgcGVyZiBkdW1wCj4+Cj4+IHJvb3RAY2VwaDUtMjp+IyBjZXBoIGRhZW1v
+biBvc2QuNCBwZXJmIGR1bXAKPj4gewo+PiAiQXN5bmNNZXNzZW5nZXI6Oldvcmtlci0wIjogewo+
+PiAibXNncl9yZWN2X21lc3NhZ2VzIjogMjI5NDg1NzAsCj4+ICJtc2dyX3NlbmRfbWVzc2FnZXMi
+OiAyMjU2MTU3MCwKPj4gIm1zZ3JfcmVjdl9ieXRlcyI6IDMzMzA4NTA4MDI3MSwKPj4gIm1zZ3Jf
+c2VuZF9ieXRlcyI6IDI2MTc5ODg3MTIwNCwKPj4gIm1zZ3JfY3JlYXRlZF9jb25uZWN0aW9ucyI6
+IDYxNTIsCj4+ICJtc2dyX2FjdGl2ZV9jb25uZWN0aW9ucyI6IDI3MDEsCj4+ICJtc2dyX3J1bm5p
+bmdfdG90YWxfdGltZSI6IDEwNTUuMTk3ODY3MzMwLAo+PiAibXNncl9ydW5uaW5nX3NlbmRfdGlt
+ZSI6IDM1Mi43NjQ0ODAxMjEsCj4+ICJtc2dyX3J1bm5pbmdfcmVjdl90aW1lIjogNDk5LjIwNjgz
+MTk1NSwKPj4gIm1zZ3JfcnVubmluZ19mYXN0X2Rpc3BhdGNoX3RpbWUiOiAxMzAuOTgyMjAxNjA3
+Cj4+IH0sCj4+ICJBc3luY01lc3Nlbmdlcjo6V29ya2VyLTEiOiB7Cj4+ICJtc2dyX3JlY3ZfbWVz
+c2FnZXMiOiAxODgwMTU5MywKPj4gIm1zZ3Jfc2VuZF9tZXNzYWdlcyI6IDE4NDMwMjY0LAo+PiAi
+bXNncl9yZWN2X2J5dGVzIjogMzA2ODcxNzYwOTM0LAo+PiAibXNncl9zZW5kX2J5dGVzIjogMTky
+Nzg5MDQ4NjY2LAo+PiAibXNncl9jcmVhdGVkX2Nvbm5lY3Rpb25zIjogNTc3MywKPj4gIm1zZ3Jf
+YWN0aXZlX2Nvbm5lY3Rpb25zIjogMjcyMSwKPj4gIm1zZ3JfcnVubmluZ190b3RhbF90aW1lIjog
+ODE2LjgyMTA3NjMwNSwKPj4gIm1zZ3JfcnVubmluZ19zZW5kX3RpbWUiOiAyNjEuMzUzMjI4OTI2
+LAo+PiAibXNncl9ydW5uaW5nX3JlY3ZfdGltZSI6IDM5NC4wMzU1ODc5MTEsCj4+ICJtc2dyX3J1
+bm5pbmdfZmFzdF9kaXNwYXRjaF90aW1lIjogMTA0LjAxMjE1NTcyMAo+PiB9LAo+PiAiQXN5bmNN
+ZXNzZW5nZXI6Oldvcmtlci0yIjogewo+PiAibXNncl9yZWN2X21lc3NhZ2VzIjogMTg0NjM0MDAs
+Cj4+ICJtc2dyX3NlbmRfbWVzc2FnZXMiOiAxODEwNTg1NiwKPj4gIm1zZ3JfcmVjdl9ieXRlcyI6
+IDE4NzQyNTQ1MzU5MCwKPj4gIm1zZ3Jfc2VuZF9ieXRlcyI6IDIyMDczNTEwMjU1NSwKPj4gIm1z
+Z3JfY3JlYXRlZF9jb25uZWN0aW9ucyI6IDU4OTcsCj4+ICJtc2dyX2FjdGl2ZV9jb25uZWN0aW9u
+cyI6IDI2MDUsCj4+ICJtc2dyX3J1bm5pbmdfdG90YWxfdGltZSI6IDgwNy4xODY4NTQzMjQsCj4+
+ICJtc2dyX3J1bm5pbmdfc2VuZF90aW1lIjogMjk2LjgzNDQzNTgzOSwKPj4gIm1zZ3JfcnVubmlu
+Z19yZWN2X3RpbWUiOiAzNTEuMzY0Mzg5NjkxLAo+PiAibXNncl9ydW5uaW5nX2Zhc3RfZGlzcGF0
+Y2hfdGltZSI6IDEwMS4yMTU3NzY3OTIKPj4gfSwKPj4gImJsdWVmcyI6IHsKPj4gImdpZnRfYnl0
+ZXMiOiAwLAo+PiAicmVjbGFpbV9ieXRlcyI6IDAsCj4+ICJkYl90b3RhbF9ieXRlcyI6IDI1NjA1
+MDcyNDg2NCwKPj4gImRiX3VzZWRfYnl0ZXMiOiAxMjQxMzA0MjY4OCwKPj4gIndhbF90b3RhbF9i
+eXRlcyI6IDAsCj4+ICJ3YWxfdXNlZF9ieXRlcyI6IDAsCj4+ICJzbG93X3RvdGFsX2J5dGVzIjog
+MCwKPj4gInNsb3dfdXNlZF9ieXRlcyI6IDAsCj4+ICJudW1fZmlsZXMiOiAyMDksCj4+ICJsb2df
+Ynl0ZXMiOiAxMDM4MzM2MCwKPj4gImxvZ19jb21wYWN0aW9ucyI6IDE0LAo+PiAibG9nZ2VkX2J5
+dGVzIjogMzM2NDk4Njg4LAo+PiAiZmlsZXNfd3JpdHRlbl93YWwiOiAyLAo+PiAiZmlsZXNfd3Jp
+dHRlbl9zc3QiOiA0NDk5LAo+PiAiYnl0ZXNfd3JpdHRlbl93YWwiOiA0MTc5ODkwOTk3ODMsCj4+
+ICJieXRlc193cml0dGVuX3NzdCI6IDIxMzE4ODc1MDIwOQo+PiB9LAo+PiAiYmx1ZXN0b3JlIjog
+ewo+PiAia3ZfZmx1c2hfbGF0Ijogewo+PiAiYXZnY291bnQiOiAyNjM3MTk1NywKPj4gInN1bSI6
+IDI2LjczNDAzODQ5NywKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMTAxMwo+PiB9LAo+PiAia3ZfY29t
+bWl0X2xhdCI6IHsKPj4gImF2Z2NvdW50IjogMjYzNzE5NTcsCj4+ICJzdW0iOiAzMzk3LjQ5MTE1
+MDYwMywKPj4gImF2Z3RpbWUiOiAwLjAwMDEyODgyOQo+PiB9LAo+PiAia3ZfbGF0Ijogewo+PiAi
+YXZnY291bnQiOiAyNjM3MTk1NywKPj4gInN1bSI6IDM0MjQuMjI1MTg5MTAwLAo+PiAiYXZndGlt
+ZSI6IDAuMDAwMTI5ODQzCj4+IH0sCj4+ICJzdGF0ZV9wcmVwYXJlX2xhdCI6IHsKPj4gImF2Z2Nv
+dW50IjogMzA0ODQ5MjQsCj4+ICJzdW0iOiAzNjg5LjU0MjEwNTMzNywKPj4gImF2Z3RpbWUiOiAw
+LjAwMDEyMTAyOAo+PiB9LAo+PiAic3RhdGVfYWlvX3dhaXRfbGF0Ijogewo+PiAiYXZnY291bnQi
+OiAzMDQ4NDkyNCwKPj4gInN1bSI6IDUwOS44NjQ1NDYxMTEsCj4+ICJhdmd0aW1lIjogMC4wMDAw
+MTY3MjUKPj4gfSwKPj4gInN0YXRlX2lvX2RvbmVfbGF0Ijogewo+PiAiYXZnY291bnQiOiAzMDQ4
+NDkyNCwKPj4gInN1bSI6IDI0LjUzNDA1Mjk1MywKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDgwNAo+
+PiB9LAo+PiAic3RhdGVfa3ZfcXVldWVkX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogMzA0ODQ5MjQs
+Cj4+ICJzdW0iOiAzNDg4LjMzODQyNDIzOCwKPj4gImF2Z3RpbWUiOiAwLjAwMDExNDQyOAo+PiB9
+LAo+PiAic3RhdGVfa3ZfY29tbWl0aW5nX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogMzA0ODQ5MjQs
+Cj4+ICJzdW0iOiA1NjYwLjQzNzAwMzQzMiwKPj4gImF2Z3RpbWUiOiAwLjAwMDE4NTY3OQo+PiB9
+LAo+PiAic3RhdGVfa3ZfZG9uZV9sYXQiOiB7Cj4+ICJhdmdjb3VudCI6IDMwNDg0OTI0LAo+PiAi
+c3VtIjogNy43NjM1MTE1MDAsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDAyNTQKPj4gfSwKPj4gInN0
+YXRlX2RlZmVycmVkX3F1ZXVlZF9sYXQiOiB7Cj4+ICJhdmdjb3VudCI6IDI2MzQ2MTM0LAo+PiAi
+c3VtIjogNjY2MDcxLjI5Njg1NjY5NiwKPj4gImF2Z3RpbWUiOiAwLjAyNTI4MTU1Nwo+PiB9LAo+
+PiAic3RhdGVfZGVmZXJyZWRfYWlvX3dhaXRfbGF0Ijogewo+PiAiYXZnY291bnQiOiAyNjM0NjEz
+NCwKPj4gInN1bSI6IDE3NTUuNjYwNTQ3MDcxLAo+PiAiYXZndGltZSI6IDAuMDAwMDY2NjM4Cj4+
+IH0sCj4+ICJzdGF0ZV9kZWZlcnJlZF9jbGVhbnVwX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogMjYz
+NDYxMzQsCj4+ICJzdW0iOiAxODU0NjUuMTUxNjUzNzAzLAo+PiAiYXZndGltZSI6IDAuMDA3MDM5
+NTU4Cj4+IH0sCj4+ICJzdGF0ZV9maW5pc2hpbmdfbGF0Ijogewo+PiAiYXZnY291bnQiOiAzMDQ4
+NDkyMCwKPj4gInN1bSI6IDMuMDQ2ODQ3NDgxLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDk5Cj4+
+IH0sCj4+ICJzdGF0ZV9kb25lX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogMzA0ODQ5MjAsCj4+ICJz
+dW0iOiAxMzE5My4zNjI2ODUyODAsCj4+ICJhdmd0aW1lIjogMC4wMDA0MzI3ODMKPj4gfSwKPj4g
+InRocm90dGxlX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogMzA0ODQ5MjQsCj4+ICJzdW0iOiAxNC42
+MzQyNjk5NzksCj4+ICJhdmd0aW1lIjogMC4wMDAwMDA0ODAKPj4gfSwKPj4gInN1Ym1pdF9sYXQi
+OiB7Cj4+ICJhdmdjb3VudCI6IDMwNDg0OTI0LAo+PiAic3VtIjogMzg3My44ODMwNzYxNDgsCj4+
+ICJhdmd0aW1lIjogMC4wMDAxMjcwNzUKPj4gfSwKPj4gImNvbW1pdF9sYXQiOiB7Cj4+ICJhdmdj
+b3VudCI6IDMwNDg0OTI0LAo+PiAic3VtIjogMTMzNzYuNDkyMzE3MzMxLAo+PiAiYXZndGltZSI6
+IDAuMDAwNDM4NzkwCj4+IH0sCj4+ICJyZWFkX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogNTg3Mzky
+MywKPj4gInN1bSI6IDE4MTcuMTY3NTgyMDU3LAo+PiAiYXZndGltZSI6IDAuMDAwMzA5MzYxCj4+
+IH0sCj4+ICJyZWFkX29ub2RlX21ldGFfbGF0Ijogewo+PiAiYXZnY291bnQiOiAxOTYwODIwMSwK
+Pj4gInN1bSI6IDE0Ni43NzA0NjQ0ODIsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDc0ODUKPj4gfSwK
+Pj4gInJlYWRfd2FpdF9haW9fbGF0Ijogewo+PiAiYXZnY291bnQiOiAxMzczNDI3OCwKPj4gInN1
+bSI6IDI1MzIuNTc4MDc3MjQyLAo+PiAiYXZndGltZSI6IDAuMDAwMTg0Mzk4Cj4+IH0sCj4+ICJj
+b21wcmVzc19sYXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwK
+Pj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9LAo+PiAiZGVjb21wcmVzc19sYXQiOiB7Cj4+
+ICJhdmdjb3VudCI6IDEzNDY5NDUsCj4+ICJzdW0iOiAyNi4yMjc1NzU4OTYsCj4+ICJhdmd0aW1l
+IjogMC4wMDAwMTk0NzEKPj4gfSwKPj4gImNzdW1fbGF0Ijogewo+PiAiYXZnY291bnQiOiAyODAy
+MDM5MiwKPj4gInN1bSI6IDE0OS41ODc4MTkwNDEsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDUzMzgK
+Pj4gfSwKPj4gImNvbXByZXNzX3N1Y2Nlc3NfY291bnQiOiAwLAo+PiAiY29tcHJlc3NfcmVqZWN0
+ZWRfY291bnQiOiAwLAo+PiAid3JpdGVfcGFkX2J5dGVzIjogMzUyOTIzNjA1LAo+PiAiZGVmZXJy
+ZWRfd3JpdGVfb3BzIjogMjQzNzMzNDAsCj4+ICJkZWZlcnJlZF93cml0ZV9ieXRlcyI6IDIxNjc5
+MTg0MjgxNiwKPj4gIndyaXRlX3BlbmFsdHlfcmVhZF9vcHMiOiA4MDYyMzY2LAo+PiAiYmx1ZXN0
+b3JlX2FsbG9jYXRlZCI6IDM3NjU1NjYwMTM0NDAsCj4+ICJibHVlc3RvcmVfc3RvcmVkIjogNDE4
+NjI1NTIyMTg1MiwKPj4gImJsdWVzdG9yZV9jb21wcmVzc2VkIjogMzk5ODEzNzkwNDAsCj4+ICJi
+bHVlc3RvcmVfY29tcHJlc3NlZF9hbGxvY2F0ZWQiOiA3Mzc0ODM0ODkyOCwKPj4gImJsdWVzdG9y
+ZV9jb21wcmVzc2VkX29yaWdpbmFsIjogMTY1MDQxMzgxMzc2LAo+PiAiYmx1ZXN0b3JlX29ub2Rl
+cyI6IDEwNDIzMiwKPj4gImJsdWVzdG9yZV9vbm9kZV9oaXRzIjogNzEyMDY4NzQsCj4+ICJibHVl
+c3RvcmVfb25vZGVfbWlzc2VzIjogMTIxNzkxNCwKPj4gImJsdWVzdG9yZV9vbm9kZV9zaGFyZF9o
+aXRzIjogMjYwMTgzMjkyLAo+PiAiYmx1ZXN0b3JlX29ub2RlX3NoYXJkX21pc3NlcyI6IDIyODUx
+NTczLAo+PiAiYmx1ZXN0b3JlX2V4dGVudHMiOiAzMzk0NTEzLAo+PiAiYmx1ZXN0b3JlX2Jsb2Jz
+IjogMjc3MzU4NywKPj4gImJsdWVzdG9yZV9idWZmZXJzIjogMCwKPj4gImJsdWVzdG9yZV9idWZm
+ZXJfYnl0ZXMiOiAwLAo+PiAiYmx1ZXN0b3JlX2J1ZmZlcl9oaXRfYnl0ZXMiOiA2MjAyNjAxMTIy
+MSwKPj4gImJsdWVzdG9yZV9idWZmZXJfbWlzc19ieXRlcyI6IDk5NTIzMzY2OTkyMiwKPj4gImJs
+dWVzdG9yZV93cml0ZV9iaWciOiA1NjQ4ODE1LAo+PiAiYmx1ZXN0b3JlX3dyaXRlX2JpZ19ieXRl
+cyI6IDU1MjUwMjIxNDY1NiwKPj4gImJsdWVzdG9yZV93cml0ZV9iaWdfYmxvYnMiOiAxMjQ0MDk5
+MiwKPj4gImJsdWVzdG9yZV93cml0ZV9zbWFsbCI6IDM1ODgzNzcwLAo+PiAiYmx1ZXN0b3JlX3dy
+aXRlX3NtYWxsX2J5dGVzIjogMjIzNDM2OTY1NzE5LAo+PiAiYmx1ZXN0b3JlX3dyaXRlX3NtYWxs
+X3VudXNlZCI6IDQwODEyNSwKPj4gImJsdWVzdG9yZV93cml0ZV9zbWFsbF9kZWZlcnJlZCI6IDM0
+OTYxNDU1LAo+PiAiYmx1ZXN0b3JlX3dyaXRlX3NtYWxsX3ByZV9yZWFkIjogMzQ5NjE0NTUsCj4+
+ICJibHVlc3RvcmVfd3JpdGVfc21hbGxfbmV3IjogNTE0MTkwLAo+PiAiYmx1ZXN0b3JlX3R4YyI6
+IDMwNDg0OTI0LAo+PiAiYmx1ZXN0b3JlX29ub2RlX3Jlc2hhcmQiOiA1MTQ0MTg5LAo+PiAiYmx1
+ZXN0b3JlX2Jsb2Jfc3BsaXQiOiA2MDEwNCwKPj4gImJsdWVzdG9yZV9leHRlbnRfY29tcHJlc3Mi
+OiA1MzM0NzI1MiwKPj4gImJsdWVzdG9yZV9nY19tZXJnZWQiOiAyMTE0MjUyOCwKPj4gImJsdWVz
+dG9yZV9yZWFkX2VpbyI6IDAsCj4+ICJibHVlc3RvcmVfZnJhZ21lbnRhdGlvbl9taWNyb3MiOiA2
+Nwo+PiB9LAo+PiAiZmluaXNoZXItZGVmZXJlZF9maW5pc2hlciI6IHsKPj4gInF1ZXVlX2xlbiI6
+IDAsCj4+ICJjb21wbGV0ZV9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAwLAo+PiAic3VtIjog
+MC4wMDAwMDAwMDAsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKPj4gfQo+PiB9LAo+PiAiZmlu
+aXNoZXItZmluaXNoZXItMCI6IHsKPj4gInF1ZXVlX2xlbiI6IDAsCj4+ICJjb21wbGV0ZV9sYXRl
+bmN5Ijogewo+PiAiYXZnY291bnQiOiAyNjYyNTE2MywKPj4gInN1bSI6IDEwNTcuNTA2OTkwOTUx
+LAo+PiAiYXZndGltZSI6IDAuMDAwMDM5NzE4Cj4+IH0KPj4gfSwKPj4gImZpbmlzaGVyLW9iamVj
+dGVyLWZpbmlzaGVyLTAiOiB7Cj4+ICJxdWV1ZV9sZW4iOiAwLAo+PiAiY29tcGxldGVfbGF0ZW5j
+eSI6IHsKPj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGlt
+ZSI6IDAuMDAwMDAwMDAwCj4+IH0KPj4gfSwKPj4gIm11dGV4LU9TRFNoYXJkLjA6OnNkYXRhX3dh
+aXRfbG9jayI6IHsKPj4gIndhaXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAw
+MDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9Cj4+IH0sCj4+ICJtdXRleC1P
+U0RTaGFyZC4wOjpzaGFyZF9sb2NrIjogewo+PiAid2FpdCI6IHsKPj4gImF2Z2NvdW50IjogMCwK
+Pj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0KPj4g
+fSwKPj4gIm11dGV4LU9TRFNoYXJkLjE6OnNkYXRhX3dhaXRfbG9jayI6IHsKPj4gIndhaXQiOiB7
+Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAw
+LjAwMDAwMDAwMAo+PiB9Cj4+IH0sCj4+ICJtdXRleC1PU0RTaGFyZC4xOjpzaGFyZF9sb2NrIjog
+ewo+PiAid2FpdCI6IHsKPj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+
+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0KPj4gfSwKPj4gIm11dGV4LU9TRFNoYXJkLjI6
+OnNkYXRhX3dhaXRfbG9jayI6IHsKPj4gIndhaXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJz
+dW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9Cj4+IH0sCj4+
+ICJtdXRleC1PU0RTaGFyZC4yOjpzaGFyZF9sb2NrIjogewo+PiAid2FpdCI6IHsKPj4gImF2Z2Nv
+dW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAw
+Cj4+IH0KPj4gfSwKPj4gIm11dGV4LU9TRFNoYXJkLjM6OnNkYXRhX3dhaXRfbG9jayI6IHsKPj4g
+IndhaXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2
+Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9Cj4+IH0sCj4+ICJtdXRleC1PU0RTaGFyZC4zOjpzaGFy
+ZF9sb2NrIjogewo+PiAid2FpdCI6IHsKPj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAw
+MDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0KPj4gfSwKPj4gIm11dGV4LU9T
+RFNoYXJkLjQ6OnNkYXRhX3dhaXRfbG9jayI6IHsKPj4gIndhaXQiOiB7Cj4+ICJhdmdjb3VudCI6
+IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9
+Cj4+IH0sCj4+ICJtdXRleC1PU0RTaGFyZC40OjpzaGFyZF9sb2NrIjogewo+PiAid2FpdCI6IHsK
+Pj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAu
+MDAwMDAwMDAwCj4+IH0KPj4gfSwKPj4gIm11dGV4LU9TRFNoYXJkLjU6OnNkYXRhX3dhaXRfbG9j
+ayI6IHsKPj4gIndhaXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAw
+MCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9Cj4+IH0sCj4+ICJtdXRleC1PU0RTaGFy
+ZC41OjpzaGFyZF9sb2NrIjogewo+PiAid2FpdCI6IHsKPj4gImF2Z2NvdW50IjogMCwKPj4gInN1
+bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0KPj4gfSwKPj4g
+Im11dGV4LU9TRFNoYXJkLjY6OnNkYXRhX3dhaXRfbG9jayI6IHsKPj4gIndhaXQiOiB7Cj4+ICJh
+dmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAw
+MDAwMAo+PiB9Cj4+IH0sCj4+ICJtdXRleC1PU0RTaGFyZC42OjpzaGFyZF9sb2NrIjogewo+PiAi
+d2FpdCI6IHsKPj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZn
+dGltZSI6IDAuMDAwMDAwMDAwCj4+IH0KPj4gfSwKPj4gIm11dGV4LU9TRFNoYXJkLjc6OnNkYXRh
+X3dhaXRfbG9jayI6IHsKPj4gIndhaXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAw
+LjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9Cj4+IH0sCj4+ICJtdXRl
+eC1PU0RTaGFyZC43OjpzaGFyZF9sb2NrIjogewo+PiAid2FpdCI6IHsKPj4gImF2Z2NvdW50Ijog
+MCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0K
+Pj4gfSwKPj4gIm9iamVjdGVyIjogewo+PiAib3BfYWN0aXZlIjogMCwKPj4gIm9wX2xhZ2d5Ijog
+MCwKPj4gIm9wX3NlbmQiOiAwLAo+PiAib3Bfc2VuZF9ieXRlcyI6IDAsCj4+ICJvcF9yZXNlbmQi
+OiAwLAo+PiAib3BfcmVwbHkiOiAwLAo+PiAib3AiOiAwLAo+PiAib3BfciI6IDAsCj4+ICJvcF93
+IjogMCwKPj4gIm9wX3JtdyI6IDAsCj4+ICJvcF9wZyI6IDAsCj4+ICJvc2RvcF9zdGF0IjogMCwK
+Pj4gIm9zZG9wX2NyZWF0ZSI6IDAsCj4+ICJvc2RvcF9yZWFkIjogMCwKPj4gIm9zZG9wX3dyaXRl
+IjogMCwKPj4gIm9zZG9wX3dyaXRlZnVsbCI6IDAsCj4+ICJvc2RvcF93cml0ZXNhbWUiOiAwLAo+
+PiAib3Nkb3BfYXBwZW5kIjogMCwKPj4gIm9zZG9wX3plcm8iOiAwLAo+PiAib3Nkb3BfdHJ1bmNh
+dGUiOiAwLAo+PiAib3Nkb3BfZGVsZXRlIjogMCwKPj4gIm9zZG9wX21hcGV4dCI6IDAsCj4+ICJv
+c2RvcF9zcGFyc2VfcmVhZCI6IDAsCj4+ICJvc2RvcF9jbG9uZXJhbmdlIjogMCwKPj4gIm9zZG9w
+X2dldHhhdHRyIjogMCwKPj4gIm9zZG9wX3NldHhhdHRyIjogMCwKPj4gIm9zZG9wX2NtcHhhdHRy
+IjogMCwKPj4gIm9zZG9wX3JteGF0dHIiOiAwLAo+PiAib3Nkb3BfcmVzZXR4YXR0cnMiOiAwLAo+
+PiAib3Nkb3BfdG1hcF91cCI6IDAsCj4+ICJvc2RvcF90bWFwX3B1dCI6IDAsCj4+ICJvc2RvcF90
+bWFwX2dldCI6IDAsCj4+ICJvc2RvcF9jYWxsIjogMCwKPj4gIm9zZG9wX3dhdGNoIjogMCwKPj4g
+Im9zZG9wX25vdGlmeSI6IDAsCj4+ICJvc2RvcF9zcmNfY21weGF0dHIiOiAwLAo+PiAib3Nkb3Bf
+cGdscyI6IDAsCj4+ICJvc2RvcF9wZ2xzX2ZpbHRlciI6IDAsCj4+ICJvc2RvcF9vdGhlciI6IDAs
+Cj4+ICJsaW5nZXJfYWN0aXZlIjogMCwKPj4gImxpbmdlcl9zZW5kIjogMCwKPj4gImxpbmdlcl9y
+ZXNlbmQiOiAwLAo+PiAibGluZ2VyX3BpbmciOiAwLAo+PiAicG9vbG9wX2FjdGl2ZSI6IDAsCj4+
+ICJwb29sb3Bfc2VuZCI6IDAsCj4+ICJwb29sb3BfcmVzZW5kIjogMCwKPj4gInBvb2xzdGF0X2Fj
+dGl2ZSI6IDAsCj4+ICJwb29sc3RhdF9zZW5kIjogMCwKPj4gInBvb2xzdGF0X3Jlc2VuZCI6IDAs
+Cj4+ICJzdGF0ZnNfYWN0aXZlIjogMCwKPj4gInN0YXRmc19zZW5kIjogMCwKPj4gInN0YXRmc19y
+ZXNlbmQiOiAwLAo+PiAiY29tbWFuZF9hY3RpdmUiOiAwLAo+PiAiY29tbWFuZF9zZW5kIjogMCwK
+Pj4gImNvbW1hbmRfcmVzZW5kIjogMCwKPj4gIm1hcF9lcG9jaCI6IDEwNTkxMywKPj4gIm1hcF9m
+dWxsIjogMCwKPj4gIm1hcF9pbmMiOiA4MjgsCj4+ICJvc2Rfc2Vzc2lvbnMiOiAwLAo+PiAib3Nk
+X3Nlc3Npb25fb3BlbiI6IDAsCj4+ICJvc2Rfc2Vzc2lvbl9jbG9zZSI6IDAsCj4+ICJvc2RfbGFn
+Z3kiOiAwLAo+PiAib21hcF93ciI6IDAsCj4+ICJvbWFwX3JkIjogMCwKPj4gIm9tYXBfZGVsIjog
+MAo+PiB9LAo+PiAib3NkIjogewo+PiAib3Bfd2lwIjogMCwKPj4gIm9wIjogMTY3NTgxMDIsCj4+
+ICJvcF9pbl9ieXRlcyI6IDIzODM5ODgyMDU4NiwKPj4gIm9wX291dF9ieXRlcyI6IDE2NTQ4NDk5
+OTQ2MywKPj4gIm9wX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDE2NzU4MTAyLAo+PiAic3Vt
+IjogMzgyNDIuNDgxNjQwODQyLAo+PiAiYXZndGltZSI6IDAuMDAyMjgyMDI5Cj4+IH0sCj4+ICJv
+cF9wcm9jZXNzX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDE2NzU4MTAyLAo+PiAic3VtIjog
+Mjg2NDQuOTA2MzEwNjg3LAo+PiAiYXZndGltZSI6IDAuMDAxNzA5MzE2Cj4+IH0sCj4+ICJvcF9w
+cmVwYXJlX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDE2NzYxMzY3LAo+PiAic3VtIjogMzQ4
+OS44NTY1OTk5MzQsCj4+ICJhdmd0aW1lIjogMC4wMDAyMDgyMDgKPj4gfSwKPj4gIm9wX3IiOiA2
+MTg4NTY1LAo+PiAib3Bfcl9vdXRfYnl0ZXMiOiAxNjU0ODQ5OTk0NjMsCj4+ICJvcF9yX2xhdGVu
+Y3kiOiB7Cj4+ICJhdmdjb3VudCI6IDYxODg1NjUsCj4+ICJzdW0iOiA0NTA3LjM2NTc1Njc5MiwK
+Pj4gImF2Z3RpbWUiOiAwLjAwMDcyODMzNwo+PiB9LAo+PiAib3Bfcl9wcm9jZXNzX2xhdGVuY3ki
+OiB7Cj4+ICJhdmdjb3VudCI6IDYxODg1NjUsCj4+ICJzdW0iOiA5NDIuMzYzMDYzNDI5LAo+PiAi
+YXZndGltZSI6IDAuMDAwMTUyMjc0Cj4+IH0sCj4+ICJvcF9yX3ByZXBhcmVfbGF0ZW5jeSI6IHsK
+Pj4gImF2Z2NvdW50IjogNjE4ODY0NCwKPj4gInN1bSI6IDk4Mi44NjY3MTAzODksCj4+ICJhdmd0
+aW1lIjogMC4wMDAxNTg4MTcKPj4gfSwKPj4gIm9wX3ciOiAxMDU0NjAzNywKPj4gIm9wX3dfaW5f
+Ynl0ZXMiOiAyMzgzMzQzMjk0OTQsCj4+ICJvcF93X2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6
+IDEwNTQ2MDM3LAo+PiAic3VtIjogMzMxNjAuNzE5OTk4MzE2LAo+PiAiYXZndGltZSI6IDAuMDAz
+MTQ0Mzc3Cj4+IH0sCj4+ICJvcF93X3Byb2Nlc3NfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50Ijog
+MTA1NDYwMzcsCj4+ICJzdW0iOiAyNzY2OC43MDIwMjkwMzAsCj4+ICJhdmd0aW1lIjogMC4wMDI2
+MjM2MTEKPj4gfSwKPj4gIm9wX3dfcHJlcGFyZV9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAx
+MDU0ODY1MiwKPj4gInN1bSI6IDI0OTkuNjg4NjA5MTczLAo+PiAiYXZndGltZSI6IDAuMDAwMjM2
+OTY3Cj4+IH0sCj4+ICJvcF9ydyI6IDIzNTAwLAo+PiAib3BfcndfaW5fYnl0ZXMiOiA2NDQ5MTA5
+MiwKPj4gIm9wX3J3X291dF9ieXRlcyI6IDAsCj4+ICJvcF9yd19sYXRlbmN5Ijogewo+PiAiYXZn
+Y291bnQiOiAyMzUwMCwKPj4gInN1bSI6IDU3NC4zOTU4ODU3MzQsCj4+ICJhdmd0aW1lIjogMC4w
+MjQ0NDIzNzgKPj4gfSwKPj4gIm9wX3J3X3Byb2Nlc3NfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50
+IjogMjM1MDAsCj4+ICJzdW0iOiAzMy44NDEyMTgyMjgsCj4+ICJhdmd0aW1lIjogMC4wMDE0NDAw
+NTEKPj4gfSwKPj4gIm9wX3J3X3ByZXBhcmVfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50IjogMjQw
+NzEsCj4+ICJzdW0iOiA3LjMwMTI4MDM3MiwKPj4gImF2Z3RpbWUiOiAwLjAwMDMwMzMyMgo+PiB9
+LAo+PiAib3BfYmVmb3JlX3F1ZXVlX29wX2xhdCI6IHsKPj4gImF2Z2NvdW50IjogNTc4OTI5ODYs
+Cj4+ICJzdW0iOiAxNTAyLjExNzcxODg4OSwKPj4gImF2Z3RpbWUiOiAwLjAwMDAyNTk0Ngo+PiB9
+LAo+PiAib3BfYmVmb3JlX2RlcXVldWVfb3BfbGF0Ijogewo+PiAiYXZnY291bnQiOiA1ODA5MTY4
+MywKPj4gInN1bSI6IDQ1MTk0LjQ1MzI1NDAzNywKPj4gImF2Z3RpbWUiOiAwLjAwMDc3Nzk4NAo+
+PiB9LAo+PiAic3Vib3AiOiAxOTc4NDc1OCwKPj4gInN1Ym9wX2luX2J5dGVzIjogNTQ3MTc0OTY5
+NzU0LAo+PiAic3Vib3BfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50IjogMTk3ODQ3NTgsCj4+ICJz
+dW0iOiAxMzAxOS43MTQ0MjQwNjAsCj4+ICJhdmd0aW1lIjogMC4wMDA2NTgwNjcKPj4gfSwKPj4g
+InN1Ym9wX3ciOiAxOTc4NDc1OCwKPj4gInN1Ym9wX3dfaW5fYnl0ZXMiOiA1NDcxNzQ5Njk3NTQs
+Cj4+ICJzdWJvcF93X2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDE5Nzg0NzU4LAo+PiAic3Vt
+IjogMTMwMTkuNzE0NDI0MDYwLAo+PiAiYXZndGltZSI6IDAuMDAwNjU4MDY3Cj4+IH0sCj4+ICJz
+dWJvcF9wdWxsIjogMCwKPj4gInN1Ym9wX3B1bGxfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50Ijog
+MCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0s
+Cj4+ICJzdWJvcF9wdXNoIjogMCwKPj4gInN1Ym9wX3B1c2hfaW5fYnl0ZXMiOiAwLAo+PiAic3Vi
+b3BfcHVzaF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAwLAo+PiAic3VtIjogMC4wMDAwMDAw
+MDAsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKPj4gfSwKPj4gInB1bGwiOiAwLAo+PiAicHVz
+aCI6IDIwMDMsCj4+ICJwdXNoX291dF9ieXRlcyI6IDU1NjAwMDk3MjgsCj4+ICJyZWNvdmVyeV9v
+cHMiOiAxOTQwLAo+PiAibG9hZGF2ZyI6IDExOCwKPj4gImJ1ZmZlcl9ieXRlcyI6IDAsCj4+ICJo
+aXN0b3J5X2FsbG9jX01ieXRlcyI6IDAsCj4+ICJoaXN0b3J5X2FsbG9jX251bSI6IDAsCj4+ICJj
+YWNoZWRfY3JjIjogMCwKPj4gImNhY2hlZF9jcmNfYWRqdXN0ZWQiOiAwLAo+PiAibWlzc2VkX2Ny
+YyI6IDAsCj4+ICJudW1wZyI6IDI0MywKPj4gIm51bXBnX3ByaW1hcnkiOiA4MiwKPj4gIm51bXBn
+X3JlcGxpY2EiOiAxNjEsCj4+ICJudW1wZ19zdHJheSI6IDAsCj4+ICJudW1wZ19yZW1vdmluZyI6
+IDAsCj4+ICJoZWFydGJlYXRfdG9fcGVlcnMiOiAxMCwKPj4gIm1hcF9tZXNzYWdlcyI6IDcwMTMs
+Cj4+ICJtYXBfbWVzc2FnZV9lcG9jaHMiOiA3MTQzLAo+PiAibWFwX21lc3NhZ2VfZXBvY2hfZHVw
+cyI6IDYzMTUsCj4+ICJtZXNzYWdlc19kZWxheWVkX2Zvcl9tYXAiOiAwLAo+PiAib3NkX21hcF9j
+YWNoZV9oaXQiOiAyMDMzMDksCj4+ICJvc2RfbWFwX2NhY2hlX21pc3MiOiAzMywKPj4gIm9zZF9t
+YXBfY2FjaGVfbWlzc19sb3ciOiAwLAo+PiAib3NkX21hcF9jYWNoZV9taXNzX2xvd19hdmciOiB7
+Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwCj4+IH0sCj4+ICJvc2RfbWFwX2JsX2NhY2hl
+X2hpdCI6IDQ3MDEyLAo+PiAib3NkX21hcF9ibF9jYWNoZV9taXNzIjogMTY4MSwKPj4gInN0YXRf
+Ynl0ZXMiOiA2NDAxMjQ4MTk4NjU2LAo+PiAic3RhdF9ieXRlc191c2VkIjogMzc3Nzk3OTA3MjUx
+MiwKPj4gInN0YXRfYnl0ZXNfYXZhaWwiOiAyNjIzMjY5MTI2MTQ0LAo+PiAiY29weWZyb20iOiAw
+LAo+PiAidGllcl9wcm9tb3RlIjogMCwKPj4gInRpZXJfZmx1c2giOiAwLAo+PiAidGllcl9mbHVz
+aF9mYWlsIjogMCwKPj4gInRpZXJfdHJ5X2ZsdXNoIjogMCwKPj4gInRpZXJfdHJ5X2ZsdXNoX2Zh
+aWwiOiAwLAo+PiAidGllcl9ldmljdCI6IDAsCj4+ICJ0aWVyX3doaXRlb3V0IjogMTYzMSwKPj4g
+InRpZXJfZGlydHkiOiAyMjM2MCwKPj4gInRpZXJfY2xlYW4iOiAwLAo+PiAidGllcl9kZWxheSI6
+IDAsCj4+ICJ0aWVyX3Byb3h5X3JlYWQiOiAwLAo+PiAidGllcl9wcm94eV93cml0ZSI6IDAsCj4+
+ICJhZ2VudF93YWtlIjogMCwKPj4gImFnZW50X3NraXAiOiAwLAo+PiAiYWdlbnRfZmx1c2giOiAw
+LAo+PiAiYWdlbnRfZXZpY3QiOiAwLAo+PiAib2JqZWN0X2N0eF9jYWNoZV9oaXQiOiAxNjMxMTE1
+NiwKPj4gIm9iamVjdF9jdHhfY2FjaGVfdG90YWwiOiAxNzQyNjM5MywKPj4gIm9wX2NhY2hlX2hp
+dCI6IDAsCj4+ICJvc2RfdGllcl9mbHVzaF9sYXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJz
+dW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9LAo+PiAib3Nk
+X3RpZXJfcHJvbW90ZV9sYXQiOiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAw
+MDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9LAo+PiAib3NkX3RpZXJfcl9sYXQi
+OiB7Cj4+ICJhdmdjb3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUi
+OiAwLjAwMDAwMDAwMAo+PiB9LAo+PiAib3NkX3BnX2luZm8iOiAzMDQ4MzExMywKPj4gIm9zZF9w
+Z19mYXN0aW5mbyI6IDI5NjE5ODg1LAo+PiAib3NkX3BnX2JpZ2luZm8iOiA4MTcwMwo+PiB9LAo+
+PiAicmVjb3ZlcnlzdGF0ZV9wZXJmIjogewo+PiAiaW5pdGlhbF9sYXRlbmN5Ijogewo+PiAiYXZn
+Y291bnQiOiAyNDMsCj4+ICJzdW0iOiA2Ljg2OTI5NjUwMCwKPj4gImF2Z3RpbWUiOiAwLjAyODI2
+ODcwOQo+PiB9LAo+PiAic3RhcnRlZF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAxMTI1LAo+
+PiAic3VtIjogMTM1NTEzODQuOTE3MzM1ODUwLAo+PiAiYXZndGltZSI6IDEyMDQ1LjY3NTQ4MjA3
+Ngo+PiB9LAo+PiAicmVzZXRfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50IjogMTM2OCwKPj4gInN1
+bSI6IDExMDEuNzI3Nzk5MDQwLAo+PiAiYXZndGltZSI6IDAuODA1MzU2NTc4Cj4+IH0sCj4+ICJz
+dGFydF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAxMzY4LAo+PiAic3VtIjogMC4wMDIwMTQ3
+OTksCj4+ICJhdmd0aW1lIjogMC4wMDAwMDE0NzIKPj4gfSwKPj4gInByaW1hcnlfbGF0ZW5jeSI6
+IHsKPj4gImF2Z2NvdW50IjogNTA3LAo+PiAic3VtIjogNDU3NTU2MC42Mzg4MjM0MjgsCj4+ICJh
+dmd0aW1lIjogOTAyNC43NzQ0MzU1NDkKPj4gfSwKPj4gInBlZXJpbmdfbGF0ZW5jeSI6IHsKPj4g
+ImF2Z2NvdW50IjogNTUwLAo+PiAic3VtIjogNDk5LjM3MjI4MzYxNiwKPj4gImF2Z3RpbWUiOiAw
+LjkwNzk0OTYwNgo+PiB9LAo+PiAiYmFja2ZpbGxpbmdfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50
+IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+
+IH0sCj4+ICJ3YWl0cmVtb3RlYmFja2ZpbGxyZXNlcnZlZF9sYXRlbmN5Ijogewo+PiAiYXZnY291
+bnQiOiAwLAo+PiAic3VtIjogMC4wMDAwMDAwMDAsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAK
+Pj4gfSwKPj4gIndhaXRsb2NhbGJhY2tmaWxscmVzZXJ2ZWRfbGF0ZW5jeSI6IHsKPj4gImF2Z2Nv
+dW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAw
+Cj4+IH0sCj4+ICJub3RiYWNrZmlsbGluZ19sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAwLAo+
+PiAic3VtIjogMC4wMDAwMDAwMDAsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDAwMDAKPj4gfSwKPj4g
+InJlcG5vdHJlY292ZXJpbmdfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50IjogMTAwOSwKPj4gInN1
+bSI6IDg5NzUzMDEuMDgyMjc0NDExLAo+PiAiYXZndGltZSI6IDg4OTUuMjQzODg3Mjg4Cj4+IH0s
+Cj4+ICJyZXB3YWl0cmVjb3ZlcnlyZXNlcnZlZF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiA0
+MjAsCj4+ICJzdW0iOiA5OS44NDYwNTY1MjAsCj4+ICJhdmd0aW1lIjogMC4yMzc3Mjg3MDYKPj4g
+fSwKPj4gInJlcHdhaXRiYWNrZmlsbHJlc2VydmVkX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6
+IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAwMAo+PiB9
+LAo+PiAicmVwcmVjb3ZlcmluZ19sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiA0MjAsCj4+ICJz
+dW0iOiAyNDEuNjgyNzY0MzgyLAo+PiAiYXZndGltZSI6IDAuNTc1NDM1MTUzCj4+IH0sCj4+ICJh
+Y3RpdmF0aW5nX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDUwNywKPj4gInN1bSI6IDE2Ljg5
+MzM0NzMzOSwKPj4gImF2Z3RpbWUiOiAwLjAzMzMyMDIxMQo+PiB9LAo+PiAid2FpdGxvY2FscmVj
+b3ZlcnlyZXNlcnZlZF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAxOTksCj4+ICJzdW0iOiA2
+NzIuMzM1NTEyNzY5LAo+PiAiYXZndGltZSI6IDMuMzc4NTcwNDE1Cj4+IH0sCj4+ICJ3YWl0cmVt
+b3RlcmVjb3ZlcnlyZXNlcnZlZF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAxOTksCj4+ICJz
+dW0iOiAyMTMuNTM2NDM5MzYzLAo+PiAiYXZndGltZSI6IDEuMDczMDQ3NDMzCj4+IH0sCj4+ICJy
+ZWNvdmVyaW5nX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDE5OSwKPj4gInN1bSI6IDc5LjAw
+NzY5NjQ3OSwKPj4gImF2Z3RpbWUiOiAwLjM5NzAyMzYwMAo+PiB9LAo+PiAicmVjb3ZlcmVkX2xh
+dGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDUwNywKPj4gInN1bSI6IDE0LjAwMDczMjc0OCwKPj4g
+ImF2Z3RpbWUiOiAwLjAyNzYxNDg1Nwo+PiB9LAo+PiAiY2xlYW5fbGF0ZW5jeSI6IHsKPj4gImF2
+Z2NvdW50IjogMzk1LAo+PiAic3VtIjogNDU3NDMyNS45MDAzNzEwODMsCj4+ICJhdmd0aW1lIjog
+MTE1ODAuNTcxODk5NjczCj4+IH0sCj4+ICJhY3RpdmVfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50
+IjogNDI1LAo+PiAic3VtIjogNDU3NTEwNy42MzAxMjM2ODAsCj4+ICJhdmd0aW1lIjogMTA3NjQu
+OTU5MTI5NzAyCj4+IH0sCj4+ICJyZXBsaWNhYWN0aXZlX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3Vu
+dCI6IDU4OSwKPj4gInN1bSI6IDg5NzUxODQuNDk5MDQ5OTU0LAo+PiAiYXZndGltZSI6IDE1MjM4
+LjAwNDI0Mjg2OQo+PiB9LAo+PiAic3RyYXlfbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50IjogODE4
+LAo+PiAic3VtIjogODAwLjcyOTQ1NTY2NiwKPj4gImF2Z3RpbWUiOiAwLjk3ODg4Njg2NQo+PiB9
+LAo+PiAiZ2V0aW5mb19sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiA1NTAsCj4+ICJzdW0iOiAx
+NS4wODU2NjcwNDgsCj4+ICJhdmd0aW1lIjogMC4wMjc0Mjg0ODUKPj4gfSwKPj4gImdldGxvZ19s
+YXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiA1NDYsCj4+ICJzdW0iOiAzLjQ4MjE3NTY5MywKPj4g
+ImF2Z3RpbWUiOiAwLjAwNjM3NzYxMQo+PiB9LAo+PiAid2FpdGFjdGluZ2NoYW5nZV9sYXRlbmN5
+Ijogewo+PiAiYXZnY291bnQiOiAzOSwKPj4gInN1bSI6IDM1LjQ0NDU1MTI4NCwKPj4gImF2Z3Rp
+bWUiOiAwLjkwODgzNDY0OAo+PiB9LAo+PiAiaW5jb21wbGV0ZV9sYXRlbmN5Ijogewo+PiAiYXZn
+Y291bnQiOiAwLAo+PiAic3VtIjogMC4wMDAwMDAwMDAsCj4+ICJhdmd0aW1lIjogMC4wMDAwMDAw
+MDAKPj4gfSwKPj4gImRvd25fbGF0ZW5jeSI6IHsKPj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6
+IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAwCj4+IH0sCj4+ICJnZXRtaXNz
+aW5nX2xhdGVuY3kiOiB7Cj4+ICJhdmdjb3VudCI6IDUwNywKPj4gInN1bSI6IDYuNzAyMTI5NjI0
+LAo+PiAiYXZndGltZSI6IDAuMDEzMjE5MTkwCj4+IH0sCj4+ICJ3YWl0dXB0aHJ1X2xhdGVuY3ki
+OiB7Cj4+ICJhdmdjb3VudCI6IDUwNywKPj4gInN1bSI6IDQ3NC4wOTgyNjE3MjcsCj4+ICJhdmd0
+aW1lIjogMC45MzUxMDUwNTIKPj4gfSwKPj4gIm5vdHJlY292ZXJpbmdfbGF0ZW5jeSI6IHsKPj4g
+ImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAw
+MDAwMDAwCj4+IH0KPj4gfSwKPj4gInJvY2tzZGIiOiB7Cj4+ICJnZXQiOiAyODMyMDk3NywKPj4g
+InN1Ym1pdF90cmFuc2FjdGlvbiI6IDMwNDg0OTI0LAo+PiAic3VibWl0X3RyYW5zYWN0aW9uX3N5
+bmMiOiAyNjM3MTk1NywKPj4gImdldF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAyODMyMDk3
+NywKPj4gInN1bSI6IDMyNS45MDA5MDg3MzMsCj4+ICJhdmd0aW1lIjogMC4wMDAwMTE1MDcKPj4g
+fSwKPj4gInN1Ym1pdF9sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAzMDQ4NDkyNCwKPj4gInN1
+bSI6IDE4MzUuODg4NjkyMzcxLAo+PiAiYXZndGltZSI6IDAuMDAwMDYwMjIyCj4+IH0sCj4+ICJz
+dWJtaXRfc3luY19sYXRlbmN5Ijogewo+PiAiYXZnY291bnQiOiAyNjM3MTk1NywKPj4gInN1bSI6
+IDE0MzEuNTU1MjMwNjI4LAo+PiAiYXZndGltZSI6IDAuMDAwMDU0MjgzCj4+IH0sCj4+ICJjb21w
+YWN0IjogMCwKPj4gImNvbXBhY3RfcmFuZ2UiOiAwLAo+PiAiY29tcGFjdF9xdWV1ZV9tZXJnZSI6
+IDAsCj4+ICJjb21wYWN0X3F1ZXVlX2xlbiI6IDAsCj4+ICJyb2Nrc2RiX3dyaXRlX3dhbF90aW1l
+Ijogewo+PiAiYXZnY291bnQiOiAwLAo+PiAic3VtIjogMC4wMDAwMDAwMDAsCj4+ICJhdmd0aW1l
+IjogMC4wMDAwMDAwMDAKPj4gfSwKPj4gInJvY2tzZGJfd3JpdGVfbWVtdGFibGVfdGltZSI6IHsK
+Pj4gImF2Z2NvdW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAu
+MDAwMDAwMDAwCj4+IH0sCj4+ICJyb2Nrc2RiX3dyaXRlX2RlbGF5X3RpbWUiOiB7Cj4+ICJhdmdj
+b3VudCI6IDAsCj4+ICJzdW0iOiAwLjAwMDAwMDAwMCwKPj4gImF2Z3RpbWUiOiAwLjAwMDAwMDAw
+MAo+PiB9LAo+PiAicm9ja3NkYl93cml0ZV9wcmVfYW5kX3Bvc3RfdGltZSI6IHsKPj4gImF2Z2Nv
+dW50IjogMCwKPj4gInN1bSI6IDAuMDAwMDAwMDAwLAo+PiAiYXZndGltZSI6IDAuMDAwMDAwMDAw
+Cj4+IH0KPj4gfQo+PiB9Cj4+Cj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KPj4gRGU6ICJJ
+Z29yIEZlZG90b3YiIDxpZmVkb3RvdkBzdXNlLmRlPgo+PiDDgDogImFkZXJ1bWllciIgPGFkZXJ1
+bWllckBvZGlzby5jb20+Cj4+IENjOiAiU3RlZmFuIFByaWViZSwgUHJvZmlob3N0IEFHIiA8cy5w
+cmllYmVAcHJvZmlob3N0LmFnPiwgIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiwg
+IlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiwgImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zz4KPj4gRW52b3nDqTogTWFyZGkgNSBGw6l2cmllciAyMDE5IDE4OjU2OjUxCj4+IE9iamV0OiBS
+ZTogW2NlcGgtdXNlcnNdIGNlcGggb3NkIGNvbW1pdCBsYXRlbmN5IGluY3JlYXNlIG92ZXIgdGlt
+ZSwgdW50aWwgcmVzdGFydAo+Pgo+PiBPbiAyLzQvMjAxOSA2OjQwIFBNLCBBbGV4YW5kcmUgREVS
+VU1JRVIgd3JvdGU6Cj4+Pj4+IGJ1dCBJIGRvbid0IHNlZSBsX2JsdWVzdG9yZV9mcmFnbWVudGF0
+aW9uIGNvdW50ZXIuCj4+Pj4+IChidXQgSSBoYXZlIGJsdWVzdG9yZV9mcmFnbWVudGF0aW9uX21p
+Y3JvcykKPj4+IG9rLCB0aGlzIGlzIHRoZSBzYW1lCj4+Pgo+Pj4gYi5hZGRfdTY0KGxfYmx1ZXN0
+b3JlX2ZyYWdtZW50YXRpb24sICJibHVlc3RvcmVfZnJhZ21lbnRhdGlvbl9taWNyb3MiLAo+Pj4g
+IkhvdyBmcmFnbWVudGVkIGJsdWVzdG9yZSBmcmVlIHNwYWNlIGlzIChmcmVlIGV4dGVudHMgLyBt
+YXggcG9zc2libGUgbnVtYmVyIG9mIGZyZWUgZXh0ZW50cykgKiAxMDAwIik7Cj4+Pgo+Pj4KPj4+
+IEhlcmUgYSBncmFwaCBvbiBsYXN0IG1vbnRoLCB3aXRoIGJsdWVzdG9yZV9mcmFnbWVudGF0aW9u
+X21pY3JvcyBhbmQgbGF0ZW5jeSwKPj4+Cj4+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9s
+YXRlbmN5X3ZzX2ZyYWdtZW50YXRpb25fbWljcm9zLnBuZwo+PiBobW0sIHNvIGZyYWdtZW50YXRp
+b24gZ3Jvd3MgZXZlbnR1YWxseSBhbmQgZHJvcHMgb24gT1NEIHJlc3RhcnRzLCBpc24ndAo+PiBp
+dD8gVGhlIHNhbWUgZm9yIG90aGVyIE9TRHM/Cj4+Cj4+IFRoaXMgcHJvdmVzIHNvbWUgaXNzdWUg
+d2l0aCB0aGUgYWxsb2NhdG9yIC0gZ2VuZXJhbGx5IGZyYWdtZW50YXRpb24KPj4gbWlnaHQgZ3Jv
+dyBidXQgaXQgc2hvdWxkbid0IHJlc2V0IG9uIHJlc3RhcnQuIExvb2tzIGxpa2Ugc29tZSBpbnRl
+cnZhbHMKPj4gYXJlbid0IHByb3Blcmx5IG1lcmdlZCBpbiBydW4tdGltZS4KPj4KPj4gT24gdGhl
+IG90aGVyIHNpZGUgSSdtIG5vdCBjb21wbGV0ZWx5IHN1cmUgdGhhdCBsYXRlbmN5IGRlZ3JhZGF0
+aW9uIGlzCj4+IGNhdXNlZCBieSB0aGF0IC0gZnJhZ21lbnRhdGlvbiBncm93dGggaXMgcmVsYXRp
+dmVseSBzbWFsbCAtIEkgZG9uJ3Qgc2VlCj4+IGhvdyB0aGlzIG1pZ2h0IGltcGFjdCBwZXJmb3Jt
+YW5jZSB0aGF0IGhpZ2guCj4+Cj4+IFdvbmRlcmluZyBpZiB5b3UgaGF2ZSBPU0QgbWVtcG9vbCBt
+b25pdG9yaW5nIChkdW1wX21lbXBvb2xzIGNvbW1hbmQKPj4gb3V0cHV0IG9uIGFkbWluIHNvY2tl
+dCkgcmVwb3J0cz8gRG8geW91IGhhdmUgYW55IGhpc3RvcmljIGRhdGE/Cj4+Cj4+IElmIG5vdCBt
+YXkgSSBoYXZlIGN1cnJlbnQgb3V0cHV0IGFuZCBzYXkgYSBjb3VwbGUgbW9yZSBzYW1wbGVzIHdp
+dGgKPj4gOC0xMiBob3VycyBpbnRlcnZhbD8KPj4KPj4KPj4gV3J0IHRvIGJhY2twb3J0aW5nIGJp
+dG1hcCBhbGxvY2F0b3IgdG8gbWltaWMgLSB3ZSBoYXZlbid0IGhhZCBzdWNoIHBsYW5zCj4+IGJl
+Zm9yZSB0aGF0IGJ1dCBJJ2xsIGRpc2N1c3MgdGhpcyBhdCBCbHVlU3RvcmUgbWVldGluZyBzaG9y
+dGx5Lgo+Pgo+Pgo+PiBUaGFua3MsCj4+Cj4+IElnb3IKPj4KPj4+IC0tLS0tIE1haWwgb3JpZ2lu
+YWwgLS0tLS0KPj4+IERlOiAiQWxleGFuZHJlIERlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNv
+bT4KPj4+IMOAOiAiSWdvciBGZWRvdG92IiA8aWZlZG90b3ZAc3VzZS5kZT4KPj4+IENjOiAiU3Rl
+ZmFuIFByaWViZSwgUHJvZmlob3N0IEFHIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiwgIk1hcmsg
+TmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0u
+bmV0PiwgImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2
+ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4KPj4+IEVudm95w6k6IEx1bmRpIDQgRsOp
+dnJpZXIgMjAxOSAxNjowNDozOAo+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gY2VwaCBvc2Qg
+Y29tbWl0IGxhdGVuY3kgaW5jcmVhc2Ugb3ZlciB0aW1lLCB1bnRpbCByZXN0YXJ0Cj4+Pgo+Pj4g
+VGhhbmtzIElnb3IsCj4+Pgo+Pj4+PiBDb3VsZCB5b3UgcGxlYXNlIGNvbGxlY3QgQmx1ZVN0b3Jl
+IHBlcmZvcm1hbmNlIGNvdW50ZXJzIHJpZ2h0IGFmdGVyIE9TRAo+Pj4+PiBzdGFydHVwIGFuZCBv
+bmNlIHlvdSBnZXQgaGlnaCBsYXRlbmN5Lgo+Pj4+Pgo+Pj4+PiBTcGVjaWZpY2FsbHkgJ2xfYmx1
+ZXN0b3JlX2ZyYWdtZW50YXRpb24nIHBhcmFtZXRlciBpcyBvZiBpbnRlcmVzdC4KPj4+IEknbSBh
+bHJlYWR5IG1vbml0b3Jpbmcgd2l0aAo+Pj4gImNlcGggZGFlbW9uIG9zZC54IHBlcmYgZHVtcCAi
+LCAoSSBoYXZlIDJtb250aHMgaGlzdG9yeSB3aWxsIGFsbCBjb3VudGVycykKPj4+Cj4+PiBidXQg
+SSBkb24ndCBzZWUgbF9ibHVlc3RvcmVfZnJhZ21lbnRhdGlvbiBjb3VudGVyLgo+Pj4KPj4+IChi
+dXQgSSBoYXZlIGJsdWVzdG9yZV9mcmFnbWVudGF0aW9uX21pY3JvcykKPj4+Cj4+Pgo+Pj4+PiBB
+bHNvIGlmIHlvdSdyZSBhYmxlIHRvIHJlYnVpbGQgdGhlIGNvZGUgSSBjYW4gcHJvYmFibHkgbWFr
+ZSBhIHNpbXBsZQo+Pj4+PiBwYXRjaCB0byB0cmFjayBsYXRlbmN5IGFuZCBzb21lIG90aGVyIGlu
+dGVybmFsIGFsbG9jYXRvcidzIHBhcmFtdGVyIHRvCj4+Pj4+IG1ha2Ugc3VyZSBpdCdzIGRlZ3Jh
+ZGVkIGFuZCBsZWFybiBtb3JlIGRldGFpbHMuCj4+PiBTb3JyeSwgSXQncyBhIGNyaXRpY2FsIHBy
+b2R1Y3Rpb24gY2x1c3RlciwgSSBjYW4ndCB0ZXN0IG9uIGl0IDooCj4+PiBCdXQgSSBoYXZlIGEg
+dGVzdCBjbHVzdGVyLCBtYXliZSBJIGNhbiB0cnkgdG8gcHV0IHNvbWUgbG9hZCBvbiBpdCwgYW5k
+IHRyeSB0byByZXByb2R1Y2UuCj4+Pgo+Pj4KPj4+Cj4+Pj4+IE1vcmUgdmlnb3JvdXMgZml4IHdv
+dWxkIGJlIHRvIGJhY2twb3J0IGJpdG1hcCBhbGxvY2F0b3IgZnJvbSBOYXV0aWx1cwo+Pj4+PiBh
+bmQgdHJ5IHRoZSBkaWZmZXJlbmNlLi4uCj4+PiBBbnkgcGxhbiB0byBiYWNrcG9ydCBpdCB0byBt
+aW1pYyA/IChCdXQgSSBjYW4gd2FpdCBmb3IgTmF1dGlsdXMpCj4+PiBwZXJmIHJlc3VsdHMgb2Yg
+bmV3IGJpdG1hcCBhbGxvY2F0b3Igc2VlbSB2ZXJ5IHByb21pc2luZyBmcm9tIHdoYXQgSSd2ZSBz
+ZWVuIGluIFBSLgo+Pj4KPj4+Cj4+Pgo+Pj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQo+Pj4g
+RGU6ICJJZ29yIEZlZG90b3YiIDxpZmVkb3RvdkBzdXNlLmRlPgo+Pj4gw4A6ICJBbGV4YW5kcmUg
+RGVydW1pZXIiIDxhZGVydW1pZXJAb2Rpc28uY29tPiwgIlN0ZWZhbiBQcmllYmUsIFByb2ZpaG9z
+dCBBRyIgPHMucHJpZWJlQHByb2ZpaG9zdC5hZz4sICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVk
+aGF0LmNvbT4KPj4+IENjOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5uZXQ+LCAiY2VwaC11
+c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnPgo+Pj4gRW52b3nDqTogTHVuZGkgNCBGw6l2cmllciAyMDE5IDE1
+OjUxOjMwCj4+PiBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9zZCBjb21taXQgbGF0ZW5j
+eSBpbmNyZWFzZSBvdmVyIHRpbWUsIHVudGlsIHJlc3RhcnQKPj4+Cj4+PiBIaSBBbGV4YW5kcmUs
+Cj4+Pgo+Pj4gbG9va3MgbGlrZSBhIGJ1ZyBpbiBTdHVwaWRBbGxvY2F0b3IuCj4+Pgo+Pj4gQ291
+bGQgeW91IHBsZWFzZSBjb2xsZWN0IEJsdWVTdG9yZSBwZXJmb3JtYW5jZSBjb3VudGVycyByaWdo
+dCBhZnRlciBPU0QKPj4+IHN0YXJ0dXAgYW5kIG9uY2UgeW91IGdldCBoaWdoIGxhdGVuY3kuCj4+
+Pgo+Pj4gU3BlY2lmaWNhbGx5ICdsX2JsdWVzdG9yZV9mcmFnbWVudGF0aW9uJyBwYXJhbWV0ZXIg
+aXMgb2YgaW50ZXJlc3QuCj4+Pgo+Pj4gQWxzbyBpZiB5b3UncmUgYWJsZSB0byByZWJ1aWxkIHRo
+ZSBjb2RlIEkgY2FuIHByb2JhYmx5IG1ha2UgYSBzaW1wbGUKPj4+IHBhdGNoIHRvIHRyYWNrIGxh
+dGVuY3kgYW5kIHNvbWUgb3RoZXIgaW50ZXJuYWwgYWxsb2NhdG9yJ3MgcGFyYW10ZXIgdG8KPj4+
+IG1ha2Ugc3VyZSBpdCdzIGRlZ3JhZGVkIGFuZCBsZWFybiBtb3JlIGRldGFpbHMuCj4+Pgo+Pj4K
+Pj4+IE1vcmUgdmlnb3JvdXMgZml4IHdvdWxkIGJlIHRvIGJhY2twb3J0IGJpdG1hcCBhbGxvY2F0
+b3IgZnJvbSBOYXV0aWx1cwo+Pj4gYW5kIHRyeSB0aGUgZGlmZmVyZW5jZS4uLgo+Pj4KPj4+Cj4+
+PiBUaGFua3MsCj4+Pgo+Pj4gSWdvcgo+Pj4KPj4+Cj4+PiBPbiAyLzQvMjAxOSA1OjE3IFBNLCBB
+bGV4YW5kcmUgREVSVU1JRVIgd3JvdGU6Cj4+Pj4gSGkgYWdhaW4sCj4+Pj4KPj4+PiBJIHNwZWFr
+IHRvbyBmYXN0LCB0aGUgcHJvYmxlbSBoYXMgb2NjdXJlZCBhZ2Fpbiwgc28gaXQncyBub3QgdGNt
+YWxsb2MgY2FjaGUgc2l6ZSByZWxhdGVkLgo+Pj4+Cj4+Pj4KPj4+PiBJIGhhdmUgbm90aWNlIHNv
+bWV0aGluZyB1c2luZyBhIHNpbXBsZSAicGVyZiB0b3AiLAo+Pj4+Cj4+Pj4gZWFjaCB0aW1lIEkg
+aGF2ZSB0aGlzIHByb2JsZW0gKEkgaGF2ZSBzZWVuIGV4YWN0bHkgNCB0aW1lcyB0aGUgc2FtZSBi
+ZWhhdmlvdXIpLAo+Pj4+Cj4+Pj4gd2hlbiBsYXRlbmN5IGlzIGJhZCwgcGVyZiB0b3AgZ2l2ZSBt
+ZSA6Cj4+Pj4KPj4+PiBTdHVwaWRBbGxvY2F0b3I6Ol9hbGlnbmVkX2xlbgo+Pj4+IGFuZAo+Pj4+
+IGJ0cmVlOjpidHJlZV9pdGVyYXRvcjxidHJlZTo6YnRyZWVfbm9kZTxidHJlZTo6YnRyZWVfbWFw
+X3BhcmFtczx1bnNpZ25lZCBsb25nLCB1bnNpZ25lZCBsb25nLCBzdGQ6Omxlc3M8dW5zaWduZWQg
+bG9uZz4sIG1lbXBvbwo+Pj4+IGw6OnBvb2xfYWxsb2NhdG9yPChtZW1wb29sOjpwb29sX2luZGV4
+X3QpMSwgc3RkOjpwYWlyPHVuc2lnbmVkIGxvbmcgY29uc3QsIHVuc2lnbmVkIGxvbmc+ID4sIDI1
+Nj4gPiwgc3RkOjpwYWlyPHVuc2lnbmVkIGxvbmcgY29uc3QsIHVuc2lnbmVkIGxvbmc+Jiwgc3Rk
+OjpwYWlyPHVuc2lnbmVkIGxvbmcKPj4+PiBjb25zdCwgdW5zaWduZWQgbG9uZz4qPjo6aW5jcmVt
+ZW50X3Nsb3coKQo+Pj4+Cj4+Pj4gKGFyb3VuZCAxMC0yMCUgdGltZSBmb3IgYm90aCkKPj4+Pgo+
+Pj4+Cj4+Pj4gd2hlbiBsYXRlbmN5IGlzIGdvb2QsIEkgZG9uJ3Qgc2VlIHRoZW0gYXQgYWxsLgo+
+Pj4+Cj4+Pj4KPj4+PiBJIGhhdmUgdXNlZCB0aGUgTWFyayB3YWxsY2xvY2sgcHJvZmlsZXIsIGhl
+cmUgdGhlIHJlc3VsdHM6Cj4+Pj4KPj4+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9nZGJw
+bXAtb2sudHh0Cj4+Pj4KPj4+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNvLm5ldC9nZGJwbXAtYmFk
+LnR4dAo+Pj4+Cj4+Pj4KPj4+PiBoZXJlIGFuIGV4dHJhY3Qgb2YgdGhlIHRocmVhZCB3aXRoIGJ0
+cmVlOjpidHJlZV9pdGVyYXRvciAmJiBTdHVwaWRBbGxvY2F0b3I6Ol9hbGlnbmVkX2xlbgo+Pj4+
+Cj4+Pj4KPj4+PiArIDEwMC4wMCUgY2xvbmUKPj4+PiArIDEwMC4wMCUgc3RhcnRfdGhyZWFkCj4+
+Pj4gKyAxMDAuMDAlIFNoYXJkZWRUaHJlYWRQb29sOjpXb3JrVGhyZWFkU2hhcmRlZDo6ZW50cnko
+KQo+Pj4+ICsgMTAwLjAwJSBTaGFyZGVkVGhyZWFkUG9vbDo6c2hhcmRlZHRocmVhZHBvb2xfd29y
+a2VyKHVuc2lnbmVkIGludCkKPj4+PiArIDEwMC4wMCUgT1NEOjpTaGFyZGVkT3BXUTo6X3Byb2Nl
+c3ModW5zaWduZWQgaW50LCBjZXBoOjpoZWFydGJlYXRfaGFuZGxlX2QqKQo+Pj4+ICsgNzAuMDAl
+IFBHT3BJdGVtOjpydW4oT1NEKiwgT1NEU2hhcmQqLCBib29zdDo6aW50cnVzaXZlX3B0cjxQRz4m
+LCBUaHJlYWRQb29sOjpUUEhhbmRsZSYpCj4+Pj4gfCArIDcwLjAwJSBPU0Q6OmRlcXVldWVfb3Ao
+Ym9vc3Q6OmludHJ1c2l2ZV9wdHI8UEc+LCBib29zdDo6aW50cnVzaXZlX3B0cjxPcFJlcXVlc3Q+
+LCBUaHJlYWRQb29sOjpUUEhhbmRsZSYpCj4+Pj4gfCArIDcwLjAwJSBQcmltYXJ5TG9nUEc6OmRv
+X3JlcXVlc3QoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8T3BSZXF1ZXN0PiYsIFRocmVhZFBvb2w6OlRQ
+SGFuZGxlJikKPj4+PiB8ICsgNjguMDAlIFBHQmFja2VuZDo6aGFuZGxlX21lc3NhZ2UoYm9vc3Q6
+OmludHJ1c2l2ZV9wdHI8T3BSZXF1ZXN0PikKPj4+PiB8IHwgKyA2OC4wMCUgUmVwbGljYXRlZEJh
+Y2tlbmQ6Ol9oYW5kbGVfbWVzc2FnZShib29zdDo6aW50cnVzaXZlX3B0cjxPcFJlcXVlc3Q+KQo+
+Pj4+IHwgfCArIDY4LjAwJSBSZXBsaWNhdGVkQmFja2VuZDo6ZG9fcmVwb3AoYm9vc3Q6OmludHJ1
+c2l2ZV9wdHI8T3BSZXF1ZXN0PikKPj4+PiB8IHwgKyA2Ny4wMCUgbm9uLXZpcnR1YWwgdGh1bmsg
+dG8gUHJpbWFyeUxvZ1BHOjpxdWV1ZV90cmFuc2FjdGlvbnMoc3RkOjp2ZWN0b3I8T2JqZWN0U3Rv
+cmU6OlRyYW5zYWN0aW9uLCBzdGQ6OmFsbG9jYXRvcjxPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24+
+ID4mLCBib29zdDo6aW50cnVzaXZlX3B0cjxPcFJlcXVlc3Q+KQo+Pj4+IHwgfCB8ICsgNjcuMDAl
+IEJsdWVTdG9yZTo6cXVldWVfdHJhbnNhY3Rpb25zKGJvb3N0OjppbnRydXNpdmVfcHRyPE9iamVj
+dFN0b3JlOjpDb2xsZWN0aW9uSW1wbD4mLCBzdGQ6OnZlY3RvcjxPYmplY3RTdG9yZTo6VHJhbnNh
+Y3Rpb24sIHN0ZDo6YWxsb2NhdG9yPE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbj4gPiYsIGJvb3N0
+OjppbnRydXNpdmVfcHRyPFRyYWNrZWRPcD4sIFRocmVhZFBvb2w6OlRQSGFuZGxlKikKPj4+PiB8
+IHwgfCArIDY2LjAwJSBCbHVlU3RvcmU6Ol90eGNfYWRkX3RyYW5zYWN0aW9uKEJsdWVTdG9yZTo6
+VHJhbnNDb250ZXh0KiwgT2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uKikKPj4+PiB8IHwgfCB8ICsg
+NjYuMDAlIEJsdWVTdG9yZTo6X3dyaXRlKEJsdWVTdG9yZTo6VHJhbnNDb250ZXh0KiwgYm9vc3Q6
+OmludHJ1c2l2ZV9wdHI8Qmx1ZVN0b3JlOjpDb2xsZWN0aW9uPiYsIGJvb3N0OjppbnRydXNpdmVf
+cHRyPEJsdWVTdG9yZTo6T25vZGU+JiwgdW5zaWduZWQgbG9uZywgdW5zaWduZWQgbG9uZywgY2Vw
+aDo6YnVmZmVyOjpsaXN0JiwgdW5zaWduZWQgaW50KQo+Pj4+IHwgfCB8IHwgKyA2Ni4wMCUgQmx1
+ZVN0b3JlOjpfZG9fd3JpdGUoQmx1ZVN0b3JlOjpUcmFuc0NvbnRleHQqLCBib29zdDo6aW50cnVz
+aXZlX3B0cjxCbHVlU3RvcmU6OkNvbGxlY3Rpb24+JiwgYm9vc3Q6OmludHJ1c2l2ZV9wdHI8Qmx1
+ZVN0b3JlOjpPbm9kZT4sIHVuc2lnbmVkIGxvbmcsIHVuc2lnbmVkIGxvbmcsIGNlcGg6OmJ1ZmZl
+cjo6bGlzdCYsIHVuc2lnbmVkIGludCkKPj4+PiB8IHwgfCB8ICsgNjUuMDAlIEJsdWVTdG9yZTo6
+X2RvX2FsbG9jX3dyaXRlKEJsdWVTdG9yZTo6VHJhbnNDb250ZXh0KiwgYm9vc3Q6OmludHJ1c2l2
+ZV9wdHI8Qmx1ZVN0b3JlOjpDb2xsZWN0aW9uPiwgYm9vc3Q6OmludHJ1c2l2ZV9wdHI8Qmx1ZVN0
+b3JlOjpPbm9kZT4sIEJsdWVTdG9yZTo6V3JpdGVDb250ZXh0KikKPj4+PiB8IHwgfCB8IHwgKyA2
+NC4wMCUgU3R1cGlkQWxsb2NhdG9yOjphbGxvY2F0ZSh1bnNpZ25lZCBsb25nLCB1bnNpZ25lZCBs
+b25nLCB1bnNpZ25lZCBsb25nLCBsb25nLCBzdGQ6OnZlY3RvcjxibHVlc3RvcmVfcGV4dGVudF90
+LCBtZW1wb29sOjpwb29sX2FsbG9jYXRvcjwobWVtcG9vbDo6cG9vbF9pbmRleF90KTQsIGJsdWVz
+dG9yZV9wZXh0ZW50X3Q+ID4qKQo+Pj4+IHwgfCB8IHwgfCB8ICsgNjQuMDAlIFN0dXBpZEFsbG9j
+YXRvcjo6YWxsb2NhdGVfaW50KHVuc2lnbmVkIGxvbmcsIHVuc2lnbmVkIGxvbmcsIGxvbmcsIHVu
+c2lnbmVkIGxvbmcqLCB1bnNpZ25lZCBpbnQqKQo+Pj4+IHwgfCB8IHwgfCB8ICsgMzQuMDAlIGJ0
+cmVlOjpidHJlZV9pdGVyYXRvcjxidHJlZTo6YnRyZWVfbm9kZTxidHJlZTo6YnRyZWVfbWFwX3Bh
+cmFtczx1bnNpZ25lZCBsb25nLCB1bnNpZ25lZCBsb25nLCBzdGQ6Omxlc3M8dW5zaWduZWQgbG9u
+Zz4sIG1lbXBvb2w6OnBvb2xfYWxsb2NhdG9yPChtZW1wb29sOjpwb29sX2luZGV4X3QpMSwgc3Rk
+OjpwYWlyPHVuc2lnbmVkIGxvbmcgY29uc3QsIHVuc2lnbmVkIGxvbmc+ID4sIDI1Nj4gPiwgc3Rk
+OjpwYWlyPHVuc2lnbmVkIGxvbmcgY29uc3QsIHVuc2lnbmVkIGxvbmc+Jiwgc3RkOjpwYWlyPHVu
+c2lnbmVkIGxvbmcgY29uc3QsIHVuc2lnbmVkIGxvbmc+Kj46OmluY3JlbWVudF9zbG93KCkKPj4+
+PiB8IHwgfCB8IHwgfCArIDI2LjAwJSBTdHVwaWRBbGxvY2F0b3I6Ol9hbGlnbmVkX2xlbihpbnRl
+cnZhbF9zZXQ8dW5zaWduZWQgbG9uZywgYnRyZWU6OmJ0cmVlX21hcDx1bnNpZ25lZCBsb25nLCB1
+bnNpZ25lZCBsb25nLCBzdGQ6Omxlc3M8dW5zaWduZWQgbG9uZz4sIG1lbXBvb2w6OnBvb2xfYWxs
+b2NhdG9yPChtZW1wb29sOjpwb29sX2luZGV4X3QpMSwgc3RkOjpwYWlyPHVuc2lnbmVkIGxvbmcg
+Y29uc3QsIHVuc2lnbmVkIGxvbmc+ID4sIDI1Nj4gPjo6aXRlcmF0b3IsIHVuc2lnbmVkIGxvbmcp
+Cj4+Pj4KPj4+Pgo+Pj4+Cj4+Pj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQo+Pj4+IERlOiAi
+QWxleGFuZHJlIERlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4KPj4+PiDDgDogIlN0ZWZh
+biBQcmllYmUsIFByb2ZpaG9zdCBBRyIgPHMucHJpZWJlQHByb2ZpaG9zdC5hZz4KPj4+PiBDYzog
+IlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiwgImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zz4KPj4+PiBFbnZvecOpOiBMdW5kaSA0IEbDqXZyaWVyIDIwMTkgMDk6Mzg6MTEKPj4+PiBPYmpl
+dDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9zZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFzZSBvdmVy
+IHRpbWUsIHVudGlsIHJlc3RhcnQKPj4+Pgo+Pj4+IEhpLAo+Pj4+Cj4+Pj4gc29tZSBuZXdzOgo+
+Pj4+Cj4+Pj4gSSBoYXZlIHRyaWVkIHdpdGggZGlmZmVyZW50IHRyYW5zcGFyZW50IGh1Z2VwYWdl
+IHZhbHVlcyAobWFkdmlzZSwgbmV2ZXIpIDogbm8gY2hhbmdlCj4+Pj4KPj4+PiBJIGhhdmUgdHJp
+ZWQgdG8gaW5jcmVhc2UgYmx1ZXN0b3JlX2NhY2hlX3NpemVfc3NkIHRvIDhHOiBubyBjaGFuZ2UK
+Pj4+Pgo+Pj4+IEkgaGF2ZSB0cmllZCB0byBpbmNyZWFzZSBUQ01BTExPQ19NQVhfVE9UQUxfVEhS
+RUFEX0NBQ0hFX0JZVEVTIHRvIDI1Nm1iIDogaXQgc2VlbSB0byBoZWxwLCBhZnRlciAyNGggSSdt
+IHN0aWxsIGFyb3VuZCAxLDVtcy4gKG5lZWQgdG8gd2FpdCBzb21lIG1vcmUgZGF5cyB0byBiZSBz
+dXJlKQo+Pj4+Cj4+Pj4KPj4+PiBOb3RlIHRoYXQgdGhpcyBiZWhhdmlvdXIgc2VlbSB0byBoYXBw
+ZW4gcmVhbGx5IGZhc3RlciAoPCAyIGRheXMpIG9uIG15IGJpZyBudm1lIGRyaXZlcyAoNlRCKSwK
+Pj4+PiBteSBvdGhlcnMgY2x1c3RlcnMgdXNlciAxLDZUQiBzc2QuCj4+Pj4KPj4+PiBDdXJyZW50
+bHkgSSdtIHVzaW5nIG9ubHkgMSBvc2QgYnkgbnZtZSAoSSBkb24ndCBoYXZlIG1vcmUgdGhhbiA1
+MDAwaW9wcyBieSBvc2QpLCBidXQgSSdsbCB0cnkgdGhpcyB3ZWVrIHdpdGggMm9zZCBieSBudm1l
+LCB0byBzZWUgaWYgaXQncyBoZWxwaW5nLgo+Pj4+Cj4+Pj4KPj4+PiBCVFcsIGRvZXMgc29tZWJv
+ZHkgaGF2ZSBhbHJlYWR5IHRlc3RlZCBjZXBoIHdpdGhvdXQgdGNtYWxsb2MsIHdpdGggZ2xpYmMg
+Pj0gMi4yNiAod2hpY2ggaGF2ZSBhbHNvIHRocmVhZCBjYWNoZSkgPwo+Pj4+Cj4+Pj4KPj4+PiBS
+ZWdhcmRzLAo+Pj4+Cj4+Pj4gQWxleGFuZHJlCj4+Pj4KPj4+Pgo+Pj4+IC0tLS0tIE1haWwgb3Jp
+Z2luYWwgLS0tLS0KPj4+PiBEZTogImFkZXJ1bWllciIgPGFkZXJ1bWllckBvZGlzby5jb20+Cj4+
+Pj4gw4A6ICJTdGVmYW4gUHJpZWJlLCBQcm9maWhvc3QgQUciIDxzLnByaWViZUBwcm9maWhvc3Qu
+YWc+Cj4+Pj4gQ2M6ICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4sICJjZXBoLXVzZXJz
+IiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmc+Cj4+Pj4gRW52b3nDqTogTWVyY3JlZGkgMzAgSmFudmllciAyMDE5IDE5
+OjU4OjE1Cj4+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gY2VwaCBvc2QgY29tbWl0IGxhdGVu
+Y3kgaW5jcmVhc2Ugb3ZlciB0aW1lLCB1bnRpbCByZXN0YXJ0Cj4+Pj4KPj4+Pj4+IFRoYW5rcy4g
+SXMgdGhlcmUgYW55IHJlYXNvbiB5b3UgbW9uaXRvciBvcF93X2xhdGVuY3kgYnV0IG5vdAo+Pj4+
+Pj4gb3Bfcl9sYXRlbmN5IGJ1dCBpbnN0ZWFkIG9wX2xhdGVuY3k/Cj4+Pj4+Pgo+Pj4+Pj4gQWxz
+byB3aHkgZG8geW91IG1vbml0b3Igb3Bfd19wcm9jZXNzX2xhdGVuY3k/IGJ1dCBub3Qgb3Bfcl9w
+cm9jZXNzX2xhdGVuY3k/Cj4+Pj4gSSBtb25pdG9yIHJlYWQgdG9vLiAoSSBoYXZlIGFsbCBtZXRy
+aWNzIGZvciBvc2Qgc29ja2V0cywgYW5kIGEgbG90IG9mIGdyYXBocykuCj4+Pj4KPj4+PiBJIGp1
+c3QgZG9uJ3Qgc2VlIGxhdGVuY3kgZGlmZmVyZW5jZSBvbiByZWFkcy4gKG9yIHRoZXkgYXJlIHZl
+cnkgdmVyeSBzbWFsbCB2cyB0aGUgd3JpdGUgbGF0ZW5jeSBpbmNyZWFzZSkKPj4+Pgo+Pj4+Cj4+
+Pj4KPj4+PiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCj4+Pj4gRGU6ICJTdGVmYW4gUHJpZWJl
+LCBQcm9maWhvc3QgQUciIDxzLnByaWViZUBwcm9maWhvc3QuYWc+Cj4+Pj4gw4A6ICJhZGVydW1p
+ZXIiIDxhZGVydW1pZXJAb2Rpc28uY29tPgo+Pj4+IENjOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdk
+cmVhbS5uZXQ+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAiY2Vw
+aC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgo+Pj4+IEVudm95w6k6IE1lcmNy
+ZWRpIDMwIEphbnZpZXIgMjAxOSAxOTo1MDoyMAo+Pj4+IE9iamV0OiBSZTogW2NlcGgtdXNlcnNd
+IGNlcGggb3NkIGNvbW1pdCBsYXRlbmN5IGluY3JlYXNlIG92ZXIgdGltZSwgdW50aWwgcmVzdGFy
+dAo+Pj4+Cj4+Pj4gSGksCj4+Pj4KPj4+PiBBbSAzMC4wMS4xOSB1bSAxNDo1OSBzY2hyaWViIEFs
+ZXhhbmRyZSBERVJVTUlFUjoKPj4+Pj4gSGkgU3RlZmFuLAo+Pj4+Pgo+Pj4+Pj4+IGN1cnJlbnRs
+eSBpJ20gaW4gdGhlIHByb2Nlc3Mgb2Ygc3dpdGNoaW5nIGJhY2sgZnJvbSBqZW1hbGxvYyB0byB0
+Y21hbGxvYwo+Pj4+Pj4+IGxpa2Ugc3VnZ2VzdGVkLiBUaGlzIHJlcG9ydCBtYWtlcyBtZSBhIGxp
+dHRsZSBuZXJ2b3VzIGFib3V0IG15IGNoYW5nZS4KPj4+Pj4gV2VsbCxJJ20gcmVhbGx5IG5vdCBz
+dXJlIHRoYXQgaXQncyBhIHRjbWFsbG9jIGJ1Zy4KPj4+Pj4gbWF5YmUgYmx1ZXN0b3JlIHJlbGF0
+ZWQgKGRvbid0IGhhdmUgZmlsZXN0b3JlIGFueW1vcmUgdG8gY29tcGFyZSkKPj4+Pj4gSSBuZWVk
+IHRvIGNvbXBhcmUgd2l0aCBiaWdnZXIgbGF0ZW5jaWVzCj4+Pj4+Cj4+Pj4+IGhlcmUgYW4gZXhh
+bXBsZSwgd2hlbiBhbGwgb3NkIGF0IDIwLTUwbXMgYmVmb3JlIHJlc3RhcnQsIHRoZW4gYWZ0ZXIg
+cmVzdGFydCAoYXQgMjE6MTUpLCAxbXMKPj4+Pj4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQv
+bGF0ZW5jeWJhZC5wbmcKPj4+Pj4KPj4+Pj4gSSBvYnNlcnZlIHRoZSBsYXRlbmN5IGluIG15IGd1
+ZXN0IHZtIHRvbywgb24gZGlza3MgaW93YWl0Lgo+Pj4+Pgo+Pj4+PiBodHRwOi8vb2Rpc293ZWIx
+Lm9kaXNvLm5ldC9sYXRlbmN5YmFkdm0ucG5nCj4+Pj4+Cj4+Pj4+Pj4gQWxzbyBpJ20gY3VycmVu
+dGx5IG9ubHkgbW9uaXRvcmluZyBsYXRlbmN5IGZvciBmaWxlc3RvcmUgb3Nkcy4gV2hpY2gKPj4+
+Pj4+PiBleGFjdCB2YWx1ZXMgb3V0IG9mIHRoZSBkYWVtb24gZG8geW91IHVzZSBmb3IgYmx1ZXN0
+b3JlPwo+Pj4+PiBoZXJlIG15IGluZmx1eGRiIHF1ZXJpZXM6Cj4+Pj4+Cj4+Pj4+IEl0IHRha2Ug
+b3BfbGF0ZW5jeS5zdW0vb3BfbGF0ZW5jeS5hdmdjb3VudCBvbiBsYXN0IHNlY29uZC4KPj4+Pj4K
+Pj4+Pj4KPj4+Pj4gU0VMRUNUIG5vbl9uZWdhdGl2ZV9kZXJpdmF0aXZlKGZpcnN0KCJvcF9sYXRl
+bmN5LnN1bSIpLCAxcykvbm9uX25lZ2F0aXZlX2Rlcml2YXRpdmUoZmlyc3QoIm9wX2xhdGVuY3ku
+YXZnY291bnQiKSwxcykgRlJPTSAiY2VwaCIgV0hFUkUgImhvc3QiID1+IC9eKFtbaG9zdF1dKSQv
+IEFORCAiaWQiID1+IC9eKFtbb3NkXV0pJC8gQU5EICR0aW1lRmlsdGVyIEdST1VQIEJZIHRpbWUo
+JGludGVydmFsKSwgImhvc3QiLCAiaWQiIGZpbGwocHJldmlvdXMpCj4+Pj4+Cj4+Pj4+Cj4+Pj4+
+IFNFTEVDVCBub25fbmVnYXRpdmVfZGVyaXZhdGl2ZShmaXJzdCgib3Bfd19sYXRlbmN5LnN1bSIp
+LCAxcykvbm9uX25lZ2F0aXZlX2Rlcml2YXRpdmUoZmlyc3QoIm9wX3dfbGF0ZW5jeS5hdmdjb3Vu
+dCIpLDFzKSBGUk9NICJjZXBoIiBXSEVSRSAiaG9zdCIgPX4gL14oW1tob3N0XV0pJC8gQU5EIGNv
+bGxlY3Rpb249J29zZCcgQU5EICJpZCIgPX4gL14oW1tvc2RdXSkkLyBBTkQgJHRpbWVGaWx0ZXIg
+R1JPVVAgQlkgdGltZSgkaW50ZXJ2YWwpLCAiaG9zdCIsICJpZCIgZmlsbChwcmV2aW91cykKPj4+
+Pj4KPj4+Pj4KPj4+Pj4gU0VMRUNUIG5vbl9uZWdhdGl2ZV9kZXJpdmF0aXZlKGZpcnN0KCJvcF93
+X3Byb2Nlc3NfbGF0ZW5jeS5zdW0iKSwgMXMpL25vbl9uZWdhdGl2ZV9kZXJpdmF0aXZlKGZpcnN0
+KCJvcF93X3Byb2Nlc3NfbGF0ZW5jeS5hdmdjb3VudCIpLDFzKSBGUk9NICJjZXBoIiBXSEVSRSAi
+aG9zdCIgPX4gL14oW1tob3N0XV0pJC8gQU5EIGNvbGxlY3Rpb249J29zZCcgQU5EICJpZCIgPX4g
+L14oW1tvc2RdXSkkLyBBTkQgJHRpbWVGaWx0ZXIgR1JPVVAgQlkgdGltZSgkaW50ZXJ2YWwpLCAi
+aG9zdCIsICJpZCIgZmlsbChwcmV2aW91cykKPj4+PiBUaGFua3MuIElzIHRoZXJlIGFueSByZWFz
+b24geW91IG1vbml0b3Igb3Bfd19sYXRlbmN5IGJ1dCBub3QKPj4+PiBvcF9yX2xhdGVuY3kgYnV0
+IGluc3RlYWQgb3BfbGF0ZW5jeT8KPj4+Pgo+Pj4+IEFsc28gd2h5IGRvIHlvdSBtb25pdG9yIG9w
+X3dfcHJvY2Vzc19sYXRlbmN5PyBidXQgbm90IG9wX3JfcHJvY2Vzc19sYXRlbmN5Pwo+Pj4+Cj4+
+Pj4gZ3JlZXRzLAo+Pj4+IFN0ZWZhbgo+Pj4+Cj4+Pj4+Cj4+Pj4+IC0tLS0tIE1haWwgb3JpZ2lu
+YWwgLS0tLS0KPj4+Pj4gRGU6ICJTdGVmYW4gUHJpZWJlLCBQcm9maWhvc3QgQUciIDxzLnByaWVi
+ZUBwcm9maWhvc3QuYWc+Cj4+Pj4+IMOAOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNv
+bT4sICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4KPj4+Pj4gQ2M6ICJjZXBoLXVzZXJz
+IiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmc+Cj4+Pj4+IEVudm95w6k6IE1lcmNyZWRpIDMwIEphbnZpZXIgMjAxOSAw
+ODo0NTozMwo+Pj4+PiBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9zZCBjb21taXQgbGF0
+ZW5jeSBpbmNyZWFzZSBvdmVyIHRpbWUsIHVudGlsIHJlc3RhcnQKPj4+Pj4KPj4+Pj4gSGksCj4+
+Pj4+Cj4+Pj4+IEFtIDMwLjAxLjE5IHVtIDA4OjMzIHNjaHJpZWIgQWxleGFuZHJlIERFUlVNSUVS
+Ogo+Pj4+Pj4gSGksCj4+Pj4+Pgo+Pj4+Pj4gaGVyZSBzb21lIG5ldyByZXN1bHRzLAo+Pj4+Pj4g
+ZGlmZmVyZW50IG9zZC8gZGlmZmVyZW50IGNsdXN0ZXIKPj4+Pj4+Cj4+Pj4+PiBiZWZvcmUgb3Nk
+IHJlc3RhcnQgbGF0ZW5jeSB3YXMgYmV0d2VlbiAyLTVtcwo+Pj4+Pj4gYWZ0ZXIgb3NkIHJlc3Rh
+cnQgaXMgYXJvdW5kIDEtMS41bXMKPj4+Pj4+Cj4+Pj4+PiBodHRwOi8vb2Rpc293ZWIxLm9kaXNv
+Lm5ldC9jZXBocGVyZjIvYmFkLnR4dCAoMi01bXMpCj4+Pj4+PiBodHRwOi8vb2Rpc293ZWIxLm9k
+aXNvLm5ldC9jZXBocGVyZjIvb2sudHh0ICgxLTEuNW1zKQo+Pj4+Pj4gaHR0cDovL29kaXNvd2Vi
+MS5vZGlzby5uZXQvY2VwaHBlcmYyL2RpZmYudHh0Cj4+Pj4+Pgo+Pj4+Pj4gIEZyb20gd2hhdCBJ
+IHNlZSBpbiBkaWZmLCB0aGUgYmlnZ2VzdCBkaWZmZXJlbmNlIGlzIGluIHRjbWFsbG9jLCBidXQg
+bWF5YmUgSSdtIHdyb25nLgo+Pj4+Pj4gKEknbSB1c2luZyB0Y21hbGxvYyAyLjUtMi4yKQo+Pj4+
+PiBjdXJyZW50bHkgaSdtIGluIHRoZSBwcm9jZXNzIG9mIHN3aXRjaGluZyBiYWNrIGZyb20gamVt
+YWxsb2MgdG8gdGNtYWxsb2MKPj4+Pj4gbGlrZSBzdWdnZXN0ZWQuIFRoaXMgcmVwb3J0IG1ha2Vz
+IG1lIGEgbGl0dGxlIG5lcnZvdXMgYWJvdXQgbXkgY2hhbmdlLgo+Pj4+Pgo+Pj4+PiBBbHNvIGkn
+bSBjdXJyZW50bHkgb25seSBtb25pdG9yaW5nIGxhdGVuY3kgZm9yIGZpbGVzdG9yZSBvc2RzLiBX
+aGljaAo+Pj4+PiBleGFjdCB2YWx1ZXMgb3V0IG9mIHRoZSBkYWVtb24gZG8geW91IHVzZSBmb3Ig
+Ymx1ZXN0b3JlPwo+Pj4+Pgo+Pj4+PiBJIHdvdWxkIGxpa2UgdG8gY2hlY2sgaWYgaSBzZWUgdGhl
+IHNhbWUgYmVoYXZpb3VyLgo+Pj4+Pgo+Pj4+PiBHcmVldHMsCj4+Pj4+IFN0ZWZhbgo+Pj4+Pgo+
+Pj4+Pj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQo+Pj4+Pj4gRGU6ICJTYWdlIFdlaWwiIDxz
+YWdlQG5ld2RyZWFtLm5ldD4KPj4+Pj4+IMOAOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNv
+LmNvbT4KPj4+Pj4+IENjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+
+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgo+Pj4+Pj4gRW52b3nD
+qTogVmVuZHJlZGkgMjUgSmFudmllciAyMDE5IDEwOjQ5OjAyCj4+Pj4+PiBPYmpldDogUmU6IGNl
+cGggb3NkIGNvbW1pdCBsYXRlbmN5IGluY3JlYXNlIG92ZXIgdGltZSwgdW50aWwgcmVzdGFydAo+
+Pj4+Pj4KPj4+Pj4+IENhbiB5b3UgY2FwdHVyZSBhIHBlcmYgdG9wIG9yIHBlcmYgcmVjb3JkIHRv
+IHNlZSB3aGVyZSB0ZWggQ1BVIHRpbWUgaXMKPj4+Pj4+IGdvaW5nIG9uIG9uZSBvZiB0aGUgT1NE
+cyB3dGggYSBoaWdoIGxhdGVuY3k/Cj4+Pj4+Pgo+Pj4+Pj4gVGhhbmtzIQo+Pj4+Pj4gc2FnZQo+
+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+PiBPbiBGcmksIDI1IEphbiAyMDE5LCBBbGV4YW5kcmUgREVSVU1J
+RVIgd3JvdGU6Cj4+Pj4+Pgo+Pj4+Pj4+IEhpLAo+Pj4+Pj4+Cj4+Pj4+Pj4gSSBoYXZlIGEgc3Ry
+YW5nZSBiZWhhdmlvdXIgb2YgbXkgb3NkLCBvbiBtdWx0aXBsZSBjbHVzdGVycywKPj4+Pj4+Pgo+
+Pj4+Pj4+IEFsbCBjbHVzdGVyIGFyZSBydW5uaW5nIG1pbWljIDEzLjIuMSxibHVlc3RvcmUsIHdp
+dGggc3NkIG9yIG52bWUgZHJpdmVycywKPj4+Pj4+PiB3b3JrbG9hZCBpcyByYmQgb25seSwgd2l0
+aCBxZW11LWt2bSB2bXMgcnVubmluZyB3aXRoIGxpYnJiZCArIHNuYXBzaG90L3JiZCBleHBvcnQt
+ZGlmZi9zbmFwc2hvdGRlbGV0ZSBlYWNoIGRheSBmb3IgYmFja3VwCj4+Pj4+Pj4KPj4+Pj4+PiBX
+aGVuIHRoZSBvc2QgYXJlIHJlZnJlc2hseSBzdGFydGVkLCB0aGUgY29tbWl0IGxhdGVuY3kgaXMg
+YmV0d2VlbiAwLDUtMW1zLgo+Pj4+Pj4+Cj4+Pj4+Pj4gQnV0IG92ZXJ0aW1lLCB0aGlzIGxhdGVu
+Y3kgaW5jcmVhc2Ugc2xvd2x5IChtYXliZSBhcm91bmQgMW1zIGJ5IGRheSksIHVudGlsIHJlYWNo
+aW5nIGNyYXp5Cj4+Pj4+Pj4gdmFsdWVzIGxpa2UgMjAtMjAwbXMuCj4+Pj4+Pj4KPj4+Pj4+PiBT
+b21lIGV4YW1wbGUgZ3JhcGhzOgo+Pj4+Pj4+Cj4+Pj4+Pj4gaHR0cDovL29kaXNvd2ViMS5vZGlz
+by5uZXQvb3NkbGF0ZW5jeTEucG5nCj4+Pj4+Pj4gaHR0cDovL29kaXNvd2ViMS5vZGlzby5uZXQv
+b3NkbGF0ZW5jeTIucG5nCj4+Pj4+Pj4KPj4+Pj4+PiBBbGwgb3NkcyBoYXZlIHRoaXMgYmVoYXZp
+b3VyLCBpbiBhbGwgY2x1c3RlcnMuCj4+Pj4+Pj4KPj4+Pj4+PiBUaGUgbGF0ZW5jeSBvZiBwaHlz
+aWNhbCBkaXNrcyBpcyBvay4gKENsdXN0ZXJzIGFyZSBmYXIgdG8gYmUgZnVsbCBsb2FkZWQpCj4+
+Pj4+Pj4KPj4+Pj4+PiBBbmQgaWYgSSByZXN0YXJ0IHRoZSBvc2QsIHRoZSBsYXRlbmN5IGNvbWUg
+YmFjayB0byAwLDUtMW1zLgo+Pj4+Pj4+Cj4+Pj4+Pj4gVGhhdCdzIHJlbWVtYmVyIG1lIG9sZCB0
+Y21hbGxvYyBidWcsIGJ1dCBtYXliZSBjb3VsZCBpdCBiZSBhIGJsdWVzdG9yZSBtZW1vcnkgYnVn
+ID8KPj4+Pj4+Pgo+Pj4+Pj4+IEFueSBIaW50cyBmb3IgY291bnRlcnMvbG9ncyB0byBjaGVjayA/
+Cj4+Pj4+Pj4KPj4+Pj4+Pgo+Pj4+Pj4+IFJlZ2FyZHMsCj4+Pj4+Pj4KPj4+Pj4+PiBBbGV4YW5k
+cmUKPj4+Pj4+Pgo+Pj4+Pj4+Cj4+Pj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwo+Pj4+Pj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPj4+Pj4+IGNl
+cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4+Pj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pj4+Pj4KPj4KPj4KPgo+Cj4KX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
+IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
+dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
