@@ -1,76 +1,72 @@
-From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph Nautilus Release T-shirt Design
-Date: Thu, 14 Feb 2019 15:05:12 -0800
-Message-ID: <CAFFUGJcX+NE=JQpzJ1T7qRQKWMUS-JT0B8VMuErnLr9PRkMUgQ@mail.gmail.com>
-References: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
- <H000007100130d1d.1547800766.sx.f1-outsourcing.eu*@MHS>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.20 41/77] libceph: avoid KEEPALIVE_PENDING races in ceph_con_keepalive()
+Date: Thu, 14 Feb 2019 21:08:19 -0500
+Message-ID: <20190215020855.176727-41-sashal@kernel.org>
+References: <20190215020855.176727-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <H000007100130d1d.1547800766.sx.f1-outsourcing.eu*@MHS>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Marc Roos <M.Roos-yG4tGvGIC004hcxptnrGZodd74u8MsAO@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, aad <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190215020855.176727-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Marc,
+From: Ilya Dryomov <idryomov@gmail.com>
 
-You can see previous designs on the Ceph store:
+[ Upstream commit 4aac9228d16458cedcfd90c7fb37211cf3653ac3 ]
 
-https://www.proforma.com/sdscommunitystore
+con_fault() can transition the connection into STANDBY right after
+ceph_con_keepalive() clears STANDBY in clear_standby():
 
---
-Mike Perez (thingee)
+    libceph user thread               ceph-msgr worker
 
-On Fri, Jan 18, 2019 at 12:39 AM Marc Roos <M.Roos-yG4tGvGIC004hcxptnrGZodd74u8MsAO@public.gmane.org> wrote:
->
->
-> Is there an overview of previous tshirts?
->
->
-> -----Original Message-----
-> From: Anthony D'Atri [mailto:aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org]
-> Sent: 18 January 2019 01:07
-> To: Tim Serong
-> Cc: Ceph Development; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> Subject: Re: [ceph-users] Ceph Nautilus Release T-shirt Design
->
-> >> Lenz has provided this image that is currently being used for the 404
->
-> >> page of the dashboard:
-> >>
-> >> https://github.com/ceph/ceph/blob/master/src/pybind/mgr/dashboard/fro
-> >> ntend/src/assets/1280px-Nautilus_Octopus.jpg
-> >
-> > Nautilus *shells* are somewhat iconic/well known/distinctive.  Maybe a
->
-> > variant of https://en.wikipedia.org/wiki/File:Nautilus_Section_cut.jpg
-> > would be interesting on a t-shirt?
->
-> I agree with Tim.  T shirts with photos can be tricky, its easy for
-> them to look cheesy and they dont age well.
->
-> In the same vein, something with a lower bit-depth and not
-> non-cross-section might be slightly more recognizable:
->
-> https://www.vectorstock.com/royalty-free-vector/nautilus-vector-2806848
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+ceph_con_keepalive()
+  mutex_lock(&con->mutex)
+  clear_standby(con)
+  mutex_unlock(&con->mutex)
+                                mutex_lock(&con->mutex)
+                                con_fault()
+                                  ...
+                                  if KEEPALIVE_PENDING isn't set
+                                    set state to STANDBY
+                                  ...
+                                mutex_unlock(&con->mutex)
+  set KEEPALIVE_PENDING
+  set WRITE_PENDING
+
+This triggers warnings in clear_standby() when either ceph_con_send()
+or ceph_con_keepalive() get to clearing STANDBY next time.
+
+I don't see a reason to condition queue_con() call on the previous
+value of KEEPALIVE_PENDING, so move the setting of KEEPALIVE_PENDING
+into the critical section -- unlike WRITE_PENDING, KEEPALIVE_PENDING
+could have been a non-atomic flag.
+
+Reported-by: syzbot+acdeb633f6211ccdf886@syzkaller.appspotmail.com
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Tested-by: Myungho Jung <mhjungk@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ net/ceph/messenger.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 2f126eff275d..664f886f464d 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -3219,9 +3219,10 @@ void ceph_con_keepalive(struct ceph_connection *con)
+ 	dout("con_keepalive %p\n", con);
+ 	mutex_lock(&con->mutex);
+ 	clear_standby(con);
++	con_flag_set(con, CON_FLAG_KEEPALIVE_PENDING);
+ 	mutex_unlock(&con->mutex);
+-	if (con_flag_test_and_set(con, CON_FLAG_KEEPALIVE_PENDING) == 0 &&
+-	    con_flag_test_and_set(con, CON_FLAG_WRITE_PENDING) == 0)
++
++	if (con_flag_test_and_set(con, CON_FLAG_WRITE_PENDING) == 0)
+ 		queue_con(con);
+ }
+ EXPORT_SYMBOL(ceph_con_keepalive);
+-- 
+2.19.1
