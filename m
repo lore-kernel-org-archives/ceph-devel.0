@@ -1,72 +1,42 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 34/65] libceph: avoid KEEPALIVE_PENDING races in ceph_con_keepalive()
-Date: Thu, 14 Feb 2019 21:10:50 -0500
-Message-ID: <20190215021121.177674-34-sashal@kernel.org>
-References: <20190215021121.177674-1-sashal@kernel.org>
+From: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Ceph Nautilus Release T-shirt Design
+Date: Fri, 15 Feb 2019 10:39:36 +0100
+Message-ID: <CAOi1vP-dSDCeo7DziOrMyCTfP98jBnJzHtwAMA4msNp7SpoQnQ@mail.gmail.com>
+References: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
+ <H000007100130d1d.1547800766.sx.f1-outsourcing.eu*@MHS>
+ <CAFFUGJcX+NE=JQpzJ1T7qRQKWMUS-JT0B8VMuErnLr9PRkMUgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190215021121.177674-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAFFUGJcX+NE=JQpzJ1T7qRQKWMUS-JT0B8VMuErnLr9PRkMUgQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, aad <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-From: Ilya Dryomov <idryomov@gmail.com>
+On Fri, Feb 15, 2019 at 12:05 AM Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>
+> Hi Marc,
+>
+> You can see previous designs on the Ceph store:
+>
+> https://www.proforma.com/sdscommunitystore
 
-[ Upstream commit 4aac9228d16458cedcfd90c7fb37211cf3653ac3 ]
+Hi Mike,
 
-con_fault() can transition the connection into STANDBY right after
-ceph_con_keepalive() clears STANDBY in clear_standby():
+This site stopped working during DevConf and hasn't been working since.
+I think Greg has contacted some folks about this, but it would be great
+if you could follow up because it's been a couple of weeks now...
 
-    libceph user thread               ceph-msgr worker
+Thanks,
 
-ceph_con_keepalive()
-  mutex_lock(&con->mutex)
-  clear_standby(con)
-  mutex_unlock(&con->mutex)
-                                mutex_lock(&con->mutex)
-                                con_fault()
-                                  ...
-                                  if KEEPALIVE_PENDING isn't set
-                                    set state to STANDBY
-                                  ...
-                                mutex_unlock(&con->mutex)
-  set KEEPALIVE_PENDING
-  set WRITE_PENDING
-
-This triggers warnings in clear_standby() when either ceph_con_send()
-or ceph_con_keepalive() get to clearing STANDBY next time.
-
-I don't see a reason to condition queue_con() call on the previous
-value of KEEPALIVE_PENDING, so move the setting of KEEPALIVE_PENDING
-into the critical section -- unlike WRITE_PENDING, KEEPALIVE_PENDING
-could have been a non-atomic flag.
-
-Reported-by: syzbot+acdeb633f6211ccdf886@syzkaller.appspotmail.com
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Tested-by: Myungho Jung <mhjungk@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- net/ceph/messenger.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 9a1c27c61de8..a127d1442116 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -3240,9 +3240,10 @@ void ceph_con_keepalive(struct ceph_connection *con)
- 	dout("con_keepalive %p\n", con);
- 	mutex_lock(&con->mutex);
- 	clear_standby(con);
-+	con_flag_set(con, CON_FLAG_KEEPALIVE_PENDING);
- 	mutex_unlock(&con->mutex);
--	if (con_flag_test_and_set(con, CON_FLAG_KEEPALIVE_PENDING) == 0 &&
--	    con_flag_test_and_set(con, CON_FLAG_WRITE_PENDING) == 0)
-+
-+	if (con_flag_test_and_set(con, CON_FLAG_WRITE_PENDING) == 0)
- 		queue_con(con);
- }
- EXPORT_SYMBOL(ceph_con_keepalive);
--- 
-2.19.1
+                Ilya
