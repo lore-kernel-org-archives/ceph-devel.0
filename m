@@ -1,21 +1,16 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: ceph mon_data_size_warn limits for large cluster
-Date: Mon, 18 Feb 2019 17:00:58 +0530
-Message-ID: <CANA9Uk42oDaySWdS48oTfkr4JvH+j7ZPgU=Toz812WkUCNv+Uw@mail.gmail.com>
-References: <CANA9Uk437gWgTABHq66dw8v2KN6LqGF5DVc+ecaqoV24ABt++w@mail.gmail.com>
- <alpine.DEB.2.11.1902061225330.4436@piezo.novalocal>
- <CABZ+qqmBshV3DvSrP2UnvKLo1pSEDtVy_xfgP2YNd8e1ctW=xw@mail.gmail.com>
- <CANA9Uk5byzNw8ewi3YHKtnxZnWprMYcmtvB9N3Qq3DaqPtMOwg@mail.gmail.com>
- <CABZ+qqn=NtW5oEb-qiqwTku2N4A04PvYBPLGspUnr29wCXqwjg@mail.gmail.com>
- <alpine.DEB.2.11.1902141327510.14565@piezo.novalocal>
- <CANA9Uk4BHvaZk9dQ8v7+a780U+c5usYqcQJB_M6fuNR0nRnzTA@mail.gmail.com>
- <CANA9Uk4yVo65S5gsfzMOxzE0ya80Brqkmhxb3tFVW49a1c_MFA@mail.gmail.com>
- <CABZ+qqktu6RXFSA9-9tHcUGYy2CkuGPJU9s=uvrParrzujoiEA@mail.gmail.com>
+From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: IRC channels now require registered and identified
+ users
+Date: Mon, 18 Feb 2019 14:17:28 -0500
+Message-ID: <CAN-Gep+pJ1txKXRtL6jufzP9bu0n5Sf62WGroOWUJw+6K4kO6A@mail.gmail.com>
+References: <ce0a9512-e2cc-8eba-6c0e-226c8351bddf@suse.de>
+ <CABZ+qqn+iR6j_kk_RsUastNvysbZzUqMRGHfa7P9x+rwCY4M1w@mail.gmail.com>
+ <c1e28839-a3b5-61cf-28be-878a9e539e7e@suse.de>
+ <8cdb553c-67fc-a441-aea7-890d37e978fc@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============5624141464743708385=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqktu6RXFSA9-9tHcUGYy2CkuGPJU9s=uvrParrzujoiEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <8cdb553c-67fc-a441-aea7-890d37e978fc-l3A5Bk7waGM@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -25,138 +20,103 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Cc: Bryan Stillwell <bokeoa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-OK, sure will restart the ceph-mon (starting from non leader first,
-and then last leader node).
+--===============5624141464743708385==
+Content-Type: multipart/alternative; boundary="00000000000061240605822ffa29"
 
+--00000000000061240605822ffa29
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Feb 18, 2019 at 4:59 PM Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
->
-> Not really.
->
-> You should just restart your mons though -- if done one at a time it
-> has zero impact on your clients.
->
-> -- dan
->
->
-> On Mon, Feb 18, 2019 at 12:11 PM M Ranga Swami Reddy
-> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+Is this still broken in the 1-way direction where Slack users' comments do
+not show up in IRC?  That would explain why nothing I ever type (as either
+helping someone or asking a question) ever have anyone respond to them.
+
+On Tue, Dec 18, 2018 at 6:50 AM Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org> wrote:
+
+> On 12/18/2018 11:22 AM, Joao Eduardo Luis wrote:
+> > On 12/18/2018 11:18 AM, Dan van der Ster wrote:
+> >> Hi Joao,
+> >>
+> >> Has that broken the Slack connection? I can't tell if its broken or
+> >> just quiet... last message on #ceph-devel was today at 1:13am.
 > >
-> > Hi Sage - If the mon data increases, is this impacts the ceph cluster
-> > performance (ie on ceph osd bench, etc)?
-> >
-> > On Fri, Feb 15, 2019 at 3:13 PM M Ranga Swami Reddy
-> > <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > >
-> > > today I again hit the warn with 30G also...
-> > >
-> > > On Thu, Feb 14, 2019 at 7:39 PM Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > > >
-> > > > On Thu, 7 Feb 2019, Dan van der Ster wrote:
-> > > > > On Thu, Feb 7, 2019 at 12:17 PM M Ranga Swami Reddy
-> > > > > <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > > > > >
-> > > > > > Hi Dan,
-> > > > > > >During backfilling scenarios, the mons keep old maps and grow quite
-> > > > > > >quickly. So if you have balancing, pg splitting, etc. ongoing for
-> > > > > > >awhile, the mon stores will eventually trigger that 15GB alarm.
-> > > > > > >But the intended behavior is that once the PGs are all active+clean,
-> > > > > > >the old maps should be trimmed and the disk space freed.
-> > > > > >
-> > > > > > old maps not trimmed after cluster reached to "all+clean" state for all PGs.
-> > > > > > Is there (known) bug here?
-> > > > > > As the size of dB showing > 15G, do I need to run the compact commands
-> > > > > > to do the trimming?
-> > > > >
-> > > > > Compaction isn't necessary -- you should only need to restart all
-> > > > > peon's then the leader. A few minutes later the db's should start
-> > > > > trimming.
-> > > >
-> > > > The next time someone sees this behavior, can you please
-> > > >
-> > > > - enable debug_mon = 20 on all mons (*before* restarting)
-> > > >    ceph tell mon.* injectargs '--debug-mon 20'
-> > > > - wait for 10 minutes or so to generate some logs
-> > > > - add 'debug mon = 20' to ceph.conf (on mons only)
-> > > > - restart the monitors
-> > > > - wait for them to start trimming
-> > > > - remove 'debug mon = 20' from ceph.conf (on mons only)
-> > > > - tar up the log files, ceph-post-file them, and share them with ticket
-> > > > http://tracker.ceph.com/issues/38322
-> > > >
-> > > > Thanks!
-> > > > sage
-> > > >
-> > > >
-> > > >
-> > > >
-> > > > > -- dan
-> > > > >
-> > > > >
-> > > > > >
-> > > > > > Thanks
-> > > > > > Swami
-> > > > > >
-> > > > > > On Wed, Feb 6, 2019 at 6:24 PM Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
-> > > > > > >
-> > > > > > > Hi,
-> > > > > > >
-> > > > > > > With HEALTH_OK a mon data dir should be under 2GB for even such a large cluster.
-> > > > > > >
-> > > > > > > During backfilling scenarios, the mons keep old maps and grow quite
-> > > > > > > quickly. So if you have balancing, pg splitting, etc. ongoing for
-> > > > > > > awhile, the mon stores will eventually trigger that 15GB alarm.
-> > > > > > > But the intended behavior is that once the PGs are all active+clean,
-> > > > > > > the old maps should be trimmed and the disk space freed.
-> > > > > > >
-> > > > > > > However, several people have noted that (at least in luminous
-> > > > > > > releases) the old maps are not trimmed until after HEALTH_OK *and* all
-> > > > > > > mons are restarted. This ticket seems related:
-> > > > > > > http://tracker.ceph.com/issues/37875
-> > > > > > >
-> > > > > > > (Over here we're restarting mons every ~2-3 weeks, resulting in the
-> > > > > > > mon stores dropping from >15GB to ~700MB each time).
-> > > > > > >
-> > > > > > > -- Dan
-> > > > > > >
-> > > > > > >
-> > > > > > > On Wed, Feb 6, 2019 at 1:26 PM Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > > > > > > >
-> > > > > > > > Hi Swami
-> > > > > > > >
-> > > > > > > > The limit is somewhat arbitrary, based on cluster sizes we had seen when
-> > > > > > > > we picked it.  In your case it should be perfectly safe to increase it.
-> > > > > > > >
-> > > > > > > > sage
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > On Wed, 6 Feb 2019, M Ranga Swami Reddy wrote:
-> > > > > > > >
-> > > > > > > > > Hello -  Are the any limits for mon_data_size for cluster with 2PB
-> > > > > > > > > (with 2000+ OSDs)?
-> > > > > > > > >
-> > > > > > > > > Currently it set as 15G. What is logic behind this? Can we increase
-> > > > > > > > > when we get the mon_data_size_warn messages?
-> > > > > > > > >
-> > > > > > > > > I am getting the mon_data_size_warn message even though there a ample
-> > > > > > > > > of free space on the disk (around 300G free disk)
-> > > > > > > > >
-> > > > > > > > > Earlier thread on the same discusion:
-> > > > > > > > > https://www.spinics.net/lists/ceph-users/msg42456.html
-> > > > > > > > >
-> > > > > > > > > Thanks
-> > > > > > > > > Swami
-> > > > > > > > >
-> > > > > > > > >
-> > > > > > > > >
-> > > > > > > > _______________________________________________
-> > > > > > > > ceph-users mailing list
-> > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> > > > >
-> > > > >
-> > > > >
+> > Just quiet, it seems. Just tested it and the bridge is still working.
+>
+> Okay, turns out the ceph-ircslackbot user is not identified, and that
+> makes it unable to send messages to the channel. This means the bridge
+> is working in one direction only (irc to slack), and will likely break
+> when/if the user leaves the channel (as it won't be able to get back in).
+>
+> I will figure out just how this works today. In the mean time, I've
+> relaxed the requirement for registered/identified users so that the bot
+> works again. It will be reactivated once this is addressed.
+>
+>   -Joao
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+--00000000000061240605822ffa29
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Is this still broken in the 1-way direction where Slack us=
+ers&#39; comments do not show up in IRC?=C2=A0 That would explain why nothi=
+ng I ever type (as either helping someone or asking a question) ever have a=
+nyone respond to them.</div><br><div class=3D"gmail_quote"><div dir=3D"ltr"=
+ class=3D"gmail_attr">On Tue, Dec 18, 2018 at 6:50 AM Joao Eduardo Luis &lt=
+;<a href=3D"mailto:joao-l3A5Bk7waGM@public.gmane.org">joao-l3A5Bk7waGM@public.gmane.org</a>&gt; wrote:<br></div><bloc=
+kquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:=
+1px solid rgb(204,204,204);padding-left:1ex">On 12/18/2018 11:22 AM, Joao E=
+duardo Luis wrote:<br>
+&gt; On 12/18/2018 11:18 AM, Dan van der Ster wrote:<br>
+&gt;&gt; Hi Joao,<br>
+&gt;&gt;<br>
+&gt;&gt; Has that broken the Slack connection? I can&#39;t tell if its brok=
+en or<br>
+&gt;&gt; just quiet... last message on #ceph-devel was today at 1:13am.<br>
+&gt; <br>
+&gt; Just quiet, it seems. Just tested it and the bridge is still working.<=
+br>
+<br>
+Okay, turns out the ceph-ircslackbot user is not identified, and that<br>
+makes it unable to send messages to the channel. This means the bridge<br>
+is working in one direction only (irc to slack), and will likely break<br>
+when/if the user leaves the channel (as it won&#39;t be able to get back in=
+).<br>
+<br>
+I will figure out just how this works today. In the mean time, I&#39;ve<br>
+relaxed the requirement for registered/identified users so that the bot<br>
+works again. It will be reactivated once this is addressed.<br>
+<br>
+=C2=A0 -Joao<br>
+<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
+ists.ceph.com</a><br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
+ceph.com</a><br>
+</blockquote></div>
+
+--00000000000061240605822ffa29--
+
+--===============5624141464743708385==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============5624141464743708385==--
