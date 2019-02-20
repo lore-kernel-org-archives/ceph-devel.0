@@ -1,15 +1,16 @@
-From: =?UTF-8?Q?Darius_Kasparavi=C4=8Dius?= <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Alexandru Cucu <me-8/hOu4Zd+9ihKNWrAYCRhA@public.gmane.org>
 Subject: Re: Ceph cluster stability
-Date: Wed, 20 Feb 2019 17:47:08 +0200
-Message-ID: <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w@mail.gmail.com>
+Date: Wed, 20 Feb 2019 17:55:20 +0200
+Message-ID: <CAHrLTFnMc3Jep4P8WwdR-8J+qNeWhXHtgba4E88V=NBx99YJqw@mail.gmail.com>
 References: <CANA9Uk5YZYbq5EN40PX5vo55wPzjYLU+Oy9m8Hm-DRG-f1zxFw@mail.gmail.com>
  <CAN-Gep+H2sbh+LL4Pzj9-XVyvCnP+2m++1yFgErBQaWNH3fv=A@mail.gmail.com>
  <CANA9Uk5_FfQqEbZ7O3xp4PPy=cSYUwSf-xWVM6+5WnQO6YkqmQ@mail.gmail.com>
+ <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk5_FfQqEbZ7O3xp4PPy=cSYUwSf-xWVM6+5WnQO6YkqmQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,67 +20,64 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: =?UTF-8?Q?Darius_Kasparavi=C4=8Dius?= <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hello,
-
-
-Check your CPU usage when you are doing those kind of operations. We
-had a similar issue where our CPU monitoring was reporting fine < 40%
-usage, but our load on the nodes was high mid 60-80. If it's possible
-try disabling ht and see the actual cpu usage.
-If you are hitting CPU limits you can try disabling crc on messages.
-ms_nocrc
-ms_crc_data
-ms_crc_header
-
-And setting all your debug messages to 0.
-If you haven't done you can also lower your recovery settings a little.
-osd recovery max active
-osd max backfills
-
-You can also lower your file store threads.
-filestore op threads
-
-
-If you can also switch to bluestore from filestore. This will also
-lower your CPU usage. I'm not sure that this is bluestore that does
-it, but I'm seeing lower cpu usage when moving to bluestore + rocksdb
-compared to filestore + leveldb .
-
-
-On Wed, Feb 20, 2019 at 4:27 PM M Ranga Swami Reddy
-<swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->
-> Thats expected from Ceph by design. But in our case, we are using all
-> recommendation like rack failure domain, replication n/w,etc, still
-> face client IO performance issues during one OSD down..
->
-> On Tue, Feb 19, 2019 at 10:56 PM David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> > With a RACK failure domain, you should be able to have an entire rack powered down without noticing any major impact on the clients.  I regularly take down OSDs and nodes for maintenance and upgrades without seeing any problems with client IO.
-> >
-> > On Tue, Feb 12, 2019 at 5:01 AM M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >>
-> >> Hello - I have a couple of questions on ceph cluster stability, even
-> >> we follow all recommendations as below:
-> >> - Having separate replication n/w and data n/w
-> >> - RACK is the failure domain
-> >> - Using SSDs for journals (1:4ratio)
-> >>
-> >> Q1 - If one OSD down, cluster IO down drastically and customer Apps impacted.
-> >> Q2 - what is stability ratio, like with above, is ceph cluster
-> >> workable condition, if one osd down or one node down,etc.
-> >>
-> >> Thanks
-> >> Swami
-> >> _______________________________________________
-> >> ceph-users mailing list
-> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+SGksCgpJIHdvdWxkIGRlY3Jlc2UgbWF4IGFjdGl2ZSByZWNvdmVyeSBwcm9jZXNzZXMgcGVyIG9z
+ZCBhbmQgaW5jcmVhc2UKcmVjb3Zlcnkgc2xlZXAuCiAgICBvc2QgcmVjb3ZlcnkgbWF4IGFjdGl2
+ZSA9IDEgKGRlZmF1bHQgaXMgMykKICAgIG9zZCByZWNvdmVyeSBzbGVlcCA9IDEgKGRlZmF1bHQg
+aXMgMCBvciAwLjEpCgpvc2QgbWF4IGJhY2tmaWxscyBkZWZhdWx0cyB0byAxIHNvIHRoYXQgc2hv
+dWxkIGJlIE9LIGlmIGhlJ3MgdXNpbmcgdGhlCmRlZmF1bHQgOkQKCkRpc2FibGluZyBzY3J1YmJp
+bmcgZHVyaW5nIHJlY292ZXJ5IHNob3VsZCBhbHNvIGhlbHA6CiAgICBvc2Qgc2NydWIgZHVyaW5n
+IHJlY292ZXJ5ID0gZmFsc2UKCk9uIFdlZCwgRmViIDIwLCAyMDE5IGF0IDU6NDcgUE0gRGFyaXVz
+IEthc3BhcmF2acSNaXVzIDxkYXpuaXNAZ21haWwuY29tPiB3cm90ZToKPgo+IEhlbGxvLAo+Cj4K
+PiBDaGVjayB5b3VyIENQVSB1c2FnZSB3aGVuIHlvdSBhcmUgZG9pbmcgdGhvc2Uga2luZCBvZiBv
+cGVyYXRpb25zLiBXZQo+IGhhZCBhIHNpbWlsYXIgaXNzdWUgd2hlcmUgb3VyIENQVSBtb25pdG9y
+aW5nIHdhcyByZXBvcnRpbmcgZmluZSA8IDQwJQo+IHVzYWdlLCBidXQgb3VyIGxvYWQgb24gdGhl
+IG5vZGVzIHdhcyBoaWdoIG1pZCA2MC04MC4gSWYgaXQncyBwb3NzaWJsZQo+IHRyeSBkaXNhYmxp
+bmcgaHQgYW5kIHNlZSB0aGUgYWN0dWFsIGNwdSB1c2FnZS4KPiBJZiB5b3UgYXJlIGhpdHRpbmcg
+Q1BVIGxpbWl0cyB5b3UgY2FuIHRyeSBkaXNhYmxpbmcgY3JjIG9uIG1lc3NhZ2VzLgo+IG1zX25v
+Y3JjCj4gbXNfY3JjX2RhdGEKPiBtc19jcmNfaGVhZGVyCj4KPiBBbmQgc2V0dGluZyBhbGwgeW91
+ciBkZWJ1ZyBtZXNzYWdlcyB0byAwLgo+IElmIHlvdSBoYXZlbid0IGRvbmUgeW91IGNhbiBhbHNv
+IGxvd2VyIHlvdXIgcmVjb3Zlcnkgc2V0dGluZ3MgYSBsaXR0bGUuCj4gb3NkIHJlY292ZXJ5IG1h
+eCBhY3RpdmUKPiBvc2QgbWF4IGJhY2tmaWxscwo+Cj4gWW91IGNhbiBhbHNvIGxvd2VyIHlvdXIg
+ZmlsZSBzdG9yZSB0aHJlYWRzLgo+IGZpbGVzdG9yZSBvcCB0aHJlYWRzCj4KPgo+IElmIHlvdSBj
+YW4gYWxzbyBzd2l0Y2ggdG8gYmx1ZXN0b3JlIGZyb20gZmlsZXN0b3JlLiBUaGlzIHdpbGwgYWxz
+bwo+IGxvd2VyIHlvdXIgQ1BVIHVzYWdlLiBJJ20gbm90IHN1cmUgdGhhdCB0aGlzIGlzIGJsdWVz
+dG9yZSB0aGF0IGRvZXMKPiBpdCwgYnV0IEknbSBzZWVpbmcgbG93ZXIgY3B1IHVzYWdlIHdoZW4g
+bW92aW5nIHRvIGJsdWVzdG9yZSArIHJvY2tzZGIKPiBjb21wYXJlZCB0byBmaWxlc3RvcmUgKyBs
+ZXZlbGRiIC4KPgo+Cj4gT24gV2VkLCBGZWIgMjAsIDIwMTkgYXQgNDoyNyBQTSBNIFJhbmdhIFN3
+YW1pIFJlZGR5Cj4gPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90ZToKPiA+Cj4gPiBUaGF0cyBl
+eHBlY3RlZCBmcm9tIENlcGggYnkgZGVzaWduLiBCdXQgaW4gb3VyIGNhc2UsIHdlIGFyZSB1c2lu
+ZyBhbGwKPiA+IHJlY29tbWVuZGF0aW9uIGxpa2UgcmFjayBmYWlsdXJlIGRvbWFpbiwgcmVwbGlj
+YXRpb24gbi93LGV0Yywgc3RpbGwKPiA+IGZhY2UgY2xpZW50IElPIHBlcmZvcm1hbmNlIGlzc3Vl
+cyBkdXJpbmcgb25lIE9TRCBkb3duLi4KPiA+Cj4gPiBPbiBUdWUsIEZlYiAxOSwgMjAxOSBhdCAx
+MDo1NiBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNvbT4gd3JvdGU6Cj4gPiA+
+Cj4gPiA+IFdpdGggYSBSQUNLIGZhaWx1cmUgZG9tYWluLCB5b3Ugc2hvdWxkIGJlIGFibGUgdG8g
+aGF2ZSBhbiBlbnRpcmUgcmFjayBwb3dlcmVkIGRvd24gd2l0aG91dCBub3RpY2luZyBhbnkgbWFq
+b3IgaW1wYWN0IG9uIHRoZSBjbGllbnRzLiAgSSByZWd1bGFybHkgdGFrZSBkb3duIE9TRHMgYW5k
+IG5vZGVzIGZvciBtYWludGVuYW5jZSBhbmQgdXBncmFkZXMgd2l0aG91dCBzZWVpbmcgYW55IHBy
+b2JsZW1zIHdpdGggY2xpZW50IElPLgo+ID4gPgo+ID4gPiBPbiBUdWUsIEZlYiAxMiwgMjAxOSBh
+dCA1OjAxIEFNIE0gUmFuZ2EgU3dhbWkgUmVkZHkgPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90
+ZToKPiA+ID4+Cj4gPiA+PiBIZWxsbyAtIEkgaGF2ZSBhIGNvdXBsZSBvZiBxdWVzdGlvbnMgb24g
+Y2VwaCBjbHVzdGVyIHN0YWJpbGl0eSwgZXZlbgo+ID4gPj4gd2UgZm9sbG93IGFsbCByZWNvbW1l
+bmRhdGlvbnMgYXMgYmVsb3c6Cj4gPiA+PiAtIEhhdmluZyBzZXBhcmF0ZSByZXBsaWNhdGlvbiBu
+L3cgYW5kIGRhdGEgbi93Cj4gPiA+PiAtIFJBQ0sgaXMgdGhlIGZhaWx1cmUgZG9tYWluCj4gPiA+
+PiAtIFVzaW5nIFNTRHMgZm9yIGpvdXJuYWxzICgxOjRyYXRpbykKPiA+ID4+Cj4gPiA+PiBRMSAt
+IElmIG9uZSBPU0QgZG93biwgY2x1c3RlciBJTyBkb3duIGRyYXN0aWNhbGx5IGFuZCBjdXN0b21l
+ciBBcHBzIGltcGFjdGVkLgo+ID4gPj4gUTIgLSB3aGF0IGlzIHN0YWJpbGl0eSByYXRpbywgbGlr
+ZSB3aXRoIGFib3ZlLCBpcyBjZXBoIGNsdXN0ZXIKPiA+ID4+IHdvcmthYmxlIGNvbmRpdGlvbiwg
+aWYgb25lIG9zZCBkb3duIG9yIG9uZSBub2RlIGRvd24sZXRjLgo+ID4gPj4KPiA+ID4+IFRoYW5r
+cwo+ID4gPj4gU3dhbWkKPiA+ID4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCj4gPiA+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4gPj4gY2VwaC11
+c2Vyc0BsaXN0cy5jZXBoLmNvbQo+ID4gPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
+LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwo+ID4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiA+IGNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb20KPiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
+Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxp
+c3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
+ZXJzLWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0
+cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
