@@ -1,83 +1,72 @@
-From: Alexandru Cucu <me-8/hOu4Zd+9ihKNWrAYCRhA@public.gmane.org>
-Subject: Re: Ceph cluster stability
-Date: Wed, 20 Feb 2019 17:55:20 +0200
-Message-ID: <CAHrLTFnMc3Jep4P8WwdR-8J+qNeWhXHtgba4E88V=NBx99YJqw@mail.gmail.com>
-References: <CANA9Uk5YZYbq5EN40PX5vo55wPzjYLU+Oy9m8Hm-DRG-f1zxFw@mail.gmail.com>
- <CAN-Gep+H2sbh+LL4Pzj9-XVyvCnP+2m++1yFgErBQaWNH3fv=A@mail.gmail.com>
- <CANA9Uk5_FfQqEbZ7O3xp4PPy=cSYUwSf-xWVM6+5WnQO6YkqmQ@mail.gmail.com>
- <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w@mail.gmail.com>
+From: Ira Weiny <ira.weiny@intel.com>
+Subject: Re: [RESEND PATCH 0/7] Add FOLL_LONGTERM to GUP fast and use it
+Date: Wed, 20 Feb 2019 10:02:56 -0800
+Message-ID: <20190220180255.GA12020@iweiny-DESK2.sc.intel.com>
+References: <20190220053040.10831-1-ira.weiny@intel.com>
+ <20190220151930.GB11695@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?Q?Darius_Kasparavi=C4=8Dius?= <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <20190220151930.GB11695@infradead.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: linux-fbdev@vger.kernel.org, Michal Hocko <mhocko@suse.com>, kvm@vger.kernel.org, linux-sh@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, James Hogan <jhogan@kernel.org>, linux-fpga@vger.kernel.org, Heiko Carstens <heiko.carstens@de.ibm.com>, dri-devel@lists.freedesktop.org, linux-mips@vger.kernel.org, linux-mm@kvack.org, Rich Felker <dalias@libc.org>, Paul Mackerras <paulus@samba.org>, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, rds-devel@oss.oracle.com, Yoshinori Sato <ysato@users.sourceforge.jp>, linux-rdma@vger.kernel.org, Jason Gunthorpe <jgg@ziepe.ca>, Ingo Molnar <mingo@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, kvm-ppc@vger.kernel.org, Borislav
 List-Id: ceph-devel.vger.kernel.org
 
-SGksCgpJIHdvdWxkIGRlY3Jlc2UgbWF4IGFjdGl2ZSByZWNvdmVyeSBwcm9jZXNzZXMgcGVyIG9z
-ZCBhbmQgaW5jcmVhc2UKcmVjb3Zlcnkgc2xlZXAuCiAgICBvc2QgcmVjb3ZlcnkgbWF4IGFjdGl2
-ZSA9IDEgKGRlZmF1bHQgaXMgMykKICAgIG9zZCByZWNvdmVyeSBzbGVlcCA9IDEgKGRlZmF1bHQg
-aXMgMCBvciAwLjEpCgpvc2QgbWF4IGJhY2tmaWxscyBkZWZhdWx0cyB0byAxIHNvIHRoYXQgc2hv
-dWxkIGJlIE9LIGlmIGhlJ3MgdXNpbmcgdGhlCmRlZmF1bHQgOkQKCkRpc2FibGluZyBzY3J1YmJp
-bmcgZHVyaW5nIHJlY292ZXJ5IHNob3VsZCBhbHNvIGhlbHA6CiAgICBvc2Qgc2NydWIgZHVyaW5n
-IHJlY292ZXJ5ID0gZmFsc2UKCk9uIFdlZCwgRmViIDIwLCAyMDE5IGF0IDU6NDcgUE0gRGFyaXVz
-IEthc3BhcmF2acSNaXVzIDxkYXpuaXNAZ21haWwuY29tPiB3cm90ZToKPgo+IEhlbGxvLAo+Cj4K
-PiBDaGVjayB5b3VyIENQVSB1c2FnZSB3aGVuIHlvdSBhcmUgZG9pbmcgdGhvc2Uga2luZCBvZiBv
-cGVyYXRpb25zLiBXZQo+IGhhZCBhIHNpbWlsYXIgaXNzdWUgd2hlcmUgb3VyIENQVSBtb25pdG9y
-aW5nIHdhcyByZXBvcnRpbmcgZmluZSA8IDQwJQo+IHVzYWdlLCBidXQgb3VyIGxvYWQgb24gdGhl
-IG5vZGVzIHdhcyBoaWdoIG1pZCA2MC04MC4gSWYgaXQncyBwb3NzaWJsZQo+IHRyeSBkaXNhYmxp
-bmcgaHQgYW5kIHNlZSB0aGUgYWN0dWFsIGNwdSB1c2FnZS4KPiBJZiB5b3UgYXJlIGhpdHRpbmcg
-Q1BVIGxpbWl0cyB5b3UgY2FuIHRyeSBkaXNhYmxpbmcgY3JjIG9uIG1lc3NhZ2VzLgo+IG1zX25v
-Y3JjCj4gbXNfY3JjX2RhdGEKPiBtc19jcmNfaGVhZGVyCj4KPiBBbmQgc2V0dGluZyBhbGwgeW91
-ciBkZWJ1ZyBtZXNzYWdlcyB0byAwLgo+IElmIHlvdSBoYXZlbid0IGRvbmUgeW91IGNhbiBhbHNv
-IGxvd2VyIHlvdXIgcmVjb3Zlcnkgc2V0dGluZ3MgYSBsaXR0bGUuCj4gb3NkIHJlY292ZXJ5IG1h
-eCBhY3RpdmUKPiBvc2QgbWF4IGJhY2tmaWxscwo+Cj4gWW91IGNhbiBhbHNvIGxvd2VyIHlvdXIg
-ZmlsZSBzdG9yZSB0aHJlYWRzLgo+IGZpbGVzdG9yZSBvcCB0aHJlYWRzCj4KPgo+IElmIHlvdSBj
-YW4gYWxzbyBzd2l0Y2ggdG8gYmx1ZXN0b3JlIGZyb20gZmlsZXN0b3JlLiBUaGlzIHdpbGwgYWxz
-bwo+IGxvd2VyIHlvdXIgQ1BVIHVzYWdlLiBJJ20gbm90IHN1cmUgdGhhdCB0aGlzIGlzIGJsdWVz
-dG9yZSB0aGF0IGRvZXMKPiBpdCwgYnV0IEknbSBzZWVpbmcgbG93ZXIgY3B1IHVzYWdlIHdoZW4g
-bW92aW5nIHRvIGJsdWVzdG9yZSArIHJvY2tzZGIKPiBjb21wYXJlZCB0byBmaWxlc3RvcmUgKyBs
-ZXZlbGRiIC4KPgo+Cj4gT24gV2VkLCBGZWIgMjAsIDIwMTkgYXQgNDoyNyBQTSBNIFJhbmdhIFN3
-YW1pIFJlZGR5Cj4gPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90ZToKPiA+Cj4gPiBUaGF0cyBl
-eHBlY3RlZCBmcm9tIENlcGggYnkgZGVzaWduLiBCdXQgaW4gb3VyIGNhc2UsIHdlIGFyZSB1c2lu
-ZyBhbGwKPiA+IHJlY29tbWVuZGF0aW9uIGxpa2UgcmFjayBmYWlsdXJlIGRvbWFpbiwgcmVwbGlj
-YXRpb24gbi93LGV0Yywgc3RpbGwKPiA+IGZhY2UgY2xpZW50IElPIHBlcmZvcm1hbmNlIGlzc3Vl
-cyBkdXJpbmcgb25lIE9TRCBkb3duLi4KPiA+Cj4gPiBPbiBUdWUsIEZlYiAxOSwgMjAxOSBhdCAx
-MDo1NiBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNvbT4gd3JvdGU6Cj4gPiA+
-Cj4gPiA+IFdpdGggYSBSQUNLIGZhaWx1cmUgZG9tYWluLCB5b3Ugc2hvdWxkIGJlIGFibGUgdG8g
-aGF2ZSBhbiBlbnRpcmUgcmFjayBwb3dlcmVkIGRvd24gd2l0aG91dCBub3RpY2luZyBhbnkgbWFq
-b3IgaW1wYWN0IG9uIHRoZSBjbGllbnRzLiAgSSByZWd1bGFybHkgdGFrZSBkb3duIE9TRHMgYW5k
-IG5vZGVzIGZvciBtYWludGVuYW5jZSBhbmQgdXBncmFkZXMgd2l0aG91dCBzZWVpbmcgYW55IHBy
-b2JsZW1zIHdpdGggY2xpZW50IElPLgo+ID4gPgo+ID4gPiBPbiBUdWUsIEZlYiAxMiwgMjAxOSBh
-dCA1OjAxIEFNIE0gUmFuZ2EgU3dhbWkgUmVkZHkgPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90
-ZToKPiA+ID4+Cj4gPiA+PiBIZWxsbyAtIEkgaGF2ZSBhIGNvdXBsZSBvZiBxdWVzdGlvbnMgb24g
-Y2VwaCBjbHVzdGVyIHN0YWJpbGl0eSwgZXZlbgo+ID4gPj4gd2UgZm9sbG93IGFsbCByZWNvbW1l
-bmRhdGlvbnMgYXMgYmVsb3c6Cj4gPiA+PiAtIEhhdmluZyBzZXBhcmF0ZSByZXBsaWNhdGlvbiBu
-L3cgYW5kIGRhdGEgbi93Cj4gPiA+PiAtIFJBQ0sgaXMgdGhlIGZhaWx1cmUgZG9tYWluCj4gPiA+
-PiAtIFVzaW5nIFNTRHMgZm9yIGpvdXJuYWxzICgxOjRyYXRpbykKPiA+ID4+Cj4gPiA+PiBRMSAt
-IElmIG9uZSBPU0QgZG93biwgY2x1c3RlciBJTyBkb3duIGRyYXN0aWNhbGx5IGFuZCBjdXN0b21l
-ciBBcHBzIGltcGFjdGVkLgo+ID4gPj4gUTIgLSB3aGF0IGlzIHN0YWJpbGl0eSByYXRpbywgbGlr
-ZSB3aXRoIGFib3ZlLCBpcyBjZXBoIGNsdXN0ZXIKPiA+ID4+IHdvcmthYmxlIGNvbmRpdGlvbiwg
-aWYgb25lIG9zZCBkb3duIG9yIG9uZSBub2RlIGRvd24sZXRjLgo+ID4gPj4KPiA+ID4+IFRoYW5r
-cwo+ID4gPj4gU3dhbWkKPiA+ID4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fCj4gPiA+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4gPj4gY2VwaC11
-c2Vyc0BsaXN0cy5jZXBoLmNvbQo+ID4gPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
-LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwo+ID4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiA+IGNlcGgt
-dXNlcnNAbGlzdHMuY2VwaC5jb20KPiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
-ZXJzLWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0
-cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On Wed, Feb 20, 2019 at 07:19:30AM -0800, Christoph Hellwig wrote:
+> On Tue, Feb 19, 2019 at 09:30:33PM -0800, ira.weiny@intel.com wrote:
+> > From: Ira Weiny <ira.weiny@intel.com>
+> > 
+> > Resending these as I had only 1 minor comment which I believe we have covered
+> > in this series.  I was anticipating these going through the mm tree as they
+> > depend on a cleanup patch there and the IB changes are very minor.  But they
+> > could just as well go through the IB tree.
+> > 
+> > NOTE: This series depends on my clean up patch to remove the write parameter
+> > from gup_fast_permitted()[1]
+> > 
+> > HFI1, qib, and mthca, use get_user_pages_fast() due to it performance
+> > advantages.  These pages can be held for a significant time.  But
+> > get_user_pages_fast() does not protect against mapping of FS DAX pages.
+> 
+> This I don't get - if you do lock down long term mappings performance
+> of the actual get_user_pages call shouldn't matter to start with.
+> 
+> What do I miss?
+
+A couple of points.
+
+First "longterm" is a relative thing and at this point is probably a misnomer.
+This is really flagging a pin which is going to be given to hardware and can't
+move.  I've thought of a couple of alternative names but I think we have to
+settle on if we are going to use FL_LAYOUT or something else to solve the
+"longterm" problem.  Then I think we can change the flag to a better name.
+
+Second, It depends on how often you are registering memory.  I have spoken with
+some RDMA users who consider MR in the performance path...  For the overall
+application performance.  I don't have the numbers as the tests for HFI1 were
+done a long time ago.  But there was a significant advantage.  Some of which is
+probably due to the fact that you don't have to hold mmap_sem.
+
+Finally, architecturally I think it would be good for everyone to use *_fast.
+There are patches submitted to the RDMA list which would allow the use of
+*_fast (they reworking the use of mmap_sem) and as soon as they are accepted
+I'll submit a patch to convert the RDMA core as well.  Also to this point
+others are looking to use *_fast.[2]
+
+As an asside, Jasons pointed out in my previous submission that *_fast and
+*_unlocked look very much the same.  I agree and I think further cleanup will
+be coming.  But I'm focused on getting the final solution for DAX at the
+moment.
+
+Ira
