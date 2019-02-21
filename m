@@ -1,8 +1,8 @@
-From: Mike Marshall <hubcap@omnibond.com>
+From: Souptick Joarder <jrdr.linux@gmail.com>
 Subject: Re: [RESEND PATCH 3/7] mm/gup: Change GUP fast to use flags rather
  than a write 'bool'
-Date: Wed, 20 Feb 2019 14:29:57 -0500
-Message-ID: <CAOg9mSTTcD-9bCSDfC0WRYqfVrNB4TwOzL0c4+6QXi-N_Y43Vw@mail.gmail.com>
+Date: Thu, 21 Feb 2019 08:48:41 +0530
+Message-ID: <CAFqt6zYvkhKw3GExRQB2e_c16KQqrKT=GoiqErA06txUQa2bMQ@mail.gmail.com>
 References: <20190220053040.10831-1-ira.weiny@intel.com> <20190220053040.10831-4-ira.weiny@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
@@ -10,19 +10,12 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190220053040.10831-4-ira.weiny@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: ira.weiny@intel.com
-Cc: John Hubbard <jhubbard@nvidia.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Peter Zijlstra <peterz@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, "David S. Miller" <davem@davemloft.net>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Heiko Carstens <heiko.carstens@de.ibm.com>, Rich Felker <dalias@libc.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, linux-fbdev@vger.kernel
+Cc: John Hubbard <jhubbard@nvidia.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Peter Zijlstra <peterz@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, "David S. Miller" <davem@davemloft.net>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Heiko Carstens <heiko.carstens@de.ibm.com>, Rich Felker <dalias@libc.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, linux-kernel@vger.kerne
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Ira
+Hi Ira,
 
-Martin and I looked at your patch and agree that it doesn't change
-functionality for Orangefs.
-
-Reviewed-by: Mike Marshall <hubcap@omnibond.com>
-
-
-
-On Wed, Feb 20, 2019 at 12:32 AM <ira.weiny@intel.com> wrote:
+On Wed, Feb 20, 2019 at 11:01 AM <ira.weiny@intel.com> wrote:
 >
 > From: Ira Weiny <ira.weiny@intel.com>
 >
@@ -128,6 +121,11 @@ On Wed, Feb 20, 2019 at 12:32 AM <ira.weiny@intel.com> wrote:
 >         hva = gfn_to_hva_memslot(memslot, gfn);
 > -       npages = get_user_pages_fast(hva, 1, writing, pages);
 > +       npages = get_user_pages_fast(hva, 1, writing ? FOLL_WRITE : 0, pages);
+
+Just requesting for opinion,
+* writing ? FOLL_WRITE : 0 * is used in many places. How about placing it in a
+macro/ inline ?
+
 >         if (npages < 1) {
 >                 /* Check if it's an I/O mapping */
 >                 down_read(&current->mm->mmap_sem);
@@ -750,5 +748,4 @@ On Wed, Feb 20, 2019 at 12:32 AM <ira.weiny@intel.com> wrote:
 >                 while (ret--)
 > --
 > 2.20.1
->
 >
