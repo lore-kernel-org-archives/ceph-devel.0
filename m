@@ -1,22 +1,18 @@
 From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Ceph cluster stability
-Date: Fri, 22 Feb 2019 17:44:08 +0530
-Message-ID: <CANA9Uk6CFJnGXz-Bcwe7Cb9JMBFGw5rwd3xgFvyo9teCWoUcCQ@mail.gmail.com>
+Date: Fri, 22 Feb 2019 17:44:39 +0530
+Message-ID: <CANA9Uk7roX_w-dTOc5Vy9PY+Oe=KYB-457Ph7E5wYV15w3GOAQ@mail.gmail.com>
 References: <CANA9Uk5YZYbq5EN40PX5vo55wPzjYLU+Oy9m8Hm-DRG-f1zxFw@mail.gmail.com>
  <CAN-Gep+H2sbh+LL4Pzj9-XVyvCnP+2m++1yFgErBQaWNH3fv=A@mail.gmail.com>
  <CANA9Uk5_FfQqEbZ7O3xp4PPy=cSYUwSf-xWVM6+5WnQO6YkqmQ@mail.gmail.com>
  <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w@mail.gmail.com>
- <CANA9Uk5p7so6BYrR+BMhN-qQv3BFnqJwW7cpNA-Xpqtu3mQFhg@mail.gmail.com>
- <CAN-GepJDYqs931SwNvevPPYLUnAcqWPc3oQUDLDeBVFVrWHZEw@mail.gmail.com>
- <CANA9Uk4_Ynn8+3BDWDiy5Pshv2u_cp90a=vGWwUxrJXS+Q-STQ@mail.gmail.com>
- <CAN-Gep+wy9axKNL26RUpCKy3S2uTxzOrSXq+bf=+zhsrGxAvCQ@mail.gmail.com>
- <CANA9Uk6rHoAtvAUGtW1VqZnXDz6EjaFOUfxmYUocChRe5mZwDw@mail.gmail.com>
- <CANrNMwUuODV3Ju+TxosZE0hM9qwAU1Rk0efST6QmzmWXW+hXFA@mail.gmail.com>
+ <CANA9Uk5+D1GU55Goc0+TEjfYhtS8wQ0XRC-3QrSqBpEXPR9Z-g@mail.gmail.com>
+ <CAA6-MF9ki_eHY=ZHwreHJ1KpB1iFrJd-+k7CeaOtTdTMBmD=DA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANrNMwUuODV3Ju+TxosZE0hM9qwAU1Rk0efST6QmzmWXW+hXFA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAA6-MF9ki_eHY=ZHwreHJ1KpB1iFrJd-+k7CeaOtTdTMBmD=DA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -26,92 +22,22 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?Q?Darius_Kasparavi=C4=8Dius?= <daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Janne Johansson <icepic.dz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-QnV0IGNlcGggcmVjb21tZW5kYXRpb24gaXMgdG8gdXNlIFZNIChub3QgZXZlbiB0aGUgIEhXIG5v
-ZGUKcmVjb21tZW5kZWQpLiB3aWxsIHRyeSB0byBjaGFuZ2UgdGhlIG1vbiBkaXNrIGFzIFNTRCBh
-bmQgSFcgbm9kZS4KCk9uIEZyaSwgRmViIDIyLCAyMDE5IGF0IDU6MjUgUE0gRGFyaXVzIEthc3Bh
-cmF2acSNaXVzIDxkYXpuaXNAZ21haWwuY29tPiB3cm90ZToKPgo+IElmIHlvdXIgdXNpbmcgaGRk
-IGZvciBtb25pdG9yIHNlcnZlcnMuIENoZWNrIHRoZWlyIGxvYWQuIEl0IG1pZ2h0IGJlCj4gdGhl
-IGlzc3VlIHRoZXJlLgo+Cj4gT24gRnJpLCBGZWIgMjIsIDIwMTkgYXQgMTo1MCBQTSBNIFJhbmdh
-IFN3YW1pIFJlZGR5Cj4gPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90ZToKPiA+Cj4gPiBjZXBo
-LW1vbiBkaXNrIHdpdGggNTAwRyB3aXRoIEhERCAobm90IGpvdXJuYWxzL1NTRHMpLiAgWWVzLCBt
-b24gdXNlCj4gPiBmb2xkZXIgb24gRlMgb24gYSBkaXNrCj4gPgo+ID4gT24gRnJpLCBGZWIgMjIs
-IDIwMTkgYXQgNToxMyBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNvbT4gd3Jv
-dGU6Cj4gPiA+Cj4gPiA+IE1vbiBkaXNrcyBkb24ndCBoYXZlIGpvdXJuYWxzLCB0aGV5J3JlIGp1
-c3QgYSBmb2xkZXIgb24gYSBmaWxlc3lzdGVtIG9uIGEgZGlzay4KPiA+ID4KPiA+ID4gT24gRnJp
-LCBGZWIgMjIsIDIwMTksIDY6NDAgQU0gTSBSYW5nYSBTd2FtaSBSZWRkeSA8c3dhbWlyZWRkeUBn
-bWFpbC5jb20+IHdyb3RlOgo+ID4gPj4KPiA+ID4+IGNlcGggbW9ucyBsb29rcyBmaW5lIGR1cmlu
-ZyB0aGUgcmVjb3ZlcnkuICBVc2luZyAgSEREIHdpdGggU1NECj4gPiA+PiBqb3VybmFscy4gd2l0
-aCByZWNvbW1lZGVkIENQVSBhbmQgUkFNIG51bWJlcnMuCj4gPiA+Pgo+ID4gPj4gT24gRnJpLCBG
-ZWIgMjIsIDIwMTkgYXQgNDo0MCBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNv
-bT4gd3JvdGU6Cj4gPiA+PiA+Cj4gPiA+PiA+IFdoYXQgYWJvdXQgdGhlIHN5c3RlbSBzdGF0cyBv
-biB5b3VyIG1vbnMgZHVyaW5nIHJlY292ZXJ5PyBJZiB0aGV5IGFyZSBoYXZpbmcgYSBoYXJkIHRp
-bWUga2VlcGluZyB1cCB3aXRoIHJlcXVlc3RzIGR1cmluZyBhIHJlY292ZXJ5LCBJIGNvdWxkIHNl
-ZSB0aGF0IGltcGFjdGluZyBjbGllbnQgaW8uIFdoYXQgZGlza3MgYXJlIHRoZXkgcnVubmluZyBv
-bj8gQ1BVPyBFdGMuCj4gPiA+PiA+Cj4gPiA+PiA+IE9uIEZyaSwgRmViIDIyLCAyMDE5LCA2OjAx
-IEFNIE0gUmFuZ2EgU3dhbWkgUmVkZHkgPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90ZToKPiA+
-ID4+ID4+Cj4gPiA+PiA+PiBEZWJ1ZyBzZXR0aW5nIGRlZmF1bHRzIGFyZSB1c2luZy4ubGlrZSAx
-LzUgYW5kIDAvNSBmb3IgYWxtb3N0Li4KPiA+ID4+ID4+IFNoYWxsIEkgdHJ5IHdpdGggMCBmb3Ig
-YWxsIGRlYnVnIHNldHRpbmdzPwo+ID4gPj4gPj4KPiA+ID4+ID4+IE9uIFdlZCwgRmViIDIwLCAy
-MDE5IGF0IDk6MTcgUE0gRGFyaXVzIEthc3BhcmF2acSNaXVzIDxkYXpuaXNAZ21haWwuY29tPiB3
-cm90ZToKPiA+ID4+ID4+ID4KPiA+ID4+ID4+ID4gSGVsbG8sCj4gPiA+PiA+PiA+Cj4gPiA+PiA+
-PiA+Cj4gPiA+PiA+PiA+IENoZWNrIHlvdXIgQ1BVIHVzYWdlIHdoZW4geW91IGFyZSBkb2luZyB0
-aG9zZSBraW5kIG9mIG9wZXJhdGlvbnMuIFdlCj4gPiA+PiA+PiA+IGhhZCBhIHNpbWlsYXIgaXNz
-dWUgd2hlcmUgb3VyIENQVSBtb25pdG9yaW5nIHdhcyByZXBvcnRpbmcgZmluZSA8IDQwJQo+ID4g
-Pj4gPj4gPiB1c2FnZSwgYnV0IG91ciBsb2FkIG9uIHRoZSBub2RlcyB3YXMgaGlnaCBtaWQgNjAt
-ODAuIElmIGl0J3MgcG9zc2libGUKPiA+ID4+ID4+ID4gdHJ5IGRpc2FibGluZyBodCBhbmQgc2Vl
-IHRoZSBhY3R1YWwgY3B1IHVzYWdlLgo+ID4gPj4gPj4gPiBJZiB5b3UgYXJlIGhpdHRpbmcgQ1BV
-IGxpbWl0cyB5b3UgY2FuIHRyeSBkaXNhYmxpbmcgY3JjIG9uIG1lc3NhZ2VzLgo+ID4gPj4gPj4g
-PiBtc19ub2NyYwo+ID4gPj4gPj4gPiBtc19jcmNfZGF0YQo+ID4gPj4gPj4gPiBtc19jcmNfaGVh
-ZGVyCj4gPiA+PiA+PiA+Cj4gPiA+PiA+PiA+IEFuZCBzZXR0aW5nIGFsbCB5b3VyIGRlYnVnIG1l
-c3NhZ2VzIHRvIDAuCj4gPiA+PiA+PiA+IElmIHlvdSBoYXZlbid0IGRvbmUgeW91IGNhbiBhbHNv
-IGxvd2VyIHlvdXIgcmVjb3Zlcnkgc2V0dGluZ3MgYSBsaXR0bGUuCj4gPiA+PiA+PiA+IG9zZCBy
-ZWNvdmVyeSBtYXggYWN0aXZlCj4gPiA+PiA+PiA+IG9zZCBtYXggYmFja2ZpbGxzCj4gPiA+PiA+
-PiA+Cj4gPiA+PiA+PiA+IFlvdSBjYW4gYWxzbyBsb3dlciB5b3VyIGZpbGUgc3RvcmUgdGhyZWFk
-cy4KPiA+ID4+ID4+ID4gZmlsZXN0b3JlIG9wIHRocmVhZHMKPiA+ID4+ID4+ID4KPiA+ID4+ID4+
-ID4KPiA+ID4+ID4+ID4gSWYgeW91IGNhbiBhbHNvIHN3aXRjaCB0byBibHVlc3RvcmUgZnJvbSBm
-aWxlc3RvcmUuIFRoaXMgd2lsbCBhbHNvCj4gPiA+PiA+PiA+IGxvd2VyIHlvdXIgQ1BVIHVzYWdl
-LiBJJ20gbm90IHN1cmUgdGhhdCB0aGlzIGlzIGJsdWVzdG9yZSB0aGF0IGRvZXMKPiA+ID4+ID4+
-ID4gaXQsIGJ1dCBJJ20gc2VlaW5nIGxvd2VyIGNwdSB1c2FnZSB3aGVuIG1vdmluZyB0byBibHVl
-c3RvcmUgKyByb2Nrc2RiCj4gPiA+PiA+PiA+IGNvbXBhcmVkIHRvIGZpbGVzdG9yZSArIGxldmVs
-ZGIgLgo+ID4gPj4gPj4gPgo+ID4gPj4gPj4gPgo+ID4gPj4gPj4gPiBPbiBXZWQsIEZlYiAyMCwg
-MjAxOSBhdCA0OjI3IFBNIE0gUmFuZ2EgU3dhbWkgUmVkZHkKPiA+ID4+ID4+ID4gPHN3YW1pcmVk
-ZHlAZ21haWwuY29tPiB3cm90ZToKPiA+ID4+ID4+ID4gPgo+ID4gPj4gPj4gPiA+IFRoYXRzIGV4
-cGVjdGVkIGZyb20gQ2VwaCBieSBkZXNpZ24uIEJ1dCBpbiBvdXIgY2FzZSwgd2UgYXJlIHVzaW5n
-IGFsbAo+ID4gPj4gPj4gPiA+IHJlY29tbWVuZGF0aW9uIGxpa2UgcmFjayBmYWlsdXJlIGRvbWFp
-biwgcmVwbGljYXRpb24gbi93LGV0Yywgc3RpbGwKPiA+ID4+ID4+ID4gPiBmYWNlIGNsaWVudCBJ
-TyBwZXJmb3JtYW5jZSBpc3N1ZXMgZHVyaW5nIG9uZSBPU0QgZG93bi4uCj4gPiA+PiA+PiA+ID4K
-PiA+ID4+ID4+ID4gPiBPbiBUdWUsIEZlYiAxOSwgMjAxOSBhdCAxMDo1NiBQTSBEYXZpZCBUdXJu
-ZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNvbT4gd3JvdGU6Cj4gPiA+PiA+PiA+ID4gPgo+ID4gPj4g
-Pj4gPiA+ID4gV2l0aCBhIFJBQ0sgZmFpbHVyZSBkb21haW4sIHlvdSBzaG91bGQgYmUgYWJsZSB0
-byBoYXZlIGFuIGVudGlyZSByYWNrIHBvd2VyZWQgZG93biB3aXRob3V0IG5vdGljaW5nIGFueSBt
-YWpvciBpbXBhY3Qgb24gdGhlIGNsaWVudHMuICBJIHJlZ3VsYXJseSB0YWtlIGRvd24gT1NEcyBh
-bmQgbm9kZXMgZm9yIG1haW50ZW5hbmNlIGFuZCB1cGdyYWRlcyB3aXRob3V0IHNlZWluZyBhbnkg
-cHJvYmxlbXMgd2l0aCBjbGllbnQgSU8uCj4gPiA+PiA+PiA+ID4gPgo+ID4gPj4gPj4gPiA+ID4g
-T24gVHVlLCBGZWIgMTIsIDIwMTkgYXQgNTowMSBBTSBNIFJhbmdhIFN3YW1pIFJlZGR5IDxzd2Ft
-aXJlZGR5QGdtYWlsLmNvbT4gd3JvdGU6Cj4gPiA+PiA+PiA+ID4gPj4KPiA+ID4+ID4+ID4gPiA+
-PiBIZWxsbyAtIEkgaGF2ZSBhIGNvdXBsZSBvZiBxdWVzdGlvbnMgb24gY2VwaCBjbHVzdGVyIHN0
-YWJpbGl0eSwgZXZlbgo+ID4gPj4gPj4gPiA+ID4+IHdlIGZvbGxvdyBhbGwgcmVjb21tZW5kYXRp
-b25zIGFzIGJlbG93Ogo+ID4gPj4gPj4gPiA+ID4+IC0gSGF2aW5nIHNlcGFyYXRlIHJlcGxpY2F0
-aW9uIG4vdyBhbmQgZGF0YSBuL3cKPiA+ID4+ID4+ID4gPiA+PiAtIFJBQ0sgaXMgdGhlIGZhaWx1
-cmUgZG9tYWluCj4gPiA+PiA+PiA+ID4gPj4gLSBVc2luZyBTU0RzIGZvciBqb3VybmFscyAoMTo0
-cmF0aW8pCj4gPiA+PiA+PiA+ID4gPj4KPiA+ID4+ID4+ID4gPiA+PiBRMSAtIElmIG9uZSBPU0Qg
-ZG93biwgY2x1c3RlciBJTyBkb3duIGRyYXN0aWNhbGx5IGFuZCBjdXN0b21lciBBcHBzIGltcGFj
-dGVkLgo+ID4gPj4gPj4gPiA+ID4+IFEyIC0gd2hhdCBpcyBzdGFiaWxpdHkgcmF0aW8sIGxpa2Ug
-d2l0aCBhYm92ZSwgaXMgY2VwaCBjbHVzdGVyCj4gPiA+PiA+PiA+ID4gPj4gd29ya2FibGUgY29u
-ZGl0aW9uLCBpZiBvbmUgb3NkIGRvd24gb3Igb25lIG5vZGUgZG93bixldGMuCj4gPiA+PiA+PiA+
-ID4gPj4KPiA+ID4+ID4+ID4gPiA+PiBUaGFua3MKPiA+ID4+ID4+ID4gPiA+PiBTd2FtaQo+ID4g
-Pj4gPj4gPiA+ID4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCj4gPiA+PiA+PiA+ID4gPj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiA+ID4+ID4+ID4g
-PiA+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gPiA+PiA+PiA+ID4gPj4gaHR0cDovL2xp
-c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gPiA+PiA+PiA+
-ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiA+ID4+
-ID4+ID4gPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4gPj4gPj4gPiA+IGNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20KPiA+ID4+ID4+ID4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0
-cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMt
-Y2VwaC5jb20K
+Opps...is this really impact...will righ-away change this and test it.
+
+On Fri, Feb 22, 2019 at 5:29 PM Janne Johansson <icepic.dz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>
+> Den fre 22 feb. 2019 kl 12:35 skrev M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+>>
+>> No seen the CPU limitation because we are using the 4 cores per osd daemon.
+>> But still using "ms_crc_data = true and ms_crc_header = true". Will
+>> disable these and try the performance.
+>
+>
+> I am a bit sceptical to crc being so heavy that it would impact a CPU made after 1990..
+>
+> --
+> May the most significant bit of your life be positive.
