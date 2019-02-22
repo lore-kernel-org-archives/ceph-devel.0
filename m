@@ -1,16 +1,18 @@
-From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Ceph cluster stability
-Date: Fri, 22 Feb 2019 06:10:19 -0500
-Message-ID: <CAN-GepJDYqs931SwNvevPPYLUnAcqWPc3oQUDLDeBVFVrWHZEw@mail.gmail.com>
+Date: Fri, 22 Feb 2019 17:09:54 +0530
+Message-ID: <CANA9Uk4_Ynn8+3BDWDiy5Pshv2u_cp90a=vGWwUxrJXS+Q-STQ@mail.gmail.com>
 References: <CANA9Uk5YZYbq5EN40PX5vo55wPzjYLU+Oy9m8Hm-DRG-f1zxFw@mail.gmail.com>
  <CAN-Gep+H2sbh+LL4Pzj9-XVyvCnP+2m++1yFgErBQaWNH3fv=A@mail.gmail.com>
  <CANA9Uk5_FfQqEbZ7O3xp4PPy=cSYUwSf-xWVM6+5WnQO6YkqmQ@mail.gmail.com>
  <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w@mail.gmail.com>
  <CANA9Uk5p7so6BYrR+BMhN-qQv3BFnqJwW7cpNA-Xpqtu3mQFhg@mail.gmail.com>
+ <CAN-GepJDYqs931SwNvevPPYLUnAcqWPc3oQUDLDeBVFVrWHZEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7896716898528985112=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk5p7so6BYrR+BMhN-qQv3BFnqJwW7cpNA-Xpqtu3mQFhg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAN-GepJDYqs931SwNvevPPYLUnAcqWPc3oQUDLDeBVFVrWHZEw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,220 +22,69 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============7896716898528985112==
-Content-Type: multipart/alternative; boundary="0000000000009b79ff058279a388"
-
---0000000000009b79ff058279a388
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-What about the system stats on your mons during recovery? If they are
-having a hard time keeping up with requests during a recovery, I could see
-that impacting client io. What disks are they running on? CPU? Etc.
-
-On Fri, Feb 22, 2019, 6:01 AM M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-wrote:
-
-> Debug setting defaults are using..like 1/5 and 0/5 for almost..
-> Shall I try with 0 for all debug settings?
->
-> On Wed, Feb 20, 2019 at 9:17 PM Darius Kasparavi=C4=8Dius <daznis@gmail.c=
-om>
-> wrote:
-> >
-> > Hello,
-> >
-> >
-> > Check your CPU usage when you are doing those kind of operations. We
-> > had a similar issue where our CPU monitoring was reporting fine < 40%
-> > usage, but our load on the nodes was high mid 60-80. If it's possible
-> > try disabling ht and see the actual cpu usage.
-> > If you are hitting CPU limits you can try disabling crc on messages.
-> > ms_nocrc
-> > ms_crc_data
-> > ms_crc_header
-> >
-> > And setting all your debug messages to 0.
-> > If you haven't done you can also lower your recovery settings a little.
-> > osd recovery max active
-> > osd max backfills
-> >
-> > You can also lower your file store threads.
-> > filestore op threads
-> >
-> >
-> > If you can also switch to bluestore from filestore. This will also
-> > lower your CPU usage. I'm not sure that this is bluestore that does
-> > it, but I'm seeing lower cpu usage when moving to bluestore + rocksdb
-> > compared to filestore + leveldb .
-> >
-> >
-> > On Wed, Feb 20, 2019 at 4:27 PM M Ranga Swami Reddy
-> > <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > >
-> > > Thats expected from Ceph by design. But in our case, we are using all
-> > > recommendation like rack failure domain, replication n/w,etc, still
-> > > face client IO performance issues during one OSD down..
-> > >
-> > > On Tue, Feb 19, 2019 at 10:56 PM David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> wrote:
-> > > >
-> > > > With a RACK failure domain, you should be able to have an entire
-> rack powered down without noticing any major impact on the clients.  I
-> regularly take down OSDs and nodes for maintenance and upgrades without
-> seeing any problems with client IO.
-> > > >
-> > > > On Tue, Feb 12, 2019 at 5:01 AM M Ranga Swami Reddy <
-> swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > > >>
-> > > >> Hello - I have a couple of questions on ceph cluster stability, ev=
-en
-> > > >> we follow all recommendations as below:
-> > > >> - Having separate replication n/w and data n/w
-> > > >> - RACK is the failure domain
-> > > >> - Using SSDs for journals (1:4ratio)
-> > > >>
-> > > >> Q1 - If one OSD down, cluster IO down drastically and customer App=
-s
-> impacted.
-> > > >> Q2 - what is stability ratio, like with above, is ceph cluster
-> > > >> workable condition, if one osd down or one node down,etc.
-> > > >>
-> > > >> Thanks
-> > > >> Swami
-> > > >> _______________________________________________
-> > > >> ceph-users mailing list
-> > > >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > > >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> > > _______________________________________________
-> > > ceph-users mailing list
-> > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---0000000000009b79ff058279a388
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"auto">What about the system stats on your mons during recovery?=
- If they are having a hard time keeping up with requests during a recovery,=
- I could see that impacting client io. What disks are they running on? CPU?=
- Etc.</div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_a=
-ttr">On Fri, Feb 22, 2019, 6:01 AM M Ranga Swami Reddy &lt;<a href=3D"mailt=
-o:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></div><block=
-quote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc=
- solid;padding-left:1ex">Debug setting defaults are using..like 1/5 and 0/5=
- for almost..<br>
-Shall I try with 0 for all debug settings?<br>
-<br>
-On Wed, Feb 20, 2019 at 9:17 PM Darius Kasparavi=C4=8Dius &lt;<a href=3D"ma=
-ilto:daznis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank" rel=3D"noreferrer">daznis-Re5JQEeQqe8@public.gmane.org=
-m</a>&gt; wrote:<br>
-&gt;<br>
-&gt; Hello,<br>
-&gt;<br>
-&gt;<br>
-&gt; Check your CPU usage when you are doing those kind of operations. We<b=
-r>
-&gt; had a similar issue where our CPU monitoring was reporting fine &lt; 4=
-0%<br>
-&gt; usage, but our load on the nodes was high mid 60-80. If it&#39;s possi=
-ble<br>
-&gt; try disabling ht and see the actual cpu usage.<br>
-&gt; If you are hitting CPU limits you can try disabling crc on messages.<b=
-r>
-&gt; ms_nocrc<br>
-&gt; ms_crc_data<br>
-&gt; ms_crc_header<br>
-&gt;<br>
-&gt; And setting all your debug messages to 0.<br>
-&gt; If you haven&#39;t done you can also lower your recovery settings a li=
-ttle.<br>
-&gt; osd recovery max active<br>
-&gt; osd max backfills<br>
-&gt;<br>
-&gt; You can also lower your file store threads.<br>
-&gt; filestore op threads<br>
-&gt;<br>
-&gt;<br>
-&gt; If you can also switch to bluestore from filestore. This will also<br>
-&gt; lower your CPU usage. I&#39;m not sure that this is bluestore that doe=
-s<br>
-&gt; it, but I&#39;m seeing lower cpu usage when moving to bluestore + rock=
-sdb<br>
-&gt; compared to filestore + leveldb .<br>
-&gt;<br>
-&gt;<br>
-&gt; On Wed, Feb 20, 2019 at 4:27 PM M Ranga Swami Reddy<br>
-&gt; &lt;<a href=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank" rel=3D"n=
-oreferrer">swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt; &gt;<br>
-&gt; &gt; Thats expected from Ceph by design. But in our case, we are using=
- all<br>
-&gt; &gt; recommendation like rack failure domain, replication n/w,etc, sti=
-ll<br>
-&gt; &gt; face client IO performance issues during one OSD down..<br>
-&gt; &gt;<br>
-&gt; &gt; On Tue, Feb 19, 2019 at 10:56 PM David Turner &lt;<a href=3D"mail=
-to:drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank" rel=3D"noreferrer">drakonstein@=
-gmail.com</a>&gt; wrote:<br>
-&gt; &gt; &gt;<br>
-&gt; &gt; &gt; With a RACK failure domain, you should be able to have an en=
-tire rack powered down without noticing any major impact on the clients.=C2=
-=A0 I regularly take down OSDs and nodes for maintenance and upgrades witho=
-ut seeing any problems with client IO.<br>
-&gt; &gt; &gt;<br>
-&gt; &gt; &gt; On Tue, Feb 12, 2019 at 5:01 AM M Ranga Swami Reddy &lt;<a h=
-ref=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank" rel=3D"noreferrer">sw=
-amireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt; &gt; &gt;&gt;<br>
-&gt; &gt; &gt;&gt; Hello - I have a couple of questions on ceph cluster sta=
-bility, even<br>
-&gt; &gt; &gt;&gt; we follow all recommendations as below:<br>
-&gt; &gt; &gt;&gt; - Having separate replication n/w and data n/w<br>
-&gt; &gt; &gt;&gt; - RACK is the failure domain<br>
-&gt; &gt; &gt;&gt; - Using SSDs for journals (1:4ratio)<br>
-&gt; &gt; &gt;&gt;<br>
-&gt; &gt; &gt;&gt; Q1 - If one OSD down, cluster IO down drastically and cu=
-stomer Apps impacted.<br>
-&gt; &gt; &gt;&gt; Q2 - what is stability ratio, like with above, is ceph c=
-luster<br>
-&gt; &gt; &gt;&gt; workable condition, if one osd down or one node down,etc=
-.<br>
-&gt; &gt; &gt;&gt;<br>
-&gt; &gt; &gt;&gt; Thanks<br>
-&gt; &gt; &gt;&gt; Swami<br>
-&gt; &gt; &gt;&gt; _______________________________________________<br>
-&gt; &gt; &gt;&gt; ceph-users mailing list<br>
-&gt; &gt; &gt;&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_=
-blank" rel=3D"noreferrer">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-&gt; &gt; &gt;&gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users=
--ceph.com" rel=3D"noreferrer noreferrer" target=3D"_blank">http://lists.cep=
-h.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-&gt; &gt; _______________________________________________<br>
-&gt; &gt; ceph-users mailing list<br>
-&gt; &gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank" re=
-l=3D"noreferrer">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-&gt; &gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=
-" rel=3D"noreferrer noreferrer" target=3D"_blank">http://lists.ceph.com/lis=
-tinfo.cgi/ceph-users-ceph.com</a><br>
-</blockquote></div>
-
---0000000000009b79ff058279a388--
-
---===============7896716898528985112==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============7896716898528985112==--
+Y2VwaCBtb25zIGxvb2tzIGZpbmUgZHVyaW5nIHRoZSByZWNvdmVyeS4gIFVzaW5nICBIREQgd2l0
+aCBTU0QKam91cm5hbHMuIHdpdGggcmVjb21tZWRlZCBDUFUgYW5kIFJBTSBudW1iZXJzLgoKT24g
+RnJpLCBGZWIgMjIsIDIwMTkgYXQgNDo0MCBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdt
+YWlsLmNvbT4gd3JvdGU6Cj4KPiBXaGF0IGFib3V0IHRoZSBzeXN0ZW0gc3RhdHMgb24geW91ciBt
+b25zIGR1cmluZyByZWNvdmVyeT8gSWYgdGhleSBhcmUgaGF2aW5nIGEgaGFyZCB0aW1lIGtlZXBp
+bmcgdXAgd2l0aCByZXF1ZXN0cyBkdXJpbmcgYSByZWNvdmVyeSwgSSBjb3VsZCBzZWUgdGhhdCBp
+bXBhY3RpbmcgY2xpZW50IGlvLiBXaGF0IGRpc2tzIGFyZSB0aGV5IHJ1bm5pbmcgb24/IENQVT8g
+RXRjLgo+Cj4gT24gRnJpLCBGZWIgMjIsIDIwMTksIDY6MDEgQU0gTSBSYW5nYSBTd2FtaSBSZWRk
+eSA8c3dhbWlyZWRkeUBnbWFpbC5jb20+IHdyb3RlOgo+Pgo+PiBEZWJ1ZyBzZXR0aW5nIGRlZmF1
+bHRzIGFyZSB1c2luZy4ubGlrZSAxLzUgYW5kIDAvNSBmb3IgYWxtb3N0Li4KPj4gU2hhbGwgSSB0
+cnkgd2l0aCAwIGZvciBhbGwgZGVidWcgc2V0dGluZ3M/Cj4+Cj4+IE9uIFdlZCwgRmViIDIwLCAy
+MDE5IGF0IDk6MTcgUE0gRGFyaXVzIEthc3BhcmF2acSNaXVzIDxkYXpuaXNAZ21haWwuY29tPiB3
+cm90ZToKPj4gPgo+PiA+IEhlbGxvLAo+PiA+Cj4+ID4KPj4gPiBDaGVjayB5b3VyIENQVSB1c2Fn
+ZSB3aGVuIHlvdSBhcmUgZG9pbmcgdGhvc2Uga2luZCBvZiBvcGVyYXRpb25zLiBXZQo+PiA+IGhh
+ZCBhIHNpbWlsYXIgaXNzdWUgd2hlcmUgb3VyIENQVSBtb25pdG9yaW5nIHdhcyByZXBvcnRpbmcg
+ZmluZSA8IDQwJQo+PiA+IHVzYWdlLCBidXQgb3VyIGxvYWQgb24gdGhlIG5vZGVzIHdhcyBoaWdo
+IG1pZCA2MC04MC4gSWYgaXQncyBwb3NzaWJsZQo+PiA+IHRyeSBkaXNhYmxpbmcgaHQgYW5kIHNl
+ZSB0aGUgYWN0dWFsIGNwdSB1c2FnZS4KPj4gPiBJZiB5b3UgYXJlIGhpdHRpbmcgQ1BVIGxpbWl0
+cyB5b3UgY2FuIHRyeSBkaXNhYmxpbmcgY3JjIG9uIG1lc3NhZ2VzLgo+PiA+IG1zX25vY3JjCj4+
+ID4gbXNfY3JjX2RhdGEKPj4gPiBtc19jcmNfaGVhZGVyCj4+ID4KPj4gPiBBbmQgc2V0dGluZyBh
+bGwgeW91ciBkZWJ1ZyBtZXNzYWdlcyB0byAwLgo+PiA+IElmIHlvdSBoYXZlbid0IGRvbmUgeW91
+IGNhbiBhbHNvIGxvd2VyIHlvdXIgcmVjb3Zlcnkgc2V0dGluZ3MgYSBsaXR0bGUuCj4+ID4gb3Nk
+IHJlY292ZXJ5IG1heCBhY3RpdmUKPj4gPiBvc2QgbWF4IGJhY2tmaWxscwo+PiA+Cj4+ID4gWW91
+IGNhbiBhbHNvIGxvd2VyIHlvdXIgZmlsZSBzdG9yZSB0aHJlYWRzLgo+PiA+IGZpbGVzdG9yZSBv
+cCB0aHJlYWRzCj4+ID4KPj4gPgo+PiA+IElmIHlvdSBjYW4gYWxzbyBzd2l0Y2ggdG8gYmx1ZXN0
+b3JlIGZyb20gZmlsZXN0b3JlLiBUaGlzIHdpbGwgYWxzbwo+PiA+IGxvd2VyIHlvdXIgQ1BVIHVz
+YWdlLiBJJ20gbm90IHN1cmUgdGhhdCB0aGlzIGlzIGJsdWVzdG9yZSB0aGF0IGRvZXMKPj4gPiBp
+dCwgYnV0IEknbSBzZWVpbmcgbG93ZXIgY3B1IHVzYWdlIHdoZW4gbW92aW5nIHRvIGJsdWVzdG9y
+ZSArIHJvY2tzZGIKPj4gPiBjb21wYXJlZCB0byBmaWxlc3RvcmUgKyBsZXZlbGRiIC4KPj4gPgo+
+PiA+Cj4+ID4gT24gV2VkLCBGZWIgMjAsIDIwMTkgYXQgNDoyNyBQTSBNIFJhbmdhIFN3YW1pIFJl
+ZGR5Cj4+ID4gPHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90ZToKPj4gPiA+Cj4+ID4gPiBUaGF0
+cyBleHBlY3RlZCBmcm9tIENlcGggYnkgZGVzaWduLiBCdXQgaW4gb3VyIGNhc2UsIHdlIGFyZSB1
+c2luZyBhbGwKPj4gPiA+IHJlY29tbWVuZGF0aW9uIGxpa2UgcmFjayBmYWlsdXJlIGRvbWFpbiwg
+cmVwbGljYXRpb24gbi93LGV0Yywgc3RpbGwKPj4gPiA+IGZhY2UgY2xpZW50IElPIHBlcmZvcm1h
+bmNlIGlzc3VlcyBkdXJpbmcgb25lIE9TRCBkb3duLi4KPj4gPiA+Cj4+ID4gPiBPbiBUdWUsIEZl
+YiAxOSwgMjAxOSBhdCAxMDo1NiBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNv
+bT4gd3JvdGU6Cj4+ID4gPiA+Cj4+ID4gPiA+IFdpdGggYSBSQUNLIGZhaWx1cmUgZG9tYWluLCB5
+b3Ugc2hvdWxkIGJlIGFibGUgdG8gaGF2ZSBhbiBlbnRpcmUgcmFjayBwb3dlcmVkIGRvd24gd2l0
+aG91dCBub3RpY2luZyBhbnkgbWFqb3IgaW1wYWN0IG9uIHRoZSBjbGllbnRzLiAgSSByZWd1bGFy
+bHkgdGFrZSBkb3duIE9TRHMgYW5kIG5vZGVzIGZvciBtYWludGVuYW5jZSBhbmQgdXBncmFkZXMg
+d2l0aG91dCBzZWVpbmcgYW55IHByb2JsZW1zIHdpdGggY2xpZW50IElPLgo+PiA+ID4gPgo+PiA+
+ID4gPiBPbiBUdWUsIEZlYiAxMiwgMjAxOSBhdCA1OjAxIEFNIE0gUmFuZ2EgU3dhbWkgUmVkZHkg
+PHN3YW1pcmVkZHlAZ21haWwuY29tPiB3cm90ZToKPj4gPiA+ID4+Cj4+ID4gPiA+PiBIZWxsbyAt
+IEkgaGF2ZSBhIGNvdXBsZSBvZiBxdWVzdGlvbnMgb24gY2VwaCBjbHVzdGVyIHN0YWJpbGl0eSwg
+ZXZlbgo+PiA+ID4gPj4gd2UgZm9sbG93IGFsbCByZWNvbW1lbmRhdGlvbnMgYXMgYmVsb3c6Cj4+
+ID4gPiA+PiAtIEhhdmluZyBzZXBhcmF0ZSByZXBsaWNhdGlvbiBuL3cgYW5kIGRhdGEgbi93Cj4+
+ID4gPiA+PiAtIFJBQ0sgaXMgdGhlIGZhaWx1cmUgZG9tYWluCj4+ID4gPiA+PiAtIFVzaW5nIFNT
+RHMgZm9yIGpvdXJuYWxzICgxOjRyYXRpbykKPj4gPiA+ID4+Cj4+ID4gPiA+PiBRMSAtIElmIG9u
+ZSBPU0QgZG93biwgY2x1c3RlciBJTyBkb3duIGRyYXN0aWNhbGx5IGFuZCBjdXN0b21lciBBcHBz
+IGltcGFjdGVkLgo+PiA+ID4gPj4gUTIgLSB3aGF0IGlzIHN0YWJpbGl0eSByYXRpbywgbGlrZSB3
+aXRoIGFib3ZlLCBpcyBjZXBoIGNsdXN0ZXIKPj4gPiA+ID4+IHdvcmthYmxlIGNvbmRpdGlvbiwg
+aWYgb25lIG9zZCBkb3duIG9yIG9uZSBub2RlIGRvd24sZXRjLgo+PiA+ID4gPj4KPj4gPiA+ID4+
+IFRoYW5rcwo+PiA+ID4gPj4gU3dhbWkKPj4gPiA+ID4+IF9fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fCj4+ID4gPiA+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlz
+dAo+PiA+ID4gPj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+PiA+ID4gPj4gaHR0cDovL2xp
+c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4+ID4gPiBfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+PiA+ID4gY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKPj4gPiA+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4gPiA+
+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
