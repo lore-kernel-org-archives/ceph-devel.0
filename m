@@ -1,17 +1,23 @@
-From: Mykola Golub <to.my.trociny-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: RBD image format v1 EOL ...
-Date: Fri, 22 Feb 2019 16:38:36 +0200
-Message-ID: <20190222143835.GA20829@gmail.com>
-References: <CA+aFP1Dod_hwug_omfegFTERyiYmwa+3KDcBZsXcjR+B87YykQ@mail.gmail.com>
- <20190220092247.GZ92783@fi.muni.cz>
- <20190220153758.GA10288@gmail.com>
- <48f860e6-f9d4-ef39-53a2-465380596429@yahoo.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+Subject: Re: Ceph cluster stability
+Date: Fri, 22 Feb 2019 17:01:24 -0800
+Message-ID: <7B24D99C-9F31-401F-9455-8F7B0E013160@dreamsnake.net>
+References: <CANA9Uk5YZYbq5EN40PX5vo55wPzjYLU+Oy9m8Hm-DRG-f1zxFw@mail.gmail.com>
+ <CAN-Gep+H2sbh+LL4Pzj9-XVyvCnP+2m++1yFgErBQaWNH3fv=A@mail.gmail.com>
+ <CANA9Uk5_FfQqEbZ7O3xp4PPy=cSYUwSf-xWVM6+5WnQO6YkqmQ@mail.gmail.com>
+ <CANrNMwUVupc80VWW_OKbYnH1JzB9fKRJFB7q7wVgJH9MY8fB6w@mail.gmail.com>
+ <CANA9Uk5p7so6BYrR+BMhN-qQv3BFnqJwW7cpNA-Xpqtu3mQFhg@mail.gmail.com>
+ <CAN-GepJDYqs931SwNvevPPYLUnAcqWPc3oQUDLDeBVFVrWHZEw@mail.gmail.com>
+ <CANA9Uk4_Ynn8+3BDWDiy5Pshv2u_cp90a=vGWwUxrJXS+Q-STQ@mail.gmail.com>
+ <CAN-Gep+wy9axKNL26RUpCKy3S2uTxzOrSXq+bf=+zhsrGxAvCQ@mail.gmail.com>
+ <CANA9Uk6rHoAtvAUGtW1VqZnXDz6EjaFOUfxmYUocChRe5mZwDw@mail.gmail.com>
+ <CANrNMwUuODV3Ju+TxosZE0hM9qwAU1Rk0efST6QmzmWXW+hXFA@mail.gmail.com>
+ <CANA9Uk6CFJnGXz-Bcwe7Cb9JMBFGw5rwd3xgFvyo9teCWoUcCQ@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <48f860e6-f9d4-ef39-53a2-465380596429-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CANA9Uk6CFJnGXz-Bcwe7Cb9JMBFGw5rwd3xgFvyo9teCWoUcCQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -21,35 +27,99 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: koukou73gr <koukou73gr-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Feb 22, 2019 at 02:43:36PM +0200, koukou73gr wrote:
-> On 2019-02-20 17:38, Mykola Golub wrote:
-> 
-> > Note, if even rbd supported live (without any downtime) migration you
-> > would still need to restart the client after the upgrate to a new
-> > librbd with migration support.
-> > 
-> > 
-> You could probably get away with executing the client with a new librbd
-> version by live migrating the VM to an updated hypervisor.
-> 
-> At least, this is what I have been doing so far when updating Ceph client
-> libraries having zero downtime.
-
-Yes, and this is what I meant when I was writing about investigating a
-possiblilty to migrate to the new format with zero downtime by using
-VM live migration. If there were a way to execute "rbd migration
-prepare $pool/$image" during live VM migration, exactly after the
-source VM closes the rbd image but before the destination VM opens it,
-it would do the trick (the destination VM would start using the new
-format).
-
-Right now I don't know if it is possible at all, because I am not
-familiar with VM migration, e.g. I don't know if it opens the image on
-the destination before or after it closes it on the source.
-
--- 
-Mykola Golub
+Cj8gRGlkIHdlIHN0YXJ0IHJlY29tbWVuZGluZyB0aGF0IHByb2R1Y3Rpb24gbW9ucyBydW4gb24g
+YSBWTT8gIEknZCBiZSB2ZXJ5IGhlc2l0YW50IHRvIGRvIHRoYXQsIHRob3VnaCBwcm9iYWJseSBz
+b21lIGZvbGtzIGRvLgoKSSBjYW4gc2F5IGZvciBzdXJlIHRoYXQgaW4gdGhlIHBhc3QgKEZpcmVm
+bHkpIEkgZXhwZXJpZW5jZWQgb3V0YWdlcyByZWxhdGVkIHRvIG1vbnMgcnVubmluZyBvbiBIRERz
+LiAgVGhhdCB3YXMgYSBjbHVzdGVyIG9mIDQ1MCBIREQgT1NEcyB3aXRoIGNvbG8gam91cm5hbHMg
+YW5kIGh1bmRyZWRzIG9mIFJCRCBjbGllbnRzLiAgU29tZXRoaW5nIG9ic2N1cmUgYWJvdXQgcnVu
+bmluZyBvdXQgb2YgImdsb2JhbCBJRHMiIGFuZCBub3QgYmVpbmcgYWJsZSB0byBjcmVhdGUgbmV3
+IG9uZXMgZmFzdCBlbm91Z2guICBXZSBoYWQgdG8gd29yayBhcm91bmQgd2l0aCBhIGNvbWJvIG9m
+IGxlYXNlIHNldHRpbmdzIG9uIHRoZSBtb25zIGFuZCBjbGllbnRzLCB0aG91Z2ggd2l0aCBIYW1t
+ZXIgYW5kIGxhdGVyIEkgd291bGQgbm90IGV4cGVjdCB0aGF0IGV4YWN0IHNpdHVhdGlvbiB0byBh
+cmlzZS4gIFN0aWxsIGl0IGxlZnQgbWUgcGFyYW5vaWQgYWJvdXQgbW9uIERCcyBhbmQgSEREcy4g
+CgotLSBhYWQKCgo+IAo+IEJ1dCBjZXBoIHJlY29tbWVuZGF0aW9uIGlzIHRvIHVzZSBWTSAobm90
+IGV2ZW4gdGhlICBIVyBub2RlCj4gcmVjb21tZW5kZWQpLiB3aWxsIHRyeSB0byBjaGFuZ2UgdGhl
+IG1vbiBkaXNrIGFzIFNTRCBhbmQgSFcgbm9kZS4KPiAKPiBPbiBGcmksIEZlYiAyMiwgMjAxOSBh
+dCA1OjI1IFBNIERhcml1cyBLYXNwYXJhdmnEjWl1cyA8ZGF6bmlzQGdtYWlsLmNvbT4gd3JvdGU6
+Cj4+IAo+PiBJZiB5b3VyIHVzaW5nIGhkZCBmb3IgbW9uaXRvciBzZXJ2ZXJzLiBDaGVjayB0aGVp
+ciBsb2FkLiBJdCBtaWdodCBiZQo+PiB0aGUgaXNzdWUgdGhlcmUuCj4+IAo+PiBPbiBGcmksIEZl
+YiAyMiwgMjAxOSBhdCAxOjUwIFBNIE0gUmFuZ2EgU3dhbWkgUmVkZHkKPj4gPHN3YW1pcmVkZHlA
+Z21haWwuY29tPiB3cm90ZToKPj4+IAo+Pj4gY2VwaC1tb24gZGlzayB3aXRoIDUwMEcgd2l0aCBI
+REQgKG5vdCBqb3VybmFscy9TU0RzKS4gIFllcywgbW9uIHVzZQo+Pj4gZm9sZGVyIG9uIEZTIG9u
+IGEgZGlzawo+Pj4gCj4+PiBPbiBGcmksIEZlYiAyMiwgMjAxOSBhdCA1OjEzIFBNIERhdmlkIFR1
+cm5lciA8ZHJha29uc3RlaW5AZ21haWwuY29tPiB3cm90ZToKPj4+PiAKPj4+PiBNb24gZGlza3Mg
+ZG9uJ3QgaGF2ZSBqb3VybmFscywgdGhleSdyZSBqdXN0IGEgZm9sZGVyIG9uIGEgZmlsZXN5c3Rl
+bSBvbiBhIGRpc2suCj4+Pj4gCj4+Pj4gT24gRnJpLCBGZWIgMjIsIDIwMTksIDY6NDAgQU0gTSBS
+YW5nYSBTd2FtaSBSZWRkeSA8c3dhbWlyZWRkeUBnbWFpbC5jb20+IHdyb3RlOgo+Pj4+PiAKPj4+
+Pj4gY2VwaCBtb25zIGxvb2tzIGZpbmUgZHVyaW5nIHRoZSByZWNvdmVyeS4gIFVzaW5nICBIREQg
+d2l0aCBTU0QKPj4+Pj4gam91cm5hbHMuIHdpdGggcmVjb21tZWRlZCBDUFUgYW5kIFJBTSBudW1i
+ZXJzLgo+Pj4+PiAKPj4+Pj4gT24gRnJpLCBGZWIgMjIsIDIwMTkgYXQgNDo0MCBQTSBEYXZpZCBU
+dXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNvbT4gd3JvdGU6Cj4+Pj4+PiAKPj4+Pj4+IFdoYXQg
+YWJvdXQgdGhlIHN5c3RlbSBzdGF0cyBvbiB5b3VyIG1vbnMgZHVyaW5nIHJlY292ZXJ5PyBJZiB0
+aGV5IGFyZSBoYXZpbmcgYSBoYXJkIHRpbWUga2VlcGluZyB1cCB3aXRoIHJlcXVlc3RzIGR1cmlu
+ZyBhIHJlY292ZXJ5LCBJIGNvdWxkIHNlZSB0aGF0IGltcGFjdGluZyBjbGllbnQgaW8uIFdoYXQg
+ZGlza3MgYXJlIHRoZXkgcnVubmluZyBvbj8gQ1BVPyBFdGMuCj4+Pj4+PiAKPj4+Pj4+IE9uIEZy
+aSwgRmViIDIyLCAyMDE5LCA2OjAxIEFNIE0gUmFuZ2EgU3dhbWkgUmVkZHkgPHN3YW1pcmVkZHlA
+Z21haWwuY29tPiB3cm90ZToKPj4+Pj4+PiAKPj4+Pj4+PiBEZWJ1ZyBzZXR0aW5nIGRlZmF1bHRz
+IGFyZSB1c2luZy4ubGlrZSAxLzUgYW5kIDAvNSBmb3IgYWxtb3N0Li4KPj4+Pj4+PiBTaGFsbCBJ
+IHRyeSB3aXRoIDAgZm9yIGFsbCBkZWJ1ZyBzZXR0aW5ncz8KPj4+Pj4+PiAKPj4+Pj4+PiBPbiBX
+ZWQsIEZlYiAyMCwgMjAxOSBhdCA5OjE3IFBNIERhcml1cyBLYXNwYXJhdmnEjWl1cyA8ZGF6bmlz
+QGdtYWlsLmNvbT4gd3JvdGU6Cj4+Pj4+Pj4+IAo+Pj4+Pj4+PiBIZWxsbywKPj4+Pj4+Pj4gCj4+
+Pj4+Pj4+IAo+Pj4+Pj4+PiBDaGVjayB5b3VyIENQVSB1c2FnZSB3aGVuIHlvdSBhcmUgZG9pbmcg
+dGhvc2Uga2luZCBvZiBvcGVyYXRpb25zLiBXZQo+Pj4+Pj4+PiBoYWQgYSBzaW1pbGFyIGlzc3Vl
+IHdoZXJlIG91ciBDUFUgbW9uaXRvcmluZyB3YXMgcmVwb3J0aW5nIGZpbmUgPCA0MCUKPj4+Pj4+
+Pj4gdXNhZ2UsIGJ1dCBvdXIgbG9hZCBvbiB0aGUgbm9kZXMgd2FzIGhpZ2ggbWlkIDYwLTgwLiBJ
+ZiBpdCdzIHBvc3NpYmxlCj4+Pj4+Pj4+IHRyeSBkaXNhYmxpbmcgaHQgYW5kIHNlZSB0aGUgYWN0
+dWFsIGNwdSB1c2FnZS4KPj4+Pj4+Pj4gSWYgeW91IGFyZSBoaXR0aW5nIENQVSBsaW1pdHMgeW91
+IGNhbiB0cnkgZGlzYWJsaW5nIGNyYyBvbiBtZXNzYWdlcy4KPj4+Pj4+Pj4gbXNfbm9jcmMKPj4+
+Pj4+Pj4gbXNfY3JjX2RhdGEKPj4+Pj4+Pj4gbXNfY3JjX2hlYWRlcgo+Pj4+Pj4+PiAKPj4+Pj4+
+Pj4gQW5kIHNldHRpbmcgYWxsIHlvdXIgZGVidWcgbWVzc2FnZXMgdG8gMC4KPj4+Pj4+Pj4gSWYg
+eW91IGhhdmVuJ3QgZG9uZSB5b3UgY2FuIGFsc28gbG93ZXIgeW91ciByZWNvdmVyeSBzZXR0aW5n
+cyBhIGxpdHRsZS4KPj4+Pj4+Pj4gb3NkIHJlY292ZXJ5IG1heCBhY3RpdmUKPj4+Pj4+Pj4gb3Nk
+IG1heCBiYWNrZmlsbHMKPj4+Pj4+Pj4gCj4+Pj4+Pj4+IFlvdSBjYW4gYWxzbyBsb3dlciB5b3Vy
+IGZpbGUgc3RvcmUgdGhyZWFkcy4KPj4+Pj4+Pj4gZmlsZXN0b3JlIG9wIHRocmVhZHMKPj4+Pj4+
+Pj4gCj4+Pj4+Pj4+IAo+Pj4+Pj4+PiBJZiB5b3UgY2FuIGFsc28gc3dpdGNoIHRvIGJsdWVzdG9y
+ZSBmcm9tIGZpbGVzdG9yZS4gVGhpcyB3aWxsIGFsc28KPj4+Pj4+Pj4gbG93ZXIgeW91ciBDUFUg
+dXNhZ2UuIEknbSBub3Qgc3VyZSB0aGF0IHRoaXMgaXMgYmx1ZXN0b3JlIHRoYXQgZG9lcwo+Pj4+
+Pj4+PiBpdCwgYnV0IEknbSBzZWVpbmcgbG93ZXIgY3B1IHVzYWdlIHdoZW4gbW92aW5nIHRvIGJs
+dWVzdG9yZSArIHJvY2tzZGIKPj4+Pj4+Pj4gY29tcGFyZWQgdG8gZmlsZXN0b3JlICsgbGV2ZWxk
+YiAuCj4+Pj4+Pj4+IAo+Pj4+Pj4+PiAKPj4+Pj4+Pj4gT24gV2VkLCBGZWIgMjAsIDIwMTkgYXQg
+NDoyNyBQTSBNIFJhbmdhIFN3YW1pIFJlZGR5Cj4+Pj4+Pj4+IDxzd2FtaXJlZGR5QGdtYWlsLmNv
+bT4gd3JvdGU6Cj4+Pj4+Pj4+PiAKPj4+Pj4+Pj4+IFRoYXRzIGV4cGVjdGVkIGZyb20gQ2VwaCBi
+eSBkZXNpZ24uIEJ1dCBpbiBvdXIgY2FzZSwgd2UgYXJlIHVzaW5nIGFsbAo+Pj4+Pj4+Pj4gcmVj
+b21tZW5kYXRpb24gbGlrZSByYWNrIGZhaWx1cmUgZG9tYWluLCByZXBsaWNhdGlvbiBuL3csZXRj
+LCBzdGlsbAo+Pj4+Pj4+Pj4gZmFjZSBjbGllbnQgSU8gcGVyZm9ybWFuY2UgaXNzdWVzIGR1cmlu
+ZyBvbmUgT1NEIGRvd24uLgo+Pj4+Pj4+Pj4gCj4+Pj4+Pj4+PiBPbiBUdWUsIEZlYiAxOSwgMjAx
+OSBhdCAxMDo1NiBQTSBEYXZpZCBUdXJuZXIgPGRyYWtvbnN0ZWluQGdtYWlsLmNvbT4gd3JvdGU6
+Cj4+Pj4+Pj4+Pj4gCj4+Pj4+Pj4+Pj4gV2l0aCBhIFJBQ0sgZmFpbHVyZSBkb21haW4sIHlvdSBz
+aG91bGQgYmUgYWJsZSB0byBoYXZlIGFuIGVudGlyZSByYWNrIHBvd2VyZWQgZG93biB3aXRob3V0
+IG5vdGljaW5nIGFueSBtYWpvciBpbXBhY3Qgb24gdGhlIGNsaWVudHMuICBJIHJlZ3VsYXJseSB0
+YWtlIGRvd24gT1NEcyBhbmQgbm9kZXMgZm9yIG1haW50ZW5hbmNlIGFuZCB1cGdyYWRlcyB3aXRo
+b3V0IHNlZWluZyBhbnkgcHJvYmxlbXMgd2l0aCBjbGllbnQgSU8uCj4+Pj4+Pj4+Pj4gCj4+Pj4+
+Pj4+Pj4gT24gVHVlLCBGZWIgMTIsIDIwMTkgYXQgNTowMSBBTSBNIFJhbmdhIFN3YW1pIFJlZGR5
+IDxzd2FtaXJlZGR5QGdtYWlsLmNvbT4gd3JvdGU6Cj4+Pj4+Pj4+Pj4+IAo+Pj4+Pj4+Pj4+PiBI
+ZWxsbyAtIEkgaGF2ZSBhIGNvdXBsZSBvZiBxdWVzdGlvbnMgb24gY2VwaCBjbHVzdGVyIHN0YWJp
+bGl0eSwgZXZlbgo+Pj4+Pj4+Pj4+PiB3ZSBmb2xsb3cgYWxsIHJlY29tbWVuZGF0aW9ucyBhcyBi
+ZWxvdzoKPj4+Pj4+Pj4+Pj4gLSBIYXZpbmcgc2VwYXJhdGUgcmVwbGljYXRpb24gbi93IGFuZCBk
+YXRhIG4vdwo+Pj4+Pj4+Pj4+PiAtIFJBQ0sgaXMgdGhlIGZhaWx1cmUgZG9tYWluCj4+Pj4+Pj4+
+Pj4+IC0gVXNpbmcgU1NEcyBmb3Igam91cm5hbHMgKDE6NHJhdGlvKQo+Pj4+Pj4+Pj4+PiAKPj4+
+Pj4+Pj4+Pj4gUTEgLSBJZiBvbmUgT1NEIGRvd24sIGNsdXN0ZXIgSU8gZG93biBkcmFzdGljYWxs
+eSBhbmQgY3VzdG9tZXIgQXBwcyBpbXBhY3RlZC4KPj4+Pj4+Pj4+Pj4gUTIgLSB3aGF0IGlzIHN0
+YWJpbGl0eSByYXRpbywgbGlrZSB3aXRoIGFib3ZlLCBpcyBjZXBoIGNsdXN0ZXIKPj4+Pj4+Pj4+
+Pj4gd29ya2FibGUgY29uZGl0aW9uLCBpZiBvbmUgb3NkIGRvd24gb3Igb25lIG5vZGUgZG93bixl
+dGMuCj4+Pj4+Pj4+Pj4+IAo+Pj4+Pj4+Pj4+PiBUaGFua3MKPj4+Pj4+Pj4+Pj4gU3dhbWkKPj4+
+Pj4+Pj4+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+Pj4+Pj4+Pj4+Pj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPj4+Pj4+Pj4+Pj4gY2VwaC11c2Vy
+c0BsaXN0cy5jZXBoLmNvbQo+Pj4+Pj4+Pj4+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPj4+Pj4+Pj4+IF9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+Pj4+Pj4+PiBjZXBoLXVzZXJzIG1haWxpbmcg
+bGlzdAo+Pj4+Pj4+Pj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+Pj4+Pj4+Pj4gaHR0cDov
+L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCgpfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxp
+bmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9s
+aXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
