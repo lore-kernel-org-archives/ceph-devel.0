@@ -1,14 +1,11 @@
-From: Alex Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: redirect log to syslog and disable log to stderr
-Date: Tue, 26 Feb 2019 12:12:42 -0600
-Message-ID: <q53vj3$4cfc$1@blaine.gmane.org>
-References: <q4pkqr$3kmo$1@blaine.gmane.org>
+From: hnuzhoulin2 <hnuzhoulin2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: osd exit common/Thread.cc: 160: FAILED assert(ret ==
+ 0)--10.2.10
+Date: Wed, 27 Feb 2019 18:35:07 +0800
+Message-ID: <817FE621-5FEB-40E0-A404-7D0034804DDB@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============1377091211147161485=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <q4pkqr$3kmo$1@blaine.gmane.org>
-Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,19 +15,102 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "=?utf-8?Q?ceph-users=40lists.ceph.com?=" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Dear Cephers,
+--===============1377091211147161485==
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: base64
 
-In mimic 13.2.2
-ceph tell mgr.* injectargs --log-to-stderr=false
-Returns an error (no valid command found ...).  What is the correct way to inject mgr configuration values?
+PGh0bWw+DQo8aGVhZD4NCiAgICA8bWV0YSBodHRwLWVxdWl2PSdDb250ZW50LVR5cGUnIGNvbnRl
+bnQ9J3RleHQvaHRtbDsgY2hhcnNldD1VVEYtOCc+DQo8L2hlYWQ+DQo8Ym9keT4NCjxzdHlsZT4N
+CiAgICBmb250ew0KICAgICAgICBsaW5lLWhlaWdodDogMS42Ow0KICAgIH0NCiAgICB1bCxvbHsN
+CiAgICAgICAgcGFkZGluZy1sZWZ0OiAyMHB4Ow0KICAgICAgICBsaXN0LXN0eWxlLXBvc2l0aW9u
+OiBpbnNpZGU7DQogICAgfQ0KPC9zdHlsZT4NCjxkaXYgc3R5bGUgPSAnZm9udC1mYW1pbHk6SGVs
+dmV0aWNhLEhlbHZldGljYSzlvq7ova/pm4Xpu5EsIOWui+S9kzsgbGluZS1oZWlnaHQ6MS42Oyc+
+DQogICAgPGRpdiA+PC9kaXY+PGRpdj4KICAgIDxkaXY+CiAgICAgICAgPGRpdj5IaSwgZ3V5czwv
+ZGl2PjxkaXY+PGJyPjwvZGl2PjxkaXY+U28gZmFyLCB0aGVyZSBoYXZlIGJlZW4gMTAgb3NkIHNl
+cnZpY2UgZXhpdCBiZWNhdXNlIG9mIHRoaXMgZXJyb3IuPC9kaXY+PGRpdj50aGUgZXJyb3IgbWVz
+c2FnZXMgYXJlIGFsbCB0aGUgc2FtZS48L2Rpdj48ZGl2Pjxicj48L2Rpdj48ZGl2PjIwMTktMDIt
+MjcgMTc6MTQ6NTkuNzU3MTQ2IDdmODk5MjVmZjcwMCAwIC0tIDEwLjE5MS4xNzUuMTU6Njg4Ni8x
+OTI4MDMgJmd0OyZndDsgMTAuMTkxLjE3NS40OTo2ODMzLzE4ODczMSBwaXBlKDB4NTVlYmJhODE5
+NDAwIHNkPTc0MSA6Njg4NiBzPTAgcGdzPTAgY3M9MCBsPTAgYz0weDU1ZWJiYjhiYTkwMCkuYWNj
+ZXB0IGNvbm5lY3Rfc2VxIDM5MTIgdnMgZXhpc3RpbmcgMzkxMSBzdGF0ZSBzdGFuZGJ5PC9kaXY+
+PGRpdj4yMDE5LTAyLTI3IDE3OjE1OjA1Ljg1ODgwMiA3Zjg5ZDk4NTY3MDAgLTEgY29tbW9uL1Ro
+cmVhZC5jYzogSW4gZnVuY3Rpb24gJ3ZvaWQgVGhyZWFkOjpjcmVhdGUoY29uc3QgY2hhciosIHNp
+emVfdCknIHRocmVhZCA3Zjg5ZDk4NTY3MDAgdGltZSAyMDE5LTAyLTI3IDE3OjE1OjA1LjgwNjYw
+NzwvZGl2PjxkaXY+Y29tbW9uL1RocmVhZC5jYzogMTYwOiBGQUlMRUQgYXNzZXJ0KHJldCAwKTwv
+ZGl2PjxkaXY+PGJyPjwvZGl2PjxkaXY+Y2VwaCB2ZXJzaW9uIDEwLjIuMTAgKDVkYzFlNGMwNWNi
+NjhkYmY2MmFlNmZjZTNmMDcwMGU0NjU0ZmRiYmUpPC9kaXY+PGRpdj4mbmJzcDsxOiAoY2VwaDo6
+X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3QqLCBjaGFyIGNvbnN0KiwgaW50LCBjaGFyIGNv
+bnN0KikrMHg4MikgWzB4NTVlYjdhODQ5ZTEyXTwvZGl2PjxkaXY+Jm5ic3A7MjogKFRocmVhZDo6
+Y3JlYXRlKGNoYXIgY29uc3QqLCB1bnNpZ25lZCBsb25nKSsweGJhKSBbMHg1NWViN2E4MmMxNGFd
+PC9kaXY+PGRpdj4mbmJzcDszOiAoU2ltcGxlTWVzc2VuZ2VyOjphZGRfYWNjZXB0X3BpcGUoaW50
+KSsweDZmKSBbMHg1NWViN2E4MjAzZWZdPC9kaXY+PGRpdj4mbmJzcDs0OiAoQWNjZXB0ZXI6OmVu
+dHJ5KCkrMHgzNzkpIFsweDU1ZWI3YThmM2VlOV08L2Rpdj48ZGl2PiZuYnNwOzU6ICgoKSsweDgw
+NjQpIFsweDdmODllY2Y3NjA2NF08L2Rpdj48ZGl2PiZuYnNwOzY6IChjbG9uZSgpKzB4NmQpIFsw
+eDdmODllYjA3NzYyZF08L2Rpdj48ZGl2PiZuYnNwO05PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0
+YWJsZSwgb3IgYG9iamR1bXAgLXJkUyAmYW1wO2x0O2V4ZWN1dGFibGUmYW1wO2d0O2AgaXMgbmVl
+ZGVkIHRvIGludGVycHJldCB0aGlzLjwvZGl2PjxkaXY+LS0tIGJlZ2luIGR1bXAgb2YgcmVjZW50
+IGV2ZW50cyAtLS08L2Rpdj48ZGl2PjEwMDAwJmd0OyAyMDE5LTAyLTI3IDE3OjE0OjUwLjk5OTI3
+NiA3Zjg5M2U4MTE3MDAgMSAtIDEwLjE5MS4xNzUuMTU6MC8xOTI4MDMgJmx0OyBvc2QuODUwIDEw
+LjE5MS4xNzUuNDY6NjgzNy8xOTA4NTUgNjk1MzQ0NyA9PT09IG9zZF9waW5nKHBpbmdfcmVwbHkg
+ZTE3ODQ2IHN0YW1wIDIwMTktMDItMjcgMTc6MTQ6NTAuOTk1MDQzKSB2MyA9PT09IDIwMDQrMCsw
+ICgzOTgwMTY3NTUzIDAgMCkgMHg1NWViYTEyYjc0MDAgY29uIDB4NTVlYjk2YWRhNjAwPC9kaXY+
+PGRpdj48YnI+PC9kaXY+PGRpdj5kZXRhaWwgbG9ncyBzZWU6Jm5ic3A7aHR0cHM6Ly9kcml2ZS5n
+b29nbGUuY29tL2ZpbGUvZC8xZlp5aFRqMDZDSmxjUmptbGxhUFFNTkprbkk5Z0FnNkovdmlldzwv
+ZGl2PjxkaXY+PGJyPjwvZGl2PjxkaXY+d2hlbiBJIHJlc3RhcnQgdGhlc2Ugb3NkIHNlcnZpY2Vz
+LCBpdCBsb29rcyB3b3JrcyB3ZWxsLiBCdXQgSSBkbyBub3Qga25vdyBpZiBpdCB3aWxsIGhhcHBl
+biBpbiB0aGUgb3RoZXIgb3Nkcy48L2Rpdj48ZGl2PkFuZCBJIGNhbiBub3QgZmluZCBhbnkgZXJy
+b3IgbG9nIGluIHRoZSBzeXN0ZW0gZXhjZXB0IHRoZSBmb2xsb3dpbmcgZG1lc2cgaW5mbzo8L2Rp
+dj48ZGl2Pjxicj48L2Rpdj48ZGl2PlvkuIkgMeaciCAzMCAwODoxNDoxMSAyMDE5XSBtZWdhc2Fz
+OiBDb21tYW5kIHBvb2wgKGZ1c2lvbikgZW1wdHkhPC9kaXY+PGRpdj5b5LiJIDHmnIggMzAgMDg6
+MTQ6MTEgMjAxOV0gQ291bGRuJ3QgYnVpbGQgTUZJIHBhc3MgdGhydSBjbWQ8L2Rpdj48ZGl2Plvk
+uIkgMeaciCAzMCAwODoxNDoxMSAyMDE5XSBDb3VsZG4ndCBpc3N1ZSBNRkkgcGFzcyB0aHJ1IGNt
+ZDwvZGl2PjxkaXY+W+S4iSAx5pyIIDMwIDA4OjE0OjExIDIwMTldIG1lZ2FzYXM6IENvbW1hbmQg
+cG9vbCBlbXB0eSE8L2Rpdj48ZGl2PlvkuIkgMeaciCAzMCAwODoxNDoxMSAyMDE5XSBtZWdhc2Fz
+OiBGYWlsZWQgdG8gZ2V0IGEgY21kIHBhY2tldDwvZGl2PjxkaXY+W+S4iSAx5pyIIDMwIDA4OjE0
+OjExIDIwMTldIG1lZ2FzYXM6IENvbW1hbmQgcG9vbCBlbXB0eSE8L2Rpdj48ZGl2PlvkuIkgMeac
+iCAzMCAwODoxNDoxMSAyMDE5XSBtZWdhc2FzOiBGYWlsZWQgdG8gZ2V0IGEgY21kIHBhY2tldDwv
+ZGl2PjxkaXY+W+S4iSAx5pyIIDMwIDA4OjE0OjExIDIwMTldIG1lZ2FzYXM6IENvbW1hbmQgcG9v
+bCBlbXB0eSE8L2Rpdj48ZGl2PlvkuIkgMeaciCAzMCAwODoxNDoxMSAyMDE5XSBtZWdhc2FzOiBG
+YWlsZWQgdG8gZ2V0IGEgY21kIHBhY2tldDwvZGl2PjxkaXY+W+S4iSAx5pyIIDMwIDA4OjE0OjEx
+IDIwMTldIG1lZ2FzYXM6IENvbW1hbmQgcG9vbCAoZnVzaW9uKSBlbXB0eSE8L2Rpdj48ZGl2Plvk
+uIkgMeaciCAzMCAwODoxNDoxMSAyMDE5XSBtZWdhc2FzOiBFcnIgcmV0dXJuZWQgZnJvbSBidWls
+ZF9hbmRfaXNzdWVfY21kPC9kaXY+PGRpdj5b5LiJIDHmnIggMzAgMDg6MTQ6MTEgMjAxOV0gbWVn
+YXNhczogQ29tbWFuZCBwb29sIChmdXNpb24pIGVtcHR5ITwvZGl2PjxkaXY+PGJyPjwvZGl2Pjxk
+aXY+dGhpcyBjbHVzdGVyIG9ubHkgdXNlZCBhYXMgcmJkIGNsdXN0ZXIsY2VwaCBzdGF0dXMgaXMg
+YmVsb3c6PC9kaXY+PGRpdj5yb290QGNsZC1vc2Q1LTQ0On4jIGNlcGggLXM8L2Rpdj48ZGl2PmNs
+dXN0ZXIgMmJlYzk0MjUtZWE1Zi00YTQ4LWI1NmEtZmU4OGUxMjZiY2VkPC9kaXY+PGRpdj5oZWFs
+dGggSEVBTFRIX1dBUk48L2Rpdj48ZGl2Pm5vb3V0IGZsYWcocykgc2V0PC9kaXY+PGRpdj5tb25t
+YXAgZTE6IDMgbW9ucyBhdCB7YT0xMC4xOTEuMTc1LjI0OTo2Nzg5LzAsYj0xMC4xOTEuMTc1LjI1
+MDo2Nzg5LzAsYz0xMC4xOTEuMTc1LjI1MTo2Nzg5LzB9PC9kaXY+PGRpdj5lbGVjdGlvbiBlcG9j
+aCAyNiwgcXVvcnVtIDAsMSwyIGEsYixjPC9kaXY+PGRpdj5vc2RtYXAgZTE3ODU2OiAxMDgwIG9z
+ZHM6IDEwODAgdXAsIDEwODAgaW48L2Rpdj48ZGl2PmZsYWdzIG5vb3V0LHNvcnRiaXR3aXNlLHJl
+cXVpcmVfamV3ZWxfb3NkczwvZGl2PjxkaXY+cGdtYXAgdjI1MTYwNDc1OiA5MDExMiBwZ3MsIDMg
+cG9vbHMsIDQzOTExIEdCIGRhdGEsIDE3NjE4IGtvYmplY3RzPC9kaXY+PGRpdj4xMzkgVEIgdXNl
+ZCwgMTU3OSBUQiAvIDE3MTggVEIgYXZhaWw8L2Rpdj48ZGl2PjkwMTA4IGFjdGl2ZStjbGVhbjwv
+ZGl2PjxkaXY+MyBhY3RpdmUrY2xlYW4rc2NydWJiaW5nK2RlZXA8L2Rpdj48ZGl2PjEgYWN0aXZl
+K2NsZWFuK3NjcnViYmluZzwvZGl2PjxkaXY+Y2xpZW50IGlvIDEwNyBNQi9zIHJkLCAyMTIgTUIv
+cyB3ciwgMTYyMSBvcC9zIHJkLCA3NTU1IG9wL3Mgd3I8L2Rpdj48c3Bhbj4KICAgICAgICAgICAg
+CiAgICAgICAgPC9zcGFuPgogICAgPC9kaXY+CiAgICA8ZGl2PgogICAgICAgIDxzcGFuPgogICAg
+ICAgICAgICA8YnI+CiAgICAgICAgPC9zcGFuPgogICAgPC9kaXY+CiAgICA8ZGl2IGlkPSJudGVz
+LXBjbWFjLXNpZ25hdHVyZSIgc3R5bGU9ImZvbnQtZmFtaWx5OidIZWx2ZXRpY2EnLCdNaWNyb3Nv
+ZnQgWWFoZWknLCAn5b6u6L2v6ZuF6buRJyI+CiAgICAKICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6
+ZToxNHB4OyBwYWRkaW5nOiAwOyAgbWFyZ2luOjA7Ij4KCiAgICA8L2Rpdj4KPC9kaXY+CiAgICA8
+YnI+CjwvZGl2PjwhLS3vv70tLT4NCjwvZGl2Pg0KPC9ib2R5Pg0KPC9odG1sPg==
 
-The same command works on mon
 
-ceph tell mon.* injectargs --log-to-stderr=false
+--===============1377091211147161485==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Thank you in advance,
+--===============1377091211147161485==--
