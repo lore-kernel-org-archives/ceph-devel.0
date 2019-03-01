@@ -1,28 +1,39 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: ceph bug#2445 hitting version-12.2.4
-Date: Fri, 1 Mar 2019 17:43:40 +0530
-Message-ID: <CANA9Uk6hyS5P6H8ZYd9LNoD75UBfEPSL8n1YPj9p-EAJ4R71Yg@mail.gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH 0/2] fix quota subdir mounts
+Date: Fri,  1 Mar 2019 17:57:50 +0000
+Message-ID: <20190301175752.17808-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi - we are using ceph 12.2.4 and bug#24445 hitting, which caused 10
-min IO pause on ceph cluster..
+Hi!
 
-Is this bug fixed?
-bug: https://tracker.ceph.com/issues/24445/
+As reported recently in the ceph-users mailing-list[1], the kernel client
+behaves differently from the fuse client regarding mounting subdirs where
+quotas are in effect.  I've also created a bug to track this issue[2].
 
-Thanks
-Swami
+The following patches are a possible way of fixing this issue.  The
+performance impact should be close to zero if the mount is done in the
+CephFS root inode.  When we're mounting subdirs, we may have extra
+queries to the MDSs, depending on how many extra realms we'll need to
+loop through.
+
+Warning: this is just an RFC, and the patches are only lightly tested!
+
+[1] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2019-February/033357.html
+[2] https://tracker.ceph.com/issues/38482
+
+Luis Henriques (2):
+  ceph: factor out ceph_lookup_inode()
+  ceph: quota: fix quota subdir mounts
+
+ fs/ceph/caps.c   |  2 +-
+ fs/ceph/export.c | 14 +++++++++++++-
+ fs/ceph/quota.c  | 30 +++++++++++++++++++++++++++---
+ fs/ceph/snap.c   |  3 +++
+ fs/ceph/super.h  |  3 +++
+ 5 files changed, 47 insertions(+), 5 deletions(-)
