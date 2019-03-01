@@ -1,8 +1,8 @@
 From: Igor Fedotov <ifedotov-l3A5Bk7waGM@public.gmane.org>
 Subject: Re: ceph osd commit latency increase over time,
  until restart
-Date: Fri, 1 Mar 2019 13:24:35 +0300
-Message-ID: <dbee8337-aedc-2336-fcc9-ce048767ca9e@suse.de>
+Date: Fri, 1 Mar 2019 13:26:46 +0300
+Message-ID: <d37edbfa-0ab5-ee1b-cbeb-3379badad9d1@suse.de>
 References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <2062110719.174905.1549294821422.JavaMail.zimbra@oxygem.tv>
  <d4558d4b-b1c9-211a-626a-0c14df3e29b9@suse.de>
@@ -18,7 +18,7 @@ References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <c051fcb9-9c8c-32bd-7835-2182fade8d14@suse.de>
  <CAEYCsVJRqJDsS7iMXuk68ecFpPS9_qivuNPihXhy7E55o+GvoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3819210019706118962=="
+Content-Type: multipart/mixed; boundary="===============5104475065458327088=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <CAEYCsVJRqJDsS7iMXuk68ecFpPS9_qivuNPihXhy7E55o+GvoA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Content-Language: en-US
@@ -36,15 +36,18 @@ Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel 
 List-Id: ceph-devel.vger.kernel.org
 
 This is a multi-part message in MIME format.
---===============3819210019706118962==
+--===============5104475065458327088==
 Content-Type: multipart/alternative;
- boundary="------------1FB629510FDF66F198CBC2F8"
+ boundary="------------4DACAD7450D8649415A83E64"
 Content-Language: en-US
 
 This is a multi-part message in MIME format.
---------------1FB629510FDF66F198CBC2F8
+--------------4DACAD7450D8649415A83E64
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
+
+resending, not sure the prev email reached the mailing list...
+
 
 Hi Chen,
 
@@ -66,12 +69,10 @@ Thanks,
 Igor
 
 -------- Forwarded Message --------
-
-Subject: 	High CPU in StupidAllocator
-Date: 	Tue, 12 Feb 2019 10:24:37 +0100
-From: 	Adam Kupczyk <akupczyk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-To: 	IGOR FEDOTOV <ifed75-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-
+Subject:     High CPU in StupidAllocator
+Date:     Tue, 12 Feb 2019 10:24:37 +0100
+From:     Adam Kupczyk <akupczyk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To:     IGOR FEDOTOV <ifed75-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
 
 Hi Igor,
@@ -81,7 +82,7 @@ StupidAllocator::allocate_int().
 This comes from loops:
 while (p != free[bin].end()) {
      if (_aligned_len(p, alloc_unit) >= want_size) {
-       goto found;
+       goto found;
      }
      ++p;
 }
@@ -156,7 +157,7 @@ On 3/1/2019 11:46 AM, Xiaoxi Chen wrote:
 >     >>
 >
 
---------------1FB629510FDF66F198CBC2F8
+--------------4DACAD7450D8649415A83E64
 Content-Type: text/html; charset=utf-8
 Content-Transfer-Encoding: 8bit
 
@@ -165,83 +166,62 @@ Content-Transfer-Encoding: 8bit
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body text="#000000" bgcolor="#FFFFFF">
-    <p>Hi Chen,</p>
-    <p>thanks for the update. Will prepare patch to periodically reset
-      StupidAllocator today.<br>
+    <p>resending, not sure the prev email reached the mailing list...</p>
+    <p><br>
     </p>
-    <p>And just to let you know below is an e-mail from AdamK from RH
-      which might explain the issue with the allocator.</p>
-    <p>Also please note that StupidAllocator might not perform full
+    <p>Hi Chen,<br>
+      <br>
+      thanks for the update. Will prepare patch to periodically reset
+      StupidAllocator today.<br>
+      <br>
+      And just to let you know below is an e-mail from AdamK from RH
+      which might explain the issue with the allocator.<br>
+      <br>
+      Also please note that StupidAllocator might not perform full
       defragmentation in run-time. That's why we observed (mentioned
       somewhere in the thread) fragmentation growth while OSD is running
       and its drop on restart. Such a restart rebuilds internal tree and
       eliminates defragmentation flaws. May be that's the case.<br>
-    </p>
-    <p><br>
-    </p>
-    <p>Thanks,</p>
-    <p>Igor<br>
-    </p>
-    <p>-------- Forwarded Message --------</p>
-    <table class="moz-email-headers-table" cellspacing="0"
-      cellpadding="0" border="0">
-      <tbody>
-        <tr>
-          <th valign="BASELINE" nowrap="nowrap" align="RIGHT">Subject: </th>
-          <td>High CPU in StupidAllocator</td>
-        </tr>
-        <tr>
-          <th valign="BASELINE" nowrap="nowrap" align="RIGHT">Date: </th>
-          <td>Tue, 12 Feb 2019 10:24:37 +0100</td>
-        </tr>
-        <tr>
-          <th valign="BASELINE" nowrap="nowrap" align="RIGHT">From: </th>
-          <td>Adam Kupczyk <a class="moz-txt-link-rfc2396E" href="mailto:akupczyk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;akupczyk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a></td>
-        </tr>
-        <tr>
-          <th valign="BASELINE" nowrap="nowrap" align="RIGHT">To: </th>
-          <td>IGOR FEDOTOV <a class="moz-txt-link-rfc2396E" href="mailto:ifed75-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">&lt;ifed75-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&gt;</a></td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    <br>
-    <div>Hi Igor,</div>
-    <div><br>
-    </div>
-    <div>I have observed that StupidAllocator can burn a lot of CPU in
+      <br>
+      <br>
+      Thanks,<br>
+      <br>
+      Igor<br>
+      <br>
+      -------- Forwarded Message --------<br>
+      Subject:     High CPU in StupidAllocator<br>
+      Date:     Tue, 12 Feb 2019 10:24:37 +0100<br>
+      From:     Adam Kupczyk <a class="moz-txt-link-rfc2396E" href="mailto:akupczyk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;akupczyk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a><br>
+      To:     IGOR FEDOTOV <a class="moz-txt-link-rfc2396E" href="mailto:ifed75-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">&lt;ifed75-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&gt;</a><br>
+      <br>
+      <br>
+      Hi Igor,<br>
+      <br>
+      I have observed that StupidAllocator can burn a lot of CPU in
       StupidAllocator::allocate_int().<br>
-    </div>
-    <div>This comes from loops:<br>
+      This comes from loops:<br>
       while (p != free[bin].end()) {<br>
           if (_aligned_len(p, alloc_unit) &gt;= want_size) {<br>
-            goto found;<br>
+            goto found;<br>
           }<br>
           ++p;<br>
       }<br>
-    </div>
-    <div><br>
-    </div>
-    <div>It happens when want_size is close to limit of size of bin.<br>
-    </div>
-    <div>For example, free[5] contains sizes 8192..16383.<br>
-    </div>
-    <div>When requesting size like 16000 it is quite likely that
-      multiple chunks must be checked.<br>
       <br>
-    </div>
-    <div>I have made an attempt to improve it by increasing amount of
+      It happens when want_size is close to limit of size of bin.<br>
+      For example, free[5] contains sizes 8192..16383.<br>
+      When requesting size like 16000 it is quite likely that multiple
+      chunks must be checked.<br>
+      <br>
+      I have made an attempt to improve it by increasing amount of
       buckets.<br>
-    </div>
-    <div>It is done in aclamk/wip-bs-stupid-allocator-2 .</div>
-    <div><br>
-    </div>
-    <div>Best regards, <br>
-    </div>
-    <p>Adam Kupczyk</p>
-    <p><br>
-    </p>
-    <p><br>
+      It is done in aclamk/wip-bs-stupid-allocator-2 .<br>
+      <br>
+      Best regards,<br>
+      <br>
+      Adam Kupczyk<br>
+      <br>
+      <br>
+      <br>
     </p>
     <div class="moz-cite-prefix">On 3/1/2019 11:46 AM, Xiaoxi Chen
       wrote:<br>
@@ -326,9 +306,9 @@ cite="mid:CAEYCsVJRqJDsS7iMXuk68ecFpPS9_qivuNPihXhy7E55o+GvoA-JsoAwUIsXosN+BqQ9r
   </body>
 </html>
 
---------------1FB629510FDF66F198CBC2F8--
+--------------4DACAD7450D8649415A83E64--
 
---===============3819210019706118962==
+--===============5104475065458327088==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -339,4 +319,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============3819210019706118962==--
+--===============5104475065458327088==--
