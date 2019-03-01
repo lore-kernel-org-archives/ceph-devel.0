@@ -1,12 +1,9 @@
-From: Igor Fedotov <ifedotov-l3A5Bk7waGM@public.gmane.org>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Subject: Re: ceph osd commit latency increase over time,
  until restart
-Date: Fri, 1 Mar 2019 01:01:58 +0300
-Message-ID: <c051fcb9-9c8c-32bd-7835-2182fade8d14@suse.de>
+Date: Fri, 1 Mar 2019 09:29:26 +0100 (CET)
+Message-ID: <694860109.765017.1551428966633.JavaMail.zimbra@odiso.com>
 References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
- <2062110719.174905.1549294821422.JavaMail.zimbra@oxygem.tv>
- <d4558d4b-b1c9-211a-626a-0c14df3e29b9@suse.de>
- <825077993.841032.1549638894023.JavaMail.zimbra@oxygem.tv>
  <2132634351.842536.1549641461010.JavaMail.zimbra@oxygem.tv>
  <c26e0eca-1a1c-3354-bff6-4560e3aea4c5@suse.de>
  <1554220830.1076801.1550047328269.JavaMail.zimbra@oxygem.tv>
@@ -14,13 +11,11 @@ References: <395511117.2665.1548405853447.JavaMail.zimbra@oxygem.tv>
  <19368722.1223708.1550237472044.JavaMail.zimbra@odiso.com>
  <056c13b4-fbcf-787f-cfbe-bb37044161f8@42on.com>
  <20190228205705.GB31731@shell.dmz.bit.nl>
- <392d66bb-5647-9b19-c17b-5259f4ed6749@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <392d66bb-5647-9b19-c17b-5259f4ed6749-l3A5Bk7waGM@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <20190228205705.GB31731-VkyGEX2O1ez1kYbDYJMsfg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -30,29 +25,40 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Stefan Kooman <stefan-68+x73Hep80@public.gmane.org>, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+To: Stefan Kooman <stefan-68+x73Hep80@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Also I think it makes sense to create a ticket at this point. Any 
-volunteers?
-
-On 3/1/2019 1:00 AM, Igor Fedotov wrote:
-> Wondering if somebody would be able to apply simple patch that 
-> periodically resets StupidAllocator?
->
-> Just to verify/disprove the hypothesis it's allocator relateted
->
-> On 2/28/2019 11:57 PM, Stefan Kooman wrote:
->> Quoting Wido den Hollander (wido-fspyXLx8qC4@public.gmane.org):
->>> Just wanted to chime in, I've seen this with Luminous+BlueStore+NVMe
->>> OSDs as well. Over time their latency increased until we started to
->>> notice I/O-wait inside VMs.
->> On a Luminous 12.2.8 cluster with only SSDs we also hit this issue I
->> guess. After restarting the OSD servers the latency would drop to normal
->> values again. See https://owncloud.kooman.org/s/BpkUc7YM79vhcDj
->>
->> Reboots were finished at ~ 19:00.
->>
->> Gr. Stefan
->>
+SGksCgpzb21lIG5ld3MsIGl0IHNlZW0gdGhhdCBpdCdzIGZpbmFsbHkgc3RhYmxlIGZvciBtZSBz
+aW5jZSAxd2Vlay4gKGFyb3VuZCAwLDdtcyBvZiBjb21taXQgbGF0ZW5jeSBhdmVyYWdlKQogCmh0
+dHA6Ly9vZGlzb3dlYjEub2Rpc28ubmV0L29zZHN0YWJsZS5wbmcKClRoZSBiaWdnZXN0IGNoYW5n
+ZSBpcyB0aGUgMTgvMDIsIHdoZXJlIEkgaGF2ZSBmaW5pc2hlZCB0byByZWJ1aWxkIGFsbCBteSBv
+c2QsIHdpdGggMiBvc2Qgb2YgM1RCIGZvciAxTlZNRSA2VEIuCgoocHJldmlvdXNseSBJIG9ubHkg
+aGF2ZSBkb25lIGl0IG9uIDEgbm9kZSwgc28gbWF5YmUgd2l0aCByZXBsaWNhdGlvbiBJIGRpZG4n
+dCBzZWUgdGhlIGJlbmVmaXQpCgpJIGhhdmUgYWxzbyBwdXNoIGJsdWVzdG9yZV9jYWNoZV9rdl9t
+YXggdG8gMUcsIGFuZCBrZWVwIG9zZF90YXJnZXRfbWVtb3J5IHRvIGRlZmF1bHQsIGFuZCBkaXNh
+YmxlIFRIUC4KCkRpZmZlcmVudHMgYnVmZmVycyBzZWVtIHRvIGJlIG1vcmUgY29uc3RhbnQgdG9v
+LiAgCgoKCkJ1dCBjbGVhcmx5LCAyIHggc21hbGxlciAzVEIgb3NkIHdpdGggM0cgb3NkX3Rhcmdl
+dF9tZW1vcnkgIHZzIDEgYmlnIG9zZCA2VEIgd2l0aCA2RyBvc2RfdGFyZ2V0X21lbW9yeSBoYXZl
+IGEgZGlmZmVyZW50cyBiZWhhdmlvdXIuCihtYXliZSBmcmFnbWVudGF0aW9uLCBtYXliZSByb2Nr
+c2RiLCBtYXliZSBudW1iZXIgb2Ygb2JqZWN0cyBpbiBjYWNoZSwgSSByZWFsbHkgZG9uJ3Qga25v
+d24pCgoKCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQpEZTogIlN0ZWZhbiBLb29tYW4iIDxz
+dGVmYW5AYml0Lm5sPgrDgDogIldpZG8gZGVuIEhvbGxhbmRlciIgPHdpZG9ANDJvbi5jb20+CkNj
+OiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4sICJJZ29yIEZlZG90b3YiIDxpZmVk
+b3RvdkBzdXNlLmRlPiwgImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiwg
+ImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4KRW52b3nDqTogSmV1ZGkg
+MjggRsOpdnJpZXIgMjAxOSAyMTo1NzowNQpPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBjZXBoIG9z
+ZCBjb21taXQgbGF0ZW5jeSBpbmNyZWFzZSBvdmVyIHRpbWUsIHVudGlsIHJlc3RhcnQKClF1b3Rp
+bmcgV2lkbyBkZW4gSG9sbGFuZGVyICh3aWRvQDQyb24uY29tKTogCgo+IEp1c3Qgd2FudGVkIHRv
+IGNoaW1lIGluLCBJJ3ZlIHNlZW4gdGhpcyB3aXRoIEx1bWlub3VzK0JsdWVTdG9yZStOVk1lIAo+
+IE9TRHMgYXMgd2VsbC4gT3ZlciB0aW1lIHRoZWlyIGxhdGVuY3kgaW5jcmVhc2VkIHVudGlsIHdl
+IHN0YXJ0ZWQgdG8gCj4gbm90aWNlIEkvTy13YWl0IGluc2lkZSBWTXMuIAoKT24gYSBMdW1pbm91
+cyAxMi4yLjggY2x1c3RlciB3aXRoIG9ubHkgU1NEcyB3ZSBhbHNvIGhpdCB0aGlzIGlzc3VlIEkg
+Cmd1ZXNzLiBBZnRlciByZXN0YXJ0aW5nIHRoZSBPU0Qgc2VydmVycyB0aGUgbGF0ZW5jeSB3b3Vs
+ZCBkcm9wIHRvIG5vcm1hbCAKdmFsdWVzIGFnYWluLiBTZWUgaHR0cHM6Ly9vd25jbG91ZC5rb29t
+YW4ub3JnL3MvQnBrVWM3WU03OXZoY0RqIAoKUmVib290cyB3ZXJlIGZpbmlzaGVkIGF0IH4gMTk6
+MDAuIAoKR3IuIFN0ZWZhbiAKCi0tIAp8IEJJVCBCViBodHRwOi8vd3d3LmJpdC5ubC8gS2FtZXIg
+dmFuIEtvb3BoYW5kZWwgMDkwOTAzNTEgCnwgR1BHOiAweEQxNDgzOUM2ICszMSAzMTggNjQ4IDY4
+OCAvIGluZm9AYml0Lm5sIAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
