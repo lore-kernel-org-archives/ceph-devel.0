@@ -1,86 +1,216 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [RFC PATCH 2/2] ceph: quota: fix quota subdir mounts
-Date: Thu, 7 Mar 2019 22:23:03 +0800
-Message-ID: <CAAM7YA=ry+t3X4ECXZNb51oXtk+5wXSWd6EM46vsZafQ2LL7sg@mail.gmail.com>
-References: <20190301175752.17808-1-lhenriques@suse.com> <20190301175752.17808-3-lhenriques@suse.com>
- <CAAM7YAmPSoEaJ6tXUtp+f56SV-Tqr6VKP4RquV0FA+LYkR8Rxg@mail.gmail.com>
- <87va0vamog.fsf@suse.com> <CAAM7YAmapiFwj=sY+vCUyOU1mPZE2sk4_ZYPYAk06iPDd_utzQ@mail.gmail.com>
- <87mum79ccu.fsf@suse.com>
+From: Herbert Alexander Faleiros <herbert-b2jWxOBV4z0IdKJ7tpkyPg@public.gmane.org>
+Subject: Failed to repair pg
+Date: Thu, 7 Mar 2019 13:37:55 -0300
+Message-ID: <20190307163755.GV6574@registro.br>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87mum79ccu.fsf@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Hendrik Peyerl <hpeyerl@plusline.net>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Mar 7, 2019 at 7:02 PM Luis Henriques <lhenriques@suse.com> wrote:
->
-> "Yan, Zheng" <ukernel@gmail.com> writes:
->
-> > On Thu, Mar 7, 2019 at 2:21 AM Luis Henriques <lhenriques@suse.com> wrote:
-> >>
-> >> "Yan, Zheng" <ukernel@gmail.com> writes:
-> >>
-> >> > On Sat, Mar 2, 2019 at 3:13 AM Luis Henriques <lhenriques@suse.com> wrote:
-> >> >>
-> >> >> The CephFS kernel client doesn't enforce quotas that are set in a
-> >> >> directory that isn't visible in the mount point.  For example, given the
-> >> >> path '/dir1/dir2', if quotas are set in 'dir1' and the mount is done in with
-> >> >>
-> >> >>   mount -t ceph <server>:<port>:/dir1/ /mnt
-> >> >>
-> >> >> then the client can't access the 'dir1' inode from the quota realm dir2
-> >> >> belongs to.
-> >> >>
-> >> >> This patch fixes this by simply doing an MDS LOOKUPINO Op and grabbing a
-> >> >> reference to it (so that it doesn't disappear again).  This also requires an
-> >> >> extra field in ceph_snap_realm so that we know we have to release that
-> >> >> reference when destroying the realm.
-> >> >>
-> >> >
-> >> > This may cause circle reference if somehow an inode owned by snaprealm
-> >> > get moved into mount subdir (other clients do rename).  how about
-> >> > holding these inodes in mds_client?
-> >>
-> >> Ok, before proceeded any further I wanted to make sure that what you
-> >> were suggesting was something like the patch below.  It simply keeps a
-> >> list of inodes in ceph_mds_client until the filesystem is umounted,
-> >> iput()ing them at that point.
-> >>
-> > yes,
-> >
-> >> I'm sure I'm missing another place where the reference should be
-> >> dropped, but I couldn't figure it out yet.  It can't be
-> >> ceph_destroy_inode; drop_inode_snap_realm is a possibility, but what if
-> >> the inode becomes visible in the meantime?  Well, I'll continue thinking
-> >> about it.
-> >
-> > why do you think we need to clean up the references at other place.
-> > what problem you encountered.
->
-> I'm not really seeing any issue, at least not at the moment.  I believe
-> that we could just be holding refs to inodes that may not exist anymore
-> in the cluster.  For example, in client 1:
->
->  mkdir -p /mnt/a/b
->  setfattr -n ceph.quota.max_files -v 5 /mnt/a
->
-> In client 2 we mount:
->
->  mount <addr>:/a/b /mnt
->
-> This client will access the realm and inode for 'a' (adding that inode
-> to the ceph_mds_client list), because it has quotas.  If client 1 then
-> deletes 'a', client 2 will continue to have a reference to that inode in
-> that list.  That's why I thought we should be able to clean up that refs
-> list in some other place, although that's probably a big deal, since we
-> won't be able to a lot with this mount anyway.
->
+Hi,
 
-Agree, it's not big deal
+# ceph health detail
+HEALTH_ERR 3 scrub errors; Possible data damage: 1 pg inconsistent
+OSD_SCRUB_ERRORS 3 scrub errors
+PG_DAMAGED Possible data damage: 1 pg inconsistent
+    pg 2.2bb is active+clean+inconsistent, acting [36,12,80]
 
-> Cheers,
-> --
-> Luis
+# ceph pg repair 2.2bb
+instructing pg 2.2bb on osd.36 to repair
+
+But:
+
+2019-03-07 13:23:38.636881 [ERR]  Health check update: Possible data damage: 1 pg inconsistent, 1 pg repair (PG_DAMAGED) 
+2019-03-07 13:20:38.373431 [ERR]  2.2bb deep-scrub 3 errors 
+2019-03-07 13:20:38.373426 [ERR]  2.2bb deep-scrub 0 missing, 1 inconsistent objects 
+2019-03-07 13:20:43.486860 [ERR]  Health check update: 3 scrub errors (OSD_SCRUB_ERRORS) 
+2019-03-07 13:19:17.741350 [ERR]  deep-scrub 2.2bb 2:dd4a7bd3:::rbd_data.dfd5e2235befd0.000000000001c299:4f986 : is an unexpected clone 
+2019-03-07 13:19:17.523042 [ERR]  2.2bb shard 36 soid 2:dd4a7bd3:::rbd_data.dfd5e2235befd0.000000000001c299:4f986 : data_digest 0xffffffff != data_digest 0xfc6b9538 from shard 12, size 0 != size 4194304 from auth oi 2:dd4a7bd3:::rbd_data.dfd5e2235befd0.000000000001c299:4f986(482757'14986708 client.112595650.0:344888465 dirty|omap_digest s 4194304 uv 14974021 od ffffffff alloc_hint [0 0 0]), size 0 != size 4194304 from shard 12 
+2019-03-07 13:19:17.523038 [ERR]  2.2bb shard 36 soid 2:dd4a7bd3:::rbd_data.dfd5e2235befd0.000000000001c299:4f986 : candidate size 0 info size 4194304 mismatch 
+2019-03-07 13:16:48.542673 [ERR]  2.2bb repair 2 errors, 1 fixed 
+2019-03-07 13:16:48.542656 [ERR]  2.2bb repair 1 missing, 0 inconsistent objects 
+2019-03-07 13:16:53.774956 [ERR]  Health check update: Possible data damage: 1 pg inconsistent (PG_DAMAGED) 
+2019-03-07 13:16:53.774916 [ERR]  Health check update: 2 scrub errors (OSD_SCRUB_ERRORS) 
+2019-03-07 13:15:16.986872 [ERR]  repair 2.2bb 2:dd4a7bd3:::rbd_data.dfd5e2235befd0.000000000001c299:4f986 : is an unexpected clone 
+2019-03-07 13:15:16.986817 [ERR]  2.2bb shard 36 2:dd4a7bd3:::rbd_data.dfd5e2235befd0.000000000001c299:4f986 : missing 
+2019-03-07 13:12:18.517442 [ERR]  Health check update: Possible data damage: 1 pg inconsistent, 1 pg repair (PG_DAMAGED) 
+
+Also tried deep-scrub and scrub, same results.
+
+Also set noscrub,nodeep-scrub, kicked currently active scrubs one at
+a time using 'ceph osd down <id>'. After the last scrub was kicked,
+forced scrub ran immediately then 'ceph pg repair', no luck.
+
+Finally tryed the manual aproach:
+
+ - stop osd.36
+ - flush-journal
+ - rm rbd\udata.dfd5e2235befd0.000000000001c299__4f986_CBDE52BB__2
+ - start osd.36
+ - ceph pg repair 2.2bb
+
+Also no luck...
+
+rbd\udata.dfd5e2235befd0.000000000001c299__4f986_CBDE52BB__2 at osd.36
+is empty (0 size). At osd.80 4.0M, osd.2 is bluestore (can't find it).
+
+Ceph is 12.2.10, I'm currently migrating all my OSDs to bluestore.
+
+Is there anything else I can do?
+
+# rados list-inconsistent-obj 2.2bb | jq
+{
+  "epoch": 484655,
+  "inconsistents": [
+    {
+      "object": {
+        "name": "rbd_data.dfd5e2235befd0.000000000001c299",
+        "nspace": "",
+        "locator": "",
+        "snap": 326022,
+        "version": 14974021
+      },
+      "errors": [
+        "data_digest_mismatch",
+        "size_mismatch"
+      ],
+      "union_shard_errors": [
+        "size_mismatch_info",
+        "obj_size_info_mismatch"
+      ],
+      "selected_object_info": {
+        "oid": {
+          "oid": "rbd_data.dfd5e2235befd0.000000000001c299",
+          "key": "",
+          "snapid": 326022,
+          "hash": 3420345019,
+          "max": 0,
+          "pool": 2,
+          "namespace": ""
+        },
+        "version": "482757'14986708",
+        "prior_version": "482697'14980304",
+        "last_reqid": "client.112595650.0:344888465",
+        "user_version": 14974021,
+        "size": 4194304,
+        "mtime": "2019-03-02 22:30:23.812849",
+        "local_mtime": "2019-03-02 22:30:23.813281",
+        "lost": 0,
+        "flags": [
+          "dirty",
+          "omap_digest"
+        ],
+        "legacy_snaps": [],
+        "truncate_seq": 0,
+        "truncate_size": 0,
+        "data_digest": "0xffffffff",
+        "omap_digest": "0xffffffff",
+        "expected_object_size": 0,
+        "expected_write_size": 0,
+        "alloc_hint_flags": 0,
+        "manifest": {
+          "type": 0,
+          "redirect_target": {
+            "oid": "",
+            "key": "",
+            "snapid": 0,
+            "hash": 0,
+            "max": 0,
+            "pool": -9223372036854776000,
+            "namespace": ""
+          }
+        },
+        "watchers": {}
+      },
+      "shards": [
+        {
+          "osd": 12,
+          "primary": false,
+          "errors": [],
+          "size": 4194304,
+          "omap_digest": "0xffffffff",
+          "data_digest": "0xfc6b9538"
+        },
+        {
+          "osd": 36,
+          "primary": true,
+          "errors": [
+            "size_mismatch_info",
+            "obj_size_info_mismatch"
+          ],
+          "size": 0,
+          "omap_digest": "0xffffffff",
+          "data_digest": "0xffffffff",
+          "object_info": {
+            "oid": {
+              "oid": "rbd_data.dfd5e2235befd0.000000000001c299",
+              "key": "",
+              "snapid": 326022,
+              "hash": 3420345019,
+              "max": 0,
+              "pool": 2,
+              "namespace": ""
+            },
+            "version": "482757'14986708",
+            "prior_version": "482697'14980304",
+            "last_reqid": "client.112595650.0:344888465",
+            "user_version": 14974021,
+            "size": 4194304,
+            "mtime": "2019-03-02 22:30:23.812849",
+            "local_mtime": "2019-03-02 22:30:23.813281",
+            "lost": 0,
+            "flags": [
+              "dirty",
+              "omap_digest"
+            ],
+            "legacy_snaps": [],
+            "truncate_seq": 0,
+            "truncate_size": 0,
+            "data_digest": "0xffffffff",
+            "omap_digest": "0xffffffff",
+            "expected_object_size": 0,
+            "expected_write_size": 0,
+            "alloc_hint_flags": 0,
+            "manifest": {
+              "type": 0,
+              "redirect_target": {
+                "oid": "",
+                "key": "",
+                "snapid": 0,
+                "hash": 0,
+                "max": 0,
+                "pool": -9223372036854776000,
+                "namespace": ""
+              }
+            },
+            "watchers": {}
+          }
+        },
+        {
+          "osd": 80,
+          "primary": false,
+          "errors": [],
+          "size": 4194304,
+          "omap_digest": "0xffffffff",
+          "data_digest": "0xfc6b9538"
+        }
+      ]
+    }
+  ]
+}
+
+-- 
+Herbert
