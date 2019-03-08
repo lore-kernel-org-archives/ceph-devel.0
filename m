@@ -1,47 +1,55 @@
-From: Herbert Alexander Faleiros <herbert-b2jWxOBV4z0IdKJ7tpkyPg@public.gmane.org>
-Subject: Re: Failed to repair pg
-Date: Fri, 8 Mar 2019 13:19:14 -0300
-Message-ID: <20190308161914.GC92844@registro.br>
-References: <20190307163755.GV6574@registro.br>
- <20190307173242.GB6574@registro.br>
- <ab4615ef-6064-52b6-4442-faa45cbc84f5@redhat.com>
- <20190308125224.GA92844@registro.br>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH 0/2] fix quota subdir mounts
+Date: Fri,  8 Mar 2019 16:27:55 +0000
+Message-ID: <20190308162757.9260-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20190308125224.GA92844-b2jWxOBV4z0IdKJ7tpkyPg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: David Zafman <dzafman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
 Hi,
 
-[...]
-> Now I have:
->
-> HEALTH_ERR 5 scrub errors; Possible data damage: 1 pg inconsistent
-> OSD_SCRUB_ERRORS 5 scrub errors
-> PG_DAMAGED Possible data damage: 1 pg inconsistent
->     pg 2.2bb is active+clean+inconsistent, acting [36,12,80]
->
-> Jumped from 3 to 5 scrub errors now.
+As recently reported in the ceph-users mailing-list[1], the kernel client
+behaves differently from the fuse client regarding mounting subdirs where
+quotas are in effect.  I've also created a bug to track this issue[2].
 
-did the same on osd.36 and a repair worked.
+The following patches are a possible way of fixing this issue.  The
+performance impact should be close to zero if the mount is done in the
+CephFS root inode.  When we're mounting subdirs, we may have extra
+queries to the MDSs, depending on how many extra realms we'll need to
+loop through.
 
-Health OK again.
+Changes since RFC:
 
-Thank you,
+The 1st patch hasn't been changed since the initial RFC.  The 2nd patch
+has been refactored to include the following changes:
 
+- Zheng Yan's suggestions, i.e, move inode references from the realms to
+  ceph_mds_client instance
+
+- It now also handles other cases where an MDS lookup may need to be
+  performed:
+  * statfs when there are quotas
+  * renames, to forbid cross-quota renames
+
+[1] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2019-February/033357.html
+[2] https://tracker.ceph.com/issues/38482
+
+Cheers,
 --
-Herbert
+Luís
+
+Luis Henriques (2):
+  ceph: factor out ceph_lookup_inode()
+  ceph: quota: fix quota subdir mounts
+
+ fs/ceph/export.c     | 14 ++++++-
+ fs/ceph/mds_client.c | 14 +++++++
+ fs/ceph/mds_client.h |  2 +
+ fs/ceph/quota.c      | 91 +++++++++++++++++++++++++++++++++++++++-----
+ fs/ceph/super.h      |  3 ++
+ 5 files changed, 113 insertions(+), 11 deletions(-)
