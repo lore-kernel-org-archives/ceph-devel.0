@@ -1,73 +1,68 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH v2 1/2] ceph: factor out ceph_lookup_inode()
-Date: Tue, 12 Mar 2019 14:20:18 +0000
-Message-ID: <20190312142019.30936-2-lhenriques@suse.com>
-References: <20190312142019.30936-1-lhenriques@suse.com>
+Subject: [PATCH v2 0/2] fix quota subdir mounts
+Date: Tue, 12 Mar 2019 14:20:17 +0000
+Message-ID: <20190312142019.30936-1-lhenriques@suse.com>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190312142019.30936-1-lhenriques@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-This function will be used by __fh_to_dentry and by the quotas code, to
-find quota realm inodes that are not visible in the mountpoint.
+Hi,
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/export.c | 14 +++++++++++++-
- fs/ceph/super.h  |  1 +
- 2 files changed, 14 insertions(+), 1 deletion(-)
+As recently reported in the ceph-users mailing-list[1], the kernel client
+behaves differently from the fuse client regarding mounting subdirs where
+quotas are in effect.  I've also created a bug to track this issue[2].
 
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index 3c59ad180ef0..0d8ead82c816 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -59,7 +59,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
- 	return type;
- }
- 
--static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
-+struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
- {
- 	struct ceph_mds_client *mdsc = ceph_sb_to_client(sb)->mdsc;
- 	struct inode *inode;
-@@ -92,12 +92,24 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
- 		ceph_mdsc_put_request(req);
- 		if (!inode)
- 			return ERR_PTR(-ESTALE);
-+		if (err)
-+			return ERR_PTR(err);
- 		if (inode->i_nlink == 0) {
- 			iput(inode);
- 			return ERR_PTR(-ESTALE);
- 		}
- 	}
- 
-+	return inode;
-+}
-+
-+static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
-+{
-+	struct inode *inode = ceph_lookup_inode(sb, ino);
-+
-+	if (IS_ERR(inode))
-+		return ERR_CAST(inode);
-+
- 	return d_obtain_alias(inode);
- }
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index dfb64a5211b6..ce51e98b08ec 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1061,6 +1061,7 @@ extern long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
- 
- /* export.c */
- extern const struct export_operations ceph_export_ops;
-+struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino);
- 
- /* locks.c */
- extern __init void ceph_flock_init(void);
+The following patches are a possible way of fixing this issue.  The
+performance impact should be close to zero if the mount is done in the
+CephFS root inode.  When we're mounting subdirs, we may have extra
+queries to the MDSs, depending on how many extra realms we'll need to
+loop through.
+
+Changes since v1:
+
+- Loop to free mdsc->quotarealms_inodes_list list was moved further down
+  where it's not possible to race with insertions.  This way there's no need
+  to hold the spinlock anymore.
+
+- Clarified comments regarding the get_quota_realm function 'retry'
+  parameter, both in the function itself and in function
+  ceph_quota_is_same_realm, where that param is set to 'false'
+
+- Distinguish between 'realm->inode is NULL' and igrab failures, both in
+  get_quota_realm and check_quota_exceeded
+
+Changes since RFC:
+
+The 1st patch hasn't been changed since the initial RFC.  The 2nd patch
+has been refactored to include the following changes:
+
+- Zheng Yan's suggestions, i.e, move inode references from the realms to
+  ceph_mds_client instance
+
+- It now also handles other cases where an MDS lookup may need to be
+  performed:
+  * statfs when there are quotas
+  * renames, to forbid cross-quota renames
+
+[1] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2019-February/033357.html
+[2] https://tracker.ceph.com/issues/38482
+
+Cheers,
+--
+Luís
+
+Luis Henriques (2):
+  ceph: factor out ceph_lookup_inode()
+  ceph: quota: fix quota subdir mounts
+
+ fs/ceph/export.c     |  14 +++++-
+ fs/ceph/mds_client.c |  15 ++++++
+ fs/ceph/mds_client.h |   2 +
+ fs/ceph/quota.c      | 106 +++++++++++++++++++++++++++++++++++++++----
+ fs/ceph/super.h      |   3 ++
+ 5 files changed, 129 insertions(+), 11 deletions(-)
