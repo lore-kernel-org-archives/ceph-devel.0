@@ -1,24 +1,62 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph updates for 5.1-rc1
-Date: Tue, 12 Mar 2019 22:20:22 +0000
-Message-ID: <155242922270.11942.12559361231257770995.pr-tracker-bot@kernel.org>
-References: <20190312175017.27764-1-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190312175017.27764-1-idryomov@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: v13.2.5 Mimic released
+Date: Wed, 13 Mar 2019 15:52:58 +0100
+Message-ID: <877ed2g71x.fsf@suse.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
+List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
+ <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-a8pt6IJUokc@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-The pull request you sent on Tue, 12 Mar 2019 18:50:17 +0100:
-
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.1-rc1
-
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/2b0a80b0d0bb0a3db74588279bf851b28c6c4705
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+CldlJ3JlIGdsYWQgdG8gYW5ub3VuY2UgdGhlIGZpZnRoIGJ1ZyBmaXggcmVsZWFzZSBvZiBNaW1p
+YyB2MTMuMi5YIHN0YWJsZQpyZWxlYXNlIHNlcmllcy4gV2UgcmVjb21tZW5kIHRoYXQgYWxsIHVz
+ZXJzIHVwZ3JhZGUuCgpOb3RhYmxlIENoYW5nZXMKLS0tLS0tLS0tLS0tLS0tCgoqIFRoaXMgcmVs
+ZWFzZSBmaXhlcyB0aGUgcGcgbG9nIGhhcmQgbGltaXQgYnVnIHRoYXQgd2FzIGludHJvZHVjZWQg
+aW4KICAxMy4yLjIsIGh0dHBzOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMzY2ODYuIEEgZmxh
+ZyBjYWxsZWQKICBgcGdsb2dfaGFyZGxpbWl0YCBoYXMgYmVlbiBpbnRyb2R1Y2VkLCB3aGljaCBp
+cyBvZmYgYnkgZGVmYXVsdC4gRW5hYmxpbmcKICB0aGlzIGZsYWcgd2lsbCBsaW1pdCB0aGUgbGVu
+Z3RoIG9mIHRoZSBwZyBsb2cuIEluIG9yZGVyIHRvIGVuYWJsZQogIHRoYXQsIHRoZSBmbGFnIG11
+c3QgYmUgc2V0IGJ5IHJ1bm5pbmcgYGNlcGggb3NkIHNldCBwZ2xvZ19oYXJkbGltaXRgCiAgYWZ0
+ZXIgY29tcGxldGVseSB1cGdyYWRpbmcgdG8gMTMuMi4yLiBPbmNlIHRoZSBjbHVzdGVyIGhhcyB0
+aGlzIGZsYWcKICBzZXQsIHRoZSBsZW5ndGggb2YgdGhlIHBnIGxvZyB3aWxsIGJlIGNhcHBlZCBi
+eSBhIGhhcmQgbGltaXQuIE9uY2Ugc2V0LAogIHRoaXMgZmxhZyAqbXVzdCBub3QqIGJlIHVuc2V0
+IGFueW1vcmUuIEluIGx1bWlub3VzLCB0aGlzIGZlYXR1cmUgd2FzCiAgaW50cm9kdWNlZCBpbiAx
+Mi4yLjExLiBVc2VycyB3aG8gYXJlIHJ1bm5pbmcgMTIuMi4xMSwgYW5kIHdhbnQgdG8KICBjb250
+aW51ZSB0byB1c2UgdGhpcyBmZWF0dXJlLCBzaG91bGQgdXBncmFkZSB0byAxMy4yLjUgb3IgbGF0
+ZXIuCgoqIFRoaXMgcmVsZWFzZSBhbHNvIGZpeGVzIGEgQ1ZFIG9uIGNpdmV0d2ViLCBDVkUtMjAx
+OS0zODIxIHdoZXJlIFNTTCBmaWxlCiAgZGVzY3JpcHRvcnMgd2VyZSBub3QgY2xvc2VkIGluIGNp
+dmV0d2ViIGluIGNhc2UgdGhlIGluaXRpYWwgbmVnb3RpYXRpb24gZmFpbHMuCgoqIFRoZXJlIGhh
+dmUgYmVlbiBmaXhlcyB0byBSR1cgZHluYW1pYyBhbmQgbWFudWFsIHJlc2hhcmRpbmcsIHdoaWNo
+IG5vIGxvbmdlcgogIGxlYXZlcyBiZWhpbmQgc3RhbGUgYnVja2V0IGluc3RhbmNlcyB0byBiZSBy
+ZW1vdmVkIG1hbnVhbGx5LiBGb3IgZmluZGluZyBhbmQKICBjbGVhbmluZyB1cCBvbGRlciBpbnN0
+YW5jZXMgZnJvbSBhIHJlc2hhcmQgYSByYWRvc2d3LWFkbWluIGNvbW1hbmQgYHJlc2hhcmQKICBz
+dGFsZS1pbnN0YW5jZXMgbGlzdGAgYW5kIGByZXNoYXJkIHN0YWxlLWluc3RhbmNlcyBybWAgc2hv
+dWxkIGRvIHRoZSBuZWNlc3NhcnkKICBjbGVhbnVwLiBUaGVzZSBjb21tYW5kcyBzaG91bGQgKm5v
+dCogYmUgdXNlZCBvbiBhIG11bHRpc2l0ZSBzZXR1cCBhcyB0aGUgc3RhbGUKICBpbnN0YW5jZXMg
+bWF5IGJlIHVubGlrZWx5IHRvIGJlIGZyb20gYSByZXNoYXJkIGFuZCBjYW4gaGF2ZSBjb25zZXF1
+ZW5jZXMuIEluCiAgdGhlIG5leHQgdmVyc2lvbiB0aGUgYWRtaW4gQ0xJIHdpbGwgcHJldmVudCB0
+aGlzIGNvbW1hbmQgdG8gYmUgcnVuIG9uIGEKICBtdWx0aXNpdGUgY2x1c3RlciwgaG93ZXZlciBm
+b3IgdGhlIGN1cnJlbnQgcmVsZWFzZSB1c2VycyBhcmUgdXJnZWQgbm90IHRvCiAgdXNlIHRoZSBk
+ZWxldGUgY29tbWFuZCBvbiBhIG11bHRpc2l0ZSBjbHVzdGVyLgoKRm9yIGEgZGV0YWlsZWQgY2hh
+bmdlbG9nIHBsZWFzZSByZWZlciB0byB0aGUgb2ZmaWNpYWwgcmVsZWFzZSBibG9nIGF0Cmh0dHBz
+Oi8vY2VwaC5jb20vcmVsZWFzZXMvdjEzLTItNS1taW1pYy1yZWxlYXNlZC8KCkdldHRpbmcgY2Vw
+aAoqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5naXQKKiBUYXJiYWxsIGF0IGh0
+dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBoLTEzLjIuNS50YXIuZ3oKKiBGb3Ig
+cGFja2FnZXMsIHNlZSBodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2dl
+dC1wYWNrYWdlcy8KKiBSZWxlYXNlIGdpdCBzaGExOiBjYmZmODc0ZjkwMDdmMTg2OWJmZDM4MjFi
+N2UzM2IyYTZmZmQ0OTg4CgotLSAKQWJoaXNoZWsgTGVrc2htYW5hbgpTVVNFIExpbnV4IEdtYkgs
+IEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEphbmUgU21pdGhhcmQsIEdyYWhhbSBOb3J0b24sCkhS
+QiAyMTI4NCAoQUcgTsO8cm5iZXJnKQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpDZXBoLWFubm91bmNlIG1haWxpbmcgbGlzdApDZXBoLWFubm91bmNlQGxp
+c3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC1hbm5v
+dW5jZS1jZXBoLmNvbQo=
