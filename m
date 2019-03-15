@@ -1,53 +1,47 @@
-From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
-Subject: Re: Ceph Nautilus Release T-shirt Design
-Date: Fri, 15 Mar 2019 22:16:00 +1100
-Message-ID: <a93a80de-8a49-b124-79e1-20250302abeb@suse.com>
-References: <CAFFUGJdFsLF6fJZ-nR2RWqLj0vOpQMRcJqETwbc6EeQ7RW_bbw@mail.gmail.com>
- <53a6ab5b-dc72-e786-d1ea-fdbb912e463c@suse.com>
- <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH] libceph: Avoid a NULL pointer dereference
+Date: Fri, 15 Mar 2019 11:24:26 +0000
+Message-ID: <87ef78bct1.fsf@suse.com>
+References: <20190314211724.21306-1-pakki001@umn.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190314211724.21306-1-pakki001@umn.edu> (Aditya Pakki's message
+        of "Thu, 14 Mar 2019 16:17:24 -0500")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Aditya Pakki <pakki001@umn.edu>
+Cc: kjlu@umn.edu, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gMDEvMTgvMjAxOSAxMTowNyBBTSwgQW50aG9ueSBEJ0F0cmkgd3JvdGU6Cj4+PiBMZW56IGhh
-cyBwcm92aWRlZCB0aGlzIGltYWdlIHRoYXQgaXMgY3VycmVudGx5IGJlaW5nIHVzZWQgZm9yIHRo
-ZSA0MDQKPj4+IHBhZ2Ugb2YgdGhlIGRhc2hib2FyZDoKPj4+Cj4+PiBodHRwczovL2dpdGh1Yi5j
-b20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL3NyYy9weWJpbmQvbWdyL2Rhc2hib2FyZC9mcm9udGVu
-ZC9zcmMvYXNzZXRzLzEyODBweC1OYXV0aWx1c19PY3RvcHVzLmpwZwo+Pgo+PiBOYXV0aWx1cyAq
-c2hlbGxzKiBhcmUgc29tZXdoYXQgaWNvbmljL3dlbGwga25vd24vZGlzdGluY3RpdmUuICBNYXli
-ZSBhCj4+IHZhcmlhbnQgb2YgaHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvRmlsZTpOYXV0
-aWx1c19TZWN0aW9uX2N1dC5qcGcKPj4gd291bGQgYmUgaW50ZXJlc3Rpbmcgb24gYSB0LXNoaXJ0
-Pwo+IAo+IEkgYWdyZWUgd2l0aCBUaW0uICBUIHNoaXJ0cyB3aXRoIHBob3RvcyBjYW4gYmUgdHJp
-Y2t5LCBpdOKAmXMgZWFzeSBmb3IgdGhlbSB0byBsb29rIGNoZWVzeSBhbmQgdGhleSBkb27igJl0
-IGFnZSB3ZWxsLgo+IAo+IEluIHRoZSBzYW1lIHZlaW4sIHNvbWV0aGluZyB3aXRoIGEgbG93ZXIg
-Yml0LWRlcHRoIGFuZCBub3Qgbm9uLWNyb3NzLXNlY3Rpb24gbWlnaHQgYmUgc2xpZ2h0bHkgbW9y
-ZSByZWNvZ25pemFibGU6Cj4gCj4gaHR0cHM6Ly93d3cudmVjdG9yc3RvY2suY29tL3JveWFsdHkt
-ZnJlZS12ZWN0b3IvbmF1dGlsdXMtdmVjdG9yLTI4MDY4NDgKCkknbSBub3Qgc3VyZSBpZiBpdCdz
-IHRvbyBsYXRlIG5vdywgYnV0IGp1c3QgZm9yIGZ1biBJIHNwZW50IHNvbWUgdGltZQpzY3Jld2lu
-ZyBhcm91bmQgdGhpcyBldmVuaW5nIGluIElua3NjYXBlLCBhbmQgY2FtZSB1cCB3aXRoIGEgc2hl
-bGwKZGVzaWduIHNvbWV3aGVyZSBiZXR3ZWVuIHRoZSBjdXQgc2VjdGlvbiBJIHN1Z2dlc3RlZCBl
-YXJsaWVyIGFuZCB0aGUKdmVjdG9yIEFudGhvbnkgc3VnZ2VzdGVkOgoKICBodHRwczovL2dpdGh1
-Yi5jb20vdHNlcm9uZy9zY3JhdGNoL2Jsb2IvbWFzdGVyL2ltYWdlcy9uYXV0aWx1cy5zdmcucG5n
-CgpUaGUgZmluZSBsaW5lcyBhcmUgcG9zc2libHkgdG9vIHRoaW4gZm9yIHQtc2hpcnQgcHJpbnRp
-bmcsIHNvIGlmIGl0J3MKZGVzaXJhYmxlIHRvIHVzZSB0aGlzLCBpdCBtYXkgd2FudCBzb21lIGZ1
-cnRoZXIgd29yay4gIFRoZSBvcmlnaW5hbCBTVkcKaXMgaW4gdGhhdCByZXBvIHRvbywgaWYgYW55
-b25lIGVsc2Ugd2FudHMgdG8gcGxheS4KCkNoZWVycywKClRpbQotLSAKVGltIFNlcm9uZwpTZW5p
-b3IgQ2x1c3RlcmluZyBFbmdpbmVlcgpTVVNFCnRzZXJvbmdAc3VzZS5jb20KX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
-c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Aditya Pakki <pakki001@umn.edu> writes:
+
+> kmalloc allocates memory for dest->name and attempts to call
+> memcpy without a check for failure. This patch avoids such a scenario.
+
+Since kmalloc is being invoked with the __GFP_NOFAIL flag, it will never
+fail.  Thus, there's no point in checking for NULL in this case.
+
+Cheers,
+-- 
+Luis
+
+
+>
+> Signed-off-by: Aditya Pakki <pakki001@umn.edu>
+> ---
+>  net/ceph/osdmap.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 48a31dc9161c..c76a7c7e6a77 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -1901,6 +1901,8 @@ void ceph_oid_copy(struct ceph_object_id *dest,
+>  	} else {
+>  		dest->name = dest->inline_name;
+>  	}
+> +	if (!dest->name)
+> +		return;
+>  	memcpy(dest->name, src->name, src->name_len + 1);
+>  	dest->name_len = src->name_len;
+>  }
