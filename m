@@ -1,69 +1,53 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] ceph: Fix a memory leak in ci->i_head_snapc
-Date: Fri, 15 Mar 2019 11:11:07 +0000
-Message-ID: <20190315111107.15154-1-lhenriques@suse.com>
+From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
+Subject: Re: Ceph Nautilus Release T-shirt Design
+Date: Fri, 15 Mar 2019 22:16:00 +1100
+Message-ID: <a93a80de-8a49-b124-79e1-20250302abeb@suse.com>
+References: <CAFFUGJdFsLF6fJZ-nR2RWqLj0vOpQMRcJqETwbc6EeQ7RW_bbw@mail.gmail.com>
+ <53a6ab5b-dc72-e786-d1ea-fdbb912e463c@suse.com>
+ <DDEDCA80-F6C8-4B24-A92C-2F1698E25408@dreamsnake.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <DDEDCA80-F6C8-4B24-A92C-2F1698E25408-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-I'm occasionally seeing a kmemleak warning in xfstest generic/013:
-
-unreferenced object 0xffff8881fccca940 (size 32):
-  comm "kworker/0:1", pid 12, jiffies 4295005883 (age 130.648s)
-  hex dump (first 32 bytes):
-    01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00  ................
-    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-  backtrace:
-    [<00000000d741a1ea>] build_snap_context+0x5b/0x2a0
-    [<0000000021a00533>] rebuild_snap_realms+0x27/0x90
-    [<00000000ac538600>] rebuild_snap_realms+0x42/0x90
-    [<000000000e955fac>] ceph_update_snap_trace+0x2ee/0x610
-    [<00000000a9550416>] ceph_handle_snap+0x317/0x5f3
-    [<00000000fc287b83>] dispatch+0x362/0x176c
-    [<00000000a312c741>] ceph_con_workfn+0x9ce/0x2cf0
-    [<000000004168e3a9>] process_one_work+0x1d4/0x400
-    [<000000002188e9e7>] worker_thread+0x2d/0x3c0
-    [<00000000b593e4b3>] kthread+0x112/0x130
-    [<00000000a8587dca>] ret_from_fork+0x35/0x40
-    [<00000000ba1c9c1d>] 0xffffffffffffffff
-
-It looks like it is possible that we miss a flush_ack from the MDS when,
-for example, umounting the filesystem.  In that case, we can simply drop
-the reference to the ceph_snap_context obtained in ceph_queue_cap_snap().
-
-Link: https://tracker.ceph.com/issues/38224
-Cc: stable@vger.kernel.org
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/caps.c | 7 +++++++
- 1 file changed, 7 insertions(+)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 36a8dc699448..208f4dc6f574 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1054,6 +1054,7 @@ int ceph_is_any_caps(struct inode *inode)
- static void drop_inode_snap_realm(struct ceph_inode_info *ci)
- {
- 	struct ceph_snap_realm *realm = ci->i_snap_realm;
-+
- 	spin_lock(&realm->inodes_with_caps_lock);
- 	list_del_init(&ci->i_snap_realm_item);
- 	ci->i_snap_realm_counter++;
-@@ -1063,6 +1064,12 @@ static void drop_inode_snap_realm(struct ceph_inode_info *ci)
- 	spin_unlock(&realm->inodes_with_caps_lock);
- 	ceph_put_snap_realm(ceph_sb_to_client(ci->vfs_inode.i_sb)->mdsc,
- 			    realm);
-+	/*
-+	 * ci->i_head_snapc should be NULL, but we may still be waiting for a
-+	 * flush_ack from the MDS.  In that case, we still hold a ref for the
-+	 * ceph_snap_context and we need to drop it.
-+	 */
-+	ceph_put_snap_context(ci->i_head_snapc);
- }
- 
- /*
+T24gMDEvMTgvMjAxOSAxMTowNyBBTSwgQW50aG9ueSBEJ0F0cmkgd3JvdGU6Cj4+PiBMZW56IGhh
+cyBwcm92aWRlZCB0aGlzIGltYWdlIHRoYXQgaXMgY3VycmVudGx5IGJlaW5nIHVzZWQgZm9yIHRo
+ZSA0MDQKPj4+IHBhZ2Ugb2YgdGhlIGRhc2hib2FyZDoKPj4+Cj4+PiBodHRwczovL2dpdGh1Yi5j
+b20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL3NyYy9weWJpbmQvbWdyL2Rhc2hib2FyZC9mcm9udGVu
+ZC9zcmMvYXNzZXRzLzEyODBweC1OYXV0aWx1c19PY3RvcHVzLmpwZwo+Pgo+PiBOYXV0aWx1cyAq
+c2hlbGxzKiBhcmUgc29tZXdoYXQgaWNvbmljL3dlbGwga25vd24vZGlzdGluY3RpdmUuICBNYXli
+ZSBhCj4+IHZhcmlhbnQgb2YgaHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvRmlsZTpOYXV0
+aWx1c19TZWN0aW9uX2N1dC5qcGcKPj4gd291bGQgYmUgaW50ZXJlc3Rpbmcgb24gYSB0LXNoaXJ0
+Pwo+IAo+IEkgYWdyZWUgd2l0aCBUaW0uICBUIHNoaXJ0cyB3aXRoIHBob3RvcyBjYW4gYmUgdHJp
+Y2t5LCBpdOKAmXMgZWFzeSBmb3IgdGhlbSB0byBsb29rIGNoZWVzeSBhbmQgdGhleSBkb27igJl0
+IGFnZSB3ZWxsLgo+IAo+IEluIHRoZSBzYW1lIHZlaW4sIHNvbWV0aGluZyB3aXRoIGEgbG93ZXIg
+Yml0LWRlcHRoIGFuZCBub3Qgbm9uLWNyb3NzLXNlY3Rpb24gbWlnaHQgYmUgc2xpZ2h0bHkgbW9y
+ZSByZWNvZ25pemFibGU6Cj4gCj4gaHR0cHM6Ly93d3cudmVjdG9yc3RvY2suY29tL3JveWFsdHkt
+ZnJlZS12ZWN0b3IvbmF1dGlsdXMtdmVjdG9yLTI4MDY4NDgKCkknbSBub3Qgc3VyZSBpZiBpdCdz
+IHRvbyBsYXRlIG5vdywgYnV0IGp1c3QgZm9yIGZ1biBJIHNwZW50IHNvbWUgdGltZQpzY3Jld2lu
+ZyBhcm91bmQgdGhpcyBldmVuaW5nIGluIElua3NjYXBlLCBhbmQgY2FtZSB1cCB3aXRoIGEgc2hl
+bGwKZGVzaWduIHNvbWV3aGVyZSBiZXR3ZWVuIHRoZSBjdXQgc2VjdGlvbiBJIHN1Z2dlc3RlZCBl
+YXJsaWVyIGFuZCB0aGUKdmVjdG9yIEFudGhvbnkgc3VnZ2VzdGVkOgoKICBodHRwczovL2dpdGh1
+Yi5jb20vdHNlcm9uZy9zY3JhdGNoL2Jsb2IvbWFzdGVyL2ltYWdlcy9uYXV0aWx1cy5zdmcucG5n
+CgpUaGUgZmluZSBsaW5lcyBhcmUgcG9zc2libHkgdG9vIHRoaW4gZm9yIHQtc2hpcnQgcHJpbnRp
+bmcsIHNvIGlmIGl0J3MKZGVzaXJhYmxlIHRvIHVzZSB0aGlzLCBpdCBtYXkgd2FudCBzb21lIGZ1
+cnRoZXIgd29yay4gIFRoZSBvcmlnaW5hbCBTVkcKaXMgaW4gdGhhdCByZXBvIHRvbywgaWYgYW55
+b25lIGVsc2Ugd2FudHMgdG8gcGxheS4KCkNoZWVycywKClRpbQotLSAKVGltIFNlcm9uZwpTZW5p
+b3IgQ2x1c3RlcmluZyBFbmdpbmVlcgpTVVNFCnRzZXJvbmdAc3VzZS5jb20KX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
