@@ -1,47 +1,47 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH] libceph: Avoid a NULL pointer dereference
-Date: Fri, 15 Mar 2019 11:24:26 +0000
-Message-ID: <87ef78bct1.fsf@suse.com>
-References: <20190314211724.21306-1-pakki001@umn.edu>
+From: Alex Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Constant Compaction on one mimic node
+Date: Sun, 17 Mar 2019 04:11:47 -0500
+Message-ID: <q6l30k$3l2i$1@blaine.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190314211724.21306-1-pakki001@umn.edu> (Aditya Pakki's message
-        of "Thu, 14 Mar 2019 16:17:24 -0500")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Aditya Pakki <pakki001@umn.edu>
-Cc: kjlu@umn.edu, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Aditya Pakki <pakki001@umn.edu> writes:
+Hello everyone,
 
-> kmalloc allocates memory for dest->name and attempts to call
-> memcpy without a check for failure. This patch avoids such a scenario.
+I am getting a huge number of messages on one out of three nodes showing Manual compaction starting all the time.  I see no such of log entries on the other nodes in the cluster.
 
-Since kmalloc is being invoked with the __GFP_NOFAIL flag, it will never
-fail.  Thus, there's no point in checking for NULL in this case.
+Mar 16 06:40:11 storage1n1-chi docker[24502]: debug 2019-03-16 06:40:11.441 7f6967af4700  4 rocksdb: 
+[/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/13.2.2/rpm/el7/BUILD/ceph-13.2.2/src/rocksdb/db/db_impl_compaction_flush.cc:1024] 
+[default] Manual compaction starting
+Mar 16 06:40:11 storage1n1-chi docker[24502]: message repeated 4 times: [ debug 2019-03-16 06:40:11.441 7f6967af4700  4 rocksdb: 
+[/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/13.2.2/rpm/el7/BUILD/ceph-13.2.2/src/rocksdb/db/db_impl_compaction_flush.cc:1024] 
+[default] Manual compaction starting]
+Mar 16 06:42:21 storage1n1-chi docker[24502]: debug 2019-03-16 06:42:21.466 7f6970305700  4 rocksdb: 
+[/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/13.2.2/rpm/el7/BUILD/ceph-13.2.2/src/rocksdb/db/db_impl_compaction_flush.cc:77] 
+[JOB 1021] Syncing log #194307
 
-Cheers,
--- 
-Luis
+I am not sure what triggers those message on one node an not on the others.
 
+Checking config on all mons
 
->
-> Signed-off-by: Aditya Pakki <pakki001@umn.edu>
-> ---
->  net/ceph/osdmap.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 48a31dc9161c..c76a7c7e6a77 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -1901,6 +1901,8 @@ void ceph_oid_copy(struct ceph_object_id *dest,
->  	} else {
->  		dest->name = dest->inline_name;
->  	}
-> +	if (!dest->name)
-> +		return;
->  	memcpy(dest->name, src->name, src->name_len + 1);
->  	dest->name_len = src->name_len;
->  }
+debug_leveldb             4/5                                          override
+debug_memdb               4/5                                          override
+debug_mgr                 0/5                                          override
+debug_mgrc                0/5                                          override
+debug_rocksdb             4/5                                          override
+
+Documentation tells nothing about the compaction logs or at least I couldn't find anything specific to my issue.
