@@ -1,11 +1,13 @@
 From: Alex Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: How to lower log verbosity
-Date: Sun, 17 Mar 2019 10:16:24 -0500
-Message-ID: <q6loc9$6qal$1@blaine.gmane.org>
+Subject: Re: Constant Compaction on one mimic node
+Date: Sun, 17 Mar 2019 11:46:07 -0500
+Message-ID: <dcf7d470-e39e-6150-0522-ac3d288d59f3@gmail.com>
+References: <q6l30k$3l2i$1@blaine.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <q6l30k$3l2i$1@blaine.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -20,69 +22,52 @@ To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hello everyone,
-
-As I am troubleshooting an issue I see logs literally littered with messages such as below.  I searched documentation and couldn't find a specific debug nob to turn.  I see some debugging is on by 
-default but I don't need to see staff below especially mgr and client repeating.  Also I am not sure what the difference with memory vs file debug ratios.  Thanks in advance for any hint.
-
-
-Mar 17 08:11:44 storage1n1-chi docker[13518]: audit 2019-03-17 08:11:43.045636 mgr.storage1n2-chi mgr.394322 10.1.40.62:0/19661 3377 : audit [DBG] from='client.320702 10.1.40.62:0/3859627195' 
-entity='client.admin' cmd=[{"width": 80, "prefix": "iostat", "poll": true, "target": ["mgr", ""], "print_header": false}]: dispatch
-Mar 17 08:11:44 storage1n1-chi docker[13518]: audit 2019-03-17 08:11:43.048607 mgr.storage1n2-chi mgr.394322 10.1.40.62:0/19661 3378 : audit [DBG] from='client.328541 10.1.40.62:0/748275798' 
-entity='client.admin' cmd=[{"width": 80, "prefix": "iostat", "poll": true, "target": ["mgr", ""], "print_header": false}]: dispatch
-Mar 17 08:11:44 storage1n1-chi docker[13518]: audit 2019-03-17 08:11:43.921762 mgr.storage1n2-chi mgr.394322 10.1.40.62:0/19661 3379 : audit [DBG] from='client.341603 10.1.40.62:0/535963786' 
-entity='client.admin' cmd=[{"width": 80, "prefix": "iostat", "poll": true, "target": ["mgr", ""], "print_header": false}]: dispatch
-
-Mar 17 08:11:25 storage1n1-chi bf695c816174[17083]: 2019-03-17 08:11:25.845 7fe9ddb4f700  1 mgr send_beacon standby
-Mar 17 08:11:25 storage1n1-chi docker[13941]: 2019-03-17 08:11:25.845 7fe9ddb4f700  1 mgr send_beacon standby
-Mar 17 08:11:27 storage1n1-chi bf695c816174[17083]: 2019-03-17 08:11:27.865 7fe9ddb4f700  1 mgr send_beacon standby
-Mar 17 08:11:27 storage1n1-chi docker[13941]: 2019-03-17 08:11:27.865 7fe9ddb4f700  1 mgr send_beacon standby
-Mar 17 08:11:29 storage1n1-chi bf695c816174[17083]: 2019-03-17 08:11:29.885 7fe9ddb4f700  1 mgr send_beacon standby
-Mar 17 08:11:29 storage1n1-chi docker[13941]: 2019-03-17 08:11:29.885 7fe9ddb4f700  1 mgr send_beacon standby
-
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27d16700  1 mgr.server reply handle_command (0) Success |  299 KiB/s |  122 KiB/s |  421 KiB/s |        306 |         17 
-|        324 |
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  0 log_channel(audit) log [DBG] : from='client.320702 10.1.40.62:0/3859627195' entity='client.admin' 
-cmd=[{"width": 80, "prefix": "iostat", "poll": true, "target": ["mgr", ""], "print_header": false}]: dispatch
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer status'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer mode'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer on'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer off'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer eval'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer eval-verbose'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer optimize'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer show'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer rm'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer reset'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer dump'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'balancer execute'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-login-credentials'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-session-expire'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard create-self-signed-cert'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-access-key'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-port'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-enable-browsable-api'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-port'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-admin-resource'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-secret-key'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-scheme'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-enable-browsable-api'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-user-id'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-admin-resource'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-access-key'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rest-requests-timeout'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-scheme'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-host'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rgw-api-user-id'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard get-rest-requests-timeout'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-host'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'dashboard set-rgw-api-secret-key'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'hello'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'influx config-set'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'influx config-show'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'influx send'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'influx self-test'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27515700  1 mgr.server handle_command pyc_prefix: 'iostat'
-Mar 17 08:13:05 storage1n2-chi ecbe67c5b2e7[36572]: 2019-03-17 08:13:05.302 7f9c27d16700  1 mgr.server reply handle_command (0) Success |  299 KiB/s |  122 KiB/s |  421 KiB/s |        306 |         17 
-|        324 |
-^C
+SSBkaWQgc29tZSBhZGRpdGlvbmFsIGNsZWFudXAgYW5kIHJlc3RhcnRlZCBtb24gb24gYWxsIG5v
+ZGVzLiAgTWFudWFsIGNvbXBhY3Rpb24gaXMgbm93IHNob3duIG9uIGFsbCBub2Rlcy4gIElzIHRo
+aXMgbm9ybWFsIG9wZXJhdGluZyBtb2RlPyAgQXMgaXQgc2VlbXMgdG8gYmUgc3BvcmFkaWMsIGNv
+dWxkIGl0IGhhdmUgYW4gZWZmZWN0IG9uIApwZXJmb3JtYW5jZSBpLmUuIGNhdXNlIHNsb3cgb3Bz
+LiAgSXMgdGhlcmUgYSB3YXkgdG8gbGltaXQgaXQgYW5kIGlzIHRoZXJlIGEgZG9jdW1lbnQgdGhh
+dCBleHBsYWlucyB0aG9zZSB0aGluZ3MuCgpUaGFuayB5b3UgYWdhaW4sCgoKT24gMy8xNy8yMDE5
+IDQ6MTEgQU0sIEFsZXggTGl0dmFrIHdyb3RlOgo+IEhlbGxvIGV2ZXJ5b25lLAo+IAo+IEkgYW0g
+Z2V0dGluZyBhIGh1Z2UgbnVtYmVyIG9mIG1lc3NhZ2VzIG9uIG9uZSBvdXQgb2YgdGhyZWUgbm9k
+ZXMgc2hvd2luZyBNYW51YWwgY29tcGFjdGlvbiBzdGFydGluZyBhbGwgdGhlIHRpbWUuwqAgSSBz
+ZWUgbm8gc3VjaCBvZiBsb2cgZW50cmllcyBvbiB0aGUgb3RoZXIgbm9kZXMgaW4gdGhlIGNsdXN0
+ZXIuCj4gCj4gTWFyIDE2IDA2OjQwOjExIHN0b3JhZ2UxbjEtY2hpIGRvY2tlclsyNDUwMl06IGRl
+YnVnIDIwMTktMDMtMTYgMDY6NDA6MTEuNDQxIDdmNjk2N2FmNDcwMMKgIDQgcm9ja3NkYjogCj4g
+Wy9ob21lL2plbmtpbnMtYnVpbGQvYnVpbGQvd29ya3NwYWNlL2NlcGgtYnVpbGQvQVJDSC94ODZf
+NjQvQVZBSUxBQkxFX0FSQ0gveDg2XzY0L0FWQUlMQUJMRV9ESVNUL2NlbnRvczcvRElTVC9jZW50
+b3M3L01BQ0hJTkVfU0laRS9odWdlL3JlbGVhc2UvMTMuMi4yL3JwbS9lbDcvQlVJTEQvY2VwaC0x
+My4yLjIvc3JjL3JvY2tzZGIvZGIvZGJfaW1wbF9jb21wYWN0aW9uX2ZsdXNoLmNjOjEwMjRdIAo+
+IFtkZWZhdWx0XSBNYW51YWwgY29tcGFjdGlvbiBzdGFydGluZwo+IE1hciAxNiAwNjo0MDoxMSBz
+dG9yYWdlMW4xLWNoaSBkb2NrZXJbMjQ1MDJdOiBtZXNzYWdlIHJlcGVhdGVkIDQgdGltZXM6IFsg
+ZGVidWcgMjAxOS0wMy0xNiAwNjo0MDoxMS40NDEgN2Y2OTY3YWY0NzAwwqAgNCByb2Nrc2RiOiAK
+PiBbL2hvbWUvamVua2lucy1idWlsZC9idWlsZC93b3Jrc3BhY2UvY2VwaC1idWlsZC9BUkNIL3g4
+Nl82NC9BVkFJTEFCTEVfQVJDSC94ODZfNjQvQVZBSUxBQkxFX0RJU1QvY2VudG9zNy9ESVNUL2Nl
+bnRvczcvTUFDSElORV9TSVpFL2h1Z2UvcmVsZWFzZS8xMy4yLjIvcnBtL2VsNy9CVUlMRC9jZXBo
+LTEzLjIuMi9zcmMvcm9ja3NkYi9kYi9kYl9pbXBsX2NvbXBhY3Rpb25fZmx1c2guY2M6MTAyNF0g
+Cj4gW2RlZmF1bHRdIE1hbnVhbCBjb21wYWN0aW9uIHN0YXJ0aW5nXQo+IE1hciAxNiAwNjo0Mjoy
+MSBzdG9yYWdlMW4xLWNoaSBkb2NrZXJbMjQ1MDJdOiBkZWJ1ZyAyMDE5LTAzLTE2IDA2OjQyOjIx
+LjQ2NiA3ZjY5NzAzMDU3MDDCoCA0IHJvY2tzZGI6IAo+IFsvaG9tZS9qZW5raW5zLWJ1aWxkL2J1
+aWxkL3dvcmtzcGFjZS9jZXBoLWJ1aWxkL0FSQ0gveDg2XzY0L0FWQUlMQUJMRV9BUkNIL3g4Nl82
+NC9BVkFJTEFCTEVfRElTVC9jZW50b3M3L0RJU1QvY2VudG9zNy9NQUNISU5FX1NJWkUvaHVnZS9y
+ZWxlYXNlLzEzLjIuMi9ycG0vZWw3L0JVSUxEL2NlcGgtMTMuMi4yL3NyYy9yb2Nrc2RiL2RiL2Ri
+X2ltcGxfY29tcGFjdGlvbl9mbHVzaC5jYzo3N10gCj4gW0pPQiAxMDIxXSBTeW5jaW5nIGxvZyAj
+MTk0MzA3Cj4gCj4gSSBhbSBub3Qgc3VyZSB3aGF0IHRyaWdnZXJzIHRob3NlIG1lc3NhZ2Ugb24g
+b25lIG5vZGUgYW4gbm90IG9uIHRoZSBvdGhlcnMuCj4gCj4gQ2hlY2tpbmcgY29uZmlnIG9uIGFs
+bCBtb25zCj4gCj4gZGVidWdfbGV2ZWxkYsKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCA0LzXCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgIG92ZXJyaWRlCj4gZGVidWdfbWVtZGLCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgIDQvNcKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgb3ZlcnJpZGUKPiBk
+ZWJ1Z19tZ3LCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAwLzXCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgIG92ZXJyaWRlCj4gZGVidWdfbWdyY8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoCAwLzXCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIG92ZXJyaWRlCj4gZGVidWdfcm9j
+a3NkYsKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCA0LzXCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+IG92ZXJyaWRlCj4gCj4gRG9jdW1lbnRhdGlvbiB0ZWxscyBub3RoaW5nIGFib3V0IHRoZSBjb21w
+YWN0aW9uIGxvZ3Mgb3IgYXQgbGVhc3QgSSBjb3VsZG4ndCBmaW5kIGFueXRoaW5nIHNwZWNpZmlj
+IHRvIG15IGlzc3VlLgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20K
+aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
