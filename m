@@ -1,64 +1,64 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] rbd: avoid clang -Wuninitialized warning
-Date: Fri, 22 Mar 2019 15:36:37 +0100
-Message-ID: <20190322143643.1317312-1-arnd@arndb.de>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] ceph: fix clang warning for CEPH_DEFINE_OID_ONSTACK
+Date: Fri, 22 Mar 2019 15:41:39 +0100
+Message-ID: <CAOi1vP_=5gBUFLCofhaCNbMkfdwYNSkJ06Rmw-bJkLXNC4v8fA@mail.gmail.com>
+References: <20190322140819.300740-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190322140819.300740-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>
-Cc: clang-built-linux@googlegroups.com, Nick Desaulniers <ndesaulniers@google.com>, Nathan Chancellor <natechancellor@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jason Dillaman <dillaman@redhat.com>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, clang-built-linux@googlegroups.com, Nick Desaulniers <ndesaulniers@google.com>, Nathan Chancellor <natechancellor@gmail.com>, Alex Elder <elder@linaro.org>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-clang fails to see that rbd_assert(0) ends in an unreachable code
-path and warns about a subsequent use of an uninitialized variable
-when CONFIG_PROFILE_ANNOTATED_BRANCHES is set:
+On Fri, Mar 22, 2019 at 3:08 PM Arnd Bergmann <arnd@arndb.de> wrote:
+>
+> clang complains about assigning a variable to itself during the
+> declaration:
+>
+> fs/ceph/ioctl.c:187:26: error: variable 'oid' is uninitialized when used within its own initialization [-Werror,-Wuninitialized]
+>         CEPH_DEFINE_OID_ONSTACK(oid);
+>                                 ^~~
+> include/linux/ceph/osdmap.h:122:52: note: expanded from macro 'CEPH_DEFINE_OID_ONSTACK'
+>         struct ceph_object_id oid = CEPH_OID_INIT_ONSTACK(oid)
+>                               ~~~                         ^~~
+> include/linux/ceph/osdmap.h:120:29: note: expanded from macro 'CEPH_OID_INIT_ONSTACK'
+>     ({ ceph_oid_init(&oid); oid; })
+>                             ^~~
+>
+> We use this trick in other places, but it is completely unnecessary
+> here, as we can just use a regular struct initializer.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  include/linux/ceph/osdmap.h | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+>
+> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+> index 5675b1f09bc5..82f957a7a0d6 100644
+> --- a/include/linux/ceph/osdmap.h
+> +++ b/include/linux/ceph/osdmap.h
+> @@ -116,10 +116,8 @@ static inline void ceph_oid_init(struct ceph_object_id *oid)
+>         oid->name_len = 0;
+>  }
+>
+> -#define CEPH_OID_INIT_ONSTACK(oid)                                     \
+> -    ({ ceph_oid_init(&oid); oid; })
+>  #define CEPH_DEFINE_OID_ONSTACK(oid)                                   \
+> -       struct ceph_object_id oid = CEPH_OID_INIT_ONSTACK(oid)
+> +       struct ceph_object_id oid = { .name = oid.inline_name }
+>
+>  static inline bool ceph_oid_empty(const struct ceph_object_id *oid)
+>  {
 
-drivers/block/rbd.c:2402:4: error: variable 'ret' is used uninitialized whenever 'if' condition is false
-      [-Werror,-Wsometimes-uninitialized]
-                        rbd_assert(0);
-                        ^~~~~~~~~~~~~
-drivers/block/rbd.c:563:7: note: expanded from macro 'rbd_assert'
-                if (unlikely(!(expr))) {                                \
-                    ^~~~~~~~~~~~~~~~~
-include/linux/compiler.h:48:23: note: expanded from macro 'unlikely'
- #  define unlikely(x)   (__branch_check__(x, 0, __builtin_constant_p(x)))
-                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-drivers/block/rbd.c:2410:6: note: uninitialized use occurs here
-        if (ret) {
-            ^~~
-drivers/block/rbd.c:2402:4: note: remove the 'if' if its condition is always true
-                        rbd_assert(0);
-                        ^
-drivers/block/rbd.c:563:3: note: expanded from macro 'rbd_assert'
-                if (unlikely(!(expr))) {                                \
-                ^
-drivers/block/rbd.c:2376:9: note: initialize the variable 'ret' to silence this warning
-        int ret;
-               ^
-                = 0
-1 error generated.
+Hi Arnd,
 
-This seems to be a bug in clang, but is easy to work around by using
-an unconditional BUG().
+I don't like this because the initialization is no longer contained to
+ceph_oid_init().  Now there are two things to patch instead of one.
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/block/rbd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+How is this going to be fixed in other places?
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4ba967d65cf9..cbcc3baf3807 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -2399,7 +2399,7 @@ static int rbd_obj_read_from_parent(struct rbd_obj_request *obj_req)
- 						      &obj_req->bvec_pos);
- 			break;
- 		default:
--			rbd_assert(0);
-+			BUG();
- 		}
- 	} else {
- 		ret = rbd_img_fill_from_bvecs(child_img_req,
--- 
-2.20.0
+Thanks,
+
+                Ilya
