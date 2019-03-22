@@ -1,145 +1,104 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH] ceph: Fix a memory leak in ci->i_head_snapc
-Date: Fri, 22 Mar 2019 10:04:44 +0000
-Message-ID: <87o963jkcj.fsf@suse.com>
-References: <20190315111107.15154-1-lhenriques@suse.com>
-        <CAAM7YAnD_dK2py+95N8Z7T+Vgr2ZbBJne+tNYivEeUGObhpiCQ@mail.gmail.com>
-        <87r2b4zd2q.fsf@suse.com>
-        <CAAM7YAkhA6ddto3KESWm8yw3D6f02ev7oYmEto=nK3mXZeUy4A@mail.gmail.com>
-        <87lg1c17b2.fsf@suse.com>
-        <CAAM7YAnhJUey6eX6zeWuPCVgyG9JghGQetJ-hk5R8nONivZzkg@mail.gmail.com>
-        <87a7hr19v7.fsf@suse.com>
+From: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH 0/2] Remove support for deprecated %pf and %pF in vsprintf
+Date: Fri, 22 Mar 2019 15:21:06 +0200
+Message-ID: <20190322132108.25501-1-sakari.ailus@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <87a7hr19v7.fsf@suse.com> (Luis Henriques's message of "Tue, 19
-        Mar 2019 09:39:24 +0000")
-Sender: stable-owner@vger.kernel.org
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-um-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Luis Henriques <lhenriques@suse.com> writes:
+Hi all,
 
-> "Yan, Zheng" <ukernel@gmail.com> writes:
->
->> On Tue, Mar 19, 2019 at 12:22 AM Luis Henriques <lhenriques@suse.com> wrote:
->>>
->>> "Yan, Zheng" <ukernel@gmail.com> writes:
->>>
->>> > On Mon, Mar 18, 2019 at 6:33 PM Luis Henriques <lhenriques@suse.com> wrote:
->>> >>
->>> >> "Yan, Zheng" <ukernel@gmail.com> writes:
->>> >>
->>> >> > On Fri, Mar 15, 2019 at 7:13 PM Luis Henriques <lhenriques@suse.com> wrote:
->>> >> >>
->>> >> >> I'm occasionally seeing a kmemleak warning in xfstest generic/013:
->>> >> >>
->>> >> >> unreferenced object 0xffff8881fccca940 (size 32):
->>> >> >>   comm "kworker/0:1", pid 12, jiffies 4295005883 (age 130.648s)
->>> >> >>   hex dump (first 32 bytes):
->>> >> >>     01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00  ................
->>> >> >>     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
->>> >> >>   backtrace:
->>> >> >>     [<00000000d741a1ea>] build_snap_context+0x5b/0x2a0
->>> >> >>     [<0000000021a00533>] rebuild_snap_realms+0x27/0x90
->>> >> >>     [<00000000ac538600>] rebuild_snap_realms+0x42/0x90
->>> >> >>     [<000000000e955fac>] ceph_update_snap_trace+0x2ee/0x610
->>> >> >>     [<00000000a9550416>] ceph_handle_snap+0x317/0x5f3
->>> >> >>     [<00000000fc287b83>] dispatch+0x362/0x176c
->>> >> >>     [<00000000a312c741>] ceph_con_workfn+0x9ce/0x2cf0
->>> >> >>     [<000000004168e3a9>] process_one_work+0x1d4/0x400
->>> >> >>     [<000000002188e9e7>] worker_thread+0x2d/0x3c0
->>> >> >>     [<00000000b593e4b3>] kthread+0x112/0x130
->>> >> >>     [<00000000a8587dca>] ret_from_fork+0x35/0x40
->>> >> >>     [<00000000ba1c9c1d>] 0xffffffffffffffff
->>> >> >>
->>> >> >> It looks like it is possible that we miss a flush_ack from the MDS when,
->>> >> >> for example, umounting the filesystem.  In that case, we can simply drop
->>> >> >> the reference to the ceph_snap_context obtained in ceph_queue_cap_snap().
->>> >> >>
->>> >> >> Link: https://tracker.ceph.com/issues/38224
->>> >> >> Cc: stable@vger.kernel.org
->>> >> >> Signed-off-by: Luis Henriques <lhenriques@suse.com>
->>> >> >> ---
->>> >> >>  fs/ceph/caps.c | 7 +++++++
->>> >> >>  1 file changed, 7 insertions(+)
->>> >> >>
->>> >> >> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->>> >> >> index 36a8dc699448..208f4dc6f574 100644
->>> >> >> --- a/fs/ceph/caps.c
->>> >> >> +++ b/fs/ceph/caps.c
->>> >> >> @@ -1054,6 +1054,7 @@ int ceph_is_any_caps(struct inode *inode)
->>> >> >>  static void drop_inode_snap_realm(struct ceph_inode_info *ci)
->>> >> >>  {
->>> >> >>         struct ceph_snap_realm *realm = ci->i_snap_realm;
->>> >> >> +
->>> >> >>         spin_lock(&realm->inodes_with_caps_lock);
->>> >> >>         list_del_init(&ci->i_snap_realm_item);
->>> >> >>         ci->i_snap_realm_counter++;
->>> >> >> @@ -1063,6 +1064,12 @@ static void drop_inode_snap_realm(struct ceph_inode_info *ci)
->>> >> >>         spin_unlock(&realm->inodes_with_caps_lock);
->>> >> >>         ceph_put_snap_realm(ceph_sb_to_client(ci->vfs_inode.i_sb)->mdsc,
->>> >> >>                             realm);
->>> >> >> +       /*
->>> >> >> +        * ci->i_head_snapc should be NULL, but we may still be waiting for a
->>> >> >> +        * flush_ack from the MDS.  In that case, we still hold a ref for the
->>> >> >> +        * ceph_snap_context and we need to drop it.
->>> >> >> +        */
->>> >> >> +       ceph_put_snap_context(ci->i_head_snapc);
->>> >> >>  }
->>> >> >>
->>> >> >>  /*
->>> >> >
->>> >> > This does not seem right.  i_head_snapc is cleared when
->>> >> > (ci->i_wrbuffer_ref_head == 0 && ci->i_dirty_caps == 0 &&
->>> >> > ci->i_flushing_caps == 0) . Nothing do with dropping ci->i_snap_realm.
->>> >> > Did you see 'reconnect denied' during the test? If you did, the fix
->>> >> > should be in iterate_session_caps()
->>> >> >
->>> >>
->>> >> No, I didn't saw any 'reconnect denied' in the test.  The test actually
->>> >> seems to execute fine, except from the memory leak.
->>> >>
->>> >> It's very difficult to reproduce this issue, but last time I managed to
->>> >> get this memory leak to trigger I actually had some debugging code in
->>> >> drop_inode_snap_realm, something like:
->>> >>
->>> >>   if (ci->i_head_snapc)
->>> >>         printk("i_head_snapc: 0x%px\n", ci->i_head_snapc);
->>> >
->>> > please add code that prints i_wrbuffer_ref_head, i_dirty_caps,
->>> > i_flushing_caps. and try reproducing it again.
->>> >
->>>
->>> Ok, it took me a few hours, but I managed to reproduce the bug, with
->>> those extra printks.  All those values are set to 0 when the bug
->>> triggers (and i_head_snapc != NULL).
->>>
->>
->> Thanks, which test triggers this bug?
->
-> That's generic/013.  It usually triggers after a few hours of running it
-> in a loop (I'm using a vstart cluster for that).
->
->>
->> I searched that code, found we may fail to cleanup i_head_snap in two
->> places. One is in ceph_queue_cap_snap, Another is in
->> remove_session_caps_cb().
->
-> Ah, great!  I spent a lot of time looking but I couldn't really find it.
-> My bet was that ceph_queue_cap_snap was doing the ceph_get_snap_context
-> and that the corresponding ceph_put_snap_context would be done in
-> handle_cap_flush_ack. That's why I mentioned the missing flush_ack from
-> MDS.
+The printk family of functions supports %ps and %pS conversion specifiers
+to print function names. Yet the deprecated %pf and %pF conversion
+specifiers with equivalent functionality remain supported. A number of
+users of %pf and %pF remain.
 
-Something that I didn't said explicitly is that I *know* that the
-unbalanced ceph_get_snap_context() is the one in function
-ceph_queue_cap_snap().  I know this for sure because I've managed to
-reproduce the issue several times with an instrumented kernel (with
-tracepoints) that allowed me to keep track of all ceph_snap_context
-operations (create, get, put, delete).
+This patchsets converts the existing users of %pf and %pF to %ps and %pS,
+respectively, and removes support for the deprecated %pf and %pF.
 
-Cheers,
+The patches apply cleanly both on 5.1-rc1 as well as on Linux-next. No new
+%pf or %pF users have been added in the meantime so the patch is
+sufficient as itself on linux-next, too.
+
+Sakari Ailus (2):
+  treewide: Switch printk users from %pf and %pF to %ps and %pS,
+    respectively
+  vsprintf: Remove support for %pF and %pf in favour of %pS and %ps
+
+ Documentation/core-api/printk-formats.rst | 10 ----------
+ arch/alpha/kernel/pci_iommu.c             | 20 ++++++++++----------
+ arch/arm/mach-imx/pm-imx6.c               |  2 +-
+ arch/arm/mm/alignment.c                   |  2 +-
+ arch/arm/nwfpe/fpmodule.c                 |  2 +-
+ arch/microblaze/mm/pgtable.c              |  2 +-
+ arch/sparc/kernel/ds.c                    |  2 +-
+ arch/um/kernel/sysrq.c                    |  2 +-
+ arch/x86/include/asm/trace/exceptions.h   |  2 +-
+ arch/x86/kernel/irq_64.c                  |  2 +-
+ arch/x86/mm/extable.c                     |  4 ++--
+ arch/x86/xen/multicalls.c                 |  2 +-
+ drivers/acpi/device_pm.c                  |  2 +-
+ drivers/base/power/main.c                 |  6 +++---
+ drivers/base/syscore.c                    | 12 ++++++------
+ drivers/block/drbd/drbd_receiver.c        |  2 +-
+ drivers/block/floppy.c                    | 10 +++++-----
+ drivers/cpufreq/cpufreq.c                 |  2 +-
+ drivers/mmc/core/quirks.h                 |  2 +-
+ drivers/nvdimm/bus.c                      |  2 +-
+ drivers/nvdimm/dimm_devs.c                |  2 +-
+ drivers/pci/pci-driver.c                  | 14 +++++++-------
+ drivers/pci/quirks.c                      |  4 ++--
+ drivers/pnp/quirks.c                      |  2 +-
+ drivers/scsi/esp_scsi.c                   |  2 +-
+ fs/btrfs/tests/free-space-tree-tests.c    |  4 ++--
+ fs/f2fs/f2fs.h                            |  2 +-
+ fs/pstore/inode.c                         |  2 +-
+ include/trace/events/btrfs.h              |  2 +-
+ include/trace/events/cpuhp.h              |  4 ++--
+ include/trace/events/preemptirq.h         |  2 +-
+ include/trace/events/rcu.h                |  4 ++--
+ include/trace/events/sunrpc.h             |  2 +-
+ include/trace/events/timer.h              |  8 ++++----
+ include/trace/events/vmscan.h             |  4 ++--
+ include/trace/events/workqueue.h          |  4 ++--
+ include/trace/events/xen.h                |  2 +-
+ init/main.c                               |  6 +++---
+ kernel/async.c                            |  4 ++--
+ kernel/events/uprobes.c                   |  2 +-
+ kernel/fail_function.c                    |  2 +-
+ kernel/irq/debugfs.c                      |  2 +-
+ kernel/irq/handle.c                       |  2 +-
+ kernel/irq/manage.c                       |  2 +-
+ kernel/irq/spurious.c                     |  4 ++--
+ kernel/rcu/tree.c                         |  2 +-
+ kernel/stop_machine.c                     |  2 +-
+ kernel/time/sched_clock.c                 |  2 +-
+ kernel/time/timer.c                       |  2 +-
+ kernel/workqueue.c                        | 12 ++++++------
+ lib/error-inject.c                        |  2 +-
+ lib/percpu-refcount.c                     |  4 ++--
+ lib/vsprintf.c                            |  8 ++------
+ mm/memblock.c                             | 12 ++++++------
+ mm/memory.c                               |  2 +-
+ mm/vmscan.c                               |  2 +-
+ net/ceph/osd_client.c                     |  2 +-
+ net/core/net-procfs.c                     |  2 +-
+ net/core/netpoll.c                        |  4 ++--
+ scripts/checkpatch.pl                     |  5 -----
+ 60 files changed, 111 insertions(+), 130 deletions(-)
+
 -- 
-Luis
+2.11.0
