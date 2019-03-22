@@ -1,49 +1,34 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] rbd: avoid clang -Wuninitialized warning
-Date: Fri, 22 Mar 2019 17:55:11 +0100
-Message-ID: <CAK8P3a2mZ-zyAMrR2zesAUoLO0BiDcmr6VnJzuJb=PFSHj4PWg@mail.gmail.com>
-References: <20190322143643.1317312-1-arnd@arndb.de> <CAOi1vP9scH+DECa1udToEvtYMRTZ1-VMuVajAh8uwpxzuMq0RA@mail.gmail.com>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH 0/2] Remove support for deprecated %pf and %pF in vsprintf
+Date: Fri, 22 Mar 2019 19:05:50 +0200
+Message-ID: <20190322170550.GX9224@smile.fi.intel.com>
+References: <20190322132108.25501-1-sakari.ailus@linux.intel.com>
+ <CAMuHMdVmqqjVx7As9AAywYxYXG=grijF5rF77OBn6TUjM9+xKw@mail.gmail.com>
+ <20190322135350.2btpno7vspvewxvk@paasikivi.fi.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP9scH+DECa1udToEvtYMRTZ1-VMuVajAh8uwpxzuMq0RA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20190322135350.2btpno7vspvewxvk@paasikivi.fi.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, clang-built-linux@googlegroups.com, Nick Desaulniers <ndesaulniers@google.com>, Nathan Chancellor <natechancellor@gmail.com>, Jason Dillaman <dillaman@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Sakari Ailus <sakari.ailus@linux.intel.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Petr Mladek <pmladek@suse.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, scsi <linux-scsi@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, linux-um@lists.infradead.org, linux-f2fs-devel@lists.sourceforge.net, linux-block@vger.kernel.org, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, netdev <netdev@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, linux-pci <linux-pci@vger.kernel.org>, sparclinux <sparclinux@vger.kernel.org>, xen-devel@lists.xenproject.org, ceph-devel <ceph-devel@vger.kernel.org>, Linux MM <linux-mm@kvack.org>, Linux ARM <linux-arm-kernel@l>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Mar 22, 2019 at 5:33 PM Ilya Dryomov <idryomov@gmail.com> wrote:
->
-> On Fri, Mar 22, 2019 at 3:36 PM Arnd Bergmann <arnd@arndb.de> wrote:
-> >
-> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> > index 4ba967d65cf9..cbcc3baf3807 100644
-> > --- a/drivers/block/rbd.c
-> > +++ b/drivers/block/rbd.c
-> > @@ -2399,7 +2399,7 @@ static int rbd_obj_read_from_parent(struct rbd_obj_request *obj_req)
-> >                                                       &obj_req->bvec_pos);
-> >                         break;
-> >                 default:
-> > -                       rbd_assert(0);
-> > +                       BUG();
-> >                 }
-> >         } else {
-> >                 ret = rbd_img_fill_from_bvecs(child_img_req,
->
-> Hi Arnd,
->
-> You did a couple of these last year in commit c6244b3b2377 ("rbd: avoid
-> Wreturn-type warnings").
+On Fri, Mar 22, 2019 at 03:53:50PM +0200, Sakari Ailus wrote:
 
-Ah, I had completely forgotten about that. Different bug and different
-compiler, but same solution ;-)
+> Porting a patch
+> forward should have no issues either as checkpatch.pl has been complaining
+> of the use of %pf and %pF for a while now.
 
->  Let's change all of those default cases to BUG
-> in one go.  Do you want to do that or should I?
+And that's exactly the reason why I think instead of removing warning on
+checkpatch, it makes sense to convert to an error for a while. People are
+tending read documentation on internet and thus might have outdated one. And
+yes, the compiler doesn't tell a thing about it.
 
-I've prepared another patch now and sent it out, please
-apply it on top. I'd like this one-line patch to stay separate though
-since it captures the warning message and may need to
-be backported to stable kernels later.
+P.S. Though, if majority of people will tell that I'm wrong, then it's okay to
+remove.
 
-      Arnd
+-- 
+With Best Regards,
+Andy Shevchenko
