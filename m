@@ -1,51 +1,48 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] ceph: fix clang warning for CEPH_DEFINE_OID_ONSTACK
-Date: Fri, 22 Mar 2019 15:08:11 +0100
-Message-ID: <20190322140819.300740-1-arnd@arndb.de>
+From: David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: [PATCH 1/2] treewide: Switch printk users from %pf and %pF to
+ %ps and %pS, respectively
+Date: Fri, 22 Mar 2019 15:30:28 +0100
+Message-ID: <20190322143028.GD28481@twin.jikos.cz>
+References: <20190322132108.25501-1-sakari.ailus@linux.intel.com>
+ <20190322132108.25501-2-sakari.ailus@linux.intel.com>
+Reply-To: dsterba-AlSwsSmVLrQ@public.gmane.org
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
-Cc: clang-built-linux@googlegroups.com, Nick Desaulniers <ndesaulniers@google.com>, Nathan Chancellor <natechancellor@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Alex Elder <elder@linaro.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20190322132108.25501-2-sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-um-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-clang complains about assigning a variable to itself during the
-declaration:
+On Fri, Mar 22, 2019 at 03:21:07PM +0200, Sakari Ailus wrote:
+> %pF and %pf are functionally equivalent to %pS and %ps conversion
+> specifiers. The former are deprecated, therefore switch the current users
+> to use the preferred variant.
+> 
+> The changes have been produced by the following command:
+> 
+> 	git grep -l '%p[fF]' | grep -v '^\(tools\|Documentation\)/' | \
+> 	while read i; do perl -i -pe 's/%pf/%ps/g; s/%pF/%pS/g;' $i; done
+> 
+> And verifying the result.
+> 
+> Signed-off-by: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> ---
 
-fs/ceph/ioctl.c:187:26: error: variable 'oid' is uninitialized when used within its own initialization [-Werror,-Wuninitialized]
-        CEPH_DEFINE_OID_ONSTACK(oid);
-                                ^~~
-include/linux/ceph/osdmap.h:122:52: note: expanded from macro 'CEPH_DEFINE_OID_ONSTACK'
-        struct ceph_object_id oid = CEPH_OID_INIT_ONSTACK(oid)
-                              ~~~                         ^~~
-include/linux/ceph/osdmap.h:120:29: note: expanded from macro 'CEPH_OID_INIT_ONSTACK'
-    ({ ceph_oid_init(&oid); oid; })
-                            ^~~
+For 
 
-We use this trick in other places, but it is completely unnecessary
-here, as we can just use a regular struct initializer.
+>  fs/btrfs/tests/free-space-tree-tests.c  |  4 ++--
+>  include/trace/events/btrfs.h            |  2 +-
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- include/linux/ceph/osdmap.h | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
-
-diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-index 5675b1f09bc5..82f957a7a0d6 100644
---- a/include/linux/ceph/osdmap.h
-+++ b/include/linux/ceph/osdmap.h
-@@ -116,10 +116,8 @@ static inline void ceph_oid_init(struct ceph_object_id *oid)
- 	oid->name_len = 0;
- }
- 
--#define CEPH_OID_INIT_ONSTACK(oid)					\
--    ({ ceph_oid_init(&oid); oid; })
- #define CEPH_DEFINE_OID_ONSTACK(oid)					\
--	struct ceph_object_id oid = CEPH_OID_INIT_ONSTACK(oid)
-+	struct ceph_object_id oid = { .name = oid.inline_name }
- 
- static inline bool ceph_oid_empty(const struct ceph_object_id *oid)
- {
--- 
-2.20.0
+Acked-by: David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>
