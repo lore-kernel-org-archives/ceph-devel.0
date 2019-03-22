@@ -1,46 +1,41 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] ceph: fix clang warning for CEPH_DEFINE_OID_ONSTACK
-Date: Fri, 22 Mar 2019 16:07:50 +0100
-Message-ID: <CAK8P3a0NXVt3znez-BtVpCX61sNWoJ6Q9XmJw6mJVzQkG6VCdQ@mail.gmail.com>
-References: <20190322140819.300740-1-arnd@arndb.de> <CAOi1vP_=5gBUFLCofhaCNbMkfdwYNSkJ06Rmw-bJkLXNC4v8fA@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 5.1-rc2
+Date: Fri, 22 Mar 2019 17:19:47 +0100
+Message-ID: <20190322161947.15053-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP_=5gBUFLCofhaCNbMkfdwYNSkJ06Rmw-bJkLXNC4v8fA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, clang-built-linux@googlegroups.com, Nick Desaulniers <ndesaulniers@google.com>, Nathan Chancellor <natechancellor@gmail.com>, Alex Elder <elder@linaro.org>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Mar 22, 2019 at 3:40 PM Ilya Dryomov <idryomov@gmail.com> wrote:
->
-> On Fri, Mar 22, 2019 at 3:08 PM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> Hi Arnd,
->
-> I don't like this because the initialization is no longer contained to
-> ceph_oid_init().  Now there are two things to patch instead of one.
->
-> How is this going to be fixed in other places?
+Hi Linus,
 
-The only other warning like this that I encountered was in
-DECLARE_WAIT_QUEUE_HEAD_ONSTACK().
+The following changes since commit 9e98c678c2d6ae3a17cb2de55d17f69dddaa231b:
 
-So far, I have no idea for how to solve it, other than disabling
-CONFIG_LOCKDEP when clang is used.
+  Linux 5.1-rc1 (2019-03-17 14:22:26 -0700)
 
-Would you prefer this version?
+are available in the Git repository at:
 
-#define CEPH_OID_INITIALIZER(oid) { .name = (oid).inline_name }
-#define CEPH_DEFINE_OID_ONSTACK(oid)                            \
-        struct ceph_object_id oid = CEPH_OID_INITIALIZER(oid)
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.1-rc2
 
-static inline void ceph_oid_init(struct ceph_object_id *oid)
-{
-        *oid = (struct ceph_object_id)CEPH_OID_INITIALIZER(*oid);
-}
+for you to fetch changes up to 9d4a227f6ef189cf37eb22641f6ee788b7dc41bb:
 
+  rbd: drop wait_for_latest_osdmap() (2019-03-20 16:27:40 +0100)
 
+----------------------------------------------------------------
+A follow up for the new alloc_size logic and a blacklisting fix, marked
+for stable.
 
+----------------------------------------------------------------
+Ilya Dryomov (3):
+      rbd: set io_min, io_opt and discard_granularity to alloc_size
+      libceph: wait for latest osdmap in ceph_monc_blacklist_add()
+      rbd: drop wait_for_latest_osdmap()
 
-       Arnd
+ drivers/block/rbd.c          | 28 ++++++----------------------
+ include/linux/ceph/libceph.h |  2 ++
+ net/ceph/ceph_common.c       | 18 +++++++++++++++++-
+ net/ceph/mon_client.c        |  9 +++++++++
+ 4 files changed, 34 insertions(+), 23 deletions(-)
