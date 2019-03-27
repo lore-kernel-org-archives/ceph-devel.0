@@ -1,1278 +1,2124 @@
-From: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH v2 1/1] treewide: Switch printk users from %pf and %pF to
- %ps and %pS, respectively
-Date: Tue, 26 Mar 2019 14:35:10 +0100
-Message-ID: <20190326133510.cylhvyvc7l77bqdg@pathway.suse.cz>
-References: <20190325193229.23390-1-sakari.ailus@linux.intel.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [RFC PATCH] ceph: Convert to fs_context
+Date: Wed, 27 Mar 2019 16:59:03 +0800
+Message-ID: <CAAM7YAnsYr0uQixmcv-=UDLWdmdJmbEN2D_zBcFQq2j-s+xtiw@mail.gmail.com>
+References: <155309339693.2324.9941108136967815885.stgit@warthog.procyon.org.uk>
+ <155309340402.2324.7571102623113278534.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20190325193229.23390-1-sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-um-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Anna-Maria Gleixner <anna-maria-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <155309340402.2324.7571102623113278534.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Linus,
-
-On Mon 2019-03-25 21:32:28, Sakari Ailus wrote:
-> %pF and %pf are functionally equivalent to %pS and %ps conversion
-> specifiers. The former are deprecated, therefore switch the current users
-> to use the preferred variant.
-> 
-> The changes have been produced by the following command:
-> 
-> 	git grep -l '%p[fF]' | grep -v '^\(tools\|Documentation\)/' | \
-> 	while read i; do perl -i -pe 's/%pf/%ps/g; s/%pF/%pS/g;' $i; done
-> 
-> And verifying the result.
-
-I guess that the best timing for such tree-wide clean up is the end
-of the merge window. Should we wait for 5.2 or is it still acceptable
-to push this for 5.1-rc3?
-
-The %pf/%pF modifiers are deprecated since the commit
-04b8eb7a4ccd9ef93 ("symbol lookup: introduce
-dereference_symbol_descriptor()") in v4.16-rc1.
-
-Note that include/trace/events/timer.h is handled separately
-in linux-next by
-https://lkml.kernel.org/r/20190321120921.16463-4-anna-maria-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
-
-Or we could use v1 of this patch, see
-https://lkml.kernel.org/r/20190322132108.25501-2-sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org
-
-> Signed-off-by: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-> Acked-by: David Sterba <dsterba-IBi9RG/b67k@public.gmane.org> (for btrfs)
-> Acked-by: Mike Rapoport <rppt-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org> (for mm/memblock.c)
-> Acked-by: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-
-Reviewed-by: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>
-
-Best Regards,
-Petr
-
+On Wed, Mar 20, 2019 at 10:53 PM David Howells <dhowells@redhat.com> wrote:
+>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> cc: Ilya Dryomov <idryomov@gmail.com>
+> cc: "Yan, Zheng" <zyan@redhat.com>
+> cc: Sage Weil <sage@redhat.com>
+> cc: ceph-devel@vger.kernel.org
 > ---
-> I split this off from the set as there's a change in
-> include/trace/events/timer.h that conflicts with v1 of this patch and
-> should the second patch to be applied without that change, results into
-> invalid use of %pf. To address the matter safely without conflicts or
-> trying to print invalid pointer conversions, this patch and the other one
-> changing include/trace/events/timer.h must be merged before second patch
-> in v1 of this set can go in.
-> 
-> since v1:
-> 
-> - Drop such changes to include/trace/events/timer.h where %pf has already
->   been converted to %ps in linux-next master.
-> 
->  arch/alpha/kernel/pci_iommu.c           | 20 ++++++++++----------
->  arch/arm/mach-imx/pm-imx6.c             |  2 +-
->  arch/arm/mm/alignment.c                 |  2 +-
->  arch/arm/nwfpe/fpmodule.c               |  2 +-
->  arch/microblaze/mm/pgtable.c            |  2 +-
->  arch/sparc/kernel/ds.c                  |  2 +-
->  arch/um/kernel/sysrq.c                  |  2 +-
->  arch/x86/include/asm/trace/exceptions.h |  2 +-
->  arch/x86/kernel/irq_64.c                |  2 +-
->  arch/x86/mm/extable.c                   |  4 ++--
->  arch/x86/xen/multicalls.c               |  2 +-
->  drivers/acpi/device_pm.c                |  2 +-
->  drivers/base/power/main.c               |  6 +++---
->  drivers/base/syscore.c                  | 12 ++++++------
->  drivers/block/drbd/drbd_receiver.c      |  2 +-
->  drivers/block/floppy.c                  | 10 +++++-----
->  drivers/cpufreq/cpufreq.c               |  2 +-
->  drivers/mmc/core/quirks.h               |  2 +-
->  drivers/nvdimm/bus.c                    |  2 +-
->  drivers/nvdimm/dimm_devs.c              |  2 +-
->  drivers/pci/pci-driver.c                | 14 +++++++-------
->  drivers/pci/quirks.c                    |  4 ++--
->  drivers/pnp/quirks.c                    |  2 +-
->  drivers/scsi/esp_scsi.c                 |  2 +-
->  fs/btrfs/tests/free-space-tree-tests.c  |  4 ++--
->  fs/f2fs/f2fs.h                          |  2 +-
->  fs/pstore/inode.c                       |  2 +-
->  include/trace/events/btrfs.h            |  2 +-
->  include/trace/events/cpuhp.h            |  4 ++--
->  include/trace/events/preemptirq.h       |  2 +-
->  include/trace/events/rcu.h              |  4 ++--
->  include/trace/events/sunrpc.h           |  2 +-
->  include/trace/events/vmscan.h           |  4 ++--
->  include/trace/events/workqueue.h        |  4 ++--
->  include/trace/events/xen.h              |  2 +-
->  init/main.c                             |  6 +++---
->  kernel/async.c                          |  4 ++--
->  kernel/events/uprobes.c                 |  2 +-
->  kernel/fail_function.c                  |  2 +-
->  kernel/irq/debugfs.c                    |  2 +-
->  kernel/irq/handle.c                     |  2 +-
->  kernel/irq/manage.c                     |  2 +-
->  kernel/irq/spurious.c                   |  4 ++--
->  kernel/rcu/tree.c                       |  2 +-
->  kernel/stop_machine.c                   |  2 +-
->  kernel/time/sched_clock.c               |  2 +-
->  kernel/time/timer.c                     |  2 +-
->  kernel/workqueue.c                      | 12 ++++++------
->  lib/error-inject.c                      |  2 +-
->  lib/percpu-refcount.c                   |  4 ++--
->  mm/memblock.c                           | 12 ++++++------
->  mm/memory.c                             |  2 +-
->  mm/vmscan.c                             |  2 +-
->  net/ceph/osd_client.c                   |  2 +-
->  net/core/net-procfs.c                   |  2 +-
->  net/core/netpoll.c                      |  4 ++--
->  56 files changed, 105 insertions(+), 105 deletions(-)
-> 
-> diff --git a/arch/alpha/kernel/pci_iommu.c b/arch/alpha/kernel/pci_iommu.c
-> index 3034d6d936d2..242108439f42 100644
-> --- a/arch/alpha/kernel/pci_iommu.c
-> +++ b/arch/alpha/kernel/pci_iommu.c
-> @@ -249,7 +249,7 @@ static int pci_dac_dma_supported(struct pci_dev *dev, u64 mask)
->  		ok = 0;
->  
->  	/* If both conditions above are met, we are fine. */
-> -	DBGA("pci_dac_dma_supported %s from %pf\n",
-> +	DBGA("pci_dac_dma_supported %s from %ps\n",
->  	     ok ? "yes" : "no", __builtin_return_address(0));
->  
->  	return ok;
-> @@ -281,7 +281,7 @@ pci_map_single_1(struct pci_dev *pdev, void *cpu_addr, size_t size,
->  	    && paddr + size <= __direct_map_size) {
->  		ret = paddr + __direct_map_base;
->  
-> -		DBGA2("pci_map_single: [%p,%zx] -> direct %llx from %pf\n",
-> +		DBGA2("pci_map_single: [%p,%zx] -> direct %llx from %ps\n",
->  		      cpu_addr, size, ret, __builtin_return_address(0));
->  
->  		return ret;
-> @@ -292,7 +292,7 @@ pci_map_single_1(struct pci_dev *pdev, void *cpu_addr, size_t size,
->  	if (dac_allowed) {
->  		ret = paddr + alpha_mv.pci_dac_offset;
->  
-> -		DBGA2("pci_map_single: [%p,%zx] -> DAC %llx from %pf\n",
-> +		DBGA2("pci_map_single: [%p,%zx] -> DAC %llx from %ps\n",
->  		      cpu_addr, size, ret, __builtin_return_address(0));
->  
->  		return ret;
-> @@ -329,7 +329,7 @@ pci_map_single_1(struct pci_dev *pdev, void *cpu_addr, size_t size,
->  	ret = arena->dma_base + dma_ofs * PAGE_SIZE;
->  	ret += (unsigned long)cpu_addr & ~PAGE_MASK;
->  
-> -	DBGA2("pci_map_single: [%p,%zx] np %ld -> sg %llx from %pf\n",
-> +	DBGA2("pci_map_single: [%p,%zx] np %ld -> sg %llx from %ps\n",
->  	      cpu_addr, size, npages, ret, __builtin_return_address(0));
->  
->  	return ret;
-> @@ -396,14 +396,14 @@ static void alpha_pci_unmap_page(struct device *dev, dma_addr_t dma_addr,
->  	    && dma_addr < __direct_map_base + __direct_map_size) {
->  		/* Nothing to do.  */
->  
-> -		DBGA2("pci_unmap_single: direct [%llx,%zx] from %pf\n",
-> +		DBGA2("pci_unmap_single: direct [%llx,%zx] from %ps\n",
->  		      dma_addr, size, __builtin_return_address(0));
->  
->  		return;
->  	}
->  
->  	if (dma_addr > 0xffffffff) {
-> -		DBGA2("pci64_unmap_single: DAC [%llx,%zx] from %pf\n",
-> +		DBGA2("pci64_unmap_single: DAC [%llx,%zx] from %ps\n",
->  		      dma_addr, size, __builtin_return_address(0));
->  		return;
->  	}
-> @@ -435,7 +435,7 @@ static void alpha_pci_unmap_page(struct device *dev, dma_addr_t dma_addr,
->  
->  	spin_unlock_irqrestore(&arena->lock, flags);
->  
-> -	DBGA2("pci_unmap_single: sg [%llx,%zx] np %ld from %pf\n",
-> +	DBGA2("pci_unmap_single: sg [%llx,%zx] np %ld from %ps\n",
->  	      dma_addr, size, npages, __builtin_return_address(0));
->  }
->  
-> @@ -458,7 +458,7 @@ static void *alpha_pci_alloc_coherent(struct device *dev, size_t size,
->  	cpu_addr = (void *)__get_free_pages(gfp | __GFP_ZERO, order);
->  	if (! cpu_addr) {
->  		printk(KERN_INFO "pci_alloc_consistent: "
-> -		       "get_free_pages failed from %pf\n",
-> +		       "get_free_pages failed from %ps\n",
->  			__builtin_return_address(0));
->  		/* ??? Really atomic allocation?  Otherwise we could play
->  		   with vmalloc and sg if we can't find contiguous memory.  */
-> @@ -477,7 +477,7 @@ static void *alpha_pci_alloc_coherent(struct device *dev, size_t size,
->  		goto try_again;
->  	}
->  
-> -	DBGA2("pci_alloc_consistent: %zx -> [%p,%llx] from %pf\n",
-> +	DBGA2("pci_alloc_consistent: %zx -> [%p,%llx] from %ps\n",
->  	      size, cpu_addr, *dma_addrp, __builtin_return_address(0));
->  
->  	return cpu_addr;
-> @@ -497,7 +497,7 @@ static void alpha_pci_free_coherent(struct device *dev, size_t size,
->  	pci_unmap_single(pdev, dma_addr, size, PCI_DMA_BIDIRECTIONAL);
->  	free_pages((unsigned long)cpu_addr, get_order(size));
->  
-> -	DBGA2("pci_free_consistent: [%llx,%zx] from %pf\n",
-> +	DBGA2("pci_free_consistent: [%llx,%zx] from %ps\n",
->  	      dma_addr, size, __builtin_return_address(0));
->  }
->  
-> diff --git a/arch/arm/mach-imx/pm-imx6.c b/arch/arm/mach-imx/pm-imx6.c
-> index 54add0178b96..e527532f6931 100644
-> --- a/arch/arm/mach-imx/pm-imx6.c
-> +++ b/arch/arm/mach-imx/pm-imx6.c
-> @@ -633,7 +633,7 @@ static void imx6_pm_stby_poweroff(void)
->  static int imx6_pm_stby_poweroff_probe(void)
+>
+>  drivers/block/rbd.c             |  362 +++++++++++---------
+>  fs/ceph/cache.c                 |    9 -
+>  fs/ceph/cache.h                 |    2
+>  fs/ceph/super.c                 |  697 +++++++++++++++++++--------------------
+>  fs/ceph/super.h                 |    1
+>  fs/fs_context.c                 |    2
+>  fs/fs_parser.c                  |    2
+>  include/linux/ceph/ceph_debug.h |    1
+>  include/linux/ceph/libceph.h    |   17 +
+>  net/ceph/ceph_common.c          |  410 ++++++++++-------------
+>  10 files changed, 726 insertions(+), 777 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 4ba967d65cf9..489f6c2322a6 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -34,7 +34,7 @@
+>  #include <linux/ceph/cls_lock_client.h>
+>  #include <linux/ceph/striper.h>
+>  #include <linux/ceph/decode.h>
+> -#include <linux/parser.h>
+> +#include <linux/fs_parser.h>
+>  #include <linux/bsearch.h>
+>
+>  #include <linux/kernel.h>
+> @@ -747,40 +747,6 @@ static struct rbd_client *rbd_client_find(struct ceph_options *ceph_opts)
+>  /*
+>   * (Per device) rbd map options
+>   */
+> -enum {
+> -       Opt_queue_depth,
+> -       Opt_alloc_size,
+> -       Opt_lock_timeout,
+> -       Opt_last_int,
+> -       /* int args above */
+> -       Opt_pool_ns,
+> -       Opt_last_string,
+> -       /* string args above */
+> -       Opt_read_only,
+> -       Opt_read_write,
+> -       Opt_lock_on_read,
+> -       Opt_exclusive,
+> -       Opt_notrim,
+> -       Opt_err
+> -};
+> -
+> -static match_table_t rbd_opts_tokens = {
+> -       {Opt_queue_depth, "queue_depth=%d"},
+> -       {Opt_alloc_size, "alloc_size=%d"},
+> -       {Opt_lock_timeout, "lock_timeout=%d"},
+> -       /* int args above */
+> -       {Opt_pool_ns, "_pool_ns=%s"},
+> -       /* string args above */
+> -       {Opt_read_only, "read_only"},
+> -       {Opt_read_only, "ro"},          /* Alternate spelling */
+> -       {Opt_read_write, "read_write"},
+> -       {Opt_read_write, "rw"},         /* Alternate spelling */
+> -       {Opt_lock_on_read, "lock_on_read"},
+> -       {Opt_exclusive, "exclusive"},
+> -       {Opt_notrim, "notrim"},
+> -       {Opt_err, NULL}
+> -};
+> -
+>  struct rbd_options {
+>         int     queue_depth;
+>         int     alloc_size;
+> @@ -799,85 +765,98 @@ struct rbd_options {
+>  #define RBD_EXCLUSIVE_DEFAULT  false
+>  #define RBD_TRIM_DEFAULT       true
+>
+> -struct parse_rbd_opts_ctx {
+> -       struct rbd_spec         *spec;
+> -       struct rbd_options      *opts;
+> +enum {
+> +       Opt_alloc_size,
+> +       Opt_exclusive,
+> +       Opt_lock_on_read,
+> +       Opt_lock_timeout,
+> +       Opt_notrim,
+> +       Opt_pool_ns,
+> +       Opt_queue_depth,
+> +       Opt_read_only,
+> +       Opt_read_write,
+> +};
+> +
+> +static const struct fs_parameter_spec rbd_param_specs[] = {
+> +       fsparam_u32     ("alloc_size",                  Opt_alloc_size),
+> +       fsparam_flag    ("exclusive",                   Opt_exclusive),
+> +       fsparam_flag    ("lock_on_read",                Opt_lock_on_read),
+> +       fsparam_u32     ("lock_timeout",                Opt_lock_timeout),
+> +       fsparam_flag    ("notrim",                      Opt_notrim),
+> +       fsparam_string  ("_pool_ns",                    Opt_pool_ns),
+> +       fsparam_u32     ("queue_depth",                 Opt_queue_depth),
+> +       fsparam_flag    ("ro",                          Opt_read_only),
+> +       fsparam_flag    ("rw",                          Opt_read_write),
+> +       {}
+> +};
+> +
+> +static const struct fs_parameter_description rbd_parameters = {
+> +       .name           = "rbd",
+> +       .specs          = rbd_param_specs,
+>  };
+>
+> -static int parse_rbd_opts_token(char *c, void *private)
+> +static int rbd_parse_param(struct ceph_config_context *ctx, struct fs_parameter *param)
 >  {
->  	if (pm_power_off) {
-> -		pr_warn("%s: pm_power_off already claimed  %p %pf!\n",
-> +		pr_warn("%s: pm_power_off already claimed  %p %ps!\n",
->  			__func__, pm_power_off, pm_power_off);
->  		return -EBUSY;
->  	}
-> diff --git a/arch/arm/mm/alignment.c b/arch/arm/mm/alignment.c
-> index b54f8f8def36..e376883ab35b 100644
-> --- a/arch/arm/mm/alignment.c
-> +++ b/arch/arm/mm/alignment.c
-> @@ -133,7 +133,7 @@ static const char *usermode_action[] = {
->  static int alignment_proc_show(struct seq_file *m, void *v)
+> -       struct parse_rbd_opts_ctx *pctx = private;
+> -       substring_t argstr[MAX_OPT_ARGS];
+> -       int token, intval, ret;
+> +       struct rbd_options *opts = ctx->rbd_opts;
+> +       struct rbd_spec *spec = ctx->rbd_spec;
+> +       struct fs_parse_result result;
+> +       int ret, opt;
+>
+> -       token = match_token(c, rbd_opts_tokens, argstr);
+> -       if (token < Opt_last_int) {
+> -               ret = match_int(&argstr[0], &intval);
+> -               if (ret < 0) {
+> -                       pr_err("bad option arg (not int) at '%s'\n", c);
+> -                       return ret;
+> -               }
+> -               dout("got int token %d val %d\n", token, intval);
+> -       } else if (token > Opt_last_int && token < Opt_last_string) {
+> -               dout("got string token %d val %s\n", token, argstr[0].from);
+> -       } else {
+> -               dout("got token %d\n", token);
+> -       }
+> +       ret = ceph_parse_option(ctx->opt, NULL, param);
+> +       if (ret != -ENOPARAM)
+> +               return ret;
+> +
+> +       opt = fs_parse(NULL, &rbd_parameters, param, &result);
+> +       if (opt < 0)
+> +               return opt;
+>
+> -       switch (token) {
+> +       switch (opt) {
+>         case Opt_queue_depth:
+> -               if (intval < 1) {
+> -                       pr_err("queue_depth out of range\n");
+> -                       return -EINVAL;
+> -               }
+> -               pctx->opts->queue_depth = intval;
+> +               if (result.uint_32 < 1)
+> +                       goto out_of_range;
+> +               opts->queue_depth = result.uint_32;
+>                 break;
+>         case Opt_alloc_size:
+> -               if (intval < 1) {
+> -                       pr_err("alloc_size out of range\n");
+> -                       return -EINVAL;
+> -               }
+> -               if (!is_power_of_2(intval)) {
+> -                       pr_err("alloc_size must be a power of 2\n");
+> -                       return -EINVAL;
+> -               }
+> -               pctx->opts->alloc_size = intval;
+> +               if (result.uint_32 < 1)
+> +                       goto out_of_range;
+> +               if (!is_power_of_2(result.uint_32))
+> +                       return invalf(NULL, "alloc_size must be a power of 2\n");
+> +               opts->alloc_size = result.uint_32;
+>                 break;
+>         case Opt_lock_timeout:
+>                 /* 0 is "wait forever" (i.e. infinite timeout) */
+> -               if (intval < 0 || intval > INT_MAX / 1000) {
+> -                       pr_err("lock_timeout out of range\n");
+> -                       return -EINVAL;
+> -               }
+> -               pctx->opts->lock_timeout = msecs_to_jiffies(intval * 1000);
+> +               if (result.uint_32 > INT_MAX / 1000)
+> +                       goto out_of_range;
+> +               opts->lock_timeout = msecs_to_jiffies(result.uint_32 * 1000);
+>                 break;
+>         case Opt_pool_ns:
+> -               kfree(pctx->spec->pool_ns);
+> -               pctx->spec->pool_ns = match_strdup(argstr);
+> -               if (!pctx->spec->pool_ns)
+> -                       return -ENOMEM;
+> +               kfree(spec->pool_ns);
+> +               spec->pool_ns = param->string;
+> +               param->string = NULL;
+>                 break;
+>         case Opt_read_only:
+> -               pctx->opts->read_only = true;
+> +               opts->read_only = true;
+>                 break;
+>         case Opt_read_write:
+> -               pctx->opts->read_only = false;
+> +               opts->read_only = false;
+>                 break;
+>         case Opt_lock_on_read:
+> -               pctx->opts->lock_on_read = true;
+> +               opts->lock_on_read = true;
+>                 break;
+>         case Opt_exclusive:
+> -               pctx->opts->exclusive = true;
+> +               opts->exclusive = true;
+>                 break;
+>         case Opt_notrim:
+> -               pctx->opts->trim = false;
+> +               opts->trim = false;
+>                 break;
+>         default:
+> -               /* libceph prints "bad option" msg */
+>                 return -EINVAL;
+>         }
+>
+>         return 0;
+> +
+> +out_of_range:
+> +       return invalf(NULL, "ceph: %s out of range", param->key);
+>  }
+>
+>  static char* obj_op_name(enum obj_operation_type op_type)
+> @@ -5444,22 +5423,79 @@ static inline size_t next_token(const char **buf)
+>   *
+>   * Note: uses GFP_KERNEL for allocation.
+>   */
+> -static inline char *dup_token(const char **buf, size_t *lenp)
+> +static inline char *dup_token(const char **buf)
 >  {
->  	seq_printf(m, "User:\t\t%lu\n", ai_user);
-> -	seq_printf(m, "System:\t\t%lu (%pF)\n", ai_sys, ai_sys_last_pc);
-> +	seq_printf(m, "System:\t\t%lu (%pS)\n", ai_sys, ai_sys_last_pc);
->  	seq_printf(m, "Skipped:\t%lu\n", ai_skipped);
->  	seq_printf(m, "Half:\t\t%lu\n", ai_half);
->  	seq_printf(m, "Word:\t\t%lu\n", ai_word);
-> diff --git a/arch/arm/nwfpe/fpmodule.c b/arch/arm/nwfpe/fpmodule.c
-> index 1365e8650843..ee34c76e6624 100644
-> --- a/arch/arm/nwfpe/fpmodule.c
-> +++ b/arch/arm/nwfpe/fpmodule.c
-> @@ -147,7 +147,7 @@ void float_raise(signed char flags)
->  #ifdef CONFIG_DEBUG_USER
->  	if (flags & debug)
->   		printk(KERN_DEBUG
-> -		       "NWFPE: %s[%d] takes exception %08x at %pf from %08lx\n",
-> +		       "NWFPE: %s[%d] takes exception %08x at %ps from %08lx\n",
->  		       current->comm, current->pid, flags,
->  		       __builtin_return_address(0), GET_USERREG()->ARM_pc);
+>         char *dup;
+>         size_t len;
+>
+>         len = next_token(buf);
+> -       dup = kmemdup(*buf, len + 1, GFP_KERNEL);
+> -       if (!dup)
+> -               return NULL;
+> -       *(dup + len) = '\0';
+> -       *buf += len;
+> +       dup = kmemdup_nul(*buf, len, GFP_KERNEL);
+> +       if (dup)
+> +               *buf += len;
+> +       return dup;
+> +}
+>
+> -       if (lenp)
+> -               *lenp = len;
+> +/*
+> + * Parse the parameter string.
+> + */
+> +static int rbd_parse_monolithic(struct ceph_config_context *ctx, const char *data)
+> +{
+> +       const char *sep, *key, *eq, *value;
+> +       char key_buf[32];
+> +       size_t size, klen;
+> +       int ret = 0;
+>
+> -       return dup;
+> +       struct fs_parameter param = {
+> +               .key    = key_buf,
+> +               .type   = fs_value_is_string,
+> +       };
+> +
+> +       do {
+> +               key = data;
+> +               sep = strchr(data, ',');
+> +               if (sep) {
+> +                       data = sep + 1;
+> +                       size = sep - key;
+> +               } else {
+> +                       data = NULL;
+> +                       size = strlen(key);
+> +               }
+> +
+> +               if (!size)
+> +                       continue;
+> +
+> +               eq = memchr(key, '=', sep - key);
+> +               if (eq) {
+> +                       klen = eq - key;
+> +                       if (klen == 0)
+> +                               return invalf(NULL, "Invalid option \"\"");
+> +                       value = eq + 1;
+> +                       param.size = sep - value;
+> +               } else {
+> +                       klen = size;
+> +                       param.size = 0;
+> +               }
+> +
+> +               if (klen >= sizeof(key_buf))
+> +                       return invalf(NULL, "Unknown option %*.*s",
+> +                                     (int)klen, (int)klen, key);
+> +               memcpy(key_buf, key, klen);
+> +               key_buf[klen] = 0;
+> +
+> +               if (param.size > 0) {
+> +                       param.string = kmemdup_nul(value, param.size,
+> +                                                  GFP_KERNEL);
+> +                       if (!param.string)
+> +                               return -ENOMEM;
+> +               }
+> +
+> +               ret = rbd_parse_param(ctx, &param);
+> +               kfree(param.string);
+> +               if (ret < 0)
+> +                       break;
+> +       } while (data);
+> +
+> +       return ret;
+>  }
+>
+>  /*
+> @@ -5503,18 +5539,11 @@ static inline char *dup_token(const char **buf, size_t *lenp)
+>   *      created.  The image head is used if no snapshot id is
+>   *      provided.  Snapshot mappings are always read-only.
+>   */
+> -static int rbd_add_parse_args(const char *buf,
+> -                               struct ceph_options **ceph_opts,
+> -                               struct rbd_options **opts,
+> -                               struct rbd_spec **rbd_spec)
+> +static int rbd_add_parse_args(const char *buf, struct ceph_config_context *ctx)
+>  {
+> -       size_t len;
+> -       char *options;
+> -       const char *mon_addrs;
+> +       const char *options, *mon_addrs;
+> +       size_t len, options_len, mon_addrs_size;
+>         char *snap_name;
+> -       size_t mon_addrs_size;
+> -       struct parse_rbd_opts_ctx pctx = { 0 };
+> -       struct ceph_options *copts;
+>         int ret;
+>
+>         /* The first four tokens are required */
+> @@ -5525,36 +5554,35 @@ static int rbd_add_parse_args(const char *buf,
+>                 return -EINVAL;
+>         }
+>         mon_addrs = buf;
+> -       mon_addrs_size = len + 1;
+> +       mon_addrs_size = len;
+>         buf += len;
+>
+> -       ret = -EINVAL;
+> -       options = dup_token(&buf, NULL);
+> -       if (!options)
+> -               return -ENOMEM;
+> -       if (!*options) {
+> +       options_len = next_token(&buf);
+> +       if (options_len == 0) {
+>                 rbd_warn(NULL, "no options provided");
+> -               goto out_err;
+> +               return -EINVAL;
+>         }
+> +       options = buf;
+> +       buf += len;
+>
+> -       pctx.spec = rbd_spec_alloc();
+> -       if (!pctx.spec)
+> -               goto out_mem;
+> +       ctx->rbd_spec = rbd_spec_alloc();
+> +       if (!ctx->rbd_spec)
+> +               return -ENOMEM;
+>
+> -       pctx.spec->pool_name = dup_token(&buf, NULL);
+> -       if (!pctx.spec->pool_name)
+> -               goto out_mem;
+> -       if (!*pctx.spec->pool_name) {
+> +       ctx->rbd_spec->pool_name = dup_token(&buf);
+> +       if (!ctx->rbd_spec->pool_name)
+> +               return -ENOMEM;
+> +       if (!*ctx->rbd_spec->pool_name) {
+>                 rbd_warn(NULL, "no pool name provided");
+> -               goto out_err;
+> +               return -EINVAL;
+>         }
+>
+> -       pctx.spec->image_name = dup_token(&buf, NULL);
+> -       if (!pctx.spec->image_name)
+> -               goto out_mem;
+> -       if (!*pctx.spec->image_name) {
+> +       ctx->rbd_spec->image_name = dup_token(&buf);
+> +       if (!ctx->rbd_spec->image_name)
+> +               return -ENOMEM;
+> +       if (!*ctx->rbd_spec->image_name) {
+>                 rbd_warn(NULL, "no image name provided");
+> -               goto out_err;
+> +               return -EINVAL;
+>         }
+>
+>         /*
+> @@ -5566,51 +5594,37 @@ static int rbd_add_parse_args(const char *buf,
+>                 buf = RBD_SNAP_HEAD_NAME; /* No snapshot supplied */
+>                 len = sizeof (RBD_SNAP_HEAD_NAME) - 1;
+>         } else if (len > RBD_MAX_SNAP_NAME_LEN) {
+> -               ret = -ENAMETOOLONG;
+> -               goto out_err;
+> +               return -ENAMETOOLONG;
+>         }
+> -       snap_name = kmemdup(buf, len + 1, GFP_KERNEL);
+> +
+> +       snap_name = kmemdup_nul(buf, len, GFP_KERNEL);
+>         if (!snap_name)
+> -               goto out_mem;
+> -       *(snap_name + len) = '\0';
+> -       pctx.spec->snap_name = snap_name;
+> +               return -ENOMEM;
+> +       ctx->rbd_spec->snap_name = snap_name;
+>
+>         /* Initialize all rbd options to the defaults */
+>
+> -       pctx.opts = kzalloc(sizeof(*pctx.opts), GFP_KERNEL);
+> -       if (!pctx.opts)
+> -               goto out_mem;
+> -
+> -       pctx.opts->read_only = RBD_READ_ONLY_DEFAULT;
+> -       pctx.opts->queue_depth = RBD_QUEUE_DEPTH_DEFAULT;
+> -       pctx.opts->alloc_size = RBD_ALLOC_SIZE_DEFAULT;
+> -       pctx.opts->lock_timeout = RBD_LOCK_TIMEOUT_DEFAULT;
+> -       pctx.opts->lock_on_read = RBD_LOCK_ON_READ_DEFAULT;
+> -       pctx.opts->exclusive = RBD_EXCLUSIVE_DEFAULT;
+> -       pctx.opts->trim = RBD_TRIM_DEFAULT;
+> -
+> -       copts = ceph_parse_options(options, mon_addrs,
+> -                                  mon_addrs + mon_addrs_size - 1,
+> -                                  parse_rbd_opts_token, &pctx);
+> -       if (IS_ERR(copts)) {
+> -               ret = PTR_ERR(copts);
+> -               goto out_err;
+> -       }
+> -       kfree(options);
+> +       ctx->rbd_opts = kzalloc(sizeof(*ctx->rbd_opts), GFP_KERNEL);
+> +       if (!ctx->rbd_opts)
+> +               return -ENOMEM;
+>
+> -       *ceph_opts = copts;
+> -       *opts = pctx.opts;
+> -       *rbd_spec = pctx.spec;
+> +       ctx->rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
+> +       ctx->rbd_opts->queue_depth = RBD_QUEUE_DEPTH_DEFAULT;
+> +       ctx->rbd_opts->alloc_size = RBD_ALLOC_SIZE_DEFAULT;
+> +       ctx->rbd_opts->lock_timeout = RBD_LOCK_TIMEOUT_DEFAULT;
+> +       ctx->rbd_opts->lock_on_read = RBD_LOCK_ON_READ_DEFAULT;
+> +       ctx->rbd_opts->exclusive = RBD_EXCLUSIVE_DEFAULT;
+> +       ctx->rbd_opts->trim = RBD_TRIM_DEFAULT;
+>
+> -       return 0;
+> -out_mem:
+> -       ret = -ENOMEM;
+> -out_err:
+> -       kfree(pctx.opts);
+> -       rbd_spec_put(pctx.spec);
+> -       kfree(options);
+> +       ctx->opt = ceph_alloc_options();
+> +       if (!ctx->opt)
+> +               return -ENOMEM;
+>
+> -       return ret;
+> +       ret = ceph_parse_server_specs(ctx->opt, NULL, mon_addrs, mon_addrs_size);
+> +       if (ret < 0)
+> +               return ret;
+> +
+> +       return rbd_parse_monolithic(ctx, options);
+>  }
+>
+>  static void rbd_dev_image_unlock(struct rbd_device *rbd_dev)
+> @@ -6017,10 +6031,8 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+>                           const char *buf,
+>                           size_t count)
+>  {
+> +       struct ceph_config_context ctx = {};
+>         struct rbd_device *rbd_dev = NULL;
+> -       struct ceph_options *ceph_opts = NULL;
+> -       struct rbd_options *rbd_opts = NULL;
+> -       struct rbd_spec *spec = NULL;
+>         struct rbd_client *rbdc;
+>         int rc;
+>
+> @@ -6028,33 +6040,34 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+>                 return -ENODEV;
+>
+>         /* parse add command */
+> -       rc = rbd_add_parse_args(buf, &ceph_opts, &rbd_opts, &spec);
+> +       rc = rbd_add_parse_args(buf, &ctx);
+>         if (rc < 0)
+>                 goto out;
+>
+> -       rbdc = rbd_get_client(ceph_opts);
+> +       rbdc = rbd_get_client(ctx.opt);
+>         if (IS_ERR(rbdc)) {
+>                 rc = PTR_ERR(rbdc);
+>                 goto err_out_args;
+>         }
+>
+>         /* pick the pool */
+> -       rc = ceph_pg_poolid_by_name(rbdc->client->osdc.osdmap, spec->pool_name);
+> +       rc = ceph_pg_poolid_by_name(rbdc->client->osdc.osdmap,
+> +                                   ctx.rbd_spec->pool_name);
+>         if (rc < 0) {
+>                 if (rc == -ENOENT)
+> -                       pr_info("pool %s does not exist\n", spec->pool_name);
+> +                       pr_info("pool %s does not exist\n", ctx.rbd_spec->pool_name);
+>                 goto err_out_client;
+>         }
+> -       spec->pool_id = (u64)rc;
+> +       ctx.rbd_spec->pool_id = (u64)rc;
+>
+> -       rbd_dev = rbd_dev_create(rbdc, spec, rbd_opts);
+> +       rbd_dev = rbd_dev_create(rbdc, ctx.rbd_spec, ctx.rbd_opts);
+>         if (!rbd_dev) {
+>                 rc = -ENOMEM;
+>                 goto err_out_client;
+>         }
+>         rbdc = NULL;            /* rbd_dev now owns this */
+> -       spec = NULL;            /* rbd_dev now owns this */
+> -       rbd_opts = NULL;        /* rbd_dev now owns this */
+> +       ctx.rbd_spec = NULL;    /* rbd_dev now owns this */
+> +       ctx.rbd_opts = NULL;    /* rbd_dev now owns this */
+>
+>         rbd_dev->config_info = kstrdup(buf, GFP_KERNEL);
+>         if (!rbd_dev->config_info) {
+> @@ -6122,8 +6135,9 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+>  err_out_client:
+>         rbd_put_client(rbdc);
+>  err_out_args:
+> -       rbd_spec_put(spec);
+> -       kfree(rbd_opts);
+> +       rbd_spec_put(ctx.rbd_spec);
+> +       kfree(ctx.rbd_opts);
+> +       ceph_destroy_options(ctx.opt);
+>         goto out;
+>  }
+>
+> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
+> index 1bf3502bdd6f..890d914ff5d5 100644
+> --- a/fs/ceph/cache.c
+> +++ b/fs/ceph/cache.c
+> @@ -21,6 +21,7 @@
+>   *
+>   */
+>
+> +#include <linux/fs_context.h>
+>  #include "super.h"
+>  #include "cache.h"
+>
+> @@ -62,7 +63,7 @@ void ceph_fscache_unregister(void)
+>         fscache_unregister_netfs(&ceph_cache_netfs);
+>  }
+>
+> -int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
+> +int ceph_fscache_register_fs(struct fs_context *fc, struct ceph_fs_client* fsc)
+>  {
+>         const struct ceph_fsid *fsid = &fsc->client->fsid;
+>         const char *fscache_uniq = fsc->mount_options->fscache_uniq;
+> @@ -79,8 +80,8 @@ int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
+>                 if (uniq_len && memcmp(ent->uniquifier, fscache_uniq, uniq_len))
+>                         continue;
+>
+> -               pr_err("fscache cookie already registered for fsid %pU\n", fsid);
+> -               pr_err("  use fsc=%%s mount option to specify a uniquifier\n");
+> +               errorf(fc, "fscache cookie already registered for fsid %pU\n", fsid);
+> +               errorf(fc, "  use fsc=%%s mount option to specify a uniquifier\n");
+>                 err = -EBUSY;
+>                 goto out_unlock;
+>         }
+> @@ -108,7 +109,7 @@ int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
+>                 list_add_tail(&ent->list, &ceph_fscache_list);
+>         } else {
+>                 kfree(ent);
+> -               pr_err("unable to register fscache cookie for fsid %pU\n",
+> +               errorf(fc, "unable to register fscache cookie for fsid %pU\n",
+>                        fsid);
+>                 /* all other fs ignore this error */
+>         }
+> diff --git a/fs/ceph/cache.h b/fs/ceph/cache.h
+> index 7e72c7594f0c..2b79ef177b2d 100644
+> --- a/fs/ceph/cache.h
+> +++ b/fs/ceph/cache.h
+> @@ -31,7 +31,7 @@ extern struct fscache_netfs ceph_cache_netfs;
+>  int ceph_fscache_register(void);
+>  void ceph_fscache_unregister(void);
+>
+> -int ceph_fscache_register_fs(struct ceph_fs_client* fsc);
+> +int ceph_fscache_register_fs(struct fs_context *fc, struct ceph_fs_client* fsc);
+>  void ceph_fscache_unregister_fs(struct ceph_fs_client* fsc);
+>
+>  void ceph_fscache_register_inode_cookie(struct inode *inode);
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 6d5bb2f74612..26cbaaaf5c83 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -8,7 +8,8 @@
+>  #include <linux/in6.h>
+>  #include <linux/module.h>
+>  #include <linux/mount.h>
+> -#include <linux/parser.h>
+> +#include <linux/fs_context.h>
+> +#include <linux/fs_parser.h>
+>  #include <linux/sched.h>
+>  #include <linux/seq_file.h>
+>  #include <linux/slab.h>
+> @@ -128,272 +129,290 @@ static int ceph_sync_fs(struct super_block *sb, int wait)
+>   * mount options
+>   */
+>  enum {
+> -       Opt_wsize,
+> -       Opt_rsize,
+> -       Opt_rasize,
+> -       Opt_caps_wanted_delay_min,
+> -       Opt_caps_wanted_delay_max,
+> +       Opt_acl,
+> +       Opt_asyncreaddir,
+>         Opt_caps_max,
+> -       Opt_readdir_max_entries,
+> -       Opt_readdir_max_bytes,
+> +       Opt_caps_wanted_delay_max,
+> +       Opt_caps_wanted_delay_min,
+>         Opt_congestion_kb,
+> -       Opt_last_int,
+> -       /* int args above */
+> -       Opt_snapdirname,
+> -       Opt_mds_namespace,
+> -       Opt_fscache_uniq,
+> -       Opt_last_string,
+> -       /* string args above */
+> -       Opt_dirstat,
+> -       Opt_nodirstat,
+> -       Opt_rbytes,
+> -       Opt_norbytes,
+> -       Opt_asyncreaddir,
+> -       Opt_noasyncreaddir,
+> +       Opt_copyfrom,
+>         Opt_dcache,
+> -       Opt_nodcache,
+> -       Opt_ino32,
+> -       Opt_noino32,
+> +       Opt_dirstat,
+>         Opt_fscache,
+> -       Opt_nofscache,
+> +       Opt_ino32,
+> +       Opt_mds_namespace,
+>         Opt_poolperm,
+> -       Opt_nopoolperm,
+> -       Opt_require_active_mds,
+> -       Opt_norequire_active_mds,
+> -#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> -       Opt_acl,
+> -#endif
+> -       Opt_noacl,
+>         Opt_quotadf,
+> -       Opt_noquotadf,
+> -       Opt_copyfrom,
+> -       Opt_nocopyfrom,
+> +       Opt_rasize,
+> +       Opt_rbytes,
+> +       Opt_readdir_max_bytes,
+> +       Opt_readdir_max_entries,
+> +       Opt_require_active_mds,
+> +       Opt_rsize,
+> +       Opt_snapdirname,
+> +       Opt_source,
+> +       Opt_wsize,
+>  };
+>
+> -static match_table_t fsopt_tokens = {
+> -       {Opt_wsize, "wsize=%d"},
+> -       {Opt_rsize, "rsize=%d"},
+> -       {Opt_rasize, "rasize=%d"},
+> -       {Opt_caps_wanted_delay_min, "caps_wanted_delay_min=%d"},
+> -       {Opt_caps_wanted_delay_max, "caps_wanted_delay_max=%d"},
+> -       {Opt_caps_max, "caps_max=%d"},
+> -       {Opt_readdir_max_entries, "readdir_max_entries=%d"},
+> -       {Opt_readdir_max_bytes, "readdir_max_bytes=%d"},
+> -       {Opt_congestion_kb, "write_congestion_kb=%d"},
+> -       /* int args above */
+> -       {Opt_snapdirname, "snapdirname=%s"},
+> -       {Opt_mds_namespace, "mds_namespace=%s"},
+> -       {Opt_fscache_uniq, "fsc=%s"},
+> -       /* string args above */
+> -       {Opt_dirstat, "dirstat"},
+> -       {Opt_nodirstat, "nodirstat"},
+> -       {Opt_rbytes, "rbytes"},
+> -       {Opt_norbytes, "norbytes"},
+> -       {Opt_asyncreaddir, "asyncreaddir"},
+> -       {Opt_noasyncreaddir, "noasyncreaddir"},
+> -       {Opt_dcache, "dcache"},
+> -       {Opt_nodcache, "nodcache"},
+> -       {Opt_ino32, "ino32"},
+> -       {Opt_noino32, "noino32"},
+> -       {Opt_fscache, "fsc"},
+> -       {Opt_nofscache, "nofsc"},
+> -       {Opt_poolperm, "poolperm"},
+> -       {Opt_nopoolperm, "nopoolperm"},
+> -       {Opt_require_active_mds, "require_active_mds"},
+> -       {Opt_norequire_active_mds, "norequire_active_mds"},
+> -#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> -       {Opt_acl, "acl"},
+> -#endif
+> -       {Opt_noacl, "noacl"},
+> -       {Opt_quotadf, "quotadf"},
+> -       {Opt_noquotadf, "noquotadf"},
+> -       {Opt_copyfrom, "copyfrom"},
+> -       {Opt_nocopyfrom, "nocopyfrom"},
+> -       {-1, NULL}
+> +static const struct fs_parameter_spec ceph_param_specs[] = {
+> +       fsparam_flag_no ("acl",                         Opt_acl),
+> +       fsparam_flag_no ("asyncreaddir",                Opt_asyncreaddir),
+> +       fsparam_u32     ("caps_max",                    Opt_caps_max),
+> +       fsparam_u32     ("caps_wanted_delay_max",       Opt_caps_wanted_delay_max),
+> +       fsparam_u32     ("caps_wanted_delay_min",       Opt_caps_wanted_delay_min),
+> +       fsparam_s32     ("write_congestion_kb",         Opt_congestion_kb),
+> +       fsparam_flag_no ("copyfrom",                    Opt_copyfrom),
+> +       fsparam_flag_no ("dcache",                      Opt_dcache),
+> +       fsparam_flag_no ("dirstat",                     Opt_dirstat),
+> +       __fsparam       (fs_param_is_string, "fsc",     Opt_fscache,
+> +                        fs_param_neg_with_no | fs_param_v_optional),
+> +       fsparam_flag_no ("ino32",                       Opt_ino32),
+> +       fsparam_string  ("mds_namespace",               Opt_mds_namespace),
+> +       fsparam_flag_no ("poolperm",                    Opt_poolperm),
+> +       fsparam_flag_no ("quotadf",                     Opt_quotadf),
+> +       fsparam_u32     ("rasize",                      Opt_rasize),
+> +       fsparam_flag_no ("rbytes",                      Opt_rbytes),
+> +       fsparam_s32     ("readdir_max_bytes",           Opt_readdir_max_bytes),
+> +       fsparam_s32     ("readdir_max_entries",         Opt_readdir_max_entries),
+> +       fsparam_flag_no ("require_active_mds",          Opt_require_active_mds),
+> +       fsparam_u32     ("rsize",                       Opt_rsize),
+> +       fsparam_string  ("snapdirname",                 Opt_snapdirname),
+> +       fsparam_string  ("source",                      Opt_source),
+> +       fsparam_u32     ("wsize",                       Opt_wsize),
+> +       {}
+>  };
+>
+> -static int parse_fsopt_token(char *c, void *private)
+> +static const struct fs_parameter_description ceph_fs_parameters = {
+> +        .name           = "ceph",
+> +        .specs          = ceph_param_specs,
+> +};
+> +
+> +/*
+> + * Parse the source parameter.  Distinguish the server list from the path.
+> + * Internally we do not include the leading '/' in the path.
+> + *
+> + * The source will look like:
+> + *     <server_spec>[,<server_spec>...]:[<path>]
+> + * where
+> + *     <server_spec> is <ip>[:<port>]
+> + *     <path> is optional, but if present must begin with '/'
+> + */
+> +static int ceph_parse_source(struct fs_context *fc, struct fs_parameter *param)
+>  {
+> -       struct ceph_mount_options *fsopt = private;
+> -       substring_t argstr[MAX_OPT_ARGS];
+> -       int token, intval, ret;
+> -
+> -       token = match_token((char *)c, fsopt_tokens, argstr);
+> -       if (token < 0)
+> -               return -EINVAL;
+> -
+> -       if (token < Opt_last_int) {
+> -               ret = match_int(&argstr[0], &intval);
+> -               if (ret < 0) {
+> -                       pr_err("bad option arg (not int) at '%s'\n", c);
+> -                       return ret;
+> +       struct ceph_config_context *ctx = fc->fs_private;
+> +       struct ceph_mount_options *fsopt = ctx->mount_options;
+> +       char *dev_name = param->string, *dev_name_end;
+> +       int ret;
+> +
+> +       dout("parse_mount_options %p, dev_name '%s'\n", fsopt, dev_name);
+> +
+> +       if (fc->source)
+> +               return invalf(fc, "Multiple sources specified");
+> +       if (!dev_name || !*dev_name)
+> +               return invalf(fc, "Empty source");
+> +       if (dev_name[0] == '/')
+> +               return invalf(fc, "Missing colon");
+> +
+> +       dev_name_end = strchr(dev_name + 1, '/');
+> +       if (dev_name_end) {
+> +               if (strlen(dev_name_end) > 1) {
+> +                       kfree(fsopt->server_path);
+> +                       fsopt->server_path = kstrdup(dev_name_end, GFP_KERNEL);
+> +                       if (!fsopt->server_path)
+> +                               return -ENOMEM;
+>                 }
+> -               dout("got int token %d val %d\n", token, intval);
+> -       } else if (token > Opt_last_int && token < Opt_last_string) {
+> -               dout("got string token %d val %s\n", token,
+> -                    argstr[0].from);
+>         } else {
+> -               dout("got token %d\n", token);
+> +               dev_name_end = dev_name + strlen(dev_name);
+> +       }
+> +
+> +       /* Trim off the path and the colon separator */
+> +       dev_name_end--;
+> +       if (*dev_name_end != ':')
+> +               return invalf(fc, "device name is missing path (no : separator in %s)\n",
+> +                             dev_name);
+> +       *dev_name_end = 0;
+> +
+> +       dout("device name '%s'\n", dev_name);
+> +       if (fsopt->server_path)
+> +               dout("server path '%s'\n", fsopt->server_path);
+> +
+> +       param->size = dev_name_end - dev_name;
+> +       ret = ceph_parse_server_specs(ctx->opt, fc,
+> +                                     param->string, dev_name_end - dev_name);
+> +       if (ret == 0) {
+> +               fc->source = param->string;
+> +               param->string = NULL;
+>         }
+>
+> -       switch (token) {
+> +       return 0;
+> +}
+> +
+> +static int ceph_parse_param(struct fs_context *fc, struct fs_parameter *param)
+> +{
+> +       struct ceph_config_context *ctx = fc->fs_private;
+> +       struct ceph_mount_options *fsopt = ctx->mount_options;
+> +       struct fs_parse_result result;
+> +       int ret, opt;
+> +
+> +       ret = ceph_parse_option(ctx->opt, fc, param);
+> +       if (ret != -ENOPARAM)
+> +               return ret;
+> +
+> +       opt = fs_parse(fc, &ceph_fs_parameters, param, &result);
+> +       if (opt < 0)
+> +               return opt;
+> +
+> +       switch (opt) {
+> +       case Opt_source:
+> +               return ceph_parse_source(fc, param);
+>         case Opt_snapdirname:
+>                 kfree(fsopt->snapdir_name);
+> -               fsopt->snapdir_name = kstrndup(argstr[0].from,
+> -                                              argstr[0].to-argstr[0].from,
+> -                                              GFP_KERNEL);
+> -               if (!fsopt->snapdir_name)
+> -                       return -ENOMEM;
+> +               fsopt->snapdir_name = param->string;
+> +               param->string = NULL;
+>                 break;
+>         case Opt_mds_namespace:
+>                 kfree(fsopt->mds_namespace);
+> -               fsopt->mds_namespace = kstrndup(argstr[0].from,
+> -                                               argstr[0].to-argstr[0].from,
+> -                                               GFP_KERNEL);
+> -               if (!fsopt->mds_namespace)
+> -                       return -ENOMEM;
+> +               fsopt->mds_namespace = param->string;
+> +               param->string = NULL;
+>                 break;
+> -       case Opt_fscache_uniq:
+> -               kfree(fsopt->fscache_uniq);
+> -               fsopt->fscache_uniq = kstrndup(argstr[0].from,
+> -                                              argstr[0].to-argstr[0].from,
+> -                                              GFP_KERNEL);
+> -               if (!fsopt->fscache_uniq)
+> -                       return -ENOMEM;
+> -               fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
+> -               break;
+> -               /* misc */
+>         case Opt_wsize:
+> -               if (intval < (int)PAGE_SIZE || intval > CEPH_MAX_WRITE_SIZE)
+> -                       return -EINVAL;
+> -               fsopt->wsize = ALIGN(intval, PAGE_SIZE);
+> +               if (result.uint_32 < (int)PAGE_SIZE || result.uint_32 > CEPH_MAX_WRITE_SIZE)
+> +                       goto invalid_value;
+> +               fsopt->wsize = ALIGN(result.uint_32, PAGE_SIZE);
+>                 break;
+>         case Opt_rsize:
+> -               if (intval < (int)PAGE_SIZE || intval > CEPH_MAX_READ_SIZE)
+> -                       return -EINVAL;
+> -               fsopt->rsize = ALIGN(intval, PAGE_SIZE);
+> +               if (result.uint_32 < (int)PAGE_SIZE || result.uint_32 > CEPH_MAX_READ_SIZE)
+> +                       goto invalid_value;
+> +               fsopt->rsize = ALIGN(result.uint_32, PAGE_SIZE);
+>                 break;
+>         case Opt_rasize:
+> -               if (intval < 0)
+> -                       return -EINVAL;
+> -               fsopt->rasize = ALIGN(intval, PAGE_SIZE);
+> +               fsopt->rasize = ALIGN(result.uint_32, PAGE_SIZE);
+>                 break;
+>         case Opt_caps_wanted_delay_min:
+> -               if (intval < 1)
+> -                       return -EINVAL;
+> -               fsopt->caps_wanted_delay_min = intval;
+> +               if (result.uint_32 < 1)
+> +                       goto invalid_value;
+> +               fsopt->caps_wanted_delay_min = result.uint_32;
+>                 break;
+>         case Opt_caps_wanted_delay_max:
+> -               if (intval < 1)
+> -                       return -EINVAL;
+> -               fsopt->caps_wanted_delay_max = intval;
+> +               if (result.uint_32 < 1)
+> +                       goto invalid_value;
+> +               fsopt->caps_wanted_delay_max = result.uint_32;
+>                 break;
+>         case Opt_caps_max:
+> -               if (intval < 0)
+> -                       return -EINVAL;
+> -               fsopt->caps_max = intval;
+> +               fsopt->caps_max = result.uint_32;
+>                 break;
+>         case Opt_readdir_max_entries:
+> -               if (intval < 1)
+> -                       return -EINVAL;
+> -               fsopt->max_readdir = intval;
+> +               if (result.uint_32 < 1)
+> +                       goto invalid_value;
+> +               fsopt->max_readdir = result.uint_32;
+>                 break;
+>         case Opt_readdir_max_bytes:
+> -               if (intval < (int)PAGE_SIZE && intval != 0)
+> -                       return -EINVAL;
+> -               fsopt->max_readdir_bytes = intval;
+> +               if (result.uint_32 < (int)PAGE_SIZE && result.uint_32 != 0)
+> +                       goto invalid_value;
+> +               fsopt->max_readdir_bytes = result.uint_32;
+>                 break;
+>         case Opt_congestion_kb:
+> -               if (intval < 1024) /* at least 1M */
+> -                       return -EINVAL;
+> -               fsopt->congestion_kb = intval;
+> +               if (result.uint_32 < 1024) /* at least 1M */
+> +                       goto invalid_value;
+> +               fsopt->congestion_kb = result.uint_32;
+>                 break;
+>         case Opt_dirstat:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_DIRSTAT;
+> -               break;
+> -       case Opt_nodirstat:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_DIRSTAT;
+> +               if (!result.negated)
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_DIRSTAT;
+> +               else
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_DIRSTAT;
+>                 break;
+>         case Opt_rbytes:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_RBYTES;
+> -               break;
+> -       case Opt_norbytes:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_RBYTES;
+> +               if (!result.negated)
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_RBYTES;
+> +               else
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_RBYTES;
+>                 break;
+>         case Opt_asyncreaddir:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_NOASYNCREADDIR;
+> -               break;
+> -       case Opt_noasyncreaddir:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_NOASYNCREADDIR;
+> +               if (!result.negated)
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_NOASYNCREADDIR;
+> +               else
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_NOASYNCREADDIR;
+>                 break;
+>         case Opt_dcache:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_DCACHE;
+> -               break;
+> -       case Opt_nodcache:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_DCACHE;
+> +               if (!result.negated)
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_DCACHE;
+> +               else
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_DCACHE;
+>                 break;
+>         case Opt_ino32:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_INO32;
+> -               break;
+> -       case Opt_noino32:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_INO32;
+> +               if (!result.negated)
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_INO32;
+> +               else
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_INO32;
+>                 break;
+> +
+>         case Opt_fscache:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
+> -               kfree(fsopt->fscache_uniq);
+> -               fsopt->fscache_uniq = NULL;
+> -               break;
+> -       case Opt_nofscache:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
+>                 kfree(fsopt->fscache_uniq);
+>                 fsopt->fscache_uniq = NULL;
+> +               if (result.negated) {
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
+> +               } else {
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
+> +                       fsopt->fscache_uniq = param->string;
+> +                       param->string = NULL;
+> +               }
+>                 break;
+> +
+>         case Opt_poolperm:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_NOPOOLPERM;
+> -               break;
+> -       case Opt_nopoolperm:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_NOPOOLPERM;
+> +               if (!result.negated)
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_NOPOOLPERM;
+> +               else
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_NOPOOLPERM;
+>                 break;
+>         case Opt_require_active_mds:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_MOUNTWAIT;
+> -               break;
+> -       case Opt_norequire_active_mds:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_MOUNTWAIT;
+> +               if (!result.negated)
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_MOUNTWAIT;
+> +               else
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_MOUNTWAIT;
+>                 break;
+>         case Opt_quotadf:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_NOQUOTADF;
+> -               break;
+> -       case Opt_noquotadf:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_NOQUOTADF;
+> +               if (!result.negated)
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_NOQUOTADF;
+> +               else
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_NOQUOTADF;
+>                 break;
+>         case Opt_copyfrom:
+> -               fsopt->flags &= ~CEPH_MOUNT_OPT_NOCOPYFROM;
+> +               if (!result.negated)
+> +                       fsopt->flags &= ~CEPH_MOUNT_OPT_NOCOPYFROM;
+> +               else
+> +                       fsopt->flags |= CEPH_MOUNT_OPT_NOCOPYFROM;
+>                 break;
+> -       case Opt_nocopyfrom:
+> -               fsopt->flags |= CEPH_MOUNT_OPT_NOCOPYFROM;
+> -               break;
+> -#ifdef CONFIG_CEPH_FS_POSIX_ACL
+>         case Opt_acl:
+> -               fsopt->sb_flags |= SB_POSIXACL;
+> -               break;
+> +               if (!result.negated) {
+> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> +                       fc->sb_flags |= SB_POSIXACL;
+> +#else
+> +                       return invalf(fc, "POSIX ACL support is disabled");
 >  #endif
-> diff --git a/arch/microblaze/mm/pgtable.c b/arch/microblaze/mm/pgtable.c
-> index c2ce1e42b888..8fe54fda31dc 100644
-> --- a/arch/microblaze/mm/pgtable.c
-> +++ b/arch/microblaze/mm/pgtable.c
-> @@ -75,7 +75,7 @@ static void __iomem *__ioremap(phys_addr_t addr, unsigned long size,
->  		p >= memory_start && p < virt_to_phys(high_memory) &&
->  		!(p >= __virt_to_phys((phys_addr_t)__bss_stop) &&
->  		p < __virt_to_phys((phys_addr_t)__bss_stop))) {
-> -		pr_warn("__ioremap(): phys addr "PTE_FMT" is RAM lr %pf\n",
-> +		pr_warn("__ioremap(): phys addr "PTE_FMT" is RAM lr %ps\n",
->  			(unsigned long)p, __builtin_return_address(0));
->  		return NULL;
->  	}
-> diff --git a/arch/sparc/kernel/ds.c b/arch/sparc/kernel/ds.c
-> index f87265afb175..cad08ccce625 100644
-> --- a/arch/sparc/kernel/ds.c
-> +++ b/arch/sparc/kernel/ds.c
-> @@ -876,7 +876,7 @@ void ldom_power_off(void)
->  
->  static void ds_conn_reset(struct ds_info *dp)
+> -       case Opt_noacl:
+> -               fsopt->sb_flags &= ~SB_POSIXACL;
+> +               } else {
+> +                       fc->sb_flags &= ~SB_POSIXACL;
+> +               }
+>                 break;
+>         default:
+> -               BUG_ON(token);
+> +               BUG();
+>         }
+>         return 0;
+> +
+> +invalid_value:
+> +       return invalf(fc, "ceph: Invalid value for %s", param->key);
+>  }
+>
+>  static void destroy_mount_options(struct ceph_mount_options *args)
 >  {
-> -	printk(KERN_ERR "ds-%llu: ds_conn_reset() from %pf\n",
-> +	printk(KERN_ERR "ds-%llu: ds_conn_reset() from %ps\n",
->  	       dp->id, __builtin_return_address(0));
+> -       dout("destroy_mount_options %p\n", args);
+> -       kfree(args->snapdir_name);
+> -       kfree(args->mds_namespace);
+> -       kfree(args->server_path);
+> -       kfree(args->fscache_uniq);
+> -       kfree(args);
+> +       if (args) {
+> +               dout("destroy_mount_options %p\n", args);
+> +               kfree(args->snapdir_name);
+> +               kfree(args->mds_namespace);
+> +               kfree(args->server_path);
+> +               kfree(args->fscache_uniq);
+> +               kfree(args);
+> +       }
 >  }
->  
-> diff --git a/arch/um/kernel/sysrq.c b/arch/um/kernel/sysrq.c
-> index 6b995e870d55..05585eef11d9 100644
-> --- a/arch/um/kernel/sysrq.c
-> +++ b/arch/um/kernel/sysrq.c
-> @@ -20,7 +20,7 @@
->  
->  static void _print_addr(void *data, unsigned long address, int reliable)
->  {
-> -	pr_info(" [<%08lx>] %s%pF\n", address, reliable ? "" : "? ",
-> +	pr_info(" [<%08lx>] %s%pS\n", address, reliable ? "" : "? ",
->  		(void *)address);
+>
+>  static int strcmp_null(const char *s1, const char *s2)
+> @@ -436,91 +455,6 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+>         return ceph_compare_options(new_opt, fsc->client);
 >  }
->  
-> diff --git a/arch/x86/include/asm/trace/exceptions.h b/arch/x86/include/asm/trace/exceptions.h
-> index e0e6d7f21399..6b1e87194809 100644
-> --- a/arch/x86/include/asm/trace/exceptions.h
-> +++ b/arch/x86/include/asm/trace/exceptions.h
-> @@ -30,7 +30,7 @@ DECLARE_EVENT_CLASS(x86_exceptions,
->  		__entry->error_code = error_code;
->  	),
->  
-> -	TP_printk("address=%pf ip=%pf error_code=0x%lx",
-> +	TP_printk("address=%ps ip=%ps error_code=0x%lx",
->  		  (void *)__entry->address, (void *)__entry->ip,
->  		  __entry->error_code) );
->  
-> diff --git a/arch/x86/kernel/irq_64.c b/arch/x86/kernel/irq_64.c
-> index 0469cd078db1..4dff56658427 100644
-> --- a/arch/x86/kernel/irq_64.c
-> +++ b/arch/x86/kernel/irq_64.c
-> @@ -58,7 +58,7 @@ static inline void stack_overflow_check(struct pt_regs *regs)
->  	if (regs->sp >= estack_top && regs->sp <= estack_bottom)
->  		return;
->  
-> -	WARN_ONCE(1, "do_IRQ(): %s has overflown the kernel stack (cur:%Lx,sp:%lx,irq stk top-bottom:%Lx-%Lx,exception stk top-bottom:%Lx-%Lx,ip:%pF)\n",
-> +	WARN_ONCE(1, "do_IRQ(): %s has overflown the kernel stack (cur:%Lx,sp:%lx,irq stk top-bottom:%Lx-%Lx,exception stk top-bottom:%Lx-%Lx,ip:%pS)\n",
->  		current->comm, curbase, regs->sp,
->  		irq_stack_top, irq_stack_bottom,
->  		estack_top, estack_bottom, (void *)regs->ip);
-> diff --git a/arch/x86/mm/extable.c b/arch/x86/mm/extable.c
-> index 3c4568f8fb28..b0a2de8d2f9e 100644
-> --- a/arch/x86/mm/extable.c
-> +++ b/arch/x86/mm/extable.c
-> @@ -145,7 +145,7 @@ __visible bool ex_handler_rdmsr_unsafe(const struct exception_table_entry *fixup
->  				       unsigned long error_code,
->  				       unsigned long fault_addr)
->  {
-> -	if (pr_warn_once("unchecked MSR access error: RDMSR from 0x%x at rIP: 0x%lx (%pF)\n",
-> +	if (pr_warn_once("unchecked MSR access error: RDMSR from 0x%x at rIP: 0x%lx (%pS)\n",
->  			 (unsigned int)regs->cx, regs->ip, (void *)regs->ip))
->  		show_stack_regs(regs);
->  
-> @@ -162,7 +162,7 @@ __visible bool ex_handler_wrmsr_unsafe(const struct exception_table_entry *fixup
->  				       unsigned long error_code,
->  				       unsigned long fault_addr)
->  {
-> -	if (pr_warn_once("unchecked MSR access error: WRMSR to 0x%x (tried to write 0x%08x%08x) at rIP: 0x%lx (%pF)\n",
-> +	if (pr_warn_once("unchecked MSR access error: WRMSR to 0x%x (tried to write 0x%08x%08x) at rIP: 0x%lx (%pS)\n",
->  			 (unsigned int)regs->cx, (unsigned int)regs->dx,
->  			 (unsigned int)regs->ax,  regs->ip, (void *)regs->ip))
->  		show_stack_regs(regs);
-> diff --git a/arch/x86/xen/multicalls.c b/arch/x86/xen/multicalls.c
-> index 0766a08bdf45..07054572297f 100644
-> --- a/arch/x86/xen/multicalls.c
-> +++ b/arch/x86/xen/multicalls.c
-> @@ -105,7 +105,7 @@ void xen_mc_flush(void)
->  		for (i = 0; i < b->mcidx; i++) {
->  			if (b->entries[i].result < 0) {
->  #if MC_DEBUG
-> -				pr_err("  call %2d: op=%lu arg=[%lx] result=%ld\t%pF\n",
-> +				pr_err("  call %2d: op=%lu arg=[%lx] result=%ld\t%pS\n",
->  				       i + 1,
->  				       b->debug[i].op,
->  				       b->debug[i].args[0],
-> diff --git a/drivers/acpi/device_pm.c b/drivers/acpi/device_pm.c
-> index 824ae985ad93..1aa0d014dc34 100644
-> --- a/drivers/acpi/device_pm.c
-> +++ b/drivers/acpi/device_pm.c
-> @@ -414,7 +414,7 @@ static void acpi_pm_notify_handler(acpi_handle handle, u32 val, void *not_used)
->  	if (adev->wakeup.flags.notifier_present) {
->  		pm_wakeup_ws_event(adev->wakeup.ws, 0, acpi_s2idle_wakeup());
->  		if (adev->wakeup.context.func) {
-> -			acpi_handle_debug(handle, "Running %pF for %s\n",
-> +			acpi_handle_debug(handle, "Running %pS for %s\n",
->  					  adev->wakeup.context.func,
->  					  dev_name(adev->wakeup.context.dev));
->  			adev->wakeup.context.func(&adev->wakeup.context);
-> diff --git a/drivers/base/power/main.c b/drivers/base/power/main.c
-> index f80d298de3fa..a619be025056 100644
-> --- a/drivers/base/power/main.c
-> +++ b/drivers/base/power/main.c
-> @@ -207,7 +207,7 @@ static ktime_t initcall_debug_start(struct device *dev, void *cb)
->  	if (!pm_print_times_enabled)
->  		return 0;
->  
-> -	dev_info(dev, "calling %pF @ %i, parent: %s\n", cb,
-> +	dev_info(dev, "calling %pS @ %i, parent: %s\n", cb,
->  		 task_pid_nr(current),
->  		 dev->parent ? dev_name(dev->parent) : "none");
->  	return ktime_get();
-> @@ -225,7 +225,7 @@ static void initcall_debug_report(struct device *dev, ktime_t calltime,
->  	rettime = ktime_get();
->  	nsecs = (s64) ktime_to_ns(ktime_sub(rettime, calltime));
->  
-> -	dev_info(dev, "%pF returned %d after %Ld usecs\n", cb, error,
-> +	dev_info(dev, "%pS returned %d after %Ld usecs\n", cb, error,
->  		 (unsigned long long)nsecs >> 10);
->  }
->  
-> @@ -2063,7 +2063,7 @@ EXPORT_SYMBOL_GPL(dpm_suspend_start);
->  void __suspend_report_result(const char *function, void *fn, int ret)
->  {
->  	if (ret)
-> -		pr_err("%s(): %pF returns %d\n", function, fn, ret);
-> +		pr_err("%s(): %pS returns %d\n", function, fn, ret);
->  }
->  EXPORT_SYMBOL_GPL(__suspend_report_result);
->  
-> diff --git a/drivers/base/syscore.c b/drivers/base/syscore.c
-> index 6e076f359dcc..0d346a307140 100644
-> --- a/drivers/base/syscore.c
-> +++ b/drivers/base/syscore.c
-> @@ -62,19 +62,19 @@ int syscore_suspend(void)
->  	list_for_each_entry_reverse(ops, &syscore_ops_list, node)
->  		if (ops->suspend) {
->  			if (initcall_debug)
-> -				pr_info("PM: Calling %pF\n", ops->suspend);
-> +				pr_info("PM: Calling %pS\n", ops->suspend);
->  			ret = ops->suspend();
->  			if (ret)
->  				goto err_out;
->  			WARN_ONCE(!irqs_disabled(),
-> -				"Interrupts enabled after %pF\n", ops->suspend);
-> +				"Interrupts enabled after %pS\n", ops->suspend);
->  		}
->  
->  	trace_suspend_resume(TPS("syscore_suspend"), 0, false);
->  	return 0;
->  
->   err_out:
-> -	pr_err("PM: System core suspend callback %pF failed.\n", ops->suspend);
-> +	pr_err("PM: System core suspend callback %pS failed.\n", ops->suspend);
->  
->  	list_for_each_entry_continue(ops, &syscore_ops_list, node)
->  		if (ops->resume)
-> @@ -100,10 +100,10 @@ void syscore_resume(void)
->  	list_for_each_entry(ops, &syscore_ops_list, node)
->  		if (ops->resume) {
->  			if (initcall_debug)
-> -				pr_info("PM: Calling %pF\n", ops->resume);
-> +				pr_info("PM: Calling %pS\n", ops->resume);
->  			ops->resume();
->  			WARN_ONCE(!irqs_disabled(),
-> -				"Interrupts enabled after %pF\n", ops->resume);
-> +				"Interrupts enabled after %pS\n", ops->resume);
->  		}
->  	trace_suspend_resume(TPS("syscore_resume"), 0, false);
->  }
-> @@ -122,7 +122,7 @@ void syscore_shutdown(void)
->  	list_for_each_entry_reverse(ops, &syscore_ops_list, node)
->  		if (ops->shutdown) {
->  			if (initcall_debug)
-> -				pr_info("PM: Calling %pF\n", ops->shutdown);
-> +				pr_info("PM: Calling %pS\n", ops->shutdown);
->  			ops->shutdown();
->  		}
->  
-> diff --git a/drivers/block/drbd/drbd_receiver.c b/drivers/block/drbd/drbd_receiver.c
-> index c7ad88d91a09..3e5fd97a3b4d 100644
-> --- a/drivers/block/drbd/drbd_receiver.c
-> +++ b/drivers/block/drbd/drbd_receiver.c
-> @@ -6116,7 +6116,7 @@ int drbd_ack_receiver(struct drbd_thread *thi)
->  
->  			err = cmd->fn(connection, &pi);
->  			if (err) {
-> -				drbd_err(connection, "%pf failed\n", cmd->fn);
-> +				drbd_err(connection, "%ps failed\n", cmd->fn);
->  				goto reconnect;
->  			}
->  
-> diff --git a/drivers/block/floppy.c b/drivers/block/floppy.c
-> index 95f608d1a098..49f89db0766f 100644
-> --- a/drivers/block/floppy.c
-> +++ b/drivers/block/floppy.c
-> @@ -1693,7 +1693,7 @@ irqreturn_t floppy_interrupt(int irq, void *dev_id)
->  		/* we don't even know which FDC is the culprit */
->  		pr_info("DOR0=%x\n", fdc_state[0].dor);
->  		pr_info("floppy interrupt on bizarre fdc %d\n", fdc);
-> -		pr_info("handler=%pf\n", handler);
-> +		pr_info("handler=%ps\n", handler);
->  		is_alive(__func__, "bizarre fdc");
->  		return IRQ_NONE;
->  	}
-> @@ -1752,7 +1752,7 @@ static void reset_interrupt(void)
->  	debugt(__func__, "");
->  	result();		/* get the status ready for set_fdc */
->  	if (FDCS->reset) {
-> -		pr_info("reset set in interrupt, calling %pf\n", cont->error);
-> +		pr_info("reset set in interrupt, calling %ps\n", cont->error);
->  		cont->error();	/* a reset just after a reset. BAD! */
->  	}
->  	cont->redo();
-> @@ -1793,7 +1793,7 @@ static void show_floppy(void)
->  	pr_info("\n");
->  	pr_info("floppy driver state\n");
->  	pr_info("-------------------\n");
-> -	pr_info("now=%lu last interrupt=%lu diff=%lu last called handler=%pf\n",
-> +	pr_info("now=%lu last interrupt=%lu diff=%lu last called handler=%ps\n",
->  		jiffies, interruptjiffies, jiffies - interruptjiffies,
->  		lasthandler);
->  
-> @@ -1812,9 +1812,9 @@ static void show_floppy(void)
->  	pr_info("status=%x\n", fd_inb(FD_STATUS));
->  	pr_info("fdc_busy=%lu\n", fdc_busy);
->  	if (do_floppy)
-> -		pr_info("do_floppy=%pf\n", do_floppy);
-> +		pr_info("do_floppy=%ps\n", do_floppy);
->  	if (work_pending(&floppy_work))
-> -		pr_info("floppy_work.func=%pf\n", floppy_work.func);
-> +		pr_info("floppy_work.func=%ps\n", floppy_work.func);
->  	if (delayed_work_pending(&fd_timer))
->  		pr_info("delayed work.function=%p expires=%ld\n",
->  		       fd_timer.work.func,
-> diff --git a/drivers/cpufreq/cpufreq.c b/drivers/cpufreq/cpufreq.c
-> index e10922709d13..bf78a3d9e0e9 100644
-> --- a/drivers/cpufreq/cpufreq.c
-> +++ b/drivers/cpufreq/cpufreq.c
-> @@ -426,7 +426,7 @@ static void cpufreq_list_transition_notifiers(void)
->  	mutex_lock(&cpufreq_transition_notifier_list.mutex);
->  
->  	for (nb = cpufreq_transition_notifier_list.head; nb; nb = nb->next)
-> -		pr_info("%pF\n", nb->notifier_call);
-> +		pr_info("%pS\n", nb->notifier_call);
->  
->  	mutex_unlock(&cpufreq_transition_notifier_list.mutex);
->  }
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index dd2f73af8f2c..2d2d9ea8be4f 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -159,7 +159,7 @@ static inline void mmc_fixup_device(struct mmc_card *card,
->  		    (f->ext_csd_rev == EXT_CSD_REV_ANY ||
->  		     f->ext_csd_rev == card->ext_csd.rev) &&
->  		    rev >= f->rev_start && rev <= f->rev_end) {
-> -			dev_dbg(&card->dev, "calling %pf\n", f->vendor_fixup);
-> +			dev_dbg(&card->dev, "calling %ps\n", f->vendor_fixup);
->  			f->vendor_fixup(card, f->data);
->  		}
->  	}
-> diff --git a/drivers/nvdimm/bus.c b/drivers/nvdimm/bus.c
-> index 7bbff0af29b2..7ff684159f29 100644
-> --- a/drivers/nvdimm/bus.c
-> +++ b/drivers/nvdimm/bus.c
-> @@ -581,7 +581,7 @@ int __nd_driver_register(struct nd_device_driver *nd_drv, struct module *owner,
->  	struct device_driver *drv = &nd_drv->drv;
->  
->  	if (!nd_drv->type) {
-> -		pr_debug("driver type bitmask not set (%pf)\n",
-> +		pr_debug("driver type bitmask not set (%ps)\n",
->  				__builtin_return_address(0));
->  		return -EINVAL;
->  	}
-> diff --git a/drivers/nvdimm/dimm_devs.c b/drivers/nvdimm/dimm_devs.c
-> index 91b9abbf689c..ecbab2d66e38 100644
-> --- a/drivers/nvdimm/dimm_devs.c
-> +++ b/drivers/nvdimm/dimm_devs.c
-> @@ -58,7 +58,7 @@ static int validate_dimm(struct nvdimm_drvdata *ndd)
->  
->  	rc = nvdimm_check_config_data(ndd->dev);
->  	if (rc)
-> -		dev_dbg(ndd->dev, "%pf: %s error: %d\n",
-> +		dev_dbg(ndd->dev, "%ps: %s error: %d\n",
->  				__builtin_return_address(0), __func__, rc);
->  	return rc;
->  }
-> diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-> index 71853befd435..cae630fe6387 100644
-> --- a/drivers/pci/pci-driver.c
-> +++ b/drivers/pci/pci-driver.c
-> @@ -578,7 +578,7 @@ static int pci_legacy_suspend(struct device *dev, pm_message_t state)
->  		if (!pci_dev->state_saved && pci_dev->current_state != PCI_D0
->  		    && pci_dev->current_state != PCI_UNKNOWN) {
->  			WARN_ONCE(pci_dev->current_state != prev,
-> -				"PCI PM: Device state not saved by %pF\n",
-> +				"PCI PM: Device state not saved by %pS\n",
->  				drv->suspend);
->  		}
->  	}
-> @@ -605,7 +605,7 @@ static int pci_legacy_suspend_late(struct device *dev, pm_message_t state)
->  		if (!pci_dev->state_saved && pci_dev->current_state != PCI_D0
->  		    && pci_dev->current_state != PCI_UNKNOWN) {
->  			WARN_ONCE(pci_dev->current_state != prev,
-> -				"PCI PM: Device state not saved by %pF\n",
-> +				"PCI PM: Device state not saved by %pS\n",
->  				drv->suspend_late);
->  			goto Fixup;
->  		}
-> @@ -773,7 +773,7 @@ static int pci_pm_suspend(struct device *dev)
->  		if (!pci_dev->state_saved && pci_dev->current_state != PCI_D0
->  		    && pci_dev->current_state != PCI_UNKNOWN) {
->  			WARN_ONCE(pci_dev->current_state != prev,
-> -				"PCI PM: State of device not saved by %pF\n",
-> +				"PCI PM: State of device not saved by %pS\n",
->  				pm->suspend);
->  		}
->  	}
-> @@ -821,7 +821,7 @@ static int pci_pm_suspend_noirq(struct device *dev)
->  		if (!pci_dev->state_saved && pci_dev->current_state != PCI_D0
->  		    && pci_dev->current_state != PCI_UNKNOWN) {
->  			WARN_ONCE(pci_dev->current_state != prev,
-> -				"PCI PM: State of device not saved by %pF\n",
-> +				"PCI PM: State of device not saved by %pS\n",
->  				pm->suspend_noirq);
->  			goto Fixup;
->  		}
-> @@ -1260,11 +1260,11 @@ static int pci_pm_runtime_suspend(struct device *dev)
->  		 * log level.
->  		 */
->  		if (error == -EBUSY || error == -EAGAIN) {
-> -			dev_dbg(dev, "can't suspend now (%pf returned %d)\n",
-> +			dev_dbg(dev, "can't suspend now (%ps returned %d)\n",
->  				pm->runtime_suspend, error);
->  			return error;
->  		} else if (error) {
-> -			dev_err(dev, "can't suspend (%pf returned %d)\n",
-> +			dev_err(dev, "can't suspend (%ps returned %d)\n",
->  				pm->runtime_suspend, error);
->  			return error;
->  		}
-> @@ -1276,7 +1276,7 @@ static int pci_pm_runtime_suspend(struct device *dev)
->  	    && !pci_dev->state_saved && pci_dev->current_state != PCI_D0
->  	    && pci_dev->current_state != PCI_UNKNOWN) {
->  		WARN_ONCE(pci_dev->current_state != prev,
-> -			"PCI PM: State of device not saved by %pF\n",
-> +			"PCI PM: State of device not saved by %pS\n",
->  			pm->runtime_suspend);
->  		return 0;
->  	}
-> diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-> index a59ad09ce911..b56c2a75d42f 100644
-> --- a/drivers/pci/quirks.c
-> +++ b/drivers/pci/quirks.c
-> @@ -36,7 +36,7 @@ static ktime_t fixup_debug_start(struct pci_dev *dev,
->  				 void (*fn)(struct pci_dev *dev))
->  {
->  	if (initcall_debug)
-> -		pci_info(dev, "calling  %pF @ %i\n", fn, task_pid_nr(current));
-> +		pci_info(dev, "calling  %pS @ %i\n", fn, task_pid_nr(current));
->  
->  	return ktime_get();
->  }
-> @@ -51,7 +51,7 @@ static void fixup_debug_report(struct pci_dev *dev, ktime_t calltime,
->  	delta = ktime_sub(rettime, calltime);
->  	duration = (unsigned long long) ktime_to_ns(delta) >> 10;
->  	if (initcall_debug || duration > 10000)
-> -		pci_info(dev, "%pF took %lld usecs\n", fn, duration);
-> +		pci_info(dev, "%pS took %lld usecs\n", fn, duration);
->  }
->  
->  static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
-> diff --git a/drivers/pnp/quirks.c b/drivers/pnp/quirks.c
-> index 803666ae3635..de99f371d362 100644
-> --- a/drivers/pnp/quirks.c
-> +++ b/drivers/pnp/quirks.c
-> @@ -458,7 +458,7 @@ void pnp_fixup_device(struct pnp_dev *dev)
->  	for (f = pnp_fixups; *f->id; f++) {
->  		if (!compare_pnp_id(dev->id, f->id))
->  			continue;
-> -		pnp_dbg(&dev->dev, "%s: calling %pF\n", f->id,
-> +		pnp_dbg(&dev->dev, "%s: calling %pS\n", f->id,
->  			f->quirk_function);
->  		f->quirk_function(dev);
->  	}
-> diff --git a/drivers/scsi/esp_scsi.c b/drivers/scsi/esp_scsi.c
-> index 465df475f753..76fd02ccbf49 100644
-> --- a/drivers/scsi/esp_scsi.c
-> +++ b/drivers/scsi/esp_scsi.c
-> @@ -1031,7 +1031,7 @@ static int esp_check_spur_intr(struct esp *esp)
->  
->  static void esp_schedule_reset(struct esp *esp)
->  {
-> -	esp_log_reset("esp_schedule_reset() from %pf\n",
-> +	esp_log_reset("esp_schedule_reset() from %ps\n",
->  		      __builtin_return_address(0));
->  	esp->flags |= ESP_FLAG_RESETTING;
->  	esp_event(esp, ESP_EVENT_RESET);
-> diff --git a/fs/btrfs/tests/free-space-tree-tests.c b/fs/btrfs/tests/free-space-tree-tests.c
-> index 09c27628e305..201fcd45fc23 100644
-> --- a/fs/btrfs/tests/free-space-tree-tests.c
-> +++ b/fs/btrfs/tests/free-space-tree-tests.c
-> @@ -539,7 +539,7 @@ static int run_test_both_formats(test_func_t test_func, u32 sectorsize,
->  	ret = run_test(test_func, 0, sectorsize, nodesize, alignment);
->  	if (ret) {
->  		test_err(
-> -	"%pf failed with extents, sectorsize=%u, nodesize=%u, alignment=%u",
-> +	"%ps failed with extents, sectorsize=%u, nodesize=%u, alignment=%u",
->  			 test_func, sectorsize, nodesize, alignment);
->  		test_ret = ret;
->  	}
-> @@ -547,7 +547,7 @@ static int run_test_both_formats(test_func_t test_func, u32 sectorsize,
->  	ret = run_test(test_func, 1, sectorsize, nodesize, alignment);
->  	if (ret) {
->  		test_err(
-> -	"%pf failed with bitmaps, sectorsize=%u, nodesize=%u, alignment=%u",
-> +	"%ps failed with bitmaps, sectorsize=%u, nodesize=%u, alignment=%u",
->  			 test_func, sectorsize, nodesize, alignment);
->  		test_ret = ret;
->  	}
-> diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
-> index 5bc7b99fb9c1..41584c961d5c 100644
-> --- a/fs/f2fs/f2fs.h
-> +++ b/fs/f2fs/f2fs.h
-> @@ -1338,7 +1338,7 @@ struct f2fs_private_dio {
->  
->  #ifdef CONFIG_F2FS_FAULT_INJECTION
->  #define f2fs_show_injection_info(type)					\
-> -	printk_ratelimited("%sF2FS-fs : inject %s in %s of %pF\n",	\
-> +	printk_ratelimited("%sF2FS-fs : inject %s in %s of %pS\n",	\
->  		KERN_INFO, f2fs_fault_name[type],			\
->  		__func__, __builtin_return_address(0))
->  static inline bool time_to_inject(struct f2fs_sb_info *sbi, int type)
-> diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
-> index c60ee46f3e39..29e94e0b6d73 100644
-> --- a/fs/pstore/inode.c
-> +++ b/fs/pstore/inode.c
-> @@ -115,7 +115,7 @@ static int pstore_ftrace_seq_show(struct seq_file *s, void *v)
->  
->  	rec = (struct pstore_ftrace_record *)(ps->record->buf + data->off);
->  
-> -	seq_printf(s, "CPU:%d ts:%llu %08lx  %08lx  %pf <- %pF\n",
-> +	seq_printf(s, "CPU:%d ts:%llu %08lx  %08lx  %ps <- %pS\n",
->  		   pstore_ftrace_decode_cpu(rec),
->  		   pstore_ftrace_read_timestamp(rec),
->  		   rec->ip, rec->parent_ip, (void *)rec->ip,
-> diff --git a/include/trace/events/btrfs.h b/include/trace/events/btrfs.h
-> index 8b12753fee78..9621498d42e9 100644
-> --- a/include/trace/events/btrfs.h
-> +++ b/include/trace/events/btrfs.h
-> @@ -1380,7 +1380,7 @@ DECLARE_EVENT_CLASS(btrfs__work,
->  		__entry->normal_work	= &work->normal_work;
->  	),
->  
-> -	TP_printk_btrfs("work=%p (normal_work=%p) wq=%p func=%pf ordered_func=%p "
-> +	TP_printk_btrfs("work=%p (normal_work=%p) wq=%p func=%ps ordered_func=%p "
->  		  "ordered_free=%p",
->  		  __entry->work, __entry->normal_work, __entry->wq,
->  		   __entry->func, __entry->ordered_func, __entry->ordered_free)
-> diff --git a/include/trace/events/cpuhp.h b/include/trace/events/cpuhp.h
-> index fe1d6e8cd99d..ad16f77310c6 100644
-> --- a/include/trace/events/cpuhp.h
-> +++ b/include/trace/events/cpuhp.h
-> @@ -30,7 +30,7 @@ TRACE_EVENT(cpuhp_enter,
->  		__entry->fun	= fun;
->  	),
->  
-> -	TP_printk("cpu: %04u target: %3d step: %3d (%pf)",
-> +	TP_printk("cpu: %04u target: %3d step: %3d (%ps)",
->  		  __entry->cpu, __entry->target, __entry->idx, __entry->fun)
->  );
->  
-> @@ -58,7 +58,7 @@ TRACE_EVENT(cpuhp_multi_enter,
->  		__entry->fun	= fun;
->  	),
->  
-> -	TP_printk("cpu: %04u target: %3d step: %3d (%pf)",
-> +	TP_printk("cpu: %04u target: %3d step: %3d (%ps)",
->  		  __entry->cpu, __entry->target, __entry->idx, __entry->fun)
->  );
->  
-> diff --git a/include/trace/events/preemptirq.h b/include/trace/events/preemptirq.h
-> index 9a0d4ceeb166..95fba0471e5b 100644
-> --- a/include/trace/events/preemptirq.h
-> +++ b/include/trace/events/preemptirq.h
-> @@ -27,7 +27,7 @@ DECLARE_EVENT_CLASS(preemptirq_template,
->  		__entry->parent_offs = (u32)(parent_ip - (unsigned long)_stext);
->  	),
->  
-> -	TP_printk("caller=%pF parent=%pF",
-> +	TP_printk("caller=%pS parent=%pS",
->  		  (void *)((unsigned long)(_stext) + __entry->caller_offs),
->  		  (void *)((unsigned long)(_stext) + __entry->parent_offs))
->  );
-> diff --git a/include/trace/events/rcu.h b/include/trace/events/rcu.h
-> index f0c4d10e614b..80339fd14c1c 100644
-> --- a/include/trace/events/rcu.h
-> +++ b/include/trace/events/rcu.h
-> @@ -491,7 +491,7 @@ TRACE_EVENT(rcu_callback,
->  		__entry->qlen = qlen;
->  	),
->  
-> -	TP_printk("%s rhp=%p func=%pf %ld/%ld",
-> +	TP_printk("%s rhp=%p func=%ps %ld/%ld",
->  		  __entry->rcuname, __entry->rhp, __entry->func,
->  		  __entry->qlen_lazy, __entry->qlen)
->  );
-> @@ -587,7 +587,7 @@ TRACE_EVENT(rcu_invoke_callback,
->  		__entry->func = rhp->func;
->  	),
->  
-> -	TP_printk("%s rhp=%p func=%pf",
-> +	TP_printk("%s rhp=%p func=%ps",
->  		  __entry->rcuname, __entry->rhp, __entry->func)
->  );
->  
-> diff --git a/include/trace/events/sunrpc.h b/include/trace/events/sunrpc.h
-> index 7e899e635d33..f0a6f0c5549c 100644
-> --- a/include/trace/events/sunrpc.h
-> +++ b/include/trace/events/sunrpc.h
-> @@ -146,7 +146,7 @@ DECLARE_EVENT_CLASS(rpc_task_running,
->  		__entry->flags = task->tk_flags;
->  		),
->  
-> -	TP_printk("task:%u@%d flags=%s runstate=%s status=%d action=%pf",
-> +	TP_printk("task:%u@%d flags=%s runstate=%s status=%d action=%ps",
->  		__entry->task_id, __entry->client_id,
->  		rpc_show_task_flags(__entry->flags),
->  		rpc_show_runstate(__entry->runstate),
-> diff --git a/include/trace/events/vmscan.h b/include/trace/events/vmscan.h
-> index a1cb91342231..252327dbfa51 100644
-> --- a/include/trace/events/vmscan.h
-> +++ b/include/trace/events/vmscan.h
-> @@ -226,7 +226,7 @@ TRACE_EVENT(mm_shrink_slab_start,
->  		__entry->priority = priority;
->  	),
->  
-> -	TP_printk("%pF %p: nid: %d objects to shrink %ld gfp_flags %s cache items %ld delta %lld total_scan %ld priority %d",
-> +	TP_printk("%pS %p: nid: %d objects to shrink %ld gfp_flags %s cache items %ld delta %lld total_scan %ld priority %d",
->  		__entry->shrink,
->  		__entry->shr,
->  		__entry->nid,
-> @@ -265,7 +265,7 @@ TRACE_EVENT(mm_shrink_slab_end,
->  		__entry->total_scan = total_scan;
->  	),
->  
-> -	TP_printk("%pF %p: nid: %d unused scan count %ld new scan count %ld total_scan %ld last shrinker return val %d",
-> +	TP_printk("%pS %p: nid: %d unused scan count %ld new scan count %ld total_scan %ld last shrinker return val %d",
->  		__entry->shrink,
->  		__entry->shr,
->  		__entry->nid,
-> diff --git a/include/trace/events/workqueue.h b/include/trace/events/workqueue.h
-> index 9a761bc6a251..e172549283be 100644
-> --- a/include/trace/events/workqueue.h
-> +++ b/include/trace/events/workqueue.h
-> @@ -60,7 +60,7 @@ TRACE_EVENT(workqueue_queue_work,
->  		__entry->cpu		= pwq->pool->cpu;
->  	),
->  
-> -	TP_printk("work struct=%p function=%pf workqueue=%p req_cpu=%u cpu=%u",
-> +	TP_printk("work struct=%p function=%ps workqueue=%p req_cpu=%u cpu=%u",
->  		  __entry->work, __entry->function, __entry->workqueue,
->  		  __entry->req_cpu, __entry->cpu)
->  );
-> @@ -102,7 +102,7 @@ TRACE_EVENT(workqueue_execute_start,
->  		__entry->function	= work->func;
->  	),
->  
-> -	TP_printk("work struct %p: function %pf", __entry->work, __entry->function)
-> +	TP_printk("work struct %p: function %ps", __entry->work, __entry->function)
->  );
->  
+>
+> -static int parse_mount_options(struct ceph_mount_options **pfsopt,
+> -                              struct ceph_options **popt,
+> -                              int flags, char *options,
+> -                              const char *dev_name)
+> -{
+> -       struct ceph_mount_options *fsopt;
+> -       const char *dev_name_end;
+> -       int err;
+> -
+> -       if (!dev_name || !*dev_name)
+> -               return -EINVAL;
+> -
+> -       fsopt = kzalloc(sizeof(*fsopt), GFP_KERNEL);
+> -       if (!fsopt)
+> -               return -ENOMEM;
+> -
+> -       dout("parse_mount_options %p, dev_name '%s'\n", fsopt, dev_name);
+> -
+> -       fsopt->sb_flags = flags;
+> -       fsopt->flags = CEPH_MOUNT_OPT_DEFAULT;
+> -
+> -       fsopt->wsize = CEPH_MAX_WRITE_SIZE;
+> -       fsopt->rsize = CEPH_MAX_READ_SIZE;
+> -       fsopt->rasize = CEPH_RASIZE_DEFAULT;
+> -       fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
+> -       if (!fsopt->snapdir_name) {
+> -               err = -ENOMEM;
+> -               goto out;
+> -       }
+> -
+> -       fsopt->caps_wanted_delay_min = CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT;
+> -       fsopt->caps_wanted_delay_max = CEPH_CAPS_WANTED_DELAY_MAX_DEFAULT;
+> -       fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
+> -       fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
+> -       fsopt->congestion_kb = default_congestion_kb();
+> -
+> -       /*
+> -        * Distinguish the server list from the path in "dev_name".
+> -        * Internally we do not include the leading '/' in the path.
+> -        *
+> -        * "dev_name" will look like:
+> -        *     <server_spec>[,<server_spec>...]:[<path>]
+> -        * where
+> -        *     <server_spec> is <ip>[:<port>]
+> -        *     <path> is optional, but if present must begin with '/'
+> -        */
+> -       dev_name_end = strchr(dev_name, '/');
+> -       if (dev_name_end) {
+> -               if (strlen(dev_name_end) > 1) {
+> -                       fsopt->server_path = kstrdup(dev_name_end, GFP_KERNEL);
+> -                       if (!fsopt->server_path) {
+> -                               err = -ENOMEM;
+> -                               goto out;
+> -                       }
+> -               }
+> -       } else {
+> -               dev_name_end = dev_name + strlen(dev_name);
+> -       }
+> -       err = -EINVAL;
+> -       dev_name_end--;         /* back up to ':' separator */
+> -       if (dev_name_end < dev_name || *dev_name_end != ':') {
+> -               pr_err("device name is missing path (no : separator in %s)\n",
+> -                               dev_name);
+> -               goto out;
+> -       }
+> -       dout("device name '%.*s'\n", (int)(dev_name_end - dev_name), dev_name);
+> -       if (fsopt->server_path)
+> -               dout("server path '%s'\n", fsopt->server_path);
+> -
+> -       *popt = ceph_parse_options(options, dev_name, dev_name_end,
+> -                                parse_fsopt_token, (void *)fsopt);
+> -       if (IS_ERR(*popt)) {
+> -               err = PTR_ERR(*popt);
+> -               goto out;
+> -       }
+> -
+> -       /* success */
+> -       *pfsopt = fsopt;
+> -       return 0;
+> -
+> -out:
+> -       destroy_mount_options(fsopt);
+> -       return err;
+> -}
+> -
 >  /**
-> diff --git a/include/trace/events/xen.h b/include/trace/events/xen.h
-> index fdcf88bcf0ea..9a0e8af21310 100644
-> --- a/include/trace/events/xen.h
-> +++ b/include/trace/events/xen.h
-> @@ -73,7 +73,7 @@ TRACE_EVENT(xen_mc_callback,
->  		    __entry->fn = fn;
->  		    __entry->data = data;
->  		    ),
-> -	    TP_printk("callback %pf, data %p",
-> +	    TP_printk("callback %ps, data %p",
->  		      __entry->fn, __entry->data)
->  	);
->  
-> diff --git a/init/main.c b/init/main.c
-> index 598e278b46f7..204e87ec3419 100644
-> --- a/init/main.c
-> +++ b/init/main.c
-> @@ -840,7 +840,7 @@ trace_initcall_start_cb(void *data, initcall_t fn)
+>   * ceph_show_options - Show mount options in /proc/mounts
+>   * @m: seq_file to write to
+> @@ -564,7 +498,7 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+>                 seq_puts(m, ",noquotadf");
+>
+>  #ifdef CONFIG_CEPH_FS_POSIX_ACL
+> -       if (fsopt->sb_flags & SB_POSIXACL)
+> +       if (root->d_sb->s_flags & SB_POSIXACL)
+>                 seq_puts(m, ",acl");
+>         else
+>                 seq_puts(m, ",noacl");
+> @@ -624,12 +558,10 @@ static int extra_mon_dispatch(struct ceph_client *client, struct ceph_msg *msg)
+>
+>  /*
+>   * create a new fs client
+> - *
+> - * Success or not, this function consumes @fsopt and @opt.
+>   */
+> -static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+> -                                       struct ceph_options *opt)
+> +static struct ceph_fs_client *create_fs_client(struct fs_context *fc)
 >  {
->  	ktime_t *calltime = (ktime_t *)data;
->  
-> -	printk(KERN_DEBUG "calling  %pF @ %i\n", fn, task_pid_nr(current));
-> +	printk(KERN_DEBUG "calling  %pS @ %i\n", fn, task_pid_nr(current));
->  	*calltime = ktime_get();
+> +       struct ceph_config_context *ctx = fc->fs_private;
+>         struct ceph_fs_client *fsc;
+>         int page_count;
+>         size_t size;
+> @@ -641,17 +573,18 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>                 goto fail;
+>         }
+>
+> -       fsc->client = ceph_create_client(opt, fsc);
+> +       fsc->client = ceph_create_client(ctx->opt, fsc);
+>         if (IS_ERR(fsc->client)) {
+> +               errorf(fc, "ceph: Failed to create client");
+>                 err = PTR_ERR(fsc->client);
+>                 goto fail;
+>         }
+> -       opt = NULL; /* fsc->client now owns this */
+> +       ctx->opt = NULL; /* fsc->client now owns this */
+>
+>         fsc->client->extra_mon_dispatch = extra_mon_dispatch;
+>         ceph_set_opt(fsc->client, ABORT_ON_FULL);
+>
+> -       if (!fsopt->mds_namespace) {
+> +       if (!ctx->mount_options->mds_namespace) {
+>                 ceph_monc_want_map(&fsc->client->monc, CEPH_SUB_MDSMAP,
+>                                    0, true);
+>         } else {
+> @@ -659,7 +592,8 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>                                    0, false);
+>         }
+>
+> -       fsc->mount_options = fsopt;
+> +       fsc->mount_options = ctx->mount_options;
+> +       ctx->mount_options = NULL;
+>
+>         fsc->sb = NULL;
+>         fsc->mount_state = CEPH_MOUNT_MOUNTING;
+> @@ -706,9 +640,6 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>         ceph_destroy_client(fsc->client);
+>  fail:
+>         kfree(fsc);
+> -       if (opt)
+> -               ceph_destroy_options(opt);
+> -       destroy_mount_options(fsopt);
+>         return ERR_PTR(err);
 >  }
->  
-> @@ -854,7 +854,7 @@ trace_initcall_finish_cb(void *data, initcall_t fn, int ret)
->  	rettime = ktime_get();
->  	delta = ktime_sub(rettime, *calltime);
->  	duration = (unsigned long long) ktime_to_ns(delta) >> 10;
-> -	printk(KERN_DEBUG "initcall %pF returned %d after %lld usecs\n",
-> +	printk(KERN_DEBUG "initcall %pS returned %d after %lld usecs\n",
->  		 fn, ret, duration);
+>
+> @@ -912,7 +843,7 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
+>  /*
+>   * mount: join the ceph cluster, and open root directory.
+>   */
+> -static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+> +static int ceph_real_mount(struct fs_context *fc, struct ceph_fs_client *fsc)
+>  {
+>         int err;
+>         unsigned long started = jiffies;  /* note the start time */
+> @@ -929,7 +860,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+>
+>                 /* setup fscache */
+>                 if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
+> -                       err = ceph_fscache_register_fs(fsc);
+> +                       err = ceph_fscache_register_fs(fc, fsc);
+>                         if (err < 0)
+>                                 goto out;
+>                 }
+> @@ -943,41 +874,41 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+>                 }
+>
+>                 err = ceph_fs_debugfs_init(fsc);
+> -               if (err < 0)
+> +               if (err < 0) {
+> +                       errorf(fc, "ceph: Can't create debugfs entries: %d",
+> +                              err);
+>                         goto out;
+> +               }
+>
+>                 root = open_root_dentry(fsc, path, started);
+>                 if (IS_ERR(root)) {
+>                         err = PTR_ERR(root);
+>                         goto out;
+>                 }
+> -               fsc->sb->s_root = dget(root);
+> -       } else {
+> -               root = dget(fsc->sb->s_root);
+> +               fsc->sb->s_root = root;
+>         }
+>
+> +       fc->root = dget(fsc->sb->s_root);
+>         fsc->mount_state = CEPH_MOUNT_MOUNTED;
+>         dout("mount success\n");
+>         mutex_unlock(&fsc->client->mount_mutex);
+> -       return root;
+> +       return err;
+>
+>  out:
+>         mutex_unlock(&fsc->client->mount_mutex);
+> -       return ERR_PTR(err);
+> +       return err;
 >  }
->  
-> @@ -911,7 +911,7 @@ int __init_or_module do_one_initcall(initcall_t fn)
->  		strlcat(msgbuf, "disabled interrupts ", sizeof(msgbuf));
->  		local_irq_enable();
->  	}
-> -	WARN(msgbuf[0], "initcall %pF returned with %s\n", fn, msgbuf);
-> +	WARN(msgbuf[0], "initcall %pS returned with %s\n", fn, msgbuf);
->  
->  	add_latent_entropy();
->  	return ret;
-> diff --git a/kernel/async.c b/kernel/async.c
-> index f6bd0d9885e1..12c332e4e13e 100644
-> --- a/kernel/async.c
-> +++ b/kernel/async.c
-> @@ -119,7 +119,7 @@ static void async_run_entry_fn(struct work_struct *work)
->  
->  	/* 1) run (and print duration) */
->  	if (initcall_debug && system_state < SYSTEM_RUNNING) {
-> -		pr_debug("calling  %lli_%pF @ %i\n",
-> +		pr_debug("calling  %lli_%pS @ %i\n",
->  			(long long)entry->cookie,
->  			entry->func, task_pid_nr(current));
->  		calltime = ktime_get();
-> @@ -128,7 +128,7 @@ static void async_run_entry_fn(struct work_struct *work)
->  	if (initcall_debug && system_state < SYSTEM_RUNNING) {
->  		rettime = ktime_get();
->  		delta = ktime_sub(rettime, calltime);
-> -		pr_debug("initcall %lli_%pF returned 0 after %lld usecs\n",
-> +		pr_debug("initcall %lli_%pS returned 0 after %lld usecs\n",
->  			(long long)entry->cookie,
->  			entry->func,
->  			(long long)ktime_to_ns(delta) >> 10);
-> diff --git a/kernel/events/uprobes.c b/kernel/events/uprobes.c
-> index c5cde87329c7..4a1ef880253c 100644
-> --- a/kernel/events/uprobes.c
-> +++ b/kernel/events/uprobes.c
-> @@ -2028,7 +2028,7 @@ static void handler_chain(struct uprobe *uprobe, struct pt_regs *regs)
->  		if (uc->handler) {
->  			rc = uc->handler(uc, regs);
->  			WARN(rc & ~UPROBE_HANDLER_MASK,
-> -				"bad rc=0x%x from %pf()\n", rc, uc->handler);
-> +				"bad rc=0x%x from %ps()\n", rc, uc->handler);
->  		}
->  
->  		if (uc->ret_handler)
-> diff --git a/kernel/fail_function.c b/kernel/fail_function.c
-> index 17f75b545f66..feb80712b913 100644
-> --- a/kernel/fail_function.c
-> +++ b/kernel/fail_function.c
-> @@ -210,7 +210,7 @@ static int fei_seq_show(struct seq_file *m, void *v)
+>
+> -static int ceph_set_super(struct super_block *s, void *data)
+> +static int ceph_set_super(struct super_block *s, struct fs_context *fc)
 >  {
->  	struct fei_attr *attr = list_entry(v, struct fei_attr, list);
->  
-> -	seq_printf(m, "%pf\n", attr->kp.addr);
-> +	seq_printf(m, "%ps\n", attr->kp.addr);
->  	return 0;
+> -       struct ceph_fs_client *fsc = data;
+> +       struct ceph_fs_client *fsc = s->s_fs_info;
+>         int ret;
+>
+> -       dout("set_super %p data %p\n", s, data);
+> +       dout("set_super %p\n", s);
+>
+> -       s->s_flags = fsc->mount_options->sb_flags;
+>         s->s_maxbytes = MAX_LFS_FILESIZE;
+>
+>         s->s_xattr = ceph_xattr_handlers;
+> -       s->s_fs_info = fsc;
+>         fsc->sb = s;
+>         fsc->max_file_size = 1ULL << 40; /* temp value until we get mdsmap */
+>
+> @@ -987,24 +918,18 @@ static int ceph_set_super(struct super_block *s, void *data)
+>
+>         s->s_time_gran = 1000;  /* 1000 ns == 1 us */
+>
+> -       ret = set_anon_super(s, NULL);  /* what is that second arg for? */
+> +       ret = set_anon_super_fc(s, fc);
+>         if (ret != 0)
+> -               goto fail;
+> -
+> -       return ret;
+> -
+> -fail:
+> -       s->s_fs_info = NULL;
+> -       fsc->sb = NULL;
+> +               fsc->sb = NULL;
+>         return ret;
 >  }
->  
-> diff --git a/kernel/irq/debugfs.c b/kernel/irq/debugfs.c
-> index 516c00a5e867..c1eccd4f6520 100644
-> --- a/kernel/irq/debugfs.c
-> +++ b/kernel/irq/debugfs.c
-> @@ -152,7 +152,7 @@ static int irq_debug_show(struct seq_file *m, void *p)
->  
->  	raw_spin_lock_irq(&desc->lock);
->  	data = irq_desc_get_irq_data(desc);
-> -	seq_printf(m, "handler:  %pf\n", desc->handle_irq);
-> +	seq_printf(m, "handler:  %ps\n", desc->handle_irq);
->  	seq_printf(m, "device:   %s\n", desc->dev_name);
->  	seq_printf(m, "status:   0x%08x\n", desc->status_use_accessors);
->  	irq_debug_show_bits(m, 0, desc->status_use_accessors, irqdesc_states,
-> diff --git a/kernel/irq/handle.c b/kernel/irq/handle.c
-> index 6df5ddfdb0f8..a4ace611f47f 100644
-> --- a/kernel/irq/handle.c
-> +++ b/kernel/irq/handle.c
-> @@ -149,7 +149,7 @@ irqreturn_t __handle_irq_event_percpu(struct irq_desc *desc, unsigned int *flags
->  		res = action->handler(irq, action->dev_id);
->  		trace_irq_handler_exit(irq, action, res);
->  
-> -		if (WARN_ONCE(!irqs_disabled(),"irq %u handler %pF enabled interrupts\n",
-> +		if (WARN_ONCE(!irqs_disabled(),"irq %u handler %pS enabled interrupts\n",
->  			      irq, action->handler))
->  			local_irq_disable();
->  
-> diff --git a/kernel/irq/manage.c b/kernel/irq/manage.c
-> index 53a081392115..78f3ddeb7fe4 100644
-> --- a/kernel/irq/manage.c
-> +++ b/kernel/irq/manage.c
-> @@ -781,7 +781,7 @@ int __irq_set_trigger(struct irq_desc *desc, unsigned long flags)
->  		ret = 0;
->  		break;
->  	default:
-> -		pr_err("Setting trigger mode %lu for irq %u failed (%pF)\n",
-> +		pr_err("Setting trigger mode %lu for irq %u failed (%pS)\n",
->  		       flags, irq_desc_get_irq(desc), chip->irq_set_type);
->  	}
->  	if (unmask)
-> diff --git a/kernel/irq/spurious.c b/kernel/irq/spurious.c
-> index 6d2fa6914b30..2ed97a7c9b2a 100644
-> --- a/kernel/irq/spurious.c
-> +++ b/kernel/irq/spurious.c
-> @@ -212,9 +212,9 @@ static void __report_bad_irq(struct irq_desc *desc, irqreturn_t action_ret)
->  	 */
->  	raw_spin_lock_irqsave(&desc->lock, flags);
->  	for_each_action_of_desc(desc, action) {
-> -		printk(KERN_ERR "[<%p>] %pf", action->handler, action->handler);
-> +		printk(KERN_ERR "[<%p>] %ps", action->handler, action->handler);
->  		if (action->thread_fn)
-> -			printk(KERN_CONT " threaded [<%p>] %pf",
-> +			printk(KERN_CONT " threaded [<%p>] %ps",
->  					action->thread_fn, action->thread_fn);
->  		printk(KERN_CONT "\n");
->  	}
-> diff --git a/kernel/rcu/tree.c b/kernel/rcu/tree.c
-> index acd6ccf56faf..8eee921b384d 100644
-> --- a/kernel/rcu/tree.c
-> +++ b/kernel/rcu/tree.c
-> @@ -2870,7 +2870,7 @@ __call_rcu(struct rcu_head *head, rcu_callback_t func, int cpu, bool lazy)
->  		 * Use rcu:rcu_callback trace event to find the previous
->  		 * time callback was passed to __call_rcu().
->  		 */
-> -		WARN_ONCE(1, "__call_rcu(): Double-freed CB %p->%pF()!!!\n",
-> +		WARN_ONCE(1, "__call_rcu(): Double-freed CB %p->%pS()!!!\n",
->  			  head, head->func);
->  		WRITE_ONCE(head->func, rcu_leak_callback);
->  		return;
-> diff --git a/kernel/stop_machine.c b/kernel/stop_machine.c
-> index 067cb83f37ea..7231fb5953fc 100644
-> --- a/kernel/stop_machine.c
-> +++ b/kernel/stop_machine.c
-> @@ -513,7 +513,7 @@ static void cpu_stopper_thread(unsigned int cpu)
->  		}
->  		preempt_count_dec();
->  		WARN_ONCE(preempt_count(),
-> -			  "cpu_stop: %pf(%p) leaked preempt count\n", fn, arg);
-> +			  "cpu_stop: %ps(%p) leaked preempt count\n", fn, arg);
->  		goto repeat;
->  	}
+>
+>  /*
+>   * share superblock if same fs AND options
+>   */
+> -static int ceph_compare_super(struct super_block *sb, void *data)
+> +static int ceph_compare_super(struct super_block *sb, struct fs_context *fc)
+>  {
+> -       struct ceph_fs_client *new = data;
+> +       struct ceph_fs_client *new = fc->s_fs_info;
+>         struct ceph_mount_options *fsopt = new->mount_options;
+>         struct ceph_options *opt = new->client->options;
+>         struct ceph_fs_client *other = ceph_sb_to_client(sb);
+> @@ -1020,7 +945,7 @@ static int ceph_compare_super(struct super_block *sb, void *data)
+>                 dout("fsid doesn't match\n");
+>                 return 0;
+>         }
+> -       if (fsopt->sb_flags != other->mount_options->sb_flags) {
+> +       if (fc->sb_flags != sb->s_flags) {
+>                 dout("flags differ\n");
+>                 return 0;
+>         }
+
+Hi, I found this check always return 0.  sb->s_flags has SB_BORN flag,
+but fc->sb_flags does not have.
+
+Regards
+Yan, Zheng
+
+
+> @@ -1050,46 +975,41 @@ static int ceph_setup_bdi(struct super_block *sb, struct ceph_fs_client *fsc)
+>         return 0;
 >  }
-> diff --git a/kernel/time/sched_clock.c b/kernel/time/sched_clock.c
-> index 16b80c2b4fe8..6be81ef90ee5 100644
-> --- a/kernel/time/sched_clock.c
-> +++ b/kernel/time/sched_clock.c
-> @@ -231,7 +231,7 @@ sched_clock_register(u64 (*read)(void), int bits, unsigned long rate)
->  	if (irqtime > 0 || (irqtime == -1 && rate >= 1000000))
->  		enable_sched_clock_irqtime();
->  
-> -	pr_debug("Registered %pF as sched_clock source\n", read);
-> +	pr_debug("Registered %pS as sched_clock source\n", read);
+>
+> -static struct dentry *ceph_mount(struct file_system_type *fs_type,
+> -                      int flags, const char *dev_name, void *data)
+> +static int ceph_get_tree(struct fs_context *fc)
+>  {
+> -       struct super_block *sb;
+>         struct ceph_fs_client *fsc;
+> -       struct dentry *res;
+> +       struct super_block *sb;
+>         int err;
+> -       int (*compare_super)(struct super_block *, void *) = ceph_compare_super;
+> -       struct ceph_mount_options *fsopt = NULL;
+> -       struct ceph_options *opt = NULL;
+> +       int (*compare_super)(struct super_block *, struct fs_context *) =
+> +               ceph_compare_super;
+> +
+> +       dout("ceph_get_tree\n");
+>
+> -       dout("ceph_mount\n");
+> +       if (!fc->source)
+> +               return invalf(fc, "source parameter not specified");
+>
+>  #ifdef CONFIG_CEPH_FS_POSIX_ACL
+> -       flags |= SB_POSIXACL;
+> +       fc->sb_flags |= SB_POSIXACL;
+>  #endif
+> -       err = parse_mount_options(&fsopt, &opt, flags, data, dev_name);
+> -       if (err < 0) {
+> -               res = ERR_PTR(err);
+> -               goto out_final;
+> -       }
+>
+>         /* create client (which we may/may not use) */
+> -       fsc = create_fs_client(fsopt, opt);
+> +       fsc = create_fs_client(fc);
+>         if (IS_ERR(fsc)) {
+> -               res = ERR_CAST(fsc);
+> -               goto out_final;
+> +               err = PTR_ERR(fsc);
+> +               goto out;
+>         }
+>
+>         err = ceph_mdsc_init(fsc);
+> -       if (err < 0) {
+> -               res = ERR_PTR(err);
+> +       if (err < 0)
+>                 goto out;
+> -       }
+>
+>         if (ceph_test_opt(fsc->client, NOSHARE))
+>                 compare_super = NULL;
+> -       sb = sget(fs_type, compare_super, ceph_set_super, flags, fsc);
+> +
+> +       fc->s_fs_info = fsc;
+> +       sb = sget_fc(fc, compare_super, ceph_set_super);
+>         if (IS_ERR(sb)) {
+> -               res = ERR_CAST(sb);
+> +               err = PTR_ERR(sb);
+>                 goto out;
+>         }
+>
+> @@ -1101,30 +1021,97 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
+>         } else {
+>                 dout("get_sb using new client %p\n", fsc);
+>                 err = ceph_setup_bdi(sb, fsc);
+> -               if (err < 0) {
+> -                       res = ERR_PTR(err);
+> +               if (err < 0)
+>                         goto out_splat;
+> -               }
+>         }
+>
+> -       res = ceph_real_mount(fsc);
+> -       if (IS_ERR(res))
+> +       err = ceph_real_mount(fc, fsc);
+> +       if (err < 0)
+>                 goto out_splat;
+> -       dout("root %p inode %p ino %llx.%llx\n", res,
+> -            d_inode(res), ceph_vinop(d_inode(res)));
+> -       return res;
+> +       dout("root %p inode %p ino %llx.%llx\n",
+> +            fc->root, d_inode(fc->root), ceph_vinop(d_inode(fc->root)));
+> +       return 0;
+>
+>  out_splat:
+>         ceph_mdsc_close_sessions(fsc->mdsc);
+>         deactivate_locked_super(sb);
+> -       goto out_final;
+> -
+>  out:
+> -       ceph_mdsc_destroy(fsc);
+> -       destroy_fs_client(fsc);
+> -out_final:
+> -       dout("ceph_mount fail %ld\n", PTR_ERR(res));
+> -       return res;
+> +       dout("ceph_mount fail %d\n", err);
+> +       return err;
+> +}
+> +
+> +static void ceph_free_fc(struct fs_context *fc)
+> +{
+> +       struct ceph_config_context *ctx = fc->fs_private;
+> +       struct ceph_fs_client *fsc = fc->s_fs_info;
+> +
+> +       if (fsc) {
+> +               ceph_mdsc_destroy(fsc);
+> +               destroy_fs_client(fsc);
+> +       }
+> +
+> +       if (ctx) {
+> +               destroy_mount_options(ctx->mount_options);
+> +               ceph_destroy_options(ctx->opt);
+> +               kfree(ctx);
+> +       }
+> +}
+> +
+> +static const struct fs_context_operations ceph_context_ops = {
+> +       .free           = ceph_free_fc,
+> +       .parse_param    = ceph_parse_param,
+> +       .get_tree       = ceph_get_tree,
+> +};
+> +
+> +/*
+> + * Set up the filesystem mount context.
+> + */
+> +static int ceph_init_fs_context(struct fs_context *fc)
+> +{
+> +       struct ceph_config_context *ctx;
+> +       struct ceph_mount_options *fsopt;
+> +
+> +       ctx = kzalloc(sizeof(struct ceph_config_context), GFP_KERNEL);
+> +       if (!ctx)
+> +               goto nomem;
+> +
+> +       ctx->mount_options = kzalloc(sizeof(struct ceph_mount_options), GFP_KERNEL);
+> +       if (!ctx->mount_options)
+> +               goto nomem_ctx;
+> +
+> +       ctx->mount_options->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
+> +       if (!ctx->mount_options->snapdir_name)
+> +               goto nomem_mo;
+> +
+> +       ctx->opt = ceph_alloc_options();
+> +       if (!ctx->opt)
+> +               goto nomem_snap;
+> +
+> +       fsopt = ctx->mount_options;
+> +       fsopt->flags = CEPH_MOUNT_OPT_DEFAULT;
+> +
+> +       fsopt->wsize = CEPH_MAX_WRITE_SIZE;
+> +       fsopt->rsize = CEPH_MAX_READ_SIZE;
+> +       fsopt->rasize = CEPH_RASIZE_DEFAULT;
+> +
+> +       fsopt->caps_wanted_delay_min = CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT;
+> +       fsopt->caps_wanted_delay_max = CEPH_CAPS_WANTED_DELAY_MAX_DEFAULT;
+> +       fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
+> +       fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
+> +       fsopt->congestion_kb = default_congestion_kb();
+> +
+> +       fc->fs_private = ctx;
+> +       fc->ops = &ceph_context_ops;
+> +       return 0;
+> +
+> +nomem_snap:
+> +       kfree(ctx->mount_options->snapdir_name);
+> +nomem_mo:
+> +       kfree(ctx->mount_options);
+> +nomem_ctx:
+> +       kfree(ctx);
+> +nomem:
+> +       return -ENOMEM;
 >  }
->  
->  void __init generic_sched_clock_init(void)
-> diff --git a/kernel/time/timer.c b/kernel/time/timer.c
-> index a9b1bbc2d88d..343c7ba33b1c 100644
-> --- a/kernel/time/timer.c
-> +++ b/kernel/time/timer.c
-> @@ -1325,7 +1325,7 @@ static void call_timer_fn(struct timer_list *timer,
->  	lock_map_release(&lockdep_map);
->  
->  	if (count != preempt_count()) {
-> -		WARN_ONCE(1, "timer: %pF preempt leak: %08x -> %08x\n",
-> +		WARN_ONCE(1, "timer: %pS preempt leak: %08x -> %08x\n",
->  			  fn, count, preempt_count());
->  		/*
->  		 * Restore the preempt count. That gives us a decent
-> diff --git a/kernel/workqueue.c b/kernel/workqueue.c
-> index 6bc7b180fdf6..2d896f574323 100644
-> --- a/kernel/workqueue.c
-> +++ b/kernel/workqueue.c
-> @@ -2278,7 +2278,7 @@ __acquires(&pool->lock)
->  
->  	if (unlikely(in_atomic() || lockdep_depth(current) > 0)) {
->  		pr_err("BUG: workqueue leaked lock or atomic: %s/0x%08x/%d\n"
-> -		       "     last function: %pf\n",
-> +		       "     last function: %ps\n",
->  		       current->comm, preempt_count(), task_pid_nr(current),
->  		       worker->current_func);
->  		debug_show_held_locks(current);
-> @@ -2597,11 +2597,11 @@ static void check_flush_dependency(struct workqueue_struct *target_wq,
->  	worker = current_wq_worker();
->  
->  	WARN_ONCE(current->flags & PF_MEMALLOC,
-> -		  "workqueue: PF_MEMALLOC task %d(%s) is flushing !WQ_MEM_RECLAIM %s:%pf",
-> +		  "workqueue: PF_MEMALLOC task %d(%s) is flushing !WQ_MEM_RECLAIM %s:%ps",
->  		  current->pid, current->comm, target_wq->name, target_func);
->  	WARN_ONCE(worker && ((worker->current_pwq->wq->flags &
->  			      (WQ_MEM_RECLAIM | __WQ_LEGACY)) == WQ_MEM_RECLAIM),
-> -		  "workqueue: WQ_MEM_RECLAIM %s:%pf is flushing !WQ_MEM_RECLAIM %s:%pf",
-> +		  "workqueue: WQ_MEM_RECLAIM %s:%ps is flushing !WQ_MEM_RECLAIM %s:%ps",
->  		  worker->current_pwq->wq->name, worker->current_func,
->  		  target_wq->name, target_func);
+>
+>  static void ceph_kill_sb(struct super_block *s)
+> @@ -1153,7 +1140,7 @@ static void ceph_kill_sb(struct super_block *s)
+>  static struct file_system_type ceph_fs_type = {
+>         .owner          = THIS_MODULE,
+>         .name           = "ceph",
+> -       .mount          = ceph_mount,
+> +       .init_fs_context = ceph_init_fs_context,
+>         .kill_sb        = ceph_kill_sb,
+>         .fs_flags       = FS_RENAME_DOES_D_MOVE,
+>  };
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 16c03188578e..47e0e4b4f7f8 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -72,7 +72,6 @@
+>
+>  struct ceph_mount_options {
+>         int flags;
+> -       int sb_flags;
+>
+>         int wsize;            /* max write size */
+>         int rsize;            /* max read size */
+> diff --git a/fs/fs_context.c b/fs/fs_context.c
+> index 65e705d02521..862f9559ac0a 100644
+> --- a/fs/fs_context.c
+> +++ b/fs/fs_context.c
+> @@ -195,7 +195,7 @@ EXPORT_SYMBOL(vfs_parse_fs_string);
+>
+>  /**
+>   * generic_parse_monolithic - Parse key[=val][,key[=val]]* mount data
+> - * @ctx: The superblock configuration to fill in.
+> + * @fc: The filesystem configuration to fill in.
+>   * @data: The data to parse
+>   *
+>   * Parse a blob of data that's in key[=val][,key[=val]]* form.  This can be
+> diff --git a/fs/fs_parser.c b/fs/fs_parser.c
+> index bd59e1725c50..a74f1c5f3599 100644
+> --- a/fs/fs_parser.c
+> +++ b/fs/fs_parser.c
+> @@ -64,7 +64,7 @@ static const struct fs_parameter_spec *fs_lookup_key(
+>
+>  /*
+>   * fs_parse - Parse a filesystem configuration parameter
+> - * @fc: The filesystem context to log errors through.
+> + * @fc: The filesystem context to log errors through (or NULL).
+>   * @desc: The parameter description to use.
+>   * @param: The parameter.
+>   * @result: Where to place the result of the parse
+> diff --git a/include/linux/ceph/ceph_debug.h b/include/linux/ceph/ceph_debug.h
+> index d5a5da838caf..fa4a84e0e018 100644
+> --- a/include/linux/ceph/ceph_debug.h
+> +++ b/include/linux/ceph/ceph_debug.h
+> @@ -2,6 +2,7 @@
+>  #ifndef _FS_CEPH_DEBUG_H
+>  #define _FS_CEPH_DEBUG_H
+>
+> +#undef pr_fmt
+>  #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+>
+>  #include <linux/string.h>
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index a420c07904bc..43039d1c081a 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -66,6 +66,13 @@ struct ceph_options {
+>         struct ceph_crypto_key *key;
+>  };
+>
+> +struct ceph_config_context {
+> +       struct ceph_options             *opt;
+> +       struct ceph_mount_options       *mount_options;
+> +       struct rbd_spec                 *rbd_spec;
+> +       struct rbd_options              *rbd_opts;
+> +};
+> +
+>  /*
+>   * defaults
+>   */
+> @@ -278,10 +285,12 @@ extern const char *ceph_msg_type_name(int type);
+>  extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid);
+>  extern void *ceph_kvmalloc(size_t size, gfp_t flags);
+>
+> -extern struct ceph_options *ceph_parse_options(char *options,
+> -                             const char *dev_name, const char *dev_name_end,
+> -                             int (*parse_extra_token)(char *c, void *private),
+> -                             void *private);
+> +struct fs_parameter;
+> +extern struct ceph_options *ceph_alloc_options(void);
+> +extern int ceph_parse_server_specs(struct ceph_options *opt, struct fs_context *fc,
+> +                                  const char *data, size_t size);
+> +extern int ceph_parse_option(struct ceph_options *opt, struct fs_context *fc,
+> +                            struct fs_parameter *param);
+>  int ceph_print_client_options(struct seq_file *m, struct ceph_client *client,
+>                               bool show_all);
+>  extern void ceph_destroy_options(struct ceph_options *opt);
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index 9cab80207ced..c25d2494883d 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -10,7 +10,7 @@
+>  #include <linux/module.h>
+>  #include <linux/mount.h>
+>  #include <linux/nsproxy.h>
+> -#include <linux/parser.h>
+> +#include <linux/fs_parser.h>
+>  #include <linux/sched.h>
+>  #include <linux/seq_file.h>
+>  #include <linux/slab.h>
+> @@ -231,70 +231,84 @@ static int parse_fsid(const char *str, struct ceph_fsid *fsid)
+>   * ceph options
+>   */
+>  enum {
+> -       Opt_osdtimeout,
+> -       Opt_osdkeepalivetimeout,
+> +       Opt_abort_on_full,
+> +       Opt_cephx_require_signatures,
+> +       Opt_cephx_sign_messages,
+> +       Opt_crc,
+> +       Opt_fsid,
+> +       Opt_ip,
+> +       Opt_key,
+>         Opt_mount_timeout,
+> +       Opt_name,
+>         Opt_osd_idle_ttl,
+>         Opt_osd_request_timeout,
+> -       Opt_last_int,
+> -       /* int args above */
+> -       Opt_fsid,
+> -       Opt_name,
+> +       Opt_osdkeepalivetimeout,
+> +       Opt_osdtimeout,
+>         Opt_secret,
+> -       Opt_key,
+> -       Opt_ip,
+> -       Opt_last_string,
+> -       /* string args above */
+>         Opt_share,
+> -       Opt_noshare,
+> -       Opt_crc,
+> -       Opt_nocrc,
+> -       Opt_cephx_require_signatures,
+> -       Opt_nocephx_require_signatures,
+> -       Opt_cephx_sign_messages,
+> -       Opt_nocephx_sign_messages,
+>         Opt_tcp_nodelay,
+> -       Opt_notcp_nodelay,
+> -       Opt_abort_on_full,
+>  };
+>
+> -static match_table_t opt_tokens = {
+> -       {Opt_osdtimeout, "osdtimeout=%d"},
+> -       {Opt_osdkeepalivetimeout, "osdkeepalive=%d"},
+> -       {Opt_mount_timeout, "mount_timeout=%d"},
+> -       {Opt_osd_idle_ttl, "osd_idle_ttl=%d"},
+> -       {Opt_osd_request_timeout, "osd_request_timeout=%d"},
+> -       /* int args above */
+> -       {Opt_fsid, "fsid=%s"},
+> -       {Opt_name, "name=%s"},
+> -       {Opt_secret, "secret=%s"},
+> -       {Opt_key, "key=%s"},
+> -       {Opt_ip, "ip=%s"},
+> -       /* string args above */
+> -       {Opt_share, "share"},
+> -       {Opt_noshare, "noshare"},
+> -       {Opt_crc, "crc"},
+> -       {Opt_nocrc, "nocrc"},
+> -       {Opt_cephx_require_signatures, "cephx_require_signatures"},
+> -       {Opt_nocephx_require_signatures, "nocephx_require_signatures"},
+> -       {Opt_cephx_sign_messages, "cephx_sign_messages"},
+> -       {Opt_nocephx_sign_messages, "nocephx_sign_messages"},
+> -       {Opt_tcp_nodelay, "tcp_nodelay"},
+> -       {Opt_notcp_nodelay, "notcp_nodelay"},
+> -       {Opt_abort_on_full, "abort_on_full"},
+> -       {-1, NULL}
+> +static const struct fs_parameter_spec ceph_option_specs[] = {
+> +       fsparam_flag    ("abort_on_full",               Opt_abort_on_full),
+> +       fsparam_flag_no ("cephx_require_signatures",    Opt_cephx_require_signatures),
+> +       fsparam_flag_no ("cephx_sign_messages",         Opt_cephx_sign_messages),
+> +       fsparam_flag_no ("crc",                         Opt_crc),
+> +       fsparam_string  ("fsid",                        Opt_fsid),
+> +       fsparam_string  ("ip",                          Opt_ip),
+> +       fsparam_string  ("key",                         Opt_key),
+> +       fsparam_u32     ("mount_timeout",               Opt_mount_timeout),
+> +       fsparam_string  ("name",                        Opt_name),
+> +       fsparam_u32     ("osd_idle_ttl",                Opt_osd_idle_ttl),
+> +       fsparam_u32     ("osd_request_timeout",         Opt_osd_request_timeout),
+> +       fsparam_u32     ("osdkeepalive",                Opt_osdkeepalivetimeout),
+> +       __fsparam       (fs_param_is_s32, "osdtimeout", Opt_osdtimeout, fs_param_deprecated),
+> +       fsparam_string  ("secret",                      Opt_secret),
+> +       fsparam_flag_no ("share",                       Opt_share),
+> +       fsparam_flag_no ("tcp_nodelay",                 Opt_tcp_nodelay),
+> +       {}
+> +};
+> +
+> +static const struct fs_parameter_description ceph_options = {
+> +        .name           = "ceph",
+> +        .specs          = ceph_option_specs,
+>  };
+>
+> +struct ceph_options *ceph_alloc_options(void)
+> +{
+> +       struct ceph_options *opt;
+> +
+> +       opt = kzalloc(sizeof(struct ceph_options), GFP_KERNEL);
+> +       if (!opt)
+> +               return NULL;
+> +
+> +       opt->mon_addr = kcalloc(CEPH_MAX_MON, sizeof(*opt->mon_addr), GFP_KERNEL);
+> +       if (!opt->mon_addr) {
+> +               kfree(opt);
+> +               return NULL;
+> +       }
+> +
+> +       opt->flags = CEPH_OPT_DEFAULT;
+> +       opt->osd_keepalive_timeout = CEPH_OSD_KEEPALIVE_DEFAULT;
+> +       opt->mount_timeout = CEPH_MOUNT_TIMEOUT_DEFAULT;
+> +       opt->osd_idle_ttl = CEPH_OSD_IDLE_TTL_DEFAULT;
+> +       opt->osd_request_timeout = CEPH_OSD_REQUEST_TIMEOUT_DEFAULT;
+> +       return opt;
+> +}
+> +EXPORT_SYMBOL(ceph_alloc_options);
+> +
+>  void ceph_destroy_options(struct ceph_options *opt)
+>  {
+> -       dout("destroy_options %p\n", opt);
+> -       kfree(opt->name);
+> -       if (opt->key) {
+> -               ceph_crypto_key_destroy(opt->key);
+> -               kfree(opt->key);
+> +       if (opt) {
+> +               dout("destroy_options %p\n", opt);
+> +               kfree(opt->name);
+> +               if (opt->key) {
+> +                       ceph_crypto_key_destroy(opt->key);
+> +                       kfree(opt->key);
+> +               }
+> +               kfree(opt->mon_addr);
+> +               kfree(opt);
+>         }
+> -       kfree(opt->mon_addr);
+> -       kfree(opt);
 >  }
-> @@ -4589,7 +4589,7 @@ void print_worker_info(const char *log_lvl, struct task_struct *task)
->  	probe_kernel_read(desc, worker->desc, sizeof(desc) - 1);
->  
->  	if (fn || name[0] || desc[0]) {
-> -		printk("%sWorkqueue: %s %pf", log_lvl, name, fn);
-> +		printk("%sWorkqueue: %s %ps", log_lvl, name, fn);
->  		if (strcmp(name, desc))
->  			pr_cont(" (%s)", desc);
->  		pr_cont("\n");
-> @@ -4614,7 +4614,7 @@ static void pr_cont_work(bool comma, struct work_struct *work)
->  		pr_cont("%s BAR(%d)", comma ? "," : "",
->  			task_pid_nr(barr->task));
->  	} else {
-> -		pr_cont("%s %pf", comma ? "," : "", work->func);
-> +		pr_cont("%s %ps", comma ? "," : "", work->func);
->  	}
+>  EXPORT_SYMBOL(ceph_destroy_options);
+>
+> @@ -343,217 +357,141 @@ static int get_secret(struct ceph_crypto_key *dst, const char *name) {
+>         return err;
 >  }
->  
-> @@ -4646,7 +4646,7 @@ static void show_pwq(struct pool_workqueue *pwq)
->  			if (worker->current_pwq != pwq)
->  				continue;
->  
-> -			pr_cont("%s %d%s:%pf", comma ? "," : "",
-> +			pr_cont("%s %d%s:%ps", comma ? "," : "",
->  				task_pid_nr(worker->task),
->  				worker == pwq->wq->rescuer ? "(RESCUER)" : "",
->  				worker->current_func);
-> diff --git a/lib/error-inject.c b/lib/error-inject.c
-> index c0d4600f4896..aa63751c916f 100644
-> --- a/lib/error-inject.c
-> +++ b/lib/error-inject.c
-> @@ -189,7 +189,7 @@ static int ei_seq_show(struct seq_file *m, void *v)
+>
+> -struct ceph_options *
+> -ceph_parse_options(char *options, const char *dev_name,
+> -                       const char *dev_name_end,
+> -                       int (*parse_extra_token)(char *c, void *private),
+> -                       void *private)
+> +int ceph_parse_server_specs(struct ceph_options *opt, struct fs_context *fc,
+> +                           const char *data, size_t size)
 >  {
->  	struct ei_entry *ent = list_entry(v, struct ei_entry, list);
->  
-> -	seq_printf(m, "%pf\t%s\n", (void *)ent->start_addr,
-> +	seq_printf(m, "%ps\t%s\n", (void *)ent->start_addr,
->  		   error_type_string(ent->etype));
->  	return 0;
+> -       struct ceph_options *opt;
+> -       const char *c;
+> -       int err = -ENOMEM;
+> -       substring_t argstr[MAX_OPT_ARGS];
+> -
+> -       opt = kzalloc(sizeof(*opt), GFP_KERNEL);
+> -       if (!opt)
+> -               return ERR_PTR(-ENOMEM);
+> -       opt->mon_addr = kcalloc(CEPH_MAX_MON, sizeof(*opt->mon_addr),
+> -                               GFP_KERNEL);
+> -       if (!opt->mon_addr)
+> -               goto out;
+> -
+> -       dout("parse_options %p options '%s' dev_name '%s'\n", opt, options,
+> -            dev_name);
+> -
+> -       /* start with defaults */
+> -       opt->flags = CEPH_OPT_DEFAULT;
+> -       opt->osd_keepalive_timeout = CEPH_OSD_KEEPALIVE_DEFAULT;
+> -       opt->mount_timeout = CEPH_MOUNT_TIMEOUT_DEFAULT;
+> -       opt->osd_idle_ttl = CEPH_OSD_IDLE_TTL_DEFAULT;
+> -       opt->osd_request_timeout = CEPH_OSD_REQUEST_TIMEOUT_DEFAULT;
+> -
+>         /* get mon ip(s) */
+>         /* ip1[:port1][,ip2[:port2]...] */
+> -       err = ceph_parse_ips(dev_name, dev_name_end, opt->mon_addr,
+> -                            CEPH_MAX_MON, &opt->num_mon);
+> -       if (err < 0)
+> -               goto out;
+> +       return ceph_parse_ips(data, data + size,
+> +                             opt->mon_addr, CEPH_MAX_MON, &opt->num_mon);
+> +}
+> +EXPORT_SYMBOL(ceph_parse_server_specs);
+>
+> -       /* parse mount options */
+> -       while ((c = strsep(&options, ",")) != NULL) {
+> -               int token, intval;
+> -               if (!*c)
+> -                       continue;
+> -               err = -EINVAL;
+> -               token = match_token((char *)c, opt_tokens, argstr);
+> -               if (token < 0 && parse_extra_token) {
+> -                       /* extra? */
+> -                       err = parse_extra_token((char *)c, private);
+> -                       if (err < 0) {
+> -                               pr_err("bad option at '%s'\n", c);
+> -                               goto out;
+> -                       }
+> -                       continue;
+> -               }
+> -               if (token < Opt_last_int) {
+> -                       err = match_int(&argstr[0], &intval);
+> -                       if (err < 0) {
+> -                               pr_err("bad option arg (not int) at '%s'\n", c);
+> -                               goto out;
+> -                       }
+> -                       dout("got int token %d val %d\n", token, intval);
+> -               } else if (token > Opt_last_int && token < Opt_last_string) {
+> -                       dout("got string token %d val %s\n", token,
+> -                            argstr[0].from);
+> -               } else {
+> -                       dout("got token %d\n", token);
+> -               }
+> -               switch (token) {
+> -               case Opt_ip:
+> -                       err = ceph_parse_ips(argstr[0].from,
+> -                                            argstr[0].to,
+> -                                            &opt->my_addr,
+> -                                            1, NULL);
+> -                       if (err < 0)
+> -                               goto out;
+> +int ceph_parse_option(struct ceph_options *opt, struct fs_context *fc,
+> +                     struct fs_parameter *param)
+> +{
+> +       struct fs_parse_result result;
+> +       int token, err;
+> +
+> +       dout("parse_option '%s'\n", param->key);
+> +
+> +       token = fs_parse(fc, &ceph_options, param, &result);
+> +       if (token < 0)
+> +               return token;
+> +
+> +       switch (token) {
+> +       case Opt_ip:
+> +               err = ceph_parse_ips(param->string,
+> +                                    param->string + param->size,
+> +                                    &opt->my_addr,
+> +                                    1, NULL);
+> +               if (err == 0)
+>                         opt->flags |= CEPH_OPT_MYIP;
+> -                       break;
+> +               break;
+>
+> -               case Opt_fsid:
+> -                       err = parse_fsid(argstr[0].from, &opt->fsid);
+> -                       if (err == 0)
+> -                               opt->flags |= CEPH_OPT_FSID;
+> -                       break;
+> -               case Opt_name:
+> -                       kfree(opt->name);
+> -                       opt->name = kstrndup(argstr[0].from,
+> -                                             argstr[0].to-argstr[0].from,
+> -                                             GFP_KERNEL);
+> -                       if (!opt->name) {
+> -                               err = -ENOMEM;
+> -                               goto out;
+> -                       }
+> -                       break;
+> -               case Opt_secret:
+> -                       ceph_crypto_key_destroy(opt->key);
+> -                       kfree(opt->key);
+> -
+> -                       opt->key = kzalloc(sizeof(*opt->key), GFP_KERNEL);
+> -                       if (!opt->key) {
+> -                               err = -ENOMEM;
+> -                               goto out;
+> -                       }
+> -                       err = ceph_crypto_key_unarmor(opt->key, argstr[0].from);
+> -                       if (err < 0)
+> -                               goto out;
+> -                       break;
+> -               case Opt_key:
+> -                       ceph_crypto_key_destroy(opt->key);
+> -                       kfree(opt->key);
+> -
+> -                       opt->key = kzalloc(sizeof(*opt->key), GFP_KERNEL);
+> -                       if (!opt->key) {
+> -                               err = -ENOMEM;
+> -                               goto out;
+> -                       }
+> -                       err = get_secret(opt->key, argstr[0].from);
+> -                       if (err < 0)
+> -                               goto out;
+> -                       break;
+> +       case Opt_fsid:
+> +               err = parse_fsid(param->string, &opt->fsid);
+> +               if (err < 0)
+> +                       return invalf(fc, "Invalid fsid");
+> +               opt->flags |= CEPH_OPT_FSID;
+> +               break;
+> +       case Opt_name:
+> +               kfree(opt->name);
+> +               opt->name = param->string;
+> +               param->string = NULL;
+> +               break;
+> +       case Opt_secret:
+> +               ceph_crypto_key_destroy(opt->key);
+> +               kfree(opt->key);
+>
+> -                       /* misc */
+> -               case Opt_osdtimeout:
+> -                       pr_warn("ignoring deprecated osdtimeout option\n");
+> -                       break;
+> -               case Opt_osdkeepalivetimeout:
+> -                       /* 0 isn't well defined right now, reject it */
+> -                       if (intval < 1 || intval > INT_MAX / 1000) {
+> -                               pr_err("osdkeepalive out of range\n");
+> -                               err = -EINVAL;
+> -                               goto out;
+> -                       }
+> -                       opt->osd_keepalive_timeout =
+> -                                       msecs_to_jiffies(intval * 1000);
+> -                       break;
+> -               case Opt_osd_idle_ttl:
+> -                       /* 0 isn't well defined right now, reject it */
+> -                       if (intval < 1 || intval > INT_MAX / 1000) {
+> -                               pr_err("osd_idle_ttl out of range\n");
+> -                               err = -EINVAL;
+> -                               goto out;
+> -                       }
+> -                       opt->osd_idle_ttl = msecs_to_jiffies(intval * 1000);
+> -                       break;
+> -               case Opt_mount_timeout:
+> -                       /* 0 is "wait forever" (i.e. infinite timeout) */
+> -                       if (intval < 0 || intval > INT_MAX / 1000) {
+> -                               pr_err("mount_timeout out of range\n");
+> -                               err = -EINVAL;
+> -                               goto out;
+> -                       }
+> -                       opt->mount_timeout = msecs_to_jiffies(intval * 1000);
+> -                       break;
+> -               case Opt_osd_request_timeout:
+> -                       /* 0 is "wait forever" (i.e. infinite timeout) */
+> -                       if (intval < 0 || intval > INT_MAX / 1000) {
+> -                               pr_err("osd_request_timeout out of range\n");
+> -                               err = -EINVAL;
+> -                               goto out;
+> -                       }
+> -                       opt->osd_request_timeout = msecs_to_jiffies(intval * 1000);
+> -                       break;
+> +               opt->key = kzalloc(sizeof(*opt->key), GFP_KERNEL);
+> +               if (!opt->key)
+> +                       return -ENOMEM;
+> +               return ceph_crypto_key_unarmor(opt->key, param->string);
+> +       case Opt_key:
+> +               ceph_crypto_key_destroy(opt->key);
+> +               kfree(opt->key);
+>
+> -               case Opt_share:
+> +               opt->key = kzalloc(sizeof(*opt->key), GFP_KERNEL);
+> +               if (!opt->key)
+> +                       return -ENOMEM;
+> +               return get_secret(opt->key, param->string);
+> +
+> +               /* misc */
+> +       case Opt_osdkeepalivetimeout:
+> +               /* 0 isn't well defined right now, reject it */
+> +               if (result.uint_32 < 1 || result.uint_32 > INT_MAX / 1000)
+> +                       goto out_of_range;
+> +               opt->osd_keepalive_timeout =
+> +                       msecs_to_jiffies(result.uint_32 * 1000);
+> +               break;
+> +       case Opt_osd_idle_ttl:
+> +               /* 0 isn't well defined right now, reject it */
+> +               if (result.uint_32 < 1 || result.uint_32 > INT_MAX / 1000)
+> +                       goto out_of_range;
+> +               opt->osd_idle_ttl = msecs_to_jiffies(result.uint_32 * 1000);
+> +               break;
+> +       case Opt_mount_timeout:
+> +               /* 0 is "wait forever" (i.e. infinite timeout) */
+> +               if (result.uint_32 > INT_MAX / 1000)
+> +                       goto out_of_range;
+> +               opt->mount_timeout = msecs_to_jiffies(result.uint_32 * 1000);
+> +               break;
+> +       case Opt_osd_request_timeout:
+> +               /* 0 is "wait forever" (i.e. infinite timeout) */
+> +               if (result.uint_32 > INT_MAX / 1000)
+> +                       goto out_of_range;
+> +               opt->osd_request_timeout = msecs_to_jiffies(result.uint_32 * 1000);
+> +               break;
+> +
+> +       case Opt_share:
+> +               if (!result.negated)
+>                         opt->flags &= ~CEPH_OPT_NOSHARE;
+> -                       break;
+> -               case Opt_noshare:
+> +               else
+>                         opt->flags |= CEPH_OPT_NOSHARE;
+> -                       break;
+> +               break;
+>
+> -               case Opt_crc:
+> +       case Opt_crc:
+> +               if (!result.negated)
+>                         opt->flags &= ~CEPH_OPT_NOCRC;
+> -                       break;
+> -               case Opt_nocrc:
+> +               else
+>                         opt->flags |= CEPH_OPT_NOCRC;
+> -                       break;
+> +               break;
+>
+> -               case Opt_cephx_require_signatures:
+> +       case Opt_cephx_require_signatures:
+> +               if (!result.negated)
+>                         opt->flags &= ~CEPH_OPT_NOMSGAUTH;
+> -                       break;
+> -               case Opt_nocephx_require_signatures:
+> +               else
+>                         opt->flags |= CEPH_OPT_NOMSGAUTH;
+> -                       break;
+> -               case Opt_cephx_sign_messages:
+> +               break;
+> +       case Opt_cephx_sign_messages:
+> +               if (!result.negated)
+>                         opt->flags &= ~CEPH_OPT_NOMSGSIGN;
+> -                       break;
+> -               case Opt_nocephx_sign_messages:
+> +               else
+>                         opt->flags |= CEPH_OPT_NOMSGSIGN;
+> -                       break;
+> +               break;
+>
+> -               case Opt_tcp_nodelay:
+> +       case Opt_tcp_nodelay:
+> +               if (!result.negated)
+>                         opt->flags |= CEPH_OPT_TCP_NODELAY;
+> -                       break;
+> -               case Opt_notcp_nodelay:
+> +               else
+>                         opt->flags &= ~CEPH_OPT_TCP_NODELAY;
+> -                       break;
+> +               break;
+>
+> -               case Opt_abort_on_full:
+> -                       opt->flags |= CEPH_OPT_ABORT_ON_FULL;
+> -                       break;
+> +       case Opt_abort_on_full:
+> +               opt->flags |= CEPH_OPT_ABORT_ON_FULL;
+> +               break;
+>
+> -               default:
+> -                       BUG_ON(token);
+> -               }
+> +       default:
+> +               BUG();
+>         }
+>
+> -       /* success */
+> -       return opt;
+> +       return 0;
+>
+> -out:
+> -       ceph_destroy_options(opt);
+> -       return ERR_PTR(err);
+> +out_of_range:
+> +       return invalf(fc, "ceph: %s out of range", param->key);
 >  }
-> diff --git a/lib/percpu-refcount.c b/lib/percpu-refcount.c
-> index 9877682e49c7..da54318d3b55 100644
-> --- a/lib/percpu-refcount.c
-> +++ b/lib/percpu-refcount.c
-> @@ -151,7 +151,7 @@ static void percpu_ref_switch_to_atomic_rcu(struct rcu_head *rcu)
->  	atomic_long_add((long)count - PERCPU_COUNT_BIAS, &ref->count);
->  
->  	WARN_ONCE(atomic_long_read(&ref->count) <= 0,
-> -		  "percpu ref (%pf) <= 0 (%ld) after switching to atomic",
-> +		  "percpu ref (%ps) <= 0 (%ld) after switching to atomic",
->  		  ref->release, atomic_long_read(&ref->count));
->  
->  	/* @ref is viewed as dead on all CPUs, send out switch confirmation */
-> @@ -333,7 +333,7 @@ void percpu_ref_kill_and_confirm(struct percpu_ref *ref,
->  	spin_lock_irqsave(&percpu_ref_switch_lock, flags);
->  
->  	WARN_ONCE(ref->percpu_count_ptr & __PERCPU_REF_DEAD,
-> -		  "%s called more than once on %pf!", __func__, ref->release);
-> +		  "%s called more than once on %ps!", __func__, ref->release);
->  
->  	ref->percpu_count_ptr |= __PERCPU_REF_DEAD;
->  	__percpu_ref_switch_mode(ref, confirm_kill);
-> diff --git a/mm/memblock.c b/mm/memblock.c
-> index 28fa8926d9f8..f315eca9f4a1 100644
-> --- a/mm/memblock.c
-> +++ b/mm/memblock.c
-> @@ -702,7 +702,7 @@ int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
->  {
->  	phys_addr_t end = base + size - 1;
->  
-> -	memblock_dbg("memblock_add: [%pa-%pa] %pF\n",
-> +	memblock_dbg("memblock_add: [%pa-%pa] %pS\n",
->  		     &base, &end, (void *)_RET_IP_);
->  
->  	return memblock_add_range(&memblock.memory, base, size, MAX_NUMNODES, 0);
-> @@ -821,7 +821,7 @@ int __init_memblock memblock_free(phys_addr_t base, phys_addr_t size)
->  {
->  	phys_addr_t end = base + size - 1;
->  
-> -	memblock_dbg("   memblock_free: [%pa-%pa] %pF\n",
-> +	memblock_dbg("   memblock_free: [%pa-%pa] %pS\n",
->  		     &base, &end, (void *)_RET_IP_);
->  
->  	kmemleak_free_part_phys(base, size);
-> @@ -832,7 +832,7 @@ int __init_memblock memblock_reserve(phys_addr_t base, phys_addr_t size)
->  {
->  	phys_addr_t end = base + size - 1;
->  
-> -	memblock_dbg("memblock_reserve: [%pa-%pa] %pF\n",
-> +	memblock_dbg("memblock_reserve: [%pa-%pa] %pS\n",
->  		     &base, &end, (void *)_RET_IP_);
->  
->  	return memblock_add_range(&memblock.reserved, base, size, MAX_NUMNODES, 0);
-> @@ -1511,7 +1511,7 @@ void * __init memblock_alloc_try_nid_raw(
->  {
->  	void *ptr;
->  
-> -	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pF\n",
-> +	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pS\n",
->  		     __func__, (u64)size, (u64)align, nid, &min_addr,
->  		     &max_addr, (void *)_RET_IP_);
->  
-> @@ -1547,7 +1547,7 @@ void * __init memblock_alloc_try_nid(
->  {
->  	void *ptr;
->  
-> -	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pF\n",
-> +	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pS\n",
->  		     __func__, (u64)size, (u64)align, nid, &min_addr,
->  		     &max_addr, (void *)_RET_IP_);
->  	ptr = memblock_alloc_internal(size, align,
-> @@ -1572,7 +1572,7 @@ void __init __memblock_free_late(phys_addr_t base, phys_addr_t size)
->  	phys_addr_t cursor, end;
->  
->  	end = base + size - 1;
-> -	memblock_dbg("%s: [%pa-%pa] %pF\n",
-> +	memblock_dbg("%s: [%pa-%pa] %pS\n",
->  		     __func__, &base, &end, (void *)_RET_IP_);
->  	kmemleak_free_part_phys(base, size);
->  	cursor = PFN_UP(base);
-> diff --git a/mm/memory.c b/mm/memory.c
-> index c0391a9f18b8..42c156db12d6 100644
-> --- a/mm/memory.c
-> +++ b/mm/memory.c
-> @@ -519,7 +519,7 @@ static void print_bad_pte(struct vm_area_struct *vma, unsigned long addr,
->  		dump_page(page, "bad pte");
->  	pr_alert("addr:%p vm_flags:%08lx anon_vma:%p mapping:%p index:%lx\n",
->  		 (void *)addr, vma->vm_flags, vma->anon_vma, mapping, index);
-> -	pr_alert("file:%pD fault:%pf mmap:%pf readpage:%pf\n",
-> +	pr_alert("file:%pD fault:%ps mmap:%ps readpage:%ps\n",
->  		 vma->vm_file,
->  		 vma->vm_ops ? vma->vm_ops->fault : NULL,
->  		 vma->vm_file ? vma->vm_file->f_op->mmap : NULL,
-> diff --git a/mm/vmscan.c b/mm/vmscan.c
-> index 07f74e9507b6..7ec5785d7715 100644
-> --- a/mm/vmscan.c
-> +++ b/mm/vmscan.c
-> @@ -493,7 +493,7 @@ static unsigned long do_shrink_slab(struct shrink_control *shrinkctl,
->  
->  	total_scan += delta;
->  	if (total_scan < 0) {
-> -		pr_err("shrink_slab: %pF negative objects to delete nr=%ld\n",
-> +		pr_err("shrink_slab: %pS negative objects to delete nr=%ld\n",
->  		       shrinker->scan_objects, total_scan);
->  		total_scan = freeable;
->  		next_deferred = nr;
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index fa9530dd876e..6f739de28918 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -2398,7 +2398,7 @@ static void finish_request(struct ceph_osd_request *req)
->  
->  static void __complete_request(struct ceph_osd_request *req)
->  {
-> -	dout("%s req %p tid %llu cb %pf result %d\n", __func__, req,
-> +	dout("%s req %p tid %llu cb %ps result %d\n", __func__, req,
->  	     req->r_tid, req->r_callback, req->r_result);
->  
->  	if (req->r_callback)
-> diff --git a/net/core/net-procfs.c b/net/core/net-procfs.c
-> index 63881f72ef71..36347933ec3a 100644
-> --- a/net/core/net-procfs.c
-> +++ b/net/core/net-procfs.c
-> @@ -258,7 +258,7 @@ static int ptype_seq_show(struct seq_file *seq, void *v)
->  		else
->  			seq_printf(seq, "%04x", ntohs(pt->type));
->  
-> -		seq_printf(seq, " %-8s %pf\n",
-> +		seq_printf(seq, " %-8s %ps\n",
->  			   pt->dev ? pt->dev->name : "", pt->func);
->  	}
->  
-> diff --git a/net/core/netpoll.c b/net/core/netpoll.c
-> index e365e8fb1c40..a0f05416657b 100644
-> --- a/net/core/netpoll.c
-> +++ b/net/core/netpoll.c
-> @@ -149,7 +149,7 @@ static void poll_one_napi(struct napi_struct *napi)
->  	 * indicate that we are clearing the Tx path only.
->  	 */
->  	work = napi->poll(napi, 0);
-> -	WARN_ONCE(work, "%pF exceeded budget in poll\n", napi->poll);
-> +	WARN_ONCE(work, "%pS exceeded budget in poll\n", napi->poll);
->  	trace_napi_poll(napi, work, 0);
->  
->  	clear_bit(NAPI_STATE_NPSVC, &napi->state);
-> @@ -346,7 +346,7 @@ void netpoll_send_skb_on_dev(struct netpoll *np, struct sk_buff *skb,
->  		}
->  
->  		WARN_ONCE(!irqs_disabled(),
-> -			"netpoll_send_skb_on_dev(): %s enabled interrupts in poll (%pF)\n",
-> +			"netpoll_send_skb_on_dev(): %s enabled interrupts in poll (%pS)\n",
->  			dev->name, dev->netdev_ops->ndo_start_xmit);
->  
->  	}
-> -- 
-> 2.11.0
-> 
+> -EXPORT_SYMBOL(ceph_parse_options);
+> +EXPORT_SYMBOL(ceph_parse_option);
+>
+>  int ceph_print_client_options(struct seq_file *m, struct ceph_client *client,
+>                               bool show_all)
+>
