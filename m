@@ -1,40 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.1-rc3
-Date: Fri, 29 Mar 2019 17:32:13 +0100
-Message-ID: <20190329163213.17081-1-idryomov@gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fixes for 5.1-rc3
+Date: Fri, 29 Mar 2019 21:50:12 +0000
+Message-ID: <155389621216.28625.13207181306263631140.pr-tracker-bot@kernel.org>
+References: <20190329163213.17081-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190329163213.17081-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Fri, 29 Mar 2019 17:32:13 +0100:
 
-The following changes since commit 8c2ffd9174779014c3fe1f96d9dc3641d9175f00:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.1-rc3
 
-  Linux 5.1-rc2 (2019-03-24 14:02:26 -0700)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/7376e39ad96583545faefa2e7798bcb6a2a212a7
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.1-rc3
-
-for you to fetch changes up to daf5cc27eed99afdea8d96e71b89ba41f5406ef6:
-
-  ceph: fix use-after-free on symlink traversal (2019-03-27 19:00:37 +0100)
-
-----------------------------------------------------------------
-A patch to avoid choking on multipage bvecs in the messenger and
-a small use-after-free fix.
-
-----------------------------------------------------------------
-Al Viro (1):
-      ceph: fix use-after-free on symlink traversal
-
-Ilya Dryomov (1):
-      libceph: fix breakage caused by multipage bvecs
-
- fs/ceph/inode.c      | 2 +-
- net/ceph/messenger.c | 8 ++++++--
- 2 files changed, 7 insertions(+), 3 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
