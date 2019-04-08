@@ -1,7 +1,7 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Cephalocon Barcelona, May 19-20
-Date: Fri, 5 Apr 2019 19:32:14 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1904051542160.3887@piezo.novalocal>
+From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: DevConf US CFP Ends Today + Planning
+Date: Mon, 8 Apr 2019 10:10:56 -0700
+Message-ID: <CAFFUGJdoTdGhE-E3dx9yK7zvR=1d0tazKNz-wC=hguUyoNw9EQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -15,49 +15,25 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi everyone,
+Hey everyone,
 
-This is a reminder that Cephalocon Barcelona is coming up next month (May 
-19-20), and it's going to be great!  We have two days of Ceph content over 
-four tracks, including:
+The CFP for DevConf US [1] ends today! I have submitted for us to have
+a Ceph Foundation booth, BOF space and two presentations myself which
+you can find on our CFP coordination pad [2]. I'll update here if our
+booth is accepted and a call for help.
 
- - A Rook tutorial for deploy Ceph over SSD instances
- - Several other Rook and Kubernetes related talks, including 
-   self-service provisioning of object storage via kubernetes claim-like 
-   APIs
- - Two sessions on project Crimson, which is a reimplementation
-   of the Ceph OSD using Seastar, DPDK, and SPDK, targeting high 
-   performance hardware and storage devices
- - Talks from Ceph power users with large-scale deployments from CERN, 
-   China Mobile, OVH, MeerKAT (part of the Square Kilometer Array), UWisc, 
-   and more.
- - How to build fast NVMe-based Ceph clusters on a reasonable budget
- - Using Ceph to provide NFS, CIFS, iSCSI service
- - The latest status of the Ceph management dashboard
- - Best practices for multi-cluster capabilities in RGW and RBD
- - S3 API compatibility in RGW, now and over the long term
- - and lots more!
+If you're planning on attending and want to help with Ceph's presence,
+please email me directly so I can make sure you're part of any
+communication.
 
-You can see the full schedule here (minus a few keynote slots that haven't 
-been finalized yet):
+Looking forward to potentially meeting more people in the community!
 
-	https://ceph.com/cephalocon/barcelona-2019/cephalocon-2019-barcelona-schedule/
+[1] - https://devconf.info/us/2019
+[2] - https://pad.ceph.com/p/cfp-coordination
 
-There are going to be a lot of Ceph developers in Barcelona for the 
-conference, both for Cephalocon (Sunday and Monday) and for KubeCon 
-(Tuesday through Thursday).
-
-For more information (including registration), see
-
-	https://ceph.com/cephalocon/barcelona-2019/
-
-For those interested in Kubernetes and the intersection of storage with 
-the leading container orchestration platform, KubeCon + CloudNativeCon 
-runs directly after Cephalocon for the rest of the week.
-
-We're looking forward to seeing many of you there!
-
-sage
+--
+Mike Perez (thingee)
