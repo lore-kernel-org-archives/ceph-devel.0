@@ -1,84 +1,53 @@
-From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Subject: v12.2.12 Luminous released
-Date: Fri, 12 Apr 2019 18:48:51 +0200
-Message-ID: <87tvf3tbik.fsf@suse.com>
+From: Paul Emmerich <paul.emmerich-iZXOWb+A65A@public.gmane.org>
+Subject: Re: v12.2.12 Luminous released
+Date: Sat, 13 Apr 2019 02:03:10 +0200
+Message-ID: <CAD9yTbFKWkxy5JRo0H8jF6_agCB=tfeHXi87YCPC+UkX-O1GsA@mail.gmail.com>
+References: <87tvf3tbik.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6536743736658192627=="
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-a8pt6IJUokc@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <87tvf3tbik.fsf-IBi9RG/b67k@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Cc: ceph-devel-a8pt6IJUokc@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============6536743736658192627==
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha256; protocol="application/pgp-signature"
-
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-
-We are happy to announce the next bugfix release for v12.2.x Luminous
-stable release series. We recommend all luminous users to upgrade to
-this release. Many thanks to everyone who contributed backports and a
-special mention to Yuri for the QE efforts put in to this release.
-
-Notable Changes
-=2D--------------
-* In 12.2.11 and earlier releases, keyring caps were not checked for validi=
-ty,
-  so the caps string could be anything. As of 12.2.12, caps strings are
-  validated and providing a keyring with an invalid caps string to, e.g.,
-  `ceph auth add` will result in an error.
-
-For the complete changelog, please refer to the release blog entry at=20
-https://ceph.com/releases/v12-2-12-luminous-released/
-
-Getting ceph:
-=2D-----------
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-12.2.12.tar.gz
-* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
-* Release git sha1: 1436006594665279fe734b4c15d7e08c13ebd777
-
-=2D-=20
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG N=C3=BCrnberg)
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEEac9IOI7jdGxe1B8W+fBkHxtl7V8FAlywwXUACgkQ+fBkHxtl
-7V/1Iwf/dYe494qzIv5RlxlIKk8T9jfj2mPaFMoiHIRR+YpRR5PypxBltDU5vv/x
-ZH0b2usEabgGObR0ArHlyPZYKuOV0R8C1Q4iFd70ZZlqMGo+6ibqzEWfvwE0GpSH
-hr1kPL5UKMp5SQSIni7/c/OF7ln0UyshSZ8KX4YNw+5J+AMQfFH59ODhqhYyRL7C
-WXa5jEEKZEx/HmVmtqSzWclGtpllG06rntB3CV+05xX0+CQRqYfSQMSixo5qhAbW
-fbAnLE3NYggInVYJXuL7dY4+KMs9zkA+MUfEt4GL5eVunVirpOYxSnsAuLmI9ED+
-Z3O5oKyxEA/ZeCs/Ngi55xMUCcR4ug==
-=ImZ9
------END PGP SIGNATURE-----
---=-=-=--
-
---===============6536743736658192627==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Ceph-announce mailing list
-Ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com
-
---===============6536743736658192627==--
+SSB0aGluayB0aGUgbW9zdCBub3RhYmxlIGNoYW5nZSBoZXJlIGlzIHRoZSBiYWNrcG9ydCBvZiB0
+aGUgbmV3IGJpdG1hcAphbGxvY2F0b3IsIGJ1dCB0aGF0J3MgbWlzc2luZyBjb21wbGV0ZWx5IGZy
+b20gdGhlIGNoYW5nZSBsb2cuCgoKUGF1bAoKLS0gClBhdWwgRW1tZXJpY2gKCkxvb2tpbmcgZm9y
+IGhlbHAgd2l0aCB5b3VyIENlcGggY2x1c3Rlcj8gQ29udGFjdCB1cyBhdCBodHRwczovL2Nyb2l0
+LmlvCgpjcm9pdCBHbWJICkZyZXNlbml1c3N0ci4gMzFoCjgxMjQ3IE3DvG5jaGVuCnd3dy5jcm9p
+dC5pbwpUZWw6ICs0OSA4OSAxODk2NTg1IDkwCgpPbiBGcmksIEFwciAxMiwgMjAxOSBhdCA2OjQ4
+IFBNIEFiaGlzaGVrIExla3NobWFuYW4gPGFiaGlzaGVrQHN1c2UuY29tPiB3cm90ZToKPgo+Cj4g
+V2UgYXJlIGhhcHB5IHRvIGFubm91bmNlIHRoZSBuZXh0IGJ1Z2ZpeCByZWxlYXNlIGZvciB2MTIu
+Mi54IEx1bWlub3VzCj4gc3RhYmxlIHJlbGVhc2Ugc2VyaWVzLiBXZSByZWNvbW1lbmQgYWxsIGx1
+bWlub3VzIHVzZXJzIHRvIHVwZ3JhZGUgdG8KPiB0aGlzIHJlbGVhc2UuIE1hbnkgdGhhbmtzIHRv
+IGV2ZXJ5b25lIHdobyBjb250cmlidXRlZCBiYWNrcG9ydHMgYW5kIGEKPiBzcGVjaWFsIG1lbnRp
+b24gdG8gWXVyaSBmb3IgdGhlIFFFIGVmZm9ydHMgcHV0IGluIHRvIHRoaXMgcmVsZWFzZS4KPgo+
+IE5vdGFibGUgQ2hhbmdlcwo+IC0tLS0tLS0tLS0tLS0tLQo+ICogSW4gMTIuMi4xMSBhbmQgZWFy
+bGllciByZWxlYXNlcywga2V5cmluZyBjYXBzIHdlcmUgbm90IGNoZWNrZWQgZm9yIHZhbGlkaXR5
+LAo+ICAgc28gdGhlIGNhcHMgc3RyaW5nIGNvdWxkIGJlIGFueXRoaW5nLiBBcyBvZiAxMi4yLjEy
+LCBjYXBzIHN0cmluZ3MgYXJlCj4gICB2YWxpZGF0ZWQgYW5kIHByb3ZpZGluZyBhIGtleXJpbmcg
+d2l0aCBhbiBpbnZhbGlkIGNhcHMgc3RyaW5nIHRvLCBlLmcuLAo+ICAgYGNlcGggYXV0aCBhZGRg
+IHdpbGwgcmVzdWx0IGluIGFuIGVycm9yLgo+Cj4gRm9yIHRoZSBjb21wbGV0ZSBjaGFuZ2Vsb2cs
+IHBsZWFzZSByZWZlciB0byB0aGUgcmVsZWFzZSBibG9nIGVudHJ5IGF0Cj4gaHR0cHM6Ly9jZXBo
+LmNvbS9yZWxlYXNlcy92MTItMi0xMi1sdW1pbm91cy1yZWxlYXNlZC8KPgo+IEdldHRpbmcgY2Vw
+aDoKPiAtLS0tLS0tLS0tLS0KPiAqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5n
+aXQKPiAqIFRhcmJhbGwgYXQgaHR0cDovL2Rvd25sb2FkLmNlcGguY29tL3RhcmJhbGxzL2NlcGgt
+MTIuMi4xMi50YXIuZ3oKPiAqIEZvciBwYWNrYWdlcywgc2VlIGh0dHA6Ly9kb2NzLmNlcGguY29t
+L2RvY3MvbWFzdGVyL2luc3RhbGwvZ2V0LXBhY2thZ2VzLwo+ICogUmVsZWFzZSBnaXQgc2hhMTog
+MTQzNjAwNjU5NDY2NTI3OWZlNzM0YjRjMTVkN2UwOGMxM2ViZDc3Nwo+Cj4gLS0KPiBBYmhpc2hl
+ayBMZWtzaG1hbmFuCj4gU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBK
+YW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLAo+IEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
