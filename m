@@ -1,53 +1,68 @@
-From: Paul Emmerich <paul.emmerich-iZXOWb+A65A@public.gmane.org>
-Subject: Re: v12.2.12 Luminous released
-Date: Sat, 13 Apr 2019 02:03:10 +0200
-Message-ID: <CAD9yTbFKWkxy5JRo0H8jF6_agCB=tfeHXi87YCPC+UkX-O1GsA@mail.gmail.com>
-References: <87tvf3tbik.fsf@suse.com>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v1 15/15] ceph: use put_user_pages() instead of
+ ceph_put_page_vector()
+Date: Mon, 15 Apr 2019 15:46:59 +0800
+Message-ID: <df4da184-fe8b-c189-43e5-fac58adb3ed9@redhat.com>
+References: <20190411210834.4105-1-jglisse@redhat.com>
+ <20190411210834.4105-16-jglisse@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <87tvf3tbik.fsf-IBi9RG/b67k@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Cc: ceph-devel-a8pt6IJUokc@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190411210834.4105-16-jglisse@redhat.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: jglisse@redhat.com, linux-kernel@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, linux-mm@kvack.org, John Hubbard <jhubbard@nvidia.com>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Johannes Thumshirn <jthumshirn@suse.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Matthew Wilcox <willy@infradead.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-SSB0aGluayB0aGUgbW9zdCBub3RhYmxlIGNoYW5nZSBoZXJlIGlzIHRoZSBiYWNrcG9ydCBvZiB0
-aGUgbmV3IGJpdG1hcAphbGxvY2F0b3IsIGJ1dCB0aGF0J3MgbWlzc2luZyBjb21wbGV0ZWx5IGZy
-b20gdGhlIGNoYW5nZSBsb2cuCgoKUGF1bAoKLS0gClBhdWwgRW1tZXJpY2gKCkxvb2tpbmcgZm9y
-IGhlbHAgd2l0aCB5b3VyIENlcGggY2x1c3Rlcj8gQ29udGFjdCB1cyBhdCBodHRwczovL2Nyb2l0
-LmlvCgpjcm9pdCBHbWJICkZyZXNlbml1c3N0ci4gMzFoCjgxMjQ3IE3DvG5jaGVuCnd3dy5jcm9p
-dC5pbwpUZWw6ICs0OSA4OSAxODk2NTg1IDkwCgpPbiBGcmksIEFwciAxMiwgMjAxOSBhdCA2OjQ4
-IFBNIEFiaGlzaGVrIExla3NobWFuYW4gPGFiaGlzaGVrQHN1c2UuY29tPiB3cm90ZToKPgo+Cj4g
-V2UgYXJlIGhhcHB5IHRvIGFubm91bmNlIHRoZSBuZXh0IGJ1Z2ZpeCByZWxlYXNlIGZvciB2MTIu
-Mi54IEx1bWlub3VzCj4gc3RhYmxlIHJlbGVhc2Ugc2VyaWVzLiBXZSByZWNvbW1lbmQgYWxsIGx1
-bWlub3VzIHVzZXJzIHRvIHVwZ3JhZGUgdG8KPiB0aGlzIHJlbGVhc2UuIE1hbnkgdGhhbmtzIHRv
-IGV2ZXJ5b25lIHdobyBjb250cmlidXRlZCBiYWNrcG9ydHMgYW5kIGEKPiBzcGVjaWFsIG1lbnRp
-b24gdG8gWXVyaSBmb3IgdGhlIFFFIGVmZm9ydHMgcHV0IGluIHRvIHRoaXMgcmVsZWFzZS4KPgo+
-IE5vdGFibGUgQ2hhbmdlcwo+IC0tLS0tLS0tLS0tLS0tLQo+ICogSW4gMTIuMi4xMSBhbmQgZWFy
-bGllciByZWxlYXNlcywga2V5cmluZyBjYXBzIHdlcmUgbm90IGNoZWNrZWQgZm9yIHZhbGlkaXR5
-LAo+ICAgc28gdGhlIGNhcHMgc3RyaW5nIGNvdWxkIGJlIGFueXRoaW5nLiBBcyBvZiAxMi4yLjEy
-LCBjYXBzIHN0cmluZ3MgYXJlCj4gICB2YWxpZGF0ZWQgYW5kIHByb3ZpZGluZyBhIGtleXJpbmcg
-d2l0aCBhbiBpbnZhbGlkIGNhcHMgc3RyaW5nIHRvLCBlLmcuLAo+ICAgYGNlcGggYXV0aCBhZGRg
-IHdpbGwgcmVzdWx0IGluIGFuIGVycm9yLgo+Cj4gRm9yIHRoZSBjb21wbGV0ZSBjaGFuZ2Vsb2cs
-IHBsZWFzZSByZWZlciB0byB0aGUgcmVsZWFzZSBibG9nIGVudHJ5IGF0Cj4gaHR0cHM6Ly9jZXBo
-LmNvbS9yZWxlYXNlcy92MTItMi0xMi1sdW1pbm91cy1yZWxlYXNlZC8KPgo+IEdldHRpbmcgY2Vw
-aDoKPiAtLS0tLS0tLS0tLS0KPiAqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5n
-aXQKPiAqIFRhcmJhbGwgYXQgaHR0cDovL2Rvd25sb2FkLmNlcGguY29tL3RhcmJhbGxzL2NlcGgt
-MTIuMi4xMi50YXIuZ3oKPiAqIEZvciBwYWNrYWdlcywgc2VlIGh0dHA6Ly9kb2NzLmNlcGguY29t
-L2RvY3MvbWFzdGVyL2luc3RhbGwvZ2V0LXBhY2thZ2VzLwo+ICogUmVsZWFzZSBnaXQgc2hhMTog
-MTQzNjAwNjU5NDY2NTI3OWZlNzM0YjRjMTVkN2UwOGMxM2ViZDc3Nwo+Cj4gLS0KPiBBYmhpc2hl
-ayBMZWtzaG1hbmFuCj4gU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBK
-YW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLAo+IEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
-IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
-LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On 4/12/19 5:08 AM, jglisse@redhat.com wrote:
+> From: Jérôme Glisse <jglisse@redhat.com>
+> 
+> When page reference were taken through GUP (get_user_page*()) we need
+> to drop them with put_user_pages().
+> 
+> Signed-off-by: Jérôme Glisse <jglisse@redhat.com>
+> Cc: linux-fsdevel@vger.kernel.org
+> Cc: linux-block@vger.kernel.org
+> Cc: linux-mm@kvack.org
+> Cc: John Hubbard <jhubbard@nvidia.com>
+> Cc: Jan Kara <jack@suse.cz>
+> Cc: Dan Williams <dan.j.williams@intel.com>
+> Cc: Alexander Viro <viro@zeniv.linux.org.uk>
+> Cc: Johannes Thumshirn <jthumshirn@suse.de>
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: Jens Axboe <axboe@kernel.dk>
+> Cc: Ming Lei <ming.lei@redhat.com>
+> Cc: Dave Chinner <david@fromorbit.com>
+> Cc: Jason Gunthorpe <jgg@ziepe.ca>
+> Cc: Matthew Wilcox <willy@infradead.org>
+> Cc: Yan Zheng <zyan@redhat.com>
+> Cc: Sage Weil <sage@redhat.com>
+> Cc: Ilya Dryomov <idryomov@gmail.com>
+> Cc: ceph-devel@vger.kernel.org
+> ---
+>   fs/ceph/file.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 6c5b85f01721..5842ad3a4218 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -667,7 +667,8 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+>   			} else {
+>   				iov_iter_advance(to, 0);
+>   			}
+> -			ceph_put_page_vector(pages, num_pages, false);
+> +			/* iov_iter_get_pages_alloc() did call GUP */
+> +			put_user_pages(pages, num_pages);
+
+pages in pipe were not from get_user_pages(). Am I missing anything?
+
+Regards
+Yan, Zheng
+
+>   		} else {
+>   			int idx = 0;
+>   			size_t left = ret > 0 ? ret : 0;
+> 
