@@ -1,10 +1,15 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: HW failure cause client IO drops
-Date: Mon, 15 Apr 2019 18:38:42 +0530
-Message-ID: <CANA9Uk7rGa53ZgYTx4shvyEbgBgOk2_mySDzz-TB4qkQPC7VbA@mail.gmail.com>
+From: Paul Emmerich <paul.emmerich-iZXOWb+A65A@public.gmane.org>
+Subject: Re: v12.2.12 Luminous released
+Date: Mon, 15 Apr 2019 16:26:12 +0200
+Message-ID: <CAD9yTbERUYo+gF1yyaje4DZyqEuQsE7183m51HLVPNsyrW7fWA@mail.gmail.com>
+References: <87tvf3tbik.fsf@suse.com>
+ <CAD9yTbFKWkxy5JRo0H8jF6_agCB=tfeHXi87YCPC+UkX-O1GsA@mail.gmail.com>
+ <87r2a3tu02.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5444323715054297253=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <87r2a3tu02.fsf-IBi9RG/b67k@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -14,51 +19,51 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============5444323715054297253==
-Content-Type: multipart/alternative; boundary="000000000000a995470586915aa0"
-
---000000000000a995470586915aa0
-Content-Type: text/plain; charset="UTF-8"
-
-Hello - Recevenlt we had an issue with storage node's battery failure,
-which cause ceph client IO dropped to '0' bytes. Means ceph cluster
-couldn't perform IO operations on the cluster till the node takes out. This
-is not expected from Ceph, as some HW fails, those respective OSDs should
-mark as out/down and IO should go as is..
-
-Please let me know if anyone seen the similar behavior and is this issue
-resolved?
-
-Thanks
-Swami
-
---000000000000a995470586915aa0
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hello - Recevenlt we had an issue with storage node&#39;s =
-battery failure, which cause ceph=C2=A0client IO dropped to &#39;0&#39; byt=
-es. Means ceph=C2=A0cluster couldn&#39;t perform IO operations on the clust=
-er till the node takes out. This is not expected from Ceph, as some HW fail=
-s, those respective OSDs should mark as out/down and IO should go as is..<d=
-iv><br></div><div>Please let me know if anyone seen the similar behavior an=
-d is this issue resolved?</div><div><br></div><div>Thanks</div><div>Swami</=
-div></div>
-
---000000000000a995470586915aa0--
-
---===============5444323715054297253==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============5444323715054297253==--
+VGhhbmtzIQoKLS0gClBhdWwgRW1tZXJpY2gKCkxvb2tpbmcgZm9yIGhlbHAgd2l0aCB5b3VyIENl
+cGggY2x1c3Rlcj8gQ29udGFjdCB1cyBhdCBodHRwczovL2Nyb2l0LmlvCgpjcm9pdCBHbWJICkZy
+ZXNlbml1c3N0ci4gMzFoCjgxMjQ3IE3DvG5jaGVuCnd3dy5jcm9pdC5pbwpUZWw6ICs0OSA4OSAx
+ODk2NTg1IDkwCgpPbiBNb24sIEFwciAxNSwgMjAxOSBhdCAxMjo1OCBQTSBBYmhpc2hlayBMZWtz
+aG1hbmFuIDxhYmhpc2hla0BzdXNlLmNvbT4gd3JvdGU6Cj4KPiBQYXVsIEVtbWVyaWNoIDxwYXVs
+LmVtbWVyaWNoQGNyb2l0LmlvPiB3cml0ZXM6Cj4KPiA+IEkgdGhpbmsgdGhlIG1vc3Qgbm90YWJs
+ZSBjaGFuZ2UgaGVyZSBpcyB0aGUgYmFja3BvcnQgb2YgdGhlIG5ldyBiaXRtYXAKPiA+IGFsbG9j
+YXRvciwgYnV0IHRoYXQncyBtaXNzaW5nIGNvbXBsZXRlbHkgZnJvbSB0aGUgY2hhbmdlIGxvZy4K
+Pgo+IFVwZGF0ZWQgdGhlIGNoYW5nZWxvZyBpbiBkb2NzIGFuZCB0aGUgYmxvZy4gVGhlIGVhcmxp
+ZXIgc2NyaXB0IHdhcwo+IGlnbm9yaW5nIGVudHJpZXMgdGhhdCBkaWRuJ3QgbGluayB0byBiYWNr
+cG9ydCB0cmFja2VyIGZvbGxvd2luZyBiYWNrIHRvCj4gYSBtYXN0ZXIgdHJhY2tlci4KPiA+Cj4g
+Pgo+ID4gUGF1bAo+ID4KPiA+IC0tCj4gPiBQYXVsIEVtbWVyaWNoCj4gPgo+ID4gTG9va2luZyBm
+b3IgaGVscCB3aXRoIHlvdXIgQ2VwaCBjbHVzdGVyPyBDb250YWN0IHVzIGF0IGh0dHBzOi8vY3Jv
+aXQuaW8KPiA+Cj4gPiBjcm9pdCBHbWJICj4gPiBGcmVzZW5pdXNzdHIuIDMxaAo+ID4gODEyNDcg
+TcO8bmNoZW4KPiA+IHd3dy5jcm9pdC5pbwo+ID4gVGVsOiArNDkgODkgMTg5NjU4NSA5MAo+ID4K
+PiA+IE9uIEZyaSwgQXByIDEyLCAyMDE5IGF0IDY6NDggUE0gQWJoaXNoZWsgTGVrc2htYW5hbiA8
+YWJoaXNoZWtAc3VzZS5jb20+IHdyb3RlOgo+ID4+Cj4gPj4KPiA+PiBXZSBhcmUgaGFwcHkgdG8g
+YW5ub3VuY2UgdGhlIG5leHQgYnVnZml4IHJlbGVhc2UgZm9yIHYxMi4yLnggTHVtaW5vdXMKPiA+
+PiBzdGFibGUgcmVsZWFzZSBzZXJpZXMuIFdlIHJlY29tbWVuZCBhbGwgbHVtaW5vdXMgdXNlcnMg
+dG8gdXBncmFkZSB0bwo+ID4+IHRoaXMgcmVsZWFzZS4gTWFueSB0aGFua3MgdG8gZXZlcnlvbmUg
+d2hvIGNvbnRyaWJ1dGVkIGJhY2twb3J0cyBhbmQgYQo+ID4+IHNwZWNpYWwgbWVudGlvbiB0byBZ
+dXJpIGZvciB0aGUgUUUgZWZmb3J0cyBwdXQgaW4gdG8gdGhpcyByZWxlYXNlLgo+ID4+Cj4gPj4g
+Tm90YWJsZSBDaGFuZ2VzCj4gPj4gLS0tLS0tLS0tLS0tLS0tCj4gPj4gKiBJbiAxMi4yLjExIGFu
+ZCBlYXJsaWVyIHJlbGVhc2VzLCBrZXlyaW5nIGNhcHMgd2VyZSBub3QgY2hlY2tlZCBmb3IgdmFs
+aWRpdHksCj4gPj4gICBzbyB0aGUgY2FwcyBzdHJpbmcgY291bGQgYmUgYW55dGhpbmcuIEFzIG9m
+IDEyLjIuMTIsIGNhcHMgc3RyaW5ncyBhcmUKPiA+PiAgIHZhbGlkYXRlZCBhbmQgcHJvdmlkaW5n
+IGEga2V5cmluZyB3aXRoIGFuIGludmFsaWQgY2FwcyBzdHJpbmcgdG8sIGUuZy4sCj4gPj4gICBg
+Y2VwaCBhdXRoIGFkZGAgd2lsbCByZXN1bHQgaW4gYW4gZXJyb3IuCj4gPj4KPiA+PiBGb3IgdGhl
+IGNvbXBsZXRlIGNoYW5nZWxvZywgcGxlYXNlIHJlZmVyIHRvIHRoZSByZWxlYXNlIGJsb2cgZW50
+cnkgYXQKPiA+PiBodHRwczovL2NlcGguY29tL3JlbGVhc2VzL3YxMi0yLTEyLWx1bWlub3VzLXJl
+bGVhc2VkLwo+ID4+Cj4gPj4gR2V0dGluZyBjZXBoOgo+ID4+IC0tLS0tLS0tLS0tLQo+ID4+ICog
+R2l0IGF0IGdpdDovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdAo+ID4+ICogVGFyYmFsbCBhdCBo
+dHRwOi8vZG93bmxvYWQuY2VwaC5jb20vdGFyYmFsbHMvY2VwaC0xMi4yLjEyLnRhci5nego+ID4+
+ICogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvaW5z
+dGFsbC9nZXQtcGFja2FnZXMvCj4gPj4gKiBSZWxlYXNlIGdpdCBzaGExOiAxNDM2MDA2NTk0NjY1
+Mjc5ZmU3MzRiNGMxNWQ3ZTA4YzEzZWJkNzc3Cj4gPj4KPiA+PiAtLQo+ID4+IEFiaGlzaGVrIExl
+a3NobWFuYW4KPiA+PiBTVVNFIExpbnV4IEdtYkgsIEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEph
+bmUgU21pdGhhcmQsIEdyYWhhbSBOb3J0b24sCj4gPj4gSFJCIDIxMjg0IChBRyBOw7xybmJlcmcp
+Cj4gPgo+Cj4gLS0KPiBBYmhpc2hlayBMZWtzaG1hbmFuCj4gU1VTRSBMaW51eCBHbWJILCBHRjog
+RmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLAo+IEhSQiAy
+MTI4NCAoQUcgTsO8cm5iZXJnKQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
+bQo=
