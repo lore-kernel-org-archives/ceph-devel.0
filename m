@@ -1,68 +1,61 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v1 15/15] ceph: use put_user_pages() instead of
- ceph_put_page_vector()
-Date: Mon, 15 Apr 2019 15:46:59 +0800
-Message-ID: <df4da184-fe8b-c189-43e5-fac58adb3ed9@redhat.com>
-References: <20190411210834.4105-1-jglisse@redhat.com>
- <20190411210834.4105-16-jglisse@redhat.com>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: Re: v12.2.12 Luminous released
+Date: Mon, 15 Apr 2019 12:58:37 +0200
+Message-ID: <87r2a3tu02.fsf@suse.com>
+References: <87tvf3tbik.fsf@suse.com>
+ <CAD9yTbFKWkxy5JRo0H8jF6_agCB=tfeHXi87YCPC+UkX-O1GsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190411210834.4105-16-jglisse@redhat.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: jglisse@redhat.com, linux-kernel@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, linux-mm@kvack.org, John Hubbard <jhubbard@nvidia.com>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Johannes Thumshirn <jthumshirn@suse.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Matthew Wilcox <willy@infradead.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAD9yTbFKWkxy5JRo0H8jF6_agCB=tfeHXi87YCPC+UkX-O1GsA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Paul Emmerich <paul.emmerich-iZXOWb+A65A@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 4/12/19 5:08 AM, jglisse@redhat.com wrote:
-> From: Jérôme Glisse <jglisse@redhat.com>
-> 
-> When page reference were taken through GUP (get_user_page*()) we need
-> to drop them with put_user_pages().
-> 
-> Signed-off-by: Jérôme Glisse <jglisse@redhat.com>
-> Cc: linux-fsdevel@vger.kernel.org
-> Cc: linux-block@vger.kernel.org
-> Cc: linux-mm@kvack.org
-> Cc: John Hubbard <jhubbard@nvidia.com>
-> Cc: Jan Kara <jack@suse.cz>
-> Cc: Dan Williams <dan.j.williams@intel.com>
-> Cc: Alexander Viro <viro@zeniv.linux.org.uk>
-> Cc: Johannes Thumshirn <jthumshirn@suse.de>
-> Cc: Christoph Hellwig <hch@lst.de>
-> Cc: Jens Axboe <axboe@kernel.dk>
-> Cc: Ming Lei <ming.lei@redhat.com>
-> Cc: Dave Chinner <david@fromorbit.com>
-> Cc: Jason Gunthorpe <jgg@ziepe.ca>
-> Cc: Matthew Wilcox <willy@infradead.org>
-> Cc: Yan Zheng <zyan@redhat.com>
-> Cc: Sage Weil <sage@redhat.com>
-> Cc: Ilya Dryomov <idryomov@gmail.com>
-> Cc: ceph-devel@vger.kernel.org
-> ---
->   fs/ceph/file.c | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 6c5b85f01721..5842ad3a4218 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -667,7 +667,8 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
->   			} else {
->   				iov_iter_advance(to, 0);
->   			}
-> -			ceph_put_page_vector(pages, num_pages, false);
-> +			/* iov_iter_get_pages_alloc() did call GUP */
-> +			put_user_pages(pages, num_pages);
-
-pages in pipe were not from get_user_pages(). Am I missing anything?
-
-Regards
-Yan, Zheng
-
->   		} else {
->   			int idx = 0;
->   			size_t left = ret > 0 ? ret : 0;
-> 
+UGF1bCBFbW1lcmljaCA8cGF1bC5lbW1lcmljaEBjcm9pdC5pbz4gd3JpdGVzOgoKPiBJIHRoaW5r
+IHRoZSBtb3N0IG5vdGFibGUgY2hhbmdlIGhlcmUgaXMgdGhlIGJhY2twb3J0IG9mIHRoZSBuZXcg
+Yml0bWFwCj4gYWxsb2NhdG9yLCBidXQgdGhhdCdzIG1pc3NpbmcgY29tcGxldGVseSBmcm9tIHRo
+ZSBjaGFuZ2UgbG9nLgoKVXBkYXRlZCB0aGUgY2hhbmdlbG9nIGluIGRvY3MgYW5kIHRoZSBibG9n
+LiBUaGUgZWFybGllciBzY3JpcHQgd2FzCmlnbm9yaW5nIGVudHJpZXMgdGhhdCBkaWRuJ3QgbGlu
+ayB0byBiYWNrcG9ydCB0cmFja2VyIGZvbGxvd2luZyBiYWNrIHRvCmEgbWFzdGVyIHRyYWNrZXIu
+Cj4KPgo+IFBhdWwKPgo+IC0tIAo+IFBhdWwgRW1tZXJpY2gKPgo+IExvb2tpbmcgZm9yIGhlbHAg
+d2l0aCB5b3VyIENlcGggY2x1c3Rlcj8gQ29udGFjdCB1cyBhdCBodHRwczovL2Nyb2l0LmlvCj4K
+PiBjcm9pdCBHbWJICj4gRnJlc2VuaXVzc3RyLiAzMWgKPiA4MTI0NyBNw7xuY2hlbgo+IHd3dy5j
+cm9pdC5pbwo+IFRlbDogKzQ5IDg5IDE4OTY1ODUgOTAKPgo+IE9uIEZyaSwgQXByIDEyLCAyMDE5
+IGF0IDY6NDggUE0gQWJoaXNoZWsgTGVrc2htYW5hbiA8YWJoaXNoZWtAc3VzZS5jb20+IHdyb3Rl
+Ogo+Pgo+Pgo+PiBXZSBhcmUgaGFwcHkgdG8gYW5ub3VuY2UgdGhlIG5leHQgYnVnZml4IHJlbGVh
+c2UgZm9yIHYxMi4yLnggTHVtaW5vdXMKPj4gc3RhYmxlIHJlbGVhc2Ugc2VyaWVzLiBXZSByZWNv
+bW1lbmQgYWxsIGx1bWlub3VzIHVzZXJzIHRvIHVwZ3JhZGUgdG8KPj4gdGhpcyByZWxlYXNlLiBN
+YW55IHRoYW5rcyB0byBldmVyeW9uZSB3aG8gY29udHJpYnV0ZWQgYmFja3BvcnRzIGFuZCBhCj4+
+IHNwZWNpYWwgbWVudGlvbiB0byBZdXJpIGZvciB0aGUgUUUgZWZmb3J0cyBwdXQgaW4gdG8gdGhp
+cyByZWxlYXNlLgo+Pgo+PiBOb3RhYmxlIENoYW5nZXMKPj4gLS0tLS0tLS0tLS0tLS0tCj4+ICog
+SW4gMTIuMi4xMSBhbmQgZWFybGllciByZWxlYXNlcywga2V5cmluZyBjYXBzIHdlcmUgbm90IGNo
+ZWNrZWQgZm9yIHZhbGlkaXR5LAo+PiAgIHNvIHRoZSBjYXBzIHN0cmluZyBjb3VsZCBiZSBhbnl0
+aGluZy4gQXMgb2YgMTIuMi4xMiwgY2FwcyBzdHJpbmdzIGFyZQo+PiAgIHZhbGlkYXRlZCBhbmQg
+cHJvdmlkaW5nIGEga2V5cmluZyB3aXRoIGFuIGludmFsaWQgY2FwcyBzdHJpbmcgdG8sIGUuZy4s
+Cj4+ICAgYGNlcGggYXV0aCBhZGRgIHdpbGwgcmVzdWx0IGluIGFuIGVycm9yLgo+Pgo+PiBGb3Ig
+dGhlIGNvbXBsZXRlIGNoYW5nZWxvZywgcGxlYXNlIHJlZmVyIHRvIHRoZSByZWxlYXNlIGJsb2cg
+ZW50cnkgYXQKPj4gaHR0cHM6Ly9jZXBoLmNvbS9yZWxlYXNlcy92MTItMi0xMi1sdW1pbm91cy1y
+ZWxlYXNlZC8KPj4KPj4gR2V0dGluZyBjZXBoOgo+PiAtLS0tLS0tLS0tLS0KPj4gKiBHaXQgYXQg
+Z2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGguZ2l0Cj4+ICogVGFyYmFsbCBhdCBodHRwOi8vZG93
+bmxvYWQuY2VwaC5jb20vdGFyYmFsbHMvY2VwaC0xMi4yLjEyLnRhci5nego+PiAqIEZvciBwYWNr
+YWdlcywgc2VlIGh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL2luc3RhbGwvZ2V0LXBh
+Y2thZ2VzLwo+PiAqIFJlbGVhc2UgZ2l0IHNoYTE6IDE0MzYwMDY1OTQ2NjUyNzlmZTczNGI0YzE1
+ZDdlMDhjMTNlYmQ3NzcKPj4KPj4gLS0KPj4gQWJoaXNoZWsgTGVrc2htYW5hbgo+PiBTVVNFIExp
+bnV4IEdtYkgsIEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEphbmUgU21pdGhhcmQsIEdyYWhhbSBO
+b3J0b24sCj4+IEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQo+CgotLSAKQWJoaXNoZWsgTGVrc2ht
+YW5hbgpTVVNFIExpbnV4IEdtYkgsIEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEphbmUgU21pdGhh
+cmQsIEdyYWhhbSBOb3J0b24sCkhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlz
+dApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
+by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
