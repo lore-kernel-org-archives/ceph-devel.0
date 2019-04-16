@@ -1,189 +1,199 @@
-From: Douglas Gilbert <dgilbert@interlog.com>
-Subject: Re: [PATCH v3 00/26] compat_ioctl: cleanups
-Date: Tue, 16 Apr 2019 18:33:35 -0400
-Message-ID: <c379ed8d-1f33-e391-a1b5-810da77605f2@interlog.com>
-References: <20190416202013.4034148-1-arnd@arndb.de>
-Reply-To: dgilbert@interlog.com
+From: Jerome Glisse <jglisse@redhat.com>
+Subject: Re: [PATCH v1 00/15] Keep track of GUPed pages in fs and block
+Date: Tue, 16 Apr 2019 19:16:56 -0400
+Message-ID: <20190416231655.GB22465@redhat.com>
+References: <20190411210834.4105-1-jglisse@redhat.com>
+ <2c124cc4-b97e-ee28-2926-305bc6bc74bd@plexistor.com>
+ <20190416185922.GA12818@kmo-pixel>
+ <CAPcyv4jLrQ6evLAJzsASh=H6Tzx8E1oiF+YR3L2fOpbZYNUWGg@mail.gmail.com>
+ <ccac6c5a-7120-0455-88de-ca321b01e825@plexistor.com>
+ <20190416195735.GE21526@redhat.com>
+ <41e2d7e1-104b-a006-2824-015ca8c76cc8@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190416202013.4034148-1-arnd@arndb.de>
-Content-Language: en-CA
+Content-Disposition: inline
+In-Reply-To: <41e2d7e1-104b-a006-2824-015ca8c76cc8@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Alexander Viro <viro@zeniv.linux.org.uk>
-Cc: linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org, linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Karsten Keil <isdn@linux-pingi.de>, "James E.J. Bottomley" <jejb@linux.ibm.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Marcel Holtmann <marcel@holtmann.org>, netdev@vger.kernel.org, devel@driverdev.osuosl.org, linux-integrity@vger.kernel.org, qat-linux@intel.com, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, linux1394-devel@lists.sourceforge.net, amd-gfx@lists.freedesktop.org, linux-input@vger.kernel.org, linux-usb@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-ide@vger.kernel.org, linux-iio@vger.kernel.org, linux-rdma@vge
+To: Boaz Harrosh <openosd@gmail.com>
+Cc: Boaz Harrosh <boaz@plexistor.com>, Dan Williams <dan.j.williams@intel.com>, Kent Overstreet <kent.overstreet@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-block@vger.kernel.org, Linux MM <linux-mm@kvack.org>, John Hubbard <jhubbard@nvidia.com>, Jan Kara <jack@suse.cz>, Alexander Viro <viro@zeniv.linux.org.uk>, Johannes Thumshirn <jthumshirn@suse.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, Jason Gunthorpe <jgg@ziepe.ca>, Matthew Wilcox <willy@infradead.org>, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Alex Elder <elder@kernel.or>
 List-Id: ceph-devel.vger.kernel.org
 
-On 2019-04-16 4:19 p.m., Arnd Bergmann wrote:
-> Hi Al,
+On Wed, Apr 17, 2019 at 01:09:22AM +0300, Boaz Harrosh wrote:
+> On 16/04/19 22:57, Jerome Glisse wrote:
+> <>
+> > 
+> > A very long thread on this:
+> > 
+> > https://lkml.org/lkml/2018/12/3/1128
+> > 
+> > especialy all the reply to this first one
+> > 
+> > There is also:
+> > 
+> > https://lkml.org/lkml/2019/3/26/1395
+> > https://lwn.net/Articles/753027/
+> > 
 > 
-> It took me way longer than I had hoped to revisit this series, see
-> https://lore.kernel.org/lkml/20180912150142.157913-1-arnd@arndb.de/
-> for the previously posted version.
+> OK I have re-read this patchset and a little bit of the threads above (not all)
 > 
-> I've come to the point where all conversion handlers and most
-> COMPATIBLE_IOCTL() entries are gone from this file, but for
-> now, this series only has the parts that have either been reviewed
-> previously, or that are simple enough to include.
+> As I understand the long term plan is to keep two separate ref-counts one
+> for GUP-ref and one for the regular page-state/ownership ref.
+> Currently looking at page-ref we do not know if we have a GUP currently held.
+> With the new plan we can (Still not sure what's the full plan with this new info)
 > 
-> The main missing piece is the SG_IO/SG_GET_REQUEST_TABLE conversion.
-> I'll post the patches I made for that later, as they need more
-> testing and review from the scsi maintainers.
-
-Perhaps you could look at the document in this url:
-     http://sg.danny.cz/sg/sg_v40.html
-
-It is work-in-progress to modernize the SCSI generic driver. It
-extends ioctl(sg_fd, SG_IO, &pt_obj) to additionally accept the sg v4
-interface as defined in include/uapi/linux/bsg.h . Currently only the
-bsg driver uses the sg v4 interface. Since struct sg_io_v4 is all
-explicitly sized integers, I'm guessing it is immune "compat" problems.
-[I can see no reference to bsg nor struct sg_io_v4 in the current
-fs/compat_ioctl.c file.]
-
-Other additions described in the that document are these new ioctls:
-   - SG_IOSUBMIT    ultimately to replace write(sg_fd, ...)
-   - SG_IORECEIVE              to replace read(sg_fd, ...)
-   - SG_IOABORT     abort SCSI cmd in progress; new functionality
-   - SG_SET_GET_EXTENDED   has associated struct sg_extended_info
-
-The first three take a pointer to a struct sg_io_hdr (v3 interface) or
-a struct sg_io_v4 object. Both objects start with a 32 bit integer:
-'S' identifies the v3 interface while 'Q' identifies the v4 interface.
-
-The SG_SET_GET_EXTENDED ioctl takes a pointer to a struct
-sg_extended_info object which contains explicitly sized integers so it
-may also be immune from "compat" problems. The ioctls section (13) of
-that document referenced above has a table showing how many "sets and
-gets" are hiding in the SG_SET_GET_EXTENDED ioctl.
-
-BTW No change is proposed for this case:
-     ioctl(normal_block_device, SG_IO, &sg_v3_obj)
-which is handled by block/scsi_ioctl.c
-
-
-This would be a good time for me to address any "compat" concerns in the
-proposed sg driver update.
-
-Doug Gilbert
-
-
-> I hope you can still take these for the coming merge window, unless
-> new problems come up.
+> But if you make it such as the first GUP-ref also takes a page_ref and the
+> last GUp-dec also does put_page. Then the all of these becomes a matter of
+> matching every call to get_user_pages or iov_iter_get_pages() with a new
+> put_user_pages or iov_iter_put_pages().
 > 
->        Arnd
+> Then if much below us an LLD takes a get_page() say an skb below the iscsi
+> driver, and so on. We do not care and we keep doing a put_page because we know
+> the GUP-ref holds the page for us.
 > 
-> Arnd Bergmann (26):
->    compat_ioctl: pppoe: fix PPPOEIOCSFWD handling
->    compat_ioctl: move simple ppp command handling into driver
->    compat_ioctl: avoid unused function warning for do_ioctl
->    compat_ioctl: move PPPIOCSCOMPRESS32 to ppp-generic.c
->    compat_ioctl: move PPPIOCSPASS32/PPPIOCSACTIVE32 to ppp_generic.c
->    compat_ioctl: handle PPPIOCGIDLE for 64-bit time_t
->    compat_ioctl: move rtc handling into rtc-dev.c
->    compat_ioctl: add compat_ptr_ioctl()
->    compat_ioctl: move drivers to compat_ptr_ioctl
->    compat_ioctl: use correct compat_ptr() translation in drivers
->    ceph: fix compat_ioctl for ceph_dir_operations
->    compat_ioctl: move more drivers to compat_ptr_ioctl
->    compat_ioctl: move tape handling into drivers
->    compat_ioctl: move ATYFB_CLK handling to atyfb driver
->    compat_ioctl: move isdn/capi ioctl translation into driver
->    compat_ioctl: move rfcomm handlers into driver
->    compat_ioctl: move hci_sock handlers into driver
->    compat_ioctl: remove HCIUART handling
->    compat_ioctl: remove HIDIO translation
->    compat_ioctl: remove translation for sound ioctls
->    compat_ioctl: remove IGNORE_IOCTL()
->    compat_ioctl: remove /dev/random commands
->    compat_ioctl: remove joystick ioctl translation
->    compat_ioctl: remove PCI ioctl translation
->    compat_ioctl: remove /dev/raw ioctl translation
->    compat_ioctl: remove last RAID handling code
+> The current block layer is transparent to any page-ref it does not take any
+> nor put_page any. It is only the higher users that have done GUP that take care of that.
 > 
->   Documentation/networking/ppp_generic.txt    |   2 +
->   arch/um/drivers/hostaudio_kern.c            |   1 +
->   drivers/android/binder.c                    |   2 +-
->   drivers/char/ppdev.c                        |  12 +-
->   drivers/char/random.c                       |   1 +
->   drivers/char/tpm/tpm_vtpm_proxy.c           |  12 +-
->   drivers/crypto/qat/qat_common/adf_ctl_drv.c |   2 +-
->   drivers/dma-buf/dma-buf.c                   |   4 +-
->   drivers/dma-buf/sw_sync.c                   |   2 +-
->   drivers/dma-buf/sync_file.c                 |   2 +-
->   drivers/firewire/core-cdev.c                |  12 +-
->   drivers/gpu/drm/amd/amdkfd/kfd_chardev.c    |   2 +-
->   drivers/hid/hidraw.c                        |   4 +-
->   drivers/hid/usbhid/hiddev.c                 |  11 +-
->   drivers/hwtracing/stm/core.c                |  12 +-
->   drivers/ide/ide-tape.c                      |  31 +-
->   drivers/iio/industrialio-core.c             |   2 +-
->   drivers/infiniband/core/uverbs_main.c       |   4 +-
->   drivers/isdn/capi/capi.c                    |  31 +
->   drivers/isdn/i4l/isdn_ppp.c                 |  14 +-
->   drivers/media/rc/lirc_dev.c                 |   4 +-
->   drivers/mfd/cros_ec_dev.c                   |   4 +-
->   drivers/misc/cxl/flash.c                    |   8 +-
->   drivers/misc/genwqe/card_dev.c              |  23 +-
->   drivers/misc/mei/main.c                     |  22 +-
->   drivers/misc/vmw_vmci/vmci_host.c           |   2 +-
->   drivers/mtd/ubi/cdev.c                      |  36 +-
->   drivers/net/ppp/ppp_generic.c               |  99 +++-
->   drivers/net/ppp/pppoe.c                     |   7 +
->   drivers/net/ppp/pptp.c                      |   3 +
->   drivers/net/tap.c                           |  12 +-
->   drivers/nvdimm/bus.c                        |   4 +-
->   drivers/nvme/host/core.c                    |   2 +-
->   drivers/pci/switch/switchtec.c              |   2 +-
->   drivers/platform/x86/wmi.c                  |   2 +-
->   drivers/rpmsg/rpmsg_char.c                  |   4 +-
->   drivers/rtc/dev.c                           |  13 +-
->   drivers/rtc/rtc-vr41xx.c                    |  10 +
->   drivers/s390/char/tape_char.c               |  41 +-
->   drivers/sbus/char/display7seg.c             |   2 +-
->   drivers/sbus/char/envctrl.c                 |   4 +-
->   drivers/scsi/3w-xxxx.c                      |   4 +-
->   drivers/scsi/cxlflash/main.c                |   2 +-
->   drivers/scsi/esas2r/esas2r_main.c           |   2 +-
->   drivers/scsi/megaraid/megaraid_mm.c         |  28 +-
->   drivers/scsi/osst.c                         |  34 +-
->   drivers/scsi/pmcraid.c                      |   4 +-
->   drivers/scsi/st.c                           |  35 +-
->   drivers/staging/android/ion/ion.c           |   4 +-
->   drivers/staging/pi433/pi433_if.c            |  12 +-
->   drivers/staging/vme/devices/vme_user.c      |   2 +-
->   drivers/tee/tee_core.c                      |   2 +-
->   drivers/usb/class/cdc-wdm.c                 |   2 +-
->   drivers/usb/class/usbtmc.c                  |   4 +-
->   drivers/usb/core/devio.c                    |  16 +-
->   drivers/usb/gadget/function/f_fs.c          |  12 +-
->   drivers/vfio/vfio.c                         |  39 +-
->   drivers/vhost/net.c                         |  12 +-
->   drivers/vhost/scsi.c                        |  12 +-
->   drivers/vhost/test.c                        |  12 +-
->   drivers/vhost/vsock.c                       |  12 +-
->   drivers/video/fbdev/aty/atyfb_base.c        |  12 +-
->   drivers/virt/fsl_hypervisor.c               |   2 +-
->   fs/btrfs/super.c                            |   2 +-
->   fs/ceph/dir.c                               |   1 +
->   fs/ceph/file.c                              |   2 +-
->   fs/compat_ioctl.c                           | 602 +-------------------
->   fs/fat/file.c                               |  13 +-
->   fs/fuse/dev.c                               |   2 +-
->   fs/notify/fanotify/fanotify_user.c          |   2 +-
->   fs/userfaultfd.c                            |   2 +-
->   include/linux/fs.h                          |   7 +
->   include/linux/if_pppox.h                    |   2 +
->   include/linux/mtio.h                        |  58 ++
->   include/uapi/linux/ppp-ioctl.h              |   2 +
->   include/uapi/linux/ppp_defs.h               |  14 +
->   net/bluetooth/hci_sock.c                    |  21 +-
->   net/bluetooth/rfcomm/sock.c                 |  14 +-
->   net/l2tp/l2tp_ppp.c                         |   3 +
->   net/rfkill/core.c                           |   2 +-
->   sound/core/oss/pcm_oss.c                    |   4 +
->   sound/oss/dmasound/dmasound_core.c          |   2 +
->   82 files changed, 452 insertions(+), 1034 deletions(-)
->   create mode 100644 include/linux/mtio.h
+> The patterns I see are:
 > 
+>   iov_iter_get_pages()
+> 
+> 	IO(sync)
+> 
+>   for(numpages)
+> 	put_page()
+> 
+> Or
+> 
+>   iov_iter_get_pages()
+> 
+> 	IO (async)
+> 		->	foo_end_io()
+> 				put_page
+> 
+> (Same with get_user_pages)
+> (IO need not be block layer. It can be networking and so on like in NFS or CIFS
+>  and so on)
+
+They are also other code that pass around bio_vec and the code that
+fill it is disconnected from the code that release the page and they
+can mix and match GUP and non GUP AFAICT.
+
+On fs side they are also code that fill either bio or bio_vec and
+use some extra mechanism other than bio_end to submit io through
+workqueue and then release pages (cifs for instance). Again i believe
+they can mix and match GUP and non GUP (i have not spotted something
+obvious indicating otherwise).
+
+> 
+> The first pattern is easy just add the proper new api for
+> it, so for every iov_iter_get_pages() you have an iov_iter_put_pages() and remove
+> lots of cooked up for loops. Also the all iov_iter_get_pages_use_gup() just drops.
+> (Same at get_user_pages sites use put_user_pages)
+
+Yes this patchset already convert some of this first pattern.
+
+> The second pattern is a bit harder because it is possible that the foo_end_io()
+> is currently used for GUP as well as none-GUP cases. this is easy to fix. But the
+> even harder case is if the same foo_end_io() call has some pages GUPed and some not
+> in the same call.
+> 
+> staring at this patchset and the call sites I did not see any such places. Do you know
+> of any?
+> (We can always force such mixed-case users to always GUP-ref the pages and code
+>  foo_end_io() to GUP-dec)
+
+I believe direct-io.c is such example thought in that case i believe it
+can only be the ZERO_PAGE so this might easily detectable. They are also
+lot of fs functions taking an iterator and then using iov_iter_get_pages*()
+to fill a bio. AFAICT those functions can be call with pipe iterator or
+iovec iterator and probably also with other iterator type. But it is all
+common code afterward (the bi_end_io function is the same no matter the
+iterator).
+
+Thought that can probably be solve that way:
+
+From:
+    foo_bi_end_io(struct bio *bio) {
+        ...
+        for (i = 0; i < npages; ++i) {
+            put_page(pages[i]);
+        }
+    }
+
+To:
+    foo_bi_end_io_common(struct bio *bio) {
+        ...
+    }
+
+    foo_bi_end_io_normal(struct bio *bio)
+        foo_bi_end_io_common(bio);
+        for (i = 0; i < npages; ++i) {
+            put_page(pages[i]);
+        }
+    }
+
+    foo_bi_end_io_gup(struct bio *bio)
+        foo_bi_end_io_common(bio);
+        for (i = 0; i < npages; ++i) {
+            put_user_page(pages[i]);
+        }
+    }
+
+Then when filling in the bio i either pick foo_bi_end_io_normal() or
+foo_bi_end_io_gup(). I am assuming that bio with different bi_end_io
+function never get merge.
+
+The issue is that some bio_add_page*() call site are disconnected
+from where the bio is allocated and initialized (and also where the
+bi_end_io function is set). This make it quite hard to ascertain
+that GUPed page and non GUP page can not co-exist in same bio.
+
+Also in some cases it is not clear that the same iter is use to
+fill the same bio ie it might be possible that some code path fill
+the same bio from different iterator (and thus some pages might
+be coming from GUP and other not).
+
+It would certainly seems to require more careful review from the
+maintainers of such fs. I tend to believe that putting the burden
+on the reviewer is a harder sell :)
+
+From quick glance:
+   - nilfs segment thing
+   - direct-io same bio accumulate pages over multiple call but
+     it should always be from same iterator and thus either always
+     be from GUP or non GUP. Also the ZERO_PAGE case should be easy
+     to catch.
+   - fs/nfs/blocklayout/blocklayout.c
+   - gfs2 log buffer, that should never be page from GUP but i could
+     not ascertain that easily from quick review
+
+This is not extensive, i was just grepping for bio_add_page() and
+they are 2 other variant to check and i tended to discard places
+where bio is allocated in same function as bio_add_page() but this
+might not be a valid assumption either. Some bio might be allocated
+and only if there is no default bio already and then set as default
+bio which might be use latter on with different iterator.
+
+> 
+> So with a very careful coding I think you need not touch the block / scatter-list layers
+> nor any LLD drivers. The only code affected is the code around the get_user_pages and friends.
+> Changing the API will surface all those.
+> (IE. introduce a new API, convert one by one, Remove old API)
+> 
+> Am I smoking?
+
+No, i thought about it seemed more dangerous and harder to get right
+because some code add page in one place and setup bio in another. I
+can dig some more on that front but this still leave the non-bio user
+of bio_vec and those IIRC also suffer from same disconnect issue.
+
+> 
+> BTW: Are you aware of the users of iov_iter_get_pages_alloc() Do they need fixing too?
+
+Yeah and that patchset should address those already, i do not think
+i missed any.
+
+Cheers,
+Jérôme
