@@ -1,153 +1,167 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH v1 00/15] Keep track of GUPed pages in fs and block
-Date: Wed, 17 Apr 2019 16:32:19 -0700
-Message-ID: <CAPcyv4h8Wfy_ry54NOCeFGncwDPCfizpsntbD-w+E11fuf13zQ@mail.gmail.com>
-References: <20190411210834.4105-1-jglisse@redhat.com> <2c124cc4-b97e-ee28-2926-305bc6bc74bd@plexistor.com>
- <20190416185922.GA12818@kmo-pixel> <CAPcyv4jLrQ6evLAJzsASh=H6Tzx8E1oiF+YR3L2fOpbZYNUWGg@mail.gmail.com>
- <20190416194936.GD21526@redhat.com> <CAPcyv4i-YHH+dH8za1i1aMcHzQXfovVSrRFp_nfa-KYN-XhAvw@mail.gmail.com>
- <20190417222858.GA4146@redhat.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] ceph: Fix a memory leak in ci->i_head_snapc
+Date: Thu, 18 Apr 2019 11:37:52 +0800
+Message-ID: <CAAM7YAmGzYM0wKGKJ3Z_uHOTgcmEjXhXtuu8NwE+sbRhiRj=Mg@mail.gmail.com>
+References: <20190315111107.15154-1-lhenriques@suse.com> <CAAM7YAnD_dK2py+95N8Z7T+Vgr2ZbBJne+tNYivEeUGObhpiCQ@mail.gmail.com>
+ <87r2b4zd2q.fsf@suse.com> <CAAM7YAkhA6ddto3KESWm8yw3D6f02ev7oYmEto=nK3mXZeUy4A@mail.gmail.com>
+ <87lg1c17b2.fsf@suse.com> <CAAM7YAnhJUey6eX6zeWuPCVgyG9JghGQetJ-hk5R8nONivZzkg@mail.gmail.com>
+ <87a7hr19v7.fsf@suse.com> <87o963jkcj.fsf@suse.com> <CAAM7YAko8qnfjWEdEqX=XE3azDZLpO_+egxDEsqowK9ByYZxwg@mail.gmail.com>
+ <878swre7xz.fsf@suse.com> <87d0lm6psq.fsf@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190417222858.GA4146@redhat.com>
+In-Reply-To: <87d0lm6psq.fsf@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Glisse <jglisse@redhat.com>
-Cc: Kent Overstreet <kent.overstreet@gmail.com>, Boaz Harrosh <boaz@plexistor.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-block@vger.kernel.org, Linux MM <linux-mm@kvack.org>, John Hubbard <jhubbard@nvidia.com>, Jan Kara <jack@suse.cz>, Alexander Viro <viro@zeniv.linux.org.uk>, Johannes Thumshirn <jthumshirn@suse.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, Jason Gunthorpe <jgg@ziepe.ca>, Matthew Wilcox <willy@infradead.org>, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, samba-technical@lists.samba.org, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Alex Elder <elder@kernel.org>, ceph-devel@v
+To: Luis Henriques <lhenriques@suse.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Apr 17, 2019 at 3:29 PM Jerome Glisse <jglisse@redhat.com> wrote:
+On Tue, Apr 16, 2019 at 9:30 PM Luis Henriques <lhenriques@suse.com> wrote:
 >
-> On Wed, Apr 17, 2019 at 02:53:28PM -0700, Dan Williams wrote:
-> > On Tue, Apr 16, 2019 at 12:50 PM Jerome Glisse <jglisse@redhat.com> wro=
-te:
-> > >
-> > > On Tue, Apr 16, 2019 at 12:12:27PM -0700, Dan Williams wrote:
-> > > > On Tue, Apr 16, 2019 at 11:59 AM Kent Overstreet
-> > > > <kent.overstreet@gmail.com> wrote:
-> > > > >
-> > > > > On Tue, Apr 16, 2019 at 09:35:04PM +0300, Boaz Harrosh wrote:
-> > > > > > On Thu, Apr 11, 2019 at 05:08:19PM -0400, jglisse@redhat.com wr=
-ote:
-> > > > > > > From: J=C3=A9r=C3=B4me Glisse <jglisse@redhat.com>
-> > > > > > >
-> > > > > > > This patchset depends on various small fixes [1] and also on =
-patchset
-> > > > > > > which introduce put_user_page*() [2] and thus is 5.3 material=
- as those
-> > > > > > > pre-requisite will get in 5.2 at best. Nonetheless i am posti=
-ng it now
-> > > > > > > so that it can get review and comments on how and what should=
- be done
-> > > > > > > to test things.
-> > > > > > >
-> > > > > > > For various reasons [2] [3] we want to track page reference t=
-hrough GUP
-> > > > > > > differently than "regular" page reference. Thus we need to ke=
-ep track
-> > > > > > > of how we got a page within the block and fs layer. To do so =
-this patch-
-> > > > > > > set change the bio_bvec struct to store a pfn and flags inste=
-ad of a
-> > > > > > > direct pointer to a page. This way we can flag page that are =
-coming from
-> > > > > > > GUP.
-> > > > > > >
-> > > > > > > This patchset is divided as follow:
-> > > > > > >     - First part of the patchset is just small cleanup i beli=
-eve they
-> > > > > > >       can go in as his assuming people are ok with them.
-> > > > > >
-> > > > > >
-> > > > > > >     - Second part convert bio_vec->bv_page to bio_vec->bv_pfn=
- this is
-> > > > > > >       done in multi-step, first we replace all direct derefer=
-ence of
-> > > > > > >       the field by call to inline helper, then we introduce m=
-acro for
-> > > > > > >       bio_bvec that are initialized on the stack. Finaly we c=
-hange the
-> > > > > > >       bv_page field to bv_pfn.
-> > > > > >
-> > > > > > Why do we need a bv_pfn. Why not just use the lowest bit of the=
- page-ptr
-> > > > > > as a flag (pointer always aligned to 64 bytes in our case).
-> > > > > >
-> > > > > > So yes we need an inline helper for reference of the page but i=
-s it not clearer
-> > > > > > that we assume a page* and not any kind of pfn ?
-> > > > > > It will not be the first place using low bits of a pointer for =
-flags.
-> > > > > >
-> > > > > > That said. Why we need it at all? I mean why not have it as a b=
-io flag. If it exist
-> > > > > > at all that a user has a GUP and none-GUP pages to IO at the sa=
-me request he/she
-> > > > > > can just submit them as two separate BIOs (chained at the block=
- layer).
-> > > > > >
-> > > > > > Many users just submit one page bios and let elevator merge the=
-m any way.
-> > > > >
-> > > > > Let's please not add additional flags and weirdness to struct bio=
- - "if this
-> > > > > flag is set interpret one way, if not interpret another" - or eve=
-ntually bios
-> > > > > will be as bad as skbuffs. I would much prefer just changing bv_p=
-age to bv_pfn.
-> > > >
-> > > > This all reminds of the failed attempt to teach the block layer to
-> > > > operate without pages:
-> > > >
-> > > > https://lore.kernel.org/lkml/20150316201640.33102.33761.stgit@dwill=
-ia2-desk3.amr.corp.intel.com/
-> > > >
-> > > > >
-> > > > > Question though - why do we need a flag for whether a page is a G=
-UP page or not?
-> > > > > Couldn't the needed information just be determined by what range =
-the pfn is not
-> > > > > (i.e. whether or not it has a struct page associated with it)?
-> > > >
-> > > > That amounts to a pfn_valid() check which is a bit heavier than if =
-we
-> > > > can store a flag in the bv_pfn entry directly.
-> > > >
-> > > > I'd say create a new PFN_* flag, and make bv_pfn a 'pfn_t' rather t=
-han
-> > > > an 'unsigned long'.
-> > > >
-> > > > That said, I'm still in favor of Jan's proposal to just make the
-> > > > bv_page semantics uniform. Otherwise we're complicating this core
-> > > > infrastructure for some yet to be implemented GPU memory management
-> > > > capabilities with yet to be determined value. Circle back when that
-> > > > value is clear, but in the meantime fix the GUP bug.
-> > >
-> > > This has nothing to do with GPU, what make you think so ? Here i am
-> > > trying to solve GUP and to keep the value of knowing wether a page
-> > > has been GUP or not. I argue that if we bias every page in every bio
-> > > then we loose that information and thus the value.
-> > >
-> > > I gave the page protection mechanisms as an example that would be
-> > > impacted but it is not the only one. Knowing if a page has been GUP
-> > > can be useful for memory reclaimation, compaction, NUMA balancing,
-> >
-> > Right, this is what I was reacting to in your pushback to Jan's
-> > proposal. You're claiming value for not doing the simple thing for
-> > some future "may be useful in these contexts". To my knowledge those
-> > things are not broken today. You're asking for the complexity to be
-> > carried today for some future benefit, and I'm asking for the
-> > simplicity to be maintained as much as possible today and let the
-> > value of future changes stand on their own to push for more complexity
-> > later.
-> >
-> > Effectively don't use this bug fix to push complexity for a future
-> > agenda where the value has yet to be quantified.
+> Luis Henriques <lhenriques@suse.com> writes:
 >
-> Except that this solution (biasing everyone in bio) would _more complex_
-> it is only conceptualy appealing. The changes are on the other hand much
-> deeper and much riskier but you decided to ignore that and focus on some-
-> thing i was just giving as an example.
+> > "Yan, Zheng" <ukernel@gmail.com> writes:
+> >
+> >> On Fri, Mar 22, 2019 at 6:04 PM Luis Henriques <lhenriques@suse.com> wrote:
+> >>>
+> >>> Luis Henriques <lhenriques@suse.com> writes:
+> >>>
+> >>> > "Yan, Zheng" <ukernel@gmail.com> writes:
+> >>> >
+> >>> >> On Tue, Mar 19, 2019 at 12:22 AM Luis Henriques <lhenriques@suse.com> wrote:
+> >>> >>>
+> >>> >>> "Yan, Zheng" <ukernel@gmail.com> writes:
+> >>> >>>
+> >>> >>> > On Mon, Mar 18, 2019 at 6:33 PM Luis Henriques <lhenriques@suse.com> wrote:
+> >>> >>> >>
+> >>> >>> >> "Yan, Zheng" <ukernel@gmail.com> writes:
+> >>> >>> >>
+> >>> >>> >> > On Fri, Mar 15, 2019 at 7:13 PM Luis Henriques <lhenriques@suse.com> wrote:
+> >>> >>> >> >>
+> >>> >>> >> >> I'm occasionally seeing a kmemleak warning in xfstest generic/013:
+> >>> >>> >> >>
+> >>> >>> >> >> unreferenced object 0xffff8881fccca940 (size 32):
+> >>> >>> >> >>   comm "kworker/0:1", pid 12, jiffies 4295005883 (age 130.648s)
+> >>> >>> >> >>   hex dump (first 32 bytes):
+> >>> >>> >> >>     01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00  ................
+> >>> >>> >> >>     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+> >>> >>> >> >>   backtrace:
+> >>> >>> >> >>     [<00000000d741a1ea>] build_snap_context+0x5b/0x2a0
+> >>> >>> >> >>     [<0000000021a00533>] rebuild_snap_realms+0x27/0x90
+> >>> >>> >> >>     [<00000000ac538600>] rebuild_snap_realms+0x42/0x90
+> >>> >>> >> >>     [<000000000e955fac>] ceph_update_snap_trace+0x2ee/0x610
+> >>> >>> >> >>     [<00000000a9550416>] ceph_handle_snap+0x317/0x5f3
+> >>> >>> >> >>     [<00000000fc287b83>] dispatch+0x362/0x176c
+> >>> >>> >> >>     [<00000000a312c741>] ceph_con_workfn+0x9ce/0x2cf0
+> >>> >>> >> >>     [<000000004168e3a9>] process_one_work+0x1d4/0x400
+> >>> >>> >> >>     [<000000002188e9e7>] worker_thread+0x2d/0x3c0
+> >>> >>> >> >>     [<00000000b593e4b3>] kthread+0x112/0x130
+> >>> >>> >> >>     [<00000000a8587dca>] ret_from_fork+0x35/0x40
+> >>> >>> >> >>     [<00000000ba1c9c1d>] 0xffffffffffffffff
+> >>> >>> >> >>
+> >>> >>> >> >> It looks like it is possible that we miss a flush_ack from the MDS when,
+> >>> >>> >> >> for example, umounting the filesystem.  In that case, we can simply drop
+> >>> >>> >> >> the reference to the ceph_snap_context obtained in ceph_queue_cap_snap().
+> >>> >>> >> >>
+> >>> >>> >> >> Link: https://tracker.ceph.com/issues/38224
+> >>> >>> >> >> Cc: stable@vger.kernel.org
+> >>> >>> >> >> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> >>> >>> >> >> ---
+> >>> >>> >> >>  fs/ceph/caps.c | 7 +++++++
+> >>> >>> >> >>  1 file changed, 7 insertions(+)
+> >>> >>> >> >>
+> >>> >>> >> >> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> >>> >>> >> >> index 36a8dc699448..208f4dc6f574 100644
+> >>> >>> >> >> --- a/fs/ceph/caps.c
+> >>> >>> >> >> +++ b/fs/ceph/caps.c
+> >>> >>> >> >> @@ -1054,6 +1054,7 @@ int ceph_is_any_caps(struct inode *inode)
+> >>> >>> >> >>  static void drop_inode_snap_realm(struct ceph_inode_info *ci)
+> >>> >>> >> >>  {
+> >>> >>> >> >>         struct ceph_snap_realm *realm = ci->i_snap_realm;
+> >>> >>> >> >> +
+> >>> >>> >> >>         spin_lock(&realm->inodes_with_caps_lock);
+> >>> >>> >> >>         list_del_init(&ci->i_snap_realm_item);
+> >>> >>> >> >>         ci->i_snap_realm_counter++;
+> >>> >>> >> >> @@ -1063,6 +1064,12 @@ static void drop_inode_snap_realm(struct ceph_inode_info *ci)
+> >>> >>> >> >>         spin_unlock(&realm->inodes_with_caps_lock);
+> >>> >>> >> >>         ceph_put_snap_realm(ceph_sb_to_client(ci->vfs_inode.i_sb)->mdsc,
+> >>> >>> >> >>                             realm);
+> >>> >>> >> >> +       /*
+> >>> >>> >> >> +        * ci->i_head_snapc should be NULL, but we may still be waiting for a
+> >>> >>> >> >> +        * flush_ack from the MDS.  In that case, we still hold a ref for the
+> >>> >>> >> >> +        * ceph_snap_context and we need to drop it.
+> >>> >>> >> >> +        */
+> >>> >>> >> >> +       ceph_put_snap_context(ci->i_head_snapc);
+> >>> >>> >> >>  }
+> >>> >>> >> >>
+> >>> >>> >> >>  /*
+> >>> >>> >> >
+> >>> >>> >> > This does not seem right.  i_head_snapc is cleared when
+> >>> >>> >> > (ci->i_wrbuffer_ref_head == 0 && ci->i_dirty_caps == 0 &&
+> >>> >>> >> > ci->i_flushing_caps == 0) . Nothing do with dropping ci->i_snap_realm.
+> >>> >>> >> > Did you see 'reconnect denied' during the test? If you did, the fix
+> >>> >>> >> > should be in iterate_session_caps()
+> >>> >>> >> >
+> >>> >>> >>
+> >>> >>> >> No, I didn't saw any 'reconnect denied' in the test.  The test actually
+> >>> >>> >> seems to execute fine, except from the memory leak.
+> >>> >>> >>
+> >>> >>> >> It's very difficult to reproduce this issue, but last time I managed to
+> >>> >>> >> get this memory leak to trigger I actually had some debugging code in
+> >>> >>> >> drop_inode_snap_realm, something like:
+> >>> >>> >>
+> >>> >>> >>   if (ci->i_head_snapc)
+> >>> >>> >>         printk("i_head_snapc: 0x%px\n", ci->i_head_snapc);
+> >>> >>> >
+> >>> >>> > please add code that prints i_wrbuffer_ref_head, i_dirty_caps,
+> >>> >>> > i_flushing_caps. and try reproducing it again.
+> >>> >>> >
+> >>> >>>
+> >>> >>> Ok, it took me a few hours, but I managed to reproduce the bug, with
+> >>> >>> those extra printks.  All those values are set to 0 when the bug
+> >>> >>> triggers (and i_head_snapc != NULL).
+> >>> >>>
+> >>> >>
+> >>> >> Thanks, which test triggers this bug?
+> >>> >
+> >>> > That's generic/013.  It usually triggers after a few hours of running it
+> >>> > in a loop (I'm using a vstart cluster for that).
+> >>> >
+> >>> >>
+> >>> >> I searched that code, found we may fail to cleanup i_head_snap in two
+> >>> >> places. One is in ceph_queue_cap_snap, Another is in
+> >>> >> remove_session_caps_cb().
+> >>> >
+> >>> > Ah, great!  I spent a lot of time looking but I couldn't really find it.
+> >>> > My bet was that ceph_queue_cap_snap was doing the ceph_get_snap_context
+> >>> > and that the corresponding ceph_put_snap_context would be done in
+> >>> > handle_cap_flush_ack. That's why I mentioned the missing flush_ack from
+> >>> > MDS.
+> >>>
+> >>> Something that I didn't said explicitly is that I *know* that the
+> >>> unbalanced ceph_get_snap_context() is the one in function
+> >>> ceph_queue_cap_snap().  I know this for sure because I've managed to
+> >>> reproduce the issue several times with an instrumented kernel (with
+> >>> tracepoints) that allowed me to keep track of all ceph_snap_context
+> >>> operations (create, get, put, delete).
+> >>>
+> >>
+> >> Sorry for the delay. please try
+> >
+> > Thank you, I'll try the test with your patch applied and see if I still
+> > see the issue (obviously, this will take some time as it takes several
+> > hours for the bug to trigger).
+>
+> Ok, after several hours of running it, I confirm that I was not able to
+> reproduce the issue with your patch.  It took me a while because my test
+> environment changed a bit and I was failing to reproduce it even without
+> the patch.
+>
 
-Not ignoring, asking for more clarification on the complexity it
-introduces independent of potential future uses.
+Thanks, I pushed the patch to testing branch.
+
+Yan, Zheng
+
+> Cheers,
+> --
+> Luis
