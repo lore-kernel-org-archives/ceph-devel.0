@@ -1,16 +1,17 @@
-From: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+From: Mike Lowe <j.michael.lowe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: rgw,
  nss: dropping the legacy PKI token support in RadosGW (removed in
  OpenStack Ocata)
-Date: Fri, 19 Apr 2019 11:39:55 -0700
-Message-ID: <4DF8AE6D-2A41-4FEB-B5A5-C4AA88CEF1E6@dreamsnake.net>
+Date: Fri, 19 Apr 2019 15:00:05 -0400
+Message-ID: <8437FC12-80FD-4FB4-AF5E-7E0371DF990E@gmail.com>
 References: <CAB-Rz_XgtSahmo=+bx5rPPWPrXwPNDTq22i6KppybgqMeMCrUw@mail.gmail.com>
  <alpine.DEB.2.11.1904191222130.7074@piezo.novalocal>
+ <4DF8AE6D-2A41-4FEB-B5A5-C4AA88CEF1E6@dreamsnake.net>
 Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.8\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1904191222130.7074-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+In-Reply-To: <4DF8AE6D-2A41-4FEB-B5A5-C4AA88CEF1E6-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,62 +21,66 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-
-I've been away from OpenStack for a couple of years now, so this may have changed.  But back around the Icehouse release, at least, upgrading between OpenStack releases was a major undertaking, so backing an older OpenStack with newer Ceph seems like it might be more common than one might think.
-
-Which is not to argue for or against dropping PKI in Ceph, but if it's going to be done, please call that out early in the release notes to avoid rude awakenings.
-
-
-> [Adding ceph-users for better usability]
-> 
-> On Fri, 19 Apr 2019, Radoslaw Zarzynski wrote:
->> Hello,
->> 
->> RadosGW can use OpenStack Keystone as one of its authentication
->> backends. Keystone in turn had been offering many token variants
->> over the time with PKI/PKIz being one of them. Unfortunately,
->> this specific type had many flaws (like explosion in size of HTTP
->> header) and has been dropped from Keystone in August 2016 [1].
->> By "dropping" I don't mean just "deprecating". PKI tokens have
->> been physically eradicated from Keystone's code base not leaving
->> documentation behind. This happened in OpenStack Ocata.
->> 
->> Intuitively I don't expect that brand new Ceph is deployed with
->> an ancient OpenStack release. Similarly, upgrading Ceph while
->> keeping very old OpenStack seems quite improbable.
-> 
-> This sounds reasonable to me.  If someone is running an old OpenStack, 
-> they should be able to defer their Ceph upgrade until OpenStack is 
-> upgraded... or at least transition off the old keystone variant?
-> 
-> sage
-> 
->> If so, we may consider dropping PKI token support in further
->> releases. What makes me perceive this idea as attractive is:
->> 1) significant clean-up in RGW. We could remove a lot of
->> complexity including the entire revocation machinery with
->> its dedicated thread.
->> 2) Killing the NSS dependency. After moving the AWS-like
->> crypto services of RGW to OpenSSL, the CMS utilized by PKI
->> token support is the library sole's user.
->> I'm not saying it's a blocker for NSS removal. Likely we could
->> reimplement the stuff on top of OpenSSL as well.
->> All I'm worrying about is this can be futile effort bringing
->> more problems/confusion than benefits. For instance, instead
->> of just dropping the "nss_db_path" config option, we would
->> need to replace it with counterpart for OpenSSL or take care
->> of differences in certificate formats between the libraries.
->> 
->> I can see benefits of the removal. However, the actual cost
->> is mysterious to me. Is the feature useful?
->> 
->> Regards,
->> Radek
->> 
->> [1]: https://github.com/openstack/keystone/commit/8a66ef635400083fa426c0daf477038967785caf
->> 
->> 
+SeKAmXZlIHJ1biBwcm9kdWN0aW9uIENlcGgvT3BlblN0YWNrIHNpbmNlIDIwMTUuICBUaGUgcmVh
+bGl0eSBpcyBydW5uaW5nIE9wZW5TdGFjayBOZXd0b24gKHRoZSBsYXN0IG9uZSB3aXRoIHBraSkg
+d2l0aCBhIHBvc3QgTmF1dGlsdXMgcmVsZWFzZSBqdXN0IGlzbuKAmXQgZ29pbmcgdG8gd29yay4g
+WW91IGFyZSBnb2luZyB0byBoYXZlIGJpZ2dlciBwcm9ibGVtcyB0aGFuIHRyeWluZyB0byBtYWtl
+IG9iamVjdCBzdG9yYWdlIHdvcmsgd2l0aCBrZXlzdG9uZSBpc3N1ZWQgdG9rZW5zLiBXb3JzdCBj
+YXNlIGlzIHlvdSB3aWxsIGhhdmUgdG8gZG8gdGhlIHJpZ2h0IHRoaW5nIGFuZCBzd2l0Y2ggdG8g
+ZmVybmV0IHRva2VucyB3aGljaCBhcmUgc3VwcG9ydGVkIGFsbCB0aGUgd2F5IGJhY2sgdG8gS2ls
+byByZWxlYXNlZCA0IHllYXJzIGFnby4KCj4gT24gQXByIDE5LCAyMDE5LCBhdCAyOjM5IFBNLCBB
+bnRob255IEQnQXRyaSA8YWFkQGRyZWFtc25ha2UubmV0PiB3cm90ZToKPiAKPiAKPiBJJ3ZlIGJl
+ZW4gYXdheSBmcm9tIE9wZW5TdGFjayBmb3IgYSBjb3VwbGUgb2YgeWVhcnMgbm93LCBzbyB0aGlz
+IG1heSBoYXZlIGNoYW5nZWQuICBCdXQgYmFjayBhcm91bmQgdGhlIEljZWhvdXNlIHJlbGVhc2Us
+IGF0IGxlYXN0LCB1cGdyYWRpbmcgYmV0d2VlbiBPcGVuU3RhY2sgcmVsZWFzZXMgd2FzIGEgbWFq
+b3IgdW5kZXJ0YWtpbmcsIHNvIGJhY2tpbmcgYW4gb2xkZXIgT3BlblN0YWNrIHdpdGggbmV3ZXIg
+Q2VwaCBzZWVtcyBsaWtlIGl0IG1pZ2h0IGJlIG1vcmUgY29tbW9uIHRoYW4gb25lIG1pZ2h0IHRo
+aW5rLgo+IAo+IFdoaWNoIGlzIG5vdCB0byBhcmd1ZSBmb3Igb3IgYWdhaW5zdCBkcm9wcGluZyBQ
+S0kgaW4gQ2VwaCwgYnV0IGlmIGl0J3MgZ29pbmcgdG8gYmUgZG9uZSwgcGxlYXNlIGNhbGwgdGhh
+dCBvdXQgZWFybHkgaW4gdGhlIHJlbGVhc2Ugbm90ZXMgdG8gYXZvaWQgcnVkZSBhd2FrZW5pbmdz
+Lgo+IAo+IAo+PiBbQWRkaW5nIGNlcGgtdXNlcnMgZm9yIGJldHRlciB1c2FiaWxpdHldCj4+IAo+
+PiBPbiBGcmksIDE5IEFwciAyMDE5LCBSYWRvc2xhdyBaYXJ6eW5za2kgd3JvdGU6Cj4+PiBIZWxs
+bywKPj4+IAo+Pj4gUmFkb3NHVyBjYW4gdXNlIE9wZW5TdGFjayBLZXlzdG9uZSBhcyBvbmUgb2Yg
+aXRzIGF1dGhlbnRpY2F0aW9uCj4+PiBiYWNrZW5kcy4gS2V5c3RvbmUgaW4gdHVybiBoYWQgYmVl
+biBvZmZlcmluZyBtYW55IHRva2VuIHZhcmlhbnRzCj4+PiBvdmVyIHRoZSB0aW1lIHdpdGggUEtJ
+L1BLSXogYmVpbmcgb25lIG9mIHRoZW0uIFVuZm9ydHVuYXRlbHksCj4+PiB0aGlzIHNwZWNpZmlj
+IHR5cGUgaGFkIG1hbnkgZmxhd3MgKGxpa2UgZXhwbG9zaW9uIGluIHNpemUgb2YgSFRUUAo+Pj4g
+aGVhZGVyKSBhbmQgaGFzIGJlZW4gZHJvcHBlZCBmcm9tIEtleXN0b25lIGluIEF1Z3VzdCAyMDE2
+IFsxXS4KPj4+IEJ5ICJkcm9wcGluZyIgSSBkb24ndCBtZWFuIGp1c3QgImRlcHJlY2F0aW5nIi4g
+UEtJIHRva2VucyBoYXZlCj4+PiBiZWVuIHBoeXNpY2FsbHkgZXJhZGljYXRlZCBmcm9tIEtleXN0
+b25lJ3MgY29kZSBiYXNlIG5vdCBsZWF2aW5nCj4+PiBkb2N1bWVudGF0aW9uIGJlaGluZC4gVGhp
+cyBoYXBwZW5lZCBpbiBPcGVuU3RhY2sgT2NhdGEuCj4+PiAKPj4+IEludHVpdGl2ZWx5IEkgZG9u
+J3QgZXhwZWN0IHRoYXQgYnJhbmQgbmV3IENlcGggaXMgZGVwbG95ZWQgd2l0aAo+Pj4gYW4gYW5j
+aWVudCBPcGVuU3RhY2sgcmVsZWFzZS4gU2ltaWxhcmx5LCB1cGdyYWRpbmcgQ2VwaCB3aGlsZQo+
+Pj4ga2VlcGluZyB2ZXJ5IG9sZCBPcGVuU3RhY2sgc2VlbXMgcXVpdGUgaW1wcm9iYWJsZS4KPj4g
+Cj4+IFRoaXMgc291bmRzIHJlYXNvbmFibGUgdG8gbWUuICBJZiBzb21lb25lIGlzIHJ1bm5pbmcg
+YW4gb2xkIE9wZW5TdGFjaywgCj4+IHRoZXkgc2hvdWxkIGJlIGFibGUgdG8gZGVmZXIgdGhlaXIg
+Q2VwaCB1cGdyYWRlIHVudGlsIE9wZW5TdGFjayBpcyAKPj4gdXBncmFkZWQuLi4gb3IgYXQgbGVh
+c3QgdHJhbnNpdGlvbiBvZmYgdGhlIG9sZCBrZXlzdG9uZSB2YXJpYW50Pwo+PiAKPj4gc2FnZQo+
+PiAKPj4+IElmIHNvLCB3ZSBtYXkgY29uc2lkZXIgZHJvcHBpbmcgUEtJIHRva2VuIHN1cHBvcnQg
+aW4gZnVydGhlcgo+Pj4gcmVsZWFzZXMuIFdoYXQgbWFrZXMgbWUgcGVyY2VpdmUgdGhpcyBpZGVh
+IGFzIGF0dHJhY3RpdmUgaXM6Cj4+PiAxKSBzaWduaWZpY2FudCBjbGVhbi11cCBpbiBSR1cuIFdl
+IGNvdWxkIHJlbW92ZSBhIGxvdCBvZgo+Pj4gY29tcGxleGl0eSBpbmNsdWRpbmcgdGhlIGVudGly
+ZSByZXZvY2F0aW9uIG1hY2hpbmVyeSB3aXRoCj4+PiBpdHMgZGVkaWNhdGVkIHRocmVhZC4KPj4+
+IDIpIEtpbGxpbmcgdGhlIE5TUyBkZXBlbmRlbmN5LiBBZnRlciBtb3ZpbmcgdGhlIEFXUy1saWtl
+Cj4+PiBjcnlwdG8gc2VydmljZXMgb2YgUkdXIHRvIE9wZW5TU0wsIHRoZSBDTVMgdXRpbGl6ZWQg
+YnkgUEtJCj4+PiB0b2tlbiBzdXBwb3J0IGlzIHRoZSBsaWJyYXJ5IHNvbGUncyB1c2VyLgo+Pj4g
+SSdtIG5vdCBzYXlpbmcgaXQncyBhIGJsb2NrZXIgZm9yIE5TUyByZW1vdmFsLiBMaWtlbHkgd2Ug
+Y291bGQKPj4+IHJlaW1wbGVtZW50IHRoZSBzdHVmZiBvbiB0b3Agb2YgT3BlblNTTCBhcyB3ZWxs
+Lgo+Pj4gQWxsIEknbSB3b3JyeWluZyBhYm91dCBpcyB0aGlzIGNhbiBiZSBmdXRpbGUgZWZmb3J0
+IGJyaW5naW5nCj4+PiBtb3JlIHByb2JsZW1zL2NvbmZ1c2lvbiB0aGFuIGJlbmVmaXRzLiBGb3Ig
+aW5zdGFuY2UsIGluc3RlYWQKPj4+IG9mIGp1c3QgZHJvcHBpbmcgdGhlICJuc3NfZGJfcGF0aCIg
+Y29uZmlnIG9wdGlvbiwgd2Ugd291bGQKPj4+IG5lZWQgdG8gcmVwbGFjZSBpdCB3aXRoIGNvdW50
+ZXJwYXJ0IGZvciBPcGVuU1NMIG9yIHRha2UgY2FyZQo+Pj4gb2YgZGlmZmVyZW5jZXMgaW4gY2Vy
+dGlmaWNhdGUgZm9ybWF0cyBiZXR3ZWVuIHRoZSBsaWJyYXJpZXMuCj4+PiAKPj4+IEkgY2FuIHNl
+ZSBiZW5lZml0cyBvZiB0aGUgcmVtb3ZhbC4gSG93ZXZlciwgdGhlIGFjdHVhbCBjb3N0Cj4+PiBp
+cyBteXN0ZXJpb3VzIHRvIG1lLiBJcyB0aGUgZmVhdHVyZSB1c2VmdWw/Cj4+PiAKPj4+IFJlZ2Fy
+ZHMsCj4+PiBSYWRlawo+Pj4gCj4+PiBbMV06IGh0dHBzOi8vZ2l0aHViLmNvbS9vcGVuc3RhY2sv
+a2V5c3RvbmUvY29tbWl0LzhhNjZlZjYzNTQwMDA4M2ZhNDI2YzBkYWY0NzcwMzg5Njc3ODVjYWYK
+Pj4+IAo+Pj4gCj4gCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0
+dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
