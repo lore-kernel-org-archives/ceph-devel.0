@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 18/21] ceph: fix use-after-free on symlink traversal
-Date: Mon, 22 Apr 2019 15:49:38 -0400
-Message-ID: <20190422194941.13433-18-sashal@kernel.org>
-References: <20190422194941.13433-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 24/29] ceph: fix use-after-free on symlink traversal
+Date: Mon, 22 Apr 2019 15:48:43 -0400
+Message-ID: <20190422194848.13049-24-sashal@kernel.org>
+References: <20190422194848.13049-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190422194941.13433-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190422194848.13049-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Al Viro <viro@zeniv.linux.org.uk>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
@@ -29,10 +29,10 @@ Signed-off-by: Sasha Levin (Microsoft) <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9f0d99094cc1..a663b676d566 100644
+index 30d9d9e7057d..7a4052501866 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -474,6 +474,7 @@ static void ceph_i_callback(struct rcu_head *head)
+@@ -523,6 +523,7 @@ static void ceph_i_callback(struct rcu_head *head)
  	struct inode *inode = container_of(head, struct inode, i_rcu);
  	struct ceph_inode_info *ci = ceph_inode(inode);
  
@@ -40,7 +40,7 @@ index 9f0d99094cc1..a663b676d566 100644
  	kmem_cache_free(ceph_inode_cachep, ci);
  }
  
-@@ -505,7 +506,6 @@ void ceph_destroy_inode(struct inode *inode)
+@@ -554,7 +555,6 @@ void ceph_destroy_inode(struct inode *inode)
  		ceph_put_snap_realm(mdsc, realm);
  	}
  
