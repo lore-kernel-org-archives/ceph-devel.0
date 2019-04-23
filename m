@@ -1,19 +1,19 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH AUTOSEL 4.19 48/68] libceph: fix breakage caused by
+Subject: Re: [PATCH AUTOSEL 5.0 61/98] libceph: fix breakage caused by
  multipage bvecs
-Date: Tue, 23 Apr 2019 10:27:34 +0200
-Message-ID: <CAOi1vP9qzUZOO5Mv2+eoFH9Xn2Kvxf_1EiDJsFuDHLZS1843+w@mail.gmail.com>
-References: <20190422194516.11634-1-sashal@kernel.org> <20190422194516.11634-48-sashal@kernel.org>
+Date: Tue, 23 Apr 2019 10:28:56 +0200
+Message-ID: <CAOi1vP8Q=bH9uXVi=35PKpE0T=MNpRViaBJWPMYfD6_pfC8xRw@mail.gmail.com>
+References: <20190422194205.10404-1-sashal@kernel.org> <20190422194205.10404-61-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190422194516.11634-48-sashal@kernel.org>
+In-Reply-To: <20190422194205.10404-61-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Sasha Levin <sashal@kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Apr 22, 2019 at 9:46 PM Sasha Levin <sashal@kernel.org> wrote:
+On Mon, Apr 22, 2019 at 9:44 PM Sasha Levin <sashal@kernel.org> wrote:
 >
 > From: Ilya Dryomov <idryomov@gmail.com>
 >
@@ -37,10 +37,10 @@ On Mon, Apr 22, 2019 at 9:46 PM Sasha Levin <sashal@kernel.org> wrote:
 >  1 file changed, 6 insertions(+), 2 deletions(-)
 >
 > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index f7d7f32ac673..ef5216206bdf 100644
+> index 7e71b0df1fbc..3083988ce729 100644
 > --- a/net/ceph/messenger.c
 > +++ b/net/ceph/messenger.c
-> @@ -870,6 +870,7 @@ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
+> @@ -840,6 +840,7 @@ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
 >                                         size_t bytes)
 >  {
 >         struct ceph_bio_iter *it = &cursor->bio_iter;
@@ -48,7 +48,7 @@ On Mon, Apr 22, 2019 at 9:46 PM Sasha Levin <sashal@kernel.org> wrote:
 >
 >         BUG_ON(bytes > cursor->resid);
 >         BUG_ON(bytes > bio_iter_len(it->bio, it->iter));
-> @@ -881,7 +882,8 @@ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
+> @@ -851,7 +852,8 @@ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
 >                 return false;   /* no more data */
 >         }
 >
@@ -58,7 +58,7 @@ On Mon, Apr 22, 2019 at 9:46 PM Sasha Levin <sashal@kernel.org> wrote:
 >                 return false;   /* more bytes to process in this segment */
 >
 >         if (!it->iter.bi_size) {
-> @@ -929,6 +931,7 @@ static bool ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
+> @@ -899,6 +901,7 @@ static bool ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
 >                                         size_t bytes)
 >  {
 >         struct bio_vec *bvecs = cursor->data->bvec_pos.bvecs;
@@ -66,7 +66,7 @@ On Mon, Apr 22, 2019 at 9:46 PM Sasha Levin <sashal@kernel.org> wrote:
 >
 >         BUG_ON(bytes > cursor->resid);
 >         BUG_ON(bytes > bvec_iter_len(bvecs, cursor->bvec_iter));
-> @@ -940,7 +943,8 @@ static bool ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
+> @@ -910,7 +913,8 @@ static bool ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
 >                 return false;   /* no more data */
 >         }
 >
@@ -77,11 +77,7 @@ On Mon, Apr 22, 2019 at 9:46 PM Sasha Levin <sashal@kernel.org> wrote:
 >
 >         BUG_ON(cursor->last_piece);
 
-Hi Sasha,
-
-This shouldn't be needed.  Multipage bvecs code is new in 5.1 (commit
-07173c3ec276 ("block: enable multipage bvecs")), this commit just fixed
-the fall out.
+Same here, shouldn't be needed.
 
 Thanks,
 
