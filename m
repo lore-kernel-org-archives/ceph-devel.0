@@ -1,601 +1,619 @@
-From: lin zhou <hnuzhoulin2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: rbd omap disappeared
-Date: Wed, 24 Apr 2019 20:42:15 +0800
-Message-ID: <CAKO+7k2UyEgd8VDjA-KcK7_Edmk4GBpqyEAm3G8ctHqPXM8Gbw@mail.gmail.com>
+From: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Subject: Re: [PATCH v3 12/26] compat_ioctl: move more drivers to
+ compat_ptr_ioctl
+Date: Thu, 25 Apr 2019 12:21:53 -0300
+Message-ID: <20190425122153.450fc094@coco.lan>
+References: <20190416202013.4034148-1-arnd@arndb.de>
+        <20190416202701.127745-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6479710305964019524=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190416202701.127745-1-arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org, linux-kernel@vger.kernel.org, Jason Gunthorpe <jgg@mellanox.com>, Daniel Vetter <daniel.vetter@ffwll.ch>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, David Sterba <dsterba@suse.com>, Darren Hart <dvhart@infradead.org>, Jonathan Cameron <Jonathan.Cameron@huawei.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, devel@driverdev.osuosl.org, qat-linux@intel.com, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, linaro-mm-sig@lists.linaro.org, amd-gfx@lists.freedesktop.org, linux-input@vger.kernel.org, linux-iio@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvdimm@lists.01.org, linux-nvme@lists.infradead.org, linux-pci@vger
 List-Id: ceph-devel.vger.kernel.org
 
---===============6479710305964019524==
-Content-Type: multipart/alternative; boundary="000000000000be73dc05874609f7"
+Em Tue, 16 Apr 2019 22:25:33 +0200
+Arnd Bergmann <arnd@arndb.de> escreveu:
 
---000000000000be73dc05874609f7
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+> The .ioctl and .compat_ioctl file operations have the same prototype so
+> they can both point to the same function, which works great almost all
+> the time when all the commands are compatible.
+> 
+> One exception is the s390 architecture, where a compat pointer is only
+> 31 bit wide, and converting it into a 64-bit pointer requires calling
+> compat_ptr(). Most drivers here will ever run in s390, but since we now
+> have a generic helper for it, it's easy enough to use it consistently.
+> 
+> I double-checked all these drivers to ensure that all ioctl arguments
+> are used as pointers or are ignored, but are not interpreted as integer
+> values.
+> 
+> Acked-by: Jason Gunthorpe <jgg@mellanox.com>
+> Acked-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+> Acked-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+> Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Acked-by: David Sterba <dsterba@suse.com>
+> Acked-by: Darren Hart (VMware) <dvhart@infradead.org>
+> Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+> Acked-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  drivers/android/binder.c                    | 2 +-
+>  drivers/crypto/qat/qat_common/adf_ctl_drv.c | 2 +-
+>  drivers/dma-buf/dma-buf.c                   | 4 +---
+>  drivers/dma-buf/sw_sync.c                   | 2 +-
+>  drivers/dma-buf/sync_file.c                 | 2 +-
+>  drivers/gpu/drm/amd/amdkfd/kfd_chardev.c    | 2 +-
+>  drivers/hid/hidraw.c                        | 4 +---
+>  drivers/iio/industrialio-core.c             | 2 +-
+>  drivers/infiniband/core/uverbs_main.c       | 4 ++--
+>  drivers/media/rc/lirc_dev.c                 | 4 +---
 
-my cluster occur a big error this morning.
-many osd suicide because of heartbeat_map timeout.
-when I start all osd manually.it looks well.
+If I understand your patch description well, using compat_ptr_ioctl
+only works if the driver is not for s390, right?
 
-but when I using rbd info for a rbd from rbd ls, it say not such file or
-directory.
-And the I use the way in
-https://fnordahl.com/2017/04/17/ceph-rbd-volume-header-recovery/ to
-recovery omap.
+In thesis, nothing prevents to use LIRC API on s390 - as this isn't
+a driver but, instead, RC core feature to expose raw remote controller
+codes to userspace.
 
-At last,most rbd works well.But still have 5 rbd can not reocvery.
+Yet, lirc_dev will only work if the system has a remote controller driver.
 
-2019-04-24 16:00:40.045342 7fd5fdffb700 -1 librbd::image::OpenRequest:
-failed to retreive immutable metadata: (5) Input/output error
-2019-04-24 16:00:40.045419 7fd5fd7fa700 -1 librbd::ImageState:
-0x5593262fb830 failed to open image: (5) Input/output error
-rbd: error opening image volume-bef74858-0fcb-4a0b-b197-9618e6824c46: (5)
-Input/output error
+Well, we don't have any for s390. Despite we don't have such driver, 
+I can't possible see why someone would use a remote controller for a
+mainframe :-p
 
-I try to locate its omap head object, and stop master osd, delete the pg
-data in master osd, then restart master osd. It looks three replication is
-the same  when I using attr.
+Anyway, if someone ever come with such driver/usecase, reverting this
+change (or adding an #ifdef to check if arch is 390) should be
+pretty straight forward.
 
-But I can not get the rbd info.Alwayse the vm among this  rbd is still
-alive and works well.
+So:
 
-ceph -s
-    cluster 2bec9425-ea5f-4a48-b56a-fe88e126bced
-     health HEALTH_WARN
-            noout flag(s) set
-     monmap e1: 3 mons at {a=3D
-10.191.175.249:6789/0,b=3D10.191.175.250:6789/0,c=3D10.191.175.251:6789/0}
-            election epoch 26, quorum 0,1,2 a,b,c
-     osdmap e22551: 1080 osds: 1078 up, 1078 in
-            flags noout,sortbitwise,require_jewel_osds
-      pgmap v29327873: 90112 pgs, 3 pools, 69753 GB data, 30081 kobjects
-            214 TB used, 1500 TB / 1715 TB avail
-               90111 active+clean
-                   1 active+clean+scrubbing+deep
-  client io 57082 kB/s rd, 207 MB/s wr, 1091 op/s rd, 7658 op/s wr
+Acked-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
 
-the log of osd.219 which is the firstest log heartbeat no reply.
 
-2019-04-24 04:00:54.905504 7f5eb7fab700  1 heartbeat_map is_healthy
-'OSD::osd_op_tp thread 0x7f5e97182700' had timed out after 15
-...
-2019-04-24 04:00:54.905536 7f5eb7fab700  1 heartbeat_map is_healthy
-'OSD::osd_op_tp thread 0x7f5e9b18a700' had timed out after 15
-2019-04-24 04:00:57.499903 7f5df2997700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.33:6947/3001469 pipe(0x55d93b470800 sd=3D1914 :6855 s=3D2 pgs=3D=
-514958
-cs=3D17 l=3D0 c=3D0x55d91a3c1200).fault with nothing to send, going to stan=
-dby
-... repeat large
-2019-04-24 04:00:57.651603 7f5e77735700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.36:6845/1062649 pipe(0x55d92d2cb400 sd=3D105 :45295 s=3D2 pgs=3D=
-493749
-cs=3D11 l=3D0 c=3D0x55d943755200).fault with nothing to send, going to stan=
-dby
-2019-04-24 04:00:59.905846 7f5eb7fab700  1 heartbeat_map is_healthy
-'OSD::osd_op_tp thread 0x7f5e97182700' had timed out after 15
-...
-2019-04-24 04:01:04.666159 7f5dbb6d7700  0 -- 10.191.175.20:6856/3169631 >>
-:/0 pipe(0x55d9234b1400 sd=3D1926 :6856 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d924743600).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:04.905958 7f5eb7fab700  1 heartbeat_map is_healthy
-'OSD::osd_op_tp thread 0x7f5e97182700' had timed out after 15
-2019-04-24 04:01:14.550812 7f5db7793700  0 -- 10.191.175.20:6856/3169631 >>
-:/0 pipe(0x55d9234b2800 sd=3D1927 :6856 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d924742a00).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-...
-2019-04-24 04:01:14.691430 7f5db7793700  0 -- 10.191.175.20:6858/3169631 >>
-:/0 pipe(0x55d936a78800 sd=3D1383 :6858 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d94ecf5a80).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.692176 7f5e90469700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.31:6835/2092007 pipe(0x55d93c41a800 sd=3D67 :17328 s=3D2 pgs=3D5=
-71754
-cs=3D83 l=3D0 c=3D0x55d939913180).fault, initiating reconnect
-2019-04-24 04:01:14.693742 7f5e4c889700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.31:6835/2092007 pipe(0x55d93c41a800 sd=3D67 :17766 s=3D1 pgs=3D5=
-71754
-cs=3D84 l=3D0 c=3D0x55d939913180).connect got RESETSESSION
-2019-04-24 04:01:14.697098 7f5db256c700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d95606c800 sd=3D352 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d920d79500).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.697516 7f5e08523700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d91b30c000 sd=3D1926 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d9263cb780).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-...
-2019-04-24 04:01:14.704225 7f5dd7790700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d9531c5400 sd=3D1927 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d9263ca280).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.704511 7f5e78c4a700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.37:6801/2131766 pipe(0x55d939274800 sd=3D507 :10332 s=3D1 pgs=3D=
-604906
-cs=3D3 l=3D0 c=3D0x55d925714600).connect got RESETSESSION
-...
-2019-04-24 04:01:14.705970 7f5dc4980700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.38:6833/3181256 pipe(0x55d950fed400 sd=3D455 :58907 s=3D1 pgs=3D=
-563194
-cs=3D17 l=3D0 c=3D0x55d9320a2480).connect got RESETSESSION
-2019-04-24 04:01:14.696315 7f5db548e700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d939e45400 sd=3D1929 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d91b787d80).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.708160 7f5e808c6700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.37:6823/2160572 pipe(0x55d943742800 sd=3D812 :41939 s=3D1 pgs=3D=
-566937
-cs=3D1 l=3D0 c=3D0x55d930f82900).connect got RESETSESSION
-2019-04-24 04:01:14.708417 7f5e9a989700  1 heartbeat_map reset_timeout
-'OSD::osd_op_tp thread 0x7f5e9a989700' had timed out after 15
-...
-2019-04-24 04:01:14.708949 7f5e97983700  1 heartbeat_map reset_timeout
-'OSD::osd_op_tp thread 0x7f5e97983700' had timed out after 15
-2019-04-24 04:01:14.709602 7f5e007ac700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.28:6821/1091360 pipe(0x55d94e69b400 sd=3D1419 :40317 s=3D1
-pgs=3D566133 cs=3D1 l=3D0 c=3D0x55d938741480).connect got RESETSESSION
-2019-04-24 04:01:14.710727 7f5e07216700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.44:6838/112579 pipe(0x55d946d74800 sd=3D809 :23481 s=3D1 pgs=3D3=
-2 cs=3D1
-l=3D0 c=3D0x55d94f963a80).connect got RESETSESSION
-2019-04-24 04:01:14.712774 7f5e8716c700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.34:6916/1001159 pipe(0x55d95be21400 sd=3D189 :55315 s=3D1 pgs=3D=
-533958
-cs=3D1 l=3D0 c=3D0x55d935329e00).connect got RESETSESSION
-2019-04-24 04:01:14.713262 7f5e90e73700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.34:6945/1173248 pipe(0x55d9447e8000 sd=3D99 :37118 s=3D1 pgs=3D5=
-56344
-cs=3D1 l=3D0 c=3D0x55d91ff36700).connect got RESETSESSION
-2019-04-24 04:01:14.717779 7f5e87a75700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.26:6930/1101469 pipe(0x55d92c171400 sd=3D183 :23002 s=3D1 pgs=3D=
-590456
-cs=3D1 l=3D0 c=3D0x55d94e748580).connect got RESETSESSION
-2019-04-24 04:01:14.717778 7f5db2f5d700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d948732800 sd=3D1936 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d9276cd680).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.717885 7f5e8a409700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.41:6827/2071106 pipe(0x55d93cc55400 sd=3D165 :48272 s=3D1 pgs=3D=
-578891
-cs=3D1 l=3D0 c=3D0x55d93d4aca00).connect got RESETSESSION
-2019-04-24 04:01:14.717982 7f5e3dfa1700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.54:6851/2123643 pipe(0x55d920934000 sd=3D383 :42585 s=3D1 pgs=3D=
-574915
-cs=3D1 l=3D0 c=3D0x55d928482d00).connect got RESETSESSION
-2019-04-24 04:01:14.718139 7f5e513d4700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.42:6861/3118363 pipe(0x55d93dcb0000 sd=3D808 :45616 s=3D1 pgs=3D=
-492641
-cs=3D1 l=3D0 c=3D0x55d930cf9800).connect got RESETSESSION
-2019-04-24 04:01:14.718191 7f5db4b6b700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d934596000 sd=3D1932 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d92f572000).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.719112 7f5e8dc41700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.30:6815/3154304 pipe(0x55d946d73400 sd=3D545 :54330 s=3D1 pgs=3D=
-552367
-cs=3D1 l=3D0 c=3D0x55d94f019180).connect got RESETSESSION
-2019-04-24 04:01:14.719200 7f5e07715700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d9234b1400 sd=3D1935 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d92345c700).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.719295 7f5ea5ac1700  0 -- 10.191.175.20:6908/169631 >>
-:/0 pipe(0x55d9234b2800 sd=3D1934 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0
-c=3D0x55d941d0a780).accept failed to getpeername (107) Transport endpoint i=
-s
-not connected
-2019-04-24 04:01:14.719556 7f5e97182700  1 heartbeat_map reset_timeout
-'OSD::osd_op_tp thread 0x7f5e97182700' had timed out after 15
-=E3=80=82=E3=80=82=E3=80=82=E3=80=82
-2019-04-24 04:01:14.731783 7f5e8a70c700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.47:6890/1064637 pipe(0x55d93cc56800 sd=3D164 :56146 s=3D1 pgs=3D=
-493037
-cs=3D1 l=3D0 c=3D0x55d93d4ad600).connect got RESETSESSION
-2019-04-24 04:01:14.731789 7f5e22f8c700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.35:6818/1109909 pipe(0x55d93b319400 sd=3D300 :48698 s=3D1 pgs=3D=
-555765
-cs=3D1 l=3D0 c=3D0x55d925407500).connect got RESETSESSION
-2019-04-24 04:01:14.732623 7f5e2419e700  0 -- 10.191.175.20:6855/3169631 >>
-10.191.175.29:6956/2086678 pipe(0x55d94b9cc800 sd=3D1070 :42700 s=3D1
-pgs=3D582448 cs=3D1 l=3D0 c=3D0x55d94ef83b00).connect got RESETSESSION
-2019-04-24 04:01:14.792353 7f5eb2c35700 -1 osd.219 22611 heartbeat_check:
-no reply from 10.191.175.20:6861 osd.218 since back 2019-04-24
-04:00:33.420027 front 2019-04-24 04:00:33.420027 (cutoff 2019-04-24
-04:00:54.792349)
-... large amount of no reply
-2019-04-24 04:01:14.810961 7f5eb2c35700 -1 osd.219 22611 heartbeat_check:
-no reply from 10.191.175.55:6896 osd.1069 since back 2019-04-24
-04:00:33.420027 front 2019-04-24 04:00:33.420027 (cutoff 2019-04-24
-04:00:54.792349)
-2019-04-24 04:01:14.810972 7f5eb2c35700 -1 osd.219 22611 heartbeat_check:
-no reply from 10.191.175.55:6807 osd.1072 since back 2019-04-24
-04:00:33.420027 front 2019-04-24 04:00:33.420027 (cutoff 2019-04-24
-04:00:54.792349)
-2019-04-24 04:01:14.820935 7f5e9a188700  0 -- 10.191.175.20:6908/169631
-submit_message osd_op_reply(1103570 rbd_header.b0bc14677ca78c [watch ping
-cookie 140029489856640 gen 1] v0'0 uv0 ondisk =3D -107 ((107) Transport
-endpoint is not connected)) v7 remote, 10.191.122.251:0/1594377730, failed
-lossy con, dropping message 0x55d957747600
-2019-04-24 04:01:14.821340 7f5eb2c35700  0 log_channel(cluster) log [WRN] :
-69 slow requests, 5 included below; oldest blocked for > 44.042324 secs
-2019-04-24 04:01:14.821355 7f5eb2c35700  0 log_channel(cluster) log [WRN] :
-slow request 37.989255 seconds old, received at 2019-04-24 04:00:36.821750:
-osd_op(client.9569145.0:11357796 7.2339e183 (undecoded)
-ack+ondisk+write+known_if_redirected e22611) currently queued_for_pg
-...
-2019-04-24 04:10:15.049210 7f5eb7fab700  1 heartbeat_map is_healthy
-'OSD::osd_tp thread 0x7f5e9c98d700' had timed out after 15
-2019-04-24 04:10:15.049213 7f5eb7fab700  1 heartbeat_map is_healthy
-'OSD::osd_tp thread 0x7f5e9c98d700' had suicide timed out after 150
-2019-04-24 04:10:15.159190 7f5eb7fab700 -1 common/HeartbeatMap.cc: In
-function 'bool ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d*,
-const char*, time_t)' thread 7f5eb7fab70
-0 time 2019-04-24 04:10:15.049507
-common/HeartbeatMap.cc: 86: FAILED assert(0 =3D=3D "hit suicide timeout")
 
- ceph version 10.2.10 (5dc1e4c05cb68dbf62ae6fce3f0700e4654fdbbe)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x82) [0x55d909a9ae12]
- 2: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d const*, char
-const*, long)+0x11f) [0x55d9099d2f4f]
- 3: (ceph::HeartbeatMap::is_healthy()+0xd6) [0x55d9099d3976]
- 4: (ceph::HeartbeatMap::check_touch_file()+0x2a) [0x55d9099d418a]
- 5: (CephContextServiceThread::entry()+0x16c) [0x55d909ab4edc]
- 6: (()+0x8064) [0x7f5ebc5dc064]
- 7: (clone()+0x6d) [0x7f5eba6dd62d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
-to interpret this.
+>  drivers/mfd/cros_ec_dev.c                   | 4 +---
+>  drivers/misc/vmw_vmci/vmci_host.c           | 2 +-
+>  drivers/nvdimm/bus.c                        | 4 ++--
+>  drivers/nvme/host/core.c                    | 2 +-
+>  drivers/pci/switch/switchtec.c              | 2 +-
+>  drivers/platform/x86/wmi.c                  | 2 +-
+>  drivers/rpmsg/rpmsg_char.c                  | 4 ++--
+>  drivers/sbus/char/display7seg.c             | 2 +-
+>  drivers/sbus/char/envctrl.c                 | 4 +---
+>  drivers/scsi/3w-xxxx.c                      | 4 +---
+>  drivers/scsi/cxlflash/main.c                | 2 +-
+>  drivers/scsi/esas2r/esas2r_main.c           | 2 +-
+>  drivers/scsi/pmcraid.c                      | 4 +---
+>  drivers/staging/android/ion/ion.c           | 4 +---
+>  drivers/staging/vme/devices/vme_user.c      | 2 +-
+>  drivers/tee/tee_core.c                      | 2 +-
+>  drivers/usb/class/cdc-wdm.c                 | 2 +-
+>  drivers/usb/class/usbtmc.c                  | 4 +---
+>  drivers/virt/fsl_hypervisor.c               | 2 +-
+>  fs/btrfs/super.c                            | 2 +-
+>  fs/ceph/dir.c                               | 2 +-
+>  fs/ceph/file.c                              | 2 +-
+>  fs/fuse/dev.c                               | 2 +-
+>  fs/notify/fanotify/fanotify_user.c          | 2 +-
+>  fs/userfaultfd.c                            | 2 +-
+>  net/rfkill/core.c                           | 2 +-
+>  36 files changed, 39 insertions(+), 57 deletions(-)
+> 
+> diff --git a/drivers/android/binder.c b/drivers/android/binder.c
+> index 4b9c7ca492e6..48109ade7234 100644
+> --- a/drivers/android/binder.c
+> +++ b/drivers/android/binder.c
+> @@ -5998,7 +5998,7 @@ const struct file_operations binder_fops = {
+>  	.owner = THIS_MODULE,
+>  	.poll = binder_poll,
+>  	.unlocked_ioctl = binder_ioctl,
+> -	.compat_ioctl = binder_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.mmap = binder_mmap,
+>  	.open = binder_open,
+>  	.flush = binder_flush,
+> diff --git a/drivers/crypto/qat/qat_common/adf_ctl_drv.c b/drivers/crypto/qat/qat_common/adf_ctl_drv.c
+> index abc7a7f64d64..ef0e482ee04f 100644
+> --- a/drivers/crypto/qat/qat_common/adf_ctl_drv.c
+> +++ b/drivers/crypto/qat/qat_common/adf_ctl_drv.c
+> @@ -68,7 +68,7 @@ static long adf_ctl_ioctl(struct file *fp, unsigned int cmd, unsigned long arg);
+>  static const struct file_operations adf_ctl_ops = {
+>  	.owner = THIS_MODULE,
+>  	.unlocked_ioctl = adf_ctl_ioctl,
+> -	.compat_ioctl = adf_ctl_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  struct adf_ctl_drv_info {
+> diff --git a/drivers/dma-buf/dma-buf.c b/drivers/dma-buf/dma-buf.c
+> index 7c858020d14b..0cb336fe6324 100644
+> --- a/drivers/dma-buf/dma-buf.c
+> +++ b/drivers/dma-buf/dma-buf.c
+> @@ -325,9 +325,7 @@ static const struct file_operations dma_buf_fops = {
+>  	.llseek		= dma_buf_llseek,
+>  	.poll		= dma_buf_poll,
+>  	.unlocked_ioctl	= dma_buf_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl	= dma_buf_ioctl,
+> -#endif
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+>  
+>  /*
+> diff --git a/drivers/dma-buf/sw_sync.c b/drivers/dma-buf/sw_sync.c
+> index 32dcf7b4c935..411de6a8a0ad 100644
+> --- a/drivers/dma-buf/sw_sync.c
+> +++ b/drivers/dma-buf/sw_sync.c
+> @@ -419,5 +419,5 @@ const struct file_operations sw_sync_debugfs_fops = {
+>  	.open           = sw_sync_debugfs_open,
+>  	.release        = sw_sync_debugfs_release,
+>  	.unlocked_ioctl = sw_sync_ioctl,
+> -	.compat_ioctl	= sw_sync_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+> diff --git a/drivers/dma-buf/sync_file.c b/drivers/dma-buf/sync_file.c
+> index 4f6305ca52c8..0949f91eb85f 100644
+> --- a/drivers/dma-buf/sync_file.c
+> +++ b/drivers/dma-buf/sync_file.c
+> @@ -488,5 +488,5 @@ static const struct file_operations sync_file_fops = {
+>  	.release = sync_file_release,
+>  	.poll = sync_file_poll,
+>  	.unlocked_ioctl = sync_file_ioctl,
+> -	.compat_ioctl = sync_file_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+> diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_chardev.c b/drivers/gpu/drm/amd/amdkfd/kfd_chardev.c
+> index 083bd8114db1..5d6ac7885aa7 100644
+> --- a/drivers/gpu/drm/amd/amdkfd/kfd_chardev.c
+> +++ b/drivers/gpu/drm/amd/amdkfd/kfd_chardev.c
+> @@ -49,7 +49,7 @@ static const char kfd_dev_name[] = "kfd";
+>  static const struct file_operations kfd_fops = {
+>  	.owner = THIS_MODULE,
+>  	.unlocked_ioctl = kfd_ioctl,
+> -	.compat_ioctl = kfd_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.open = kfd_open,
+>  	.mmap = kfd_mmap,
+>  };
+> diff --git a/drivers/hid/hidraw.c b/drivers/hid/hidraw.c
+> index 9fc51eff1079..e7284d38b66d 100644
+> --- a/drivers/hid/hidraw.c
+> +++ b/drivers/hid/hidraw.c
+> @@ -476,9 +476,7 @@ static const struct file_operations hidraw_ops = {
+>  	.release =      hidraw_release,
+>  	.unlocked_ioctl = hidraw_ioctl,
+>  	.fasync =	hidraw_fasync,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl   = hidraw_ioctl,
+> -#endif
+> +	.compat_ioctl   = compat_ptr_ioctl,
+>  	.llseek =	noop_llseek,
+>  };
+>  
+> diff --git a/drivers/iio/industrialio-core.c b/drivers/iio/industrialio-core.c
+> index 4700fd5d8c90..eed1bea257b4 100644
+> --- a/drivers/iio/industrialio-core.c
+> +++ b/drivers/iio/industrialio-core.c
+> @@ -1635,7 +1635,7 @@ static const struct file_operations iio_buffer_fileops = {
+>  	.owner = THIS_MODULE,
+>  	.llseek = noop_llseek,
+>  	.unlocked_ioctl = iio_ioctl,
+> -	.compat_ioctl = iio_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static int iio_check_unique_scan_index(struct iio_dev *indio_dev)
+> diff --git a/drivers/infiniband/core/uverbs_main.c b/drivers/infiniband/core/uverbs_main.c
+> index 70b7d80431a9..ac4321d7c800 100644
+> --- a/drivers/infiniband/core/uverbs_main.c
+> +++ b/drivers/infiniband/core/uverbs_main.c
+> @@ -1120,7 +1120,7 @@ static const struct file_operations uverbs_fops = {
+>  	.release = ib_uverbs_close,
+>  	.llseek	 = no_llseek,
+>  	.unlocked_ioctl = ib_uverbs_ioctl,
+> -	.compat_ioctl = ib_uverbs_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static const struct file_operations uverbs_mmap_fops = {
+> @@ -1131,7 +1131,7 @@ static const struct file_operations uverbs_mmap_fops = {
+>  	.release = ib_uverbs_close,
+>  	.llseek	 = no_llseek,
+>  	.unlocked_ioctl = ib_uverbs_ioctl,
+> -	.compat_ioctl = ib_uverbs_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static struct ib_client uverbs_client = {
+> diff --git a/drivers/media/rc/lirc_dev.c b/drivers/media/rc/lirc_dev.c
+> index f862f1b7f996..9ccc7e9cbc8e 100644
+> --- a/drivers/media/rc/lirc_dev.c
+> +++ b/drivers/media/rc/lirc_dev.c
+> @@ -730,9 +730,7 @@ static const struct file_operations lirc_fops = {
+>  	.owner		= THIS_MODULE,
+>  	.write		= ir_lirc_transmit_ir,
+>  	.unlocked_ioctl	= ir_lirc_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl	= ir_lirc_ioctl,
+> -#endif
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  	.read		= ir_lirc_read,
+>  	.poll		= ir_lirc_poll,
+>  	.open		= ir_lirc_open,
+> diff --git a/drivers/mfd/cros_ec_dev.c b/drivers/mfd/cros_ec_dev.c
+> index d275deaecb12..4a602a40d75c 100644
+> --- a/drivers/mfd/cros_ec_dev.c
+> +++ b/drivers/mfd/cros_ec_dev.c
+> @@ -251,9 +251,7 @@ static const struct file_operations fops = {
+>  	.release = ec_device_release,
+>  	.read = ec_device_read,
+>  	.unlocked_ioctl = ec_device_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl = ec_device_ioctl,
+> -#endif
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static void cros_ec_class_release(struct device *dev)
+> diff --git a/drivers/misc/vmw_vmci/vmci_host.c b/drivers/misc/vmw_vmci/vmci_host.c
+> index 997f92543dd4..5bb406dabe85 100644
+> --- a/drivers/misc/vmw_vmci/vmci_host.c
+> +++ b/drivers/misc/vmw_vmci/vmci_host.c
+> @@ -969,7 +969,7 @@ static const struct file_operations vmuser_fops = {
+>  	.release	= vmci_host_close,
+>  	.poll		= vmci_host_poll,
+>  	.unlocked_ioctl	= vmci_host_unlocked_ioctl,
+> -	.compat_ioctl	= vmci_host_unlocked_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+>  
+>  static struct miscdevice vmci_host_miscdev = {
+> diff --git a/drivers/nvdimm/bus.c b/drivers/nvdimm/bus.c
+> index 7bbff0af29b2..065ebd584482 100644
+> --- a/drivers/nvdimm/bus.c
+> +++ b/drivers/nvdimm/bus.c
+> @@ -1167,7 +1167,7 @@ static const struct file_operations nvdimm_bus_fops = {
+>  	.owner = THIS_MODULE,
+>  	.open = nd_open,
+>  	.unlocked_ioctl = nd_ioctl,
+> -	.compat_ioctl = nd_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.llseek = noop_llseek,
+>  };
+>  
+> @@ -1175,7 +1175,7 @@ static const struct file_operations nvdimm_fops = {
+>  	.owner = THIS_MODULE,
+>  	.open = nd_open,
+>  	.unlocked_ioctl = nvdimm_ioctl,
+> -	.compat_ioctl = nvdimm_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.llseek = noop_llseek,
+>  };
+>  
+> diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
+> index 2c43e12b70af..560929bee5ce 100644
+> --- a/drivers/nvme/host/core.c
+> +++ b/drivers/nvme/host/core.c
+> @@ -2739,7 +2739,7 @@ static const struct file_operations nvme_dev_fops = {
+>  	.owner		= THIS_MODULE,
+>  	.open		= nvme_dev_open,
+>  	.unlocked_ioctl	= nvme_dev_ioctl,
+> -	.compat_ioctl	= nvme_dev_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+>  
+>  static ssize_t nvme_sysfs_reset(struct device *dev,
+> diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+> index e22766c79fe9..3a54b4b616e2 100644
+> --- a/drivers/pci/switch/switchtec.c
+> +++ b/drivers/pci/switch/switchtec.c
+> @@ -1006,7 +1006,7 @@ static const struct file_operations switchtec_fops = {
+>  	.read = switchtec_dev_read,
+>  	.poll = switchtec_dev_poll,
+>  	.unlocked_ioctl = switchtec_dev_ioctl,
+> -	.compat_ioctl = switchtec_dev_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static void link_event_work(struct work_struct *work)
+> diff --git a/drivers/platform/x86/wmi.c b/drivers/platform/x86/wmi.c
+> index 7b26b6ccf1a0..dded9cef42f4 100644
+> --- a/drivers/platform/x86/wmi.c
+> +++ b/drivers/platform/x86/wmi.c
+> @@ -889,7 +889,7 @@ static const struct file_operations wmi_fops = {
+>  	.read		= wmi_char_read,
+>  	.open		= wmi_char_open,
+>  	.unlocked_ioctl	= wmi_ioctl,
+> -	.compat_ioctl	= wmi_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+>  
+>  static int wmi_dev_probe(struct device *dev)
+> diff --git a/drivers/rpmsg/rpmsg_char.c b/drivers/rpmsg/rpmsg_char.c
+> index eea5ebbb5119..507bfe163883 100644
+> --- a/drivers/rpmsg/rpmsg_char.c
+> +++ b/drivers/rpmsg/rpmsg_char.c
+> @@ -290,7 +290,7 @@ static const struct file_operations rpmsg_eptdev_fops = {
+>  	.write_iter = rpmsg_eptdev_write_iter,
+>  	.poll = rpmsg_eptdev_poll,
+>  	.unlocked_ioctl = rpmsg_eptdev_ioctl,
+> -	.compat_ioctl = rpmsg_eptdev_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static ssize_t name_show(struct device *dev, struct device_attribute *attr,
+> @@ -451,7 +451,7 @@ static const struct file_operations rpmsg_ctrldev_fops = {
+>  	.open = rpmsg_ctrldev_open,
+>  	.release = rpmsg_ctrldev_release,
+>  	.unlocked_ioctl = rpmsg_ctrldev_ioctl,
+> -	.compat_ioctl = rpmsg_ctrldev_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static void rpmsg_ctrldev_release_device(struct device *dev)
+> diff --git a/drivers/sbus/char/display7seg.c b/drivers/sbus/char/display7seg.c
+> index a36e4cf1841d..c9f60656f54d 100644
+> --- a/drivers/sbus/char/display7seg.c
+> +++ b/drivers/sbus/char/display7seg.c
+> @@ -155,7 +155,7 @@ static long d7s_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+>  static const struct file_operations d7s_fops = {
+>  	.owner =		THIS_MODULE,
+>  	.unlocked_ioctl =	d7s_ioctl,
+> -	.compat_ioctl =		d7s_ioctl,
+> +	.compat_ioctl =		compat_ptr_ioctl,
+>  	.open =			d7s_open,
+>  	.release =		d7s_release,
+>  	.llseek = noop_llseek,
+> diff --git a/drivers/sbus/char/envctrl.c b/drivers/sbus/char/envctrl.c
+> index 1a6e7224017c..dd2dfa85fc68 100644
+> --- a/drivers/sbus/char/envctrl.c
+> +++ b/drivers/sbus/char/envctrl.c
+> @@ -714,9 +714,7 @@ static const struct file_operations envctrl_fops = {
+>  	.owner =		THIS_MODULE,
+>  	.read =			envctrl_read,
+>  	.unlocked_ioctl =	envctrl_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl =		envctrl_ioctl,
+> -#endif
+> +	.compat_ioctl =		compat_ptr_ioctl,
+>  	.open =			envctrl_open,
+>  	.release =		envctrl_release,
+>  	.llseek =		noop_llseek,
+> diff --git a/drivers/scsi/3w-xxxx.c b/drivers/scsi/3w-xxxx.c
+> index 2b1e0d503020..fb6444d0409c 100644
+> --- a/drivers/scsi/3w-xxxx.c
+> +++ b/drivers/scsi/3w-xxxx.c
+> @@ -1049,9 +1049,7 @@ static int tw_chrdev_open(struct inode *inode, struct file *file)
+>  static const struct file_operations tw_fops = {
+>  	.owner		= THIS_MODULE,
+>  	.unlocked_ioctl	= tw_chrdev_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl   = tw_chrdev_ioctl,
+> -#endif
+> +	.compat_ioctl   = compat_ptr_ioctl,
+>  	.open		= tw_chrdev_open,
+>  	.release	= NULL,
+>  	.llseek		= noop_llseek,
+> diff --git a/drivers/scsi/cxlflash/main.c b/drivers/scsi/cxlflash/main.c
+> index 7096810fd222..e13d5de1d76e 100644
+> --- a/drivers/scsi/cxlflash/main.c
+> +++ b/drivers/scsi/cxlflash/main.c
+> @@ -3589,7 +3589,7 @@ static const struct file_operations cxlflash_chr_fops = {
+>  	.owner          = THIS_MODULE,
+>  	.open           = cxlflash_chr_open,
+>  	.unlocked_ioctl	= cxlflash_chr_ioctl,
+> -	.compat_ioctl	= cxlflash_chr_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+>  
+>  /**
+> diff --git a/drivers/scsi/esas2r/esas2r_main.c b/drivers/scsi/esas2r/esas2r_main.c
+> index fdbda5c05aa0..80c5a235d193 100644
+> --- a/drivers/scsi/esas2r/esas2r_main.c
+> +++ b/drivers/scsi/esas2r/esas2r_main.c
+> @@ -613,7 +613,7 @@ static int __init esas2r_init(void)
+>  
+>  /* Handle ioctl calls to "/proc/scsi/esas2r/ATTOnode" */
+>  static const struct file_operations esas2r_proc_fops = {
+> -	.compat_ioctl	= esas2r_proc_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  	.unlocked_ioctl = esas2r_proc_ioctl,
+>  };
+>  
+> diff --git a/drivers/scsi/pmcraid.c b/drivers/scsi/pmcraid.c
+> index e338d7a4f571..c0a1a1218c56 100644
+> --- a/drivers/scsi/pmcraid.c
+> +++ b/drivers/scsi/pmcraid.c
+> @@ -3988,9 +3988,7 @@ static const struct file_operations pmcraid_fops = {
+>  	.open = pmcraid_chr_open,
+>  	.fasync = pmcraid_chr_fasync,
+>  	.unlocked_ioctl = pmcraid_chr_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl = pmcraid_chr_ioctl,
+> -#endif
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.llseek = noop_llseek,
+>  };
+>  
+> diff --git a/drivers/staging/android/ion/ion.c b/drivers/staging/android/ion/ion.c
+> index 92c2914239e3..1663c163edca 100644
+> --- a/drivers/staging/android/ion/ion.c
+> +++ b/drivers/staging/android/ion/ion.c
+> @@ -567,9 +567,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+>  static const struct file_operations ion_fops = {
+>  	.owner          = THIS_MODULE,
+>  	.unlocked_ioctl = ion_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl	= ion_ioctl,
+> -#endif
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  };
+>  
+>  static int debug_shrink_set(void *data, u64 val)
+> diff --git a/drivers/staging/vme/devices/vme_user.c b/drivers/staging/vme/devices/vme_user.c
+> index 6a33aaa1a49f..fd0ea4dbcb91 100644
+> --- a/drivers/staging/vme/devices/vme_user.c
+> +++ b/drivers/staging/vme/devices/vme_user.c
+> @@ -494,7 +494,7 @@ static const struct file_operations vme_user_fops = {
+>  	.write = vme_user_write,
+>  	.llseek = vme_user_llseek,
+>  	.unlocked_ioctl = vme_user_unlocked_ioctl,
+> -	.compat_ioctl = vme_user_unlocked_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.mmap = vme_user_mmap,
+>  };
+>  
+> diff --git a/drivers/tee/tee_core.c b/drivers/tee/tee_core.c
+> index 17c64fccbb10..eb97acf09868 100644
+> --- a/drivers/tee/tee_core.c
+> +++ b/drivers/tee/tee_core.c
+> @@ -684,7 +684,7 @@ static const struct file_operations tee_fops = {
+>  	.open = tee_open,
+>  	.release = tee_release,
+>  	.unlocked_ioctl = tee_ioctl,
+> -	.compat_ioctl = tee_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static void tee_release_device(struct device *dev)
+> diff --git a/drivers/usb/class/cdc-wdm.c b/drivers/usb/class/cdc-wdm.c
+> index 9e9caff905d5..d48c032580d0 100644
+> --- a/drivers/usb/class/cdc-wdm.c
+> +++ b/drivers/usb/class/cdc-wdm.c
+> @@ -724,7 +724,7 @@ static const struct file_operations wdm_fops = {
+>  	.release =	wdm_release,
+>  	.poll =		wdm_poll,
+>  	.unlocked_ioctl = wdm_ioctl,
+> -	.compat_ioctl = wdm_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.llseek =	noop_llseek,
+>  };
+>  
+> diff --git a/drivers/usb/class/usbtmc.c b/drivers/usb/class/usbtmc.c
+> index 4942122b2346..bbd0308b13f5 100644
+> --- a/drivers/usb/class/usbtmc.c
+> +++ b/drivers/usb/class/usbtmc.c
+> @@ -2220,9 +2220,7 @@ static const struct file_operations fops = {
+>  	.release	= usbtmc_release,
+>  	.flush		= usbtmc_flush,
+>  	.unlocked_ioctl	= usbtmc_ioctl,
+> -#ifdef CONFIG_COMPAT
+> -	.compat_ioctl	= usbtmc_ioctl,
+> -#endif
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  	.fasync         = usbtmc_fasync,
+>  	.poll           = usbtmc_poll,
+>  	.llseek		= default_llseek,
+> diff --git a/drivers/virt/fsl_hypervisor.c b/drivers/virt/fsl_hypervisor.c
+> index 8ba726e600e9..fbf02bf60f62 100644
+> --- a/drivers/virt/fsl_hypervisor.c
+> +++ b/drivers/virt/fsl_hypervisor.c
+> @@ -703,7 +703,7 @@ static const struct file_operations fsl_hv_fops = {
+>  	.poll = fsl_hv_poll,
+>  	.read = fsl_hv_read,
+>  	.unlocked_ioctl = fsl_hv_ioctl,
+> -	.compat_ioctl = fsl_hv_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  };
+>  
+>  static struct miscdevice fsl_hv_misc_dev = {
+> diff --git a/fs/btrfs/super.c b/fs/btrfs/super.c
+> index 120e4340792a..162ea4b6b417 100644
+> --- a/fs/btrfs/super.c
+> +++ b/fs/btrfs/super.c
+> @@ -2307,7 +2307,7 @@ static const struct super_operations btrfs_super_ops = {
+>  static const struct file_operations btrfs_ctl_fops = {
+>  	.open = btrfs_control_open,
+>  	.unlocked_ioctl	 = btrfs_control_ioctl,
+> -	.compat_ioctl = btrfs_control_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.owner	 = THIS_MODULE,
+>  	.llseek = noop_llseek,
+>  };
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 7c060cb22aa3..a493b957713f 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -1785,7 +1785,7 @@ const struct file_operations ceph_dir_fops = {
+>  	.open = ceph_open,
+>  	.release = ceph_release,
+>  	.unlocked_ioctl = ceph_ioctl,
+> -	.compat_ioctl = ceph_ioctl,
+> +	.compat_ioctl = compat_ptr_ioctl,
+>  	.fsync = ceph_fsync,
+>  	.lock = ceph_lock,
+>  	.flock = ceph_flock,
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 9f53c3d99304..9b5fe7eee3c1 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -2112,7 +2112,7 @@ const struct file_operations ceph_file_fops = {
+>  	.splice_read = generic_file_splice_read,
+>  	.splice_write = iter_file_splice_write,
+>  	.unlocked_ioctl = ceph_ioctl,
+> -	.compat_ioctl	= ceph_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  	.fallocate	= ceph_fallocate,
+>  	.copy_file_range = ceph_copy_file_range,
+>  };
+> diff --git a/fs/fuse/dev.c b/fs/fuse/dev.c
+> index 9971a35cf1ef..dcdb26068b71 100644
+> --- a/fs/fuse/dev.c
+> +++ b/fs/fuse/dev.c
+> @@ -2354,7 +2354,7 @@ const struct file_operations fuse_dev_operations = {
+>  	.release	= fuse_dev_release,
+>  	.fasync		= fuse_dev_fasync,
+>  	.unlocked_ioctl = fuse_dev_ioctl,
+> -	.compat_ioctl   = fuse_dev_ioctl,
+> +	.compat_ioctl   = compat_ptr_ioctl,
+>  };
+>  EXPORT_SYMBOL_GPL(fuse_dev_operations);
+>  
+> diff --git a/fs/notify/fanotify/fanotify_user.c b/fs/notify/fanotify/fanotify_user.c
+> index a90bb19dcfa2..a55aa029a308 100644
+> --- a/fs/notify/fanotify/fanotify_user.c
+> +++ b/fs/notify/fanotify/fanotify_user.c
+> @@ -523,7 +523,7 @@ static const struct file_operations fanotify_fops = {
+>  	.fasync		= NULL,
+>  	.release	= fanotify_release,
+>  	.unlocked_ioctl	= fanotify_ioctl,
+> -	.compat_ioctl	= fanotify_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  	.llseek		= noop_llseek,
+>  };
+>  
+> diff --git a/fs/userfaultfd.c b/fs/userfaultfd.c
+> index 89800fc7dc9d..f93dcf8c996f 100644
+> --- a/fs/userfaultfd.c
+> +++ b/fs/userfaultfd.c
+> @@ -1901,7 +1901,7 @@ static const struct file_operations userfaultfd_fops = {
+>  	.poll		= userfaultfd_poll,
+>  	.read		= userfaultfd_read,
+>  	.unlocked_ioctl = userfaultfd_ioctl,
+> -	.compat_ioctl	= userfaultfd_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  	.llseek		= noop_llseek,
+>  };
+>  
+> diff --git a/net/rfkill/core.c b/net/rfkill/core.c
+> index abca57040f37..3b2f6ea44397 100644
+> --- a/net/rfkill/core.c
+> +++ b/net/rfkill/core.c
+> @@ -1323,7 +1323,7 @@ static const struct file_operations rfkill_fops = {
+>  	.release	= rfkill_fop_release,
+>  #ifdef CONFIG_RFKILL_INPUT
+>  	.unlocked_ioctl	= rfkill_fop_ioctl,
+> -	.compat_ioctl	= rfkill_fop_ioctl,
+> +	.compat_ioctl	= compat_ptr_ioctl,
+>  #endif
+>  	.llseek		= no_llseek,
+>  };
 
---- begin dump of recent events ---
--10000> 2019-04-24 04:07:00.490378 7f5e9c18c700  5 osd.219 pg_epoch: 22818
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22804/22804/22804) [437,1013] r=3D-1 lpr=3D=
-22804
-pi=3D22780-22803/1 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY] ente=
-r
-Reset
- -9999> 2019-04-24 04:07:00.490427 7f5e9c18c700  5 osd.219 pg_epoch: 22819
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818
-pi=3D22780-22817/2 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY] exit
-Reset 0.000049 2 0.000045
- -9998> 2019-04-24 04:07:00.490437 7f5e9c18c700  5 osd.219 pg_epoch: 22819
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818
-pi=3D22780-22817/2 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY] ente=
-r
-Started
- -9997> 2019-04-24 04:07:00.490443 7f5e9c18c700  5 osd.219 pg_epoch: 22819
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818
-pi=3D22780-22817/2 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY] ente=
-r
-Start
- -9996> 2019-04-24 04:07:00.490448 7f5e9c18c700  1 osd.219 pg_epoch: 22819
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818
-pi=3D22780-22817/2 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY]
-state<Start>: transitioning to Stray
- -9995> 2019-04-24 04:07:00.490455 7f5e9c18c700  5 osd.219 pg_epoch: 22819
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818
-pi=3D22780-22817/2 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY] exit
-Start 0.000012 0 0.000000
- -9994> 2019-04-24 04:07:00.490462 7f5e9c18c700  5 osd.219 pg_epoch: 22819
-pg[7.1ee8( v 22611'65709 (19416'62700,22611'65709] local-les=3D22799 n=3D21=
-7
-ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818
-pi=3D22780-22817/2 crt=3D22611'65707 lcod 22611'65708 inactive NOTIFY] ente=
-r
-Started/Stray
 
---000000000000be73dc05874609f7
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr">my cluster occur a big e=
-rror this morning.<div>many osd suicide because of heartbeat_map timeout.</=
-div><div>when I start all osd <a href=3D"http://manually.it">manually.it</a=
-> looks well.</div><div><br></div><div>but when I using rbd info for a rbd =
-from rbd ls, it say not such file or directory.</div><div>And the I use the=
- way in=C2=A0<a href=3D"https://fnordahl.com/2017/04/17/ceph-rbd-volume-hea=
-der-recovery/">https://fnordahl.com/2017/04/17/ceph-rbd-volume-header-recov=
-ery/</a>=C2=A0to recovery omap.</div><div><br></div><div>At last,most rbd w=
-orks well.But still have 5 rbd can not reocvery.</div><div><br></div><div><=
-div>2019-04-24 16:00:40.045342 7fd5fdffb700 -1 librbd::image::OpenRequest: =
-failed to retreive immutable metadata: (5) Input/output error</div><div>201=
-9-04-24 16:00:40.045419 7fd5fd7fa700 -1 librbd::ImageState: 0x5593262fb830 =
-failed to open image: (5) Input/output error</div><div>rbd: error opening i=
-mage volume-bef74858-0fcb-4a0b-b197-9618e6824c46: (5) Input/output error</d=
-iv></div><div><br></div><div>I try to locate its omap head object, and stop=
- master osd, delete the pg data in master osd, then restart master osd. It =
-looks three replication is the same=C2=A0 when I using attr.</div><div><br>=
-</div><div>But I can not get the rbd info.Alwayse the vm among this=C2=A0 r=
-bd is still alive and works well.</div><div><br></div><div><div>ceph -s</di=
-v><div><div>=C2=A0 =C2=A0 cluster 2bec9425-ea5f-4a48-b56a-fe88e126bced</div=
-><div>=C2=A0 =C2=A0 =C2=A0health HEALTH_WARN</div><div>=C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 noout flag(s) set</div><div>=C2=A0 =C2=A0 =C2=A0monma=
-p e1: 3 mons at {a=3D<a href=3D"http://10.191.175.249:6789/0,b=3D10.191.175=
-.250:6789/0,c=3D10.191.175.251:6789/0" target=3D"_blank">10.191.175.249:678=
-9/0,b=3D10.191.175.250:6789/0,c=3D10.191.175.251:6789/0</a>}</div><div>=C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 election epoch 26, quorum 0,1,2 a,b,=
-c</div><div>=C2=A0 =C2=A0 =C2=A0osdmap e22551: 1080 osds: 1078 up, 1078 in<=
-/div><div>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 flags noout,sortbitwise=
-,require_jewel_osds</div><div>=C2=A0 =C2=A0 =C2=A0 pgmap v29327873: 90112 p=
-gs, 3 pools, 69753 GB data, 30081 kobjects</div><div>=C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 214 TB used, 1500 TB / 1715 TB avail</div><div>=C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A090111 active+clean</div><di=
-v>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A01 ac=
-tive+clean+scrubbing+deep</div><div>=C2=A0 client io 57082 kB/s rd, 207 MB/=
-s wr, 1091 op/s rd, 7658 op/s wr</div></div></div><div><br></div><div>the l=
-og of osd.219 which is the firstest log heartbeat no reply.</div><div><br><=
-/div><div><div>2019-04-24 04:00:54.905504 7f5eb7fab700=C2=A0 1 heartbeat_ma=
-p is_healthy &#39;OSD::osd_op_tp thread 0x7f5e97182700&#39; had timed out a=
-fter 15</div><div>...</div><div>2019-04-24 04:00:54.905536 7f5eb7fab700=C2=
-=A0 1 heartbeat_map is_healthy &#39;OSD::osd_op_tp thread 0x7f5e9b18a700&#3=
-9; had timed out after 15</div><div>2019-04-24 04:00:57.499903 7f5df2997700=
-=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20:685=
-5/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.33:6947/3001469">10.191=
-.175.33:6947/3001469</a> pipe(0x55d93b470800 sd=3D1914 :6855 s=3D2 pgs=3D51=
-4958 cs=3D17 l=3D0 c=3D0x55d91a3c1200).fault with nothing to send, going to=
- standby</div><div>... repeat large</div><div>2019-04-24 04:00:57.651603 7f=
-5e77735700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.=
-175.20:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.36:6845/10626=
-49">10.191.175.36:6845/1062649</a> pipe(0x55d92d2cb400 sd=3D105 :45295 s=3D=
-2 pgs=3D493749 cs=3D11 l=3D0 c=3D0x55d943755200).fault with nothing to send=
-, going to standby</div><div>2019-04-24 04:00:59.905846 7f5eb7fab700=C2=A0 =
-1 heartbeat_map is_healthy &#39;OSD::osd_op_tp thread 0x7f5e97182700&#39; h=
-ad timed out after 15</div><div>...</div><div>2019-04-24 04:01:04.666159 7f=
-5dbb6d7700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6856/3169631">10.191.=
-175.20:6856/3169631</a> &gt;&gt; :/0 pipe(0x55d9234b1400 sd=3D1926 :6856 s=
-=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d924743600).accept failed to getpeername =
-(107) Transport endpoint is not connected</div><div>2019-04-24 04:01:04.905=
-958 7f5eb7fab700=C2=A0 1 heartbeat_map is_healthy &#39;OSD::osd_op_tp threa=
-d 0x7f5e97182700&#39; had timed out after 15</div><div>2019-04-24 04:01:14.=
-550812 7f5db7793700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6856/3169631=
-">10.191.175.20:6856/3169631</a> &gt;&gt; :/0 pipe(0x55d9234b2800 sd=3D1927=
- :6856 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d924742a00).accept failed to getp=
-eername (107) Transport endpoint is not connected</div><div>...</div><div>2=
-019-04-24 04:01:14.691430 7f5db7793700=C2=A0 0 -- <a href=3D"http://10.191.=
-175.20:6858/3169631">10.191.175.20:6858/3169631</a> &gt;&gt; :/0 pipe(0x55d=
-936a78800 sd=3D1383 :6858 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d94ecf5a80).ac=
-cept failed to getpeername (107) Transport endpoint is not connected</div><=
-div>2019-04-24 04:01:14.692176 7f5e90469700=C2=A0 0 -- <a href=3D"http://10=
-.191.175.20:6855/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=
-=3D"http://10.191.175.31:6835/2092007">10.191.175.31:6835/2092007</a> pipe(=
-0x55d93c41a800 sd=3D67 :17328 s=3D2 pgs=3D571754 cs=3D83 l=3D0 c=3D0x55d939=
-913180).fault, initiating reconnect</div><div>2019-04-24 04:01:14.693742 7f=
-5e4c889700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.=
-175.20:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.31:6835/20920=
-07">10.191.175.31:6835/2092007</a> pipe(0x55d93c41a800 sd=3D67 :17766 s=3D1=
- pgs=3D571754 cs=3D84 l=3D0 c=3D0x55d939913180).connect got RESETSESSION</d=
-iv><div>2019-04-24 04:01:14.697098 7f5db256c700=C2=A0 0 -- <a href=3D"http:=
-//10.191.175.20:6908/169631">10.191.175.20:6908/169631</a> &gt;&gt; :/0 pip=
-e(0x55d95606c800 sd=3D352 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d920d795=
-00).accept failed to getpeername (107) Transport endpoint is not connected<=
-/div><div>2019-04-24 04:01:14.697516 7f5e08523700=C2=A0 0 -- <a href=3D"htt=
-p://10.191.175.20:6908/169631">10.191.175.20:6908/169631</a> &gt;&gt; :/0 p=
-ipe(0x55d91b30c000 sd=3D1926 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d9263=
-cb780).accept failed to getpeername (107) Transport endpoint is not connect=
-ed</div><div>...</div><div>2019-04-24 04:01:14.704225 7f5dd7790700=C2=A0 0 =
--- <a href=3D"http://10.191.175.20:6908/169631">10.191.175.20:6908/169631</=
-a> &gt;&gt; :/0 pipe(0x55d9531c5400 sd=3D1927 :6908 s=3D0 pgs=3D0 cs=3D0 l=
-=3D0 c=3D0x55d9263ca280).accept failed to getpeername (107) Transport endpo=
-int is not connected</div><div>2019-04-24 04:01:14.704511 7f5e78c4a700=C2=
-=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20:6855/3=
-169631</a> &gt;&gt; <a href=3D"http://10.191.175.37:6801/2131766">10.191.17=
-5.37:6801/2131766</a> pipe(0x55d939274800 sd=3D507 :10332 s=3D1 pgs=3D60490=
-6 cs=3D3 l=3D0 c=3D0x55d925714600).connect got RESETSESSION</div><div>...</=
-div><div>2019-04-24 04:01:14.705970 7f5dc4980700=C2=A0 0 -- <a href=3D"http=
-://10.191.175.20:6855/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a h=
-ref=3D"http://10.191.175.38:6833/3181256">10.191.175.38:6833/3181256</a> pi=
-pe(0x55d950fed400 sd=3D455 :58907 s=3D1 pgs=3D563194 cs=3D17 l=3D0 c=3D0x55=
-d9320a2480).connect got RESETSESSION</div><div>2019-04-24 04:01:14.696315 7=
-f5db548e700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6908/169631">10.191.=
-175.20:6908/169631</a> &gt;&gt; :/0 pipe(0x55d939e45400 sd=3D1929 :6908 s=
-=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d91b787d80).accept failed to getpeername =
-(107) Transport endpoint is not connected</div><div>2019-04-24 04:01:14.708=
-160 7f5e808c6700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">1=
-0.191.175.20:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.37:6823=
-/2160572">10.191.175.37:6823/2160572</a> pipe(0x55d943742800 sd=3D812 :4193=
-9 s=3D1 pgs=3D566937 cs=3D1 l=3D0 c=3D0x55d930f82900).connect got RESETSESS=
-ION</div><div>2019-04-24 04:01:14.708417 7f5e9a989700=C2=A0 1 heartbeat_map=
- reset_timeout &#39;OSD::osd_op_tp thread 0x7f5e9a989700&#39; had timed out=
- after 15</div><div>...</div><div>2019-04-24 04:01:14.708949 7f5e97983700=
-=C2=A0 1 heartbeat_map reset_timeout &#39;OSD::osd_op_tp thread 0x7f5e97983=
-700&#39; had timed out after 15</div><div>2019-04-24 04:01:14.709602 7f5e00=
-7ac700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.=
-20:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.28:6821/1091360">=
-10.191.175.28:6821/1091360</a> pipe(0x55d94e69b400 sd=3D1419 :40317 s=3D1 p=
-gs=3D566133 cs=3D1 l=3D0 c=3D0x55d938741480).connect got RESETSESSION</div>=
-<div>2019-04-24 04:01:14.710727 7f5e07216700=C2=A0 0 -- <a href=3D"http://1=
-0.191.175.20:6855/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=
-=3D"http://10.191.175.44:6838/112579">10.191.175.44:6838/112579</a> pipe(0x=
-55d946d74800 sd=3D809 :23481 s=3D1 pgs=3D32 cs=3D1 l=3D0 c=3D0x55d94f963a80=
-).connect got RESETSESSION</div><div>2019-04-24 04:01:14.712774 7f5e8716c70=
-0=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20:68=
-55/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.34:6916/1001159">10.19=
-1.175.34:6916/1001159</a> pipe(0x55d95be21400 sd=3D189 :55315 s=3D1 pgs=3D5=
-33958 cs=3D1 l=3D0 c=3D0x55d935329e00).connect got RESETSESSION</div><div>2=
-019-04-24 04:01:14.713262 7f5e90e73700=C2=A0 0 -- <a href=3D"http://10.191.=
-175.20:6855/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=3D"htt=
-p://10.191.175.34:6945/1173248">10.191.175.34:6945/1173248</a> pipe(0x55d94=
-47e8000 sd=3D99 :37118 s=3D1 pgs=3D556344 cs=3D1 l=3D0 c=3D0x55d91ff36700).=
-connect got RESETSESSION</div><div>2019-04-24 04:01:14.717779 7f5e87a75700=
-=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20:685=
-5/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.26:6930/1101469">10.191=
-.175.26:6930/1101469</a> pipe(0x55d92c171400 sd=3D183 :23002 s=3D1 pgs=3D59=
-0456 cs=3D1 l=3D0 c=3D0x55d94e748580).connect got RESETSESSION</div><div>20=
-19-04-24 04:01:14.717778 7f5db2f5d700=C2=A0 0 -- <a href=3D"http://10.191.1=
-75.20:6908/169631">10.191.175.20:6908/169631</a> &gt;&gt; :/0 pipe(0x55d948=
-732800 sd=3D1936 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d9276cd680).accep=
-t failed to getpeername (107) Transport endpoint is not connected</div><div=
->2019-04-24 04:01:14.717885 7f5e8a409700=C2=A0 0 -- <a href=3D"http://10.19=
-1.175.20:6855/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=3D"h=
-ttp://10.191.175.41:6827/2071106">10.191.175.41:6827/2071106</a> pipe(0x55d=
-93cc55400 sd=3D165 :48272 s=3D1 pgs=3D578891 cs=3D1 l=3D0 c=3D0x55d93d4aca0=
-0).connect got RESETSESSION</div><div>2019-04-24 04:01:14.717982 7f5e3dfa17=
-00=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20:6=
-855/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.54:6851/2123643">10.1=
-91.175.54:6851/2123643</a> pipe(0x55d920934000 sd=3D383 :42585 s=3D1 pgs=3D=
-574915 cs=3D1 l=3D0 c=3D0x55d928482d00).connect got RESETSESSION</div><div>=
-2019-04-24 04:01:14.718139 7f5e513d4700=C2=A0 0 -- <a href=3D"http://10.191=
-.175.20:6855/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=3D"ht=
-tp://10.191.175.42:6861/3118363">10.191.175.42:6861/3118363</a> pipe(0x55d9=
-3dcb0000 sd=3D808 :45616 s=3D1 pgs=3D492641 cs=3D1 l=3D0 c=3D0x55d930cf9800=
-).connect got RESETSESSION</div><div>2019-04-24 04:01:14.718191 7f5db4b6b70=
-0=C2=A0 0 -- <a href=3D"http://10.191.175.20:6908/169631">10.191.175.20:690=
-8/169631</a> &gt;&gt; :/0 pipe(0x55d934596000 sd=3D1932 :6908 s=3D0 pgs=3D0=
- cs=3D0 l=3D0 c=3D0x55d92f572000).accept failed to getpeername (107) Transp=
-ort endpoint is not connected</div><div>2019-04-24 04:01:14.719112 7f5e8dc4=
-1700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20=
-:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.175.30:6815/3154304">10=
-.191.175.30:6815/3154304</a> pipe(0x55d946d73400 sd=3D545 :54330 s=3D1 pgs=
-=3D552367 cs=3D1 l=3D0 c=3D0x55d94f019180).connect got RESETSESSION</div><d=
-iv>2019-04-24 04:01:14.719200 7f5e07715700=C2=A0 0 -- <a href=3D"http://10.=
-191.175.20:6908/169631">10.191.175.20:6908/169631</a> &gt;&gt; :/0 pipe(0x5=
-5d9234b1400 sd=3D1935 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d92345c700).=
-accept failed to getpeername (107) Transport endpoint is not connected</div=
-><div>2019-04-24 04:01:14.719295 7f5ea5ac1700=C2=A0 0 -- <a href=3D"http://=
-10.191.175.20:6908/169631">10.191.175.20:6908/169631</a> &gt;&gt; :/0 pipe(=
-0x55d9234b2800 sd=3D1934 :6908 s=3D0 pgs=3D0 cs=3D0 l=3D0 c=3D0x55d941d0a78=
-0).accept failed to getpeername (107) Transport endpoint is not connected</=
-div><div>2019-04-24 04:01:14.719556 7f5e97182700=C2=A0 1 heartbeat_map rese=
-t_timeout &#39;OSD::osd_op_tp thread 0x7f5e97182700&#39; had timed out afte=
-r 15</div><div>=E3=80=82=E3=80=82=E3=80=82=E3=80=82</div><div>2019-04-24 04=
-:01:14.731783 7f5e8a70c700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855/=
-3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.1=
-75.47:6890/1064637">10.191.175.47:6890/1064637</a> pipe(0x55d93cc56800 sd=
-=3D164 :56146 s=3D1 pgs=3D493037 cs=3D1 l=3D0 c=3D0x55d93d4ad600).connect g=
-ot RESETSESSION</div><div>2019-04-24 04:01:14.731789 7f5e22f8c700=C2=A0 0 -=
-- <a href=3D"http://10.191.175.20:6855/3169631">10.191.175.20:6855/3169631<=
-/a> &gt;&gt; <a href=3D"http://10.191.175.35:6818/1109909">10.191.175.35:68=
-18/1109909</a> pipe(0x55d93b319400 sd=3D300 :48698 s=3D1 pgs=3D555765 cs=3D=
-1 l=3D0 c=3D0x55d925407500).connect got RESETSESSION</div><div>2019-04-24 0=
-4:01:14.732623 7f5e2419e700=C2=A0 0 -- <a href=3D"http://10.191.175.20:6855=
-/3169631">10.191.175.20:6855/3169631</a> &gt;&gt; <a href=3D"http://10.191.=
-175.29:6956/2086678">10.191.175.29:6956/2086678</a> pipe(0x55d94b9cc800 sd=
-=3D1070 :42700 s=3D1 pgs=3D582448 cs=3D1 l=3D0 c=3D0x55d94ef83b00).connect =
-got RESETSESSION</div><div>2019-04-24 04:01:14.792353 7f5eb2c35700 -1 osd.2=
-19 22611 heartbeat_check: no reply from <a href=3D"http://10.191.175.20:686=
-1">10.191.175.20:6861</a> osd.218 since back 2019-04-24 04:00:33.420027 fro=
-nt 2019-04-24 04:00:33.420027 (cutoff 2019-04-24 04:00:54.792349)</div><div=
->... large amount of no reply</div><div>2019-04-24 04:01:14.810961 7f5eb2c3=
-5700 -1 osd.219 22611 heartbeat_check: no reply from <a href=3D"http://10.1=
-91.175.55:6896">10.191.175.55:6896</a> osd.1069 since back 2019-04-24 04:00=
-:33.420027 front 2019-04-24 04:00:33.420027 (cutoff 2019-04-24 04:00:54.792=
-349)</div><div>2019-04-24 04:01:14.810972 7f5eb2c35700 -1 osd.219 22611 hea=
-rtbeat_check: no reply from <a href=3D"http://10.191.175.55:6807">10.191.17=
-5.55:6807</a> osd.1072 since back 2019-04-24 04:00:33.420027 front 2019-04-=
-24 04:00:33.420027 (cutoff 2019-04-24 04:00:54.792349)</div><div>2019-04-24=
- 04:01:14.820935 7f5e9a188700=C2=A0 0 -- <a href=3D"http://10.191.175.20:69=
-08/169631">10.191.175.20:6908/169631</a> submit_message osd_op_reply(110357=
-0 rbd_header.b0bc14677ca78c [watch ping cookie 140029489856640 gen 1] v0&#3=
-9;0 uv0 ondisk =3D -107 ((107) Transport endpoint is not connected)) v7 rem=
-ote, <a href=3D"http://10.191.122.251:0/1594377730">10.191.122.251:0/159437=
-7730</a>, failed lossy con, dropping message 0x55d957747600</div><div>2019-=
-04-24 04:01:14.821340 7f5eb2c35700=C2=A0 0 log_channel(cluster) log [WRN] :=
- 69 slow requests, 5 included below; oldest blocked for &gt; 44.042324 secs=
-</div><div>2019-04-24 04:01:14.821355 7f5eb2c35700=C2=A0 0 log_channel(clus=
-ter) log [WRN] : slow request 37.989255 seconds old, received at 2019-04-24=
- 04:00:36.821750: osd_op(client.9569145.0:11357796 7.2339e183 (undecoded) a=
-ck+ondisk+write+known_if_redirected e22611) currently queued_for_pg</div><d=
-iv>...</div><div>2019-04-24 04:10:15.049210 7f5eb7fab700=C2=A0 1 heartbeat_=
-map is_healthy &#39;OSD::osd_tp thread 0x7f5e9c98d700&#39; had timed out af=
-ter 15</div><div>2019-04-24 04:10:15.049213 7f5eb7fab700=C2=A0 1 heartbeat_=
-map is_healthy &#39;OSD::osd_tp thread 0x7f5e9c98d700&#39; had suicide time=
-d out after 150</div><div>2019-04-24 04:10:15.159190 7f5eb7fab700 -1 common=
-/HeartbeatMap.cc: In function &#39;bool ceph::HeartbeatMap::_check(const ce=
-ph::heartbeat_handle_d*, const char*, time_t)&#39; thread 7f5eb7fab70</div>=
-<div>0 time 2019-04-24 04:10:15.049507</div><div>common/HeartbeatMap.cc: 86=
-: FAILED assert(0 =3D=3D &quot;hit suicide timeout&quot;)</div><div><br></d=
-iv><div>=C2=A0ceph version 10.2.10 (5dc1e4c05cb68dbf62ae6fce3f0700e4654fdbb=
-e)</div><div>=C2=A01: (ceph::__ceph_assert_fail(char const*, char const*, i=
-nt, char const*)+0x82) [0x55d909a9ae12]</div><div>=C2=A02: (ceph::Heartbeat=
-Map::_check(ceph::heartbeat_handle_d const*, char const*, long)+0x11f) [0x5=
-5d9099d2f4f]</div><div>=C2=A03: (ceph::HeartbeatMap::is_healthy()+0xd6) [0x=
-55d9099d3976]</div><div>=C2=A04: (ceph::HeartbeatMap::check_touch_file()+0x=
-2a) [0x55d9099d418a]</div><div>=C2=A05: (CephContextServiceThread::entry()+=
-0x16c) [0x55d909ab4edc]</div><div>=C2=A06: (()+0x8064) [0x7f5ebc5dc064]</di=
-v><div>=C2=A07: (clone()+0x6d) [0x7f5eba6dd62d]</div><div>=C2=A0NOTE: a cop=
-y of the executable, or `objdump -rdS &lt;executable&gt;` is needed to inte=
-rpret this.</div><div><br></div><div>--- begin dump of recent events ---</d=
-iv><div>-10000&gt; 2019-04-24 04:07:00.490378 7f5e9c18c700=C2=A0 5 osd.219 =
-pg_epoch: 22818 pg[7.1ee8( v 22611&#39;65709 (19416&#39;62700,22611&#39;657=
-09] local-les=3D22799 n=3D217 ec=3D6370 les/c/f 22799/22800/0 22804/22804/2=
-2804) [437,1013] r=3D-1 lpr=3D22804 pi=3D22780-22803/1 crt=3D22611&#39;6570=
-7 lcod 22611&#39;65708 inactive NOTIFY] enter Reset</div><div>=C2=A0-9999&g=
-t; 2019-04-24 04:07:00.490427 7f5e9c18c700=C2=A0 5 osd.219 pg_epoch: 22819 =
-pg[7.1ee8( v 22611&#39;65709 (19416&#39;62700,22611&#39;65709] local-les=3D=
-22799 n=3D217 ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 =
-lpr=3D22818 pi=3D22780-22817/2 crt=3D22611&#39;65707 lcod 22611&#39;65708 i=
-nactive NOTIFY] exit Reset 0.000049 2 0.000045</div><div>=C2=A0-9998&gt; 20=
-19-04-24 04:07:00.490437 7f5e9c18c700=C2=A0 5 osd.219 pg_epoch: 22819 pg[7.=
-1ee8( v 22611&#39;65709 (19416&#39;62700,22611&#39;65709] local-les=3D22799=
- n=3D217 ec=3D6370 les/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=
-=3D22818 pi=3D22780-22817/2 crt=3D22611&#39;65707 lcod 22611&#39;65708 inac=
-tive NOTIFY] enter Started</div><div>=C2=A0-9997&gt; 2019-04-24 04:07:00.49=
-0443 7f5e9c18c700=C2=A0 5 osd.219 pg_epoch: 22819 pg[7.1ee8( v 22611&#39;65=
-709 (19416&#39;62700,22611&#39;65709] local-les=3D22799 n=3D217 ec=3D6370 l=
-es/c/f 22799/22800/0 22818/22818/22818) [] r=3D-1 lpr=3D22818 pi=3D22780-22=
-817/2 crt=3D22611&#39;65707 lcod 22611&#39;65708 inactive NOTIFY] enter Sta=
-rt</div><div>=C2=A0-9996&gt; 2019-04-24 04:07:00.490448 7f5e9c18c700=C2=A0 =
-1 osd.219 pg_epoch: 22819 pg[7.1ee8( v 22611&#39;65709 (19416&#39;62700,226=
-11&#39;65709] local-les=3D22799 n=3D217 ec=3D6370 les/c/f 22799/22800/0 228=
-18/22818/22818) [] r=3D-1 lpr=3D22818 pi=3D22780-22817/2 crt=3D22611&#39;65=
-707 lcod 22611&#39;65708 inactive NOTIFY] state&lt;Start&gt;: transitioning=
- to Stray</div><div>=C2=A0-9995&gt; 2019-04-24 04:07:00.490455 7f5e9c18c700=
-=C2=A0 5 osd.219 pg_epoch: 22819 pg[7.1ee8( v 22611&#39;65709 (19416&#39;62=
-700,22611&#39;65709] local-les=3D22799 n=3D217 ec=3D6370 les/c/f 22799/2280=
-0/0 22818/22818/22818) [] r=3D-1 lpr=3D22818 pi=3D22780-22817/2 crt=3D22611=
-&#39;65707 lcod 22611&#39;65708 inactive NOTIFY] exit Start 0.000012 0 0.00=
-0000</div><div>=C2=A0-9994&gt; 2019-04-24 04:07:00.490462 7f5e9c18c700=C2=
-=A0 5 osd.219 pg_epoch: 22819 pg[7.1ee8( v 22611&#39;65709 (19416&#39;62700=
-,22611&#39;65709] local-les=3D22799 n=3D217 ec=3D6370 les/c/f 22799/22800/0=
- 22818/22818/22818) [] r=3D-1 lpr=3D22818 pi=3D22780-22817/2 crt=3D22611&#3=
-9;65707 lcod 22611&#39;65708 inactive NOTIFY] enter Started/Stray</div><div=
->=C2=A0</div></div></div></div></div>
-
---000000000000be73dc05874609f7--
-
---===============6479710305964019524==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============6479710305964019524==--
+Thanks,
+Mauro
