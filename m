@@ -1,24 +1,43 @@
-From: pr-tracker-bot@kernel.org
+From: Jeff Layton <jlayton@kernel.org>
 Subject: Re: [GIT PULL] Ceph fixes for 5.1-rc7
-Date: Thu, 25 Apr 2019 18:35:04 +0000
-Message-ID: <155621730444.24029.13457956880929582266.pr-tracker-bot@kernel.org>
+Date: Thu, 25 Apr 2019 14:36:53 -0400
+Message-ID: <7c25c38a57a61f0603364e64956a8f54026c6e3f.camel@kernel.org>
 References: <20190425174739.27604-1-idryomov@gmail.com>
+         <CAHk-=wgPBx9xPWY7obK60=RTnOF3Ln0j9XkhYbekML=Fi3bFXg@mail.gmail.com>
+         <20190425182100.GU2217@ZenIV.linux.org.uk>
+         <CAHk-=winWXbk2dPa8x2AhkiRKFe07Vk9yuqOi+B_rZsUottGUQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190425174739.27604-1-idryomov@gmail.com>
+In-Reply-To: <CAHk-=winWXbk2dPa8x2AhkiRKFe07Vk9yuqOi+B_rZsUottGUQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>, Al Viro <viro@zeniv.linux.org.uk>
+Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Linux List Kernel Mailing <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-The pull request you sent on Thu, 25 Apr 2019 19:47:39 +0200:
+On Thu, 2019-04-25 at 11:24 -0700, Linus Torvalds wrote:
+> On Thu, Apr 25, 2019 at 11:21 AM Al Viro <viro@zeniv.linux.org.uk> wrote:
+> > I really wonder if 76a495d666e5 (ceph: ensure d_name stability in
+> > ceph_dentry_hash()) makes any sense; OK, you have ->d_lock held
+> > over that, but what does it protect against?  Sure, you'll get
+> > something that was valid while you held ->d_lock, but what good
+> > does it do to the callers?  If they really have to care about
+> > races with d_move(), which value do they want?
+> 
+> I suspect they only care that the data they gather for the network
+> packet is coherent, and passes internal sanity tests. You get either
+> old or new, but at least you don't get "not NUL terminated because the
+> length didn't match the data".
+> 
+>                     Linus
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.1-rc7
+Right. My main concern was preventing oopses while iterating over
+d_name.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/8113a85f872003a9f5c58f9f143054b0d8ec73a5
-
-Thank you!
-
+The main use for this hash is to help determine to which MDS we should
+direct the request. My understanding is that if we get it wrong, we'll
+end up retrying the request and pick a different MDS, so it's not fatal
+if we do race in this fashion.
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Jeff Layton <jlayton@kernel.org>
