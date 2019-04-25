@@ -1,73 +1,62 @@
-From: Al Viro <viro@zeniv.linux.org.uk>
-Subject: Re: [GIT PULL] Ceph fixes for 5.1-rc7
-Date: Thu, 25 Apr 2019 21:09:42 +0100
-Message-ID: <20190425200941.GW2217@ZenIV.linux.org.uk>
-References: <20190425174739.27604-1-idryomov@gmail.com>
- <CAHk-=wgPBx9xPWY7obK60=RTnOF3Ln0j9XkhYbekML=Fi3bFXg@mail.gmail.com>
- <342ef35feb1110197108068d10e518742823a210.camel@kernel.org>
+From: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Subject: Re: [PATCH v3 12/26] compat_ioctl: move more drivers to
+ compat_ptr_ioctl
+Date: Thu, 25 Apr 2019 23:25:43 +0200
+Message-ID: <5511420228cb38d08a67c0f6a614b7671d7d23d4.camel@sipsolutions.net>
+References: <20190416202013.4034148-1-arnd@arndb.de>
+ <20190416202701.127745-1-arnd@arndb.de> <20190425122153.450fc094@coco.lan>
+ <20190425153534.GS2217@ZenIV.linux.org.uk>
+ <CAK8P3a2HmiYQJ2FV2FgLiFsD8M9UKteC9Jetx7ja06PQVZWYfA@mail.gmail.com>
+ (sfid-20190425_175600_668610_93FA972E)
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <342ef35feb1110197108068d10e518742823a210.camel@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Linux List Kernel Mailing <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+In-Reply-To: <CAK8P3a2HmiYQJ2FV2FgLiFsD8M9UKteC9Jetx7ja06PQVZWYfA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+ (sfid-20190425_175600_668610_93FA972E)
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Cc: Sean Young <sean-hENCXIMQXOg@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Daniel Vetter <daniel.vetter-/w4YWyX8dFk@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, dri-devel <dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org>, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, sparclinux <sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mauro Carvalho Chehab <mchehab+samsung-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, driverdevel <devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org>, linux-scsi <linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, qat-linux-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, amd-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Jason Gunthorpe <jgg-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>, "open list:HID CORE LAYER" <linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Darren Hart <dvhart-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Linux Media Mailing List <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-mm-sig-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jonathan Cameron <Jonathan.Cameron-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, David Sterba <dsterba@su>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Apr 25, 2019 at 02:23:59PM -0400, Jeff Layton wrote:
-
-> I took a quick look at the dcache code to see if we had something like
-> that before I did this, but I guess I didn't look closely enough. Those
-> routines do look nicer than my hand-rolled version.
+On Thu, 2019-04-25 at 17:55 +0200, Arnd Bergmann wrote:
+> On Thu, Apr 25, 2019 at 5:35 PM Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org> wrote:
+> > 
+> > On Thu, Apr 25, 2019 at 12:21:53PM -0300, Mauro Carvalho Chehab wrote:
+> > 
+> > > If I understand your patch description well, using compat_ptr_ioctl
+> > > only works if the driver is not for s390, right?
+> > 
+> > No; s390 is where "oh, just set ->compat_ioctl same as ->unlocked_ioctl
+> > and be done with that; compat_ptr() is a no-op anyway" breaks.  IOW,
+> > s390 is the reason for having compat_ptr_ioctl() in the first place;
+> > that thing works on all biarch architectures, as long as all stuff
+> > handled by ->ioctl() takes pointer to arch-independent object as
+> > argument.  IOW,
+> >         argument ignored => OK
+> >         any arithmetical type => no go, compat_ptr() would bugger it
+> >         pointer to int => OK
+> >         pointer to string => OK
+> >         pointer to u64 => OK
+> >         pointer to struct {u64 addr; char s[11];} => OK
 > 
-> I'll look at spinning up a patch to switch that over in the near future.
+> To be extra pedantic, the 'struct {u64 addr; char s[11];} '
+> case is also broken on x86, because sizeof (obj) is smaller
+> on i386, even though the location of the members are
+> the same. i.e. you can copy_from_user() this
 
-Jeff asked to put the name length in there; looking at the existing users,
-it does make sense.  I propose turning struct name_snapshot into
+Actually, you can't even do that because the struct might sit at the end
+of a page and then you'd erroneously fault in this case.
 
-struct name_snapshot {
-        struct qstr name;
-        unsigned char inline_name[DNAME_INLINE_LEN];
-};
+We had this a while ago with struct ifreq, see commit 98406133dd and its
+parents.
 
-with
-void take_dentry_name_snapshot(struct name_snapshot *name, struct dentry *dentry)
-{
-        spin_lock(&dentry->d_lock);
-	name->name = dentry->d_name;
-        if (unlikely(dname_external(dentry))) {
-                struct external_name *p = external_name(dentry);
-                atomic_inc(&p->u.count);
-        } else {
-                memcpy(name->inline_name, dentry->d_iname,
-                       dentry->d_name.len + 1);
-                name->name.name = name->inline_name;
-        }
-	spin_unlock(&dentry->d_lock);
-}
-
-and callers adjusted, initially simply by turning snapshot.name into
-snapshot.name.name.  Next step: overlayfs call site becoming
-        take_dentry_name_snapshot(&name, real);
-        this = lookup_one_len(name.name.name, connected, name.name.len);
-Next: snotify stuff switched to passing struct qstr * - fsnotify_move()
-first, then fsnotify().  That one would
-	* leave callers passing NULL alone
-	* have the callers passing snapshot.name.name pass &snapshot.name
-	* fsnotify_dirent() pass the entire &dentry->d_name, not just
-dentry->d_name.name (that's dependent upon parent being held exclusive;
-devpts plays fast and loose here, relying upon the lack of any kind of
-renames, explicit or implicit, in that fs)
-	* ditto for remaining call in fsnotify_move() (both parents
-are locked in all callers, thankfully)
-	* ditto for fsnotify_link()
-	* kernfs callers in kernfs_notify_workfn() would grow strlen().
-Next: send_to_group() and ->handle_event() instances switched to passing
-struct qstr *.
-Next: inotify_handle_event() doesn't need to bother with strlen().
-Next: audit_update_watch() and audit_compare_dname_path() switched to
-struct qstr *.  Callers in __audit_inode_child() pass the entire
-&dentry->d_name.  strlen() inside audit_compare_dname_path() goes away.
-
-Objections?
+johannes
