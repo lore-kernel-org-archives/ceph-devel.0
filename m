@@ -1,96 +1,67 @@
 From: Jeff Layton <jlayton@kernel.org>
 Subject: Re: [GIT PULL] Ceph fixes for 5.1-rc7
-Date: Fri, 26 Apr 2019 13:30:53 -0400
-Message-ID: <b175faae4bb98d3379a8642fe5f4e00587c3a734.camel@kernel.org>
+Date: Fri, 26 Apr 2019 16:49:24 -0400
+Message-ID: <fd4327a68e79540e9faee40bd198dfee373e59fb.camel@kernel.org>
 References: <20190425174739.27604-1-idryomov@gmail.com>
          <CAHk-=wgPBx9xPWY7obK60=RTnOF3Ln0j9XkhYbekML=Fi3bFXg@mail.gmail.com>
          <342ef35feb1110197108068d10e518742823a210.camel@kernel.org>
          <20190425200941.GW2217@ZenIV.linux.org.uk>
          <86674e79e9f24e81feda75bc3c0dd4215604ffa5.camel@kernel.org>
-         <20190426165055.GY2217@ZenIV.linux.org.uk>
+         <CAHk-=wiaZoELovfo4gkfxB0zi6k5pQJNkmSRsEoWYr_z-oupiQ@mail.gmail.com>
+         <20190426170108.GZ2217@ZenIV.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190426165055.GY2217@ZenIV.linux.org.uk>
+In-Reply-To: <20190426170108.GZ2217@ZenIV.linux.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Linux List Kernel Mailing <linux-kernel@vger.kernel.org>
+To: Al Viro <viro@zeniv.linux.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Linux List Kernel Mailing <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 2019-04-26 at 17:50 +0100, Al Viro wrote:
-> On Fri, Apr 26, 2019 at 12:25:03PM -0400, Jeff Layton wrote:
-> 
-> > It turns out though that using name_snapshot from ceph is a bit more
-> > tricky. In some cases, we have to call ceph_mdsc_build_path to build up
-> > a full path string. We can't easily populate a name_snapshot from there
-> > because struct external_name is only defined in fs/dcache.c.
-> 
-> Explain, please.  For ceph_mdsc_build_path() you don't need name
-> snapshots at all and existing code is, AFAICS, just fine, except
-> for pointless pr_err() there.
-> 
-
-Eventually we have to pass back the result of all the
-build_dentry_path() shenanigans to create_request_message(), and then
-free whatever that result is after using it.
-
-Today we can get back a string+length from ceph_mdsc_build_path or
-clone_dentry_name, or we might get direct pointers into the dentry if
-the situation allows for it.
-
-Now we want to rip out clone_dentry_name() and start using
-take_dentry_name_snapshot(). That returns a name_snapshot that we'll
-need to pass back to create_request_message. It will need to deal with
-the fact that it could get one of those instead of just a string+length.
-
-My original thought was to always pass back a name_snapshot, but that
-turns out to be difficult because its innards are not public. The other
-potential solutions that I've tried make this code look even worse than
-it already is.
-
-
-> I _probably_ would take allocation out of the loop (e.g. make it
-> __getname(), called unconditionally) and turned it into the
-> d_path.c-style read_seqbegin_or_lock()/need_seqretry()/done_seqretry()
-> loop, so that the first pass would go under rcu_read_lock(), while
-> the second (if needed) would just hold rename_lock exclusive (without
-> bumping the refcount).  But that's a matter of (theoretical) livelock
-> avoidance, not the locking correctness for ->d_name accesses.
-> 
-
-Yeah, that does sound better. I want to think about this code a bit
-
-> Oh, and
->         *base = ceph_ino(d_inode(temp));
->         *plen = len;
-> probably belongs in critical section - _that_ might be a correctness
-> issue, since temp is not held by anything once you are out of there.
-> 
-
-Good catch. I'll fix that up.
-
-> > I could add some routines to do this, but it feels a lot like I'm
-> > abusing internal dcache interfaces. I'll keep thinking about it though.
+On Fri, 2019-04-26 at 18:01 +0100, Al Viro wrote:
+> On Fri, Apr 26, 2019 at 09:36:00AM -0700, Linus Torvalds wrote:
+> > On Fri, Apr 26, 2019 at 9:25 AM Jeff Layton <jlayton@kernel.org> wrote:
+> > > Is it really ok to union the count and rcu_head there?
 > > 
-> > While we're on the subject though:
+> > It should be fine, because the rcu_count should only ever be used once
+> > the count has gone to zero and the name cannot be found any more.
 > > 
-> > struct external_name {
-> >         union {
-> >                 atomic_t count;
-> >                 struct rcu_head head;
-> >         } u;
-> >         unsigned char name[];
-> > };
-> > 
-> > Is it really ok to union the count and rcu_head there?
-> > 
-> > I haven't trawled through all of the code yet, but what prevents someone
-> > from trying to access the count inside an RCU critical section, after
-> > call_rcu has been called on it?
+> > And while RCU path walking may find and use the *name* after the
+> > dentry has been killed off (but not free'd yet), all the actual
+> > external_name() accesses should be serialized by the dentry lock, so
+> > there's no access to those fields once the dentry is dead.
 > 
-> The fact that no lockless accesses to ->count are ever done?
+> It's not quite that; access to external_name contents is fine,
+> ->d_lock or not.  __d_lookup_rcu() does read it under rcu_read_lock
+> alone.
+> 
+> However:
+> 	* we never free it without an RCU delay after the final
+> drop of refcount.  RCU delay might happen on dentry->d_rcu (if
+> it's dentry_free()) or on name->p.rcu (if it's release_dentry_name_snapshot()
+> or d_move() dropping the final reference).
+> 	* it's never observed in ->d_name after the refcount
+> reaches zero.
+> 	* no lockless access ever looks at the refcount.  It
+> can look at ->name[], but that's it.
+> 
 
-Thanks,
+Got it, thanks. Why use an atomic_t for the refcount if it's always
+accessed under spinlock?
+
+> What I don't understand is why would anyone want to mess with
+> name snapshots for dentry_path() lookalikes...
+
+Mostly because the place where the ceph code needs to use and free these
+strings is rather far removed from where they are created. It simplifies
+that part if we can access and free them all in the same way.
+
+I was planning to just use name_snapshots universally for that purpose,
+but they have a rather specific method of freeing things that is hard to
+duplicate if you don't have a dentry to clone.
+
+Probably that means I'm approaching this problem in the wrong way and
+need to do it differently.
 -- 
 Jeff Layton <jlayton@kernel.org>
