@@ -1,80 +1,45 @@
-From: Abhishek <abhishek-IBi9RG/b67k@public.gmane.org>
-Subject: v14.2.1 Nautilus released
-Date: Mon, 29 Apr 2019 21:18:06 +0200
-Message-ID: <cbfed3591a3224536aa02f71ca469714@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
- <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+From: Andrea Parri <andrea.parri@amarulasolutions.com>
+Subject: [PATCH 4/5] ceph: fix improper use of smp_mb__before_atomic()
+Date: Mon, 29 Apr 2019 22:15:00 +0200
+Message-ID: <1556568902-12464-5-git-send-email-andrea.parri@amarulasolutions.com>
+References: <1556568902-12464-1-git-send-email-andrea.parri@amarulasolutions.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1556568902-12464-1-git-send-email-andrea.parri@amarulasolutions.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Andrea Parri <andrea.parri@amarulasolutions.com>, stable@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-We're happy to announce the first bug fix release of Ceph Nautilus 
-release series.
-We recommend all nautilus users upgrade to this release. For upgrading 
-from older releases of
-ceph, general guidelines for upgrade to nautilus must be followed
+This barrier only applies to the read-modify-write operations; in
+particular, it does not apply to the atomic64_set() primitive.
 
-Notable Changes
----------------
+Replace the barrier with an smp_mb().
 
-* The default value for `mon_crush_min_required_version` has been
-   changed from `firefly` to `hammer`, which means the cluster will
-   issue a health warning if your CRUSH tunables are older than hammer.
-   There is generally a small (but non-zero) amount of data that will
-   move around by making the switch to hammer tunables; for more 
-information,
-   see :ref:`crush-map-tunables`.
+Fixes: fdd4e15838e59 ("ceph: rework dcache readdir")
+Cc: stable@vger.kernel.org
+Reported-by: "Paul E. McKenney" <paulmck@linux.ibm.com>
+Reported-by: Peter Zijlstra <peterz@infradead.org>
+Signed-off-by: Andrea Parri <andrea.parri@amarulasolutions.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>
+Cc: Sage Weil <sage@redhat.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org
+---
+ fs/ceph/super.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-   If possible, we recommend that you set the oldest allowed client to 
-`hammer`
-   or later.  You can tell what the current oldest allowed client is 
-with::
-
-     ceph osd dump | min_compat_client
-
-   If the current value is older than hammer, you can tell whether it
-   is safe to make this change by verifying that there are no clients
-   older than hammer current connected to the cluster with::
-
-     ceph features
-
-   The newer `straw2` CRUSH bucket type was introduced in hammer, and
-   ensuring that all clients are hammer or newer allows new features
-   only supported for `straw2` buckets to be used, including the
-   `crush-compat` mode for the :ref:`balancer`.
-
-* Ceph now packages python bindings for python3.6 instead of
-   python3.4, because EPEL7 recently switched from python3.4 to
-   python3.6 as the native python3. see the `announcement 
-<https://lists.fedoraproject.org/archives/list/epel-announce-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org/message/EGUMKAIMPK2UD5VSHXM53BH2MBDGDWMO/>`_
-   for more details on the background of this change.
-
-Known Issues
-------------
-
-* Nautilus-based librbd clients cannot open images stored on 
-pre-Luminous
-   clusters
-
-
-For a detailed changelog please refer to the official release notes
-entry at the ceph blog 
-https://ceph.com/releases/v14-2-1-nautilus-released/
-
-Getting ceph:
-------------
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-14.2.1.tar.gz
-* For packages, see
-http://docs.ceph.com/docs/master/install/get-packages/
-* Release git sha1: d555a9489eb35f84f2e1ef49b77e19da9d113972
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 16c03188578ea..b5c782e6d62f1 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -541,7 +541,7 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
+ 					   long long release_count,
+ 					   long long ordered_count)
+ {
+-	smp_mb__before_atomic();
++	smp_mb();
+ 	atomic64_set(&ci->i_complete_seq[0], release_count);
+ 	atomic64_set(&ci->i_complete_seq[1], ordered_count);
+ }
+-- 
+2.7.4
