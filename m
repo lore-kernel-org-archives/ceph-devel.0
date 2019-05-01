@@ -1,67 +1,81 @@
-From: Mike Perez <miperez-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [events] Ceph at Red Hat Summit May 7th 6:30pm
-Date: Tue, 30 Apr 2019 18:38:20 +0000
-Message-ID: <CAFFUGJetUR5kdOJXjtE_oDkPOm-rQ_QzLztzFSGsE1oUCdnFSw@mail.gmail.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH] ceph: remove ceph_get_direct_page_vector
+Date: Wed,  1 May 2019 16:40:32 -0400
+Message-ID: <20190501204032.26380-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4326724800764331638=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: netdev@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============4326724800764331638==
-Content-Type: multipart/alternative; boundary="00000000000030d2240587c3b532"
+This function is entirely unused.
 
---00000000000030d2240587c3b532
-Content-Type: text/plain; charset="UTF-8"
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ include/linux/ceph/libceph.h |  4 ----
+ net/ceph/pagevec.c           | 33 ---------------------------------
+ 2 files changed, 37 deletions(-)
 
-Hey all,
-
-If you happen to be attending the Boston Red Hat Summit or in the area,
-please join the Ceph and Gluster community May 7th 6:30pm at our happy hour
-event. Find all the details on the Eventbrite page. Looking forward to
-seeing you all there!
-
-https://www.eventbrite.com/e/ceph-and-gluster-community-happy-hour-at-red-hat-summit-registration-60698158827
-
---
-Mike Perez (thingee)
-
---00000000000030d2240587c3b532
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div dir=3D"ltr"><div>Hey all,</div><div><br></div><div>If=
- you happen to be attending the Boston Red Hat Summit or in the area, pleas=
-e join the Ceph and Gluster community May 7th 6:30pm at our happy hour even=
-t. Find all the details on the Eventbrite page. Looking forward to seeing y=
-ou all there!</div><div><br></div><div><a href=3D"https://www.eventbrite.co=
-m/e/ceph-and-gluster-community-happy-hour-at-red-hat-summit-registration-60=
-698158827">https://www.eventbrite.com/e/ceph-and-gluster-community-happy-ho=
-ur-at-red-hat-summit-registration-60698158827</a><br></div><div><div dir=3D=
-"ltr" class=3D"gmail-m_-8182362367114059228gmail_signature"><br>--<br>Mike =
-Perez (thingee)</div></div></div></div>
-
---00000000000030d2240587c3b532--
-
---===============4326724800764331638==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============4326724800764331638==--
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 337d5049ff93..a3cddf5f0e60 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -299,10 +299,6 @@ int ceph_wait_for_latest_osdmap(struct ceph_client *client,
+ 
+ /* pagevec.c */
+ extern void ceph_release_page_vector(struct page **pages, int num_pages);
+-
+-extern struct page **ceph_get_direct_page_vector(const void __user *data,
+-						 int num_pages,
+-						 bool write_page);
+ extern void ceph_put_page_vector(struct page **pages, int num_pages,
+ 				 bool dirty);
+ extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
+diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
+index d3736f5bffec..64305e7056a1 100644
+--- a/net/ceph/pagevec.c
++++ b/net/ceph/pagevec.c
+@@ -10,39 +10,6 @@
+ 
+ #include <linux/ceph/libceph.h>
+ 
+-/*
+- * build a vector of user pages
+- */
+-struct page **ceph_get_direct_page_vector(const void __user *data,
+-					  int num_pages, bool write_page)
+-{
+-	struct page **pages;
+-	int got = 0;
+-	int rc = 0;
+-
+-	pages = kmalloc_array(num_pages, sizeof(*pages), GFP_NOFS);
+-	if (!pages)
+-		return ERR_PTR(-ENOMEM);
+-
+-	while (got < num_pages) {
+-		rc = get_user_pages_fast(
+-		    (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
+-		    num_pages - got, write_page, pages + got);
+-		if (rc < 0)
+-			break;
+-		BUG_ON(rc == 0);
+-		got += rc;
+-	}
+-	if (rc < 0)
+-		goto fail;
+-	return pages;
+-
+-fail:
+-	ceph_put_page_vector(pages, got, false);
+-	return ERR_PTR(rc);
+-}
+-EXPORT_SYMBOL(ceph_get_direct_page_vector);
+-
+ void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty)
+ {
+ 	int i;
+-- 
+2.20.1
