@@ -1,14 +1,15 @@
 From: Daniel Gryniewicz <dang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: RGW Beast frontend and ipv6 options
-Date: Thu, 2 May 2019 10:08:23 -0400
-Message-ID: <613006e7-62d9-a03f-f8d7-5a37ef1ffb88@redhat.com>
+Date: Thu, 2 May 2019 10:36:05 -0400
+Message-ID: <98b48a08-ae33-e26d-b46d-95d1488b059c@redhat.com>
 References: <87a7gdgngp.fsf@suse.com>
+ <613006e7-62d9-a03f-f8d7-5a37ef1ffb88@redhat.com>
 Reply-To: dang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <87a7gdgngp.fsf-IBi9RG/b67k@public.gmane.org>
+In-Reply-To: <613006e7-62d9-a03f-f8d7-5a37ef1ffb88-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -22,72 +23,69 @@ Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Based on past experience with this issue in other projects, I would 
-propose this:
-
-1. By default (rgw frontends=beast), we should bind to both IPv4 and 
-IPv6, if available.
-
-2. Just specifying port (rgw frontends=beast port=8000) should apply to 
-both IPv4 and IPv6, if available.
-
-3. If the user provides endpoint config, we should use only that 
-endpoint config.  For example, if they provide only v4 addresses, we 
-should only bind to v4.
-
-This should all be independent of the bindv6only setting; that is, we 
-should specifically bind our v4 and v6 addresses, and not depend on the 
-system to automatically bind v4 when binding v6.
-
-In the case of 1 or 2, if the system has disabled either v4 or v6, this 
-should not be an error, as long as one of the two binds works.  In the 
-case of 3, we should error out if any configured endpoint cannot be bound.
-
-This should allow an orchestrator to confidently install a system, 
-knowing what will happen, without needing to know or manipulate the 
-bindv6only flag.
-
-As for what happens if you specify an endpoint and a port, I don't have 
-a strong opinion.  I see 2 reasonable possibilites:
-
-a. Make it an error
-
-b. Treat a port in this case as an endpoint of 0.0.0.0:port (v4-only)
-
-Daniel
-
-On 4/26/19 4:49 AM, Abhishek Lekshmanan wrote:
-> 
-> Currently RGW's beast frontend supports ipv6 via the endpoint
-> configurable. The port option will bind to ipv4 _only_.
-> 
-> http://docs.ceph.com/docs/master/radosgw/frontends/#options
-> 
-> Since many Linux systems may default the sysconfig net.ipv6.bindv6only
-> flag to true, it usually means that specifying a v6 endpoint will bind
-> to both v4 and v6. But this also means that deployment systems must be
-> aware of this while configuring depending on whether both v4 and v6
-> endpoints need to work or not. Specifying both a v4 and v6 endpoint or a
-> port (v4) and endpoint with the same v6 port will currently lead to a
-> failure as the system would've already bound the v6 port to both v4 and
-> v6. This leaves us with a few options.
-> 
-> 1. Keep the implicit behaviour as it is, document this, as systems are
-> already aware of sysconfig flags and will expect that at a v6 endpoint
-> will bind to both v4 and v6.
-> 
-> 2. Be explicit with endpoints & configuration, Beast itself overrides
-> the socket option to bind both v4 and v6, which means that v6 endpoint
-> will bind to v6 *only* and binding to a v4 will need an explicit
-> specification. (there is a pr in progress for this:
-> https://github.com/ceph/ceph/pull/27270)
-> 
-> Any more suggestions on how systems handle this are also welcome.
-> 
-> --
-> Abhishek
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
+QWZ0ZXIgZGlzY3Vzc2luZyB3aXRoIENhc2V5LCBJJ2QgbGlrZSB0byBwcm9wb3NlIHNvbWUgY2xh
+cmlmaWNhdGlvbnMgdG8gCnRoaXMuCgpGaXJzdCwgd2UgZG8gbm90IHRyZWF0IEVBRk5PU1VQUE9S
+VCBhcyBhIG5vbi1mYXRhbCBlcnJvci4gIEFueSBvdGhlciAKZXJyb3IgYmluZGluZyBpcyBmYXRh
+bCwgYnV0IHRoYXQgb25lIHdlIHdhcm4gYW5kIGNvbnRpbnVlLgoKU2Vjb25kLCB3ZSB0cmVhdCAi
+cG9ydD08cG9ydD4iIGFzIGV4cGFuZGluZyB0byAiZW5kcG9pbnQ9MC4wLjAuMDo8cG9ydD4sIApl
+bmRwb2ludD1bOjo8cG9ydD5dIi4KClRoZW4sIHdlIGp1c3QgcHJvY2VzcyB0aGUgc2V0IG9mIGVu
+ZHBvaW50cyBwcm9wZXJseS4gIFRoaXMgc2hvdWxkLCBJIApiZWxpZXZlLCByZXN1bHQgaW4gc2lt
+cGxlLCBzdHJhaWdodC1mb3J3YXJkIGNvZGUsIGFuZCBlYXNpbHkgCnVuZGVyc3RhbmRhYmxlIHNl
+bWFudGljcywgYW5kIHNob3VsZCBtYWtlIGl0IHNpbXBsZSBmb3Igb3JjaGV0cmF0b3JzLgoKVGhp
+cyB3b3VsZCBtYWtlIDEgYW5kIDIgYmVsb3cgZmFsbG91dCBuYXR1cmFsbHkuICAzIGlzIG1vZGlm
+aWVkIHNvIHRoYXQgCndlIG9ubHkgdXNlIGNvbmZpZ3VyZWQgZW5kcG9pbnRzLCBidXQgcG9ydD0g
+aXMgbm93IGltcGxpY2l0IGVuZHBvaW50IApjb25maWd1cmF0aW9uLgoKRGFuaWVsCgpPbiA1LzIv
+MTkgMTA6MDggQU0sIERhbmllbCBHcnluaWV3aWN6IHdyb3RlOgo+IEJhc2VkIG9uIHBhc3QgZXhw
+ZXJpZW5jZSB3aXRoIHRoaXMgaXNzdWUgaW4gb3RoZXIgcHJvamVjdHMsIEkgd291bGQgCj4gcHJv
+cG9zZSB0aGlzOgo+IAo+IDEuIEJ5IGRlZmF1bHQgKHJndyBmcm9udGVuZHM9YmVhc3QpLCB3ZSBz
+aG91bGQgYmluZCB0byBib3RoIElQdjQgYW5kIAo+IElQdjYsIGlmIGF2YWlsYWJsZS4KPiAKPiAy
+LiBKdXN0IHNwZWNpZnlpbmcgcG9ydCAocmd3IGZyb250ZW5kcz1iZWFzdCBwb3J0PTgwMDApIHNo
+b3VsZCBhcHBseSB0byAKPiBib3RoIElQdjQgYW5kIElQdjYsIGlmIGF2YWlsYWJsZS4KPiAKPiAz
+LiBJZiB0aGUgdXNlciBwcm92aWRlcyBlbmRwb2ludCBjb25maWcsIHdlIHNob3VsZCB1c2Ugb25s
+eSB0aGF0IAo+IGVuZHBvaW50IGNvbmZpZy7CoCBGb3IgZXhhbXBsZSwgaWYgdGhleSBwcm92aWRl
+IG9ubHkgdjQgYWRkcmVzc2VzLCB3ZSAKPiBzaG91bGQgb25seSBiaW5kIHRvIHY0Lgo+IAo+IFRo
+aXMgc2hvdWxkIGFsbCBiZSBpbmRlcGVuZGVudCBvZiB0aGUgYmluZHY2b25seSBzZXR0aW5nOyB0
+aGF0IGlzLCB3ZSAKPiBzaG91bGQgc3BlY2lmaWNhbGx5IGJpbmQgb3VyIHY0IGFuZCB2NiBhZGRy
+ZXNzZXMsIGFuZCBub3QgZGVwZW5kIG9uIHRoZSAKPiBzeXN0ZW0gdG8gYXV0b21hdGljYWxseSBi
+aW5kIHY0IHdoZW4gYmluZGluZyB2Ni4KPiAKPiBJbiB0aGUgY2FzZSBvZiAxIG9yIDIsIGlmIHRo
+ZSBzeXN0ZW0gaGFzIGRpc2FibGVkIGVpdGhlciB2NCBvciB2NiwgdGhpcyAKPiBzaG91bGQgbm90
+IGJlIGFuIGVycm9yLCBhcyBsb25nIGFzIG9uZSBvZiB0aGUgdHdvIGJpbmRzIHdvcmtzLsKgIElu
+IHRoZSAKPiBjYXNlIG9mIDMsIHdlIHNob3VsZCBlcnJvciBvdXQgaWYgYW55IGNvbmZpZ3VyZWQg
+ZW5kcG9pbnQgY2Fubm90IGJlIGJvdW5kLgo+IAo+IFRoaXMgc2hvdWxkIGFsbG93IGFuIG9yY2hl
+c3RyYXRvciB0byBjb25maWRlbnRseSBpbnN0YWxsIGEgc3lzdGVtLCAKPiBrbm93aW5nIHdoYXQg
+d2lsbCBoYXBwZW4sIHdpdGhvdXQgbmVlZGluZyB0byBrbm93IG9yIG1hbmlwdWxhdGUgdGhlIAo+
+IGJpbmR2Nm9ubHkgZmxhZy4KPiAKPiBBcyBmb3Igd2hhdCBoYXBwZW5zIGlmIHlvdSBzcGVjaWZ5
+IGFuIGVuZHBvaW50IGFuZCBhIHBvcnQsIEkgZG9uJ3QgaGF2ZSAKPiBhIHN0cm9uZyBvcGluaW9u
+LsKgIEkgc2VlIDIgcmVhc29uYWJsZSBwb3NzaWJpbGl0ZXM6Cj4gCj4gYS4gTWFrZSBpdCBhbiBl
+cnJvcgo+IAo+IGIuIFRyZWF0IGEgcG9ydCBpbiB0aGlzIGNhc2UgYXMgYW4gZW5kcG9pbnQgb2Yg
+MC4wLjAuMDpwb3J0ICh2NC1vbmx5KQo+IAo+IERhbmllbAo+IAo+IE9uIDQvMjYvMTkgNDo0OSBB
+TSwgQWJoaXNoZWsgTGVrc2htYW5hbiB3cm90ZToKPj4KPj4gQ3VycmVudGx5IFJHVydzIGJlYXN0
+IGZyb250ZW5kIHN1cHBvcnRzIGlwdjYgdmlhIHRoZSBlbmRwb2ludAo+PiBjb25maWd1cmFibGUu
+IFRoZSBwb3J0IG9wdGlvbiB3aWxsIGJpbmQgdG8gaXB2NCBfb25seV8uCj4+Cj4+IGh0dHA6Ly9k
+b2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JhZG9zZ3cvZnJvbnRlbmRzLyNvcHRpb25zCj4+Cj4+
+IFNpbmNlIG1hbnkgTGludXggc3lzdGVtcyBtYXkgZGVmYXVsdCB0aGUgc3lzY29uZmlnIG5ldC5p
+cHY2LmJpbmR2Nm9ubHkKPj4gZmxhZyB0byB0cnVlLCBpdCB1c3VhbGx5IG1lYW5zIHRoYXQgc3Bl
+Y2lmeWluZyBhIHY2IGVuZHBvaW50IHdpbGwgYmluZAo+PiB0byBib3RoIHY0IGFuZCB2Ni4gQnV0
+IHRoaXMgYWxzbyBtZWFucyB0aGF0IGRlcGxveW1lbnQgc3lzdGVtcyBtdXN0IGJlCj4+IGF3YXJl
+IG9mIHRoaXMgd2hpbGUgY29uZmlndXJpbmcgZGVwZW5kaW5nIG9uIHdoZXRoZXIgYm90aCB2NCBh
+bmQgdjYKPj4gZW5kcG9pbnRzIG5lZWQgdG8gd29yayBvciBub3QuIFNwZWNpZnlpbmcgYm90aCBh
+IHY0IGFuZCB2NiBlbmRwb2ludCBvciBhCj4+IHBvcnQgKHY0KSBhbmQgZW5kcG9pbnQgd2l0aCB0
+aGUgc2FtZSB2NiBwb3J0IHdpbGwgY3VycmVudGx5IGxlYWQgdG8gYQo+PiBmYWlsdXJlIGFzIHRo
+ZSBzeXN0ZW0gd291bGQndmUgYWxyZWFkeSBib3VuZCB0aGUgdjYgcG9ydCB0byBib3RoIHY0IGFu
+ZAo+PiB2Ni4gVGhpcyBsZWF2ZXMgdXMgd2l0aCBhIGZldyBvcHRpb25zLgo+Pgo+PiAxLiBLZWVw
+IHRoZSBpbXBsaWNpdCBiZWhhdmlvdXIgYXMgaXQgaXMsIGRvY3VtZW50IHRoaXMsIGFzIHN5c3Rl
+bXMgYXJlCj4+IGFscmVhZHkgYXdhcmUgb2Ygc3lzY29uZmlnIGZsYWdzIGFuZCB3aWxsIGV4cGVj
+dCB0aGF0IGF0IGEgdjYgZW5kcG9pbnQKPj4gd2lsbCBiaW5kIHRvIGJvdGggdjQgYW5kIHY2Lgo+
+Pgo+PiAyLiBCZSBleHBsaWNpdCB3aXRoIGVuZHBvaW50cyAmIGNvbmZpZ3VyYXRpb24sIEJlYXN0
+IGl0c2VsZiBvdmVycmlkZXMKPj4gdGhlIHNvY2tldCBvcHRpb24gdG8gYmluZCBib3RoIHY0IGFu
+ZCB2Niwgd2hpY2ggbWVhbnMgdGhhdCB2NiBlbmRwb2ludAo+PiB3aWxsIGJpbmQgdG8gdjYgKm9u
+bHkqIGFuZCBiaW5kaW5nIHRvIGEgdjQgd2lsbCBuZWVkIGFuIGV4cGxpY2l0Cj4+IHNwZWNpZmlj
+YXRpb24uICh0aGVyZSBpcyBhIHByIGluIHByb2dyZXNzIGZvciB0aGlzOgo+PiBodHRwczovL2dp
+dGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMjcyNzApCj4+Cj4+IEFueSBtb3JlIHN1Z2dlc3Rpb25z
+IG9uIGhvdyBzeXN0ZW1zIGhhbmRsZSB0aGlzIGFyZSBhbHNvIHdlbGNvbWUuCj4+Cj4+IC0tIAo+
+PiBBYmhpc2hlawo+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwo+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tCj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
+LmNvbQo+Pgo+IAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
