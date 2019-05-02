@@ -1,81 +1,86 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH] ceph: remove ceph_get_direct_page_vector
-Date: Wed,  1 May 2019 16:40:32 -0400
-Message-ID: <20190501204032.26380-1-hch@lst.de>
+From: Sasha Levin <sashal@kernel.org>
+Subject: Re: [PATCH AUTOSEL 5.0 61/98] libceph: fix breakage caused by
+ multipage bvecs
+Date: Thu, 2 May 2019 08:51:45 -0400
+Message-ID: <20190502125145.GC11584@sasha-vm>
+References: <20190422194205.10404-1-sashal@kernel.org>
+ <20190422194205.10404-61-sashal@kernel.org>
+ <CAOi1vP8Q=bH9uXVi=35PKpE0T=MNpRViaBJWPMYfD6_pfC8xRw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ceph-devel@vger.kernel.org
-Cc: netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP8Q=bH9uXVi=35PKpE0T=MNpRViaBJWPMYfD6_pfC8xRw@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This function is entirely unused.
+On Tue, Apr 23, 2019 at 10:28:56AM +0200, Ilya Dryomov wrote:
+>On Mon, Apr 22, 2019 at 9:44 PM Sasha Levin <sashal@kernel.org> wrote:
+>>
+>> From: Ilya Dryomov <idryomov@gmail.com>
+>>
+>> [ Upstream commit 187df76325af5d9e12ae9daec1510307797e54f0 ]
+>>
+>> A bvec can now consist of multiple physically contiguous pages.
+>> This means that bvec_iter_advance() can move to a different page while
+>> staying in the same bvec (i.e. ->bi_bvec_done != 0).
+>>
+>> The messenger works in terms of segments which can now be defined as
+>> the smaller of a bvec and a page.  The "more bytes to process in this
+>> segment" condition holds only if bvec_iter_advance() leaves us in the
+>> same bvec _and_ in the same page.  On next bvec (possibly in the same
+>> page) and on next page (possibly in the same bvec) we may need to set
+>> ->last_piece.
+>>
+>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+>> Signed-off-by: Sasha Levin (Microsoft) <sashal@kernel.org>
+>> ---
+>>  net/ceph/messenger.c | 8 ++++++--
+>>  1 file changed, 6 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+>> index 7e71b0df1fbc..3083988ce729 100644
+>> --- a/net/ceph/messenger.c
+>> +++ b/net/ceph/messenger.c
+>> @@ -840,6 +840,7 @@ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
+>>                                         size_t bytes)
+>>  {
+>>         struct ceph_bio_iter *it = &cursor->bio_iter;
+>> +       struct page *page = bio_iter_page(it->bio, it->iter);
+>>
+>>         BUG_ON(bytes > cursor->resid);
+>>         BUG_ON(bytes > bio_iter_len(it->bio, it->iter));
+>> @@ -851,7 +852,8 @@ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
+>>                 return false;   /* no more data */
+>>         }
+>>
+>> -       if (!bytes || (it->iter.bi_size && it->iter.bi_bvec_done))
+>> +       if (!bytes || (it->iter.bi_size && it->iter.bi_bvec_done &&
+>> +                      page == bio_iter_page(it->bio, it->iter)))
+>>                 return false;   /* more bytes to process in this segment */
+>>
+>>         if (!it->iter.bi_size) {
+>> @@ -899,6 +901,7 @@ static bool ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
+>>                                         size_t bytes)
+>>  {
+>>         struct bio_vec *bvecs = cursor->data->bvec_pos.bvecs;
+>> +       struct page *page = bvec_iter_page(bvecs, cursor->bvec_iter);
+>>
+>>         BUG_ON(bytes > cursor->resid);
+>>         BUG_ON(bytes > bvec_iter_len(bvecs, cursor->bvec_iter));
+>> @@ -910,7 +913,8 @@ static bool ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
+>>                 return false;   /* no more data */
+>>         }
+>>
+>> -       if (!bytes || cursor->bvec_iter.bi_bvec_done)
+>> +       if (!bytes || (cursor->bvec_iter.bi_bvec_done &&
+>> +                      page == bvec_iter_page(bvecs, cursor->bvec_iter)))
+>>                 return false;   /* more bytes to process in this segment */
+>>
+>>         BUG_ON(cursor->last_piece);
+>
+>Same here, shouldn't be needed.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- include/linux/ceph/libceph.h |  4 ----
- net/ceph/pagevec.c           | 33 ---------------------------------
- 2 files changed, 37 deletions(-)
-
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 337d5049ff93..a3cddf5f0e60 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -299,10 +299,6 @@ int ceph_wait_for_latest_osdmap(struct ceph_client *client,
- 
- /* pagevec.c */
- extern void ceph_release_page_vector(struct page **pages, int num_pages);
--
--extern struct page **ceph_get_direct_page_vector(const void __user *data,
--						 int num_pages,
--						 bool write_page);
- extern void ceph_put_page_vector(struct page **pages, int num_pages,
- 				 bool dirty);
- extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
-diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-index d3736f5bffec..64305e7056a1 100644
---- a/net/ceph/pagevec.c
-+++ b/net/ceph/pagevec.c
-@@ -10,39 +10,6 @@
- 
- #include <linux/ceph/libceph.h>
- 
--/*
-- * build a vector of user pages
-- */
--struct page **ceph_get_direct_page_vector(const void __user *data,
--					  int num_pages, bool write_page)
--{
--	struct page **pages;
--	int got = 0;
--	int rc = 0;
--
--	pages = kmalloc_array(num_pages, sizeof(*pages), GFP_NOFS);
--	if (!pages)
--		return ERR_PTR(-ENOMEM);
--
--	while (got < num_pages) {
--		rc = get_user_pages_fast(
--		    (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
--		    num_pages - got, write_page, pages + got);
--		if (rc < 0)
--			break;
--		BUG_ON(rc == 0);
--		got += rc;
--	}
--	if (rc < 0)
--		goto fail;
--	return pages;
--
--fail:
--	ceph_put_page_vector(pages, got, false);
--	return ERR_PTR(rc);
--}
--EXPORT_SYMBOL(ceph_get_direct_page_vector);
--
- void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty)
- {
- 	int i;
--- 
-2.20.1
+Dropped, thanks!
