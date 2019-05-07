@@ -1,43 +1,71 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v3 00/26] compat_ioctl: cleanups
-Date: Mon, 6 May 2019 12:03:42 +0300
-Message-ID: <CAHp75Vc2-zzRYk0vpdPQm5duZwW+v=svEndTPV4Sr59QrGcMHg@mail.gmail.com>
-References: <20190416202013.4034148-1-arnd@arndb.de>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.0 84/99] ceph: handle the case where a dentry has been renamed on outstanding req
+Date: Tue,  7 May 2019 01:32:18 -0400
+Message-ID: <20190507053235.29900-84-sashal@kernel.org>
+References: <20190507053235.29900-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20190416202013.4034148-1-arnd@arndb.de>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linux NVMe Mailinglist <linux-nvme@lists.infradead.org>, linux-iio <linux-iio@vger.kernel.org>, linux-remoteproc@vger.kernel.org, linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org, Platform Driver <platform-driver-x86@vger.kernel.org>, linux-ide@vger.kernel.org, "open list:MEMORY TECHNOLOGY..." <linux-mtd@lists.infradead.org>, sparclinux@vger.kernel.org, linux1394-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, linux-scsi <linux-scsi@vger.kernel.org>, linux-bluetooth@vger.kernel.org, y2038@lists.linaro.org, qat-linux@intel.com, amd-gfx@lists.freedesktop.org, linux-input <linux-input@vger.kernel.org>, Marcel Holtmann <marcel@holtmann.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" <linux-rtc@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.o>
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190507053235.29900-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gVHVlLCBBcHIgMTYsIDIwMTkgYXQgMTE6MjMgUE0gQXJuZCBCZXJnbWFubiA8YXJuZEBhcm5k
-Yi5kZT4gd3JvdGU6Cj4KPiBIaSBBbCwKPgo+IEl0IHRvb2sgbWUgd2F5IGxvbmdlciB0aGFuIEkg
-aGFkIGhvcGVkIHRvIHJldmlzaXQgdGhpcyBzZXJpZXMsIHNlZQo+IGh0dHBzOi8vbG9yZS5rZXJu
-ZWwub3JnL2xrbWwvMjAxODA5MTIxNTAxNDIuMTU3OTEzLTEtYXJuZEBhcm5kYi5kZS8KPiBmb3Ig
-dGhlIHByZXZpb3VzbHkgcG9zdGVkIHZlcnNpb24uCj4KPiBJJ3ZlIGNvbWUgdG8gdGhlIHBvaW50
-IHdoZXJlIGFsbCBjb252ZXJzaW9uIGhhbmRsZXJzIGFuZCBtb3N0Cj4gQ09NUEFUSUJMRV9JT0NU
-TCgpIGVudHJpZXMgYXJlIGdvbmUgZnJvbSB0aGlzIGZpbGUsIGJ1dCBmb3IKPiBub3csIHRoaXMg
-c2VyaWVzIG9ubHkgaGFzIHRoZSBwYXJ0cyB0aGF0IGhhdmUgZWl0aGVyIGJlZW4gcmV2aWV3ZWQK
-PiBwcmV2aW91c2x5LCBvciB0aGF0IGFyZSBzaW1wbGUgZW5vdWdoIHRvIGluY2x1ZGUuCj4KPiBU
-aGUgbWFpbiBtaXNzaW5nIHBpZWNlIGlzIHRoZSBTR19JTy9TR19HRVRfUkVRVUVTVF9UQUJMRSBj
-b252ZXJzaW9uLgo+IEknbGwgcG9zdCB0aGUgcGF0Y2hlcyBJIG1hZGUgZm9yIHRoYXQgbGF0ZXIs
-IGFzIHRoZXkgbmVlZCBtb3JlCj4gdGVzdGluZyBhbmQgcmV2aWV3IGZyb20gdGhlIHNjc2kgbWFp
-bnRhaW5lcnMuCj4KPiBJIGhvcGUgeW91IGNhbiBzdGlsbCB0YWtlIHRoZXNlIGZvciB0aGUgY29t
-aW5nIG1lcmdlIHdpbmRvdywgdW5sZXNzCj4gbmV3IHByb2JsZW1zIGNvbWUgdXAuCgo+ICBkcml2
-ZXJzL3BsYXRmb3JtL3g4Ni93bWkuYyAgICAgICAgICAgICAgICAgIHwgICAyICstCgpBY2tlZC1i
-eTogQW5keSBTaGV2Y2hlbmtvIDxhbmR5LnNoZXZjaGVua29AZ21haWwuY29tPgoKLS0gCldpdGgg
-QmVzdCBSZWdhcmRzLApBbmR5IFNoZXZjaGVua28KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlz
-dHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4v
-bGlzdGluZm8vZHJpLWRldmVs
+From: Jeff Layton <jlayton@kernel.org>
+
+[ Upstream commit 4b8222870032715f9d995f3eb7c7acd8379a275d ]
+
+It's possible for us to issue a lookup to revalidate a dentry
+concurrently with a rename. If done in the right order, then we could
+end up processing dentry info in the reply that no longer reflects the
+state of the dentry.
+
+If req->r_dentry->d_name differs from the one in the trace, then just
+ignore the trace in the reply. We only need to do this however if the
+parent's i_rwsem is not held.
+
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ fs/ceph/inode.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 9d1f34d46627..5880ee20ada4 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1152,6 +1152,19 @@ static int splice_dentry(struct dentry **pdn, struct inode *in)
+ 	return 0;
+ }
+ 
++static int d_name_cmp(struct dentry *dentry, const char *name, size_t len)
++{
++	int ret;
++
++	/* take d_lock to ensure dentry->d_name stability */
++	spin_lock(&dentry->d_lock);
++	ret = dentry->d_name.len - len;
++	if (!ret)
++		ret = memcmp(dentry->d_name.name, name, len);
++	spin_unlock(&dentry->d_lock);
++	return ret;
++}
++
+ /*
+  * Incorporate results into the local cache.  This is either just
+  * one inode, or a directory, dentry, and possibly linked-to inode (e.g.,
+@@ -1401,7 +1414,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		err = splice_dentry(&req->r_dentry, in);
+ 		if (err < 0)
+ 			goto done;
+-	} else if (rinfo->head->is_dentry) {
++	} else if (rinfo->head->is_dentry &&
++		   !d_name_cmp(req->r_dentry, rinfo->dname, rinfo->dname_len)) {
+ 		struct ceph_vino *ptvino = NULL;
+ 
+ 		if ((le32_to_cpu(rinfo->diri.in->cap.caps) & CEPH_CAP_FILE_SHARED) ||
+-- 
+2.20.1
