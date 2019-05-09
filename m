@@ -1,71 +1,61 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.0 84/99] ceph: handle the case where a dentry has been renamed on outstanding req
-Date: Tue,  7 May 2019 01:32:18 -0400
-Message-ID: <20190507053235.29900-84-sashal@kernel.org>
-References: <20190507053235.29900-1-sashal@kernel.org>
+From: Andrea Parri <andrea.parri@amarulasolutions.com>
+Subject: Re: [PATCH 4/5] ceph: fix improper use of smp_mb__before_atomic()
+Date: Thu, 9 May 2019 22:55:43 +0200
+Message-ID: <20190509205452.GA4359@andrea>
+References: <1556568902-12464-1-git-send-email-andrea.parri@amarulasolutions.com>
+ <1556568902-12464-5-git-send-email-andrea.parri@amarulasolutions.com>
+ <20190430082332.GB2677@hirez.programming.kicks-ass.net>
+ <CAAM7YA=YOM79GJK8b7OOQbzT_-sYRD2UFHYithY7Li1yQt5Hog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190507053235.29900-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAAM7YA=YOM79GJK8b7OOQbzT_-sYRD2UFHYithY7Li1yQt5Hog@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Paul E. McKenney" <paulmck@linux.ibm.com>, Peter Zijlstra <peterz@infradead.org>
 List-Id: ceph-devel.vger.kernel.org
 
-From: Jeff Layton <jlayton@kernel.org>
+On Tue, Apr 30, 2019 at 05:08:43PM +0800, Yan, Zheng wrote:
+> On Tue, Apr 30, 2019 at 4:26 PM Peter Zijlstra <peterz@infradead.org> wrote:
+> >
+> > On Mon, Apr 29, 2019 at 10:15:00PM +0200, Andrea Parri wrote:
+> > > This barrier only applies to the read-modify-write operations; in
+> > > particular, it does not apply to the atomic64_set() primitive.
+> > >
+> > > Replace the barrier with an smp_mb().
+> > >
+> >
+> > > @@ -541,7 +541,7 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
+> > >                                          long long release_count,
+> > >                                          long long ordered_count)
+> > >  {
+> > > -     smp_mb__before_atomic();
+> >
+> > same
+> >         /*
+> >          * XXX: the comment that explain this barrier goes here.
+> >          */
+> >
+> 
+> makes sure operations that setup readdir cache (update page cache and
+> i_size) are strongly ordered with following atomic64_set.
 
-[ Upstream commit 4b8222870032715f9d995f3eb7c7acd8379a275d ]
+Thanks for the suggestion, Yan.
 
-It's possible for us to issue a lookup to revalidate a dentry
-concurrently with a rename. If done in the right order, then we could
-end up processing dentry info in the reply that no longer reflects the
-state of the dentry.
+To be clear: would you like me to integrate your comment and resend?
+any other suggestions?
 
-If req->r_dentry->d_name differs from the one in the trace, then just
-ignore the trace in the reply. We only need to do this however if the
-parent's i_rwsem is not held.
+Thanx,
+  Andrea
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
-Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- fs/ceph/inode.c | 16 +++++++++++++++-
- 1 file changed, 15 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9d1f34d46627..5880ee20ada4 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1152,6 +1152,19 @@ static int splice_dentry(struct dentry **pdn, struct inode *in)
- 	return 0;
- }
- 
-+static int d_name_cmp(struct dentry *dentry, const char *name, size_t len)
-+{
-+	int ret;
-+
-+	/* take d_lock to ensure dentry->d_name stability */
-+	spin_lock(&dentry->d_lock);
-+	ret = dentry->d_name.len - len;
-+	if (!ret)
-+		ret = memcmp(dentry->d_name.name, name, len);
-+	spin_unlock(&dentry->d_lock);
-+	return ret;
-+}
-+
- /*
-  * Incorporate results into the local cache.  This is either just
-  * one inode, or a directory, dentry, and possibly linked-to inode (e.g.,
-@@ -1401,7 +1414,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		err = splice_dentry(&req->r_dentry, in);
- 		if (err < 0)
- 			goto done;
--	} else if (rinfo->head->is_dentry) {
-+	} else if (rinfo->head->is_dentry &&
-+		   !d_name_cmp(req->r_dentry, rinfo->dname, rinfo->dname_len)) {
- 		struct ceph_vino *ptvino = NULL;
- 
- 		if ((le32_to_cpu(rinfo->diri.in->cap.caps) & CEPH_CAP_FILE_SHARED) ||
--- 
-2.20.1
+> 
+> > > +     smp_mb();
+> >
+> > >       atomic64_set(&ci->i_complete_seq[0], release_count);
+> > >       atomic64_set(&ci->i_complete_seq[1], ordered_count);
+> > >  }
+> > > --
+> > > 2.7.4
+> > >
