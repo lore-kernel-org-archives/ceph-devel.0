@@ -1,61 +1,72 @@
-From: Andrea Parri <andrea.parri@amarulasolutions.com>
-Subject: Re: [PATCH 4/5] ceph: fix improper use of smp_mb__before_atomic()
-Date: Thu, 9 May 2019 22:55:43 +0200
-Message-ID: <20190509205452.GA4359@andrea>
-References: <1556568902-12464-1-git-send-email-andrea.parri@amarulasolutions.com>
- <1556568902-12464-5-git-send-email-andrea.parri@amarulasolutions.com>
- <20190430082332.GB2677@hirez.programming.kicks-ass.net>
- <CAAM7YA=YOM79GJK8b7OOQbzT_-sYRD2UFHYithY7Li1yQt5Hog@mail.gmail.com>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: RFC: relicence Ceph LGPL-2.1 code as LGPL-2.1 or
+ LGPL-3.0
+Date: Fri, 10 May 2019 14:27:11 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1904221623540.7135@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAAM7YA=YOM79GJK8b7OOQbzT_-sYRD2UFHYithY7Li1yQt5Hog@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Paul E. McKenney" <paulmck@linux.ibm.com>, Peter Zijlstra <peterz@infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Apr 30, 2019 at 05:08:43PM +0800, Yan, Zheng wrote:
-> On Tue, Apr 30, 2019 at 4:26 PM Peter Zijlstra <peterz@infradead.org> wrote:
-> >
-> > On Mon, Apr 29, 2019 at 10:15:00PM +0200, Andrea Parri wrote:
-> > > This barrier only applies to the read-modify-write operations; in
-> > > particular, it does not apply to the atomic64_set() primitive.
-> > >
-> > > Replace the barrier with an smp_mb().
-> > >
-> >
-> > > @@ -541,7 +541,7 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
-> > >                                          long long release_count,
-> > >                                          long long ordered_count)
-> > >  {
-> > > -     smp_mb__before_atomic();
-> >
-> > same
-> >         /*
-> >          * XXX: the comment that explain this barrier goes here.
-> >          */
-> >
-> 
-> makes sure operations that setup readdir cache (update page cache and
-> i_size) are strongly ordered with following atomic64_set.
+Hi everyone,
 
-Thanks for the suggestion, Yan.
+-- What --
 
-To be clear: would you like me to integrate your comment and resend?
-any other suggestions?
+The Ceph Leadership Team[1] is proposing a change of license from 
+*LGPL-2.1* to *LGPL-2.1 or LGPL-3.0* (dual license). The specific changes 
+are described by this pull request:
 
-Thanx,
-  Andrea
+	https://github.com/ceph/ceph/pull/22446
+
+If you are a Ceph developer who has contributed code to Ceph and object to 
+this change of license, please let us know, either by replying to this 
+message or by commenting on that pull request.
+
+Our plan is to leave the issue open for comment for some period of time 
+and, if no objections are raised that cannot be adequately addressed (via 
+persuasion, code replacement, or whatever) we will move forward with the 
+change.
 
 
-> 
-> > > +     smp_mb();
-> >
-> > >       atomic64_set(&ci->i_complete_seq[0], release_count);
-> > >       atomic64_set(&ci->i_complete_seq[1], ordered_count);
-> > >  }
-> > > --
-> > > 2.7.4
-> > >
+-- Why --
+
+The primary motivation to relicense is a desire to integrate with projects 
+that are licensed under the Apache License version 2.0. Although opinions 
+vary, there are some who argue the the LGPL-2.1 and Apache-2.0 licenses 
+are not fully compatible. We would like to avoid the ambiguity and 
+potential for controversy.
+
+Projects we would like to consume that are Apache-2.0 licensed include 
+RocksDB, Seastar, OpenSSL (which is in the process of relicensing to 
+Apache-2.0), and Swagger (swagger.io). Note that some of these are (or 
+could be) dynamically linked or are consumed via a high-level language, 
+and may or may not require a change to LGPL-3.0, but providing the option 
+for LGPL-3.0 will avoid any uncertainty.
+
+A few other source files are already incorporated into Ceph that claim an 
+Apache-2.0 license:
+
+   src/common/deleter.h
+   src/common/sstring.h
+   src/include/cpp-btree
+
+The Ceph developers would further like to provide a license option that is 
+more modern than the current LGPL-2.1. LGPL-3.0 includes updated, 
+clarified language around several issues and is widely considered more 
+modern, superior license.
+
+Thank you!
+
+
+[1] http://docs.ceph.com/docs/master/governance/#ceph-leadership-team
