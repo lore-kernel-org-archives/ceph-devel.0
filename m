@@ -1,90 +1,70 @@
-From: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
-Subject: Re: RFC: relicence Ceph LGPL-2.1 code as LGPL-2.1 or
- LGPL-3.0
-Date: Fri, 10 May 2019 20:10:35 +0000
-Message-ID: <robbat2-20190510T200848-729932465Z@orbis-terrarum.net>
-References: <alpine.DEB.2.11.1904221623540.7135@piezo.novalocal>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 4/5] ceph: fix improper use of smp_mb__before_atomic()
+Date: Mon, 13 May 2019 21:04:10 +0800
+Message-ID: <6956e700-ef56-7f20-4e6c-3ad86c9fd89e@redhat.com>
+References: <1556568902-12464-1-git-send-email-andrea.parri@amarulasolutions.com>
+ <1556568902-12464-5-git-send-email-andrea.parri@amarulasolutions.com>
+ <20190430082332.GB2677@hirez.programming.kicks-ass.net>
+ <CAAM7YA=YOM79GJK8b7OOQbzT_-sYRD2UFHYithY7Li1yQt5Hog@mail.gmail.com>
+ <20190509205452.GA4359@andrea>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7099287779759783748=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1904221623540.7135-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190509205452.GA4359@andrea>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrea Parri <andrea.parri@amarulasolutions.com>, "Yan, Zheng" <ukernel@gmail.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Paul E. McKenney" <paulmck@linux.ibm.com>, Peter Zijlstra <peterz@infradead.org>
 List-Id: ceph-devel.vger.kernel.org
 
+On 5/10/19 4:55 AM, Andrea Parri wrote:
+> On Tue, Apr 30, 2019 at 05:08:43PM +0800, Yan, Zheng wrote:
+>> On Tue, Apr 30, 2019 at 4:26 PM Peter Zijlstra <peterz@infradead.org> wrote:
+>>>
+>>> On Mon, Apr 29, 2019 at 10:15:00PM +0200, Andrea Parri wrote:
+>>>> This barrier only applies to the read-modify-write operations; in
+>>>> particular, it does not apply to the atomic64_set() primitive.
+>>>>
+>>>> Replace the barrier with an smp_mb().
+>>>>
+>>>
+>>>> @@ -541,7 +541,7 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
+>>>>                                           long long release_count,
+>>>>                                           long long ordered_count)
+>>>>   {
+>>>> -     smp_mb__before_atomic();
+>>>
+>>> same
+>>>          /*
+>>>           * XXX: the comment that explain this barrier goes here.
+>>>           */
+>>>
+>>
+>> makes sure operations that setup readdir cache (update page cache and
+>> i_size) are strongly ordered with following atomic64_set.
+> 
+> Thanks for the suggestion, Yan.
+> 
+> To be clear: would you like me to integrate your comment and resend?
+> any other suggestions?
+> 
 
---===============7099287779759783748==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="svExV93C05KqedWb"
-Content-Disposition: inline
+Yes, please
 
+Regards
+Yan, Zheng
 
---svExV93C05KqedWb
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Fri, May 10, 2019 at 02:27:11PM +0000, Sage Weil wrote:
-> If you are a Ceph developer who has contributed code to Ceph and object t=
-o=20
-> this change of license, please let us know, either by replying to this=20
-> message or by commenting on that pull request.
-Am I correct in reading the diff that only a very small number of files
-did not already have the 'or later' clause of *GPL in effect?
-
-As a slight tangent, can we get SPDX tags on files rather than this
-hard-to-parse text?
-
---=20
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Treasurer
-E-Mail   : robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
-
---svExV93C05KqedWb
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
-
-iQKTBAABCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlzV2rpfFIAAAAAALgAo
-aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
-RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
-JsSWEw/+I/q6teCgXaxfNiuBQIDB4VdTthja1AsuAmkv1g3hBFTKwRv0g9llv4V7
-QNnspug4+tu4m3UyMc9kqjijUiBpFB+jIaEesN9SEQK3C/y4nejvMaVshKZNEApB
-6fcmEBg2PsGVhpBYuIl4ciSg7JXeWaY6tjWfKwe6vaPBAxGBFMxLVfV50NmLPLZh
-0QLMgui7RRa1opawhMsVOwRsSz4NWsG2N97M4Nxy+pnA3cwJfn1AFPJDVG14VtC0
-mHZ5z4w/UQzY2kxo38GYren9qtt1RCDt2kujvHFlENzUH0MGtutRcbj0E97LA7oS
-TGa8eFp1L6wqHTmSUtgtTm6UKDkFIqxDM718R3XOVOFpK5gYkPEiFKZdVJnuJa6Y
-6xMvUaPXe6TaEOC24L61P+9gMogCeGZ0e1VXZKXmPmX1vPiPjFTw+lCLHJHCHhG1
-sAdAY+iaZvmp4vuc6NvF0axZ5Jgdle7fHZrH2Bjf+MJvc9hz8VBBBB3nfEgWmF85
-eNaE34yYStm2PzfGyJ/CzwCzDFRjIs19A8+Paj+nWD+TtW8ddOcZC8k1Y3L5FH/v
-/3R/SlqxK1SHjemy9YJIq+de/aES3p7r4P2AUuillxBwg82GKrn1HLf54jzr4BNc
-5v9vwFZeu+ijLThUbCBPaAhtDHsyIc72LsbKOqpV8SiWa5KLVRg=
-=Y/ST
------END PGP SIGNATURE-----
-
---svExV93C05KqedWb--
-
---===============7099287779759783748==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============7099287779759783748==--
+> Thanx,
+>    Andrea
+> 
+> 
+>>
+>>>> +     smp_mb();
+>>>
+>>>>        atomic64_set(&ci->i_complete_seq[0], release_count);
+>>>>        atomic64_set(&ci->i_complete_seq[1], ordered_count);
+>>>>   }
+>>>> --
+>>>> 2.7.4
+>>>>
