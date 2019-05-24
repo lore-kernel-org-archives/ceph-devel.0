@@ -1,59 +1,49 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH 4/4] ceph: fix improper use of smp_mb__before_atomic()
-Date: Tue, 21 May 2019 10:18:07 +0800
-Message-ID: <a1dcab3f-6018-9d4d-ee6d-505b4086f097@redhat.com>
-References: <1558373038-5611-1-git-send-email-andrea.parri@amarulasolutions.com>
- <1558373038-5611-5-git-send-email-andrea.parri@amarulasolutions.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: RFC: relicence Ceph LGPL-2.1 code as LGPL-2.1 or
+ LGPL-3.0
+Date: Fri, 24 May 2019 14:37:20 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1905162245580.24518@piezo.novalocal>
+References: <alpine.DEB.2.11.1904221623540.7135@piezo.novalocal>
+ <robbat2-20190510T200848-729932465Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1558373038-5611-5-git-send-email-andrea.parri@amarulasolutions.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrea Parri <andrea.parri@amarulasolutions.com>, linux-kernel@vger.kernel.org
-Cc: stable@vger.kernel.org, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, "Paul E. McKenney" <paulmck@linux.ibm.com>, Peter Zijlstra <peterz@infradead.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <robbat2-20190510T200848-729932465Z-UgNl/1uUEYUufQK+DwRw3KxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On 5/21/19 1:23 AM, Andrea Parri wrote:
-> This barrier only applies to the read-modify-write operations; in
-> particular, it does not apply to the atomic64_set() primitive.
-> 
-> Replace the barrier with an smp_mb().
-> 
-> Fixes: fdd4e15838e59 ("ceph: rework dcache readdir")
-> Cc: stable@vger.kernel.org
-> Reported-by: "Paul E. McKenney" <paulmck@linux.ibm.com>
-> Reported-by: Peter Zijlstra <peterz@infradead.org>
-> Signed-off-by: Andrea Parri <andrea.parri@amarulasolutions.com>
-> Cc: "Yan, Zheng" <zyan@redhat.com>
-> Cc: Sage Weil <sage@redhat.com>
-> Cc: Ilya Dryomov <idryomov@gmail.com>
-> Cc: ceph-devel@vger.kernel.org
-> Cc: "Paul E. McKenney" <paulmck@linux.ibm.com>
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> ---
->   fs/ceph/super.h | 7 ++++++-
->   1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 6edab9a750f8a..e02f4ff0be3f1 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -541,7 +541,12 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
->   					   long long release_count,
->   					   long long ordered_count)
->   {
-> -	smp_mb__before_atomic();
-> +	/*
-> +	 * Makes sure operations that setup readdir cache (update page
-> +	 * cache and i_size) are strongly ordered w.r.t. the following
-> +	 * atomic64_set() operations.
-> +	 */
-> +	smp_mb();
->   	atomic64_set(&ci->i_complete_seq[0], release_count);
->   	atomic64_set(&ci->i_complete_seq[1], ordered_count);
->   }
-> 
+On Fri, 10 May 2019, Robin H. Johnson wrote:
+> On Fri, May 10, 2019 at 02:27:11PM +0000, Sage Weil wrote:
+> > If you are a Ceph developer who has contributed code to Ceph and object to 
+> > this change of license, please let us know, either by replying to this 
+> > message or by commenting on that pull request.
+> Am I correct in reading the diff that only a very small number of files
+> did not already have the 'or later' clause of *GPL in effect?
 
-Applied, thanks
+To the contrary, I think one file (the COPYING file) has one line as a 
+catch-all for everything (that isn't a special case) which is changing 
+from 2.1 to 2.1 or 3.
+
+https://github.com/ceph/ceph/pull/22446/files#diff-7116ef0705885343c9e1b2171a06be0eR6
+
+> As a slight tangent, can we get SPDX tags on files rather than this
+> hard-to-parse text?
+
+(/me googles SPDX)
+
+Sure?  The current format is based on the Debian copyright file format, 
+which seemed appropriate at the time.  Happy to take patches that add more 
+appropriate annotations...
+
+sage
