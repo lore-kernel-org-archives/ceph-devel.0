@@ -1,13 +1,14 @@
-From: Linh Vu <vul-keaFvQtjc6i7NGdpmJTKYQ@public.gmane.org>
+From: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Changing the release cadence
-Date: Thu, 6 Jun 2019 00:31:53 +0000
-Message-ID: <ME1PR01MB070645B4EDCB63853433D02A81170@ME1PR01MB0706.ausprd01.prod.outlook.com>
+Date: Thu, 6 Jun 2019 15:26:46 +0800
+Message-ID: <CAEYCsVLdWh_hGQN+LoTrX1=BOVJZ-ras+PTGgRJ0n1Z_3-P3dw@mail.gmail.com>
 References: <alpine.DEB.2.11.1906051556500.987@piezo.novalocal>
+ <ME1PR01MB070645B4EDCB63853433D02A81170@ME1PR01MB0706.ausprd01.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0324290320169728562=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1906051556500.987-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-Content-Language: en-AU
+In-Reply-To: <ME1PR01MB070645B4EDCB63853433D02A81170-2wSXk0H63TwVj78W2k5HnsNU+h3Mz0HLvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,255 +18,101 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "dev-a8pt6IJUokc@public.gmane.org" <dev-a8pt6IJUokc@public.gmane.org>
+To: Linh Vu <vul-keaFvQtjc6i7NGdpmJTKYQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "dev-a8pt6IJUokc@public.gmane.org" <dev-a8pt6IJUokc@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============0324290320169728562==
-Content-Language: en-AU
-Content-Type: multipart/alternative;
-	boundary="_000_ME1PR01MB070645B4EDCB63853433D02A81170ME1PR01MB0706ausp_"
-
---_000_ME1PR01MB070645B4EDCB63853433D02A81170ME1PR01MB0706ausp_
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
-
-I think 12 months cycle is much better from the cluster operations perspect=
-ive. I also like March as a release month as well.
-________________________________
-From: ceph-users <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org> on behalf of Sage Weil=
- <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Sent: Thursday, 6 June 2019 1:57 AM
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; dev-a8pt6IJUokc@public.gmane.org
-Subject: [ceph-users] Changing the release cadence
-
-Hi everyone,
-
-Since luminous, we have had the follow release cadence and policy:
- - release every 9 months
- - maintain backports for the last two releases
- - enable upgrades to move either 1 or 2 releases heads
-   (e.g., luminous -> mimic or nautilus; mimic -> nautilus or octopus; ...)
-
-This has mostly worked out well, except that the mimic release received
-less attention that we wanted due to the fact that multiple downstream
-Ceph products (from Red Has and SUSE) decided to based their next release
-on nautilus.  Even though upstream every release is an "LTS" release, as a
-practical matter mimic got less attention than luminous or nautilus.
-
-We've had several requests/proposals to shift to a 12 month cadence. This
-has several advantages:
-
- - Stable/conservative clusters only have to be upgraded every 2 years
-   (instead of every 18 months)
- - Yearly releases are more likely to intersect with downstream
-   distribution release (e.g., Debian).  In the past there have been
-   problems where the Ceph releases included in consecutive releases of a
-   distro weren't easily upgradeable.
- - Vendors that make downstream Ceph distributions/products tend to
-   release yearly.  Aligning with those vendors means they are more likely
-   to productize *every* Ceph release.  This will help make every Ceph
-   release an "LTS" release (not just in name but also in terms of
-   maintenance attention).
-
-So far the balance of opinion seems to favor a shift to a 12 month
-cycle[1], especially among developers, so it seems pretty likely we'll
-make that shift.  (If you do have strong concerns about such a move, now
-is the time to raise them.)
-
-That brings us to an important decision: what time of year should we
-release?  Once we pick the timing, we'll be releasing at that time *every
-year* for each release (barring another schedule shift, which we want to
-avoid), so let's choose carefully!
-
-A few options:
-
- - November: If we release Octopus 9 months from the Nautilus release
-   (planned for Feb, released in Mar) then we'd target this November.  We
-   could shift to a 12 months candence after that.
- - February: That's 12 months from the Nautilus target.
- - March: That's 12 months from when Nautilus was *actually* released.
-
-November is nice in the sense that we'd wrap things up before the
-holidays.  It's less good in that users may not be inclined to install the
-new release when many developers will be less available in December.
-
-February kind of sucked in that the scramble to get the last few things
-done happened during the holidays.  OTOH, we should be doing what we can
-to avoid such scrambles, so that might not be something we should factor
-in.  March may be a bit more balanced, with a solid 3 months before when
-people are productive, and 3 months after before they disappear on holiday
-to address any post-release issues.
-
-People tend to be somewhat less available over the summer months due to
-holidays etc, so an early or late summer release might also be less than
-ideal.
-
-Thoughts?  If we can narrow it down to a few options maybe we could do a
-poll to gauge user preferences.
-
-Thanks!
-sage
-
-
-[1] https://twitter.com/larsmb/status/1130010208971952129
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
---_000_ME1PR01MB070645B4EDCB63853433D02A81170ME1PR01MB0706ausp_
-Content-Type: text/html; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
->
-<style type=3D"text/css" style=3D"display:none;"> P {margin-top:0;margin-bo=
-ttom:0;} </style>
-</head>
-<body dir=3D"ltr">
-<div style=3D"font-family: Calibri, Arial, Helvetica, sans-serif; font-size=
-: 12pt; color: rgb(0, 0, 0);">
-I think 12 months cycle is much better from the cluster operations perspect=
-ive. I also like March as a release month as well.&nbsp;</div>
-<div id=3D"appendonsend"></div>
-<hr style=3D"display:inline-block;width:98%" tabindex=3D"-1">
-<div id=3D"divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif" st=
-yle=3D"font-size:11pt" color=3D"#000000"><b>From:</b> ceph-users &lt;ceph-u=
-sers-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&gt; on behalf of Sage Weil &lt;sage-BnTBU8nroG6DGRHsOpWV0g@public.gmane.org=
-t&gt;<br>
-<b>Sent:</b> Thursday, 6 June 2019 1:57 AM<br>
-<b>To:</b> ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; dev-a8pt6IJUokc@public.gmane.org<br>
-<b>Subject:</b> [ceph-users] Changing the release cadence</font>
-<div>&nbsp;</div>
-</div>
-<div class=3D"BodyFragment"><font size=3D"2"><span style=3D"font-size:11pt;=
-">
-<div class=3D"PlainText">Hi everyone,<br>
-<br>
-Since luminous, we have had the follow release cadence and policy:&nbsp;&nb=
-sp; <br>
-&nbsp;- release every 9 months<br>
-&nbsp;- maintain backports for the last two releases<br>
-&nbsp;- enable upgrades to move either 1 or 2 releases heads<br>
-&nbsp;&nbsp; (e.g., luminous -&gt; mimic or nautilus; mimic -&gt; nautilus =
-or octopus; ...)<br>
-<br>
-This has mostly worked out well, except that the mimic release received <br=
->
-less attention that we wanted due to the fact that multiple downstream <br>
-Ceph products (from Red Has and SUSE) decided to based their next release <=
-br>
-on nautilus.&nbsp; Even though upstream every release is an &quot;LTS&quot;=
- release, as a <br>
-practical matter mimic got less attention than luminous or nautilus.<br>
-<br>
-We've had several requests/proposals to shift to a 12 month cadence. This <=
-br>
-has several advantages:<br>
-<br>
-&nbsp;- Stable/conservative clusters only have to be upgraded every 2 years=
-<br>
-&nbsp;&nbsp; (instead of every 18 months)<br>
-&nbsp;- Yearly releases are more likely to intersect with downstream<br>
-&nbsp;&nbsp; distribution release (e.g., Debian).&nbsp; In the past there h=
-ave been <br>
-&nbsp;&nbsp; problems where the Ceph releases included in consecutive relea=
-ses of a <br>
-&nbsp;&nbsp; distro weren't easily upgradeable.<br>
-&nbsp;- Vendors that make downstream Ceph distributions/products tend to<br=
->
-&nbsp;&nbsp; release yearly.&nbsp; Aligning with those vendors means they a=
-re more likely <br>
-&nbsp;&nbsp; to productize *every* Ceph release.&nbsp; This will help make =
-every Ceph <br>
-&nbsp;&nbsp; release an &quot;LTS&quot; release (not just in name but also =
-in terms of <br>
-&nbsp;&nbsp; maintenance attention).<br>
-<br>
-So far the balance of opinion seems to favor a shift to a 12 month <br>
-cycle[1], especially among developers, so it seems pretty likely we'll <br>
-make that shift.&nbsp; (If you do have strong concerns about such a move, n=
-ow <br>
-is the time to raise them.)<br>
-<br>
-That brings us to an important decision: what time of year should we <br>
-release?&nbsp; Once we pick the timing, we'll be releasing at that time *ev=
-ery <br>
-year* for each release (barring another schedule shift, which we want to <b=
-r>
-avoid), so let's choose carefully!<br>
-<br>
-A few options:<br>
-<br>
-&nbsp;- November: If we release Octopus 9 months from the Nautilus release<=
-br>
-&nbsp;&nbsp; (planned for Feb, released in Mar) then we'd target this Novem=
-ber.&nbsp; We <br>
-&nbsp;&nbsp; could shift to a 12 months candence after that.<br>
-&nbsp;- February: That's 12 months from the Nautilus target.<br>
-&nbsp;- March: That's 12 months from when Nautilus was *actually* released.=
-<br>
-<br>
-November is nice in the sense that we'd wrap things up before the <br>
-holidays.&nbsp; It's less good in that users may not be inclined to install=
- the <br>
-new release when many developers will be less available in December.<br>
-<br>
-February kind of sucked in that the scramble to get the last few things<br>
-done happened during the holidays.&nbsp; OTOH, we should be doing what we c=
-an<br>
-to avoid such scrambles, so that might not be something we should factor<br=
->
-in.&nbsp; March may be a bit more balanced, with a solid 3 months before wh=
-en<br>
-people are productive, and 3 months after before they disappear on holiday<=
-br>
-to address any post-release issues.<br>
-<br>
-People tend to be somewhat less available over the summer months due to<br>
-holidays etc, so an early or late summer release might also be less than<br=
->
-ideal.<br>
-<br>
-Thoughts?&nbsp; If we can narrow it down to a few options maybe we could do=
- a<br>
-poll to gauge user preferences.<br>
-<br>
-Thanks!<br>
-sage<br>
-<br>
-<br>
-[1] <a href=3D"https://twitter.com/larsmb/status/1130010208971952129">
-https://protect-au.mimecast.com/s/N1l6CROAEns1RN1Zu9Jwts?domain=3Dtwitter.c=
-om</a><br>
-<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com">http://l=
-ists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-<br>
-</div>
-</span></font></div>
-</body>
-</html>
-
---_000_ME1PR01MB070645B4EDCB63853433D02A81170ME1PR01MB0706ausp_--
-
-
---===============0324290320169728562==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0324290320169728562==--
+V2UgZ28gd2l0aCB1cHN0cmVhbSByZWxlYXNlIGFuZCBtb3N0bHkgTmF1dGlsdXMgbm93LCBwcm9i
+YWJseSB0aGUgbW9zdAphZ2dyZXNzaXZlIG9uZXMgYW1vbmcgc2VyaW91cyBwcm9kdWN0aW9uIHVz
+ZXIgKGkuZSB0ZW5zIG9mIFBCKyApLAoKSSB3aWxsIHZvdGUgZm9yIE5vdmVtYmVyIGZvciBzZXZl
+cmFsIHJlYXNvbnM6CgogMS4gICBRNCBpcyBob2xpZGF5IHNlYXNvbiBhbmQgdXN1YWxseSBwcm9k
+dWN0aW9uIHJvbGxvdXQgd2FzIGJsb2NrZWQKLCBlc3BlY2lhbGx5IHN0b3JhZ2UgcmVsYXRlZCBj
+aGFuZ2UsIHdoaWNoIHVzdWFsbHkgZ2l2ZSB0ZWFtIG1vcmUgdGltZQp0byBwcmVwYXJlLyB0ZXN0
+aW5nLyBMblAgdGhlIG5ldyByZWxlYXNlcywgYXMgd2VsbCBhcyBjYXRjaCB1cCB3aXRoCm5ldyBm
+ZWF0dXJlcy4KCiAyLiAgUTQvUTEgaXMgdXN1YWxseSB0aGUgcGxhbm5pbmcgc2Vhc29uLCAgaGF2
+aW5nIHRoZSB1cHN0cmVhbQpyZWxlYXNlZCBhbmQgdGVzdGluZyB0byBrbm93IHRoZSByZWFkaW5l
+c3Mgb2YgbmV3IGZlYXR1cmUsIHdpbGwKZ3JlYXRseSBoZWxwcyB3aGVuIHBsYW5uaW5nIHRoZSBm
+ZWF0dXJlL29mZmVyaW5nIG9mIG5leHQgeWVhci4KCiAzLiAgVXNlcnMgaGF2ZSB3aG9sZSB5ZWFy
+IHRvIG1pZ3JhdGUgdGhlaXIKcHJvdmlzaW9uL21vbml0b3JpbmcvZGVwbG95bWVudC9yZW1lZGlh
+dGlvbiBzeXN0ZW0gdG8gbmV3IHZlcnNpb24sIGFuZApoYXZlIGVub3VnaCB0aW1lIHRvIGZpeCBh
+bmQgc3RhYmxlIHRoZSBzdXJyb3VuZGluZyBzeXN0ZW0gYmVmb3JlIG5leHQKaG9saWRheSBzZWFz
+b24uCgpSZWxlYXNlIGluIEZlYiBvciBNYXJjaCB3aWxsIG1ha2UgdGhlIFE0IGp1c3QgaW4gdGhl
+IG1pZGRsZSBvZiB0aGUKY3ljbGUsIGFuZCBsb3Qgb2YgY2hhbmdlcyB3aWxsIGxhbmQgYXQgbGFz
+dCBtaW51dGVzKG1vbnRoKSwgICBpbiB3aGljaApjYXNlLCBmZXcgdGhpbmdzIGNhbiBiZSB0ZXN0
+IGFuZCBmb3JlY2FzdGVkIGJhc2VkIG9uIHRoZSBzdGF0ZS1vZi1hcnQKaW4gUTQuCgotWGlhb3hp
+CgpMaW5oIFZ1IDx2dWxAdW5pbWVsYi5lZHUuYXU+IOS6jjIwMTnlubQ25pyINuaXpeWRqOWbmyDk
+uIrljYg4OjMy5YaZ6YGT77yaCj4KPiBJIHRoaW5rIDEyIG1vbnRocyBjeWNsZSBpcyBtdWNoIGJl
+dHRlciBmcm9tIHRoZSBjbHVzdGVyIG9wZXJhdGlvbnMgcGVyc3BlY3RpdmUuIEkgYWxzbyBsaWtl
+IE1hcmNoIGFzIGEgcmVsZWFzZSBtb250aCBhcyB3ZWxsLgo+IF9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCj4gRnJvbTogY2VwaC11c2VycyA8Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3Rz
+LmNlcGguY29tPiBvbiBiZWhhbGYgb2YgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD4KPiBT
+ZW50OiBUaHVyc2RheSwgNiBKdW5lIDIwMTkgMTo1NyBBTQo+IFRvOiBjZXBoLXVzZXJzQGNlcGgu
+Y29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgZGV2QGNlcGguaW8KPiBTdWJqZWN0OiBb
+Y2VwaC11c2Vyc10gQ2hhbmdpbmcgdGhlIHJlbGVhc2UgY2FkZW5jZQo+Cj4gSGkgZXZlcnlvbmUs
+Cj4KPiBTaW5jZSBsdW1pbm91cywgd2UgaGF2ZSBoYWQgdGhlIGZvbGxvdyByZWxlYXNlIGNhZGVu
+Y2UgYW5kIHBvbGljeToKPiAgLSByZWxlYXNlIGV2ZXJ5IDkgbW9udGhzCj4gIC0gbWFpbnRhaW4g
+YmFja3BvcnRzIGZvciB0aGUgbGFzdCB0d28gcmVsZWFzZXMKPiAgLSBlbmFibGUgdXBncmFkZXMg
+dG8gbW92ZSBlaXRoZXIgMSBvciAyIHJlbGVhc2VzIGhlYWRzCj4gICAgKGUuZy4sIGx1bWlub3Vz
+IC0+IG1pbWljIG9yIG5hdXRpbHVzOyBtaW1pYyAtPiBuYXV0aWx1cyBvciBvY3RvcHVzOyAuLi4p
+Cj4KPiBUaGlzIGhhcyBtb3N0bHkgd29ya2VkIG91dCB3ZWxsLCBleGNlcHQgdGhhdCB0aGUgbWlt
+aWMgcmVsZWFzZSByZWNlaXZlZAo+IGxlc3MgYXR0ZW50aW9uIHRoYXQgd2Ugd2FudGVkIGR1ZSB0
+byB0aGUgZmFjdCB0aGF0IG11bHRpcGxlIGRvd25zdHJlYW0KPiBDZXBoIHByb2R1Y3RzIChmcm9t
+IFJlZCBIYXMgYW5kIFNVU0UpIGRlY2lkZWQgdG8gYmFzZWQgdGhlaXIgbmV4dCByZWxlYXNlCj4g
+b24gbmF1dGlsdXMuICBFdmVuIHRob3VnaCB1cHN0cmVhbSBldmVyeSByZWxlYXNlIGlzIGFuICJM
+VFMiIHJlbGVhc2UsIGFzIGEKPiBwcmFjdGljYWwgbWF0dGVyIG1pbWljIGdvdCBsZXNzIGF0dGVu
+dGlvbiB0aGFuIGx1bWlub3VzIG9yIG5hdXRpbHVzLgo+Cj4gV2UndmUgaGFkIHNldmVyYWwgcmVx
+dWVzdHMvcHJvcG9zYWxzIHRvIHNoaWZ0IHRvIGEgMTIgbW9udGggY2FkZW5jZS4gVGhpcwo+IGhh
+cyBzZXZlcmFsIGFkdmFudGFnZXM6Cj4KPiAgLSBTdGFibGUvY29uc2VydmF0aXZlIGNsdXN0ZXJz
+IG9ubHkgaGF2ZSB0byBiZSB1cGdyYWRlZCBldmVyeSAyIHllYXJzCj4gICAgKGluc3RlYWQgb2Yg
+ZXZlcnkgMTggbW9udGhzKQo+ICAtIFllYXJseSByZWxlYXNlcyBhcmUgbW9yZSBsaWtlbHkgdG8g
+aW50ZXJzZWN0IHdpdGggZG93bnN0cmVhbQo+ICAgIGRpc3RyaWJ1dGlvbiByZWxlYXNlIChlLmcu
+LCBEZWJpYW4pLiAgSW4gdGhlIHBhc3QgdGhlcmUgaGF2ZSBiZWVuCj4gICAgcHJvYmxlbXMgd2hl
+cmUgdGhlIENlcGggcmVsZWFzZXMgaW5jbHVkZWQgaW4gY29uc2VjdXRpdmUgcmVsZWFzZXMgb2Yg
+YQo+ICAgIGRpc3RybyB3ZXJlbid0IGVhc2lseSB1cGdyYWRlYWJsZS4KPiAgLSBWZW5kb3JzIHRo
+YXQgbWFrZSBkb3duc3RyZWFtIENlcGggZGlzdHJpYnV0aW9ucy9wcm9kdWN0cyB0ZW5kIHRvCj4g
+ICAgcmVsZWFzZSB5ZWFybHkuICBBbGlnbmluZyB3aXRoIHRob3NlIHZlbmRvcnMgbWVhbnMgdGhl
+eSBhcmUgbW9yZSBsaWtlbHkKPiAgICB0byBwcm9kdWN0aXplICpldmVyeSogQ2VwaCByZWxlYXNl
+LiAgVGhpcyB3aWxsIGhlbHAgbWFrZSBldmVyeSBDZXBoCj4gICAgcmVsZWFzZSBhbiAiTFRTIiBy
+ZWxlYXNlIChub3QganVzdCBpbiBuYW1lIGJ1dCBhbHNvIGluIHRlcm1zIG9mCj4gICAgbWFpbnRl
+bmFuY2UgYXR0ZW50aW9uKS4KPgo+IFNvIGZhciB0aGUgYmFsYW5jZSBvZiBvcGluaW9uIHNlZW1z
+IHRvIGZhdm9yIGEgc2hpZnQgdG8gYSAxMiBtb250aAo+IGN5Y2xlWzFdLCBlc3BlY2lhbGx5IGFt
+b25nIGRldmVsb3BlcnMsIHNvIGl0IHNlZW1zIHByZXR0eSBsaWtlbHkgd2UnbGwKPiBtYWtlIHRo
+YXQgc2hpZnQuICAoSWYgeW91IGRvIGhhdmUgc3Ryb25nIGNvbmNlcm5zIGFib3V0IHN1Y2ggYSBt
+b3ZlLCBub3cKPiBpcyB0aGUgdGltZSB0byByYWlzZSB0aGVtLikKPgo+IFRoYXQgYnJpbmdzIHVz
+IHRvIGFuIGltcG9ydGFudCBkZWNpc2lvbjogd2hhdCB0aW1lIG9mIHllYXIgc2hvdWxkIHdlCj4g
+cmVsZWFzZT8gIE9uY2Ugd2UgcGljayB0aGUgdGltaW5nLCB3ZSdsbCBiZSByZWxlYXNpbmcgYXQg
+dGhhdCB0aW1lICpldmVyeQo+IHllYXIqIGZvciBlYWNoIHJlbGVhc2UgKGJhcnJpbmcgYW5vdGhl
+ciBzY2hlZHVsZSBzaGlmdCwgd2hpY2ggd2Ugd2FudCB0bwo+IGF2b2lkKSwgc28gbGV0J3MgY2hv
+b3NlIGNhcmVmdWxseSEKPgo+IEEgZmV3IG9wdGlvbnM6Cj4KPiAgLSBOb3ZlbWJlcjogSWYgd2Ug
+cmVsZWFzZSBPY3RvcHVzIDkgbW9udGhzIGZyb20gdGhlIE5hdXRpbHVzIHJlbGVhc2UKPiAgICAo
+cGxhbm5lZCBmb3IgRmViLCByZWxlYXNlZCBpbiBNYXIpIHRoZW4gd2UnZCB0YXJnZXQgdGhpcyBO
+b3ZlbWJlci4gIFdlCj4gICAgY291bGQgc2hpZnQgdG8gYSAxMiBtb250aHMgY2FuZGVuY2UgYWZ0
+ZXIgdGhhdC4KPiAgLSBGZWJydWFyeTogVGhhdCdzIDEyIG1vbnRocyBmcm9tIHRoZSBOYXV0aWx1
+cyB0YXJnZXQuCj4gIC0gTWFyY2g6IFRoYXQncyAxMiBtb250aHMgZnJvbSB3aGVuIE5hdXRpbHVz
+IHdhcyAqYWN0dWFsbHkqIHJlbGVhc2VkLgo+Cj4gTm92ZW1iZXIgaXMgbmljZSBpbiB0aGUgc2Vu
+c2UgdGhhdCB3ZSdkIHdyYXAgdGhpbmdzIHVwIGJlZm9yZSB0aGUKPiBob2xpZGF5cy4gIEl0J3Mg
+bGVzcyBnb29kIGluIHRoYXQgdXNlcnMgbWF5IG5vdCBiZSBpbmNsaW5lZCB0byBpbnN0YWxsIHRo
+ZQo+IG5ldyByZWxlYXNlIHdoZW4gbWFueSBkZXZlbG9wZXJzIHdpbGwgYmUgbGVzcyBhdmFpbGFi
+bGUgaW4gRGVjZW1iZXIuCj4KPiBGZWJydWFyeSBraW5kIG9mIHN1Y2tlZCBpbiB0aGF0IHRoZSBz
+Y3JhbWJsZSB0byBnZXQgdGhlIGxhc3QgZmV3IHRoaW5ncwo+IGRvbmUgaGFwcGVuZWQgZHVyaW5n
+IHRoZSBob2xpZGF5cy4gIE9UT0gsIHdlIHNob3VsZCBiZSBkb2luZyB3aGF0IHdlIGNhbgo+IHRv
+IGF2b2lkIHN1Y2ggc2NyYW1ibGVzLCBzbyB0aGF0IG1pZ2h0IG5vdCBiZSBzb21ldGhpbmcgd2Ug
+c2hvdWxkIGZhY3Rvcgo+IGluLiAgTWFyY2ggbWF5IGJlIGEgYml0IG1vcmUgYmFsYW5jZWQsIHdp
+dGggYSBzb2xpZCAzIG1vbnRocyBiZWZvcmUgd2hlbgo+IHBlb3BsZSBhcmUgcHJvZHVjdGl2ZSwg
+YW5kIDMgbW9udGhzIGFmdGVyIGJlZm9yZSB0aGV5IGRpc2FwcGVhciBvbiBob2xpZGF5Cj4gdG8g
+YWRkcmVzcyBhbnkgcG9zdC1yZWxlYXNlIGlzc3Vlcy4KPgo+IFBlb3BsZSB0ZW5kIHRvIGJlIHNv
+bWV3aGF0IGxlc3MgYXZhaWxhYmxlIG92ZXIgdGhlIHN1bW1lciBtb250aHMgZHVlIHRvCj4gaG9s
+aWRheXMgZXRjLCBzbyBhbiBlYXJseSBvciBsYXRlIHN1bW1lciByZWxlYXNlIG1pZ2h0IGFsc28g
+YmUgbGVzcyB0aGFuCj4gaWRlYWwuCj4KPiBUaG91Z2h0cz8gIElmIHdlIGNhbiBuYXJyb3cgaXQg
+ZG93biB0byBhIGZldyBvcHRpb25zIG1heWJlIHdlIGNvdWxkIGRvIGEKPiBwb2xsIHRvIGdhdWdl
+IHVzZXIgcHJlZmVyZW5jZXMuCj4KPiBUaGFua3MhCj4gc2FnZQo+Cj4KPiBbMV0gaHR0cHM6Ly9w
+cm90ZWN0LWF1Lm1pbWVjYXN0LmNvbS9zL04xbDZDUk9BRW5zMVJOMVp1OUp3dHM/ZG9tYWluPXR3
+aXR0ZXIuY29tCj4KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
+bQo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBj
+ZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWls
+aW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20v
+bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
