@@ -1,190 +1,51 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH 2/3] ceph: don't NULL terminate virtual xattr strings
-Date: Fri, 14 Jun 2019 09:46:24 -0400
-Message-ID: <20190614134625.6870-3-jlayton@kernel.org>
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: Re: [PATCH 0/3] ceph: don't NULL terminate virtual xattr values
+Date: Fri, 14 Jun 2019 18:56:34 +0200
+Message-ID: <CAHc6FU5QVQQ43TZNZ7A53D3Ka3e_qq9GEtV_fZt7C5A+xrWm_A@mail.gmail.com>
 References: <20190614134625.6870-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190614134625.6870-1-jlayton@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-Cc: akpm@linux-foundation.org, idryomov@gmail.com, zyan@redhat.com, sage@redhat.com, agruenba@redhat.com
+To: Jeff Layton <jlayton@kernel.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
 List-Id: ceph-devel.vger.kernel.org
 
-The convention with xattrs is to not NULL terminate string data in the
-value. Have ceph use snprintf_noterm to populate virtual xattrs.
+On Fri, 14 Jun 2019 at 15:46, Jeff Layton <jlayton@kernel.org> wrote:
+> kcephfs has several "virtual" xattrs that return strings that are
+> currently populated using snprintf(), which always NULL terminates the
+> string.
+>
+> This leads to the string being truncated when we use a buffer length
+> acquired by calling getxattr with a 0 size first. The last character
+> of the string ends up being clobbered by the termination.
+>
+> The convention with xattrs is to not store the termination with string
+> data, given that we have the length. This is how setfattr/getfattr
+> operate.
+>
+> This patch makes ceph's virtual xattrs not include NULL termination
+> when formatting their values. In order to handle this, a new
+> snprintf_noterm function is added, and ceph is changed over to use
+> this to populate the xattr value buffer. Finally, we fix ceph to
+> return -ERANGE properly when the string didn't fit in the buffer.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/xattr.c | 44 +++++++++++++++++++++++---------------------
- 1 file changed, 23 insertions(+), 21 deletions(-)
+This looks reasonable from an xattr point of view.
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 6621d27e64f5..a1cd9613be98 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -71,13 +71,13 @@ static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- 	down_read(&osdc->lock);
- 	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, pool);
- 	if (pool_name) {
--		len = snprintf(buf, sizeof(buf),
-+		len = snprintf_noterm(buf, sizeof(buf),
- 		"stripe_unit=%u stripe_count=%u object_size=%u pool=",
- 		ci->i_layout.stripe_unit, ci->i_layout.stripe_count,
- 	        ci->i_layout.object_size);
- 		total_len = len + strlen(pool_name);
- 	} else {
--		len = snprintf(buf, sizeof(buf),
-+		len = snprintf_noterm(buf, sizeof(buf),
- 		"stripe_unit=%u stripe_count=%u object_size=%u pool=%lld",
- 		ci->i_layout.stripe_unit, ci->i_layout.stripe_count,
- 	        ci->i_layout.object_size, (unsigned long long)pool);
-@@ -115,19 +115,19 @@ static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- static size_t ceph_vxattrcb_layout_stripe_unit(struct ceph_inode_info *ci,
- 					       char *val, size_t size)
- {
--	return snprintf(val, size, "%u", ci->i_layout.stripe_unit);
-+	return snprintf_noterm(val, size, "%u", ci->i_layout.stripe_unit);
- }
- 
- static size_t ceph_vxattrcb_layout_stripe_count(struct ceph_inode_info *ci,
- 						char *val, size_t size)
- {
--	return snprintf(val, size, "%u", ci->i_layout.stripe_count);
-+	return snprintf_noterm(val, size, "%u", ci->i_layout.stripe_count);
- }
- 
- static size_t ceph_vxattrcb_layout_object_size(struct ceph_inode_info *ci,
- 					       char *val, size_t size)
- {
--	return snprintf(val, size, "%u", ci->i_layout.object_size);
-+	return snprintf_noterm(val, size, "%u", ci->i_layout.object_size);
- }
- 
- static size_t ceph_vxattrcb_layout_pool(struct ceph_inode_info *ci,
-@@ -142,9 +142,10 @@ static size_t ceph_vxattrcb_layout_pool(struct ceph_inode_info *ci,
- 	down_read(&osdc->lock);
- 	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, pool);
- 	if (pool_name)
--		ret = snprintf(val, size, "%s", pool_name);
-+		ret = snprintf_noterm(val, size, "%s", pool_name);
- 	else
--		ret = snprintf(val, size, "%lld", (unsigned long long)pool);
-+		ret = snprintf_noterm(val, size, "%lld",
-+					(unsigned long long)pool);
- 	up_read(&osdc->lock);
- 	return ret;
- }
-@@ -155,7 +156,7 @@ static size_t ceph_vxattrcb_layout_pool_namespace(struct ceph_inode_info *ci,
- 	int ret = 0;
- 	struct ceph_string *ns = ceph_try_get_string(ci->i_layout.pool_ns);
- 	if (ns) {
--		ret = snprintf(val, size, "%.*s", (int)ns->len, ns->str);
-+		ret = snprintf_noterm(val, size, "%.*s", (int)ns->len, ns->str);
- 		ceph_put_string(ns);
- 	}
- 	return ret;
-@@ -166,49 +167,50 @@ static size_t ceph_vxattrcb_layout_pool_namespace(struct ceph_inode_info *ci,
- static size_t ceph_vxattrcb_dir_entries(struct ceph_inode_info *ci, char *val,
- 					size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_files + ci->i_subdirs);
-+	return snprintf_noterm(val, size, "%lld", ci->i_files + ci->i_subdirs);
- }
- 
- static size_t ceph_vxattrcb_dir_files(struct ceph_inode_info *ci, char *val,
- 				      size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_files);
-+	return snprintf_noterm(val, size, "%lld", ci->i_files);
- }
- 
- static size_t ceph_vxattrcb_dir_subdirs(struct ceph_inode_info *ci, char *val,
- 					size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_subdirs);
-+	return snprintf_noterm(val, size, "%lld", ci->i_subdirs);
- }
- 
- static size_t ceph_vxattrcb_dir_rentries(struct ceph_inode_info *ci, char *val,
- 					 size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_rfiles + ci->i_rsubdirs);
-+	return snprintf_noterm(val, size, "%lld",
-+				ci->i_rfiles + ci->i_rsubdirs);
- }
- 
- static size_t ceph_vxattrcb_dir_rfiles(struct ceph_inode_info *ci, char *val,
- 				       size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_rfiles);
-+	return snprintf_noterm(val, size, "%lld", ci->i_rfiles);
- }
- 
- static size_t ceph_vxattrcb_dir_rsubdirs(struct ceph_inode_info *ci, char *val,
- 					 size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_rsubdirs);
-+	return snprintf_noterm(val, size, "%lld", ci->i_rsubdirs);
- }
- 
- static size_t ceph_vxattrcb_dir_rbytes(struct ceph_inode_info *ci, char *val,
- 				       size_t size)
- {
--	return snprintf(val, size, "%lld", ci->i_rbytes);
-+	return snprintf_noterm(val, size, "%lld", ci->i_rbytes);
- }
- 
- static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
- 				       size_t size)
- {
--	return snprintf(val, size, "%lld.%09ld", ci->i_rctime.tv_sec,
-+	return snprintf_noterm(val, size, "%lld.%09ld", ci->i_rctime.tv_sec,
- 			ci->i_rctime.tv_nsec);
- }
- 
-@@ -221,7 +223,7 @@ static bool ceph_vxattrcb_dir_pin_exists(struct ceph_inode_info *ci)
- static size_t ceph_vxattrcb_dir_pin(struct ceph_inode_info *ci, char *val,
-                                     size_t size)
- {
--	return snprintf(val, size, "%d", (int)ci->i_dir_pin);
-+	return snprintf_noterm(val, size, "%d", (int)ci->i_dir_pin);
- }
- 
- /* quotas */
-@@ -241,20 +243,20 @@ static bool ceph_vxattrcb_quota_exists(struct ceph_inode_info *ci)
- static size_t ceph_vxattrcb_quota(struct ceph_inode_info *ci, char *val,
- 				  size_t size)
- {
--	return snprintf(val, size, "max_bytes=%llu max_files=%llu",
-+	return snprintf_noterm(val, size, "max_bytes=%llu max_files=%llu",
- 			ci->i_max_bytes, ci->i_max_files);
- }
- 
- static size_t ceph_vxattrcb_quota_max_bytes(struct ceph_inode_info *ci,
- 					    char *val, size_t size)
- {
--	return snprintf(val, size, "%llu", ci->i_max_bytes);
-+	return snprintf_noterm(val, size, "%llu", ci->i_max_bytes);
- }
- 
- static size_t ceph_vxattrcb_quota_max_files(struct ceph_inode_info *ci,
- 					    char *val, size_t size)
- {
--	return snprintf(val, size, "%llu", ci->i_max_files);
-+	return snprintf_noterm(val, size, "%llu", ci->i_max_files);
- }
- 
- /* snapshots */
-@@ -266,7 +268,7 @@ static bool ceph_vxattrcb_snap_btime_exists(struct ceph_inode_info *ci)
- static size_t ceph_vxattrcb_snap_btime(struct ceph_inode_info *ci, char *val,
- 				       size_t size)
- {
--	return snprintf(val, size, "%lld.%09ld", ci->i_snap_btime.tv_sec,
-+	return snprintf_noterm(val, size, "%lld.%09ld", ci->i_snap_btime.tv_sec,
- 			ci->i_snap_btime.tv_nsec);
- }
- 
--- 
-2.21.0
+Thanks,
+Andreas
+
+> Jeff Layton (3):
+>   lib/vsprintf: add snprintf_noterm
+>   ceph: don't NULL terminate virtual xattr strings
+>   ceph: return -ERANGE if virtual xattr value didn't fit in buffer
+>
+>  fs/ceph/xattr.c        |  49 +++++++-------
+>  include/linux/kernel.h |   2 +
+>  lib/vsprintf.c         | 145 ++++++++++++++++++++++++++++-------------
+>  3 files changed, 130 insertions(+), 66 deletions(-)
+>
+> --
+> 2.21.0
+>
