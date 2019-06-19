@@ -1,41 +1,64 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v2 3/3] ceph: return -ERANGE if virtual xattr value didn't fit in buffer
-Date: Wed, 19 Jun 2019 12:45:28 -0400
-Message-ID: <20190619164528.31958-4-jlayton@kernel.org>
-References: <20190619164528.31958-1-jlayton@kernel.org>
+From: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: CephFS damaged and cannot recover
+Date: Wed, 19 Jun 2019 10:30:39 -0700
+Message-ID: <CA+2bHPYNuDabO-KC=-dqTdfA+AMs8GeVRHF2QYPE0KeunDD7OA@mail.gmail.com>
+References: <CAPpSHbUz2GmtnND2ptUaiSD2JgagBxsPkguUkhE37N6UHFRmHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190619164528.31958-1-jlayton@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com, agruenba@redhat.com, joe@perches.com, pmladek@suse.com, rostedt@goodmis.org, geert+renesas@glider.be, andriy.shevchenko@linux.intel.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAPpSHbUz2GmtnND2ptUaiSD2JgagBxsPkguUkhE37N6UHFRmHw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Wei Jin <wjin.cn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-The getxattr manpage states that we should return ERANGE if the
-destination buffer size is too small to hold the value.
-
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/xattr.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index a1cd9613be98..e3246c27f2da 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -805,8 +805,11 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 		if (err)
- 			return err;
- 		err = -ENODATA;
--		if (!(vxattr->exists_cb && !vxattr->exists_cb(ci)))
-+		if (!(vxattr->exists_cb && !vxattr->exists_cb(ci))) {
- 			err = vxattr->getxattr_cb(ci, value, size);
-+			if (size && size < err)
-+				err = -ERANGE;
-+		}
- 		return err;
- 	}
- 
--- 
-2.21.0
+T24gV2VkLCBKdW4gMTksIDIwMTkgYXQgOToxOSBBTSBXZWkgSmluIDx3amluLmNuQGdtYWlsLmNv
+bT4gd3JvdGU6Cj4KPiBUaGVyZSBhcmUgcGxlbnR5IG9mIGRhdGEgaW4gdGhpcyBjbHVzdGVyICgy
+UEIpLCBwbGVhc2UgaGVscCB1cywgdGh4Lgo+IEJlZm9yZSBkb2luZyB0aGlzIGRhbmdlcm91cwo+
+IG9wZXJhdGlvbnPvvIhodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9jZXBoZnMvZGlz
+YXN0ZXItcmVjb3ZlcnktZXhwZXJ0cy8jZGlzYXN0ZXItcmVjb3ZlcnktZXhwZXJ0c++8iQo+ICwg
+YW55IHN1Z2dlc3Rpb25zPwo+Cj4gQ2VwaCB2ZXJzaW9uOiAxMi4yLjEyCj4KPiBjZXBoIGZzIHN0
+YXR1czoKPgo+IGNlcGhmcyAtIDEwNTcgY2xpZW50cwo+ID09PT09PQo+ICstLS0tLS0rLS0tLS0t
+LS0tKy0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLSstLS0tLS0tKy0tLS0tLS0rCj4gfCBSYW5rIHwg
+IFN0YXRlICB8ICAgICBNRFMgICAgIHwgQWN0aXZpdHkgfCAgZG5zICB8ICBpbm9zIHwKPiArLS0t
+LS0tKy0tLS0tLS0tLSstLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0rLS0tLS0tLSstLS0tLS0tKwo+
+IHwgIDAgICB8ICBmYWlsZWQgfCAgICAgICAgICAgICB8ICAgICAgICAgIHwgICAgICAgfCAgICAg
+ICB8Cj4gfCAgMSAgIHwgcmVzb2x2ZSB8IG4zMS0wMjMtMjE0IHwgICAgICAgICAgfCAgICAwICB8
+ICAgIDAgIHwKPiB8ICAyICAgfCByZXNvbHZlIHwgbjMxLTAyMy0yMTUgfCAgICAgICAgICB8ICAg
+IDAgIHwgICAgMCAgfAo+IHwgIDMgICB8IHJlc29sdmUgfCBuMzEtMDIzLTIxOCB8ICAgICAgICAg
+IHwgICAgMCAgfCAgICAwICB8Cj4gfCAgNCAgIHwgcmVzb2x2ZSB8IG4zMS0wMjMtMjIwIHwgICAg
+ICAgICAgfCAgICAwICB8ICAgIDAgIHwKPiB8ICA1ICAgfCByZXNvbHZlIHwgbjMxLTAyMy0yMTcg
+fCAgICAgICAgICB8ICAgIDAgIHwgICAgMCAgfAo+IHwgIDYgICB8IHJlc29sdmUgfCBuMzEtMDIz
+LTIyMiB8ICAgICAgICAgIHwgICAgMCAgfCAgICAwICB8Cj4gfCAgNyAgIHwgcmVzb2x2ZSB8IG4z
+MS0wMjMtMjE2IHwgICAgICAgICAgfCAgICAwICB8ICAgIDAgIHwKPiB8ICA4ICAgfCByZXNvbHZl
+IHwgbjMxLTAyMy0yMjEgfCAgICAgICAgICB8ICAgIDAgIHwgICAgMCAgfAo+IHwgIDkgICB8IHJl
+c29sdmUgfCBuMzEtMDIzLTIyMyB8ICAgICAgICAgIHwgICAgMCAgfCAgICAwICB8Cj4gfCAgMTAg
+IHwgcmVzb2x2ZSB8IG4zMS0wMjMtMjI1IHwgICAgICAgICAgfCAgICAwICB8ICAgIDAgIHwKPiB8
+ICAxMSAgfCByZXNvbHZlIHwgbjMxLTAyMy0yMjQgfCAgICAgICAgICB8ICAgIDAgIHwgICAgMCAg
+fAo+IHwgIDEyICB8IHJlc29sdmUgfCBuMzEtMDIzLTIxOSB8ICAgICAgICAgIHwgICAgMCAgfCAg
+ICAwICB8Cj4gfCAgMTMgIHwgcmVzb2x2ZSB8IG4zMS0wMjMtMjI5IHwgICAgICAgICAgfCAgICAw
+ICB8ICAgIDAgIHwKPiArLS0tLS0tKy0tLS0tLS0tLSstLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0r
+LS0tLS0tLSstLS0tLS0tKwo+ICstLS0tLS0tLS0tLS0tLS0tLSstLS0tLS0tLS0tKy0tLS0tLS0r
+LS0tLS0tLSsKPiB8ICAgICAgIFBvb2wgICAgICB8ICAgdHlwZSAgIHwgIHVzZWQgfCBhdmFpbCB8
+Cj4gKy0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0rLS0tLS0tLSstLS0tLS0tKwo+IHwgY2Vw
+aGZzX21ldGFkYXRhIHwgbWV0YWRhdGEgfCAyODQzTSB8IDM0LjlUIHwKPiB8ICAgY2VwaGZzX2Rh
+dGEgICB8ICAgZGF0YSAgIHwgMjU4MFQgfCAgNzMxVCB8Cj4gKy0tLS0tLS0tLS0tLS0tLS0tKy0t
+LS0tLS0tLS0rLS0tLS0tLSstLS0tLS0tKwo+Cj4gKy0tLS0tLS0tLS0tLS0rCj4gfCBTdGFuZGJ5
+IE1EUyB8Cj4gKy0tLS0tLS0tLS0tLS0rCj4gfCBuMzEtMDIzLTIyNyB8Cj4gfCBuMzEtMDIzLTIy
+NiB8Cj4gfCBuMzEtMDIzLTIyOCB8Cj4gKy0tLS0tLS0tLS0tLS0rCgpBcmUgdGhlcmUgZmFpbG92
+ZXJzIG9jY3VycmluZyB3aGlsZSBhbGwgdGhlIHJhbmtzIGFyZSBpbiB1cDpyZXNvbHZlPwpNRFMg
+bG9ncyBhdCBoaWdoIGRlYnVnIGxldmVsIHdvdWxkIGJlIGhlbHBmdWwuCgotLSAKUGF0cmljayBE
+b25uZWxseSwgUGguRC4KSGUgLyBIaW0gLyBIaXMKU2VuaW9yIFNvZnR3YXJlIEVuZ2luZWVyClJl
+ZCBIYXQgU3Vubnl2YWxlLCBDQQpHUEc6IDE5RjI4QTU4NkY4MDhDMjQwMjM1MUI5M0MzMzAxQTNF
+MjU4REQ3OUQKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8v
+bGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
