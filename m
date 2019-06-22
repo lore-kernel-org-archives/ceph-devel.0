@@ -1,54 +1,39 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v3 2/2] ceph: fix return of ceph_vxattrcb_layout
-Date: Fri, 21 Jun 2019 10:18:33 -0400
-Message-ID: <20190621141833.17551-3-jlayton@kernel.org>
-References: <20190621141833.17551-1-jlayton@kernel.org>
+From: lin zhou <hnuzhoulin2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: near 300 pg per osd make cluster very very unstable?
+Date: Sun, 23 Jun 2019 07:33:27 +0800
+Message-ID: <CAKO+7k304JfiN3Drgy9BDsKxXzCip7180NckQoeBo2BJxb2xgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190621141833.17551-1-jlayton@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com, agruenba@redhat.com, joe@perches.com, geert+renesas@glider.be, andriy.shevchenko@linux.intel.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Currently it returns -ERANGE if it thinks that the buffer won't fit, but
-the function returns size_t which is unsigned. Fix it to just return the
-length in this case like the other xattrs do, and rely on the caller to
-handle the case where it won't fit in the destination buffer.
+recently our ceph cluster very unstable, even replace a failed disk
+may trigger a chain reaction,  cause large quantities of osd been
+wrongly marked down.
+I am not sure if it is because we have near 300 pgs in each sas osds
+and small bigger than 300  pgs for ssd osd.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/xattr.c | 10 +++-------
- 1 file changed, 3 insertions(+), 7 deletions(-)
+from logs, it all starts from osd_op_tp timed out, then osd no reply,
+then large wrongly mark down.
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 359d3cbbb37b..23687e3819f5 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -62,8 +62,7 @@ static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- 	const char *pool_name;
- 	const char *ns_field = " pool_namespace=";
- 	char buf[128];
--	size_t len, total_len = 0;
--	int ret;
-+	size_t ret, len, total_len = 0;
- 
- 	pool_ns = ceph_try_get_string(ci->i_layout.pool_ns);
- 
-@@ -87,11 +86,8 @@ static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- 	if (pool_ns)
- 		total_len += strlen(ns_field) + pool_ns->len;
- 
--	if (!size) {
--		ret = total_len;
--	} else if (total_len > size) {
--		ret = -ERANGE;
--	} else {
-+	ret = total_len;
-+	if (size >= total_len) {
- 		memcpy(val, buf, len);
- 		ret = len;
- 		if (pool_name) {
--- 
-2.21.0
+1. 45 machines, each machine has 16 sas and 8 ssd, all file journal in
+the osd data dir.
+2. use rbd in this cluster
+3. 300+ compute node to hold vm
+4. osd node current has a hundred thousand threads and fifty thousand
+established network connection.
+5. dell R730xd, and dell say no hardware error log
+
+so someone else faces the same unstable problem or using 300+ pgs?
