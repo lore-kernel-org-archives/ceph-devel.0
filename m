@@ -1,11 +1,14 @@
 From: lin zhou <hnuzhoulin2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: near 300 pg per osd make cluster very very unstable?
-Date: Sun, 23 Jun 2019 07:33:27 +0800
-Message-ID: <CAKO+7k304JfiN3Drgy9BDsKxXzCip7180NckQoeBo2BJxb2xgQ@mail.gmail.com>
+Subject: Re: near 300 pg per osd make cluster very very
+ unstable?
+Date: Sun, 23 Jun 2019 07:54:21 +0800
+Message-ID: <CAKO+7k3Yjmo2WSo=y-tv4SDQ-WV6c_nciquLUsttHZayoKpk7Q@mail.gmail.com>
+References: <CAKO+7k304JfiN3Drgy9BDsKxXzCip7180NckQoeBo2BJxb2xgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAKO+7k304JfiN3Drgy9BDsKxXzCip7180NckQoeBo2BJxb2xgQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,21 +22,31 @@ To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-recently our ceph cluster very unstable, even replace a failed disk
-may trigger a chain reaction,  cause large quantities of osd been
-wrongly marked down.
-I am not sure if it is because we have near 300 pgs in each sas osds
-and small bigger than 300  pgs for ssd osd.
-
-from logs, it all starts from osd_op_tp timed out, then osd no reply,
-then large wrongly mark down.
-
-1. 45 machines, each machine has 16 sas and 8 ssd, all file journal in
-the osd data dir.
-2. use rbd in this cluster
-3. 300+ compute node to hold vm
-4. osd node current has a hundred thousand threads and fifty thousand
-established network connection.
-5. dell R730xd, and dell say no hardware error log
-
-so someone else faces the same unstable problem or using 300+ pgs?
+QWRkIG1vcmUgZGV0YWlscyBhYm91dCB0aGUgbmV3ZXN0IGNoYWluIHJlYWN0aW9uIGZhdWx0Lgox
+Lm9uZSBvc2Qgbm9kZXMgb2NjdXIgb3NkX29wX3RwIGFuZCBvc2RfdHAgdGltZWQgb3V0ICh0aGUg
+cmVhc29uIGlzIHVua25vd24pCjIudGhlbiBtYW55IG9zZCBubyByZXBseSBvY2N1ciwgZnJvbSBv
+dGhlciBub2RlcyBhbmQgdGhlIGZpcnN0IGZhdWx0IG5vZGUuCjMudGhlbiBsYXJnZSBudW1iZXIg
+b3NkIHdyb25nbHkgbWFyayBkb3duLCBzdGFydGluZyBmbGFwcGluZywgbGFyZ2UgcGVlcgo0LnRo
+ZW4gdGhlIGZpcnN0IGZhdWx0IG5vZGUgaGFuZyBhbmQgY2FuIG5vdCBzc2ggbG9naW4gLHdoZW4g
+SSBzZXQgb3NkCm5vZG93biBhbmQgdHJ5IHRvIHNldCB0aGUgdGhlIG9zZHMgaW4gdGhlIGZhdWx0
+IG5vZGUgdG8gZG93biB0bwpyZWNvdmVyCjUudGhlbiBwZWVyIHBnIGNoYW5nZWQKNi50aGVuIG1v
+cmUgbm9kZXMgaGFuZywgYmVnaW4gZGlzYXBwZWFyIG1vbml0b3IgZGF0YSwgY2FuIG5vdCBzc2gK
+Ny5hbGwgbXkgdm1zIGhhbmcKCmFsbCB0aGlzIGlzIGp1c3QgYWZ0ZXIgSSBjZXBoIG9zZCBpbi4K
+CmxpbiB6aG91IDxobnV6aG91bGluMkBnbWFpbC5jb20+IOS6jjIwMTnlubQ25pyIMjPml6Xlkajm
+l6Ug5LiK5Y2INzozM+WGmemBk++8mgo+Cj4gcmVjZW50bHkgb3VyIGNlcGggY2x1c3RlciB2ZXJ5
+IHVuc3RhYmxlLCBldmVuIHJlcGxhY2UgYSBmYWlsZWQgZGlzawo+IG1heSB0cmlnZ2VyIGEgY2hh
+aW4gcmVhY3Rpb24sICBjYXVzZSBsYXJnZSBxdWFudGl0aWVzIG9mIG9zZCBiZWVuCj4gd3Jvbmds
+eSBtYXJrZWQgZG93bi4KPiBJIGFtIG5vdCBzdXJlIGlmIGl0IGlzIGJlY2F1c2Ugd2UgaGF2ZSBu
+ZWFyIDMwMCBwZ3MgaW4gZWFjaCBzYXMgb3Nkcwo+IGFuZCBzbWFsbCBiaWdnZXIgdGhhbiAzMDAg
+IHBncyBmb3Igc3NkIG9zZC4KPgo+IGZyb20gbG9ncywgaXQgYWxsIHN0YXJ0cyBmcm9tIG9zZF9v
+cF90cCB0aW1lZCBvdXQsIHRoZW4gb3NkIG5vIHJlcGx5LAo+IHRoZW4gbGFyZ2Ugd3JvbmdseSBt
+YXJrIGRvd24uCj4KPiAxLiA0NSBtYWNoaW5lcywgZWFjaCBtYWNoaW5lIGhhcyAxNiBzYXMgYW5k
+IDggc3NkLCBhbGwgZmlsZSBqb3VybmFsIGluCj4gdGhlIG9zZCBkYXRhIGRpci4KPiAyLiB1c2Ug
+cmJkIGluIHRoaXMgY2x1c3Rlcgo+IDMuIDMwMCsgY29tcHV0ZSBub2RlIHRvIGhvbGQgdm0KPiA0
+LiBvc2Qgbm9kZSBjdXJyZW50IGhhcyBhIGh1bmRyZWQgdGhvdXNhbmQgdGhyZWFkcyBhbmQgZmlm
+dHkgdGhvdXNhbmQKPiBlc3RhYmxpc2hlZCBuZXR3b3JrIGNvbm5lY3Rpb24uCj4gNS4gZGVsbCBS
+NzMweGQsIGFuZCBkZWxsIHNheSBubyBoYXJkd2FyZSBlcnJvciBsb2cKPgo+IHNvIHNvbWVvbmUg
+ZWxzZSBmYWNlcyB0aGUgc2FtZSB1bnN0YWJsZSBwcm9ibGVtIG9yIHVzaW5nIDMwMCsgcGdzPwpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
