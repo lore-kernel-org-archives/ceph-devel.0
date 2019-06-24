@@ -1,52 +1,44 @@
-From: lin zhou <hnuzhoulin2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: near 300 pg per osd make cluster very very
- unstable?
-Date: Sun, 23 Jun 2019 07:54:21 +0800
-Message-ID: <CAKO+7k3Yjmo2WSo=y-tv4SDQ-WV6c_nciquLUsttHZayoKpk7Q@mail.gmail.com>
-References: <CAKO+7k304JfiN3Drgy9BDsKxXzCip7180NckQoeBo2BJxb2xgQ@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH v3 0/2] ceph: don't NULL terminate virtual xattr values
+Date: Mon, 24 Jun 2019 16:56:52 +0800
+Message-ID: <CAAM7YAmfb0ZoaGMqHE8POFbHUFNvzz+eP3Ygsq-ncRptq6wN7w@mail.gmail.com>
+References: <20190621141833.17551-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAKO+7k304JfiN3Drgy9BDsKxXzCip7180NckQoeBo2BJxb2xgQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190621141833.17551-1-jlayton@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>, Sage Weil <sage@redhat.com>, agruenba@redhat.com, joe@perches.com, geert+renesas@glider.be, andriy.shevchenko@linux.intel.com
 List-Id: ceph-devel.vger.kernel.org
 
-QWRkIG1vcmUgZGV0YWlscyBhYm91dCB0aGUgbmV3ZXN0IGNoYWluIHJlYWN0aW9uIGZhdWx0Lgox
-Lm9uZSBvc2Qgbm9kZXMgb2NjdXIgb3NkX29wX3RwIGFuZCBvc2RfdHAgdGltZWQgb3V0ICh0aGUg
-cmVhc29uIGlzIHVua25vd24pCjIudGhlbiBtYW55IG9zZCBubyByZXBseSBvY2N1ciwgZnJvbSBv
-dGhlciBub2RlcyBhbmQgdGhlIGZpcnN0IGZhdWx0IG5vZGUuCjMudGhlbiBsYXJnZSBudW1iZXIg
-b3NkIHdyb25nbHkgbWFyayBkb3duLCBzdGFydGluZyBmbGFwcGluZywgbGFyZ2UgcGVlcgo0LnRo
-ZW4gdGhlIGZpcnN0IGZhdWx0IG5vZGUgaGFuZyBhbmQgY2FuIG5vdCBzc2ggbG9naW4gLHdoZW4g
-SSBzZXQgb3NkCm5vZG93biBhbmQgdHJ5IHRvIHNldCB0aGUgdGhlIG9zZHMgaW4gdGhlIGZhdWx0
-IG5vZGUgdG8gZG93biB0bwpyZWNvdmVyCjUudGhlbiBwZWVyIHBnIGNoYW5nZWQKNi50aGVuIG1v
-cmUgbm9kZXMgaGFuZywgYmVnaW4gZGlzYXBwZWFyIG1vbml0b3IgZGF0YSwgY2FuIG5vdCBzc2gK
-Ny5hbGwgbXkgdm1zIGhhbmcKCmFsbCB0aGlzIGlzIGp1c3QgYWZ0ZXIgSSBjZXBoIG9zZCBpbi4K
-CmxpbiB6aG91IDxobnV6aG91bGluMkBnbWFpbC5jb20+IOS6jjIwMTnlubQ25pyIMjPml6Xlkajm
-l6Ug5LiK5Y2INzozM+WGmemBk++8mgo+Cj4gcmVjZW50bHkgb3VyIGNlcGggY2x1c3RlciB2ZXJ5
-IHVuc3RhYmxlLCBldmVuIHJlcGxhY2UgYSBmYWlsZWQgZGlzawo+IG1heSB0cmlnZ2VyIGEgY2hh
-aW4gcmVhY3Rpb24sICBjYXVzZSBsYXJnZSBxdWFudGl0aWVzIG9mIG9zZCBiZWVuCj4gd3Jvbmds
-eSBtYXJrZWQgZG93bi4KPiBJIGFtIG5vdCBzdXJlIGlmIGl0IGlzIGJlY2F1c2Ugd2UgaGF2ZSBu
-ZWFyIDMwMCBwZ3MgaW4gZWFjaCBzYXMgb3Nkcwo+IGFuZCBzbWFsbCBiaWdnZXIgdGhhbiAzMDAg
-IHBncyBmb3Igc3NkIG9zZC4KPgo+IGZyb20gbG9ncywgaXQgYWxsIHN0YXJ0cyBmcm9tIG9zZF9v
-cF90cCB0aW1lZCBvdXQsIHRoZW4gb3NkIG5vIHJlcGx5LAo+IHRoZW4gbGFyZ2Ugd3JvbmdseSBt
-YXJrIGRvd24uCj4KPiAxLiA0NSBtYWNoaW5lcywgZWFjaCBtYWNoaW5lIGhhcyAxNiBzYXMgYW5k
-IDggc3NkLCBhbGwgZmlsZSBqb3VybmFsIGluCj4gdGhlIG9zZCBkYXRhIGRpci4KPiAyLiB1c2Ug
-cmJkIGluIHRoaXMgY2x1c3Rlcgo+IDMuIDMwMCsgY29tcHV0ZSBub2RlIHRvIGhvbGQgdm0KPiA0
-LiBvc2Qgbm9kZSBjdXJyZW50IGhhcyBhIGh1bmRyZWQgdGhvdXNhbmQgdGhyZWFkcyBhbmQgZmlm
-dHkgdGhvdXNhbmQKPiBlc3RhYmxpc2hlZCBuZXR3b3JrIGNvbm5lY3Rpb24uCj4gNS4gZGVsbCBS
-NzMweGQsIGFuZCBkZWxsIHNheSBubyBoYXJkd2FyZSBlcnJvciBsb2cKPgo+IHNvIHNvbWVvbmUg
-ZWxzZSBmYWNlcyB0aGUgc2FtZSB1bnN0YWJsZSBwcm9ibGVtIG9yIHVzaW5nIDMwMCsgcGdzPwpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
-IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
-LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Fri, Jun 21, 2019 at 10:21 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> v3: switch to using an intermediate buffer for snprintf destination
+>     add patch to fix ceph_vxattrcb_layout return value
+> v2: drop bogus EXPORT_SYMBOL of static function
+>
+> This is the 3rd posting of this patchset. Instead of adding a new
+> snprintf variant that doesn't NULL terminate, this set instead has
+> the vxattr handlers use an intermediate buffer as the snprintf
+> destination and then memcpy's the result into the destination buffer.
+>
+> Also, I added a patch to fix up the return of ceph_vxattrcb_layout. The
+> existing code actually worked, but relied on casting a signed negative
+> value to unsigned and back, which seemed a little sketchy.
+>
+> Most of the rationale for this set is in the description of the first
+> patch of the series.
+>
+> Jeff Layton (2):
+>   ceph: fix buffer length handling in virtual xattrs
+>   ceph: fix return of ceph_vxattrcb_layout
+>
+>  fs/ceph/xattr.c | 113 ++++++++++++++++++++++++++++++++++--------------
+>  1 file changed, 81 insertions(+), 32 deletions(-)
+>
+
+Reviewed-by
+> --
+> 2.21.0
+>
