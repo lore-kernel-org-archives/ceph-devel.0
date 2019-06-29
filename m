@@ -1,35 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fix for 5.2-rc7
-Date: Fri, 28 Jun 2019 17:17:24 +0200
-Message-ID: <20190628151724.5642-1-idryomov@gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fix for 5.2-rc7
+Date: Sat, 29 Jun 2019 09:30:04 +0000
+Message-ID: <156180060420.8003.14726926142083769663.pr-tracker-bot@kernel.org>
+References: <20190628151724.5642-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190628151724.5642-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Fri, 28 Jun 2019 17:17:24 +0200:
 
-The following changes since commit 4b972a01a7da614b4796475f933094751a295a2f:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.2-rc7
 
-  Linux 5.2-rc6 (2019-06-22 16:01:36 -0700)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/43251dbd6ac278a8bdaaee43ec5e299c1a5dafdd
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.2-rc7
-
-for you to fetch changes up to d6b8bd679c9c8856fa04b80490765c43a4cb613b:
-
-  ceph: fix ceph_mdsc_build_path to not stop on first component (2019-06-27 18:27:36 +0200)
-
-----------------------------------------------------------------
-A small fix for a potential -rc1 regression from Jeff.
-
-----------------------------------------------------------------
-Jeff Layton (1):
-      ceph: fix ceph_mdsc_build_path to not stop on first component
-
- fs/ceph/mds_client.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
