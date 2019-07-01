@@ -1,24 +1,43 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph fix for 5.2-rc7
-Date: Sat, 29 Jun 2019 09:30:04 +0000
-Message-ID: <156180060420.8003.14726926142083769663.pr-tracker-bot@kernel.org>
-References: <20190628151724.5642-1-idryomov@gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] ceph: fix end offset in truncate_inode_pages_range call
+Date: Mon,  1 Jul 2019 18:16:34 +0100
+Message-ID: <20190701171634.20290-1-lhenriques@suse.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190628151724.5642-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: zhengbin <zhengbin13@huawei.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-The pull request you sent on Fri, 28 Jun 2019 17:17:24 +0200:
+Commit e450f4d1a5d6 ("ceph: pass inclusive lend parameter to
+filemap_write_and_wait_range()") fixed the end offset parameter used to
+call filemap_write_and_wait_range and invalidate_inode_pages2_range.
+Unfortunately it missed truncate_inode_pages_range, introducing a
+regression that is easily detected by xfstest generic/130.
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.2-rc7
+The problem is that when doing direct IO it is possible that an extra page
+is truncated from the page cache when the end offset is page aligned.
+This can cause data loss if that page hasn't been sync'ed to the OSDs.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/43251dbd6ac278a8bdaaee43ec5e299c1a5dafdd
+While there, change code to use PAGE_ALIGN macro instead.
 
-Thank you!
+Fixes: e450f4d1a5d6 ("ceph: pass inclusive lend parameter to filemap_write_and_wait_range()")
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/file.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 183c37c0a8fc..7a57db8e2fa9 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1007,7 +1007,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			 * may block.
+ 			 */
+ 			truncate_inode_pages_range(inode->i_mapping, pos,
+-					(pos+len) | (PAGE_SIZE - 1));
++						   PAGE_ALIGN(pos + len) - 1);
+ 
+ 			req->r_mtime = mtime;
+ 		}
