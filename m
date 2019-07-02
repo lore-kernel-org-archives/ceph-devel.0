@@ -1,7 +1,7 @@
 From: Jeff Layton <jlayton@kernel.org>
 Subject: Re: [PATCH] ceph: fix end offset in truncate_inode_pages_range call
-Date: Mon, 01 Jul 2019 13:31:44 -0400
-Message-ID: <af6b83143e56f803b6a9293a3138165317efbdbf.camel@kernel.org>
+Date: Tue, 02 Jul 2019 09:48:16 -0400
+Message-ID: <85689b9674e96c15602f6a1829142273868250df.camel@kernel.org>
 References: <20190701171634.20290-1-lhenriques@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
@@ -36,7 +36,7 @@ On Mon, 2019-07-01 at 18:16 +0100, Luis Henriques wrote:
 > index 183c37c0a8fc..7a57db8e2fa9 100644
 > --- a/fs/ceph/file.c
 > +++ b/fs/ceph/file.c
-> @@ -1007,7 +1007,7 @@ 	(struct kiocb *iocb, struct iov_iter *iter,
+> @@ -1007,7 +1007,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
 >  			 * may block.
 >  			 */
 >  			truncate_inode_pages_range(inode->i_mapping, pos,
@@ -46,4 +46,9 @@ On Mon, 2019-07-01 at 18:16 +0100, Luis Henriques wrote:
 >  			req->r_mtime = mtime;
 >  		}
 
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Luis, should this be sent to stable? It seems like a data corruption
+problem...
+
+Thanks,
+-- 
+Jeff Layton <jlayton@kernel.org>
