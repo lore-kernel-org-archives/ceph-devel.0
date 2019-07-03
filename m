@@ -1,20 +1,23 @@
 From: Fuqian Huang <huangfq.daxian@gmail.com>
-Subject: [PATCH 03/30] block: Use kmemdup rather than duplicating its implementation
-Date: Wed,  3 Jul 2019 21:13:36 +0800
-Message-ID: <20190703131336.24808-1-huangfq.daxian@gmail.com>
+Subject: [PATCH v2 04/35] block: Use kmemdup rather than duplicating its implementation
+Date: Thu,  4 Jul 2019 00:26:50 +0800
+Message-ID: <20190703162650.32045-1-huangfq.daxian@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, Fuqian Huang <huangfq.daxian@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
 kmemdup is introduced to duplicate a region of memory in a neat way.
-Rather than kmalloc/kzalloc + memset, which the programmer needs to
+Rather than kmalloc/kzalloc + memcpy, which the programmer needs to
 write the size twice (sometimes lead to mistakes), kmemdup improves
 readability, leads to smaller code and also reduce the chances of mistakes.
-Suggestion to use kmemdup rather than using kmalloc/kzalloc + memset.
+Suggestion to use kmemdup rather than using kmalloc/kzalloc + memcpy.
 
 Signed-off-by: Fuqian Huang <huangfq.daxian@gmail.com>
 ---
+Changes in v2:
+  - Fix a typo in commit message (memset -> memcpy)
+
  drivers/block/rbd.c | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
