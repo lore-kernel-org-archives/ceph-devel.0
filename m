@@ -1,61 +1,43 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH] ceph: fix end offset in truncate_inode_pages_range call
-Date: Tue, 02 Jul 2019 14:58:57 +0100
-Message-ID: <87y31g7d26.fsf@suse.com>
-References: <20190701171634.20290-1-lhenriques@suse.com>
-        <85689b9674e96c15602f6a1829142273868250df.camel@kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Fuqian Huang <huangfq.daxian@gmail.com>
+Subject: [PATCH 03/30] block: Use kmemdup rather than duplicating its implementation
+Date: Wed,  3 Jul 2019 21:13:36 +0800
+Message-ID: <20190703131336.24808-1-huangfq.daxian@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <85689b9674e96c15602f6a1829142273868250df.camel@kernel.org> (Jeff
-        Layton's message of "Tue, 02 Jul 2019 09:48:16 -0400")
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Zheng Yan <zyan@redhat.com>, zhengbin <zhengbin13@huawei.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, Fuqian Huang <huangfq.daxian@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
-"Jeff Layton" <jlayton@kernel.org> writes:
+kmemdup is introduced to duplicate a region of memory in a neat way.
+Rather than kmalloc/kzalloc + memset, which the programmer needs to
+write the size twice (sometimes lead to mistakes), kmemdup improves
+readability, leads to smaller code and also reduce the chances of mistakes.
+Suggestion to use kmemdup rather than using kmalloc/kzalloc + memset.
 
-> On Mon, 2019-07-01 at 18:16 +0100, Luis Henriques wrote:
->> Commit e450f4d1a5d6 ("ceph: pass inclusive lend parameter to
->> filemap_write_and_wait_range()") fixed the end offset parameter used to
->> call filemap_write_and_wait_range and invalidate_inode_pages2_range.
->> Unfortunately it missed truncate_inode_pages_range, introducing a
->> regression that is easily detected by xfstest generic/130.
->> 
->> The problem is that when doing direct IO it is possible that an extra page
->> is truncated from the page cache when the end offset is page aligned.
->> This can cause data loss if that page hasn't been sync'ed to the OSDs.
->> 
->> While there, change code to use PAGE_ALIGN macro instead.
->> 
->> Fixes: e450f4d1a5d6 ("ceph: pass inclusive lend parameter to filemap_write_and_wait_range()")
->> Signed-off-by: Luis Henriques <lhenriques@suse.com>
->> ---
->>  fs/ceph/file.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->> 
->> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> index 183c37c0a8fc..7a57db8e2fa9 100644
->> --- a/fs/ceph/file.c
->> +++ b/fs/ceph/file.c
->> @@ -1007,7 +1007,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
->>  			 * may block.
->>  			 */
->>  			truncate_inode_pages_range(inode->i_mapping, pos,
->> -					(pos+len) | (PAGE_SIZE - 1));
->> +						   PAGE_ALIGN(pos + len) - 1);
->>  
->>  			req->r_mtime = mtime;
->>  		}
->
-> Luis, should this be sent to stable? It seems like a data corruption
-> problem...
+Signed-off-by: Fuqian Huang <huangfq.daxian@gmail.com>
+---
+ drivers/block/rbd.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-Yes, I believe so.  But I believe all the active stable kernels that
-include commit e450f4d1a5d6 (or a backport of it) will pick it anyway
-due to the 'Fixes:' tag.  AFAIK only 5.1 and 5.2 are affected.
-
-Cheers,
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index e5009a34f9c2..47ad3772dc58 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1068,7 +1068,7 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
+ 
+ 		if (snap_names_len > (u64)SIZE_MAX)
+ 			goto out_2big;
+-		snap_names = kmalloc(snap_names_len, GFP_KERNEL);
++		snap_names = kmemdup(&ondisk->snaps[snap_count], snap_names_len, GFP_KERNEL);
+ 		if (!snap_names)
+ 			goto out_err;
+ 
+@@ -1088,7 +1088,6 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
+ 		 * snap_names_len bytes beyond the end of the
+ 		 * snapshot id array, this memcpy() is safe.
+ 		 */
+-		memcpy(snap_names, &ondisk->snaps[snap_count], snap_names_len);
+ 		snaps = ondisk->snaps;
+ 		for (i = 0; i < snap_count; i++) {
+ 			snapc->snaps[i] = le64_to_cpu(snaps[i].id);
 -- 
-Luis
+2.11.0
