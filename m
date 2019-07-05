@@ -1,54 +1,68 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v2 04/35] block: Use kmemdup rather than duplicating its
- implementation
-Date: Wed, 03 Jul 2019 12:33:43 -0400
-Message-ID: <e3f1ecd6f68ed34df240346fae92f9c821503c68.camel@kernel.org>
-References: <20190703162650.32045-1-huangfq.daxian@gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] ceph: use generic_delete_inode() for ->drop_inode
+Date: Fri,  5 Jul 2019 17:14:56 +0100
+Message-ID: <20190705161456.5138-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190703162650.32045-1-huangfq.daxian@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Fuqian Huang <huangfq.daxian@gmail.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 2019-07-04 at 00:26 +0800, Fuqian Huang wrote:
-> kmemdup is introduced to duplicate a region of memory in a neat way.
-> Rather than kmalloc/kzalloc + memcpy, which the programmer needs to
-> write the size twice (sometimes lead to mistakes), kmemdup improves
-> readability, leads to smaller code and also reduce the chances of mistakes.
-> Suggestion to use kmemdup rather than using kmalloc/kzalloc + memcpy.
-> 
-> Signed-off-by: Fuqian Huang <huangfq.daxian@gmail.com>
-> ---
-> Changes in v2:
->   - Fix a typo in commit message (memset -> memcpy)
-> 
->  drivers/block/rbd.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index e5009a34f9c2..47ad3772dc58 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1068,7 +1068,7 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
->  
->  		if (snap_names_len > (u64)SIZE_MAX)
->  			goto out_2big;
-> -		snap_names = kmalloc(snap_names_len, GFP_KERNEL);
-> +		snap_names = kmemdup(&ondisk->snaps[snap_count], snap_names_len, GFP_KERNEL);
->  		if (!snap_names)
->  			goto out_err;
->  
-> @@ -1088,7 +1088,6 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
->  		 * snap_names_len bytes beyond the end of the
->  		 * snapshot id array, this memcpy() is safe.
->  		 */
-> -		memcpy(snap_names, &ondisk->snaps[snap_count], snap_names_len);
->  		snaps = ondisk->snaps;
->  		for (i = 0; i < snap_count; i++) {
->  			snapc->snaps[i] = le64_to_cpu(snaps[i].id);
+ceph_drop_inode() implementation is not any different from the generic
+function, thus there's no point in keeping it around.
 
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/inode.c | 10 ----------
+ fs/ceph/super.c |  2 +-
+ fs/ceph/super.h |  1 -
+ 3 files changed, 1 insertion(+), 12 deletions(-)
+
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 761451f36e2d..211140e6ef9c 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -578,16 +578,6 @@ void ceph_destroy_inode(struct inode *inode)
+ 	ceph_put_string(rcu_dereference_raw(ci->i_layout.pool_ns));
+ }
+ 
+-int ceph_drop_inode(struct inode *inode)
+-{
+-	/*
+-	 * Positve dentry and corresponding inode are always accompanied
+-	 * in MDS reply. So no need to keep inode in the cache after
+-	 * dropping all its aliases.
+-	 */
+-	return 1;
+-}
+-
+ static inline blkcnt_t calc_inode_blocks(u64 size)
+ {
+ 	return (size + (1<<9) - 1) >> 9;
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index d57fa60dcd43..b4a4772756cb 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -843,7 +843,7 @@ static const struct super_operations ceph_super_ops = {
+ 	.destroy_inode	= ceph_destroy_inode,
+ 	.free_inode	= ceph_free_inode,
+ 	.write_inode    = ceph_write_inode,
+-	.drop_inode	= ceph_drop_inode,
++	.drop_inode	= generic_delete_inode,
+ 	.sync_fs        = ceph_sync_fs,
+ 	.put_super	= ceph_put_super,
+ 	.remount_fs	= ceph_remount,
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 5f27e1f7f2d6..622e6c96c960 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -878,7 +878,6 @@ extern const struct inode_operations ceph_file_iops;
+ extern struct inode *ceph_alloc_inode(struct super_block *sb);
+ extern void ceph_destroy_inode(struct inode *inode);
+ extern void ceph_free_inode(struct inode *inode);
+-extern int ceph_drop_inode(struct inode *inode);
+ 
+ extern struct inode *ceph_get_inode(struct super_block *sb,
+ 				    struct ceph_vino vino);
