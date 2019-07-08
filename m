@@ -1,19 +1,19 @@
-From: Nathan Chancellor <natechancellor@gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
 Subject: Re: [PATCH] ceph: fix uninitialized return code
-Date: Mon, 8 Jul 2019 07:50:03 -0700
-Message-ID: <20190708145003.GB43693@archlinux-epyc>
+Date: Mon, 08 Jul 2019 13:16:14 -0400
+Message-ID: <e2d1659f8fec54d9bfcbec1822afc76753b44667.camel@kernel.org>
 References: <20190708134821.587398-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <20190708134821.587398-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, David Howells <dhowells@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@kernel.org>, Luis Henriques <lhenriques@suse.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, clang-built-linux@googlegroups.com
+To: Arnd Bergmann <arnd@arndb.de>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: David Howells <dhowells@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, Luis Henriques <lhenriques@suse.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, clang-built-linux@googlegroups.com
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Jul 08, 2019 at 03:48:08PM +0200, Arnd Bergmann wrote:
+On Mon, 2019-07-08 at 15:48 +0200, Arnd Bergmann wrote:
 > clang points out a -Wsometimed-uninitized bug in the modified
 > ceph_real_mount() function:
 > 
@@ -35,7 +35,28 @@ On Mon, Jul 08, 2019 at 03:48:08PM +0200, Arnd Bergmann wrote:
 > 
 > Fixes: 108f95bfaa56 ("vfs: Convert ceph to use the new mount API")
 > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  fs/ceph/super.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 0d23903ddfa5..d663aa1286f6 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -876,6 +876,8 @@ static int ceph_real_mount(struct fs_context *fc, struct ceph_fs_client *fsc)
+>  			goto out;
+>  		}
+>  		fsc->sb->s_root = root;
+> +	} else {
+> +		err = 0;
+>  	}
+>  
+>  	fc->root = dget(fsc->sb->s_root);
 
-Thanks for the patch!
+I see 108f95bfaa56 linux-next, but this hasn't been merged into the ceph
+kclient tree yet. It'd be ideal if Al just squashed this in before
+sending the PR to Linus.
 
-Reviewed-by: Nathan Chancellor <natechancellor@gmail.com>
+In any case, patch looks fine:
+
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
