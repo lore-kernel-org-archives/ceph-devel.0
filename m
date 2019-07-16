@@ -1,45 +1,68 @@
-From: Colin Ian King <colin.king@canonical.com>
-Subject: bug report: re: vfs: Convert ceph to use the new mount API
-Date: Mon, 8 Jul 2019 22:31:32 +0100
-Message-ID: <2b919604-282e-85d6-b9d8-827beefdcb0d@canonical.com>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: pools limit
+Date: Tue, 16 Jul 2019 19:46:28 +0530
+Message-ID: <CANA9Uk6ZyYY1HuFXEjvs4aT3zaf7YvDdCH20Rhgb_5U89em0MQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>, linux-block@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============2649834263249410853=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+--===============2649834263249410853==
+Content-Type: multipart/alternative; boundary="0000000000006d84a5058dcd06be"
 
-Static analysis with Coverity on linux-next has detected an
-uninitialized variable error in the following commit:
+--0000000000006d84a5058dcd06be
+Content-Type: text/plain; charset="UTF-8"
 
-commit 108f95bfaa5665724159e66e4a26206b5589f126
-Author: David Howells <dhowells@redhat.com>
-Date:   Mon Mar 25 16:38:32 2019 +0000
+Hello - I have created 10 nodes ceph cluster with 14.x version. Can you
+please confirm below:
 
-    vfs: Convert ceph to use the new mount API
+Q1 - Can I create 100+ pool (or more) on the cluster? (the reason is -
+creating a pool per project). Any limitation on pool creation?
 
+Q2 - In the above pool - I use 128 PG-NUM - to start with and enable
+autoscale for PG_NUM, so that based on the data in the pool, PG_NUM will
+increase by ceph itself.
 
-Specifically, in fs/ceph/super.c in function ceph_real_mount, variable
-err is not initialized, and when the if (!fsc->sb->s_root) code block is
-not executed then err is never assigned and an uninitialized value is
-returned:
+Let me know if any limitations for the above and any fore see issue?
 
- 884        mutex_unlock(&fsc->client->mount_mutex);
+Thanks
+Swami
 
-Uninitialized scalar variable (UNINIT)
-uninit_use: Using uninitialized value err.
+--0000000000006d84a5058dcd06be
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
- 885        return err;
- 886
- 887 out:
- 888        mutex_unlock(&fsc->client->mount_mutex);
- 889        return err;
- 890 }
+<div dir=3D"ltr">Hello - I have created 10 nodes ceph cluster with 14.x ver=
+sion. Can you please confirm below:<div><br></div><div>Q1 - Can I create 10=
+0+ pool (or more) on the cluster? (the reason is - creating a pool per proj=
+ect). Any limitation on pool creation?</div><div><br></div><div>Q2 - In the=
+ above pool - I use 128 PG-NUM - to start with and enable autoscale for PG_=
+NUM, so that based on the data in the pool, PG_NUM will increase by ceph it=
+self.</div><div><br></div><div>Let me know if any limitations for the above=
+ and any fore see issue?</div><div><br></div><div>Thanks</div><div>Swami</d=
+iv></div>
 
-Not sure what err should be returning, so I'm reporting this a as bug.
+--0000000000006d84a5058dcd06be--
 
-Colin
+--===============2649834263249410853==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============2649834263249410853==--
