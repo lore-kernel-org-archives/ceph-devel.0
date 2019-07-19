@@ -1,59 +1,36 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH 0/4] Sleeping functions in invalid context bug fixes
-Date: Fri, 19 Jul 2019 11:20:34 -0400
-Message-ID: <ab5ccaa05994e2eef05bdb54510e6b017db2d807.camel@kernel.org>
-References: <20190719143222.16058-1-lhenriques@suse.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Nautilus 14.2.2 release announcement
+Date: Fri, 19 Jul 2019 17:19:55 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1907191719140.26683@piezo.novalocal>
+References: <qgst06$712f$1@blaine.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190719143222.16058-1-lhenriques@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <qgst06$712f$1@blaine.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alex Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 2019-07-19 at 15:32 +0100, Luis Henriques wrote:
-> Hi,
+On Fri, 19 Jul 2019, Alex Litvak wrote:
+> Dear Ceph developers,
 > 
-> I'm sending three "sleeping function called from invalid context" bug
-> fixes that I had on my TODO for a while.  All of them are ceph_buffer_put
-> related, and all the fixes follow the same pattern: delay the operation
-> until the ci->i_ceph_lock is released.
-> 
-> The first patch simply allows ceph_buffer_put to receive a NULL buffer so
-> that the NULL check doesn't need to be performed in all the other patches.
-> IOW, it's not really required, just convenient.
-> 
-> (Note: maybe these patches should all be tagged for stable.)
-> 
-> Luis Henriques (4):
->   libceph: allow ceph_buffer_put() to receive a NULL ceph_buffer
->   ceph: fix buffer free while holding i_ceph_lock in __ceph_setxattr()
->   ceph: fix buffer free while holding i_ceph_lock in
->     __ceph_build_xattrs_blob()
->   ceph: fix buffer free while holding i_ceph_lock in fill_inode()
-> 
->  fs/ceph/caps.c              |  5 ++++-
->  fs/ceph/inode.c             |  7 ++++---
->  fs/ceph/snap.c              |  4 +++-
->  fs/ceph/super.h             |  2 +-
->  fs/ceph/xattr.c             | 19 ++++++++++++++-----
->  include/linux/ceph/buffer.h |  3 ++-
->  6 files changed, 28 insertions(+), 12 deletions(-)
+> Please forgive me if this post offends anyone, but it would be nice if this
+> and all other releases would be announced before or shortly after they hit the
+> repos.
 
-This all looks good to me. I'll plan to merge these into the testing
-branch soon, and tag them for stable.
+Yep, my fault.  Abhishek normally does this but he's out on vacation 
+this week, and I forgot to do it yesterday.  Fixing a missing item in 
+the release notes and then I'll send it all out.
 
-PS: On a related note (and more of a question for Ilya)...
-
-I'm wondering if we get any benefit from having our own ceph_kvmalloc
-routine. Why are we not better off using the stock kvmalloc routine
-instead? Forcing a vmalloc just because we've gone above 32k allocation
-doesn't seem like the right thing to do.
-
-PPS: I also wonder if we ought to put a might_sleep() in kvfree(). I
-think that kfree generally doesn't, and I wonder how many uses of this
-end up using kfree until memory ends up fragmented.
--- 
-Jeff Layton <jlayton@kernel.org>
+Thanks!
+sage
