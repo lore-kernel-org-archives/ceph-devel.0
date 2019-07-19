@@ -1,24 +1,39 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph updates for 5.3-rc1
-Date: Thu, 18 Jul 2019 18:30:17 +0000
-Message-ID: <156347461755.12683.16079074350077877952.pr-tracker-bot@kernel.org>
-References: <20190717112825.23829-1-idryomov@gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH 0/4] Sleeping functions in invalid context bug fixes
+Date: Fri, 19 Jul 2019 15:32:18 +0100
+Message-ID: <20190719143222.16058-1-lhenriques@suse.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190717112825.23829-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-The pull request you sent on Wed, 17 Jul 2019 13:28:25 +0200:
+Hi,
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.3-rc1
+I'm sending three "sleeping function called from invalid context" bug
+fixes that I had on my TODO for a while.  All of them are ceph_buffer_put
+related, and all the fixes follow the same pattern: delay the operation
+until the ci->i_ceph_lock is released.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/d9b9c893048e9d308a833619f0866f1f52778cf5
+The first patch simply allows ceph_buffer_put to receive a NULL buffer so
+that the NULL check doesn't need to be performed in all the other patches.
+IOW, it's not really required, just convenient.
 
-Thank you!
+(Note: maybe these patches should all be tagged for stable.)
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Luis Henriques (4):
+  libceph: allow ceph_buffer_put() to receive a NULL ceph_buffer
+  ceph: fix buffer free while holding i_ceph_lock in __ceph_setxattr()
+  ceph: fix buffer free while holding i_ceph_lock in
+    __ceph_build_xattrs_blob()
+  ceph: fix buffer free while holding i_ceph_lock in fill_inode()
+
+ fs/ceph/caps.c              |  5 ++++-
+ fs/ceph/inode.c             |  7 ++++---
+ fs/ceph/snap.c              |  4 +++-
+ fs/ceph/super.h             |  2 +-
+ fs/ceph/xattr.c             | 19 ++++++++++++++-----
+ include/linux/ceph/buffer.h |  3 ++-
+ 6 files changed, 28 insertions(+), 12 deletions(-)
