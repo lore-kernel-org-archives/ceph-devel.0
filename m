@@ -1,14 +1,15 @@
-From: "Brent Kennedy" <bkennedy-3tLf1voIkJTQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Changing the release cadence
-Date: Sun, 21 Jul 2019 23:03:25 -0400
-Message-ID: <02cb01d5403a$09b89430$1d29bc90$@cfl.rr.com>
-References: <alpine.DEB.2.11.1906051556500.987@piezo.novalocal>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Failed to get omap key when mirroring of image is
+ enabled
+Date: Mon, 22 Jul 2019 08:06:45 -0400
+Message-ID: <CA+aFP1BaKeK6QNhiV3dRr9JArsH3nxOuoOY4Tjdu=k_g6PdxyQ@mail.gmail.com>
+References: <CAEbG6hHOe0Q8-dcgBxbW2GX+21BuETso9orZY-9sW37Y5rDwKQ@mail.gmail.com>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1906051556500.987-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-Content-Language: en-us
+In-Reply-To: <CAEbG6hHOe0Q8-dcgBxbW2GX+21BuETso9orZY-9sW37Y5rDwKQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,93 +19,52 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dev-a8pt6IJUokc@public.gmane.org
+To: Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-12 months sounds good to me, I like the idea of march as well since we plan
-on doing upgrades in June/July each year.  Gives it time to be discussed and
-marinate before we decide to upgrade.
+On Sun, Jul 21, 2019 at 8:25 PM Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>
+>  I have a rbd mirroring setup with primary and secondary clusters as peers and I have a pool enabled image mode.., In this i created a rbd image , enabled with journaling.
+>
+> But whenever i enable mirroring on the image,  I m getting error in osd.log. I couldnt trace it out. please guide me to solve this error.
+>
+> I think initially it worked fine. but after ceph process restart. these error coming
+>
+>
+> Secondary.osd.0.log
+>
+> 2019-07-22 05:36:17.371771 7ffbaa0e9700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap key: client_a5c76849-ba16-480a-a96b-ebfdb7f6ac65
+> 2019-07-22 05:36:17.388552 7ffbaa0e9700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier than minimum: 0 < 1
+> 2019-07-22 05:36:17.413102 7ffbaa0e9700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap key: order
+> 2019-07-22 05:36:23.341490 7ffbab8ec700  0 <cls> /build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrieving image id for global id '9e36b9f8-238e-4a54-a055-19b19447855e': (2) No such file or directory
+>
+>
+> primary-osd.0.log
+>
+> 2019-07-22 05:16:49.287769 7fae12db1700  0 log_channel(cluster) log [DBG] : 1.b deep-scrub ok
+> 2019-07-22 05:16:54.078698 7fae125b0700  0 log_channel(cluster) log [DBG] : 1.1b scrub starts
+> 2019-07-22 05:16:54.293839 7fae125b0700  0 log_channel(cluster) log [DBG] : 1.1b scrub ok
+> 2019-07-22 05:17:04.055277 7fae12db1700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier than minimum: 0 < 1
+>
+> 2019-07-22 05:33:21.540986 7fae135b2700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier than minimum: 0 < 1
+> 2019-07-22 05:35:27.447820 7fae12db1700  0 <cls> /build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrieving image id for global id '8a61f694-f650-4ba1-b768-c5e7629ad2e0': (2) No such file or directory
 
--Brent
+Those don't look like errors, but the log level should probably be
+reduced for those OSD cls methods. If you look at your rbd-mirror
+daemon log, do you see any errors? That would be the important place
+to look.
 
------Original Message-----
-From: ceph-users <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org> On Behalf Of Sage Weil
-Sent: Wednesday, June 5, 2019 11:58 AM
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; dev-a8pt6IJUokc@public.gmane.org
-Subject: [ceph-users] Changing the release cadence
-
-Hi everyone,
-
-Since luminous, we have had the follow release cadence and policy:   
- - release every 9 months
- - maintain backports for the last two releases
- - enable upgrades to move either 1 or 2 releases heads
-   (e.g., luminous -> mimic or nautilus; mimic -> nautilus or octopus; ...)
-
-This has mostly worked out well, except that the mimic release received less
-attention that we wanted due to the fact that multiple downstream Ceph
-products (from Red Has and SUSE) decided to based their next release on
-nautilus.  Even though upstream every release is an "LTS" release, as a
-practical matter mimic got less attention than luminous or nautilus.
-
-We've had several requests/proposals to shift to a 12 month cadence. This
-has several advantages:
-
- - Stable/conservative clusters only have to be upgraded every 2 years
-   (instead of every 18 months)
- - Yearly releases are more likely to intersect with downstream
-   distribution release (e.g., Debian).  In the past there have been 
-   problems where the Ceph releases included in consecutive releases of a 
-   distro weren't easily upgradeable.
- - Vendors that make downstream Ceph distributions/products tend to
-   release yearly.  Aligning with those vendors means they are more likely 
-   to productize *every* Ceph release.  This will help make every Ceph 
-   release an "LTS" release (not just in name but also in terms of 
-   maintenance attention).
-
-So far the balance of opinion seems to favor a shift to a 12 month cycle[1],
-especially among developers, so it seems pretty likely we'll make that
-shift.  (If you do have strong concerns about such a move, now is the time
-to raise them.)
-
-That brings us to an important decision: what time of year should we
-release?  Once we pick the timing, we'll be releasing at that time *every
-year* for each release (barring another schedule shift, which we want to
-avoid), so let's choose carefully!
-
-A few options:
-
- - November: If we release Octopus 9 months from the Nautilus release
-   (planned for Feb, released in Mar) then we'd target this November.  We 
-   could shift to a 12 months candence after that.
- - February: That's 12 months from the Nautilus target.
- - March: That's 12 months from when Nautilus was *actually* released.
-
-November is nice in the sense that we'd wrap things up before the holidays.
-It's less good in that users may not be inclined to install the new release
-when many developers will be less available in December.
-
-February kind of sucked in that the scramble to get the last few things done
-happened during the holidays.  OTOH, we should be doing what we can to avoid
-such scrambles, so that might not be something we should factor in.  March
-may be a bit more balanced, with a solid 3 months before when people are
-productive, and 3 months after before they disappear on holiday to address
-any post-release issues.
-
-People tend to be somewhat less available over the summer months due to
-holidays etc, so an early or late summer release might also be less than
-ideal.
-
-Thoughts?  If we can narrow it down to a few options maybe we could do a
-poll to gauge user preferences.
-
-Thanks!
-sage
+>
+> --
+> Regards,
+> Ajitha R
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
 
-[1] https://twitter.com/larsmb/status/1130010208971952129
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+-- 
+Jason
