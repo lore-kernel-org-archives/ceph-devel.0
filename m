@@ -1,11 +1,14 @@
-From: Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Failed to get omap key when mirroring of image is
- enabled
-Date: Mon, 22 Jul 2019 05:55:31 +0530
-Message-ID: <CAEbG6hHOe0Q8-dcgBxbW2GX+21BuETso9orZY-9sW37Y5rDwKQ@mail.gmail.com>
+From: "Brent Kennedy" <bkennedy-3tLf1voIkJTQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Changing the release cadence
+Date: Sun, 21 Jul 2019 23:03:25 -0400
+Message-ID: <02cb01d5403a$09b89430$1d29bc90$@cfl.rr.com>
+References: <alpine.DEB.2.11.1906051556500.987@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3035034521777127450=="
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1906051556500.987-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-us
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,121 +18,93 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dev-a8pt6IJUokc@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============3035034521777127450==
-Content-Type: multipart/alternative; boundary="000000000000d3aa43058e3a1dca"
+12 months sounds good to me, I like the idea of march as well since we plan
+on doing upgrades in June/July each year.  Gives it time to be discussed and
+marinate before we decide to upgrade.
 
---000000000000d3aa43058e3a1dca
-Content-Type: text/plain; charset="UTF-8"
+-Brent
 
- I have a rbd mirroring setup with primary and secondary clusters as peers
-and I have a pool enabled image mode.., In this i created a rbd image ,
-enabled with journaling.
+-----Original Message-----
+From: ceph-users <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org> On Behalf Of Sage Weil
+Sent: Wednesday, June 5, 2019 11:58 AM
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; dev-a8pt6IJUokc@public.gmane.org
+Subject: [ceph-users] Changing the release cadence
 
-But whenever i enable mirroring on the image,  I m getting error in
-osd.log. I couldnt trace it out. please guide me to solve this error.
-I think initially it worked fine. but after ceph process restart. these
-error coming
+Hi everyone,
+
+Since luminous, we have had the follow release cadence and policy:   
+ - release every 9 months
+ - maintain backports for the last two releases
+ - enable upgrades to move either 1 or 2 releases heads
+   (e.g., luminous -> mimic or nautilus; mimic -> nautilus or octopus; ...)
+
+This has mostly worked out well, except that the mimic release received less
+attention that we wanted due to the fact that multiple downstream Ceph
+products (from Red Has and SUSE) decided to based their next release on
+nautilus.  Even though upstream every release is an "LTS" release, as a
+practical matter mimic got less attention than luminous or nautilus.
+
+We've had several requests/proposals to shift to a 12 month cadence. This
+has several advantages:
+
+ - Stable/conservative clusters only have to be upgraded every 2 years
+   (instead of every 18 months)
+ - Yearly releases are more likely to intersect with downstream
+   distribution release (e.g., Debian).  In the past there have been 
+   problems where the Ceph releases included in consecutive releases of a 
+   distro weren't easily upgradeable.
+ - Vendors that make downstream Ceph distributions/products tend to
+   release yearly.  Aligning with those vendors means they are more likely 
+   to productize *every* Ceph release.  This will help make every Ceph 
+   release an "LTS" release (not just in name but also in terms of 
+   maintenance attention).
+
+So far the balance of opinion seems to favor a shift to a 12 month cycle[1],
+especially among developers, so it seems pretty likely we'll make that
+shift.  (If you do have strong concerns about such a move, now is the time
+to raise them.)
+
+That brings us to an important decision: what time of year should we
+release?  Once we pick the timing, we'll be releasing at that time *every
+year* for each release (barring another schedule shift, which we want to
+avoid), so let's choose carefully!
+
+A few options:
+
+ - November: If we release Octopus 9 months from the Nautilus release
+   (planned for Feb, released in Mar) then we'd target this November.  We 
+   could shift to a 12 months candence after that.
+ - February: That's 12 months from the Nautilus target.
+ - March: That's 12 months from when Nautilus was *actually* released.
+
+November is nice in the sense that we'd wrap things up before the holidays.
+It's less good in that users may not be inclined to install the new release
+when many developers will be less available in December.
+
+February kind of sucked in that the scramble to get the last few things done
+happened during the holidays.  OTOH, we should be doing what we can to avoid
+such scrambles, so that might not be something we should factor in.  March
+may be a bit more balanced, with a solid 3 months before when people are
+productive, and 3 months after before they disappear on holiday to address
+any post-release issues.
+
+People tend to be somewhat less available over the summer months due to
+holidays etc, so an early or late summer release might also be less than
+ideal.
+
+Thoughts?  If we can narrow it down to a few options maybe we could do a
+poll to gauge user preferences.
+
+Thanks!
+sage
 
 
-Secondary.osd.0.log
-
-2019-07-22 05:36:17.371771 7ffbaa0e9700  0 <cls>
-/build/ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap
-key: client_a5c76849-ba16-480a-a96b-ebfdb7f6ac65
-2019-07-22 05:36:17.388552 7ffbaa0e9700  0 <cls>
-/build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set
-earlier than minimum: 0 < 1
-2019-07-22 05:36:17.413102 7ffbaa0e9700  0 <cls>
-/build/ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap
-key: order
-2019-07-22 05:36:23.341490 7ffbab8ec700  0 <cls>
-/build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrieving image id
-for global id '9e36b9f8-238e-4a54-a055-19b19447855e': (2) No such file or
-directory
-
-
-primary-osd.0.log
-
-2019-07-22 05:16:49.287769 7fae12db1700  0 log_channel(cluster) log [DBG] :
-1.b deep-scrub ok
-2019-07-22 05:16:54.078698 7fae125b0700  0 log_channel(cluster) log [DBG] :
-1.1b scrub starts
-2019-07-22 05:16:54.293839 7fae125b0700  0 log_channel(cluster) log [DBG] :
-1.1b scrub ok
-2019-07-22 05:17:04.055277 7fae12db1700  0 <cls>
-/build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set
-earlier than minimum: 0 < 1
-
-2019-07-22 05:33:21.540986 7fae135b2700  0 <cls>
-/build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set
-earlier than minimum: 0 < 1
-2019-07-22 05:35:27.447820 7fae12db1700  0 <cls>
-/build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrieving image id
-for global id '8a61f694-f650-4ba1-b768-c5e7629ad2e0': (2) No such file or
-directory
-
-
--- 
-
-
-*Regards,Ajitha R*
-
---000000000000d3aa43058e3a1dca
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div><p dir=3D"ltr" style=3D"font-family:sans-serif">=C2=
-=A0I have a rbd mirroring=20
-setup with primary and secondary clusters as peers and I have a pool enable=
-d=20
-image mode.., In this i created a rbd image , enabled with journaling.</p><=
-p dir=3D"ltr" style=3D"font-family:sans-serif">But whenever i enable mirror=
-ing on the image,=C2=A0 I m getting error in osd.log. I couldnt trace it ou=
-t. please guide me to solve this error.<br></p></div><div>I think initially=
- it worked fine. but after ceph process restart. these error coming <br></d=
-iv><div><br></div><div><br></div><div>Secondary.osd.0.log</div><div><br></d=
-iv><div>2019-07-22 05:36:17.371771 7ffbaa0e9700 =C2=A00 &lt;cls&gt; /build/=
-ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap key: cli=
-ent_a5c76849-ba16-480a-a96b-ebfdb7f6ac65</div>2019-07-22 05:36:17.388552 7f=
-fbaa0e9700 =C2=A00 &lt;cls&gt; /build/ceph-12.2.12/src/cls/journal/cls_jour=
-nal.cc:472: active object set earlier than minimum: 0 &lt; 1<br>2019-07-22 =
-05:36:17.413102 7ffbaa0e9700 =C2=A00 &lt;cls&gt; /build/ceph-12.2.12/src/cl=
-s/journal/cls_journal.cc:61: failed to get omap key: order<br>2019-07-22 05=
-:36:23.341490 7ffbab8ec700 =C2=A00 &lt;cls&gt; /build/ceph-12.2.12/src/cls/=
-rbd/cls_rbd.cc:4125: error retrieving image id for global id &#39;9e36b9f8-=
-238e-4a54-a055-19b19447855e&#39;: (2) No such file or directory<br><br><div=
-><br></div><div>primary-osd.0.log</div><div><br></div><div>2019-07-22 05:16=
-:49.287769 7fae12db1700 =C2=A00 log_channel(cluster) log [DBG] : 1.b deep-s=
-crub ok<br>2019-07-22 05:16:54.078698 7fae125b0700 =C2=A00 log_channel(clus=
-ter) log [DBG] : 1.1b scrub starts<br>2019-07-22 05:16:54.293839 7fae125b07=
-00 =C2=A00 log_channel(cluster) log [DBG] : 1.1b scrub ok<br>2019-07-22 05:=
-17:04.055277 7fae12db1700 =C2=A00 &lt;cls&gt; /build/ceph-12.2.12/src/cls/j=
-ournal/cls_journal.cc:472: active object set earlier than minimum: 0 &lt; 1=
-<br><br>2019-07-22 05:33:21.540986 7fae135b2700 =C2=A00 &lt;cls&gt; /build/=
-ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier =
-than minimum: 0 &lt; 1<br>2019-07-22 05:35:27.447820 7fae12db1700 =C2=A00 &=
-lt;cls&gt; /build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrievin=
-g image id for global id &#39;8a61f694-f650-4ba1-b768-c5e7629ad2e0&#39;: (2=
-) No such file or directory<br><br></div><br>-- <br><div dir=3D"ltr" class=
-=3D"m_-7686208623902720713gmail_signature" data-smartmail=3D"gmail_signatur=
-e"><div dir=3D"ltr"><b><i style=3D"background-color:rgb(255,255,255);color:=
-rgb(102,0,0)">Regards,<span></span><br>Ajitha R</i><br></b></div></div></di=
-v>
-
---000000000000d3aa43058e3a1dca--
-
---===============3035034521777127450==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+[1] https://twitter.com/larsmb/status/1130010208971952129
 
 _______________________________________________
 ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============3035034521777127450==--
