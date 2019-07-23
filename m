@@ -1,70 +1,62 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Failed to get omap key when mirroring of image is
- enabled
-Date: Mon, 22 Jul 2019 08:06:45 -0400
-Message-ID: <CA+aFP1BaKeK6QNhiV3dRr9JArsH3nxOuoOY4Tjdu=k_g6PdxyQ@mail.gmail.com>
-References: <CAEbG6hHOe0Q8-dcgBxbW2GX+21BuETso9orZY-9sW37Y5rDwKQ@mail.gmail.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 0/4] Sleeping functions in invalid context bug fixes
+Date: Tue, 23 Jul 2019 12:02:57 +0200
+Message-ID: <CAOi1vP86qVeMV9hJPCP7sHfimMv08j-znSGyhcYdd1TC_Gn19A@mail.gmail.com>
+References: <20190719143222.16058-1-lhenriques@suse.com> <ab5ccaa05994e2eef05bdb54510e6b017db2d807.camel@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAEbG6hHOe0Q8-dcgBxbW2GX+21BuETso9orZY-9sW37Y5rDwKQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <ab5ccaa05994e2eef05bdb54510e6b017db2d807.camel@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Luis Henriques <lhenriques@suse.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Sun, Jul 21, 2019 at 8:25 PM Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+On Fri, Jul 19, 2019 at 5:20 PM Jeff Layton <jlayton@kernel.org> wrote:
 >
->  I have a rbd mirroring setup with primary and secondary clusters as peers and I have a pool enabled image mode.., In this i created a rbd image , enabled with journaling.
+> On Fri, 2019-07-19 at 15:32 +0100, Luis Henriques wrote:
+> > Hi,
+> >
+> > I'm sending three "sleeping function called from invalid context" bug
+> > fixes that I had on my TODO for a while.  All of them are ceph_buffer_put
+> > related, and all the fixes follow the same pattern: delay the operation
+> > until the ci->i_ceph_lock is released.
+> >
+> > The first patch simply allows ceph_buffer_put to receive a NULL buffer so
+> > that the NULL check doesn't need to be performed in all the other patches.
+> > IOW, it's not really required, just convenient.
+> >
+> > (Note: maybe these patches should all be tagged for stable.)
+> >
+> > Luis Henriques (4):
+> >   libceph: allow ceph_buffer_put() to receive a NULL ceph_buffer
+> >   ceph: fix buffer free while holding i_ceph_lock in __ceph_setxattr()
+> >   ceph: fix buffer free while holding i_ceph_lock in
+> >     __ceph_build_xattrs_blob()
+> >   ceph: fix buffer free while holding i_ceph_lock in fill_inode()
+> >
+> >  fs/ceph/caps.c              |  5 ++++-
+> >  fs/ceph/inode.c             |  7 ++++---
+> >  fs/ceph/snap.c              |  4 +++-
+> >  fs/ceph/super.h             |  2 +-
+> >  fs/ceph/xattr.c             | 19 ++++++++++++++-----
+> >  include/linux/ceph/buffer.h |  3 ++-
+> >  6 files changed, 28 insertions(+), 12 deletions(-)
 >
-> But whenever i enable mirroring on the image,  I m getting error in osd.log. I couldnt trace it out. please guide me to solve this error.
+> This all looks good to me. I'll plan to merge these into the testing
+> branch soon, and tag them for stable.
 >
-> I think initially it worked fine. but after ceph process restart. these error coming
+> PS: On a related note (and more of a question for Ilya)...
 >
->
-> Secondary.osd.0.log
->
-> 2019-07-22 05:36:17.371771 7ffbaa0e9700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap key: client_a5c76849-ba16-480a-a96b-ebfdb7f6ac65
-> 2019-07-22 05:36:17.388552 7ffbaa0e9700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier than minimum: 0 < 1
-> 2019-07-22 05:36:17.413102 7ffbaa0e9700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:61: failed to get omap key: order
-> 2019-07-22 05:36:23.341490 7ffbab8ec700  0 <cls> /build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrieving image id for global id '9e36b9f8-238e-4a54-a055-19b19447855e': (2) No such file or directory
->
->
-> primary-osd.0.log
->
-> 2019-07-22 05:16:49.287769 7fae12db1700  0 log_channel(cluster) log [DBG] : 1.b deep-scrub ok
-> 2019-07-22 05:16:54.078698 7fae125b0700  0 log_channel(cluster) log [DBG] : 1.1b scrub starts
-> 2019-07-22 05:16:54.293839 7fae125b0700  0 log_channel(cluster) log [DBG] : 1.1b scrub ok
-> 2019-07-22 05:17:04.055277 7fae12db1700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier than minimum: 0 < 1
->
-> 2019-07-22 05:33:21.540986 7fae135b2700  0 <cls> /build/ceph-12.2.12/src/cls/journal/cls_journal.cc:472: active object set earlier than minimum: 0 < 1
-> 2019-07-22 05:35:27.447820 7fae12db1700  0 <cls> /build/ceph-12.2.12/src/cls/rbd/cls_rbd.cc:4125: error retrieving image id for global id '8a61f694-f650-4ba1-b768-c5e7629ad2e0': (2) No such file or directory
+> I'm wondering if we get any benefit from having our own ceph_kvmalloc
+> routine. Why are we not better off using the stock kvmalloc routine
+> instead? Forcing a vmalloc just because we've gone above 32k allocation
+> doesn't seem like the right thing to do.
 
-Those don't look like errors, but the log level should probably be
-reduced for those OSD cls methods. If you look at your rbd-mirror
-daemon log, do you see any errors? That would be the important place
-to look.
+I don't remember off the top of my head and can't check right now.
+Could be that kvmalloc() didn't exist back then.  I'll add that to my
+TODO list.
 
->
-> --
-> Regards,
-> Ajitha R
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Thanks,
 
-
-
--- 
-Jason
+                Ilya
