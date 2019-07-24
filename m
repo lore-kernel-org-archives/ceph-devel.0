@@ -1,161 +1,161 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 03/12] block: bio_release_pages: use flags arg instead of bool
-Date: Tue, 23 Jul 2019 21:25:09 -0700
-Message-ID: <20190724042518.14363-4-jhubbard@nvidia.com>
+Subject: [PATCH 05/12] block_dev: convert put_page() to put_user_page*()
+Date: Tue, 23 Jul 2019 21:25:11 -0700
+Message-ID: <20190724042518.14363-6-jhubbard@nvidia.com>
 References: <20190724042518.14363-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190724042518.14363-1-jhubbard@nvidia.com>
-Sender: netdev-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Anna Schumaker <anna.schumaker@netapp.com>, "David S . Miller" <davem@davemloft.net>, Dominique Martinet <asmadeus@codewreck.org>, Eric Van Hensbergen <ericvh@gmail.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jason Wang <jasowang@redhat.com>, Jens Axboe <axboe@kernel.dk>, Latchesar Ionkov <lucho@ionkov.net>, "Michael S . Tsirkin" <mst@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trond.myklebust@hammerspace.com>, Christoph Hellwig <hch@lst.de>, Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, kvm@vger.kernel.org, linux-block@vger.kernel.org, linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.orglinu
 List-Id: ceph-devel.vger.kernel.org
 
-From: John Hubbard <jhubbard@nvidia.com>
+From: Jérôme Glisse <jglisse@redhat.com>
 
-In commit d241a95f3514 ("block: optionally mark pages dirty in
-bio_release_pages"), new "bool mark_dirty" argument was added to
-bio_release_pages.
+For pages that were retained via get_user_pages*(), release those pages
+via the new put_user_page*() routines, instead of via put_page() or
+release_pages().
 
-In upcoming work, another bool argument (to indicate that the pages came
-from get_user_pages) is going to be added. That's one bool too many,
-because it's not desirable have calls of the form:
+This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
+("mm: introduce put_user_page*(), placeholder versions").
 
-    foo(true, false, true, etc);
+Changes from Jérôme's original patch:
 
-In order to prepare for that, change the argument from a bool, to a
-typesafe (enum-based) flags argument.
+* reworked to be compatible with recent bio_release_pages() changes.
 
-Cc: Christoph Hellwig <hch@infradead.org>
-Cc: Jérôme Glisse <jglisse@redhat.com>
-Cc: Minwoo Im <minwoo.im.dev@gmail.com>
-Cc: Jens Axboe <axboe@kernel.dk>
+Signed-off-by: Jérôme Glisse <jglisse@redhat.com>
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
+Cc: linux-fsdevel@vger.kernel.org
+Cc: linux-block@vger.kernel.org
+Cc: linux-mm@kvack.org
+Cc: Jan Kara <jack@suse.cz>
+Cc: Dan Williams <dan.j.williams@intel.com>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>
+Cc: Johannes Thumshirn <jthumshirn@suse.de>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@kernel.dk>
+Cc: Ming Lei <ming.lei@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>
+Cc: Jason Gunthorpe <jgg@ziepe.ca>
+Cc: Matthew Wilcox <willy@infradead.org>
+Cc: Boaz Harrosh <boaz@plexistor.com>
 ---
- block/bio.c         | 12 ++++++------
- fs/block_dev.c      |  4 ++--
- fs/direct-io.c      |  2 +-
- include/linux/bio.h | 13 ++++++++++++-
- 4 files changed, 21 insertions(+), 10 deletions(-)
+ block/bio.c         | 13 +++++++++++++
+ fs/block_dev.c      | 22 +++++++++++++++++-----
+ include/linux/bio.h |  8 ++++++++
+ 3 files changed, 38 insertions(+), 5 deletions(-)
 
 diff --git a/block/bio.c b/block/bio.c
-index 299a0e7651ec..7675e2de509d 100644
+index 74f9eba2583b..3b9f66e64bc1 100644
 --- a/block/bio.c
 +++ b/block/bio.c
-@@ -833,7 +833,7 @@ int bio_add_page(struct bio *bio, struct page *page,
+@@ -1746,6 +1746,19 @@ void bio_check_pages_dirty(struct bio *bio)
+ 	__bio_check_pages_dirty(bio, false);
  }
- EXPORT_SYMBOL(bio_add_page);
  
--void bio_release_pages(struct bio *bio, bool mark_dirty)
-+void bio_release_pages(struct bio *bio, enum bio_rp_flags_t flags)
++enum bio_rp_flags_t bio_rp_flags(struct iov_iter *iter, bool mark_dirty)
++{
++	enum bio_rp_flags_t flags = BIO_RP_NORMAL;
++
++	if (mark_dirty)
++		flags |= BIO_RP_MARK_DIRTY;
++
++	if (iov_iter_get_pages_use_gup(iter))
++		flags |= BIO_RP_FROM_GUP;
++
++	return flags;
++}
++
+ void update_io_ticks(struct hd_struct *part, unsigned long now)
  {
- 	struct bvec_iter_all iter_all;
- 	struct bio_vec *bvec;
-@@ -842,7 +842,7 @@ void bio_release_pages(struct bio *bio, bool mark_dirty)
- 		return;
- 
- 	bio_for_each_segment_all(bvec, bio, iter_all) {
--		if (mark_dirty && !PageCompound(bvec->bv_page))
-+		if ((flags & BIO_RP_MARK_DIRTY) && !PageCompound(bvec->bv_page))
- 			set_page_dirty_lock(bvec->bv_page);
- 		put_page(bvec->bv_page);
- 	}
-@@ -1421,7 +1421,7 @@ struct bio *bio_map_user_iov(struct request_queue *q,
- 	return bio;
- 
-  out_unmap:
--	bio_release_pages(bio, false);
-+	bio_release_pages(bio, BIO_RP_NORMAL);
- 	bio_put(bio);
- 	return ERR_PTR(ret);
- }
-@@ -1437,7 +1437,7 @@ struct bio *bio_map_user_iov(struct request_queue *q,
-  */
- void bio_unmap_user(struct bio *bio)
- {
--	bio_release_pages(bio, bio_data_dir(bio) == READ);
-+	bio_release_pages(bio, bio_rp_dirty_flag(bio_data_dir(bio) == READ));
- 	bio_put(bio);
- 	bio_put(bio);
- }
-@@ -1683,7 +1683,7 @@ static void bio_dirty_fn(struct work_struct *work)
- 	while ((bio = next) != NULL) {
- 		next = bio->bi_private;
- 
--		bio_release_pages(bio, true);
-+		bio_release_pages(bio, BIO_RP_MARK_DIRTY);
- 		bio_put(bio);
- 	}
- }
-@@ -1699,7 +1699,7 @@ void bio_check_pages_dirty(struct bio *bio)
- 			goto defer;
- 	}
- 
--	bio_release_pages(bio, false);
-+	bio_release_pages(bio, BIO_RP_NORMAL);
- 	bio_put(bio);
- 	return;
- defer:
+ 	unsigned long stamp;
 diff --git a/fs/block_dev.c b/fs/block_dev.c
-index 4707dfff991b..9fe6616f8788 100644
+index 9fe6616f8788..d53abaf31e54 100644
 --- a/fs/block_dev.c
 +++ b/fs/block_dev.c
 @@ -259,7 +259,7 @@ __blkdev_direct_IO_simple(struct kiocb *iocb, struct iov_iter *iter,
  	}
  	__set_current_state(TASK_RUNNING);
  
--	bio_release_pages(&bio, should_dirty);
-+	bio_release_pages(&bio, bio_rp_dirty_flag(should_dirty));
+-	bio_release_pages(&bio, bio_rp_dirty_flag(should_dirty));
++	bio_release_pages(&bio, bio_rp_flags(iter, should_dirty));
  	if (unlikely(bio.bi_status))
  		ret = blk_status_to_errno(bio.bi_status);
  
-@@ -329,7 +329,7 @@ static void blkdev_bio_end_io(struct bio *bio)
+@@ -295,7 +295,7 @@ static int blkdev_iopoll(struct kiocb *kiocb, bool wait)
+ 	return blk_poll(q, READ_ONCE(kiocb->ki_cookie), wait);
+ }
+ 
+-static void blkdev_bio_end_io(struct bio *bio)
++static void _blkdev_bio_end_io(struct bio *bio, bool from_gup)
+ {
+ 	struct blkdev_dio *dio = bio->bi_private;
+ 	bool should_dirty = dio->should_dirty;
+@@ -327,13 +327,23 @@ static void blkdev_bio_end_io(struct bio *bio)
+ 	}
+ 
  	if (should_dirty) {
- 		bio_check_pages_dirty(bio);
+-		bio_check_pages_dirty(bio);
++		__bio_check_pages_dirty(bio, from_gup);
  	} else {
--		bio_release_pages(bio, false);
-+		bio_release_pages(bio, BIO_RP_NORMAL);
+-		bio_release_pages(bio, BIO_RP_NORMAL);
++		bio_release_pages(bio, bio_rp_gup_flag(from_gup));
  		bio_put(bio);
  	}
  }
-diff --git a/fs/direct-io.c b/fs/direct-io.c
-index ae196784f487..423ef431ddda 100644
---- a/fs/direct-io.c
-+++ b/fs/direct-io.c
-@@ -551,7 +551,7 @@ static blk_status_t dio_bio_complete(struct dio *dio, struct bio *bio)
- 	if (dio->is_async && should_dirty) {
- 		bio_check_pages_dirty(bio);	/* transfers ownership */
- 	} else {
--		bio_release_pages(bio, should_dirty);
-+		bio_release_pages(bio, bio_rp_dirty_flag(should_dirty));
- 		bio_put(bio);
- 	}
- 	return err;
-diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 3cdb84cdc488..2715e55679c1 100644
---- a/include/linux/bio.h
-+++ b/include/linux/bio.h
-@@ -440,7 +440,18 @@ bool __bio_try_merge_page(struct bio *bio, struct page *page,
- void __bio_add_page(struct bio *bio, struct page *page,
- 		unsigned int len, unsigned int off);
- int bio_iov_iter_get_pages(struct bio *bio, struct iov_iter *iter);
--void bio_release_pages(struct bio *bio, bool mark_dirty);
-+
-+enum bio_rp_flags_t {
-+	BIO_RP_NORMAL		= 0,
-+	BIO_RP_MARK_DIRTY	= 1,
-+};
-+
-+static inline enum bio_rp_flags_t bio_rp_dirty_flag(bool mark_dirty)
+ 
++static void blkdev_bio_end_io(struct bio *bio)
 +{
-+	return mark_dirty ? BIO_RP_MARK_DIRTY : BIO_RP_NORMAL;
++	_blkdev_bio_end_io(bio, false);
 +}
 +
-+void bio_release_pages(struct bio *bio, enum bio_rp_flags_t flags);
++static void blkdev_bio_from_gup_end_io(struct bio *bio)
++{
++	_blkdev_bio_end_io(bio, true);
++}
++
+ static ssize_t
+ __blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter, int nr_pages)
+ {
+@@ -380,7 +390,9 @@ __blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter, int nr_pages)
+ 		bio->bi_iter.bi_sector = pos >> 9;
+ 		bio->bi_write_hint = iocb->ki_hint;
+ 		bio->bi_private = dio;
+-		bio->bi_end_io = blkdev_bio_end_io;
++		bio->bi_end_io = iov_iter_get_pages_use_gup(iter) ?
++				 blkdev_bio_from_gup_end_io :
++				 blkdev_bio_end_io;
+ 		bio->bi_ioprio = iocb->ki_ioprio;
+ 
+ 		ret = bio_iov_iter_get_pages(bio, iter);
+diff --git a/include/linux/bio.h b/include/linux/bio.h
+index d68a40c2c9d4..b9460d1a4679 100644
+--- a/include/linux/bio.h
++++ b/include/linux/bio.h
+@@ -452,6 +452,13 @@ static inline enum bio_rp_flags_t bio_rp_dirty_flag(bool mark_dirty)
+ 	return mark_dirty ? BIO_RP_MARK_DIRTY : BIO_RP_NORMAL;
+ }
+ 
++static inline enum bio_rp_flags_t bio_rp_gup_flag(bool from_gup)
++{
++	return from_gup ? BIO_RP_FROM_GUP : BIO_RP_NORMAL;
++}
++
++enum bio_rp_flags_t bio_rp_flags(struct iov_iter *iter, bool mark_dirty);
++
+ void bio_release_pages(struct bio *bio, enum bio_rp_flags_t flags);
  struct rq_map_data;
  extern struct bio *bio_map_user_iov(struct request_queue *,
- 				    struct iov_iter *, gfp_t);
+@@ -463,6 +470,7 @@ extern struct bio *bio_copy_kern(struct request_queue *, void *, unsigned int,
+ 				 gfp_t, int);
+ extern void bio_set_pages_dirty(struct bio *bio);
+ extern void bio_check_pages_dirty(struct bio *bio);
++void __bio_check_pages_dirty(struct bio *bio, bool from_gup);
+ 
+ void generic_start_io_acct(struct request_queue *q, int op,
+ 				unsigned long sectors, struct hd_struct *part);
 -- 
 2.22.0
