@@ -1,48 +1,66 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 00/12] block/bio, fs: convert put_page() to
- put_user_page*()
-Date: Tue, 23 Jul 2019 23:17:50 -0700
-Message-ID: <20190724061750.GA19397@infradead.org>
-References: <20190724042518.14363-1-jhubbard@nvidia.com>
+From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Subject: Re: pools limit
+Date: Wed, 24 Jul 2019 09:25:26 +0200
+Message-ID: <445eb2fe-4082-8c20-0848-2571f1ec3816@42on.com>
+References: <CANA9Uk6ZyYY1HuFXEjvs4aT3zaf7YvDdCH20Rhgb_5U89em0MQ@mail.gmail.com>
+ <CAD9yTbHdKtre8ZjnXTxV_=mE513djznyFP-dgiG+9MpQZxx_Pg@mail.gmail.com>
+ <CANA9Uk4Yt9oS7D31oR++f48ph8_KLAXH5ebeSeJAXUvyuF_NRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190724042518.14363-1-jhubbard@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: john.hubbard@gmail.com
-Cc: Andrew Morton <akpm@linux-foundation.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Anna Schumaker <anna.schumaker@netapp.com>, "David S . Miller" <davem@davemloft.net>, Dominique Martinet <asmadeus@codewreck.org>, Eric Van Hensbergen <ericvh@gmail.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jason Wang <jasowang@redhat.com>, Jens Axboe <axboe@kernel.dk>, Latchesar Ionkov <lucho@ionkov.net>, "Michael S . Tsirkin" <mst@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trond.myklebust@hammerspace.com>, Christoph Hellwig <hch@lst.de>, Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, kvm@vger.kernel.org, linux-block@vger.kernel.org, linux-cifs@vger.kernel.org, linux-fsdevel@vger.
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CANA9Uk4Yt9oS7D31oR++f48ph8_KLAXH5ebeSeJAXUvyuF_NRQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Paul Emmerich <paul.emmerich-iZXOWb+A65A@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Jul 23, 2019 at 09:25:06PM -0700, john.hubbard@gmail.com wrote:
-> * Store, in the iov_iter, a "came from gup (get_user_pages)" parameter.
->   Then, use the new iov_iter_get_pages_use_gup() to retrieve it when
->   it is time to release the pages. That allows choosing between put_page()
->   and put_user_page*().
-> 
-> * Pass in one more piece of information to bio_release_pages: a "from_gup"
->   parameter. Similar use as above.
-> 
-> * Change the block layer, and several file systems, to use
->   put_user_page*().
-
-I think we can do this in a simple and better way.  We have 5 ITER_*
-types.  Of those ITER_DISCARD as the name suggests never uses pages, so
-we can skip handling it.  ITER_PIPE is rejected іn the direct I/O path,
-which leaves us with three.
-
-Out of those ITER_BVEC needs a user page reference, so we want to call
-put_user_page* on it.  ITER_BVEC always already has page reference,
-which means in the block direct I/O path path we alread don't take
-a page reference.  We should extent that handling to all other calls
-of iov_iter_get_pages / iov_iter_get_pages_alloc.  I think we should
-just reject ITER_KVEC for direct I/O as well as we have no users and
-it is rather pointless.  Alternatively if we see a use for it the
-callers should always have a life page reference anyway (or might
-be on kmalloc memory), so we really should not take a reference either.
-
-In other words:  the only time we should ever have to put a page in
-this patch is when they are user pages.  We'll need to clean up
-various bits of code for that, but that can be done gradually before
-even getting to the actual put_user_pages conversion.
+CgpPbiA3LzE2LzE5IDY6NTMgUE0sIE0gUmFuZ2EgU3dhbWkgUmVkZHkgd3JvdGU6Cj4gVGhhbmtz
+IGZvcsKgeW91ciByZXBseS4uCj4gSGVyZSwgbmV3IHBvb2wgY3JlYXRpb25zIGFuZCBwZyBhdXRv
+IHNjYWxlIG1heSBjYXVzZSByZWJhbGFuY2UuLndoaWNoCj4gaW1wYWN0IHRoZSBjZXBoIGNsdXN0
+ZXIgcGVyZm9ybWFuY2UuLgo+IAo+IFBsZWFzZSBzaGFyZSBuYW1lIHNwYWNlIGRldGFpbCBsaWtl
+IGhvdyB0byB1c2UgZXRjCj4gCgpXb3VsZCBpdCBiZSBSQkQsIFJhZG9zLCBDZXBoRlM/IFdoYXQg
+d291bGQgeW91IGJlIHVzaW5nIG9uIHRvcCBvZiBDZXBoPwoKV2lkbwoKPiAKPiAKPiBPbiBUdWUs
+IDE2IEp1bCwgMjAxOSwgOTozMCBQTSBQYXVsIEVtbWVyaWNoLCA8cGF1bC5lbW1lcmljaEBjcm9p
+dC5pbwo+IDxtYWlsdG86cGF1bC5lbW1lcmljaEBjcm9pdC5pbz4+IHdyb3RlOgo+IAo+ICAgICAx
+MDArIHBvb2xzIHdvcmsgZmluZSBpZiB5b3UgY2FuIGdldCB0aGUgUEcgY291bnQgcmlnaHQgKGF1
+dG8tc2NhbGVyCj4gICAgIGhlbHBzLCB0aGVyZSBhcmUgc29tZSBvcHRpb25zIHRoYXQgeW91J2xs
+IG5lZWQgdG8gdHVuZSBmb3Igc21hbGwtaXNoCj4gICAgIHBvb2xzKS4KPiAKPiAgICAgQnV0IGl0
+J3Mgbm90IGEgIm5pY2UiIHNldHVwLiBIYXZlIHlvdSBjb25zaWRlcmVkIHVzaW5nIG5hbWVzcGFj
+ZXMKPiAgICAgaW5zdGVhZD8KPiAKPiAKPiAgICAgUGF1bAo+IAo+ICAgICAtLSAKPiAgICAgUGF1
+bCBFbW1lcmljaAo+IAo+ICAgICBMb29raW5nIGZvciBoZWxwIHdpdGggeW91ciBDZXBoIGNsdXN0
+ZXI/IENvbnRhY3QgdXMgYXQgaHR0cHM6Ly9jcm9pdC5pbwo+IAo+ICAgICBjcm9pdCBHbWJICj4g
+ICAgIEZyZXNlbml1c3N0ci4gMzFoCj4gICAgIDgxMjQ3IE3DvG5jaGVuCj4gICAgIHd3dy5jcm9p
+dC5pbyA8aHR0cDovL3d3dy5jcm9pdC5pbz4KPiAgICAgVGVsOiArNDkgODkgMTg5NjU4NSA5MAo+
+IAo+IAo+ICAgICBPbiBUdWUsIEp1bCAxNiwgMjAxOSBhdCA0OjE3IFBNIE0gUmFuZ2EgU3dhbWkg
+UmVkZHkKPiAgICAgPHN3YW1pcmVkZHlAZ21haWwuY29tIDxtYWlsdG86c3dhbWlyZWRkeUBnbWFp
+bC5jb20+PiB3cm90ZToKPiAKPiAgICAgICAgIEhlbGxvIC0gSSBoYXZlIGNyZWF0ZWQgMTAgbm9k
+ZXMgY2VwaCBjbHVzdGVyIHdpdGggMTQueCB2ZXJzaW9uLgo+ICAgICAgICAgQ2FuIHlvdSBwbGVh
+c2UgY29uZmlybSBiZWxvdzoKPiAKPiAgICAgICAgIFExIC0gQ2FuIEkgY3JlYXRlIDEwMCsgcG9v
+bCAob3IgbW9yZSkgb24gdGhlIGNsdXN0ZXI/ICh0aGUKPiAgICAgICAgIHJlYXNvbiBpcyAtIGNy
+ZWF0aW5nIGEgcG9vbCBwZXIgcHJvamVjdCkuIEFueSBsaW1pdGF0aW9uIG9uIHBvb2wKPiAgICAg
+ICAgIGNyZWF0aW9uPwo+IAo+ICAgICAgICAgUTIgLSBJbiB0aGUgYWJvdmUgcG9vbCAtIEkgdXNl
+IDEyOCBQRy1OVU0gLSB0byBzdGFydCB3aXRoIGFuZAo+ICAgICAgICAgZW5hYmxlIGF1dG9zY2Fs
+ZSBmb3IgUEdfTlVNLCBzbyB0aGF0IGJhc2VkIG9uIHRoZSBkYXRhIGluIHRoZQo+ICAgICAgICAg
+cG9vbCwgUEdfTlVNIHdpbGwgaW5jcmVhc2UgYnkgY2VwaCBpdHNlbGYuCj4gCj4gICAgICAgICBM
+ZXQgbWUga25vdyBpZiBhbnkgbGltaXRhdGlvbnMgZm9yIHRoZSBhYm92ZSBhbmQgYW55IGZvcmUg
+c2VlIGlzc3VlPwo+IAo+ICAgICAgICAgVGhhbmtzCj4gICAgICAgICBTd2FtaQo+ICAgICAgICAg
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiAgICAgICAg
+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gICAgICAgICBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tIDxtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4KPiAgICAgICAgIGh0dHA6Ly9s
+aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IAo+IAo+IF9f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3Rz
+LmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gCl9fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBs
+aXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
+bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
