@@ -1,10 +1,9 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 08/12] fs/cifs: convert put_page() to put_user_page*()
-Date: Tue, 23 Jul 2019 21:25:14 -0700
-Message-ID: <20190724042518.14363-9-jhubbard@nvidia.com>
+Subject: [PATCH 12/12] fs/ceph: fix a build warning: returning a value from void function
+Date: Tue, 23 Jul 2019 21:25:18 -0700
+Message-ID: <20190724042518.14363-13-jhubbard@nvidia.com>
 References: <20190724042518.14363-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190724042518.14363-1-jhubbard@nvidia.com>
@@ -13,170 +12,28 @@ To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Anna Schumaker <anna.schumaker@netapp.com>, "David S . Miller" <davem@davemloft.net>, Dominique Martinet <asmadeus@codewreck.org>, Eric Van Hensbergen <ericvh@gmail.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jason Wang <jasowang@redhat.com>, Jens Axboe <axboe@kernel.dk>, Latchesar Ionkov <lucho@ionkov.net>, "Michael S . Tsirkin" <mst@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trond.myklebust@hammerspace.com>, Christoph Hellwig <hch@lst.de>, Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, kvm@vger.kernel.org, linux-block@vger.kernel.org, linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.orglinu
 List-Id: ceph-devel.vger.kernel.org
 
-From: Jérôme Glisse <jglisse@redhat.com>
+From: John Hubbard <jhubbard@nvidia.com>
 
-For pages that were retained via get_user_pages*(), release those pages
-via the new put_user_page*() routines, instead of via put_page().
+Trivial build warning fix: don't return a value from a function
+whose type is "void".
 
-This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
-("mm: introduce put_user_page*(), placeholder versions").
-
-Signed-off-by: Jérôme Glisse <jglisse@redhat.com>
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
-Cc: linux-fsdevel@vger.kernel.org
-Cc: linux-block@vger.kernel.org
-Cc: linux-mm@kvack.org
-Cc: linux-cifs@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
-Cc: Dan Williams <dan.j.williams@intel.com>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>
-Cc: Johannes Thumshirn <jthumshirn@suse.de>
-Cc: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@kernel.dk>
-Cc: Ming Lei <ming.lei@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>
-Cc: Jason Gunthorpe <jgg@ziepe.ca>
-Cc: Matthew Wilcox <willy@infradead.org>
-Cc: Boaz Harrosh <boaz@plexistor.com>
-Cc: Steve French <sfrench@samba.org>
 ---
- fs/cifs/cifsglob.h |  3 +++
- fs/cifs/file.c     | 22 +++++++++++++++++-----
- fs/cifs/misc.c     | 19 +++++++++++++++----
- 3 files changed, 35 insertions(+), 9 deletions(-)
+ fs/ceph/debugfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/cifs/cifsglob.h b/fs/cifs/cifsglob.h
-index fe610e7e3670..e95cb82bfa50 100644
---- a/fs/cifs/cifsglob.h
-+++ b/fs/cifs/cifsglob.h
-@@ -1283,6 +1283,7 @@ struct cifs_aio_ctx {
- 	 * If yes, iter is a copy of the user passed iov_iter
- 	 */
- 	bool			direct_io;
-+	bool			from_gup;
- };
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 2eb88ed22993..fa14c8e8761d 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -294,7 +294,7 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
  
- struct cifs_readdata;
-@@ -1317,6 +1318,7 @@ struct cifs_readdata {
- 	struct cifs_credits		credits;
- 	unsigned int			nr_pages;
- 	struct page			**pages;
-+	bool				from_gup;
- };
- 
- struct cifs_writedata;
-@@ -1343,6 +1345,7 @@ struct cifs_writedata {
- 	struct cifs_credits		credits;
- 	unsigned int			nr_pages;
- 	struct page			**pages;
-+	bool				from_gup;
- };
- 
- /*
-diff --git a/fs/cifs/file.c b/fs/cifs/file.c
-index 97090693d182..84fa7e0a578f 100644
---- a/fs/cifs/file.c
-+++ b/fs/cifs/file.c
-@@ -2571,8 +2571,13 @@ cifs_uncached_writedata_release(struct kref *refcount)
- 					struct cifs_writedata, refcount);
- 
- 	kref_put(&wdata->ctx->refcount, cifs_aio_ctx_release);
--	for (i = 0; i < wdata->nr_pages; i++)
--		put_page(wdata->pages[i]);
-+	if (wdata->from_gup) {
-+		for (i = 0; i < wdata->nr_pages; i++)
-+			put_user_page(wdata->pages[i]);
-+	} else {
-+		for (i = 0; i < wdata->nr_pages; i++)
-+			put_page(wdata->pages[i]);
-+	}
- 	cifs_writedata_release(refcount);
+ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
+ {
+-	return 0;
++	return;
  }
  
-@@ -2781,7 +2786,7 @@ cifs_write_from_iter(loff_t offset, size_t len, struct iov_iter *from,
- 				break;
- 			}
- 
--
-+			wdata->from_gup = iov_iter_get_pages_use_gup(from);
- 			wdata->page_offset = start;
- 			wdata->tailsz =
- 				nr_pages > 1 ?
-@@ -2797,6 +2802,7 @@ cifs_write_from_iter(loff_t offset, size_t len, struct iov_iter *from,
- 				add_credits_and_wake_if(server, credits, 0);
- 				break;
- 			}
-+			wdata->from_gup = false;
- 
- 			rc = cifs_write_allocate_pages(wdata->pages, nr_pages);
- 			if (rc) {
-@@ -3238,8 +3244,12 @@ cifs_uncached_readdata_release(struct kref *refcount)
- 	unsigned int i;
- 
- 	kref_put(&rdata->ctx->refcount, cifs_aio_ctx_release);
--	for (i = 0; i < rdata->nr_pages; i++) {
--		put_page(rdata->pages[i]);
-+	if (rdata->from_gup) {
-+		for (i = 0; i < rdata->nr_pages; i++)
-+			put_user_page(rdata->pages[i]);
-+	} else {
-+		for (i = 0; i < rdata->nr_pages; i++)
-+			put_page(rdata->pages[i]);
- 	}
- 	cifs_readdata_release(refcount);
- }
-@@ -3502,6 +3512,7 @@ cifs_send_async_read(loff_t offset, size_t len, struct cifsFileInfo *open_file,
- 				break;
- 			}
- 
-+			rdata->from_gup = iov_iter_get_pages_use_gup(&direct_iov);
- 			npages = (cur_len + start + PAGE_SIZE-1) / PAGE_SIZE;
- 			rdata->page_offset = start;
- 			rdata->tailsz = npages > 1 ?
-@@ -3519,6 +3530,7 @@ cifs_send_async_read(loff_t offset, size_t len, struct cifsFileInfo *open_file,
- 				rc = -ENOMEM;
- 				break;
- 			}
-+			rdata->from_gup = false;
- 
- 			rc = cifs_read_allocate_pages(rdata, npages);
- 			if (rc) {
-diff --git a/fs/cifs/misc.c b/fs/cifs/misc.c
-index f383877a6511..5a04c34fea05 100644
---- a/fs/cifs/misc.c
-+++ b/fs/cifs/misc.c
-@@ -822,10 +822,18 @@ cifs_aio_ctx_release(struct kref *refcount)
- 	if (ctx->bv) {
- 		unsigned i;
- 
--		for (i = 0; i < ctx->npages; i++) {
--			if (ctx->should_dirty)
--				set_page_dirty(ctx->bv[i].bv_page);
--			put_page(ctx->bv[i].bv_page);
-+		if (ctx->from_gup) {
-+			for (i = 0; i < ctx->npages; i++) {
-+				if (ctx->should_dirty)
-+					set_page_dirty(ctx->bv[i].bv_page);
-+				put_user_page(ctx->bv[i].bv_page);
-+			}
-+		} else {
-+			for (i = 0; i < ctx->npages; i++) {
-+				if (ctx->should_dirty)
-+					set_page_dirty(ctx->bv[i].bv_page);
-+				put_page(ctx->bv[i].bv_page);
-+			}
- 		}
- 		kvfree(ctx->bv);
- 	}
-@@ -881,6 +889,9 @@ setup_aio_ctx_iter(struct cifs_aio_ctx *ctx, struct iov_iter *iter, int rw)
- 
- 	saved_len = count;
- 
-+	/* This is only use by cifs_aio_ctx_release() */
-+	ctx->from_gup = iov_iter_get_pages_use_gup(iter);
-+
- 	while (count && npages < max_pages) {
- 		rc = iov_iter_get_pages(iter, pages, count, max_pages, &start);
- 		if (rc < 0) {
+ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
 -- 
 2.22.0
