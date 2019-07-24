@@ -1,7 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 07/12] vhost-scsi: convert put_page() to put_user_page*()
-Date: Tue, 23 Jul 2019 21:25:13 -0700
-Message-ID: <20190724042518.14363-8-jhubbard@nvidia.com>
+Subject: [PATCH 06/12] fs/nfs: convert put_page() to put_user_page*()
+Date: Tue, 23 Jul 2019 21:25:12 -0700
+Message-ID: <20190724042518.14363-7-jhubbard@nvidia.com>
 References: <20190724042518.14363-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -16,21 +16,18 @@ List-Id: ceph-devel.vger.kernel.org
 From: Jérôme Glisse <jglisse@redhat.com>
 
 For pages that were retained via get_user_pages*(), release those pages
-via the new put_user_page*() routines, instead of via put_page().
+via the new put_user_page*() routines, instead of via put_page() or
+release_pages().
 
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-Changes from Jérôme's original patch:
-
-* Changed a WARN_ON to a BUG_ON.
-
 Signed-off-by: Jérôme Glisse <jglisse@redhat.com>
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
-Cc: virtualization@lists.linux-foundation.org
 Cc: linux-fsdevel@vger.kernel.org
 Cc: linux-block@vger.kernel.org
 Cc: linux-mm@kvack.org
+Cc: linux-nfs@vger.kernel.org
 Cc: Jan Kara <jack@suse.cz>
 Cc: Dan Williams <dan.j.williams@intel.com>
 Cc: Alexander Viro <viro@zeniv.linux.org.uk>
@@ -42,55 +39,39 @@ Cc: Dave Chinner <david@fromorbit.com>
 Cc: Jason Gunthorpe <jgg@ziepe.ca>
 Cc: Matthew Wilcox <willy@infradead.org>
 Cc: Boaz Harrosh <boaz@plexistor.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>
-Cc: "Michael S. Tsirkin" <mst@redhat.com>
-Cc: Jason Wang <jasowang@redhat.com>
-Cc: Paolo Bonzini <pbonzini@redhat.com>
-Cc: Stefan Hajnoczi <stefanha@redhat.com>
+Cc: Trond Myklebust <trond.myklebust@hammerspace.com>
+Cc: Anna Schumaker <anna.schumaker@netapp.com>
 ---
- drivers/vhost/scsi.c | 13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
+ fs/nfs/direct.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/vhost/scsi.c b/drivers/vhost/scsi.c
-index a9caf1bc3c3e..282565ab5e3f 100644
---- a/drivers/vhost/scsi.c
-+++ b/drivers/vhost/scsi.c
-@@ -329,11 +329,11 @@ static void vhost_scsi_release_cmd(struct se_cmd *se_cmd)
- 
- 	if (tv_cmd->tvc_sgl_count) {
- 		for (i = 0; i < tv_cmd->tvc_sgl_count; i++)
--			put_page(sg_page(&tv_cmd->tvc_sgl[i]));
-+			put_user_page(sg_page(&tv_cmd->tvc_sgl[i]));
- 	}
- 	if (tv_cmd->tvc_prot_sgl_count) {
- 		for (i = 0; i < tv_cmd->tvc_prot_sgl_count; i++)
--			put_page(sg_page(&tv_cmd->tvc_prot_sgl[i]));
-+			put_user_page(sg_page(&tv_cmd->tvc_prot_sgl[i]));
- 	}
- 
- 	vhost_scsi_put_inflight(tv_cmd->inflight);
-@@ -630,6 +630,13 @@ vhost_scsi_map_to_sgl(struct vhost_scsi_cmd *cmd,
- 	size_t offset;
- 	unsigned int npages = 0;
- 
-+	/*
-+	 * Here in all cases we should have an IOVEC which use GUP. If that is
-+	 * not the case then we will wrongly call put_user_page() and the page
-+	 * refcount will go wrong (this is in vhost_scsi_release_cmd())
-+	 */
-+	WARN_ON(!iov_iter_get_pages_use_gup(iter));
-+
- 	bytes = iov_iter_get_pages(iter, pages, LONG_MAX,
- 				VHOST_SCSI_PREALLOC_UPAGES, &offset);
- 	/* No pages were pinned */
-@@ -681,7 +688,7 @@ vhost_scsi_iov_to_sgl(struct vhost_scsi_cmd *cmd, bool write,
- 			while (p < sg) {
- 				struct page *page = sg_page(p++);
- 				if (page)
--					put_page(page);
-+					put_user_page(page);
- 			}
- 			return ret;
+diff --git a/fs/nfs/direct.c b/fs/nfs/direct.c
+index 0cb442406168..35f30fe2900f 100644
+--- a/fs/nfs/direct.c
++++ b/fs/nfs/direct.c
+@@ -512,7 +512,10 @@ static ssize_t nfs_direct_read_schedule_iovec(struct nfs_direct_req *dreq,
+ 			pos += req_len;
+ 			dreq->bytes_left -= req_len;
  		}
+-		nfs_direct_release_pages(pagevec, npages);
++		if (iov_iter_get_pages_use_gup(iter))
++			put_user_pages(pagevec, npages);
++		else
++			nfs_direct_release_pages(pagevec, npages);
+ 		kvfree(pagevec);
+ 		if (result < 0)
+ 			break;
+@@ -935,7 +938,10 @@ static ssize_t nfs_direct_write_schedule_iovec(struct nfs_direct_req *dreq,
+ 			pos += req_len;
+ 			dreq->bytes_left -= req_len;
+ 		}
+-		nfs_direct_release_pages(pagevec, npages);
++		if (iov_iter_get_pages_use_gup(iter))
++			put_user_pages(pagevec, npages);
++		else
++			nfs_direct_release_pages(pagevec, npages);
+ 		kvfree(pagevec);
+ 		if (result < 0)
+ 			break;
 -- 
 2.22.0
