@@ -1,161 +1,294 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 04/12] block: bio_release_pages: convert put_page() to put_user_page*()
-Date: Tue, 23 Jul 2019 21:25:10 -0700
-Message-ID: <20190724042518.14363-5-jhubbard@nvidia.com>
+Subject: [PATCH 01/12] mm/gup: add make_dirty arg to put_user_pages_dirty_lock()
+Date: Tue, 23 Jul 2019 21:25:07 -0700
+Message-ID: <20190724042518.14363-2-jhubbard@nvidia.com>
 References: <20190724042518.14363-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190724042518.14363-1-jhubbard@nvidia.com>
-Sender: netdev-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Anna Schumaker <anna.schumaker@netapp.com>, "David S . Miller" <davem@davemloft.net>, Dominique Martinet <asmadeus@codewreck.org>, Eric Van Hensbergen <ericvh@gmail.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jason Wang <jasowang@redhat.com>, Jens Axboe <axboe@kernel.dk>, Latchesar Ionkov <lucho@ionkov.net>, "Michael S . Tsirkin" <mst@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trond.myklebust@hammerspace.com>, Christoph Hellwig <hch@lst.de>, Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, kvm@vger.kernel.org, linux-block@vger.kernel.org, linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.orglinu
 List-Id: ceph-devel.vger.kernel.org
 
-From: Jérôme Glisse <jglisse@redhat.com>
+From: John Hubbard <jhubbard@nvidia.com>
 
-For pages that were retained via get_user_pages*(), release those pages
-via the new put_user_page*() routines, instead of via put_page() or
-release_pages().
+Provide more capable variation of put_user_pages_dirty_lock(),
+and delete put_user_pages_dirty(). This is based on the
+following:
 
-This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
-("mm: introduce put_user_page*(), placeholder versions").
+1. Lots of call sites become simpler if a bool is passed
+into put_user_page*(), instead of making the call site
+choose which put_user_page*() variant to call.
 
-Changes from Jérôme's original patch:
-    * reworked to be compatible with recent bio_release_pages() changes,
-    * refactored slightly to remove some code duplication,
-    * use an approach that changes fewer bio_check_pages_dirty()
-      callers.
+2. Christoph Hellwig's observation that set_page_dirty_lock()
+is usually correct, and set_page_dirty() is usually a
+bug, or at least questionable, within a put_user_page*()
+calling chain.
 
-Signed-off-by: Jérôme Glisse <jglisse@redhat.com>
+This leads to the following API choices:
+
+    * put_user_pages_dirty_lock(page, npages, make_dirty)
+
+    * There is no put_user_pages_dirty(). You have to
+      hand code that, in the rare case that it's
+      required.
+
+Cc: Matthew Wilcox <willy@infradead.org>
+Cc: Jan Kara <jack@suse.cz>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Ira Weiny <ira.weiny@intel.com>
+Cc: Jason Gunthorpe <jgg@ziepe.ca>
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
-Cc: Christoph Hellwig <hch@infradead.org>
-Cc: Minwoo Im <minwoo.im.dev@gmail.com>
-Cc: Jens Axboe <axboe@kernel.dk>
 ---
- block/bio.c         | 60 ++++++++++++++++++++++++++++++++++++---------
- include/linux/bio.h |  1 +
- 2 files changed, 49 insertions(+), 12 deletions(-)
+ drivers/infiniband/core/umem.c             |   5 +-
+ drivers/infiniband/hw/hfi1/user_pages.c    |   5 +-
+ drivers/infiniband/hw/qib/qib_user_pages.c |   5 +-
+ drivers/infiniband/hw/usnic/usnic_uiom.c   |   5 +-
+ drivers/infiniband/sw/siw/siw_mem.c        |   8 +-
+ include/linux/mm.h                         |   5 +-
+ mm/gup.c                                   | 115 +++++++++------------
+ 7 files changed, 58 insertions(+), 90 deletions(-)
 
-diff --git a/block/bio.c b/block/bio.c
-index 7675e2de509d..74f9eba2583b 100644
---- a/block/bio.c
-+++ b/block/bio.c
-@@ -844,7 +844,11 @@ void bio_release_pages(struct bio *bio, enum bio_rp_flags_t flags)
- 	bio_for_each_segment_all(bvec, bio, iter_all) {
- 		if ((flags & BIO_RP_MARK_DIRTY) && !PageCompound(bvec->bv_page))
- 			set_page_dirty_lock(bvec->bv_page);
--		put_page(bvec->bv_page);
-+
-+		if (flags & BIO_RP_FROM_GUP)
-+			put_user_page(bvec->bv_page);
-+		else
-+			put_page(bvec->bv_page);
- 	}
- }
+diff --git a/drivers/infiniband/core/umem.c b/drivers/infiniband/core/umem.c
+index 08da840ed7ee..965cf9dea71a 100644
+--- a/drivers/infiniband/core/umem.c
++++ b/drivers/infiniband/core/umem.c
+@@ -54,10 +54,7 @@ static void __ib_umem_release(struct ib_device *dev, struct ib_umem *umem, int d
  
-@@ -1667,28 +1671,50 @@ static void bio_dirty_fn(struct work_struct *work);
- static DECLARE_WORK(bio_dirty_work, bio_dirty_fn);
- static DEFINE_SPINLOCK(bio_dirty_lock);
- static struct bio *bio_dirty_list;
-+static struct bio *bio_gup_dirty_list;
- 
--/*
-- * This runs in process context
-- */
--static void bio_dirty_fn(struct work_struct *work)
-+static void __bio_dirty_fn(struct work_struct *work,
-+			   struct bio **dirty_list,
-+			   enum bio_rp_flags_t flags)
- {
- 	struct bio *bio, *next;
- 
- 	spin_lock_irq(&bio_dirty_lock);
--	next = bio_dirty_list;
--	bio_dirty_list = NULL;
-+	next = *dirty_list;
-+	*dirty_list = NULL;
- 	spin_unlock_irq(&bio_dirty_lock);
- 
- 	while ((bio = next) != NULL) {
- 		next = bio->bi_private;
- 
--		bio_release_pages(bio, BIO_RP_MARK_DIRTY);
-+		bio_release_pages(bio, BIO_RP_MARK_DIRTY | flags);
- 		bio_put(bio);
- 	}
- }
- 
--void bio_check_pages_dirty(struct bio *bio)
-+/*
-+ * This runs in process context
-+ */
-+static void bio_dirty_fn(struct work_struct *work)
-+{
-+	__bio_dirty_fn(work, &bio_dirty_list,     BIO_RP_NORMAL);
-+	__bio_dirty_fn(work, &bio_gup_dirty_list, BIO_RP_FROM_GUP);
-+}
-+
-+/**
-+ * __bio_check_pages_dirty() - queue up pages on a workqueue to dirty them
-+ * @bio: the bio struct containing the pages we should dirty
-+ * @from_gup: did the pages in the bio came from GUP (get_user_pages*())
-+ *
-+ * This will go over all pages in the bio, and for each non dirty page, the
-+ * bio is added to a list of bio's that need to get their pages dirtied.
-+ *
-+ * We also need to know if the pages in the bio are coming from GUP or not,
-+ * as GUPed pages need to be released via put_user_page(), instead of
-+ * put_page(). Please see Documentation/vm/get_user_pages.rst for details
-+ * on that.
-+ */
-+void __bio_check_pages_dirty(struct bio *bio, bool from_gup)
- {
- 	struct bio_vec *bvec;
- 	unsigned long flags;
-@@ -1699,17 +1725,27 @@ void bio_check_pages_dirty(struct bio *bio)
- 			goto defer;
+ 	for_each_sg_page(umem->sg_head.sgl, &sg_iter, umem->sg_nents, 0) {
+ 		page = sg_page_iter_page(&sg_iter);
+-		if (umem->writable && dirty)
+-			put_user_pages_dirty_lock(&page, 1);
+-		else
+-			put_user_page(page);
++		put_user_pages_dirty_lock(&page, 1, umem->writable && dirty);
  	}
  
--	bio_release_pages(bio, BIO_RP_NORMAL);
-+	bio_release_pages(bio, from_gup ? BIO_RP_FROM_GUP : BIO_RP_NORMAL);
- 	bio_put(bio);
- 	return;
- defer:
- 	spin_lock_irqsave(&bio_dirty_lock, flags);
--	bio->bi_private = bio_dirty_list;
--	bio_dirty_list = bio;
-+	if (from_gup) {
-+		bio->bi_private = bio_gup_dirty_list;
-+		bio_gup_dirty_list = bio;
-+	} else {
-+		bio->bi_private = bio_dirty_list;
-+		bio_dirty_list = bio;
-+	}
- 	spin_unlock_irqrestore(&bio_dirty_lock, flags);
- 	schedule_work(&bio_dirty_work);
+ 	sg_free_table(&umem->sg_head);
+diff --git a/drivers/infiniband/hw/hfi1/user_pages.c b/drivers/infiniband/hw/hfi1/user_pages.c
+index b89a9b9aef7a..469acb961fbd 100644
+--- a/drivers/infiniband/hw/hfi1/user_pages.c
++++ b/drivers/infiniband/hw/hfi1/user_pages.c
+@@ -118,10 +118,7 @@ int hfi1_acquire_user_pages(struct mm_struct *mm, unsigned long vaddr, size_t np
+ void hfi1_release_user_pages(struct mm_struct *mm, struct page **p,
+ 			     size_t npages, bool dirty)
+ {
+-	if (dirty)
+-		put_user_pages_dirty_lock(p, npages);
+-	else
+-		put_user_pages(p, npages);
++	put_user_pages_dirty_lock(p, npages, dirty);
+ 
+ 	if (mm) { /* during close after signal, mm can be NULL */
+ 		atomic64_sub(npages, &mm->pinned_vm);
+diff --git a/drivers/infiniband/hw/qib/qib_user_pages.c b/drivers/infiniband/hw/qib/qib_user_pages.c
+index bfbfbb7e0ff4..6bf764e41891 100644
+--- a/drivers/infiniband/hw/qib/qib_user_pages.c
++++ b/drivers/infiniband/hw/qib/qib_user_pages.c
+@@ -40,10 +40,7 @@
+ static void __qib_release_user_pages(struct page **p, size_t num_pages,
+ 				     int dirty)
+ {
+-	if (dirty)
+-		put_user_pages_dirty_lock(p, num_pages);
+-	else
+-		put_user_pages(p, num_pages);
++	put_user_pages_dirty_lock(p, num_pages, dirty);
  }
  
-+void bio_check_pages_dirty(struct bio *bio)
-+{
-+	__bio_check_pages_dirty(bio, false);
-+}
-+
- void update_io_ticks(struct hd_struct *part, unsigned long now)
+ /**
+diff --git a/drivers/infiniband/hw/usnic/usnic_uiom.c b/drivers/infiniband/hw/usnic/usnic_uiom.c
+index 0b0237d41613..62e6ffa9ad78 100644
+--- a/drivers/infiniband/hw/usnic/usnic_uiom.c
++++ b/drivers/infiniband/hw/usnic/usnic_uiom.c
+@@ -75,10 +75,7 @@ static void usnic_uiom_put_pages(struct list_head *chunk_list, int dirty)
+ 		for_each_sg(chunk->page_list, sg, chunk->nents, i) {
+ 			page = sg_page(sg);
+ 			pa = sg_phys(sg);
+-			if (dirty)
+-				put_user_pages_dirty_lock(&page, 1);
+-			else
+-				put_user_page(page);
++			put_user_pages_dirty_lock(&page, 1, dirty);
+ 			usnic_dbg("pa: %pa\n", &pa);
+ 		}
+ 		kfree(chunk);
+diff --git a/drivers/infiniband/sw/siw/siw_mem.c b/drivers/infiniband/sw/siw/siw_mem.c
+index 67171c82b0c4..358d440efa11 100644
+--- a/drivers/infiniband/sw/siw/siw_mem.c
++++ b/drivers/infiniband/sw/siw/siw_mem.c
+@@ -65,13 +65,7 @@ static void siw_free_plist(struct siw_page_chunk *chunk, int num_pages,
  {
- 	unsigned long stamp;
-diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 2715e55679c1..d68a40c2c9d4 100644
---- a/include/linux/bio.h
-+++ b/include/linux/bio.h
-@@ -444,6 +444,7 @@ int bio_iov_iter_get_pages(struct bio *bio, struct iov_iter *iter);
- enum bio_rp_flags_t {
- 	BIO_RP_NORMAL		= 0,
- 	BIO_RP_MARK_DIRTY	= 1,
-+	BIO_RP_FROM_GUP		= 2,
+ 	struct page **p = chunk->plist;
+ 
+-	while (num_pages--) {
+-		if (!PageDirty(*p) && dirty)
+-			put_user_pages_dirty_lock(p, 1);
+-		else
+-			put_user_page(*p);
+-		p++;
+-	}
++	put_user_pages_dirty_lock(chunk->plist, num_pages, dirty);
+ }
+ 
+ void siw_umem_release(struct siw_umem *umem, bool dirty)
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index 0334ca97c584..9759b6a24420 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -1057,8 +1057,9 @@ static inline void put_user_page(struct page *page)
+ 	put_page(page);
+ }
+ 
+-void put_user_pages_dirty(struct page **pages, unsigned long npages);
+-void put_user_pages_dirty_lock(struct page **pages, unsigned long npages);
++void put_user_pages_dirty_lock(struct page **pages, unsigned long npages,
++			       bool make_dirty);
++
+ void put_user_pages(struct page **pages, unsigned long npages);
+ 
+ #if defined(CONFIG_SPARSEMEM) && !defined(CONFIG_SPARSEMEM_VMEMMAP)
+diff --git a/mm/gup.c b/mm/gup.c
+index 98f13ab37bac..7fefd7ab02c4 100644
+--- a/mm/gup.c
++++ b/mm/gup.c
+@@ -29,85 +29,70 @@ struct follow_page_context {
+ 	unsigned int page_mask;
  };
  
- static inline enum bio_rp_flags_t bio_rp_dirty_flag(bool mark_dirty)
+-typedef int (*set_dirty_func_t)(struct page *page);
+-
+-static void __put_user_pages_dirty(struct page **pages,
+-				   unsigned long npages,
+-				   set_dirty_func_t sdf)
+-{
+-	unsigned long index;
+-
+-	for (index = 0; index < npages; index++) {
+-		struct page *page = compound_head(pages[index]);
+-
+-		/*
+-		 * Checking PageDirty at this point may race with
+-		 * clear_page_dirty_for_io(), but that's OK. Two key cases:
+-		 *
+-		 * 1) This code sees the page as already dirty, so it skips
+-		 * the call to sdf(). That could happen because
+-		 * clear_page_dirty_for_io() called page_mkclean(),
+-		 * followed by set_page_dirty(). However, now the page is
+-		 * going to get written back, which meets the original
+-		 * intention of setting it dirty, so all is well:
+-		 * clear_page_dirty_for_io() goes on to call
+-		 * TestClearPageDirty(), and write the page back.
+-		 *
+-		 * 2) This code sees the page as clean, so it calls sdf().
+-		 * The page stays dirty, despite being written back, so it
+-		 * gets written back again in the next writeback cycle.
+-		 * This is harmless.
+-		 */
+-		if (!PageDirty(page))
+-			sdf(page);
+-
+-		put_user_page(page);
+-	}
+-}
+-
+ /**
+- * put_user_pages_dirty() - release and dirty an array of gup-pinned pages
+- * @pages:  array of pages to be marked dirty and released.
++ * put_user_pages_dirty_lock() - release and optionally dirty gup-pinned pages
++ * @pages:  array of pages to be maybe marked dirty, and definitely released.
+  * @npages: number of pages in the @pages array.
++ * @make_dirty: whether to mark the pages dirty
+  *
+  * "gup-pinned page" refers to a page that has had one of the get_user_pages()
+  * variants called on that page.
+  *
+  * For each page in the @pages array, make that page (or its head page, if a
+- * compound page) dirty, if it was previously listed as clean. Then, release
+- * the page using put_user_page().
++ * compound page) dirty, if @make_dirty is true, and if the page was previously
++ * listed as clean. In any case, releases all pages using put_user_page(),
++ * possibly via put_user_pages(), for the non-dirty case.
+  *
+  * Please see the put_user_page() documentation for details.
+  *
+- * set_page_dirty(), which does not lock the page, is used here.
+- * Therefore, it is the caller's responsibility to ensure that this is
+- * safe. If not, then put_user_pages_dirty_lock() should be called instead.
++ * set_page_dirty_lock() is used internally. If instead, set_page_dirty() is
++ * required, then the caller should a) verify that this is really correct,
++ * because _lock() is usually required, and b) hand code it:
++ * set_page_dirty_lock(), put_user_page().
+  *
+  */
+-void put_user_pages_dirty(struct page **pages, unsigned long npages)
++void put_user_pages_dirty_lock(struct page **pages, unsigned long npages,
++			       bool make_dirty)
+ {
+-	__put_user_pages_dirty(pages, npages, set_page_dirty);
+-}
+-EXPORT_SYMBOL(put_user_pages_dirty);
++	unsigned long index;
+ 
+-/**
+- * put_user_pages_dirty_lock() - release and dirty an array of gup-pinned pages
+- * @pages:  array of pages to be marked dirty and released.
+- * @npages: number of pages in the @pages array.
+- *
+- * For each page in the @pages array, make that page (or its head page, if a
+- * compound page) dirty, if it was previously listed as clean. Then, release
+- * the page using put_user_page().
+- *
+- * Please see the put_user_page() documentation for details.
+- *
+- * This is just like put_user_pages_dirty(), except that it invokes
+- * set_page_dirty_lock(), instead of set_page_dirty().
+- *
+- */
+-void put_user_pages_dirty_lock(struct page **pages, unsigned long npages)
+-{
+-	__put_user_pages_dirty(pages, npages, set_page_dirty_lock);
++	/*
++	 * TODO: this can be optimized for huge pages: if a series of pages is
++	 * physically contiguous and part of the same compound page, then a
++	 * single operation to the head page should suffice.
++	 */
++
++	if (!make_dirty) {
++		put_user_pages(pages, npages);
++		return;
++	}
++
++	for (index = 0; index < npages; index++) {
++		struct page *page = compound_head(pages[index]);
++		/*
++		 * Checking PageDirty at this point may race with
++		 * clear_page_dirty_for_io(), but that's OK. Two key
++		 * cases:
++		 *
++		 * 1) This code sees the page as already dirty, so it
++		 * skips the call to set_page_dirty(). That could happen
++		 * because clear_page_dirty_for_io() called
++		 * page_mkclean(), followed by set_page_dirty().
++		 * However, now the page is going to get written back,
++		 * which meets the original intention of setting it
++		 * dirty, so all is well: clear_page_dirty_for_io() goes
++		 * on to call TestClearPageDirty(), and write the page
++		 * back.
++		 *
++		 * 2) This code sees the page as clean, so it calls
++		 * set_page_dirty(). The page stays dirty, despite being
++		 * written back, so it gets written back again in the
++		 * next writeback cycle. This is harmless.
++		 */
++		if (!PageDirty(page))
++			set_page_dirty_lock(page);
++		put_user_page(page);
++	}
+ }
+ EXPORT_SYMBOL(put_user_pages_dirty_lock);
+ 
 -- 
 2.22.0
