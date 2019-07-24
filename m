@@ -1,77 +1,67 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [RFC PATCH] ceph: fix directories inode i_blkbits initialization
-Date: Wed, 24 Jul 2019 07:50:11 -0400
-Message-ID: <49ef4b704f7925c584a2bab6650648ba456b5717.camel@kernel.org>
-References: <20190723155020.17338-1-lhenriques@suse.com>
-         <c657b0d65acd5e8bc9d5d726d68e2ad1fff38b51.camel@kernel.org>
-         <87o91k61sr.fsf@suse.com> <874l3b694l.fsf@suse.com>
+From: John Hubbard <jhubbard@nvidia.com>
+Subject: Re: [PATCH 00/12] block/bio, fs: convert put_page() to
+	put_user_page*()
+Date: Wed, 24 Jul 2019 16:23:21 -0700
+Message-ID: <17f12f3d-981e-a717-c8e5-bfbbfb7ec1a3@nvidia.com>
+References: <20190724042518.14363-1-jhubbard@nvidia.com>
+	<20190724061750.GA19397@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <874l3b694l.fsf@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20190724061750.GA19397@infradead.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Christoph Hellwig <hch@infradead.org>, john.hubbard@gmail.com
+Cc: kvm@vger.kernel.org, "Michael S . Tsirkin" <mst@redhat.com>, virtualization@lists.linux-foundation.org, linux-mm@kvack.org, Christoph Hellwig <hch@lst.de>, linux-cifs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, linux-rdma@vger.kernel.org, Matthew Wilcox <willy@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, v9fs-developer@lists.sourceforge.net, Eric Van Hensbergen <ericvh@gmail.com>, linux-block@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, ceph-devel@vger.kernel.org, Trond Myklebust <trond.myklebust@hammerspace.com>, Jens Axboe <axboe@kernel.dk>, linux-nfs@vger.kernel.org, netdev@vger.kernel.org, samba-technical@lists.samba.org, LKML <linux-kernel@vger.kernel.org>, "David
+	S . Miller" <davem@davemloft.net>, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Anna Schumaker <anna.schumaker@netapp.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 2019-07-24 at 11:04 +0100, Luis Henriques wrote:
-> Luis Henriques <lhenriques@suse.com> writes:
-> 
-> > "Jeff Layton" <jlayton@kernel.org> writes:
-> > 
-> > > On Tue, 2019-07-23 at 16:50 +0100, Luis Henriques wrote:
-> > > > When filling an inode with info from the MDS, i_blkbits is being
-> > > > initialized using fl_stripe_unit, which contains the stripe unit in
-> > > > bytes.  Unfortunately, this doesn't make sense for directories as they
-> > > > have fl_stripe_unit set to '0'.  This means that i_blkbits will be set
-> > > > to 0xff, causing an UBSAN undefined behaviour in i_blocksize():
-> > > > 
-> > > >   UBSAN: Undefined behaviour in ./include/linux/fs.h:731:12
-> > > >   shift exponent 255 is too large for 32-bit type 'int'
-> > > > 
-> > > > Fix this by initializing i_blkbits to CEPH_BLOCK_SHIFT if fl_stripe_unit
-> > > > is zero.
-> > > > 
-> > > > Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> > > > ---
-> > > >  fs/ceph/inode.c | 7 ++++++-
-> > > >  1 file changed, 6 insertions(+), 1 deletion(-)
-> > > > 
-> > > > Hi Jeff,
-> > > > 
-> > > > To be honest, I'm not sure CEPH_BLOCK_SHIFT is the right value to use
-> > > > here, but for sure the one currently being used isn't correct if the
-> > > > inode is a directory.  Using stripe units seems to be a bug that has
-> > > > been there since the beginning, but it definitely became bigger problem
-> > > > after commit 69448867abcb ("fs: shave 8 bytes off of struct inode").
-> > > > 
-> > > > This fix could also be moved into the 'switch' statement later in that
-> > > > function, in the S_IFDIR case, similar to commit 5ba72e607cdb ("ceph:
-> > > > set special inode's blocksize to page size").  Let me know which version
-> > > > you would prefer.
-> > > > 
-> > > 
-> > > What happens with (e.g.) named pipes or symlinks? Do those inodes also
-> > > get this bogus value? Assuming that they do, I'd probably prefer this
-> > > patch since it'd fix things for all inode types, not just directories.
-> > 
-> > I tested symlinks and they seem to be handled correctly (i.e. the stripe
-> > units seems to be the same as the target file).  Regarding pipes, I
-> > didn't test them, but from the code it should be set to PAGE_SHIFT (see
-> > the above mentioned commit 5ba72e607cdb).
-> 
-> Ok, after looking closer at the other inode types and running a few
-> tests with extra debug code, it all seems to be sane -- only directories
-> (root dir is an exception) will cause problems with i_blkbits being set
-> to a bogus value.  So, I'm sticking with my original RFC patch approach,
-> which should be easy to apply to stable kernels.
-> 
-> Cheers,
-
-Sounds good. I'll just plan to merge your RFC patch, after I run some
-more tests on it.
-
-Thanks!
--- 
-Jeff Layton <jlayton@kernel.org>
+T24gNy8yMy8xOSAxMToxNyBQTSwgQ2hyaXN0b3BoIEhlbGx3aWcgd3JvdGU6Cj4gT24gVHVlLCBK
+dWwgMjMsIDIwMTkgYXQgMDk6MjU6MDZQTSAtMDcwMCwgam9obi5odWJiYXJkQGdtYWlsLmNvbSB3
+cm90ZToKPj4gKiBTdG9yZSwgaW4gdGhlIGlvdl9pdGVyLCBhICJjYW1lIGZyb20gZ3VwIChnZXRf
+dXNlcl9wYWdlcykiIHBhcmFtZXRlci4KPj4gICBUaGVuLCB1c2UgdGhlIG5ldyBpb3ZfaXRlcl9n
+ZXRfcGFnZXNfdXNlX2d1cCgpIHRvIHJldHJpZXZlIGl0IHdoZW4KPj4gICBpdCBpcyB0aW1lIHRv
+IHJlbGVhc2UgdGhlIHBhZ2VzLiBUaGF0IGFsbG93cyBjaG9vc2luZyBiZXR3ZWVuIHB1dF9wYWdl
+KCkKPj4gICBhbmQgcHV0X3VzZXJfcGFnZSooKS4KPj4KPj4gKiBQYXNzIGluIG9uZSBtb3JlIHBp
+ZWNlIG9mIGluZm9ybWF0aW9uIHRvIGJpb19yZWxlYXNlX3BhZ2VzOiBhICJmcm9tX2d1cCIKPj4g
+ICBwYXJhbWV0ZXIuIFNpbWlsYXIgdXNlIGFzIGFib3ZlLgo+Pgo+PiAqIENoYW5nZSB0aGUgYmxv
+Y2sgbGF5ZXIsIGFuZCBzZXZlcmFsIGZpbGUgc3lzdGVtcywgdG8gdXNlCj4+ICAgcHV0X3VzZXJf
+cGFnZSooKS4KPiAKPiBJIHRoaW5rIHdlIGNhbiBkbyB0aGlzIGluIGEgc2ltcGxlIGFuZCBiZXR0
+ZXIgd2F5LiAgV2UgaGF2ZSA1IElURVJfKgo+IHR5cGVzLiAgT2YgdGhvc2UgSVRFUl9ESVNDQVJE
+IGFzIHRoZSBuYW1lIHN1Z2dlc3RzIG5ldmVyIHVzZXMgcGFnZXMsIHNvCj4gd2UgY2FuIHNraXAg
+aGFuZGxpbmcgaXQuICBJVEVSX1BJUEUgaXMgcmVqZWN0ZWQg0ZZuIHRoZSBkaXJlY3QgSS9PIHBh
+dGgsCj4gd2hpY2ggbGVhdmVzIHVzIHdpdGggdGhyZWUuCj4gCj4gT3V0IG9mIHRob3NlIElURVJf
+QlZFQyBuZWVkcyBhIHVzZXIgcGFnZSByZWZlcmVuY2UsIHNvIHdlIHdhbnQgdG8gY2FsbAoKICAg
+ICAgICAgICAgICAgXiBJVEVSX0lPVkVDLCBJIGhvcGUuIE90aGVyd2lzZSBJJ20gaG9wZWxlc3Mg
+bG9zdC4gOikKCj4gcHV0X3VzZXJfcGFnZSogb24gaXQuICBJVEVSX0JWRUMgYWx3YXlzIGFscmVh
+ZHkgaGFzIHBhZ2UgcmVmZXJlbmNlLAo+IHdoaWNoIG1lYW5zIGluIHRoZSBibG9jayBkaXJlY3Qg
+SS9PIHBhdGggcGF0aCB3ZSBhbHJlYWQgZG9uJ3QgdGFrZQo+IGEgcGFnZSByZWZlcmVuY2UuICBX
+ZSBzaG91bGQgZXh0ZW50IHRoYXQgaGFuZGxpbmcgdG8gYWxsIG90aGVyIGNhbGxzCj4gb2YgaW92
+X2l0ZXJfZ2V0X3BhZ2VzIC8gaW92X2l0ZXJfZ2V0X3BhZ2VzX2FsbG9jLiAgSSB0aGluayB3ZSBz
+aG91bGQKPiBqdXN0IHJlamVjdCBJVEVSX0tWRUMgZm9yIGRpcmVjdCBJL08gYXMgd2VsbCBhcyB3
+ZSBoYXZlIG5vIHVzZXJzIGFuZAo+IGl0IGlzIHJhdGhlciBwb2ludGxlc3MuICBBbHRlcm5hdGl2
+ZWx5IGlmIHdlIHNlZSBhIHVzZSBmb3IgaXQgdGhlCj4gY2FsbGVycyBzaG91bGQgYWx3YXlzIGhh
+dmUgYSBsaWZlIHBhZ2UgcmVmZXJlbmNlIGFueXdheSAob3IgbWlnaHQKPiBiZSBvbiBrbWFsbG9j
+IG1lbW9yeSksIHNvIHdlIHJlYWxseSBzaG91bGQgbm90IHRha2UgYSByZWZlcmVuY2UgZWl0aGVy
+Lgo+IAo+IEluIG90aGVyIHdvcmRzOiAgdGhlIG9ubHkgdGltZSB3ZSBzaG91bGQgZXZlciBoYXZl
+IHRvIHB1dCBhIHBhZ2UgaW4KPiB0aGlzIHBhdGNoIGlzIHdoZW4gdGhleSBhcmUgdXNlciBwYWdl
+cy4gIFdlJ2xsIG5lZWQgdG8gY2xlYW4gdXAKPiB2YXJpb3VzIGJpdHMgb2YgY29kZSBmb3IgdGhh
+dCwgYnV0IHRoYXQgY2FuIGJlIGRvbmUgZ3JhZHVhbGx5IGJlZm9yZQo+IGV2ZW4gZ2V0dGluZyB0
+byB0aGUgYWN0dWFsIHB1dF91c2VyX3BhZ2VzIGNvbnZlcnNpb24uCj4gCgpTb3VuZHMgZ3JlYXQu
+IEknbSBwYXJ0IHdheSBpbnRvIGl0IGFuZCBpdCBkb2Vzbid0IGxvb2sgdG9vIGJhZC4gVGhlIG1h
+aW4KcXVlc3Rpb24gaXMgd2hlcmUgdG8gc2NhdHRlciB2YXJpb3VzIGNoZWNrcyBhbmQgYXNzZXJ0
+aW9ucywgdG8ga2VlcAp0aGUga3ZlY3Mgb3V0IG9mIGRpcmVjdCBJLzAuIE9yIGF0IGxlYXN0IGtl
+ZXAgdGhlIGd1cHMgYXdheSBmcm9tIApkaXJlY3QgSS8wLgoKCnRoYW5rcywKLS0gCkpvaG4gSHVi
+YmFyZApOVklESUEKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KVmlydHVhbGl6YXRpb24gbWFpbGluZyBsaXN0ClZpcnR1YWxpemF0aW9uQGxpc3RzLmxpbnV4
+LWZvdW5kYXRpb24ub3JnCmh0dHBzOi8vbGlzdHMubGludXhmb3VuZGF0aW9uLm9yZy9tYWlsbWFu
+L2xpc3RpbmZvL3ZpcnR1YWxpemF0aW9u
