@@ -1,14 +1,15 @@
-From: Bob Liu <bob.liu@oracle.com>
+From: John Hubbard <jhubbard@nvidia.com>
 Subject: Re: [PATCH 00/12] block/bio, fs: convert put_page() to
 	put_user_page*()
-Date: Thu, 25 Jul 2019 08:41:04 +0800
-Message-ID: <8621066c-e242-c449-eb04-4f2ce6867140@oracle.com>
+Date: Thu, 25 Jul 2019 18:24:16 -0700
+Message-ID: <88864b91-516d-9774-f4ca-b45927ac4556@nvidia.com>
 References: <20190724042518.14363-1-jhubbard@nvidia.com>
+	<8621066c-e242-c449-eb04-4f2ce6867140@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <virtualization-bounces@lists.linux-foundation.org>
-In-Reply-To: <20190724042518.14363-1-jhubbard@nvidia.com>
+In-Reply-To: <8621066c-e242-c449-eb04-4f2ce6867140@oracle.com>
 Content-Language: en-US
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
 	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
@@ -19,87 +20,44 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualizati
 	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
 Sender: virtualization-bounces@lists.linux-foundation.org
 Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: john.hubbard@gmail.com, Andrew Morton <akpm@linux-foundation.org>
-Cc: kvm@vger.kernel.org, "Michael S . Tsirkin" <mst@redhat.com>, virtualization@lists.linux-foundation.org, linux-mm@kvack.org, Christoph Hellwig <hch@lst.de>, linux-cifs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, linux-rdma@vger.kernel.org, Matthew Wilcox <willy@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, v9fs-developer@lists.sourceforge.net, Eric Van Hensbergen <ericvh@gmail.com>, John Hubbard <jhubbard@nvidia.com>, linux-block@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, ceph-devel@vger.kernel.org, Trond Myklebust <trond.myklebust@hammerspace.com>, Jens Axboe <axboe@kernel.dk>, linux-nfs@vger.kernel.org, netdev@vger.kernel.org, samba-technical@lists.samba.org, LKML <linux-kernel@vger.kernel.org>, "David S . Miller" <davem@davemloft.net>, linux-fsdevel@vger.kernel.org, Anna Schumaker <anna.schumaker@netapp.com>
+To: Bob Liu <bob.liu@oracle.com>, Andrew Morton <akpm@linux-foundation.org>
+Cc: kvm@vger.kernel.org, "Michael S . Tsirkin" <mst@redhat.com>, virtualization@lists.linux-foundation.org, linux-mm@kvack.org, Christoph Hellwig <hch@lst.de>, linux-cifs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, linux-rdma@vger.kernel.org, Matthew Wilcox <willy@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, v9fs-developer@lists.sourceforge.net, Eric Van Hensbergen <ericvh@gmail.com>, linux-block@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, ceph-devel@vger.kernel.org, Trond Myklebust <trond.myklebust@hammerspace.com>, Jens Axboe <axboe@kernel.dk>, linux-nfs@vger.kernel.org, netdev@vger.kernel.org, samba-technical@lists.samba.org, LKML <linux-kernel@vger.kernel.org>, "David S . Miller" <davem@davemloft.net>, linux-fsdevel@vger.kernel.org, Anna Schumaker <anna.schumaker@netapp.com>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gNy8yNC8xOSAxMjoyNSBQTSwgam9obi5odWJiYXJkQGdtYWlsLmNvbSB3cm90ZToKPiBGcm9t
-OiBKb2huIEh1YmJhcmQgPGpodWJiYXJkQG52aWRpYS5jb20+Cj4gCj4gSGksCj4gCj4gVGhpcyBp
-cyBtb3N0bHkgSmVyb21lJ3Mgd29yaywgY29udmVydGluZyB0aGUgYmxvY2svYmlvIGFuZCByZWxh
-dGVkIGFyZWFzCj4gdG8gY2FsbCBwdXRfdXNlcl9wYWdlKigpIGluc3RlYWQgb2YgcHV0X3BhZ2Uo
-KS4gQmVjYXVzZSBJJ3ZlIGNoYW5nZWQKPiBKZXJvbWUncyBwYXRjaGVzLCBpbiBzb21lIGNhc2Vz
-IHNpZ25pZmljYW50bHksIEknZCBsaWtlIHRvIGdldCBoaXMKPiBmZWVkYmFjayBiZWZvcmUgd2Ug
-YWN0dWFsbHkgbGVhdmUgaGltIGxpc3RlZCBhcyB0aGUgYXV0aG9yIChoZSBtaWdodAo+IHdhbnQg
-dG8gZGlzb3duIHNvbWUgb3IgYWxsIG9mIHRoZXNlKS4KPiAKCkNvdWxkIHlvdSBhZGQgc29tZSBi
-YWNrZ3JvdW5kIHRvIHRoZSBjb21taXQgbG9nIGZvciBwZW9wbGUgZG9uJ3QgaGF2ZSB0aGUgY29u
-dGV4dC4uCldoeSB0aGlzIGNvbnZlcnRpbmc/IFdoYXQncyB0aGUgbWFpbiBkaWZmZXJlbmNlcz8K
-ClJlZ2FyZHMsIC1Cb2IKCj4gSSBhZGRlZCBhIG5ldyBwYXRjaCwgaW4gb3JkZXIgdG8gbWFrZSB0
-aGlzIHdvcmsgd2l0aCBDaHJpc3RvcGggSGVsbHdpZydzCj4gcmVjZW50IG92ZXJoYXVsIHRvIGJp
-b19yZWxlYXNlX3BhZ2VzKCk6ICJibG9jazogYmlvX3JlbGVhc2VfcGFnZXM6IHVzZQo+IGZsYWdz
-IGFyZyBpbnN0ZWFkIG9mIGJvb2wiLgo+IAo+IEkndmUgc3RhcnRlZCB0aGUgc2VyaWVzIHdpdGgg
-YSBwYXRjaCB0aGF0IEkndmUgcG9zdGVkIGluIGFub3RoZXIKPiBzZXJpZXMgKCJtbS9ndXA6IGFk
-ZCBtYWtlX2RpcnR5IGFyZyB0byBwdXRfdXNlcl9wYWdlc19kaXJ0eV9sb2NrKCkiWzFdKSwKPiBi
-ZWNhdXNlIEknbSBub3Qgc3VyZSB3aGljaCBvZiB0aGVzZSB3aWxsIGdvIGluIGZpcnN0LCBhbmQg
-dGhpcyBhbGxvd3MgZWFjaAo+IHRvIHN0YW5kIGFsb25lLgo+IAo+IFRlc3Rpbmc6IG5vdCBtdWNo
-IGJleW9uZCBidWlsZCBhbmQgYm9vdCB0ZXN0aW5nIGhhcyBiZWVuIGRvbmUgeWV0LiBBbmQKPiBJ
-J20gbm90IHNldCB1cCB0byBldmVuIGV4ZXJjaXNlIGFsbCBvZiBpdCAoZXNwZWNpYWxseSB0aGUg
-SUIgcGFydHMpIGF0Cj4gcnVuIHRpbWUuCj4gCj4gQW55d2F5LCBjaGFuZ2VzIGhlcmUgYXJlOgo+
-IAo+ICogU3RvcmUsIGluIHRoZSBpb3ZfaXRlciwgYSAiY2FtZSBmcm9tIGd1cCAoZ2V0X3VzZXJf
-cGFnZXMpIiBwYXJhbWV0ZXIuCj4gICBUaGVuLCB1c2UgdGhlIG5ldyBpb3ZfaXRlcl9nZXRfcGFn
-ZXNfdXNlX2d1cCgpIHRvIHJldHJpZXZlIGl0IHdoZW4KPiAgIGl0IGlzIHRpbWUgdG8gcmVsZWFz
-ZSB0aGUgcGFnZXMuIFRoYXQgYWxsb3dzIGNob29zaW5nIGJldHdlZW4gcHV0X3BhZ2UoKQo+ICAg
-YW5kIHB1dF91c2VyX3BhZ2UqKCkuCj4gCj4gKiBQYXNzIGluIG9uZSBtb3JlIHBpZWNlIG9mIGlu
-Zm9ybWF0aW9uIHRvIGJpb19yZWxlYXNlX3BhZ2VzOiBhICJmcm9tX2d1cCIKPiAgIHBhcmFtZXRl
-ci4gU2ltaWxhciB1c2UgYXMgYWJvdmUuCj4gCj4gKiBDaGFuZ2UgdGhlIGJsb2NrIGxheWVyLCBh
-bmQgc2V2ZXJhbCBmaWxlIHN5c3RlbXMsIHRvIHVzZQo+ICAgcHV0X3VzZXJfcGFnZSooKS4KPiAK
-PiBbMV0gaHR0cHM6Ly91cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHBzLTNB
-X19sb3JlLmtlcm5lbC5vcmdfcl8yMDE5MDcyNDAxMjYwNi4yNTg0NC0yRDItMkRqaHViYmFyZC00
-MG52aWRpYS5jb20mZD1Ed0lEYVEmYz1Sb1AxWXVtQ1hDZ2FXSHZsWllSOFBaaDhCdjdxSXJNVUI2
-NWVhcElfSm5FJnI9MWt0VDBVMllTX0k4Wnoyby1NUzFZY0NBeldaNmhGR3R5VGd2Vk1HTTdnSSZt
-PUZwRmh2MnJqYktDQVlHbU82SHk4V0pBb3R0cjFRel9tREtETE9iUTQwRlUmcz1xLV9tWDNkYUVy
-MjJXYmRaTUVsY19aYkQ4TDlvR0xEN1UweExleUo2NjFZJmU9IAo+ICAgICBBbmQgcGxlYXNlIG5v
-dGUgdGhlIGNvcnJlY3Rpb24gZW1haWwgdGhhdCBJIHBvc3RlZCBhcyBhIGZvbGxvdy11cCwKPiAg
-ICAgaWYgeW91J3JlIGxvb2tpbmcgY2xvc2VseSBhdCB0aGF0IHBhdGNoLiA6KSBUaGUgZml4ZWQg
-dmVyc2lvbiBpcwo+ICAgICBpbmNsdWRlZCBoZXJlLgo+IAo+IEpvaG4gSHViYmFyZCAoMyk6Cj4g
-ICBtbS9ndXA6IGFkZCBtYWtlX2RpcnR5IGFyZyB0byBwdXRfdXNlcl9wYWdlc19kaXJ0eV9sb2Nr
-KCkKPiAgIGJsb2NrOiBiaW9fcmVsZWFzZV9wYWdlczogdXNlIGZsYWdzIGFyZyBpbnN0ZWFkIG9m
-IGJvb2wKPiAgIGZzL2NlcGg6IGZpeCBhIGJ1aWxkIHdhcm5pbmc6IHJldHVybmluZyBhIHZhbHVl
-IGZyb20gdm9pZCBmdW5jdGlvbgo+IAo+IErDqXLDtG1lIEdsaXNzZSAoOSk6Cj4gICBpb3ZfaXRl
-cjogYWRkIGhlbHBlciB0byB0ZXN0IGlmIGFuIGl0ZXIgd291bGQgdXNlIEdVUCB2Mgo+ICAgYmxv
-Y2s6IGJpb19yZWxlYXNlX3BhZ2VzOiBjb252ZXJ0IHB1dF9wYWdlKCkgdG8gcHV0X3VzZXJfcGFn
-ZSooKQo+ICAgYmxvY2tfZGV2OiBjb252ZXJ0IHB1dF9wYWdlKCkgdG8gcHV0X3VzZXJfcGFnZSoo
-KQo+ICAgZnMvbmZzOiBjb252ZXJ0IHB1dF9wYWdlKCkgdG8gcHV0X3VzZXJfcGFnZSooKQo+ICAg
-dmhvc3Qtc2NzaTogY29udmVydCBwdXRfcGFnZSgpIHRvIHB1dF91c2VyX3BhZ2UqKCkKPiAgIGZz
-L2NpZnM6IGNvbnZlcnQgcHV0X3BhZ2UoKSB0byBwdXRfdXNlcl9wYWdlKigpCj4gICBmcy9mdXNl
-OiBjb252ZXJ0IHB1dF9wYWdlKCkgdG8gcHV0X3VzZXJfcGFnZSooKQo+ICAgZnMvY2VwaDogY29u
-dmVydCBwdXRfcGFnZSgpIHRvIHB1dF91c2VyX3BhZ2UqKCkKPiAgIDlwL25ldDogY29udmVydCBw
-dXRfcGFnZSgpIHRvIHB1dF91c2VyX3BhZ2UqKCkKPiAKPiAgYmxvY2svYmlvLmMgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHwgIDgxICsrKysrKysrKysrKy0tLQo+ICBkcml2ZXJzL2lu
-ZmluaWJhbmQvY29yZS91bWVtLmMgICAgICAgICAgICAgfCAgIDUgKy0KPiAgZHJpdmVycy9pbmZp
-bmliYW5kL2h3L2hmaTEvdXNlcl9wYWdlcy5jICAgIHwgICA1ICstCj4gIGRyaXZlcnMvaW5maW5p
-YmFuZC9ody9xaWIvcWliX3VzZXJfcGFnZXMuYyB8ICAgNSArLQo+ICBkcml2ZXJzL2luZmluaWJh
-bmQvaHcvdXNuaWMvdXNuaWNfdWlvbS5jICAgfCAgIDUgKy0KPiAgZHJpdmVycy9pbmZpbmliYW5k
-L3N3L3Npdy9zaXdfbWVtLmMgICAgICAgIHwgICA4ICstCj4gIGRyaXZlcnMvdmhvc3Qvc2NzaS5j
-ICAgICAgICAgICAgICAgICAgICAgICB8ICAxMyArKy0KPiAgZnMvYmxvY2tfZGV2LmMgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHwgIDIyICsrKy0KPiAgZnMvY2VwaC9kZWJ1Z2ZzLmMgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHwgICAyICstCj4gIGZzL2NlcGgvZmlsZS5jICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICB8ICA2MiArKysrKysrKy0tLQo+ICBmcy9jaWZzL2NpZnNnbG9i
-LmggICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDMgKwo+ICBmcy9jaWZzL2ZpbGUuYyAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgfCAgMjIgKysrLQo+ICBmcy9jaWZzL21pc2MuYyAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgfCAgMTkgKysrLQo+ICBmcy9kaXJlY3QtaW8uYyAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDIgKy0KPiAgZnMvZnVzZS9kZXYuYyAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHwgIDIyICsrKy0KPiAgZnMvZnVzZS9maWxlLmMgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHwgIDUzICsrKysrKystLS0KPiAgZnMvbmZzL2RpcmVjdC5j
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDEwICstCj4gIGluY2x1ZGUvbGludXgvYmlv
-LmggICAgICAgICAgICAgICAgICAgICAgICB8ICAyMiArKystCj4gIGluY2x1ZGUvbGludXgvbW0u
-aCAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgNSArLQo+ICBpbmNsdWRlL2xpbnV4L3Vpby5o
-ICAgICAgICAgICAgICAgICAgICAgICAgfCAgMTEgKysKPiAgbW0vZ3VwLmMgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHwgMTE1ICsrKysrKysrKy0tLS0tLS0tLS0tLQo+ICBuZXQv
-OXAvdHJhbnNfY29tbW9uLmMgICAgICAgICAgICAgICAgICAgICAgfCAgMTQgKystCj4gIG5ldC85
-cC90cmFuc19jb21tb24uaCAgICAgICAgICAgICAgICAgICAgICB8ICAgMyArLQo+ICBuZXQvOXAv
-dHJhbnNfdmlydGlvLmMgICAgICAgICAgICAgICAgICAgICAgfCAgMTggKysrLQo+ICAyNCBmaWxl
-cyBjaGFuZ2VkLCAzNTcgaW5zZXJ0aW9ucygrKSwgMTcwIGRlbGV0aW9ucygtKQo+IAoKX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KVmlydHVhbGl6YXRpb24g
-bWFpbGluZyBsaXN0ClZpcnR1YWxpemF0aW9uQGxpc3RzLmxpbnV4LWZvdW5kYXRpb24ub3JnCmh0
-dHBzOi8vbGlzdHMubGludXhmb3VuZGF0aW9uLm9yZy9tYWlsbWFuL2xpc3RpbmZvL3ZpcnR1YWxp
-emF0aW9u
+On 7/24/19 5:41 PM, Bob Liu wrote:
+> On 7/24/19 12:25 PM, john.hubbard@gmail.com wrote:
+>> From: John Hubbard <jhubbard@nvidia.com>
+>>
+>> Hi,
+>>
+>> This is mostly Jerome's work, converting the block/bio and related areas
+>> to call put_user_page*() instead of put_page(). Because I've changed
+>> Jerome's patches, in some cases significantly, I'd like to get his
+>> feedback before we actually leave him listed as the author (he might
+>> want to disown some or all of these).
+>>
+> 
+> Could you add some background to the commit log for people don't have the context..
+> Why this converting? What's the main differences?
+> 
+
+Hi Bob,
+
+1. Many of the patches have a blurb like this:
+
+For pages that were retained via get_user_pages*(), release those pages
+via the new put_user_page*() routines, instead of via put_page().
+
+This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
+("mm: introduce put_user_page*(), placeholder versions").
+
+...and if you look at that commit, you'll find several pages of
+information in its commit description, which should address your point.
+
+2. This whole series has to be re-worked, as per the other feedback thread.
+So I'll keep your comment in mind when I post a new series.
+
+thanks,
+-- 
+John Hubbard
+NVIDIA
