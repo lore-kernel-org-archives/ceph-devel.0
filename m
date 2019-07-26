@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 11/30] ceph: fix improper use of smp_mb__before_atomic()
-Date: Fri, 26 Jul 2019 09:44:13 -0400
-Message-ID: <20190726134432.12993-11-sashal@kernel.org>
-References: <20190726134432.12993-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 08/23] ceph: fix improper use of smp_mb__before_atomic()
+Date: Fri, 26 Jul 2019 09:45:07 -0400
+Message-ID: <20190726134522.13308-8-sashal@kernel.org>
+References: <20190726134522.13308-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190726134432.12993-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190726134522.13308-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Andrea Parri <andrea.parri@amarulasolutions.com>, "Paul E. McKenney" <paulmck@linux.ibm.com>, Peter Zijlstra <peterz@infradead.org>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
@@ -33,10 +33,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 622d5dd9f616..9bd0d928057b 100644
+index 8c8cb8fe3d32..5d05c77c158d 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -476,7 +476,12 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
+@@ -474,7 +474,12 @@ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
  					   long long release_count,
  					   long long ordered_count)
  {
