@@ -1,77 +1,79 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Error in ceph rbd
- mirroring(rbd::mirror::InstanceWatcher: C_NotifyInstanceRequestfinish:
- resending after timeout)
-Date: Fri, 26 Jul 2019 09:58:59 -0400
-Message-ID: <CA+aFP1BwL73Drgz+9Tezw6TwuUug-ibR+nw_5N3cEKdvj1SPQQ@mail.gmail.com>
-References: <CAEbG6hG7dAhg=Z9JUKcCCTOEPyXZ6cZcS=jar7SeL-5VTcqEgA@mail.gmail.com>
- <20190726093147.GA31242@gmail.com>
- <CAEbG6hFgvWFMgaYHRRtZdth-OkJ7ib4vWxf__b7QvGPd1rF6Qg@mail.gmail.com>
- <20190726132546.GA6825@gmail.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.2 35/85] ceph: return -ERANGE if virtual xattr value didn't fit in buffer
+Date: Fri, 26 Jul 2019 09:38:45 -0400
+Message-ID: <20190726133936.11177-35-sashal@kernel.org>
+References: <20190726133936.11177-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20190726132546.GA6825-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mykola Golub <to.my.trociny-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190726133936.11177-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Jul 26, 2019 at 9:26 AM Mykola Golub <to.my.trociny-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->
-> On Fri, Jul 26, 2019 at 04:40:35PM +0530, Ajitha Robert wrote:
-> > Thank you for the clarification.
-> >
-> > But i was trying with openstack-cinder.. when i load some data into the
-> > volume around 50gb, the image sync will stop by 5 % or something within
-> > 15%...  What could be the reason?
->
-> I suppose you see image sync stop in mirror status output? Could you
-> please provide an example? And I suppose you don't see any other
-> messages in rbd-mirror log apart from what you have already posted?
-> Depending on configuration rbd-mirror might log in several logs. Could
-> you please try to find all its logs? `lsof |grep 'rbd-mirror.*log'`
-> may be useful for this.
->
-> BTW, what rbd-mirror version are you running?
+From: Jeff Layton <jlayton@kernel.org>
 
-From the previous thread a few days ago (not sure why a new thread was
-started on this same topic), to me it sounded like one or more OSDs
-isn't reachable from the secondary site:
+[ Upstream commit 3b421018f48c482bdc9650f894aa1747cf90e51d ]
 
-> > Scenario 2:
-> > but when i create a 50gb volume with another glance image. Volume  get created. and in the backend i could see the rbd images both in primary and secondary
-> >
-> > From rbd mirror image status i found secondary cluster starts copying , and syncing was struck at around 14 %... It will be in 14 % .. no progress at all. should I set any parameters for this like timeout??
-> >
-> > I manually checked rbd --cluster primary object-map check <object-name>..  No results came for the objects and the command was in hanging.. Thats why got worried on the failed to map object key log. I couldnt even rebuild the object map.
+The getxattr manpage states that we should return ERANGE if the
+destination buffer size is too small to hold the value.
+ceph_vxattrcb_layout does this internally, but we should be doing
+this for all vxattrs.
 
-> It sounds like one or more of your primary OSDs are not reachable from
-> the secondary site. If you run w/ "debug rbd-mirror = 20" and "debug
-> rbd = 20", you should be able to see the last object it attempted to
-> copy. From that, you could use "ceph osd map" to figure out the
-> primary OSD for that object.
+Fix the only caller of getxattr_cb to check the returned size
+against the buffer length and return -ERANGE if it doesn't fit.
+Drop the same check in ceph_vxattrcb_layout and just rely on the
+caller to handle it.
 
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+Acked-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ fs/ceph/xattr.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-
-> --
-> Mykola Golub
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
-
---
-Jason
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index b9df49e13d9c..0d2f8f9eb592 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -79,7 +79,7 @@ static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
+ 	const char *ns_field = " pool_namespace=";
+ 	char buf[128];
+ 	size_t len, total_len = 0;
+-	int ret;
++	ssize_t ret;
+ 
+ 	pool_ns = ceph_try_get_string(ci->i_layout.pool_ns);
+ 
+@@ -103,11 +103,8 @@ static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
+ 	if (pool_ns)
+ 		total_len += strlen(ns_field) + pool_ns->len;
+ 
+-	if (!size) {
+-		ret = total_len;
+-	} else if (total_len > size) {
+-		ret = -ERANGE;
+-	} else {
++	ret = total_len;
++	if (size >= total_len) {
+ 		memcpy(val, buf, len);
+ 		ret = len;
+ 		if (pool_name) {
+@@ -835,8 +832,11 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
+ 		if (err)
+ 			return err;
+ 		err = -ENODATA;
+-		if (!(vxattr->exists_cb && !vxattr->exists_cb(ci)))
++		if (!(vxattr->exists_cb && !vxattr->exists_cb(ci))) {
+ 			err = vxattr->getxattr_cb(ci, value, size);
++			if (size && size < err)
++				err = -ERANGE;
++		}
+ 		return err;
+ 	}
+ 
+-- 
+2.20.1
