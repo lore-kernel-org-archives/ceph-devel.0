@@ -1,46 +1,126 @@
-From: Mykola Golub <to.my.trociny-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Error in ceph rbd
- mirroring(rbd::mirror::InstanceWatcher: C_NotifyInstanceRequestfinish:
- resending after timeout)
-Date: Fri, 26 Jul 2019 16:25:46 +0300
-Message-ID: <20190726132546.GA6825@gmail.com>
-References: <CAEbG6hG7dAhg=Z9JUKcCCTOEPyXZ6cZcS=jar7SeL-5VTcqEgA@mail.gmail.com>
- <20190726093147.GA31242@gmail.com>
- <CAEbG6hFgvWFMgaYHRRtZdth-OkJ7ib4vWxf__b7QvGPd1rF6Qg@mail.gmail.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.2 32/85] ceph: fix listxattr vxattr buffer length calculation
+Date: Fri, 26 Jul 2019 09:38:42 -0400
+Message-ID: <20190726133936.11177-32-sashal@kernel.org>
+References: <20190726133936.11177-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAEbG6hFgvWFMgaYHRRtZdth-OkJ7ib4vWxf__b7QvGPd1rF6Qg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ajitha Robert <ajitharobert01-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190726133936.11177-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: David Disseldorp <ddiss@suse.de>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Jul 26, 2019 at 04:40:35PM +0530, Ajitha Robert wrote:
-> Thank you for the clarification.
-> 
-> But i was trying with openstack-cinder.. when i load some data into the
-> volume around 50gb, the image sync will stop by 5 % or something within
-> 15%...  What could be the reason?
+From: David Disseldorp <ddiss@suse.de>
 
-I suppose you see image sync stop in mirror status output? Could you
-please provide an example? And I suppose you don't see any other
-messages in rbd-mirror log apart from what you have already posted?
-Depending on configuration rbd-mirror might log in several logs. Could
-you please try to find all its logs? `lsof |grep 'rbd-mirror.*log'`
-may be useful for this.
+[ Upstream commit 2b2abcac8c251d1c77a4cc9d9f248daefae0fb4e ]
 
-BTW, what rbd-mirror version are you running?
+ceph_listxattr() incorrectly returns a length based on the static
+ceph_vxattrs_name_size() value, which only takes into account whether
+vxattrs are hidden, ignoring vxattr.exists_cb().
 
+When filling the xattr buffer ceph_listxattr() checks VXATTR_FLAG_HIDDEN
+and vxattr.exists_cb(). If both are false, we return an incorrect
+(oversize) length.
+
+Fix this behaviour by always calculating the vxattrs length at runtime,
+taking both vxattr.hidden and vxattr.exists_cb() into account.
+
+This bug is only exposed with the new "ceph.snap.btime" vxattr, as all
+other vxattrs with a non-null exists_cb also carry VXATTR_FLAG_HIDDEN.
+
+Signed-off-by: David Disseldorp <ddiss@suse.de>
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ fs/ceph/xattr.c | 54 +++++++++++++++++++++++++++----------------------
+ 1 file changed, 30 insertions(+), 24 deletions(-)
+
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 0cc42c8879e9..b9df49e13d9c 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -897,10 +897,9 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
+ 	struct inode *inode = d_inode(dentry);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_vxattr *vxattrs = ceph_inode_vxattrs(inode);
+-	u32 vir_namelen = 0;
++	bool len_only = (size == 0);
+ 	u32 namelen;
+ 	int err;
+-	u32 len;
+ 	int i;
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+@@ -919,38 +918,45 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
+ 	err = __build_xattrs(inode);
+ 	if (err < 0)
+ 		goto out;
+-	/*
+-	 * Start with virtual dir xattr names (if any) (including
+-	 * terminating '\0' characters for each).
+-	 */
+-	vir_namelen = ceph_vxattrs_name_size(vxattrs);
+ 
+-	/* adding 1 byte per each variable due to the null termination */
++	/* add 1 byte for each xattr due to the null termination */
+ 	namelen = ci->i_xattrs.names_size + ci->i_xattrs.count;
+-	err = -ERANGE;
+-	if (size && vir_namelen + namelen > size)
+-		goto out;
+-
+-	err = namelen + vir_namelen;
+-	if (size == 0)
+-		goto out;
++	if (!len_only) {
++		if (namelen > size) {
++			err = -ERANGE;
++			goto out;
++		}
++		names = __copy_xattr_names(ci, names);
++		size -= namelen;
++	}
+ 
+-	names = __copy_xattr_names(ci, names);
+ 
+ 	/* virtual xattr names, too */
+-	err = namelen;
+ 	if (vxattrs) {
+ 		for (i = 0; vxattrs[i].name; i++) {
+-			if (!(vxattrs[i].flags & VXATTR_FLAG_HIDDEN) &&
+-			    !(vxattrs[i].exists_cb &&
+-			      !vxattrs[i].exists_cb(ci))) {
+-				len = sprintf(names, "%s", vxattrs[i].name);
+-				names += len + 1;
+-				err += len + 1;
++			size_t this_len;
++
++			if (vxattrs[i].flags & VXATTR_FLAG_HIDDEN)
++				continue;
++			if (vxattrs[i].exists_cb && !vxattrs[i].exists_cb(ci))
++				continue;
++
++			this_len = strlen(vxattrs[i].name) + 1;
++			namelen += this_len;
++			if (len_only)
++				continue;
++
++			if (this_len > size) {
++				err = -ERANGE;
++				goto out;
+ 			}
++
++			memcpy(names, vxattrs[i].name, this_len);
++			names += this_len;
++			size -= this_len;
+ 		}
+ 	}
+-
++	err = namelen;
+ out:
+ 	spin_unlock(&ci->i_ceph_lock);
+ 	return err;
 -- 
-Mykola Golub
+2.20.1
