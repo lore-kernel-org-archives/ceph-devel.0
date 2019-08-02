@@ -1,9 +1,10 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 03/34] net/ceph: convert put_page() to put_user_page*()
-Date: Thu,  1 Aug 2019 19:19:34 -0700
-Message-ID: <20190802022005.5117-4-jhubbard@nvidia.com>
+Subject: [PATCH 05/34] drm/etnaviv: convert release_pages() to put_user_pages()
+Date: Thu,  1 Aug 2019 19:19:36 -0700
+Message-ID: <20190802022005.5117-6-jhubbard@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190802022005.5117-1-jhubbard@nvidia.com>
@@ -21,34 +22,41 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>
-Cc: David S. Miller <davem@davemloft.net>
-Cc: ceph-devel@vger.kernel.org
-Cc: netdev@vger.kernel.org
+Cc: Joerg Roedel <joro@8bytes.org>
+Cc: Paolo Bonzini <pbonzini@redhat.com>
+Cc: "Radim Krčmář" <rkrcmar@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: x86@kernel.org
+Cc: kvm@vger.kernel.org
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- net/ceph/pagevec.c | 8 +-------
- 1 file changed, 1 insertion(+), 7 deletions(-)
+ drivers/gpu/drm/etnaviv/etnaviv_gem.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-index 64305e7056a1..c88fff2ab9bd 100644
---- a/net/ceph/pagevec.c
-+++ b/net/ceph/pagevec.c
-@@ -12,13 +12,7 @@
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.c b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
+index e8778ebb72e6..a0144a5ee325 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
+@@ -686,7 +686,7 @@ static int etnaviv_gem_userptr_get_pages(struct etnaviv_gem_object *etnaviv_obj)
+ 		ret = get_user_pages_fast(ptr, num_pages,
+ 					  !userptr->ro ? FOLL_WRITE : 0, pages);
+ 		if (ret < 0) {
+-			release_pages(pvec, pinned);
++			put_user_pages(pvec, pinned);
+ 			kvfree(pvec);
+ 			return ret;
+ 		}
+@@ -710,7 +710,7 @@ static void etnaviv_gem_userptr_release(struct etnaviv_gem_object *etnaviv_obj)
+ 	if (etnaviv_obj->pages) {
+ 		int npages = etnaviv_obj->base.size >> PAGE_SHIFT;
  
- void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty)
- {
--	int i;
--
--	for (i = 0; i < num_pages; i++) {
--		if (dirty)
--			set_page_dirty_lock(pages[i]);
--		put_page(pages[i]);
--	}
-+	put_user_pages_dirty_lock(pages, num_pages, dirty);
- 	kvfree(pages);
+-		release_pages(etnaviv_obj->pages, npages);
++		put_user_pages(etnaviv_obj->pages, npages);
+ 		kvfree(etnaviv_obj->pages);
+ 	}
  }
- EXPORT_SYMBOL(ceph_put_page_vector);
 -- 
 2.22.0
