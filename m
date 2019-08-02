@@ -1,41 +1,62 @@
-From: John Hubbard <jhubbard@nvidia.com>
-Subject: Re: [PATCH 00/34] put_user_pages(): miscellaneous call sites
-Date: Thu, 1 Aug 2019 19:39:00 -0700
-Message-ID: <ec87b662-0fc2-0951-1337-a91b4888201b@nvidia.com>
-References: <20190802021653.4882-1-jhubbard@nvidia.com>
+From: Juergen Gross <jgross@suse.com>
+Subject: Re: [PATCH 20/34] xen: convert put_page() to
+ put_user_page*()
+Date: Fri, 2 Aug 2019 06:36:51 +0200
+Message-ID: <4471e9dc-a315-42c1-0c3c-55ba4eeeb106@suse.com>
+References: <20190802022005.5117-1-jhubbard@nvidia.com>
+ <20190802022005.5117-21-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190802021653.4882-1-jhubbard@nvidia.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+In-Reply-To: <20190802022005.5117-21-jhubbard@nvidia.com>
+Content-Language: de-DE
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
 To: john.hubbard@gmail.com, Andrew Morton <akpm@linux-foundation.org>
-Cc: Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Dave Hansen <dave.hansen@linux.intel.com>, Ira Weiny <ira.weiny@intel.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, LKML <linux-kernel@vger.kernel.org>, amd-gfx@lists.freedesktop.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, devel@lists.orangefs.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org, linux-crypto@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org, linux-mm@kvack.org
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>, Dan Williams <dan.j.williams@intel.com>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, ceph-devel@vger.kernel.org, linux-arm-kernel@list
 List-Id: ceph-devel.vger.kernel.org
 
-On 8/1/19 7:16 PM, john.hubbard@gmail.com wrote:
-> From: John Hubbard <jhubbard@nvidia.com>
-> 
-> Hi,
-> 
-> These are best characterized as miscellaneous conversions: many (not all)
-> call sites that don't involve biovec or iov_iter, nor mm/. It also leaves
-> out a few call sites that require some more work. These are mostly pretty
-> simple ones.
-> 
-> It's probably best to send all of these via Andrew's -mm tree, assuming
-> that there are no significant merge conflicts with ongoing work in other
-> trees (which I doubt, given that these are small changes).
-> 
-
-In case anyone is wondering, this truncated series is due to a script failure:
-git-send-email chokes when it hits email addresses whose names have a
-comma in them, as happened here with patch 0003.  
-
-Please disregard this set and reply to the other thread.
-
-thanks,
--- 
-John Hubbard
-NVIDIA
+T24gMDIuMDguMTkgMDQ6MTksIGpvaG4uaHViYmFyZEBnbWFpbC5jb20gd3JvdGU6Cj4gRnJvbTog
+Sm9obiBIdWJiYXJkIDxqaHViYmFyZEBudmlkaWEuY29tPgo+IAo+IEZvciBwYWdlcyB0aGF0IHdl
+cmUgcmV0YWluZWQgdmlhIGdldF91c2VyX3BhZ2VzKigpLCByZWxlYXNlIHRob3NlIHBhZ2VzCj4g
+dmlhIHRoZSBuZXcgcHV0X3VzZXJfcGFnZSooKSByb3V0aW5lcywgaW5zdGVhZCBvZiB2aWEgcHV0
+X3BhZ2UoKSBvcgo+IHJlbGVhc2VfcGFnZXMoKS4KPiAKPiBUaGlzIGlzIHBhcnQgYSB0cmVlLXdp
+ZGUgY29udmVyc2lvbiwgYXMgZGVzY3JpYmVkIGluIGNvbW1pdCBmYzFkOGU3Y2NhMmQKPiAoIm1t
+OiBpbnRyb2R1Y2UgcHV0X3VzZXJfcGFnZSooKSwgcGxhY2Vob2xkZXIgdmVyc2lvbnMiKS4KPiAK
+PiBDYzogQm9yaXMgT3N0cm92c2t5IDxib3Jpcy5vc3Ryb3Zza3lAb3JhY2xlLmNvbT4KPiBDYzog
+SnVlcmdlbiBHcm9zcyA8amdyb3NzQHN1c2UuY29tPgo+IENjOiB4ZW4tZGV2ZWxAbGlzdHMueGVu
+cHJvamVjdC5vcmcKPiBTaWduZWQtb2ZmLWJ5OiBKb2huIEh1YmJhcmQgPGpodWJiYXJkQG52aWRp
+YS5jb20+Cj4gLS0tCj4gICBkcml2ZXJzL3hlbi9nbnRkZXYuYyAgfCA1ICstLS0tCj4gICBkcml2
+ZXJzL3hlbi9wcml2Y21kLmMgfCA3ICstLS0tLS0KPiAgIDIgZmlsZXMgY2hhbmdlZCwgMiBpbnNl
+cnRpb25zKCspLCAxMCBkZWxldGlvbnMoLSkKPiAKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy94ZW4v
+Z250ZGV2LmMgYi9kcml2ZXJzL3hlbi9nbnRkZXYuYwo+IGluZGV4IDRjMzM5YzdlNjZlNS4uMjU4
+NmIzZGYyYmI2IDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMveGVuL2dudGRldi5jCj4gKysrIGIvZHJp
+dmVycy94ZW4vZ250ZGV2LmMKPiBAQCAtODY0LDEwICs4NjQsNyBAQCBzdGF0aWMgaW50IGdudGRl
+dl9nZXRfcGFnZShzdHJ1Y3QgZ250ZGV2X2NvcHlfYmF0Y2ggKmJhdGNoLCB2b2lkIF9fdXNlciAq
+dmlydCwKPiAgIAo+ICAgc3RhdGljIHZvaWQgZ250ZGV2X3B1dF9wYWdlcyhzdHJ1Y3QgZ250ZGV2
+X2NvcHlfYmF0Y2ggKmJhdGNoKQo+ICAgewo+IC0JdW5zaWduZWQgaW50IGk7Cj4gLQo+IC0JZm9y
+IChpID0gMDsgaSA8IGJhdGNoLT5ucl9wYWdlczsgaSsrKQo+IC0JCXB1dF9wYWdlKGJhdGNoLT5w
+YWdlc1tpXSk7Cj4gKwlwdXRfdXNlcl9wYWdlcyhiYXRjaC0+cGFnZXMsIGJhdGNoLT5ucl9wYWdl
+cyk7Cj4gICAJYmF0Y2gtPm5yX3BhZ2VzID0gMDsKPiAgIH0KPiAgIAo+IGRpZmYgLS1naXQgYS9k
+cml2ZXJzL3hlbi9wcml2Y21kLmMgYi9kcml2ZXJzL3hlbi9wcml2Y21kLmMKPiBpbmRleCAyZjVj
+ZTcyMzBhNDMuLjI5ZTQ2MWRiZWUyZCAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL3hlbi9wcml2Y21k
+LmMKPiArKysgYi9kcml2ZXJzL3hlbi9wcml2Y21kLmMKPiBAQCAtNjExLDE1ICs2MTEsMTAgQEAg
+c3RhdGljIGludCBsb2NrX3BhZ2VzKAo+ICAgCj4gICBzdGF0aWMgdm9pZCB1bmxvY2tfcGFnZXMo
+c3RydWN0IHBhZ2UgKnBhZ2VzW10sIHVuc2lnbmVkIGludCBucl9wYWdlcykKPiAgIHsKPiAtCXVu
+c2lnbmVkIGludCBpOwo+IC0KPiAgIAlpZiAoIXBhZ2VzKQo+ICAgCQlyZXR1cm47Cj4gICAKPiAt
+CWZvciAoaSA9IDA7IGkgPCBucl9wYWdlczsgaSsrKSB7Cj4gLQkJaWYgKHBhZ2VzW2ldKQo+IC0J
+CQlwdXRfcGFnZShwYWdlc1tpXSk7Cj4gLQl9Cj4gKwlwdXRfdXNlcl9wYWdlcyhwYWdlcywgbnJf
+cGFnZXMpOwoKWW91IGFyZSBub3QgaGFuZGxpbmcgdGhlIGNhc2Ugd2hlcmUgcGFnZXNbaV0gaXMg
+TlVMTCBoZXJlLiBPciBhbSBJCm1pc3NpbmcgYSBwZW5kaW5nIHBhdGNoIHRvIHB1dF91c2VyX3Bh
+Z2VzKCkgaGVyZT8KCgpKdWVyZ2VuCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCkludGVsLWdmeCBtYWlsaW5nIGxpc3QKSW50ZWwtZ2Z4QGxpc3RzLmZyZWVk
+ZXNrdG9wLm9yZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZv
+L2ludGVsLWdmeA==
