@@ -1,23 +1,24 @@
 From: John Hubbard <jhubbard@nvidia.com>
-Subject: Re: [PATCH 06/34] drm/i915: convert put_page() to put_user_page*()
-Date: Fri, 2 Aug 2019 11:48:08 -0700
-Message-ID: <7d9a9c57-4322-270b-b636-7214019f87e9@nvidia.com>
+Subject: Re: [PATCH 16/34] drivers/tee: convert put_page() to put_user_page*()
+Date: Fri, 2 Aug 2019 11:51:14 -0700
+Message-ID: <23cc9ac3-4b03-9187-aae6-d64ba8cfca00@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
- <20190802022005.5117-7-jhubbard@nvidia.com>
- <156473756254.19842.12384378926183716632@jlahtine-desk.ger.corp.intel.com>
+ <20190802022005.5117-17-jhubbard@nvidia.com>
+ <CAHUa44G++iiwU62jj7QH=V3sr4z26sf007xrwWLPw6AAeMLAEw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <156473756254.19842.12384378926183716632@jlahtine-desk.ger.corp.intel.com>
+In-Reply-To: <CAHUa44G++iiwU62jj7QH=V3sr4z26sf007xrwWLPw6AAeMLAEw@mail.gmail.com>
 Content-Language: en-US
 Sender: netdev-owner@vger.kernel.org
-To: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, john.hubbard@gmail.com
-Cc: Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Dave Hansen <dave.hansen@linux.intel.com>, Ira Weiny <ira.weiny@intel.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, LKML <linux-kernel@vger.kernel.org>, amd-gfx@lists.freedesktop.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, devel@lists.orangefs.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org, linux-crypto@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org, linux-mm@kvack.org
+To: Jens Wiklander <jens.wiklander@linaro.org>, john.hubbard@gmail.com
+Cc: Andrew Morton <akpm@linux-foundation.org>, Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Dave Hansen <dave.hansen@linux.intel.com>, Ira Weiny <ira.weiny@intel.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, LKML <linux-kernel@vger.kernel.org>, amd-gfx@lists.freedesktop.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, devel@lists.orangefs.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-block@vger.kernel.org, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>linux
 List-Id: ceph-devel.vger.kernel.org
 
-On 8/2/19 2:19 AM, Joonas Lahtinen wrote:
-> Quoting john.hubbard@gmail.com (2019-08-02 05:19:37)
+On 8/1/19 11:29 PM, Jens Wiklander wrote:
+> On Fri, Aug 2, 2019 at 4:20 AM <john.hubbard@gmail.com> wrote:
+>>
 >> From: John Hubbard <jhubbard@nvidia.com>
 >>
 >> For pages that were retained via get_user_pages*(), release those pages
@@ -27,59 +28,23 @@ On 8/2/19 2:19 AM, Joonas Lahtinen wrote:
 >> This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 >> ("mm: introduce put_user_page*(), placeholder versions").
 >>
->> Note that this effectively changes the code's behavior in
->> i915_gem_userptr_put_pages(): it now calls set_page_dirty_lock(),
->> instead of set_page_dirty(). This is probably more accurate.
+>> Cc: Jens Wiklander <jens.wiklander@linaro.org>
+>> Signed-off-by: John Hubbard <jhubbard@nvidia.com>
+>> ---
+>>   drivers/tee/tee_shm.c | 10 ++--------
+>>   1 file changed, 2 insertions(+), 8 deletions(-)
 > 
-> We've already fixed this in drm-tip where the current code uses
-> set_page_dirty_lock().
+> Acked-by: Jens Wiklander <jens.wiklander@linaro.org>
 > 
-> This would conflict with our tree. Rodrigo is handling
-> drm-intel-next for 5.4, so you guys want to coordinate how
-> to merge.
+> I suppose you're taking this via your own tree or such.
 > 
 
-Hi Joonas, Rodrigo,
+Hi Jens,
 
-First of all, I apologize for the API breakage: put_user_pages_dirty_lock()
-has an additional "dirty" parameter.
-
-In order to deal with the merge problem, I'll drop this patch from my series,
-and I'd recommend that the drm-intel-next take the following approach:
-
-1) For now, s/put_page/put_user_page/ in i915_gem_userptr_put_pages(),
-and fix up the set_page_dirty() --> set_page_dirty_lock() issue, like this
-(based against linux.git):
-
-diff --git a/drivers/gpu/drm/i915/gem/i915_gem_userptr.c 
-b/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
-index 528b61678334..94721cc0093b 100644
---- a/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
-+++ b/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
-@@ -664,10 +664,10 @@ i915_gem_userptr_put_pages(struct drm_i915_gem_object *obj,
-
-         for_each_sgt_page(page, sgt_iter, pages) {
-                 if (obj->mm.dirty)
--                       set_page_dirty(page);
-+                       set_page_dirty_lock(page);
-
-                 mark_page_accessed(page);
--               put_page(page);
-+               put_user_page(page);
-         }
-         obj->mm.dirty = false;
-
-
-That will leave you with your original set_page_dirty_lock() calls
-and everything works properly.
-
-2) Next cycle, move to the new put_user_pages_dirty_lock().
+Thanks for the ACK! I'm expecting that Andrew will take this through his
+-mm tree, unless he pops up and says otherwise.
 
 thanks,
 -- 
 John Hubbard
 NVIDIA
-
-
-> Regards, Joonas
-> 
