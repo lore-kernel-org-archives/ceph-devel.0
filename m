@@ -1,7 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 25/34] mm/frame_vector.c: convert put_page() to put_user_page*()
-Date: Thu,  1 Aug 2019 19:19:56 -0700
-Message-ID: <20190802022005.5117-26-jhubbard@nvidia.com>
+Subject: [PATCH 30/34] crypt: convert put_page() to put_user_page*()
+Date: Thu,  1 Aug 2019 19:20:01 -0700
+Message-ID: <20190802022005.5117-31-jhubbard@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -21,36 +21,38 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-Cc: Dan Williams <dan.j.williams@intel.com>
-Cc: Jan Kara <jack@suse.cz>
-Cc: Mel Gorman <mgorman@suse.de>
-Cc: Vlastimil Babka <vbabka@suse.cz>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: David S. Miller <davem@davemloft.net>
+Cc: linux-crypto@vger.kernel.org
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- mm/frame_vector.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ crypto/af_alg.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/mm/frame_vector.c b/mm/frame_vector.c
-index c64dca6e27c2..f590badac776 100644
---- a/mm/frame_vector.c
-+++ b/mm/frame_vector.c
-@@ -120,7 +120,6 @@ EXPORT_SYMBOL(get_vaddr_frames);
-  */
- void put_vaddr_frames(struct frame_vector *vec)
+diff --git a/crypto/af_alg.c b/crypto/af_alg.c
+index 879cf23f7489..edd358ea64da 100644
+--- a/crypto/af_alg.c
++++ b/crypto/af_alg.c
+@@ -428,10 +428,7 @@ static void af_alg_link_sg(struct af_alg_sgl *sgl_prev,
+ 
+ void af_alg_free_sg(struct af_alg_sgl *sgl)
  {
 -	int i;
- 	struct page **pages;
+-
+-	for (i = 0; i < sgl->npages; i++)
+-		put_page(sgl->pages[i]);
++	put_user_pages(sgl->pages, sgl->npages);
+ }
+ EXPORT_SYMBOL_GPL(af_alg_free_sg);
  
- 	if (!vec->got_ref)
-@@ -133,8 +132,7 @@ void put_vaddr_frames(struct frame_vector *vec)
- 	 */
- 	if (WARN_ON(IS_ERR(pages)))
- 		goto out;
--	for (i = 0; i < vec->nr_frames; i++)
--		put_page(pages[i]);
-+	put_user_pages(pages, vec->nr_frames);
- 	vec->got_ref = false;
- out:
- 	vec->nr_frames = 0;
+@@ -668,7 +665,7 @@ static void af_alg_free_areq_sgls(struct af_alg_async_req *areq)
+ 		for_each_sg(tsgl, sg, areq->tsgl_entries, i) {
+ 			if (!sg_page(sg))
+ 				continue;
+-			put_page(sg_page(sg));
++			put_user_page(sg_page(sg));
+ 		}
+ 
+ 		sock_kfree_s(sk, tsgl, areq->tsgl_entries * sizeof(*tsgl));
 -- 
 2.22.0
