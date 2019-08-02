@@ -1,7 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 19/34] fsl_hypervisor: convert put_page() to put_user_page*()
-Date: Thu,  1 Aug 2019 19:19:50 -0700
-Message-ID: <20190802022005.5117-20-jhubbard@nvidia.com>
+Subject: [PATCH 12/34] vmci: convert put_page() to put_user_page*()
+Date: Thu,  1 Aug 2019 19:19:43 -0700
+Message-ID: <20190802022005.5117-13-jhubbard@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,7 +18,7 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, Rob Herring <robh@kernel.org>, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, Kees Cook <keescook@chromium.org>, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, linux-arm-kernel@lists.infrade
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, Kees Cook <keescook@chromium.org>, Arnd Bergmann <arnd@arndb.de>, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.wil>
 List-Id: ceph-devel.vger.kernel.org
 
 From: John Hubbard <jhubbard@nvidia.com>
@@ -30,36 +30,60 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-This changes the release code slightly, because each page slot in the
-page_list[] array is no longer checked for NULL. However, that check
-was wrong anyway, because the get_user_pages() pattern of usage here
-never allowed for NULL entries within a range of pinned pages.
+Note that this effectively changes the code's behavior in
+qp_release_pages(): it now ultimately calls set_page_dirty_lock(),
+instead of set_page_dirty(). This is probably more accurate.
 
+As Christophe Hellwig put it, "set_page_dirty() is only safe if we are
+dealing with a file backed page where we have reference on the inode it
+hangs off." [1]
+
+[1] https://lore.kernel.org/r/20190723153640.GB720@lst.de
+
+Cc: Arnd Bergmann <arnd@arndb.de>
 Cc: Al Viro <viro@zeniv.linux.org.uk>
+Cc: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
 Cc: Kees Cook <keescook@chromium.org>
-Cc: Rob Herring <robh@kernel.org>
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- drivers/virt/fsl_hypervisor.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ drivers/misc/vmw_vmci/vmci_context.c    |  2 +-
+ drivers/misc/vmw_vmci/vmci_queue_pair.c | 11 ++---------
+ 2 files changed, 3 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/virt/fsl_hypervisor.c b/drivers/virt/fsl_hypervisor.c
-index 93d5bebf9572..a8f78d572c45 100644
---- a/drivers/virt/fsl_hypervisor.c
-+++ b/drivers/virt/fsl_hypervisor.c
-@@ -292,11 +292,8 @@ static long ioctl_memcpy(struct fsl_hv_ioctl_memcpy __user *p)
- 		virt_to_phys(sg_list), num_pages);
+diff --git a/drivers/misc/vmw_vmci/vmci_context.c b/drivers/misc/vmw_vmci/vmci_context.c
+index 16695366ec92..9daa52ee63b7 100644
+--- a/drivers/misc/vmw_vmci/vmci_context.c
++++ b/drivers/misc/vmw_vmci/vmci_context.c
+@@ -587,7 +587,7 @@ void vmci_ctx_unset_notify(struct vmci_ctx *context)
  
- exit:
--	if (pages) {
--		for (i = 0; i < num_pages; i++)
--			if (pages[i])
--				put_page(pages[i]);
+ 	if (notify_page) {
+ 		kunmap(notify_page);
+-		put_page(notify_page);
++		put_user_page(notify_page);
+ 	}
+ }
+ 
+diff --git a/drivers/misc/vmw_vmci/vmci_queue_pair.c b/drivers/misc/vmw_vmci/vmci_queue_pair.c
+index 8531ae781195..e5434551d0ef 100644
+--- a/drivers/misc/vmw_vmci/vmci_queue_pair.c
++++ b/drivers/misc/vmw_vmci/vmci_queue_pair.c
+@@ -626,15 +626,8 @@ static void qp_release_queue_mutex(struct vmci_queue *queue)
+ static void qp_release_pages(struct page **pages,
+ 			     u64 num_pages, bool dirty)
+ {
+-	int i;
+-
+-	for (i = 0; i < num_pages; i++) {
+-		if (dirty)
+-			set_page_dirty(pages[i]);
+-
+-		put_page(pages[i]);
+-		pages[i] = NULL;
 -	}
-+	if (pages)
-+		put_user_pages(pages, num_pages);
++	put_user_pages_dirty_lock(pages, num_pages, dirty);
++	memset(pages, 0, num_pages * sizeof(struct page *));
+ }
  
- 	kfree(sg_list_unaligned);
- 	kfree(pages);
+ /*
 -- 
 2.22.0
