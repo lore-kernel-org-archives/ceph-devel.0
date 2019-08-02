@@ -1,7 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 10/34] genwqe: convert put_page() to put_user_page*()
-Date: Thu,  1 Aug 2019 19:19:41 -0700
-Message-ID: <20190802022005.5117-11-jhubbard@nvidia.com>
+Subject: [PATCH 06/34] drm/i915: convert put_page() to put_user_page*()
+Date: Thu,  1 Aug 2019 19:19:37 -0700
+Message-ID: <20190802022005.5117-7-jhubbard@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,7 +18,7 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, "Guilherme G. Piccoli" <gpiccoli@linux.vnet.ibm.com>, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, linux-arm-
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, David Airlie <airlied@linux.ie>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, Jani Nikula <jani.nikula@linux.intel.com>, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Rodrigo
 List-Id: ceph-devel.vger.kernel.org
 
 From: John Hubbard <jhubbard@nvidia.com>
@@ -30,51 +30,61 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-This changes the release code slightly, because each page slot in the
-page_list[] array is no longer checked for NULL. However, that check
-was wrong anyway, because the get_user_pages() pattern of usage here
-never allowed for NULL entries within a range of pinned pages.
+Note that this effectively changes the code's behavior in
+i915_gem_userptr_put_pages(): it now calls set_page_dirty_lock(),
+instead of set_page_dirty(). This is probably more accurate.
 
-Cc: Frank Haverkamp <haver@linux.vnet.ibm.com>
-Cc: "Guilherme G. Piccoli" <gpiccoli@linux.vnet.ibm.com>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+As Christophe Hellwig put it, "set_page_dirty() is only safe if we are
+dealing with a file backed page where we have reference on the inode it
+hangs off." [1]
+
+[1] https://lore.kernel.org/r/20190723153640.GB720@lst.de
+
+Cc: Jani Nikula <jani.nikula@linux.intel.com>
+Cc: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>
+Cc: Rodrigo Vivi <rodrigo.vivi@intel.com>
+Cc: David Airlie <airlied@linux.ie>
+Cc: intel-gfx@lists.freedesktop.org
+Cc: dri-devel@lists.freedesktop.org
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- drivers/misc/genwqe/card_utils.c | 17 +++--------------
- 1 file changed, 3 insertions(+), 14 deletions(-)
+ drivers/gpu/drm/i915/gem/i915_gem_userptr.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/misc/genwqe/card_utils.c b/drivers/misc/genwqe/card_utils.c
-index 2e1c4d2905e8..2a888f31d2c5 100644
---- a/drivers/misc/genwqe/card_utils.c
-+++ b/drivers/misc/genwqe/card_utils.c
-@@ -517,24 +517,13 @@ int genwqe_free_sync_sgl(struct genwqe_dev *cd, struct genwqe_sgl *sgl)
- /**
-  * genwqe_free_user_pages() - Give pinned pages back
-  *
-- * Documentation of get_user_pages is in mm/gup.c:
-- *
-- * If the page is written to, set_page_dirty (or set_page_dirty_lock,
-- * as appropriate) must be called after the page is finished with, and
-- * before put_page is called.
-+ * The pages may have been written to, so we call put_user_pages_dirty_lock(),
-+ * rather than put_user_pages().
-  */
- static int genwqe_free_user_pages(struct page **page_list,
- 			unsigned int nr_pages, int dirty)
- {
--	unsigned int i;
+diff --git a/drivers/gpu/drm/i915/gem/i915_gem_userptr.c b/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
+index 528b61678334..c18008d3cc2a 100644
+--- a/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
++++ b/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
+@@ -527,7 +527,7 @@ __i915_gem_userptr_get_pages_worker(struct work_struct *_work)
+ 	}
+ 	mutex_unlock(&obj->mm.lock);
+ 
+-	release_pages(pvec, pinned);
++	put_user_pages(pvec, pinned);
+ 	kvfree(pvec);
+ 
+ 	i915_gem_object_put(obj);
+@@ -640,7 +640,7 @@ static int i915_gem_userptr_get_pages(struct drm_i915_gem_object *obj)
+ 		__i915_gem_userptr_set_active(obj, true);
+ 
+ 	if (IS_ERR(pages))
+-		release_pages(pvec, pinned);
++		put_user_pages(pvec, pinned);
+ 	kvfree(pvec);
+ 
+ 	return PTR_ERR_OR_ZERO(pages);
+@@ -663,11 +663,8 @@ i915_gem_userptr_put_pages(struct drm_i915_gem_object *obj,
+ 	i915_gem_gtt_finish_pages(obj, pages);
+ 
+ 	for_each_sgt_page(page, sgt_iter, pages) {
+-		if (obj->mm.dirty)
+-			set_page_dirty(page);
 -
--	for (i = 0; i < nr_pages; i++) {
--		if (page_list[i] != NULL) {
--			if (dirty)
--				set_page_dirty_lock(page_list[i]);
--			put_page(page_list[i]);
--		}
--	}
-+	put_user_pages_dirty_lock(page_list, nr_pages, dirty);
- 	return 0;
- }
+ 		mark_page_accessed(page);
+-		put_page(page);
++		put_user_pages_dirty_lock(&page, 1, obj->mm.dirty);
+ 	}
+ 	obj->mm.dirty = false;
  
 -- 
 2.22.0
