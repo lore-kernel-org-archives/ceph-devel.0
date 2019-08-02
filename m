@@ -1,7 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH 12/34] vmci: convert put_page() to put_user_page*()
-Date: Thu,  1 Aug 2019 19:19:43 -0700
-Message-ID: <20190802022005.5117-13-jhubbard@nvidia.com>
+Subject: [PATCH 17/34] vfio: convert put_page() to put_user_page*()
+Date: Thu,  1 Aug 2019 19:19:48 -0700
+Message-ID: <20190802022005.5117-18-jhubbard@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,7 +18,7 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, Kees Cook <keescook@chromium.org>, Arnd Bergmann <arnd@arndb.de>, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.wil>
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, Alex Williamson <alex.williamson@redhat.com>, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, linux-arm-kernel@lists.infradead.org, linux-nfs@vg
 List-Id: ceph-devel.vger.kernel.org
 
 From: John Hubbard <jhubbard@nvidia.com>
@@ -40,50 +40,38 @@ hangs off." [1]
 
 [1] https://lore.kernel.org/r/20190723153640.GB720@lst.de
 
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Al Viro <viro@zeniv.linux.org.uk>
-Cc: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Kees Cook <keescook@chromium.org>
+Cc: Alex Williamson <alex.williamson@redhat.com>
+Cc: kvm@vger.kernel.org
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- drivers/misc/vmw_vmci/vmci_context.c    |  2 +-
- drivers/misc/vmw_vmci/vmci_queue_pair.c | 11 ++---------
- 2 files changed, 3 insertions(+), 10 deletions(-)
+ drivers/vfio/vfio_iommu_type1.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/misc/vmw_vmci/vmci_context.c b/drivers/misc/vmw_vmci/vmci_context.c
-index 16695366ec92..9daa52ee63b7 100644
---- a/drivers/misc/vmw_vmci/vmci_context.c
-+++ b/drivers/misc/vmw_vmci/vmci_context.c
-@@ -587,7 +587,7 @@ void vmci_ctx_unset_notify(struct vmci_ctx *context)
- 
- 	if (notify_page) {
- 		kunmap(notify_page);
--		put_page(notify_page);
-+		put_user_page(notify_page);
- 	}
- }
- 
-diff --git a/drivers/misc/vmw_vmci/vmci_queue_pair.c b/drivers/misc/vmw_vmci/vmci_queue_pair.c
-index 8531ae781195..e5434551d0ef 100644
---- a/drivers/misc/vmw_vmci/vmci_queue_pair.c
-+++ b/drivers/misc/vmw_vmci/vmci_queue_pair.c
-@@ -626,15 +626,8 @@ static void qp_release_queue_mutex(struct vmci_queue *queue)
- static void qp_release_pages(struct page **pages,
- 			     u64 num_pages, bool dirty)
+diff --git a/drivers/vfio/vfio_iommu_type1.c b/drivers/vfio/vfio_iommu_type1.c
+index 054391f30fa8..5a5461a14299 100644
+--- a/drivers/vfio/vfio_iommu_type1.c
++++ b/drivers/vfio/vfio_iommu_type1.c
+@@ -320,9 +320,9 @@ static int put_pfn(unsigned long pfn, int prot)
  {
--	int i;
--
--	for (i = 0; i < num_pages; i++) {
--		if (dirty)
--			set_page_dirty(pages[i]);
--
--		put_page(pages[i]);
--		pages[i] = NULL;
--	}
-+	put_user_pages_dirty_lock(pages, num_pages, dirty);
-+	memset(pages, 0, num_pages * sizeof(struct page *));
- }
- 
- /*
+ 	if (!is_invalid_reserved_pfn(pfn)) {
+ 		struct page *page = pfn_to_page(pfn);
+-		if (prot & IOMMU_WRITE)
+-			SetPageDirty(page);
+-		put_page(page);
++		bool dirty = prot & IOMMU_WRITE;
++
++		put_user_pages_dirty_lock(&page, 1, dirty);
+ 		return 1;
+ 	}
+ 	return 0;
+@@ -356,7 +356,7 @@ static int vaddr_get_pfn(struct mm_struct *mm, unsigned long vaddr,
+ 		 */
+ 		if (ret > 0 && vma_is_fsdax(vmas[0])) {
+ 			ret = -EOPNOTSUPP;
+-			put_page(page[0]);
++			put_user_page(page[0]);
+ 		}
+ 	}
+ 	up_read(&mm->mmap_sem);
 -- 
 2.22.0
