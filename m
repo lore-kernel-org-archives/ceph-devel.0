@@ -1,62 +1,81 @@
-From: Juergen Gross <jgross@suse.com>
-Subject: Re: [PATCH 20/34] xen: convert put_page() to
- put_user_page*()
-Date: Fri, 2 Aug 2019 06:36:51 +0200
-Message-ID: <4471e9dc-a315-42c1-0c3c-55ba4eeeb106@suse.com>
+From: John Hubbard <jhubbard@nvidia.com>
+Subject: Re: [PATCH 20/34] xen: convert put_page() to put_user_page*()
+Date: Thu, 1 Aug 2019 22:48:15 -0700
+Message-ID: <d5140833-e9ee-beb5-ff0a-2d13a4fe819f@nvidia.com>
 References: <20190802022005.5117-1-jhubbard@nvidia.com>
  <20190802022005.5117-21-jhubbard@nvidia.com>
+ <4471e9dc-a315-42c1-0c3c-55ba4eeeb106@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-In-Reply-To: <20190802022005.5117-21-jhubbard@nvidia.com>
-Content-Language: de-DE
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: john.hubbard@gmail.com, Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>, Dan Williams <dan.j.williams@intel.com>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, ceph-devel@vger.kernel.org, linux-arm-kernel@list
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <4471e9dc-a315-42c1-0c3c-55ba4eeeb106@suse.com>
+Content-Language: en-US
+Sender: netdev-owner@vger.kernel.org
+To: Juergen Gross <jgross@suse.com>, john.hubbard@gmail.com, Andrew Morton <akpm@linux-foundation.org>
+Cc: devel@driverdev.osuosl.org, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Ira Weiny <ira.weiny@intel.com>, x86@kernel.org, linux-mm@kvack.org, Dave Hansen <dave.hansen@linux.intel.com>, amd-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, devel@lists.orangefs.org, xen-devel@lists.xenproject.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, rds-devel@oss.oracle.com, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, kvm@vger.kernel.org, linux-block@vger.kernel.org, linux-crypto@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gMDIuMDguMTkgMDQ6MTksIGpvaG4uaHViYmFyZEBnbWFpbC5jb20gd3JvdGU6Cj4gRnJvbTog
-Sm9obiBIdWJiYXJkIDxqaHViYmFyZEBudmlkaWEuY29tPgo+IAo+IEZvciBwYWdlcyB0aGF0IHdl
-cmUgcmV0YWluZWQgdmlhIGdldF91c2VyX3BhZ2VzKigpLCByZWxlYXNlIHRob3NlIHBhZ2VzCj4g
-dmlhIHRoZSBuZXcgcHV0X3VzZXJfcGFnZSooKSByb3V0aW5lcywgaW5zdGVhZCBvZiB2aWEgcHV0
-X3BhZ2UoKSBvcgo+IHJlbGVhc2VfcGFnZXMoKS4KPiAKPiBUaGlzIGlzIHBhcnQgYSB0cmVlLXdp
-ZGUgY29udmVyc2lvbiwgYXMgZGVzY3JpYmVkIGluIGNvbW1pdCBmYzFkOGU3Y2NhMmQKPiAoIm1t
-OiBpbnRyb2R1Y2UgcHV0X3VzZXJfcGFnZSooKSwgcGxhY2Vob2xkZXIgdmVyc2lvbnMiKS4KPiAK
-PiBDYzogQm9yaXMgT3N0cm92c2t5IDxib3Jpcy5vc3Ryb3Zza3lAb3JhY2xlLmNvbT4KPiBDYzog
-SnVlcmdlbiBHcm9zcyA8amdyb3NzQHN1c2UuY29tPgo+IENjOiB4ZW4tZGV2ZWxAbGlzdHMueGVu
-cHJvamVjdC5vcmcKPiBTaWduZWQtb2ZmLWJ5OiBKb2huIEh1YmJhcmQgPGpodWJiYXJkQG52aWRp
-YS5jb20+Cj4gLS0tCj4gICBkcml2ZXJzL3hlbi9nbnRkZXYuYyAgfCA1ICstLS0tCj4gICBkcml2
-ZXJzL3hlbi9wcml2Y21kLmMgfCA3ICstLS0tLS0KPiAgIDIgZmlsZXMgY2hhbmdlZCwgMiBpbnNl
-cnRpb25zKCspLCAxMCBkZWxldGlvbnMoLSkKPiAKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy94ZW4v
-Z250ZGV2LmMgYi9kcml2ZXJzL3hlbi9nbnRkZXYuYwo+IGluZGV4IDRjMzM5YzdlNjZlNS4uMjU4
-NmIzZGYyYmI2IDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMveGVuL2dudGRldi5jCj4gKysrIGIvZHJp
-dmVycy94ZW4vZ250ZGV2LmMKPiBAQCAtODY0LDEwICs4NjQsNyBAQCBzdGF0aWMgaW50IGdudGRl
-dl9nZXRfcGFnZShzdHJ1Y3QgZ250ZGV2X2NvcHlfYmF0Y2ggKmJhdGNoLCB2b2lkIF9fdXNlciAq
-dmlydCwKPiAgIAo+ICAgc3RhdGljIHZvaWQgZ250ZGV2X3B1dF9wYWdlcyhzdHJ1Y3QgZ250ZGV2
-X2NvcHlfYmF0Y2ggKmJhdGNoKQo+ICAgewo+IC0JdW5zaWduZWQgaW50IGk7Cj4gLQo+IC0JZm9y
-IChpID0gMDsgaSA8IGJhdGNoLT5ucl9wYWdlczsgaSsrKQo+IC0JCXB1dF9wYWdlKGJhdGNoLT5w
-YWdlc1tpXSk7Cj4gKwlwdXRfdXNlcl9wYWdlcyhiYXRjaC0+cGFnZXMsIGJhdGNoLT5ucl9wYWdl
-cyk7Cj4gICAJYmF0Y2gtPm5yX3BhZ2VzID0gMDsKPiAgIH0KPiAgIAo+IGRpZmYgLS1naXQgYS9k
-cml2ZXJzL3hlbi9wcml2Y21kLmMgYi9kcml2ZXJzL3hlbi9wcml2Y21kLmMKPiBpbmRleCAyZjVj
-ZTcyMzBhNDMuLjI5ZTQ2MWRiZWUyZCAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL3hlbi9wcml2Y21k
-LmMKPiArKysgYi9kcml2ZXJzL3hlbi9wcml2Y21kLmMKPiBAQCAtNjExLDE1ICs2MTEsMTAgQEAg
-c3RhdGljIGludCBsb2NrX3BhZ2VzKAo+ICAgCj4gICBzdGF0aWMgdm9pZCB1bmxvY2tfcGFnZXMo
-c3RydWN0IHBhZ2UgKnBhZ2VzW10sIHVuc2lnbmVkIGludCBucl9wYWdlcykKPiAgIHsKPiAtCXVu
-c2lnbmVkIGludCBpOwo+IC0KPiAgIAlpZiAoIXBhZ2VzKQo+ICAgCQlyZXR1cm47Cj4gICAKPiAt
-CWZvciAoaSA9IDA7IGkgPCBucl9wYWdlczsgaSsrKSB7Cj4gLQkJaWYgKHBhZ2VzW2ldKQo+IC0J
-CQlwdXRfcGFnZShwYWdlc1tpXSk7Cj4gLQl9Cj4gKwlwdXRfdXNlcl9wYWdlcyhwYWdlcywgbnJf
-cGFnZXMpOwoKWW91IGFyZSBub3QgaGFuZGxpbmcgdGhlIGNhc2Ugd2hlcmUgcGFnZXNbaV0gaXMg
-TlVMTCBoZXJlLiBPciBhbSBJCm1pc3NpbmcgYSBwZW5kaW5nIHBhdGNoIHRvIHB1dF91c2VyX3Bh
-Z2VzKCkgaGVyZT8KCgpKdWVyZ2VuCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fCkludGVsLWdmeCBtYWlsaW5nIGxpc3QKSW50ZWwtZ2Z4QGxpc3RzLmZyZWVk
-ZXNrdG9wLm9yZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZv
-L2ludGVsLWdmeA==
+On 8/1/19 9:36 PM, Juergen Gross wrote:
+> On 02.08.19 04:19, john.hubbard@gmail.com wrote:
+>> From: John Hubbard <jhubbard@nvidia.com>
+...
+>> diff --git a/drivers/xen/privcmd.c b/drivers/xen/privcmd.c
+>> index 2f5ce7230a43..29e461dbee2d 100644
+>> --- a/drivers/xen/privcmd.c
+>> +++ b/drivers/xen/privcmd.c
+>> @@ -611,15 +611,10 @@ static int lock_pages(
+>> =C2=A0 static void unlock_pages(struct page *pages[], unsigned int nr_pa=
+ges)
+>> =C2=A0 {
+>> -=C2=A0=C2=A0=C2=A0 unsigned int i;
+>> -
+>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (!pages)
+>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return;
+>> -=C2=A0=C2=A0=C2=A0 for (i =3D 0; i < nr_pages; i++) {
+>> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (pages[i])
+>> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 put_=
+page(pages[i]);
+>> -=C2=A0=C2=A0=C2=A0 }
+>> +=C2=A0=C2=A0=C2=A0 put_user_pages(pages, nr_pages);
+>=20
+> You are not handling the case where pages[i] is NULL here. Or am I
+> missing a pending patch to put_user_pages() here?
+>=20
+
+Hi Juergen,
+
+You are correct--this no longer handles the cases where pages[i]
+is NULL. It's intentional, though possibly wrong. :)
+
+I see that I should have added my standard blurb to this
+commit description. I missed this one, but some of the other patches
+have it. It makes the following, possibly incorrect claim:
+
+"This changes the release code slightly, because each page slot in the
+page_list[] array is no longer checked for NULL. However, that check
+was wrong anyway, because the get_user_pages() pattern of usage here
+never allowed for NULL entries within a range of pinned pages."
+
+The way I've seen these page arrays used with get_user_pages(),
+things are either done single page, or with a contiguous range. So
+unless I'm missing a case where someone is either
+
+a) releasing individual pages within a range (and thus likely messing
+up their count of pages they have), or
+
+b) allocating two gup ranges within the same pages[] array, with a
+gap between the allocations,
+
+...then it should be correct. If so, then I'll add the above blurb
+to this patch's commit description.
+
+If that's not the case (both here, and in 3 or 4 other patches in this
+series, then as you said, I should add NULL checks to put_user_pages()
+and put_user_pages_dirty_lock().
+
+
+thanks,
+--=20
+John Hubbard
+NVIDIA
