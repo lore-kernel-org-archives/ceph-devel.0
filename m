@@ -1,82 +1,40 @@
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Subject: Re: [PATCH 16/34] drivers/tee: convert put_page() to put_user_page*()
-Date: Fri, 2 Aug 2019 08:29:07 +0200
-Message-ID: <CAHUa44G++iiwU62jj7QH=V3sr4z26sf007xrwWLPw6AAeMLAEw@mail.gmail.com>
-References: <20190802022005.5117-1-jhubbard@nvidia.com> <20190802022005.5117-17-jhubbard@nvidia.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH 00/34] put_user_pages(): miscellaneous call sites
+Date: Fri, 2 Aug 2019 10:05:54 +0200
+Message-ID: <20190802080554.GD2332@hirez.programming.kicks-ass.net>
+References: <20190802021653.4882-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190802022005.5117-17-jhubbard@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20190802021653.4882-1-jhubbard@nvidia.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: john.hubbard@gmail.com
-Cc: Andrew Morton <akpm@linux-foundation.org>, Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Dave Hansen <dave.hansen@linux.intel.com>, Ira Weiny <ira.weiny@intel.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, LKML <linux-kernel@vger.kernel.org>, amd-gfx@lists.freedesktop.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, devel@lists.orangefs.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-block@vger.kernel.org, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, linux-fbdev@vger.kerne
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>, Dan Williams <dan.j.williams@intel.com>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?iso-8859-1?B?Suly9G1l?= Glisse <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, ceph-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-nfs@vger.kernel.orgne
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Aug 2, 2019 at 4:20 AM <john.hubbard@gmail.com> wrote:
->
-> From: John Hubbard <jhubbard@nvidia.com>
->
-> For pages that were retained via get_user_pages*(), release those pages
-> via the new put_user_page*() routines, instead of via put_page() or
-> release_pages().
->
+On Thu, Aug 01, 2019 at 07:16:19PM -0700, john.hubbard@gmail.com wrote:
+
 > This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
-> ("mm: introduce put_user_page*(), placeholder versions").
->
-> Cc: Jens Wiklander <jens.wiklander@linaro.org>
-> Signed-off-by: John Hubbard <jhubbard@nvidia.com>
-> ---
->  drivers/tee/tee_shm.c | 10 ++--------
->  1 file changed, 2 insertions(+), 8 deletions(-)
+> ("mm: introduce put_user_page*(), placeholder versions"). That commit
+> has an extensive description of the problem and the planned steps to
+> solve it, but the highlites are:
 
-Acked-by: Jens Wiklander <jens.wiklander@linaro.org>
+That is one horridly mangled Changelog there :-/ It looks like it's
+partially duplicated.
 
-I suppose you're taking this via your own tree or such.
+Anyway; no objections to any of that, but I just wanted to mention that
+there are other problems with long term pinning that haven't been
+mentioned, notably they inhibit compaction.
 
-Thanks,
-Jens
-
->
-> diff --git a/drivers/tee/tee_shm.c b/drivers/tee/tee_shm.c
-> index 2da026fd12c9..c967d0420b67 100644
-> --- a/drivers/tee/tee_shm.c
-> +++ b/drivers/tee/tee_shm.c
-> @@ -31,16 +31,13 @@ static void tee_shm_release(struct tee_shm *shm)
->
->                 poolm->ops->free(poolm, shm);
->         } else if (shm->flags & TEE_SHM_REGISTER) {
-> -               size_t n;
->                 int rc = teedev->desc->ops->shm_unregister(shm->ctx, shm);
->
->                 if (rc)
->                         dev_err(teedev->dev.parent,
->                                 "unregister shm %p failed: %d", shm, rc);
->
-> -               for (n = 0; n < shm->num_pages; n++)
-> -                       put_page(shm->pages[n]);
-> -
-> +               put_user_pages(shm->pages, shm->num_pages);
->                 kfree(shm->pages);
->         }
->
-> @@ -313,16 +310,13 @@ struct tee_shm *tee_shm_register(struct tee_context *ctx, unsigned long addr,
->         return shm;
->  err:
->         if (shm) {
-> -               size_t n;
-> -
->                 if (shm->id >= 0) {
->                         mutex_lock(&teedev->mutex);
->                         idr_remove(&teedev->idr, shm->id);
->                         mutex_unlock(&teedev->mutex);
->                 }
->                 if (shm->pages) {
-> -                       for (n = 0; n < shm->num_pages; n++)
-> -                               put_page(shm->pages[n]);
-> +                       put_user_pages(shm->pages, shm->num_pages);
->                         kfree(shm->pages);
->                 }
->         }
-> --
-> 2.22.0
->
+A long time ago I proposed an interface to mark pages as pinned, such
+that we could run compaction before we actually did the pinning.
