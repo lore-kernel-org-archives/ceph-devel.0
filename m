@@ -1,8 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH v2 19/34] fsl_hypervisor: convert put_page() to
- put_user_page*()
-Date: Sun,  4 Aug 2019 15:49:00 -0700
-Message-ID: <20190804224915.28669-20-jhubbard@nvidia.com>
+Subject: [PATCH v2 17/34] vfio: convert put_page() to put_user_page*()
+Date: Sun,  4 Aug 2019 15:48:58 -0700
+Message-ID: <20190804224915.28669-18-jhubbard@nvidia.com>
 References: <20190804224915.28669-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,7 +18,7 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, Rob Herring <robh@kernel.org>, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, Kees Cook <keescook@chromium.org>, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, linux-arm-kernel@lists.infrade
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, Alex Williamson <alex.williamson@redhat.com>, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, linux-arm-kernel@lists.infradead.org, linux-nfs@vg
 List-Id: ceph-devel.vger.kernel.org
 
 From: John Hubbard <jhubbard@nvidia.com>
@@ -31,36 +30,48 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-This changes the release code slightly, because each page slot in the
-page_list[] array is no longer checked for NULL. However, that check
-was wrong anyway, because the get_user_pages() pattern of usage here
-never allowed for NULL entries within a range of pinned pages.
+Note that this effectively changes the code's behavior in
+qp_release_pages(): it now ultimately calls set_page_dirty_lock(),
+instead of set_page_dirty(). This is probably more accurate.
 
-Cc: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Rob Herring <robh@kernel.org>
+As Christoph Hellwig put it, "set_page_dirty() is only safe if we are
+dealing with a file backed page where we have reference on the inode it
+hangs off." [1]
+
+[1] https://lore.kernel.org/r/20190723153640.GB720@lst.de
+
+Cc: Alex Williamson <alex.williamson@redhat.com>
+Cc: kvm@vger.kernel.org
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- drivers/virt/fsl_hypervisor.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ drivers/vfio/vfio_iommu_type1.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/virt/fsl_hypervisor.c b/drivers/virt/fsl_hypervisor.c
-index 93d5bebf9572..a8f78d572c45 100644
---- a/drivers/virt/fsl_hypervisor.c
-+++ b/drivers/virt/fsl_hypervisor.c
-@@ -292,11 +292,8 @@ static long ioctl_memcpy(struct fsl_hv_ioctl_memcpy __user *p)
- 		virt_to_phys(sg_list), num_pages);
- 
- exit:
--	if (pages) {
--		for (i = 0; i < num_pages; i++)
--			if (pages[i])
--				put_page(pages[i]);
--	}
-+	if (pages)
-+		put_user_pages(pages, num_pages);
- 
- 	kfree(sg_list_unaligned);
- 	kfree(pages);
+diff --git a/drivers/vfio/vfio_iommu_type1.c b/drivers/vfio/vfio_iommu_type1.c
+index 054391f30fa8..5a5461a14299 100644
+--- a/drivers/vfio/vfio_iommu_type1.c
++++ b/drivers/vfio/vfio_iommu_type1.c
+@@ -320,9 +320,9 @@ static int put_pfn(unsigned long pfn, int prot)
+ {
+ 	if (!is_invalid_reserved_pfn(pfn)) {
+ 		struct page *page = pfn_to_page(pfn);
+-		if (prot & IOMMU_WRITE)
+-			SetPageDirty(page);
+-		put_page(page);
++		bool dirty = prot & IOMMU_WRITE;
++
++		put_user_pages_dirty_lock(&page, 1, dirty);
+ 		return 1;
+ 	}
+ 	return 0;
+@@ -356,7 +356,7 @@ static int vaddr_get_pfn(struct mm_struct *mm, unsigned long vaddr,
+ 		 */
+ 		if (ret > 0 && vma_is_fsdax(vmas[0])) {
+ 			ret = -EOPNOTSUPP;
+-			put_page(page[0]);
++			put_user_page(page[0]);
+ 		}
+ 	}
+ 	up_read(&mm->mmap_sem);
 -- 
 2.22.0
