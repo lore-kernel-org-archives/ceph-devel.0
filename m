@@ -1,11 +1,13 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH v2 00/34] put_user_pages(): miscellaneous call sites
-Date: Sun,  4 Aug 2019 15:48:41 -0700
-Message-ID: <20190804224915.28669-1-jhubbard@nvidia.com>
+Subject: [PATCH v2 04/34] x86/kvm: convert put_page() to put_user_page*()
+Date: Sun,  4 Aug 2019 15:48:45 -0700
+Message-ID: <20190804224915.28669-5-jhubbard@nvidia.com>
+References: <20190804224915.28669-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20190804224915.28669-1-jhubbard@nvidia.com>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
@@ -16,167 +18,46 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, linux-arm-kernel@lists.infradead.org, linux-nfs@vger.kernel.org, netdev@vger.kernel.orgLKML <l>
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, =?UTF-8?q?Radim=20Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, "H . Peter Anvin" <hpa@zytor.com>, sparclinux@vger.kernel.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, Joerg Roedel <joro@8bytes.org>, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, Ingo Molnar <mingo@redhat.com>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, linux-rpi-k
 List-Id: ceph-devel.vger.kernel.org
 
-From: John Hubbard <jhubbard@nvidia.com>
-
-Changes since v1:
-
-* 9 out of 34 patches have been reviewed or ack'd or changed:
-    * Picked up Keith's Reviewed-by for patch 26 (gup_benchmark).
-    * Picked up ACKs for patches 3, 10, 15, 16 (ceph, genwqe,
-      staging/vc04_services, drivers/tee).
-
-* Patch 6 (i915): adjusted drivers/gpu/drm/i915/gem/i915_gem_userptr.c to
-  match the latest linux.git: the code has already been fixed in linux.git,
-  as of the latest -rc, to do a set_page_dirty_lock(), instead of
-  set_page_dirty(). So all that it needs now is a conversion to
-  put_user_page(). I've done that in a way (avoiding the changed API call)
-  that allows patch 6 to go up via either Andrew's -mm tree, or the drm
-  tree, just in case. See that patch's comments for slightly more detail.
-
-* Patch 20 (xen): applied Juergen's recommended fix, and speculatively
-  (pending his approval) added his Signed-off-by (also noted in the patch
-  comments).
-
-* Improved patch 31 (NFS) as recommended by Calum Mackay.
-
-* Includes the latest version of patch 1. (Patch 1 has been separately
-  reposted [3], with those updates. And it's included here in order to
-  make this series apply directly to linux.git, as noted in the original
-  cover letter below.)
-
-Cover letter from v1:
-
-These are best characterized as miscellaneous conversions: many (not all)
-call sites that don't involve biovec or iov_iter, nor mm/. It also leaves
-out a few call sites that require some more work. These are mostly pretty
-simple ones.
-
-It's probably best to send all of these via Andrew's -mm tree, assuming
-that there are no significant merge conflicts with ongoing work in other
-trees (which I doubt, given that these are small changes).
-
-These patches apply to the latest linux.git. Patch #1 is also already in
-Andrew's tree, but given the broad non-linux-mm Cc list, I thought it
-would be more convenient to just include that patch here, so that people
-can use linux.git as the base--even though these are probably destined
-for linux-mm.
-
-This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
-("mm: introduce put_user_page*(), placeholder versions"). That commit
-has an extensive description of the problem and the planned steps to
-solve it, but the highlites are:
-
-1) Provide put_user_page*() routines, intended to be used
-for releasing pages that were pinned via get_user_pages*().
-
-2) Convert all of the call sites for get_user_pages*(), to
-invoke put_user_page*(), instead of put_page(). This involves dozens of
-call sites, and will take some time.
-
-3) After (2) is complete, use get_user_pages*() and put_user_page*() to
-implement tracking of these pages. This tracking will be separate from
-the existing struct page refcounting.
-
-4) Use the tracking and identification of these pages, to implement
-special handling (especially in writeback paths) when the pages are
-backed by a filesystem.
-
-And a few references, also from that commit:
-
-[1] https://lwn.net/Articles/774411/ : "DMA and get_user_pages()"
-[2] https://lwn.net/Articles/753027/ : "The Trouble with get_user_pages()"
-
-[3] "mm/gup: add make_dirty arg to put_user_pages_dirty_lock()"
-    https://lore.kernel.org/r/20190804214042.4564-1-jhubbard@nvidia.com
-
-Ira Weiny (1):
-  fs/binfmt_elf: convert put_page() to put_user_page*()
-
-John Hubbard (33):
-  mm/gup: add make_dirty arg to put_user_pages_dirty_lock()
-  net/rds: convert put_page() to put_user_page*()
-  net/ceph: convert put_page() to put_user_page*()
-  x86/kvm: convert put_page() to put_user_page*()
-  drm/etnaviv: convert release_pages() to put_user_pages()
-  drm/i915: convert put_page() to put_user_page*()
-  drm/radeon: convert put_page() to put_user_page*()
-  media/ivtv: convert put_page() to put_user_page*()
-  media/v4l2-core/mm: convert put_page() to put_user_page*()
-  genwqe: convert put_page() to put_user_page*()
-  scif: convert put_page() to put_user_page*()
-  vmci: convert put_page() to put_user_page*()
-  rapidio: convert put_page() to put_user_page*()
-  oradax: convert put_page() to put_user_page*()
-  staging/vc04_services: convert put_page() to put_user_page*()
-  drivers/tee: convert put_page() to put_user_page*()
-  vfio: convert put_page() to put_user_page*()
-  fbdev/pvr2fb: convert put_page() to put_user_page*()
-  fsl_hypervisor: convert put_page() to put_user_page*()
-  fs/exec.c: convert put_page() to put_user_page*()
-  xen: convert put_page() to put_user_page*()
-  orangefs: convert put_page() to put_user_page*()
-  uprobes: convert put_page() to put_user_page*()
-  futex: convert put_page() to put_user_page*()
-  mm/frame_vector.c: convert put_page() to put_user_page*()
-  mm/gup_benchmark.c: convert put_page() to put_user_page*()
-  mm/memory.c: convert put_page() to put_user_page*()
-  mm/madvise.c: convert put_page() to put_user_page*()
-  mm/process_vm_access.c: convert put_page() to put_user_page*()
-  crypt: convert put_page() to put_user_page*()
-  fs/nfs: convert put_page() to put_user_page*()
-  goldfish_pipe: convert put_page() to put_user_page*()
-  kernel/events/core.c: convert put_page() to put_user_page*()
-
- arch/x86/kvm/svm.c                            |   4 +-
- crypto/af_alg.c                               |   7 +-
- drivers/gpu/drm/etnaviv/etnaviv_gem.c         |   4 +-
- drivers/gpu/drm/i915/gem/i915_gem_userptr.c   |   6 +-
- drivers/gpu/drm/radeon/radeon_ttm.c           |   2 +-
- drivers/infiniband/core/umem.c                |   5 +-
- drivers/infiniband/hw/hfi1/user_pages.c       |   5 +-
- drivers/infiniband/hw/qib/qib_user_pages.c    |  13 +-
- drivers/infiniband/hw/usnic/usnic_uiom.c      |   5 +-
- drivers/infiniband/sw/siw/siw_mem.c           |  19 +--
- drivers/media/pci/ivtv/ivtv-udma.c            |  14 +--
- drivers/media/pci/ivtv/ivtv-yuv.c             |  11 +-
- drivers/media/v4l2-core/videobuf-dma-sg.c     |   3 +-
- drivers/misc/genwqe/card_utils.c              |  17 +--
- drivers/misc/mic/scif/scif_rma.c              |  17 ++-
- drivers/misc/vmw_vmci/vmci_context.c          |   2 +-
- drivers/misc/vmw_vmci/vmci_queue_pair.c       |  11 +-
- drivers/platform/goldfish/goldfish_pipe.c     |   9 +-
- drivers/rapidio/devices/rio_mport_cdev.c      |   9 +-
- drivers/sbus/char/oradax.c                    |   2 +-
- .../interface/vchiq_arm/vchiq_2835_arm.c      |  10 +-
- drivers/tee/tee_shm.c                         |  10 +-
- drivers/vfio/vfio_iommu_type1.c               |   8 +-
- drivers/video/fbdev/pvr2fb.c                  |   3 +-
- drivers/virt/fsl_hypervisor.c                 |   7 +-
- drivers/xen/privcmd.c                         |  32 ++---
- fs/binfmt_elf.c                               |   2 +-
- fs/binfmt_elf_fdpic.c                         |   2 +-
- fs/exec.c                                     |   2 +-
- fs/nfs/direct.c                               |  11 +-
- fs/orangefs/orangefs-bufmap.c                 |   7 +-
- include/linux/mm.h                            |   5 +-
- kernel/events/core.c                          |   2 +-
- kernel/events/uprobes.c                       |   6 +-
- kernel/futex.c                                |  10 +-
- mm/frame_vector.c                             |   4 +-
- mm/gup.c                                      | 115 ++++++++----------
- mm/gup_benchmark.c                            |   2 +-
- mm/madvise.c                                  |   2 +-
- mm/memory.c                                   |   2 +-
- mm/process_vm_access.c                        |  18 +--
- net/ceph/pagevec.c                            |   8 +-
- net/rds/info.c                                |   5 +-
- net/rds/message.c                             |   2 +-
- net/rds/rdma.c                                |  15 ++-
- virt/kvm/kvm_main.c                           |   4 +-
- 46 files changed, 164 insertions(+), 295 deletions(-)
-
--- 
-2.22.0
+RnJvbTogSm9obiBIdWJiYXJkIDxqaHViYmFyZEBudmlkaWEuY29tPgoKRm9yIHBhZ2VzIHRoYXQg
+d2VyZSByZXRhaW5lZCB2aWEgZ2V0X3VzZXJfcGFnZXMqKCksIHJlbGVhc2UgdGhvc2UgcGFnZXMK
+dmlhIHRoZSBuZXcgcHV0X3VzZXJfcGFnZSooKSByb3V0aW5lcywgaW5zdGVhZCBvZiB2aWEgcHV0
+X3BhZ2UoKS4KClRoaXMgaXMgcGFydCBhIHRyZWUtd2lkZSBjb252ZXJzaW9uLCBhcyBkZXNjcmli
+ZWQgaW4gY29tbWl0IGZjMWQ4ZTdjY2EyZAooIm1tOiBpbnRyb2R1Y2UgcHV0X3VzZXJfcGFnZSoo
+KSwgcGxhY2Vob2xkZXIgdmVyc2lvbnMiKS4KCkNjOiBKb2VyZyBSb2VkZWwgPGpvcm9AOGJ5dGVz
+Lm9yZz4KQ2M6IFBhb2xvIEJvbnppbmkgPHBib256aW5pQHJlZGhhdC5jb20+CkNjOiBSYWRpbSBL
+csSNbcOhxZkgPHJrcmNtYXJAcmVkaGF0LmNvbT4KQ2M6IFRob21hcyBHbGVpeG5lciA8dGdseEBs
+aW51dHJvbml4LmRlPgpDYzogSW5nbyBNb2xuYXIgPG1pbmdvQHJlZGhhdC5jb20+CkNjOiBILiBQ
+ZXRlciBBbnZpbiA8aHBhQHp5dG9yLmNvbT4KQ2M6IHg4NkBrZXJuZWwub3JnCkNjOiBrdm1Admdl
+ci5rZXJuZWwub3JnClNpZ25lZC1vZmYtYnk6IEpvaG4gSHViYmFyZCA8amh1YmJhcmRAbnZpZGlh
+LmNvbT4KLS0tCiBhcmNoL3g4Ni9rdm0vc3ZtLmMgIHwgNCArKy0tCiB2aXJ0L2t2bS9rdm1fbWFp
+bi5jIHwgNCArKy0tCiAyIGZpbGVzIGNoYW5nZWQsIDQgaW5zZXJ0aW9ucygrKSwgNCBkZWxldGlv
+bnMoLSkKCmRpZmYgLS1naXQgYS9hcmNoL3g4Ni9rdm0vc3ZtLmMgYi9hcmNoL3g4Ni9rdm0vc3Zt
+LmMKaW5kZXggN2VhZmM2OTA3ODYxLi5mZjkzYzkyM2VkMzYgMTAwNjQ0Ci0tLSBhL2FyY2gveDg2
+L2t2bS9zdm0uYworKysgYi9hcmNoL3g4Ni9rdm0vc3ZtLmMKQEAgLTE4MjcsNyArMTgyNyw3IEBA
+IHN0YXRpYyBzdHJ1Y3QgcGFnZSAqKnNldl9waW5fbWVtb3J5KHN0cnVjdCBrdm0gKmt2bSwgdW5z
+aWduZWQgbG9uZyB1YWRkciwKIAogZXJyOgogCWlmIChucGlubmVkID4gMCkKLQkJcmVsZWFzZV9w
+YWdlcyhwYWdlcywgbnBpbm5lZCk7CisJCXB1dF91c2VyX3BhZ2VzKHBhZ2VzLCBucGlubmVkKTsK
+IAogCWt2ZnJlZShwYWdlcyk7CiAJcmV0dXJuIE5VTEw7CkBAIC0xODM4LDcgKzE4MzgsNyBAQCBz
+dGF0aWMgdm9pZCBzZXZfdW5waW5fbWVtb3J5KHN0cnVjdCBrdm0gKmt2bSwgc3RydWN0IHBhZ2Ug
+KipwYWdlcywKIHsKIAlzdHJ1Y3Qga3ZtX3Nldl9pbmZvICpzZXYgPSAmdG9fa3ZtX3N2bShrdm0p
+LT5zZXZfaW5mbzsKIAotCXJlbGVhc2VfcGFnZXMocGFnZXMsIG5wYWdlcyk7CisJcHV0X3VzZXJf
+cGFnZXMocGFnZXMsIG5wYWdlcyk7CiAJa3ZmcmVlKHBhZ2VzKTsKIAlzZXYtPnBhZ2VzX2xvY2tl
+ZCAtPSBucGFnZXM7CiB9CmRpZmYgLS1naXQgYS92aXJ0L2t2bS9rdm1fbWFpbi5jIGIvdmlydC9r
+dm0va3ZtX21haW4uYwppbmRleCA4ODdmM2IwYzJiNjAuLjRiNmE1OTZlYThlOSAxMDA2NDQKLS0t
+IGEvdmlydC9rdm0va3ZtX21haW4uYworKysgYi92aXJ0L2t2bS9rdm1fbWFpbi5jCkBAIC0xNDk5
+LDcgKzE0OTksNyBAQCBzdGF0aWMgaW50IGh2YV90b19wZm5fc2xvdyh1bnNpZ25lZCBsb25nIGFk
+ZHIsIGJvb2wgKmFzeW5jLCBib29sIHdyaXRlX2ZhdWx0LAogCiAJCWlmIChfX2dldF91c2VyX3Bh
+Z2VzX2Zhc3QoYWRkciwgMSwgMSwgJndwYWdlKSA9PSAxKSB7CiAJCQkqd3JpdGFibGUgPSB0cnVl
+OwotCQkJcHV0X3BhZ2UocGFnZSk7CisJCQlwdXRfdXNlcl9wYWdlKHBhZ2UpOwogCQkJcGFnZSA9
+IHdwYWdlOwogCQl9CiAJfQpAQCAtMTgzMSw3ICsxODMxLDcgQEAgRVhQT1JUX1NZTUJPTF9HUEwo
+a3ZtX3JlbGVhc2VfcGFnZV9jbGVhbik7CiB2b2lkIGt2bV9yZWxlYXNlX3Bmbl9jbGVhbihrdm1f
+cGZuX3QgcGZuKQogewogCWlmICghaXNfZXJyb3Jfbm9zbG90X3BmbihwZm4pICYmICFrdm1faXNf
+cmVzZXJ2ZWRfcGZuKHBmbikpCi0JCXB1dF9wYWdlKHBmbl90b19wYWdlKHBmbikpOworCQlwdXRf
+dXNlcl9wYWdlKHBmbl90b19wYWdlKHBmbikpOwogfQogRVhQT1JUX1NZTUJPTF9HUEwoa3ZtX3Jl
+bGVhc2VfcGZuX2NsZWFuKTsKIAotLSAKMi4yMi4wCgpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpkZXZlbCBtYWlsaW5nIGxpc3QKZGV2ZWxAbGludXhkcml2
+ZXJwcm9qZWN0Lm9yZwpodHRwOi8vZHJpdmVyZGV2LmxpbnV4ZHJpdmVycHJvamVjdC5vcmcvbWFp
+bG1hbi9saXN0aW5mby9kcml2ZXJkZXYtZGV2ZWwK
