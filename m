@@ -1,86 +1,65 @@
-From: Rodrigo Vivi <rodrigo.vivi@intel.com>
-Subject: Re: [PATCH v2 06/34] drm/i915: convert put_page() to put_user_page*()
-Date: Mon, 5 Aug 2019 09:53:46 -0700
-Message-ID: <20190805165346.GB25953@intel.com>
-References: <20190804224915.28669-1-jhubbard@nvidia.com>
- <20190804224915.28669-7-jhubbard@nvidia.com>
+From: John Hubbard <jhubbard@nvidia.com>
+Subject: Re: [PATCH 00/12] block/bio, fs: convert put_page() to
+	put_user_page*()
+Date: Mon, 5 Aug 2019 15:54:35 -0700
+Message-ID: <c35aa2bf-c830-9e57-78ca-9ce6fb6cb53b@nvidia.com>
+References: <20190724042518.14363-1-jhubbard@nvidia.com>
+	<20190724061750.GA19397@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190804224915.28669-7-jhubbard@nvidia.com>
-Sender: netdev-owner@vger.kernel.org
-To: john.hubbard@gmail.com
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, David Airlie <airlied@linux.ie>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?iso-8859-1?B?Suly
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20190724061750.GA19397@infradead.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Christoph Hellwig <hch@infradead.org>, john.hubbard@gmail.com
+Cc: kvm@vger.kernel.org, "Michael S . Tsirkin" <mst@redhat.com>, virtualization@lists.linux-foundation.org, linux-mm@kvack.org, Christoph Hellwig <hch@lst.de>, linux-cifs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, linux-rdma@vger.kernel.org, Matthew Wilcox <willy@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, v9fs-developer@lists.sourceforge.net, Eric Van Hensbergen <ericvh@gmail.com>, linux-block@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, ceph-devel@vger.kernel.org, Trond Myklebust <trond.myklebust@hammerspace.com>, Jens Axboe <axboe@kernel.dk>, linux-nfs@vger.kernel.org, netdev@vger.kernel.org, samba-technical@lists.samba.org, LKML <linux-kernel@vger.kernel.org>, "David
+	S . Miller" <davem@davemloft.net>, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Anna Schumaker <anna.schumaker@netapp.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Sun, Aug 04, 2019 at 03:48:47PM -0700, john.hubbard@gmail.com wrote:
-> From: John Hubbard <jhubbard@nvidia.com>
-> 
-> For pages that were retained via get_user_pages*(), release those pages
-> via the new put_user_page*() routines, instead of via put_page() or
-> release_pages().
-> 
-> This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
-> ("mm: introduce put_user_page*(), placeholder versions").
-> 
-> This is a merge-able version of the fix, because it restricts
-> itself to put_user_page() and put_user_pages(), both of which
-> have not changed their APIs. Later, i915_gem_userptr_put_pages()
-> can be simplified to use put_user_pages_dirty_lock().
-
-Thanks for that.
-with this version we won't have any conflict.
-
-Ack for going through mm tree.
-
-> 
-> Cc: Jani Nikula <jani.nikula@linux.intel.com>
-> Cc: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>
-> Cc: Rodrigo Vivi <rodrigo.vivi@intel.com>
-> Cc: David Airlie <airlied@linux.ie>
-> Cc: intel-gfx@lists.freedesktop.org
-> Cc: dri-devel@lists.freedesktop.org
-> Signed-off-by: John Hubbard <jhubbard@nvidia.com>
-> ---
->  drivers/gpu/drm/i915/gem/i915_gem_userptr.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/gpu/drm/i915/gem/i915_gem_userptr.c b/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
-> index 2caa594322bc..76dda2923cf1 100644
-> --- a/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
-> +++ b/drivers/gpu/drm/i915/gem/i915_gem_userptr.c
-> @@ -527,7 +527,7 @@ __i915_gem_userptr_get_pages_worker(struct work_struct *_work)
->  	}
->  	mutex_unlock(&obj->mm.lock);
->  
-> -	release_pages(pvec, pinned);
-> +	put_user_pages(pvec, pinned);
->  	kvfree(pvec);
->  
->  	i915_gem_object_put(obj);
-> @@ -640,7 +640,7 @@ static int i915_gem_userptr_get_pages(struct drm_i915_gem_object *obj)
->  		__i915_gem_userptr_set_active(obj, true);
->  
->  	if (IS_ERR(pages))
-> -		release_pages(pvec, pinned);
-> +		put_user_pages(pvec, pinned);
->  	kvfree(pvec);
->  
->  	return PTR_ERR_OR_ZERO(pages);
-> @@ -675,7 +675,7 @@ i915_gem_userptr_put_pages(struct drm_i915_gem_object *obj,
->  			set_page_dirty_lock(page);
->  
->  		mark_page_accessed(page);
-> -		put_page(page);
-> +		put_user_page(page);
->  	}
->  	obj->mm.dirty = false;
->  
-> -- 
-> 2.22.0
-> 
-> _______________________________________________
-> dri-devel mailing list
-> dri-devel@lists.freedesktop.org
-> https://lists.freedesktop.org/mailman/listinfo/dri-devel
+T24gNy8yMy8xOSAxMToxNyBQTSwgQ2hyaXN0b3BoIEhlbGx3aWcgd3JvdGU6Cj4gT24gVHVlLCBK
+dWwgMjMsIDIwMTkgYXQgMDk6MjU6MDZQTSAtMDcwMCwgam9obi5odWJiYXJkQGdtYWlsLmNvbSB3
+cm90ZToKPj4gKiBTdG9yZSwgaW4gdGhlIGlvdl9pdGVyLCBhICJjYW1lIGZyb20gZ3VwIChnZXRf
+dXNlcl9wYWdlcykiIHBhcmFtZXRlci4KPj4gICBUaGVuLCB1c2UgdGhlIG5ldyBpb3ZfaXRlcl9n
+ZXRfcGFnZXNfdXNlX2d1cCgpIHRvIHJldHJpZXZlIGl0IHdoZW4KPj4gICBpdCBpcyB0aW1lIHRv
+IHJlbGVhc2UgdGhlIHBhZ2VzLiBUaGF0IGFsbG93cyBjaG9vc2luZyBiZXR3ZWVuIHB1dF9wYWdl
+KCkKPj4gICBhbmQgcHV0X3VzZXJfcGFnZSooKS4KPj4KPj4gKiBQYXNzIGluIG9uZSBtb3JlIHBp
+ZWNlIG9mIGluZm9ybWF0aW9uIHRvIGJpb19yZWxlYXNlX3BhZ2VzOiBhICJmcm9tX2d1cCIKPj4g
+ICBwYXJhbWV0ZXIuIFNpbWlsYXIgdXNlIGFzIGFib3ZlLgo+Pgo+PiAqIENoYW5nZSB0aGUgYmxv
+Y2sgbGF5ZXIsIGFuZCBzZXZlcmFsIGZpbGUgc3lzdGVtcywgdG8gdXNlCj4+ICAgcHV0X3VzZXJf
+cGFnZSooKS4KPiAKPiBJIHRoaW5rIHdlIGNhbiBkbyB0aGlzIGluIGEgc2ltcGxlIGFuZCBiZXR0
+ZXIgd2F5LiAgV2UgaGF2ZSA1IElURVJfKgo+IHR5cGVzLiAgT2YgdGhvc2UgSVRFUl9ESVNDQVJE
+IGFzIHRoZSBuYW1lIHN1Z2dlc3RzIG5ldmVyIHVzZXMgcGFnZXMsIHNvCj4gd2UgY2FuIHNraXAg
+aGFuZGxpbmcgaXQuICBJVEVSX1BJUEUgaXMgcmVqZWN0ZWQg0ZZuIHRoZSBkaXJlY3QgSS9PIHBh
+dGgsCj4gd2hpY2ggbGVhdmVzIHVzIHdpdGggdGhyZWUuCj4gCgpIaSBDaHJpc3RvcGgsCgpBcmUg
+eW91IHdvcmtpbmcgb24gYW55dGhpbmcgbGlrZSB0aGlzPyBPciBvbiB0aGUgcHV0X3VzZXJfYnZl
+YygpIGlkZWE/ClBsZWFzZSBsZXQgbWUga25vdywgb3RoZXJ3aXNlIEknbGwgZ28gaW4gYW5kIGlt
+cGxlbWVudCBzb21ldGhpbmcgaGVyZS4KCgp0aGFua3MsCi0tIApKb2huIEh1YmJhcmQKTlZJRElB
+Cgo+IE91dCBvZiB0aG9zZSBJVEVSX0JWRUMgbmVlZHMgYSB1c2VyIHBhZ2UgcmVmZXJlbmNlLCBz
+byB3ZSB3YW50IHRvIGNhbGwKPiBwdXRfdXNlcl9wYWdlKiBvbiBpdC4gIElURVJfQlZFQyBhbHdh
+eXMgYWxyZWFkeSBoYXMgcGFnZSByZWZlcmVuY2UsCj4gd2hpY2ggbWVhbnMgaW4gdGhlIGJsb2Nr
+IGRpcmVjdCBJL08gcGF0aCBwYXRoIHdlIGFscmVhZCBkb24ndCB0YWtlCj4gYSBwYWdlIHJlZmVy
+ZW5jZS4gIFdlIHNob3VsZCBleHRlbnQgdGhhdCBoYW5kbGluZyB0byBhbGwgb3RoZXIgY2FsbHMK
+PiBvZiBpb3ZfaXRlcl9nZXRfcGFnZXMgLyBpb3ZfaXRlcl9nZXRfcGFnZXNfYWxsb2MuICBJIHRo
+aW5rIHdlIHNob3VsZAo+IGp1c3QgcmVqZWN0IElURVJfS1ZFQyBmb3IgZGlyZWN0IEkvTyBhcyB3
+ZWxsIGFzIHdlIGhhdmUgbm8gdXNlcnMgYW5kCj4gaXQgaXMgcmF0aGVyIHBvaW50bGVzcy4gIEFs
+dGVybmF0aXZlbHkgaWYgd2Ugc2VlIGEgdXNlIGZvciBpdCB0aGUKPiBjYWxsZXJzIHNob3VsZCBh
+bHdheXMgaGF2ZSBhIGxpZmUgcGFnZSByZWZlcmVuY2UgYW55d2F5IChvciBtaWdodAo+IGJlIG9u
+IGttYWxsb2MgbWVtb3J5KSwgc28gd2UgcmVhbGx5IHNob3VsZCBub3QgdGFrZSBhIHJlZmVyZW5j
+ZSBlaXRoZXIuCj4gCj4gSW4gb3RoZXIgd29yZHM6ICB0aGUgb25seSB0aW1lIHdlIHNob3VsZCBl
+dmVyIGhhdmUgdG8gcHV0IGEgcGFnZSBpbgo+IHRoaXMgcGF0Y2ggaXMgd2hlbiB0aGV5IGFyZSB1
+c2VyIHBhZ2VzLiAgV2UnbGwgbmVlZCB0byBjbGVhbiB1cAo+IHZhcmlvdXMgYml0cyBvZiBjb2Rl
+IGZvciB0aGF0LCBidXQgdGhhdCBjYW4gYmUgZG9uZSBncmFkdWFsbHkgYmVmb3JlCj4gZXZlbiBn
+ZXR0aW5nIHRvIHRoZSBhY3R1YWwgcHV0X3VzZXJfcGFnZXMgY29udmVyc2lvbi4KPiAKX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KVmlydHVhbGl6YXRpb24g
+bWFpbGluZyBsaXN0ClZpcnR1YWxpemF0aW9uQGxpc3RzLmxpbnV4LWZvdW5kYXRpb24ub3JnCmh0
+dHBzOi8vbGlzdHMubGludXhmb3VuZGF0aW9uLm9yZy9tYWlsbWFuL2xpc3RpbmZvL3ZpcnR1YWxp
+emF0aW9u
