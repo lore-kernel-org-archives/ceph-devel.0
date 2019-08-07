@@ -1,48 +1,99 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH v3 28/41] mm/gup_benchmark.c: convert put_page()
- to put_user_page*()
-Date: Tue,  6 Aug 2019 18:33:27 -0700
-Message-ID: <20190807013340.9706-29-jhubbard@nvidia.com>
+Subject: [PATCH v3 41/41] mm/ksm: convert put_page() to put_user_page*()
+Date: Tue,  6 Aug 2019 18:33:40 -0700
+Message-ID: <20190807013340.9706-42-jhubbard@nvidia.com>
 References: <20190807013340.9706-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xenproject.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190807013340.9706-1-jhubbard@nvidia.com>
-List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xenproject.org>
-List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
-List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xenproject.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, "Michael S . Tsirkin" <mst@redhat.com>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, Keith Busch <keith.busch@intel.com>, linux-mm@kvack.org, sparclinux@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>, Ira Weiny <ira.weiny@intel.com>, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, YueHaibing <yuehaibing@huawei.com>, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@>
+Cc: Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Dave Hansen <dave.hansen@linux.intel.com>, Ira Weiny <ira.weiny@intel.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, LKML <linux-kernel@vger.kernel.org>, amd-gfx@lists.freedesktop.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, devel@lists.orangefs.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org, linux-crypto@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org, linux-mm@kvack.org, linux-nfs@vger.kernel.or
 List-Id: ceph-devel.vger.kernel.org
 
-RnJvbTogSm9obiBIdWJiYXJkIDxqaHViYmFyZEBudmlkaWEuY29tPgoKRm9yIHBhZ2VzIHRoYXQg
-d2VyZSByZXRhaW5lZCB2aWEgZ2V0X3VzZXJfcGFnZXMqKCksIHJlbGVhc2UgdGhvc2UgcGFnZXMK
-dmlhIHRoZSBuZXcgcHV0X3VzZXJfcGFnZSooKSByb3V0aW5lcywgaW5zdGVhZCBvZiB2aWEgcHV0
-X3BhZ2UoKSBvcgpyZWxlYXNlX3BhZ2VzKCkuCgpUaGlzIGlzIHBhcnQgYSB0cmVlLXdpZGUgY29u
-dmVyc2lvbiwgYXMgZGVzY3JpYmVkIGluIGNvbW1pdCBmYzFkOGU3Y2NhMmQKKCJtbTogaW50cm9k
-dWNlIHB1dF91c2VyX3BhZ2UqKCksIHBsYWNlaG9sZGVyIHZlcnNpb25zIikuCgpSZXZpZXdlZC1i
-eTogS2VpdGggQnVzY2ggPGtlaXRoLmJ1c2NoQGludGVsLmNvbT4KCkNjOiBEYW4gQ2FycGVudGVy
-IDxkYW4uY2FycGVudGVyQG9yYWNsZS5jb20+CkNjOiBHcmVnIEtyb2FoLUhhcnRtYW4gPGdyZWdr
-aEBsaW51eGZvdW5kYXRpb24ub3JnPgpDYzogS2VpdGggQnVzY2ggPGtlaXRoLmJ1c2NoQGludGVs
-LmNvbT4KQ2M6IEtpcmlsbCBBLiBTaHV0ZW1vdiA8a2lyaWxsLnNodXRlbW92QGxpbnV4LmludGVs
-LmNvbT4KQ2M6IE1pY2hhZWwgUy4gVHNpcmtpbiA8bXN0QHJlZGhhdC5jb20+CkNjOiBZdWVIYWli
-aW5nIDx5dWVoYWliaW5nQGh1YXdlaS5jb20+ClNpZ25lZC1vZmYtYnk6IEpvaG4gSHViYmFyZCA8
-amh1YmJhcmRAbnZpZGlhLmNvbT4KLS0tCiBtbS9ndXBfYmVuY2htYXJrLmMgfCAyICstCiAxIGZp
-bGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkKCmRpZmYgLS1naXQgYS9t
-bS9ndXBfYmVuY2htYXJrLmMgYi9tbS9ndXBfYmVuY2htYXJrLmMKaW5kZXggN2RkNjAyZDdmOGRi
-Li41MTVhYzhlZWI2ZWUgMTAwNjQ0Ci0tLSBhL21tL2d1cF9iZW5jaG1hcmsuYworKysgYi9tbS9n
-dXBfYmVuY2htYXJrLmMKQEAgLTc5LDcgKzc5LDcgQEAgc3RhdGljIGludCBfX2d1cF9iZW5jaG1h
-cmtfaW9jdGwodW5zaWduZWQgaW50IGNtZCwKIAlmb3IgKGkgPSAwOyBpIDwgbnJfcGFnZXM7IGkr
-KykgewogCQlpZiAoIXBhZ2VzW2ldKQogCQkJYnJlYWs7Ci0JCXB1dF9wYWdlKHBhZ2VzW2ldKTsK
-KwkJcHV0X3VzZXJfcGFnZShwYWdlc1tpXSk7CiAJfQogCWVuZF90aW1lID0ga3RpbWVfZ2V0KCk7
-CiAJZ3VwLT5wdXRfZGVsdGFfdXNlYyA9IGt0aW1lX3VzX2RlbHRhKGVuZF90aW1lLCBzdGFydF90
-aW1lKTsKLS0gCjIuMjIuMAoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QKWGVuLWRldmVsQGxpc3RzLnhlbnByb2pl
-Y3Qub3JnCmh0dHBzOi8vbGlzdHMueGVucHJvamVjdC5vcmcvbWFpbG1hbi9saXN0aW5mby94ZW4t
-ZGV2ZWw=
+From: John Hubbard <jhubbard@nvidia.com>
+
+For pages that were retained via get_user_pages*(), release those pages
+via the new put_user_page*() routines, instead of via put_page() or
+release_pages().
+
+This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
+("mm: introduce put_user_page*(), placeholder versions").
+
+Cc: Dan Williams <dan.j.williams@intel.com>
+Cc: Daniel Black <daniel@linux.ibm.com>
+Cc: Jan Kara <jack@suse.cz>
+Cc: Jérôme Glisse <jglisse@redhat.com>
+Cc: Matthew Wilcox <willy@infradead.org>
+Cc: Mike Kravetz <mike.kravetz@oracle.com>
+Signed-off-by: John Hubbard <jhubbard@nvidia.com>
+---
+ mm/ksm.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/mm/ksm.c b/mm/ksm.c
+index 3dc4346411e4..e10ee4d5fdd8 100644
+--- a/mm/ksm.c
++++ b/mm/ksm.c
+@@ -456,7 +456,7 @@ static inline bool ksm_test_exit(struct mm_struct *mm)
+  * We use break_ksm to break COW on a ksm page: it's a stripped down
+  *
+  *	if (get_user_pages(addr, 1, 1, 1, &page, NULL) == 1)
+- *		put_page(page);
++ *		put_user_page(page);
+  *
+  * but taking great care only to touch a ksm page, in a VM_MERGEABLE vma,
+  * in case the application has unmapped and remapped mm,addr meanwhile.
+@@ -483,7 +483,7 @@ static int break_ksm(struct vm_area_struct *vma, unsigned long addr)
+ 					FAULT_FLAG_WRITE | FAULT_FLAG_REMOTE);
+ 		else
+ 			ret = VM_FAULT_WRITE;
+-		put_page(page);
++		put_user_page(page);
+ 	} while (!(ret & (VM_FAULT_WRITE | VM_FAULT_SIGBUS | VM_FAULT_SIGSEGV | VM_FAULT_OOM)));
+ 	/*
+ 	 * We must loop because handle_mm_fault() may back out if there's
+@@ -568,7 +568,7 @@ static struct page *get_mergeable_page(struct rmap_item *rmap_item)
+ 		flush_anon_page(vma, page, addr);
+ 		flush_dcache_page(page);
+ 	} else {
+-		put_page(page);
++		put_user_page(page);
+ out:
+ 		page = NULL;
+ 	}
+@@ -1974,10 +1974,10 @@ struct rmap_item *unstable_tree_search_insert(struct rmap_item *rmap_item,
+ 
+ 		parent = *new;
+ 		if (ret < 0) {
+-			put_page(tree_page);
++			put_user_page(tree_page);
+ 			new = &parent->rb_left;
+ 		} else if (ret > 0) {
+-			put_page(tree_page);
++			put_user_page(tree_page);
+ 			new = &parent->rb_right;
+ 		} else if (!ksm_merge_across_nodes &&
+ 			   page_to_nid(tree_page) != nid) {
+@@ -1986,7 +1986,7 @@ struct rmap_item *unstable_tree_search_insert(struct rmap_item *rmap_item,
+ 			 * it will be flushed out and put in the right unstable
+ 			 * tree next time: only merge with it when across_nodes.
+ 			 */
+-			put_page(tree_page);
++			put_user_page(tree_page);
+ 			return NULL;
+ 		} else {
+ 			*tree_pagep = tree_page;
+@@ -2328,7 +2328,7 @@ static struct rmap_item *scan_get_next_rmap_item(struct page **page)
+ 							&rmap_item->rmap_list;
+ 					ksm_scan.address += PAGE_SIZE;
+ 				} else
+-					put_page(*page);
++					put_user_page(*page);
+ 				up_read(&mm->mmap_sem);
+ 				return rmap_item;
+ 			}
+-- 
+2.22.0
