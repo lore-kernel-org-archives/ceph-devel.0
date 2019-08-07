@@ -1,14 +1,13 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH v3 41/41] mm/ksm: convert put_page() to put_user_page*()
-Date: Tue,  6 Aug 2019 18:33:40 -0700
-Message-ID: <20190807013340.9706-42-jhubbard@nvidia.com>
+Subject: [PATCH v3 32/41] crypt: convert put_page() to put_user_page*()
+Date: Tue,  6 Aug 2019 18:33:31 -0700
+Message-ID: <20190807013340.9706-33-jhubbard@nvidia.com>
 References: <20190807013340.9706-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <20190807013340.9706-1-jhubbard@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: netdev-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Christoph Hellwig <hch@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Dave Hansen <dave.hansen@linux.intel.com>, Ira Weiny <ira.weiny@intel.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, =?UTF-8?q?J=C3=A9r=C3=B4me=20Glisse?= <jglisse@redhat.com>, LKML <linux-kernel@vger.kernel.org>, amd-gfx@lists.freedesktop.org, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, devel@lists.orangefs.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org, linux-crypto@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org, linux-mm@kvack.org, linux-nfs@vger.kernel.or
 List-Id: ceph-devel.vger.kernel.org
@@ -22,78 +21,38 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-Cc: Dan Williams <dan.j.williams@intel.com>
-Cc: Daniel Black <daniel@linux.ibm.com>
-Cc: Jan Kara <jack@suse.cz>
-Cc: Jérôme Glisse <jglisse@redhat.com>
-Cc: Matthew Wilcox <willy@infradead.org>
-Cc: Mike Kravetz <mike.kravetz@oracle.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: David S. Miller <davem@davemloft.net>
+Cc: linux-crypto@vger.kernel.org
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- mm/ksm.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ crypto/af_alg.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/mm/ksm.c b/mm/ksm.c
-index 3dc4346411e4..e10ee4d5fdd8 100644
---- a/mm/ksm.c
-+++ b/mm/ksm.c
-@@ -456,7 +456,7 @@ static inline bool ksm_test_exit(struct mm_struct *mm)
-  * We use break_ksm to break COW on a ksm page: it's a stripped down
-  *
-  *	if (get_user_pages(addr, 1, 1, 1, &page, NULL) == 1)
-- *		put_page(page);
-+ *		put_user_page(page);
-  *
-  * but taking great care only to touch a ksm page, in a VM_MERGEABLE vma,
-  * in case the application has unmapped and remapped mm,addr meanwhile.
-@@ -483,7 +483,7 @@ static int break_ksm(struct vm_area_struct *vma, unsigned long addr)
- 					FAULT_FLAG_WRITE | FAULT_FLAG_REMOTE);
- 		else
- 			ret = VM_FAULT_WRITE;
--		put_page(page);
-+		put_user_page(page);
- 	} while (!(ret & (VM_FAULT_WRITE | VM_FAULT_SIGBUS | VM_FAULT_SIGSEGV | VM_FAULT_OOM)));
- 	/*
- 	 * We must loop because handle_mm_fault() may back out if there's
-@@ -568,7 +568,7 @@ static struct page *get_mergeable_page(struct rmap_item *rmap_item)
- 		flush_anon_page(vma, page, addr);
- 		flush_dcache_page(page);
- 	} else {
--		put_page(page);
-+		put_user_page(page);
- out:
- 		page = NULL;
- 	}
-@@ -1974,10 +1974,10 @@ struct rmap_item *unstable_tree_search_insert(struct rmap_item *rmap_item,
+diff --git a/crypto/af_alg.c b/crypto/af_alg.c
+index 879cf23f7489..edd358ea64da 100644
+--- a/crypto/af_alg.c
++++ b/crypto/af_alg.c
+@@ -428,10 +428,7 @@ static void af_alg_link_sg(struct af_alg_sgl *sgl_prev,
  
- 		parent = *new;
- 		if (ret < 0) {
--			put_page(tree_page);
-+			put_user_page(tree_page);
- 			new = &parent->rb_left;
- 		} else if (ret > 0) {
--			put_page(tree_page);
-+			put_user_page(tree_page);
- 			new = &parent->rb_right;
- 		} else if (!ksm_merge_across_nodes &&
- 			   page_to_nid(tree_page) != nid) {
-@@ -1986,7 +1986,7 @@ struct rmap_item *unstable_tree_search_insert(struct rmap_item *rmap_item,
- 			 * it will be flushed out and put in the right unstable
- 			 * tree next time: only merge with it when across_nodes.
- 			 */
--			put_page(tree_page);
-+			put_user_page(tree_page);
- 			return NULL;
- 		} else {
- 			*tree_pagep = tree_page;
-@@ -2328,7 +2328,7 @@ static struct rmap_item *scan_get_next_rmap_item(struct page **page)
- 							&rmap_item->rmap_list;
- 					ksm_scan.address += PAGE_SIZE;
- 				} else
--					put_page(*page);
-+					put_user_page(*page);
- 				up_read(&mm->mmap_sem);
- 				return rmap_item;
- 			}
+ void af_alg_free_sg(struct af_alg_sgl *sgl)
+ {
+-	int i;
+-
+-	for (i = 0; i < sgl->npages; i++)
+-		put_page(sgl->pages[i]);
++	put_user_pages(sgl->pages, sgl->npages);
+ }
+ EXPORT_SYMBOL_GPL(af_alg_free_sg);
+ 
+@@ -668,7 +665,7 @@ static void af_alg_free_areq_sgls(struct af_alg_async_req *areq)
+ 		for_each_sg(tsgl, sg, areq->tsgl_entries, i) {
+ 			if (!sg_page(sg))
+ 				continue;
+-			put_page(sg_page(sg));
++			put_user_page(sg_page(sg));
+ 		}
+ 
+ 		sock_kfree_s(sk, tsgl, areq->tsgl_entries * sizeof(*tsgl));
 -- 
 2.22.0
