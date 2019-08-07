@@ -1,7 +1,7 @@
 From: john.hubbard@gmail.com
-Subject: [PATCH v3 11/41] media/v4l2-core/mm: convert put_page() to put_user_page*()
-Date: Tue,  6 Aug 2019 18:33:10 -0700
-Message-ID: <20190807013340.9706-12-jhubbard@nvidia.com>
+Subject: [PATCH v3 13/41] scif: convert put_page() to put_user_page*()
+Date: Tue,  6 Aug 2019 18:33:12 -0700
+Message-ID: <20190807013340.9706-14-jhubbard@nvidia.com>
 References: <20190807013340.9706-1-jhubbard@nvidia.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -21,33 +21,54 @@ release_pages().
 This is part a tree-wide conversion, as described in commit fc1d8e7cca2d
 ("mm: introduce put_user_page*(), placeholder versions").
 
-Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Hans Verkuil <hans.verkuil@cisco.com>
-Cc: Sakari Ailus <sakari.ailus@linux.intel.com>
-Cc: Jan Kara <jack@suse.cz>
+Cc: Sudeep Dutt <sudeep.dutt@intel.com>
+Cc: Ashutosh Dixit <ashutosh.dixit@intel.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Joerg Roedel <jroedel@suse.de>
 Cc: Robin Murphy <robin.murphy@arm.com>
-Cc: Souptick Joarder <jrdr.linux@gmail.com>
-Cc: Dan Williams <dan.j.williams@intel.com>
-Cc: linux-media@vger.kernel.org
+Cc: Zhen Lei <thunder.leizhen@huawei.com>
 Signed-off-by: John Hubbard <jhubbard@nvidia.com>
 ---
- drivers/media/v4l2-core/videobuf-dma-sg.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/misc/mic/scif/scif_rma.c | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/media/v4l2-core/videobuf-dma-sg.c b/drivers/media/v4l2-core/videobuf-dma-sg.c
-index 66a6c6c236a7..d6eeb437ec19 100644
---- a/drivers/media/v4l2-core/videobuf-dma-sg.c
-+++ b/drivers/media/v4l2-core/videobuf-dma-sg.c
-@@ -349,8 +349,7 @@ int videobuf_dma_free(struct videobuf_dmabuf *dma)
- 	BUG_ON(dma->sglen);
+diff --git a/drivers/misc/mic/scif/scif_rma.c b/drivers/misc/mic/scif/scif_rma.c
+index 01e27682ea30..d84ed9466920 100644
+--- a/drivers/misc/mic/scif/scif_rma.c
++++ b/drivers/misc/mic/scif/scif_rma.c
+@@ -113,13 +113,14 @@ static int scif_destroy_pinned_pages(struct scif_pinned_pages *pin)
+ 	int writeable = pin->prot & SCIF_PROT_WRITE;
+ 	int kernel = SCIF_MAP_KERNEL & pin->map_flags;
  
- 	if (dma->pages) {
--		for (i = 0; i < dma->nr_pages; i++)
--			put_page(dma->pages[i]);
-+		put_user_pages(dma->pages, dma->nr_pages);
- 		kfree(dma->pages);
- 		dma->pages = NULL;
- 	}
+-	for (j = 0; j < pin->nr_pages; j++) {
+-		if (pin->pages[j] && !kernel) {
++	if (kernel) {
++		for (j = 0; j < pin->nr_pages; j++) {
+ 			if (writeable)
+-				SetPageDirty(pin->pages[j]);
++				set_page_dirty_lock(pin->pages[j]);
+ 			put_page(pin->pages[j]);
+ 		}
+-	}
++	} else
++		put_user_pages_dirty_lock(pin->pages, pin->nr_pages, writeable);
+ 
+ 	scif_free(pin->pages,
+ 		  pin->nr_pages * sizeof(*pin->pages));
+@@ -1385,11 +1386,9 @@ int __scif_pin_pages(void *addr, size_t len, int *out_prot,
+ 				if (ulimit)
+ 					__scif_dec_pinned_vm_lock(mm, nr_pages);
+ 				/* Roll back any pinned pages */
+-				for (i = 0; i < pinned_pages->nr_pages; i++) {
+-					if (pinned_pages->pages[i])
+-						put_page(
+-						pinned_pages->pages[i]);
+-				}
++				put_user_pages(pinned_pages->pages,
++					       pinned_pages->nr_pages);
++
+ 				prot &= ~SCIF_PROT_WRITE;
+ 				try_upgrade = false;
+ 				goto retry;
 -- 
 2.22.0
