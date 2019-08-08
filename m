@@ -1,43 +1,146 @@
-From: Michael Ellerman <mpe@ellerman.id.au>
-Subject: Re: [PATCH v3 38/41] powerpc: convert put_page() to
- put_user_page*()
-Date: Thu, 08 Aug 2019 15:42:34 +1000
-Message-ID: <87k1botdpx.fsf@concordia.ellerman.id.au>
-References: <20190807013340.9706-1-jhubbard@nvidia.com>
- <20190807013340.9706-39-jhubbard@nvidia.com>
+From: Chuhong Yuan <hslester96@gmail.com>
+Subject: [PATCH 2/3] rbd: Use refcount_t for refcount
+Date: Thu,  8 Aug 2019 21:10:48 +0800
+Message-ID: <20190808131048.24695-1-hslester96@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xenproject.org>
-In-Reply-To: <20190807013340.9706-39-jhubbard@nvidia.com>
-List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xenproject.org>
-List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
-List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xenproject.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
-To: john.hubbard@gmail.com, Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, sparclinux@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@lst.de>, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, John Hubbard <jhubbard@nvidia.com>, intel-gfx@lists.freedesktop.org, linux-block@vger.kernel.org, =?utf-8?B?SsOpcsO0?= =?utf-8?B?bWU=?= Glisse <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, Chuhong Yuan <hslester96@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
-SGkgSm9obiwKCmpvaG4uaHViYmFyZEBnbWFpbC5jb20gd3JpdGVzOgo+IGRpZmYgLS1naXQgYS9h
-cmNoL3Bvd2VycGMvbW0vYm9vazNzNjQvaW9tbXVfYXBpLmMgYi9hcmNoL3Bvd2VycGMvbW0vYm9v
-azNzNjQvaW9tbXVfYXBpLmMKPiBpbmRleCBiMDU2Y2FlMzM4OGIuLmUxMjYxOTNiYTI5NSAxMDA2
-NDQKPiAtLS0gYS9hcmNoL3Bvd2VycGMvbW0vYm9vazNzNjQvaW9tbXVfYXBpLmMKPiArKysgYi9h
-cmNoL3Bvd2VycGMvbW0vYm9vazNzNjQvaW9tbXVfYXBpLmMKPiBAQCAtMjAzLDYgKzIwMiw3IEBA
-IHN0YXRpYyB2b2lkIG1tX2lvbW11X3VucGluKHN0cnVjdCBtbV9pb21tdV90YWJsZV9ncm91cF9t
-ZW1fdCAqbWVtKQo+ICB7Cj4gIAlsb25nIGk7Cj4gIAlzdHJ1Y3QgcGFnZSAqcGFnZSA9IE5VTEw7
-Cj4gKwlib29sIGRpcnR5ID0gZmFsc2U7CgpJIGRvbid0IHRoaW5rIHlvdSBuZWVkIHRoYXQgaW5p
-dGlhbGlzYXRpb24gZG8geW91PwoKPiAgCWlmICghbWVtLT5ocGFzKQo+ICAJCXJldHVybjsKPiBA
-QCAtMjE1LDEwICsyMTUsOSBAQCBzdGF0aWMgdm9pZCBtbV9pb21tdV91bnBpbihzdHJ1Y3QgbW1f
-aW9tbXVfdGFibGVfZ3JvdXBfbWVtX3QgKm1lbSkKPiAgCQlpZiAoIXBhZ2UpCj4gIAkJCWNvbnRp
-bnVlOwo+ICAKPiAtCQlpZiAobWVtLT5ocGFzW2ldICYgTU1fSU9NTVVfVEFCTEVfR1JPVVBfUEFH
-RV9ESVJUWSkKPiAtCQkJU2V0UGFnZURpcnR5KHBhZ2UpOwo+ICsJCWRpcnR5ID0gbWVtLT5ocGFz
-W2ldICYgTU1fSU9NTVVfVEFCTEVfR1JPVVBfUEFHRV9ESVJUWTsKPiAtCQlwdXRfcGFnZShwYWdl
-KTsKPiArCQlwdXRfdXNlcl9wYWdlc19kaXJ0eV9sb2NrKCZwYWdlLCAxLCBkaXJ0eSk7Cj4gIAkJ
-bWVtLT5ocGFzW2ldID0gMDsKPiAgCX0KPiAgfQoKY2hlZXJzCgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0Clhlbi1k
-ZXZlbEBsaXN0cy54ZW5wcm9qZWN0Lm9yZwpodHRwczovL2xpc3RzLnhlbnByb2plY3Qub3JnL21h
-aWxtYW4vbGlzdGluZm8veGVuLWRldmVs
+Reference counters are preferred to use refcount_t instead of
+atomic_t.
+This is because the implementation of refcount_t can prevent
+overflows and detect possible use-after-free.
+So convert atomic_t ref counters to refcount_t.
+
+Since refcount_() APIs have checks for overflow and use-after-free,
+the inc/dec_return_safe functions and the warnings are redundant
+now. Remove them.
+
+Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
+---
+ drivers/block/rbd.c | 57 ++++++++-------------------------------------
+ 1 file changed, 10 insertions(+), 47 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 3327192bb71f..74d2dddbe108 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -46,44 +46,12 @@
+ #include <linux/slab.h>
+ #include <linux/idr.h>
+ #include <linux/workqueue.h>
++#include <linux/refcount.h>
+ 
+ #include "rbd_types.h"
+ 
+ #define RBD_DEBUG	/* Activate rbd_assert() calls */
+ 
+-/*
+- * Increment the given counter and return its updated value.
+- * If the counter is already 0 it will not be incremented.
+- * If the counter is already at its maximum value returns
+- * -EINVAL without updating it.
+- */
+-static int atomic_inc_return_safe(atomic_t *v)
+-{
+-	unsigned int counter;
+-
+-	counter = (unsigned int)atomic_fetch_add_unless(v, 1, 0);
+-	if (counter <= (unsigned int)INT_MAX)
+-		return (int)counter;
+-
+-	atomic_dec(v);
+-
+-	return -EINVAL;
+-}
+-
+-/* Decrement the counter.  Return the resulting value, or -EINVAL */
+-static int atomic_dec_return_safe(atomic_t *v)
+-{
+-	int counter;
+-
+-	counter = atomic_dec_return(v);
+-	if (counter >= 0)
+-		return counter;
+-
+-	atomic_inc(v);
+-
+-	return -EINVAL;
+-}
+-
+ #define RBD_DRV_NAME "rbd"
+ 
+ #define RBD_MINORS_PER_MAJOR		256
+@@ -438,7 +406,7 @@ struct rbd_device {
+ 
+ 	struct rbd_spec		*parent_spec;
+ 	u64			parent_overlap;
+-	atomic_t		parent_ref;
++	refcount_t		parent_ref;
+ 	struct rbd_device	*parent;
+ 
+ 	/* Block layer tags. */
+@@ -1680,21 +1648,19 @@ static void rbd_dev_unparent(struct rbd_device *rbd_dev)
+  */
+ static void rbd_dev_parent_put(struct rbd_device *rbd_dev)
+ {
+-	int counter;
++	bool is_dec_to_zero;
+ 
+ 	if (!rbd_dev->parent_spec)
+ 		return;
+ 
+-	counter = atomic_dec_return_safe(&rbd_dev->parent_ref);
+-	if (counter > 0)
++	is_dec_to_zero = refcount_dec_and_test_checked(&rbd_dev->parent_ref);
++	if (!is_dec_to_zero)
+ 		return;
+ 
+ 	/* Last reference; clean up parent data structures */
+ 
+-	if (!counter)
++	if (is_dec_to_zero)
+ 		rbd_dev_unparent(rbd_dev);
+-	else
+-		rbd_warn(rbd_dev, "parent reference underflow");
+ }
+ 
+ /*
+@@ -1707,20 +1673,17 @@ static void rbd_dev_parent_put(struct rbd_device *rbd_dev)
+  */
+ static bool rbd_dev_parent_get(struct rbd_device *rbd_dev)
+ {
+-	int counter = 0;
++	bool is_inc_suc = false;
+ 
+ 	if (!rbd_dev->parent_spec)
+ 		return false;
+ 
+ 	down_read(&rbd_dev->header_rwsem);
+ 	if (rbd_dev->parent_overlap)
+-		counter = atomic_inc_return_safe(&rbd_dev->parent_ref);
++		is_inc_suc = refcount_inc_not_zero_checked(&rbd_dev->parent_ref);
+ 	up_read(&rbd_dev->header_rwsem);
+ 
+-	if (counter < 0)
+-		rbd_warn(rbd_dev, "parent reference overflow");
+-
+-	return counter > 0;
++	return is_inc_suc;
+ }
+ 
+ /*
+@@ -6823,7 +6786,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+ 		goto out_err;
+ 
+ 	rbd_dev->parent = parent;
+-	atomic_set(&rbd_dev->parent_ref, 1);
++	refcount_set(&rbd_dev->parent_ref, 1);
+ 	return 0;
+ 
+ out_err:
+-- 
+2.20.1
