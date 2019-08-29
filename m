@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 26/27] ceph: fix buffer free while holding i_ceph_lock in fill_inode()
-Date: Thu, 29 Aug 2019 14:16:52 -0400
-Message-ID: <20190829181655.8741-26-sashal@kernel.org>
-References: <20190829181655.8741-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 42/45] ceph: fix buffer free while holding i_ceph_lock in fill_inode()
+Date: Thu, 29 Aug 2019 14:15:42 -0400
+Message-ID: <20190829181547.8280-42-sashal@kernel.org>
+References: <20190829181547.8280-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829181655.8741-1-sashal@kernel.org>
+In-Reply-To: <20190829181547.8280-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
@@ -62,18 +62,18 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index f2b722f0df5d0..9bda8c7a80a05 100644
+index 3e518c2ae2bf9..11f19432a74c4 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -730,6 +730,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
- 	int issued = 0, implemented, new_issued;
- 	struct timespec mtime, atime, ctime;
+@@ -742,6 +742,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	int issued, new_issued, info_caps;
+ 	struct timespec64 mtime, atime, ctime;
  	struct ceph_buffer *xattr_blob = NULL;
 +	struct ceph_buffer *old_blob = NULL;
  	struct ceph_string *pool_ns = NULL;
  	struct ceph_cap *new_cap = NULL;
  	int err = 0;
-@@ -847,7 +848,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+@@ -878,7 +879,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
  	if ((ci->i_xattrs.version == 0 || !(issued & CEPH_CAP_XATTR_EXCL))  &&
  	    le64_to_cpu(info->xattr_version) > ci->i_xattrs.version) {
  		if (ci->i_xattrs.blob)
@@ -82,7 +82,7 @@ index f2b722f0df5d0..9bda8c7a80a05 100644
  		ci->i_xattrs.blob = xattr_blob;
  		if (xattr_blob)
  			memcpy(ci->i_xattrs.blob->vec.iov_base,
-@@ -993,8 +994,8 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+@@ -1017,8 +1018,8 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
  out:
  	if (new_cap)
  		ceph_put_cap(mdsc, new_cap);
