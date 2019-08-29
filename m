@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 24/27] ceph: fix buffer free while holding i_ceph_lock in __ceph_setxattr()
-Date: Thu, 29 Aug 2019 14:16:50 -0400
-Message-ID: <20190829181655.8741-24-sashal@kernel.org>
-References: <20190829181655.8741-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 14/15] ceph: fix buffer free while holding i_ceph_lock in __ceph_setxattr()
+Date: Thu, 29 Aug 2019 14:18:01 -0400
+Message-ID: <20190829181802.9619-14-sashal@kernel.org>
+References: <20190829181802.9619-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829181655.8741-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190829181802.9619-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
@@ -60,18 +60,18 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 0376db8a74f85..932c6cdc22d66 100644
+index b24275ef97f74..22e5f3432abbf 100644
 --- a/fs/ceph/xattr.c
 +++ b/fs/ceph/xattr.c
-@@ -955,6 +955,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+@@ -916,6 +916,7 @@ int __ceph_setxattr(struct dentry *dentry, const char *name,
  	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_client(dentry->d_sb)->mdsc;
  	struct ceph_cap_flush *prealloc_cf = NULL;
 +	struct ceph_buffer *old_blob = NULL;
  	int issued;
  	int err;
  	int dirty = 0;
-@@ -1023,13 +1024,15 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+@@ -984,13 +985,15 @@ int __ceph_setxattr(struct dentry *dentry, const char *name,
  		struct ceph_buffer *blob;
  
  		spin_unlock(&ci->i_ceph_lock);
@@ -89,7 +89,7 @@ index 0376db8a74f85..932c6cdc22d66 100644
  		ci->i_xattrs.prealloc_blob = blob;
  		goto retry;
  	}
-@@ -1045,6 +1048,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+@@ -1006,6 +1009,7 @@ int __ceph_setxattr(struct dentry *dentry, const char *name,
  	}
  
  	spin_unlock(&ci->i_ceph_lock);
