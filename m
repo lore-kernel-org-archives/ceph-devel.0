@@ -1,47 +1,125 @@
-From: Mark Salyzyn via Linux-f2fs-devel
- <linux-f2fs-devel@lists.sourceforge.net>
-Subject: Re: [PATCH v8] Add flags option to get xattr method
- paired to __vfs_getxattr
-Date: Wed, 28 Aug 2019 07:40:15 -0700
-Message-ID: <5dd09a38-fffb-36f2-505b-be2ddf6bb750@android.com>
-References: <20190827150544.151031-1-salyzyn@android.com>
- <20190828142423.GA1955@infradead.org>
-Reply-To: Mark Salyzyn <salyzyn@android.com>
+From: Deepa Dinamani <deepa.kernel@gmail.com>
+Subject: Re: [GIT PULL] vfs: Add support for timestamp limits
+Date: Wed, 28 Aug 2019 21:38:03 -0700
+Message-ID: <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
+References: <20190829041132.26677-1-deepa.kernel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-f2fs-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <20190828142423.GA1955@infradead.org>
-Content-Language: en-GB
-List-Unsubscribe: <https://lists.sourceforge.net/lists/options/linux-f2fs-devel>,
- <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-f2fs-devel>
-List-Post: <mailto:linux-f2fs-devel@lists.sourceforge.net>
-List-Help: <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
- <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=subscribe>
-Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Latchesar Ionkov <lucho@ionkov.net>, Hugh Dickins <hughd@google.com>, Mike Marshall <hubcap@omnibond.com>, James Morris <jmorris@namei.org>, devel@lists.orangefs.org, Eric Van Hensbergen <ericvh@gmail.com>, Joel Becker <jlbec@evilplan.org>, Anna Schumaker <anna.schumaker@netapp.com>, Trond Myklebust <trond.myklebust@hammerspace.com>, Mathieu Malaterre <malat@debian.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Jan Kara <jack@suse.com>, Casey Schaufler <casey@schaufler-ca.com>, Andrew Morton <akpm@linux-foundation.org>, Dave Kleikamp <shaggy@kernel.org>, linux-doc@vger.kernel.org, Jeff Layton <jlayton@kernel.org>, Mimi Zohar <zohar@linux.ibm.com>, linux-cifs@vger.kernel.org, Paul Moore <paul@paul-moore.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Eric Sandeen <sandeen@sandeen.net>, kernel-team@android.com, selinux@vger.kernel.o
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <20190829041132.26677-1-deepa.kernel@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Alexander Viro <viro@zeniv.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, martin@omnibond.com, jfs-discussion@lists.sourceforge.net, Dave Kleikamp <shaggy@kernel.org>, al@alarsen.net, yuchao0@huawei.com, Bob Copeland <me@bobcopeland.com>, Adrian Hunter <adrian.hunter@intel.com>, Andreas Dilger <adilger.kernel@dilger.ca>, mikulas@artax.karlin.mff.cuni.cz, stoph Hellwig <hch@lst.de>, nico@fluxnic.net, Mike Marshall <hubcap@omnibond.com>, linux-cifs@vger.kernel.org, "Yan,
+ Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, y2038 Mailman List <y2038@lists.linaro.org>, Richard Weinberger <richard@nod.at>, Steve French <sfrench@samba.org>, Anton Vorontsov <anton@enomsg.org>, linux@armlinux.org.uk, codalist@coda.cs.cmu.edu, Christoph Hellwig <hch@infradead.org>, coda@cs.cmu.edu, V9FS Developers <v9fs-developer@lists.sourceforge.net>, Ilya Dryomov <idryomov@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gOC8yOC8xOSA3OjI0IEFNLCBDaHJpc3RvcGggSGVsbHdpZyB3cm90ZToKPiBPbiBUdWUsIEF1
-ZyAyNywgMjAxOSBhdCAwODowNToxNUFNIC0wNzAwLCBNYXJrIFNhbHl6eW4gd3JvdGU6Cj4+IFJl
-cGxhY2UgYXJndW1lbnRzIGZvciBnZXQgYW5kIHNldCB4YXR0ciBtZXRob2RzLCBhbmQgX192ZnNf
-Z2V0eGF0dHIKPj4gYW5kIF9fdmZzX3NldGF4dHIgZnVuY3Rpb25zIHdpdGggYSByZWZlcmVuY2Ug
-dG8gdGhlIGZvbGxvd2luZyBub3cKPj4gY29tbW9uIGFyZ3VtZW50IHN0cnVjdHVyZToKPiBZaWtl
-cy4gIFRoYXQgbG9va3MgbGlrZSBhIG1lc3MuICBXaHkgY2FuJ3Qgd2UgcGFzcyBhIGtlcm5lbC1v
-bmx5Cj4gZmxhZyBpbiB0aGUgZXhpc3RpbmcgZmxhZ3MgZmllbGQgZm9yIOKCiz5zZXQgYW5kIGFk
-ZCBhIGZsYWdzIGZpZWxkCj4gdG8gLT5nZXQ/ICBQYXNzaW5nIG1ldGhvZHMgYnkgc3RydWN0dXJl
-IGFsd2F5cyB0ZW5kcyB0byBiZSBhIG1lc3MuCgpUaGlzIHdhcyBhIHJlc3BvbnNlIHRvIEdyZWdL
-SEAgY3JpdGljaXNtLCBhbiBlYXJsaWVyIHBhdGNoIHNldCBqdXN0IAphZGRlZCBhIGZsYWcgYXMg
-eW91IHN0YXRlZCB0byBnZXQgbWV0aG9kLCB1bnRpbCBjb21wbGFpbnRzIG9mIGFuIApleGNlc3Np
-dmVseSBsb25nIGFyZ3VtZW50IGxpc3QgYW5kIGZyYWdpbGl0eSB0byBhZGQgb3IgY2hhbmdlIG1v
-cmUgCmFyZ3VtZW50cy4KClNvIG1hbnkgd2F5cyBoYXZlIGJlZW4gdHJpZWQgdG8gc2tpbiB0aGlz
-IGNhdCAuLi4gdGhlIHJpc2sgd2FzIHRha2VuIHRvIApwbGVhc2Ugc29tZSwgYW5kIHdlIG5vdyBo
-YXZlIGh1bmRyZWRzIG9mIHN0YWtlaG9sZGVycywgd2hlbiB0aGUgZmlyc3QgCnBhdGNoIHNldCB3
-YXMgbGVzcyB0aGFuIGEgZG96ZW4uIEEgcmVjaXBlIGZvciBmYWlsdXJlPwoKLS0gTWFyawoKCgpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eC1mMmZz
-LWRldmVsIG1haWxpbmcgbGlzdApMaW51eC1mMmZzLWRldmVsQGxpc3RzLnNvdXJjZWZvcmdlLm5l
-dApodHRwczovL2xpc3RzLnNvdXJjZWZvcmdlLm5ldC9saXN0cy9saXN0aW5mby9saW51eC1mMmZz
-LWRldmVsCg==
+Adding the others who were on original cc, just in case.
+- Deepa
+
+On Wed, Aug 28, 2019 at 9:12 PM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
+>
+> Hi Al, Arnd,
+>
+> This is a pull request for filling in min and max timestamps for filesystems.
+> I've added all the acks, and dropped the adfs patch. That will be merged through
+> Russell's tree.
+>
+> Thanks,
+> Deepa
+>
+> The following changes since commit 5d18cb62218608a1388858880ad3ec76d6cb0d3b:
+>
+>   Add linux-next specific files for 20190828 (2019-08-28 19:59:14 +1000)
+>
+> are available in the Git repository at:
+>
+>   https://github.com/deepa-hub/vfs limits
+>
+> for you to fetch changes up to f0f216afa4c7e4dee9121fde52ccf57f76119188:
+>
+>   isofs: Initialize filesystem timestamp ranges (2019-08-28 19:19:36 -0700)
+>
+> ----------------------------------------------------------------
+> Deepa Dinamani (19):
+>       vfs: Add file timestamp range support
+>       vfs: Add timestamp_truncate() api
+>       timestamp_truncate: Replace users of timespec64_trunc
+>       mount: Add mount warning for impending timestamp expiry
+>       utimes: Clamp the timestamps before update
+>       fs: Fill in max and min timestamps in superblock
+>       9p: Fill min and max timestamps in sb
+>       ext4: Initialize timestamps limits
+>       fs: nfs: Initialize filesystem timestamp ranges
+>       fs: cifs: Initialize filesystem timestamp ranges
+>       fs: fat: Initialize filesystem timestamp ranges
+>       fs: affs: Initialize filesystem timestamp ranges
+>       fs: sysv: Initialize filesystem timestamp ranges
+>       fs: ceph: Initialize filesystem timestamp ranges
+>       fs: orangefs: Initialize filesystem timestamp ranges
+>       fs: hpfs: Initialize filesystem timestamp ranges
+>       fs: omfs: Initialize filesystem timestamp ranges
+>       pstore: fs superblock limits
+>       isofs: Initialize filesystem timestamp ranges
+>
+>  fs/9p/vfs_super.c        |  6 +++++-
+>  fs/affs/amigaffs.c       |  2 +-
+>  fs/affs/amigaffs.h       |  3 +++
+>  fs/affs/inode.c          |  4 ++--
+>  fs/affs/super.c          |  4 ++++
+>  fs/attr.c                | 21 ++++++++++++---------
+>  fs/befs/linuxvfs.c       |  2 ++
+>  fs/bfs/inode.c           |  2 ++
+>  fs/ceph/super.c          |  2 ++
+>  fs/cifs/cifsfs.c         | 22 ++++++++++++++++++++++
+>  fs/cifs/netmisc.c        | 14 +++++++-------
+>  fs/coda/inode.c          |  3 +++
+>  fs/configfs/inode.c      | 12 ++++++------
+>  fs/cramfs/inode.c        |  2 ++
+>  fs/efs/super.c           |  2 ++
+>  fs/ext2/super.c          |  2 ++
+>  fs/ext4/ext4.h           | 10 +++++++++-
+>  fs/ext4/super.c          | 17 +++++++++++++++--
+>  fs/f2fs/file.c           | 21 ++++++++++++---------
+>  fs/fat/inode.c           | 12 ++++++++++++
+>  fs/freevxfs/vxfs_super.c |  2 ++
+>  fs/hpfs/hpfs_fn.h        |  6 ++----
+>  fs/hpfs/super.c          |  2 ++
+>  fs/inode.c               | 33 ++++++++++++++++++++++++++++++++-
+>  fs/isofs/inode.c         |  7 +++++++
+>  fs/jffs2/fs.c            |  3 +++
+>  fs/jfs/super.c           |  2 ++
+>  fs/kernfs/inode.c        |  7 +++----
+>  fs/minix/inode.c         |  2 ++
+>  fs/namespace.c           | 33 ++++++++++++++++++++++++++++++++-
+>  fs/nfs/super.c           | 20 +++++++++++++++++++-
+>  fs/ntfs/inode.c          | 21 ++++++++++++---------
+>  fs/omfs/inode.c          |  4 ++++
+>  fs/orangefs/super.c      |  2 ++
+>  fs/pstore/ram.c          |  2 ++
+>  fs/qnx4/inode.c          |  2 ++
+>  fs/qnx6/inode.c          |  2 ++
+>  fs/reiserfs/super.c      |  3 +++
+>  fs/romfs/super.c         |  2 ++
+>  fs/squashfs/super.c      |  2 ++
+>  fs/super.c               |  2 ++
+>  fs/sysv/super.c          |  5 ++++-
+>  fs/ubifs/file.c          | 21 ++++++++++++---------
+>  fs/ufs/super.c           |  7 +++++++
+>  fs/utimes.c              |  6 ++----
+>  fs/xfs/xfs_super.c       |  2 ++
+>  include/linux/fs.h       |  5 +++++
+>  include/linux/time64.h   |  2 ++
+>  48 files changed, 298 insertions(+), 72 deletions(-)
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
