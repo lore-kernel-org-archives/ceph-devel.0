@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 41/45] ceph: fix buffer free while holding i_ceph_lock in __ceph_build_xattrs_blob()
-Date: Thu, 29 Aug 2019 14:15:41 -0400
-Message-ID: <20190829181547.8280-41-sashal@kernel.org>
-References: <20190829181547.8280-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.2 67/76] ceph: fix buffer free while holding i_ceph_lock in __ceph_build_xattrs_blob()
+Date: Thu, 29 Aug 2019 14:13:02 -0400
+Message-ID: <20190829181311.7562-67-sashal@kernel.org>
+References: <20190829181311.7562-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829181547.8280-1-sashal@kernel.org>
+In-Reply-To: <20190829181311.7562-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
@@ -65,10 +65,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  4 files changed, 16 insertions(+), 6 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index a11fa0b6b34d5..db547af01b593 100644
+index 7754d76791228..622467e47cde8 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -1280,6 +1280,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+@@ -1305,6 +1305,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
  {
  	struct ceph_inode_info *ci = cap->ci;
  	struct inode *inode = &ci->vfs_inode;
@@ -76,7 +76,7 @@ index a11fa0b6b34d5..db547af01b593 100644
  	struct cap_msg_args arg;
  	int held, revoking;
  	int wake = 0;
-@@ -1344,7 +1345,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+@@ -1369,7 +1370,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
  	ci->i_requested_max_size = arg.max_size;
  
  	if (flushing & CEPH_CAP_XATTR_EXCL) {
@@ -85,7 +85,7 @@ index a11fa0b6b34d5..db547af01b593 100644
  		arg.xattr_version = ci->i_xattrs.version;
  		arg.xattr_buf = ci->i_xattrs.blob;
  	} else {
-@@ -1379,6 +1380,8 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+@@ -1404,6 +1405,8 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
  
  	spin_unlock(&ci->i_ceph_lock);
  
@@ -95,10 +95,10 @@ index a11fa0b6b34d5..db547af01b593 100644
  	if (ret < 0) {
  		dout("error sending cap msg, must requeue %p\n", inode);
 diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 1f46b02f73149..5cf7b5f4db947 100644
+index 72c6c022f02bd..213bc1475e91f 100644
 --- a/fs/ceph/snap.c
 +++ b/fs/ceph/snap.c
-@@ -460,6 +460,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
+@@ -464,6 +464,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
  	struct inode *inode = &ci->vfs_inode;
  	struct ceph_cap_snap *capsnap;
  	struct ceph_snap_context *old_snapc, *new_snapc;
@@ -106,7 +106,7 @@ index 1f46b02f73149..5cf7b5f4db947 100644
  	int used, dirty;
  
  	capsnap = kzalloc(sizeof(*capsnap), GFP_NOFS);
-@@ -536,7 +537,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
+@@ -540,7 +541,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
  	capsnap->gid = inode->i_gid;
  
  	if (dirty & CEPH_CAP_XATTR_EXCL) {
@@ -115,7 +115,7 @@ index 1f46b02f73149..5cf7b5f4db947 100644
  		capsnap->xattr_blob =
  			ceph_buffer_get(ci->i_xattrs.blob);
  		capsnap->xattr_version = ci->i_xattrs.version;
-@@ -579,6 +580,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
+@@ -583,6 +584,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
  	}
  	spin_unlock(&ci->i_ceph_lock);
  
@@ -124,10 +124,10 @@ index 1f46b02f73149..5cf7b5f4db947 100644
  	ceph_put_snap_context(old_snapc);
  }
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index d8579a56e5dc2..0180193097905 100644
+index 1d313d0536f9d..38b42d7594b67 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -896,7 +896,7 @@ extern int ceph_getattr(const struct path *path, struct kstat *stat,
+@@ -924,7 +924,7 @@ extern int ceph_getattr(const struct path *path, struct kstat *stat,
  int __ceph_setxattr(struct inode *, const char *, const void *, size_t, int);
  ssize_t __ceph_getxattr(struct inode *, const char *, void *, size_t);
  extern ssize_t ceph_listxattr(struct dentry *, char *, size_t);
@@ -137,10 +137,10 @@ index d8579a56e5dc2..0180193097905 100644
  extern void __init ceph_xattr_init(void);
  extern void ceph_xattr_exit(void);
 diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 71ea45b0231f9..5e4f3f833e85e 100644
+index 8382299fc2d84..9772db01720b9 100644
 --- a/fs/ceph/xattr.c
 +++ b/fs/ceph/xattr.c
-@@ -734,12 +734,15 @@ static int __get_required_blob_size(struct ceph_inode_info *ci, int name_size,
+@@ -752,12 +752,15 @@ static int __get_required_blob_size(struct ceph_inode_info *ci, int name_size,
  
  /*
   * If there are dirty xattrs, reencode xattrs into the prealloc_blob
@@ -158,7 +158,7 @@ index 71ea45b0231f9..5e4f3f833e85e 100644
  	void *dest;
  
  	dout("__build_xattrs_blob %p\n", &ci->vfs_inode);
-@@ -770,12 +773,14 @@ void __ceph_build_xattrs_blob(struct ceph_inode_info *ci)
+@@ -788,12 +791,14 @@ void __ceph_build_xattrs_blob(struct ceph_inode_info *ci)
  			dest - ci->i_xattrs.prealloc_blob->vec.iov_base;
  
  		if (ci->i_xattrs.blob)
