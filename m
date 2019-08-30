@@ -1,71 +1,97 @@
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: Re: [GIT PULL] vfs: Add support for timestamp limits
-Date: Thu, 29 Aug 2019 19:02:13 -0700
-Message-ID: <CABeXuvpe9vADLZUr4zHrH0izt=1BaLQvBMxAu=T1A2CV3AN4vA@mail.gmail.com>
-References: <20190829041132.26677-1-deepa.kernel@gmail.com>
- <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
- <CAOg9mSR25eAH7e1KhDZt_uscJSzyuSmELbCxgyh=-KWRxjZtcw@mail.gmail.com>
+From: John Hubbard <jhubbard@nvidia.com>
+Subject: Re: [PATCH v3 00/39] put_user_pages(): miscellaneous call sites
+Date: Thu, 29 Aug 2019 19:21:03 -0700
+Message-ID: <d453f865-2224-ed53-a2f4-f43d574c130a@nvidia.com>
+References: <20190807013340.9706-1-jhubbard@nvidia.com>
+ <912eb2bd-4102-05c1-5571-c261617ad30b@nvidia.com>
+ <CAOg9mSQKGDywcMde2DE42diUS7J8m74Hdv+xp_PJhC39EXZQuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-f2fs-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <CAOg9mSR25eAH7e1KhDZt_uscJSzyuSmELbCxgyh=-KWRxjZtcw@mail.gmail.com>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/options/linux-f2fs-devel>,
- <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-f2fs-devel>
-List-Post: <mailto:linux-f2fs-devel@lists.sourceforge.net>
-List-Help: <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
- <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=subscribe>
-Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAOg9mSQKGDywcMde2DE42diUS7J8m74Hdv+xp_PJhC39EXZQuw@mail.gmail.com>
+Content-Language: en-US
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Mike Marshall <hubcap@omnibond.com>
-Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, jfs-discussion@lists.sourceforge.net, Dave Kleikamp <shaggy@kernel.org>, al@alarsen.net, Bob Copeland <me@bobcopeland.com>, Adrian Hunter <adrian.hunter@intel.com>, Andreas Dilger <adilger.kernel@dilger.ca>, mikulas@artax.karlin.mff.cuni.cz, stoph Hellwig <hch@lst.de>, nico@fluxnic.net, linux-cifs@vger.kernel.org, "Yan,
- Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, y2038 Mailman List <y2038@lists.linaro.org>, Richard Weinberger <richard@nod.at>, Steve French <sfrench@samba.org>, Anton Vorontsov <anton@enomsg.org>, linux@armlinux.org.uk, codalist@coda.cs.cmu.edu, Christoph Hellwig <hch@infradead.org>, coda@cs.cmu.edu, V9FS Developers <v9fs-developer@lists.sourceforge.net>, Ilya Dryomov <idryomov@gmail.com>, Ext4 Developers List <linux-ext4@>
+Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm <linux-mm@kvack.org>, sparclinux@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, intel-gfx@lists.freedesktop.org, john.hubbard@gmail.com, linux-block@vger.kernel.org, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, ceph-devel <ceph-devel@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Aug 29, 2019 at 6:20 PM Mike Marshall <hubcap@omnibond.com> wrote:
->
-> Hi Deepa...
->
-> I installed this patch series on top of Linux 5.3-rc6 and ran xfstests
-> on orangefs and got a regression... generic/258 failed
-> with: "Timestamp wrapped"...
->
-> # cat results/generic/258.out.bad
-> QA output created by 258
-> Creating file with timestamp of Jan 1, 1960
-> Testing for negative seconds since epoch
-> Timestamp wrapped: 0
-> Timestamp wrapped
-> (see /home/hubcap/xfstests-dev/results//generic/258.full for details)
+On 8/29/2019 6:29 PM, Mike Marshall wrote:
+> Hi John...
+> 
+> I added this patch series on top of Linux 5.3rc6 and ran
+> xfstests with no regressions...
+> 
+> Acked-by: Mike Marshall <hubcap@omnibond.com>
+> 
 
-Note that patch [16/20] https://lkml.org/lkml/2019/8/18/193 assumes
-that orangefs does not support negative timestamps.
-And, the reason was pointed out in the commit text:
+Hi Mike (and I hope Ira and others are reading as well, because
+I'm making a bunch of claims further down),
 
-----------------------
-Assume the limits as unsigned according to the below
-commit 98e8eef557a9 ("changed PVFS_time from int64_t to uint64_t")
-in https://github.com/waltligon/orangefs
+That's great news, thanks for running that test suite and for
+the report and the ACK.
 
-Author: Neill Miller <neillm@mcs.anl.gov>
-Date:   Thu Sep 2 15:00:38 2004 +0000
---------------------
+There is an interesting pause right now, due to the fact that
+we've made some tentative decisions about gup pinning, that affect
+the call sites. A key decision is that only pages that were
+requested via FOLL_PIN, will require put_user_page*() to release
+them. There are 4 main cases, which were first explained by Jan
+Kara and Vlastimil Babka, and are now written up in my FOLL_PIN
+patch [1].
 
-So the timestamp being wrapped to 0 in this case is correct behavior
-according to my patchset.
-The generic/258 assumes that the timestamps can be negative. If this
-is not true then it should not be run for this fs.
+So, what that means for this series is that:
 
-But, if you think the timestamp should support negative timestamps for
-orangefs, I'd be happy to change it.
+1. Some call sites (mlock.c for example, and a lot of the mm/ files
+in fact, and more) will not be converted: some of these patches will
+get dropped, especially in mm/.
 
-> Just to double check, I compiled Linux 5.3-rc6 without the timestamp series,
-> and 258 passed... then added the patch series back and the failure returned...
->
-> Also.... when I was using "git am" to apply the patch series, the ceph patch
-> failed, so I "git skipped" it...
+2. Call sites that do DirectIO or RDMA will need to set FOLL_PIN, and
+will also need to call put_user_page().
 
-My series applies cleanly against linux-next as of yesterday.
+3. Call sites that do RDMA will need to set FOLL_LONGTERM *and* FOLL_PIN,
 
--Deepa
+    3.a. ...and will at least in some cases need to provide a link to a
+    vaddr_pin object, and thus back to a struct file*...maybe. Still
+    under discussion.
+
+4. It's desirable to keep FOLL_* flags (or at least FOLL_PIN) internal
+to the gup() calls. That implies using a wrapper call such as Ira's
+vaddr_pin_[user]_pages(), instead of gup(), and vaddr_unpin_[user]_pages()
+instead of put_user_page*().
+
+5. We don't want to churn the call sites unnecessarily.
+
+With that in mind, I've taken another pass through all these patches
+and narrowed it down to:
+
+     a) 12 call sites that I'd like to convert soon, but even those
+        really look cleaner with a full conversion to a wrapper call
+        similar to (identical to?) vaddr_pin_[user]_pages(), probably
+        just the FOLL_PIN only variant (not FOLL_LONGTERM). That
+        wrapper call is not ready yet, though.
+
+     b) Some more call sites that require both FOLL_PIN and FOLL_LONGTERM.
+        Definitely will wait to use the wrapper calls for these, because
+        they may also require hooking up to a struct file*.
+
+     c) A few more that were already applied, which is fine, because they
+        show where to convert, and simplify a few sites anyway. But they'll
+        need follow-on changes to, one way or another, set FOLL_PIN.
+
+     d) And of course a few sites whose patches get dropped, as mentioned
+        above.
+
+[1] https://lore.kernel.org/r/20190821040727.19650-3-jhubbard@nvidia.com
+
+thanks,
+-- 
+John Hubbard
+NVIDIA
