@@ -1,113 +1,153 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: Re: [PATCH AUTOSEL 5.2 66/76] ceph: fix buffer free while holding
- i_ceph_lock in __ceph_setxattr()
-Date: Thu, 29 Aug 2019 17:16:40 -0400
-Message-ID: <20190829211640.GN5281@sasha-vm>
-References: <20190829181311.7562-1-sashal@kernel.org>
- <20190829181311.7562-66-sashal@kernel.org>
- <CAOi1vP9-A-U6J15hT+XmtXzBw5WVRZECry8gPFzqp0CV36ecig@mail.gmail.com>
+From: Mike Marshall <hubcap@omnibond.com>
+Subject: Re: [GIT PULL] vfs: Add support for timestamp limits
+Date: Thu, 29 Aug 2019 21:20:18 -0400
+Message-ID: <CAOg9mSR25eAH7e1KhDZt_uscJSzyuSmELbCxgyh=-KWRxjZtcw@mail.gmail.com>
+References: <20190829041132.26677-1-deepa.kernel@gmail.com>
+ <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP9-A-U6J15hT+XmtXzBw5WVRZECry8gPFzqp0CV36ecig@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, jfs-discussion@lists.sourceforge.net, Dave Kleikamp <shaggy@kernel.org>, al@alarsen.net, yuchao0@huawei.com, Bob Copeland <me@bobcopeland.com>, Adrian Hunter <adrian.hunter@intel.com>, Andreas Dilger <adilger.kernel@dilger.ca>, mikulas@artax.karlin.mff.cuni.cz, stoph Hellwig <hch@lst.de>, nico@fluxnic.net, linux-cifs@vger.kernel.org, "Yan,
+ Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, y2038 Mailman List <y2038@lists.linaro.org>, Richard Weinberger <richard@nod.at>, Steve French <sfrench@samba.org>, Anton Vorontsov <anton@enomsg.org>, linux@armlinux.org.uk, codalist@coda.cs.cmu.edu, Christoph Hellwig <hch@infradead.org>, coda@cs.cmu.edu, V9FS Developers <v9fs-developer@lists.sourceforge.net>, Ilya Dryomov <idryomov@gmail.com>, Ext4
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Aug 29, 2019 at 10:51:04PM +0200, Ilya Dryomov wrote:
->On Thu, Aug 29, 2019 at 8:15 PM Sasha Levin <sashal@kernel.org> wrote:
->>
->> From: Luis Henriques <lhenriques@suse.com>
->>
->> [ Upstream commit 86968ef21596515958d5f0a40233d02be78ecec0 ]
->>
->> Calling ceph_buffer_put() in __ceph_setxattr() may end up freeing the
->> i_xattrs.prealloc_blob buffer while holding the i_ceph_lock.  This can be
->> fixed by postponing the call until later, when the lock is released.
->>
->> The following backtrace was triggered by fstests generic/117.
->>
->>   BUG: sleeping function called from invalid context at mm/vmalloc.c:2283
->>   in_atomic(): 1, irqs_disabled(): 0, pid: 650, name: fsstress
->>   3 locks held by fsstress/650:
->>    #0: 00000000870a0fe8 (sb_writers#8){.+.+}, at: mnt_want_write+0x20/0x50
->>    #1: 00000000ba0c4c74 (&type->i_mutex_dir_key#6){++++}, at: vfs_setxattr+0x55/0xa0
->>    #2: 000000008dfbb3f2 (&(&ci->i_ceph_lock)->rlock){+.+.}, at: __ceph_setxattr+0x297/0x810
->>   CPU: 1 PID: 650 Comm: fsstress Not tainted 5.2.0+ #437
->>   Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.12.1-0-ga5cab58-prebuilt.qemu.org 04/01/2014
->>   Call Trace:
->>    dump_stack+0x67/0x90
->>    ___might_sleep.cold+0x9f/0xb1
->>    vfree+0x4b/0x60
->>    ceph_buffer_release+0x1b/0x60
->>    __ceph_setxattr+0x2b4/0x810
->>    __vfs_setxattr+0x66/0x80
->>    __vfs_setxattr_noperm+0x59/0xf0
->>    vfs_setxattr+0x81/0xa0
->>    setxattr+0x115/0x230
->>    ? filename_lookup+0xc9/0x140
->>    ? rcu_read_lock_sched_held+0x74/0x80
->>    ? rcu_sync_lockdep_assert+0x2e/0x60
->>    ? __sb_start_write+0x142/0x1a0
->>    ? mnt_want_write+0x20/0x50
->>    path_setxattr+0xba/0xd0
->>    __x64_sys_lsetxattr+0x24/0x30
->>    do_syscall_64+0x50/0x1c0
->>    entry_SYSCALL_64_after_hwframe+0x49/0xbe
->>   RIP: 0033:0x7ff23514359a
->>
->> Signed-off-by: Luis Henriques <lhenriques@suse.com>
->> Reviewed-by: Jeff Layton <jlayton@kernel.org>
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> Signed-off-by: Sasha Levin <sashal@kernel.org>
->> ---
->>  fs/ceph/xattr.c | 8 ++++++--
->>  1 file changed, 6 insertions(+), 2 deletions(-)
->>
->> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
->> index 0619adbcbe14c..8382299fc2d84 100644
->> --- a/fs/ceph/xattr.c
->> +++ b/fs/ceph/xattr.c
->> @@ -1028,6 +1028,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
->>         struct ceph_inode_info *ci = ceph_inode(inode);
->>         struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
->>         struct ceph_cap_flush *prealloc_cf = NULL;
->> +       struct ceph_buffer *old_blob = NULL;
->>         int issued;
->>         int err;
->>         int dirty = 0;
->> @@ -1101,13 +1102,15 @@ int __ceph_setxattr(struct inode *inode, const char *name,
->>                 struct ceph_buffer *blob;
->>
->>                 spin_unlock(&ci->i_ceph_lock);
->> -               dout(" preaallocating new blob size=%d\n", required_blob_size);
->> +               ceph_buffer_put(old_blob); /* Shouldn't be required */
->> +               dout(" pre-allocating new blob size=%d\n", required_blob_size);
->>                 blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
->>                 if (!blob)
->>                         goto do_sync_unlocked;
->>                 spin_lock(&ci->i_ceph_lock);
->> +               /* prealloc_blob can't be released while holding i_ceph_lock */
->>                 if (ci->i_xattrs.prealloc_blob)
->> -                       ceph_buffer_put(ci->i_xattrs.prealloc_blob);
->> +                       old_blob = ci->i_xattrs.prealloc_blob;
->>                 ci->i_xattrs.prealloc_blob = blob;
->>                 goto retry;
->>         }
->> @@ -1123,6 +1126,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
->>         }
->>
->>         spin_unlock(&ci->i_ceph_lock);
->> +       ceph_buffer_put(old_blob);
->>         if (lock_snap_rwsem)
->>                 up_read(&mdsc->snap_rwsem);
->>         if (dirty)
->
->Hi Sasha,
->
->I didn't tag i_ceph_lock series for stable because this is a very old
->bug which no one ever hit in real life, at least to my knowledge.
+Hi Deepa...
 
-I can drop it if you prefer.
+I installed this patch series on top of Linux 5.3-rc6 and ran xfstests
+on orangefs and got a regression... generic/258 failed
+with: "Timestamp wrapped"...
+
+# cat results/generic/258.out.bad
+QA output created by 258
+Creating file with timestamp of Jan 1, 1960
+Testing for negative seconds since epoch
+Timestamp wrapped: 0
+Timestamp wrapped
+(see /home/hubcap/xfstests-dev/results//generic/258.full for details)
+
+Just to double check, I compiled Linux 5.3-rc6 without the timestamp series,
+and 258 passed... then added the patch series back and the failure returned...
+
+Also.... when I was using "git am" to apply the patch series, the ceph patch
+failed, so I "git skipped" it...
+
+I obtained the patch series from: https://github.com/deepa-hub/vfs limits
+today.
+
+-Mike
+
+On Thu, Aug 29, 2019 at 12:38 AM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
+>
+> Adding the others who were on original cc, just in case.
+> - Deepa
+>
+> On Wed, Aug 28, 2019 at 9:12 PM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
+> >
+> > Hi Al, Arnd,
+> >
+> > This is a pull request for filling in min and max timestamps for filesystems.
+> > I've added all the acks, and dropped the adfs patch. That will be merged through
+> > Russell's tree.
+> >
+> > Thanks,
+> > Deepa
+> >
+> > The following changes since commit 5d18cb62218608a1388858880ad3ec76d6cb0d3b:
+> >
+> >   Add linux-next specific files for 20190828 (2019-08-28 19:59:14 +1000)
+> >
+> > are available in the Git repository at:
+> >
+> >   https://github.com/deepa-hub/vfs limits
+> >
+> > for you to fetch changes up to f0f216afa4c7e4dee9121fde52ccf57f76119188:
+> >
+> >   isofs: Initialize filesystem timestamp ranges (2019-08-28 19:19:36 -0700)
+> >
+> > ----------------------------------------------------------------
+> > Deepa Dinamani (19):
+> >       vfs: Add file timestamp range support
+> >       vfs: Add timestamp_truncate() api
+> >       timestamp_truncate: Replace users of timespec64_trunc
+> >       mount: Add mount warning for impending timestamp expiry
+> >       utimes: Clamp the timestamps before update
+> >       fs: Fill in max and min timestamps in superblock
+> >       9p: Fill min and max timestamps in sb
+> >       ext4: Initialize timestamps limits
+> >       fs: nfs: Initialize filesystem timestamp ranges
+> >       fs: cifs: Initialize filesystem timestamp ranges
+> >       fs: fat: Initialize filesystem timestamp ranges
+> >       fs: affs: Initialize filesystem timestamp ranges
+> >       fs: sysv: Initialize filesystem timestamp ranges
+> >       fs: ceph: Initialize filesystem timestamp ranges
+> >       fs: orangefs: Initialize filesystem timestamp ranges
+> >       fs: hpfs: Initialize filesystem timestamp ranges
+> >       fs: omfs: Initialize filesystem timestamp ranges
+> >       pstore: fs superblock limits
+> >       isofs: Initialize filesystem timestamp ranges
+> >
+> >  fs/9p/vfs_super.c        |  6 +++++-
+> >  fs/affs/amigaffs.c       |  2 +-
+> >  fs/affs/amigaffs.h       |  3 +++
+> >  fs/affs/inode.c          |  4 ++--
+> >  fs/affs/super.c          |  4 ++++
+> >  fs/attr.c                | 21 ++++++++++++---------
+> >  fs/befs/linuxvfs.c       |  2 ++
+> >  fs/bfs/inode.c           |  2 ++
+> >  fs/ceph/super.c          |  2 ++
+> >  fs/cifs/cifsfs.c         | 22 ++++++++++++++++++++++
+> >  fs/cifs/netmisc.c        | 14 +++++++-------
+> >  fs/coda/inode.c          |  3 +++
+> >  fs/configfs/inode.c      | 12 ++++++------
+> >  fs/cramfs/inode.c        |  2 ++
+> >  fs/efs/super.c           |  2 ++
+> >  fs/ext2/super.c          |  2 ++
+> >  fs/ext4/ext4.h           | 10 +++++++++-
+> >  fs/ext4/super.c          | 17 +++++++++++++++--
+> >  fs/f2fs/file.c           | 21 ++++++++++++---------
+> >  fs/fat/inode.c           | 12 ++++++++++++
+> >  fs/freevxfs/vxfs_super.c |  2 ++
+> >  fs/hpfs/hpfs_fn.h        |  6 ++----
+> >  fs/hpfs/super.c          |  2 ++
+> >  fs/inode.c               | 33 ++++++++++++++++++++++++++++++++-
+> >  fs/isofs/inode.c         |  7 +++++++
+> >  fs/jffs2/fs.c            |  3 +++
+> >  fs/jfs/super.c           |  2 ++
+> >  fs/kernfs/inode.c        |  7 +++----
+> >  fs/minix/inode.c         |  2 ++
+> >  fs/namespace.c           | 33 ++++++++++++++++++++++++++++++++-
+> >  fs/nfs/super.c           | 20 +++++++++++++++++++-
+> >  fs/ntfs/inode.c          | 21 ++++++++++++---------
+> >  fs/omfs/inode.c          |  4 ++++
+> >  fs/orangefs/super.c      |  2 ++
+> >  fs/pstore/ram.c          |  2 ++
+> >  fs/qnx4/inode.c          |  2 ++
+> >  fs/qnx6/inode.c          |  2 ++
+> >  fs/reiserfs/super.c      |  3 +++
+> >  fs/romfs/super.c         |  2 ++
+> >  fs/squashfs/super.c      |  2 ++
+> >  fs/super.c               |  2 ++
+> >  fs/sysv/super.c          |  5 ++++-
+> >  fs/ubifs/file.c          | 21 ++++++++++++---------
+> >  fs/ufs/super.c           |  7 +++++++
+> >  fs/utimes.c              |  6 ++----
+> >  fs/xfs/xfs_super.c       |  2 ++
+> >  include/linux/fs.h       |  5 +++++
+> >  include/linux/time64.h   |  2 ++
+> >  48 files changed, 298 insertions(+), 72 deletions(-)
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
