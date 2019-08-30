@@ -1,121 +1,126 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH AUTOSEL 5.2 66/76] ceph: fix buffer free while holding
- i_ceph_lock in __ceph_setxattr()
-Date: Fri, 30 Aug 2019 10:31:53 +0200
-Message-ID: <CAOi1vP-EPJ5VfEAMa_-4LyNv-mXf1acozoa=Z0kHDMAnVKfGxw@mail.gmail.com>
-References: <20190829181311.7562-1-sashal@kernel.org> <20190829181311.7562-66-sashal@kernel.org>
- <CAOi1vP9-A-U6J15hT+XmtXzBw5WVRZECry8gPFzqp0CV36ecig@mail.gmail.com> <20190829211640.GN5281@sasha-vm>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [GIT PULL] vfs: Add support for timestamp limits
+Date: Fri, 30 Aug 2019 15:58:35 +0200
+Message-ID: <CAK8P3a0NMUv2xOw=fCxJXo_2wbmBMG24Fst3U1LT-m7C8uxz0w@mail.gmail.com>
+References: <20190829041132.26677-1-deepa.kernel@gmail.com>
+ <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
+ <CAOg9mSR25eAH7e1KhDZt_uscJSzyuSmELbCxgyh=-KWRxjZtcw@mail.gmail.com>
+ <CABeXuvpe9vADLZUr4zHrH0izt=1BaLQvBMxAu=T1A2CV3AN4vA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190829211640.GN5281@sasha-vm>
-Sender: stable-owner@vger.kernel.org
-To: Sasha Levin <sashal@kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-f2fs-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <CABeXuvpe9vADLZUr4zHrH0izt=1BaLQvBMxAu=T1A2CV3AN4vA@mail.gmail.com>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/options/linux-f2fs-devel>,
+ <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-f2fs-devel>
+List-Post: <mailto:linux-f2fs-devel@lists.sourceforge.net>
+List-Help: <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
+ <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, jfs-discussion@lists.sourceforge.net, Dave Kleikamp <shaggy@kernel.org>, Anders Larsen <al@alarsen.net>, Bob Copeland <me@bobcopeland.com>, Adrian Hunter <adrian.hunter@intel.com>, Andreas Dilger <adilger.kernel@dilger.ca>, mikulas@artax.karlin.mff.cuni.cz, stoph Hellwig <hch@lst.de>, Nicolas Pitre <nico@fluxnic.net>, Mike Marshall <hubcap@omnibond.com>, linux-cifs@vger.kernel.org, "Yan,
+ Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, y2038 Mailman List <y2038@lists.linaro.org>, Richard Weinberger <richard@nod.at>, Steve French <sfrench@samba.org>, Anton Vorontsov <anton@enomsg.org>, Russell King - ARM Linux <linux@armlinux.org.uk>, codalist@coda.cs.cmu.edu, Christoph Hellwig <hch@infradead.org>, coda@cs.cmu.edu, V9FS Developers <v9fs-develo>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Aug 29, 2019 at 11:16 PM Sasha Levin <sashal@kernel.org> wrote:
->
-> On Thu, Aug 29, 2019 at 10:51:04PM +0200, Ilya Dryomov wrote:
-> >On Thu, Aug 29, 2019 at 8:15 PM Sasha Levin <sashal@kernel.org> wrote:
-> >>
-> >> From: Luis Henriques <lhenriques@suse.com>
-> >>
-> >> [ Upstream commit 86968ef21596515958d5f0a40233d02be78ecec0 ]
-> >>
-> >> Calling ceph_buffer_put() in __ceph_setxattr() may end up freeing the
-> >> i_xattrs.prealloc_blob buffer while holding the i_ceph_lock.  This can be
-> >> fixed by postponing the call until later, when the lock is released.
-> >>
-> >> The following backtrace was triggered by fstests generic/117.
-> >>
-> >>   BUG: sleeping function called from invalid context at mm/vmalloc.c:2283
-> >>   in_atomic(): 1, irqs_disabled(): 0, pid: 650, name: fsstress
-> >>   3 locks held by fsstress/650:
-> >>    #0: 00000000870a0fe8 (sb_writers#8){.+.+}, at: mnt_want_write+0x20/0x50
-> >>    #1: 00000000ba0c4c74 (&type->i_mutex_dir_key#6){++++}, at: vfs_setxattr+0x55/0xa0
-> >>    #2: 000000008dfbb3f2 (&(&ci->i_ceph_lock)->rlock){+.+.}, at: __ceph_setxattr+0x297/0x810
-> >>   CPU: 1 PID: 650 Comm: fsstress Not tainted 5.2.0+ #437
-> >>   Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.12.1-0-ga5cab58-prebuilt.qemu.org 04/01/2014
-> >>   Call Trace:
-> >>    dump_stack+0x67/0x90
-> >>    ___might_sleep.cold+0x9f/0xb1
-> >>    vfree+0x4b/0x60
-> >>    ceph_buffer_release+0x1b/0x60
-> >>    __ceph_setxattr+0x2b4/0x810
-> >>    __vfs_setxattr+0x66/0x80
-> >>    __vfs_setxattr_noperm+0x59/0xf0
-> >>    vfs_setxattr+0x81/0xa0
-> >>    setxattr+0x115/0x230
-> >>    ? filename_lookup+0xc9/0x140
-> >>    ? rcu_read_lock_sched_held+0x74/0x80
-> >>    ? rcu_sync_lockdep_assert+0x2e/0x60
-> >>    ? __sb_start_write+0x142/0x1a0
-> >>    ? mnt_want_write+0x20/0x50
-> >>    path_setxattr+0xba/0xd0
-> >>    __x64_sys_lsetxattr+0x24/0x30
-> >>    do_syscall_64+0x50/0x1c0
-> >>    entry_SYSCALL_64_after_hwframe+0x49/0xbe
-> >>   RIP: 0033:0x7ff23514359a
-> >>
-> >> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> >> Reviewed-by: Jeff Layton <jlayton@kernel.org>
-> >> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> >> Signed-off-by: Sasha Levin <sashal@kernel.org>
-> >> ---
-> >>  fs/ceph/xattr.c | 8 ++++++--
-> >>  1 file changed, 6 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> >> index 0619adbcbe14c..8382299fc2d84 100644
-> >> --- a/fs/ceph/xattr.c
-> >> +++ b/fs/ceph/xattr.c
-> >> @@ -1028,6 +1028,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
-> >>         struct ceph_inode_info *ci = ceph_inode(inode);
-> >>         struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
-> >>         struct ceph_cap_flush *prealloc_cf = NULL;
-> >> +       struct ceph_buffer *old_blob = NULL;
-> >>         int issued;
-> >>         int err;
-> >>         int dirty = 0;
-> >> @@ -1101,13 +1102,15 @@ int __ceph_setxattr(struct inode *inode, const char *name,
-> >>                 struct ceph_buffer *blob;
-> >>
-> >>                 spin_unlock(&ci->i_ceph_lock);
-> >> -               dout(" preaallocating new blob size=%d\n", required_blob_size);
-> >> +               ceph_buffer_put(old_blob); /* Shouldn't be required */
-> >> +               dout(" pre-allocating new blob size=%d\n", required_blob_size);
-> >>                 blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
-> >>                 if (!blob)
-> >>                         goto do_sync_unlocked;
-> >>                 spin_lock(&ci->i_ceph_lock);
-> >> +               /* prealloc_blob can't be released while holding i_ceph_lock */
-> >>                 if (ci->i_xattrs.prealloc_blob)
-> >> -                       ceph_buffer_put(ci->i_xattrs.prealloc_blob);
-> >> +                       old_blob = ci->i_xattrs.prealloc_blob;
-> >>                 ci->i_xattrs.prealloc_blob = blob;
-> >>                 goto retry;
-> >>         }
-> >> @@ -1123,6 +1126,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
-> >>         }
-> >>
-> >>         spin_unlock(&ci->i_ceph_lock);
-> >> +       ceph_buffer_put(old_blob);
-> >>         if (lock_snap_rwsem)
-> >>                 up_read(&mdsc->snap_rwsem);
-> >>         if (dirty)
+On Fri, Aug 30, 2019 at 4:02 AM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
+> On Thu, Aug 29, 2019 at 6:20 PM Mike Marshall <hubcap@omnibond.com> wrote:
 > >
-> >Hi Sasha,
+> > Hi Deepa...
 > >
-> >I didn't tag i_ceph_lock series for stable because this is a very old
-> >bug which no one ever hit in real life, at least to my knowledge.
+> > I installed this patch series on top of Linux 5.3-rc6 and ran xfstests
+> > on orangefs and got a regression... generic/258 failed
+> > with: "Timestamp wrapped"...
+> >
+> > # cat results/generic/258.out.bad
+> > QA output created by 258
+> > Creating file with timestamp of Jan 1, 1960
+> > Testing for negative seconds since epoch
+> > Timestamp wrapped: 0
+> > Timestamp wrapped
+> > (see /home/hubcap/xfstests-dev/results//generic/258.full for details)
 >
-> I can drop it if you prefer.
+> Note that patch [16/20] https://lkml.org/lkml/2019/8/18/193 assumes
+> that orangefs does not support negative timestamps.
+> And, the reason was pointed out in the commit text:
+>
+> ----------------------
+> Assume the limits as unsigned according to the below
+> commit 98e8eef557a9 ("changed PVFS_time from int64_t to uint64_t")
+> in https://github.com/waltligon/orangefs
+>
+> Author: Neill Miller <neillm@mcs.anl.gov>
+> Date:   Thu Sep 2 15:00:38 2004 +0000
+> --------------------
+>
+> So the timestamp being wrapped to 0 in this case is correct behavior
+> according to my patchset.
+> The generic/258 assumes that the timestamps can be negative. If this
+> is not true then it should not be run for this fs.
+>
+> But, if you think the timestamp should support negative timestamps for
+> orangefs, I'd be happy to change it.
 
-Either is fine with me.  I just wanted to explain my rationale for not
-tagging them for stable in the first place and point out that there is
-a prerequisite.
+I think it's unclear from the orangefs source code what the intention is,
+as there is a mixed of signed and unsigned types used for the inode
+stamps:
 
-Thanks,
+#define encode_PVFS_time encode_int64_t
+#define encode_int64_t(pptr,x) do { \
+    *(int64_t*) *(pptr) = cpu_to_le64(*(x)); \
+    *(pptr) += 8; \
+} while (0)
+#define decode_PVFS_time decode_int64_t
+#define decode_int64_t(pptr,x) do { \
+    *(x) = le64_to_cpu(*(int64_t*) *(pptr)); \
+    *(pptr) += 8; \
+} while (0)
 
-                Ilya
+This suggests that making it unsigned may have been an accident.
+
+Then again,  it's clearly and consistently printed as unsigned in
+user space:
+
+        gossip_debug(
+            GOSSIP_GETATTR_DEBUG, " VERSION is %llu, mtime is %llu\n",
+            llu(s_op->attr.mtime), llu(resp_attr->mtime));
+
+A related issue I noticed is this:
+
+PVFS_time PINT_util_mktime_version(PVFS_time time)
+{
+    struct timeval t = {0,0};
+    PVFS_time version = (time << 32);
+
+    gettimeofday(&t, NULL);
+    version |= (PVFS_time)t.tv_usec;
+    return version;
+}
+PVFS_time PINT_util_mkversion_time(PVFS_time version)
+{
+    return (PVFS_time)(version >> 32);
+}
+static PINT_sm_action getattr_verify_attribs(
+        struct PINT_smcb *smcb, job_status_s *js_p)
+{
+...
+    resp_attr->mtime = PINT_util_mkversion_time(s_op->attr.mtime);
+...
+}
+
+which suggests that at least for some purposes, the mtime field
+is only an unsigned 32-bit number (1970..2106). From my readiing,
+this affects the on-disk format, but not the protocol implemented
+by the kernel.
+
+atime and ctime are apparently 64-bit, but mtime is only 32-bit
+seconds, plus a 32-bit 'version'. I suppose the server could be
+fixed to allow a larger range, but probably would take it out of
+the 'version' bits, not the upper half.
+
+To be on the safe side, I suppose the kernel can only assume
+an unsigned 32-bit range to be available. If the server gets
+extended beyond that, it would have to pass a feature flag.
+
+     Arnd
