@@ -1,97 +1,121 @@
-From: John Hubbard <jhubbard@nvidia.com>
-Subject: Re: [PATCH v3 00/39] put_user_pages(): miscellaneous call sites
-Date: Thu, 29 Aug 2019 19:21:03 -0700
-Message-ID: <d453f865-2224-ed53-a2f4-f43d574c130a@nvidia.com>
-References: <20190807013340.9706-1-jhubbard@nvidia.com>
- <912eb2bd-4102-05c1-5571-c261617ad30b@nvidia.com>
- <CAOg9mSQKGDywcMde2DE42diUS7J8m74Hdv+xp_PJhC39EXZQuw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH AUTOSEL 5.2 66/76] ceph: fix buffer free while holding
+ i_ceph_lock in __ceph_setxattr()
+Date: Fri, 30 Aug 2019 10:31:53 +0200
+Message-ID: <CAOi1vP-EPJ5VfEAMa_-4LyNv-mXf1acozoa=Z0kHDMAnVKfGxw@mail.gmail.com>
+References: <20190829181311.7562-1-sashal@kernel.org> <20190829181311.7562-66-sashal@kernel.org>
+ <CAOi1vP9-A-U6J15hT+XmtXzBw5WVRZECry8gPFzqp0CV36ecig@mail.gmail.com> <20190829211640.GN5281@sasha-vm>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <CAOg9mSQKGDywcMde2DE42diUS7J8m74Hdv+xp_PJhC39EXZQuw@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Mike Marshall <hubcap@omnibond.com>
-Cc: linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Dave Chinner <david@fromorbit.com>, dri-devel@lists.freedesktop.org, linux-mm <linux-mm@kvack.org>, sparclinux@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, x86@kernel.org, amd-gfx@lists.freedesktop.org, Christoph Hellwig <hch@infradead.org>, Jason Gunthorpe <jgg@ziepe.ca>, xen-devel@lists.xenproject.org, devel@lists.orangefs.org, linux-media@vger.kernel.org, intel-gfx@lists.freedesktop.org, john.hubbard@gmail.com, linux-block@vger.kernel.org, =?UTF-8?B?SsOpcsO0bWUgR2xpc3Nl?= <jglisse@redhat.com>, linux-rpi-kernel@lists.infradead.org, ceph-devel <ceph-devel@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190829211640.GN5281@sasha-vm>
+Sender: stable-owner@vger.kernel.org
+To: Sasha Levin <sashal@kernel.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 8/29/2019 6:29 PM, Mike Marshall wrote:
-> Hi John...
-> 
-> I added this patch series on top of Linux 5.3rc6 and ran
-> xfstests with no regressions...
-> 
-> Acked-by: Mike Marshall <hubcap@omnibond.com>
-> 
+On Thu, Aug 29, 2019 at 11:16 PM Sasha Levin <sashal@kernel.org> wrote:
+>
+> On Thu, Aug 29, 2019 at 10:51:04PM +0200, Ilya Dryomov wrote:
+> >On Thu, Aug 29, 2019 at 8:15 PM Sasha Levin <sashal@kernel.org> wrote:
+> >>
+> >> From: Luis Henriques <lhenriques@suse.com>
+> >>
+> >> [ Upstream commit 86968ef21596515958d5f0a40233d02be78ecec0 ]
+> >>
+> >> Calling ceph_buffer_put() in __ceph_setxattr() may end up freeing the
+> >> i_xattrs.prealloc_blob buffer while holding the i_ceph_lock.  This can be
+> >> fixed by postponing the call until later, when the lock is released.
+> >>
+> >> The following backtrace was triggered by fstests generic/117.
+> >>
+> >>   BUG: sleeping function called from invalid context at mm/vmalloc.c:2283
+> >>   in_atomic(): 1, irqs_disabled(): 0, pid: 650, name: fsstress
+> >>   3 locks held by fsstress/650:
+> >>    #0: 00000000870a0fe8 (sb_writers#8){.+.+}, at: mnt_want_write+0x20/0x50
+> >>    #1: 00000000ba0c4c74 (&type->i_mutex_dir_key#6){++++}, at: vfs_setxattr+0x55/0xa0
+> >>    #2: 000000008dfbb3f2 (&(&ci->i_ceph_lock)->rlock){+.+.}, at: __ceph_setxattr+0x297/0x810
+> >>   CPU: 1 PID: 650 Comm: fsstress Not tainted 5.2.0+ #437
+> >>   Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.12.1-0-ga5cab58-prebuilt.qemu.org 04/01/2014
+> >>   Call Trace:
+> >>    dump_stack+0x67/0x90
+> >>    ___might_sleep.cold+0x9f/0xb1
+> >>    vfree+0x4b/0x60
+> >>    ceph_buffer_release+0x1b/0x60
+> >>    __ceph_setxattr+0x2b4/0x810
+> >>    __vfs_setxattr+0x66/0x80
+> >>    __vfs_setxattr_noperm+0x59/0xf0
+> >>    vfs_setxattr+0x81/0xa0
+> >>    setxattr+0x115/0x230
+> >>    ? filename_lookup+0xc9/0x140
+> >>    ? rcu_read_lock_sched_held+0x74/0x80
+> >>    ? rcu_sync_lockdep_assert+0x2e/0x60
+> >>    ? __sb_start_write+0x142/0x1a0
+> >>    ? mnt_want_write+0x20/0x50
+> >>    path_setxattr+0xba/0xd0
+> >>    __x64_sys_lsetxattr+0x24/0x30
+> >>    do_syscall_64+0x50/0x1c0
+> >>    entry_SYSCALL_64_after_hwframe+0x49/0xbe
+> >>   RIP: 0033:0x7ff23514359a
+> >>
+> >> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> >> Reviewed-by: Jeff Layton <jlayton@kernel.org>
+> >> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> >> Signed-off-by: Sasha Levin <sashal@kernel.org>
+> >> ---
+> >>  fs/ceph/xattr.c | 8 ++++++--
+> >>  1 file changed, 6 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> >> index 0619adbcbe14c..8382299fc2d84 100644
+> >> --- a/fs/ceph/xattr.c
+> >> +++ b/fs/ceph/xattr.c
+> >> @@ -1028,6 +1028,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+> >>         struct ceph_inode_info *ci = ceph_inode(inode);
+> >>         struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+> >>         struct ceph_cap_flush *prealloc_cf = NULL;
+> >> +       struct ceph_buffer *old_blob = NULL;
+> >>         int issued;
+> >>         int err;
+> >>         int dirty = 0;
+> >> @@ -1101,13 +1102,15 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+> >>                 struct ceph_buffer *blob;
+> >>
+> >>                 spin_unlock(&ci->i_ceph_lock);
+> >> -               dout(" preaallocating new blob size=%d\n", required_blob_size);
+> >> +               ceph_buffer_put(old_blob); /* Shouldn't be required */
+> >> +               dout(" pre-allocating new blob size=%d\n", required_blob_size);
+> >>                 blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
+> >>                 if (!blob)
+> >>                         goto do_sync_unlocked;
+> >>                 spin_lock(&ci->i_ceph_lock);
+> >> +               /* prealloc_blob can't be released while holding i_ceph_lock */
+> >>                 if (ci->i_xattrs.prealloc_blob)
+> >> -                       ceph_buffer_put(ci->i_xattrs.prealloc_blob);
+> >> +                       old_blob = ci->i_xattrs.prealloc_blob;
+> >>                 ci->i_xattrs.prealloc_blob = blob;
+> >>                 goto retry;
+> >>         }
+> >> @@ -1123,6 +1126,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+> >>         }
+> >>
+> >>         spin_unlock(&ci->i_ceph_lock);
+> >> +       ceph_buffer_put(old_blob);
+> >>         if (lock_snap_rwsem)
+> >>                 up_read(&mdsc->snap_rwsem);
+> >>         if (dirty)
+> >
+> >Hi Sasha,
+> >
+> >I didn't tag i_ceph_lock series for stable because this is a very old
+> >bug which no one ever hit in real life, at least to my knowledge.
+>
+> I can drop it if you prefer.
 
-Hi Mike (and I hope Ira and others are reading as well, because
-I'm making a bunch of claims further down),
+Either is fine with me.  I just wanted to explain my rationale for not
+tagging them for stable in the first place and point out that there is
+a prerequisite.
 
-That's great news, thanks for running that test suite and for
-the report and the ACK.
+Thanks,
 
-There is an interesting pause right now, due to the fact that
-we've made some tentative decisions about gup pinning, that affect
-the call sites. A key decision is that only pages that were
-requested via FOLL_PIN, will require put_user_page*() to release
-them. There are 4 main cases, which were first explained by Jan
-Kara and Vlastimil Babka, and are now written up in my FOLL_PIN
-patch [1].
-
-So, what that means for this series is that:
-
-1. Some call sites (mlock.c for example, and a lot of the mm/ files
-in fact, and more) will not be converted: some of these patches will
-get dropped, especially in mm/.
-
-2. Call sites that do DirectIO or RDMA will need to set FOLL_PIN, and
-will also need to call put_user_page().
-
-3. Call sites that do RDMA will need to set FOLL_LONGTERM *and* FOLL_PIN,
-
-    3.a. ...and will at least in some cases need to provide a link to a
-    vaddr_pin object, and thus back to a struct file*...maybe. Still
-    under discussion.
-
-4. It's desirable to keep FOLL_* flags (or at least FOLL_PIN) internal
-to the gup() calls. That implies using a wrapper call such as Ira's
-vaddr_pin_[user]_pages(), instead of gup(), and vaddr_unpin_[user]_pages()
-instead of put_user_page*().
-
-5. We don't want to churn the call sites unnecessarily.
-
-With that in mind, I've taken another pass through all these patches
-and narrowed it down to:
-
-     a) 12 call sites that I'd like to convert soon, but even those
-        really look cleaner with a full conversion to a wrapper call
-        similar to (identical to?) vaddr_pin_[user]_pages(), probably
-        just the FOLL_PIN only variant (not FOLL_LONGTERM). That
-        wrapper call is not ready yet, though.
-
-     b) Some more call sites that require both FOLL_PIN and FOLL_LONGTERM.
-        Definitely will wait to use the wrapper calls for these, because
-        they may also require hooking up to a struct file*.
-
-     c) A few more that were already applied, which is fine, because they
-        show where to convert, and simplify a few sites anyway. But they'll
-        need follow-on changes to, one way or another, set FOLL_PIN.
-
-     d) And of course a few sites whose patches get dropped, as mentioned
-        above.
-
-[1] https://lore.kernel.org/r/20190821040727.19650-3-jhubbard@nvidia.com
-
-thanks,
--- 
-John Hubbard
-NVIDIA
+                Ilya
