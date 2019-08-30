@@ -1,14 +1,16 @@
 From: Mike Marshall <hubcap@omnibond.com>
-Subject: Re: [GIT PULL] vfs: Add support for timestamp limits
-Date: Thu, 29 Aug 2019 21:20:18 -0400
-Message-ID: <CAOg9mSR25eAH7e1KhDZt_uscJSzyuSmELbCxgyh=-KWRxjZtcw@mail.gmail.com>
-References: <20190829041132.26677-1-deepa.kernel@gmail.com>
- <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
+Subject: Re: [PATCH v8] Add flags option to get xattr method paired to
+ __vfs_getxattr
+Date: Thu, 29 Aug 2019 21:24:38 -0400
+Message-ID: <CAOg9mSTCC4Z3RpEyppC50B+pnSBbV0sr-F7hbsM-B+z3c-AZVA@mail.gmail.com>
+References: <20190827150544.151031-1-salyzyn@android.com>
+ <20190828142423.GA1955@infradead.org>
+ <5dd09a38-fffb-36f2-505b-be2ddf6bb750@android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <CABeXuvoKD83B7iUqE33Y9E2OVtf61DKv-swZr-N=ozz-cMmGOA@mail.gmail.com>
+In-Reply-To: <5dd09a38-fffb-36f2-505b-be2ddf6bb750@android.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
  <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
@@ -18,136 +20,31 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
  <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
 Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, jfs-discussion@lists.sourceforge.net, Dave Kleikamp <shaggy@kernel.org>, al@alarsen.net, yuchao0@huawei.com, Bob Copeland <me@bobcopeland.com>, Adrian Hunter <adrian.hunter@intel.com>, Andreas Dilger <adilger.kernel@dilger.ca>, mikulas@artax.karlin.mff.cuni.cz, stoph Hellwig <hch@lst.de>, nico@fluxnic.net, linux-cifs@vger.kernel.org, "Yan,
- Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, y2038 Mailman List <y2038@lists.linaro.org>, Richard Weinberger <richard@nod.at>, Steve French <sfrench@samba.org>, Anton Vorontsov <anton@enomsg.org>, linux@armlinux.org.uk, codalist@coda.cs.cmu.edu, Christoph Hellwig <hch@infradead.org>, coda@cs.cmu.edu, V9FS Developers <v9fs-developer@lists.sourceforge.net>, Ilya Dryomov <idryomov@gmail.com>, Ext4
+To: Mark Salyzyn <salyzyn@android.com>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Hugh Dickins <hughd@google.com>, James Morris <jmorris@namei.org>, Christoph Hellwig <hch@infradead.org>, devel@lists.orangefs.org, Eric Van Hensbergen <ericvh@gmail.com>, Joel Becker <jlbec@evilplan.org>, Anna Schumaker <anna.schumaker@netapp.com>, Trond Myklebust <trond.myklebust@hammerspace.com>, Mathieu Malaterre <malat@debian.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Jan Kara <jack@suse.com>, Casey Schaufler <casey@schaufler-ca.com>, Andrew Morton <akpm@linux-foundation.org>, Dave Kleikamp <shaggy@kernel.org>, linux-doc@vger.kernel.org, Jeff Layton <jlayton@kernel.org>, Chao Yu <yuchao0@huawei.com>, Mimi Zohar <zohar@linux.ibm.com>, linux-cifs@vger.kernel.org, Paul Moore <paul@paul-moore.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Eric Sandeen <sandeen@sandeen.net>kernel
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Deepa...
-
-I installed this patch series on top of Linux 5.3-rc6 and ran xfstests
-on orangefs and got a regression... generic/258 failed
-with: "Timestamp wrapped"...
-
-# cat results/generic/258.out.bad
-QA output created by 258
-Creating file with timestamp of Jan 1, 1960
-Testing for negative seconds since epoch
-Timestamp wrapped: 0
-Timestamp wrapped
-(see /home/hubcap/xfstests-dev/results//generic/258.full for details)
-
-Just to double check, I compiled Linux 5.3-rc6 without the timestamp series,
-and 258 passed... then added the patch series back and the failure returned...
-
-Also.... when I was using "git am" to apply the patch series, the ceph patch
-failed, so I "git skipped" it...
-
-I obtained the patch series from: https://github.com/deepa-hub/vfs limits
-today.
-
--Mike
-
-On Thu, Aug 29, 2019 at 12:38 AM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
->
-> Adding the others who were on original cc, just in case.
-> - Deepa
->
-> On Wed, Aug 28, 2019 at 9:12 PM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
-> >
-> > Hi Al, Arnd,
-> >
-> > This is a pull request for filling in min and max timestamps for filesystems.
-> > I've added all the acks, and dropped the adfs patch. That will be merged through
-> > Russell's tree.
-> >
-> > Thanks,
-> > Deepa
-> >
-> > The following changes since commit 5d18cb62218608a1388858880ad3ec76d6cb0d3b:
-> >
-> >   Add linux-next specific files for 20190828 (2019-08-28 19:59:14 +1000)
-> >
-> > are available in the Git repository at:
-> >
-> >   https://github.com/deepa-hub/vfs limits
-> >
-> > for you to fetch changes up to f0f216afa4c7e4dee9121fde52ccf57f76119188:
-> >
-> >   isofs: Initialize filesystem timestamp ranges (2019-08-28 19:19:36 -0700)
-> >
-> > ----------------------------------------------------------------
-> > Deepa Dinamani (19):
-> >       vfs: Add file timestamp range support
-> >       vfs: Add timestamp_truncate() api
-> >       timestamp_truncate: Replace users of timespec64_trunc
-> >       mount: Add mount warning for impending timestamp expiry
-> >       utimes: Clamp the timestamps before update
-> >       fs: Fill in max and min timestamps in superblock
-> >       9p: Fill min and max timestamps in sb
-> >       ext4: Initialize timestamps limits
-> >       fs: nfs: Initialize filesystem timestamp ranges
-> >       fs: cifs: Initialize filesystem timestamp ranges
-> >       fs: fat: Initialize filesystem timestamp ranges
-> >       fs: affs: Initialize filesystem timestamp ranges
-> >       fs: sysv: Initialize filesystem timestamp ranges
-> >       fs: ceph: Initialize filesystem timestamp ranges
-> >       fs: orangefs: Initialize filesystem timestamp ranges
-> >       fs: hpfs: Initialize filesystem timestamp ranges
-> >       fs: omfs: Initialize filesystem timestamp ranges
-> >       pstore: fs superblock limits
-> >       isofs: Initialize filesystem timestamp ranges
-> >
-> >  fs/9p/vfs_super.c        |  6 +++++-
-> >  fs/affs/amigaffs.c       |  2 +-
-> >  fs/affs/amigaffs.h       |  3 +++
-> >  fs/affs/inode.c          |  4 ++--
-> >  fs/affs/super.c          |  4 ++++
-> >  fs/attr.c                | 21 ++++++++++++---------
-> >  fs/befs/linuxvfs.c       |  2 ++
-> >  fs/bfs/inode.c           |  2 ++
-> >  fs/ceph/super.c          |  2 ++
-> >  fs/cifs/cifsfs.c         | 22 ++++++++++++++++++++++
-> >  fs/cifs/netmisc.c        | 14 +++++++-------
-> >  fs/coda/inode.c          |  3 +++
-> >  fs/configfs/inode.c      | 12 ++++++------
-> >  fs/cramfs/inode.c        |  2 ++
-> >  fs/efs/super.c           |  2 ++
-> >  fs/ext2/super.c          |  2 ++
-> >  fs/ext4/ext4.h           | 10 +++++++++-
-> >  fs/ext4/super.c          | 17 +++++++++++++++--
-> >  fs/f2fs/file.c           | 21 ++++++++++++---------
-> >  fs/fat/inode.c           | 12 ++++++++++++
-> >  fs/freevxfs/vxfs_super.c |  2 ++
-> >  fs/hpfs/hpfs_fn.h        |  6 ++----
-> >  fs/hpfs/super.c          |  2 ++
-> >  fs/inode.c               | 33 ++++++++++++++++++++++++++++++++-
-> >  fs/isofs/inode.c         |  7 +++++++
-> >  fs/jffs2/fs.c            |  3 +++
-> >  fs/jfs/super.c           |  2 ++
-> >  fs/kernfs/inode.c        |  7 +++----
-> >  fs/minix/inode.c         |  2 ++
-> >  fs/namespace.c           | 33 ++++++++++++++++++++++++++++++++-
-> >  fs/nfs/super.c           | 20 +++++++++++++++++++-
-> >  fs/ntfs/inode.c          | 21 ++++++++++++---------
-> >  fs/omfs/inode.c          |  4 ++++
-> >  fs/orangefs/super.c      |  2 ++
-> >  fs/pstore/ram.c          |  2 ++
-> >  fs/qnx4/inode.c          |  2 ++
-> >  fs/qnx6/inode.c          |  2 ++
-> >  fs/reiserfs/super.c      |  3 +++
-> >  fs/romfs/super.c         |  2 ++
-> >  fs/squashfs/super.c      |  2 ++
-> >  fs/super.c               |  2 ++
-> >  fs/sysv/super.c          |  5 ++++-
-> >  fs/ubifs/file.c          | 21 ++++++++++++---------
-> >  fs/ufs/super.c           |  7 +++++++
-> >  fs/utimes.c              |  6 ++----
-> >  fs/xfs/xfs_super.c       |  2 ++
-> >  include/linux/fs.h       |  5 +++++
-> >  include/linux/time64.h   |  2 ++
-> >  48 files changed, 298 insertions(+), 72 deletions(-)
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+SSBhZGRlZCB0aGlzIHBhdGNoIHNlcmllcyBvbiB0b3Agb2YgTGludXggNS4zLXJjNiBhbmQgcmFu
+IHhmc3Rlc3RzCm9uIG9yYW5nZWZzIHdpdGggbm8gcmVncmVzc2lvbnMuCgpBY2tlZC1ieTogTWlr
+ZSBNYXJzaGFsbCA8aHViY2FwQG9tbmlib25kLmNvbT4KCi1NaWtlCgpPbiBXZWQsIEF1ZyAyOCwg
+MjAxOSBhdCAxMDo0MCBBTSBNYXJrIFNhbHl6eW4gPHNhbHl6eW5AYW5kcm9pZC5jb20+IHdyb3Rl
+Ogo+Cj4gT24gOC8yOC8xOSA3OjI0IEFNLCBDaHJpc3RvcGggSGVsbHdpZyB3cm90ZToKPiA+IE9u
+IFR1ZSwgQXVnIDI3LCAyMDE5IGF0IDA4OjA1OjE1QU0gLTA3MDAsIE1hcmsgU2FseXp5biB3cm90
+ZToKPiA+PiBSZXBsYWNlIGFyZ3VtZW50cyBmb3IgZ2V0IGFuZCBzZXQgeGF0dHIgbWV0aG9kcywg
+YW5kIF9fdmZzX2dldHhhdHRyCj4gPj4gYW5kIF9fdmZzX3NldGF4dHIgZnVuY3Rpb25zIHdpdGgg
+YSByZWZlcmVuY2UgdG8gdGhlIGZvbGxvd2luZyBub3cKPiA+PiBjb21tb24gYXJndW1lbnQgc3Ry
+dWN0dXJlOgo+ID4gWWlrZXMuICBUaGF0IGxvb2tzIGxpa2UgYSBtZXNzLiAgV2h5IGNhbid0IHdl
+IHBhc3MgYSBrZXJuZWwtb25seQo+ID4gZmxhZyBpbiB0aGUgZXhpc3RpbmcgZmxhZ3MgZmllbGQg
+Zm9yIOKCiz5zZXQgYW5kIGFkZCBhIGZsYWdzIGZpZWxkCj4gPiB0byAtPmdldD8gIFBhc3Npbmcg
+bWV0aG9kcyBieSBzdHJ1Y3R1cmUgYWx3YXlzIHRlbmRzIHRvIGJlIGEgbWVzcy4KPgo+IFRoaXMg
+d2FzIGEgcmVzcG9uc2UgdG8gR3JlZ0tIQCBjcml0aWNpc20sIGFuIGVhcmxpZXIgcGF0Y2ggc2V0
+IGp1c3QKPiBhZGRlZCBhIGZsYWcgYXMgeW91IHN0YXRlZCB0byBnZXQgbWV0aG9kLCB1bnRpbCBj
+b21wbGFpbnRzIG9mIGFuCj4gZXhjZXNzaXZlbHkgbG9uZyBhcmd1bWVudCBsaXN0IGFuZCBmcmFn
+aWxpdHkgdG8gYWRkIG9yIGNoYW5nZSBtb3JlCj4gYXJndW1lbnRzLgo+Cj4gU28gbWFueSB3YXlz
+IGhhdmUgYmVlbiB0cmllZCB0byBza2luIHRoaXMgY2F0IC4uLiB0aGUgcmlzayB3YXMgdGFrZW4g
+dG8KPiBwbGVhc2Ugc29tZSwgYW5kIHdlIG5vdyBoYXZlIGh1bmRyZWRzIG9mIHN0YWtlaG9sZGVy
+cywgd2hlbiB0aGUgZmlyc3QKPiBwYXRjaCBzZXQgd2FzIGxlc3MgdGhhbiBhIGRvemVuLiBBIHJl
+Y2lwZSBmb3IgZmFpbHVyZT8KPgo+IC0tIE1hcmsKPgoKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkxpbnV4IE1URCBkaXNjdXNzaW9uIG1haWxp
+bmcgbGlzdApodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4
+LW10ZC8K
