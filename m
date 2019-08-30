@@ -1,41 +1,39 @@
-From: Colin Ian King <colin.king@canonical.com>
-Subject: bug report: libceph: follow redirect replies from osds
-Date: Fri, 30 Aug 2019 15:05:28 +0100
-Message-ID: <3a4ff829-7302-7201-81c2-a557fe35afc8@canonical.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 5.3-rc7
+Date: Fri, 30 Aug 2019 16:11:15 +0200
+Message-ID: <20190830141115.8049-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: netdev-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Hi Linus,
 
-Static analysis with Coverity has picked up an issue with commit:
+The following changes since commit a55aa89aab90fae7c815b0551b07be37db359d76:
 
-commit 205ee1187a671c3b067d7f1e974903b44036f270
-Author: Ilya Dryomov <ilya.dryomov@inktank.com>
-Date:   Mon Jan 27 17:40:20 2014 +0200
+  Linux 5.3-rc6 (2019-08-25 12:01:23 -0700)
 
-    libceph: follow redirect replies from osds
+are available in the Git repository at:
 
-Specifically in function ceph_redirect_decode in net/ceph/osd_client.c:
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.3-rc7
 
-3485
-3486        len = ceph_decode_32(p);
+for you to fetch changes up to d435c9a7b85be1e820668d2f3718c2d9f24d5548:
 
-CID 17904: Unused value (UNUSED_VALUE)
+  rbd: restore zeroing past the overlap when reading from parent (2019-08-28 12:34:11 +0200)
 
-3487        *p += len; /* skip osd_instructions */
-3488
-3489        /* skip the rest */
-3490        *p = struct_end;
+----------------------------------------------------------------
+A fix for a -rc1 regression in rbd and a trivial static checker fix.
 
-The double write to *p looks wrong, I suspect the *p += len; should be
-just incrementing pointer p as in: p += len.  Am I correct to assume
-this is the correct fix?
+----------------------------------------------------------------
+Ilya Dryomov (1):
+      rbd: restore zeroing past the overlap when reading from parent
 
-Colin
+Jia-Ju Bai (1):
+      libceph: don't call crypto_free_sync_skcipher() on a NULL tfm
+
+ drivers/block/rbd.c | 11 +++++++++++
+ net/ceph/crypto.c   |  6 ++++--
+ 2 files changed, 15 insertions(+), 2 deletions(-)
