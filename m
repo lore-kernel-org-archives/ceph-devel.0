@@ -1,39 +1,56 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.3-rc7
-Date: Fri, 30 Aug 2019 16:11:15 +0200
-Message-ID: <20190830141115.8049-1-idryomov@gmail.com>
+Subject: Re: bug report: libceph: follow redirect replies from osds
+Date: Fri, 30 Aug 2019 16:26:33 +0200
+Message-ID: <CAOi1vP9x1SS9YGFgHuZcpga5fTYac-y3vazsAKr9N8WJB7-hpA@mail.gmail.com>
+References: <3a4ff829-7302-7201-81c2-a557fe35afc8@canonical.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <3a4ff829-7302-7201-81c2-a557fe35afc8@canonical.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Colin Ian King <colin.king@canonical.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Fri, Aug 30, 2019 at 4:05 PM Colin Ian King <colin.king@canonical.com> wrote:
+>
+> Hi,
+>
+> Static analysis with Coverity has picked up an issue with commit:
+>
+> commit 205ee1187a671c3b067d7f1e974903b44036f270
+> Author: Ilya Dryomov <ilya.dryomov@inktank.com>
+> Date:   Mon Jan 27 17:40:20 2014 +0200
+>
+>     libceph: follow redirect replies from osds
+>
+> Specifically in function ceph_redirect_decode in net/ceph/osd_client.c:
+>
+> 3485
+> 3486        len = ceph_decode_32(p);
+>
+> CID 17904: Unused value (UNUSED_VALUE)
+>
+> 3487        *p += len; /* skip osd_instructions */
+> 3488
+> 3489        /* skip the rest */
+> 3490        *p = struct_end;
+>
+> The double write to *p looks wrong, I suspect the *p += len; should be
+> just incrementing pointer p as in: p += len.  Am I correct to assume
+> this is the correct fix?
 
-The following changes since commit a55aa89aab90fae7c815b0551b07be37db359d76:
+Hi Colin,
 
-  Linux 5.3-rc6 (2019-08-25 12:01:23 -0700)
+No, the double write to *p is correct.  It skips over len bytes and
+then skips to the end of the redirect reply.  There is no bug here but
+we could drop
 
-are available in the Git repository at:
+  len = ceph_decode_32(p);
+  *p += len; /* skip osd_instructions */
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.3-rc7
+and skip to the end directly to make Coverity happier.
 
-for you to fetch changes up to d435c9a7b85be1e820668d2f3718c2d9f24d5548:
+Thanks,
 
-  rbd: restore zeroing past the overlap when reading from parent (2019-08-28 12:34:11 +0200)
-
-----------------------------------------------------------------
-A fix for a -rc1 regression in rbd and a trivial static checker fix.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      rbd: restore zeroing past the overlap when reading from parent
-
-Jia-Ju Bai (1):
-      libceph: don't call crypto_free_sync_skcipher() on a NULL tfm
-
- drivers/block/rbd.c | 11 +++++++++++
- net/ceph/crypto.c   |  6 ++++--
- 2 files changed, 15 insertions(+), 2 deletions(-)
+                Ilya
