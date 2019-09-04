@@ -1,87 +1,54 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 131/167] ceph: use ceph_evict_inode to cleanup inode's resource
-Date: Tue,  3 Sep 2019 12:24:43 -0400
-Message-ID: <20190903162519.7136-131-sashal@kernel.org>
-References: <20190903162519.7136-1-sashal@kernel.org>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: v14.2.3 Nautilus released
+Date: Wed, 04 Sep 2019 15:45:54 +0200
+Message-ID: <87v9u8dvjh.fsf@suse.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190903162519.7136-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-announce-bounces-a8pt6IJUokc@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-announce-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-announce-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-announce-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-announce-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-announce-leave-a8pt6IJUokc@public.gmane.org>
+To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, dev-a8pt6IJUokc@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: "Yan, Zheng" <zyan@redhat.com>
 
-[ Upstream commit 87bc5b895d94a0f40fe170d4cf5771c8e8f85d15 ]
+This is the third bug fix release of Ceph Nautilus release series. This
+release fixes a security issue. We recommend all Nautilus users upgrade
+to this release. For upgrading from older releases of ceph, general
+guidelines for upgrade to nautilus must be followed
 
-remove_session_caps() relies on __wait_on_freeing_inode(), to wait for
-freeing inode to remove its caps. But VFS wakes freeing inode waiters
-before calling destroy_inode().
+Notable Changes
+---------------
+* CVE-2019-10222 - Fixed a denial of service vulnerability where an
+  unauthenticated client of Ceph Object Gateway could trigger a crash from an
+  uncaught exception
+* Nautilus-based librbd clients can now open images on Jewel clusters.
+* The RGW `num_rados_handles` has been removed. If you were using a value of
+  `num_rados_handles` greater than 1, multiply your current
+  `objecter_inflight_ops` and `objecter_inflight_op_bytes` parameters by the
+  old `num_rados_handles` to get the same throttle behavior.
+* The secure mode of Messenger v2 protocol is no longer experimental with this
+  release. This mode is now the preferred mode of connection for monitors.
+* "osd_deep_scrub_large_omap_object_key_threshold" has been lowered to detect an
+  object with large number of omap keys more easily.
 
-Cc: stable@vger.kernel.org
-Link: https://tracker.ceph.com/issues/40102
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- fs/ceph/inode.c | 7 +++++--
- fs/ceph/super.c | 2 +-
- fs/ceph/super.h | 2 +-
- 3 files changed, 7 insertions(+), 4 deletions(-)
+For a detailed changelog please refer to the official release notes 
+entry at the ceph blog: https://ceph.io/releases/v14-2-3-nautilus-released/
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 3e518c2ae2bf9..2a64e8f695b93 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -528,13 +528,16 @@ static void ceph_i_callback(struct rcu_head *head)
- 	kmem_cache_free(ceph_inode_cachep, ci);
- }
- 
--void ceph_destroy_inode(struct inode *inode)
-+void ceph_evict_inode(struct inode *inode)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_inode_frag *frag;
- 	struct rb_node *n;
- 
--	dout("destroy_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
-+	dout("evict_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
-+
-+	truncate_inode_pages_final(&inode->i_data);
-+	clear_inode(inode);
- 
- 	ceph_fscache_unregister_inode_cookie(ci);
- 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c5cf46e43f2e7..02528e11bf331 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -827,9 +827,9 @@ static int ceph_remount(struct super_block *sb, int *flags, char *data)
- 
- static const struct super_operations ceph_super_ops = {
- 	.alloc_inode	= ceph_alloc_inode,
--	.destroy_inode	= ceph_destroy_inode,
- 	.write_inode    = ceph_write_inode,
- 	.drop_inode	= ceph_drop_inode,
-+	.evict_inode	= ceph_evict_inode,
- 	.sync_fs        = ceph_sync_fs,
- 	.put_super	= ceph_put_super,
- 	.remount_fs	= ceph_remount,
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index d8579a56e5dc2..6ef2a3b60951a 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -854,7 +854,7 @@ static inline bool __ceph_have_pending_cap_snap(struct ceph_inode_info *ci)
- extern const struct inode_operations ceph_file_iops;
- 
- extern struct inode *ceph_alloc_inode(struct super_block *sb);
--extern void ceph_destroy_inode(struct inode *inode);
-+extern void ceph_evict_inode(struct inode *inode);
- extern int ceph_drop_inode(struct inode *inode);
- 
- extern struct inode *ceph_get_inode(struct super_block *sb,
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-14.2.3.tar.gz
+* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
+* Release git sha1: 0f776cf838a1ae3130b2b73dc26be9c95c6ccc39
+
 -- 
-2.20.1
+Abhishek Lekshmanan
+SUSE Software Solutions Germany GmbH
+_______________________________________________
+Ceph-announce mailing list -- ceph-announce-a8pt6IJUokc@public.gmane.org
+To unsubscribe send an email to ceph-announce-leave-a8pt6IJUokc@public.gmane.org
