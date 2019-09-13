@@ -1,148 +1,81 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH v2] ceph: allow object copies across different filesystems in the same cluster
-Date: Tue, 10 Sep 2019 11:45:41 +0100
-Message-ID: <871rwoo2ei.fsf@suse.com>
-References: <87k1ahojri.fsf@suse.com>
-        <20190909102834.16246-1-lhenriques@suse.com>
-        <3f838e42a50575595c7310386cf698aca8f89607.camel@kernel.org>
-        <87d0g9oh4r.fsf@suse.com>
-        <CAJ4mKGZVjJxQA69s92C+7DFbDxv87SOj10AUfyLXwVe9b+SDTw@mail.gmail.com>
+From: Jeff Layton <jlayton-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [coreutils PATCH v2 0/2] ls: convert to using statx when available
+Date: Fri, 13 Sep 2019 06:58:03 -0400
+Message-ID: <20190913105805.24669-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJ4mKGZVjJxQA69s92C+7DFbDxv87SOj10AUfyLXwVe9b+SDTw@mail.gmail.com>
-        (Gregory Farnum's message of "Mon, 9 Sep 2019 15:22:10 -0700")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: IlyaDryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <coreutils-bounces+gcgcg-coreutils=m.gmane.org-mXXj517/zsQ@public.gmane.org>
+List-Unsubscribe: <https://lists.gnu.org/mailman/options/coreutils>,
+ <mailto:coreutils-request-mXXj517/zsQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <https://lists.gnu.org/archive/html/coreutils>
+List-Post: <mailto:coreutils-mXXj517/zsQ@public.gmane.org>
+List-Help: <mailto:coreutils-request-mXXj517/zsQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.gnu.org/mailman/listinfo/coreutils>,
+ <mailto:coreutils-request-mXXj517/zsQ@public.gmane.org?subject=subscribe>
+Errors-To: coreutils-bounces+gcgcg-coreutils=m.gmane.org-mXXj517/zsQ@public.gmane.org
+Sender: "coreutils" <coreutils-bounces+gcgcg-coreutils=m.gmane.org-mXXj517/zsQ@public.gmane.org>
+To: coreutils-mXXj517/zsQ@public.gmane.org
+Cc: adilger-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Gregory Farnum <gfarnum@redhat.com> writes:
+v2:
+- add wrappers for stat_for_ino and fstat_for_ino, don't factor out loop
+  detection
+- style cleanups
 
-> On Mon, Sep 9, 2019 at 4:15 AM Luis Henriques <lhenriques@suse.com> wrote:
->>
->> "Jeff Layton" <jlayton@kernel.org> writes:
->>
->> > On Mon, 2019-09-09 at 11:28 +0100, Luis Henriques wrote:
->> >> OSDs are able to perform object copies across different pools.  Thus,
->> >> there's no need to prevent copy_file_range from doing remote copies if the
->> >> source and destination superblocks are different.  Only return -EXDEV if
->> >> they have different fsid (the cluster ID).
->> >>
->> >> Signed-off-by: Luis Henriques <lhenriques@suse.com>
->> >> ---
->> >>  fs/ceph/file.c | 18 ++++++++++++++----
->> >>  1 file changed, 14 insertions(+), 4 deletions(-)
->> >>
->> >> Hi,
->> >>
->> >> Here's the patch changelog since initial submittion:
->> >>
->> >> - Dropped have_fsid checks on client structs
->> >> - Use %pU to print the fsid instead of raw hex strings (%*ph)
->> >> - Fixed 'To:' field in email so that this time the patch hits vger
->> >>
->> >> Cheers,
->> >> --
->> >> Luis
->> >>
->> >> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> >> index 685a03cc4b77..4a624a1dd0bb 100644
->> >> --- a/fs/ceph/file.c
->> >> +++ b/fs/ceph/file.c
->> >> @@ -1904,6 +1904,7 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->> >>      struct ceph_inode_info *src_ci = ceph_inode(src_inode);
->> >>      struct ceph_inode_info *dst_ci = ceph_inode(dst_inode);
->> >>      struct ceph_cap_flush *prealloc_cf;
->> >> +    struct ceph_fs_client *src_fsc = ceph_inode_to_client(src_inode);
->> >>      struct ceph_object_locator src_oloc, dst_oloc;
->> >>      struct ceph_object_id src_oid, dst_oid;
->> >>      loff_t endoff = 0, size;
->> >> @@ -1915,8 +1916,17 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->> >>
->> >>      if (src_inode == dst_inode)
->> >>              return -EINVAL;
->> >> -    if (src_inode->i_sb != dst_inode->i_sb)
->> >> -            return -EXDEV;
->> >> +    if (src_inode->i_sb != dst_inode->i_sb) {
->> >> +            struct ceph_fs_client *dst_fsc = ceph_inode_to_client(dst_inode);
->> >> +
->> >> +            if (ceph_fsid_compare(&src_fsc->client->fsid,
->> >> +                                  &dst_fsc->client->fsid)) {
->> >> +                    dout("Copying object across different clusters:");
->> >> +                    dout("  src fsid: %pU dst fsid: %pU\n",
->> >> +                         &src_fsc->client->fsid, &dst_fsc->client->fsid);
->> >> +                    return -EXDEV;
->> >> +            }
->> >> +    }
->> >
->> > Just to be clear: what happens here if I mount two entirely separate
->> > clusters, and their OSDs don't have any access to one another? Will this
->> > fail at some later point with an error that we can catch so that we can
->> > fall back?
->>
->> This is exactly what this check prevents: if we have two CephFS from two
->> unrelated clusters mounted and we try to copy a file across them, the
->> operation will fail with -EXDEV[1] because the FSIDs for these two
->> ceph_fs_client will be different.  OTOH, if these two filesystems are
->> within the same cluster (and thus with the same FSID), then the OSDs are
->> able to do 'copy-from' operations between them.
->>
->> I've tested all these scenarios and they seem to be handled correctly.
->> Now, I'm assuming that *all* OSDs within the same ceph cluster can
->> communicate between themselves; if this assumption is false, then this
->> patch is broken.  But again, I'm not aware of any mechanism that
->> prevents 2 OSDs from communicating between them.
->
-> Your assumption is correct: all OSDs in a Ceph cluster can communicate
-> with each other. I'm not aware of any plans to change this.
->
-> I spent a bit of time trying to figure out how this could break
-> security models and things and didn't come up with anything, so I
-> think functionally it's fine even though I find it a bit scary.
->
-> Also, yes, cluster FSIDs are UUIDs so they shouldn't collide.
+Sending to a wider distribution list this time, as this may encourage
+other filesystem maintainers to flesh out their statx implementations
+to take advantage of this.
 
-Awesome, thanks for clarifying these points!
+Original patch description follows:
 
-Cheers,
--- 
-Luis
+This patchset converts the ls command to use statx instead of stat when
+available. This allows ls to indicate interest in only certain inode
+metadata.
 
+This is potentially a win on networked/clustered/distributed
+filesystems. In cases where we'd have to do a full, heavyweight stat()
+call we can now do a much lighter statx() call.
 
-> -Greg
->
->>
->> [1] Actually, the files will still be copied because we'll fallback into
->> the default VFS generic_copy_file_range behaviour, which is to do
->> reads+writes operations.
->>
->> Cheers,
->> --
->> Luis
->>
->>
->> >
->> >
->> >>      if (ceph_snap(dst_inode) != CEPH_NOSNAP)
->> >>              return -EROFS;
->> >>
->> >> @@ -1928,7 +1938,7 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->> >>       * efficient).
->> >>       */
->> >>
->> >> -    if (ceph_test_mount_opt(ceph_inode_to_client(src_inode), NOCOPYFROM))
->> >> +    if (ceph_test_mount_opt(src_fsc, NOCOPYFROM))
->> >>              return -EOPNOTSUPP;
->> >>
->> >>      if ((src_ci->i_layout.stripe_unit != dst_ci->i_layout.stripe_unit) ||
->> >> @@ -2044,7 +2054,7 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->> >>                              dst_ci->i_vino.ino, dst_objnum);
->> >>              /* Do an object remote copy */
->> >>              err = ceph_osdc_copy_from(
->> >> -                    &ceph_inode_to_client(src_inode)->client->osdc,
->> >> +                    &src_fsc->client->osdc,
->> >>                      src_ci->i_vino.snap, 0,
->> >>                      &src_oid, &src_oloc,
->> >>                      CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL |
->
+As a real-world example, consider a filesystem like CephFS where one
+client is actively writing to a file and another client does an
+ls --color in the same directory. --color means that we need to fetch
+the mode of the file.
+
+Doing that with a stat() call means that we have to fetch the size and
+mtime in addition to the mode. The MDS in that situation will have to
+revoke caps in order to ensure that it has up-to-date values to report,
+which disrupts the writer.
+
+This has a measurable affect on performance. I ran a fio sequential
+write test on one cephfs client and had a second client do "ls --color"
+in a tight loop on the directory that held the file:
+
+Baseline -- no activity on the second client:
+
+  WRITE: bw=3D76.7MiB/s (80.4MB/s), 76.7MiB/s-76.7MiB/s (80.4MB/s-80.4MB/=
+s), io=3D4600MiB (4824MB), run=3D60016-60016msec
+
+Without this patch series, we see a noticable performance hit:
+
+  WRITE: bw=3D70.4MiB/s (73.9MB/s), 70.4MiB/s-70.4MiB/s (73.9MB/s-73.9MB/=
+s), io=3D4228MiB (4433MB), run=3D60012-60012msec
+
+With this patch series, we gain most of that ground back:
+
+  WRITE: bw=3D75.9MiB/s (79.6MB/s), 75.9MiB/s-75.9MiB/s (79.6MB/s-79.6MB/=
+s), io=3D4555MiB (4776MB), run=3D60019-60019msec
+
+Jeff Layton (2):
+  stat: move struct statx to struct stat conversion routines to new
+    header
+  ls: use statx instead of stat when available
+
+ src/ls.c    | 106 ++++++++++++++++++++++++++++++++++++++++++++++++----
+ src/stat.c  |  32 +---------------
+ src/statx.h |  54 ++++++++++++++++++++++++++
+ 3 files changed, 154 insertions(+), 38 deletions(-)
+ create mode 100644 src/statx.h
+
+--=20
+2.21.0
