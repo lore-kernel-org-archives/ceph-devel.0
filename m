@@ -1,10 +1,13 @@
 From: Jeff Layton <jlayton-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [coreutils PATCH v2 0/2] ls: convert to using statx when available
-Date: Fri, 13 Sep 2019 06:58:03 -0400
-Message-ID: <20190913105805.24669-1-jlayton@kernel.org>
+Subject: [coreutils PATCH v2 1/2] stat: move struct statx to struct stat
+ conversion routines to new header
+Date: Fri, 13 Sep 2019 06:58:04 -0400
+Message-ID: <20190913105805.24669-2-jlayton@kernel.org>
+References: <20190913105805.24669-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 Return-path: <coreutils-bounces+gcgcg-coreutils=m.gmane.org-mXXj517/zsQ@public.gmane.org>
+In-Reply-To: <20190913105805.24669-1-jlayton-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Unsubscribe: <https://lists.gnu.org/mailman/options/coreutils>,
  <mailto:coreutils-request-mXXj517/zsQ@public.gmane.org?subject=unsubscribe>
 List-Archive: <https://lists.gnu.org/archive/html/coreutils>
@@ -18,64 +21,123 @@ To: coreutils-mXXj517/zsQ@public.gmane.org
 Cc: adilger-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-v2:
-- add wrappers for stat_for_ino and fstat_for_ino, don't factor out loop
-  detection
-- style cleanups
-
-Sending to a wider distribution list this time, as this may encourage
-other filesystem maintainers to flesh out their statx implementations
-to take advantage of this.
-
-Original patch description follows:
-
-This patchset converts the ls command to use statx instead of stat when
-available. This allows ls to indicate interest in only certain inode
-metadata.
-
-This is potentially a win on networked/clustered/distributed
-filesystems. In cases where we'd have to do a full, heavyweight stat()
-call we can now do a much lighter statx() call.
-
-As a real-world example, consider a filesystem like CephFS where one
-client is actively writing to a file and another client does an
-ls --color in the same directory. --color means that we need to fetch
-the mode of the file.
-
-Doing that with a stat() call means that we have to fetch the size and
-mtime in addition to the mode. The MDS in that situation will have to
-revoke caps in order to ensure that it has up-to-date values to report,
-which disrupts the writer.
-
-This has a measurable affect on performance. I ran a fio sequential
-write test on one cephfs client and had a second client do "ls --color"
-in a tight loop on the directory that held the file:
-
-Baseline -- no activity on the second client:
-
-  WRITE: bw=3D76.7MiB/s (80.4MB/s), 76.7MiB/s-76.7MiB/s (80.4MB/s-80.4MB/=
-s), io=3D4600MiB (4824MB), run=3D60016-60016msec
-
-Without this patch series, we see a noticable performance hit:
-
-  WRITE: bw=3D70.4MiB/s (73.9MB/s), 70.4MiB/s-70.4MiB/s (73.9MB/s-73.9MB/=
-s), io=3D4228MiB (4433MB), run=3D60012-60012msec
-
-With this patch series, we gain most of that ground back:
-
-  WRITE: bw=3D75.9MiB/s (79.6MB/s), 75.9MiB/s-75.9MiB/s (79.6MB/s-79.6MB/=
-s), io=3D4555MiB (4776MB), run=3D60019-60019msec
-
-Jeff Layton (2):
-  stat: move struct statx to struct stat conversion routines to new
-    header
-  ls: use statx instead of stat when available
-
- src/ls.c    | 106 ++++++++++++++++++++++++++++++++++++++++++++++++----
- src/stat.c  |  32 +---------------
- src/statx.h |  54 ++++++++++++++++++++++++++
- 3 files changed, 154 insertions(+), 38 deletions(-)
+* move statx_timestamp_to_timespec and statx_to_stat to a new header
+---
+ src/stat.c  | 32 +------------------------------
+ src/statx.h | 54 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 55 insertions(+), 31 deletions(-)
  create mode 100644 src/statx.h
 
+diff --git a/src/stat.c b/src/stat.c
+index ee68f1682bc8..f2bf0dcb7901 100644
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -73,6 +73,7 @@
+ #include "strftime.h"
+ #include "find-mount-point.h"
+ #include "xvasprintf.h"
++#include "statx.h"
+=20
+ #if HAVE_STATX && defined STATX_INO
+ # define USE_STATX 1
+@@ -1245,37 +1246,6 @@ static bool dont_sync;
+ static bool force_sync;
+=20
+ #if USE_STATX
+-/* Much of the format printing requires a struct stat or timespec */
+-static struct timespec
+-statx_timestamp_to_timespec (struct statx_timestamp tsx)
+-{
+-  struct timespec ts;
+-
+-  ts.tv_sec =3D tsx.tv_sec;
+-  ts.tv_nsec =3D tsx.tv_nsec;
+-  return ts;
+-}
+-
+-static void
+-statx_to_stat (struct statx *stx, struct stat *stat)
+-{
+-  stat->st_dev =3D makedev (stx->stx_dev_major, stx->stx_dev_minor);
+-  stat->st_ino =3D stx->stx_ino;
+-  stat->st_mode =3D stx->stx_mode;
+-  stat->st_nlink =3D stx->stx_nlink;
+-  stat->st_uid =3D stx->stx_uid;
+-  stat->st_gid =3D stx->stx_gid;
+-  stat->st_rdev =3D makedev (stx->stx_rdev_major, stx->stx_rdev_minor);
+-  stat->st_size =3D stx->stx_size;
+-  stat->st_blksize =3D stx->stx_blksize;
+-/* define to avoid sc_prohibit_stat_st_blocks.  */
+-# define SC_ST_BLOCKS st_blocks
+-  stat->SC_ST_BLOCKS =3D stx->stx_blocks;
+-  stat->st_atim =3D statx_timestamp_to_timespec (stx->stx_atime);
+-  stat->st_mtim =3D statx_timestamp_to_timespec (stx->stx_mtime);
+-  stat->st_ctim =3D statx_timestamp_to_timespec (stx->stx_ctime);
+-}
+-
+ static unsigned int
+ fmt_to_mask (char fmt)
+ {
+diff --git a/src/statx.h b/src/statx.h
+new file mode 100644
+index 000000000000..a98ec10de380
+--- /dev/null
++++ b/src/statx.h
+@@ -0,0 +1,54 @@
++/* statx -> stat conversion functions for coreutils
++   Copyright (C) 2019 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation, either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <https://www.gnu.org/licenses/>=
+.  */
++
++#ifndef COREUTILS_STATX_H
++# define COREUTILS_STATX_H
++
++#include <sys/stat.h>
++
++#if HAVE_STATX && defined STATX_INO
++/* Much of the format printing requires a struct stat or timespec */
++static inline struct timespec
++statx_timestamp_to_timespec (struct statx_timestamp tsx)
++{
++  struct timespec ts;
++
++  ts.tv_sec =3D tsx.tv_sec;
++  ts.tv_nsec =3D tsx.tv_nsec;
++  return ts;
++}
++
++static inline void
++statx_to_stat (struct statx *stx, struct stat *stat)
++{
++  stat->st_dev =3D makedev (stx->stx_dev_major, stx->stx_dev_minor);
++  stat->st_ino =3D stx->stx_ino;
++  stat->st_mode =3D stx->stx_mode;
++  stat->st_nlink =3D stx->stx_nlink;
++  stat->st_uid =3D stx->stx_uid;
++  stat->st_gid =3D stx->stx_gid;
++  stat->st_rdev =3D makedev (stx->stx_rdev_major, stx->stx_rdev_minor);
++  stat->st_size =3D stx->stx_size;
++  stat->st_blksize =3D stx->stx_blksize;
++/* define to avoid sc_prohibit_stat_st_blocks.  */
++# define SC_ST_BLOCKS st_blocks
++  stat->SC_ST_BLOCKS =3D stx->stx_blocks;
++  stat->st_atim =3D statx_timestamp_to_timespec (stx->stx_atime);
++  stat->st_mtim =3D statx_timestamp_to_timespec (stx->stx_mtime);
++  stat->st_ctim =3D statx_timestamp_to_timespec (stx->stx_ctime);
++}
++#endif /* HAVE_STATX && defined STATX_INO */
++#endif /* COREUTILS_STATX_H */
 --=20
 2.21.0
