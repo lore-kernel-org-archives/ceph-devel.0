@@ -1,117 +1,44 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: ceph; pg scrub errors
-Date: Tue, 24 Sep 2019 18:21:13 +0530
-Message-ID: <CANA9Uk53woKRHkOqRTRsthODL8+JOfXX4BEpNhriqdTb0wG4yw@mail.gmail.com>
-References: <CANA9Uk7nUFcLc7L4-=3hGH-7Dcf4dt1+xVSrs7hDzgWdNB+vqw@mail.gmail.com>
- <CAANLjFq3HCJvd6R-17ip+-TqTYeQFk0Z2eSz+hkCr2B4jUyX7w@mail.gmail.com>
+From: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: download.ceph.com repository changes
+Date: Tue, 24 Sep 2019 14:05:36 -0600
+Message-ID: <CALqRxCygXUzA0+4sY6meMO9Smq2rouei7ay0BqJD9+-du7RCYQ@mail.gmail.com>
+References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
+ <CAC-Np1zjZJW2iqLVe720u_sxQDTKjoUqL9ftrqKbMcYbZQgYFQ@mail.gmail.com> <CALi_L4_Sz8oFHAFyRfqDfLWGRJSHnSd=dyYUZ6P92o8VY3vGCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3256492640689197126=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAANLjFq3HCJvd6R-17ip+-TqTYeQFk0Z2eSz+hkCr2B4jUyX7w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
+In-Reply-To: <CALi_L4_Sz8oFHAFyRfqDfLWGRJSHnSd=dyYUZ6P92o8VY3vGCQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
+To: Sasha Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users <ceph-users-a8pt6IJUokc@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============3256492640689197126==
-Content-Type: multipart/alternative; boundary="0000000000008049d105934bfe13"
-
---0000000000008049d105934bfe13
-Content-Type: text/plain; charset="UTF-8"
-
-Interestingly - "rados list-inconsistent-obj ${PG} --format=json"  not
-showing any objects inconsistent-obj.
-And also "rados list-missing-obj ${PG} --format=json" also not showing any
-missing or unfound objects.
-
-Thanks
-Swami
-
-On Mon, Sep 23, 2019 at 8:18 PM Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
-
-> On Thu, Sep 19, 2019 at 4:34 AM M Ranga Swami Reddy
-> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> > Hi-Iam using ceph 12.2.11. here I am getting a few scrub errors. To fix
-> these scrub error I ran the "ceph pg repair <pg_id>".
-> > But scrub error not going and the repair is talking long time like 8-12
-> hours.
+On Tue, Sep 17, 2019 at 8:03 AM Sasha Litvak
+<alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 >
-> Depending on the size of the PGs and how active the cluster is, it
-> could take a long time as it takes another deep scrub to happen to
-> clear the error status after a repair. Since it is not going away,
-> either the problem is too complicated to automatically repair and
-> needs to be done by hand, or the problem is repaired and when it
-> deep-scrubs to check it, the problem has reappeared or another problem
-> was found and the disk needs to be replaced.
->
-> Try running:
-> rados list-inconsistent-obj ${PG} --format=json
->
-> and see what the exact problems are.
-> ----------------
-> Robert LeBlanc
-> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->
+> * I am bothered with a quality of the releases of a very complex system that
+> can bring down a whole house and keep it down for a while.  While I wish the
+> QA would be perfect, I wonder if it would be practical to release new
+> packages to a testing repo before moving it to a main one.  There is a
+> chance then someone will detect a problem before it becomes a production
+> issue.  Let it seat for a couple days or weeks in testing.  People who need
+> new update right away or just want to test will install it and report the
+> problems.  Others will not be affected.
 
---0000000000008049d105934bfe13
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+I think it would be a good step forward to have a separate "testing"
+repository. This repository would be a little more cutting-edge, and we'd copy
+all the binaries over to the "main" repository location after 48 hours or
+something.
 
-<div dir=3D"ltr">Interestingly - &quot;rados list-inconsistent-obj ${PG} --=
-format=3Djson&quot;=C2=A0 not showing any objects inconsistent-obj.<div>And=
- also &quot;rados list-missing-obj ${PG} --format=3Djson&quot; also not sho=
-wing any missing or unfound objects.</div><div><br></div><div>Thanks</div><=
-div>Swami</div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=
-=3D"gmail_attr">On Mon, Sep 23, 2019 at 8:18 PM Robert LeBlanc &lt;<a href=
-=3D"mailto:robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org">robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org</a>&gt; wrote:<br></d=
-iv><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bord=
-er-left:1px solid rgb(204,204,204);padding-left:1ex">On Thu, Sep 19, 2019 a=
-t 4:34 AM M Ranga Swami Reddy<br>
-&lt;<a href=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">swamireddy@gm=
-ail.com</a>&gt; wrote:<br>
-&gt;<br>
-&gt; Hi-Iam using ceph 12.2.11. here I am getting a few scrub errors. To fi=
-x these scrub error I ran the &quot;ceph pg repair &lt;pg_id&gt;&quot;.<br>
-&gt; But scrub error not going and the repair is talking long time like 8-1=
-2 hours.<br>
-<br>
-Depending on the size of the PGs and how active the cluster is, it<br>
-could take a long time as it takes another deep scrub to happen to<br>
-clear the error status after a repair. Since it is not going away,<br>
-either the problem is too complicated to automatically repair and<br>
-needs to be done by hand, or the problem is repaired and when it<br>
-deep-scrubs to check it, the problem has reappeared or another problem<br>
-was found and the disk needs to be replaced.<br>
-<br>
-Try running:<br>
-rados list-inconsistent-obj ${PG} --format=3Djson<br>
-<br>
-and see what the exact problems are.<br>
-----------------<br>
-Robert LeBlanc<br>
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904=C2=A0 C70E E654 3BB2 FA62 B9F1<br>
-</blockquote></div>
+This would let us all publicly test the candidate GPG-signed packages, for
+example.
 
---0000000000008049d105934bfe13--
-
---===============3256492640689197126==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
+- Ken
 _______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============3256492640689197126==--
+ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
+To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
