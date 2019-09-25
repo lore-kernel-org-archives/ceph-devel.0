@@ -1,73 +1,63 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RADOS EC: is it okay to reduce the number of
- commits required for reply to client?
-Date: Wed, 25 Sep 2019 14:00:38 -0700
-Message-ID: <CAJ4mKGY0g00sZCpn-BEBh+ohNkeC6K56bNFbXVRurHWcfEzd2g@mail.gmail.com>
-References: <CAPHfcngzug4HDzHtZcb80xdf-NZFNjc2Q7r3vJWSHJufjcgKKQ@mail.gmail.com>
+From: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: download.ceph.com repository changes
+Date: Wed, 25 Sep 2019 16:10:25 -0600
+Message-ID: <CALqRxCw3Z2HHfszEizVtNbd2f22antp-2CbRpehUVTMO0b3FKw@mail.gmail.com>
+References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
+ <CAC-Np1zjZJW2iqLVe720u_sxQDTKjoUqL9ftrqKbMcYbZQgYFQ@mail.gmail.com>
+ <CALi_L4_Sz8oFHAFyRfqDfLWGRJSHnSd=dyYUZ6P92o8VY3vGCQ@mail.gmail.com>
+ <CALqRxCygXUzA0+4sY6meMO9Smq2rouei7ay0BqJD9+-du7RCYQ@mail.gmail.com>
+ <CAN-GepKyROe6CRmKFjFyMvH8b5AGPomh96Q6gRVzQS-Zv-iDtQ@mail.gmail.com>
+ <CAA6-MF_OwcHjDTM=48_pbPbp8BPf0Dd+iLTWZ+06E8akKoMxGA@mail.gmail.com> <CALi_L4-QGFaKhRSNUMcC+CfNnh8rBR_A8PBkVqDydSEX5ho7Ag@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPHfcngzug4HDzHtZcb80xdf-NZFNjc2Q7r3vJWSHJufjcgKKQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alex Xu <alexu4993-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
+In-Reply-To: <CALi_L4-QGFaKhRSNUMcC+CfNnh8rBR_A8PBkVqDydSEX5ho7Ag-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
+To: Sasha Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Unknown <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, ceph-users <ceph-users-a8pt6IJUokc@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Sep 19, 2019 at 12:06 AM Alex Xu <alexu4993-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+On Wed, Sep 25, 2019 at 1:56 PM Sasha Litvak
+<alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 >
-> Hi Cephers,
+> I guess for me the more crucial  questions should be answered:
 >
-> We are testing the write performance of Ceph EC (Luminous, 8 + 4), and
-> noticed that tail latency is extremly high. Say, avgtime of 10th
-> commit is 40ms, acceptable as it's an all HDD cluster; 11th is 80ms,
-> doubled; then 12th is 160ms, doubled again, which is not so good. Then
-> we made a small modification and tested again, and did get a much
-> better result. The patch is quite simple (for test only of course):
->
-> --- a/src/osd/ECBackend.cc
-> +++ b/src/osd/ECBackend.cc
-> @@ -1188,7 +1188,7 @@ void ECBackend::handle_sub_write_reply(
->      i->second.on_all_applied = 0;
->      i->second.trace.event("ec write all applied");
->    }
-> -  if (i->second.pending_commit.empty() && i->second.on_all_commit) {
-> +  if (i->second.pending_commit.size() == 2 &&
-> i->second.on_all_commit) {  // 8 + 4 - 10 = 2
->      dout(10) << __func__ << " Calling on_all_commit on " << i->second << dendl;
->      i->second.on_all_commit->complete(0);
->      i->second.on_all_commit = 0;
->
-> As far as what I see, everything still goes well (maybe because of the
-> rwlock in primary OSD? not sure though), but I'm afraid it might break
-> data consistency in some ways not aware of. So I'm writing to ask if
-> someone could kindly provide expertise comments on this or maybe share
-> any known drawbacks. Thank you!
 
-Unfortunately this is one of those things that will work okay in
-everyday use but fail catastrophically if something else goes wrong.
+> 1.  How can a busted release be taken out of repos (some metadata
+> update I hope)?
 
-Ceph assumes throughout its codebase that if a write committed to
-disk, it can be retrieved as long as k OSDs are available from the
-PG's acting set when that write was committed. But by letting writes
-"commit" on less than the full acting set, you might lose some of the
-OSDs which *did* ack the write and no longer be able to find out what
-it was even though you have >k OSDs available!
+It's hard to define the word "busted" in a way that satisfies everyone.
 
-This will result in a very, very confused Ceph recovery algorithm,
-lots of badness, and unhappy cluster users. :(
--Greg
+For example, in the past, we've heard rumors that the releases are
+"busted" and we need to pull them, and in reality the impact turned out
+to be way smaller than expected. If we let panic reign, we would have
+builds appearing and disappearing quite often.
 
->
-> PS: OSD is backended with filestore, not bluestore, if that matters.
->
-> Regards,
-> Alex
+Or to borrow a real example, what happens when the new (buggy) release
+fixes a CVE, and we coordinated the disclosure of the CVE to happen on
+release day? Then we're hurting some users to help others.
+
+> 2.  Can some fix(es) be added into a test release so they can be
+> accessed by community and tested  / used before next general release
+> is avaialble.  I was thinking about trying to pick some critical
+> backports for internal build / testing but it is not very simple for
+> everyone.  It seems that shaman has some test builds going on, so may
+> be if a track issue will mention that build xxxyz contains fixes for
+> ticket 9999 "for testing purposes only use at your peril", it will
+> allow the community to test the build and for someone who in need to
+> get to the higher ground quickly.
+
+There's certainly more to explore here. Maybe we need a defined release
+criteria so things are less subjective. Or maybe increasing the
+frequency and decreasing the size of releases will help. I'm interested
+in lowering the barriers for contributors to test early and often so
+our cutting-edge users get their builds fast and our more conservative
+users get something more stable.
+_______________________________________________
+ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
+To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
