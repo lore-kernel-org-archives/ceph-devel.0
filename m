@@ -1,181 +1,136 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: ceph; pg scrub errors
-Date: Wed, 25 Sep 2019 12:32:38 +0530
-Message-ID: <CANA9Uk5zsJYgd7ZE9WGYd28LGVD3b38S7UMNfJOOdizABkpBog@mail.gmail.com>
-References: <CANA9Uk7nUFcLc7L4-=3hGH-7Dcf4dt1+xVSrs7hDzgWdNB+vqw@mail.gmail.com>
- <CAANLjFq3HCJvd6R-17ip+-TqTYeQFk0Z2eSz+hkCr2B4jUyX7w@mail.gmail.com>
- <CANA9Uk53woKRHkOqRTRsthODL8+JOfXX4BEpNhriqdTb0wG4yw@mail.gmail.com>
- <CAF-wwdFvbTRDULTYQAK_3orwqcFLJZYQHcqPXd0d4kyF99orMw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 5.4-rc1
+Date: Wed, 25 Sep 2019 19:20:21 +0200
+Message-ID: <20190925172021.23334-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6816759466164667405=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAF-wwdFvbTRDULTYQAK_3orwqcFLJZYQHcqPXd0d4kyF99orMw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============6816759466164667405==
-Content-Type: multipart/alternative; boundary="000000000000b01ee205935b3d72"
+Hi Linus,
 
---000000000000b01ee205935b3d72
-Content-Type: text/plain; charset="UTF-8"
+The following changes since commit 4d856f72c10ecb060868ed10ff1b1453943fc6c8:
 
-repair took almost 6 hours..but after repair, still sees the scrub errs.
+  Linux 5.3 (2019-09-15 14:19:32 -0700)
 
-On Wed, Sep 25, 2019 at 5:11 AM Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+are available in the Git repository at:
 
-> On Tue, Sep 24, 2019 at 10:51 PM M Ranga Swami Reddy
-> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> > Interestingly - "rados list-inconsistent-obj ${PG} --format=json"  not
-> showing any objects inconsistent-obj.
-> > And also "rados list-missing-obj ${PG} --format=json" also not showing
-> any missing or unfound objects.
->
-> Complete a scrub of ${PG} just before you run these commands.
->
-> >
-> > Thanks
-> > Swami
-> >
-> > On Mon, Sep 23, 2019 at 8:18 PM Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-> wrote:
-> >>
-> >> On Thu, Sep 19, 2019 at 4:34 AM M Ranga Swami Reddy
-> >> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >> >
-> >> > Hi-Iam using ceph 12.2.11. here I am getting a few scrub errors. To
-> fix these scrub error I ran the "ceph pg repair <pg_id>".
-> >> > But scrub error not going and the repair is talking long time like
-> 8-12 hours.
-> >>
-> >> Depending on the size of the PGs and how active the cluster is, it
-> >> could take a long time as it takes another deep scrub to happen to
-> >> clear the error status after a repair. Since it is not going away,
-> >> either the problem is too complicated to automatically repair and
-> >> needs to be done by hand, or the problem is repaired and when it
-> >> deep-scrubs to check it, the problem has reappeared or another problem
-> >> was found and the disk needs to be replaced.
-> >>
-> >> Try running:
-> >> rados list-inconsistent-obj ${PG} --format=json
-> >>
-> >> and see what the exact problems are.
-> >> ----------------
-> >> Robert LeBlanc
-> >> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> >
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
->
-> --
-> Cheers,
-> Brad
->
->
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.4-rc1
 
---000000000000b01ee205935b3d72
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+for you to fetch changes up to 3ee5a7015c8b7cb4de21f7345f8381946f2fce55:
 
-<div dir=3D"ltr">repair took almost 6 hours..but after repair, still sees t=
-he scrub errs.</div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=
-=3D"gmail_attr">On Wed, Sep 25, 2019 at 5:11 AM Brad Hubbard &lt;<a href=3D=
-"mailto:bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br></div><b=
-lockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-le=
-ft:1px solid rgb(204,204,204);padding-left:1ex">On Tue, Sep 24, 2019 at 10:=
-51 PM M Ranga Swami Reddy<br>
-&lt;<a href=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">swamireddy@gm=
-ail.com</a>&gt; wrote:<br>
-&gt;<br>
-&gt; Interestingly - &quot;rados list-inconsistent-obj ${PG} --format=3Djso=
-n&quot;=C2=A0 not showing any objects inconsistent-obj.<br>
-&gt; And also &quot;rados list-missing-obj ${PG} --format=3Djson&quot; also=
- not showing any missing or unfound objects.<br>
-<br>
-Complete a scrub of ${PG} just before you run these commands.<br>
-<br>
-&gt;<br>
-&gt; Thanks<br>
-&gt; Swami<br>
-&gt;<br>
-&gt; On Mon, Sep 23, 2019 at 8:18 PM Robert LeBlanc &lt;<a href=3D"mailto:r=
-obert-4JaGZRWAfWbajFs6igw21g@public.gmane.org" target=3D"_blank">robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org</a>&gt; wrote:<=
-br>
-&gt;&gt;<br>
-&gt;&gt; On Thu, Sep 19, 2019 at 4:34 AM M Ranga Swami Reddy<br>
-&gt;&gt; &lt;<a href=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">swam=
-ireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt; Hi-Iam using ceph 12.2.11. here I am getting a few scrub erro=
-rs. To fix these scrub error I ran the &quot;ceph pg repair &lt;pg_id&gt;&q=
-uot;.<br>
-&gt;&gt; &gt; But scrub error not going and the repair is talking long time=
- like 8-12 hours.<br>
-&gt;&gt;<br>
-&gt;&gt; Depending on the size of the PGs and how active the cluster is, it=
-<br>
-&gt;&gt; could take a long time as it takes another deep scrub to happen to=
-<br>
-&gt;&gt; clear the error status after a repair. Since it is not going away,=
-<br>
-&gt;&gt; either the problem is too complicated to automatically repair and<=
-br>
-&gt;&gt; needs to be done by hand, or the problem is repaired and when it<b=
-r>
-&gt;&gt; deep-scrubs to check it, the problem has reappeared or another pro=
-blem<br>
-&gt;&gt; was found and the disk needs to be replaced.<br>
-&gt;&gt;<br>
-&gt;&gt; Try running:<br>
-&gt;&gt; rados list-inconsistent-obj ${PG} --format=3Djson<br>
-&gt;&gt;<br>
-&gt;&gt; and see what the exact problems are.<br>
-&gt;&gt; ----------------<br>
-&gt;&gt; Robert LeBlanc<br>
-&gt;&gt; PGP Fingerprint 79A2 9CA4 6CC4 45DD A904=C2=A0 C70E E654 3BB2 FA62=
- B9F1<br>
-&gt;<br>
-&gt; _______________________________________________<br>
-&gt; ceph-users mailing list<br>
-&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-us=
-ers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-&gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=
-=3D"noreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-u=
-sers-ceph.com</a><br>
-<br>
-<br>
-<br>
--- <br>
-Cheers,<br>
-Brad<br>
-<br>
-</blockquote></div>
+  ceph: call ceph_mdsc_destroy from destroy_fs_client (2019-09-16 12:06:25 +0200)
 
---000000000000b01ee205935b3d72--
+----------------------------------------------------------------
+The highlights are:
 
---===============6816759466164667405==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+- automatic recovery of a blacklisted filesystem session (Zheng Yan).
+  This is disabled by default and can be enabled by mounting with the
+  new "recover_session=clean" option.
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+- serialize buffered reads and O_DIRECT writes (Jeff Layton).  Care is
+  taken to avoid serializing O_DIRECT reads and writes with each other,
+  this is based on the exclusion scheme from NFS.
 
---===============6816759466164667405==--
+- handle large osdmaps better in the face of fragmented memory (myself)
+
+- don't limit what security.* xattrs can be get or set (Jeff Layton).
+  We were overly restrictive here, unnecessarily preventing things like
+  file capability sets stored in security.capability from working.
+
+- allow copy_file_range() within the same inode and across different
+  filesystems within the same cluster (Luis Henriques)
+
+----------------------------------------------------------------
+David Disseldorp (1):
+      libceph: handle OSD op ceph_pagelist_append() errors
+
+Dongsheng Yang (1):
+      rbd: fix response length parameter for encoded strings
+
+Erqi Chen (1):
+      ceph: reconnect connection if session hang in opening state
+
+Ilya Dryomov (6):
+      ceph: fix indentation in __get_snap_name()
+      libceph: drop unused con parameter of calc_target()
+      rbd: pull rbd_img_request_create() dout out into the callers
+      ceph: include ceph_debug.h in cache.c
+      libceph: avoid a __vmalloc() deadlock in ceph_kvmalloc()
+      libceph: use ceph_kvmalloc() for osdmap arrays
+
+Jeff Layton (18):
+      ceph: allow copy_file_range when src and dst inode are same
+      ceph: don't list vxattrs in listxattr()
+      ceph: don't SetPageError on writepage errors
+      ceph: remove ceph_get_cap_mds and __ceph_get_cap_mds
+      ceph: fetch cap_gen under spinlock in ceph_add_cap
+      ceph: eliminate session->s_trim_caps
+      ceph: fix comments over ceph_add_cap
+      ceph: have __mark_caps_flushing return flush_tid
+      ceph: remove unneeded test in try_flush_caps
+      ceph: remove CEPH_I_NOFLUSH
+      ceph: remove incorrect comment above __send_cap
+      ceph: update the mtime when truncating up
+      ceph: don't freeze during write page faults
+      ceph: add buffered/direct exclusionary locking for reads and writes
+      ceph: turn ceph_security_invalidate_secctx into static inline
+      ceph: only set CEPH_I_SEC_INITED if we got a MAC label
+      ceph: allow arbitrary security.* xattrs
+      ceph: call ceph_mdsc_destroy from destroy_fs_client
+
+John Hubbard (2):
+      ceph: don't return a value from void function
+      ceph: use release_pages() directly
+
+Krzysztof Wilczynski (1):
+      ceph: move static keyword to the front of declarations
+
+Luis Henriques (2):
+      ceph: fix directories inode i_blkbits initialization
+      ceph: allow object copies across different filesystems in the same cluster
+
+Yan, Zheng (9):
+      libceph: add function that reset client's entity addr
+      libceph: add function that clears osd client's abort_err
+      ceph: allow closing session in restarting/reconnect state
+      ceph: track and report error of async metadata operation
+      ceph: pass filp to ceph_get_caps()
+      ceph: add helper function that forcibly reconnects to ceph cluster.
+      ceph: return -EIO if read/write against filp that lost file locks
+      ceph: invalidate all write mode filp after reconnect
+      ceph: auto reconnect after blacklisted
+
+ Documentation/filesystems/ceph.txt |  14 +++
+ drivers/block/rbd.c                |  18 ++--
+ fs/ceph/Makefile                   |   2 +-
+ fs/ceph/addr.c                     |  61 +++++++------
+ fs/ceph/cache.c                    |   2 +
+ fs/ceph/caps.c                     | 173 +++++++++++++++++++------------------
+ fs/ceph/debugfs.c                  |   1 -
+ fs/ceph/export.c                   |  60 ++++++-------
+ fs/ceph/file.c                     | 104 +++++++++++++---------
+ fs/ceph/inode.c                    |  50 ++++++-----
+ fs/ceph/io.c                       | 163 ++++++++++++++++++++++++++++++++++
+ fs/ceph/io.h                       |  12 +++
+ fs/ceph/locks.c                    |   8 +-
+ fs/ceph/mds_client.c               | 110 +++++++++++++++++------
+ fs/ceph/mds_client.h               |   8 +-
+ fs/ceph/super.c                    |  52 +++++++++--
+ fs/ceph/super.h                    |  49 +++++++----
+ fs/ceph/xattr.c                    |  76 ++--------------
+ include/linux/ceph/libceph.h       |   1 +
+ include/linux/ceph/messenger.h     |   1 +
+ include/linux/ceph/mon_client.h    |   1 +
+ include/linux/ceph/osd_client.h    |   2 +
+ net/ceph/ceph_common.c             |  37 ++++++--
+ net/ceph/messenger.c               |   6 ++
+ net/ceph/mon_client.c              |   7 ++
+ net/ceph/osd_client.c              |  65 +++++++++++---
+ net/ceph/osdmap.c                  |  69 +++++++++------
+ 27 files changed, 767 insertions(+), 385 deletions(-)
+ create mode 100644 fs/ceph/io.c
+ create mode 100644 fs/ceph/io.h
