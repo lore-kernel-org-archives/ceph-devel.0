@@ -1,142 +1,73 @@
-From: Sasha Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: download.ceph.com repository changes
-Date: Wed, 25 Sep 2019 14:55:18 -0500
-Message-ID: <CALi_L4-QGFaKhRSNUMcC+CfNnh8rBR_A8PBkVqDydSEX5ho7Ag@mail.gmail.com>
-References: <CAC-Np1zTk1G-LF3eJiqzSF8SS=h=Jrr261C4vHdgmmwcqhUeXQ@mail.gmail.com>
- <CAC-Np1zjZJW2iqLVe720u_sxQDTKjoUqL9ftrqKbMcYbZQgYFQ@mail.gmail.com>
- <CALi_L4_Sz8oFHAFyRfqDfLWGRJSHnSd=dyYUZ6P92o8VY3vGCQ@mail.gmail.com>
- <CALqRxCygXUzA0+4sY6meMO9Smq2rouei7ay0BqJD9+-du7RCYQ@mail.gmail.com>
- <CAN-GepKyROe6CRmKFjFyMvH8b5AGPomh96Q6gRVzQS-Zv-iDtQ@mail.gmail.com> <CAA6-MF_OwcHjDTM=48_pbPbp8BPf0Dd+iLTWZ+06E8akKoMxGA@mail.gmail.com>
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: RADOS EC: is it okay to reduce the number of
+ commits required for reply to client?
+Date: Wed, 25 Sep 2019 14:00:38 -0700
+Message-ID: <CAJ4mKGY0g00sZCpn-BEBh+ohNkeC6K56bNFbXVRurHWcfEzd2g@mail.gmail.com>
+References: <CAPHfcngzug4HDzHtZcb80xdf-NZFNjc2Q7r3vJWSHJufjcgKKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3159748477051378923=="
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-In-Reply-To: <CAA6-MF_OwcHjDTM=48_pbPbp8BPf0Dd+iLTWZ+06E8akKoMxGA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: Janne Johansson <icepic.dz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Unknown <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, ceph-users <ceph-users-a8pt6IJUokc@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAPHfcngzug4HDzHtZcb80xdf-NZFNjc2Q7r3vJWSHJufjcgKKQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alex Xu <alexu4993-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============3159748477051378923==
-Content-Type: multipart/alternative; boundary="00000000000071cce30593660a0f"
-
---00000000000071cce30593660a0f
-Content-Type: text/plain; charset="UTF-8"
-
-I guess for me the more crucial  questions should be answered:
-
-1.  How can a busted release be taken out of repos (some metadata update I
-hope)?
-2.  Can some fix(es) be added into a test release so they can be accessed
-by community and tested  / used before next general release is avaialble.
-I was thinking about trying to pick some critical backports for internal
-build / testing but it is not very simple for everyone.  It seems that
-shaman has some test builds going on, so may be if a track issue will
-mention that build xxxyz contains fixes for ticket 9999 "for testing
-purposes only use at your peril", it will allow the community to test the
-build and for someone who in need to get to the higher ground quickly.
-
-
-
-On Wed, Sep 25, 2019 at 12:41 AM Janne Johansson <icepic.dz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-wrote:
-
-> Den tis 24 sep. 2019 kl 23:35 skrev David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+On Thu, Sep 19, 2019 at 12:06 AM Alex Xu <alexu4993-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 >
->>
->> At work I haven't had a problem with which version of Ceph is being
->> installed because we always have local mirrors of the repo that we only
->> update with the upstream repos when we're ready to test a new version in
->> our QA environments long before we promote the version for production use.
->>
->> Problem releases have become more problematic than needed because the
->> packages were left the default packages after a bug was known because there
->> was no way to remove them from the repo. People continue to see the upgrade
->> and grabbing it not realizing it's a busted release. I've only seen that
->> happen on the ML here, but I personally will not touch a new release for at
->> least 2 weeks after it's been released even in my testing clusters.
->>
+> Hi Cephers,
 >
-> So this solution (having a mirror of your own) then becomes "when should I
-> run mirror sync" instead of "when should I make an install that pulls
-> whatever is deemed current in the repo" which might help you but still
-> would be prone to falling into the same trap, "bad" pgks gets listed as the
-> latest and hence get installed, regardless of if bad means "has bugs" or
-> just "installed before announcement is out or before announcement+2 weeks".
-> The window gets smaller but not zero. 8-/
+> We are testing the write performance of Ceph EC (Luminous, 8 + 4), and
+> noticed that tail latency is extremly high. Say, avgtime of 10th
+> commit is 40ms, acceptable as it's an all HDD cluster; 11th is 80ms,
+> doubled; then 12th is 160ms, doubled again, which is not so good. Then
+> we made a small modification and tested again, and did get a much
+> better result. The patch is quite simple (for test only of course):
 >
-> --
-> May the most significant bit of your life be positive.
-> _______________________________________________
-> ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
-> To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
+> --- a/src/osd/ECBackend.cc
+> +++ b/src/osd/ECBackend.cc
+> @@ -1188,7 +1188,7 @@ void ECBackend::handle_sub_write_reply(
+>      i->second.on_all_applied = 0;
+>      i->second.trace.event("ec write all applied");
+>    }
+> -  if (i->second.pending_commit.empty() && i->second.on_all_commit) {
+> +  if (i->second.pending_commit.size() == 2 &&
+> i->second.on_all_commit) {  // 8 + 4 - 10 = 2
+>      dout(10) << __func__ << " Calling on_all_commit on " << i->second << dendl;
+>      i->second.on_all_commit->complete(0);
+>      i->second.on_all_commit = 0;
 >
+> As far as what I see, everything still goes well (maybe because of the
+> rwlock in primary OSD? not sure though), but I'm afraid it might break
+> data consistency in some ways not aware of. So I'm writing to ask if
+> someone could kindly provide expertise comments on this or maybe share
+> any known drawbacks. Thank you!
 
---00000000000071cce30593660a0f
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Unfortunately this is one of those things that will work okay in
+everyday use but fail catastrophically if something else goes wrong.
 
-<div dir=3D"ltr">I guess for me the more crucial=C2=A0 questions should be =
-answered:<div><br></div><div>1.=C2=A0 How can a busted release be taken out=
- of repos (some metadata update I hope)?</div><div>2.=C2=A0 Can some fix(es=
-) be added into a test release so they can be accessed by community and tes=
-ted=C2=A0 / used before next general release is avaialble.=C2=A0 I was thin=
-king about trying to pick some critical backports for internal build / test=
-ing but it is not very simple for everyone.=C2=A0 It seems that shaman has =
-some test builds going on, so may be if a track issue will mention that bui=
-ld xxxyz contains fixes for ticket 9999 &quot;for testing purposes only use=
- at your peril&quot;, it will allow the community to test the build and for=
- someone who in need to get to the higher ground quickly.</div><div><br></d=
-iv><div><br></div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" cla=
-ss=3D"gmail_attr">On Wed, Sep 25, 2019 at 12:41 AM Janne Johansson &lt;<a h=
-ref=3D"mailto:icepic.dz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">icepic.dz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></=
-div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bor=
-der-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div=
- dir=3D"ltr">Den tis 24 sep. 2019 kl 23:35 skrev David Turner &lt;<a href=
-=3D"mailto:drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</=
-a>&gt;:<br></div><div class=3D"gmail_quote"><blockquote class=3D"gmail_quot=
-e" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204)=
-;padding-left:1ex"><div dir=3D"ltr"><div><br></div><div>At work I haven&#39=
-;t had a problem with which version of Ceph is being installed because we a=
-lways have local mirrors of the repo that we only update with the upstream =
-repos when we&#39;re ready to test a new version in our QA environments lon=
-g before we promote the version for production use.</div><div><br></div><di=
-v>Problem releases have become more problematic than needed because the pac=
-kages were left the default packages after a bug was known because there wa=
-s no way to remove them from the repo. People continue to see the upgrade a=
-nd grabbing it not realizing it&#39;s a busted release. I&#39;ve only seen =
-that happen on the ML here, but I personally will not touch a new release f=
-or at least 2 weeks after it&#39;s been released even in my testing cluster=
-s.</div></div></blockquote></div><div><br></div>So this solution (having a =
-mirror of your own) then becomes &quot;when should I run mirror sync&quot; =
-instead of &quot;when should I make an install that pulls whatever is deeme=
-d current in the repo&quot; which might help you but still would be prone t=
-o falling into the same trap, &quot;bad&quot; pgks gets listed as the lates=
-t and hence get installed, regardless of if bad means &quot;has bugs&quot; =
-or just &quot;installed before announcement is out or before announcement+2=
- weeks&quot;. The window gets smaller but not zero. 8-/<br clear=3D"all"><d=
-iv><br></div>-- <br><div dir=3D"ltr">May the most significant bit of your l=
-ife be positive.<br></div></div>
-_______________________________________________<br>
-ceph-users mailing list -- <a href=3D"mailto:ceph-users-a8pt6IJUokc@public.gmane.org" target=3D"=
-_blank">ceph-users-a8pt6IJUokc@public.gmane.org</a><br>
-To unsubscribe send an email to <a href=3D"mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org"=
- target=3D"_blank">ceph-users-leave-a8pt6IJUokc@public.gmane.org</a><br>
-</blockquote></div>
+Ceph assumes throughout its codebase that if a write committed to
+disk, it can be retrieved as long as k OSDs are available from the
+PG's acting set when that write was committed. But by letting writes
+"commit" on less than the full acting set, you might lose some of the
+OSDs which *did* ack the write and no longer be able to find out what
+it was even though you have >k OSDs available!
 
---00000000000071cce30593660a0f--
+This will result in a very, very confused Ceph recovery algorithm,
+lots of badness, and unhappy cluster users. :(
+-Greg
 
---===============3159748477051378923==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
-To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
-
---===============3159748477051378923==--
+>
+> PS: OSD is backended with filestore, not bluestore, if that matters.
+>
+> Regards,
+> Alex
