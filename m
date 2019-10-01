@@ -1,58 +1,76 @@
-From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-Subject: Re: Commit and Apply latency on nautilus
-Date: Tue, 1 Oct 2019 07:57:12 -0700
-Message-ID: <CAANLjFq0epgd-EPNG2Bb6WSr7XRRwMR7K205g52h=L_jJJEVdA@mail.gmail.com>
-References: <qmq36f$5pap$1@blaine.gmane.org>
- <H000007100150ea4.1569860022.sx.f1-outsourcing.eu*@MHS>
- <CALi_L4-fNi=gP9sOCWPNcok9tVG=K-rtER68n1s9bkZzwuGhEw@mail.gmail.com>
- <CAD9yTbEzPJwAqVgn2fWtjZCG8zFnAgjvtMOnO-+FJd4XQx364Q@mail.gmail.com>
- <CALi_L4_dzsu3r4FGpc6K6Ce3iz6JAZmKaVTB8LXrLqVNOH1ong@mail.gmail.com>
- <CAANLjFqW6WE_vfYd=39GVV8DgGJge+qBr52tHj+t0P3Aap4rBw@mail.gmail.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.3 15/71] rbd: fix response length parameter for encoded strings
+Date: Tue,  1 Oct 2019 12:38:25 -0400
+Message-ID: <20191001163922.14735-15-sashal@kernel.org>
+References: <20191001163922.14735-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAANLjFqW6WE_vfYd=39GVV8DgGJge+qBr52tHj+t0P3Aap4rBw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sasha Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191001163922.14735-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Dongsheng Yang <dongsheng.yang@easystack.cn>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Oct 1, 2019 at 7:54 AM Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
->
-> On Mon, Sep 30, 2019 at 5:12 PM Sasha Litvak
-> <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> > At this point, I ran out of ideas.  I changed nr_requests and readahead parameters to 128->1024 and 128->4096, tuned nodes to performance-throughput.  However, I still get high latency during benchmark testing.  I attempted to disable cache on ssd
-> >
-> > for i in {a..f}; do hdparm -W 0 -A 0 /dev/sd$i; done
-> >
-> > and I think it make things not better at all.  I have H740 and H730 controllers with drives in HBA mode.
-> >
-> > Other them converting them one by one to RAID0 I am not sure what else I can try.
-> >
-> > Any suggestions?
->
-> If you haven't already tried this, add this to your ceph.conf and
-> restart your OSDs, this should help bring down the variance in latency
-> (It will be the default in Octopus):
->
-> osd op queue = wpq
-> osd op queue cut off = high
+From: Dongsheng Yang <dongsheng.yang@easystack.cn>
 
-I should clarify. This will reduce the variance in latency for client
-OPs. If this counter is also including recovery/backfill/deep_scrub
-OP-, then the latency can still be high as these settings make
-recovery/backfill/deep_scrub less impactful to client I/O at the cost
-of them possibly being delayed a bit.
-----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+[ Upstream commit 5435d2069503e2aa89c34a94154f4f2fa4a0c9c4 ]
+
+rbd_dev_image_id() allocates space for length but passes a smaller
+value to rbd_obj_method_sync().  rbd_dev_v2_object_prefix() doesn't
+allocate space for length.  Fix both to be consistent.
+
+Signed-off-by: Dongsheng Yang <dongsheng.yang@easystack.cn>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/block/rbd.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index c8fb886aebd4e..69db7385c8df5 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -5669,17 +5669,20 @@ static int rbd_dev_v2_image_size(struct rbd_device *rbd_dev)
+ 
+ static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
+ {
++	size_t size;
+ 	void *reply_buf;
+ 	int ret;
+ 	void *p;
+ 
+-	reply_buf = kzalloc(RBD_OBJ_PREFIX_LEN_MAX, GFP_KERNEL);
++	/* Response will be an encoded string, which includes a length */
++	size = sizeof(__le32) + RBD_OBJ_PREFIX_LEN_MAX;
++	reply_buf = kzalloc(size, GFP_KERNEL);
+ 	if (!reply_buf)
+ 		return -ENOMEM;
+ 
+ 	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
+ 				  &rbd_dev->header_oloc, "get_object_prefix",
+-				  NULL, 0, reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
++				  NULL, 0, reply_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		goto out;
+@@ -6696,7 +6699,6 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+ 	dout("rbd id object name is %s\n", oid.name);
+ 
+ 	/* Response will be an encoded string, which includes a length */
+-
+ 	size = sizeof (__le32) + RBD_IMAGE_ID_LEN_MAX;
+ 	response = kzalloc(size, GFP_NOIO);
+ 	if (!response) {
+@@ -6708,7 +6710,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+ 
+ 	ret = rbd_obj_method_sync(rbd_dev, &oid, &rbd_dev->header_oloc,
+ 				  "get_id", NULL, 0,
+-				  response, RBD_IMAGE_ID_LEN_MAX);
++				  response, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret == -ENOENT) {
+ 		image_id = kstrdup("", GFP_KERNEL);
+-- 
+2.20.1
