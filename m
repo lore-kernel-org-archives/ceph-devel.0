@@ -1,10 +1,12 @@
 From: Jeff Layton <jlayton@kernel.org>
 Subject: [v4.19-stable PATCH] ceph: use ceph_evict_inode to cleanup inode's resource
-Date: Tue,  1 Oct 2019 17:24:24 -0400
-Message-ID: <20191001212425.3085-1-jlayton@kernel.org>
+Date: Tue,  1 Oct 2019 17:24:25 -0400
+Message-ID: <20191001212425.3085-2-jlayton@kernel.org>
+References: <20191001212425.3085-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20191001212425.3085-1-jlayton@kernel.org>
 Sender: stable-owner@vger.kernel.org
 To: sashal@kernel.org
 Cc: idryomov@gmail.com, zyan@redhat.com, ceph-devel@vger.kernel.org, stable@vger.kernel.org
