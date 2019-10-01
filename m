@@ -1,58 +1,76 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 05/29] ceph: fix directories inode i_blkbits initialization
-Date: Tue,  1 Oct 2019 12:43:59 -0400
-Message-ID: <20191001164423.16406-5-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 07/29] rbd: fix response length parameter for encoded strings
+Date: Tue,  1 Oct 2019 12:44:01 -0400
+Message-ID: <20191001164423.16406-7-sashal@kernel.org>
 References: <20191001164423.16406-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20191001164423.16406-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Cc: Dongsheng Yang <dongsheng.yang@easystack.cn>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: Luis Henriques <lhenriques@suse.com>
+From: Dongsheng Yang <dongsheng.yang@easystack.cn>
 
-[ Upstream commit 750670341a24cb714e624e0fd7da30900ad93752 ]
+[ Upstream commit 5435d2069503e2aa89c34a94154f4f2fa4a0c9c4 ]
 
-When filling an inode with info from the MDS, i_blkbits is being
-initialized using fl_stripe_unit, which contains the stripe unit in
-bytes.  Unfortunately, this doesn't make sense for directories as they
-have fl_stripe_unit set to '0'.  This means that i_blkbits will be set
-to 0xff, causing an UBSAN undefined behaviour in i_blocksize():
+rbd_dev_image_id() allocates space for length but passes a smaller
+value to rbd_obj_method_sync().  rbd_dev_v2_object_prefix() doesn't
+allocate space for length.  Fix both to be consistent.
 
-  UBSAN: Undefined behaviour in ./include/linux/fs.h:731:12
-  shift exponent 255 is too large for 32-bit type 'int'
-
-Fix this by initializing i_blkbits to CEPH_BLOCK_SHIFT if fl_stripe_unit
-is zero.
-
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Dongsheng Yang <dongsheng.yang@easystack.cn>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- fs/ceph/inode.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ drivers/block/rbd.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9bda8c7a80a05..879bc08250931 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -789,7 +789,12 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
- 	ci->i_version = le64_to_cpu(info->version);
- 	inode->i_version++;
- 	inode->i_rdev = le32_to_cpu(info->rdev);
--	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
-+	/* directories have fl_stripe_unit set to zero */
-+	if (le32_to_cpu(info->layout.fl_stripe_unit))
-+		inode->i_blkbits =
-+			fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
-+	else
-+		inode->i_blkbits = CEPH_BLOCK_SHIFT;
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index f2b1994d58a06..4a9bff6ec0756 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -4911,17 +4911,20 @@ static int rbd_dev_v2_image_size(struct rbd_device *rbd_dev)
  
- 	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
- 	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
+ static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
+ {
++	size_t size;
+ 	void *reply_buf;
+ 	int ret;
+ 	void *p;
+ 
+-	reply_buf = kzalloc(RBD_OBJ_PREFIX_LEN_MAX, GFP_KERNEL);
++	/* Response will be an encoded string, which includes a length */
++	size = sizeof(__le32) + RBD_OBJ_PREFIX_LEN_MAX;
++	reply_buf = kzalloc(size, GFP_KERNEL);
+ 	if (!reply_buf)
+ 		return -ENOMEM;
+ 
+ 	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
+ 				  &rbd_dev->header_oloc, "get_object_prefix",
+-				  NULL, 0, reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
++				  NULL, 0, reply_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		goto out;
+@@ -5815,7 +5818,6 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+ 	dout("rbd id object name is %s\n", oid.name);
+ 
+ 	/* Response will be an encoded string, which includes a length */
+-
+ 	size = sizeof (__le32) + RBD_IMAGE_ID_LEN_MAX;
+ 	response = kzalloc(size, GFP_NOIO);
+ 	if (!response) {
+@@ -5827,7 +5829,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+ 
+ 	ret = rbd_obj_method_sync(rbd_dev, &oid, &rbd_dev->header_oloc,
+ 				  "get_id", NULL, 0,
+-				  response, RBD_IMAGE_ID_LEN_MAX);
++				  response, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret == -ENOENT) {
+ 		image_id = kstrdup("", GFP_KERNEL);
 -- 
 2.20.1
