@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 05/15] ceph: fix directories inode i_blkbits initialization
-Date: Tue,  1 Oct 2019 12:45:23 -0400
-Message-ID: <20191001164533.16915-5-sashal@kernel.org>
-References: <20191001164533.16915-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 05/19] ceph: fix directories inode i_blkbits initialization
+Date: Tue,  1 Oct 2019 12:44:51 -0400
+Message-ID: <20191001164505.16708-5-sashal@kernel.org>
+References: <20191001164505.16708-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191001164533.16915-1-sashal@kernel.org>
+In-Reply-To: <20191001164505.16708-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
@@ -37,10 +37,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index a663b676d5661..2ad3f4ab4dcfa 100644
+index 339fdf6355df7..7fcddaaca8a5d 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -725,7 +725,12 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+@@ -800,7 +800,12 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
  	ci->i_version = le64_to_cpu(info->version);
  	inode->i_version++;
  	inode->i_rdev = le32_to_cpu(info->rdev);
