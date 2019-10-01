@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.2 13/63] ceph: reconnect connection if session hang in opening state
-Date: Tue,  1 Oct 2019 12:40:35 -0400
-Message-ID: <20191001164125.15398-13-sashal@kernel.org>
-References: <20191001164125.15398-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.3 14/71] ceph: reconnect connection if session hang in opening state
+Date: Tue,  1 Oct 2019 12:38:24 -0400
+Message-ID: <20191001163922.14735-14-sashal@kernel.org>
+References: <20191001163922.14735-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191001164125.15398-1-sashal@kernel.org>
+In-Reply-To: <20191001163922.14735-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Erqi Chen <chenerqi@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
@@ -36,10 +36,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index c8a9b89b922d7..b8e268e6add27 100644
+index 920e9f048bd8f..b11af7d8e8e93 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -4033,7 +4033,9 @@ static void delayed_work(struct work_struct *work)
+@@ -4044,7 +4044,9 @@ static void delayed_work(struct work_struct *work)
  				pr_info("mds%d hung\n", s->s_mds);
  			}
  		}
