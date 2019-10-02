@@ -1,107 +1,50 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [v4.19-stable PATCH] ceph: use ceph_evict_inode to cleanup inode's resource
-Date: Tue,  1 Oct 2019 17:24:25 -0400
-Message-ID: <20191001212425.3085-2-jlayton@kernel.org>
+From: Sasha Levin <sashal@kernel.org>
+Subject: Re: [v4.19-stable PATCH] ceph: use ceph_evict_inode to cleanup
+ inode's resource
+Date: Tue, 1 Oct 2019 20:17:27 -0400
+Message-ID: <20191002001727.GI17454@sasha-vm>
 References: <20191001212425.3085-1-jlayton@kernel.org>
+ <20191001212425.3085-2-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii; format=flowed
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20191001212425.3085-1-jlayton@kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20191001212425.3085-2-jlayton@kernel.org>
 Sender: stable-owner@vger.kernel.org
-To: sashal@kernel.org
+To: Jeff Layton <jlayton@kernel.org>
 Cc: idryomov@gmail.com, zyan@redhat.com, ceph-devel@vger.kernel.org, stable@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: "Yan, Zheng" <zyan@redhat.com>
+On Tue, Oct 01, 2019 at 05:24:25PM -0400, Jeff Layton wrote:
+>From: "Yan, Zheng" <zyan@redhat.com>
+>
+>[ Upstream commit 87bc5b895d94a0f40fe170d4cf5771c8e8f85d15 ]
+>
+>remove_session_caps() relies on __wait_on_freeing_inode(), to wait for
+>freeing inode to remove its caps. But VFS wakes freeing inode waiters
+>before calling destroy_inode().
+>
+>[ jlayton: mainline moved to ->free_inode before the original patch was
+>	   merged. This backport reinstates ceph_destroy_inode and just
+>	   has it do the call_rcu call. ]
+>
+>Cc: stable@vger.kernel.org
+>Link: https://tracker.ceph.com/issues/40102
+>Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+>Reviewed-by: Jeff Layton <jlayton@redhat.com>
+>Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+>Signed-off-by: Sasha Levin <sashal@kernel.org>
+>---
+> fs/ceph/inode.c | 10 ++++++++--
+> fs/ceph/super.c |  1 +
+> fs/ceph/super.h |  1 +
+> 3 files changed, 10 insertions(+), 2 deletions(-)
+>
+>Hi Sasha,
+>
+>Sorry for the resend -- forgot to cc stable@vger on the first one.
+>
+>This patch should be applied after commit 81281039999 is reverted.
+>Sorry for the mixup!
 
-[ Upstream commit 87bc5b895d94a0f40fe170d4cf5771c8e8f85d15 ]
-
-remove_session_caps() relies on __wait_on_freeing_inode(), to wait for
-freeing inode to remove its caps. But VFS wakes freeing inode waiters
-before calling destroy_inode().
-
-[ jlayton: mainline moved to ->free_inode before the original patch was
-	   merged. This backport reinstates ceph_destroy_inode and just
-	   has it do the call_rcu call. ]
-
-Cc: stable@vger.kernel.org
-Link: https://tracker.ceph.com/issues/40102
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- fs/ceph/inode.c | 10 ++++++++--
- fs/ceph/super.c |  1 +
- fs/ceph/super.h |  1 +
- 3 files changed, 10 insertions(+), 2 deletions(-)
-
-Hi Sasha,
-
-Sorry for the resend -- forgot to cc stable@vger on the first one.
-
-This patch should be applied after commit 81281039999 is reverted.
-Sorry for the mixup!
-
--- Jeff
-
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 11f19432a74c..c06845237cba 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -528,13 +528,16 @@ static void ceph_i_callback(struct rcu_head *head)
- 	kmem_cache_free(ceph_inode_cachep, ci);
- }
- 
--void ceph_destroy_inode(struct inode *inode)
-+void ceph_evict_inode(struct inode *inode)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_inode_frag *frag;
- 	struct rb_node *n;
- 
--	dout("destroy_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
-+	dout("evict_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
-+
-+	truncate_inode_pages_final(&inode->i_data);
-+	clear_inode(inode);
- 
- 	ceph_fscache_unregister_inode_cookie(ci);
- 
-@@ -576,7 +579,10 @@ void ceph_destroy_inode(struct inode *inode)
- 		ceph_buffer_put(ci->i_xattrs.prealloc_blob);
- 
- 	ceph_put_string(rcu_dereference_raw(ci->i_layout.pool_ns));
-+}
- 
-+void ceph_destroy_inode(struct inode *inode)
-+{
- 	call_rcu(&inode->i_rcu, ceph_i_callback);
- }
- 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c5cf46e43f2e..ccab249a37f6 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -830,6 +830,7 @@ static const struct super_operations ceph_super_ops = {
- 	.destroy_inode	= ceph_destroy_inode,
- 	.write_inode    = ceph_write_inode,
- 	.drop_inode	= ceph_drop_inode,
-+	.evict_inode	= ceph_evict_inode,
- 	.sync_fs        = ceph_sync_fs,
- 	.put_super	= ceph_put_super,
- 	.remount_fs	= ceph_remount,
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 018019309790..8d3eabf06d66 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -854,6 +854,7 @@ static inline bool __ceph_have_pending_cap_snap(struct ceph_inode_info *ci)
- extern const struct inode_operations ceph_file_iops;
- 
- extern struct inode *ceph_alloc_inode(struct super_block *sb);
-+extern void ceph_evict_inode(struct inode *inode);
- extern void ceph_destroy_inode(struct inode *inode);
- extern int ceph_drop_inode(struct inode *inode);
- 
--- 
-2.21.0
+I've queued it up for the next release, thank you!
