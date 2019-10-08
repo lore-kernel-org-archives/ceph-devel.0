@@ -1,59 +1,92 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: rgw: multisite support
-Date: Thu, 3 Oct 2019 15:28:05 +0530
-Message-ID: <CANA9Uk5f3HB7oSkiC6NGHnj6gcV1eQ_VU_h2f=9mmOB7GJdY-A@mail.gmail.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: Re: [PATCH AUTOSEL 5.3 15/71] rbd: fix response length parameter for
+ encoded strings
+Date: Tue, 8 Oct 2019 17:29:44 -0400
+Message-ID: <20191008212944.GD1396@sasha-vm>
+References: <20191001163922.14735-1-sashal@kernel.org>
+ <20191001163922.14735-15-sashal@kernel.org>
+ <CAOi1vP-2iSHxJVOabN05+NCiSZ0DxBC9fGN=5cx98mk5RvaDZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7257407444233645890=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP-2iSHxJVOabN05+NCiSZ0DxBC9fGN=5cx98mk5RvaDZA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Dongsheng Yang <dongsheng.yang@easystack.cn>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============7257407444233645890==
-Content-Type: multipart/alternative; boundary="000000000000dae2170593fe9fb9"
+On Tue, Oct 01, 2019 at 07:15:49PM +0200, Ilya Dryomov wrote:
+>On Tue, Oct 1, 2019 at 6:39 PM Sasha Levin <sashal@kernel.org> wrote:
+>>
+>> From: Dongsheng Yang <dongsheng.yang@easystack.cn>
+>>
+>> [ Upstream commit 5435d2069503e2aa89c34a94154f4f2fa4a0c9c4 ]
+>>
+>> rbd_dev_image_id() allocates space for length but passes a smaller
+>> value to rbd_obj_method_sync().  rbd_dev_v2_object_prefix() doesn't
+>> allocate space for length.  Fix both to be consistent.
+>>
+>> Signed-off-by: Dongsheng Yang <dongsheng.yang@easystack.cn>
+>> Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+>> Signed-off-by: Sasha Levin <sashal@kernel.org>
+>> ---
+>>  drivers/block/rbd.c | 10 ++++++----
+>>  1 file changed, 6 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index c8fb886aebd4e..69db7385c8df5 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -5669,17 +5669,20 @@ static int rbd_dev_v2_image_size(struct rbd_device *rbd_dev)
+>>
+>>  static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
+>>  {
+>> +       size_t size;
+>>         void *reply_buf;
+>>         int ret;
+>>         void *p;
+>>
+>> -       reply_buf = kzalloc(RBD_OBJ_PREFIX_LEN_MAX, GFP_KERNEL);
+>> +       /* Response will be an encoded string, which includes a length */
+>> +       size = sizeof(__le32) + RBD_OBJ_PREFIX_LEN_MAX;
+>> +       reply_buf = kzalloc(size, GFP_KERNEL);
+>>         if (!reply_buf)
+>>                 return -ENOMEM;
+>>
+>>         ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
+>>                                   &rbd_dev->header_oloc, "get_object_prefix",
+>> -                                 NULL, 0, reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
+>> +                                 NULL, 0, reply_buf, size);
+>>         dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+>>         if (ret < 0)
+>>                 goto out;
+>> @@ -6696,7 +6699,6 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+>>         dout("rbd id object name is %s\n", oid.name);
+>>
+>>         /* Response will be an encoded string, which includes a length */
+>> -
+>>         size = sizeof (__le32) + RBD_IMAGE_ID_LEN_MAX;
+>>         response = kzalloc(size, GFP_NOIO);
+>>         if (!response) {
+>> @@ -6708,7 +6710,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+>>
+>>         ret = rbd_obj_method_sync(rbd_dev, &oid, &rbd_dev->header_oloc,
+>>                                   "get_id", NULL, 0,
+>> -                                 response, RBD_IMAGE_ID_LEN_MAX);
+>> +                                 response, size);
+>>         dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+>>         if (ret == -ENOENT) {
+>>                 image_id = kstrdup("", GFP_KERNEL);
+>
+>Hi Sasha,
+>
+>This patch just made things consistent, there was no bug here.  I don't
+>think it should be backported.
 
---000000000000dae2170593fe9fb9
-Content-Type: text/plain; charset="UTF-8"
+I'll drop it, thanks!
 
-Hi,
-Iam using the 2 ceph clusters in diff DCs (away by 500 KM) with ceph
-12.2.11 version.
-Now, I want to setup rgw multisite using the above 2 ceph clusters.
-
-is it possible? if yes, please share good document to do the same.
-
-Thanks
-Swami
-
---000000000000dae2170593fe9fb9
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi,<div>Iam using the 2 ceph clusters=C2=A0in diff DCs (aw=
-ay by 500 KM) with ceph 12.2.11 version.</div><div>Now, I want to setup rgw=
- multisite using the above 2 ceph clusters.</div><div><br></div><div>is it =
-possible? if yes, please share good document to do the same.</div><div><br>=
-</div><div>Thanks</div><div>Swami</div></div>
-
---000000000000dae2170593fe9fb9--
-
---===============7257407444233645890==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============7257407444233645890==--
+-- 
+Thanks,
+Sasha
