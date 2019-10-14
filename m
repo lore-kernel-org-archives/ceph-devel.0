@@ -1,22 +1,23 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] function dispatch should return if mds session does not exist
-Date: Mon, 14 Oct 2019 11:36:09 +0200
-Message-ID: <CAOi1vP-tvu-p4J+OJKcu209zn_pNFr_=sYhZ5=1ChgejQzHJpg@mail.gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH] function dispatch should return if mds session does not
+ exist
+Date: Mon, 14 Oct 2019 06:00:58 -0400
+Message-ID: <6157a498a381e63bbf19094b5d59137f62be7c7f.camel@kernel.org>
 References: <20191014090059.21871-1-gmayyyha@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20191014090059.21871-1-gmayyyha@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Yanhu Cao <gmayyyha@gmail.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 14, 2019 at 11:01 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
->
+On Mon, 2019-10-14 at 17:00 +0800, Yanhu Cao wrote:
 > we shouldn't call ceph_msg_put, otherwise libceph will pass
 > invalid pointer to mm.
->
+> 
 > kernel panic - not syncing: fatal exception
 >     [5452201.213885] ------------[ cut here ]------------
 >     [5452201.213889] kernel BUG at mm/slub.c:3901!
@@ -52,43 +53,42 @@ On Mon, Oct 14, 2019 at 11:01 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
 >     [5452201.215112]  ? max_active_store+0x80/0x80
 >     [5452201.215139]  ? kthread_bind+0x10/0x10
 >     [5452201.215167]  ret_from_fork+0x1f/0x30
->
+> 
 > Link: https://tracker.ceph.com/issues/42288
->
+> 
 > Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
 > ---
 >  fs/ceph/mds_client.c | 3 +--
 >  1 file changed, 1 insertion(+), 2 deletions(-)
->
+> 
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
 > index a8a8f84f3bbf..066358fea347 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
 > @@ -4635,7 +4635,7 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
->         mutex_lock(&mdsc->mutex);
->         if (__verify_registered_session(mdsc, s) < 0) {
->                 mutex_unlock(&mdsc->mutex);
-> -               goto out;
-> +               return;
->         }
->         mutex_unlock(&mdsc->mutex);
->
+>  	mutex_lock(&mdsc->mutex);
+>  	if (__verify_registered_session(mdsc, s) < 0) {
+>  		mutex_unlock(&mdsc->mutex);
+> -		goto out;
+> +		return;
+>  	}
+>  	mutex_unlock(&mdsc->mutex);
+>  
 > @@ -4672,7 +4672,6 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
->                 pr_err("received unknown message type %d %s\n", type,
->                        ceph_msg_type_name(type));
->         }
+>  		pr_err("received unknown message type %d %s\n", type,
+>  		       ceph_msg_type_name(type));
+>  	}
 > -out:
->         ceph_msg_put(msg);
+>  	ceph_msg_put(msg);
 >  }
->
+>  
 
-Hi Yanhu,
+This doesn't look quite right. We hold a msg reference here. If we don't
+call ceph_msg_put on it then that reference will leak.
 
-This doesn't look right to me.  The messenger hands its reference to
-the dispatch function, the dispatch function is responsible for putting
-it.  Even if the session isn't registered, the message should still be
-valid and should still be freed.  The bug is somewhere else...
+Do you know which pointer it was trying to kfree at the time of the
+crash? What's your rationale for thinking that this is the problem?
 
 Thanks,
-
-                Ilya
+-- 
+Jeff Layton <jlayton@kernel.org>
