@@ -1,96 +1,81 @@
-From: Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH AUTOSEL 5.3 15/71] rbd: fix response length parameter for
- encoded strings
-Date: Tue, 8 Oct 2019 21:45:18 -0600
-Message-ID: <ecddc946-4fbf-4bb2-aac2-689135473f36@kernel.dk>
-References: <20191001163922.14735-1-sashal@kernel.org>
- <20191001163922.14735-15-sashal@kernel.org>
- <CAOi1vP-2iSHxJVOabN05+NCiSZ0DxBC9fGN=5cx98mk5RvaDZA@mail.gmail.com>
- <20191008212944.GD1396@sasha-vm>
+From: Yanhu Cao <gmayyyha@gmail.com>
+Subject: [PATCH] function dispatch should return if mds session does not exist
+Date: Mon, 14 Oct 2019 17:00:59 +0800
+Message-ID: <20191014090059.21871-1-gmayyyha@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191008212944.GD1396@sasha-vm>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sasha Levin <sashal@kernel.org>, Ilya Dryomov <idryomov@gmail.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Dongsheng Yang <dongsheng.yang@easystack.cn>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
+To: jlayton@kernel.org
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yanhu Cao <gmayyyha@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On 10/8/19 3:29 PM, Sasha Levin wrote:
-> On Tue, Oct 01, 2019 at 07:15:49PM +0200, Ilya Dryomov wrote:
->> On Tue, Oct 1, 2019 at 6:39 PM Sasha Levin <sashal@kernel.org> wrote:
->>>
->>> From: Dongsheng Yang <dongsheng.yang@easystack.cn>
->>>
->>> [ Upstream commit 5435d2069503e2aa89c34a94154f4f2fa4a0c9c4 ]
->>>
->>> rbd_dev_image_id() allocates space for length but passes a smaller
->>> value to rbd_obj_method_sync().  rbd_dev_v2_object_prefix() doesn't
->>> allocate space for length.  Fix both to be consistent.
->>>
->>> Signed-off-by: Dongsheng Yang <dongsheng.yang@easystack.cn>
->>> Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
->>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->>> Signed-off-by: Sasha Levin <sashal@kernel.org>
->>> ---
->>>   drivers/block/rbd.c | 10 ++++++----
->>>   1 file changed, 6 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index c8fb886aebd4e..69db7385c8df5 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -5669,17 +5669,20 @@ static int rbd_dev_v2_image_size(struct rbd_device *rbd_dev)
->>>
->>>   static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
->>>   {
->>> +       size_t size;
->>>          void *reply_buf;
->>>          int ret;
->>>          void *p;
->>>
->>> -       reply_buf = kzalloc(RBD_OBJ_PREFIX_LEN_MAX, GFP_KERNEL);
->>> +       /* Response will be an encoded string, which includes a length */
->>> +       size = sizeof(__le32) + RBD_OBJ_PREFIX_LEN_MAX;
->>> +       reply_buf = kzalloc(size, GFP_KERNEL);
->>>          if (!reply_buf)
->>>                  return -ENOMEM;
->>>
->>>          ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
->>>                                    &rbd_dev->header_oloc, "get_object_prefix",
->>> -                                 NULL, 0, reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
->>> +                                 NULL, 0, reply_buf, size);
->>>          dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
->>>          if (ret < 0)
->>>                  goto out;
->>> @@ -6696,7 +6699,6 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
->>>          dout("rbd id object name is %s\n", oid.name);
->>>
->>>          /* Response will be an encoded string, which includes a length */
->>> -
->>>          size = sizeof (__le32) + RBD_IMAGE_ID_LEN_MAX;
->>>          response = kzalloc(size, GFP_NOIO);
->>>          if (!response) {
->>> @@ -6708,7 +6710,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
->>>
->>>          ret = rbd_obj_method_sync(rbd_dev, &oid, &rbd_dev->header_oloc,
->>>                                    "get_id", NULL, 0,
->>> -                                 response, RBD_IMAGE_ID_LEN_MAX);
->>> +                                 response, size);
->>>          dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
->>>          if (ret == -ENOENT) {
->>>                  image_id = kstrdup("", GFP_KERNEL);
->>
->> Hi Sasha,
->>
->> This patch just made things consistent, there was no bug here.  I don't
->> think it should be backported.
-> 
-> I'll drop it, thanks!
+we shouldn't call ceph_msg_put, otherwise libceph will pass
+invalid pointer to mm.
 
-How did it even get picked up, it's not marked for stable?
+kernel panic - not syncing: fatal exception
+    [5452201.213885] ------------[ cut here ]------------
+    [5452201.213889] kernel BUG at mm/slub.c:3901!
+    [5452201.213938] invalid opcode: 0000 [#1] SMP PTI
+    [5452201.213971] CPU: 35 PID: 3037447 Comm: kworker/35:1 Kdump: loaded Not tainted 4.19.15 #1
+    [5452201.214020] Hardware name: HP ProLiant DL380 Gen9/ProLiant DL380 Gen9, BIOS P89 01/22/2018
+    [5452201.214088] Workqueue: ceph-msgr ceph_con_workfn [libceph]
+    [5452201.214129] RIP: 0010:kfree+0x15b/0x170
+    [5452201.214156] Code: 8b 02 f6 c4 80 75 08 49 8b 42 08 a8 01 74 1b 49 8b 02 31 f6 f6 c4 80 74 05 41 0f b6 72 51 5b 5d 41 5c 4c 89 d7 e9 95 03 f9 ff <0f> 0b 48 83 e8 01 e9 01 ff ff ff 49 83 ea 01 e9 e9 fe ff ff 90 0f
+    [5452201.214262] RSP: 0018:ffffb8c3a0607cb0 EFLAGS: 00010246
+    [5452201.214296] RAX: ffffeee840000008 RBX: ffff9130c0000000 RCX: 0000000080200016
+    [5452201.214339] RDX: 00006f0ec0000000 RSI: 0000000000000000 RDI: ffff9130c0000000
+    [5452201.214383] RBP: ffff91107f823970 R08: 0000000000000001 R09: 0000000000000000
+    [5452201.214426] R10: ffffeee840000000 R11: 0000000000000001 R12: ffffffffc076c45d
+    [5452201.214469] R13: ffff91107f823970 R14: ffff91107f8239e0 R15: ffff91107f823900
+    [5452201.214513] FS:  0000000000000000(0000) GS:ffff9110bfbc0000(0000) knlGS:0000000000000000
+    [5452201.214562] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    [5452201.214598] CR2: 000055993ab29620 CR3: 0000003a1e00a003 CR4: 00000000003606e0
+    [5452201.214641] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+    [5452201.214685] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+    [5452201.214728] Call Trace:
+    [5452201.214759]  ceph_msg_release+0x15d/0x190 [libceph]
+    [5452201.214811]  dispatch+0x66/0xa50 [ceph]
+    [5452201.214846]  try_read+0x7f3/0x11d0 [libceph]
+    [5452201.214878]  ? dequeue_entity+0x37e/0x7e0
+    [5452201.214907]  ? pick_next_task_fair+0x291/0x610
+    [5452201.214937]  ? dequeue_task_fair+0x5d/0x700
+    [5452201.214966]  ? __switch_to+0x8c/0x470
+    [5452201.214999]  ceph_con_workfn+0xa2/0x5b0 [libceph]
+    [5452201.215033]  process_one_work+0x16b/0x370
+    [5452201.215062]  worker_thread+0x49/0x3f0
+    [5452201.215089]  kthread+0xf5/0x130
+    [5452201.215112]  ? max_active_store+0x80/0x80
+    [5452201.215139]  ? kthread_bind+0x10/0x10
+    [5452201.215167]  ret_from_fork+0x1f/0x30
 
+Link: https://tracker.ceph.com/issues/42288
+
+Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+---
+ fs/ceph/mds_client.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a8a8f84f3bbf..066358fea347 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4635,7 +4635,7 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+ 	mutex_lock(&mdsc->mutex);
+ 	if (__verify_registered_session(mdsc, s) < 0) {
+ 		mutex_unlock(&mdsc->mutex);
+-		goto out;
++		return;
+ 	}
+ 	mutex_unlock(&mdsc->mutex);
+ 
+@@ -4672,7 +4672,6 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+ 		pr_err("received unknown message type %d %s\n", type,
+ 		       ceph_msg_type_name(type));
+ 	}
+-out:
+ 	ceph_msg_put(msg);
+ }
+ 
 -- 
-Jens Axboe
+2.21.0 (Apple Git-122)
