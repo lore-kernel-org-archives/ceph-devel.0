@@ -1,83 +1,91 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH v2] ceph: Fix use-after-free in __ceph_remove_cap
-Date: Fri, 25 Oct 2019 14:05:24 +0100
-Message-ID: <20191025130524.31755-1-lhenriques@suse.com>
-References: <9c1fe73500ca7dece15c73d7534b9e0ec417c83a.camel@kernel.org>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.3 76/99] rbd: cancel lock_dwork if the wait is interrupted
+Date: Sat, 26 Oct 2019 09:15:37 -0400
+Message-ID: <20191026131600.2507-76-sashal@kernel.org>
+References: <20191026131600.2507-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <9c1fe73500ca7dece15c73d7534b9e0ec417c83a.camel@kernel.org>
+In-Reply-To: <20191026131600.2507-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <ukernel@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Dongsheng Yang <dongsheng.yang@easystack.cn>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-KASAN reports a use-after-free when running xfstest generic/531, with the
-following trace:
+From: Dongsheng Yang <dongsheng.yang@easystack.cn>
 
-[  293.903362]  kasan_report+0xe/0x20
-[  293.903365]  rb_erase+0x1f/0x790
-[  293.903370]  __ceph_remove_cap+0x201/0x370
-[  293.903375]  __ceph_remove_caps+0x4b/0x70
-[  293.903380]  ceph_evict_inode+0x4e/0x360
-[  293.903386]  evict+0x169/0x290
-[  293.903390]  __dentry_kill+0x16f/0x250
-[  293.903394]  dput+0x1c6/0x440
-[  293.903398]  __fput+0x184/0x330
-[  293.903404]  task_work_run+0xb9/0xe0
-[  293.903410]  exit_to_usermode_loop+0xd3/0xe0
-[  293.903413]  do_syscall_64+0x1a0/0x1c0
-[  293.903417]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+[ Upstream commit 25e6be21230d3208d687dad90b6e43419013c351 ]
 
-This happens because __ceph_remove_cap() may queue a cap release
-(__ceph_queue_cap_release) which can be scheduled before that cap is
-removed from the inode list with
+There is a warning message in my test with below steps:
 
-	rb_erase(&cap->ci_node, &ci->i_caps);
+  # rbd bench --io-type write --io-size 4K --io-threads 1 --io-pattern rand test &
+  # sleep 5
+  # pkill -9 rbd
+  # rbd map test &
+  # sleep 5
+  # pkill rbd
 
-And, when this finally happens, the use-after-free will occur.
+The reason is that the rbd_add_acquire_lock() is interruptable,
+that means, when we kill the waiting on ->acquire_wait, the lock_dwork
+could be still running.
 
-This can be fixed by removing the cap from the inode list before being
-removed from the session list, and thus eliminating the risk of an UAF.
+1. do_rbd_add()					2. lock_dwork
+rbd_add_acquire_lock()
+  - queue_delayed_work()
+						lock_dwork queued
+    - wait_for_completion_killable_timeout()  <-- kill happen
+rbd_dev_image_unlock()	<-- UNLOCKED now, nothing to do.
+rbd_dev_device_release()
+rbd_dev_image_release()
+  - ...
+						lock successed here
+     - cancel_delayed_work_sync(&rbd_dev->lock_dwork)
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
+Then when we reach the rbd_dev_free(), WARN_ON is triggered because
+lock_state is not RBD_LOCK_STATE_UNLOCKED.
+
+To fix it, this commit make sure the lock_dwork was finished before
+calling rbd_dev_image_unlock().
+
+On the other hand, this would not happend in do_rbd_remove(), because
+after rbd mapped, lock_dwork will only be queued for IO request, and
+request will continue unless lock_dwork finished. when we call
+rbd_dev_image_unlock() in do_rbd_remove(), all requests are done.
+That means, lock_state should not be locked again after
+rbd_dev_image_unlock().
+
+[ Cancel lock_dwork in rbd_add_acquire_lock(), only if the wait is
+  interrupted. ]
+
+Fixes: 637cd060537d ("rbd: new exclusive lock wait/wake code")
+Signed-off-by: Dongsheng Yang <dongsheng.yang@easystack.cn>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
-Hi!
+ drivers/block/rbd.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-So, after spending some time trying to find possible races throught code
-review and testing, I modified the fix according to Jeff's suggestion.
-
-Cheers,
-Luis
-
-fs/ceph/caps.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d3b9c9d5c1bd..a9ce858c37d0 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1058,6 +1058,11 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index c8fb886aebd4e..e6369b9f33873 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -6632,10 +6632,13 @@ static int rbd_add_acquire_lock(struct rbd_device *rbd_dev)
+ 	queue_delayed_work(rbd_dev->task_wq, &rbd_dev->lock_dwork, 0);
+ 	ret = wait_for_completion_killable_timeout(&rbd_dev->acquire_wait,
+ 			    ceph_timeout_jiffies(rbd_dev->opts->lock_timeout));
+-	if (ret > 0)
++	if (ret > 0) {
+ 		ret = rbd_dev->acquire_err;
+-	else if (!ret)
+-		ret = -ETIMEDOUT;
++	} else {
++		cancel_delayed_work_sync(&rbd_dev->lock_dwork);
++		if (!ret)
++			ret = -ETIMEDOUT;
++	}
  
- 	dout("__ceph_remove_cap %p from %p\n", cap, &ci->vfs_inode);
- 
-+	/* remove from inode list */
-+	rb_erase(&cap->ci_node, &ci->i_caps);
-+	if (ci->i_auth_cap == cap)
-+		ci->i_auth_cap = NULL;
-+
- 	/* remove from session list */
- 	spin_lock(&session->s_cap_lock);
- 	if (session->s_cap_iterator == cap) {
-@@ -1091,11 +1096,6 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
- 
- 	spin_unlock(&session->s_cap_lock);
- 
--	/* remove from inode list */
--	rb_erase(&cap->ci_node, &ci->i_caps);
--	if (ci->i_auth_cap == cap)
--		ci->i_auth_cap = NULL;
--
- 	if (removed)
- 		ceph_put_cap(mdsc, cap);
- 
+ 	if (ret) {
+ 		rbd_warn(rbd_dev, "failed to acquire exclusive lock: %ld", ret);
+-- 
+2.20.1
