@@ -1,51 +1,103 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.4-rc7
-Date: Fri,  8 Nov 2019 16:58:53 +0100
-Message-ID: <20191108155853.23314-1-idryomov@gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [RFC PATCH 0/2] ceph: safely use 'copy-from' Op on Octopus OSDs
+Date: Fri, 8 Nov 2019 16:47:58 +0000
+Message-ID: <20191108164758.GA1760@hermes.olymp>
+References: <20191108141555.31176-1-lhenriques@suse.com>
+ <CAOi1vP-sVQKvpiPLoZ=9s7Hy=c2eQRocxSs1nPrXAUCbbZUZ-g@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP-sVQKvpiPLoZ=9s7Hy=c2eQRocxSs1nPrXAUCbbZUZ-g@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <ukernel@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Fri, Nov 08, 2019 at 04:15:35PM +0100, Ilya Dryomov wrote:
+> On Fri, Nov 8, 2019 at 3:15 PM Luis Henriques <lhenriques@suse.com> wrote:
+> >
+> > Hi!
+> >
+> > (Sorry for the long cover letter!)
+> 
+> This is exactly what cover letters are for!
+> 
+> >
+> > Since the fix for [1] has finally been merged and should be available in
+> > the next (Octopus) ceph release, I'm trying to clean-up my kernel client
+> > patch that tries to find out whether or not it's safe to use the
+> > 'copy-from' RADOS operation for copy_file_range.
+> >
+> > So, the fix for [1] was to modify the 'copy-from' operation to allow
+> > clients to optionally (using the CEPH_OSD_COPY_FROM_FLAG_TRUNCATE_SEQ
+> > flag) send the extra truncate_seq and truncate_size parameters.  Since
+> > only Octopus will have this fix (no backports planned), the client
+> > simply needs to ensure the OSDs being used have SERVER_OCTOPUS in their
+> > features.
+> >
+> > My initial solution was to add an extra test in __submit_request,
+> > looping all the request ops and checking if the connection has the
+> > required features for that operation.  Obviously, at the moment only the
+> > copy-from operation has a restriction but I guess others may be added in
+> > the future.  I believe that doing this at this point (__submit_request)
+> > allows to cover cases where a cluster is being upgraded to Octopus and
+> > we have different OSDs running with different feature bits.
+> >
+> > Unfortunately, this solution is racy because the connection state
+> > machine may be changing and the peer_features field isn't yet set.  For
+> > example: if the connection to an OSD is being re-open when we're about
+> > to check the features, the con->state will be CON_STATE_PREOPEN and the
+> > con->peer_features will be 0.  I tried to find ways to move the feature
+> > check further down in the stack, but that can't be easily done without
+> > adding more infrastructure.  A solution that came to my mind was to add
+> > a new con->ops, invoked in the context of ceph_con_workfn, under the
+> > con->mutex.  This callback could then verify the available features,
+> > aborting the operation if needed.
+> >
+> > Note that the race in this patchset doesn't seem to be a huge problem,
+> > other than occasionally reverting to a VFS generic copy_file_range, as
+> > -EOPNOTSUPP will be returned here.  But it's still a race, and there are
+> > probably other cases that I'm missing.
+> >
+> > Anyway, maybe I'm missing an obvious solution for checking these OSD
+> > features, but I'm open to any suggestions on other options (or some
+> > feedback on the new callback in ceph_connection_operations option).
+> >
+> > [1] https://tracker.ceph.com/issues/37378
+> 
+> If the OSD checked for unknown flags, like newer syscalls do, it would
+> be super easy, but it looks like it doesn't.
+> 
+> An obvious solution is to look at require_osd_release in osdmap, but we
+> don't decode that in the kernel because it lives the OSD portion of the
+> osdmap.  We could add that and consider the fact that the client now
+> needs to decode more than just the client portion a design mistake.
+> I'm not sure what can of worms does that open and if copy-from alone is
+> worth it though.  Perhaps that field could be moved to (or a copy of it
+> be replicated in) the client portion of the osdmap starting with
+> octopus?  We seem to be running into it on the client side more and
+> more...
 
-The following changes since commit d6d5df1db6e9d7f8f76d2911707f7d5877251b02:
+I can't say I'm thrilled with the idea of going back to hack into the
+OSDs code again, I was hoping to be able to handle this with the
+information we already have on the connection peer_features field.  It
+took me *months* to have the OSD fix merged in so I'm not really
+convinced a change to the osdmap would make it into Octopus :-)
 
-  Linux 5.4-rc5 (2019-10-27 13:19:19 -0400)
+(But I'll have a look at this and see if I can understand what moving or
+replicating the field in the osdmap would really entail.)
 
-are available in the Git repository at:
+> Given the track record of this feature (the fix for the most recently
+> discovered data corrupting bug hasn't even merged yet), I would be very
+> hesitant to turn it back on by default even if we figure out a good
+> solution for the feature check.  In my opinion, it should stay opt-in.
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.4-rc7
+Ok, makes sense.
 
-for you to fetch changes up to ff29fde84d1fc82f233c7da0daa3574a3942bec7:
+And thanks a lot for your feedback, Ilya.
 
-  ceph: return -EINVAL if given fsc mount option on kernel w/o support (2019-11-07 18:03:23 +0100)
-
-----------------------------------------------------------------
-Some late-breaking dentry handling fixes from Al and Jeff, a patch to
-further restrict copy_file_range() to avoid potential data corruption
-from Luis and a fix for !CONFIG_CEPH_FSCACHE kernels.  Everything but
-the fscache fix is marked for stable.
-
-----------------------------------------------------------------
-Al Viro (2):
-      ceph: fix RCU case handling in ceph_d_revalidate()
-      ceph: add missing check in d_revalidate snapdir handling
-
-Jeff Layton (2):
-      ceph: don't try to handle hashed dentries in non-O_CREAT atomic_open
-      ceph: return -EINVAL if given fsc mount option on kernel w/o support
-
-Luis Henriques (2):
-      ceph: fix use-after-free in __ceph_remove_cap()
-      ceph: don't allow copy_file_range when stripe_count != 1
-
- fs/ceph/caps.c  | 10 +++++-----
- fs/ceph/dir.c   | 15 ++++++++-------
- fs/ceph/file.c  | 15 +++++++++++++--
- fs/ceph/inode.c |  1 +
- fs/ceph/super.c | 11 ++++++++++-
- 5 files changed, 37 insertions(+), 15 deletions(-)
+Cheers,
+--
+Luís
