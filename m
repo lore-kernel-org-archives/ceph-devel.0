@@ -1,69 +1,27 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [RFC PATCH 0/2] ceph: safely use 'copy-from' Op on Octopus OSDs
-Date: Tue, 12 Nov 2019 10:42:16 +0000
-Message-ID: <20191112104216.GA2028@hermes.olymp>
-References: <20191108141555.31176-1-lhenriques@suse.com>
- <CAOi1vP-sVQKvpiPLoZ=9s7Hy=c2eQRocxSs1nPrXAUCbbZUZ-g@mail.gmail.com>
- <20191108164758.GA1760@hermes.olymp>
- <alpine.DEB.2.21.1911081656320.10553@piezo.novalocal>
- <20191108171616.GA2569@hermes.olymp>
- <alpine.DEB.2.21.1911081721120.28682@piezo.novalocal>
- <20191108173101.GA3300@hermes.olymp>
- <20191111163036.GA20513@hermes.olymp>
- <CAOi1vP-kFnu_mJaTERHbSjBxQRvfXhFWF=9_nCaaFbh7ACiVhg@mail.gmail.com>
+From: Jerry Lee <leisurelysw24-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Revert a CephFS snapshot?
+Date: Wed, 13 Nov 2019 18:30:19 +0800
+Message-ID: <CAKQB+ftphk7pepLdGEgckLtfj=KBp02cMqdea+R_NTd6Gwn-TA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP-kFnu_mJaTERHbSjBxQRvfXhFWF=9_nCaaFbh7ACiVhg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <ukernel@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Nov 11, 2019 at 09:51:47PM +0100, Ilya Dryomov wrote:
-> On Mon, Nov 11, 2019 at 5:30 PM Luis Henriques <lhenriques@suse.com> wrote:
-> >
-> > On Fri, Nov 08, 2019 at 05:31:01PM +0000, Luis Henriques wrote:
-> > <snip>
-> > > > - You'll need to add it for both OSDMap::Incremental and OSDMap
-> > > > - You'll need to make the encoding condition by updating the block like
-> > > > the one below from OSDMap::encode()
-> > > >
-> > > >     uint8_t v = 9;
-> > > >     if (!HAVE_FEATURE(features, SERVER_LUMINOUS)) {
-> > > >       v = 3;
-> > > >     } else if (!HAVE_FEATURE(features, SERVER_MIMIC)) {
-> > > >       v = 6;
-> > > >     } else if (!HAVE_FEATURE(features, SERVER_NAUTILUS)) {
-> > > >       v = 7;
-> > > >     }
-> > > >
-> > > > to include a SERVER_OCTOPUS case too.  Same goes for Incremental::encode()
-> > >
-> > > Awesome, thanks!  I'll give it a try, and test it with the appropriate
-> > > kernel client side changes to use this.
-> >
-> > Ok, I've got the patch bellow for the OSD code, which IIRC should do
-> > exactly what we want: duplicate the require_osd_release in the client
-> > side.
-> >
-> > Now, in order to quickly test this I've started adding flags to the
-> > CEPH_FEATURES_SUPPORTED_DEFAULT definition.  SERVER_MIMIC *seemed* to be
-> > Ok, but once I've added SERVER_NAUTILUS I've realized that we'll need to
-> > handle TYPE_MSGR2 address.  Which is a _big_ thing.  Is anyone already
-> > looking into adding support for msgr v2 to the kernel client?
-> 
-> It should be easy enough to hack around it for testing purposes.
->
-> I made some initial steps and hope to be able to dedicate the 5.6 cycle
-> to it.
+Hi,
 
-Yeah, I'll give that a try; adding support for that new address type
-shouldn't be a big deal.  I was just wondering if that wasn't already
-being handling by any new msgrv2 code under development.  Thanks, Ilya.
-
-Cheers,
---
-Luís
+Recently, I'm evaluating the snpahsot feature of CephFS from kernel
+client and everthing works like a charm.  But, it seems that reverting
+a snapshot is not available currently.  Is there some reason or
+technical limitation that the feature is not provided?  Any insights
+or ideas are appreciated.
