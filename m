@@ -1,7 +1,7 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH v2 1/4] ceph: add support for TYPE_MSGR2 address decode
-Date: Thu, 14 Nov 2019 10:57:33 +0000
-Message-ID: <20191114105736.8636-2-lhenriques@suse.com>
+Subject: [RFC PATCH v2 3/4] ceph: add require_osd_release field to osdmap debugfs
+Date: Thu, 14 Nov 2019 10:57:35 +0000
+Message-ID: <20191114105736.8636-4-lhenriques@suse.com>
 References: <20191114105736.8636-1-lhenriques@suse.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,80 +12,104 @@ To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov 
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-The new format actually includes two addresses: one the new messenger v2,
-and other for the legacy v1, which is the only one currently understood
-by kernel clients.  Add code to pick the legacy address and ignore the v2
-one.
+Add the require_osd_release information to debugfs.
 
 Signed-off-by: Luis Henriques <lhenriques@suse.com>
 ---
- include/linux/ceph/decode.h |  3 ++-
- net/ceph/decode.c           | 33 +++++++++++++++++++++++++++++++--
- 2 files changed, 33 insertions(+), 3 deletions(-)
+ include/linux/ceph/rados.h | 22 ++++++++++++++++++++++
+ net/ceph/ceph_strings.c    | 38 ++++++++++++++++++++++++++++++++++++++
+ net/ceph/debugfs.c         |  2 ++
+ 3 files changed, 62 insertions(+)
 
-diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-index 450384fe487c..2a2f07dfb39c 100644
---- a/include/linux/ceph/decode.h
-+++ b/include/linux/ceph/decode.h
-@@ -219,7 +219,8 @@ static inline void ceph_encode_timespec64(struct ceph_timespec *tv,
-  * sockaddr_storage <-> ceph_sockaddr
-  */
- #define CEPH_ENTITY_ADDR_TYPE_NONE	0
--#define CEPH_ENTITY_ADDR_TYPE_LEGACY	__cpu_to_le32(1)
-+#define CEPH_ENTITY_ADDR_TYPE_LEGACY	__cpu_to_le32(1) /* legacy msgr1 */
-+#define CEPH_ENTITY_ADDR_TYPE_MSGR2	__cpu_to_le32(2) /* msgr2 protocol */
+diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+index 3eb0e55665b4..68bc65f971b4 100644
+--- a/include/linux/ceph/rados.h
++++ b/include/linux/ceph/rados.h
+@@ -164,6 +164,28 @@ extern const char *ceph_osd_state_name(int s);
+ #define CEPH_OSDMAP_REQUIRE_LUMINOUS (1<<18) /* require l for booting osds */
+ #define CEPH_OSDMAP_RECOVERY_DELETES (1<<19) /* deletes performed during recovery instead of peering */
  
- static inline void ceph_encode_banner_addr(struct ceph_entity_addr *a)
- {
-diff --git a/net/ceph/decode.c b/net/ceph/decode.c
-index eea529595a7a..613a2bc6f805 100644
---- a/net/ceph/decode.c
-+++ b/net/ceph/decode.c
-@@ -67,16 +67,45 @@ ceph_decode_entity_addr_legacy(void **p, void *end,
- 	return ret;
++/*
++ * major ceph release numbers
++ */
++#define CEPH_RELEASE_ARGONAUT	1
++#define CEPH_RELEASE_BOBTAIL	2
++#define CEPH_RELEASE_CUTTLEFISH	3
++#define CEPH_RELEASE_DUMPLING	4
++#define CEPH_RELEASE_EMPEROR	5
++#define CEPH_RELEASE_FIREFLY	6
++#define CEPH_RELEASE_GIANT	7
++#define CEPH_RELEASE_HAMMER	8
++#define CEPH_RELEASE_INFERNALIS	9
++#define CEPH_RELEASE_JEWEL	10
++#define CEPH_RELEASE_KRAKEN	11
++#define CEPH_RELEASE_LUMINOUS	12
++#define CEPH_RELEASE_MIMIC	13
++#define CEPH_RELEASE_NAUTILUS	14
++#define CEPH_RELEASE_OCTOPUS	15
++#define CEPH_RELEASE_MAX	16 /* highest + 1 */
++
++extern const char *ceph_release_name(int r);
++
+ /*
+  * The error code to return when an OSD can't handle a write
+  * because it is too large.
+diff --git a/net/ceph/ceph_strings.c b/net/ceph/ceph_strings.c
+index 10e01494993c..3f280f17bbcb 100644
+--- a/net/ceph/ceph_strings.c
++++ b/net/ceph/ceph_strings.c
+@@ -60,3 +60,41 @@ const char *ceph_osd_state_name(int s)
+ 		return "???";
+ 	}
  }
- 
-+static int
-+ceph_decode_entity_addr_versioned_msgr2(void **p, void *end,
-+					struct ceph_entity_addr *addr)
++
++const char *ceph_release_name(int r)
 +{
-+	struct ceph_entity_addr tmp_addr;
-+	struct ceph_entity_addr *paddr = addr;
-+	int ret = -EINVAL;
-+
-+	ceph_decode_skip_32(p, end, bad); /* hard-coded '2' */
-+	ceph_decode_skip_8(p, end, bad);  /* hard-coded '1' */
-+
-+	ret = ceph_decode_entity_addr_versioned(p, end, paddr);
-+	if (ret)
-+		goto bad;
-+	/* If we already have a v1 address, simply skip over the other address */
-+	if (paddr->type == CEPH_ENTITY_ADDR_TYPE_LEGACY)
-+		paddr = &tmp_addr;
-+
-+	ceph_decode_skip_8(p, end, bad);  /* hard-coded '1' */
-+
-+	ret = ceph_decode_entity_addr_versioned(p, end, paddr);
-+
-+bad:
-+	return ret;
++	switch (r) {
++	case CEPH_RELEASE_ARGONAUT:
++		return "argonaut";
++	case CEPH_RELEASE_BOBTAIL:
++		return "bobtail";
++	case CEPH_RELEASE_CUTTLEFISH:
++		return "cuttlefish";
++	case CEPH_RELEASE_DUMPLING:
++		return "dumpling";
++	case CEPH_RELEASE_EMPEROR:
++		return "emperor";
++	case CEPH_RELEASE_FIREFLY:
++		return "firefly";
++	case CEPH_RELEASE_GIANT:
++		return "giant";
++	case CEPH_RELEASE_HAMMER:
++		return "hammer";
++	case CEPH_RELEASE_INFERNALIS:
++		return "infernalis";
++	case CEPH_RELEASE_JEWEL:
++		return "jewel";
++	case CEPH_RELEASE_KRAKEN:
++		return "kraken";
++	case CEPH_RELEASE_LUMINOUS:
++		return "luminous";
++	case CEPH_RELEASE_MIMIC:
++		return "mimic";
++	case CEPH_RELEASE_NAUTILUS:
++		return "nautilus";
++	case CEPH_RELEASE_OCTOPUS:
++		return "octopus";
++	default:
++		return "unknown";
++	}
 +}
-+
- int
- ceph_decode_entity_addr(void **p, void *end, struct ceph_entity_addr *addr)
- {
- 	u8 marker;
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index 7cb992e55475..d42071f6ab57 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -65,6 +65,8 @@ static int osdmap_show(struct seq_file *s, void *p)
+ 	down_read(&osdc->lock);
+ 	seq_printf(s, "epoch %u barrier %u flags 0x%x\n", map->epoch,
+ 			osdc->epoch_barrier, map->flags);
++	seq_printf(s, "require_osd_release: %s\n",
++		   ceph_release_name(map->require_osd_release));
  
- 	ceph_decode_8_safe(p, end, marker, bad);
--	if (marker == 1)
-+	if (marker == CEPH_ENTITY_ADDR_TYPE_MSGR2)
-+		return ceph_decode_entity_addr_versioned_msgr2(p, end, addr);
-+	else if (marker == CEPH_ENTITY_ADDR_TYPE_LEGACY)
- 		return ceph_decode_entity_addr_versioned(p, end, addr);
--	else if (marker == 0)
-+	else if (marker == CEPH_ENTITY_ADDR_TYPE_NONE)
- 		return ceph_decode_entity_addr_legacy(p, end, addr);
-+
- bad:
- 	return -EINVAL;
- }
+ 	for (n = rb_first(&map->pg_pools); n; n = rb_next(n)) {
+ 		struct ceph_pg_pool_info *pi =
