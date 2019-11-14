@@ -1,7 +1,7 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH v2 4/4] ceph: add support for sending truncate_{seq,size} in 'copy-from' Op
-Date: Thu, 14 Nov 2019 10:57:36 +0000
-Message-ID: <20191114105736.8636-5-lhenriques@suse.com>
+Subject: [RFC PATCH v2 2/4] ceph: get the require_osd_release field from the osdmap
+Date: Thu, 14 Nov 2019 10:57:34 +0000
+Message-ID: <20191114105736.8636-3-lhenriques@suse.com>
 References: <20191114105736.8636-1-lhenriques@suse.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,123 +12,106 @@ To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov 
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Doing an object copy in Ceph will result in not only the data being
-copied but also the truncate_seq value.  This may make sense in generic
-RADOS object copies, but for the specific case of performing a file copy
-will result in data corruption in the destination file.
+Since Ceph Octopus, OSDs are encoding require_osd_release into the client
+data part of the osdmap.  This patch adds code to pick this extra field.
 
-In order to fix this, the 'copy-from' operation had to be modified so
-that it could receive the two extra parameters for the destination
-object truncate_seq and truncate_size.  This patch adds support for
-these extra parameters to the kernel client.  Unfortunately, this
-operation modification is available in Ceph Octopus only, so it is
-necessary to ensure that the OSD doing the copy does indeed support this
-feature.
-
-Link: https://tracker.ceph.com/issues/37378
 Signed-off-by: Luis Henriques <lhenriques@suse.com>
 ---
- fs/ceph/file.c                  | 10 +++++++++-
- include/linux/ceph/osd_client.h |  1 +
- include/linux/ceph/rados.h      |  1 +
- net/ceph/osd_client.c           |  7 ++++++-
- 4 files changed, 17 insertions(+), 2 deletions(-)
+ include/linux/ceph/ceph_features.h | 10 ++++++++--
+ include/linux/ceph/osdmap.h        |  1 +
+ net/ceph/osdmap.c                  | 21 +++++++++++++++++++++
+ 3 files changed, 30 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index bd77adb64bfd..f45bb3837a31 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1928,6 +1928,7 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
- 	struct ceph_fs_client *src_fsc = ceph_inode_to_client(src_inode);
- 	struct ceph_object_locator src_oloc, dst_oloc;
- 	struct ceph_object_id src_oid, dst_oid;
-+	struct ceph_osdmap *map = src_fsc->client->osdc.osdmap;
- 	loff_t endoff = 0, size;
- 	ssize_t ret = -EIO;
- 	u64 src_objnum, dst_objnum, src_objoff, dst_objoff;
-@@ -1958,6 +1959,11 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index 39e6f4c57580..f329d1907dd7 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -9,6 +9,7 @@
+  */
+ #define CEPH_FEATURE_INCARNATION_1 (0ull)
+ #define CEPH_FEATURE_INCARNATION_2 (1ull<<57) // CEPH_FEATURE_SERVER_JEWEL
++#define CEPH_FEATURE_INCARNATION_3 ((1ull<<57)|(1ull<<28)) // SERVER_MIMIC
  
- 	if (ceph_test_mount_opt(src_fsc, NOCOPYFROM))
- 		return -EOPNOTSUPP;
-+	if (map->require_osd_release < CEPH_RELEASE_OCTOPUS) {
-+		pr_warn_once("copy_file_range not supported in '%s' release\n",
-+			     ceph_release_name(map->require_osd_release));
-+		return -EOPNOTSUPP;
+ #define DEFINE_CEPH_FEATURE(bit, incarnation, name)			\
+ 	static const uint64_t CEPH_FEATURE_##name = (1ULL<<bit);		\
+@@ -76,6 +77,7 @@ DEFINE_CEPH_FEATURE( 0, 1, UID)
+ DEFINE_CEPH_FEATURE( 1, 1, NOSRCADDR)
+ DEFINE_CEPH_FEATURE_RETIRED( 2, 1, MONCLOCKCHECK, JEWEL, LUMINOUS)
+ 
++DEFINE_CEPH_FEATURE( 2, 3, SERVER_NAUTILUS)
+ DEFINE_CEPH_FEATURE( 3, 1, FLOCK)
+ DEFINE_CEPH_FEATURE( 4, 1, SUBSCRIBE2)
+ DEFINE_CEPH_FEATURE( 5, 1, MONNAMES)
+@@ -92,6 +94,7 @@ DEFINE_CEPH_FEATURE(14, 2, SERVER_KRAKEN)
+ DEFINE_CEPH_FEATURE(15, 1, MONENC)
+ DEFINE_CEPH_FEATURE_RETIRED(16, 1, QUERY_T, JEWEL, LUMINOUS)
+ 
++DEFINE_CEPH_FEATURE(16, 3, SERVER_OCTOPUS)
+ DEFINE_CEPH_FEATURE_RETIRED(17, 1, INDEP_PG_MAP, JEWEL, LUMINOUS)
+ 
+ DEFINE_CEPH_FEATURE(18, 1, CRUSH_TUNABLES)
+@@ -114,7 +117,7 @@ DEFINE_CEPH_FEATURE(25, 1, CRUSH_TUNABLES2)
+ DEFINE_CEPH_FEATURE(26, 1, CREATEPOOLID)
+ DEFINE_CEPH_FEATURE(27, 1, REPLY_CREATE_INODE)
+ DEFINE_CEPH_FEATURE_RETIRED(28, 1, OSD_HBMSGS, HAMMER, JEWEL)
+-DEFINE_CEPH_FEATURE(28, 2, SERVER_M)
++DEFINE_CEPH_FEATURE(28, 2, SERVER_MIMIC)
+ DEFINE_CEPH_FEATURE(29, 1, MDSENC)
+ DEFINE_CEPH_FEATURE(30, 1, OSDHASHPSPOOL)
+ DEFINE_CEPH_FEATURE(31, 1, MON_SINGLE_PAXOS)  // deprecate me
+@@ -212,7 +215,10 @@ DEFINE_CEPH_FEATURE_DEPRECATED(63, 1, RESERVED_BROKEN, LUMINOUS) // client-facin
+ 	 CEPH_FEATURE_CRUSH_TUNABLES5 |		\
+ 	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING |	\
+ 	 CEPH_FEATURE_MSG_ADDR2 |		\
+-	 CEPH_FEATURE_CEPHX_V2)
++	 CEPH_FEATURE_CEPHX_V2 |		\
++	 CEPH_FEATURE_SERVER_MIMIC |		\
++	 CEPH_FEATURE_SERVER_NAUTILUS |		\
++	 CEPH_FEATURE_SERVER_OCTOPUS)
+ 
+ #define CEPH_FEATURES_REQUIRED_DEFAULT	0
+ 
+diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+index e081b56f1c1d..0d8e7f5e3478 100644
+--- a/include/linux/ceph/osdmap.h
++++ b/include/linux/ceph/osdmap.h
+@@ -160,6 +160,7 @@ struct ceph_osdmap {
+ 
+ 	u32 flags;         /* CEPH_OSDMAP_* */
+ 
++	u8 require_osd_release;
+ 	u32 max_osd;       /* size of osd_state, _offload, _addr arrays */
+ 	u32 *osd_state;    /* CEPH_OSD_* */
+ 	u32 *osd_weight;   /* 0 = failed, 0x10000 = 100% normal */
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 4e0de14f80bb..29526fd61983 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -1582,6 +1582,27 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+ 		WARN_ON(!RB_EMPTY_ROOT(&map->pg_upmap_items));
+ 	}
+ 
++	if (struct_v >= 6)
++		/* crush version */
++		ceph_decode_skip_32(p, end, e_inval);
++	if (struct_v >= 7) {
++		/*
++		 * skip removed_snaps and purged_snaps
++		 * (snap_interval_set_t = 8 + 8)
++		 */
++		ceph_decode_skip_set(p, end, 16, e_inval);
++		ceph_decode_skip_set(p, end, 16, e_inval);
 +	}
- 
- 	/*
- 	 * Striped file layouts require that we copy partial objects, but the
-@@ -2086,7 +2092,9 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
- 			CEPH_OSD_OP_FLAG_FADVISE_NOCACHE,
- 			&dst_oid, &dst_oloc,
- 			CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL |
--			CEPH_OSD_OP_FLAG_FADVISE_DONTNEED, 0);
-+			CEPH_OSD_OP_FLAG_FADVISE_DONTNEED,
-+			dst_ci->i_truncate_seq, dst_ci->i_truncate_size,
-+			CEPH_OSD_COPY_FROM_FLAG_TRUNCATE_SEQ);
- 		if (err) {
- 			dout("ceph_osdc_copy_from returned %d\n", err);
- 			if (!ret)
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index eaffbdddf89a..5a62dbd3f4c2 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -534,6 +534,7 @@ int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
- 			struct ceph_object_id *dst_oid,
- 			struct ceph_object_locator *dst_oloc,
- 			u32 dst_fadvise_flags,
-+			u32 truncate_seq, u64 truncate_size,
- 			u8 copy_from_flags);
- 
- /* watch/notify */
-diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-index 68bc65f971b4..318da211bb79 100644
---- a/include/linux/ceph/rados.h
-+++ b/include/linux/ceph/rados.h
-@@ -468,6 +468,7 @@ enum {
- 	CEPH_OSD_COPY_FROM_FLAG_MAP_SNAP_CLONE = 8, /* map snap direct to
- 						     * cloneid */
- 	CEPH_OSD_COPY_FROM_FLAG_RWORDERED = 16,     /* order with write */
-+	CEPH_OSD_COPY_FROM_FLAG_TRUNCATE_SEQ = 32,  /* send truncate_{seq,size} */
- };
- 
- enum {
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index ba45b074a362..02abf2790e99 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -5315,6 +5315,7 @@ static int osd_req_op_copy_from_init(struct ceph_osd_request *req,
- 				     struct ceph_object_locator *src_oloc,
- 				     u32 src_fadvise_flags,
- 				     u32 dst_fadvise_flags,
-+				     u32 truncate_seq, u64 truncate_size,
- 				     u8 copy_from_flags)
- {
- 	struct ceph_osd_req_op *op;
-@@ -5335,6 +5336,8 @@ static int osd_req_op_copy_from_init(struct ceph_osd_request *req,
- 	end = p + PAGE_SIZE;
- 	ceph_encode_string(&p, end, src_oid->name, src_oid->name_len);
- 	encode_oloc(&p, end, src_oloc);
-+	ceph_encode_32(&p, truncate_seq);
-+	ceph_encode_64(&p, truncate_size);
- 	op->indata_len = PAGE_SIZE - (end - p);
- 
- 	ceph_osd_data_pages_init(&op->copy_from.osd_data, pages,
-@@ -5350,6 +5353,7 @@ int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
- 			struct ceph_object_id *dst_oid,
- 			struct ceph_object_locator *dst_oloc,
- 			u32 dst_fadvise_flags,
-+			u32 truncate_seq, u64 truncate_size,
- 			u8 copy_from_flags)
- {
- 	struct ceph_osd_request *req;
-@@ -5366,7 +5370,8 @@ int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
- 
- 	ret = osd_req_op_copy_from_init(req, src_snapid, src_version, src_oid,
- 					src_oloc, src_fadvise_flags,
--					dst_fadvise_flags, copy_from_flags);
-+					dst_fadvise_flags, truncate_seq,
-+					truncate_size, copy_from_flags);
- 	if (ret)
- 		goto out;
++	if (struct_v >= 9) {
++		struct ceph_timespec ts;
++
++		/* last_up_change and last_in_change */
++		ceph_decode_copy_safe(p, end, &ts, sizeof(ts), e_inval);
++		ceph_decode_copy_safe(p, end, &ts, sizeof(ts), e_inval);
++	}
++	if (struct_v >= 10)
++		ceph_decode_8_safe(p, end, map->require_osd_release, e_inval);
++
+ 	/* ignore the rest */
+ 	*p = end;
  
