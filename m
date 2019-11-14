@@ -1,56 +1,74 @@
-From: Jerry Lee <leisurelysw24-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Revert a CephFS snapshot?
-Date: Thu, 14 Nov 2019 10:36:05 +0800
-Message-ID: <CAKQB+fvUCUAeHEHwP06auyK+ZGUHZdRzTT-38xtgsSbQDjyoHQ@mail.gmail.com>
-References: <CAKQB+ftphk7pepLdGEgckLtfj=KBp02cMqdea+R_NTd6Gwn-TA@mail.gmail.com>
- <CA+2bHPaCg4Pq-88hnvnH93QCOfgKv27gDTUjHF5rnDr6Nd2=wQ@mail.gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH v2 0/4] ceph: safely use 'copy-from' Op on Octopus OSDs
+Date: Thu, 14 Nov 2019 10:57:32 +0000
+Message-ID: <20191114105736.8636-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+2bHPaCg4Pq-88hnvnH93QCOfgKv27gDTUjHF5rnDr6Nd2=wQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 14 Nov 2019 at 07:07, Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
-> On Wed, Nov 13, 2019 at 2:30 AM Jerry Lee <leisurelysw24-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > Recently, I'm evaluating the snpahsot feature of CephFS from kernel
-> > client and everthing works like a charm.  But, it seems that reverting
-> > a snapshot is not available currently.  Is there some reason or
-> > technical limitation that the feature is not provided?  Any insights
-> > or ideas are appreciated.
->
-> Please provide more information about what you tried to do (commands
-> run) and how it surprised you.
+Hi!
 
-The thing I would like to do is to rollback a snapped directory to a
-previous version of snapshot.  It looks like the operation can be done
-by over-writting all the current version of files/directories from a
-previous snapshot via cp.  But cp may take lots of time when there are
-many files and directories in the target directory.  Is there any
-possibility to achieve the goal much faster from the CephFS internal
-via command like "ceph fs <cephfs_name> <dir> snap rollback
-<snapname>" (just a example)?  Thank you!
+So, after the feedback I got from v1 [1] I've sent out a pull-request
+for the OSDs [2] which encodes require_osd_release into the OSDMap
+client data.  This allows the client to figure out which ceph release
+the OSDs cluster is running and decide whether or not it's safe to use
+the copy-from Op for copy_file_range.
 
+This new patchset I'm sending simply adds enough functionality to the
+kernel client so that it can take advantage of this OSD patch:
 
-- Jerry
+0001 - adds the ability to decode TYPE_MSGR2 addresses.  This is a
+       required functionality for enabling SERVER_NAUTILUS in the
+       client.  I hope I got the new format right, as I couldn't figure
+       out what the hard-coded values (see comments) really mean.
 
->
-> --
-> Patrick Donnelly, Ph.D.
-> He / Him / His
-> Senior Software Engineer
-> Red Hat Sunnyvale, CA
-> GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
->
+0002 - allows the client to retrieve the new require_osd_release field
+       from the OSDMap if available.  This patch also adds SERVER_MIMIC,
+       SERVER_NAUTILUS and SERVER_OCTOPUS to the supported features,
+       which TBH I'm not sure if that's a safe thing to do -- the only
+       issue I've seen was that Nautilus requires the ability to decode
+       TYPE_MSGR2 address, but I may have missed others.
+
+0003 - debug code to add require_osd_release to the osdmap debugfs file.
+
+0004 - adds the truncate_{seq,size} fields to the 'copy-from' operation
+       if the OSDs are >= Octopus.
+
+Also note that, as suggested by Ilya, I've dropped the patch that would
+change the default mount options to 'copyfrom'.
+
+These patches have been tested with the xfstests generic test suite, and
+with a couple of other (local) tests that exercise the cephfs
+copy_file_range syscall.  I didn't saw any issues, but as I said above,
+I'm not really sure if adding the SERVER_* flags to the supported
+features have other side effects.
+
+[1] https://lore.kernel.org/lkml/20191108141555.31176-1-lhenriques@suse.com/
+[2] https://github.com/ceph/ceph/pull/31611
+
+Cheers,
+--
+Luis
+
+Luis Henriques (4):
+  ceph: add support for TYPE_MSGR2 address decode
+  ceph: get the require_osd_release field from the osdmap
+  ceph: add require_osd_release field to osdmap debugfs
+  ceph: add support for sending truncate_{seq,size} in 'copy-from' Op
+
+ fs/ceph/file.c                     | 10 +++++++-
+ include/linux/ceph/ceph_features.h | 10 ++++++--
+ include/linux/ceph/decode.h        |  3 ++-
+ include/linux/ceph/osd_client.h    |  1 +
+ include/linux/ceph/osdmap.h        |  1 +
+ include/linux/ceph/rados.h         | 23 ++++++++++++++++++
+ net/ceph/ceph_strings.c            | 38 ++++++++++++++++++++++++++++++
+ net/ceph/debugfs.c                 |  2 ++
+ net/ceph/decode.c                  | 33 ++++++++++++++++++++++++--
+ net/ceph/osd_client.c              |  7 +++++-
+ net/ceph/osdmap.c                  | 21 +++++++++++++++++
+ 11 files changed, 142 insertions(+), 7 deletions(-)
