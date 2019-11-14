@@ -1,109 +1,59 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [RFC PATCH v2 0/4] ceph: safely use 'copy-from' Op on Octopus OSDs
-Date: Thu, 14 Nov 2019 10:28:10 -0800
-Message-ID: <CAJ4mKGZVV2dt6qKZGO-KyQt0p81hAUqFGBwRodB6MSdeLh=Tow@mail.gmail.com>
-References: <20191114105736.8636-1-lhenriques@suse.com> <cbda3a69d25b04e10332e7b3898064a93b2d04ae.camel@kernel.org>
- <alpine.DEB.2.21.1911141326260.17979@piezo.novalocal>
+From: Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Revert a CephFS snapshot?
+Date: Thu, 14 Nov 2019 10:50:17 -0800
+Message-ID: <CA+2bHPbw3uMLeq77XfjZfhYnYcnF-Gk+Od6UJrTiYkW+g77s4w@mail.gmail.com>
+References: <CAKQB+ftphk7pepLdGEgckLtfj=KBp02cMqdea+R_NTd6Gwn-TA@mail.gmail.com>
+ <CA+2bHPaCg4Pq-88hnvnH93QCOfgKv27gDTUjHF5rnDr6Nd2=wQ@mail.gmail.com>
+ <CAKQB+fvUCUAeHEHwP06auyK+ZGUHZdRzTT-38xtgsSbQDjyoHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.21.1911141326260.17979@piezo.novalocal>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sweil@redhat.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAKQB+fvUCUAeHEHwP06auyK+ZGUHZdRzTT-38xtgsSbQDjyoHQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Jerry Lee <leisurelysw24-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Nov 14, 2019 at 5:28 AM Sage Weil <sweil@redhat.com> wrote:
+On Wed, Nov 13, 2019 at 6:36 PM Jerry Lee <leisurelysw24-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 >
-> On Thu, 14 Nov 2019, Jeff Layton wrote:
-> > On Thu, 2019-11-14 at 10:57 +0000, Luis Henriques wrote:
-> > > Hi!
-> > >
-> > > So, after the feedback I got from v1 [1] I've sent out a pull-request
-> > > for the OSDs [2] which encodes require_osd_release into the OSDMap
-> > > client data.  This allows the client to figure out which ceph release
-> > > the OSDs cluster is running and decide whether or not it's safe to us=
-e
-> > > the copy-from Op for copy_file_range.
-> > >
-> > > This new patchset I'm sending simply adds enough functionality to the
-> > > kernel client so that it can take advantage of this OSD patch:
-> > >
-> > > 0001 - adds the ability to decode TYPE_MSGR2 addresses.  This is a
-> > >        required functionality for enabling SERVER_NAUTILUS in the
-> > >        client.  I hope I got the new format right, as I couldn't figu=
-re
-> > >        out what the hard-coded values (see comments) really mean.
-> > >
+> On Thu, 14 Nov 2019 at 07:07, Patrick Donnelly <pdonnell-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
 > >
-> > nit: the first 3 patch subject lines should probably be prefixed with
-> > "libceph:"
+> > On Wed, Nov 13, 2019 at 2:30 AM Jerry Lee <leisurelysw24-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> > > Recently, I'm evaluating the snpahsot feature of CephFS from kernel
+> > > client and everthing works like a charm.  But, it seems that reverting
+> > > a snapshot is not available currently.  Is there some reason or
+> > > technical limitation that the feature is not provided?  Any insights
+> > > or ideas are appreciated.
 > >
-> > > 0002 - allows the client to retrieve the new require_osd_release fiel=
-d
-> > >        from the OSDMap if available.  This patch also adds SERVER_MIM=
-IC,
-> > >        SERVER_NAUTILUS and SERVER_OCTOPUS to the supported features,
-> > >        which TBH I'm not sure if that's a safe thing to do -- the onl=
-y
-> > >        issue I've seen was that Nautilus requires the ability to deco=
-de
-> > >        TYPE_MSGR2 address, but I may have missed others.
-> > >
-> >
-> > Yes, this needs to be done with care. We have to ensure that the server
-> > side isn't assuming that the client supports something that it doesn't.
-> > I think that means just trawling through the code and verifying whether
-> > this is safe.
-> >
-> > > 0003 - debug code to add require_osd_release to the osdmap debugfs fi=
-le.
-> > >
-> > > 0004 - adds the truncate_{seq,size} fields to the 'copy-from' operati=
-on
-> > >        if the OSDs are >=3D Octopus.
-> > >
-> > > Also note that, as suggested by Ilya, I've dropped the patch that wou=
-ld
-> > > change the default mount options to 'copyfrom'.
-> > >
-> > > These patches have been tested with the xfstests generic test suite, =
-and
-> > > with a couple of other (local) tests that exercise the cephfs
-> > > copy_file_range syscall.  I didn't saw any issues, but as I said abov=
-e,
-> > > I'm not really sure if adding the SERVER_* flags to the supported
-> > > features have other side effects.
-> > >
-> > > [1] https://lore.kernel.org/lkml/20191108141555.31176-1-lhenriques@su=
-se.com/
-> > > [2] https://github.com/ceph/ceph/pull/31611
-> > >
-> >
-> > I'm just getting caught up on the discussion here, but why was it
-> > decided to do it this way instead of just adding a new OSD
-> > "copy-from-no-truncseq" operation? Once you tried it once and an OSD
-> > didn't support it, you could just give up on using it any longer? That
-> > seems a lot simpler than trying to monkey with feature bits.
+> > Please provide more information about what you tried to do (commands
+> > run) and how it surprised you.
 >
-> I don't remember the original discussion either, but in retrospect that
-> does seem much simpler--especially since hte client is conditioning
-> sending this based on the the require_osd_release.  It seems like passing
-> a flag to the copy-from op would be more reasonable instead of conditiona=
-l
-> feature-based behavior.
->
-> Greg, do you remember why we ended up here?
+> The thing I would like to do is to rollback a snapped directory to a
+> previous version of snapshot.  It looks like the operation can be done
+> by over-writting all the current version of files/directories from a
+> previous snapshot via cp.  But cp may take lots of time when there are
+> many files and directories in the target directory.  Is there any
+> possibility to achieve the goal much faster from the CephFS internal
+> via command like "ceph fs <cephfs_name> <dir> snap rollback
+> <snapname>" (just a example)?  Thank you!
 
-Well, I can look it up. We discussed it being a different op in
-February ("OSD 'copy-from' operation and truncate_seq value") and...it
-looks like that conversation ended with that being the plan?
+RADOS doesn't support rollback of snapshots so it needs to be done
+manually. The best tool to do this would probably be rsync of the
+.snap directory with appropriate options including deletion of files
+that do not exist in the source (snapshot).
 
-I can't see why it changed in the making though, and everyone seems to
-have forgotten about it at the next pass.
--Greg
-
->
-> sage
->
+-- 
+Patrick Donnelly, Ph.D.
+He / Him / His
+Senior Software Engineer
+Red Hat Sunnyvale, CA
+GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
