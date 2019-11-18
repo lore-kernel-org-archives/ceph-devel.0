@@ -1,115 +1,133 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH AUTOSEL 4.19 100/237] libceph: don't consume a ref on
- pagelist in ceph_msg_data_add_pagelist()
-Date: Sat, 16 Nov 2019 17:23:28 +0100
-Message-ID: <CAOi1vP8ZTyaGsn-hXtnr+AnCrEQfSB6sTLYwkkZ8P1oY9EgPXg@mail.gmail.com>
-References: <20191116154113.7417-1-sashal@kernel.org> <20191116154113.7417-100-sashal@kernel.org>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH] osd: add new 'copy-from-notrunc' operation
+Date: Mon, 18 Nov 2019 12:09:34 +0000
+Message-ID: <20191118120935.7013-2-lhenriques@suse.com>
+References: <20191118120935.7013-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20191116154113.7417-100-sashal@kernel.org>
-Sender: netdev-owner@vger.kernel.org
-To: Sasha Levin <sashal@kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191118120935.7013-1-lhenriques@suse.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Nov 16, 2019 at 4:43 PM Sasha Levin <sashal@kernel.org> wrote:
->
-> From: Ilya Dryomov <idryomov@gmail.com>
->
-> [ Upstream commit 894868330a1e038ea4a65dbb81741eef70ad71b1 ]
->
-> Because send_mds_reconnect() wants to send a message with a pagelist
-> and pass the ownership to the messenger, ceph_msg_data_add_pagelist()
-> consumes a ref which is then put in ceph_msg_data_destroy().  This
-> makes managing pagelists in the OSD client (where they are wrapped in
-> ceph_osd_data) unnecessarily hard because the handoff only happens in
-> ceph_osdc_start_request() instead of when the pagelist is passed to
-> ceph_osd_data_pagelist_init().  I counted several memory leaks on
-> various error paths.
->
-> Fix up ceph_msg_data_add_pagelist() and carry a pagelist ref in
-> ceph_osd_data.
->
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> Signed-off-by: Sasha Levin <sashal@kernel.org>
-> ---
->  fs/ceph/mds_client.c  | 2 +-
->  net/ceph/messenger.c  | 1 +
->  net/ceph/osd_client.c | 8 ++++++++
->  3 files changed, 10 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 09db6d08614d2..94494d05a94cb 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -2184,7 +2184,6 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
->
->         if (req->r_pagelist) {
->                 struct ceph_pagelist *pagelist = req->r_pagelist;
-> -               refcount_inc(&pagelist->refcnt);
->                 ceph_msg_data_add_pagelist(msg, pagelist);
->                 msg->hdr.data_len = cpu_to_le32(pagelist->length);
->         } else {
-> @@ -3289,6 +3288,7 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
->         mutex_unlock(&mdsc->mutex);
->
->         up_read(&mdsc->snap_rwsem);
-> +       ceph_pagelist_release(pagelist);
->         return;
->
->  fail:
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index f7d7f32ac673c..2c8cd339d59ea 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -3323,6 +3323,7 @@ void ceph_msg_data_add_pagelist(struct ceph_msg *msg,
->
->         data = ceph_msg_data_create(CEPH_MSG_DATA_PAGELIST);
->         BUG_ON(!data);
-> +       refcount_inc(&pagelist->refcnt);
->         data->pagelist = pagelist;
->
->         list_add_tail(&data->links, &msg->data);
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 76c41a84550e7..c3494c1fb3a9a 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -126,6 +126,9 @@ static void ceph_osd_data_init(struct ceph_osd_data *osd_data)
->         osd_data->type = CEPH_OSD_DATA_TYPE_NONE;
->  }
->
-> +/*
-> + * Consumes @pages if @own_pages is true.
-> + */
->  static void ceph_osd_data_pages_init(struct ceph_osd_data *osd_data,
->                         struct page **pages, u64 length, u32 alignment,
->                         bool pages_from_pool, bool own_pages)
-> @@ -138,6 +141,9 @@ static void ceph_osd_data_pages_init(struct ceph_osd_data *osd_data,
->         osd_data->own_pages = own_pages;
->  }
->
-> +/*
-> + * Consumes a ref on @pagelist.
-> + */
->  static void ceph_osd_data_pagelist_init(struct ceph_osd_data *osd_data,
->                         struct ceph_pagelist *pagelist)
->  {
-> @@ -362,6 +368,8 @@ static void ceph_osd_data_release(struct ceph_osd_data *osd_data)
->                 num_pages = calc_pages_for((u64)osd_data->alignment,
->                                                 (u64)osd_data->length);
->                 ceph_release_page_vector(osd_data->pages, num_pages);
-> +       } else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
-> +               ceph_pagelist_release(osd_data->pagelist);
->         }
->         ceph_osd_data_init(osd_data);
->  }
+The new 'copy-from-notrunc' is very similar to the 'copy-from' operation,
+except that it receives 2 extra parameters: truncate_seq and
+truncate_size.
 
-Hi Sasha,
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ src/include/rados.h     |  1 +
+ src/osd/OSD.cc          |  3 ++-
+ src/osd/PrimaryLogPG.cc | 24 +++++++++++++++++++-----
+ 3 files changed, 22 insertions(+), 6 deletions(-)
 
-This commit was part of a larger series and shouldn't be backported on
-its own.  Please drop it.
-
-Thanks,
-
-                Ilya
+diff --git a/src/include/rados.h b/src/include/rados.h
+index 44cbacffcad8..bba0168c5f07 100644
+--- a/src/include/rados.h
++++ b/src/include/rados.h
+@@ -297,6 +297,7 @@ extern const char *ceph_osd_state_name(int s);
+ 									    \
+ 	/* tiering */							    \
+ 	f(COPY_FROM,	__CEPH_OSD_OP(WR, DATA, 26),	"copy-from")	    \
++	f(COPY_FROM_NOTRUNC, __CEPH_OSD_OP(WR, DATA, 45), "copy-from-notrunc") \
+ 	/* was copy-get-classic */					\
+ 	f(UNDIRTY,	__CEPH_OSD_OP(WR, DATA, 28),	"undirty")	    \
+ 	f(ISDIRTY,	__CEPH_OSD_OP(RD, DATA, 29),	"isdirty")	    \
+diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
+index 6b592ff85bfa..1d34bc683562 100644
+--- a/src/osd/OSD.cc
++++ b/src/osd/OSD.cc
+@@ -9919,7 +9919,8 @@ int OSD::init_op_flags(OpRequestRef& op)
+             (iter->op.op != CEPH_OSD_OP_RMXATTR) &&
+             (iter->op.op != CEPH_OSD_OP_STARTSYNC) &&
+             (iter->op.op != CEPH_OSD_OP_COPY_GET) &&
+-            (iter->op.op != CEPH_OSD_OP_COPY_FROM)) {
++            (iter->op.op != CEPH_OSD_OP_COPY_FROM) &&
++	    (iter->op.op != CEPH_OSD_OP_COPY_FROM_NOTRUNC)) {
+           op->set_promote();
+         }
+       }
+diff --git a/src/osd/PrimaryLogPG.cc b/src/osd/PrimaryLogPG.cc
+index 2ef4ebf8b6cf..e4f884476fc0 100644
+--- a/src/osd/PrimaryLogPG.cc
++++ b/src/osd/PrimaryLogPG.cc
+@@ -282,9 +282,11 @@ public:
+   PrimaryLogPG::CopyResults *results = nullptr;
+   PrimaryLogPG::OpContext *ctx;
+   OSDOp &osd_op;
++  uint32_t truncate_seq;
++  uint64_t truncate_size;
+ 
+-  CopyFromCallback(PrimaryLogPG::OpContext *ctx, OSDOp &osd_op)
+-    : ctx(ctx), osd_op(osd_op) {
++  CopyFromCallback(PrimaryLogPG::OpContext *ctx, OSDOp &osd_op, uint32_t seq, uint64_t size)
++    : ctx(ctx), osd_op(osd_op), truncate_seq(seq), truncate_size(size) {
+   }
+   ~CopyFromCallback() override {}
+ 
+@@ -292,6 +294,10 @@ public:
+     results = results_.get<1>();
+     int r = results_.get<0>();
+ 
++    if (osd_op.op.op != CEPH_OSD_OP_COPY_FROM_NOTRUNC) {
++      truncate_seq = results->truncate_seq;
++      truncate_size = results->truncate_size;
++    }
+     // for finish_copyfrom
+     ctx->user_at_version = results->user_version;
+ 
+@@ -5668,6 +5674,7 @@ int PrimaryLogPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
+     case CEPH_OSD_OP_CACHE_TRY_FLUSH:
+     case CEPH_OSD_OP_UNDIRTY:
+     case CEPH_OSD_OP_COPY_FROM:  // we handle user_version update explicitly
++    case CEPH_OSD_OP_COPY_FROM_NOTRUNC:
+     case CEPH_OSD_OP_CACHE_PIN:
+     case CEPH_OSD_OP_CACHE_UNPIN:
+     case CEPH_OSD_OP_SET_REDIRECT:
+@@ -7664,17 +7671,24 @@ int PrimaryLogPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
+       }
+       break;
+ 
++    case CEPH_OSD_OP_COPY_FROM_NOTRUNC:
+     case CEPH_OSD_OP_COPY_FROM:
+       ++ctx->num_write;
+       result = 0;
+       {
+ 	object_t src_name;
+ 	object_locator_t src_oloc;
++	uint32_t truncate_seq = 0;
++	uint64_t truncate_size = 0;
+ 	snapid_t src_snapid = (uint64_t)op.copy_from.snapid;
+ 	version_t src_version = op.copy_from.src_version;
+ 	try {
+ 	  decode(src_name, bp);
+ 	  decode(src_oloc, bp);
++	  if (op.op == CEPH_OSD_OP_COPY_FROM_NOTRUNC) {
++	    decode(truncate_seq, bp);
++	    decode(truncate_size, bp);
++	  }
+ 	}
+ 	catch (buffer::error& e) {
+ 	  result = -EINVAL;
+@@ -7714,7 +7728,7 @@ int PrimaryLogPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
+ 	    result = -EINVAL;
+ 	    break;
+ 	  }
+-	  CopyFromCallback *cb = new CopyFromCallback(ctx, osd_op);
++	  CopyFromCallback *cb = new CopyFromCallback(ctx, osd_op, truncate_seq, truncate_size);
+           ctx->op_finishers[ctx->current_osd_subop_num].reset(
+             new CopyFromFinisher(cb));
+ 	  start_copy(cb, ctx->obc, src, src_oloc, src_version,
+@@ -9546,8 +9560,8 @@ void PrimaryLogPG::finish_copyfrom(CopyFromCallback *cb)
+     obs.oi.clear_omap_digest();
+   }
+ 
+-  obs.oi.truncate_seq = cb->results->truncate_seq;
+-  obs.oi.truncate_size = cb->results->truncate_size;
++  obs.oi.truncate_seq = cb->truncate_seq;
++  obs.oi.truncate_size = cb->truncate_size;
+ 
+   obs.oi.mtime = ceph::real_clock::to_timespec(cb->results->mtime);
+   ctx->mtime = utime_t();
