@@ -1,60 +1,45 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: scrub error on object storage pool
-Date: Wed, 20 Nov 2019 18:43:45 +0530
-Message-ID: <CANA9Uk6jn7s9ZRpCue4JB+LmPzj95-EN_RHvVH++M_O9yoYgOw@mail.gmail.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Cephalocon 2020 will be March 4-5 in Seoul, South Korea!
+Date: Wed, 20 Nov 2019 19:49:53 +0000 (UTC)
+Message-ID: <alpine.DEB.2.21.1911201827180.21478@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4953717779824139117=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
+To: ceph-announce-a8pt6IJUokc@public.gmane.org, ceph-users-a8pt6IJUokc@public.gmane.org, dev-a8pt6IJUokc@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============4953717779824139117==
-Content-Type: multipart/alternative; boundary="000000000000fbe4f90597c6f30b"
+Hi everyone,
 
---000000000000fbe4f90597c6f30b
-Content-Type: text/plain; charset="UTF-8"
+We're pleased to announce that the next Cephalocon will be March 3-5 in 
+Seoul, South Korea!
 
-Hello - Recently we have upgraded to Luminous 12.2.11. After that we can
-see the scrub errors on the object storage pool only on daily basis. After
-repair, it will be cleared. But again it will come tomorrow after scrub
-performed the PG.
+	https://ceph.com/cephalocon/seoul-2020/
 
-Any known issue - on scrub errs with 12.2.11 version?
+The CFP for the conference is now open:
 
-Thanks
-Swami
+	https://linuxfoundation.smapply.io/prog/cephalocon_2020
 
---000000000000fbe4f90597c6f30b
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Main conference: March 4-5
+Developer summit: March 3
 
-<div dir=3D"ltr">Hello - Recently we have upgraded to Luminous 12.2.11. Aft=
-er that we can see the scrub errors on the object=C2=A0storage pool only on=
- daily basis. After repair, it will be cleared. But again it will come tomo=
-rrow after scrub performed the PG.<div><br></div><div>Any known issue - on =
-scrub errs with 12.2.11 version?</div><div><br></div><div>Thanks</div><div>=
-Swami</div></div>
+Mark your calendars, and get your talk proposals in!  The CFP will close 
+in early December in order to get a final schedule published in early 
+January.
 
---000000000000fbe4f90597c6f30b--
+In addition to the two day conference, we will also have a developer 
+summit on March 3 to take advantage of having so many developers in the 
+same place at the same time.  The developer sessions will include video 
+conferencing so that remote developers will also be able to participate.
 
---===============4953717779824139117==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+A sponsorship prospectus will be available Real Soon Now.
 
+We hope you can join us!
 _______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============4953717779824139117==--
+ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
+To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
