@@ -1,76 +1,60 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [RFC PATCH v3] ceph: add new obj copy OSD Op
-Date: Wed, 20 Nov 2019 09:55:36 +0000
-Message-ID: <20191120095536.GA13949@hermes.olymp>
-References: <20191118120935.7013-1-lhenriques@suse.com>
- <3dc2df0ba5776fb0f7aaac3a099a938823ed0ebf.camel@kernel.org>
- <20191118140551.GA8951@hermes.olymp>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: scrub error on object storage pool
+Date: Wed, 20 Nov 2019 18:43:45 +0530
+Message-ID: <CANA9Uk6jn7s9ZRpCue4JB+LmPzj95-EN_RHvVH++M_O9yoYgOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20191118140551.GA8951@hermes.olymp>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============4953717779824139117=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Nov 18, 2019 at 02:05:51PM +0000, Luis Henriques wrote:
-> On Mon, Nov 18, 2019 at 08:12:39AM -0500, Jeff Layton wrote:
-> > On Mon, 2019-11-18 at 12:09 +0000, Luis Henriques wrote:
-> > > Hi,
-> > > 
-> > > Before going ahead with a pull-request for ceph I would like to make sure
-> > > we're all on the same page regarding the final fix for this problem.
-> > > Thus, following this email, I'm sending 2 patches: one for ceph OSDs and
-> > > the another for the kernel client.
-> > > 
-> > > * osd: add new 'copy-from-notrunc' operation
-> > >   This patch shall be applied to ceph master after reverting commit
-> > >   ba152435fd85 ("osd: add flag to prevent truncate_seq copy in copy-from
-> > >   operation").  It adds a new operation that will be exactly the same as
-> > >   the original 'copy-from' operation, but with the extra 2 parameters
-> > >   (truncate_{seq,size})
-> > > 
-> > > * ceph: switch copy_file_range to 'copy-from-notrunc' operation
-> > >   This will make the kernel client use the new OSD op in
-> > >   copy_file_range.  One extra thing that could probably be added is
-> > >   changing the mount options to NOCOPYFROM if the first call to
-> > >   ceph_osdc_copy_from() fails.
-> > > 
-> > 
-> > I probably wouldn't change the mount options to be different from what
-> > was initially specified. How about just disable copy_file_range
-> > internally for that superblock, and then pr_notice a message that says
-> > that copy_file_range is being autodisabled. If they mount with '-o
-> > nocopyfrom' that will make the warning go away.
-> 
-> Ok, that makes sense.  I'll include this in the next rev, which will
-> probably be sent only after the pull-request for ceph goes in (assuming
-> the OSD patch won't need any major rework).
+--===============4953717779824139117==
+Content-Type: multipart/alternative; boundary="000000000000fbe4f90597c6f30b"
 
-FYI, yesterday I created the pull-request for this [1].  I thought I had
-also sent an email to this thread, but I guess I didn't... so, here it
-is :-) 
+--000000000000fbe4f90597c6f30b
+Content-Type: text/plain; charset="UTF-8"
 
-[1] https://github.com/ceph/ceph/pull/31728
+Hello - Recently we have upgraded to Luminous 12.2.11. After that we can
+see the scrub errors on the object storage pool only on daily basis. After
+repair, it will be cleared. But again it will come tomorrow after scrub
+performed the PG.
 
-Cheers,
---
-Luís
+Any known issue - on scrub errs with 12.2.11 version?
 
-> 
-> > > Does this look good, or did I missed something from the previous
-> > > discussion?
-> > > 
-> > > (One advantage of this approach: the OSD patch can be easily backported!)
-> > > 
-> > 
-> > Yep, I think this looks like a _much_ simpler approach to the problem.
-> 
-> Agreed!
-> 
-> Cheers,
-> --
-> Luís
+Thanks
+Swami
+
+--000000000000fbe4f90597c6f30b
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hello - Recently we have upgraded to Luminous 12.2.11. Aft=
+er that we can see the scrub errors on the object=C2=A0storage pool only on=
+ daily basis. After repair, it will be cleared. But again it will come tomo=
+rrow after scrub performed the PG.<div><br></div><div>Any known issue - on =
+scrub errs with 12.2.11 version?</div><div><br></div><div>Thanks</div><div>=
+Swami</div></div>
+
+--000000000000fbe4f90597c6f30b--
+
+--===============4953717779824139117==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============4953717779824139117==--
