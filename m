@@ -1,45 +1,70 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Cephalocon 2020 will be March 4-5 in Seoul, South Korea!
-Date: Wed, 20 Nov 2019 19:49:53 +0000 (UTC)
-Message-ID: <alpine.DEB.2.21.1911201827180.21478@piezo.novalocal>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 140/219] libceph: drop last_piece logic from write_partial_message_data()
+Date: Fri, 22 Nov 2019 00:47:52 -0500
+Message-ID: <20191122054911.1750-133-sashal@kernel.org>
+References: <20191122054911.1750-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: ceph-announce-a8pt6IJUokc@public.gmane.org, ceph-users-a8pt6IJUokc@public.gmane.org, dev-a8pt6IJUokc@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191122054911.1750-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi everyone,
+From: Ilya Dryomov <idryomov@gmail.com>
 
-We're pleased to announce that the next Cephalocon will be March 3-5 in 
-Seoul, South Korea!
+[ Upstream commit 1f6b821aef78e3d79e8d598ae59fc7e23fb6c563 ]
 
-	https://ceph.com/cephalocon/seoul-2020/
+last_piece is for the last piece in the current data item, not in the
+entire data payload of the message.  This is harmful for messages with
+multiple data items.  On top of that, we don't need to signal the end
+of a data payload either because it is always followed by a footer.
 
-The CFP for the conference is now open:
+We used to signal "more" unconditionally, until commit fe38a2b67bc6
+("libceph: start defining message data cursor").  Part of a large
+series, it introduced cursor->last_piece and also mistakenly inverted
+the hint by passing last_piece for "more".  This was corrected with
+commit c2cfa1940097 ("libceph: Fix ceph_tcp_sendpage()'s more boolean
+usage").
 
-	https://linuxfoundation.smapply.io/prog/cephalocon_2020
+As it is, last_piece is not helping at all: because Nagle algorithm is
+disabled, for a simple message with two 512-byte data items we end up
+emitting three packets: front + first data item, second data item and
+footer.  Go back to the original pre-fe38a2b67bc6 behavior -- a single
+packet in most cases.
 
-Main conference: March 4-5
-Developer summit: March 3
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ net/ceph/messenger.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-Mark your calendars, and get your talk proposals in!  The CFP will close 
-in early December in order to get a final schedule published in early 
-January.
-
-In addition to the two day conference, we will also have a developer 
-summit on March 3 to take advantage of having so many developers in the 
-same place at the same time.  The developer sessions will include video 
-conferencing so that remote developers will also be able to participate.
-
-A sponsorship prospectus will be available Real Soon Now.
-
-We hope you can join us!
-_______________________________________________
-ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
-To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index f7d7f32ac673c..6514816947fbe 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1612,7 +1612,6 @@ static int write_partial_message_data(struct ceph_connection *con)
+ 		struct page *page;
+ 		size_t page_offset;
+ 		size_t length;
+-		bool last_piece;
+ 		int ret;
+ 
+ 		if (!cursor->resid) {
+@@ -1620,10 +1619,9 @@ static int write_partial_message_data(struct ceph_connection *con)
+ 			continue;
+ 		}
+ 
+-		page = ceph_msg_data_next(cursor, &page_offset, &length,
+-					  &last_piece);
+-		ret = ceph_tcp_sendpage(con->sock, page, page_offset,
+-					length, !last_piece);
++		page = ceph_msg_data_next(cursor, &page_offset, &length, NULL);
++		ret = ceph_tcp_sendpage(con->sock, page, page_offset, length,
++					true);
+ 		if (ret <= 0) {
+ 			if (do_datacrc)
+ 				msg->footer.data_crc = cpu_to_le32(crc);
+-- 
+2.20.1
