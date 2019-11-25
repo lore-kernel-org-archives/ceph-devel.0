@@ -1,79 +1,68 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH AUTOSEL 4.19 140/219] libceph: drop last_piece logic from write_partial_message_data()
-Date: Fri, 22 Nov 2019 15:00:43 +0100
-Message-ID: <CAOi1vP9MCrPf44V2GMyODH185A0HJcuPsYfVkOAVGkcMRb+=iw@mail.gmail.com>
-References: <20191122054911.1750-1-sashal@kernel.org> <20191122054911.1750-133-sashal@kernel.org>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: scrub errors on rgw data pool
+Date: Mon, 25 Nov 2019 15:34:46 +0530
+Message-ID: <CANA9Uk4kmPqe6z17BUCnUuJyNcQkOqEcwXv+RLOsbKS-bmsyGw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20191122054911.1750-133-sashal@kernel.org>
-Sender: netdev-owner@vger.kernel.org
-To: Sasha Levin <sashal@kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1918484070848081661=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Nov 22, 2019 at 6:51 AM Sasha Levin <sashal@kernel.org> wrote:
->
-> From: Ilya Dryomov <idryomov@gmail.com>
->
-> [ Upstream commit 1f6b821aef78e3d79e8d598ae59fc7e23fb6c563 ]
->
-> last_piece is for the last piece in the current data item, not in the
-> entire data payload of the message.  This is harmful for messages with
-> multiple data items.  On top of that, we don't need to signal the end
-> of a data payload either because it is always followed by a footer.
->
-> We used to signal "more" unconditionally, until commit fe38a2b67bc6
-> ("libceph: start defining message data cursor").  Part of a large
-> series, it introduced cursor->last_piece and also mistakenly inverted
-> the hint by passing last_piece for "more".  This was corrected with
-> commit c2cfa1940097 ("libceph: Fix ceph_tcp_sendpage()'s more boolean
-> usage").
->
-> As it is, last_piece is not helping at all: because Nagle algorithm is
-> disabled, for a simple message with two 512-byte data items we end up
-> emitting three packets: front + first data item, second data item and
-> footer.  Go back to the original pre-fe38a2b67bc6 behavior -- a single
-> packet in most cases.
->
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> Signed-off-by: Sasha Levin <sashal@kernel.org>
-> ---
->  net/ceph/messenger.c | 8 +++-----
->  1 file changed, 3 insertions(+), 5 deletions(-)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index f7d7f32ac673c..6514816947fbe 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1612,7 +1612,6 @@ static int write_partial_message_data(struct ceph_connection *con)
->                 struct page *page;
->                 size_t page_offset;
->                 size_t length;
-> -               bool last_piece;
->                 int ret;
->
->                 if (!cursor->resid) {
-> @@ -1620,10 +1619,9 @@ static int write_partial_message_data(struct ceph_connection *con)
->                         continue;
->                 }
->
-> -               page = ceph_msg_data_next(cursor, &page_offset, &length,
-> -                                         &last_piece);
-> -               ret = ceph_tcp_sendpage(con->sock, page, page_offset,
-> -                                       length, !last_piece);
-> +               page = ceph_msg_data_next(cursor, &page_offset, &length, NULL);
-> +               ret = ceph_tcp_sendpage(con->sock, page, page_offset, length,
-> +                                       true);
->                 if (ret <= 0) {
->                         if (do_datacrc)
->                                 msg->footer.data_crc = cpu_to_le32(crc);
+--===============1918484070848081661==
+Content-Type: multipart/alternative; boundary="00000000000056268d059828e5b0"
 
-Hi Sasha,
+--00000000000056268d059828e5b0
+Content-Type: text/plain; charset="UTF-8"
 
-This commit was part of a larger series and shouldn't be backported on
-its own.  Please drop it.
+Hello - We are using the ceph 12.2.11 version (upgraded from Jewel 10.2.12
+to 12.2.11). In this cluster, we are having mix of filestore and bluestore
+OSD backends.
+Recently we are seeing the scrub errors on rgw buckets.data pool every day,
+after scrub operation performed by Ceph. If we run the PG repair, the
+errors will go way.
 
-Thanks,
+Anyone seen the above issue?
+Is the mix of filestore backend has bug/issue with 12.2.11 version (ie
+Luminous).
+Is the mix of filestore and bluestore OSDs cause this type of issue?
 
-                Ilya
+Thanks
+Swami
+
+--00000000000056268d059828e5b0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hello - We are using the ceph 12.2.11 version (upgraded fr=
+om Jewel 10.2.12 to 12.2.11). In this cluster, we are having=C2=A0mix of fi=
+lestore and bluestore OSD backends.<div>Recently=C2=A0we are seeing the scr=
+ub errors on rgw buckets.data pool every day, after scrub operation perform=
+ed by Ceph. If we run the PG repair, the errors will go way.</div><div><br>=
+</div><div>Anyone seen the above issue?=C2=A0=C2=A0</div><div>Is the mix of=
+ filestore backend has bug/issue with 12.2.11 version (ie Luminous).</div><=
+div>Is the mix of filestore and bluestore OSDs cause this type of issue?</d=
+iv><div><br></div><div>Thanks</div><div>Swami</div></div>
+
+--00000000000056268d059828e5b0--
+
+--===============1918484070848081661==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1918484070848081661==--
