@@ -1,121 +1,52 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: Re: [PATCH AUTOSEL 4.19 100/237] libceph: don't consume a ref on
- pagelist in ceph_msg_data_add_pagelist()
-Date: Mon, 25 Nov 2019 09:06:51 -0500
-Message-ID: <20191125140651.GE5861@sasha-vm>
-References: <20191116154113.7417-1-sashal@kernel.org>
- <20191116154113.7417-100-sashal@kernel.org>
- <CAOi1vP8ZTyaGsn-hXtnr+AnCrEQfSB6sTLYwkkZ8P1oY9EgPXg@mail.gmail.com>
+From: Fyodor Ustinov <ufm-TAHq1US7lqU@public.gmane.org>
+Subject: Re: scrub errors on rgw data pool
+Date: Tue, 26 Nov 2019 04:32:45 +0200 (EET)
+Message-ID: <1067131621.54855.1574735565028.JavaMail.zimbra@ufm.su>
+References: <CANA9Uk4kmPqe6z17BUCnUuJyNcQkOqEcwXv+RLOsbKS-bmsyGw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP8ZTyaGsn-hXtnr+AnCrEQfSB6sTLYwkkZ8P1oY9EgPXg@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CANA9Uk4kmPqe6z17BUCnUuJyNcQkOqEcwXv+RLOsbKS-bmsyGw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Nov 16, 2019 at 05:23:28PM +0100, Ilya Dryomov wrote:
->On Sat, Nov 16, 2019 at 4:43 PM Sasha Levin <sashal@kernel.org> wrote:
->>
->> From: Ilya Dryomov <idryomov@gmail.com>
->>
->> [ Upstream commit 894868330a1e038ea4a65dbb81741eef70ad71b1 ]
->>
->> Because send_mds_reconnect() wants to send a message with a pagelist
->> and pass the ownership to the messenger, ceph_msg_data_add_pagelist()
->> consumes a ref which is then put in ceph_msg_data_destroy().  This
->> makes managing pagelists in the OSD client (where they are wrapped in
->> ceph_osd_data) unnecessarily hard because the handoff only happens in
->> ceph_osdc_start_request() instead of when the pagelist is passed to
->> ceph_osd_data_pagelist_init().  I counted several memory leaks on
->> various error paths.
->>
->> Fix up ceph_msg_data_add_pagelist() and carry a pagelist ref in
->> ceph_osd_data.
->>
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> Signed-off-by: Sasha Levin <sashal@kernel.org>
->> ---
->>  fs/ceph/mds_client.c  | 2 +-
->>  net/ceph/messenger.c  | 1 +
->>  net/ceph/osd_client.c | 8 ++++++++
->>  3 files changed, 10 insertions(+), 1 deletion(-)
->>
->> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->> index 09db6d08614d2..94494d05a94cb 100644
->> --- a/fs/ceph/mds_client.c
->> +++ b/fs/ceph/mds_client.c
->> @@ -2184,7 +2184,6 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
->>
->>         if (req->r_pagelist) {
->>                 struct ceph_pagelist *pagelist = req->r_pagelist;
->> -               refcount_inc(&pagelist->refcnt);
->>                 ceph_msg_data_add_pagelist(msg, pagelist);
->>                 msg->hdr.data_len = cpu_to_le32(pagelist->length);
->>         } else {
->> @@ -3289,6 +3288,7 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
->>         mutex_unlock(&mdsc->mutex);
->>
->>         up_read(&mdsc->snap_rwsem);
->> +       ceph_pagelist_release(pagelist);
->>         return;
->>
->>  fail:
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index f7d7f32ac673c..2c8cd339d59ea 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -3323,6 +3323,7 @@ void ceph_msg_data_add_pagelist(struct ceph_msg *msg,
->>
->>         data = ceph_msg_data_create(CEPH_MSG_DATA_PAGELIST);
->>         BUG_ON(!data);
->> +       refcount_inc(&pagelist->refcnt);
->>         data->pagelist = pagelist;
->>
->>         list_add_tail(&data->links, &msg->data);
->> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> index 76c41a84550e7..c3494c1fb3a9a 100644
->> --- a/net/ceph/osd_client.c
->> +++ b/net/ceph/osd_client.c
->> @@ -126,6 +126,9 @@ static void ceph_osd_data_init(struct ceph_osd_data *osd_data)
->>         osd_data->type = CEPH_OSD_DATA_TYPE_NONE;
->>  }
->>
->> +/*
->> + * Consumes @pages if @own_pages is true.
->> + */
->>  static void ceph_osd_data_pages_init(struct ceph_osd_data *osd_data,
->>                         struct page **pages, u64 length, u32 alignment,
->>                         bool pages_from_pool, bool own_pages)
->> @@ -138,6 +141,9 @@ static void ceph_osd_data_pages_init(struct ceph_osd_data *osd_data,
->>         osd_data->own_pages = own_pages;
->>  }
->>
->> +/*
->> + * Consumes a ref on @pagelist.
->> + */
->>  static void ceph_osd_data_pagelist_init(struct ceph_osd_data *osd_data,
->>                         struct ceph_pagelist *pagelist)
->>  {
->> @@ -362,6 +368,8 @@ static void ceph_osd_data_release(struct ceph_osd_data *osd_data)
->>                 num_pages = calc_pages_for((u64)osd_data->alignment,
->>                                                 (u64)osd_data->length);
->>                 ceph_release_page_vector(osd_data->pages, num_pages);
->> +       } else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
->> +               ceph_pagelist_release(osd_data->pagelist);
->>         }
->>         ceph_osd_data_init(osd_data);
->>  }
->
->Hi Sasha,
->
->This commit was part of a larger series and shouldn't be backported on
->its own.  Please drop it.
+Hi!
 
-Dropped, thanks!
+I had similar errors in pools on SSD until I upgraded to nautilus (clean bluestore installation)
 
--- 
-Thanks,
-Sasha
+----- Original Message -----
+> From: "M Ranga Swami Reddy" <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> To: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Sent: Monday, 25 November, 2019 12:04:46
+> Subject: [ceph-users] scrub errors on rgw data pool
+
+> Hello - We are using the ceph 12.2.11 version (upgraded from Jewel 10.2.12 to
+> 12.2.11). In this cluster, we are having mix of filestore and bluestore OSD
+> backends.
+> Recently we are seeing the scrub errors on rgw buckets.data pool every day,
+> after scrub operation performed by Ceph. If we run the PG repair, the errors
+> will go way.
+> 
+> Anyone seen the above issue?
+> Is the mix of filestore backend has bug/issue with 12.2.11 version (ie
+> Luminous).
+> Is the mix of filestore and bluestore OSDs cause this type of issue?
+> 
+> Thanks
+> Swami
+> 
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
