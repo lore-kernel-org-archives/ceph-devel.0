@@ -1,72 +1,143 @@
-From: Vincent Godin <vince.mlist-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: mimic 13.2.6 too much broken connexions
-Date: Wed, 27 Nov 2019 16:31:14 +0100
-Message-ID: <CAL2-6b+A2tQd=pMoXRewK2KeakDpy0X40vDg0OTWk-ZAm5RfmA@mail.gmail.com>
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] fs: Fix page_mkwrite off-by-one errors
+Date: Wed, 27 Nov 2019 07:49:54 -0800
+Message-ID: <20191127154954.GT6219@magnolia>
+References: <20191127151811.9229-1-agruenba@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: ceph-users-a8pt6IJUokc@public.gmane.org, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20191127151811.9229-1-agruenba@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: linux-xfs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Theodore Ts'o <tytso@mit.edu>, Sage Weil <sage@redhat.com>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Chao Yu <chao@kernel.org>, Jeff Layton <jlayton@kernel.org>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Christoph Hellwig <hch@infradead.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Till i submit the mail below few days ago, we found some clues
-We observed a lot of lossy connexion like :
-ceph-osd.9.log:2019-11-27 11:03:49.369 7f6bb77d0700  0 --
-192.168.4.181:6818/2281415 >> 192.168.4.41:0/1962809518
-conn(0x563979a9f600 :6818   s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH
-pgs=0 cs=0 l=1).handle_connect_msg accept replacing existing (lossy)
-channel (new one lossy=1)
-We raised the log of the messenger to 5/5 and observed for the whole
-cluster more than 80 000 lossy connexion per minute !!!
-We adjusted  the "ms_tcp_read_timeout" from 900 to 60 sec then no more
-lossy connexion in logs nor health check failed
-It's just a workaround but there is a real problem with these broken
-sessions and it leads to two
-assertions :
-- Ceph take too much time to detect broken session and should recycle quicker !
-- The reasons for these broken sessions ?
+On Wed, Nov 27, 2019 at 04:18:11PM +0100, Andreas Gruenbacher wrote:
+> Fix a check in block_page_mkwrite meant to determine whether an offset
+> is within the inode size.  This error has spread to several filesystems
+> and to iomap_page_mkwrite, so fix those instances as well.
 
-We have a other mimic cluster on different hardware and observed the
-same behavior : lot of lossy sessions, slow ops and co.
-Symptoms are the same :
-- some OSDs on one host have no response from an other osd on a different hosts
-- after some time, slow ops are detected
-- sometime it leads to ioblocked
-- after about 15mn the problem vanish
+Seeing how this has gotten screwed up at least six times in the kernel,
+maybe we need a static inline helper to do this for us?
 
------------
+> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 
-Help on diag needed : heartbeat_failed
+The iomap part looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-We encounter a strange behavior on our Mimic 13.2.6 cluster. A any
-time, and without any load, some OSDs become unreachable from only
-some hosts. It last 10 mn and then the problem vanish.
-It 's not always the same OSDs and the same hosts. There is no network
-failure on any of the host (because only some OSDs become unreachable)
-nor disk freeze as we can see in our grafana dashboard. Logs message
-are :
-first msg :
-2019-11-24 09:19:43.292 7fa9980fc700 -1 osd.596 146481
-heartbeat_check: no reply from 192.168.6.112:6817 osd.394 since back
-2019-11-24 09:19:22.761142 front 2019-11-24 09:19:39.769138 (cutoff
-2019-11-24 09:19:23.293436)
-last msg:
-2019-11-24 09:30:33.735 7f632354f700 -1 osd.591 146481
-heartbeat_check: no reply from 192.168.6.123:6828 osd.600 since back
-2019-11-24 09:27:05.269330 front 2019-11-24 09:30:33.214874 (cutoff
-2019-11-24 09:30:13.736517)
-During this time, 3 hosts were involved : host-18, host-20 and host-30 :
-host-30 is the only one who can't see osds 346,356,and 352 on host-18
-host-30 is the only one who can't see osds 387 and 394 on host-20
-host-18 is the only one who can't see osds 583, 585, 591 and 597 on host-30
-We can't see any strange behavior on hosts 18, 20 and 30 in our node
-exporter data during this time
-Any ideas or advices ?
-_______________________________________________
-ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
-To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
+(I might just extract the iomap part and put it in the iomap tree if
+someone doesn't merge this one before I get to it...)
+
+--D
+
+> 
+> ---
+> 
+> This patch has a trivial conflict with commit "iomap: Fix overflow in
+> iomap_page_mkwrite" in Darrick's iomap pull request for 5.5:
+> 
+>   https://lore.kernel.org/lkml/20191125190907.GN6219@magnolia/
+> ---
+>  fs/buffer.c            | 2 +-
+>  fs/ceph/addr.c         | 2 +-
+>  fs/ext4/inode.c        | 2 +-
+>  fs/f2fs/file.c         | 2 +-
+>  fs/iomap/buffered-io.c | 2 +-
+>  fs/ubifs/file.c        | 2 +-
+>  6 files changed, 6 insertions(+), 6 deletions(-)
+> 
+> diff --git a/fs/buffer.c b/fs/buffer.c
+> index 86a38b979323..152d391858d4 100644
+> --- a/fs/buffer.c
+> +++ b/fs/buffer.c
+> @@ -2465,7 +2465,7 @@ int block_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf,
+>  	lock_page(page);
+>  	size = i_size_read(inode);
+>  	if ((page->mapping != inode->i_mapping) ||
+> -	    (page_offset(page) > size)) {
+> +	    (page_offset(page) >= size)) {
+>  		/* We overload EFAULT to mean page got truncated */
+>  		ret = -EFAULT;
+>  		goto out_unlock;
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 7ab616601141..9fa0729ece41 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -1575,7 +1575,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+>  	do {
+>  		lock_page(page);
+>  
+> -		if ((off > size) || (page->mapping != inode->i_mapping)) {
+> +		if ((off >= size) || (page->mapping != inode->i_mapping)) {
+>  			unlock_page(page);
+>  			ret = VM_FAULT_NOPAGE;
+>  			break;
+> diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
+> index 516faa280ced..6dd4efe2fb63 100644
+> --- a/fs/ext4/inode.c
+> +++ b/fs/ext4/inode.c
+> @@ -6224,7 +6224,7 @@ vm_fault_t ext4_page_mkwrite(struct vm_fault *vmf)
+>  	lock_page(page);
+>  	size = i_size_read(inode);
+>  	/* Page got truncated from under us? */
+> -	if (page->mapping != mapping || page_offset(page) > size) {
+> +	if (page->mapping != mapping || page_offset(page) >= size) {
+>  		unlock_page(page);
+>  		ret = VM_FAULT_NOPAGE;
+>  		goto out;
+> diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
+> index 29bc0a542759..3436be01af45 100644
+> --- a/fs/f2fs/file.c
+> +++ b/fs/f2fs/file.c
+> @@ -71,7 +71,7 @@ static vm_fault_t f2fs_vm_page_mkwrite(struct vm_fault *vmf)
+>  	down_read(&F2FS_I(inode)->i_mmap_sem);
+>  	lock_page(page);
+>  	if (unlikely(page->mapping != inode->i_mapping ||
+> -			page_offset(page) > i_size_read(inode) ||
+> +			page_offset(page) >= i_size_read(inode) ||
+>  			!PageUptodate(page))) {
+>  		unlock_page(page);
+>  		err = -EFAULT;
+> diff --git a/fs/iomap/buffered-io.c b/fs/iomap/buffered-io.c
+> index e25901ae3ff4..d454dbab5133 100644
+> --- a/fs/iomap/buffered-io.c
+> +++ b/fs/iomap/buffered-io.c
+> @@ -1041,7 +1041,7 @@ vm_fault_t iomap_page_mkwrite(struct vm_fault *vmf, const struct iomap_ops *ops)
+>  	lock_page(page);
+>  	size = i_size_read(inode);
+>  	if ((page->mapping != inode->i_mapping) ||
+> -	    (page_offset(page) > size)) {
+> +	    (page_offset(page) >= size)) {
+>  		/* We overload EFAULT to mean page got truncated */
+>  		ret = -EFAULT;
+>  		goto out_unlock;
+> diff --git a/fs/ubifs/file.c b/fs/ubifs/file.c
+> index cd52585c8f4f..ca0148ec77e6 100644
+> --- a/fs/ubifs/file.c
+> +++ b/fs/ubifs/file.c
+> @@ -1564,7 +1564,7 @@ static vm_fault_t ubifs_vm_page_mkwrite(struct vm_fault *vmf)
+>  
+>  	lock_page(page);
+>  	if (unlikely(page->mapping != inode->i_mapping ||
+> -		     page_offset(page) > i_size_read(inode))) {
+> +		     page_offset(page) >= i_size_read(inode))) {
+>  		/* Page got truncated out from underneath us */
+>  		goto sigbus;
+>  	}
+> -- 
+> 2.20.1
+> 
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
