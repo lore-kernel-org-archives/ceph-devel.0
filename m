@@ -1,143 +1,96 @@
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] fs: Fix page_mkwrite off-by-one errors
-Date: Wed, 27 Nov 2019 07:49:54 -0800
-Message-ID: <20191127154954.GT6219@magnolia>
-References: <20191127151811.9229-1-agruenba@redhat.com>
+From: Vincent Godin <vince.mlist-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: mimic 13.2.6 too much broken connexions
+Date: Wed, 27 Nov 2019 20:11:23 +0100
+Message-ID: <CAL2-6b+wKe0X1BB2Wts9Q7RX_BQiVk0MaA0=k1LXV_hGwezb5Q@mail.gmail.com>
+References: <CAL2-6b+A2tQd=pMoXRewK2KeakDpy0X40vDg0OTWk-ZAm5RfmA@mail.gmail.com>
+ <62E3E7FC-DEB5-4EBC-8945-F7FF43C6433C@dreamsnake.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20191127151811.9229-1-agruenba@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: linux-xfs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Theodore Ts'o <tytso@mit.edu>, Sage Weil <sage@redhat.com>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Chao Yu <chao@kernel.org>, Jeff Layton <jlayton@kernel.org>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Christoph Hellwig <hch@infradead.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
+In-Reply-To: <62E3E7FC-DEB5-4EBC-8945-F7FF43C6433C-lmG3kWHAawoohuQDye/k0w@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
+To: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>, ceph-users-a8pt6IJUokc@public.gmane.org, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Nov 27, 2019 at 04:18:11PM +0100, Andreas Gruenbacher wrote:
-> Fix a check in block_page_mkwrite meant to determine whether an offset
-> is within the inode size.  This error has spread to several filesystems
-> and to iomap_page_mkwrite, so fix those instances as well.
-
-Seeing how this has gotten screwed up at least six times in the kernel,
-maybe we need a static inline helper to do this for us?
-
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
-
-The iomap part looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
-(I might just extract the iomap part and put it in the iomap tree if
-someone doesn't merge this one before I get to it...)
-
---D
-
-> 
-> ---
-> 
-> This patch has a trivial conflict with commit "iomap: Fix overflow in
-> iomap_page_mkwrite" in Darrick's iomap pull request for 5.5:
-> 
->   https://lore.kernel.org/lkml/20191125190907.GN6219@magnolia/
-> ---
->  fs/buffer.c            | 2 +-
->  fs/ceph/addr.c         | 2 +-
->  fs/ext4/inode.c        | 2 +-
->  fs/f2fs/file.c         | 2 +-
->  fs/iomap/buffered-io.c | 2 +-
->  fs/ubifs/file.c        | 2 +-
->  6 files changed, 6 insertions(+), 6 deletions(-)
-> 
-> diff --git a/fs/buffer.c b/fs/buffer.c
-> index 86a38b979323..152d391858d4 100644
-> --- a/fs/buffer.c
-> +++ b/fs/buffer.c
-> @@ -2465,7 +2465,7 @@ int block_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf,
->  	lock_page(page);
->  	size = i_size_read(inode);
->  	if ((page->mapping != inode->i_mapping) ||
-> -	    (page_offset(page) > size)) {
-> +	    (page_offset(page) >= size)) {
->  		/* We overload EFAULT to mean page got truncated */
->  		ret = -EFAULT;
->  		goto out_unlock;
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 7ab616601141..9fa0729ece41 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -1575,7 +1575,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
->  	do {
->  		lock_page(page);
->  
-> -		if ((off > size) || (page->mapping != inode->i_mapping)) {
-> +		if ((off >= size) || (page->mapping != inode->i_mapping)) {
->  			unlock_page(page);
->  			ret = VM_FAULT_NOPAGE;
->  			break;
-> diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
-> index 516faa280ced..6dd4efe2fb63 100644
-> --- a/fs/ext4/inode.c
-> +++ b/fs/ext4/inode.c
-> @@ -6224,7 +6224,7 @@ vm_fault_t ext4_page_mkwrite(struct vm_fault *vmf)
->  	lock_page(page);
->  	size = i_size_read(inode);
->  	/* Page got truncated from under us? */
-> -	if (page->mapping != mapping || page_offset(page) > size) {
-> +	if (page->mapping != mapping || page_offset(page) >= size) {
->  		unlock_page(page);
->  		ret = VM_FAULT_NOPAGE;
->  		goto out;
-> diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
-> index 29bc0a542759..3436be01af45 100644
-> --- a/fs/f2fs/file.c
-> +++ b/fs/f2fs/file.c
-> @@ -71,7 +71,7 @@ static vm_fault_t f2fs_vm_page_mkwrite(struct vm_fault *vmf)
->  	down_read(&F2FS_I(inode)->i_mmap_sem);
->  	lock_page(page);
->  	if (unlikely(page->mapping != inode->i_mapping ||
-> -			page_offset(page) > i_size_read(inode) ||
-> +			page_offset(page) >= i_size_read(inode) ||
->  			!PageUptodate(page))) {
->  		unlock_page(page);
->  		err = -EFAULT;
-> diff --git a/fs/iomap/buffered-io.c b/fs/iomap/buffered-io.c
-> index e25901ae3ff4..d454dbab5133 100644
-> --- a/fs/iomap/buffered-io.c
-> +++ b/fs/iomap/buffered-io.c
-> @@ -1041,7 +1041,7 @@ vm_fault_t iomap_page_mkwrite(struct vm_fault *vmf, const struct iomap_ops *ops)
->  	lock_page(page);
->  	size = i_size_read(inode);
->  	if ((page->mapping != inode->i_mapping) ||
-> -	    (page_offset(page) > size)) {
-> +	    (page_offset(page) >= size)) {
->  		/* We overload EFAULT to mean page got truncated */
->  		ret = -EFAULT;
->  		goto out_unlock;
-> diff --git a/fs/ubifs/file.c b/fs/ubifs/file.c
-> index cd52585c8f4f..ca0148ec77e6 100644
-> --- a/fs/ubifs/file.c
-> +++ b/fs/ubifs/file.c
-> @@ -1564,7 +1564,7 @@ static vm_fault_t ubifs_vm_page_mkwrite(struct vm_fault *vmf)
->  
->  	lock_page(page);
->  	if (unlikely(page->mapping != inode->i_mapping ||
-> -		     page_offset(page) > i_size_read(inode))) {
-> +		     page_offset(page) >= i_size_read(inode))) {
->  		/* Page got truncated out from underneath us */
->  		goto sigbus;
->  	}
-> -- 
-> 2.20.1
-> 
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+SWYgaXQgd2FzIGEgbmV0d29yayBpc3N1ZSwgdGhlIGNvdW50ZXJzIHNob3VsZCBleHBsb3NlIChh
+cyBpIHNhaWQsDQp3aXRoIGEgbG9nIGxldmVsIG9mIDUgb24gdGhlIG1lc3Nlbmdlciwgd2Ugb2Jz
+ZXJ2ZWQgbW9yZSB0aGVuIDgwIDAwMA0KbG9zc3kgY2hhbm5lbHMgcGVyIG1pbnV0ZSkgYnV0IG5v
+dGhpbmcgYWJub3JtYWwgaXMgcmVsZXZhbnQgb24gdGhlDQpjb3VudGVycyAob24gc3dpdGNocyBh
+bmQgc2VydmVycykNCk9uIHRoZSBzd2l0Y2hzICBubyBkcm9wLCBubyBjcmMgZXJyb3IsIG5vIHBh
+Y2tldCBsb3NzLCBvbmx5IHNvbWUNCm91dHB1dCBkaXNjYXJkcyBidXQgbm90IGVub3VnaCB0byBi
+ZSBzaWduaWZpY2FudC4gT24gdGhlIE5JQ3Mgb24gdGhlDQpzZXJ2ZXJzIHZpYSBldGh0b29sIC1T
+LCBub3RoaW5nIGlzIHJlbGV2YW50Lg0KQW5kIGFzIGkgc2FpZCwgYW4gb3RoZXIgbWltaWMgY2x1
+c3RlciB3aXRoIGRpZmZlcmVudCBoYXJkd2FyZSBoYXMgdGhlDQpzYW1lIGJlaGF2aW9yDQpDZXBo
+IHVzZXMgY29ubmV4aW9ucyBwb29scyBmcm9tIGhvc3QgdG8gaG9zdCBidXQgaG93IGRvZXMgaXQg
+Y2hlY2sgdGhlDQphdmFpbGFiaWxpdHkgb2YgdGhlc2UgY29ubmV4aW9ucyBvdmVyIHRoZSB0aW1l
+ID8NCkFuZCBhcyB0aGUgbmV0d29yayBkb2Vzbid0IHNlZW0gdG8gYmUgZ3VpbHR5LCB3aGF0IGNh
+biBleHBsYWluIHRoZXNlDQpicm9rZW4gY2hhbm5lbHMgPw0KDQpMZSBtZXIuIDI3IG5vdi4gMjAx
+OSDDoCAxOTowNSwgQW50aG9ueSBEJ0F0cmkgPGFhZEBkcmVhbXNuYWtlLm5ldD4gYSDDqWNyaXQg
+Og0KPg0KPiBBcmUgeW91IGJvbmRpbmcgTklDIHBvcnRzPyAgIElmIHNvIGRvIHlvdSBoYXZlIHRo
+ZSBjb3JyZWN0IGhhc2ggcG9saWN5IGRlZmluZWQ/IEhhdmUgeW91IGxvb2tlZCBhdCB0aGUgKnN3
+aXRjaCogc2lkZSBmb3IgcGFja2V0IGxvc3MsIENSQyBlcnJvcnMsIGV0Yz8gICBXaGF0IHlvdSBy
+ZXBvcnQgY291bGQgYmUgY29uc2lzdGVudCB3aXRoIHRoaXMuICBTaW5jZSB0aGUgaG9zdCAgaW50
+ZXJmYWNlIGZvciBhIGdpdmVuIGNvbm5lY3Rpb24gd2lsbCB2YXJ5IGJ5IHRoZSBib25kIGhhc2gs
+IHNvbWUgT1NEIGNvbm5lY3Rpb25zIHdpbGwgdXNlIG9uZSBwb3J0IGFuZCBzb21lIHRoZSBvdGhl
+ci4gICBTbyBpZiBvbmUgcG9ydCBoYXMgc3dpdGNoIHNpZGUgZXJyb3JzLCBvciBpcyBibGFja2hv
+bGVkIG9uIHRoZSBzd2l0Y2gsIHlvdSBjb3VsZCBzZWUgc29tZSBoZWFydCBiZWF0aW5nIGltcGFj
+dGVkIGJ1dCBub3Qgb3RoZXJzLg0KPg0KPiBBbHNvIG1ha2Ugc3VyZSB5b3UgaGF2ZSB0aGUgb3B0
+aW1hbCByZXBvcnRlcnMgdmFsdWUuDQo+DQo+ID4gT24gTm92IDI3LCAyMDE5LCBhdCA3OjMxIEFN
+LCBWaW5jZW50IEdvZGluIDx2aW5jZS5tbGlzdEBnbWFpbC5jb20+IHdyb3RlOg0KPiA+DQo+ID4g
+77u/VGlsbCBpIHN1Ym1pdCB0aGUgbWFpbCBiZWxvdyBmZXcgZGF5cyBhZ28sIHdlIGZvdW5kIHNv
+bWUgY2x1ZXMNCj4gPiBXZSBvYnNlcnZlZCBhIGxvdCBvZiBsb3NzeSBjb25uZXhpb24gbGlrZSA6
+DQo+ID4gY2VwaC1vc2QuOS5sb2c6MjAxOS0xMS0yNyAxMTowMzo0OS4zNjkgN2Y2YmI3N2QwNzAw
+ICAwIC0tDQo+ID4gMTkyLjE2OC40LjE4MTo2ODE4LzIyODE0MTUgPj4gMTkyLjE2OC40LjQxOjAv
+MTk2MjgwOTUxOA0KPiA+IGNvbm4oMHg1NjM5NzlhOWY2MDAgOjY4MTggICBzPVNUQVRFX0FDQ0VQ
+VElOR19XQUlUX0NPTk5FQ1RfTVNHX0FVVEgNCj4gPiBwZ3M9MCBjcz0wIGw9MSkuaGFuZGxlX2Nv
+bm5lY3RfbXNnIGFjY2VwdCByZXBsYWNpbmcgZXhpc3RpbmcgKGxvc3N5KQ0KPiA+IGNoYW5uZWwg
+KG5ldyBvbmUgbG9zc3k9MSkNCj4gPiBXZSByYWlzZWQgdGhlIGxvZyBvZiB0aGUgbWVzc2VuZ2Vy
+IHRvIDUvNSBhbmQgb2JzZXJ2ZWQgZm9yIHRoZSB3aG9sZQ0KPiA+IGNsdXN0ZXIgbW9yZSB0aGFu
+IDgwIDAwMCBsb3NzeSBjb25uZXhpb24gcGVyIG1pbnV0ZSAhISENCj4gPiBXZSBhZGp1c3RlZCAg
+dGhlICJtc190Y3BfcmVhZF90aW1lb3V0IiBmcm9tIDkwMCB0byA2MCBzZWMgdGhlbiBubyBtb3Jl
+DQo+ID4gbG9zc3kgY29ubmV4aW9uIGluIGxvZ3Mgbm9yIGhlYWx0aCBjaGVjayBmYWlsZWQNCj4g
+PiBJdCdzIGp1c3QgYSB3b3JrYXJvdW5kIGJ1dCB0aGVyZSBpcyBhIHJlYWwgcHJvYmxlbSB3aXRo
+IHRoZXNlIGJyb2tlbg0KPiA+IHNlc3Npb25zIGFuZCBpdCBsZWFkcyB0byB0d28NCj4gPiBhc3Nl
+cnRpb25zIDoNCj4gPiAtIENlcGggdGFrZSB0b28gbXVjaCB0aW1lIHRvIGRldGVjdCBicm9rZW4g
+c2Vzc2lvbiBhbmQgc2hvdWxkIHJlY3ljbGUgcXVpY2tlciAhDQo+ID4gLSBUaGUgcmVhc29ucyBm
+b3IgdGhlc2UgYnJva2VuIHNlc3Npb25zID8NCj4gPg0KPiA+IFdlIGhhdmUgYSBvdGhlciBtaW1p
+YyBjbHVzdGVyIG9uIGRpZmZlcmVudCBoYXJkd2FyZSBhbmQgb2JzZXJ2ZWQgdGhlDQo+ID4gc2Ft
+ZSBiZWhhdmlvciA6IGxvdCBvZiBsb3NzeSBzZXNzaW9ucywgc2xvdyBvcHMgYW5kIGNvLg0KPiA+
+IFN5bXB0b21zIGFyZSB0aGUgc2FtZSA6DQo+ID4gLSBzb21lIE9TRHMgb24gb25lIGhvc3QgaGF2
+ZSBubyByZXNwb25zZSBmcm9tIGFuIG90aGVyIG9zZCBvbiBhIGRpZmZlcmVudCBob3N0cw0KPiA+
+IC0gYWZ0ZXIgc29tZSB0aW1lLCBzbG93IG9wcyBhcmUgZGV0ZWN0ZWQNCj4gPiAtIHNvbWV0aW1l
+IGl0IGxlYWRzIHRvIGlvYmxvY2tlZA0KPiA+IC0gYWZ0ZXIgYWJvdXQgMTVtbiB0aGUgcHJvYmxl
+bSB2YW5pc2gNCj4gPg0KPiA+IC0tLS0tLS0tLS0tDQo+ID4NCj4gPiBIZWxwIG9uIGRpYWcgbmVl
+ZGVkIDogaGVhcnRiZWF0X2ZhaWxlZA0KPiA+DQo+ID4gV2UgZW5jb3VudGVyIGEgc3RyYW5nZSBi
+ZWhhdmlvciBvbiBvdXIgTWltaWMgMTMuMi42IGNsdXN0ZXIuIEEgYW55DQo+ID4gdGltZSwgYW5k
+IHdpdGhvdXQgYW55IGxvYWQsIHNvbWUgT1NEcyBiZWNvbWUgdW5yZWFjaGFibGUgZnJvbSBvbmx5
+DQo+ID4gc29tZSBob3N0cy4gSXQgbGFzdCAxMCBtbiBhbmQgdGhlbiB0aGUgcHJvYmxlbSB2YW5p
+c2guDQo+ID4gSXQgJ3Mgbm90IGFsd2F5cyB0aGUgc2FtZSBPU0RzIGFuZCB0aGUgc2FtZSBob3N0
+cy4gVGhlcmUgaXMgbm8gbmV0d29yaw0KPiA+IGZhaWx1cmUgb24gYW55IG9mIHRoZSBob3N0IChi
+ZWNhdXNlIG9ubHkgc29tZSBPU0RzIGJlY29tZSB1bnJlYWNoYWJsZSkNCj4gPiBub3IgZGlzayBm
+cmVlemUgYXMgd2UgY2FuIHNlZSBpbiBvdXIgZ3JhZmFuYSBkYXNoYm9hcmQuIExvZ3MgbWVzc2Fn
+ZQ0KPiA+IGFyZSA6DQo+ID4gZmlyc3QgbXNnIDoNCj4gPiAyMDE5LTExLTI0IDA5OjE5OjQzLjI5
+MiA3ZmE5OTgwZmM3MDAgLTEgb3NkLjU5NiAxNDY0ODENCj4gPiBoZWFydGJlYXRfY2hlY2s6IG5v
+IHJlcGx5IGZyb20gMTkyLjE2OC42LjExMjo2ODE3IG9zZC4zOTQgc2luY2UgYmFjaw0KPiA+IDIw
+MTktMTEtMjQgMDk6MTk6MjIuNzYxMTQyIGZyb250IDIwMTktMTEtMjQgMDk6MTk6MzkuNzY5MTM4
+IChjdXRvZmYNCj4gPiAyMDE5LTExLTI0IDA5OjE5OjIzLjI5MzQzNikNCj4gPiBsYXN0IG1zZzoN
+Cj4gPiAyMDE5LTExLTI0IDA5OjMwOjMzLjczNSA3ZjYzMjM1NGY3MDAgLTEgb3NkLjU5MSAxNDY0
+ODENCj4gPiBoZWFydGJlYXRfY2hlY2s6IG5vIHJlcGx5IGZyb20gMTkyLjE2OC42LjEyMzo2ODI4
+IG9zZC42MDAgc2luY2UgYmFjaw0KPiA+IDIwMTktMTEtMjQgMDk6Mjc6MDUuMjY5MzMwIGZyb250
+IDIwMTktMTEtMjQgMDk6MzA6MzMuMjE0ODc0IChjdXRvZmYNCj4gPiAyMDE5LTExLTI0IDA5OjMw
+OjEzLjczNjUxNykNCj4gPiBEdXJpbmcgdGhpcyB0aW1lLCAzIGhvc3RzIHdlcmUgaW52b2x2ZWQg
+OiBob3N0LTE4LCBob3N0LTIwIGFuZCBob3N0LTMwIDoNCj4gPiBob3N0LTMwIGlzIHRoZSBvbmx5
+IG9uZSB3aG8gY2FuJ3Qgc2VlIG9zZHMgMzQ2LDM1NixhbmQgMzUyIG9uIGhvc3QtMTgNCj4gPiBo
+b3N0LTMwIGlzIHRoZSBvbmx5IG9uZSB3aG8gY2FuJ3Qgc2VlIG9zZHMgMzg3IGFuZCAzOTQgb24g
+aG9zdC0yMA0KPiA+IGhvc3QtMTggaXMgdGhlIG9ubHkgb25lIHdobyBjYW4ndCBzZWUgb3NkcyA1
+ODMsIDU4NSwgNTkxIGFuZCA1OTcgb24gaG9zdC0zMA0KPiA+IFdlIGNhbid0IHNlZSBhbnkgc3Ry
+YW5nZSBiZWhhdmlvciBvbiBob3N0cyAxOCwgMjAgYW5kIDMwIGluIG91ciBub2RlDQo+ID4gZXhw
+b3J0ZXIgZGF0YSBkdXJpbmcgdGhpcyB0aW1lDQo+ID4gQW55IGlkZWFzIG9yIGFkdmljZXMgPwpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdCAtLSBjZXBoLXVzZXJzQGNlcGguaW8KVG8gdW5zdWJzY3JpYmUgc2VuZCBh
+biBlbWFpbCB0byBjZXBoLXVzZXJzLWxlYXZlQGNlcGguaW8K
