@@ -1,147 +1,119 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: scrub errors on rgw data pool
-Date: Tue, 26 Nov 2019 12:00:43 +0530
-Message-ID: <CANA9Uk6CyYfFuw-X82wgikjvPRWCe9sQxziB-oo0hW_So74pFA@mail.gmail.com>
-References: <CANA9Uk4kmPqe6z17BUCnUuJyNcQkOqEcwXv+RLOsbKS-bmsyGw@mail.gmail.com>
- <1067131621.54855.1574735565028.JavaMail.zimbra@ufm.su>
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH] fs: Fix page_mkwrite off-by-one errors
+Date: Wed, 27 Nov 2019 16:18:11 +0100
+Message-ID: <20191127151811.9229-1-agruenba@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4881720310633547688=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1067131621.54855.1574735565028.JavaMail.zimbra-TAHq1US7lqU@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Fyodor Ustinov <ufm-TAHq1US7lqU@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Andreas Gruenbacher <agruenba@redhat.com>, linux-kernel@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>, Christoph Hellwig <hch@infradead.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, Richard Weinberger <richard@nod.at>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============4881720310633547688==
-Content-Type: multipart/alternative; boundary="000000000000b2300305983a0515"
+Fix a check in block_page_mkwrite meant to determine whether an offset
+is within the inode size.  This error has spread to several filesystems
+and to iomap_page_mkwrite, so fix those instances as well.
 
---000000000000b2300305983a0515
-Content-Type: text/plain; charset="UTF-8"
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 
-Thanks for reply
-Have you migrated all filestore OSDs from filestore backend to bluestore
-backend?
-Or
-Have you upgraded from Luminious 12.2.11 to 14.x?
+---
 
-What helped here?
+This patch has a trivial conflict with commit "iomap: Fix overflow in
+iomap_page_mkwrite" in Darrick's iomap pull request for 5.5:
 
+  https://lore.kernel.org/lkml/20191125190907.GN6219@magnolia/
+---
+ fs/buffer.c            | 2 +-
+ fs/ceph/addr.c         | 2 +-
+ fs/ext4/inode.c        | 2 +-
+ fs/f2fs/file.c         | 2 +-
+ fs/iomap/buffered-io.c | 2 +-
+ fs/ubifs/file.c        | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
 
-On Tue, Nov 26, 2019 at 8:03 AM Fyodor Ustinov <ufm-TAHq1US7lqU@public.gmane.org> wrote:
-
-> Hi!
->
-> I had similar errors in pools on SSD until I upgraded to nautilus (clean
-> bluestore installation)
->
-> ----- Original Message -----
-> > From: "M Ranga Swami Reddy" <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> > To: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <
-> ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> > Sent: Monday, 25 November, 2019 12:04:46
-> > Subject: [ceph-users] scrub errors on rgw data pool
->
-> > Hello - We are using the ceph 12.2.11 version (upgraded from Jewel
-> 10.2.12 to
-> > 12.2.11). In this cluster, we are having mix of filestore and bluestore
-> OSD
-> > backends.
-> > Recently we are seeing the scrub errors on rgw buckets.data pool every
-> day,
-> > after scrub operation performed by Ceph. If we run the PG repair, the
-> errors
-> > will go way.
-> >
-> > Anyone seen the above issue?
-> > Is the mix of filestore backend has bug/issue with 12.2.11 version (ie
-> > Luminous).
-> > Is the mix of filestore and bluestore OSDs cause this type of issue?
-> >
-> > Thanks
-> > Swami
-> >
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---000000000000b2300305983a0515
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Thanks for reply=C2=A0<div>Have=C2=A0you migrated all file=
-store OSDs from filestore backend to bluestore backend?</div><div>Or</div><=
-div>Have you upgraded from Luminious 12.2.11 to 14.x?</div><div><br></div><=
-div>What helped here?</div><div><br></div></div><br><div class=3D"gmail_quo=
-te"><div dir=3D"ltr" class=3D"gmail_attr">On Tue, Nov 26, 2019 at 8:03 AM F=
-yodor Ustinov &lt;<a href=3D"mailto:ufm-TAHq1US7lqU@public.gmane.org">ufm-TAHq1US7lqU@public.gmane.org</a>&gt; wrote:<b=
-r></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex=
-;border-left:1px solid rgb(204,204,204);padding-left:1ex">Hi!<br>
-<br>
-I had similar errors in pools on SSD until I upgraded to nautilus (clean bl=
-uestore installation)<br>
-<br>
------ Original Message -----<br>
-&gt; From: &quot;M Ranga Swami Reddy&quot; &lt;<a href=3D"mailto:swamireddy=
-@gmail.com" target=3D"_blank">swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt; To: &quot;ceph-users&quot; &lt;<a href=3D"mailto:ceph-users-idqoXFIVOFLXfrYAhh+zQw@public.gmane.org=
-.com" target=3D"_blank">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&gt;, &quot;ceph-devel=
-&quot; &lt;<a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" target=3D"_blank">=
-ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;<br>
-&gt; Sent: Monday, 25 November, 2019 12:04:46<br>
-&gt; Subject: [ceph-users] scrub errors on rgw data pool<br>
-<br>
-&gt; Hello - We are using the ceph 12.2.11 version (upgraded from Jewel 10.=
-2.12 to<br>
-&gt; 12.2.11). In this cluster, we are having mix of filestore and bluestor=
-e OSD<br>
-&gt; backends.<br>
-&gt; Recently we are seeing the scrub errors on rgw buckets.data pool every=
- day,<br>
-&gt; after scrub operation performed by Ceph. If we run the PG repair, the =
-errors<br>
-&gt; will go way.<br>
-&gt; <br>
-&gt; Anyone seen the above issue?<br>
-&gt; Is the mix of filestore backend has bug/issue with 12.2.11 version (ie=
-<br>
-&gt; Luminous).<br>
-&gt; Is the mix of filestore and bluestore OSDs cause this type of issue?<b=
-r>
-&gt; <br>
-&gt; Thanks<br>
-&gt; Swami<br>
-&gt; <br>
-&gt; _______________________________________________<br>
-&gt; ceph-users mailing list<br>
-&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-us=
-ers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-&gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=
-=3D"noreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-u=
-sers-ceph.com</a><br>
-</blockquote></div>
-
---000000000000b2300305983a0515--
-
---===============4881720310633547688==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============4881720310633547688==--
+diff --git a/fs/buffer.c b/fs/buffer.c
+index 86a38b979323..152d391858d4 100644
+--- a/fs/buffer.c
++++ b/fs/buffer.c
+@@ -2465,7 +2465,7 @@ int block_page_mkwrite(struct vm_area_struct *vma, st=
+ruct vm_fault *vmf,
+ =09lock_page(page);
+ =09size =3D i_size_read(inode);
+ =09if ((page->mapping !=3D inode->i_mapping) ||
+-=09    (page_offset(page) > size)) {
++=09    (page_offset(page) >=3D size)) {
+ =09=09/* We overload EFAULT to mean page got truncated */
+ =09=09ret =3D -EFAULT;
+ =09=09goto out_unlock;
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 7ab616601141..9fa0729ece41 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1575,7 +1575,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *=
+vmf)
+ =09do {
+ =09=09lock_page(page);
+=20
+-=09=09if ((off > size) || (page->mapping !=3D inode->i_mapping)) {
++=09=09if ((off >=3D size) || (page->mapping !=3D inode->i_mapping)) {
+ =09=09=09unlock_page(page);
+ =09=09=09ret =3D VM_FAULT_NOPAGE;
+ =09=09=09break;
+diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
+index 516faa280ced..6dd4efe2fb63 100644
+--- a/fs/ext4/inode.c
++++ b/fs/ext4/inode.c
+@@ -6224,7 +6224,7 @@ vm_fault_t ext4_page_mkwrite(struct vm_fault *vmf)
+ =09lock_page(page);
+ =09size =3D i_size_read(inode);
+ =09/* Page got truncated from under us? */
+-=09if (page->mapping !=3D mapping || page_offset(page) > size) {
++=09if (page->mapping !=3D mapping || page_offset(page) >=3D size) {
+ =09=09unlock_page(page);
+ =09=09ret =3D VM_FAULT_NOPAGE;
+ =09=09goto out;
+diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
+index 29bc0a542759..3436be01af45 100644
+--- a/fs/f2fs/file.c
++++ b/fs/f2fs/file.c
+@@ -71,7 +71,7 @@ static vm_fault_t f2fs_vm_page_mkwrite(struct vm_fault *v=
+mf)
+ =09down_read(&F2FS_I(inode)->i_mmap_sem);
+ =09lock_page(page);
+ =09if (unlikely(page->mapping !=3D inode->i_mapping ||
+-=09=09=09page_offset(page) > i_size_read(inode) ||
++=09=09=09page_offset(page) >=3D i_size_read(inode) ||
+ =09=09=09!PageUptodate(page))) {
+ =09=09unlock_page(page);
+ =09=09err =3D -EFAULT;
+diff --git a/fs/iomap/buffered-io.c b/fs/iomap/buffered-io.c
+index e25901ae3ff4..d454dbab5133 100644
+--- a/fs/iomap/buffered-io.c
++++ b/fs/iomap/buffered-io.c
+@@ -1041,7 +1041,7 @@ vm_fault_t iomap_page_mkwrite(struct vm_fault *vmf, c=
+onst struct iomap_ops *ops)
+ =09lock_page(page);
+ =09size =3D i_size_read(inode);
+ =09if ((page->mapping !=3D inode->i_mapping) ||
+-=09    (page_offset(page) > size)) {
++=09    (page_offset(page) >=3D size)) {
+ =09=09/* We overload EFAULT to mean page got truncated */
+ =09=09ret =3D -EFAULT;
+ =09=09goto out_unlock;
+diff --git a/fs/ubifs/file.c b/fs/ubifs/file.c
+index cd52585c8f4f..ca0148ec77e6 100644
+--- a/fs/ubifs/file.c
++++ b/fs/ubifs/file.c
+@@ -1564,7 +1564,7 @@ static vm_fault_t ubifs_vm_page_mkwrite(struct vm_fau=
+lt *vmf)
+=20
+ =09lock_page(page);
+ =09if (unlikely(page->mapping !=3D inode->i_mapping ||
+-=09=09     page_offset(page) > i_size_read(inode))) {
++=09=09     page_offset(page) >=3D i_size_read(inode))) {
+ =09=09/* Page got truncated out from underneath us */
+ =09=09goto sigbus;
+ =09}
+--=20
+2.20.1
