@@ -1,154 +1,94 @@
-From: Vincent Godin <vince.mlist-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: mimic 13.2.6 too much broken connexions
-Date: Fri, 29 Nov 2019 10:57:47 +0100
-Message-ID: <CAL2-6b+DW1pENpNucjnnEGaZ4PxkGUOyY4K2fXARc0RX4WjFrg@mail.gmail.com>
-References: <CAL2-6b+A2tQd=pMoXRewK2KeakDpy0X40vDg0OTWk-ZAm5RfmA@mail.gmail.com>
- <62E3E7FC-DEB5-4EBC-8945-F7FF43C6433C@dreamsnake.net> <CAL2-6b+wKe0X1BB2Wts9Q7RX_BQiVk0MaA0=k1LXV_hGwezb5Q@mail.gmail.com>
- <8c4c081a83e640e9bfaaa6679590cefa@dtu.dk>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: scrub errors on rgw data pool
+Date: Fri, 29 Nov 2019 15:45:40 +0530
+Message-ID: <CANA9Uk75OULZLAJbWqh+1sd5r5D4LMPrej-gZYUUagDbEZU2HQ@mail.gmail.com>
+References: <CANA9Uk4kmPqe6z17BUCnUuJyNcQkOqEcwXv+RLOsbKS-bmsyGw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-In-Reply-To: <8c4c081a83e640e9bfaaa6679590cefa-9ZbMq6gy2Bo@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: Frank Schilder <frans-9ZbMq6gy2Bo@public.gmane.org>
-Cc: Anthony D'Atri <aad-lmG3kWHAawoohuQDye/k0w@public.gmane.org>, "ceph-users-a8pt6IJUokc@public.gmane.org" <ceph-users-a8pt6IJUokc@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: multipart/mixed; boundary="===============7518094735601318334=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CANA9Uk4kmPqe6z17BUCnUuJyNcQkOqEcwXv+RLOsbKS-bmsyGw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SGVsbG8gRnJhbmNrLA0KVGhhbmsgeW91IGZvciB5b3VyIGhlbHANCkNlcGggaXMgb3VyIE9wZW5z
-dGFjayBtYWluIHN0b3JhZ2UuIFdlIGhhdmUgNjQgY29tcHV0ZXMgKGNlcGgNCmNsaWVudHMpLCAz
-NiBDZXBoLUhvc3RzIChjbGllbnQgYW5kIGNsdXN0ZXIgbmV0d29ya3MpIGFuZCAzIE1vbnMgOiAg
-c28NCnJvdWdobHkgMTQwIGFycCBlbnRyaWVzDQpPdXIgQVJQIGNhY2hlIHNpemUgaXMgYmFzZWQg
-b24gZGVmYXVsdCBzbyAxMjgvNTEyLzEwMjQuIEFzIDE0MCA8IDUxMiwNCmRlZmF1bHQgc2hvdWxk
-IHdvcmtzIChpIHdpbGwgY2hlY2sgb3ZlciB0aW1lIHRoZSBhcnAgY2FjaGVzaXplIGhvd2V2ZXIN
-CldlIHRyaWVkIHRoZXNlIHNldHRpbmdzIGJlbG93IDIgd2Vla3MgYWdvICh3ZSB0aG91Z2h0IGl0
-IHNob3VsZA0KaW1wcm92ZSBvdXIgbmV0d29yaykgYnV0IGl0IHdhcyB3b3JzdCAhDQpuZXQuY29y
-ZS5ybWVtX21heCA9IDEzNDIxNzcyOCAgICAgKGZvciBhIDEwR2JwcyB3aXRoIGxvdyBsYXRlbmN5
-KQ0KbmV0LmNvcmUud21lbV9tYXggPSAxMzQyMTc3MjggICAgIChmb3IgYSAxMEdicHMgd2l0aCBs
-b3cgbGF0ZW5jeSkNCm5ldC5jb3JlLm5ldGRldl9tYXhfYmFja2xvZyA9IDMwMDAwMA0KbmV0LmNv
-cmUuc29tYXhjb25uID0gMjAwMA0KbmV0LmlwdjQuaXBfbG9jYWxfcG9ydF9yYW5nZT3igJkxMDAw
-MCA2NTAwMOKAmQ0KbmV0LmlwdjQudGNwX3JtZW0gPSA0MDk2IDg3MzgwIDEzNDIxNzcyOCAgICAg
-KGZvciBhIDEwR2JwcyB3aXRoIGxvdyBsYXRlbmN5KQ0KbmV0LmlwdjQudGNwX3dtZW0gPSA0MDk2
-IDg3MzgwIDEzNDIxNzcyOCAgICAgKGZvciBhIDEwR2JwcyB3aXRoIGxvdyBsYXRlbmN5KQ0KbmV0
-LmlwdjQudGNwX210dV9wcm9iaW5nID0gMQ0KbmV0LmlwdjQudGNwX3NhY2sgPSAwDQpuZXQuaXB2
-NC50Y3BfZHNhY2sgPSAwDQpuZXQuaXB2NC50Y3BfZmFjayA9IDANCm5ldC5pcHY0LnRjcF9maW5f
-dGltZW91dCA9IDIwDQpuZXQuaXB2NC50Y3Bfc2xvd19zdGFydF9hZnRlcl9pZGxlID0gMA0KbmV0
-LmlwdjQudGNwX3RpbWVzdGFtcHMgPSAwDQpuZXQuaXB2NC50Y3BfbWF4X3N5bl9iYWNrbG9nID0g
-MzAwMDANCg0KQ2xpZW50IGFuZCBDbHVzdGVyIE5ldHdvcmsgaGF2ZSBhIDkwMDAgTVRVLiBFYWNo
-IE9TRC1Ib3N0IGhhcyB0d28NCnRlYW1pbmcgKExBQ1ApOiAyeDEwR2JwcyBmb3IgY2xpZW50IGFu
-ZCAyeDEwR2JwcyBmb3IgY2x1c3Rlci4gQ2xpZW50DQpuZXR3b3JrIGlzIG9uZSBsZXZlbC0yIGxh
-biwgaWRlbSBmb3IgQ2x1c3RlciBuZXR3b3JrDQpBcyBpIHNhaWQgd2UgZGlkbid0IHNlZSBzaWdu
-aWZpY2FudCBlcnJvcnMgY291bnRlcnMgb24gc3dpdGNocyBvciBzZXJ2ZXINCg0KVmluY2VudA0K
-DQoNCkxlIHZlbi4gMjkgbm92LiAyMDE5IMOgIDA5OjMwLCBGcmFuayBTY2hpbGRlciA8ZnJhbnNA
-ZHR1LmRrPiBhIMOpY3JpdCA6DQo+DQo+IEhvdyBsYXJnZSBpcyB5b3VyIGFycCBjYWNoZT8gV2Ug
-aGF2ZSBzZWVuIGNlcGggZHJvcHBpbmcgY29ubmVjdGlvbnMgYXMgc29vbiBhcyB0aGUgbGV2ZWwt
-MiBuZXR3b3JrIChkaXJlY3QgbmVpZ2hib3VycykgaXMgbGFyZ2VyIHRoYW4gdGhlIGFycCBjYWNo
-ZS4gV2UgYWRqdXN0ZWQgdGhlIGZvbGxvd2luZyBzZXR0aW5nczoNCj4NCj4gIyBJbmNyZWFzZSBB
-UlAgY2FjaGUgc2l6ZSB0byBhY2NvbW1vZGF0ZSBsYXJnZSBsZXZlbC0yIGNsaWVudCBuZXR3b3Jr
-Lg0KPiBuZXQuaXB2NC5uZWlnaC5kZWZhdWx0LmdjX3RocmVzaDEgPSAxMDI0DQo+IG5ldC5pcHY0
-Lm5laWdoLmRlZmF1bHQuZ2NfdGhyZXNoMiA9IDIwNDgNCj4gbmV0LmlwdjQubmVpZ2guZGVmYXVs
-dC5nY190aHJlc2gzID0gNDA5Ng0KPg0KPiBBbm90aGVyIGltcG9ydGFudCBncm91cCBvZiBwYXJh
-bWV0ZXJzIGZvciBUQ1AgY29ubmVjdGlvbnMgc2VlbXMgdG8gYmUgdGhlc2UsIHdpdGggb3VyIHZh
-bHVlczoNCj4NCj4gIyMgSW5jcmVhc2UgbnVtYmVyIG9mIGluY29taW5nIGNvbm5lY3Rpb25zLiBU
-aGUgdmFsdWUgY2FuIGJlIHJhaXNlZCB0byBidXJzdHMgb2YgcmVxdWVzdCwgZGVmYXVsdCBpcyAx
-MjgNCj4gbmV0LmNvcmUuc29tYXhjb25uID0gMjA0OA0KPiAjIyBJbmNyZWFzZSBudW1iZXIgb2Yg
-aW5jb21pbmcgY29ubmVjdGlvbnMgYmFja2xvZywgZGVmYXVsdCBpcyAxMDAwDQo+IG5ldC5jb3Jl
-Lm5ldGRldl9tYXhfYmFja2xvZyA9IDUwMDAwDQo+ICMjIE1heGltdW0gbnVtYmVyIG9mIHJlbWVt
-YmVyZWQgY29ubmVjdGlvbiByZXF1ZXN0cywgZGVmYXVsdCBpcyAxMjgNCj4gbmV0LmlwdjQudGNw
-X21heF9zeW5fYmFja2xvZyA9IDMwMDAwDQo+DQo+IFdpdGggdGhpcywgd2UgZ290IHJpZCBvZiBk
-cm9wcGVkIGNvbm5lY3Rpb25zIGluIGEgY2x1c3RlciBvZiAyMCBjZXBoIG5vZGVzIGFuZCBjYS4g
-NTUwIGNsaWVudCBub2RlcywgYWNjb3VudGluZyBmb3IgYWJvdXQgMTUwMCBhY3RpdmUgY2VwaCBj
-bGllbnRzLCAxNDAwIGNlcGhmcyBhbmQgMTcwIFJCRCBpbWFnZXMuDQo+DQo+IEJlc3QgcmVnYXJk
-cywNCj4NCj4gPT09PT09PT09PT09PT09PT0NCj4gRnJhbmsgU2NoaWxkZXINCj4gQUlUIFJpc8O4
-IENhbXB1cw0KPiBCeWduaW5nIDEwOSwgcnVtIFMxNA0KPg0KPiBfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fDQo+IEZyb206IFZpbmNlbnQgR29kaW4gPHZpbmNlLm1saXN0
-QGdtYWlsLmNvbT4NCj4gU2VudDogMjcgTm92ZW1iZXIgMjAxOSAyMDoxMToyMw0KPiBUbzogQW50
-aG9ueSBEJ0F0cmk7IGNlcGgtdXNlcnNAY2VwaC5pbzsgQ2VwaCBEZXZlbG9wbWVudA0KPiBTdWJq
-ZWN0OiBbY2VwaC11c2Vyc10gUmU6IG1pbWljIDEzLjIuNiB0b28gbXVjaCBicm9rZW4gY29ubmV4
-aW9ucw0KPg0KPiBJZiBpdCB3YXMgYSBuZXR3b3JrIGlzc3VlLCB0aGUgY291bnRlcnMgc2hvdWxk
-IGV4cGxvc2UgKGFzIGkgc2FpZCwNCj4gd2l0aCBhIGxvZyBsZXZlbCBvZiA1IG9uIHRoZSBtZXNz
-ZW5nZXIsIHdlIG9ic2VydmVkIG1vcmUgdGhlbiA4MCAwMDANCj4gbG9zc3kgY2hhbm5lbHMgcGVy
-IG1pbnV0ZSkgYnV0IG5vdGhpbmcgYWJub3JtYWwgaXMgcmVsZXZhbnQgb24gdGhlDQo+IGNvdW50
-ZXJzIChvbiBzd2l0Y2hzIGFuZCBzZXJ2ZXJzKQ0KPiBPbiB0aGUgc3dpdGNocyAgbm8gZHJvcCwg
-bm8gY3JjIGVycm9yLCBubyBwYWNrZXQgbG9zcywgb25seSBzb21lDQo+IG91dHB1dCBkaXNjYXJk
-cyBidXQgbm90IGVub3VnaCB0byBiZSBzaWduaWZpY2FudC4gT24gdGhlIE5JQ3Mgb24gdGhlDQo+
-IHNlcnZlcnMgdmlhIGV0aHRvb2wgLVMsIG5vdGhpbmcgaXMgcmVsZXZhbnQuDQo+IEFuZCBhcyBp
-IHNhaWQsIGFuIG90aGVyIG1pbWljIGNsdXN0ZXIgd2l0aCBkaWZmZXJlbnQgaGFyZHdhcmUgaGFz
-IHRoZQ0KPiBzYW1lIGJlaGF2aW9yDQo+IENlcGggdXNlcyBjb25uZXhpb25zIHBvb2xzIGZyb20g
-aG9zdCB0byBob3N0IGJ1dCBob3cgZG9lcyBpdCBjaGVjayB0aGUNCj4gYXZhaWxhYmlsaXR5IG9m
-IHRoZXNlIGNvbm5leGlvbnMgb3ZlciB0aGUgdGltZSA/DQo+IEFuZCBhcyB0aGUgbmV0d29yayBk
-b2Vzbid0IHNlZW0gdG8gYmUgZ3VpbHR5LCB3aGF0IGNhbiBleHBsYWluIHRoZXNlDQo+IGJyb2tl
-biBjaGFubmVscyA/DQo+DQo+IExlIG1lci4gMjcgbm92LiAyMDE5IMOgIDE5OjA1LCBBbnRob255
-IEQnQXRyaSA8YWFkQGRyZWFtc25ha2UubmV0PiBhIMOpY3JpdCA6DQo+ID4NCj4gPiBBcmUgeW91
-IGJvbmRpbmcgTklDIHBvcnRzPyAgIElmIHNvIGRvIHlvdSBoYXZlIHRoZSBjb3JyZWN0IGhhc2gg
-cG9saWN5IGRlZmluZWQ/IEhhdmUgeW91IGxvb2tlZCBhdCB0aGUgKnN3aXRjaCogc2lkZSBmb3Ig
-cGFja2V0IGxvc3MsIENSQyBlcnJvcnMsIGV0Yz8gICBXaGF0IHlvdSByZXBvcnQgY291bGQgYmUg
-Y29uc2lzdGVudCB3aXRoIHRoaXMuICBTaW5jZSB0aGUgaG9zdCAgaW50ZXJmYWNlIGZvciBhIGdp
-dmVuIGNvbm5lY3Rpb24gd2lsbCB2YXJ5IGJ5IHRoZSBib25kIGhhc2gsIHNvbWUgT1NEIGNvbm5l
-Y3Rpb25zIHdpbGwgdXNlIG9uZSBwb3J0IGFuZCBzb21lIHRoZSBvdGhlci4gICBTbyBpZiBvbmUg
-cG9ydCBoYXMgc3dpdGNoIHNpZGUgZXJyb3JzLCBvciBpcyBibGFja2hvbGVkIG9uIHRoZSBzd2l0
-Y2gsIHlvdSBjb3VsZCBzZWUgc29tZSBoZWFydCBiZWF0aW5nIGltcGFjdGVkIGJ1dCBub3Qgb3Ro
-ZXJzLg0KPiA+DQo+ID4gQWxzbyBtYWtlIHN1cmUgeW91IGhhdmUgdGhlIG9wdGltYWwgcmVwb3J0
-ZXJzIHZhbHVlLg0KPiA+DQo+ID4gPiBPbiBOb3YgMjcsIDIwMTksIGF0IDc6MzEgQU0sIFZpbmNl
-bnQgR29kaW4gPHZpbmNlLm1saXN0QGdtYWlsLmNvbT4gd3JvdGU6DQo+ID4gPg0KPiA+ID4g77u/
-VGlsbCBpIHN1Ym1pdCB0aGUgbWFpbCBiZWxvdyBmZXcgZGF5cyBhZ28sIHdlIGZvdW5kIHNvbWUg
-Y2x1ZXMNCj4gPiA+IFdlIG9ic2VydmVkIGEgbG90IG9mIGxvc3N5IGNvbm5leGlvbiBsaWtlIDoN
-Cj4gPiA+IGNlcGgtb3NkLjkubG9nOjIwMTktMTEtMjcgMTE6MDM6NDkuMzY5IDdmNmJiNzdkMDcw
-MCAgMCAtLQ0KPiA+ID4gMTkyLjE2OC40LjE4MTo2ODE4LzIyODE0MTUgPj4gMTkyLjE2OC40LjQx
-OjAvMTk2MjgwOTUxOA0KPiA+ID4gY29ubigweDU2Mzk3OWE5ZjYwMCA6NjgxOCAgIHM9U1RBVEVf
-QUNDRVBUSU5HX1dBSVRfQ09OTkVDVF9NU0dfQVVUSA0KPiA+ID4gcGdzPTAgY3M9MCBsPTEpLmhh
-bmRsZV9jb25uZWN0X21zZyBhY2NlcHQgcmVwbGFjaW5nIGV4aXN0aW5nIChsb3NzeSkNCj4gPiA+
-IGNoYW5uZWwgKG5ldyBvbmUgbG9zc3k9MSkNCj4gPiA+IFdlIHJhaXNlZCB0aGUgbG9nIG9mIHRo
-ZSBtZXNzZW5nZXIgdG8gNS81IGFuZCBvYnNlcnZlZCBmb3IgdGhlIHdob2xlDQo+ID4gPiBjbHVz
-dGVyIG1vcmUgdGhhbiA4MCAwMDAgbG9zc3kgY29ubmV4aW9uIHBlciBtaW51dGUgISEhDQo+ID4g
-PiBXZSBhZGp1c3RlZCAgdGhlICJtc190Y3BfcmVhZF90aW1lb3V0IiBmcm9tIDkwMCB0byA2MCBz
-ZWMgdGhlbiBubyBtb3JlDQo+ID4gPiBsb3NzeSBjb25uZXhpb24gaW4gbG9ncyBub3IgaGVhbHRo
-IGNoZWNrIGZhaWxlZA0KPiA+ID4gSXQncyBqdXN0IGEgd29ya2Fyb3VuZCBidXQgdGhlcmUgaXMg
-YSByZWFsIHByb2JsZW0gd2l0aCB0aGVzZSBicm9rZW4NCj4gPiA+IHNlc3Npb25zIGFuZCBpdCBs
-ZWFkcyB0byB0d28NCj4gPiA+IGFzc2VydGlvbnMgOg0KPiA+ID4gLSBDZXBoIHRha2UgdG9vIG11
-Y2ggdGltZSB0byBkZXRlY3QgYnJva2VuIHNlc3Npb24gYW5kIHNob3VsZCByZWN5Y2xlIHF1aWNr
-ZXIgIQ0KPiA+ID4gLSBUaGUgcmVhc29ucyBmb3IgdGhlc2UgYnJva2VuIHNlc3Npb25zID8NCj4g
-PiA+DQo+ID4gPiBXZSBoYXZlIGEgb3RoZXIgbWltaWMgY2x1c3RlciBvbiBkaWZmZXJlbnQgaGFy
-ZHdhcmUgYW5kIG9ic2VydmVkIHRoZQ0KPiA+ID4gc2FtZSBiZWhhdmlvciA6IGxvdCBvZiBsb3Nz
-eSBzZXNzaW9ucywgc2xvdyBvcHMgYW5kIGNvLg0KPiA+ID4gU3ltcHRvbXMgYXJlIHRoZSBzYW1l
-IDoNCj4gPiA+IC0gc29tZSBPU0RzIG9uIG9uZSBob3N0IGhhdmUgbm8gcmVzcG9uc2UgZnJvbSBh
-biBvdGhlciBvc2Qgb24gYSBkaWZmZXJlbnQgaG9zdHMNCj4gPiA+IC0gYWZ0ZXIgc29tZSB0aW1l
-LCBzbG93IG9wcyBhcmUgZGV0ZWN0ZWQNCj4gPiA+IC0gc29tZXRpbWUgaXQgbGVhZHMgdG8gaW9i
-bG9ja2VkDQo+ID4gPiAtIGFmdGVyIGFib3V0IDE1bW4gdGhlIHByb2JsZW0gdmFuaXNoDQo+ID4g
-Pg0KPiA+ID4gLS0tLS0tLS0tLS0NCj4gPiA+DQo+ID4gPiBIZWxwIG9uIGRpYWcgbmVlZGVkIDog
-aGVhcnRiZWF0X2ZhaWxlZA0KPiA+ID4NCj4gPiA+IFdlIGVuY291bnRlciBhIHN0cmFuZ2UgYmVo
-YXZpb3Igb24gb3VyIE1pbWljIDEzLjIuNiBjbHVzdGVyLiBBIGFueQ0KPiA+ID4gdGltZSwgYW5k
-IHdpdGhvdXQgYW55IGxvYWQsIHNvbWUgT1NEcyBiZWNvbWUgdW5yZWFjaGFibGUgZnJvbSBvbmx5
-DQo+ID4gPiBzb21lIGhvc3RzLiBJdCBsYXN0IDEwIG1uIGFuZCB0aGVuIHRoZSBwcm9ibGVtIHZh
-bmlzaC4NCj4gPiA+IEl0ICdzIG5vdCBhbHdheXMgdGhlIHNhbWUgT1NEcyBhbmQgdGhlIHNhbWUg
-aG9zdHMuIFRoZXJlIGlzIG5vIG5ldHdvcmsNCj4gPiA+IGZhaWx1cmUgb24gYW55IG9mIHRoZSBo
-b3N0IChiZWNhdXNlIG9ubHkgc29tZSBPU0RzIGJlY29tZSB1bnJlYWNoYWJsZSkNCj4gPiA+IG5v
-ciBkaXNrIGZyZWV6ZSBhcyB3ZSBjYW4gc2VlIGluIG91ciBncmFmYW5hIGRhc2hib2FyZC4gTG9n
-cyBtZXNzYWdlDQo+ID4gPiBhcmUgOg0KPiA+ID4gZmlyc3QgbXNnIDoNCj4gPiA+IDIwMTktMTEt
-MjQgMDk6MTk6NDMuMjkyIDdmYTk5ODBmYzcwMCAtMSBvc2QuNTk2IDE0NjQ4MQ0KPiA+ID4gaGVh
-cnRiZWF0X2NoZWNrOiBubyByZXBseSBmcm9tIDE5Mi4xNjguNi4xMTI6NjgxNyBvc2QuMzk0IHNp
-bmNlIGJhY2sNCj4gPiA+IDIwMTktMTEtMjQgMDk6MTk6MjIuNzYxMTQyIGZyb250IDIwMTktMTEt
-MjQgMDk6MTk6MzkuNzY5MTM4IChjdXRvZmYNCj4gPiA+IDIwMTktMTEtMjQgMDk6MTk6MjMuMjkz
-NDM2KQ0KPiA+ID4gbGFzdCBtc2c6DQo+ID4gPiAyMDE5LTExLTI0IDA5OjMwOjMzLjczNSA3ZjYz
-MjM1NGY3MDAgLTEgb3NkLjU5MSAxNDY0ODENCj4gPiA+IGhlYXJ0YmVhdF9jaGVjazogbm8gcmVw
-bHkgZnJvbSAxOTIuMTY4LjYuMTIzOjY4Mjggb3NkLjYwMCBzaW5jZSBiYWNrDQo+ID4gPiAyMDE5
-LTExLTI0IDA5OjI3OjA1LjI2OTMzMCBmcm9udCAyMDE5LTExLTI0IDA5OjMwOjMzLjIxNDg3NCAo
-Y3V0b2ZmDQo+ID4gPiAyMDE5LTExLTI0IDA5OjMwOjEzLjczNjUxNykNCj4gPiA+IER1cmluZyB0
-aGlzIHRpbWUsIDMgaG9zdHMgd2VyZSBpbnZvbHZlZCA6IGhvc3QtMTgsIGhvc3QtMjAgYW5kIGhv
-c3QtMzAgOg0KPiA+ID4gaG9zdC0zMCBpcyB0aGUgb25seSBvbmUgd2hvIGNhbid0IHNlZSBvc2Rz
-IDM0NiwzNTYsYW5kIDM1MiBvbiBob3N0LTE4DQo+ID4gPiBob3N0LTMwIGlzIHRoZSBvbmx5IG9u
-ZSB3aG8gY2FuJ3Qgc2VlIG9zZHMgMzg3IGFuZCAzOTQgb24gaG9zdC0yMA0KPiA+ID4gaG9zdC0x
-OCBpcyB0aGUgb25seSBvbmUgd2hvIGNhbid0IHNlZSBvc2RzIDU4MywgNTg1LCA1OTEgYW5kIDU5
-NyBvbiBob3N0LTMwDQo+ID4gPiBXZSBjYW4ndCBzZWUgYW55IHN0cmFuZ2UgYmVoYXZpb3Igb24g
-aG9zdHMgMTgsIDIwIGFuZCAzMCBpbiBvdXIgbm9kZQ0KPiA+ID4gZXhwb3J0ZXIgZGF0YSBkdXJp
-bmcgdGhpcyB0aW1lDQo+ID4gPiBBbnkgaWRlYXMgb3IgYWR2aWNlcyA/DQo+IF9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+IGNlcGgtdXNlcnMgbWFpbGlu
-ZyBsaXN0IC0tIGNlcGgtdXNlcnNAY2VwaC5pbw0KPiBUbyB1bnN1YnNjcmliZSBzZW5kIGFuIGVt
-YWlsIHRvIGNlcGgtdXNlcnMtbGVhdmVAY2VwaC5pbwpfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAtLSBjZXBoLXVz
-ZXJzQGNlcGguaW8KVG8gdW5zdWJzY3JpYmUgc2VuZCBhbiBlbWFpbCB0byBjZXBoLXVzZXJzLWxl
-YXZlQGNlcGguaW8K
+--===============7518094735601318334==
+Content-Type: multipart/alternative; boundary="000000000000b200240598798374"
+
+--000000000000b200240598798374
+Content-Type: text/plain; charset="UTF-8"
+
+Primary OSD crashes with below assert:
+12.2.11/src/osd/ReplicatedBackend.cc:1445 assert(peer_missing.count(
+fromshard))
+==
+here I have 2 OSDs with bluestore backend and 1 osd with filestore backend.
+
+On Mon, Nov 25, 2019 at 3:34 PM M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+wrote:
+
+> Hello - We are using the ceph 12.2.11 version (upgraded from Jewel 10.2.12
+> to 12.2.11). In this cluster, we are having mix of filestore and bluestore
+> OSD backends.
+> Recently we are seeing the scrub errors on rgw buckets.data pool every
+> day, after scrub operation performed by Ceph. If we run the PG repair, the
+> errors will go way.
+>
+> Anyone seen the above issue?
+> Is the mix of filestore backend has bug/issue with 12.2.11 version (ie
+> Luminous).
+> Is the mix of filestore and bluestore OSDs cause this type of issue?
+>
+> Thanks
+> Swami
+>
+
+--000000000000b200240598798374
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Primary=C2=A0OSD crashes with below assert:<div><code><spa=
+n class=3D"gmail-n">12.2.11/src/osd/ReplicatedBackend.cc:1445 assert</span>=
+<span class=3D"gmail-p">(</span><span class=3D"gmail-n">peer_missing</span>=
+<span class=3D"gmail-p">.</span><span class=3D"gmail-n">count</span><span c=
+lass=3D"gmail-p">(</span><span class=3D"gmail-n">fromshard</span><span clas=
+s=3D"gmail-p">))</span></code><br></div><div><code><span class=3D"gmail-p">=
+=3D=3D</span></code></div><div><code><span class=3D"gmail-p">here I have 2 =
+OSDs with bluestore backend and 1 osd with filestore backend.</span></code>=
+</div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_=
+attr">On Mon, Nov 25, 2019 at 3:34 PM M Ranga Swami Reddy &lt;<a href=3D"ma=
+ilto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></div><bl=
+ockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-lef=
+t:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr">Hello - We =
+are using the ceph 12.2.11 version (upgraded from Jewel 10.2.12 to 12.2.11)=
+. In this cluster, we are having=C2=A0mix of filestore and bluestore OSD ba=
+ckends.<div>Recently=C2=A0we are seeing the scrub errors on rgw buckets.dat=
+a pool every day, after scrub operation performed by Ceph. If we run the PG=
+ repair, the errors will go way.</div><div><br></div><div>Anyone seen the a=
+bove issue?=C2=A0=C2=A0</div><div>Is the mix of filestore backend has bug/i=
+ssue with 12.2.11 version (ie Luminous).</div><div>Is the mix of filestore =
+and bluestore OSDs cause this type of issue?</div><div><br></div><div>Thank=
+s</div><div>Swami</div></div>
+</blockquote></div>
+
+--000000000000b200240598798374--
+
+--===============7518094735601318334==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============7518094735601318334==--
