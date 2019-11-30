@@ -1,44 +1,49 @@
-From: Richard Weinberger <richard@nod.at>
-Subject: Re: [PATCH v2] fs: Fix page_mkwrite off-by-one errors
-Date: Fri, 29 Nov 2019 17:35:53 +0100 (CET)
-Message-ID: <51833696.101442.1575045353332.JavaMail.zimbra@nod.at>
-References: <20191129142045.7215-1-agruenba@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Deepa Dinamani <deepa.kernel@gmail.com>
+Subject: [PATCH 0/7] Delete timespec64_trunc()
+Date: Fri, 29 Nov 2019 21:30:23 -0800
+Message-ID: <20191130053030.7868-1-deepa.kernel@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191129142045.7215-1-agruenba@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, Darrick <darrick.wong@oracle.com>, torvalds <torvalds@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, tytso <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>, linux-xfs@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd <linux-mtd@lists.infradead.org>, Chris Mason <clm@fb.com>, Josef Bacik <josef@toxicpan>
+To: viro@zeniv.linux.org.uk, linux-kernel@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, arnd@arndb.de, hirofumi@mail.parknet.co.jp, jlayton@kernel.org, richard@nod.at, stfrench@microsoft.com, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-mtd@lists.infradead.org
 List-Id: ceph-devel.vger.kernel.org
 
------ Ursprüngliche Mail -----
-> Von: "Andreas Gruenbacher" <agruenba@redhat.com>
-> An: "Christoph Hellwig" <hch@infradead.org>, "Darrick" <darrick.wong@oracle.com>
-> CC: "Andreas Gruenbacher" <agruenba@redhat.com>, "torvalds" <torvalds@linux-foundation.org>, "linux-kernel"
-> <linux-kernel@vger.kernel.org>, "Al Viro" <viro@zeniv.linux.org.uk>, "Jeff Layton" <jlayton@kernel.org>, "Sage Weil"
-> <sage@redhat.com>, "Ilya Dryomov" <idryomov@gmail.com>, "tytso" <tytso@mit.edu>, "Andreas Dilger"
-> <adilger.kernel@dilger.ca>, "Jaegeuk Kim" <jaegeuk@kernel.org>, "Chao Yu" <chao@kernel.org>, linux-xfs@vger.kernel.org,
-> "linux-fsdevel" <linux-fsdevel@vger.kernel.org>, "richard" <richard@nod.at>, "Artem Bityutskiy" <dedekind1@gmail.com>,
-> "Adrian Hunter" <adrian.hunter@intel.com>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org,
-> linux-f2fs-devel@lists.sourceforge.net, "linux-mtd" <linux-mtd@lists.infradead.org>, "Chris Mason" <clm@fb.com>, "Josef
-> Bacik" <josef@toxicpanda.com>, "David Sterba" <dsterba@suse.com>, "linux-btrfs" <linux-btrfs@vger.kernel.org>
-> Gesendet: Freitag, 29. November 2019 15:20:45
-> Betreff: [PATCH v2] fs: Fix page_mkwrite off-by-one errors
+This series aims at deleting timespec64_trunc().
+There is a new api: timestamp_truncate() that is the
+replacement api. The api additionally does a limits
+check on the filesystem timestamps.
 
-> The check in block_page_mkwrite meant to determine whether an offset is
-> within the inode size is off by one.  This bug has spread to
-> iomap_page_mkwrite and to several filesystems (ubifs, ext4, f2fs, ceph).
-> To fix that, introduce a new page_mkwrite_check_truncate helper that
-> checks for truncate and computes the bytes in the page up to EOF, and
-> use that helper in the above mentioned filesystems and in btrfs.
-> 
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+The suggestion to open code some of the truncate logic
+came from Al Viro. And, this does make the code in some
+filesystems easy to follow.
 
-Thank you for fixing UBIFS!
+The series also does some update_time() cleanup as
+suggested by Al Viro.
 
-Acked-by: Richard Weinberger <richard@nod.at>
+Deepa Dinamani (7):
+  fs: fat: Eliminate timespec64_trunc() usage
+  fs: cifs: Fix atime update check vs mtime
+  fs: cifs: Delete usage of timespec64_trunc
+  fs: ceph: Delete timespec64_trunc() usage
+  fs: ubifs: Eliminate timespec64_trunc() usage
+  fs: Delete timespec64_trunc()
+  fs: Do not overload update_time
 
-Thanks,
-//richard
+ fs/ceph/mds_client.c |  3 +--
+ fs/cifs/inode.c      | 15 ++++++++-------
+ fs/fat/misc.c        | 10 +++++++++-
+ fs/inode.c           | 30 +++---------------------------
+ fs/ubifs/sb.c        | 11 ++++-------
+ include/linux/fs.h   |  1 -
+ 6 files changed, 25 insertions(+), 45 deletions(-)
+
+-- 
+2.17.1
+
+Cc: hirofumi@mail.parknet.co.jp
+Cc: jlayton@kernel.org
+Cc: richard@nod.at
+Cc: stfrench@microsoft.com
+Cc: ceph-devel@vger.kernel.org
+Cc: linux-cifs@vger.kernel.org
+Cc: linux-mtd@lists.infradead.org
