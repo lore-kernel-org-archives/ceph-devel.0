@@ -1,86 +1,62 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: Re: [PATCH AUTOSEL 4.19 140/219] libceph: drop last_piece logic from
- write_partial_message_data()
-Date: Sun, 1 Dec 2019 09:34:36 -0500
-Message-ID: <20191201143436.GS5861@sasha-vm>
-References: <20191122054911.1750-1-sashal@kernel.org>
- <20191122054911.1750-133-sashal@kernel.org>
- <CAOi1vP9MCrPf44V2GMyODH185A0HJcuPsYfVkOAVGkcMRb+=iw@mail.gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH v2] fs: Fix page_mkwrite off-by-one errors
+Date: Mon, 2 Dec 2019 17:06:17 -0800
+Message-ID: <CAHk-=wj5caXKoukPyM7Zc6A0Q+E-pBGHSV64iZe8t98OerXR_w@mail.gmail.com>
+References: <20191129142045.7215-1-agruenba@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP9MCrPf44V2GMyODH185A0HJcuPsYfVkOAVGkcMRb+=iw@mail.gmail.com>
+In-Reply-To: <20191129142045.7215-1-agruenba@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Richard Weinberger <richard@nod.at>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, ceph-devel@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.in
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Nov 22, 2019 at 03:00:43PM +0100, Ilya Dryomov wrote:
->On Fri, Nov 22, 2019 at 6:51 AM Sasha Levin <sashal@kernel.org> wrote:
->>
->> From: Ilya Dryomov <idryomov@gmail.com>
->>
->> [ Upstream commit 1f6b821aef78e3d79e8d598ae59fc7e23fb6c563 ]
->>
->> last_piece is for the last piece in the current data item, not in the
->> entire data payload of the message.  This is harmful for messages with
->> multiple data items.  On top of that, we don't need to signal the end
->> of a data payload either because it is always followed by a footer.
->>
->> We used to signal "more" unconditionally, until commit fe38a2b67bc6
->> ("libceph: start defining message data cursor").  Part of a large
->> series, it introduced cursor->last_piece and also mistakenly inverted
->> the hint by passing last_piece for "more".  This was corrected with
->> commit c2cfa1940097 ("libceph: Fix ceph_tcp_sendpage()'s more boolean
->> usage").
->>
->> As it is, last_piece is not helping at all: because Nagle algorithm is
->> disabled, for a simple message with two 512-byte data items we end up
->> emitting three packets: front + first data item, second data item and
->> footer.  Go back to the original pre-fe38a2b67bc6 behavior -- a single
->> packet in most cases.
->>
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> Signed-off-by: Sasha Levin <sashal@kernel.org>
->> ---
->>  net/ceph/messenger.c | 8 +++-----
->>  1 file changed, 3 insertions(+), 5 deletions(-)
->>
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index f7d7f32ac673c..6514816947fbe 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -1612,7 +1612,6 @@ static int write_partial_message_data(struct ceph_connection *con)
->>                 struct page *page;
->>                 size_t page_offset;
->>                 size_t length;
->> -               bool last_piece;
->>                 int ret;
->>
->>                 if (!cursor->resid) {
->> @@ -1620,10 +1619,9 @@ static int write_partial_message_data(struct ceph_connection *con)
->>                         continue;
->>                 }
->>
->> -               page = ceph_msg_data_next(cursor, &page_offset, &length,
->> -                                         &last_piece);
->> -               ret = ceph_tcp_sendpage(con->sock, page, page_offset,
->> -                                       length, !last_piece);
->> +               page = ceph_msg_data_next(cursor, &page_offset, &length, NULL);
->> +               ret = ceph_tcp_sendpage(con->sock, page, page_offset, length,
->> +                                       true);
->>                 if (ret <= 0) {
->>                         if (do_datacrc)
->>                                 msg->footer.data_crc = cpu_to_le32(crc);
+On Fri, Nov 29, 2019 at 6:21 AM Andreas Gruenbacher <agruenba@redhat.com> wrote:
 >
->Hi Sasha,
->
->This commit was part of a larger series and shouldn't be backported on
->its own.  Please drop it.
+> +/**
+> + * page_mkwrite_check_truncate - check if page was truncated
+> + * @page: the page to check
+> + * @inode: the inode to check the page against
+> + *
+> + * Returns the number of bytes in the page up to EOF,
+> + * or -EFAULT if the page was truncated.
+> + */
+> +static inline int page_mkwrite_check_truncate(struct page *page,
+> +                                             struct inode *inode)
+> +{
+> +       loff_t size = i_size_read(inode);
+> +       pgoff_t end_index = (size + PAGE_SIZE - 1) >> PAGE_SHIFT;
 
-Now dropped, thanks!
+This special end_index calculation seems to be redundant.
 
--- 
-Thanks,
-Sasha
+You later want "size >> PAGE_SHIFT" for another test, and that's
+actually the important part.
+
+The "+ PAGE_SIZE - 1" case is purely to handle the "AT the page
+boundary is special" case, but since you have to calculate
+"offset_in_page(size)" anyway, that's entirely redundant - the answer
+is part of that.
+
+So I think it would be better to write the logic as
+
+        loff_t size = i_size_read(inode);
+        pgoff_t index = size >> PAGE_SHIFT;
+        int offset = offset_in_page(size);
+
+        if (page->mapping != inode->i_mapping)
+                return -EFAULT;
+
+        /* Page is wholly past the EOF page */
+        if (page->index > index)
+                return -EFAULT;
+        /* page is wholly inside EOF */
+        if (page->index < index)
+                return PAGE_SIZE;
+        /* bytes in a page? If 0, it's past EOF */
+        return offset ? offset : -PAGE_SIZE;
+
+instead. That avoids the unnecessary "round up" part, and simply uses
+the same EOF index for everything.
+
+              Linus
