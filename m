@@ -1,77 +1,51 @@
-From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Subject: Re: [PATCH v2] fs: Fix page_mkwrite off-by-one errors
-Date: Tue, 3 Dec 2019 02:52:13 +0100
-Message-ID: <CAHpGcMLe2Qy=RdcyFPav5Rfto9M4S9VdsX6E=b3FEywtUNQdqg@mail.gmail.com>
-References: <20191129142045.7215-1-agruenba@redhat.com> <CAHk-=wj5caXKoukPyM7Zc6A0Q+E-pBGHSV64iZe8t98OerXR_w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Deepa Dinamani <deepa.kernel@gmail.com>
+Subject: [PATCH v2 0/6] Delete timespec64_trunc()
+Date: Mon,  2 Dec 2019 21:19:39 -0800
+Message-ID: <20191203051945.9440-1-deepa.kernel@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAHk-=wj5caXKoukPyM7Zc6A0Q+E-pBGHSV64iZe8t98OerXR_w@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Andreas Gruenbacher <agruenba@redhat.com>, Christoph Hellwig <hch@infradead.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Richard Weinberger <richard@nod.at>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>, Ext4 Developers List <linux-ext4@vger.kernel.org>
+To: viro@zeniv.linux.org.uk, linux-kernel@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, arnd@arndb.de, ceph-devel@vger.kernel.org, hirofumi@mail.parknet.co.jp, jlayton@kernel.org, linux-cifs@vger.kernel.org, linux-mtd@lists.infradead.org, richard@nod.at, stfrench@microsoft.com
 List-Id: ceph-devel.vger.kernel.org
 
-Am Di., 3. Dez. 2019 um 02:09 Uhr schrieb Linus Torvalds
-<torvalds@linux-foundation.org>:
->
-> On Fri, Nov 29, 2019 at 6:21 AM Andreas Gruenbacher <agruenba@redhat.com> wrote:
-> >
-> > +/**
-> > + * page_mkwrite_check_truncate - check if page was truncated
-> > + * @page: the page to check
-> > + * @inode: the inode to check the page against
-> > + *
-> > + * Returns the number of bytes in the page up to EOF,
-> > + * or -EFAULT if the page was truncated.
-> > + */
-> > +static inline int page_mkwrite_check_truncate(struct page *page,
-> > +                                             struct inode *inode)
-> > +{
-> > +       loff_t size = i_size_read(inode);
-> > +       pgoff_t end_index = (size + PAGE_SIZE - 1) >> PAGE_SHIFT;
->
-> This special end_index calculation seems to be redundant.
->
-> You later want "size >> PAGE_SHIFT" for another test, and that's
-> actually the important part.
->
-> The "+ PAGE_SIZE - 1" case is purely to handle the "AT the page
-> boundary is special" case, but since you have to calculate
-> "offset_in_page(size)" anyway, that's entirely redundant - the answer
-> is part of that.
->
-> So I think it would be better to write the logic as
->
->         loff_t size = i_size_read(inode);
->         pgoff_t index = size >> PAGE_SHIFT;
->         int offset = offset_in_page(size);
->
->         if (page->mapping != inode->i_mapping)
->                 return -EFAULT;
->
->         /* Page is wholly past the EOF page */
->         if (page->index > index)
->                 return -EFAULT;
->         /* page is wholly inside EOF */
->         if (page->index < index)
->                 return PAGE_SIZE;
->         /* bytes in a page? If 0, it's past EOF */
->         return offset ? offset : -PAGE_SIZE;
->
-> instead. That avoids the unnecessary "round up" part, and simply uses
-> the same EOF index for everything.
+This series aims at deleting timespec64_trunc().
+There is a new api: timestamp_truncate() that is the
+replacement api. The api additionally does a limits
+check on the filesystem timestamps.
 
-And if we rearrange things slightly, we end up with:
+The suggestion to open code some of the truncate logic
+came from Al Viro. And, this does make the code in some
+filesystems easy to follow.
 
-        /* page is wholly inside EOF */
-        if (page->index < index)
-                return PAGE_SIZE;
-        /* page is wholly past EOF */
-        if (page->index > index || !offset)
-                return -EFAULT;
-        /* page is partially inside EOF */
-        return offset;
+The series also does some update_time() cleanup as
+suggested by Al Viro.
 
-Thanks,
-Andreas
+Deepa Dinamani (6):
+  fs: fat: Eliminate timespec64_trunc() usage
+  fs: cifs: Delete usage of timespec64_trunc
+  fs: ceph: Delete timespec64_trunc() usage
+  fs: ubifs: Eliminate timespec64_trunc() usage
+  fs: Delete timespec64_trunc()
+  fs: Do not overload update_time
+
+ fs/ceph/mds_client.c |  4 +---
+ fs/cifs/inode.c      | 13 +++++++------
+ fs/fat/misc.c        | 10 +++++++++-
+ fs/inode.c           | 33 +++------------------------------
+ fs/ubifs/sb.c        | 11 ++++-------
+ include/linux/fs.h   |  1 -
+ 6 files changed, 24 insertions(+), 48 deletions(-)
+
+-- 
+Changes since v1:
+* Dropped the atime comparison (patch 2/7) taken through cifs tree.
+* Refactored update_time according to review comments.
+2.17.1
+
+Cc: ceph-devel@vger.kernel.org
+Cc: hirofumi@mail.parknet.co.jp
+Cc: jlayton@kernel.org
+Cc: linux-cifs@vger.kernel.org
+Cc: linux-mtd@lists.infradead.org
+Cc: richard@nod.at
+Cc: stfrench@microsoft.com
