@@ -1,75 +1,93 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph updates for 5.5-rc1
-Date: Wed,  4 Dec 2019 21:03:07 +0100
-Message-ID: <20191204200307.21047-1-idryomov@gmail.com>
+From: Yanhu Cao <gmayyyha@gmail.com>
+Subject: Re: [PATCH] ceph: check set quota operation support before syncing setxattr.
+Date: Thu, 5 Dec 2019 10:42:46 +0800
+Message-ID: <CAB9OAC2vzPy=ELYzDRjBvA6m8T8AvwdJugS2NoCczwD1+Xb36Q@mail.gmail.com>
+References: <20191204031005.2638-1-gmayyyha@gmail.com> <20191204103629.GA22244@hermes.olymp>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191204103629.GA22244@hermes.olymp>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Luis Henriques <lhenriques@suse.com>
+Cc: jlayton@kernel.org, sage@redhat.com, idryomov@gmail.com, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Wed, Dec 4, 2019 at 6:36 PM Luis Henriques <lhenriques@suse.com> wrote:
+>
+> On Wed, Dec 04, 2019 at 11:10:05AM +0800, Yanhu Cao wrote:
+> > Environment
+> > -----------
+> > ceph version: 12.2.*
+> > kernel version: 4.19+
+> >
+> > setfattr quota operation actually sends op to MDS, and settings
+> > effective. but kclient outputs 'Operation not supported'. This may conf=
+use
+> > users' understandings.
+>
+> What exactly do you mean by "settings effective"?  There have been
+> changes in the way CephFS quotas work in mimic and, if you're using a
+> Luminous cluster (12.2.*) the kernel client effectively does *not*
+> support quotas -- you'll be able to exceed the quotas you've tried to
+> set because the client won't be checking the limits.  Thus, -EOPNOTSUPP
+> seems appropriate for this scenario.
+>
+> I guess that the confusing part is that the xattr is actually set in
+> that case, but the kernel client won't be able to use it to validate
+> quotas in the filesystem tree because realms won't be created.
+>
+Yes. we use kcephfs+nfs for CentOS6.*, it does not support ceph-fuse(12.2.*=
+).
+The operating system of other applications is CentOS7.*, which uses
+ceph-fuse and can get quota settings set by kclient.
 
-The following changes since commit 219d54332a09e8d8741c1e1982f5eae56099de85:
+Thanks.
+BRs
 
-  Linux 5.4 (2019-11-24 16:32:01 -0800)
-
-are available in the Git repository at:
-
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.5-rc1
-
-for you to fetch changes up to 82995cc6c5ae4bf4d72edef381a085e52d5b5905:
-
-  libceph, rbd, ceph: convert to use the new mount API (2019-11-27 22:28:37 +0100)
-
-----------------------------------------------------------------
-The two highlights are a set of improvements to how rbd read-only
-mappings are handled and a conversion to the new mount API (slightly
-complicated by the fact that we had a common option parsing framework
-that called out into rbd and the filesystem instead of them calling
-into it).  Also included a few scattered fixes and a MAINTAINERS update
-for rbd, adding Dongsheng as a reviewer.
-
-----------------------------------------------------------------
-Colin Ian King (1):
-      rbd: fix spelling mistake "requeueing" -> "requeuing"
-
-David Howells (1):
-      libceph, rbd, ceph: convert to use the new mount API
-
-Ilya Dryomov (11):
-      libceph: drop unnecessary check from dispatch() in mon_client.c
-      rbd: update MAINTAINERS info
-      rbd: introduce rbd_is_snap()
-      rbd: introduce RBD_DEV_FLAG_READONLY
-      rbd: treat images mapped read-only seriously
-      rbd: disallow read-write partitions on images mapped read-only
-      rbd: don't acquire exclusive lock for read-only mappings
-      rbd: don't establish watch for read-only mappings
-      rbd: remove snapshot existence validation code
-      rbd: don't query snapshot features
-      rbd: ask for a weaker incompat mask for read-only mappings
-
-Jeff Layton (3):
-      ceph: make several helper accessors take const pointers
-      ceph: tone down loglevel on ceph_mdsc_build_path warning
-      ceph: don't leave ino field in ceph_mds_request_head uninitialized
-
-Xiubo Li (1):
-      ceph: fix geting random mds from mdsmap
-
- MAINTAINERS                  |   2 +-
- drivers/block/rbd.c          | 467 ++++++++++++++++---------------
- fs/ceph/cache.c              |   9 +-
- fs/ceph/cache.h              |   5 +-
- fs/ceph/mds_client.c         |  19 +-
- fs/ceph/mdsmap.c             |  11 +-
- fs/ceph/super.c              | 646 ++++++++++++++++++++++---------------------
- fs/ceph/super.h              |  13 +-
- include/linux/ceph/libceph.h |  10 +-
- net/ceph/ceph_common.c       | 419 +++++++++++++---------------
- net/ceph/messenger.c         |   2 -
- net/ceph/mon_client.c        |   3 -
- 12 files changed, 803 insertions(+), 803 deletions(-)
+> Cheers,
+> --
+> Lu=C3=ADs
+> >
+> > If the kernel version and ceph version are not compatible, should check
+> > quota operations are supported first, then do sync_setxattr.
+> >
+> > reference: https://docs.ceph.com/docs/master/cephfs/quota/
+> >
+> > Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+> > ---
+> >  fs/ceph/xattr.c | 6 ++++--
+> >  1 file changed, 4 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> > index cb18ee637cb7..189aace75186 100644
+> > --- a/fs/ceph/xattr.c
+> > +++ b/fs/ceph/xattr.c
+> > @@ -1132,8 +1132,8 @@ int __ceph_setxattr(struct inode *inode, const ch=
+ar *name,
+> >                                   "during filling trace\n", inode);
+> >               err =3D -EBUSY;
+> >       } else {
+> > -             err =3D ceph_sync_setxattr(inode, name, value, size, flag=
+s);
+> > -             if (err >=3D 0 && check_realm) {
+> > +             err =3D 0;
+> > +             if (check_realm) {
+> >                       /* check if snaprealm was created for quota inode=
+ */
+> >                       spin_lock(&ci->i_ceph_lock);
+> >                       if ((ci->i_max_files || ci->i_max_bytes) &&
+> > @@ -1142,6 +1142,8 @@ int __ceph_setxattr(struct inode *inode, const ch=
+ar *name,
+> >                               err =3D -EOPNOTSUPP;
+> >                       spin_unlock(&ci->i_ceph_lock);
+> >               }
+> > +             if (err =3D=3D 0)
+> > +                     err =3D ceph_sync_setxattr(inode, name, value, si=
+ze, flags);
+> >       }
+> >  out:
+> >       ceph_free_cap_flush(prealloc_cf);
+> > --
+> > 2.21.0 (Apple Git-122.2)
+> >
