@@ -1,24 +1,24 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph updates for 5.5-rc1
-Date: Thu, 05 Dec 2019 21:30:26 +0000
-Message-ID: <157558142612.8243.11548479580688352353.pr-tracker-bot@kernel.org>
-References: <20191204200307.21047-1-idryomov@gmail.com>
+From: Deepa Dinamani <deepa.kernel@gmail.com>
+Subject: Re: [PATCH v2 0/6] Delete timespec64_trunc()
+Date: Thu, 5 Dec 2019 18:43:26 -0800
+Message-ID: <CABeXuvpkYQbsvGTuktEAR8ptr478peet3EH=RD0v+nK5o2Wmjg@mail.gmail.com>
+References: <20191203051945.9440-1-deepa.kernel@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191204200307.21047-1-idryomov@gmail.com>
+In-Reply-To: <20191203051945.9440-1-deepa.kernel@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Alexander Viro <viro@zeniv.linux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, ceph-devel <ceph-devel@vger.kernel.org>, OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Jeff Layton <jlayton@kernel.org>, CIFS <linux-cifs@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Richard Weinberger <richard@nod.at>, Steve French <stfrench@microsoft.com>
 List-Id: ceph-devel.vger.kernel.org
 
-The pull request you sent on Wed,  4 Dec 2019 21:03:07 +0100:
+On Mon, Dec 2, 2019 at 9:20 PM Deepa Dinamani <deepa.kernel@gmail.com> wrote:
+> This series aims at deleting timespec64_trunc().
+> There is a new api: timestamp_truncate() that is the
+> replacement api. The api additionally does a limits
+> check on the filesystem timestamps.
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.5-rc1
+Al/Andrew, can one of you help merge these patches?
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/a231582359ec27e121bf4bb0ab3df8355f919d1d
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Thanks,
+-Deepa
