@@ -1,49 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.5-rc2
-Date: Thu, 12 Dec 2019 19:43:56 +0100
-Message-ID: <20191212184356.7143-1-idryomov@gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fixes for 5.5-rc2
+Date: Thu, 12 Dec 2019 19:00:19 +0000
+Message-ID: <157617721920.9887.11221829530650580146.pr-tracker-bot@kernel.org>
+References: <20191212184356.7143-1-idryomov@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191212184356.7143-1-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Thu, 12 Dec 2019 19:43:56 +0100:
 
-The following changes since commit e42617b825f8073569da76dc4510bfa019b1c35a:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.5-rc2
 
-  Linux 5.5-rc1 (2019-12-08 14:57:55 -0800)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/37d4e84f765bb3038ddfeebdc5d1cfd7e1ef688f
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.5-rc2
-
-for you to fetch changes up to da08e1e1d7c3f805f8771ad6a6fd3a7a30ba4fe2:
-
-  ceph: add more debug info when decoding mdsmap (2019-12-09 20:55:10 +0100)
-
-----------------------------------------------------------------
-A fix to avoid a corner case when scheduling cap reclaim in batches
-from Xiubo, a patch to add some observability into cap waiters from
-Jeff and a couple of cleanups.
-
-----------------------------------------------------------------
-Jeff Layton (2):
-      ceph: convert int fields in ceph_mount_options to unsigned int
-      ceph: show tasks waiting on caps in debugfs caps file
-
-Xiubo Li (3):
-      ceph: trigger the reclaim work once there has enough pending caps
-      ceph: switch to global cap helper
-      ceph: add more debug info when decoding mdsmap
-
- fs/ceph/caps.c       | 41 +++++++++++++++++++++++++++--------------
- fs/ceph/debugfs.c    | 13 +++++++++++++
- fs/ceph/mds_client.c |  8 +++++---
- fs/ceph/mds_client.h |  9 +++++++++
- fs/ceph/mdsmap.c     | 12 ++++++++----
- fs/ceph/super.c      | 28 +++++++++++++++-------------
- fs/ceph/super.h      | 16 ++++++++--------
- 7 files changed, 85 insertions(+), 42 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
