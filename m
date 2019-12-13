@@ -1,58 +1,54 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Ceph rgw pools per client
-Date: Fri, 13 Dec 2019 14:53:08 +0530
-Message-ID: <CANA9Uk7S0xSw0D6fY_S6Y=chNEqRCjSv60cU5o_QKJppJoPmzA@mail.gmail.com>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: v13.2.8 Mimic released
+Date: Fri, 13 Dec 2019 18:10:14 +0100
+Message-ID: <877e30cft5.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0152071110457659121=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-announce-bounces-a8pt6IJUokc@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-announce-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-announce-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-announce-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-announce-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-announce-leave-a8pt6IJUokc@public.gmane.org>
+To: ceph-announce-a8pt6IJUokc@public.gmane.org, ceph-users-a8pt6IJUokc@public.gmane.org, dev-a8pt6IJUokc@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============0152071110457659121==
-Content-Type: multipart/alternative; boundary="000000000000a0cd6b0599926971"
 
---000000000000a0cd6b0599926971
-Content-Type: text/plain; charset="UTF-8"
+This is the eighth backport release in the Ceph Mimic stable release
+series. Its sole purpose is to fix a regression that found its way into
+the previous release. 
 
-Hello - I want to have 2 diff. rgw pools for 2 diff. clients. For ex:
-For client#1 - rgw.data1, rgw.index1, rgw.user1, rgw.metadata1
-For client#2 - rgw.data2, rgw.index2, rgw.user2, rgw.metadata2
+Notable Changes
+---------------
 
-Is the above possible with ceph radosgw?
+* Due to a missed backport, clusters in the process of being upgraded from
+  13.2.6 to 13.2.7 might suffer an OSD crash in build_incremental_map_msg.
+  This regression was reported in https://tracker.ceph.com/issues/43106
+  and is fixed in 13.2.8 (this release). Users of 13.2.6 can upgrade to 13.2.8
+  directly - i.e., skip 13.2.7 - to avoid this.
 
-Thanks
-Swami
+Changelog
+---------
 
---000000000000a0cd6b0599926971
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+* osd: fix sending incremental map messages (issue#43106 pr#32000, Sage Weil)
+* tests: added missing point release versions (pr#32087, Yuri Weinstein)
+* tests: rgw: add missing force-branch: ceph-mimic for swift tasks (pr#32033, Casey Bodley)
 
-<div dir=3D"ltr">Hello - I want to have 2 diff. rgw pools for 2 diff. clien=
-ts. For ex:<div>For client#1 - rgw.data1, rgw.index1, rgw.user1, rgw.metada=
-ta1</div><div>For client#2 - rgw.data2, rgw.index2, rgw.user2, rgw.metadata=
-2</div><div><br></div><div>Is the above possible with ceph radosgw?</div><d=
-iv><br></div><div>Thanks</div><div>Swami</div></div>
+For a blog with links to PRs and issues please check out
+https://ceph.io/releases/v13-2-8-mimic-released/
 
---000000000000a0cd6b0599926971--
+Getting Ceph
+------------
 
---===============0152071110457659121==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-13.2.8.tar.gz
+* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
+* Release git sha1: 5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0
 
+-- 
+Abhishek Lekshmanan
+SUSE Software Solutions Germany GmbH
 _______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0152071110457659121==--
+Ceph-announce mailing list -- ceph-announce-a8pt6IJUokc@public.gmane.org
+To unsubscribe send an email to ceph-announce-leave-a8pt6IJUokc@public.gmane.org
