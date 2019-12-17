@@ -1,49 +1,49 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] rbd: Avoid calling BUG() when object_map is not empty
-Date: Mon, 16 Dec 2019 11:18:30 +0100
-Message-ID: <CAOi1vP_dYP05Wj1fpH-U2WLGhOBp3RmFXPvjYmjorx_MLZW6Zg@mail.gmail.com>
-References: <20191215163527.25203-1-pakki001@umn.edu>
+From: Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: Re: [PATCH 0/1] Use inode_lock/unlock class of provided APIs in
+ filesystems
+Date: Tue, 17 Dec 2019 13:42:29 +0530
+Message-ID: <20191217081233.A81214C040@d06av22.portsmouth.uk.ibm.com>
+References: <20191205103902.23618-1-riteshh@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191215163527.25203-1-pakki001@umn.edu>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Aditya Pakki <pakki001@umn.edu>
-Cc: kjlu@umn.edu, Sage Weil <sage@redhat.com>, Dongsheng Yang <dongsheng.yang@easystack.cn>, Jens Axboe <axboe@kernel.dk>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+In-Reply-To: <20191205103902.23618-1-riteshh@linux.ibm.com>
+Content-Language: en-US
+Sender: linux-btrfs-owner@vger.kernel.org
+To: willy@infradead.org, linux-fsdevel@vger.kernel.org, jlayton@kernel.org, viro@zeniv.linux.org.uk
+Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-nfs@vger.kernel.org, devel@lists.orangefs.org, linux-unionfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Sun, Dec 15, 2019 at 5:35 PM Aditya Pakki <pakki001@umn.edu> wrote:
->
-> In __rbd_object_map_load, if object_map contains data, return
-> error -EINVAL upstream, instead of crashing, via BUG. The patch
-> fixes this issue.
->
-> Signed-off-by: Aditya Pakki <pakki001@umn.edu>
-> ---
->  drivers/block/rbd.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 2b184563cd32..6e9a11f32a94 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1892,7 +1892,8 @@ static int __rbd_object_map_load(struct rbd_device *rbd_dev)
->         int num_pages;
->         int ret;
->
-> -       rbd_assert(!rbd_dev->object_map && !rbd_dev->object_map_size);
-> +       if (rbd_dev->object_map || rbd_dev->object_map_size)
-> +               return -EINVAL;
->
->         num_objects = ceph_get_num_objects(&rbd_dev->layout,
->                                            rbd_dev->mapping.size);
+Al, do you think this can be picked up via your tree?
+Please let me know if anything needed from my end on this.
 
-Hi Aditya,
+-ritesh
 
-Could you explain what issue is being fixed?  Did you hit this assert?
-If so, under what circumstances?  The fact that __rbd_object_map_load()
-can fail doesn't mean that it shouldn't have asserts...
-
-Thanks,
-
-                Ilya
+On 12/5/19 4:09 PM, Ritesh Harjani wrote:
+> Matthew Wilcox in [1] suggested that it will be a good idea
+> to define some missing API instead of directly using i_rwsem in
+> filesystems drivers for lock/unlock/downgrade purposes.
+> 
+> This patch does that work. No functionality change in this patch.
+> 
+> After this there are only lockdep class of APIs at certain places
+> in filesystems which are directly using i_rwsem and second is XFS,
+> but it seems to be anyway defining it's own xfs_ilock/iunlock set
+> of APIs and 'iolock' naming convention for this lock.
+> 
+> [1]: https://www.spinics.net/lists/linux-ext4/msg68689.html
+> 
+> Ritesh Harjani (1):
+>    fs: Use inode_lock/unlock class of provided APIs in filesystems
+> 
+>   fs/btrfs/delayed-inode.c |  2 +-
+>   fs/btrfs/ioctl.c         |  4 ++--
+>   fs/ceph/io.c             | 24 ++++++++++++------------
+>   fs/nfs/io.c              | 24 ++++++++++++------------
+>   fs/orangefs/file.c       |  4 ++--
+>   fs/overlayfs/readdir.c   |  2 +-
+>   fs/readdir.c             |  4 ++--
+>   include/linux/fs.h       | 21 +++++++++++++++++++++
+>   8 files changed, 53 insertions(+), 32 deletions(-)
+> 
