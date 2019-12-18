@@ -1,23 +1,35 @@
-From: Jan Kara <jack@suse.cz>
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Subject: Re: [PATCH v3] fs: Fix page_mkwrite off-by-one errors
-Date: Wed, 18 Dec 2019 15:10:12 +0100
-Message-ID: <20191218141012.GD19387@quack2.suse.cz>
+Date: Wed, 18 Dec 2019 10:52:16 -0800
+Message-ID: <20191218185216.GA7497@magnolia>
 References: <20191218130935.32402-1-agruenba@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
 Content-Disposition: inline
 In-Reply-To: <20191218130935.32402-1-agruenba@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
 To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, Richard Weinberger <richard@nod.at>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org, Chris Mason <clm@fb.com>, Jo
+Cc: Jan Kara <jack@suse.cz>, Adrian Hunter <adrian.hunter@intel.com>, Chris Mason <clm@fb.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Sage Weil <sage@redhat.com>, Richard Weinberger <richard@nod.at>, Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, Chao Yu <chao@kernel.org>, Josef Bacik <josef@toxicpanda.com>, Alexander Viro <viro@zeniv.linux.org.uk>, David Sterba <dsterba@suse.com>, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Artem Bityutskiy <dedekind1@gmail.com>, Jeff Layton <jlayton@kernel.org>, linux-kernel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-btrfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed 18-12-19 14:09:35, Andreas Gruenbacher wrote:
+On Wed, Dec 18, 2019 at 02:09:35PM +0100, Andreas Gruenbacher wrote:
 > Hi Darrick,
 > 
 > can this fix go in via the xfs tree?
-> 
+
+Er, I'd rather not touch five other filesystems via the XFS tree.
+However, a more immediate problem that I think I see is...
+
 > Thanks,
 > Andreas
 > 
@@ -37,16 +49,6 @@ On Wed 18-12-19 14:09:35, Andreas Gruenbacher wrote:
 > Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 > Acked-by: David Sterba <dsterba@suse.com> (btrfs part)
 > Acked-by: Richard Weinberger <richard@nod.at> (ubifs part)
-
-The patch looks good to me (didn't really check btrfs). I'd just note that
-page_mkwrite_check_truncate() doesn't seem that small to be worth
-inlining... Other than that feel free to add:
-
-Reviewed-by: Jan Kara <jack@suse.cz>
-
-								Honza
-
-
 > ---
 >  fs/btrfs/inode.c        | 15 ++++-----------
 >  fs/buffer.c             | 16 +++-------------
@@ -74,6 +76,13 @@ Reviewed-by: Jan Kara <jack@suse.cz>
 > +	ret2 = page_mkwrite_check_truncate(page, inode);
 > +	if (ret2 < 0)
 >  		goto out_unlock;
+
+...here we try to return -EFAULT as vm_fault_t.  Notice how btrfs returns
+VM_FAULT_* values directly and never calls block_page_mkwrite_return?  I
+know dsterba acked this, but I cannot see how this is correct?
+
+--D
+
 > -	}
 > +	zero_start = ret2;
 >  	wait_on_page_writeback(page);
@@ -315,6 +324,7 @@ Reviewed-by: Jan Kara <jack@suse.cz>
 > -- 
 > 2.20.1
 > 
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
