@@ -1,59 +1,45 @@
-From: Chen Wandun <chenwandun@huawei.com>
-Subject: [PATCH next] ceph: Fix debugfs_simple_attr.cocci warnings
-Date: Mon, 23 Dec 2019 22:39:18 +0800
-Message-ID: <1577111958-100981-1-git-send-email-chenwandun@huawei.com>
+From: Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [RESEND PATCH 0/1] Use inode_lock/unlock class of provided APIs in filesystems
+Date: Wed,  1 Jan 2020 16:22:47 +0530
+Message-ID: <20200101105248.25304-1-riteshh@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: jlayton@kernel.org, sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: chenwandun@huawei.com
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: linux-fsdevel@vger.kernel.org, viro@zeniv.linux.org.uk
+Cc: willy@infradead.org, jlayton@kernel.org, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-nfs@vger.kernel.org, devel@lists.orangefs.org, linux-unionfs@vger.kernel.org, dsterba@suse.cz, Ritesh Harjani <riteshh@linux.ibm.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Use DEFINE_DEBUGFS_ATTRIBUTE rather than DEFINE_SIMPLE_ATTRIBUTE
-for debugfs files.
+Al, any comments?
+Resending this after adding Reviewed-by/Acked-by tags.
 
-Semantic patch information:
-Rationale: DEFINE_SIMPLE_ATTRIBUTE + debugfs_create_file()
-imposes some significant overhead as compared to
-DEFINE_DEBUGFS_ATTRIBUTE + debugfs_create_file_unsafe().
 
-Signed-off-by: Chen Wandun <chenwandun@huawei.com>
----
- fs/ceph/debugfs.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+From previous version:-
+Matthew Wilcox in [1] suggested that it will be a good idea
+to define some missing API instead of directly using i_rwsem in
+filesystems drivers for lock/unlock/downgrade purposes.
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index c281f32..60a0f1a 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -243,8 +243,8 @@ static int congestion_kb_get(void *data, u64 *val)
- 	return 0;
- }
- 
--DEFINE_SIMPLE_ATTRIBUTE(congestion_kb_fops, congestion_kb_get,
--			congestion_kb_set, "%llu\n");
-+DEFINE_DEBUGFS_ATTRIBUTE(congestion_kb_fops, congestion_kb_get,
-+			 congestion_kb_set, "%llu\n");
- 
- 
- void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
-@@ -264,11 +264,11 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 
- 	dout("ceph_fs_debugfs_init\n");
- 	fsc->debugfs_congestion_kb =
--		debugfs_create_file("writeback_congestion_kb",
--				    0600,
--				    fsc->client->debugfs_dir,
--				    fsc,
--				    &congestion_kb_fops);
-+		debugfs_create_file_unsafe("writeback_congestion_kb",
-+					   0600,
-+					   fsc->client->debugfs_dir,
-+					   fsc,
-+					   &congestion_kb_fops);
- 
- 	snprintf(name, sizeof(name), "../../bdi/%s",
- 		 dev_name(fsc->sb->s_bdi->dev));
+This patch does that work. No functionality change in this patch.
+
+After this there are only lockdep class of APIs at certain places
+in filesystems which are directly using i_rwsem and second is XFS,
+but it seems to be anyway defining it's own xfs_ilock/iunlock set
+of APIs and 'iolock' naming convention for this lock.
+
+[1]: https://www.spinics.net/lists/linux-ext4/msg68689.html
+
+Ritesh Harjani (1):
+  fs: Use inode_lock/unlock class of provided APIs in filesystems
+
+ fs/btrfs/delayed-inode.c |  2 +-
+ fs/btrfs/ioctl.c         |  4 ++--
+ fs/ceph/io.c             | 24 ++++++++++++------------
+ fs/nfs/io.c              | 24 ++++++++++++------------
+ fs/orangefs/file.c       |  4 ++--
+ fs/overlayfs/readdir.c   |  2 +-
+ fs/readdir.c             |  4 ++--
+ include/linux/fs.h       | 21 +++++++++++++++++++++
+ 8 files changed, 53 insertions(+), 32 deletions(-)
+
 -- 
-2.7.4
+2.21.0
