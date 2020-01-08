@@ -1,71 +1,44 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] rbd: work around -Wuninitialized warning
-Date: Wed, 8 Jan 2020 17:05:25 +0100
-Message-ID: <CAK8P3a0qb3fE1D4o1wYMVVets8CtbTpMRg1hUJF1wW+oC1GJjg@mail.gmail.com>
-References: <20200107210256.2426176-1-arnd@arndb.de> <CAOi1vP_j1Mhdev5yGqxWVyfCvFMtmFzGw+34TdsJiQ53vWOQpA@mail.gmail.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v4] fs: Fix page_mkwrite off-by-one errors
+Date: Wed, 8 Jan 2020 08:57:10 -0800
+Message-ID: <20200108165710.GA18523@infradead.org>
+References: <20200108131528.4279-1-agruenba@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP_j1Mhdev5yGqxWVyfCvFMtmFzGw+34TdsJiQ53vWOQpA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Jens Axboe <axboe@kernel.dk>, Oleksandr Natalenko <oleksandr@redhat.com>, Dongsheng Yang <dongsheng.yang@easystack.cn>, Jason Dillaman <dillaman@redhat.com>, David Howells <dhowells@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20200108131528.4279-1-agruenba@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: Jan Kara <jack@suse.cz>, Chao Yu <yuchao0@huawei.com>, Adrian Hunter <adrian.hunter@intel.com>, Chris Mason <clm@fb.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Sage Weil <sage@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Richard Weinberger <richard@nod.at>, YueHaibing <yuehaibing@huawei.com>, Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chao Yu <chao@kernel.org>, Josef Bacik <josef@toxicpanda.com>, Alexander Viro <viro@zeniv.linux.org.uk>, David Sterba <dsterba@suse.com>, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Artem Bityutskiy <dedekind1@gmail.com>, Jeff Layton <jlayton@kernel.org>, linux-kernel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.orglinux
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jan 8, 2020 at 4:31 PM Ilya Dryomov <idryomov@gmail.com> wrote:
->
-> On Tue, Jan 7, 2020 at 10:02 PM Arnd Bergmann <arnd@arndb.de> wrote:
-> >
-> > gcc -O3 warns about a dummy variable that is passed
-> > down into rbd_img_fill_nodata without being initialized:
-> >
-> > drivers/block/rbd.c: In function 'rbd_img_fill_nodata':
-> > drivers/block/rbd.c:2573:13: error: 'dummy' is used uninitialized in this function [-Werror=uninitialized]
-> >   fctx->iter = *fctx->pos;
-> >
-> > Since this is a dummy, I assume the warning is harmless, but
-> > it's better to initialize it anyway and avoid the warning.
-> >
-> > Fixes: mmtom ("init/Kconfig: enable -O3 for all arches")
-> > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> > ---
-> >  drivers/block/rbd.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> > index 29be02838b67..070edc5983df 100644
-> > --- a/drivers/block/rbd.c
-> > +++ b/drivers/block/rbd.c
-> > @@ -2664,7 +2664,7 @@ static int rbd_img_fill_nodata(struct rbd_img_request *img_req,
-> >                                u64 off, u64 len)
-> >  {
-> >         struct ceph_file_extent ex = { off, len };
-> > -       union rbd_img_fill_iter dummy;
-> > +       union rbd_img_fill_iter dummy = {};
-> >         struct rbd_img_fill_ctx fctx = {
-> >                 .pos_type = OBJ_REQUEST_NODATA,
-> >                 .pos = &dummy,
->
-> Applied, but slightly confused.  Wasn't selecting -O3/s/etc supposed to
-> automatically disable -Wmaybe-uninitialized via Kconfig?
+I don't want to be the party pooper, but shouldn't this be a series
+with one patch to add the helper, and then once for each fs / piece
+of common code switched over?
 
-Oh, that's right. I have a couple of patches in my randconfig tree that
-completely rework the way that the warning options are handled and
-that accidentally ignored CONFIG_CC_DISABLE_WARN_MAYBE_UNINITIALIZED,
-so it's won't actually happen on linux-next right now, just on my kernel.
+On Wed, Jan 08, 2020 at 02:15:28PM +0100, Andreas Gruenbacher wrote:
+> Hi Darrick,
+> 
+> here's an updated version with the latest feedback incorporated.  Hope
+> you find that useful.
+> 
+> As far as the f2fs merge conflict goes, I've been told by Linus not to
+> resolve those kinds of conflicts but to point them out when sending the
+> merge request.  So this shouldn't be a big deal.
 
-However, given that -O3 did not actually introduce too many false
-positives here but did find some actual uninitialized variables, we should
-probably have it turned on anyway.
+Also this isn't really the proper way to write a commit message.  This
+text would go into the cover letter if it was a series..
 
-A lot of these false positives seem to happen whenever gcc can partially
-understand how a variable is used, but not enough to see that it's ok.
-With higher optimization levels, this happens less often than with the
-lower levels as it inlines more aggressively and correctly determines
-uses to be safe that were false-positives earlier.
-
-I'm fairly sure that the output at -Os still won't be helpful as that would
-mostly show up cases that -O2 has found to be safe rather than those
-that -O2 decided not to warn about because of lack of information.
-
-      Arnd
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
