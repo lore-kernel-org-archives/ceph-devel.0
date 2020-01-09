@@ -1,110 +1,67 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [RFC PATCH v4] ceph: use 'copy-from2' operation in
- copy_file_range
-Date: Thu, 9 Jan 2020 16:28:21 +0000
-Message-ID: <20200109162821.GA19915@brahms>
-References: <20200108100353.23770-1-lhenriques@suse.com>
- <913eb28e6bb698f27f1831f75ea5250497ee659c.camel@kernel.org>
- <20200109143011.GA14582@brahms>
- <CAOi1vP-YbPswsmk5TicVwnspBSkz9_8HreOWmpU=kZeTWWiV-A@mail.gmail.com>
- <0c8566e39221cc475840da0f93913aeaa77dc0e4.camel@kernel.org>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: [PATCH 6/6] ceph: perform asynchronous unlink if we have
+ sufficient caps
+Date: Thu, 9 Jan 2020 09:53:15 -0800
+Message-ID: <CA+2bHPaML5kSYaZrNPsDHYTv-7_scEPWZ2xkD0fxp2Pg5G1cCA@mail.gmail.com>
+References: <20200106153520.307523-1-jlayton@kernel.org> <20200106153520.307523-7-jlayton@kernel.org>
+ <8f5e345a-2743-5868-3d89-017db6ae3d8c@redhat.com> <9cd39feb0b8d92f29af69a787355b89359c797a8.camel@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <0c8566e39221cc475840da0f93913aeaa77dc0e4.camel@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:45123 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728653AbgAIRxo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2020 12:53:44 -0500
+Received: by mail-qk1-f200.google.com with SMTP id 194so4648639qkh.18
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2020 09:53:42 -0800 (PST)
+In-Reply-To: <9cd39feb0b8d92f29af69a787355b89359c797a8.camel@kernel.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@kernel.org>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
 
-On Thu, Jan 09, 2020 at 11:05:50AM -0500, Jeff Layton wrote:
-> On Thu, 2020-01-09 at 15:53 +0100, Ilya Dryomov wrote:
-> > On Thu, Jan 9, 2020 at 3:30 PM Luis Henriques <lhenriques@suse.com> wrote:
-> > > On Thu, Jan 09, 2020 at 08:06:17AM -0500, Jeff Layton wrote:
-> > > > On Wed, 2020-01-08 at 10:03 +0000, Luis Henriques wrote:
-> > > > > Instead of using the 'copy-from' operation, switch copy_file_range to the
-> > > > > new 'copy-from2' operation, which allows to send the truncate_seq and
-> > > > > truncate_size parameters.
-> > > > > 
-> > > > > If an OSD does not support the 'copy-from2' operation it will return
-> > > > > -EOPNOTSUPP.  In that case, the kernel client will stop trying to do
-> > > > > remote object copies for this fs client and will always use the generic
-> > > > > VFS copy_file_range.
-> > > > > 
-> > > > > Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> > > > > ---
-> > > > > Hi Jeff,
-> > > > > 
-> > > > > This is a follow-up to the discussion in [1].  Since PR [2] has been
-> > > > > merged, it's now time to change the kernel client to use the new
-> > > > > 'copy-from2'.  And that's what this patch does.
-> > > > > 
-> > > > > [1] https://lore.kernel.org/lkml/20191118120935.7013-1-lhenriques@suse.com/
-> > > > > [2] https://github.com/ceph/ceph/pull/31728
-> > > > > 
-> > > > >  fs/ceph/file.c                  | 13 ++++++++++++-
-> > > > >  fs/ceph/super.c                 |  1 +
-> > > > >  fs/ceph/super.h                 |  3 +++
-> > > > >  include/linux/ceph/osd_client.h |  1 +
-> > > > >  include/linux/ceph/rados.h      |  2 ++
-> > > > >  net/ceph/osd_client.c           | 18 ++++++++++++------
-> > > > >  6 files changed, 31 insertions(+), 7 deletions(-)
-> > > > > 
-> > > > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > > > > index 11929d2bb594..1e6cdf2dfe90 100644
-> > > > > --- a/fs/ceph/file.c
-> > > > > +++ b/fs/ceph/file.c
-> > > > > @@ -1974,6 +1974,10 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
-> > > > >     if (ceph_test_mount_opt(src_fsc, NOCOPYFROM))
-> > > > >             return -EOPNOTSUPP;
-> > > > > 
-> > > > > +   /* Do the OSDs support the 'copy-from2' operation? */
-> > > > > +   if (!src_fsc->have_copy_from2)
-> > > > > +           return -EOPNOTSUPP;
-> > > > > +
-> > > > >     /*
-> > > > >      * Striped file layouts require that we copy partial objects, but the
-> > > > >      * OSD copy-from operation only supports full-object copies.  Limit
-> > > > > @@ -2101,8 +2105,15 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
-> > > > >                     CEPH_OSD_OP_FLAG_FADVISE_NOCACHE,
-> > > > >                     &dst_oid, &dst_oloc,
-> > > > >                     CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL |
-> > > > > -                   CEPH_OSD_OP_FLAG_FADVISE_DONTNEED, 0);
-> > > > > +                   CEPH_OSD_OP_FLAG_FADVISE_DONTNEED,
-> > > > > +                   dst_ci->i_truncate_seq, dst_ci->i_truncate_size,
-> > > > > +                   CEPH_OSD_COPY_FROM_FLAG_TRUNCATE_SEQ);
-> > > > >             if (err) {
-> > > > > +                   if (err == -EOPNOTSUPP) {
-> > > > > +                           src_fsc->have_copy_from2 = false;
-> > > > > +                           pr_notice("OSDs don't support 'copy-from2'; "
-> > > > > +                                     "disabling copy_file_range\n");
-> > > > > +                   }
-> > > > >                     dout("ceph_osdc_copy_from returned %d\n", err);
-> > > > >                     if (!ret)
-> > > > >                             ret = err;
-> > > > 
-> > > > The patch itself looks fine to me. I'll not merge yet, since you sent it
-> > > > as an RFC, but I don't have any objection to it at first glance.
-> > > 
-> > > I was going to drop the RFC, but then at the last minute decided to leave.
-> > > 
-> > > >                                                                    The
-> > > > only other comment I'd make is that you should probably split this into
-> > > > two patches -- one for the libceph changes and one for cephfs.
-> > > 
-> > > Hmm... TBH I didn't thought about that, but since the libceph patch would
-> > > be changing its API (ceph_osdc_copy_from would have 2 extra parameters), I
-> > > don't think that's a good idea.  Bisection would be broken between these 2
-> > > patches.
-> > 
-> 
-> In that case, I'll just go ahead and do some testing with this patch and
-> will plan to merge it as-is, assuming that goes ok.
+On Thu, Jan 9, 2020 at 3:34 AM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> On Thu, 2020-01-09 at 17:18 +0800, Yan, Zheng wrote:
+> > > +bool enable_async_dirops;
+> > > +module_param(enable_async_dirops, bool, 0644);
+> > > +MODULE_PARM_DESC(enable_async_dirops, "Asynchronous directory operations enabled");
+> > > +
+> >
+> > why not use mount option
+> >
+>
+> I'm open to suggestions here.
+>
+> I mostly put this in originally to help facilitate performance testing.
+> A module option makes it easy to change this at runtime (without having
+> to remount or anything).
+>
+> That said, we probably _do_ want to have a way for users to enable or
+> disable this feature. We'll probably want this disabled by default
+> initially, but I can forsee that changing once get more confidence.
+>
+> Mount options are a bit of a pain to deal with over time. If the
+> defaults change, we need to document that in the manpages and online
+> documentation. If you put a mount option in the fstab, then you have to
+> deal with breakage if you boot to an earlier kernel that doesn't support
+> that option.
+>
+> My thinking is that we should just use a module option initially (for
+> the really early adopters) and only convert that to a mount option as
+> the need for it becomes clear.
 
-Awesome, thanks!
+Module option makes sense.
 
-Cheers,
---
-Luís
+A mount option to disable async ops would also make sense. I do not
+think the default behavior should be off-by-default.
+
+(Someday perhaps the kernel will be smart enough to also digest the
+ceph configs delivered through the monitors...)
+
+-- 
+Patrick Donnelly, Ph.D.
+He / Him / His
+Senior Software Engineer
+Red Hat Sunnyvale, CA
+GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
