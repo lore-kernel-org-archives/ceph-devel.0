@@ -1,150 +1,111 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v2] ceph: allocate the accurate extra bytes for the
- session features
-Date: Thu, 09 Jan 2020 08:08:46 -0500
-Message-ID: <11bff5cb24cfd0dd1ddc836aabaa23cf38c802aa.camel@kernel.org>
-References: <20200108101731.26652-1-xiubli@redhat.com>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH 2/6] ceph: hold extra reference to r_parent over life of
+ request
+Date: Thu, 9 Jan 2020 21:16:02 +0800
+Message-ID: <95938157-3d47-52e5-d847-b058e1191151@redhat.com>
+References: <20200106153520.307523-1-jlayton@kernel.org>
+ <20200106153520.307523-3-jlayton@kernel.org>
+ <e8e28503-bda4-df57-6a42-33761e716fe4@redhat.com>
+ <7baad50a9e9f8d8f93171e5d4756bc35ab36a319.camel@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:56672 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730222AbgAINIt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 9 Jan 2020 08:08:49 -0500
-In-Reply-To: <20200108101731.26652-1-xiubli@redhat.com>
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:47927 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729266AbgAINQO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2020 08:16:14 -0500
+In-Reply-To: <7baad50a9e9f8d8f93171e5d4756bc35ab36a319.camel@kernel.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xiubli@redhat.com, idryomov@gmail.com, zyan@redhat.com
-Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
+Cc: sage@redhat.com, idryomov@gmail.com, zyan@redhat.com, pdonnell@redhat.com
 
-On Wed, 2020-01-08 at 05:17 -0500, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
-> 
-> The totally bytes maybe potentially larger than 8.
-> 
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  fs/ceph/mds_client.c | 20 ++++++++++++++------
->  fs/ceph/mds_client.h | 23 ++++++++++++++++-------
->  2 files changed, 30 insertions(+), 13 deletions(-)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 94cce2ab92c4..d379f489ab63 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -9,6 +9,7 @@
->  #include <linux/debugfs.h>
->  #include <linux/seq_file.h>
->  #include <linux/ratelimit.h>
-> +#include <linux/bits.h>
->  
->  #include "super.h"
->  #include "mds_client.h"
-> @@ -1053,20 +1054,21 @@ static struct ceph_msg *create_session_msg(u32 op, u64 seq)
->  	return msg;
->  }
->  
-> +static const unsigned char feature_bits[] = CEPHFS_FEATURES_CLIENT_SUPPORTED;
-> +#define FEATURE_BYTES(c) (DIV_ROUND_UP((size_t)feature_bits[c - 1] + 1, 64) * 8)
->  static void encode_supported_features(void **p, void *end)
->  {
-> -	static const unsigned char bits[] = CEPHFS_FEATURES_CLIENT_SUPPORTED;
-> -	static const size_t count = ARRAY_SIZE(bits);
-> +	static const size_t count = ARRAY_SIZE(feature_bits);
->  
->  	if (count > 0) {
->  		size_t i;
-> -		size_t size = ((size_t)bits[count - 1] + 64) / 64 * 8;
-> +		size_t size = FEATURE_BYTES(count);
->  
->  		BUG_ON(*p + 4 + size > end);
->  		ceph_encode_32(p, size);
->  		memset(*p, 0, size);
->  		for (i = 0; i < count; i++)
-> -			((unsigned char*)(*p))[i / 8] |= 1 << (bits[i] % 8);
-> +			((unsigned char*)(*p))[i / 8] |= BIT(feature_bits[i] % 8);
->  		*p += size;
->  	} else {
->  		BUG_ON(*p + 4 > end);
-> @@ -1087,6 +1089,7 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
->  	int metadata_key_count = 0;
->  	struct ceph_options *opt = mdsc->fsc->client->options;
->  	struct ceph_mount_options *fsopt = mdsc->fsc->mount_options;
-> +	size_t size, count;
->  	void *p, *end;
->  
->  	const char* metadata[][2] = {
-> @@ -1104,8 +1107,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
->  			strlen(metadata[i][1]);
->  		metadata_key_count++;
->  	}
-> +
->  	/* supported feature */
-> -	extra_bytes += 4 + 8;
-> +	size = 0;
-> +	count = ARRAY_SIZE(feature_bits);
-> +	if (count > 0)
-> +		size = FEATURE_BYTES(count);
-> +	extra_bytes += 4 + size;
->  
->  	/* Allocate the message */
->  	msg = ceph_msg_new(CEPH_MSG_CLIENT_SESSION, sizeof(*h) + extra_bytes,
-> @@ -1125,7 +1133,7 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
->  	 * Serialize client metadata into waiting buffer space, using
->  	 * the format that userspace expects for map<string, string>
->  	 *
-> -	 * ClientSession messages with metadata are v2
-> +	 * ClientSession messages with metadata are v3
->  	 */
->  	msg->hdr.version = cpu_to_le16(3);
->  	msg->hdr.compat_version = cpu_to_le16(1);
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index c021df5f50ce..c950f8f88f58 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -17,22 +17,31 @@
->  #include <linux/ceph/auth.h>
->  
->  /* The first 8 bits are reserved for old ceph releases */
-> -#define CEPHFS_FEATURE_MIMIC		8
-> -#define CEPHFS_FEATURE_REPLY_ENCODING	9
-> -#define CEPHFS_FEATURE_RECLAIM_CLIENT	10
-> -#define CEPHFS_FEATURE_LAZY_CAP_WANTED	11
-> -#define CEPHFS_FEATURE_MULTI_RECONNECT  12
-> +enum ceph_feature_type {
-> +	CEPHFS_FEATURE_MIMIC = 8,
-> +	CEPHFS_FEATURE_REPLY_ENCODING,
-> +	CEPHFS_FEATURE_RECLAIM_CLIENT,
-> +	CEPHFS_FEATURE_LAZY_CAP_WANTED,
-> +	CEPHFS_FEATURE_MULTI_RECONNECT,
-> +
-> +	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_MULTI_RECONNECT,
-> +};
->  
-> -#define CEPHFS_FEATURES_CLIENT_SUPPORTED { 	\
-> +/*
-> + * This will always have the highest feature bit value
-> + * as the last element of the array.
-> + */
-> +#define CEPHFS_FEATURES_CLIENT_SUPPORTED {	\
->  	0, 1, 2, 3, 4, 5, 6, 7,			\
->  	CEPHFS_FEATURE_MIMIC,			\
->  	CEPHFS_FEATURE_REPLY_ENCODING,		\
->  	CEPHFS_FEATURE_LAZY_CAP_WANTED,		\
->  	CEPHFS_FEATURE_MULTI_RECONNECT,		\
-> +						\
-> +	CEPHFS_FEATURE_MAX,			\
->  }
->  #define CEPHFS_FEATURES_CLIENT_REQUIRED {}
->  
-> -
->  /*
->   * Some lock dependencies:
->   *
+On 2020/1/9 19:20, Jeff Layton wrote:
+> On Thu, 2020-01-09 at 10:05 +0800, Xiubo Li wrote:
+>> On 2020/1/6 23:35, Jeff Layton wrote:
+>>> Currently, we just assume that it will stick around by virtue of the
+>>> submitter's reference, but later patches will allow the syscall to
+>>> return early and we can't rely on that reference at that point.
+>>>
+>>> Take an extra reference to the inode when setting r_parent and releas=
+e
+>>> it when releasing the request.
+>>>
+>>> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+>>> ---
+>>>    fs/ceph/mds_client.c | 8 ++++++--
+>>>    1 file changed, 6 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>>> index 94cce2ab92c4..b7122f682678 100644
+>>> --- a/fs/ceph/mds_client.c
+>>> +++ b/fs/ceph/mds_client.c
+>>> @@ -708,8 +708,10 @@ void ceph_mdsc_release_request(struct kref *kref=
+)
+>>>    		/* avoid calling iput_final() in mds dispatch threads */
+>>>    		ceph_async_iput(req->r_inode);
+>>>    	}
+>>> -	if (req->r_parent)
+>>> +	if (req->r_parent) {
+>>>    		ceph_put_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
+>>> +		ceph_async_iput(req->r_parent);
+>>> +	}
+>>>    	ceph_async_iput(req->r_target_inode);
+>>>    	if (req->r_dentry)
+>>>    		dput(req->r_dentry);
+>>> @@ -2706,8 +2708,10 @@ int ceph_mdsc_submit_request(struct ceph_mds_c=
+lient *mdsc, struct inode *dir,
+>>>    	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
+>>>    	if (req->r_inode)
+>>>    		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
+>>> -	if (req->r_parent)
+>>> +	if (req->r_parent) {
+>>>    		ceph_get_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
+>>> +		ihold(req->r_parent);
+>>> +	}
+>> This might also fix another issue when the mdsc request is timedout an=
+d
+>> returns to the vfs, then the r_parent maybe released in vfs. And then =
+if
+>> we reference it again in mdsc handle_reply() -->
+>> ceph_mdsc_release_request(),  some unknown issues may happen later ??
+>>
+> AIUI, when a timeout occurs, the req is unhashed such that handle_reply
+> can't find it. So, I doubt this affects that one way or another.
 
-Merged (with small changelog rephrasing).
+If my understanding is correct, such as for rmdir(), the logic will be :
 
-Thanks!
--- 
-Jeff Layton <jlayton@kernel.org>
+req =3D ceph_mdsc_create_request()=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 //=C2=A0=
+ ref =3D=3D 1
+
+ceph_mdsc_do_request(req) -->
+
+ =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ceph_mdsc_submit_request(req)=
+ -->
+
+ =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0 __register_request(req) // ref =3D=3D 2
+
+ =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ceph_mdsc_wait_request(req)=C2=
+=A0 // If timedout
+
+ceph_mdsc_put_request(req)=C2=A0 // ref =3D=3D 1
+
+Then in handled_reply(), only when we get a safe reply it will call=20
+__unregister_request(req), then the ref could be 0.
+
+Though it will ihold()/ceph_async_iput() the req->r_unsafe_dir(=3D=20
+req->r_parent) , but the _iput() will be called just before we reference=20
+the req->r_parent in the _relase_request(). And the _iput() here may=20
+call the iput_final().
+
+BRs
+
+
+
+>>>    	if (req->r_old_dentry_dir)
+>>>    		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
+>>>    				  CEPH_CAP_PIN);
+>>
