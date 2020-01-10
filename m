@@ -1,105 +1,162 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH 7/9] ceph: add flag to delegate an inode number for async create
-Date: Fri, 10 Jan 2020 15:56:45 -0500
-Message-ID: <20200110205647.311023-8-jlayton@kernel.org>
-References: <20200110205647.311023-1-jlayton@kernel.org>
+From: "Liu, Chunmei" <chunmei.liu@intel.com>
+Subject: RE: crimson-osd vs legacy-osd: should the perf difference be already
+ noticeable?
+Date: Fri, 10 Jan 2020 23:28:59 +0000
+Message-ID: <BY5PR11MB4273BE8C4A3FB0E3D01A20ACE0380@BY5PR11MB4273.namprd11.prod.outlook.com>
+References: <02e2209f66f18217aa45b8f7caf715f6@suse.de>
+ <CAJE9aON93O75PPRjfuFGYrtpBxRHHuepGX+tEC3FkBSgM6TgNQ@mail.gmail.com>
+ <f3a976a6d2eba9cd8bd6bf46c0fc9967@suse.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:49084 "EHLO mail.kernel.org"
+Received: from mga09.intel.com ([134.134.136.24]:46942 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727205AbgAJU44 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 10 Jan 2020 15:56:56 -0500
-In-Reply-To: <20200110205647.311023-1-jlayton@kernel.org>
+        id S1727474AbgAJX3M (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 10 Jan 2020 18:29:12 -0500
+In-Reply-To: <f3a976a6d2eba9cd8bd6bf46c0fc9967@suse.de>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com
+To: Roman Penyaev <rpenyaev@suse.de>, kefu chai <tchaikov@gmail.com>, "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Radoslaw Zarzynski <rzarzyns@redhat.com>, Samuel Just <sjust@redhat.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-In order to issue an async create request, we need to send an inode
-number when we do the request, but we don't know which to which MDS
-we'll be issuing the request.
 
-Add a new r_req_flag that tells the request sending machinery to
-grab an inode number from the delegated set, and encode it into the
-request. If it can't get one then have it return -ECHILD. The
-requestor can then reissue a synchronous request.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/inode.c      |  1 +
- fs/ceph/mds_client.c | 19 ++++++++++++++++++-
- fs/ceph/mds_client.h |  2 ++
- 3 files changed, 21 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 79bb1e6af090..9cfc093fd273 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1317,6 +1317,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
- 				NULL, session,
- 				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
-+				 !test_bit(CEPH_MDS_R_DELEG_INO, &req->r_req_flags) &&
- 				 rinfo->head->result == 0) ?  req->r_fmode : -1,
- 				&req->r_caps_reservation);
- 		if (err < 0) {
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 852c46550d96..9e7492b21b50 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2623,7 +2623,10 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 	rhead->flags = cpu_to_le32(flags);
- 	rhead->num_fwd = req->r_num_fwd;
- 	rhead->num_retry = req->r_attempts - 1;
--	rhead->ino = 0;
-+	if (test_bit(CEPH_MDS_R_DELEG_INO, &req->r_req_flags))
-+		rhead->ino = cpu_to_le64(req->r_deleg_ino);
-+	else
-+		rhead->ino = 0;
- 
- 	dout(" r_parent = %p\n", req->r_parent);
- 	return 0;
-@@ -2736,6 +2739,20 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 		goto out_session;
- 	}
- 
-+	if (test_bit(CEPH_MDS_R_DELEG_INO, &req->r_req_flags) &&
-+	    !req->r_deleg_ino) {
-+		req->r_deleg_ino = get_delegated_ino(req->r_session);
-+
-+		if (!req->r_deleg_ino) {
-+			/*
-+			 * If we can't get a deleg ino, exit with -ECHILD,
-+			 * so the caller can reissue a sync request
-+			 */
-+			err = -ECHILD;
-+			goto out_session;
-+		}
-+	}
-+
- 	/* send request */
- 	req->r_resend_mds = -1;   /* forget any previous mds hint */
- 
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 3db7ef47e1c9..e0b36be7c44f 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -258,6 +258,7 @@ struct ceph_mds_request {
- #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
- #define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
- #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
-+#define CEPH_MDS_R_DELEG_INO		(8) /* attempt to get r_deleg_ino */
- 	unsigned long	r_req_flags;
- 
- 	struct mutex r_fill_mutex;
-@@ -307,6 +308,7 @@ struct ceph_mds_request {
- 	int               r_num_fwd;    /* number of forward attempts */
- 	int               r_resend_mds; /* mds to resend to next, if any*/
- 	u32               r_sent_on_mseq; /* cap mseq request was sent at*/
-+	unsigned long	  r_deleg_ino;
- 
- 	struct list_head  r_wait;
- 	struct completion r_completion;
--- 
-2.24.1
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org <ceph-devel-owner@vger.kernel.org>
+> On Behalf Of Roman Penyaev
+> Sent: Friday, January 10, 2020 10:54 AM
+> To: kefu chai <tchaikov@gmail.com>
+> Cc: Radoslaw Zarzynski <rzarzyns@redhat.com>; Samuel Just
+> <sjust@redhat.com>; The Esoteric Order of the Squid Cybernetic <ceph-
+> devel@vger.kernel.org>
+> Subject: Re: crimson-osd vs legacy-osd: should the perf difference be alr=
+eady
+> noticeable?
+>=20
+> On 2020-01-10 17:18, kefu chai wrote:
+>=20
+> [skip]
+>=20
+> >>
+> >> First thing that catches my eye is that for small blocks there is no
+> >> big difference at all, but as the block increases, crimsons iops
+> >> starts to
+> >
+> > that's also our findings. and it's expected. as async messenger uses
+> > the same reactor model as seastar does. actually its original
+> > implementation was adapted from seastar's socket stream
+> > implementation.
+>=20
+> Hm, regardless of model messenger should not be a bottleneck.  Take a loo=
+k on
+> the results of fio_ceph_messenger load (runs pure messenger), I can squee=
+ze
+> IOPS=3D89.8k, BW=3D351MiB/s on 4k block size, iodepth=3D32.
+> (also good example https://github.com/ceph/ceph/pull/26932 , almost
+> ~200k)
+>=20
+> With PG layer (memstore_debug_omit_block_device_write=3Dtrue option) I ca=
+n
+> reach 40k iops max.  Without PG layer (immediate completion from the
+> transport callback, osd_immediate_completions=3Dtrue) I get almost 60k.
+>=20
+> Seems that here starts playing costs on client side and these costs preva=
+il.
+>=20
+> >
+> >> decline. Can it be the transport issue? Can be tested as well.
+> >
+> > because seastar's socket facility reads from the wire with 4K chunk
+> > size, while classic OSD's async messenger reads the payload with the
+> > size suggested by the header. so when it comes to larger block size,
+> > it takes crimson-osd multiple syscalls and memcpy calls to read the
+> > request from wire, that's why classic OSD wins in this case.
+>=20
+> Do you plan to fix that?
+>=20
+> > have you tried to use multiple fio clients to saturate CPU capacity of
+> > OSD nodes?
+>=20
+> Not yet.  But regarding CPU I have these numbers:
+>=20
+> output of pidstat while rbd.fio is running, 4k block only:
+>=20
+> legacy-osd
+>=20
+> [roman@dell ~]$ pidstat 1 -p 109930
+> Linux 5.3.13-arch1-1 (dell)     01/09/2020      _x86_64_        (8 CPU)
+>=20
+> 03:51:49 PM   UID       PID    %usr %system  %guest   %wait    %CPU
+> CPU  Command
+> 03:51:51 PM  1000    109930   14.00    8.00    0.00    0.00   22.00
+> 1  ceph-osd
+> 03:51:52 PM  1000    109930   40.00   19.00    0.00    0.00   59.00
+> 1  ceph-osd
+> 03:51:53 PM  1000    109930   44.00   17.00    0.00    0.00   61.00
+> 1  ceph-osd
+> 03:51:54 PM  1000    109930   40.00   20.00    0.00    0.00   60.00
+> 1  ceph-osd
+> 03:51:55 PM  1000    109930   39.00   18.00    0.00    0.00   57.00
+> 1  ceph-osd
+> 03:51:56 PM  1000    109930   41.00   20.00    0.00    0.00   61.00
+> 1  ceph-osd
+> 03:51:57 PM  1000    109930   41.00   15.00    0.00    0.00   56.00
+> 1  ceph-osd
+> 03:51:58 PM  1000    109930   42.00   16.00    0.00    0.00   58.00
+> 1  ceph-osd
+> 03:51:59 PM  1000    109930   42.00   15.00    0.00    0.00   57.00
+> 1  ceph-osd
+> 03:52:00 PM  1000    109930   43.00   15.00    0.00    0.00   58.00
+> 1  ceph-osd
+> 03:52:01 PM  1000    109930   24.00   12.00    0.00    0.00   36.00
+> 1  ceph-osd
+>=20
+>=20
+> crimson-osd
+>=20
+> [roman@dell ~]$ pidstat 1  -p 108141
+> Linux 5.3.13-arch1-1 (dell)     01/09/2020      _x86_64_        (8 CPU)
+>=20
+> 03:47:50 PM   UID       PID    %usr %system  %guest   %wait    %CPU
+> CPU  Command
+> 03:47:55 PM  1000    108141   67.00   11.00    0.00    0.00   78.00
+> 0  crimson-osd
+> 03:47:56 PM  1000    108141   79.00   12.00    0.00    0.00   91.00
+> 0  crimson-osd
+> 03:47:57 PM  1000    108141   81.00    9.00    0.00    0.00   90.00
+> 0  crimson-osd
+> 03:47:58 PM  1000    108141   78.00   12.00    0.00    0.00   90.00
+> 0  crimson-osd
+> 03:47:59 PM  1000    108141   78.00   12.00    0.00    1.00   90.00
+> 0  crimson-osd
+> 03:48:00 PM  1000    108141   78.00   13.00    0.00    0.00   91.00
+> 0  crimson-osd
+> 03:48:01 PM  1000    108141   79.00   13.00    0.00    0.00   92.00
+> 0  crimson-osd
+> 03:48:02 PM  1000    108141   78.00   12.00    0.00    0.00   90.00
+> 0  crimson-osd
+> 03:48:03 PM  1000    108141   77.00   11.00    0.00    0.00   88.00
+> 0  crimson-osd
+> 03:48:04 PM  1000    108141   79.00   12.00    0.00    1.00   91.00
+> 0  crimson-osd
+>=20
+>=20
+> Seems quite saturated, almost twice more than legacy-osd.  Did you see
+> something similar?
+Crimson-osd (seastar) use epoll, by default, it will use more cpu capacity,=
+(you can change epoll mode setting to reduce it), add Ma, Jianpeng in the t=
+hread since he did more study on it.=20
+BTW, by default crimson-osd is one thread, and legacy ceph-osd (3 threads f=
+or async messenger, 2x8 threads for osd (SDD), finisher thread etc,) ,so by=
+ default setting, it is 1 thread compare to over 10 threads work,  it is ex=
+pected crimson-osd not show obvious difference. you can change the default =
+thread number for legacy ceph-osd(such as thread=3D1 for each layer to see =
+more difference.)
+BTW, please use release build to do test.=20
+Crimson-osd is aysnc model, if workload is very light, can't take more adva=
+ntage of it.
+>=20
+> --
+> Roman
