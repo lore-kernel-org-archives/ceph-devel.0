@@ -1,134 +1,241 @@
-From: Roman Penyaev <rpenyaev@suse.de>
-Subject: Re: crimson-osd vs legacy-osd: should the perf difference be already
- noticeable?
-Date: Fri, 10 Jan 2020 19:53:38 +0100
-Message-ID: <f3a976a6d2eba9cd8bd6bf46c0fc9967@suse.de>
-References: <02e2209f66f18217aa45b8f7caf715f6@suse.de>
- <CAJE9aON93O75PPRjfuFGYrtpBxRHHuepGX+tEC3FkBSgM6TgNQ@mail.gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [RFC PATCH 6/9] ceph: decode interval_sets for delegated inos
+Date: Fri, 10 Jan 2020 15:56:44 -0500
+Message-ID: <20200110205647.311023-7-jlayton@kernel.org>
+References: <20200110205647.311023-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34174 "EHLO mx2.suse.de"
+Received: from mail.kernel.org ([198.145.29.99]:49072 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728023AbgAJSxl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 10 Jan 2020 13:53:41 -0500
-In-Reply-To: <CAJE9aON93O75PPRjfuFGYrtpBxRHHuepGX+tEC3FkBSgM6TgNQ@mail.gmail.com>
+        id S1727199AbgAJU4z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 10 Jan 2020 15:56:55 -0500
+In-Reply-To: <20200110205647.311023-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Radoslaw Zarzynski <rzarzyns@redhat.com>, Samuel Just <sjust@redhat.com>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com
 
-On 2020-01-10 17:18, kefu chai wrote:
+Starting in Octopus, the MDS will hand out caps that allow the client
+to do asynchronous file creates under certain conditions. As part of
+that, the MDS will delegate ranges of inode numbers to the client.
 
-[skip]
+Add the infrastructure to decode these ranges, and stuff them into an
+xarray for later consumption by the async creation code.
 
->> 
->> First thing that catches my eye is that for small blocks there is no 
->> big
->> difference at all, but as the block increases, crimsons iops starts to
-> 
-> that's also our findings. and it's expected. as async messenger uses
-> the same reactor model as seastar does. actually its original
-> implementation was adapted from seastar's socket stream
-> implementation.
+Because the xarray code currently only handles unsigned long indexes,
+and those are 32-bits on 32-bit arches, we only enable the decoding when
+running on a 64-bit arch.
 
-Hm, regardless of model messenger should not be a bottleneck.  Take
-a look on the results of fio_ceph_messenger load (runs pure messenger),
-I can squeeze IOPS=89.8k, BW=351MiB/s on 4k block size, iodepth=32.
-(also good example https://github.com/ceph/ceph/pull/26932 , almost
-~200k)
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/mds_client.c | 107 +++++++++++++++++++++++++++++++++++++++----
+ fs/ceph/mds_client.h |   5 +-
+ 2 files changed, 102 insertions(+), 10 deletions(-)
 
-With PG layer (memstore_debug_omit_block_device_write=true option)
-I can reach 40k iops max.  Without PG layer (immediate completion
-from the transport callback, osd_immediate_completions=true)
-I get almost 60k.
-
-Seems that here starts playing costs on client side and these costs
-prevail.
-
-> 
->> decline. Can it be the transport issue? Can be tested as well.
-> 
-> because seastar's socket facility reads from the wire with 4K chunk
-> size, while classic OSD's async messenger reads the payload with the
-> size suggested by the header. so when it comes to larger block size,
-> it takes crimson-osd multiple syscalls and memcpy calls to read the
-> request from wire, that's why classic OSD wins in this case.
-
-Do you plan to fix that?
-
-> have you tried to use multiple fio clients to saturate CPU capacity of
-> OSD nodes?
-
-Not yet.  But regarding CPU I have these numbers:
-
-output of pidstat while rbd.fio is running, 4k block only:
-
-legacy-osd
-
-[roman@dell ~]$ pidstat 1 -p 109930
-Linux 5.3.13-arch1-1 (dell)     01/09/2020      _x86_64_        (8 CPU)
-
-03:51:49 PM   UID       PID    %usr %system  %guest   %wait    %CPU   
-CPU  Command
-03:51:51 PM  1000    109930   14.00    8.00    0.00    0.00   22.00     
-1  ceph-osd
-03:51:52 PM  1000    109930   40.00   19.00    0.00    0.00   59.00     
-1  ceph-osd
-03:51:53 PM  1000    109930   44.00   17.00    0.00    0.00   61.00     
-1  ceph-osd
-03:51:54 PM  1000    109930   40.00   20.00    0.00    0.00   60.00     
-1  ceph-osd
-03:51:55 PM  1000    109930   39.00   18.00    0.00    0.00   57.00     
-1  ceph-osd
-03:51:56 PM  1000    109930   41.00   20.00    0.00    0.00   61.00     
-1  ceph-osd
-03:51:57 PM  1000    109930   41.00   15.00    0.00    0.00   56.00     
-1  ceph-osd
-03:51:58 PM  1000    109930   42.00   16.00    0.00    0.00   58.00     
-1  ceph-osd
-03:51:59 PM  1000    109930   42.00   15.00    0.00    0.00   57.00     
-1  ceph-osd
-03:52:00 PM  1000    109930   43.00   15.00    0.00    0.00   58.00     
-1  ceph-osd
-03:52:01 PM  1000    109930   24.00   12.00    0.00    0.00   36.00     
-1  ceph-osd
-
-
-crimson-osd
-
-[roman@dell ~]$ pidstat 1  -p 108141
-Linux 5.3.13-arch1-1 (dell)     01/09/2020      _x86_64_        (8 CPU)
-
-03:47:50 PM   UID       PID    %usr %system  %guest   %wait    %CPU   
-CPU  Command
-03:47:55 PM  1000    108141   67.00   11.00    0.00    0.00   78.00     
-0  crimson-osd
-03:47:56 PM  1000    108141   79.00   12.00    0.00    0.00   91.00     
-0  crimson-osd
-03:47:57 PM  1000    108141   81.00    9.00    0.00    0.00   90.00     
-0  crimson-osd
-03:47:58 PM  1000    108141   78.00   12.00    0.00    0.00   90.00     
-0  crimson-osd
-03:47:59 PM  1000    108141   78.00   12.00    0.00    1.00   90.00     
-0  crimson-osd
-03:48:00 PM  1000    108141   78.00   13.00    0.00    0.00   91.00     
-0  crimson-osd
-03:48:01 PM  1000    108141   79.00   13.00    0.00    0.00   92.00     
-0  crimson-osd
-03:48:02 PM  1000    108141   78.00   12.00    0.00    0.00   90.00     
-0  crimson-osd
-03:48:03 PM  1000    108141   77.00   11.00    0.00    0.00   88.00     
-0  crimson-osd
-03:48:04 PM  1000    108141   79.00   12.00    0.00    1.00   91.00     
-0  crimson-osd
-
-
-Seems quite saturated, almost twice more than legacy-osd.  Did you see 
-something
-similar?
-
---
-Roman
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 8263f75badfc..852c46550d96 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -415,21 +415,108 @@ static int parse_reply_info_filelock(void **p, void *end,
+ 	return -EIO;
+ }
+ 
++
++#if BITS_PER_LONG == 64
++
++#define DELEGATED_INO_AVAILABLE		xa_mk_value(1)
++
++static int parse_delegated_inos(void **p, void *end, struct ceph_mds_session *s)
++{
++	u32 sets;
++
++	ceph_decode_32_safe(p, end, sets, bad);
++	dout("got %u sets of delegated inodes\n", sets);
++	while (sets--) {
++		u64 start, len, ino;
++
++		ceph_decode_64_safe(p, end, start, bad);
++		ceph_decode_64_safe(p, end, len, bad);
++		while (len--) {
++			int err = xa_insert(&s->s_delegated_inos, ino = start++,
++					    DELEGATED_INO_AVAILABLE,
++					    GFP_KERNEL);
++			if (!err) {
++				dout("added delegated inode 0x%llx\n",
++				     start - 1);
++			} else if (err == -EBUSY) {
++				pr_warn("ceph: MDS delegated inode 0x%llx more than once.\n",
++					start - 1);
++			} else {
++				return err;
++			}
++		}
++	}
++	return 0;
++bad:
++	return -EIO;
++}
++
++static unsigned long get_delegated_ino(struct ceph_mds_session *s)
++{
++	unsigned long ino;
++	void *val;
++
++	xa_for_each(&s->s_delegated_inos, ino, val) {
++		val = xa_erase(&s->s_delegated_inos, ino);
++		if (val == DELEGATED_INO_AVAILABLE)
++			return ino;
++	}
++	return 0;
++}
++#else /* BITS_PER_LONG == 64 */
++/*
++ * FIXME: xarrays can't handle 64-bit indexes on a 32-bit arch. For now, just
++ * ignore delegated_inos on 32 bit arch. Maybe eventually add xarrays for top
++ * and bottom words?
++ */
++static int parse_delegated_inos(void **p, void *end, struct ceph_mds_session *s)
++{
++	u32 sets;
++
++	ceph_decode_32_safe(p, end, sets, bad);
++	if (sets)
++		ceph_decode_skip_n(p, end, sets * 2 * sizeof(__le64), bad);
++	return 0;
++bad:
++	return -EIO;
++}
++
++static inline unsigned long get_delegated_ino(struct ceph_mds_session *s)
++{
++	return 0;
++}
++#endif /* BITS_PER_LONG == 64 */
++
+ /*
+  * parse create results
+  */
+ static int parse_reply_info_create(void **p, void *end,
+ 				  struct ceph_mds_reply_info_parsed *info,
+-				  u64 features)
++				  u64 features, struct ceph_mds_session *s)
+ {
++	int ret;
++
+ 	if (features == (u64)-1 ||
+ 	    (features & CEPH_FEATURE_REPLY_CREATE_INODE)) {
+-		/* Malformed reply? */
+ 		if (*p == end) {
++			/* Malformed reply? */
+ 			info->has_create_ino = false;
+-		} else {
++		} else if (test_bit(CEPHFS_FEATURE_OCTOPUS, &s->s_features)) {
++			u8 struct_v, struct_compat;
++			u32 len;
++
+ 			info->has_create_ino = true;
++			ceph_decode_8_safe(p, end, struct_v, bad);
++			ceph_decode_8_safe(p, end, struct_compat, bad);
++			ceph_decode_32_safe(p, end, len, bad);
++			ceph_decode_64_safe(p, end, info->ino, bad);
++			ret = parse_delegated_inos(p, end, s);
++			if (ret)
++				return ret;
++		} else {
++			/* legacy */
+ 			ceph_decode_64_safe(p, end, info->ino, bad);
++			info->has_create_ino = true;
+ 		}
+ 	} else {
+ 		if (*p != end)
+@@ -448,7 +535,7 @@ static int parse_reply_info_create(void **p, void *end,
+  */
+ static int parse_reply_info_extra(void **p, void *end,
+ 				  struct ceph_mds_reply_info_parsed *info,
+-				  u64 features)
++				  u64 features, struct ceph_mds_session *s)
+ {
+ 	u32 op = le32_to_cpu(info->head->op);
+ 
+@@ -457,7 +544,7 @@ static int parse_reply_info_extra(void **p, void *end,
+ 	else if (op == CEPH_MDS_OP_READDIR || op == CEPH_MDS_OP_LSSNAP)
+ 		return parse_reply_info_readdir(p, end, info, features);
+ 	else if (op == CEPH_MDS_OP_CREATE)
+-		return parse_reply_info_create(p, end, info, features);
++		return parse_reply_info_create(p, end, info, features, s);
+ 	else
+ 		return -EIO;
+ }
+@@ -465,7 +552,7 @@ static int parse_reply_info_extra(void **p, void *end,
+ /*
+  * parse entire mds reply
+  */
+-static int parse_reply_info(struct ceph_msg *msg,
++static int parse_reply_info(struct ceph_mds_session *s, struct ceph_msg *msg,
+ 			    struct ceph_mds_reply_info_parsed *info,
+ 			    u64 features)
+ {
+@@ -490,7 +577,7 @@ static int parse_reply_info(struct ceph_msg *msg,
+ 	ceph_decode_32_safe(&p, end, len, bad);
+ 	if (len > 0) {
+ 		ceph_decode_need(&p, end, len, bad);
+-		err = parse_reply_info_extra(&p, p+len, info, features);
++		err = parse_reply_info_extra(&p, p+len, info, features, s);
+ 		if (err < 0)
+ 			goto out_bad;
+ 	}
+@@ -558,6 +645,7 @@ void ceph_put_mds_session(struct ceph_mds_session *s)
+ 	if (refcount_dec_and_test(&s->s_ref)) {
+ 		if (s->s_auth.authorizer)
+ 			ceph_auth_destroy_authorizer(s->s_auth.authorizer);
++		xa_destroy(&s->s_delegated_inos);
+ 		kfree(s);
+ 	}
+ }
+@@ -645,6 +733,7 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
+ 	refcount_set(&s->s_ref, 1);
+ 	INIT_LIST_HEAD(&s->s_waiting);
+ 	INIT_LIST_HEAD(&s->s_unsafe);
++	xa_init(&s->s_delegated_inos);
+ 	s->s_num_cap_releases = 0;
+ 	s->s_cap_reconnect = 0;
+ 	s->s_cap_iterator = NULL;
+@@ -2947,9 +3036,9 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 	dout("handle_reply tid %lld result %d\n", tid, result);
+ 	rinfo = &req->r_reply_info;
+ 	if (test_bit(CEPHFS_FEATURE_REPLY_ENCODING, &session->s_features))
+-		err = parse_reply_info(msg, rinfo, (u64)-1);
++		err = parse_reply_info(session, msg, rinfo, (u64)-1);
+ 	else
+-		err = parse_reply_info(msg, rinfo, session->s_con.peer_features);
++		err = parse_reply_info(session, msg, rinfo, session->s_con.peer_features);
+ 	mutex_unlock(&mdsc->mutex);
+ 
+ 	mutex_lock(&session->s_mutex);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 27a7446e10d3..3db7ef47e1c9 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -23,8 +23,10 @@ enum ceph_feature_type {
+ 	CEPHFS_FEATURE_RECLAIM_CLIENT,
+ 	CEPHFS_FEATURE_LAZY_CAP_WANTED,
+ 	CEPHFS_FEATURE_MULTI_RECONNECT,
++	CEPHFS_FEATURE_NAUTILUS = CEPHFS_FEATURE_MULTI_RECONNECT,
++	CEPHFS_FEATURE_OCTOPUS,
+ 
+-	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_MULTI_RECONNECT,
++	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_OCTOPUS,
+ };
+ 
+ /*
+@@ -201,6 +203,7 @@ struct ceph_mds_session {
+ 
+ 	struct list_head  s_waiting;  /* waiting requests */
+ 	struct list_head  s_unsafe;   /* unsafe requests */
++	struct xarray	  s_delegated_inos;
+ };
+ 
+ /*
+-- 
+2.24.1
