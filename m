@@ -1,122 +1,172 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH 0/9] ceph: add asynchronous create functionality
-Date: Fri, 10 Jan 2020 15:56:38 -0500
-Message-ID: <20200110205647.311023-1-jlayton@kernel.org>
+Subject: [RFC PATCH 4/9] ceph: make ceph_fill_inode non-static
+Date: Fri, 10 Jan 2020 15:56:42 -0500
+Message-ID: <20200110205647.311023-5-jlayton@kernel.org>
+References: <20200110205647.311023-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:48952 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:49028 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726836AbgAJU4v (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 10 Jan 2020 15:56:51 -0500
+        id S1727191AbgAJU4y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 10 Jan 2020 15:56:54 -0500
+In-Reply-To: <20200110205647.311023-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com
 
-I recently sent a patchset that allows the client to do an asynchronous
-UNLINK call to the MDS when it has the appropriate caps and dentry info.
-This set adds the corresponding functionality for creates.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/inode.c | 47 ++++++++++++++++++++++++-----------------------
+ fs/ceph/super.h |  8 ++++++++
+ 2 files changed, 32 insertions(+), 23 deletions(-)
 
-When the client has the appropriate caps on the parent directory and
-dentry information, and a delegated inode number, it can satisfy a
-request locally without contacting the server. This allows the kernel
-client to return very quickly from an O_CREAT open, so it can get on
-with doing other things.
-
-These numbers are based on my personal test rig, which is a KVM client
-vs a vstart cluster running on my workstation (nothing scientific here).
-
-A simple benchmark (with the cephfs mounted at /mnt/cephfs):
--------------------8<-------------------
-#!/bin/sh
-
-TESTDIR=/mnt/cephfs/test-dirops.$$
-
-mkdir $TESTDIR
-stat $TESTDIR
-echo "Creating files in $TESTDIR"
-time for i in `seq 1 10000`; do
-    echo "foobarbaz" > $TESTDIR/$i
-done
--------------------8<-------------------
-
-With async dirops disabled:
-
-real	0m9.865s
-user	0m0.353s
-sys	0m0.888s
-
-With async dirops enabled:
-
-real	0m5.272s
-user	0m0.104s
-sys	0m0.454s
-
-That workload is a bit synthetic though. One workload we're interested
-in improving is untar. Untarring a deep directory tree (random kernel
-tarball I had laying around):
-
-Disabled:
-$ time tar xf ~/linux-4.18.0-153.el8.jlayton.006.tar
-
-real	1m35.774s
-user	0m0.835s
-sys	0m7.410s
-
-Enabled:
-$ time tar xf ~/linux-4.18.0-153.el8.jlayton.006.tar
-
-real	1m32.182s
-user	0m0.783s
-sys	0m6.830s
-
-Not a huge win there. I suspect at this point that synchronous mkdir
-may be serializing behind the async creates.
-
-It needs a lot more performance tuning and analysis, but it's now at the
-point where it's basically usable. To enable it, turn on the
-ceph.enable_async_dirops module option.
-
-There are some places that need further work:
-
-1) The MDS patchset to delegate inodes to the client is not yet merged:
-
-    https://github.com/ceph/ceph/pull/31817
-
-2) this is 64-bit arch only for the moment. I'm using an xarray to track
-the delegated inode numbers, and those don't do 64-bit indexes on
-32-bit machines. Is anyone using 32-bit ceph clients? We could probably
-build an xarray of xarrays if needed.
-
-3) The error handling is still pretty lame. If the create fails, it'll
-set a writeback error on the parent dir and the inode itself, but the
-client could end up writing a bunch before it notices, if it even
-bothers to check. We probably need to do better here. I'm open to
-suggestions on this bit especially.
-
-Jeff Layton (9):
-  ceph: ensure we have a new cap before continuing in fill_inode
-  ceph: print name of xattr being set in set/getxattr dout message
-  ceph: close some holes in struct ceph_mds_request
-  ceph: make ceph_fill_inode non-static
-  libceph: export ceph_file_layout_is_valid
-  ceph: decode interval_sets for delegated inos
-  ceph: add flag to delegate an inode number for async create
-  ceph: copy layout, max_size and truncate_size on successful sync
-    create
-  ceph: attempt to do async create when possible
-
- fs/ceph/caps.c               |  31 +++++-
- fs/ceph/file.c               | 202 +++++++++++++++++++++++++++++++++--
- fs/ceph/inode.c              |  57 +++++-----
- fs/ceph/mds_client.c         | 130 ++++++++++++++++++++--
- fs/ceph/mds_client.h         |  12 ++-
- fs/ceph/super.h              |  10 ++
- fs/ceph/xattr.c              |   5 +-
- include/linux/ceph/ceph_fs.h |   8 +-
- net/ceph/ceph_fs.c           |   1 +
- 9 files changed, 396 insertions(+), 60 deletions(-)
-
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index aee7a24bf1bc..79bb1e6af090 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -728,11 +728,11 @@ void ceph_fill_file_time(struct inode *inode, int issued,
+  * Populate an inode based on info from mds.  May be called on new or
+  * existing inodes.
+  */
+-static int fill_inode(struct inode *inode, struct page *locked_page,
+-		      struct ceph_mds_reply_info_in *iinfo,
+-		      struct ceph_mds_reply_dirfrag *dirinfo,
+-		      struct ceph_mds_session *session, int cap_fmode,
+-		      struct ceph_cap_reservation *caps_reservation)
++int ceph_fill_inode(struct inode *inode, struct page *locked_page,
++		    struct ceph_mds_reply_info_in *iinfo,
++		    struct ceph_mds_reply_dirfrag *dirinfo,
++		    struct ceph_mds_session *session, int cap_fmode,
++		    struct ceph_cap_reservation *caps_reservation)
+ {
+ 	struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
+ 	struct ceph_mds_reply_inode *info = iinfo->in;
+@@ -749,7 +749,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	bool new_version = false;
+ 	bool fill_inline = false;
+ 
+-	dout("fill_inode %p ino %llx.%llx v %llu had %llu\n",
++	dout("%s %p ino %llx.%llx v %llu had %llu\n", __func__,
+ 	     inode, ceph_vinop(inode), le64_to_cpu(info->version),
+ 	     ci->i_version);
+ 
+@@ -770,7 +770,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	if (iinfo->xattr_len > 4) {
+ 		xattr_blob = ceph_buffer_new(iinfo->xattr_len, GFP_NOFS);
+ 		if (!xattr_blob)
+-			pr_err("fill_inode ENOMEM xattr blob %d bytes\n",
++			pr_err("%s ENOMEM xattr blob %d bytes\n", __func__,
+ 			       iinfo->xattr_len);
+ 	}
+ 
+@@ -933,8 +933,9 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 			spin_unlock(&ci->i_ceph_lock);
+ 
+ 			if (symlen != i_size_read(inode)) {
+-				pr_err("fill_inode %llx.%llx BAD symlink "
+-					"size %lld\n", ceph_vinop(inode),
++				pr_err("%s %llx.%llx BAD symlink "
++					"size %lld\n", __func__,
++					ceph_vinop(inode),
+ 					i_size_read(inode));
+ 				i_size_write(inode, symlen);
+ 				inode->i_blocks = calc_inode_blocks(symlen);
+@@ -958,7 +959,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 		inode->i_fop = &ceph_dir_fops;
+ 		break;
+ 	default:
+-		pr_err("fill_inode %llx.%llx BAD mode 0%o\n",
++		pr_err("%s %llx.%llx BAD mode 0%o\n", __func__,
+ 		       ceph_vinop(inode), inode->i_mode);
+ 	}
+ 
+@@ -1246,10 +1247,9 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		struct inode *dir = req->r_parent;
+ 
+ 		if (dir) {
+-			err = fill_inode(dir, NULL,
+-					 &rinfo->diri, rinfo->dirfrag,
+-					 session, -1,
+-					 &req->r_caps_reservation);
++			err = ceph_fill_inode(dir, NULL, &rinfo->diri,
++					      rinfo->dirfrag, session, -1,
++					      &req->r_caps_reservation);
+ 			if (err < 0)
+ 				goto done;
+ 		} else {
+@@ -1314,13 +1314,13 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			goto done;
+ 		}
+ 
+-		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
+-				session,
++		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
++				NULL, session,
+ 				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
+ 				 rinfo->head->result == 0) ?  req->r_fmode : -1,
+ 				&req->r_caps_reservation);
+ 		if (err < 0) {
+-			pr_err("fill_inode badness %p %llx.%llx\n",
++			pr_err("ceph_fill_inode badness %p %llx.%llx\n",
+ 				in, ceph_vinop(in));
+ 			if (in->i_state & I_NEW)
+ 				discard_new_inode(in);
+@@ -1507,10 +1507,11 @@ static int readdir_prepopulate_inodes_only(struct ceph_mds_request *req,
+ 			dout("new_inode badness got %d\n", err);
+ 			continue;
+ 		}
+-		rc = fill_inode(in, NULL, &rde->inode, NULL, session,
+-				-1, &req->r_caps_reservation);
++		rc = ceph_fill_inode(in, NULL, &rde->inode, NULL, session,
++				     -1, &req->r_caps_reservation);
+ 		if (rc < 0) {
+-			pr_err("fill_inode badness on %p got %d\n", in, rc);
++			pr_err("ceph_fill_inode badness on %p got %d\n",
++			       in, rc);
+ 			err = rc;
+ 			if (in->i_state & I_NEW) {
+ 				ihold(in);
+@@ -1714,10 +1715,10 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 			}
+ 		}
+ 
+-		ret = fill_inode(in, NULL, &rde->inode, NULL, session,
+-				 -1, &req->r_caps_reservation);
++		ret = ceph_fill_inode(in, NULL, &rde->inode, NULL, session,
++				      -1, &req->r_caps_reservation);
+ 		if (ret < 0) {
+-			pr_err("fill_inode badness on %p\n", in);
++			pr_err("ceph_fill_inode badness on %p\n", in);
+ 			if (d_really_is_negative(dn)) {
+ 				/* avoid calling iput_final() in mds
+ 				 * dispatch threads */
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 3ef17dd6491e..ec4d66d7c261 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -893,6 +893,9 @@ static inline bool __ceph_have_pending_cap_snap(struct ceph_inode_info *ci)
+ }
+ 
+ /* inode.c */
++struct ceph_mds_reply_info_in;
++struct ceph_mds_reply_dirfrag;
++
+ extern const struct inode_operations ceph_file_iops;
+ 
+ extern struct inode *ceph_alloc_inode(struct super_block *sb);
+@@ -908,6 +911,11 @@ extern void ceph_fill_file_time(struct inode *inode, int issued,
+ 				u64 time_warp_seq, struct timespec64 *ctime,
+ 				struct timespec64 *mtime,
+ 				struct timespec64 *atime);
++extern int ceph_fill_inode(struct inode *inode, struct page *locked_page,
++		    struct ceph_mds_reply_info_in *iinfo,
++		    struct ceph_mds_reply_dirfrag *dirinfo,
++		    struct ceph_mds_session *session, int cap_fmode,
++		    struct ceph_cap_reservation *caps_reservation);
+ extern int ceph_fill_trace(struct super_block *sb,
+ 			   struct ceph_mds_request *req);
+ extern int ceph_readdir_prepopulate(struct ceph_mds_request *req,
 -- 
 2.24.1
