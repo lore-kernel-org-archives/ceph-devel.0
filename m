@@ -1,26 +1,26 @@
 From: Jeff Layton <jlayton@kernel.org>
 Subject: Re: [RFC PATCH 8/9] ceph: copy layout, max_size and truncate_size
  on successful sync create
-Date: Mon, 13 Jan 2020 08:26:35 -0500
-Message-ID: <c2fafa047fea5b3d0adc325f5864178463cc6a06.camel@kernel.org>
+Date: Mon, 13 Jan 2020 08:29:13 -0500
+Message-ID: <1dea62351871a65e76d15c041aadf7fb51c5dd47.camel@kernel.org>
 References: <20200110205647.311023-1-jlayton@kernel.org>
          <20200110205647.311023-9-jlayton@kernel.org>
-         <98bb5af6-415f-e035-2d54-15ed492914b4@redhat.com>
+         <b4dea395-11af-8a16-415e-da145c3def1f@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:41740 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:44420 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726450AbgAMN0i (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Jan 2020 08:26:38 -0500
-In-Reply-To: <98bb5af6-415f-e035-2d54-15ed492914b4@redhat.com>
+        id S1726277AbgAMN3Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Jan 2020 08:29:16 -0500
+In-Reply-To: <b4dea395-11af-8a16-415e-da145c3def1f@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
 Cc: sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com
 
-On Mon, 2020-01-13 at 11:51 +0800, Yan, Zheng wrote:
+On Mon, 2020-01-13 at 17:01 +0800, Yan, Zheng wrote:
 > On 1/11/20 4:56 AM, Jeff Layton wrote:
 > > It doesn't do much good to do an asynchronous create unless we can do
 > > I/O to it before the create reply comes in. That means we need layout
@@ -71,16 +71,6 @@ On Mon, 2020-01-13 at 11:51 +0800, Yan, Zheng wrote:
 > > +			}
 > > +		}
 > > +	}
-> 
-> should do this in __check_cap_issue
-> 
-
-That function doesn't get called from the put codepath. Suppose one task
-is setting up an async create and a Dc (DIR_CREATE) cap revoke races in.
-We zero out the layout and then the inode has a bogus layout set in it.
-
-We can't wipe the cached layout until all of the Dc references are put.
-
 > >   	if (had & CEPH_CAP_FILE_EXCL)
 > >   		if (--ci->i_fx_ref == 0)
 > >   			last++;
@@ -104,9 +94,6 @@ We can't wipe the cached layout until all of the Dc references are put.
 > > +			ceph_put_string(rcu_dereference_raw(ci->i_layout.pool_ns));
 > > +			memset(&ci->i_layout, 0, sizeof(ci->i_layout));
 > > +		}
-> 
-> same here
-> 
 > > +
 > >   		if (S_ISREG(inode->i_mode) &&
 > >   		    (revoking & used & CEPH_CAP_FILE_BUFFER))
@@ -131,10 +118,28 @@ We can't wipe the cached layout until all of the Dc references are put.
 > > +	    !ceph_file_layout_is_valid(&cdst->i_layout)) {
 > > +		memcpy(&cdst->i_layout, &csrc->i_layout,
 > > +			sizeof(cdst->i_layout));
+> 
+> directory's i_layout is used for other purpose. shouldn't modify it.
+> 
+
+Yeah, I realized that just recently. I'll add a new field for this.
+Maybe we can at least union it with something that is unused in
+directories.
+
 > > +		rcu_assign_pointer(cdst->i_layout.pool_ns,
 > > +				   ceph_try_get_string(csrc->i_layout.pool_ns));
-> > +		cdst->i_max_size = csrc->i_max_size;
-> > +		cdst->i_truncate_size = csrc->i_truncate_size;
+> > +		cdst->i_max_size = csrc->i_max_size; > +		cdst->i_truncate_size = csrc->i_truncate_size;
+> no need to save above two. just set truncate size of new file to 
+> (u64)-1, set max_size of new file to its layout.stripe_unit;
+> 
+> max_size == layout.strip_unit ensure that client only write to the first 
+> object before its writeable range is persistent.
+> 
+
+ACK, I saw that in your userland client patchset. I'll fix that up.
+
+Thanks,
+
 > > +	}
 > > +	spin_unlock(&cdst->i_ceph_lock);
 > > +}
