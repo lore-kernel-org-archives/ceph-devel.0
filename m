@@ -1,20 +1,19 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [RFC PATCH 8/9] ceph: copy layout, max_size and truncate_size on
- successful sync create
-Date: Mon, 13 Jan 2020 17:01:09 +0800
-Message-ID: <b4dea395-11af-8a16-415e-da145c3def1f@redhat.com>
+Subject: Re: [RFC PATCH 7/9] ceph: add flag to delegate an inode number for
+ async create
+Date: Mon, 13 Jan 2020 17:17:09 +0800
+Message-ID: <056df2f9-07b9-a5ac-f4f3-861b8a364ff3@redhat.com>
 References: <20200110205647.311023-1-jlayton@kernel.org>
- <20200110205647.311023-9-jlayton@kernel.org>
+ <20200110205647.311023-8-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:55451 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725268AbgAMJBX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Jan 2020 04:01:23 -0500
-In-Reply-To: <20200110205647.311023-9-jlayton@kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:48436 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726399AbgAMJRX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jan 2020 04:17:23 -0500
+In-Reply-To: <20200110205647.311023-8-jlayton@kernel.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -22,145 +21,94 @@ To: Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
 Cc: sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com
 
 On 1/11/20 4:56 AM, Jeff Layton wrote:
-> It doesn't do much good to do an asynchronous create unless we can do
-> I/O to it before the create reply comes in. That means we need layout
-> info the new file before we've gotten the response from the MDS.
+> In order to issue an async create request, we need to send an inode
+> number when we do the request, but we don't know which to which MDS
+> we'll be issuing the request.
 > 
-> All files created in a directory will initially inherit the same layout,
-> so copy off the requisite info from the first synchronous create in the
-> directory. Save it in the same fields in the directory inode, as those
-> are otherwise unsed for dir inodes. This means we need to be a bit
-> careful about only updating layout info on non-dir inodes.
-> 
-> Also, zero out the layout when we drop Dc caps in the dir.
+
+the request should be sent to auth mds (dir_ci->i_auth_cap->session) of 
+directory. I think grabing inode number in get_caps_for_async_create() 
+is simpler.
+
+> Add a new r_req_flag that tells the request sending machinery to
+> grab an inode number from the delegated set, and encode it into the
+> request. If it can't get one then have it return -ECHILD. The
+> requestor can then reissue a synchronous request.
 > 
 > Signed-off-by: Jeff Layton <jlayton@kernel.org>
 > ---
->   fs/ceph/caps.c  | 24 ++++++++++++++++++++----
->   fs/ceph/file.c  | 24 +++++++++++++++++++++++-
->   fs/ceph/inode.c |  4 ++--
->   3 files changed, 45 insertions(+), 7 deletions(-)
+>   fs/ceph/inode.c      |  1 +
+>   fs/ceph/mds_client.c | 19 ++++++++++++++++++-
+>   fs/ceph/mds_client.h |  2 ++
+>   3 files changed, 21 insertions(+), 1 deletion(-)
 > 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 7fc87b693ba4..b96fb1378479 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2847,7 +2847,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
->   			return ret;
->   		}
->   
-> -		if (S_ISREG(ci->vfs_inode.i_mode) &&
-> +		if (!S_ISDIR(ci->vfs_inode.i_mode) &&
->   		    ci->i_inline_version != CEPH_INLINE_NONE &&
->   		    (_got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) &&
->   		    i_size_read(inode) > 0) {
-> @@ -2944,9 +2944,17 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
->   	if (had & CEPH_CAP_FILE_RD)
->   		if (--ci->i_rd_ref == 0)
->   			last++;
-> -	if (had & CEPH_CAP_FILE_CACHE)
-> -		if (--ci->i_rdcache_ref == 0)
-> +	if (had & CEPH_CAP_FILE_CACHE) {
-> +		if (--ci->i_rdcache_ref == 0) {
->   			last++;
-> +			/* Zero out layout if we lost CREATE caps */
-> +			if (S_ISDIR(inode->i_mode) &&
-> +			    !(__ceph_caps_issued(ci, NULL) & CEPH_CAP_DIR_CREATE)) {
-> +				ceph_put_string(rcu_dereference_raw(ci->i_layout.pool_ns));
-> +				memset(&ci->i_layout, 0, sizeof(ci->i_layout));
-> +			}
-> +		}
-> +	}
->   	if (had & CEPH_CAP_FILE_EXCL)
->   		if (--ci->i_fx_ref == 0)
->   			last++;
-> @@ -3264,7 +3272,8 @@ static void handle_cap_grant(struct inode *inode,
->   		ci->i_subdirs = extra_info->nsubdirs;
->   	}
->   
-> -	if (newcaps & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR)) {
-> +	if (!S_ISDIR(inode->i_mode) &&
-> +	    (newcaps & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
->   		/* file layout may have changed */
->   		s64 old_pool = ci->i_layout.pool_id;
->   		struct ceph_string *old_ns;
-> @@ -3336,6 +3345,13 @@ static void handle_cap_grant(struct inode *inode,
->   		     ceph_cap_string(cap->issued),
->   		     ceph_cap_string(newcaps),
->   		     ceph_cap_string(revoking));
-> +
-> +		if (S_ISDIR(inode->i_mode) &&
-> +		    (revoking & CEPH_CAP_DIR_CREATE) && !ci->i_rdcache_ref) {
-> +			ceph_put_string(rcu_dereference_raw(ci->i_layout.pool_ns));
-> +			memset(&ci->i_layout, 0, sizeof(ci->i_layout));
-> +		}
-> +
->   		if (S_ISREG(inode->i_mode) &&
->   		    (revoking & used & CEPH_CAP_FILE_BUFFER))
->   			writeback = true;  /* initiate writeback; will delay ack */
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 1e6cdf2dfe90..d4d7a277faf1 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -430,6 +430,25 @@ int ceph_open(struct inode *inode, struct file *file)
->   	return err;
->   }
->   
-> +/* Clone the layout from a synchronous create, if the dir now has Dc caps */
-> +static void
-> +copy_file_layout(struct inode *dst, struct inode *src)
-> +{
-> +	struct ceph_inode_info *cdst = ceph_inode(dst);
-> +	struct ceph_inode_info *csrc = ceph_inode(src);
-> +
-> +	spin_lock(&cdst->i_ceph_lock);
-> +	if ((__ceph_caps_issued(cdst, NULL) & CEPH_CAP_DIR_CREATE) &&
-> +	    !ceph_file_layout_is_valid(&cdst->i_layout)) {
-> +		memcpy(&cdst->i_layout, &csrc->i_layout,
-> +			sizeof(cdst->i_layout));
-
-directory's i_layout is used for other purpose. shouldn't modify it.
-
-> +		rcu_assign_pointer(cdst->i_layout.pool_ns,
-> +				   ceph_try_get_string(csrc->i_layout.pool_ns));
-> +		cdst->i_max_size = csrc->i_max_size; > +		cdst->i_truncate_size = csrc->i_truncate_size;
-no need to save above two. just set truncate size of new file to 
-(u64)-1, set max_size of new file to its layout.stripe_unit;
-
-max_size == layout.strip_unit ensure that client only write to the first 
-object before its writeable range is persistent.
-
-> +	}
-> +	spin_unlock(&cdst->i_ceph_lock);
-> +}
->   
->   /*
->    * Do a lookup + open with a single request.  If we get a non-existent
-> @@ -518,7 +537,10 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
->   	} else {
->   		dout("atomic_open finish_open on dn %p\n", dn);
->   		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
-> -			ceph_init_inode_acls(d_inode(dentry), &as_ctx);
-> +			struct inode *newino = d_inode(dentry);
-> +
-> +			copy_file_layout(dir, newino);
-> +			ceph_init_inode_acls(newino, &as_ctx);
->   			file->f_mode |= FMODE_CREATED;
->   		}
->   		err = finish_open(file, dentry, ceph_open);
 > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 9cfc093fd273..8b51051b79b0 100644
+> index 79bb1e6af090..9cfc093fd273 100644
 > --- a/fs/ceph/inode.c
 > +++ b/fs/ceph/inode.c
-> @@ -848,8 +848,8 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
->   		ci->i_subdirs = le64_to_cpu(info->subdirs);
+> @@ -1317,6 +1317,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+>   		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
+>   				NULL, session,
+>   				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
+> +				 !test_bit(CEPH_MDS_R_DELEG_INO, &req->r_req_flags) &&
+>   				 rinfo->head->result == 0) ?  req->r_fmode : -1,
+>   				&req->r_caps_reservation);
+>   		if (err < 0) {
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 852c46550d96..9e7492b21b50 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2623,7 +2623,10 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
+>   	rhead->flags = cpu_to_le32(flags);
+>   	rhead->num_fwd = req->r_num_fwd;
+>   	rhead->num_retry = req->r_attempts - 1;
+> -	rhead->ino = 0;
+> +	if (test_bit(CEPH_MDS_R_DELEG_INO, &req->r_req_flags))
+> +		rhead->ino = cpu_to_le64(req->r_deleg_ino);
+> +	else
+> +		rhead->ino = 0;
+>   
+>   	dout(" r_parent = %p\n", req->r_parent);
+>   	return 0;
+> @@ -2736,6 +2739,20 @@ static void __do_request(struct ceph_mds_client *mdsc,
+>   		goto out_session;
 >   	}
 >   
-> -	if (new_version ||
-> -	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
-> +	if (!S_ISDIR(inode->i_mode) && (new_version ||
-> +	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR)))) {
->   		s64 old_pool = ci->i_layout.pool_id;
->   		struct ceph_string *old_ns;
+> +	if (test_bit(CEPH_MDS_R_DELEG_INO, &req->r_req_flags) &&
+> +	    !req->r_deleg_ino) {
+> +		req->r_deleg_ino = get_delegated_ino(req->r_session);
+> +
+> +		if (!req->r_deleg_ino) {
+> +			/*
+> +			 * If we can't get a deleg ino, exit with -ECHILD,
+> +			 * so the caller can reissue a sync request
+> +			 */
+> +			err = -ECHILD;
+> +			goto out_session;
+> +		}
+> +	}
+> +
+>   	/* send request */
+>   	req->r_resend_mds = -1;   /* forget any previous mds hint */
 >   
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index 3db7ef47e1c9..e0b36be7c44f 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -258,6 +258,7 @@ struct ceph_mds_request {
+>   #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
+>   #define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
+>   #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
+> +#define CEPH_MDS_R_DELEG_INO		(8) /* attempt to get r_deleg_ino */
+>   	unsigned long	r_req_flags;
+>   
+>   	struct mutex r_fill_mutex;
+> @@ -307,6 +308,7 @@ struct ceph_mds_request {
+>   	int               r_num_fwd;    /* number of forward attempts */
+>   	int               r_resend_mds; /* mds to resend to next, if any*/
+>   	u32               r_sent_on_mseq; /* cap mseq request was sent at*/
+> +	unsigned long	  r_deleg_ino;
+>   
+>   	struct list_head  r_wait;
+>   	struct completion r_completion;
 > 
