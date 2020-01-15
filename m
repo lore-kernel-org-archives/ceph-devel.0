@@ -1,71 +1,127 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v2 00/10] ceph: asynchronous file create support
-Date: Wed, 15 Jan 2020 15:59:02 -0500
-Message-ID: <20200115205912.38688-1-jlayton@kernel.org>
+Subject: [RFC PATCH v2 07/10] ceph: add infrastructure for waiting for async create to complete
+Date: Wed, 15 Jan 2020 15:59:09 -0500
+Message-ID: <20200115205912.38688-8-jlayton@kernel.org>
+References: <20200115205912.38688-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:57808 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:58160 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726513AbgAOU7Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 15 Jan 2020 15:59:16 -0500
+        id S1729524AbgAOU7V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 15 Jan 2020 15:59:21 -0500
+In-Reply-To: <20200115205912.38688-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com, xiubli@redhat.com
 
-v2:
-- move cached layout to dedicated field in inode
-- protect cached layout with i_ceph_lock
-- wipe cached layout in __check_cap_issue
-- set max_size of file to layout.stripe_unit
-- set truncate_size to (u64)-1
-- use dedicated CephFS feature bit instead of CEPHFS_FEATURE_OCTOPUS
-- set cap_id to 1 in async created inode
-- allocate inode number before submitting request
-- rework the prep for an async create to be more efficient
-- don't allow MDS or cap messages involving an inode until we get async
-  create reply
+When we issue an async create, we must ensure that any later on-the-wire
+requests involving it wait for the create reply.
 
-A lot of changes in this set, mostly based on Zheng and Xiubo's
-comments. Performance is pretty similar to the previous set:
+Expand i_ceph_flags to be an unsigned long, and add a new bit that
+MDS requests can wait on. If the bit is set in the inode when sending
+caps, then don't send it and just return that it has been delayed.
 
-Untarring a kernel tarball into a cephfs takes about 98s with
-async dirops disabled. With them enabled, it takes around 78s,
-which is about a 25% improvement.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/caps.c       |  9 ++++++++-
+ fs/ceph/dir.c        |  2 +-
+ fs/ceph/mds_client.c | 12 +++++++++++-
+ fs/ceph/super.h      |  4 +++-
+ 4 files changed, 23 insertions(+), 4 deletions(-)
 
-This is not quite ready for merge. Error handling could still be
-improved. With xfstest generic/531, I see some messages like this pop
-up in the ring buffer:
-
-    [ 7331.393110] ceph: ceph_async_create_cb: inode number mismatch! err=0 deleg_ino=0x100001232d9 target=0x100001232b9
-
-Basically, we went to do an async create and got a different inode
-number back than expected. That still needs investigation, but I
-didn't see any test failures due to it.
-
-Jeff Layton (10):
-  libceph: export ceph_file_layout_is_valid
-  ceph: make ceph_fill_inode non-static
-  ceph: make dentry_lease_is_valid non-static
-  ceph: make __take_cap_refs a public function
-  ceph: decode interval_sets for delegated inos
-  ceph: add flag to designate that a request is asynchronous
-  ceph: add infrastructure for waiting for async create to complete
-  ceph: add new MDS req field to hold delegated inode number
-  ceph: cache layout in parent dir on first sync create
-  ceph: attempt to do async create when possible
-
- fs/ceph/caps.c               |  34 ++++--
- fs/ceph/dir.c                |  13 ++-
- fs/ceph/file.c               | 218 +++++++++++++++++++++++++++++++++--
- fs/ceph/inode.c              |  50 ++++----
- fs/ceph/mds_client.c         | 126 ++++++++++++++++++--
- fs/ceph/mds_client.h         |   9 +-
- fs/ceph/super.h              |  16 ++-
- include/linux/ceph/ceph_fs.h |   8 +-
- net/ceph/ceph_fs.c           |   1 +
- 9 files changed, 410 insertions(+), 65 deletions(-)
-
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index c983990acb75..9d1a3d6831f7 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -511,7 +511,7 @@ static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
+ 				struct ceph_inode_info *ci,
+ 				bool set_timeout)
+ {
+-	dout("__cap_delay_requeue %p flags %d at %lu\n", &ci->vfs_inode,
++	dout("__cap_delay_requeue %p flags 0x%lx at %lu\n", &ci->vfs_inode,
+ 	     ci->i_ceph_flags, ci->i_hold_caps_max);
+ 	if (!mdsc->stopping) {
+ 		spin_lock(&mdsc->cap_delay_lock);
+@@ -1298,6 +1298,13 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+ 	int delayed = 0;
+ 	int ret;
+ 
++	/* Don't send anything if it's still being created. Return delayed */
++	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
++		spin_unlock(&ci->i_ceph_lock);
++		dout("%s async create in flight for %p\n", __func__, inode);
++		return 1;
++	}
++
+ 	held = cap->issued | cap->implemented;
+ 	revoking = cap->implemented & ~cap->issued;
+ 	retain &= ~revoking;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 0d97c2962314..b2bcd01ab4e9 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -752,7 +752,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 		struct ceph_dentry_info *di = ceph_dentry(dentry);
+ 
+ 		spin_lock(&ci->i_ceph_lock);
+-		dout(" dir %p flags are %d\n", dir, ci->i_ceph_flags);
++		dout(" dir %p flags are 0x%lx\n", dir, ci->i_ceph_flags);
+ 		if (strncmp(dentry->d_name.name,
+ 			    fsc->mount_options->snapdir_name,
+ 			    dentry->d_name.len) &&
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index f06496bb5705..e49ca0533df1 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2806,14 +2806,24 @@ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
+ 	}
+ }
+ 
++static int ceph_wait_on_async_create(struct inode *inode)
++{
++	struct ceph_inode_info *ci = ceph_inode(inode);
++
++	return wait_on_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT,
++			   TASK_INTERRUPTIBLE);
++}
++
+ int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc, struct inode *dir,
+ 			      struct ceph_mds_request *req)
+ {
+ 	int err;
+ 
+ 	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
+-	if (req->r_inode)
++	if (req->r_inode) {
++		ceph_wait_on_async_create(req->r_inode);
+ 		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
++	}
+ 	if (req->r_parent) {
+ 		ceph_get_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
+ 		ihold(req->r_parent);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index cb7b549f0995..86dd4a2163e0 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -319,7 +319,7 @@ struct ceph_inode_info {
+ 	u64 i_inline_version;
+ 	u32 i_time_warp_seq;
+ 
+-	unsigned i_ceph_flags;
++	unsigned long i_ceph_flags;
+ 	atomic64_t i_release_count;
+ 	atomic64_t i_ordered_count;
+ 	atomic64_t i_complete_seq[2];
+@@ -527,6 +527,8 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
+ #define CEPH_I_ERROR_WRITE	(1 << 10) /* have seen write errors */
+ #define CEPH_I_ERROR_FILELOCK	(1 << 11) /* have seen file lock errors */
+ #define CEPH_I_ODIRECT		(1 << 12) /* inode in direct I/O mode */
++#define CEPH_ASYNC_CREATE_BIT	(13)	  /* async create in flight for this */
++#define CEPH_I_ASYNC_CREATE	(1 << CEPH_ASYNC_CREATE_BIT)
+ 
+ /*
+  * Masks of ceph inode work.
 -- 
 2.24.1
