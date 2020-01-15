@@ -1,68 +1,71 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v2 03/10] ceph: make dentry_lease_is_valid non-static
-Date: Wed, 15 Jan 2020 15:59:05 -0500
-Message-ID: <20200115205912.38688-4-jlayton@kernel.org>
-References: <20200115205912.38688-1-jlayton@kernel.org>
+Subject: [RFC PATCH v2 00/10] ceph: asynchronous file create support
+Date: Wed, 15 Jan 2020 15:59:02 -0500
+Message-ID: <20200115205912.38688-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:57988 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:57808 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729464AbgAOU7S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 15 Jan 2020 15:59:18 -0500
-In-Reply-To: <20200115205912.38688-1-jlayton@kernel.org>
+        id S1726513AbgAOU7Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 15 Jan 2020 15:59:16 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, pdonnell@redhat.com, xiubli@redhat.com
 
-...and move a comment over the proper function.
+v2:
+- move cached layout to dedicated field in inode
+- protect cached layout with i_ceph_lock
+- wipe cached layout in __check_cap_issue
+- set max_size of file to layout.stripe_unit
+- set truncate_size to (u64)-1
+- use dedicated CephFS feature bit instead of CEPHFS_FEATURE_OCTOPUS
+- set cap_id to 1 in async created inode
+- allocate inode number before submitting request
+- rework the prep for an async create to be more efficient
+- don't allow MDS or cap messages involving an inode until we get async
+  create reply
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/dir.c   | 10 +++++-----
- fs/ceph/super.h |  1 +
- 2 files changed, 6 insertions(+), 5 deletions(-)
+A lot of changes in this set, mostly based on Zheng and Xiubo's
+comments. Performance is pretty similar to the previous set:
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 10294f07f5f0..9d2eca67985a 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1477,10 +1477,6 @@ void ceph_invalidate_dentry_lease(struct dentry *dentry)
- 	spin_unlock(&dentry->d_lock);
- }
- 
--/*
-- * Check if dentry lease is valid.  If not, delete the lease.  Try to
-- * renew if the least is more than half up.
-- */
- static bool __dentry_lease_is_valid(struct ceph_dentry_info *di)
- {
- 	struct ceph_mds_session *session;
-@@ -1507,7 +1503,11 @@ static bool __dentry_lease_is_valid(struct ceph_dentry_info *di)
- 	return false;
- }
- 
--static int dentry_lease_is_valid(struct dentry *dentry, unsigned int flags)
-+/*
-+ * Check if dentry lease is valid.  If not, delete the lease.  Try to
-+ * renew if the least is more than half up.
-+ */
-+int dentry_lease_is_valid(struct dentry *dentry, unsigned int flags)
- {
- 	struct ceph_dentry_info *di;
- 	struct ceph_mds_session *session = NULL;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index ec4d66d7c261..f27b2bf9a3f5 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1121,6 +1121,7 @@ extern int ceph_handle_snapdir(struct ceph_mds_request *req,
- extern struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
- 					 struct dentry *dentry, int err);
- 
-+extern int dentry_lease_is_valid(struct dentry *dentry, unsigned int flags);
- extern void __ceph_dentry_lease_touch(struct ceph_dentry_info *di);
- extern void __ceph_dentry_dir_lease_touch(struct ceph_dentry_info *di);
- extern void ceph_invalidate_dentry_lease(struct dentry *dentry);
+Untarring a kernel tarball into a cephfs takes about 98s with
+async dirops disabled. With them enabled, it takes around 78s,
+which is about a 25% improvement.
+
+This is not quite ready for merge. Error handling could still be
+improved. With xfstest generic/531, I see some messages like this pop
+up in the ring buffer:
+
+    [ 7331.393110] ceph: ceph_async_create_cb: inode number mismatch! err=0 deleg_ino=0x100001232d9 target=0x100001232b9
+
+Basically, we went to do an async create and got a different inode
+number back than expected. That still needs investigation, but I
+didn't see any test failures due to it.
+
+Jeff Layton (10):
+  libceph: export ceph_file_layout_is_valid
+  ceph: make ceph_fill_inode non-static
+  ceph: make dentry_lease_is_valid non-static
+  ceph: make __take_cap_refs a public function
+  ceph: decode interval_sets for delegated inos
+  ceph: add flag to designate that a request is asynchronous
+  ceph: add infrastructure for waiting for async create to complete
+  ceph: add new MDS req field to hold delegated inode number
+  ceph: cache layout in parent dir on first sync create
+  ceph: attempt to do async create when possible
+
+ fs/ceph/caps.c               |  34 ++++--
+ fs/ceph/dir.c                |  13 ++-
+ fs/ceph/file.c               | 218 +++++++++++++++++++++++++++++++++--
+ fs/ceph/inode.c              |  50 ++++----
+ fs/ceph/mds_client.c         | 126 ++++++++++++++++++--
+ fs/ceph/mds_client.h         |   9 +-
+ fs/ceph/super.h              |  16 ++-
+ include/linux/ceph/ceph_fs.h |   8 +-
+ net/ceph/ceph_fs.c           |   1 +
+ 9 files changed, 410 insertions(+), 65 deletions(-)
+
 -- 
 2.24.1
