@@ -1,50 +1,45 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 457/671] ceph: fix "ceph.dir.rctime" vxattr value
-Date: Thu, 16 Jan 2020 12:01:35 -0500
-Message-ID: <20200116170509.12787-194-sashal@kernel.org>
-References: <20200116170509.12787-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 235/671] rbd: clear ->xferred on error from rbd_obj_issue_copyup()
+Date: Thu, 16 Jan 2020 11:52:24 -0500
+Message-ID: <20200116165940.10720-118-sashal@kernel.org>
+References: <20200116165940.10720-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:46272 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:55336 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389735AbgAPRJo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Jan 2020 12:09:44 -0500
-In-Reply-To: <20200116170509.12787-1-sashal@kernel.org>
+        id S2388399AbgAPRCb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Jan 2020 12:02:31 -0500
+In-Reply-To: <20200116165940.10720-1-sashal@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: David Disseldorp <ddiss@suse.de>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
 
-From: David Disseldorp <ddiss@suse.de>
+From: Ilya Dryomov <idryomov@gmail.com>
 
-[ Upstream commit 718807289d4130be1fe13f24f018733116958070 ]
+[ Upstream commit 356889c49d84f11f446ec235bd52ca1a7d581aa0 ]
 
-The vxattr value incorrectly places a "09" prefix to the nanoseconds
-field, instead of providing it as a zero-pad width specifier after '%'.
+Otherwise the assert in rbd_obj_end_request() is triggered.
 
-Fixes: 3489b42a72a4 ("ceph: fix three bugs, two in ceph_vxattrcb_file_layout()")
-Link: https://tracker.ceph.com/issues/39943
-Signed-off-by: David Disseldorp <ddiss@suse.de>
-Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+Fixes: 3da691bf4366 ("rbd: new request handling code")
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- fs/ceph/xattr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/block/rbd.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 5e4f3f833e85..a09ce27ab220 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -221,7 +221,7 @@ static size_t ceph_vxattrcb_dir_rbytes(struct ceph_inode_info *ci, char *val,
- static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, char *val,
- 				       size_t size)
- {
--	return snprintf(val, size, "%lld.09%ld", ci->i_rctime.tv_sec,
-+	return snprintf(val, size, "%lld.%09ld", ci->i_rctime.tv_sec,
- 			ci->i_rctime.tv_nsec);
- }
- 
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 585378bc988c..b942f4c8cea8 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2506,6 +2506,7 @@ static bool rbd_obj_handle_write(struct rbd_obj_request *obj_req)
+ 		ret = rbd_obj_issue_copyup(obj_req, obj_req->xferred);
+ 		if (ret) {
+ 			obj_req->result = ret;
++			obj_req->xferred = 0;
+ 			return true;
+ 		}
+ 		return false;
 -- 
 2.20.1
