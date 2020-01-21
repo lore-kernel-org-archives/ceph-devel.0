@@ -1,91 +1,89 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v3 01/10] ceph: move net/ceph/ceph_fs.c to fs/ceph/util.c
-Date: Tue, 21 Jan 2020 14:29:19 -0500
-Message-ID: <20200121192928.469316-2-jlayton@kernel.org>
+Subject: [RFC PATCH v3 04/10] ceph: make __take_cap_refs non-static
+Date: Tue, 21 Jan 2020 14:29:22 -0500
+Message-ID: <20200121192928.469316-5-jlayton@kernel.org>
 References: <20200121192928.469316-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:40096 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:40144 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726926AbgAUT3c (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 21 Jan 2020 14:29:32 -0500
+        id S1728913AbgAUT3e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 21 Jan 2020 14:29:34 -0500
 In-Reply-To: <20200121192928.469316-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com
 
-All of these functions are only called from CephFS, so move them into
-ceph.ko, and drop the exports.
+Rename it to ceph_take_cap_refs and make it available to other files.
+Also replace a comment with a lockdep assertion.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/Makefile                     | 2 +-
- net/ceph/ceph_fs.c => fs/ceph/util.c | 4 ----
- net/ceph/Makefile                    | 2 +-
- 3 files changed, 2 insertions(+), 6 deletions(-)
- rename net/ceph/ceph_fs.c => fs/ceph/util.c (94%)
+ fs/ceph/caps.c  | 12 ++++++------
+ fs/ceph/super.h |  2 ++
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-index c1da294418d1..0a0823d378db 100644
---- a/fs/ceph/Makefile
-+++ b/fs/ceph/Makefile
-@@ -8,7 +8,7 @@ obj-$(CONFIG_CEPH_FS) += ceph.o
- ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
- 	export.o caps.o snap.o xattr.o quota.o io.o \
- 	mds_client.o mdsmap.o strings.o ceph_frag.o \
--	debugfs.o
-+	debugfs.o util.o
- 
- ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
- ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
-diff --git a/net/ceph/ceph_fs.c b/fs/ceph/util.c
-similarity index 94%
-rename from net/ceph/ceph_fs.c
-rename to fs/ceph/util.c
-index 756a2dc10d27..2c34875675bf 100644
---- a/net/ceph/ceph_fs.c
-+++ b/fs/ceph/util.c
-@@ -39,7 +39,6 @@ void ceph_file_layout_from_legacy(struct ceph_file_layout *fl,
- 	    fl->stripe_count == 0 && fl->object_size == 0)
- 		fl->pool_id = -1;
- }
--EXPORT_SYMBOL(ceph_file_layout_from_legacy);
- 
- void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
- 				struct ceph_file_layout_legacy *legacy)
-@@ -52,7 +51,6 @@ void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
- 	else
- 		legacy->fl_pg_pool = 0;
- }
--EXPORT_SYMBOL(ceph_file_layout_to_legacy);
- 
- int ceph_flags_to_mode(int flags)
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 7fc87b693ba4..c983990acb75 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2512,12 +2512,12 @@ static void kick_flushing_inode_caps(struct ceph_mds_client *mdsc,
+ /*
+  * Take references to capabilities we hold, so that we don't release
+  * them to the MDS prematurely.
+- *
+- * Protected by i_ceph_lock.
+  */
+-static void __take_cap_refs(struct ceph_inode_info *ci, int got,
++void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
+ 			    bool snap_rwsem_locked)
  {
-@@ -82,7 +80,6 @@ int ceph_flags_to_mode(int flags)
- 
- 	return mode;
++	lockdep_assert_held(&ci->i_ceph_lock);
++
+ 	if (got & CEPH_CAP_PIN)
+ 		ci->i_pin_ref++;
+ 	if (got & CEPH_CAP_FILE_RD)
+@@ -2538,7 +2538,7 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got,
+ 		if (ci->i_wb_ref == 0)
+ 			ihold(&ci->vfs_inode);
+ 		ci->i_wb_ref++;
+-		dout("__take_cap_refs %p wb %d -> %d (?)\n",
++		dout("%s %p wb %d -> %d (?)\n", __func__,
+ 		     &ci->vfs_inode, ci->i_wb_ref-1, ci->i_wb_ref);
+ 	}
  }
--EXPORT_SYMBOL(ceph_flags_to_mode);
- 
- int ceph_caps_for_mode(int mode)
+@@ -2664,7 +2664,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 			    (need & CEPH_CAP_FILE_RD) &&
+ 			    !(*got & CEPH_CAP_FILE_CACHE))
+ 				ceph_disable_fscache_readpage(ci);
+-			__take_cap_refs(ci, *got, true);
++			ceph_take_cap_refs(ci, *got, true);
+ 			ret = 1;
+ 		}
+ 	} else {
+@@ -2896,7 +2896,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
+ void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps)
  {
-@@ -101,4 +98,3 @@ int ceph_caps_for_mode(int mode)
- 
- 	return caps;
+ 	spin_lock(&ci->i_ceph_lock);
+-	__take_cap_refs(ci, caps, false);
++	ceph_take_cap_refs(ci, caps, false);
+ 	spin_unlock(&ci->i_ceph_lock);
  }
--EXPORT_SYMBOL(ceph_caps_for_mode);
-diff --git a/net/ceph/Makefile b/net/ceph/Makefile
-index 59d0ba2072de..ce09bb4fb249 100644
---- a/net/ceph/Makefile
-+++ b/net/ceph/Makefile
-@@ -13,5 +13,5 @@ libceph-y := ceph_common.o messenger.o msgpool.o buffer.o pagelist.o \
- 	auth.o auth_none.o \
- 	crypto.o armor.o \
- 	auth_x.o \
--	ceph_fs.o ceph_strings.o ceph_hash.o \
-+	ceph_strings.o ceph_hash.o \
- 	pagevec.o snapshot.o string_table.o
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index f27b2bf9a3f5..cb7b549f0995 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1062,6 +1062,8 @@ extern void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 				    struct ceph_mds_session *session);
+ extern struct ceph_cap *ceph_get_cap_for_mds(struct ceph_inode_info *ci,
+ 					     int mds);
++extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
++				bool snap_rwsem_locked);
+ extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
+ extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
+ extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
 -- 
 2.24.1
