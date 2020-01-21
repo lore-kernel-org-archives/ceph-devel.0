@@ -1,62 +1,68 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v3 08/10] ceph: add new MDS req field to hold delegated inode number
-Date: Tue, 21 Jan 2020 14:29:26 -0500
-Message-ID: <20200121192928.469316-9-jlayton@kernel.org>
+Subject: [RFC PATCH v3 03/10] ceph: make dentry_lease_is_valid non-static
+Date: Tue, 21 Jan 2020 14:29:21 -0500
+Message-ID: <20200121192928.469316-4-jlayton@kernel.org>
 References: <20200121192928.469316-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:40144 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:40124 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729031AbgAUT3g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 21 Jan 2020 14:29:36 -0500
+        id S1726926AbgAUT3d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 21 Jan 2020 14:29:33 -0500
 In-Reply-To: <20200121192928.469316-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com
 
-Add new request field to hold the delegated inode number. Encode that
-into the message when it's set.
+...and move a comment over the proper function.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 3 +--
- fs/ceph/mds_client.h | 1 +
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ fs/ceph/dir.c   | 10 +++++-----
+ fs/ceph/super.h |  1 +
+ 2 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index ea9cfed6c027..e9de37691ce8 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2466,7 +2466,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
- 	head->op = cpu_to_le32(req->r_op);
- 	head->caller_uid = cpu_to_le32(from_kuid(&init_user_ns, req->r_uid));
- 	head->caller_gid = cpu_to_le32(from_kgid(&init_user_ns, req->r_gid));
--	head->ino = 0;
-+	head->ino = cpu_to_le64(req->r_deleg_ino);
- 	head->args = req->r_args;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 10294f07f5f0..9d2eca67985a 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1477,10 +1477,6 @@ void ceph_invalidate_dentry_lease(struct dentry *dentry)
+ 	spin_unlock(&dentry->d_lock);
+ }
  
- 	ceph_encode_filepath(&p, end, ino1, path1);
-@@ -2627,7 +2627,6 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 	rhead->flags = cpu_to_le32(flags);
- 	rhead->num_fwd = req->r_num_fwd;
- 	rhead->num_retry = req->r_attempts - 1;
--	rhead->ino = 0;
+-/*
+- * Check if dentry lease is valid.  If not, delete the lease.  Try to
+- * renew if the least is more than half up.
+- */
+ static bool __dentry_lease_is_valid(struct ceph_dentry_info *di)
+ {
+ 	struct ceph_mds_session *session;
+@@ -1507,7 +1503,11 @@ static bool __dentry_lease_is_valid(struct ceph_dentry_info *di)
+ 	return false;
+ }
  
- 	dout(" r_parent = %p\n", req->r_parent);
- 	return 0;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index acad9adca0af..4f25fd6df3f9 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -308,6 +308,7 @@ struct ceph_mds_request {
- 	int               r_num_fwd;    /* number of forward attempts */
- 	int               r_resend_mds; /* mds to resend to next, if any*/
- 	u32               r_sent_on_mseq; /* cap mseq request was sent at*/
-+	u64		  r_deleg_ino;
+-static int dentry_lease_is_valid(struct dentry *dentry, unsigned int flags)
++/*
++ * Check if dentry lease is valid.  If not, delete the lease.  Try to
++ * renew if the least is more than half up.
++ */
++int dentry_lease_is_valid(struct dentry *dentry, unsigned int flags)
+ {
+ 	struct ceph_dentry_info *di;
+ 	struct ceph_mds_session *session = NULL;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index ec4d66d7c261..f27b2bf9a3f5 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1121,6 +1121,7 @@ extern int ceph_handle_snapdir(struct ceph_mds_request *req,
+ extern struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
+ 					 struct dentry *dentry, int err);
  
- 	struct list_head  r_wait;
- 	struct completion r_completion;
++extern int dentry_lease_is_valid(struct dentry *dentry, unsigned int flags);
+ extern void __ceph_dentry_lease_touch(struct ceph_dentry_info *di);
+ extern void __ceph_dentry_dir_lease_touch(struct ceph_dentry_info *di);
+ extern void ceph_invalidate_dentry_lease(struct dentry *dentry);
 -- 
 2.24.1
