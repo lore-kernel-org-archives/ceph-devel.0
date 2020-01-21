@@ -1,89 +1,172 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v3 04/10] ceph: make __take_cap_refs non-static
-Date: Tue, 21 Jan 2020 14:29:22 -0500
-Message-ID: <20200121192928.469316-5-jlayton@kernel.org>
+Subject: [RFC PATCH v3 02/10] ceph: make ceph_fill_inode non-static
+Date: Tue, 21 Jan 2020 14:29:20 -0500
+Message-ID: <20200121192928.469316-3-jlayton@kernel.org>
 References: <20200121192928.469316-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:40144 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:40106 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728913AbgAUT3e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 21 Jan 2020 14:29:34 -0500
+        id S1728855AbgAUT3d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 21 Jan 2020 14:29:33 -0500
 In-Reply-To: <20200121192928.469316-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com
 
-Rename it to ceph_take_cap_refs and make it available to other files.
-Also replace a comment with a lockdep assertion.
-
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c  | 12 ++++++------
- fs/ceph/super.h |  2 ++
- 2 files changed, 8 insertions(+), 6 deletions(-)
+ fs/ceph/inode.c | 47 ++++++++++++++++++++++++-----------------------
+ fs/ceph/super.h |  8 ++++++++
+ 2 files changed, 32 insertions(+), 23 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 7fc87b693ba4..c983990acb75 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2512,12 +2512,12 @@ static void kick_flushing_inode_caps(struct ceph_mds_client *mdsc,
- /*
-  * Take references to capabilities we hold, so that we don't release
-  * them to the MDS prematurely.
-- *
-- * Protected by i_ceph_lock.
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index aee7a24bf1bc..79bb1e6af090 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -728,11 +728,11 @@ void ceph_fill_file_time(struct inode *inode, int issued,
+  * Populate an inode based on info from mds.  May be called on new or
+  * existing inodes.
   */
--static void __take_cap_refs(struct ceph_inode_info *ci, int got,
-+void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
- 			    bool snap_rwsem_locked)
+-static int fill_inode(struct inode *inode, struct page *locked_page,
+-		      struct ceph_mds_reply_info_in *iinfo,
+-		      struct ceph_mds_reply_dirfrag *dirinfo,
+-		      struct ceph_mds_session *session, int cap_fmode,
+-		      struct ceph_cap_reservation *caps_reservation)
++int ceph_fill_inode(struct inode *inode, struct page *locked_page,
++		    struct ceph_mds_reply_info_in *iinfo,
++		    struct ceph_mds_reply_dirfrag *dirinfo,
++		    struct ceph_mds_session *session, int cap_fmode,
++		    struct ceph_cap_reservation *caps_reservation)
  {
-+	lockdep_assert_held(&ci->i_ceph_lock);
-+
- 	if (got & CEPH_CAP_PIN)
- 		ci->i_pin_ref++;
- 	if (got & CEPH_CAP_FILE_RD)
-@@ -2538,7 +2538,7 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got,
- 		if (ci->i_wb_ref == 0)
- 			ihold(&ci->vfs_inode);
- 		ci->i_wb_ref++;
--		dout("__take_cap_refs %p wb %d -> %d (?)\n",
-+		dout("%s %p wb %d -> %d (?)\n", __func__,
- 		     &ci->vfs_inode, ci->i_wb_ref-1, ci->i_wb_ref);
- 	}
- }
-@@ -2664,7 +2664,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 			    (need & CEPH_CAP_FILE_RD) &&
- 			    !(*got & CEPH_CAP_FILE_CACHE))
- 				ceph_disable_fscache_readpage(ci);
--			__take_cap_refs(ci, *got, true);
-+			ceph_take_cap_refs(ci, *got, true);
- 			ret = 1;
- 		}
- 	} else {
-@@ -2896,7 +2896,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
- void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps)
- {
- 	spin_lock(&ci->i_ceph_lock);
--	__take_cap_refs(ci, caps, false);
-+	ceph_take_cap_refs(ci, caps, false);
- 	spin_unlock(&ci->i_ceph_lock);
- }
+ 	struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
+ 	struct ceph_mds_reply_inode *info = iinfo->in;
+@@ -749,7 +749,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	bool new_version = false;
+ 	bool fill_inline = false;
  
+-	dout("fill_inode %p ino %llx.%llx v %llu had %llu\n",
++	dout("%s %p ino %llx.%llx v %llu had %llu\n", __func__,
+ 	     inode, ceph_vinop(inode), le64_to_cpu(info->version),
+ 	     ci->i_version);
+ 
+@@ -770,7 +770,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	if (iinfo->xattr_len > 4) {
+ 		xattr_blob = ceph_buffer_new(iinfo->xattr_len, GFP_NOFS);
+ 		if (!xattr_blob)
+-			pr_err("fill_inode ENOMEM xattr blob %d bytes\n",
++			pr_err("%s ENOMEM xattr blob %d bytes\n", __func__,
+ 			       iinfo->xattr_len);
+ 	}
+ 
+@@ -933,8 +933,9 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 			spin_unlock(&ci->i_ceph_lock);
+ 
+ 			if (symlen != i_size_read(inode)) {
+-				pr_err("fill_inode %llx.%llx BAD symlink "
+-					"size %lld\n", ceph_vinop(inode),
++				pr_err("%s %llx.%llx BAD symlink "
++					"size %lld\n", __func__,
++					ceph_vinop(inode),
+ 					i_size_read(inode));
+ 				i_size_write(inode, symlen);
+ 				inode->i_blocks = calc_inode_blocks(symlen);
+@@ -958,7 +959,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 		inode->i_fop = &ceph_dir_fops;
+ 		break;
+ 	default:
+-		pr_err("fill_inode %llx.%llx BAD mode 0%o\n",
++		pr_err("%s %llx.%llx BAD mode 0%o\n", __func__,
+ 		       ceph_vinop(inode), inode->i_mode);
+ 	}
+ 
+@@ -1246,10 +1247,9 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		struct inode *dir = req->r_parent;
+ 
+ 		if (dir) {
+-			err = fill_inode(dir, NULL,
+-					 &rinfo->diri, rinfo->dirfrag,
+-					 session, -1,
+-					 &req->r_caps_reservation);
++			err = ceph_fill_inode(dir, NULL, &rinfo->diri,
++					      rinfo->dirfrag, session, -1,
++					      &req->r_caps_reservation);
+ 			if (err < 0)
+ 				goto done;
+ 		} else {
+@@ -1314,13 +1314,13 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			goto done;
+ 		}
+ 
+-		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
+-				session,
++		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
++				NULL, session,
+ 				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
+ 				 rinfo->head->result == 0) ?  req->r_fmode : -1,
+ 				&req->r_caps_reservation);
+ 		if (err < 0) {
+-			pr_err("fill_inode badness %p %llx.%llx\n",
++			pr_err("ceph_fill_inode badness %p %llx.%llx\n",
+ 				in, ceph_vinop(in));
+ 			if (in->i_state & I_NEW)
+ 				discard_new_inode(in);
+@@ -1507,10 +1507,11 @@ static int readdir_prepopulate_inodes_only(struct ceph_mds_request *req,
+ 			dout("new_inode badness got %d\n", err);
+ 			continue;
+ 		}
+-		rc = fill_inode(in, NULL, &rde->inode, NULL, session,
+-				-1, &req->r_caps_reservation);
++		rc = ceph_fill_inode(in, NULL, &rde->inode, NULL, session,
++				     -1, &req->r_caps_reservation);
+ 		if (rc < 0) {
+-			pr_err("fill_inode badness on %p got %d\n", in, rc);
++			pr_err("ceph_fill_inode badness on %p got %d\n",
++			       in, rc);
+ 			err = rc;
+ 			if (in->i_state & I_NEW) {
+ 				ihold(in);
+@@ -1714,10 +1715,10 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 			}
+ 		}
+ 
+-		ret = fill_inode(in, NULL, &rde->inode, NULL, session,
+-				 -1, &req->r_caps_reservation);
++		ret = ceph_fill_inode(in, NULL, &rde->inode, NULL, session,
++				      -1, &req->r_caps_reservation);
+ 		if (ret < 0) {
+-			pr_err("fill_inode badness on %p\n", in);
++			pr_err("ceph_fill_inode badness on %p\n", in);
+ 			if (d_really_is_negative(dn)) {
+ 				/* avoid calling iput_final() in mds
+ 				 * dispatch threads */
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index f27b2bf9a3f5..cb7b549f0995 100644
+index 3ef17dd6491e..ec4d66d7c261 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -1062,6 +1062,8 @@ extern void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
- 				    struct ceph_mds_session *session);
- extern struct ceph_cap *ceph_get_cap_for_mds(struct ceph_inode_info *ci,
- 					     int mds);
-+extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
-+				bool snap_rwsem_locked);
- extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
- extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
- extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+@@ -893,6 +893,9 @@ static inline bool __ceph_have_pending_cap_snap(struct ceph_inode_info *ci)
+ }
+ 
+ /* inode.c */
++struct ceph_mds_reply_info_in;
++struct ceph_mds_reply_dirfrag;
++
+ extern const struct inode_operations ceph_file_iops;
+ 
+ extern struct inode *ceph_alloc_inode(struct super_block *sb);
+@@ -908,6 +911,11 @@ extern void ceph_fill_file_time(struct inode *inode, int issued,
+ 				u64 time_warp_seq, struct timespec64 *ctime,
+ 				struct timespec64 *mtime,
+ 				struct timespec64 *atime);
++extern int ceph_fill_inode(struct inode *inode, struct page *locked_page,
++		    struct ceph_mds_reply_info_in *iinfo,
++		    struct ceph_mds_reply_dirfrag *dirinfo,
++		    struct ceph_mds_session *session, int cap_fmode,
++		    struct ceph_cap_reservation *caps_reservation);
+ extern int ceph_fill_trace(struct super_block *sb,
+ 			   struct ceph_mds_request *req);
+ extern int ceph_readdir_prepopulate(struct ceph_mds_request *req,
 -- 
 2.24.1
