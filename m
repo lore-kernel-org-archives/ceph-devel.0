@@ -1,8 +1,8 @@
 From: Jeff Layton <jlayton@kernel.org>
 Subject: Re: [bug report] ceph: perform asynchronous unlink if we have
  sufficient caps
-Date: Fri, 24 Jan 2020 05:44:06 -0500
-Message-ID: <3170eaf909e7a007575150f04a3cfc1cc27e6408.camel@kernel.org>
+Date: Fri, 24 Jan 2020 08:01:12 -0500
+Message-ID: <8477028daad377357416cdffb46ee5a7a54c1c2a.camel@kernel.org>
 References: <20200123153031.o53tzem7bhedyubg@kili.mountain>
          <7ccd37a37f2f700bc648cafcd87784e85c784a31.camel@kernel.org>
          <20200123172927.GD1870@kadam>
@@ -10,15 +10,15 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:51640 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:50968 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725843AbgAXKoI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 24 Jan 2020 05:44:08 -0500
+        id S2387445AbgAXNBO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 24 Jan 2020 08:01:14 -0500
 In-Reply-To: <20200123172927.GD1870@kadam>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
 
 On Thu, 2020-01-23 at 20:29 +0300, Dan Carpenter wrote:
 > On Thu, Jan 23, 2020 at 10:45:31AM -0500, Jeff Layton wrote:
@@ -61,11 +61,13 @@ On Thu, 2020-01-23 at 20:29 +0300, Dan Carpenter wrote:
 > 
 > It's complaining about the printk before the error handling.
 > 
-> regards,
-> dan carpenter
 > 
 
-Ahh thanks, I'll fix that up!
+Duh, of course. Thanks, Dan. I fixed up that up in tree and changed it
+to print "got" with ceph_cap_string as well.
+
+Ilya, be advised that I force-pushed ceph-client/testing today with the
+corrected patch.
 
 Cheers,
 -- 
