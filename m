@@ -1,130 +1,104 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [RFC PATCH v3 00/10] ceph: asynchronous file create support
-Date: Sat, 25 Jan 2020 09:58:39 +0800
-Message-ID: <8f207ea4-dc47-114f-cb33-edf2524bf334@redhat.com>
-References: <20200121192928.469316-1-jlayton@kernel.org>
- <CAAM7YAnYoCuxu2Oj3vK1ZyWyAgh_vWWTYRxE2ZqEhU9vT+YTKg@mail.gmail.com>
- <c894860b08a36191e8556afd3cf4bdb19cd5875b.camel@kernel.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [RFC PATCH v3 01/10] ceph: move net/ceph/ceph_fs.c to fs/ceph/util.c
+Date: Sat, 25 Jan 2020 09:08:03 +0100
+Message-ID: <CAOi1vP82OgP+uxEg9aQuSf-QUGJe6OcF5DkBLeFzY2qrBdewCg@mail.gmail.com>
+References: <20200121192928.469316-1-jlayton@kernel.org> <20200121192928.469316-2-jlayton@kernel.org>
+ <ca86904cc6b03bf5844358ebac6684e88aa8ca11.camel@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:32184 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2387608AbgAYB6w (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 24 Jan 2020 20:58:52 -0500
-In-Reply-To: <c894860b08a36191e8556afd3cf4bdb19cd5875b.camel@kernel.org>
-Content-Language: en-US
+Received: from mail-io1-f68.google.com ([209.85.166.68]:41911 "EHLO
+        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726303AbgAYIIA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Jan 2020 03:08:00 -0500
+Received: by mail-io1-f68.google.com with SMTP id m25so4473856ioo.8
+        for <ceph-devel@vger.kernel.org>; Sat, 25 Jan 2020 00:07:59 -0800 (PST)
+In-Reply-To: <ca86904cc6b03bf5844358ebac6684e88aa8ca11.camel@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <ukernel@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, idridryomov@gmail.com, Sage Weil <sage@redhat.com>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, idridryomov@gmail.com, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>
 
-On 1/25/20 1:19 AM, Jeff Layton wrote:
-> On Thu, 2020-01-23 at 01:04 +0800, Yan, Zheng wrote:
->> On Wed, Jan 22, 2020 at 3:31 AM Jeff Layton <jlayton@kernel.org> wrote:
->>> v3:
->>> - move some cephfs-specific code into ceph.ko
->>> - present and track inode numbers as u64 values
->>> - fix up check for dentry and cap eligibility checks
->>> - set O_CEPH_EXCL on async creates
->>> - attempt to handle errors better on async create (invalidate dentries
->>>    and dir completeness).
->>> - ensure that fsync waits for async create to complete
->>>
->>> v2:
->>> - move cached layout to dedicated field in inode
->>> - protect cached layout with i_ceph_lock
->>> - wipe cached layout in __check_cap_issue
->>> - set max_size of file to layout.stripe_unit
->>> - set truncate_size to (u64)-1
->>> - use dedicated CephFS feature bit instead of CEPHFS_FEATURE_OCTOPUS
->>> - set cap_id to 1 in async created inode
->>> - allocate inode number before submitting request
->>> - rework the prep for an async create to be more efficient
->>> - don't allow MDS or cap messages involving an inode until we get async
->>>    create reply
->>>
->>> Still not quite ready for merge, but I've cleaned up a number of warts
->>> in the v2 set. Performance numbers still look about the same.
->>>
->>> There is definitely still a race of some sort that causes the client to
->>> try to asynchronously create a dentry that already exists. I'm still
->>> working on tracking that down.
->>>
->>> Jeff Layton (10):
->>>    ceph: move net/ceph/ceph_fs.c to fs/ceph/util.c
->>>    ceph: make ceph_fill_inode non-static
->>>    ceph: make dentry_lease_is_valid non-static
->>>    ceph: make __take_cap_refs non-static
->>>    ceph: decode interval_sets for delegated inos
->>>    ceph: add flag to designate that a request is asynchronous
->>>    ceph: add infrastructure for waiting for async create to complete
->>>    ceph: add new MDS req field to hold delegated inode number
->>>    ceph: cache layout in parent dir on first sync create
->>>    ceph: attempt to do async create when possible
->>>
->>>   fs/ceph/Makefile                     |   2 +-
->>>   fs/ceph/caps.c                       |  38 +++--
->>>   fs/ceph/dir.c                        |  13 +-
->>>   fs/ceph/file.c                       | 240 +++++++++++++++++++++++++--
->>>   fs/ceph/inode.c                      |  50 +++---
->>>   fs/ceph/mds_client.c                 | 123 ++++++++++++--
->>>   fs/ceph/mds_client.h                 |  17 +-
->>>   fs/ceph/super.h                      |  16 +-
->>>   net/ceph/ceph_fs.c => fs/ceph/util.c |   4 -
->>>   include/linux/ceph/ceph_fs.h         |   8 +-
->>>   net/ceph/Makefile                    |   2 +-
->>>   11 files changed, 443 insertions(+), 70 deletions(-)
->>>   rename net/ceph/ceph_fs.c => fs/ceph/util.c (94%)
->>>
->>> --
->>> 2.24.1
->>>
->>
->> I realized that there still are two issues:
->> -  we needs to clear delegated inos when mds failover
-> 
-> I'm guessing we need to do this whenever any session is reconnected,
-> right? I think we may have bigger problems here though:
-> 
-> The issue is that with this set we assign out ino_t's prior to
-> submitting the request. We could get down into it and find that we're
-> reconnecting the session. At that point, that ino_t is no longer valid
-> for the session.
+On Fri, Jan 24, 2020 at 9:59 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> On Tue, 2020-01-21 at 14:29 -0500, Jeff Layton wrote:
+> > All of these functions are only called from CephFS, so move them into
+> > ceph.ko, and drop the exports.
+> >
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >  fs/ceph/Makefile                     | 2 +-
+> >  net/ceph/ceph_fs.c => fs/ceph/util.c | 4 ----
+> >  net/ceph/Makefile                    | 2 +-
+> >  3 files changed, 2 insertions(+), 6 deletions(-)
+> >  rename net/ceph/ceph_fs.c => fs/ceph/util.c (94%)
+> >
+> > diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
+> > index c1da294418d1..0a0823d378db 100644
+> > --- a/fs/ceph/Makefile
+> > +++ b/fs/ceph/Makefile
+> > @@ -8,7 +8,7 @@ obj-$(CONFIG_CEPH_FS) += ceph.o
+> >  ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
+> >       export.o caps.o snap.o xattr.o quota.o io.o \
+> >       mds_client.o mdsmap.o strings.o ceph_frag.o \
+> > -     debugfs.o
+> > +     debugfs.o util.o
+> >
+> >  ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
+> >  ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
+> > diff --git a/net/ceph/ceph_fs.c b/fs/ceph/util.c
+> > similarity index 94%
+> > rename from net/ceph/ceph_fs.c
+> > rename to fs/ceph/util.c
+> > index 756a2dc10d27..2c34875675bf 100644
+> > --- a/net/ceph/ceph_fs.c
+> > +++ b/fs/ceph/util.c
+> > @@ -39,7 +39,6 @@ void ceph_file_layout_from_legacy(struct ceph_file_layout *fl,
+> >           fl->stripe_count == 0 && fl->object_size == 0)
+> >               fl->pool_id = -1;
+> >  }
+> > -EXPORT_SYMBOL(ceph_file_layout_from_legacy);
+> >
+> >  void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
+> >                               struct ceph_file_layout_legacy *legacy)
+> > @@ -52,7 +51,6 @@ void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
+> >       else
+> >               legacy->fl_pg_pool = 0;
+> >  }
+> > -EXPORT_SYMBOL(ceph_file_layout_to_legacy);
+> >
+> >  int ceph_flags_to_mode(int flags)
+> >  {
+> > @@ -82,7 +80,6 @@ int ceph_flags_to_mode(int flags)
+> >
+> >       return mode;
+> >  }
+> > -EXPORT_SYMBOL(ceph_flags_to_mode);
+> >
+> >  int ceph_caps_for_mode(int mode)
+> >  {
+> > @@ -101,4 +98,3 @@ int ceph_caps_for_mode(int mode)
+> >
+> >       return caps;
+> >  }
+> > -EXPORT_SYMBOL(ceph_caps_for_mode);
+> > diff --git a/net/ceph/Makefile b/net/ceph/Makefile
+> > index 59d0ba2072de..ce09bb4fb249 100644
+> > --- a/net/ceph/Makefile
+> > +++ b/net/ceph/Makefile
+> > @@ -13,5 +13,5 @@ libceph-y := ceph_common.o messenger.o msgpool.o buffer.o pagelist.o \
+> >       auth.o auth_none.o \
+> >       crypto.o armor.o \
+> >       auth_x.o \
+> > -     ceph_fs.o ceph_strings.o ceph_hash.o \
+> > +     ceph_strings.o ceph_hash.o \
+> >       pagevec.o snapshot.o string_table.o
+>
+> I've gone ahead and merged this patch into testing, as I think it makes
+> sense on its own and it was becoming a hassle when testing.
 
-yes, that's a problem for current kclient impelmentaion
+Yup, sounds good.
 
+Thanks,
 
-> 
->> - we needs to clear caps for async dir operations when reconnecting to
->> mds. (see last commit of https://github.com/ceph/ceph/pull/32576)
->>
-> 
-> I guess we can use ceph_iterate_session_caps to do this. That said,
-> looking at your patch:
-> 
->          if (in->is_dir()) {
->            // remove caps for async dir operations
->            cap.implemented &= (CEPH_CAP_ANY_SHARED | CEPH_CAP_ANY_EXCL);
->          }
-> 
-> We remove all but Fsx here. That seems like quite a subtle difference
-> from how FILE caps work.
-
-only file caps have more than 2 bits. this removes caps other than 
-AsxLsxXsxFsx.
-
-> 
-> Given the way that we're doing the inode delegation and handling dir
-> caps, I think we may need to rework things such that async requests
-> never get queued to the s_waiting list, and instead return some sort of
-> distinct error that cues the caller to fall back to a synchronous
-> request.
-> 
-> That would help prevent some of the potential races here.
-
-my libcephfs implementation check if a request can be async just before 
-sending the request.
-> 
+                Ilya
