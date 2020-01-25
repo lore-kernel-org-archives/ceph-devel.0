@@ -1,7 +1,7 @@
 From: "Yan, Zheng" <zyan@redhat.com>
 Subject: Re: [RFC PATCH v3 00/10] ceph: asynchronous file create support
-Date: Sat, 25 Jan 2020 09:58:12 +0800
-Message-ID: <5181ceb7-e4f2-fe7e-1016-e78495847157@redhat.com>
+Date: Sat, 25 Jan 2020 09:58:39 +0800
+Message-ID: <8f207ea4-dc47-114f-cb33-edf2524bf334@redhat.com>
 References: <20200121192928.469316-1-jlayton@kernel.org>
  <CAAM7YAnYoCuxu2Oj3vK1ZyWyAgh_vWWTYRxE2ZqEhU9vT+YTKg@mail.gmail.com>
  <c894860b08a36191e8556afd3cf4bdb19cd5875b.camel@kernel.org>
@@ -9,11 +9,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:30979 "EHLO
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:32184 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2387608AbgAYB60 (ORCPT
+        by vger.kernel.org with ESMTP id S2387608AbgAYB6w (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 24 Jan 2020 20:58:26 -0500
+        Fri, 24 Jan 2020 20:58:52 -0500
 In-Reply-To: <c894860b08a36191e8556afd3cf4bdb19cd5875b.camel@kernel.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -113,7 +113,8 @@ yes, that's a problem for current kclient impelmentaion
 > We remove all but Fsx here. That seems like quite a subtle difference
 > from how FILE caps work.
 
-only file caps have more than 2 bits. this removes all but AsxLsxXsxFsx.
+only file caps have more than 2 bits. this removes caps other than 
+AsxLsxXsxFsx.
 
 > 
 > Given the way that we're doing the inode delegation and handling dir
