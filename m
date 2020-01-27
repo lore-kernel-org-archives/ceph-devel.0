@@ -1,82 +1,134 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH 3/3] ceph: add module param to throttle 'copy-from2' operations
-Date: Mon, 27 Jan 2020 16:43:21 +0000
-Message-ID: <20200127164321.17468-4-lhenriques@suse.com>
-References: <20200127164321.17468-1-lhenriques@suse.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [RFC PATCH 1/3] libceph: add non-blocking version of ceph_osdc_copy_from()
+Date: Mon, 27 Jan 2020 18:47:02 +0100
+Message-ID: <CAOi1vP9S3w13axR3FYxqFSZ1uF2V=0aMfnkcsMptMKL4W+-wEA@mail.gmail.com>
+References: <20200127164321.17468-1-lhenriques@suse.com> <20200127164321.17468-2-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200127164321.17468-1-lhenriques@suse.com>
+In-Reply-To: <20200127164321.17468-2-lhenriques@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+To: Luis Henriques <lhenriques@suse.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This patch adds a ceph kernel module parameter that allows to throttle the
-amount of parallel requests that can be sent to the OSDs before waiting
-for the completion.  This allows to prevent DoS'ing the ODSs with too many
-requests at once when copying a big file.
+On Mon, Jan 27, 2020 at 5:43 PM Luis Henriques <lhenriques@suse.com> wrote:
+>
+> A non-blocking version of ceph_osdc_copy_from will allow for callers to
+> send 'copy-from' requests in bulk and wait for all of them to complete in
+> the end.
+>
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+>  include/linux/ceph/osd_client.h | 12 ++++++++
+>  net/ceph/osd_client.c           | 54 +++++++++++++++++++++++++--------
+>  2 files changed, 53 insertions(+), 13 deletions(-)
+>
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index 5a62dbd3f4c2..7916a178d137 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -537,6 +537,18 @@ int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
+>                         u32 truncate_seq, u64 truncate_size,
+>                         u8 copy_from_flags);
+>
+> +struct ceph_osd_request *ceph_osdc_copy_from_nowait(
+> +                       struct ceph_osd_client *osdc,
+> +                       u64 src_snapid, u64 src_version,
+> +                       struct ceph_object_id *src_oid,
+> +                       struct ceph_object_locator *src_oloc,
+> +                       u32 src_fadvise_flags,
+> +                       struct ceph_object_id *dst_oid,
+> +                       struct ceph_object_locator *dst_oloc,
+> +                       u32 dst_fadvise_flags,
+> +                       u32 truncate_seq, u64 truncate_size,
+> +                       u8 copy_from_flags);
+> +
+>  /* watch/notify */
+>  struct ceph_osd_linger_request *
+>  ceph_osdc_watch(struct ceph_osd_client *osdc,
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b68b376d8c2f..7f984532f37c 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -5346,23 +5346,24 @@ static int osd_req_op_copy_from_init(struct ceph_osd_request *req,
+>         return 0;
+>  }
+>
+> -int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
+> -                       u64 src_snapid, u64 src_version,
+> -                       struct ceph_object_id *src_oid,
+> -                       struct ceph_object_locator *src_oloc,
+> -                       u32 src_fadvise_flags,
+> -                       struct ceph_object_id *dst_oid,
+> -                       struct ceph_object_locator *dst_oloc,
+> -                       u32 dst_fadvise_flags,
+> -                       u32 truncate_seq, u64 truncate_size,
+> -                       u8 copy_from_flags)
+> +struct ceph_osd_request *ceph_osdc_copy_from_nowait(
+> +               struct ceph_osd_client *osdc,
+> +               u64 src_snapid, u64 src_version,
+> +               struct ceph_object_id *src_oid,
+> +               struct ceph_object_locator *src_oloc,
+> +               u32 src_fadvise_flags,
+> +               struct ceph_object_id *dst_oid,
+> +               struct ceph_object_locator *dst_oloc,
+> +               u32 dst_fadvise_flags,
+> +               u32 truncate_seq, u64 truncate_size,
+> +               u8 copy_from_flags)
+>  {
+>         struct ceph_osd_request *req;
+>         int ret;
+>
+>         req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_KERNEL);
+>         if (!req)
+> -               return -ENOMEM;
+> +               return ERR_PTR(-ENOMEM);
+>
+>         req->r_flags = CEPH_OSD_FLAG_WRITE;
+>
+> @@ -5381,11 +5382,38 @@ int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
+>                 goto out;
+>
+>         ceph_osdc_start_request(osdc, req, false);
+> -       ret = ceph_osdc_wait_request(osdc, req);
+> +       return req;
+>
+>  out:
+>         ceph_osdc_put_request(req);
+> -       return ret;
+> +       return ERR_PTR(ret);
+> +}
+> +EXPORT_SYMBOL(ceph_osdc_copy_from_nowait);
+> +
+> +int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
+> +                       u64 src_snapid, u64 src_version,
+> +                       struct ceph_object_id *src_oid,
+> +                       struct ceph_object_locator *src_oloc,
+> +                       u32 src_fadvise_flags,
+> +                       struct ceph_object_id *dst_oid,
+> +                       struct ceph_object_locator *dst_oloc,
+> +                       u32 dst_fadvise_flags,
+> +                       u32 truncate_seq, u64 truncate_size,
+> +                       u8 copy_from_flags)
+> +{
+> +       struct ceph_osd_request *req;
+> +
+> +       req = ceph_osdc_copy_from_nowait(osdc,
+> +                       src_snapid, src_version,
+> +                       src_oid, src_oloc,
+> +                       src_fadvise_flags,
+> +                       dst_oid, dst_oloc,
+> +                       dst_fadvise_flags,
+> +                       truncate_seq, truncate_size,
+> +                       copy_from_flags);
+> +       if (IS_ERR(req))
+> +               return PTR_ERR(req);
+> +       return ceph_osdc_wait_request(osdc, req);
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/file.c  | 10 ++++++++++
- fs/ceph/super.c |  4 ++++
- fs/ceph/super.h |  2 ++
- 3 files changed, 16 insertions(+)
+I don't think we need a blocking version.  Change ceph_osdc_copy_from()
+and keep the name -- no need for async or nowait suffixes.
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 5d8f0ba11719..bf18712f3bd3 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1973,6 +1973,7 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
- 	int src_got = 0, dst_got = 0, err, dirty;
- 	bool do_final_copy = false;
- 	LIST_HEAD(osd_reqs);
-+	unsigned int ncopies = cfr_throttle;
- 
- 	if (src_inode->i_sb != dst_inode->i_sb) {
- 		struct ceph_fs_client *dst_fsc = ceph_inode_to_client(dst_inode);
-@@ -2151,6 +2152,15 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
- 		src_off += object_size;
- 		dst_off += object_size;
- 		ret += object_size;
-+		if (cfr_throttle && (--ncopies == 0)) {
-+			err = wait_copy_from_reqs(&osd_reqs);
-+			if (err) {
-+				if (!ret)
-+					ret = err;
-+				goto out_caps;
-+			}
-+			ncopies = cfr_throttle;
-+		}
- 	}
- 
- 	err = wait_copy_from_reqs(&osd_reqs);
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index b62c487a53af..02e8b6f93d50 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -1238,6 +1238,10 @@ static void __exit exit_ceph(void)
- 	destroy_caches();
- }
- 
-+unsigned int cfr_throttle = 0;
-+module_param(cfr_throttle, uint, 0644);
-+MODULE_PARM_DESC(cfr_throttle, "copy_file_range throttle value.");
-+
- module_init(init_ceph);
- module_exit(exit_ceph);
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index b2f86bed5c2c..fb98b4b1ec72 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -72,6 +72,8 @@
- #define CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT      5  /* cap release delay */
- #define CEPH_CAPS_WANTED_DELAY_MAX_DEFAULT     60  /* cap release delay */
- 
-+extern unsigned int cfr_throttle;
-+
- struct ceph_mount_options {
- 	unsigned int flags;
- 
+Thanks,
+
+                Ilya
