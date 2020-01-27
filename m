@@ -1,103 +1,69 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [RFC PATCH v3 01/10] ceph: move net/ceph/ceph_fs.c to fs/ceph/util.c
-Date: Sat, 25 Jan 2020 09:08:03 +0100
-Message-ID: <CAOi1vP82OgP+uxEg9aQuSf-QUGJe6OcF5DkBLeFzY2qrBdewCg@mail.gmail.com>
-References: <20200121192928.469316-1-jlayton@kernel.org> <20200121192928.469316-2-jlayton@kernel.org>
- <ca86904cc6b03bf5844358ebac6684e88aa8ca11.camel@kernel.org>
+Subject: Re: [PATCH] rbd: set the 'device' link in sysfs
+Date: Mon, 27 Jan 2020 11:29:51 +0100
+Message-ID: <CAOi1vP85wu8R3h2pQ7wt2udtwbTgbHq25_cxvQD+zwU0UCW+hw@mail.gmail.com>
+References: <20200123124433.121939-1-hare@suse.de> <CAOi1vP8Q44jLNoq+LTm8GRX687wfwLkJ3WRW_DWvY7nYUtPQxQ@mail.gmail.com>
+ <fe3fcf53-94fb-84b8-75ed-6375d81e1452@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io1-f68.google.com ([209.85.166.68]:41911 "EHLO
-        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726303AbgAYIIA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Jan 2020 03:08:00 -0500
-Received: by mail-io1-f68.google.com with SMTP id m25so4473856ioo.8
-        for <ceph-devel@vger.kernel.org>; Sat, 25 Jan 2020 00:07:59 -0800 (PST)
-In-Reply-To: <ca86904cc6b03bf5844358ebac6684e88aa8ca11.camel@kernel.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, idridryomov@gmail.com, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <fe3fcf53-94fb-84b8-75ed-6375d81e1452@suse.de>
+Sender: linux-block-owner@vger.kernel.org
+To: Hannes Reinecke <hare@suse.de>
+Cc: Sage Weil <sage@redhat.com>, Jens Axboe <axboe@kernel.dk>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, David Disseldorp <ddiss@suse.com>, Hannes Reinecke <hare@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Jan 24, 2020 at 9:59 PM Jeff Layton <jlayton@kernel.org> wrote:
+On Fri, Jan 24, 2020 at 8:03 AM Hannes Reinecke <hare@suse.de> wrote:
 >
-> On Tue, 2020-01-21 at 14:29 -0500, Jeff Layton wrote:
-> > All of these functions are only called from CephFS, so move them into
-> > ceph.ko, and drop the exports.
+> On 1/23/20 7:45 PM, Ilya Dryomov wrote:
+> > On Thu, Jan 23, 2020 at 1:44 PM Hannes Reinecke <hare@suse.de> wrote:
+> >>
+> >> The rbd driver already provides additional information in sysfs
+> >> under /sys/bus/rbd, so we should set the 'device' link in the block
+> >> device to reference this information.
+> >>
+> >> Cc: David Disseldorp <ddiss@suse.com>
+> >> Signed-off-by: Hannes Reinecke <hare@suse.com>
+> >> ---
+> >>  drivers/block/rbd.c | 2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> >> index 9f1f8689e316..3240b7744aeb 100644
+> >> --- a/drivers/block/rbd.c
+> >> +++ b/drivers/block/rbd.c
+> >> @@ -6938,7 +6938,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+> >>         if (rc)
+> >>                 goto err_out_image_lock;
+> >>
+> >> -       add_disk(rbd_dev->disk);
+> >> +       device_add_disk(&rbd_dev->dev, rbd_dev->disk, NULL);
+> >>         /* see rbd_init_disk() */
+> >>         blk_put_queue(rbd_dev->disk->queue);
 > >
-> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > ---
-> >  fs/ceph/Makefile                     | 2 +-
-> >  net/ceph/ceph_fs.c => fs/ceph/util.c | 4 ----
-> >  net/ceph/Makefile                    | 2 +-
-> >  3 files changed, 2 insertions(+), 6 deletions(-)
-> >  rename net/ceph/ceph_fs.c => fs/ceph/util.c (94%)
+> > Hi Hannes,
 > >
-> > diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-> > index c1da294418d1..0a0823d378db 100644
-> > --- a/fs/ceph/Makefile
-> > +++ b/fs/ceph/Makefile
-> > @@ -8,7 +8,7 @@ obj-$(CONFIG_CEPH_FS) += ceph.o
-> >  ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
-> >       export.o caps.o snap.o xattr.o quota.o io.o \
-> >       mds_client.o mdsmap.o strings.o ceph_frag.o \
-> > -     debugfs.o
-> > +     debugfs.o util.o
+> > I looked at this a while ago and didn't go through with the patch
+> > because I wasn't sure whether this symlink can point to something
+> > arbitrary.  IIRC it usually points a couple of levels up, to some
+> > parent.  In the rbd case, this would be a completely different tree:
+> > /sys/devices/virtual -> /sys/bus/rbd.
 > >
-> >  ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
-> >  ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
-> > diff --git a/net/ceph/ceph_fs.c b/fs/ceph/util.c
-> > similarity index 94%
-> > rename from net/ceph/ceph_fs.c
-> > rename to fs/ceph/util.c
-> > index 756a2dc10d27..2c34875675bf 100644
-> > --- a/net/ceph/ceph_fs.c
-> > +++ b/fs/ceph/util.c
-> > @@ -39,7 +39,6 @@ void ceph_file_layout_from_legacy(struct ceph_file_layout *fl,
-> >           fl->stripe_count == 0 && fl->object_size == 0)
-> >               fl->pool_id = -1;
-> >  }
-> > -EXPORT_SYMBOL(ceph_file_layout_from_legacy);
-> >
-> >  void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
-> >                               struct ceph_file_layout_legacy *legacy)
-> > @@ -52,7 +51,6 @@ void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
-> >       else
-> >               legacy->fl_pg_pool = 0;
-> >  }
-> > -EXPORT_SYMBOL(ceph_file_layout_to_legacy);
-> >
-> >  int ceph_flags_to_mode(int flags)
-> >  {
-> > @@ -82,7 +80,6 @@ int ceph_flags_to_mode(int flags)
-> >
-> >       return mode;
-> >  }
-> > -EXPORT_SYMBOL(ceph_flags_to_mode);
-> >
-> >  int ceph_caps_for_mode(int mode)
-> >  {
-> > @@ -101,4 +98,3 @@ int ceph_caps_for_mode(int mode)
-> >
-> >       return caps;
-> >  }
-> > -EXPORT_SYMBOL(ceph_caps_for_mode);
-> > diff --git a/net/ceph/Makefile b/net/ceph/Makefile
-> > index 59d0ba2072de..ce09bb4fb249 100644
-> > --- a/net/ceph/Makefile
-> > +++ b/net/ceph/Makefile
-> > @@ -13,5 +13,5 @@ libceph-y := ceph_common.o messenger.o msgpool.o buffer.o pagelist.o \
-> >       auth.o auth_none.o \
-> >       crypto.o armor.o \
-> >       auth_x.o \
-> > -     ceph_fs.o ceph_strings.o ceph_hash.o \
-> > +     ceph_strings.o ceph_hash.o \
-> >       pagevec.o snapshot.o string_table.o
+> Yes, this is expected.
+> The 'device' link will _always_ point into a different tree; the
+> accessor via /sys/block or /sys/bus are assumed to be virtual entries,
+> with the 'device' link pointing to the underlying device.
+> In our case the underlying device is also a virtual entity, but that's okay.
 >
-> I've gone ahead and merged this patch into testing, as I think it makes
-> sense on its own and it was becoming a hassle when testing.
+> > Do you know if there is precedent for this in some other driver?
+> > Are you sure it's not going to break any assumptions?
+> >
+> Things like iscsi do the very same thing.
+> And no, it doesn't break assumptions; quite the contrary.
 
-Yup, sounds good.
+I see, thanks for the explanation.
+
+Queued up for 5.6.
 
 Thanks,
 
