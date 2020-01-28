@@ -1,15 +1,16 @@
 From: xiubli@redhat.com
-Subject: [PATCH v5 10/10] ceph: send client provided metric flags in client metadata
-Date: Tue, 28 Jan 2020 08:02:48 -0500
-Message-ID: <20200128130248.4266-11-xiubli@redhat.com>
+Subject: [PATCH v5 03/10] ceph: add r_end_stamp for the osdc request
+Date: Tue, 28 Jan 2020 08:02:41 -0500
+Message-ID: <20200128130248.4266-4-xiubli@redhat.com>
 References: <20200128130248.4266-1-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:58147 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726034AbgA1ND5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jan 2020 08:03:57 -0500
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:43546 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726057AbgA1NDO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 28 Jan 2020 08:03:14 -0500
 In-Reply-To: <20200128130248.4266-1-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -18,126 +19,40 @@ Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <
 
 From: Xiubo Li <xiubli@redhat.com>
 
-Will send the metric flags to MDS, currently it supports the cap,
-dentry lease, read latency, write latency and metadata latency.
+Grab the osdc requests' end time stamp.
 
-URL: https://tracker.ceph.com/issues/43435
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/mds_client.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
- fs/ceph/metric.h     | 14 +++++++++++++
- 2 files changed, 59 insertions(+), 2 deletions(-)
+ include/linux/ceph/osd_client.h | 1 +
+ net/ceph/osd_client.c           | 2 ++
+ 2 files changed, 3 insertions(+)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index d765804dc855..f9d3acd36656 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1096,6 +1096,41 @@ static void encode_supported_features(void **p, vo=
-id *end)
- 	}
- }
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_cli=
+ent.h
+index 9d9f745b98a1..00a449cfc478 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -213,6 +213,7 @@ struct ceph_osd_request {
+ 	/* internal */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
++	unsigned long r_end_stamp;          /* jiffies */
+ 	int r_attempts;
+ 	u32 r_map_dne_bound;
 =20
-+static const unsigned char metric_bits[] =3D CEPHFS_METRIC_SPEC_CLIENT_S=
-UPPORTED;
-+#define METRIC_BYTES(cnt) (DIV_ROUND_UP((size_t)metric_bits[cnt - 1] + 1=
-, 64) * 8)
-+static void encode_metric_spec(void **p, void *end)
-+{
-+	static const size_t count =3D ARRAY_SIZE(metric_bits);
-+
-+	/* header */
-+	BUG_ON(*p + 2 > end);
-+	ceph_encode_8(p, 1); /* version */
-+	ceph_encode_8(p, 1); /* compat */
-+
-+	if (count > 0) {
-+		size_t i;
-+		size_t size =3D METRIC_BYTES(count);
-+
-+		BUG_ON(*p + 4 + 4 + size > end);
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4 + size);
-+
-+		/* metric spec */
-+		ceph_encode_32(p, size);
-+		memset(*p, 0, size);
-+		for (i =3D 0; i < count; i++)
-+			((unsigned char*)(*p))[i / 8] |=3D BIT(metric_bits[i] % 8);
-+		*p +=3D size;
-+	} else {
-+		BUG_ON(*p + 4 + 4 > end);
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4);
-+		/* metric spec */
-+		ceph_encode_32(p, 0);
-+	}
-+}
-+
- /*
-  * session message, specialization for CEPH_SESSION_REQUEST_OPEN
-  * to include additional client metadata fields.
-@@ -1135,6 +1170,13 @@ static struct ceph_msg *create_session_open_msg(st=
-ruct ceph_mds_client *mdsc, u6
- 		size =3D FEATURE_BYTES(count);
- 	extra_bytes +=3D 4 + size;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 8ff2856e2d52..108c9457d629 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2389,6 +2389,8 @@ static void finish_request(struct ceph_osd_request =
+*req)
+ 	WARN_ON(lookup_request_mc(&osdc->map_checks, req->r_tid));
+ 	dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
 =20
-+	/* metric spec */
-+	size =3D 0;
-+	count =3D ARRAY_SIZE(metric_bits);
-+	if (count > 0)
-+		size =3D METRIC_BYTES(count);
-+	extra_bytes +=3D 2 + 4 + 4 + size;
++	req->r_end_stamp =3D jiffies;
 +
- 	/* Allocate the message */
- 	msg =3D ceph_msg_new(CEPH_MSG_CLIENT_SESSION, sizeof(*h) + extra_bytes,
- 			   GFP_NOFS, false);
-@@ -1153,9 +1195,9 @@ static struct ceph_msg *create_session_open_msg(str=
-uct ceph_mds_client *mdsc, u6
- 	 * Serialize client metadata into waiting buffer space, using
- 	 * the format that userspace expects for map<string, string>
- 	 *
--	 * ClientSession messages with metadata are v3
-+	 * ClientSession messages with metadata are v4
- 	 */
--	msg->hdr.version =3D cpu_to_le16(3);
-+	msg->hdr.version =3D cpu_to_le16(4);
- 	msg->hdr.compat_version =3D cpu_to_le16(1);
-=20
- 	/* The write pointer, following the session_head structure */
-@@ -1178,6 +1220,7 @@ static struct ceph_msg *create_session_open_msg(str=
-uct ceph_mds_client *mdsc, u6
- 	}
-=20
- 	encode_supported_features(&p, end);
-+	encode_metric_spec(&p, end);
- 	msg->front.iov_len =3D p - msg->front.iov_base;
- 	msg->hdr.front_len =3D cpu_to_le32(msg->front.iov_len);
-=20
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index 352eb753ce25..70e0b586b687 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -14,6 +14,20 @@ enum ceph_metric_type {
- 	CLIENT_METRIC_TYPE_MAX =3D CLIENT_METRIC_TYPE_DENTRY_LEASE,
- };
-=20
-+/*
-+ * This will always have the highest metric bit value
-+ * as the last element of the array.
-+ */
-+#define CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED {	\
-+	CLIENT_METRIC_TYPE_CAP_INFO,		\
-+	CLIENT_METRIC_TYPE_READ_LATENCY,	\
-+	CLIENT_METRIC_TYPE_WRITE_LATENCY,	\
-+	CLIENT_METRIC_TYPE_METADATA_LATENCY,	\
-+	CLIENT_METRIC_TYPE_DENTRY_LEASE,	\
-+						\
-+	CLIENT_METRIC_TYPE_MAX,			\
-+}
-+
- /* metric caps header */
- struct ceph_metric_cap {
- 	__le32 type;     /* ceph metric type */
+ 	if (req->r_osd)
+ 		unlink_request(req->r_osd, req);
+ 	atomic_dec(&osdc->num_requests);
 --=20
 2.21.0
