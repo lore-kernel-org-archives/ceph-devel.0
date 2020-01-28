@@ -1,16 +1,15 @@
 From: xiubli@redhat.com
-Subject: [PATCH v5 03/10] ceph: add r_end_stamp for the osdc request
-Date: Tue, 28 Jan 2020 08:02:41 -0500
-Message-ID: <20200128130248.4266-4-xiubli@redhat.com>
+Subject: [PATCH v5 08/10] ceph: add CEPH_DEFINE_RW_FUNC helper support
+Date: Tue, 28 Jan 2020 08:02:46 -0500
+Message-ID: <20200128130248.4266-9-xiubli@redhat.com>
 References: <20200128130248.4266-1-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:43546 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726057AbgA1NDO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Jan 2020 08:03:14 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:40408 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726007AbgA1NDp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jan 2020 08:03:45 -0500
 In-Reply-To: <20200128130248.4266-1-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,40 +18,38 @@ Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <
 
 From: Xiubo Li <xiubli@redhat.com>
 
-Grab the osdc requests' end time stamp.
+This will support the string store.
 
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- include/linux/ceph/osd_client.h | 1 +
- net/ceph/osd_client.c           | 2 ++
- 2 files changed, 3 insertions(+)
+ include/linux/ceph/debugfs.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_cli=
-ent.h
-index 9d9f745b98a1..00a449cfc478 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -213,6 +213,7 @@ struct ceph_osd_request {
- 	/* internal */
- 	unsigned long r_stamp;                /* jiffies, send or check time */
- 	unsigned long r_start_stamp;          /* jiffies */
-+	unsigned long r_end_stamp;          /* jiffies */
- 	int r_attempts;
- 	u32 r_map_dne_bound;
+diff --git a/include/linux/ceph/debugfs.h b/include/linux/ceph/debugfs.h
+index cf5e840eec71..b918fb1f6f54 100644
+--- a/include/linux/ceph/debugfs.h
++++ b/include/linux/ceph/debugfs.h
+@@ -18,6 +18,20 @@ static const struct file_operations name##_fops =3D {	=
+		\
+ 	.release	=3D single_release,				\
+ };
 =20
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8ff2856e2d52..108c9457d629 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2389,6 +2389,8 @@ static void finish_request(struct ceph_osd_request =
-*req)
- 	WARN_ON(lookup_request_mc(&osdc->map_checks, req->r_tid));
- 	dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
-=20
-+	req->r_end_stamp =3D jiffies;
++#define CEPH_DEFINE_RW_FUNC(name)					\
++static int name##_open(struct inode *inode, struct file *file)		\
++{									\
++	return single_open(file, name##_show, inode->i_private);	\
++}									\
++									\
++static const struct file_operations name##_fops =3D {			\
++	.open		=3D name##_open,					\
++	.read		=3D seq_read,					\
++	.write		=3D name##_store,					\
++	.llseek		=3D seq_lseek,					\
++	.release	=3D single_release,				\
++};
 +
- 	if (req->r_osd)
- 		unlink_request(req->r_osd, req);
- 	atomic_dec(&osdc->num_requests);
+ /* debugfs.c */
+ extern void ceph_debugfs_init(void);
+ extern void ceph_debugfs_cleanup(void);
 --=20
 2.21.0
