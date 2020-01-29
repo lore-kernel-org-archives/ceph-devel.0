@@ -1,166 +1,128 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] libceph: drop CEPH_DEFINE_SHOW_FUNC
-Date: Wed, 29 Jan 2020 10:22:05 -0500
-Message-ID: <f557513cdb917f3bacfbe0475e3c04493d853c03.camel@kernel.org>
-References: <20200128201303.16352-1-idryomov@gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH v2 0/1] parallel 'copy-from' Ops in copy_file_range
+Date: Wed, 29 Jan 2020 18:20:10 +0000
+Message-ID: <20200129182011.5483-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:50566 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726964AbgA2PWH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 29 Jan 2020 10:22:07 -0500
-In-Reply-To: <20200128201303.16352-1-idryomov@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 2020-01-28 at 21:13 +0100, Ilya Dryomov wrote:
-> Although CEPH_DEFINE_SHOW_FUNC is much older, it now duplicates
-> DEFINE_SHOW_ATTRIBUTE from linux/seq_file.h.
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  fs/ceph/debugfs.c            | 16 ++++++++--------
->  include/linux/ceph/debugfs.h | 14 --------------
->  net/ceph/debugfs.c           | 20 ++++++++++----------
->  3 files changed, 18 insertions(+), 32 deletions(-)
-> 
-> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-> index fb7cabd98e7b..481ac97b4d25 100644
-> --- a/fs/ceph/debugfs.c
-> +++ b/fs/ceph/debugfs.c
-> @@ -218,10 +218,10 @@ static int mds_sessions_show(struct seq_file *s, void *ptr)
->  	return 0;
->  }
->  
-> -CEPH_DEFINE_SHOW_FUNC(mdsmap_show)
-> -CEPH_DEFINE_SHOW_FUNC(mdsc_show)
-> -CEPH_DEFINE_SHOW_FUNC(caps_show)
-> -CEPH_DEFINE_SHOW_FUNC(mds_sessions_show)
-> +DEFINE_SHOW_ATTRIBUTE(mdsmap);
-> +DEFINE_SHOW_ATTRIBUTE(mdsc);
-> +DEFINE_SHOW_ATTRIBUTE(caps);
-> +DEFINE_SHOW_ATTRIBUTE(mds_sessions);
->  
->  
->  /*
-> @@ -281,25 +281,25 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
->  					0400,
->  					fsc->client->debugfs_dir,
->  					fsc,
-> -					&mdsmap_show_fops);
-> +					&mdsmap_fops);
->  
->  	fsc->debugfs_mds_sessions = debugfs_create_file("mds_sessions",
->  					0400,
->  					fsc->client->debugfs_dir,
->  					fsc,
-> -					&mds_sessions_show_fops);
-> +					&mds_sessions_fops);
->  
->  	fsc->debugfs_mdsc = debugfs_create_file("mdsc",
->  						0400,
->  						fsc->client->debugfs_dir,
->  						fsc,
-> -						&mdsc_show_fops);
-> +						&mdsc_fops);
->  
->  	fsc->debugfs_caps = debugfs_create_file("caps",
->  						   0400,
->  						   fsc->client->debugfs_dir,
->  						   fsc,
-> -						   &caps_show_fops);
-> +						   &caps_fops);
->  }
->  
->  
-> diff --git a/include/linux/ceph/debugfs.h b/include/linux/ceph/debugfs.h
-> index cf5e840eec71..8b3a1a7a953a 100644
-> --- a/include/linux/ceph/debugfs.h
-> +++ b/include/linux/ceph/debugfs.h
-> @@ -2,22 +2,8 @@
->  #ifndef _FS_CEPH_DEBUGFS_H
->  #define _FS_CEPH_DEBUGFS_H
->  
-> -#include <linux/ceph/ceph_debug.h>
->  #include <linux/ceph/types.h>
->  
-> -#define CEPH_DEFINE_SHOW_FUNC(name)					\
-> -static int name##_open(struct inode *inode, struct file *file)		\
-> -{									\
-> -	return single_open(file, name, inode->i_private);		\
-> -}									\
-> -									\
-> -static const struct file_operations name##_fops = {			\
-> -	.open		= name##_open,					\
-> -	.read		= seq_read,					\
-> -	.llseek		= seq_lseek,					\
-> -	.release	= single_release,				\
-> -};
-> -
->  /* debugfs.c */
->  extern void ceph_debugfs_init(void);
->  extern void ceph_debugfs_cleanup(void);
-> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-> index 7cb992e55475..1344f232ecc5 100644
-> --- a/net/ceph/debugfs.c
-> +++ b/net/ceph/debugfs.c
-> @@ -383,11 +383,11 @@ static int client_options_show(struct seq_file *s, void *p)
->  	return 0;
->  }
->  
-> -CEPH_DEFINE_SHOW_FUNC(monmap_show)
-> -CEPH_DEFINE_SHOW_FUNC(osdmap_show)
-> -CEPH_DEFINE_SHOW_FUNC(monc_show)
-> -CEPH_DEFINE_SHOW_FUNC(osdc_show)
-> -CEPH_DEFINE_SHOW_FUNC(client_options_show)
-> +DEFINE_SHOW_ATTRIBUTE(monmap);
-> +DEFINE_SHOW_ATTRIBUTE(osdmap);
-> +DEFINE_SHOW_ATTRIBUTE(monc);
-> +DEFINE_SHOW_ATTRIBUTE(osdc);
-> +DEFINE_SHOW_ATTRIBUTE(client_options);
->  
->  void __init ceph_debugfs_init(void)
->  {
-> @@ -414,31 +414,31 @@ void ceph_debugfs_client_init(struct ceph_client *client)
->  						      0400,
->  						      client->debugfs_dir,
->  						      client,
-> -						      &monc_show_fops);
-> +						      &monc_fops);
->  
->  	client->osdc.debugfs_file = debugfs_create_file("osdc",
->  						      0400,
->  						      client->debugfs_dir,
->  						      client,
-> -						      &osdc_show_fops);
-> +						      &osdc_fops);
->  
->  	client->debugfs_monmap = debugfs_create_file("monmap",
->  					0400,
->  					client->debugfs_dir,
->  					client,
-> -					&monmap_show_fops);
-> +					&monmap_fops);
->  
->  	client->debugfs_osdmap = debugfs_create_file("osdmap",
->  					0400,
->  					client->debugfs_dir,
->  					client,
-> -					&osdmap_show_fops);
-> +					&osdmap_fops);
->  
->  	client->debugfs_options = debugfs_create_file("client_options",
->  					0400,
->  					client->debugfs_dir,
->  					client,
-> -					&client_options_show_fops);
-> +					&client_options_fops);
->  }
->  
->  void ceph_debugfs_client_cleanup(struct ceph_client *client)
+Hi,
+
+Here's a re-spin of the patchset (now a single patch!) to improve
+copy_file_range performance by parallelizing the OSD requests.
+
+Changelog since v1 (the RFC):
+
+- Dropped synchronous version of ceph_osdc_copy_from
+  * This was the reason for merging the patchset into a single patch, as
+    changing ceph_osdc_copy_from definition would break bisectability
+
+- Moved wait_copy_from_reqs into libceph, renaming it to
+  ceph_osdc_wait_requests
+
+- Use ->r_private_item instead of adding a new list_head into struct
+  ceph_osd_request
+
+- Dropped the module parameter (used for testing) and added the throttling
+  mechanism using the formula suggested by Ilya.
+
+For reference, here's the original RFC cover letter (fixed typo in results
+table: 'throttle=5' should be 'throttle=0').
+
+--------------------------------------------------------------------------
+
+As discussed here[1] I'm sending an RFC patchset that does the
+parallelization of the requests sent to the OSDs during a copy_file_range
+syscall in CephFS.
+
+  [1] https://lore.kernel.org/lkml/20200108100353.23770-1-lhenriques@suse.com/
+
+I've also some performance numbers that I wanted to share. Here's a
+description of the very simple tests I've run:
+
+ - create a file with 200 objects in it
+   * i.e. tests with different object sizes mean different file sizes
+ - drop all caches and umount the filesystem
+ - Measure:
+   * mount filesystem
+   * full file copy (with copy_file_range)
+   * umount filesystem
+
+Tests were repeated several times and the average value was used for
+comparison.
+
+  DISCLAIMER:
+  These numbers are only indicative, and different clusters and client
+  configs will for sure show different performance!  More rigorous tests
+  would be require to validate these results.
+
+Having as baseline a full read+write (basically, a copy_file_range
+operation within a filesystem mounted without the 'copyfrom' option),
+here's some values for different object sizes:
+
+			  8M	  4M	  1M	  65k
+read+write		100%	100%	100%	 100%
+sequential		 51%	 52%	 83%	>100%
+parallel (throttle=1)	 51%	 52%	 83%	>100%
+parallel (throttle=0)	 17%	 17%	 83%	>100%
+
+Notes:
+
+- 'parallel (throttle=0)' was a test where *all* the requests (i.e. 200
+  requests to copy the 200 objects in the file) were sent to the OSDs and
+  the wait for requests completion is done at the end only.
+
+- 'parallel (throttle=1)' was just a control test, where the wait for
+  completion is done immediately after a request is sent.  It was expected
+  to be very similar to the non-optimized ('sequential') tests.
+
+- These tests were executed on a cluster with 40 OSDs, spread across 5
+  (bare-metal) nodes.
+
+- The tests with object size of 65k show that copy_file_range definitely
+  doesn't scale to files with small object sizes.  '> 100%' actually means
+  more than 10x slower.
+
+Measuring the mount+copy+umount masks the actual difference between
+different throttle values due to the time spent in mount+umount.  Thus,
+there was no real difference between throttle=0 (send all and wait) and
+throttle=20 (send 20, wait, send 20, ...).  But here's what I observed
+when measuring only the copy operation (4M object size):
+
+read+write		100%
+parallel (throttle=1)	 56%
+parallel (throttle=5)	 23%
+parallel (throttle=10)	 14%
+parallel (throttle=20)	  9%
+parallel (throttle=0)	  5%
+
+Anyway, I'll still need to revisit patch 0003 as it doesn't follow the
+suggestion done by Jeff to *not* add another knob to fine-tune the
+throttle value -- this patch adds a kernel parameter for a knob that I
+wanted to use in my testing to observe different values of this throttle
+limit.
+
+The goal is to probably to drop this patch and do the throttling in patch
+0002.  I just need to come up with a decent heuristic.  Jeff's suggestion
+was to use rsize/wsize, which are set to 64M by default IIRC.  Somehow I
+feel that it should be related to the number of OSDs in the cluster
+instead, but I'm not sure how.  And testing these sort of heuristics would
+require different clusters, which isn't particularly easy to get.  Anyway,
+comments are welcome!
+
+Cheers,
+--
+Luis
 
 
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Luis Henriques (1):
+  ceph: parallelize all copy-from requests in copy_file_range
+
+ fs/ceph/file.c                  | 34 ++++++++++++++++++++--
+ include/linux/ceph/osd_client.h |  5 +++-
+ net/ceph/osd_client.c           | 50 ++++++++++++++++++++++++---------
+ 3 files changed, 72 insertions(+), 17 deletions(-)
