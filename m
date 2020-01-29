@@ -1,16 +1,16 @@
 From: xiubli@redhat.com
-Subject: [PATCH resend v5 06/11] ceph: add global write latency metric support
-Date: Wed, 29 Jan 2020 03:27:10 -0500
-Message-ID: <20200129082715.5285-7-xiubli@redhat.com>
+Subject: [PATCH resend v5 07/11] ceph: add global metadata perf metric support
+Date: Wed, 29 Jan 2020 03:27:11 -0500
+Message-ID: <20200129082715.5285-8-xiubli@redhat.com>
 References: <20200129082715.5285-1-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:51468 "EHLO
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:51084 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726246AbgA2I2G (ORCPT
+        by vger.kernel.org with ESMTP id S1726246AbgA2I2O (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 29 Jan 2020 03:28:06 -0500
+        Wed, 29 Jan 2020 03:28:14 -0500
 In-Reply-To: <20200129082715.5285-1-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -21,216 +21,125 @@ From: Xiubo Li <xiubli@redhat.com>
 
 item          total       sum_lat(us)     avg_lat(us)
 -----------------------------------------------------
-write         222         5287750000      23818693
+metadata      1288        24506000        19026
 
 URL: https://tracker.ceph.com/issues/43215
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/addr.c       | 10 ++++++++++
  fs/ceph/debugfs.c    |  6 ++++++
- fs/ceph/file.c       | 14 +++++++++++---
- fs/ceph/mds_client.c | 15 ++++++++++++++-
- fs/ceph/metric.h     | 17 +++++++++++++++++
- 5 files changed, 58 insertions(+), 4 deletions(-)
+ fs/ceph/mds_client.c | 25 +++++++++++++++++++++++++
+ fs/ceph/metric.h     | 13 +++++++++++++
+ 3 files changed, 44 insertions(+)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 0435a694370b..74868231f007 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -632,6 +632,7 @@ static int ceph_sync_writepages(struct ceph_fs_client=
- *fsc,
- 				struct page **pages, int num_pages)
- {
- 	struct ceph_osd_client *osdc =3D &fsc->client->osdc;
-+	struct ceph_client_metric *metric =3D &fsc->mdsc->metric;
- 	struct ceph_osd_request *req;
- 	int rc =3D 0;
- 	int page_align =3D off & ~PAGE_MASK;
-@@ -653,6 +654,8 @@ static int ceph_sync_writepages(struct ceph_fs_client=
- *fsc,
- 	if (!rc)
- 		rc =3D ceph_osdc_wait_request(osdc, req);
-=20
-+	ceph_update_write_latency(metric, req, rc);
-+
- 	ceph_osdc_put_request(req);
- 	if (rc =3D=3D 0)
- 		rc =3D len;
-@@ -792,6 +795,7 @@ static void writepages_finish(struct ceph_osd_request=
- *req)
- 	struct ceph_snap_context *snapc =3D req->r_snapc;
- 	struct address_space *mapping =3D inode->i_mapping;
- 	struct ceph_fs_client *fsc =3D ceph_inode_to_client(inode);
-+	struct ceph_client_metric *metric =3D &fsc->mdsc->metric;
- 	bool remove_page;
-=20
- 	dout("writepages_finish %p rc %d\n", inode, rc);
-@@ -804,6 +808,8 @@ static void writepages_finish(struct ceph_osd_request=
- *req)
- 		ceph_clear_error_write(ci);
- 	}
-=20
-+	ceph_update_write_latency(metric, req, rc);
-+
- 	/*
- 	 * We lost the cache cap, need to truncate the page before
- 	 * it is unlocked, otherwise we'd truncate it later in the
-@@ -1752,6 +1758,7 @@ int ceph_uninline_data(struct file *filp, struct pa=
-ge *locked_page)
- 	struct inode *inode =3D file_inode(filp);
- 	struct ceph_inode_info *ci =3D ceph_inode(inode);
- 	struct ceph_fs_client *fsc =3D ceph_inode_to_client(inode);
-+	struct ceph_client_metric *metric =3D &fsc->mdsc->metric;
- 	struct ceph_osd_request *req;
- 	struct page *page =3D NULL;
- 	u64 len, inline_version;
-@@ -1864,6 +1871,9 @@ int ceph_uninline_data(struct file *filp, struct pa=
-ge *locked_page)
- 	err =3D ceph_osdc_start_request(&fsc->client->osdc, req, false);
- 	if (!err)
- 		err =3D ceph_osdc_wait_request(&fsc->client->osdc, req);
-+
-+	ceph_update_write_latency(metric, req, err);
-+
- out_put:
- 	ceph_osdc_put_request(req);
- 	if (err =3D=3D -ECANCELED)
 diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index f8a32fa335ae..3d27f2e6f556 100644
+index 3d27f2e6f556..7fd031c18309 100644
 --- a/fs/ceph/debugfs.c
 +++ b/fs/ceph/debugfs.c
-@@ -140,6 +140,12 @@ static int metric_show(struct seq_file *s, void *p)
- 	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "read",
+@@ -146,6 +146,12 @@ static int metric_show(struct seq_file *s, void *p)
+ 	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "write",
  		   total, sum / NSEC_PER_USEC, avg / NSEC_PER_USEC);
 =20
-+	total =3D percpu_counter_sum(&mdsc->metric.total_writes);
-+	sum =3D percpu_counter_sum(&mdsc->metric.write_latency_sum);
++	total =3D percpu_counter_sum(&mdsc->metric.total_metadatas);
++	sum =3D percpu_counter_sum(&mdsc->metric.metadata_latency_sum);
 +	avg =3D total ? sum / total : 0;
-+	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "write",
++	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "metadata",
 +		   total, sum / NSEC_PER_USEC, avg / NSEC_PER_USEC);
 +
  	seq_printf(s, "\n");
  	seq_printf(s, "item          total           miss            hit\n");
  	seq_printf(s, "-------------------------------------------------\n");
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 69288c39229b..9940eb85eff6 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -813,8 +813,12 @@ static void ceph_aio_complete_req(struct ceph_osd_re=
-quest *req)
- 	     inode, rc, osd_data->bvec_pos.iter.bi_size);
-=20
- 	/* r_start_stamp =3D=3D 0 means the request was not submitted */
--	if (req->r_start_stamp && !aio_req->write)
--		ceph_update_read_latency(metric, req, rc);
-+	if (req->r_start_stamp) {
-+		if (aio_req->write)
-+			ceph_update_write_latency(metric, req, rc);
-+		else
-+			ceph_update_read_latency(metric, req, rc);
-+	}
-=20
- 	if (rc =3D=3D -EOLDSNAPC) {
- 		struct ceph_aio_work *aio_work;
-@@ -1061,7 +1065,9 @@ ceph_direct_read_write(struct kiocb *iocb, struct i=
-ov_iter *iter,
- 		if (!ret)
- 			ret =3D ceph_osdc_wait_request(&fsc->client->osdc, req);
-=20
--		if (!write)
-+		if (write)
-+			ceph_update_write_latency(metric, req, ret);
-+		else
- 			ceph_update_read_latency(metric, req, ret);
-=20
- 		size =3D i_size_read(inode);
-@@ -1150,6 +1156,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter=
- *from, loff_t pos,
- 	struct inode *inode =3D file_inode(file);
- 	struct ceph_inode_info *ci =3D ceph_inode(inode);
- 	struct ceph_fs_client *fsc =3D ceph_inode_to_client(inode);
-+	struct ceph_client_metric *metric =3D &fsc->mdsc->metric;
- 	struct ceph_vino vino;
- 	struct ceph_osd_request *req;
- 	struct page **pages;
-@@ -1235,6 +1242,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter=
- *from, loff_t pos,
- 		if (!ret)
- 			ret =3D ceph_osdc_wait_request(&fsc->client->osdc, req);
-=20
-+		ceph_update_write_latency(metric, req, ret);
- out:
- 		ceph_osdc_put_request(req);
- 		if (ret !=3D 0) {
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 101b51f9f05d..d072cab77ab2 100644
+index d072cab77ab2..92a933810a79 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -4195,8 +4195,19 @@ static int ceph_mdsc_metric_init(struct ceph_clien=
+@@ -2772,6 +2772,12 @@ static int ceph_mdsc_wait_request(struct ceph_mds_=
+client *mdsc,
+ 		else
+ 			err =3D timeleft;  /* killed */
+ 	}
++
++	if (!err || err =3D=3D -EIO) {
++		s64 latency =3D jiffies - req->r_started;
++		ceph_update_metadata_latency(&mdsc->metric, latency);
++	}
++
+ 	dout("do_request waited, got %d\n", err);
+ 	mutex_lock(&mdsc->mutex);
+=20
+@@ -3033,6 +3039,11 @@ static void handle_reply(struct ceph_mds_session *=
+session, struct ceph_msg *msg)
+=20
+ 	/* kick calling process */
+ 	complete_request(mdsc, req);
++
++	if (!result || result =3D=3D -ENOENT) {
++		s64 latency =3D jiffies - req->r_started;
++		ceph_update_metadata_latency(&mdsc->metric, latency);
++	}
+ out:
+ 	ceph_mdsc_put_request(req);
+ 	return;
+@@ -4203,7 +4214,19 @@ static int ceph_mdsc_metric_init(struct ceph_clien=
 t_metric *metric)
  	if (ret)
- 		goto err_read_latency_sum;
+ 		goto err_write_latency_sum;
 =20
--	return ret;
-+	ret =3D percpu_counter_init(&metric->total_writes, 0, GFP_KERNEL);
++	ret =3D percpu_counter_init(&metric->total_metadatas, 0, GFP_KERNEL);
 +	if (ret)
-+		goto err_total_writes;
-=20
-+	ret =3D percpu_counter_init(&metric->write_latency_sum, 0, GFP_KERNEL);
-+	if (ret)
-+		goto err_write_latency_sum;
++		goto err_total_metadatas;
 +
-+	return ret;
-+err_write_latency_sum:
-+	percpu_counter_destroy(&metric->total_writes);
-+err_total_writes:
-+	percpu_counter_destroy(&metric->read_latency_sum);
- err_read_latency_sum:
- 	percpu_counter_destroy(&metric->total_reads);
- err_total_reads:
-@@ -4544,6 +4555,8 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
++	ret =3D percpu_counter_init(&metric->metadata_latency_sum, 0, GFP_KERNE=
+L);
++	if (ret)
++		goto err_metadata_latency_sum;
++
+ 	return ret;
++err_metadata_latency_sum:
++	percpu_counter_destroy(&metric->total_metadatas);
++err_total_metadatas:
++	percpu_counter_destroy(&metric->write_latency_sum);
+ err_write_latency_sum:
+ 	percpu_counter_destroy(&metric->total_writes);
+ err_total_writes:
+@@ -4555,6 +4578,8 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
 =20
  	ceph_mdsc_stop(mdsc);
 =20
-+	percpu_counter_destroy(&mdsc->metric.write_latency_sum);
-+	percpu_counter_destroy(&mdsc->metric.total_writes);
++	percpu_counter_destroy(&mdsc->metric.metadata_latency_sum);
++	percpu_counter_destroy(&mdsc->metric.total_metadatas);
+ 	percpu_counter_destroy(&mdsc->metric.write_latency_sum);
+ 	percpu_counter_destroy(&mdsc->metric.total_writes);
  	percpu_counter_destroy(&mdsc->metric.read_latency_sum);
- 	percpu_counter_destroy(&mdsc->metric.total_reads);
- 	percpu_counter_destroy(&mdsc->metric.d_lease_mis);
 diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index 2a7b8f3fe6a4..49546961eeed 100644
+index 49546961eeed..3cda616ba594 100644
 --- a/fs/ceph/metric.h
 +++ b/fs/ceph/metric.h
-@@ -12,6 +12,9 @@ struct ceph_client_metric {
+@@ -15,6 +15,9 @@ struct ceph_client_metric {
 =20
- 	struct percpu_counter	total_reads;
- 	struct percpu_counter	read_latency_sum;
+ 	struct percpu_counter	total_writes;
+ 	struct percpu_counter	write_latency_sum;
 +
-+	struct percpu_counter	total_writes;
-+	struct percpu_counter	write_latency_sum;
++	struct percpu_counter	total_metadatas;
++	struct percpu_counter	metadata_latency_sum;
  };
 =20
  static inline void ceph_update_read_latency(struct ceph_client_metric *m=
 ,
-@@ -27,4 +30,18 @@ static inline void ceph_update_read_latency(struct cep=
-h_client_metric *m,
- 		percpu_counter_add(&m->read_latency_sum, latency);
+@@ -44,4 +47,14 @@ static inline void ceph_update_write_latency(struct ce=
+ph_client_metric *m,
+ 		percpu_counter_add(&m->write_latency_sum, latency);
  	}
  }
 +
-+static inline void ceph_update_write_latency(struct ceph_client_metric *=
-m,
-+					     struct ceph_osd_request *req,
-+					     int rc)
++static inline void ceph_update_metadata_latency(struct ceph_client_metri=
+c *m,
++						s64 latency)
 +{
-+	if (!m || !req)
++	if (!m)
 +		return;
 +
-+	if (!rc || rc =3D=3D -ETIMEDOUT) {
-+		s64 latency =3D req->r_end_stamp - req->r_start_stamp;
-+		percpu_counter_inc(&m->total_writes);
-+		percpu_counter_add(&m->write_latency_sum, latency);
-+	}
++	percpu_counter_inc(&m->total_metadatas);
++	percpu_counter_add(&m->metadata_latency_sum, latency);
 +}
  #endif
 --=20
