@@ -1,280 +1,166 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Some tasks got to hang_task that would be due to RBD driver
-Date: Thu, 30 Jan 2020 15:54:43 +0100
-Message-ID: <CAOi1vP_ONM2iyyxi1wJrvOyGPanW=bC1BiGENGKGTc4EtBGnfw@mail.gmail.com>
-References: <CAMym5ws4+-XstsJyvJmhzSHgvNYk8pbzOuY3cmT_ySwNDHkqCw@mail.gmail.com>
- <CAOi1vP8XLFV8OVr4g7N_U3oo4yEVafn=7uMxnjX8NJ-VJHUsgQ@mail.gmail.com>
+Subject: Re: [PATCH] rbd: lock object request list
+Date: Thu, 30 Jan 2020 16:09:26 +0100
+Message-ID: <CAOi1vP9AyPrNmU-=O8WVKd++vgWj8s=uiQgUCPMQ5Dwe-7aZsg@mail.gmail.com>
+References: <20200130114258.8482-1-hare@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-il1-f196.google.com ([209.85.166.196]:45423 "EHLO
-        mail-il1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726948AbgA3Oye (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jan 2020 09:54:34 -0500
-Received: by mail-il1-f196.google.com with SMTP id p8so3244967iln.12
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jan 2020 06:54:34 -0800 (PST)
-In-Reply-To: <CAOi1vP8XLFV8OVr4g7N_U3oo4yEVafn=7uMxnjX8NJ-VJHUsgQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Satoru Takeuchi <satoru.takeuchi@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20200130114258.8482-1-hare@suse.de>
+Sender: linux-block-owner@vger.kernel.org
+To: Hannes Reinecke <hare@suse.de>
+Cc: Sage Weil <sage@redhat.com>, Jens Axboe <axboe@kernel.dk>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jan 29, 2020 at 12:07 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+On Thu, Jan 30, 2020 at 12:43 PM Hannes Reinecke <hare@suse.de> wrote:
 >
-> On Wed, Jan 29, 2020 at 8:25 AM Satoru Takeuchi
-> <satoru.takeuchi@gmail.com> wrote:
-> >
-> > Hi,
-> >
-> > In Rook(*1)/Ceph community, some users encountered hang_task in XFS and it
-> > would be caused by RBD driver.
-> >
-> > Although we've not reproduced this problem in the newest kernel, could anyone
-> > give us any hint about this problem, if possible?
-> >
-> > *1) An Ceph orchestration in Kubernetes
-> >
-> > - A question about this problem in linux-xfs ML
-> >   https://marc.info/?l=linux-xfs&m=158009629016068&w=2
-> >
-> > - The reply to the above-mentioned question from Dave Chinner.
-> >   https://marc.info/?l=linux-xfs&m=158018349207976&w=2
-> >
-> > I copied-and-pasted the discussion of above-mentioned mails here.
-> >
-> > my question:
-> > ```
-> > Under some workload in Ceph, many processes got to hang_task. We found
-> > that there are two kinds of processes.
-> >
-> > a) In very high CPU load
-> > b) Encountered hang_task in the XFS
-> >
-> > In addition,a user got the following two kernel traces.
-> >
-> > A (b) process's backtrace with `hung_task_panic=1`.
-> >
-> > ```
-> > [51717.039319] INFO: task kworker/2:1:5938 blocked for more than 120 seconds.
-> > [51717.039361]       Not tainted 4.15.0-72-generic #81-Ubuntu
-> > [51717.039388] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
-> > disables this message.
-> > [51717.039426] kworker/2:1     D    0  5938      2 0x80000000
-> > [51717.039471] Workqueue: xfs-sync/rbd0 xfs_log_worker [xfs]
-> > [51717.039472] Call Trace:
-> > [51717.039478]  __schedule+0x24e/0x880
-> > [51717.039504]  ? xlog_sync+0x2d5/0x3c0 [xfs]
-> > [51717.039506]  schedule+0x2c/0x80
-> > [51717.039530]  _xfs_log_force_lsn+0x20e/0x350 [xfs]
-> > [51717.039533]  ? wake_up_q+0x80/0x80
-> > [51717.039556]  __xfs_trans_commit+0x20b/0x280 [xfs]
-> > [51717.039577]  xfs_trans_commit+0x10/0x20 [xfs]
-> > [51717.039600]  xfs_sync_sb+0x6d/0x80 [xfs]
-> > [51717.039623]  xfs_log_worker+0xe7/0x100 [xfs]
-> > [51717.039626]  process_one_work+0x1de/0x420
-> > [51717.039627]  worker_thread+0x32/0x410
-> > [51717.039628]  kthread+0x121/0x140
-> > [51717.039630]  ? process_one_work+0x420/0x420
-> > [51717.039631]  ? kthread_create_worker_on_cpu+0x70/0x70
-> > [51717.039633]  ret_from_fork+0x35/0x40
-> > ```
-> >
-> > A (b) process's backtrace that is got by `sudo cat /proc/<PID of a D
-> > process>/stack`
-> >
-> > ```
-> > [<0>] _xfs_log_force_lsn+0x20e/0x350 [xfs]
-> > [<0>] __xfs_trans_commit+0x20b/0x280 [xfs]
-> > [<0>] xfs_trans_commit+0x10/0x20 [xfs]
-> > [<0>] xfs_sync_sb+0x6d/0x80 [xfs]
-> > [<0>] xfs_log_sbcount+0x4b/0x60 [xfs]
-> > [<0>] xfs_unmountfs+0xe7/0x200 [xfs]
-> > [<0>] xfs_fs_put_super+0x3e/0xb0 [xfs]
-> > [<0>] generic_shutdown_super+0x72/0x120
-> > [<0>] kill_block_super+0x2c/0x80
-> > [<0>] deactivate_locked_super+0x48/0x80
-> > [<0>] deactivate_super+0x40/0x60
-> > [<0>] cleanup_mnt+0x3f/0x80
-> > [<0>] __cleanup_mnt+0x12/0x20
-> > [<0>] task_work_run+0x9d/0xc0
-> > [<0>] exit_to_usermode_loop+0xc0/0xd0
-> > [<0>] do_syscall_64+0x121/0x130
-> > [<0>] entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-> > [<0>] 0xffffffffffffffff
-> > ```
-> >
-> > Here is the result of my investigation:
-> >
-> > - I couldn't find any commit that would be related to this problem,
-> > both in the upstream
-> >   master and master and XFS's for-next
-> > - I couldn't find any discussions that would be related to the
-> > above-mentioned backtrace
-> >   in linux-xfs ML
-> > - There would be a problem in the transaction commit of XFS. In both
-> > of two traces,
-> >   (b) processes hung in _xfs_log_force_lsn+0x20e/0x350 [xfs]. This
-> > code is one of
-> >   the following two xlog_wait().
-> >
-> >   https://github.com/torvalds/linux/blob/master/fs/xfs/xfs_log.c#L3366
-> >   https://github.com/torvalds/linux/blob/master/fs/xfs/xfs_log.c#L3387
-> >
-> >   These processes released CPU voluntarily in the following line.
-> >
-> >   https://github.com/torvalds/linux/blob/master/fs/xfs/xfs_log_priv.h#L549
-> >
-> >   These two processes should be woken by the other process after that.
-> >   However, unfortunately, it didn't happen.
-> >
-> > Test environment:
-> > - kernel: 4.15.0-<x>-generic
-> > - XFS # Anyone hasn't reported this problem with other filesystems yet.
-> >
-> > Related discussions:
-> > - Issue of Rook:
-> >   https://github.com/rook/rook/issues/3132
-> > - Issue of Ceph
-> >   https://tracker.ceph.com/issues/40068
-> > ```
-> >
-> > Dave's answer:
-> > ```
-> > > Under some workload in Ceph, many processes got to hang_task. We found
-> > > that there
-> > > are two kinds of processes.
-> > >
-> > > a) In very high CPU load
-> > > b) Encountered hang_task in the XFS
-> > >
-> > > In addition,a user got the following two kernel traces.
-> > >
-> > > A (b) process's backtrace with `hung_task_panic=1`.
-> > >
-> > > ```
-> > > [51717.039319] INFO: task kworker/2:1:5938 blocked for more than 120 seconds.
-> > > [51717.039361]       Not tainted 4.15.0-72-generic #81-Ubuntu
-> >
-> > Kinda old, and not an upstream LTS kernel, right?
-> >
-> > > [51717.039388] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
-> > > disables this message.
-> > > [51717.039426] kworker/2:1     D    0  5938      2 0x80000000
-> > > [51717.039471] Workqueue: xfs-sync/rbd0 xfs_log_worker [xfs]
-> >
-> > Filesystem is on a Ceph RBD device.
-> >
-> > > [51717.039472] Call Trace:
-> > > [51717.039478]  __schedule+0x24e/0x880
-> > > [51717.039504]  ? xlog_sync+0x2d5/0x3c0 [xfs]
-> > > [51717.039506]  schedule+0x2c/0x80
-> > > [51717.039530]  _xfs_log_force_lsn+0x20e/0x350 [xfs]
-> > > [51717.039533]  ? wake_up_q+0x80/0x80
-> > > [51717.039556]  __xfs_trans_commit+0x20b/0x280 [xfs]
-> > > [51717.039577]  xfs_trans_commit+0x10/0x20 [xfs]
-> > > [51717.039600]  xfs_sync_sb+0x6d/0x80 [xfs]
-> > > [51717.039623]  xfs_log_worker+0xe7/0x100 [xfs]
-> > > [51717.039626]  process_one_work+0x1de/0x420
-> > > [51717.039627]  worker_thread+0x32/0x410
-> > > [51717.039628]  kthread+0x121/0x140
-> > > [51717.039630]  ? process_one_work+0x420/0x420
-> > > [51717.039631]  ? kthread_create_worker_on_cpu+0x70/0x70
-> > > [51717.039633]  ret_from_fork+0x35/0x40
-> >
-> > That's waiting for log IO completion.
-> >
-> > > ```
-> > >
-> > > A (b) process's backtrace that is got by `sudo cat /proc/<PID of a D
-> > > process>/stack`
-> > >
-> > > ```
-> > > [<0>] _xfs_log_force_lsn+0x20e/0x350 [xfs]
-> > > [<0>] __xfs_trans_commit+0x20b/0x280 [xfs]
-> > > [<0>] xfs_trans_commit+0x10/0x20 [xfs]
-> > > [<0>] xfs_sync_sb+0x6d/0x80 [xfs]
-> > > [<0>] xfs_log_sbcount+0x4b/0x60 [xfs]
-> > > [<0>] xfs_unmountfs+0xe7/0x200 [xfs]
-> > > [<0>] xfs_fs_put_super+0x3e/0xb0 [xfs]
-> > > [<0>] generic_shutdown_super+0x72/0x120
-> > > [<0>] kill_block_super+0x2c/0x80
-> > > [<0>] deactivate_locked_super+0x48/0x80
-> > > [<0>] deactivate_super+0x40/0x60
-> > > [<0>] cleanup_mnt+0x3f/0x80
-> > > [<0>] __cleanup_mnt+0x12/0x20
-> > > [<0>] task_work_run+0x9d/0xc0
-> > > [<0>] exit_to_usermode_loop+0xc0/0xd0
-> > > [<0>] do_syscall_64+0x121/0x130
-> > > [<0>] entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-> > > [<0>] 0xffffffffffffffff
-> >
-> > ANd this is the last reference to the filesystem being dropped and
-> > it waiting for log IO completion.
-> >
-> > So, the filesytem has been unmounted, and it's waiting for journal
-> > IO on the device to complete.  I wonder if a wakeup was missed
-> > somewhere?
-> >
-> > Did the system stop/tear down /dev/rbd0 prematurely?
+> The object request list can be accessed from various contexts
+> so we need to lock it to avoid concurrent modifications and
+> random crashes.
 >
-> Hi Satoru,
+> Signed-off-by: Hannes Reinecke <hare@suse.de>
+> ---
+>  drivers/block/rbd.c | 31 ++++++++++++++++++++++++-------
+>  1 file changed, 24 insertions(+), 7 deletions(-)
 >
-> I would ask the same question.  Typically this is seen when the network
-> is shut off before the filesystem on top of rbd is fully unmounted.
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 5710b2a8609c..ddc170661607 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -344,6 +344,7 @@ struct rbd_img_request {
 >
-> >
-> > > Related discussions:
-> > > - Issue of Rook:
-> > >   https://github.com/rook/rook/issues/3132
-> > > - Issue of Ceph
-> > >   https://tracker.ceph.com/issues/40068
-> >
-> > These point to Ceph RBDs failing to respond under high load and
-> > tasks hanging because they are waiting on IO. That's exactly the
-> > symptoms you are reporting here. That points to it being a Ceph RBD
-> > issue to me, especially the reports where rbd devices report no IO
-> > load but the ceph back end is at 100% disk utilisation doing
-> > -something-.
+>         struct list_head        lock_item;
+>         struct list_head        object_extents; /* obj_req.ex structs */
+> +       struct mutex            object_mutex;
 >
-> I skimmed through https://github.com/rook/rook/issues/3132 and this
-> particular stack trace came from someone who was upgrading their
-> cluster, draining node after node and saw a umount process get stuck.
-> This happens outside of k8s as well, but it is easier to hit with k8s
-> because of different volume plugins and sometimes multiple layers of
-> SDN involved.  One thing to do is to make sure that the filesystem on
-> top of rbd gets mounted with _netdev option.  It has no effect on the
-> kernel, but serves as a cue to systemd to order the unmount before
-> network teardown and some container engines had trouble propagating it
-> between their bind mounts in the past.  Of course, if you or k8s
-> somehow shut the network down before umount runs, _netdev won't help.
+>         struct mutex            state_mutex;
+>         struct pending_result   pending;
+> @@ -1664,6 +1665,7 @@ static struct rbd_img_request *rbd_img_request_create(
+>         INIT_LIST_HEAD(&img_request->lock_item);
+>         INIT_LIST_HEAD(&img_request->object_extents);
+>         mutex_init(&img_request->state_mutex);
+> +       mutex_init(&img_request->object_mutex);
+>         kref_init(&img_request->kref);
 >
-> When dealing with suspected kernel issues, try to collect the entire
-> dmesg, not just a couple of stack traces.  In this case we would have
-> likely seen the kernel attempting to reconnect to the cluster over the
-> dead network because XFS has not finished unmounting:
+>         return img_request;
+> @@ -1680,8 +1682,10 @@ static void rbd_img_request_destroy(struct kref *kref)
+>         dout("%s: img %p\n", __func__, img_request);
 >
->   libceph: connect 10.19.115.5:6789 error -101
->   libceph: mon1 10.19.115.5:6789 connect error
+>         WARN_ON(!list_empty(&img_request->lock_item));
+> +       mutex_lock(&img_request->object_mutex);
+>         for_each_obj_request_safe(img_request, obj_request, next_obj_request)
+>                 rbd_img_obj_request_del(img_request, obj_request);
+> +       mutex_unlock(&img_request->object_mutex);
 >
+>         if (img_request_layered_test(img_request)) {
+>                 img_request_layered_clear(img_request);
+> @@ -2486,6 +2490,7 @@ static int __rbd_img_fill_request(struct rbd_img_request *img_req)
+>         struct rbd_obj_request *obj_req, *next_obj_req;
+>         int ret;
 >
-> The rest of the issues in that ticket appear to have been resolved by
-> switching from XFS to ext4 on top of rbd.  This is crucial when mapping
-> rbd devices on the OSD nodes (i.e. co-locating the kernel client with
-> the OSDs) because XFS is a lot more aggressive about memory reclaim and
-> in doing that it is _much_ more likely to recurse back on itself, which
-> results in a deadlock.  This co-location + XFS deadlock is not specific
-> to rbd or ceph, here is someone who hit it with nbd:
+> +       mutex_lock(&img_req->object_mutex);
+>         for_each_obj_request_safe(img_req, obj_req, next_obj_req) {
+>                 switch (img_req->op_type) {
+>                 case OBJ_OP_READ:
+> @@ -2510,7 +2515,7 @@ static int __rbd_img_fill_request(struct rbd_img_request *img_req)
+>                         continue;
+>                 }
+>         }
+> -
+> +       mutex_unlock(&img_req->object_mutex);
+>         img_req->state = RBD_IMG_START;
+>         return 0;
+>  }
+> @@ -2569,6 +2574,7 @@ static int rbd_img_fill_request_nocopy(struct rbd_img_request *img_req,
+>          * position in the provided bio (list) or bio_vec array.
+>          */
+>         fctx->iter = *fctx->pos;
+> +       mutex_lock(&img_req->object_mutex);
+>         for (i = 0; i < num_img_extents; i++) {
+>                 ret = ceph_file_to_extents(&img_req->rbd_dev->layout,
+>                                            img_extents[i].fe_off,
+> @@ -2576,10 +2582,12 @@ static int rbd_img_fill_request_nocopy(struct rbd_img_request *img_req,
+>                                            &img_req->object_extents,
+>                                            alloc_object_extent, img_req,
+>                                            fctx->set_pos_fn, &fctx->iter);
+> -               if (ret)
+> +               if (ret) {
+> +                       mutex_unlock(&img_req->object_mutex);
+>                         return ret;
+> +               }
+>         }
+> -
+> +       mutex_unlock(&img_req->object_mutex);
+>         return __rbd_img_fill_request(img_req);
+>  }
 >
->   https://www.spinics.net/lists/linux-xfs/msg26261.html
+> @@ -2620,6 +2628,7 @@ static int rbd_img_fill_request(struct rbd_img_request *img_req,
+>          * or bio_vec array because when mapped, those bio_vecs can straddle
+>          * stripe unit boundaries.
+>          */
+> +       mutex_lock(&img_req->object_mutex);
+>         fctx->iter = *fctx->pos;
+>         for (i = 0; i < num_img_extents; i++) {
+>                 ret = ceph_file_to_extents(&rbd_dev->layout,
+> @@ -2629,15 +2638,17 @@ static int rbd_img_fill_request(struct rbd_img_request *img_req,
+>                                            alloc_object_extent, img_req,
+>                                            fctx->count_fn, &fctx->iter);
+>                 if (ret)
+> -                       return ret;
+> +                       goto out_unlock;
+>         }
 >
-> There is no reliable way to prevent it in current kernels.  This is why
-> rook and ceph-csi default to ext4.
+>         for_each_obj_request(img_req, obj_req) {
+>                 obj_req->bvec_pos.bvecs = kmalloc_array(obj_req->bvec_count,
+>                                               sizeof(*obj_req->bvec_pos.bvecs),
+>                                               GFP_NOIO);
+> -               if (!obj_req->bvec_pos.bvecs)
+> -                       return -ENOMEM;
+> +               if (!obj_req->bvec_pos.bvecs) {
+> +                       ret = -ENOMEM;
+> +                       goto out_unlock;
+> +               }
+>         }
+>
+>         /*
+> @@ -2652,10 +2663,14 @@ static int rbd_img_fill_request(struct rbd_img_request *img_req,
+>                                            &img_req->object_extents,
+>                                            fctx->copy_fn, &fctx->iter);
+>                 if (ret)
+> -                       return ret;
+> +                       goto out_unlock;
+>         }
+> +       mutex_unlock(&img_req->object_mutex);
+>
+>         return __rbd_img_fill_request(img_req);
+> +out_unlock:
+> +       mutex_unlock(&img_req->object_mutex);
+> +       return ret;
+>  }
+>
+>  static int rbd_img_fill_nodata(struct rbd_img_request *img_req,
+> @@ -3552,6 +3567,7 @@ static void rbd_img_object_requests(struct rbd_img_request *img_req)
+>
+>         rbd_assert(!img_req->pending.result && !img_req->pending.num_pending);
+>
+> +       mutex_lock(&img_req->object_mutex);
+>         for_each_obj_request(img_req, obj_req) {
+>                 int result = 0;
+>
+> @@ -3564,6 +3580,7 @@ static void rbd_img_object_requests(struct rbd_img_request *img_req)
+>                         img_req->pending.num_pending++;
+>                 }
+>         }
+> +       mutex_unlock(&img_req->object_mutex);
+>  }
+>
+>  static bool rbd_img_advance(struct rbd_img_request *img_req, int *result)
 
-This patch has just merged for 5.6 kernel.  Once it's out and ceph
-daemons are updated to make use of PR_SET_IO_FLUSHER, XFS should become
-usable in co-located setups.
+Hi Hannes,
 
-  https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=8d19f1c8e1937baf74e1962aae9f90fa3aeab463
+I'm afraid I don't immediately see the issue and the commit
+message is very light on details.  Can you elaborate on what
+concurrent modifications are possible?  An example of a crash?
 
 Thanks,
 
