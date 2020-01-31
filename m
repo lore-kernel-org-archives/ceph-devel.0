@@ -1,88 +1,87 @@
-From: Hannes Reinecke <hare@suse.de>
-Subject: [PATCH 08/15] rbd: add debugging statements for the state machine
-Date: Fri, 31 Jan 2020 11:37:32 +0100
-Message-ID: <20200131103739.136098-9-hare@suse.de>
-References: <20200131103739.136098-1-hare@suse.de>
+From: xiubli@redhat.com
+Subject: [RFC PATCH] ceph: do not direct write executes in parallel if O_APPEND is set
+Date: Fri, 31 Jan 2020 08:36:19 -0500
+Message-ID: <20200131133619.14209-1-xiubli@redhat.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:55726 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728335AbgAaKiD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 31 Jan 2020 05:38:03 -0500
-In-Reply-To: <20200131103739.136098-1-hare@suse.de>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:36977 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728614AbgAaNgg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jan 2020 08:36:36 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Daniel Disseldorp <ddiss@suse.com>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, Hannes Reinecke <hare@suse.de>
+To: jlayton@kernel.org, idryomov@gmail.com, zyan@redhat.com
+Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-Add additional debugging statements to analyse the state machine.
+From: Xiubo Li <xiubli@redhat.com>
 
-Signed-off-by: Hannes Reinecke <hare@suse.de>
+In O_APPEND & O_DIRECT mode, the data from different writers will
+be possiblly overlapping each other. Just use the exclusive clock
+instead in O_APPEND & O_DIRECT mode.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- drivers/block/rbd.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
+ fs/ceph/file.c | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 8cfd9407cbb8..b708f5ecda07 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -291,6 +291,7 @@ struct rbd_obj_request {
- 	union {
- 		enum rbd_obj_read_state	 read_state;	/* for reads */
- 		enum rbd_obj_write_state write_state;	/* for writes */
-+		unsigned char		 obj_state;	/* generic access */
- 	};
- 
- 	struct rbd_img_request	*img_request;
-@@ -1352,8 +1353,12 @@ static inline void rbd_img_obj_request_add(struct rbd_img_request *img_request,
- static inline void rbd_img_obj_request_del(struct rbd_img_request *img_request,
- 					struct rbd_obj_request *obj_request)
- {
--	dout("%s: img %p obj %p\n", __func__, img_request, obj_request);
--	list_del(&obj_request->ex.oe_item);
-+	dout("%s: img %p obj %p state %d copyup %d pending %d\n", __func__,
-+	     img_request, obj_request, obj_request->obj_state,
-+	     obj_request->copyup_state, obj_request->pending.num_pending);
-+	WARN_ON(obj_request->obj_state > 1);
-+	WARN_ON(obj_request->pending.num_pending);
-+	list_del_init(&obj_request->ex.oe_item);
- 	rbd_assert(obj_request->img_request == img_request);
- 	rbd_obj_request_put(obj_request);
- }
-@@ -1497,6 +1502,8 @@ __rbd_obj_add_osd_request(struct rbd_obj_request *obj_req,
- 	req->r_callback = rbd_osd_req_callback;
- 	req->r_priv = obj_req;
- 
-+	dout("%s: osd_req %p for obj_req %p\n", __func__, req, obj_req);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 77f8e58cbb99..1cedba452a66 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1443,6 +1443,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, =
+struct iov_iter *from)
+ 	struct ceph_cap_flush *prealloc_cf;
+ 	ssize_t count, written =3D 0;
+ 	int err, want, got;
++	bool direct_lock =3D false;
+ 	loff_t pos;
+ 	loff_t limit =3D max(i_size_read(inode), fsc->max_file_size);
+=20
+@@ -1453,8 +1454,11 @@ static ssize_t ceph_write_iter(struct kiocb *iocb,=
+ struct iov_iter *from)
+ 	if (!prealloc_cf)
+ 		return -ENOMEM;
+=20
++	if ((iocb->ki_flags & (IOCB_DIRECT | IOCB_APPEND)) =3D=3D IOCB_DIRECT)
++		direct_lock =3D true;
 +
- 	/*
- 	 * Data objects may be stored in a separate pool, but always in
- 	 * the same namespace in that pool as the header in its pool.
-@@ -1686,6 +1693,7 @@ static void rbd_img_request_destroy(struct kref *kref)
- 	dout("%s: img %p\n", __func__, img_request);
- 
- 	WARN_ON(!list_empty(&img_request->lock_item));
-+	WARN_ON(img_request->state != RBD_IMG_DONE);
- 	mutex_lock(&img_request->object_mutex);
- 	for_each_obj_request_safe(img_request, obj_request, next_obj_request)
- 		rbd_img_obj_request_del(img_request, obj_request);
-@@ -3513,6 +3521,8 @@ static void rbd_obj_handle_request(struct rbd_obj_request *obj_req, int result)
- {
- 	if (__rbd_obj_handle_request(obj_req, &result)) {
- 		/* Recurse into parent */
-+		dout("%s: obj %p parent %p result %d\n", __func__,
-+		     obj_req, obj_req->img_request, result);
- 		rbd_img_handle_request(obj_req->img_request, result);
- 	}
- }
-@@ -3603,6 +3613,9 @@ static void rbd_img_object_requests(struct rbd_img_request *img_req)
- 		int result = 0;
- 
- 		if (__rbd_obj_handle_request(obj_req, &result)) {
-+			dout("%s: obj %p parent %p img %p result %d\n",
-+			     __func__, obj_req, obj_req->img_request,
-+			     img_req, result);
- 			if (result) {
- 				img_req->pending.result = result;
- 				mutex_unlock(&img_req->object_mutex);
--- 
-2.16.4
+ retry_snap:
+-	if (iocb->ki_flags & IOCB_DIRECT)
++	if (direct_lock)
+ 		ceph_start_io_direct(inode);
+ 	else
+ 		ceph_start_io_write(inode);
+@@ -1544,14 +1548,15 @@ static ssize_t ceph_write_iter(struct kiocb *iocb=
+, struct iov_iter *from)
+=20
+ 		/* we might need to revert back to that point */
+ 		data =3D *from;
+-		if (iocb->ki_flags & IOCB_DIRECT) {
++		if (iocb->ki_flags & IOCB_DIRECT)
+ 			written =3D ceph_direct_read_write(iocb, &data, snapc,
+ 							 &prealloc_cf);
+-			ceph_end_io_direct(inode);
+-		} else {
++		else
+ 			written =3D ceph_sync_write(iocb, &data, pos, snapc);
++		if (direct_lock)
++			ceph_end_io_direct(inode);
++		else
+ 			ceph_end_io_write(inode);
+-		}
+ 		if (written > 0)
+ 			iov_iter_advance(from, written);
+ 		ceph_put_snap_context(snapc);
+@@ -1602,7 +1607,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, =
+struct iov_iter *from)
+=20
+ 	goto out_unlocked;
+ out:
+-	if (iocb->ki_flags & IOCB_DIRECT)
++	if (direct_lock)
+ 		ceph_end_io_direct(inode);
+ 	else
+ 		ceph_end_io_write(inode);
+--=20
+2.21.0
