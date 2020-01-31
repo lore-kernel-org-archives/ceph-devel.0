@@ -1,7 +1,7 @@
 From: Hannes Reinecke <hare@suse.de>
-Subject: [PATCH 09/15] rbd: count pending object requests in-line
-Date: Fri, 31 Jan 2020 11:37:33 +0100
-Message-ID: <20200131103739.136098-10-hare@suse.de>
+Subject: [PATCH 06/15] rbd: add 'done' state for rbd_obj_advance_copyup()
+Date: Fri, 31 Jan 2020 11:37:30 +0100
+Message-ID: <20200131103739.136098-7-hare@suse.de>
 References: <20200131103739.136098-1-hare@suse.de>
 Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20200131103739.136098-1-hare@suse.de>
@@ -10,101 +10,100 @@ To: Ilya Dryomov <idryomov@gmail.com>
 Cc: Sage Weil <sage@redhat.com>, Daniel Disseldorp <ddiss@suse.com>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, Hannes Reinecke <hare@suse.de>
 List-Id: ceph-devel.vger.kernel.org
 
-Instead of having a counter for outstanding object requests
-check the state and count only those which are not in the final
-state.
+Rename 'RBD_OBJ_COPYUP_WRITE_OBJECT' to 'RBD_OBJ_COPYUP_DONE' to
+signal that the state machine has completed.
+With that we can rename '__RBD_OBJ_COPYUP_WRITE_OBJECT' to
+'RBD_OPJ_COPYUP_WRITE_OBJECT'.
 
 Signed-off-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/block/rbd.c | 41 ++++++++++++++++++++++++++++++-----------
- 1 file changed, 30 insertions(+), 11 deletions(-)
+ drivers/block/rbd.c | 25 ++++++++++++++++---------
+ 1 file changed, 16 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index b708f5ecda07..a6c95b6e9c0c 100644
+index 766d67e4d5e5..c31507a5fdd2 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -350,7 +350,7 @@ struct rbd_img_request {
- 	struct mutex		object_mutex;
+@@ -277,11 +277,11 @@ enum rbd_obj_write_state {
+ };
  
- 	struct mutex		state_mutex;
--	struct pending_result	pending;
-+	int			pending_result;
- 	struct work_struct	work;
- 	int			work_result;
- 	struct kref		kref;
-@@ -3602,11 +3602,12 @@ static int rbd_img_exclusive_lock(struct rbd_img_request *img_req)
- 	return 0;
- }
+ enum rbd_obj_copyup_state {
+-	RBD_OBJ_COPYUP_START = 1,
++	RBD_OBJ_COPYUP_DONE,
++	RBD_OBJ_COPYUP_START,
+ 	RBD_OBJ_COPYUP_READ_PARENT,
+ 	__RBD_OBJ_COPYUP_OBJECT_MAPS,
+ 	RBD_OBJ_COPYUP_OBJECT_MAPS,
+-	__RBD_OBJ_COPYUP_WRITE_OBJECT,
+ 	RBD_OBJ_COPYUP_WRITE_OBJECT,
+ };
  
--static void rbd_img_object_requests(struct rbd_img_request *img_req)
-+static int rbd_img_object_requests(struct rbd_img_request *img_req)
- {
- 	struct rbd_obj_request *obj_req;
-+	int num_pending = 0;
+@@ -3294,6 +3294,8 @@ static bool rbd_obj_advance_copyup(struct rbd_obj_request *obj_req, int *result)
+ 	int ret;
  
--	rbd_assert(!img_req->pending.result && !img_req->pending.num_pending);
-+	rbd_assert(!img_req->pending_result);
- 
- 	mutex_lock(&img_req->object_mutex);
- 	for_each_obj_request(img_req, obj_req) {
-@@ -3617,15 +3618,33 @@ static void rbd_img_object_requests(struct rbd_img_request *img_req)
- 			     __func__, obj_req, obj_req->img_request,
- 			     img_req, result);
- 			if (result) {
--				img_req->pending.result = result;
--				mutex_unlock(&img_req->object_mutex);
--				return;
-+				img_req->pending_result = result;
-+				break;
- 			}
- 		} else {
--			img_req->pending.num_pending++;
-+			num_pending++;
- 		}
- 	}
- 	mutex_unlock(&img_req->object_mutex);
-+	return num_pending;
-+}
-+
-+static int rbd_img_object_requests_pending(struct rbd_img_request *img_req)
-+{
-+	struct rbd_obj_request *obj_req;
-+	int num_pending = 0;
-+
-+	mutex_lock(&img_req->object_mutex);
-+	for_each_obj_request(img_req, obj_req) {
-+		if (obj_req->obj_state > 1)
-+			num_pending++;
-+		else if (WARN_ON(obj_req->obj_state == 1))
-+			num_pending++;
-+		else if (WARN_ON(obj_req->pending.num_pending))
-+			num_pending++;
-+	}
-+	mutex_unlock(&img_req->object_mutex);
-+	return num_pending;
- }
- 
- static bool rbd_img_advance(struct rbd_img_request *img_req, int *result)
-@@ -3658,16 +3677,16 @@ static bool rbd_img_advance(struct rbd_img_request *img_req, int *result)
- 			   __rbd_is_lock_owner(rbd_dev));
- 
- 		img_req->state = RBD_IMG_OBJECT_REQUESTS;
--		rbd_img_object_requests(img_req);
--		if (!img_req->pending.num_pending) {
--			*result = img_req->pending.result;
-+		if (!rbd_img_object_requests(img_req)) {
-+			*result = img_req->pending_result;
- 			img_req->state = RBD_IMG_DONE;
+ again:
++	dout("%s: obj %p copyup %d pending %d\n", __func__,
++	     obj_req, obj_req->copyup_state, obj_req->pending.num_pending);
+ 	switch (obj_req->copyup_state) {
+ 	case RBD_OBJ_COPYUP_START:
+ 		rbd_assert(!*result);
+@@ -3301,17 +3303,19 @@ static bool rbd_obj_advance_copyup(struct rbd_obj_request *obj_req, int *result)
+ 		ret = rbd_obj_copyup_read_parent(obj_req);
+ 		if (ret) {
+ 			*result = ret;
++			obj_req->copyup_state = RBD_OBJ_COPYUP_DONE;
  			return true;
  		}
+ 		if (obj_req->num_img_extents)
+ 			obj_req->copyup_state = RBD_OBJ_COPYUP_READ_PARENT;
+ 		else
+-			obj_req->copyup_state = RBD_OBJ_COPYUP_WRITE_OBJECT;
++			obj_req->copyup_state = RBD_OBJ_COPYUP_DONE;
  		return false;
- 	case RBD_IMG_OBJECT_REQUESTS:
--		if (!pending_result_dec(&img_req->pending, result))
-+		if (rbd_img_object_requests_pending(img_req))
+ 	case RBD_OBJ_COPYUP_READ_PARENT:
+-		if (*result)
++		if (*result) {
++			obj_req->copyup_state = RBD_OBJ_COPYUP_DONE;
+ 			return true;
+-
++		}
+ 		if (is_zero_bvecs(obj_req->copyup_bvecs,
+ 				  rbd_obj_img_extents_bytes(obj_req))) {
+ 			dout("%s %p detected zeros\n", __func__, obj_req);
+@@ -3329,27 +3333,30 @@ static bool rbd_obj_advance_copyup(struct rbd_obj_request *obj_req, int *result)
+ 	case __RBD_OBJ_COPYUP_OBJECT_MAPS:
+ 		if (!pending_result_dec(&obj_req->pending, result))
  			return false;
-+		*result = img_req->pending_result;
- 		img_req->state = RBD_IMG_DONE;
++		obj_req->copyup_state = RBD_OBJ_COPYUP_OBJECT_MAPS;
  		/* fall through */
- 	case RBD_IMG_DONE:
+ 	case RBD_OBJ_COPYUP_OBJECT_MAPS:
+ 		if (*result) {
+ 			rbd_warn(rbd_dev, "snap object map update failed: %d",
+ 				 *result);
++			obj_req->copyup_state = RBD_OBJ_COPYUP_DONE;
+ 			return true;
+ 		}
+ 
+ 		rbd_obj_copyup_write_object(obj_req);
+ 		if (!obj_req->pending.num_pending) {
+ 			*result = obj_req->pending.result;
+-			obj_req->copyup_state = RBD_OBJ_COPYUP_WRITE_OBJECT;
++			obj_req->copyup_state = RBD_OBJ_COPYUP_DONE;
+ 			goto again;
+ 		}
+-		obj_req->copyup_state = __RBD_OBJ_COPYUP_WRITE_OBJECT;
++		obj_req->copyup_state = RBD_OBJ_COPYUP_WRITE_OBJECT;
+ 		return false;
+-	case __RBD_OBJ_COPYUP_WRITE_OBJECT:
++	case RBD_OBJ_COPYUP_WRITE_OBJECT:
+ 		if (!pending_result_dec(&obj_req->pending, result))
+ 			return false;
++		obj_req->copyup_state = RBD_OBJ_COPYUP_DONE;
+ 		/* fall through */
+-	case RBD_OBJ_COPYUP_WRITE_OBJECT:
++	case RBD_OBJ_COPYUP_DONE:
+ 		return true;
+ 	default:
+ 		BUG();
 -- 
 2.16.4
