@@ -1,111 +1,49 @@
 From: Hannes Reinecke <hare@suse.de>
-Subject: [PATCH 12/15] rbd: kill img_request kref
-Date: Fri, 31 Jan 2020 11:37:36 +0100
-Message-ID: <20200131103739.136098-13-hare@suse.de>
+Subject: [PATCH 10/15] rbd: kill 'work_result'
+Date: Fri, 31 Jan 2020 11:37:34 +0100
+Message-ID: <20200131103739.136098-11-hare@suse.de>
 References: <20200131103739.136098-1-hare@suse.de>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:55860 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728385AbgAaKiF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 31 Jan 2020 05:38:05 -0500
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20200131103739.136098-1-hare@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: linux-block-owner@vger.kernel.org
 To: Ilya Dryomov <idryomov@gmail.com>
 Cc: Sage Weil <sage@redhat.com>, Daniel Disseldorp <ddiss@suse.com>, Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, Hannes Reinecke <hare@suse.de>
+List-Id: ceph-devel.vger.kernel.org
 
-The reference counter is never increased, so we can as well call
-rbd_img_request_destroy() directly and drop the kref.
+Use 'pending_result' instead of 'work_result' and kill the latter.
 
 Signed-off-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/block/rbd.c | 24 +++++-------------------
- 1 file changed, 5 insertions(+), 19 deletions(-)
+ drivers/block/rbd.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index db04401c4d8b..2566d6bd8230 100644
+index a6c95b6e9c0c..671e941d6edf 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -351,7 +351,6 @@ struct rbd_img_request {
- 
+@@ -352,7 +352,6 @@ struct rbd_img_request {
+ 	struct mutex		state_mutex;
  	int			pending_result;
  	struct work_struct	work;
--	struct kref		kref;
+-	int			work_result;
+ 	struct kref		kref;
  };
  
- #define for_each_obj_request(ireq, oreq) \
-@@ -1329,15 +1328,6 @@ static void rbd_obj_request_put(struct rbd_obj_request *obj_request)
- 	kref_put(&obj_request->kref, rbd_obj_request_destroy);
+@@ -2834,13 +2833,13 @@ static void rbd_img_handle_request_work(struct work_struct *work)
+ 	struct rbd_img_request *img_req =
+ 	    container_of(work, struct rbd_img_request, work);
+ 
+-	rbd_img_handle_request(img_req, img_req->work_result);
++	rbd_img_handle_request(img_req, img_req->pending_result);
  }
  
--static void rbd_img_request_destroy(struct kref *kref);
--static void rbd_img_request_put(struct rbd_img_request *img_request)
--{
--	rbd_assert(img_request != NULL);
--	dout("%s: img %p (was %d)\n", __func__, img_request,
--		kref_read(&img_request->kref));
--	kref_put(&img_request->kref, rbd_img_request_destroy);
--}
--
- static inline void rbd_img_obj_request_add(struct rbd_img_request *img_request,
- 					struct rbd_obj_request *obj_request)
+ static void rbd_img_schedule(struct rbd_img_request *img_req, int result)
  {
-@@ -1674,19 +1664,15 @@ static struct rbd_img_request *rbd_img_request_create(
- 	INIT_LIST_HEAD(&img_request->lock_item);
- 	INIT_LIST_HEAD(&img_request->object_extents);
- 	mutex_init(&img_request->object_mutex);
--	kref_init(&img_request->kref);
- 
- 	return img_request;
+ 	INIT_WORK(&img_req->work, rbd_img_handle_request_work);
+-	img_req->work_result = result;
++	img_req->pending_result = result;
+ 	queue_work(rbd_wq, &img_req->work);
  }
  
--static void rbd_img_request_destroy(struct kref *kref)
-+static void rbd_img_request_destroy(struct rbd_img_request *img_request)
- {
--	struct rbd_img_request *img_request;
- 	struct rbd_obj_request *obj_request;
- 	struct rbd_obj_request *next_obj_request;
- 
--	img_request = container_of(kref, struct rbd_img_request, kref);
--
- 	dout("%s: img %p\n", __func__, img_request);
- 
- 	WARN_ON(!list_empty(&img_request->lock_item));
-@@ -2920,7 +2906,7 @@ static int rbd_obj_read_from_parent(struct rbd_obj_request *obj_req)
- 					      obj_req->copyup_bvecs);
- 	}
- 	if (ret) {
--		rbd_img_request_put(child_img_req);
-+		rbd_img_request_destroy(child_img_req);
- 		return ret;
- 	}
- 
-@@ -3726,7 +3712,7 @@ static void rbd_img_end_child_request(struct rbd_img_request *img_req,
- {
- 	struct rbd_obj_request *obj_req = img_req->callback_data;
- 
--	rbd_img_request_put(img_req);
-+	rbd_img_request_destroy(img_req);
- 	rbd_obj_handle_request(obj_req, result);
- }
- 
-@@ -3734,7 +3720,7 @@ static void rbd_img_end_request(struct rbd_img_request *img_req, int result)
- {
- 	struct request *rq = img_req->callback_data;
- 
--	rbd_img_request_put(img_req);
-+	rbd_img_request_destroy(img_req);
- 	blk_mq_end_request(rq, errno_to_blk_status(result));
- }
- 
-@@ -4886,7 +4872,7 @@ static void rbd_queue_workfn(struct work_struct *work)
- 	return;
- 
- err_img_request:
--	rbd_img_request_put(img_request);
-+	rbd_img_request_destroy(img_request);
- err_rq:
- 	if (result)
- 		rbd_warn(rbd_dev, "%s %llx at %llx result %d",
 -- 
 2.16.4
