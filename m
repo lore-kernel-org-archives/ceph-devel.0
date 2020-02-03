@@ -1,80 +1,141 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 02/15] rbd: use READ_ONCE() when checking the mapping size
-Date: Mon, 3 Feb 2020 17:50:03 +0100
-Message-ID: <CAOi1vP--6qWHtifpeBVWRYOP8J_CC+fvKOkG7Xdsjoxaa7mrDQ@mail.gmail.com>
-References: <20200131103739.136098-1-hare@suse.de> <20200131103739.136098-3-hare@suse.de>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH v3 0/1] parallel 'copy-from' Ops in copy_file_range
+Date: Mon,  3 Feb 2020 16:51:16 +0000
+Message-ID: <20200203165117.5701-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20200131103739.136098-3-hare@suse.de>
-Sender: linux-block-owner@vger.kernel.org
-To: Hannes Reinecke <hare@suse.de>
-Cc: Sage Weil <sage@redhat.com>, Daniel Disseldorp <ddiss@suse.com>, Jens Axboe <axboe@kernel.dk>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Jan 31, 2020 at 11:38 AM Hannes Reinecke <hare@suse.de> wrote:
->
-> The mapping size is changed only very infrequently, so we don't
-> need to take the header mutex for checking; using READ_ONCE()
-> is sufficient here. And it avoids having to take a mutex in the
-> hot path.
->
-> Signed-off-by: Hannes Reinecke <hare@suse.de>
-> ---
->  drivers/block/rbd.c | 12 ++++++------
->  1 file changed, 6 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index db80b964d8ea..792180548e89 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4788,13 +4788,13 @@ static void rbd_queue_workfn(struct work_struct *work)
->
->         blk_mq_start_request(rq);
->
-> -       down_read(&rbd_dev->header_rwsem);
-> -       mapping_size = rbd_dev->mapping.size;
-> +       mapping_size = READ_ONCE(rbd_dev->mapping.size);
->         if (op_type != OBJ_OP_READ) {
-> +               down_read(&rbd_dev->header_rwsem);
->                 snapc = rbd_dev->header.snapc;
->                 ceph_get_snap_context(snapc);
-> +               up_read(&rbd_dev->header_rwsem);
->         }
-> -       up_read(&rbd_dev->header_rwsem);
->
->         if (offset + length > mapping_size) {
->                 rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)", offset,
-> @@ -4981,9 +4981,9 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->         u64 mapping_size;
->         int ret;
->
-> -       down_write(&rbd_dev->header_rwsem);
-> -       mapping_size = rbd_dev->mapping.size;
-> +       mapping_size = READ_ONCE(rbd_dev->mapping.size);
->
-> +       down_write(&rbd_dev->header_rwsem);
->         ret = rbd_dev_header_info(rbd_dev);
->         if (ret)
->                 goto out;
-> @@ -4999,7 +4999,7 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->         }
->
->         rbd_assert(!rbd_is_snap(rbd_dev));
-> -       rbd_dev->mapping.size = rbd_dev->header.image_size;
-> +       WRITE_ONCE(rbd_dev->mapping.size, rbd_dev->header.image_size);
->
->  out:
->         up_write(&rbd_dev->header_rwsem);
+Hi,
 
-Does this result in a measurable performance improvement?
+Here's another re-spin of the patch to improve copy_file_range performance
+by parallelizing the OSD requests.
 
-I'd rather not go down the READ/WRITE_ONCE path and continue using
-proper locking, especially given that it's only for reads.  FWIW the
-plan is to replace header_rwsem with a spin lock, after refactoring
-header read-in code to use a private buffer instead of reading into
-rbd_dev directly.
+Changelog since v2:
 
-Thanks,
+- Refactor copy loop to ensure 'ret' is updated with the number of bytes
+  already copied only after the ceph_osdc_wait_requests() returns.  This
+  meant to change this helper function to also return the number of
+  successful requests.  Also fixed error handling.
 
-                Ilya
+- Use counter for # copies instead of re-calculating ncopies (now
+  copy_count) everytime time it reaches zero.
+
+- Dropped 'dout' in ceph_osdc_wait_requests
+
+- Have ceph_osdc_wait_requests and ceph_osdc_wait_request functions close
+
+Changelog since v1 (the RFC):
+
+- Dropped synchronous version of ceph_osdc_copy_from
+  * This was the reason for merging the patchset into a single patch, as
+    changing ceph_osdc_copy_from definition would break bisectability
+
+- Moved wait_copy_from_reqs into libceph, renaming it to
+  ceph_osdc_wait_requests
+
+- Use ->r_private_item instead of adding a new list_head into struct
+  ceph_osd_request
+
+- Dropped the module parameter (used for testing) and added the throttling
+  mechanism using the formula suggested by Ilya.
+
+For reference, here's the original RFC cover letter (fixed typo in results
+table: 'throttle=5' should be 'throttle=0').
+
+--------------------------------------------------------------------------
+
+As discussed here[1] I'm sending an RFC patchset that does the
+parallelization of the requests sent to the OSDs during a copy_file_range
+syscall in CephFS.
+
+  [1] https://lore.kernel.org/lkml/20200108100353.23770-1-lhenriques@suse.com/
+
+I've also some performance numbers that I wanted to share. Here's a
+description of the very simple tests I've run:
+
+ - create a file with 200 objects in it
+   * i.e. tests with different object sizes mean different file sizes
+ - drop all caches and umount the filesystem
+ - Measure:
+   * mount filesystem
+   * full file copy (with copy_file_range)
+   * umount filesystem
+
+Tests were repeated several times and the average value was used for
+comparison.
+
+  DISCLAIMER:
+  These numbers are only indicative, and different clusters and client
+  configs will for sure show different performance!  More rigorous tests
+  would be require to validate these results.
+
+Having as baseline a full read+write (basically, a copy_file_range
+operation within a filesystem mounted without the 'copyfrom' option),
+here's some values for different object sizes:
+
+			  8M	  4M	  1M	  65k
+read+write		100%	100%	100%	 100%
+sequential		 51%	 52%	 83%	>100%
+parallel (throttle=1)	 51%	 52%	 83%	>100%
+parallel (throttle=0)	 17%	 17%	 83%	>100%
+
+Notes:
+
+- 'parallel (throttle=0)' was a test where *all* the requests (i.e. 200
+  requests to copy the 200 objects in the file) were sent to the OSDs and
+  the wait for requests completion is done at the end only.
+
+- 'parallel (throttle=1)' was just a control test, where the wait for
+  completion is done immediately after a request is sent.  It was expected
+  to be very similar to the non-optimized ('sequential') tests.
+
+- These tests were executed on a cluster with 40 OSDs, spread across 5
+  (bare-metal) nodes.
+
+- The tests with object size of 65k show that copy_file_range definitely
+  doesn't scale to files with small object sizes.  '> 100%' actually means
+  more than 10x slower.
+
+Measuring the mount+copy+umount masks the actual difference between
+different throttle values due to the time spent in mount+umount.  Thus,
+there was no real difference between throttle=0 (send all and wait) and
+throttle=20 (send 20, wait, send 20, ...).  But here's what I observed
+when measuring only the copy operation (4M object size):
+
+read+write		100%
+parallel (throttle=1)	 56%
+parallel (throttle=5)	 23%
+parallel (throttle=10)	 14%
+parallel (throttle=20)	  9%
+parallel (throttle=0)	  5%
+
+Anyway, I'll still need to revisit patch 0003 as it doesn't follow the
+suggestion done by Jeff to *not* add another knob to fine-tune the
+throttle value -- this patch adds a kernel parameter for a knob that I
+wanted to use in my testing to observe different values of this throttle
+limit.
+
+The goal is to probably to drop this patch and do the throttling in patch
+0002.  I just need to come up with a decent heuristic.  Jeff's suggestion
+was to use rsize/wsize, which are set to 64M by default IIRC.  Somehow I
+feel that it should be related to the number of OSDs in the cluster
+instead, but I'm not sure how.  And testing these sort of heuristics would
+require different clusters, which isn't particularly easy to get.  Anyway,
+comments are welcome!
+
+Cheers,
+--
+Luis
+
+Luis Henriques (1):
+  ceph: parallelize all copy-from requests in copy_file_range
+
+ fs/ceph/file.c                  | 45 +++++++++++++++++++++-----
+ include/linux/ceph/osd_client.h |  6 +++-
+ net/ceph/osd_client.c           | 56 +++++++++++++++++++++++++--------
+ 3 files changed, 85 insertions(+), 22 deletions(-)
