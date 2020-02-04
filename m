@@ -1,125 +1,275 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v3 1/1] ceph: parallelize all copy-from requests in copy_file_range
-Date: Tue, 4 Feb 2020 19:06:36 +0100
-Message-ID: <CAOi1vP-LvJYwAALQ_69rDUaiXYWa-_NPboeZV5zZiw_cokNyfw@mail.gmail.com>
-References: <20200203165117.5701-1-lhenriques@suse.com> <20200203165117.5701-2-lhenriques@suse.com>
- <CAOi1vP8vXeY156baexdZY2FWK_F0jHfWkyNdZ90PA+7txG=Qsw@mail.gmail.com> <20200204151158.GA15992@suse.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH resend v5 03/11] ceph: move ceph_osdc_{read,write}pages
+ to ceph.ko
+Date: Tue, 04 Feb 2020 13:38:36 -0500
+Message-ID: <000994726a54ff699cddf9a68ebdc7d5fd902b9d.camel@kernel.org>
+References: <20200129082715.5285-1-xiubli@redhat.com>
+         <20200129082715.5285-4-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200204151158.GA15992@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:55692 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727308AbgBDSij (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 4 Feb 2020 13:38:39 -0500
+In-Reply-To: <20200129082715.5285-4-xiubli@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: xiubli@redhat.com, idryomov@gmail.com, zyan@redhat.com
+Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On Tue, Feb 4, 2020 at 4:11 PM Luis Henriques <lhenriques@suse.com> wrote:
->
-> On Tue, Feb 04, 2020 at 11:56:57AM +0100, Ilya Dryomov wrote:
-> ...
-> > > @@ -2108,21 +2118,40 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
-> > >                         CEPH_OSD_OP_FLAG_FADVISE_DONTNEED,
-> > >                         dst_ci->i_truncate_seq, dst_ci->i_truncate_size,
-> > >                         CEPH_OSD_COPY_FROM_FLAG_TRUNCATE_SEQ);
-> > > -               if (err) {
-> > > -                       if (err == -EOPNOTSUPP) {
-> > > -                               src_fsc->have_copy_from2 = false;
-> > > -                               pr_notice("OSDs don't support 'copy-from2'; "
-> > > -                                         "disabling copy_file_range\n");
-> > > -                       }
-> > > +               if (IS_ERR(req)) {
-> > > +                       err = PTR_ERR(req);
-> > >                         dout("ceph_osdc_copy_from returned %d\n", err);
-> > > +
-> > > +                       /* wait for all queued requests */
-> > > +                       ceph_osdc_wait_requests(&osd_reqs, &reqs_complete);
-> > > +                       ret += reqs_complete * object_size; /* Update copied bytes */
-> >
-> > Hi Luis,
-> >
-> > Looks like ret is still incremented unconditionally?  What happens
-> > if there are three OSD requests on the list and the first fails but
-> > the second and the third succeed?  As is, ceph_osdc_wait_requests()
-> > will return an error with reqs_complete set to 2...
-> >
-> > >                         if (!ret)
-> > >                                 ret = err;
-> >
-> > ... and we will return 8M instead of an error.
->
-> Right, my assumption was that if a request fails, all subsequent requests
-> would also fail.  This would allow ret to be updated with the number of
-> successful requests (x object size), even if the OSDs replies were being
-> delivered in a different order.  But from your comment I see that my
-> assumption is incorrect.
->
-> In that case, when shall ret be updated with the number of bytes already
-> written?  Only after a successful call to ceph_osdc_wait_requests()?
+On Wed, 2020-01-29 at 03:27 -0500, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> Since this helpers are only used by cpeh.ko, let's move it to ceph.ko
+> and rename to _sync_.
+> 
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  fs/ceph/addr.c                  | 86 ++++++++++++++++++++++++++++++++-
+>  include/linux/ceph/osd_client.h | 17 -------
+>  net/ceph/osd_client.c           | 79 ------------------------------
+>  3 files changed, 84 insertions(+), 98 deletions(-)
+> 
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 29d4513eff8c..20e5ebfff389 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -182,6 +182,47 @@ static int ceph_releasepage(struct page *page, gfp_t g)
+>  	return !PagePrivate(page);
+>  }
+>  
+> +/*
+> + * Read some contiguous pages.  If we cross a stripe boundary, shorten
+> + * *plen.  Return number of bytes read, or error.
+> + */
+> +static int ceph_sync_readpages(struct ceph_fs_client *fsc,
+> +			       struct ceph_vino vino,
+> +			       struct ceph_file_layout *layout,
+> +			       u64 off, u64 *plen,
+> +			       u32 truncate_seq, u64 truncate_size,
+> +			       struct page **pages, int num_pages,
+> +			       int page_align)
+> +{
+> +	struct ceph_osd_client *osdc = &fsc->client->osdc;
+> +	struct ceph_osd_request *req;
+> +	int rc = 0;
+> +
+> +	dout("readpages on ino %llx.%llx on %llu~%llu\n", vino.ino,
+> +	     vino.snap, off, *plen);
+> +	req = ceph_osdc_new_request(osdc, layout, vino, off, plen, 0, 1,
+> +				    CEPH_OSD_OP_READ, CEPH_OSD_FLAG_READ,
+> +				    NULL, truncate_seq, truncate_size,
+> +				    false);
+> +	if (IS_ERR(req))
+> +		return PTR_ERR(req);
+> +
+> +	/* it may be a short read due to an object boundary */
+> +	osd_req_op_extent_osd_data_pages(req, 0,
+> +				pages, *plen, page_align, false, false);
+> +
+> +	dout("readpages  final extent is %llu~%llu (%llu bytes align %d)\n",
+> +	     off, *plen, *plen, page_align);
+> +
+> +	rc = ceph_osdc_start_request(osdc, req, false);
+> +	if (!rc)
+> +		rc = ceph_osdc_wait_request(osdc, req);
+> +
+> +	ceph_osdc_put_request(req);
+> +	dout("readpages result %d\n", rc);
+> +	return rc;
+> +}
+> +
+>  /*
+>   * read a single page, without unlocking it.
+>   */
+> @@ -218,7 +259,7 @@ static int ceph_do_readpage(struct file *filp, struct page *page)
+>  
+>  	dout("readpage inode %p file %p page %p index %lu\n",
+>  	     inode, filp, page, page->index);
+> -	err = ceph_osdc_readpages(&fsc->client->osdc, ceph_vino(inode),
+> +	err = ceph_sync_readpages(fsc, ceph_vino(inode),
+>  				  &ci->i_layout, off, &len,
+>  				  ci->i_truncate_seq, ci->i_truncate_size,
+>  				  &page, 1, 0);
+> @@ -570,6 +611,47 @@ static u64 get_writepages_data_length(struct inode *inode,
+>  	return end > start ? end - start : 0;
+>  }
+>  
+> +/*
+> + * do a synchronous write on N pages
+> + */
+> +static int ceph_sync_writepages(struct ceph_fs_client *fsc,
+> +				struct ceph_vino vino,
+> +				struct ceph_file_layout *layout,
+> +				struct ceph_snap_context *snapc,
+> +				u64 off, u64 len,
+> +				u32 truncate_seq, u64 truncate_size,
+> +				struct timespec64 *mtime,
+> +				struct page **pages, int num_pages)
+> +{
+> +	struct ceph_osd_client *osdc = &fsc->client->osdc;
+> +	struct ceph_osd_request *req;
+> +	int rc = 0;
+> +	int page_align = off & ~PAGE_MASK;
+> +
+> +	req = ceph_osdc_new_request(osdc, layout, vino, off, &len, 0, 1,
+> +				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE,
+> +				    snapc, truncate_seq, truncate_size,
+> +				    true);
+> +	if (IS_ERR(req))
+> +		return PTR_ERR(req);
+> +
+> +	/* it may be a short write due to an object boundary */
+> +	osd_req_op_extent_osd_data_pages(req, 0, pages, len, page_align,
+> +				false, false);
+> +	dout("writepages %llu~%llu (%llu bytes)\n", off, len, len);
+> +
+> +	req->r_mtime = *mtime;
+> +	rc = ceph_osdc_start_request(osdc, req, true);
+> +	if (!rc)
+> +		rc = ceph_osdc_wait_request(osdc, req);
+> +
+> +	ceph_osdc_put_request(req);
+> +	if (rc == 0)
+> +		rc = len;
+> +	dout("writepages result %d\n", rc);
+> +	return rc;
+> +}
+> +
+>  /*
+>   * Write a single page, but leave the page locked.
+>   *
+> @@ -628,7 +710,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+>  		set_bdi_congested(inode_to_bdi(inode), BLK_RW_ASYNC);
+>  
+>  	set_page_writeback(page);
+> -	err = ceph_osdc_writepages(&fsc->client->osdc, ceph_vino(inode),
+> +	err = ceph_sync_writepages(fsc, ceph_vino(inode),
+>  				   &ci->i_layout, snapc, page_off, len,
+>  				   ceph_wbc.truncate_seq,
+>  				   ceph_wbc.truncate_size,
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index 5a62dbd3f4c2..9d9f745b98a1 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -509,23 +509,6 @@ int ceph_osdc_call(struct ceph_osd_client *osdc,
+>  		   struct page *req_page, size_t req_len,
+>  		   struct page **resp_pages, size_t *resp_len);
+>  
+> -extern int ceph_osdc_readpages(struct ceph_osd_client *osdc,
+> -			       struct ceph_vino vino,
+> -			       struct ceph_file_layout *layout,
+> -			       u64 off, u64 *plen,
+> -			       u32 truncate_seq, u64 truncate_size,
+> -			       struct page **pages, int nr_pages,
+> -			       int page_align);
+> -
+> -extern int ceph_osdc_writepages(struct ceph_osd_client *osdc,
+> -				struct ceph_vino vino,
+> -				struct ceph_file_layout *layout,
+> -				struct ceph_snap_context *sc,
+> -				u64 off, u64 len,
+> -				u32 truncate_seq, u64 truncate_size,
+> -				struct timespec64 *mtime,
+> -				struct page **pages, int nr_pages);
+> -
+>  int ceph_osdc_copy_from(struct ceph_osd_client *osdc,
+>  			u64 src_snapid, u64 src_version,
+>  			struct ceph_object_id *src_oid,
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b68b376d8c2f..8ff2856e2d52 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -5230,85 +5230,6 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
+>  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
+>  }
+>  
+> -/*
+> - * Read some contiguous pages.  If we cross a stripe boundary, shorten
+> - * *plen.  Return number of bytes read, or error.
+> - */
+> -int ceph_osdc_readpages(struct ceph_osd_client *osdc,
+> -			struct ceph_vino vino, struct ceph_file_layout *layout,
+> -			u64 off, u64 *plen,
+> -			u32 truncate_seq, u64 truncate_size,
+> -			struct page **pages, int num_pages, int page_align)
+> -{
+> -	struct ceph_osd_request *req;
+> -	int rc = 0;
+> -
+> -	dout("readpages on ino %llx.%llx on %llu~%llu\n", vino.ino,
+> -	     vino.snap, off, *plen);
+> -	req = ceph_osdc_new_request(osdc, layout, vino, off, plen, 0, 1,
+> -				    CEPH_OSD_OP_READ, CEPH_OSD_FLAG_READ,
+> -				    NULL, truncate_seq, truncate_size,
+> -				    false);
+> -	if (IS_ERR(req))
+> -		return PTR_ERR(req);
+> -
+> -	/* it may be a short read due to an object boundary */
+> -	osd_req_op_extent_osd_data_pages(req, 0,
+> -				pages, *plen, page_align, false, false);
+> -
+> -	dout("readpages  final extent is %llu~%llu (%llu bytes align %d)\n",
+> -	     off, *plen, *plen, page_align);
+> -
+> -	rc = ceph_osdc_start_request(osdc, req, false);
+> -	if (!rc)
+> -		rc = ceph_osdc_wait_request(osdc, req);
+> -
+> -	ceph_osdc_put_request(req);
+> -	dout("readpages result %d\n", rc);
+> -	return rc;
+> -}
+> -EXPORT_SYMBOL(ceph_osdc_readpages);
+> -
+> -/*
+> - * do a synchronous write on N pages
+> - */
+> -int ceph_osdc_writepages(struct ceph_osd_client *osdc, struct ceph_vino vino,
+> -			 struct ceph_file_layout *layout,
+> -			 struct ceph_snap_context *snapc,
+> -			 u64 off, u64 len,
+> -			 u32 truncate_seq, u64 truncate_size,
+> -			 struct timespec64 *mtime,
+> -			 struct page **pages, int num_pages)
+> -{
+> -	struct ceph_osd_request *req;
+> -	int rc = 0;
+> -	int page_align = off & ~PAGE_MASK;
+> -
+> -	req = ceph_osdc_new_request(osdc, layout, vino, off, &len, 0, 1,
+> -				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE,
+> -				    snapc, truncate_seq, truncate_size,
+> -				    true);
+> -	if (IS_ERR(req))
+> -		return PTR_ERR(req);
+> -
+> -	/* it may be a short write due to an object boundary */
+> -	osd_req_op_extent_osd_data_pages(req, 0, pages, len, page_align,
+> -				false, false);
+> -	dout("writepages %llu~%llu (%llu bytes)\n", off, len, len);
+> -
+> -	req->r_mtime = *mtime;
+> -	rc = ceph_osdc_start_request(osdc, req, true);
+> -	if (!rc)
+> -		rc = ceph_osdc_wait_request(osdc, req);
+> -
+> -	ceph_osdc_put_request(req);
+> -	if (rc == 0)
+> -		rc = len;
+> -	dout("writepages result %d\n", rc);
+> -	return rc;
+> -}
+> -EXPORT_SYMBOL(ceph_osdc_writepages);
+> -
+>  static int osd_req_op_copy_from_init(struct ceph_osd_request *req,
+>  				     u64 src_snapid, u64 src_version,
+>  				     struct ceph_object_id *src_oid,
 
-I mentioned this in the previous email: you probably want to change
-ceph_osdc_wait_requests() so that the counter isn't incremented after
-an error is encountered.
-
-> I.e. only after each throttling cycle, when we don't have any requests
-> pending completion?  In this case, I can simply drop the extra
-> reqs_complete parameter to the ceph_osdc_wait_requests.
->
-> In your example the right thing to do would be to simply return an error,
-> I guess.  But then we're assuming that we're loosing space in the storage,
-> as we may have created objects that won't be reachable anymore.
-
-Well, that is what I'm getting at -- this needs a lot more
-consideration.  How errors are dealt with, how file metadata is
-updated, when do we fall back to plain copy, etc.  Generating stray
-objects is bad but way better than reporting that e.g. 0..12M were
-copied when only 0..4M and 8M..12M were actually copied, leaving
-the user one step away from data loss.  One option is to revert to
-issuing copy-from requests serially when an error is encountered.
-Another option is to fall back to plain copy on any error.  Or perhaps
-we just don't bother with the complexity of parallel copy-from requests
-at all...
-
-Of course, no matter what we do for parallel copy-from requests, the
-existing short copy bug needs to be fixed separately.
-
->
-> >
-> > >                         goto out_caps;
-> > >                 }
-> > > +               list_add(&req->r_private_item, &osd_reqs);
-> > >                 len -= object_size;
-> > >                 src_off += object_size;
-> > >                 dst_off += object_size;
-> > > -               ret += object_size;
-> > > +               /*
-> > > +                * Wait requests if we've reached the maximum requests allowed
-> > > +                * or if this was the last copy
-> > > +                */
-> > > +               if ((--copy_count == 0) || (len < object_size)) {
-> > > +                       err = ceph_osdc_wait_requests(&osd_reqs, &reqs_complete);
-> > > +                       ret += reqs_complete * object_size; /* Update copied bytes */
-> >
-> > Same here.
-> >
-> > > +                       if (err) {
-> > > +                               if (err == -EOPNOTSUPP) {
-> > > +                                       src_fsc->have_copy_from2 = false;
-> >
-> > Since EOPNOTSUPP is special in that it triggers the fallback, it
-> > should be returned even if something was copied.  Think about a
-> > mixed cluster, where some OSDs support copy-from2 and some don't.
-> > If the range is split between such OSDs, copy_file_range() will
-> > always return short if the range happens to start on a new OSD.
->
-> IMO, if we managed to copy some objects, we still need to return the
-> number of bytes copied.  Because, since this return value will be less
-> then the expected amount of bytes, the application will retry the
-> operation.  And at that point, since we've set have_copy_from2 to 'false',
-> the default VFS implementation will be used.
-
-Ah, yeah, given have_copy_from2 guard, this particular corner case is
-fine.
-
-Thanks,
-
-                Ilya
+This looks like a nice cleanup. I'll plan to merge this one after a bit
+of testing.
+-- 
+Jeff Layton <jlayton@kernel.org>
