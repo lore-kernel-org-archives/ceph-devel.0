@@ -1,62 +1,98 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH resend v5 04/11] ceph: add r_end_stamp for the osdc
- request
-Date: Wed, 05 Feb 2020 14:14:01 -0500
-Message-ID: <6edd0eca025a4e1f1da719406219f8770e6cef91.camel@kernel.org>
-References: <20200129082715.5285-1-xiubli@redhat.com>
-         <20200129082715.5285-5-xiubli@redhat.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH] ceph: fix copy_file_range error path in short copies
+Date: Wed, 5 Feb 2020 19:24:14 +0000
+Message-ID: <20200205192414.GA27345@suse.com>
+References: <20200205102852.12236-1-lhenriques@suse.com>
+ <CAOi1vP8w_ssGZJTimgDMULgd4jyb_CYuxNyjvHhbBR9FgAqB9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:38698 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727122AbgBETOD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 5 Feb 2020 14:14:03 -0500
-In-Reply-To: <20200129082715.5285-5-xiubli@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: xiubli@redhat.com, idryomov@gmail.com, zyan@redhat.com
-Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP8w_ssGZJTimgDMULgd4jyb_CYuxNyjvHhbBR9FgAqB9A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 2020-01-29 at 03:27 -0500, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
+On Wed, Feb 05, 2020 at 12:16:02PM +0100, Ilya Dryomov wrote:
+> On Wed, Feb 5, 2020 at 11:28 AM Luis Henriques <lhenriques@suse.com> wrote:
+> >
+> > When there's an error in the copying loop but some bytes have already been
+> > copied into the destination file, it is necessary to dirty the caps and
+> > eventually update the MDS with the file metadata (timestamps, size).  This
+> > patch fixes this error path.
+> >
+> > Cc: stable@vger.kernel.org
+> > Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> > ---
+> >  fs/ceph/file.c | 12 ++++++++++--
+> >  1 file changed, 10 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > index 11929d2bb594..7be47d24edb1 100644
+> > --- a/fs/ceph/file.c
+> > +++ b/fs/ceph/file.c
+> > @@ -2104,9 +2104,16 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
+> >                         CEPH_OSD_OP_FLAG_FADVISE_DONTNEED, 0);
+> >                 if (err) {
+> >                         dout("ceph_osdc_copy_from returned %d\n", err);
+> > -                       if (!ret)
+> > +                       /*
+> > +                        * If we haven't done any copy yet, just exit with the
+> > +                        * error code; otherwise, return the number of bytes
+> > +                        * already copied, update metadata and dirty caps.
+> > +                        */
+> > +                       if (!ret) {
+> >                                 ret = err;
+> > -                       goto out_caps;
+> > +                               goto out_caps;
+> > +                       }
+> > +                       goto out_early;
+> >                 }
+> >                 len -= object_size;
+> >                 src_off += object_size;
+> > @@ -2118,6 +2125,7 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
+> >                 /* We still need one final local copy */
+> >                 do_final_copy = true;
+> >
+> > +out_early:
 > 
-> Grab the osdc requests' end time stamp.
+> out_early is misleading, especially given that there already
+> is out_caps, which just puts caps.  I suggest something like
+> update_dst_inode.
 > 
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  include/linux/ceph/osd_client.h | 1 +
->  net/ceph/osd_client.c           | 2 ++
->  2 files changed, 3 insertions(+)
+> >         file_update_time(dst_file);
+> >         inode_inc_iversion_raw(dst_inode);
+> >
 > 
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index 9d9f745b98a1..00a449cfc478 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -213,6 +213,7 @@ struct ceph_osd_request {
->  	/* internal */
->  	unsigned long r_stamp;                /* jiffies, send or check time */
->  	unsigned long r_start_stamp;          /* jiffies */
-> +	unsigned long r_end_stamp;          /* jiffies */
->  	int r_attempts;
->  	u32 r_map_dne_bound;
->  
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 8ff2856e2d52..108c9457d629 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -2389,6 +2389,8 @@ static void finish_request(struct ceph_osd_request *req)
->  	WARN_ON(lookup_request_mc(&osdc->map_checks, req->r_tid));
->  	dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
->  
-> +	req->r_end_stamp = jiffies;
-> +
->  	if (req->r_osd)
->  		unlink_request(req->r_osd, req);
->  	atomic_dec(&osdc->num_requests);
+> I think this is still buggy.  What follows is this:
+> 
+>         if (endoff > size) {
+>                 int caps_flags = 0;
+> 
+>                 /* Let the MDS know about dst file size change */
+>                 if (ceph_quota_is_max_bytes_approaching(dst_inode, endoff))
+>                         caps_flags |= CHECK_CAPS_NODELAY;
+>                 if (ceph_inode_set_size(dst_inode, endoff))
+>                         caps_flags |= CHECK_CAPS_AUTHONLY;
+>                 if (caps_flags)
+>                         ceph_check_caps(dst_ci, caps_flags, NULL);
+>         }
+> 
+> with endoff being:
+> 
+>         size = i_size_read(dst_inode);
+>         endoff = dst_off + len;
+> 
+> So a short copy effectively zero-fills the destination file...
 
-Maybe fold this patch into #6 in this series? I'd prefer to add the new
-field along with its first user.
--- 
-Jeff Layton <jlayton@kernel.org>
+Ah!  What a surprise!  Yet another bug in copy_file_range.  /me hides
+
+I guess that replacing 'endoff' by 'dst_off' in the 'if' statement above
+(including the condition itself) should fix it.  But I start to think that
+I'm biased and unable to see the most obvious issues with this code :-/
+
+Cheers,
+--
+Luís
