@@ -1,69 +1,62 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [RFC PATCH] ceph: serialize the direct writes when couldn't
- submit in a single req
-Date: Wed, 05 Feb 2020 11:38:54 -0500
-Message-ID: <e9677dc33eecf80ee988e946cc84a4d9a9803d15.camel@kernel.org>
-References: <20200204015445.4435-1-xiubli@redhat.com>
-         <06b35b716c6f158360f2a21f00c3c1c0232562cc.camel@kernel.org>
+Subject: Re: [PATCH resend v5 04/11] ceph: add r_end_stamp for the osdc
+ request
+Date: Wed, 05 Feb 2020 14:14:01 -0500
+Message-ID: <6edd0eca025a4e1f1da719406219f8770e6cef91.camel@kernel.org>
+References: <20200129082715.5285-1-xiubli@redhat.com>
+         <20200129082715.5285-5-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:42988 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:38698 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726534AbgBEQi4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 5 Feb 2020 11:38:56 -0500
-In-Reply-To: <06b35b716c6f158360f2a21f00c3c1c0232562cc.camel@kernel.org>
+        id S1727122AbgBETOD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 5 Feb 2020 14:14:03 -0500
+In-Reply-To: <20200129082715.5285-5-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: xiubli@redhat.com, idryomov@gmail.com, zyan@redhat.com
 Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On Wed, 2020-02-05 at 11:24 -0500, Jeff Layton wrote:
-> On Mon, 2020-02-03 at 20:54 -0500, xiubli@redhat.com wrote:
-> > From: Xiubo Li <xiubli@redhat.com>
-> > 
-> > If the direct io couldn't be submit in a single request, for multiple
-> > writers, they may overlap each other.
-> > 
-> > For example, with the file layout:
-> > ceph.file.layout="stripe_unit=4194304 stripe_count=1 object_size=4194304
-> > 
-> > fd = open(, O_DIRECT | O_WRONLY, );
-> > 
-> > Writer1:
-> > posix_memalign(&buffer, 4194304, SIZE);
-> > memset(buffer, 'T', SIZE);
-> > write(fd, buffer, SIZE);
-> > 
-> > Writer2:
-> > posix_memalign(&buffer, 4194304, SIZE);
-> > memset(buffer, 'X', SIZE);
-> > write(fd, buffer, SIZE);
-> > 
-> > From the test result, the data in the file possiblly will be:
-> > TTT...TTT <---> object1
-> > XXX...XXX <---> object2
-> > 
-> > The expected result should be all "XX.." or "TT.." in both object1
-> > and object2.
-> > 
+On Wed, 2020-01-29 at 03:27 -0500, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
 > 
-> I really don't see this as broken. If you're using O_DIRECT, I don't
-> believe there is any expectation that the write operations (or even read
-> operations) will be atomic wrt to one another.
+> Grab the osdc requests' end time stamp.
 > 
-> Basically, when you do this, you're saying "I know what I'm doing", and
-> need to provide synchronization yourself between competing applications
-> and clients (typically via file locking).
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  include/linux/ceph/osd_client.h | 1 +
+>  net/ceph/osd_client.c           | 2 ++
+>  2 files changed, 3 insertions(+)
 > 
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index 9d9f745b98a1..00a449cfc478 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -213,6 +213,7 @@ struct ceph_osd_request {
+>  	/* internal */
+>  	unsigned long r_stamp;                /* jiffies, send or check time */
+>  	unsigned long r_start_stamp;          /* jiffies */
+> +	unsigned long r_end_stamp;          /* jiffies */
+>  	int r_attempts;
+>  	u32 r_map_dne_bound;
+>  
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 8ff2856e2d52..108c9457d629 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2389,6 +2389,8 @@ static void finish_request(struct ceph_osd_request *req)
+>  	WARN_ON(lookup_request_mc(&osdc->map_checks, req->r_tid));
+>  	dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
+>  
+> +	req->r_end_stamp = jiffies;
+> +
+>  	if (req->r_osd)
+>  		unlink_request(req->r_osd, req);
+>  	atomic_dec(&osdc->num_requests);
 
-In fact, here's a discussion about this from a couple of years ago. This
-one mostly applies to local filesystems, but the same concepts apply to
-CephFS as well:
-
-
-https://www.spinics.net/lists/linux-fsdevel/msg118115.html
-
+Maybe fold this patch into #6 in this series? I'd prefer to add the new
+field along with its first user.
 -- 
 Jeff Layton <jlayton@kernel.org>
