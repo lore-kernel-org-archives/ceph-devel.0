@@ -1,84 +1,123 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v2] ceph: fix copy_file_range error path in short copies
-Date: Thu, 06 Feb 2020 06:46:27 -0500
-Message-ID: <fceaee0128a0c81991df6e3531e746e4ebbe5a01.camel@kernel.org>
-References: <20200205192414.GA27345@suse.com>
-         <20200206103842.14936-1-lhenriques@suse.com>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH resend v5 08/11] ceph: periodically send perf metrics to
+ MDS
+Date: Thu, 6 Feb 2020 20:26:51 +0800
+Message-ID: <6010186e-6b3d-8664-b4e9-b6a015b6cca2@redhat.com>
+References: <20200129082715.5285-1-xiubli@redhat.com>
+ <20200129082715.5285-9-xiubli@redhat.com>
+ <57de3eb2f2009aec0ba086bb9d95a2936a7d1d9f.camel@kernel.org>
+ <d4b8f9a5-b2f7-ec71-c8fe-528ec24d8695@redhat.com>
+ <1cf98f0bd2bda7eef3f6b8f5bfd42188ee74ef38.camel@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200206103842.14936-1-lhenriques@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:48884 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726744AbgBFM1E (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Feb 2020 07:27:04 -0500
+In-Reply-To: <1cf98f0bd2bda7eef3f6b8f5bfd42188ee74ef38.camel@kernel.org>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com, zyan@redhat.com
+Cc: sage@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On Thu, 2020-02-06 at 10:38 +0000, Luis Henriques wrote:
-> When there's an error in the copying loop but some bytes have already been
-> copied into the destination file, it is necessary to dirty the caps and
-> eventually update the MDS with the file metadata (timestamps, size).  This
-> patch fixes this error path.
-> 
-> Another issue this patch fixes is the destination file size being reported
-> to the MDS.  If we're on the error path but the amount of bytes written
-> has already changed the destination file size, the offset to use is
-> dst_off and not endoff.
-> 
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
->  fs/ceph/file.c | 18 +++++++++++++-----
->  1 file changed, 13 insertions(+), 5 deletions(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 11929d2bb594..f7f8cb6c243f 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -2104,9 +2104,16 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->  			CEPH_OSD_OP_FLAG_FADVISE_DONTNEED, 0);
->  		if (err) {
->  			dout("ceph_osdc_copy_from returned %d\n", err);
-> -			if (!ret)
-> +			/*
-> +			 * If we haven't done any copy yet, just exit with the
-> +			 * error code; otherwise, return the number of bytes
-> +			 * already copied, update metadata and dirty caps.
-> +			 */
-> +			if (!ret) {
->  				ret = err;
-> -			goto out_caps;
-> +				goto out_caps;
-> +			}
-> +			goto update_dst_inode;
->  		}
->  		len -= object_size;
->  		src_off += object_size;
-> @@ -2118,16 +2125,17 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->  		/* We still need one final local copy */
->  		do_final_copy = true;
->  
-> +update_dst_inode:
->  	file_update_time(dst_file);
->  	inode_inc_iversion_raw(dst_inode);
->  
-> -	if (endoff > size) {
-> +	if (dst_off > size) {
->  		int caps_flags = 0;
->  
->  		/* Let the MDS know about dst file size change */
-> -		if (ceph_quota_is_max_bytes_approaching(dst_inode, endoff))
-> +		if (ceph_quota_is_max_bytes_approaching(dst_inode, dst_off))
->  			caps_flags |= CHECK_CAPS_NODELAY;
-> -		if (ceph_inode_set_size(dst_inode, endoff))
-> +		if (ceph_inode_set_size(dst_inode, dst_off))
->  			caps_flags |= CHECK_CAPS_AUTHONLY;
->  		if (caps_flags)
->  			ceph_check_caps(dst_ci, caps_flags, NULL);
+On 2020/2/6 19:31, Jeff Layton wrote:
+> On Thu, 2020-02-06 at 10:36 +0800, Xiubo Li wrote:
+>> On 2020/2/6 5:43, Jeff Layton wrote:
+>>> On Wed, 2020-01-29 at 03:27 -0500, xiubli@redhat.com wrote:
+>> [...]
+>>>> +
+>>>> +static int sending_metrics_get(void *data, u64 *val)
+>>>> +{
+>>>> +	struct ceph_fs_client *fsc = (struct ceph_fs_client *)data;
+>>>> +	struct ceph_mds_client *mdsc = fsc->mdsc;
+>>>> +
+>>>> +	mutex_lock(&mdsc->mutex);
+>>>> +	*val = (u64)mdsc->sending_metrics;
+>>>> +	mutex_unlock(&mdsc->mutex);
+>>>> +
+>>>> +	return 0;
+>>>> +}
+>>>> +DEFINE_SIMPLE_ATTRIBUTE(sending_metrics_fops, sending_metrics_get,
+>>>> +			sending_metrics_set, "%llu\n");
+>>>> +
+>>> I'd like to hear more about how we expect users to use this facility.
+>>> This debugfs file doesn't seem consistent with the rest of the UI, and I
+>>> imagine if the box reboots you'd have to (manually) re-enable it after
+>>> mount, right? Maybe this should be a mount option instead?
+>> A mount option means we must do the unmounting to disable it.
+>>
+> Technically, no. You could wire it up so that you could enable and
+> disable it via -o remount. For example:
+>
+>      # mount -o remount,metrics=disabled
 
-Looks good to me. Merged into ceph-client/testing. We'll see about
-getting it in before 5.6 ships.
+Yeah, this is cool.
 
-Thanks,
--- 
-Jeff Layton <jlayton@kernel.org>
+>
+> Another option might be a module parameter if this is something that you
+> really want to be global (and not per-mount or per-session).
+>
+>> I was thinking with the debugfs file we can do the debug or tuning even
+>> in the product setups at any time, usually this should be disabled since
+>> it will send it per second.
+>>
+> Meh, one frame per second doesn't seem like it'll add much overhead.
+Okay.
+>
+> Also, why one update per second? Should that interval be tunable?
+
+Per second just keep it the same with the fuse client.
+
+
+>> Or we could merge the "sending_metric" to "metrics" UI, just writing
+>> "enable"/"disable" to enable/disable sending the metrics to ceph, and
+>> just like the "reset" does to clean the metrics.
+>>
+>> Then the "/sys/kernel/debug/ceph/XXX.clientYYY/metrics" could be
+>> writable with:
+>>
+>> "reset"  --> to clean and reset the metrics counters
+>>
+>> "enable" --> enable sending metrics to ceph cluster
+>>
+>> "disable" --> disable sending metrics to ceph cluster
+>>
+>> Will this be better ?
+>>
+> I guess it's not clear to me how you intend for this to be used.
+>
+> A debugfs switch means that this is being enabled and disabled on a per-
+> session basis. Is the user supposed to turn this on for all, or just one
+> session? How do they know?
+
+Not for all, just per-superblock.
+
+>
+> Is this something we expect people to just turn on briefly when they are
+> experiencing a problem, or is this something that we expect to be turned
+> on and left on for long periods of time?
+
+If this won't add much overhead even per second, let's keep sending the 
+metrics to ceph always and the mount option for this switch is not 
+needed any more.
+
+And there is already a switch to enable/disable showing the metrics in 
+the ceph side, if here add another switch per client, it will be also 
+yucky for admins .
+
+Let's make the update interval tunable and per second as default. Maybe 
+we should make this as a global UI for all clients ?
+
+Is this okay ?
+
+Thanks.
+
+
+> If it's the latter then setting up a mount in /etc/fstab is not going to
+> be sufficient for an admin. She'll have to write a script or something
+> that goes in after the mount and enables this by writing to debugfs
+> after rebooting. Yuck.
+>
