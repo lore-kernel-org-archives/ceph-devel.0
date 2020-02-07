@@ -1,69 +1,34 @@
-From: Al Viro <viro@zeniv.linux.org.uk>
-Subject: Re: KASAN: slab-out-of-bounds Read in suffix_kstrtoint
-Date: Fri, 7 Feb 2020 05:07:06 +0000
-Message-ID: <20200207050706.GC23230@ZenIV.linux.org.uk>
-References: <000000000000860811059df44228@google.com>
+From: "Mr. Theophilus Odadudu" <bukahenry10@gmail.com>
+Subject: LETTER OF INQUIRY
+Date: Fri, 7 Feb 2020 15:17:42 -0500
+Message-ID: <CAEzczGKW-GMe+hHt8SaU-=Ypisy6B5FVOVmBboCB+L+ym3dd=w__17516.0200380319$1581106675$gmane$org@mail.gmail.com>
+Reply-To: auch197722@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <000000000000860811059df44228@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: syzbot <syzbot+c23efa0cc68e79d551fc@syzkaller.appspotmail.com>
-Cc: axboe@kernel.dk, ceph-devel@vger.kernel.org, darrick.wong@oracle.com, dhowells@redhat.com, dongsheng.yang@easystack.cn, gregkh@linuxfoundation.org, idryomov@gmail.com, kstewart@linuxfoundation.org, linux-block@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-xfs@vger.kernel.org, sage@redhat.com, syzkaller-bugs@googlegroups.com, tglx@linutronix.de
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pj1-f67.google.com ([209.85.216.67]:53978 "EHLO
+        mail-pj1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727671AbgBGURn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Feb 2020 15:17:43 -0500
+Received: by mail-pj1-f67.google.com with SMTP id n96so1383670pjc.3
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Feb 2020 12:17:43 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 
-On Thu, Feb 06, 2020 at 07:48:17PM -0800, syzbot wrote:
-> Hello,
-> 
-> syzbot found the following crash on:
-> 
-> HEAD commit:    a0c61bf1 Add linux-next specific files for 20200206
-> git tree:       linux-next
-> console output: https://syzkaller.appspot.com/x/log.txt?x=13925e6ee00000
-> kernel config:  https://syzkaller.appspot.com/x/.config?x=7d320d6d9afdaecd
-> dashboard link: https://syzkaller.appspot.com/bug?extid=c23efa0cc68e79d551fc
-> compiler:       gcc (GCC) 9.0.0 20181231 (experimental)
-> syz repro:      https://syzkaller.appspot.com/x/repro.syz?x=1725bad9e00000
-> C reproducer:   https://syzkaller.appspot.com/x/repro.c?x=15ac3c5ee00000
-> 
-> The bug was bisected to:
-> 
-> commit 61dff92158775e70c0183f4f52c3a5a071dbc24b
-> Author: Al Viro <viro@zeniv.linux.org.uk>
-> Date:   Tue Dec 17 19:15:04 2019 +0000
-> 
->     Pass consistent param->type to fs_parse()
-> 
-> bisection log:  https://syzkaller.appspot.com/x/bisect.txt?x=11fa020de00000
-> final crash:    https://syzkaller.appspot.com/x/report.txt?x=13fa020de00000
-> console output: https://syzkaller.appspot.com/x/log.txt?x=15fa020de00000
-> 
-> IMPORTANT: if you fix the bug, please add the following tag to the commit:
-> Reported-by: syzbot+c23efa0cc68e79d551fc@syzkaller.appspotmail.com
-> Fixes: 61dff9215877 ("Pass consistent param->type to fs_parse()")
+Good Day,
 
-Argh...  OK, I see what's going on.
+I work as a clerk in a Bank here in Nigeria, I have a very
+confidential Business Proposition for you. There is a said amount of
+money floating in the bank unclaimed, belonging to the bank Foreign
+customer who die with his family in the Ethiopian Airline crash of
+March 11, 2019.
 
-commit 296713d91a7df022b0edf20d55f83554b4f95ba1
-Author: Al Viro <viro@zeniv.linux.org.uk>
-Date:   Fri Feb 7 00:02:11 2020 -0500
+I seek your good collaboration to move the fund for our benefit. we
+have agreed that 40% be yours once you help claim.
 
-    do not accept empty strings for fsparam_string()
-    
-    Reported-by: syzbot+c23efa0cc68e79d551fc@syzkaller.appspotmail.com
-    Fixes: 61dff9215877 ("Pass consistent param->type to fs_parse()")
+Do get back to with 1) Your Full Name: (2) Residential Address: (3)
+Phone, Mobile  (4) Scan Copy of Your ID. to apply for claims of the
+funds.
 
-diff --git a/fs/fs_parser.c b/fs/fs_parser.c
-index fdc047b804b2..7e6fb43f9541 100644
---- a/fs/fs_parser.c
-+++ b/fs/fs_parser.c
-@@ -256,7 +256,7 @@ EXPORT_SYMBOL(fs_param_is_enum);
- int fs_param_is_string(struct p_log *log, const struct fs_parameter_spec *p,
- 		       struct fs_parameter *param, struct fs_parse_result *result)
- {
--	if (param->type != fs_value_is_string)
-+	if (param->type != fs_value_is_string || !*param->string)
- 		return fs_param_bad_value(log, param);
- 	return 0;
- }
+Regards
+Theophilus Odadudu
