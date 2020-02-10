@@ -1,16 +1,16 @@
 From: xiubli@redhat.com
-Subject: [PATCH v6 5/9] ceph: add global metadata perf metric support
-Date: Mon, 10 Feb 2020 00:34:03 -0500
-Message-ID: <20200210053407.37237-6-xiubli@redhat.com>
+Subject: [PATCH v6 7/9] ceph: add CEPH_DEFINE_RW_FUNC helper support
+Date: Mon, 10 Feb 2020 00:34:05 -0500
+Message-ID: <20200210053407.37237-8-xiubli@redhat.com>
 References: <20200210053407.37237-1-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:51044 "EHLO
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:22583 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726950AbgBJFeo (ORCPT
+        by vger.kernel.org with ESMTP id S1726950AbgBJFet (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Feb 2020 00:34:44 -0500
+        Mon, 10 Feb 2020 00:34:49 -0500
 In-Reply-To: <20200210053407.37237-1-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,120 +19,37 @@ Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kerne
 
 From: Xiubo Li <xiubli@redhat.com>
 
-It will calculate the latency for the metedata requests, which only
-include the time cousumed by network and the ceph.
+This will support the string store.
 
-item          total       sum_lat(us)     avg_lat(us)
------------------------------------------------------
-metadata      113         220000          1946
-
-URL: https://tracker.ceph.com/issues/43215
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/debugfs.c    |  6 ++++++
- fs/ceph/mds_client.c | 20 ++++++++++++++++++++
- fs/ceph/metric.h     | 13 +++++++++++++
- 3 files changed, 39 insertions(+)
+ include/linux/ceph/debugfs.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 464bfbdb970d..60f3e307fca1 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -146,6 +146,12 @@ static int metric_show(struct seq_file *s, void *p)
- 	avg =3D total ? sum / total : 0;
- 	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "write", total, sum, avg);
+diff --git a/include/linux/ceph/debugfs.h b/include/linux/ceph/debugfs.h
+index 8b3a1a7a953a..b9100712f87f 100644
+--- a/include/linux/ceph/debugfs.h
++++ b/include/linux/ceph/debugfs.h
+@@ -4,6 +4,20 @@
 =20
-+	total =3D percpu_counter_sum(&mdsc->metric.total_metadatas);
-+	sum =3D percpu_counter_sum(&mdsc->metric.metadata_latency_sum);
-+	sum =3D jiffies_to_usecs(sum);
-+	avg =3D total ? sum / total : 0;
-+	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "metadata", total, sum, avg)=
-;
-+
- 	seq_printf(s, "\n");
- 	seq_printf(s, "item          total           miss            hit\n");
- 	seq_printf(s, "-------------------------------------------------\n");
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index cc2b426cd8e4..d414eded6810 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -3019,6 +3019,12 @@ static void handle_reply(struct ceph_mds_session *=
-session, struct ceph_msg *msg)
+ #include <linux/ceph/types.h>
 =20
- 	/* kick calling process */
- 	complete_request(mdsc, req);
-+
-+	if (!result || result =3D=3D -ENOENT) {
-+		s64 latency =3D jiffies - req->r_started;
-+
-+		ceph_update_metadata_latency(&mdsc->metric, latency);
-+	}
- out:
- 	ceph_mdsc_put_request(req);
- 	return;
-@@ -4198,8 +4204,20 @@ static int ceph_mdsc_metric_init(struct ceph_clien=
-t_metric *metric)
- 	if (ret)
- 		goto err_write_latency_sum;
-=20
-+	ret =3D percpu_counter_init(&metric->total_metadatas, 0, GFP_KERNEL);
-+	if (ret)
-+		goto err_total_metadatas;
-+
-+	ret =3D percpu_counter_init(&metric->metadata_latency_sum, 0, GFP_KERNE=
-L);
-+	if (ret)
-+		goto err_metadata_latency_sum;
-+
- 	return 0;
-=20
-+err_metadata_latency_sum:
-+	percpu_counter_destroy(&metric->total_metadatas);
-+err_total_metadatas:
-+	percpu_counter_destroy(&metric->write_latency_sum);
- err_write_latency_sum:
- 	percpu_counter_destroy(&metric->total_writes);
- err_total_writes:
-@@ -4555,6 +4573,8 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
-=20
- 	ceph_mdsc_stop(mdsc);
-=20
-+	percpu_counter_destroy(&mdsc->metric.metadata_latency_sum);
-+	percpu_counter_destroy(&mdsc->metric.total_metadatas);
- 	percpu_counter_destroy(&mdsc->metric.write_latency_sum);
- 	percpu_counter_destroy(&mdsc->metric.total_writes);
- 	percpu_counter_destroy(&mdsc->metric.read_latency_sum);
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index a87197f3e915..9de8beb436c7 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -18,6 +18,9 @@ struct ceph_client_metric {
-=20
- 	struct percpu_counter total_writes;
- 	struct percpu_counter write_latency_sum;
-+
-+	struct percpu_counter total_metadatas;
-+	struct percpu_counter metadata_latency_sum;
- };
-=20
- static inline void ceph_update_read_latency(struct ceph_client_metric *m=
-,
-@@ -49,4 +52,14 @@ static inline void ceph_update_write_latency(struct ce=
-ph_client_metric *m,
- 		percpu_counter_add(&m->write_latency_sum, latency);
- 	}
- }
-+
-+static inline void ceph_update_metadata_latency(struct ceph_client_metri=
-c *m,
-+						s64 latency)
-+{
-+	if (!m)
-+		return;
-+
-+	percpu_counter_inc(&m->total_metadatas);
-+	percpu_counter_add(&m->metadata_latency_sum, latency);
++#define CEPH_DEFINE_RW_FUNC(name)					\
++static int name##_open(struct inode *inode, struct file *file)		\
++{									\
++	return single_open(file, name##_show, inode->i_private);	\
++}									\
++									\
++static const struct file_operations name##_fops =3D {			\
++	.open		=3D name##_open,					\
++	.read		=3D seq_read,					\
++	.write		=3D name##_store,					\
++	.llseek		=3D seq_lseek,					\
++	.release	=3D single_release,				\
 +}
- #endif /* _FS_CEPH_MDS_METRIC_H */
++
+ /* debugfs.c */
+ extern void ceph_debugfs_init(void);
+ extern void ceph_debugfs_cleanup(void);
 --=20
 2.21.0
