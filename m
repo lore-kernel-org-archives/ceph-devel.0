@@ -1,102 +1,60 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2] ceph: fix copy_file_range error path in short copies
-Date: Mon, 10 Feb 2020 19:38:10 +0100
-Message-ID: <CAOi1vP_fTwCnUtN6GfpF0ATBSEygzd+waH8qJ1H3ioWmc-xS6A@mail.gmail.com>
-References: <20200205192414.GA27345@suse.com> <20200206103842.14936-1-lhenriques@suse.com>
+Subject: Re: [PATCH] ceph: fix posix acl couldn't be settable
+Date: Mon, 10 Feb 2020 20:45:36 +0100
+Message-ID: <CAOi1vP9Pw+=JGJsBLphO44j9RYu=O11VsgJs3fJGG1=gT=Q0UA@mail.gmail.com>
+References: <20200210135841.21177-1-xiubli@redhat.com> <e2614ef4-7dc1-d9ac-752a-d48b806dd561@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20200206103842.14936-1-lhenriques@suse.com>
-Sender: stable-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-il1-f194.google.com ([209.85.166.194]:37685 "EHLO
+        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727518AbgBJTpT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Feb 2020 14:45:19 -0500
+Received: by mail-il1-f194.google.com with SMTP id v13so1313909iln.4
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Feb 2020 11:45:18 -0800 (PST)
+In-Reply-To: <e2614ef4-7dc1-d9ac-752a-d48b806dd561@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xiubo Li <xiubli@redhat.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, David Howells <dhowells@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Feb 6, 2020 at 11:38 AM Luis Henriques <lhenriques@suse.com> wrote:
+On Mon, Feb 10, 2020 at 3:52 PM Xiubo Li <xiubli@redhat.com> wrote:
 >
-> When there's an error in the copying loop but some bytes have already been
-> copied into the destination file, it is necessary to dirty the caps and
-> eventually update the MDS with the file metadata (timestamps, size).  This
-> patch fixes this error path.
+> On 2020/2/10 21:58, xiubli@redhat.com wrote:
+> > From: Xiubo Li <xiubli@redhat.com>
+> >
+> > For the old mount API, the module parameters parseing function will
+> > be called in ceph_mount() and also just after the default posix acl
+> > flag set, so we can control to enable/disable it via the mount option.
+> >
+> > But for the new mount API, it will call the module parameters
+> > parseing function before ceph_get_tree(), so the posix acl will always
+> > be enabled.
+> >
+> > Fixes: 82995cc6c5ae ("libceph, rbd, ceph: convert to use the new mount API")
+> > Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> > ---
+> >   fs/ceph/super.c | 8 ++++----
+> >   1 file changed, 4 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> > index 5fef4f59e13e..69fa498391dc 100644
+> > --- a/fs/ceph/super.c
+> > +++ b/fs/ceph/super.c
+> > @@ -341,6 +341,10 @@ static int ceph_parse_mount_param(struct fs_context *fc,
+> >       unsigned int mode;
+> >       int token, ret;
+> >
+> > +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> > +     fc->sb_flags |= SB_POSIXACL;
+> > +#endif
+> > +
 >
-> Another issue this patch fixes is the destination file size being reported
-> to the MDS.  If we're on the error path but the amount of bytes written
-> has already changed the destination file size, the offset to use is
-> dst_off and not endoff.
->
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
->  fs/ceph/file.c | 18 +++++++++++++-----
->  1 file changed, 13 insertions(+), 5 deletions(-)
->
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 11929d2bb594..f7f8cb6c243f 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -2104,9 +2104,16 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->                         CEPH_OSD_OP_FLAG_FADVISE_DONTNEED, 0);
->                 if (err) {
->                         dout("ceph_osdc_copy_from returned %d\n", err);
-> -                       if (!ret)
-> +                       /*
-> +                        * If we haven't done any copy yet, just exit with the
-> +                        * error code; otherwise, return the number of bytes
-> +                        * already copied, update metadata and dirty caps.
-> +                        */
-> +                       if (!ret) {
->                                 ret = err;
-> -                       goto out_caps;
-> +                               goto out_caps;
-> +                       }
-> +                       goto update_dst_inode;
->                 }
->                 len -= object_size;
->                 src_off += object_size;
-> @@ -2118,16 +2125,17 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
->                 /* We still need one final local copy */
->                 do_final_copy = true;
->
-> +update_dst_inode:
->         file_update_time(dst_file);
->         inode_inc_iversion_raw(dst_inode);
->
-> -       if (endoff > size) {
-> +       if (dst_off > size) {
->                 int caps_flags = 0;
->
->                 /* Let the MDS know about dst file size change */
-> -               if (ceph_quota_is_max_bytes_approaching(dst_inode, endoff))
-> +               if (ceph_quota_is_max_bytes_approaching(dst_inode, dst_off))
->                         caps_flags |= CHECK_CAPS_NODELAY;
-> -               if (ceph_inode_set_size(dst_inode, endoff))
-> +               if (ceph_inode_set_size(dst_inode, dst_off))
->                         caps_flags |= CHECK_CAPS_AUTHONLY;
->                 if (caps_flags)
->                         ceph_check_caps(dst_ci, caps_flags, NULL);
+> Maybe we should move this to ceph_init_fs_context().
 
-Hi Luis,
+Hi Xiubo,
 
-I think this function still has short copy and file size issues:
-
-- do_splice_direct() may write fewer bytes than requested, including
-  nothing at all (i.e. return 0).  While we don't care about the second
-  call much, handling the first call is crucial because proceeding to
-  the copy-from loop with src/dst_off not at the object boundary will
-  corrupt the destination file.
-
-- size is set after caps are acquired for the first time and never
-  updated.  But caps are dropped before do_splice_direct(), so by the
-  time we get to dst_off > size check, it may be stale.  Again, data
-  loss if e.g. old-size < dst_off < new-size because the destination
-  file will get truncated...
-
-Also, src/dst_oloc need to be freed with ceph_oloc_destroy() to avoid
-leaking memory on namespace layouts.
-
-It seems clear that this function needs to be split, with the new
-loop around do_splice_direct() and the copy-from loop each going into
-a separate functions with clear pre- and post-conditions.
+Yes -- so it is together with fsopt defaults.
 
 Thanks,
 
