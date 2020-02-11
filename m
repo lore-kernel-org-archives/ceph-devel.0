@@ -1,81 +1,323 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] ceph: check if file lock exists before sending unlock request
-Date: Tue, 11 Feb 2020 16:59:01 +0800
-Message-ID: <20200211085901.16256-1-zyan@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] ceph: fix allocation under spinlock in mount option parsing
+Date: Tue, 11 Feb 2020 10:15:41 +0100
+Message-ID: <CAOi1vP-z4+NKMMhCz19Ld_=X5B7nvzVbS-fErS9MA3cq+SMvGg@mail.gmail.com>
+References: <20200207214948.1073419-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:54080 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727608AbgBKI7K (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 11 Feb 2020 03:59:10 -0500
+Received: from mail-il1-f193.google.com ([209.85.166.193]:37404 "EHLO
+        mail-il1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727582AbgBKJPX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2020 04:15:23 -0500
+In-Reply-To: <20200207214948.1073419-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Xiubo Li <xiubli@redhat.com>
 
-When a process exits, kernel closes its files. locks_remove_file()
-is called to remove file locks on these files. locks_remove_file()
-tries unlocking files locks even there is no file locks.
+On Fri, Feb 7, 2020 at 10:49 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> Al and syzbot reported that 4fbc0c711b24 (ceph: remove the extra slashes
+> in the server path) had caused a regression where an allocation could be
+> done under spinlock.
+>
+> Fix this by keeping a canonicalized version of the path in the mount
+> options. Then we can simply compare those without making copies at all
+> during the comparison.
+>
+> Fixes: 4fbc0c711b24 ("ceph: remove the extra slashes in the server path")
+> Reported-by: syzbot+98704a51af8e3d9425a9@syzkaller.appspotmail.com
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/super.c | 170 ++++++++++++++++++++++--------------------------
+>  fs/ceph/super.h |   1 +
+>  2 files changed, 79 insertions(+), 92 deletions(-)
+>
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 5fa28e98d2b8..196d547c7054 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -208,6 +208,69 @@ struct ceph_parse_opts_ctx {
+>         struct ceph_mount_options       *opts;
+>  };
+>
+> +/**
+> + * canonicalize_path - Remove the extra slashes in the server path
+> + * @server_path: the server path and could be NULL
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- fs/ceph/locks.c | 28 ++++++++++++++++++++++++++--
- 1 file changed, 26 insertions(+), 2 deletions(-)
+Hi Jeff,
 
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index 544e9e85b120..78be861259eb 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -255,9 +255,21 @@ int ceph_lock(struct file *file, int cmd, struct fil=
-e_lock *fl)
- 	else
- 		lock_cmd =3D CEPH_LOCK_UNLOCK;
-=20
-+	if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && F_UNLCK =3D=3D fl->fl_type) {
-+		unsigned int orig_flags =3D fl->fl_flags;
-+		fl->fl_flags |=3D FL_EXISTS;
-+		err =3D posix_lock_file(file, fl, NULL);
-+		fl->fl_flags =3D orig_flags;
-+		if (err =3D=3D -ENOENT) {
-+			if (!(orig_flags & FL_EXISTS))
-+				err =3D 0;
-+			return err;
-+		}
-+	}
-+
- 	err =3D ceph_lock_message(CEPH_LOCK_FCNTL, op, inode, lock_cmd, wait, f=
-l);
- 	if (!err) {
--		if (op =3D=3D CEPH_MDS_OP_SETFILELOCK) {
-+		if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && F_UNLCK !=3D fl->fl_type) {
- 			dout("mds locked, locking locally\n");
- 			err =3D posix_lock_file(file, fl, NULL);
- 			if (err) {
-@@ -311,9 +323,21 @@ int ceph_flock(struct file *file, int cmd, struct fi=
-le_lock *fl)
- 	else
- 		lock_cmd =3D CEPH_LOCK_UNLOCK;
-=20
-+	if (F_UNLCK =3D=3D fl->fl_type) {
-+		unsigned int orig_flags =3D fl->fl_flags;
-+		fl->fl_flags |=3D FL_EXISTS;
-+		err =3D locks_lock_file_wait(file, fl);
-+		fl->fl_flags =3D orig_flags;
-+		if (err =3D=3D -ENOENT) {
-+			if (!(orig_flags & FL_EXISTS))
-+				err =3D 0;
-+			return err;
-+		}
-+	}
-+
- 	err =3D ceph_lock_message(CEPH_LOCK_FLOCK, CEPH_MDS_OP_SETFILELOCK,
- 				inode, lock_cmd, wait, fl);
--	if (!err) {
-+	if (!err && F_UNLCK !=3D fl->fl_type) {
- 		err =3D locks_lock_file_wait(file, fl);
- 		if (err) {
- 			ceph_lock_message(CEPH_LOCK_FLOCK,
---=20
-2.21.1
+It doesn't look like server_path can be NULL, and the code doesn't
+handle that either.
+
+> + *
+> + * Return NULL if the path is NULL or only consists of "/", or a string
+> + * without any extra slashes including the leading slash(es) and the
+
+It can return an error, so this should say "string, NULL or error", but
+see below.
+
+> + * slash(es) at the end of the server path, such as:
+> + * "//dir1////dir2///" --> "dir1/dir2"
+> + */
+> +static char *canonicalize_path(const char *server_path)
+> +{
+> +       const char *path = server_path;
+> +       const char *cur, *end;
+> +       char *buf, *p;
+> +       int len;
+> +
+> +       /* remove all the leading slashes */
+> +       while (*path == '/')
+> +               path++;
+> +
+> +       /* if the server path only consists of slashes */
+> +       if (*path == '\0')
+> +               return NULL;
+> +
+> +       len = strlen(path);
+> +
+> +       buf = kmalloc(len + 1, GFP_KERNEL);
+> +       if (!buf)
+> +               return ERR_PTR(-ENOMEM);
+> +
+> +       end = path + len;
+> +       p = buf;
+> +       do {
+> +               cur = strchr(path, '/');
+> +               if (!cur)
+> +                       cur = end;
+> +
+> +               len = cur - path;
+> +
+> +               /* including one '/' */
+> +               if (cur != end)
+> +                       len += 1;
+> +
+> +               memcpy(p, path, len);
+> +               p += len;
+> +
+> +               while (cur <= end && *cur == '/')
+> +                       cur++;
+> +               path = cur;
+> +       } while (path < end);
+> +
+> +       *p = '\0';
+> +
+> +       /*
+> +        * remove the last slash if there has and just to make sure that
+> +        * we will get something like "dir1/dir2"
+> +        */
+> +       if (*(--p) == '/')
+> +               *p = '\0';
+> +
+> +       return buf;
+> +}
+
+I realize that you just adapted the existing function, but it really
+looks like a mouthful -- both the signature (string, NULL or error)
+and the code.  It could be a lot more concise...
+
+> +
+>  /*
+>   * Parse the source parameter.  Distinguish the server list from the path.
+>   *
+> @@ -230,15 +293,23 @@ static int ceph_parse_source(struct fs_parameter *param, struct fs_context *fc)
+>
+>         dev_name_end = strchr(dev_name, '/');
+>         if (dev_name_end) {
+> -               kfree(fsopt->server_path);
+>
+
+Blank line.
+
+>                 /*
+>                  * The server_path will include the whole chars from userland
+>                  * including the leading '/'.
+>                  */
+> +               kfree(fsopt->server_path);
+>                 fsopt->server_path = kstrdup(dev_name_end, GFP_KERNEL);
+>                 if (!fsopt->server_path)
+>                         return -ENOMEM;
+> +
+> +               kfree(fsopt->canon_path);
+> +               fsopt->canon_path = canonicalize_path(fsopt->server_path);
+> +               if (fsopt->canon_path && IS_ERR(fsopt->canon_path)) {
+> +                       ret = PTR_ERR(fsopt->canon_path);
+> +                       fsopt->canon_path = NULL;
+> +                       return ret;
+> +               }
+>         } else {
+>                 dev_name_end = dev_name + strlen(dev_name);
+>         }
+> @@ -447,6 +518,7 @@ static void destroy_mount_options(struct ceph_mount_options *args)
+>         kfree(args->snapdir_name);
+>         kfree(args->mds_namespace);
+>         kfree(args->server_path);
+> +       kfree(args->canon_path);
+>         kfree(args->fscache_uniq);
+>         kfree(args);
+>  }
+> @@ -462,73 +534,6 @@ static int strcmp_null(const char *s1, const char *s2)
+>         return strcmp(s1, s2);
+>  }
+>
+> -/**
+> - * path_remove_extra_slash - Remove the extra slashes in the server path
+> - * @server_path: the server path and could be NULL
+> - *
+> - * Return NULL if the path is NULL or only consists of "/", or a string
+> - * without any extra slashes including the leading slash(es) and the
+> - * slash(es) at the end of the server path, such as:
+> - * "//dir1////dir2///" --> "dir1/dir2"
+> - */
+> -static char *path_remove_extra_slash(const char *server_path)
+> -{
+> -       const char *path = server_path;
+> -       const char *cur, *end;
+> -       char *buf, *p;
+> -       int len;
+> -
+> -       /* if the server path is omitted */
+> -       if (!path)
+> -               return NULL;
+> -
+> -       /* remove all the leading slashes */
+> -       while (*path == '/')
+> -               path++;
+> -
+> -       /* if the server path only consists of slashes */
+> -       if (*path == '\0')
+> -               return NULL;
+> -
+> -       len = strlen(path);
+> -
+> -       buf = kmalloc(len + 1, GFP_KERNEL);
+> -       if (!buf)
+> -               return ERR_PTR(-ENOMEM);
+> -
+> -       end = path + len;
+> -       p = buf;
+> -       do {
+> -               cur = strchr(path, '/');
+> -               if (!cur)
+> -                       cur = end;
+> -
+> -               len = cur - path;
+> -
+> -               /* including one '/' */
+> -               if (cur != end)
+> -                       len += 1;
+> -
+> -               memcpy(p, path, len);
+> -               p += len;
+> -
+> -               while (cur <= end && *cur == '/')
+> -                       cur++;
+> -               path = cur;
+> -       } while (path < end);
+> -
+> -       *p = '\0';
+> -
+> -       /*
+> -        * remove the last slash if there has and just to make sure that
+> -        * we will get something like "dir1/dir2"
+> -        */
+> -       if (*(--p) == '/')
+> -               *p = '\0';
+> -
+> -       return buf;
+> -}
+> -
+>  static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+>                                  struct ceph_options *new_opt,
+>                                  struct ceph_fs_client *fsc)
+> @@ -536,7 +541,6 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+>         struct ceph_mount_options *fsopt1 = new_fsopt;
+>         struct ceph_mount_options *fsopt2 = fsc->mount_options;
+>         int ofs = offsetof(struct ceph_mount_options, snapdir_name);
+> -       char *p1, *p2;
+>         int ret;
+>
+>         ret = memcmp(fsopt1, fsopt2, ofs);
+> @@ -546,21 +550,12 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+>         ret = strcmp_null(fsopt1->snapdir_name, fsopt2->snapdir_name);
+>         if (ret)
+>                 return ret;
+> +
+>         ret = strcmp_null(fsopt1->mds_namespace, fsopt2->mds_namespace);
+>         if (ret)
+>                 return ret;
+>
+> -       p1 = path_remove_extra_slash(fsopt1->server_path);
+> -       if (IS_ERR(p1))
+> -               return PTR_ERR(p1);
+> -       p2 = path_remove_extra_slash(fsopt2->server_path);
+> -       if (IS_ERR(p2)) {
+> -               kfree(p1);
+> -               return PTR_ERR(p2);
+> -       }
+> -       ret = strcmp_null(p1, p2);
+> -       kfree(p1);
+> -       kfree(p2);
+> +       ret = strcmp_null(fsopt1->canon_path, fsopt2->canon_path);
+>         if (ret)
+>                 return ret;
+>
+> @@ -963,7 +958,9 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc,
+>         mutex_lock(&fsc->client->mount_mutex);
+>
+>         if (!fsc->sb->s_root) {
+> -               const char *path, *p;
+> +               const char *path = fsc->mount_options->canon_path ?
+> +                                       fsc->mount_options->canon_path : "";
+> +
+>                 err = __ceph_open_session(fsc->client, started);
+>                 if (err < 0)
+>                         goto out;
+> @@ -975,22 +972,11 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc,
+>                                 goto out;
+>                 }
+>
+> -               p = path_remove_extra_slash(fsc->mount_options->server_path);
+> -               if (IS_ERR(p)) {
+> -                       err = PTR_ERR(p);
+> -                       goto out;
+> -               }
+> -               /* if the server path is omitted or just consists of '/' */
+> -               if (!p)
+> -                       path = "";
+> -               else
+> -                       path = p;
+>                 dout("mount opening path '%s'\n", path);
+>
+>                 ceph_fs_debugfs_init(fsc);
+>
+>                 root = open_root_dentry(fsc, path, started);
+> -               kfree(p);
+>                 if (IS_ERR(root)) {
+>                         err = PTR_ERR(root);
+>                         goto out;
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index e8f891770f9d..70aa32cfb64d 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -94,6 +94,7 @@ struct ceph_mount_options {
+>         char *snapdir_name;   /* default ".snap" */
+>         char *mds_namespace;  /* default NULL */
+>         char *server_path;    /* default  "/" */
+> +       char *canon_path;     /* default "/" */
+
+Why keep both the original and canon_path around?  It looks like
+the only remaining use of server_path is in create_session_open_msg().
+Since that's just metadata, I think we can safely switch it over.
+
+Also, the comment is misleading.  The default is NULL (which _means_
+"/" for metadata purposes but "/" is never stored here).
+
+I'll post what I have in mind as a patch shortly.
+
+Thanks,
+
+                Ilya
