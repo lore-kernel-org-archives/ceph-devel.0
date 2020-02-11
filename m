@@ -1,28 +1,62 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Readiness for 14.2.8 ?
-Date: Mon, 10 Feb 2020 11:57:19 -0800
-Message-ID: <CAMMFjmGWrhC_gd3wY5SfqfSB6O=0Tp_QRAu0ibMTDPVrja2HSg@mail.gmail.com>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: fix posix acl couldn't be settable
+Date: Tue, 11 Feb 2020 09:09:45 +0800
+Message-ID: <6aa4147c-68db-c030-8432-c1c42926adec@redhat.com>
+References: <20200210135841.21177-1-xiubli@redhat.com>
+ <e2614ef4-7dc1-d9ac-752a-d48b806dd561@redhat.com>
+ <CAOi1vP9Pw+=JGJsBLphO44j9RYu=O11VsgJs3fJGG1=gT=Q0UA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:54254 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727003AbgBJT5e (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Feb 2020 14:57:34 -0500
-Received: by mail-qv1-f69.google.com with SMTP id p3so5705290qvt.9
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Feb 2020 11:57:31 -0800 (PST)
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:24535 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727398AbgBKBJ7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Feb 2020 20:09:59 -0500
+In-Reply-To: <CAOi1vP9Pw+=JGJsBLphO44j9RYu=O11VsgJs3fJGG1=gT=Q0UA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dev@ceph.io, "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, Nathan Cutler <ncutler@suse.cz>, Casey Bodley <cbodley@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Neha Ojha <nojha@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, David Zafman <dzafman@redhat.com>, "Weil, Sage" <sweil@redhat.com>, Ramana Venkatesh Raja <rraja@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-qa <ceph-qa@ceph.com>M
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, David Howells <dhowells@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Below is the current queue of PRs:
-https://github.com/ceph/ceph/pulls?page=2&q=is%3Aopen+label%3Anautilus-batch-1+label%3Aneeds-qa
+On 2020/2/11 3:45, Ilya Dryomov wrote:
+> On Mon, Feb 10, 2020 at 3:52 PM Xiubo Li <xiubli@redhat.com> wrote:
+>> On 2020/2/10 21:58, xiubli@redhat.com wrote:
+>>> From: Xiubo Li <xiubli@redhat.com>
+>>>
+>>> For the old mount API, the module parameters parseing function will
+>>> be called in ceph_mount() and also just after the default posix acl
+>>> flag set, so we can control to enable/disable it via the mount option.
+>>>
+>>> But for the new mount API, it will call the module parameters
+>>> parseing function before ceph_get_tree(), so the posix acl will always
+>>> be enabled.
+>>>
+>>> Fixes: 82995cc6c5ae ("libceph, rbd, ceph: convert to use the new mount API")
+>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>>> ---
+>>>    fs/ceph/super.c | 8 ++++----
+>>>    1 file changed, 4 insertions(+), 4 deletions(-)
+>>>
+>>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>>> index 5fef4f59e13e..69fa498391dc 100644
+>>> --- a/fs/ceph/super.c
+>>> +++ b/fs/ceph/super.c
+>>> @@ -341,6 +341,10 @@ static int ceph_parse_mount_param(struct fs_context *fc,
+>>>        unsigned int mode;
+>>>        int token, ret;
+>>>
+>>> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+>>> +     fc->sb_flags |= SB_POSIXACL;
+>>> +#endif
+>>> +
+>> Maybe we should move this to ceph_init_fs_context().
+> Hi Xiubo,
+>
+> Yes -- so it is together with fsopt defaults.
+>
+Okay, will fix it.
 
-Most PRs are being tested.
-Unless there are objections, we will start QE validation as soon as
-all PRs in this queue were merged.
-
-Dev leads - pls add and tag all RRs that must be included.
-
-Thx
-YuriW
+Thanks.
