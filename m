@@ -1,93 +1,58 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH v2] ceph: check if file lock exists before sending unlock request
-Date: Tue, 11 Feb 2020 22:54:43 +0800
-Message-ID: <20200211145443.40988-1-zyan@redhat.com>
+From: xiubli@redhat.com
+Subject: [RFC PATCH] ceph: fix description of some mount options
+Date: Tue, 11 Feb 2020 10:31:20 -0500
+Message-ID: <20200211153120.21369-1-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:25611 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729592AbgBKOyw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 11 Feb 2020 09:54:52 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, linux-doc@vger.kernel.org, corbet@lwn.net, Xiubo Li <xiubli@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-When a process exits, kernel closes its files. locks_remove_file()
-is called to remove file locks on these files. locks_remove_file()
-tries unlocking files even there is no file lock.
+From: Xiubo Li <xiubli@redhat.com>
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+Based on the latest code, the default value for wsize/rsize is
+64MB and the default value for the mount_timeout is 60 seconds.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/locks.c | 31 +++++++++++++++++++++++++++++--
- 1 file changed, 29 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index 544e9e85b120..d6b9166e71e4 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -210,6 +210,21 @@ static int ceph_lock_wait_for_completion(struct ceph=
-_mds_client *mdsc,
- 	return 0;
- }
+Checked the history of the code, I am a little confused about the
+default values for wsize/rsize, there never been 16MB as the default,
+and for the mount_timeout, never seen 30 as default.
+
+So did I miss something important about this ?
+
+
+ Documentation/filesystems/ceph.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesyste=
+ms/ceph.txt
+index b19b6a03f91c..92ffc9b3b018 100644
+--- a/Documentation/filesystems/ceph.txt
++++ b/Documentation/filesystems/ceph.txt
+@@ -103,17 +103,17 @@ Mount Options
+ 	address its connection to the monitor originates from.
 =20
-+static int try_unlock_file(struct file *file, struct file_lock *fl)
-+{
-+	int err;
-+	unsigned int orig_flags =3D fl->fl_flags;
-+	fl->fl_flags |=3D FL_EXISTS;
-+	err =3D locks_lock_file_wait(file, fl);
-+	fl->fl_flags =3D orig_flags;
-+	if (err =3D=3D -ENOENT) {
-+		if (!(orig_flags & FL_EXISTS))
-+			err =3D 0;
-+		return err;
-+	}
-+	return 1;
-+}
-+
- /**
-  * Attempt to set an fcntl lock.
-  * For now, this just goes away to the server. Later it may be more awes=
-ome.
-@@ -255,9 +270,15 @@ int ceph_lock(struct file *file, int cmd, struct fil=
-e_lock *fl)
- 	else
- 		lock_cmd =3D CEPH_LOCK_UNLOCK;
+   wsize=3DX
+-	Specify the maximum write size in bytes.  Default: 16 MB.
++	Specify the maximum write size in bytes.  Default: 64 MB.
 =20
-+	if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && F_UNLCK =3D=3D fl->fl_type) {
-+		err =3D try_unlock_file(file, fl);
-+		if (err <=3D 0)
-+			return err;
-+	}
-+
- 	err =3D ceph_lock_message(CEPH_LOCK_FCNTL, op, inode, lock_cmd, wait, f=
-l);
- 	if (!err) {
--		if (op =3D=3D CEPH_MDS_OP_SETFILELOCK) {
-+		if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && F_UNLCK !=3D fl->fl_type) {
- 			dout("mds locked, locking locally\n");
- 			err =3D posix_lock_file(file, fl, NULL);
- 			if (err) {
-@@ -311,9 +332,15 @@ int ceph_flock(struct file *file, int cmd, struct fi=
-le_lock *fl)
- 	else
- 		lock_cmd =3D CEPH_LOCK_UNLOCK;
+   rsize=3DX
+-	Specify the maximum read size in bytes.  Default: 16 MB.
++	Specify the maximum read size in bytes.  Default: 64 MB.
 =20
-+	if (F_UNLCK =3D=3D fl->fl_type) {
-+		err =3D try_unlock_file(file, fl);
-+		if (err <=3D 0)
-+			return err;
-+	}
-+
- 	err =3D ceph_lock_message(CEPH_LOCK_FLOCK, CEPH_MDS_OP_SETFILELOCK,
- 				inode, lock_cmd, wait, fl);
--	if (!err) {
-+	if (!err && F_UNLCK !=3D fl->fl_type) {
- 		err =3D locks_lock_file_wait(file, fl);
- 		if (err) {
- 			ceph_lock_message(CEPH_LOCK_FLOCK,
+   rasize=3DX
+ 	Specify the maximum readahead size in bytes.  Default: 8 MB.
+=20
+   mount_timeout=3DX
+ 	Specify the timeout value for mount (in seconds), in the case
+-	of a non-responsive Ceph file system.  The default is 30
++	of a non-responsive Ceph file system.  The default is 60
+ 	seconds.
+=20
+   caps_max=3DX
 --=20
-2.21.1
+2.21.0
