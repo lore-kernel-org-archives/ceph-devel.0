@@ -1,28 +1,96 @@
-From: "Mme Euredice M." <1ad.rmo@paf.mil.ph>
-Subject: =?utf-8?Q?J=E2=80=99esp=C3=A8re_que_vous_allez_bien.?=
-Date: Wed, 12 Feb 2020 08:15:23 +0800 (PHT)
-Message-ID: <1783286075.11621.1581466523836.JavaMail.root@paf.mil.ph>
-Reply-To: "Mme Euredice M." <mme.euredice.maillard@gmail.com>
+From: xiubli@redhat.com
+Subject: [PATCH] ceph: remove CEPH_MOUNT_OPT_FSCACHE flag
+Date: Wed, 12 Feb 2020 03:24:35 -0500
+Message-ID: <20200212082435.18118-1-xiubli@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.airforce.mil.ph ([122.49.217.138]:46812 "EHLO
-        hera.paf.mil.ph" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727641AbgBLDWY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2020 22:22:24 -0500
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:45680 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728353AbgBLIY7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Feb 2020 03:24:59 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: jlayton@kernel.org
+Cc: sage@redhat.com, idryomov@gmail.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-Bonjour,
+From: Xiubo Li <xiubli@redhat.com>
 
-Je m'appelle Mme Euredice MAILLARD de nationalité française. Je vous envoie ce présent message afin de solliciter votre accord pour la réalisation d'un projet de donation. Ayant perdu mon époux et mon enfant de 8 ans au cours d'un accident tragique et mortel Il y a quelques années, je n'ai ni famille ni enfant qui pourra bénéficier de ma fortune.
+Since we can figure out whether the fscache is enabled or not by
+using the fscache_uniq and this flag is redundant.
 
-Actuellement hospitalisée aux États-Unis pour un cancer en phase terminale, je décide de faire don de ma fortune afin que vous puissiez réaliser les œuvres de charité de votre choix.
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/super.c | 9 +++------
+ fs/ceph/super.h | 9 ++++-----
+ 2 files changed, 7 insertions(+), 11 deletions(-)
 
-Pour cela je vous lègue à titre de don.une somme de un million cinq cent mille dollars américain (1.500.000$) en banque en Afrique de l’ouest où je m’étais installée après la mort de mon mari et mon enfant.
-Que le Seigneur vous bénisse et vous garde et qu’Il vous apporte la paix !
-
-Cordialement
-Mme Euredice M.
-Adresse Email: mme.euredice.maillard@gmail.com
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 48f86eb82b9b..8df506dd9039 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -383,10 +383,7 @@ static int ceph_parse_mount_param(struct fs_context =
+*fc,
+ #ifdef CONFIG_CEPH_FSCACHE
+ 		kfree(fsopt->fscache_uniq);
+ 		fsopt->fscache_uniq =3D NULL;
+-		if (result.negated) {
+-			fsopt->flags &=3D ~CEPH_MOUNT_OPT_FSCACHE;
+-		} else {
+-			fsopt->flags |=3D CEPH_MOUNT_OPT_FSCACHE;
++		if (!result.negated) {
+ 			fsopt->fscache_uniq =3D param->string;
+ 			param->string =3D NULL;
+ 		}
+@@ -605,7 +602,7 @@ static int ceph_show_options(struct seq_file *m, stru=
+ct dentry *root)
+ 		seq_puts(m, ",nodcache");
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_INO32)
+ 		seq_puts(m, ",ino32");
+-	if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
++	if (fsopt->fscache_uniq) {
+ 		seq_show_option(m, "fsc", fsopt->fscache_uniq);
+ 	}
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
+@@ -969,7 +966,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_=
+client *fsc,
+ 			goto out;
+=20
+ 		/* setup fscache */
+-		if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
++		if (fsc->mount_options->fscache_uniq) {
+ 			err =3D ceph_fscache_register_fs(fsc, fc);
+ 			if (err < 0)
+ 				goto out;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index ebc25072b19b..ad44b98f3c3b 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -38,11 +38,10 @@
+ #define CEPH_MOUNT_OPT_NOASYNCREADDIR  (1<<7) /* no dcache readdir */
+ #define CEPH_MOUNT_OPT_INO32           (1<<8) /* 32 bit inos */
+ #define CEPH_MOUNT_OPT_DCACHE          (1<<9) /* use dcache for readdir =
+etc */
+-#define CEPH_MOUNT_OPT_FSCACHE         (1<<10) /* use fscache */
+-#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission che=
+ck */
+-#define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<12) /* mount waits if no mds =
+is up */
+-#define CEPH_MOUNT_OPT_NOQUOTADF       (1<<13) /* no root dir quota in s=
+tatfs */
+-#define CEPH_MOUNT_OPT_NOCOPYFROM      (1<<14) /* don't use RADOS 'copy-=
+from' op */
++#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<10) /* no pool permission che=
+ck */
++#define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<11) /* mount waits if no mds =
+is up */
++#define CEPH_MOUNT_OPT_NOQUOTADF       (1<<12) /* no root dir quota in s=
+tatfs */
++#define CEPH_MOUNT_OPT_NOCOPYFROM      (1<<13) /* don't use RADOS 'copy-=
+from' op */
+=20
+ #define CEPH_MOUNT_OPT_DEFAULT			\
+ 	(CEPH_MOUNT_OPT_DCACHE |		\
+--=20
+2.21.0
