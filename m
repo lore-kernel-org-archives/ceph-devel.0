@@ -1,89 +1,166 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v4 4/9] ceph: make __take_cap_refs non-static
-Date: Wed, 12 Feb 2020 12:27:24 -0500
-Message-ID: <20200212172729.260752-5-jlayton@kernel.org>
+Subject: [PATCH v4 8/9] ceph: cache layout in parent dir on first sync create
+Date: Wed, 12 Feb 2020 12:27:28 -0500
+Message-ID: <20200212172729.260752-9-jlayton@kernel.org>
 References: <20200212172729.260752-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:35510 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:35554 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727680AbgBLR1e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Feb 2020 12:27:34 -0500
+        id S1728716AbgBLR1h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Feb 2020 12:27:37 -0500
 In-Reply-To: <20200212172729.260752-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com
 
-Rename it to ceph_take_cap_refs and make it available to other files.
-Also replace a comment with a lockdep assertion.
+If a create is done, then typically we'll end up writing to the file
+soon afterward. We don't want to wait for the reply before doing that
+when doing an async create, so that means we need the layout for the
+new file before we've gotten the response from the MDS.
+
+All files created in a directory will initially inherit the same layout,
+so copy off the requisite info from the first synchronous create in the
+directory, and save it in a new i_cached_layout field. Zero out the
+layout when we lose Dc caps in the dir.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c  | 12 ++++++------
- fs/ceph/super.h |  2 ++
- 2 files changed, 8 insertions(+), 6 deletions(-)
+ fs/ceph/caps.c       | 13 ++++++++++---
+ fs/ceph/file.c       | 22 +++++++++++++++++++++-
+ fs/ceph/inode.c      |  2 ++
+ fs/ceph/mds_client.c |  7 ++++++-
+ fs/ceph/super.h      |  1 +
+ 5 files changed, 40 insertions(+), 5 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 7fc87b693ba4..c983990acb75 100644
+index 869e2102e827..0c95a7c9c7c1 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -2512,12 +2512,12 @@ static void kick_flushing_inode_caps(struct ceph_mds_client *mdsc,
- /*
-  * Take references to capabilities we hold, so that we don't release
-  * them to the MDS prematurely.
-- *
-- * Protected by i_ceph_lock.
-  */
--static void __take_cap_refs(struct ceph_inode_info *ci, int got,
-+void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
- 			    bool snap_rwsem_locked)
- {
-+	lockdep_assert_held(&ci->i_ceph_lock);
-+
- 	if (got & CEPH_CAP_PIN)
- 		ci->i_pin_ref++;
- 	if (got & CEPH_CAP_FILE_RD)
-@@ -2538,7 +2538,7 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got,
- 		if (ci->i_wb_ref == 0)
- 			ihold(&ci->vfs_inode);
- 		ci->i_wb_ref++;
--		dout("__take_cap_refs %p wb %d -> %d (?)\n",
-+		dout("%s %p wb %d -> %d (?)\n", __func__,
- 		     &ci->vfs_inode, ci->i_wb_ref-1, ci->i_wb_ref);
- 	}
- }
-@@ -2664,7 +2664,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 			    (need & CEPH_CAP_FILE_RD) &&
- 			    !(*got & CEPH_CAP_FILE_CACHE))
- 				ceph_disable_fscache_readpage(ci);
--			__take_cap_refs(ci, *got, true);
-+			ceph_take_cap_refs(ci, *got, true);
- 			ret = 1;
- 		}
- 	} else {
-@@ -2896,7 +2896,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
- void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps)
- {
- 	spin_lock(&ci->i_ceph_lock);
--	__take_cap_refs(ci, caps, false);
-+	ceph_take_cap_refs(ci, caps, false);
- 	spin_unlock(&ci->i_ceph_lock);
+@@ -561,14 +561,14 @@ static void __cap_delay_cancel(struct ceph_mds_client *mdsc,
+ 	spin_unlock(&mdsc->cap_delay_lock);
  }
  
+-/*
+- * Common issue checks for add_cap, handle_cap_grant.
+- */
++/* Common issue checks for add_cap, handle_cap_grant. */
+ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
+ 			      unsigned issued)
+ {
+ 	unsigned had = __ceph_caps_issued(ci, NULL);
+ 
++	lockdep_assert_held(&ci->i_ceph_lock);
++
+ 	/*
+ 	 * Each time we receive FILE_CACHE anew, we increment
+ 	 * i_rdcache_gen.
+@@ -593,6 +593,13 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
+ 			__ceph_dir_clear_complete(ci);
+ 		}
+ 	}
++
++	/* Wipe saved layout if we're losing DIR_CREATE caps */
++	if (S_ISDIR(ci->vfs_inode.i_mode) && (had & CEPH_CAP_DIR_CREATE) &&
++		!(issued & CEPH_CAP_DIR_CREATE)) {
++	     ceph_put_string(rcu_dereference_raw(ci->i_cached_layout.pool_ns));
++	     memset(&ci->i_cached_layout, 0, sizeof(ci->i_cached_layout));
++	}
+ }
+ 
+ /*
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 7e0190b1f821..472d90ccdf44 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -430,6 +430,23 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	return err;
+ }
+ 
++/* Clone the layout from a synchronous create, if the dir now has Dc caps */
++static void
++cache_file_layout(struct inode *dst, struct inode *src)
++{
++	struct ceph_inode_info *cdst = ceph_inode(dst);
++	struct ceph_inode_info *csrc = ceph_inode(src);
++
++	spin_lock(&cdst->i_ceph_lock);
++	if ((__ceph_caps_issued(cdst, NULL) & CEPH_CAP_DIR_CREATE) &&
++	    !ceph_file_layout_is_valid(&cdst->i_cached_layout)) {
++		memcpy(&cdst->i_cached_layout, &csrc->i_layout,
++			sizeof(cdst->i_cached_layout));
++		rcu_assign_pointer(cdst->i_cached_layout.pool_ns,
++				   ceph_try_get_string(csrc->i_layout.pool_ns));
++	}
++	spin_unlock(&cdst->i_ceph_lock);
++}
+ 
+ /*
+  * Do a lookup + open with a single request.  If we get a non-existent
+@@ -518,7 +535,10 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	} else {
+ 		dout("atomic_open finish_open on dn %p\n", dn);
+ 		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
+-			ceph_init_inode_acls(d_inode(dentry), &as_ctx);
++			struct inode *newino = d_inode(dentry);
++
++			cache_file_layout(dir, newino);
++			ceph_init_inode_acls(newino, &as_ctx);
+ 			file->f_mode |= FMODE_CREATED;
+ 		}
+ 		err = finish_open(file, dentry, ceph_open);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 4056c7968b86..73f986efb1fd 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -447,6 +447,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	ci->i_max_files = 0;
+ 
+ 	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
++	memset(&ci->i_cached_layout, 0, sizeof(ci->i_cached_layout));
+ 	RCU_INIT_POINTER(ci->i_layout.pool_ns, NULL);
+ 
+ 	ci->i_fragtree = RB_ROOT;
+@@ -587,6 +588,7 @@ void ceph_evict_inode(struct inode *inode)
+ 		ceph_buffer_put(ci->i_xattrs.prealloc_blob);
+ 
+ 	ceph_put_string(rcu_dereference_raw(ci->i_layout.pool_ns));
++	ceph_put_string(rcu_dereference_raw(ci->i_cached_layout.pool_ns));
+ }
+ 
+ static inline blkcnt_t calc_inode_blocks(u64 size)
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 2321c955439b..09d5301b036c 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3502,8 +3502,13 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+ 	cap->cap_gen = cap->session->s_cap_gen;
+ 
+ 	/* These are lost when the session goes away */
+-	if (S_ISDIR(inode->i_mode))
++	if (S_ISDIR(inode->i_mode)) {
++		if (cap->issued & CEPH_CAP_DIR_CREATE) {
++			ceph_put_string(rcu_dereference_raw(ci->i_cached_layout.pool_ns));
++			memset(&ci->i_cached_layout, 0, sizeof(ci->i_cached_layout));
++		}
+ 		cap->issued &= ~(CEPH_CAP_DIR_CREATE|CEPH_CAP_DIR_UNLINK);
++	}
+ 
+ 	if (recon_state->msg_version >= 2) {
+ 		rec.v2.cap_id = cpu_to_le64(cap->cap_id);
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 3192e506ad5e..ea68eef977ef 100644
+index 47fb6e022339..60701a2e36b3 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -1062,6 +1062,8 @@ extern void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
- 				    struct ceph_mds_session *session);
- extern struct ceph_cap *ceph_get_cap_for_mds(struct ceph_inode_info *ci,
- 					     int mds);
-+extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
-+				bool snap_rwsem_locked);
- extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
- extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
- extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+@@ -326,6 +326,7 @@ struct ceph_inode_info {
+ 
+ 	struct ceph_dir_layout i_dir_layout;
+ 	struct ceph_file_layout i_layout;
++	struct ceph_file_layout i_cached_layout;	// for async creates
+ 	char *i_symlink;
+ 
+ 	/* for dirs */
 -- 
 2.24.1
