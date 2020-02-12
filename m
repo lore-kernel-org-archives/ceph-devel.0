@@ -1,109 +1,173 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v4 1/9] ceph: add flag to designate that a request is asynchronous
-Date: Wed, 12 Feb 2020 12:27:21 -0500
-Message-ID: <20200212172729.260752-2-jlayton@kernel.org>
+Subject: [PATCH v4 3/9] ceph: make ceph_fill_inode non-static
+Date: Wed, 12 Feb 2020 12:27:23 -0500
+Message-ID: <20200212172729.260752-4-jlayton@kernel.org>
 References: <20200212172729.260752-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:35482 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:35500 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727041AbgBLR1c (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Feb 2020 12:27:32 -0500
+        id S1727041AbgBLR1e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Feb 2020 12:27:34 -0500
 In-Reply-To: <20200212172729.260752-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com
 
-...and ensure that such requests are never queued. The MDS has need to
-know that a request is asynchronous so add flags and proper
-infrastructure for that.
-
-Also, delegated inode numbers and directory caps are associated with the
-session, so ensure that async requests are always transmitted on the
-first attempt and are never queued to wait for session reestablishment.
-
-If it does end up looking like we'll need to queue the request, then
-have it return -EJUKEBOX so the caller can reattempt with a synchronous
-request.
-
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c              |  1 +
- fs/ceph/mds_client.c         | 11 +++++++++++
- fs/ceph/mds_client.h         |  1 +
- include/linux/ceph/ceph_fs.h |  5 +++--
- 4 files changed, 16 insertions(+), 2 deletions(-)
+ fs/ceph/inode.c | 47 ++++++++++++++++++++++++-----------------------
+ fs/ceph/super.h |  8 ++++++++
+ 2 files changed, 32 insertions(+), 23 deletions(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 094b8fc37787..9869ec101e88 100644
+index 7478bd0283c1..4056c7968b86 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -1311,6 +1311,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
- 				session,
+@@ -728,11 +728,11 @@ void ceph_fill_file_time(struct inode *inode, int issued,
+  * Populate an inode based on info from mds.  May be called on new or
+  * existing inodes.
+  */
+-static int fill_inode(struct inode *inode, struct page *locked_page,
+-		      struct ceph_mds_reply_info_in *iinfo,
+-		      struct ceph_mds_reply_dirfrag *dirinfo,
+-		      struct ceph_mds_session *session, int cap_fmode,
+-		      struct ceph_cap_reservation *caps_reservation)
++int ceph_fill_inode(struct inode *inode, struct page *locked_page,
++		    struct ceph_mds_reply_info_in *iinfo,
++		    struct ceph_mds_reply_dirfrag *dirinfo,
++		    struct ceph_mds_session *session, int cap_fmode,
++		    struct ceph_cap_reservation *caps_reservation)
+ {
+ 	struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
+ 	struct ceph_mds_reply_inode *info = iinfo->in;
+@@ -749,7 +749,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	bool new_version = false;
+ 	bool fill_inline = false;
+ 
+-	dout("fill_inode %p ino %llx.%llx v %llu had %llu\n",
++	dout("%s %p ino %llx.%llx v %llu had %llu\n", __func__,
+ 	     inode, ceph_vinop(inode), le64_to_cpu(info->version),
+ 	     ci->i_version);
+ 
+@@ -770,7 +770,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 	if (iinfo->xattr_len > 4) {
+ 		xattr_blob = ceph_buffer_new(iinfo->xattr_len, GFP_NOFS);
+ 		if (!xattr_blob)
+-			pr_err("fill_inode ENOMEM xattr blob %d bytes\n",
++			pr_err("%s ENOMEM xattr blob %d bytes\n", __func__,
+ 			       iinfo->xattr_len);
+ 	}
+ 
+@@ -933,8 +933,9 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 			spin_unlock(&ci->i_ceph_lock);
+ 
+ 			if (symlen != i_size_read(inode)) {
+-				pr_err("fill_inode %llx.%llx BAD symlink "
+-					"size %lld\n", ceph_vinop(inode),
++				pr_err("%s %llx.%llx BAD symlink "
++					"size %lld\n", __func__,
++					ceph_vinop(inode),
+ 					i_size_read(inode));
+ 				i_size_write(inode, symlen);
+ 				inode->i_blocks = calc_inode_blocks(symlen);
+@@ -958,7 +959,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 		inode->i_fop = &ceph_dir_fops;
+ 		break;
+ 	default:
+-		pr_err("fill_inode %llx.%llx BAD mode 0%o\n",
++		pr_err("%s %llx.%llx BAD mode 0%o\n", __func__,
+ 		       ceph_vinop(inode), inode->i_mode);
+ 	}
+ 
+@@ -1246,10 +1247,9 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		struct inode *dir = req->r_parent;
+ 
+ 		if (dir) {
+-			err = fill_inode(dir, NULL,
+-					 &rinfo->diri, rinfo->dirfrag,
+-					 session, -1,
+-					 &req->r_caps_reservation);
++			err = ceph_fill_inode(dir, NULL, &rinfo->diri,
++					      rinfo->dirfrag, session, -1,
++					      &req->r_caps_reservation);
+ 			if (err < 0)
+ 				goto done;
+ 		} else {
+@@ -1314,14 +1314,14 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			goto done;
+ 		}
+ 
+-		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
+-				session,
++		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
++				NULL, session,
  				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
-+				 !test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags) &&
+ 				 !test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags) &&
  				 rinfo->head->result == 0) ?  req->r_fmode : -1,
  				&req->r_caps_reservation);
  		if (err < 0) {
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 2980e57ca7b9..9f2aeb6908b2 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2527,6 +2527,8 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 	rhead->oldest_client_tid = cpu_to_le64(__get_oldest_tid(mdsc));
- 	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
- 		flags |= CEPH_MDS_FLAG_REPLAY;
-+	if (test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags))
-+		flags |= CEPH_MDS_FLAG_ASYNC;
- 	if (req->r_parent)
- 		flags |= CEPH_MDS_FLAG_WANT_DENTRY;
- 	rhead->flags = cpu_to_le32(flags);
-@@ -2634,6 +2636,15 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 			err = -EACCES;
- 			goto out_session;
+-			pr_err("fill_inode badness %p %llx.%llx\n",
++			pr_err("ceph_fill_inode badness %p %llx.%llx\n",
+ 				in, ceph_vinop(in));
+ 			if (in->i_state & I_NEW)
+ 				discard_new_inode(in);
+@@ -1508,10 +1508,11 @@ static int readdir_prepopulate_inodes_only(struct ceph_mds_request *req,
+ 			dout("new_inode badness got %d\n", err);
+ 			continue;
  		}
-+		/*
-+		 * We cannot queue async requests since the caps and delegated
-+		 * inodes are bound to the session. Just return -EJUKEBOX and
-+		 * let the caller retry a sync request in that case.
-+		 */
-+		if (test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags)) {
-+			err = -EJUKEBOX;
-+			goto out_session;
-+		}
- 		if (session->s_state == CEPH_MDS_SESSION_NEW ||
- 		    session->s_state == CEPH_MDS_SESSION_CLOSING) {
- 			__open_session(mdsc, session);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 27a7446e10d3..0327974d0763 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -255,6 +255,7 @@ struct ceph_mds_request {
- #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
- #define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
- #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
-+#define CEPH_MDS_R_ASYNC		(8) /* async request */
- 	unsigned long	r_req_flags;
+-		rc = fill_inode(in, NULL, &rde->inode, NULL, session,
+-				-1, &req->r_caps_reservation);
++		rc = ceph_fill_inode(in, NULL, &rde->inode, NULL, session,
++				     -1, &req->r_caps_reservation);
+ 		if (rc < 0) {
+-			pr_err("fill_inode badness on %p got %d\n", in, rc);
++			pr_err("ceph_fill_inode badness on %p got %d\n",
++			       in, rc);
+ 			err = rc;
+ 			if (in->i_state & I_NEW) {
+ 				ihold(in);
+@@ -1715,10 +1716,10 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 			}
+ 		}
  
- 	struct mutex r_fill_mutex;
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index cb21c5cf12c3..9f747a1b8788 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -444,8 +444,9 @@ union ceph_mds_request_args {
- 	} __attribute__ ((packed)) lookupino;
- } __attribute__ ((packed));
+-		ret = fill_inode(in, NULL, &rde->inode, NULL, session,
+-				 -1, &req->r_caps_reservation);
++		ret = ceph_fill_inode(in, NULL, &rde->inode, NULL, session,
++				      -1, &req->r_caps_reservation);
+ 		if (ret < 0) {
+-			pr_err("fill_inode badness on %p\n", in);
++			pr_err("ceph_fill_inode badness on %p\n", in);
+ 			if (d_really_is_negative(dn)) {
+ 				/* avoid calling iput_final() in mds
+ 				 * dispatch threads */
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 540393ba861b..3192e506ad5e 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -893,6 +893,9 @@ static inline bool __ceph_have_pending_cap_snap(struct ceph_inode_info *ci)
+ }
  
--#define CEPH_MDS_FLAG_REPLAY        1  /* this is a replayed op */
--#define CEPH_MDS_FLAG_WANT_DENTRY   2  /* want dentry in reply */
-+#define CEPH_MDS_FLAG_REPLAY		1 /* this is a replayed op */
-+#define CEPH_MDS_FLAG_WANT_DENTRY	2 /* want dentry in reply */
-+#define CEPH_MDS_FLAG_ASYNC		4 /* request is asynchronous */
+ /* inode.c */
++struct ceph_mds_reply_info_in;
++struct ceph_mds_reply_dirfrag;
++
+ extern const struct inode_operations ceph_file_iops;
  
- struct ceph_mds_request_head {
- 	__le64 oldest_client_tid;
+ extern struct inode *ceph_alloc_inode(struct super_block *sb);
+@@ -908,6 +911,11 @@ extern void ceph_fill_file_time(struct inode *inode, int issued,
+ 				u64 time_warp_seq, struct timespec64 *ctime,
+ 				struct timespec64 *mtime,
+ 				struct timespec64 *atime);
++extern int ceph_fill_inode(struct inode *inode, struct page *locked_page,
++		    struct ceph_mds_reply_info_in *iinfo,
++		    struct ceph_mds_reply_dirfrag *dirinfo,
++		    struct ceph_mds_session *session, int cap_fmode,
++		    struct ceph_cap_reservation *caps_reservation);
+ extern int ceph_fill_trace(struct super_block *sb,
+ 			   struct ceph_mds_request *req);
+ extern int ceph_readdir_prepopulate(struct ceph_mds_request *req,
 -- 
 2.24.1
