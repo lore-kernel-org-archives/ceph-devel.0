@@ -1,155 +1,348 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v4 6/9] ceph: add infrastructure for waiting for async create to complete
-Date: Wed, 12 Feb 2020 12:27:26 -0500
-Message-ID: <20200212172729.260752-7-jlayton@kernel.org>
+Subject: [PATCH v4 9/9] ceph: attempt to do async create when possible
+Date: Wed, 12 Feb 2020 12:27:29 -0500
+Message-ID: <20200212172729.260752-10-jlayton@kernel.org>
 References: <20200212172729.260752-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:35532 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:35562 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727680AbgBLR1g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Feb 2020 12:27:36 -0500
+        id S1728673AbgBLR1i (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Feb 2020 12:27:38 -0500
 In-Reply-To: <20200212172729.260752-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com
 
-When we issue an async create, we must ensure that any later on-the-wire
-requests involving it wait for the create reply.
+With the Octopus release, the MDS will hand out directory create caps.
 
-Expand i_ceph_flags to be an unsigned long, and add a new bit that
-MDS requests can wait on. If the bit is set in the inode when sending
-caps, then don't send it and just return that it has been delayed.
+If we have Fxc caps on the directory, and complete directory information
+or a known negative dentry, then we can return without waiting on the
+reply, allowing the open() call to return very quickly to userland.
+
+We use the normal ceph_fill_inode() routine to fill in the inode, so we
+have to gin up some reply inode information with what we'd expect the
+newly-created inode to have. The client assumes that it has a full set
+of caps on the new inode, and that the MDS will revoke them when there
+is conflicting access.
+
+This functionality is gated on the wsync/nowsync mount options.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c       | 13 ++++++++++++-
- fs/ceph/dir.c        |  2 +-
- fs/ceph/mds_client.c | 18 ++++++++++++++++++
- fs/ceph/mds_client.h |  8 ++++++++
- fs/ceph/super.h      |  4 +++-
- 5 files changed, 42 insertions(+), 3 deletions(-)
+ fs/ceph/file.c               | 231 +++++++++++++++++++++++++++++++++--
+ include/linux/ceph/ceph_fs.h |   3 +
+ 2 files changed, 224 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index c983990acb75..869e2102e827 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -511,7 +511,7 @@ static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
- 				struct ceph_inode_info *ci,
- 				bool set_timeout)
- {
--	dout("__cap_delay_requeue %p flags %d at %lu\n", &ci->vfs_inode,
-+	dout("__cap_delay_requeue %p flags 0x%lx at %lu\n", &ci->vfs_inode,
- 	     ci->i_ceph_flags, ci->i_hold_caps_max);
- 	if (!mdsc->stopping) {
- 		spin_lock(&mdsc->cap_delay_lock);
-@@ -1298,6 +1298,13 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
- 	int delayed = 0;
- 	int ret;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 472d90ccdf44..814ff435832c 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -448,6 +448,196 @@ cache_file_layout(struct inode *dst, struct inode *src)
+ 	spin_unlock(&cdst->i_ceph_lock);
+ }
  
-+	/* Don't send anything if it's still being created. Return delayed */
-+	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
-+		spin_unlock(&ci->i_ceph_lock);
-+		dout("%s async create in flight for %p\n", __func__, inode);
-+		return 1;
-+	}
-+
- 	held = cap->issued | cap->implemented;
- 	revoking = cap->implemented & ~cap->issued;
- 	retain &= ~revoking;
-@@ -2257,6 +2264,10 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
- 	if (datasync)
- 		goto out;
- 
-+	ret = ceph_wait_on_async_create(inode);
-+	if (ret)
-+		goto out;
-+
- 	dirty = try_flush_caps(inode, &flush_tid);
- 	dout("fsync dirty caps are %s\n", ceph_cap_string(dirty));
- 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 46314ccf48c5..4e695f2a9347 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -752,7 +752,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
- 		struct ceph_dentry_info *di = ceph_dentry(dentry);
- 
- 		spin_lock(&ci->i_ceph_lock);
--		dout(" dir %p flags are %d\n", dir, ci->i_ceph_flags);
-+		dout(" dir %p flags are 0x%lx\n", dir, ci->i_ceph_flags);
- 		if (strncmp(dentry->d_name.name,
- 			    fsc->mount_options->snapdir_name,
- 			    dentry->d_name.len) &&
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 91c5f999da7d..314dd0f6f5a9 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2829,6 +2829,24 @@ int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc, struct inode *dir,
- 		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
- 				  CEPH_CAP_PIN);
- 
-+	if (req->r_inode) {
-+		err = ceph_wait_on_async_create(req->r_inode);
-+		if (err) {
-+			dout("%s: wait for async create returned: %d\n",
-+			     __func__, err);
-+			return err;
-+		}
-+	}
-+
-+	if (req->r_old_inode) {
-+		err = ceph_wait_on_async_create(req->r_old_inode);
-+		if (err) {
-+			dout("%s: wait for async create returned: %d\n",
-+			     __func__, err);
-+			return err;
-+		}
-+	}
-+
- 	dout("submit_request on %p for inode %p\n", req, dir);
- 	mutex_lock(&mdsc->mutex);
- 	__register_request(mdsc, req, dir);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 31f68897bc87..acad9adca0af 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -543,4 +543,12 @@ extern int ceph_trim_caps(struct ceph_mds_client *mdsc,
- 			  int max_caps);
- 
- extern u64 ceph_get_deleg_ino(struct ceph_mds_session *session);
-+
-+static inline int ceph_wait_on_async_create(struct inode *inode)
++/*
++ * Try to set up an async create. We need caps, a file layout, and inode number,
++ * and either a lease on the dentry or complete dir info. If any of those
++ * criteria are not satisfied, then return false and the caller can go
++ * synchronous.
++ */
++static bool try_prep_async_create(struct inode *dir, struct dentry *dentry,
++				  struct ceph_file_layout *lo, u64 *pino)
 +{
-+	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_inode_info *ci = ceph_inode(dir);
++	struct ceph_dentry_info *di = ceph_dentry(dentry);
++	bool ret = false;
++	u64 ino;
 +
-+	return wait_on_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT,
-+			   TASK_INTERRUPTIBLE);
++	spin_lock(&ci->i_ceph_lock);
++	/* No auth cap means no chance for Dc caps */
++	if (!ci->i_auth_cap)
++		goto no_async;
++
++	/* Any delegated inos? */
++	if (xa_empty(&ci->i_auth_cap->session->s_delegated_inos))
++		goto no_async;
++
++	if (!ceph_file_layout_is_valid(&ci->i_cached_layout))
++		goto no_async;
++
++	if ((__ceph_caps_issued(ci, NULL) &
++	     (CEPH_CAP_FILE_EXCL | CEPH_CAP_DIR_CREATE)) !=
++	    (CEPH_CAP_FILE_EXCL | CEPH_CAP_DIR_CREATE))
++		goto no_async;
++
++	if (d_in_lookup(dentry)) {
++		if (!__ceph_dir_is_complete(ci))
++			goto no_async;
++	} else if (atomic_read(&ci->i_shared_gen) !=
++		   READ_ONCE(di->lease_shared_gen)) {
++		goto no_async;
++	}
++
++	ino = ceph_get_deleg_ino(ci->i_auth_cap->session);
++	if (!ino)
++		goto no_async;
++
++	*pino = ino;
++	ceph_take_cap_refs(ci, CEPH_CAP_FILE_EXCL | CEPH_CAP_DIR_CREATE, false);
++	memcpy(lo, &ci->i_cached_layout, sizeof(*lo));
++	rcu_assign_pointer(lo->pool_ns,
++			   ceph_try_get_string(ci->i_cached_layout.pool_ns));
++	ret = true;
++no_async:
++	spin_unlock(&ci->i_ceph_lock);
++	return ret;
 +}
- #endif
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index ea68eef977ef..47fb6e022339 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -319,7 +319,7 @@ struct ceph_inode_info {
- 	u64 i_inline_version;
- 	u32 i_time_warp_seq;
- 
--	unsigned i_ceph_flags;
-+	unsigned long i_ceph_flags;
- 	atomic64_t i_release_count;
- 	atomic64_t i_ordered_count;
- 	atomic64_t i_complete_seq[2];
-@@ -527,6 +527,8 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- #define CEPH_I_ERROR_WRITE	(1 << 10) /* have seen write errors */
- #define CEPH_I_ERROR_FILELOCK	(1 << 11) /* have seen file lock errors */
- #define CEPH_I_ODIRECT		(1 << 12) /* inode in direct I/O mode */
-+#define CEPH_ASYNC_CREATE_BIT	(13)	  /* async create in flight for this */
-+#define CEPH_I_ASYNC_CREATE	(1 << CEPH_ASYNC_CREATE_BIT)
- 
++
++static void ceph_async_create_cb(struct ceph_mds_client *mdsc,
++                                 struct ceph_mds_request *req)
++{
++	int result = req->r_err ? req->r_err :
++			le32_to_cpu(req->r_reply_info.head->result);
++
++	mapping_set_error(req->r_parent->i_mapping, result);
++
++	if (result) {
++		struct dentry *dentry = req->r_dentry;
++		int pathlen;
++		u64 base;
++		char *path = ceph_mdsc_build_path(req->r_dentry, &pathlen,
++						  &base, 0);
++
++		ceph_dir_clear_complete(req->r_parent);
++		if (!d_unhashed(dentry))
++			d_drop(dentry);
++
++		/* FIXME: start returning I/O errors on all accesses? */
++		pr_warn("ceph: async create failure path=(%llx)%s result=%d!\n",
++			base, IS_ERR(path) ? "<<bad>>" : path, result);
++		ceph_mdsc_free_path(path, pathlen);
++	}
++
++	if (req->r_target_inode) {
++		struct ceph_inode_info *ci = ceph_inode(req->r_target_inode);
++		u64 ino = ceph_vino(req->r_target_inode).ino;
++
++		if (req->r_deleg_ino != ino)
++			pr_warn("%s: inode number mismatch! err=%d deleg_ino=0x%llx target=0x%llx\n",
++				__func__, req->r_err, req->r_deleg_ino, ino);
++		mapping_set_error(req->r_target_inode->i_mapping, result);
++
++		spin_lock(&ci->i_ceph_lock);
++		if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
++			ci->i_ceph_flags &= ~CEPH_I_ASYNC_CREATE;
++			wake_up_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT);
++		}
++		spin_unlock(&ci->i_ceph_lock);
++	} else {
++		pr_warn("%s: no req->r_target_inode for 0x%llx\n", __func__,
++			req->r_deleg_ino);
++	}
++	ceph_put_cap_refs(ceph_inode(req->r_parent),
++			  CEPH_CAP_FILE_EXCL | CEPH_CAP_DIR_CREATE);
++}
++
++static int ceph_finish_async_create(struct inode *dir, struct dentry *dentry,
++				    struct file *file, umode_t mode,
++				    struct ceph_mds_request *req,
++				    struct ceph_acl_sec_ctx *as_ctx,
++				    struct ceph_file_layout *lo)
++{
++	int ret;
++	char xattr_buf[4];
++	struct ceph_mds_reply_inode in = { };
++	struct ceph_mds_reply_info_in iinfo = { .in = &in };
++	struct ceph_inode_info *ci = ceph_inode(dir);
++	struct inode *inode;
++	struct timespec64 now;
++	struct ceph_vino vino = { .ino = req->r_deleg_ino,
++				  .snap = CEPH_NOSNAP };
++
++	ktime_get_real_ts64(&now);
++
++	inode = ceph_get_inode(dentry->d_sb, vino);
++	if (IS_ERR(inode))
++		return PTR_ERR(inode);
++
++	iinfo.inline_version = CEPH_INLINE_NONE;
++	iinfo.change_attr = 1;
++	ceph_encode_timespec64(&iinfo.btime, &now);
++
++	iinfo.xattr_len = ARRAY_SIZE(xattr_buf);
++	iinfo.xattr_data = xattr_buf;
++	memset(iinfo.xattr_data, 0, iinfo.xattr_len);
++
++	in.ino = cpu_to_le64(vino.ino);
++	in.snapid = cpu_to_le64(CEPH_NOSNAP);
++	in.version = cpu_to_le64(1);	// ???
++	in.cap.caps = in.cap.wanted = cpu_to_le32(CEPH_CAP_ALL_FILE);
++	in.cap.cap_id = cpu_to_le64(1);
++	in.cap.realm = cpu_to_le64(ci->i_snap_realm->ino);
++	in.cap.flags = CEPH_CAP_FLAG_AUTH;
++	in.ctime = in.mtime = in.atime = iinfo.btime;
++	in.mode = cpu_to_le32((u32)mode);
++	in.truncate_seq = cpu_to_le32(1);
++	in.truncate_size = cpu_to_le64(-1ULL);
++	in.xattr_version = cpu_to_le64(1);
++	in.uid = cpu_to_le32(from_kuid(&init_user_ns, current_fsuid()));
++	in.gid = cpu_to_le32(from_kgid(&init_user_ns, dir->i_mode & S_ISGID ?
++				dir->i_gid : current_fsgid()));
++	in.nlink = cpu_to_le32(1);
++	in.max_size = cpu_to_le64(lo->stripe_unit);
++
++	ceph_file_layout_to_legacy(lo, &in.layout);
++
++	ret = ceph_fill_inode(inode, NULL, &iinfo, NULL, req->r_session,
++			      req->r_fmode, NULL);
++	if (ret) {
++		dout("%s failed to fill inode: %d\n", __func__, ret);
++		ceph_dir_clear_complete(dir);
++		if (!d_unhashed(dentry))
++			d_drop(dentry);
++		if (inode->i_state & I_NEW)
++			discard_new_inode(inode);
++	} else {
++		struct dentry *dn;
++
++		dout("%s d_adding new inode 0x%llx to 0x%lx/%s\n", __func__,
++			vino.ino, dir->i_ino, dentry->d_name.name);
++		ceph_dir_clear_ordered(dir);
++		ceph_init_inode_acls(inode, as_ctx);
++		if (inode->i_state & I_NEW) {
++			/*
++			 * If it's not I_NEW, then someone created this before
++			 * we got here. Assume the server is aware of it at
++			 * that point and don't worry about setting
++			 * CEPH_I_ASYNC_CREATE.
++			 */
++			ceph_inode(inode)->i_ceph_flags = CEPH_I_ASYNC_CREATE;
++			unlock_new_inode(inode);
++		}
++		if (d_in_lookup(dentry) || d_really_is_negative(dentry)) {
++			if (!d_unhashed(dentry))
++				d_drop(dentry);
++			dn = d_splice_alias(inode, dentry);
++			WARN_ON_ONCE(dn && dn != dentry);
++		}
++		file->f_mode |= FMODE_CREATED;
++		ret = finish_open(file, dentry, ceph_open);
++	}
++	return ret;
++}
++
  /*
-  * Masks of ceph inode work.
+  * Do a lookup + open with a single request.  If we get a non-existent
+  * file or symlink, return 1 so the VFS can retry.
+@@ -460,6 +650,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	struct ceph_mds_request *req;
+ 	struct dentry *dn;
+ 	struct ceph_acl_sec_ctx as_ctx = {};
++	bool try_async = ceph_test_mount_opt(fsc, ASYNC_DIROPS);
+ 	int mask;
+ 	int err;
+ 
+@@ -483,7 +674,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		/* If it's not being looked up, it's negative */
+ 		return -ENOENT;
+ 	}
+-
++retry:
+ 	/* do the open */
+ 	req = prepare_open_request(dir->i_sb, flags, mode);
+ 	if (IS_ERR(req)) {
+@@ -492,28 +683,47 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
++	mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
++	if (ceph_security_xattr_wanted(dir))
++		mask |= CEPH_CAP_XATTR_SHARED;
++	req->r_args.open.mask = cpu_to_le32(mask);
++	req->r_parent = dir;
++
+ 	if (flags & O_CREAT) {
++		struct ceph_file_layout lo;
++
+ 		req->r_dentry_drop = CEPH_CAP_FILE_SHARED | CEPH_CAP_AUTH_EXCL;
+ 		req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
+ 		if (as_ctx.pagelist) {
+ 			req->r_pagelist = as_ctx.pagelist;
+ 			as_ctx.pagelist = NULL;
+ 		}
++		if (try_async && try_prep_async_create(dir, dentry, &lo,
++						       &req->r_deleg_ino)) {
++			set_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags);
++			req->r_args.open.flags |= cpu_to_le32(CEPH_O_EXCL);
++			req->r_callback = ceph_async_create_cb;
++			err = ceph_mdsc_submit_request(mdsc, dir, req);
++			if (!err) {
++				err = ceph_finish_async_create(dir, dentry,
++							file, mode, req,
++							&as_ctx, &lo);
++			} else if (err == -EJUKEBOX) {
++				ceph_mdsc_put_request(req);
++				try_async = false;
++				goto retry;
++			}
++			goto out_req;
++		}
+ 	}
+ 
+-       mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
+-       if (ceph_security_xattr_wanted(dir))
+-               mask |= CEPH_CAP_XATTR_SHARED;
+-       req->r_args.open.mask = cpu_to_le32(mask);
+-
+-	req->r_parent = dir;
+ 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	err = ceph_mdsc_do_request(mdsc,
+ 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
+ 				   req);
+ 	err = ceph_handle_snapdir(req, dentry, err);
+ 	if (err)
+-		goto out_req;
++		goto out_fmode;
+ 
+ 	if ((flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
+ 		err = ceph_handle_notrace_create(dir, dentry);
+@@ -527,7 +737,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		dn = NULL;
+ 	}
+ 	if (err)
+-		goto out_req;
++		goto out_fmode;
+ 	if (dn || d_really_is_negative(dentry) || d_is_symlink(dentry)) {
+ 		/* make vfs retry on splice, ENOENT, or symlink */
+ 		dout("atomic_open finish_no_open on dn %p\n", dn);
+@@ -543,9 +753,10 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		}
+ 		err = finish_open(file, dentry, ceph_open);
+ 	}
+-out_req:
++out_fmode:
+ 	if (!req->r_err && req->r_target_inode)
+ 		ceph_put_fmode(ceph_inode(req->r_target_inode), req->r_fmode);
++out_req:
+ 	ceph_mdsc_put_request(req);
+ out_ctx:
+ 	ceph_release_acl_sec_ctx(&as_ctx);
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 91d09cf37649..e035c5194005 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -659,6 +659,9 @@ int ceph_flags_to_mode(int flags);
+ #define CEPH_CAP_ANY      (CEPH_CAP_ANY_RD | CEPH_CAP_ANY_EXCL | \
+ 			   CEPH_CAP_ANY_FILE_WR | CEPH_CAP_FILE_LAZYIO | \
+ 			   CEPH_CAP_PIN)
++#define CEPH_CAP_ALL_FILE (CEPH_CAP_PIN | CEPH_CAP_ANY_SHARED | \
++			   CEPH_CAP_AUTH_EXCL | CEPH_CAP_XATTR_EXCL | \
++			   CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR)
+ 
+ #define CEPH_CAP_LOCKS (CEPH_LOCK_IFILE | CEPH_LOCK_IAUTH | CEPH_LOCK_ILINK | \
+ 			CEPH_LOCK_IXATTR)
 -- 
 2.24.1
