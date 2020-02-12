@@ -1,26 +1,26 @@
 From: Xiubo Li <xiubli@redhat.com>
 Subject: Re: [PATCH] ceph: fs add reconfiguring superblock parameters support
-Date: Wed, 12 Feb 2020 22:45:11 +0800
-Message-ID: <8983edb7-8f8e-9b73-12eb-9f19ace5b440@redhat.com>
+Date: Wed, 12 Feb 2020 23:01:37 +0800
+Message-ID: <8fa89139-4774-65f7-fc48-e1ef368beb6e@redhat.com>
 References: <20200212085454.35665-1-xiubli@redhat.com>
- <CAOi1vP_GJ99XW-ncn2WD1GwvkZ4MU2HqXAbQiuGm3hqmg3otPQ@mail.gmail.com>
+ <c2571e75d3fe3f37ea77c5b1acaa5e3dcc45cb2b.camel@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:32664 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:32175 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728139AbgBLOp2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Feb 2020 09:45:28 -0500
-In-Reply-To: <CAOi1vP_GJ99XW-ncn2WD1GwvkZ4MU2HqXAbQiuGm3hqmg3otPQ@mail.gmail.com>
+        with ESMTP id S1727231AbgBLPBy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Feb 2020 10:01:54 -0500
+In-Reply-To: <c2571e75d3fe3f37ea77c5b1acaa5e3dcc45cb2b.camel@kernel.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On 2020/2/12 19:17, Ilya Dryomov wrote:
-> On Wed, Feb 12, 2020 at 9:55 AM <xiubli@redhat.com> wrote:
+On 2020/2/12 20:01, Jeff Layton wrote:
+> On Wed, 2020-02-12 at 03:54 -0500, xiubli@redhat.com wrote:
 >> From: Xiubo Li <xiubli@redhat.com>
 >>
 >> This will enable the remount and reconfiguring superblock params
@@ -52,45 +52,144 @@ On 2020/2/12 19:17, Ilya Dryomov wrote:
 >>   #include <linux/sbitmap.h>
 >>   #include <linux/delay.h>
 >> +#include <linux/rbtree.h>
-> Hi Xiubo,
->
-> This hunk touches the block layer.
-
-Ah, okay, I thought I have removed this.
-
-[...]
->> +       if (memcmp(&new_opts->fsid, &opts->fsid, sizeof(opts->fsid)))
->> +               return invalf(fc, "ceph: reconfiguration of fsid not allowed");
+>>   
+>>   #include "bfq-iosched.h"
+>>   
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index 4e494d5600cc..470de27cf809 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -6573,7 +6573,7 @@ static int rbd_add_parse_args(const char *buf,
+>>   	*(snap_name + len) = '\0';
+>>   	pctx.spec->snap_name = snap_name;
+>>   
+>> -	pctx.copts = ceph_alloc_options();
+>> +	pctx.copts = ceph_alloc_options(NULL);
+>>   	if (!pctx.copts)
+>>   		goto out_mem;
+>>   
+>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>> index b4f122eb74bb..020f83186f94 100644
+>> --- a/fs/ceph/caps.c
+>> +++ b/fs/ceph/caps.c
+>> @@ -491,10 +491,12 @@ static void __cap_set_timeouts(struct ceph_mds_client *mdsc,
+>>   {
+>>   	struct ceph_mount_options *opt = mdsc->fsc->mount_options;
+>>   
+>> +	spin_lock(&opt->ceph_opt_lock);
+>>   	ci->i_hold_caps_min = round_jiffies(jiffies +
+>>   					    opt->caps_wanted_delay_min * HZ);
+>>   	ci->i_hold_caps_max = round_jiffies(jiffies +
+>>   					    opt->caps_wanted_delay_max * HZ);
+>> +	spin_unlock(&opt->ceph_opt_lock);
+>>   	dout("__cap_set_timeouts %p min %lu max %lu\n", &ci->vfs_inode,
+>>   	     ci->i_hold_caps_min - jiffies, ci->i_hold_caps_max - jiffies);
+>>   }
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index 376e7cf1685f..451c3727cd0b 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -2099,6 +2099,7 @@ int ceph_alloc_readdir_reply_buffer(struct ceph_mds_request *req,
+>>   	struct ceph_inode_info *ci = ceph_inode(dir);
+>>   	struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
+>>   	struct ceph_mount_options *opt = req->r_mdsc->fsc->mount_options;
+>> +	unsigned int max_readdir = opt->max_readdir;
+>>   	size_t size = sizeof(struct ceph_mds_reply_dir_entry);
+>>   	unsigned int num_entries;
+>>   	int order;
+>> @@ -2107,7 +2108,7 @@ int ceph_alloc_readdir_reply_buffer(struct ceph_mds_request *req,
+>>   	num_entries = ci->i_files + ci->i_subdirs;
+>>   	spin_unlock(&ci->i_ceph_lock);
+>>   	num_entries = max(num_entries, 1U);
+>> -	num_entries = min(num_entries, opt->max_readdir);
+>> +	num_entries = min(num_entries, max_readdir);
+>>   
+>>   	order = get_order(size * num_entries);
+>>   	while (order >= 0) {
+>> @@ -2122,7 +2123,7 @@ int ceph_alloc_readdir_reply_buffer(struct ceph_mds_request *req,
+>>   		return -ENOMEM;
+>>   
+>>   	num_entries = (PAGE_SIZE << order) / size;
+>> -	num_entries = min(num_entries, opt->max_readdir);
+>> +	num_entries = min(num_entries, max_readdir);
+>>   
+>>   	rinfo->dir_buf_size = PAGE_SIZE << order;
+>>   	req->r_num_caps = num_entries + 1;
+>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>> index 9a21054059f2..8df506dd9039 100644
+>> --- a/fs/ceph/super.c
+>> +++ b/fs/ceph/super.c
+>> @@ -1175,7 +1175,57 @@ static void ceph_free_fc(struct fs_context *fc)
+>>   
+>>   static int ceph_reconfigure_fc(struct fs_context *fc)
+>>   {
+>> -	sync_filesystem(fc->root->d_sb);
+>> +	struct super_block *sb = fc->root->d_sb;
+>> +	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+>> +	struct ceph_mount_options *fsopt = fsc->mount_options;
+>> +	struct ceph_parse_opts_ctx *pctx = fc->fs_private;
+>> +	struct ceph_mount_options *new_fsopt = pctx->opts;
+>> +	int ret;
 >> +
->> +       if (strcmp_null(new_opts->name, opts->name))
->> +               return invalf(fc, "ceph: reconfiguration of name not allowed");
+>> +	sync_filesystem(sb);
 >> +
->> +       if (new_opts->key && (!opts->key ||
->> +               new_opts->key->type != opts->key->type ||
->> +               new_opts->key->created.tv_sec != opts->key->created.tv_sec ||
->> +               new_opts->key->created.tv_nsec != opts->key->created.tv_nsec ||
->> +               new_opts->key->len != opts->key->len ||
->> +               memcmp(new_opts->key->key, opts->key->key, opts->key->len)))
->> +               return invalf(fc, "ceph: reconfiguration of secret not allowed");
+>> +	ret = ceph_reconfigure_copts(fc, pctx->copts, fsc->client->options);
+>> +	if (ret)
+>> +		return ret;
 >> +
->> +       opts->osd_keepalive_timeout = new_opts->osd_keepalive_timeout;
->> +       opts->osd_idle_ttl = new_opts->osd_idle_ttl;
->> +       opts->mount_timeout = new_opts->mount_timeout;
->> +       opts->osd_request_timeout = new_opts->osd_request_timeout;
-> What is the use case for reconfiguring any of these options?  They are
-> all low level and aren't really meant to be reconfigured.
+>> +	if (new_fsopt->snapdir_name != fsopt->snapdir_name)
+>> +		return invalf(fc, "ceph: reconfiguration of snapdir_name not allowed");
+>> +
+>> +	if (new_fsopt->mds_namespace != fsopt->mds_namespace)
+>> +		return invalf(fc, "ceph: reconfiguration of mds_namespace not allowed");
+>> +
+>> +	if (new_fsopt->wsize != fsopt->wsize)
+>> +		return invalf(fc, "ceph: reconfiguration of wsize not allowed");
+>> +	if (new_fsopt->rsize != fsopt->rsize)
+>> +		return invalf(fc, "ceph: reconfiguration of rsize not allowed");
+>> +	if (new_fsopt->rasize != fsopt->rasize)
+>> +		return invalf(fc, "ceph: reconfiguration of rasize not allowed");
+>> +
+> Odd. I would think the wsize, rsize and rasize are things you _could_
+> reconfigure at remount time.
 
-Okay, actually now these are not needed to reconfigured.
+There has some race for the wsize,
 
->> +       opts->flags = new_opts->flags;
-> This is particularly true for flags.  Reconfiguring tcp_nodelay will
-> not have effect on sockets that are already open, reconfiguring noshare
-> will not unshare the client instance, etc.  Messing with crc or
-> cephx_sign_messages is very likely to hang the client.
 
-Okay, will check this more.
-
-> Thanks,
 >
->                  Ilya
->
+> In any case, I agree with Ilya. Not everything can be changed on a
+> remount. It'd be best to identify some small subset of mount options
+> that you do need to allow to be changed, and ensure we can do that.
+
+Yeah, I have disabled some already which may be racing when changing 
+them in remount.
+
+Will disable the low level ones and some others in next version.
+
+
+>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+>> index 2acb09980432..ad44b98f3c3b 100644
+>> --- a/fs/ceph/super.h
+>> +++ b/fs/ceph/super.h
+>> @@ -95,6 +95,8 @@ struct ceph_mount_options {
+>>   	char *mds_namespace;  /* default NULL */
+>>   	char *server_path;    /* default  "/" */
+>>   	char *fscache_uniq;   /* default NULL */
+>> +
+>> +	spinlock_t ceph_opt_lock;
+> I'm not sure we really need an extra lock around these fields,
+> particularly if you're intending to only allow a few different things to
+> be changed at remount.
+
+This will only protect the "fsopt->caps_wanted_delay_min" and 
+"fsopt->caps_wanted_delay_min", just in case we are changing them both 
+which may be racing with __cap_set_timeouts().
+
+For example:
+
+The old range is [40, 60] and if the new range is [10, 30], we may hit 
+the [i_hold_caps_min, i_hold_caps_max] are set as [40, 30].
+
+Thanks,
+
+BRs
