@@ -1,62 +1,89 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v4 7/9] ceph: add new MDS req field to hold delegated inode number
-Date: Wed, 12 Feb 2020 12:27:27 -0500
-Message-ID: <20200212172729.260752-8-jlayton@kernel.org>
+Subject: [PATCH v4 4/9] ceph: make __take_cap_refs non-static
+Date: Wed, 12 Feb 2020 12:27:24 -0500
+Message-ID: <20200212172729.260752-5-jlayton@kernel.org>
 References: <20200212172729.260752-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:35540 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:35510 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728673AbgBLR1h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Feb 2020 12:27:37 -0500
+        id S1727680AbgBLR1e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Feb 2020 12:27:34 -0500
 In-Reply-To: <20200212172729.260752-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idridryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com
 
-Add new request field to hold the delegated inode number. Encode that
-into the message when it's set.
+Rename it to ceph_take_cap_refs and make it available to other files.
+Also replace a comment with a lockdep assertion.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 3 +--
- fs/ceph/mds_client.h | 1 +
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ fs/ceph/caps.c  | 12 ++++++------
+ fs/ceph/super.h |  2 ++
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 314dd0f6f5a9..2321c955439b 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2464,7 +2464,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
- 	head->op = cpu_to_le32(req->r_op);
- 	head->caller_uid = cpu_to_le32(from_kuid(&init_user_ns, req->r_uid));
- 	head->caller_gid = cpu_to_le32(from_kgid(&init_user_ns, req->r_gid));
--	head->ino = 0;
-+	head->ino = cpu_to_le64(req->r_deleg_ino);
- 	head->args = req->r_args;
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 7fc87b693ba4..c983990acb75 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2512,12 +2512,12 @@ static void kick_flushing_inode_caps(struct ceph_mds_client *mdsc,
+ /*
+  * Take references to capabilities we hold, so that we don't release
+  * them to the MDS prematurely.
+- *
+- * Protected by i_ceph_lock.
+  */
+-static void __take_cap_refs(struct ceph_inode_info *ci, int got,
++void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
+ 			    bool snap_rwsem_locked)
+ {
++	lockdep_assert_held(&ci->i_ceph_lock);
++
+ 	if (got & CEPH_CAP_PIN)
+ 		ci->i_pin_ref++;
+ 	if (got & CEPH_CAP_FILE_RD)
+@@ -2538,7 +2538,7 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got,
+ 		if (ci->i_wb_ref == 0)
+ 			ihold(&ci->vfs_inode);
+ 		ci->i_wb_ref++;
+-		dout("__take_cap_refs %p wb %d -> %d (?)\n",
++		dout("%s %p wb %d -> %d (?)\n", __func__,
+ 		     &ci->vfs_inode, ci->i_wb_ref-1, ci->i_wb_ref);
+ 	}
+ }
+@@ -2664,7 +2664,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 			    (need & CEPH_CAP_FILE_RD) &&
+ 			    !(*got & CEPH_CAP_FILE_CACHE))
+ 				ceph_disable_fscache_readpage(ci);
+-			__take_cap_refs(ci, *got, true);
++			ceph_take_cap_refs(ci, *got, true);
+ 			ret = 1;
+ 		}
+ 	} else {
+@@ -2896,7 +2896,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
+ void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps)
+ {
+ 	spin_lock(&ci->i_ceph_lock);
+-	__take_cap_refs(ci, caps, false);
++	ceph_take_cap_refs(ci, caps, false);
+ 	spin_unlock(&ci->i_ceph_lock);
+ }
  
- 	ceph_encode_filepath(&p, end, ino1, path1);
-@@ -2625,7 +2625,6 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 	rhead->flags = cpu_to_le32(flags);
- 	rhead->num_fwd = req->r_num_fwd;
- 	rhead->num_retry = req->r_attempts - 1;
--	rhead->ino = 0;
- 
- 	dout(" r_parent = %p\n", req->r_parent);
- 	return 0;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index acad9adca0af..4f25fd6df3f9 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -308,6 +308,7 @@ struct ceph_mds_request {
- 	int               r_num_fwd;    /* number of forward attempts */
- 	int               r_resend_mds; /* mds to resend to next, if any*/
- 	u32               r_sent_on_mseq; /* cap mseq request was sent at*/
-+	u64		  r_deleg_ino;
- 
- 	struct list_head  r_wait;
- 	struct completion r_completion;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 3192e506ad5e..ea68eef977ef 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1062,6 +1062,8 @@ extern void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 				    struct ceph_mds_session *session);
+ extern struct ceph_cap *ceph_get_cap_for_mds(struct ceph_inode_info *ci,
+ 					     int mds);
++extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
++				bool snap_rwsem_locked);
+ extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
+ extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
+ extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
 -- 
 2.24.1
