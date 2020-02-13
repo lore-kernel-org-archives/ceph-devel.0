@@ -1,50 +1,57 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 0/5] rbd: enable multiple blk-mq queues
-Date: Thu, 13 Feb 2020 20:26:01 +0100
-Message-ID: <20200213192606.31194-1-idryomov@gmail.com>
+Subject: [PATCH 2/5] rbd: get rid of img_request_layered_clear()
+Date: Thu, 13 Feb 2020 20:26:03 +0100
+Message-ID: <20200213192606.31194-3-idryomov@gmail.com>
+References: <20200213192606.31194-1-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:44802 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728075AbgBMTZn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Feb 2020 14:25:43 -0500
-Received: by mail-wr1-f68.google.com with SMTP id m16so8084214wrx.11
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Feb 2020 11:25:42 -0800 (PST)
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:36356 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728075AbgBMTZo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Feb 2020 14:25:44 -0500
+Received: by mail-wr1-f67.google.com with SMTP id z3so8144757wru.3
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Feb 2020 11:25:44 -0800 (PST)
+In-Reply-To: <20200213192606.31194-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Hannes Reinecke <hare@suse.de>
 
-Hi Hannes,
+No need to clear IMG_REQ_LAYERED before destroying the request.
 
-Here is what I intend to queue for 5.7.  I didn't hear from you on
-the need to protect the object request list, the impact of image
-request state_mutex on performance or the problem with queue_rq(),
-so I concentrated on the tail of your series and reworked the payload
-patch to avoid acquiring header_rwsem at least twice for each I/O.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
 
-I observed the same ~25-30% improvement in some rough synthetic tests
-on a laptop (random 4k reads with very high queue depth in particular).
-I assume you did your testing on real hardware -- it would be great if
-you could share some details.
-
-Thanks,
-
-                Ilya
-
-
-Hannes Reinecke (2):
-  rbd: kill img_request kref
-  rbd: enable multiple blk-mq queues
-
-Ilya Dryomov (3):
-  rbd: get rid of img_request_layered_clear()
-  rbd: acquire header_rwsem just once in rbd_queue_workfn()
-  rbd: embed image request in blk-mq pdu
-
- drivers/block/rbd.c | 212 +++++++++++++++++---------------------------
- 1 file changed, 79 insertions(+), 133 deletions(-)
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 22d524a0e98b..96aa0133fb40 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1358,11 +1358,6 @@ static void img_request_layered_set(struct rbd_img_request *img_request)
+ 	set_bit(IMG_REQ_LAYERED, &img_request->flags);
+ }
+ 
+-static void img_request_layered_clear(struct rbd_img_request *img_request)
+-{
+-	clear_bit(IMG_REQ_LAYERED, &img_request->flags);
+-}
+-
+ static bool img_request_layered_test(struct rbd_img_request *img_request)
+ {
+ 	return test_bit(IMG_REQ_LAYERED, &img_request->flags) != 0;
+@@ -1661,10 +1656,8 @@ static void rbd_img_request_destroy(struct rbd_img_request *img_request)
+ 	for_each_obj_request_safe(img_request, obj_request, next_obj_request)
+ 		rbd_img_obj_request_del(img_request, obj_request);
+ 
+-	if (img_request_layered_test(img_request)) {
+-		img_request_layered_clear(img_request);
++	if (img_request_layered_test(img_request))
+ 		rbd_dev_parent_put(img_request->rbd_dev);
+-	}
+ 
+ 	if (rbd_img_is_write(img_request))
+ 		ceph_put_snap_context(img_request->snapc);
 -- 
 2.19.2
