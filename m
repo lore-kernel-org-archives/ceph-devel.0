@@ -1,57 +1,52 @@
-From: xiubli@redhat.com
-Subject: [PATCH] ceph: switch to ceph_test_mount_opt helper
-Date: Fri, 14 Feb 2020 03:32:25 -0500
-Message-ID: <20200214083225.2804-1-xiubli@redhat.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.5 488/542] rbd: work around -Wuninitialized warning
+Date: Fri, 14 Feb 2020 10:48:00 -0500
+Message-ID: <20200214154854.6746-488-sashal@kernel.org>
+References: <20200214154854.6746-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:34899 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728779AbgBNIck (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2020 03:32:40 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, idryomov@gmail.com
-Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200214154854.6746-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+From: Arnd Bergmann <arnd@arndb.de>
 
-Clean up the code.
+[ Upstream commit a55e601b2f02df5db7070e9a37bd655c9c576a52 ]
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+gcc -O3 warns about a dummy variable that is passed
+down into rbd_img_fill_nodata without being initialized:
+
+drivers/block/rbd.c: In function 'rbd_img_fill_nodata':
+drivers/block/rbd.c:2573:13: error: 'dummy' is used uninitialized in this function [-Werror=uninitialized]
+  fctx->iter = *fctx->pos;
+
+Since this is a dummy, I assume the warning is harmless, but
+it's better to initialize it anyway and avoid the warning.
+
+Fixes: mmtom ("init/Kconfig: enable -O3 for all arches")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- fs/ceph/mds_client.c | 3 +--
- fs/ceph/super.c      | 2 +-
- 2 files changed, 2 insertions(+), 3 deletions(-)
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 451c3727cd0b..8a8aaa20699c 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2643,8 +2643,7 @@ static void __do_request(struct ceph_mds_client *md=
-sc,
- 			list_add(&req->r_wait, &mdsc->waiting_for_map);
- 			return;
- 		}
--		if (!(mdsc->fsc->mount_options->flags &
--		      CEPH_MOUNT_OPT_MOUNTWAIT) &&
-+		if (!ceph_test_mount_opt(mdsc->fsc, MOUNTWAIT) &&
- 		    !ceph_mdsmap_is_cluster_available(mdsc->mdsmap)) {
- 			err =3D -EHOSTUNREACH;
- 			goto finish;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index abdf61909879..c494351e3cc8 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -992,7 +992,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_=
-client *fsc,
- 			goto out;
-=20
- 		/* setup fscache */
--		if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
-+		if (ceph_test_mount_opt(fsc, FSCACHE)) {
- 			err =3D ceph_fscache_register_fs(fsc, fc);
- 			if (err < 0)
- 				goto out;
---=20
-2.21.0
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 2b184563cd32e..38dcb39051a7f 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2662,7 +2662,7 @@ static int rbd_img_fill_nodata(struct rbd_img_request *img_req,
+ 			       u64 off, u64 len)
+ {
+ 	struct ceph_file_extent ex = { off, len };
+-	union rbd_img_fill_iter dummy;
++	union rbd_img_fill_iter dummy = {};
+ 	struct rbd_img_fill_ctx fctx = {
+ 		.pos_type = OBJ_REQUEST_NODATA,
+ 		.pos = &dummy,
+-- 
+2.20.1
