@@ -1,71 +1,53 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 419/459] ceph: check availability of mds cluster on mount after wait timeout
-Date: Fri, 14 Feb 2020 11:01:09 -0500
-Message-ID: <20200214160149.11681-419-sashal@kernel.org>
-References: <20200214160149.11681-1-sashal@kernel.org>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: Readiness for 14.2.7 ?
+Date: Fri, 14 Feb 2020 09:25:47 -0800
+Message-ID: <CAMMFjmGDBQf+K5K2Zz4e6-PJS=y1YoUAEm5_X0tTUTre3EmZgA@mail.gmail.com>
+References: <CAMMFjmGWrhC_gd3wY5SfqfSB6O=0Tp_QRAu0ibMTDPVrja2HSg@mail.gmail.com>
+ <20200214171554.l7ibzoo64uthd2ke@jfsuselaptop>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:36544 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2391597AbgBNQKt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Feb 2020 11:10:49 -0500
-In-Reply-To: <20200214160149.11681-1-sashal@kernel.org>
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:28709 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S2391151AbgBNR0D (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 14 Feb 2020 12:26:03 -0500
+Received: by mail-qk1-f197.google.com with SMTP id 24so6634159qka.16
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Feb 2020 09:25:58 -0800 (PST)
+In-Reply-To: <20200214171554.l7ibzoo64uthd2ke@jfsuselaptop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+To: Yuri Weinstein <yweinste@redhat.com>, dev@ceph.io, "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, Nathan Cutler <ncutler@suse.cz>, Casey Bodley <cbodley@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Neha Ojha <nojha@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, David Zafman <dzafman@redhat.com>, "Weil, Sage" <sweil@redhat.com>, Ramana Venkatesh Raja <rraja@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, Andrew Schoen <aschoen@redh>
 
-From: Xiubo Li <xiubli@redhat.com>
+Thank you !
 
-[ Upstream commit 97820058fb2831a4b203981fa2566ceaaa396103 ]
+Correction  - the subject line should say 14.2.7
 
-If all the MDS daemons are down for some reason, then the first mount
-attempt will fail with EIO after the mount request times out.  A mount
-attempt will also fail with EIO if all of the MDS's are laggy.
-
-This patch changes the code to return -EHOSTUNREACH in these situations
-and adds a pr_info error message to help the admin determine the cause.
-
-URL: https://tracker.ceph.com/issues/4386
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- fs/ceph/mds_client.c | 3 +--
- fs/ceph/super.c      | 5 +++++
- 2 files changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index ee02a742fff57..8c1f04c3a684c 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2552,8 +2552,7 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 		if (!(mdsc->fsc->mount_options->flags &
- 		      CEPH_MOUNT_OPT_MOUNTWAIT) &&
- 		    !ceph_mdsmap_is_cluster_available(mdsc->mdsmap)) {
--			err = -ENOENT;
--			pr_info("probably no mds server is up\n");
-+			err = -EHOSTUNREACH;
- 			goto finish;
- 		}
- 	}
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index b47f43fc2d688..62fc7d46032e8 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -1137,6 +1137,11 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
- 	return res;
- 
- out_splat:
-+	if (!ceph_mdsmap_is_cluster_available(fsc->mdsc->mdsmap)) {
-+		pr_info("No mds server is up or the cluster is laggy\n");
-+		err = -EHOSTUNREACH;
-+	}
-+
- 	ceph_mdsc_close_sessions(fsc->mdsc);
- 	deactivate_locked_super(sb);
- 	goto out_final;
--- 
-2.20.1
+On Fri, Feb 14, 2020 at 9:19 AM Jan Fajerski <jfajerski@suse.com> wrote:
+>
+> On Mon, Feb 10, 2020 at 11:57:19AM -0800, Yuri Weinstein wrote:
+> >Below is the current queue of PRs:
+> >https://github.com/ceph/ceph/pulls?page=3D2&q=3Dis%3Aopen+label%3Anautil=
+us-batch-1+label%3Aneeds-qa
+> >
+> >Most PRs are being tested.
+> >Unless there are objections, we will start QE validation as soon as
+> >all PRs in this queue were merged.
+> >
+> >Dev leads - pls add and tag all RRs that must be included.
+> ceph-volume is ready, al backports are merged and tested (thank you Natha=
+n!).
+> >
+> >Thx
+> >YuriW
+> >
+>
+> --
+> Jan Fajerski
+> Senior Software Engineer Enterprise Storage
+> SUSE Software Solutions Germany GmbH
+> Maxfeldstr. 5, 90409 N=C3=BCrnberg, Germany
+> (HRB 36809, AG N=C3=BCrnberg)
+> Gesch=C3=A4ftsf=C3=BChrer: Felix Imend=C3=B6rffer
+>
