@@ -1,16 +1,20 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.5 488/542] rbd: work around -Wuninitialized warning
-Date: Fri, 14 Feb 2020 10:48:00 -0500
-Message-ID: <20200214154854.6746-488-sashal@kernel.org>
-References: <20200214154854.6746-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 420/459] rbd: work around -Wuninitialized warning
+Date: Fri, 14 Feb 2020 11:01:10 -0500
+Message-ID: <20200214160149.11681-420-sashal@kernel.org>
+References: <20200214160149.11681-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200214154854.6746-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:36614 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2391614AbgBNQKx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 14 Feb 2020 11:10:53 -0500
+In-Reply-To: <20200214160149.11681-1-sashal@kernel.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Arnd Bergmann <arnd@arndb.de>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, linux-block@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
@@ -36,10 +40,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2b184563cd32e..38dcb39051a7f 100644
+index 13527a0b4e448..a67315786db47 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2662,7 +2662,7 @@ static int rbd_img_fill_nodata(struct rbd_img_request *img_req,
+@@ -2739,7 +2739,7 @@ static int rbd_img_fill_nodata(struct rbd_img_request *img_req,
  			       u64 off, u64 len)
  {
  	struct ceph_file_extent ex = { off, len };
