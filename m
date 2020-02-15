@@ -1,44 +1,70 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: FYI nautilus branch is locked
-Date: Fri, 14 Feb 2020 20:06:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.21.2002142006120.18815@piezo.novalocal>
-References: <CAMMFjmE4wyKcP0KkudhTu2zeZF+SswZ=kN_k-Xaq1aC6o4vWkQ@mail.gmail.com> <CAMMFjmGOqAoBYmmFOWFHTw9NrGQEwNLeUPmw2+5RE+LzVMsuYw@mail.gmail.com>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH v6 0/9] ceph: add perf metrics support
+Date: Sat, 15 Feb 2020 08:39:43 +0800
+Message-ID: <5729f4f1-caeb-84fb-4df3-dc623ee15ba3@redhat.com>
+References: <20200210053407.37237-1-xiubli@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:28848 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:44465 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S2388578AbgBNUHR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2020 15:07:17 -0500
-In-Reply-To: <CAMMFjmGOqAoBYmmFOWFHTw9NrGQEwNLeUPmw2+5RE+LzVMsuYw@mail.gmail.com>
+        with ESMTP id S1725924AbgBOAkA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2020 19:40:00 -0500
+In-Reply-To: <20200210053407.37237-1-xiubli@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: dev@ceph.io, "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, Nathan Cutler <ncutler@suse.cz>, Casey Bodley <cbodley@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Neha Ojha <nojha@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, David Zafman <dzafman@redhat.com>, Ramana Venkatesh Raja <rraja@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-qa <ceph-qa@ceph.com>, Matt Benjamin <mbenjamin@redhat.com>
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-Just a note, we need to sort out the mimic->nautilus upgrade failure 
-before getting too far along here
+On 2020/2/10 13:33, xiubli@redhat.com wrote:
+>
+> Xiubo Li (9):
+>    ceph: add global dentry lease metric support
+>    ceph: add caps perf metric for each session
+>    ceph: add global read latency metric support
+>    ceph: add global write latency metric support
+>    ceph: add global metadata perf metric support
+
+Hi Jeff, Ilya
+
+Currently the corresponding PR in the ceph is still not merged, so the 
+following 4 patches we could ignore for now. And I will address the new 
+comments and post them after that PR get merged.
+
+The above 5 ones are only kclient concerned, if the above is okay could 
+we split this series and test/merge them ?
+
+Thanks
+
+BRs
+
+Xiubo
 
 
-
-
-On Fri, 14 Feb 2020, Yuri Weinstein wrote:
-
-> Sorry correction again - 14.2.8
-> 
-> On Fri, Feb 14, 2020 at 11:30 AM Yuri Weinstein <yweinste@redhat.com> wrote:
-> >
-> > We are getting ready to test 14.2.9 and nautilus branch is locked for
-> > merges until it's done.
-> >
-> > sah1 - 4d5b84085009968f557baaa4209183f1374773cd
-> >
-> > Nathan, Abhishek pls confirm.
-> >
-> > Thank you
-> > YuriW
-> _______________________________________________
-> Dev mailing list -- dev@ceph.io
-> To unsubscribe send an email to dev-leave@ceph.io
-> 
-> 
+>    ceph: periodically send perf metrics to ceph
+>    ceph: add CEPH_DEFINE_RW_FUNC helper support
+>    ceph: add reset metrics support
+>    ceph: send client provided metric flags in client metadata
+>
+>   fs/ceph/acl.c                   |   2 +
+>   fs/ceph/addr.c                  |  13 ++
+>   fs/ceph/caps.c                  |  29 +++
+>   fs/ceph/debugfs.c               | 107 ++++++++-
+>   fs/ceph/dir.c                   |  25 ++-
+>   fs/ceph/file.c                  |  22 ++
+>   fs/ceph/mds_client.c            | 381 +++++++++++++++++++++++++++++---
+>   fs/ceph/mds_client.h            |   6 +
+>   fs/ceph/metric.h                | 155 +++++++++++++
+>   fs/ceph/quota.c                 |   9 +-
+>   fs/ceph/super.c                 |   4 +
+>   fs/ceph/super.h                 |  11 +
+>   fs/ceph/xattr.c                 |  17 +-
+>   include/linux/ceph/ceph_fs.h    |   1 +
+>   include/linux/ceph/debugfs.h    |  14 ++
+>   include/linux/ceph/osd_client.h |   1 +
+>   net/ceph/osd_client.c           |   2 +
+>   17 files changed, 759 insertions(+), 40 deletions(-)
+>   create mode 100644 fs/ceph/metric.h
+>
