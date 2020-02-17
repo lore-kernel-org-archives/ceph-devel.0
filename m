@@ -1,124 +1,173 @@
-From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH] ceph: add halt mount option support
-Date: Mon, 17 Feb 2020 23:45:16 +0800
-Message-ID: <ae54de81-f191-d4cd-8d86-d06958946095@redhat.com>
-References: <20200216064945.61726-1-xiubli@redhat.com>
- <78ff80dd12d497be7a6606a60973f7e2d864e910.camel@kernel.org>
+From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Subject: [PATCH 00/44] Manually convert filesystem FS documents to ReST
+Date: Mon, 17 Feb 2020 17:11:46 +0100
+Message-ID: <cover.1581955849.git.mchehab+huawei@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:23611 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729347AbgBQPpe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Feb 2020 10:45:34 -0500
-In-Reply-To: <78ff80dd12d497be7a6606a60973f7e2d864e910.camel@kernel.org>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
-Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=m.gmane-mx.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=m.gmane-mx.org@lists.infradead.org
+To: Linux Doc Mailing List <linux-doc@vger.kernel.org>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, Jan Kara <jack@suse.cz>, Dominique Martinet <asmadeus@codewreck.org>, Amir Goldstein <amir73il@gmail.com>, Bob Copeland <me@bobcopeland.com>, David Howells <dhowells@redhat.com>, Joseph Qi <joseph.qi@linux.alibaba.com>, linux-mtd@lists.infradead.org, Tyler Hicks <code@tyhicks.com>, linux-afs@lists.infradead.org, Mike Marshall <hubcap@omnibond.com>, Naohiro Aota <naohiro.aota@wdc.com>, Christoph Hellwig <hch@infradead.org>, linux-nilfs@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>, Sage Weil <sage@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Mauro Carvalho Chehab <mchehab+huawei@kernel.org>, Richard Weinberger <richard@nod.at>, Mark Fasheh <mark@fasheh.com>, Chris Mason <clm@fb.com>, Ryusuke Konishi <konishi.ryusuke@gmail.com>, cluster-devel@redhat.com, v9fs-developer@lists.sourc
+List-Id: ceph-devel.vger.kernel.org
 
-On 2020/2/17 21:04, Jeff Layton wrote:
-> On Sun, 2020-02-16 at 01:49 -0500, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> This will simulate pulling the power cable situation, which will
->> do:
->>
->> - abort all the inflight osd/mds requests and fail them with -EIO.
->> - reject any new coming osd/mds requests with -EIO.
->> - close all the mds connections directly without doing any clean up
->>    and disable mds sessions recovery routine.
->> - close all the osd connections directly without doing any clean up.
->> - set the msgr as stopped.
->>
->> URL: https://tracker.ceph.com/issues/44044
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> There is no explanation of how to actually _use_ this feature?
+There are lots of plain text documents under Documentation/filesystems.
 
- From the tracker's description I am assuming it just will do something 
-like testing some features in the cephfs by simulating connections to 
-the client node are lost due to some reasons, such as lost power.
+Manually convert several of those to ReST and add them to the index file.
 
->   I assume
-> you have to remount the fs with "-o remount,halt" ?
+Mauro Carvalho Chehab (44):
+  docs: filesystems: convert 9p.txt to ReST
+  docs: filesystems: convert adfs.txt to ReST
+  docs: filesystems: convert affs.txt to ReST
+  docs: filesystems: convert afs.txt to ReST
+  docs: filesystems: convert autofs-mount-control.txt to ReST
+  docs: filesystems: convert befs.txt to ReST
+  docs: filesystems: convert bfs.txt to ReST
+  docs: filesystems: convert btrfs.txt to ReST
+  docs: filesystems: convert ceph.txt to ReST
+  docs: filesystems: convert cramfs.txt to ReST
+  docs: filesystems: convert debugfs.txt to ReST
+  docs: filesystems: convert dlmfs.txt to ReST
+  docs: filesystems: convert ecryptfs.txt to ReST
+  docs: filesystems: convert efivarfs.txt to ReST
+  docs: filesystems: convert erofs.txt to ReST
+  docs: filesystems: convert ext2.txt to ReST
+  docs: filesystems: convert ext3.txt to ReST
+  docs: filesystems: convert f2fs.txt to ReST
+  docs: filesystems: convert gfs2.txt to ReST
+  docs: filesystems: convert gfs2-uevents.txt to ReST
+  docs: filesystems: convert hfsplus.txt to ReST
+  docs: filesystems: convert hfs.txt to ReST
+  docs: filesystems: convert hpfs.txt to ReST
+  docs: filesystems: convert inotify.txt to ReST
+  docs: filesystems: convert isofs.txt to ReST
+  docs: filesystems: convert nilfs2.txt to ReST
+  docs: filesystems: convert ntfs.txt to ReST
+  docs: filesystems: convert ocfs2-online-filecheck.txt to ReST
+  docs: filesystems: convert ocfs2.txt to ReST
+  docs: filesystems: convert omfs.txt to ReST
+  docs: filesystems: convert orangefs.txt to ReST
+  docs: filesystems: convert proc.txt to ReST
+  docs: filesystems: convert qnx6.txt to ReST
+  docs: filesystems: convert ramfs-rootfs-initramfs.txt to ReST
+  docs: filesystems: convert relay.txt to ReST
+  docs: filesystems: convert romfs.txt to ReST
+  docs: filesystems: convert squashfs.txt to ReST
+  docs: filesystems: convert sysfs.txt to ReST
+  docs: filesystems: convert sysv-fs.txt to ReST
+  docs: filesystems: convert tmpfs.txt to ReST
+  docs: filesystems: convert ubifs-authentication.rst.txt to ReST
+  docs: filesystems: convert ubifs.txt to ReST
+  docs: filesystems: convert udf.txt to ReST
+  docs: filesystems: convert zonefs.txt to ReST
 
-Yeah, right.
+ Documentation/filesystems/{9p.txt => 9p.rst}  |  114 +-
+ .../filesystems/{adfs.txt => adfs.rst}        |   29 +-
+ .../filesystems/{affs.txt => affs.rst}        |   62 +-
+ .../filesystems/{afs.txt => afs.rst}          |   73 +-
+ ...t-control.txt => autofs-mount-control.rst} |  102 +-
+ .../filesystems/{befs.txt => befs.rst}        |   59 +-
+ .../filesystems/{bfs.txt => bfs.rst}          |   37 +-
+ .../filesystems/{btrfs.txt => btrfs.rst}      |    3 +
+ .../filesystems/{ceph.txt => ceph.rst}        |   26 +-
+ .../filesystems/{cramfs.txt => cramfs.rst}    |   19 +-
+ .../filesystems/{debugfs.txt => debugfs.rst}  |   54 +-
+ .../filesystems/{dlmfs.txt => dlmfs.rst}      |   28 +-
+ .../{ecryptfs.txt => ecryptfs.rst}            |   44 +-
+ .../{efivarfs.txt => efivarfs.rst}            |    5 +-
+ .../filesystems/{erofs.txt => erofs.rst}      |  175 +-
+ .../filesystems/{ext2.txt => ext2.rst}        |   41 +-
+ .../filesystems/{ext3.txt => ext3.rst}        |    2 +
+ .../filesystems/{f2fs.txt => f2fs.rst}        |  252 +--
+ .../{gfs2-uevents.txt => gfs2-uevents.rst}    |   20 +-
+ .../filesystems/{gfs2.txt => gfs2.rst}        |   20 +-
+ .../filesystems/{hfs.txt => hfs.rst}          |   23 +-
+ .../filesystems/{hfsplus.txt => hfsplus.rst}  |    2 +
+ .../filesystems/{hpfs.txt => hpfs.rst}        |  239 ++-
+ Documentation/filesystems/index.rst           |   46 +-
+ .../filesystems/{inotify.txt => inotify.rst}  |   33 +-
+ Documentation/filesystems/isofs.rst           |   64 +
+ Documentation/filesystems/isofs.txt           |   48 -
+ .../filesystems/{nilfs2.txt => nilfs2.rst}    |   40 +-
+ .../filesystems/{ntfs.txt => ntfs.rst}        |  143 +-
+ ...lecheck.txt => ocfs2-online-filecheck.rst} |   45 +-
+ .../filesystems/{ocfs2.txt => ocfs2.rst}      |   31 +-
+ Documentation/filesystems/omfs.rst            |  112 ++
+ Documentation/filesystems/omfs.txt            |  106 --
+ .../{orangefs.txt => orangefs.rst}            |  187 +-
+ .../filesystems/{proc.txt => proc.rst}        | 1498 +++++++++--------
+ .../filesystems/{qnx6.txt => qnx6.rst}        |   22 +
+ ...itramfs.txt => ramfs-rootfs-initramfs.rst} |   54 +-
+ .../filesystems/{relay.txt => relay.rst}      |  129 +-
+ .../filesystems/{romfs.txt => romfs.rst}      |   42 +-
+ .../{squashfs.txt => squashfs.rst}            |   60 +-
+ .../filesystems/{sysfs.txt => sysfs.rst}      |  324 ++--
+ .../filesystems/{sysv-fs.txt => sysv-fs.rst}  |  155 +-
+ .../filesystems/{tmpfs.txt => tmpfs.rst}      |   44 +-
+ .../filesystems/ubifs-authentication.rst      |   10 +-
+ .../filesystems/{ubifs.txt => ubifs.rst}      |   25 +-
+ .../filesystems/{udf.txt => udf.rst}          |   21 +-
+ .../filesystems/{zonefs.txt => zonefs.rst}    |  106 +-
+ 47 files changed, 2739 insertions(+), 2035 deletions(-)
+ rename Documentation/filesystems/{9p.txt => 9p.rst} (63%)
+ rename Documentation/filesystems/{adfs.txt => adfs.rst} (85%)
+ rename Documentation/filesystems/{affs.txt => affs.rst} (86%)
+ rename Documentation/filesystems/{afs.txt => afs.rst} (90%)
+ rename Documentation/filesystems/{autofs-mount-control.txt => autofs-mount-control.rst} (89%)
+ rename Documentation/filesystems/{befs.txt => befs.rst} (83%)
+ rename Documentation/filesystems/{bfs.txt => bfs.rst} (71%)
+ rename Documentation/filesystems/{btrfs.txt => btrfs.rst} (96%)
+ rename Documentation/filesystems/{ceph.txt => ceph.rst} (91%)
+ rename Documentation/filesystems/{cramfs.txt => cramfs.rst} (88%)
+ rename Documentation/filesystems/{debugfs.txt => debugfs.rst} (91%)
+ rename Documentation/filesystems/{dlmfs.txt => dlmfs.rst} (86%)
+ rename Documentation/filesystems/{ecryptfs.txt => ecryptfs.rst} (70%)
+ rename Documentation/filesystems/{efivarfs.txt => efivarfs.rst} (85%)
+ rename Documentation/filesystems/{erofs.txt => erofs.rst} (54%)
+ rename Documentation/filesystems/{ext2.txt => ext2.rst} (91%)
+ rename Documentation/filesystems/{ext3.txt => ext3.rst} (88%)
+ rename Documentation/filesystems/{f2fs.txt => f2fs.rst} (84%)
+ rename Documentation/filesystems/{gfs2-uevents.txt => gfs2-uevents.rst} (94%)
+ rename Documentation/filesystems/{gfs2.txt => gfs2.rst} (76%)
+ rename Documentation/filesystems/{hfs.txt => hfs.rst} (80%)
+ rename Documentation/filesystems/{hfsplus.txt => hfsplus.rst} (95%)
+ rename Documentation/filesystems/{hpfs.txt => hpfs.rst} (66%)
+ rename Documentation/filesystems/{inotify.txt => inotify.rst} (83%)
+ create mode 100644 Documentation/filesystems/isofs.rst
+ delete mode 100644 Documentation/filesystems/isofs.txt
+ rename Documentation/filesystems/{nilfs2.txt => nilfs2.rst} (89%)
+ rename Documentation/filesystems/{ntfs.txt => ntfs.rst} (85%)
+ rename Documentation/filesystems/{ocfs2-online-filecheck.txt => ocfs2-online-filecheck.rst} (77%)
+ rename Documentation/filesystems/{ocfs2.txt => ocfs2.rst} (88%)
+ create mode 100644 Documentation/filesystems/omfs.rst
+ delete mode 100644 Documentation/filesystems/omfs.txt
+ rename Documentation/filesystems/{orangefs.txt => orangefs.rst} (83%)
+ rename Documentation/filesystems/{proc.txt => proc.rst} (65%)
+ rename Documentation/filesystems/{qnx6.txt => qnx6.rst} (98%)
+ rename Documentation/filesystems/{ramfs-rootfs-initramfs.txt => ramfs-rootfs-initramfs.rst} (91%)
+ rename Documentation/filesystems/{relay.txt => relay.rst} (91%)
+ rename Documentation/filesystems/{romfs.txt => romfs.rst} (86%)
+ rename Documentation/filesystems/{squashfs.txt => squashfs.rst} (91%)
+ rename Documentation/filesystems/{sysfs.txt => sysfs.rst} (56%)
+ rename Documentation/filesystems/{sysv-fs.txt => sysv-fs.rst} (73%)
+ rename Documentation/filesystems/{tmpfs.txt => tmpfs.rst} (86%)
+ rename Documentation/filesystems/{ubifs.txt => ubifs.rst} (91%)
+ rename Documentation/filesystems/{udf.txt => udf.rst} (83%)
+ rename Documentation/filesystems/{zonefs.txt => zonefs.rst} (90%)
+
+-- 
+2.24.1
 
 
-> Is it possible to
-> reenable the mount as well?
 
-For the "halt", no.
-
->    If not, why keep the mount around?
-
-I would let the followed umount to continue to do the cleanup.
-
-
->   Maybe we
-> should consider wiring this in to a new umount2() flag instead?
-
-For the umount2(), it seems have conflicted with the MNT_FORCE, but a 
-little different.
-
-
->
-> This needs much better documentation.
->
-> In the past, I've generally done this using iptables. Granted that that
-> is difficult with a clustered fs like ceph (given that you potentially
-> have to set rules for a lot of addresses), but I wonder whether a scheme
-> like that might be more viable in the long run.
->
-> Note too that this may have interesting effects when superblocks end up
-> being shared between vfsmounts.
-
-Yeah, this is based the superblock, so for the shared vfsmounts, they 
-all will be halted at the same time.
-
-
->> @@ -4748,7 +4751,12 @@ void ceph_mdsc_force_umount(struct ceph_mds_client *mdsc)
->>   		if (!session)
->>   			continue;
->>   
->> -		if (session->s_state == CEPH_MDS_SESSION_REJECTED)
->> +		/*
->> +		 * when halting the superblock, it will simulate pulling
->> +		 * the power cable, so here close the connection before
->> +		 * doing any cleanup.
->> +		 */
->> +		if (halt || (session->s_state == CEPH_MDS_SESSION_REJECTED))
->>   			__unregister_session(mdsc, session);
-> Note that this is not exactly like pulling the power cable. The
-> connection will be closed, which will send a FIN to the peer.
-
-Yeah, it is.
-
-I was thinking for the fuse client, if we send a KILL signal, the kernel 
-will also help us close the socket fds and send the FIN to the peer ?
-
-If the fuse client works for this case, so will it here.
-
->> @@ -1115,6 +1117,16 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
->>   }
->>   EXPORT_SYMBOL(ceph_monc_init);
->>   
->> +void ceph_monc_halt(struct ceph_mon_client *monc)
->> +{
->> +	dout("monc halt\n");
->> +
->> +	mutex_lock(&monc->mutex);
->> +	monc->halt = true;
->> +	ceph_con_close(&monc->con);
->> +	mutex_unlock(&monc->mutex);
->> +}
->> +
-> The changelog doesn't mention shutting down connections to the mons.
-
-Yeah, I missed it.
-
-Thanks,
-
-BRs
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
