@@ -1,93 +1,61 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] ceph: add halt mount option support
-Date: Tue, 18 Feb 2020 10:25:11 -0500
-Message-ID: <d54188d2df1733bee17ad91b66c9439ee87b56e1.camel@kernel.org>
-References: <20200216064945.61726-1-xiubli@redhat.com>
-         <78ff80dd12d497be7a6606a60973f7e2d864e910.camel@kernel.org>
-         <36e1f3a9-1688-9eb0-27d7-351a12bca85a@redhat.com>
-         <4a4cfe2a5fc1de6f73fa3f557921c1ad5802add6.camel@kernel.org>
-         <CAOi1vP_yGJGqkY+QLdQoruJrS3gawEC-_NqDnpucCWfXOHL-aQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] ceph: move to a dedicated slabcache for mds requests
+Date: Tue, 18 Feb 2020 16:27:45 +0100
+Message-ID: <CAOi1vP9fKwZ+Q70Q8kcqByRz3A07+75mWqu5GL6CHoGqTwX2YA@mail.gmail.com>
+References: <20200218141116.26481-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:39336 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726716AbgBRPZN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Feb 2020 10:25:13 -0500
-In-Reply-To: <CAOi1vP_yGJGqkY+QLdQoruJrS3gawEC-_NqDnpucCWfXOHL-aQ@mail.gmail.com>
+Received: from mail-io1-f65.google.com ([209.85.166.65]:34413 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726312AbgBRP1V (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2020 10:27:21 -0500
+Received: by mail-io1-f65.google.com with SMTP id z193so22738953iof.1
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Feb 2020 07:27:21 -0800 (PST)
+In-Reply-To: <20200218141116.26481-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Xiubo Li <xiubli@redhat.com>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>
 
-On Tue, 2020-02-18 at 15:59 +0100, Ilya Dryomov wrote:
-> On Tue, Feb 18, 2020 at 1:01 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > On Tue, 2020-02-18 at 15:19 +0800, Xiubo Li wrote:
-> > > On 2020/2/17 21:04, Jeff Layton wrote:
-> > > > On Sun, 2020-02-16 at 01:49 -0500, xiubli@redhat.com wrote:
-> > > > > From: Xiubo Li <xiubli@redhat.com>
-> > > > > 
-> > > > > This will simulate pulling the power cable situation, which will
-> > > > > do:
-> > > > > 
-> > > > > - abort all the inflight osd/mds requests and fail them with -EIO.
-> > > > > - reject any new coming osd/mds requests with -EIO.
-> > > > > - close all the mds connections directly without doing any clean up
-> > > > >    and disable mds sessions recovery routine.
-> > > > > - close all the osd connections directly without doing any clean up.
-> > > > > - set the msgr as stopped.
-> > > > > 
-> > > > > URL: https://tracker.ceph.com/issues/44044
-> > > > > Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> > > > There is no explanation of how to actually _use_ this feature? I assume
-> > > > you have to remount the fs with "-o remount,halt" ? Is it possible to
-> > > > reenable the mount as well?  If not, why keep the mount around? Maybe we
-> > > > should consider wiring this in to a new umount2() flag instead?
-> > > > 
-> > > > This needs much better documentation.
-> > > > 
-> > > > In the past, I've generally done this using iptables. Granted that that
-> > > > is difficult with a clustered fs like ceph (given that you potentially
-> > > > have to set rules for a lot of addresses), but I wonder whether a scheme
-> > > > like that might be more viable in the long run.
-> > > > 
-> > > How about fulfilling the DROP iptable rules in libceph ? Could you
-> > > foresee any problem ? This seems the one approach could simulate pulling
-> > > the power cable.
-> > > 
-> > 
-> > Yeah, I've mostly done this using DROP rules when I needed to test things.
-> > But, I think I was probably just guilty of speculating out loud here.
-> 
-> I'm not sure what exactly Xiubo meant by "fulfilling" iptables rules
-> in libceph, but I will say that any kind of iptables manipulation from
-> within libceph is probably out of the question.
-> 
-> > I think doing this by just closing down the sockets is probably fine. I
-> > wouldn't pursue anything relating to to iptables here, unless we have
-> > some larger reason to go that route.
-> 
-> IMO investing into a set of iptables and tc helpers for teuthology
-> makes a _lot_ of sense.  It isn't exactly the same as a cable pull,
-> but it's probably the next best thing.  First, it will be external to
-> the system under test.  Second, it can be made selective -- you can
-> cut a single session or all of them, simulate packet loss and latency
-> issues, etc.  Third, it can be used for recovery and failover/fencing
-> testing -- what happens when these packets get delivered two minutes
-> later?  None of this is possible with something that just attempts to
-> wedge the mount and acts as a point of no return.
-> 
+On Tue, Feb 18, 2020 at 3:11 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> On my machine (x86_64) this struct is 952 bytes, which gets rounded up
+> to 1024 by kmalloc. Move this to a dedicated slabcache, so we can
+> allocate them without the extra 72 bytes of overhead per.
+>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/mds_client.c         | 6 +++---
+>  fs/ceph/super.c              | 8 ++++++++
+>  include/linux/ceph/libceph.h | 1 +
+>  3 files changed, 12 insertions(+), 3 deletions(-)
+>
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 2980e57ca7b9..76655047fca5 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -736,7 +736,7 @@ void ceph_mdsc_release_request(struct kref *kref)
+>         put_request_session(req);
+>         ceph_unreserve_caps(req->r_mdsc, &req->r_caps_reservation);
+>         WARN_ON_ONCE(!list_empty(&req->r_wait));
+> -       kfree(req);
+> +       kmem_cache_free(ceph_mds_request_cachep, req);
+>  }
+>
+>  DEFINE_RB_FUNCS(request, struct ceph_mds_request, r_tid, r_node)
+> @@ -2094,8 +2094,8 @@ int ceph_alloc_readdir_reply_buffer(struct ceph_mds_request *req,
+>  struct ceph_mds_request *
+>  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>  {
+> -       struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
+> -
+> +       struct ceph_mds_request *req = kmem_cache_alloc(ceph_mds_request_cachep,
+> +                                                       GFP_NOFS | __GFP_ZERO);
 
-That's a great point and does sound tremendously more useful than just
-"halting" a mount like this.
+This can be kmem_cache_zalloc(), less verbose.  Also, I would separate
+declaration and assignment here.
 
-That said, one of the stated goals in the tracker bug is:
+Thanks,
 
-"It'd be better if we had a way to shutdown the cephfs mount without any
-kind of cleanup. This would allow us to have kernel clients all on the
-same node and selectively "kill" them."
-
-That latter point sounds rather hard to fulfill with iptables rules.
--- 
-Jeff Layton <jlayton@kernel.org>
+                Ilya
