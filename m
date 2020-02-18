@@ -1,36 +1,58 @@
-From: Matthew Wilcox <willy@infradead.org>
-Subject: Re: [PATCH 00/44] Manually convert filesystem FS documents to ReST
-Date: Mon, 17 Feb 2020 20:01:46 -0800
-Message-ID: <20200218040146.GM7778@bombadil.infradead.org>
-References: <cover.1581955849.git.mchehab+huawei@kernel.org>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: add halt mount option support
+Date: Tue, 18 Feb 2020 15:19:22 +0800
+Message-ID: <36e1f3a9-1688-9eb0-27d7-351a12bca85a@redhat.com>
+References: <20200216064945.61726-1-xiubli@redhat.com>
+ <78ff80dd12d497be7a6606a60973f7e2d864e910.camel@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=m.gmane-mx.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <cover.1581955849.git.mchehab+huawei@kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=m.gmane-mx.org@lists.infradead.org
-To: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, Jan Kara <jack@suse.cz>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, Dominique Martinet <asmadeus@codewreck.org>, Amir Goldstein <amir73il@gmail.com>, Bob Copeland <me@bobcopeland.com>, David Howells <dhowells@redhat.com>, Chris Mason <clm@fb.com>, linux-mtd@lists.infradead.org, Ilya Dryomov <idryomov@gmail.com>, linux-afs@lists.infradead.org, Mike Marshall <hubcap@omnibond.com>, Naohiro Aota <naohiro.aota@wdc.com>, Christoph Hellwig <hch@infradead.org>, linux-nilfs@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>, Sage Weil <sage@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Richard Weinberger <richard@nod.at>, Tyler Hicks <code@tyhicks.com>, cluster-devel@redhat.com, v9fs-developer@lists.sourceforge.net, Gao Xiang <xiang@kernel.org>, linux-ext4@vger.kernel.org, Salah
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:59234 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726072AbgBRHTk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2020 02:19:40 -0500
+In-Reply-To: <78ff80dd12d497be7a6606a60973f7e2d864e910.camel@kernel.org>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On Mon, Feb 17, 2020 at 05:11:46PM +0100, Mauro Carvalho Chehab wrote:
-> There are lots of plain text documents under Documentation/filesystems.
-> 
-> Manually convert several of those to ReST and add them to the index file.
+On 2020/2/17 21:04, Jeff Layton wrote:
+> On Sun, 2020-02-16 at 01:49 -0500, xiubli@redhat.com wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> This will simulate pulling the power cable situation, which will
+>> do:
+>>
+>> - abort all the inflight osd/mds requests and fail them with -EIO.
+>> - reject any new coming osd/mds requests with -EIO.
+>> - close all the mds connections directly without doing any clean up
+>>    and disable mds sessions recovery routine.
+>> - close all the osd connections directly without doing any clean up.
+>> - set the msgr as stopped.
+>>
+>> URL: https://tracker.ceph.com/issues/44044
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> There is no explanation of how to actually _use_ this feature? I assume
+> you have to remount the fs with "-o remount,halt" ? Is it possible to
+> reenable the mount as well?  If not, why keep the mount around? Maybe we
+> should consider wiring this in to a new umount2() flag instead?
+>
+> This needs much better documentation.
+>
+> In the past, I've generally done this using iptables. Granted that that
+> is difficult with a clustered fs like ceph (given that you potentially
+> have to set rules for a lot of addresses), but I wonder whether a scheme
+> like that might be more viable in the long run.
+>
+How about fulfilling the DROP iptable rules in libceph ? Could you 
+foresee any problem ? This seems the one approach could simulate pulling 
+the power cable.
 
-I think at least 90% of this material needs to be in admin-guide.  Should
-we create Documentation/admin-guide/filesystems/ and move most of these
-files there?
+Any idea ?
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Thanks
+
+BRs
