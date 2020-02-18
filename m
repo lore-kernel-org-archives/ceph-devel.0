@@ -1,17 +1,18 @@
 From: Xiubo Li <xiubli@redhat.com>
 Subject: Re: [PATCH] ceph: fix use-after-free for the osdmap memory
-Date: Tue, 18 Feb 2020 18:26:41 +0800
-Message-ID: <585fc43b-938b-cd5f-b41a-66dc9717a844@redhat.com>
+Date: Tue, 18 Feb 2020 18:31:06 +0800
+Message-ID: <e8078415-2c0f-3d97-345a-97dab25fa1a3@redhat.com>
 References: <20200218033042.40047-1-xiubli@redhat.com>
  <CAOi1vP_nFEVUY+O-T_2WinyPGJvS_ciNXXZg3SwiyyfubWdPsw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:55079 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726193AbgBRK06 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2020 05:26:58 -0500
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:44331 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726193AbgBRKbT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 18 Feb 2020 05:31:19 -0500
 In-Reply-To: <CAOi1vP_nFEVUY+O-T_2WinyPGJvS_ciNXXZg3SwiyyfubWdPsw@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -137,13 +138,14 @@ On 2020/2/18 18:21, Ilya Dryomov wrote:
 > The monmap pointer is reset the same way, so it needs some locking
 > as well.  And a quick grep shows more places that need to be fixed,
 > some between libceph and rbd.
->
-> I'll treat this patch as a bug report and fix them myself.
 
-Yeah, sure.
+I just checked mdsmap all the other places, they are all in the lock 
+wrappers.
 
 Thanks,
 
+> I'll treat this patch as a bug report and fix them myself.
+>
 > Thanks,
 >
 >                  Ilya
