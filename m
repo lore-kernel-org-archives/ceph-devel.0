@@ -1,96 +1,66 @@
-From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH] ceph: add halt mount option support
-Date: Wed, 19 Feb 2020 11:25:31 +0800
-Message-ID: <0d72bb98-f306-75de-f0db-60cf315b5ce4@redhat.com>
-References: <20200216064945.61726-1-xiubli@redhat.com>
- <78ff80dd12d497be7a6606a60973f7e2d864e910.camel@kernel.org>
- <36e1f3a9-1688-9eb0-27d7-351a12bca85a@redhat.com>
- <4a4cfe2a5fc1de6f73fa3f557921c1ad5802add6.camel@kernel.org>
- <CAOi1vP_yGJGqkY+QLdQoruJrS3gawEC-_NqDnpucCWfXOHL-aQ@mail.gmail.com>
+From: xiubli@redhat.com
+Subject: [PATCH v7 0/5] ceph: add perf metrics support
+Date: Tue, 18 Feb 2020 22:38:46 -0500
+Message-ID: <20200219033851.6548-1-xiubli@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:24270 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726446AbgBSDZy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Feb 2020 22:25:54 -0500
-In-Reply-To: <CAOi1vP_yGJGqkY+QLdQoruJrS3gawEC-_NqDnpucCWfXOHL-aQ@mail.gmail.com>
-Content-Language: en-US
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:43712 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726403AbgBSDj4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2020 22:39:56 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>
-Cc: Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-On 2020/2/18 22:59, Ilya Dryomov wrote:
-> On Tue, Feb 18, 2020 at 1:01 PM Jeff Layton <jlayton@kernel.org> wrote:
->> On Tue, 2020-02-18 at 15:19 +0800, Xiubo Li wrote:
->>> On 2020/2/17 21:04, Jeff Layton wrote:
->>>> On Sun, 2020-02-16 at 01:49 -0500, xiubli@redhat.com wrote:
->>>>> From: Xiubo Li <xiubli@redhat.com>
->>>>>
->>>>> This will simulate pulling the power cable situation, which will
->>>>> do:
->>>>>
->>>>> - abort all the inflight osd/mds requests and fail them with -EIO.
->>>>> - reject any new coming osd/mds requests with -EIO.
->>>>> - close all the mds connections directly without doing any clean up
->>>>>     and disable mds sessions recovery routine.
->>>>> - close all the osd connections directly without doing any clean up.
->>>>> - set the msgr as stopped.
->>>>>
->>>>> URL: https://tracker.ceph.com/issues/44044
->>>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->>>> There is no explanation of how to actually _use_ this feature? I assume
->>>> you have to remount the fs with "-o remount,halt" ? Is it possible to
->>>> reenable the mount as well?  If not, why keep the mount around? Maybe we
->>>> should consider wiring this in to a new umount2() flag instead?
->>>>
->>>> This needs much better documentation.
->>>>
->>>> In the past, I've generally done this using iptables. Granted that that
->>>> is difficult with a clustered fs like ceph (given that you potentially
->>>> have to set rules for a lot of addresses), but I wonder whether a scheme
->>>> like that might be more viable in the long run.
->>>>
->>> How about fulfilling the DROP iptable rules in libceph ? Could you
->>> foresee any problem ? This seems the one approach could simulate pulling
->>> the power cable.
->>>
->> Yeah, I've mostly done this using DROP rules when I needed to test things.
->> But, I think I was probably just guilty of speculating out loud here.
-> I'm not sure what exactly Xiubo meant by "fulfilling" iptables rules
-> in libceph, but I will say that any kind of iptables manipulation from
-> within libceph is probably out of the question.
+From: Xiubo Li <xiubli@redhat.com>
 
-Sorry for confusing here.
+Changed in V7:
+- Rebase to the latest commit
+- Address the comments for cap patch.
+- Drop the other patches which will send the metrics to ceph cluster for
+now.
 
-I meant in libceph add some helpers to enable/disable dropping the any 
-new coming packet on the floor without responding anything to the ceph 
-cluster for a specified session.
+We can get the metrics from the debugfs:
+
+$ cat /sys/kernel/debug/ceph/0c93a60d-5645-4c46-8568-4c8f63db4c7f.client4=
+267/metrics=20
+item          total       sum_lat(us)     avg_lat(us)
+-----------------------------------------------------
+read          13          417000          32076
+write         42          131205000       3123928
+metadata      104         493000          4740
+
+item          total           miss            hit
+-------------------------------------------------
+d_lease       204             0               918
+caps          204             213             368218
 
 
->
->> I think doing this by just closing down the sockets is probably fine. I
->> wouldn't pursue anything relating to to iptables here, unless we have
->> some larger reason to go that route.
-> IMO investing into a set of iptables and tc helpers for teuthology
-> makes a _lot_ of sense.  It isn't exactly the same as a cable pull,
-> but it's probably the next best thing.  First, it will be external to
-> the system under test.  Second, it can be made selective -- you can
-> cut a single session or all of them, simulate packet loss and latency
-> issues, etc.  Third, it can be used for recovery and failover/fencing
-> testing -- what happens when these packets get delivered two minutes
-> later?  None of this is possible with something that just attempts to
-> wedge the mount and acts as a point of no return.
+Xiubo Li (5):
+  ceph: add global dentry lease metric support
+  ceph: add caps perf metric for each session
+  ceph: add global read latency metric support
+  ceph: add global write latency metric support
+  ceph: add global metadata perf metric support
 
-Yeah, cool and this is what the tracker#44044 intends to.
+ fs/ceph/acl.c                   |   2 +
+ fs/ceph/addr.c                  |  13 ++++
+ fs/ceph/caps.c                  |  31 ++++++++++
+ fs/ceph/debugfs.c               |  71 ++++++++++++++++++++--
+ fs/ceph/dir.c                   |  25 ++++++--
+ fs/ceph/file.c                  |  22 +++++++
+ fs/ceph/mds_client.c            | 103 +++++++++++++++++++++++++++++++-
+ fs/ceph/mds_client.h            |   4 ++
+ fs/ceph/metric.h                |  65 ++++++++++++++++++++
+ fs/ceph/quota.c                 |   9 ++-
+ fs/ceph/super.h                 |  10 ++++
+ fs/ceph/xattr.c                 |  17 +++++-
+ include/linux/ceph/osd_client.h |   1 +
+ net/ceph/osd_client.c           |   2 +
+ 14 files changed, 360 insertions(+), 15 deletions(-)
+ create mode 100644 fs/ceph/metric.h
 
-Thanks
-BRs
-Xiubo
-> Thanks,
->
->                  Ilya
->
+--=20
+2.21.0
