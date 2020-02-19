@@ -1,115 +1,164 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2] ceph: move to a dedicated slabcache for mds requests
-Date: Tue, 18 Feb 2020 19:27:13 +0100
-Message-ID: <CAOi1vP-wbXxjnVSyyFf2anUf9kbsVjfP7iGdbxeDfbaYNtsnNw@mail.gmail.com>
-References: <20200218153526.31389-1-jlayton@kernel.org>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: fix use-after-free for the osdmap memory
+Date: Wed, 19 Feb 2020 09:32:56 +0800
+Message-ID: <8be626df-c0e9-f517-b6f5-6244107c36cf@redhat.com>
+References: <20200218033042.40047-1-xiubli@redhat.com>
+ <CAOi1vP_nFEVUY+O-T_2WinyPGJvS_ciNXXZg3SwiyyfubWdPsw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-il1-f193.google.com ([209.85.166.193]:33139 "EHLO
-        mail-il1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726239AbgBRS0t (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2020 13:26:49 -0500
-Received: by mail-il1-f193.google.com with SMTP id s18so18179154iln.0
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Feb 2020 10:26:48 -0800 (PST)
-In-Reply-To: <20200218153526.31389-1-jlayton@kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:50425 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726482AbgBSBdL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2020 20:33:11 -0500
+In-Reply-To: <CAOi1vP_nFEVUY+O-T_2WinyPGJvS_ciNXXZg3SwiyyfubWdPsw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 18, 2020 at 4:35 PM Jeff Layton <jlayton@kernel.org> wrote:
+On 2020/2/18 18:21, Ilya Dryomov wrote:
+> On Tue, Feb 18, 2020 at 4:30 AM <xiubli@redhat.com> wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> When there has new osdmap comes, it will replace and release
+>> the old osdmap memory, but if the mount is still on the way
+>> without the osdc->lock wrappers, we will hit use after free
+>> bug, like:
+>>
+>> <3>[ 3797.775970] BUG: KASAN: use-after-free in __ceph_open_session+0x2a9/0x370 [libceph]
+>> <3>[ 3797.775974] Read of size 4 at addr ffff8883d8b8a110 by task mount.ceph/64782
+>> <3>[ 3797.775975]
+>> <4>[ 3797.775980] CPU: 0 PID: 64782 Comm: mount.ceph Tainted: G            E     5.5.0+ #16
+>> <4>[ 3797.775982] Hardware name: VMware, Inc. VMware Virtual Platform/440BX Desktop Reference Platform, BIOS 6.00 05/19/2017
+>> <4>[ 3797.775984] Call Trace:
+>> <4>[ 3797.775992]  dump_stack+0x8c/0xc0
+>> <4>[ 3797.775997]  print_address_description.constprop.0+0x1b/0x210
+>> <4>[ 3797.776029]  ? __ceph_open_session+0x2a9/0x370 [libceph]
+>> <4>[ 3797.776062]  ? __ceph_open_session+0x2a9/0x370 [libceph]
+>> <4>[ 3797.776065]  __kasan_report.cold+0x1a/0x33
+>> <4>[ 3797.776098]  ? __ceph_open_session+0x2a9/0x370 [libceph]
+>> <4>[ 3797.776101]  kasan_report+0xe/0x20
+>> <4>[ 3797.776133]  __ceph_open_session+0x2a9/0x370 [libceph]
+>> <4>[ 3797.776170]  ? ceph_reset_client_addr+0x30/0x30 [libceph]
+>> <4>[ 3797.776173]  ? _raw_spin_lock+0x7a/0xd0
+>> <4>[ 3797.776178]  ? finish_wait+0x100/0x100
+>> <4>[ 3797.776182]  ? __mutex_lock_slowpath+0x10/0x10
+>> <4>[ 3797.776227]  ceph_get_tree+0x65b/0xa40 [ceph]
+>> <4>[ 3797.776236]  vfs_get_tree+0x46/0x120
+>> <4>[ 3797.776240]  do_mount+0xa2c/0xd70
+>> <4>[ 3797.776245]  ? __list_add_valid+0x2f/0x60
+>> <4>[ 3797.776249]  ? copy_mount_string+0x20/0x20
+>> <4>[ 3797.776254]  ? __kasan_kmalloc.constprop.0+0xc2/0xd0
+>> <4>[ 3797.776258]  __x64_sys_mount+0xbe/0x100
+>> <4>[ 3797.776263]  do_syscall_64+0x73/0x210
+>> <4>[ 3797.776268]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+>> <4>[ 3797.776271] RIP: 0033:0x7f8f026e5b8e
+>> <4>[ 3797.776275] Code: 48 8b 0d fd 42 0c 00 f7 d8 64 89 01 48 83 c8 ff c3 66 2e 0f 1f 84 00 00 00 00 00 90 f3 0f 1e fa 49 89 ca b8 a5 00 00 00 0f 05 <48> 3d 01 f0 ff ff 73 01 c3 48 8b 0d ca 42 0c 00 f7 d8 64 89 01 48
+>> <4>[ 3797.776277] RSP: 002b:00007ffc2d7cccd8 EFLAGS: 00000206 ORIG_RAX: 00000000000000a5
+>> <4>[ 3797.776281] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007f8f026e5b8e
+>> <4>[ 3797.776283] RDX: 00005582afb2a558 RSI: 00007ffc2d7cef0d RDI: 00005582b01707a0
+>> <4>[ 3797.776285] RBP: 00007ffc2d7ccda0 R08: 00005582b0173250 R09: 0000000000000067
+>> <4>[ 3797.776287] R10: 0000000000000000 R11: 0000000000000206 R12: 00005582afb043a0
+>> <4>[ 3797.776289] R13: 00007ffc2d7cce80 R14: 0000000000000000 R15: 0000000000000000
+>> <3>[ 3797.776293]
+>> <3>[ 3797.776295] Allocated by task 64782:
+>> <4>[ 3797.776299]  save_stack+0x1b/0x80
+>> <4>[ 3797.776302]  __kasan_kmalloc.constprop.0+0xc2/0xd0
+>> <4>[ 3797.776336]  ceph_osdmap_alloc+0x29/0xd0 [libceph]
+>> <4>[ 3797.776368]  ceph_osdc_init+0x1ff/0x490 [libceph]
+>> <4>[ 3797.776399]  ceph_create_client+0x154/0x1b0 [libceph]
+>> <4>[ 3797.776427]  ceph_get_tree+0x97/0xa40 [ceph]
+>> <4>[ 3797.776430]  vfs_get_tree+0x46/0x120
+>> <4>[ 3797.776433]  do_mount+0xa2c/0xd70
+>> <4>[ 3797.776436]  __x64_sys_mount+0xbe/0x100
+>> <4>[ 3797.776439]  do_syscall_64+0x73/0x210
+>> <4>[ 3797.776443]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+>> <3>[ 3797.776443]
+>> <3>[ 3797.776445] Freed by task 55184:
+>> <4>[ 3797.776461]  save_stack+0x1b/0x80
+>> <4>[ 3797.776464]  __kasan_slab_free+0x12c/0x170
+>> <4>[ 3797.776467]  kfree+0xa3/0x290
+>> <4>[ 3797.776500]  handle_one_map+0x1f4/0x3c0 [libceph]
+>> <4>[ 3797.776533]  ceph_osdc_handle_map+0x910/0xa90 [libceph]
+>> <4>[ 3797.776567]  dispatch+0x826/0xde0 [libceph]
+>> <4>[ 3797.776599]  ceph_con_workfn+0x18c1/0x3b30 [libceph]
+>> <4>[ 3797.776603]  process_one_work+0x3b1/0x6a0
+>> <4>[ 3797.776606]  worker_thread+0x78/0x5d0
+>> <4>[ 3797.776609]  kthread+0x191/0x1e0
+>> <4>[ 3797.776612]  ret_from_fork+0x35/0x40
+>> <3>[ 3797.776613]
+>> <3>[ 3797.776616] The buggy address belongs to the object at ffff8883d8b8a100
+>> <3>[ 3797.776616]  which belongs to the cache kmalloc-192 of size 192
+>> <3>[ 3797.776836] The buggy address is located 16 bytes inside of
+>> <3>[ 3797.776836]  192-byte region [ffff8883d8b8a100, ffff8883d8b8a1c0)
+>> <3>[ 3797.776838] The buggy address belongs to the page:
+>> <4>[ 3797.776842] page:ffffea000f62e280 refcount:1 mapcount:0 mapping:ffff8883ec80f000 index:0xffff8883d8b8bf00 compound_mapcount: 0
+>> <4>[ 3797.776847] raw: 0017ffe000010200 ffffea000f6c6780 0000000200000002 ffff8883ec80f000
+>> <4>[ 3797.776851] raw: ffff8883d8b8bf00 000000008020001b 00000001ffffffff 0000000000000000
+>> <4>[ 3797.776852] page dumped because: kasan: bad access detected
+>> <3>[ 3797.776853]
+>> <3>[ 3797.776854] Memory state around the buggy address:
+>> <3>[ 3797.776857]  ffff8883d8b8a000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>> <3>[ 3797.776859]  ffff8883d8b8a080: 00 00 00 00 00 00 00 00 fc fc fc fc fc fc fc fc
+>> <3>[ 3797.776862] >ffff8883d8b8a100: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+>> <3>[ 3797.776863]                          ^
+>> <3>[ 3797.776866]  ffff8883d8b8a180: fb fb fb fb fb fb fb fb fc fc fc fc fc fc fc fc
+>> <3>[ 3797.776868]  ffff8883d8b8a200: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+>> <3>[ 3797.776869] ==================================================================
+>>
+>> URL: https://tracker.ceph.com/issues/44177
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   net/ceph/ceph_common.c | 8 +++++++-
+>>   1 file changed, 7 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+>> index a0e97f6c1072..5c6230b56e02 100644
+>> --- a/net/ceph/ceph_common.c
+>> +++ b/net/ceph/ceph_common.c
+>> @@ -682,8 +682,14 @@ EXPORT_SYMBOL(ceph_reset_client_addr);
+>>    */
+>>   static bool have_mon_and_osd_map(struct ceph_client *client)
+>>   {
+>> +       bool have_osd_map = false;
+>> +
+>> +       down_read(&client->osdc.lock);
+>> +       have_osd_map = !!(client->osdc.osdmap && client->osdc.osdmap->epoch);
+>> +       up_read(&client->osdc.lock);
+>> +
+>>          return client->monc.monmap && client->monc.monmap->epoch &&
+>> -              client->osdc.osdmap && client->osdc.osdmap->epoch;
+>> +              have_osd_map;
+> Hi Xiubo,
 >
-> On my machine (x86_64) this struct is 952 bytes, which gets rounded up
-> to 1024 by kmalloc. Move this to a dedicated slabcache, so we can
-> allocate them without the extra 72 bytes of overhead per.
+> The monmap pointer is reset the same way, so it needs some locking
+> as well.  And a quick grep shows more places that need to be fixed,
+> some between libceph and rbd.
 >
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  fs/ceph/mds_client.c         | 5 +++--
->  fs/ceph/super.c              | 8 ++++++++
->  include/linux/ceph/libceph.h | 1 +
->  3 files changed, 12 insertions(+), 2 deletions(-)
->
-> v2: switch to kmem_cache_zalloc()
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 2980e57ca7b9..fab9d6461a65 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -736,7 +736,7 @@ void ceph_mdsc_release_request(struct kref *kref)
->         put_request_session(req);
->         ceph_unreserve_caps(req->r_mdsc, &req->r_caps_reservation);
->         WARN_ON_ONCE(!list_empty(&req->r_wait));
-> -       kfree(req);
-> +       kmem_cache_free(ceph_mds_request_cachep, req);
->  }
->
->  DEFINE_RB_FUNCS(request, struct ceph_mds_request, r_tid, r_node)
-> @@ -2094,8 +2094,9 @@ int ceph_alloc_readdir_reply_buffer(struct ceph_mds_request *req,
->  struct ceph_mds_request *
->  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
->  {
-> -       struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
-> +       struct ceph_mds_request *req;
->
-> +       req = kmem_cache_zalloc(ceph_mds_request_cachep, GFP_NOFS);
->         if (!req)
->                 return ERR_PTR(-ENOMEM);
->
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index c7f150686a53..b1329cd5388a 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -729,6 +729,7 @@ struct kmem_cache *ceph_cap_flush_cachep;
->  struct kmem_cache *ceph_dentry_cachep;
->  struct kmem_cache *ceph_file_cachep;
->  struct kmem_cache *ceph_dir_file_cachep;
-> +struct kmem_cache *ceph_mds_request_cachep;
->
->  static void ceph_inode_init_once(void *foo)
->  {
-> @@ -769,6 +770,10 @@ static int __init init_caches(void)
->         if (!ceph_dir_file_cachep)
->                 goto bad_dir_file;
->
-> +       ceph_mds_request_cachep = KMEM_CACHE(ceph_mds_request, SLAB_MEM_SPREAD);
-> +       if (!ceph_mds_request_cachep)
-> +               goto bad_mds_req;
-> +
->         error = ceph_fscache_register();
->         if (error)
->                 goto bad_fscache;
-> @@ -776,6 +781,8 @@ static int __init init_caches(void)
->         return 0;
->
->  bad_fscache:
-> +       kmem_cache_destroy(ceph_mds_request_cachep);
-> +bad_mds_req:
->         kmem_cache_destroy(ceph_dir_file_cachep);
->  bad_dir_file:
->         kmem_cache_destroy(ceph_file_cachep);
-> @@ -804,6 +811,7 @@ static void destroy_caches(void)
->         kmem_cache_destroy(ceph_dentry_cachep);
->         kmem_cache_destroy(ceph_file_cachep);
->         kmem_cache_destroy(ceph_dir_file_cachep);
-> +       kmem_cache_destroy(ceph_mds_request_cachep);
->
->         ceph_fscache_unregister();
->  }
-> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> index ec73ebc4827d..525b7c3f1c81 100644
-> --- a/include/linux/ceph/libceph.h
-> +++ b/include/linux/ceph/libceph.h
-> @@ -272,6 +272,7 @@ extern struct kmem_cache *ceph_cap_flush_cachep;
->  extern struct kmem_cache *ceph_dentry_cachep;
->  extern struct kmem_cache *ceph_file_cachep;
->  extern struct kmem_cache *ceph_dir_file_cachep;
-> +extern struct kmem_cache *ceph_mds_request_cachep;
->
->  /* ceph_common.c */
->  extern bool libceph_compatible(void *data);
+> I'll treat this patch as a bug report and fix them myself.
 
-Looks good, thanks for addressing my nit.
+Hi Ilya,
 
-                Ilya
+I reproduced it again in the debugfs and mount path when running some tests.
+
+There are 2 places could cause this:
+
+1, in the debugfs for monmap/osdmap show functions.
+
+2, here for the monmap/osdmap check.
+
+This have block my test case locally and I have fixed them all locally, 
+If you are okay, I will post the V2.
+
+Thanks
+
+BRs
+
+
+> Thanks,
+>
+>                  Ilya
+>
