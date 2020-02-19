@@ -1,56 +1,89 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v5 06/12] ceph: don't take refs to want mask unless we have all bits
-Date: Wed, 19 Feb 2020 08:25:20 -0500
-Message-ID: <20200219132526.17590-7-jlayton@kernel.org>
+Subject: [PATCH v5 04/12] ceph: make __take_cap_refs non-static
+Date: Wed, 19 Feb 2020 08:25:18 -0500
+Message-ID: <20200219132526.17590-5-jlayton@kernel.org>
 References: <20200219132526.17590-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33654 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:33636 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726725AbgBSNZd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Feb 2020 08:25:33 -0500
+        id S1726725AbgBSNZb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Feb 2020 08:25:31 -0500
 In-Reply-To: <20200219132526.17590-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, xiubli@redhat.com
 
-From: "Yan, Zheng" <ukernel@gmail.com>
+Rename it to ceph_take_cap_refs and make it available to other files.
+Also replace a comment with a lockdep assertion.
 
-If we don't have all of the cap bits for the want mask in
-try_get_cap_refs, then just take refs on the need bits.
-
-Signed-off-by: "Yan, Zheng" <ukernel@gmail.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-Zheng,
-
-I broke this patch out on its own as I wasn't sure it was still
-needed with the latest iteration of the code. We can fold it into
-the previous one if we do want it, or just drop it.
-
-Thanks,
-Jeff
+ fs/ceph/caps.c  | 12 ++++++------
+ fs/ceph/super.h |  2 ++
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d6c5ee33f30f..c96b18407aef 100644
+index 85e13aa359d2..295837215a3a 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -2667,7 +2667,10 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 				}
- 				snap_rwsem_locked = true;
- 			}
--			*got = need | (have & want);
-+			if ((have & want) == want)
-+				*got = need | want;
-+			else
-+				*got = need;
- 			if (S_ISREG(inode->i_mode) &&
+@@ -2516,12 +2516,12 @@ static void kick_flushing_inode_caps(struct ceph_mds_client *mdsc,
+ /*
+  * Take references to capabilities we hold, so that we don't release
+  * them to the MDS prematurely.
+- *
+- * Protected by i_ceph_lock.
+  */
+-static void __take_cap_refs(struct ceph_inode_info *ci, int got,
++void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
+ 			    bool snap_rwsem_locked)
+ {
++	lockdep_assert_held(&ci->i_ceph_lock);
++
+ 	if (got & CEPH_CAP_PIN)
+ 		ci->i_pin_ref++;
+ 	if (got & CEPH_CAP_FILE_RD)
+@@ -2542,7 +2542,7 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got,
+ 		if (ci->i_wb_ref == 0)
+ 			ihold(&ci->vfs_inode);
+ 		ci->i_wb_ref++;
+-		dout("__take_cap_refs %p wb %d -> %d (?)\n",
++		dout("%s %p wb %d -> %d (?)\n", __func__,
+ 		     &ci->vfs_inode, ci->i_wb_ref-1, ci->i_wb_ref);
+ 	}
+ }
+@@ -2665,7 +2665,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
  			    (need & CEPH_CAP_FILE_RD) &&
  			    !(*got & CEPH_CAP_FILE_CACHE))
+ 				ceph_disable_fscache_readpage(ci);
+-			__take_cap_refs(ci, *got, true);
++			ceph_take_cap_refs(ci, *got, true);
+ 			ret = 1;
+ 		}
+ 	} else {
+@@ -2894,7 +2894,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
+ void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps)
+ {
+ 	spin_lock(&ci->i_ceph_lock);
+-	__take_cap_refs(ci, caps, false);
++	ceph_take_cap_refs(ci, caps, false);
+ 	spin_unlock(&ci->i_ceph_lock);
+ }
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index bfb03adb4a08..2393803c38de 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1053,6 +1053,8 @@ extern void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 				    struct ceph_mds_session *session);
+ extern struct ceph_cap *ceph_get_cap_for_mds(struct ceph_inode_info *ci,
+ 					     int mds);
++extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
++				bool snap_rwsem_locked);
+ extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
+ extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
+ extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
 -- 
 2.24.1
