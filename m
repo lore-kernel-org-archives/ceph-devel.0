@@ -1,120 +1,79 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v5 01/12] ceph: add flag to designate that a request is asynchronous
-Date: Wed, 19 Feb 2020 08:25:15 -0500
-Message-ID: <20200219132526.17590-2-jlayton@kernel.org>
-References: <20200219132526.17590-1-jlayton@kernel.org>
+Subject: [PATCH v5 00/12] ceph: async directory operations support
+Date: Wed, 19 Feb 2020 08:25:14 -0500
+Message-ID: <20200219132526.17590-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33608 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:33602 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726725AbgBSNZ3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Feb 2020 08:25:29 -0500
-In-Reply-To: <20200219132526.17590-1-jlayton@kernel.org>
+        id S1726725AbgBSNZ2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Feb 2020 08:25:28 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, xiubli@redhat.com
 
-...and ensure that such requests are never queued. The MDS has need to
-know that a request is asynchronous so add flags and proper
-infrastructure for that.
+A lot of changes in this set -- some highlights:
 
-Also, delegated inode numbers and directory caps are associated with the
-session, so ensure that async requests are always transmitted on the
-first attempt and are never queued to wait for session reestablishment.
+v5: reorganize patchset for easier review and better bisectability
+    rework how dir caps are acquired and tracked in requests
+    preemptively release cap refs when reconnecting session
+    restore inode number back to pool when fall back to sync create
+    rework unlink cap acquisition to be lighter weight
+    new "nowsync" mount opt, patterned after xfs "wsync" mount opt
 
-If it does end up looking like we'll need to queue the request, then
-have it return -EJUKEBOX so the caller can reattempt with a synchronous
-request.
+Performance is on par with earlier sets.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/inode.c              |  1 +
- fs/ceph/mds_client.c         | 15 +++++++++++++++
- fs/ceph/mds_client.h         |  1 +
- include/linux/ceph/ceph_fs.h |  5 +++--
- 4 files changed, 20 insertions(+), 2 deletions(-)
+I previously pulled the async unlink patch from ceph-client/testing, so
+this set includes a revised version of that as well, and orders it
+some other changes. I also broke that one up into several patches.
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 094b8fc37787..9869ec101e88 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1311,6 +1311,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
- 				session,
- 				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
-+				 !test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags) &&
- 				 rinfo->head->result == 0) ?  req->r_fmode : -1,
- 				&req->r_caps_reservation);
- 		if (err < 0) {
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index fab9d6461a65..94d18e643a3d 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2528,6 +2528,8 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 	rhead->oldest_client_tid = cpu_to_le64(__get_oldest_tid(mdsc));
- 	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
- 		flags |= CEPH_MDS_FLAG_REPLAY;
-+	if (test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags))
-+		flags |= CEPH_MDS_FLAG_ASYNC;
- 	if (req->r_parent)
- 		flags |= CEPH_MDS_FLAG_WANT_DENTRY;
- 	rhead->flags = cpu_to_le32(flags);
-@@ -2611,6 +2613,10 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 	mds = __choose_mds(mdsc, req, &random);
- 	if (mds < 0 ||
- 	    ceph_mdsmap_get_state(mdsc->mdsmap, mds) < CEPH_MDS_STATE_ACTIVE) {
-+		if (test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags)) {
-+			err = -EJUKEBOX;
-+			goto finish;
-+		}
- 		dout("do_request no mds or not active, waiting for map\n");
- 		list_add(&req->r_wait, &mdsc->waiting_for_map);
- 		return;
-@@ -2635,6 +2641,15 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 			err = -EACCES;
- 			goto out_session;
- 		}
-+		/*
-+		 * We cannot queue async requests since the caps and delegated
-+		 * inodes are bound to the session. Just return -EJUKEBOX and
-+		 * let the caller retry a sync request in that case.
-+		 */
-+		if (test_bit(CEPH_MDS_R_ASYNC, &req->r_req_flags)) {
-+			err = -EJUKEBOX;
-+			goto out_session;
-+		}
- 		if (session->s_state == CEPH_MDS_SESSION_NEW ||
- 		    session->s_state == CEPH_MDS_SESSION_CLOSING) {
- 			__open_session(mdsc, session);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index a0918d00117c..95ac00e59e66 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -255,6 +255,7 @@ struct ceph_mds_request {
- #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
- #define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
- #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
-+#define CEPH_MDS_R_ASYNC		(8) /* async request */
- 	unsigned long	r_req_flags;
- 
- 	struct mutex r_fill_mutex;
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index cb21c5cf12c3..9f747a1b8788 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -444,8 +444,9 @@ union ceph_mds_request_args {
- 	} __attribute__ ((packed)) lookupino;
- } __attribute__ ((packed));
- 
--#define CEPH_MDS_FLAG_REPLAY        1  /* this is a replayed op */
--#define CEPH_MDS_FLAG_WANT_DENTRY   2  /* want dentry in reply */
-+#define CEPH_MDS_FLAG_REPLAY		1 /* this is a replayed op */
-+#define CEPH_MDS_FLAG_WANT_DENTRY	2 /* want dentry in reply */
-+#define CEPH_MDS_FLAG_ASYNC		4 /* request is asynchronous */
- 
- struct ceph_mds_request_head {
- 	__le64 oldest_client_tid;
+This should (hopefully) address Zheng's concerns about releasing the
+caps when the session is lost. Those are preemptively released now
+when the session is reconnected. 
+
+This adds a new mount option too. xfs has a "wsync" mount option which
+makes it wait for namespaced directory operations to be journalled
+before returning. This patchset adds "wsync" and "nowsync" options, so
+it can now be enabled/disabled on a per-sb-basis.
+
+The default for xfs is "nowsync". For ceph though, I'm leaving it as
+"wsync" for now, so you need to mount with "nowsync" to enable async
+dirops.
+
+We may not actually need patch #6 here. Zheng had that delta in one
+of the earlier patches, but I'm not sure it's really needed now. It
+may make sense to just take it on its own merits though.
+
+Comments and suggestions welcome.
+
+Jeff Layton (11):
+  ceph: add flag to designate that a request is asynchronous
+  ceph: track primary dentry link
+  ceph: add infrastructure for waiting for async create to complete
+  ceph: make __take_cap_refs non-static
+  ceph: cap tracking for async directory operations
+  ceph: perform asynchronous unlink if we have sufficient caps
+  ceph: make ceph_fill_inode non-static
+  ceph: decode interval_sets for delegated inos
+  ceph: add new MDS req field to hold delegated inode number
+  ceph: cache layout in parent dir on first sync create
+  ceph: attempt to do async create when possible
+
+Yan, Zheng (1):
+  ceph: don't take refs to want mask unless we have all bits
+
+ fs/ceph/caps.c               |  72 +++++++---
+ fs/ceph/dir.c                | 106 +++++++++++++-
+ fs/ceph/file.c               | 270 +++++++++++++++++++++++++++++++++--
+ fs/ceph/inode.c              |  58 ++++----
+ fs/ceph/mds_client.c         | 196 ++++++++++++++++++++++---
+ fs/ceph/mds_client.h         |  24 +++-
+ fs/ceph/super.c              |  20 +++
+ fs/ceph/super.h              |  21 ++-
+ include/linux/ceph/ceph_fs.h |  17 ++-
+ 9 files changed, 701 insertions(+), 83 deletions(-)
+
 -- 
 2.24.1
