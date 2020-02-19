@@ -1,213 +1,96 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v5 05/12] ceph: cap tracking for async directory operations
-Date: Wed, 19 Feb 2020 08:25:19 -0500
-Message-ID: <20200219132526.17590-6-jlayton@kernel.org>
+Subject: [PATCH v5 02/12] ceph: track primary dentry link
+Date: Wed, 19 Feb 2020 08:25:16 -0500
+Message-ID: <20200219132526.17590-3-jlayton@kernel.org>
 References: <20200219132526.17590-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33644 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:33614 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727786AbgBSNZd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Feb 2020 08:25:33 -0500
+        id S1726725AbgBSNZa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Feb 2020 08:25:30 -0500
 In-Reply-To: <20200219132526.17590-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, xiubli@redhat.com
 
-Track and correctly handle directory caps for asynchronous operations.
-Add aliases for Frc caps that we now designate at Dcu caps (when dealing
-with directories).
-
-Unlike file caps, we don't reclaim these when the session goes away, and
-instead preemptively release them. In-flight async dirops are instead
-handled during reconnect phase. The client needs to re-do a synchronous
-operation in order to re-get directory caps.
+Newer versions of the MDS will flag a dentry as "primary". In later
+patches, we'll need to consult this info, so track it in di->flags.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c               | 29 ++++++++++++++++++++---------
- fs/ceph/mds_client.c         | 31 ++++++++++++++++++++++++++-----
- fs/ceph/mds_client.h         |  6 +++++-
- include/linux/ceph/ceph_fs.h |  6 ++++++
- 4 files changed, 57 insertions(+), 15 deletions(-)
+ fs/ceph/dir.c                | 1 +
+ fs/ceph/inode.c              | 8 +++++++-
+ fs/ceph/super.h              | 1 +
+ include/linux/ceph/ceph_fs.h | 3 +++
+ 4 files changed, 12 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 295837215a3a..d6c5ee33f30f 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -992,7 +992,11 @@ int __ceph_caps_file_wanted(struct ceph_inode_info *ci)
- int __ceph_caps_wanted(struct ceph_inode_info *ci)
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index d0cd0aba5843..a87274935a09 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1411,6 +1411,7 @@ void ceph_invalidate_dentry_lease(struct dentry *dentry)
+ 	spin_lock(&dentry->d_lock);
+ 	di->time = jiffies;
+ 	di->lease_shared_gen = 0;
++	di->flags &= ~CEPH_DENTRY_PRIMARY_LINK;
+ 	__dentry_lease_unlist(di);
+ 	spin_unlock(&dentry->d_lock);
+ }
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 9869ec101e88..7478bd0283c1 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1051,6 +1051,7 @@ static void __update_dentry_lease(struct inode *dir, struct dentry *dentry,
+ 				  struct ceph_mds_session **old_lease_session)
  {
- 	int w = __ceph_caps_file_wanted(ci) | __ceph_caps_used(ci);
--	if (!S_ISDIR(ci->vfs_inode.i_mode)) {
-+	if (S_ISDIR(ci->vfs_inode.i_mode)) {
-+		/* we want EXCL if holding caps of dir ops */
-+		if (w & CEPH_CAP_ANY_DIR_OPS)
-+			w |= CEPH_CAP_FILE_EXCL;
-+	} else {
- 		/* we want EXCL if dirty data */
- 		if (w & CEPH_CAP_FILE_BUFFER)
- 			w |= CEPH_CAP_FILE_EXCL;
-@@ -1890,10 +1894,13 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
- 			 * revoking the shared cap on every create/unlink
- 			 * operation.
- 			 */
--			if (IS_RDONLY(inode))
-+			if (IS_RDONLY(inode)) {
- 				want = CEPH_CAP_ANY_SHARED;
--			else
--				want = CEPH_CAP_ANY_SHARED | CEPH_CAP_FILE_EXCL;
-+			} else {
-+				want = CEPH_CAP_ANY_SHARED |
-+				       CEPH_CAP_FILE_EXCL |
-+				       CEPH_CAP_ANY_DIR_OPS;
-+			}
- 			retain |= want;
- 		} else {
+ 	struct ceph_dentry_info *di = ceph_dentry(dentry);
++	unsigned mask = le16_to_cpu(lease->mask);
+ 	long unsigned duration = le32_to_cpu(lease->duration_ms);
+ 	long unsigned ttl = from_time + (duration * HZ) / 1000;
+ 	long unsigned half_ttl = from_time + (duration * HZ / 2) / 1000;
+@@ -1062,8 +1063,13 @@ static void __update_dentry_lease(struct inode *dir, struct dentry *dentry,
+ 	if (ceph_snap(dir) != CEPH_NOSNAP)
+ 		return;
  
-@@ -2750,13 +2757,17 @@ int ceph_try_get_caps(struct inode *inode, int need, int want,
- 	int ret;
- 
- 	BUG_ON(need & ~CEPH_CAP_FILE_RD);
--	BUG_ON(want & ~(CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO|CEPH_CAP_FILE_SHARED));
--	ret = ceph_pool_perm_check(inode, need);
--	if (ret < 0)
--		return ret;
-+	if (need) {
-+		ret = ceph_pool_perm_check(inode, need);
-+		if (ret < 0)
-+			return ret;
-+	}
- 
-+	BUG_ON(want & ~(CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO |
-+			CEPH_CAP_FILE_SHARED | CEPH_CAP_FILE_EXCL |
-+			CEPH_CAP_ANY_DIR_OPS));
- 	ret = try_get_cap_refs(inode, need, want, 0,
--			       (nonblock ? NON_BLOCKING : 0), got);
-+			       nonblock ? NON_BLOCKING : 0, got);
- 	return ret == -EAGAIN ? 0 : ret;
- }
- 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 38eb9dd5062b..ef3dd6fe2f4d 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -699,6 +699,7 @@ void ceph_mdsc_release_request(struct kref *kref)
- 	struct ceph_mds_request *req = container_of(kref,
- 						    struct ceph_mds_request,
- 						    r_kref);
-+	ceph_mdsc_release_dir_caps(req);
- 	destroy_reply_info(&req->r_reply_info);
- 	if (req->r_request)
- 		ceph_msg_put(req->r_request);
-@@ -3280,6 +3281,17 @@ static void handle_session(struct ceph_mds_session *session,
- 	return;
- }
- 
-+void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req)
-+{
-+	int dcaps;
++	if (mask & CEPH_LEASE_PRIMARY_LINK)
++		di->flags |= CEPH_DENTRY_PRIMARY_LINK;
++	else
++		di->flags &= ~CEPH_DENTRY_PRIMARY_LINK;
 +
-+	dcaps = xchg(&req->r_dir_caps, 0);
-+	if (dcaps) {
-+		dout("releasing r_dir_caps=%s\n", ceph_cap_string(dcaps));
-+		ceph_put_cap_refs(ceph_inode(req->r_parent), dcaps);
-+	}
-+}
-+
- /*
-  * called under session->mutex.
-  */
-@@ -3307,9 +3319,14 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
- 			continue;
- 		if (req->r_attempts == 0)
- 			continue; /* only old requests */
--		if (req->r_session &&
--		    req->r_session->s_mds == session->s_mds)
--			__send_request(mdsc, session, req, true);
-+		if (!req->r_session)
-+			continue;
-+		if (req->r_session->s_mds != session->s_mds)
-+			continue;
-+
-+		ceph_mdsc_release_dir_caps(req);
-+
-+		__send_request(mdsc, session, req, true);
+ 	di->lease_shared_gen = atomic_read(&ceph_inode(dir)->i_shared_gen);
+-	if (duration == 0) {
++	if (!(mask & CEPH_LEASE_VALID)) {
+ 		__ceph_dentry_dir_lease_touch(di);
+ 		return;
  	}
- 	mutex_unlock(&mdsc->mutex);
- }
-@@ -3393,7 +3410,7 @@ static int send_reconnect_partial(struct ceph_reconnect_state *recon_state)
- /*
-  * Encode information about a cap for a reconnect with the MDS.
-  */
--static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
-+static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
- 			  void *arg)
- {
- 	union {
-@@ -3416,6 +3433,10 @@ static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
- 	cap->mseq = 0;       /* and migrate_seq */
- 	cap->cap_gen = cap->session->s_cap_gen;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 37dc1ac8f6c3..3430d7ffe8f7 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -284,6 +284,7 @@ struct ceph_dentry_info {
+ #define CEPH_DENTRY_REFERENCED		1
+ #define CEPH_DENTRY_LEASE_LIST		2
+ #define CEPH_DENTRY_SHRINK_LIST		4
++#define CEPH_DENTRY_PRIMARY_LINK	8
  
-+	/* These are lost when the session goes away */
-+	if (S_ISDIR(inode->i_mode))
-+		cap->issued &= ~CEPH_CAP_ANY_DIR_OPS;
-+
- 	if (recon_state->msg_version >= 2) {
- 		rec.v2.cap_id = cpu_to_le64(cap->cap_id);
- 		rec.v2.wanted = cpu_to_le32(__ceph_caps_wanted(ci));
-@@ -3712,7 +3733,7 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
- 		recon_state.msg_version = 2;
- 	}
- 	/* trsaverse this session's caps */
--	err = ceph_iterate_session_caps(session, encode_caps_cb, &recon_state);
-+	err = ceph_iterate_session_caps(session, reconnect_caps_cb, &recon_state);
- 
- 	spin_lock(&session->s_cap_lock);
- 	session->s_cap_reconnect = 0;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 8043f2b439b1..f10d342ea585 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -284,8 +284,11 @@ struct ceph_mds_request {
- 	struct ceph_msg  *r_request;  /* original request */
- 	struct ceph_msg  *r_reply;
- 	struct ceph_mds_reply_info_parsed r_reply_info;
--	struct page *r_locked_page;
- 	int r_err;
-+
-+
-+	struct page *r_locked_page;
-+	int r_dir_caps;
- 	int r_num_caps;
- 	u32               r_readdir_offset;
- 
-@@ -489,6 +492,7 @@ extern int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc,
- extern int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
- 				struct inode *dir,
- 				struct ceph_mds_request *req);
-+extern void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req);
- static inline void ceph_mdsc_get_request(struct ceph_mds_request *req)
- {
- 	kref_get(&req->r_kref);
+ struct ceph_inode_xattrs_info {
+ 	/*
 diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index 94cc4b047987..91d09cf37649 100644
+index 9f747a1b8788..94cc4b047987 100644
 --- a/include/linux/ceph/ceph_fs.h
 +++ b/include/linux/ceph/ceph_fs.h
-@@ -663,6 +663,12 @@ int ceph_flags_to_mode(int flags);
- #define CEPH_CAP_LOCKS (CEPH_LOCK_IFILE | CEPH_LOCK_IAUTH | CEPH_LOCK_ILINK | \
- 			CEPH_LOCK_IXATTR)
+@@ -531,6 +531,9 @@ struct ceph_mds_reply_lease {
+ 	__le32 seq;
+ } __attribute__ ((packed));
  
-+/* cap masks async dir operations */
-+#define CEPH_CAP_DIR_CREATE	CEPH_CAP_FILE_CACHE
-+#define CEPH_CAP_DIR_UNLINK	CEPH_CAP_FILE_RD
-+#define CEPH_CAP_ANY_DIR_OPS	(CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_RD | \
-+				 CEPH_CAP_FILE_WREXTEND | CEPH_CAP_FILE_LAZYIO)
++#define CEPH_LEASE_VALID        (1 | 2) /* old and new bit values */
++#define CEPH_LEASE_PRIMARY_LINK 4       /* primary linkage */
 +
- int ceph_caps_for_mode(int mode);
- 
- enum {
+ struct ceph_mds_reply_dirfrag {
+ 	__le32 frag;            /* fragment */
+ 	__le32 auth;            /* auth mds, if this is a delegation point */
 -- 
 2.24.1
