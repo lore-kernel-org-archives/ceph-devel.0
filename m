@@ -1,96 +1,62 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v5 02/12] ceph: track primary dentry link
-Date: Wed, 19 Feb 2020 08:25:16 -0500
-Message-ID: <20200219132526.17590-3-jlayton@kernel.org>
+Subject: [PATCH v5 10/12] ceph: add new MDS req field to hold delegated inode number
+Date: Wed, 19 Feb 2020 08:25:24 -0500
+Message-ID: <20200219132526.17590-11-jlayton@kernel.org>
 References: <20200219132526.17590-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33614 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:33680 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726725AbgBSNZa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Feb 2020 08:25:30 -0500
+        id S1727786AbgBSNZg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Feb 2020 08:25:36 -0500
 In-Reply-To: <20200219132526.17590-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, xiubli@redhat.com
 
-Newer versions of the MDS will flag a dentry as "primary". In later
-patches, we'll need to consult this info, so track it in di->flags.
+Add new request field to hold the delegated inode number. Encode that
+into the message when it's set.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/dir.c                | 1 +
- fs/ceph/inode.c              | 8 +++++++-
- fs/ceph/super.h              | 1 +
- include/linux/ceph/ceph_fs.h | 3 +++
- 4 files changed, 12 insertions(+), 1 deletion(-)
+ fs/ceph/mds_client.c | 3 +--
+ fs/ceph/mds_client.h | 1 +
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index d0cd0aba5843..a87274935a09 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1411,6 +1411,7 @@ void ceph_invalidate_dentry_lease(struct dentry *dentry)
- 	spin_lock(&dentry->d_lock);
- 	di->time = jiffies;
- 	di->lease_shared_gen = 0;
-+	di->flags &= ~CEPH_DENTRY_PRIMARY_LINK;
- 	__dentry_lease_unlist(di);
- 	spin_unlock(&dentry->d_lock);
- }
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9869ec101e88..7478bd0283c1 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1051,6 +1051,7 @@ static void __update_dentry_lease(struct inode *dir, struct dentry *dentry,
- 				  struct ceph_mds_session **old_lease_session)
- {
- 	struct ceph_dentry_info *di = ceph_dentry(dentry);
-+	unsigned mask = le16_to_cpu(lease->mask);
- 	long unsigned duration = le32_to_cpu(lease->duration_ms);
- 	long unsigned ttl = from_time + (duration * HZ) / 1000;
- 	long unsigned half_ttl = from_time + (duration * HZ / 2) / 1000;
-@@ -1062,8 +1063,13 @@ static void __update_dentry_lease(struct inode *dir, struct dentry *dentry,
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return;
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 831578798b6e..925f6ca334b9 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2477,7 +2477,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+ 	head->op = cpu_to_le32(req->r_op);
+ 	head->caller_uid = cpu_to_le32(from_kuid(&init_user_ns, req->r_uid));
+ 	head->caller_gid = cpu_to_le32(from_kgid(&init_user_ns, req->r_gid));
+-	head->ino = 0;
++	head->ino = cpu_to_le64(req->r_deleg_ino);
+ 	head->args = req->r_args;
  
-+	if (mask & CEPH_LEASE_PRIMARY_LINK)
-+		di->flags |= CEPH_DENTRY_PRIMARY_LINK;
-+	else
-+		di->flags &= ~CEPH_DENTRY_PRIMARY_LINK;
-+
- 	di->lease_shared_gen = atomic_read(&ceph_inode(dir)->i_shared_gen);
--	if (duration == 0) {
-+	if (!(mask & CEPH_LEASE_VALID)) {
- 		__ceph_dentry_dir_lease_touch(di);
- 		return;
- 	}
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 37dc1ac8f6c3..3430d7ffe8f7 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -284,6 +284,7 @@ struct ceph_dentry_info {
- #define CEPH_DENTRY_REFERENCED		1
- #define CEPH_DENTRY_LEASE_LIST		2
- #define CEPH_DENTRY_SHRINK_LIST		4
-+#define CEPH_DENTRY_PRIMARY_LINK	8
+ 	ceph_encode_filepath(&p, end, ino1, path1);
+@@ -2638,7 +2638,6 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
+ 	rhead->flags = cpu_to_le32(flags);
+ 	rhead->num_fwd = req->r_num_fwd;
+ 	rhead->num_retry = req->r_attempts - 1;
+-	rhead->ino = 0;
  
- struct ceph_inode_xattrs_info {
- 	/*
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index 9f747a1b8788..94cc4b047987 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -531,6 +531,9 @@ struct ceph_mds_reply_lease {
- 	__le32 seq;
- } __attribute__ ((packed));
+ 	dout(" r_parent = %p\n", req->r_parent);
+ 	return 0;
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 4c3b71707470..4e5be79bf080 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -313,6 +313,7 @@ struct ceph_mds_request {
+ 	int               r_num_fwd;    /* number of forward attempts */
+ 	int               r_resend_mds; /* mds to resend to next, if any*/
+ 	u32               r_sent_on_mseq; /* cap mseq request was sent at*/
++	u64		  r_deleg_ino;
  
-+#define CEPH_LEASE_VALID        (1 | 2) /* old and new bit values */
-+#define CEPH_LEASE_PRIMARY_LINK 4       /* primary linkage */
-+
- struct ceph_mds_reply_dirfrag {
- 	__le32 frag;            /* fragment */
- 	__le32 auth;            /* auth mds, if this is a delegation point */
+ 	struct list_head  r_wait;
+ 	struct completion r_completion;
 -- 
 2.24.1
