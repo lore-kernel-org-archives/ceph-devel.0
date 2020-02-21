@@ -1,63 +1,63 @@
-From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH v7 2/5] ceph: add caps perf metric for each session
-Date: Fri, 21 Feb 2020 12:16:42 +0800
-Message-ID: <ebe5e479-0da4-093a-adee-2b432ef2e109@redhat.com>
-References: <20200219033851.6548-1-xiubli@redhat.com>
- <20200219033851.6548-3-xiubli@redhat.com>
- <b3837ae640e8ec3fa631b4b2a4d61adf15440ec2.camel@kernel.org>
+From: xiubli@redhat.com
+Subject: [PATCH v8 0/5] ceph: add perf metrics support
+Date: Fri, 21 Feb 2020 02:05:51 -0500
+Message-ID: <20200221070556.18922-1-xiubli@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:33231 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:33592 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729782AbgBUEQ7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Feb 2020 23:16:59 -0500
-In-Reply-To: <b3837ae640e8ec3fa631b4b2a4d61adf15440ec2.camel@kernel.org>
-Content-Language: en-US
+        with ESMTP id S1726244AbgBUHGt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2020 02:06:49 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
-Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-On 2020/2/20 2:29, Jeff Layton wrote:
-> On Tue, 2020-02-18 at 22:38 -0500, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> This will fulfill the cap hit/mis metric stuff per-superblock,
->> it will count the hit/mis counters based each inode, and if one
->> inode's 'issued & ~revoking == mask' will mean a hit, or a miss.
->>
->> item          total           miss            hit
->> -------------------------------------------------
->> caps          295             107             4119
->>
->> URL: https://tracker.ceph.com/issues/43215
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   fs/ceph/acl.c        |  2 ++
->>   fs/ceph/caps.c       | 31 +++++++++++++++++++++++++++++++
->>   fs/ceph/debugfs.c    | 16 ++++++++++++++++
->>   fs/ceph/dir.c        |  9 +++++++--
->>   fs/ceph/file.c       |  2 ++
->>   fs/ceph/mds_client.c | 26 ++++++++++++++++++++++----
->>   fs/ceph/metric.h     |  3 +++
->>   fs/ceph/quota.c      |  9 +++++++--
->>   fs/ceph/super.h      |  9 +++++++++
->>   fs/ceph/xattr.c      | 17 ++++++++++++++---
->>   10 files changed, 113 insertions(+), 11 deletions(-)
->>
-> Summary:
->
-> I think counting this stuff is useful, but I'm not sure you're doing it
-> in the right places below. Also, you're calling __ceph_caps_metric from
-> many places where you already know whether it's a hit or miss. You could
-> just bump the counter and do less work in those cases.
->
-> More notes below:
+From: Xiubo Li <xiubli@redhat.com>
 
-Will fix them all.
+Changed in V8:
+- address the comments for cap patch from Jeff.
 
-Thanks
-BRs
-Xiubo
+We can get the metrics from the debugfs:
+
+$ cat /sys/kernel/debug/ceph/0c93a60d-5645-4c46-8568-4c8f63db4c7f.client4=
+267/metrics=20
+item          total       sum_lat(us)     avg_lat(us)
+-----------------------------------------------------
+read          13          417000          32076
+write         42          131205000       3123928
+metadata      104         493000          4740
+
+item          total           miss            hit
+-------------------------------------------------
+d_lease       204             0               918
+caps          204             213             368218
+
+
+Xiubo Li (5):
+  ceph: add global dentry lease metric support
+  ceph: add caps perf metric for each session
+  ceph: add global read latency metric support
+  ceph: add global write latency metric support
+  ceph: add global metadata perf metric support
+
+ fs/ceph/acl.c                   |   2 +-
+ fs/ceph/addr.c                  |  13 ++++
+ fs/ceph/caps.c                  |  19 ++++++
+ fs/ceph/debugfs.c               |  71 ++++++++++++++++++++--
+ fs/ceph/dir.c                   |  21 +++++--
+ fs/ceph/file.c                  |  20 +++++++
+ fs/ceph/inode.c                 |   4 +-
+ fs/ceph/mds_client.c            | 103 +++++++++++++++++++++++++++++++-
+ fs/ceph/mds_client.h            |   4 ++
+ fs/ceph/metric.h                |  81 +++++++++++++++++++++++++
+ fs/ceph/super.h                 |   9 ++-
+ fs/ceph/xattr.c                 |   4 +-
+ include/linux/ceph/osd_client.h |   1 +
+ net/ceph/osd_client.c           |   2 +
+ 14 files changed, 336 insertions(+), 18 deletions(-)
+ create mode 100644 fs/ceph/metric.h
+
+--=20
+2.21.0
