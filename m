@@ -1,143 +1,187 @@
 From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH v8 5/5] ceph: add global metadata perf metric support
-Date: Sat, 22 Feb 2020 09:36:28 +0800
-Message-ID: <27ce72e5-1be4-a6ed-1613-fc7febaa7dcf@redhat.com>
+Subject: Re: [PATCH v8 2/5] ceph: add caps perf metric for each session
+Date: Sat, 22 Feb 2020 09:51:22 +0800
+Message-ID: <ff394699-2de4-c3ba-9b11-0730acf7d4df@redhat.com>
 References: <20200221070556.18922-1-xiubli@redhat.com>
- <20200221070556.18922-6-xiubli@redhat.com>
- <68e496bca563ed6439c16f0de04d7daeb17f718a.camel@kernel.org>
- <CAOi1vP92XUaOfQ_xJFZDXuH4r9D07fW6ckEyd2csr7EhUSRkpg@mail.gmail.com>
- <8d977d6a-da80-5900-aead-395b9b4eaa76@redhat.com>
+ <20200221070556.18922-3-xiubli@redhat.com>
+ <a654d3d4765741594e9c49ef62ba1d0ab41e3960.camel@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:24560 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:30211 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726842AbgBVBgm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2020 20:36:42 -0500
-In-Reply-To: <8d977d6a-da80-5900-aead-395b9b4eaa76@redhat.com>
+        with ESMTP id S1726842AbgBVBvm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2020 20:51:42 -0500
+In-Reply-To: <a654d3d4765741594e9c49ef62ba1d0ab41e3960.camel@kernel.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>
-Cc: Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On 2020/2/22 9:20, Xiubo Li wrote:
-> On 2020/2/21 22:56, Ilya Dryomov wrote:
->> On Fri, Feb 21, 2020 at 1:03 PM Jeff Layton <jlayton@kernel.org> wrote=
-:
->>> On Fri, 2020-02-21 at 02:05 -0500, xiubli@redhat.com wrote:
->>>> From: Xiubo Li <xiubli@redhat.com>
->>>>
->>>> It will calculate the latency for the metedata requests, which only
->>>> include the time cousumed by network and the ceph.
->>>>
->>> "and the ceph MDS" ?
->>>
->>>> item=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 total sum=
-_lat(us)=C2=A0=C2=A0=C2=A0=C2=A0 avg_lat(us)
->>>> -----------------------------------------------------
->>>> metadata=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 113=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0 220000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0 1946
->>>>
->>>> URL: https://tracker.ceph.com/issues/43215
->>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->>>> ---
->>>> =C2=A0 fs/ceph/debugfs.c=C2=A0=C2=A0=C2=A0 |=C2=A0 6 ++++++
->>>> =C2=A0 fs/ceph/mds_client.c | 20 ++++++++++++++++++++
->>>> =C2=A0 fs/ceph/metric.h=C2=A0=C2=A0=C2=A0=C2=A0 | 13 +++++++++++++
->>>> =C2=A0 3 files changed, 39 insertions(+)
->>>>
->>>> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
->>>> index 464bfbdb970d..60f3e307fca1 100644
->>>> --- a/fs/ceph/debugfs.c
->>>> +++ b/fs/ceph/debugfs.c
->>>> @@ -146,6 +146,12 @@ static int metric_show(struct seq_file *s,=20
->>>> void *p)
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 avg =3D total ? sum / total : 0=
-;
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 seq_printf(s, "%-14s%-12lld%-16=
-lld%lld\n", "write", total,=20
->>>> sum, avg);
->>>>
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 total =3D percpu_counter_sum(&mdsc->metric=
-.total_metadatas);
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 sum =3D percpu_counter_sum(&mdsc->metric.m=
-etadata_latency_sum);
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 sum =3D jiffies_to_usecs(sum);
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 avg =3D total ? sum / total : 0;
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 seq_printf(s, "%-14s%-12lld%-16lld%lld\n",=
- "metadata", total,=20
->>>> sum, avg);
->>>> +
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 seq_printf(s, "\n");
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 seq_printf(s, "item=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 total miss=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 hit\n");
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 seq_printf(s,=20
->>>> "-------------------------------------------------\n");
->>>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->>>> index 0a3447966b26..3e792eca6af7 100644
->>>> --- a/fs/ceph/mds_client.c
->>>> +++ b/fs/ceph/mds_client.c
->>>> @@ -3017,6 +3017,12 @@ static void handle_reply(struct=20
->>>> ceph_mds_session *session, struct ceph_msg *msg)
->>>>
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* kick calling process */
->>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 complete_request(mdsc, req);
->>>> +
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 if (!result || result =3D=3D -ENOENT) {
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 s64 latency =3D jiffies - req->r_started;
->>>> +
->>>> + ceph_update_metadata_latency(&mdsc->metric, latency);
->>>> +=C2=A0=C2=A0=C2=A0=C2=A0 }
->>> Should we add an r_end_stamp field to the mds request struct and use
->>> that to calculate this? Many jiffies may have passed between the repl=
-y
->>> coming in and this point. If you really want to measure the latency=20
->>> that
->>> would be more accurate, I think.
->> Yes, capturing it after invoking the callback is inconsistent
->> with what is done for OSD requests (the new r_end_stamp is set in
->> finish_request()).
+On 2020/2/21 20:00, Jeff Layton wrote:
+> On Fri, 2020-02-21 at 02:05 -0500, xiubli@redhat.com wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
 >>
->> It looks like this is the only place where MDS r_end_stamp would be
->> needed, so perhaps just move this before complete_request() call?
+>> This will fulfill the cap hit/mis metric stuff per-superblock,
+>> it will count the hit/mis counters based each inode, and if one
+>> inode's 'issued & ~revoking == mask' will mean a hit, or a miss.
+>>
+>> item          total           miss            hit
+>> -------------------------------------------------
+>> caps          295             107             4119
+>>
+>> URL: https://tracker.ceph.com/issues/43215
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   fs/ceph/acl.c        |  2 +-
+>>   fs/ceph/caps.c       | 19 +++++++++++++++++++
+>>   fs/ceph/debugfs.c    | 16 ++++++++++++++++
+>>   fs/ceph/dir.c        |  5 +++--
+>>   fs/ceph/inode.c      |  4 ++--
+>>   fs/ceph/mds_client.c | 26 ++++++++++++++++++++++----
+>>   fs/ceph/metric.h     | 19 +++++++++++++++++++
+>>   fs/ceph/super.h      |  8 +++++---
+>>   fs/ceph/xattr.c      |  4 ++--
+>>   9 files changed, 89 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+>> index 26be6520d3fb..e0465741c591 100644
+>> --- a/fs/ceph/acl.c
+>> +++ b/fs/ceph/acl.c
+>> @@ -22,7 +22,7 @@ static inline void ceph_set_cached_acl(struct inode *inode,
+>>   	struct ceph_inode_info *ci = ceph_inode(inode);
+>>   
+>>   	spin_lock(&ci->i_ceph_lock);
+>> -	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 0))
+>> +	if (__ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 0))
+>>   		set_cached_acl(inode, type, acl);
+>>   	else
+>>   		forget_cached_acl(inode, type);
+> nit: calling __ceph_caps_issued_mask_metric means that you have an extra
+> branch. One to set/forget acl and one to update the counter.
 >
-> Currently for the OSD requests, they are almost in the same place=20
-> where at the end of the handle_reply.
+> This would be (very slightly) more efficient if you just put the cap
+> hit/miss calls inside the existing if block above. IOW, you could just
+> do:
 >
-> If we don't want to calculate the consumption by the most of=20
-> handle_reply code, we may set the r_end_stamp in the begin of it for=20
-> both OSD/MDS requests ?
->
-> I'm thinking since in the handle_reply, it may also wait for the mutex=20
-> locks and then sleeps, so move the r_end_stamp to the beginning should=20
-> make sense...
->
-Currently case: we are calculating the time took from OSD/MDS requests=20
-creating until the handle_reply finishes.
+> if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 0)) {
+> 	set_cached_acl(inode, type, acl);
+> 	ceph_update_cap_hit(&fsc->mdsc->metric);
+> } else {
+> 	forget_cached_acl(inode, type);
+> 	ceph_update_cap_mis(&fsc->mdsc->metric);
+> }
 
-Another case mentioned above: we should move the r_end_stamp to the=20
-handle_reply beginning, move r_start_stamp just before the requesting=20
-submitted.
+Yeah, this will works well here.
 
-Which one should be better ?
 
-Thanks.
+>> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+>> index ff1714fe03aa..227949c3deb8 100644
+>> --- a/fs/ceph/dir.c
+>> +++ b/fs/ceph/dir.c
+>> @@ -346,8 +346,9 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+>>   	    !ceph_test_mount_opt(fsc, NOASYNCREADDIR) &&
+>>   	    ceph_snap(inode) != CEPH_SNAPDIR &&
+>>   	    __ceph_dir_is_complete_ordered(ci) &&
+>> -	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
+>> +	    __ceph_caps_issued_mask_metric(ci, CEPH_CAP_FILE_SHARED, 1)) {
+> These could also just be cap_hit/mis calls inside the existing if
+> blocks.
+
+Yeah, right in the if branch we can be sure that the 
+__ceph_caps_issued_mask() is called. But in the else branch we still 
+need to get the return value from (rc = __ceph_caps_issued_mask()), and 
+only when "rc == 0" cap_mis will need. This could simplify the code here 
+and below.
+
+This is main reason to add the __ceph_caps_issued_mask_metric() here. 
+And if you do not like this approach I will switch it back :-)
+
+>
+>> @@ -7,5 +7,24 @@ struct ceph_client_metric {
+>>   	atomic64_t            total_dentries;
+>>   	struct percpu_counter d_lease_hit;
+>>   	struct percpu_counter d_lease_mis;
+>> +
+>> +	struct percpu_counter i_caps_hit;
+>> +	struct percpu_counter i_caps_mis;
+>>   };
+>> +
+>> +static inline void ceph_update_cap_hit(struct ceph_client_metric *m)
+>> +{
+>> +	if (!m)
+>> +		return;
+>> +
+> When are these ever NULL?
+
+Will delete it.
+
+Thanks
 
 BRs
 
-
-> Thanks
-> BRs
 >
->
->> Thanks,
->>
->> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0 Ilya
->>
->
+>> +	percpu_counter_inc(&m->i_caps_hit);
+>> +}
+>> +
+>> +static inline void ceph_update_cap_mis(struct ceph_client_metric *m)
+>> +{
+>> +	if (!m)
+>> +		return;
+>> +
+>> +	percpu_counter_inc(&m->i_caps_mis);
+>> +}
+>>   #endif /* _FS_CEPH_MDS_METRIC_H */
+>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+>> index ebcf7612eac9..4b269dc845bb 100644
+>> --- a/fs/ceph/super.h
+>> +++ b/fs/ceph/super.h
+>> @@ -639,6 +639,8 @@ static inline bool __ceph_is_any_real_caps(struct ceph_inode_info *ci)
+>>   
+>>   extern int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented);
+>>   extern int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int t);
+>> +extern int __ceph_caps_issued_mask_metric(struct ceph_inode_info *ci, int mask,
+>> +					  int t);
+>>   extern int __ceph_caps_issued_other(struct ceph_inode_info *ci,
+>>   				    struct ceph_cap *cap);
+>>   
+>> @@ -651,12 +653,12 @@ static inline int ceph_caps_issued(struct ceph_inode_info *ci)
+>>   	return issued;
+>>   }
+>>   
+>> -static inline int ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask,
+>> -					int touch)
+>> +static inline int ceph_caps_issued_mask_metric(struct ceph_inode_info *ci,
+>> +					       int mask, int touch)
+>>   {
+>>   	int r;
+>>   	spin_lock(&ci->i_ceph_lock);
+>> -	r = __ceph_caps_issued_mask(ci, mask, touch);
+>> +	r = __ceph_caps_issued_mask_metric(ci, mask, touch);
+>>   	spin_unlock(&ci->i_ceph_lock);
+>>   	return r;
+>>   }
+>> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+>> index 7b8a070a782d..71ee34d160c3 100644
+>> --- a/fs/ceph/xattr.c
+>> +++ b/fs/ceph/xattr.c
+>> @@ -856,7 +856,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
+>>   
+>>   	if (ci->i_xattrs.version == 0 ||
+>>   	    !((req_mask & CEPH_CAP_XATTR_SHARED) ||
+>> -	      __ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1))) {
+>> +	      __ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 1))) {
+>>   		spin_unlock(&ci->i_ceph_lock);
+>>   
+>>   		/* security module gets xattr while filling trace */
+>> @@ -914,7 +914,7 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
+>>   	     ci->i_xattrs.version, ci->i_xattrs.index_version);
+>>   
+>>   	if (ci->i_xattrs.version == 0 ||
+>> -	    !__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1)) {
+>> +	    !__ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 1)) {
+>>   		spin_unlock(&ci->i_ceph_lock);
+>>   		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR, true);
+>>   		if (err)
