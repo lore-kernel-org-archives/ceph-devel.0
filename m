@@ -1,16 +1,16 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.5 20/58] ceph: do not execute direct write in parallel if O_APPEND is specified
-Date: Sat, 22 Feb 2020 21:20:41 -0500
-Message-ID: <20200223022119.707-20-sashal@kernel.org>
-References: <20200223022119.707-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 19/50] ceph: do not execute direct write in parallel if O_APPEND is specified
+Date: Sat, 22 Feb 2020 21:22:04 -0500
+Message-ID: <20200223022235.1404-19-sashal@kernel.org>
+References: <20200223022235.1404-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:50252 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:52148 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727689AbgBWCVp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 22 Feb 2020 21:21:45 -0500
-In-Reply-To: <20200223022119.707-1-sashal@kernel.org>
+        id S1728397AbgBWCXA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 22 Feb 2020 21:23:00 -0500
+In-Reply-To: <20200223022235.1404-1-sashal@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
