@@ -1,83 +1,233 @@
 From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH] ceph: add 'fs' mount option support
-Date: Mon, 24 Feb 2020 10:41:58 +0800
-Message-ID: <33fb49fe-87bc-b5d3-f717-3c22c7a15030@redhat.com>
-References: <20200223021440.40257-1-xiubli@redhat.com>
- <552341c730d2835b1492599fce319ae91a34f504.camel@kernel.org>
+Subject: Re: [PATCH] ceph: show more detail logs during mount
+Date: Mon, 24 Feb 2020 11:10:12 +0800
+Message-ID: <6b1ceaf9-e71c-23f9-9594-3872f05be05d@redhat.com>
+References: <20200223121808.5584-1-xiubli@redhat.com>
+ <e430129d5d670c929cae62acd5a6714624d7b3db.camel@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:56215 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:58604 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727156AbgBXCmO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Feb 2020 21:42:14 -0500
-In-Reply-To: <552341c730d2835b1492599fce319ae91a34f504.camel@kernel.org>
+        with ESMTP id S1727158AbgBXDK3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Feb 2020 22:10:29 -0500
+In-Reply-To: <e430129d5d670c929cae62acd5a6714624d7b3db.camel@kernel.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
 Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On 2020/2/23 22:56, Jeff Layton wrote:
-> On Sat, 2020-02-22 at 21:14 -0500, xiubli@redhat.com wrote:
+On 2020/2/24 3:18, Jeff Layton wrote:
+> On Sun, 2020-02-23 at 07:18 -0500, xiubli@redhat.com wrote:
 >> From: Xiubo Li <xiubli@redhat.com>
 >>
->> The 'fs' here will be cleaner when specifying the ceph fs name,
->> and we can easily get the corresponding name from the `ceph fs
->> dump`:
+>> Return -ETIMEDOUT when the requests are timed out instead of -EIO
+>> to make it cleaner for the userland. And just print the logs in
+>> error level to give a helpful hint.
 >>
->> [...]
->> Filesystem 'a' (1)
->> fs_name	a
->> epoch	12
->> flags	12
->> [...]
->>
->> The 'fs' here just an alias name for 'mds_namespace' mount options,
->> and we will keep 'mds_namespace' for backwards compatibility.
->>
->> URL: https://tracker.ceph.com/issues/44214
+>> URL: https://tracker.ceph.com/issues/44215
 >> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> It looks like mds_namespace feature went into the kernel in 2016 (in
-> v4.7). We're at v5.5 today, so that's a large swath of kernels in the
-> field that only support the old option.
+>> ---
+>>   fs/ceph/mds_client.c   |  4 ++--
+>>   fs/ceph/super.c        | 28 ++++++++++++++++++++--------
+>>   net/ceph/ceph_common.c |  7 +++++--
+>>   net/ceph/mon_client.c  |  1 +
+>>   4 files changed, 28 insertions(+), 12 deletions(-)
+>>
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index 82f63ef2694c..0dfea8cdb50a 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -2578,7 +2578,7 @@ static void __do_request(struct ceph_mds_client *mdsc,
+>>   	if (req->r_timeout &&
+>>   	    time_after_eq(jiffies, req->r_started + req->r_timeout)) {
+>>   		dout("do_request timed out\n");
+>> -		err = -EIO;
+>> +		err = -ETIMEDOUT;
+>>   		goto finish;
+>>   	}
+>>   	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
+>> @@ -2752,7 +2752,7 @@ static int ceph_mdsc_wait_request(struct ceph_mds_client *mdsc,
+>>   		if (timeleft > 0)
+>>   			err = 0;
+>>   		else if (!timeleft)
+>> -			err = -EIO;  /* timed out */
+>> +			err = -ETIMEDOUT;  /* timed out */
+>>   		else
+>>   			err = timeleft;  /* killed */
+>>   	}
+> I'm fine with the two hunks above.
 >
-> While I agree that 'fs=' would have been cleaner and more user-friendly,
-> I've found that it's just not worth it to add mount option aliases like
-> this unless you have a really good reason. It all ends up being a huge
-> amount of churn for little benefit.
->
-> The problem with changing it after the fact like this is that you still
-> have to support both options forever. Removing support isn't worth the
-> pain as you can break working environments. When working environments
-> upgrade they won't change to use the new option (why bother?)
->
-> Maybe it would be good to start this change by doing a "fs=" to
-> "mds_namespace=" translation in the mount helper? That would make the
-> new option work across older kernel releases too, and make it simpler to
-> document what options are supported.
-
-This sounds a pretty good idea for me.
-
-
->> @@ -561,8 +562,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->>   	if ((fsopt->flags & CEPH_MOUNT_OPT_NOCOPYFROM) == 0)
->>   		seq_puts(m, ",copyfrom");
+> Note that AFAICT, r_timeout is only set at mount time, so we should
+> never see this in other codepaths. This probably ought to be done in a
+> separate patch from the rest.
+Sure, will split it.
+>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>> index 31acb4fe1f2c..6778f2a7d6d4 100644
+>> --- a/fs/ceph/super.c
+>> +++ b/fs/ceph/super.c
+>> @@ -849,11 +849,13 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
+>>   {
+>>   	struct ceph_mds_client *mdsc = fsc->mdsc;
+>>   	struct ceph_mds_request *req = NULL;
+>> +	struct ceph_mds_session *session;
+>>   	int err;
+>>   	struct dentry *root;
+>> +	char buf[32] = {0};
 >>   
->> -	if (fsopt->mds_namespace)
->> -		seq_show_option(m, "mds_namespace", fsopt->mds_namespace);
->> +	if (fsopt->fs_name)
->> +		seq_show_option(m, "fs", fsopt->fs_name);
-> Someone will mount with mds_namespace= but then that will be converted
-> to fs= when displaying options here. It's not necessarily a problem but
-> it may be noticed by some users.
+>>   	/* open dir */
+>> -	dout("open_root_inode opening '%s'\n", path);
+>> +	dout("mount open_root_inode opening '%s'\n", path);
+>>   	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
+>>   	if (IS_ERR(req))
+>>   		return ERR_CAST(req);
+>> @@ -873,18 +875,26 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
+>>   	if (err == 0) {
+>>   		struct inode *inode = req->r_target_inode;
+>>   		req->r_target_inode = NULL;
+>> -		dout("open_root_inode success\n");
+>>   		root = d_make_root(inode);
+>>   		if (!root) {
+>>   			root = ERR_PTR(-ENOMEM);
+>>   			goto out;
+>>   		}
+>> -		dout("open_root_inode success, root dentry is %p\n", root);
+>> +		dout(" root dentry is %p\n", root);
+>>   	} else {
+>>   		root = ERR_PTR(err);
+>>   	}
+>>   out:
+>> +	session = ceph_get_mds_session(req->r_session);
+>> +	if (session)
+>> +		snprintf(buf, 32, " on mds%d", session->s_mds);
+>> +
+> Where is this new session reference put? I'm not sure I understand this
+> change.
 
-Yeah, but if we convert 'fs=' to 'mds_namespace=' in userland and here 
-it will always showing with 'mds_namespace=', won't it be the same issue?
+Ah okay, forgot to add the put.
 
-Or should we covert it to "fs/mds_namespace=" here ? Will it make sense ?
+Usually the mount request will do in one specified MDS, here will show 
+in which MDS it was trying to. Will it make sense ?
 
-Thanks
+>>   	ceph_mdsc_put_request(req);
+>> +	if (!IS_ERR(root))
+>> +		dout("mount open_root_inode success%s\n", buf[0] ? buf : "");
+>> +	else
+>> +		pr_err("mount open_root_inode fail %ld%s\n", PTR_ERR(root),
+>> +		       buf[0] ? buf : "");
+>>   	return root;
+>>   }
+>>   
+> This goes to the generic kernel log. This may warrant an error message
+> there, but it needs to be something a typical user would understand.
+
+Will fix it.
+
+>> @@ -937,6 +947,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc,
+>>   
+>>   out:
+>>   	mutex_unlock(&fsc->client->mount_mutex);
+>> +	pr_err("mount fail\n");
+> This is not something we'd want to add here.
+Okay, will delete it.
+>>   	return ERR_PTR(err);
+>>   }
+>>   
+>> @@ -1028,7 +1039,7 @@ static int ceph_get_tree(struct fs_context *fc)
+>>   		ceph_compare_super;
+>>   	int err;
+>>   
+>> -	dout("ceph_get_tree\n");
+>> +	dout("ceph_get_tree start\n");
+>>   
+>>   	if (!fc->source)
+>>   		return invalfc(fc, "No source");
+>> @@ -1073,14 +1084,15 @@ static int ceph_get_tree(struct fs_context *fc)
+>>   		err = PTR_ERR(res);
+>>   		goto out_splat;
+>>   	}
+>> -	dout("root %p inode %p ino %llx.%llx\n", res,
+>> -	     d_inode(res), ceph_vinop(d_inode(res)));
+>> +        dout(" root %p inode %p ino %llx.%llx\n",
+>> +	     res, d_inode(res), ceph_vinop(d_inode(res)));
+>>   	fc->root = fsc->sb->s_root;
+>> +	dout("ceph_get_tree success\n");
+>>   	return 0;
+>>   
+>>   out_splat:
+>>   	if (!ceph_mdsmap_is_cluster_available(fsc->mdsc->mdsmap)) {
+>> -		pr_info("No mds server is up or the cluster is laggy\n");
+>> +		pr_err("No mds server is up or the cluster is laggy\n");
+>> 		err = -EHOSTUNREACH;
+> Is pr_err the right infolevel here? It may be, I'm just curious why the
+> change after making this pr_info before.
+
+This should be as an error IMO, before we may just want an hint but 
+ignore the level stuff.
+
+
+>>   	}
+>>   
+>> @@ -1091,7 +1103,7 @@ static int ceph_get_tree(struct fs_context *fc)
+>>   out:
+>>   	destroy_fs_client(fsc);
+>>   out_final:
+>> -	dout("ceph_get_tree fail %d\n", err);
+>> +	pr_err("ceph_get_tree fail %d\n", err);
+> This doesn't seem to be something we want to pr_err.
+>
+>>   	return err;
+>>   }
+>>   
+>> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+>> index a0e97f6c1072..5971a815fb8e 100644
+>> --- a/net/ceph/ceph_common.c
+>> +++ b/net/ceph/ceph_common.c
+>> @@ -700,11 +700,14 @@ int __ceph_open_session(struct ceph_client *client, unsigned long started)
+>>   		return err;
+>>   
+>>   	while (!have_mon_and_osd_map(client)) {
+>> -		if (timeout && time_after_eq(jiffies, started + timeout))
+>> +		if (timeout && time_after_eq(jiffies, started + timeout)) {
+>> +			pr_err("mount wating for mon/osd maps timed out on mon%d\n",
+>> +			       client->monc.cur_mon);
+>>   			return -ETIMEDOUT;
+>> +		}
+>>
+> This code is also called from RBD codepaths and those don't necessarily
+> involve a "mount". You should consider how to make the new message more
+> generic, or maybe handle it at a higher level, so that rbd isn't
+> affected.
+
+Okay, actually the RBD is also in the 'mount' codepath here.
+
+
+>>   		/* wait */
+>> -		dout("mount waiting for mon_map\n");
+>> +		dout("mount waiting for mon/osd maps\n");
+>>   		err = wait_event_interruptible_timeout(client->auth_wq,
+>>   			have_mon_and_osd_map(client) || (client->auth_err < 0),
+>>   			ceph_timeout_jiffies(timeout));
+>
+>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>> index 9d9e4e4ea600..8f09df9c3aee 100644
+>> --- a/net/ceph/mon_client.c
+>> +++ b/net/ceph/mon_client.c
+>> @@ -1179,6 +1179,7 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
+>>   
+>>   	if (ret < 0) {
+>>   		monc->client->auth_err = ret;
+>> +		pr_err("mon%d session auth failed %d\n", monc->cur_mon, ret);
+>>   	} else if (!was_auth && ceph_auth_is_authenticated(monc->auth)) {
+>>   		dout("authenticated, starting session\n");
+>>   
+> Again, these need to be human-readable, and not just debugging messages
+> that are hard to disable.
+
+Okay, will fix it.
+
+Thanks.
 
 BRs
