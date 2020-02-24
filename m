@@ -1,194 +1,52 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 1/4] ceph: always renew caps if mds_wanted is
- insufficient
-Date: Mon, 24 Feb 2020 11:17:37 +0800
-Message-ID: <8126e83a-0732-b44a-6858-4c9cc13c3231@redhat.com>
-References: <20200221131659.87777-1-zyan@redhat.com>
- <20200221131659.87777-2-zyan@redhat.com>
- <f1e5924fb183b738e4103130ec1197cacea0047e.camel@kernel.org>
+From: xiubli@redhat.com
+Subject: [PATCH] ceph: return ETIMEDOUT errno to userland when request timed out
+Date: Sun, 23 Feb 2020 22:23:11 -0500
+Message-ID: <20200224032311.26107-1-xiubli@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:47100 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:50096 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727156AbgBXDRq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Feb 2020 22:17:46 -0500
-In-Reply-To: <f1e5924fb183b738e4103130ec1197cacea0047e.camel@kernel.org>
-Content-Language: en-US
+        with ESMTP id S1727156AbgBXDXb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Feb 2020 22:23:31 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-On 2/22/20 1:17 AM, Jeff Layton wrote:
-> On Fri, 2020-02-21 at 21:16 +0800, Yan, Zheng wrote:
->> original code only renews caps for inodes with CEPH_I_CAP_DROPPED flags.
->> The flag indicates that mds closed session and caps were dropped. This
->> patch is preparation for not requesting caps for idle open files.
->>
->> CEPH_I_CAP_DROPPED is no longer tested by anyone, so this patch also
->> remove it.
->>
->> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
->> ---
->>   fs/ceph/caps.c       | 36 +++++++++++++++---------------------
->>   fs/ceph/mds_client.c |  5 -----
->>   fs/ceph/super.h      | 11 +++++------
->>   3 files changed, 20 insertions(+), 32 deletions(-)
->>
->> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->> index d05717397c2a..293920d013ff 100644
->> --- a/fs/ceph/caps.c
->> +++ b/fs/ceph/caps.c
->> @@ -2659,6 +2659,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
->>   		}
->>   	} else {
->>   		int session_readonly = false;
->> +		int mds_wanted;
->>   		if (ci->i_auth_cap &&
->>   		    (need & (CEPH_CAP_FILE_WR | CEPH_CAP_FILE_EXCL))) {
->>   			struct ceph_mds_session *s = ci->i_auth_cap->session;
->> @@ -2667,32 +2668,27 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
->>   			spin_unlock(&s->s_cap_lock);
->>   		}
->>   		if (session_readonly) {
->> -			dout("get_cap_refs %p needed %s but mds%d readonly\n",
->> +			dout("get_cap_refs %p need %s but mds%d readonly\n",
->>   			     inode, ceph_cap_string(need), ci->i_auth_cap->mds);
->>   			ret = -EROFS;
->>   			goto out_unlock;
->>   		}
->>   
->> -		if (ci->i_ceph_flags & CEPH_I_CAP_DROPPED) {
->> -			int mds_wanted;
->> -			if (READ_ONCE(mdsc->fsc->mount_state) ==
->> -			    CEPH_MOUNT_SHUTDOWN) {
->> -				dout("get_cap_refs %p forced umount\n", inode);
->> -				ret = -EIO;
->> -				goto out_unlock;
->> -			}
->> -			mds_wanted = __ceph_caps_mds_wanted(ci, false);
->> -			if (need & ~(mds_wanted & need)) {
->> -				dout("get_cap_refs %p caps were dropped"
->> -				     " (session killed?)\n", inode);
->> -				ret = -ESTALE;
->> -				goto out_unlock;
->> -			}
->> -			if (!(file_wanted & ~mds_wanted))
->> -				ci->i_ceph_flags &= ~CEPH_I_CAP_DROPPED;
->> +		if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
->> +			dout("get_cap_refs %p forced umount\n", inode);
->> +			ret = -EIO;
->> +			goto out_unlock;
->> +		}
->> +		mds_wanted = __ceph_caps_mds_wanted(ci, false);
->> +		if (need & ~mds_wanted) {
->> +			dout("get_cap_refs %p need %s > mds_wanted %s\n",
->> +			     inode, ceph_cap_string(need),
->> +			     ceph_cap_string(mds_wanted));
->> +			ret = -ESTALE;
->> +			goto out_unlock;
->>   		}
->>   
-> 
-> I was able to reproduce softlockups with xfstests reliably for a little
-> while, but it doesn't always happen. I bisected it down to this patch
-> though. I suspect the problem is in the hunk above. It looks like it's
-> getting into a situation where this is continually returning ESTALE.
-> 
-> I cranked up debug logging in this function and I see this:
-> 
-> [  259.284839] ceph:  get_cap_refs 000000003d7d65fa ret -116 got -
-> [  259.284848] ceph:  get_cap_refs 000000003d7d65fa ret -116 got -
-> [  259.284855] ceph:  get_cap_refs 000000003d7d65fa ret -116 got -
-> [  259.284863] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284868] ceph:  get_cap_refs 000000003d7d65fa need Fr > mds_wanted -
-> [  259.284877] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284885] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284890] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284899] ceph:  get_cap_refs 000000003d7d65fa ret -116 got -
-> [  259.284908] ceph:  get_cap_refs 000000003d7d65fa need Fr > mds_wanted -
-> [  259.284918] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284926] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284945] ceph:  get_cap_refs 000000003d7d65fa need Fr > mds_wanted -
-> [  259.284950] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284961] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284969] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> [  259.284975] ceph:  get_cap_refs 000000003d7d65fa ret -116 got -
-> [  259.284984] ceph:  get_cap_refs 000000003d7d65fa need Fr > mds_wanted -
-> [  259.284994] ceph:  get_cap_refs 000000003d7d65fa ret -116 got -
-> [  259.285003] ceph:  get_cap_refs 000000003d7d65fa need Fr want Fc
-> 
+From: Xiubo Li <xiubli@redhat.com>
 
-Looks like ceph_check_caps did update caps' mds_wanted. Did you test 
-this patch with async dirops patches? please try reproducing this issue 
-again with debug log of try_get_cap_refs(), ceph_check_caps() and 
-ceph_renew_caps().
+The ETIMEOUT errno will be cleaner and be more user-friendly.
 
-Thanks
-Yan, Zheng
+URL: https://tracker.ceph.com/issues/44215
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/mds_client.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-
-> ...not sure I understand the logical flow in this function well enough
-> to suggest a fix yet though.
-> 
->> -		dout("get_cap_refs %p have %s needed %s\n", inode,
->> +		dout("get_cap_refs %p have %s need %s\n", inode,
->>   		     ceph_cap_string(have), ceph_cap_string(need));
->>   	}
->>   out_unlock:
->> @@ -3646,8 +3642,6 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
->>   		goto out_unlock;
->>   
->>   	if (target < 0) {
->> -		if (cap->mds_wanted | cap->issued)
->> -			ci->i_ceph_flags |= CEPH_I_CAP_DROPPED;
->>   		__ceph_remove_cap(cap, false);
->>   		goto out_unlock;
->>   	}
->> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->> index fab9d6461a65..98d746b3bb53 100644
->> --- a/fs/ceph/mds_client.c
->> +++ b/fs/ceph/mds_client.c
->> @@ -1411,8 +1411,6 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
->>   	dout("removing cap %p, ci is %p, inode is %p\n",
->>   	     cap, ci, &ci->vfs_inode);
->>   	spin_lock(&ci->i_ceph_lock);
->> -	if (cap->mds_wanted | cap->issued)
->> -		ci->i_ceph_flags |= CEPH_I_CAP_DROPPED;
->>   	__ceph_remove_cap(cap, false);
->>   	if (!ci->i_auth_cap) {
->>   		struct ceph_cap_flush *cf;
->> @@ -1578,9 +1576,6 @@ static int wake_up_session_cb(struct inode *inode, struct ceph_cap *cap,
->>   			/* mds did not re-issue stale cap */
->>   			spin_lock(&ci->i_ceph_lock);
->>   			cap->issued = cap->implemented = CEPH_CAP_PIN;
->> -			/* make sure mds knows what we want */
->> -			if (__ceph_caps_file_wanted(ci) & ~cap->mds_wanted)
->> -				ci->i_ceph_flags |= CEPH_I_CAP_DROPPED;
->>   			spin_unlock(&ci->i_ceph_lock);
->>   		}
->>   	} else if (ev == FORCE_RO) {
->> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
->> index 37dc1ac8f6c3..48e84d7f48a0 100644
->> --- a/fs/ceph/super.h
->> +++ b/fs/ceph/super.h
->> @@ -517,12 +517,11 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
->>   #define CEPH_I_POOL_RD		(1 << 4)  /* can read from pool */
->>   #define CEPH_I_POOL_WR		(1 << 5)  /* can write to pool */
->>   #define CEPH_I_SEC_INITED	(1 << 6)  /* security initialized */
->> -#define CEPH_I_CAP_DROPPED	(1 << 7)  /* caps were forcibly dropped */
->> -#define CEPH_I_KICK_FLUSH	(1 << 8)  /* kick flushing caps */
->> -#define CEPH_I_FLUSH_SNAPS	(1 << 9)  /* need flush snapss */
->> -#define CEPH_I_ERROR_WRITE	(1 << 10) /* have seen write errors */
->> -#define CEPH_I_ERROR_FILELOCK	(1 << 11) /* have seen file lock errors */
->> -#define CEPH_I_ODIRECT		(1 << 12) /* inode in direct I/O mode */
->> +#define CEPH_I_KICK_FLUSH	(1 << 7)  /* kick flushing caps */
->> +#define CEPH_I_FLUSH_SNAPS	(1 << 8)  /* need flush snapss */
->> +#define CEPH_I_ERROR_WRITE	(1 << 9)  /* have seen write errors */
->> +#define CEPH_I_ERROR_FILELOCK	(1 << 10) /* have seen file lock errors */
->> +#define CEPH_I_ODIRECT		(1 << 11) /* inode in direct I/O mode */
->>   
->>   /*
->>    * Masks of ceph inode work.
-> 
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 3e792eca6af7..a1649eb3a3fd 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2578,7 +2578,7 @@ static void __do_request(struct ceph_mds_client *md=
+sc,
+ 	if (req->r_timeout &&
+ 	    time_after_eq(jiffies, req->r_started + req->r_timeout)) {
+ 		dout("do_request timed out\n");
+-		err =3D -EIO;
++		err =3D -ETIMEDOUT;
+ 		goto finish;
+ 	}
+ 	if (READ_ONCE(mdsc->fsc->mount_state) =3D=3D CEPH_MOUNT_SHUTDOWN) {
+@@ -2752,7 +2752,7 @@ static int ceph_mdsc_wait_request(struct ceph_mds_c=
+lient *mdsc,
+ 		if (timeleft > 0)
+ 			err =3D 0;
+ 		else if (!timeleft)
+-			err =3D -EIO;  /* timed out */
++			err =3D -ETIMEDOUT;  /* timed out */
+ 		else
+ 			err =3D timeleft;  /* killed */
+ 	}
+--=20
+2.21.0
