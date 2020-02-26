@@ -1,74 +1,61 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [bug report] libceph: revamp subs code, switch to SUBSCRIBE2 protocol
-Date: Wed, 26 Feb 2020 16:31:07 +0100
-Message-ID: <CAOi1vP-gSGMQRPpPTJYAAYCLH2c=R0oGqmTrHeUjBt-oFL_c1g@mail.gmail.com>
-References: <20200226145927.jtuc5bgiojhoefad@kili.mountain>
+Subject: [PATCH] libceph: simplify ceph_monc_handle_map()
+Date: Wed, 26 Feb 2020 17:22:43 +0100
+Message-ID: <20200226162243.12028-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io1-f66.google.com ([209.85.166.66]:37487 "EHLO
-        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728014AbgBZPbQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Feb 2020 10:31:16 -0500
-Received: by mail-io1-f66.google.com with SMTP id c17so3783526ioc.4
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Feb 2020 07:31:16 -0800 (PST)
-In-Reply-To: <20200226145927.jtuc5bgiojhoefad@kili.mountain>
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:39414 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726583AbgBZQXC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Feb 2020 11:23:02 -0500
+Received: by mail-wm1-f65.google.com with SMTP id c84so3872373wme.4
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Feb 2020 08:23:02 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Dan Carpenter <dan.carpenter@oracle.com>
 
-On Wed, Feb 26, 2020 at 3:59 PM Dan Carpenter <dan.carpenter@oracle.com> wrote:
->
-> Hello Ilya Dryomov,
->
-> The patch 82dcabad750a: "libceph: revamp subs code, switch to
-> SUBSCRIBE2 protocol" from Jan 19, 2016, leads to the following static
-> checker warning:
->
->         net/ceph/mon_client.c:495 ceph_monc_handle_map()
->         error: dereferencing freed memory 'monc->monmap'
->
-> net/ceph/mon_client.c
->    466  static void ceph_monc_handle_map(struct ceph_mon_client *monc,
->    467                                   struct ceph_msg *msg)
->    468  {
->    469          struct ceph_client *client = monc->client;
->    470          struct ceph_monmap *monmap = NULL, *old = monc->monmap;
->                                                     ^^^^^^^^^^^^^^^^^^
->
->    471          void *p, *end;
->    472
->    473          mutex_lock(&monc->mutex);
->    474
->    475          dout("handle_monmap\n");
->    476          p = msg->front.iov_base;
->    477          end = p + msg->front.iov_len;
->    478
->    479          monmap = ceph_monmap_decode(p, end);
->    480          if (IS_ERR(monmap)) {
->    481                  pr_err("problem decoding monmap, %d\n",
->    482                         (int)PTR_ERR(monmap));
->    483                  ceph_msg_dump(msg);
->    484                  goto out;
->    485          }
->    486
->    487          if (ceph_check_fsid(monc->client, &monmap->fsid) < 0) {
->    488                  kfree(monmap);
->    489                  goto out;
->    490          }
->    491
->    492          client->monc.monmap = monmap;
->    493          kfree(old);
->                       ^^^
-> Frees monc->monmap.
+ceph_monc_handle_map() confuses static checkers which report a
+false use-after-free on monc->monmap, missing that monc->monmap and
+client->monc.monmap is the same pointer.
 
-Hi Dan,
+Use monc->monmap consistently and get rid of "old", which is redundant.
 
-There is no bug here, see https://lists.openwall.net/netdev/2018/11/27/81.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ net/ceph/mon_client.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-I'll simplify this code and CC you on a patch.
-
-Thanks,
-
-                Ilya
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 9d9e4e4ea600..3d8c8015e976 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -467,7 +467,7 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
+ 				 struct ceph_msg *msg)
+ {
+ 	struct ceph_client *client = monc->client;
+-	struct ceph_monmap *monmap = NULL, *old = monc->monmap;
++	struct ceph_monmap *monmap;
+ 	void *p, *end;
+ 
+ 	mutex_lock(&monc->mutex);
+@@ -484,13 +484,13 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
+ 		goto out;
+ 	}
+ 
+-	if (ceph_check_fsid(monc->client, &monmap->fsid) < 0) {
++	if (ceph_check_fsid(client, &monmap->fsid) < 0) {
+ 		kfree(monmap);
+ 		goto out;
+ 	}
+ 
+-	client->monc.monmap = monmap;
+-	kfree(old);
++	kfree(monc->monmap);
++	monc->monmap = monmap;
+ 
+ 	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monc->monmap->epoch);
+ 	client->have_fsid = true;
+-- 
+2.19.2
