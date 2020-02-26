@@ -1,131 +1,104 @@
-From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Subject: [PATCH][next] block: Replace zero-length array with flexible-array
- member
-Date: Tue, 25 Feb 2020 17:48:37 -0600
-Message-ID: <20200225234836.GA31741@embeddedor>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: show more detail logs during mount
+Date: Wed, 26 Feb 2020 08:58:00 +0800
+Message-ID: <dba7ea1c-334b-4302-2a9c-0f8fa4f8afcb@redhat.com>
+References: <20200225033013.4832-1-xiubli@redhat.com>
+ <CAOi1vP8J9UaTM+FLHuBVoy_O4mwc=+VK0sCjA=VpAwPhBWBLiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Richard Russon (FlatCap)" <ldm@flatcap.org>, Jens Axboe <axboe@kernel.dk>, Philipp Reisner <philipp.reisner@linbit.com>, Lars Ellenberg <lars.ellenberg@linbit.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Dongsheng Yang <dongsheng.yang@easystack.cn>
-Cc: linux-ntfs-dev@lists.sourceforge.net, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, drbd-dev@lists.linbit.com, ceph-devel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:45142 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729277AbgBZA6Q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2020 19:58:16 -0500
+In-Reply-To: <CAOi1vP8J9UaTM+FLHuBVoy_O4mwc=+VK0sCjA=VpAwPhBWBLiw@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-The current codebase makes use of the zero-length array language
-extension to the C90 standard, but the preferred mechanism to declare
-variable-length types such as these ones is a flexible array member[1][2],
-introduced in C99:
+On 2020/2/25 18:39, Ilya Dryomov wrote:
+> On Tue, Feb 25, 2020 at 4:30 AM <xiubli@redhat.com> wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> Print the logs in error level to give a helpful hint to make it
+>> more user-friendly to debug.
+>>
+>> URL: https://tracker.ceph.com/issues/44215
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   fs/ceph/super.c       | 8 ++++++--
+>>   net/ceph/mon_client.c | 2 ++
+>>   2 files changed, 8 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>> index c7f150686a53..e33c2f86647b 100644
+>> --- a/fs/ceph/super.c
+>> +++ b/fs/ceph/super.c
+>> @@ -905,8 +905,10 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc,
+>>                                       fsc->mount_options->server_path + 1 : "";
+>>
+>>                  err = __ceph_open_session(fsc->client, started);
+>> -               if (err < 0)
+>> +               if (err < 0) {
+>> +                       pr_err("mount joining the ceph cluster fail %d\n", err);
+>>                          goto out;
+>> +               }
+>>
+>>                  /* setup fscache */
+>>                  if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
+>> @@ -922,6 +924,8 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc,
+>>                  root = open_root_dentry(fsc, path, started);
+>>                  if (IS_ERR(root)) {
+>>                          err = PTR_ERR(root);
+>> +                       pr_err("mount opening the root directory fail %d\n",
+>> +                              err);
+> Hi Xiubo,
+>
+> Given that these are new user-level filesystem log messages, they
+> should probably go into fs_context log.
 
-struct foo {
-        int stuff;
-        struct boo array[];
-};
+Yeah, will fix it.
 
-By making use of the mechanism above, we will get a compiler warning
-in case the flexible array does not occur last in the structure, which
-will help us prevent some kind of undefined behavior bugs from being
-inadvertently introduced[3] to the codebase from now on.
 
-Also, notice that, dynamic memory allocations won't be affected by
-this change:
+>
+>>                          goto out;
+>>                  }
+>>                  fsc->sb->s_root = dget(root);
+>> @@ -1079,7 +1083,7 @@ static int ceph_get_tree(struct fs_context *fc)
+>>
+>>   out_splat:
+>>          if (!ceph_mdsmap_is_cluster_available(fsc->mdsc->mdsmap)) {
+>> -               pr_info("No mds server is up or the cluster is laggy\n");
+>> +               pr_err("No mds server is up or the cluster is laggy\n");
+>>                  err = -EHOSTUNREACH;
+>>          }
+> If you are changing this one, it should be directed to fs_context log
+> as well.
+Will do it.
+>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>> index 9d9e4e4ea600..6f1372f5f2a7 100644
+>> --- a/net/ceph/mon_client.c
+>> +++ b/net/ceph/mon_client.c
+>> @@ -1179,6 +1179,8 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
+>>
+>>          if (ret < 0) {
+>>                  monc->client->auth_err = ret;
+>> +               pr_err("authenticate fail on mon%d %s\n", monc->cur_mon,
+>> +                       ceph_pr_addr(&monc->con.peer_addr));
+> I don't think this is needed.  Authentication errors are already logged
+> in ceph_handle_auth_reply().
 
-"Flexible array members have incomplete type, and so the sizeof operator
-may not be applied. As a quirk of the original implementation of
-zero-length arrays, sizeof evaluates to zero."[1]
+Yeah, it is, here just want to give more messages, such as the monX. But 
+it is not necessary. So I will delete it.
 
-This issue was found with the help of Coccinelle.
+Thanks Ilya.
 
-[1] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
-[2] https://github.com/KSPP/linux/issues/21
-[3] commit 76497732932f ("cxgb3/l2t: Fix undefined behaviour")
+BRs
 
-Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
----
- block/partitions/ldm.h             | 2 +-
- drivers/block/drbd/drbd_int.h      | 2 +-
- drivers/block/drbd/drbd_protocol.h | 8 ++++----
- drivers/block/rbd_types.h          | 2 +-
- 4 files changed, 7 insertions(+), 7 deletions(-)
-
-diff --git a/block/partitions/ldm.h b/block/partitions/ldm.h
-index 1ca63e97bccc..172432ce5c0f 100644
---- a/block/partitions/ldm.h
-+++ b/block/partitions/ldm.h
-@@ -93,7 +93,7 @@ struct frag {				/* VBLK Fragment handling */
- 	u8		num;		/* Total number of records */
- 	u8		rec;		/* This is record number n */
- 	u8		map;		/* Which portions are in use */
--	u8		data[0];
-+	u8		data[];
- };
- 
- /* In memory LDM database structures. */
-diff --git a/drivers/block/drbd/drbd_int.h b/drivers/block/drbd/drbd_int.h
-index aae99a2d7bd4..a3314dd781a7 100644
---- a/drivers/block/drbd/drbd_int.h
-+++ b/drivers/block/drbd/drbd_int.h
-@@ -620,7 +620,7 @@ struct fifo_buffer {
- 	unsigned int head_index;
- 	unsigned int size;
- 	int total; /* sum of all values */
--	int values[0];
-+	int values[];
- };
- extern struct fifo_buffer *fifo_alloc(unsigned int fifo_size);
- 
-diff --git a/drivers/block/drbd/drbd_protocol.h b/drivers/block/drbd/drbd_protocol.h
-index e6fc5ad72501..dea59c92ecc1 100644
---- a/drivers/block/drbd/drbd_protocol.h
-+++ b/drivers/block/drbd/drbd_protocol.h
-@@ -271,7 +271,7 @@ struct p_rs_param {
- 	u32 resync_rate;
- 
- 	      /* Since protocol version 88 and higher. */
--	char verify_alg[0];
-+	char verify_alg[];
- } __packed;
- 
- struct p_rs_param_89 {
-@@ -305,7 +305,7 @@ struct p_protocol {
- 	u32 two_primaries;
- 
- 	/* Since protocol version 87 and higher. */
--	char integrity_alg[0];
-+	char integrity_alg[];
- 
- } __packed;
- 
-@@ -360,7 +360,7 @@ struct p_sizes {
- 	u16	    dds_flags; /* use enum dds_flags here. */
- 
- 	/* optional queue_limits if (agreed_features & DRBD_FF_WSAME) */
--	struct o_qlim qlim[0];
-+	struct o_qlim qlim[];
- } __packed;
- 
- struct p_state {
-@@ -409,7 +409,7 @@ struct p_compressed_bm {
- 	 */
- 	u8 encoding;
- 
--	u8 code[0];
-+	u8 code[];
- } __packed;
- 
- struct p_delay_probe93 {
-diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
-index ac98ab6ccd3b..a600e0eb6b6f 100644
---- a/drivers/block/rbd_types.h
-+++ b/drivers/block/rbd_types.h
-@@ -93,7 +93,7 @@ struct rbd_image_header_ondisk {
- 	__le32 snap_count;
- 	__le32 reserved;
- 	__le64 snap_names_len;
--	struct rbd_image_snap_ondisk snaps[0];
-+	struct rbd_image_snap_ondisk snaps[];
- } __attribute__((packed));
- 
- 
--- 
-2.25.0
+> Thanks,
+>
+>                  Ilya
+>
