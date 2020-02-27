@@ -1,61 +1,25 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: simplify ceph_monc_handle_map()
-Date: Wed, 26 Feb 2020 17:22:43 +0100
-Message-ID: <20200226162243.12028-1-idryomov@gmail.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Readiness for v13.2.9?
+Date: Wed, 26 Feb 2020 16:07:28 -0800
+Message-ID: <CAMMFjmFAB2E_h7VhrCOBz-EUHHk0nrB=JSudfcOhCpA7FwNd6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm1-f65.google.com ([209.85.128.65]:39414 "EHLO
-        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726583AbgBZQXC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Feb 2020 11:23:02 -0500
-Received: by mail-wm1-f65.google.com with SMTP id c84so3872373wme.4
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Feb 2020 08:23:02 -0800 (PST)
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:26887 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726413AbgB0AHo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 26 Feb 2020 19:07:44 -0500
+Received: by mail-qt1-f200.google.com with SMTP id r19so1072643qtb.10
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Feb 2020 16:07:40 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Dan Carpenter <dan.carpenter@oracle.com>
+To: dev@ceph.io, "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, Nathan Cutler <ncutler@suse.cz>, Casey Bodley <cbodley@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Neha Ojha <nojha@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, David Zafman <dzafman@redhat.com>, "Weil, Sage" <sweil@redhat.com>, Ramana Venkatesh Raja <rraja@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-qa <ceph-qa@ceph.com>M
 
-ceph_monc_handle_map() confuses static checkers which report a
-false use-after-free on monc->monmap, missing that monc->monmap and
-client->monc.monmap is the same pointer.
+Below is the current queue of PRs:
+https://github.com/ceph/ceph/pulls?q=is%3Aopen+label%3Amimic-batch-1+label%3Aneeds-qa
 
-Use monc->monmap consistently and get rid of "old", which is redundant.
+Dev leads - pls add and tag all RRs that must be included.
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/mon_client.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index 9d9e4e4ea600..3d8c8015e976 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -467,7 +467,7 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
- 				 struct ceph_msg *msg)
- {
- 	struct ceph_client *client = monc->client;
--	struct ceph_monmap *monmap = NULL, *old = monc->monmap;
-+	struct ceph_monmap *monmap;
- 	void *p, *end;
- 
- 	mutex_lock(&monc->mutex);
-@@ -484,13 +484,13 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
- 		goto out;
- 	}
- 
--	if (ceph_check_fsid(monc->client, &monmap->fsid) < 0) {
-+	if (ceph_check_fsid(client, &monmap->fsid) < 0) {
- 		kfree(monmap);
- 		goto out;
- 	}
- 
--	client->monc.monmap = monmap;
--	kfree(old);
-+	kfree(monc->monmap);
-+	monc->monmap = monmap;
- 
- 	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monc->monmap->epoch);
- 	client->have_fsid = true;
--- 
-2.19.2
+Thx
+YuriW
