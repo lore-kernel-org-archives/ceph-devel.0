@@ -1,65 +1,43 @@
-From: Yanhu Cao <gmayyyha@gmail.com>
-Subject: Re: [PATCH] ceph: using POOL FULL flag instead of OSDMAP FULL flag
-Date: Fri, 28 Feb 2020 19:41:44 +0800
-Message-ID: <CAB9OAC0dURDHgqGDVCg_Gd+EhH-9_n4-mycgsqfxS64GRgd4Og@mail.gmail.com>
-References: <20200228044518.20314-1-gmayyyha@gmail.com> <CAOi1vP-K+e0N26qpthLcst8HLE-FAMGSE9XwBhj1dPBiLyN-iA@mail.gmail.com>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH v3 0/6] ceph: don't request caps for idle open files
+Date: Fri, 28 Feb 2020 19:55:44 +0800
+Message-ID: <20200228115550.6904-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP-K+e0N26qpthLcst8HLE-FAMGSE9XwBhj1dPBiLyN-iA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, kuba@kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:20286 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726631AbgB1L4A (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 28 Feb 2020 06:56:00 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: jlayton@kernel.org, "Yan, Zheng" <zyan@redhat.com>
 
-On Fri, Feb 28, 2020 at 6:23 PM Ilya Dryomov <idryomov@gmail.com> wrote:
->
-> On Fri, Feb 28, 2020 at 5:45 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
-> >
-> > OSDMAP_FULL and OSDMAP_NEARFULL are deprecated since mimic.
-> >
-> > Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
-> > ---
-> >  fs/ceph/file.c                  |  6 ++++--
-> >  include/linux/ceph/osd_client.h |  2 ++
-> >  include/linux/ceph/osdmap.h     |  3 ++-
-> >  net/ceph/osd_client.c           | 23 +++++++++++++----------
-> >  4 files changed, 21 insertions(+), 13 deletions(-)
-> >
-> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > index 7e0190b1f821..60ea1eed1b84 100644
-> > --- a/fs/ceph/file.c
-> > +++ b/fs/ceph/file.c
-> > @@ -1482,7 +1482,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-> >         }
-> >
-> >         /* FIXME: not complete since it doesn't account for being at quota */
-> > -       if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_FULL)) {
-> > +       if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
-> > +                               CEPH_POOL_FLAG_FULL)) {
-> >                 err = -ENOSPC;
-> >                 goto out;
-> >         }
-> > @@ -1575,7 +1576,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-> >         }
-> >
-> >         if (written >= 0) {
-> > -               if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
-> > +               if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
-> > +                                       CEPH_POOL_FLAG_NEARFULL))
->
-> Hi Yanhu,
->
-> Have you considered pre-mimic clusters here?  They are still supported
-> (and will continue to be supported for the foreseeable future).
->
-> Thanks,
->
->                 Ilya
+This series make cephfs client not request caps for open files that
+idle for a long time. For the case that one active client and multiple
+standby clients open the same file, this increase the possibility that
+mds issues exclusive caps to the active client.
 
-I have tested it work on Luminous, I think it work too since
-ceph-v0.80(https://github.com/ceph/ceph/blob/b78644e7dee100e48dfeca32c9270a6b210d3003/src/osd/osd_types.h#L815)
-alread have pool FLAG_FULL.
+Yan, Zheng (4):
+  ceph: always renew caps if mds_wanted is insufficient
+  ceph: consider inode's last read/write when calculating wanted caps
+  ceph: simplify calling of ceph_get_fmode()
+  ceph: remove delay check logic from ceph_check_caps()
 
-CephFS doesn't write synchronously even if CEPH_OSDMAP_NEARFULL is
-used, then should fixed by CEPH_POOL_FLAG_NEARFULL.
+ fs/ceph/caps.c               | 324 +++++++++++++++--------------------
+ fs/ceph/file.c               |  39 ++---
+ fs/ceph/inode.c              |  19 +-
+ fs/ceph/ioctl.c              |   2 +
+ fs/ceph/mds_client.c         |   5 -
+ fs/ceph/super.h              |  35 ++--
+ include/linux/ceph/ceph_fs.h |   1 +
+ 7 files changed, 188 insertions(+), 237 deletions(-)
+
+changes since v2
+ - make __ceph_caps_file_wanted more readable
+ - add patch 5 and 6, which fix hung write during testing patch 1~4
+
+--=20
+2.21.1
