@@ -1,49 +1,92 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v3 0/6] ceph: don't request caps for idle open files
-Date: Fri, 28 Feb 2020 08:01:11 -0500
-Message-ID: <61519b99b630ea6be7893bf9493b0f3d68a54e8d.camel@kernel.org>
-References: <20200228115550.6904-1-zyan@redhat.com>
+Subject: Re: libceph: follow redirect replies from osds
+Date: Fri, 28 Feb 2020 09:01:29 -0500
+Message-ID: <6567c8fa690d9f9a0682ee22e528fcd5e3b51212.camel@kernel.org>
+References: <6ea7e486-a3f3-7def-1f88-2e645e3b9780@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:34084 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725730AbgB1NBN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 28 Feb 2020 08:01:13 -0500
-In-Reply-To: <20200228115550.6904-1-zyan@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <6ea7e486-a3f3-7def-1f88-2e645e3b9780@canonical.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Colin Ian King <colin.king@canonical.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.co>, ceph-devel@vger.kernel.org
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 2020-02-28 at 19:55 +0800, Yan, Zheng wrote:
-> This series make cephfs client not request caps for open files that
-> idle for a long time. For the case that one active client and multiple
-> standby clients open the same file, this increase the possibility that
-> mds issues exclusive caps to the active client.
+On Fri, 2020-02-28 at 12:46 +0000, Colin Ian King wrote:
+> Hi,
 > 
-> Yan, Zheng (4):
->   ceph: always renew caps if mds_wanted is insufficient
->   ceph: consider inode's last read/write when calculating wanted caps
->   ceph: simplify calling of ceph_get_fmode()
->   ceph: remove delay check logic from ceph_check_caps()
+> Static analysis with Coverity has detected a potential issue in the
+> following commit in function ceph_redirect_decode():
 > 
->  fs/ceph/caps.c               | 324 +++++++++++++++--------------------
->  fs/ceph/file.c               |  39 ++---
->  fs/ceph/inode.c              |  19 +-
->  fs/ceph/ioctl.c              |   2 +
->  fs/ceph/mds_client.c         |   5 -
->  fs/ceph/super.h              |  35 ++--
->  include/linux/ceph/ceph_fs.h |   1 +
->  7 files changed, 188 insertions(+), 237 deletions(-)
+> commit 205ee1187a671c3b067d7f1e974903b44036f270
+> Author: Ilya Dryomov <ilya.dryomov@inktank.com>
+> Date:   Mon Jan 27 17:40:20 2014 +0200
 > 
-> changes since v2
->  - make __ceph_caps_file_wanted more readable
->  - add patch 5 and 6, which fix hung write during testing patch 1~4
+>     libceph: follow redirect replies from osds
+> 
+> The issue is as follows:
+> 
+> 
+> 3486        len = ceph_decode_32(p);
+> 
+> Unused value (UNUSED_VALUE)
+> assigned_pointer: Assigning value from len to *p here, but that stored
+> value is overwritten before it can be used.
+> 
+> 3487        *p += len; /* skip osd_instructions */
+> 3488
+> 3489        /* skip the rest */
+> 
+> value_overwrite: Overwriting previous write to *p with value from
+> struct_end.
+> 
+> 3490        *p = struct_end;
+> 
+> The *p assignment in line 3487 is effectively being overwritten by the
+> *p assignment in 3490.  Maybe the following is correct:
+> 
+>         len = ceph_decode_32(p);
+> -       p += len; /* skip osd_instructions */
+> +       struct_end = *p + len;  /* skip osd_instructions */
+> 
+>         /* skip the rest */
+>         *p = struct_end;
+> 
+> I'm not familiar with the ceph structure here, so I'm not sure what the
+> correct fix would be.
 > 
 
-Thanks Zheng. This looks good to me -- merged into testing branch with
-some small revisions to the changelogs. Let me know if I made any
-mistakes there.
+Probably something like this? (untested, of course)
+
+----------------------
+
+[PATCH] libceph: fix up Coverity warning in ceph_redirect_decode
+
+We're going to skip to the end of the msg after checking the
+object_name anyway, so there is no need to separately decode
+the osd instructions that follow it.
+
+Reported-by: Colin Ian King <colin.king@canonical.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ net/ceph/osd_client.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 8ff2856e2d52..51810db4130a 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -3483,9 +3483,6 @@ static int ceph_redirect_decode(void **p, void
+*end,
+ 		goto e_inval;
+ 	}
+ 
+-	len = ceph_decode_32(p);
+-	*p += len; /* skip osd_instructions */
+-
+ 	/* skip the rest */
+ 	*p = struct_end;
+ out:
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.24.1
