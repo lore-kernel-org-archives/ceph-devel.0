@@ -1,92 +1,84 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: libceph: follow redirect replies from osds
-Date: Fri, 28 Feb 2020 09:01:29 -0500
-Message-ID: <6567c8fa690d9f9a0682ee22e528fcd5e3b51212.camel@kernel.org>
-References: <6ea7e486-a3f3-7def-1f88-2e645e3b9780@canonical.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] ceph: using POOL FULL flag instead of OSDMAP FULL flag
+Date: Fri, 28 Feb 2020 15:01:56 +0100
+Message-ID: <CAOi1vP_opdc=OP70T2eiamMWa-o71nU8t_LYyTCytqT5BT8gdQ@mail.gmail.com>
+References: <20200228044518.20314-1-gmayyyha@gmail.com> <CAOi1vP-K+e0N26qpthLcst8HLE-FAMGSE9XwBhj1dPBiLyN-iA@mail.gmail.com>
+ <CAB9OAC0dURDHgqGDVCg_Gd+EhH-9_n4-mycgsqfxS64GRgd4Og@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6ea7e486-a3f3-7def-1f88-2e645e3b9780@canonical.com>
+In-Reply-To: <CAB9OAC0dURDHgqGDVCg_Gd+EhH-9_n4-mycgsqfxS64GRgd4Og@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Colin Ian King <colin.king@canonical.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.co>, ceph-devel@vger.kernel.org
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Yanhu Cao <gmayyyha@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, kuba@kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 2020-02-28 at 12:46 +0000, Colin Ian King wrote:
-> Hi,
-> 
-> Static analysis with Coverity has detected a potential issue in the
-> following commit in function ceph_redirect_decode():
-> 
-> commit 205ee1187a671c3b067d7f1e974903b44036f270
-> Author: Ilya Dryomov <ilya.dryomov@inktank.com>
-> Date:   Mon Jan 27 17:40:20 2014 +0200
-> 
->     libceph: follow redirect replies from osds
-> 
-> The issue is as follows:
-> 
-> 
-> 3486        len = ceph_decode_32(p);
-> 
-> Unused value (UNUSED_VALUE)
-> assigned_pointer: Assigning value from len to *p here, but that stored
-> value is overwritten before it can be used.
-> 
-> 3487        *p += len; /* skip osd_instructions */
-> 3488
-> 3489        /* skip the rest */
-> 
-> value_overwrite: Overwriting previous write to *p with value from
-> struct_end.
-> 
-> 3490        *p = struct_end;
-> 
-> The *p assignment in line 3487 is effectively being overwritten by the
-> *p assignment in 3490.  Maybe the following is correct:
-> 
->         len = ceph_decode_32(p);
-> -       p += len; /* skip osd_instructions */
-> +       struct_end = *p + len;  /* skip osd_instructions */
-> 
->         /* skip the rest */
->         *p = struct_end;
-> 
-> I'm not familiar with the ceph structure here, so I'm not sure what the
-> correct fix would be.
-> 
+On Fri, Feb 28, 2020 at 12:41 PM Yanhu Cao <gmayyyha@gmail.com> wrote:
+>
+> On Fri, Feb 28, 2020 at 6:23 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+> >
+> > On Fri, Feb 28, 2020 at 5:45 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
+> > >
+> > > OSDMAP_FULL and OSDMAP_NEARFULL are deprecated since mimic.
+> > >
+> > > Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+> > > ---
+> > >  fs/ceph/file.c                  |  6 ++++--
+> > >  include/linux/ceph/osd_client.h |  2 ++
+> > >  include/linux/ceph/osdmap.h     |  3 ++-
+> > >  net/ceph/osd_client.c           | 23 +++++++++++++----------
+> > >  4 files changed, 21 insertions(+), 13 deletions(-)
+> > >
+> > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > > index 7e0190b1f821..60ea1eed1b84 100644
+> > > --- a/fs/ceph/file.c
+> > > +++ b/fs/ceph/file.c
+> > > @@ -1482,7 +1482,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+> > >         }
+> > >
+> > >         /* FIXME: not complete since it doesn't account for being at quota */
+> > > -       if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_FULL)) {
+> > > +       if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
+> > > +                               CEPH_POOL_FLAG_FULL)) {
+> > >                 err = -ENOSPC;
+> > >                 goto out;
+> > >         }
+> > > @@ -1575,7 +1576,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+> > >         }
+> > >
+> > >         if (written >= 0) {
+> > > -               if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
+> > > +               if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
+> > > +                                       CEPH_POOL_FLAG_NEARFULL))
+> >
+> > Hi Yanhu,
+> >
+> > Have you considered pre-mimic clusters here?  They are still supported
+> > (and will continue to be supported for the foreseeable future).
+> >
+> > Thanks,
+> >
+> >                 Ilya
+>
+> I have tested it work on Luminous, I think it work too since
+> ceph-v0.80(https://github.com/ceph/ceph/blob/b78644e7dee100e48dfeca32c9270a6b210d3003/src/osd/osd_types.h#L815)
+> alread have pool FLAG_FULL.
 
-Probably something like this? (untested, of course)
+But not FLAG_NEARFULL, which appeared in mimic.
 
-----------------------
+>
+> CephFS doesn't write synchronously even if CEPH_OSDMAP_NEARFULL is
+> used, then should fixed by CEPH_POOL_FLAG_NEARFULL.
 
-[PATCH] libceph: fix up Coverity warning in ceph_redirect_decode
+I'm not sure I follow.
 
-We're going to skip to the end of the msg after checking the
-object_name anyway, so there is no need to separately decode
-the osd instructions that follow it.
+-    if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
++    if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
++                            CEPH_POOL_FLAG_NEARFULL))
 
-Reported-by: Colin Ian King <colin.king@canonical.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- net/ceph/osd_client.c | 3 ---
- 1 file changed, 3 deletions(-)
+AFAICT this change would effectively disable this branch for pre-mimic
+clusters.  Are you saying this branch is already broken?
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8ff2856e2d52..51810db4130a 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -3483,9 +3483,6 @@ static int ceph_redirect_decode(void **p, void
-*end,
- 		goto e_inval;
- 	}
- 
--	len = ceph_decode_32(p);
--	*p += len; /* skip osd_instructions */
--
- 	/* skip the rest */
- 	*p = struct_end;
- out:
--- 
-2.24.1
+Thanks,
+
+                Ilya
