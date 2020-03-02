@@ -1,26 +1,38 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v6 00/13] ceph: async directory operations support
-Date: Mon, 02 Mar 2020 16:07:14 -0500
-Message-ID: <ecf67b60b2549264dd8e8fcfef432ab93e7285f9.camel@kernel.org>
-References: <20200302141434.59825-1-jlayton@kernel.org>
-         <544d98ca-6dc9-bcda-3f99-ff87f646265c@redhat.com>
+From: Jonathan Corbet <corbet@lwn.net>
+Subject: Re: [PATCH 00/44] Manually convert filesystem FS documents to ReST
+Date: Mon, 2 Mar 2020 14:13:16 -0700
+Message-ID: <20200302141316.4269b22d@lwn.net>
+References: <cover.1581955849.git.mchehab+huawei@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:50524 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725911AbgCBVHQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 2 Mar 2020 16:07:16 -0500
-In-Reply-To: <544d98ca-6dc9-bcda-3f99-ff87f646265c@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, sage@redhat.com, pdonnell@redhat.com
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=m.gmane-mx.org@lists.infradead.org>
+In-Reply-To: <cover.1581955849.git.mchehab+huawei@kernel.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=m.gmane-mx.org@lists.infradead.org
+To: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Martin Brandenburg <martin@omnibond.com>, Jan Kara <jack@suse.cz>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, Dominique Martinet <asmadeus@codewreck.org>, Amir Goldstein <amir73il@gmail.com>, Bob Copeland <me@bobcopeland.com>, David Howells <dhowells@redhat.com>, Joseph Qi <joseph.qi@linux.alibaba.com>, linux-mtd@lists.infradead.org, Tyler Hicks <code@tyhicks.com>, linux-afs@lists.infradead.org, Mike Marshall <hubcap@omnibond.com>, Naohiro Aota <naohiro.aota@wdc.com>, Christoph Hellwig <hch@infradead.org>, linux-nilfs@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>, Sage Weil <sage@redhat.com>, Richard Weinberger <richard@nod.at>, Mark Fasheh <mark@fasheh.com>, Chris Mason <clm@fb.com>, Ryusuke Konishi <konishi.ryusuke@gmail.com>, cluster-devel@redhat.com, v9fs-developer@lists.sourceforge.net, Gao Xiang <xiang@kern>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 2020-03-03 at 00:22 +0800, Yan, Zheng wrote:
-> Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+On Mon, 17 Feb 2020 17:11:46 +0100
+Mauro Carvalho Chehab <mchehab+huawei@kernel.org> wrote:
 
-Thanks Zheng, merged into "testing".
--- 
-Jeff Layton <jlayton@kernel.org>
+> There are lots of plain text documents under Documentation/filesystems.
+> 
+> Manually convert several of those to ReST and add them to the index file.
+
+OK, I've finally managed to add all the acks and wrestle this pile into
+docs-next - thanks.
+
+jon
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
