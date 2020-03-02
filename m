@@ -1,69 +1,58 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v6 00/13] ceph: async directory operations support
-Date: Tue, 3 Mar 2020 00:22:51 +0800
-Message-ID: <544d98ca-6dc9-bcda-3f99-ff87f646265c@redhat.com>
-References: <20200302141434.59825-1-jlayton@kernel.org>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH v3 0/6] ceph: don't request caps for idle open files
+Date: Mon, 02 Mar 2020 14:53:50 -0500
+Message-ID: <186bfc2278dbdd4eac21f6ce03108c53e3f574b3.camel@kernel.org>
+References: <20200228115550.6904-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:40797 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726831AbgCBQXD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Mar 2020 11:23:03 -0500
-In-Reply-To: <20200302141434.59825-1-jlayton@kernel.org>
-Content-Language: en-US
+Received: from mail.kernel.org ([198.145.29.99]:32896 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725446AbgCBTxw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 2 Mar 2020 14:53:52 -0500
+In-Reply-To: <20200228115550.6904-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, sage@redhat.com, pdonnell@redhat.com
+To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Patrick Donnelly <pdonnell@redhat.com>
 
-On 3/2/20 10:14 PM, Jeff Layton wrote:
-> v6: move handling of CEPH_I_ASYNC_CREATE from __send_cap into callers
->      also issue ceph_mdsc_release_dir_caps() in complete_request
->      properly handle -EJUKEBOX return in async callbacks
->      
-> I previously pulled the async unlink patch from ceph-client/testing, so
-> this set includes a revised version of that as well, and orders it
-> some other changes.
+On Fri, 2020-02-28 at 19:55 +0800, Yan, Zheng wrote:
+> This series make cephfs client not request caps for open files that
+> idle for a long time. For the case that one active client and multiple
+> standby clients open the same file, this increase the possibility that
+> mds issues exclusive caps to the active client.
 > 
-> The main change from v5 is to rework the callers of __send_cap to either
-> skip sending or wait if the create reply hasn't come in yet.
+> Yan, Zheng (4):
+>   ceph: always renew caps if mds_wanted is insufficient
+>   ceph: consider inode's last read/write when calculating wanted caps
+>   ceph: simplify calling of ceph_get_fmode()
+>   ceph: remove delay check logic from ceph_check_caps()
 > 
-> We may not actually need patch #7 here. Zheng had that delta in one
-> of the earlier patches, but I'm not sure it's really needed now. It
-> may make sense to just take it on its own merits though.
+>  fs/ceph/caps.c               | 324 +++++++++++++++--------------------
+>  fs/ceph/file.c               |  39 ++---
+>  fs/ceph/inode.c              |  19 +-
+>  fs/ceph/ioctl.c              |   2 +
+>  fs/ceph/mds_client.c         |   5 -
+>  fs/ceph/super.h              |  35 ++--
+>  include/linux/ceph/ceph_fs.h |   1 +
+>  7 files changed, 188 insertions(+), 237 deletions(-)
 > 
-> Jeff Layton (12):
->    ceph: make kick_flushing_inode_caps non-static
->    ceph: add flag to designate that a request is asynchronous
->    ceph: track primary dentry link
->    ceph: add infrastructure for waiting for async create to complete
->    ceph: make __take_cap_refs non-static
->    ceph: cap tracking for async directory operations
->    ceph: perform asynchronous unlink if we have sufficient caps
->    ceph: make ceph_fill_inode non-static
->    ceph: decode interval_sets for delegated inos
->    ceph: add new MDS req field to hold delegated inode number
->    ceph: cache layout in parent dir on first sync create
->    ceph: attempt to do async create when possible
-> 
-> Yan, Zheng (1):
->    ceph: don't take refs to want mask unless we have all bits
-> 
->   fs/ceph/caps.c               |  91 ++++++++----
->   fs/ceph/dir.c                | 111 ++++++++++++++-
->   fs/ceph/file.c               | 269 +++++++++++++++++++++++++++++++++--
->   fs/ceph/inode.c              |  58 ++++----
->   fs/ceph/mds_client.c         | 196 ++++++++++++++++++++++---
->   fs/ceph/mds_client.h         |  24 +++-
->   fs/ceph/super.c              |  20 +++
->   fs/ceph/super.h              |  23 ++-
->   include/linux/ceph/ceph_fs.h |  17 ++-
->   9 files changed, 724 insertions(+), 85 deletions(-)
+> changes since v2
+>  - make __ceph_caps_file_wanted more readable
+>  - add patch 5 and 6, which fix hung write during testing patch 1~4
 > 
 
+This patch series causes some serious slowdown in the async dirops
+patches that I've not yet fully tracked down, and I suspect that they
+may also be the culprit in these bugs:
 
-series
+    https://tracker.ceph.com/issues/44381
+    https://tracker.ceph.com/issues/44382
 
-Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+I'm going to drop this series from the testing branch for now, until we
+can track down the issue.
+
+Thanks,
+-- 
+Jeff Layton <jlayton@kernel.org>
