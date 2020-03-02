@@ -1,89 +1,138 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v6 05/13] ceph: make __take_cap_refs non-static
-Date: Mon,  2 Mar 2020 09:14:26 -0500
-Message-ID: <20200302141434.59825-6-jlayton@kernel.org>
-References: <20200302141434.59825-1-jlayton@kernel.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] ceph: using POOL FULL flag instead of OSDMAP FULL flag
+Date: Mon, 2 Mar 2020 15:31:03 +0100
+Message-ID: <CAOi1vP_Gnd2m2yjTWuwyJ-FFJ1yPNr8NawyXw93kYmjoS2Q75w@mail.gmail.com>
+References: <20200228044518.20314-1-gmayyyha@gmail.com> <CAOi1vP-K+e0N26qpthLcst8HLE-FAMGSE9XwBhj1dPBiLyN-iA@mail.gmail.com>
+ <CAB9OAC0dURDHgqGDVCg_Gd+EhH-9_n4-mycgsqfxS64GRgd4Og@mail.gmail.com>
+ <CAOi1vP_opdc=OP70T2eiamMWa-o71nU8t_LYyTCytqT5BT8gdQ@mail.gmail.com>
+ <CAB9OAC08TGgXGFJsZCNpMzqnorn=jw1S_i8Ux2euaG=4-=JGwg@mail.gmail.com>
+ <CAOi1vP-BKfaL-d2GMWDHf7tD=LpDLEug0-NY9dgT=qEi00gpLQ@mail.gmail.com> <CAB9OAC2YtvbmKAnPS83eCO+vZxwnMrBQP=9X2dTKywyM87PZvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:39058 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727178AbgCBOOk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 2 Mar 2020 09:14:40 -0500
-In-Reply-To: <20200302141434.59825-1-jlayton@kernel.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAB9OAC2YtvbmKAnPS83eCO+vZxwnMrBQP=9X2dTKywyM87PZvw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yanhu Cao <gmayyyha@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, kuba@kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Rename it to ceph_take_cap_refs and make it available to other files.
-Also replace a comment with a lockdep assertion.
+On Mon, Mar 2, 2020 at 12:02 PM Yanhu Cao <gmayyyha@gmail.com> wrote:
+>
+> On Mon, Mar 2, 2020 at 6:09 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+> >
+> > On Mon, Mar 2, 2020 at 3:30 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
+> > >
+> > > On Fri, Feb 28, 2020 at 10:02 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+> > > >
+> > > > On Fri, Feb 28, 2020 at 12:41 PM Yanhu Cao <gmayyyha@gmail.com> wrote:
+> > > > >
+> > > > > On Fri, Feb 28, 2020 at 6:23 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+> > > > > >
+> > > > > > On Fri, Feb 28, 2020 at 5:45 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
+> > > > > > >
+> > > > > > > OSDMAP_FULL and OSDMAP_NEARFULL are deprecated since mimic.
+> > > > > > >
+> > > > > > > Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+> > > > > > > ---
+> > > > > > >  fs/ceph/file.c                  |  6 ++++--
+> > > > > > >  include/linux/ceph/osd_client.h |  2 ++
+> > > > > > >  include/linux/ceph/osdmap.h     |  3 ++-
+> > > > > > >  net/ceph/osd_client.c           | 23 +++++++++++++----------
+> > > > > > >  4 files changed, 21 insertions(+), 13 deletions(-)
+> > > > > > >
+> > > > > > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > > > > > > index 7e0190b1f821..60ea1eed1b84 100644
+> > > > > > > --- a/fs/ceph/file.c
+> > > > > > > +++ b/fs/ceph/file.c
+> > > > > > > @@ -1482,7 +1482,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+> > > > > > >         }
+> > > > > > >
+> > > > > > >         /* FIXME: not complete since it doesn't account for being at quota */
+> > > > > > > -       if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_FULL)) {
+> > > > > > > +       if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
+> > > > > > > +                               CEPH_POOL_FLAG_FULL)) {
+> > > > > > >                 err = -ENOSPC;
+> > > > > > >                 goto out;
+> > > > > > >         }
+> > > > > > > @@ -1575,7 +1576,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+> > > > > > >         }
+> > > > > > >
+> > > > > > >         if (written >= 0) {
+> > > > > > > -               if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
+> > > > > > > +               if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
+> > > > > > > +                                       CEPH_POOL_FLAG_NEARFULL))
+> > > > > >
+> > > > > > Hi Yanhu,
+> > > > > >
+> > > > > > Have you considered pre-mimic clusters here?  They are still supported
+> > > > > > (and will continue to be supported for the foreseeable future).
+> > > > > >
+> > > > > > Thanks,
+> > > > > >
+> > > > > >                 Ilya
+> > > > >
+> > > > > I have tested it work on Luminous, I think it work too since
+> > > > > ceph-v0.80(https://github.com/ceph/ceph/blob/b78644e7dee100e48dfeca32c9270a6b210d3003/src/osd/osd_types.h#L815)
+> > > > > alread have pool FLAG_FULL.
+> > > >
+> > > > But not FLAG_NEARFULL, which appeared in mimic.
+> > > FLAG_NEARFULL appeared in Luminous.
+> >
+> > Well, it appeared in mimic in v13.0.1 and was backported to luminous
+> > in v12.2.2.  So technically, some luminous releases don't have it.
+> >
+> > >
+> > > >
+> > > > >
+> > > > > CephFS doesn't write synchronously even if CEPH_OSDMAP_NEARFULL is
+> > > > > used, then should fixed by CEPH_POOL_FLAG_NEARFULL.
+> > > >
+> > > > I'm not sure I follow.
+> > > >
+> > > > -    if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
+> > > > +    if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
+> > > > +                            CEPH_POOL_FLAG_NEARFULL))
+> > > >
+> > > > AFAICT this change would effectively disable this branch for pre-mimic
+> > > > clusters.  Are you saying this branch is already broken?
+> > > >
+> > > > Thanks,
+> > > >
+> > > >                 Ilya
+> > > CEPH_OSDMAP_NEARFULL is not set in Jewel, so it has no effect. And in
+> > > Luminous version, this flag is cleared as a legacy and has no effect
+> > > too.
+> >
+> > Are you sure?  What about this code in OSDMonitor::tick() that showed
+> > up in kraken in v11.0.1 and was backported to jewel in v10.2.4?
+> >
+> >   if (!mon->pgmon()->pg_map.nearfull_osds.empty()) {
+> >     ...
+> >     add_flag(CEPH_OSDMAP_NEARFULL);
+> >   } else if (osdmap.test_flag(CEPH_OSDMAP_NEARFULL)){
+> >     ...
+> >     remove_flag(CEPH_OSDMAP_NEARFULL);
+> >   }
+> >   if (pending_inc.new_flags != -1 &&
+> >      (pending_inc.new_flags ^ osdmap.flags) & (CEPH_OSDMAP_FULL |
+> >                                                CEPH_OSDMAP_NEARFULL)) {
+> >     ...
+> >     do_propose = true;
+> >
+> > It's there in v10.2.11 (the final jewel release).  It's also there
+> > in hammer since v0.94.10...
+> >
+> > Thanks,
+> >
+> >                 Ilya
+>
+> Sorry for not seeing all version changes, I will submit plus
+> CEPH_OSDMAP_FULL/NEARFULL.
+> How to check if the feature is backported?
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c  | 12 ++++++------
- fs/ceph/super.h |  2 ++
- 2 files changed, 8 insertions(+), 6 deletions(-)
+Look through release notes and git history.  It's the only source of
+truth ;)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 3fff4945f10e..526743d65244 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2474,12 +2474,12 @@ void ceph_kick_flushing_inode_caps(struct ceph_mds_session *session,
- /*
-  * Take references to capabilities we hold, so that we don't release
-  * them to the MDS prematurely.
-- *
-- * Protected by i_ceph_lock.
-  */
--static void __take_cap_refs(struct ceph_inode_info *ci, int got,
-+void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
- 			    bool snap_rwsem_locked)
- {
-+	lockdep_assert_held(&ci->i_ceph_lock);
-+
- 	if (got & CEPH_CAP_PIN)
- 		ci->i_pin_ref++;
- 	if (got & CEPH_CAP_FILE_RD)
-@@ -2500,7 +2500,7 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got,
- 		if (ci->i_wb_ref == 0)
- 			ihold(&ci->vfs_inode);
- 		ci->i_wb_ref++;
--		dout("__take_cap_refs %p wb %d -> %d (?)\n",
-+		dout("%s %p wb %d -> %d (?)\n", __func__,
- 		     &ci->vfs_inode, ci->i_wb_ref-1, ci->i_wb_ref);
- 	}
- }
-@@ -2614,7 +2614,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 			    (need & CEPH_CAP_FILE_RD) &&
- 			    !(*got & CEPH_CAP_FILE_CACHE))
- 				ceph_disable_fscache_readpage(ci);
--			__take_cap_refs(ci, *got, true);
-+			ceph_take_cap_refs(ci, *got, true);
- 			ret = 1;
- 		}
- 	} else {
-@@ -2862,7 +2862,7 @@ int ceph_get_caps(struct file *filp, int need, int want,
- void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps)
- {
- 	spin_lock(&ci->i_ceph_lock);
--	__take_cap_refs(ci, caps, false);
-+	ceph_take_cap_refs(ci, caps, false);
- 	spin_unlock(&ci->i_ceph_lock);
- }
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 8cfacee5e856..2d3b88f674ca 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1058,6 +1058,8 @@ void ceph_kick_flushing_inode_caps(struct ceph_mds_session *session,
- 				   struct ceph_inode_info *ci);
- extern struct ceph_cap *ceph_get_cap_for_mds(struct ceph_inode_info *ci,
- 					     int mds);
-+extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
-+				bool snap_rwsem_locked);
- extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
- extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
- extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
--- 
-2.24.1
+Thanks,
+
+                Ilya
