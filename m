@@ -1,91 +1,38 @@
-From: Yanhu Cao <gmayyyha@gmail.com>
-Subject: Re: [PATCH] ceph: using POOL FULL flag instead of OSDMAP FULL flag
-Date: Mon, 2 Mar 2020 10:30:42 +0800
-Message-ID: <CAB9OAC08TGgXGFJsZCNpMzqnorn=jw1S_i8Ux2euaG=4-=JGwg@mail.gmail.com>
-References: <20200228044518.20314-1-gmayyyha@gmail.com> <CAOi1vP-K+e0N26qpthLcst8HLE-FAMGSE9XwBhj1dPBiLyN-iA@mail.gmail.com>
- <CAB9OAC0dURDHgqGDVCg_Gd+EhH-9_n4-mycgsqfxS64GRgd4Og@mail.gmail.com> <CAOi1vP_opdc=OP70T2eiamMWa-o71nU8t_LYyTCytqT5BT8gdQ@mail.gmail.com>
+From: Jan Fajerski <jfajerski@suse.com>
+Subject: Re: Readiness for v13.2.9?
+Date: Mon, 2 Mar 2020 10:46:06 +0100
+Message-ID: <20200302094606.scn3hp6huakwpb3o@jfsuselaptop>
+References: <CAMMFjmFAB2E_h7VhrCOBz-EUHHk0nrB=JSudfcOhCpA7FwNd6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP_opdc=OP70T2eiamMWa-o71nU8t_LYyTCytqT5BT8gdQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, kuba@kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-15"; format=flowed
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from m4a0073g.houston.softwaregrp.com ([15.124.2.131]:43335 "EHLO
+        m4a0073g.houston.softwaregrp.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726956AbgCBJ5G (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Mar 2020 04:57:06 -0500
+Content-Disposition: inline
+In-Reply-To: <CAMMFjmFAB2E_h7VhrCOBz-EUHHk0nrB=JSudfcOhCpA7FwNd6w@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: dev@ceph.io, "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, Nathan Cutler <ncutler@suse.cz>, Casey Bodley <cbodley@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Neha Ojha <nojha@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, David Zafman <dzafman@redhat.com>, "Weil, Sage" <sweil@redhat.com>, Ramana Venkatesh Raja <rraja@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Lekshmanan, Abhishek" <abhishek.lekshmanan@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>, ceph-qe-team <ceph-qe-team@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-qa <ceph-qa@ceph.com>
 
-On Fri, Feb 28, 2020 at 10:02 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+On Wed, Feb 26, 2020 at 04:07:28PM -0800, Yuri Weinstein wrote:
+>Below is the current queue of PRs:
+>https://github.com/ceph/ceph/pulls?q=is%3Aopen+label%3Amimic-batch-1+label%3Aneeds-qa
 >
-> On Fri, Feb 28, 2020 at 12:41 PM Yanhu Cao <gmayyyha@gmail.com> wrote:
-> >
-> > On Fri, Feb 28, 2020 at 6:23 PM Ilya Dryomov <idryomov@gmail.com> wrote:
-> > >
-> > > On Fri, Feb 28, 2020 at 5:45 AM Yanhu Cao <gmayyyha@gmail.com> wrote:
-> > > >
-> > > > OSDMAP_FULL and OSDMAP_NEARFULL are deprecated since mimic.
-> > > >
-> > > > Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
-> > > > ---
-> > > >  fs/ceph/file.c                  |  6 ++++--
-> > > >  include/linux/ceph/osd_client.h |  2 ++
-> > > >  include/linux/ceph/osdmap.h     |  3 ++-
-> > > >  net/ceph/osd_client.c           | 23 +++++++++++++----------
-> > > >  4 files changed, 21 insertions(+), 13 deletions(-)
-> > > >
-> > > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > > > index 7e0190b1f821..60ea1eed1b84 100644
-> > > > --- a/fs/ceph/file.c
-> > > > +++ b/fs/ceph/file.c
-> > > > @@ -1482,7 +1482,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-> > > >         }
-> > > >
-> > > >         /* FIXME: not complete since it doesn't account for being at quota */
-> > > > -       if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_FULL)) {
-> > > > +       if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
-> > > > +                               CEPH_POOL_FLAG_FULL)) {
-> > > >                 err = -ENOSPC;
-> > > >                 goto out;
-> > > >         }
-> > > > @@ -1575,7 +1576,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-> > > >         }
-> > > >
-> > > >         if (written >= 0) {
-> > > > -               if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
-> > > > +               if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
-> > > > +                                       CEPH_POOL_FLAG_NEARFULL))
-> > >
-> > > Hi Yanhu,
-> > >
-> > > Have you considered pre-mimic clusters here?  They are still supported
-> > > (and will continue to be supported for the foreseeable future).
-> > >
-> > > Thanks,
-> > >
-> > >                 Ilya
-> >
-> > I have tested it work on Luminous, I think it work too since
-> > ceph-v0.80(https://github.com/ceph/ceph/blob/b78644e7dee100e48dfeca32c9270a6b210d3003/src/osd/osd_types.h#L815)
-> > alread have pool FLAG_FULL.
+>Dev leads - pls add and tag all RRs that must be included.
+ceph-volume is caught up on backports and ready to go.
 >
-> But not FLAG_NEARFULL, which appeared in mimic.
-FLAG_NEARFULL appeared in Luminous.
+>Thx
+>YuriW
+>
 
->
-> >
-> > CephFS doesn't write synchronously even if CEPH_OSDMAP_NEARFULL is
-> > used, then should fixed by CEPH_POOL_FLAG_NEARFULL.
->
-> I'm not sure I follow.
->
-> -    if (ceph_osdmap_flag(&fsc->client->osdc, CEPH_OSDMAP_NEARFULL))
-> +    if (pool_flag(&fsc->client->osdc, ci->i_layout.pool_id,
-> +                            CEPH_POOL_FLAG_NEARFULL))
->
-> AFAICT this change would effectively disable this branch for pre-mimic
-> clusters.  Are you saying this branch is already broken?
->
-> Thanks,
->
->                 Ilya
-CEPH_OSDMAP_NEARFULL is not set in Jewel, so it has no effect. And in
-Luminous version, this flag is cleared as a legacy and has no effect
-too.
+-- 
+Jan Fajerski
+Senior Software Engineer Enterprise Storage
+SUSE Software Solutions Germany GmbH
+Maxfeldstr. 5, 90409 Nürnberg, Germany
+(HRB 36809, AG Nürnberg)
+Geschäftsführer: Felix Imendörffer
