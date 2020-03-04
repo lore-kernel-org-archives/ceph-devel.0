@@ -1,67 +1,49 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] mds: update dentry lease for async create
-Date: Wed, 04 Mar 2020 09:50:41 -0500
-Message-ID: <6a2a42dfed9a33cfe7417ae3f7ef953a7d0f5b2b.camel@kernel.org>
-References: <20200304132220.41238-1-zyan@redhat.com>
-         <88afc25efd69e9d07df88bb2efbc3e989e14fd9a.camel@kernel.org>
-         <29ed368fce6cb62f2bbc9b5d181eacf2cdf990bb.camel@kernel.org>
-         <6642e002-9e9b-4e73-a160-726e6d164173@redhat.com>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH v4 0/6] ceph: don't request caps for idle open files
+Date: Thu,  5 Mar 2020 01:32:52 +0800
+Message-ID: <20200304173258.48377-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:48180 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725795AbgCDOun (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 4 Mar 2020 09:50:43 -0500
-In-Reply-To: <6642e002-9e9b-4e73-a160-726e6d164173@redhat.com>
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:44726 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727084AbgCDRdH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2020 12:33:07 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: jlayton@kernel.org, "Yan, Zheng" <zyan@redhat.com>
 
-On Wed, 2020-03-04 at 22:26 +0800, Yan, Zheng wrote:
-> On 3/4/20 10:05 PM, Jeff Layton wrote:
-> > On Wed, 2020-03-04 at 08:55 -0500, Jeff Layton wrote:
-> > > On Wed, 2020-03-04 at 21:22 +0800, Yan, Zheng wrote:
-> > > > Otherwise ceph_d_delete() may return 1 for the dentry, which makes
-> > > > dput() prune the dentry and clear parent dir's complete flag.
-> > > > 
-> > > > Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> > > > ---
-> > > >   fs/ceph/file.c | 3 +++
-> > > >   1 file changed, 3 insertions(+)
-> > > > 
-> > > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > > > index 53321bf517c2..671b141aedfe 100644
-> > > > --- a/fs/ceph/file.c
-> > > > +++ b/fs/ceph/file.c
-> > > > @@ -480,6 +480,9 @@ static int try_prep_async_create(struct inode *dir, struct dentry *dentry,
-> > > >   	if (d_in_lookup(dentry)) {
-> > > >   		if (!__ceph_dir_is_complete(ci))
-> > > >   			goto no_async;
-> > > > +		spin_lock(&dentry->d_lock);
-> > > > +		di->lease_shared_gen = atomic_read(&ci->i_shared_gen);
-> > > > +		spin_unlock(&dentry->d_lock);
-> > > >   	} else if (atomic_read(&ci->i_shared_gen) !=
-> > > >   		   READ_ONCE(di->lease_shared_gen)) {
-> > > >   		goto no_async;
-> > > 
-> > > Good catch, merged into testing (with small update to changelog
-> > > s/mds:/ceph:/)
-> > > 
-> > 
-> > One related comment though. This patch implies that lease_shared_gen is
-> > protected by the d_lock, but it's not held when it's assigned in
-> > ceph_lookup. Should it be?
-> > 
-> 
-> we only assign and compare lease_shared_gen, I think it doesn't matter 
-> if it's protected by d_lock or not
-> 
+This series make cephfs client not request caps for open files that
+idle for a long time. For the case that one active client and multiple
+standby clients open the same file, this increase the possibility that
+mds issues exclusive caps to the active client.
 
-That's the case here too. Do we need the d_lock in
-try_prep_async_create? Maybe lease_shared_gen should also be an
-atomic_t?
+Yan, Zheng (6):
+  ceph: always renew caps if mds_wanted is insufficient
+  ceph: consider inode's last read/write when calculating wanted caps
+  ceph: remove delay check logic from ceph_check_caps()
+  ceph: simplify calling of ceph_get_fmode()
+  ceph: update i_requested_max_size only when sending cap msg to auth mds
+  ceph: check all mds' caps after page writeback
 
--- 
-Jeff Layton <jlayton@kernel.org>
+ fs/ceph/caps.c               | 338 ++++++++++++++++-------------------
+ fs/ceph/file.c               |  45 ++---
+ fs/ceph/inode.c              |  21 +--
+ fs/ceph/ioctl.c              |   2 +
+ fs/ceph/mds_client.c         |   5 -
+ fs/ceph/super.h              |  37 ++--
+ include/linux/ceph/ceph_fs.h |   1 +
+ 7 files changed, 202 insertions(+), 247 deletions(-)
+
+changes since v2
+ - make __ceph_caps_file_wanted() more readable
+ - add patch 5 and 6, which fix hung write during testing patch 1~4
+
+changes since v3
+ - don't queue delayed cap check for snap inode
+ - initialize ci->{last_rd,last_wr} to jiffies - 3600 * HZ
+ - make __ceph_caps_file_wanted() check inode type
+
+--=20
+2.21.1
