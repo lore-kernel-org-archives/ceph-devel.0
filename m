@@ -1,226 +1,145 @@
-From: chen kael <chenji.bupt@gmail.com>
-Subject: The attempt to reduce latency for ReplicatedBackend
-Date: Wed, 4 Mar 2020 18:23:40 +0800
-Message-ID: <CAA-rZjbfMpnzWeghBP0FTrs0UrYzOCgRknVqwNyGjH1Q+joMVA@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: v14.2.8 Nautilus released
+Date: Wed, 4 Mar 2020 19:05:21 +0800
+Message-ID: <CAJE9aOPKtMmVNeHH2H-LE2pYvDfpdAONWAifmBJcTAWqu=k-dQ@mail.gmail.com>
+References: <87sgipaa4v.fsf@suse.com> <CAC+Jd5B5XBqK9R3+KGRiRG=6ChYYP3uCkHrOf8FCy67B=1GKOQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vs1-f43.google.com ([209.85.217.43]:46017 "EHLO
-        mail-vs1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387398AbgCDKXy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2020 05:23:54 -0500
-Received: by mail-vs1-f43.google.com with SMTP id m4so769951vsa.12
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Mar 2020 02:23:53 -0800 (PST)
+Received: from mail-oi1-f194.google.com ([209.85.167.194]:43844 "EHLO
+        mail-oi1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726440AbgCDLFe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2020 06:05:34 -0500
+Received: by mail-oi1-f194.google.com with SMTP id p125so1642503oif.10
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Mar 2020 03:05:33 -0800 (PST)
+In-Reply-To: <CAC+Jd5B5XBqK9R3+KGRiRG=6ChYYP3uCkHrOf8FCy67B=1GKOQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Kaleb Keithley <kkeithle@redhat.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, ceph-users@ceph.io, dev <dev@ceph.io>, The Esoteric Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Dear Cepher
-As all we know, PrimaryPG will never return success to client until
-all replica send their MSG_OSD_REPOPREPLY message. This does help ceph
-to obtain the strong consistence all the time.
+On Wed, Mar 4, 2020 at 3:46 AM Kaleb Keithley <kkeithle@redhat.com> wrote:
+>
+>
+> Just FYI, 14.2.8 build fails on Fedora-32 on S390x. Other architectures b=
+uild fine.
+>
 
-I have made some small changes to this golden rule in Ceph in order to
-reduce the latency during random write as much as possible.
+Kaleb, see https://github.com/ceph/ceph/pull/33716. hopefully we can
+get in the next release or probably you could include this patch in
+the rpm packaging?
 
-In the test patch (please see below), we assume pool size is 3,  the
-'success' will be returned to client once PrimaryPG has received any
-two of the messages, in this case everything works well, including
-recovery and backfill etc. In the meanwhile, the Latency of 4K-random
-write in my HDD cluster is almost reduced by 50%, which is cut down
-from 20ms to 10ms.
+> Build log at https://kojipkgs.fedoraproject.org//work/tasks/6999/42146999=
+/build.log
+>
+> On Tue, Mar 3, 2020 at 7:38 AM Abhishek Lekshmanan <abhishek@suse.com> wr=
+ote:
+>>
+>>
+>> This is the eighth update to the Ceph Nautilus release series. This rele=
+ase
+>> fixes issues across a range of subsystems. We recommend that all users u=
+pgrade
+>> to this release. Please note the following important changes in this
+>> release; as always the full changelog is posted at:
+>> https://ceph.io/releases/v14-2-8-nautilus-released
+>>
+>> Notable Changes
+>> ---------------
+>>
+>> * The default value of `bluestore_min_alloc_size_ssd` has been changed
+>>   to 4K to improve performance across all workloads.
+>>
+>> * The following OSD memory config options related to bluestore cache aut=
+otuning can now
+>>   be configured during runtime:
+>>
+>>     - osd_memory_base (default: 768 MB)
+>>     - osd_memory_cache_min (default: 128 MB)
+>>     - osd_memory_expected_fragmentation (default: 0.15)
+>>     - osd_memory_target (default: 4 GB)
+>>
+>>   The above options can be set with::
+>>
+>>     ceph config set osd <option> <value>
+>>
+>> * The MGR now accepts `profile rbd` and `profile rbd-read-only` user cap=
+s.
+>>   These caps can be used to provide users access to MGR-based RBD functi=
+onality
+>>   such as `rbd perf image iostat` an `rbd perf image iotop`.
+>>
+>> * The configuration value `osd_calc_pg_upmaps_max_stddev` used for upmap
+>>   balancing has been removed. Instead use the mgr balancer config
+>>   `upmap_max_deviation` which now is an integer number of PGs of deviati=
+on
+>>   from the target PGs per OSD.  This can be set with a command like
+>>   `ceph config set mgr mgr/balancer/upmap_max_deviation 2`.  The default
+>>   `upmap_max_deviation` is 1.  There are situations where crush rules
+>>   would not allow a pool to ever have completely balanced PGs.  For exam=
+ple, if
+>>   crush requires 1 replica on each of 3 racks, but there are fewer OSDs =
+in 1 of
+>>   the racks.  In those cases, the configuration value can be increased.
+>>
+>> * RGW: a mismatch between the bucket notification documentation and the =
+actual
+>>   message format was fixed. This means that any endpoints receiving buck=
+et
+>>   notification, will now receive the same notifications inside a JSON ar=
+ray
+>>   named 'Records'. Note that this does not affect pulling bucket notific=
+ation
+>>   from a subscription in a 'pubsub' zone, as these are already wrapped i=
+nside
+>>   that array.
+>>
+>> * CephFS: multiple active MDS forward scrub is now rejected. Scrub curre=
+ntly
+>>   only is permitted on a file system with a single rank. Reduce the rank=
+s to one
+>>   via `ceph fs set <fs_name> max_mds 1`.
+>>
+>> * Ceph now refuses to create a file system with a default EC data pool. =
+For
+>>   further explanation, see:
+>>   https://docs.ceph.com/docs/nautilus/cephfs/createfs/#creating-pools
+>>
+>> * Ceph will now issue a health warning if a RADOS pool has a `pg_num`
+>>   value that is not a power of two. This can be fixed by adjusting
+>>   the pool to a nearby power of two::
+>>
+>>     ceph osd pool set <pool-name> pg_num <new-pg-num>
+>>
+>>   Alternatively, the warning can be silenced with::
+>>
+>>     ceph config set global mon_warn_on_pool_pg_num_not_power_of_two fals=
+e
+>>
+>> Getting Ceph
+>> ------------
+>>
+>> * Git at git://github.com/ceph/ceph.git
+>> * Tarball at http://download.ceph.com/tarballs/ceph-14.2.8.tar.gz
+>> * For packages, see http://docs.ceph.com/docs/master/install/get-package=
+s/
+>> * Release git sha1: 2d095e947a02261ce61424021bb43bd3022d35cb
+>>
+>> --
+>> Abhishek Lekshmanan
+>> SUSE Software Solutions Germany GmbH
+>> GF: Felix Imend=C3=B6rffer HRB 21284 (AG N=C3=BCrnberg)
+>> _______________________________________________
+>> Dev mailing list -- dev@ceph.io
+>> To unsubscribe send an email to dev-leave@ceph.io
+>
+> _______________________________________________
+> Dev mailing list -- dev@ceph.io
+> To unsubscribe send an email to dev-leave@ceph.io
 
-However, with this patch, balance read must be disabled since stale
-data could be read from replica PG. And the reliability of the data
-will be compromised. Even so, I think the effect is limited since
-these missing data can be recovered by using PGLOG.
 
-Besides, this modification also made me a little bit anxious. The
-reason is that some bugs have been detected and fixed during testing.
-Considering this, I am not sure if there will be any other bugs
-related to this modification. Therefore, I really hope to get your
-suggestions in order to avoid the unexpected bugs in advance.
 
-It will be highly appreciated if any of you would like to share your
-experience and comment.
-Big thanks in advance
-
-This patch is base on 14.2.7
-
-diff --git a/src/common/legacy_config_opts.h b/src/common/legacy_config_opts.h
-index 79d9c1f..464fba1 100644
---- a/src/common/legacy_config_opts.h
-+++ b/src/common/legacy_config_opts.h
-@@ -873,6 +873,8 @@ OPTION(osd_requested_scrub_priority, OPT_U32)
- OPTION(osd_pg_delete_priority, OPT_U32)
- OPTION(osd_pg_delete_cost, OPT_U32) // set default cost equal to 1MB io
-
-+OPTION(osd_pg_allow_majority_write, OPT_BOOL) // set default cost
-equal to 1MB io
-+
- OPTION(osd_recovery_priority, OPT_U32)
- // set default cost equal to 20MB io
- OPTION(osd_recovery_cost, OPT_U32)
-diff --git a/src/common/options.cc b/src/common/options.cc
-index f0ba13a..26242eb 100644
---- a/src/common/options.cc
-+++ b/src/common/options.cc
-@@ -4082,6 +4082,10 @@ std::vector<Option> get_global_options() {
-     .set_default(1<<20)
-     .set_description(""),
-
-+    Option("osd_pg_allow_majority_write", Option::TYPE_BOOL,
-Option::LEVEL_ADVANCED)
-+    .set_default(false)
-+    .set_description(""),
-+
-     Option("osd_scrub_priority", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
-     .set_default(5)
-     .set_description("Priority for scrub operations in work queue"),
-diff --git a/src/osd/PG.cc b/src/osd/PG.cc
-index cd52976..ad293ec 100644
---- a/src/osd/PG.cc
-+++ b/src/osd/PG.cc
-@@ -3936,12 +3936,23 @@ void PG::write_if_dirty(ObjectStore::Transaction& t)
-
- void PG::add_log_entry(const pg_log_entry_t& e, bool applied)
- {
-+  // test if this assertion can pass for ever!
-+  dout(10) << "add_log_entry e.version" << e.version << dendl;
-+  dout(10) << "add_log_entry e.user_version" << e.user_version << dendl;
-+  dout(10) << "add_log_entry info.last_user_version" <<
-info.last_user_version << dendl;
-+  dout(10) << "add_log_entry info.last_complete" <<
-info.last_complete << dendl;
-+  dout(10) << "add_log_entry info.last_update" << info.last_update << dendl;
-+
-   // raise last_complete only if we were previously up to date
-   if (info.last_complete == info.last_update)
-+  {
-+    ceph_assert(e.version.version == info.last_complete.version + 1);
-     info.last_complete = e.version;
--
-+  }
-+
-   // raise last_update.
-   ceph_assert(e.version > info.last_update);
-+  ceph_assert(e.version.version == info.last_update.version + 1);
-   info.last_update = e.version;
-
-   // raise user_version, if it increased (it may have not get bumped
-diff --git a/src/osd/ReplicatedBackend.cc b/src/osd/ReplicatedBackend.cc
-index f8d67af..1aca6e8 100644
---- a/src/osd/ReplicatedBackend.cc
-+++ b/src/osd/ReplicatedBackend.cc
-@@ -509,9 +509,11 @@ void ReplicatedBackend::submit_transaction(
- void ReplicatedBackend::op_commit(
-   InProgressOpRef& op)
- {
--  if (op->on_commit == nullptr) {
--    // aborted
--    return;
-+  if (!cct->_conf->osd_pg_allow_majority_write) {
-+    if (op->on_commit == nullptr) {
-+      // aborted
-+      return;
-+    }
-   }
-
-   FUNCTRACE(cct);
-@@ -523,17 +525,26 @@ void ReplicatedBackend::op_commit(
-   }
-
-   op->waiting_for_commit.erase(get_parent()->whoami_shard());
--
--  if (op->waiting_for_commit.empty()) {
--    op->on_commit->complete(0);
--    op->on_commit = 0;
--    in_progress_ops.erase(op->tid);
-+  if (cct->_conf->osd_pg_allow_majority_write) {
-+    if (op->waiting_for_commit.size() == 1 && op->on_commit) {
-+      op->on_commit->complete(0);
-+      op->on_commit = 0;
-+    }
-+    if (op->waiting_for_commit.empty()) {
-+      in_progress_ops.erase(op->tid);
-+    }
-+  } else {
-+    if (op->waiting_for_commit.empty()) {
-+      op->on_commit->complete(0);
-+      op->on_commit = 0;
-+      in_progress_ops.erase(op->tid);
-+    }
-   }
- }
-
- void ReplicatedBackend::do_repop_reply(OpRequestRef op)
- {
--  static_cast<MOSDRepOpReply*>(op->get_nonconst_req())->finish_decode();
-+  static_cast<MOSDRepOpReply *>(op->get_nonconst_req())->finish_decode();
-   const MOSDRepOpReply *r = static_cast<const MOSDRepOpReply *>(op->get_req());
-   ceph_assert(r->get_header().type == MSG_OSD_REPOPREPLY);
-
-@@ -552,14 +563,14 @@ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
-
-     if (m)
-       dout(7) << __func__ << ": tid " << ip_op.tid << " op " //<< *m
--       << " ack_type " << (int)r->ack_type
--       << " from " << from
--       << dendl;
-+              << " ack_type " << (int)r->ack_type
-+              << " from " << from
-+              << dendl;
-     else
-       dout(7) << __func__ << ": tid " << ip_op.tid << " (no op) "
--       << " ack_type " << (int)r->ack_type
--       << " from " << from
--       << dendl;
-+              << " ack_type " << (int)r->ack_type
-+              << " from " << from
-+              << dendl;
-
-     // oh, good.
-
-@@ -567,8 +578,8 @@ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
-       ceph_assert(ip_op.waiting_for_commit.count(from));
-       ip_op.waiting_for_commit.erase(from);
-       if (ip_op.op) {
-- ip_op.op->mark_event("sub_op_commit_rec");
-- ip_op.op->pg_trace.event("sub_op_commit_rec");
-+        ip_op.op->mark_event("sub_op_commit_rec");
-+        ip_op.op->pg_trace.event("sub_op_commit_rec");
-       }
-     } else {
-       // legacy peer; ignore
-@@ -578,12 +589,28 @@ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
-       from,
-       r->get_last_complete_ondisk());
-
--    if (ip_op.waiting_for_commit.empty() &&
-+    if (cct->_conf->osd_pg_allow_majority_write) {
-+      if (ip_op.waiting_for_commit.size() == 1 &&
-         ip_op.on_commit) {
--      ip_op.on_commit->complete(0);
--      ip_op.on_commit = 0;
--      in_progress_ops.erase(iter);
-+        ip_op.on_commit->complete(0);
-+        ip_op.on_commit = 0;
-+      }
-+      if (ip_op.waiting_for_commit.empty()) {
-+        in_progress_ops.erase(iter);
-+      }
-+    } else {
-+      if (ip_op.waiting_for_commit.empty() && ip_op.on_commit) {
-+        ip_op.on_commit->complete(0);
-+        ip_op.on_commit = 0;
-+        in_progress_ops.erase(iter);
-+      }
-     }
-+
-+    dout(10) << __func__ << ": tid " << ip_op.tid << " op " //<< *m
-+              << " ack_type " << (int)r->ack_type
-+              << " from " << from
-+              << " in_progress_ops size " << in_progress_ops.size()
-+              << dendl;
-   }
- }
+--=20
+Regards
+Kefu Chai
