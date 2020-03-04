@@ -1,62 +1,103 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH v4 6/6] ceph: check all mds' caps after page writeback
-Date: Thu,  5 Mar 2020 01:32:58 +0800
-Message-ID: <20200304173258.48377-7-zyan@redhat.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH v4 0/6] ceph: don't request caps for idle open files
+Date: Wed, 04 Mar 2020 12:48:52 -0500
+Message-ID: <9922f9e850f52fd68bc67be675d7571fc9bb55f1.camel@kernel.org>
 References: <20200304173258.48377-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:25615 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729892AbgCDRdV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2020 12:33:21 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33348 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729675AbgCDRsy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 4 Mar 2020 12:48:54 -0500
 In-Reply-To: <20200304173258.48377-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: jlayton@kernel.org, "Yan, Zheng" <zyan@redhat.com>
+To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
 
-If an inode has caps from multiple mds's, the following can happen:
+On Thu, 2020-03-05 at 01:32 +0800, Yan, Zheng wrote:
+> This series make cephfs client not request caps for open files that
+> idle for a long time. For the case that one active client and multiple
+> standby clients open the same file, this increase the possibility that
+> mds issues exclusive caps to the active client.
+> 
+> Yan, Zheng (6):
+>   ceph: always renew caps if mds_wanted is insufficient
+>   ceph: consider inode's last read/write when calculating wanted caps
+>   ceph: remove delay check logic from ceph_check_caps()
+>   ceph: simplify calling of ceph_get_fmode()
+>   ceph: update i_requested_max_size only when sending cap msg to auth mds
+>   ceph: check all mds' caps after page writeback
+> 
+>  fs/ceph/caps.c               | 338 ++++++++++++++++-------------------
+>  fs/ceph/file.c               |  45 ++---
+>  fs/ceph/inode.c              |  21 +--
+>  fs/ceph/ioctl.c              |   2 +
+>  fs/ceph/mds_client.c         |   5 -
+>  fs/ceph/super.h              |  37 ++--
+>  include/linux/ceph/ceph_fs.h |   1 +
+>  7 files changed, 202 insertions(+), 247 deletions(-)
+> 
+> changes since v2
+>  - make __ceph_caps_file_wanted() more readable
+>  - add patch 5 and 6, which fix hung write during testing patch 1~4
+> 
+> changes since v3
+>  - don't queue delayed cap check for snap inode
+>  - initialize ci->{last_rd,last_wr} to jiffies - 3600 * HZ
+>  - make __ceph_caps_file_wanted() check inode type
+> 
 
-- non-auth mds revokes Fsc. Fcb is used, so page writeback is queued.
-- when writeback finishes, ceph_check_caps() is called with auth only
-  flag. ceph_check_caps() invalidates pagecache, but skips checking any
-  non-auth caps.
+I just tried this out, and it still seems to kill unlink performance
+with -o nowsync. From the script I posted to the other thread:
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c  | 2 +-
- fs/ceph/inode.c | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+--------8<--------
+$ ./test-async-dirops.sh 
+  File: /mnt/cephfs/test-dirops.1401
+  Size: 0         	Blocks: 0          IO Block: 65536  directory
+Device: 26h/38d	Inode: 1099511627778  Links: 2
+Access: (0775/drwxrwxr-x)  Uid: ( 4447/ jlayton)   Gid: ( 4447/ jlayton)
+Context: system_u:object_r:cephfs_t:s0
+Access: 2020-03-04 12:42:03.914006772 -0500
+Modify: 2020-03-04 12:42:03.914006772 -0500
+Change: 2020-03-04 12:42:03.914006772 -0500
+ Birth: 2020-03-04 12:42:03.914006772 -0500
+Creating files in /mnt/cephfs/test-dirops.1401
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 0408749ced2d..5e9aecfa2f52 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3052,7 +3052,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_i=
-nfo *ci, int nr,
- 	spin_unlock(&ci->i_ceph_lock);
-=20
- 	if (last) {
--		ceph_check_caps(ci, CHECK_CAPS_AUTHONLY, NULL);
-+		ceph_check_caps(ci, 0, NULL);
- 	} else if (flush_snaps) {
- 		ceph_flush_snaps(ci, NULL);
- 	}
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index c7ff9f7067f6..ee40ba7e0e77 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1984,7 +1984,7 @@ void __ceph_do_pending_vmtruncate(struct inode *ino=
-de)
- 	mutex_unlock(&ci->i_truncate_mutex);
-=20
- 	if (wrbuffer_refs =3D=3D 0)
--		ceph_check_caps(ci, CHECK_CAPS_AUTHONLY, NULL);
-+		ceph_check_caps(ci, 0, NULL);
-=20
- 	wake_up_all(&ci->i_cap_wq);
- }
---=20
-2.21.1
+real	0m6.269s
+user	0m0.123s
+sys	0m0.454s
+
+sync
+
+real	0m5.358s
+user	0m0.003s
+sys	0m0.011s
+Starting rm
+
+real	0m18.932s
+user	0m0.169s
+sys	0m0.713s
+
+rmdir
+
+real	0m0.135s
+user	0m0.000s
+sys	0m0.002s
+
+sync
+
+real	0m1.725s
+user	0m0.000s
+sys	0m0.002s
+--------8<--------
+
+Create and sync parts look reasonable. Usually, the rm part finishes in
+less than a second as we end up doing most of the removes
+asynchronously, but here it didn't. I suspect that means that unlink
+didn't get caps for some reason, but I'd need to do some debugging to
+figure out what's actually happening.
+
+-- 
+Jeff Layton <jlayton@kernel.org>
