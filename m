@@ -1,109 +1,226 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v3 0/6] ceph: don't request caps for idle open files
-Date: Tue, 03 Mar 2020 15:17:39 -0500
-Message-ID: <523329cc1778972c17ada75b19478a1444c65638.camel@kernel.org>
-References: <20200228115550.6904-1-zyan@redhat.com>
-         <186bfc2278dbdd4eac21f6ce03108c53e3f574b3.camel@kernel.org>
-         <a226d5b6-2371-5c94-97ee-6bc5b273b21d@redhat.com>
+From: chen kael <chenji.bupt@gmail.com>
+Subject: The attempt to reduce latency for ReplicatedBackend
+Date: Wed, 4 Mar 2020 18:23:40 +0800
+Message-ID: <CAA-rZjbfMpnzWeghBP0FTrs0UrYzOCgRknVqwNyGjH1Q+joMVA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:34898 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730862AbgCCURm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 3 Mar 2020 15:17:42 -0500
-In-Reply-To: <a226d5b6-2371-5c94-97ee-6bc5b273b21d@redhat.com>
+Received: from mail-vs1-f43.google.com ([209.85.217.43]:46017 "EHLO
+        mail-vs1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387398AbgCDKXy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2020 05:23:54 -0500
+Received: by mail-vs1-f43.google.com with SMTP id m4so769951vsa.12
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Mar 2020 02:23:53 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Patrick Donnelly <pdonnell@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 2020-03-04 at 00:23 +0800, Yan, Zheng wrote:
-> On 3/3/20 3:53 AM, Jeff Layton wrote:
-> > On Fri, 2020-02-28 at 19:55 +0800, Yan, Zheng wrote:
-> > > This series make cephfs client not request caps for open files that
-> > > idle for a long time. For the case that one active client and multiple
-> > > standby clients open the same file, this increase the possibility that
-> > > mds issues exclusive caps to the active client.
-> > > 
-> > > Yan, Zheng (4):
-> > >    ceph: always renew caps if mds_wanted is insufficient
-> > >    ceph: consider inode's last read/write when calculating wanted caps
-> > >    ceph: simplify calling of ceph_get_fmode()
-> > >    ceph: remove delay check logic from ceph_check_caps()
-> > > 
-> > >   fs/ceph/caps.c               | 324 +++++++++++++++--------------------
-> > >   fs/ceph/file.c               |  39 ++---
-> > >   fs/ceph/inode.c              |  19 +-
-> > >   fs/ceph/ioctl.c              |   2 +
-> > >   fs/ceph/mds_client.c         |   5 -
-> > >   fs/ceph/super.h              |  35 ++--
-> > >   include/linux/ceph/ceph_fs.h |   1 +
-> > >   7 files changed, 188 insertions(+), 237 deletions(-)
-> > > 
-> > > changes since v2
-> > >   - make __ceph_caps_file_wanted more readable
-> > >   - add patch 5 and 6, which fix hung write during testing patch 1~4
-> > > 
-> > 
-> > This patch series causes some serious slowdown in the async dirops
-> > patches that I've not yet fully tracked down, and I suspect that they
-> > may also be the culprit in these bugs:
-> > 
-> 
-> slow down which tests?
-> 
+Dear Cepher
+As all we know, PrimaryPG will never return success to client until
+all replica send their MSG_OSD_REPOPREPLY message. This does help ceph
+to obtain the strong consistence all the time.
 
-Most of the simple tests I was doing to sanity check async dirops.
-Basically, this script was not seeing speed gain with async dirops
-enabled:
+I have made some small changes to this golden rule in Ceph in order to
+reduce the latency during random write as much as possible.
 
------------------8<-------------------
-#!/bin/sh
+In the test patch (please see below), we assume pool size is 3,  the
+'success' will be returned to client once PrimaryPG has received any
+two of the messages, in this case everything works well, including
+recovery and backfill etc. In the meanwhile, the Latency of 4K-random
+write in my HDD cluster is almost reduced by 50%, which is cut down
+from 20ms to 10ms.
 
-MOUNTPOINT=/mnt/cephfs
-TESTDIR=$MOUNTPOINT/test-dirops.$$
+However, with this patch, balance read must be disabled since stale
+data could be read from replica PG. And the reliability of the data
+will be compromised. Even so, I think the effect is limited since
+these missing data can be recovered by using PGLOG.
 
-mkdir $TESTDIR
-stat $TESTDIR
-echo "Creating files in $TESTDIR"
-time for i in `seq 1 10000`; do
-    echo "foobarbaz" > $TESTDIR/$i
-done
-echo; echo "sync"
-time sync
-echo "Starting rm"
-time rm -f $TESTDIR/*
-echo; echo "rmdir"
-time rmdir $TESTDIR
-echo; echo "sync"
-time sync
------------------8<-------------------
+Besides, this modification also made me a little bit anxious. The
+reason is that some bugs have been detected and fixed during testing.
+Considering this, I am not sure if there will be any other bugs
+related to this modification. Therefore, I really hope to get your
+suggestions in order to avoid the unexpected bugs in advance.
 
-It mostly seemed like it was just not getting caps in some cases.
-Cranking up dynamic_debug seemed to make the problem go away, which led
-me to believe there was probably a race condition in there.
+It will be highly appreciated if any of you would like to share your
+experience and comment.
+Big thanks in advance
 
-At this point, I've gone ahead and merged the async dirops patches into
-testing, so if you could rebase this on top of the current testing
-branch and repost, I'll test them out again.
+This patch is base on 14.2.7
 
-> >      https://tracker.ceph.com/issues/44381
-> 
-> this is because I forgot to check if inode is snap when queue delayed 
-> check. But it can't explain slow down.
->
+diff --git a/src/common/legacy_config_opts.h b/src/common/legacy_config_opts.h
+index 79d9c1f..464fba1 100644
+--- a/src/common/legacy_config_opts.h
++++ b/src/common/legacy_config_opts.h
+@@ -873,6 +873,8 @@ OPTION(osd_requested_scrub_priority, OPT_U32)
+ OPTION(osd_pg_delete_priority, OPT_U32)
+ OPTION(osd_pg_delete_cost, OPT_U32) // set default cost equal to 1MB io
 
-Ok, good to know.
++OPTION(osd_pg_allow_majority_write, OPT_BOOL) // set default cost
+equal to 1MB io
++
+ OPTION(osd_recovery_priority, OPT_U32)
+ // set default cost equal to 20MB io
+ OPTION(osd_recovery_cost, OPT_U32)
+diff --git a/src/common/options.cc b/src/common/options.cc
+index f0ba13a..26242eb 100644
+--- a/src/common/options.cc
++++ b/src/common/options.cc
+@@ -4082,6 +4082,10 @@ std::vector<Option> get_global_options() {
+     .set_default(1<<20)
+     .set_description(""),
 
-> >      https://tracker.ceph.com/issues/44382
-> > 
-> > I'm going to drop this series from the testing branch for now, until we
-> > can track down the issue.
-> > 
-> > 
++    Option("osd_pg_allow_majority_write", Option::TYPE_BOOL,
+Option::LEVEL_ADVANCED)
++    .set_default(false)
++    .set_description(""),
++
+     Option("osd_scrub_priority", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
+     .set_default(5)
+     .set_description("Priority for scrub operations in work queue"),
+diff --git a/src/osd/PG.cc b/src/osd/PG.cc
+index cd52976..ad293ec 100644
+--- a/src/osd/PG.cc
++++ b/src/osd/PG.cc
+@@ -3936,12 +3936,23 @@ void PG::write_if_dirty(ObjectStore::Transaction& t)
 
-Thanks,
--- 
-Jeff Layton <jlayton@kernel.org>
+ void PG::add_log_entry(const pg_log_entry_t& e, bool applied)
+ {
++  // test if this assertion can pass for ever!
++  dout(10) << "add_log_entry e.version" << e.version << dendl;
++  dout(10) << "add_log_entry e.user_version" << e.user_version << dendl;
++  dout(10) << "add_log_entry info.last_user_version" <<
+info.last_user_version << dendl;
++  dout(10) << "add_log_entry info.last_complete" <<
+info.last_complete << dendl;
++  dout(10) << "add_log_entry info.last_update" << info.last_update << dendl;
++
+   // raise last_complete only if we were previously up to date
+   if (info.last_complete == info.last_update)
++  {
++    ceph_assert(e.version.version == info.last_complete.version + 1);
+     info.last_complete = e.version;
+-
++  }
++
+   // raise last_update.
+   ceph_assert(e.version > info.last_update);
++  ceph_assert(e.version.version == info.last_update.version + 1);
+   info.last_update = e.version;
+
+   // raise user_version, if it increased (it may have not get bumped
+diff --git a/src/osd/ReplicatedBackend.cc b/src/osd/ReplicatedBackend.cc
+index f8d67af..1aca6e8 100644
+--- a/src/osd/ReplicatedBackend.cc
++++ b/src/osd/ReplicatedBackend.cc
+@@ -509,9 +509,11 @@ void ReplicatedBackend::submit_transaction(
+ void ReplicatedBackend::op_commit(
+   InProgressOpRef& op)
+ {
+-  if (op->on_commit == nullptr) {
+-    // aborted
+-    return;
++  if (!cct->_conf->osd_pg_allow_majority_write) {
++    if (op->on_commit == nullptr) {
++      // aborted
++      return;
++    }
+   }
+
+   FUNCTRACE(cct);
+@@ -523,17 +525,26 @@ void ReplicatedBackend::op_commit(
+   }
+
+   op->waiting_for_commit.erase(get_parent()->whoami_shard());
+-
+-  if (op->waiting_for_commit.empty()) {
+-    op->on_commit->complete(0);
+-    op->on_commit = 0;
+-    in_progress_ops.erase(op->tid);
++  if (cct->_conf->osd_pg_allow_majority_write) {
++    if (op->waiting_for_commit.size() == 1 && op->on_commit) {
++      op->on_commit->complete(0);
++      op->on_commit = 0;
++    }
++    if (op->waiting_for_commit.empty()) {
++      in_progress_ops.erase(op->tid);
++    }
++  } else {
++    if (op->waiting_for_commit.empty()) {
++      op->on_commit->complete(0);
++      op->on_commit = 0;
++      in_progress_ops.erase(op->tid);
++    }
+   }
+ }
+
+ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
+ {
+-  static_cast<MOSDRepOpReply*>(op->get_nonconst_req())->finish_decode();
++  static_cast<MOSDRepOpReply *>(op->get_nonconst_req())->finish_decode();
+   const MOSDRepOpReply *r = static_cast<const MOSDRepOpReply *>(op->get_req());
+   ceph_assert(r->get_header().type == MSG_OSD_REPOPREPLY);
+
+@@ -552,14 +563,14 @@ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
+
+     if (m)
+       dout(7) << __func__ << ": tid " << ip_op.tid << " op " //<< *m
+-       << " ack_type " << (int)r->ack_type
+-       << " from " << from
+-       << dendl;
++              << " ack_type " << (int)r->ack_type
++              << " from " << from
++              << dendl;
+     else
+       dout(7) << __func__ << ": tid " << ip_op.tid << " (no op) "
+-       << " ack_type " << (int)r->ack_type
+-       << " from " << from
+-       << dendl;
++              << " ack_type " << (int)r->ack_type
++              << " from " << from
++              << dendl;
+
+     // oh, good.
+
+@@ -567,8 +578,8 @@ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
+       ceph_assert(ip_op.waiting_for_commit.count(from));
+       ip_op.waiting_for_commit.erase(from);
+       if (ip_op.op) {
+- ip_op.op->mark_event("sub_op_commit_rec");
+- ip_op.op->pg_trace.event("sub_op_commit_rec");
++        ip_op.op->mark_event("sub_op_commit_rec");
++        ip_op.op->pg_trace.event("sub_op_commit_rec");
+       }
+     } else {
+       // legacy peer; ignore
+@@ -578,12 +589,28 @@ void ReplicatedBackend::do_repop_reply(OpRequestRef op)
+       from,
+       r->get_last_complete_ondisk());
+
+-    if (ip_op.waiting_for_commit.empty() &&
++    if (cct->_conf->osd_pg_allow_majority_write) {
++      if (ip_op.waiting_for_commit.size() == 1 &&
+         ip_op.on_commit) {
+-      ip_op.on_commit->complete(0);
+-      ip_op.on_commit = 0;
+-      in_progress_ops.erase(iter);
++        ip_op.on_commit->complete(0);
++        ip_op.on_commit = 0;
++      }
++      if (ip_op.waiting_for_commit.empty()) {
++        in_progress_ops.erase(iter);
++      }
++    } else {
++      if (ip_op.waiting_for_commit.empty() && ip_op.on_commit) {
++        ip_op.on_commit->complete(0);
++        ip_op.on_commit = 0;
++        in_progress_ops.erase(iter);
++      }
+     }
++
++    dout(10) << __func__ << ": tid " << ip_op.tid << " op " //<< *m
++              << " ack_type " << (int)r->ack_type
++              << " from " << from
++              << " in_progress_ops size " << in_progress_ops.size()
++              << dendl;
+   }
+ }
