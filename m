@@ -1,66 +1,35 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v5 0/7] ceph: don't request caps for idle open files
-Date: Thu, 05 Mar 2020 10:32:20 -0500
-Message-ID: <6bc88d487b99ec0cb2721151a706242d9c213dfd.camel@kernel.org>
-References: <20200305122105.69184-1-zyan@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:57142 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726142AbgCEPcW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 5 Mar 2020 10:32:22 -0500
-In-Reply-To: <20200305122105.69184-1-zyan@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+From: Qiujun Huang <hqjagain@gmail.com>
+Subject: [PATCH] fs/ceph: return errcode in __get_parent().
+Date: Fri,  6 Mar 2020 09:34:20 +0800
+Message-ID: <1583458460-31917-1-git-send-email-hqjagain@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: jlayton@kernel.org
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Qiujun Huang <hqjagain@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 2020-03-05 at 20:20 +0800, Yan, Zheng wrote:
-> This series make cephfs client not request caps for open files that
-> idle for a long time. For the case that one active client and multiple
-> standby clients open the same file, this increase the possibility that
-> mds issues exclusive caps to the active client.
-> 
-> Yan, Zheng (7):
->   ceph: always renew caps if mds_wanted is insufficient
->   ceph: consider inode's last read/write when calculating wanted caps
->   ceph: remove delay check logic from ceph_check_caps()
->   ceph: simplify calling of ceph_get_fmode()
->   ceph: update i_requested_max_size only when sending cap msg to auth mds
->   ceph: check all mds' caps after page writeback
->   ceph: calculate dir's wanted caps according to recent dirops
-> 
->  fs/ceph/caps.c               | 360 ++++++++++++++++-------------------
->  fs/ceph/dir.c                |  21 +-
->  fs/ceph/file.c               |  45 ++---
->  fs/ceph/inode.c              |  21 +-
->  fs/ceph/ioctl.c              |   2 +
->  fs/ceph/mds_client.c         |  16 +-
->  fs/ceph/super.h              |  37 ++--
->  include/linux/ceph/ceph_fs.h |   1 +
->  8 files changed, 243 insertions(+), 260 deletions(-)
-> 
-> changes since v2
->  - make __ceph_caps_file_wanted() more readable
->  - add patch 5 and 6, which fix hung write during testing patch 1~4
-> 
-> changes since v3
->  - don't queue delayed cap check for snap inode
->  - initialize ci->{last_rd,last_wr} to jiffies - 3600 * HZ
->  - make __ceph_caps_file_wanted() check inode type
-> 
-> changes since v4
->  - add patch 7, improve how to calculate dir's wanted caps
-> 
+return real errcode when it's different from ENOENT.
 
-Thanks Zheng. This one seems to work just fine. Merged into ceph-
-client/testing branch with the following changes:
+Signed-off-by: Qiujun Huang <hqjagain@gmail.com>
+---
+ fs/ceph/export.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-- squashed patch 7 into patch 2
-- cleaned up a few changelog grammatical and spelling errors
-- fix a small bit of whitespace damage
-
-Thanks!
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index b6bfa94..79dc068 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -315,6 +315,11 @@ static struct dentry *__get_parent(struct super_block *sb,
+ 
+ 	req->r_num_caps = 1;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
++	if (err) {
++		ceph_mdsc_put_request(req);
++		return ERR_PTR(err);
++	}
++
+ 	inode = req->r_target_inode;
+ 	if (inode)
+ 		ihold(inode);
 -- 
-Jeff Layton <jlayton@kernel.org>
+1.8.3.1
