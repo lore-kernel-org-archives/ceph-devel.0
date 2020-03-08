@@ -1,44 +1,44 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] fs/ceph: return errcode in __get_parent().
-Date: Fri, 06 Mar 2020 07:13:41 -0500
-Message-ID: <f7318d47df2074a7a00ea3a8580bc973a8c0b206.camel@kernel.org>
-References: <1583458460-31917-1-git-send-email-hqjagain@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1583458460-31917-1-git-send-email-hqjagain@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Qiujun Huang <hqjagain@gmail.com>
-Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: XuYun <yunxu@me.com>
+Subject: Re: [ceph-users] ceph rbd volumes/images IO details
+Date: Sun, 8 Mar 2020 14:58:42 +0800
+Message-ID: <B6D7DD2C-7F32-40D0-A24B-CE955B33438F@me.com>
+References: <CANA9Uk54Ygo98sjozbU_HcAGjocSV2ui=-=imrDTCpdLOHhx6Q@mail.gmail.com>
+ <CANA9Uk5eR41ZBYU_XGpgQoLwO8MnGTFuu6L+OKKvEBhs2YXCiA@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 13.0 \(3608.60.0.2.5\))
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from pv50p00im-zteg10011401.me.com ([17.58.6.41]:49912 "EHLO
+        pv50p00im-zteg10011401.me.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725854AbgCHHFn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 8 Mar 2020 03:05:43 -0400
+In-Reply-To: <CANA9Uk5eR41ZBYU_XGpgQoLwO8MnGTFuu6L+OKKvEBhs2YXCiA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>, Robert LeBlanc <robert@leblancnet.us>, ceph-users <ceph-users@ceph.com>, Ceph Community <ceph-community@lists.ceph.com>
 
-On Fri, 2020-03-06 at 09:34 +0800, Qiujun Huang wrote:
-> return real errcode when it's different from ENOENT.
-> 
-> Signed-off-by: Qiujun Huang <hqjagain@gmail.com>
-> ---
->  fs/ceph/export.c | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> index b6bfa94..79dc068 100644
-> --- a/fs/ceph/export.c
-> +++ b/fs/ceph/export.c
-> @@ -315,6 +315,11 @@ static struct dentry *__get_parent(struct super_block *sb,
->  
->  	req->r_num_caps = 1;
->  	err = ceph_mdsc_do_request(mdsc, NULL, req);
-> +	if (err) {
-> +		ceph_mdsc_put_request(req);
-> +		return ERR_PTR(err);
-> +	}
-> +
->  	inode = req->r_target_inode;
->  	if (inode)
->  		ihold(inode);
+You can enable prometheus module of mgr if you are running Nautilus.
 
-Looks good! Merged into the ceph-client/testing branch and should make
-5.7. Thanks for the patch!
--- 
-Jeff Layton <jlayton@kernel.org>
+> 2020=E5=B9=B43=E6=9C=888=E6=97=A5 =E4=B8=8A=E5=8D=882:15=EF=BC=8CM =
+Ranga Swami Reddy <swamireddy@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
+>=20
+> On Fri, Mar 6, 2020 at 1:06 AM M Ranga Swami Reddy =
+<swamireddy@gmail.com>
+> wrote:
+>=20
+>> Hello,
+>> Can we get the IOPs of any rbd image/volume?
+>>=20
+>> For ex: I have created volumes via OpenStack Cinder. Want to know
+>> the IOPs of these volumes.
+>>=20
+>> In general - we can get pool stats, but not seen the per volumes =
+stats.
+>>=20
+>> Any hint here? Appreciated.
+>>=20
+> _______________________________________________
+> ceph-users mailing list -- ceph-users@ceph.io
+> To unsubscribe send an email to ceph-users-leave@ceph.io
