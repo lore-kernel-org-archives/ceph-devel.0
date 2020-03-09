@@ -1,149 +1,62 @@
-From: xiubli@redhat.com
-Subject: [PATCH v9 5/5] ceph: add global metadata perf metric support
-Date: Mon,  9 Mar 2020 03:37:10 -0400
-Message-ID: <1583739430-4928-6-git-send-email-xiubli@redhat.com>
-References: <1583739430-4928-1-git-send-email-xiubli@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [ceph-users] Re: ceph rbd volumes/images IO details
+Date: Mon, 9 Mar 2020 11:17:22 +0100
+Message-ID: <CAOi1vP_WNn2eSqwm-9Nvo+Gzv9MUYGmPaMGRpAsd3EKSdHBb3Q@mail.gmail.com>
+References: <CANA9Uk54Ygo98sjozbU_HcAGjocSV2ui=-=imrDTCpdLOHhx6Q@mail.gmail.com>
+ <CANA9Uk5eR41ZBYU_XGpgQoLwO8MnGTFuu6L+OKKvEBhs2YXCiA@mail.gmail.com>
+ <B6D7DD2C-7F32-40D0-A24B-CE955B33438F@me.com> <CANA9Uk76E6D-nznLF+ij9aoJgbpckKqc5gtUu0p4jfPOWCGWbA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:23226 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726071AbgCIHhh (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2020 03:37:37 -0400
-In-Reply-To: <1583739430-4928-1-git-send-email-xiubli@redhat.com>
+Received: from mail-io1-f65.google.com ([209.85.166.65]:38351 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725796AbgCIKRW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2020 06:17:22 -0400
+Received: by mail-io1-f65.google.com with SMTP id s24so8537866iog.5
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Mar 2020 03:17:22 -0700 (PDT)
+In-Reply-To: <CANA9Uk76E6D-nznLF+ij9aoJgbpckKqc5gtUu0p4jfPOWCGWbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, idryomov@gmail.com
-Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: XuYun <yunxu@me.com>, ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, Ceph Community <ceph-community@lists.ceph.com>
 
-From: Xiubo Li <xiubli@redhat.com>
+On Sun, Mar 8, 2020 at 5:13 PM M Ranga Swami Reddy <swamireddy@gmail.com> w=
+rote:
+>
+> Iam using the Luminous 12.2.11 version with prometheus.
+>
+> On Sun, Mar 8, 2020 at 12:28 PM XuYun <yunxu@me.com> wrote:
+>
+> > You can enable prometheus module of mgr if you are running Nautilus.
+> >
+> > > 2020=E5=B9=B43=E6=9C=888=E6=97=A5 =E4=B8=8A=E5=8D=882:15=EF=BC=8CM Ra=
+nga Swami Reddy <swamireddy@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
+> > >
+> > > On Fri, Mar 6, 2020 at 1:06 AM M Ranga Swami Reddy <swamireddy@gmail.=
+com
+> > >
+> > > wrote:
+> > >
+> > >> Hello,
+> > >> Can we get the IOPs of any rbd image/volume?
+> > >>
+> > >> For ex: I have created volumes via OpenStack Cinder. Want to know
+> > >> the IOPs of these volumes.
+> > >>
+> > >> In general - we can get pool stats, but not seen the per volumes sta=
+ts.
+> > >>
+> > >> Any hint here? Appreciated.
 
-It will calculate the latency for the metedata requests:
-item          total       sum_lat(us)     avg_lat(us)
------------------------------------------------------
-metadata      113         220000          1946
+Per image/volume stats are available since nautilus [1].  There is
+no automated way to do it in luminous.  Since you are using openstack,
+you can probably set up some generic I/O monitoring at instance level
+(i.e. external to ceph) and possibly apply disk I/O limits (again at
+instance level, enforced in qemu).
 
-URL: https://tracker.ceph.com/issues/43215
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/debugfs.c    |  6 ++++++
- fs/ceph/mds_client.c | 19 +++++++++++++++++++
- fs/ceph/mds_client.h |  3 ++-
- fs/ceph/metric.h     | 15 +++++++++++++++
- 4 files changed, 42 insertions(+), 1 deletion(-)
+[1] https://ceph.io/rbd/new-in-nautilus-rbd-performance-monitoring/
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 464bfbd..60f3e307 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -146,6 +146,12 @@ static int metric_show(struct seq_file *s, void *p)
- 	avg = total ? sum / total : 0;
- 	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "write", total, sum, avg);
- 
-+	total = percpu_counter_sum(&mdsc->metric.total_metadatas);
-+	sum = percpu_counter_sum(&mdsc->metric.metadata_latency_sum);
-+	sum = jiffies_to_usecs(sum);
-+	avg = total ? sum / total : 0;
-+	seq_printf(s, "%-14s%-12lld%-16lld%lld\n", "metadata", total, sum, avg);
-+
- 	seq_printf(s, "\n");
- 	seq_printf(s, "item          total           miss            hit\n");
- 	seq_printf(s, "-------------------------------------------------\n");
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 43f5d59..5c03ed3 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2547,6 +2547,8 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
- static void complete_request(struct ceph_mds_client *mdsc,
- 			     struct ceph_mds_request *req)
- {
-+	req->r_ended = jiffies;
-+
- 	if (req->r_callback)
- 		req->r_callback(mdsc, req);
- 	complete_all(&req->r_completion);
-@@ -3155,6 +3157,9 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 
- 	/* kick calling process */
- 	complete_request(mdsc, req);
-+
-+	ceph_update_metadata_latency(&mdsc->metric, req->r_started,
-+				     req->r_ended, err);
- out:
- 	ceph_mdsc_put_request(req);
- 	return;
-@@ -4361,8 +4366,20 @@ static int ceph_mdsc_metric_init(struct ceph_client_metric *metric)
- 	if (ret)
- 		goto err_write_latency_sum;
- 
-+	ret = percpu_counter_init(&metric->total_metadatas, 0, GFP_KERNEL);
-+	if (ret)
-+		goto err_total_metadatas;
-+
-+	ret = percpu_counter_init(&metric->metadata_latency_sum, 0, GFP_KERNEL);
-+	if (ret)
-+		goto err_metadata_latency_sum;
-+
- 	return 0;
- 
-+err_metadata_latency_sum:
-+	percpu_counter_destroy(&metric->total_metadatas);
-+err_total_metadatas:
-+	percpu_counter_destroy(&metric->write_latency_sum);
- err_write_latency_sum:
- 	percpu_counter_destroy(&metric->total_writes);
- err_total_writes:
-@@ -4718,6 +4735,8 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
- 
- 	ceph_mdsc_stop(mdsc);
- 
-+	percpu_counter_destroy(&mdsc->metric.metadata_latency_sum);
-+	percpu_counter_destroy(&mdsc->metric.total_metadatas);
- 	percpu_counter_destroy(&mdsc->metric.write_latency_sum);
- 	percpu_counter_destroy(&mdsc->metric.total_writes);
- 	percpu_counter_destroy(&mdsc->metric.read_latency_sum);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index ae1d01c..9018fa7 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -298,7 +298,8 @@ struct ceph_mds_request {
- 	u32               r_readdir_offset;
- 
- 	unsigned long r_timeout;  /* optional.  jiffies, 0 is "wait forever" */
--	unsigned long r_started;  /* start time to measure timeout against */
-+	unsigned long r_started;  /* start time to measure timeout against and latency */
-+	unsigned long r_ended;    /* finish time to measure latency */
- 	unsigned long r_request_started; /* start time for mds request only,
- 					    used to measure lease durations */
- 
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index 13698aa..faba142 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -16,6 +16,9 @@ struct ceph_client_metric {
- 
- 	struct percpu_counter total_writes;
- 	struct percpu_counter write_latency_sum;
-+
-+	struct percpu_counter total_metadatas;
-+	struct percpu_counter metadata_latency_sum;
- };
- 
- static inline void ceph_update_cap_hit(struct ceph_client_metric *m)
-@@ -51,4 +54,16 @@ static inline void ceph_update_write_latency(struct ceph_client_metric *m,
- 	percpu_counter_inc(&m->total_writes);
- 	percpu_counter_add(&m->write_latency_sum, r_end - r_start);
- }
-+
-+static inline void ceph_update_metadata_latency(struct ceph_client_metric *m,
-+						unsigned long r_start,
-+						unsigned long r_end,
-+						int rc)
-+{
-+	if (rc && rc != -ENOENT)
-+		return;
-+
-+	percpu_counter_inc(&m->total_metadatas);
-+	percpu_counter_add(&m->metadata_latency_sum, r_end - r_start);
-+}
- #endif /* _FS_CEPH_MDS_METRIC_H */
--- 
-1.8.3.1
+Thanks,
+
+                Ilya
