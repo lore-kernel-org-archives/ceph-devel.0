@@ -1,62 +1,101 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [ceph-users] Re: ceph rbd volumes/images IO details
-Date: Mon, 9 Mar 2020 11:17:22 +0100
-Message-ID: <CAOi1vP_WNn2eSqwm-9Nvo+Gzv9MUYGmPaMGRpAsd3EKSdHBb3Q@mail.gmail.com>
-References: <CANA9Uk54Ygo98sjozbU_HcAGjocSV2ui=-=imrDTCpdLOHhx6Q@mail.gmail.com>
- <CANA9Uk5eR41ZBYU_XGpgQoLwO8MnGTFuu6L+OKKvEBhs2YXCiA@mail.gmail.com>
- <B6D7DD2C-7F32-40D0-A24B-CE955B33438F@me.com> <CANA9Uk76E6D-nznLF+ij9aoJgbpckKqc5gtUu0p4jfPOWCGWbA@mail.gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH v9 2/5] ceph: add caps perf metric for each session
+Date: Mon, 09 Mar 2020 07:51:38 -0400
+Message-ID: <16b9a2a5bfbd8802ce2f2c435aba7331cd1adb35.camel@kernel.org>
+References: <1583739430-4928-1-git-send-email-xiubli@redhat.com>
+         <1583739430-4928-3-git-send-email-xiubli@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io1-f65.google.com ([209.85.166.65]:38351 "EHLO
-        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725796AbgCIKRW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2020 06:17:22 -0400
-Received: by mail-io1-f65.google.com with SMTP id s24so8537866iog.5
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Mar 2020 03:17:22 -0700 (PDT)
-In-Reply-To: <CANA9Uk76E6D-nznLF+ij9aoJgbpckKqc5gtUu0p4jfPOWCGWbA@mail.gmail.com>
+Received: from mail.kernel.org ([198.145.29.99]:39004 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725796AbgCILvl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 9 Mar 2020 07:51:41 -0400
+In-Reply-To: <1583739430-4928-3-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: M Ranga Swami Reddy <swamireddy@gmail.com>
-Cc: XuYun <yunxu@me.com>, ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, Ceph Community <ceph-community@lists.ceph.com>
+To: xiubli@redhat.com, idryomov@gmail.com
+Cc: sage@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-On Sun, Mar 8, 2020 at 5:13 PM M Ranga Swami Reddy <swamireddy@gmail.com> w=
-rote:
->
-> Iam using the Luminous 12.2.11 version with prometheus.
->
-> On Sun, Mar 8, 2020 at 12:28 PM XuYun <yunxu@me.com> wrote:
->
-> > You can enable prometheus module of mgr if you are running Nautilus.
-> >
-> > > 2020=E5=B9=B43=E6=9C=888=E6=97=A5 =E4=B8=8A=E5=8D=882:15=EF=BC=8CM Ra=
-nga Swami Reddy <swamireddy@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
-> > >
-> > > On Fri, Mar 6, 2020 at 1:06 AM M Ranga Swami Reddy <swamireddy@gmail.=
-com
-> > >
-> > > wrote:
-> > >
-> > >> Hello,
-> > >> Can we get the IOPs of any rbd image/volume?
-> > >>
-> > >> For ex: I have created volumes via OpenStack Cinder. Want to know
-> > >> the IOPs of these volumes.
-> > >>
-> > >> In general - we can get pool stats, but not seen the per volumes sta=
-ts.
-> > >>
-> > >> Any hint here? Appreciated.
+On Mon, 2020-03-09 at 03:37 -0400, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> This will fulfill the cap hit/mis metric stuff per-superblock,
+> it will count the hit/mis counters based each inode, and if one
+> inode's 'issued & ~revoking == mask' will mean a hit, or a miss.
+> 
+> item          total           miss            hit
+> -------------------------------------------------
+> caps          295             107             4119
+> 
+> URL: https://tracker.ceph.com/issues/43215
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  fs/ceph/acl.c        |  2 +-
+>  fs/ceph/caps.c       | 19 +++++++++++++++++++
+>  fs/ceph/debugfs.c    | 16 ++++++++++++++++
+>  fs/ceph/dir.c        |  5 +++--
+>  fs/ceph/inode.c      |  4 ++--
+>  fs/ceph/mds_client.c | 26 ++++++++++++++++++++++----
+>  fs/ceph/metric.h     | 13 +++++++++++++
+>  fs/ceph/super.h      |  8 +++++---
+>  fs/ceph/xattr.c      |  4 ++--
+>  9 files changed, 83 insertions(+), 14 deletions(-)
+> 
+> diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+> index 26be652..e046574 100644
+> --- a/fs/ceph/acl.c
+> +++ b/fs/ceph/acl.c
+> @@ -22,7 +22,7 @@ static inline void ceph_set_cached_acl(struct inode *inode,
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>  
+>  	spin_lock(&ci->i_ceph_lock);
+> -	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 0))
+> +	if (__ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 0))
+>  		set_cached_acl(inode, type, acl);
+>  	else
+>  		forget_cached_acl(inode, type);
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 342a32c..efaeb67 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -912,6 +912,20 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
+>  	return 0;
+>  }
+>  
+> +int __ceph_caps_issued_mask_metric(struct ceph_inode_info *ci, int mask,
+> +				   int touch)
+> +{
+> +	struct ceph_fs_client *fsc = ceph_sb_to_client(ci->vfs_inode.i_sb);
+> +	int r;
+> +
+> +	r = __ceph_caps_issued_mask(ci, mask, touch);
+> +	if (r)
+> +		ceph_update_cap_hit(&fsc->mdsc->metric);
+> +	else
+> +		ceph_update_cap_mis(&fsc->mdsc->metric);
+> +	return r;
+> +}
+> +
+>  /*
+>   * Return true if mask caps are currently being revoked by an MDS.
+>   */
+> @@ -2680,6 +2694,11 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+>  	if (snap_rwsem_locked)
+>  		up_read(&mdsc->snap_rwsem);
+>  
+> +	if (!ret)
+> +		ceph_update_cap_mis(&mdsc->metric);
 
-Per image/volume stats are available since nautilus [1].  There is
-no automated way to do it in luminous.  Since you are using openstack,
-you can probably set up some generic I/O monitoring at instance level
-(i.e. external to ceph) and possibly apply disk I/O limits (again at
-instance level, enforced in qemu).
+Should a negative error code here also mean a miss?
 
-[1] https://ceph.io/rbd/new-in-nautilus-rbd-performance-monitoring/
+> +	else if (ret == 1)
+> +		ceph_update_cap_hit(&mdsc->metric);
+> +
+>  	dout("get_cap_refs %p ret %d got %s\n", inode,
+>  	     ret, ceph_cap_string(*got));
+>  	return ret;
 
-Thanks,
-
-                Ilya
+-- 
+Jeff Layton <jlayton@kernel.org>
