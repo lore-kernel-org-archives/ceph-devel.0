@@ -1,123 +1,109 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 1/1] libceph: fix memory leak for messages allocated with CEPH_MSG_DATA_PAGES
-Date: Tue, 10 Mar 2020 11:40:38 +0100
-Message-ID: <CAOi1vP8S6xTpbNaeRHZ=pKOf4vbw03LxT5RbheDMSHidDPGr+w@mail.gmail.com>
-References: <20200310090924.49788-1-rpenyaev@suse.de> <CAOi1vP9chc5PZD8SpSKXWMec2jMgESQuoAqkwy5GpF61Qs2Uhg@mail.gmail.com>
- <9998629d1021eb8c2bd3a1bd5c2d87c8@suse.de>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH 1/4] ceph: cleanup return error of try_get_cap_refs()
+Date: Tue, 10 Mar 2020 19:34:18 +0800
+Message-ID: <20200310113421.174873-2-zyan@redhat.com>
+References: <20200310113421.174873-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io1-f67.google.com ([209.85.166.67]:40444 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726331AbgCJKki (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2020 06:40:38 -0400
-Received: by mail-io1-f67.google.com with SMTP id d8so12226309ion.7
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2020 03:40:37 -0700 (PDT)
-In-Reply-To: <9998629d1021eb8c2bd3a1bd5c2d87c8@suse.de>
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:42306 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725937AbgCJLed (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 10 Mar 2020 07:34:33 -0400
+In-Reply-To: <20200310113421.174873-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roman Penyaev <rpenyaev@suse.de>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: jlayton@kernel.org, "Yan, Zheng" <zyan@redhat.com>
 
-On Tue, Mar 10, 2020 at 11:15 AM Roman Penyaev <rpenyaev@suse.de> wrote:
->
-> On 2020-03-10 11:03, Ilya Dryomov wrote:
-> > On Tue, Mar 10, 2020 at 10:09 AM Roman Penyaev <rpenyaev@suse.de>
-> > wrote:
-> >>
-> >> OSD client allocates a message with a page vector for OSD_MAP,
-> >> OSD_BACKOFF
-> >> and WATCH_NOTIFY message types (see alloc_msg_with_page_vector()
-> >> caller),
-> >> but pages vector release is never called.
-> >>
-> >> Signed-off-by: Roman Penyaev <rpenyaev@suse.de>
-> >> Cc: Ilya Dryomov <idryomov@gmail.com>
-> >> Cc: Jeff Layton <jlayton@kernel.org>
-> >> Cc: Sage Weil <sage@redhat.com>
-> >> Cc: ceph-devel@vger.kernel.org
-> >> ---
-> >>  net/ceph/messenger.c | 9 ++++++++-
-> >>  1 file changed, 8 insertions(+), 1 deletion(-)
-> >>
-> >> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> >> index 5b4bd8261002..28cbd55ec2e3 100644
-> >> --- a/net/ceph/messenger.c
-> >> +++ b/net/ceph/messenger.c
-> >> @@ -3248,8 +3248,15 @@ static struct ceph_msg_data
-> >> *ceph_msg_data_add(struct ceph_msg *msg)
-> >>
-> >>  static void ceph_msg_data_destroy(struct ceph_msg_data *data)
-> >>  {
-> >> -       if (data->type == CEPH_MSG_DATA_PAGELIST)
-> >> +       if (data->type == CEPH_MSG_DATA_PAGES) {
-> >> +               int num_pages;
-> >> +
-> >> +               num_pages = calc_pages_for(data->alignment,
-> >> +                                          data->length);
-> >> +               ceph_release_page_vector(data->pages, num_pages);
-> >> +       } else if (data->type == CEPH_MSG_DATA_PAGELIST) {
-> >>                 ceph_pagelist_release(data->pagelist);
-> >> +       }
-> >>  }
-> >>
-> >>  void ceph_msg_data_add_pages(struct ceph_msg *msg, struct page
-> >> **pages,
-> >
-> > Hi Roman,
-> >
-> > I don't think there is a leak here.
-> >
-> > osdmap and backoff messages don't have data.
->
-> I tried to be symmetric on this path: allocation path
-> exists, but there is no deallocation.
->
-> > watch_notify message may or may not have data and this is dealt
-> > with in handle_watch_notify().  The pages are either released in
-> > handle_watch_notify() or transferred to ceph_osdc_notify() through
-> > lreq.  The caller of ceph_osdc_notify() is then responsible for
-> > them:
-> >
-> >    * @preply_{pages,len} are initialized both on success and error.
-> >    * The caller is responsible for:
-> >    *
-> >    *     ceph_release_page_vector(...)
-> >    */
-> >   int ceph_osdc_notify(struct ceph_osd_client *osdc,
->
-> Thanks for taking a look. Then there is a rare and unobvious
-> leak, please check ceph_con_in_msg_alloc() in messenger.c.
-> Message can be allocated for osd client (->alloc_msg) and then
-> can be immediately put by the following path:
->
->         if (con->state != CON_STATE_OPEN) {
->                 if (msg)
->                         ceph_msg_put(msg);
->
-> (also few lines below where con->in_msg is put)
->
-> without reaching the dispatch and set of handle_* functions,
-> which you've referred.
+Returns 0 if caps were not able to be acquired (yet), 1 if succeed,
+or a negative error code. There are 3 speical error codes:
 
-Yeah, this one is real, and rather old.  That is why there is a TODO
-on top of alloc_msg_with_page_vector():
+-EAGAIN: need to sleep but non-blocking is specified
+-EFBIG:  ask caller to call check_max_size() and try again.
+-ESTALE: ask caller to call ceph_renew_caps() and try again.
 
-  /*
-   * TODO: switch to a msg-owned pagelist
-   */
+Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+---
+ fs/ceph/caps.c | 25 ++++++++++++++-----------
+ 1 file changed, 14 insertions(+), 11 deletions(-)
 
->
-> And seems if the ownership of the ->pages is transferred to
-> the handle_watch_notify() and freed there, then it should be
-> fixed by having release in one place: here or there.
-
-The problem is that at least at one point CEPH_MSG_DATA_PAGES needed
-a reference count -- it couldn't be freed it in one place.  pagelists
-are reference counted, but can't be easily swapped in, hence that TODO.
-
-Thanks for reminding me about this.  I'll take a look -- perhaps the
-reference count is no longer required and we can get away with a simple
-flag.
-
-                Ilya
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 342a32c74c64..804f4c65251a 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2530,10 +2530,11 @@ void ceph_take_cap_refs(struct ceph_inode_info *c=
+i, int got,
+  * Note that caller is responsible for ensuring max_size increases are
+  * requested from the MDS.
+  *
+- * Returns 0 if caps were not able to be acquired (yet), a 1 if they wer=
+e,
+- * or a negative error code.
+- *
+- * FIXME: how does a 0 return differ from -EAGAIN?
++ * Returns 0 if caps were not able to be acquired (yet), 1 if succeed,
++ * or a negative error code. There are 3 speical error codes:
++ *  -EAGAIN: need to sleep but non-blocking is specified
++ *  -EFBIG:  ask caller to call check_max_size() and try again.
++ *  -ESTALE: ask caller to call ceph_renew_caps() and try again.
+  */
+ enum {
+ 	/* first 8 bits are reserved for CEPH_FILE_MODE_FOO */
+@@ -2581,7 +2582,7 @@ static int try_get_cap_refs(struct inode *inode, in=
+t need, int want,
+ 			dout("get_cap_refs %p endoff %llu > maxsize %llu\n",
+ 			     inode, endoff, ci->i_max_size);
+ 			if (endoff > ci->i_requested_max_size)
+-				ret =3D -EAGAIN;
++				ret =3D -EFBIG;
+ 			goto out_unlock;
+ 		}
+ 		/*
+@@ -2743,7 +2744,10 @@ int ceph_try_get_caps(struct inode *inode, int nee=
+d, int want,
+ 		flags |=3D NON_BLOCKING;
+=20
+ 	ret =3D try_get_cap_refs(inode, need, want, 0, flags, got);
+-	return ret =3D=3D -EAGAIN ? 0 : ret;
++	/* three special error codes */
++	if (ret =3D=3D -EAGAIN || ret =3D=3D -EFBIG || ret =3D=3D -EAGAIN)
++		ret =3D 0;
++	return ret;
+ }
+=20
+ /*
+@@ -2771,17 +2775,12 @@ int ceph_get_caps(struct file *filp, int need, in=
+t want,
+ 	flags =3D get_used_fmode(need | want);
+=20
+ 	while (true) {
+-		if (endoff > 0)
+-			check_max_size(inode, endoff);
+-
+ 		flags &=3D CEPH_FILE_MODE_MASK;
+ 		if (atomic_read(&fi->num_locks))
+ 			flags |=3D CHECK_FILELOCK;
+ 		_got =3D 0;
+ 		ret =3D try_get_cap_refs(inode, need, want, endoff,
+ 				       flags, &_got);
+-		if (ret =3D=3D -EAGAIN)
+-			continue;
+ 		if (!ret) {
+ 			struct ceph_mds_client *mdsc =3D fsc->mdsc;
+ 			struct cap_wait cw;
+@@ -2829,6 +2828,10 @@ int ceph_get_caps(struct file *filp, int need, int=
+ want,
+ 		}
+=20
+ 		if (ret < 0) {
++			if (ret =3D=3D -EFBIG) {
++				check_max_size(inode, endoff);
++				continue;
++			}
+ 			if (ret =3D=3D -ESTALE) {
+ 				/* session was killed, try renew caps */
+ 				ret =3D ceph_renew_caps(inode, flags);
+--=20
+2.21.1
