@@ -1,40 +1,73 @@
-From: ''Michael weirsky'' <ronald.pena@11d01.mspz7.gob.ec>
-Subject: =?utf-8?q?Wohlt=C3=A4tigkeitsspende_von_2=2E000=2E000_Millionen_Euro?=
-Date: Tue, 10 Mar 2020 10:18:09 +0200
-Message-ID: <20200310074841.83EF32F6BD5F@mail.11d01.mspz7.gob.ec>
-Reply-To: mikeweirskyspende@gmail.com
+From: Roman Penyaev <rpenyaev@suse.de>
+Subject: Re: [PATCH 1/1] libceph: fix memory leak for messages allocated with
+ CEPH_MSG_DATA_PAGES
+Date: Tue, 10 Mar 2020 13:44:55 +0100
+Message-ID: <5e1f57d6f17b43ea99052a082b584190@suse.de>
+References: <20200310090924.49788-1-rpenyaev@suse.de>
+ <CAOi1vP9chc5PZD8SpSKXWMec2jMgESQuoAqkwy5GpF61Qs2Uhg@mail.gmail.com>
+ <9998629d1021eb8c2bd3a1bd5c2d87c8@suse.de>
+ <CAOi1vP8S6xTpbNaeRHZ=pKOf4vbw03LxT5RbheDMSHidDPGr+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.11d01.mspz7.gob.ec ([190.152.145.91]:53590 "EHLO
-        mail.11d01.mspz7.gob.ec" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726252AbgCJL4X (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2020 07:56:23 -0400
-Content-Description: Mail message body
+Received: from mx2.suse.de ([195.135.220.15]:36442 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727541AbgCJMo5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 10 Mar 2020 08:44:57 -0400
+In-Reply-To: <CAOi1vP8S6xTpbNaeRHZ=pKOf4vbw03LxT5RbheDMSHidDPGr+w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <ronald.pena@11d01.mspz7.gob.ec>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Lieber Freund,
+On 2020-03-10 11:40, Ilya Dryomov wrote:
 
-Ich bin Herr Mike Weirsky, New Jersey, Vereinigte Staaten von Amerika, der =
-Mega-Gewinner von $ 273million In Mega Millions Jackpot, spende ich an 5 zu=
-f=C3=A4llige Personen, wenn Sie diese E-Mail erhalten, dann wurde Ihre E-Ma=
-il nach einem Spinball ausgew=C3=A4hlt.Ich habe den gr=C3=B6=C3=9Ften Teil =
-meines Verm=C3=B6gens auf eine Reihe von Wohlt=C3=A4tigkeitsorganisationen =
-und Organisationen verteilt.Ich habe mich freiwillig dazu entschieden, die =
-Summe von =E2=82=AC 2.000.000,00 an Sie als eine der ausgew=C3=A4hlten 5 zu=
- spenden, um meine Gewinne zu =C3=BCberpr=C3=BCfen.
-Das ist dein Spendencode: [MW530342019]
-www.youtube.com/watch?v=3Dun8yRTmrYMY
+[skip]
 
-Antworten Sie mit dem SPENDE-CODE an diese =
+>> And seems if the ownership of the ->pages is transferred to
+>> the handle_watch_notify() and freed there, then it should be
+>> fixed by having release in one place: here or there.
+> 
+> The problem is that at least at one point CEPH_MSG_DATA_PAGES needed
+> a reference count -- it couldn't be freed it in one place.  pagelists
+> are reference counted, but can't be easily swapped in, hence that TODO.
+> 
+> Thanks for reminding me about this.  I'll take a look -- perhaps the
+> reference count is no longer required and we can get away with a simple
+> flag.
+
+To my shallow understanding handle_watch_notify() also has an error
+path which eventually does not free or take ownership of data->pages,
+e.g. callers of 'goto out_unlock_osdc'. Probably code relies on the
+fact, that sender knows what is doing and never sends ->data with
+wrong cookie or opcode, but looks very suspicious to me.
+
+Seems for this particular DATA_PAGES case it is possible just to
+take an ownership by zeroing out data->pages and data->length,
+which prevents double free, something as the following:
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index b68b376d8c2f..15ae6377c461 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -4440,6 +4440,8 @@ static void handle_watch_notify(struct 
+ceph_osd_client *osdc,
+                                         
+ceph_release_page_vector(data->pages,
+                                                calc_pages_for(0, 
+data->length));
+                                 }
++                               data->pages = NULL;
++                               data->length = 0;
+                         }
+                         lreq->notify_finish_error = return_code;
 
 
-E-Mail:mikeweirskyspende@gmail.com
+and keeping the current patch with explicit call of
+ceph_release_page_vector from ceph_msg_data_destroy() from
+messenger.c.
 
-Ich hoffe, Sie und Ihre Familie gl=C3=BCcklich zu machen.
-
-Gr=C3=BC=C3=9Fe
-Herr Mike Weirsky
+--
+Roman
