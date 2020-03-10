@@ -1,75 +1,79 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [ceph-users] cephfs snap mkdir strange timestamp
-Date: Tue, 10 Mar 2020 13:39:29 -0400
-Message-ID: <7f684a1a23c007858d996346532971bd0de9f138.camel@kernel.org>
-References: <"H000007100163fdf.1583792359.sx.f1-outsourcing.eu*"@MHS>
-         <"H000007100164304.1583836879.sx.f1-outsourcing.eu*"@MHS>
-         <20200310134613.GA74810@suse.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 1/1] libceph: fix memory leak for messages allocated with CEPH_MSG_DATA_PAGES
+Date: Tue, 10 Mar 2020 20:20:49 +0100
+Message-ID: <CAOi1vP-Q3JyCPZJi99d3NA_uWhLn4f-_X7cy8jdRQcgniQ8XVw@mail.gmail.com>
+References: <20200310090924.49788-1-rpenyaev@suse.de> <CAOi1vP9chc5PZD8SpSKXWMec2jMgESQuoAqkwy5GpF61Qs2Uhg@mail.gmail.com>
+ <9998629d1021eb8c2bd3a1bd5c2d87c8@suse.de> <CAOi1vP8S6xTpbNaeRHZ=pKOf4vbw03LxT5RbheDMSHidDPGr+w@mail.gmail.com>
+ <5e1f57d6f17b43ea99052a082b584190@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:39892 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726290AbgCJRjb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 10 Mar 2020 13:39:31 -0400
-In-Reply-To: <20200310134613.GA74810@suse.com>
+Received: from mail-io1-f67.google.com ([209.85.166.67]:39634 "EHLO
+        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726604AbgCJTUt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2020 15:20:49 -0400
+Received: by mail-io1-f67.google.com with SMTP id f21so9822175iol.6
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2020 12:20:48 -0700 (PDT)
+In-Reply-To: <5e1f57d6f17b43ea99052a082b584190@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Henriques <lhenriques@suse.com>, Marc Roos <M.Roos@f1-outsourcing.eu>
-Cc: ceph-users <ceph-users@ceph.io>, ceph-devel@vger.kernel.org
+To: Roman Penyaev <rpenyaev@suse.de>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 2020-03-10 at 13:46 +0000, Luis Henriques wrote:
-> [ CC'ing Jeff and ceph-devel@ ]
-> 
-> On Tue, Mar 10, 2020 at 11:41:19AM +0100, Marc Roos wrote:
-> >  
-> > 
-> > If I make a directory in linux the directory has the date of now, why is 
-> > this not with creating a snap dir? Is this not a bug? One expects this 
-> > to be the same as in linux not????
-> 
-> I've noticed that long time ago, but I never checked the fuse client
-> behaviour, which turns out to be different.  The fuse client seems to set
-> ctime and atime to the same value as the parent directory (see
-> Client::open_snapdir()).
-> 
-> The patch below mimics that behaviour, by simply copying those timestamps
-> from the parent inode.
-> 
-> Cheers,
-> --
-> Luis
-> 
-> From 2c8e06e66e5453ddf8b634cf1689a812dc05a0c6 Mon Sep 17 00:00:00 2001
-> From: Luis Henriques <lhenriques@suse.com>
-> Date: Tue, 10 Mar 2020 13:35:11 +0000
-> Subject: [PATCH] ceph: fix snapshot dir ctime and mtime
-> 
-> The .snap directory timestamps are kept at 0 (1970-01-01 00:00), which
-> isn't consistent with what the fuse client does.  This patch makes the
-> behaviour consistent, by setting these timestamps to those of the parent
-> directory.
-> 
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
->  fs/ceph/inode.c | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index d01710a16a4a..f4e78ade0871 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -82,6 +82,8 @@ struct inode *ceph_get_snapdir(struct inode *parent)
->  	inode->i_mode = parent->i_mode;
->  	inode->i_uid = parent->i_uid;
->  	inode->i_gid = parent->i_gid;
-> +	inode->i_mtime = parent->i_mtime;
-> +	inode->i_ctime = parent->i_ctime;
->  	inode->i_op = &ceph_snapdir_iops;
->  	inode->i_fop = &ceph_snapdir_fops;
->  	ci->i_snap_caps = CEPH_CAP_PIN; /* so we can open */
+On Tue, Mar 10, 2020 at 1:44 PM Roman Penyaev <rpenyaev@suse.de> wrote:
+>
+> On 2020-03-10 11:40, Ilya Dryomov wrote:
+>
+> [skip]
+>
+> >> And seems if the ownership of the ->pages is transferred to
+> >> the handle_watch_notify() and freed there, then it should be
+> >> fixed by having release in one place: here or there.
+> >
+> > The problem is that at least at one point CEPH_MSG_DATA_PAGES needed
+> > a reference count -- it couldn't be freed it in one place.  pagelists
+> > are reference counted, but can't be easily swapped in, hence that TODO.
+> >
+> > Thanks for reminding me about this.  I'll take a look -- perhaps the
+> > reference count is no longer required and we can get away with a simple
+> > flag.
+>
+> To my shallow understanding handle_watch_notify() also has an error
+> path which eventually does not free or take ownership of data->pages,
+> e.g. callers of 'goto out_unlock_osdc'. Probably code relies on the
+> fact, that sender knows what is doing and never sends ->data with
+> wrong cookie or opcode, but looks very suspicious to me.
+>
+> Seems for this particular DATA_PAGES case it is possible just to
+> take an ownership by zeroing out data->pages and data->length,
+> which prevents double free, something as the following:
+>
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b68b376d8c2f..15ae6377c461 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -4440,6 +4440,8 @@ static void handle_watch_notify(struct
+> ceph_osd_client *osdc,
+>
+> ceph_release_page_vector(data->pages,
+>                                                 calc_pages_for(0,
+> data->length));
+>                                  }
+> +                               data->pages = NULL;
+> +                               data->length = 0;
+>                          }
+>                          lreq->notify_finish_error = return_code;
+>
+>
+> and keeping the current patch with explicit call of
+> ceph_release_page_vector from ceph_msg_data_destroy() from
+> messenger.c.
 
-What about the atime, and the ci->i_btime ?
--- 
-Jeff Layton <jlayton@kernel.org>
+Not quite -- that would break all of OSD client, which supplies its
+own page vectors.
+
+I'll send a patch in a few.
+
+Thanks,
+
+                Ilya
