@@ -1,50 +1,40 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 4/4] ceph: wait for async creating inode before requesting new max size
-Date: Tue, 10 Mar 2020 19:34:21 +0800
-Message-ID: <20200310113421.174873-5-zyan@redhat.com>
-References: <20200310113421.174873-1-zyan@redhat.com>
+From: ''Michael weirsky'' <ronald.pena@11d01.mspz7.gob.ec>
+Subject: =?utf-8?q?Wohlt=C3=A4tigkeitsspende_von_2=2E000=2E000_Millionen_Euro?=
+Date: Tue, 10 Mar 2020 10:18:09 +0200
+Message-ID: <20200310074841.83EF32F6BD5F@mail.11d01.mspz7.gob.ec>
+Reply-To: mikeweirskyspende@gmail.com
 Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:57193 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726205AbgCJLek (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 10 Mar 2020 07:34:40 -0400
-In-Reply-To: <20200310113421.174873-1-zyan@redhat.com>
+Received: from mail.11d01.mspz7.gob.ec ([190.152.145.91]:53590 "EHLO
+        mail.11d01.mspz7.gob.ec" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726252AbgCJL4X (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2020 07:56:23 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: jlayton@kernel.org, "Yan, Zheng" <zyan@redhat.com>
+To: Recipients <ronald.pena@11d01.mspz7.gob.ec>
 
-ceph_check_caps() can't request new max size for async creating inode.
-This may make ceph_get_caps() loop busily until getting reply of the
-async create.
+Lieber Freund,
 
-This patch also waits for async creating inode before calling
-ceph_renew_caps()
+Ich bin Herr Mike Weirsky, New Jersey, Vereinigte Staaten von Amerika, der =
+Mega-Gewinner von $ 273million In Mega Millions Jackpot, spende ich an 5 zu=
+f=C3=A4llige Personen, wenn Sie diese E-Mail erhalten, dann wurde Ihre E-Ma=
+il nach einem Spinball ausgew=C3=A4hlt.Ich habe den gr=C3=B6=C3=9Ften Teil =
+meines Verm=C3=B6gens auf eine Reihe von Wohlt=C3=A4tigkeitsorganisationen =
+und Organisationen verteilt.Ich habe mich freiwillig dazu entschieden, die =
+Summe von =E2=82=AC 2.000.000,00 an Sie als eine der ausgew=C3=A4hlten 5 zu=
+ spenden, um meine Gewinne zu =C3=BCberpr=C3=BCfen.
+Das ist dein Spendencode: [MW530342019]
+www.youtube.com/watch?v=3Dun8yRTmrYMY
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- fs/ceph/caps.c | 5 +++++
- 1 file changed, 5 insertions(+)
+Antworten Sie mit dem SPENDE-CODE an diese =
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index f63db3cb9c4f..14bedf2c16cd 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2832,6 +2832,11 @@ int ceph_get_caps(struct file *filp, int need, int=
- want,
- 		}
-=20
- 		if (ret < 0) {
-+			if (ret =3D=3D -EFBIG || ret =3D=3D -ESTALE) {
-+				int ret2 =3D ceph_wait_on_async_create(inode);
-+				if (ret2 < 0)
-+					return ret2;
-+			}
- 			if (ret =3D=3D -EFBIG) {
- 				check_max_size(inode, endoff);
- 				continue;
---=20
-2.21.1
+
+E-Mail:mikeweirskyspende@gmail.com
+
+Ich hoffe, Sie und Ihre Familie gl=C3=BCcklich zu machen.
+
+Gr=C3=BC=C3=9Fe
+Herr Mike Weirsky
