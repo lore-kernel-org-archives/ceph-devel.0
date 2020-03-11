@@ -1,31 +1,26 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [ceph-users] cephfs snap mkdir strange timestamp
-Date: Wed, 11 Mar 2020 11:25:24 +0000
-Message-ID: <20200311112524.GA72386@suse.com>
-References: <"H000007100163fdf.1583792359.sx.f1-outsourcing.eu*"@MHS>
- <"H000007100164304.1583836879.sx.f1-outsourcing.eu*"@MHS>
- <20200310134613.GA74810@suse.com>
- <7f684a1a23c007858d996346532971bd0de9f138.camel@kernel.org>
+From: WeiGuo Ren <rwg1335252904@gmail.com>
+Subject: =?UTF-8?Q?RGW=3A_Can_RGW=2Dmulitisite_provide_sync_strategy=EF=BC=9F?=
+Date: Wed, 11 Mar 2020 20:57:59 +0800
+Message-ID: <CAPy+zYVB6A+-CLWH6f5O=yX--C9ALvfgTZEcViZy-dXh+7GOsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:46102 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725834AbgCKLZ1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 11 Mar 2020 07:25:27 -0400
-Content-Disposition: inline
-In-Reply-To: <7f684a1a23c007858d996346532971bd0de9f138.camel@kernel.org>
+Received: from mail-ua1-f50.google.com ([209.85.222.50]:45726 "EHLO
+        mail-ua1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729232AbgCKM6N (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Mar 2020 08:58:13 -0400
+Received: by mail-ua1-f50.google.com with SMTP id 9so155687uav.12
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Mar 2020 05:58:13 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Marc Roos <M.Roos@f1-outsourcing.eu>, ceph-users <ceph-users@ceph.io>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, Mar 10, 2020 at 01:39:29PM -0400, Jeff Layton wrote:
-...
-> What about the atime, and the ci->i_btime ?
+Hi,cepher.
+    I wonder  if  it provide synchronous bandwidth control. For
+example, I can set the related parameters of rgw to control the
+listening bandwidth. and Whether the bucket has priority when
+synchronizing, the one with high priority should be synchronized
+first=E3=80=82Does the community have these plans.
 
-FYI, I've also created PR#33879 to also get the atime in the fuse client.
-
-Cheers,
---
-Luis
+   thanks
