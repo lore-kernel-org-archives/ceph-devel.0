@@ -1,56 +1,52 @@
 From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: [PATCH] rbd: don't mess with a page vector in rbd_notify_op_lock()
-Date: Tue, 17 Mar 2020 11:25:53 -0400
-Message-ID: <CA+aFP1C_M8AorihGCj16jVE7UY-z9LSnMmQ2r_o52QcN4JW3-Q@mail.gmail.com>
-References: <20200317144847.10913-1-idryomov@gmail.com>
+Subject: Re: [PATCH 0/3] rbd: fix some issues around flushing notifies
+Date: Tue, 17 Mar 2020 12:41:16 -0400
+Message-ID: <CA+aFP1DkGftqkWF6_g6Op0prYBXgv50ynfsG=yyCinLDm++uRg@mail.gmail.com>
+References: <20200317120422.3406-1-idryomov@gmail.com>
 Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:51366 "EHLO
+Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:21833 "EHLO
         us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726019AbgCQP0J (ORCPT
+        by vger.kernel.org with ESMTP id S1726130AbgCQQlc (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 17 Mar 2020 11:26:09 -0400
-Received: by mail-wm1-f70.google.com with SMTP id n188so7293042wmf.0
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2020 08:26:06 -0700 (PDT)
-In-Reply-To: <20200317144847.10913-1-idryomov@gmail.com>
+        Tue, 17 Mar 2020 12:41:32 -0400
+Received: by mail-wm1-f72.google.com with SMTP id z16so2056512wmi.2
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2020 09:41:29 -0700 (PDT)
+In-Reply-To: <20200317120422.3406-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <idryomov@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Mar 17, 2020 at 10:50 AM Ilya Dryomov <idryomov@gmail.com> wrote:
+On Tue, Mar 17, 2020 at 8:06 AM Ilya Dryomov <idryomov@gmail.com> wrote:
 >
-> rbd_notify_op_lock() isn't interested in a notify reply.  Instead of
-> accepting that page vector just to free it, have watch-notify code take
-> care of it.
+> Hello,
 >
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  drivers/block/rbd.c | 6 +-----
->  1 file changed, 1 insertion(+), 5 deletions(-)
+> A recent snapshot-based mirroring experiment exposed a deadlock on
+> header_rwsem in the error path of rbd_dev_image_probe() (i.e. "rbd
+> map").
 >
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index f44ce9ccadd6..acafdae16be2 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3754,11 +3754,7 @@ static int __rbd_notify_op_lock(struct rbd_device *rbd_dev,
->  static void rbd_notify_op_lock(struct rbd_device *rbd_dev,
->                                enum rbd_notify_op notify_op)
->  {
-> -       struct page **reply_pages;
-> -       size_t reply_len;
-> -
-> -       __rbd_notify_op_lock(rbd_dev, notify_op, &reply_pages, &reply_len);
-> -       ceph_release_page_vector(reply_pages, calc_pages_for(0, reply_len));
-> +       __rbd_notify_op_lock(rbd_dev, notify_op, NULL, NULL);
->  }
+> Thanks,
 >
->  static void rbd_notify_acquired_lock(struct work_struct *work)
+>                 Ilya
+>
+>
+> Ilya Dryomov (3):
+>   rbd: avoid a deadlock on header_rwsem when flushing notifies
+>   rbd: call rbd_dev_unprobe() after unwatching and flushing notifies
+>   rbd: don't test rbd_dev->opts in rbd_dev_image_release()
+>
+>  drivers/block/rbd.c | 23 ++++++++++++++---------
+>  1 file changed, 14 insertions(+), 9 deletions(-)
+>
 > --
 > 2.19.2
 >
+
+The "get_snapcontext" call still going to hang (albeit in an
+interruptible state) if the image has > 510 snapshots, correct?
 
 Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 
