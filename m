@@ -1,359 +1,64 @@
-From: xiubli@redhat.com
-Subject: [PATCH v4 4/4] ceph: add standard deviation support for read/write/metadata perf metric
-Date: Wed, 18 Mar 2020 01:45:55 -0400
-Message-ID: <1584510355-6936-5-git-send-email-xiubli@redhat.com>
-References: <1584510355-6936-1-git-send-email-xiubli@redhat.com>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [ceph-client:testing 8/8]
+ metric.c:(.text.ceph_update_read_latency+0x180): undefined reference to
+ `__divdi3'
+Date: Wed, 18 Mar 2020 13:48:30 +0800
+Message-ID: <f39fa6cd-f17d-10fb-ee86-77d1758c9e58@redhat.com>
+References: <202003181302.3vWy9Yc7%lkp@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:27590 "EHLO
+Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:49772 "EHLO
         us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727029AbgCRFq0 (ORCPT
+        by vger.kernel.org with ESMTP id S1726550AbgCRFst (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 18 Mar 2020 01:46:26 -0400
-In-Reply-To: <1584510355-6936-1-git-send-email-xiubli@redhat.com>
+        Wed, 18 Mar 2020 01:48:49 -0400
+In-Reply-To: <202003181302.3vWy9Yc7%lkp@intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org
-Cc: sage@redhat.com, idryomov@gmail.com, gfarnum@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+To: kbuild test robot <lkp@intel.com>
+Cc: kbuild-all@lists.01.org, ceph-devel@vger.kernel.org, Jeff Layton <jlayton@kernel.org>
 
-From: Xiubo Li <xiubli@redhat.com>
+On 2020/3/18 13:29, kbuild test robot wrote:
+> tree:   https://github.com/ceph/ceph-client.git testing
+> head:   9707d15b204bb0c87dbb2a8e6ac97d012582510e
+> commit: 9707d15b204bb0c87dbb2a8e6ac97d012582510e [8/8] ceph: add standard deviation support for read/write/metadata perf metric
+> config: mips-allyesconfig (attached as .config)
+> compiler: mips-linux-gcc (GCC) 9.2.0
+> reproduce:
+>          wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+>          chmod +x ~/bin/make.cross
+>          git checkout 9707d15b204bb0c87dbb2a8e6ac97d012582510e
+>          # save the attached .config to linux build tree
+>          GCC_VERSION=9.2.0 make.cross ARCH=mips
+>
+> If you fix the issue, kindly add following tag
+> Reported-by: kbuild test robot <lkp@intel.com>
+>
+> All errors (new ones prefixed by >>):
+>
+>     mips-linux-ld: fs/ceph/debugfs.o: in function `metric_show':
+>     debugfs.c:(.text.metric_show+0x19c): undefined reference to `__divdi3'
+>     mips-linux-ld: debugfs.c:(.text.metric_show+0x340): undefined reference to `__divdi3'
+>     mips-linux-ld: debugfs.c:(.text.metric_show+0x4e0): undefined reference to `__divdi3'
+>     mips-linux-ld: fs/ceph/metric.o: in function `ceph_update_read_latency':
+>>> metric.c:(.text.ceph_update_read_latency+0x180): undefined reference to `__divdi3'
+>     mips-linux-ld: fs/ceph/metric.o: in function `ceph_update_write_latency':
+>>> metric.c:(.text.ceph_update_write_latency+0x160): undefined reference to `__divdi3'
+>     mips-linux-ld: fs/ceph/metric.o:metric.c:(.text.ceph_update_metadata_latency+0x160): more undefined references to `__divdi3' follow
 
-Switch {read/write/metadata}_latency_sum to atomic type and remove
-{read/write/metadata}_latency_sum showing in the debugfs, which makes
-no sense.
+The patch series [1] should have fixed all the __divdi3 issues.
 
-URL: https://tracker.ceph.com/issues/44534
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/debugfs.c | 88 +++++++++++++++++++++++++++++++++----------------
- fs/ceph/metric.c  | 99 ++++++++++++++++++++++++++++++++-----------------------
- fs/ceph/metric.h  | 18 ++++++----
- 3 files changed, 129 insertions(+), 76 deletions(-)
+[1] https://patchwork.kernel.org/project/ceph-devel/list/?series=258001
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 01b95fe..21f5663 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -1,6 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0
- #include <linux/ceph/ceph_debug.h>
- 
-+#include <linux/kernel.h>
- #include <linux/device.h>
- #include <linux/slab.h>
- #include <linux/module.h>
-@@ -124,48 +125,77 @@ static int mdsc_show(struct seq_file *s, void *p)
- 	return 0;
- }
- 
-+static s64 get_avg(atomic64_t *totalp, atomic64_t *sump, spinlock_t *lockp,
-+		   s64 *total)
-+{
-+	s64 n, sum, avg = 0;
-+
-+	spin_lock(lockp);
-+	n = atomic64_read(totalp);
-+	sum = atomic64_read(sump);
-+	spin_unlock(lockp);
-+
-+	if (likely(n))
-+		avg = DIV64_U64_ROUND_CLOSEST(sum, n);
-+
-+	*total = n;
-+	return avg;
-+}
-+
-+#define METRIC(name, total, avg, min, max, sq)	{			\
-+	s64 _total, _avg, _min, _max, _sq, _st, _re = 0;		\
-+	_avg = jiffies_to_usecs(avg);					\
-+	_min = jiffies_to_usecs(min == S64_MAX ? 0 : min);		\
-+	_max = jiffies_to_usecs(max);					\
-+	_total = total - 1;						\
-+	_sq = _total > 0 ? DIV64_U64_ROUND_CLOSEST(sq, _total) : 0;	\
-+	_sq = jiffies_to_usecs(_sq);					\
-+	_st = int_sqrt64(_sq);						\
-+	if (_st > 0) {							\
-+		_re = 5 * (_sq - (_st * _st));				\
-+		_re = _re > 0 ? _re - 1 : 0;				\
-+		_re = _st > 0 ? div64_s64(_re, _st) : 0;		\
-+	}								\
-+	seq_printf(s, "%-14s%-12lld%-16lld%-16lld%-16lld%lld.%lld\n",	\
-+		   name, total, _avg, _min, _max, _st, _re);		\
-+}
-+
- static int metric_show(struct seq_file *s, void *p)
- {
- 	struct ceph_fs_client *fsc = s->private;
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	int i, nr_caps = 0;
--	s64 total, sum, avg = 0, min, max;
-+	s64 total, avg, min, max, sq;
- 
--	seq_printf(s, "item          total       sum_lat(us)     avg_lat(us)     min_lat(us)     max_lat(us)\n");
--	seq_printf(s, "-------------------------------------------------------------------------------------\n");
-+	seq_printf(s, "item          total       avg_lat(us)     min_lat(us)     max_lat(us)     stdev(us)\n");
-+	seq_printf(s, "-----------------------------------------------------------------------------------\n");
- 
--	total = percpu_counter_sum(&mdsc->metric.total_reads);
--	sum = percpu_counter_sum(&mdsc->metric.read_latency_sum);
--	sum = jiffies_to_usecs(sum);
--	avg = total ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
-+	avg = get_avg(&mdsc->metric.total_reads,
-+		      &mdsc->metric.read_latency_sum,
-+		      &mdsc->metric.read_latency_lock,
-+		      &total);
- 	min = atomic64_read(&mdsc->metric.read_latency_min);
--	min = jiffies_to_usecs(min == S64_MAX ? 0 : min);
- 	max = atomic64_read(&mdsc->metric.read_latency_max);
--	max = jiffies_to_usecs(max);
--	seq_printf(s, "%-14s%-12lld%-16lld%-16lld%-16lld%lld\n", "read",
--		   total, sum, avg, min, max);
--
--	total = percpu_counter_sum(&mdsc->metric.total_writes);
--	sum = percpu_counter_sum(&mdsc->metric.write_latency_sum);
--	sum = jiffies_to_usecs(sum);
--	avg = total ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
-+	sq = percpu_counter_sum(&mdsc->metric.read_latency_sq_sum);
-+	METRIC("read", total, avg, min, max, sq);
-+
-+	avg = get_avg(&mdsc->metric.total_writes,
-+		      &mdsc->metric.write_latency_sum,
-+		      &mdsc->metric.write_latency_lock,
-+		      &total);
- 	min = atomic64_read(&mdsc->metric.write_latency_min);
--	min = jiffies_to_usecs(min == S64_MAX ? 0 : min);
- 	max = atomic64_read(&mdsc->metric.write_latency_max);
--	max = jiffies_to_usecs(max);
--	seq_printf(s, "%-14s%-12lld%-16lld%-16lld%-16lld%lld\n", "write",
--		   total, sum, avg, min, max);
--
--	total = percpu_counter_sum(&mdsc->metric.total_metadatas);
--	sum = percpu_counter_sum(&mdsc->metric.metadata_latency_sum);
--	sum = jiffies_to_usecs(sum);
--	avg = total ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
-+	sq = percpu_counter_sum(&mdsc->metric.write_latency_sq_sum);
-+	METRIC("write", total, avg, min, max, sq);
-+
-+	avg = get_avg(&mdsc->metric.total_metadatas,
-+		      &mdsc->metric.metadata_latency_sum,
-+		      &mdsc->metric.metadata_latency_lock,
-+		      &total);
- 	min = atomic64_read(&mdsc->metric.metadata_latency_min);
--	min = jiffies_to_usecs(min == S64_MAX ? 0 : min);
- 	max = atomic64_read(&mdsc->metric.metadata_latency_max);
--	max = jiffies_to_usecs(max);
--	seq_printf(s, "%-14s%-12lld%-16lld%-16lld%-16lld%lld\n", "metadata",
--		   total, sum, avg, min, max);
-+	sq = percpu_counter_sum(&mdsc->metric.metadata_latency_sq_sum);
-+	METRIC("metadata", total, avg, min, max, sq);
- 
- 	seq_printf(s, "\n");
- 	seq_printf(s, "item          total           miss            hit\n");
-diff --git a/fs/ceph/metric.c b/fs/ceph/metric.c
-index 1b764df..23bd80f 100644
---- a/fs/ceph/metric.c
-+++ b/fs/ceph/metric.c
-@@ -1,5 +1,6 @@
- // SPDX-License-Identifier: GPL-2.0-only
- 
-+#include <linux/kernel.h>
- #include <linux/atomic.h>
- #include <linux/percpu_counter.h>
- 
-@@ -29,52 +30,43 @@ int ceph_mdsc_metric_init(struct ceph_client_metric *m)
- 	if (ret)
- 		goto err_i_caps_mis;
- 
--	ret = percpu_counter_init(&m->total_reads, 0, GFP_KERNEL);
-+	ret = percpu_counter_init(&m->read_latency_sq_sum, 0, GFP_KERNEL);
- 	if (ret)
--		goto err_total_reads;
--
--	ret = percpu_counter_init(&m->read_latency_sum, 0, GFP_KERNEL);
--	if (ret)
--		goto err_read_latency_sum;
-+		goto err_read_latency_sq_sum;
- 
-+	spin_lock_init(&m->read_latency_lock);
-+	atomic64_set(&m->total_reads, 0);
-+	atomic64_set(&m->read_latency_sum, 0);
- 	atomic64_set(&m->read_latency_min, S64_MAX);
- 	atomic64_set(&m->read_latency_max, 0);
- 
--	ret = percpu_counter_init(&m->total_writes, 0, GFP_KERNEL);
--	if (ret)
--		goto err_total_writes;
--
--	ret = percpu_counter_init(&m->write_latency_sum, 0, GFP_KERNEL);
-+	ret = percpu_counter_init(&m->write_latency_sq_sum, 0, GFP_KERNEL);
- 	if (ret)
--		goto err_write_latency_sum;
-+		goto err_write_latency_sq_sum;
- 
-+	spin_lock_init(&m->write_latency_lock);
-+	atomic64_set(&m->total_writes, 0);
-+	atomic64_set(&m->write_latency_sum, 0);
- 	atomic64_set(&m->write_latency_min, S64_MAX);
- 	atomic64_set(&m->write_latency_max, 0);
- 
--	ret = percpu_counter_init(&m->total_metadatas, 0, GFP_KERNEL);
-+	ret = percpu_counter_init(&m->metadata_latency_sq_sum, 0, GFP_KERNEL);
- 	if (ret)
--		goto err_total_metadatas;
--
--	ret = percpu_counter_init(&m->metadata_latency_sum, 0, GFP_KERNEL);
--	if (ret)
--		goto err_metadata_latency_sum;
-+		goto err_metadata_latency_sq_sum;
- 
-+	spin_lock_init(&m->metadata_latency_lock);
-+	atomic64_set(&m->total_metadatas, 0);
-+	atomic64_set(&m->metadata_latency_sum, 0);
- 	atomic64_set(&m->metadata_latency_min, S64_MAX);
- 	atomic64_set(&m->metadata_latency_max, 0);
- 
- 	return 0;
- 
--err_metadata_latency_sum:
--	percpu_counter_destroy(&m->total_metadatas);
--err_total_metadatas:
--	percpu_counter_destroy(&m->write_latency_sum);
--err_write_latency_sum:
--	percpu_counter_destroy(&m->total_writes);
--err_total_writes:
--	percpu_counter_destroy(&m->read_latency_sum);
--err_read_latency_sum:
--	percpu_counter_destroy(&m->total_reads);
--err_total_reads:
-+err_metadata_latency_sq_sum:
-+	percpu_counter_destroy(&m->write_latency_sq_sum);
-+err_write_latency_sq_sum:
-+	percpu_counter_destroy(&m->read_latency_sq_sum);
-+err_read_latency_sq_sum:
- 	percpu_counter_destroy(&m->i_caps_mis);
- err_i_caps_mis:
- 	percpu_counter_destroy(&m->i_caps_hit);
-@@ -88,12 +80,9 @@ int ceph_mdsc_metric_init(struct ceph_client_metric *m)
- 
- void ceph_mdsc_metric_destroy(struct ceph_client_metric *m)
- {
--	percpu_counter_destroy(&m->metadata_latency_sum);
--	percpu_counter_destroy(&m->total_metadatas);
--	percpu_counter_destroy(&m->write_latency_sum);
--	percpu_counter_destroy(&m->total_writes);
--	percpu_counter_destroy(&m->read_latency_sum);
--	percpu_counter_destroy(&m->total_reads);
-+	percpu_counter_destroy(&m->metadata_latency_sq_sum);
-+	percpu_counter_destroy(&m->write_latency_sq_sum);
-+	percpu_counter_destroy(&m->read_latency_sq_sum);
- 	percpu_counter_destroy(&m->i_caps_mis);
- 	percpu_counter_destroy(&m->i_caps_hit);
- 	percpu_counter_destroy(&m->d_lease_mis);
-@@ -124,6 +113,28 @@ static inline void __update_max_latency(atomic64_t *max, unsigned long lat)
- 	} while (unlikely((cur = atomic64_cmpxchg(max, old, lat)) != old));
- }
- 
-+static inline void __update_avg_and_sq(atomic64_t *totalp, atomic64_t *lat_sump,
-+				       struct percpu_counter *sq_sump,
-+				       spinlock_t *lockp, unsigned long lat)
-+{
-+	s64 total, avg, sq, lsum;
-+
-+	spin_lock(lockp);
-+	total = atomic64_inc_return(totalp);
-+	lsum = atomic64_add_return(lat, lat_sump);
-+	spin_unlock(lockp);
-+
-+	if (unlikely(total == 1))
-+		return;
-+
-+	/* the sq is (lat - old_avg) * (lat - new_avg) */
-+	avg = DIV64_U64_ROUND_CLOSEST((lsum - lat), (total - 1));
-+	sq = lat - avg;
-+	avg = DIV64_U64_ROUND_CLOSEST(lsum, total);
-+	sq = sq * (lat - avg);
-+	percpu_counter_add(sq_sump, sq);
-+}
-+
- void ceph_update_read_latency(struct ceph_client_metric *m,
- 			      unsigned long r_start,
- 			      unsigned long r_end,
-@@ -134,10 +145,12 @@ void ceph_update_read_latency(struct ceph_client_metric *m,
- 	if (rc < 0 && rc != -ENOENT && rc != -ETIMEDOUT)
- 		return;
- 
--	percpu_counter_inc(&m->total_reads);
--	percpu_counter_add(&m->read_latency_sum, lat);
- 	__update_min_latency(&m->read_latency_min, lat);
- 	__update_max_latency(&m->read_latency_max, lat);
-+	__update_avg_and_sq(&m->total_reads, &m->read_latency_sum,
-+			    &m->read_latency_sq_sum,
-+			    &m->read_latency_lock,
-+			    lat);
- }
- 
- void ceph_update_write_latency(struct ceph_client_metric *m,
-@@ -150,10 +163,12 @@ void ceph_update_write_latency(struct ceph_client_metric *m,
- 	if (rc && rc != -ETIMEDOUT)
- 		return;
- 
--	percpu_counter_inc(&m->total_writes);
--	percpu_counter_add(&m->write_latency_sum, lat);
- 	__update_min_latency(&m->write_latency_min, lat);
- 	__update_max_latency(&m->write_latency_max, lat);
-+	__update_avg_and_sq(&m->total_writes, &m->write_latency_sum,
-+			    &m->write_latency_sq_sum,
-+			    &m->write_latency_lock,
-+			    lat);
- }
- 
- void ceph_update_metadata_latency(struct ceph_client_metric *m,
-@@ -166,8 +181,10 @@ void ceph_update_metadata_latency(struct ceph_client_metric *m,
- 	if (rc && rc != -ENOENT)
- 		return;
- 
--	percpu_counter_inc(&m->total_metadatas);
--	percpu_counter_add(&m->metadata_latency_sum, lat);
- 	__update_min_latency(&m->metadata_latency_min, lat);
- 	__update_max_latency(&m->metadata_latency_max, lat);
-+	__update_avg_and_sq(&m->total_metadatas, &m->metadata_latency_sum,
-+			    &m->metadata_latency_sq_sum,
-+			    &m->metadata_latency_lock,
-+			    lat);
- }
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index f139aff..d63b95e 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -14,18 +14,24 @@ struct ceph_client_metric {
- 	struct percpu_counter i_caps_hit;
- 	struct percpu_counter i_caps_mis;
- 
--	struct percpu_counter total_reads;
--	struct percpu_counter read_latency_sum;
-+	struct percpu_counter read_latency_sq_sum;
-+	spinlock_t read_latency_lock;
-+	atomic64_t total_reads;
-+	atomic64_t read_latency_sum;
- 	atomic64_t read_latency_min;
- 	atomic64_t read_latency_max;
- 
--	struct percpu_counter total_writes;
--	struct percpu_counter write_latency_sum;
-+	struct percpu_counter write_latency_sq_sum;
-+	spinlock_t write_latency_lock;
-+	atomic64_t total_writes;
-+	atomic64_t write_latency_sum;
- 	atomic64_t write_latency_min;
- 	atomic64_t write_latency_max;
- 
--	struct percpu_counter total_metadatas;
--	struct percpu_counter metadata_latency_sum;
-+	struct percpu_counter metadata_latency_sq_sum;
-+	spinlock_t metadata_latency_lock;
-+	atomic64_t total_metadatas;
-+	atomic64_t metadata_latency_sum;
- 	atomic64_t metadata_latency_min;
- 	atomic64_t metadata_latency_max;
- };
--- 
-1.8.3.1
+Thanks
+
+BR
+
+
+
+> ---
+> 0-DAY CI Kernel Test Service, Intel Corporation
+> https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
