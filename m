@@ -1,67 +1,99 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] ceph: fix memory leak in ceph_cleanup_snapid_map
-Date: Thu, 19 Mar 2020 11:43:48 +0000
-Message-ID: <20200319114348.GA72449@suse.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH v11 3/4] ceph: add read/write latency metric support
+Date: Thu, 19 Mar 2020 08:38:07 -0400
+Message-ID: <f093e7c9769f6c4accedb7fa6d7ac8d9c3e62418.camel@kernel.org>
+References: <1584597626-11127-1-git-send-email-xiubli@redhat.com>
+         <1584597626-11127-4-git-send-email-xiubli@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:39338 "EHLO mx2.suse.de"
+Received: from mail.kernel.org ([198.145.29.99]:39778 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726188AbgCSLnv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Mar 2020 07:43:51 -0400
-Content-Disposition: inline
+        id S1726589AbgCSMiL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 19 Mar 2020 08:38:11 -0400
+In-Reply-To: <1584597626-11127-4-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, lhenriques@suse.com
+To: xiubli@redhat.com
+Cc: sage@redhat.com, idryomov@gmail.com, gfarnum@redhat.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-kmemleak reports the following memory leak:
+On Thu, 2020-03-19 at 02:00 -0400, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> Calculate the latency for OSD read requests. Add a new r_end_stamp
+> field to struct ceph_osd_request that will hold the time of that
+> the reply was received. Use that to calculate the RTT for each call,
+> and divide the sum of those by number of calls to get averate RTT.
+> 
+> Keep a tally of RTT for OSD writes and number of calls to track average
+> latency of OSD writes.
+> 
+> URL: https://tracker.ceph.com/issues/43215
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  fs/ceph/addr.c                  |  18 +++++++
+>  fs/ceph/debugfs.c               |  61 +++++++++++++++++++++-
+>  fs/ceph/file.c                  |  26 ++++++++++
+>  fs/ceph/metric.c                | 109 ++++++++++++++++++++++++++++++++++++++++
+>  fs/ceph/metric.h                |  23 +++++++++
+>  include/linux/ceph/osd_client.h |   1 +
+>  net/ceph/osd_client.c           |   2 +
+>  7 files changed, 239 insertions(+), 1 deletion(-)
+> 
 
-unreferenced object 0xffff88821feac8a0 (size 96):
-  comm "kworker/1:0", pid 17, jiffies 4294896362 (age 20.512s)
-  hex dump (first 32 bytes):
-    a0 c8 ea 1f 82 88 ff ff 00 c9 ea 1f 82 88 ff ff  ................
-    00 00 00 00 00 00 00 00 00 01 00 00 00 00 ad de  ................
-  backtrace:
-    [<00000000b3ea77fb>] ceph_get_snapid_map+0x75/0x2a0
-    [<00000000d4060942>] fill_inode+0xb26/0x1010
-    [<0000000049da6206>] ceph_readdir_prepopulate+0x389/0xc40
-    [<00000000e2fe2549>] dispatch+0x11ab/0x1521
-    [<000000007700b894>] ceph_con_workfn+0xf3d/0x3240
-    [<0000000039138a41>] process_one_work+0x24d/0x590
-    [<00000000eb751f34>] worker_thread+0x4a/0x3d0
-    [<000000007e8f0d42>] kthread+0xfb/0x130
-    [<00000000d49bd1fa>] ret_from_fork+0x3a/0x50
+[...]
 
-A kfree was missing in commit 75c9627efb72 ("ceph: map snapid to anonymous
-bdev ID"), while looping the 'to_free' list of ceph_snapid_map objects.
+> +static inline void __update_avg_and_sq(atomic64_t *totalp, atomic64_t *lat_sump,
+> +				       struct percpu_counter *sq_sump,
+> +				       spinlock_t *lockp, unsigned long lat)
+> +{
+> +	s64 total, avg, sq, lsum;
+> +
+> +	spin_lock(lockp);
+> +	total = atomic64_inc_return(totalp);
+> +	lsum = atomic64_add_return(lat, lat_sump);
+> +	spin_unlock(lockp);
+> +
+> +	if (unlikely(total == 1))
+> +		return;
+> +
+> +	/* the sq is (lat - old_avg) * (lat - new_avg) */
+> +	avg = DIV64_U64_ROUND_CLOSEST((lsum - lat), (total - 1));
+> +	sq = lat - avg;
+> +	avg = DIV64_U64_ROUND_CLOSEST(lsum, total);
+> +	sq = sq * (lat - avg);
+> +	percpu_counter_add(sq_sump, sq);
+> +}
+> +
+> +void ceph_update_read_latency(struct ceph_client_metric *m,
+> +			      unsigned long r_start,
+> +			      unsigned long r_end,
+> +			      int rc)
+> +{
+> +	unsigned long lat = r_end - r_start;
+> +
+> +	if (unlikely(rc < 0 && rc != -ENOENT && rc != -ETIMEDOUT))
+> +		return;
+> +
+> +	__update_min_latency(&m->read_latency_min, lat);
+> +	__update_max_latency(&m->read_latency_max, lat);
+> +	__update_avg_and_sq(&m->total_reads, &m->read_latency_sum,
+> +			    &m->read_latency_sq_sum,
+> +			    &m->read_latency_lock,
+> +			    lat);
+> +
 
-Fixes: 75c9627efb72 ("ceph: map snapid to anonymous bdev ID")
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
-Hi!
+Thanks for refactoring the set, Xiubo.
 
-A bit of mailing-list archaeology shows that v1 of this patch actually
-included this kfree [1], and was lost on v2 [2].
+This makes something very evident though. __update_avg_and_sq takes a
+spinlock and we have to hit it every time we update the other values, so
+there really is no reason to use atomic or percpu values for any of
+this.
 
-[1] https://patchwork.kernel.org/patch/10114319/
-[2] https://patchwork.kernel.org/patch/10749907/
+I think it would be best to just make all of these be normal variables,
+and simply take the spinlock when you fetch or update them.
 
-Cheers,
---
-Luis
-
-fs/ceph/snap.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index ccfcc66aaf44..923be9399b21 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -1155,5 +1155,6 @@ void ceph_cleanup_snapid_map(struct ceph_mds_client *mdsc)
- 			pr_err("snapid map %llx -> %x still in use\n",
- 			       sm->snap, sm->dev);
- 		}
-+		kfree(sm);
- 	}
- }
+Thoughts?
+-- 
+Jeff Layton <jlayton@kernel.org>
