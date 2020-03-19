@@ -1,14 +1,14 @@
 From: xiubli@redhat.com
-Subject: [PATCH v12 1/4] ceph: add dentry lease metric support
-Date: Thu, 19 Mar 2020 10:06:49 -0400
-Message-ID: <1584626812-21323-2-git-send-email-xiubli@redhat.com>
+Subject: [PATCH v12 3/4] ceph: add read/write latency metric support
+Date: Thu, 19 Mar 2020 10:06:51 -0400
+Message-ID: <1584626812-21323-4-git-send-email-xiubli@redhat.com>
 References: <1584626812-21323-1-git-send-email-xiubli@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-74.mimecast.com ([63.128.21.74]:49173 "EHLO
+Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:33393 "EHLO
         us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726988AbgCSOHU (ORCPT
+        by vger.kernel.org with ESMTP id S1727159AbgCSOHY (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Mar 2020 10:07:20 -0400
+        Thu, 19 Mar 2020 10:07:24 -0400
 In-Reply-To: <1584626812-21323-1-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -17,319 +17,448 @@ Cc: sage@redhat.com, idryomov@gmail.com, gfarnum@redhat.com, zyan@redhat.com, pd
 
 From: Xiubo Li <xiubli@redhat.com>
 
-For dentry leases, only count the hit/miss info triggered from the vfs
-calls. For the cases like request reply handling and ceph_trim_dentries,
-ignore them.
+Calculate the latency for OSD read requests. Add a new r_end_stamp
+field to struct ceph_osd_request that will hold the time of that
+the reply was received. Use that to calculate the RTT for each call,
+and divide the sum of those by number of calls to get averate RTT.
 
-For now, these are only viewable using debugfs. Future patches will
-allow the client to send the stats to the MDS.
-
-The output looks like:
-
-item          total           miss            hit
--------------------------------------------------
-d_lease       11              7               141
+Keep a tally of RTT for OSD writes and number of calls to track average
+latency of OSD writes.
 
 URL: https://tracker.ceph.com/issues/43215
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/Makefile     |  2 +-
- fs/ceph/debugfs.c    | 33 +++++++++++++++++++++++++++++----
- fs/ceph/dir.c        | 12 ++++++++++++
- fs/ceph/mds_client.c | 16 ++++++++++++++--
- fs/ceph/mds_client.h |  4 ++++
- fs/ceph/metric.c     | 35 +++++++++++++++++++++++++++++++++++
- fs/ceph/metric.h     | 17 +++++++++++++++++
- fs/ceph/super.h      |  1 +
- 8 files changed, 113 insertions(+), 7 deletions(-)
- create mode 100644 fs/ceph/metric.c
- create mode 100644 fs/ceph/metric.h
+ fs/ceph/addr.c                  |  18 +++++++
+ fs/ceph/debugfs.c               |  60 +++++++++++++++++++++-
+ fs/ceph/file.c                  |  26 ++++++++++
+ fs/ceph/metric.c                | 110 ++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/metric.h                |  23 +++++++++
+ include/linux/ceph/osd_client.h |   1 +
+ net/ceph/osd_client.c           |   2 +
+ 7 files changed, 239 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-index 0a0823d..50c635d 100644
---- a/fs/ceph/Makefile
-+++ b/fs/ceph/Makefile
-@@ -8,7 +8,7 @@ obj-$(CONFIG_CEPH_FS) += ceph.o
- ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
- 	export.o caps.o snap.o xattr.o quota.o io.o \
- 	mds_client.o mdsmap.o strings.o ceph_frag.o \
--	debugfs.o util.o
-+	debugfs.o util.o metric.o
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6f4678d..f359619 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -216,6 +216,9 @@ static int ceph_sync_readpages(struct ceph_fs_client *fsc,
+ 	if (!rc)
+ 		rc = ceph_osdc_wait_request(osdc, req);
  
- ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
- ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
++	ceph_update_read_latency(&fsc->mdsc->metric, req->r_start_stamp,
++				 req->r_end_stamp, rc);
++
+ 	ceph_osdc_put_request(req);
+ 	dout("readpages result %d\n", rc);
+ 	return rc;
+@@ -299,6 +302,7 @@ static int ceph_readpage(struct file *filp, struct page *page)
+ static void finish_read(struct ceph_osd_request *req)
+ {
+ 	struct inode *inode = req->r_inode;
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_osd_data *osd_data;
+ 	int rc = req->r_result <= 0 ? req->r_result : 0;
+ 	int bytes = req->r_result >= 0 ? req->r_result : 0;
+@@ -336,6 +340,10 @@ static void finish_read(struct ceph_osd_request *req)
+ 		put_page(page);
+ 		bytes -= PAGE_SIZE;
+ 	}
++
++	ceph_update_read_latency(&fsc->mdsc->metric, req->r_start_stamp,
++				 req->r_end_stamp, rc);
++
+ 	kfree(osd_data->pages);
+ }
+ 
+@@ -643,6 +651,9 @@ static int ceph_sync_writepages(struct ceph_fs_client *fsc,
+ 	if (!rc)
+ 		rc = ceph_osdc_wait_request(osdc, req);
+ 
++	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_stamp,
++				  req->r_end_stamp, rc);
++
+ 	ceph_osdc_put_request(req);
+ 	if (rc == 0)
+ 		rc = len;
+@@ -794,6 +805,9 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 		ceph_clear_error_write(ci);
+ 	}
+ 
++	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_stamp,
++				  req->r_end_stamp, rc);
++
+ 	/*
+ 	 * We lost the cache cap, need to truncate the page before
+ 	 * it is unlocked, otherwise we'd truncate it later in the
+@@ -1852,6 +1866,10 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
+ 	err = ceph_osdc_start_request(&fsc->client->osdc, req, false);
+ 	if (!err)
+ 		err = ceph_osdc_wait_request(&fsc->client->osdc, req);
++
++	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_stamp,
++				  req->r_end_stamp, err);
++
+ out_put:
+ 	ceph_osdc_put_request(req);
+ 	if (err == -ECANCELED)
 diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 481ac97..60cdb8f 100644
+index 66b9622..de07fdb 100644
 --- a/fs/ceph/debugfs.c
 +++ b/fs/ceph/debugfs.c
-@@ -124,6 +124,23 @@ static int mdsc_show(struct seq_file *s, void *p)
+@@ -7,6 +7,7 @@
+ #include <linux/ctype.h>
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
++#include <linux/math64.h>
+ 
+ #include <linux/ceph/libceph.h>
+ #include <linux/ceph/mon_client.h>
+@@ -124,13 +125,70 @@ static int mdsc_show(struct seq_file *s, void *p)
  	return 0;
  }
  
-+static int metric_show(struct seq_file *s, void *p)
++static u64 get_avg(u64 *totalp, u64 *sump, spinlock_t *lockp, u64 *total)
 +{
-+	struct ceph_fs_client *fsc = s->private;
-+	struct ceph_mds_client *mdsc = fsc->mdsc;
-+	struct ceph_client_metric *m = &mdsc->metric;
++	u64 t, sum, avg = 0;
 +
-+	seq_printf(s, "item          total           miss            hit\n");
-+	seq_printf(s, "-------------------------------------------------\n");
++	spin_lock(lockp);
++	t = *totalp;
++	sum = *sump;
++	spin_unlock(lockp);
 +
-+	seq_printf(s, "%-14s%-16lld%-16lld%lld\n", "d_lease",
-+		   atomic64_read(&m->total_dentries),
-+		   percpu_counter_sum(&m->d_lease_mis),
-+		   percpu_counter_sum(&m->d_lease_hit));
++	if (likely(t))
++		avg = DIV64_U64_ROUND_CLOSEST(sum, t);
 +
-+	return 0;
++	*total = t;
++	return avg;
 +}
 +
- static int caps_show_cb(struct inode *inode, struct ceph_cap *cap, void *p)
++#define CEPH_METRIC_SHOW(name, total, avg, min, max, sq) {		\
++	u64 _total, _avg, _min, _max, _sq, _st, _re = 0;		\
++	_avg = jiffies_to_usecs(avg);					\
++	_min = jiffies_to_usecs(min == S64_MAX ? 0 : min);		\
++	_max = jiffies_to_usecs(max);					\
++	_total = total - 1;						\
++	_sq = _total > 0 ? DIV64_U64_ROUND_CLOSEST(sq, _total) : 0;	\
++	_sq = jiffies_to_usecs(_sq);					\
++	_st = int_sqrt64(_sq);						\
++	if (_st > 0) {							\
++		_re = 5 * (_sq - (_st * _st));				\
++		_re = _re > 0 ? _re - 1 : 0;				\
++		_re = _st > 0 ? div64_s64(_re, _st) : 0;		\
++	}								\
++	seq_printf(s, "%-14s%-12llu%-16llu%-16llu%-16llu%llu.%llu\n",	\
++		   name, total, _avg, _min, _max, _st, _re);		\
++}
++
+ static int metric_show(struct seq_file *s, void *p)
  {
- 	struct seq_file *s = p;
-@@ -222,6 +239,7 @@ static int mds_sessions_show(struct seq_file *s, void *ptr)
- DEFINE_SHOW_ATTRIBUTE(mdsc);
- DEFINE_SHOW_ATTRIBUTE(caps);
- DEFINE_SHOW_ATTRIBUTE(mds_sessions);
-+DEFINE_SHOW_ATTRIBUTE(metric);
- 
- 
- /*
-@@ -255,6 +273,7 @@ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
- 	debugfs_remove(fsc->debugfs_mdsmap);
- 	debugfs_remove(fsc->debugfs_mds_sessions);
- 	debugfs_remove(fsc->debugfs_caps);
-+	debugfs_remove(fsc->debugfs_metric);
- 	debugfs_remove(fsc->debugfs_mdsc);
- }
- 
-@@ -295,11 +314,17 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 						fsc,
- 						&mdsc_fops);
- 
-+	fsc->debugfs_metric = debugfs_create_file("metrics",
-+						  0400,
-+						  fsc->client->debugfs_dir,
-+						  fsc,
-+						  &metric_fops);
+ 	struct ceph_fs_client *fsc = s->private;
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_client_metric *m = &mdsc->metric;
+ 	int i, nr_caps = 0;
+-
++	u64 total, avg, min, max, sq;
 +
- 	fsc->debugfs_caps = debugfs_create_file("caps",
--						   0400,
--						   fsc->client->debugfs_dir,
--						   fsc,
--						   &caps_fops);
-+						0400,
-+						fsc->client->debugfs_dir,
-+						fsc,
-+						&caps_fops);
- }
- 
- 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index d594c26..8097a86 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -38,6 +38,8 @@
- static int ceph_d_init(struct dentry *dentry)
- {
- 	struct ceph_dentry_info *di;
-+	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
-+	struct ceph_mds_client *mdsc = fsc->mdsc;
- 
- 	di = kmem_cache_zalloc(ceph_dentry_cachep, GFP_KERNEL);
- 	if (!di)
-@@ -48,6 +50,9 @@ static int ceph_d_init(struct dentry *dentry)
- 	di->time = jiffies;
- 	dentry->d_fsdata = di;
- 	INIT_LIST_HEAD(&di->lease_list);
++	seq_printf(s, "item          total       avg_lat(us)     min_lat(us)     max_lat(us)     stdev(us)\n");
++	seq_printf(s, "-----------------------------------------------------------------------------------\n");
 +
-+	atomic64_inc(&mdsc->metric.total_dentries);
++	avg = get_avg(&m->total_reads,
++		      &m->read_latency_sum,
++		      &m->read_latency_lock,
++		      &total);
++	min = atomic64_read(&m->read_latency_min);
++	max = atomic64_read(&m->read_latency_max);
++	sq = percpu_counter_sum(&m->read_latency_sq_sum);
++	CEPH_METRIC_SHOW("read", total, avg, min, max, sq);
 +
- 	return 0;
- }
- 
-@@ -1709,6 +1714,8 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 		if (flags & LOOKUP_RCU)
- 			return -ECHILD;
- 
-+		percpu_counter_inc(&mdsc->metric.d_lease_mis);
++	avg = get_avg(&m->total_writes,
++		      &m->write_latency_sum,
++		      &m->write_latency_lock,
++		      &total);
++	min = atomic64_read(&m->write_latency_min);
++	max = atomic64_read(&m->write_latency_max);
++	sq = percpu_counter_sum(&m->write_latency_sq_sum);
++	CEPH_METRIC_SHOW("write", total, avg, min, max, sq);
 +
- 		op = ceph_snap(dir) == CEPH_SNAPDIR ?
- 			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_LOOKUP;
- 		req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
-@@ -1740,6 +1747,8 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 			dout("d_revalidate %p lookup result=%d\n",
- 			     dentry, err);
- 		}
-+	} else {
-+		percpu_counter_inc(&mdsc->metric.d_lease_hit);
- 	}
++	seq_printf(s, "\n");
+ 	seq_printf(s, "item          total           miss            hit\n");
+ 	seq_printf(s, "-------------------------------------------------\n");
  
- 	dout("d_revalidate %p %s\n", dentry, valid ? "valid" : "invalid");
-@@ -1782,9 +1791,12 @@ static int ceph_d_delete(const struct dentry *dentry)
- static void ceph_d_release(struct dentry *dentry)
- {
- 	struct ceph_dentry_info *di = ceph_dentry(dentry);
-+	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
- 
- 	dout("d_release %p\n", dentry);
- 
-+	atomic64_dec(&fsc->mdsc->metric.total_dentries);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 4a5ccbb..8e40022 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -906,6 +906,10 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 		ret = ceph_osdc_start_request(osdc, req, false);
+ 		if (!ret)
+ 			ret = ceph_osdc_wait_request(osdc, req);
 +
- 	spin_lock(&dentry->d_lock);
- 	__dentry_lease_unlist(di);
- 	dentry->d_fsdata = NULL;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 486f91f..1e242d8 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4325,6 +4325,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 
- {
- 	struct ceph_mds_client *mdsc;
-+	int err;
- 
- 	mdsc = kzalloc(sizeof(struct ceph_mds_client), GFP_NOFS);
- 	if (!mdsc)
-@@ -4333,8 +4334,8 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	mutex_init(&mdsc->mutex);
- 	mdsc->mdsmap = kzalloc(sizeof(*mdsc->mdsmap), GFP_NOFS);
- 	if (!mdsc->mdsmap) {
--		kfree(mdsc);
--		return -ENOMEM;
-+		err = -ENOMEM;
-+		goto err_mdsc;
- 	}
- 
- 	fsc->mdsc = mdsc;
-@@ -4373,6 +4374,9 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	init_waitqueue_head(&mdsc->cap_flushing_wq);
- 	INIT_WORK(&mdsc->cap_reclaim_work, ceph_cap_reclaim_work);
- 	atomic_set(&mdsc->cap_reclaim_pending, 0);
-+	err = ceph_metric_init(&mdsc->metric);
-+	if (err)
-+		goto err_mdsmap;
- 
- 	spin_lock_init(&mdsc->dentry_list_lock);
- 	INIT_LIST_HEAD(&mdsc->dentry_leases);
-@@ -4391,6 +4395,12 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	strscpy(mdsc->nodename, utsname()->nodename,
- 		sizeof(mdsc->nodename));
- 	return 0;
++		ceph_update_read_latency(&fsc->mdsc->metric, req->r_start_stamp,
++					 req->r_end_stamp, ret);
 +
-+err_mdsmap:
-+	kfree(mdsc->mdsmap);
-+err_mdsc:
-+	kfree(mdsc);
-+	return err;
- }
+ 		ceph_osdc_put_request(req);
  
- /*
-@@ -4648,6 +4658,8 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
+ 		i_size = i_size_read(inode);
+@@ -1044,6 +1048,8 @@ static void ceph_aio_complete_req(struct ceph_osd_request *req)
+ 	struct inode *inode = req->r_inode;
+ 	struct ceph_aio_request *aio_req = req->r_priv;
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
++	struct ceph_client_metric *metric = &fsc->mdsc->metric;
  
- 	ceph_mdsc_stop(mdsc);
+ 	BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_BVECS);
+ 	BUG_ON(!osd_data->num_bvecs);
+@@ -1051,6 +1057,16 @@ static void ceph_aio_complete_req(struct ceph_osd_request *req)
+ 	dout("ceph_aio_complete_req %p rc %d bytes %u\n",
+ 	     inode, rc, osd_data->bvec_pos.iter.bi_size);
  
-+	ceph_metric_destroy(&mdsc->metric);
-+
- 	fsc->mdsc = NULL;
- 	kfree(mdsc);
- 	dout("mdsc_destroy %p done\n", mdsc);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 4e5be79b..ae1d01c 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -16,6 +16,8 @@
- #include <linux/ceph/mdsmap.h>
- #include <linux/ceph/auth.h>
- 
-+#include "metric.h"
-+
- /* The first 8 bits are reserved for old ceph releases */
- enum ceph_feature_type {
- 	CEPHFS_FEATURE_MIMIC = 8,
-@@ -454,6 +456,8 @@ struct ceph_mds_client {
- 	struct list_head  dentry_leases;     /* fifo list */
- 	struct list_head  dentry_dir_leases; /* lru list */
- 
-+	struct ceph_client_metric metric;
-+
- 	spinlock_t		snapid_map_lock;
- 	struct rb_root		snapid_map_tree;
- 	struct list_head	snapid_map_lru;
-diff --git a/fs/ceph/metric.c b/fs/ceph/metric.c
-new file mode 100644
-index 0000000..873a376
---- /dev/null
-+++ b/fs/ceph/metric.c
-@@ -0,0 +1,35 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#include <linux/types.h>
-+#include <linux/percpu_counter.h>
-+
-+#include "metric.h"
-+
-+int ceph_metric_init(struct ceph_client_metric *m)
-+{
-+	int ret;
-+
-+	if (!m)
-+		return -EINVAL;
-+
-+	atomic64_set(&m->total_dentries, 0);
-+	ret = percpu_counter_init(&m->d_lease_hit, 0, GFP_KERNEL);
-+	if (ret)
-+		return ret;
-+	ret = percpu_counter_init(&m->d_lease_mis, 0, GFP_KERNEL);
-+	if (ret) {
-+		percpu_counter_destroy(&m->d_lease_hit);
-+		return ret;
++	/* r_start_stamp == 0 means the request was not submitted */
++	if (req->r_start_stamp) {
++		if (aio_req->write)
++			ceph_update_write_latency(metric, req->r_start_stamp,
++						  req->r_end_stamp, rc);
++		else
++			ceph_update_read_latency(metric, req->r_start_stamp,
++						 req->r_end_stamp, rc);
 +	}
 +
-+	return 0;
+ 	if (rc == -EOLDSNAPC) {
+ 		struct ceph_aio_work *aio_work;
+ 		BUG_ON(!aio_req->write);
+@@ -1179,6 +1195,7 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
++	struct ceph_client_metric *metric = &fsc->mdsc->metric;
+ 	struct ceph_vino vino;
+ 	struct ceph_osd_request *req;
+ 	struct bio_vec *bvecs;
+@@ -1295,6 +1312,13 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 		if (!ret)
+ 			ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
+ 
++		if (write)
++			ceph_update_write_latency(metric, req->r_start_stamp,
++						  req->r_end_stamp, ret);
++		else
++			ceph_update_read_latency(metric, req->r_start_stamp,
++						 req->r_end_stamp, ret);
++
+ 		size = i_size_read(inode);
+ 		if (!write) {
+ 			if (ret == -ENOENT)
+@@ -1466,6 +1490,8 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 		if (!ret)
+ 			ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
+ 
++		ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_stamp,
++					  req->r_end_stamp, ret);
+ out:
+ 		ceph_osdc_put_request(req);
+ 		if (ret != 0) {
+diff --git a/fs/ceph/metric.c b/fs/ceph/metric.c
+index 2a4b739..6cb64fb 100644
+--- a/fs/ceph/metric.c
++++ b/fs/ceph/metric.c
+@@ -2,6 +2,7 @@
+ 
+ #include <linux/types.h>
+ #include <linux/percpu_counter.h>
++#include <linux/math64.h>
+ 
+ #include "metric.h"
+ 
+@@ -29,8 +30,32 @@ int ceph_metric_init(struct ceph_client_metric *m)
+ 	if (ret)
+ 		goto err_i_caps_mis;
+ 
++	ret = percpu_counter_init(&m->read_latency_sq_sum, 0, GFP_KERNEL);
++	if (ret)
++		goto err_read_latency_sq_sum;
++
++	atomic64_set(&m->read_latency_min, S64_MAX);
++	atomic64_set(&m->read_latency_max, 0);
++	spin_lock_init(&m->read_latency_lock);
++	m->total_reads = 0;
++	m->read_latency_sum = 0;
++
++	ret = percpu_counter_init(&m->write_latency_sq_sum, 0, GFP_KERNEL);
++	if (ret)
++		goto err_write_latency_sq_sum;
++
++	atomic64_set(&m->write_latency_min, S64_MAX);
++	atomic64_set(&m->write_latency_max, 0);
++	spin_lock_init(&m->write_latency_lock);
++	m->total_writes = 0;
++	m->write_latency_sum = 0;
++
+ 	return 0;
+ 
++err_write_latency_sq_sum:
++	percpu_counter_destroy(&m->read_latency_sq_sum);
++err_read_latency_sq_sum:
++	percpu_counter_destroy(&m->i_caps_mis);
+ err_i_caps_mis:
+ 	percpu_counter_destroy(&m->i_caps_hit);
+ err_i_caps_hit:
+@@ -46,8 +71,93 @@ void ceph_metric_destroy(struct ceph_client_metric *m)
+ 	if (!m)
+ 		return;
+ 
++	percpu_counter_destroy(&m->write_latency_sq_sum);
++	percpu_counter_destroy(&m->read_latency_sq_sum);
+ 	percpu_counter_destroy(&m->i_caps_mis);
+ 	percpu_counter_destroy(&m->i_caps_hit);
+ 	percpu_counter_destroy(&m->d_lease_mis);
+ 	percpu_counter_destroy(&m->d_lease_hit);
+ }
++
++static inline void __update_min_latency(atomic64_t *min, unsigned long lat)
++{
++	u64 cur, old;
++
++	cur = atomic64_read(min);
++	do {
++		old = cur;
++		if (likely(lat >= old))
++			break;
++	} while (unlikely((cur = atomic64_cmpxchg(min, old, lat)) != old));
 +}
 +
-+void ceph_metric_destroy(struct ceph_client_metric *m)
++static inline void __update_max_latency(atomic64_t *max, unsigned long lat)
 +{
-+	if (!m)
++	u64 cur, old;
++
++	cur = atomic64_read(max);
++	do {
++		old = cur;
++		if (likely(lat <= old))
++			break;
++	} while (unlikely((cur = atomic64_cmpxchg(max, old, lat)) != old));
++}
++
++static inline void __update_avg_and_sq(u64 *totalp, u64 *lsump,
++				       struct percpu_counter *sq_sump,
++				       spinlock_t *lockp, unsigned long lat)
++{
++	u64 total, avg, sq, lsum;
++
++	spin_lock(lockp);
++	total = ++(*totalp);
++	*lsump += lat;
++	lsum = *lsump;
++	spin_unlock(lockp);
++
++	if (unlikely(total == 1))
 +		return;
 +
-+	percpu_counter_destroy(&m->d_lease_mis);
-+	percpu_counter_destroy(&m->d_lease_hit);
++	/* the sq is (lat - old_avg) * (lat - new_avg) */
++	avg = DIV64_U64_ROUND_CLOSEST((lsum - lat), (total - 1));
++	sq = lat - avg;
++	avg = DIV64_U64_ROUND_CLOSEST(lsum, total);
++	sq = sq * (lat - avg);
++	percpu_counter_add(sq_sump, sq);
++}
++
++void ceph_update_read_latency(struct ceph_client_metric *m,
++			      unsigned long r_start,
++			      unsigned long r_end,
++			      int rc)
++{
++	unsigned long lat = r_end - r_start;
++
++	if (unlikely(rc < 0 && rc != -ENOENT && rc != -ETIMEDOUT))
++		return;
++
++	__update_min_latency(&m->read_latency_min, lat);
++	__update_max_latency(&m->read_latency_max, lat);
++	__update_avg_and_sq(&m->total_reads, &m->read_latency_sum,
++			    &m->read_latency_sq_sum,
++			    &m->read_latency_lock,
++			    lat);
++}
++
++void ceph_update_write_latency(struct ceph_client_metric *m,
++			       unsigned long r_start,
++			       unsigned long r_end,
++			       int rc)
++{
++	unsigned long lat = r_end - r_start;
++
++	if (unlikely(rc && rc != -ETIMEDOUT))
++		return;
++
++	__update_min_latency(&m->write_latency_min, lat);
++	__update_max_latency(&m->write_latency_max, lat);
++	__update_avg_and_sq(&m->total_writes, &m->write_latency_sum,
++			    &m->write_latency_sq_sum,
++			    &m->write_latency_lock,
++			    lat);
 +}
 diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-new file mode 100644
-index 0000000..da725da
---- /dev/null
+index 098ee8a..c7eae56 100644
+--- a/fs/ceph/metric.h
 +++ b/fs/ceph/metric.h
-@@ -0,0 +1,17 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+#ifndef _FS_CEPH_MDS_METRIC_H
-+#define _FS_CEPH_MDS_METRIC_H
-+
-+#include <linux/types.h>
-+#include <linux/percpu_counter.h>
-+
-+/* This is the global metrics */
-+struct ceph_client_metric {
-+	atomic64_t            total_dentries;
-+	struct percpu_counter d_lease_hit;
-+	struct percpu_counter d_lease_mis;
-+};
-+
-+extern int ceph_metric_init(struct ceph_client_metric *m);
-+extern void ceph_metric_destroy(struct ceph_client_metric *m);
-+#endif /* _FS_CEPH_MDS_METRIC_H */
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 60aac3a..5c73cf1 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -128,6 +128,7 @@ struct ceph_fs_client {
- 	struct dentry *debugfs_congestion_kb;
- 	struct dentry *debugfs_bdi;
- 	struct dentry *debugfs_mdsc, *debugfs_mdsmap;
-+	struct dentry *debugfs_metric;
- 	struct dentry *debugfs_mds_sessions;
- #endif
+@@ -13,6 +13,20 @@ struct ceph_client_metric {
  
+ 	struct percpu_counter i_caps_hit;
+ 	struct percpu_counter i_caps_mis;
++
++	struct percpu_counter read_latency_sq_sum;
++	atomic64_t read_latency_min;
++	atomic64_t read_latency_max;
++	spinlock_t read_latency_lock;
++	u64 total_reads;
++	u64 read_latency_sum;
++
++	struct percpu_counter write_latency_sq_sum;
++	atomic64_t write_latency_min;
++	atomic64_t write_latency_max;
++	spinlock_t write_latency_lock;
++	u64 total_writes;
++	u64 write_latency_sum;
+ };
+ 
+ extern int ceph_metric_init(struct ceph_client_metric *m);
+@@ -27,4 +41,13 @@ static inline void ceph_update_cap_mis(struct ceph_client_metric *m)
+ {
+ 	percpu_counter_inc(&m->i_caps_mis);
+ }
++
++extern void ceph_update_read_latency(struct ceph_client_metric *m,
++				     unsigned long r_start,
++				     unsigned long r_end,
++				     int rc);
++extern void ceph_update_write_latency(struct ceph_client_metric *m,
++				      unsigned long r_start,
++				      unsigned long r_end,
++				      int rc);
+ #endif /* _FS_CEPH_MDS_METRIC_H */
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 9d9f745..02ff3a3 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -213,6 +213,7 @@ struct ceph_osd_request {
+ 	/* internal */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
++	unsigned long r_end_stamp;            /* jiffies */
+ 	int r_attempts;
+ 	u32 r_map_dne_bound;
+ 
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 998e26b..28e33e0 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2389,6 +2389,8 @@ static void finish_request(struct ceph_osd_request *req)
+ 	WARN_ON(lookup_request_mc(&osdc->map_checks, req->r_tid));
+ 	dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
+ 
++	req->r_end_stamp = jiffies;
++
+ 	if (req->r_osd)
+ 		unlink_request(req->r_osd, req);
+ 	atomic_dec(&osdc->num_requests);
 -- 
 1.8.3.1
