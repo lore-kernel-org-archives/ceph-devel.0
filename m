@@ -1,14 +1,14 @@
 From: xiubli@redhat.com
-Subject: [PATCH v13 2/4] ceph: add caps perf metric for each superblock
-Date: Thu, 19 Mar 2020 23:45:00 -0400
-Message-ID: <1584675902-16493-3-git-send-email-xiubli@redhat.com>
+Subject: [PATCH v13 4/4] ceph: add metadata perf metric support
+Date: Thu, 19 Mar 2020 23:45:02 -0400
+Message-ID: <1584675902-16493-5-git-send-email-xiubli@redhat.com>
 References: <1584675902-16493-1-git-send-email-xiubli@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:42398 "EHLO
+Received: from us-smtp-delivery-74.mimecast.com ([63.128.21.74]:57103 "EHLO
         us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726658AbgCTDp0 (ORCPT
+        by vger.kernel.org with ESMTP id S1726658AbgCTDpa (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Mar 2020 23:45:26 -0400
+        Thu, 19 Mar 2020 23:45:30 -0400
 In-Reply-To: <1584675902-16493-1-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -17,270 +17,163 @@ Cc: sage@redhat.com, idryomov@gmail.com, gfarnum@redhat.com, zyan@redhat.com, pd
 
 From: Xiubo Li <xiubli@redhat.com>
 
-Count hits and misses in the caps cache. If the client has all of
-the necessary caps when a task needs references, then it's counted
-as a hit. Any other situation is a miss.
+Add a new "r_ended" field to struct ceph_mds_request and use that to
+maintain the average latency of MDS requests.
 
 URL: https://tracker.ceph.com/issues/43215
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/acl.c     |  2 +-
- fs/ceph/caps.c    | 19 +++++++++++++++++++
- fs/ceph/debugfs.c | 16 ++++++++++++++++
- fs/ceph/dir.c     |  5 +++--
- fs/ceph/inode.c   |  4 ++--
- fs/ceph/metric.c  | 26 ++++++++++++++++++++++----
- fs/ceph/metric.h  | 13 +++++++++++++
- fs/ceph/super.h   |  8 +++++---
- fs/ceph/xattr.c   |  4 ++--
- 9 files changed, 83 insertions(+), 14 deletions(-)
+ fs/ceph/debugfs.c    | 10 ++++++++++
+ fs/ceph/mds_client.c |  7 +++++++
+ fs/ceph/mds_client.h |  3 +++
+ fs/ceph/metric.c     | 23 +++++++++++++++++++++++
+ fs/ceph/metric.h     | 10 ++++++++++
+ 5 files changed, 53 insertions(+)
 
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index 26be652..e046574 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -22,7 +22,7 @@ static inline void ceph_set_cached_acl(struct inode *inode,
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 
- 	spin_lock(&ci->i_ceph_lock);
--	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 0))
-+	if (__ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 0))
- 		set_cached_acl(inode, type, acl);
- 	else
- 		forget_cached_acl(inode, type);
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 185db76..7794338 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -912,6 +912,20 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
- 	return 0;
- }
- 
-+int __ceph_caps_issued_mask_metric(struct ceph_inode_info *ci, int mask,
-+				   int touch)
-+{
-+	struct ceph_fs_client *fsc = ceph_sb_to_client(ci->vfs_inode.i_sb);
-+	int r;
-+
-+	r = __ceph_caps_issued_mask(ci, mask, touch);
-+	if (r)
-+		ceph_update_cap_hit(&fsc->mdsc->metric);
-+	else
-+		ceph_update_cap_mis(&fsc->mdsc->metric);
-+	return r;
-+}
-+
- /*
-  * Return true if mask caps are currently being revoked by an MDS.
-  */
-@@ -2685,6 +2699,11 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 	if (snap_rwsem_locked)
- 		up_read(&mdsc->snap_rwsem);
- 
-+	if (!ret)
-+		ceph_update_cap_mis(&mdsc->metric);
-+	else if (ret == 1)
-+		ceph_update_cap_hit(&mdsc->metric);
-+
- 	dout("get_cap_refs %p ret %d got %s\n", inode,
- 	     ret, ceph_cap_string(*got));
- 	return ret;
 diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 60cdb8f..66b9622 100644
+index 4a96b7f8..eebbce7 100644
 --- a/fs/ceph/debugfs.c
 +++ b/fs/ceph/debugfs.c
-@@ -129,6 +129,7 @@ static int metric_show(struct seq_file *s, void *p)
- 	struct ceph_fs_client *fsc = s->private;
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_client_metric *m = &mdsc->metric;
-+	int i, nr_caps = 0;
+@@ -171,6 +171,16 @@ static int metric_show(struct seq_file *s, void *p)
+ 	spin_unlock(&m->write_latency_lock);
+ 	CEPH_METRIC_SHOW("write", total, avg, min, max, sq);
  
++	spin_lock(&m->metadata_latency_lock);
++	total = m->total_metadatas;
++	sum = m->metadata_latency_sum;
++	avg = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
++	min = m->metadata_latency_min;
++	max = m->metadata_latency_max;
++	sq = m->metadata_latency_sq_sum;
++	spin_unlock(&m->metadata_latency_lock);
++	CEPH_METRIC_SHOW("metadata", total, avg, min, max, sq);
++
+ 	seq_printf(s, "\n");
  	seq_printf(s, "item          total           miss            hit\n");
  	seq_printf(s, "-------------------------------------------------\n");
-@@ -138,6 +139,21 @@ static int metric_show(struct seq_file *s, void *p)
- 		   percpu_counter_sum(&m->d_lease_mis),
- 		   percpu_counter_sum(&m->d_lease_hit));
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 1e242d8..acce044 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -10,6 +10,7 @@
+ #include <linux/seq_file.h>
+ #include <linux/ratelimit.h>
+ #include <linux/bits.h>
++#include <linux/ktime.h>
  
-+	mutex_lock(&mdsc->mutex);
-+	for (i = 0; i < mdsc->max_sessions; i++) {
-+		struct ceph_mds_session *s;
+ #include "super.h"
+ #include "mds_client.h"
+@@ -2201,6 +2202,7 @@ struct ceph_mds_request *
+ 	mutex_init(&req->r_fill_mutex);
+ 	req->r_mdsc = mdsc;
+ 	req->r_started = jiffies;
++	req->r_start_latency = ktime_get();
+ 	req->r_resend_mds = -1;
+ 	INIT_LIST_HEAD(&req->r_unsafe_dir_item);
+ 	INIT_LIST_HEAD(&req->r_unsafe_target_item);
+@@ -2547,6 +2549,8 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+ static void complete_request(struct ceph_mds_client *mdsc,
+ 			     struct ceph_mds_request *req)
+ {
++	req->r_end_latency = ktime_get();
 +
-+		s = __ceph_lookup_mds_session(mdsc, i);
-+		if (!s)
-+			continue;
-+		nr_caps += s->s_nr_caps;
-+		ceph_put_mds_session(s);
-+	}
-+	mutex_unlock(&mdsc->mutex);
-+	seq_printf(s, "%-14s%-16d%-16lld%lld\n", "caps", nr_caps,
-+		   percpu_counter_sum(&m->i_caps_mis),
-+		   percpu_counter_sum(&m->i_caps_hit));
+ 	if (req->r_callback)
+ 		req->r_callback(mdsc, req);
+ 	complete_all(&req->r_completion);
+@@ -3155,6 +3159,9 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 
+ 	/* kick calling process */
+ 	complete_request(mdsc, req);
 +
- 	return 0;
- }
++	ceph_update_metadata_latency(&mdsc->metric, req->r_start_latency,
++				     req->r_end_latency, err);
+ out:
+ 	ceph_mdsc_put_request(req);
+ 	return;
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index ae1d01c..8065863 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -10,6 +10,7 @@
+ #include <linux/spinlock.h>
+ #include <linux/refcount.h>
+ #include <linux/utsname.h>
++#include <linux/ktime.h>
  
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 8097a86..10d528a 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -349,8 +349,9 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 	    !ceph_test_mount_opt(fsc, NOASYNCREADDIR) &&
- 	    ceph_snap(inode) != CEPH_SNAPDIR &&
- 	    __ceph_dir_is_complete_ordered(ci) &&
--	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
-+	    __ceph_caps_issued_mask_metric(ci, CEPH_CAP_FILE_SHARED, 1)) {
- 		int shared_gen = atomic_read(&ci->i_shared_gen);
-+
- 		spin_unlock(&ci->i_ceph_lock);
- 		err = __dcache_readdir(file, ctx, shared_gen);
- 		if (err != -EAGAIN)
-@@ -767,7 +768,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
- 		    !is_root_ceph_dentry(dir, dentry) &&
- 		    ceph_test_mount_opt(fsc, DCACHE) &&
- 		    __ceph_dir_is_complete(ci) &&
--		    (__ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1))) {
-+		    __ceph_caps_issued_mask_metric(ci, CEPH_CAP_FILE_SHARED, 1)) {
- 			__ceph_touch_fmode(ci, mdsc, CEPH_FILE_MODE_RD);
- 			spin_unlock(&ci->i_ceph_lock);
- 			dout(" dir %p complete, -ENOENT\n", dir);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 7fef94f..357c937 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2288,8 +2288,8 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
+ #include <linux/ceph/types.h>
+ #include <linux/ceph/messenger.h>
+@@ -299,6 +300,8 @@ struct ceph_mds_request {
  
- 	dout("do_getattr inode %p mask %s mode 0%o\n",
- 	     inode, ceph_cap_string(mask), inode->i_mode);
--	if (!force && ceph_caps_issued_mask(ceph_inode(inode), mask, 1))
--		return 0;
-+	if (!force && ceph_caps_issued_mask_metric(ceph_inode(inode), mask, 1))
-+			return 0;
+ 	unsigned long r_timeout;  /* optional.  jiffies, 0 is "wait forever" */
+ 	unsigned long r_started;  /* start time to measure timeout against */
++	unsigned long r_start_latency;  /* start time to measure latency */
++	unsigned long r_end_latency;    /* finish time to measure latency */
+ 	unsigned long r_request_started; /* start time for mds request only,
+ 					    used to measure lease durations */
  
- 	mode = (mask & CEPH_STAT_RSTAT) ? USE_AUTH_MDS : USE_ANY_MDS;
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, mode);
 diff --git a/fs/ceph/metric.c b/fs/ceph/metric.c
-index 873a376..2a4b739 100644
+index f5cf32e7..9217f35 100644
 --- a/fs/ceph/metric.c
 +++ b/fs/ceph/metric.c
-@@ -16,13 +16,29 @@ int ceph_metric_init(struct ceph_client_metric *m)
- 	ret = percpu_counter_init(&m->d_lease_hit, 0, GFP_KERNEL);
- 	if (ret)
- 		return ret;
-+
- 	ret = percpu_counter_init(&m->d_lease_mis, 0, GFP_KERNEL);
--	if (ret) {
--		percpu_counter_destroy(&m->d_lease_hit);
--		return ret;
--	}
-+	if (ret)
-+		goto err_d_lease_mis;
-+
-+	ret = percpu_counter_init(&m->i_caps_hit, 0, GFP_KERNEL);
-+	if (ret)
-+		goto err_i_caps_hit;
-+
-+	ret = percpu_counter_init(&m->i_caps_mis, 0, GFP_KERNEL);
-+	if (ret)
-+		goto err_i_caps_mis;
+@@ -44,6 +44,13 @@ int ceph_metric_init(struct ceph_client_metric *m)
+ 	m->total_writes = 0;
+ 	m->write_latency_sum = 0;
  
++	spin_lock_init(&m->metadata_latency_lock);
++	m->metadata_latency_sq_sum = 0;
++	m->metadata_latency_min = KTIME_MAX;
++	m->metadata_latency_max = 0;
++	m->total_metadatas = 0;
++	m->metadata_latency_sum = 0;
++
  	return 0;
-+
-+err_i_caps_mis:
-+	percpu_counter_destroy(&m->i_caps_hit);
-+err_i_caps_hit:
-+	percpu_counter_destroy(&m->d_lease_mis);
-+err_d_lease_mis:
-+	percpu_counter_destroy(&m->d_lease_hit);
-+
-+	return ret;
- }
  
- void ceph_metric_destroy(struct ceph_client_metric *m)
-@@ -30,6 +46,8 @@ void ceph_metric_destroy(struct ceph_client_metric *m)
- 	if (!m)
- 		return;
- 
-+	percpu_counter_destroy(&m->i_caps_mis);
-+	percpu_counter_destroy(&m->i_caps_hit);
- 	percpu_counter_destroy(&m->d_lease_mis);
- 	percpu_counter_destroy(&m->d_lease_hit);
+ err_i_caps_mis:
+@@ -123,3 +130,19 @@ void ceph_update_write_latency(struct ceph_client_metric *m,
+ 			 &m->write_latency_sq_sum, lat);
+ 	spin_unlock(&m->write_latency_lock);
  }
++
++void ceph_update_metadata_latency(struct ceph_client_metric *m,
++				  ktime_t r_start, ktime_t r_end,
++				  int rc)
++{
++	ktime_t lat = ktime_sub(r_end, r_start);
++
++	if (unlikely(rc && rc != -ENOENT))
++		return;
++
++	spin_lock(&m->metadata_latency_lock);
++	__update_latency(&m->total_metadatas, &m->metadata_latency_sum,
++			 &m->metadata_latency_min, &m->metadata_latency_max,
++			 &m->metadata_latency_sq_sum, lat);
++	spin_unlock(&m->metadata_latency_lock);
++}
 diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index da725da..098ee8a 100644
+index ab1543c..ccd8128 100644
 --- a/fs/ceph/metric.h
 +++ b/fs/ceph/metric.h
-@@ -10,8 +10,21 @@ struct ceph_client_metric {
- 	atomic64_t            total_dentries;
- 	struct percpu_counter d_lease_hit;
- 	struct percpu_counter d_lease_mis;
+@@ -28,6 +28,13 @@ struct ceph_client_metric {
+ 	ktime_t write_latency_sq_sum;
+ 	ktime_t write_latency_min;
+ 	ktime_t write_latency_max;
 +
-+	struct percpu_counter i_caps_hit;
-+	struct percpu_counter i_caps_mis;
++	spinlock_t metadata_latency_lock;
++	u64 total_metadatas;
++	ktime_t metadata_latency_sum;
++	ktime_t metadata_latency_sq_sum;
++	ktime_t metadata_latency_min;
++	ktime_t metadata_latency_max;
  };
  
  extern int ceph_metric_init(struct ceph_client_metric *m);
- extern void ceph_metric_destroy(struct ceph_client_metric *m);
-+
-+static inline void ceph_update_cap_hit(struct ceph_client_metric *m)
-+{
-+	percpu_counter_inc(&m->i_caps_hit);
-+}
-+
-+static inline void ceph_update_cap_mis(struct ceph_client_metric *m)
-+{
-+	percpu_counter_inc(&m->i_caps_mis);
-+}
+@@ -49,4 +56,7 @@ extern void ceph_update_read_latency(struct ceph_client_metric *m,
+ extern void ceph_update_write_latency(struct ceph_client_metric *m,
+ 				      ktime_t r_start, ktime_t r_end,
+ 				      int rc);
++extern void ceph_update_metadata_latency(struct ceph_client_metric *m,
++				         ktime_t r_start, ktime_t r_end,
++					 int rc);
  #endif /* _FS_CEPH_MDS_METRIC_H */
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 5c73cf1..47cfd89 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -645,6 +645,8 @@ static inline bool __ceph_is_any_real_caps(struct ceph_inode_info *ci)
- 
- extern int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented);
- extern int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int t);
-+extern int __ceph_caps_issued_mask_metric(struct ceph_inode_info *ci, int mask,
-+					  int t);
- extern int __ceph_caps_issued_other(struct ceph_inode_info *ci,
- 				    struct ceph_cap *cap);
- 
-@@ -657,12 +659,12 @@ static inline int ceph_caps_issued(struct ceph_inode_info *ci)
- 	return issued;
- }
- 
--static inline int ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask,
--					int touch)
-+static inline int ceph_caps_issued_mask_metric(struct ceph_inode_info *ci,
-+					       int mask, int touch)
- {
- 	int r;
- 	spin_lock(&ci->i_ceph_lock);
--	r = __ceph_caps_issued_mask(ci, mask, touch);
-+	r = __ceph_caps_issued_mask_metric(ci, mask, touch);
- 	spin_unlock(&ci->i_ceph_lock);
- 	return r;
- }
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 7b8a070..71ee34d 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -856,7 +856,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 
- 	if (ci->i_xattrs.version == 0 ||
- 	    !((req_mask & CEPH_CAP_XATTR_SHARED) ||
--	      __ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1))) {
-+	      __ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 1))) {
- 		spin_unlock(&ci->i_ceph_lock);
- 
- 		/* security module gets xattr while filling trace */
-@@ -914,7 +914,7 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
- 	     ci->i_xattrs.version, ci->i_xattrs.index_version);
- 
- 	if (ci->i_xattrs.version == 0 ||
--	    !__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1)) {
-+	    !__ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 1)) {
- 		spin_unlock(&ci->i_ceph_lock);
- 		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR, true);
- 		if (err)
 -- 
 1.8.3.1
