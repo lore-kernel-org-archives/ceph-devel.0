@@ -1,61 +1,84 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v2] ceph: fix potential race in ceph_check_caps
-Date: Thu, 26 Mar 2020 09:25:26 -0400
-Message-ID: <20200326132526.15639-1-jlayton@kernel.org>
-References: <20200323160708.104152-8-jlayton@kernel.org>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: reducing s_mutex coverage in kcephfs client
+Date: Thu, 26 Mar 2020 12:58:28 -0400
+Message-ID: <d6e7fca9b7276f36f828182faceea92bdc254fb1.camel@redhat.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33022 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726318AbgCZNZ2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 26 Mar 2020 09:25:28 -0400
-In-Reply-To: <20200323160708.104152-8-jlayton@kernel.org>
+Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:57587 "EHLO
+        us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725994AbgCZQ6g (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 26 Mar 2020 12:58:36 -0400
+Received: by mail-qk1-f197.google.com with SMTP id r64so4742419qkc.17
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Mar 2020 09:58:32 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ukernel@gmail.com, idryomov@gmail.com, sage@redhat.com
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>, Sage Weil <sage@redhat.com>
 
-Nothing ensures that session will still be valid by the time we
-dereference the pointer. Take and put a reference.
+I had mentioned this in standup this morning, but it's a bit of a
+complex topic and Zheng asked me to send email instead. I'm also cc'ing
+ceph-devel for posterity...
 
-In principle, we should always be able to get a reference here, but
-throw a warning if that's ever not the case.
+The locking in the cap handling code is extremely hairy, with many
+places where we need to take sleeping locks while we're in atomic
+context (under spinlock, mostly). A lot of the problem is due to the
+need to take the session->s_mutex.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c | 14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
+For instance, there's this in ceph_check_caps:
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 80bde0024615..f8b51d0c8184 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2045,12 +2045,24 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
- 			if (mutex_trylock(&session->s_mutex) == 0) {
- 				dout("inverting session/ino locks on %p\n",
- 				     session);
-+				session = ceph_get_mds_session(session);
- 				spin_unlock(&ci->i_ceph_lock);
- 				if (took_snap_rwsem) {
- 					up_read(&mdsc->snap_rwsem);
- 					took_snap_rwsem = 0;
- 				}
--				mutex_lock(&session->s_mutex);
-+				if (session) {
-+					mutex_lock(&session->s_mutex);
-+					ceph_put_mds_session(session);
-+				} else {
-+					/*
-+					 * Because we take the reference while
-+					 * holding the i_ceph_lock, it should
-+					 * never be NULL. Throw a warning if it
-+					 * ever is.
-+					 */
-+					WARN_ON_ONCE(true);
-+				}
- 				goto retry;
- 			}
- 		}
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 1999)              if (session && session != cap->session) {
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2000)                      dout("oops, wrong session %p mutex\n", session);
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2001)                      mutex_unlock(&session->s_mutex);
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2002)                      session = NULL;
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2003)              }
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2004)              if (!session) {
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2005)                      session = cap->session;
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2006)                      if (mutex_trylock(&session->s_mutex) == 0) {
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2007)                              dout("inverting session/ino locks on %p\n",
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2008)                                   session);
+be655596b3de5 (Sage Weil           2011-11-30 09:47:09 -0800 2009)                              spin_unlock(&ci->i_ceph_lock);
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2010)                              if (took_snap_rwsem) {
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2011)                                      up_read(&mdsc->snap_rwsem);
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2012)                                      took_snap_rwsem = 0;
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2013)                              }
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2014)                              mutex_lock(&session->s_mutex);
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2015)                              goto retry;
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2016)                      }
+a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2017)              }
+
+At this point, we're walking the inode's caps rbtree, while holding the
+inode->i_ceph_lock. We're eventually going to need to send a cap message
+to the MDS for this cap, but that requires the cap->session->s_mutex. We
+try to take it without blocking first, but if that fails, we have to
+unwind all of the locking and start over. Gross. That also makes the
+handling of snap_rwsem much more complex than it really should be too.
+
+It does this, despite the fact that the cap message doesn't actually
+need much from the session (just the session->s_con, mostly). Most of
+the info in the message comes from the inode and cap objects.
+
+My question is: What is the s_mutex guaranteeing at this point?
+
+More to the point, is it strictly required that we hold that mutex as we
+marshal up the outgoing request? It would be much cleaner to be able to
+just drop the spinlock after getting the ceph_msg_args ready to send,
+then take the session mutex and send the request.
+
+The state of the MDS session is not checked in this codepath before the
+send, so it doesn't seem like ordering vs. session state messages is
+very important. This _is_ ordered vs. regular MDS requests, but a
+per-session mutex seems like a very heavyweight way to do that.
+
+If we're concerned about reordering cap messages that involve the same
+inode, then there are other ways to ensure that ordering that don't
+require a coarse-grained mutex.
+
+It's just not clear to me what data this mutex is protecting in this
+case.
+
+Any hints would be welcome!
 -- 
-2.25.1
+Jeff Layton <jlayton@redhat.com>
