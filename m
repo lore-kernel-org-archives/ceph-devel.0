@@ -1,73 +1,100 @@
-From: Lee Duncan <lduncan-IBi9RG/b67k@public.gmane.org>
-Subject: Re:
-Date: Fri, 27 Mar 2020 08:53:20 -0700
-Message-ID: <5462bc04-8409-a0c3-628f-640d1c92b8c6@suse.com>
-References: <5e7dc543.vYG3wru8B/me1sOV%chenanqing@oppo.com>
-Reply-To: open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: reducing s_mutex coverage in kcephfs client
+Date: Fri, 27 Mar 2020 15:47:24 -0400
+Message-ID: <f4931c8940e982bd0bf0d4f02ed11b6867ece2ca.camel@redhat.com>
+References: <d6e7fca9b7276f36f828182faceea92bdc254fb1.camel@redhat.com>
+         <CAAM7YAk3AhWv0KKWAqAh3zP9Lbj7f9RSDMVXZ2A_1W8M6mSOSA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <open-iscsi+bncBD54HHNYIIILVRXY6MCRUBDRJD4XS-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <5e7dc543.vYG3wru8B/me1sOV%chenanqing-Oq79sGaMObY@public.gmane.org>
-Content-Language: en-US
-List-Post: <https://groups.google.com/group/open-iscsi/post>, <mailto:open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:open-iscsi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/open-iscsi
-List-Subscribe: <https://groups.google.com/group/open-iscsi/subscribe>, <mailto:open-iscsi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+856124926423+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/open-iscsi/subscribe>
-To: chenanqing-Oq79sGaMObY@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, jejb-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org, cleech-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-74.mimecast.com ([216.205.24.74]:56400 "EHLO
+        us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726900AbgC0Trb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 27 Mar 2020 15:47:31 -0400
+Received: by mail-qv1-f69.google.com with SMTP id v88so8625702qvv.6
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2020 12:47:26 -0700 (PDT)
+In-Reply-To: <CAAM7YAk3AhWv0KKWAqAh3zP9Lbj7f9RSDMVXZ2A_1W8M6mSOSA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>, Sage Weil <sage@redhat.com>
 
-On 3/27/20 2:20 AM, chenanqing-Oq79sGaMObY@public.gmane.org wrote:
-> From: Chen Anqing <chenanqing-Oq79sGaMObY@public.gmane.org>
-> To: Lee Duncan <lduncan-IBi9RG/b67k@public.gmane.org>
-> Cc: Chris Leech <cleech-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>,
->         "James E . J . Bottomley" <jejb-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>,
->         "Martin K . Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>,
->         ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org,
->         open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org,
->         linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org,
->         linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org,
->         chenanqing-Oq79sGaMObY@public.gmane.org
-> Subject: [PATCH] scsi: libiscsi: we should take compound page into account also
-> Date: Fri, 27 Mar 2020 05:20:01 -0400
-> Message-Id: <20200327092001.56879-1-chenanqing-Oq79sGaMObY@public.gmane.org>
-> X-Mailer: git-send-email 2.18.2
+On Fri, 2020-03-27 at 22:31 +0800, Yan, Zheng wrote:
+> On Fri, Mar 27, 2020 at 12:58 AM Jeff Layton <jlayton@redhat.com> wrote:
+> > I had mentioned this in standup this morning, but it's a bit of a
+> > complex topic and Zheng asked me to send email instead. I'm also cc'ing
+> > ceph-devel for posterity...
+> > 
+> > The locking in the cap handling code is extremely hairy, with many
+> > places where we need to take sleeping locks while we're in atomic
+> > context (under spinlock, mostly). A lot of the problem is due to the
+> > need to take the session->s_mutex.
+> > 
+> > For instance, there's this in ceph_check_caps:
+> > 
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 1999)              if (session && session != cap->session) {
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2000)                      dout("oops, wrong session %p mutex\n", session);
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2001)                      mutex_unlock(&session->s_mutex);
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2002)                      session = NULL;
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2003)              }
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2004)              if (!session) {
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2005)                      session = cap->session;
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2006)                      if (mutex_trylock(&session->s_mutex) == 0) {
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2007)                              dout("inverting session/ino locks on %p\n",
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2008)                                   session);
+> > be655596b3de5 (Sage Weil           2011-11-30 09:47:09 -0800 2009)                              spin_unlock(&ci->i_ceph_lock);
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2010)                              if (took_snap_rwsem) {
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2011)                                      up_read(&mdsc->snap_rwsem);
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2012)                                      took_snap_rwsem = 0;
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2013)                              }
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2014)                              mutex_lock(&session->s_mutex);
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2015)                              goto retry;
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2016)                      }
+> > a8599bd821d08 (Sage Weil           2009-10-06 11:31:12 -0700 2017)              }
+> > 
+> > At this point, we're walking the inode's caps rbtree, while holding the
+> > inode->i_ceph_lock. We're eventually going to need to send a cap message
+> > to the MDS for this cap, but that requires the cap->session->s_mutex. We
+> > try to take it without blocking first, but if that fails, we have to
+> > unwind all of the locking and start over. Gross. That also makes the
+> > handling of snap_rwsem much more complex than it really should be too.
+> > 
+> > It does this, despite the fact that the cap message doesn't actually
+> > need much from the session (just the session->s_con, mostly). Most of
+> > the info in the message comes from the inode and cap objects.
+> > 
+> > My question is: What is the s_mutex guaranteeing at this point?
+> > 
+> > More to the point, is it strictly required that we hold that mutex as we
+> > marshal up the outgoing request? It would be much cleaner to be able to
+> > just drop the spinlock after getting the ceph_msg_args ready to send,
+> > then take the session mutex and send the request.
+> > 
+> > The state of the MDS session is not checked in this codepath before the
+> > send, so it doesn't seem like ordering vs. session state messages is
+> > very important. This _is_ ordered vs. regular MDS requests, but a
+> > per-session mutex seems like a very heavyweight way to do that.
+> > 
+> > If we're concerned about reordering cap messages that involve the same
+> > inode, then there are other ways to ensure that ordering that don't
+> > require a coarse-grained mutex.
+> > 
+> > It's just not clear to me what data this mutex is protecting in this
+> > case.
 > 
-> the patch is occur at a real crash,which slab is
-> come from a compound page,so we need take the compound page
-> into account also.
-> fixed commit 08b11eaccfcf ("scsi: libiscsi: fall back to
-> sendmsg for slab pages").
-> 
-> Signed-off-by: Chen Anqing <chenanqing-Oq79sGaMObY@public.gmane.org>
-> ---
->  drivers/scsi/libiscsi_tcp.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/scsi/libiscsi_tcp.c b/drivers/scsi/libiscsi_tcp.c
-> index 6ef93c7af954..98304e5e1f6f 100644
-> --- a/drivers/scsi/libiscsi_tcp.c
-> +++ b/drivers/scsi/libiscsi_tcp.c
-> @@ -128,7 +128,8 @@ static void iscsi_tcp_segment_map(struct iscsi_segment *segment, int recv)
->          * coalescing neighboring slab objects into a single frag which
->          * triggers one of hardened usercopy checks.
->          */
-> -       if (!recv && page_count(sg_page(sg)) >= 1 && !PageSlab(sg_page(sg)))
-> +       if (!recv && page_count(sg_page(sg)) >= 1 &&
-> +           !PageSlab(compound_head(sg_page(sg))))
->                 return;
-> 
->         if (recv) {
-> --
-> 2.18.2
-> 
+> I think it's mainly for message ordering. For example,  a request may
+> release multiple inodes' caps (by ceph_encode_inode_release).  Before
+> sending the request out, we need to prevent ceph_check_caps() from
+> touch these inodes' caps and sending cap messages.
 
+I don't get it.
 
-This is missing a proper subject ...
+AFAICT, ceph_encode_inode_release is called while holding the
+mdsc->mutex, not the s_mutex. That is serialized on the i_ceph_lock, but
+I don't think there's any guarantee what order (e.g.) a racing cap
+update and release would be sent.
 
--- 
-You received this message because you are subscribed to the Google Groups "open-iscsi" group.
-To unsubscribe from this group and stop receiving emails from it, send an email to open-iscsi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-To view this discussion on the web visit https://groups.google.com/d/msgid/open-iscsi/5462bc04-8409-a0c3-628f-640d1c92b8c6%40suse.com.
+--
+Jeff Layton <jlayton@redhat.com>
