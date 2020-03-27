@@ -1,196 +1,253 @@
-From: =?utf-8?B?6ZmI5a6J5bqG?= <chenanqing@oppo.com>
-Subject: Re: [PATCH] scsi: libiscsi: we should take compound page into account
- also
-Date: Fri, 27 Mar 2020 10:04:40 +0000
-Message-ID: <HK0PR02MB2563E665E2867865CE8258C2ABCC0@HK0PR02MB2563.apcprd02.prod.outlook.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] scsi: libiscsi: we should take compound page into account also
+Date: Fri, 27 Mar 2020 11:46:56 +0100
+Message-ID: <CAOi1vP-ckVdkAivQSKBTExiYfSFdURSx82_YWWc2ODHP0fYTpg@mail.gmail.com>
+References: <HK0PR02MB2563E665E2867865CE8258C2ABCC0@HK0PR02MB2563.apcprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: zh-CN
+In-Reply-To: <HK0PR02MB2563E665E2867865CE8258C2ABCC0@HK0PR02MB2563.apcprd02.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
+To: =?UTF-8?B?6ZmI5a6J5bqG?= <chenanqing@oppo.com>
 Cc: LKML <linux-kernel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "kuba@kernel.org" <kuba@kernel.org>, Sage Weil <sage@redhat.com>, Jeff Layton <jlayton@kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-DQpPbiBGcmksIE1hciAyNywgMjAyMCBhdCA5OjM2IEFNIDxjaGVuYW5xaW5nQG9wcG8uY29tPiB3
-cm90ZToNCj4NCj4gRnJvbTogQ2hlbiBBbnFpbmcgPGNoZW5hbnFpbmdAb3Bwby5jb20+DQo+IFRv
-OiBJbHlhIERyeW9tb3YgPGlkcnlvbW92QGdtYWlsLmNvbT4NCj4gQ2M6IEplZmYgTGF5dG9uIDxq
-bGF5dG9uQGtlcm5lbC5vcmc+LA0KPiAgICAgICAgIFNhZ2UgV2VpbCA8c2FnZUByZWRoYXQuY29t
-PiwNCj4gICAgICAgICBKYWt1YiBLaWNpbnNraSA8a3ViYUBrZXJuZWwub3JnPiwNCj4gICAgICAg
-ICBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZywNCj4gICAgICAgICBuZXRkZXZAdmdlci5rZXJu
-ZWwub3JnLA0KPiAgICAgICAgIGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmcsDQo+ICAgICAg
-ICAgY2hlbmFucWluZ0BvcHBvLmNvbQ0KPiBTdWJqZWN0OiBbUEFUQ0hdIGxpYmNlcGg6IHdlIHNo
-b3VsZCB0YWtlIGNvbXBvdW5kIHBhZ2UgaW50byBhY2NvdW50DQo+IGFsc28NCj4gRGF0ZTogRnJp
-LCAyNyBNYXIgMjAyMCAwNDozNjozMCAtMDQwMA0KPiBNZXNzYWdlLUlkOiA8MjAyMDAzMjcwODM2
-MzAuMzYyOTYtMS1jaGVuYW5xaW5nQG9wcG8uY29tPg0KPiBYLU1haWxlcjogZ2l0LXNlbmQtZW1h
-aWwgMi4xOC4yDQo+DQo+IHRoZSBwYXRjaCBpcyBvY2N1ciBhdCBhIHJlYWwgY3Jhc2gsd2hpY2gg
-c2xhYiBpcyBjb21lIGZyb20gYSBjb21wb3VuZA0KPiBwYWdlLHNvIHdlIG5lZWQgdGFrZSB0aGUg
-Y29tcG91bmQgcGFnZSBpbnRvIGFjY291bnQgYWxzby4NCj4gZml4ZWQgY29tbWl0IDdlMjQxZjY0
-N2RjNyAoImxpYmNlcGg6IGZhbGwgYmFjayB0byBzZW5kbXNnIGZvciBzbGFiIHBhZ2VzIiknDQo+
-DQo+IFNpZ25lZC1vZmYtYnk6IENoZW4gQW5xaW5nIDxjaGVuYW5xaW5nQG9wcG8uY29tPg0KPiAt
-LS0NCj4gIG5ldC9jZXBoL21lc3Nlbmdlci5jIHwgMiArLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDEg
-aW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9uZXQvY2VwaC9t
-ZXNzZW5nZXIuYyBiL25ldC9jZXBoL21lc3Nlbmdlci5jIGluZGV4DQo+IGY4Y2E1ZWRjNWYyYy4u
-ZTA4YzFjMzM0Y2Q5IDEwMDY0NA0KPiAtLS0gYS9uZXQvY2VwaC9tZXNzZW5nZXIuYw0KPiArKysg
-Yi9uZXQvY2VwaC9tZXNzZW5nZXIuYw0KPiBAQCAtNTgyLDcgKzU4Miw3IEBAIHN0YXRpYyBpbnQg
-Y2VwaF90Y3Bfc2VuZHBhZ2Uoc3RydWN0IHNvY2tldCAqc29jaywgc3RydWN0IHBhZ2UgKnBhZ2Us
-DQo+ICAgICAgICAgICogY29hbGVzY2luZyBuZWlnaGJvcmluZyBzbGFiIG9iamVjdHMgaW50byBh
-IHNpbmdsZSBmcmFnIHdoaWNoDQo+ICAgICAgICAgICogdHJpZ2dlcnMgb25lIG9mIGhhcmRlbmVk
-IHVzZXJjb3B5IGNoZWNrcy4NCj4gICAgICAgICAgKi8NCj4gLSAgICAgICBpZiAocGFnZV9jb3Vu
-dChwYWdlKSA+PSAxICYmICFQYWdlU2xhYihwYWdlKSkNCj4gKyAgICAgICBpZiAocGFnZV9jb3Vu
-dChwYWdlKSA+PSAxICYmICFQYWdlU2xhYihjb21wb3VuZF9oZWFkKHBhZ2UpKSkNCj4gICAgICAg
-ICAgICAgICAgIHNlbmRwYWdlID0gc29jay0+b3BzLT5zZW5kcGFnZTsNCj4gICAgICAgICBlbHNl
-DQo+ICAgICAgICAgICAgICAgICBzZW5kcGFnZSA9IHNvY2tfbm9fc2VuZHBhZ2U7DQoNCj5IaSBD
-aGVuLA0KDQo+QUZBSUNUIGNvbXBvdW5kIHBhZ2VzIHNob3VsZCBhbHJlYWR5IGJlIHRha2VuIGlu
-dG8gYWNjb3VudCwgYmVjYXVzZSBQYWdlU2xhYiBpcyBkZWZpbmVkIGFzOg0KPg0KPiAgX19QQUdF
-RkxBRyhTbGFiLCBzbGFiLCBQRl9OT19UQUlMKQ0KPg0KPiAgI2RlZmluZSBfX1BBR0VGTEFHKHVu
-YW1lLCBsbmFtZSwgcG9saWN5KSAgICAgICAgICAgICAgICAgICAgICAgXA0KPiAgICAgIFRFU1RQ
-QUdFRkxBRyh1bmFtZSwgbG5hbWUsIHBvbGljeSkgICAgICAgICAgICAgICAgICAgICAgICAgXA0K
-PiAgICAgIF9fU0VUUEFHRUZMQUcodW5hbWUsIGxuYW1lLCBwb2xpY3kpICAgICAgICAgICAgICAg
-ICAgICAgICAgXA0KPiAgICAgIF9fQ0xFQVJQQUdFRkxBRyh1bmFtZSwgbG5hbWUsIHBvbGljeSkN
-Cj4NCj4gICNkZWZpbmUgVEVTVFBBR0VGTEFHKHVuYW1lLCBsbmFtZSwgcG9saWN5KSAgICAgICAg
-ICAgICAgICAgICAgIFwNCj4gIHN0YXRpYyBfX2Fsd2F5c19pbmxpbmUgaW50IFBhZ2UjI3VuYW1l
-KHN0cnVjdCBwYWdlICpwYWdlKSAgICAgIFwNCj4gICAgICB7IHJldHVybiB0ZXN0X2JpdChQR18j
-I2xuYW1lLCAmcG9saWN5KHBhZ2UsIDApLT5mbGFncyk7IH0NCj4NCj4gYW5kIFBGX05PX1RBSUwg
-cG9saWN5IGlzIGRlZmluZWQgYXM6DQoNCj4gICNkZWZpbmUgUEZfTk9fVEFJTChwYWdlLCBlbmZv
-cmNlKSAoeyAgICAgICAgICAgICAgICAgICAgICAgIFwNCj4gICAgICBWTV9CVUdfT05fUEdGTEFH
-UyhlbmZvcmNlICYmIFBhZ2VUYWlsKHBhZ2UpLCBwYWdlKTsgICAgIFwNCj4gICAgICBQRl9QT0lT
-T05FRF9DSEVDSyhjb21wb3VuZF9oZWFkKHBhZ2UpKTsgfSkNCg0KPiBTbyBjb21wb3VuZF9oZWFk
-KCkgaXMgY2FsbGVkIGJlaGluZCB0aGUgc2NlbmVzLg0KDQo+Q291bGQgeW91IHBsZWFzZSBleHBs
-YWluIHdoYXQgY3Jhc2ggZGlkIHlvdSBvYnNlcnZlIGluIG1vcmUgZGV0YWlsPw0KPlBlcmhhcHMg
-eW91IGJhY2twb3J0ZWQgdGhpcyBwYXRjaCB0byBhbiBvbGRlciBrZXJuZWw/DQoNCj5UaGFua3Ms
-DQoNCj4gICAgICAgICAgICAgICAgSWx5YQ0KSGkgbGx5YSwNCiB0aGFuayB5b3UgZm9yIHlvdSBy
-ZXBseSBzbyBxdWlja2x5Lg0KIEkgaGF2ZSBhcHBseSB0aGUgcGF0Y2ggaW4gbXkgc2VydmVyICxp
-dCdzIHdvcmsgZmluZSAsc28gSSB0aG91Z2h0IGl0IHNob3VsZCBiZSBwdXNoZWQgdG8gdGhlIGNv
-bW11bml0eSwgYnV0IEkgS25vdyBub3RoaW5nIGFib3V0IHRoZQ0KIFBhZ2VTbGFiIGhhcyBiZWVu
-IGNoYW5nZWQgLGJlY2F1c2UgSSB1c2UgdGhlIDMuMTAuMC0gYWxsIHRoZSB0aW1lICxzb3JyeSBm
-b3IgdGhhdC4gaSBhbHNvIHNlbmQgcGF0Y2ggdG8gc2NzaSBncm91cCBhbHNvLg0KDQogbXkgY3Jh
-c2ggaXMgd3JpdGVkIGJlbG93Og0KDQpbODU3NzQuNTU4NjA0XSB1c2VyY29weToga2VybmVsIG1l
-bW9yeSBleHBvc3VyZSBhdHRlbXB0IGRldGVjdGVkIGZyb20gZmZmZjljYmEwYmY3NTQwMCAoa21h
-bGxvYy01MTIpICgxMDI0IGJ5dGVzKQ0KWzg1Nzc0LjU1OTI2MV0gLS0tLS0tLS0tLS0tWyBjdXQg
-aGVyZSBdLS0tLS0tLS0tLS0tDQpbODU3NzQuNTU5ODM5XSBrZXJuZWwgQlVHIGF0IG1tL3VzZXJj
-b3B5LmM6NzIhDQpbODU3NzQuNTYwMzY3XSBpbnZhbGlkIG9wY29kZTogMDAwMCBbIzFdIFNNUA0K
-Wzg1Nzc0LjU2MDg3OV0gTW9kdWxlcyBsaW5rZWQgaW46IGNtYWMgYXJjNCBtZDQgbmxzX3V0Zjgg
-Y2lmcyBjY20gZG5zX3Jlc29sdmVyIHhmcyBpc2NzaV90Y3AgbGliaXNjc2lfdGNwIGxpYmlzY3Np
-IGlwdGFibGVfcmF3IGlwdGFibGVfbWFuZ2xlIHNjaF9zZnEgc2NoX2h0YiBzY3NpX3RyYW5zcG9y
-dF9pc2NzaSB2ZXRoIGlwdF9NQVNRVUVSQURFIG5mX25hdF9tYXNxdWVyYWRlX2lwdjQgeHRfY29t
-bWVudCB4dF9tYXJrIGlwdGFibGVfbmF0IG5mX2Nvbm50cmFja19pcHY0IG5mX2RlZnJhZ19pcHY0
-IG5mX25hdF9pcHY0IHh0X2FkZHJ0eXBlIGlwdGFibGVfZmlsdGVyIHh0X2Nvbm50cmFjayBuZl9u
-YXQgbmZfY29ubnRyYWNrIGJyX25ldGZpbHRlciBicmlkZ2Ugc3RwIGxsYyBkbV90aGluX3Bvb2wg
-ZG1fcGVyc2lzdGVudF9kYXRhIGRtX2Jpb19wcmlzb24gZG1fYnVmaW8gbGliY3JjMzJjIGxvb3Ag
-Ym9uZGluZyBmdXNlIHN1bnJwYyBkbV9taXJyb3IgZG1fcmVnaW9uX2hhc2ggZG1fbG9nIGRtX21v
-ZCBkZWxsX3NtYmlvcyBkZWxsX3dtaV9kZXNjcmlwdG9yIGlUQ09fd2R0IGlUQ09fdmVuZG9yX3N1
-cHBvcnQgZGNkYmFzIHNreF9lZGFjIGludGVsX3Bvd2VyY2xhbXAgY29yZXRlbXAgaW50ZWxfcmFw
-bCBpb3NmX21iaSBrdm1faW50ZWwga3ZtIGlycWJ5cGFzcyBjcmMzMl9wY2xtdWwgZ2hhc2hfY2xt
-dWxuaV9pbnRlbCBhZXNuaV9pbnRlbCBscncgZ2YxMjhtdWwgZ2x1ZV9oZWxwZXIgYWJsa19oZWxw
-ZXIgY3J5cHRkIGlwbWlfc3NpZiBzZyBwY3Nwa3IgbWVpX21lIGxwY19pY2ggaTJjX2k4MDEgbWVp
-IHdtaSBpcG1pX3NpDQpbODU3NzQuNTY0MzQzXSAgaXBtaV9kZXZpbnRmIGlwbWlfbXNnaGFuZGxl
-ciBhY3BpX3BhZCBhY3BpX3Bvd2VyX21ldGVyIGlwX3RhYmxlcyBleHQ0IG1iY2FjaGUgamJkMiBz
-ZF9tb2QgY3JjX3QxMGRpZiBjcmN0MTBkaWZfZ2VuZXJpYyBjcmN0MTBkaWZfcGNsbXVsIGNyY3Qx
-MGRpZl9jb21tb24gY3JjMzJjX2ludGVsIG1nYWcyMDAgZHJtX2ttc19oZWxwZXIgc3lzY29weWFy
-ZWEgc3lzZmlsbHJlY3Qgc3lzaW1nYmx0IGZiX3N5c19mb3BzIHR0bSBtZWdhcmFpZF9zYXMgZHJt
-IGl4Z2JlIGFoY2kgaWdiIGRybV9wYW5lbF9vcmllbnRhdGlvbl9xdWlya3MgbGliYWhjaSBtZGlv
-IGxpYmF0YSBwdHAgcHBzX2NvcmUgZGNhIGkyY19hbGdvX2JpdCBuZml0IGxpYm52ZGltbQ0KWzg1
-Nzc0LjU2NjgwOV0gQ1BVOiA5IFBJRDogMjgwNTQgQ29tbTogdGd0ZCBLZHVtcDogbG9hZGVkIE5v
-dCB0YWludGVkIDMuMTAuMC05NTcuMjcuMi5lbDcueDg2XzY0ICMxDQpbODU3NzQuNTY3NDQ2XSBI
-YXJkd2FyZSBuYW1lOiBEZWxsIEluYy4gUG93ZXJFZGdlIFI3NDAvMFlOWDU2LCBCSU9TIDIuNC44
-IDExLzI2LzIwMTkNCls4NTc3NC41NjgwOTRdIHRhc2s6IGZmZmY5Y2IxMmUxZTAwMDAgdGk6IGZm
-ZmY5Y2IxMjQyMjQwMDAgdGFzay50aTogZmZmZjljYjEyNDIyNDAwMA0KWzg1Nzc0LjU2ODc1NF0g
-UklQOiAwMDEwOls8ZmZmZmZmZmY5ODAzZjU1Nz5dICBbPGZmZmZmZmZmOTgwM2Y1NTc+XSBfX2No
-ZWNrX29iamVjdF9zaXplKzB4ODcvMHgyNTANCls4NTc3NC41Njk0MTldIFJTUDogMDAxODpmZmZm
-OWNiMTI0MjI3Yjk4ICBFRkxBR1M6IDAwMDEwMjQ2DQpbODU3NzQuNTcwMDcyXSBSQVg6IDAwMDAw
-MDAwMDAwMDAwNjIgUkJYOiBmZmZmOWNiYTBiZjc1NDAwIFJDWDogMDAwMDAwMDAwMDAwMDAwMA0K
-Wzg1Nzc0LjU3MDcyM10gUkRYOiAwMDAwMDAwMDAwMDAwMDAwIFJTSTogZmZmZjljYzEzYmYxMzg5
-OCBSREk6IGZmZmY5Y2MxM2JmMTM4OTgNCls4NTc3NC41NzEzNzJdIFJCUDogZmZmZjljYjEyNDIy
-N2JiOCBSMDg6IDAwMDAwMDAwMDAwMDAwMDAgUjA5OiBmZmZmOWNiMTMxM2U2ZjAwDQpbODU3NzQu
-NTcyMDE3XSBSMTA6IDAwMDAwMDAwMDAwM2JjOTUgUjExOiAwMDAwMDAwMDAwMDAwMDAxIFIxMjog
-MDAwMDAwMDAwMDAwMDQwMA0KWzg1Nzc0LjU3MjY2OV0gUjEzOiAwMDAwMDAwMDAwMDAwMDAxIFIx
-NDogZmZmZjljYmEwYmY3NTgwMCBSMTU6IDAwMDAwMDAwMDAwMDA0MDANCls4NTc3NC41NzMzMjVd
-IEZTOiAgMDAwMDdmNDFhMTIyYTc0MCgwMDAwKSBHUzpmZmZmOWNjMTNiZjAwMDAwKDAwMDApIGtu
-bEdTOjAwMDAwMDAwMDAwMDAwMDANCls4NTc3NC41NzM5OTRdIENTOiAgMDAxMCBEUzogMDAwMCBF
-UzogMDAwMCBDUjA6IDAwMDAwMDAwODAwNTAwMzMNCls4NTc3NC41NzQ2NTVdIENSMjogMDAwMDAw
-MDAwMzIzNmZlMCBDUjM6IDAwMDAwMDEwMjMxMzgwMDAgQ1I0OiAwMDAwMDAwMDAwNzYwN2UwDQpb
-ODU3NzQuNTc1MzE0XSBEUjA6IDAwMDAwMDAwMDAwMDAwMDAgRFIxOiAwMDAwMDAwMDAwMDAwMDAw
-IERSMjogMDAwMDAwMDAwMDAwMDAwMA0KWzg1Nzc0LjU3NTk2NF0gRFIzOiAwMDAwMDAwMDAwMDAw
-MDAwIERSNjogMDAwMDAwMDBmZmZlMGZmMCBEUjc6IDAwMDAwMDAwMDAwMDA0MDANCls4NTc3NC41
-NzY2MDldIFBLUlU6IDU1NTU1NTU0DQpbODU3NzQuNTc3MjQyXSBDYWxsIFRyYWNlOg0KWzg1Nzc0
-LjU3Nzg4MF0gIFs8ZmZmZmZmZmY5ODE4ZGQ5ZD5dIG1lbWNweV90b2lvdmVjKzB4NGQvMHhiMA0K
-Wzg1Nzc0LjU3ODUzMV0gIFs8ZmZmZmZmZmY5ODQyYzg1OD5dIHNrYl9jb3B5X2RhdGFncmFtX2lv
-dmVjKzB4MTI4LzB4MjgwDQpbODU3NzQuNTc5MTkwXSAgWzxmZmZmZmZmZjk4NDkzNzJhPl0gdGNw
-X3JlY3Ztc2crMHgyMmEvMHhiMzANCls4NTc3NC41Nzk4MzhdICBbPGZmZmZmZmZmOTg0YzIzNDA+
-XSBpbmV0X3JlY3Ztc2crMHg4MC8weGIwDQpbODU3NzQuNTgwNDc0XSAgWzxmZmZmZmZmZjk4NDFh
-NmVjPl0gc29ja19haW9fcmVhZC5wYXJ0LjkrMHgxNGMvMHgxNzANCls4NTc3NC41ODEwOTddICBb
-PGZmZmZmZmZmOTg0MWE3MzE+XSBzb2NrX2Fpb19yZWFkKzB4MjEvMHgzMA0KWzg1Nzc0LjU4MTcx
-NF0gIFs8ZmZmZmZmZmY5ODA0MWIzMz5dIGRvX3N5bmNfcmVhZCsweDkzLzB4ZTANCls4NTc3NC41
-ODIzMjhdICBbPGZmZmZmZmZmOTgwNDI2MTU+XSB2ZnNfcmVhZCsweDE0NS8weDE3MA0KWzg1Nzc0
-LjU4MjkzNF0gIFs8ZmZmZmZmZmY5ODA0MzQyZj5dIFN5U19yZWFkKzB4N2YvMHhmMA0KWzg1Nzc0
-LjU4MzU0M10gIFs8ZmZmZmZmZmY5ODU3NmRkYj5dIHN5c3RlbV9jYWxsX2Zhc3RwYXRoKzB4MjIv
-MHgyNw0KWzg1Nzc0LjU4NDE1OF0gQ29kZTogNDUgZDEgNDggYzcgYzYgMDUgYzMgODcgOTggNDgg
-YzcgYzEgZjYgNTcgODggOTggNDggMGYgNDUgZjEgNDkgODkgYzAgNGQgODkgZTEgNDggODkgZDkg
-NDggYzcgYzcgMDAgMjcgODggOTggMzEgYzAgZTggMzAgZTQgNTEgMDAgPDBmPiAwYiAwZiAxZiA4
-MCAwMCAwMCAwMCAwMCA0OCBjNyBjMCAwMCAwMCBlMCA5NyA0YyAzOSBmMCA3MyAwZA0KWzg1Nzc0
-LjU4NTQ5NV0gUklQICBbPGZmZmZmZmZmOTgwM2Y1NTc+XSBfX2NoZWNrX29iamVjdF9zaXplKzB4
-ODcvMHgyNTANCls4NTc3NC41ODYxMzVdICBSU1AgPGZmZmY5Y2IxMjQyMjdiOTg+DQoNCmNyYXNo
-PiBkaXMgLWwgc2tiX2NvcHlfZGF0YWdyYW1faW92ZWMNCi91c3Ivc3JjL2RlYnVnL2tlcm5lbC0z
-LjEwLjAtOTU3LjI3LjIuZWw3L2xpbnV4LTMuMTAuMC05NTcuMjcuMi5lbDcueDg2XzY0L25ldC9j
-b3JlL2RhdGFncmFtLmM6IDM5NQ0KMHhmZmZmZmZmZjk4NDJjNzMwIDxza2JfY29weV9kYXRhZ3Jh
-bV9pb3ZlYz46ICAgbm9wbCAgIDB4MCglcmF4LCVyYXgsMSkgW0ZUUkFDRSBOT1BdDQoweGZmZmZm
-ZmZmOTg0MmM3MzUgPHNrYl9jb3B5X2RhdGFncmFtX2lvdmVjKzU+OiBwdXNoICAgJXJicA0KMHhm
-ZmZmZmZmZjk4NDJjNzM2IDxza2JfY29weV9kYXRhZ3JhbV9pb3ZlYys2PjogbW92ICAgICVyc3As
-JXJicA0KMHhmZmZmZmZmZjk4NDJjNzM5IDxza2JfY29weV9kYXRhZ3JhbV9pb3ZlYys5PjogcHVz
-aCAgICVyMTUNCjB4ZmZmZmZmZmY5ODQyYzczYiA8c2tiX2NvcHlfZGF0YWdyYW1faW92ZWMrMTE+
-OiAgICAgICAgcHVzaCAgICVyMTQNCjB4ZmZmZmZmZmY5ODQyYzczZCA8c2tiX2NvcHlfZGF0YWdy
-YW1faW92ZWMrMTM+OiAgICAgICAgbW92ICAgICVyZGksJXIxNA0KMHhmZmZmZmZmZjk4NDJjNzQw
-IDxza2JfY29weV9kYXRhZ3JhbV9pb3ZlYysxNj46ICAgICAgICBwdXNoICAgJXIxMw0KMHhmZmZm
-ZmZmZjk4NDJjNzQyIDxza2JfY29weV9kYXRhZ3JhbV9pb3ZlYysxOD46ICAgICAgICBwdXNoICAg
-JXIxMg0KMHhmZmZmZmZmZjk4NDJjNzQ0IDxza2JfY29weV9kYXRhZ3JhbV9pb3ZlYysyMD46ICAg
-ICAgICBtb3YgICAgJWVzaSwlcjEyZA0KMHhmZmZmZmZmZjk4NDJjNzQ3IDxza2JfY29weV9kYXRh
-Z3JhbV9pb3ZlYysyMz46ICAgICAgICBwdXNoICAgJXJieC0tLS0tLS0tLS0tLS0tLS3vvJpza2Ig
-aXMgc3RvcmUgaW4gcmJ4IGFuZCBJIGdldCBpdCBmcm9tIHN0YWNrDQoweGZmZmZmZmZmOTg0MmM3
-NDggPHNrYl9jb3B5X2RhdGFncmFtX2lvdmVjKzI0PjogICAgICAgIG1vdiAgICAlZWN4LCVlYngN
-CjB4ZmZmZmZmZmY5ODQyYzc0YSA8c2tiX2NvcHlfZGF0YWdyYW1faW92ZWMrMjY+OiAgICAgICAg
-c3ViICAgICQweDI4LCVyc3ANCg0KY3Jhc2g+IHNrX2J1ZmYubGVuIGZmZmY5Y2IwZTNiMzg4ZjgN
-CiAgbGVuID0gMTAyNA0KDQpjcmFzaD4gc2tfYnVmZi5kYXRhX2xlbiAgZmZmZjljYjBlM2IzODhm
-OA0KICBkYXRhX2xlbiA9IDEwMjQNCg0KY3Jhc2g+IHNrX2J1ZmYuaGVhZCAgZmZmZjljYjBlM2Iz
-ODhmOA0KICBoZWFkID0gMHhmZmZmOWNiZjljNjc5NDAwICIiDQoNCmNyYXNoPiBza19idWZmLmVu
-ZCAgZmZmZjljYjBlM2IzODhmOCAteA0KICBlbmQgPSAweDJjMA0KY3Jhc2g+IHB4ICAweGZmZmY5
-Y2JmOWM2Nzk0MDAgKyAweDJjMA0KJDUgPSAweGZmZmY5Y2JmOWM2Nzk2YzANCg0KY3Jhc2g+IHNr
-Yl9zaGFyZWRfaW5mbyAweGZmZmY5Y2JmOWM2Nzk2YzANCnN0cnVjdCBza2Jfc2hhcmVkX2luZm8g
-ew0KICBucl9mcmFncyA9IDEgJ1wwMDEnLA0KICB0eF9mbGFncyA9IDMyICcgJywNCiAgZ3NvX3Np
-emUgPSAwLA0KICBnc29fc2VncyA9IDEsDQogIGdzb190eXBlID0gMCwNCiAgZnJhZ19saXN0ID0g
-MHgwLA0KICBod3RzdGFtcHMgPSB7DQoNCg0KY3Jhc2g+IHNrYl9zaGFyZWRfaW5mby5mcmFncyAw
-eGZmZmY5Y2JmOWM2Nzk2YzANCiAgZnJhZ3MgPSB7ew0KICAgICAgcGFnZSA9IHsNCiAgICAgICAg
-cCA9IDB4ZmZmZmY1OTdhNDJmZGQ0MC0tLS0taXQgdGhlIHBhZ2Ugd2hpY2ggc3RvcmUgdGhlIGRh
-dGENCiAgICAgIH0sDQogICAgICBwYWdlX29mZnNldCA9IDEwMjQsDQogICAgICBzaXplID0gMTAy
-NA0KICAgIH0sIHsNCg0KY3Jhc2g+IGttZW0gZmZmZjljYmEwYmY3NTQwMC0tLS0tLS0tLS0tLXRo
-ZSBhZGRyZXNzIHdoaWNoIGlzIHJlcG9ydGVkIGluIHRoZSBidWdvbiBsaW5l77yMDQpDQUNIRSAg
-ICAgICAgICAgIE5BTUUgICAgICAgICAgICAgICAgIE9CSlNJWkUgIEFMTE9DQVRFRCAgICAgVE9U
-QUwgIFNMQUJTICBTU0laRQ0KZmZmZjljYTI3ZmMwNzYwMCBrbWFsbG9jLTUxMiAgICAgICAgICAg
-ICAgNTEyICAgICAyNDI0NTQgICAgNDY0NTEyICAgNzI1OCAgICAzMmsNCiAgU0xBQiAgICAgICAg
-ICAgICAgTUVNT1JZICAgICAgICAgICAgTk9ERSAgVE9UQUwgIEFMTE9DQVRFRCAgRlJFRQ0KICBm
-ZmZmZjU5N2E0MmZkYzAwICBmZmZmOWNiYTBiZjcwMDAwICAgICAxICAgICA2NCAgICAgICAgIDU5
-ICAgICA1DQogIEZSRUUgLyBbQUxMT0NBVEVEXQ0KICBbZmZmZjljYmEwYmY3NTQwMF0NCg0KICAg
-ICAgUEFHRSAgICAgICAgIFBIWVNJQ0FMICAgICAgTUFQUElORyAgICAgICBJTkRFWCBDTlQgRkxB
-R1MNCmZmZmZmNTk3YTQyZmRkNDAgMTkwYmY3NTAwMCAgICAgICAgICAgICAgICAwICAgICAgICAw
-ICAwIDZmZmZmZjAwMDA4MDAwIHRhaWwNCg0KYW5kIEkgZm91bmQgdGhlIHBhZ2UgaXMgbm90IHRo
-ZSBoZWFkIHBhZ2UgLGl0IGlzIGEgdGFpbCBwYWdlIG9mIGNvbXBvdW5kIHBhZ2UuDQoNCnNvIEkg
-c2VhcmNoIHRoZSBsaW51eCBjb2RlICxJIGdldCB0aGUgcGF0Y2g6DQpjb21taXQgN2UyNDFmNjQ3
-ZGM3ICgibGliY2VwaDogZmFsbCBiYWNrIHRvIHNlbmRtc2cgZm9yIHNsYWIgcGFnZXMiKScNCmNv
-bW1pdCAwOGIxMWVhY2NmY2YgKCJzY3NpOiBsaWJpc2NzaTogZmFsbCBiYWNrIHRvIHNlbmRtc2cg
-Zm9yIHNsYWIgcGFnZXMiKS4NCg0Kc29ycnkgYWdhaW4gZm9yIHRyb3VibGluZyB5b3UuDQpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KT1BQTw0KDQrmnKznlLXlrZDpgq7ku7blj4rl
-hbbpmYTku7blkKvmnIlPUFBP5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO6YKu5Lu2
-5oyH5piO55qE5pS25Lu25Lq65L2/55So77yI5YyF5ZCr5Liq5Lq65Y+K576k57uE77yJ44CC56aB
-5q2i5Lu75L2V5Lq65Zyo5pyq57uP5o6I5p2D55qE5oOF5Ya15LiL5Lul5Lu75L2V5b2i5byP5L2/
-55So44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+356uL5Y2z5Lul55S15a2Q6YKu
-5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pys6YKu5Lu25Y+K5YW26ZmE5Lu244CCDQoNClRo
-aXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3Jt
-YXRpb24gZnJvbSBPUFBPLCB3aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9y
-IGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUgaW5m
-b3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3Qg
-bGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbCBkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9y
-IGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQgcmVjaXBp
-ZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9y
-LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkg
-YW5kIGRlbGV0ZSBpdCENCg==
+On Fri, Mar 27, 2020 at 11:04 AM =E9=99=88=E5=AE=89=E5=BA=86 <chenanqing@op=
+po.com> wrote:
+>
+>
+> On Fri, Mar 27, 2020 at 9:36 AM <chenanqing@oppo.com> wrote:
+> >
+> > From: Chen Anqing <chenanqing@oppo.com>
+> > To: Ilya Dryomov <idryomov@gmail.com>
+> > Cc: Jeff Layton <jlayton@kernel.org>,
+> >         Sage Weil <sage@redhat.com>,
+> >         Jakub Kicinski <kuba@kernel.org>,
+> >         ceph-devel@vger.kernel.org,
+> >         netdev@vger.kernel.org,
+> >         linux-kernel@vger.kernel.org,
+> >         chenanqing@oppo.com
+> > Subject: [PATCH] libceph: we should take compound page into account
+> > also
+> > Date: Fri, 27 Mar 2020 04:36:30 -0400
+> > Message-Id: <20200327083630.36296-1-chenanqing@oppo.com>
+> > X-Mailer: git-send-email 2.18.2
+> >
+> > the patch is occur at a real crash,which slab is come from a compound
+> > page,so we need take the compound page into account also.
+> > fixed commit 7e241f647dc7 ("libceph: fall back to sendmsg for slab page=
+s")'
+> >
+> > Signed-off-by: Chen Anqing <chenanqing@oppo.com>
+> > ---
+> >  net/ceph/messenger.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c index
+> > f8ca5edc5f2c..e08c1c334cd9 100644
+> > --- a/net/ceph/messenger.c
+> > +++ b/net/ceph/messenger.c
+> > @@ -582,7 +582,7 @@ static int ceph_tcp_sendpage(struct socket *sock, s=
+truct page *page,
+> >          * coalescing neighboring slab objects into a single frag which
+> >          * triggers one of hardened usercopy checks.
+> >          */
+> > -       if (page_count(page) >=3D 1 && !PageSlab(page))
+> > +       if (page_count(page) >=3D 1 && !PageSlab(compound_head(page)))
+> >                 sendpage =3D sock->ops->sendpage;
+> >         else
+> >                 sendpage =3D sock_no_sendpage;
+>
+> >Hi Chen,
+>
+> >AFAICT compound pages should already be taken into account, because Page=
+Slab is defined as:
+> >
+> >  __PAGEFLAG(Slab, slab, PF_NO_TAIL)
+> >
+> >  #define __PAGEFLAG(uname, lname, policy)                       \
+> >      TESTPAGEFLAG(uname, lname, policy)                         \
+> >      __SETPAGEFLAG(uname, lname, policy)                        \
+> >      __CLEARPAGEFLAG(uname, lname, policy)
+> >
+> >  #define TESTPAGEFLAG(uname, lname, policy)                     \
+> >  static __always_inline int Page##uname(struct page *page)      \
+> >      { return test_bit(PG_##lname, &policy(page, 0)->flags); }
+> >
+> > and PF_NO_TAIL policy is defined as:
+>
+> >  #define PF_NO_TAIL(page, enforce) ({                        \
+> >      VM_BUG_ON_PGFLAGS(enforce && PageTail(page), page);     \
+> >      PF_POISONED_CHECK(compound_head(page)); })
+>
+> > So compound_head() is called behind the scenes.
+>
+> >Could you please explain what crash did you observe in more detail?
+> >Perhaps you backported this patch to an older kernel?
+>
+> >Thanks,
+>
+> >                Ilya
+> Hi llya,
+>  thank you for you reply so quickly.
+>  I have apply the patch in my server ,it's work fine ,so I thought it sho=
+uld be pushed to the community, but I Know nothing about the
+>  PageSlab has been changed ,because I use the 3.10.0- all the time ,sorry=
+ for that. i also send patch to scsi group also.
+
+No problem at all, pushing fixes upstream is a good thing!
+
+So yes, if you are backporting to 3.10 on your own, you need this
+patch.  FWIW libceph has been patched in kernel-3.10.0-957.10.1.el7.
+Can't say anything about tgtd though.
+
+>
+>  my crash is writed below:
+>
+> [85774.558604] usercopy: kernel memory exposure attempt detected from fff=
+f9cba0bf75400 (kmalloc-512) (1024 bytes)
+> [85774.559261] ------------[ cut here ]------------
+> [85774.559839] kernel BUG at mm/usercopy.c:72!
+> [85774.560367] invalid opcode: 0000 [#1] SMP
+> [85774.560879] Modules linked in: cmac arc4 md4 nls_utf8 cifs ccm dns_res=
+olver xfs iscsi_tcp libiscsi_tcp libiscsi iptable_raw iptable_mangle sch_sf=
+q sch_htb scsi_transport_iscsi veth ipt_MASQUERADE nf_nat_masquerade_ipv4 x=
+t_comment xt_mark iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 =
+xt_addrtype iptable_filter xt_conntrack nf_nat nf_conntrack br_netfilter br=
+idge stp llc dm_thin_pool dm_persistent_data dm_bio_prison dm_bufio libcrc3=
+2c loop bonding fuse sunrpc dm_mirror dm_region_hash dm_log dm_mod dell_smb=
+ios dell_wmi_descriptor iTCO_wdt iTCO_vendor_support dcdbas skx_edac intel_=
+powerclamp coretemp intel_rapl iosf_mbi kvm_intel kvm irqbypass crc32_pclmu=
+l ghash_clmulni_intel aesni_intel lrw gf128mul glue_helper ablk_helper cryp=
+td ipmi_ssif sg pcspkr mei_me lpc_ich i2c_i801 mei wmi ipmi_si
+> [85774.564343]  ipmi_devintf ipmi_msghandler acpi_pad acpi_power_meter ip=
+_tables ext4 mbcache jbd2 sd_mod crc_t10dif crct10dif_generic crct10dif_pcl=
+mul crct10dif_common crc32c_intel mgag200 drm_kms_helper syscopyarea sysfil=
+lrect sysimgblt fb_sys_fops ttm megaraid_sas drm ixgbe ahci igb drm_panel_o=
+rientation_quirks libahci mdio libata ptp pps_core dca i2c_algo_bit nfit li=
+bnvdimm
+> [85774.566809] CPU: 9 PID: 28054 Comm: tgtd Kdump: loaded Not tainted 3.1=
+0.0-957.27.2.el7.x86_64 #1
+> [85774.567446] Hardware name: Dell Inc. PowerEdge R740/0YNX56, BIOS 2.4.8=
+ 11/26/2019
+> [85774.568094] task: ffff9cb12e1e0000 ti: ffff9cb124224000 task.ti: ffff9=
+cb124224000
+> [85774.568754] RIP: 0010:[<ffffffff9803f557>]  [<ffffffff9803f557>] __che=
+ck_object_size+0x87/0x250
+> [85774.569419] RSP: 0018:ffff9cb124227b98  EFLAGS: 00010246
+> [85774.570072] RAX: 0000000000000062 RBX: ffff9cba0bf75400 RCX: 000000000=
+0000000
+> [85774.570723] RDX: 0000000000000000 RSI: ffff9cc13bf13898 RDI: ffff9cc13=
+bf13898
+> [85774.571372] RBP: ffff9cb124227bb8 R08: 0000000000000000 R09: ffff9cb13=
+13e6f00
+> [85774.572017] R10: 000000000003bc95 R11: 0000000000000001 R12: 000000000=
+0000400
+> [85774.572669] R13: 0000000000000001 R14: ffff9cba0bf75800 R15: 000000000=
+0000400
+> [85774.573325] FS:  00007f41a122a740(0000) GS:ffff9cc13bf00000(0000) knlG=
+S:0000000000000000
+> [85774.573994] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [85774.574655] CR2: 0000000003236fe0 CR3: 0000001023138000 CR4: 000000000=
+07607e0
+> [85774.575314] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 000000000=
+0000000
+> [85774.575964] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 000000000=
+0000400
+> [85774.576609] PKRU: 55555554
+> [85774.577242] Call Trace:
+> [85774.577880]  [<ffffffff9818dd9d>] memcpy_toiovec+0x4d/0xb0
+> [85774.578531]  [<ffffffff9842c858>] skb_copy_datagram_iovec+0x128/0x280
+> [85774.579190]  [<ffffffff9849372a>] tcp_recvmsg+0x22a/0xb30
+> [85774.579838]  [<ffffffff984c2340>] inet_recvmsg+0x80/0xb0
+> [85774.580474]  [<ffffffff9841a6ec>] sock_aio_read.part.9+0x14c/0x170
+> [85774.581097]  [<ffffffff9841a731>] sock_aio_read+0x21/0x30
+> [85774.581714]  [<ffffffff98041b33>] do_sync_read+0x93/0xe0
+> [85774.582328]  [<ffffffff98042615>] vfs_read+0x145/0x170
+> [85774.582934]  [<ffffffff9804342f>] SyS_read+0x7f/0xf0
+> [85774.583543]  [<ffffffff98576ddb>] system_call_fastpath+0x22/0x27
+> [85774.584158] Code: 45 d1 48 c7 c6 05 c3 87 98 48 c7 c1 f6 57 88 98 48 0=
+f 45 f1 49 89 c0 4d 89 e1 48 89 d9 48 c7 c7 00 27 88 98 31 c0 e8 30 e4 51 0=
+0 <0f> 0b 0f 1f 80 00 00 00 00 48 c7 c0 00 00 e0 97 4c 39 f0 73 0d
+> [85774.585495] RIP  [<ffffffff9803f557>] __check_object_size+0x87/0x250
+> [85774.586135]  RSP <ffff9cb124227b98>
+>
+> crash> dis -l skb_copy_datagram_iovec
+> /usr/src/debug/kernel-3.10.0-957.27.2.el7/linux-3.10.0-957.27.2.el7.x86_6=
+4/net/core/datagram.c: 395
+> 0xffffffff9842c730 <skb_copy_datagram_iovec>:   nopl   0x0(%rax,%rax,1) [=
+FTRACE NOP]
+> 0xffffffff9842c735 <skb_copy_datagram_iovec+5>: push   %rbp
+> 0xffffffff9842c736 <skb_copy_datagram_iovec+6>: mov    %rsp,%rbp
+> 0xffffffff9842c739 <skb_copy_datagram_iovec+9>: push   %r15
+> 0xffffffff9842c73b <skb_copy_datagram_iovec+11>:        push   %r14
+> 0xffffffff9842c73d <skb_copy_datagram_iovec+13>:        mov    %rdi,%r14
+> 0xffffffff9842c740 <skb_copy_datagram_iovec+16>:        push   %r13
+> 0xffffffff9842c742 <skb_copy_datagram_iovec+18>:        push   %r12
+> 0xffffffff9842c744 <skb_copy_datagram_iovec+20>:        mov    %esi,%r12d
+> 0xffffffff9842c747 <skb_copy_datagram_iovec+23>:        push   %rbx------=
+----------=EF=BC=9Askb is store in rbx and I get it from stack
+> 0xffffffff9842c748 <skb_copy_datagram_iovec+24>:        mov    %ecx,%ebx
+> 0xffffffff9842c74a <skb_copy_datagram_iovec+26>:        sub    $0x28,%rsp
+>
+> crash> sk_buff.len ffff9cb0e3b388f8
+>   len =3D 1024
+>
+> crash> sk_buff.data_len  ffff9cb0e3b388f8
+>   data_len =3D 1024
+>
+> crash> sk_buff.head  ffff9cb0e3b388f8
+>   head =3D 0xffff9cbf9c679400 ""
+>
+> crash> sk_buff.end  ffff9cb0e3b388f8 -x
+>   end =3D 0x2c0
+> crash> px  0xffff9cbf9c679400 + 0x2c0
+> $5 =3D 0xffff9cbf9c6796c0
+>
+> crash> skb_shared_info 0xffff9cbf9c6796c0
+> struct skb_shared_info {
+>   nr_frags =3D 1 '\001',
+>   tx_flags =3D 32 ' ',
+>   gso_size =3D 0,
+>   gso_segs =3D 1,
+>   gso_type =3D 0,
+>   frag_list =3D 0x0,
+>   hwtstamps =3D {
+>
+>
+> crash> skb_shared_info.frags 0xffff9cbf9c6796c0
+>   frags =3D {{
+>       page =3D {
+>         p =3D 0xfffff597a42fdd40-----it the page which store the data
+>       },
+>       page_offset =3D 1024,
+>       size =3D 1024
+>     }, {
+>
+> crash> kmem ffff9cba0bf75400------------the address which is reported in =
+the bugon line=EF=BC=8C
+> CACHE            NAME                 OBJSIZE  ALLOCATED     TOTAL  SLABS=
+  SSIZE
+> ffff9ca27fc07600 kmalloc-512              512     242454    464512   7258=
+    32k
+>   SLAB              MEMORY            NODE  TOTAL  ALLOCATED  FREE
+>   fffff597a42fdc00  ffff9cba0bf70000     1     64         59     5
+>   FREE / [ALLOCATED]
+>   [ffff9cba0bf75400]
+>
+>       PAGE         PHYSICAL      MAPPING       INDEX CNT FLAGS
+> fffff597a42fdd40 190bf75000                0        0  0 6fffff00008000 t=
+ail
+>
+> and I found the page is not the head page ,it is a tail page of compound =
+page.
+>
+> so I search the linux code ,I get the patch:
+> commit 7e241f647dc7 ("libceph: fall back to sendmsg for slab pages")'
+> commit 08b11eaccfcf ("scsi: libiscsi: fall back to sendmsg for slab pages=
+").
+
+Thanks,
+
+                Ilya
