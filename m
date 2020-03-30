@@ -1,29 +1,23 @@
-From: "maryalice - maryalice:" <maryalice00.06@gmail.com>
-Subject: Reply For More Details.
-Date: Mon, 30 Mar 2020 03:10:55 -0200
-Message-ID: <CAJrXg5Q7WjdNq8Ugzckh2G+XYiBeutBXPUPYVbWrmB4DTS4CiA__21143.9704102062$1585545064$gmane$org@mail.gmail.com>
-Reply-To: maryalice00.12@postribe.com
+From: "Manuel Franco" <luis.sanchez@11d01.mspz7.gob.ec>
+Subject: spende von 2.000.000,00 Euro
+Date: Mon, 30 Mar 2020 11:37:39 +0200
+Message-ID: <20200330090626.CEB372F6EE08@mail.11d01.mspz7.gob.ec>
+Reply-To: manuelfrancospende11@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:34643 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727994AbgC3FK6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Mar 2020 01:10:58 -0400
-Received: by mail-qk1-f194.google.com with SMTP id i6so17765219qke.1
-        for <ceph-devel@vger.kernel.org>; Sun, 29 Mar 2020 22:10:56 -0700 (PDT)
+Received: from mail.11d01.mspz7.gob.ec ([190.152.145.91]:43746 "EHLO
+        mail.11d01.mspz7.gob.ec" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729196AbgC3Kos (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Mar 2020 06:44:48 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <luis.sanchez@11d01.mspz7.gob.ec>
 
--- 
-My dear,
+Ich bin Manuel Franco, ich spende Ihnen 2.000.000,00 Euro. Kontaktieren Sie=
+ mich jetzt, damit wir fortfahren k=F6nnen.
 
-I am Mrs Maryalice Williams, I want to send you donation of two
-million seven hundred thousand Dollars ($2.7M) for volunteer projects
-in your country due to my ill health that could not permit me. Kindly
-reply for more details, and also send me the following details, as per
-below, your full Name ..........,  Address...........,
-Age...............,  Occupation ...............
-
-Remain blessed,
-Mrs. Maryalice Williams.
+I am Manuel Franco, I donate to you 2,000,000.00 euros. Contact me now so w=
+e can proceed.
