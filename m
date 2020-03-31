@@ -1,56 +1,53 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH] ceph: request expedited service when flushing caps
-Date: Tue, 31 Mar 2020 06:52:23 -0400
-Message-ID: <20200331105223.9610-1-jlayton@kernel.org>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH 0/8] ceph: cap handling code fixes, cleanups and comments
+Date: Tue, 31 Mar 2020 13:24:50 +0100
+Message-ID: <20200331122450.GA2364@suse.com>
+References: <20200323160708.104152-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:48062 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:59182 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730481AbgCaKwZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 31 Mar 2020 06:52:25 -0400
+        id S1730357AbgCaMYw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 31 Mar 2020 08:24:52 -0400
+Content-Disposition: inline
+In-Reply-To: <20200323160708.104152-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ukernel@gmail.com, idryomov@gmail.com, sage@redhat.com, jfajerski@suse.com
+To: Jeff Layton <jlayton@kernel.org>
+Cc: ceph-devel@vger.kernel.org, ukernel@gmail.com, idryomov@gmail.com, sage@redhat.com
 
-Jan noticed some long stalls when flushing caps using sync() after
-doing small file creates. For instance, running this:
+On Mon, Mar 23, 2020 at 12:07:00PM -0400, Jeff Layton wrote:
+> I've been going over the cap handling code with an aim toward
+> simplifying the locking. There's one fix for a potential use-after-free
+> race in here. This also eliminates a number of __acquires and __releases
+> annotations by reorganizing the code, and adds some (hopefully helpful)
+> comments.
+> 
+> There should be no behavioral changes with this set.
 
-    $ time for i in $(seq -w 11 30); do echo "Hello World" > hello-$i.txt; sync -f ./hello-$i.txt; done
+But a lot of clarifications!  Thanks a lot for this patchset, Jeff ;-)
 
-Could take more than 90s in some cases. The sync() will flush out caps,
-but doesn't tell the MDS that it's waiting synchronously on the
-replies.
+Cheers,
+--
+Luis
 
-When ceph_check_caps finds that CHECK_CAPS_FLUSH is set, then set the
-CEPH_CLIENT_CAPS_SYNC bit in the cap update request. This clues the MDS
-into that fact and it can then expedite the reply.
-
-URL: https://tracker.ceph.com/issues/44744
-Reported-and-Tested-by: Jan Fajerski <jfajerski@suse.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 61808793e0c0..6403178f2376 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2111,8 +2111,11 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
- 
- 		mds = cap->mds;  /* remember mds, so we don't repeat */
- 
--		__prep_cap(&arg, cap, CEPH_CAP_OP_UPDATE, 0, cap_used, want,
--			   retain, flushing, flush_tid, oldest_flush_tid);
-+		__prep_cap(&arg, cap, CEPH_CAP_OP_UPDATE,
-+			   (flags & CHECK_CAPS_FLUSH) ?
-+			    CEPH_CLIENT_CAPS_SYNC : 0,
-+			   cap_used, want, retain, flushing, flush_tid,
-+			   oldest_flush_tid);
- 		spin_unlock(&ci->i_ceph_lock);
- 
- 		__send_cap(mdsc, &arg, ci);
--- 
-2.25.1
+> 
+> Jeff Layton (8):
+>   ceph: reorganize __send_cap for less spinlock abuse
+>   ceph: split up __finish_cap_flush
+>   ceph: add comments for handle_cap_flush_ack logic
+>   ceph: don't release i_ceph_lock in handle_cap_trunc
+>   ceph: don't take i_ceph_lock in handle_cap_import
+>   ceph: document what protects i_dirty_item and i_flushing_item
+>   ceph: fix potential race in ceph_check_caps
+>   ceph: throw a warning if we destroy session with mutex still locked
+> 
+>  fs/ceph/caps.c       | 292 ++++++++++++++++++++++++-------------------
+>  fs/ceph/mds_client.c |   1 +
+>  fs/ceph/super.h      |   4 +-
+>  3 files changed, 170 insertions(+), 127 deletions(-)
+> 
+> -- 
+> 2.25.1
+> 
