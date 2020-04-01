@@ -1,96 +1,102 @@
-From: Jeff Layton <jlayton@kernel.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
 Subject: Re: [PATCH] ceph: request expedited service when flushing caps
-Date: Tue, 31 Mar 2020 10:56:13 -0400
-Message-ID: <924ac730ea35f3a10c3828f3b532a2b7642776dc.camel@kernel.org>
-References: <20200331105223.9610-1-jlayton@kernel.org>
-         <CAAM7YAmzyYrREBtmX+JrEQMMuo9LhZ2J2c-PyahQaAiVVEn2fQ@mail.gmail.com>
-         <CAJ4mKGbMgoQ6tgsiQchR2QirxOW_oPOuNo5X26YKpy66yHD+FA@mail.gmail.com>
+Date: Wed, 1 Apr 2020 19:04:12 +0800
+Message-ID: <CAAM7YAmwduzm6kWw7rv62TMgJoZCqstZWOiQTVoP8LhxutHUuw@mail.gmail.com>
+References: <20200331105223.9610-1-jlayton@kernel.org> <CAAM7YAmzyYrREBtmX+JrEQMMuo9LhZ2J2c-PyahQaAiVVEn2fQ@mail.gmail.com>
+ <CAJ4mKGbMgoQ6tgsiQchR2QirxOW_oPOuNo5X26YKpy66yHD+FA@mail.gmail.com> <924ac730ea35f3a10c3828f3b532a2b7642776dc.camel@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:58906 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730511AbgCaO4R (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 31 Mar 2020 10:56:17 -0400
-In-Reply-To: <CAJ4mKGbMgoQ6tgsiQchR2QirxOW_oPOuNo5X26YKpy66yHD+FA@mail.gmail.com>
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:33707 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732006AbgDALEY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2020 07:04:24 -0400
+Received: by mail-qt1-f195.google.com with SMTP id c14so21235295qtp.0
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Apr 2020 04:04:24 -0700 (PDT)
+In-Reply-To: <924ac730ea35f3a10c3828f3b532a2b7642776dc.camel@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Jan Fajerski <jfajerski@suse.com>, "Yan, Zheng" <ukernel@gmail.com>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Jan Fajerski <jfajerski@suse.com>
 
-On Tue, 2020-03-31 at 07:00 -0700, Gregory Farnum wrote:
-> On Tue, Mar 31, 2020 at 6:49 AM Yan, Zheng <ukernel@gmail.com> wrote:
-> > On Tue, Mar 31, 2020 at 6:52 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > > Jan noticed some long stalls when flushing caps using sync() after
-> > > doing small file creates. For instance, running this:
-> > > 
-> > >     $ time for i in $(seq -w 11 30); do echo "Hello World" > hello-$i.txt; sync -f ./hello-$i.txt; done
-> > > 
-> > > Could take more than 90s in some cases. The sync() will flush out caps,
-> > > but doesn't tell the MDS that it's waiting synchronously on the
-> > > replies.
-> > > 
-> > > When ceph_check_caps finds that CHECK_CAPS_FLUSH is set, then set the
-> > > CEPH_CLIENT_CAPS_SYNC bit in the cap update request. This clues the MDS
-> > > into that fact and it can then expedite the reply.
-> > > 
-> > > URL: https://tracker.ceph.com/issues/44744
-> > > Reported-and-Tested-by: Jan Fajerski <jfajerski@suse.com>
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > ---
-> > >  fs/ceph/caps.c | 7 +++++--
-> > >  1 file changed, 5 insertions(+), 2 deletions(-)
-> > > 
-> > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> > > index 61808793e0c0..6403178f2376 100644
-> > > --- a/fs/ceph/caps.c
-> > > +++ b/fs/ceph/caps.c
-> > > @@ -2111,8 +2111,11 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
-> > > 
-> > >                 mds = cap->mds;  /* remember mds, so we don't repeat */
-> > > 
-> > > -               __prep_cap(&arg, cap, CEPH_CAP_OP_UPDATE, 0, cap_used, want,
-> > > -                          retain, flushing, flush_tid, oldest_flush_tid);
-> > > +               __prep_cap(&arg, cap, CEPH_CAP_OP_UPDATE,
-> > > +                          (flags & CHECK_CAPS_FLUSH) ?
-> > > +                           CEPH_CLIENT_CAPS_SYNC : 0,
-> > > +                          cap_used, want, retain, flushing, flush_tid,
-> > > +                          oldest_flush_tid);
-> > >                 spin_unlock(&ci->i_ceph_lock);
-> > > 
-> > 
-> > this is too expensive for syncfs case. mds needs to flush journal for
-> > each dirty inode.  we'd better to track dirty inodes by session, and
-> > only set the flag when flushing the last inode in session dirty list.
+On Tue, Mar 31, 2020 at 10:56 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> On Tue, 2020-03-31 at 07:00 -0700, Gregory Farnum wrote:
+> > On Tue, Mar 31, 2020 at 6:49 AM Yan, Zheng <ukernel@gmail.com> wrote:
+> > > On Tue, Mar 31, 2020 at 6:52 PM Jeff Layton <jlayton@kernel.org> wrote:
+> > > > Jan noticed some long stalls when flushing caps using sync() after
+> > > > doing small file creates. For instance, running this:
+> > > >
+> > > >     $ time for i in $(seq -w 11 30); do echo "Hello World" > hello-$i.txt; sync -f ./hello-$i.txt; done
+> > > >
+> > > > Could take more than 90s in some cases. The sync() will flush out caps,
+> > > > but doesn't tell the MDS that it's waiting synchronously on the
+> > > > replies.
+> > > >
+> > > > When ceph_check_caps finds that CHECK_CAPS_FLUSH is set, then set the
+> > > > CEPH_CLIENT_CAPS_SYNC bit in the cap update request. This clues the MDS
+> > > > into that fact and it can then expedite the reply.
+> > > >
+> > > > URL: https://tracker.ceph.com/issues/44744
+> > > > Reported-and-Tested-by: Jan Fajerski <jfajerski@suse.com>
+> > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > > > ---
+> > > >  fs/ceph/caps.c | 7 +++++--
+> > > >  1 file changed, 5 insertions(+), 2 deletions(-)
+> > > >
+> > > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > > > index 61808793e0c0..6403178f2376 100644
+> > > > --- a/fs/ceph/caps.c
+> > > > +++ b/fs/ceph/caps.c
+> > > > @@ -2111,8 +2111,11 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
+> > > >
+> > > >                 mds = cap->mds;  /* remember mds, so we don't repeat */
+> > > >
+> > > > -               __prep_cap(&arg, cap, CEPH_CAP_OP_UPDATE, 0, cap_used, want,
+> > > > -                          retain, flushing, flush_tid, oldest_flush_tid);
+> > > > +               __prep_cap(&arg, cap, CEPH_CAP_OP_UPDATE,
+> > > > +                          (flags & CHECK_CAPS_FLUSH) ?
+> > > > +                           CEPH_CLIENT_CAPS_SYNC : 0,
+> > > > +                          cap_used, want, retain, flushing, flush_tid,
+> > > > +                          oldest_flush_tid);
+> > > >                 spin_unlock(&ci->i_ceph_lock);
+> > > >
+> > >
+> > > this is too expensive for syncfs case. mds needs to flush journal for
+> > > each dirty inode.  we'd better to track dirty inodes by session, and
+> > > only set the flag when flushing the last inode in session dirty list.
+>
+> I think this will be more difficult than that...
+>
+> >
+> > Yeah, see the userspace Client::_sync_fs() where we have an internal
+> > flags argument which is set on the last cap in the dirty set and tells
+> > the actual cap message flushing code to set FLAG_SYNC on the
+> > MClientCaps message. I presume the kernel is operating on a similar
+> > principle here?
+>
+> Not today, but we need it to.
+>
+> The caps are not tracked on a per-session basis (as Zheng points out),
+> and the locking and ordering of these requests is not as straightforward
+> as it is in the (trivial) libcephfs case. Fixing this will be a lot more
+> invasive than I had originally hoped.
+>
+> It's also not 100% clear to me how we'll gauge which cap will be
+> "last".  As we move the last cap on the session's list from dirty to
+> flushing state, we can mark it so that it sets the SYNC flag when it
+> goes out, but what happens if we have a process that is actively
+> dirtying other inodes during this? You might never see the per-session
+> list go empty.
+>
 
-I think this will be more difficult than that...
+It's not necessary to be strict 'last'.  just the one before exiting the loop
 
-> 
-> Yeah, see the userspace Client::_sync_fs() where we have an internal
-> flags argument which is set on the last cap in the dirty set and tells
-> the actual cap message flushing code to set FLAG_SYNC on the
-> MClientCaps message. I presume the kernel is operating on a similar
-> principle here?
-
-Not today, but we need it to.
-
-The caps are not tracked on a per-session basis (as Zheng points out),
-and the locking and ordering of these requests is not as straightforward
-as it is in the (trivial) libcephfs case. Fixing this will be a lot more
-invasive than I had originally hoped.
-
-It's also not 100% clear to me how we'll gauge which cap will be
-"last".  As we move the last cap on the session's list from dirty to
-flushing state, we can mark it so that it sets the SYNC flag when it
-goes out, but what happens if we have a process that is actively
-dirtying other inodes during this? You might never see the per-session
-list go empty.
-
-It may also go empty for reasons that have nothing to do with issuing a
-sync(), (or fsync() or...) so we don't want to universally set this flag
-in that case.
-
-I'm not sure what the right solution is yet.
--- 
-Jeff Layton <jlayton@kernel.org>
+> It may also go empty for reasons that have nothing to do with issuing a
+> sync(), (or fsync() or...) so we don't want to universally set this flag
+> in that case.
+>
+> I'm not sure what the right solution is yet.
+> --
+> Jeff Layton <jlayton@kernel.org>
+>
