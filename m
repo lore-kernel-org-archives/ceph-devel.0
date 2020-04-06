@@ -1,91 +1,109 @@
-From: Jesper Krogh <jesper.krogh@gmail.com>
-Subject: Re: 5.4.20 - high load - lots of incoming data - small data read.
-Date: Mon, 6 Apr 2020 15:17:22 +0200
-Message-ID: <CAED-sie+qsrr3yZVAiB=t6cAzWUwX9Y=32srJY2dwyRpSXvgxg@mail.gmail.com>
-References: <CAED-sidS3jt5f0nTvLp6_xL+sgk0FFJGaX-X7cCDav-8nwj4TA@mail.gmail.com>
- <db72c749125519b9c042c9664918eacbe8744985.camel@kernel.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] ceph: ceph_kick_flushing_caps needs the s_mutex
+Date: Mon, 6 Apr 2020 22:53:50 +0800
+Message-ID: <CAAM7YAnW_20a3seYJk_yPfYt+00izT+83Y72prdOgXwwwrt25w@mail.gmail.com>
+References: <20200403191423.40938-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lj1-f180.google.com ([209.85.208.180]:44227 "EHLO
-        mail-lj1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728176AbgDFNRf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Apr 2020 09:17:35 -0400
-Received: by mail-lj1-f180.google.com with SMTP id p14so14608758lji.11
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2020 06:17:34 -0700 (PDT)
-In-Reply-To: <db72c749125519b9c042c9664918eacbe8744985.camel@kernel.org>
+Received: from mail-qt1-f194.google.com ([209.85.160.194]:35990 "EHLO
+        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728781AbgDFOyC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Apr 2020 10:54:02 -0400
+Received: by mail-qt1-f194.google.com with SMTP id m33so13053262qtb.3
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2020 07:54:02 -0700 (PDT)
+In-Reply-To: <20200403191423.40938-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@kernel.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
 
-Hi Jeff.
-
-No, because the client "bacula-fd" is reading from the local
-filesystem - here CephFS and sending it over the network to the server
-with the tape-libraries attached to it.  Thus "ideal" receive == send
-- which is also the pattern I see when using larger files (multiple
-MB).
-
-Is the per-file overhead many KB?
-
-Jesper
-
-On Mon, Apr 6, 2020 at 1:45 PM Jeff Layton <jlayton@kernel.org> wrote:
+On Sat, Apr 4, 2020 at 3:14 AM Jeff Layton <jlayton@kernel.org> wrote:
 >
-> On Mon, 2020-04-06 at 10:04 +0200, Jesper Krogh wrote:
-> > This is a CephFS client - its only purpose is to run the "filedaemon" of bacula
-> > and transport data to the tape-library from CephFS - below 2 threads is
-> > essentially doing something equivalent to
-> >
-> > find /cephfs/ -type f | xargs cat | nc server
-> >
-> > 2 threads only, load exploding and the "net read vs net write" has
-> > more than 100x difference.
-> >
+> The mdsc->cap_dirty_lock is not held while walking the list in
+> ceph_kick_flushing_caps, which is not safe.
 >
-> Makes sense. You're basically just reading in all of the data on this
-> cephfs, so the receive is going to be much larger than the send.
+> ceph_early_kick_flushing_caps does something similar, but the
+> s_mutex is held while it's called and I think that guards against
+> changes to the list.
 >
-> > Can anyone explain this as "normal" behaviour?
-> > Server is a  VM with 16 "vCPU" and 16GB memory running libvirt/qemu
-> >
-> > jk@wombat:~$ w
-> >  07:50:33 up 11:25,  1 user,  load average: 206.43, 76.23, 50.58
-> > USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-> > jk       pts/0    10.194.133.42    06:54    0.00s  0.05s  0.00s w
-> > jk@wombat:~$ dstat -ar
-> > --total-cpu-usage-- -dsk/total- -net/total- ---paging-- ---system-- --io/total-
-> > usr sys idl wai stl| read  writ| recv  send|  in   out | int   csw | read  writ
-> >   0   0  98   1   0|  14k   34k|   0     0 |   3B   27B| 481   294 |0.55  0.73
-> >   1   1   0  98   0|   0     0 |  60M  220k|   0     0 |6402  6182 |   0     0
-> >   0   1   0  98   0|   0     0 |  69M  255k|   0     0 |7305  4339 |   0     0
-> >   1   2   0  98   0|   0     0 |  76M  282k|   0     0 |7914  4886 |   0     0
-> >   1   1   0  99   0|   0     0 |  70M  260k|   0     0 |7293  4444 |   0     0
-> >   1   1   0  98   0|   0     0 |  80M  278k|   0     0 |8018  4931 |   0     0
-> >   0   1   0  98   0|   0     0 |  60M  221k|   0     0 |6435  5951 |   0     0
-> >   0   1   0  99   0|   0     0 |  59M  211k|   0     0 |6163  3584 |   0     0
-> >   0   1   0  98   0|   0     0 |  64M  323k|   0     0 |6653  3881 |   0     0
-> >   1   0   0  99   0|   0     0 |  61M  243k|   0     0 |6822  4401 |   0     0
-> >   0   1   0  99   0|   0     0 |  55M  205k|   0     0 |5975  3518 |   0     0
-> >   1   1   0  98   0|   0     0 |  68M  242k|   0     0 |7094  6544 |   0     0
-> >   0   1   0  99   0|   0     0 |  58M  230k|   0     0 |6639  4178 |   0     0
-> >   1   2   0  98   0|   0     0 |  61M  243k|   0     0 |7117  4477 |   0     0
-> >   0   1   0  99   0|   0     0 |  61M  228k|   0     0 |6500  4078 |   0     0
-> >   0   1   0  99   0|   0     0 |  65M  234k|   0     0 |6595  3914 |   0     0
-> >   0   1   0  98   0|   0     0 |  64M  219k|   0     0 |6507  5755 |   0     0
-> >   1   1   0  99   0|   0     0 |  64M  233k|   0     0 |6869  4153 |   0     0
-> >   1   2   0  98   0|   0     0 |  63M  232k|   0     0 |6632  3907 |
-> > 0     0 ^C
+> Ensure we hold the s_mutex when calling ceph_kick_flushing_caps,
+> and add some clarifying comments.
 >
-> Load average is high, but it looks like it's all just waiting on I/O.
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/caps.c       |  2 ++
+>  fs/ceph/mds_client.c |  2 ++
+>  fs/ceph/mds_client.h |  4 +++-
+>  fs/ceph/super.h      | 11 ++++++-----
+>  4 files changed, 13 insertions(+), 6 deletions(-)
 >
-> > jk@wombat:~$ w
-> >  07:50:56 up 11:25,  1 user,  load average: 221.35, 88.07, 55.02
-> > USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-> > jk       pts/0    10.194.133.42    06:54    0.00s  0.05s  0.00s w
-> > jk@wombat:~$
-> >
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index ba6e11810877..f5b37842cdcd 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -2508,6 +2508,8 @@ void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
+>         struct ceph_cap *cap;
+>         u64 oldest_flush_tid;
+>
+> +       lockdep_assert_held(session->s_mutex);
+> +
+>         dout("kick_flushing_caps mds%d\n", session->s_mds);
+>
+>         spin_lock(&mdsc->cap_dirty_lock);
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index be4ad7d28e3a..a8a5b98148ec 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -4026,7 +4026,9 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>                             oldstate != CEPH_MDS_STATE_STARTING)
+>                                 pr_info("mds%d recovery completed\n", s->s_mds);
+>                         kick_requests(mdsc, i);
+> +                       mutex_lock(&s->s_mutex);
+>                         ceph_kick_flushing_caps(mdsc, s);
+> +                       mutex_unlock(&s->s_mutex);
+>                         wake_up_session_caps(s, RECONNECT);
+>                 }
+>         }
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index bd20257fb4c2..1b40f30e0a8e 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -199,8 +199,10 @@ struct ceph_mds_session {
+>         struct list_head  s_cap_releases; /* waiting cap_release messages */
+>         struct work_struct s_cap_release_work;
+>
+> -       /* both protected by s_mdsc->cap_dirty_lock */
+> +       /* See ceph_inode_info->i_dirty_item. */
+>         struct list_head  s_cap_dirty;        /* inodes w/ dirty caps */
+> +
+> +       /* See ceph_inode_info->i_flushing_item. */
+>         struct list_head  s_cap_flushing;     /* inodes w/ flushing caps */
+>
+>         unsigned long     s_renew_requested; /* last time we sent a renew req */
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 3235c7e3bde7..b82f82d8213a 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -361,11 +361,12 @@ struct ceph_inode_info {
+>          */
+>         struct list_head i_dirty_item;
+>
+> -       /* Link to session's s_cap_flushing list. Protected by
+> -        * mdsc->cap_dirty_lock.
+> -        *
+> -        * FIXME: this list is sometimes walked without the spinlock being
+> -        *        held. What really protects it?
+> +       /*
+> +        * Link to session's s_cap_flushing list. Protected in a similar
+> +        * fashion to i_dirty_item, but also by the s_mutex for changes. The
+> +        * s_cap_flushing list can be walked while holding either the s_mutex
+> +        * or msdc->cap_dirty_lock. List presence can also be checked while
+> +        * holding the i_ceph_lock for this inode.
+>          */
+>         struct list_head i_flushing_item;
+>
 > --
-> Jeff Layton <jlayton@kernel.org>
+> 2.25.1
 >
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
