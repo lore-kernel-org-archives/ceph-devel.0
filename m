@@ -1,36 +1,34 @@
-From: minstry finance <minstyfinance10@gmail.com>
-Subject: whether this is your correct email address or not
-Date: Tue, 7 Apr 2020 04:32:43 +0000
-Message-ID: <CAGhLdxRVES_QkwETLG=jjRw4+p8N0R68jKujiEEY_yWVGOKRzg@mail.gmail.com>
+From: kbuild test robot <lkp@intel.com>
+Subject: [ceph-client:testing 2/4] fs/ceph/caps.c:4244:2-3: Unneeded semicolon
+Date: Tue, 7 Apr 2020 13:19:44 +0800
+Message-ID: <202004071337.Kr4o9xHr%lkp@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-il1-f195.google.com ([209.85.166.195]:45541 "EHLO
-        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725802AbgDGEco (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2020 00:32:44 -0400
-Received: by mail-il1-f195.google.com with SMTP id x16so1870047ilp.12
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2020 21:32:44 -0700 (PDT)
+Received: from mga09.intel.com ([134.134.136.24]:24262 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725802AbgDGFUh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Apr 2020 01:20:37 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: kbuild-all@lists.01.org, ceph-devel@vger.kernel.org
 
-Hello,
+tree:   https://github.com/ceph/ceph-client.git testing
+head:   35d3521ea33df79af4358eb1e75f4d89316bf879
+commit: ed8895ddd103b886380f70cae1592dd2332278c2 [2/4] ceph: convert mdsc->cap_dirty to a per-session list
+
+If you fix the issue, kindly add following tag as appropriate
+Reported-by: kbuild test robot <lkp@intel.com>
 
 
-Certain amount of money has been here ( Global Security services
-Company ) a trunk box addressed to a client for some years now and I
-have made my findings, only to discover that the real owner is late.
+coccinelle warnings: (new ones prefixed by >>)
 
-Can you help us {me and my colleagues} here to receive it as we are
-ready to change everything on it in your name as the original owner
+>> fs/ceph/caps.c:4244:2-3: Unneeded semicolon
 
-and we share it in the ratio of 50/50. Meaning 50% to you and the
-balance of 50% to me here.
+Please review and possibly fold the followup patch.
 
-Waiting desperately for your reply.
-
-Yours Faithfully,
-
-Mrs. Sandra Dewi
-
-Email  mrsdewi@gmx.com
+---
+0-DAY CI Kernel Test Service, Intel Corporation
+https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
