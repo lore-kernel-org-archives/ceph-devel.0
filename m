@@ -1,27 +1,23 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH v2 2/2] ceph: allow rename operation under different quota realms
-Date: Wed, 8 Apr 2020 11:10:34 +0800
-Message-ID: <CAAM7YAmpDKu_WuroNxZ2y+Po8_oT59Bi4_FOY1LD1ttOO0UDgQ@mail.gmail.com>
-References: <20200407103020.22588-1-lhenriques@suse.com> <20200407103020.22588-3-lhenriques@suse.com>
- <e32db4ef5a0ae4e2002a3d957491c88e49daa5bb.camel@kernel.org>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH 0/2] stable CephFS backports
+Date: Wed,  8 Apr 2020 11:58:38 +0100
+Message-ID: <20200408105844.21840-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <e32db4ef5a0ae4e2002a3d957491c88e49daa5bb.camel@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Luis Henriques <lhenriques@suse.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, Zheng Yan <zyan@redhat.com>, Frank Schilder <frans@dtu.dk>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sasha Levin <sashal@kernel.org>
+Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, stable@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Apr 8, 2020 at 7:00 AM Jeff Layton <jlayton@kernel.org> wrote:
+Hi!
 
->
-> Somewhat idle curiosity, but what happens with hardlinked files where
-> one dentry is in one quota domain and another is in a different one?
-> Does it stay in the old quotarealm?
->
-> In any case, this is likely fine as non-hardlinked files are the
-> pessimal case anyway.
+Please pick the backports for the following upstream commits:
 
-rstat only tracks primary dentry.  inode is in the quota realm where
-its primary linkage is in.
+  4fbc0c711b24 "ceph: remove the extra slashes in the server path"
+  b27a939e8376 "ceph: canonicalize server path in place"
+
+They fix an ancient bug that can be reproduced in kernels as old as 4.9 (I
+couldn't reproduced it with 4.4).
+
+Cheers,
