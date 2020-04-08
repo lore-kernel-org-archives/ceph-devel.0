@@ -1,49 +1,39 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH 0/2] stable CephFS backports
-Date: Wed, 8 Apr 2020 14:45:50 +0100
-Message-ID: <20200408134550.GA32263@suse.com>
-References: <20200408105844.21840-1-lhenriques@suse.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH 0/2] ceph: fix error handling bugs in async dirops callbacks
+Date: Wed,  8 Apr 2020 10:21:23 -0400
+Message-ID: <20200408142125.52908-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:39806 "EHLO mx2.suse.de"
+Received: from mail.kernel.org ([198.145.29.99]:46734 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727939AbgDHNpc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 8 Apr 2020 09:45:32 -0400
-Content-Disposition: inline
-In-Reply-To: <20200408105844.21840-1-lhenriques@suse.com>
+        id S1727486AbgDHOV1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 8 Apr 2020 10:21:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sasha Levin <sashal@kernel.org>
-Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, stable@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com, dan.carpenter@oracle.com, sage@redhat.com
 
-On Wed, Apr 08, 2020 at 11:58:38AM +0100, Luis Henriques wrote:
-> Hi!
-> 
-> Please pick the backports for the following upstream commits:
+This fixes a couple of problems that Dan spotted with a static checker.
+Additionally the first patch also simplifies some of the error handling
+in other callers.
 
-I'm not sure how that happen, but it looks like I've messed up the 2nd
-backport.  Please hold on picking these backports for now, I'll need to
-figure out how I did that.  I'll send a new version soon.
+Originally, I was going to squash these into the earlier patches that
+introduced those bugs, but this is new code that isn't enabled by
+default and Ilya was planning to a PR soon, so it's probably best to
+just handle them as follow-on fixes to what's currently in
+ceph-client/master.
 
-Cheers,
---
-Luís
+Jeff Layton (2):
+  ceph: have ceph_mdsc_free_path ignore ERR_PTR values
+  ceph: initialize base and pathlen variables in async dirops cb's
 
-> 
->   4fbc0c711b24 "ceph: remove the extra slashes in the server path"
->   b27a939e8376 "ceph: canonicalize server path in place"
-> 
-> They fix an ancient bug that can be reproduced in kernels as old as 4.9 (I
-> couldn't reproduced it with 4.4).
-> 
-> Cheers,
-> --
-> Luis Henriques
-> 
-> Ilya Dryomov (1):
->   ceph: canonicalize server path in place
-> 
-> Xiubo Li (1):
->   ceph: remove the extra slashes in the server path
+ fs/ceph/debugfs.c    | 4 ----
+ fs/ceph/dir.c        | 4 ++--
+ fs/ceph/file.c       | 4 ++--
+ fs/ceph/mds_client.c | 6 ++----
+ fs/ceph/mds_client.h | 2 +-
+ 5 files changed, 7 insertions(+), 13 deletions(-)
+
+-- 
+2.25.2
