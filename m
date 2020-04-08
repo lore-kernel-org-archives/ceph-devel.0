@@ -1,16 +1,20 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH 4.14,4.19 2/2] ceph: canonicalize server path in place
-Date: Wed,  8 Apr 2020 11:58:42 +0100
-Message-ID: <20200408105844.21840-5-lhenriques@suse.com>
+Subject: [PATCH 5.4 2/2] ceph: canonicalize server path in place
+Date: Wed,  8 Apr 2020 11:58:44 +0100
+Message-ID: <20200408105844.21840-7-lhenriques@suse.com>
 References: <20200408105844.21840-1-lhenriques@suse.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:36128 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728137AbgDHK6d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 8 Apr 2020 06:58:33 -0400
 In-Reply-To: <20200408105844.21840-1-lhenriques@suse.com>
-Sender: stable-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sasha Levin <sashal@kernel.org>
 Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, stable@vger.kernel.org, syzbot+98704a51af8e3d9425a9@syzkaller.appspotmail.com, Luis Henriques <lhenriques@suse.com>
-List-Id: ceph-devel.vger.kernel.org
 
 From: Ilya Dryomov <idryomov@gmail.com>
 
@@ -38,10 +42,10 @@ Signed-off-by: Luis Henriques <lhenriques@suse.com>
  2 files changed, 28 insertions(+), 92 deletions(-)
 
 diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 712e4a15cb3e..18e967089aeb 100644
+index 54b50452ec1e..d40658d5e808 100644
 --- a/fs/ceph/super.c
 +++ b/fs/ceph/super.c
-@@ -205,6 +205,26 @@ static match_table_t fsopt_tokens = {
+@@ -214,6 +214,26 @@ static match_table_t fsopt_tokens = {
  	{-1, NULL}
  };
  
@@ -68,7 +72,7 @@ index 712e4a15cb3e..18e967089aeb 100644
  static int parse_fsopt_token(char *c, void *private)
  {
  	struct ceph_mount_options *fsopt = private;
-@@ -398,73 +418,6 @@ static int strcmp_null(const char *s1, const char *s2)
+@@ -429,73 +449,6 @@ static int strcmp_null(const char *s1, const char *s2)
  	return strcmp(s1, s2);
  }
  
@@ -142,7 +146,7 @@ index 712e4a15cb3e..18e967089aeb 100644
  static int compare_mount_options(struct ceph_mount_options *new_fsopt,
  				 struct ceph_options *new_opt,
  				 struct ceph_fs_client *fsc)
-@@ -472,7 +425,6 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+@@ -503,7 +456,6 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
  	struct ceph_mount_options *fsopt1 = new_fsopt;
  	struct ceph_mount_options *fsopt2 = fsc->mount_options;
  	int ofs = offsetof(struct ceph_mount_options, snapdir_name);
@@ -150,7 +154,7 @@ index 712e4a15cb3e..18e967089aeb 100644
  	int ret;
  
  	ret = memcmp(fsopt1, fsopt2, ofs);
-@@ -482,21 +434,12 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+@@ -513,21 +465,12 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
  	ret = strcmp_null(fsopt1->snapdir_name, fsopt2->snapdir_name);
  	if (ret)
  		return ret;
@@ -174,7 +178,7 @@ index 712e4a15cb3e..18e967089aeb 100644
  	if (ret)
  		return ret;
  
-@@ -564,6 +507,8 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
+@@ -595,6 +538,8 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
  			err = -ENOMEM;
  			goto out;
  		}
@@ -183,7 +187,7 @@ index 712e4a15cb3e..18e967089aeb 100644
  	} else {
  		dev_name_end = dev_name + strlen(dev_name);
  	}
-@@ -990,7 +935,9 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+@@ -1022,7 +967,9 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
  	mutex_lock(&fsc->client->mount_mutex);
  
  	if (!fsc->sb->s_root) {
@@ -194,7 +198,7 @@ index 712e4a15cb3e..18e967089aeb 100644
  		err = __ceph_open_session(fsc->client, started);
  		if (err < 0)
  			goto out;
-@@ -1002,16 +949,6 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+@@ -1034,22 +981,11 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
  				goto out;
  		}
  
@@ -210,9 +214,7 @@ index 712e4a15cb3e..18e967089aeb 100644
 -			path = p;
  		dout("mount opening path '%s'\n", path);
  
- 		err = ceph_fs_debugfs_init(fsc);
-@@ -1019,7 +956,6 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
- 			goto out;
+ 		ceph_fs_debugfs_init(fsc);
  
  		root = open_root_dentry(fsc, path, started);
 -		kfree(p);
@@ -220,10 +222,10 @@ index 712e4a15cb3e..18e967089aeb 100644
  			err = PTR_ERR(root);
  			goto out;
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 8d3eabf06d66..65da12ff5449 100644
+index f98d9247f9cb..bb12c9f3a218 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -86,7 +86,7 @@ struct ceph_mount_options {
+@@ -92,7 +92,7 @@ struct ceph_mount_options {
  
  	char *snapdir_name;   /* default ".snap" */
  	char *mds_namespace;  /* default NULL */
