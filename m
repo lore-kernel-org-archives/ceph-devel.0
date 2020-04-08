@@ -1,52 +1,49 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [bug report] ceph: attempt to do async create when possible
-Date: Wed, 8 Apr 2020 16:27:41 +0300
-Message-ID: <20200408132741.GO2066@kadam>
-References: <20200408111734.GA252918@mwanda>
- <20200408112201.GN2066@kadam>
- <7114ea60738d083e618ac35beb840afeea74fce1.camel@kernel.org>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH 0/2] stable CephFS backports
+Date: Wed, 8 Apr 2020 14:45:50 +0100
+Message-ID: <20200408134550.GA32263@suse.com>
+References: <20200408105844.21840-1-lhenriques@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp2130.oracle.com ([156.151.31.86]:34804 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727049AbgDHN1x (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2020 09:27:53 -0400
+Received: from mx2.suse.de ([195.135.220.15]:39806 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727939AbgDHNpc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 8 Apr 2020 09:45:32 -0400
 Content-Disposition: inline
-In-Reply-To: <7114ea60738d083e618ac35beb840afeea74fce1.camel@kernel.org>
+In-Reply-To: <20200408105844.21840-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <ukernel@gmail.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sasha Levin <sashal@kernel.org>
+Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, stable@vger.kernel.org
 
-On Wed, Apr 08, 2020 at 08:48:05AM -0400, Jeff Layton wrote:
->
-> Sound ok?
-
-Sounds good.
-
->  fs/ceph/mds_client.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+On Wed, Apr 08, 2020 at 11:58:38AM +0100, Luis Henriques wrote:
+> Hi!
 > 
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index 1b40f30e0a8e..754e0682398e 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -531,7 +531,7 @@ extern void ceph_mdsc_pre_umount(struct ceph_mds_client *mdsc);
->  
->  static inline void ceph_mdsc_free_path(char *path, int len)
->  {
-> -	if (path)
-> +	if (path && !IS_ERR(path))
+> Please pick the backports for the following upstream commits:
 
-if (!IS_ERR_OR_NULL(path)
+I'm not sure how that happen, but it looks like I've messed up the 2nd
+backport.  Please hold on picking these backports for now, I'll need to
+figure out how I did that.  I'll send a new version soon.
 
->  		__putname(path - (PATH_MAX - 1 - len));
->  }
->  
-> -- 
-> 2.25.2
+Cheers,
+--
+Luís
+
 > 
-
-regards,
-dan carpenter
+>   4fbc0c711b24 "ceph: remove the extra slashes in the server path"
+>   b27a939e8376 "ceph: canonicalize server path in place"
+> 
+> They fix an ancient bug that can be reproduced in kernels as old as 4.9 (I
+> couldn't reproduced it with 4.4).
+> 
+> Cheers,
+> --
+> Luis Henriques
+> 
+> Ilya Dryomov (1):
+>   ceph: canonicalize server path in place
+> 
+> Xiubo Li (1):
+>   ceph: remove the extra slashes in the server path
