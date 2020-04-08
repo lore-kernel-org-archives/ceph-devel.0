@@ -1,7 +1,7 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH 4.14,4.19 1/2] ceph: remove the extra slashes in the server path
-Date: Wed,  8 Apr 2020 11:58:41 +0100
-Message-ID: <20200408105844.21840-4-lhenriques@suse.com>
+Subject: [PATCH 5.4 1/2] ceph: remove the extra slashes in the server path
+Date: Wed,  8 Apr 2020 11:58:43 +0100
+Message-ID: <20200408105844.21840-6-lhenriques@suse.com>
 References: <20200408105844.21840-1-lhenriques@suse.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -58,10 +58,10 @@ Signed-off-by: Luis Henriques <lhenriques@suse.com>
  1 file changed, 101 insertions(+), 19 deletions(-)
 
 diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c4314f449240..712e4a15cb3e 100644
+index 62fc7d46032e..54b50452ec1e 100644
 --- a/fs/ceph/super.c
 +++ b/fs/ceph/super.c
-@@ -105,7 +105,6 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+@@ -106,7 +106,6 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
  	return 0;
  }
  
@@ -69,7 +69,7 @@ index c4314f449240..712e4a15cb3e 100644
  static int ceph_sync_fs(struct super_block *sb, int wait)
  {
  	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
-@@ -399,6 +398,73 @@ static int strcmp_null(const char *s1, const char *s2)
+@@ -430,6 +429,73 @@ static int strcmp_null(const char *s1, const char *s2)
  	return strcmp(s1, s2);
  }
  
@@ -143,7 +143,7 @@ index c4314f449240..712e4a15cb3e 100644
  static int compare_mount_options(struct ceph_mount_options *new_fsopt,
  				 struct ceph_options *new_opt,
  				 struct ceph_fs_client *fsc)
-@@ -406,6 +472,7 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+@@ -437,6 +503,7 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
  	struct ceph_mount_options *fsopt1 = new_fsopt;
  	struct ceph_mount_options *fsopt2 = fsc->mount_options;
  	int ofs = offsetof(struct ceph_mount_options, snapdir_name);
@@ -151,7 +151,7 @@ index c4314f449240..712e4a15cb3e 100644
  	int ret;
  
  	ret = memcmp(fsopt1, fsopt2, ofs);
-@@ -418,9 +485,21 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
+@@ -449,9 +516,21 @@ static int compare_mount_options(struct ceph_mount_options *new_fsopt,
  	ret = strcmp_null(fsopt1->mds_namespace, fsopt2->mds_namespace);
  	if (ret)
  		return ret;
@@ -174,7 +174,7 @@ index c4314f449240..712e4a15cb3e 100644
  	ret = strcmp_null(fsopt1->fscache_uniq, fsopt2->fscache_uniq);
  	if (ret)
  		return ret;
-@@ -476,12 +555,14 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
+@@ -507,12 +586,14 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
  	 */
  	dev_name_end = strchr(dev_name, '/');
  	if (dev_name_end) {
@@ -195,7 +195,7 @@ index c4314f449240..712e4a15cb3e 100644
  		}
  	} else {
  		dev_name_end = dev_name + strlen(dev_name);
-@@ -810,7 +891,6 @@ static void destroy_caches(void)
+@@ -842,7 +923,6 @@ static void destroy_caches(void)
  	ceph_fscache_unregister();
  }
  
@@ -203,7 +203,7 @@ index c4314f449240..712e4a15cb3e 100644
  /*
   * ceph_umount_begin - initiate forced umount.  Tear down down the
   * mount, skipping steps that may hang while waiting for server(s).
-@@ -897,9 +977,6 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
+@@ -929,9 +1009,6 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
  	return root;
  }
  
@@ -213,7 +213,7 @@ index c4314f449240..712e4a15cb3e 100644
  /*
   * mount: join the ceph cluster, and open root directory.
   */
-@@ -913,7 +990,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+@@ -945,7 +1022,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
  	mutex_lock(&fsc->client->mount_mutex);
  
  	if (!fsc->sb->s_root) {
@@ -222,7 +222,7 @@ index c4314f449240..712e4a15cb3e 100644
  		err = __ceph_open_session(fsc->client, started);
  		if (err < 0)
  			goto out;
-@@ -925,19 +1002,24 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+@@ -957,17 +1034,22 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
  				goto out;
  		}
  
@@ -244,9 +244,7 @@ index c4314f449240..712e4a15cb3e 100644
 +			path = p;
 +		dout("mount opening path '%s'\n", path);
  
- 		err = ceph_fs_debugfs_init(fsc);
- 		if (err < 0)
- 			goto out;
+ 		ceph_fs_debugfs_init(fsc);
  
  		root = open_root_dentry(fsc, path, started);
 +		kfree(p);
