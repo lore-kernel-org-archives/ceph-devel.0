@@ -1,46 +1,43 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: 5.4.20 - high load - lots of incoming data - small data read.
-Date: Thu, 09 Apr 2020 12:30:05 -0400
-Message-ID: <25bc975e164a73f18653156d6591dda785c8d0c1.camel@kernel.org>
-References: <CAED-sidS3jt5f0nTvLp6_xL+sgk0FFJGaX-X7cCDav-8nwj4TA@mail.gmail.com>
-         <db72c749125519b9c042c9664918eacbe8744985.camel@kernel.org>
-         <CAED-sie+qsrr3yZVAiB=t6cAzWUwX9Y=32srJY2dwyRpSXvgxg@mail.gmail.com>
-         <e9c9ffb60265aebdab6edd7ce1565402eb787270.camel@kernel.org>
-         <CAED-sicefQuJ3GGWh2bBXz6R=BFr1EQ=h6Sz-W_mh3u+-tO0wA@mail.gmail.com>
-         <cbbc31d2041601b3e0d2c9b1e8b657ffa23ed97e.camel@kernel.org>
-         <CAED-sic=eDaXz-A6_ejZOYcJYs=-tJtmxXLcONdQRRCod59L_g@mail.gmail.com>
+From: Abhishek <abhishek@suse.com>
+Subject: v15.2.1 Octopus released
+Date: Thu, 09 Apr 2020 19:36:31 +0200
+Message-ID: <57f63719d6aaa7990b158e657b2fa822@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:44800 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:51386 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726720AbgDIQaH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 9 Apr 2020 12:30:07 -0400
-In-Reply-To: <CAED-sic=eDaXz-A6_ejZOYcJYs=-tJtmxXLcONdQRRCod59L_g@mail.gmail.com>
+        id S1726521AbgDIRgc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 9 Apr 2020 13:36:32 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesper Krogh <jesper.krogh@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-announce@ceph.io, ceph-users@ceph.io, dev@ceph.io, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.io
 
-On Thu, 2020-04-09 at 18:00 +0200, Jesper Krogh wrote:
-> Thanks Jeff - I'll try that.
-> 
-> I would just add to the case that this is a problem we have had on a
-> physical machine - but too many "other" workloads at the same time -
-> so we isolated it off to a VM - assuming that it was the mixed
-> workload situation that did cause us issues. I cannot be sure that it
-> is "excactly" the same problem we're seeing but symptoms are
-> identical.
-> 
+This is the first bugfix release of Ceph Octopus, we recommend all 
+Octopus users
+upgrade. This release fixes an upgrade issue and also has 2 security 
+fixes
 
-Do you see the "page allocation failure" warnings on bare metal hosts
-too? If so, then maybe we're dealing with a problem that isn't
-virtio_net specific. In any case, let's get some folks more familiar
-with that area involved first and take it from there.
+Notable Changes
+~~~~~~~~~~~~~~~
 
-Feel free to cc me on the bug report too.
+* issue#44759: Fixed luminous->nautilus->octopus upgrade asserts
+* CVE-2020-1759: Fixed nonce reuse in msgr V2 secure mode
+* CVE-2020-1760: Fixed XSS due to RGW GetObject header-splitting
 
-Thanks,
--- 
-Jeff Layton <jlayton@kernel.org>
+For the full changelog please refer to the official release blog entry 
+at https://ceph.io/releases/v15-2-1-octopus-released/, for upgrades from 
+previous versions, please follow the relevant section of the upgrade 
+docs at 
+https://docs.ceph.com/docs/master/releases/octopus/#upgrading-from-mimic-or-nautilus
+
+
+Getting Ceph
+------------
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-15.2.1.tar.gz
+* For packages, see 
+http://docs.ceph.com/docs/master/install/get-packages/
+* Release git sha1: 9fd2f65f91d9246fae2c841a6222d34d121680ee
