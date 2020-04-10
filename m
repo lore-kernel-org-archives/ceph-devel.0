@@ -1,22 +1,33 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 5.4 1/2] ceph: remove the extra slashes in the server path
-Date: Fri, 10 Apr 2020 11:11:11 +0200
-Message-ID: <20200410091111.GE1691838@kroah.com>
+Subject: Re: [PATCH 0/2] stable CephFS backports
+Date: Fri, 10 Apr 2020 11:14:10 +0200
+Message-ID: <20200410091410.GF1691838@kroah.com>
 References: <20200408105844.21840-1-lhenriques@suse.com>
- <20200408105844.21840-6-lhenriques@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:43582 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725897AbgDJJOM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 10 Apr 2020 05:14:12 -0400
 Content-Disposition: inline
-In-Reply-To: <20200408105844.21840-6-lhenriques@suse.com>
-Sender: stable-owner@vger.kernel.org
+In-Reply-To: <20200408105844.21840-1-lhenriques@suse.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Luis Henriques <lhenriques@suse.com>
-Cc: Sasha Levin <sashal@kernel.org>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, stable@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Cc: Sasha Levin <sashal@kernel.org>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, stable@vger.kernel.org
 
-On Wed, Apr 08, 2020 at 11:58:43AM +0100, Luis Henriques wrote:
-> From: Xiubo Li <xiubli@redhat.com>
+On Wed, Apr 08, 2020 at 11:58:38AM +0100, Luis Henriques wrote:
+> Hi!
 > 
-> commit 4fbc0c711b2464ee1551850b85002faae0b775d5 upstream.
+> Please pick the backports for the following upstream commits:
+> 
+>   4fbc0c711b24 "ceph: remove the extra slashes in the server path"
+>   b27a939e8376 "ceph: canonicalize server path in place"
+> 
+> They fix an ancient bug that can be reproduced in kernels as old as 4.9 (I
+> couldn't reproduced it with 4.4).
 
-You forgot about 5.5.y :(
+All now queued up, including for 5.5.y, thanks.
+
+greg k-h
