@@ -1,60 +1,30 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH 1/2] ceph: have ceph_mdsc_free_path ignore ERR_PTR values
-Date: Tue, 14 Apr 2020 06:43:14 -0400
-Message-ID: <dbbf8ac2491089a864bab08a83ca89ca2fd65d5f.camel@kernel.org>
-References: <20200408142125.52908-1-jlayton@kernel.org>
-         <20200408142125.52908-2-jlayton@kernel.org>
-         <CAOi1vP99BbHFrrg+0HAbZrZV7DQ7EG7euTY6cbtdWajsdyN3jQ@mail.gmail.com>
-         <ded1b71dcda70e3a249df21c294607dac6545694.camel@kernel.org>
-         <CAOi1vP9mZTShECrVVohuj4p=Yr+rWvWnXNY03c85CuO4fGNSyQ@mail.gmail.com>
-         <55c47d66b579fcf5749376c73d681d0273095f6d.camel@kernel.org>
-         <20200413194153.GD14511@kadam>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: What's a good default TTL for DNS keys in the kernel
+Date: Tue, 14 Apr 2020 15:20:10 +0100
+Message-ID: <3865908.1586874010@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:50272 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2438529AbgDNKnP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 14 Apr 2020 06:43:15 -0400
-In-Reply-To: <20200413194153.GD14511@kadam>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-ID: <3865907.1586874010.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fweimer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 2020-04-13 at 22:41 +0300, Dan Carpenter wrote:
-> On Mon, Apr 13, 2020 at 09:23:22AM -0400, Jeff Layton wrote:
-> > > > I don't see a problem with having a "free" routine ignore IS_ERR values
-> > > > just like it does NULL values. How about I just trim off the other
-> > > > deltas in this patch? Something like this?
-> > > 
-> > > I think it encourages fragile code.  Less so than functions that
-> > > return pointer, NULL or IS_ERR pointer, but still.  You yourself
-> > > almost fell into one of these traps while editing debugfs.c ;)
-> > > 
-> > 
-> > We'll have to agree to disagree here. Having a free routine ignore
-> > ERR_PTR values seems perfectly reasonable to me.
-> 
-> Freeing things which haven't been allocated is a constant source bugs.
-> 
-> err:
-> 	kfree(foo->bar);
-> 	kfree(foo);
-> 
-> Oops...  "foo" wasn't allocated so the first line will crash.  Every
-> other day someone commits code like that.
-> 
+Since key.dns_resolver isn't given a TTL for the address information obtained
+for getaddrinfo(), no expiry is set on dns_resolver keys in the kernel for
+NFS, CIFS or Ceph.  AFS gets one if it looks up a cell SRV or AFSDB record
+because that is looked up in the DNS directly, but it doesn't look up A or
+AAAA records, so doesn't get an expiry for the addresses themselves.
 
-It's not clear to me whether you're advocating for Ilya's approach or
-mine (neither? both?). Which approach do you think is best?
+I've previously asked the libc folks if there's a way to get this information
+exposed in struct addrinfo, but I don't think that ended up going anywhere -
+and, in any case, would take a few years to work through the system.
 
-FWIW, my rationale for doing it this way is that the "allocator" for
-ceph_mdsc_free_path is ceph_mdsc_build_path. That routine returns an
-ERR_PTR value on failure, not a NULL pointer, so it makes sense to me
-to have the free routine accept and ignore those values.
+For the moment, I think I should put a default on any dns_resolver keys and
+have it applied either by the kernel (configurable with a /proc/sys/ setting)
+or by the key.dnf_resolver program (configurable with an /etc file).
 
-I don't quite follow the rationale that that encourages fragile code.
--- 
-Jeff Layton <jlayton@kernel.org>
+Any suggestion as to the preferred default TTL?  10 minutes?
+
+David
