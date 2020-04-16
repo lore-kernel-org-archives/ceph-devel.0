@@ -1,51 +1,28 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.7-rc2
-Date: Thu, 16 Apr 2020 19:23:21 +0200
-Message-ID: <20200416172321.20778-1-idryomov@gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fixes for 5.7-rc2
+Date: Thu, 16 Apr 2020 17:55:21 +0000
+Message-ID: <158705972176.30027.7508667561184560509.pr-tracker-bot@kernel.org>
+References: <20200416172321.20778-1-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36246 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2388338AbgDPRXj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Apr 2020 13:23:39 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47724 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729436AbgDPRzW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Apr 2020 13:55:22 -0400
+In-Reply-To: <20200416172321.20778-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Thu, 16 Apr 2020 19:23:21 +0200:
 
-The following changes since commit 8f3d9f354286745c751374f5f1fcafee6b3f3136:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc2
 
-  Linux 5.7-rc1 (2020-04-12 12:35:55 -0700)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/3fa84bf926f32edf798cfad0317e14df41ac0509
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc2
-
-for you to fetch changes up to 2a575f138d003fff0f4930b5cfae4a1c46343b8f:
-
-  ceph: fix potential bad pointer deref in async dirops cb's (2020-04-13 19:33:47 +0200)
-
-----------------------------------------------------------------
-A set of patches for a deadlock on "rbd map" error path and a fix
-for invalid pointer dereference and uninitialized variable use on
-asynchronous create and unlink error paths.
-
-----------------------------------------------------------------
-Ilya Dryomov (4):
-      rbd: avoid a deadlock on header_rwsem when flushing notifies
-      rbd: call rbd_dev_unprobe() after unwatching and flushing notifies
-      rbd: don't test rbd_dev->opts in rbd_dev_image_release()
-      rbd: don't mess with a page vector in rbd_notify_op_lock()
-
-Jeff Layton (1):
-      ceph: fix potential bad pointer deref in async dirops cb's
-
- drivers/block/rbd.c  | 33 +++++++++++++++++++--------------
- fs/ceph/dir.c        |  4 ++--
- fs/ceph/file.c       |  4 ++--
- fs/ceph/mds_client.h |  2 +-
- 4 files changed, 24 insertions(+), 19 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
