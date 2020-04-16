@@ -1,28 +1,54 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph fixes for 5.7-rc2
-Date: Thu, 16 Apr 2020 17:55:21 +0000
-Message-ID: <158705972176.30027.7508667561184560509.pr-tracker-bot@kernel.org>
-References: <20200416172321.20778-1-idryomov@gmail.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
+Subject: v13.2.9 Mimic released
+Date: Thu, 16 Apr 2020 20:46:12 +0200
+Message-ID: <87zhbbl157.fsf@suse.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:47724 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:52690 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729436AbgDPRzW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Apr 2020 13:55:22 -0400
-In-Reply-To: <20200416172321.20778-1-idryomov@gmail.com>
+        id S1727962AbgDPSq0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Apr 2020 14:46:26 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: ceph-announce@ceph.io, ceph-users@ceph.io, dev@ceph.io, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.io
 
-The pull request you sent on Thu, 16 Apr 2020 19:23:21 +0200:
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc2
+We're glad to announce the availability of the ninth and very likely the
+last stable release in the Ceph Mimic stable release series. This
+release fixes bugs across all components and also contains a RGW
+security fix. We recommend all mimic users to upgrade to this version.
+We thank everyone for making this release a possibility.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/3fa84bf926f32edf798cfad0317e14df41ac0509
+Notable Changes
+---------------
 
-Thank you!
+* CVE-2020-1760: Fixed XSS due to RGW GetObject header-splitting
+* The configuration value `osd_calc_pg_upmaps_max_stddev` used for upmap
+  balancing has been removed. Instead use the mgr balancer config
+  `upmap_max_deviation` which now is an integer number of PGs of deviation
+  from the target PGs per OSD.  This can be set with a command like
+  `ceph config set mgr mgr/balancer/upmap_max_deviation 2`.  The default
+  `upmap_max_deviation` is 1.  There are situations where crush rules
+  would not allow a pool to ever have completely balanced PGs.  For example, if
+  crush requires 1 replica on each of 3 racks, but there are fewer OSDs in 1 of
+  the racks.  In those cases, the configuration value can be increased.
+* The `cephfs-data-scan scan_links` command now automatically repair inotables
+  and snaptable.
+
+For the full changelog please refer to the official release blog entry
+at https://ceph.io/releases/v13-2-9-mimic-released
+
+Getting Ceph
+------------
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-13.2.9.tar.gz
+* For packages, see
+http://docs.ceph.com/docs/master/install/get-packages/
+* Release git sha1: 58a2a9b31fd08d8bb3089fce0e312331502ff945
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Abhishek Lekshmanan
+SUSE Software Solutions Germany GmbH
+GF: Felix Imendörffer 
