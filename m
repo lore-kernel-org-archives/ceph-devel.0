@@ -1,61 +1,49 @@
-From: =?utf-8?Q?Aur=C3=A9lien?= Aptel <aaptel@suse.com>
+From: Steve French <smfrench@gmail.com>
 Subject: Re: What's a good default TTL for DNS keys in the kernel
-Date: Fri, 17 Apr 2020 13:31:39 +0200
-Message-ID: <87sgh22vs4.fsf@suse.com>
-References: <874ktl2ide.fsf@oldenburg2.str.redhat.com>
- <3865908.1586874010@warthog.procyon.org.uk>
- <128769.1587032833@warthog.procyon.org.uk>
- <8DC44895-E904-4155-B7B8-B109A777F23C@oracle.com>
+Date: Fri, 17 Apr 2020 18:23:53 -0500
+Message-ID: <CAH2r5mv5p=WJQu2SbTn53FeTsXyN6ke_CgEjVARQ3fX8QAtK_w@mail.gmail.com>
+References: <3865908.1586874010@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8DC44895-E904-4155-B7B8-B109A777F23C@oracle.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chuck Lever <chuck.lever@oracle.com>, David Howells <dhowells@redhat.com>
-Cc: Florian Weimer <fweimer@redhat.com>, Linux NFS Mailing List <linux-nfs@vger.kernel.org>, linux-cifs@vger.kernel.org, linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org, keyrings@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <3865908.1586874010@warthog.procyon.org.uk>
+Sender: netdev-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-nfs <linux-nfs@vger.kernel.org>, CIFS <linux-cifs@vger.kernel.org>, linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org, keyrings@vger.kernel.org, Network Development <netdev@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, fweimer@redhat.com
 List-Id: ceph-devel.vger.kernel.org
 
-Chuck Lever <chuck.lever@oracle.com> writes:
-> The Linux NFS client won't connect to a new server when the server's
-> DNS information changes. A fresh mount operation would be needed for
-> the client to recognize and make use of it.
+>> The question remains what the expected impact of TTL expiry is.  Will
+>> the kernel just perform a new DNS query if it needs one?
+
+For SMB3/CIFS mounts, Paulo added support last year for automatic
+reconnect if the IP address of the server changes.  It also is helpful
+when DFS (global name space) addresses change.
+
+It does not require a remount for SMB3/CIFS
+
+On Tue, Apr 14, 2020 at 11:09 AM David Howells <dhowells@redhat.com> wrote:
 >
-> There are mechanisms in the NFSv4 protocol to collect server IP addresses
-> from the server itself (fs_locations) and then try those locations if the
-> current server fails to respond. But currently that is not implemented in
-> Linux (and servers would need to be ready to provide that kind of update).
+> Since key.dns_resolver isn't given a TTL for the address information obtained
+> for getaddrinfo(), no expiry is set on dns_resolver keys in the kernel for
+> NFS, CIFS or Ceph.  AFS gets one if it looks up a cell SRV or AFSDB record
+> because that is looked up in the DNS directly, but it doesn't look up A or
+> AAAA records, so doesn't get an expiry for the addresses themselves.
+>
+> I've previously asked the libc folks if there's a way to get this information
+> exposed in struct addrinfo, but I don't think that ended up going anywhere -
+> and, in any case, would take a few years to work through the system.
+>
+> For the moment, I think I should put a default on any dns_resolver keys and
+> have it applied either by the kernel (configurable with a /proc/sys/ setting)
+> or by the key.dnf_resolver program (configurable with an /etc file).
+>
+> Any suggestion as to the preferred default TTL?  10 minutes?
+>
+> David
+>
 
-We have a very similar system in CIFS. Failover can be handled in 2 ways
-(technically both can be used at the same time):
 
-a) with DFS, the mount can have a list of possible location to connect
-   to, sort of like cross-server symlinks with multiple possible
-   targets. Note that the target value uses hostnames.
-b) the domain controler can notice the server is down and automatically
-   switch the server hostname DNS entry to a backup one with a different IP.
-
->> CIFS also doesn't make direct use of the TTL, and again this may be because it
->> uses the server address as part of the primary key for the superblock (see
->> cifs_match_super()).
-
-When we try to reconnect after a failure (using (a) or just reconnecting
-to same server) we resolve the host again to try to use any new IP (in
-case (b) happened). This is done via upcalling using the request_key()
-API.
-
-The cifs.upcall prog (from cifs-utils) calls getaddrinfo() and sets a
-key with a default TTL of 10mn [2][3] but if the system uses DNS caching
-via nscd[1] there's no way to tell how long the old IP will remain in
-use...
-
-1: https://linux.die.net/man/8/nscd
-2: https://github.com/piastry/cifs-utils/blob/9a8c21ad9e4510a83a3a41f7a04f763a4fe9ec09/cifs.upcall.c#L66
-3: https://github.com/piastry/cifs-utils/blob/9a8c21ad9e4510a83a3a41f7a04f763a4fe9ec09/cifs.upcall.c#L783
-
-Cheers,
 -- 
-Aurélien Aptel / SUSE Labs Samba Team
-GPG: 1839 CB5F 9F5B FB9B AA97  8C99 03C8 A49B 521B D5D3
-SUSE Software Solutions Germany GmbH, Maxfeldstr. 5, 90409 Nürnberg, DE
-GF: Felix Imendörffer, Mary Higgins, Sri Rasiah HRB 247165 (AG München)
+Thanks,
+
+Steve
