@@ -1,54 +1,35 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: v13.2.9 Mimic released
-Date: Thu, 16 Apr 2020 20:46:12 +0200
-Message-ID: <87zhbbl157.fsf@suse.com>
+From: Yanhu Cao <gmayyyha@gmail.com>
+Subject: [PATCH] ceph: if we are blacklisted, __do_request returns directly
+Date: Fri, 17 Apr 2020 16:34:48 +0800
+Message-ID: <20200417083448.9122-1-gmayyyha@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:52690 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727962AbgDPSq0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Apr 2020 14:46:26 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-announce@ceph.io, ceph-users@ceph.io, dev@ceph.io, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.io
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: jlayton@kernel.org
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yanhu Cao <gmayyyha@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
+Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+---
+ fs/ceph/mds_client.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-We're glad to announce the availability of the ninth and very likely the
-last stable release in the Ceph Mimic stable release series. This
-release fixes bugs across all components and also contains a RGW
-security fix. We recommend all mimic users to upgrade to this version.
-We thank everyone for making this release a possibility.
-
-Notable Changes
----------------
-
-* CVE-2020-1760: Fixed XSS due to RGW GetObject header-splitting
-* The configuration value `osd_calc_pg_upmaps_max_stddev` used for upmap
-  balancing has been removed. Instead use the mgr balancer config
-  `upmap_max_deviation` which now is an integer number of PGs of deviation
-  from the target PGs per OSD.  This can be set with a command like
-  `ceph config set mgr mgr/balancer/upmap_max_deviation 2`.  The default
-  `upmap_max_deviation` is 1.  There are situations where crush rules
-  would not allow a pool to ever have completely balanced PGs.  For example, if
-  crush requires 1 replica on each of 3 racks, but there are fewer OSDs in 1 of
-  the racks.  In those cases, the configuration value can be increased.
-* The `cephfs-data-scan scan_links` command now automatically repair inotables
-  and snaptable.
-
-For the full changelog please refer to the official release blog entry
-at https://ceph.io/releases/v13-2-9-mimic-released
-
-Getting Ceph
-------------
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-13.2.9.tar.gz
-* For packages, see
-http://docs.ceph.com/docs/master/install/get-packages/
-* Release git sha1: 58a2a9b31fd08d8bb3089fce0e312331502ff945
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 486f91f9685b..d2ea755b7c02 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2708,6 +2708,11 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 
+ 	put_request_session(req);
+ 
++	if (mdsc->fsc->blacklisted) {
++		err = -EACCES;
++		goto finish;
++	}
++
+ 	mds = __choose_mds(mdsc, req, &random);
+ 	if (mds < 0 ||
+ 	    ceph_mdsmap_get_state(mdsc->mdsmap, mds) < CEPH_MDS_STATE_ACTIVE) {
 -- 
-Abhishek Lekshmanan
-SUSE Software Solutions Germany GmbH
-GF: Felix Imendörffer 
+2.24.2 (Apple Git-127)
