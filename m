@@ -1,48 +1,28 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 07/47] ceph: return ceph_mdsc_do_request() errors from __get_parent()
-Date: Sat, 18 Apr 2020 10:41:47 -0400
-Message-ID: <20200418144227.9802-7-sashal@kernel.org>
-References: <20200418144227.9802-1-sashal@kernel.org>
+From: Florian Weimer <fweimer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: What's a good default TTL for DNS keys in the kernel
+Date: Sat, 18 Apr 2020 20:10:53 +0200
+Message-ID: <87a738aclu.fsf@oldenburg2.str.redhat.com>
+References: <3865908.1586874010@warthog.procyon.org.uk>
+        <CAH2r5mv5p=WJQu2SbTn53FeTsXyN6ke_CgEjVARQ3fX8QAtK_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200418144227.9802-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Qiujun Huang <hqjagain@gmail.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAH2r5mv5p=WJQu2SbTn53FeTsXyN6ke_CgEjVARQ3fX8QAtK_w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+        (Steve French's message of "Fri, 17 Apr 2020 18:23:53 -0500")
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Steve French <smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-nfs <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, CIFS <linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Network Development <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-From: Qiujun Huang <hqjagain@gmail.com>
+* Steve French:
 
-[ Upstream commit c6d50296032f0b97473eb2e274dc7cc5d0173847 ]
+>>> The question remains what the expected impact of TTL expiry is.  Will
+>>> the kernel just perform a new DNS query if it needs one?
+>
+> For SMB3/CIFS mounts, Paulo added support last year for automatic
+> reconnect if the IP address of the server changes.  It also is helpful
+> when DFS (global name space) addresses change.
 
-Return the error returned by ceph_mdsc_do_request(). Otherwise,
-r_target_inode ends up being NULL this ends up returning ENOENT
-regardless of the error.
+Do you have reference to the source code implementation?  Thanks.
 
-Signed-off-by: Qiujun Huang <hqjagain@gmail.com>
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- fs/ceph/export.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index 3c59ad180ef0b..4cfe1154d4c72 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -151,6 +151,11 @@ static struct dentry *__get_parent(struct super_block *sb,
- 
- 	req->r_num_caps = 1;
- 	err = ceph_mdsc_do_request(mdsc, NULL, req);
-+	if (err) {
-+		ceph_mdsc_put_request(req);
-+		return ERR_PTR(err);
-+	}
-+
- 	inode = req->r_target_inode;
- 	if (inode)
- 		ihold(inode);
--- 
-2.20.1
+Florian
