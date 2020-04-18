@@ -1,20 +1,16 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 04/23] ceph: return ceph_mdsc_do_request() errors from __get_parent()
-Date: Sat, 18 Apr 2020 10:43:46 -0400
-Message-ID: <20200418144405.10565-4-sashal@kernel.org>
-References: <20200418144405.10565-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 03/19] ceph: return ceph_mdsc_do_request() errors from __get_parent()
+Date: Sat, 18 Apr 2020 10:44:20 -0400
+Message-ID: <20200418144436.10818-3-sashal@kernel.org>
+References: <20200418144436.10818-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:55764 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728752AbgDROoL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 18 Apr 2020 10:44:11 -0400
-In-Reply-To: <20200418144405.10565-1-sashal@kernel.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200418144436.10818-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Qiujun Huang <hqjagain@gmail.com>, Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
 From: Qiujun Huang <hqjagain@gmail.com>
 
@@ -33,11 +29,11 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 5 insertions(+)
 
 diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index 1780218a48f08..f8e1f31e46439 100644
+index fe02ae7f056a3..ff9e60daf086b 100644
 --- a/fs/ceph/export.c
 +++ b/fs/ceph/export.c
-@@ -157,6 +157,11 @@ static struct dentry *__get_parent(struct super_block *sb,
- 
+@@ -146,6 +146,11 @@ static struct dentry *__get_parent(struct super_block *sb,
+ 	}
  	req->r_num_caps = 1;
  	err = ceph_mdsc_do_request(mdsc, NULL, req);
 +	if (err) {
