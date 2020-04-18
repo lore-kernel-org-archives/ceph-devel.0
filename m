@@ -1,16 +1,16 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 04/19] ceph: don't skip updating wanted caps when cap is stale
-Date: Sat, 18 Apr 2020 10:44:21 -0400
-Message-ID: <20200418144436.10818-4-sashal@kernel.org>
-References: <20200418144436.10818-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 05/23] ceph: don't skip updating wanted caps when cap is stale
+Date: Sat, 18 Apr 2020 10:43:47 -0400
+Message-ID: <20200418144405.10565-5-sashal@kernel.org>
+References: <20200418144405.10565-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:56588 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:55772 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728104AbgDROol (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 18 Apr 2020 10:44:41 -0400
-In-Reply-To: <20200418144436.10818-1-sashal@kernel.org>
+        id S1728757AbgDROoM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 18 Apr 2020 10:44:12 -0400
+In-Reply-To: <20200418144405.10565-1-sashal@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -39,10 +39,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index aa4df4a022525..efdf81ea3b5f8 100644
+index f5d9835264aa1..617e9ae67f506 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -1734,8 +1734,12 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
+@@ -1764,8 +1764,12 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
  		}
  
  		/* want more caps from mds? */
