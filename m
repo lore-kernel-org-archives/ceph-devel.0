@@ -1,37 +1,37 @@
-From: Christopher Kunz <chrislist@de-punkt.de>
-Subject: Goodbye and thanks for all the cuttlefish!
-Date: Mon, 20 Apr 2020 15:39:36 +0200
-Message-ID: <dd25fcff-5f8f-187d-0530-a94ec8ade8af@de-punkt.de>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH] MAINTAINERS: remove myself as ceph co-maintainer
+Date: Mon, 20 Apr 2020 10:21:12 -0400
+Message-ID: <cc2b7b3f2601aa6ab3698bd9d12a6c4c34076e9d.camel@kernel.org>
+References: <alpine.DEB.2.21.2004201343420.29831@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-4.de-punkt.de ([93.190.64.233]:51350 "EHLO
-        mail-4.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726817AbgDTNrY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Apr 2020 09:47:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37538 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727890AbgDTOVO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Apr 2020 10:21:14 -0400
+In-Reply-To: <alpine.DEB.2.21.2004201343420.29831@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@ceph.io>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Hello ceph-{users,devel},
+On Mon, 2020-04-20 at 13:44 +0000, Sage Weil wrote:
+> Jeff, Ilya, and Dongsheng are doing all of the Ceph maintainance
+> these days.
+> 
+> Signed-off-by: Sage Weil <sage@redhat.com>
+> ---
+>  MAINTAINERS | 3 ---
+>  1 file changed, 3 deletions(-)
+> 
 
-most of you might not know me, but I've been around a while.
-I've been on these lists since probably 2012, when my company, Filoo,
-started operating one of the early Ceph clusters for VM images. Much has
-changed since then, and today we shut down our biggest Ceph cluster.
+Merged -- should make v5.8 (or could go in sooner if we have follow-on
+fixes).
 
-This was not for technical reasons, but purely for operational and
-commercial reasons. I still think Ceph is a superior concept and I'm
-sure it will continue to evolve and mature.
+Thanks for all the contributions over the years! Any time you want to
+get back into kernel work, just let us know. ;)
 
-The interactions on and off the Ceph lists, especially by Sage and many
-of the original Inktank team, have helped us tremendously, thanks a lot
-for that!
-
-I wish you all the best for the future of Ceph and will unsubscribe now.
-See you around!
-
-Best regads,
-
-Chris
+Cheers,
+-- 
+Jeff Layton <jlayton@kernel.org>
