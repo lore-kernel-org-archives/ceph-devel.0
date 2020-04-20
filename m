@@ -1,61 +1,55 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: Fix potential ceph_osd_request refcnt leak
-Date: Mon, 20 Apr 2020 10:44:37 +0200
-Message-ID: <CAOi1vP_-82vLSG6UeeLToRGjNepE--fnj8tsb4y8e7eAoH9tCA@mail.gmail.com>
-References: <1587361243-83431-1-git-send-email-xiyuyang19@fudan.edu.cn>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [v3] ceph: if we are blacklisted, __do_request returns directly
+Date: Mon, 20 Apr 2020 08:16:45 -0400
+Message-ID: <ad6ca41f601d4feb2c3bd2850aeab95c3187bf2d.camel@kernel.org>
+References: <20200417110723.12235-1-gmayyyha@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1587361243-83431-1-git-send-email-xiyuyang19@fudan.edu.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Xiyu Yang <xiyuyang19@fudan.edu.cn>
-Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, yuanxzhang@fudan.edu.cn, kjlu@umn.edu, Xin Tan <tanxin.ctf@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:52274 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726936AbgDTMQr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Apr 2020 08:16:47 -0400
+In-Reply-To: <20200417110723.12235-1-gmayyyha@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yanhu Cao <gmayyyha@gmail.com>
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, Apr 20, 2020 at 7:41 AM Xiyu Yang <xiyuyang19@fudan.edu.cn> wrote:
->
-> ceph_writepages_start() invokes ceph_osdc_start_request(), which
-> increases the refcount of the ceph_osd_request object "req" and then
-> submit the request.
->
-> When ceph_writepages_start() returns or a new object is assigned to
-> "req", the original local reference of "req" becomes invalid, so the
-> refcount should be decreased to keep refcount balanced.
->
-> The reference counting issue happens in a normal path of
-> ceph_writepages_start(). Before NULL assigned to "req", the function
-> forgets to decrease its refcnt increased by ceph_osdc_start_request()
-> and will cause a refcnt leak.
->
-> Fix this issue by calling ceph_osdc_put_request() before the original
-> object pointed by "req" becomes invalid.
->
-> Fixes: 1d3576fd10f0 ("ceph: address space operations")
-> Signed-off-by: Xiyu Yang <xiyuyang19@fudan.edu.cn>
-> Signed-off-by: Xin Tan <tanxin.ctf@gmail.com>
+On Fri, 2020-04-17 at 19:07 +0800, Yanhu Cao wrote:
+> If we mount cephfs by the recover_session option,
+> __do_request can return directly until the client automatically reconnects.
+> 
+> Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
 > ---
->  fs/ceph/addr.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 7ab616601141..b02c050a3418 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -1126,6 +1126,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->                 req->r_mtime = inode->i_mtime;
->                 rc = ceph_osdc_start_request(&fsc->client->osdc, req, true);
->                 BUG_ON(rc);
-> +               ceph_osdc_put_request(req);
->                 req = NULL;
->
->                 wbc->nr_to_write -= i;
+>  fs/ceph/mds_client.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 486f91f9685b..16ac5e5f7f79 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2708,6 +2708,12 @@ static void __do_request(struct ceph_mds_client *mdsc,
+>  
+>  	put_request_session(req);
+>  
+> +	if (mdsc->fsc->blacklisted &&
+> +	    ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER)) {
+> +		err = -EBLACKLISTED;
+> +		goto finish;
+> +	}
+> +
 
-Hi Xiyu,
+Why check for CLEANRECOVER? If we're mounted with recover_session=no
+wouldn't we want to do the same thing here?
 
-I think this reference is put in writepages_finish().  Putting it in
-ceph_writepages_start() will result in freed pointer dereference in
-libceph (in __complete_request() or elsewhere).
+Either way, it's still blacklisted. The only difference is that it won't
+attempt to automatically recover the session that way.
 
-Thanks,
 
-                Ilya
+>  	mds = __choose_mds(mdsc, req, &random);
+>  	if (mds < 0 ||
+>  	    ceph_mdsmap_get_state(mdsc->mdsmap, mds) < CEPH_MDS_STATE_ACTIVE) {
+-- 
+Jeff Layton <jlayton@kernel.org>
