@@ -1,45 +1,61 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: What's a good default TTL for DNS keys in the kernel
-Date: Mon, 20 Apr 2020 14:13:40 +0100
-Message-ID: <1136024.1587388420@warthog.procyon.org.uk>
-References: <87imhvj7m6.fsf@cjr.nz> <CAH2r5mv5p=WJQu2SbTn53FeTsXyN6ke_CgEjVARQ3fX8QAtK_w@mail.gmail.com> <3865908.1586874010@warthog.procyon.org.uk> <927453.1587285472@warthog.procyon.org.uk>
+From: Sage Weil <sweil@redhat.com>
+Subject: [PATCH] MAINTAINERS: remove myself as ceph co-maintainer
+Date: Mon, 20 Apr 2020 13:44:25 +0000 (UTC)
+Message-ID: <alpine.DEB.2.21.2004201343420.29831@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87imhvj7m6.fsf-jNnf+gw1pmM@public.gmane.org>
-Content-ID: <1136023.1587388420.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Paulo Alcantara <pc-jNnf+gw1pmM@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Steve French <smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-nfs <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, CIFS <linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Network Development <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, fweimer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:23380 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726081AbgDTNoi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Apr 2020 09:44:38 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 804E2190A7A4
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2020 13:44:28 +0000 (UTC)
+Received: from [10.3.128.3] (unknown [10.3.128.3])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0FCEA58
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2020 13:44:27 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Paulo Alcantara <pc-jNnf+gw1pmM@public.gmane.org> wrote:
+Jeff, Ilya, and Dongsheng are doing all of the Ceph maintainance
+these days.
 
-> >> For SMB3/CIFS mounts, Paulo added support last year for automatic
-> >> reconnect if the IP address of the server changes.  It also is helpfu=
-l
-> >> when DFS (global name space) addresses change.
-> >
-> > What happens if the IP address the superblock is going to changes, the=
-n
-> > another mount is made back to the original IP address?  Does the secon=
-d mount
-> > just pick the original superblock?
-> =
+Signed-off-by: Sage Weil <sage@redhat.com>
+---
+ MAINTAINERS | 3 ---
+ 1 file changed, 3 deletions(-)
 
-> It is going to transparently reconnect to the new ip address, SMB share,
-> and cifs superblock is kept unchanged.  We, however, update internal
-> TCP_Server_Info structure to reflect new destination ip address.
-> =
-
-> For the second mount, since the hostname (extracted out of the UNC path
-> at mount time) resolves to a new ip address and that address was saved e=
-arlier
-> in TCP_Server_Info structure during reconnect, we will end up
-> reusing same cifs superblock as per fs/cifs/connect.c:cifs_match_super()=
-.
-
-Would that be a bug?
-
-David
+diff --git a/MAINTAINERS b/MAINTAINERS
+index b816a453b10e..7a691c8fc76d 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -3937,7 +3937,6 @@ F:        arch/powerpc/platforms/cell/
+ CEPH COMMON CODE (LIBCEPH)
+ M:     Ilya Dryomov <idryomov@gmail.com>
+ M:     Jeff Layton <jlayton@kernel.org>
+-M:     Sage Weil <sage@redhat.com>
+ L:     ceph-devel@vger.kernel.org
+ S:     Supported
+ W:     http://ceph.com/
+@@ -3949,7 +3948,6 @@ F:        net/ceph/
+ 
+ CEPH DISTRIBUTED FILE SYSTEM CLIENT (CEPH)
+ M:     Jeff Layton <jlayton@kernel.org>
+-M:     Sage Weil <sage@redhat.com>
+ M:     Ilya Dryomov <idryomov@gmail.com>
+ L:     ceph-devel@vger.kernel.org
+ S:     Supported
+@@ -14096,7 +14094,6 @@ F:      drivers/media/radio/radio-tea5777.c
+ 
+ RADOS BLOCK DEVICE (RBD)
+ M:     Ilya Dryomov <idryomov@gmail.com>
+-M:     Sage Weil <sage@redhat.com>
+ R:     Dongsheng Yang <dongsheng.yang@easystack.cn>
+ L:     ceph-devel@vger.kernel.org
+ S:     Supported
+-- 
+2.24.1
