@@ -1,55 +1,45 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [v3] ceph: if we are blacklisted, __do_request returns directly
-Date: Mon, 20 Apr 2020 08:16:45 -0400
-Message-ID: <ad6ca41f601d4feb2c3bd2850aeab95c3187bf2d.camel@kernel.org>
-References: <20200417110723.12235-1-gmayyyha@gmail.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: What's a good default TTL for DNS keys in the kernel
+Date: Mon, 20 Apr 2020 14:13:40 +0100
+Message-ID: <1136024.1587388420@warthog.procyon.org.uk>
+References: <87imhvj7m6.fsf@cjr.nz> <CAH2r5mv5p=WJQu2SbTn53FeTsXyN6ke_CgEjVARQ3fX8QAtK_w@mail.gmail.com> <3865908.1586874010@warthog.procyon.org.uk> <927453.1587285472@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:52274 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726936AbgDTMQr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 20 Apr 2020 08:16:47 -0400
-In-Reply-To: <20200417110723.12235-1-gmayyyha@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yanhu Cao <gmayyyha@gmail.com>
-Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <87imhvj7m6.fsf-jNnf+gw1pmM@public.gmane.org>
+Content-ID: <1136023.1587388420.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Paulo Alcantara <pc-jNnf+gw1pmM@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Steve French <smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-nfs <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, CIFS <linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Network Development <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, fweimer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 2020-04-17 at 19:07 +0800, Yanhu Cao wrote:
-> If we mount cephfs by the recover_session option,
-> __do_request can return directly until the client automatically reconnects.
-> 
-> Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
-> ---
->  fs/ceph/mds_client.c | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 486f91f9685b..16ac5e5f7f79 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -2708,6 +2708,12 @@ static void __do_request(struct ceph_mds_client *mdsc,
->  
->  	put_request_session(req);
->  
-> +	if (mdsc->fsc->blacklisted &&
-> +	    ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER)) {
-> +		err = -EBLACKLISTED;
-> +		goto finish;
-> +	}
-> +
+Paulo Alcantara <pc-jNnf+gw1pmM@public.gmane.org> wrote:
 
-Why check for CLEANRECOVER? If we're mounted with recover_session=no
-wouldn't we want to do the same thing here?
+> >> For SMB3/CIFS mounts, Paulo added support last year for automatic
+> >> reconnect if the IP address of the server changes.  It also is helpfu=
+l
+> >> when DFS (global name space) addresses change.
+> >
+> > What happens if the IP address the superblock is going to changes, the=
+n
+> > another mount is made back to the original IP address?  Does the secon=
+d mount
+> > just pick the original superblock?
+> =
 
-Either way, it's still blacklisted. The only difference is that it won't
-attempt to automatically recover the session that way.
+> It is going to transparently reconnect to the new ip address, SMB share,
+> and cifs superblock is kept unchanged.  We, however, update internal
+> TCP_Server_Info structure to reflect new destination ip address.
+> =
 
+> For the second mount, since the hostname (extracted out of the UNC path
+> at mount time) resolves to a new ip address and that address was saved e=
+arlier
+> in TCP_Server_Info structure during reconnect, we will end up
+> reusing same cifs superblock as per fs/cifs/connect.c:cifs_match_super()=
+.
 
->  	mds = __choose_mds(mdsc, req, &random);
->  	if (mds < 0 ||
->  	    ceph_mdsmap_get_state(mdsc->mdsmap, mds) < CEPH_MDS_STATE_ACTIVE) {
--- 
-Jeff Layton <jlayton@kernel.org>
+Would that be a bug?
+
+David
