@@ -1,129 +1,112 @@
 From: Roman Penyaev <rpenyaev@suse.de>
-Subject: [PATCH 16/16] libceph: remove ceph_msg_data_*_next() from messenger
-Date: Tue, 21 Apr 2020 15:18:50 +0200
-Message-ID: <20200421131850.443228-17-rpenyaev@suse.de>
+Subject: [PATCH 14/16] libceph: switch pages cursor to iov_iter for messenger
+Date: Tue, 21 Apr 2020 15:18:48 +0200
+Message-ID: <20200421131850.443228-15-rpenyaev@suse.de>
 References: <20200421131850.443228-1-rpenyaev@suse.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:50238 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:50210 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728996AbgDUNTD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 21 Apr 2020 09:19:03 -0400
+        id S1728990AbgDUNTC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 21 Apr 2020 09:19:02 -0400
 In-Reply-To: <20200421131850.443228-1-rpenyaev@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 Cc: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org, Roman Penyaev <rpenyaev@suse.de>
 
-All cursor types do not need next operation, advance handles
-everything, so just remove it.
+Though it still uses pages, ceph_msg_data_pages_next() is noop now.
 
 Signed-off-by: Roman Penyaev <rpenyaev@suse.de>
 ---
- net/ceph/messenger.c | 49 --------------------------------------------
- 1 file changed, 49 deletions(-)
+ include/linux/ceph/messenger.h |  1 -
+ net/ceph/messenger.c           | 33 ++++++++++++++-------------------
+ 2 files changed, 14 insertions(+), 20 deletions(-)
 
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 89874fe7153b..822182ac4386 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -201,7 +201,6 @@ struct ceph_msg_data_cursor {
+ 		struct ceph_bio_iter	bio_iter;
+ #endif /* CONFIG_BLOCK */
+ 		struct {				/* pages */
+-			unsigned int	page_offset;	/* offset in page */
+ 			unsigned short	page_index;	/* index in array */
+ 			unsigned short	page_count;	/* pages in array */
+ 		};
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index c001f3c551bd..3facb1a8c5d5 100644
+index ea91f94096f1..288f3c66a4d1 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -865,11 +865,6 @@ static void ceph_msg_data_bio_cursor_init(struct ceph_msg_data_cursor *cursor,
- 	set_bio_iter_to_iov_iter(cursor);
- }
- 
--static void ceph_msg_data_bio_next(struct ceph_msg_data_cursor *cursor)
--{
--	/* Nothing here */
--}
--
- static void ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
- 				      size_t bytes)
+@@ -929,6 +929,7 @@ static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data_cursor *cursor,
+ 					size_t length)
  {
-@@ -907,11 +902,6 @@ static void ceph_msg_data_bvecs_cursor_init(struct ceph_msg_data_cursor *cursor,
- 		      data->num_bvecs, cursor->resid);
+ 	struct ceph_msg_data *data = cursor->data;
++	unsigned int page_offset;
+ 	int page_count;
+ 
+ 	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
+@@ -938,26 +939,20 @@ static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data_cursor *cursor,
+ 
+ 	cursor->resid = min(length, data->length);
+ 	page_count = calc_pages_for(data->alignment, (u64)data->length);
+-	cursor->page_offset = data->alignment & ~PAGE_MASK;
++	page_offset = data->alignment & ~PAGE_MASK;
+ 	cursor->page_index = 0;
+ 	BUG_ON(page_count > (int)USHRT_MAX);
+ 	cursor->page_count = (unsigned short)page_count;
+-	BUG_ON(length > SIZE_MAX - cursor->page_offset);
++	BUG_ON(length > SIZE_MAX - page_offset);
++
++	ceph_msg_data_set_iter(cursor, data->pages[cursor->page_index],
++			       page_offset, min(PAGE_SIZE - page_offset,
++						cursor->resid));
  }
  
--static void ceph_msg_data_bvecs_next(struct ceph_msg_data_cursor *cursor)
--{
--	/* Nothing here */
--}
--
- static void ceph_msg_data_bvecs_advance(struct ceph_msg_data_cursor *cursor,
- 					size_t bytes)
+ static void ceph_msg_data_pages_next(struct ceph_msg_data_cursor *cursor)
  {
-@@ -950,11 +940,6 @@ static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data_cursor *cursor,
- 						cursor->resid));
+-	struct ceph_msg_data *data = cursor->data;
+-
+-	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
+-
+-	BUG_ON(cursor->page_index >= cursor->page_count);
+-	BUG_ON(cursor->page_offset >= PAGE_SIZE);
+-
+-	ceph_msg_data_set_iter(cursor, data->pages[cursor->page_index],
+-			       cursor->page_offset,
+-			       min(PAGE_SIZE - cursor->page_offset,
+-				   cursor->resid));
++	/* Nothing here */
  }
  
--static void ceph_msg_data_pages_next(struct ceph_msg_data_cursor *cursor)
--{
--	/* Nothing here */
--}
--
  static void ceph_msg_data_pages_advance(struct ceph_msg_data_cursor *cursor,
- 					size_t bytes)
+@@ -965,13 +960,10 @@ static void ceph_msg_data_pages_advance(struct ceph_msg_data_cursor *cursor,
  {
-@@ -1007,11 +992,6 @@ ceph_msg_data_pagelist_cursor_init(struct ceph_msg_data_cursor *cursor,
- 	ceph_msg_data_set_iter(cursor, page, 0, min(PAGE_SIZE, cursor->resid));
+ 	BUG_ON(cursor->data->type != CEPH_MSG_DATA_PAGES);
+ 
+-	BUG_ON(cursor->page_offset + bytes > PAGE_SIZE);
+-
+-	/* Advance the cursor page offset */
+-
++	/* Advance the cursor iter */
+ 	cursor->resid -= bytes;
+-	cursor->page_offset = (cursor->page_offset + bytes) & ~PAGE_MASK;
+-	if (!bytes || cursor->page_offset)
++	iov_iter_advance(&cursor->iter, bytes);
++	if (!bytes || iov_iter_count(&cursor->iter))
+ 		return;	/* more bytes to process in the current page */
+ 
+ 	if (!cursor->resid)
+@@ -981,6 +973,9 @@ static void ceph_msg_data_pages_advance(struct ceph_msg_data_cursor *cursor,
+ 
+ 	BUG_ON(cursor->page_index >= cursor->page_count);
+ 	cursor->page_index++;
++
++	ceph_msg_data_set_iter(cursor, cursor->data->pages[cursor->page_index],
++			       0, min(PAGE_SIZE, cursor->resid));
  }
  
--static void ceph_msg_data_pagelist_next(struct ceph_msg_data_cursor *cursor)
--{
--	/* Nothing here */
--}
--
- static void ceph_msg_data_pagelist_advance(struct ceph_msg_data_cursor *cursor,
- 					   size_t bytes)
- {
-@@ -1087,33 +1067,6 @@ static void ceph_msg_data_cursor_init(unsigned int dir, struct ceph_msg *msg,
- 	__ceph_msg_data_cursor_init(cursor);
- }
- 
--/*
-- * Setups cursor->iter for the next piece to process.
-- */
--static void ceph_msg_data_next(struct ceph_msg_data_cursor *cursor)
--{
--	switch (cursor->data->type) {
--	case CEPH_MSG_DATA_PAGELIST:
--		ceph_msg_data_pagelist_next(cursor);
--		break;
--	case CEPH_MSG_DATA_PAGES:
--		ceph_msg_data_pages_next(cursor);
--		break;
--#ifdef CONFIG_BLOCK
--	case CEPH_MSG_DATA_BIO:
--		ceph_msg_data_bio_next(cursor);
--		break;
--#endif /* CONFIG_BLOCK */
--	case CEPH_MSG_DATA_BVECS:
--		ceph_msg_data_bvecs_next(cursor);
--		break;
--	case CEPH_MSG_DATA_NONE:
--	default:
--		BUG();
--		break;
--	}
--}
--
- static void ceph_msg_data_advance(struct ceph_msg_data_cursor *cursor,
- 				  size_t bytes)
- {
-@@ -1519,7 +1472,6 @@ static int write_partial_message_data(struct ceph_connection *con)
- 			continue;
- 		}
- 
--		ceph_msg_data_next(cursor);
- 		ret = ceph_tcp_sendiov(con->sock, &cursor->iter, true);
- 		if (ret <= 0) {
- 			if (do_datacrc)
-@@ -2260,7 +2212,6 @@ static int read_partial_msg_data(struct ceph_connection *con)
- 			continue;
- 		}
- 
--		ceph_msg_data_next(cursor);
- 		ret = ceph_tcp_recviov(con->sock, &cursor->iter);
- 		if (ret <= 0) {
- 			if (do_datacrc)
+ /*
 -- 
 2.24.1
