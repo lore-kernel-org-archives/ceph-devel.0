@@ -1,39 +1,24 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: v13.2.10 Mimic released
-Date: Thu, 23 Apr 2020 21:09:35 +0200
-Message-ID: <87blniqas0.fsf@suse.com>
+From: Ruben CONVY <andrewboccc@gmail.com>
+Subject: Why continued silence 2
+Date: Mon, 27 Apr 2020 12:39:21 +0100
+Message-ID: <CAHVC0+BCfiV-4oVhRBza_VHyzMGLDHZsknFbwXsDRR0DVRoRAQ__67.9335602157494$1587987570$gmane$org@mail.gmail.com>
+Reply-To: convy0090@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:58922 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726121AbgDWTJh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 23 Apr 2020 15:09:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35702 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726604AbgD0LjW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2020 07:39:22 -0400
+Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99894C061BD3
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Apr 2020 04:39:22 -0700 (PDT)
+Received: by mail-il1-x144.google.com with SMTP id c18so1071460ile.5
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Apr 2020 04:39:22 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-announce@ceph.io, ceph-users@ceph.io, dev@ceph.io, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.io
 
-
-We're happy to announce the availability of the tenth bugfix release of
-Ceph Mimic, this release fixes a RGW vulnerability affecting mimic, and
-we recommend that all mimic users upgrade.
-
-Notable Changes
----------------
-* CVE 2020 12059: Fix an issue with Post Object Requests with Tagging
-  (#44967, Lei Cao, Abhishek Lekshmanan)
-
-
-Getting Ceph
-------------
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-13.2.10.tar.gz
-* For packages: http://docs.ceph.com/docs/master/install/get-packages/
-* Release git sha1: 564bdc4ae87418a232fc901524470e1a0f76d641
-* Release blog: https://ceph.io/releases/v13-2-10-mimic-released
-
---
-Abhishek Lekshmanan
-SUSE Software Solutions Germany GmbH
-GF: Felix Imendörffer
+Did you receive my previous email regarding your family inheritance?
+Reply strictly through: convy0090@gmail.com
+Best Regards,
+Ruben CONVY
