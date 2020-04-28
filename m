@@ -1,81 +1,39 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH V2] fs/ceph:fix double unlock in handle_cap_export()
-Date: Tue, 28 Apr 2020 10:48:10 -0400
-Message-ID: <e89bd817c69422c85f1945041dd83fbe8d534805.camel@kernel.org>
-References: <1588079622-423774-1-git-send-email-wubo40@huawei.com>
+From: David Miller <davem@davemloft.net>
+Subject: Re: [PATCH 00/38] net: manually convert files to ReST format -
+ part 1
+Date: Tue, 28 Apr 2020 13:11:43 -0700 (PDT)
+Message-ID: <20200428.131143.378850463944291442.davem@davemloft.net>
+References: <cover.1588024424.git.mchehab+huawei@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: Text/Plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1588079622-423774-1-git-send-email-wubo40@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wu Bo <wubo40@huawei.com>, sage@redhat.com, idryomov@gmail.com
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, liuzhiqiang26@huawei.com, linfeilong@huawei.com
+Return-path: <linux-hams-owner@vger.kernel.org>
+In-Reply-To: <cover.1588024424.git.mchehab+huawei@kernel.org>
+Sender: linux-hams-owner@vger.kernel.org
+To: mchehab+huawei@kernel.org
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, corbet@lwn.net, netdev@vger.kernel.org, linux-hams@vger.kernel.org, intel-wired-lan@lists.osuosl.org, linux-decnet-user@lists.sourceforge.net, ceph-devel@vger.kernel.org, bpf@vger.kernel.org, linux-atm-general@lists.sourceforge.net, lvs-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 2020-04-28 at 21:13 +0800, Wu Bo wrote:
-> if the ceph_mdsc_open_export_target_session() return fails,
-> should add a lock to avoid twice unlocking.
-> Because the lock will be released at the retry or out_unlock tag.
+From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Date: Tue, 28 Apr 2020 00:01:15 +0200
+
+> There are very few documents upstream that aren't converted upstream.
 > 
-
-The problem looks real, but...
-
-> --
-> v1 -> v2:
-> add spin_lock(&ci->i_ceph_lock) before goto out_unlock tag. 
+> This series convert part of the networking text files into ReST.
+> It is part of a bigger set of patches, which were split on parts,
+> in order to make reviewing task easier.
 > 
-> Signed-off-by: Wu Bo <wubo40@huawei.com>
-> ---
->  fs/ceph/caps.c | 27 +++++++++++++++------------
->  1 file changed, 15 insertions(+), 12 deletions(-)
+> The full series (including those ones) are at:
 > 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 185db76..414c0e2 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -3731,22 +3731,25 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
->  
->  	/* open target session */
->  	tsession = ceph_mdsc_open_export_target_session(mdsc, target);
-> -	if (!IS_ERR(tsession)) {
-> -		if (mds > target) {
-> -			mutex_lock(&session->s_mutex);
-> -			mutex_lock_nested(&tsession->s_mutex,
-> -					  SINGLE_DEPTH_NESTING);
-> -		} else {
-> -			mutex_lock(&tsession->s_mutex);
-> -			mutex_lock_nested(&session->s_mutex,
-> -					  SINGLE_DEPTH_NESTING);
-> -		}
-> -		new_cap = ceph_get_cap(mdsc, NULL);
-> -	} else {
-> +	if (IS_ERR(tsession)) {
->  		WARN_ON(1);
->  		tsession = NULL;
->  		target = -1;
-> +		mutex_lock(&session->s_mutex);
-> +		spin_lock(&ci->i_ceph_lock);
-> +		goto out_unlock;
+> 	https://git.linuxtv.org/mchehab/experimental.git/log/?h=net-docs
+> 
+> And the documents, converted to HTML via the building system
+> are at:
+> 
+> 	https://www.infradead.org/~mchehab/kernel_docs/networking/
 
-Why did you make this case goto out_unlock instead of retrying as it did
-before?
+These look good as far as I can tell.
 
-> +	}
-> +
-> +	if (mds > target) {
-> +		mutex_lock(&session->s_mutex);
-> +		mutex_lock_nested(&tsession->s_mutex,
-> +					SINGLE_DEPTH_NESTING);
-> +	} else {
-> +		mutex_lock(&tsession->s_mutex);
-> +		mutex_lock_nested(&session->s_mutex,
-> +					SINGLE_DEPTH_NESTING);
->  	}
-> +	new_cap = ceph_get_cap(mdsc, NULL);
->  	goto retry;
->  
->  out_unlock:
+Jon, do you mind if I merge this via the networking tree?
 
--- 
-Jeff Layton <jlayton@kernel.org>
+Thanks.
