@@ -1,43 +1,132 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] fs/ceph:fix speical error code in ceph_try_get_caps()
-Date: Wed, 29 Apr 2020 11:37:25 -0400
-Message-ID: <591b050483a0326bbcaf075254a69bfefc77550f.camel@kernel.org>
-References: <1588125715-188363-1-git-send-email-wubo40@huawei.com>
+Subject: Re: [PATCH] ceph: fix up endian bug in managing feature bits
+Date: Wed, 29 Apr 2020 11:39:57 -0400
+Message-ID: <ea3dc3b2657a766f2fc253fe6b1bac08aeb968db.camel@kernel.org>
+References: <1588023986-23672-1-git-send-email-edward6@linux.ibm.com>
+         <f36451800e4656f99483f4d47487a40ea5f942cd.camel@kernel.org>
+         <d322ad5e-8409-7e5e-8d16-a2706223f26f@linux.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1588125715-188363-1-git-send-email-wubo40@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wu Bo <wubo40@huawei.com>, sage@redhat.com, idryomov@gmail.com
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, liuzhiqiang26@huawei.com, linfeilong@huawei.com
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:58804 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726519AbgD2Pj7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 29 Apr 2020 11:39:59 -0400
+In-Reply-To: <d322ad5e-8409-7e5e-8d16-a2706223f26f@linux.ibm.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Eduard Shishkin <edward6@linux.ibm.com>, ceph-devel@vger.kernel.org
+Cc: Ulrich.Weigand@de.ibm.com, Tuan.Hoang1@ibm.com, "Yan, Zheng" <ukernel@gmail.com>
 
-On Wed, 2020-04-29 at 10:01 +0800, Wu Bo wrote:
-> There are 3 speical error codes: -EAGAIN/-EFBIG/-ESTALE.
-> After call try_get_cap_refs function, judge the same 
-> error code -EAGAIN twice. So corrected the error code of judgment 
-> from -EAGAIN to -ESTAE.
+On Wed, 2020-04-29 at 11:46 +0200, Eduard Shishkin wrote:
+> On 4/28/20 2:23 PM, Jeff Layton wrote:
+> > On Mon, 2020-04-27 at 23:46 +0200, edward6@linux.ibm.com wrote:
+> > > From: Eduard Shishkin <edward6@linux.ibm.com>
+> > > 
+> > > In the function handle_session() variable @features always
+> > > contains little endian order of bytes. Just because the feature
+> > > bits are packed bytewise from left to right in
+> > > encode_supported_features().
+> > > 
+> > > However, test_bit(), called to check features availability, assumes
+> > > the host order of bytes in that variable. This leads to problems on
+> > > big endian architectures. Specifically it is impossible to mount
+> > > ceph volume on s390.
+> > > 
+> > > This patch adds conversion from little endian to the host order
+> > > of bytes, thus fixing the problem.
+> > > 
+> > > Signed-off-by: Eduard Shishkin <edward6@linux.ibm.com>
+> > > ---
+> > >   fs/ceph/mds_client.c | 4 ++--
+> > >   1 file changed, 2 insertions(+), 2 deletions(-)
+> > > 
+> > > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > > index 486f91f..190598d 100644
+> > > --- a/fs/ceph/mds_client.c
+> > > +++ b/fs/ceph/mds_client.c
+> > > @@ -3252,7 +3252,7 @@ static void handle_session(struct ceph_mds_session *session,
+> > >   	struct ceph_mds_session_head *h;
+> > >   	u32 op;
+> > >   	u64 seq;
+> > > -	unsigned long features = 0;
+> > > +	__le64 features = 0;
+> > >   	int wake = 0;
+> > >   	bool blacklisted = false;
+> > >   
+> > > @@ -3301,7 +3301,7 @@ static void handle_session(struct ceph_mds_session *session,
+> > >   		if (session->s_state == CEPH_MDS_SESSION_RECONNECTING)
+> > >   			pr_info("mds%d reconnect success\n", session->s_mds);
+> > >   		session->s_state = CEPH_MDS_SESSION_OPEN;
+> > > -		session->s_features = features;
+> > > +		session->s_features = le64_to_cpu(features);
+> > >   		renewed_caps(mdsc, session, 0);
+> > >   		wake = 1;
+> > >   		if (mdsc->stopping)
+> > 
+> > (cc'ing Zheng since he did the original patches here)
+> > 
+> > Thanks Eduard. The problem is real, but I think we can just do the
+> > conversion during the decode.
+> > 
+> > The feature mask words sent by the MDS are 64 bits, so if it's smaller
+> > we can assume that it's malformed. So, I don't think we need to handle
+> > the case where it's smaller than 8 bytes.
+> > 
+> > How about this patch instead?
 > 
-> Signed-off-by: Wu Bo <wubo40@huawei.com>
-> ---
->  fs/ceph/caps.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Hi Jeff,
 > 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 185db76..1a8e20e 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2749,7 +2749,7 @@ int ceph_try_get_caps(struct inode *inode, int need, int want,
->  
->  	ret = try_get_cap_refs(inode, need, want, 0, flags, got);
->  	/* three special error codes */
-> -	if (ret == -EAGAIN || ret == -EFBIG || ret == -EAGAIN)
-> +	if (ret == -EAGAIN || ret == -EFBIG || ret == -ESTALE)
->  		ret = 0;
->  	return ret;
->  }
+> This also works. Please, apply.
+> 
+> Thanks,
+> Eduard.
+> 
 
-Good catch! Merged into testing branch.
+Thanks. Merged into ceph-client/testing branch, and should make v5.8.
+
+> > --------------------------8<-----------------------------
+> > 
+> > ceph: fix endianness bug when handling MDS session feature bits
+> > 
+> > Eduard reported a problem mounting cephfs on s390 arch. The feature
+> > mask sent by the MDS is little-endian, so we need to convert it
+> > before storing and testing against it.
+> > 
+> > Reported-by: Eduard Shishkin <edward6@linux.ibm.com>
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >   fs/ceph/mds_client.c | 8 +++-----
+> >   1 file changed, 3 insertions(+), 5 deletions(-)
+> > 
+> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > index a8a5b98148ec..6c283c52d401 100644
+> > --- a/fs/ceph/mds_client.c
+> > +++ b/fs/ceph/mds_client.c
+> > @@ -3260,8 +3260,7 @@ static void handle_session(struct ceph_mds_session *session,
+> >   	void *end = p + msg->front.iov_len;
+> >   	struct ceph_mds_session_head *h;
+> >   	u32 op;
+> > -	u64 seq;
+> > -	unsigned long features = 0;
+> > +	u64 seq, features = 0;
+> >   	int wake = 0;
+> >   	bool blacklisted = false;
+> >   
+> > @@ -3280,9 +3279,8 @@ static void handle_session(struct ceph_mds_session *session,
+> >   			goto bad;
+> >   		/* version >= 3, feature bits */
+> >   		ceph_decode_32_safe(&p, end, len, bad);
+> > -		ceph_decode_need(&p, end, len, bad);
+> > -		memcpy(&features, p, min_t(size_t, len, sizeof(features)));
+> > -		p += len;
+> > +		ceph_decode_64_safe(&p, end, features, bad);
+> > +		p += len - sizeof(features);
+> >   	}
+> >   
+> >   	mutex_lock(&mdsc->mutex);
+> > 
+
 -- 
 Jeff Layton <jlayton@kernel.org>
