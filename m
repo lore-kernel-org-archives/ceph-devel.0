@@ -1,100 +1,99 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: fix up endian bug in managing feature bits
-Date: Wed, 29 Apr 2020 18:08:49 +0200
-Message-ID: <CAOi1vP-6sWTw68UJx4kV-0fmhLGE0=hw3ZYPYd8tp6aXVNYJXg@mail.gmail.com>
-References: <1588023986-23672-1-git-send-email-edward6@linux.ibm.com>
- <f36451800e4656f99483f4d47487a40ea5f942cd.camel@kernel.org>
- <d322ad5e-8409-7e5e-8d16-a2706223f26f@linux.ibm.com> <ea3dc3b2657a766f2fc253fe6b1bac08aeb968db.camel@kernel.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH V2] fs/ceph:fix double unlock in handle_cap_export()
+Date: Thu, 30 Apr 2020 10:50:57 +0800
+Message-ID: <CAAM7YA=OU2jJ9F_p1fAknaxZCDWMY7w9yiRE0z0uqxDNYPG5Mg@mail.gmail.com>
+References: <1588079622-423774-1-git-send-email-wubo40@huawei.com>
+ <e89bd817c69422c85f1945041dd83fbe8d534805.camel@kernel.org> <6c99072a-f92b-b7e8-9aef-509d1a9ee985@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48730 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726926AbgD2QIu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 29 Apr 2020 12:08:50 -0400
-Received: from mail-io1-xd44.google.com (mail-io1-xd44.google.com [IPv6:2607:f8b0:4864:20::d44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1293C03C1AD
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2020 09:08:49 -0700 (PDT)
-Received: by mail-io1-xd44.google.com with SMTP id b12so2779043ion.8
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2020 09:08:49 -0700 (PDT)
-In-Reply-To: <ea3dc3b2657a766f2fc253fe6b1bac08aeb968db.camel@kernel.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Eduard Shishkin <edward6@linux.ibm.com>, Ceph Development <ceph-devel@vger.kernel.org>, Ulrich.Weigand@de.ibm.com, Tuan.Hoang1@ibm.com, "Yan, Zheng" <ukernel@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <6c99072a-f92b-b7e8-9aef-509d1a9ee985@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Wu Bo <wubo40@huawei.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, liuzhiqiang26@huawei.com, linfeilong@huawei.com
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Apr 29, 2020 at 5:42 PM Jeff Layton <jlayton@kernel.org> wrote:
+On Wed, Apr 29, 2020 at 8:49 AM Wu Bo <wubo40@huawei.com> wrote:
 >
-> On Wed, 2020-04-29 at 11:46 +0200, Eduard Shishkin wrote:
-> > On 4/28/20 2:23 PM, Jeff Layton wrote:
-> > > On Mon, 2020-04-27 at 23:46 +0200, edward6@linux.ibm.com wrote:
-> > > > From: Eduard Shishkin <edward6@linux.ibm.com>
-> > > >
-> > > > In the function handle_session() variable @features always
-> > > > contains little endian order of bytes. Just because the feature
-> > > > bits are packed bytewise from left to right in
-> > > > encode_supported_features().
-> > > >
-> > > > However, test_bit(), called to check features availability, assumes
-> > > > the host order of bytes in that variable. This leads to problems on
-> > > > big endian architectures. Specifically it is impossible to mount
-> > > > ceph volume on s390.
-> > > >
-> > > > This patch adds conversion from little endian to the host order
-> > > > of bytes, thus fixing the problem.
-> > > >
-> > > > Signed-off-by: Eduard Shishkin <edward6@linux.ibm.com>
-> > > > ---
-> > > >   fs/ceph/mds_client.c | 4 ++--
-> > > >   1 file changed, 2 insertions(+), 2 deletions(-)
-> > > >
-> > > > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > > > index 486f91f..190598d 100644
-> > > > --- a/fs/ceph/mds_client.c
-> > > > +++ b/fs/ceph/mds_client.c
-> > > > @@ -3252,7 +3252,7 @@ static void handle_session(struct ceph_mds_session *session,
-> > > >           struct ceph_mds_session_head *h;
-> > > >           u32 op;
-> > > >           u64 seq;
-> > > > - unsigned long features = 0;
-> > > > + __le64 features = 0;
-> > > >           int wake = 0;
-> > > >           bool blacklisted = false;
-> > > >
-> > > > @@ -3301,7 +3301,7 @@ static void handle_session(struct ceph_mds_session *session,
-> > > >                   if (session->s_state == CEPH_MDS_SESSION_RECONNECTING)
-> > > >                           pr_info("mds%d reconnect success\n", session->s_mds);
-> > > >                   session->s_state = CEPH_MDS_SESSION_OPEN;
-> > > > -         session->s_features = features;
-> > > > +         session->s_features = le64_to_cpu(features);
-> > > >                   renewed_caps(mdsc, session, 0);
-> > > >                   wake = 1;
-> > > >                   if (mdsc->stopping)
-> > >
-> > > (cc'ing Zheng since he did the original patches here)
-> > >
-> > > Thanks Eduard. The problem is real, but I think we can just do the
-> > > conversion during the decode.
-> > >
-> > > The feature mask words sent by the MDS are 64 bits, so if it's smaller
-> > > we can assume that it's malformed. So, I don't think we need to handle
-> > > the case where it's smaller than 8 bytes.
-> > >
-> > > How about this patch instead?
+> On 2020/4/28 22:48, Jeff Layton wrote:
+> > On Tue, 2020-04-28 at 21:13 +0800, Wu Bo wrote:
+> >> if the ceph_mdsc_open_export_target_session() return fails,
+> >> should add a lock to avoid twice unlocking.
+> >> Because the lock will be released at the retry or out_unlock tag.
+> >>
 > >
-> > Hi Jeff,
+> > The problem looks real, but...
 > >
-> > This also works. Please, apply.
+> >> --
+> >> v1 -> v2:
+> >> add spin_lock(&ci->i_ceph_lock) before goto out_unlock tag.
+> >>
+> >> Signed-off-by: Wu Bo <wubo40@huawei.com>
+> >> ---
+> >>   fs/ceph/caps.c | 27 +++++++++++++++------------
+> >>   1 file changed, 15 insertions(+), 12 deletions(-)
+> >>
+> >> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> >> index 185db76..414c0e2 100644
+> >> --- a/fs/ceph/caps.c
+> >> +++ b/fs/ceph/caps.c
+> >> @@ -3731,22 +3731,25 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+> >>
+> >>      /* open target session */
+> >>      tsession = ceph_mdsc_open_export_target_session(mdsc, target);
+> >> -    if (!IS_ERR(tsession)) {
+> >> -            if (mds > target) {
+> >> -                    mutex_lock(&session->s_mutex);
+> >> -                    mutex_lock_nested(&tsession->s_mutex,
+> >> -                                      SINGLE_DEPTH_NESTING);
+> >> -            } else {
+> >> -                    mutex_lock(&tsession->s_mutex);
+> >> -                    mutex_lock_nested(&session->s_mutex,
+> >> -                                      SINGLE_DEPTH_NESTING);
+> >> -            }
+> >> -            new_cap = ceph_get_cap(mdsc, NULL);
+> >> -    } else {
+> >> +    if (IS_ERR(tsession)) {
+> >>              WARN_ON(1);
+> >>              tsession = NULL;
+> >>              target = -1;
+> >> +            mutex_lock(&session->s_mutex);
+> >> +            spin_lock(&ci->i_ceph_lock);
+> >> +            goto out_unlock;
 > >
-> > Thanks,
-> > Eduard.
+> > Why did you make this case goto out_unlock instead of retrying as it did
+> > before?
 > >
 >
-> Thanks. Merged into ceph-client/testing branch, and should make v5.8.
+> If the problem occurs, target = -1, and goto retry lable, you need to
+> call __get_cap_for_mds() or even call __ceph_remove_cap(), and then jump
+> to out_unlock lable. All I think is unnecessary, goto out_unlock instead
+> of retrying directly.
+>
 
-I think this is stable material.  I'll tag it and get it queued up for 5.7-rc.
+__ceph_remove_cap() must be called even if opening target session
+failed. I think adding a mutex_lock(&session->s_mutex) to the
+IS_ERR(tsession) block should be enough.
 
-Thanks,
 
-                Ilya
+> Thanks.
+> Wu Bo
+>
+> >> +    }
+> >> +
+> >> +    if (mds > target) {
+> >> +            mutex_lock(&session->s_mutex);
+> >> +            mutex_lock_nested(&tsession->s_mutex,
+> >> +                                    SINGLE_DEPTH_NESTING);
+> >> +    } else {
+> >> +            mutex_lock(&tsession->s_mutex);
+> >> +            mutex_lock_nested(&session->s_mutex,
+> >> +                                    SINGLE_DEPTH_NESTING);
+> >>      }
+> >> +    new_cap = ceph_get_cap(mdsc, NULL);
+> >>      goto retry;
+> >>
+> >>   out_unlock:
+> >
+>
+>
