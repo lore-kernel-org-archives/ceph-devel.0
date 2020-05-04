@@ -1,99 +1,191 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [RFC PATCH 30/61] cachefiles: Split cachefiles_drop_object() up a bit
-Date: Mon, 04 May 2020 18:12:00 +0100
-Message-ID: <158861232027.340223.4423626519002421674.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [RFC PATCH 31/61] cachefiles: Implement new fscache I/O backend API
+Date: Mon, 04 May 2020 18:12:09 +0100
+Message-ID: <158861232949.340223.21702873867667105.stgit@warthog.procyon.org.uk>
 References: <158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <158861203563.340223.7585359869938129395.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Trond Myklebust <trondmy-F/q8l9xzQnoyLce1RVWEUA@public.gmane.org>, Anna Schumaker <anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matthew Wilcox <willy-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:53861 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729751AbgEDRMU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2020 13:12:20 -0400
+In-Reply-To: <158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Jeff Layton <jlayton@redhat.com>
+Cc: dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Split cachefiles_drop_object() up a bit to make it easier to modify later.
+Implement the new fscache I/O backend API in cachefiles.  The
+cachefiles_object struct carries a non-accounted file to the cachefiles
+object (so that it doesn't cause ENFILE).
 
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/cachefiles/interface.c |   58 ++++++++++++++++++++++++++++++---------------
- 1 file changed, 39 insertions(+), 19 deletions(-)
+ fs/cachefiles/Makefile    |    1 +
+ fs/cachefiles/interface.c |    3 ++
+ fs/cachefiles/internal.h  |   14 +++++++
+ fs/cachefiles/io.c        |   88 +++++++++++++++++++++++++++++++++++++++++++++
+ fs/cachefiles/namei.c     |    3 ++
+ 5 files changed, 109 insertions(+)
+ create mode 100644 fs/cachefiles/io.c
 
+diff --git a/fs/cachefiles/Makefile b/fs/cachefiles/Makefile
+index 3455d3646547..d894d317d6e7 100644
+--- a/fs/cachefiles/Makefile
++++ b/fs/cachefiles/Makefile
+@@ -7,6 +7,7 @@ cachefiles-y := \
+ 	bind.o \
+ 	daemon.o \
+ 	interface.o \
++	io.o \
+ 	key.o \
+ 	main.o \
+ 	namei.o \
 diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
-index daa4f316d104..47596b58c2da 100644
+index 47596b58c2da..747211363ae0 100644
 --- a/fs/cachefiles/interface.c
 +++ b/fs/cachefiles/interface.c
-@@ -192,6 +192,42 @@ static void cachefiles_update_object(struct fscache_object *_object)
- 	_leave("");
- }
+@@ -469,4 +469,7 @@ const struct fscache_cache_ops cachefiles_cache_ops = {
+ 	.put_object		= cachefiles_put_object,
+ 	.get_object_usage	= cachefiles_get_object_usage,
+ 	.sync_cache		= cachefiles_sync_cache,
++	.shape_extent		= cachefiles_shape_extent,
++	.read			= cachefiles_read,
++	.write			= cachefiles_write,
+ };
+diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
+index 16d15291a629..9f9e33893b4f 100644
+--- a/fs/cachefiles/internal.h
++++ b/fs/cachefiles/internal.h
+@@ -115,6 +115,20 @@ extern const struct fscache_cache_ops cachefiles_cache_ops;
+ extern struct fscache_object *cachefiles_grab_object(struct fscache_object *_object,
+ 						     enum fscache_obj_ref_trace why);
  
 +/*
-+ * Commit changes to the object as we drop it.
++ * io.c
 + */
-+static void cachefiles_commit_object(struct cachefiles_object *object,
-+				     struct cachefiles_cache *cache)
-+{
-+}
-+
-+/*
-+ * Finalise and object and close the VFS structs that we have.
-+ */
-+static void cachefiles_clean_up_object(struct cachefiles_object *object,
-+				       struct cachefiles_cache *cache,
-+				       bool invalidate)
-+{
-+	if (invalidate && &object->fscache != cache->cache.fsdef) {
-+		_debug("- inval object OBJ%x", object->fscache.debug_id);
-+		cachefiles_delete_object(cache, object);
-+	} else {
-+		cachefiles_commit_object(object, cache);
-+ 	}
-+
-+	/* close the filesystem stuff attached to the object */
-+	if (object->backing_file)
-+		fput(object->backing_file);
-+	object->backing_file = NULL;
-+
-+	if (object->backer != object->dentry)
-+		dput(object->backer);
-+	object->backer = NULL;
-+
-+	cachefiles_unmark_inode_in_use(object, object->dentry);
-+	dput(object->dentry);
-+	object->dentry = NULL;
-+}
++extern unsigned int cachefiles_shape_extent(struct fscache_object *object,
++					    struct fscache_extent *extent,
++					    loff_t i_size, bool for_write);
++extern int cachefiles_read(struct fscache_object *object,
++			   struct fscache_io_request *req,
++			   struct iov_iter *iter);
++extern int cachefiles_write(struct fscache_object *object,
++			    struct fscache_io_request *req,
++			    struct iov_iter *iter);
++extern bool cachefiles_open_object(struct cachefiles_object *obj);
 +
  /*
-  * discard the resources pinned by an object and effect retirement if
-  * requested
-@@ -223,25 +259,9 @@ static void cachefiles_drop_object(struct fscache_object *_object,
- 	 * before we set it up.
- 	 */
- 	if (object->dentry) {
--		if (invalidate && _object != cache->cache.fsdef) {
--			_debug("- inval object OBJ%x", object->fscache.debug_id);
--			cachefiles_begin_secure(cache, &saved_cred);
--			cachefiles_delete_object(cache, object);
--			cachefiles_end_secure(cache, saved_cred);
--		}
--
--		/* close the filesystem stuff attached to the object */
--		if (object->backing_file)
--			fput(object->backing_file);
--		object->backing_file = NULL;
--
--		if (object->backer != object->dentry)
--			dput(object->backer);
--		object->backer = NULL;
--
--		cachefiles_unmark_inode_in_use(object, object->dentry);
--		dput(object->dentry);
--		object->dentry = NULL;
-+		cachefiles_begin_secure(cache, &saved_cred);
-+		cachefiles_clean_up_object(object, cache, invalidate);
-+		cachefiles_end_secure(cache, saved_cred);
+  * key.c
+  */
+diff --git a/fs/cachefiles/io.c b/fs/cachefiles/io.c
+new file mode 100644
+index 000000000000..d472e9d9173c
+--- /dev/null
++++ b/fs/cachefiles/io.c
+@@ -0,0 +1,88 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/* Data I/O routines
++ *
++ * Copyright (C) 2020 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ */
++
++#include <linux/mount.h>
++#include <linux/slab.h>
++#include <linux/file.h>
++#include <linux/uio.h>
++#include <linux/xattr.h>
++#include "internal.h"
++
++/*
++ * Determine the size of a data extent in a cache object.  This must be written
++ * as a whole unit, but can be read piecemeal.
++ */
++unsigned int cachefiles_shape_extent(struct fscache_object *object,
++				     struct fscache_extent *extent,
++				     loff_t i_size, bool for_write)
++{
++	return 0;
++}
++
++/*
++ * Initiate a read from the cache.
++ */
++int cachefiles_read(struct fscache_object *object,
++		    struct fscache_io_request *req,
++		    struct iov_iter *iter)
++{
++	req->error = -ENODATA;
++	if (req->io_done)
++		req->io_done(req);
++	return -ENODATA;
++}
++
++/*
++ * Initiate a write to the cache.
++ */
++int cachefiles_write(struct fscache_object *object,
++		     struct fscache_io_request *req,
++		     struct iov_iter *iter)
++{
++	req->error = -ENOBUFS;
++	if (req->io_done)
++		req->io_done(req);
++	return -ENOBUFS;
++}
++
++/*
++ * Open a cache object.
++ */
++bool cachefiles_open_object(struct cachefiles_object *object)
++{
++	struct cachefiles_cache *cache =
++		container_of(object->fscache.cache, struct cachefiles_cache, cache);
++	struct file *file;
++	struct path path;
++
++	path.mnt = cache->mnt;
++	path.dentry = object->backer;
++
++	file = open_with_fake_path(&path,
++				   O_RDWR | O_LARGEFILE | O_DIRECT,
++				   d_backing_inode(object->backer),
++				   cache->cache_cred);
++	if (IS_ERR(file))
++		goto error;
++
++	if (!S_ISREG(file_inode(file)->i_mode))
++		goto error_file;
++
++	if (unlikely(!file->f_op->read_iter) ||
++	    unlikely(!file->f_op->write_iter)) {
++		pr_notice("Cache does not support read_iter and write_iter\n");
++		goto error_file;
++	}
++
++	object->backing_file = file;
++	return true;
++
++error_file:
++	fput(file);
++error:
++	return false;
++}
+diff --git a/fs/cachefiles/namei.c b/fs/cachefiles/namei.c
+index ad7edd41ce27..c33b5ee65ac1 100644
+--- a/fs/cachefiles/namei.c
++++ b/fs/cachefiles/namei.c
+@@ -492,6 +492,9 @@ bool cachefiles_walk_to_object(struct cachefiles_object *parent,
+ 		} else {
+ 			BUG(); // TODO: open file in data-class subdir
+ 		}
++
++		if (!cachefiles_open_object(object))
++			goto check_error;
  	}
  
- 	_leave("");
+ 	if (object->new)
