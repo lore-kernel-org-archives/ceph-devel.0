@@ -1,63 +1,270 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [RFC PATCH 35/61] cachefiles: Round the cachefile size up to DIO
- block size
-Date: Mon, 04 May 2020 18:12:45 +0100
-Message-ID: <158861236514.340223.3729118853361763383.stgit@warthog.procyon.org.uk>
+Subject: [RFC PATCH 36/61] cachefiles: Implement read and write parts of new
+ I/O API
+Date: Mon, 04 May 2020 18:12:55 +0100
+Message-ID: <158861237502.340223.8393701975417626960.stgit@warthog.procyon.org.uk>
 References: <158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:38422 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1730431AbgEDRNG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2020 13:13:06 -0400
 In-Reply-To: <158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Jeff Layton <jlayton@redhat.com>
 Cc: dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
 
-Round the size of a cachefile up to DIO block size so that we can always
-read back the last partial page of a file using direct I/O.
+Implement writing into the cache and reading back from the cache inside
+cachefiles using asynchronous direct I/O from the specified iterator.  The
+size and position of the request should be aligned to the reported
+dio_block_size.
+
+Errors and completion are reported by callback.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/cachefiles/interface.c |   13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ fs/cachefiles/io.c |  208 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 202 insertions(+), 6 deletions(-)
 
-diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
-index d820051a9960..aa063857272a 100644
---- a/fs/cachefiles/interface.c
-+++ b/fs/cachefiles/interface.c
-@@ -184,6 +184,17 @@ static void cachefiles_update_object(struct fscache_object *_object)
- 			cachefiles_remove_object_xattr(cache, object->dentry);
- 			goto out;
- 		}
+diff --git a/fs/cachefiles/io.c b/fs/cachefiles/io.c
+index ddb44ec5a199..42e0d620d778 100644
+--- a/fs/cachefiles/io.c
++++ b/fs/cachefiles/io.c
+@@ -12,30 +12,226 @@
+ #include <linux/xattr.h>
+ #include "internal.h"
+ 
++struct cachefiles_kiocb {
++	struct kiocb			iocb;
++	struct fscache_io_request	*req;
++	refcount_t			ki_refcnt;
++};
 +
-+		object_size = round_up(object_size, CACHEFILES_DIO_BLOCK_SIZE);
-+		_debug("trunc %llx -> %llx", i_size_read(d_inode(object->dentry)), object_size);
-+		if (i_size_read(d_inode(object->dentry)) < object_size) {
-+			ret = vfs_truncate(&path, object_size);
-+			if (ret < 0) {
-+				cachefiles_io_error_obj(object, "Trunc-to-dio-size failed");
-+				cachefiles_remove_object_xattr(cache, object->dentry);
-+				goto out;
-+			}
-+		}
- 	}
++static inline void cachefiles_put_kiocb(struct cachefiles_kiocb *ki)
++{
++	if (refcount_dec_and_test(&ki->ki_refcnt)) {
++		fscache_put_io_request(ki->req);
++		fput(ki->iocb.ki_filp);
++		kfree(ki);
++	}
++}
++
++/*
++ * Handle completion of a read from the cache.
++ */
++static void cachefiles_read_complete(struct kiocb *iocb, long ret, long ret2)
++{
++	struct cachefiles_kiocb *ki = container_of(iocb, struct cachefiles_kiocb, iocb);
++	struct fscache_io_request *req = ki->req;
++
++	_enter("%llx,%ld,%ld", req->len, ret, ret2);
++
++	fscache_end_io_operation(req->cookie);
++
++	if (ret < 0) {
++		req->error = ret;
++	} else if (ret != req->len) {
++		req->error = -ENODATA;
++	} else {
++		req->transferred = ret;
++		set_bit(FSCACHE_IO_DATA_FROM_CACHE, &req->flags);
++	}
++	if (req->io_done)
++		req->io_done(req);
++	cachefiles_put_kiocb(ki);
++}
++
+ /*
+  * Initiate a read from the cache.
+  */
+-int cachefiles_read(struct fscache_object *object,
++int cachefiles_read(struct fscache_object *obj,
+ 		    struct fscache_io_request *req,
+ 		    struct iov_iter *iter)
+ {
+-	req->error = -ENODATA;
++	struct cachefiles_object *object =
++		container_of(obj, struct cachefiles_object, fscache);
++	struct cachefiles_kiocb *ki;
++	struct file *file = object->backing_file;
++	ssize_t ret = -ENOBUFS;
++
++	_enter("%pD,%li,%llx,%llx/%llx",
++	       file, file_inode(file)->i_ino, req->pos, req->len, i_size_read(file->f_inode));
++
++	ki = kzalloc(sizeof(struct cachefiles_kiocb), GFP_KERNEL);
++	if (!ki)
++		goto presubmission_error;
++
++	refcount_set(&ki->ki_refcnt, 2);
++	ki->iocb.ki_filp	= get_file(file);
++	ki->iocb.ki_pos		= req->pos;
++	ki->iocb.ki_flags	= IOCB_DIRECT;
++	ki->iocb.ki_hint	= ki_hint_validate(file_write_hint(file));
++	ki->iocb.ki_ioprio	= get_current_ioprio();
++	ki->req			= req;
++
++	if (req->io_done)
++		ki->iocb.ki_complete = cachefiles_read_complete;
++
++	ret = rw_verify_area(READ, file, &ki->iocb.ki_pos, iov_iter_count(iter));
++	if (ret < 0)
++		goto presubmission_error_free;
++
++	fscache_get_io_request(req);
++	ret = call_read_iter(file, &ki->iocb, iter);
++	switch (ret) {
++	case -EIOCBQUEUED:
++		goto in_progress;
++
++	case -ERESTARTSYS:
++	case -ERESTARTNOINTR:
++	case -ERESTARTNOHAND:
++	case -ERESTART_RESTARTBLOCK:
++		/* There's no easy way to restart the syscall since other AIO's
++		 * may be already running. Just fail this IO with EINTR.
++		 */
++		ret = -EINTR;
++		/* Fall through */
++	default:
++		cachefiles_read_complete(&ki->iocb, ret, 0);
++		if (ret > 0)
++			ret = 0;
++		break;
++	}
++
++in_progress:
++	cachefiles_put_kiocb(ki);
++	_leave(" = %zd", ret);
++	return ret;
++
++presubmission_error_free:
++	fput(file);
++	kfree(ki);
++presubmission_error:
++	req->error = -ENOMEM;
++	if (req->io_done)
++		req->io_done(req);
++	return -ENOMEM;
++}
++
++/*
++ * Handle completion of a write to the cache.
++ */
++static void cachefiles_write_complete(struct kiocb *iocb, long ret, long ret2)
++{
++	struct cachefiles_kiocb *ki = container_of(iocb, struct cachefiles_kiocb, iocb);
++	struct fscache_io_request *req = ki->req;
++	struct inode *inode = file_inode(ki->iocb.ki_filp);
++
++	_enter("%llx,%ld,%ld", req->len, ret, ret2);
++
++	/* Tell lockdep we inherited freeze protection from submission thread */
++	__sb_writers_acquired(inode->i_sb, SB_FREEZE_WRITE);
++	__sb_end_write(inode->i_sb, SB_FREEZE_WRITE);
++
++	fscache_end_io_operation(req->cookie);
++
++	if (ret < 0)
++		req->error = ret;
++	else if (ret != req->len)
++		req->error = -ENOBUFS;
++	else
++		cachefiles_mark_content_map(req);
+ 	if (req->io_done)
+ 		req->io_done(req);
+-	return -ENODATA;
++	cachefiles_put_kiocb(ki);
+ }
  
- 	cachefiles_set_object_xattr(object, XATTR_REPLACE);
-@@ -358,6 +369,7 @@ static int cachefiles_attr_changed(struct cachefiles_object *object)
- 	int ret;
+ /*
+  * Initiate a write to the cache.
+  */
+-int cachefiles_write(struct fscache_object *object,
++int cachefiles_write(struct fscache_object *obj,
+ 		     struct fscache_io_request *req,
+ 		     struct iov_iter *iter)
+ {
+-	req->error = -ENOBUFS;
++	struct cachefiles_object *object =
++		container_of(obj, struct cachefiles_object, fscache);
++	struct cachefiles_kiocb *ki;
++	struct inode *inode;
++	struct file *file = object->backing_file;
++	ssize_t ret = -ENOBUFS;
++
++	_enter("%pD,%li,%llx,%llx/%llx",
++	       file, file_inode(file)->i_ino, req->pos, req->len, i_size_read(file->f_inode));
++
++	ki = kzalloc(sizeof(struct cachefiles_kiocb), GFP_KERNEL);
++	if (!ki)
++		goto presubmission_error;
++
++	refcount_set(&ki->ki_refcnt, 2);
++	ki->iocb.ki_filp	= get_file(file);
++	ki->iocb.ki_pos		= req->pos;
++	ki->iocb.ki_flags	= IOCB_DIRECT | IOCB_WRITE;
++	ki->iocb.ki_hint	= ki_hint_validate(file_write_hint(file));
++	ki->iocb.ki_ioprio	= get_current_ioprio();
++	ki->req			= req;
++
++	if (req->io_done)
++		ki->iocb.ki_complete = cachefiles_write_complete;
++
++	ret = rw_verify_area(WRITE, file, &ki->iocb.ki_pos, iov_iter_count(iter));
++	if (ret < 0)
++		goto presubmission_error_free;
++
++	/* Open-code file_start_write here to grab freeze protection, which
++	 * will be released by another thread in aio_complete_rw().  Fool
++	 * lockdep by telling it the lock got released so that it doesn't
++	 * complain about the held lock when we return to userspace.
++	 */
++	inode = file_inode(file);
++	__sb_start_write(inode->i_sb, SB_FREEZE_WRITE, true);
++	__sb_writers_release(inode->i_sb, SB_FREEZE_WRITE);
++
++	fscache_get_io_request(req);
++	ret = call_write_iter(file, &ki->iocb, iter);
++	switch (ret) {
++	case -EIOCBQUEUED:
++		goto in_progress;
++
++	case -ERESTARTSYS:
++	case -ERESTARTNOINTR:
++	case -ERESTARTNOHAND:
++	case -ERESTART_RESTARTBLOCK:
++		/* There's no easy way to restart the syscall since other AIO's
++		 * may be already running. Just fail this IO with EINTR.
++		 */
++		ret = -EINTR;
++		/* Fall through */
++	default:
++		cachefiles_write_complete(&ki->iocb, ret, 0);
++		if (ret > 0)
++			ret = 0;
++		break;
++	}
++
++in_progress:
++	cachefiles_put_kiocb(ki);
++	_leave(" = %zd", ret);
++	return ret;
++
++presubmission_error_free:
++	fput(file);
++	kfree(ki);
++presubmission_error:
++	req->error = -ENOMEM;
+ 	if (req->io_done)
+ 		req->io_done(req);
+-	return -ENOBUFS;
++	return -ENOMEM;
+ }
  
- 	ni_size = object->fscache.cookie->object_size;
-+	ni_size = round_up(ni_size, CACHEFILES_DIO_BLOCK_SIZE);
- 
- 	_enter("{OBJ%x},[%llu]",
- 	       object->fscache.debug_id, (unsigned long long) ni_size);
-@@ -426,6 +438,7 @@ static void cachefiles_invalidate_object(struct fscache_object *_object)
- 			     struct cachefiles_cache, cache);
- 
- 	ni_size = object->fscache.cookie->object_size;
-+	ni_size = round_up(ni_size, CACHEFILES_DIO_BLOCK_SIZE);
- 
- 	_enter("{OBJ%x},[%llu]",
- 	       object->fscache.debug_id, (unsigned long long)ni_size);
+ /*
