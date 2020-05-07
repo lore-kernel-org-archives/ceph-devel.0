@@ -1,74 +1,80 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: demote quotarealm lookup warning to a debug message
-Date: Thu, 7 May 2020 18:26:03 +0200
-Message-ID: <CAOi1vP8oO156ZH0Ge3d5V0fu+NTW6LO12bxgy1h-W5X4+9zN=w@mail.gmail.com>
-References: <20200505125902.GA10381@suse.com> <e5839bffe4939c6290d74ca2fb39310bd4916c16.camel@kernel.org>
+From: "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Subject: [PATCH] libceph: Replace zero-length array with flexible-array
+Date: Thu, 7 May 2020 13:51:38 -0500
+Message-ID: <20200507185138.GA14076@embeddedor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <e5839bffe4939c6290d74ca2fb39310bd4916c16.camel@kernel.org>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Gregory Farnum <gfarnum@redhat.com>, Luis Henriques <lhenriques@suse.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@kernel.org>, Sage Weil <sage@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, May 7, 2020 at 3:44 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> On Tue, 2020-05-05 at 13:59 +0100, Luis Henriques wrote:
-> > A misconfigured cephx can easily result in having the kernel client
-> > flooding the logs with:
-> >
-> >   ceph: Can't lookup inode 1 (err: -13)
-> >
-> > Change his message to debug level.
-> >
-> > Link: https://tracker.ceph.com/issues/44546
-> > Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> > ---
-> > Hi!
-> >
-> > This patch should fix some harmless warnings when using cephx to restri=
-ct
-> > users access to certain filesystem paths.  I've added a comment to the
-> > tracker where removing this warning could result (unlikely, IMHO!) in a=
-n
-> > admin to miss not-so-harmless bogus configurations.
-> >
-> > Cheers,
-> > --
-> > Lu=C3=ADs
-> >
-> >  fs/ceph/quota.c | 4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-> > index de56dee60540..19507e2fdb57 100644
-> > --- a/fs/ceph/quota.c
-> > +++ b/fs/ceph/quota.c
-> > @@ -159,8 +159,8 @@ static struct inode *lookup_quotarealm_inode(struct=
- ceph_mds_client *mdsc,
-> >       }
-> >
-> >       if (IS_ERR(in)) {
-> > -             pr_warn("Can't lookup inode %llx (err: %ld)\n",
-> > -                     realm->ino, PTR_ERR(in));
-> > +             dout("Can't lookup inode %llx (err: %ld)\n",
-> > +                  realm->ino, PTR_ERR(in));
-> >               qri->timeout =3D jiffies + msecs_to_jiffies(60 * 1000); /=
-* XXX */
-> >       } else {
-> >               qri->timeout =3D 0;
-> >
->
-> Ilya,
->
-> We've had a number of reports where people get a ton of kernel log spam
-> when they hit this problem. I think we probably ought to mark this patch
-> for stable and go ahead and send it to Linus for v5.7 -- any objection?
+The current codebase makes use of the zero-length array language
+extension to the C90 standard, but the preferred mechanism to declare
+variable-length types such as these ones is a flexible array member[1][2],
+introduced in C99:
 
-Sure, I'll queue it up.
+struct foo {
+        int stuff;
+        struct boo array[];
+};
 
-Thanks,
+By making use of the mechanism above, we will get a compiler warning
+in case the flexible array does not occur last in the structure, which
+will help us prevent some kind of undefined behavior bugs from being
+inadvertently introduced[3] to the codebase from now on.
 
-                Ilya
+Also, notice that, dynamic memory allocations won't be affected by
+this change:
+
+"Flexible array members have incomplete type, and so the sizeof operator
+may not be applied. As a quirk of the original implementation of
+zero-length arrays, sizeof evaluates to zero."[1]
+
+sizeof(flexible-array-member) triggers a warning because flexible array
+members have incomplete type[1]. There are some instances of code in
+which the sizeof operator is being incorrectly/erroneously applied to
+zero-length arrays and the result is zero. Such instances may be hiding
+some bugs. So, this work (flexible-array member conversions) will also
+help to get completely rid of those sorts of issues.
+
+This issue was found with the help of Coccinelle.
+
+[1] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
+[2] https://github.com/KSPP/linux/issues/21
+[3] commit 76497732932f ("cxgb3/l2t: Fix undefined behaviour")
+
+Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
+---
+ include/linux/ceph/mon_client.h |    2 +-
+ include/linux/crush/crush.h     |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+index dbb8a6959a73..ce4ffeb384d7 100644
+--- a/include/linux/ceph/mon_client.h
++++ b/include/linux/ceph/mon_client.h
+@@ -19,7 +19,7 @@ struct ceph_monmap {
+ 	struct ceph_fsid fsid;
+ 	u32 epoch;
+ 	u32 num_mon;
+-	struct ceph_entity_inst mon_inst[0];
++	struct ceph_entity_inst mon_inst[];
+ };
+ 
+ struct ceph_mon_client;
+diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+index 54741295c70b..38b0e4d50ed9 100644
+--- a/include/linux/crush/crush.h
++++ b/include/linux/crush/crush.h
+@@ -87,7 +87,7 @@ struct crush_rule_mask {
+ struct crush_rule {
+ 	__u32 len;
+ 	struct crush_rule_mask mask;
+-	struct crush_rule_step steps[0];
++	struct crush_rule_step steps[];
+ };
+ 
+ #define crush_rule_size(len) (sizeof(struct crush_rule) + \
