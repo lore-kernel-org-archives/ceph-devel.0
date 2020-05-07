@@ -1,38 +1,66 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [RFC PATCH 54/61] afs: Wait on PG_fscache before modifying/releasing a page
-Date: Wed, 06 May 2020 15:24:32 +0100
-Message-ID: <713141.1588775072@warthog.procyon.org.uk>
-References: <20200506110942.GL16070@bombadil.infradead.org> <20200505115946.GF16070@bombadil.infradead.org> <158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk> <158861253957.340223.7465334678444521655.stgit@warthog.procyon.org.uk> <683739.1588751878@warthog.procyon.org.uk>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH] ceph: demote quotarealm lookup warning to a debug
+ message
+Date: Thu, 07 May 2020 09:44:13 -0400
+Message-ID: <e5839bffe4939c6290d74ca2fb39310bd4916c16.camel@kernel.org>
+References: <20200505125902.GA10381@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20200506110942.GL16070@bombadil.infradead.org>
-Content-ID: <713140.1588775072.1@warthog.procyon.org.uk>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Matthew Wilcox <willy@infradead.org>
-Cc: dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Jeff Layton <jlayton@redhat.com>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200505125902.GA10381@suse.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Gregory Farnum <gfarnum@redhat.com>, Luis Henriques <lhenriques@suse.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Matthew Wilcox <willy@infradead.org> wrote:
-
-> > Won't that screw up ITER_MAPPING?  Does that mean that ITER_MAPPING isn't
-> > viable?
+On Tue, 2020-05-05 at 13:59 +0100, Luis Henriques wrote:
+> A misconfigured cephx can easily result in having the kernel client
+> flooding the logs with:
 > 
-> Can you remind me why ITER_MAPPING needs:
+>   ceph: Can't lookup inode 1 (err: -13)
 > 
-> "The caller must guarantee that the pages are all present and they must be
-> locked using PG_locked, PG_writeback or PG_fscache to prevent them from
-> going away or being migrated whilst they're being accessed."
+> Change his message to debug level.
 > 
-> An elevated refcount prevents migration, and it also prevents the pages
-> from being freed.  It doesn't prevent them from being truncated out of
-> the file, but it does ensure the pages aren't reallocated.
+> Link: https://tracker.ceph.com/issues/44546
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+> Hi!
+> 
+> This patch should fix some harmless warnings when using cephx to restrict
+> users access to certain filesystem paths.  I've added a comment to the
+> tracker where removing this warning could result (unlikely, IMHO!) in an
+> admin to miss not-so-harmless bogus configurations.
+> 
+> Cheers,
+> --
+> Luís
+> 
+>  fs/ceph/quota.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+> index de56dee60540..19507e2fdb57 100644
+> --- a/fs/ceph/quota.c
+> +++ b/fs/ceph/quota.c
+> @@ -159,8 +159,8 @@ static struct inode *lookup_quotarealm_inode(struct ceph_mds_client *mdsc,
+>  	}
+>  
+>  	if (IS_ERR(in)) {
+> -		pr_warn("Can't lookup inode %llx (err: %ld)\n",
+> -			realm->ino, PTR_ERR(in));
+> +		dout("Can't lookup inode %llx (err: %ld)\n",
+> +		     realm->ino, PTR_ERR(in));
+>  		qri->timeout = jiffies + msecs_to_jiffies(60 * 1000); /* XXX */
+>  	} else {
+>  		qri->timeout = 0;
+> 
 
-ITER_MAPPING relies on the mapping to maintain the pointers to the pages so
-that it can find them rather than being like ITER_BVEC where there's a
-separate list.
+Ilya,
 
-Truncate removes the pages from the mapping - at which point ITER_MAPPING can
-no longer find them.
+We've had a number of reports where people get a ton of kernel log spam
+when they hit this problem. I think we probably ought to mark this patch
+for stable and go ahead and send it to Linus for v5.7 -- any objection?
 
-David
+-- 
+Jeff Layton <jlayton@kernel.org>
