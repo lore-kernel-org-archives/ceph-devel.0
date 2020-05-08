@@ -1,77 +1,58 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] rbd: Replace zero-length array with flexible-array
-Date: Fri, 8 May 2020 09:54:12 +0200
-Message-ID: <CAOi1vP9GfENfy_D_iOeUrweUk2CTcz+2GXGg3M6y+bvQs_zqMw@mail.gmail.com>
-References: <20200507191932.GA15991@embeddedor>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [RFC PATCH 54/61] afs: Wait on PG_fscache before modifying/releasing a page
+Date: Fri, 08 May 2020 15:39:48 +0100
+Message-ID: <1040571.1588948788@warthog.procyon.org.uk>
+References: <713141.1588775072@warthog.procyon.org.uk> <20200506110942.GL16070@bombadil.infradead.org> <20200505115946.GF16070@bombadil.infradead.org> <158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk> <158861253957.340223.7465334678444521655.stgit@warthog.procyon.org.uk> <683739.1588751878@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200507191932.GA15991@embeddedor>
+In-Reply-To: <713141.1588775072@warthog.procyon.org.uk>
+Content-ID: <1040570.1588948788.1@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: Sage Weil <sage@redhat.com>, Dongsheng Yang <dongsheng.yang@easystack.cn>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Cc: dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>, Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Jeff Layton <jlayton@redhat.com>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, May 7, 2020 at 9:15 PM Gustavo A. R. Silva
-<gustavoars@kernel.org> wrote:
->
-> The current codebase makes use of the zero-length array language
-> extension to the C90 standard, but the preferred mechanism to declare
-> variable-length types such as these ones is a flexible array member[1][2],
-> introduced in C99:
->
-> struct foo {
->         int stuff;
->         struct boo array[];
-> };
->
-> By making use of the mechanism above, we will get a compiler warning
-> in case the flexible array does not occur last in the structure, which
-> will help us prevent some kind of undefined behavior bugs from being
-> inadvertently introduced[3] to the codebase from now on.
->
-> Also, notice that, dynamic memory allocations won't be affected by
-> this change:
->
-> "Flexible array members have incomplete type, and so the sizeof operator
-> may not be applied. As a quirk of the original implementation of
-> zero-length arrays, sizeof evaluates to zero."[1]
->
-> sizeof(flexible-array-member) triggers a warning because flexible array
-> members have incomplete type[1]. There are some instances of code in
-> which the sizeof operator is being incorrectly/erroneously applied to
-> zero-length arrays and the result is zero. Such instances may be hiding
-> some bugs. So, this work (flexible-array member conversions) will also
-> help to get completely rid of those sorts of issues.
->
-> This issue was found with the help of Coccinelle.
->
-> [1] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
-> [2] https://github.com/KSPP/linux/issues/21
-> [3] commit 76497732932f ("cxgb3/l2t: Fix undefined behaviour")
->
-> Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
-> ---
->  drivers/block/rbd_types.h |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
-> index ac98ab6ccd3b..a600e0eb6b6f 100644
-> --- a/drivers/block/rbd_types.h
-> +++ b/drivers/block/rbd_types.h
-> @@ -93,7 +93,7 @@ struct rbd_image_header_ondisk {
->         __le32 snap_count;
->         __le32 reserved;
->         __le64 snap_names_len;
-> -       struct rbd_image_snap_ondisk snaps[0];
-> +       struct rbd_image_snap_ondisk snaps[];
->  } __attribute__((packed));
->
->
->
+David Howells <dhowells@redhat.com> wrote:
 
-Applied (folded into libceph patch).
+> ITER_MAPPING relies on the mapping to maintain the pointers to the pages=
+ so
+> that it can find them rather than being like ITER_BVEC where there's a
+> separate list.
+> =
 
-Thanks,
+> Truncate removes the pages from the mapping - at which point ITER_MAPPIN=
+G can
+> no longer find them.
 
-                Ilya
+It looks like ITER_MAPPING is fine with truncate, provided the invalidatio=
+n
+waits for the iterator to complete first:
+
+	int truncate_inode_page(struct address_space *mapping, struct page *page)
+	{
+		VM_BUG_ON_PAGE(PageTail(page), page);
+
+		if (page->mapping !=3D mapping)
+			return -EIO;
+
+		truncate_cleanup_page(mapping, page);
+		delete_from_page_cache(page);
+		return 0;
+	}
+
+In which case, ->invalidatepage() needs to wait for PG_fscache.
+
+Similarly, it looks like ->releasepage() is fine, provided it waits for
+PG_fscache also.
+
+If I have to use ITER_BVEC, what's the advisability of using vmalloc() to
+allocate the bio_vec array for a transient op?  Such an array can referenc=
+e up
+to 1MiB on a 64-bit machine with 4KiB non-compound pages if it only alloca=
+tes
+up to a single page.  I'm wondering what the teardown cost is, though, if =
+all
+the corresponding PTEs have to be erased from all CPUs.
+
+David
