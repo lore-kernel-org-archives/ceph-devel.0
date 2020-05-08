@@ -1,50 +1,28 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 5.7-rc5
-Date: Fri,  8 May 2020 19:16:13 +0200
-Message-ID: <20200508171613.27097-1-idryomov@gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fixes for 5.7-rc5
+Date: Fri, 08 May 2020 17:50:04 +0000
+Message-ID: <158896020488.31681.8447306784194982028.pr-tracker-bot@kernel.org>
+References: <20200508171613.27097-1-idryomov@gmail.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:42682 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726636AbgEHRuF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 8 May 2020 13:50:05 -0400
+In-Reply-To: <20200508171613.27097-1-idryomov@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Fri,  8 May 2020 19:16:13 +0200:
 
-The following changes since commit 0e698dfa282211e414076f9dc7e83c1c288314fd:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc5
 
-  Linux 5.7-rc4 (2020-05-03 14:56:04 -0700)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/eb24fdd8e6f5c6bb95129748a1801c6476492aba
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc5
-
-for you to fetch changes up to 12ae44a40a1be891bdc6463f8c7072b4ede746ef:
-
-  ceph: demote quotarealm lookup warning to a debug message (2020-05-08 18:44:40 +0200)
-
-----------------------------------------------------------------
-Fixes for an endianness handling bug that prevented mounts on
-big-endian arches, a spammy log message and a couple error paths.
-Also included a MAINTAINERS update.
-
-----------------------------------------------------------------
-Jeff Layton (1):
-      ceph: fix endianness bug when handling MDS session feature bits
-
-Luis Henriques (1):
-      ceph: demote quotarealm lookup warning to a debug message
-
-Sage Weil (1):
-      MAINTAINERS: remove myself as ceph co-maintainer
-
-Wu Bo (2):
-      ceph: fix special error code in ceph_try_get_caps()
-      ceph: fix double unlock in handle_cap_export()
-
- MAINTAINERS          | 6 ------
- fs/ceph/caps.c       | 3 ++-
- fs/ceph/mds_client.c | 8 +++-----
- fs/ceph/quota.c      | 4 ++--
- 4 files changed, 7 insertions(+), 14 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
