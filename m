@@ -1,63 +1,46 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] ceph: properly wake up cap waiter after releasing
- revoked caps
-Date: Mon, 11 May 2020 07:28:55 -0400
-Message-ID: <53aab39a79f468514cc836ef0081066376ce7d8c.camel@kernel.org>
-References: <20200511082512.4375-1-zyan@redhat.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Help understanding xfstest generic/467 failure
+Date: Tue, 12 May 2020 16:13:24 +0100
+Message-ID: <878shx190r.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:47424 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:51700 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730062AbgEKL25 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 11 May 2020 07:28:57 -0400
-In-Reply-To: <20200511082512.4375-1-zyan@redhat.com>
+        id S1727856AbgELPN1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 12 May 2020 11:13:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 2020-05-11 at 16:25 +0800, Yan, Zheng wrote:
-> arg->wake can never be true. the bug was introduced by commit
-> 0c4b255369bcf "ceph: reorganize __send_cap for less spinlock abuse"
-> 
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/caps.c | 13 ++++++-------
->  1 file changed, 6 insertions(+), 7 deletions(-)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index b3e65c89ba6e..a2a2cda117e0 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1376,6 +1376,12 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
->  	ci->i_ceph_flags &= ~CEPH_I_FLUSH;
->  
->  	cap->issued &= retain;  /* drop bits we don't want */
-> +	/*
-> +	 * Wake up any waiters on wanted -> needed transition. This is due to
-> +	 * the weird transition from buffered to sync IO... we need to flush
-> +	 * dirty pages _before_ allowing sync writes to avoid reordering.
-> +	 */
-> +	arg->wake = cap->implemented & ~cap->issued;
->  	cap->implemented &= cap->issued | used;
->  	cap->mds_wanted = want;
->  
-> @@ -1439,13 +1445,6 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
->  		}
->  	}
->  	arg->flags = flags;
-> -
-> -	/*
-> -	 * Wake up any waiters on wanted -> needed transition. This is due to
-> -	 * the weird transition from buffered to sync IO... we need to flush
-> -	 * dirty pages _before_ allowing sync writes to avoid reordering.
-> -	 */
-> -	arg->wake = cap->implemented & ~cap->issued;
->  }
->  
->  /*
+Hi Jeff,
 
-Good catch! Merged (with a small revision to the commit message).
+I've been looking at xfstest generic/467 failure in cephfs, and I simply
+can not decide if it's a genuine bug on ceph kernel code.  Since you've
+recently been touching the ceph_unlink code maybe you could help me
+understanding what's going on.
+
+generic/467 runs a couple of tests using src/open_by_handle, but the one
+failing can be summarized with the following:
+
+- get a handle to /cephfs/myfile using name_to_handle_at(2)
+- open(2) file /cephfs/myfile
+- unlink(2) /cephfs/myfile
+- drop caches
+- open_by_handle_at(2) => returns -ESTALE
+
+This test succeeds opening the handle with other (local) filesystems
+(maybe I should run it with other networked filesystem such as NFS).
+
+The -ESTALE is easy to trace to __fh_to_dentry, where inode->i_nlink is
+checked against 0.  My question is: should we really be testing the
+i_nlink here?  We dropped the name, but the file may still be there (as in
+this case).
+
+I guess I'm missing something, but hopefully you'll be able to shed some
+light on this.  Thanks in advance for any help you may provide!
+
+Cheers,
 -- 
-Jeff Layton <jlayton@kernel.org>
+Luis
