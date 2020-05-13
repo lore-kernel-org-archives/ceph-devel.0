@@ -1,46 +1,24 @@
-From: Jason Gunthorpe <jgg@ziepe.ca>
-Subject: Re: [PATCH 11/33] tcp: tcp_sock_set_nodelay
-Date: Wed, 13 May 2020 09:51:44 -0300
-Message-ID: <20200513125144.GC29989@ziepe.ca>
-References: <20200513062649.2100053-1-hch@lst.de>
- <20200513062649.2100053-12-hch@lst.de>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 29/33] rxrpc_sock_set_min_security_level
+Date: Wed, 13 May 2020 14:13:07 +0100
+Message-ID: <3123534.1589375587@warthog.procyon.org.uk>
+References: <20200513062649.2100053-30-hch@lst.de> <20200513062649.2100053-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-block-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20200513062649.2100053-12-hch@lst.de>
-Sender: linux-block-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20200513062649.2100053-30-hch-jcswGhMUV9g@public.gmane.org>
+Content-ID: <3123533.1589375587.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, May 13, 2020 at 08:26:26AM +0200, Christoph Hellwig wrote:
-> Add a helper to directly set the TCP_NODELAY sockopt from kernel space
-> without going through a fake uaccess.  Cleanup the callers to avoid
-> pointless wrappers now that this is a simple function call.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  drivers/block/drbd/drbd_int.h             |  7 ----
->  drivers/block/drbd/drbd_main.c            |  2 +-
->  drivers/block/drbd/drbd_receiver.c        |  4 +--
->  drivers/infiniband/sw/siw/siw_cm.c        | 24 +++-----------
->  drivers/nvme/host/tcp.c                   |  9 +-----
->  drivers/nvme/target/tcp.c                 | 12 ++-----
->  drivers/target/iscsi/iscsi_target_login.c | 15 ++-------
->  fs/cifs/connect.c                         | 10 ++----
->  fs/dlm/lowcomms.c                         |  8 ++---
->  fs/ocfs2/cluster/tcp.c                    | 20 ++----------
->  include/linux/tcp.h                       |  1 +
->  net/ceph/messenger.c                      | 11 ++-----
->  net/ipv4/tcp.c                            | 39 +++++++++++++++--------
->  net/rds/tcp.c                             | 11 +------
->  net/rds/tcp.h                             |  1 -
->  net/rds/tcp_listen.c                      |  2 +-
->  16 files changed, 49 insertions(+), 127 deletions(-)
+Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org> wrote:
 
-No problem with the siw change
+> +int rxrpc_sock_set_min_security_level(struct sock *sk, unsigned int val);
+> +
 
-Acked-by: Jason Gunthorpe <jgg@mellanox.com>
+Looks good - but you do need to add this to Documentation/networking/rxrpc.txt
+also, thanks.
 
-Jason
+David
