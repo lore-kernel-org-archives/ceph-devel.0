@@ -1,96 +1,86 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 27/33] sctp: export sctp_setsockopt_bindx
-Date: Wed, 13 May 2020 08:26:42 +0200
-Message-ID: <20200513062649.2100053-28-hch@lst.de>
+Subject: [PATCH 23/33] ipv6: add ip6_sock_set_recverr
+Date: Wed, 13 May 2020 08:26:38 +0200
+Message-ID: <20200513062649.2100053-24-hch@lst.de>
 References: <20200513062649.2100053-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <cluster-devel-bounces@redhat.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20200513062649.2100053-1-hch@lst.de>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
+Sender: linux-kernel-owner@vger.kernel.org
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, linux-block@vger.kernel.org, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-And call it directly from dlm instead of going through kernel_setsockopt.
+Add a helper to directly set the IPV6_RECVERR sockopt from kernel space
+without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- fs/dlm/lowcomms.c       | 13 ++++++++-----
- include/net/sctp/sctp.h |  3 +++
- net/sctp/socket.c       |  5 +++--
- 3 files changed, 14 insertions(+), 7 deletions(-)
+ include/net/ipv6.h       |  1 +
+ net/ipv6/ipv6_sockglue.c | 10 ++++++++++
+ net/rxrpc/local_object.c | 10 ++--------
+ 3 files changed, 13 insertions(+), 8 deletions(-)
 
-diff --git a/fs/dlm/lowcomms.c b/fs/dlm/lowcomms.c
-index b722a09a7ca05..e4939d770df53 100644
---- a/fs/dlm/lowcomms.c
-+++ b/fs/dlm/lowcomms.c
-@@ -1005,14 +1005,17 @@ static int sctp_bind_addrs(struct connection *con, uint16_t port)
- 		memcpy(&localaddr, dlm_local_addr[i], sizeof(localaddr));
- 		make_sockaddr(&localaddr, port, &addr_len);
+diff --git a/include/net/ipv6.h b/include/net/ipv6.h
+index e24b59201a00d..69bc1651aaef8 100644
+--- a/include/net/ipv6.h
++++ b/include/net/ipv6.h
+@@ -1176,5 +1176,6 @@ int ipv6_sock_mc_drop(struct sock *sk, int ifindex,
+ 		      const struct in6_addr *addr);
  
--		if (!i)
-+		if (!i) {
- 			result = kernel_bind(con->sock,
- 					     (struct sockaddr *)&localaddr,
- 					     addr_len);
--		else
--			result = kernel_setsockopt(con->sock, SOL_SCTP,
--						   SCTP_SOCKOPT_BINDX_ADD,
--						   (char *)&localaddr, addr_len);
-+		} else {
-+			lock_sock(con->sock->sk);
-+			result = sctp_setsockopt_bindx(con->sock->sk,
-+					(struct sockaddr *)&localaddr, addr_len,
-+					SCTP_BINDX_ADD_ADDR);
-+			release_sock(con->sock->sk);
-+		}
+ int ip6_sock_set_v6only(struct sock *sk, bool val);
++void ip6_sock_set_recverr(struct sock *sk, bool val);
  
- 		if (result < 0) {
- 			log_print("Can't bind to %d addr number %d, %d.\n",
-diff --git a/include/net/sctp/sctp.h b/include/net/sctp/sctp.h
-index 3ab5c6bbb90bd..f702b14d768ba 100644
---- a/include/net/sctp/sctp.h
-+++ b/include/net/sctp/sctp.h
-@@ -615,4 +615,7 @@ static inline bool sctp_newsk_ready(const struct sock *sk)
- 	return sock_flag(sk, SOCK_DEAD) || sk->sk_socket;
+ #endif /* _NET_IPV6_H */
+diff --git a/net/ipv6/ipv6_sockglue.c b/net/ipv6/ipv6_sockglue.c
+index f26224bb3e098..3c67626b6f5a9 100644
+--- a/net/ipv6/ipv6_sockglue.c
++++ b/net/ipv6/ipv6_sockglue.c
+@@ -147,6 +147,16 @@ int ip6_sock_set_v6only(struct sock *sk, bool val)
  }
+ EXPORT_SYMBOL(ip6_sock_set_v6only);
  
-+int sctp_setsockopt_bindx(struct sock *sk, struct sockaddr *kaddrs,
-+		int addrs_size, int op);
++void ip6_sock_set_recverr(struct sock *sk, bool val)
++{
++	lock_sock(sk);
++	inet6_sk(sk)->recverr = val;
++	if (!val)
++		skb_queue_purge(&sk->sk_error_queue);
++	release_sock(sk);
++}
++EXPORT_SYMBOL(ip6_sock_set_recverr);
 +
- #endif /* __net_sctp_h__ */
-diff --git a/net/sctp/socket.c b/net/sctp/socket.c
-index 1c96b52c4aa28..30c981d9f6158 100644
---- a/net/sctp/socket.c
-+++ b/net/sctp/socket.c
-@@ -979,8 +979,8 @@ int sctp_asconf_mgmt(struct sctp_sock *sp, struct sctp_sockaddr_entry *addrw)
-  *
-  * Returns 0 if ok, <0 errno code on error.
-  */
--static int sctp_setsockopt_bindx(struct sock *sk, struct sockaddr *kaddrs,
--				 int addrs_size, int op)
-+int sctp_setsockopt_bindx(struct sock *sk, struct sockaddr *kaddrs,
-+		int addrs_size, int op)
+ static int do_ipv6_setsockopt(struct sock *sk, int level, int optname,
+ 		    char __user *optval, unsigned int optlen)
  {
- 	int err;
- 	int addrcnt = 0;
-@@ -1032,6 +1032,7 @@ static int sctp_setsockopt_bindx(struct sock *sk, struct sockaddr *kaddrs,
- 		return -EINVAL;
- 	}
- }
-+EXPORT_SYMBOL(sctp_setsockopt_bindx);
+diff --git a/net/rxrpc/local_object.c b/net/rxrpc/local_object.c
+index 20236ddecd2ef..5e356a63aa791 100644
+--- a/net/rxrpc/local_object.c
++++ b/net/rxrpc/local_object.c
+@@ -107,7 +107,7 @@ static struct rxrpc_local *rxrpc_alloc_local(struct rxrpc_net *rxnet,
+ static int rxrpc_open_socket(struct rxrpc_local *local, struct net *net)
+ {
+ 	struct sock *usk;
+-	int ret, opt;
++	int ret;
  
- static int sctp_connect_new_asoc(struct sctp_endpoint *ep,
- 				 const union sctp_addr *daddr,
+ 	_enter("%p{%d,%d}",
+ 	       local, local->srx.transport_type, local->srx.transport.family);
+@@ -157,13 +157,7 @@ static int rxrpc_open_socket(struct rxrpc_local *local, struct net *net)
+ 	switch (local->srx.transport.family) {
+ 	case AF_INET6:
+ 		/* we want to receive ICMPv6 errors */
+-		opt = 1;
+-		ret = kernel_setsockopt(local->socket, SOL_IPV6, IPV6_RECVERR,
+-					(char *) &opt, sizeof(opt));
+-		if (ret < 0) {
+-			_debug("setsockopt failed");
+-			goto error;
+-		}
++		ip6_sock_set_recverr(local->socket->sk, true);
+ 
+ 		/* Fall through and set IPv4 options too otherwise we don't get
+ 		 * errors from IPv4 packets sent through the IPv6 socket.
 -- 
 2.26.2
