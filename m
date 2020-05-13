@@ -1,8 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 30/33] tipc: call tsk_set_importance from
-	tipc_topsrv_create_listener
-Date: Wed, 13 May 2020 08:26:45 +0200
-Message-ID: <20200513062649.2100053-31-hch@lst.de>
+Subject: [PATCH 32/33] sctp: add sctp_sock_get_primary_addr
+Date: Wed, 13 May 2020 08:26:47 +0200
+Message-ID: <20200513062649.2100053-33-hch@lst.de>
 References: <20200513062649.2100053-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
@@ -22,98 +21,138 @@ To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
 Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, linux-block@vger.kernel.org, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
 List-Id: ceph-devel.vger.kernel.org
 
-Avoid using kernel_setsockopt for the TIPC_IMPORTANCE option when we can
-just use the internal helper.  The only change needed is to pass a struct
-sock instead of tipc_sock, which is private to socket.c
+Add a helper to directly get the SCTP_PRIMARY_ADDR sockopt from kernel
+space without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- net/tipc/socket.c | 18 +++++++++---------
- net/tipc/socket.h |  2 ++
- net/tipc/topsrv.c |  6 +++---
- 3 files changed, 14 insertions(+), 12 deletions(-)
+ fs/dlm/lowcomms.c       | 11 +++-----
+ include/net/sctp/sctp.h |  1 +
+ net/sctp/socket.c       | 57 +++++++++++++++++++++++++----------------
+ 3 files changed, 39 insertions(+), 30 deletions(-)
 
-diff --git a/net/tipc/socket.c b/net/tipc/socket.c
-index 87466607097f1..f2e10fbfb03df 100644
---- a/net/tipc/socket.c
-+++ b/net/tipc/socket.c
-@@ -191,17 +191,17 @@ static int tsk_importance(struct tipc_sock *tsk)
- 	return msg_importance(&tsk->phdr);
- }
- 
--static int tsk_set_importance(struct tipc_sock *tsk, int imp)
-+static struct tipc_sock *tipc_sk(const struct sock *sk)
+diff --git a/fs/dlm/lowcomms.c b/fs/dlm/lowcomms.c
+index 6fa45365666a8..46d2d71b62c57 100644
+--- a/fs/dlm/lowcomms.c
++++ b/fs/dlm/lowcomms.c
+@@ -855,10 +855,9 @@ static int tcp_accept_from_sock(struct connection *con)
+ static int sctp_accept_from_sock(struct connection *con)
  {
--	if (imp > TIPC_CRITICAL_IMPORTANCE)
--		return -EINVAL;
--	msg_set_importance(&tsk->phdr, (u32)imp);
--	return 0;
-+	return container_of(sk, struct tipc_sock, sk);
+ 	/* Check that the new node is in the lockspace */
+-	struct sctp_prim prim;
++	struct sctp_prim prim = { };
+ 	int nodeid;
+-	int prim_len, ret;
+-	int addr_len;
++	int addr_len, ret;
+ 	struct connection *newcon;
+ 	struct connection *addcon;
+ 	struct socket *newsock;
+@@ -876,11 +875,7 @@ static int sctp_accept_from_sock(struct connection *con)
+ 	if (ret < 0)
+ 		goto accept_err;
+ 
+-	memset(&prim, 0, sizeof(struct sctp_prim));
+-	prim_len = sizeof(struct sctp_prim);
+-
+-	ret = kernel_getsockopt(newsock, IPPROTO_SCTP, SCTP_PRIMARY_ADDR,
+-				(char *)&prim, &prim_len);
++	ret = sctp_sock_get_primary_addr(con->sock->sk, &prim);
+ 	if (ret < 0) {
+ 		log_print("getsockopt/sctp_primary_addr failed: %d", ret);
+ 		goto accept_err;
+diff --git a/include/net/sctp/sctp.h b/include/net/sctp/sctp.h
+index b505fa082f254..c98b1d14db853 100644
+--- a/include/net/sctp/sctp.h
++++ b/include/net/sctp/sctp.h
+@@ -618,5 +618,6 @@ static inline bool sctp_newsk_ready(const struct sock *sk)
+ int sctp_setsockopt_bindx(struct sock *sk, struct sockaddr *kaddrs,
+ 		int addrs_size, int op);
+ void sctp_sock_set_nodelay(struct sock *sk, bool val);
++int sctp_sock_get_primary_addr(struct sock *sk, struct sctp_prim *prim);
+ 
+ #endif /* __net_sctp_h__ */
+diff --git a/net/sctp/socket.c b/net/sctp/socket.c
+index 64c395f7a86d5..39bf8090dbe1e 100644
+--- a/net/sctp/socket.c
++++ b/net/sctp/socket.c
+@@ -6411,6 +6411,35 @@ static int sctp_getsockopt_local_addrs(struct sock *sk, int len,
+ 	return err;
  }
  
--static struct tipc_sock *tipc_sk(const struct sock *sk)
-+int tsk_set_importance(struct sock *sk, int imp)
- {
--	return container_of(sk, struct tipc_sock, sk);
-+	if (imp > TIPC_CRITICAL_IMPORTANCE)
-+		return -EINVAL;
-+	msg_set_importance(&tipc_sk(sk)->phdr, (u32)imp);
-+	return 0;
- }
- 
- static bool tsk_conn_cong(struct tipc_sock *tsk)
-@@ -2661,7 +2661,7 @@ static int tipc_accept(struct socket *sock, struct socket *new_sock, int flags,
- 	/* Connect new socket to it's peer */
- 	tipc_sk_finish_conn(new_tsock, msg_origport(msg), msg_orignode(msg));
- 
--	tsk_set_importance(new_tsock, msg_importance(msg));
-+	tsk_set_importance(new_sk, msg_importance(msg));
- 	if (msg_named(msg)) {
- 		new_tsock->conn_type = msg_nametype(msg);
- 		new_tsock->conn_instance = msg_nameinst(msg);
-@@ -3079,7 +3079,7 @@ static int tipc_setsockopt(struct socket *sock, int lvl, int opt,
- 
- 	switch (opt) {
- 	case TIPC_IMPORTANCE:
--		res = tsk_set_importance(tsk, value);
-+		res = tsk_set_importance(sk, value);
- 		break;
- 	case TIPC_SRC_DROPPABLE:
- 		if (sock->type != SOCK_STREAM)
-diff --git a/net/tipc/socket.h b/net/tipc/socket.h
-index 235b9679acee4..b11575afc66fe 100644
---- a/net/tipc/socket.h
-+++ b/net/tipc/socket.h
-@@ -75,4 +75,6 @@ u32 tipc_sock_get_portid(struct sock *sk);
- bool tipc_sk_overlimit1(struct sock *sk, struct sk_buff *skb);
- bool tipc_sk_overlimit2(struct sock *sk, struct sk_buff *skb);
- 
-+int tsk_set_importance(struct sock *sk, int imp);
++static int __sctp_sock_get_primary_addr(struct sock *sk, struct sctp_prim *prim)
++{
++	struct sctp_association *asoc;
 +
- #endif
-diff --git a/net/tipc/topsrv.c b/net/tipc/topsrv.c
-index 73dbed0c4b6b8..a0d50649f71c2 100644
---- a/net/tipc/topsrv.c
-+++ b/net/tipc/topsrv.c
-@@ -494,7 +494,6 @@ static void tipc_topsrv_listener_data_ready(struct sock *sk)
- 
- static int tipc_topsrv_create_listener(struct tipc_topsrv *srv)
- {
--	int imp = TIPC_CRITICAL_IMPORTANCE;
- 	struct socket *lsock = NULL;
- 	struct sockaddr_tipc saddr;
- 	struct sock *sk;
-@@ -511,8 +510,9 @@ static int tipc_topsrv_create_listener(struct tipc_topsrv *srv)
- 	sk->sk_user_data = srv;
- 	write_unlock_bh(&sk->sk_callback_lock);
- 
--	rc = kernel_setsockopt(lsock, SOL_TIPC, TIPC_IMPORTANCE,
--			       (char *)&imp, sizeof(imp));
++	asoc = sctp_id2assoc(sk, prim->ssp_assoc_id);
++	if (!asoc)
++		return -EINVAL;
++	if (!asoc->peer.primary_path)
++		return -ENOTCONN;
++
++	memcpy(&prim->ssp_addr, &asoc->peer.primary_path->ipaddr,
++		asoc->peer.primary_path->af_specific->sockaddr_len);
++
++	sctp_get_pf_specific(sk->sk_family)->addr_to_user(sctp_sk(sk),
++			(union sctp_addr *)&prim->ssp_addr);
++	return 0;
++}
++
++int sctp_sock_get_primary_addr(struct sock *sk, struct sctp_prim *prim)
++{
++	int ret;
++
 +	lock_sock(sk);
-+	rc = tsk_set_importance(sk, TIPC_CRITICAL_IMPORTANCE);
++	ret = __sctp_sock_get_primary_addr(sk, prim);
 +	release_sock(sk);
- 	if (rc < 0)
- 		goto err;
++	return ret;
++}
++EXPORT_SYMBOL(sctp_sock_get_primary_addr);
++
+ /* 7.1.10 Set Primary Address (SCTP_PRIMARY_ADDR)
+  *
+  * Requests that the local SCTP stack use the enclosed peer address as
+@@ -6421,35 +6450,19 @@ static int sctp_getsockopt_primary_addr(struct sock *sk, int len,
+ 					char __user *optval, int __user *optlen)
+ {
+ 	struct sctp_prim prim;
+-	struct sctp_association *asoc;
+-	struct sctp_sock *sp = sctp_sk(sk);
++	int ret;
+ 
+ 	if (len < sizeof(struct sctp_prim))
+ 		return -EINVAL;
+-
+-	len = sizeof(struct sctp_prim);
+-
+-	if (copy_from_user(&prim, optval, len))
++	if (copy_from_user(&prim, optval, sizeof(struct sctp_prim)))
+ 		return -EFAULT;
+ 
+-	asoc = sctp_id2assoc(sk, prim.ssp_assoc_id);
+-	if (!asoc)
+-		return -EINVAL;
+-
+-	if (!asoc->peer.primary_path)
+-		return -ENOTCONN;
+-
+-	memcpy(&prim.ssp_addr, &asoc->peer.primary_path->ipaddr,
+-		asoc->peer.primary_path->af_specific->sockaddr_len);
+-
+-	sctp_get_pf_specific(sk->sk_family)->addr_to_user(sp,
+-			(union sctp_addr *)&prim.ssp_addr);
++	ret = __sctp_sock_get_primary_addr(sk, &prim);
++	if (ret)
++		return ret;
+ 
+-	if (put_user(len, optlen))
++	if (put_user(len, optlen) || copy_to_user(optval, &prim, len))
+ 		return -EFAULT;
+-	if (copy_to_user(optval, &prim, len))
+-		return -EFAULT;
+-
+ 	return 0;
+ }
  
 -- 
 2.26.2
