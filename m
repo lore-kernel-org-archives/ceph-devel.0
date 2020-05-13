@@ -1,101 +1,139 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 09/33] net: add sock_set_reuseport
-Date: Wed, 13 May 2020 08:26:24 +0200
-Message-ID: <20200513062649.2100053-10-hch@lst.de>
+Subject: [PATCH 18/33] ipv4: add ip_sock_set_tos
+Date: Wed, 13 May 2020 08:26:33 +0200
+Message-ID: <20200513062649.2100053-19-hch@lst.de>
 References: <20200513062649.2100053-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <cluster-devel-bounces@redhat.com>
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20200513062649.2100053-1-hch@lst.de>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
+Sender: linux-block-owner@vger.kernel.org
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, linux-block@vger.kernel.org, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly set the SO_REUSEPORT sockopt from kernel space
-without going through a fake uaccess.
+Add a helper to directly set the IP_TOS sockopt from kernel space without
+going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- include/net/sock.h    |  1 +
- net/core/sock.c       |  8 ++++++++
- net/sunrpc/xprtsock.c | 17 +----------------
- 3 files changed, 10 insertions(+), 16 deletions(-)
+ drivers/nvme/host/tcp.c   | 14 +++-----------
+ drivers/nvme/target/tcp.c | 10 ++--------
+ include/net/ip.h          |  2 ++
+ net/ipv4/ip_sockglue.c    | 30 +++++++++++++++++++++---------
+ 4 files changed, 28 insertions(+), 28 deletions(-)
 
-diff --git a/include/net/sock.h b/include/net/sock.h
-index e1ed40ff01312..6b8e06947b243 100644
---- a/include/net/sock.h
-+++ b/include/net/sock.h
-@@ -2688,6 +2688,7 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
+diff --git a/drivers/nvme/host/tcp.c b/drivers/nvme/host/tcp.c
+index 8417eeb83fcd2..6c069e982989e 100644
+--- a/drivers/nvme/host/tcp.c
++++ b/drivers/nvme/host/tcp.c
+@@ -1313,7 +1313,7 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
+ {
+ 	struct nvme_tcp_ctrl *ctrl = to_tcp_ctrl(nctrl);
+ 	struct nvme_tcp_queue *queue = &ctrl->queues[qid];
+-	int ret, opt, rcv_pdu_size;
++	int ret, rcv_pdu_size;
  
- void sock_def_readable(struct sock *sk);
- void sock_set_reuseaddr(struct sock *sk, unsigned char reuse);
-+void sock_set_reuseport(struct sock *sk, bool reuseport);
- void sock_set_linger(struct sock *sk, bool onoff, unsigned int linger);
- void sock_set_priority(struct sock *sk, u32 priority);
- void sock_set_sndtimeo(struct sock *sk, unsigned int secs);
-diff --git a/net/core/sock.c b/net/core/sock.c
-index 6af01b757cf24..7f0baf1ccde17 100644
---- a/net/core/sock.c
-+++ b/net/core/sock.c
-@@ -729,6 +729,14 @@ void sock_set_reuseaddr(struct sock *sk, unsigned char reuse)
+ 	queue->ctrl = ctrl;
+ 	INIT_LIST_HEAD(&queue->send_list);
+@@ -1352,16 +1352,8 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
+ 		sock_set_priority(queue->sock->sk, so_priority);
+ 
+ 	/* Set socket type of service */
+-	if (nctrl->opts->tos >= 0) {
+-		opt = nctrl->opts->tos;
+-		ret = kernel_setsockopt(queue->sock, SOL_IP, IP_TOS,
+-				(char *)&opt, sizeof(opt));
+-		if (ret) {
+-			dev_err(nctrl->device,
+-				"failed to set IP_TOS sock opt %d\n", ret);
+-			goto err_sock;
+-		}
+-	}
++	if (nctrl->opts->tos >= 0)
++		ip_sock_set_tos(queue->sock->sk, nctrl->opts->tos);
+ 
+ 	queue->sock->sk->sk_allocation = GFP_ATOMIC;
+ 	nvme_tcp_set_queue_io_cpu(queue);
+diff --git a/drivers/nvme/target/tcp.c b/drivers/nvme/target/tcp.c
+index b2bfa791c5cb2..4296fe3c745bf 100644
+--- a/drivers/nvme/target/tcp.c
++++ b/drivers/nvme/target/tcp.c
+@@ -1452,14 +1452,8 @@ static int nvmet_tcp_set_queue_sock(struct nvmet_tcp_queue *queue)
+ 		sock_set_priority(sock->sk, so_priority);
+ 
+ 	/* Set socket type of service */
+-	if (inet->rcv_tos > 0) {
+-		int tos = inet->rcv_tos;
+-
+-		ret = kernel_setsockopt(sock, SOL_IP, IP_TOS,
+-				(char *)&tos, sizeof(tos));
+-		if (ret)
+-			return ret;
+-	}
++	if (inet->rcv_tos > 0)
++		ip_sock_set_tos(sock->sk, inet->rcv_tos);
+ 
+ 	write_lock_bh(&sock->sk->sk_callback_lock);
+ 	sock->sk->sk_user_data = queue;
+diff --git a/include/net/ip.h b/include/net/ip.h
+index 5b317c9f4470a..2fc52e26fa88b 100644
+--- a/include/net/ip.h
++++ b/include/net/ip.h
+@@ -765,4 +765,6 @@ static inline bool inetdev_valid_mtu(unsigned int mtu)
+ 	return likely(mtu >= IPV4_MIN_MTU);
  }
- EXPORT_SYMBOL(sock_set_reuseaddr);
  
-+void sock_set_reuseport(struct sock *sk, bool reuseport)
++void ip_sock_set_tos(struct sock *sk, int val);
++
+ #endif	/* _IP_H */
+diff --git a/net/ipv4/ip_sockglue.c b/net/ipv4/ip_sockglue.c
+index 8206047d70b6b..1733ac78c21aa 100644
+--- a/net/ipv4/ip_sockglue.c
++++ b/net/ipv4/ip_sockglue.c
+@@ -560,6 +560,26 @@ int ip_recv_error(struct sock *sk, struct msghdr *msg, int len, int *addr_len)
+ 	return err;
+ }
+ 
++static void __ip_sock_set_tos(struct sock *sk, int val)
++{
++	if (sk->sk_type == SOCK_STREAM) {
++		val &= ~INET_ECN_MASK;
++		val |= inet_sk(sk)->tos & INET_ECN_MASK;
++	}
++	if (inet_sk(sk)->tos != val) {
++		inet_sk(sk)->tos = val;
++		sk->sk_priority = rt_tos2priority(val);
++		sk_dst_reset(sk);
++	}
++}
++
++void ip_sock_set_tos(struct sock *sk, int val)
 +{
 +	lock_sock(sk);
-+	sk->sk_reuseport = reuseport;
++	__ip_sock_set_tos(sk, val);
 +	release_sock(sk);
 +}
-+EXPORT_SYMBOL(sock_set_reuseport);
-+
- static void __sock_set_linger(struct sock *sk, bool onoff, unsigned int linger)
- {
- 	if (!onoff) {
-diff --git a/net/sunrpc/xprtsock.c b/net/sunrpc/xprtsock.c
-index bb61d3758be2b..3dc2d52371a0e 100644
---- a/net/sunrpc/xprtsock.c
-+++ b/net/sunrpc/xprtsock.c
-@@ -1594,21 +1594,6 @@ static int xs_get_random_port(void)
- 	return rand + min;
- }
++EXPORT_SYMBOL(ip_sock_set_tos);
  
--/**
-- * xs_set_reuseaddr_port - set the socket's port and address reuse options
-- * @sock: socket
-- *
-- * Note that this function has to be called on all sockets that share the
-- * same port, and it must be called before binding.
-- */
--static void xs_sock_set_reuseport(struct socket *sock)
--{
--	int opt = 1;
--
--	kernel_setsockopt(sock, SOL_SOCKET, SO_REUSEPORT,
--			(char *)&opt, sizeof(opt));
--}
--
- static unsigned short xs_sock_getport(struct socket *sock)
- {
- 	struct sockaddr_storage buf;
-@@ -1801,7 +1786,7 @@ static struct socket *xs_create_sock(struct rpc_xprt *xprt,
- 	xs_reclassify_socket(family, sock);
- 
- 	if (reuseport)
--		xs_sock_set_reuseport(sock);
-+		sock_set_reuseport(sock->sk, true);
- 
- 	err = xs_bind(transport, sock);
- 	if (err) {
+ /*
+  *	Socket option code for IP. This is the end of the line after any
+@@ -743,15 +763,7 @@ static int do_ip_setsockopt(struct sock *sk, int level,
+ 			inet->cmsg_flags &= ~IP_CMSG_RECVFRAGSIZE;
+ 		break;
+ 	case IP_TOS:	/* This sets both TOS and Precedence */
+-		if (sk->sk_type == SOCK_STREAM) {
+-			val &= ~INET_ECN_MASK;
+-			val |= inet->tos & INET_ECN_MASK;
+-		}
+-		if (inet->tos != val) {
+-			inet->tos = val;
+-			sk->sk_priority = rt_tos2priority(val);
+-			sk_dst_reset(sk);
+-		}
++		__ip_sock_set_tos(sk, val);
+ 		break;
+ 	case IP_TTL:
+ 		if (optlen < 1)
 -- 
 2.26.2
