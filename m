@@ -1,94 +1,215 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 29/33] rxrpc_sock_set_min_security_level
-Date: Wed, 13 May 2020 08:26:44 +0200
-Message-ID: <20200513062649.2100053-30-hch@lst.de>
+Subject: [PATCH 24/33] ipv6: add ip6_sock_set_addr_preferences
+Date: Wed, 13 May 2020 08:26:39 +0200
+Message-ID: <20200513062649.2100053-25-hch@lst.de>
 References: <20200513062649.2100053-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <cluster-devel-bounces@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46214 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732186AbgEMG3F (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2020 02:29:05 -0400
 In-Reply-To: <20200513062649.2100053-1-hch@lst.de>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, linux-block@vger.kernel.org, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
-List-Id: ceph-devel.vger.kernel.org
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
 
-Add a helper to directly set the RXRPC_MIN_SECURITY_LEVEL sockopt from
-kernel space without going through a fake uaccess.
+Add a helper to directly set the IPV6_ADD_PREFERENCES sockopt from kernel
+space without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- fs/afs/rxrpc.c         |  6 ++----
- include/net/af_rxrpc.h |  2 ++
- net/rxrpc/af_rxrpc.c   | 13 +++++++++++++
- 3 files changed, 17 insertions(+), 4 deletions(-)
+ include/net/ipv6.h       |   1 +
+ net/ipv6/ipv6_sockglue.c | 127 +++++++++++++++++++++------------------
+ net/sunrpc/xprtsock.c    |   8 ++-
+ 3 files changed, 75 insertions(+), 61 deletions(-)
 
-diff --git a/fs/afs/rxrpc.c b/fs/afs/rxrpc.c
-index 1ecc67da6c1a4..7dfcbd58da85c 100644
---- a/fs/afs/rxrpc.c
-+++ b/fs/afs/rxrpc.c
-@@ -37,7 +37,6 @@ int afs_open_socket(struct afs_net *net)
- {
- 	struct sockaddr_rxrpc srx;
- 	struct socket *socket;
--	unsigned int min_level;
- 	int ret;
+diff --git a/include/net/ipv6.h b/include/net/ipv6.h
+index 69bc1651aaef8..04b2bc1935054 100644
+--- a/include/net/ipv6.h
++++ b/include/net/ipv6.h
+@@ -1177,5 +1177,6 @@ int ipv6_sock_mc_drop(struct sock *sk, int ifindex,
  
- 	_enter("");
-@@ -57,9 +56,8 @@ int afs_open_socket(struct afs_net *net)
- 	srx.transport.sin6.sin6_family	= AF_INET6;
- 	srx.transport.sin6.sin6_port	= htons(AFS_CM_PORT);
+ int ip6_sock_set_v6only(struct sock *sk, bool val);
+ void ip6_sock_set_recverr(struct sock *sk, bool val);
++int ip6_sock_set_addr_preferences(struct sock *sk, bool val);
  
--	min_level = RXRPC_SECURITY_ENCRYPT;
--	ret = kernel_setsockopt(socket, SOL_RXRPC, RXRPC_MIN_SECURITY_LEVEL,
--				(void *)&min_level, sizeof(min_level));
-+	ret = rxrpc_sock_set_min_security_level(socket->sk,
-+			RXRPC_SECURITY_ENCRYPT);
- 	if (ret < 0)
- 		goto error_2;
- 
-diff --git a/include/net/af_rxrpc.h b/include/net/af_rxrpc.h
-index 04e97bab6f28b..8d7b469453bda 100644
---- a/include/net/af_rxrpc.h
-+++ b/include/net/af_rxrpc.h
-@@ -72,4 +72,6 @@ bool rxrpc_kernel_call_is_complete(struct rxrpc_call *);
- void rxrpc_kernel_set_max_life(struct socket *, struct rxrpc_call *,
- 			       unsigned long);
- 
-+int rxrpc_sock_set_min_security_level(struct sock *sk, unsigned int val);
-+
- #endif /* _NET_RXRPC_H */
-diff --git a/net/rxrpc/af_rxrpc.c b/net/rxrpc/af_rxrpc.c
-index 15ee92d795815..394189b81849f 100644
---- a/net/rxrpc/af_rxrpc.c
-+++ b/net/rxrpc/af_rxrpc.c
-@@ -571,6 +571,19 @@ static int rxrpc_sendmsg(struct socket *sock, struct msghdr *m, size_t len)
- 	return ret;
+ #endif /* _NET_IPV6_H */
+diff --git a/net/ipv6/ipv6_sockglue.c b/net/ipv6/ipv6_sockglue.c
+index 3c67626b6f5a9..c23d42e809d7e 100644
+--- a/net/ipv6/ipv6_sockglue.c
++++ b/net/ipv6/ipv6_sockglue.c
+@@ -157,6 +157,74 @@ void ip6_sock_set_recverr(struct sock *sk, bool val)
  }
+ EXPORT_SYMBOL(ip6_sock_set_recverr);
  
-+int rxrpc_sock_set_min_security_level(struct sock *sk, unsigned int val)
++static int __ip6_sock_set_addr_preferences(struct sock *sk, int val)
 +{
-+	if (sk->sk_state != RXRPC_UNBOUND)
-+		return -EISCONN;
-+	if (val > RXRPC_SECURITY_MAX)
++	unsigned int pref = 0;
++	unsigned int prefmask = ~0;
++
++	/* check PUBLIC/TMP/PUBTMP_DEFAULT conflicts */
++	switch (val & (IPV6_PREFER_SRC_PUBLIC |
++		       IPV6_PREFER_SRC_TMP |
++		       IPV6_PREFER_SRC_PUBTMP_DEFAULT)) {
++	case IPV6_PREFER_SRC_PUBLIC:
++		pref |= IPV6_PREFER_SRC_PUBLIC;
++		prefmask &= ~(IPV6_PREFER_SRC_PUBLIC |
++			      IPV6_PREFER_SRC_TMP);
++		break;
++	case IPV6_PREFER_SRC_TMP:
++		pref |= IPV6_PREFER_SRC_TMP;
++		prefmask &= ~(IPV6_PREFER_SRC_PUBLIC |
++			      IPV6_PREFER_SRC_TMP);
++		break;
++	case IPV6_PREFER_SRC_PUBTMP_DEFAULT:
++		prefmask &= ~(IPV6_PREFER_SRC_PUBLIC |
++			      IPV6_PREFER_SRC_TMP);
++		break;
++	case 0:
++		break;
++	default:
 +		return -EINVAL;
-+	lock_sock(sk);
-+	rxrpc_sk(sk)->min_sec_level = val;
-+	release_sock(sk);
++	}
++
++	/* check HOME/COA conflicts */
++	switch (val & (IPV6_PREFER_SRC_HOME | IPV6_PREFER_SRC_COA)) {
++	case IPV6_PREFER_SRC_HOME:
++		prefmask &= ~IPV6_PREFER_SRC_COA;
++		break;
++	case IPV6_PREFER_SRC_COA:
++		pref |= IPV6_PREFER_SRC_COA;
++		break;
++	case 0:
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	/* check CGA/NONCGA conflicts */
++	switch (val & (IPV6_PREFER_SRC_CGA|IPV6_PREFER_SRC_NONCGA)) {
++	case IPV6_PREFER_SRC_CGA:
++	case IPV6_PREFER_SRC_NONCGA:
++	case 0:
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	inet6_sk(sk)->srcprefs = (inet6_sk(sk)->srcprefs & prefmask) | pref;
 +	return 0;
 +}
-+EXPORT_SYMBOL(rxrpc_sock_set_min_security_level);
 +
- /*
-  * set RxRPC socket options
-  */
++int ip6_sock_set_addr_preferences(struct sock *sk, bool val)
++{
++	int ret;
++
++	lock_sock(sk);
++	ret = __ip6_sock_set_addr_preferences(sk, val);
++	release_sock(sk);
++	return ret;
++}
++EXPORT_SYMBOL(ip6_sock_set_addr_preferences);
++
+ static int do_ipv6_setsockopt(struct sock *sk, int level, int optname,
+ 		    char __user *optval, unsigned int optlen)
+ {
+@@ -859,67 +927,10 @@ static int do_ipv6_setsockopt(struct sock *sk, int level, int optname,
+ 		break;
+ 
+ 	case IPV6_ADDR_PREFERENCES:
+-	    {
+-		unsigned int pref = 0;
+-		unsigned int prefmask = ~0;
+-
+ 		if (optlen < sizeof(int))
+ 			goto e_inval;
+-
+-		retv = -EINVAL;
+-
+-		/* check PUBLIC/TMP/PUBTMP_DEFAULT conflicts */
+-		switch (val & (IPV6_PREFER_SRC_PUBLIC|
+-			       IPV6_PREFER_SRC_TMP|
+-			       IPV6_PREFER_SRC_PUBTMP_DEFAULT)) {
+-		case IPV6_PREFER_SRC_PUBLIC:
+-			pref |= IPV6_PREFER_SRC_PUBLIC;
+-			break;
+-		case IPV6_PREFER_SRC_TMP:
+-			pref |= IPV6_PREFER_SRC_TMP;
+-			break;
+-		case IPV6_PREFER_SRC_PUBTMP_DEFAULT:
+-			break;
+-		case 0:
+-			goto pref_skip_pubtmp;
+-		default:
+-			goto e_inval;
+-		}
+-
+-		prefmask &= ~(IPV6_PREFER_SRC_PUBLIC|
+-			      IPV6_PREFER_SRC_TMP);
+-pref_skip_pubtmp:
+-
+-		/* check HOME/COA conflicts */
+-		switch (val & (IPV6_PREFER_SRC_HOME|IPV6_PREFER_SRC_COA)) {
+-		case IPV6_PREFER_SRC_HOME:
+-			break;
+-		case IPV6_PREFER_SRC_COA:
+-			pref |= IPV6_PREFER_SRC_COA;
+-		case 0:
+-			goto pref_skip_coa;
+-		default:
+-			goto e_inval;
+-		}
+-
+-		prefmask &= ~IPV6_PREFER_SRC_COA;
+-pref_skip_coa:
+-
+-		/* check CGA/NONCGA conflicts */
+-		switch (val & (IPV6_PREFER_SRC_CGA|IPV6_PREFER_SRC_NONCGA)) {
+-		case IPV6_PREFER_SRC_CGA:
+-		case IPV6_PREFER_SRC_NONCGA:
+-		case 0:
+-			break;
+-		default:
+-			goto e_inval;
+-		}
+-
+-		np->srcprefs = (np->srcprefs & prefmask) | pref;
+-		retv = 0;
+-
++		retv = __ip6_sock_set_addr_preferences(sk, val);
+ 		break;
+-	    }
+ 	case IPV6_MINHOPCOUNT:
+ 		if (optlen < sizeof(int))
+ 			goto e_inval;
+diff --git a/net/sunrpc/xprtsock.c b/net/sunrpc/xprtsock.c
+index 88aa198456858..7aaf2baf0c393 100644
+--- a/net/sunrpc/xprtsock.c
++++ b/net/sunrpc/xprtsock.c
+@@ -2150,7 +2150,6 @@ static int xs_tcp_finish_connecting(struct rpc_xprt *xprt, struct socket *sock)
+ 
+ 	if (!transport->inet) {
+ 		struct sock *sk = sock->sk;
+-		unsigned int addr_pref = IPV6_PREFER_SRC_PUBLIC;
+ 
+ 		/* Avoid temporary address, they are bad for long-lived
+ 		 * connections such as NFS mounts.
+@@ -2159,8 +2158,11 @@ static int xs_tcp_finish_connecting(struct rpc_xprt *xprt, struct socket *sock)
+ 		 *    knowledge about the normal duration of connections,
+ 		 *    MAY override this as appropriate.
+ 		 */
+-		kernel_setsockopt(sock, SOL_IPV6, IPV6_ADDR_PREFERENCES,
+-				(char *)&addr_pref, sizeof(addr_pref));
++		if (xs_addr(xprt)->sa_family == PF_INET6 &&
++		    IS_REACHABLE(CONFIG_IPV6)) {
++			ip6_sock_set_addr_preferences(sk,
++				IPV6_PREFER_SRC_PUBLIC);
++		}
+ 
+ 		xs_tcp_set_socket_timeouts(xprt, sock);
+ 
 -- 
 2.26.2
