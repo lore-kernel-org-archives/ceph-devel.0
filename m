@@ -1,32 +1,69 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 20/33] ipv4: add ip_sock_set_recverr
-Date: Thu, 14 May 2020 04:51:26 -0700
-Message-ID: <9992a1fe768a0b1e9bb9470d2728ba25dbe042db.camel@perches.com>
-References: <20200513062649.2100053-1-hch@lst.de>
-         <20200513062649.2100053-21-hch@lst.de>
-         <0ee5acfaca4cf32d4efad162046b858981a4dae3.camel@perches.com>
-         <20200514103025.GB12680@lst.de>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
+Date: Thu, 14 May 2020 08:10:09 -0400
+Message-ID: <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
+References: <20200514111453.GA99187@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20200514103025.GB12680@lst.de>
-Sender: netdev-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200514111453.GA99187@suse.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 2020-05-14 at 12:30 +0200, Christoph Hellwig wrote:
-> On Wed, May 13, 2020 at 02:00:43PM -0700, Joe Perches wrote:
-> > On Wed, 2020-05-13 at 08:26 +0200, Christoph Hellwig wrote:
-> > > Add a helper to directly set the IP_RECVERR sockopt from kernel space
-> > > without going through a fake uaccess.
-> > 
-> > This seems used only with true as the second arg.
-> > Is there reason to have that argument at all?
+On Thu, 2020-05-14 at 12:14 +0100, Luis Henriques wrote:
+> Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
+> a file handle to dentry"), this fixes another corner case with
+> name_to_handle_at/open_by_handle_at.  The issue has been detected by
+> xfstest generic/467, when doing:
 > 
-> Mostly to keep it symmetric with the sockopt.  I could probably remove
-> a few arguments in the series if we want to be strict.
+>  - name_to_handle_at("/cephfs/myfile")
+>  - open("/cephfs/myfile")
+>  - unlink("/cephfs/myfile")
+>  - open_by_handle_at()
+> 
+> The call to open_by_handle_at should not fail because the file still
+> exists and we do have a valid handle to it.
+> 
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+>  fs/ceph/export.c | 13 +++++++++++--
+>  1 file changed, 11 insertions(+), 2 deletions(-)
+> 
+> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> index 79dc06881e78..8556df9d94d0 100644
+> --- a/fs/ceph/export.c
+> +++ b/fs/ceph/export.c
+> @@ -171,12 +171,21 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
+>  
+>  static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+>  {
+> +	struct ceph_inode_info *ci;
+>  	struct inode *inode = __lookup_inode(sb, ino);
+> +
+>  	if (IS_ERR(inode))
+>  		return ERR_CAST(inode);
+>  	if (inode->i_nlink == 0) {
+> -		iput(inode);
+> -		return ERR_PTR(-ESTALE);
+> +		bool is_open;
+> +		ci = ceph_inode(inode);
+> +		spin_lock(&ci->i_ceph_lock);
+> +		is_open = __ceph_is_file_opened(ci);
+> +		spin_unlock(&ci->i_ceph_lock);
+> +		if (!is_open) {
+> +			iput(inode);
+> +			return ERR_PTR(-ESTALE);
+> +		}
+>  	}
+>  	return d_obtain_alias(inode);
+>  }
 
-My preference would use strict and add
-arguments only when necessary.
+Thanks Luis. Out of curiousity, is there any reason we shouldn't ignore
+the i_nlink value here? Does anything obviously break if we do?
+
+Thanks,
+-- 
+Jeff Layton <jlayton@kernel.org>
