@@ -1,50 +1,43 @@
 From: David Laight <David.Laight@ACULAB.COM>
-Subject: RE: remove kernel_setsockopt and kernel_getsockopt
-Date: Thu, 14 May 2020 08:29:30 +0000
-Message-ID: <756758e8f0e34e2e97db470609f5fbba@AcuMS.aculab.com>
+Subject: RE: [PATCH 32/33] sctp: add sctp_sock_get_primary_addr
+Date: Thu, 14 May 2020 09:51:00 +0000
+Message-ID: <d112e18bfbdd40dfb219ed2c1f2082d4@AcuMS.aculab.com>
 References: <20200513062649.2100053-1-hch@lst.de>
- <ecc165c33962d964d518c80de605af632eee0474.camel@perches.com>
+ <20200513062649.2100053-33-hch@lst.de>
+ <20200513180302.GC2491@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ecc165c33962d964d518c80de605af632eee0474.camel@perches.com>
+Return-path: <target-devel-owner@vger.kernel.org>
+In-Reply-To: <20200513180302.GC2491@localhost.localdomain>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: 'Joe Perches' <joe@perches.com>, Christoph Hellwig <hch@lst.de>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, "drbd-dev@lists.linbit.com" <drbd-dev@lists.linbit.com>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>, "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>, "target-devel@vger.kernel.org" <target-devel@vger.kernel.org>, "linux-afs@lists.infradead.org" <linux-afs@lists.infradead.org>, linux-cifs@vger.kerne
+Sender: target-devel-owner@vger.kernel.org
+To: 'Marcelo Ricardo Leitner' <marcelo.leitner@gmail.com>, Christoph Hellwig <hch@lst.de>
+Cc: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, "drbd-dev@lists.linbit.com" <drbd-dev@lists.linbit.com>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>, "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>, "target-devel@vger.kernel.org" <target-devel@vger.kernel.org>, "linux-afs@lists.infradead.org" <linux-afs@lists.infradead.org>
 List-Id: ceph-devel.vger.kernel.org
 
-From: Joe Perches
-> Sent: 13 May 2020 18:39
-> On Wed, 2020-05-13 at 08:26 +0200, Christoph Hellwig wrote:
-> > this series removes the kernel_setsockopt and kernel_getsockopt
-> > functions, and instead switches their users to small functions that
-> > implement setting (or in one case getting) a sockopt directly using
-> > a normal kernel function call with type safety and all the other
-> > benefits of not having a function call.
-> >
-> > In some cases these functions seem pretty heavy handed as they do
-> > a lock_sock even for just setting a single variable, but this mirrors
-> > the real setsockopt implementation - counter to that a few kernel
-> > drivers just set the fields directly already.
-> >
-> > Nevertheless the diffstat looks quite promising:
-> >
-> >  42 files changed, 721 insertions(+), 799 deletions(-)
+From: Marcelo Ricardo Leitner
+> Sent: 13 May 2020 19:03
+> 
+> On Wed, May 13, 2020 at 08:26:47AM +0200, Christoph Hellwig wrote:
+> > Add a helper to directly get the SCTP_PRIMARY_ADDR sockopt from kernel
+> > space without going through a fake uaccess.
+> 
+> Same comment as on the other dlm/sctp patch.
 
-I missed this patch going through.
-Massive NACK.
+Wouldn't it be best to write sctp_[gs]etsockotp() that
+use a kernel buffer and then implement the user-space
+calls using a wrapper that does the copies to an on-stack
+(or malloced if big) buffer.
 
-You need to export functions that do most of the socket options
-for all protocols.
-As well as REUSADDR and NODELAY SCTP has loads because a lot
-of stuff that should have been extra system calls got piled
-into setsockopt.
+That will also simplify the code be removing all the copies
+and -EFAULT returns.
+Only the size checks will be needed and the code can assume
+the buffer is at least the size of the on-stack buffer.
 
-An alternate solution would be to move the copy_to/from_user()
-into a wrapper function so that the kernel_[sg]etsockopt()
-functions would bypass them completely.
+Our SCTP code uses SO_REUSADDR, SCTP_EVENTS, SCTP_NODELAY,
+SCTP_STATUS, SCTP_INITMSG, IPV6_ONLY, SCTP_SOCKOPT_BINDX_ADD
+and SO_LINGER.
 
 	David
 
