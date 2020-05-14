@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 24/31] ceph: fix double unlock in handle_cap_export()
-Date: Thu, 14 May 2020 14:54:06 -0400
-Message-ID: <20200514185413.20755-24-sashal@kernel.org>
-References: <20200514185413.20755-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 33/39] ceph: fix double unlock in handle_cap_export()
+Date: Thu, 14 May 2020 14:54:50 -0400
+Message-ID: <20200514185456.21060-33-sashal@kernel.org>
+References: <20200514185456.21060-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20200514185413.20755-1-sashal@kernel.org>
+In-Reply-To: <20200514185456.21060-1-sashal@kernel.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Wu Bo <wubo40@huawei.com>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
@@ -30,10 +30,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 5241102b81a82..a2d4eed27f804 100644
+index 1b5a50848b5be..589cfe3ed873b 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -3632,6 +3632,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+@@ -3502,6 +3502,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
  		WARN_ON(1);
  		tsession = NULL;
  		target = -1;
