@@ -1,39 +1,45 @@
-From: David Teigland <teigland@redhat.com>
-Subject: Re: is it ok to always pull in sctp for dlm, was: Re: [PATCH 27/33]
- sctp: export sctp_setsockopt_bindx
-Date: Thu, 14 May 2020 09:24:03 -0500
-Message-ID: <20200514142403.GA1447@redhat.com>
-References: <20200513062649.2100053-1-hch@lst.de>
- <20200513062649.2100053-28-hch@lst.de>
- <20200513180058.GB2491@localhost.localdomain>
- <20200514104040.GA12979@lst.de>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 24/31] ceph: fix double unlock in handle_cap_export()
+Date: Thu, 14 May 2020 14:54:06 -0400
+Message-ID: <20200514185413.20755-24-sashal@kernel.org>
+References: <20200514185413.20755-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <target-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20200514104040.GA12979@lst.de>
-Sender: target-devel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Christine Caulfield <ccaulfie@redhat.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20200514185413.20755-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Wu Bo <wubo40@huawei.com>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, May 14, 2020 at 12:40:40PM +0200, Christoph Hellwig wrote:
-> On Wed, May 13, 2020 at 03:00:58PM -0300, Marcelo Ricardo Leitner wrote:
-> > On Wed, May 13, 2020 at 08:26:42AM +0200, Christoph Hellwig wrote:
-> > > And call it directly from dlm instead of going through kernel_setsockopt.
-> > 
-> > The advantage on using kernel_setsockopt here is that sctp module will
-> > only be loaded if dlm actually creates a SCTP socket.  With this
-> > change, sctp will be loaded on setups that may not be actually using
-> > it. It's a quite big module and might expose the system.
-> > 
-> > I'm okay with the SCTP changes, but I'll defer to DLM folks to whether
-> > that's too bad or what for DLM.
-> 
-> So for ipv6 I could just move the helpers inline as they were trivial
-> and avoid that issue.  But some of the sctp stuff really is way too
-> big for that, so the only other option would be to use symbol_get.
+From: Wu Bo <wubo40@huawei.com>
 
-Let's try symbol_get, having the sctp module always loaded caused problems
-last time it happened (almost nobody uses dlm with it.)
-Dave 
+[ Upstream commit 4d8e28ff3106b093d98bfd2eceb9b430c70a8758 ]
+
+If the ceph_mdsc_open_export_target_session() return fails, it will
+do a "goto retry", but the session mutex has already been unlocked.
+Re-lock the mutex in that case to ensure that we don't unlock it
+twice.
+
+Signed-off-by: Wu Bo <wubo40@huawei.com>
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ fs/ceph/caps.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 5241102b81a82..a2d4eed27f804 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3632,6 +3632,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+ 		WARN_ON(1);
+ 		tsession = NULL;
+ 		target = -1;
++		mutex_lock(&session->s_mutex);
+ 	}
+ 	goto retry;
+ 
+-- 
+2.20.1
