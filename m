@@ -1,43 +1,59 @@
-From: David Laight <David.Laight@ACULAB.COM>
-Subject: RE: remove kernel_setsockopt and kernel_getsockopt
-Date: Thu, 14 May 2020 11:11:34 +0000
-Message-ID: <c2034daa0a23454abb5e5c5714807735@AcuMS.aculab.com>
-References: <20200513062649.2100053-1-hch@lst.de>
- <ecc165c33962d964d518c80de605af632eee0474.camel@perches.com>
- <756758e8f0e34e2e97db470609f5fbba@AcuMS.aculab.com>
- <20200514101838.GA12548@lst.de>
- <a76440f7305c4653877ff2abff499f4e@AcuMS.aculab.com>
- <20200514103450.GA12901@lst.de>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] ceph: don't return -ESTALE if there's still an open file
+Date: Thu, 14 May 2020 12:14:53 +0100
+Message-ID: <20200514111453.GA99187@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20200514103450.GA12901@lst.de>
-Content-Language: en-US
-Sender: linux-block-owner@vger.kernel.org
-To: 'Christoph Hellwig' <hch@lst.de>
-Cc: 'Joe Perches' <joe@perches.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, "drbd-dev@lists.linbit.com" <drbd-dev@lists.linbit.com>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>, "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>, "target-devel@vger.kernel.org" <targ>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: 'Christoph Hellwig'
-> Sent: 14 May 2020 11:35
-> On Thu, May 14, 2020 at 10:26:41AM +0000, David Laight wrote:
-> > From: Christoph Hellwig
-> > > Only for those were we have users, and all those are covered.
-> >
-> > What do we tell all our users when our kernel SCTP code
-> > no longer works?
-> 
-> We only care about in-tree modules, just like for every other interface
-> in the kernel.
+Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
+a file handle to dentry"), this fixes another corner case with
+name_to_handle_at/open_by_handle_at.  The issue has been detected by
+xfstest generic/467, when doing:
 
-Even if our management agreed to release the code and the code
-layout matched the kernel guidelines you still wouldn't want
-two large drivers that implement telephony functionality
-for hardware that very few people actually have.
+ - name_to_handle_at("/cephfs/myfile")
+ - open("/cephfs/myfile")
+ - unlink("/cephfs/myfile")
+ - open_by_handle_at()
 
-	David
+The call to open_by_handle_at should not fail because the file still
+exists and we do have a valid handle to it.
 
--
-Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
-Registration No: 1397386 (Wales)
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/export.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index 79dc06881e78..8556df9d94d0 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -171,12 +171,21 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
+ 
+ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+ {
++	struct ceph_inode_info *ci;
+ 	struct inode *inode = __lookup_inode(sb, ino);
++
+ 	if (IS_ERR(inode))
+ 		return ERR_CAST(inode);
+ 	if (inode->i_nlink == 0) {
+-		iput(inode);
+-		return ERR_PTR(-ESTALE);
++		bool is_open;
++		ci = ceph_inode(inode);
++		spin_lock(&ci->i_ceph_lock);
++		is_open = __ceph_is_file_opened(ci);
++		spin_unlock(&ci->i_ceph_lock);
++		if (!is_open) {
++			iput(inode);
++			return ERR_PTR(-ESTALE);
++		}
+ 	}
+ 	return d_obtain_alias(inode);
+ }
