@@ -1,40 +1,161 @@
-From: David Laight <David.Laight-ZS65k/vG3HxXrIkS9f7CXA@public.gmane.org>
-Subject: RE: remove kernel_setsockopt and kernel_getsockopt
-Date: Fri, 15 May 2020 08:14:07 +0000
-Message-ID: <29428bc7a5344412be9f632bced8888d@AcuMS.aculab.com>
-References: <756758e8f0e34e2e97db470609f5fbba@AcuMS.aculab.com>
-        <20200514101838.GA12548@lst.de>
-        <a76440f7305c4653877ff2abff499f4e@AcuMS.aculab.com>
- <20200514.130357.1683454520750761365.davem@davemloft.net>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
+Date: Fri, 15 May 2020 12:15:48 +0100
+Message-ID: <20200515111548.GA54598@suse.com>
+References: <20200514111453.GA99187@suse.com>
+ <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
+ <20200514124845.GA12559@suse.com>
+ <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
+ <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20200514.130357.1683454520750761365.davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
-Content-Language: en-US
-Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: 'David Miller' <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
-Cc: "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>, "joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org" <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>, "kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org" <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org" <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, "yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org" <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, "vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org" <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, "marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org" <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, "drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org" <drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-nvme-IAPFreCvJWNGWvitb5QawA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Dave Chinner <dchinner@redhat.com>, Christoph Hellwig <hch@lst.de>, Miklos Szeredi <miklos@szeredi.hu>
 List-Id: ceph-devel.vger.kernel.org
 
-Looking at __sys_setsockopt() I noticed that the BPF intercept
-can also cause set_fs(KERNEL_DS) be set in order to pass a
-modified buffer into the actual setsockopt() code.
+On Fri, May 15, 2020 at 09:42:24AM +0300, Amir Goldstein wrote:
+> +CC: fstests
+> 
+> On Thu, May 14, 2020 at 4:15 PM Jeff Layton <jlayton@kernel.org> wrote:
+> >
+> > On Thu, 2020-05-14 at 13:48 +0100, Luis Henriques wrote:
+> > > On Thu, May 14, 2020 at 08:10:09AM -0400, Jeff Layton wrote:
+> > > > On Thu, 2020-05-14 at 12:14 +0100, Luis Henriques wrote:
+> > > > > Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
+> > > > > a file handle to dentry"), this fixes another corner case with
+> > > > > name_to_handle_at/open_by_handle_at.  The issue has been detected by
+> > > > > xfstest generic/467, when doing:
+> > > > >
+> > > > >  - name_to_handle_at("/cephfs/myfile")
+> > > > >  - open("/cephfs/myfile")
+> > > > >  - unlink("/cephfs/myfile")
+> > > > >  - open_by_handle_at()
+> > > > >
+> > > > > The call to open_by_handle_at should not fail because the file still
+> > > > > exists and we do have a valid handle to it.
+> > > > >
+> > > > > Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> > > > > ---
+> > > > >  fs/ceph/export.c | 13 +++++++++++--
+> > > > >  1 file changed, 11 insertions(+), 2 deletions(-)
+> > > > >
+> > > > > diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> > > > > index 79dc06881e78..8556df9d94d0 100644
+> > > > > --- a/fs/ceph/export.c
+> > > > > +++ b/fs/ceph/export.c
+> > > > > @@ -171,12 +171,21 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
+> > > > >
+> > > > >  static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+> > > > >  {
+> > > > > + struct ceph_inode_info *ci;
+> > > > >   struct inode *inode = __lookup_inode(sb, ino);
+> > > > > +
+> > > > >   if (IS_ERR(inode))
+> > > > >           return ERR_CAST(inode);
+> > > > >   if (inode->i_nlink == 0) {
+> > > > > -         iput(inode);
+> > > > > -         return ERR_PTR(-ESTALE);
+> > > > > +         bool is_open;
+> > > > > +         ci = ceph_inode(inode);
+> > > > > +         spin_lock(&ci->i_ceph_lock);
+> > > > > +         is_open = __ceph_is_file_opened(ci);
+> > > > > +         spin_unlock(&ci->i_ceph_lock);
+> > > > > +         if (!is_open) {
+> > > > > +                 iput(inode);
+> > > > > +                 return ERR_PTR(-ESTALE);
+> > > > > +         }
+> > > > >   }
+> > > > >   return d_obtain_alias(inode);
+> > > > >  }
+> > > >
+> > > > Thanks Luis. Out of curiousity, is there any reason we shouldn't ignore
+> > > > the i_nlink value here? Does anything obviously break if we do?
+> > >
+> > > Yes, the scenario described in commit 03f219041fdb is still valid, which
+> > > is basically the same but without the extra open(2):
+> > >
+> > >   - name_to_handle_at("/cephfs/myfile")
+> > >   - unlink("/cephfs/myfile")
+> > >   - open_by_handle_at()
+> > >
+> >
+> > Ok, I guess we end up doing some delayed cleanup, and that allows the
+> > inode to be found in that situation.
+> >
+> > > The open_by_handle_at man page isn't really clear about these 2 scenarios,
+> > > but generic/426 will fail if -ESTALE isn't returned.  Want me to add a
+> > > comment to the code, describing these 2 scenarios?
+> > >
+> >
+> > (cc'ing Amir since he added this test)
+> >
+> > I don't think there is any hard requirement that open_by_handle_at
+> > should fail in that situation. It generally does for most filesystems
+> > due to the way they handle cl794798fa xfsqa: test open_by_handle() on unlinked and freed inode clusters
+> eaning up unlinked inodes, but I don't
+> > think it's technically illegal to allow the inode to still be found. If
+> > the caller cares about whether it has been unlinked it can always test
+> > i_nlink itself.
+> >
+> > Amir, is this required for some reason that I'm not aware of?
+> 
+> Hi Jeff,
+> 
+> The origin of this test is in fstests commit:
+> 794798fa xfsqa: test open_by_handle() on unlinked and freed inode clusters
+> 
+> It was introduced to catch an xfs bug, so this behavior is the expectation
+> of xfs filesystem, but note that it is not a general expectation to fail
+> open_by_handle() after unlink(), it is an expectation to fail open_by_handle()
+> after unlink() + sync() + drop_caches.
 
-If that functionality is to be kept then the underlying
-protocol specific code needs changing to accept a kernel buffer.
+Yes, sorry I should have mentioned the sync+drop_caches in the
+description.
 
-The 32bit compat code would also be a lot simpler if it could
-pass an kernel buffer through.
-At the moment it copies the modified buffer back out onto the
-user stack.
+> I have later converted the test to generic, because I needed to check the
+> same expectation for overlayfs use case, which is:
+> The original inode is always there (in lower layer), unlink creates a whiteout
+> mark and open_by_handle should treat that as ESTALE, otherwise the
+> unlinked files would be accessible to nfs clients forever.
+> 
+> In overlayfs, we handle the open file case by returning a dentry only
+> in case the inode with deletion mark in question is already in inode cache,
+> but we take care not to populate inode cache with the check.
+> It is easier, because we do not need to get inode into cache for checking
+> the delete marker.
+> 
+> Maybe you could instead check in __fh_to_dentry():
+> 
+>     if (inode->i_nlink == 0 && atomic_read(&inode->i_count) == 1)) {
+>         iput(inode);
+>         return ERR_PTR(-ESTALE);
+>     }
+> 
+> The above is untested, so I don't know if it's enough to pass generic/426.
 
-I'm sure there have been suggestions to remove that complete hack.
-Fixing the compat code would leave a kernel_[sg]et_sockopt() that
-still worked.
+Yes, I can confirm that this also fixes the issue -- both tests pass.
+__ceph_is_file_opened() uses some internal counters per inode, incremented
+each time a file is open in a specific mode.  The problem is that these
+counters require some extra locking (maybe they should be atomic_t?), so
+you're suggestion is probably better.
 
-	David
+> Note that generic/467 also checks the same behavior for rmdir().
 
--
-Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
-Registration No: 1397386 (Wales)
+Yeah, but the only test-case failing with cephfs is the one described
+above (i.e. "open_by_handle -dkr ...").
+
+> If you decide that ceph does not need to comply to this behavior,
+> then we probably need to whitelist/blocklist the filesystems that
+> want to test this behavior, which will be a shame.
+
+Unless Jeff has any objection, I'm happy sending v2, simplifying the patch
+to use your simpler solution (and mentioning sync+drop_caches in the
+commit message).
+
+Cheers,
+--
+Luis
