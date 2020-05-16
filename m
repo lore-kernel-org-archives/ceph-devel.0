@@ -1,106 +1,74 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
-Date: Sat, 16 May 2020 08:10:27 -0400
-Message-ID: <61e877867de7e683d88e2cc5d0945b0aecce1d2a.camel@kernel.org>
-References: <20200514111453.GA99187@suse.com>
-         <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
-         <20200514124845.GA12559@suse.com>
-         <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
-         <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
-         <20200515111548.GA54598@suse.com>
-         <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
-         <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
-         <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
-         <CAOQ4uxhPzcX6Ti8UX4WOg9gJJn+YTuk9OgU80d9imoJ2QdXaWQ@mail.gmail.com>
+From: David Laight <David.Laight-ZS65k/vG3HxXrIkS9f7CXA@public.gmane.org>
+Subject: RE: [PATCH 27/33] sctp: export sctp_setsockopt_bindx
+Date: Sat, 16 May 2020 15:11:40 +0000
+Message-ID: <05d946ae948946158dbfcbc07939b799@AcuMS.aculab.com>
+References: <20200514062820.GC8564@lst.de>
+ <20200513062649.2100053-1-hch@lst.de> <20200513062649.2100053-28-hch@lst.de>
+ <20200513180058.GB2491@localhost.localdomain>
+ <129070.1589556002@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOQ4uxhPzcX6Ti8UX4WOg9gJJn+YTuk9OgU80d9imoJ2QdXaWQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Dave Chinner <dchinner@redhat.com>, Christoph Hellwig <hch@lst.de>, Miklos Szeredi <miklos@szeredi.hu>, "J. Bruce Fields" <bfields@redhat.com>, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <129070.1589556002-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Content-Language: en-US
+Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: 'David Howells' <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Cc: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org" <drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>, "linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org" <rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, ceph-devel-u79uwXL29TY@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 2020-05-16 at 09:58 +0300, Amir Goldstein wrote:
-> [pulling in nfs guys]
+From: David Howells
+> Sent: 15 May 2020 16:20
+> Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org> wrote:
 > 
-> > > Questions:
-> > > 1. Does sync() result in fully purging inodes on MDS?
-> > 
-> > I don't think so, but again, that code is not trivial to follow. I do
-> > know that the MDS keeps around a "strays directory" which contains
-> > unlinked inodes that are lazily cleaned up. My suspicion is that it's
-> > satisfying lookups out of this cache as well.
-> > 
-> > Which may be fine...the MDS is not required to be POSIX compliant after
-> > all. Only the fs drivers are.
-> > 
-> > > 2. Is i_nlink synchronized among nodes on deferred delete?
-> > > IWO, can inode come back from the dead on client if another node
-> > > has linked it before i_nlink 0 was observed?
-> > 
-> > No, that shouldn't happen. The caps mechanism should ensure that it
-> > can't be observed by other clients until after the change.
-> > 
-> > That said, Luis' current patch doesn't ensure we have the correct caps
-> > to check the i_nlink. We may need to add that in before we can roll with
-> > this.
-> > 
-> > > 3. Can an NFS client be "migrated" from one ceph node to another
-> > > with an open but unlinked file?
-> > > 
-> > 
-> > No. Open files in ceph are generally per-client. You can't pass around a
-> > fd (or equivalent).
+> > > The advantage on using kernel_setsockopt here is that sctp module will
+> > > only be loaded if dlm actually creates a SCTP socket.  With this
+> > > change, sctp will be loaded on setups that may not be actually using
+> > > it. It's a quite big module and might expose the system.
+> >
+> > True.  Not that the intent is to kill kernel space callers of setsockopt,
+> > as I plan to remove the set_fs address space override used for it.
 > 
-> Not sure we are talking about the same thing.
-> It's not ceph fd that is being passed around, it's the NFS client's fd.
-> If there is no case where NFS client would access ceph client2
-> with a handle it got from ceph client1, then there is no reason to satisfy
-> an open_by_handle() call for an unlinked file on client2.
-> If file was opened on client1, it may be "legal" to satisfy open_by_handle()
-> on client2, but I don't see how stopping to satisfy that can break anything.
+> For getsockopt, does it make sense to have the core kernel load optval/optlen
+> into a buffer before calling the protocol driver?  Then the driver need not
+> see the userspace pointer at all.
 > 
+> Similar could be done for setsockopt - allocate a buffer of the size requested
+> by the user inside the kernel and pass it into the driver, then copy the data
+> back afterwards.
 
-Not currently, but eventually we may need to allow for that...which is
-another good reason to handle this on the (Ceph) client instead, as the
-client can then decide whether treat an unlinked file as an ESTALE
-return based on its needs.
+Yes, it also simplifies all the compat code.
+And there is a BPF test in setsockopt that also wants to
+pass on a kernel buffer.
 
-> > > I think what the test is trying to verify is that a "fully purged" inodes
-> > > cannot be opened db handle, but there is no standard way to verify
-> > > "fully purged", so the test resorts to sync() + another sync() + drop_caches.
-> > > 
-> > 
-> > Got it. That makes sense.
-> > 
-> > > Is there anything else that needs to be done on ceph in order to flush
-> > > all deferred operations from this client to MDS?
-> > 
-> > I'm leaning toward something like what Luis has proposed, but adding in
-> > appropriate cap handling.
-> 
-> That sounds fine.
-> 
-> > Basically, we have to consider the situation where one client has the
-> > file open and another client unlinks it, and then does an
-> > open_by_handle_at. Should it succeed in that case?
-> > 
-> > I can see arguments for either way.
-> 
-> IMO, the behavior should be defined for a client that has the file open.
-> For the rest it does not really matter.
-> 
-> My argument is that is it easy to satisfy the test's expectation and conform
-> to behavior of other filesystems without breaking any real workload.
-> 
-> To satisfy the test's expectation, you only need to change behavior of ceph
-> client in i_count 1 use case. If i_count is 1 need to take all relevant caps
-> to check that i_nlink is "globally" 0, before returning ESTALE.
-> But if i_count > 1, no need to bother.
+I'm willing to sit and write the patch.
+Quoting from a post I made later on Friday.
 
-Makes sense. Thanks.
+Basically:
 
--- 
-Jeff Layton <jlayton@kernel.org>
+This patch sequence (to be written) does the following:
+
+Patch 1: Change __sys_setsockopt() to allocate a kernel buffer,
+         copy the data into it then call set_fs(KERNEL_DS).
+         An on-stack buffer (say 64 bytes) will be used for
+         small transfers.
+
+Patch 2: The same for __sys_getsockopt().
+
+Patch 3: Compat setsockopt.
+
+Patch 4: Compat getsockopt.
+
+Patch 5: Remove the user copies from the global socket options code.
+
+Patches 6 to n-1; Remove the user copies from the per-protocol code.
+
+Patch n: Remove the set_fs(KERNEL_DS) from the entry points.
+
+This should be bisectable.
+
+	David
+
+-
+Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
+Registration No: 1397386 (Wales)
