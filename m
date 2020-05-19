@@ -1,107 +1,84 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
-Date: Tue, 19 May 2020 06:43:10 -0400
-Message-ID: <cc459ce1b7314919eaa506a82b9c28df6f41a169.camel@kernel.org>
-References: <20200514111453.GA99187@suse.com>
-         <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
-         <20200514124845.GA12559@suse.com>
-         <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
-         <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
-         <20200515111548.GA54598@suse.com>
-         <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
-         <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
-         <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
-         <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
-         <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: add ignore cache/overlay flag if got redirect reply
+Date: Tue, 19 May 2020 15:32:15 +0200
+Message-ID: <CAOi1vP-oMe2SsbuXQ9oeF+nZaCD87Een5Q1=kNPTeXeLAyHH_w@mail.gmail.com>
+References: <CAKQB+fug_Y4y8wYe-vG=itf+0BmYFPfDm-ch7DTobtkipQz-yw@mail.gmail.com>
+ <CAOi1vP-uF1_0R=5LApR=rdTXSzDWJq3LzuOYPrPmC_TPL909qA@mail.gmail.com> <CAKQB+ftbtXv0ET6OmUMsqKUoz5sRHQA35EprTY82_GC34b10XA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <fstests-owner@vger.kernel.org>
-In-Reply-To: <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
-Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Dave Chinner <dchinner@redhat.com>, Christoph Hellwig <hch@lst.de>, Miklos Szeredi <miklos@szeredi.hu>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47732 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728857AbgESNcL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2020 09:32:11 -0400
+Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67CF5C08C5C0
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2020 06:32:11 -0700 (PDT)
+Received: by mail-il1-x144.google.com with SMTP id j3so13343051ilk.11
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2020 06:32:11 -0700 (PDT)
+In-Reply-To: <CAKQB+ftbtXv0ET6OmUMsqKUoz5sRHQA35EprTY82_GC34b10XA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jerry Lee <leisurelysw24@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@kernel.org>
 
-On Tue, 2020-05-19 at 07:00 +0300, Amir Goldstein wrote:
-> On Tue, May 19, 2020 at 1:30 AM Gregory Farnum <gfarnum@redhat.com> wrote:
-> > Maybe we resolved this conversation; I can't quite tell...
-> 
-> I think v2 patch wraps it up...
-> 
-> [...]
-> 
+On Tue, May 19, 2020 at 12:30 PM Jerry Lee <leisurelysw24@gmail.com> wrote:
+>
+> On Tue, 19 May 2020 at 17:14, Ilya Dryomov <idryomov@gmail.com> wrote:
+> >
+> > On Mon, May 18, 2020 at 10:03 AM Jerry Lee <leisurelysw24@gmail.com> wrote:
+> > >
+> > > osd client should ignore cache/overlay flag if got redirect reply.
+> > > Otherwise, the client hangs when the cache tier is in forward mode.
+> > >
+> > > Similar issues:
+> > >    https://tracker.ceph.com/issues/23296
+> > >    https://tracker.ceph.com/issues/36406
+> > >
+> > > Signed-off-by: Jerry Lee <leisurelysw24@gmail.com>
+> > > ---
+> > >  net/ceph/osd_client.c | 4 +++-
+> > >  1 file changed, 3 insertions(+), 1 deletion(-)
+> > >
+> > > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> > > index 998e26b..1d4973f 100644
+> > > --- a/net/ceph/osd_client.c
+> > > +++ b/net/ceph/osd_client.c
+> > > @@ -3649,7 +3649,9 @@ static void handle_reply(struct ceph_osd *osd,
+> > > struct ceph_msg *msg)
+> > >                  * supported.
+> > >                  */
+> > >                 req->r_t.target_oloc.pool = m.redirect.oloc.pool;
+> > > -               req->r_flags |= CEPH_OSD_FLAG_REDIRECTED;
+> > > +               req->r_flags |= CEPH_OSD_FLAG_REDIRECTED |
+> > > +                               CEPH_OSD_FLAG_IGNORE_OVERLAY |
+> > > +                               CEPH_OSD_FLAG_IGNORE_CACHE;
+> > >                 req->r_tid = 0;
+> > >                 __submit_request(req, false);
+> > >                 goto out_unlock_osdc;
+> >
+> > Hi Jerry,
+> >
+> > Looks good (although the patch was whitespace damaged).  I've fixed
+> > it up, but check out Documentation/process/email-clients.rst.
+> Thanks for sharing the doc!
+> >
+> > Also, out of curiosity, are you actually using the forward cache mode?
+> No, we accidentally found the issue when removing a writeback cache.
+> The kernel client got blocked when the cache mode switched from
+> writeback to forward and waited for the cache pool to be flushed.
+>
+> BTW, a warning (Error EPERM: 'forward' is not a well-supported cache
+> mode and may corrupt your data.) is shown when the cache mode is
+> changed to forward mode.  Does it mean that the data integrity and IO
+> ordering cannot be ensured in this mode?
 
-Agreed.
+Yes.  The problem with redirects is that they can mess up the order
+of requests.  The forward mode is based on redirects and therefore
+inherently flawed.
 
-> > > > Questions:
-> > > > 1. Does sync() result in fully purging inodes on MDS?
-> > > 
-> > > I don't think so, but again, that code is not trivial to follow. I do
-> > > know that the MDS keeps around a "strays directory" which contains
-> > > unlinked inodes that are lazily cleaned up. My suspicion is that it's
-> > > satisfying lookups out of this cache as well.
-> > > 
-> > > Which may be fine...the MDS is not required to be POSIX compliant after
-> > > all. Only the fs drivers are.
-> > 
-> > I don't think this is quite that simple. Yes, the MDS is certainly
-> > giving back stray inodes in response to a lookup-by-ino request. But
-> > that's for a specific purpose: we need to be able to give back caps on
-> > unlinked-but-open files. For NFS specifically, I don't know what the
-> > rules are on NFS file handles and unlinked files, but the Ceph MDS
-> > won't know when files are closed everywhere, and it translates from
-> > NFS fh to Ceph inode using that lookup-by-ino functionality.
-> > 
-> 
-> There is no protocol rule that NFS server MUST return ESTALE
-> for file handle of a deleted file, but there is a rule that it MAY return
-> ESTALE for deleted file. For example, on server restart and traditional
-> block filesystem, there is not much choice.
-> 
-> So returning ESTALE when file is deleted but opened on another ceph
-> client is definitely allowed by the protocol standard, the question is
-> whether changing the behavior will break any existing workloads...
-> 
+Use proxy and readproxy modes instead of forward and readforward.
 
-Right -- that was sort of the point of my original question about the
-xfstest. The fact that ceph wasn't returning ESTALE in this situation
-didn't seem to be technically _wrong_ to me, but the xfstest treated
-that as a failure. It's probably best to return ESTALE since that's the
-conventional behavior, but I don't think it's necessarily required for
-correct operation in general.
+Thanks,
 
-FWIW, if we ever implement O_TMPFILE in ceph, then we may need to
-revisit this code. With that, you can do a 0->1 transition on i_nlink,
-which blows some of the assumptions we're making here out of the water.
-
-> > > > 2. Is i_nlink synchronized among nodes on deferred delete?
-> > > > IWO, can inode come back from the dead on client if another node
-> > > > has linked it before i_nlink 0 was observed?
-> > > 
-> > > No, that shouldn't happen. The caps mechanism should ensure that it
-> > > can't be observed by other clients until after the change.
-> > > 
-> > > That said, Luis' current patch doesn't ensure we have the correct caps
-> > > to check the i_nlink. We may need to add that in before we can roll with
-> > > this.
-> > > 
-> > > > 3. Can an NFS client be "migrated" from one ceph node to another
-> > > > with an open but unlinked file?
-> > > > 
-> > > 
-> > > No. Open files in ceph are generally per-client. You can't pass around a
-> > > fd (or equivalent).
-> > 
-> > But the NFS file handles I think do work across clients, right?
-> > 
-> 
-> Maybe they can, but that would be like NFS server restart, so
-> all bets are off w.r.t open but deleted files.
-> 
-
-They do work across clients, but a file handle is just an identifier for
-an inode. That's completely orthogonal to whether the file is open.
-
--- 
-Jeff Layton <jlayton@kernel.org>
+                Ilya
