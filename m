@@ -1,84 +1,637 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: add ignore cache/overlay flag if got redirect reply
-Date: Tue, 19 May 2020 15:32:15 +0200
-Message-ID: <CAOi1vP-oMe2SsbuXQ9oeF+nZaCD87Een5Q1=kNPTeXeLAyHH_w@mail.gmail.com>
-References: <CAKQB+fug_Y4y8wYe-vG=itf+0BmYFPfDm-ch7DTobtkipQz-yw@mail.gmail.com>
- <CAOi1vP-uF1_0R=5LApR=rdTXSzDWJq3LzuOYPrPmC_TPL909qA@mail.gmail.com> <CAKQB+ftbtXv0ET6OmUMsqKUoz5sRHQA35EprTY82_GC34b10XA@mail.gmail.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] dns: Apply a default TTL to records obtained from getaddrinfo()
+Date: Tue, 19 May 2020 14:39:40 +0100
+Message-ID: <1080378.1589895580@warthog.procyon.org.uk>
+References: <20200518155148.GA2595638@erythro.dev.benboeckel.internal> <158981176590.872823.11683683537698750702.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47732 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728857AbgESNcL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2020 09:32:11 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67CF5C08C5C0
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2020 06:32:11 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id j3so13343051ilk.11
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2020 06:32:11 -0700 (PDT)
-In-Reply-To: <CAKQB+ftbtXv0ET6OmUMsqKUoz5sRHQA35EprTY82_GC34b10XA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jerry Lee <leisurelysw24@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20200518155148.GA2595638-c5pJSKvn3zNoShX0ae22vCpPbLvvZHD8LbaKZrMw/B4@public.gmane.org>
+Content-ID: <1080377.1589895580.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: me-QTASWB020EJSV923RJcDwA@public.gmane.org
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fweimer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, May 19, 2020 at 12:30 PM Jerry Lee <leisurelysw24@gmail.com> wrote:
->
-> On Tue, 19 May 2020 at 17:14, Ilya Dryomov <idryomov@gmail.com> wrote:
-> >
-> > On Mon, May 18, 2020 at 10:03 AM Jerry Lee <leisurelysw24@gmail.com> wrote:
-> > >
-> > > osd client should ignore cache/overlay flag if got redirect reply.
-> > > Otherwise, the client hangs when the cache tier is in forward mode.
-> > >
-> > > Similar issues:
-> > >    https://tracker.ceph.com/issues/23296
-> > >    https://tracker.ceph.com/issues/36406
-> > >
-> > > Signed-off-by: Jerry Lee <leisurelysw24@gmail.com>
-> > > ---
-> > >  net/ceph/osd_client.c | 4 +++-
-> > >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> > > index 998e26b..1d4973f 100644
-> > > --- a/net/ceph/osd_client.c
-> > > +++ b/net/ceph/osd_client.c
-> > > @@ -3649,7 +3649,9 @@ static void handle_reply(struct ceph_osd *osd,
-> > > struct ceph_msg *msg)
-> > >                  * supported.
-> > >                  */
-> > >                 req->r_t.target_oloc.pool = m.redirect.oloc.pool;
-> > > -               req->r_flags |= CEPH_OSD_FLAG_REDIRECTED;
-> > > +               req->r_flags |= CEPH_OSD_FLAG_REDIRECTED |
-> > > +                               CEPH_OSD_FLAG_IGNORE_OVERLAY |
-> > > +                               CEPH_OSD_FLAG_IGNORE_CACHE;
-> > >                 req->r_tid = 0;
-> > >                 __submit_request(req, false);
-> > >                 goto out_unlock_osdc;
-> >
-> > Hi Jerry,
-> >
-> > Looks good (although the patch was whitespace damaged).  I've fixed
-> > it up, but check out Documentation/process/email-clients.rst.
-> Thanks for sharing the doc!
-> >
-> > Also, out of curiosity, are you actually using the forward cache mode?
-> No, we accidentally found the issue when removing a writeback cache.
-> The kernel client got blocked when the cache mode switched from
-> writeback to forward and waited for the cache pool to be flushed.
->
-> BTW, a warning (Error EPERM: 'forward' is not a well-supported cache
-> mode and may corrupt your data.) is shown when the cache mode is
-> changed to forward mode.  Does it mean that the data integrity and IO
-> ordering cannot be ensured in this mode?
+Ben Boeckel <me-QTASWB020EJSV923RJcDwA@public.gmane.org> wrote:
 
-Yes.  The problem with redirects is that they can mess up the order
-of requests.  The forward mode is based on redirects and therefore
-inherently flawed.
+> Is there precedent for this config file format?
 
-Use proxy and readproxy modes instead of forward and readforward.
+Okay, I can change it to:
 
-Thanks,
+	default_ttl =3D <number-of-seconds>
 
-                Ilya
+and strip spaces all over the place.
+
+> But no trailing whitespace is allowed?
+
+Yes...  See a few lines above:
+
+		while (p > buf && isspace(p[-1]))
+			p--;
+		*p =3D 0;
+
+> The valid range should be mentioned in the docs (basically that 0 is not
+> allowed and has no special meaning (it could mean leaving off the TTL as
+> previously done)).
+
+I suppose - that's mainly to make sure I'm not passing an invalid value to=
+ the
+syscall.
+
+> Forwards compatibility is hard with such behavior. Is there any reason
+> this can't be a warning?
+
+I can downgrade it to a warning.  I'm not sure that there's any problem he=
+re,
+but I have met circumstances before where it is the wrong thing to ignore =
+an
+explicit option that you don't support rather than giving an error.
+
+> There's no mention of the leading whitespace support or comments here.
+> Does the file deserve its own manpage?
+
+Um.  I'm not sure.  Quite possibly there should at least be a stub file wi=
+th a
+.so directive in it.
+
+Anyway, how about the attached?
+
+David
+---
+commit cbf0457e0fc99aa5beabe54daeda57be70dfdfce
+Author: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Date:   Tue Apr 14 16:07:26 2020 +0100
+
+    dns: Apply a default TTL to records obtained from getaddrinfo()
+    =
+
+    Address records obtained from getaddrinfo() don't come with any TTL
+    information, even if they're obtained from the DNS, with the result th=
+at
+    key.dns_resolver upcall program doesn't set an expiry time on dns_reso=
+lver
+    records unless they include a component obtained directly from the DNS=
+,
+    such as an SRV or AFSDB record.
+    =
+
+    Fix this to apply a default TTL of 10mins in the event that we haven't=
+ got
+    one.  This can be configured in /etc/keyutils/key.dns_resolver.conf by
+    adding the line:
+    =
+
+            default_ttl =3D <number-of-seconds>
+    =
+
+    to the file.
+    =
+
+    Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
+diff --git a/Makefile b/Makefile
+index 6f79446b..4d055701 100644
+--- a/Makefile
++++ b/Makefile
+@@ -202,6 +202,7 @@ endif
+ 	$(INSTALL) -D key.dns_resolver $(DESTDIR)$(SBINDIR)/key.dns_resolver
+ 	$(INSTALL) -D -m 0644 request-key.conf $(DESTDIR)$(ETCDIR)/request-key.c=
+onf
+ 	mkdir -p $(DESTDIR)$(ETCDIR)/request-key.d
++	mkdir -p $(DESTDIR)$(ETCDIR)/keyutils
+ 	mkdir -p $(DESTDIR)$(MAN1)
+ 	$(INSTALL) -m 0644 $(wildcard man/*.1) $(DESTDIR)$(MAN1)
+ 	mkdir -p $(DESTDIR)$(MAN3)
+diff --git a/dns.afsdb.c b/dns.afsdb.c
+index fa60e04f..986c0f38 100644
+--- a/dns.afsdb.c
++++ b/dns.afsdb.c
+@@ -37,8 +37,6 @@
+  */
+ #include "key.dns.h"
+ =
+
+-static unsigned long afs_ttl =3D ULONG_MAX;
+-
+ /*
+  *
+  */
+@@ -114,8 +112,8 @@ static void afsdb_hosts_to_addrs(ns_msg handle, ns_sec=
+t section)
+ 		}
+ 	}
+ =
+
+-	afs_ttl =3D ttl;
+-	info("ttl: %u", ttl);
++	key_expiry =3D ttl;
++	info("ttl: %u", key_expiry);
+ }
+ =
+
+ /*
+@@ -203,8 +201,8 @@ static void srv_hosts_to_addrs(ns_msg handle, ns_sect =
+section)
+ 		}
+ 	}
+ =
+
+-	afs_ttl =3D ttl;
+-	info("ttl: %u", ttl);
++	key_expiry =3D ttl;
++	info("ttl: %u", key_expiry);
+ }
+ =
+
+ /*
+@@ -240,7 +238,7 @@ static int dns_query_AFSDB(const char *cell)
+ 	/* look up the hostnames we've obtained to get the actual addresses */
+ 	afsdb_hosts_to_addrs(handle, ns_s_an);
+ =
+
+-	info("DNS query AFSDB RR results:%u ttl:%lu", payload_index, afs_ttl);
++	info("DNS query AFSDB RR results:%u ttl:%u", payload_index, key_expiry);
+ 	return 0;
+ }
+ =
+
+@@ -279,7 +277,7 @@ static int dns_query_VL_SRV(const char *cell)
+ 	/* look up the hostnames we've obtained to get the actual addresses */
+ 	srv_hosts_to_addrs(handle, ns_s_an);
+ =
+
+-	info("DNS query VL SRV RR results:%u ttl:%lu", payload_index, afs_ttl);
++	info("DNS query VL SRV RR results:%u ttl:%u", payload_index, key_expiry)=
+;
+ 	return 0;
+ }
+ =
+
+@@ -293,7 +291,7 @@ void afs_instantiate(const char *cell)
+ =
+
+ 	/* set the key's expiry time from the minimum TTL encountered */
+ 	if (!debug_mode) {
+-		ret =3D keyctl_set_timeout(key, afs_ttl);
++		ret =3D keyctl_set_timeout(key, key_expiry);
+ 		if (ret =3D=3D -1)
+ 			error("%s: keyctl_set_timeout: %m", __func__);
+ 	}
+diff --git a/key.dns.h b/key.dns.h
+index b143f4a4..33d0ab3b 100644
+--- a/key.dns.h
++++ b/key.dns.h
+@@ -29,6 +29,7 @@
+ #include <stdlib.h>
+ #include <unistd.h>
+ #include <time.h>
++#include <ctype.h>
+ =
+
+ #define	MAX_VLS			15	/* Max Volume Location Servers Per-Cell */
+ #define	INET_IP4_ONLY		0x1
+@@ -42,6 +43,7 @@
+ extern key_serial_t key;
+ extern int debug_mode;
+ extern unsigned mask;
++extern unsigned int key_expiry;
+ =
+
+ #define N_PAYLOAD 256
+ extern struct iovec payload[N_PAYLOAD];
+@@ -52,6 +54,8 @@ void error(const char *fmt, ...);
+ extern __attribute__((format(printf, 1, 2)))
+ void _error(const char *fmt, ...);
+ extern __attribute__((format(printf, 1, 2)))
++void warning(const char *fmt, ...);
++extern __attribute__((format(printf, 1, 2)))
+ void info(const char *fmt, ...);
+ extern __attribute__((noreturn))
+ void nsError(int err, const char *domain);
+diff --git a/key.dns_resolver.c b/key.dns_resolver.c
+index 4ac27d30..c241eda3 100644
+--- a/key.dns_resolver.c
++++ b/key.dns_resolver.c
+@@ -46,10 +46,13 @@ static const char key_type[] =3D "dns_resolver";
+ static const char a_query_type[] =3D "a";
+ static const char aaaa_query_type[] =3D "aaaa";
+ static const char afsdb_query_type[] =3D "afsdb";
++static const char *config_file =3D "/etc/keyutils/key.dns_resolver.conf";
++static bool config_specified =3D false;
+ key_serial_t key;
+ static int verbose;
+ int debug_mode;
+ unsigned mask =3D INET_ALL;
++unsigned int key_expiry =3D 10 * 60;
+ =
+
+ =
+
+ /*
+@@ -105,6 +108,23 @@ void _error(const char *fmt, ...)
+ 	va_end(va);
+ }
+ =
+
++/*
++ * Pring a warning to stderr or the syslog
++ */
++void warning(const char *fmt, ...)
++{
++	va_list va;
++
++	va_start(va, fmt);
++	if (isatty(2)) {
++		vfprintf(stderr, fmt, va);
++		fputc('\n', stderr);
++	} else {
++		vsyslog(LOG_WARNING, fmt, va);
++	}
++	va_end(va);
++}
++
+ /*
+  * Print status information
+  */
+@@ -272,6 +292,7 @@ void dump_payload(void)
+ 	}
+ =
+
+ 	info("The key instantiation data is '%s'", buf);
++	info("The expiry time is %us", key_expiry);
+ 	free(buf);
+ }
+ =
+
+@@ -412,6 +433,9 @@ int dns_query_a_or_aaaa(const char *hostname, char *op=
+tions)
+ =
+
+ 	/* load the key with data key */
+ 	if (!debug_mode) {
++		ret =3D keyctl_set_timeout(key, key_expiry);
++		if (ret =3D=3D -1)
++			error("%s: keyctl_set_timeout: %m", __func__);
+ 		ret =3D keyctl_instantiate_iov(key, payload, payload_index, 0);
+ 		if (ret =3D=3D -1)
+ 			error("%s: keyctl_instantiate: %m", __func__);
+@@ -420,6 +444,145 @@ int dns_query_a_or_aaaa(const char *hostname, char *=
+options)
+ 	exit(0);
+ }
+ =
+
++/*
++ * Read the config file.
++ */
++static void read_config(void)
++{
++	FILE *f;
++	char buf[4096], *b, *p, *k, *v;
++	unsigned int line =3D 0, u;
++	int n;
++
++	printf("READ CONFIG %s\n", config_file);
++
++	f =3D fopen(config_file, "r");
++	if (!f) {
++		if (errno =3D=3D ENOENT && !config_specified) {
++			debug("%s: %m", config_file);
++			return;
++		}
++		error("%s: %m", config_file);
++	}
++
++	while (fgets(buf, sizeof(buf) - 1, f)) {
++		line++;
++
++		/* Trim off leading and trailing spaces and discard whole-line
++		 * comments.
++		 */
++		b =3D buf;
++		while (isspace(*b))
++			b++;
++		if (!*b || *b =3D=3D '#')
++			continue;
++		p =3D strchr(b, '\n');
++		if (!p)
++			error("%s:%u: line missing newline or too long", config_file, line);
++		while (p > buf && isspace(p[-1]))
++			p--;
++		*p =3D 0;
++
++		/* Split into key[=3Dvalue] pairs and trim spaces. */
++		k =3D b;
++		v =3D NULL;
++		b =3D strchr(b, '=3D');
++		if (b) {
++			char quote =3D 0;
++			bool esc =3D false;
++
++			if (b =3D=3D k)
++				error("%s:%u: Unspecified key",
++				      config_file, line);
++
++			/* NUL-terminate the key. */
++			for (p =3D b - 1; isspace(*p); p--)
++				;
++			p[1] =3D 0;
++
++			/* Strip leading spaces */
++			b++;
++			while (isspace(*b))
++				b++;
++			if (!*b)
++				goto missing_value;
++
++			if (*b =3D=3D '"' || *b =3D=3D '\'') {
++				quote =3D *b;
++				b++;
++			}
++			v =3D p =3D b;
++			while (*b) {
++				if (esc) {
++					esc =3D false;
++					*p++ =3D *b++;
++					continue;
++				}
++				if (*b =3D=3D '\\') {
++					esc =3D true;
++					b++;
++					continue;
++				}
++				if (*b =3D=3D quote) {
++					b++;
++					if (*b)
++						goto post_quote_data;
++					quote =3D 0;
++					break;
++				}
++				if (!quote && *b =3D=3D '#')
++					break; /* Terminal comment */
++				*p++ =3D *b++;
++			}
++
++			if (esc)
++				error("%s:%u: Incomplete escape", config_file, line);
++			if (quote)
++				error("%s:%u: Unclosed quotes", config_file, line);
++			*p =3D 0;
++		}
++
++		if (strcmp(k, "default_ttl") =3D=3D 0) {
++			if (!v)
++				goto missing_value;
++			if (sscanf(v, "%u%n", &u, &n) !=3D 1)
++				goto bad_value;
++			if (v[n])
++				goto extra_data;
++			if (u < 1 || u > INT_MAX)
++				goto out_of_range;
++			key_expiry =3D u;
++		} else {
++			warning("%s:%u: Unknown option '%s'", config_file, line, k);
++		}
++	}
++
++	if (ferror(f) || fclose(f) =3D=3D EOF)
++		error("%s: %m", config_file);
++	return;
++
++missing_value:
++	error("%s:%u: %s: Missing value", config_file, line, k);
++post_quote_data:
++	error("%s:%u: %s: Data after closing quote", config_file, line, k);
++bad_value:
++	error("%s:%u: %s: Bad value", config_file, line, k);
++extra_data:
++	error("%s:%u: %s: Extra data supplied", config_file, line, k);
++out_of_range:
++	error("%s:%u: %s: Value out of range", config_file, line, k);
++}
++
++/*
++ * Dump the configuration after parsing the config file.
++ */
++static __attribute__((noreturn))
++void config_dumper(void)
++{
++	printf("default_ttl =3D %u\n", key_expiry);
++	exit(0);
++}
++
+ /*
+  * Print usage details,
+  */
+@@ -428,22 +591,24 @@ void usage(void)
+ {
+ 	if (isatty(2)) {
+ 		fprintf(stderr,
+-			"Usage: %s [-vv] key_serial\n",
++			"Usage: %s [-vv] [-c config] key_serial\n",
+ 			prog);
+ 		fprintf(stderr,
+-			"Usage: %s -D [-vv] <desc> <calloutinfo>\n",
++			"Usage: %s -D [-vv] [-c config] <desc> <calloutinfo>\n",
+ 			prog);
+ 	} else {
+-		info("Usage: %s [-vv] key_serial", prog);
++		info("Usage: %s [-vv] [-c config] key_serial", prog);
+ 	}
+ 	exit(2);
+ }
+ =
+
+-const struct option long_options[] =3D {
+-	{ "debug",	0, NULL, 'D' },
+-	{ "verbose",	0, NULL, 'v' },
+-	{ "version",	0, NULL, 'V' },
+-	{ NULL,		0, NULL, 0 }
++static const struct option long_options[] =3D {
++	{ "config",		0, NULL, 'c' },
++	{ "debug",		0, NULL, 'D' },
++	{ "dump-config",	0, NULL, 2   },
++	{ "verbose",		0, NULL, 'v' },
++	{ "version",		0, NULL, 'V' },
++	{ NULL,			0, NULL, 0 }
+ };
+ =
+
+ /*
+@@ -455,11 +620,19 @@ int main(int argc, char *argv[])
+ 	char *keyend, *p;
+ 	char *callout_info =3D NULL;
+ 	char *buf =3D NULL, *name;
++	bool dump_config =3D false;
+ =
+
+ 	openlog(prog, 0, LOG_DAEMON);
+ =
+
+-	while ((ret =3D getopt_long(argc, argv, "vDV", long_options, NULL)) !=3D=
+ -1) {
++	while ((ret =3D getopt_long(argc, argv, "c:vDV", long_options, NULL)) !=3D=
+ -1) {
+ 		switch (ret) {
++		case 'c':
++			config_file =3D optarg;
++			config_specified =3D true;
++			continue;
++		case 2:
++			dump_config =3D true;
++			continue;
+ 		case 'D':
+ 			debug_mode =3D 1;
+ 			continue;
+@@ -481,6 +654,9 @@ int main(int argc, char *argv[])
+ =
+
+ 	argc -=3D optind;
+ 	argv +=3D optind;
++	read_config();
++	if (dump_config)
++		config_dumper();
+ =
+
+ 	if (!debug_mode) {
+ 		if (argc !=3D 1)
+@@ -542,7 +718,7 @@ int main(int argc, char *argv[])
+ 	name++;
+ =
+
+ 	info("Query type: '%*.*s'", qtlen, qtlen, keyend);
+-	=
+
++
+ 	if ((qtlen =3D=3D sizeof(a_query_type) - 1 &&
+ 	     memcmp(keyend, a_query_type, sizeof(a_query_type) - 1) =3D=3D 0) ||
+ 	    (qtlen =3D=3D sizeof(aaaa_query_type) - 1 &&
+diff --git a/man/key.dns_resolver.8 b/man/key.dns_resolver.8
+index e1882e06..0b17edd6 100644
+--- a/man/key.dns_resolver.8
++++ b/man/key.dns_resolver.8
+@@ -7,28 +7,41 @@
+ .\" as published by the Free Software Foundation; either version
+ .\" 2 of the License, or (at your option) any later version.
+ .\"
+-.TH KEY.DNS_RESOLVER 8 "04 Mar 2011" Linux "Linux Key Management Utilitie=
+s"
++.TH KEY.DNS_RESOLVER 8 "18 May 2020" Linux "Linux Key Management Utilitie=
+s"
+ .SH NAME
+ key.dns_resolver \- upcall for request\-key to handle dns_resolver keys
+ .SH SYNOPSIS
+ \fB/sbin/key.dns_resolver \fR<key>
+ .br
+-\fB/sbin/key.dns_resolver \fR\-D [\-v] [\-v] <keydesc> <calloutinfo>
++\fB/sbin/key.dns_resolver \fR--dump-config [\-c <configfile>]
++.br
++\fB/sbin/key.dns_resolver \fR\-D [\-v] [\-v] [\-c <configfile>] <desc>
++.br
++<calloutinfo>
+ .SH DESCRIPTION
+ This program is invoked by request\-key on behalf of the kernel when kern=
+el
+ services (such as NFS, CIFS and AFS) want to perform a hostname lookup an=
+d the
+ kernel does not have the key cached.  It is not ordinarily intended to be
+ called directly.
+ .P
+-It can be called in debugging mode to test its functionality by passing a
+-\fB\-D\fR flag on the command line.  For this to work, the key descriptio=
+n and
+-the callout information must be supplied.  Verbosity can be increased by
+-supplying one or more \fB\-v\fR flags.
++There program has internal parameters that can be changed with a configur=
+ation
++file (see key.dns_resolver.conf(5) for more information).  The default
++configuration file is in /etc, but this can be overridden with the \fB-c\=
+fR
++flag.
++.P
++The program can be called in debugging mode to test its functionality by
++passing a \fB\-D\fR or \fB\--debug\fR flag on the command line.  For this=
+ to
++work, the key description and the callout information must be supplied.
++Verbosity can be increased by supplying one or more \fB\-v\fR flags.
++.P
++The program may also be called with \fB--dump-config\fR to show the value=
+s that
++configurable parameters will have after parsing the config file.
+ .SH ERRORS
+ All errors will be logged to the syslog.
+ .SH SEE ALSO
+ .ad l
+ .nh
++.BR key.dns_resolver.conf (5),
+ .BR request\-key.conf (5),
+ .BR keyrings (7),
+ .BR request\-key (8)
+diff --git a/man/key.dns_resolver.conf.5 b/man/key.dns_resolver.conf.5
+new file mode 100644
+index 00000000..03d04049
+--- /dev/null
++++ b/man/key.dns_resolver.conf.5
+@@ -0,0 +1,48 @@
++.\" -*- nroff -*-
++.\" Copyright (C) 2020 Red Hat, Inc. All Rights Reserved.
++.\" Written by David Howells (dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)
++.\"
++.\" This program is free software; you can redistribute it and/or
++.\" modify it under the terms of the GNU General Public License
++.\" as published by the Free Software Foundation; either version
++.\" 2 of the License, or (at your option) any later version.
++.\"
++.TH KEY.DNS_RESOLVER.CONF 5 "18 May 2020" Linux "Linux Key Management Uti=
+lities"
++.SH NAME
++key.dns_resolver.conf \- Kernel DNS resolver config
++.SH DESCRIPTION
++This file is used by the key.dns_resolver(5) program to set parameters.
++Unless otherwise overridden with the \fB\-c\fR flag, the program reads:
++.IP
++/etc/key.dns_resolver.conf
++.P
++Configuration options are given in \fBkey[=3Dvalue]\fR form, where \fBval=
+ue\fR is
++optional.  If present, the value may be surrounded by a pair of single ('=
+') or
++double quotes ("") which will be stripped off.  The special characters in=
+ the
++value may be escaped with a backslash to turn them into ordinary characte=
+rs.
++.P
++Lines beginning with a '#' are considered comments and ignored.  A '#' sy=
+mbol
++anywhere after the '=3D' makes the rest of the line into a comment unless=
+ the '#'
++is inside a quoted section or is escaped.
++.P
++Leading and trailing spaces and spaces around the '=3D' symbol will be st=
+ripped
++off.
++.P
++Available options include:
++.TP
++.B default_ttl=3D<number>
++The number of seconds to set as the expiration on a cached record.  This =
+will
++be overridden if the program manages to retrieve TTL information along wi=
+th
++the addresses (if, for example, it accesses the DNS directly).  The defau=
+lt is
++600 seconds.  The value must be in the range 1 to INT_MAX.
++.P
++The file can also include comments beginning with a '#' character unless
++otherwise suppressed by being inside a quoted value or being escaped with=
+ a
++backslash.
++
++.SH FILES
++.ul
++/etc/key.dns_resolver.conf
++.ul 0
++.SH SEE ALSO
++\fBkey.dns_resolver\fR(8)
