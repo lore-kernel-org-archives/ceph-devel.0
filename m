@@ -1,84 +1,107 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH v2] ceph: don't return -ESTALE if there's still an open
- file
-Date: Tue, 19 May 2020 06:32:55 -0400
-Message-ID: <a9793df5b119b81b995b903505006076811227ed.camel@kernel.org>
-References: <20200518174726.GA84496@suse.com>
+Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
+Date: Tue, 19 May 2020 06:43:10 -0400
+Message-ID: <cc459ce1b7314919eaa506a82b9c28df6f41a169.camel@kernel.org>
+References: <20200514111453.GA99187@suse.com>
+         <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
+         <20200514124845.GA12559@suse.com>
+         <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
+         <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
+         <20200515111548.GA54598@suse.com>
+         <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
+         <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
+         <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
+         <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
+         <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200518174726.GA84496@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>, Amir Goldstein <amir73il@gmail.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <fstests-owner@vger.kernel.org>
+In-Reply-To: <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Luis Henriques <lhenriques@suse.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Dave Chinner <dchinner@redhat.com>, Christoph Hellwig <hch@lst.de>, Miklos Szeredi <miklos@szeredi.hu>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 2020-05-18 at 18:47 +0100, Luis Henriques wrote:
-> Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
-> a file handle to dentry"), this fixes another corner case with
-> name_to_handle_at/open_by_handle_at.  The issue has been detected by
-> xfstest generic/467, when doing:
+On Tue, 2020-05-19 at 07:00 +0300, Amir Goldstein wrote:
+> On Tue, May 19, 2020 at 1:30 AM Gregory Farnum <gfarnum@redhat.com> wrote:
+> > Maybe we resolved this conversation; I can't quite tell...
 > 
->  - name_to_handle_at("/cephfs/myfile")
->  - open("/cephfs/myfile")
->  - unlink("/cephfs/myfile")
->  - sync; sync;
->  - drop caches
->  - open_by_handle_at()
+> I think v2 patch wraps it up...
 > 
-> The call to open_by_handle_at should not fail because the file hasn't been
-> deleted yet (only unlinked) and we do have a valid handle to it.  -ESTALE
-> shall be returned only if i_nlink is 0 *and* i_count is 1.
-> 
-> This patch also makes sure we have LINK caps before checking i_nlink.
-> 
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
-> Hi!
-> 
-> (and sorry for the delay in my reply!)
-> 
-> So, from the discussion thread and some IRC chat with Jeff, I'm sending
-> v2.  What changed?  Everything! :-)
-> 
-> - Use i_count instead of __ceph_is_file_opened to check for open files
-> - Add call to ceph_do_getattr to make sure we have LINK caps before
->   accessing i_nlink
-> 
-> Cheers,
-> --
-> Luis
-> 
->  fs/ceph/export.c | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> index 79dc06881e78..e088843a7734 100644
-> --- a/fs/ceph/export.c
-> +++ b/fs/ceph/export.c
-> @@ -172,9 +172,16 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
->  static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
->  {
->  	struct inode *inode = __lookup_inode(sb, ino);
-> +	int err;
-> +
->  	if (IS_ERR(inode))
->  		return ERR_CAST(inode);
-> -	if (inode->i_nlink == 0) {
-> +	/* We need LINK caps to reliably check i_nlink */
-> +	err = ceph_do_getattr(inode, CEPH_CAP_LINK_SHARED, false);
-> +	if (err)
-> +		return ERR_PTR(err);
-> +	/* -ESTALE if inode as been unlinked and no file is open */
-> +	if ((inode->i_nlink == 0) && (atomic_read(&inode->i_count) == 1)) {
->  		iput(inode);
->  		return ERR_PTR(-ESTALE);
->  	}
+> [...]
 > 
 
-Looks good. Merged into testing branch.
+Agreed.
 
-Thanks!
+> > > > Questions:
+> > > > 1. Does sync() result in fully purging inodes on MDS?
+> > > 
+> > > I don't think so, but again, that code is not trivial to follow. I do
+> > > know that the MDS keeps around a "strays directory" which contains
+> > > unlinked inodes that are lazily cleaned up. My suspicion is that it's
+> > > satisfying lookups out of this cache as well.
+> > > 
+> > > Which may be fine...the MDS is not required to be POSIX compliant after
+> > > all. Only the fs drivers are.
+> > 
+> > I don't think this is quite that simple. Yes, the MDS is certainly
+> > giving back stray inodes in response to a lookup-by-ino request. But
+> > that's for a specific purpose: we need to be able to give back caps on
+> > unlinked-but-open files. For NFS specifically, I don't know what the
+> > rules are on NFS file handles and unlinked files, but the Ceph MDS
+> > won't know when files are closed everywhere, and it translates from
+> > NFS fh to Ceph inode using that lookup-by-ino functionality.
+> > 
+> 
+> There is no protocol rule that NFS server MUST return ESTALE
+> for file handle of a deleted file, but there is a rule that it MAY return
+> ESTALE for deleted file. For example, on server restart and traditional
+> block filesystem, there is not much choice.
+> 
+> So returning ESTALE when file is deleted but opened on another ceph
+> client is definitely allowed by the protocol standard, the question is
+> whether changing the behavior will break any existing workloads...
+> 
+
+Right -- that was sort of the point of my original question about the
+xfstest. The fact that ceph wasn't returning ESTALE in this situation
+didn't seem to be technically _wrong_ to me, but the xfstest treated
+that as a failure. It's probably best to return ESTALE since that's the
+conventional behavior, but I don't think it's necessarily required for
+correct operation in general.
+
+FWIW, if we ever implement O_TMPFILE in ceph, then we may need to
+revisit this code. With that, you can do a 0->1 transition on i_nlink,
+which blows some of the assumptions we're making here out of the water.
+
+> > > > 2. Is i_nlink synchronized among nodes on deferred delete?
+> > > > IWO, can inode come back from the dead on client if another node
+> > > > has linked it before i_nlink 0 was observed?
+> > > 
+> > > No, that shouldn't happen. The caps mechanism should ensure that it
+> > > can't be observed by other clients until after the change.
+> > > 
+> > > That said, Luis' current patch doesn't ensure we have the correct caps
+> > > to check the i_nlink. We may need to add that in before we can roll with
+> > > this.
+> > > 
+> > > > 3. Can an NFS client be "migrated" from one ceph node to another
+> > > > with an open but unlinked file?
+> > > > 
+> > > 
+> > > No. Open files in ceph are generally per-client. You can't pass around a
+> > > fd (or equivalent).
+> > 
+> > But the NFS file handles I think do work across clients, right?
+> > 
+> 
+> Maybe they can, but that would be like NFS server restart, so
+> all bets are off w.r.t open but deleted files.
+> 
+
+They do work across clients, but a file handle is just an identifier for
+an inode. That's completely orthogonal to whether the file is open.
+
 -- 
 Jeff Layton <jlayton@kernel.org>
