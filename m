@@ -1,83 +1,126 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 31/33] sctp: add sctp_sock_set_nodelay
-Date: Wed, 20 May 2020 21:55:07 +0200
-Message-ID: <20200520195509.2215098-32-hch@lst.de>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 23/33] ipv4: add ip_sock_set_mtu_discover
+Date: Wed, 20 May 2020 21:54:59 +0200
+Message-ID: <20200520195509.2215098-24-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20200520195509.2215098-1-hch-jcswGhMUV9g@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <cluster-devel-bounces@redhat.com>
+In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/cluster-devel>
+List-Post: <mailto:cluster-devel@redhat.com>
+List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
+Sender: cluster-devel-bounces@redhat.com
+Errors-To: cluster-devel-bounces@redhat.com
+To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
+Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, David Howells <dhowells@redhat.com>, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly set the SCTP_NODELAY sockopt from kernel space
-without going through a fake uaccess.
+Add a helper to directly set the IP_MTU_DISCOVER sockopt from kernel
+space without going through a fake uaccess.
 
-Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: David Howells <dhowells@redhat.com> [rxrpc bits]
 ---
- fs/dlm/lowcomms.c       | 10 ++--------
- include/net/sctp/sctp.h |  7 +++++++
- 2 files changed, 9 insertions(+), 8 deletions(-)
+ include/net/ip.h         |  1 +
+ net/ipv4/ip_sockglue.c   | 11 +++++++++++
+ net/rxrpc/local_object.c |  8 +-------
+ net/rxrpc/output.c       | 14 +++++---------
+ 4 files changed, 18 insertions(+), 16 deletions(-)
 
-diff --git a/fs/dlm/lowcomms.c b/fs/dlm/lowcomms.c
-index 69333728d871b..9f1c3cdc9d653 100644
---- a/fs/dlm/lowcomms.c
-+++ b/fs/dlm/lowcomms.c
-@@ -914,7 +914,6 @@ static int sctp_bind_addrs(struct connection *con, uint16_t port)
- static void sctp_connect_to_sock(struct connection *con)
- {
- 	struct sockaddr_storage daddr;
--	int one = 1;
- 	int result;
- 	int addr_len;
- 	struct socket *sock;
-@@ -961,8 +960,7 @@ static void sctp_connect_to_sock(struct connection *con)
- 	log_print("connecting to %d", con->nodeid);
- 
- 	/* Turn off Nagle's algorithm */
--	kernel_setsockopt(sock, SOL_SCTP, SCTP_NODELAY, (char *)&one,
--			  sizeof(one));
-+	sctp_sock_set_nodelay(sock->sk);
- 
- 	/*
- 	 * Make sock->ops->connect() function return in specified time,
-@@ -1176,7 +1174,6 @@ static int sctp_listen_for_all(void)
- 	struct socket *sock = NULL;
- 	int result = -EINVAL;
- 	struct connection *con = nodeid2con(0, GFP_NOFS);
--	int one = 1;
- 
- 	if (!con)
- 		return -ENOMEM;
-@@ -1191,10 +1188,7 @@ static int sctp_listen_for_all(void)
- 	}
- 
- 	sock_set_rcvbuf(sock->sk, NEEDED_RMEM);
--	result = kernel_setsockopt(sock, SOL_SCTP, SCTP_NODELAY, (char *)&one,
--				   sizeof(one));
--	if (result < 0)
--		log_print("Could not set SCTP NODELAY error %d\n", result);
-+	sctp_sock_set_nodelay(sock->sk);
- 
- 	write_lock_bh(&sock->sk->sk_callback_lock);
- 	/* Init con struct */
-diff --git a/include/net/sctp/sctp.h b/include/net/sctp/sctp.h
-index 3ab5c6bbb90bd..f8bcb75bb0448 100644
---- a/include/net/sctp/sctp.h
-+++ b/include/net/sctp/sctp.h
-@@ -615,4 +615,11 @@ static inline bool sctp_newsk_ready(const struct sock *sk)
- 	return sock_flag(sk, SOCK_DEAD) || sk->sk_socket;
+diff --git a/include/net/ip.h b/include/net/ip.h
+index f063a491b9063..d3649c49dd333 100644
+--- a/include/net/ip.h
++++ b/include/net/ip.h
+@@ -766,6 +766,7 @@ static inline bool inetdev_valid_mtu(unsigned int mtu)
  }
  
-+static inline void sctp_sock_set_nodelay(struct sock *sk)
+ void ip_sock_set_freebind(struct sock *sk);
++int ip_sock_set_mtu_discover(struct sock *sk, int val);
+ void ip_sock_set_recverr(struct sock *sk);
+ void ip_sock_set_tos(struct sock *sk, int val);
+ 
+diff --git a/net/ipv4/ip_sockglue.c b/net/ipv4/ip_sockglue.c
+index 9a6a65b66f9d3..a3c46ec95a756 100644
+--- a/net/ipv4/ip_sockglue.c
++++ b/net/ipv4/ip_sockglue.c
+@@ -597,6 +597,17 @@ void ip_sock_set_recverr(struct sock *sk)
+ }
+ EXPORT_SYMBOL(ip_sock_set_recverr);
+ 
++int ip_sock_set_mtu_discover(struct sock *sk, int val)
 +{
++	if (val < IP_PMTUDISC_DONT || val > IP_PMTUDISC_OMIT)
++		return -EINVAL;
 +	lock_sock(sk);
-+	sctp_sk(sk)->nodelay = true;
++	inet_sk(sk)->pmtudisc = val;
 +	release_sock(sk);
++	return 0;
 +}
++EXPORT_SYMBOL(ip_sock_set_mtu_discover);
 +
- #endif /* __net_sctp_h__ */
+ /*
+  *	Socket option code for IP. This is the end of the line after any
+  *	TCP,UDP etc options on an IP socket.
+diff --git a/net/rxrpc/local_object.c b/net/rxrpc/local_object.c
+index 4c0e8fe5ec1fb..6f4e6b4817cf2 100644
+--- a/net/rxrpc/local_object.c
++++ b/net/rxrpc/local_object.c
+@@ -174,13 +174,7 @@ static int rxrpc_open_socket(struct rxrpc_local *local, struct net *net)
+ 		ip_sock_set_recverr(local->socket->sk);
+ 
+ 		/* we want to set the don't fragment bit */
+-		opt = IP_PMTUDISC_DO;
+-		ret = kernel_setsockopt(local->socket, SOL_IP, IP_MTU_DISCOVER,
+-					(char *) &opt, sizeof(opt));
+-		if (ret < 0) {
+-			_debug("setsockopt failed");
+-			goto error;
+-		}
++		ip_sock_set_mtu_discover(local->socket->sk, IP_PMTUDISC_DO);
+ 
+ 		/* We want receive timestamps. */
+ 		sock_enable_timestamps(local->socket->sk);
+diff --git a/net/rxrpc/output.c b/net/rxrpc/output.c
+index 90e263c6aa69e..ad0234e1e1713 100644
+--- a/net/rxrpc/output.c
++++ b/net/rxrpc/output.c
+@@ -321,7 +321,7 @@ int rxrpc_send_data_packet(struct rxrpc_call *call, struct sk_buff *skb,
+ 	struct kvec iov[2];
+ 	rxrpc_serial_t serial;
+ 	size_t len;
+-	int ret, opt;
++	int ret;
+ 
+ 	_enter(",{%d}", skb->len);
+ 
+@@ -476,18 +476,14 @@ int rxrpc_send_data_packet(struct rxrpc_call *call, struct sk_buff *skb,
+ 	switch (conn->params.local->srx.transport.family) {
+ 	case AF_INET6:
+ 	case AF_INET:
+-		opt = IP_PMTUDISC_DONT;
+-		kernel_setsockopt(conn->params.local->socket,
+-				  SOL_IP, IP_MTU_DISCOVER,
+-				  (char *)&opt, sizeof(opt));
++		ip_sock_set_mtu_discover(conn->params.local->socket->sk,
++				IP_PMTUDISC_DONT);
+ 		ret = kernel_sendmsg(conn->params.local->socket, &msg,
+ 				     iov, 2, len);
+ 		conn->params.peer->last_tx_at = ktime_get_seconds();
+ 
+-		opt = IP_PMTUDISC_DO;
+-		kernel_setsockopt(conn->params.local->socket,
+-				  SOL_IP, IP_MTU_DISCOVER,
+-				  (char *)&opt, sizeof(opt));
++		ip_sock_set_mtu_discover(conn->params.local->socket->sk,
++				IP_PMTUDISC_DO);
+ 		break;
+ 
+ 	default:
 -- 
 2.26.2
