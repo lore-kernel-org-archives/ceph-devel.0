@@ -1,136 +1,92 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 08/33] net: add sock_enable_timestamps
-Date: Wed, 20 May 2020 21:54:44 +0200
-Message-ID: <20200520195509.2215098-9-hch@lst.de>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 11/33] net: add sock_set_reuseport
+Date: Wed, 20 May 2020 21:54:47 +0200
+Message-ID: <20200520195509.2215098-12-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
-In-Reply-To: <20200520195509.2215098-1-hch-jcswGhMUV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linbit.com/mailman/options/drbd-dev>,
-	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linbit.com/pipermail/drbd-dev>
-List-Post: <mailto:drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
-List-Help: <mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linbit.com/mailman/listinfo/drbd-dev>,
-	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=subscribe>
-Sender: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
-Errors-To: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
-To: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+Content-Transfer-Encoding: 8bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
+Sender: netdev-owner@vger.kernel.org
+To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly enable timestamps instead of setting the
-SO_TIMESTAMP* sockopts from kernel space and going through a fake
-uaccess.
+Add a helper to directly set the SO_REUSEPORT sockopt from kernel space
+without going through a fake uaccess.
 
-Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- include/net/sock.h       |  1 +
- net/core/sock.c          | 47 +++++++++++++++++++++++++---------------
- net/rxrpc/local_object.c |  8 +------
- 3 files changed, 31 insertions(+), 25 deletions(-)
+ include/net/sock.h    |  1 +
+ net/core/sock.c       |  8 ++++++++
+ net/sunrpc/xprtsock.c | 17 +----------------
+ 3 files changed, 10 insertions(+), 16 deletions(-)
 
 diff --git a/include/net/sock.h b/include/net/sock.h
-index cdec7bc055d5b..99ef43508d2b5 100644
+index c997289aabbf9..d994daa418ec2 100644
 --- a/include/net/sock.h
 +++ b/include/net/sock.h
-@@ -2689,6 +2689,7 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
- void sock_def_readable(struct sock *sk);
- 
- int sock_bindtoindex(struct sock *sk, int ifindex);
-+void sock_enable_timestamps(struct sock *sk);
- void sock_no_linger(struct sock *sk);
+@@ -2695,6 +2695,7 @@ void sock_set_keepalive(struct sock *sk);
  void sock_set_priority(struct sock *sk, u32 priority);
+ void sock_set_rcvbuf(struct sock *sk, int val);
  void sock_set_reuseaddr(struct sock *sk);
++void sock_set_reuseport(struct sock *sk);
+ void sock_set_sndtimeo(struct sock *sk, s64 secs);
+ 
+ #endif	/* _SOCK_H */
 diff --git a/net/core/sock.c b/net/core/sock.c
-index 23f80880fbb2c..e4a4dd2b3d8b3 100644
+index 3c6ebf952e9ad..2ca3425b519c0 100644
 --- a/net/core/sock.c
 +++ b/net/core/sock.c
-@@ -757,6 +757,28 @@ void sock_set_sndtimeo(struct sock *sk, s64 secs)
+@@ -729,6 +729,14 @@ void sock_set_reuseaddr(struct sock *sk)
  }
- EXPORT_SYMBOL(sock_set_sndtimeo);
+ EXPORT_SYMBOL(sock_set_reuseaddr);
  
-+static void __sock_set_timestamps(struct sock *sk, bool val, bool new, bool ns)
-+{
-+	if (val)  {
-+		sock_valbool_flag(sk, SOCK_TSTAMP_NEW, new);
-+		sock_valbool_flag(sk, SOCK_RCVTSTAMPNS, ns);
-+		sock_set_flag(sk, SOCK_RCVTSTAMP);
-+		sock_enable_timestamp(sk, SOCK_TIMESTAMP);
-+	} else {
-+		sock_reset_flag(sk, SOCK_RCVTSTAMP);
-+		sock_reset_flag(sk, SOCK_RCVTSTAMPNS);
-+		sock_reset_flag(sk, SOCK_TSTAMP_NEW);
-+	}
-+}
-+
-+void sock_enable_timestamps(struct sock *sk)
++void sock_set_reuseport(struct sock *sk)
 +{
 +	lock_sock(sk);
-+	__sock_set_timestamps(sk, true, false, true);
++	sk->sk_reuseport = true;
 +	release_sock(sk);
 +}
-+EXPORT_SYMBOL(sock_enable_timestamps);
++EXPORT_SYMBOL(sock_set_reuseport);
 +
- /*
-  *	This is meant for all protocols to use and covers goings on
-  *	at the socket level. Everything here is generic.
-@@ -948,28 +970,17 @@ int sock_setsockopt(struct socket *sock, int level, int optname,
- 		break;
+ void sock_no_linger(struct sock *sk)
+ {
+ 	lock_sock(sk);
+diff --git a/net/sunrpc/xprtsock.c b/net/sunrpc/xprtsock.c
+index 30082cd039960..399848c2bcb29 100644
+--- a/net/sunrpc/xprtsock.c
++++ b/net/sunrpc/xprtsock.c
+@@ -1594,21 +1594,6 @@ static int xs_get_random_port(void)
+ 	return rand + min;
+ }
  
- 	case SO_TIMESTAMP_OLD:
-+		__sock_set_timestamps(sk, valbool, false, false);
-+		break;
- 	case SO_TIMESTAMP_NEW:
-+		__sock_set_timestamps(sk, valbool, true, false);
-+		break;
- 	case SO_TIMESTAMPNS_OLD:
-+		__sock_set_timestamps(sk, valbool, false, true);
-+		break;
- 	case SO_TIMESTAMPNS_NEW:
--		if (valbool)  {
--			if (optname == SO_TIMESTAMP_NEW || optname == SO_TIMESTAMPNS_NEW)
--				sock_set_flag(sk, SOCK_TSTAMP_NEW);
--			else
--				sock_reset_flag(sk, SOCK_TSTAMP_NEW);
+-/**
+- * xs_set_reuseaddr_port - set the socket's port and address reuse options
+- * @sock: socket
+- *
+- * Note that this function has to be called on all sockets that share the
+- * same port, and it must be called before binding.
+- */
+-static void xs_sock_set_reuseport(struct socket *sock)
+-{
+-	int opt = 1;
 -
--			if (optname == SO_TIMESTAMP_OLD || optname == SO_TIMESTAMP_NEW)
--				sock_reset_flag(sk, SOCK_RCVTSTAMPNS);
--			else
--				sock_set_flag(sk, SOCK_RCVTSTAMPNS);
--			sock_set_flag(sk, SOCK_RCVTSTAMP);
--			sock_enable_timestamp(sk, SOCK_TIMESTAMP);
--		} else {
--			sock_reset_flag(sk, SOCK_RCVTSTAMP);
--			sock_reset_flag(sk, SOCK_RCVTSTAMPNS);
--			sock_reset_flag(sk, SOCK_TSTAMP_NEW);
--		}
-+		__sock_set_timestamps(sk, valbool, true, true);
- 		break;
+-	kernel_setsockopt(sock, SOL_SOCKET, SO_REUSEPORT,
+-			(char *)&opt, sizeof(opt));
+-}
 -
- 	case SO_TIMESTAMPING_NEW:
- 		sock_set_flag(sk, SOCK_TSTAMP_NEW);
- 		/* fall through */
-diff --git a/net/rxrpc/local_object.c b/net/rxrpc/local_object.c
-index 01135e54d95d2..5ea2bd01fdd59 100644
---- a/net/rxrpc/local_object.c
-+++ b/net/rxrpc/local_object.c
-@@ -189,13 +189,7 @@ static int rxrpc_open_socket(struct rxrpc_local *local, struct net *net)
- 		}
+ static unsigned short xs_sock_getport(struct socket *sock)
+ {
+ 	struct sockaddr_storage buf;
+@@ -1801,7 +1786,7 @@ static struct socket *xs_create_sock(struct rpc_xprt *xprt,
+ 	xs_reclassify_socket(family, sock);
  
- 		/* We want receive timestamps. */
--		opt = 1;
--		ret = kernel_setsockopt(local->socket, SOL_SOCKET, SO_TIMESTAMPNS_OLD,
--					(char *)&opt, sizeof(opt));
--		if (ret < 0) {
--			_debug("setsockopt failed");
--			goto error;
--		}
-+		sock_enable_timestamps(local->socket->sk);
- 		break;
+ 	if (reuseport)
+-		xs_sock_set_reuseport(sock);
++		sock_set_reuseport(sock->sk);
  
- 	default:
+ 	err = xs_bind(transport, sock);
+ 	if (err) {
 -- 
 2.26.2
