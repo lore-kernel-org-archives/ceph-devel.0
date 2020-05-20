@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 11/33] net: add sock_set_reuseport
-Date: Wed, 20 May 2020 21:54:47 +0200
-Message-ID: <20200520195509.2215098-12-hch@lst.de>
+Subject: [PATCH 15/33] tcp: add tcp_sock_set_syncnt
+Date: Wed, 20 May 2020 21:54:51 +0200
+Message-ID: <20200520195509.2215098-16-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -9,84 +9,73 @@ Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
 Sender: netdev-owner@vger.kernel.org
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org, Sagi Grimberg <sagi@grimberg.me>
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly set the SO_REUSEPORT sockopt from kernel space
+Add a helper to directly set the TCP_SYNCNT sockopt from kernel space
 without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
+Acked-by: Sagi Grimberg <sagi@grimberg.me>
 ---
- include/net/sock.h    |  1 +
- net/core/sock.c       |  8 ++++++++
- net/sunrpc/xprtsock.c | 17 +----------------
- 3 files changed, 10 insertions(+), 16 deletions(-)
+ drivers/nvme/host/tcp.c |  9 +--------
+ include/linux/tcp.h     |  1 +
+ net/ipv4/tcp.c          | 12 ++++++++++++
+ 3 files changed, 14 insertions(+), 8 deletions(-)
 
-diff --git a/include/net/sock.h b/include/net/sock.h
-index c997289aabbf9..d994daa418ec2 100644
---- a/include/net/sock.h
-+++ b/include/net/sock.h
-@@ -2695,6 +2695,7 @@ void sock_set_keepalive(struct sock *sk);
- void sock_set_priority(struct sock *sk, u32 priority);
- void sock_set_rcvbuf(struct sock *sk, int val);
- void sock_set_reuseaddr(struct sock *sk);
-+void sock_set_reuseport(struct sock *sk);
- void sock_set_sndtimeo(struct sock *sk, s64 secs);
+diff --git a/drivers/nvme/host/tcp.c b/drivers/nvme/host/tcp.c
+index 4e4a750ecdb97..2872584f52f63 100644
+--- a/drivers/nvme/host/tcp.c
++++ b/drivers/nvme/host/tcp.c
+@@ -1336,14 +1336,7 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
+ 	}
  
- #endif	/* _SOCK_H */
-diff --git a/net/core/sock.c b/net/core/sock.c
-index 3c6ebf952e9ad..2ca3425b519c0 100644
---- a/net/core/sock.c
-+++ b/net/core/sock.c
-@@ -729,6 +729,14 @@ void sock_set_reuseaddr(struct sock *sk)
- }
- EXPORT_SYMBOL(sock_set_reuseaddr);
- 
-+void sock_set_reuseport(struct sock *sk)
-+{
-+	lock_sock(sk);
-+	sk->sk_reuseport = true;
-+	release_sock(sk);
-+}
-+EXPORT_SYMBOL(sock_set_reuseport);
-+
- void sock_no_linger(struct sock *sk)
- {
- 	lock_sock(sk);
-diff --git a/net/sunrpc/xprtsock.c b/net/sunrpc/xprtsock.c
-index 30082cd039960..399848c2bcb29 100644
---- a/net/sunrpc/xprtsock.c
-+++ b/net/sunrpc/xprtsock.c
-@@ -1594,21 +1594,6 @@ static int xs_get_random_port(void)
- 	return rand + min;
- }
- 
--/**
-- * xs_set_reuseaddr_port - set the socket's port and address reuse options
-- * @sock: socket
-- *
-- * Note that this function has to be called on all sockets that share the
-- * same port, and it must be called before binding.
-- */
--static void xs_sock_set_reuseport(struct socket *sock)
--{
--	int opt = 1;
--
--	kernel_setsockopt(sock, SOL_SOCKET, SO_REUSEPORT,
+ 	/* Single syn retry */
+-	opt = 1;
+-	ret = kernel_setsockopt(queue->sock, IPPROTO_TCP, TCP_SYNCNT,
 -			(char *)&opt, sizeof(opt));
--}
--
- static unsigned short xs_sock_getport(struct socket *sock)
- {
- 	struct sockaddr_storage buf;
-@@ -1801,7 +1786,7 @@ static struct socket *xs_create_sock(struct rpc_xprt *xprt,
- 	xs_reclassify_socket(family, sock);
+-	if (ret) {
+-		dev_err(nctrl->device,
+-			"failed to set TCP_SYNCNT sock opt %d\n", ret);
+-		goto err_sock;
+-	}
++	tcp_sock_set_syncnt(queue->sock->sk, 1);
  
- 	if (reuseport)
--		xs_sock_set_reuseport(sock);
-+		sock_set_reuseport(sock->sk);
+ 	/* Set TCP no delay */
+ 	tcp_sock_set_nodelay(queue->sock->sk);
+diff --git a/include/linux/tcp.h b/include/linux/tcp.h
+index 2eaf8320b9db0..6aa4ae5ebf3d5 100644
+--- a/include/linux/tcp.h
++++ b/include/linux/tcp.h
+@@ -500,5 +500,6 @@ int tcp_skb_shift(struct sk_buff *to, struct sk_buff *from, int pcount,
+ void tcp_sock_set_cork(struct sock *sk, bool on);
+ void tcp_sock_set_nodelay(struct sock *sk);
+ void tcp_sock_set_quickack(struct sock *sk, int val);
++int tcp_sock_set_syncnt(struct sock *sk, int val);
  
- 	err = xs_bind(transport, sock);
- 	if (err) {
+ #endif	/* _LINUX_TCP_H */
+diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
+index 27b5e7a4e2ef9..d2c67ae1da07a 100644
+--- a/net/ipv4/tcp.c
++++ b/net/ipv4/tcp.c
+@@ -2881,6 +2881,18 @@ void tcp_sock_set_quickack(struct sock *sk, int val)
+ }
+ EXPORT_SYMBOL(tcp_sock_set_quickack);
+ 
++int tcp_sock_set_syncnt(struct sock *sk, int val)
++{
++	if (val < 1 || val > MAX_TCP_SYNCNT)
++		return -EINVAL;
++
++	lock_sock(sk);
++	inet_csk(sk)->icsk_syn_retries = val;
++	release_sock(sk);
++	return 0;
++}
++EXPORT_SYMBOL(tcp_sock_set_syncnt);
++
+ /*
+  *	Socket option code for TCP.
+  */
 -- 
 2.26.2
