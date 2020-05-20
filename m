@@ -1,118 +1,38 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] ceph: make sure the mdsc->mutex is nested in s->s_mutex
- to fix dead lock
-Date: Wed, 20 May 2020 07:44:29 -0400
-Message-ID: <17832c6b42a2f3876190d8e85ce0380a0f38f541.camel@kernel.org>
-References: <1589961079-27932-1-git-send-email-xiubli@redhat.com>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: Re: [PATCH 20/33] ipv4: add ip_sock_set_recverr
+Date: Wed, 20 May 2020 16:18:30 +0200
+Message-ID: <20200520141830.GA28867@lst.de>
+References: <20200513062649.2100053-1-hch@lst.de>
+	<20200513062649.2100053-21-hch@lst.de>
+	<0ee5acfaca4cf32d4efad162046b858981a4dae3.camel@perches.com>
+	<20200514103025.GB12680@lst.de>
+	<9992a1fe768a0b1e9bb9470d2728ba25dbe042db.camel@perches.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:43600 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727018AbgETLoc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 20 May 2020 07:44:32 -0400
-In-Reply-To: <1589961079-27932-1-git-send-email-xiubli@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: xiubli@redhat.com, idryomov@gmail.com, zyan@redhat.com
-Cc: pdonnell@redhat.com, ceph-devel@vger.kernel.org
+Return-path: <drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <9992a1fe768a0b1e9bb9470d2728ba25dbe042db.camel-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <https://lists.linbit.com/mailman/options/drbd-dev>,
+	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linbit.com/pipermail/drbd-dev>
+List-Post: <mailto:drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
+List-Help: <mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linbit.com/mailman/listinfo/drbd-dev>,
+	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=subscribe>
+Sender: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Errors-To: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+To: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+Cc: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 2020-05-20 at 03:51 -0400, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
+On Thu, May 14, 2020 at 04:51:26AM -0700, Joe Perches wrote:
+> > Mostly to keep it symmetric with the sockopt.  I could probably remove
+> > a few arguments in the series if we want to be strict.
 > 
-> The call trace:
-> 
-> <6>[15981.740583] libceph: mon2 (1)10.72.36.245:40083 session lost, hunting for new mon
-> <3>[16097.960293] INFO: task kworker/18:1:32111 blocked for more than 122 seconds.
-> <3>[16097.960860]       Tainted: G            E     5.7.0-rc5+ #80
-> <3>[16097.961332] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> <6>[16097.961868] kworker/18:1    D    0 32111      2 0x80004080
-> <6>[16097.962151] Workqueue: ceph-msgr ceph_con_workfn [libceph]
-> <4>[16097.962188] Call Trace:
-> <4>[16097.962353]  ? __schedule+0x276/0x6e0
-> <4>[16097.962359]  ? schedule+0x40/0xb0
-> <4>[16097.962364]  ? schedule_preempt_disabled+0xa/0x10
-> <4>[16097.962368]  ? __mutex_lock.isra.8+0x2b5/0x4a0
-> <4>[16097.962460]  ? kick_requests+0x21/0x100 [ceph]
-> <4>[16097.962485]  ? ceph_mdsc_handle_mdsmap+0x19c/0x5f0 [ceph]
-> <4>[16097.962503]  ? extra_mon_dispatch+0x34/0x40 [ceph]
-> <4>[16097.962523]  ? extra_mon_dispatch+0x34/0x40 [ceph]
-> <4>[16097.962580]  ? dispatch+0x77/0x930 [libceph]
-> <4>[16097.962602]  ? try_read+0x78b/0x11e0 [libceph]
-> <4>[16097.962619]  ? __switch_to_asm+0x40/0x70
-> <4>[16097.962623]  ? __switch_to_asm+0x34/0x70
-> <4>[16097.962627]  ? __switch_to_asm+0x40/0x70
-> <4>[16097.962631]  ? __switch_to_asm+0x34/0x70
-> <4>[16097.962635]  ? __switch_to_asm+0x40/0x70
-> <4>[16097.962654]  ? ceph_con_workfn+0x130/0x5e0 [libceph]
-> <4>[16097.962713]  ? process_one_work+0x1ad/0x370
-> <4>[16097.962717]  ? worker_thread+0x30/0x390
-> <4>[16097.962722]  ? create_worker+0x1a0/0x1a0
-> <4>[16097.962737]  ? kthread+0x112/0x130
-> <4>[16097.962742]  ? kthread_park+0x80/0x80
-> <4>[16097.962747]  ? ret_from_fork+0x35/0x40
-> <3>[16097.962758] INFO: task kworker/25:1:1747 blocked for more than 122 seconds.
-> <3>[16097.963233]       Tainted: G            E     5.7.0-rc5+ #80
-> <3>[16097.963792] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> <6>[16097.964298] kworker/25:1    D    0  1747      2 0x80004080
-> <6>[16097.964325] Workqueue: ceph-msgr ceph_con_workfn [libceph]
-> <4>[16097.964331] Call Trace:
-> <4>[16097.964340]  ? __schedule+0x276/0x6e0
-> <4>[16097.964344]  ? schedule+0x40/0xb0
-> <4>[16097.964347]  ? schedule_preempt_disabled+0xa/0x10
-> <4>[16097.964351]  ? __mutex_lock.isra.8+0x2b5/0x4a0
-> <4>[16097.964376]  ? handle_reply+0x33f/0x6f0 [ceph]
-> <4>[16097.964407]  ? dispatch+0xa6/0xbc0 [ceph]
-> <4>[16097.964429]  ? read_partial_message+0x214/0x770 [libceph]
-> <4>[16097.964449]  ? try_read+0x78b/0x11e0 [libceph]
-> <4>[16097.964454]  ? __switch_to_asm+0x40/0x70
-> <4>[16097.964458]  ? __switch_to_asm+0x34/0x70
-> <4>[16097.964461]  ? __switch_to_asm+0x40/0x70
-> <4>[16097.964465]  ? __switch_to_asm+0x34/0x70
-> <4>[16097.964470]  ? __switch_to_asm+0x40/0x70
-> <4>[16097.964489]  ? ceph_con_workfn+0x130/0x5e0 [libceph]
-> <4>[16097.964494]  ? process_one_work+0x1ad/0x370
-> <4>[16097.964498]  ? worker_thread+0x30/0x390
-> <4>[16097.964501]  ? create_worker+0x1a0/0x1a0
-> <4>[16097.964506]  ? kthread+0x112/0x130
-> <4>[16097.964511]  ? kthread_park+0x80/0x80
-> <4>[16097.964516]  ? ret_from_fork+0x35/0x40
-> 
-> URL: https://tracker.ceph.com/issues/45609
-> Reported-by: "Yan, Zheng" <zyan@redhat.com>
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  fs/ceph/mds_client.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 6c283c5..0e0ab01 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -3769,8 +3769,6 @@ static int encode_snap_realms(struct ceph_mds_client *mdsc,
->   * recovering MDS might have.
->   *
->   * This is a relatively heavyweight operation, but it's rare.
-> - *
-> - * called with mdsc->mutex held.
->   */
->  static void send_mds_reconnect(struct ceph_mds_client *mdsc,
->  			       struct ceph_mds_session *session)
-> @@ -4024,7 +4022,9 @@ static void check_new_map(struct ceph_mds_client *mdsc,
->  			    oldstate != CEPH_MDS_STATE_STARTING)
->  				pr_info("mds%d recovery completed\n", s->s_mds);
->  			kick_requests(mdsc, i);
-> +			mutex_unlock(&mdsc->mutex);
->  			mutex_lock(&s->s_mutex);
-> +			mutex_lock(&mdsc->mutex);
->  			ceph_kick_flushing_caps(mdsc, s);
->  			mutex_unlock(&s->s_mutex);
->  			wake_up_session_caps(s, RECONNECT);
+> My preference would use strict and add
+> arguments only when necessary.
 
-
-Good catch. Merged into testing branch.
-
-Thanks!
--- 
-Jeff Layton <jlayton@kernel.org>
+In a few cases that would create confusion as the arguments are rather
+overloaded.  But for a lot of the cases where it doesn't and there isn't
+really much use for other arguments I've done that now.
