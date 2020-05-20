@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 06/33] net: add sock_set_sndtimeo
-Date: Wed, 20 May 2020 21:54:42 +0200
-Message-ID: <20200520195509.2215098-7-hch@lst.de>
+Subject: [PATCH 05/33] net: add sock_set_priority
+Date: Wed, 20 May 2020 21:54:41 +0200
+Message-ID: <20200520195509.2215098-6-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,78 +18,107 @@ List-Subscribe: <https://lists.linbit.com/mailman/listinfo/drbd-dev>,
 Sender: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 Errors-To: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 To: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+Cc: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, Sagi Grimberg <sagi-NQWnxTmZq1alnMjI0IkVqw@public.gmane.org>, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly set the SO_SNDTIMEO_NEW sockopt from kernel
-space without going through a fake uaccess.  The interface is
-simplified to only pass the seconds value, as that is the only
-thing needed at the moment.
+Add a helper to directly set the SO_PRIORITY sockopt from kernel space
+without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Acked-by: Sagi Grimberg <sagi-NQWnxTmZq1alnMjI0IkVqw@public.gmane.org>
 ---
- fs/dlm/lowcomms.c  |  8 ++------
- include/net/sock.h |  1 +
- net/core/sock.c    | 11 +++++++++++
- 3 files changed, 14 insertions(+), 6 deletions(-)
+ drivers/nvme/host/tcp.c   | 12 ++----------
+ drivers/nvme/target/tcp.c | 18 ++++--------------
+ include/net/sock.h        |  1 +
+ net/core/sock.c           |  8 ++++++++
+ 4 files changed, 15 insertions(+), 24 deletions(-)
 
-diff --git a/fs/dlm/lowcomms.c b/fs/dlm/lowcomms.c
-index 88f2574ca63ad..b79711d0aac72 100644
---- a/fs/dlm/lowcomms.c
-+++ b/fs/dlm/lowcomms.c
-@@ -918,7 +918,6 @@ static void sctp_connect_to_sock(struct connection *con)
- 	int result;
- 	int addr_len;
- 	struct socket *sock;
--	struct __kernel_sock_timeval tv = { .tv_sec = 5, .tv_usec = 0 };
- 
- 	if (con->nodeid == 0) {
- 		log_print("attempt to connect sock 0 foiled");
-@@ -970,13 +969,10 @@ static void sctp_connect_to_sock(struct connection *con)
- 	 * since O_NONBLOCK argument in connect() function does not work here,
- 	 * then, we should restore the default value of this attribute.
+diff --git a/drivers/nvme/host/tcp.c b/drivers/nvme/host/tcp.c
+index e72d87482eb78..a307972d33a02 100644
+--- a/drivers/nvme/host/tcp.c
++++ b/drivers/nvme/host/tcp.c
+@@ -1362,16 +1362,8 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
  	 */
--	kernel_setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO_NEW, (char *)&tv,
--			  sizeof(tv));
-+	sock_set_sndtimeo(sock->sk, 5);
- 	result = sock->ops->connect(sock, (struct sockaddr *)&daddr, addr_len,
- 				   0);
--	memset(&tv, 0, sizeof(tv));
--	kernel_setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO_NEW, (char *)&tv,
--			  sizeof(tv));
-+	sock_set_sndtimeo(sock->sk, 0);
+ 	sock_no_linger(queue->sock->sk);
  
- 	if (result == -EINPROGRESS)
- 		result = 0;
+-	if (so_priority > 0) {
+-		ret = kernel_setsockopt(queue->sock, SOL_SOCKET, SO_PRIORITY,
+-				(char *)&so_priority, sizeof(so_priority));
+-		if (ret) {
+-			dev_err(ctrl->ctrl.device,
+-				"failed to set SO_PRIORITY sock opt, ret %d\n",
+-				ret);
+-			goto err_sock;
+-		}
+-	}
++	if (so_priority > 0)
++		sock_set_priority(queue->sock->sk, so_priority);
+ 
+ 	/* Set socket type of service */
+ 	if (nctrl->opts->tos >= 0) {
+diff --git a/drivers/nvme/target/tcp.c b/drivers/nvme/target/tcp.c
+index e0801494b097f..f3088156d01da 100644
+--- a/drivers/nvme/target/tcp.c
++++ b/drivers/nvme/target/tcp.c
+@@ -1448,12 +1448,8 @@ static int nvmet_tcp_set_queue_sock(struct nvmet_tcp_queue *queue)
+ 	 */
+ 	sock_no_linger(sock->sk);
+ 
+-	if (so_priority > 0) {
+-		ret = kernel_setsockopt(sock, SOL_SOCKET, SO_PRIORITY,
+-				(char *)&so_priority, sizeof(so_priority));
+-		if (ret)
+-			return ret;
+-	}
++	if (so_priority > 0)
++		sock_set_priority(sock->sk, so_priority);
+ 
+ 	/* Set socket type of service */
+ 	if (inet->rcv_tos > 0) {
+@@ -1638,14 +1634,8 @@ static int nvmet_tcp_add_port(struct nvmet_port *nport)
+ 		goto err_sock;
+ 	}
+ 
+-	if (so_priority > 0) {
+-		ret = kernel_setsockopt(port->sock, SOL_SOCKET, SO_PRIORITY,
+-				(char *)&so_priority, sizeof(so_priority));
+-		if (ret) {
+-			pr_err("failed to set SO_PRIORITY sock opt %d\n", ret);
+-			goto err_sock;
+-		}
+-	}
++	if (so_priority > 0)
++		sock_set_priority(port->sock->sk, so_priority);
+ 
+ 	ret = kernel_bind(port->sock, (struct sockaddr *)&port->addr,
+ 			sizeof(port->addr));
 diff --git a/include/net/sock.h b/include/net/sock.h
-index a3a43141a4be2..9a7b9e98685ac 100644
+index 6ed00bf009bbe..a3a43141a4be2 100644
 --- a/include/net/sock.h
 +++ b/include/net/sock.h
-@@ -2691,5 +2691,6 @@ void sock_def_readable(struct sock *sk);
+@@ -2689,6 +2689,7 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
+ void sock_def_readable(struct sock *sk);
+ 
  void sock_no_linger(struct sock *sk);
- void sock_set_priority(struct sock *sk, u32 priority);
++void sock_set_priority(struct sock *sk, u32 priority);
  void sock_set_reuseaddr(struct sock *sk);
-+void sock_set_sndtimeo(struct sock *sk, s64 secs);
  
  #endif	/* _SOCK_H */
 diff --git a/net/core/sock.c b/net/core/sock.c
-index ceda1a9248b3e..d3b1d61e4f768 100644
+index f0f09524911c8..ceda1a9248b3e 100644
 --- a/net/core/sock.c
 +++ b/net/core/sock.c
-@@ -737,6 +737,17 @@ void sock_set_priority(struct sock *sk, u32 priority)
+@@ -729,6 +729,14 @@ void sock_no_linger(struct sock *sk)
  }
- EXPORT_SYMBOL(sock_set_priority);
+ EXPORT_SYMBOL(sock_no_linger);
  
-+void sock_set_sndtimeo(struct sock *sk, s64 secs)
++void sock_set_priority(struct sock *sk, u32 priority)
 +{
 +	lock_sock(sk);
-+	if (secs && secs < MAX_SCHEDULE_TIMEOUT / HZ - 1)
-+		sk->sk_sndtimeo = secs * HZ;
-+	else
-+		sk->sk_sndtimeo = MAX_SCHEDULE_TIMEOUT;
++	sk->sk_priority = priority;
 +	release_sock(sk);
 +}
-+EXPORT_SYMBOL(sock_set_sndtimeo);
++EXPORT_SYMBOL(sock_set_priority);
 +
  /*
   *	This is meant for all protocols to use and covers goings on
