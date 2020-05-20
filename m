@@ -1,97 +1,112 @@
-From: Jerry Lee <leisurelysw24@gmail.com>
-Subject: Re: [PATCH] libceph: add ignore cache/overlay flag if got redirect reply
-Date: Wed, 20 May 2020 10:35:50 +0800
-Message-ID: <CAKQB+ftke+gqQQ9OHG9mNvgHJeMbVAN9kKQacgV_Li-B5KWnCw@mail.gmail.com>
-References: <CAKQB+fug_Y4y8wYe-vG=itf+0BmYFPfDm-ch7DTobtkipQz-yw@mail.gmail.com>
- <CAOi1vP-uF1_0R=5LApR=rdTXSzDWJq3LzuOYPrPmC_TPL909qA@mail.gmail.com>
- <CAKQB+ftbtXv0ET6OmUMsqKUoz5sRHQA35EprTY82_GC34b10XA@mail.gmail.com> <CAOi1vP-oMe2SsbuXQ9oeF+nZaCD87Een5Q1=kNPTeXeLAyHH_w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: <Michal.Plsek@seznam.cz>
+Subject: Re: ceph kernel client orientation
+Date: Wed, 20 May 2020 09:36:07 +0200 (CEST)
+Message-ID: <da.cjLX.3v4GDfOKIZE.1UnDtd@seznam.cz>
+References: <6n.cjI5.4P7G519BQ1k.1Um{AC@seznam.cz>
+        <CAOi1vP9HvJd-Cdm4TnfEjNN-PooZCAPBwANpS88UfinkhJuUsg@mail.gmail.com>
+Mime-Version: 1.0 (szn-mime-2.0.57)
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57806 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726178AbgETCgE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2020 22:36:04 -0400
-Received: from mail-oi1-x241.google.com (mail-oi1-x241.google.com [IPv6:2607:f8b0:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B5E6C061A0E
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2020 19:36:02 -0700 (PDT)
-Received: by mail-oi1-x241.google.com with SMTP id j145so1666670oib.5
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2020 19:36:02 -0700 (PDT)
-In-Reply-To: <CAOi1vP-oMe2SsbuXQ9oeF+nZaCD87Een5Q1=kNPTeXeLAyHH_w@mail.gmail.com>
+        with ESMTP id S1726224AbgETHgQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2020 03:36:16 -0400
+Received: from mxb1.seznam.cz (mxb1.seznam.cz [IPv6:2a02:598:a::78:89])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 896F6C061A0E
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 00:36:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, 19 May 2020 at 21:32, Ilya Dryomov <idryomov@gmail.com> wrote:
->
-> On Tue, May 19, 2020 at 12:30 PM Jerry Lee <leisurelysw24@gmail.com> wrote:
-> >
-> > On Tue, 19 May 2020 at 17:14, Ilya Dryomov <idryomov@gmail.com> wrote:
-> > >
-> > > On Mon, May 18, 2020 at 10:03 AM Jerry Lee <leisurelysw24@gmail.com> wrote:
-> > > >
-> > > > osd client should ignore cache/overlay flag if got redirect reply.
-> > > > Otherwise, the client hangs when the cache tier is in forward mode.
-> > > >
-> > > > Similar issues:
-> > > >    https://tracker.ceph.com/issues/23296
-> > > >    https://tracker.ceph.com/issues/36406
-> > > >
-> > > > Signed-off-by: Jerry Lee <leisurelysw24@gmail.com>
-> > > > ---
-> > > >  net/ceph/osd_client.c | 4 +++-
-> > > >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > > >
-> > > > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> > > > index 998e26b..1d4973f 100644
-> > > > --- a/net/ceph/osd_client.c
-> > > > +++ b/net/ceph/osd_client.c
-> > > > @@ -3649,7 +3649,9 @@ static void handle_reply(struct ceph_osd *osd,
-> > > > struct ceph_msg *msg)
-> > > >                  * supported.
-> > > >                  */
-> > > >                 req->r_t.target_oloc.pool = m.redirect.oloc.pool;
-> > > > -               req->r_flags |= CEPH_OSD_FLAG_REDIRECTED;
-> > > > +               req->r_flags |= CEPH_OSD_FLAG_REDIRECTED |
-> > > > +                               CEPH_OSD_FLAG_IGNORE_OVERLAY |
-> > > > +                               CEPH_OSD_FLAG_IGNORE_CACHE;
-> > > >                 req->r_tid = 0;
-> > > >                 __submit_request(req, false);
-> > > >                 goto out_unlock_osdc;
-> > >
-> > > Hi Jerry,
-> > >
-> > > Looks good (although the patch was whitespace damaged).  I've fixed
-> > > it up, but check out Documentation/process/email-clients.rst.
-> > Thanks for sharing the doc!
-> > >
-> > > Also, out of curiosity, are you actually using the forward cache mode?
-> > No, we accidentally found the issue when removing a writeback cache.
-> > The kernel client got blocked when the cache mode switched from
-> > writeback to forward and waited for the cache pool to be flushed.
-> >
-> > BTW, a warning (Error EPERM: 'forward' is not a well-supported cache
-> > mode and may corrupt your data.) is shown when the cache mode is
-> > changed to forward mode.  Does it mean that the data integrity and IO
-> > ordering cannot be ensured in this mode?
->
-> Yes.  The problem with redirects is that they can mess up the order
-> of requests.  The forward mode is based on redirects and therefore
-> inherently flawed.
->
-> Use proxy and readproxy modes instead of forward and readforward.
+Thanks for swift answer.
+
+(This is my usage in librbd.cc)
+
+Basically there is a folder with symmetric keys used for block encryption,=
+ one key for one disk in some pool. For identification of key I need (pool=
+_id, disk_id) of block. I am temporarily saving key to librbd::ImageCtx st=
+ructure, so I don't have to get it from file every time. I use this key to=
+ encrypt/decrypt block data. Encrypt/decrypt is primitive, I'm not gonna m=
+ention it here, but it is done over the data provided by functions rbd_rea=
+d() and rbd_write().
+
+If you could point how to edit rbd.c content to achieve similar behaviour,=
+ I would be much obliged.
+
+M.
+
+
+
+---------- P=C5=AFvodn=C3=AD e-mail ----------
+
+Od: Ilya Dryomov <idryomov@gmail.com>
+
+Komu: Michal.Plsek@seznam.cz
+
+Datum: 19. 5. 2020 16:36:05
+
+P=C5=99edm=C4=9Bt: Re: ceph kernel client orientation
+
+On Tue, May 19, 2020 at 3:44 PM <Michal.Plsek@seznam.cz> wrote:
+
 >
 
-Thanks for the clarification.  I refer to the mimic version
-cache-tering configuration guide which states that forward mode is
-configured when removing a writeback cache.  However, in the
-up-to-date doc (master), proxy mode is recommended.  I'll use proxy
-mode instead.
+> Hello,
+
+>
+
+> I am trying to get to functions responsible for reading/writing to/openi=
+ng RBD blocks in ceph client kernel module (alternatives to librbd=
+=E2=80=99s rbd_read(), rbd_write() etc.). I presume it should be located s=
+omewhere around drivers/block/, but until now I=E2=80=99ve been without lu=
+ck. My idea is to edit these functions, rebuild the ceph kernel =E2=80=98r=
+bd=E2=80=99 module and replace it. Since comments are pretty much missing =
+everywhere, it would be nice to narrow my searching area.
+
+>
+
+> If you know anything about it, please let me know. Thanks, M.
+
+
+
+Hi Michal,
+
+
+
+Everything is in drivers/block/rbd.c.  The entry point is
+
+rbd_queue_rq(), this is where all rbd requests are dispatched from.
+
+After setting up where data is to be written from (for writes) or read
+
+to (for reads), the details specific to each type of request (read,
+
+write, discard or zeroout) are handled in __rbd_img_fill_request()
+
+and then later on the respective state machine is kicked off.
+
+
+
+The job of the state machine is to submit requests to the OSDs and
+
+handle replies from the OSDs.  As in librbd, satisfying a single
+
+user I/O request can require sending multiple OSDs requests, in some
+
+cases sequentially.
+
+
+
+Unfortunately, there is no one function to edit.  I might be able
+
+to help more if you explain what you are trying to achieve.
+
+
 
 Thanks,
-- Jerry
 
-> Thanks,
->
->                 Ilya
+
+
+                Ilya
