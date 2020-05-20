@@ -1,82 +1,191 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 02/33] net: remove kernel_getsockopt
-Date: Wed, 20 May 2020 21:54:38 +0200
-Message-ID: <20200520195509.2215098-3-hch@lst.de>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 03/33] net: add sock_set_reuseaddr
+Date: Wed, 20 May 2020 21:54:39 +0200
+Message-ID: <20200520195509.2215098-4-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20200520195509.2215098-1-hch-jcswGhMUV9g@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org, Sagi Grimberg <sagi@grimberg.me>
 List-Id: ceph-devel.vger.kernel.org
 
-No users left.
+Add a helper to directly set the SO_REUSEADDR sockopt from kernel space
+without going through a fake uaccess.
 
-Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+For this the iscsi target now has to formally depend on inet to avoid
+a mostly theoretical compile failure.  For actual operation it already
+did depend on having ipv4 or ipv6 support.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Acked-by: Sagi Grimberg <sagi@grimberg.me>
 ---
- include/linux/net.h |  2 --
- net/socket.c        | 34 ----------------------------------
- 2 files changed, 36 deletions(-)
+ drivers/infiniband/sw/siw/siw_cm.c        | 18 +++++-------------
+ drivers/nvme/target/tcp.c                 |  8 +-------
+ drivers/target/iscsi/Kconfig              |  2 +-
+ drivers/target/iscsi/iscsi_target_login.c |  9 +--------
+ fs/dlm/lowcomms.c                         |  6 +-----
+ include/net/sock.h                        |  2 ++
+ net/core/sock.c                           |  8 ++++++++
+ 7 files changed, 19 insertions(+), 34 deletions(-)
 
-diff --git a/include/linux/net.h b/include/linux/net.h
-index 6451425e828f5..74ef5d7315f70 100644
---- a/include/linux/net.h
-+++ b/include/linux/net.h
-@@ -303,8 +303,6 @@ int kernel_connect(struct socket *sock, struct sockaddr *addr, int addrlen,
- 		   int flags);
- int kernel_getsockname(struct socket *sock, struct sockaddr *addr);
- int kernel_getpeername(struct socket *sock, struct sockaddr *addr);
--int kernel_getsockopt(struct socket *sock, int level, int optname, char *optval,
--		      int *optlen);
- int kernel_setsockopt(struct socket *sock, int level, int optname, char *optval,
- 		      unsigned int optlen);
- int kernel_sendpage(struct socket *sock, struct page *page, int offset,
-diff --git a/net/socket.c b/net/socket.c
-index 80422fc3c836e..81a98b6cbd087 100644
---- a/net/socket.c
-+++ b/net/socket.c
-@@ -3624,40 +3624,6 @@ int kernel_getpeername(struct socket *sock, struct sockaddr *addr)
- }
- EXPORT_SYMBOL(kernel_getpeername);
+diff --git a/drivers/infiniband/sw/siw/siw_cm.c b/drivers/infiniband/sw/siw/siw_cm.c
+index 559e5fd3bad8b..d1860f3e87401 100644
+--- a/drivers/infiniband/sw/siw/siw_cm.c
++++ b/drivers/infiniband/sw/siw/siw_cm.c
+@@ -1312,17 +1312,14 @@ static void siw_cm_llp_state_change(struct sock *sk)
+ static int kernel_bindconnect(struct socket *s, struct sockaddr *laddr,
+ 			      struct sockaddr *raddr)
+ {
+-	int rv, flags = 0, s_val = 1;
++	int rv, flags = 0;
+ 	size_t size = laddr->sa_family == AF_INET ?
+ 		sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
  
--/**
-- *	kernel_getsockopt - get a socket option (kernel space)
-- *	@sock: socket
-- *	@level: API level (SOL_SOCKET, ...)
-- *	@optname: option tag
-- *	@optval: option value
-- *	@optlen: option length
-- *
-- *	Assigns the option length to @optlen.
-- *	Returns 0 or an error.
-- */
+ 	/*
+ 	 * Make address available again asap.
+ 	 */
+-	rv = kernel_setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&s_val,
+-			       sizeof(s_val));
+-	if (rv < 0)
+-		return rv;
++	sock_set_reuseaddr(s->sk);
+ 
+ 	rv = s->ops->bind(s, laddr, size);
+ 	if (rv < 0)
+@@ -1781,7 +1778,7 @@ int siw_create_listen(struct iw_cm_id *id, int backlog)
+ 	struct siw_cep *cep = NULL;
+ 	struct siw_device *sdev = to_siw_dev(id->device);
+ 	int addr_family = id->local_addr.ss_family;
+-	int rv = 0, s_val;
++	int rv = 0;
+ 
+ 	if (addr_family != AF_INET && addr_family != AF_INET6)
+ 		return -EAFNOSUPPORT;
+@@ -1793,13 +1790,8 @@ int siw_create_listen(struct iw_cm_id *id, int backlog)
+ 	/*
+ 	 * Allow binding local port when still in TIME_WAIT from last close.
+ 	 */
+-	s_val = 1;
+-	rv = kernel_setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&s_val,
+-			       sizeof(s_val));
+-	if (rv) {
+-		siw_dbg(id->device, "setsockopt error: %d\n", rv);
+-		goto error;
+-	}
++	sock_set_reuseaddr(s->sk);
++
+ 	if (addr_family == AF_INET) {
+ 		struct sockaddr_in *laddr = &to_sockaddr_in(id->local_addr);
+ 
+diff --git a/drivers/nvme/target/tcp.c b/drivers/nvme/target/tcp.c
+index f0da04e960f40..40757a63f4553 100644
+--- a/drivers/nvme/target/tcp.c
++++ b/drivers/nvme/target/tcp.c
+@@ -1632,6 +1632,7 @@ static int nvmet_tcp_add_port(struct nvmet_port *nport)
+ 	port->sock->sk->sk_user_data = port;
+ 	port->data_ready = port->sock->sk->sk_data_ready;
+ 	port->sock->sk->sk_data_ready = nvmet_tcp_listen_data_ready;
++	sock_set_reuseaddr(port->sock->sk);
+ 
+ 	opt = 1;
+ 	ret = kernel_setsockopt(port->sock, IPPROTO_TCP,
+@@ -1641,13 +1642,6 @@ static int nvmet_tcp_add_port(struct nvmet_port *nport)
+ 		goto err_sock;
+ 	}
+ 
+-	ret = kernel_setsockopt(port->sock, SOL_SOCKET, SO_REUSEADDR,
+-			(char *)&opt, sizeof(opt));
+-	if (ret) {
+-		pr_err("failed to set SO_REUSEADDR sock opt %d\n", ret);
+-		goto err_sock;
+-	}
 -
--int kernel_getsockopt(struct socket *sock, int level, int optname,
--			char *optval, int *optlen)
--{
--	mm_segment_t oldfs = get_fs();
--	char __user *uoptval;
--	int __user *uoptlen;
--	int err;
--
--	uoptval = (char __user __force *) optval;
--	uoptlen = (int __user __force *) optlen;
--
--	set_fs(KERNEL_DS);
--	if (level == SOL_SOCKET)
--		err = sock_getsockopt(sock, level, optname, uoptval, uoptlen);
--	else
--		err = sock->ops->getsockopt(sock, level, optname, uoptval,
--					    uoptlen);
--	set_fs(oldfs);
--	return err;
--}
--EXPORT_SYMBOL(kernel_getsockopt);
--
- /**
-  *	kernel_setsockopt - set a socket option (kernel space)
-  *	@sock: socket
+ 	if (so_priority > 0) {
+ 		ret = kernel_setsockopt(port->sock, SOL_SOCKET, SO_PRIORITY,
+ 				(char *)&so_priority, sizeof(so_priority));
+diff --git a/drivers/target/iscsi/Kconfig b/drivers/target/iscsi/Kconfig
+index 1f93ea3813536..922484ea4e304 100644
+--- a/drivers/target/iscsi/Kconfig
++++ b/drivers/target/iscsi/Kconfig
+@@ -1,7 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+ config ISCSI_TARGET
+ 	tristate "Linux-iSCSI.org iSCSI Target Mode Stack"
+-	depends on NET
++	depends on INET
+ 	select CRYPTO
+ 	select CRYPTO_CRC32C
+ 	select CRYPTO_CRC32C_INTEL if X86
+diff --git a/drivers/target/iscsi/iscsi_target_login.c b/drivers/target/iscsi/iscsi_target_login.c
+index 731ee67fe914b..91acb3f07b4cc 100644
+--- a/drivers/target/iscsi/iscsi_target_login.c
++++ b/drivers/target/iscsi/iscsi_target_login.c
+@@ -909,14 +909,7 @@ int iscsit_setup_np(
+ 		}
+ 	}
+ 
+-	/* FIXME: Someone please explain why this is endian-safe */
+-	ret = kernel_setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+-			(char *)&opt, sizeof(opt));
+-	if (ret < 0) {
+-		pr_err("kernel_setsockopt() for SO_REUSEADDR"
+-			" failed\n");
+-		goto fail;
+-	}
++	sock_set_reuseaddr(sock->sk);
+ 
+ 	ret = kernel_setsockopt(sock, IPPROTO_IP, IP_FREEBIND,
+ 			(char *)&opt, sizeof(opt));
+diff --git a/fs/dlm/lowcomms.c b/fs/dlm/lowcomms.c
+index f13dad0fd9ef3..88f2574ca63ad 100644
+--- a/fs/dlm/lowcomms.c
++++ b/fs/dlm/lowcomms.c
+@@ -1127,12 +1127,8 @@ static struct socket *tcp_create_listen_sock(struct connection *con,
+ 	kernel_setsockopt(sock, SOL_TCP, TCP_NODELAY, (char *)&one,
+ 			  sizeof(one));
+ 
+-	result = kernel_setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+-				   (char *)&one, sizeof(one));
++	sock_set_reuseaddr(sock->sk);
+ 
+-	if (result < 0) {
+-		log_print("Failed to set SO_REUSEADDR on socket: %d", result);
+-	}
+ 	write_lock_bh(&sock->sk->sk_callback_lock);
+ 	sock->sk->sk_user_data = con;
+ 	save_listen_callbacks(sock);
+diff --git a/include/net/sock.h b/include/net/sock.h
+index 3e8c6d4b4b59f..2ec085044790c 100644
+--- a/include/net/sock.h
++++ b/include/net/sock.h
+@@ -2688,4 +2688,6 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
+ 
+ void sock_def_readable(struct sock *sk);
+ 
++void sock_set_reuseaddr(struct sock *sk);
++
+ #endif	/* _SOCK_H */
+diff --git a/net/core/sock.c b/net/core/sock.c
+index fd85e651ce284..18eb84fdf5fbe 100644
+--- a/net/core/sock.c
++++ b/net/core/sock.c
+@@ -712,6 +712,14 @@ bool sk_mc_loop(struct sock *sk)
+ }
+ EXPORT_SYMBOL(sk_mc_loop);
+ 
++void sock_set_reuseaddr(struct sock *sk)
++{
++	lock_sock(sk);
++	sk->sk_reuse = SK_CAN_REUSE;
++	release_sock(sk);
++}
++EXPORT_SYMBOL(sock_set_reuseaddr);
++
+ /*
+  *	This is meant for all protocols to use and covers goings on
+  *	at the socket level. Everything here is generic.
 -- 
 2.26.2
