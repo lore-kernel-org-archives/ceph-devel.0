@@ -1,84 +1,205 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: [ceph-users] Possible bug in op path?
-Date: Wed, 20 May 2020 09:56:51 -0700
-Message-ID: <CAANLjFq+EerkocoYN0MW4VaGRHOWdNPs2HLsROLtcu374B6sMg@mail.gmail.com>
-References: <CAANLjFqkgn86Oa=70jHqHB-4o0saL9Q+AGPuGyyj94x7EiSi2Q@mail.gmail.com>
- <CABZ+qqn7DwiDO1Ecynx8zY_JuEP81AKemoesSE4F8dkhLtAmLg@mail.gmail.com>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: [PATCH 04/33] net: add sock_no_linger
+Date: Wed, 20 May 2020 21:54:40 +0200
+Message-ID: <20200520195509.2215098-5-hch@lst.de>
+References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51050 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726890AbgETQ5D (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2020 12:57:03 -0400
-Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B2C2C061A0E
-        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 09:57:03 -0700 (PDT)
-Received: by mail-qt1-x830.google.com with SMTP id p12so3065938qtn.13
-        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 09:57:03 -0700 (PDT)
-In-Reply-To: <CABZ+qqn7DwiDO1Ecynx8zY_JuEP81AKemoesSE4F8dkhLtAmLg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: ceph-users <ceph-users@ceph.io>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
+In-Reply-To: <20200520195509.2215098-1-hch-jcswGhMUV9g@public.gmane.org>
+List-Unsubscribe: <https://lists.linbit.com/mailman/options/drbd-dev>,
+	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linbit.com/pipermail/drbd-dev>
+List-Post: <mailto:drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
+List-Help: <mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linbit.com/mailman/listinfo/drbd-dev>,
+	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=subscribe>
+Sender: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Errors-To: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+To: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, Sagi Grimberg <sagi-NQWnxTmZq1alnMjI0IkVqw@public.gmane.org>, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-We are using high and the people on the list that have also changed
-have not seen the improvements that I would expect.
-----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+Add a helper to directly set the SO_LINGER sockopt from kernel space
+with onoff set to true and a linger time of 0 without going through a
+fake uaccess.
 
-On Wed, May 20, 2020 at 1:38 AM Dan van der Ster <dan@vanderster.com> wrote:
->
-> Hi Robert,
->
-> Since you didn't mention -- are you using osd_op_queue_cut_off low or
-> high? I know you are usually advocating high, but the default is still
-> low and most users don't change this setting.
->
-> Cheers, Dan
->
->
-> On Wed, May 20, 2020 at 9:41 AM Robert LeBlanc <robert@leblancnet.us> wrote:
-> >
-> > We upgraded our Jewel cluster to Nautilus a few months ago and I've noticed
-> > that op behavior has changed. This is an HDD cluster (NVMe journals and
-> > NVMe CephFS metadata pool) with about 800 OSDs. When on Jewel and running
-> > WPQ with the high cut-off, it was rock solid. When we had recoveries going
-> > on it barely dented the client ops and when the client ops on the cluster
-> > went down the backfills would run as fast as the cluster could go. I could
-> > have max_backfills set to 10 and the cluster performed admirably.
-> > After upgrading to Nautilus the cluster struggles with any kind of recovery
-> > and if there is any significant client write load the cluster can get into
-> > a death spiral. Even heavy client write bandwidth (3-4 GB/s) can cause the
-> > heartbeat checks to raise, blocked IO and even OSDs becoming unresponsive.
-> > As the person who wrote the WPQ code initially, I know that it was fair and
-> > proportional to the op priority and in Jewel it worked. It's not working in
-> > Nautilus. I've tweaked a lot of things trying to troubleshoot the issue and
-> > setting the recovery priority to 1 or zero barely makes any difference. My
-> > best estimation is that the op priority is getting lost before reaching the
-> > WPQ scheduler and is thus not prioritizing and dispatching ops correctly.
-> > It's almost as if all ops are being treated the same and there is no
-> > priority at all.
-> > Unfortunately, I do not have the time to set up the dev/testing environment
-> > to track this down and we will be moving away from Ceph. But I really like
-> > Ceph and want to see it succeed. I strongly suggest that someone look into
-> > this because I think it will resolve a lot of problems people have had on
-> > the mailing list. I'm not sure if a bug was introduced with the other
-> > queues that touches more of the op path or if something in the op path
-> > restructuring that changed how things work (I know that was being discussed
-> > around the time that Jewel was released). But my guess is that it is
-> > somewhere between the op being created and being received into the queue.
-> > I really hope that this helps in the search for this regression. I spent a
-> > lot of time studying the issue to come up with WPQ and saw it work great
-> > when I switched this cluster from PRIO to WPQ. I've also spent countless
-> > hours studying how it's changed in Nautilus.
-> >
-> > Thank you,
-> > Robert LeBlanc
-> > ----------------
-> > Robert LeBlanc
-> > PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> > _______________________________________________
-> > ceph-users mailing list -- ceph-users@ceph.io
-> > To unsubscribe send an email to ceph-users-leave@ceph.io
+Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Acked-by: Sagi Grimberg <sagi-NQWnxTmZq1alnMjI0IkVqw@public.gmane.org>
+---
+ drivers/nvme/host/tcp.c   |  9 +--------
+ drivers/nvme/target/tcp.c |  6 +-----
+ include/net/sock.h        |  1 +
+ net/core/sock.c           |  9 +++++++++
+ net/rds/tcp.h             |  1 -
+ net/rds/tcp_connect.c     |  2 +-
+ net/rds/tcp_listen.c      | 13 +------------
+ net/sunrpc/svcsock.c      | 12 ++----------
+ 8 files changed, 16 insertions(+), 37 deletions(-)
+
+diff --git a/drivers/nvme/host/tcp.c b/drivers/nvme/host/tcp.c
+index c15a92163c1f7..e72d87482eb78 100644
+--- a/drivers/nvme/host/tcp.c
++++ b/drivers/nvme/host/tcp.c
+@@ -1313,7 +1313,6 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
+ {
+ 	struct nvme_tcp_ctrl *ctrl = to_tcp_ctrl(nctrl);
+ 	struct nvme_tcp_queue *queue = &ctrl->queues[qid];
+-	struct linger sol = { .l_onoff = 1, .l_linger = 0 };
+ 	int ret, opt, rcv_pdu_size;
+ 
+ 	queue->ctrl = ctrl;
+@@ -1361,13 +1360,7 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
+ 	 * close. This is done to prevent stale data from being sent should
+ 	 * the network connection be restored before TCP times out.
+ 	 */
+-	ret = kernel_setsockopt(queue->sock, SOL_SOCKET, SO_LINGER,
+-			(char *)&sol, sizeof(sol));
+-	if (ret) {
+-		dev_err(nctrl->device,
+-			"failed to set SO_LINGER sock opt %d\n", ret);
+-		goto err_sock;
+-	}
++	sock_no_linger(queue->sock->sk);
+ 
+ 	if (so_priority > 0) {
+ 		ret = kernel_setsockopt(queue->sock, SOL_SOCKET, SO_PRIORITY,
+diff --git a/drivers/nvme/target/tcp.c b/drivers/nvme/target/tcp.c
+index 40757a63f4553..e0801494b097f 100644
+--- a/drivers/nvme/target/tcp.c
++++ b/drivers/nvme/target/tcp.c
+@@ -1429,7 +1429,6 @@ static int nvmet_tcp_set_queue_sock(struct nvmet_tcp_queue *queue)
+ {
+ 	struct socket *sock = queue->sock;
+ 	struct inet_sock *inet = inet_sk(sock->sk);
+-	struct linger sol = { .l_onoff = 1, .l_linger = 0 };
+ 	int ret;
+ 
+ 	ret = kernel_getsockname(sock,
+@@ -1447,10 +1446,7 @@ static int nvmet_tcp_set_queue_sock(struct nvmet_tcp_queue *queue)
+ 	 * close. This is done to prevent stale data from being sent should
+ 	 * the network connection be restored before TCP times out.
+ 	 */
+-	ret = kernel_setsockopt(sock, SOL_SOCKET, SO_LINGER,
+-			(char *)&sol, sizeof(sol));
+-	if (ret)
+-		return ret;
++	sock_no_linger(sock->sk);
+ 
+ 	if (so_priority > 0) {
+ 		ret = kernel_setsockopt(sock, SOL_SOCKET, SO_PRIORITY,
+diff --git a/include/net/sock.h b/include/net/sock.h
+index 2ec085044790c..6ed00bf009bbe 100644
+--- a/include/net/sock.h
++++ b/include/net/sock.h
+@@ -2688,6 +2688,7 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
+ 
+ void sock_def_readable(struct sock *sk);
+ 
++void sock_no_linger(struct sock *sk);
+ void sock_set_reuseaddr(struct sock *sk);
+ 
+ #endif	/* _SOCK_H */
+diff --git a/net/core/sock.c b/net/core/sock.c
+index 18eb84fdf5fbe..f0f09524911c8 100644
+--- a/net/core/sock.c
++++ b/net/core/sock.c
+@@ -720,6 +720,15 @@ void sock_set_reuseaddr(struct sock *sk)
+ }
+ EXPORT_SYMBOL(sock_set_reuseaddr);
+ 
++void sock_no_linger(struct sock *sk)
++{
++	lock_sock(sk);
++	sk->sk_lingertime = 0;
++	sock_set_flag(sk, SOCK_LINGER);
++	release_sock(sk);
++}
++EXPORT_SYMBOL(sock_no_linger);
++
+ /*
+  *	This is meant for all protocols to use and covers goings on
+  *	at the socket level. Everything here is generic.
+diff --git a/net/rds/tcp.h b/net/rds/tcp.h
+index 3c69361d21c73..d640e210b97b6 100644
+--- a/net/rds/tcp.h
++++ b/net/rds/tcp.h
+@@ -73,7 +73,6 @@ void rds_tcp_listen_data_ready(struct sock *sk);
+ int rds_tcp_accept_one(struct socket *sock);
+ int rds_tcp_keepalive(struct socket *sock);
+ void *rds_tcp_listen_sock_def_readable(struct net *net);
+-void rds_tcp_set_linger(struct socket *sock);
+ 
+ /* tcp_recv.c */
+ int rds_tcp_recv_init(void);
+diff --git a/net/rds/tcp_connect.c b/net/rds/tcp_connect.c
+index 008f50fb25dd2..4e64598176b05 100644
+--- a/net/rds/tcp_connect.c
++++ b/net/rds/tcp_connect.c
+@@ -207,7 +207,7 @@ void rds_tcp_conn_path_shutdown(struct rds_conn_path *cp)
+ 
+ 	if (sock) {
+ 		if (rds_destroy_pending(cp->cp_conn))
+-			rds_tcp_set_linger(sock);
++			sock_no_linger(sock->sk);
+ 		sock->ops->shutdown(sock, RCV_SHUTDOWN | SEND_SHUTDOWN);
+ 		lock_sock(sock->sk);
+ 		rds_tcp_restore_callbacks(sock, tc); /* tc->tc_sock = NULL */
+diff --git a/net/rds/tcp_listen.c b/net/rds/tcp_listen.c
+index 810a3a49e9474..bbb31b9c0b391 100644
+--- a/net/rds/tcp_listen.c
++++ b/net/rds/tcp_listen.c
+@@ -111,17 +111,6 @@ struct rds_tcp_connection *rds_tcp_accept_one_path(struct rds_connection *conn)
+ 	return NULL;
+ }
+ 
+-void rds_tcp_set_linger(struct socket *sock)
+-{
+-	struct linger no_linger = {
+-		.l_onoff = 1,
+-		.l_linger = 0,
+-	};
+-
+-	kernel_setsockopt(sock, SOL_SOCKET, SO_LINGER,
+-			  (char *)&no_linger, sizeof(no_linger));
+-}
+-
+ int rds_tcp_accept_one(struct socket *sock)
+ {
+ 	struct socket *new_sock = NULL;
+@@ -241,7 +230,7 @@ int rds_tcp_accept_one(struct socket *sock)
+ 	 * be pending on it. By setting linger, we achieve the side-effect
+ 	 * of avoiding TIME_WAIT state on new_sock.
+ 	 */
+-	rds_tcp_set_linger(new_sock);
++	sock_no_linger(new_sock->sk);
+ 	kernel_sock_shutdown(new_sock, SHUT_RDWR);
+ 	ret = 0;
+ out:
+diff --git a/net/sunrpc/svcsock.c b/net/sunrpc/svcsock.c
+index 023514e392b31..6773dacc64d8e 100644
+--- a/net/sunrpc/svcsock.c
++++ b/net/sunrpc/svcsock.c
+@@ -323,17 +323,9 @@ static int svc_tcp_has_wspace(struct svc_xprt *xprt)
+ 
+ static void svc_tcp_kill_temp_xprt(struct svc_xprt *xprt)
+ {
+-	struct svc_sock *svsk;
+-	struct socket *sock;
+-	struct linger no_linger = {
+-		.l_onoff = 1,
+-		.l_linger = 0,
+-	};
++	struct svc_sock *svsk = container_of(xprt, struct svc_sock, sk_xprt);
+ 
+-	svsk = container_of(xprt, struct svc_sock, sk_xprt);
+-	sock = svsk->sk_sock;
+-	kernel_setsockopt(sock, SOL_SOCKET, SO_LINGER,
+-			  (char *)&no_linger, sizeof(no_linger));
++	sock_no_linger(svsk->sk_sock->sk);
+ }
+ 
+ /*
+-- 
+2.26.2
