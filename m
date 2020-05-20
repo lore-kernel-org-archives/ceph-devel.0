@@ -1,109 +1,86 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 30/33] tipc: call tsk_set_importance from tipc_topsrv_create_listener
-Date: Wed, 20 May 2020 21:55:06 +0200
-Message-ID: <20200520195509.2215098-31-hch@lst.de>
+Subject: [PATCH 22/33] ipv4: add ip_sock_set_recverr
+Date: Wed, 20 May 2020 21:54:58 +0200
+Message-ID: <20200520195509.2215098-23-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <cluster-devel-bounces@redhat.com>
 In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
-Sender: netdev-owner@vger.kernel.org
+List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/cluster-devel>
+List-Post: <mailto:cluster-devel@redhat.com>
+List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
+Sender: cluster-devel-bounces@redhat.com
+Errors-To: cluster-devel-bounces@redhat.com
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
+Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, David Howells <dhowells@redhat.com>, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
 List-Id: ceph-devel.vger.kernel.org
 
-Avoid using kernel_setsockopt for the TIPC_IMPORTANCE option when we can
-just use the internal helper.  The only change needed is to pass a struct
-sock instead of tipc_sock, which is private to socket.c
+Add a helper to directly set the IP_RECVERR sockopt from kernel space
+without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: David Howells <dhowells@redhat.com>
 ---
- net/tipc/socket.c | 18 +++++++++---------
- net/tipc/socket.h |  2 ++
- net/tipc/topsrv.c |  6 +++---
- 3 files changed, 14 insertions(+), 12 deletions(-)
+ include/net/ip.h         | 1 +
+ net/ipv4/ip_sockglue.c   | 8 ++++++++
+ net/rxrpc/local_object.c | 8 +-------
+ 3 files changed, 10 insertions(+), 7 deletions(-)
 
-diff --git a/net/tipc/socket.c b/net/tipc/socket.c
-index e370ad0edd768..28c57d4544c53 100644
---- a/net/tipc/socket.c
-+++ b/net/tipc/socket.c
-@@ -191,17 +191,17 @@ static int tsk_importance(struct tipc_sock *tsk)
- 	return msg_importance(&tsk->phdr);
+diff --git a/include/net/ip.h b/include/net/ip.h
+index 5f5d8226b6abc..f063a491b9063 100644
+--- a/include/net/ip.h
++++ b/include/net/ip.h
+@@ -766,6 +766,7 @@ static inline bool inetdev_valid_mtu(unsigned int mtu)
  }
  
--static int tsk_set_importance(struct tipc_sock *tsk, int imp)
-+static struct tipc_sock *tipc_sk(const struct sock *sk)
- {
--	if (imp > TIPC_CRITICAL_IMPORTANCE)
--		return -EINVAL;
--	msg_set_importance(&tsk->phdr, (u32)imp);
--	return 0;
-+	return container_of(sk, struct tipc_sock, sk);
+ void ip_sock_set_freebind(struct sock *sk);
++void ip_sock_set_recverr(struct sock *sk);
+ void ip_sock_set_tos(struct sock *sk, int val);
+ 
+ #endif	/* _IP_H */
+diff --git a/net/ipv4/ip_sockglue.c b/net/ipv4/ip_sockglue.c
+index 62e642ab80126..9a6a65b66f9d3 100644
+--- a/net/ipv4/ip_sockglue.c
++++ b/net/ipv4/ip_sockglue.c
+@@ -589,6 +589,14 @@ void ip_sock_set_freebind(struct sock *sk)
  }
+ EXPORT_SYMBOL(ip_sock_set_freebind);
  
--static struct tipc_sock *tipc_sk(const struct sock *sk)
-+int tsk_set_importance(struct sock *sk, int imp)
- {
--	return container_of(sk, struct tipc_sock, sk);
-+	if (imp > TIPC_CRITICAL_IMPORTANCE)
-+		return -EINVAL;
-+	msg_set_importance(&tipc_sk(sk)->phdr, (u32)imp);
-+	return 0;
- }
- 
- static bool tsk_conn_cong(struct tipc_sock *tsk)
-@@ -2681,7 +2681,7 @@ static int tipc_accept(struct socket *sock, struct socket *new_sock, int flags,
- 	/* Connect new socket to it's peer */
- 	tipc_sk_finish_conn(new_tsock, msg_origport(msg), msg_orignode(msg));
- 
--	tsk_set_importance(new_tsock, msg_importance(msg));
-+	tsk_set_importance(new_sk, msg_importance(msg));
- 	if (msg_named(msg)) {
- 		new_tsock->conn_type = msg_nametype(msg);
- 		new_tsock->conn_instance = msg_nameinst(msg);
-@@ -3099,7 +3099,7 @@ static int tipc_setsockopt(struct socket *sock, int lvl, int opt,
- 
- 	switch (opt) {
- 	case TIPC_IMPORTANCE:
--		res = tsk_set_importance(tsk, value);
-+		res = tsk_set_importance(sk, value);
- 		break;
- 	case TIPC_SRC_DROPPABLE:
- 		if (sock->type != SOCK_STREAM)
-diff --git a/net/tipc/socket.h b/net/tipc/socket.h
-index 235b9679acee4..b11575afc66fe 100644
---- a/net/tipc/socket.h
-+++ b/net/tipc/socket.h
-@@ -75,4 +75,6 @@ u32 tipc_sock_get_portid(struct sock *sk);
- bool tipc_sk_overlimit1(struct sock *sk, struct sk_buff *skb);
- bool tipc_sk_overlimit2(struct sock *sk, struct sk_buff *skb);
- 
-+int tsk_set_importance(struct sock *sk, int imp);
-+
- #endif
-diff --git a/net/tipc/topsrv.c b/net/tipc/topsrv.c
-index 446af7bbd13e6..1489cfb941d8e 100644
---- a/net/tipc/topsrv.c
-+++ b/net/tipc/topsrv.c
-@@ -497,7 +497,6 @@ static void tipc_topsrv_listener_data_ready(struct sock *sk)
- 
- static int tipc_topsrv_create_listener(struct tipc_topsrv *srv)
- {
--	int imp = TIPC_CRITICAL_IMPORTANCE;
- 	struct socket *lsock = NULL;
- 	struct sockaddr_tipc saddr;
- 	struct sock *sk;
-@@ -514,8 +513,9 @@ static int tipc_topsrv_create_listener(struct tipc_topsrv *srv)
- 	sk->sk_user_data = srv;
- 	write_unlock_bh(&sk->sk_callback_lock);
- 
--	rc = kernel_setsockopt(lsock, SOL_TIPC, TIPC_IMPORTANCE,
--			       (char *)&imp, sizeof(imp));
++void ip_sock_set_recverr(struct sock *sk)
++{
 +	lock_sock(sk);
-+	rc = tsk_set_importance(sk, TIPC_CRITICAL_IMPORTANCE);
++	inet_sk(sk)->recverr = true;
 +	release_sock(sk);
- 	if (rc < 0)
- 		goto err;
++}
++EXPORT_SYMBOL(ip_sock_set_recverr);
++
+ /*
+  *	Socket option code for IP. This is the end of the line after any
+  *	TCP,UDP etc options on an IP socket.
+diff --git a/net/rxrpc/local_object.c b/net/rxrpc/local_object.c
+index 5ea2bd01fdd59..4c0e8fe5ec1fb 100644
+--- a/net/rxrpc/local_object.c
++++ b/net/rxrpc/local_object.c
+@@ -171,13 +171,7 @@ static int rxrpc_open_socket(struct rxrpc_local *local, struct net *net)
+ 		/* Fall through */
+ 	case AF_INET:
+ 		/* we want to receive ICMP errors */
+-		opt = 1;
+-		ret = kernel_setsockopt(local->socket, SOL_IP, IP_RECVERR,
+-					(char *) &opt, sizeof(opt));
+-		if (ret < 0) {
+-			_debug("setsockopt failed");
+-			goto error;
+-		}
++		ip_sock_set_recverr(local->socket->sk);
  
+ 		/* we want to set the don't fragment bit */
+ 		opt = IP_PMTUDISC_DO;
 -- 
 2.26.2
