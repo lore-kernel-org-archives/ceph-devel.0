@@ -1,104 +1,109 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 21/33] ipv4: add ip_sock_set_freebind
-Date: Wed, 20 May 2020 21:54:57 +0200
-Message-ID: <20200520195509.2215098-22-hch@lst.de>
+Subject: [PATCH 30/33] tipc: call tsk_set_importance from tipc_topsrv_create_listener
+Date: Wed, 20 May 2020 21:55:06 +0200
+Message-ID: <20200520195509.2215098-31-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <cluster-devel-bounces@redhat.com>
+Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
+Sender: netdev-owner@vger.kernel.org
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly set the IP_FREEBIND sockopt from kernel space
-without going through a fake uaccess.
+Avoid using kernel_setsockopt for the TIPC_IMPORTANCE option when we can
+just use the internal helper.  The only change needed is to pass a struct
+sock instead of tipc_sock, which is private to socket.c
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/target/iscsi/iscsi_target_login.c | 13 +++----------
- include/net/ip.h                          |  1 +
- net/ipv4/ip_sockglue.c                    |  8 ++++++++
- 3 files changed, 12 insertions(+), 10 deletions(-)
+ net/tipc/socket.c | 18 +++++++++---------
+ net/tipc/socket.h |  2 ++
+ net/tipc/topsrv.c |  6 +++---
+ 3 files changed, 14 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/target/iscsi/iscsi_target_login.c b/drivers/target/iscsi/iscsi_target_login.c
-index b561b07a869a0..85748e3388582 100644
---- a/drivers/target/iscsi/iscsi_target_login.c
-+++ b/drivers/target/iscsi/iscsi_target_login.c
-@@ -15,6 +15,7 @@
- #include <linux/sched/signal.h>
- #include <linux/idr.h>
- #include <linux/tcp.h>        /* TCP_NODELAY */
-+#include <net/ip.h>
- #include <net/ipv6.h>         /* ipv6_addr_v4mapped() */
- #include <scsi/iscsi_proto.h>
- #include <target/target_core_base.h>
-@@ -855,7 +856,7 @@ int iscsit_setup_np(
- 	struct sockaddr_storage *sockaddr)
+diff --git a/net/tipc/socket.c b/net/tipc/socket.c
+index e370ad0edd768..28c57d4544c53 100644
+--- a/net/tipc/socket.c
++++ b/net/tipc/socket.c
+@@ -191,17 +191,17 @@ static int tsk_importance(struct tipc_sock *tsk)
+ 	return msg_importance(&tsk->phdr);
+ }
+ 
+-static int tsk_set_importance(struct tipc_sock *tsk, int imp)
++static struct tipc_sock *tipc_sk(const struct sock *sk)
  {
- 	struct socket *sock = NULL;
--	int backlog = ISCSIT_TCP_BACKLOG, ret, opt = 0, len;
-+	int backlog = ISCSIT_TCP_BACKLOG, ret, len;
- 
- 	switch (np->np_network_transport) {
- 	case ISCSI_TCP:
-@@ -900,15 +901,7 @@ int iscsit_setup_np(
- 	if (np->np_network_transport == ISCSI_TCP)
- 		tcp_sock_set_nodelay(sock->sk);
- 	sock_set_reuseaddr(sock->sk);
--
--	opt = 1;
--	ret = kernel_setsockopt(sock, IPPROTO_IP, IP_FREEBIND,
--			(char *)&opt, sizeof(opt));
--	if (ret < 0) {
--		pr_err("kernel_setsockopt() for IP_FREEBIND"
--			" failed\n");
--		goto fail;
--	}
-+	ip_sock_set_freebind(sock->sk);
- 
- 	ret = kernel_bind(sock, (struct sockaddr *)&np->np_sockaddr, len);
- 	if (ret < 0) {
-diff --git a/include/net/ip.h b/include/net/ip.h
-index 2fc52e26fa88b..5f5d8226b6abc 100644
---- a/include/net/ip.h
-+++ b/include/net/ip.h
-@@ -765,6 +765,7 @@ static inline bool inetdev_valid_mtu(unsigned int mtu)
- 	return likely(mtu >= IPV4_MIN_MTU);
+-	if (imp > TIPC_CRITICAL_IMPORTANCE)
+-		return -EINVAL;
+-	msg_set_importance(&tsk->phdr, (u32)imp);
+-	return 0;
++	return container_of(sk, struct tipc_sock, sk);
  }
  
-+void ip_sock_set_freebind(struct sock *sk);
- void ip_sock_set_tos(struct sock *sk, int val);
- 
- #endif	/* _IP_H */
-diff --git a/net/ipv4/ip_sockglue.c b/net/ipv4/ip_sockglue.c
-index 1733ac78c21aa..62e642ab80126 100644
---- a/net/ipv4/ip_sockglue.c
-+++ b/net/ipv4/ip_sockglue.c
-@@ -581,6 +581,14 @@ void ip_sock_set_tos(struct sock *sk, int val)
+-static struct tipc_sock *tipc_sk(const struct sock *sk)
++int tsk_set_importance(struct sock *sk, int imp)
+ {
+-	return container_of(sk, struct tipc_sock, sk);
++	if (imp > TIPC_CRITICAL_IMPORTANCE)
++		return -EINVAL;
++	msg_set_importance(&tipc_sk(sk)->phdr, (u32)imp);
++	return 0;
  }
- EXPORT_SYMBOL(ip_sock_set_tos);
  
-+void ip_sock_set_freebind(struct sock *sk)
-+{
-+	lock_sock(sk);
-+	inet_sk(sk)->freebind = true;
-+	release_sock(sk);
-+}
-+EXPORT_SYMBOL(ip_sock_set_freebind);
+ static bool tsk_conn_cong(struct tipc_sock *tsk)
+@@ -2681,7 +2681,7 @@ static int tipc_accept(struct socket *sock, struct socket *new_sock, int flags,
+ 	/* Connect new socket to it's peer */
+ 	tipc_sk_finish_conn(new_tsock, msg_origport(msg), msg_orignode(msg));
+ 
+-	tsk_set_importance(new_tsock, msg_importance(msg));
++	tsk_set_importance(new_sk, msg_importance(msg));
+ 	if (msg_named(msg)) {
+ 		new_tsock->conn_type = msg_nametype(msg);
+ 		new_tsock->conn_instance = msg_nameinst(msg);
+@@ -3099,7 +3099,7 @@ static int tipc_setsockopt(struct socket *sock, int lvl, int opt,
+ 
+ 	switch (opt) {
+ 	case TIPC_IMPORTANCE:
+-		res = tsk_set_importance(tsk, value);
++		res = tsk_set_importance(sk, value);
+ 		break;
+ 	case TIPC_SRC_DROPPABLE:
+ 		if (sock->type != SOCK_STREAM)
+diff --git a/net/tipc/socket.h b/net/tipc/socket.h
+index 235b9679acee4..b11575afc66fe 100644
+--- a/net/tipc/socket.h
++++ b/net/tipc/socket.h
+@@ -75,4 +75,6 @@ u32 tipc_sock_get_portid(struct sock *sk);
+ bool tipc_sk_overlimit1(struct sock *sk, struct sk_buff *skb);
+ bool tipc_sk_overlimit2(struct sock *sk, struct sk_buff *skb);
+ 
++int tsk_set_importance(struct sock *sk, int imp);
 +
- /*
-  *	Socket option code for IP. This is the end of the line after any
-  *	TCP,UDP etc options on an IP socket.
+ #endif
+diff --git a/net/tipc/topsrv.c b/net/tipc/topsrv.c
+index 446af7bbd13e6..1489cfb941d8e 100644
+--- a/net/tipc/topsrv.c
++++ b/net/tipc/topsrv.c
+@@ -497,7 +497,6 @@ static void tipc_topsrv_listener_data_ready(struct sock *sk)
+ 
+ static int tipc_topsrv_create_listener(struct tipc_topsrv *srv)
+ {
+-	int imp = TIPC_CRITICAL_IMPORTANCE;
+ 	struct socket *lsock = NULL;
+ 	struct sockaddr_tipc saddr;
+ 	struct sock *sk;
+@@ -514,8 +513,9 @@ static int tipc_topsrv_create_listener(struct tipc_topsrv *srv)
+ 	sk->sk_user_data = srv;
+ 	write_unlock_bh(&sk->sk_callback_lock);
+ 
+-	rc = kernel_setsockopt(lsock, SOL_TIPC, TIPC_IMPORTANCE,
+-			       (char *)&imp, sizeof(imp));
++	lock_sock(sk);
++	rc = tsk_set_importance(sk, TIPC_CRITICAL_IMPORTANCE);
++	release_sock(sk);
+ 	if (rc < 0)
+ 		goto err;
+ 
 -- 
 2.26.2
