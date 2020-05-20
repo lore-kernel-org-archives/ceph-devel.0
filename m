@@ -1,49 +1,84 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH] ceph: flush release queue when handling caps for unknown inode
-Date: Wed, 20 May 2020 12:09:18 -0400
-Message-ID: <20200520160918.257146-1-jlayton@kernel.org>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Re: [ceph-users] Possible bug in op path?
+Date: Wed, 20 May 2020 09:56:51 -0700
+Message-ID: <CAANLjFq+EerkocoYN0MW4VaGRHOWdNPs2HLsROLtcu374B6sMg@mail.gmail.com>
+References: <CAANLjFqkgn86Oa=70jHqHB-4o0saL9Q+AGPuGyyj94x7EiSi2Q@mail.gmail.com>
+ <CABZ+qqn7DwiDO1Ecynx8zY_JuEP81AKemoesSE4F8dkhLtAmLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:49968 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726439AbgETQJU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 20 May 2020 12:09:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51050 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726890AbgETQ5D (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2020 12:57:03 -0400
+Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B2C2C061A0E
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 09:57:03 -0700 (PDT)
+Received: by mail-qt1-x830.google.com with SMTP id p12so3065938qtn.13
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 09:57:03 -0700 (PDT)
+In-Reply-To: <CABZ+qqn7DwiDO1Ecynx8zY_JuEP81AKemoesSE4F8dkhLtAmLg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, andrej.filipcic@ijs.si
+To: Dan van der Ster <dan@vanderster.com>
+Cc: ceph-users <ceph-users@ceph.io>, ceph-devel <ceph-devel@vger.kernel.org>
 
-It's possible for the VFS to completely forget about an inode, but for
-it to still be sitting on the cap release queue. If the MDS sends the
-client a cap message for such an inode, it just ignores it today, which
-can lead to a stall of up to 5s until the cap release queue is flushed.
+We are using high and the people on the list that have also changed
+have not seen the improvements that I would expect.
+----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 
-If we get a cap message for an inode that can't be located, then go
-ahead and flush the cap release queue.
-
-Cc: stable@vger.kernel.org
-Fixes: 1e9c2eb6811e ("ceph: delete stale dentry when last reference is dropped")
-Reported-by: Andrej Filipčič <andrej.filipcic@ijs.si>
-Fix-suggested-by: Yan, Zheng <zyan@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 27c2e60f33dc..41eb999dadf0 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -4070,7 +4070,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- 			__ceph_queue_cap_release(session, cap);
- 			spin_unlock(&session->s_cap_lock);
- 		}
--		goto done;
-+		goto flush_cap_releases;
- 	}
- 
- 	/* these will work even if we don't have a cap yet */
--- 
-2.26.2
+On Wed, May 20, 2020 at 1:38 AM Dan van der Ster <dan@vanderster.com> wrote:
+>
+> Hi Robert,
+>
+> Since you didn't mention -- are you using osd_op_queue_cut_off low or
+> high? I know you are usually advocating high, but the default is still
+> low and most users don't change this setting.
+>
+> Cheers, Dan
+>
+>
+> On Wed, May 20, 2020 at 9:41 AM Robert LeBlanc <robert@leblancnet.us> wrote:
+> >
+> > We upgraded our Jewel cluster to Nautilus a few months ago and I've noticed
+> > that op behavior has changed. This is an HDD cluster (NVMe journals and
+> > NVMe CephFS metadata pool) with about 800 OSDs. When on Jewel and running
+> > WPQ with the high cut-off, it was rock solid. When we had recoveries going
+> > on it barely dented the client ops and when the client ops on the cluster
+> > went down the backfills would run as fast as the cluster could go. I could
+> > have max_backfills set to 10 and the cluster performed admirably.
+> > After upgrading to Nautilus the cluster struggles with any kind of recovery
+> > and if there is any significant client write load the cluster can get into
+> > a death spiral. Even heavy client write bandwidth (3-4 GB/s) can cause the
+> > heartbeat checks to raise, blocked IO and even OSDs becoming unresponsive.
+> > As the person who wrote the WPQ code initially, I know that it was fair and
+> > proportional to the op priority and in Jewel it worked. It's not working in
+> > Nautilus. I've tweaked a lot of things trying to troubleshoot the issue and
+> > setting the recovery priority to 1 or zero barely makes any difference. My
+> > best estimation is that the op priority is getting lost before reaching the
+> > WPQ scheduler and is thus not prioritizing and dispatching ops correctly.
+> > It's almost as if all ops are being treated the same and there is no
+> > priority at all.
+> > Unfortunately, I do not have the time to set up the dev/testing environment
+> > to track this down and we will be moving away from Ceph. But I really like
+> > Ceph and want to see it succeed. I strongly suggest that someone look into
+> > this because I think it will resolve a lot of problems people have had on
+> > the mailing list. I'm not sure if a bug was introduced with the other
+> > queues that touches more of the op path or if something in the op path
+> > restructuring that changed how things work (I know that was being discussed
+> > around the time that Jewel was released). But my guess is that it is
+> > somewhere between the op being created and being received into the queue.
+> > I really hope that this helps in the search for this regression. I spent a
+> > lot of time studying the issue to come up with WPQ and saw it work great
+> > when I switched this cluster from PRIO to WPQ. I've also spent countless
+> > hours studying how it's changed in Nautilus.
+> >
+> > Thank you,
+> > Robert LeBlanc
+> > ----------------
+> > Robert LeBlanc
+> > PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> > _______________________________________________
+> > ceph-users mailing list -- ceph-users@ceph.io
+> > To unsubscribe send an email to ceph-users-leave@ceph.io
