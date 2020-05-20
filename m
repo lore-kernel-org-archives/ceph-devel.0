@@ -1,145 +1,144 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 19/33] tcp: add tcp_sock_set_keepcnt
-Date: Wed, 20 May 2020 21:54:55 +0200
-Message-ID: <20200520195509.2215098-20-hch@lst.de>
+Subject: [PATCH 32/33] net: add a new bind_add method
+Date: Wed, 20 May 2020 21:55:08 +0200
+Message-ID: <20200520195509.2215098-33-hch@lst.de>
 References: <20200520195509.2215098-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8bit
-Return-path: <cluster-devel-bounces@redhat.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20200520195509.2215098-1-hch@lst.de>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
+Sender: linux-kernel-owner@vger.kernel.org
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Eric Dumazet <edumazet@google.com>, linux-nvme@lists.infradead.org, linux-sctp@vger.kernel.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, rds-devel@oss.oracle.com, linux-rdma@vger.kernel.org, cluster-devel@redhat.com, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, drbd-dev@tron.linbit.com, ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, netdev@vger.kernel.org, Vlad Yasevich <vyasevich@gmail.com>, linux-kernel@vger.kernel.org, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, ocfs2-devel@oss.oracle.com
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Add a helper to directly set the TCP_KEEPCNT sockopt from kernel space
-without going through a fake uaccess.
+The SCTP protocol allows to bind multiple address to a socket.  That
+feature is currently only exposed as a socket option.  Add a bind_add
+method struct proto that allows to bind additional addresses, and
+switch the dlm code to use the method instead of going through the
+socket option from kernel space.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- include/linux/tcp.h   |  1 +
- net/ipv4/tcp.c        | 12 ++++++++++++
- net/rds/tcp.h         |  2 +-
- net/rds/tcp_listen.c  | 17 +++--------------
- net/sunrpc/xprtsock.c |  3 +--
- 5 files changed, 18 insertions(+), 17 deletions(-)
+ fs/dlm/lowcomms.c  |  9 +++------
+ include/net/sock.h |  6 +++++-
+ net/core/sock.c    |  8 ++++++++
+ net/sctp/socket.c  | 23 +++++++++++++++++++++++
+ 4 files changed, 39 insertions(+), 7 deletions(-)
 
-diff --git a/include/linux/tcp.h b/include/linux/tcp.h
-index 1f9bada00faab..9aac824c523cf 100644
---- a/include/linux/tcp.h
-+++ b/include/linux/tcp.h
-@@ -498,6 +498,7 @@ int tcp_skb_shift(struct sk_buff *to, struct sk_buff *from, int pcount,
- 		  int shiftlen);
+diff --git a/fs/dlm/lowcomms.c b/fs/dlm/lowcomms.c
+index 9f1c3cdc9d653..3543a8fec9075 100644
+--- a/fs/dlm/lowcomms.c
++++ b/fs/dlm/lowcomms.c
+@@ -882,6 +882,7 @@ static void writequeue_entry_complete(struct writequeue_entry *e, int completed)
+ static int sctp_bind_addrs(struct connection *con, uint16_t port)
+ {
+ 	struct sockaddr_storage localaddr;
++	struct sockaddr *addr = (struct sockaddr *)&localaddr;
+ 	int i, addr_len, result = 0;
  
- void tcp_sock_set_cork(struct sock *sk, bool on);
-+int tcp_sock_set_keepcnt(struct sock *sk, int val);
- int tcp_sock_set_keepidle(struct sock *sk, int val);
- int tcp_sock_set_keepintvl(struct sock *sk, int val);
- void tcp_sock_set_nodelay(struct sock *sk);
-diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
-index 7eb083e09786a..15d47d5e79510 100644
---- a/net/ipv4/tcp.c
-+++ b/net/ipv4/tcp.c
-@@ -2946,6 +2946,18 @@ int tcp_sock_set_keepintvl(struct sock *sk, int val)
+ 	for (i = 0; i < dlm_local_count; i++) {
+@@ -889,13 +890,9 @@ static int sctp_bind_addrs(struct connection *con, uint16_t port)
+ 		make_sockaddr(&localaddr, port, &addr_len);
+ 
+ 		if (!i)
+-			result = kernel_bind(con->sock,
+-					     (struct sockaddr *)&localaddr,
+-					     addr_len);
++			result = kernel_bind(con->sock, addr, addr_len);
+ 		else
+-			result = kernel_setsockopt(con->sock, SOL_SCTP,
+-						   SCTP_SOCKOPT_BINDX_ADD,
+-						   (char *)&localaddr, addr_len);
++			result = sock_bind_add(con->sock->sk, addr, addr_len);
+ 
+ 		if (result < 0) {
+ 			log_print("Can't bind to %d addr number %d, %d.\n",
+diff --git a/include/net/sock.h b/include/net/sock.h
+index d994daa418ec2..6e9f713a78607 100644
+--- a/include/net/sock.h
++++ b/include/net/sock.h
+@@ -1156,7 +1156,9 @@ struct proto {
+ 	int			(*sendpage)(struct sock *sk, struct page *page,
+ 					int offset, size_t size, int flags);
+ 	int			(*bind)(struct sock *sk,
+-					struct sockaddr *uaddr, int addr_len);
++					struct sockaddr *addr, int addr_len);
++	int			(*bind_add)(struct sock *sk,
++					struct sockaddr *addr, int addr_len);
+ 
+ 	int			(*backlog_rcv) (struct sock *sk,
+ 						struct sk_buff *skb);
+@@ -2698,4 +2700,6 @@ void sock_set_reuseaddr(struct sock *sk);
+ void sock_set_reuseport(struct sock *sk);
+ void sock_set_sndtimeo(struct sock *sk, s64 secs);
+ 
++int sock_bind_add(struct sock *sk, struct sockaddr *addr, int addr_len);
++
+ #endif	/* _SOCK_H */
+diff --git a/net/core/sock.c b/net/core/sock.c
+index 2ca3425b519c0..61ec573221a60 100644
+--- a/net/core/sock.c
++++ b/net/core/sock.c
+@@ -3712,3 +3712,11 @@ bool sk_busy_loop_end(void *p, unsigned long start_time)
  }
- EXPORT_SYMBOL(tcp_sock_set_keepintvl);
- 
-+int tcp_sock_set_keepcnt(struct sock *sk, int val)
+ EXPORT_SYMBOL(sk_busy_loop_end);
+ #endif /* CONFIG_NET_RX_BUSY_POLL */
++
++int sock_bind_add(struct sock *sk, struct sockaddr *addr, int addr_len)
 +{
-+	if (val < 1 || val > MAX_TCP_KEEPCNT)
++	if (!sk->sk_prot->bind_add)
++		return -EOPNOTSUPP;
++	return sk->sk_prot->bind_add(sk, addr, addr_len);
++}
++EXPORT_SYMBOL(sock_bind_add);
+diff --git a/net/sctp/socket.c b/net/sctp/socket.c
+index 827a9903ee288..8a0b9258f65c0 100644
+--- a/net/sctp/socket.c
++++ b/net/sctp/socket.c
+@@ -1057,6 +1057,27 @@ static int sctp_setsockopt_bindx(struct sock *sk,
+ 	return err;
+ }
+ 
++static int sctp_bind_add(struct sock *sk, struct sockaddr *addr,
++		int addrlen)
++{
++	struct sctp_af *af = sctp_get_af_specific(addr->sa_family);
++	int err;
++
++	if (!af || af->sockaddr_len > addrlen)
 +		return -EINVAL;
++	err = security_sctp_bind_connect(sk, SCTP_SOCKOPT_BINDX_ADD, addr,
++			addrlen);
++	if (err)
++		return err;
 +
 +	lock_sock(sk);
-+	tcp_sk(sk)->keepalive_probes = val;
++	err = sctp_do_bind(sk, (union sctp_addr *)addr, af->sockaddr_len);
++	if (!err)
++		err = sctp_send_asconf_add_ip(sk, addr, 1);
 +	release_sock(sk);
-+	return 0;
++	return err;
 +}
-+EXPORT_SYMBOL(tcp_sock_set_keepcnt);
 +
- /*
-  *	Socket option code for TCP.
-  */
-diff --git a/net/rds/tcp.h b/net/rds/tcp.h
-index f6d75d8cb167a..bad9cf49d5657 100644
---- a/net/rds/tcp.h
-+++ b/net/rds/tcp.h
-@@ -70,7 +70,7 @@ struct socket *rds_tcp_listen_init(struct net *net, bool isv6);
- void rds_tcp_listen_stop(struct socket *sock, struct work_struct *acceptor);
- void rds_tcp_listen_data_ready(struct sock *sk);
- int rds_tcp_accept_one(struct socket *sock);
--int rds_tcp_keepalive(struct socket *sock);
-+void rds_tcp_keepalive(struct socket *sock);
- void *rds_tcp_listen_sock_def_readable(struct net *net);
- 
- /* tcp_recv.c */
-diff --git a/net/rds/tcp_listen.c b/net/rds/tcp_listen.c
-index 9ad555c48d15d..101cf14215a0b 100644
---- a/net/rds/tcp_listen.c
-+++ b/net/rds/tcp_listen.c
-@@ -38,27 +38,19 @@
- #include "rds.h"
- #include "tcp.h"
- 
--int rds_tcp_keepalive(struct socket *sock)
-+void rds_tcp_keepalive(struct socket *sock)
- {
- 	/* values below based on xs_udp_default_timeout */
- 	int keepidle = 5; /* send a probe 'keepidle' secs after last data */
- 	int keepcnt = 5; /* number of unack'ed probes before declaring dead */
--	int ret = 0;
- 
- 	sock_set_keepalive(sock->sk);
--
--	ret = kernel_setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT,
--				(char *)&keepcnt, sizeof(keepcnt));
--	if (ret < 0)
--		goto bail;
--
-+	tcp_sock_set_keepcnt(sock->sk, keepcnt);
- 	tcp_sock_set_keepidle(sock->sk, keepidle);
- 	/* KEEPINTVL is the interval between successive probes. We follow
- 	 * the model in xs_tcp_finish_connecting() and re-use keepidle.
- 	 */
- 	tcp_sock_set_keepintvl(sock->sk, keepidle);
--bail:
--	return ret;
- }
- 
- /* rds_tcp_accept_one_path(): if accepting on cp_index > 0, make sure the
-@@ -140,10 +132,7 @@ int rds_tcp_accept_one(struct socket *sock)
- 	new_sock->ops = sock->ops;
- 	__module_get(new_sock->ops->owner);
- 
--	ret = rds_tcp_keepalive(new_sock);
--	if (ret < 0)
--		goto out;
--
-+	rds_tcp_keepalive(new_sock);
- 	rds_tcp_tune(new_sock);
- 
- 	inet = inet_sk(new_sock->sk);
-diff --git a/net/sunrpc/xprtsock.c b/net/sunrpc/xprtsock.c
-index 5ca64e12af0c5..0d3ec055bc12f 100644
---- a/net/sunrpc/xprtsock.c
-+++ b/net/sunrpc/xprtsock.c
-@@ -2109,8 +2109,7 @@ static void xs_tcp_set_socket_timeouts(struct rpc_xprt *xprt,
- 	sock_set_keepalive(sock->sk);
- 	tcp_sock_set_keepidle(sock->sk, keepidle);
- 	tcp_sock_set_keepintvl(sock->sk, keepidle);
--	kernel_setsockopt(sock, SOL_TCP, TCP_KEEPCNT,
--			(char *)&keepcnt, sizeof(keepcnt));
-+	tcp_sock_set_keepcnt(sock->sk, keepcnt);
- 
- 	/* TCP user timeout (see RFC5482) */
- 	tcp_sock_set_user_timeout(sock->sk, timeo);
+ static int sctp_connect_new_asoc(struct sctp_endpoint *ep,
+ 				 const union sctp_addr *daddr,
+ 				 const struct sctp_initmsg *init,
+@@ -9625,6 +9646,7 @@ struct proto sctp_prot = {
+ 	.sendmsg     =	sctp_sendmsg,
+ 	.recvmsg     =	sctp_recvmsg,
+ 	.bind        =	sctp_bind,
++	.bind_add    =  sctp_bind_add,
+ 	.backlog_rcv =	sctp_backlog_rcv,
+ 	.hash        =	sctp_hash,
+ 	.unhash      =	sctp_unhash,
+@@ -9667,6 +9689,7 @@ struct proto sctpv6_prot = {
+ 	.sendmsg	= sctp_sendmsg,
+ 	.recvmsg	= sctp_recvmsg,
+ 	.bind		= sctp_bind,
++	.bind_add	= sctp_bind_add,
+ 	.backlog_rcv	= sctp_backlog_rcv,
+ 	.hash		= sctp_hash,
+ 	.unhash		= sctp_unhash,
 -- 
 2.26.2
