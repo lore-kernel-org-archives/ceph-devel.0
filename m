@@ -1,102 +1,49 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH] dns: Apply a default TTL to records obtained from
- getaddrinfo()
-Date: Wed, 20 May 2020 11:07:50 -0400
-Message-ID: <ed3d0ebdeabe53c6cfc0c6fd185dc50f4055a0e6.camel@kernel.org>
-References: <20200519141432.GA2949457@erythro.dev.benboeckel.internal>
-         <20200518155148.GA2595638@erythro.dev.benboeckel.internal>
-         <158981176590.872823.11683683537698750702.stgit@warthog.procyon.org.uk>
-         <1080378.1589895580@warthog.procyon.org.uk>
-         <1512927.1589904409@warthog.procyon.org.uk>
+Subject: [PATCH] ceph: flush release queue when handling caps for unknown inode
+Date: Wed, 20 May 2020 12:09:18 -0400
+Message-ID: <20200520160918.257146-1-jlayton@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <1512927.1589904409@warthog.procyon.org.uk>
-Sender: netdev-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>, me@benboeckel.net, fweimer@redhat.com
-Cc: linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org, keyrings@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:49968 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726439AbgETQJU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 20 May 2020 12:09:20 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, andrej.filipcic@ijs.si
 
-On Tue, 2020-05-19 at 17:06 +0100, David Howells wrote:
-> Okay, how about this incremental change, then?  If fixes the typo, only prints
-> the "READ CONFIG" line in verbose mode, filters escape chars in the config
-> file and reduces the expiration time to 5s.
-> 
-> David
-> ---
-> diff --git a/key.dns_resolver.c b/key.dns_resolver.c
-> index c241eda3..7a7ec424 100644
-> --- a/key.dns_resolver.c
-> +++ b/key.dns_resolver.c
-> @@ -52,7 +52,7 @@ key_serial_t key;
->  static int verbose;
->  int debug_mode;
->  unsigned mask = INET_ALL;
-> -unsigned int key_expiry = 10 * 60;
-> +unsigned int key_expiry = 5;
->  
->  
->  /*
-> @@ -109,7 +109,7 @@ void _error(const char *fmt, ...)
->  }
->  
->  /*
-> - * Pring a warning to stderr or the syslog
-> + * Print a warning to stderr or the syslog
->   */
->  void warning(const char *fmt, ...)
->  {
-> @@ -454,7 +454,7 @@ static void read_config(void)
->  	unsigned int line = 0, u;
->  	int n;
->  
-> -	printf("READ CONFIG %s\n", config_file);
-> +	info("READ CONFIG %s", config_file);
->  
->  	f = fopen(config_file, "r");
->  	if (!f) {
-> @@ -514,6 +514,16 @@ static void read_config(void)
->  			v = p = b;
->  			while (*b) {
->  				if (esc) {
-> +					switch (*b) {
-> +					case ' ':
-> +					case '\t':
-> +					case '"':
-> +					case '\'':
-> +					case '\\':
-> +						break;
-> +					default:
-> +						goto invalid_escape_char;
-> +					}
->  					esc = false;
->  					*p++ = *b++;
->  					continue;
-> @@ -563,6 +573,8 @@ static void read_config(void)
->  
->  missing_value:
->  	error("%s:%u: %s: Missing value", config_file, line, k);
-> +invalid_escape_char:
-> +	error("%s:%u: %s: Invalid char in escape", config_file, line, k);
->  post_quote_data:
->  	error("%s:%u: %s: Data after closing quote", config_file, line, k);
->  bad_value:
-> diff --git a/man/key.dns_resolver.conf.5 b/man/key.dns_resolver.conf.5
-> index 03d04049..c944ad55 100644
-> --- a/man/key.dns_resolver.conf.5
-> +++ b/man/key.dns_resolver.conf.5
-> @@ -34,7 +34,7 @@ Available options include:
->  The number of seconds to set as the expiration on a cached record.  This will
->  be overridden if the program manages to retrieve TTL information along with
->  the addresses (if, for example, it accesses the DNS directly).  The default is
-> -600 seconds.  The value must be in the range 1 to INT_MAX.
-> +5 seconds.  The value must be in the range 1 to INT_MAX.
->  .P
->  The file can also include comments beginning with a '#' character unless
->  otherwise suppressed by being inside a quoted value or being escaped with a
-> 
+It's possible for the VFS to completely forget about an inode, but for
+it to still be sitting on the cap release queue. If the MDS sends the
+client a cap message for such an inode, it just ignores it today, which
+can lead to a stall of up to 5s until the cap release queue is flushed.
 
-This looks good to me.
+If we get a cap message for an inode that can't be located, then go
+ahead and flush the cap release queue.
 
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Cc: stable@vger.kernel.org
+Fixes: 1e9c2eb6811e ("ceph: delete stale dentry when last reference is dropped")
+Reported-by: Andrej Filipčič <andrej.filipcic@ijs.si>
+Fix-suggested-by: Yan, Zheng <zyan@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/caps.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 27c2e60f33dc..41eb999dadf0 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -4070,7 +4070,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 			__ceph_queue_cap_release(session, cap);
+ 			spin_unlock(&session->s_cap_lock);
+ 		}
+-		goto done;
++		goto flush_cap_releases;
+ 	}
+ 
+ 	/* these will work even if we don't have a cap yet */
+-- 
+2.26.2
