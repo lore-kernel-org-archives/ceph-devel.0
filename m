@@ -1,33 +1,27 @@
-From: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 31/33] sctp: add sctp_sock_set_nodelay
-Date: Wed, 20 May 2020 20:39:13 -0300
-Message-ID: <20200520233913.GV2491@localhost.localdomain>
-References: <20200520195509.2215098-1-hch@lst.de>
- <20200520195509.2215098-32-hch@lst.de>
- <20200520231001.GU2491@localhost.localdomain>
- <20200520.162355.2212209708127373208.davem@davemloft.net>
+From: "mrs.chantala" <mrs.maria330@gmail.com>
+Subject: hiCompliment
+Date: Thu, 21 May 2020 06:20:01 +0000
+Message-ID: <CAL_8keO=AsQ_bPy8pA7s7QDdRp-KBL6GpcMdACeBH2sd6Gnx5g@mail.gmail.com>
+Reply-To: mrs.chantala2055@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20200520.162355.2212209708127373208.davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Miller <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
-Cc: hch-jcswGhMUV9g@public.gmane.org, kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org, yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org, vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35282 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726869AbgEUGUF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2020 02:20:05 -0400
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FCE5C061A0E
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 23:20:03 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id m12so4455976ljc.6
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2020 23:20:03 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 
-On Wed, May 20, 2020 at 04:23:55PM -0700, David Miller wrote:
-> From: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Date: Wed, 20 May 2020 20:10:01 -0300
-> 
-> > The duplication with sctp_setsockopt_nodelay() is quite silly/bad.
-> > Also, why have the 'true' hardcoded? It's what dlm uses, yes, but the
-> > API could be a bit more complete than that.
-> 
-> The APIs are being designed based upon what in-tree users actually
-> make use of.  We can expand things later if necessary.
-
-Sometimes expanding things later can be though, thus why the worry.
-But ok, I get it. Thanks.
-
-The comment still applies, though. (re the duplication)
+     Compliment of the day to you. I am Mrs.CHANTAL I am sending this brief
+    letter to solicit your partnership to transfer $13.5 Million US
+    Dollars.I shall send you more information and procedures when I receive
+    positive response From you. Please send me a message in My private
+    email address is ( mrschantal066@gmail.com  )
+    Best Regards
+    MrS.Chantal
