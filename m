@@ -1,59 +1,160 @@
-From: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 31/33] sctp: add sctp_sock_set_nodelay
-Date: Thu, 21 May 2020 10:33:48 -0300
-Message-ID: <20200521133348.GX2491@localhost.localdomain>
-References: <20200520195509.2215098-1-hch@lst.de>
- <20200520195509.2215098-32-hch@lst.de>
- <20200520231001.GU2491@localhost.localdomain>
- <20200520.162355.2212209708127373208.davem@davemloft.net>
- <20200520233913.GV2491@localhost.localdomain>
- <20200521083442.GA7771@lst.de>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: add ceph_async_check_caps() to avoid double lock
+ and deadlock
+Date: Thu, 21 May 2020 21:49:10 +0800
+Message-ID: <88e418bd-36ab-a668-75e9-022b305be28a@redhat.com>
+References: <1590046576-1262-1-git-send-email-xiubli@redhat.com>
+ <CAAM7YAmoCHXB1fLSXt0fqOczqbm9s_2yfWbyAaaMuQRCNR5+3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20200521083442.GA7771-jcswGhMUV9g@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Cc: David Miller <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org, yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org, vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:49792 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729197AbgEUNtW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2020 09:49:22 -0400
+In-Reply-To: <CAAM7YAmoCHXB1fLSXt0fqOczqbm9s_2yfWbyAaaMuQRCNR5+3Q@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, May 21, 2020 at 10:34:42AM +0200, Christoph Hellwig wrote:
-> On Wed, May 20, 2020 at 08:39:13PM -0300, Marcelo Ricardo Leitner wrote:
-> > On Wed, May 20, 2020 at 04:23:55PM -0700, David Miller wrote:
-> > > From: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> > > Date: Wed, 20 May 2020 20:10:01 -0300
-> > > 
-> > > > The duplication with sctp_setsockopt_nodelay() is quite silly/bad.
-> > > > Also, why have the 'true' hardcoded? It's what dlm uses, yes, but the
-> > > > API could be a bit more complete than that.
-> > > 
-> > > The APIs are being designed based upon what in-tree users actually
-> > > make use of.  We can expand things later if necessary.
-> > 
-> > Sometimes expanding things later can be though, thus why the worry.
-> > But ok, I get it. Thanks.
-> > 
-> > The comment still applies, though. (re the duplication)
-> 
-> Where do you see duplication?
-> 
-> sctp_setsockopt_nodelay does the following things:
-> 
->  - verifies optlen, returns -EINVAL if it doesn't match
->  - calls get_user, returns -EFAULT on error
->  - converts the value from get_user to a boolean and assigns it
->    to sctp_sk(sk)->nodelay
->  - returns 0.
-> 
-> sctp_sock_set_nodelay does:
-> 
->  - call lock_sock
->  - assign true to sctp_sk(sk)->nodelay
->  - call release_sock
->  - does not return an error code
+On 2020/5/21 16:45, Yan, Zheng wrote:
+> On Thu, May 21, 2020 at 3:39 PM <xiubli@redhat.com> wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> In the ceph_check_caps() it may call the session lock/unlock stuff.
+>>
+>> There have some deadlock cases, like:
+>> handle_forward()
+>> ...
+>> mutex_lock(&mdsc->mutex)
+>> ...
+>> ceph_mdsc_put_request()
+>>    --> ceph_mdsc_release_request()
+>>      --> ceph_put_cap_request()
+>>        --> ceph_put_cap_refs()
+>>          --> ceph_check_caps()
+>> ...
+>> mutex_unlock(&mdsc->mutex)
+> For this case, it's better to call ceph_mdsc_put_request() after
+> unlock mdsc->mutex
 
-With the patch there are now two ways of enabling nodelay. It may be
-just a boolean set today, but if one wants to probe on it or if we
-want to extend it with anything, say a debug msg, we have to do it in
-two (very different) places.
+Let me check whether there has other place is doing the similar stuff.
+
+>> And also there maybe has some double session lock cases, like:
+>>
+>> send_mds_reconnect()
+>> ...
+>> mutex_lock(&session->s_mutex);
+>> ...
+>>    --> replay_unsafe_requests()
+>>      --> ceph_mdsc_release_dir_caps()
+>>        --> ceph_put_cap_refs()
+>>          --> ceph_check_caps()
+>> ...
+>> mutex_unlock(&session->s_mutex);
+> There is no point to check_caps() and send cap message while
+> reconnecting caps. So I think it's better to just skip calling
+> ceph_check_caps() for this case.
+
+Okay, will fix it.
+
+BRs
+
+Thanks
+
+>
+> Regards
+> Yan, Zheng
+>
+>> URL: https://tracker.ceph.com/issues/45635
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   fs/ceph/caps.c  |  2 +-
+>>   fs/ceph/inode.c | 10 ++++++++++
+>>   fs/ceph/super.h | 12 ++++++++++++
+>>   3 files changed, 23 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>> index 27c2e60..08194c4 100644
+>> --- a/fs/ceph/caps.c
+>> +++ b/fs/ceph/caps.c
+>> @@ -3073,7 +3073,7 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
+>>               last ? " last" : "", put ? " put" : "");
+>>
+>>          if (last)
+>> -               ceph_check_caps(ci, 0, NULL);
+>> +               ceph_async_check_caps(ci);
+>>          else if (flushsnaps)
+>>                  ceph_flush_snaps(ci, NULL);
+>>          if (wake)
+>> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+>> index 357c937..84a61d4 100644
+>> --- a/fs/ceph/inode.c
+>> +++ b/fs/ceph/inode.c
+>> @@ -35,6 +35,7 @@
+>>   static const struct inode_operations ceph_symlink_iops;
+>>
+>>   static void ceph_inode_work(struct work_struct *work);
+>> +static void ceph_check_caps_work(struct work_struct *work);
+>>
+>>   /*
+>>    * find or create an inode, given the ceph ino number
+>> @@ -518,6 +519,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+>>          INIT_LIST_HEAD(&ci->i_snap_flush_item);
+>>
+>>          INIT_WORK(&ci->i_work, ceph_inode_work);
+>> +       INIT_WORK(&ci->check_caps_work, ceph_check_caps_work);
+>>          ci->i_work_mask = 0;
+>>          memset(&ci->i_btime, '\0', sizeof(ci->i_btime));
+>>
+>> @@ -2012,6 +2014,14 @@ static void ceph_inode_work(struct work_struct *work)
+>>          iput(inode);
+>>   }
+>>
+>> +static void ceph_check_caps_work(struct work_struct *work)
+>> +{
+>> +       struct ceph_inode_info *ci = container_of(work, struct ceph_inode_info,
+>> +                                                 check_caps_work);
+>> +
+>> +       ceph_check_caps(ci, 0, NULL);
+>> +}
+>> +
+>>   /*
+>>    * symlinks
+>>    */
+>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+>> index 226f19c..96d0e41 100644
+>> --- a/fs/ceph/super.h
+>> +++ b/fs/ceph/super.h
+>> @@ -421,6 +421,8 @@ struct ceph_inode_info {
+>>          struct timespec64 i_btime;
+>>          struct timespec64 i_snap_btime;
+>>
+>> +       struct work_struct check_caps_work;
+>> +
+>>          struct work_struct i_work;
+>>          unsigned long  i_work_mask;
+>>
+>> @@ -1102,6 +1104,16 @@ extern void ceph_flush_snaps(struct ceph_inode_info *ci,
+>>   extern bool __ceph_should_report_size(struct ceph_inode_info *ci);
+>>   extern void ceph_check_caps(struct ceph_inode_info *ci, int flags,
+>>                              struct ceph_mds_session *session);
+>> +static void inline
+>> +ceph_async_check_caps(struct ceph_inode_info *ci)
+>> +{
+>> +       struct inode *inode = &ci->vfs_inode;
+>> +
+>> +       /* It's okay if queue_work fails */
+>> +       queue_work(ceph_inode_to_client(inode)->inode_wq,
+>> +                  &ceph_inode(inode)->check_caps_work);
+>> +}
+>> +
+>>   extern void ceph_check_delayed_caps(struct ceph_mds_client *mdsc);
+>>   extern void ceph_flush_dirty_caps(struct ceph_mds_client *mdsc);
+>>   extern int  ceph_drop_caps_for_unlink(struct inode *inode);
+>> --
+>> 1.8.3.1
+>>
