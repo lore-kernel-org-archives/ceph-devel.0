@@ -1,160 +1,87 @@
-From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH] ceph: add ceph_async_check_caps() to avoid double lock
- and deadlock
-Date: Thu, 21 May 2020 21:49:10 +0800
-Message-ID: <88e418bd-36ab-a668-75e9-022b305be28a@redhat.com>
-References: <1590046576-1262-1-git-send-email-xiubli@redhat.com>
- <CAAM7YAmoCHXB1fLSXt0fqOczqbm9s_2yfWbyAaaMuQRCNR5+3Q@mail.gmail.com>
+From: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+Subject: Re: [PATCH 32/33] net: add a new bind_add method
+Date: Thu, 21 May 2020 10:54:43 -0300
+Message-ID: <20200521135443.GY2491@localhost.localdomain>
+References: <20200520195509.2215098-1-hch@lst.de>
+ <20200520195509.2215098-33-hch@lst.de>
+ <20200520230025.GT2491@localhost.localdomain>
+ <20200521084224.GA7859@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:49792 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729197AbgEUNtW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2020 09:49:22 -0400
-In-Reply-To: <CAAM7YAmoCHXB1fLSXt0fqOczqbm9s_2yfWbyAaaMuQRCNR5+3Q@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <target-devel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20200521084224.GA7859@lst.de>
+Sender: target-devel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, linux-sctp@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 2020/5/21 16:45, Yan, Zheng wrote:
-> On Thu, May 21, 2020 at 3:39 PM <xiubli@redhat.com> wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> In the ceph_check_caps() it may call the session lock/unlock stuff.
->>
->> There have some deadlock cases, like:
->> handle_forward()
->> ...
->> mutex_lock(&mdsc->mutex)
->> ...
->> ceph_mdsc_put_request()
->>    --> ceph_mdsc_release_request()
->>      --> ceph_put_cap_request()
->>        --> ceph_put_cap_refs()
->>          --> ceph_check_caps()
->> ...
->> mutex_unlock(&mdsc->mutex)
-> For this case, it's better to call ceph_mdsc_put_request() after
-> unlock mdsc->mutex
+On Thu, May 21, 2020 at 10:42:24AM +0200, Christoph Hellwig wrote:
+> On Wed, May 20, 2020 at 08:00:25PM -0300, Marcelo Ricardo Leitner wrote:
+> > > +	if (err)
+> > > +		return err;
+> > > +
+> > > +	lock_sock(sk);
+> > > +	err = sctp_do_bind(sk, (union sctp_addr *)addr, af->sockaddr_len);
+> > > +	if (!err)
+> > > +		err = sctp_send_asconf_add_ip(sk, addr, 1);
+> > 
+> > Some problems here.
+> > - addr may contain a list of addresses
+> > - the addresses, then, are not being validated
+> > - sctp_do_bind may fail, on which it requires some undoing
+> >   (like sctp_bindx_add does)
+> > - code duplication with sctp_setsockopt_bindx.
+> 
+> sctp_do_bind and thus this function only support a single address, as
+> that is the only thing that the DLM code requires.  I could move the
 
-Let me check whether there has other place is doing the similar stuff.
+I see.
 
->> And also there maybe has some double session lock cases, like:
->>
->> send_mds_reconnect()
->> ...
->> mutex_lock(&session->s_mutex);
->> ...
->>    --> replay_unsafe_requests()
->>      --> ceph_mdsc_release_dir_caps()
->>        --> ceph_put_cap_refs()
->>          --> ceph_check_caps()
->> ...
->> mutex_unlock(&session->s_mutex);
-> There is no point to check_caps() and send cap message while
-> reconnecting caps. So I think it's better to just skip calling
-> ceph_check_caps() for this case.
+> user copy out of sctp_setsockopt_bindx and reuse that, but it is a
+> rather rcane API.
 
-Okay, will fix it.
+Yes. With David's patch, which is doing that, it can be as simple as:
 
-BRs
+static int sctp_bind_add(struct sock *sk, struct sockaddr *addr,
+               int addrlen)
+{
+	int ret;
+	lock_sock(sk);
+	ret = sctp_setsockopt_bindx(sk, addr, addrlen, SCTP_BINDX_ADD_ADDR);
+	release_sock(sk);
+	return ret;
+}
 
-Thanks
+and then dlm would be using code that we can test through sctp-only tests as
+well.
 
->
-> Regards
-> Yan, Zheng
->
->> URL: https://tracker.ceph.com/issues/45635
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   fs/ceph/caps.c  |  2 +-
->>   fs/ceph/inode.c | 10 ++++++++++
->>   fs/ceph/super.h | 12 ++++++++++++
->>   3 files changed, 23 insertions(+), 1 deletion(-)
->>
->> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->> index 27c2e60..08194c4 100644
->> --- a/fs/ceph/caps.c
->> +++ b/fs/ceph/caps.c
->> @@ -3073,7 +3073,7 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
->>               last ? " last" : "", put ? " put" : "");
->>
->>          if (last)
->> -               ceph_check_caps(ci, 0, NULL);
->> +               ceph_async_check_caps(ci);
->>          else if (flushsnaps)
->>                  ceph_flush_snaps(ci, NULL);
->>          if (wake)
->> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
->> index 357c937..84a61d4 100644
->> --- a/fs/ceph/inode.c
->> +++ b/fs/ceph/inode.c
->> @@ -35,6 +35,7 @@
->>   static const struct inode_operations ceph_symlink_iops;
->>
->>   static void ceph_inode_work(struct work_struct *work);
->> +static void ceph_check_caps_work(struct work_struct *work);
->>
->>   /*
->>    * find or create an inode, given the ceph ino number
->> @@ -518,6 +519,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
->>          INIT_LIST_HEAD(&ci->i_snap_flush_item);
->>
->>          INIT_WORK(&ci->i_work, ceph_inode_work);
->> +       INIT_WORK(&ci->check_caps_work, ceph_check_caps_work);
->>          ci->i_work_mask = 0;
->>          memset(&ci->i_btime, '\0', sizeof(ci->i_btime));
->>
->> @@ -2012,6 +2014,14 @@ static void ceph_inode_work(struct work_struct *work)
->>          iput(inode);
->>   }
->>
->> +static void ceph_check_caps_work(struct work_struct *work)
->> +{
->> +       struct ceph_inode_info *ci = container_of(work, struct ceph_inode_info,
->> +                                                 check_caps_work);
->> +
->> +       ceph_check_caps(ci, 0, NULL);
->> +}
->> +
->>   /*
->>    * symlinks
->>    */
->> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
->> index 226f19c..96d0e41 100644
->> --- a/fs/ceph/super.h
->> +++ b/fs/ceph/super.h
->> @@ -421,6 +421,8 @@ struct ceph_inode_info {
->>          struct timespec64 i_btime;
->>          struct timespec64 i_snap_btime;
->>
->> +       struct work_struct check_caps_work;
->> +
->>          struct work_struct i_work;
->>          unsigned long  i_work_mask;
->>
->> @@ -1102,6 +1104,16 @@ extern void ceph_flush_snaps(struct ceph_inode_info *ci,
->>   extern bool __ceph_should_report_size(struct ceph_inode_info *ci);
->>   extern void ceph_check_caps(struct ceph_inode_info *ci, int flags,
->>                              struct ceph_mds_session *session);
->> +static void inline
->> +ceph_async_check_caps(struct ceph_inode_info *ci)
->> +{
->> +       struct inode *inode = &ci->vfs_inode;
->> +
->> +       /* It's okay if queue_work fails */
->> +       queue_work(ceph_inode_to_client(inode)->inode_wq,
->> +                  &ceph_inode(inode)->check_caps_work);
->> +}
->> +
->>   extern void ceph_check_delayed_caps(struct ceph_mds_client *mdsc);
->>   extern void ceph_flush_dirty_caps(struct ceph_mds_client *mdsc);
->>   extern int  ceph_drop_caps_for_unlink(struct inode *inode);
->> --
->> 1.8.3.1
->>
+> 
+> > 
+> > This patch will conflict with David's one,
+> > [PATCH net-next] sctp: Pull the user copies out of the individual sockopt functions.
+> 
+> Do you have a link?  A quick google search just finds your mail that
+> I'm replying to.
+
+https://lore.kernel.org/netdev/fd94b5e41a7c4edc8f743c56a04ed2c9%40AcuMS.aculab.com/T/
+
+> 
+> > (I'll finish reviewing it in the sequence)
+> > 
+> > AFAICT, this patch could reuse/build on his work in there. The goal is
+> > pretty much the same and would avoid the issues above.
+> > 
+> > This patch could, then, point the new bind_add proto op to the updated
+> > sctp_setsockopt_bindx almost directly.
+> > 
+> > Question then is: dlm never removes an addr from the bind list. Do we
+> > want to add ops for both? Or one that handles both operations?
+> > Anyhow, having the add operation but not the del seems very weird to
+> > me.
+> 
+> We generally only add operations for things that we actually use.
+> bind_del is another logical op, but we can trivially add that when we
+> need it.
+
+Right, okay.
