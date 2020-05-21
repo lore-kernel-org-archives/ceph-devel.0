@@ -1,62 +1,59 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: ceph kernel client orientation
-Date: Thu, 21 May 2020 15:15:43 +0200
-Message-ID: <CAOi1vP8kz0PpBDwpp78pHP-gT5-FpcNcQ7L6omd_pj8fyOZLFw@mail.gmail.com>
-References: <6n.cjI5.4P7G519BQ1k.1Um{AC@seznam.cz> <CAOi1vP9HvJd-Cdm4TnfEjNN-PooZCAPBwANpS88UfinkhJuUsg@mail.gmail.com>
- <da.cjLX.3v4GDfOKIZE.1UnDtd@seznam.cz>
+From: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 31/33] sctp: add sctp_sock_set_nodelay
+Date: Thu, 21 May 2020 10:33:48 -0300
+Message-ID: <20200521133348.GX2491@localhost.localdomain>
+References: <20200520195509.2215098-1-hch@lst.de>
+ <20200520195509.2215098-32-hch@lst.de>
+ <20200520231001.GU2491@localhost.localdomain>
+ <20200520.162355.2212209708127373208.davem@davemloft.net>
+ <20200520233913.GV2491@localhost.localdomain>
+ <20200521083442.GA7771@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43238 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727846AbgEUNPi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2020 09:15:38 -0400
-Received: from mail-io1-xd2e.google.com (mail-io1-xd2e.google.com [IPv6:2607:f8b0:4864:20::d2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80B61C061A0E
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2020 06:15:38 -0700 (PDT)
-Received: by mail-io1-xd2e.google.com with SMTP id f3so7400281ioj.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2020 06:15:38 -0700 (PDT)
-In-Reply-To: <da.cjLX.3v4GDfOKIZE.1UnDtd@seznam.cz>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Michal.Plsek@seznam.cz
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20200521083442.GA7771-jcswGhMUV9g@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Cc: David Miller <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org, yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org, vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, May 20, 2020 at 9:36 AM <Michal.Plsek@seznam.cz> wrote:
->
-> Thanks for swift answer.
->
-> (This is my usage in librbd.cc)
->
-> Basically there is a folder with symmetric keys used for block encryption=
-, one key for one disk in some pool. For identification of key I need (pool=
-_id, disk_id) of block. I am temporarily saving key to librbd::ImageCtx str=
-ucture, so I don't have to get it from file every time. I use this key to e=
-ncrypt/decrypt block data. Encrypt/decrypt is primitive, I'm not gonna ment=
-ion it here, but it is done over the data provided by functions rbd_read() =
-and rbd_write().
->
-> If you could point how to edit rbd.c content to achieve similar behaviour=
-, I would be much obliged.
+On Thu, May 21, 2020 at 10:34:42AM +0200, Christoph Hellwig wrote:
+> On Wed, May 20, 2020 at 08:39:13PM -0300, Marcelo Ricardo Leitner wrote:
+> > On Wed, May 20, 2020 at 04:23:55PM -0700, David Miller wrote:
+> > > From: Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> > > Date: Wed, 20 May 2020 20:10:01 -0300
+> > > 
+> > > > The duplication with sctp_setsockopt_nodelay() is quite silly/bad.
+> > > > Also, why have the 'true' hardcoded? It's what dlm uses, yes, but the
+> > > > API could be a bit more complete than that.
+> > > 
+> > > The APIs are being designed based upon what in-tree users actually
+> > > make use of.  We can expand things later if necessary.
+> > 
+> > Sometimes expanding things later can be though, thus why the worry.
+> > But ok, I get it. Thanks.
+> > 
+> > The comment still applies, though. (re the duplication)
+> 
+> Where do you see duplication?
+> 
+> sctp_setsockopt_nodelay does the following things:
+> 
+>  - verifies optlen, returns -EINVAL if it doesn't match
+>  - calls get_user, returns -EFAULT on error
+>  - converts the value from get_user to a boolean and assigns it
+>    to sctp_sk(sk)->nodelay
+>  - returns 0.
+> 
+> sctp_sock_set_nodelay does:
+> 
+>  - call lock_sock
+>  - assign true to sctp_sk(sk)->nodelay
+>  - call release_sock
+>  - does not return an error code
 
-I'm not sure what exactly you mean by disk id, but I assume image
-id (displayed by "rbd info" in block_name_prefix field) is probably
-part of that.  It is looked up in rbd_dev_image_id(), called from
-rbd_dev_image_probe().  More generally, do_rbd_add() is roughly
-equivalent to rbd_open() in librbd.  Everything related to "opening"
-the image is done in or under do_rbd_add().
-
-struct rbd_device is passed pretty much everywhere, so if you are
-storing a key in librbd::ImageCtx, struct rbd_device is probably
-the place to put it.
-
-As for encryption, the easiest would probably be to stick it into
-__rbd_img_fill_request().  But I want to stress that bolting on
-your own crypto is very error-prone and highly unlikely to produce
-anything remotely secure.  Unless you are doing it to get familiar
-with the codebase or just for fun, I would advise against it.
-
-Thanks,
-
-                Ilya
+With the patch there are now two ways of enabling nodelay. It may be
+just a boolean set today, but if one wants to probe on it or if we
+want to extend it with anything, say a debug msg, we have to do it in
+two (very different) places.
