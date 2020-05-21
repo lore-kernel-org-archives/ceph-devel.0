@@ -1,100 +1,48 @@
-From: Yanhu Cao <gmayyyha@gmail.com>
-Subject: [PATCH] ceph: show max caps in debugfs caps file
-Date: Thu, 21 May 2020 17:38:45 +0800
-Message-ID: <20200521093845.15101-1-gmayyyha@gmail.com>
+From: David Laight <David.Laight@ACULAB.COM>
+Subject: RE: remove kernel_setsockopt and kernel_getsockopt v2
+Date: Thu, 21 May 2020 10:46:33 +0000
+Message-ID: <b7c7cf98999f4167b821f4425896e4e8@AcuMS.aculab.com>
+References: <20200520195509.2215098-1-hch@lst.de>
+ <138a17dfff244c089b95f129e4ea2f66@AcuMS.aculab.com>
+ <20200521091150.GA8401@lst.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200521091150.GA8401@lst.de>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: jlayton@kernel.org
-Cc: idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yanhu Cao <gmayyyha@gmail.com>
+To: 'Christoph Hellwig' <hch@lst.de>
+Cc: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Vlad Yasevich <vyasevich@gmail.com>, Neil Horman <nhorman@tuxdriver.com>, Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, "drbd-dev@lists.linbit.com" <drbd-dev@lists.linbit.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>, "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>, "target-devel@vger.kernel.org" <target-devel@vger.kernel.org>, "linux-afs@lists.infradead.org" <linux-afs@lists.infradead.org>l
 List-Id: ceph-devel.vger.kernel.org
 
-        before
-        ------
-        total           1026
-        avail           1024
-        used            2
-        reserved        0
-        min             1024
+From: 'Christoph Hellwig'
+> Sent: 21 May 2020 10:12
+...
+> > I worried about whether getsockopt() should read the entire
+> > user buffer first. SCTP needs the some of it often (including a
+> > sockaddr_storage in one case), TCP needs it once.
+> > However the cost of reading a few words is small, and a big
+> > buffer probably needs setting to avoid leaking kernel
+> > memory if the structure has holes or fields that don't get set.
+> > Reading from userspace solves both issues.
+> 
+> As mention in the thread on the last series:  That was my first idea, but
+> we have way to many sockopts, especially in obscure protocols that just
+> hard code the size.  The chance of breaking userspace in a way that can't
+> be fixed without going back to passing user pointers to get/setsockopt
+> is way to high to commit to such a change unfortunately.
 
-        after
-        ------
-        total           1026
-        avail           1024
-        used            2
-        max             2048
-        reserved        0
-        min             1024
+Right the syscall stubs probably can't do it.
+But the per-protocol ones can for the main protocols.
 
-Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
----
- fs/ceph/caps.c    | 6 ++++--
- fs/ceph/debugfs.c | 7 ++++---
- fs/ceph/super.h   | 2 +-
- 3 files changed, 9 insertions(+), 6 deletions(-)
+I posted a patch for SCTP yesterday that removes 800 lines
+of source and 8k of object code.
+Even that needs a horrid bodge for one request where the
+length returned has to be less than the data copied!
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 5f3aa4d607de..e2c759a2ef35 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -404,8 +404,8 @@ void ceph_put_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap)
- }
- 
- void ceph_reservation_status(struct ceph_fs_client *fsc,
--			     int *total, int *avail, int *used, int *reserved,
--			     int *min)
-+			     int *total, int *avail, int *used, int *max,
-+			     int *reserved, int *min)
- {
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 
-@@ -417,6 +417,8 @@ void ceph_reservation_status(struct ceph_fs_client *fsc,
- 		*avail = mdsc->caps_avail_count;
- 	if (used)
- 		*used = mdsc->caps_use_count;
-+	if (max)
-+		*max = mdsc->caps_use_max;
- 	if (reserved)
- 		*reserved = mdsc->caps_reserve_count;
- 	if (min)
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 481ac97b4d25..942004376588 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -138,16 +138,17 @@ static int caps_show(struct seq_file *s, void *p)
- {
- 	struct ceph_fs_client *fsc = s->private;
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
--	int total, avail, used, reserved, min, i;
-+	int total, avail, used, max, reserved, min, i;
- 	struct cap_wait	*cw;
- 
--	ceph_reservation_status(fsc, &total, &avail, &used, &reserved, &min);
-+	ceph_reservation_status(fsc, &total, &avail, &used, &max,
-+				&reserved, &min);
- 	seq_printf(s, "total\t\t%d\n"
- 		   "avail\t\t%d\n"
- 		   "used\t\t%d\n"
- 		   "reserved\t%d\n"
- 		   "min\t\t%d\n\n",
--		   total, avail, used, reserved, min);
-+		   total, avail, used, max, reserved, min);
- 	seq_printf(s, "ino                issued           implemented\n");
- 	seq_printf(s, "-----------------------------------------------\n");
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 60aac3aee055..79aa42d9336c 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -700,7 +700,7 @@ extern void ceph_unreserve_caps(struct ceph_mds_client *mdsc,
- 			       struct ceph_cap_reservation *ctx);
- extern void ceph_reservation_status(struct ceph_fs_client *client,
- 				    int *total, int *avail, int *used,
--				    int *reserved, int *min);
-+				    int *max, int *reserved, int *min);
- 
- 
- 
--- 
-2.24.2 (Apple Git-127)
+	David
+
+-
+Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
+Registration No: 1397386 (Wales)
