@@ -1,132 +1,25 @@
-From: xiubli@redhat.com
-Subject: [PATCH] ceph: add ceph_async_check_caps() to avoid double lock and deadlock
-Date: Thu, 21 May 2020 03:36:16 -0400
-Message-ID: <1590046576-1262-1-git-send-email-xiubli@redhat.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:40752 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728053AbgEUHg3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2020 03:36:29 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, idryomov@gmail.com, zyan@redhat.com
-Cc: pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 29/33] rxrpc: add rxrpc_sock_set_min_security_level
+Date: Thu, 21 May 2020 08:44:11 +0100
+Message-ID: <71191.1590047051@warthog.procyon.org.uk>
+References: <20200520195509.2215098-30-hch@lst.de> <20200520195509.2215098-1-hch@lst.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20200520195509.2215098-30-hch-jcswGhMUV9g@public.gmane.org>
+Content-ID: <71190.1590047051.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Marcelo Ricardo Leitner <marcelo.leitner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sctp-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Neil Horman <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vlad Yasevich <vyasevich-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, ocfs2-de
+List-Id: ceph-devel.vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org> wrote:
 
-In the ceph_check_caps() it may call the session lock/unlock stuff.
+> Add a helper to directly set the RXRPC_MIN_SECURITY_LEVEL sockopt from
+> kernel space without going through a fake uaccess.
+> 
+> Thanks to David Howells for the documentation updates.
+> 
+> Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
 
-There have some deadlock cases, like:
-handle_forward()
-...
-mutex_lock(&mdsc->mutex)
-...
-ceph_mdsc_put_request()
-  --> ceph_mdsc_release_request()
-    --> ceph_put_cap_request()
-      --> ceph_put_cap_refs()
-        --> ceph_check_caps()
-...
-mutex_unlock(&mdsc->mutex)
-
-And also there maybe has some double session lock cases, like:
-
-send_mds_reconnect()
-...
-mutex_lock(&session->s_mutex);
-...
-  --> replay_unsafe_requests()
-    --> ceph_mdsc_release_dir_caps()
-      --> ceph_put_cap_refs()
-        --> ceph_check_caps()
-...
-mutex_unlock(&session->s_mutex);
-
-URL: https://tracker.ceph.com/issues/45635
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/caps.c  |  2 +-
- fs/ceph/inode.c | 10 ++++++++++
- fs/ceph/super.h | 12 ++++++++++++
- 3 files changed, 23 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 27c2e60..08194c4 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3073,7 +3073,7 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
- 	     last ? " last" : "", put ? " put" : "");
- 
- 	if (last)
--		ceph_check_caps(ci, 0, NULL);
-+		ceph_async_check_caps(ci);
- 	else if (flushsnaps)
- 		ceph_flush_snaps(ci, NULL);
- 	if (wake)
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 357c937..84a61d4 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -35,6 +35,7 @@
- static const struct inode_operations ceph_symlink_iops;
- 
- static void ceph_inode_work(struct work_struct *work);
-+static void ceph_check_caps_work(struct work_struct *work);
- 
- /*
-  * find or create an inode, given the ceph ino number
-@@ -518,6 +519,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 	INIT_LIST_HEAD(&ci->i_snap_flush_item);
- 
- 	INIT_WORK(&ci->i_work, ceph_inode_work);
-+	INIT_WORK(&ci->check_caps_work, ceph_check_caps_work);
- 	ci->i_work_mask = 0;
- 	memset(&ci->i_btime, '\0', sizeof(ci->i_btime));
- 
-@@ -2012,6 +2014,14 @@ static void ceph_inode_work(struct work_struct *work)
- 	iput(inode);
- }
- 
-+static void ceph_check_caps_work(struct work_struct *work)
-+{
-+	struct ceph_inode_info *ci = container_of(work, struct ceph_inode_info,
-+						  check_caps_work);
-+
-+	ceph_check_caps(ci, 0, NULL);
-+}
-+
- /*
-  * symlinks
-  */
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 226f19c..96d0e41 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -421,6 +421,8 @@ struct ceph_inode_info {
- 	struct timespec64 i_btime;
- 	struct timespec64 i_snap_btime;
- 
-+	struct work_struct check_caps_work;
-+
- 	struct work_struct i_work;
- 	unsigned long  i_work_mask;
- 
-@@ -1102,6 +1104,16 @@ extern void ceph_flush_snaps(struct ceph_inode_info *ci,
- extern bool __ceph_should_report_size(struct ceph_inode_info *ci);
- extern void ceph_check_caps(struct ceph_inode_info *ci, int flags,
- 			    struct ceph_mds_session *session);
-+static void inline
-+ceph_async_check_caps(struct ceph_inode_info *ci)
-+{
-+	struct inode *inode = &ci->vfs_inode;
-+
-+	/* It's okay if queue_work fails */
-+	queue_work(ceph_inode_to_client(inode)->inode_wq,
-+		   &ceph_inode(inode)->check_caps_work);
-+}
-+
- extern void ceph_check_delayed_caps(struct ceph_mds_client *mdsc);
- extern void ceph_flush_dirty_caps(struct ceph_mds_client *mdsc);
- extern int  ceph_drop_caps_for_unlink(struct inode *inode);
--- 
-1.8.3.1
+Acked-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
