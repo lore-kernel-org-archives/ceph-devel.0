@@ -1,94 +1,180 @@
-From: <Michal.Plsek@seznam.cz>
-Subject: Re: ceph kernel client orientation
-Date: Thu, 21 May 2020 18:37:22 +0200 (CEST)
-Message-ID: <23N.cjNb.4NGwgCQo9SQ.1Ungv2@seznam.cz>
-References: <6n.cjI5.4P7G519BQ1k.1Um{AC@seznam.cz>
-        <CAOi1vP9HvJd-Cdm4TnfEjNN-PooZCAPBwANpS88UfinkhJuUsg@mail.gmail.com>
-        <da.cjLX.3v4GDfOKIZE.1UnDtd@seznam.cz>
-Mime-Version: 1.0 (szn-mime-2.0.57)
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: add ceph_async_check_caps() to avoid double lock
+ and deadlock
+Date: Fri, 22 May 2020 15:31:21 +0800
+Message-ID: <c1cfcbda-217a-18ca-4320-99f67696f85d@redhat.com>
+References: <1590046576-1262-1-git-send-email-xiubli@redhat.com>
+ <CAAM7YAmoCHXB1fLSXt0fqOczqbm9s_2yfWbyAaaMuQRCNR5+3Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46750 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726938AbgEUQh3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2020 12:37:29 -0400
-Received: from mxb1.seznam.cz (mxb1.seznam.cz [IPv6:2a02:598:a::78:89])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54147C061A0E
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2020 09:37:29 -0700 (PDT)
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:51069 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728255AbgEVHbe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2020 03:31:34 -0400
+In-Reply-To: <CAAM7YAmoCHXB1fLSXt0fqOczqbm9s_2yfWbyAaaMuQRCNR5+3Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-My mistake, I meant image id. Yesterday I decided to put en/decryption int=
-o rbd_queue_rq() and process data while traversing buffer_head structures.=
- Do not worry, I am very much aware of Never Roll Out Your Own Crypto :), =
-this is not my idea though. I am just working on someone else's idea.
+On 2020/5/21 16:45, Yan, Zheng wrote:
+> On Thu, May 21, 2020 at 3:39 PM <xiubli@redhat.com> wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> In the ceph_check_caps() it may call the session lock/unlock stuff.
+>>
+>> There have some deadlock cases, like:
+>> handle_forward()
+>> ...
+>> mutex_lock(&mdsc->mutex)
+>> ...
+>> ceph_mdsc_put_request()
+>>    --> ceph_mdsc_release_request()
+>>      --> ceph_put_cap_request()
+>>        --> ceph_put_cap_refs()
+>>          --> ceph_check_caps()
+>> ...
+>> mutex_unlock(&mdsc->mutex)
+> For this case, it's better to call ceph_mdsc_put_request() after
+> unlock mdsc->mutex
 
-Thanks for your help.
+Hi Zheng Yan, Jeff
 
+For this case there at least have 6 places, for some cases we can call 
+ceph_mdsc_put_request() after unlock mdsc->mutex very easily, but for 
+the others like:
+
+cleanup_session_requests()
+
+     --> mutex_lock(&mdsc->mutex);
+
+     --> __unregister_request()
+
+         --> ceph_mdsc_put_request() ===> will call session lock/unlock pair
+
+     --> mutex_unlock(&mdsc->mutex);
+
+There also has some more complicated cases, such as in handle_session(do 
+the mdsc->mutex lock/unlock pair) --> __wake_requests() --> 
+__do_request() --> __unregister_request() --> ceph_mdsc_put_request().
+
+Maybe using the ceph_async_check_caps() is a better choice here, any idea ?
+
+Thanks
+
+BRs
+
+Xiubo
+
+
+>> And also there maybe has some double session lock cases, like:
+>>
+>> send_mds_reconnect()
+>> ...
+>> mutex_lock(&session->s_mutex);
+>> ...
+>>    --> replay_unsafe_requests()
+>>      --> ceph_mdsc_release_dir_caps()
+>>        --> ceph_put_cap_refs()
+>>          --> ceph_check_caps()
+>> ...
+>> mutex_unlock(&session->s_mutex);
+> There is no point to check_caps() and send cap message while
+> reconnecting caps. So I think it's better to just skip calling
+> ceph_check_caps() for this case.
 >
-
-> Thanks for swift answer.
-
+> Regards
+> Yan, Zheng
 >
-
-> (This is my usage in librbd.cc)
-
->
-
-> Basically there is a folder with symmetric keys used for block encryptio=
-n, one key for one disk in some pool. For identification of key I need (po=
-ol_id, disk_id) of block. I am temporarily saving key to librbd::ImageCtx =
-structure, so I don't have to get it from file every time. I use this key =
-to encrypt/decrypt block data. Encrypt/decrypt is primitive, I'm not gonna=
- mention it here, but it is done over the data provided by functions rbd_r=
-ead() and rbd_write().
-
->
-
-> If you could point how to edit rbd.c content to achieve similar behaviou=
-r, I would be much obliged.
-
-
-
-I'm not sure what exactly you mean by disk id, but I assume image
-
-id (displayed by "rbd info" in block_name_prefix field) is probably
-
-part of that.  It is looked up in rbd_dev_image_id(), called from
-
-rbd_dev_image_probe().  More generally, do_rbd_add() is roughly
-
-equivalent to rbd_open() in librbd.  Everything related to "opening"
-
-the image is done in or under do_rbd_add().
-
-
-
-struct rbd_device is passed pretty much everywhere, so if you are
-
-storing a key in librbd::ImageCtx, struct rbd_device is probably
-
-the place to put it.
-
-
-
-As for encryption, the easiest would probably be to stick it into
-
-__rbd_img_fill_request().  But I want to stress that bolting on
-
-your own crypto is very error-prone and highly unlikely to produce
-
-anything remotely secure.  Unless you are doing it to get familiar
-
-with the codebase or just for fun, I would advise against it.
-
-
-
-Thanks,
-
-
-
-                Ilya
+>> URL: https://tracker.ceph.com/issues/45635
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   fs/ceph/caps.c  |  2 +-
+>>   fs/ceph/inode.c | 10 ++++++++++
+>>   fs/ceph/super.h | 12 ++++++++++++
+>>   3 files changed, 23 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>> index 27c2e60..08194c4 100644
+>> --- a/fs/ceph/caps.c
+>> +++ b/fs/ceph/caps.c
+>> @@ -3073,7 +3073,7 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
+>>               last ? " last" : "", put ? " put" : "");
+>>
+>>          if (last)
+>> -               ceph_check_caps(ci, 0, NULL);
+>> +               ceph_async_check_caps(ci);
+>>          else if (flushsnaps)
+>>                  ceph_flush_snaps(ci, NULL);
+>>          if (wake)
+>> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+>> index 357c937..84a61d4 100644
+>> --- a/fs/ceph/inode.c
+>> +++ b/fs/ceph/inode.c
+>> @@ -35,6 +35,7 @@
+>>   static const struct inode_operations ceph_symlink_iops;
+>>
+>>   static void ceph_inode_work(struct work_struct *work);
+>> +static void ceph_check_caps_work(struct work_struct *work);
+>>
+>>   /*
+>>    * find or create an inode, given the ceph ino number
+>> @@ -518,6 +519,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+>>          INIT_LIST_HEAD(&ci->i_snap_flush_item);
+>>
+>>          INIT_WORK(&ci->i_work, ceph_inode_work);
+>> +       INIT_WORK(&ci->check_caps_work, ceph_check_caps_work);
+>>          ci->i_work_mask = 0;
+>>          memset(&ci->i_btime, '\0', sizeof(ci->i_btime));
+>>
+>> @@ -2012,6 +2014,14 @@ static void ceph_inode_work(struct work_struct *work)
+>>          iput(inode);
+>>   }
+>>
+>> +static void ceph_check_caps_work(struct work_struct *work)
+>> +{
+>> +       struct ceph_inode_info *ci = container_of(work, struct ceph_inode_info,
+>> +                                                 check_caps_work);
+>> +
+>> +       ceph_check_caps(ci, 0, NULL);
+>> +}
+>> +
+>>   /*
+>>    * symlinks
+>>    */
+>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+>> index 226f19c..96d0e41 100644
+>> --- a/fs/ceph/super.h
+>> +++ b/fs/ceph/super.h
+>> @@ -421,6 +421,8 @@ struct ceph_inode_info {
+>>          struct timespec64 i_btime;
+>>          struct timespec64 i_snap_btime;
+>>
+>> +       struct work_struct check_caps_work;
+>> +
+>>          struct work_struct i_work;
+>>          unsigned long  i_work_mask;
+>>
+>> @@ -1102,6 +1104,16 @@ extern void ceph_flush_snaps(struct ceph_inode_info *ci,
+>>   extern bool __ceph_should_report_size(struct ceph_inode_info *ci);
+>>   extern void ceph_check_caps(struct ceph_inode_info *ci, int flags,
+>>                              struct ceph_mds_session *session);
+>> +static void inline
+>> +ceph_async_check_caps(struct ceph_inode_info *ci)
+>> +{
+>> +       struct inode *inode = &ci->vfs_inode;
+>> +
+>> +       /* It's okay if queue_work fails */
+>> +       queue_work(ceph_inode_to_client(inode)->inode_wq,
+>> +                  &ceph_inode(inode)->check_caps_work);
+>> +}
+>> +
+>>   extern void ceph_check_delayed_caps(struct ceph_mds_client *mdsc);
+>>   extern void ceph_flush_dirty_caps(struct ceph_mds_client *mdsc);
+>>   extern int  ceph_drop_caps_for_unlink(struct inode *inode);
+>> --
+>> 1.8.3.1
+>>
