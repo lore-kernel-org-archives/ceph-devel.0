@@ -1,178 +1,194 @@
-From: xiubli@redhat.com
-Subject: [PATCH v2 2/2] ceph: do not check the caps when reconnecting to mds
-Date: Mon, 25 May 2020 07:16:25 -0400
-Message-ID: <1590405385-27406-3-git-send-email-xiubli@redhat.com>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v2 1/2] ceph: add ceph_async_put_cap_refs to avoid double
+ lock and deadlock
+Date: Tue, 26 May 2020 11:11:57 +0800
+Message-ID: <23e444d7-49f7-8c5e-f179-00354d4b9b68@redhat.com>
 References: <1590405385-27406-1-git-send-email-xiubli@redhat.com>
+ <1590405385-27406-2-git-send-email-xiubli@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:47827 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:29772 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S2389897AbgEYLQp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2020 07:16:45 -0400
-In-Reply-To: <1590405385-27406-1-git-send-email-xiubli@redhat.com>
+        with ESMTP id S2388460AbgEZDMK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2020 23:12:10 -0400
+In-Reply-To: <1590405385-27406-2-git-send-email-xiubli@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, idryomov@gmail.com, zyan@redhat.com
-Cc: pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+To: xiubli@redhat.com, jlayton@kernel.org, idryomov@gmail.com
+Cc: pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+On 5/25/20 7:16 PM, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> In the ceph_check_caps() it may call the session lock/unlock stuff.
+> 
+> There have some deadlock cases, like:
+> handle_forward()
+> ...
+> mutex_lock(&mdsc->mutex)
+> ...
+> ceph_mdsc_put_request()
+>    --> ceph_mdsc_release_request()
+>      --> ceph_put_cap_request()
+>        --> ceph_put_cap_refs()
+>          --> ceph_check_caps()
+> ...
+> mutex_unlock(&mdsc->mutex)
+> 
+> And also there maybe has some double session lock cases, like:
+> 
+> send_mds_reconnect()
+> ...
+> mutex_lock(&session->s_mutex);
+> ...
+>    --> replay_unsafe_requests()
+>      --> ceph_mdsc_release_dir_caps()
+>        --> ceph_put_cap_refs()
+>          --> ceph_check_caps()
+> ...
+> mutex_unlock(&session->s_mutex);
+> 
+> URL: https://tracker.ceph.com/issues/45635
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>   fs/ceph/caps.c       | 29 +++++++++++++++++++++++++++++
+>   fs/ceph/inode.c      |  3 +++
+>   fs/ceph/mds_client.c | 12 +++++++-----
+>   fs/ceph/super.h      |  5 +++++
+>   4 files changed, 44 insertions(+), 5 deletions(-)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 27c2e60..aea66c1 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -3082,6 +3082,35 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
+>   		iput(inode);
+>   }
+>   
+> +void ceph_async_put_cap_refs_work(struct work_struct *work)
+> +{
+> +	struct ceph_inode_info *ci = container_of(work, struct ceph_inode_info,
+> +						  put_cap_refs_work);
+> +	int caps;
+> +
+> +	spin_lock(&ci->i_ceph_lock);
+> +	caps = xchg(&ci->pending_put_caps, 0);
+> +	spin_unlock(&ci->i_ceph_lock);
+> +
+> +	ceph_put_cap_refs(ci, caps);
+> +}
+> +
+> +void ceph_async_put_cap_refs(struct ceph_inode_info *ci, int had)
+> +{
+> +	struct inode *inode = &ci->vfs_inode;
+> +
+> +	spin_lock(&ci->i_ceph_lock);
+> +	if (ci->pending_put_caps & had) {
+> +	        spin_unlock(&ci->i_ceph_lock);
+> +		return;
+> +	}
 
-It make no sense to check the caps when reconnecting to mds.
+this will cause cap ref leak.
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/caps.c       | 16 ++++++++++++++--
- fs/ceph/dir.c        |  2 +-
- fs/ceph/file.c       |  2 +-
- fs/ceph/mds_client.c | 14 ++++++++++----
- fs/ceph/mds_client.h |  3 ++-
- fs/ceph/super.h      |  2 ++
- 6 files changed, 30 insertions(+), 9 deletions(-)
+I thought about this again. all the trouble is caused by calling 
+ceph_mdsc_release_dir_caps() inside ceph_mdsc_release_request().
+We already call ceph_mdsc_release_dir_caps() in ceph_async_foo_cb() for 
+normal circumdtance. We just need to call ceph_mdsc_release_dir_caps() 
+in 'session closed' case (we never abort async request). In the 'session 
+closed' case, we can use ceph_put_cap_refs_no_check_caps()
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index aea66c1..1fcf0a9 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3016,7 +3016,8 @@ static int ceph_try_drop_cap_snap(struct ceph_inode_info *ci,
-  * If we are releasing a WR cap (from a sync write), finalize any affected
-  * cap_snap, and wake up any waiters.
-  */
--void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
-+void __ceph_put_cap_refs(struct ceph_inode_info *ci, int had,
-+			 bool skip_checking_caps)
- {
- 	struct inode *inode = &ci->vfs_inode;
- 	int last = 0, put = 0, flushsnaps = 0, wake = 0;
-@@ -3072,7 +3073,7 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
- 	dout("put_cap_refs %p had %s%s%s\n", inode, ceph_cap_string(had),
- 	     last ? " last" : "", put ? " put" : "");
- 
--	if (last)
-+	if (last && !skip_checking_caps)
- 		ceph_check_caps(ci, 0, NULL);
- 	else if (flushsnaps)
- 		ceph_flush_snaps(ci, NULL);
-@@ -3082,6 +3083,16 @@ void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
- 		iput(inode);
- }
- 
-+void ceph_put_cap_refs(struct ceph_inode_info *ci, int had)
-+{
-+	__ceph_put_cap_refs(ci, had, false);
-+}
-+
-+void ceph_put_cap_refs_no_check_caps(struct ceph_inode_info *ci, int had)
-+{
-+	__ceph_put_cap_refs(ci, had, true);
-+}
-+
- void ceph_async_put_cap_refs_work(struct work_struct *work)
- {
- 	struct ceph_inode_info *ci = container_of(work, struct ceph_inode_info,
-@@ -3111,6 +3122,7 @@ void ceph_async_put_cap_refs(struct ceph_inode_info *ci, int had)
- 	queue_work(ceph_inode_to_client(inode)->inode_wq,
- 		   &ci->put_cap_refs_work);
- }
-+
- /*
-  * Release @nr WRBUFFER refs on dirty pages for the given @snapc snap
-  * context.  Adjust per-snap dirty page accounting as appropriate.
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 39f5311..9f66ea5 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1079,7 +1079,7 @@ static void ceph_async_unlink_cb(struct ceph_mds_client *mdsc,
- 	}
- out:
- 	iput(req->r_old_inode);
--	ceph_mdsc_release_dir_caps(req);
-+	ceph_mdsc_release_dir_caps(req, false);
- }
- 
- static int get_caps_for_async_unlink(struct inode *dir, struct dentry *dentry)
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 160644d..812da94 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -565,7 +565,7 @@ static void ceph_async_create_cb(struct ceph_mds_client *mdsc,
- 			req->r_deleg_ino);
- 	}
- out:
--	ceph_mdsc_release_dir_caps(req);
-+	ceph_mdsc_release_dir_caps(req, false);
- }
- 
- static int ceph_finish_async_create(struct inode *dir, struct dentry *dentry,
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 40b31da..a784f0e 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -804,7 +804,7 @@ void ceph_mdsc_release_request(struct kref *kref)
- 	struct ceph_mds_request *req = container_of(kref,
- 						    struct ceph_mds_request,
- 						    r_kref);
--	ceph_mdsc_release_dir_caps(req);
-+	ceph_mdsc_release_dir_caps(req, false);
- 	destroy_reply_info(&req->r_reply_info);
- 	if (req->r_request)
- 		ceph_msg_put(req->r_request);
-@@ -3393,14 +3393,20 @@ static void handle_session(struct ceph_mds_session *session,
- 	return;
- }
- 
--void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req)
-+void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req,
-+				bool skip_checking_caps)
- {
- 	int dcaps;
- 
- 	dcaps = xchg(&req->r_dir_caps, 0);
- 	if (dcaps) {
- 		dout("releasing r_dir_caps=%s\n", ceph_cap_string(dcaps));
--		ceph_async_put_cap_refs(ceph_inode(req->r_parent), dcaps);
-+		if (skip_checking_caps)
-+			ceph_put_cap_refs_no_check_caps(ceph_inode(req->r_parent),
-+							dcaps);
-+		else
-+			ceph_async_put_cap_refs(ceph_inode(req->r_parent),
-+						dcaps);
- 	}
- }
- 
-@@ -3436,7 +3442,7 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
- 		if (req->r_session->s_mds != session->s_mds)
- 			continue;
- 
--		ceph_mdsc_release_dir_caps(req);
-+		ceph_mdsc_release_dir_caps(req, true);
- 
- 		__send_request(mdsc, session, req, true);
- 	}
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 43111e4..73ee022 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -506,7 +506,8 @@ extern int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc,
- extern int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
- 				struct inode *dir,
- 				struct ceph_mds_request *req);
--extern void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req);
-+extern void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req,
-+				       bool skip_checking_caps);
- static inline void ceph_mdsc_get_request(struct ceph_mds_request *req)
- {
- 	kref_get(&req->r_kref);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 01d206f..4e0b18a 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1098,6 +1098,8 @@ extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
- 				bool snap_rwsem_locked);
- extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
- extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
-+extern void ceph_put_cap_refs_no_check_caps(struct ceph_inode_info *ci,
-+					    int had);
- extern void ceph_async_put_cap_refs(struct ceph_inode_info *ci, int had);
- extern void ceph_async_put_cap_refs_work(struct work_struct *work);
- extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
--- 
-1.8.3.1
+Regards
+Yan, Zheng
+
+> +
+> +	ci->pending_put_caps |= had;
+> +	spin_unlock(&ci->i_ceph_lock);
+> +
+> +	queue_work(ceph_inode_to_client(inode)->inode_wq,
+> +		   &ci->put_cap_refs_work);
+> +}
+>   /*
+>    * Release @nr WRBUFFER refs on dirty pages for the given @snapc snap
+>    * context.  Adjust per-snap dirty page accounting as appropriate.
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 357c937..303276a 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -517,6 +517,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+>   	INIT_LIST_HEAD(&ci->i_snap_realm_item);
+>   	INIT_LIST_HEAD(&ci->i_snap_flush_item);
+>   
+> +	INIT_WORK(&ci->put_cap_refs_work, ceph_async_put_cap_refs_work);
+> +	ci->pending_put_caps = 0;
+> +
+>   	INIT_WORK(&ci->i_work, ceph_inode_work);
+>   	ci->i_work_mask = 0;
+>   	memset(&ci->i_btime, '\0', sizeof(ci->i_btime));
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 0e0ab01..40b31da 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -811,12 +811,14 @@ void ceph_mdsc_release_request(struct kref *kref)
+>   	if (req->r_reply)
+>   		ceph_msg_put(req->r_reply);
+>   	if (req->r_inode) {
+> -		ceph_put_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
+> +		ceph_async_put_cap_refs(ceph_inode(req->r_inode),
+> +					CEPH_CAP_PIN);
+>   		/* avoid calling iput_final() in mds dispatch threads */
+>   		ceph_async_iput(req->r_inode);
+>   	}
+>   	if (req->r_parent) {
+> -		ceph_put_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
+> +		ceph_async_put_cap_refs(ceph_inode(req->r_parent),
+> +					CEPH_CAP_PIN);
+>   		ceph_async_iput(req->r_parent);
+>   	}
+>   	ceph_async_iput(req->r_target_inode);
+> @@ -831,8 +833,8 @@ void ceph_mdsc_release_request(struct kref *kref)
+>   		 * changed between the dir mutex being dropped and
+>   		 * this request being freed.
+>   		 */
+> -		ceph_put_cap_refs(ceph_inode(req->r_old_dentry_dir),
+> -				  CEPH_CAP_PIN);
+> +		ceph_async_put_cap_refs(ceph_inode(req->r_old_dentry_dir),
+> +					CEPH_CAP_PIN);
+>   		ceph_async_iput(req->r_old_dentry_dir);
+>   	}
+>   	kfree(req->r_path1);
+> @@ -3398,7 +3400,7 @@ void ceph_mdsc_release_dir_caps(struct ceph_mds_request *req)
+>   	dcaps = xchg(&req->r_dir_caps, 0);
+>   	if (dcaps) {
+>   		dout("releasing r_dir_caps=%s\n", ceph_cap_string(dcaps));
+> -		ceph_put_cap_refs(ceph_inode(req->r_parent), dcaps);
+> +		ceph_async_put_cap_refs(ceph_inode(req->r_parent), dcaps);
+>   	}
+>   }
+>   
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 226f19c..01d206f 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -421,6 +421,9 @@ struct ceph_inode_info {
+>   	struct timespec64 i_btime;
+>   	struct timespec64 i_snap_btime;
+>   
+> +	struct work_struct put_cap_refs_work;
+> +	int pending_put_caps;
+> +
+>   	struct work_struct i_work;
+>   	unsigned long  i_work_mask;
+>   
+> @@ -1095,6 +1098,8 @@ extern void ceph_take_cap_refs(struct ceph_inode_info *ci, int caps,
+>   				bool snap_rwsem_locked);
+>   extern void ceph_get_cap_refs(struct ceph_inode_info *ci, int caps);
+>   extern void ceph_put_cap_refs(struct ceph_inode_info *ci, int had);
+> +extern void ceph_async_put_cap_refs(struct ceph_inode_info *ci, int had);
+> +extern void ceph_async_put_cap_refs_work(struct work_struct *work);
+>   extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+>   				       struct ceph_snap_context *snapc);
+>   extern void ceph_flush_snaps(struct ceph_inode_info *ci,
+> 
