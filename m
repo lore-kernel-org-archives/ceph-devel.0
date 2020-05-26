@@ -1,8 +1,8 @@
 From: Xiubo Li <xiubli@redhat.com>
 Subject: Re: [PATCH v2 1/2] ceph: add ceph_async_put_cap_refs to avoid double
  lock and deadlock
-Date: Tue, 26 May 2020 11:38:33 +0800
-Message-ID: <06291af5-0b19-aee7-c802-9020ef0f931a@redhat.com>
+Date: Tue, 26 May 2020 11:52:26 +0800
+Message-ID: <db3cd4c0-fdb7-fed7-ab0d-af0a9ff22f07@redhat.com>
 References: <1590405385-27406-1-git-send-email-xiubli@redhat.com>
  <1590405385-27406-2-git-send-email-xiubli@redhat.com>
  <23e444d7-49f7-8c5e-f179-00354d4b9b68@redhat.com>
@@ -10,11 +10,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:53925 "EHLO
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:47666 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2388497AbgEZDiq (ORCPT
+        by vger.kernel.org with ESMTP id S1725263AbgEZDwl (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 25 May 2020 23:38:46 -0400
+        Mon, 25 May 2020 23:52:41 -0400
 In-Reply-To: <23e444d7-49f7-8c5e-f179-00354d4b9b68@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -96,27 +96,38 @@ On 2020/5/26 11:11, Yan, Zheng wrote:
 >> +    }
 >
 > this will cause cap ref leak.
-
-Ah, yeah, right.
-
-
 >
 > I thought about this again. all the trouble is caused by calling 
 > ceph_mdsc_release_dir_caps() inside ceph_mdsc_release_request().
-
-And also in ceph_mdsc_release_request() it is calling 
-ceph_put_cap_refs() directly in other 3 places.
-
-BRs
-
-Xiubo
-
 > We already call ceph_mdsc_release_dir_caps() in ceph_async_foo_cb() 
 > for normal circumdtance. We just need to call 
 > ceph_mdsc_release_dir_caps() in 'session closed' case (we never abort 
 > async request). In the 'session closed' case, we can use 
 > ceph_put_cap_refs_no_check_caps()
 >
+IMO, this ceph_async_put_cap_refs helper still needed, such as there 
+have many other cases like:
+
+cleanup_session_requests()
+
+{
+
+...
+    --> mutex_lock(&mdsc->mutex)
+...
+    --> __unregister_request()
+        --> ceph_mdsc_put_request()
+            --> ceph_mdsc_release_request()
+                --> ceph_put_cap_request()
+                    --> ceph_put_cap_refs()
+                        --> ceph_check_caps()  ===> will do the 
+session->s_mutex lock/unlock
+...
+    --> mutex_unlock(&mdsc->mutex)
+
+}
+
+
 > Regards
 > Yan, Zheng
 >
