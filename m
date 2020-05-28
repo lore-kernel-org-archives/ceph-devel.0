@@ -1,122 +1,126 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 03/28] net: add sock_set_priority
-Date: Thu, 28 May 2020 07:12:11 +0200
-Message-ID: <20200528051236.620353-4-hch@lst.de>
+Subject: [PATCH 05/28] net: add sock_bindtoindex
+Date: Thu, 28 May 2020 07:12:13 +0200
+Message-ID: <20200528051236.620353-6-hch@lst.de>
 References: <20200528051236.620353-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40366 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725298AbgE1FNO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2020 01:13:14 -0400
+        with ESMTP id S1725298AbgE1FNb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2020 01:13:31 -0400
 In-Reply-To: <20200528051236.620353-1-hch@lst.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
-Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org, tipc-discussion@lists.sourceforge.net, Sagi Grimberg <sagi@grimberg.me>
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org, tipc-discussion@lists.sourceforge.net
 
-Add a helper to directly set the SO_PRIORITY sockopt from kernel space
-without going through a fake uaccess.
+Add a helper to directly set the SO_BINDTOIFINDEX sockopt from kernel
+space without going through a fake uaccess.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
-Acked-by: Sagi Grimberg <sagi@grimberg.me>
 ---
- drivers/nvme/host/tcp.c   | 12 ++----------
- drivers/nvme/target/tcp.c | 18 ++++--------------
  include/net/sock.h        |  1 +
- net/core/sock.c           |  8 ++++++++
- 4 files changed, 15 insertions(+), 24 deletions(-)
+ net/core/sock.c           | 21 +++++++++++++++------
+ net/ipv4/udp_tunnel.c     |  4 +---
+ net/ipv6/ip6_udp_tunnel.c |  4 +---
+ 4 files changed, 18 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/nvme/host/tcp.c b/drivers/nvme/host/tcp.c
-index e72d87482eb78..a307972d33a02 100644
---- a/drivers/nvme/host/tcp.c
-+++ b/drivers/nvme/host/tcp.c
-@@ -1362,16 +1362,8 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl,
- 	 */
- 	sock_no_linger(queue->sock->sk);
- 
--	if (so_priority > 0) {
--		ret = kernel_setsockopt(queue->sock, SOL_SOCKET, SO_PRIORITY,
--				(char *)&so_priority, sizeof(so_priority));
--		if (ret) {
--			dev_err(ctrl->ctrl.device,
--				"failed to set SO_PRIORITY sock opt, ret %d\n",
--				ret);
--			goto err_sock;
--		}
--	}
-+	if (so_priority > 0)
-+		sock_set_priority(queue->sock->sk, so_priority);
- 
- 	/* Set socket type of service */
- 	if (nctrl->opts->tos >= 0) {
-diff --git a/drivers/nvme/target/tcp.c b/drivers/nvme/target/tcp.c
-index e0801494b097f..f3088156d01da 100644
---- a/drivers/nvme/target/tcp.c
-+++ b/drivers/nvme/target/tcp.c
-@@ -1448,12 +1448,8 @@ static int nvmet_tcp_set_queue_sock(struct nvmet_tcp_queue *queue)
- 	 */
- 	sock_no_linger(sock->sk);
- 
--	if (so_priority > 0) {
--		ret = kernel_setsockopt(sock, SOL_SOCKET, SO_PRIORITY,
--				(char *)&so_priority, sizeof(so_priority));
--		if (ret)
--			return ret;
--	}
-+	if (so_priority > 0)
-+		sock_set_priority(sock->sk, so_priority);
- 
- 	/* Set socket type of service */
- 	if (inet->rcv_tos > 0) {
-@@ -1638,14 +1634,8 @@ static int nvmet_tcp_add_port(struct nvmet_port *nport)
- 		goto err_sock;
- 	}
- 
--	if (so_priority > 0) {
--		ret = kernel_setsockopt(port->sock, SOL_SOCKET, SO_PRIORITY,
--				(char *)&so_priority, sizeof(so_priority));
--		if (ret) {
--			pr_err("failed to set SO_PRIORITY sock opt %d\n", ret);
--			goto err_sock;
--		}
--	}
-+	if (so_priority > 0)
-+		sock_set_priority(port->sock->sk, so_priority);
- 
- 	ret = kernel_bind(port->sock, (struct sockaddr *)&port->addr,
- 			sizeof(port->addr));
 diff --git a/include/net/sock.h b/include/net/sock.h
-index 6ed00bf009bbe..a3a43141a4be2 100644
+index 9a7b9e98685ac..cdec7bc055d5b 100644
 --- a/include/net/sock.h
 +++ b/include/net/sock.h
-@@ -2689,6 +2689,7 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
+@@ -2688,6 +2688,7 @@ static inline bool sk_dev_equal_l3scope(struct sock *sk, int dif)
+ 
  void sock_def_readable(struct sock *sk);
  
++int sock_bindtoindex(struct sock *sk, int ifindex);
  void sock_no_linger(struct sock *sk);
-+void sock_set_priority(struct sock *sk, u32 priority);
+ void sock_set_priority(struct sock *sk, u32 priority);
  void sock_set_reuseaddr(struct sock *sk);
- 
- #endif	/* _SOCK_H */
 diff --git a/net/core/sock.c b/net/core/sock.c
-index f0f09524911c8..ceda1a9248b3e 100644
+index d3b1d61e4f768..23f80880fbb2c 100644
 --- a/net/core/sock.c
 +++ b/net/core/sock.c
-@@ -729,6 +729,14 @@ void sock_no_linger(struct sock *sk)
+@@ -566,7 +566,7 @@ struct dst_entry *sk_dst_check(struct sock *sk, u32 cookie)
  }
- EXPORT_SYMBOL(sock_no_linger);
+ EXPORT_SYMBOL(sk_dst_check);
  
-+void sock_set_priority(struct sock *sk, u32 priority)
+-static int sock_setbindtodevice_locked(struct sock *sk, int ifindex)
++static int sock_bindtoindex_locked(struct sock *sk, int ifindex)
+ {
+ 	int ret = -ENOPROTOOPT;
+ #ifdef CONFIG_NETDEVICES
+@@ -594,6 +594,18 @@ static int sock_setbindtodevice_locked(struct sock *sk, int ifindex)
+ 	return ret;
+ }
+ 
++int sock_bindtoindex(struct sock *sk, int ifindex)
 +{
-+	lock_sock(sk);
-+	sk->sk_priority = priority;
-+	release_sock(sk);
-+}
-+EXPORT_SYMBOL(sock_set_priority);
++	int ret;
 +
- /*
-  *	This is meant for all protocols to use and covers goings on
-  *	at the socket level. Everything here is generic.
++	lock_sock(sk);
++	ret = sock_bindtoindex_locked(sk, ifindex);
++	release_sock(sk);
++
++	return ret;
++}
++EXPORT_SYMBOL(sock_bindtoindex);
++
+ static int sock_setbindtodevice(struct sock *sk, char __user *optval,
+ 				int optlen)
+ {
+@@ -634,10 +646,7 @@ static int sock_setbindtodevice(struct sock *sk, char __user *optval,
+ 			goto out;
+ 	}
+ 
+-	lock_sock(sk);
+-	ret = sock_setbindtodevice_locked(sk, index);
+-	release_sock(sk);
+-
++	return sock_bindtoindex(sk, index);
+ out:
+ #endif
+ 
+@@ -1216,7 +1225,7 @@ int sock_setsockopt(struct socket *sock, int level, int optname,
+ 		break;
+ 
+ 	case SO_BINDTOIFINDEX:
+-		ret = sock_setbindtodevice_locked(sk, val);
++		ret = sock_bindtoindex_locked(sk, val);
+ 		break;
+ 
+ 	default:
+diff --git a/net/ipv4/udp_tunnel.c b/net/ipv4/udp_tunnel.c
+index 150e6f0fdbf59..2158e8bddf41c 100644
+--- a/net/ipv4/udp_tunnel.c
++++ b/net/ipv4/udp_tunnel.c
+@@ -22,9 +22,7 @@ int udp_sock_create4(struct net *net, struct udp_port_cfg *cfg,
+ 		goto error;
+ 
+ 	if (cfg->bind_ifindex) {
+-		err = kernel_setsockopt(sock, SOL_SOCKET, SO_BINDTOIFINDEX,
+-					(void *)&cfg->bind_ifindex,
+-					sizeof(cfg->bind_ifindex));
++		err = sock_bindtoindex(sock->sk, cfg->bind_ifindex);
+ 		if (err < 0)
+ 			goto error;
+ 	}
+diff --git a/net/ipv6/ip6_udp_tunnel.c b/net/ipv6/ip6_udp_tunnel.c
+index 58956a6b66a21..6523609516d25 100644
+--- a/net/ipv6/ip6_udp_tunnel.c
++++ b/net/ipv6/ip6_udp_tunnel.c
+@@ -33,9 +33,7 @@ int udp_sock_create6(struct net *net, struct udp_port_cfg *cfg,
+ 			goto error;
+ 	}
+ 	if (cfg->bind_ifindex) {
+-		err = kernel_setsockopt(sock, SOL_SOCKET, SO_BINDTOIFINDEX,
+-					(void *)&cfg->bind_ifindex,
+-					sizeof(cfg->bind_ifindex));
++		err = sock_bindtoindex(sock->sk, cfg->bind_ifindex);
+ 		if (err < 0)
+ 			goto error;
+ 	}
 -- 
 2.26.2
