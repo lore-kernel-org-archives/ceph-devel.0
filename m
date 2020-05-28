@@ -1,30 +1,19 @@
-From: David Miller <davem@davemloft.net>
-Subject: Re: remove most callers of kernel_setsockopt v3
-Date: Thu, 28 May 2020 11:12:05 -0700 (PDT)
-Message-ID: <20200528.111205.608949763790224771.davem@davemloft.net>
-References: <20200528051236.620353-1-hch@lst.de>
+From: "manuel franco" <manuel@info.com>
+Subject: Spende von 2.000.000,00 Euro
+Date: Thu, 28 May 2020 18:22:01 +0200
+Message-ID: <20200528162211.DC10A38A2F86@correo.bnv.gob.ve>
+Reply-To: manuelfrancospende11@gmail.com
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <20200528051236.620353-1-hch@lst.de>
-Sender: target-devel-owner@vger.kernel.org
-To: hch@lst.de
-Cc: kuba@kernel.org, edumazet@google.com, kuznet@ms2.inr.ac.ru, yoshfuji@linux-ipv6.org, jmaloy@redhat.com, ying.xue@windriver.com, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org, tipc-discussion@lists.sourceforge.net
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.bnv.gob.ve ([201.249.200.115]:41054 "EHLO
+        correo.bnv.gob.ve" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2436945AbgE1WgZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2020 18:36:25 -0400
+Content-Description: Mail message body
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <manuel@info.com>
 
-From: Christoph Hellwig <hch@lst.de>
-Date: Thu, 28 May 2020 07:12:08 +0200
-
-> this series removes most callers of the kernel_setsockopt functions, and
-> instead switches their users to small functions that implement setting a
-> sockopt directly using a normal kernel function call with type safety and
-> all the other benefits of not having a function call.
-> 
-> In some cases these functions seem pretty heavy handed as they do
-> a lock_sock even for just setting a single variable, but this mirrors
-> the real setsockopt implementation unlike a few drivers that just set
-> set the fields directly.
- ...
-
-Series applied, thanks Christoph.
+Ich bin Manuel Franco, ich spende Ihnen 2.000.000,00 Euro. Nehmen Sie jetzt Kontakt mit mir auf, damit wir fortfahren können.
