@@ -1,47 +1,246 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: remove most callers of kernel_setsockopt v3
-Date: Thu, 28 May 2020 07:12:08 +0200
-Message-ID: <20200528051236.620353-1-hch@lst.de>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 10/28] tcp: add tcp_sock_set_cork
+Date: Thu, 28 May 2020 07:12:18 +0200
+Message-ID: <20200528051236.620353-11-hch@lst.de>
+References: <20200528051236.620353-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
-List-Unsubscribe: <https://lists.linbit.com/mailman/options/drbd-dev>,
-	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linbit.com/pipermail/drbd-dev>
-List-Post: <mailto:drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
-List-Help: <mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linbit.com/mailman/listinfo/drbd-dev>,
-	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=subscribe>
-Sender: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
-Errors-To: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
-To: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Jakub Kicinski <kuba-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Hideaki YOSHIFUJI <yoshfuji-VfPWfsRibaP+Ru+s062T9g@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jon Maloy <jmaloy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Eric Dumazet <edumazet-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tipc-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ying Xue <ying.xue-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, Alexey Kuznetsov <kuznet-v/Mj1YrvjDBInbfyfbPRSQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Content-Transfer-Encoding: 8bit
+Return-path: <target-devel-owner@vger.kernel.org>
+In-Reply-To: <20200528051236.620353-1-hch@lst.de>
+Sender: target-devel-owner@vger.kernel.org
+To: "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>
+Cc: Eric Dumazet <edumazet@google.com>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Jon Maloy <jmaloy@redhat.com>, Ying Xue <ying.xue@windriver.com>, drbd-dev@lists.linbit.com, linux-kernel@vger.kernel.org, linux-rdma@vger.kernel.org, linux-nvme@lists.infradead.org, target-devel@vger.kernel.org, linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, netdev@vger.kernel.org, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org, tipc-discussion@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Dave,
+Add a helper to directly set the TCP_CORK sockopt from kernel space
+without going through a fake uaccess.  Cleanup the callers to avoid
+pointless wrappers now that this is a simple function call.
 
-this series removes most callers of the kernel_setsockopt functions, and
-instead switches their users to small functions that implement setting a
-sockopt directly using a normal kernel function call with type safety and
-all the other benefits of not having a function call.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ drivers/block/drbd/drbd_int.h      | 14 --------
+ drivers/block/drbd/drbd_receiver.c |  4 +--
+ drivers/block/drbd/drbd_worker.c   |  6 ++--
+ fs/cifs/transport.c                |  8 ++---
+ include/linux/tcp.h                |  2 ++
+ net/ipv4/tcp.c                     | 51 +++++++++++++++++++-----------
+ net/rds/tcp_send.c                 |  9 ++----
+ 7 files changed, 43 insertions(+), 51 deletions(-)
 
-In some cases these functions seem pretty heavy handed as they do
-a lock_sock even for just setting a single variable, but this mirrors
-the real setsockopt implementation unlike a few drivers that just set
-set the fields directly.
-
-
-Changes since v2:
- - drop the separately merged kernel_getopt_removal
- - drop the sctp patches, as there is conflicting cleanup going on
- - add an additional ACK for the rxrpc changes
-
-Changes since v1:
- - use ->getname for sctp sockets in dlm
- - add a new ->bind_add struct proto method for dlm/sctp
- - switch the ipv6 and remaining sctp helpers to inline function so that
-   the ipv6 and sctp modules are not pulled in by any module that could
-   potentially use ipv6 or sctp connections
- - remove arguments to various sock_* helpers that are always used with
-   the same constant arguments
+diff --git a/drivers/block/drbd/drbd_int.h b/drivers/block/drbd/drbd_int.h
+index aae99a2d7bd40..3550adc93c68b 100644
+--- a/drivers/block/drbd/drbd_int.h
++++ b/drivers/block/drbd/drbd_int.h
+@@ -1570,20 +1570,6 @@ extern void drbd_set_recv_tcq(struct drbd_device *device, int tcq_enabled);
+ extern void _drbd_clear_done_ee(struct drbd_device *device, struct list_head *to_be_freed);
+ extern int drbd_connected(struct drbd_peer_device *);
+ 
+-static inline void drbd_tcp_cork(struct socket *sock)
+-{
+-	int val = 1;
+-	(void) kernel_setsockopt(sock, SOL_TCP, TCP_CORK,
+-			(char*)&val, sizeof(val));
+-}
+-
+-static inline void drbd_tcp_uncork(struct socket *sock)
+-{
+-	int val = 0;
+-	(void) kernel_setsockopt(sock, SOL_TCP, TCP_CORK,
+-			(char*)&val, sizeof(val));
+-}
+-
+ static inline void drbd_tcp_nodelay(struct socket *sock)
+ {
+ 	int val = 1;
+diff --git a/drivers/block/drbd/drbd_receiver.c b/drivers/block/drbd/drbd_receiver.c
+index c15e7083b13a6..55ea907ad33cb 100644
+--- a/drivers/block/drbd/drbd_receiver.c
++++ b/drivers/block/drbd/drbd_receiver.c
+@@ -6162,7 +6162,7 @@ void drbd_send_acks_wf(struct work_struct *ws)
+ 	rcu_read_unlock();
+ 
+ 	if (tcp_cork)
+-		drbd_tcp_cork(connection->meta.socket);
++		tcp_sock_set_cork(connection->meta.socket->sk, true);
+ 
+ 	err = drbd_finish_peer_reqs(device);
+ 	kref_put(&device->kref, drbd_destroy_device);
+@@ -6175,7 +6175,7 @@ void drbd_send_acks_wf(struct work_struct *ws)
+ 	}
+ 
+ 	if (tcp_cork)
+-		drbd_tcp_uncork(connection->meta.socket);
++		tcp_sock_set_cork(connection->meta.socket->sk, false);
+ 
+ 	return;
+ }
+diff --git a/drivers/block/drbd/drbd_worker.c b/drivers/block/drbd/drbd_worker.c
+index 0dc019da1f8d0..2b89c9f2ca707 100644
+--- a/drivers/block/drbd/drbd_worker.c
++++ b/drivers/block/drbd/drbd_worker.c
+@@ -2098,7 +2098,7 @@ static void wait_for_work(struct drbd_connection *connection, struct list_head *
+ 	if (uncork) {
+ 		mutex_lock(&connection->data.mutex);
+ 		if (connection->data.socket)
+-			drbd_tcp_uncork(connection->data.socket);
++			tcp_sock_set_cork(connection->data.socket->sk, false);
+ 		mutex_unlock(&connection->data.mutex);
+ 	}
+ 
+@@ -2153,9 +2153,9 @@ static void wait_for_work(struct drbd_connection *connection, struct list_head *
+ 	mutex_lock(&connection->data.mutex);
+ 	if (connection->data.socket) {
+ 		if (cork)
+-			drbd_tcp_cork(connection->data.socket);
++			tcp_sock_set_cork(connection->data.socket->sk, true);
+ 		else if (!uncork)
+-			drbd_tcp_uncork(connection->data.socket);
++			tcp_sock_set_cork(connection->data.socket->sk, false);
+ 	}
+ 	mutex_unlock(&connection->data.mutex);
+ }
+diff --git a/fs/cifs/transport.c b/fs/cifs/transport.c
+index c97570eb2c180..99760063e0006 100644
+--- a/fs/cifs/transport.c
++++ b/fs/cifs/transport.c
+@@ -325,7 +325,6 @@ __smb_send_rqst(struct TCP_Server_Info *server, int num_rqst,
+ 	size_t total_len = 0, sent, size;
+ 	struct socket *ssocket = server->ssocket;
+ 	struct msghdr smb_msg;
+-	int val = 1;
+ 	__be32 rfc1002_marker;
+ 
+ 	if (cifs_rdma_enabled(server)) {
+@@ -345,8 +344,7 @@ __smb_send_rqst(struct TCP_Server_Info *server, int num_rqst,
+ 	}
+ 
+ 	/* cork the socket */
+-	kernel_setsockopt(ssocket, SOL_TCP, TCP_CORK,
+-				(char *)&val, sizeof(val));
++	tcp_sock_set_cork(ssocket->sk, true);
+ 
+ 	for (j = 0; j < num_rqst; j++)
+ 		send_length += smb_rqst_len(server, &rqst[j]);
+@@ -435,9 +433,7 @@ __smb_send_rqst(struct TCP_Server_Info *server, int num_rqst,
+ 	}
+ 
+ 	/* uncork it */
+-	val = 0;
+-	kernel_setsockopt(ssocket, SOL_TCP, TCP_CORK,
+-				(char *)&val, sizeof(val));
++	tcp_sock_set_cork(ssocket->sk, false);
+ 
+ 	if ((total_len > 0) && (total_len != send_length)) {
+ 		cifs_dbg(FYI, "partial send (wanted=%u sent=%zu): terminating session\n",
+diff --git a/include/linux/tcp.h b/include/linux/tcp.h
+index bf44e85d709dc..889eeb2256c2d 100644
+--- a/include/linux/tcp.h
++++ b/include/linux/tcp.h
+@@ -497,4 +497,6 @@ static inline u16 tcp_mss_clamp(const struct tcp_sock *tp, u16 mss)
+ int tcp_skb_shift(struct sk_buff *to, struct sk_buff *from, int pcount,
+ 		  int shiftlen);
+ 
++void tcp_sock_set_cork(struct sock *sk, bool on);
++
+ #endif	/* _LINUX_TCP_H */
+diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
+index 9700649963773..e6cf702e16d66 100644
+--- a/net/ipv4/tcp.c
++++ b/net/ipv4/tcp.c
+@@ -2801,6 +2801,37 @@ static void tcp_enable_tx_delay(void)
+ 	}
+ }
+ 
++/* When set indicates to always queue non-full frames.  Later the user clears
++ * this option and we transmit any pending partial frames in the queue.  This is
++ * meant to be used alongside sendfile() to get properly filled frames when the
++ * user (for example) must write out headers with a write() call first and then
++ * use sendfile to send out the data parts.
++ *
++ * TCP_CORK can be set together with TCP_NODELAY and it is stronger than
++ * TCP_NODELAY.
++ */
++static void __tcp_sock_set_cork(struct sock *sk, bool on)
++{
++	struct tcp_sock *tp = tcp_sk(sk);
++
++	if (on) {
++		tp->nonagle |= TCP_NAGLE_CORK;
++	} else {
++		tp->nonagle &= ~TCP_NAGLE_CORK;
++		if (tp->nonagle & TCP_NAGLE_OFF)
++			tp->nonagle |= TCP_NAGLE_PUSH;
++		tcp_push_pending_frames(sk);
++	}
++}
++
++void tcp_sock_set_cork(struct sock *sk, bool on)
++{
++	lock_sock(sk);
++	__tcp_sock_set_cork(sk, on);
++	release_sock(sk);
++}
++EXPORT_SYMBOL(tcp_sock_set_cork);
++
+ /*
+  *	Socket option code for TCP.
+  */
+@@ -2979,25 +3010,7 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
+ 		break;
+ 
+ 	case TCP_CORK:
+-		/* When set indicates to always queue non-full frames.
+-		 * Later the user clears this option and we transmit
+-		 * any pending partial frames in the queue.  This is
+-		 * meant to be used alongside sendfile() to get properly
+-		 * filled frames when the user (for example) must write
+-		 * out headers with a write() call first and then use
+-		 * sendfile to send out the data parts.
+-		 *
+-		 * TCP_CORK can be set together with TCP_NODELAY and it is
+-		 * stronger than TCP_NODELAY.
+-		 */
+-		if (val) {
+-			tp->nonagle |= TCP_NAGLE_CORK;
+-		} else {
+-			tp->nonagle &= ~TCP_NAGLE_CORK;
+-			if (tp->nonagle&TCP_NAGLE_OFF)
+-				tp->nonagle |= TCP_NAGLE_PUSH;
+-			tcp_push_pending_frames(sk);
+-		}
++		__tcp_sock_set_cork(sk, val);
+ 		break;
+ 
+ 	case TCP_KEEPIDLE:
+diff --git a/net/rds/tcp_send.c b/net/rds/tcp_send.c
+index 78a2554a44979..8c4d1d6e9249d 100644
+--- a/net/rds/tcp_send.c
++++ b/net/rds/tcp_send.c
+@@ -38,23 +38,18 @@
+ #include "rds.h"
+ #include "tcp.h"
+ 
+-static void rds_tcp_cork(struct socket *sock, int val)
+-{
+-	kernel_setsockopt(sock, SOL_TCP, TCP_CORK, (void *)&val, sizeof(val));
+-}
+-
+ void rds_tcp_xmit_path_prepare(struct rds_conn_path *cp)
+ {
+ 	struct rds_tcp_connection *tc = cp->cp_transport_data;
+ 
+-	rds_tcp_cork(tc->t_sock, 1);
++	tcp_sock_set_cork(tc->t_sock->sk, true);
+ }
+ 
+ void rds_tcp_xmit_path_complete(struct rds_conn_path *cp)
+ {
+ 	struct rds_tcp_connection *tc = cp->cp_transport_data;
+ 
+-	rds_tcp_cork(tc->t_sock, 0);
++	tcp_sock_set_cork(tc->t_sock->sk, false);
+ }
+ 
+ /* the core send_sem serializes this with other xmit and shutdown */
+-- 
+2.26.2
