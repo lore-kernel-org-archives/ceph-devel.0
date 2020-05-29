@@ -1,41 +1,39 @@
-From: j j <jiang4357291-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: cephfs worm feature
-Date: Thu, 28 Nov 2019 12:16:16 +0800
-Message-ID: <CABvhRYgmrGGu9Y0M7OR4G1Xhio4f2YyW84jwb-EOSEHcw9wHUA@mail.gmail.com>
-References: <CABvhRYgc19BtZAe=XFgxtd0VmHjZX9CO2JfqDkw0A7mv8Jxgfw@mail.gmail.com>
- <c1cee0022b074747537d59216ee831b3ea8a3d05.camel@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 5.7-rc8
+Date: Fri, 29 May 2020 17:52:57 +0200
+Message-ID: <20200529155257.21043-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-In-Reply-To: <c1cee0022b074747537d59216ee831b3ea8a3d05.camel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: dev-a8pt6IJUokc@public.gmane.org, ceph-users-a8pt6IJUokc@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-VGhhbmtzIGZvciB0aGUgaW5mb3JtYXRpb24sIEknbGwgdGFrZSBhIGxvb2sgYXQgdGhpcyBwciBh
-bmQgdGhpbmsgaXQgb3Zlci4NCg0KSmVmZiBMYXl0b24gPGpsYXl0b25AcmVkaGF0LmNvbT4g5LqO
-MjAxOeW5tDEx5pyIMjfml6XlkajkuIkg5LiL5Y2INjo1MOWGmemBk++8mg0KDQo+IE9uIFdlZCwg
-MjAxOS0xMS0yNyBhdCAxNToxNCArMDgwMCwgaiBqIHdyb3RlOg0KPiA+IEhpIGFsbCwNCj4gPg0K
-PiA+ICAgIFJlY2VudGx5IEkgZW5jb3VudGVyZWQgYSBzaXR1YXRpb24gcmVxdWlyZXMgcmVsaWFi
-bGUgZmlsZSBzdG9yYWdlDQo+IHdpdGggY2VwaGZzLCBhbmQgdGhlIHBvaW50IGlzIHRob3NlIGRh
-dGEgaXMgbm90IGFsbG93ZWQgdG8gZ2V0IG1vZGlmaWVkIG9yDQo+IGRlbGV0ZWQuDQo+ID4gQWZ0
-ZXIgc29tZSBsZWFybmluZyBJIGZvdW5kIHRoYXQgdGhlIFdPUk0od3JpdGUgb25jZSByZWFkIG1h
-bnkpIGZlYXR1cmUNCj4gaXMgZXhhY3RseSB3aGF0IEkgbmVlZC5VbmZvcnR1bmF0ZWx5LCBhcyBm
-YXIgYXMgSSBrbm93LCB0aGVyZSBpcyBubyB3b3JtDQo+ID4gZmVhdHVyZSBpbiBjZXBoZnMuDQo+
-ID4gICAgU28gSSB3YXMgd29uZGVyaW5nIGlzIHRoZXJlIGFueSBwbGFuIG9yIGRlc2lnbiBhYm91
-dCB0aGlzIGZlYXR1cmU/DQo+ID4NCj4gPiBUaGFua3MuDQo+DQo+IFRoZXJlJ3MgYSBwdWxsIHJl
-cXVlc3QgZm9yIHRoaXMgdGhhdCBoYXMgYmVlbiBzdGFsbGVkIHNpbmNlIHNwcmluZzoNCj4NCj4g
-ICAgIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8yNjY5MQ0KPg0KPiBQZXJzb25h
-bGx5LCBJIGRvbid0IHNlZSBob3cgd2UgY2FuIGdldCBhd2F5IHdpdGggbWFraW5nIGZpbGUgZGF0
-YSAxMDAlDQo+IGltbXV0YWJsZS4gV2UnbGwgbmVlZCB0byBhbGxvdyBfc29tZV8gZW50aXR5IHRv
-IHVuLVdPUk0gdGhlIHRoaW5nLCBhbmQNCj4gaXQgd2FzIG5ldmVyIGNsZWFyIHRvIG1lIGhvdyB0
-aGF0IHdvdWxkIHdvcmsuDQo+IC0tDQo+IEplZmYgTGF5dG9uIDxqbGF5dG9uQHJlZGhhdC5jb20+
-DQo+DQo+DQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpj
-ZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAtLSBjZXBoLXVzZXJzQGNlcGguaW8KVG8gdW5zdWJzY3Jp
-YmUgc2VuZCBhbiBlbWFpbCB0byBjZXBoLXVzZXJzLWxlYXZlQGNlcGguaW8K
+Hi Linus,
+
+The following changes since commit 9cb1fd0efd195590b828b9b865421ad345a4a145:
+
+  Linux 5.7-rc7 (2020-05-24 15:32:54 -0700)
+
+are available in the Git repository at:
+
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc8
+
+for you to fetch changes up to fb33c114d3ed5bdac230716f5b0a93b56b92a90d:
+
+  ceph: flush release queue when handling caps for unknown inode (2020-05-27 13:03:57 +0200)
+
+----------------------------------------------------------------
+Cache tiering and cap handling fixups, both marked for stable.
+
+----------------------------------------------------------------
+Jeff Layton (1):
+      ceph: flush release queue when handling caps for unknown inode
+
+Jerry Lee (1):
+      libceph: ignore pool overlay and cache logic on redirects
+
+ fs/ceph/caps.c        | 2 +-
+ net/ceph/osd_client.c | 4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
