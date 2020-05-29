@@ -1,303 +1,190 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 3/5] libceph: crush_location infrastructure
-Date: Fri, 29 May 2020 17:19:50 +0200
-Message-ID: <20200529151952.15184-4-idryomov@gmail.com>
+Subject: [PATCH 1/5] libceph: add non-asserting rbtree insertion helper
+Date: Fri, 29 May 2020 17:19:48 +0200
+Message-ID: <20200529151952.15184-2-idryomov@gmail.com>
 References: <20200529151952.15184-1-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48340 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48332 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727117AbgE2PT6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 May 2020 11:19:58 -0400
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C8D8C08C5CB
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2020 08:19:57 -0700 (PDT)
-Received: by mail-ej1-x643.google.com with SMTP id d7so2435854eja.7
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2020 08:19:57 -0700 (PDT)
+        with ESMTP id S1727112AbgE2PTz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 May 2020 11:19:55 -0400
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8756FC08C5C9
+        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2020 08:19:55 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id f7so2438007ejq.6
+        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2020 08:19:55 -0700 (PDT)
 In-Reply-To: <20200529151952.15184-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Jeff Layton <jlayton@kernel.org>
 
-Allow expressing client's location in terms of CRUSH hierarchy as
-a set of (bucket type name, bucket name) pairs.  The userspace syntax
-"crush_location = key1=value1 key2=value2" is incompatible with mount
-options and needed adaptation:
-
-- ':' separator
-- one key:value pair per crush_location option
-- crush_location options are combined together
-
-So for:
-
-  crush_location = host=foo rack=bar
-
-one would write:
-
-  crush_location=host:foo,crush_location=rack:bar
-
-As in userspace, "multipath" locations are supported, so indicating
-locality for parallel hierarchies is possible:
-
-  crush_location=rack:foo1,crush_location=rack:foo2,crush_location=datacenter:bar
+Needed for the next commit and useful for ceph_pg_pool_info tree as
+well.  I'm leaving the asserting helper in for now, but we should look
+at getting rid of it in the future.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/ceph/libceph.h |   1 +
- include/linux/ceph/osdmap.h  |  16 ++++-
- net/ceph/ceph_common.c       |  25 ++++++++
- net/ceph/osdmap.c            | 114 +++++++++++++++++++++++++++++++++++
- 4 files changed, 155 insertions(+), 1 deletion(-)
+ include/linux/ceph/libceph.h | 10 ++++--
+ net/ceph/osdmap.c            | 60 +++++++-----------------------------
+ 2 files changed, 19 insertions(+), 51 deletions(-)
 
 diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 4b5a47bcaba4..4733959f1ec7 100644
+index 525b7c3f1c81..4b5a47bcaba4 100644
 --- a/include/linux/ceph/libceph.h
 +++ b/include/linux/ceph/libceph.h
-@@ -64,6 +64,7 @@ struct ceph_options {
- 	int num_mon;
- 	char *name;
- 	struct ceph_crypto_key *key;
-+	struct rb_root crush_locs;
- };
+@@ -188,7 +188,7 @@ static inline int calc_pages_for(u64 off, u64 len)
+ #define RB_CMP3WAY(a, b) ((a) < (b) ? -1 : (a) > (b))
  
- /*
-diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-index 5e601975745f..ef8619ad1401 100644
---- a/include/linux/ceph/osdmap.h
-+++ b/include/linux/ceph/osdmap.h
-@@ -302,9 +302,23 @@ bool ceph_pg_to_primary_shard(struct ceph_osdmap *osdmap,
- int ceph_pg_to_acting_primary(struct ceph_osdmap *osdmap,
- 			      const struct ceph_pg *raw_pgid);
- 
-+struct crush_loc {
-+	char *cl_type_name;
-+	char *cl_name;
-+};
-+
-+struct crush_loc_node {
-+	struct rb_node cl_node;
-+	struct crush_loc cl_loc;  /* pointers into cl_data */
-+	char cl_data[];
-+};
-+
-+int ceph_parse_crush_loc(const char *str, struct rb_root *locs);
-+int ceph_compare_crush_locs(struct rb_root *locs1, struct rb_root *locs2);
-+void ceph_clear_crush_locs(struct rb_root *locs);
-+
- extern struct ceph_pg_pool_info *ceph_pg_pool_by_id(struct ceph_osdmap *map,
- 						    u64 id);
--
- extern const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64 id);
- extern int ceph_pg_poolid_by_name(struct ceph_osdmap *map, const char *name);
- u64 ceph_pg_pool_flags(struct ceph_osdmap *map, u64 id);
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index a0e97f6c1072..6d495685ee03 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -176,6 +176,10 @@ int ceph_compare_options(struct ceph_options *new_opt,
- 		}
- 	}
- 
-+	ret = ceph_compare_crush_locs(&opt1->crush_locs, &opt2->crush_locs);
-+	if (ret)
-+		return ret;
-+
- 	/* any matching mon ip implies a match */
- 	for (i = 0; i < opt1->num_mon; i++) {
- 		if (ceph_monmap_contains(client->monc.monmap,
-@@ -260,6 +264,7 @@ enum {
- 	Opt_secret,
- 	Opt_key,
- 	Opt_ip,
-+	Opt_crush_location,
- 	/* string args above */
- 	Opt_share,
- 	Opt_crc,
-@@ -274,6 +279,7 @@ static const struct fs_parameter_spec ceph_parameters[] = {
- 	fsparam_flag_no ("cephx_require_signatures",	Opt_cephx_require_signatures),
- 	fsparam_flag_no ("cephx_sign_messages",		Opt_cephx_sign_messages),
- 	fsparam_flag_no ("crc",				Opt_crc),
-+	fsparam_string	("crush_location",		Opt_crush_location),
- 	fsparam_string	("fsid",			Opt_fsid),
- 	fsparam_string	("ip",				Opt_ip),
- 	fsparam_string	("key",				Opt_key),
-@@ -298,6 +304,7 @@ struct ceph_options *ceph_alloc_options(void)
- 	if (!opt)
- 		return NULL;
- 
-+	opt->crush_locs = RB_ROOT;
- 	opt->mon_addr = kcalloc(CEPH_MAX_MON, sizeof(*opt->mon_addr),
- 				GFP_KERNEL);
- 	if (!opt->mon_addr) {
-@@ -320,6 +327,7 @@ void ceph_destroy_options(struct ceph_options *opt)
- 	if (!opt)
- 		return;
- 
-+	ceph_clear_crush_locs(&opt->crush_locs);
- 	kfree(opt->name);
- 	if (opt->key) {
- 		ceph_crypto_key_destroy(opt->key);
-@@ -454,6 +462,14 @@ int ceph_parse_param(struct fs_parameter *param, struct ceph_options *opt,
- 		if (!opt->key)
- 			return -ENOMEM;
- 		return get_secret(opt->key, param->string, &log);
-+	case Opt_crush_location:
-+		err = ceph_parse_crush_loc(param->string, &opt->crush_locs);
-+		if (err) {
-+			error_plog(&log, "Failed to parse crush location: %d",
-+				   err);
-+			return err;
-+		}
-+		break;
- 
- 	case Opt_osdtimeout:
- 		warn_plog(&log, "Ignoring osdtimeout");
-@@ -536,6 +552,7 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client,
- {
- 	struct ceph_options *opt = client->options;
- 	size_t pos = m->count;
-+	struct rb_node *n;
- 
- 	if (opt->name) {
- 		seq_puts(m, "name=");
-@@ -545,6 +562,14 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client,
- 	if (opt->key)
- 		seq_puts(m, "secret=<hidden>,");
- 
-+	for (n = rb_first(&opt->crush_locs); n; n = rb_next(n)) {
-+		struct crush_loc_node *loc =
-+		    rb_entry(n, struct crush_loc_node, cl_node);
-+
-+		seq_printf(m, "crush_location=%s:%s,",
-+			   loc->cl_loc.cl_type_name, loc->cl_loc.cl_name);
-+	}
-+
- 	if (opt->flags & CEPH_OPT_FSID)
- 		seq_printf(m, "fsid=%pU,", &opt->fsid);
- 	if (opt->flags & CEPH_OPT_NOSHARE)
+ #define DEFINE_RB_INSDEL_FUNCS2(name, type, keyfld, cmpexp, keyexp, nodefld) \
+-static void insert_##name(struct rb_root *root, type *t)		\
++static bool __insert_##name(struct rb_root *root, type *t)		\
+ {									\
+ 	struct rb_node **n = &root->rb_node;				\
+ 	struct rb_node *parent = NULL;					\
+@@ -206,11 +206,17 @@ static void insert_##name(struct rb_root *root, type *t)		\
+ 		else if (cmp > 0)					\
+ 			n = &(*n)->rb_right;				\
+ 		else							\
+-			BUG();						\
++			return false;					\
+ 	}								\
+ 									\
+ 	rb_link_node(&t->nodefld, parent, n);				\
+ 	rb_insert_color(&t->nodefld, root);				\
++	return true;							\
++}									\
++static void __maybe_unused insert_##name(struct rb_root *root, type *t)	\
++{									\
++	if (!__insert_##name(root, t))					\
++		BUG();							\
+ }									\
+ static void erase_##name(struct rb_root *root, type *t)			\
+ {									\
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index e74130876d3a..995cdb8b559e 100644
+index 2a6e63a8edbe..5d00ce2b5339 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -2715,3 +2715,117 @@ int ceph_pg_to_acting_primary(struct ceph_osdmap *osdmap,
- 	return acting.primary;
+@@ -636,48 +636,11 @@ DEFINE_RB_FUNCS2(pg_mapping, struct ceph_pg_mapping, pgid, ceph_pg_compare,
+ /*
+  * rbtree of pg pool info
+  */
+-static int __insert_pg_pool(struct rb_root *root, struct ceph_pg_pool_info *new)
+-{
+-	struct rb_node **p = &root->rb_node;
+-	struct rb_node *parent = NULL;
+-	struct ceph_pg_pool_info *pi = NULL;
+-
+-	while (*p) {
+-		parent = *p;
+-		pi = rb_entry(parent, struct ceph_pg_pool_info, node);
+-		if (new->id < pi->id)
+-			p = &(*p)->rb_left;
+-		else if (new->id > pi->id)
+-			p = &(*p)->rb_right;
+-		else
+-			return -EEXIST;
+-	}
+-
+-	rb_link_node(&new->node, parent, p);
+-	rb_insert_color(&new->node, root);
+-	return 0;
+-}
+-
+-static struct ceph_pg_pool_info *__lookup_pg_pool(struct rb_root *root, u64 id)
+-{
+-	struct ceph_pg_pool_info *pi;
+-	struct rb_node *n = root->rb_node;
+-
+-	while (n) {
+-		pi = rb_entry(n, struct ceph_pg_pool_info, node);
+-		if (id < pi->id)
+-			n = n->rb_left;
+-		else if (id > pi->id)
+-			n = n->rb_right;
+-		else
+-			return pi;
+-	}
+-	return NULL;
+-}
++DEFINE_RB_FUNCS(pg_pool, struct ceph_pg_pool_info, id, node)
+ 
+ struct ceph_pg_pool_info *ceph_pg_pool_by_id(struct ceph_osdmap *map, u64 id)
+ {
+-	return __lookup_pg_pool(&map->pg_pools, id);
++	return lookup_pg_pool(&map->pg_pools, id);
  }
- EXPORT_SYMBOL(ceph_pg_to_acting_primary);
-+
-+static struct crush_loc_node *alloc_crush_loc(size_t type_name_len,
-+					      size_t name_len)
-+{
-+	struct crush_loc_node *loc;
-+
-+	loc = kmalloc(sizeof(*loc) + type_name_len + name_len + 2, GFP_NOIO);
-+	if (!loc)
-+		return NULL;
-+
-+	RB_CLEAR_NODE(&loc->cl_node);
-+	return loc;
-+}
-+
-+static void free_crush_loc(struct crush_loc_node *loc)
-+{
-+	WARN_ON(!RB_EMPTY_NODE(&loc->cl_node));
-+
-+	kfree(loc);
-+}
-+
-+static int crush_loc_compare(const struct crush_loc *loc1,
-+			     const struct crush_loc *loc2)
-+{
-+	return strcmp(loc1->cl_type_name, loc2->cl_type_name) ?:
-+	       strcmp(loc1->cl_name, loc2->cl_name);
-+}
-+
-+DEFINE_RB_FUNCS2(crush_loc, struct crush_loc_node, cl_loc, crush_loc_compare,
-+		 RB_BYPTR, const struct crush_loc *, cl_node)
-+
-+/*
-+ * A <bucket type name>:<bucket name> pair, e.g. "zone:us-east".
-+ */
-+int ceph_parse_crush_loc(const char *str, struct rb_root *locs)
-+{
-+	struct crush_loc_node *loc;
-+	const char *type_name, *name;
-+	size_t type_name_len, name_len;
-+
-+	type_name = str;
-+	str = strchrnul(str, ':');
-+	if (*str == '\0')
-+		return -EINVAL;  /* no ':' */
-+
-+	type_name_len = str - type_name;
-+	if (type_name_len == 0)
-+		return -EINVAL;
-+
-+	name = ++str;
-+	str = strchrnul(str, ':');
-+	if (*str != '\0')
-+		return -EINVAL;  /* another ':' */
-+
-+	name_len = str - name;
-+	if (name_len == 0)
-+		return -EINVAL;
-+
-+	loc = alloc_crush_loc(type_name_len, name_len);
-+	if (!loc)
-+		return -ENOMEM;
-+
-+	loc->cl_loc.cl_type_name = loc->cl_data;
-+	memcpy(loc->cl_loc.cl_type_name, type_name, type_name_len);
-+	loc->cl_loc.cl_type_name[type_name_len] = '\0';
-+
-+	loc->cl_loc.cl_name = loc->cl_data + type_name_len + 1;
-+	memcpy(loc->cl_loc.cl_name, name, name_len);
-+	loc->cl_loc.cl_name[name_len] = '\0';
-+
-+	if (!__insert_crush_loc(locs, loc)) {
-+		free_crush_loc(loc);
-+		return -EEXIST;
-+	}
-+
-+	dout("%s type_name '%s' name '%s'\n", __func__,
-+	     loc->cl_loc.cl_type_name, loc->cl_loc.cl_name);
-+	return 0;
-+}
-+
-+int ceph_compare_crush_locs(struct rb_root *locs1, struct rb_root *locs2)
-+{
-+	struct rb_node *n1 = rb_first(locs1);
-+	struct rb_node *n2 = rb_first(locs2);
-+	int ret;
-+
-+	for ( ; n1 && n2; n1 = rb_next(n1), n2 = rb_next(n2)) {
-+		struct crush_loc_node *loc1 =
-+		    rb_entry(n1, struct crush_loc_node, cl_node);
-+		struct crush_loc_node *loc2 =
-+		    rb_entry(n2, struct crush_loc_node, cl_node);
-+
-+		ret = crush_loc_compare(&loc1->cl_loc, &loc2->cl_loc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	if (!n1 && n2)
-+		return -1;
-+	if (n1 && !n2)
-+		return 1;
-+	return 0;
-+}
-+
-+void ceph_clear_crush_locs(struct rb_root *locs)
-+{
-+	while (!RB_EMPTY_ROOT(locs)) {
-+		struct crush_loc_node *loc =
-+		    rb_entry(rb_first(locs), struct crush_loc_node, cl_node);
-+
-+		erase_crush_loc(locs, loc);
-+		free_crush_loc(loc);
-+	}
-+}
+ 
+ const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64 id)
+@@ -690,8 +653,7 @@ const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64 id)
+ 	if (WARN_ON_ONCE(id > (u64) INT_MAX))
+ 		return NULL;
+ 
+-	pi = __lookup_pg_pool(&map->pg_pools, (int) id);
+-
++	pi = lookup_pg_pool(&map->pg_pools, id);
+ 	return pi ? pi->name : NULL;
+ }
+ EXPORT_SYMBOL(ceph_pg_pool_name_by_id);
+@@ -714,14 +676,14 @@ u64 ceph_pg_pool_flags(struct ceph_osdmap *map, u64 id)
+ {
+ 	struct ceph_pg_pool_info *pi;
+ 
+-	pi = __lookup_pg_pool(&map->pg_pools, id);
++	pi = lookup_pg_pool(&map->pg_pools, id);
+ 	return pi ? pi->flags : 0;
+ }
+ EXPORT_SYMBOL(ceph_pg_pool_flags);
+ 
+ static void __remove_pg_pool(struct rb_root *root, struct ceph_pg_pool_info *pi)
+ {
+-	rb_erase(&pi->node, root);
++	erase_pg_pool(root, pi);
+ 	kfree(pi->name);
+ 	kfree(pi);
+ }
+@@ -903,7 +865,7 @@ static int decode_pool_names(void **p, void *end, struct ceph_osdmap *map)
+ 		ceph_decode_32_safe(p, end, len, bad);
+ 		dout("  pool %llu len %d\n", pool, len);
+ 		ceph_decode_need(p, end, len, bad);
+-		pi = __lookup_pg_pool(&map->pg_pools, pool);
++		pi = lookup_pg_pool(&map->pg_pools, pool);
+ 		if (pi) {
+ 			char *name = kstrndup(*p, len, GFP_NOFS);
+ 
+@@ -1154,18 +1116,18 @@ static int __decode_pools(void **p, void *end, struct ceph_osdmap *map,
+ 
+ 		ceph_decode_64_safe(p, end, pool, e_inval);
+ 
+-		pi = __lookup_pg_pool(&map->pg_pools, pool);
++		pi = lookup_pg_pool(&map->pg_pools, pool);
+ 		if (!incremental || !pi) {
+ 			pi = kzalloc(sizeof(*pi), GFP_NOFS);
+ 			if (!pi)
+ 				return -ENOMEM;
+ 
++			RB_CLEAR_NODE(&pi->node);
+ 			pi->id = pool;
+ 
+-			ret = __insert_pg_pool(&map->pg_pools, pi);
+-			if (ret) {
++			if (!__insert_pg_pool(&map->pg_pools, pi)) {
+ 				kfree(pi);
+-				return ret;
++				return -EEXIST;
+ 			}
+ 		}
+ 
+@@ -1829,7 +1791,7 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+ 		struct ceph_pg_pool_info *pi;
+ 
+ 		ceph_decode_64_safe(p, end, pool, e_inval);
+-		pi = __lookup_pg_pool(&map->pg_pools, pool);
++		pi = lookup_pg_pool(&map->pg_pools, pool);
+ 		if (pi)
+ 			__remove_pg_pool(&map->pg_pools, pi);
+ 	}
 -- 
 2.19.2
