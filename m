@@ -1,94 +1,24 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 3/5] libceph: crush_location infrastructure
-Date: Fri, 29 May 2020 22:42:57 +0200
-Message-ID: <CAOi1vP82akP6L4kGyVmBxLYEDxqimPiiP9=DyvuUkHcQ4gawwQ@mail.gmail.com>
-References: <20200529151952.15184-1-idryomov@gmail.com> <20200529151952.15184-4-idryomov@gmail.com>
- <adbdcc0f39b050252241c7afab17e7a4a6ba5a43.camel@kernel.org>
- <CAOi1vP-UPktbA7gcx0tQvN9wi1L2DB1zHyb212x5kbErkchR=Q@mail.gmail.com> <c76c2f3634898c3618ef536f4c507423196eb876.camel@kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42404 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726975AbgE2Umx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 May 2020 16:42:53 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F84FC03E969
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2020 13:42:53 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id t8so3279311ilm.7
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2020 13:42:53 -0700 (PDT)
-In-Reply-To: <c76c2f3634898c3618ef536f4c507423196eb876.camel@kernel.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] Ceph fixes for 5.7-rc8
+Date: Fri, 29 May 2020 21:10:05 +0000
+Message-ID: <159078660588.32003.3531710216240216117.pr-tracker-bot@kernel.org>
+References: <20200529155257.21043-1-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20200529155257.21043-1-idryomov@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, May 29, 2020 at 9:10 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> On Fri, 2020-05-29 at 20:38 +0200, Ilya Dryomov wrote:
-> > On Fri, May 29, 2020 at 7:27 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > > On Fri, 2020-05-29 at 17:19 +0200, Ilya Dryomov wrote:
-> > > > Allow expressing client's location in terms of CRUSH hierarchy as
-> > > > a set of (bucket type name, bucket name) pairs.  The userspace syntax
-> > > > "crush_location = key1=value1 key2=value2" is incompatible with mount
-> > > > options and needed adaptation:
-> > > >
-> > > > - ':' separator
-> > > > - one key:value pair per crush_location option
-> > > > - crush_location options are combined together
-> > > >
-> > > > So for:
-> > > >
-> > > >   crush_location = host=foo rack=bar
-> > > >
-> > > > one would write:
-> > > >
-> > > >   crush_location=host:foo,crush_location=rack:bar
-> > > >
-> > > > As in userspace, "multipath" locations are supported, so indicating
-> > > > locality for parallel hierarchies is possible:
-> > > >
-> > > >   crush_location=rack:foo1,crush_location=rack:foo2,crush_location=datacenter:bar
-> > > >
-> > >
-> > > Blech, that syntax is hideous. It's also problematic in that the options
-> > > are additive -- you can't override an option that was given earlier
-> > > (e.g. in fstab), or in a shell script.
-> > >
-> > > Is it not possible to do something with a single crush_location= option?
-> > > Maybe:
-> > >
-> > >     crush_location=rack:foo1/rack:foo2/datacenter:bar
-> > >
-> > > It's still ugly with the embedded '=' signs, but it would at least make
-> > > it so that the options aren't additive.
-> >
-> > I suppose we could do something like that at the cost of more
-> > parsing boilerplate, but I'm not sure additive options are that
-> > hideous.  I don't think additive options are unprecedented and
-> > more importantly I think many simple boolean and integer options
-> > are not properly overridable even in major filesystems.
-> >
->
-> That is the long-standing convention though. There are reasons to
-> deviate from it, but I don't see it here. Plus, I think the syntax I
-> proposed above is more readable (and compact) as well.
->
-> It would mean a bit more parsing code though, granted.
->
-> > What embedded '=' signs are you referring to?  I see ':' and '/'
-> > in your suggested syntax.
-> >
->
-> Sorry, yeah... I had originally done one that had '=' chars in it, but
-> converted it to the above. Please disregard that paragraph.
+The pull request you sent on Fri, 29 May 2020 17:52:57 +0200:
 
-One of the reasons I did it this way is that crush_location is
-inherently additive.  I don't have a strong opinion on this though
-so let's adhere to the convention.
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.7-rc8
 
-I'll implement the suggested syntax and repost.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/e2fce151d2b4bd9722b3344ae381c768d249761f
 
-Thanks,
+Thank you!
 
-                Ilya
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
