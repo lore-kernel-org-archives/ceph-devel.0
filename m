@@ -1,190 +1,183 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH v2 1/5] libceph: add non-asserting rbtree insertion helper
-Date: Sat, 30 May 2020 17:34:35 +0200
-Message-ID: <20200530153439.31312-2-idryomov@gmail.com>
+Subject: [PATCH v2 2/5] libceph: decode CRUSH device/bucket types and names
+Date: Sat, 30 May 2020 17:34:36 +0200
+Message-ID: <20200530153439.31312-3-idryomov@gmail.com>
 References: <20200530153439.31312-1-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48994 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728998AbgE3Pel (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 30 May 2020 11:34:41 -0400
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F370C08C5C9
-        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:41 -0700 (PDT)
-Received: by mail-wm1-x342.google.com with SMTP id c71so6626821wmd.5
-        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:41 -0700 (PDT)
+        with ESMTP id S1729038AbgE3Pem (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 30 May 2020 11:34:42 -0400
+Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FC4DC03E969
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:42 -0700 (PDT)
+Received: by mail-wm1-x341.google.com with SMTP id f185so7095783wmf.3
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:42 -0700 (PDT)
 In-Reply-To: <20200530153439.31312-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Jeff Layton <jlayton@kernel.org>
 
-Needed for the next commit and useful for ceph_pg_pool_info tree as
-well.  I'm leaving the asserting helper in for now, but we should look
-at getting rid of it in the future.
+These would be matched with the provided client location to calculate
+the locality value.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/ceph/libceph.h | 10 ++++--
- net/ceph/osdmap.c            | 60 +++++++-----------------------------
- 2 files changed, 19 insertions(+), 51 deletions(-)
+ include/linux/crush/crush.h |  6 +++
+ net/ceph/crush/crush.c      |  3 ++
+ net/ceph/osdmap.c           | 85 ++++++++++++++++++++++++++++++++++++-
+ 3 files changed, 92 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 525b7c3f1c81..4b5a47bcaba4 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -188,7 +188,7 @@ static inline int calc_pages_for(u64 off, u64 len)
- #define RB_CMP3WAY(a, b) ((a) < (b) ? -1 : (a) > (b))
+diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+index 38b0e4d50ed9..29b0de2e202b 100644
+--- a/include/linux/crush/crush.h
++++ b/include/linux/crush/crush.h
+@@ -301,6 +301,12 @@ struct crush_map {
  
- #define DEFINE_RB_INSDEL_FUNCS2(name, type, keyfld, cmpexp, keyexp, nodefld) \
--static void insert_##name(struct rb_root *root, type *t)		\
-+static bool __insert_##name(struct rb_root *root, type *t)		\
- {									\
- 	struct rb_node **n = &root->rb_node;				\
- 	struct rb_node *parent = NULL;					\
-@@ -206,11 +206,17 @@ static void insert_##name(struct rb_root *root, type *t)		\
- 		else if (cmp > 0)					\
- 			n = &(*n)->rb_right;				\
- 		else							\
--			BUG();						\
-+			return false;					\
- 	}								\
- 									\
- 	rb_link_node(&t->nodefld, parent, n);				\
- 	rb_insert_color(&t->nodefld, root);				\
-+	return true;							\
-+}									\
-+static void __maybe_unused insert_##name(struct rb_root *root, type *t)	\
-+{									\
-+	if (!__insert_##name(root, t))					\
-+		BUG();							\
- }									\
- static void erase_##name(struct rb_root *root, type *t)			\
- {									\
+ 	__u32 *choose_tries;
+ #else
++	/* device/bucket type id -> type name (CrushWrapper::type_map) */
++	struct rb_root type_names;
++
++	/* device/bucket id -> name (CrushWrapper::name_map) */
++	struct rb_root names;
++
+ 	/* CrushWrapper::choose_args */
+ 	struct rb_root choose_args;
+ #endif
+diff --git a/net/ceph/crush/crush.c b/net/ceph/crush/crush.c
+index 3d70244bc1b6..2e6b29fa8518 100644
+--- a/net/ceph/crush/crush.c
++++ b/net/ceph/crush/crush.c
+@@ -2,6 +2,7 @@
+ #ifdef __KERNEL__
+ # include <linux/slab.h>
+ # include <linux/crush/crush.h>
++void clear_crush_names(struct rb_root *root);
+ void clear_choose_args(struct crush_map *c);
+ #else
+ # include "crush_compat.h"
+@@ -130,6 +131,8 @@ void crush_destroy(struct crush_map *map)
+ #ifndef __KERNEL__
+ 	kfree(map->choose_tries);
+ #else
++	clear_crush_names(&map->type_names);
++	clear_crush_names(&map->names);
+ 	clear_choose_args(map);
+ #endif
+ 	kfree(map);
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 2a6e63a8edbe..5d00ce2b5339 100644
+index 5d00ce2b5339..e74130876d3a 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -636,48 +636,11 @@ DEFINE_RB_FUNCS2(pg_mapping, struct ceph_pg_mapping, pgid, ceph_pg_compare,
- /*
-  * rbtree of pg pool info
-  */
--static int __insert_pg_pool(struct rb_root *root, struct ceph_pg_pool_info *new)
--{
--	struct rb_node **p = &root->rb_node;
--	struct rb_node *parent = NULL;
--	struct ceph_pg_pool_info *pi = NULL;
--
--	while (*p) {
--		parent = *p;
--		pi = rb_entry(parent, struct ceph_pg_pool_info, node);
--		if (new->id < pi->id)
--			p = &(*p)->rb_left;
--		else if (new->id > pi->id)
--			p = &(*p)->rb_right;
--		else
--			return -EEXIST;
--	}
--
--	rb_link_node(&new->node, parent, p);
--	rb_insert_color(&new->node, root);
--	return 0;
--}
--
--static struct ceph_pg_pool_info *__lookup_pg_pool(struct rb_root *root, u64 id)
--{
--	struct ceph_pg_pool_info *pi;
--	struct rb_node *n = root->rb_node;
--
--	while (n) {
--		pi = rb_entry(n, struct ceph_pg_pool_info, node);
--		if (id < pi->id)
--			n = n->rb_left;
--		else if (id > pi->id)
--			n = n->rb_right;
--		else
--			return pi;
--	}
--	return NULL;
--}
-+DEFINE_RB_FUNCS(pg_pool, struct ceph_pg_pool_info, id, node)
+@@ -138,6 +138,79 @@ static int crush_decode_straw2_bucket(void **p, void *end,
+ 	return -EINVAL;
+ }
  
- struct ceph_pg_pool_info *ceph_pg_pool_by_id(struct ceph_osdmap *map, u64 id)
++struct crush_name_node {
++	struct rb_node cn_node;
++	int cn_id;
++	char cn_name[];
++};
++
++static struct crush_name_node *alloc_crush_name(size_t name_len)
++{
++	struct crush_name_node *cn;
++
++	cn = kmalloc(sizeof(*cn) + name_len + 1, GFP_NOIO);
++	if (!cn)
++		return NULL;
++
++	RB_CLEAR_NODE(&cn->cn_node);
++	return cn;
++}
++
++static void free_crush_name(struct crush_name_node *cn)
++{
++	WARN_ON(!RB_EMPTY_NODE(&cn->cn_node));
++
++	kfree(cn);
++}
++
++DEFINE_RB_FUNCS(crush_name, struct crush_name_node, cn_id, cn_node)
++
++static int decode_crush_names(void **p, void *end, struct rb_root *root)
++{
++	u32 n;
++
++	ceph_decode_32_safe(p, end, n, e_inval);
++	while (n--) {
++		struct crush_name_node *cn;
++		int id;
++		u32 name_len;
++
++		ceph_decode_32_safe(p, end, id, e_inval);
++		ceph_decode_32_safe(p, end, name_len, e_inval);
++		ceph_decode_need(p, end, name_len, e_inval);
++
++		cn = alloc_crush_name(name_len);
++		if (!cn)
++			return -ENOMEM;
++
++		cn->cn_id = id;
++		memcpy(cn->cn_name, *p, name_len);
++		cn->cn_name[name_len] = '\0';
++		*p += name_len;
++
++		if (!__insert_crush_name(root, cn)) {
++			free_crush_name(cn);
++			return -EEXIST;
++		}
++	}
++
++	return 0;
++
++e_inval:
++	return -EINVAL;
++}
++
++void clear_crush_names(struct rb_root *root)
++{
++	while (!RB_EMPTY_ROOT(root)) {
++		struct crush_name_node *cn =
++		    rb_entry(rb_first(root), struct crush_name_node, cn_node);
++
++		erase_crush_name(root, cn);
++		free_crush_name(cn);
++	}
++}
++
+ static struct crush_choose_arg_map *alloc_choose_arg_map(void)
  {
--	return __lookup_pg_pool(&map->pg_pools, id);
-+	return lookup_pg_pool(&map->pg_pools, id);
- }
+ 	struct crush_choose_arg_map *arg_map;
+@@ -354,6 +427,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 	if (c == NULL)
+ 		return ERR_PTR(-ENOMEM);
  
- const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64 id)
-@@ -690,8 +653,7 @@ const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64 id)
- 	if (WARN_ON_ONCE(id > (u64) INT_MAX))
- 		return NULL;
++	c->type_names = RB_ROOT;
++	c->names = RB_ROOT;
+ 	c->choose_args = RB_ROOT;
  
--	pi = __lookup_pg_pool(&map->pg_pools, (int) id);
--
-+	pi = lookup_pg_pool(&map->pg_pools, id);
- 	return pi ? pi->name : NULL;
- }
- EXPORT_SYMBOL(ceph_pg_pool_name_by_id);
-@@ -714,14 +676,14 @@ u64 ceph_pg_pool_flags(struct ceph_osdmap *map, u64 id)
- {
- 	struct ceph_pg_pool_info *pi;
- 
--	pi = __lookup_pg_pool(&map->pg_pools, id);
-+	pi = lookup_pg_pool(&map->pg_pools, id);
- 	return pi ? pi->flags : 0;
- }
- EXPORT_SYMBOL(ceph_pg_pool_flags);
- 
- static void __remove_pg_pool(struct rb_root *root, struct ceph_pg_pool_info *pi)
- {
--	rb_erase(&pi->node, root);
-+	erase_pg_pool(root, pi);
- 	kfree(pi->name);
- 	kfree(pi);
- }
-@@ -903,7 +865,7 @@ static int decode_pool_names(void **p, void *end, struct ceph_osdmap *map)
- 		ceph_decode_32_safe(p, end, len, bad);
- 		dout("  pool %llu len %d\n", pool, len);
- 		ceph_decode_need(p, end, len, bad);
--		pi = __lookup_pg_pool(&map->pg_pools, pool);
-+		pi = lookup_pg_pool(&map->pg_pools, pool);
- 		if (pi) {
- 			char *name = kstrndup(*p, len, GFP_NOFS);
- 
-@@ -1154,18 +1116,18 @@ static int __decode_pools(void **p, void *end, struct ceph_osdmap *map,
- 
- 		ceph_decode_64_safe(p, end, pool, e_inval);
- 
--		pi = __lookup_pg_pool(&map->pg_pools, pool);
-+		pi = lookup_pg_pool(&map->pg_pools, pool);
- 		if (!incremental || !pi) {
- 			pi = kzalloc(sizeof(*pi), GFP_NOFS);
- 			if (!pi)
- 				return -ENOMEM;
- 
-+			RB_CLEAR_NODE(&pi->node);
- 			pi->id = pool;
- 
--			ret = __insert_pg_pool(&map->pg_pools, pi);
--			if (ret) {
-+			if (!__insert_pg_pool(&map->pg_pools, pi)) {
- 				kfree(pi);
--				return ret;
-+				return -EEXIST;
- 			}
+         /* set tunables to default values */
+@@ -510,8 +585,14 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
  		}
- 
-@@ -1829,7 +1791,7 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
- 		struct ceph_pg_pool_info *pi;
- 
- 		ceph_decode_64_safe(p, end, pool, e_inval);
--		pi = __lookup_pg_pool(&map->pg_pools, pool);
-+		pi = lookup_pg_pool(&map->pg_pools, pool);
- 		if (pi)
- 			__remove_pg_pool(&map->pg_pools, pi);
  	}
+ 
+-	ceph_decode_skip_map(p, end, 32, string, bad); /* type_map */
+-	ceph_decode_skip_map(p, end, 32, string, bad); /* name_map */
++	err = decode_crush_names(p, end, &c->type_names);
++	if (err)
++		goto fail;
++
++	err = decode_crush_names(p, end, &c->names);
++	if (err)
++		goto fail;
++
+ 	ceph_decode_skip_map(p, end, 32, string, bad); /* rule_name_map */
+ 
+         /* tunables */
 -- 
 2.19.2
