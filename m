@@ -1,183 +1,311 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH v2 2/5] libceph: decode CRUSH device/bucket types and names
-Date: Sat, 30 May 2020 17:34:36 +0200
-Message-ID: <20200530153439.31312-3-idryomov@gmail.com>
+Subject: [PATCH v2 3/5] libceph: crush_location infrastructure
+Date: Sat, 30 May 2020 17:34:37 +0200
+Message-ID: <20200530153439.31312-4-idryomov@gmail.com>
 References: <20200530153439.31312-1-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48998 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729038AbgE3Pem (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 30 May 2020 11:34:42 -0400
-Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FC4DC03E969
-        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:42 -0700 (PDT)
-Received: by mail-wm1-x341.google.com with SMTP id f185so7095783wmf.3
-        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:42 -0700 (PDT)
+        with ESMTP id S1729038AbgE3Peo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 30 May 2020 11:34:44 -0400
+Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69157C03E969
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:43 -0700 (PDT)
+Received: by mail-wm1-x342.google.com with SMTP id k26so7088519wmi.4
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2020 08:34:43 -0700 (PDT)
 In-Reply-To: <20200530153439.31312-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Jeff Layton <jlayton@kernel.org>
 
-These would be matched with the provided client location to calculate
-the locality value.
+Allow expressing client's location in terms of CRUSH hierarchy as
+a set of (bucket type name, bucket name) pairs.  The userspace syntax
+"crush_location = key1=value1 key2=value2" is incompatible with mount
+options and needed adaptation.  Key-value pairs are separated by '|'
+and we use ':' instead of '=' to separate keys from values.  So for:
+
+  crush_location = host=foo rack=bar
+
+one would write:
+
+  crush_location=host:foo|rack:bar
+
+As in userspace, "multipath" locations are supported, so indicating
+locality for parallel hierarchies is possible:
+
+  crush_location=rack:foo1|rack:foo2|datacenter:bar
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/crush/crush.h |  6 +++
- net/ceph/crush/crush.c      |  3 ++
- net/ceph/osdmap.c           | 85 ++++++++++++++++++++++++++++++++++++-
- 3 files changed, 92 insertions(+), 2 deletions(-)
+ include/linux/ceph/libceph.h |   1 +
+ include/linux/ceph/osdmap.h  |  16 ++++-
+ net/ceph/ceph_common.c       |  36 +++++++++++
+ net/ceph/osdmap.c            | 116 +++++++++++++++++++++++++++++++++++
+ 4 files changed, 168 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 38b0e4d50ed9..29b0de2e202b 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -301,6 +301,12 @@ struct crush_map {
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 4b5a47bcaba4..4733959f1ec7 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -64,6 +64,7 @@ struct ceph_options {
+ 	int num_mon;
+ 	char *name;
+ 	struct ceph_crypto_key *key;
++	struct rb_root crush_locs;
+ };
  
- 	__u32 *choose_tries;
- #else
-+	/* device/bucket type id -> type name (CrushWrapper::type_map) */
-+	struct rb_root type_names;
-+
-+	/* device/bucket id -> name (CrushWrapper::name_map) */
-+	struct rb_root names;
-+
- 	/* CrushWrapper::choose_args */
- 	struct rb_root choose_args;
- #endif
-diff --git a/net/ceph/crush/crush.c b/net/ceph/crush/crush.c
-index 3d70244bc1b6..2e6b29fa8518 100644
---- a/net/ceph/crush/crush.c
-+++ b/net/ceph/crush/crush.c
-@@ -2,6 +2,7 @@
- #ifdef __KERNEL__
- # include <linux/slab.h>
- # include <linux/crush/crush.h>
-+void clear_crush_names(struct rb_root *root);
- void clear_choose_args(struct crush_map *c);
- #else
- # include "crush_compat.h"
-@@ -130,6 +131,8 @@ void crush_destroy(struct crush_map *map)
- #ifndef __KERNEL__
- 	kfree(map->choose_tries);
- #else
-+	clear_crush_names(&map->type_names);
-+	clear_crush_names(&map->names);
- 	clear_choose_args(map);
- #endif
- 	kfree(map);
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 5d00ce2b5339..e74130876d3a 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -138,6 +138,79 @@ static int crush_decode_straw2_bucket(void **p, void *end,
- 	return -EINVAL;
- }
+ /*
+diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+index 5e601975745f..8c9d18cc9f45 100644
+--- a/include/linux/ceph/osdmap.h
++++ b/include/linux/ceph/osdmap.h
+@@ -302,9 +302,23 @@ bool ceph_pg_to_primary_shard(struct ceph_osdmap *osdmap,
+ int ceph_pg_to_acting_primary(struct ceph_osdmap *osdmap,
+ 			      const struct ceph_pg *raw_pgid);
  
-+struct crush_name_node {
-+	struct rb_node cn_node;
-+	int cn_id;
-+	char cn_name[];
++struct crush_loc {
++	char *cl_type_name;
++	char *cl_name;
 +};
 +
-+static struct crush_name_node *alloc_crush_name(size_t name_len)
-+{
-+	struct crush_name_node *cn;
++struct crush_loc_node {
++	struct rb_node cl_node;
++	struct crush_loc cl_loc;  /* pointers into cl_data */
++	char cl_data[];
++};
 +
-+	cn = kmalloc(sizeof(*cn) + name_len + 1, GFP_NOIO);
-+	if (!cn)
-+		return NULL;
++int ceph_parse_crush_location(char *crush_location, struct rb_root *locs);
++int ceph_compare_crush_locs(struct rb_root *locs1, struct rb_root *locs2);
++void ceph_clear_crush_locs(struct rb_root *locs);
 +
-+	RB_CLEAR_NODE(&cn->cn_node);
-+	return cn;
-+}
-+
-+static void free_crush_name(struct crush_name_node *cn)
-+{
-+	WARN_ON(!RB_EMPTY_NODE(&cn->cn_node));
-+
-+	kfree(cn);
-+}
-+
-+DEFINE_RB_FUNCS(crush_name, struct crush_name_node, cn_id, cn_node)
-+
-+static int decode_crush_names(void **p, void *end, struct rb_root *root)
-+{
-+	u32 n;
-+
-+	ceph_decode_32_safe(p, end, n, e_inval);
-+	while (n--) {
-+		struct crush_name_node *cn;
-+		int id;
-+		u32 name_len;
-+
-+		ceph_decode_32_safe(p, end, id, e_inval);
-+		ceph_decode_32_safe(p, end, name_len, e_inval);
-+		ceph_decode_need(p, end, name_len, e_inval);
-+
-+		cn = alloc_crush_name(name_len);
-+		if (!cn)
-+			return -ENOMEM;
-+
-+		cn->cn_id = id;
-+		memcpy(cn->cn_name, *p, name_len);
-+		cn->cn_name[name_len] = '\0';
-+		*p += name_len;
-+
-+		if (!__insert_crush_name(root, cn)) {
-+			free_crush_name(cn);
-+			return -EEXIST;
-+		}
-+	}
-+
-+	return 0;
-+
-+e_inval:
-+	return -EINVAL;
-+}
-+
-+void clear_crush_names(struct rb_root *root)
-+{
-+	while (!RB_EMPTY_ROOT(root)) {
-+		struct crush_name_node *cn =
-+		    rb_entry(rb_first(root), struct crush_name_node, cn_node);
-+
-+		erase_crush_name(root, cn);
-+		free_crush_name(cn);
-+	}
-+}
-+
- static struct crush_choose_arg_map *alloc_choose_arg_map(void)
- {
- 	struct crush_choose_arg_map *arg_map;
-@@ -354,6 +427,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 	if (c == NULL)
- 		return ERR_PTR(-ENOMEM);
- 
-+	c->type_names = RB_ROOT;
-+	c->names = RB_ROOT;
- 	c->choose_args = RB_ROOT;
- 
-         /* set tunables to default values */
-@@ -510,8 +585,14 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ extern struct ceph_pg_pool_info *ceph_pg_pool_by_id(struct ceph_osdmap *map,
+ 						    u64 id);
+-
+ extern const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64 id);
+ extern int ceph_pg_poolid_by_name(struct ceph_osdmap *map, const char *name);
+ u64 ceph_pg_pool_flags(struct ceph_osdmap *map, u64 id);
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index a0e97f6c1072..44770b60bc38 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -176,6 +176,10 @@ int ceph_compare_options(struct ceph_options *new_opt,
  		}
  	}
  
--	ceph_decode_skip_map(p, end, 32, string, bad); /* type_map */
--	ceph_decode_skip_map(p, end, 32, string, bad); /* name_map */
-+	err = decode_crush_names(p, end, &c->type_names);
-+	if (err)
-+		goto fail;
++	ret = ceph_compare_crush_locs(&opt1->crush_locs, &opt2->crush_locs);
++	if (ret)
++		return ret;
 +
-+	err = decode_crush_names(p, end, &c->names);
-+	if (err)
-+		goto fail;
-+
- 	ceph_decode_skip_map(p, end, 32, string, bad); /* rule_name_map */
+ 	/* any matching mon ip implies a match */
+ 	for (i = 0; i < opt1->num_mon; i++) {
+ 		if (ceph_monmap_contains(client->monc.monmap,
+@@ -260,6 +264,7 @@ enum {
+ 	Opt_secret,
+ 	Opt_key,
+ 	Opt_ip,
++	Opt_crush_location,
+ 	/* string args above */
+ 	Opt_share,
+ 	Opt_crc,
+@@ -274,6 +279,7 @@ static const struct fs_parameter_spec ceph_parameters[] = {
+ 	fsparam_flag_no ("cephx_require_signatures",	Opt_cephx_require_signatures),
+ 	fsparam_flag_no ("cephx_sign_messages",		Opt_cephx_sign_messages),
+ 	fsparam_flag_no ("crc",				Opt_crc),
++	fsparam_string	("crush_location",		Opt_crush_location),
+ 	fsparam_string	("fsid",			Opt_fsid),
+ 	fsparam_string	("ip",				Opt_ip),
+ 	fsparam_string	("key",				Opt_key),
+@@ -298,6 +304,7 @@ struct ceph_options *ceph_alloc_options(void)
+ 	if (!opt)
+ 		return NULL;
  
-         /* tunables */
++	opt->crush_locs = RB_ROOT;
+ 	opt->mon_addr = kcalloc(CEPH_MAX_MON, sizeof(*opt->mon_addr),
+ 				GFP_KERNEL);
+ 	if (!opt->mon_addr) {
+@@ -320,6 +327,7 @@ void ceph_destroy_options(struct ceph_options *opt)
+ 	if (!opt)
+ 		return;
+ 
++	ceph_clear_crush_locs(&opt->crush_locs);
+ 	kfree(opt->name);
+ 	if (opt->key) {
+ 		ceph_crypto_key_destroy(opt->key);
+@@ -454,6 +462,16 @@ int ceph_parse_param(struct fs_parameter *param, struct ceph_options *opt,
+ 		if (!opt->key)
+ 			return -ENOMEM;
+ 		return get_secret(opt->key, param->string, &log);
++	case Opt_crush_location:
++		ceph_clear_crush_locs(&opt->crush_locs);
++		err = ceph_parse_crush_location(param->string,
++						&opt->crush_locs);
++		if (err) {
++			error_plog(&log, "Failed to parse CRUSH location: %d",
++				   err);
++			return err;
++		}
++		break;
+ 
+ 	case Opt_osdtimeout:
+ 		warn_plog(&log, "Ignoring osdtimeout");
+@@ -536,6 +554,7 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client,
+ {
+ 	struct ceph_options *opt = client->options;
+ 	size_t pos = m->count;
++	struct rb_node *n;
+ 
+ 	if (opt->name) {
+ 		seq_puts(m, "name=");
+@@ -545,6 +564,23 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client,
+ 	if (opt->key)
+ 		seq_puts(m, "secret=<hidden>,");
+ 
++	if (!RB_EMPTY_ROOT(&opt->crush_locs)) {
++		seq_puts(m, "crush_location=");
++		for (n = rb_first(&opt->crush_locs); ; ) {
++			struct crush_loc_node *loc =
++			    rb_entry(n, struct crush_loc_node, cl_node);
++
++			seq_printf(m, "%s:%s", loc->cl_loc.cl_type_name,
++				   loc->cl_loc.cl_name);
++			n = rb_next(n);
++			if (!n)
++				break;
++
++			seq_putc(m, '|');
++		}
++		seq_putc(m, ',');
++	}
++
+ 	if (opt->flags & CEPH_OPT_FSID)
+ 		seq_printf(m, "fsid=%pU,", &opt->fsid);
+ 	if (opt->flags & CEPH_OPT_NOSHARE)
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index e74130876d3a..4b81334e9e5b 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -2715,3 +2715,119 @@ int ceph_pg_to_acting_primary(struct ceph_osdmap *osdmap,
+ 	return acting.primary;
+ }
+ EXPORT_SYMBOL(ceph_pg_to_acting_primary);
++
++static struct crush_loc_node *alloc_crush_loc(size_t type_name_len,
++					      size_t name_len)
++{
++	struct crush_loc_node *loc;
++
++	loc = kmalloc(sizeof(*loc) + type_name_len + name_len + 2, GFP_NOIO);
++	if (!loc)
++		return NULL;
++
++	RB_CLEAR_NODE(&loc->cl_node);
++	return loc;
++}
++
++static void free_crush_loc(struct crush_loc_node *loc)
++{
++	WARN_ON(!RB_EMPTY_NODE(&loc->cl_node));
++
++	kfree(loc);
++}
++
++static int crush_loc_compare(const struct crush_loc *loc1,
++			     const struct crush_loc *loc2)
++{
++	return strcmp(loc1->cl_type_name, loc2->cl_type_name) ?:
++	       strcmp(loc1->cl_name, loc2->cl_name);
++}
++
++DEFINE_RB_FUNCS2(crush_loc, struct crush_loc_node, cl_loc, crush_loc_compare,
++		 RB_BYPTR, const struct crush_loc *, cl_node)
++
++/*
++ * Parses a set of <bucket type name>':'<bucket name> pairs separated
++ * by '|', e.g. "rack:foo1|rack:foo2|datacenter:bar".
++ *
++ * Note that @crush_location is modified by strsep().
++ */
++int ceph_parse_crush_location(char *crush_location, struct rb_root *locs)
++{
++	struct crush_loc_node *loc;
++	const char *type_name, *name, *colon;
++	size_t type_name_len, name_len;
++
++	dout("%s '%s'\n", __func__, crush_location);
++	while ((type_name = strsep(&crush_location, "|"))) {
++		colon = strchr(type_name, ':');
++		if (!colon)
++			return -EINVAL;
++
++		type_name_len = colon - type_name;
++		if (type_name_len == 0)
++			return -EINVAL;
++
++		name = colon + 1;
++		name_len = strlen(name);
++		if (name_len == 0)
++			return -EINVAL;
++
++		loc = alloc_crush_loc(type_name_len, name_len);
++		if (!loc)
++			return -ENOMEM;
++
++		loc->cl_loc.cl_type_name = loc->cl_data;
++		memcpy(loc->cl_loc.cl_type_name, type_name, type_name_len);
++		loc->cl_loc.cl_type_name[type_name_len] = '\0';
++
++		loc->cl_loc.cl_name = loc->cl_data + type_name_len + 1;
++		memcpy(loc->cl_loc.cl_name, name, name_len);
++		loc->cl_loc.cl_name[name_len] = '\0';
++
++		if (!__insert_crush_loc(locs, loc)) {
++			free_crush_loc(loc);
++			return -EEXIST;
++		}
++
++		dout("%s type_name '%s' name '%s'\n", __func__,
++		     loc->cl_loc.cl_type_name, loc->cl_loc.cl_name);
++	}
++
++	return 0;
++}
++
++int ceph_compare_crush_locs(struct rb_root *locs1, struct rb_root *locs2)
++{
++	struct rb_node *n1 = rb_first(locs1);
++	struct rb_node *n2 = rb_first(locs2);
++	int ret;
++
++	for ( ; n1 && n2; n1 = rb_next(n1), n2 = rb_next(n2)) {
++		struct crush_loc_node *loc1 =
++		    rb_entry(n1, struct crush_loc_node, cl_node);
++		struct crush_loc_node *loc2 =
++		    rb_entry(n2, struct crush_loc_node, cl_node);
++
++		ret = crush_loc_compare(&loc1->cl_loc, &loc2->cl_loc);
++		if (ret)
++			return ret;
++	}
++
++	if (!n1 && n2)
++		return -1;
++	if (n1 && !n2)
++		return 1;
++	return 0;
++}
++
++void ceph_clear_crush_locs(struct rb_root *locs)
++{
++	while (!RB_EMPTY_ROOT(locs)) {
++		struct crush_loc_node *loc =
++		    rb_entry(rb_first(locs), struct crush_loc_node, cl_node);
++
++		erase_crush_loc(locs, loc);
++		free_crush_loc(loc);
++	}
++}
 -- 
 2.19.2
