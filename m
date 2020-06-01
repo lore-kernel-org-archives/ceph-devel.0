@@ -1,44 +1,188 @@
-From: ''Tayeb Souami'' <yoshi@bestprofit-futures.co.id>
-Subject: =?utf-8?q?Wohlt=C3=A4tigkeitsspende_von_2=2E000=2E000_Millionen_Euro?=
-Date: Mon, 01 Jun 2020 02:39:29 +0200
-Message-ID: <20200601003937.7229F525103@mx.bestprofit-futures.co.id>
-Reply-To: Tayebsouam.spende@gmail.com
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH v2 2/5] libceph: decode CRUSH device/bucket types and
+ names
+Date: Mon, 01 Jun 2020 06:49:41 -0400
+Message-ID: <ce644470a74c0d7865ea92cdf29c13dbe609fca9.camel@kernel.org>
+References: <20200530153439.31312-1-idryomov@gmail.com>
+         <20200530153439.31312-3-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hs-162.6.buanalintas.co.id ([223.165.6.162]:58384 "EHLO
-        mx.bestprofit-futures.co.id" rhost-flags-OK-FAIL-OK-OK)
-        by vger.kernel.org with ESMTP id S1725283AbgFAE36 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2020 00:29:58 -0400
-Content-Description: Mail message body
+Received: from mail.kernel.org ([198.145.29.99]:57326 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725886AbgFAKtn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 1 Jun 2020 06:49:43 -0400
+In-Reply-To: <20200530153439.31312-3-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <yoshi@bestprofit-futures.co.id>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-Lieber Freund,
+On Sat, 2020-05-30 at 17:34 +0200, Ilya Dryomov wrote:
+> These would be matched with the provided client location to calculate
+> the locality value.
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  include/linux/crush/crush.h |  6 +++
+>  net/ceph/crush/crush.c      |  3 ++
+>  net/ceph/osdmap.c           | 85 ++++++++++++++++++++++++++++++++++++-
+>  3 files changed, 92 insertions(+), 2 deletions(-)
+> 
+> diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+> index 38b0e4d50ed9..29b0de2e202b 100644
+> --- a/include/linux/crush/crush.h
+> +++ b/include/linux/crush/crush.h
+> @@ -301,6 +301,12 @@ struct crush_map {
+>  
+>  	__u32 *choose_tries;
+>  #else
+> +	/* device/bucket type id -> type name (CrushWrapper::type_map) */
+> +	struct rb_root type_names;
+> +
+> +	/* device/bucket id -> name (CrushWrapper::name_map) */
+> +	struct rb_root names;
+> +
 
-Ich bin Herr Tayeb Souami, New Jersey, Vereinigte Staaten von Amerika, der =
-Mega-Gewinner von $ 315million In Mega Millions Jackpot, spende ich an 5 zu=
-f=C3=A4llige Personen, wenn Sie diese E-Mail erhalten, dann wurde Ihre E-Ma=
-il nach einem Spinball ausgew=C3=A4hlt.Ich habe den gr=C3=B6=C3=9Ften Teil =
-meines Verm=C3=B6gens auf eine Reihe von Wohlt=C3=A4tigkeitsorganisationen =
-und Organisationen verteilt.Ich habe mich freiwillig dazu entschieden, die =
-Summe von =E2=82=AC 2.000.000,00 an Sie als eine der ausgew=C3=A4hlten 5 zu=
- spenden, um meine Gewinne zu =C3=BCberpr=C3=BCfen, sehen Sie bitte meine Y=
-ou Tube Seite unten.
+I'm not as familiar with the OSD client-side code, but I don't see any
+mention of locking here. What protects these new rbtrees? From reading
+over the code, I'd assume the osdc->lock, but it might be nice to have a
+comment here that makes that clear.
 
-UHR MICH HIER: https://www.youtube.com/watch?v=3DZ6ui8ZDQ6Ks
+>  	/* CrushWrapper::choose_args */
+>  	struct rb_root choose_args;
+>  #endif
+> diff --git a/net/ceph/crush/crush.c b/net/ceph/crush/crush.c
+> index 3d70244bc1b6..2e6b29fa8518 100644
+> --- a/net/ceph/crush/crush.c
+> +++ b/net/ceph/crush/crush.c
+> @@ -2,6 +2,7 @@
+>  #ifdef __KERNEL__
+>  # include <linux/slab.h>
+>  # include <linux/crush/crush.h>
+> +void clear_crush_names(struct rb_root *root);
+>  void clear_choose_args(struct crush_map *c);
+>  #else
+>  # include "crush_compat.h"
+> @@ -130,6 +131,8 @@ void crush_destroy(struct crush_map *map)
+>  #ifndef __KERNEL__
+>  	kfree(map->choose_tries);
+>  #else
+> +	clear_crush_names(&map->type_names);
+> +	clear_crush_names(&map->names);
+>  	clear_choose_args(map);
+>  #endif
+>  	kfree(map);
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 5d00ce2b5339..e74130876d3a 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -138,6 +138,79 @@ static int crush_decode_straw2_bucket(void **p, void *end,
+>  	return -EINVAL;
+>  }
+>  
+> +struct crush_name_node {
+> +	struct rb_node cn_node;
+> +	int cn_id;
+> +	char cn_name[];
+> +};
+> +
+> +static struct crush_name_node *alloc_crush_name(size_t name_len)
+> +{
+> +	struct crush_name_node *cn;
+> +
+> +	cn = kmalloc(sizeof(*cn) + name_len + 1, GFP_NOIO);
+> +	if (!cn)
+> +		return NULL;
+> +
+> +	RB_CLEAR_NODE(&cn->cn_node);
+> +	return cn;
+> +}
+> +
+> +static void free_crush_name(struct crush_name_node *cn)
+> +{
+> +	WARN_ON(!RB_EMPTY_NODE(&cn->cn_node));
+> +
+> +	kfree(cn);
+> +}
+> +
+> +DEFINE_RB_FUNCS(crush_name, struct crush_name_node, cn_id, cn_node)
+> +
+> +static int decode_crush_names(void **p, void *end, struct rb_root *root)
+> +{
+> +	u32 n;
+> +
+> +	ceph_decode_32_safe(p, end, n, e_inval);
+> +	while (n--) {
+> +		struct crush_name_node *cn;
+> +		int id;
+> +		u32 name_len;
+> +
+> +		ceph_decode_32_safe(p, end, id, e_inval);
+> +		ceph_decode_32_safe(p, end, name_len, e_inval);
+> +		ceph_decode_need(p, end, name_len, e_inval);
+> +
+> +		cn = alloc_crush_name(name_len);
+> +		if (!cn)
+> +			return -ENOMEM;
+> +
+> +		cn->cn_id = id;
+> +		memcpy(cn->cn_name, *p, name_len);
+> +		cn->cn_name[name_len] = '\0';
+> +		*p += name_len;
+> +
+> +		if (!__insert_crush_name(root, cn)) {
+> +			free_crush_name(cn);
+> +			return -EEXIST;
+> +		}
+> +	}
+> +
+> +	return 0;
+> +
+> +e_inval:
+> +	return -EINVAL;
+> +}
+> +
+> +void clear_crush_names(struct rb_root *root)
+> +{
+> +	while (!RB_EMPTY_ROOT(root)) {
+> +		struct crush_name_node *cn =
+> +		    rb_entry(rb_first(root), struct crush_name_node, cn_node);
+> +
+> +		erase_crush_name(root, cn);
+> +		free_crush_name(cn);
+> +	}
+> +}
+> +
+>  static struct crush_choose_arg_map *alloc_choose_arg_map(void)
+>  {
+>  	struct crush_choose_arg_map *arg_map;
+> @@ -354,6 +427,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+>  	if (c == NULL)
+>  		return ERR_PTR(-ENOMEM);
+>  
+> +	c->type_names = RB_ROOT;
+> +	c->names = RB_ROOT;
+>  	c->choose_args = RB_ROOT;
+>  
+>          /* set tunables to default values */
+> @@ -510,8 +585,14 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+>  		}
+>  	}
+>  
+> -	ceph_decode_skip_map(p, end, 32, string, bad); /* type_map */
+> -	ceph_decode_skip_map(p, end, 32, string, bad); /* name_map */
+> +	err = decode_crush_names(p, end, &c->type_names);
+> +	if (err)
+> +		goto fail;
+> +
+> +	err = decode_crush_names(p, end, &c->names);
+> +	if (err)
+> +		goto fail;
+> +
+>  	ceph_decode_skip_map(p, end, 32, string, bad); /* rule_name_map */
+>  
+>          /* tunables */
 
-
-Das ist dein Spendencode: [TS530342018]
-
-
-Antworten Sie mit dem SPENDE-CODE an diese
-
- E-Mail:Tayebsouam.spende@gmail.com
-
-Ich hoffe, Sie und Ihre Familie gl=C3=BCcklich zu machen.
-
-Gr=C3=BC=C3=9Fe
-Herr Tayeb Souami
+-- 
+Jeff Layton <jlayton@kernel.org>
