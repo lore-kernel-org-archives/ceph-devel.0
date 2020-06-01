@@ -1,46 +1,43 @@
-From: "Mr.Mahmoud Abbas" <fredalbert62@gmail.com>
-Subject: To You.
-Date: Mon, 1 Jun 2020 16:47:13 +0100
-Message-ID: <CABajoUJnXDVi=sF5BKvVTHFJ9e_qrd+0-WrAEkxbm+7_tP=+kw@mail.gmail.com>
-Reply-To: mr.mahmouda@yahoo.com
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 0/2] rbd: compression_hint option
+Date: Mon,  1 Jun 2020 21:58:24 +0200
+Message-ID: <20200601195826.17159-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44086 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55092 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726075AbgFAPrP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2020 11:47:15 -0400
-Received: from mail-ot1-x343.google.com (mail-ot1-x343.google.com [IPv6:2607:f8b0:4864:20::343])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEC8FC05BD43
-        for <ceph-devel@vger.kernel.org>; Mon,  1 Jun 2020 08:47:15 -0700 (PDT)
-Received: by mail-ot1-x343.google.com with SMTP id b18so8363592oti.1
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2020 08:47:15 -0700 (PDT)
+        with ESMTP id S1726176AbgFAT6h (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2020 15:58:37 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48124C061A0E
+        for <ceph-devel@vger.kernel.org>; Mon,  1 Jun 2020 12:58:37 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id q25so777705wmj.0
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2020 12:58:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Jason Dillaman <jdillama@redhat.com>
 
-Dear Friend,
+Hello,
 
-I am Mr.Mahmoud Abbas, the accountant personal confident to Dr.S=C3=B2ng
-W=C3=A1ng who died together with his wife Dr. Mrs.Lee W=C3=A1ng in a plane =
-crash
-on the 1st Oct. 2003 on their way to attend wedding in Boston. Dr.S=C3=B2ng
-W=C3=A1ng, is an Chinese, a physician and industrialist, he died without
-having any beneficiary to his assets including his account here in
-Burkina Faso which he opened in one of the Bank in the year 2000 as
-his personal savings for the purpose of expansion and development of
-his company before his untimely death in 2003.
+This adds support for RADOS compressible/incompressible allocation
+hints, available since Kraken.
 
-The amount involved is (USD 10,500,000.00) Ten Million Five Hundred
-Thousand USD, no other person knows about this account, I am
-contacting you for us to transfer this funds to your account as the
-beneficiary,) but I don't know any foreigner, I am only contacting you
-as a foreigner because this money can not be approved to a local
-person here.
+Thanks,
 
-Reply urgently so that I will inform you the next step to take urgently.
-Sincerely,
+                Ilya
 
-Mr.Mahmoud Abbas.
 
-Reply to this e-mail addess:mr.mahmouda@yahoo.com
+Ilya Dryomov (2):
+  libceph: support for alloc hint flags
+  rbd: compression_hint option
+
+ drivers/block/rbd.c             | 44 ++++++++++++++++++++++++++++++++-
+ include/linux/ceph/osd_client.h |  4 ++-
+ include/linux/ceph/rados.h      | 14 +++++++++++
+ net/ceph/osd_client.c           |  8 +++++-
+ 4 files changed, 67 insertions(+), 3 deletions(-)
+
+-- 
+2.19.2
