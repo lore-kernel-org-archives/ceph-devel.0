@@ -1,164 +1,77 @@
-From: Dongsheng Yang <dongsheng.yang@easystack.cn>
-Subject: Re: [PATCH 2/2] rbd: compression_hint option
-Date: Tue, 2 Jun 2020 18:52:45 +0800
-Message-ID: <a6acec52-91b8-89d6-0faf-32db16536742@easystack.cn>
-References: <20200601195826.17159-1-idryomov@gmail.com>
- <20200601195826.17159-3-idryomov@gmail.com>
- <e3446fba-65e9-89b4-9687-6735f6935196@easystack.cn>
- <CAOi1vP9yu=xTJ-Oec=M-g0C0RKzb_oZ9DxjLDfmoqeNhyVpwHg@mail.gmail.com>
- <f5d1cc3a-935d-542d-c6ac-29e698ef1b1f@easystack.cn>
- <CAOi1vP-7qgEDQSE+0050_uH=fcUbtBGQurk3nsGVyYJMbeiKaA@mail.gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [ceph-client:testing 9/30] include/linux/spinlock.h:353:9:
+ sparse: sparse: context imbalance in 'ceph_handle_caps' - unexpected unlock
+Date: Tue, 02 Jun 2020 09:51:32 -0400
+Message-ID: <c66e1eb422662fabc10afed7d175f65067fec1c1.camel@kernel.org>
+References: <202006021202.ox5WWela%lkp@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m9783.mail.qiye.163.com ([220.181.97.83]:64008 "EHLO
-        m9783.mail.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726110AbgFBKwt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jun 2020 06:52:49 -0400
-In-Reply-To: <CAOi1vP-7qgEDQSE+0050_uH=fcUbtBGQurk3nsGVyYJMbeiKaA@mail.gmail.com>
+Received: from mail.kernel.org ([198.145.29.99]:51604 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725940AbgFBNve (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 2 Jun 2020 09:51:34 -0400
+In-Reply-To: <202006021202.ox5WWela%lkp@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Jason Dillaman <jdillama@redhat.com>
+To: kbuild test robot <lkp@intel.com>
+Cc: kbuild-all@lists.01.org, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
 
+On Tue, 2020-06-02 at 12:38 +0800, kbuild test robot wrote:
+> tree:   https://github.com/ceph/ceph-client.git testing
+> head:   9c4e2af200ffe80d2f917b75f92ab57f0a091a17
+> commit: 7833323363233c75fd8d10b5ceefbb9515cb3e32 [9/30] ceph: don't take i_ceph_lock in handle_cap_import
+> config: microblaze-randconfig-s031-20200602 (attached as .config)
+> compiler: microblaze-linux-gcc (GCC) 9.3.0
+> reproduce:
+>         # apt-get install sparse
+>         # sparse version: v0.6.1-243-gc100a7ab-dirty
+>         git checkout 7833323363233c75fd8d10b5ceefbb9515cb3e32
+>         # save the attached .config to linux build tree
+>         make W=1 C=1 ARCH=microblaze CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__'
+> 
+> If you fix the issue, kindly add following tag as appropriate
+> Reported-by: kbuild test robot <lkp@intel.com>
+> 
+> 
+> sparse warnings: (new ones prefixed by >>)
+> 
+>    fs/ceph/caps.c:3443:9: sparse: sparse: context imbalance in 'handle_cap_grant' - wrong count at exit
+> > > include/linux/spinlock.h:353:9: sparse: sparse: context imbalance in 'ceph_handle_caps' - unexpected unlock
+> 
+> vim +/ceph_handle_caps +353 include/linux/spinlock.h
+> 
+> de8f5e4f2dc1f0 Peter Zijlstra  2020-03-21  350  
+> 3490565b633c70 Denys Vlasenko  2015-07-13  351  static __always_inline void spin_lock(spinlock_t *lock)
+> c2f21ce2e31286 Thomas Gleixner 2009-12-02  352  {
+> c2f21ce2e31286 Thomas Gleixner 2009-12-02 @353  	raw_spin_lock(&lock->rlock);
+> c2f21ce2e31286 Thomas Gleixner 2009-12-02  354  }
+> c2f21ce2e31286 Thomas Gleixner 2009-12-02  355  
+> 
+> :::::: The code at line 353 was first introduced by commit
+> :::::: c2f21ce2e31286a0a32f8da0a7856e9ca1122ef3 locking: Implement new raw_spinlock
+> 
+> :::::: TO: Thomas Gleixner <tglx@linutronix.de>
+> :::::: CC: Thomas Gleixner <tglx@linutronix.de>
+> 
+> ---
+> 0-DAY CI Kernel Test Service, Intel Corporation
+> https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
 
-在 6/2/2020 5:59 PM, Ilya Dryomov 写道:
-> On Tue, Jun 2, 2020 at 11:06 AM Dongsheng Yang
-> <dongsheng.yang@easystack.cn> wrote:
->>
->> 在 6/2/2020 4:31 PM, Ilya Dryomov 写道:
->>> On Tue, Jun 2, 2020 at 4:34 AM Dongsheng Yang
->>> <dongsheng.yang@easystack.cn> wrote:
->>>> Hi Ilya,
->>>>
->>>> 在 6/2/2020 3:58 AM, Ilya Dryomov 写道:
->>>>> Allow hinting to bluestore if the data should/should not be compressed.
->>>>> The default is to not hint (compression_hint=none).
->>>>>
->>>>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->>>>> ---
->>>>>     drivers/block/rbd.c | 43 ++++++++++++++++++++++++++++++++++++++++++-
->>>>>     1 file changed, 42 insertions(+), 1 deletion(-)
->>>>>
->>>>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>>>> index b1cd41e671d1..e02089d550a4 100644
->>>>> --- a/drivers/block/rbd.c
->>>>> +++ b/drivers/block/rbd.c
->>>>> @@ -836,6 +836,7 @@ enum {
->>>>>         Opt_lock_timeout,
->>>>>         /* int args above */
->>>>>         Opt_pool_ns,
->>>>> +     Opt_compression_hint,
->>>>>         /* string args above */
->>>>>         Opt_read_only,
->>>>>         Opt_read_write,
->>>>> @@ -844,8 +845,23 @@ enum {
->>>>>         Opt_notrim,
->>>>>     };
->>>>>
->>>>> +enum {
->>>>> +     Opt_compression_hint_none,
->>>>> +     Opt_compression_hint_compressible,
->>>>> +     Opt_compression_hint_incompressible,
->>>>> +};
->>>>> +
->>>>> +static const struct constant_table rbd_param_compression_hint[] = {
->>>>> +     {"none",                Opt_compression_hint_none},
->>>>> +     {"compressible",        Opt_compression_hint_compressible},
->>>>> +     {"incompressible",      Opt_compression_hint_incompressible},
->>>>> +     {}
->>>>> +};
->>>>> +
->>>>>     static const struct fs_parameter_spec rbd_parameters[] = {
->>>>>         fsparam_u32     ("alloc_size",                  Opt_alloc_size),
->>>>> +     fsparam_enum    ("compression_hint",            Opt_compression_hint,
->>>>> +                      rbd_param_compression_hint),
->>>>>         fsparam_flag    ("exclusive",                   Opt_exclusive),
->>>>>         fsparam_flag    ("lock_on_read",                Opt_lock_on_read),
->>>>>         fsparam_u32     ("lock_timeout",                Opt_lock_timeout),
->>>>> @@ -867,6 +883,8 @@ struct rbd_options {
->>>>>         bool    lock_on_read;
->>>>>         bool    exclusive;
->>>>>         bool    trim;
->>>>> +
->>>>> +     u32 alloc_hint_flags;  /* CEPH_OSD_OP_ALLOC_HINT_FLAG_* */
->>>>>     };
->>>>>
->>>>>     #define RBD_QUEUE_DEPTH_DEFAULT     BLKDEV_MAX_RQ
->>>>> @@ -2254,7 +2272,7 @@ static void __rbd_osd_setup_write_ops(struct ceph_osd_request *osd_req,
->>>>>                 osd_req_op_alloc_hint_init(osd_req, which++,
->>>>>                                            rbd_dev->layout.object_size,
->>>>>                                            rbd_dev->layout.object_size,
->>>>> -                                        0);
->>>>> +                                        rbd_dev->opts->alloc_hint_flags);
->>>>>         }
->>>>>
->>>>>         if (rbd_obj_is_entire(obj_req))
->>>>> @@ -6332,6 +6350,29 @@ static int rbd_parse_param(struct fs_parameter *param,
->>>>>                 pctx->spec->pool_ns = param->string;
->>>>>                 param->string = NULL;
->>>>>                 break;
->>>>> +     case Opt_compression_hint:
->>>>> +             switch (result.uint_32) {
->>>>> +             case Opt_compression_hint_none:
->>>>> +                     opt->alloc_hint_flags &=
->>>>> +                         ~(CEPH_OSD_ALLOC_HINT_FLAG_COMPRESSIBLE |
->>>>> +                           CEPH_OSD_ALLOC_HINT_FLAG_INCOMPRESSIBLE);
->>>>> +                     break;
->>>>> +             case Opt_compression_hint_compressible:
->>>>> +                     opt->alloc_hint_flags |=
->>>>> +                         CEPH_OSD_ALLOC_HINT_FLAG_COMPRESSIBLE;
->>>>> +                     opt->alloc_hint_flags &=
->>>>> +                         ~CEPH_OSD_ALLOC_HINT_FLAG_INCOMPRESSIBLE;
->>>>> +                     break;
->>>>> +             case Opt_compression_hint_incompressible:
->>>>> +                     opt->alloc_hint_flags |=
->>>>> +                         CEPH_OSD_ALLOC_HINT_FLAG_INCOMPRESSIBLE;
->>>>> +                     opt->alloc_hint_flags &=
->>>>> +                         ~CEPH_OSD_ALLOC_HINT_FLAG_COMPRESSIBLE;
->>>>> +                     break;
->>>> Just one little question here,
->>>>
->>>> (1) none opt means clear compressible related bits in hint flags, then
->>>> lets the compressor in bluestore to decide compress or not.
->>>>
->>>> (2) compressible opt means set compressible bit and clear incompressible bit
->>>>
->>>> (3) incompressible opt means set incompressible bit and clear
->>>> compressible bit
->>>>
->>>>
->>>> Is there any scenario that alloc_hint_flags is not zero filled before
->>>> rbd_parse_param(), then we have to clear the unexpected bit?
->>> Hi Dongsheng,
->>>
->>> This is to handle the case when the map option string has multiple
->>> compression_hint options:
->>>
->>>     name=admin,...,compression_hint=compressible,...,compression_hint=none
->>>
->>> The last one wins and we always end up with either zero or just one
->>> of the flags set, not both.
->>
->> Hi Ilya,
->>
->>        Considering this case, should we make this kind of useage invalid?
->> Maybe we
->>
->> can do it in another patch to solve all rbd parameters conflicting problem.
-> No.  On the contrary, the intention is to support overriding in
-> the form of "the last one wins" going forward to be consistent with
-> filesystems, where this behaviour is expected for the use case of
-> overriding /etc/fstab options on the command line.
+I think this is a false-positive, but I'd welcome someone else to sanity
+check me here (Ilya?). My sparse says something a little different:
 
+    fs/ceph/caps.c:4052:26: warning: context imbalance in 'ceph_handle_caps' - unexpected unlock
 
-Okey makes sense.
+...and I get a similar warning when I move to the commit ahead of
+7833323363233c as well.
 
+All that patch does is push the i_ceph_lock acquisition from
+handle_cap_import to ceph_handle_caps. I don't see how it would have
+introduced a locking imbalance, but the locking in this code really is
+quite confusing, so please do point it out if I'm wrong here.
 
-Thanx
-
->
-> Thanks,
->
->                  Ilya
+Thanks,
+-- 
+Jeff Layton <jlayton@kernel.org>
