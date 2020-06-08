@@ -1,133 +1,128 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH] libceph: move away from global osd_req_flags
-Date: Mon, 08 Jun 2020 11:41:46 +0100
-Message-ID: <874krlalg5.fsf@suse.com>
-References: <20200608075603.29053-1-idryomov@gmail.com>
-        <878sgxan7d.fsf@suse.com>
-        <CAOi1vP-K8RQ1gapeYObmCestiqnYgh4iWE25NVKy4e6x3-OE-w@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 5.8-rc1
+Date: Mon,  8 Jun 2020 18:36:26 +0200
+Message-ID: <20200608163626.7339-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60784 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729280AbgFHKlt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 8 Jun 2020 06:41:49 -0400
-In-Reply-To: <CAOi1vP-K8RQ1gapeYObmCestiqnYgh4iWE25NVKy4e6x3-OE-w@mail.gmail.com>
-        (Ilya Dryomov's message of "Mon, 8 Jun 2020 12:25:30 +0200")
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33730 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730383AbgFHQg2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jun 2020 12:36:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Ilya Dryomov <idryomov@gmail.com> writes:
+Hi Linus,
 
-> On Mon, Jun 8, 2020 at 12:03 PM Luis Henriques <lhenriques@suse.com> wrote:
->>
->> Ilya Dryomov <idryomov@gmail.com> writes:
->>
->> > osd_req_flags is overly general and doesn't suit its only user
->> > (read_from_replica option) well:
->> >
->> > - applying osd_req_flags in account_request() affects all OSD
->> >   requests, including linger (i.e. watch and notify).  However,
->> >   linger requests should always go to the primary even though
->> >   some of them are reads (e.g. notify has side effects but it
->> >   is a read because it doesn't result in mutation on the OSDs).
->> >
->> > - calls to class methods that are reads are allowed to go to
->> >   the replica, but most such calls issued for "rbd map" and/or
->> >   exclusive lock transitions are requested to be resent to the
->> >   primary via EAGAIN, doubling the latency.
->> >
->> > Get rid of global osd_req_flags and set read_from_replica flag
->> > only on specific OSD requests instead.
->> >
->> > Fixes: 8ad44d5e0d1e ("libceph: read_from_replica option")
->>
->> Since this isn't yet in mainline, can't you simply merge these two
->> patches?
->
-> Hi Luis,
->
-> The pull request has already been put together and I'd rather not
-> rebase.
+The following changes since commit 3d77e6a8804abcc0504c904bd6e5cdf3a5cf8162:
 
-Ah, ok.  It's a bit more churn but that's not a big deal I guess.
+  Linux 5.7 (2020-05-31 16:49:15 -0700)
 
->>
->> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> > ---
->> >  drivers/block/rbd.c          |  4 +++-
->> >  include/linux/ceph/libceph.h |  4 ++--
->> >  net/ceph/ceph_common.c       | 14 ++++++--------
->> >  net/ceph/osd_client.c        |  3 +--
->> >  4 files changed, 12 insertions(+), 13 deletions(-)
->> >
->> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> > index e02089d550a4..b2bb2f10562a 100644
->> > --- a/drivers/block/rbd.c
->> > +++ b/drivers/block/rbd.c
->> > @@ -1451,8 +1451,10 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req)
->> >  static void rbd_osd_format_read(struct ceph_osd_request *osd_req)
->> >  {
->> >       struct rbd_obj_request *obj_request = osd_req->r_priv;
->> > +     struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
->> > +     struct ceph_options *opt = rbd_dev->rbd_client->client->options;
->> >
->> > -     osd_req->r_flags = CEPH_OSD_FLAG_READ;
->> > +     osd_req->r_flags = CEPH_OSD_FLAG_READ | opt->read_from_replica;
->> >       osd_req->r_snapid = obj_request->img_request->snap_id;
->> >  }
->> >
->> > diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
->> > index 2247e71beb83..e5ed1c541e7f 100644
->> > --- a/include/linux/ceph/libceph.h
->> > +++ b/include/linux/ceph/libceph.h
->> > @@ -52,8 +52,7 @@ struct ceph_options {
->> >       unsigned long osd_idle_ttl;             /* jiffies */
->> >       unsigned long osd_keepalive_timeout;    /* jiffies */
->> >       unsigned long osd_request_timeout;      /* jiffies */
->> > -
->> > -     u32 osd_req_flags;  /* CEPH_OSD_FLAG_*, applied to each OSD request */
->> > +     u32 read_from_replica;  /* CEPH_OSD_FLAG_BALANCE/LOCALIZE_READS */
->> >
->> >       /*
->> >        * any type that can't be simply compared or doesn't need
->> > @@ -76,6 +75,7 @@ struct ceph_options {
->> >  #define CEPH_OSD_KEEPALIVE_DEFAULT   msecs_to_jiffies(5 * 1000)
->> >  #define CEPH_OSD_IDLE_TTL_DEFAULT    msecs_to_jiffies(60 * 1000)
->> >  #define CEPH_OSD_REQUEST_TIMEOUT_DEFAULT 0  /* no timeout */
->> > +#define CEPH_READ_FROM_REPLICA_DEFAULT       0  /* read from primary */
->> >
->> >  #define CEPH_MONC_HUNT_INTERVAL              msecs_to_jiffies(3 * 1000)
->> >  #define CEPH_MONC_PING_INTERVAL              msecs_to_jiffies(10 * 1000)
->> > diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
->> > index 9bab3e9a039b..b7705e91ae9a 100644
->> > --- a/net/ceph/ceph_common.c
->> > +++ b/net/ceph/ceph_common.c
->> > @@ -333,6 +333,7 @@ struct ceph_options *ceph_alloc_options(void)
->> >       opt->mount_timeout = CEPH_MOUNT_TIMEOUT_DEFAULT;
->> >       opt->osd_idle_ttl = CEPH_OSD_IDLE_TTL_DEFAULT;
->> >       opt->osd_request_timeout = CEPH_OSD_REQUEST_TIMEOUT_DEFAULT;
->> > +     opt->read_from_replica = CEPH_READ_FROM_REPLICA_DEFAULT;
->> >       return opt;
->> >  }
->> >  EXPORT_SYMBOL(ceph_alloc_options);
->> > @@ -491,16 +492,13 @@ int ceph_parse_param(struct fs_parameter *param, struct ceph_options *opt,
->> >       case Opt_read_from_replica:
->> >               switch (result.uint_32) {
->> >               case Opt_read_from_replica_no:
->> > -                     opt->osd_req_flags &= ~(CEPH_OSD_FLAG_BALANCE_READS |
->> > -                                             CEPH_OSD_FLAG_LOCALIZE_READS);
->> > +                     opt->read_from_replica = 0;
->>
->> CEPH_READ_FROM_REPLICA_DEFAULT?
->
-> No.  If the default changes, read_from_replica=no should still mean
-> "don't go to the replica, use the primary".
+are available in the Git repository at:
 
-Makes sense.  Thanks.
+  https://github.com/ceph/ceph-client.git tags/ceph-for-5.8-rc1
 
-Cheers,
--- 
-Luis
+for you to fetch changes up to dc1dad8e1a612650b1e786e992cb0c6e101e226a:
+
+  rbd: compression_hint option (2020-06-01 23:32:35 +0200)
+
+----------------------------------------------------------------
+The highlights are:
+
+- OSD/MDS latency and caps cache metrics infrastructure for the
+  filesytem (Xiubo Li).  Currently available through debugfs and
+  will be periodically sent to the MDS in the future.
+
+- support for replica reads (balanced and localized reads) for
+  rbd and the filesystem (myself).  The default remains to always
+  read from primary, users can opt-in with the new crush_location
+  and read_from_replica options.  Note that reading from replica
+  is safe for general use only since Octopus.
+
+- support for RADOS allocation hint flags (myself).  Currently
+  used by rbd to propagate the compressible/incompressible hint
+  given with the new compression_hint map option and ready for
+  passing on more advanced hints, e.g. based on fadvise() from
+  the filesystem.
+
+- support for efficient cross-quota-realm renames (Luis Henriques)
+
+- assorted cap handling improvements and cleanups, particularly
+  untangling some of the locking (Jeff Layton)
+
+----------------------------------------------------------------
+Gustavo A. R. Silva (1):
+      libceph, rbd: replace zero-length array with flexible-array
+
+Ilya Dryomov (7):
+      libceph: add non-asserting rbtree insertion helper
+      libceph: decode CRUSH device/bucket types and names
+      libceph: crush_location infrastructure
+      libceph: support for balanced and localized reads
+      libceph: read_from_replica option
+      libceph: support for alloc hint flags
+      rbd: compression_hint option
+
+Jeff Layton (11):
+      ceph: reorganize __send_cap for less spinlock abuse
+      ceph: split up __finish_cap_flush
+      ceph: add comments for handle_cap_flush_ack logic
+      ceph: don't release i_ceph_lock in handle_cap_trunc
+      ceph: don't take i_ceph_lock in handle_cap_import
+      ceph: document what protects i_dirty_item and i_flushing_item
+      ceph: fix potential race in ceph_check_caps
+      ceph: throw a warning if we destroy session with mutex still locked
+      ceph: convert mdsc->cap_dirty to a per-session list
+      ceph: request expedited service on session's last cap flush
+      ceph: ceph_kick_flushing_caps needs the s_mutex
+
+Luis Henriques (3):
+      ceph: normalize 'delta' parameter usage in check_quota_exceeded
+      ceph: allow rename operation under different quota realms
+      ceph: don't return -ESTALE if there's still an open file
+
+Xiubo Li (6):
+      ceph: add dentry lease metric support
+      ceph: add caps perf metric for each superblock
+      ceph: add read/write latency metric support
+      ceph: add metadata perf metric support
+      ceph: make sure mdsc->mutex is nested in s->s_mutex to fix dead lock
+      ceph: skip checking caps when session reconnecting and releasing reqs
+
+Yan, Zheng (1):
+      ceph: reset i_requested_max_size if file write is not wanted
+
+ drivers/block/rbd.c             |  44 ++++-
+ drivers/block/rbd_types.h       |   2 +-
+ fs/ceph/Makefile                |   2 +-
+ fs/ceph/acl.c                   |   2 +-
+ fs/ceph/addr.c                  |  20 ++
+ fs/ceph/caps.c                  | 425 ++++++++++++++++++++++++++--------------
+ fs/ceph/debugfs.c               | 100 +++++++++-
+ fs/ceph/dir.c                   |  26 ++-
+ fs/ceph/export.c                |   9 +-
+ fs/ceph/file.c                  |  30 +++
+ fs/ceph/inode.c                 |   4 +-
+ fs/ceph/mds_client.c            |  48 ++++-
+ fs/ceph/mds_client.h            |  15 +-
+ fs/ceph/metric.c                | 148 ++++++++++++++
+ fs/ceph/metric.h                |  62 ++++++
+ fs/ceph/quota.c                 |  62 +++++-
+ fs/ceph/super.h                 |  34 +++-
+ fs/ceph/xattr.c                 |   4 +-
+ include/linux/ceph/libceph.h    |  13 +-
+ include/linux/ceph/mon_client.h |   2 +-
+ include/linux/ceph/osd_client.h |   8 +-
+ include/linux/ceph/osdmap.h     |  19 +-
+ include/linux/ceph/rados.h      |  14 ++
+ include/linux/crush/crush.h     |  14 +-
+ net/ceph/ceph_common.c          |  75 +++++++
+ net/ceph/crush/crush.c          |   3 +-
+ net/ceph/debugfs.c              |   6 +-
+ net/ceph/osd_client.c           | 103 +++++++++-
+ net/ceph/osdmap.c               | 363 +++++++++++++++++++++++++++++-----
+ 29 files changed, 1405 insertions(+), 252 deletions(-)
+ create mode 100644 fs/ceph/metric.c
+ create mode 100644 fs/ceph/metric.h
