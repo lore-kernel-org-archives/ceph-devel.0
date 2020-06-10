@@ -1,57 +1,30 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.6 325/606] libceph: ignore pool overlay and cache logic on redirects
-Date: Mon,  8 Jun 2020 19:07:30 -0400
-Message-ID: <20200608231211.3363633-325-sashal@kernel.org>
-References: <20200608231211.3363633-1-sashal@kernel.org>
+From: norman <norman.kern@gmx.com>
+Subject: Questions of QoS on ceph
+Date: Wed, 10 Jun 2020 16:38:00 +0800
+Message-ID: <b8eca4d9-e368-0f35-f3dc-6049d9a213fd@gmx.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200608231211.3363633-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Jerry Lee <leisurelysw24@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mout.gmx.net ([212.227.15.15]:58897 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726753AbgFJIiG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 10 Jun 2020 04:38:06 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@redhat.com
 
-From: Jerry Lee <leisurelysw24@gmail.com>
+Hi guys,
 
-[ Upstream commit 890bd0f8997ae6ac0a367dd5146154a3963306dd ]
+I want to setup a=C2=A0 ceph cluster for teams, using fs and s3 interface.=
+ I
+met a problem about the QoS: How can I limit the
 
-OSD client should ignore cache/overlay flag if got redirect reply.
-Otherwise, the client hangs when the cache tier is in forward mode.
+bw or qps of a client to avoid the someone blocking others by running
+lots of threads?
 
-[ idryomov: Redirects are effectively deprecated and no longer
-  used or tested.  The original tiering modes based on redirects
-  are inherently flawed because redirects can race and reorder,
-  potentially resulting in data corruption.  The new proxy and
-  readproxy tiering modes should be used instead of forward and
-  readforward.  Still marking for stable as obviously correct,
-  though. ]
+Best regards,
 
-Cc: stable@vger.kernel.org
-URL: https://tracker.ceph.com/issues/23296
-URL: https://tracker.ceph.com/issues/36406
-Signed-off-by: Jerry Lee <leisurelysw24@gmail.com>
-Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- net/ceph/osd_client.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index af868d3923b9..834019dbc6b1 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -3652,7 +3652,9 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
- 		 * supported.
- 		 */
- 		req->r_t.target_oloc.pool = m.redirect.oloc.pool;
--		req->r_flags |= CEPH_OSD_FLAG_REDIRECTED;
-+		req->r_flags |= CEPH_OSD_FLAG_REDIRECTED |
-+				CEPH_OSD_FLAG_IGNORE_OVERLAY |
-+				CEPH_OSD_FLAG_IGNORE_CACHE;
- 		req->r_tid = 0;
- 		__submit_request(req, false);
- 		goto out_unlock_osdc;
--- 
-2.25.1
+Norman Kern
