@@ -1,30 +1,49 @@
-From: norman <norman.kern@gmx.com>
-Subject: Questions of QoS on ceph
-Date: Wed, 10 Jun 2020 16:38:00 +0800
-Message-ID: <b8eca4d9-e368-0f35-f3dc-6049d9a213fd@gmx.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: Questions of QoS on ceph
+Date: Thu, 11 Jun 2020 12:24:58 -0400
+Message-ID: <7ae2e9ec09cddaf1cb6420bfe6758becc7fb434b.camel@kernel.org>
+References: <b8eca4d9-e368-0f35-f3dc-6049d9a213fd@gmx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.15.15]:58897 "EHLO mout.gmx.net"
+Received: from mail.kernel.org ([198.145.29.99]:33952 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726753AbgFJIiG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 10 Jun 2020 04:38:06 -0400
-Content-Language: en-US
+        id S1725782AbgFKQZA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 11 Jun 2020 12:25:00 -0400
+In-Reply-To: <b8eca4d9-e368-0f35-f3dc-6049d9a213fd@gmx.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@redhat.com
+To: norman <norman.kern@gmx.com>, ceph-devel@vger.kernel.org
+Cc: sage@redhat.com, ceph-users <ceph-users@ceph.io>
 
-Hi guys,
+On Wed, 2020-06-10 at 16:38 +0800, norman wrote:
+> Hi guys,
+> 
+> I want to setup a  ceph cluster for teams, using fs and s3 interface. I
+> met a problem about the QoS: How can I limit the
+> 
+> bw or qps of a client to avoid the someone blocking others by running
+> lots of threads?
+> 
 
-I want to setup a=C2=A0 ceph cluster for teams, using fs and s3 interface.=
- I
-met a problem about the QoS: How can I limit the
+(this is probably a better question for ceph-users mailing list.
+cc'ed...)
 
-bw or qps of a client to avoid the someone blocking others by running
-lots of threads?
+It's not clear to me which one concerns you most:
 
-Best regards,
+1/ parceling out a single client's resources between different tasks
+(e.g. multiple programs interacting on a kcephfs mount).
 
-Norman Kern
+2/ parceling out resources of the entire cluster between different
+clients
+
+...both turn out to be pretty thorny problems, and ceph doesn't really
+have much in the way of mechanisms for addressing either.
+
+The Ceph MDS can do things like recall caps to manage resources but I
+don't believe it does that in response to (e.g.) excess activity vs. a
+single OSD. It's more focused on its own memory consumption.
+
+-- 
+Jeff Layton <jlayton@kernel.org>
