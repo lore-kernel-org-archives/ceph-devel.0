@@ -1,49 +1,23 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: Questions of QoS on ceph
-Date: Thu, 11 Jun 2020 12:24:58 -0400
-Message-ID: <7ae2e9ec09cddaf1cb6420bfe6758becc7fb434b.camel@kernel.org>
-References: <b8eca4d9-e368-0f35-f3dc-6049d9a213fd@gmx.com>
+From: "manuel franco" <manuel@info.com>
+Subject: donation of Euro 2,000,000.00.
+Date: Mon, 15 Jun 2020 23:45:57 +0200
+Message-ID: <20200615214604.CF41B363335A@correo.bnv.gob.ve>
+Reply-To: manuelfrancospende22@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33952 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725782AbgFKQZA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 11 Jun 2020 12:25:00 -0400
-In-Reply-To: <b8eca4d9-e368-0f35-f3dc-6049d9a213fd@gmx.com>
+Received: from mail.bnv.gob.ve ([201.249.200.115]:51714 "EHLO
+        correo.bnv.gob.ve" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726313AbgFOXTn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jun 2020 19:19:43 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: norman <norman.kern@gmx.com>, ceph-devel@vger.kernel.org
-Cc: sage@redhat.com, ceph-users <ceph-users@ceph.io>
+To: Recipients <manuel@info.com>
 
-On Wed, 2020-06-10 at 16:38 +0800, norman wrote:
-> Hi guys,
-> 
-> I want to setup a  ceph cluster for teams, using fs and s3 interface. I
-> met a problem about the QoS: How can I limit the
-> 
-> bw or qps of a client to avoid the someone blocking others by running
-> lots of threads?
-> 
+You have a donation of Euro 2,000,000.00.
 
-(this is probably a better question for ceph-users mailing list.
-cc'ed...)
+My name is Manuel Franco from the United States.
 
-It's not clear to me which one concerns you most:
-
-1/ parceling out a single client's resources between different tasks
-(e.g. multiple programs interacting on a kcephfs mount).
-
-2/ parceling out resources of the entire cluster between different
-clients
-
-...both turn out to be pretty thorny problems, and ceph doesn't really
-have much in the way of mechanisms for addressing either.
-
-The Ceph MDS can do things like recall caps to manage resources but I
-don't believe it does that in response to (e.g.) excess activity vs. a
-single OSD. It's more focused on its own memory consumption.
-
--- 
-Jeff Layton <jlayton@kernel.org>
+I won the America lottery worth $768 million and I am donating a portion of it to just 5 lucky people and a few Orphanage homes as a memorandum of goodwill to humanity.email: manuelfrancospende@gmail.com
