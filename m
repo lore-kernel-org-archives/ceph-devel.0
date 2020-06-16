@@ -1,42 +1,41 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: dump class and method names on method calls
-Date: Tue, 16 Jun 2020 10:04:14 +0200
-Message-ID: <20200616080414.15534-1-idryomov@gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH 0/3] libceph: target_copy() fixups
+Date: Tue, 16 Jun 2020 07:33:24 -0400
+Message-ID: <e2ff602f1b643092eae1682ba770cadd31faefe3.camel@kernel.org>
+References: <20200616074415.9989-1-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59254 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726222AbgFPIEJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2020 04:04:09 -0400
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 480F5C05BD43
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2020 01:04:09 -0700 (PDT)
-Received: by mail-ej1-x643.google.com with SMTP id k11so20464525ejr.9
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2020 01:04:09 -0700 (PDT)
+Received: from mail.kernel.org ([198.145.29.99]:57556 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728645AbgFPLd0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 16 Jun 2020 07:33:26 -0400
+In-Reply-To: <20200616074415.9989-1-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Jeff Layton <jlayton@kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/debugfs.c | 3 +++
- 1 file changed, 3 insertions(+)
+On Tue, 2020-06-16 at 09:44 +0200, Ilya Dryomov wrote:
+> Hello,
+> 
+> Split into three commits for backporting reasons: the first two can be
+> picked up by stable, the third should get some soak time in testing.
+> 
+> Thanks,
+> 
+>                 Ilya
+> 
+> 
+> Ilya Dryomov (3):
+>   libceph: don't omit recovery_deletes in target_copy()
+>   libceph: don't omit used_replica in target_copy()
+>   libceph: use target_copy() in send_linger()
+> 
+>  net/ceph/osd_client.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
 
-diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-index 409d505ff320..2110439f8a24 100644
---- a/net/ceph/debugfs.c
-+++ b/net/ceph/debugfs.c
-@@ -223,6 +223,9 @@ static void dump_request(struct seq_file *s, struct ceph_osd_request *req)
- 		if (op->op == CEPH_OSD_OP_WATCH)
- 			seq_printf(s, "-%s",
- 				   ceph_osd_watch_op_name(op->watch.op));
-+		else if (op->op == CEPH_OSD_OP_CALL)
-+			seq_printf(s, "-%s/%s", op->cls.class_name,
-+				   op->cls.method_name);
- 	}
- 
- 	seq_putc(s, '\n');
--- 
-2.19.2
+These all look sane to me:
+
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
