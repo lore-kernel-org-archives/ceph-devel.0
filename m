@@ -1,147 +1,159 @@
-From: xiubli@redhat.com
-Subject: [PATCH v2 5/5] ceph: send client provided metric flags in client metadata
-Date: Thu, 18 Jun 2020 07:59:59 -0400
-Message-ID: <1592481599-7851-6-git-send-email-xiubli@redhat.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH v2 2/5] ceph: periodically send perf metrics to ceph
+Date: Thu, 18 Jun 2020 10:42:57 -0400
+Message-ID: <0b035117f68e00be64569021e10e202371589205.camel@kernel.org>
 References: <1592481599-7851-1-git-send-email-xiubli@redhat.com>
+         <1592481599-7851-3-git-send-email-xiubli@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:50565 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728103AbgFRMBU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2020 08:01:20 -0400
-In-Reply-To: <1592481599-7851-1-git-send-email-xiubli@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:34396 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1730920AbgFROnA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 Jun 2020 10:43:00 -0400
+In-Reply-To: <1592481599-7851-3-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, idryomov@gmail.com
-Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+To: xiubli@redhat.com, idryomov@gmail.com
+Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+On Thu, 2020-06-18 at 07:59 -0400, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> This will send the caps/read/write/metadata metrics to any available
+> MDS only once per second as default, which will be the same as the
+> userland client, or every metric_send_interval seconds, which is a
+> module parameter.
+> 
+> URL: https://tracker.ceph.com/issues/43215
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  fs/ceph/mds_client.c         |   3 +
+>  fs/ceph/metric.c             | 134 +++++++++++++++++++++++++++++++++++++++++++
+>  fs/ceph/metric.h             |  78 +++++++++++++++++++++++++
+>  fs/ceph/super.c              |  49 ++++++++++++++++
+>  fs/ceph/super.h              |   2 +
+>  include/linux/ceph/ceph_fs.h |   1 +
+>  6 files changed, 267 insertions(+)
+> 
+> 
 
-Will send the metric flags to MDS, currently it supports the cap,
-read latency, write latency and metadata latency.
+I think 3/5 needs to moved ahead of this one or folded into it, as we'll
+have a temporary regression otherwise.
 
-URL: https://tracker.ceph.com/issues/43435
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/mds_client.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++--
- fs/ceph/metric.h     | 13 ++++++++++++
- 2 files changed, 71 insertions(+), 2 deletions(-)
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index c9784eb1..5f409dd 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -27,6 +27,9 @@
+>  #include <linux/ceph/auth.h>
+>  #include <linux/ceph/debugfs.h>
+>  
+> +static DEFINE_MUTEX(ceph_fsc_lock);
+> +static LIST_HEAD(ceph_fsc_list);
+> +
+>  /*
+>   * Ceph superblock operations
+>   *
+> @@ -691,6 +694,10 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>  	if (!fsc->wb_pagevec_pool)
+>  		goto fail_cap_wq;
+>  
+> +	mutex_lock(&ceph_fsc_lock);
+> +	list_add_tail(&fsc->list, &ceph_fsc_list);
+> +	mutex_unlock(&ceph_fsc_lock);
+> +
+>  	return fsc;
+>  
+>  fail_cap_wq:
+> @@ -717,6 +724,10 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
+>  {
+>  	dout("destroy_fs_client %p\n", fsc);
+>  
+> +	mutex_lock(&ceph_fsc_lock);
+> +	list_del(&fsc->list);
+> +	mutex_unlock(&ceph_fsc_lock);
+> +
+>  	ceph_mdsc_destroy(fsc);
+>  	destroy_workqueue(fsc->inode_wq);
+>  	destroy_workqueue(fsc->cap_wq);
+> @@ -1282,6 +1293,44 @@ static void __exit exit_ceph(void)
+>  	destroy_caches();
+>  }
+>  
+> +static int param_set_metric_interval(const char *val, const struct kernel_param *kp)
+> +{
+> +	struct ceph_fs_client *fsc;
+> +	unsigned int interval;
+> +	int ret;
+> +
+> +	ret = kstrtouint(val, 0, &interval);
+> +	if (ret < 0) {
+> +		pr_err("Failed to parse metric interval '%s'\n", val);
+> +		return ret;
+> +	}
+> +
+> +	if (interval > 5) {
+> +		pr_err("Invalid metric interval %u\n", interval);
+> +		return -EINVAL;
+> +	}
+> +
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index f29cb11..a55dda3 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1194,6 +1194,48 @@ static int encode_supported_features(void **p, void *end)
- 	return 0;
- }
- 
-+static const unsigned char metric_bits[] = CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED;
-+#define METRIC_BYTES(cnt) (DIV_ROUND_UP((size_t)metric_bits[cnt - 1] + 1, 64) * 8)
-+static int encode_metric_spec(void **p, void *end)
-+{
-+	static const size_t count = ARRAY_SIZE(metric_bits);
-+
-+	/* header */
-+	if (WARN_ON(*p + 2 > end))
-+		return -ERANGE;
-+
-+	ceph_encode_8(p, 1); /* version */
-+	ceph_encode_8(p, 1); /* compat */
-+
-+	if (count > 0) {
-+		size_t i;
-+		size_t size = METRIC_BYTES(count);
-+
-+		if (WARN_ON(*p + 4 + 4 + size > end))
-+			return -ERANGE;
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4 + size);
-+
-+		/* metric spec */
-+		ceph_encode_32(p, size);
-+		memset(*p, 0, size);
-+		for (i = 0; i < count; i++)
-+			((unsigned char *)(*p))[i / 8] |= BIT(metric_bits[i] % 8);
-+		*p += size;
-+	} else {
-+		if (WARN_ON(*p + 4 + 4 > end))
-+			return -ERANGE;
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4);
-+		/* metric spec */
-+		ceph_encode_32(p, 0);
-+	}
-+
-+	return 0;
-+}
-+
- /*
-  * session message, specialization for CEPH_SESSION_REQUEST_OPEN
-  * to include additional client metadata fields.
-@@ -1234,6 +1276,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 		size = FEATURE_BYTES(count);
- 	extra_bytes += 4 + size;
- 
-+	/* metric spec */
-+	size = 0;
-+	count = ARRAY_SIZE(metric_bits);
-+	if (count > 0)
-+		size = METRIC_BYTES(count);
-+	extra_bytes += 2 + 4 + 4 + size;
-+
- 	/* Allocate the message */
- 	msg = ceph_msg_new(CEPH_MSG_CLIENT_SESSION, sizeof(*h) + extra_bytes,
- 			   GFP_NOFS, false);
-@@ -1252,9 +1301,9 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 	 * Serialize client metadata into waiting buffer space, using
- 	 * the format that userspace expects for map<string, string>
- 	 *
--	 * ClientSession messages with metadata are v3
-+	 * ClientSession messages with metadata are v4
- 	 */
--	msg->hdr.version = cpu_to_le16(3);
-+	msg->hdr.version = cpu_to_le16(4);
- 	msg->hdr.compat_version = cpu_to_le16(1);
- 
- 	/* The write pointer, following the session_head structure */
-@@ -1283,6 +1332,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 		return ERR_PTR(ret);
- 	}
- 
-+	ret = encode_metric_spec(&p, end);
-+	if (ret) {
-+		pr_err("encode_metric_spec failed!\n");
-+		ceph_msg_put(msg);
-+		return ERR_PTR(ret);
-+	}
-+
- 	msg->front.iov_len = p - msg->front.iov_base;
- 	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
- 
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index 2af9e0b..f34adf7 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -18,6 +18,19 @@ enum ceph_metric_type {
- 	CLIENT_METRIC_TYPE_MAX = CLIENT_METRIC_TYPE_DENTRY_LEASE,
- };
- 
-+/*
-+ * This will always have the highest metric bit value
-+ * as the last element of the array.
-+ */
-+#define CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED {	\
-+	CLIENT_METRIC_TYPE_CAP_INFO,		\
-+	CLIENT_METRIC_TYPE_READ_LATENCY,	\
-+	CLIENT_METRIC_TYPE_WRITE_LATENCY,	\
-+	CLIENT_METRIC_TYPE_METADATA_LATENCY,	\
-+						\
-+	CLIENT_METRIC_TYPE_MAX,			\
-+}
-+
- /* metric caps header */
- struct ceph_metric_cap {
- 	__le32 type;     /* ceph metric type */
+Why do we want to reject an interval larger than 5s? Is that problematic
+for some reason? In any case, it would be good to replace this with a
+#defined constant that describes what that value represents.
+
+> +	metric_send_interval = interval;
+> +
+> +	// wake up all the mds clients
+> +	mutex_lock(&ceph_fsc_lock);
+> +	list_for_each_entry(fsc, &ceph_fsc_list, list) {
+> +		metric_schedule_delayed(&fsc->mdsc->metric);
+> +	}
+> +	mutex_unlock(&ceph_fsc_lock);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct kernel_param_ops param_ops_metric_interval = {
+> +	.set = param_set_metric_interval,
+> +	.get = param_get_uint,
+> +};
+> +
+> +unsigned int metric_send_interval = 1;
+> +module_param_cb(metric_send_interval, &param_ops_metric_interval, &metric_send_interval, 0644);
+> +MODULE_PARM_DESC(metric_send_interval, "Interval (in seconds) of sending perf metric to ceph cluster, valid values are 0~5, 0 means disabled (default: 1)");
+> +
+>  module_init(init_ceph);
+>  module_exit(exit_ceph);
+>  
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 5a6cdd3..05edc9a 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -101,6 +101,8 @@ struct ceph_mount_options {
+>  struct ceph_fs_client {
+>  	struct super_block *sb;
+>  
+> +	struct list_head list;
+> +
+>  	struct ceph_mount_options *mount_options;
+>  	struct ceph_client *client;
+>  
+> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+> index ebf5ba6..455e9b9 100644
+> --- a/include/linux/ceph/ceph_fs.h
+> +++ b/include/linux/ceph/ceph_fs.h
+> @@ -130,6 +130,7 @@ struct ceph_dir_layout {
+>  #define CEPH_MSG_CLIENT_REQUEST         24
+>  #define CEPH_MSG_CLIENT_REQUEST_FORWARD 25
+>  #define CEPH_MSG_CLIENT_REPLY           26
+> +#define CEPH_MSG_CLIENT_METRICS         29
+>  #define CEPH_MSG_CLIENT_CAPS            0x310
+>  #define CEPH_MSG_CLIENT_LEASE           0x311
+>  #define CEPH_MSG_CLIENT_SNAP            0x312
+
+Thanks,
 -- 
-1.8.3.1
+Jeff Layton <jlayton@kernel.org>
