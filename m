@@ -1,69 +1,112 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 216/266] ceph: don't return -ESTALE if there's still an open file
-Date: Wed, 17 Jun 2020 21:15:41 -0400
-Message-ID: <20200618011631.604574-216-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Amir Goldstein <amir73il@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: xiubli@redhat.com
+Subject: [PATCH v2 1/5] ceph: add check_session_state helper and make it global
+Date: Thu, 18 Jun 2020 07:59:55 -0400
+Message-ID: <1592481599-7851-2-git-send-email-xiubli@redhat.com>
+References: <1592481599-7851-1-git-send-email-xiubli@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:50163 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728103AbgFRMBF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2020 08:01:05 -0400
+In-Reply-To: <1592481599-7851-1-git-send-email-xiubli@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-From: Luis Henriques <lhenriques@suse.com>
+From: Xiubo Li <xiubli@redhat.com>
 
-[ Upstream commit 878dabb64117406abd40977b87544d05bb3031fc ]
+This will be used by followed sending metrics patches.
 
-Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
-a file handle to dentry"), this fixes another corner case with
-name_to_handle_at/open_by_handle_at.  The issue has been detected by
-xfstest generic/467, when doing:
-
- - name_to_handle_at("/cephfs/myfile")
- - open("/cephfs/myfile")
- - unlink("/cephfs/myfile")
- - sync; sync;
- - drop caches
- - open_by_handle_at()
-
-The call to open_by_handle_at should not fail because the file hasn't been
-deleted yet (only unlinked) and we do have a valid handle to it.  -ESTALE
-shall be returned only if i_nlink is 0 *and* i_count is 1.
-
-This patch also makes sure we have LINK caps before checking i_nlink.
-
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
-Acked-by: Amir Goldstein <amir73il@gmail.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+URL: https://tracker.ceph.com/issues/43215
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/export.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ fs/ceph/mds_client.c | 43 ++++++++++++++++++++++++++-----------------
+ fs/ceph/mds_client.h |  4 ++++
+ 2 files changed, 30 insertions(+), 17 deletions(-)
 
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index 79dc06881e78..e088843a7734 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -172,9 +172,16 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
- static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
- {
- 	struct inode *inode = __lookup_inode(sb, ino);
-+	int err;
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a504971..608fb5c 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4263,6 +4263,30 @@ static void maybe_recover_session(struct ceph_mds_client *mdsc)
+ 	ceph_force_reconnect(fsc->sb);
+ }
+ 
++bool check_session_state(struct ceph_mds_client *mdsc,
++			 struct ceph_mds_session *s)
++{
++	if (s->s_state == CEPH_MDS_SESSION_CLOSING) {
++		dout("resending session close request for mds%d\n",
++				s->s_mds);
++		request_close_session(mdsc, s);
++		return false;
++	}
++	if (s->s_ttl && time_after(jiffies, s->s_ttl)) {
++		if (s->s_state == CEPH_MDS_SESSION_OPEN) {
++			s->s_state = CEPH_MDS_SESSION_HUNG;
++			pr_info("mds%d hung\n", s->s_mds);
++		}
++	}
++	if (s->s_state == CEPH_MDS_SESSION_NEW ||
++	    s->s_state == CEPH_MDS_SESSION_RESTARTING ||
++	    s->s_state == CEPH_MDS_SESSION_REJECTED)
++		/* this mds is failed or recovering, just wait */
++		return false;
 +
- 	if (IS_ERR(inode))
- 		return ERR_CAST(inode);
--	if (inode->i_nlink == 0) {
-+	/* We need LINK caps to reliably check i_nlink */
-+	err = ceph_do_getattr(inode, CEPH_CAP_LINK_SHARED, false);
-+	if (err)
-+		return ERR_PTR(err);
-+	/* -ESTALE if inode as been unlinked and no file is open */
-+	if ((inode->i_nlink == 0) && (atomic_read(&inode->i_count) == 1)) {
- 		iput(inode);
- 		return ERR_PTR(-ESTALE);
- 	}
++	return true;
++}
++
+ /*
+  * delayed work -- periodically trim expired leases, renew caps with mds
+  */
+@@ -4294,23 +4318,8 @@ static void delayed_work(struct work_struct *work)
+ 		struct ceph_mds_session *s = __ceph_lookup_mds_session(mdsc, i);
+ 		if (!s)
+ 			continue;
+-		if (s->s_state == CEPH_MDS_SESSION_CLOSING) {
+-			dout("resending session close request for mds%d\n",
+-			     s->s_mds);
+-			request_close_session(mdsc, s);
+-			ceph_put_mds_session(s);
+-			continue;
+-		}
+-		if (s->s_ttl && time_after(jiffies, s->s_ttl)) {
+-			if (s->s_state == CEPH_MDS_SESSION_OPEN) {
+-				s->s_state = CEPH_MDS_SESSION_HUNG;
+-				pr_info("mds%d hung\n", s->s_mds);
+-			}
+-		}
+-		if (s->s_state == CEPH_MDS_SESSION_NEW ||
+-		    s->s_state == CEPH_MDS_SESSION_RESTARTING ||
+-		    s->s_state == CEPH_MDS_SESSION_REJECTED) {
+-			/* this mds is failed or recovering, just wait */
++
++		if (!check_session_state(mdsc, s)) {
+ 			ceph_put_mds_session(s);
+ 			continue;
+ 		}
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 5e0c407..bcb3892 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -18,6 +18,7 @@
+ #include <linux/ceph/auth.h>
+ 
+ #include "metric.h"
++#include "super.h"
+ 
+ /* The first 8 bits are reserved for old ceph releases */
+ enum ceph_feature_type {
+@@ -476,6 +477,9 @@ struct ceph_mds_client {
+ 
+ extern const char *ceph_mds_op_name(int op);
+ 
++extern bool check_session_state(struct ceph_mds_client *mdsc,
++				struct ceph_mds_session *s);
++
+ extern struct ceph_mds_session *
+ __ceph_lookup_mds_session(struct ceph_mds_client *, int mds);
+ 
 -- 
-2.25.1
+1.8.3.1
