@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.7 315/388] ceph: don't return -ESTALE if there's still an open file
-Date: Wed, 17 Jun 2020 21:06:52 -0400
-Message-ID: <20200618010805.600873-315-sashal@kernel.org>
-References: <20200618010805.600873-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 216/266] ceph: don't return -ESTALE if there's still an open file
+Date: Wed, 17 Jun 2020 21:15:41 -0400
+Message-ID: <20200618011631.604574-216-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Luis Henriques <lhenriques@suse.com>, Jeff Layton <jlayton@kernel.org>, Amir Goldstein <amir73il@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
