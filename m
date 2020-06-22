@@ -1,12 +1,14 @@
 From: xiubli@redhat.com
-Subject: [PATCH v3 0/4] ceph: periodically send perf metrics to ceph
-Date: Mon, 22 Jun 2020 09:24:56 -0400
-Message-ID: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
+Subject: [PATCH v3 4/4] ceph: send client provided metric flags in client metadata
+Date: Mon, 22 Jun 2020 09:25:00 -0400
+Message-ID: <1592832300-29109-5-git-send-email-xiubli@redhat.com>
+References: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:26157 "EHLO
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:20187 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727963AbgFVNZX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jun 2020 09:25:23 -0400
+        with ESMTP id S1727963AbgFVNZ0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jun 2020 09:25:26 -0400
+In-Reply-To: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: jlayton@kernel.org, idryomov@gmail.com
@@ -14,49 +16,132 @@ Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <
 
 From: Xiubo Li <xiubli@redhat.com>
 
-This series is based the previous patches of the metrics in kceph[1]
-and mds daemons record and forward client side metrics to manager[2][3].
+Will send the metric flags to MDS, currently it supports the cap,
+read latency, write latency and metadata latency.
 
-This will send the caps/read/write/metadata metrics to any available
-MDS only once per second as default, which will be the same as the
-userland client, or every metric_send_interval seconds, which is a
-module parameter, the valid values for metric_send_interval will be
-0~5 seconds, 0 means disabled.
+URL: https://tracker.ceph.com/issues/43435
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/mds_client.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++--
+ fs/ceph/metric.h     | 13 ++++++++++++
+ 2 files changed, 71 insertions(+), 2 deletions(-)
 
-And will also send the metric flags to MDS, currently it supports the
-cap, read latency, write latency and metadata latency.
-
-Also have pushed this series to github [4].
-
-[1] https://patchwork.kernel.org/project/ceph-devel/list/?series=238907 [Merged]
-[2] https://github.com/ceph/ceph/pull/26004 [Merged]
-[3] https://github.com/ceph/ceph/pull/35608 [Merged]
-[4] https://github.com/lxbsz/ceph-client/commits/perf_metric2
-
-Changed in V3:
-- fold "check the METRIC_COLLECT feature before sending metrics" into previous one
-- use `enable_send_metrics` on/off switch instead
-
-Changed in V2:
-- split the patches into small ones as possible.
-- check the METRIC_COLLECT feature before sending metrics
-- switch to WARN_ON and bubble up errnos to the callers
-
-
-Xiubo Li (4):
-  ceph: add check_session_state helper and make it global
-  ceph: periodically send perf metrics to ceph
-  ceph: switch to WARN_ON and bubble up errnos to the callers
-  ceph: send client provided metric flags in client metadata
-
- fs/ceph/mds_client.c         | 152 ++++++++++++++++++++++++++++++++++---------
- fs/ceph/mds_client.h         |   8 ++-
- fs/ceph/metric.c             | 142 ++++++++++++++++++++++++++++++++++++++++
- fs/ceph/metric.h             |  91 ++++++++++++++++++++++++++
- fs/ceph/super.c              |  42 ++++++++++++
- fs/ceph/super.h              |   2 +
- include/linux/ceph/ceph_fs.h |   1 +
- 7 files changed, 407 insertions(+), 31 deletions(-)
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index f29cb11..a55dda3 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1194,6 +1194,48 @@ static int encode_supported_features(void **p, void *end)
+ 	return 0;
+ }
+ 
++static const unsigned char metric_bits[] = CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED;
++#define METRIC_BYTES(cnt) (DIV_ROUND_UP((size_t)metric_bits[cnt - 1] + 1, 64) * 8)
++static int encode_metric_spec(void **p, void *end)
++{
++	static const size_t count = ARRAY_SIZE(metric_bits);
++
++	/* header */
++	if (WARN_ON(*p + 2 > end))
++		return -ERANGE;
++
++	ceph_encode_8(p, 1); /* version */
++	ceph_encode_8(p, 1); /* compat */
++
++	if (count > 0) {
++		size_t i;
++		size_t size = METRIC_BYTES(count);
++
++		if (WARN_ON(*p + 4 + 4 + size > end))
++			return -ERANGE;
++
++		/* metric spec info length */
++		ceph_encode_32(p, 4 + size);
++
++		/* metric spec */
++		ceph_encode_32(p, size);
++		memset(*p, 0, size);
++		for (i = 0; i < count; i++)
++			((unsigned char *)(*p))[i / 8] |= BIT(metric_bits[i] % 8);
++		*p += size;
++	} else {
++		if (WARN_ON(*p + 4 + 4 > end))
++			return -ERANGE;
++
++		/* metric spec info length */
++		ceph_encode_32(p, 4);
++		/* metric spec */
++		ceph_encode_32(p, 0);
++	}
++
++	return 0;
++}
++
+ /*
+  * session message, specialization for CEPH_SESSION_REQUEST_OPEN
+  * to include additional client metadata fields.
+@@ -1234,6 +1276,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
+ 		size = FEATURE_BYTES(count);
+ 	extra_bytes += 4 + size;
+ 
++	/* metric spec */
++	size = 0;
++	count = ARRAY_SIZE(metric_bits);
++	if (count > 0)
++		size = METRIC_BYTES(count);
++	extra_bytes += 2 + 4 + 4 + size;
++
+ 	/* Allocate the message */
+ 	msg = ceph_msg_new(CEPH_MSG_CLIENT_SESSION, sizeof(*h) + extra_bytes,
+ 			   GFP_NOFS, false);
+@@ -1252,9 +1301,9 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
+ 	 * Serialize client metadata into waiting buffer space, using
+ 	 * the format that userspace expects for map<string, string>
+ 	 *
+-	 * ClientSession messages with metadata are v3
++	 * ClientSession messages with metadata are v4
+ 	 */
+-	msg->hdr.version = cpu_to_le16(3);
++	msg->hdr.version = cpu_to_le16(4);
+ 	msg->hdr.compat_version = cpu_to_le16(1);
+ 
+ 	/* The write pointer, following the session_head structure */
+@@ -1283,6 +1332,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
+ 		return ERR_PTR(ret);
+ 	}
+ 
++	ret = encode_metric_spec(&p, end);
++	if (ret) {
++		pr_err("encode_metric_spec failed!\n");
++		ceph_msg_put(msg);
++		return ERR_PTR(ret);
++	}
++
+ 	msg->front.iov_len = p - msg->front.iov_base;
+ 	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+ 
+diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
+index 5a1f8b9..87172ca 100644
+--- a/fs/ceph/metric.h
++++ b/fs/ceph/metric.h
+@@ -18,6 +18,19 @@ enum ceph_metric_type {
+ 	CLIENT_METRIC_TYPE_MAX = CLIENT_METRIC_TYPE_DENTRY_LEASE,
+ };
+ 
++/*
++ * This will always have the highest metric bit value
++ * as the last element of the array.
++ */
++#define CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED {	\
++	CLIENT_METRIC_TYPE_CAP_INFO,		\
++	CLIENT_METRIC_TYPE_READ_LATENCY,	\
++	CLIENT_METRIC_TYPE_WRITE_LATENCY,	\
++	CLIENT_METRIC_TYPE_METADATA_LATENCY,	\
++						\
++	CLIENT_METRIC_TYPE_MAX,			\
++}
++
+ /* metric caps header */
+ struct ceph_metric_cap {
+ 	__le32 type;     /* ceph metric type */
 -- 
 1.8.3.1
