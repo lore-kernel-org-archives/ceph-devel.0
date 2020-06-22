@@ -1,144 +1,112 @@
-From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH v2 2/5] ceph: periodically send perf metrics to ceph
-Date: Mon, 22 Jun 2020 09:19:29 +0800
-Message-ID: <452d11ba-c404-46b5-3815-aa311e7c0c4a@redhat.com>
-References: <1592481599-7851-1-git-send-email-xiubli@redhat.com>
- <1592481599-7851-3-git-send-email-xiubli@redhat.com>
- <0b035117f68e00be64569021e10e202371589205.camel@kernel.org>
- <f15a5885-3a9b-f308-bb5f-585f14e8ad19@redhat.com>
- <CAOi1vP81JshWEX7Ja1hqA4512ZBCVNiZX=204ijH15RrVeiT1Q@mail.gmail.com>
- <5f985d1c59ad5e562bcf4c19514137d5041ddc80.camel@kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: xiubli@redhat.com
+Subject: [PATCH v3 1/4] ceph: add check_session_state helper and make it global
+Date: Mon, 22 Jun 2020 09:24:57 -0400
+Message-ID: <1592832300-29109-2-git-send-email-xiubli@redhat.com>
+References: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:52815 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726529AbgFVBTp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 21 Jun 2020 21:19:45 -0400
-In-Reply-To: <5f985d1c59ad5e562bcf4c19514137d5041ddc80.camel@kernel.org>
-Content-Language: en-US
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:42694 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726308AbgFVNZO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jun 2020 09:25:14 -0400
+In-Reply-To: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>, Ilya Dryomov <idryomov@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Venky Shankar <vshankar@redhat.com>
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-On 2020/6/19 20:22, Jeff Layton wrote:
-> On Fri, 2020-06-19 at 11:35 +0200, Ilya Dryomov wrote:
->> On Fri, Jun 19, 2020 at 2:38 AM Xiubo Li <xiubli@redhat.com> wrote:
->>> On 2020/6/18 22:42, Jeff Layton wrote:
->>>> On Thu, 2020-06-18 at 07:59 -0400, xiubli@redhat.com wrote:
->>>>> From: Xiubo Li <xiubli@redhat.com>
->>>>>
->>>>> This will send the caps/read/write/metadata metrics to any available
->>>>> MDS only once per second as default, which will be the same as the
->>>>> userland client, or every metric_send_interval seconds, which is a
->>>>> module parameter.
->>>>>
->>>>> URL: https://tracker.ceph.com/issues/43215
->>>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->>>>> ---
->>>>>    fs/ceph/mds_client.c         |   3 +
->>>>>    fs/ceph/metric.c             | 134 +++++++++++++++++++++++++++++++++++++++++++
->>>>>    fs/ceph/metric.h             |  78 +++++++++++++++++++++++++
->>>>>    fs/ceph/super.c              |  49 ++++++++++++++++
->>>>>    fs/ceph/super.h              |   2 +
->>>>>    include/linux/ceph/ceph_fs.h |   1 +
->>>>>    6 files changed, 267 insertions(+)
->>>>>
->>>>>
->>>> I think 3/5 needs to moved ahead of this one or folded into it, as we'll
->>>> have a temporary regression otherwise.
->>>>
->>>>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
->>>>> index c9784eb1..5f409dd 100644
->>>>> --- a/fs/ceph/super.c
->>>>> +++ b/fs/ceph/super.c
->>>>> @@ -27,6 +27,9 @@
->>>>>    #include <linux/ceph/auth.h>
->>>>>    #include <linux/ceph/debugfs.h>
->>>>>
->>>>> +static DEFINE_MUTEX(ceph_fsc_lock);
->>>>> +static LIST_HEAD(ceph_fsc_list);
->>>>> +
->>>>>    /*
->>>>>     * Ceph superblock operations
->>>>>     *
->>>>> @@ -691,6 +694,10 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
->>>>>       if (!fsc->wb_pagevec_pool)
->>>>>               goto fail_cap_wq;
->>>>>
->>>>> +    mutex_lock(&ceph_fsc_lock);
->>>>> +    list_add_tail(&fsc->list, &ceph_fsc_list);
->>>>> +    mutex_unlock(&ceph_fsc_lock);
->>>>> +
->>>>>       return fsc;
->>>>>
->>>>>    fail_cap_wq:
->>>>> @@ -717,6 +724,10 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
->>>>>    {
->>>>>       dout("destroy_fs_client %p\n", fsc);
->>>>>
->>>>> +    mutex_lock(&ceph_fsc_lock);
->>>>> +    list_del(&fsc->list);
->>>>> +    mutex_unlock(&ceph_fsc_lock);
->>>>> +
->>>>>       ceph_mdsc_destroy(fsc);
->>>>>       destroy_workqueue(fsc->inode_wq);
->>>>>       destroy_workqueue(fsc->cap_wq);
->>>>> @@ -1282,6 +1293,44 @@ static void __exit exit_ceph(void)
->>>>>       destroy_caches();
->>>>>    }
->>>>>
->>>>> +static int param_set_metric_interval(const char *val, const struct kernel_param *kp)
->>>>> +{
->>>>> +    struct ceph_fs_client *fsc;
->>>>> +    unsigned int interval;
->>>>> +    int ret;
->>>>> +
->>>>> +    ret = kstrtouint(val, 0, &interval);
->>>>> +    if (ret < 0) {
->>>>> +            pr_err("Failed to parse metric interval '%s'\n", val);
->>>>> +            return ret;
->>>>> +    }
->>>>> +
->>>>> +    if (interval > 5) {
->>>>> +            pr_err("Invalid metric interval %u\n", interval);
->>>>> +            return -EINVAL;
->>>>> +    }
->>>>> +
->>>> Why do we want to reject an interval larger than 5s? Is that problematic
->>>> for some reason?
->>> IMO, a larger interval doesn't make much sense, to limit the interval
->>> value in 5s to make sure that the ceph side could show the client real
->>> metrics in time. Is this okay ? Or should we use a larger limit ?
-> 5s may seem like a lot now, but in 5-10 years we might be wishing we had
-> the ability to change this to something else (e.g.: maybe we find that
-> stats every 5s cause undue load on the MDS, and need to increase it).
->
->> I wonder if providing the option to tune the interval makes sense
->> at all then.  Since most clients will be sending their metrics every
->> second, the MDS may eventually start relying on that in some way.
->> Would a simple on/off switch, to be used if sending metrics causes
->> unforeseen trouble, work?
->>
-> Yeah, I'm leery of grabbing values out of our nether regions like this,
-> and it doesn't seem like making this that configurable has many
-> benefits.
+From: Xiubo Li <xiubli@redhat.com>
 
-Let's use an on/off switch here.
+This will be used by followed sending metrics patches.
 
-> Perhaps the preferred interval should be something advertised by the MDS
-> in some way? New field in the mdsmap, perhaps?
+URL: https://tracker.ceph.com/issues/43215
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/mds_client.c | 43 ++++++++++++++++++++++++++-----------------
+ fs/ceph/mds_client.h |  4 ++++
+ 2 files changed, 30 insertions(+), 17 deletions(-)
 
-For this maybe we could add one MDS or global option in ceph or one 
-parameter in MDS perf query interface based PR[1] in future.
-
-For now the on/off switch should be good and enough.
-
-[1] https://github.com/ceph/ceph/pull/29951
-
-Thanks
-
-BRs
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a504971..608fb5c 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4263,6 +4263,30 @@ static void maybe_recover_session(struct ceph_mds_client *mdsc)
+ 	ceph_force_reconnect(fsc->sb);
+ }
+ 
++bool check_session_state(struct ceph_mds_client *mdsc,
++			 struct ceph_mds_session *s)
++{
++	if (s->s_state == CEPH_MDS_SESSION_CLOSING) {
++		dout("resending session close request for mds%d\n",
++				s->s_mds);
++		request_close_session(mdsc, s);
++		return false;
++	}
++	if (s->s_ttl && time_after(jiffies, s->s_ttl)) {
++		if (s->s_state == CEPH_MDS_SESSION_OPEN) {
++			s->s_state = CEPH_MDS_SESSION_HUNG;
++			pr_info("mds%d hung\n", s->s_mds);
++		}
++	}
++	if (s->s_state == CEPH_MDS_SESSION_NEW ||
++	    s->s_state == CEPH_MDS_SESSION_RESTARTING ||
++	    s->s_state == CEPH_MDS_SESSION_REJECTED)
++		/* this mds is failed or recovering, just wait */
++		return false;
++
++	return true;
++}
++
+ /*
+  * delayed work -- periodically trim expired leases, renew caps with mds
+  */
+@@ -4294,23 +4318,8 @@ static void delayed_work(struct work_struct *work)
+ 		struct ceph_mds_session *s = __ceph_lookup_mds_session(mdsc, i);
+ 		if (!s)
+ 			continue;
+-		if (s->s_state == CEPH_MDS_SESSION_CLOSING) {
+-			dout("resending session close request for mds%d\n",
+-			     s->s_mds);
+-			request_close_session(mdsc, s);
+-			ceph_put_mds_session(s);
+-			continue;
+-		}
+-		if (s->s_ttl && time_after(jiffies, s->s_ttl)) {
+-			if (s->s_state == CEPH_MDS_SESSION_OPEN) {
+-				s->s_state = CEPH_MDS_SESSION_HUNG;
+-				pr_info("mds%d hung\n", s->s_mds);
+-			}
+-		}
+-		if (s->s_state == CEPH_MDS_SESSION_NEW ||
+-		    s->s_state == CEPH_MDS_SESSION_RESTARTING ||
+-		    s->s_state == CEPH_MDS_SESSION_REJECTED) {
+-			/* this mds is failed or recovering, just wait */
++
++		if (!check_session_state(mdsc, s)) {
+ 			ceph_put_mds_session(s);
+ 			continue;
+ 		}
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 5e0c407..bcb3892 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -18,6 +18,7 @@
+ #include <linux/ceph/auth.h>
+ 
+ #include "metric.h"
++#include "super.h"
+ 
+ /* The first 8 bits are reserved for old ceph releases */
+ enum ceph_feature_type {
+@@ -476,6 +477,9 @@ struct ceph_mds_client {
+ 
+ extern const char *ceph_mds_op_name(int op);
+ 
++extern bool check_session_state(struct ceph_mds_client *mdsc,
++				struct ceph_mds_session *s);
++
+ extern struct ceph_mds_session *
+ __ceph_lookup_mds_session(struct ceph_mds_client *, int mds);
+ 
+-- 
+1.8.3.1
