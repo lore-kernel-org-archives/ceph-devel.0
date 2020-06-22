@@ -1,147 +1,34 @@
-From: xiubli@redhat.com
-Subject: [PATCH v3 4/4] ceph: send client provided metric flags in client metadata
-Date: Mon, 22 Jun 2020 09:25:00 -0400
-Message-ID: <1592832300-29109-5-git-send-email-xiubli@redhat.com>
-References: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
+From: Karim Zakari <kariim1960z@gmail.com>
+Subject: URGENT REPLY.
+Date: Mon, 22 Jun 2020 15:46:33 +0000 (UTC)
+Message-ID: <333757312.1852569.1592840793061__5661.28035295463$1592840805$gmane$org@mail.yahoo.com>
+References: <333757312.1852569.1592840793061.ref@mail.yahoo.com>
+Reply-To: kzakari04@gmail.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:20187 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727963AbgFVNZ0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jun 2020 09:25:26 -0400
-In-Reply-To: <1592832300-29109-1-git-send-email-xiubli@redhat.com>
+Received: from sonic316-20.consmr.mail.ne1.yahoo.com ([66.163.187.146]:38777
+        "EHLO sonic316-20.consmr.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1729196AbgFVPqi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 22 Jun 2020 11:46:38 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org, idryomov@gmail.com
-Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-From: Xiubo Li <xiubli@redhat.com>
 
-Will send the metric flags to MDS, currently it supports the cap,
-read latency, write latency and metadata latency.
 
-URL: https://tracker.ceph.com/issues/43435
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/mds_client.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++--
- fs/ceph/metric.h     | 13 ++++++++++++
- 2 files changed, 71 insertions(+), 2 deletions(-)
+Good-Day=C2=A0Friend,
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index f29cb11..a55dda3 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1194,6 +1194,48 @@ static int encode_supported_features(void **p, void *end)
- 	return 0;
- }
- 
-+static const unsigned char metric_bits[] = CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED;
-+#define METRIC_BYTES(cnt) (DIV_ROUND_UP((size_t)metric_bits[cnt - 1] + 1, 64) * 8)
-+static int encode_metric_spec(void **p, void *end)
-+{
-+	static const size_t count = ARRAY_SIZE(metric_bits);
-+
-+	/* header */
-+	if (WARN_ON(*p + 2 > end))
-+		return -ERANGE;
-+
-+	ceph_encode_8(p, 1); /* version */
-+	ceph_encode_8(p, 1); /* compat */
-+
-+	if (count > 0) {
-+		size_t i;
-+		size_t size = METRIC_BYTES(count);
-+
-+		if (WARN_ON(*p + 4 + 4 + size > end))
-+			return -ERANGE;
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4 + size);
-+
-+		/* metric spec */
-+		ceph_encode_32(p, size);
-+		memset(*p, 0, size);
-+		for (i = 0; i < count; i++)
-+			((unsigned char *)(*p))[i / 8] |= BIT(metric_bits[i] % 8);
-+		*p += size;
-+	} else {
-+		if (WARN_ON(*p + 4 + 4 > end))
-+			return -ERANGE;
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4);
-+		/* metric spec */
-+		ceph_encode_32(p, 0);
-+	}
-+
-+	return 0;
-+}
-+
- /*
-  * session message, specialization for CEPH_SESSION_REQUEST_OPEN
-  * to include additional client metadata fields.
-@@ -1234,6 +1276,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 		size = FEATURE_BYTES(count);
- 	extra_bytes += 4 + size;
- 
-+	/* metric spec */
-+	size = 0;
-+	count = ARRAY_SIZE(metric_bits);
-+	if (count > 0)
-+		size = METRIC_BYTES(count);
-+	extra_bytes += 2 + 4 + 4 + size;
-+
- 	/* Allocate the message */
- 	msg = ceph_msg_new(CEPH_MSG_CLIENT_SESSION, sizeof(*h) + extra_bytes,
- 			   GFP_NOFS, false);
-@@ -1252,9 +1301,9 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 	 * Serialize client metadata into waiting buffer space, using
- 	 * the format that userspace expects for map<string, string>
- 	 *
--	 * ClientSession messages with metadata are v3
-+	 * ClientSession messages with metadata are v4
- 	 */
--	msg->hdr.version = cpu_to_le16(3);
-+	msg->hdr.version = cpu_to_le16(4);
- 	msg->hdr.compat_version = cpu_to_le16(1);
- 
- 	/* The write pointer, following the session_head structure */
-@@ -1283,6 +1332,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 		return ERR_PTR(ret);
- 	}
- 
-+	ret = encode_metric_spec(&p, end);
-+	if (ret) {
-+		pr_err("encode_metric_spec failed!\n");
-+		ceph_msg_put(msg);
-+		return ERR_PTR(ret);
-+	}
-+
- 	msg->front.iov_len = p - msg->front.iov_base;
- 	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
- 
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index 5a1f8b9..87172ca 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -18,6 +18,19 @@ enum ceph_metric_type {
- 	CLIENT_METRIC_TYPE_MAX = CLIENT_METRIC_TYPE_DENTRY_LEASE,
- };
- 
-+/*
-+ * This will always have the highest metric bit value
-+ * as the last element of the array.
-+ */
-+#define CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED {	\
-+	CLIENT_METRIC_TYPE_CAP_INFO,		\
-+	CLIENT_METRIC_TYPE_READ_LATENCY,	\
-+	CLIENT_METRIC_TYPE_WRITE_LATENCY,	\
-+	CLIENT_METRIC_TYPE_METADATA_LATENCY,	\
-+						\
-+	CLIENT_METRIC_TYPE_MAX,			\
-+}
-+
- /* metric caps header */
- struct ceph_metric_cap {
- 	__le32 type;     /* ceph metric type */
--- 
-1.8.3.1
+=C2=A0Hope=C2=A0you=C2=A0are=C2=A0doing=C2=A0great=C2=A0Today.=C2=A0I=C2=A0=
+have=C2=A0a=C2=A0proposed=C2=A0business=C2=A0deal=C2=A0worthy=C2=A0(US$16.5=
+=C2=A0Million=C2=A0Dollars)=C2=A0that=C2=A0will=C2=A0benefit=C2=A0both=C2=
+=A0parties.=C2=A0This=C2=A0is=C2=A0legitimate'=C2=A0legal=C2=A0and=C2=A0you=
+r=C2=A0personality=C2=A0will=C2=A0not=C2=A0be=C2=A0compromised.
+
+Waiting=C2=A0for=C2=A0your=C2=A0response=C2=A0for=C2=A0more=C2=A0details,=
+=C2=A0As=C2=A0you=C2=A0are=C2=A0willing=C2=A0to=C2=A0execute=C2=A0this=C2=
+=A0business=C2=A0opportunity=C2=A0with=C2=A0me.
+
+Sincerely=C2=A0Yours,
+Mr.=C2=A0Karim=C2=A0Zakari.
