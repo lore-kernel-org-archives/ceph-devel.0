@@ -1,24 +1,131 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] Ceph fixes for 5.8-rc2
-Date: Fri, 19 Jun 2020 19:30:23 +0000
-Message-ID: <159259502339.2705.15825277458052180337.pr-tracker-bot@kernel.org>
-References: <20200619123547.14353-1-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200619123547.14353-1-idryomov@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH v2 2/5] ceph: periodically send perf metrics to ceph
+Date: Mon, 22 Jun 2020 08:54:29 +0800
+Message-ID: <650a1cd9-7a01-0826-51bc-48baabeca05e@redhat.com>
+References: <1592481599-7851-1-git-send-email-xiubli@redhat.com>
+ <1592481599-7851-3-git-send-email-xiubli@redhat.com>
+ <0b035117f68e00be64569021e10e202371589205.camel@kernel.org>
+ <f15a5885-3a9b-f308-bb5f-585f14e8ad19@redhat.com>
+ <CAOi1vP81JshWEX7Ja1hqA4512ZBCVNiZX=204ijH15RrVeiT1Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:50295 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726375AbgFVAyq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Jun 2020 20:54:46 -0400
+In-Reply-To: <CAOi1vP81JshWEX7Ja1hqA4512ZBCVNiZX=204ijH15RrVeiT1Q@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: Jeff Layton <jlayton@kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-The pull request you sent on Fri, 19 Jun 2020 14:35:47 +0200:
+On 2020/6/19 17:35, Ilya Dryomov wrote:
+> On Fri, Jun 19, 2020 at 2:38 AM Xiubo Li <xiubli@redhat.com> wrote:
+>> On 2020/6/18 22:42, Jeff Layton wrote:
+>>> On Thu, 2020-06-18 at 07:59 -0400, xiubli@redhat.com wrote:
+>>>> From: Xiubo Li <xiubli@redhat.com>
+>>>>
+>>>> This will send the caps/read/write/metadata metrics to any available
+>>>> MDS only once per second as default, which will be the same as the
+>>>> userland client, or every metric_send_interval seconds, which is a
+>>>> module parameter.
+>>>>
+>>>> URL: https://tracker.ceph.com/issues/43215
+>>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>>>> ---
+>>>>    fs/ceph/mds_client.c         |   3 +
+>>>>    fs/ceph/metric.c             | 134 +++++++++++++++++++++++++++++++++++++++++++
+>>>>    fs/ceph/metric.h             |  78 +++++++++++++++++++++++++
+>>>>    fs/ceph/super.c              |  49 ++++++++++++++++
+>>>>    fs/ceph/super.h              |   2 +
+>>>>    include/linux/ceph/ceph_fs.h |   1 +
+>>>>    6 files changed, 267 insertions(+)
+>>>>
+>>>>
+>>> I think 3/5 needs to moved ahead of this one or folded into it, as we'll
+>>> have a temporary regression otherwise.
+>>>
+>>>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>>>> index c9784eb1..5f409dd 100644
+>>>> --- a/fs/ceph/super.c
+>>>> +++ b/fs/ceph/super.c
+>>>> @@ -27,6 +27,9 @@
+>>>>    #include <linux/ceph/auth.h>
+>>>>    #include <linux/ceph/debugfs.h>
+>>>>
+>>>> +static DEFINE_MUTEX(ceph_fsc_lock);
+>>>> +static LIST_HEAD(ceph_fsc_list);
+>>>> +
+>>>>    /*
+>>>>     * Ceph superblock operations
+>>>>     *
+>>>> @@ -691,6 +694,10 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>>>>       if (!fsc->wb_pagevec_pool)
+>>>>               goto fail_cap_wq;
+>>>>
+>>>> +    mutex_lock(&ceph_fsc_lock);
+>>>> +    list_add_tail(&fsc->list, &ceph_fsc_list);
+>>>> +    mutex_unlock(&ceph_fsc_lock);
+>>>> +
+>>>>       return fsc;
+>>>>
+>>>>    fail_cap_wq:
+>>>> @@ -717,6 +724,10 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
+>>>>    {
+>>>>       dout("destroy_fs_client %p\n", fsc);
+>>>>
+>>>> +    mutex_lock(&ceph_fsc_lock);
+>>>> +    list_del(&fsc->list);
+>>>> +    mutex_unlock(&ceph_fsc_lock);
+>>>> +
+>>>>       ceph_mdsc_destroy(fsc);
+>>>>       destroy_workqueue(fsc->inode_wq);
+>>>>       destroy_workqueue(fsc->cap_wq);
+>>>> @@ -1282,6 +1293,44 @@ static void __exit exit_ceph(void)
+>>>>       destroy_caches();
+>>>>    }
+>>>>
+>>>> +static int param_set_metric_interval(const char *val, const struct kernel_param *kp)
+>>>> +{
+>>>> +    struct ceph_fs_client *fsc;
+>>>> +    unsigned int interval;
+>>>> +    int ret;
+>>>> +
+>>>> +    ret = kstrtouint(val, 0, &interval);
+>>>> +    if (ret < 0) {
+>>>> +            pr_err("Failed to parse metric interval '%s'\n", val);
+>>>> +            return ret;
+>>>> +    }
+>>>> +
+>>>> +    if (interval > 5) {
+>>>> +            pr_err("Invalid metric interval %u\n", interval);
+>>>> +            return -EINVAL;
+>>>> +    }
+>>>> +
+>>> Why do we want to reject an interval larger than 5s? Is that problematic
+>>> for some reason?
+>> IMO, a larger interval doesn't make much sense, to limit the interval
+>> value in 5s to make sure that the ceph side could show the client real
+>> metrics in time. Is this okay ? Or should we use a larger limit ?
+> I wonder if providing the option to tune the interval makes sense
+> at all then.  Since most clients will be sending their metrics every
+> second, the MDS may eventually start relying on that in some way.
+> Would a simple on/off switch, to be used if sending metrics causes
+> unforeseen trouble, work?
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.8-rc2
+Hi Ilya,
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/672f9255a727d04c98b05ba7af625ab7032c8028
+Yeah, this sounds sensible.
 
-Thank you!
+Thanks
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+BRs
+
+>
+> Thanks,
+>
+>                  Ilya
+>
