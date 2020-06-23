@@ -1,67 +1,27 @@
-From: Sarah Koffi <paulwiliam782@gmail.com>
-Subject: Greetings From Mrs. Sarah Koffi
-Date: Tue, 23 Jun 2020 12:15:30 +0100
-Message-ID: <CAHqcnY3uztg=hnF-RE7HUkdLHGJjnU94LpTkHp23AV2ruu=Rcg__21191.4368368284$1592910942$gmane$org@mail.gmail.com>
-Reply-To: sarahkoffi389@yahoo.co.jp
+From: YAVUZ BEKTER <bakert.jg@gmail.com>
+Subject: Hello.
+Date: Tue, 23 Jun 2020 05:10:02 -0700
+Message-ID: <CAAUSuTX82L2c_ZdznzuNANEZ8=YU379EQdkZXYpOHe1Z2ByM6g@mail.gmail.com>
+Reply-To: bektery@outlook.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52534 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732477AbgFWLPe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2020 07:15:34 -0400
-Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5C34C061798
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Jun 2020 04:15:32 -0700 (PDT)
-Received: by mail-wm1-x341.google.com with SMTP id u26so2012601wmn.1
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Jun 2020 04:15:32 -0700 (PDT)
+        with ESMTP id S1732396AbgFWMKE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2020 08:10:04 -0400
+Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1F2CC061573
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Jun 2020 05:10:03 -0700 (PDT)
+Received: by mail-qt1-x843.google.com with SMTP id g13so4759086qtv.8
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Jun 2020 05:10:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sarahkoffi389@yahoo.co.jp
 
-Greetings From Mrs. Sarah Koffi
-
-I'm contacting you based on your good profiles I read and for a good
-reasons, I am in search of a property to buy in your country as I
-intended to come over to your
-country for investment, Though I have not meet with you before but I
-believe that one has to risk confiding in someone to succeed sometimes
-in life.
-
-My name is Mrs. Sarah Koffi. My late husband deals on Crude Oil with
-Federal Government of Sudan and he has a personal Oil firm in Bentiu
-Oil zone town and Upper
-Nile city. What I have experience physically, I don't wish to
-experience it again in my life due to the recent civil Ethnic war
-cause by our President Mr. Salva Kiir
-and the rebel leader Mr Riek Machar, I have been Under United Nation
-refuge camp in chad to save my life and that of my little daughter.
-
-Though, I do not know how you will feel to my proposal, but the truth
-is that I sneaked into Chad our neighboring country where I am living
-now as a refugee.
-I escaped with my little daughter when the rebels bust into our house
-and killed my husband as one of the big oil dealers in the country,
-ever since then, I have being on the run.
-
-I left my country and move to Chad our neighboring country with the
-little ceasefire we had, due to the face to face peace meeting accord
-coordinated by the US Secretary of State, Mr John Kerry and United
-Nations in Ethiopia (Addis Ababa) between our President Mr Salva Kiir
-and the rebel leader Mr Riek Machar to stop this war.
-
-I want to solicit for your partnership with trust to invest the $8
-million dollars deposited by my late husband in Bank because my life
-is no longer safe in our country, since the rebels are looking for the
-families of all the oil business men in the country to kill, saying
-that they are they one that is milking the country dry.
-
-I will offer you 20% of the total fund for your help while I will
-partner with you for the investment in your country.
-If I get your reply.
-
-I will wait to hear from you so as to give you details.With love from
-
- i need you to contact me here sarahkoffi389@yahoo.co.jp
-
-Mrs. Sarah Koffi
+I am the foreign operations director of Bank of Turkey.
+My name is Mr, Yavuz. I have a sensitive investment project to discuss
+with you, please reply now.
+________________________
+Ik ben de directeur buitenlandse activiteiten van de Bank of Turkey.
+Mijn naam is meneer Yavuz. Ik moet een gevoelig investeringsproject bespreken
+met u, antwoord dan nu.
