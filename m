@@ -1,34 +1,67 @@
-From: Karim Zakari <kariim1960z@gmail.com>
-Subject: URGENT REPLY.
-Date: Mon, 22 Jun 2020 15:46:33 +0000 (UTC)
-Message-ID: <333757312.1852569.1592840793061__5661.28035295463$1592840805$gmane$org@mail.yahoo.com>
-References: <333757312.1852569.1592840793061.ref@mail.yahoo.com>
-Reply-To: kzakari04@gmail.com
+From: Sarah Koffi <paulwiliam782@gmail.com>
+Subject: Greetings From Mrs. Sarah Koffi
+Date: Tue, 23 Jun 2020 12:15:30 +0100
+Message-ID: <CAHqcnY3uztg=hnF-RE7HUkdLHGJjnU94LpTkHp23AV2ruu=Rcg__21191.4368368284$1592910942$gmane$org@mail.gmail.com>
+Reply-To: sarahkoffi389@yahoo.co.jp
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sonic316-20.consmr.mail.ne1.yahoo.com ([66.163.187.146]:38777
-        "EHLO sonic316-20.consmr.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729196AbgFVPqi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 22 Jun 2020 11:46:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52534 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732477AbgFWLPe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2020 07:15:34 -0400
+Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5C34C061798
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Jun 2020 04:15:32 -0700 (PDT)
+Received: by mail-wm1-x341.google.com with SMTP id u26so2012601wmn.1
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Jun 2020 04:15:32 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: sarahkoffi389@yahoo.co.jp
 
+Greetings From Mrs. Sarah Koffi
 
+I'm contacting you based on your good profiles I read and for a good
+reasons, I am in search of a property to buy in your country as I
+intended to come over to your
+country for investment, Though I have not meet with you before but I
+believe that one has to risk confiding in someone to succeed sometimes
+in life.
 
-Good-Day=C2=A0Friend,
+My name is Mrs. Sarah Koffi. My late husband deals on Crude Oil with
+Federal Government of Sudan and he has a personal Oil firm in Bentiu
+Oil zone town and Upper
+Nile city. What I have experience physically, I don't wish to
+experience it again in my life due to the recent civil Ethnic war
+cause by our President Mr. Salva Kiir
+and the rebel leader Mr Riek Machar, I have been Under United Nation
+refuge camp in chad to save my life and that of my little daughter.
 
-=C2=A0Hope=C2=A0you=C2=A0are=C2=A0doing=C2=A0great=C2=A0Today.=C2=A0I=C2=A0=
-have=C2=A0a=C2=A0proposed=C2=A0business=C2=A0deal=C2=A0worthy=C2=A0(US$16.5=
-=C2=A0Million=C2=A0Dollars)=C2=A0that=C2=A0will=C2=A0benefit=C2=A0both=C2=
-=A0parties.=C2=A0This=C2=A0is=C2=A0legitimate'=C2=A0legal=C2=A0and=C2=A0you=
-r=C2=A0personality=C2=A0will=C2=A0not=C2=A0be=C2=A0compromised.
+Though, I do not know how you will feel to my proposal, but the truth
+is that I sneaked into Chad our neighboring country where I am living
+now as a refugee.
+I escaped with my little daughter when the rebels bust into our house
+and killed my husband as one of the big oil dealers in the country,
+ever since then, I have being on the run.
 
-Waiting=C2=A0for=C2=A0your=C2=A0response=C2=A0for=C2=A0more=C2=A0details,=
-=C2=A0As=C2=A0you=C2=A0are=C2=A0willing=C2=A0to=C2=A0execute=C2=A0this=C2=
-=A0business=C2=A0opportunity=C2=A0with=C2=A0me.
+I left my country and move to Chad our neighboring country with the
+little ceasefire we had, due to the face to face peace meeting accord
+coordinated by the US Secretary of State, Mr John Kerry and United
+Nations in Ethiopia (Addis Ababa) between our President Mr Salva Kiir
+and the rebel leader Mr Riek Machar to stop this war.
 
-Sincerely=C2=A0Yours,
-Mr.=C2=A0Karim=C2=A0Zakari.
+I want to solicit for your partnership with trust to invest the $8
+million dollars deposited by my late husband in Bank because my life
+is no longer safe in our country, since the rebels are looking for the
+families of all the oil business men in the country to kill, saying
+that they are they one that is milking the country dry.
+
+I will offer you 20% of the total fund for your help while I will
+partner with you for the investment in your country.
+If I get your reply.
+
+I will wait to hear from you so as to give you details.With love from
+
+ i need you to contact me here sarahkoffi389@yahoo.co.jp
+
+Mrs. Sarah Koffi
