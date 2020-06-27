@@ -1,76 +1,49 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: v14.2.10 Nautilus released
-Date: Fri, 26 Jun 2020 17:51:35 +0200
-Message-ID: <87a70pzuyg.fsf@suse.com>
+From: lookman joe <mrlookmanjoe@gmail.com>
+Subject: (unknown)
+Date: Sat, 27 Jun 2020 22:58:17 +0100
+Message-ID: <CAG9X5Hfvk-fmbqs9+RtHRqyUu35f9-A5+EbwjPrw9eVNH09ftg__32949.0557125368$1593295457$gmane$org@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41670 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727062AbgFZPxX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Jun 2020 11:53:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50898 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725907AbgF0WEK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Jun 2020 18:04:10 -0400
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFBD7C061794
+        for <ceph-devel@vger.kernel.org>; Sat, 27 Jun 2020 15:04:10 -0700 (PDT)
+Received: by mail-pf1-x444.google.com with SMTP id x3so695515pfo.9
+        for <ceph-devel@vger.kernel.org>; Sat, 27 Jun 2020 15:04:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-announce@ceph.io, ceph-users@ceph.io, dev@ceph.io, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.io
+
+MONEY-GRAM TRANSFERRED PAYMENT INFO:
+
+Below is the sender=E2=80=99s information
 
 
-We're happy to announce the tenth release in the Nautilus series. In
-addition to fixing a security-related bug in RGW, this release brings a
-number of bugfixes across all major components of Ceph. We recommend
-that all Nautilus users upgrade to this release. For a detailed
-changelog please refer to the ceph release blog at:
-https://ceph.io/releases/v14-2-10-nautilus-released
 
-Notable Changes
----------------
-* CVE-2020-10753: rgw: sanitize newlines in s3 CORSConfiguration's ExposeHeader
-  (William Bowling, Adam Mohammed, Casey Bodley)
+1. MG. REFERENCE NO#: 36360857
 
-* RGW: Bucket notifications now support Kafka endpoints. This requires librdkafka of
-  version 0.9.2 and up. Note that Ubuntu 16.04.6 LTS (Xenial Xerus) has an older
-  version of librdkafka, and would require an update to the library.
+2. SENDER'S NAME: Johnson Williams
 
-* The pool parameter `target_size_ratio`, used by the pg autoscaler,
-  has changed meaning. It is now normalized across pools, rather than
-  specifying an absolute ratio. For details, see :ref:`pg-autoscaler`.
-  If you have set target size ratios on any pools, you may want to set
-  these pools to autoscale `warn` mode to avoid data movement during
-  the upgrade::
+3. AMOUNT TO PICKUP: US$10,000
 
-    ceph osd pool set <pool-name> pg_autoscale_mode warn
 
-* The behaviour of the `-o` argument to the rados tool has been reverted to
-  its orignal behaviour of indicating an output file. This reverts it to a more
-  consistent behaviour when compared to other tools. Specifying object size is now
-  accomplished by using an upper case O `-O`.
 
-* The format of MDSs in `ceph fs dump` has changed.
+Go to any Money Gram office near you and pick up the payment Track the
 
-* Ceph will issue a health warning if a RADOS pool's `size` is set to 1
-  or in other words the pool is configured with no redundancy. This can
-  be fixed by setting the pool size to the minimum recommended value
-  with::
+Reference Number by visiting and click the link below
 
-    ceph osd pool set <pool-name> size <num-replicas>
+(https://secure.moneygram.com/embed/track) and enter the Reference
 
-  The warning can be silenced with::
+Number: 36360857 and the Last Name: Williams, you will find the payment
 
-    ceph config set global mon_warn_on_pool_no_redundancy false
+available for pickup instantly.
 
-* RGW: bucket listing performance on sharded bucket indexes has been
-  notably improved by heuristically -- and significantly, in many
-  cases -- reducing the number of entries requested from each bucket
-  index shard.
+Yours Sincerely,
 
-Getting Ceph
-------------
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-14.2.10.tar.gz
-* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
-* Release git sha1: b340acf629a010a74d90da5782a2c5fe0b54ac20
-
---
-Abhishek Lekshmanan
-SUSE Software Solutions Germany GmbH
-GF: Felix Imendörffer, HRB 36809 (AG Nürnberg)
+Mrs. Helen Marvis
+United Nations Liaison Office
+Directorate for International Payments
