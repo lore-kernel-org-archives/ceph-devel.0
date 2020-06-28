@@ -1,54 +1,70 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: why cephfs kernel module does not support fallocate with default mode?
-Date: Sun, 28 Jun 2020 06:23:53 +0200
-Message-ID: <CAOi1vP8Ppr300Ag7FvRRg6mY1+4+dvXUkLsD4CYogv9aEsZbkQ@mail.gmail.com>
-References: <CALZt5jy7G3e7+bibmNXeqxsRuoSwwE-U7G=cu5KvwAbsEiAmKQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+From: xiubli@redhat.com
+Subject: [PATCH v4 0/5] ceph: periodically send perf metrics to ceph
+Date: Sun, 28 Jun 2020 04:42:09 -0400
+Message-ID: <1593333734-27480-1-git-send-email-xiubli@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52320 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725988AbgF1EXq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Jun 2020 00:23:46 -0400
-Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EFAAC061794
-        for <ceph-devel@vger.kernel.org>; Sat, 27 Jun 2020 21:23:46 -0700 (PDT)
-Received: by mail-io1-xd43.google.com with SMTP id v6so136569iob.4
-        for <ceph-devel@vger.kernel.org>; Sat, 27 Jun 2020 21:23:46 -0700 (PDT)
-In-Reply-To: <CALZt5jy7G3e7+bibmNXeqxsRuoSwwE-U7G=cu5KvwAbsEiAmKQ@mail.gmail.com>
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:48036 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726038AbgF1Im3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 28 Jun 2020 04:42:29 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: dev <dev@ceph.io>, "Yan, Zheng" <zyan@redhat.com>, "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: jlayton@kernel.org, idryomov@gmail.com
+Cc: zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
 
-On Sat, Jun 27, 2020 at 6:02 PM Ning Yao <zay11022@gmail.com> wrote:
->
-> Hi, all
->
-> I find the in cephfs kernel module fs/ceph/file.c, the function ceph_fall=
-ocate return -EOPNOTSUPP=EF=BC=8Cwhen mode !=3D (FALLOC_FL_KEEP_SIZE | FALL=
-OC_FL_PUNCH_HOLE)=E3=80=82
->
-> Recently=EF=BC=8Cwe try to use cephfs but need supporting fallocate sysca=
-ll to generate the file writing not failed after reserved space. But we fin=
-d the cephfs kernel module does not support this right now. Can anyone expl=
-ain why we don't implement this now?
+From: Xiubo Li <xiubli@redhat.com>
 
-It used to be supported (as in it wasn't rejected with EOPNOTSUPP),
-but never actually worked.  There is no easy way to preallocate/reserve
-space in the cluster without explicitly zeroing it.  If the space isn't
-actually reserved, subsequent writes could fail with ENOSPC which would
-violate POSIX and break applications, so we chose to disable it.
+This series is based the previous patches of the metrics in kceph[1]
+and mds daemons record and forward client side metrics to manager[2][3].
 
->
-> We also find out ceph-fuse can support the falllocate syscall but endwith=
- a pool writing performance vs cephfs kernel mount. There is a large perfor=
-mance gap under fio.cfg below:
+This will send the caps/read/write/metadata metrics to any available
+MDS only once per second, which will be the same as the userland client.
+We could disable it via the enable_send_metrics module parameter.
 
-ceph-fuse is broken in the same way and it should be disabled there
-as well.
+And will also send the metric flags to MDS, currently it supports the
+cap, read latency, write latency and metadata latency.
 
-Thanks,
+Also have pushed this series to github [4].
 
-                Ilya
+[1] https://patchwork.kernel.org/project/ceph-devel/list/?series=238907 [Merged]
+[2] https://github.com/ceph/ceph/pull/26004 [Merged]
+[3] https://github.com/ceph/ceph/pull/35608 [Merged]
+[4] https://github.com/lxbsz/ceph-client/commits/perf_metric4
+
+Changes in V4:
+- WARN_ON --> WARN_ON_ONCE
+- do not send metrics when no mds suppor the metric collection.
+- add global total_caps in mdsc->metric
+- add the delayed work for each session and choose one to send the metrics to get rid of the mdsc->mutex lock
+
+Changed in V3:
+- fold "check the METRIC_COLLECT feature before sending metrics" into previous one
+- use `enable_send_metrics` on/off switch instead
+
+Changed in V2:
+- split the patches into small ones as possible.
+- check the METRIC_COLLECT feature before sending metrics
+- switch to WARN_ON and bubble up errnos to the callers
+
+
+
+Xiubo Li (5):
+  ceph: add check_session_state helper and make it global
+  ceph: add global total_caps to count the mdsc's caps number
+  ceph: periodically send perf metrics to ceph
+  ceph: switch to WARN_ON_ONCE and bubble up errnos to the callers
+  ceph: send client provided metric flags in client metadata
+
+ fs/ceph/caps.c               |   2 +
+ fs/ceph/mds_client.c         | 158 +++++++++++++++++++++++++++++++++++--------
+ fs/ceph/mds_client.h         |   8 ++-
+ fs/ceph/metric.c             | 156 ++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/metric.h             |  96 ++++++++++++++++++++++++++
+ fs/ceph/super.c              |  42 ++++++++++++
+ fs/ceph/super.h              |   2 +
+ include/linux/ceph/ceph_fs.h |   1 +
+ 8 files changed, 434 insertions(+), 31 deletions(-)
+
+-- 
+1.8.3.1
