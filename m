@@ -1,35 +1,34 @@
-From: charles jackson <lisa.petel@sd73.bc.ca>
-Subject: =?UTF-8?Q?=5BPossible_Spam=5D_Covid?= =?UTF-8?Q?_19_Wohlt=C3=A4tigkeitsfon?= =?UTF-8?Q?ds?=
-Date: Tue, 30 Jun 2020 00:45:53 -0700 (PDT)
-Message-ID: <1303336891.67033799.1593503153821.JavaMail.zimbra@zimbra.sd73.bc.ca>
-Reply-To: charles jackson <charlesjacksonjr001@gmail.com>
+From: " Mrs. Victoria Alexander  " <mrssamiraali20@gmail.com>
+Subject: Hello,
+Date: Tue, 30 Jun 2020 03:40:52 -0700
+Message-ID: <CAOch3DjT4wGkP1Hg3w5RpmLShvDSoq-kRiPOomVOx=Y+vZSfUg__5926.08757303736$1593513663$gmane$org@mail.gmail.com>
+Reply-To: mrs.victoria.alexander2@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp3.sd73.bc.ca ([142.24.50.246]:38582 "EHLO smtp3.sd73.bc.ca"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730909AbgF3JtY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 30 Jun 2020 05:49:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46598 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732417AbgF3Kk5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jun 2020 06:40:57 -0400
+Received: from mail-il1-x143.google.com (mail-il1-x143.google.com [IPv6:2607:f8b0:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC217C061755
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2020 03:40:56 -0700 (PDT)
+Received: by mail-il1-x143.google.com with SMTP id r12so10022399ilh.4
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2020 03:40:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 
+Dear friend,
 
 
--- 
-Hallo
- 
- Ich bin Charles W. Jackson aus North Carolina, Vereinigte Staaten von Amerika, und ich bin der Gewinner des Mega-Millionen-Jackpots von 344 Millionen US-Dollar. Ich spende die Summe von 2.000.000 Millionen Euro als Teil der Hilfsgelder f&uuml;r das Corona-Virus.
- 
- Dies ist Ihr Spendencode: [CJ530342019]
- 
- www.youtube.com/watch?v=BSr8myiLPMQ
- 
- Bitte antworten Sie auf diese E-Mail mit dem SPENDERCODE:
- 
- charlesjacksonjr001@gmail.com
- 
- Ich hoffe, dass Sie und Ihre Familie dies durchkommen
- 
- 
- Herr Charles Jackson
+I have a business container transaction what that some of( $13million dollars)
+
+ I would like to discuss with you. If you are interested, please
+contact my email
+
+address (mrs.victoria.alexander2@gmail.com)
+
+My WhatsApp number but only message +19293737780
+
+Please do not reply if you are not ready
+Thanks
