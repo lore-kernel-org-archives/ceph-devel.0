@@ -1,14 +1,14 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH 1/4] libceph: just have osd_req_op_init return a pointer
-Date: Wed,  1 Jul 2020 11:54:43 -0400
-Message-ID: <20200701155446.41141-2-jlayton@kernel.org>
+Subject: [PATCH 3/4] libceph: rename __ceph_osdc_alloc_messages to ceph_osdc_alloc_num_messages
+Date: Wed,  1 Jul 2020 11:54:45 -0400
+Message-ID: <20200701155446.41141-4-jlayton@kernel.org>
 References: <20200701155446.41141-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:36886 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:36902 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732243AbgGAPyt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S1732244AbgGAPyt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Wed, 1 Jul 2020 11:54:49 -0400
 In-Reply-To: <20200701155446.41141-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -16,146 +16,72 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com
 
-The caller can just ignore the return. No need for this wrapper that
-just casts the other function to void.
+...and make it public and export it.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- include/linux/ceph/osd_client.h |  2 +-
- net/ceph/osd_client.c           | 31 ++++++++++++-------------------
- 2 files changed, 13 insertions(+), 20 deletions(-)
+ include/linux/ceph/osd_client.h |  3 +++
+ net/ceph/osd_client.c           | 13 +++++++------
+ 2 files changed, 10 insertions(+), 6 deletions(-)
 
 diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index c60b59e9291b..8d63dc22cb36 100644
+index 40a08c4e5d8d..71b7610c3a3c 100644
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
-@@ -404,7 +404,7 @@ void ceph_osdc_clear_abort_err(struct ceph_osd_client *osdc);
- 	&__oreq->r_ops[__whch].typ.fld;					\
- })
+@@ -481,6 +481,9 @@ extern struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *
+ 					       unsigned int num_ops,
+ 					       bool use_mempool,
+ 					       gfp_t gfp_flags);
++int ceph_osdc_alloc_num_messages(struct ceph_osd_request *req, gfp_t gfp,
++				 int num_request_data_items,
++				 int num_reply_data_items);
+ int ceph_osdc_alloc_messages(struct ceph_osd_request *req, gfp_t gfp);
  
--extern void osd_req_op_init(struct ceph_osd_request *osd_req,
-+extern struct ceph_osd_req_op *osd_req_op_init(struct ceph_osd_request *osd_req,
- 			    unsigned int which, u16 opcode, u32 flags);
- 
- extern void osd_req_op_raw_data_in_pages(struct ceph_osd_request *,
+ extern struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *,
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index db6abb5a5511..3cff29d38b9f 100644
+index 4ddf23120b1a..7be78fa6e2c3 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -525,7 +525,7 @@ EXPORT_SYMBOL(ceph_osdc_put_request);
- 
- static void request_init(struct ceph_osd_request *req)
- {
--	/* req only, each op is zeroed in _osd_req_op_init() */
-+	/* req only, each op is zeroed in osd_req_op_init() */
- 	memset(req, 0, sizeof(*req));
- 
- 	kref_init(&req->r_kref);
-@@ -746,8 +746,8 @@ EXPORT_SYMBOL(ceph_osdc_alloc_messages);
-  * other information associated with them.  It also serves as a
-  * common init routine for all the other init functions, below.
-  */
--static struct ceph_osd_req_op *
--_osd_req_op_init(struct ceph_osd_request *osd_req, unsigned int which,
-+struct ceph_osd_req_op *
-+osd_req_op_init(struct ceph_osd_request *osd_req, unsigned int which,
- 		 u16 opcode, u32 flags)
- {
- 	struct ceph_osd_req_op *op;
-@@ -762,12 +762,6 @@ _osd_req_op_init(struct ceph_osd_request *osd_req, unsigned int which,
- 
- 	return op;
+@@ -613,9 +613,9 @@ static int ceph_oloc_encoding_size(const struct ceph_object_locator *oloc)
+ 	return 8 + 4 + 4 + 4 + (oloc->pool_ns ? oloc->pool_ns->len : 0);
  }
--
--void osd_req_op_init(struct ceph_osd_request *osd_req,
--		     unsigned int which, u16 opcode, u32 flags)
--{
--	(void)_osd_req_op_init(osd_req, which, opcode, flags);
--}
- EXPORT_SYMBOL(osd_req_op_init);
  
- void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
-@@ -775,8 +769,7 @@ void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
- 				u64 offset, u64 length,
- 				u64 truncate_size, u32 truncate_seq)
+-static int __ceph_osdc_alloc_messages(struct ceph_osd_request *req, gfp_t gfp,
+-				      int num_request_data_items,
+-				      int num_reply_data_items)
++int ceph_osdc_alloc_num_messages(struct ceph_osd_request *req, gfp_t gfp,
++				 int num_request_data_items,
++				 int num_reply_data_items)
  {
--	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
--						      opcode, 0);
-+	struct ceph_osd_req_op *op = osd_req_op_init(osd_req, which, opcode, 0);
- 	size_t payload_len = 0;
+ 	struct ceph_osd_client *osdc = req->r_osdc;
+ 	struct ceph_msg *msg;
+@@ -672,6 +672,7 @@ static int __ceph_osdc_alloc_messages(struct ceph_osd_request *req, gfp_t gfp,
  
- 	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
-@@ -822,7 +815,7 @@ void osd_req_op_extent_dup_last(struct ceph_osd_request *osd_req,
- 	BUG_ON(which + 1 >= osd_req->r_num_ops);
+ 	return 0;
+ }
++EXPORT_SYMBOL(ceph_osdc_alloc_num_messages);
  
- 	prev_op = &osd_req->r_ops[which];
--	op = _osd_req_op_init(osd_req, which + 1, prev_op->op, prev_op->flags);
-+	op = osd_req_op_init(osd_req, which + 1, prev_op->op, prev_op->flags);
- 	/* dup previous one */
- 	op->indata_len = prev_op->indata_len;
- 	op->outdata_len = prev_op->outdata_len;
-@@ -845,7 +838,7 @@ int osd_req_op_cls_init(struct ceph_osd_request *osd_req, unsigned int which,
- 	size_t size;
- 	int ret;
- 
--	op = _osd_req_op_init(osd_req, which, CEPH_OSD_OP_CALL, 0);
-+	op = osd_req_op_init(osd_req, which, CEPH_OSD_OP_CALL, 0);
- 
- 	pagelist = ceph_pagelist_alloc(GFP_NOFS);
- 	if (!pagelist)
-@@ -883,7 +876,7 @@ int osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
- 			  u16 opcode, const char *name, const void *value,
- 			  size_t size, u8 cmp_op, u8 cmp_mode)
+ static bool osd_req_opcode_valid(u16 opcode)
  {
--	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-+	struct ceph_osd_req_op *op = osd_req_op_init(osd_req, which,
- 						      opcode, 0);
- 	struct ceph_pagelist *pagelist;
- 	size_t payload_len;
-@@ -928,7 +921,7 @@ static void osd_req_op_watch_init(struct ceph_osd_request *req, int which,
- {
- 	struct ceph_osd_req_op *op;
+@@ -738,8 +739,8 @@ int ceph_osdc_alloc_messages(struct ceph_osd_request *req, gfp_t gfp)
+ 	int num_request_data_items, num_reply_data_items;
  
--	op = _osd_req_op_init(req, which, CEPH_OSD_OP_WATCH, 0);
-+	op = osd_req_op_init(req, which, CEPH_OSD_OP_WATCH, 0);
- 	op->watch.cookie = cookie;
- 	op->watch.op = watch_opcode;
- 	op->watch.gen = 0;
-@@ -943,7 +936,7 @@ void osd_req_op_alloc_hint_init(struct ceph_osd_request *osd_req,
- 				u64 expected_write_size,
- 				u32 flags)
- {
--	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-+	struct ceph_osd_req_op *op = osd_req_op_init(osd_req, which,
- 						      CEPH_OSD_OP_SETALLOCHINT,
- 						      0);
+ 	get_num_data_items(req, &num_request_data_items, &num_reply_data_items);
+-	return __ceph_osdc_alloc_messages(req, gfp, num_request_data_items,
+-					  num_reply_data_items);
++	return ceph_osdc_alloc_num_messages(req, gfp, num_request_data_items,
++						  num_reply_data_items);
+ }
+ EXPORT_SYMBOL(ceph_osdc_alloc_messages);
  
-@@ -4799,7 +4792,7 @@ static int osd_req_op_notify_ack_init(struct ceph_osd_request *req, int which,
- 	struct ceph_pagelist *pl;
- 	int ret;
- 
--	op = _osd_req_op_init(req, which, CEPH_OSD_OP_NOTIFY_ACK, 0);
-+	op = osd_req_op_init(req, which, CEPH_OSD_OP_NOTIFY_ACK, 0);
- 
- 	pl = ceph_pagelist_alloc(GFP_NOIO);
- 	if (!pl)
-@@ -4868,7 +4861,7 @@ static int osd_req_op_notify_init(struct ceph_osd_request *req, int which,
- 	struct ceph_pagelist *pl;
- 	int ret;
- 
--	op = _osd_req_op_init(req, which, CEPH_OSD_OP_NOTIFY, 0);
-+	op = osd_req_op_init(req, which, CEPH_OSD_OP_NOTIFY, 0);
- 	op->notify.cookie = cookie;
- 
- 	pl = ceph_pagelist_alloc(GFP_NOIO);
-@@ -5332,7 +5325,7 @@ static int osd_req_op_copy_from_init(struct ceph_osd_request *req,
- 	if (IS_ERR(pages))
- 		return PTR_ERR(pages);
- 
--	op = _osd_req_op_init(req, 0, CEPH_OSD_OP_COPY_FROM2,
-+	op = osd_req_op_init(req, 0, CEPH_OSD_OP_COPY_FROM2,
- 			      dst_fadvise_flags);
- 	op->copy_from.snapid = src_snapid;
- 	op->copy_from.src_version = src_version;
+@@ -1129,7 +1130,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 		 * also covers ceph_uninline_data().  If more multi-op request
+ 		 * use cases emerge, we will need a separate helper.
+ 		 */
+-		r = __ceph_osdc_alloc_messages(req, GFP_NOFS, num_ops, 0);
++		r = ceph_osdc_alloc_num_messages(req, GFP_NOFS, num_ops, 0);
+ 	else
+ 		r = ceph_osdc_alloc_messages(req, GFP_NOFS);
+ 	if (r)
 -- 
 2.26.2
