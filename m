@@ -1,98 +1,47 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] Replace HTTP links with HTTPS ones: CEPH COMMON CODE (LIBCEPH)
-Date: Wed, 8 Jul 2020 13:25:35 +0200
-Message-ID: <CAOi1vP_vS-nNMXuo4n8njx=pRVUQd-C8LAeSTpVTufqiHsCS-g@mail.gmail.com>
-References: <20200708065328.13031-1-grandmaster@al2klimov.de>
+From: ''Tayeb Souami'' <dreyes@elsol.com.pe>
+Subject: =?utf-8?q?Covid_19_Wohlt=C3=A4tigkeitsfonds?=
+Date: Wed, 08 Jul 2020 09:16:22 +0200
+Message-ID: <20200708072012.09977608E2B@mail.elsol.com.pe>
+Reply-To: Tayebsouam.spende@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200708065328.13031-1-grandmaster@al2klimov.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Alexander A. Klimov" <grandmaster@al2klimov.de>
-Cc: Jeff Layton <jlayton@kernel.org>, "David S. Miller" <davem@davemloft.net>, kuba@kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.elsol.com.pe ([170.231.82.35]:40891 "EHLO
+        mail.elsol.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728592AbgGHLuG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2020 07:50:06 -0400
+Content-Description: Mail message body
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <dreyes@elsol.com.pe>
 
-On Wed, Jul 8, 2020 at 8:53 AM Alexander A. Klimov
-<grandmaster@al2klimov.de> wrote:
->
-> Rationale:
-> Reduces attack surface on kernel devs opening the links for MITM
-> as HTTPS traffic is much harder to manipulate.
->
-> Deterministic algorithm:
-> For each file:
->   If not .svg:
->     For each line:
->       If doesn't contain `\bxmlns\b`:
->         For each link, `\bhttp://[^# \t\r\n]*(?:\w|/)`:
->           If neither `\bgnu\.org/license`, nor `\bmozilla\.org/MPL\b`:
->             If both the HTTP and HTTPS versions
->             return 200 OK and serve the same content:
->               Replace HTTP with HTTPS.
->
-> Signed-off-by: Alexander A. Klimov <grandmaster@al2klimov.de>
-> ---
->  Continuing my work started at 93431e0607e5.
->  See also: git log --oneline '--author=Alexander A. Klimov <grandmaster@al2klimov.de>' v5.7..master
->  (Actually letting a shell for loop submit all this stuff for me.)
->
->  If there are any URLs to be removed completely or at least not HTTPSified:
->  Just clearly say so and I'll *undo my change*.
->  See also: https://lkml.org/lkml/2020/6/27/64
->
->  If there are any valid, but yet not changed URLs:
->  See: https://lkml.org/lkml/2020/6/26/837
->
->  If you apply the patch, please let me know.
->
->
->  net/ceph/ceph_hash.c    | 2 +-
->  net/ceph/crush/hash.c   | 2 +-
->  net/ceph/crush/mapper.c | 2 +-
->  3 files changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/net/ceph/ceph_hash.c b/net/ceph/ceph_hash.c
-> index 9a5850f264ed..81e1e006c540 100644
-> --- a/net/ceph/ceph_hash.c
-> +++ b/net/ceph/ceph_hash.c
-> @@ -4,7 +4,7 @@
->
->  /*
->   * Robert Jenkin's hash function.
-> - * http://burtleburtle.net/bob/hash/evahash.html
-> + * https://burtleburtle.net/bob/hash/evahash.html
->   * This is in the public domain.
->   */
->  #define mix(a, b, c)                                           \
-> diff --git a/net/ceph/crush/hash.c b/net/ceph/crush/hash.c
-> index e5cc603cdb17..fe79f6d2d0db 100644
-> --- a/net/ceph/crush/hash.c
-> +++ b/net/ceph/crush/hash.c
-> @@ -7,7 +7,7 @@
->
->  /*
->   * Robert Jenkins' function for mixing 32-bit values
-> - * http://burtleburtle.net/bob/hash/evahash.html
-> + * https://burtleburtle.net/bob/hash/evahash.html
->   * a, b = random bits, c = input and output
->   */
->  #define crush_hashmix(a, b, c) do {                    \
-> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> index 3f323ed9df52..07e5614eb3f1 100644
-> --- a/net/ceph/crush/mapper.c
-> +++ b/net/ceph/crush/mapper.c
-> @@ -298,7 +298,7 @@ static __u64 crush_ln(unsigned int xin)
->   *
->   * for reference, see:
->   *
-> - * http://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
-> + * https://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
->   *
->   */
->
+Lieber Freund,
 
-Applied with a couple more link fixes folded in.
+Ich bin Herr Tayeb Souami, New Jersey, Vereinigte Staaten von Amerika, der =
+Mega-Gewinner von $ 315million In Mega Millions Jackpot, spende ich an 5 zu=
+f=C3=A4llige Personen, wenn Sie diese E-Mail erhalten, dann wurde Ihre E-Ma=
+il nach einem Spinball ausgew=C3=A4hlt.Ich habe den gr=C3=B6=C3=9Ften Teil =
+meines Verm=C3=B6gens auf eine Reihe von Wohlt=C3=A4tigkeitsorganisationen =
+und Organisationen verteilt.Ich habe mich freiwillig dazu entschieden, die =
+Summe von =E2=82=AC 2.000.000,00 an Sie als eine der ausgew=C3=A4hlten 5 zu=
+ spenden, um meine Gewinne zu =C3=BCberpr=C3=BCfen, sehen Sie bitte meine Y=
+ou Tube Seite unten.
 
-Thanks,
+UHR MICH HIER: https://www.youtube.com/watch?v=3DZ6ui8ZDQ6Ks
 
-                Ilya
+
+
+Das ist dein Spendencode: [TS530342018]
+
+
+
+Antworten Sie mit dem SPENDE-CODE an diese
+
+E-Mail:Tayebsouam.spende@gmail.com
+
+
+Ich hoffe, Sie und Ihre Familie gl=C3=BCcklich zu machen.
+
+Gr=C3=BC=C3=9Fe
+Herr Tayeb Souami
