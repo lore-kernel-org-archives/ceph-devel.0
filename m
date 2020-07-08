@@ -1,96 +1,60 @@
-From: "Alexander A. Klimov" <grandmaster@al2klimov.de>
-Subject: [PATCH] Replace HTTP links with HTTPS ones: CEPH COMMON CODE (LIBCEPH)
-Date: Wed,  8 Jul 2020 08:53:28 +0200
-Message-ID: <20200708065328.13031-1-grandmaster@al2klimov.de>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35378 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729535AbgGHGxk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2020 02:53:40 -0400
-Received: from smtp.al2klimov.de (smtp.al2klimov.de [IPv6:2a01:4f8:c0c:1465::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5ECAC061755
-        for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2020 23:53:39 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: idryomov@gmail.com, jlayton@kernel.org, davem@davemloft.net, kuba@kernel.org, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: "Alexander A. Klimov" <grandmaster@al2klimov.de>
+From: Xu Wang <vulab@iscas.ac.cn>
+Subject: [PATCH] fs: ceph: Remove unnecessary cast in kfree()
+Date: Wed,  8 Jul 2020 07:03:22 +0000
+Message-ID: <20200708070322.30695-1-vulab@iscas.ac.cn>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: jlayton@kernel.org, idryomov@gmail.com, ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Xu Wang <vulab@iscas.ac.cn>
+List-Id: ceph-devel.vger.kernel.org
 
-Rationale:
-Reduces attack surface on kernel devs opening the links for MITM
-as HTTPS traffic is much harder to manipulate.
+Remove unnecassary casts in the argument to kfree.
 
-Deterministic algorithm:
-For each file:
-  If not .svg:
-    For each line:
-      If doesn't contain `\bxmlns\b`:
-        For each link, `\bhttp://[^# \t\r\n]*(?:\w|/)`:
-	  If neither `\bgnu\.org/license`, nor `\bmozilla\.org/MPL\b`:
-            If both the HTTP and HTTPS versions
-            return 200 OK and serve the same content:
-              Replace HTTP with HTTPS.
-
-Signed-off-by: Alexander A. Klimov <grandmaster@al2klimov.de>
+Signed-off-by: Xu Wang <vulab@iscas.ac.cn>
 ---
- Continuing my work started at 93431e0607e5.
- See also: git log --oneline '--author=Alexander A. Klimov <grandmaster@al2klimov.de>' v5.7..master
- (Actually letting a shell for loop submit all this stuff for me.)
+ fs/ceph/xattr.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
- If there are any URLs to be removed completely or at least not HTTPSified:
- Just clearly say so and I'll *undo my change*.
- See also: https://lkml.org/lkml/2020/6/27/64
-
- If there are any valid, but yet not changed URLs:
- See: https://lkml.org/lkml/2020/6/26/837
-
- If you apply the patch, please let me know.
-
-
- net/ceph/ceph_hash.c    | 2 +-
- net/ceph/crush/hash.c   | 2 +-
- net/ceph/crush/mapper.c | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/net/ceph/ceph_hash.c b/net/ceph/ceph_hash.c
-index 9a5850f264ed..81e1e006c540 100644
---- a/net/ceph/ceph_hash.c
-+++ b/net/ceph/ceph_hash.c
-@@ -4,7 +4,7 @@
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 71ee34d160c3..3a733ac33d9b 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -497,10 +497,10 @@ static int __set_xattr(struct ceph_inode_info *ci,
+ 		kfree(*newxattr);
+ 		*newxattr = NULL;
+ 		if (xattr->should_free_val)
+-			kfree((void *)xattr->val);
++			kfree(xattr->val);
  
- /*
-  * Robert Jenkin's hash function.
-- * http://burtleburtle.net/bob/hash/evahash.html
-+ * https://burtleburtle.net/bob/hash/evahash.html
-  * This is in the public domain.
-  */
- #define mix(a, b, c)						\
-diff --git a/net/ceph/crush/hash.c b/net/ceph/crush/hash.c
-index e5cc603cdb17..fe79f6d2d0db 100644
---- a/net/ceph/crush/hash.c
-+++ b/net/ceph/crush/hash.c
-@@ -7,7 +7,7 @@
+ 		if (update_xattr) {
+-			kfree((void *)name);
++			kfree(name);
+ 			name = xattr->name;
+ 		}
+ 		ci->i_xattrs.names_size -= xattr->name_len;
+@@ -566,9 +566,9 @@ static void __free_xattr(struct ceph_inode_xattr *xattr)
+ 	BUG_ON(!xattr);
  
- /*
-  * Robert Jenkins' function for mixing 32-bit values
-- * http://burtleburtle.net/bob/hash/evahash.html
-+ * https://burtleburtle.net/bob/hash/evahash.html
-  * a, b = random bits, c = input and output
-  */
- #define crush_hashmix(a, b, c) do {			\
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 3f323ed9df52..07e5614eb3f1 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -298,7 +298,7 @@ static __u64 crush_ln(unsigned int xin)
-  *
-  * for reference, see:
-  *
-- * http://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
-+ * https://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
-  *
-  */
+ 	if (xattr->should_free_name)
+-		kfree((void *)xattr->name);
++		kfree(xattr->name);
+ 	if (xattr->should_free_val)
+-		kfree((void *)xattr->val);
++		kfree(xattr->val);
  
+ 	kfree(xattr);
+ }
+@@ -582,9 +582,9 @@ static int __remove_xattr(struct ceph_inode_info *ci,
+ 	rb_erase(&xattr->node, &ci->i_xattrs.index);
+ 
+ 	if (xattr->should_free_name)
+-		kfree((void *)xattr->name);
++		kfree(xattr->name);
+ 	if (xattr->should_free_val)
+-		kfree((void *)xattr->val);
++		kfree(xattr->val);
+ 
+ 	ci->i_xattrs.names_size -= xattr->name_len;
+ 	ci->i_xattrs.vals_size -= xattr->val_len;
 -- 
-2.27.0
+2.17.1
