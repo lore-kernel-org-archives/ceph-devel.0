@@ -1,83 +1,96 @@
-From: Xiubo Li <xiubli@redhat.com>
-Subject: Re: [PATCH] ceph: do not access the kiocb after aio reqeusts
-Date: Tue, 7 Jul 2020 06:55:45 +0800
-Message-ID: <012e8448-bd4f-26f8-b9e2-690c80b6f01d@redhat.com>
-References: <20200706125135.23511-1-xiubli@redhat.com>
- <ae2bc42cc3434f62ea99f1df32729360a27e487c.camel@kernel.org>
+From: "Alexander A. Klimov" <grandmaster@al2klimov.de>
+Subject: [PATCH] Replace HTTP links with HTTPS ones: CEPH COMMON CODE (LIBCEPH)
+Date: Wed,  8 Jul 2020 08:53:28 +0200
+Message-ID: <20200708065328.13031-1-grandmaster@al2klimov.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:36844 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726280AbgGFW4F (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jul 2020 18:56:05 -0400
-In-Reply-To: <ae2bc42cc3434f62ea99f1df32729360a27e487c.camel@kernel.org>
-Content-Language: en-US
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35378 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729535AbgGHGxk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2020 02:53:40 -0400
+Received: from smtp.al2klimov.de (smtp.al2klimov.de [IPv6:2a01:4f8:c0c:1465::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5ECAC061755
+        for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2020 23:53:39 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: idryomov@gmail.com, zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
+To: idryomov@gmail.com, jlayton@kernel.org, davem@davemloft.net, kuba@kernel.org, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: "Alexander A. Klimov" <grandmaster@al2klimov.de>
 
-On 2020/7/7 0:17, Jeff Layton wrote:
-> On Mon, 2020-07-06 at 08:51 -0400, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> In aio case, if the completion comes very fast just before the
->> ceph_read_iter() returns to fs/aio.c, the kiocb will be freed in
->> the completion callback, then if ceph_read_iter() access again
->> we will potentially hit the use-after-free bug.
->>
->> URL: https://tracker.ceph.com/issues/45649
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   fs/ceph/file.c | 9 ++++++---
->>   1 file changed, 6 insertions(+), 3 deletions(-)
->>
->> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> index 160644ddaeed..704bae794054 100644
->> --- a/fs/ceph/file.c
->> +++ b/fs/ceph/file.c
->> @@ -1538,6 +1538,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
->>   	struct inode *inode = file_inode(filp);
->>   	struct ceph_inode_info *ci = ceph_inode(inode);
->>   	struct page *pinned_page = NULL;
->> +	bool direct_lock = false;
-> Looks good. I made a slight change to this patch and had it initialize
-> this variable to iocb->ki_flags & IOCB_DIRECT, and then use that rather
-> than setting direct_lock in the true case. Merged into testing.
+Rationale:
+Reduces attack surface on kernel devs opening the links for MITM
+as HTTPS traffic is much harder to manipulate.
 
-Okay, looks good to me.
+Deterministic algorithm:
+For each file:
+  If not .svg:
+    For each line:
+      If doesn't contain `\bxmlns\b`:
+        For each link, `\bhttp://[^# \t\r\n]*(?:\w|/)`:
+	  If neither `\bgnu\.org/license`, nor `\bmozilla\.org/MPL\b`:
+            If both the HTTP and HTTPS versions
+            return 200 OK and serve the same content:
+              Replace HTTP with HTTPS.
 
-Thanks Jeff.
+Signed-off-by: Alexander A. Klimov <grandmaster@al2klimov.de>
+---
+ Continuing my work started at 93431e0607e5.
+ See also: git log --oneline '--author=Alexander A. Klimov <grandmaster@al2klimov.de>' v5.7..master
+ (Actually letting a shell for loop submit all this stuff for me.)
+
+ If there are any URLs to be removed completely or at least not HTTPSified:
+ Just clearly say so and I'll *undo my change*.
+ See also: https://lkml.org/lkml/2020/6/27/64
+
+ If there are any valid, but yet not changed URLs:
+ See: https://lkml.org/lkml/2020/6/26/837
+
+ If you apply the patch, please let me know.
 
 
-> Thanks!
->
->>   	ssize_t ret;
->>   	int want, got = 0;
->>   	int retry_op = 0, read = 0;
->> @@ -1546,10 +1547,12 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
->>   	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
->>   	     inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len, inode);
->>   
->> -	if (iocb->ki_flags & IOCB_DIRECT)
->> +	if (iocb->ki_flags & IOCB_DIRECT) {
->>   		ceph_start_io_direct(inode);
->> -	else
->> +		direct_lock = true;
->> +	} else {
->>   		ceph_start_io_read(inode);
->> +	}
->>   
->>   	if (fi->fmode & CEPH_FILE_MODE_LAZY)
->>   		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
->> @@ -1603,7 +1606,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
->>   	}
->>   	ceph_put_cap_refs(ci, got);
->>   
->> -	if (iocb->ki_flags & IOCB_DIRECT)
->> +	if (direct_lock)
->>   		ceph_end_io_direct(inode);
->>   	else
->>   		ceph_end_io_read(inode);
+ net/ceph/ceph_hash.c    | 2 +-
+ net/ceph/crush/hash.c   | 2 +-
+ net/ceph/crush/mapper.c | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/ceph/ceph_hash.c b/net/ceph/ceph_hash.c
+index 9a5850f264ed..81e1e006c540 100644
+--- a/net/ceph/ceph_hash.c
++++ b/net/ceph/ceph_hash.c
+@@ -4,7 +4,7 @@
+ 
+ /*
+  * Robert Jenkin's hash function.
+- * http://burtleburtle.net/bob/hash/evahash.html
++ * https://burtleburtle.net/bob/hash/evahash.html
+  * This is in the public domain.
+  */
+ #define mix(a, b, c)						\
+diff --git a/net/ceph/crush/hash.c b/net/ceph/crush/hash.c
+index e5cc603cdb17..fe79f6d2d0db 100644
+--- a/net/ceph/crush/hash.c
++++ b/net/ceph/crush/hash.c
+@@ -7,7 +7,7 @@
+ 
+ /*
+  * Robert Jenkins' function for mixing 32-bit values
+- * http://burtleburtle.net/bob/hash/evahash.html
++ * https://burtleburtle.net/bob/hash/evahash.html
+  * a, b = random bits, c = input and output
+  */
+ #define crush_hashmix(a, b, c) do {			\
+diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
+index 3f323ed9df52..07e5614eb3f1 100644
+--- a/net/ceph/crush/mapper.c
++++ b/net/ceph/crush/mapper.c
+@@ -298,7 +298,7 @@ static __u64 crush_ln(unsigned int xin)
+  *
+  * for reference, see:
+  *
+- * http://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
++ * https://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
+  *
+  */
+ 
+-- 
+2.27.0
