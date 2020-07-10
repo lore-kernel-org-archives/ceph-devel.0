@@ -1,47 +1,54 @@
-From: ''Tayeb Souami'' <dreyes@elsol.com.pe>
-Subject: =?utf-8?q?Covid_19_Wohlt=C3=A4tigkeitsfonds?=
-Date: Wed, 08 Jul 2020 09:16:22 +0200
-Message-ID: <20200708072012.09977608E2B@mail.elsol.com.pe>
-Reply-To: Tayebsouam.spende@gmail.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+From: simon gao <simon29rock@gmail.com>
+Subject: [PATCH] net : client only want latest osdmap.  If the gap with the latest version exceeds the threshold, mon will send the fullosdmap instead of incremental osdmap
+Date: Fri, 10 Jul 2020 00:39:04 -0400
+Message-ID: <1594355944-7137-1-git-send-email-simon29rock@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.elsol.com.pe ([170.231.82.35]:40891 "EHLO
-        mail.elsol.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728592AbgGHLuG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2020 07:50:06 -0400
-Content-Description: Mail message body
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37318 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725777AbgGJEic (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2020 00:38:32 -0400
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com [IPv6:2607:f8b0:4864:20::1041])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A717EC08C5CE
+        for <ceph-devel@vger.kernel.org>; Thu,  9 Jul 2020 21:38:32 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id k5so2063105pjg.3
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2020 21:38:32 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <dreyes@elsol.com.pe>
+To: ceph-devel@vger.kernel.org
+Cc: simon gao <simon29rock@gmail.com>
 
-Lieber Freund,
+Fix: https://tracker.ceph.com/issues/43421
+Signed-off-by: simon gao <simon29rock@gmail.com>
+---
+ include/linux/ceph/ceph_fs.h | 1 +
+ net/ceph/mon_client.c        | 3 ++-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-Ich bin Herr Tayeb Souami, New Jersey, Vereinigte Staaten von Amerika, der =
-Mega-Gewinner von $ 315million In Mega Millions Jackpot, spende ich an 5 zu=
-f=C3=A4llige Personen, wenn Sie diese E-Mail erhalten, dann wurde Ihre E-Ma=
-il nach einem Spinball ausgew=C3=A4hlt.Ich habe den gr=C3=B6=C3=9Ften Teil =
-meines Verm=C3=B6gens auf eine Reihe von Wohlt=C3=A4tigkeitsorganisationen =
-und Organisationen verteilt.Ich habe mich freiwillig dazu entschieden, die =
-Summe von =E2=82=AC 2.000.000,00 an Sie als eine der ausgew=C3=A4hlten 5 zu=
- spenden, um meine Gewinne zu =C3=BCberpr=C3=BCfen, sehen Sie bitte meine Y=
-ou Tube Seite unten.
-
-UHR MICH HIER: https://www.youtube.com/watch?v=3DZ6ui8ZDQ6Ks
-
-
-
-Das ist dein Spendencode: [TS530342018]
-
-
-
-Antworten Sie mit dem SPENDE-CODE an diese
-
-E-Mail:Tayebsouam.spende@gmail.com
-
-
-Ich hoffe, Sie und Ihre Familie gl=C3=BCcklich zu machen.
-
-Gr=C3=BC=C3=9Fe
-Herr Tayeb Souami
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index ebf5ba6..9dcc132 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -208,6 +208,7 @@ struct ceph_client_mount {
+ } __attribute__ ((packed));
+ 
+ #define CEPH_SUBSCRIBE_ONETIME    1  /* i want only 1 update after have */
++#define CEPH_SUBSCRIBE_LATEST_OSDMAP   2  /* i want the latest fullmap, for client */ 
+ 
+ struct ceph_mon_subscribe_item {
+ 	__le64 start;
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 3d8c801..b0d1ce6 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -349,7 +349,8 @@ static bool __ceph_monc_want_map(struct ceph_mon_client *monc, int sub,
+ {
+ 	__le64 start = cpu_to_le64(epoch);
+ 	u8 flags = !continuous ? CEPH_SUBSCRIBE_ONETIME : 0;
+-
++    if (CEPH_SUB_OSDMAP == sub)
++        flags |= CEPH_SUBSCRIBE_LATEST_OSDMAP
+ 	dout("%s %s epoch %u continuous %d\n", __func__, ceph_sub_str[sub],
+ 	     epoch, continuous);
+ 
+-- 
+1.8.3.1
