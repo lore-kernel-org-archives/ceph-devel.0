@@ -1,254 +1,319 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 10/14] fscache: Remove fscache_attr_changed()
-Date: Mon, 13 Jul 2020 17:29:40 +0100
-Message-ID: <159465778073.1376105.8734566018842067911.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 11/14] fscache: Remove obsolete stats
+Date: Mon, 13 Jul 2020 17:29:52 +0100
+Message-ID: <159465779249.1376105.6558118346084695285.stgit@warthog.procyon.org.uk>
 References: <159465766378.1376105.11619976251039287525.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <159465766378.1376105.11619976251039287525.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Trond Myklebust <trondmy-F/q8l9xzQnoyLce1RVWEUA@public.gmane.org>, Anna Schumaker <anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Matthew Wilcox <willy-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Wysochanski <dwysocha-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-cachefs-bounces@redhat.com>
+In-Reply-To: <159465766378.1376105.11619976251039287525.stgit@warthog.procyon.org.uk>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/linux-cachefs>
+List-Post: <mailto:linux-cachefs@redhat.com>
+List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
+Sender: linux-cachefs-bounces@redhat.com
+Errors-To: linux-cachefs-bounces@redhat.com
+To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Matthew Wilcox <willy@infradead.org>
+Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org
 List-Id: ceph-devel.vger.kernel.org
 
-Remove fscache_attr_changed() as it's unused.
+Remove a bunch of now-unused fscache stats counters that were obsoleted by
+the removal of the old I/O routines.
 
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/cachefiles/interface.c     |   13 ++---
- fs/fscache/Makefile           |    3 -
- fs/fscache/page.c             |   98 -----------------------------------------
- include/linux/fscache-cache.h |    4 --
- include/linux/fscache.h       |   21 ---------
- 5 files changed, 6 insertions(+), 133 deletions(-)
- delete mode 100644 fs/fscache/page.c
+ fs/fscache/internal.h |   61 -----------------------
+ fs/fscache/stats.c    |  129 -------------------------------------------------
+ 2 files changed, 1 insertion(+), 189 deletions(-)
 
-diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
-index a3837ed090a8..81322e3acadd 100644
---- a/fs/cachefiles/interface.c
-+++ b/fs/cachefiles/interface.c
-@@ -10,7 +10,7 @@
- #include <linux/xattr.h>
- #include "internal.h"
- 
--static int cachefiles_attr_changed(struct fscache_object *_object);
-+static int cachefiles_attr_changed(struct cachefiles_object *object);
- 
- /*
-  * allocate an object record for a cookie lookup and prepare the lookup data
-@@ -110,7 +110,7 @@ static int cachefiles_lookup_object(struct fscache_object *_object)
- 	/* polish off by setting the attributes of non-index files */
- 	if (ret == 0 &&
- 	    object->fscache.cookie->type != FSCACHE_COOKIE_TYPE_INDEX)
--		cachefiles_attr_changed(&object->fscache);
-+		cachefiles_attr_changed(object);
- 
- 	if (ret < 0 && ret != -ETIMEDOUT) {
- 		if (ret != -ENOBUFS)
-@@ -324,9 +324,8 @@ static void cachefiles_sync_cache(struct fscache_cache *_cache)
-  * notification the attributes on an object have changed
-  * - called with reads/writes excluded by FS-Cache
+diff --git a/fs/fscache/internal.h b/fs/fscache/internal.h
+index 20cbd1288b5a..360137fd19a7 100644
+--- a/fs/fscache/internal.h
++++ b/fs/fscache/internal.h
+@@ -166,9 +166,6 @@ extern void fscache_proc_cleanup(void);
+  * stats.c
   */
--static int cachefiles_attr_changed(struct fscache_object *_object)
-+static int cachefiles_attr_changed(struct cachefiles_object *object)
- {
--	struct cachefiles_object *object;
- 	struct cachefiles_cache *cache;
- 	const struct cred *saved_cred;
- 	struct iattr newattrs;
-@@ -334,12 +333,11 @@ static int cachefiles_attr_changed(struct fscache_object *_object)
- 	loff_t oi_size;
- 	int ret;
+ #ifdef CONFIG_FSCACHE_STATS
+-extern atomic_t fscache_n_ops_processed[FSCACHE_MAX_THREADS];
+-extern atomic_t fscache_n_objs_processed[FSCACHE_MAX_THREADS];
+-
+ extern atomic_t fscache_n_op_pend;
+ extern atomic_t fscache_n_op_run;
+ extern atomic_t fscache_n_op_enqueue;
+@@ -179,52 +176,6 @@ extern atomic_t fscache_n_op_gc;
+ extern atomic_t fscache_n_op_cancelled;
+ extern atomic_t fscache_n_op_rejected;
  
--	ni_size = _object->cookie->object_size;
-+	ni_size = object->fscache.cookie->object_size;
+-extern atomic_t fscache_n_attr_changed;
+-extern atomic_t fscache_n_attr_changed_ok;
+-extern atomic_t fscache_n_attr_changed_nobufs;
+-extern atomic_t fscache_n_attr_changed_nomem;
+-extern atomic_t fscache_n_attr_changed_calls;
+-
+-extern atomic_t fscache_n_allocs;
+-extern atomic_t fscache_n_allocs_ok;
+-extern atomic_t fscache_n_allocs_wait;
+-extern atomic_t fscache_n_allocs_nobufs;
+-extern atomic_t fscache_n_allocs_intr;
+-extern atomic_t fscache_n_allocs_object_dead;
+-extern atomic_t fscache_n_alloc_ops;
+-extern atomic_t fscache_n_alloc_op_waits;
+-
+-extern atomic_t fscache_n_retrievals;
+-extern atomic_t fscache_n_retrievals_ok;
+-extern atomic_t fscache_n_retrievals_wait;
+-extern atomic_t fscache_n_retrievals_nodata;
+-extern atomic_t fscache_n_retrievals_nobufs;
+-extern atomic_t fscache_n_retrievals_intr;
+-extern atomic_t fscache_n_retrievals_nomem;
+-extern atomic_t fscache_n_retrievals_object_dead;
+-extern atomic_t fscache_n_retrieval_ops;
+-extern atomic_t fscache_n_retrieval_op_waits;
+-
+-extern atomic_t fscache_n_stores;
+-extern atomic_t fscache_n_stores_ok;
+-extern atomic_t fscache_n_stores_again;
+-extern atomic_t fscache_n_stores_nobufs;
+-extern atomic_t fscache_n_stores_oom;
+-extern atomic_t fscache_n_store_ops;
+-extern atomic_t fscache_n_store_calls;
+-extern atomic_t fscache_n_store_pages;
+-extern atomic_t fscache_n_store_radix_deletes;
+-extern atomic_t fscache_n_store_pages_over_limit;
+-
+-extern atomic_t fscache_n_store_vmscan_not_storing;
+-extern atomic_t fscache_n_store_vmscan_gone;
+-extern atomic_t fscache_n_store_vmscan_busy;
+-extern atomic_t fscache_n_store_vmscan_cancelled;
+-extern atomic_t fscache_n_store_vmscan_wait;
+-
+-extern atomic_t fscache_n_marks;
+-extern atomic_t fscache_n_uncaches;
+-
+ extern atomic_t fscache_n_acquires;
+ extern atomic_t fscache_n_acquires_null;
+ extern atomic_t fscache_n_acquires_no_cache;
+@@ -241,7 +192,6 @@ extern atomic_t fscache_n_updates_run;
  
- 	_enter("{OBJ%x},[%llu]",
--	       _object->debug_id, (unsigned long long) ni_size);
-+	       object->fscache.debug_id, (unsigned long long) ni_size);
+ extern atomic_t fscache_n_relinquishes;
+ extern atomic_t fscache_n_relinquishes_null;
+-extern atomic_t fscache_n_relinquishes_waitcrt;
+ extern atomic_t fscache_n_relinquishes_retire;
  
--	object = container_of(_object, struct cachefiles_object, fscache);
- 	cache = container_of(object->fscache.cache,
- 			     struct cachefiles_cache, cache);
+ extern atomic_t fscache_n_cookie_index;
+@@ -258,11 +208,6 @@ extern atomic_t fscache_n_object_created;
+ extern atomic_t fscache_n_object_avail;
+ extern atomic_t fscache_n_object_dead;
  
-@@ -442,5 +440,4 @@ const struct fscache_cache_ops cachefiles_cache_ops = {
- 	.drop_object		= cachefiles_drop_object,
- 	.put_object		= cachefiles_put_object,
- 	.sync_cache		= cachefiles_sync_cache,
--	.attr_changed		= cachefiles_attr_changed,
- };
-diff --git a/fs/fscache/Makefile b/fs/fscache/Makefile
-index 79e08e05ef84..565a3441d31d 100644
---- a/fs/fscache/Makefile
-+++ b/fs/fscache/Makefile
-@@ -10,8 +10,7 @@ fscache-y := \
- 	main.o \
- 	netfs.o \
- 	object.o \
--	operation.o \
--	page.o
-+	operation.o
+-extern atomic_t fscache_n_checkaux_none;
+-extern atomic_t fscache_n_checkaux_okay;
+-extern atomic_t fscache_n_checkaux_update;
+-extern atomic_t fscache_n_checkaux_obsolete;
+-
+ extern atomic_t fscache_n_cop_alloc_object;
+ extern atomic_t fscache_n_cop_lookup_object;
+ extern atomic_t fscache_n_cop_lookup_complete;
+@@ -273,12 +218,6 @@ extern atomic_t fscache_n_cop_drop_object;
+ extern atomic_t fscache_n_cop_put_object;
+ extern atomic_t fscache_n_cop_sync_cache;
+ extern atomic_t fscache_n_cop_attr_changed;
+-extern atomic_t fscache_n_cop_read_or_alloc_page;
+-extern atomic_t fscache_n_cop_read_or_alloc_pages;
+-extern atomic_t fscache_n_cop_allocate_page;
+-extern atomic_t fscache_n_cop_allocate_pages;
+-extern atomic_t fscache_n_cop_write_page;
+-extern atomic_t fscache_n_cop_uncache_page;
  
- fscache-$(CONFIG_PROC_FS) += proc.o
- fscache-$(CONFIG_FSCACHE_STATS) += stats.o
-diff --git a/fs/fscache/page.c b/fs/fscache/page.c
-deleted file mode 100644
-index 73636e9d652d..000000000000
---- a/fs/fscache/page.c
-+++ /dev/null
-@@ -1,98 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0-or-later
--/* Cache page management and data I/O routines
-- *
-- * Copyright (C) 2004-2008 Red Hat, Inc. All Rights Reserved.
-- * Written by David Howells (dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)
-- */
--
--#define FSCACHE_DEBUG_LEVEL PAGE
--#include <linux/module.h>
--#include <linux/fscache-cache.h>
--#include <linux/buffer_head.h>
--#include <linux/pagevec.h>
--#include <linux/slab.h>
--#include "internal.h"
--
--/*
-- * actually apply the changed attributes to a cache object
-- */
--static void fscache_attr_changed_op(struct fscache_operation *op)
--{
--	struct fscache_object *object = op->object;
--	int ret;
--
--	_enter("{OBJ%x OP%x}", object->debug_id, op->debug_id);
--
--	fscache_stat(&fscache_n_attr_changed_calls);
--
--	if (fscache_object_is_active(object)) {
--		fscache_stat(&fscache_n_cop_attr_changed);
--		ret = object->cache->ops->attr_changed(object);
--		fscache_stat_d(&fscache_n_cop_attr_changed);
--		if (ret < 0)
--			fscache_abort_object(object);
--		fscache_op_complete(op, ret < 0);
--	} else {
--		fscache_op_complete(op, true);
--	}
--
--	_leave("");
--}
--
--/*
-- * notification that the attributes on an object have changed
-- */
--int __fscache_attr_changed(struct fscache_cookie *cookie)
--{
--	struct fscache_operation *op;
--	struct fscache_object *object;
--	bool wake_cookie = false;
--
--	_enter("%p", cookie);
--
--	ASSERTCMP(cookie->type, !=, FSCACHE_COOKIE_TYPE_INDEX);
--
--	fscache_stat(&fscache_n_attr_changed);
--
--	op = kzalloc(sizeof(*op), GFP_KERNEL);
--	if (!op) {
--		fscache_stat(&fscache_n_attr_changed_nomem);
--		_leave(" = -ENOMEM");
--		return -ENOMEM;
--	}
--
--	fscache_operation_init(cookie, op, fscache_attr_changed_op, NULL, NULL);
--	trace_fscache_page_op(cookie, NULL, op, fscache_page_op_attr_changed);
--	op->flags = FSCACHE_OP_ASYNC |
--		(1 << FSCACHE_OP_EXCLUSIVE) |
--		(1 << FSCACHE_OP_UNUSE_COOKIE);
--
--	spin_lock(&cookie->lock);
--
--	if (!fscache_cookie_enabled(cookie) ||
--	    hlist_empty(&cookie->backing_objects))
--		goto nobufs;
--	object = hlist_entry(cookie->backing_objects.first,
--			     struct fscache_object, cookie_link);
--
--	__fscache_use_cookie(cookie);
--	if (fscache_submit_exclusive_op(object, op) < 0)
--		goto nobufs_dec;
--	spin_unlock(&cookie->lock);
--	fscache_stat(&fscache_n_attr_changed_ok);
--	fscache_put_operation(op);
--	_leave(" = 0");
--	return 0;
--
--nobufs_dec:
--	wake_cookie = __fscache_unuse_cookie(cookie);
--nobufs:
--	spin_unlock(&cookie->lock);
--	fscache_put_operation(op);
--	if (wake_cookie)
--		__fscache_wake_unused_cookie(cookie);
--	fscache_stat(&fscache_n_attr_changed_nobufs);
--	_leave(" = %d", -ENOBUFS);
--	return -ENOBUFS;
--}
--EXPORT_SYMBOL(__fscache_attr_changed);
-diff --git a/include/linux/fscache-cache.h b/include/linux/fscache-cache.h
-index bd9411cd466f..60b2f8288668 100644
---- a/include/linux/fscache-cache.h
-+++ b/include/linux/fscache-cache.h
-@@ -184,10 +184,6 @@ struct fscache_cache_ops {
- 	/* sync a cache */
- 	void (*sync_cache)(struct fscache_cache *cache);
+ extern atomic_t fscache_n_cache_no_space_reject;
+ extern atomic_t fscache_n_cache_stale_objects;
+diff --git a/fs/fscache/stats.c b/fs/fscache/stats.c
+index 281022871e70..5b1cec456199 100644
+--- a/fs/fscache/stats.c
++++ b/fs/fscache/stats.c
+@@ -24,52 +24,6 @@ atomic_t fscache_n_op_gc;
+ atomic_t fscache_n_op_cancelled;
+ atomic_t fscache_n_op_rejected;
  
--	/* notification that the attributes of a non-index object (such as
--	 * i_size) have changed */
--	int (*attr_changed)(struct fscache_object *object);
+-atomic_t fscache_n_attr_changed;
+-atomic_t fscache_n_attr_changed_ok;
+-atomic_t fscache_n_attr_changed_nobufs;
+-atomic_t fscache_n_attr_changed_nomem;
+-atomic_t fscache_n_attr_changed_calls;
 -
- 	/* reserve space for an object's data and associated metadata */
- 	int (*reserve_space)(struct fscache_object *object, loff_t i_size);
- };
-diff --git a/include/linux/fscache.h b/include/linux/fscache.h
-index 76cfec6868de..c62b62938c4d 100644
---- a/include/linux/fscache.h
-+++ b/include/linux/fscache.h
-@@ -140,7 +140,6 @@ extern struct fscache_cookie *__fscache_acquire_cookie(
- 	loff_t, bool);
- extern void __fscache_relinquish_cookie(struct fscache_cookie *, const void *, bool);
- extern void __fscache_update_cookie(struct fscache_cookie *, const void *);
--extern int __fscache_attr_changed(struct fscache_cookie *);
- extern void __fscache_invalidate(struct fscache_cookie *);
- extern void __fscache_wait_on_invalidate(struct fscache_cookie *);
- extern void __fscache_disable_cookie(struct fscache_cookie *, const void *, bool);
-@@ -337,26 +336,6 @@ void fscache_unpin_cookie(struct fscache_cookie *cookie)
- {
- }
+-atomic_t fscache_n_allocs;
+-atomic_t fscache_n_allocs_ok;
+-atomic_t fscache_n_allocs_wait;
+-atomic_t fscache_n_allocs_nobufs;
+-atomic_t fscache_n_allocs_intr;
+-atomic_t fscache_n_allocs_object_dead;
+-atomic_t fscache_n_alloc_ops;
+-atomic_t fscache_n_alloc_op_waits;
+-
+-atomic_t fscache_n_retrievals;
+-atomic_t fscache_n_retrievals_ok;
+-atomic_t fscache_n_retrievals_wait;
+-atomic_t fscache_n_retrievals_nodata;
+-atomic_t fscache_n_retrievals_nobufs;
+-atomic_t fscache_n_retrievals_intr;
+-atomic_t fscache_n_retrievals_nomem;
+-atomic_t fscache_n_retrievals_object_dead;
+-atomic_t fscache_n_retrieval_ops;
+-atomic_t fscache_n_retrieval_op_waits;
+-
+-atomic_t fscache_n_stores;
+-atomic_t fscache_n_stores_ok;
+-atomic_t fscache_n_stores_again;
+-atomic_t fscache_n_stores_nobufs;
+-atomic_t fscache_n_stores_oom;
+-atomic_t fscache_n_store_ops;
+-atomic_t fscache_n_store_calls;
+-atomic_t fscache_n_store_pages;
+-atomic_t fscache_n_store_radix_deletes;
+-atomic_t fscache_n_store_pages_over_limit;
+-
+-atomic_t fscache_n_store_vmscan_not_storing;
+-atomic_t fscache_n_store_vmscan_gone;
+-atomic_t fscache_n_store_vmscan_busy;
+-atomic_t fscache_n_store_vmscan_cancelled;
+-atomic_t fscache_n_store_vmscan_wait;
+-
+-atomic_t fscache_n_marks;
+-atomic_t fscache_n_uncaches;
+-
+ atomic_t fscache_n_acquires;
+ atomic_t fscache_n_acquires_null;
+ atomic_t fscache_n_acquires_no_cache;
+@@ -86,7 +40,6 @@ atomic_t fscache_n_updates_run;
  
--/**
-- * fscache_attr_changed - Notify cache that an object's attributes changed
-- * @cookie: The cookie representing the cache object
-- *
-- * Send a notification to the cache indicating that an object's attributes have
-- * changed.  This includes the data size.  These attributes will be obtained
-- * through the get_attr() cookie definition op.
-- *
-- * See Documentation/filesystems/caching/netfs-api.rst for a complete
-- * description.
-- */
--static inline
--int fscache_attr_changed(struct fscache_cookie *cookie)
--{
--	if (fscache_cookie_valid(cookie) && fscache_cookie_enabled(cookie))
--		return __fscache_attr_changed(cookie);
--	else
--		return -ENOBUFS;
--}
+ atomic_t fscache_n_relinquishes;
+ atomic_t fscache_n_relinquishes_null;
+-atomic_t fscache_n_relinquishes_waitcrt;
+ atomic_t fscache_n_relinquishes_retire;
+ 
+ atomic_t fscache_n_cookie_index;
+@@ -103,11 +56,6 @@ atomic_t fscache_n_object_created;
+ atomic_t fscache_n_object_avail;
+ atomic_t fscache_n_object_dead;
+ 
+-atomic_t fscache_n_checkaux_none;
+-atomic_t fscache_n_checkaux_okay;
+-atomic_t fscache_n_checkaux_update;
+-atomic_t fscache_n_checkaux_obsolete;
 -
- /**
-  * fscache_invalidate - Notify cache that an object needs invalidation
-  * @cookie: The cookie representing the cache object
+ atomic_t fscache_n_cop_alloc_object;
+ atomic_t fscache_n_cop_lookup_object;
+ atomic_t fscache_n_cop_lookup_complete;
+@@ -118,12 +66,6 @@ atomic_t fscache_n_cop_drop_object;
+ atomic_t fscache_n_cop_put_object;
+ atomic_t fscache_n_cop_sync_cache;
+ atomic_t fscache_n_cop_attr_changed;
+-atomic_t fscache_n_cop_read_or_alloc_page;
+-atomic_t fscache_n_cop_read_or_alloc_pages;
+-atomic_t fscache_n_cop_allocate_page;
+-atomic_t fscache_n_cop_allocate_pages;
+-atomic_t fscache_n_cop_write_page;
+-atomic_t fscache_n_cop_uncache_page;
+ 
+ atomic_t fscache_n_cache_no_space_reject;
+ atomic_t fscache_n_cache_stale_objects;
+@@ -147,15 +89,6 @@ int fscache_stats_show(struct seq_file *m, void *v)
+ 		   atomic_read(&fscache_n_object_no_alloc),
+ 		   atomic_read(&fscache_n_object_avail),
+ 		   atomic_read(&fscache_n_object_dead));
+-	seq_printf(m, "ChkAux : non=%u ok=%u upd=%u obs=%u\n",
+-		   atomic_read(&fscache_n_checkaux_none),
+-		   atomic_read(&fscache_n_checkaux_okay),
+-		   atomic_read(&fscache_n_checkaux_update),
+-		   atomic_read(&fscache_n_checkaux_obsolete));
+-
+-	seq_printf(m, "Pages  : mrk=%u unc=%u\n",
+-		   atomic_read(&fscache_n_marks),
+-		   atomic_read(&fscache_n_uncaches));
+ 
+ 	seq_printf(m, "Acquire: n=%u nul=%u noc=%u ok=%u nbf=%u"
+ 		   " oom=%u\n",
+@@ -182,64 +115,11 @@ int fscache_stats_show(struct seq_file *m, void *v)
+ 		   atomic_read(&fscache_n_updates_null),
+ 		   atomic_read(&fscache_n_updates_run));
+ 
+-	seq_printf(m, "Relinqs: n=%u nul=%u wcr=%u rtr=%u\n",
++	seq_printf(m, "Relinqs: n=%u nul=%u rtr=%u\n",
+ 		   atomic_read(&fscache_n_relinquishes),
+ 		   atomic_read(&fscache_n_relinquishes_null),
+-		   atomic_read(&fscache_n_relinquishes_waitcrt),
+ 		   atomic_read(&fscache_n_relinquishes_retire));
+ 
+-	seq_printf(m, "AttrChg: n=%u ok=%u nbf=%u oom=%u run=%u\n",
+-		   atomic_read(&fscache_n_attr_changed),
+-		   atomic_read(&fscache_n_attr_changed_ok),
+-		   atomic_read(&fscache_n_attr_changed_nobufs),
+-		   atomic_read(&fscache_n_attr_changed_nomem),
+-		   atomic_read(&fscache_n_attr_changed_calls));
+-
+-	seq_printf(m, "Allocs : n=%u ok=%u wt=%u nbf=%u int=%u\n",
+-		   atomic_read(&fscache_n_allocs),
+-		   atomic_read(&fscache_n_allocs_ok),
+-		   atomic_read(&fscache_n_allocs_wait),
+-		   atomic_read(&fscache_n_allocs_nobufs),
+-		   atomic_read(&fscache_n_allocs_intr));
+-	seq_printf(m, "Allocs : ops=%u owt=%u abt=%u\n",
+-		   atomic_read(&fscache_n_alloc_ops),
+-		   atomic_read(&fscache_n_alloc_op_waits),
+-		   atomic_read(&fscache_n_allocs_object_dead));
+-
+-	seq_printf(m, "Retrvls: n=%u ok=%u wt=%u nod=%u nbf=%u"
+-		   " int=%u oom=%u\n",
+-		   atomic_read(&fscache_n_retrievals),
+-		   atomic_read(&fscache_n_retrievals_ok),
+-		   atomic_read(&fscache_n_retrievals_wait),
+-		   atomic_read(&fscache_n_retrievals_nodata),
+-		   atomic_read(&fscache_n_retrievals_nobufs),
+-		   atomic_read(&fscache_n_retrievals_intr),
+-		   atomic_read(&fscache_n_retrievals_nomem));
+-	seq_printf(m, "Retrvls: ops=%u owt=%u abt=%u\n",
+-		   atomic_read(&fscache_n_retrieval_ops),
+-		   atomic_read(&fscache_n_retrieval_op_waits),
+-		   atomic_read(&fscache_n_retrievals_object_dead));
+-
+-	seq_printf(m, "Stores : n=%u ok=%u agn=%u nbf=%u oom=%u\n",
+-		   atomic_read(&fscache_n_stores),
+-		   atomic_read(&fscache_n_stores_ok),
+-		   atomic_read(&fscache_n_stores_again),
+-		   atomic_read(&fscache_n_stores_nobufs),
+-		   atomic_read(&fscache_n_stores_oom));
+-	seq_printf(m, "Stores : ops=%u run=%u pgs=%u rxd=%u olm=%u\n",
+-		   atomic_read(&fscache_n_store_ops),
+-		   atomic_read(&fscache_n_store_calls),
+-		   atomic_read(&fscache_n_store_pages),
+-		   atomic_read(&fscache_n_store_radix_deletes),
+-		   atomic_read(&fscache_n_store_pages_over_limit));
+-
+-	seq_printf(m, "VmScan : nos=%u gon=%u bsy=%u can=%u wt=%u\n",
+-		   atomic_read(&fscache_n_store_vmscan_not_storing),
+-		   atomic_read(&fscache_n_store_vmscan_gone),
+-		   atomic_read(&fscache_n_store_vmscan_busy),
+-		   atomic_read(&fscache_n_store_vmscan_cancelled),
+-		   atomic_read(&fscache_n_store_vmscan_wait));
+-
+ 	seq_printf(m, "Ops    : pend=%u run=%u enq=%u can=%u rej=%u\n",
+ 		   atomic_read(&fscache_n_op_pend),
+ 		   atomic_read(&fscache_n_op_run),
+@@ -264,13 +144,6 @@ int fscache_stats_show(struct seq_file *m, void *v)
+ 		   atomic_read(&fscache_n_cop_put_object),
+ 		   atomic_read(&fscache_n_cop_attr_changed),
+ 		   atomic_read(&fscache_n_cop_sync_cache));
+-	seq_printf(m, "CacheOp: rap=%d ras=%d alp=%d als=%d wrp=%d ucp=%d\n",
+-		   atomic_read(&fscache_n_cop_read_or_alloc_page),
+-		   atomic_read(&fscache_n_cop_read_or_alloc_pages),
+-		   atomic_read(&fscache_n_cop_allocate_page),
+-		   atomic_read(&fscache_n_cop_allocate_pages),
+-		   atomic_read(&fscache_n_cop_write_page),
+-		   atomic_read(&fscache_n_cop_uncache_page));
+ 	seq_printf(m, "CacheEv: nsp=%d stl=%d rtr=%d cul=%d\n",
+ 		   atomic_read(&fscache_n_cache_no_space_reject),
+ 		   atomic_read(&fscache_n_cache_stale_objects),
