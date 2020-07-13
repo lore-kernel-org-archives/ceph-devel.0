@@ -1,104 +1,74 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 08/13] afs: Note the amount transferred in
-	fetch-data delivery
-Date: Mon, 13 Jul 2020 17:38:32 +0100
-Message-ID: <159465831290.1377938.10075677476527399814.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 09/13] afs: Wait on PG_fscache before modifying/releasing a
+ page
+Date: Mon, 13 Jul 2020 17:38:44 +0100
+Message-ID: <159465832417.1377938.3571599385208729791.stgit@warthog.procyon.org.uk>
 References: <159465821598.1377938.2046362270225008168.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 In-Reply-To: <159465821598.1377938.2046362270225008168.stgit@warthog.procyon.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
+Sender: linux-fsdevel-owner@vger.kernel.org
 To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Matthew Wilcox <willy@infradead.org>
-Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org
+Cc: Jeff Layton <jlayton@redhat.com>, Dave Wysochanski <dwysocha@redhat.com>, dhowells@redhat.com, linux-cachefs@redhat.com, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Note the amount of data transferred in the fscache request op structure in
-the delivery/decode routines for the various FetchData operations.
+PG_fscache is going to be used to indicate that a page is being written to
+the cache, and that the page should not be modified or released until it's
+finished.
 
-Also, we need to exclude the excess from this value and then we need to use
-this in directory read rather than actual_len.
+Make afs_invalidatepage() and afs_releasepage() wait for it.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/afs/dir.c       |    9 ++++-----
- fs/afs/fsclient.c  |    5 +++++
- fs/afs/yfsclient.c |    5 +++++
- 3 files changed, 14 insertions(+), 5 deletions(-)
+ fs/afs/file.c  |    7 +++++++
+ fs/afs/write.c |    9 +++++++++
+ 2 files changed, 16 insertions(+)
 
-diff --git a/fs/afs/dir.c b/fs/afs/dir.c
-index 9d47df15c790..03ef09330d10 100644
---- a/fs/afs/dir.c
-+++ b/fs/afs/dir.c
-@@ -209,9 +209,8 @@ static void afs_dir_dump(struct afs_vnode *dvnode, struct afs_read *req)
- 	pr_warn("DIR %llx:%llx f=%llx l=%llx al=%llx\n",
- 		dvnode->fid.vid, dvnode->fid.vnode,
- 		req->file_size, req->cache.len, req->actual_len);
--	pr_warn("DIR %llx %x %zx %zx\n",
--		req->cache.pos, req->cache.nr_pages,
--		req->iter->iov_offset,  iov_iter_count(req->iter));
-+	pr_warn("DIR %llx %x %llx\n",
-+		req->cache.pos, req->cache.nr_pages, req->cache.transferred);
+diff --git a/fs/afs/file.c b/fs/afs/file.c
+index 8baafe655433..2f9a7369b77b 100644
+--- a/fs/afs/file.c
++++ b/fs/afs/file.c
+@@ -580,6 +580,13 @@ static int afs_releasepage(struct page *page, gfp_t gfp_flags)
  
- 	xas_for_each(&xas, page, last) {
- 		if (xas_retry(&xas, page))
-@@ -321,7 +320,7 @@ static struct afs_read *afs_read_dir(struct afs_vnode *dvnode, struct key *key)
- 
- 	nr_pages = (i_size + PAGE_SIZE - 1) / PAGE_SIZE;
- 
--	req->actual_len = i_size; /* May change */
-+	req->cache.transferred = i_size; /* May change */
- 	req->cache.len = nr_pages * PAGE_SIZE; /* We can ask for more than there is */
- 	req->data_version = dvnode->status.data_version; /* May change */
- 	iov_iter_mapping(&req->def_iter, READ, dvnode->vfs_inode.i_mapping,
-@@ -546,7 +545,7 @@ static int afs_dir_iterate(struct inode *dir, struct dir_context *ctx,
- 
- 	/* walk through the blocks in sequence */
- 	ret = 0;
--	while (ctx->pos < req->actual_len) {
-+	while (ctx->pos < req->cache.transferred) {
- 		blkoff = ctx->pos & ~(sizeof(union afs_xdr_dir_block) - 1);
- 
- 		/* Fetch the appropriate page from the directory and re-add it
-diff --git a/fs/afs/fsclient.c b/fs/afs/fsclient.c
-index d6a8066e666d..e729a19f28c5 100644
---- a/fs/afs/fsclient.c
-+++ b/fs/afs/fsclient.c
-@@ -393,6 +393,11 @@ static int afs_deliver_fs_fetch_data(struct afs_call *call)
- 		break;
+ 	/* deny if page is being written to the cache and the caller hasn't
+ 	 * elected to wait */
++#ifdef CONFIG_AFS_FSCACHE
++	if (PageFsCache(page)) {
++		if (!(gfp_flags & __GFP_DIRECT_RECLAIM) || !(gfp_flags & __GFP_FS))
++			return false;
++	}
++#endif
++
+ 	if (PagePrivate(page)) {
+ 		priv = page_private(page);
+ 		trace_afs_page_dirty(vnode, tracepoint_string("rel"),
+diff --git a/fs/afs/write.c b/fs/afs/write.c
+index d9de0dc877ca..73e2f4c93512 100644
+--- a/fs/afs/write.c
++++ b/fs/afs/write.c
+@@ -125,6 +125,10 @@ int afs_write_begin(struct file *file, struct address_space *mapping,
+ 		SetPageUptodate(page);
  	}
  
-+	/* Pass the call's ref on the read request descriptor to the completion
-+	 * handler.
-+	 */
-+	req->cache.transferred = min(req->actual_len, req->cache.len);
-+	set_bit(FSCACHE_IO_DATA_FROM_SERVER, &req->cache.flags);
- 	if (req->cache.io_done)
- 		req->cache.io_done(&req->cache);
++#ifdef CONFIG_AFS_FSCACHE
++	wait_on_page_fscache(page);
++#endif
++
+ 	/* page won't leak in error case: it eventually gets cleaned off LRU */
+ 	*pagep = page;
  
-diff --git a/fs/afs/yfsclient.c b/fs/afs/yfsclient.c
-index 30621f4fffc0..4ead0c1f9014 100644
---- a/fs/afs/yfsclient.c
-+++ b/fs/afs/yfsclient.c
-@@ -450,6 +450,11 @@ static int yfs_deliver_fs_fetch_data64(struct afs_call *call)
- 		break;
- 	}
+@@ -849,6 +853,11 @@ vm_fault_t afs_page_mkwrite(struct vm_fault *vmf)
+ 	/* Wait for the page to be written to the cache before we allow it to
+ 	 * be modified.  We then assume the entire page will need writing back.
+ 	 */
++#ifdef CONFIG_AFS_FSCACHE
++	if (PageFsCache(vmf->page) &&
++	    wait_on_page_bit_killable(vmf->page, PG_fscache) < 0)
++		return VM_FAULT_RETRY;
++#endif
  
-+	/* Pass the call's ref on the read request descriptor to the completion
-+	 * handler.
-+	 */
-+	req->cache.transferred = min(req->actual_len, req->cache.len);
-+	set_bit(FSCACHE_IO_DATA_FROM_SERVER, &req->cache.flags);
- 	if (req->cache.io_done)
- 		req->cache.io_done(&req->cache);
- 
+ 	if (PageWriteback(vmf->page) &&
+ 	    wait_on_page_bit_killable(vmf->page, PG_writeback) < 0)
