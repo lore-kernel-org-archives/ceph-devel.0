@@ -1,195 +1,99 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 15/32] cachefiles: trace: Log coherency
-	checks
-Date: Mon, 13 Jul 2020 17:33:29 +0100
-Message-ID: <159465800942.1376674.11074050532334474977.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 16/32] cachefiles: Split cachefiles_drop_object() up a bit
+Date: Mon, 13 Jul 2020 17:33:38 +0100
+Message-ID: <159465801837.1376674.800536726710094793.stgit@warthog.procyon.org.uk>
 References: <159465784033.1376674.18106463693989811037.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
-In-Reply-To: <159465784033.1376674.18106463693989811037.stgit@warthog.procyon.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
-To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Matthew Wilcox <willy@infradead.org>
-Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <159465784033.1376674.18106463693989811037.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Trond Myklebust <trondmy-F/q8l9xzQnoyLce1RVWEUA@public.gmane.org>, Anna Schumaker <anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Matthew Wilcox <willy-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Wysochanski <dwysocha-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Add a cachefiles tracepoint that logs the result of coherency management
-when the coherency data on a file in the cache is checked or committed.
+Split cachefiles_drop_object() up a bit to make it easier to modify later.
 
-Signed-off-by: David Howells <dhowells@redhat.com>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
 
- fs/cachefiles/xattr.c             |   45 ++++++++++++++++++++++--------
- include/trace/events/cachefiles.h |   56 +++++++++++++++++++++++++++++++++++++
- 2 files changed, 89 insertions(+), 12 deletions(-)
+ fs/cachefiles/interface.c |   58 ++++++++++++++++++++++++++++++---------------
+ 1 file changed, 39 insertions(+), 19 deletions(-)
 
-diff --git a/fs/cachefiles/xattr.c b/fs/cachefiles/xattr.c
-index 5b2f6da91cc8..17c16c2bd07e 100644
---- a/fs/cachefiles/xattr.c
-+++ b/fs/cachefiles/xattr.c
-@@ -125,12 +125,21 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object,
- 	ret = vfs_setxattr(dentry, cachefiles_xattr_cache,
- 			   buf, sizeof(struct cachefiles_xattr) + len,
- 			   xattr_flags);
--	kfree(buf);
--	if (ret < 0 && ret != -ENOMEM)
--		cachefiles_io_error_obj(
--			object,
--			"Failed to set xattr with error %d", ret);
-+	if (ret < 0) {
-+		trace_cachefiles_coherency(object, d_inode(dentry)->i_ino,
-+					   0,
-+					   cachefiles_coherency_set_fail);
-+		if (ret != -ENOMEM)
-+			cachefiles_io_error_obj(
-+				object,
-+				"Failed to set xattr with error %d", ret);
-+	} else {
-+		trace_cachefiles_coherency(object, d_inode(dentry)->i_ino,
-+					   0,
-+					   cachefiles_coherency_set_ok);
-+	}
- 
-+	kfree(buf);
- 	_leave(" = %d", ret);
- 	return ret;
+diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
+index e4d1a82b9f33..56ed6f203e1c 100644
+--- a/fs/cachefiles/interface.c
++++ b/fs/cachefiles/interface.c
+@@ -192,6 +192,42 @@ static void cachefiles_update_object(struct fscache_object *_object)
+ 	_leave("");
  }
-@@ -144,7 +153,9 @@ int cachefiles_check_auxdata(struct cachefiles_object *object)
- 	struct dentry *dentry = object->dentry;
- 	unsigned int len = object->fscache.cookie->aux_len, tlen;
- 	const void *p = fscache_get_aux(object->fscache.cookie);
--	ssize_t ret;
-+	enum cachefiles_coherency_trace why;
-+	ssize_t xlen;
-+	int ret = -ESTALE;
  
- 	ASSERT(dentry);
- 	ASSERT(d_backing_inode(dentry));
-@@ -154,14 +165,24 @@ int cachefiles_check_auxdata(struct cachefiles_object *object)
- 	if (!buf)
- 		return -ENOMEM;
- 
--	ret = vfs_getxattr(dentry, cachefiles_xattr_cache, buf, tlen);
--	if (ret == tlen &&
--	    buf->type == object->fscache.cookie->type &&
--	    memcmp(buf->data, p, len) == 0)
-+	xlen = vfs_getxattr(dentry, cachefiles_xattr_cache, buf, tlen);
-+	if (xlen != tlen) {
-+		if (xlen == -EIO)
-+			cachefiles_io_error_obj(
-+				object,
-+				"Failed to read aux with error %zd", xlen);
-+		why = cachefiles_coherency_check_xattr;
-+	} else if (buf->type != object->fscache.cookie->type) {
-+		why = cachefiles_coherency_check_type;
-+	} else if (memcmp(buf->data, p, len) != 0) {
-+		why = cachefiles_coherency_check_aux;
++/*
++ * Commit changes to the object as we drop it.
++ */
++static void cachefiles_commit_object(struct cachefiles_object *object,
++				     struct cachefiles_cache *cache)
++{
++}
++
++/*
++ * Finalise and object and close the VFS structs that we have.
++ */
++static void cachefiles_clean_up_object(struct cachefiles_object *object,
++				       struct cachefiles_cache *cache,
++				       bool invalidate)
++{
++	if (invalidate && &object->fscache != cache->cache.fsdef) {
++		_debug("- inval object OBJ%x", object->fscache.debug_id);
++		cachefiles_delete_object(cache, object);
 +	} else {
-+		why = cachefiles_coherency_check_ok;
- 		ret = 0;
--	else
--		ret = -ESTALE;
-+	}
- 
-+	trace_cachefiles_coherency(object, d_inode(dentry)->i_ino,
-+				   0, why);
- 	kfree(buf);
- 	return ret;
- }
-diff --git a/include/trace/events/cachefiles.h b/include/trace/events/cachefiles.h
-index 0aa3f3126f6e..bf588c3f4a07 100644
---- a/include/trace/events/cachefiles.h
-+++ b/include/trace/events/cachefiles.h
-@@ -24,6 +24,19 @@ enum cachefiles_obj_ref_trace {
- 	cachefiles_obj_ref__nr_traces
- };
- 
-+enum cachefiles_coherency_trace {
-+	cachefiles_coherency_check_aux,
-+	cachefiles_coherency_check_content,
-+	cachefiles_coherency_check_dirty,
-+	cachefiles_coherency_check_len,
-+	cachefiles_coherency_check_objsize,
-+	cachefiles_coherency_check_ok,
-+	cachefiles_coherency_check_type,
-+	cachefiles_coherency_check_xattr,
-+	cachefiles_coherency_set_fail,
-+	cachefiles_coherency_set_ok,
-+};
++		cachefiles_commit_object(object, cache);
++ 	}
 +
- #endif
- 
- /*
-@@ -56,6 +69,18 @@ enum cachefiles_obj_ref_trace {
- 	EM(cachefiles_obj_put_wait_retry,	"PUT wait_retry")	\
- 	E_(cachefiles_obj_put_wait_timeo,	"PUT wait_timeo")
- 
-+#define cachefiles_coherency_traces					\
-+	EM(cachefiles_coherency_check_aux,	"BAD aux ")		\
-+	EM(cachefiles_coherency_check_content,	"BAD cont")		\
-+	EM(cachefiles_coherency_check_dirty,	"BAD dirt")		\
-+	EM(cachefiles_coherency_check_len,	"BAD len ")		\
-+	EM(cachefiles_coherency_check_objsize,	"BAD osiz")		\
-+	EM(cachefiles_coherency_check_ok,	"OK      ")		\
-+	EM(cachefiles_coherency_check_type,	"BAD type")		\
-+	EM(cachefiles_coherency_check_xattr,	"BAD xatt")		\
-+	EM(cachefiles_coherency_set_fail,	"SET fail")		\
-+	E_(cachefiles_coherency_set_ok,		"SET ok  ")
++	/* close the filesystem stuff attached to the object */
++	if (object->backing_file)
++		fput(object->backing_file);
++	object->backing_file = NULL;
++
++	if (object->backer != object->dentry)
++		dput(object->backer);
++	object->backer = NULL;
++
++	cachefiles_unmark_inode_in_use(object, object->dentry);
++	dput(object->dentry);
++	object->dentry = NULL;
++}
 +
  /*
-  * Export enum symbols via userspace.
-  */
-@@ -66,6 +91,7 @@ enum cachefiles_obj_ref_trace {
+  * discard the resources pinned by an object and effect retirement if
+  * requested
+@@ -223,25 +259,9 @@ static void cachefiles_drop_object(struct fscache_object *_object,
+ 	 * before we set it up.
+ 	 */
+ 	if (object->dentry) {
+-		if (invalidate && _object != cache->cache.fsdef) {
+-			_debug("- inval object OBJ%x", object->fscache.debug_id);
+-			cachefiles_begin_secure(cache, &saved_cred);
+-			cachefiles_delete_object(cache, object);
+-			cachefiles_end_secure(cache, saved_cred);
+-		}
+-
+-		/* close the filesystem stuff attached to the object */
+-		if (object->backing_file)
+-			fput(object->backing_file);
+-		object->backing_file = NULL;
+-
+-		if (object->backer != object->dentry)
+-			dput(object->backer);
+-		object->backer = NULL;
+-
+-		cachefiles_unmark_inode_in_use(object, object->dentry);
+-		dput(object->dentry);
+-		object->dentry = NULL;
++		cachefiles_begin_secure(cache, &saved_cred);
++		cachefiles_clean_up_object(object, cache, invalidate);
++		cachefiles_end_secure(cache, saved_cred);
+ 	}
  
- cachefiles_obj_kill_traces;
- cachefiles_obj_ref_traces;
-+cachefiles_coherency_traces;
- 
- /*
-  * Now redefine the EM() and E_() macros to map the enums to the strings that
-@@ -295,6 +321,36 @@ TRACE_EVENT(cachefiles_mark_buried,
- 		      __print_symbolic(__entry->why, cachefiles_obj_kill_traces))
- 	    );
- 
-+TRACE_EVENT(cachefiles_coherency,
-+	    TP_PROTO(struct cachefiles_object *obj,
-+		     ino_t ino,
-+		     int content,
-+		     enum cachefiles_coherency_trace why),
-+
-+	    TP_ARGS(obj, ino, content, why),
-+
-+	    /* Note that obj may be NULL */
-+	    TP_STRUCT__entry(
-+		    __field(unsigned int,			obj	)
-+		    __field(enum cachefiles_coherency_trace,	why	)
-+		    __field(int,				content	)
-+		    __field(u64,				ino	)
-+			     ),
-+
-+	    TP_fast_assign(
-+		    __entry->obj	= obj->fscache.debug_id;
-+		    __entry->why	= why;
-+		    __entry->content	= content;
-+		    __entry->ino	= ino;
-+			   ),
-+
-+	    TP_printk("o=%08x %s i=%llx c=%u",
-+		      __entry->obj,
-+		      __print_symbolic(__entry->why, cachefiles_coherency_traces),
-+		      __entry->ino,
-+		      __entry->content)
-+	    );
-+
- #endif /* _TRACE_CACHEFILES_H */
- 
- /* This part must be outside protection */
+ 	_leave("");
