@@ -1,250 +1,76 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 03/13] afs: Don't truncate iter during data
-	fetch
-Date: Mon, 13 Jul 2020 17:37:30 +0100
-Message-ID: <159465825061.1377938.14403904452300909320.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 04/13] afs: Log remote unmarshalling errors
+Date: Mon, 13 Jul 2020 17:37:42 +0100
+Message-ID: <159465826250.1377938.16372395422217583913.stgit@warthog.procyon.org.uk>
 References: <159465821598.1377938.2046362270225008168.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
-In-Reply-To: <159465821598.1377938.2046362270225008168.stgit@warthog.procyon.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
-To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Matthew Wilcox <willy@infradead.org>
-Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <159465821598.1377938.2046362270225008168.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Trond Myklebust <trondmy-F/q8l9xzQnoyLce1RVWEUA@public.gmane.org>, Anna Schumaker <anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Matthew Wilcox <willy-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Wysochanski <dwysocha-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Don't truncate the iterator to correspond to the actual data size when
-fetching the data from the server - rather, pass the length we want to read
-to rxrpc.
+Log unmarshalling errors reported by the peer (ie. it can't parse what we
+sent it).  Limit the maximum number of messages to 3.
 
-This will allow the clear-after-read code in future to simply clear the
-remaining iterator capacity rather than having to reinitialise the
-iterator.
-
-Signed-off-by: David Howells <dhowells@redhat.com>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
 
- fs/afs/fsclient.c      |    6 ++++--
- fs/afs/internal.h      |    6 ++++++
- fs/afs/rxrpc.c         |   13 +++++++++----
- fs/afs/yfsclient.c     |    6 ++++--
- include/net/af_rxrpc.h |    2 +-
- net/rxrpc/recvmsg.c    |    9 +++++----
- 6 files changed, 29 insertions(+), 13 deletions(-)
+ fs/afs/rxrpc.c |   34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
 
-diff --git a/fs/afs/fsclient.c b/fs/afs/fsclient.c
-index acb4d0ca2649..3ed95f3e47be 100644
---- a/fs/afs/fsclient.c
-+++ b/fs/afs/fsclient.c
-@@ -305,8 +305,9 @@ static int afs_deliver_fs_fetch_data(struct afs_call *call)
- 	unsigned int size;
- 	int ret;
- 
--	_enter("{%u,%zu/%llu}",
--	       call->unmarshall, iov_iter_count(call->iter), req->actual_len);
-+	_enter("{%u,%zu,%zu/%llu}",
-+	       call->unmarshall, call->iov_len, iov_iter_count(call->iter),
-+	       req->actual_len);
- 
- 	switch (call->unmarshall) {
- 	case 0:
-@@ -343,6 +344,7 @@ static int afs_deliver_fs_fetch_data(struct afs_call *call)
- 			size = PAGE_SIZE - req->offset;
- 		else
- 			size = req->remain;
-+		call->iov_len = size;
- 		call->bvec[0].bv_len = size;
- 		call->bvec[0].bv_offset = req->offset;
- 		call->bvec[0].bv_page = req->pages[req->index];
-diff --git a/fs/afs/internal.h b/fs/afs/internal.h
-index 644a04ce83a3..bf26fd28ccbd 100644
---- a/fs/afs/internal.h
-+++ b/fs/afs/internal.h
-@@ -104,6 +104,7 @@ struct afs_call {
- 	struct afs_server	*server;	/* The fileserver record if fs op (pins ref) */
- 	struct afs_vlserver	*vlserver;	/* The vlserver record if vl op */
- 	void			*request;	/* request data (first part) */
-+	size_t			iov_len;	/* Size of *iter to be used */
- 	struct iov_iter		def_iter;	/* Default buffer/data iterator */
- 	struct iov_iter		*iter;		/* Iterator currently in use */
- 	union {	/* Convenience for ->def_iter */
-@@ -1194,6 +1195,7 @@ static inline void afs_make_op_call(struct afs_operation *op, struct afs_call *c
- 
- static inline void afs_extract_begin(struct afs_call *call, void *buf, size_t size)
- {
-+	call->iov_len = size;
- 	call->kvec[0].iov_base = buf;
- 	call->kvec[0].iov_len = size;
- 	iov_iter_kvec(&call->def_iter, READ, call->kvec, 1, size);
-@@ -1201,21 +1203,25 @@ static inline void afs_extract_begin(struct afs_call *call, void *buf, size_t si
- 
- static inline void afs_extract_to_tmp(struct afs_call *call)
- {
-+	call->iov_len = sizeof(call->tmp);
- 	afs_extract_begin(call, &call->tmp, sizeof(call->tmp));
- }
- 
- static inline void afs_extract_to_tmp64(struct afs_call *call)
- {
-+	call->iov_len = sizeof(call->tmp64);
- 	afs_extract_begin(call, &call->tmp64, sizeof(call->tmp64));
- }
- 
- static inline void afs_extract_discard(struct afs_call *call, size_t size)
- {
-+	call->iov_len = size;
- 	iov_iter_discard(&call->def_iter, READ, size);
- }
- 
- static inline void afs_extract_to_buf(struct afs_call *call, size_t size)
- {
-+	call->iov_len = size;
- 	afs_extract_begin(call, call->buffer, size);
- }
- 
 diff --git a/fs/afs/rxrpc.c b/fs/afs/rxrpc.c
-index 8fc8fb406a5a..3b90ecf7958d 100644
+index 3b90ecf7958d..48361bbd4859 100644
 --- a/fs/afs/rxrpc.c
 +++ b/fs/afs/rxrpc.c
-@@ -363,6 +363,7 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
- 	struct rxrpc_call *rxcall;
- 	struct msghdr msg;
- 	struct kvec iov[1];
-+	size_t len;
- 	s64 tx_total_len;
- 	int ret;
+@@ -500,6 +500,39 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ 	_leave(" = %d", ret);
+ }
  
-@@ -466,9 +467,10 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
- 		rxrpc_kernel_abort_call(call->net->socket, rxcall,
- 					RX_USER_ABORT, ret, "KSD");
- 	} else {
-+		len = 0;
- 		iov_iter_kvec(&msg.msg_iter, READ, NULL, 0, 0);
- 		rxrpc_kernel_recv_data(call->net->socket, rxcall,
--				       &msg.msg_iter, false,
-+				       &msg.msg_iter, &len, false,
- 				       &call->abort_code, &call->service_id);
- 		ac->abort_code = call->abort_code;
- 		ac->responded = true;
-@@ -504,6 +506,7 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
- static void afs_deliver_to_call(struct afs_call *call)
- {
- 	enum afs_call_state state;
-+	size_t len;
- 	u32 abort_code, remote_abort = 0;
- 	int ret;
- 
-@@ -516,10 +519,11 @@ static void afs_deliver_to_call(struct afs_call *call)
- 	       state == AFS_CALL_SV_AWAIT_ACK
- 	       ) {
- 		if (state == AFS_CALL_SV_AWAIT_ACK) {
-+			len = 0;
- 			iov_iter_kvec(&call->def_iter, READ, NULL, 0, 0);
- 			ret = rxrpc_kernel_recv_data(call->net->socket,
- 						     call->rxcall, &call->def_iter,
--						     false, &remote_abort,
-+						     &len, false, &remote_abort,
- 						     &call->service_id);
- 			trace_afs_receive_data(call, &call->def_iter, false, ret);
- 
-@@ -929,10 +933,11 @@ int afs_extract_data(struct afs_call *call, bool want_more)
- 	u32 remote_abort = 0;
- 	int ret;
- 
--	_enter("{%s,%zu},%d", call->type->name, iov_iter_count(iter), want_more);
-+	_enter("{%s,%zu,%zu},%d",
-+	       call->type->name, call->iov_len, iov_iter_count(iter), want_more);
- 
- 	ret = rxrpc_kernel_recv_data(net->socket, call->rxcall, iter,
--				     want_more, &remote_abort,
-+				     &call->iov_len, want_more, &remote_abort,
- 				     &call->service_id);
- 	if (ret == 0 || ret == -EAGAIN)
- 		return ret;
-diff --git a/fs/afs/yfsclient.c b/fs/afs/yfsclient.c
-index 8c24fdc899e3..a53bcea8740c 100644
---- a/fs/afs/yfsclient.c
-+++ b/fs/afs/yfsclient.c
-@@ -363,8 +363,9 @@ static int yfs_deliver_fs_fetch_data64(struct afs_call *call)
- 	unsigned int size;
- 	int ret;
- 
--	_enter("{%u,%zu/%llu}",
--	       call->unmarshall, iov_iter_count(call->iter), req->actual_len);
-+	_enter("{%u,%zu, %zu/%llu}",
-+	       call->unmarshall, call->iov_len, iov_iter_count(call->iter),
-+	       req->actual_len);
- 
- 	switch (call->unmarshall) {
- 	case 0:
-@@ -396,6 +397,7 @@ static int yfs_deliver_fs_fetch_data64(struct afs_call *call)
- 			size = PAGE_SIZE - req->offset;
- 		else
- 			size = req->remain;
-+		call->iov_len = size;
- 		call->bvec[0].bv_len = size;
- 		call->bvec[0].bv_offset = req->offset;
- 		call->bvec[0].bv_page = req->pages[req->index];
-diff --git a/include/net/af_rxrpc.h b/include/net/af_rxrpc.h
-index 91eacbdcf33d..076bf895be1d 100644
---- a/include/net/af_rxrpc.h
-+++ b/include/net/af_rxrpc.h
-@@ -53,7 +53,7 @@ int rxrpc_kernel_send_data(struct socket *, struct rxrpc_call *,
- 			   struct msghdr *, size_t,
- 			   rxrpc_notify_end_tx_t);
- int rxrpc_kernel_recv_data(struct socket *, struct rxrpc_call *,
--			   struct iov_iter *, bool, u32 *, u16 *);
-+			   struct iov_iter *, size_t *, bool, u32 *, u16 *);
- bool rxrpc_kernel_abort_call(struct socket *, struct rxrpc_call *,
- 			     u32, int, const char *);
- void rxrpc_kernel_end_call(struct socket *, struct rxrpc_call *);
-diff --git a/net/rxrpc/recvmsg.c b/net/rxrpc/recvmsg.c
-index 2989742a4aa1..ea3c42c417b3 100644
---- a/net/rxrpc/recvmsg.c
-+++ b/net/rxrpc/recvmsg.c
-@@ -703,6 +703,7 @@ int rxrpc_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
-  * @sock: The socket that the call exists on
-  * @call: The call to send data through
-  * @iter: The buffer to receive into
-+ * @_len: The amount of data we want to receive (decreased on return)
-  * @want_more: True if more data is expected to be read
-  * @_abort: Where the abort code is stored if -ECONNABORTED is returned
-  * @_service: Where to store the actual service ID (may be upgraded)
-@@ -718,7 +719,7 @@ int rxrpc_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
-  * *_abort should also be initialised to 0.
++/*
++ * Log remote abort codes that indicate that we have a protocol disagreement
++ * with the server.
++ */
++static void afs_log_error(struct afs_call *call, s32 remote_abort)
++{
++	static int max = 0;
++	const char *msg;
++	int m;
++
++	switch (remote_abort) {
++	case RX_EOF:		 msg = "unexpected EOF";	break;
++	case RXGEN_CC_MARSHAL:	 msg = "client marshalling";	break;
++	case RXGEN_CC_UNMARSHAL: msg = "client unmarshalling";	break;
++	case RXGEN_SS_MARSHAL:	 msg = "server marshalling";	break;
++	case RXGEN_SS_UNMARSHAL: msg = "server unmarshalling";	break;
++	case RXGEN_DECODE:	 msg = "opcode decode";		break;
++	case RXGEN_SS_XDRFREE:	 msg = "server XDR cleanup";	break;
++	case RXGEN_CC_XDRFREE:	 msg = "client XDR cleanup";	break;
++	case -32:		 msg = "insufficient data";	break;
++	default:
++		return;
++	}
++
++	m = max;
++	if (m < 3) {
++		max = m + 1;
++		pr_notice("kAFS: Peer reported %s failure on %s [%pISp]\n",
++			  msg, call->type->name,
++			  &call->alist->addrs[call->addr_ix].transport);
++	}
++}
++
+ /*
+  * deliver messages to a call
   */
- int rxrpc_kernel_recv_data(struct socket *sock, struct rxrpc_call *call,
--			   struct iov_iter *iter,
-+			   struct iov_iter *iter, size_t *_len,
- 			   bool want_more, u32 *_abort, u16 *_service)
- {
- 	size_t offset = 0;
-@@ -726,7 +727,7 @@ int rxrpc_kernel_recv_data(struct socket *sock, struct rxrpc_call *call,
- 
- 	_enter("{%d,%s},%zu,%d",
- 	       call->debug_id, rxrpc_call_states[call->state],
--	       iov_iter_count(iter), want_more);
-+	       *_len, want_more);
- 
- 	ASSERTCMP(call->state, !=, RXRPC_CALL_SERVER_ACCEPTING);
- 
-@@ -737,8 +738,8 @@ int rxrpc_kernel_recv_data(struct socket *sock, struct rxrpc_call *call,
- 	case RXRPC_CALL_SERVER_RECV_REQUEST:
- 	case RXRPC_CALL_SERVER_ACK_REQUEST:
- 		ret = rxrpc_recvmsg_data(sock, call, NULL, iter,
--					 iov_iter_count(iter), 0,
--					 &offset);
-+					 *_len, 0, &offset);
-+		*_len -= offset;
- 		if (ret < 0)
+@@ -563,6 +596,7 @@ static void afs_deliver_to_call(struct afs_call *call)
  			goto out;
- 
+ 		case -ECONNABORTED:
+ 			ASSERTCMP(state, ==, AFS_CALL_COMPLETE);
++			afs_log_error(call, call->abort_code);
+ 			goto done;
+ 		case -ENOTSUPP:
+ 			abort_code = RXGEN_OPCODE;
