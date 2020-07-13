@@ -1,67 +1,132 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph : client only want latest osdmap. If the gap with
- the latest version exceeds the threshold, mon will send the fullosdmap
- instead of incremental osdmap
-Date: Mon, 13 Jul 2020 16:01:51 +0200
-Message-ID: <CAOi1vP9Qu4QZcpLBYcpmxfsBFh-p0MxOFKw75qZH6QM=AusSPQ@mail.gmail.com>
-References: <1594439373-2120-1-git-send-email-simon29rock@gmail.com>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 00/14] fscache: Rewrite 1: Disable and clean
+ in preparation for rewrite
+Date: Mon, 13 Jul 2020 17:27:43 +0100
+Message-ID: <159465766378.1376105.11619976251039287525.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53568 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729695AbgGMOBr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2020 10:01:47 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17F2CC061755
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2020 07:01:47 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id x9so11249047ila.3
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2020 07:01:47 -0700 (PDT)
-In-Reply-To: <1594439373-2120-1-git-send-email-simon29rock@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: simon gao <simon29rock@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-cachefs-bounces@redhat.com>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/linux-cachefs>
+List-Post: <mailto:linux-cachefs@redhat.com>
+List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
+Sender: linux-cachefs-bounces@redhat.com
+Errors-To: linux-cachefs-bounces@redhat.com
+To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Matthew Wilcox <willy@infradead.org>
+Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Jul 11, 2020 at 5:52 AM simon gao <simon29rock@gmail.com> wrote:
->
-> Fix: https://tracker.ceph.com/issues/43421
-> Signed-off-by: simon gao <simon29rock@gmail.com>
-> ---
->  include/linux/ceph/ceph_fs.h | 1 +
->  net/ceph/mon_client.c        | 3 ++-
->  2 files changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index ebf5ba6..9dcc132 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -208,6 +208,7 @@ struct ceph_client_mount {
->  } __attribute__ ((packed));
->
->  #define CEPH_SUBSCRIBE_ONETIME    1  /* i want only 1 update after have */
-> +#define CEPH_SUBSCRIBE_LATEST_OSDMAP   2  /* i want the latest fullmap, for client */
->
->  struct ceph_mon_subscribe_item {
->         __le64 start;
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 3d8c801..8d67671 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -349,7 +349,8 @@ static bool __ceph_monc_want_map(struct ceph_mon_client *monc, int sub,
->  {
->         __le64 start = cpu_to_le64(epoch);
->         u8 flags = !continuous ? CEPH_SUBSCRIBE_ONETIME : 0;
-> -
-> +       if (CEPH_SUB_OSDMAP == sub)
-> +            flags |= CEPH_SUBSCRIBE_LATEST_OSDMAP;
->         dout("%s %s epoch %u continuous %d\n", __func__, ceph_sub_str[sub],
->              epoch, continuous);
 
-I left my comments in https://github.com/ceph/ceph/pull/32422.
-This patch cannot be considered unless a corresponding change is
-merged into Objecter.
+Here's a set of patches that disables the network filesystems that use
+fscache and then remove a whole chunk of the fscache codebase pending it
+being rewritten.
 
-Thanks,
+The following parts of fscache have been removed:
 
-                Ilya
+    - The object state machine
+    - The I/O operation manager
+    - All non-transient references from fscache to the netfs's data
+    - All non-transient callbacks from fscache to the netfs
+    - The backing page I/O monitoring
+    - The tracking of netfs pages that fscache knows about
+    - The tracking of netfs pages that need writing to the cache
+    - The use of bmap to work out if a page is stored in the cache
+    - The copy of data to/from backing pages to netfs pages.
+
+The corresponding cachefiles bits have also been removed.
+
+These patches can be found as part of the branch here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=fscache-iter
+
+David
+---
+David Howells (1):
+      fscache: Remove the I/O operation manager
+
+
+ fs/9p/Kconfig                          |    2 +-
+ fs/Makefile                            |    2 +-
+ fs/afs/Kconfig                         |    1 +
+ fs/afs/cache.c                         |   54 --
+ fs/afs/cell.c                          |    9 +-
+ fs/afs/dir.c                           |  242 +++++--
+ fs/afs/file.c                          |  575 +++++++--------
+ fs/afs/fs_operation.c                  |    4 +-
+ fs/afs/fsclient.c                      |  154 ++--
+ fs/afs/inode.c                         |   57 +-
+ fs/afs/internal.h                      |   58 +-
+ fs/afs/rxrpc.c                         |  150 ++--
+ fs/afs/volume.c                        |    9 +-
+ fs/afs/write.c                         |  413 +++++++----
+ fs/afs/yfsclient.c                     |  113 ++-
+ fs/cachefiles/Makefile                 |    3 +-
+ fs/cachefiles/bind.c                   |   11 +-
+ fs/cachefiles/content-map.c            |  476 ++++++++++++
+ fs/cachefiles/daemon.c                 |   10 +-
+ fs/cachefiles/interface.c              |  564 ++++++++-------
+ fs/cachefiles/internal.h               |  139 ++--
+ fs/cachefiles/io.c                     |  279 +++++++
+ fs/cachefiles/main.c                   |   12 +-
+ fs/cachefiles/namei.c                  |  508 +++++--------
+ fs/cachefiles/rdwr.c                   |  974 -------------------------
+ fs/cachefiles/xattr.c                  |  263 +++----
+ fs/ceph/Kconfig                        |    2 +-
+ fs/cifs/Kconfig                        |    2 +-
+ fs/fscache/Kconfig                     |    8 +
+ fs/fscache/Makefile                    |   10 +-
+ fs/fscache/cache.c                     |  136 ++--
+ fs/fscache/cookie.c                    |  769 ++++++++------------
+ fs/fscache/dispatcher.c                |  150 ++++
+ fs/fscache/fsdef.c                     |   56 +-
+ fs/fscache/histogram.c                 |    2 +-
+ fs/fscache/internal.h                  |  260 +++----
+ fs/fscache/io.c                        |  201 +++++
+ fs/fscache/main.c                      |   35 +-
+ fs/fscache/netfs.c                     |   10 +-
+ fs/fscache/obj.c                       |  345 +++++++++
+ fs/fscache/object-list.c               |  129 +---
+ fs/fscache/object.c                    | 1133 -----------------------------
+ fs/fscache/object_bits.c               |  120 +++
+ fs/fscache/operation.c                 |  633 ----------------
+ fs/fscache/page.c                      | 1248 --------------------------------
+ fs/fscache/proc.c                      |   13 +-
+ fs/fscache/read_helper.c               |  688 ++++++++++++++++++
+ fs/fscache/stats.c                     |  265 +++----
+ fs/internal.h                          |    5 -
+ fs/nfs/Kconfig                         |    2 +-
+ fs/nfs/fscache-index.c                 |    4 +-
+ fs/read_write.c                        |    1 +
+ include/linux/fs.h                     |    2 +
+ include/linux/fscache-cache.h          |  508 +++----------
+ include/linux/fscache-obsolete.h       |   13 +
+ include/linux/fscache.h                |  814 ++++++++-------------
+ include/linux/mm.h                     |    1 +
+ include/linux/pagemap.h                |   14 +
+ include/linux/uio.h                    |   11 +
+ include/net/af_rxrpc.h                 |    2 +-
+ include/trace/events/afs.h             |   51 +-
+ include/trace/events/cachefiles.h      |  285 ++++++--
+ include/trace/events/fscache.h         |  421 ++---------
+ include/trace/events/fscache_support.h |   91 +++
+ lib/iov_iter.c                         |  286 +++++++-
+ mm/filemap.c                           |   27 +-
+ net/rxrpc/recvmsg.c                    |    9 +-
+ 67 files changed, 5598 insertions(+), 8246 deletions(-)
+ create mode 100644 fs/cachefiles/content-map.c
+ create mode 100644 fs/cachefiles/io.c
+ delete mode 100644 fs/cachefiles/rdwr.c
+ create mode 100644 fs/fscache/dispatcher.c
+ create mode 100644 fs/fscache/io.c
+ create mode 100644 fs/fscache/obj.c
+ delete mode 100644 fs/fscache/object.c
+ create mode 100644 fs/fscache/object_bits.c
+ delete mode 100644 fs/fscache/operation.c
+ delete mode 100644 fs/fscache/page.c
+ create mode 100644 fs/fscache/read_helper.c
+ create mode 100644 include/linux/fscache-obsolete.h
+ create mode 100644 include/trace/events/fscache_support.h
