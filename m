@@ -1,95 +1,72 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 02/32] vm: Add wait/unlock functions for
-	PG_fscache
-Date: Mon, 13 Jul 2020 17:31:04 +0100
-Message-ID: <159465786405.1376674.15704703594171055681.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 03/32] vfs: Export rw_verify_area() for use by cachefiles
+Date: Mon, 13 Jul 2020 17:31:12 +0100
+Message-ID: <159465787270.1376674.9709773455326854521.stgit@warthog.procyon.org.uk>
 References: <159465784033.1376674.18106463693989811037.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:27010 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1730256AbgGMQbX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Jul 2020 12:31:23 -0400
 In-Reply-To: <159465784033.1376674.18106463693989811037.stgit@warthog.procyon.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Matthew Wilcox <willy@infradead.org>
-Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: Jeff Layton <jlayton@redhat.com>, Dave Wysochanski <dwysocha@redhat.com>, dhowells@redhat.com, linux-cachefs@redhat.com, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Add functions to unlock and wait for unlock of PG_fscache analogously with
-those for PG_lock.
+Export rw_verify_area() for so that cachefiles can use it before issuing
+call_read_iter() and call_write_iter() to effect async DIO operations
+against the cache.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- include/linux/pagemap.h |   14 ++++++++++++++
- mm/filemap.c            |   18 ++++++++++++++++++
- 2 files changed, 32 insertions(+)
+ fs/internal.h      |    5 -----
+ fs/read_write.c    |    1 +
+ include/linux/fs.h |    1 +
+ 3 files changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
-index cf2468da68e9..0b917990dc1e 100644
---- a/include/linux/pagemap.h
-+++ b/include/linux/pagemap.h
-@@ -501,6 +501,7 @@ extern int __lock_page_killable(struct page *page);
- extern int __lock_page_or_retry(struct page *page, struct mm_struct *mm,
- 				unsigned int flags);
- extern void unlock_page(struct page *page);
-+extern void unlock_page_fscache(struct page *page);
+diff --git a/fs/internal.h b/fs/internal.h
+index 9b863a7bd708..8213a29a972f 100644
+--- a/fs/internal.h
++++ b/fs/internal.h
+@@ -156,11 +156,6 @@ extern char *simple_dname(struct dentry *, char *, int);
+ extern void dput_to_list(struct dentry *, struct list_head *);
+ extern void shrink_dentry_list(struct list_head *);
  
+-/*
+- * read_write.c
+- */
+-extern int rw_verify_area(int, struct file *, const loff_t *, size_t);
+-
  /*
-  * Return true if the page was successfully locked
-@@ -575,6 +576,19 @@ static inline int wait_on_page_locked_killable(struct page *page)
- 	return wait_on_page_bit_killable(compound_head(page), PG_locked);
+  * pipe.c
+  */
+diff --git a/fs/read_write.c b/fs/read_write.c
+index bbfa9b12b15e..eb18270a1e14 100644
+--- a/fs/read_write.c
++++ b/fs/read_write.c
+@@ -400,6 +400,7 @@ int rw_verify_area(int read_write, struct file *file, const loff_t *ppos, size_t
+ 	return security_file_permission(file,
+ 				read_write == READ ? MAY_READ : MAY_WRITE);
  }
++EXPORT_SYMBOL(rw_verify_area);
  
-+/**
-+ * wait_on_page_fscache - Wait for PG_fscache to be cleared on a page
-+ * @page: The page
-+ *
-+ * Wait for the fscache mark to be removed from a page, usually signifying the
-+ * completion of a write from that page to the cache.
-+ */
-+static inline void wait_on_page_fscache(struct page *page)
-+{
-+	if (PagePrivate2(page))
-+		wait_on_page_bit(compound_head(page), PG_fscache);
-+}
-+
- extern void put_and_wait_on_page_locked(struct page *page);
+ static ssize_t new_sync_read(struct file *filp, char __user *buf, size_t len, loff_t *ppos)
+ {
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 3f881a892ea7..aa3e3af92220 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -2905,6 +2905,7 @@ extern int notify_change(struct dentry *, struct iattr *, struct inode **);
+ extern int inode_permission(struct inode *, int);
+ extern int generic_permission(struct inode *, int);
+ extern int __check_sticky(struct inode *dir, struct inode *inode);
++extern int rw_verify_area(int, struct file *, const loff_t *, size_t);
  
- void wait_on_page_writeback(struct page *page);
-diff --git a/mm/filemap.c b/mm/filemap.c
-index f0ae9a6308cb..4894e9705d34 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -1293,6 +1293,24 @@ void unlock_page(struct page *page)
- }
- EXPORT_SYMBOL(unlock_page);
- 
-+/**
-+ * unlock_page_fscache - Unlock a page pinned with PG_fscache
-+ * @page: The page
-+ *
-+ * Unlocks the page and wakes up sleepers in wait_on_page_fscache().  Also
-+ * wakes those waiting for the lock and writeback bits because the wakeup
-+ * mechanism is shared.  But that's OK - those sleepers will just go back to
-+ * sleep.
-+ */
-+void unlock_page_fscache(struct page *page)
-+{
-+	page = compound_head(page);
-+	VM_BUG_ON_PAGE(!PagePrivate2(page), page);
-+	clear_bit_unlock(PG_fscache, &page->flags);
-+	wake_up_page_bit(page, PG_fscache);
-+}
-+EXPORT_SYMBOL(unlock_page_fscache);
-+
- /**
-  * end_page_writeback - end writeback against a page
-  * @page: the page
+ static inline bool execute_ok(struct inode *inode)
+ {
