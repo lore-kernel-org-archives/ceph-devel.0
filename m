@@ -1,40 +1,81 @@
-From: Bobby <italienisch1987-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: multiple BLK-MQ queues for Ceph's RADOS Block Device (RBD) and CephFS
-Date: Mon, 13 Jul 2020 20:40:40 +0200
-Message-ID: <CA+xD70OJhkhH=+5W7M8NM54VPh42FmbD3O0yqKe1p-+=yd9zXQ@mail.gmail.com>
+From: simon gao <simon29rock@gmail.com>
+Subject: Re: [PATCH] libceph : client only want latest osdmap. If the gap with
+ the latest version exceeds the threshold, mon will send the fullosdmap
+ instead of incremental osdmap
+Date: Tue, 14 Jul 2020 09:58:24 +0800
+Message-ID: <CAGR3woXcQpE_LUuVM54SAqxdXGEJh1Q_koh_6bJHJQ-sfybnUw@mail.gmail.com>
+References: <1594439373-2120-1-git-send-email-simon29rock@gmail.com> <CAOi1vP9Qu4QZcpLBYcpmxfsBFh-p0MxOFKw75qZH6QM=AusSPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: ceph-users <ceph-users-a8pt6IJUokc@public.gmane.org>, dev <dev-a8pt6IJUokc@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-qa-a8pt6IJUokc@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51074 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726149AbgGNB46 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2020 21:56:58 -0400
+Received: from mail-oi1-x243.google.com (mail-oi1-x243.google.com [IPv6:2607:f8b0:4864:20::243])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 723D9C061755
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2020 18:56:58 -0700 (PDT)
+Received: by mail-oi1-x243.google.com with SMTP id 12so12718238oir.4
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2020 18:56:58 -0700 (PDT)
+In-Reply-To: <CAOi1vP9Qu4QZcpLBYcpmxfsBFh-p0MxOFKw75qZH6QM=AusSPQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+hi idryomov
+I've already replied to you under this patch.
+thanks.
+gao yu
 
-I have a question regarding support for multiple BLK-MQ queues for Ceph's
-RADOS Block Device (RBD). The below given link says that the driver has
-been using the BLK-MQ interface for a while but not actually multiple
-queues until now with having a queue per-CPU. A change to not hold onto
-caps that aren't actually needed.  These improvements and more can be found
-as part of the Ceph changes for Linux 5.7, which should be released as
-stable in early June.
-
-https://www.phoronix.com/scan.php?page=news_item&px=Linux-5.7-Ceph-Performance
-
-My question is: Is it possible that through Ceph FS (Filesystem in User
-Space) I can develop a multi-queue driver for Ceph? Asking because this way
-I can avoid kernel space. (
-https://docs.ceph.com/docs/nautilus/start/quick-cephfs/)
-
-Looking forward for some help
-
-BR
-Bobby
-_______________________________________________
-ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
-To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
+Ilya Dryomov <idryomov@gmail.com> =E4=BA=8E2020=E5=B9=B47=E6=9C=8813=E6=97=
+=A5=E5=91=A8=E4=B8=80 =E4=B8=8B=E5=8D=8810:01=E5=86=99=E9=81=93=EF=BC=9A
+>
+> On Sat, Jul 11, 2020 at 5:52 AM simon gao <simon29rock@gmail.com> wrote:
+> >
+> > Fix: https://tracker.ceph.com/issues/43421
+> > Signed-off-by: simon gao <simon29rock@gmail.com>
+> > ---
+> >  include/linux/ceph/ceph_fs.h | 1 +
+> >  net/ceph/mon_client.c        | 3 ++-
+> >  2 files changed, 3 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.=
+h
+> > index ebf5ba6..9dcc132 100644
+> > --- a/include/linux/ceph/ceph_fs.h
+> > +++ b/include/linux/ceph/ceph_fs.h
+> > @@ -208,6 +208,7 @@ struct ceph_client_mount {
+> >  } __attribute__ ((packed));
+> >
+> >  #define CEPH_SUBSCRIBE_ONETIME    1  /* i want only 1 update after hav=
+e */
+> > +#define CEPH_SUBSCRIBE_LATEST_OSDMAP   2  /* i want the latest fullmap=
+, for client */
+> >
+> >  struct ceph_mon_subscribe_item {
+> >         __le64 start;
+> > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> > index 3d8c801..8d67671 100644
+> > --- a/net/ceph/mon_client.c
+> > +++ b/net/ceph/mon_client.c
+> > @@ -349,7 +349,8 @@ static bool __ceph_monc_want_map(struct ceph_mon_cl=
+ient *monc, int sub,
+> >  {
+> >         __le64 start =3D cpu_to_le64(epoch);
+> >         u8 flags =3D !continuous ? CEPH_SUBSCRIBE_ONETIME : 0;
+> > -
+> > +       if (CEPH_SUB_OSDMAP =3D=3D sub)
+> > +            flags |=3D CEPH_SUBSCRIBE_LATEST_OSDMAP;
+> >         dout("%s %s epoch %u continuous %d\n", __func__, ceph_sub_str[s=
+ub],
+> >              epoch, continuous);
+>
+> I left my comments in https://github.com/ceph/ceph/pull/32422.
+> This patch cannot be considered unless a corresponding change is
+> merged into Objecter.
+>
+> Thanks,
+>
+>                 Ilya
