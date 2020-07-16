@@ -1,149 +1,91 @@
-From: xiubli@redhat.com
-Subject: [PATCH v6 2/2] ceph: send client provided metric flags in client metadata
-Date: Thu, 16 Jul 2020 10:05:58 -0400
-Message-ID: <20200716140558.5185-3-xiubli@redhat.com>
-References: <20200716140558.5185-1-xiubli@redhat.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: multiple BLK-MQ queues for Ceph's RADOS Block Device (RBD) and CephFS
+Date: Thu, 16 Jul 2020 16:11:45 -0400
+Message-ID: <CA+aFP1Am-dQCrd-itiZo5CKEJK44PQzgZR2YuEKkLqU5v_XW=w@mail.gmail.com>
+References: <CA+xD70OJhkhH=+5W7M8NM54VPh42FmbD3O0yqKe1p-+=yd9zXQ@mail.gmail.com>
+ <CAOi1vP-hmzEkkUWGOwxksQn8ny1HzgNURtnf1D33KQq4-49xgQ@mail.gmail.com>
+ <CA+xD70Neac2hpzu-Tg7s+1NCDegwzKs-zdTk8DYTWZPjNaexaA@mail.gmail.com>
+ <CAOi1vP9yz7hLuSRWnDtj3wdKZD1qTiF+84_o5F91bw3wZam=0g@mail.gmail.com> <CA+xD70MyfKgn5m3=JvgFfg+Ww=T8eJ2b9bogdbS4ogYAifNCTw@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:59036 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727044AbgGPOHE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jul 2020 10:07:04 -0400
-In-Reply-To: <20200716140558.5185-1-xiubli@redhat.com>
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:30566 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728907AbgGPUMD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Jul 2020 16:12:03 -0400
+Received: by mail-wm1-f72.google.com with SMTP id z74so5347471wmc.4
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2020 13:11:59 -0700 (PDT)
+In-Reply-To: <CA+xD70MyfKgn5m3=JvgFfg+Ww=T8eJ2b9bogdbS4ogYAifNCTw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jlayton@kernel.org
-Cc: idryomov@gmail.com, ceph-devel@vger.kernel.org, zyan@redhat.com, pdonnell@redhat.com, vshankar@redhat.com, Xiubo Li <xiubli@redhat.com>
+To: Bobby <italienisch1987@gmail.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, dev <dev@ceph.io>, ceph-devel <ceph-devel@vger.kernel.org>
 
-From: Xiubo Li <xiubli@redhat.com>
+On Thu, Jul 16, 2020 at 3:19 PM Bobby <italienisch1987@gmail.com> wrote:
+>
+> Hi,
+>
+> I completely agree to what you said regarding Ceph client. This is exactl=
+y my understanding of a Ceph client.
+>
+> And regarding blk-mq, I meant for a block device. A multi-queue implement=
+ation of a block device.
 
-Will send the metric flags to MDS, currently it supports the cap,
-read latency, write latency and metadata latency.
+krbd is a blk-mq implementation of a block device. So is the nbd block
+device driver -- which can be combined w/ rbd-nbd (or any other NBD
+server) to utilize librbd in user-space.
 
-URL: https://tracker.ceph.com/issues/43435
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/mds_client.c | 60 ++++++++++++++++++++++++++++++++++++++++++--
- fs/ceph/metric.h     | 13 ++++++++++
- 2 files changed, 71 insertions(+), 2 deletions(-)
+> On Wednesday, July 15, 2020, Ilya Dryomov <idryomov@gmail.com> wrote:
+> > On Wed, Jul 15, 2020 at 12:47 AM Bobby <italienisch1987@gmail.com> wrot=
+e:
+> >>
+> >>
+> >>
+> >> Hi Ilya,
+> >>
+> >> Thanks for the reply. It's basically both i.e. I have a specific proje=
+ct currently and also I am looking to make ceph-fuse faster.
+> >>
+> >> But for now, let me ask specifically the project based question. In th=
+e project I have to write a blk-mq kernel driver for the Ceph client machin=
+e. The Ceph client machine will transfer the data to HBA or lets say any em=
+bedded device.
+> >
+> > What is a "Ceph client machine"?
+> >
+> > A Ceph client (or more specifically a RADOS client) speaks RADOS
+> > protocol and transfers data to OSD daemons.  It can't transfer data
+> > directly to a physical device because something has to take care of
+> > replication, ensure consistency and self healing, etc.  This is the
+> > job of the OSD.
+> >
+> >>
+> >> My hope is that there can be an alternative and that alternative is to=
+ not implement a blk-mq kernel driver and instead do the stuff in userspace=
+. I am trying to avoid writing a blk-mq kernel driver and yet achieve the m=
+ulti-queue implementation through userspace. Is it possible?
+> >>
+> >> Also AFAIK, the Ceph=E2=80=99s block storage implementation uses a cli=
+ent module and this client module has two implementations librbd (user-spac=
+e) and krbd (kernel module). I have not gone deep into these client modules=
+. but can librbd help me with this?
+> >
+> > I guess I don't understand the goal of your project.  A multi-queue
+> > implementation of what exactly?  A Ceph block device, a Ceph filesystem
+> > or something else entirely?  It would help if you were more specific
+> > because "a multi-queue driver for Ceph" is really vague.
+> >
+> > Thanks,
+> >
+> >                 Ilya
+> > _______________________________________________
+> Dev mailing list -- dev@ceph.io
+> To unsubscribe send an email to dev-leave@ceph.io
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index cf4c2ba2311f..929778625ea5 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1194,6 +1194,48 @@ static int encode_supported_features(void **p, void *end)
- 	return 0;
- }
- 
-+static const unsigned char metric_bits[] = CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED;
-+#define METRIC_BYTES(cnt) (DIV_ROUND_UP((size_t)metric_bits[cnt - 1] + 1, 64) * 8)
-+static int encode_metric_spec(void **p, void *end)
-+{
-+	static const size_t count = ARRAY_SIZE(metric_bits);
-+
-+	/* header */
-+	if (WARN_ON_ONCE(*p + 2 > end))
-+		return -ERANGE;
-+
-+	ceph_encode_8(p, 1); /* version */
-+	ceph_encode_8(p, 1); /* compat */
-+
-+	if (count > 0) {
-+		size_t i;
-+		size_t size = METRIC_BYTES(count);
-+
-+		if (WARN_ON_ONCE(*p + 4 + 4 + size > end))
-+			return -ERANGE;
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4 + size);
-+
-+		/* metric spec */
-+		ceph_encode_32(p, size);
-+		memset(*p, 0, size);
-+		for (i = 0; i < count; i++)
-+			((unsigned char *)(*p))[i / 8] |= BIT(metric_bits[i] % 8);
-+		*p += size;
-+	} else {
-+		if (WARN_ON_ONCE(*p + 4 + 4 > end))
-+			return -ERANGE;
-+
-+		/* metric spec info length */
-+		ceph_encode_32(p, 4);
-+		/* metric spec */
-+		ceph_encode_32(p, 0);
-+	}
-+
-+	return 0;
-+}
-+
- /*
-  * session message, specialization for CEPH_SESSION_REQUEST_OPEN
-  * to include additional client metadata fields.
-@@ -1234,6 +1276,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 		size = FEATURE_BYTES(count);
- 	extra_bytes += 4 + size;
- 
-+	/* metric spec */
-+	size = 0;
-+	count = ARRAY_SIZE(metric_bits);
-+	if (count > 0)
-+		size = METRIC_BYTES(count);
-+	extra_bytes += 2 + 4 + 4 + size;
-+
- 	/* Allocate the message */
- 	msg = ceph_msg_new(CEPH_MSG_CLIENT_SESSION, sizeof(*h) + extra_bytes,
- 			   GFP_NOFS, false);
-@@ -1252,9 +1301,9 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 	 * Serialize client metadata into waiting buffer space, using
- 	 * the format that userspace expects for map<string, string>
- 	 *
--	 * ClientSession messages with metadata are v3
-+	 * ClientSession messages with metadata are v4
- 	 */
--	msg->hdr.version = cpu_to_le16(3);
-+	msg->hdr.version = cpu_to_le16(4);
- 	msg->hdr.compat_version = cpu_to_le16(1);
- 
- 	/* The write pointer, following the session_head structure */
-@@ -1283,6 +1332,13 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 		return ERR_PTR(ret);
- 	}
- 
-+	ret = encode_metric_spec(&p, end);
-+	if (ret) {
-+		pr_err("encode_metric_spec failed!\n");
-+		ceph_msg_put(msg);
-+		return ERR_PTR(ret);
-+	}
-+
- 	msg->front.iov_len = p - msg->front.iov_base;
- 	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
- 
-diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
-index fe5d07d2e63a..1d0959d669d7 100644
---- a/fs/ceph/metric.h
-+++ b/fs/ceph/metric.h
-@@ -18,6 +18,19 @@ enum ceph_metric_type {
- 	CLIENT_METRIC_TYPE_MAX = CLIENT_METRIC_TYPE_DENTRY_LEASE,
- };
- 
-+/*
-+ * This will always have the highest metric bit value
-+ * as the last element of the array.
-+ */
-+#define CEPHFS_METRIC_SPEC_CLIENT_SUPPORTED {	\
-+	CLIENT_METRIC_TYPE_CAP_INFO,		\
-+	CLIENT_METRIC_TYPE_READ_LATENCY,	\
-+	CLIENT_METRIC_TYPE_WRITE_LATENCY,	\
-+	CLIENT_METRIC_TYPE_METADATA_LATENCY,	\
-+						\
-+	CLIENT_METRIC_TYPE_MAX,			\
-+}
-+
- /* metric caps header */
- struct ceph_metric_cap {
- 	__le32 type;     /* ceph metric type */
--- 
-2.27.0.221.ga08a83d.dirty
+
+
+--=20
+Jason
