@@ -1,41 +1,53 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: Re: Crimson & Seastore
-Date: Sat, 18 Jul 2020 20:17:40 -0400
-Message-ID: <4706f02713a0c8c46a7892a275ab2ae01cdb6b7b.camel@kernel.org>
-References: <CAEDtz9YeQOACR9rDERK7kBsb1j0e80SB1k_p+LAAjKMyxez==A@mail.gmail.com>
+From: Al Viro <viro@zeniv.linux.org.uk>
+Subject: Re: [PATCH 01/32] iov_iter: Add ITER_MAPPING
+Date: Sun, 19 Jul 2020 02:44:36 +0100
+Message-ID: <20200719014436.GG2786714@ZenIV.linux.org.uk>
+References: <159465784033.1376674.18106463693989811037.stgit@warthog.procyon.org.uk>
+ <159465785214.1376674.6062549291411362531.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:35246 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726209AbgGSARm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 18 Jul 2020 20:17:42 -0400
-In-Reply-To: <CAEDtz9YeQOACR9rDERK7kBsb1j0e80SB1k_p+LAAjKMyxez==A@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Rob Tilley Jr." <rftilleyjr@gmail.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <159465785214.1376674.6062549291411362531.stgit@warthog.procyon.org.uk>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Trond Myklebust <trondmy@hammerspace.com>, Anna Schumaker <anna.schumaker@netapp.com>, Steve French <sfrench@samba.org>, Matthew Wilcox <willy@infradead.org>, Jeff Layton <jlayton@redhat.com>, Dave Wysochanski <dwysocha@redhat.com>, linux-cachefs@redhat.com, linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 2020-07-18 at 19:46 -0400, Rob Tilley Jr. wrote:
-> All,
+On Mon, Jul 13, 2020 at 05:30:52PM +0100, David Howells wrote:
+> Add an iterator, ITER_MAPPING, that walks through a set of pages attached
+> to an address_space, starting at a given page and offset and walking for
+> the specified amount of bytes.
 > 
-> I am really looking forward to using Crimson with Seastore. Do you
-> have any ideas on when this will become "stable" enough to use in a
-> production environment? Even if it is in beta, I'd like to implement
-> it in a production environment if it's stable, if future releases will
-> allow for in-place upgrade. Any information on this would be greatly
-> appreciated.
+> The caller must guarantee that the pages are all present and they must be
+> locked using PG_locked, PG_writeback or PG_fscache to prevent them from
+> going away or being migrated whilst they're being accessed.
 > 
+> This is useful for copying data from socket buffers to inodes in network
+> filesystems and for transferring data between those inodes and the cache
+> using direct I/O.
+> 
+> Whilst it is true that ITER_BVEC could be used instead, that would require
+> a bio_vec array to be allocated to refer to all the pages - which should be
+> redundant if inode->i_pages also points to all these pages.
+> 
+> This could also be turned into an ITER_XARRAY, taking and xarray pointer
+> instead of a mapping pointer.  It would be mostly trivial, except for the
+> use of find_get_pages_contig() by iov_iter_get_pages*().
 > 
 
-Hi Rob,
+My main problem here is that your iterate_mapping() assumes that STEP is
+safe under rcu_read_lock(), with no visible mentioning of that fact.
+Note, BTW, that iov_iter_for_each_range() quietly calls user-supplied
+callback in such context.
 
-This list is mainly for info about the Linux kernel clients now. You
-should probably send this to one of the other ceph lists (maybe 
-dev@ceph.io, for this question). See:
+Incidentally, do you ever have different steps for bvec and mapping?
 
-    https://ceph.io/irc/
+> +	if (unlikely(iov_iter_is_mapping(i))) {
+> +		/* We really don't want to fetch pages if we can avoid it */
+> +		i->iov_offset += size;
+> +		i->count -= size;
+> +		return;
 
-Cheers,
--- 
-Jeff Layton <jlayton@kernel.org>
+That's... not nice.  At the very least you want to cap size by i->count here
+(and for discard case as well, while we are at it).
