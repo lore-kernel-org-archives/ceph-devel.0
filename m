@@ -1,103 +1,81 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH V2] fs:ceph: Remove unused variables in ceph_mdsmap_decode()
-Date: Wed, 22 Jul 2020 18:23:47 +0200
-Message-ID: <CAOi1vP9avh+h0d7vqLeLMfojzN8nWVk9OrnBZwUppMOQpDDm1w@mail.gmail.com>
-References: <20200722134604.3026-1-jiayang5@huawei.com> <CAOi1vP9kMKVTr4K0WzEpr1cjvguuH-gOy8vnOrMm3ELdiBfk_A@mail.gmail.com>
- <a2264c76c59e6bcb39acc7704fb169856d28f7b4.camel@kernel.org>
+From: Ezra Ulembeck <ulembeck@gmail.com>
+Subject: Problems with building/installing ceph from sources (git repo) on
+ x86_64 (ubuntu 20.04)
+Date: Wed, 22 Jul 2020 20:41:20 +0200
+Message-ID: <cda63c29-bf9a-635f-df95-38cd04de2ced@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41470 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726642AbgGVQXv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jul 2020 12:23:51 -0400
-Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CE76C0619DC
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2020 09:23:51 -0700 (PDT)
-Received: by mail-io1-xd43.google.com with SMTP id z6so3183119iow.6
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2020 09:23:51 -0700 (PDT)
-In-Reply-To: <a2264c76c59e6bcb39acc7704fb169856d28f7b4.camel@kernel.org>
+        with ESMTP id S1726535AbgGVSlZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jul 2020 14:41:25 -0400
+Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F1E2C0619DC
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2020 11:41:25 -0700 (PDT)
+Received: by mail-ed1-x52a.google.com with SMTP id bm28so2442993edb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2020 11:41:25 -0700 (PDT)
+Received: from oc4278210638.ibm.com ([2a02:8070:a1a5:8400:7e7:ba1f:70a9:f64e])
+        by smtp.gmail.com with ESMTPSA id e8sm302353eja.101.2020.07.22.11.41.22
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 22 Jul 2020 11:41:22 -0700 (PDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Jia Yang <jiayang5@huawei.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Jul 22, 2020 at 5:59 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> On Wed, 2020-07-22 at 15:53 +0200, Ilya Dryomov wrote:
-> > On Wed, Jul 22, 2020 at 3:39 PM Jia Yang <jiayang5@huawei.com> wrote:
-> > > Fix build warnings:
-> > >
-> > > fs/ceph/mdsmap.c: In function =E2=80=98ceph_mdsmap_decode=E2=80=99:
-> > > fs/ceph/mdsmap.c:192:7: warning:
-> > > variable =E2=80=98info_cv=E2=80=99 set but not used [-Wunused-but-set=
--variable]
-> > > fs/ceph/mdsmap.c:177:7: warning:
-> > > variable =E2=80=98state_seq=E2=80=99 set but not used [-Wunused-but-s=
-et-variable]
-> > > fs/ceph/mdsmap.c:123:15: warning:
-> > > variable =E2=80=98mdsmap_cv=E2=80=99 set but not used [-Wunused-but-s=
-et-variable]
-> > >
-> > > Use ceph_decode_skip_* instead of ceph_decode_*, because p is
-> > > increased in ceph_decode_*.
-> > >
-> > > Signed-off-by: Jia Yang <jiayang5@huawei.com>
-> > > ---
-> > >  fs/ceph/mdsmap.c | 10 ++++------
-> > >  1 file changed, 4 insertions(+), 6 deletions(-)
-> > >
-> > > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
-> > > index 889627817e52..7455ba83822a 100644
-> > > --- a/fs/ceph/mdsmap.c
-> > > +++ b/fs/ceph/mdsmap.c
-> > > @@ -120,7 +120,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, =
-void *end)
-> > >         const void *start =3D *p;
-> > >         int i, j, n;
-> > >         int err;
-> > > -       u8 mdsmap_v, mdsmap_cv;
-> > > +       u8 mdsmap_v;
-> > >         u16 mdsmap_ev;
-> > >
-> > >         m =3D kzalloc(sizeof(*m), GFP_NOFS);
-> > > @@ -129,7 +129,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, =
-void *end)
-> > >
-> > >         ceph_decode_need(p, end, 1 + 1, bad);
-> > >         mdsmap_v =3D ceph_decode_8(p);
-> > > -       mdsmap_cv =3D ceph_decode_8(p);
-> > > +       ceph_decode_skip_8(p, end, bad);
-> >
-> > Hi Jia,
-> >
-> > The bounds are already checked in ceph_decode_need(), so using
-> > ceph_decode_skip_*() is unnecessary.  Just increment the position
-> > with *p +=3D 1, staying consistent with ceph_decode_8(), which does
-> > not bounds check.
-> >
->
-> I suggested using ceph_decode_skip_*, mostly just because it's more
-> self-documenting and I didn't think it that significant an overhead.
-> Just incrementing the pointer will also work too, of course.
+Hi all,
 
-Either is fine (the overhead is negligible), but I prefer to be
-consistent: either ceph_decode_need() + unsafe variants or safe
-variants (i.e. ceph_decode_*_safe / ceph_decode_skip_*).
+While following the instructions in
+https://docs.ceph.com/docs/master/install/build-ceph/
 
->
-> While you're doing that though, please also make note of what would have
-> been decoded there too. So in this case, something like this is what I'd
-> suggest:
->
->         *p +=3D 1;        /* mdsmap_cv */
->
-> These sorts of comments are helpful later, esp. with a protocol like
-> ceph that continually has fields being deprecated.
+1) I am not able to build packages
+2) I encounter problems after building/installing in user-space
 
-Yup, definitely useful and done in many other places.
+Details:
+
+$ git clone --recursive https://github.com/ceph/ceph.git
+$ cd ceph
+$ git checkout octopus
+$ ./install-deps.sh
+
+1. Building packages
+
+$ sudo dpkg-buildpackage -j4
+...
+/usr/bin/cc -g -O2 -fdebug-prefix-map=/home/eduard/ceph=. 
+-fstack-protector-strong -Wformat -Werror=format-security -Wdate-time 
+-D_FORTIFY_SOURCE=2 -DCMAKE_HAVE_LIBC_PTHREAD  -Wl,-Bsymbolic-functions 
+-Wl,-z,relro  CMakeFiles/cmTC_277b6.dir/src.c.o  -o cmTC_277b6
+/usr/bin/ld: CMakeFiles/cmTC_277b6.dir/src.c.o: in function `main':
+./obj-x86_64-linux-gnu/CMakeFiles/CMakeTmp/./obj-x86_64-linux-gnu/CMakeFiles/CMakeTmp/src.c:11: 
+undefined reference to `pthread_create'
+/usr/bin/ld: 
+./obj-x86_64-linux-gnu/CMakeFiles/CMakeTmp/./obj-x86_64-linux-gnu/CMakeFiles/CMakeTmp/src.c:12: 
+undefined reference to `pthread_detach'
+/usr/bin/ld: 
+./obj-x86_64-linux-gnu/CMakeFiles/CMakeTmp/./obj-x86_64-linux-gnu/CMakeFiles/CMakeTmp/src.c:13: 
+undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+
+2. Building/installing in user-space
+
+$ ./do_cmake.sh
+$ cd build
+$ make
+$ sudo make install
+
+$ ceph -s
+Traceback (most recent call last):
+   File "/usr/local/bin/ceph", line 140, in <module>
+     import rados
+ImportError: librados.so.2: cannot open shared object file: No such file 
+or directory
+
+
+I will be very thankful for any hints on how to get to success,
 
 Thanks,
-
-                Ilya
+Ezra
