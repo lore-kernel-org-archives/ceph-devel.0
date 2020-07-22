@@ -1,205 +1,158 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH 05/11] ceph: fold ceph_update_writeable_page into ceph_write_begin
-Date: Wed, 22 Jul 2020 06:55:05 -0400
-Message-ID: <20200722105511.11187-6-jlayton@kernel.org>
+Subject: [RFC PATCH 04/11] ceph: fold ceph_sync_writepages into writepage_nounlock
+Date: Wed, 22 Jul 2020 06:55:04 -0400
+Message-ID: <20200722105511.11187-5-jlayton@kernel.org>
 References: <20200722105511.11187-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:53584 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:53572 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728171AbgGVKzR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 22 Jul 2020 06:55:17 -0400
+        id S1726146AbgGVKzQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 22 Jul 2020 06:55:16 -0400
 In-Reply-To: <20200722105511.11187-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: dhowells@redhat.com, dwysocha@redhat.com, smfrench@gmail.com
 
-...and reorganize the loop for better clarity.
+It's the only caller, and this will make it easier to refactor.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c | 141 ++++++++++++++++++++++---------------------------
- 1 file changed, 62 insertions(+), 79 deletions(-)
+ fs/ceph/addr.c | 93 +++++++++++++++++++-------------------------------
+ 1 file changed, 35 insertions(+), 58 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 42fb38a112b8..b43431c0c95c 100644
+index 3b464b8c7ce6..42fb38a112b8 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -1253,6 +1253,8 @@ static int context_is_writeable_or_written(struct inode *inode,
-  * @inode: inode associated with page
-  * @page: page being dirtied
-  *
-+ * We are only allowed to write into/dirty the page if the page is
-+ * clean, or already dirty within the same snap context.
-  * Returns NULL on success, negative error code on error, and a snapc ref that should be
-  * waited on otherwise.
-  */
-@@ -1309,104 +1311,85 @@ ceph_find_incompatible(struct inode *inode, struct page *page)
- /*
-  * We are only allowed to write into/dirty the page if the page is
-  * clean, or already dirty within the same snap context.
-- *
-- * called with page locked.
-- * return success with page locked,
-- * or any failure (incl -EAGAIN) with page unlocked.
-  */
--static int ceph_update_writeable_page(struct file *file,
--			    loff_t pos, unsigned len,
--			    struct page *page)
-+static int ceph_write_begin(struct file *file, struct address_space *mapping,
-+			    loff_t pos, unsigned len, unsigned flags,
-+			    struct page **pagep, void **fsdata)
- {
- 	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_snap_context *snapc;
-+	struct page *page = NULL;
-+	pgoff_t index = pos >> PAGE_SHIFT;
- 	loff_t page_off = pos & PAGE_MASK;
- 	int pos_in_page = pos & ~PAGE_MASK;
- 	int end_in_page = pos_in_page + len;
- 	loff_t i_size;
- 	int r;
-+refind:
-+	/* get a page */
-+	page = grab_cache_page_write_begin(mapping, index, 0);
-+	if (!page)
-+		return -ENOMEM;
- 
--retry_locked:
--	snapc = ceph_find_incompatible(inode, page);
--	if (snapc) {
--		if (IS_ERR(snapc)) {
--			r = PTR_ERR(snapc);
--			goto fail_unlock;
-+	dout("write_begin file %p inode %p page %p %d~%d\n", file,
-+	     inode, page, (int)pos, (int)len);
-+
-+	for (;;) {
-+		snapc = ceph_find_incompatible(inode, page);
-+		if (snapc) {
-+			if (IS_ERR(snapc)) {
-+				r = PTR_ERR(snapc);
-+				break;
-+			}
-+			unlock_page(page);
-+			ceph_queue_writeback(inode);
-+			r = wait_event_killable(ci->i_cap_wq,
-+						context_is_writeable_or_written(inode, snapc));
-+			ceph_put_snap_context(snapc);
-+			put_page(page);
-+			goto refind;
- 		}
--		unlock_page(page);
--		ceph_queue_writeback(inode);
--		r = wait_event_killable(ci->i_cap_wq,
--					context_is_writeable_or_written(inode, snapc));
--		ceph_put_snap_context(snapc);
--		return -EAGAIN;
--	}
- 
--	if (PageUptodate(page)) {
--		dout(" page %p already uptodate\n", page);
--		return 0;
--	}
-+		if (PageUptodate(page)) {
-+			dout(" page %p already uptodate\n", page);
-+			break;
-+		}
- 
--	/* full page? */
--	if (pos_in_page == 0 && len == PAGE_SIZE)
--		return 0;
-+		/* full page? */
-+		if (pos_in_page == 0 && len == PAGE_SIZE)
-+			break;
- 
--	/* past end of file? */
--	i_size = i_size_read(inode);
--
--	if (page_off >= i_size ||
--	    (pos_in_page == 0 && (pos+len) >= i_size &&
--	     end_in_page - pos_in_page != PAGE_SIZE)) {
--		dout(" zeroing %p 0 - %d and %d - %d\n",
--		     page, pos_in_page, end_in_page, (int)PAGE_SIZE);
--		zero_user_segments(page,
--				   0, pos_in_page,
--				   end_in_page, PAGE_SIZE);
--		return 0;
--	}
-+		/* past end of file? */
-+		i_size = i_size_read(inode);
-+		if (page_off >= i_size ||
-+		    (pos_in_page == 0 && (pos+len) >= i_size &&
-+		     end_in_page - pos_in_page != PAGE_SIZE)) {
-+			dout(" zeroing %p 0 - %d and %d - %d\n",
-+			     page, pos_in_page, end_in_page, (int)PAGE_SIZE);
-+			zero_user_segments(page,
-+					   0, pos_in_page,
-+					   end_in_page, PAGE_SIZE);
-+			break;
-+		}
- 
--	/* we need to read it. */
--	r = ceph_do_readpage(file, page);
--	if (r < 0) {
--		if (r == -EINPROGRESS)
--			return -EAGAIN;
--		goto fail_unlock;
-+		/* we need to read it. */
-+		r = ceph_do_readpage(file, page);
-+		if (r) {
-+			if (r == -EINPROGRESS)
-+				continue;
-+			break;
-+		}
- 	}
--	goto retry_locked;
--fail_unlock:
--	unlock_page(page);
--	return r;
--}
- 
--/*
-- * We are only allowed to write into/dirty the page if the page is
-- * clean, or already dirty within the same snap context.
-- */
--static int ceph_write_begin(struct file *file, struct address_space *mapping,
--			    loff_t pos, unsigned len, unsigned flags,
--			    struct page **pagep, void **fsdata)
--{
--	struct inode *inode = file_inode(file);
--	struct page *page;
--	pgoff_t index = pos >> PAGE_SHIFT;
--	int r;
--
--	do {
--		/* get a page */
--		page = grab_cache_page_write_begin(mapping, index, 0);
--		if (!page)
--			return -ENOMEM;
--
--		dout("write_begin file %p inode %p page %p %d~%d\n", file,
--		     inode, page, (int)pos, (int)len);
--
--		r = ceph_update_writeable_page(file, pos, len, page);
--		if (r < 0)
-+	if (r < 0) {
-+		if (page) {
-+			unlock_page(page);
- 			put_page(page);
--		else
--			*pagep = page;
--	} while (r == -EAGAIN);
--
-+		}
-+	} else {
-+		*pagep = page;
-+	}
- 	return r;
+@@ -590,50 +590,6 @@ static u64 get_writepages_data_length(struct inode *inode,
+ 	return end > start ? end - start : 0;
  }
  
+-/*
+- * do a synchronous write on N pages
+- */
+-static int ceph_sync_writepages(struct ceph_fs_client *fsc,
+-				struct ceph_vino vino,
+-				struct ceph_file_layout *layout,
+-				struct ceph_snap_context *snapc,
+-				u64 off, u64 len,
+-				u32 truncate_seq, u64 truncate_size,
+-				struct timespec64 *mtime,
+-				struct page **pages, int num_pages)
+-{
+-	struct ceph_osd_client *osdc = &fsc->client->osdc;
+-	struct ceph_osd_request *req;
+-	int rc = 0;
+-	int page_align = off & ~PAGE_MASK;
+-
+-	req = ceph_osdc_new_request(osdc, layout, vino, off, &len, 0, 1,
+-				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE,
+-				    snapc, truncate_seq, truncate_size,
+-				    true);
+-	if (IS_ERR(req))
+-		return PTR_ERR(req);
+-
+-	/* it may be a short write due to an object boundary */
+-	osd_req_op_extent_osd_data_pages(req, 0, pages, len, page_align,
+-				false, false);
+-	dout("writepages %llu~%llu (%llu bytes)\n", off, len, len);
+-
+-	req->r_mtime = *mtime;
+-	rc = ceph_osdc_start_request(osdc, req, true);
+-	if (!rc)
+-		rc = ceph_osdc_wait_request(osdc, req);
+-
+-	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_latency,
+-				  req->r_end_latency, rc);
+-
+-	ceph_osdc_put_request(req);
+-	if (rc == 0)
+-		rc = len;
+-	dout("writepages result %d\n", rc);
+-	return rc;
+-}
+-
+ /*
+  * Write a single page, but leave the page locked.
+  *
+@@ -642,20 +598,19 @@ static int ceph_sync_writepages(struct ceph_fs_client *fsc,
+  */
+ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ {
+-	struct inode *inode;
+-	struct ceph_inode_info *ci;
+-	struct ceph_fs_client *fsc;
++	struct inode *inode = page->mapping->host;
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_snap_context *snapc, *oldest;
+ 	loff_t page_off = page_offset(page);
+-	int err, len = PAGE_SIZE;
++	int err;
++	loff_t len = PAGE_SIZE;
+ 	struct ceph_writeback_ctl ceph_wbc;
++	struct ceph_osd_client *osdc = &fsc->client->osdc;
++	struct ceph_osd_request *req;
+ 
+ 	dout("writepage %p idx %lu\n", page, page->index);
+ 
+-	inode = page->mapping->host;
+-	ci = ceph_inode(inode);
+-	fsc = ceph_inode_to_client(inode);
+-
+ 	/* verify this is a writeable snap context */
+ 	snapc = page_snap_context(page);
+ 	if (!snapc) {
+@@ -684,7 +639,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	if (ceph_wbc.i_size < page_off + len)
+ 		len = ceph_wbc.i_size - page_off;
+ 
+-	dout("writepage %p page %p index %lu on %llu~%u snapc %p seq %lld\n",
++	dout("writepage %p page %p index %lu on %llu~%llu snapc %p seq %lld\n",
+ 	     inode, page, page->index, page_off, len, snapc, snapc->seq);
+ 
+ 	if (atomic_long_inc_return(&fsc->writeback_count) >
+@@ -692,11 +647,33 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 		set_bdi_congested(inode_to_bdi(inode), BLK_RW_ASYNC);
+ 
+ 	set_page_writeback(page);
+-	err = ceph_sync_writepages(fsc, ceph_vino(inode),
+-				   &ci->i_layout, snapc, page_off, len,
+-				   ceph_wbc.truncate_seq,
+-				   ceph_wbc.truncate_size,
+-				   &inode->i_mtime, &page, 1);
++	req = ceph_osdc_new_request(osdc, &ci->i_layout, ceph_vino(inode), page_off, &len, 0, 1,
++				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE, snapc,
++				    ceph_wbc.truncate_seq, ceph_wbc.truncate_size,
++				    true);
++	if (IS_ERR(req)) {
++		redirty_page_for_writepage(wbc, page);
++		end_page_writeback(page);
++		return PTR_ERR(req);
++	}
++
++	/* it may be a short write due to an object boundary */
++	WARN_ON_ONCE(len > PAGE_SIZE);
++	osd_req_op_extent_osd_data_pages(req, 0, &page, len, 0, false, false);
++	dout("writepage %llu~%llu (%llu bytes)\n", page_off, len, len);
++
++	req->r_mtime = inode->i_mtime;
++	err = ceph_osdc_start_request(osdc, req, true);
++	if (!err)
++		err = ceph_osdc_wait_request(osdc, req);
++
++	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_latency,
++				  req->r_end_latency, err);
++
++	ceph_osdc_put_request(req);
++	if (err == 0)
++		err = len;
++
+ 	if (err < 0) {
+ 		struct writeback_control tmp_wbc;
+ 		if (!wbc)
 -- 
 2.26.2
