@@ -1,42 +1,45 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH] ceph: fix memory leak when reallocating pages array for writepages
-Date: Sun, 26 Jul 2020 08:28:04 -0400
-Message-ID: <20200726122804.16008-1-jlayton@kernel.org>
+From: Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH] ceph: fix memory leak when reallocating pages array for
+ writepages
+Date: Mon, 27 Jul 2020 20:16:52 +0800
+Message-ID: <3c8fb2aa-834b-a202-24b4-7eb29cd9b7c3@redhat.com>
+References: <20200726122804.16008-1-jlayton@kernel.org>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:56656 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726042AbgGZM2G (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 26 Jul 2020 08:28:06 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EA54F206D8
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Jul 2020 12:28:05 +0000 (UTC)
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:49318 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726555AbgG0MRF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 27 Jul 2020 08:17:05 -0400
+In-Reply-To: <20200726122804.16008-1-jlayton@kernel.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
 
-Once we've replaced it, we don't want to keep the old one around
-anymore.
+On 2020/7/26 20:28, Jeff Layton wrote:
+> Once we've replaced it, we don't want to keep the old one around
+> anymore.
+>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>   fs/ceph/addr.c | 1 +
+>   1 file changed, 1 insertion(+)
+>
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 01ad09733ac7..01e167efa104 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -1212,6 +1212,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+>   			       locked_pages * sizeof(*pages));
+>   			memset(data_pages + i, 0,
+>   			       locked_pages * sizeof(*pages));
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/addr.c | 1 +
- 1 file changed, 1 insertion(+)
+BTW， do we still need to memset() the data_pages ?
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 01ad09733ac7..01e167efa104 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1212,6 +1212,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- 			       locked_pages * sizeof(*pages));
- 			memset(data_pages + i, 0,
- 			       locked_pages * sizeof(*pages));
-+			kfree(data_pages);
- 		} else {
- 			BUG_ON(num_ops != req->r_num_ops);
- 			index = pages[i - 1]->index + 1;
--- 
-2.26.2
+> +			kfree(data_pages);
+>   		} else {
+>   			BUG_ON(num_ops != req->r_num_ops);
+>   			index = pages[i - 1]->index + 1;
