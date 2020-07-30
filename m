@@ -1,63 +1,47 @@
-From: Frank Yu <flyxiaoyu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [nautilus][mds] MDS fall into ReadOnly mode
-Date: Thu, 30 Jul 2020 18:55:17 +0800
-Message-ID: <CAKXD-H7ZGqkBSYKCaCa26HuugaQn51NGgCsOw1GEHq_3SZYUCA@mail.gmail.com>
+From: Yanhu Cao <gmayyyha@gmail.com>
+Subject: [PATCH] ceph: use frag's MDS in either mode
+Date: Thu, 30 Jul 2020 19:22:42 +0800
+Message-ID: <20200730112242.31648-1-gmayyyha@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
-List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
-List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
-List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
-List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
-List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
-To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: jlayton@kernel.org
+Cc: idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yanhu Cao <gmayyyha@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi guys,
+if frag.mds != cap->session->s_mds, the client's req will be resent.
 
-I have a ceph cluster with three MDS servers, two of them in active status,
-while the left one is in standby-replay mode. Today I found the message '1
-MDSs are read only' show up when check the cluster status with 'ceph -s',
-details as below:
+e.g.
 
-# ceph -s
-  cluster:
-    id:     3d43e9a5-50dc-4f84-9493-656bf4f06f8c
-    health: HEALTH_WARN
-            5 clients failing to advance oldest client/flush tid
-            1 MDSs are read only
-            2 MDSs report slow requests
-            2 MDSs behind on trimming
-            BlueFS spillover detected on 33 OSD(s)
+file: mnt/cephfs/dir03/dir003 (0x10000000003)
+ceph.dir.pin="1"
 
-  services:
-    mon: 3 daemons, quorum bjcpu-001,bjcpu-002,bjcpu-003 (age 3M)
-    mgr: bjcpu-001.xxxx.io(active, since 3M), standbys: bjcpu-003.xxxx.io,
-bjcpu-002.xxxx.io
-    mds: cephfs:2 {0=bjcpu-003.xxxx.io=up:active,1=bjcpu-001.xxxx.io=up:active}
-1 up:standby-replay
-    osd: 48 osds: 48 up (since 7w), 48 in (since 7M)
+echo 'aaa' > /mnt/cephfs/dir03/dir003/file29
 
-  data:
-    pools:   3 pools, 2304 pgs
-    objects: 301.35M objects, 70 TiB
-    usage:   246 TiB used, 280 TiB / 527 TiB avail
-    pgs:     2295 active+clean
-             9    active+clean+scrubbing+deep
+kernel: ceph:  __choose_mds 00000000ca362c7a is_hash=1 (0x7c768b89) mode 2
+kernel: ceph:  __choose_mds 00000000ca362c7a 10000000003.fffffffffffffffe frag 0 mds1 (auth)
+kernel: ceph:  __choose_mds 00000000ca362c7a 10000000003.fffffffffffffffe mds0 (auth cap 00000000679c38e2)
+kernel: ceph:  __choose_mds using resend_mds mds1
 
-  io:
-    client:   254 B/s rd, 44 MiB/s wr, 0 op/s rd, 15 op/s wr
+Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+---
+ fs/ceph/mds_client.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-What should I do to fix the error message? it seems the cluster still works
-fine(can read and write).
-
-Many thanks
-
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a50497142e59..b2255a9be7c0 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1103,8 +1103,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+ 				     frag.frag, mds);
+ 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
+ 				    CEPH_MDS_STATE_ACTIVE) {
+-					if (mode == USE_ANY_MDS &&
+-					    !ceph_mdsmap_is_laggy(mdsc->mdsmap,
++					if (!ceph_mdsmap_is_laggy(mdsc->mdsmap,
+ 								  mds))
+ 						goto out;
+ 				}
 -- 
-Regards
-Frank Yu
-_______________________________________________
-ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
-To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
+2.24.3 (Apple Git-128)
