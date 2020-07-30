@@ -1,46 +1,63 @@
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH] ceph: set sec_context xattr on symlink creation
-Date: Tue, 28 Jul 2020 15:18:38 -0400
-Message-ID: <20200728191838.315530-1-jlayton@kernel.org>
+From: Frank Yu <flyxiaoyu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [nautilus][mds] MDS fall into ReadOnly mode
+Date: Thu, 30 Jul 2020 18:55:17 +0800
+Message-ID: <CAKXD-H7ZGqkBSYKCaCa26HuugaQn51NGgCsOw1GEHq_3SZYUCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:47950 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728751AbgG1TSk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Jul 2020 15:18:40 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8AEBE207F5
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2020 19:18:39 +0000 (UTC)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-a8pt6IJUokc@public.gmane.org>
+List-Archive: <https://lists.ceph.io/hyperkitty/list/ceph-users-a8pt6IJUokc@public.gmane.org/>
+List-Help: <mailto:ceph-users-request-a8pt6IJUokc@public.gmane.org?subject=help>
+List-Post: <mailto:ceph-users-a8pt6IJUokc@public.gmane.org>
+List-Subscribe: <mailto:ceph-users-join-a8pt6IJUokc@public.gmane.org>
+List-Unsubscribe: <mailto:ceph-users-leave-a8pt6IJUokc@public.gmane.org>
+To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Symlink inodes should have the security context set in their xattrs on
-creation. We already set the context on creation, but we don't attach
-the pagelist. Make it do so.
+Hi guys,
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/dir.c | 4 ++++
- 1 file changed, 4 insertions(+)
+I have a ceph cluster with three MDS servers, two of them in active status,
+while the left one is in standby-replay mode. Today I found the message '1
+MDSs are read only' show up when check the cluster status with 'ceph -s',
+details as below:
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 39f5311404b0..060bdcc5ce32 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -930,6 +930,10 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	req->r_num_caps = 2;
- 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED | CEPH_CAP_AUTH_EXCL;
- 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-+	if (as_ctx.pagelist) {
-+		req->r_pagelist = as_ctx.pagelist;
-+		as_ctx.pagelist = NULL;
-+	}
- 	err = ceph_mdsc_do_request(mdsc, dir, req);
- 	if (!err && !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
+# ceph -s
+  cluster:
+    id:     3d43e9a5-50dc-4f84-9493-656bf4f06f8c
+    health: HEALTH_WARN
+            5 clients failing to advance oldest client/flush tid
+            1 MDSs are read only
+            2 MDSs report slow requests
+            2 MDSs behind on trimming
+            BlueFS spillover detected on 33 OSD(s)
+
+  services:
+    mon: 3 daemons, quorum bjcpu-001,bjcpu-002,bjcpu-003 (age 3M)
+    mgr: bjcpu-001.xxxx.io(active, since 3M), standbys: bjcpu-003.xxxx.io,
+bjcpu-002.xxxx.io
+    mds: cephfs:2 {0=bjcpu-003.xxxx.io=up:active,1=bjcpu-001.xxxx.io=up:active}
+1 up:standby-replay
+    osd: 48 osds: 48 up (since 7w), 48 in (since 7M)
+
+  data:
+    pools:   3 pools, 2304 pgs
+    objects: 301.35M objects, 70 TiB
+    usage:   246 TiB used, 280 TiB / 527 TiB avail
+    pgs:     2295 active+clean
+             9    active+clean+scrubbing+deep
+
+  io:
+    client:   254 B/s rd, 44 MiB/s wr, 0 op/s rd, 15 op/s wr
+
+What should I do to fix the error message? it seems the cluster still works
+fine(can read and write).
+
+Many thanks
+
+
 -- 
-2.26.2
+Regards
+Frank Yu
+_______________________________________________
+ceph-users mailing list -- ceph-users-a8pt6IJUokc@public.gmane.org
+To unsubscribe send an email to ceph-users-leave-a8pt6IJUokc@public.gmane.org
