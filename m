@@ -1,215 +1,160 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v2 10/11] ceph: add fscache writeback support
-Date: Fri, 31 Jul 2020 09:04:20 -0400
-Message-ID: <20200731130421.127022-11-jlayton@kernel.org>
+Subject: [RFC PATCH v2 01/11] ceph: break out writeback of incompatible snap context to separate function
+Date: Fri, 31 Jul 2020 09:04:11 -0400
+Message-ID: <20200731130421.127022-2-jlayton@kernel.org>
 References: <20200731130421.127022-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:33690 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:33606 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732368AbgGaNE3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 31 Jul 2020 09:04:29 -0400
+        id S1730217AbgGaNEY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 31 Jul 2020 09:04:24 -0400
 In-Reply-To: <20200731130421.127022-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: linux-cachefs@redhat.com, idryomov@gmail.com
 
-When updating the backing store from the pagecache (a'la writepage or
-writepages), write to the cache first. This allows us to keep caching
-files even when they are open for write. If the OSD write fails,
-invalidate the cache.
+When dirtying a page, we have to flush incompatible contexts. Move that
+into a separate function.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c | 122 ++++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 116 insertions(+), 6 deletions(-)
+ fs/ceph/addr.c | 96 +++++++++++++++++++++++++++++++-------------------
+ 1 file changed, 60 insertions(+), 36 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 8905fe4a0930..a21aec8ac0f1 100644
+index 6ea761c84494..d8a8803f0e65 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -435,6 +435,98 @@ static int ceph_readpages(struct file *file, struct address_space *mapping,
+@@ -1299,40 +1299,34 @@ static int context_is_writeable_or_written(struct inode *inode,
  	return ret;
  }
  
-+#ifdef CONFIG_CEPH_FSCACHE
-+const struct fscache_io_request_ops ceph_write_fsreq_ops = {
-+	.get		= ceph_fsreq_get,
-+	.put		= ceph_fsreq_put,
-+};
+-/*
+- * We are only allowed to write into/dirty the page if the page is
+- * clean, or already dirty within the same snap context.
++/**
++ * ceph_find_incompatible - find an incompatible context and return it
++ * @inode: inode associated with page
++ * @page: page being dirtied
+  *
+- * called with page locked.
+- * return success with page locked,
+- * or any failure (incl -EAGAIN) with page unlocked.
++ * Returns NULL on success, negative error code on error, and a snapc ref that should be
++ * waited on otherwise.
+  */
+-static int ceph_update_writeable_page(struct file *file,
+-			    loff_t pos, unsigned len,
+-			    struct page *page)
++static struct ceph_snap_context *
++ceph_find_incompatible(struct inode *inode, struct page *page)
+ {
+-	struct inode *inode = file_inode(file);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	loff_t page_off = pos & PAGE_MASK;
+-	int pos_in_page = pos & ~PAGE_MASK;
+-	int end_in_page = pos_in_page + len;
+-	loff_t i_size;
+-	int r;
+-	struct ceph_snap_context *snapc, *oldest;
+ 
+ 	if (READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
+ 		dout(" page %p forced umount\n", page);
+-		unlock_page(page);
+-		return -EIO;
++		return ERR_PTR(-EIO);
+ 	}
+ 
+-retry_locked:
+-	/* writepages currently holds page lock, but if we change that later, */
+-	wait_on_page_writeback(page);
++	for (;;) {
++		struct ceph_snap_context *snapc, *oldest;
++
++		wait_on_page_writeback(page);
++
++		snapc = page_snap_context(page);
++		if (!snapc || snapc == ci->i_head_snapc)
++			break;
+ 
+-	snapc = page_snap_context(page);
+-	if (snapc && snapc != ci->i_head_snapc) {
+ 		/*
+ 		 * this page is already dirty in another (older) snap
+ 		 * context!  is it writeable now?
+@@ -1347,26 +1341,56 @@ static int ceph_update_writeable_page(struct file *file,
+ 			 * be writeable or written
+ 			 */
+ 			snapc = ceph_get_snap_context(snapc);
+-			unlock_page(page);
+-			ceph_queue_writeback(inode);
+-			r = wait_event_killable(ci->i_cap_wq,
+-			       context_is_writeable_or_written(inode, snapc));
+-			ceph_put_snap_context(snapc);
+-			if (r == -ERESTARTSYS)
+-				return r;
+-			return -EAGAIN;
++			return snapc;
+ 		}
+ 		ceph_put_snap_context(oldest);
+ 
+ 		/* yay, writeable, do it now (without dropping page lock) */
+ 		dout(" page %p snapc %p not current, but oldest\n",
+ 		     page, snapc);
+-		if (!clear_page_dirty_for_io(page))
+-			goto retry_locked;
+-		r = writepage_nounlock(page, NULL);
+-		if (r < 0)
++		if (clear_page_dirty_for_io(page)) {
++			int r = writepage_nounlock(page, NULL);
++			if (r < 0)
++				return ERR_PTR(r);
++		}
++	}
++	return NULL;
++}
 +
 +/*
-+ * Clear the PG_fscache flag from a sequence of pages and wake up anyone who's
-+ * waiting.  The last page is included in the sequence. Poached from afs_clear_fscache_bits.
++ * We are only allowed to write into/dirty the page if the page is
++ * clean, or already dirty within the same snap context.
++ *
++ * called with page locked.
++ * return success with page locked,
++ * or any failure (incl -EAGAIN) with page unlocked.
 + */
-+static void ceph_clear_fscache_bits(struct address_space *mapping,
-+				   pgoff_t start, pgoff_t last)
++static int ceph_update_writeable_page(struct file *file,
++			    loff_t pos, unsigned len,
++			    struct page *page)
 +{
-+	struct page *page;
++	struct inode *inode = file_inode(file);
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_snap_context *snapc;
++	loff_t page_off = pos & PAGE_MASK;
++	int pos_in_page = pos & ~PAGE_MASK;
++	int end_in_page = pos_in_page + len;
++	loff_t i_size;
++	int r;
 +
-+	XA_STATE(xas, &mapping->i_pages, start);
-+
-+	rcu_read_lock();
-+	xas_for_each(&xas, page, last) {
-+		unlock_page_fscache(page);
-+	}
-+	rcu_read_unlock();
-+}
-+
-+static void ceph_write_to_cache_done(struct fscache_io_request *fsreq)
-+{
-+	pgoff_t start = fsreq->pos >> PAGE_SHIFT;
-+	pgoff_t last = start + fsreq->nr_pages - 1;
-+
-+	ceph_clear_fscache_bits(fsreq->mapping, start, last);
-+	if (fsreq->error && fsreq->error != -ENOBUFS)
-+		ceph_fscache_invalidate(fsreq->mapping->host, 0);
-+}
-+
-+static void ceph_write_to_cache(struct inode *inode, u64 off, u64 len)
-+{
-+	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
-+	struct iov_iter iter;
-+	struct ceph_fscache_req *req;
-+	struct fscache_cookie *cookie = ceph_inode(inode)->fscache;
-+	pgoff_t start = off >> PAGE_SHIFT;
-+	struct fscache_request_shape shape = {
-+		.proposed_start		= start,
-+		.proposed_nr_pages	= calc_pages_for(off, len),
-+		.max_io_pages		= fsc->mount_options->wsize >> PAGE_SHIFT,
-+		.i_size			= i_size_read(inode),
-+		.for_write		= true,
-+	};
-+	pgoff_t last = start + shape.proposed_nr_pages - 1;
-+
-+	/* Don't do anything if cache is disabled */
-+	if (!fscache_cookie_enabled(cookie))
-+		goto abandon;
-+
-+	fscache_shape_request(cookie, &shape);
-+	if (!(shape.to_be_done & FSCACHE_WRITE_TO_CACHE) ||
-+	    shape.actual_nr_pages == 0 ||
-+	    shape.actual_start != shape.proposed_start)
-+		goto abandon;
-+
-+	if (shape.actual_nr_pages < shape.proposed_nr_pages) {
-+		ceph_clear_fscache_bits(inode->i_mapping, start + shape.actual_nr_pages,
-+					start + shape.proposed_nr_pages - 1);
-+		last = shape.proposed_start + shape.actual_nr_pages - 1;
-+		len = (u64)(last + 1 - start) << PAGE_SHIFT;
-+	}
-+
-+	req = ceph_fsreq_alloc();
-+	if (!req)
-+		goto abandon;
-+
-+	fscache_init_io_request(&req->fscache_req, cookie, &ceph_write_fsreq_ops);
-+	req->fscache_req.pos = round_down(off, shape.dio_block_size);
-+	req->fscache_req.len = round_up(len, shape.dio_block_size);
-+	req->fscache_req.nr_pages = shape.actual_nr_pages;
-+	req->fscache_req.mapping = inode->i_mapping;
-+	req->fscache_req.io_done = ceph_write_to_cache_done;
-+
-+	iov_iter_mapping(&iter, WRITE, inode->i_mapping, req->fscache_req.pos,
-+			 req->fscache_req.len);
-+	fscache_write(&req->fscache_req, &iter);
-+	ceph_fsreq_put(&req->fscache_req);
-+	return;
-+abandon:
-+	ceph_clear_fscache_bits(inode->i_mapping, start, last);
-+}
-+#else
-+static inline void ceph_write_to_cache(struct inode *inode, u64 off, u64 len)
-+{
-+}
-+#endif /* CONFIG_CEPH_FSCACHE */
-+
- struct ceph_writeback_ctl
- {
- 	loff_t i_size;
-@@ -588,16 +680,17 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
- 	    CONGESTION_ON_THRESH(fsc->mount_options->congestion_kb))
- 		set_bdi_congested(inode_to_bdi(inode), BLK_RW_ASYNC);
++retry_locked:
++	snapc = ceph_find_incompatible(inode, page);
++	if (snapc) {
++		if (IS_ERR(snapc)) {
++			r = PTR_ERR(snapc);
+ 			goto fail_unlock;
+-		goto retry_locked;
++		}
++		unlock_page(page);
++		ceph_queue_writeback(inode);
++		r = wait_event_killable(ci->i_cap_wq,
++					context_is_writeable_or_written(inode, snapc));
++		ceph_put_snap_context(snapc);
++		return -EAGAIN;
+ 	}
  
--	set_page_writeback(page);
- 	req = ceph_osdc_new_request(osdc, &ci->i_layout, ceph_vino(inode), page_off, &len, 0, 1,
- 				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE, snapc,
- 				    ceph_wbc.truncate_seq, ceph_wbc.truncate_size,
- 				    true);
--	if (IS_ERR(req)) {
--		redirty_page_for_writepage(wbc, page);
--		end_page_writeback(page);
-+	if (IS_ERR(req))
- 		return PTR_ERR(req);
--	}
-+
-+	set_page_writeback(page);
-+	if (TestSetPageFsCache(page))
-+		BUG();
-+	ceph_write_to_cache(inode, page_off, len);
- 
- 	/* it may be a short write due to an object boundary */
- 	WARN_ON_ONCE(len > PAGE_SIZE);
-@@ -656,6 +749,9 @@ static int ceph_writepage(struct page *page, struct writeback_control *wbc)
- 	struct inode *inode = page->mapping->host;
- 	BUG_ON(!inode);
- 	ihold(inode);
-+
-+	ceph_wait_on_page_fscache(page);
-+
- 	err = writepage_nounlock(page, wbc);
- 	if (err == -ERESTARTSYS) {
- 		/* direct memory reclaimer was killed by SIGKILL. return 0
-@@ -901,7 +997,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- 				unlock_page(page);
- 				break;
- 			}
--			if (PageWriteback(page)) {
-+			if (PageWriteback(page) || PageFsCache(page)) {
- 				if (wbc->sync_mode == WB_SYNC_NONE) {
- 					dout("%p under writeback\n", page);
- 					unlock_page(page);
-@@ -909,6 +1005,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- 				}
- 				dout("waiting on writeback %p\n", page);
- 				wait_on_page_writeback(page);
-+				ceph_wait_on_page_fscache(page);
- 			}
- 
- 			if (!clear_page_dirty_for_io(page)) {
-@@ -1041,9 +1138,19 @@ static int ceph_writepages_start(struct address_space *mapping,
- 		op_idx = 0;
- 		for (i = 0; i < locked_pages; i++) {
- 			u64 cur_offset = page_offset(pages[i]);
-+			/*
-+			 * Discontinuity in page range? Ceph can handle that by just passing
-+			 * multiple extents in the write op.
-+			 */
- 			if (offset + len != cur_offset) {
-+				/* If it's full, stop here */
- 				if (op_idx + 1 == req->r_num_ops)
- 					break;
-+
-+				/* Kick off an fscache write with what we have so far. */
-+				ceph_write_to_cache(inode, offset, len);
-+
-+				/* Start a new extent */
- 				osd_req_op_extent_dup_last(req, op_idx,
- 							   cur_offset - offset);
- 				dout("writepages got pages at %llu~%llu\n",
-@@ -1060,8 +1167,11 @@ static int ceph_writepages_start(struct address_space *mapping,
- 			}
- 
- 			set_page_writeback(pages[i]);
-+			if (TestSetPageFsCache(pages[i]))
-+				BUG();
- 			len += PAGE_SIZE;
- 		}
-+		ceph_write_to_cache(inode, offset, len);
- 
- 		if (ceph_wbc.size_stable) {
- 			len = min(len, ceph_wbc.i_size - offset);
+ 	if (PageUptodate(page)) {
 -- 
 2.26.2
