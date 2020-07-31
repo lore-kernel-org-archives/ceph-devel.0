@@ -1,205 +1,41 @@
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH v2 05/11] ceph: fold ceph_update_writeable_page into ceph_write_begin
-Date: Fri, 31 Jul 2020 09:04:15 -0400
-Message-ID: <20200731130421.127022-6-jlayton@kernel.org>
+Subject: [RFC PATCH v2 11/11] ceph: re-enable fscache support
+Date: Fri, 31 Jul 2020 09:04:21 -0400
+Message-ID: <20200731130421.127022-12-jlayton@kernel.org>
 References: <20200731130421.127022-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail.kernel.org ([198.145.29.99]:33640 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727040AbgGaNE0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 31 Jul 2020 09:04:26 -0400
+        id S1730217AbgGaNE3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 31 Jul 2020 09:04:29 -0400
 In-Reply-To: <20200731130421.127022-1-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: linux-cachefs@redhat.com, idryomov@gmail.com
 
-...and reorganize the loop for better clarity.
+Now that the code has been converted to use the new fscache API, we can
+re-enable it.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c | 141 ++++++++++++++++++++++---------------------------
- 1 file changed, 62 insertions(+), 79 deletions(-)
+ fs/ceph/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index a04eaf75480b..f4df04769761 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1252,6 +1252,8 @@ static int context_is_writeable_or_written(struct inode *inode,
-  * @inode: inode associated with page
-  * @page: page being dirtied
-  *
-+ * We are only allowed to write into/dirty the page if the page is
-+ * clean, or already dirty within the same snap context.
-  * Returns NULL on success, negative error code on error, and a snapc ref that should be
-  * waited on otherwise.
-  */
-@@ -1308,104 +1310,85 @@ ceph_find_incompatible(struct inode *inode, struct page *page)
- /*
-  * We are only allowed to write into/dirty the page if the page is
-  * clean, or already dirty within the same snap context.
-- *
-- * called with page locked.
-- * return success with page locked,
-- * or any failure (incl -EAGAIN) with page unlocked.
-  */
--static int ceph_update_writeable_page(struct file *file,
--			    loff_t pos, unsigned len,
--			    struct page *page)
-+static int ceph_write_begin(struct file *file, struct address_space *mapping,
-+			    loff_t pos, unsigned len, unsigned flags,
-+			    struct page **pagep, void **fsdata)
- {
- 	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_snap_context *snapc;
-+	struct page *page = NULL;
-+	pgoff_t index = pos >> PAGE_SHIFT;
- 	loff_t page_off = pos & PAGE_MASK;
- 	int pos_in_page = pos & ~PAGE_MASK;
- 	int end_in_page = pos_in_page + len;
- 	loff_t i_size;
- 	int r;
-+refind:
-+	/* get a page */
-+	page = grab_cache_page_write_begin(mapping, index, 0);
-+	if (!page)
-+		return -ENOMEM;
- 
--retry_locked:
--	snapc = ceph_find_incompatible(inode, page);
--	if (snapc) {
--		if (IS_ERR(snapc)) {
--			r = PTR_ERR(snapc);
--			goto fail_unlock;
-+	dout("write_begin file %p inode %p page %p %d~%d\n", file,
-+	     inode, page, (int)pos, (int)len);
-+
-+	for (;;) {
-+		snapc = ceph_find_incompatible(inode, page);
-+		if (snapc) {
-+			if (IS_ERR(snapc)) {
-+				r = PTR_ERR(snapc);
-+				break;
-+			}
-+			unlock_page(page);
-+			ceph_queue_writeback(inode);
-+			r = wait_event_killable(ci->i_cap_wq,
-+						context_is_writeable_or_written(inode, snapc));
-+			ceph_put_snap_context(snapc);
-+			put_page(page);
-+			goto refind;
- 		}
--		unlock_page(page);
--		ceph_queue_writeback(inode);
--		r = wait_event_killable(ci->i_cap_wq,
--					context_is_writeable_or_written(inode, snapc));
--		ceph_put_snap_context(snapc);
--		return -EAGAIN;
--	}
- 
--	if (PageUptodate(page)) {
--		dout(" page %p already uptodate\n", page);
--		return 0;
--	}
-+		if (PageUptodate(page)) {
-+			dout(" page %p already uptodate\n", page);
-+			break;
-+		}
- 
--	/* full page? */
--	if (pos_in_page == 0 && len == PAGE_SIZE)
--		return 0;
-+		/* full page? */
-+		if (pos_in_page == 0 && len == PAGE_SIZE)
-+			break;
- 
--	/* past end of file? */
--	i_size = i_size_read(inode);
--
--	if (page_off >= i_size ||
--	    (pos_in_page == 0 && (pos+len) >= i_size &&
--	     end_in_page - pos_in_page != PAGE_SIZE)) {
--		dout(" zeroing %p 0 - %d and %d - %d\n",
--		     page, pos_in_page, end_in_page, (int)PAGE_SIZE);
--		zero_user_segments(page,
--				   0, pos_in_page,
--				   end_in_page, PAGE_SIZE);
--		return 0;
--	}
-+		/* past end of file? */
-+		i_size = i_size_read(inode);
-+		if (page_off >= i_size ||
-+		    (pos_in_page == 0 && (pos+len) >= i_size &&
-+		     end_in_page - pos_in_page != PAGE_SIZE)) {
-+			dout(" zeroing %p 0 - %d and %d - %d\n",
-+			     page, pos_in_page, end_in_page, (int)PAGE_SIZE);
-+			zero_user_segments(page,
-+					   0, pos_in_page,
-+					   end_in_page, PAGE_SIZE);
-+			break;
-+		}
- 
--	/* we need to read it. */
--	r = ceph_do_readpage(file, page);
--	if (r < 0) {
--		if (r == -EINPROGRESS)
--			return -EAGAIN;
--		goto fail_unlock;
-+		/* we need to read it. */
-+		r = ceph_do_readpage(file, page);
-+		if (r) {
-+			if (r == -EINPROGRESS)
-+				continue;
-+			break;
-+		}
- 	}
--	goto retry_locked;
--fail_unlock:
--	unlock_page(page);
--	return r;
--}
- 
--/*
-- * We are only allowed to write into/dirty the page if the page is
-- * clean, or already dirty within the same snap context.
-- */
--static int ceph_write_begin(struct file *file, struct address_space *mapping,
--			    loff_t pos, unsigned len, unsigned flags,
--			    struct page **pagep, void **fsdata)
--{
--	struct inode *inode = file_inode(file);
--	struct page *page;
--	pgoff_t index = pos >> PAGE_SHIFT;
--	int r;
--
--	do {
--		/* get a page */
--		page = grab_cache_page_write_begin(mapping, index, 0);
--		if (!page)
--			return -ENOMEM;
--
--		dout("write_begin file %p inode %p page %p %d~%d\n", file,
--		     inode, page, (int)pos, (int)len);
--
--		r = ceph_update_writeable_page(file, pos, len, page);
--		if (r < 0)
-+	if (r < 0) {
-+		if (page) {
-+			unlock_page(page);
- 			put_page(page);
--		else
--			*pagep = page;
--	} while (r == -EAGAIN);
--
-+		}
-+	} else {
-+		*pagep = page;
-+	}
- 	return r;
- }
- 
+diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
+index 432aa34b63e7..8e6b85275c79 100644
+--- a/fs/ceph/Kconfig
++++ b/fs/ceph/Kconfig
+@@ -22,7 +22,7 @@ config CEPH_FS
+ if CEPH_FS
+ config CEPH_FSCACHE
+ 	bool "Enable Ceph client caching support"
+-	depends on CEPH_FS=m && FSCACHE_OLD || CEPH_FS=y && FSCACHE_OLD=y
++	depends on CEPH_FS=m && FSCACHE || CEPH_FS=y && FSCACHE=y
+ 	help
+ 	  Choose Y here to enable persistent, read-only local
+ 	  caching support for Ceph clients using FS-Cache
 -- 
 2.26.2
