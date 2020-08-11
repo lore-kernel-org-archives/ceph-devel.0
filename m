@@ -7,43 +7,43 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3576DC433DF
-	for <ceph-devel@archiver.kernel.org>; Tue, 11 Aug 2020 11:20:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 923B3C433DF
+	for <ceph-devel@archiver.kernel.org>; Tue, 11 Aug 2020 11:27:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C44520716
-	for <ceph-devel@archiver.kernel.org>; Tue, 11 Aug 2020 11:20:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5532120768
+	for <ceph-devel@archiver.kernel.org>; Tue, 11 Aug 2020 11:27:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1597144808;
-	bh=Ia1+jx8TGnCM0rhnf6SQW9uRQhXnAdtA+6ogA1l/NuI=;
+	s=default; t=1597145234;
+	bh=Vm2Mx1j9mNNvcpUdZ8oPSZnPCHWYFS4Z2GluNvyV5Bg=;
 	h=Subject:From:To:Date:In-Reply-To:References:List-ID:From;
-	b=befJc86ZBvjZQfohGNXfZf8V77s7AUuIiXMroEfGoipyiigHX4ed9bIdOI8dpxmWY
-	 /xoYlojkOfPr413RH8DaBq/gbUDdlUVLm3/RMD+9Y6PLO/wwsFWSrwwul8PiunJD7U
-	 RW/Gyk+Jn+pRbK3y5Y6D+ckNIB4KCOKT8wFFDUhg=
+	b=hd3FlnYXXmnXD8UnvTXkaCGd5ypmpDmU5Wma+VMuZgsLhavoTgqmsTq+p8qSuZ4Fc
+	 1REsBRoTxz3Gpu68MX494NVQ/9oo8tb0wlmol3fUcLYmO2xS1ZIfn9bUB1j4wxsWiZ
+	 bx/In3gWTm5ISnX30VkHgBJ9rzeiiaJVhsEqZVhw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728750AbgHKLUE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 11 Aug 2020 07:20:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43622 "EHLO mail.kernel.org"
+        id S1728794AbgHKL1M (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 11 Aug 2020 07:27:12 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46904 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728761AbgHKLUA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 11 Aug 2020 07:20:00 -0400
+        id S1728750AbgHKL1L (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 11 Aug 2020 07:27:11 -0400
 Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A0EF520716;
-        Tue, 11 Aug 2020 11:19:56 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5007620716;
+        Tue, 11 Aug 2020 11:27:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1597144796;
-        bh=Ia1+jx8TGnCM0rhnf6SQW9uRQhXnAdtA+6ogA1l/NuI=;
+        s=default; t=1597145230;
+        bh=Vm2Mx1j9mNNvcpUdZ8oPSZnPCHWYFS4Z2GluNvyV5Bg=;
         h=Subject:From:To:Date:In-Reply-To:References:From;
-        b=gKiEEK03UhvBBYTAIaw5I5VEmHJJSZqsZBPt53qBg0nfh4kGVWD0pCf4+FPqb+egq
-         Q1ZXobLxAkYHBBoPyAT6QXKSAR15b3SgjPhpCLitqtIFCWpBcnZNir+AF6HCfOLu3C
-         PzEsVuAc24+ZTUxnsmM5ifonto+47MjQhsxHhbGg=
-Message-ID: <c922749969ec0a070db8da1d924cd8da0aefbf45.camel@kernel.org>
+        b=DOV+3X3VuLcO2SeKeNRctNnvGh+85Yn9MdQ5dJ8CiZk1MqrY4JgWtbYXq4yFswVog
+         1S/n6x2+/IYoOtIGpfJDHmtk8+AirAJ6C7evXqpQ1zdK7E/9ivzSeI04igim+yO8u+
+         EpQ+w7J/X4yC40hWT3Fv3rTRTAJ36pBy9ZV5Gi4w=
+Message-ID: <403878ffc7403157096472bd1bc59b87c378c2a8.camel@kernel.org>
 Subject: Re: [PATCH] ceph: encode inodes' parent/d_name in cap reconnect
  message
 From:   Jeff Layton <jlayton@kernel.org>
 To:     "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
-Date:   Tue, 11 Aug 2020 07:19:55 -0400
+Date:   Tue, 11 Aug 2020 07:27:09 -0400
 In-Reply-To: <20200811072303.24322-1-zyan@redhat.com>
 References: <20200811072303.24322-1-zyan@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
@@ -135,6 +135,15 @@ On Tue, 2020-08-11 at 15:23 +0800, Yan, Zheng wrote:
 > +		/* set pathbase to parent dir when msg_version >= 2 */
 > +		path = ceph_mdsc_build_path(dentry, &pathlen, &pathbase,
 > +					    recon_state->msg_version >= 2);
+
+One question:
+
+Do we really need to build a full path back to the root for the
+msg_version == 1 case? I notice that the v1 message has a field for the
+pathbase, which would seem to make the full path unnecessary. Is there
+some quirk in older MDS versions that requires a full path for this?
+
+
 > +		dput(dentry);
 > +		if (IS_ERR(path)) {
 > +			err = PTR_ERR(path);
@@ -230,9 +239,6 @@ On Tue, 2020-08-11 at 15:23 +0800, Yan, Zheng wrote:
 >  	return err;
 >  }
 
-Looks good. Merged into testing.
-
-Thanks!
 -- 
 Jeff Layton <jlayton@kernel.org>
 
