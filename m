@@ -4,40 +4,38 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E291C433E1
-	for <ceph-devel@archiver.kernel.org>; Tue, 18 Aug 2020 13:13:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E853BC433E1
+	for <ceph-devel@archiver.kernel.org>; Tue, 18 Aug 2020 13:13:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 412D720706
-	for <ceph-devel@archiver.kernel.org>; Tue, 18 Aug 2020 13:13:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C805420706
+	for <ceph-devel@archiver.kernel.org>; Tue, 18 Aug 2020 13:13:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726570AbgHRNNQ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 18 Aug 2020 09:13:16 -0400
-Received: from mx2.suse.de ([195.135.220.15]:33284 "EHLO mx2.suse.de"
+        id S1726883AbgHRNNj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 18 Aug 2020 09:13:39 -0400
+Received: from mx2.suse.de ([195.135.220.15]:33628 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726145AbgHRNNN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Aug 2020 09:13:13 -0400
+        id S1726829AbgHRNNf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 18 Aug 2020 09:13:35 -0400
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id DC6E4B15D;
-        Tue, 18 Aug 2020 13:13:36 +0000 (UTC)
+        by mx2.suse.de (Postfix) with ESMTP id 929A8B17F;
+        Tue, 18 Aug 2020 13:13:59 +0000 (UTC)
 From:   Coly Li <colyli@suse.de>
 To:     linux-block@vger.kernel.org, linux-nvme@lists.infradead.org,
         netdev@vger.kernel.org, open-iscsi@googlegroups.com,
         linux-scsi@vger.kernel.org, ceph-devel@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Coly Li <colyli@suse.de>,
-        Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>,
-        Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.de>,
-        Jan Kara <jack@suse.com>, Jens Axboe <axboe@kernel.dk>,
-        Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Sagi Grimberg <sagi@grimberg.me>,
-        Vlastimil Babka <vbabka@suse.com>, stable@vger.kernel.org
-Subject: [PATCH v7 1/6] net: introduce helper sendpage_ok() in include/linux/net.h
-Date:   Tue, 18 Aug 2020 21:12:22 +0800
-Message-Id: <20200818131227.37020-2-colyli@suse.de>
+        Vasily Averin <vvs@virtuozzo.com>,
+        Cong Wang <amwang@redhat.com>,
+        Mike Christie <michaelc@cs.wisc.edu>,
+        Lee Duncan <lduncan@suse.com>, Chris Leech <cleech@redhat.com>,
+        Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.de>
+Subject: [PATCH v7 5/6] scsi: libiscsi: use sendpage_ok() in iscsi_tcp_segment_map()
+Date:   Tue, 18 Aug 2020 21:12:26 +0800
+Message-Id: <20200818131227.37020-6-colyli@suse.de>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200818131227.37020-1-colyli@suse.de>
 References: <20200818131227.37020-1-colyli@suse.de>
@@ -48,72 +46,42 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The original problem was from nvme-over-tcp code, who mistakenly uses
-kernel_sendpage() to send pages allocated by __get_free_pages() without
-__GFP_COMP flag. Such pages don't have refcount (page_count is 0) on
-tail pages, sending them by kernel_sendpage() may trigger a kernel panic
-from a corrupted kernel heap, because these pages are incorrectly freed
-in network stack as page_count 0 pages.
+In iscsci driver, iscsi_tcp_segment_map() uses the following code to
+check whether the page should or not be handled by sendpage:
+    if (!recv && page_count(sg_page(sg)) >= 1 && !PageSlab(sg_page(sg)))
 
-This patch introduces a helper sendpage_ok(), it returns true if the
-checking page,
-- is not slab page: PageSlab(page) is false.
-- has page refcount: page_count(page) is not zero
+The "page_count(sg_page(sg)) >= 1 && !PageSlab(sg_page(sg)" part is to
+make sure the page can be sent to network layer's zero copy path. This
+part is exactly what sendpage_ok() does.
 
-All drivers who want to send page to remote end by kernel_sendpage()
-may use this helper to check whether the page is OK. If the helper does
-not return true, the driver should try other non sendpage method (e.g.
-sock_no_sendpage()) to handle the page.
+This patch uses  use sendpage_ok() in iscsi_tcp_segment_map() to replace
+the original open coded checks.
 
 Signed-off-by: Coly Li <colyli@suse.de>
-Cc: Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
+Cc: Vasily Averin <vvs@virtuozzo.com>
+Cc: Cong Wang <amwang@redhat.com>
+Cc: Mike Christie <michaelc@cs.wisc.edu>
+Cc: Lee Duncan <lduncan@suse.com>
+Cc: Chris Leech <cleech@redhat.com>
 Cc: Christoph Hellwig <hch@lst.de>
 Cc: Hannes Reinecke <hare@suse.de>
-Cc: Jan Kara <jack@suse.com>
-Cc: Jens Axboe <axboe@kernel.dk>
-Cc: Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>
-Cc: Philipp Reisner <philipp.reisner@linbit.com>
-Cc: Sagi Grimberg <sagi@grimberg.me>
-Cc: Vlastimil Babka <vbabka@suse.com>
-Cc: stable@vger.kernel.org
 ---
- include/linux/net.h | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ drivers/scsi/libiscsi_tcp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/include/linux/net.h b/include/linux/net.h
-index d48ff1180879..05db8690f67e 100644
---- a/include/linux/net.h
-+++ b/include/linux/net.h
-@@ -21,6 +21,7 @@
- #include <linux/rcupdate.h>
- #include <linux/once.h>
- #include <linux/fs.h>
-+#include <linux/mm.h>
- #include <linux/sockptr.h>
+diff --git a/drivers/scsi/libiscsi_tcp.c b/drivers/scsi/libiscsi_tcp.c
+index 6ef93c7af954..31cd8487c16e 100644
+--- a/drivers/scsi/libiscsi_tcp.c
++++ b/drivers/scsi/libiscsi_tcp.c
+@@ -128,7 +128,7 @@ static void iscsi_tcp_segment_map(struct iscsi_segment *segment, int recv)
+ 	 * coalescing neighboring slab objects into a single frag which
+ 	 * triggers one of hardened usercopy checks.
+ 	 */
+-	if (!recv && page_count(sg_page(sg)) >= 1 && !PageSlab(sg_page(sg)))
++	if (!recv && sendpage_ok(sg_page(sg)))
+ 		return;
  
- #include <uapi/linux/net.h>
-@@ -286,6 +287,21 @@ do {									\
- #define net_get_random_once_wait(buf, nbytes)			\
- 	get_random_once_wait((buf), (nbytes))
- 
-+/*
-+ * E.g. XFS meta- & log-data is in slab pages, or bcache meta
-+ * data pages, or other high order pages allocated by
-+ * __get_free_pages() without __GFP_COMP, which have a page_count
-+ * of 0 and/or have PageSlab() set. We cannot use send_page for
-+ * those, as that does get_page(); put_page(); and would cause
-+ * either a VM_BUG directly, or __page_cache_release a page that
-+ * would actually still be referenced by someone, leading to some
-+ * obscure delayed Oops somewhere else.
-+ */
-+static inline bool sendpage_ok(struct page *page)
-+{
-+	return  !PageSlab(page) && page_count(page) >= 1;
-+}
-+
- int kernel_sendmsg(struct socket *sock, struct msghdr *msg, struct kvec *vec,
- 		   size_t num, size_t len);
- int kernel_sendmsg_locked(struct sock *sk, struct msghdr *msg,
+ 	if (recv) {
 -- 
 2.26.2
 
