@@ -5,39 +5,39 @@ X-Spam-Level:
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33B9BC433E3
-	for <ceph-devel@archiver.kernel.org>; Thu, 20 Aug 2020 00:07:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CF6AC433DF
+	for <ceph-devel@archiver.kernel.org>; Thu, 20 Aug 2020 00:09:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0757E2245C
-	for <ceph-devel@archiver.kernel.org>; Thu, 20 Aug 2020 00:07:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 589EA207FB
+	for <ceph-devel@archiver.kernel.org>; Thu, 20 Aug 2020 00:09:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1597882057;
-	bh=0yGrpJu7gFKvvJbC+j+tbevmFHvNI47Gc6ry9YWKlB0=;
+	s=default; t=1597882165;
+	bh=v9H/VNClXTCOSayoDs+ffigBMW2X2b5UbOg2dweTYX4=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=XSnVZeyJP+DfmglokqpICua3jCRfqO8stJdK9MsYl2vdrXqBLyIJSngnVTDbuykC9
-	 24xIg786IRj1U0EJocjbCh0rQ6BlawjJsB7FcdAbjZkWC6itEB2PImhxallmGma/7c
-	 Pgr+nyuaRt+G/MlNFuu2GqCjms1KqZV/hDla03+8=
+	b=ha9J2oRyyYYiiB0nCnxwxZYQU4ZAoyXLtquAeE8YUZSYSZDlk54Zpu/Wzy1HF/Ma/
+	 7aqTzTbV3nr3xZUOLovr1KfAmhZ2NjD8Mz7HT71iqX5XfRJrBW+vVt9r3qYtMOyNT+
+	 3y4guINcMKXVLihY+vJ9KCb7g8ShcyNjlH+F8baM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728473AbgHTAHd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 19 Aug 2020 20:07:33 -0400
-Received: from mail.kernel.org ([198.145.29.99]:32770 "EHLO mail.kernel.org"
+        id S1728470AbgHTAJO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 19 Aug 2020 20:09:14 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59812 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728244AbgHTADS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Aug 2020 20:03:18 -0400
+        id S1728030AbgHTACr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Aug 2020 20:02:47 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 434BC21744;
-        Thu, 20 Aug 2020 00:03:16 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B37E621775;
+        Thu, 20 Aug 2020 00:02:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1597881797;
-        bh=0yGrpJu7gFKvvJbC+j+tbevmFHvNI47Gc6ry9YWKlB0=;
+        s=default; t=1597881767;
+        bh=v9H/VNClXTCOSayoDs+ffigBMW2X2b5UbOg2dweTYX4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=CqVKnU5wUwdOtGVNItp4VAq7cZBco2Ol0S6O0NoJQKQU2p0S6W+5LOSSQV5tILjj2
-         cDs5wUh0HPPGSFAgkNTrgLpdbiL7X8cxFj4jwj1ez9mO43YRBDr5IeVeoHDsQyzk7G
-         JkKYChiLUzyjpGDjviTT6P14DO8t1mtaElVtY7Gs=
+        b=VIQU/v6KYZz+QfIV3QiAbOrK6QzjzVMOLnQbkaS/faQwV05810ClCpendA6u8Bs+f
+         r0lmbIC9/sMlvEMi7WB/XzyB6WUK2FpoYsRj6PIbRYHdPDWiAnIMWgYl8JZvtrpw2I
+         EMl+unqcD8nK2TVBTafvnL03Q/Kyiztqo5IJWKpM=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>,
@@ -45,12 +45,12 @@ Cc:     Xiubo Li <xiubli@redhat.com>,
         Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 11/18] ceph: fix use-after-free for fsc->mdsc
-Date:   Wed, 19 Aug 2020 20:02:54 -0400
-Message-Id: <20200820000302.215560-11-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 13/22] ceph: fix use-after-free for fsc->mdsc
+Date:   Wed, 19 Aug 2020 20:02:20 -0400
+Message-Id: <20200820000229.215333-13-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200820000302.215560-1-sashal@kernel.org>
-References: <20200820000302.215560-1-sashal@kernel.org>
+In-Reply-To: <20200820000229.215333-1-sashal@kernel.org>
+References: <20200820000229.215333-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -76,10 +76,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index a2e903203bf9f..0fa14d8b9c64c 100644
+index b79fe6549df6f..676e4ff1df2f3 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -3682,7 +3682,6 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+@@ -4141,7 +4141,6 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
  		return -ENOMEM;
  	}
  
@@ -87,7 +87,7 @@ index a2e903203bf9f..0fa14d8b9c64c 100644
  	init_completion(&mdsc->safe_umount_waiters);
  	init_waitqueue_head(&mdsc->session_close_wq);
  	INIT_LIST_HEAD(&mdsc->waiting_for_map);
-@@ -3723,6 +3722,8 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+@@ -4193,6 +4192,8 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
  
  	strscpy(mdsc->nodename, utsname()->nodename,
  		sizeof(mdsc->nodename));
