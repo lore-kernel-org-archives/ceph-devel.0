@@ -1,132 +1,119 @@
-Return-Path: <SRS0=4IBn=B6=vger.kernel.org=ceph-devel-owner@kernel.org>
+Return-Path: <SRS0=/ley=B7=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39B6BC433DF
-	for <ceph-devel@archiver.kernel.org>; Thu, 20 Aug 2020 21:31:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A633FC433E4
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:32:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EF6D6207DA
-	for <ceph-devel@archiver.kernel.org>; Thu, 20 Aug 2020 21:31:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 86708207DF
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:32:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1597959062;
-	bh=0m3kJKDl+90tStC1jWHdYAI2eddjB7Yb9p7PPMeCUzs=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=lyN4/KfudrhV122UWiFmnFqhzwitwOP3kNL+bLcIWVrptrazUFbiwsZUCC/7ZZkKe
-	 qJ2r4723iko/aXHmQfuXFmHp312+f4JKn3W81TPK+dPWI2mFxgvnIdVSUQuzac5FgE
-	 pxqebgTUKbCnfe9Ejlc3af94SXuj95KYB9fkXsww=
+	s=default; t=1598027532;
+	bh=fjmDARNuO3p8EyzzMXvS56Vf8PfN9ySp3dmgUpJE0JM=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=BucWAeagUHVIi+F40xvnYf3kTb+U8Gh/CsQtoig1DqogHdu/UEF1uD0k/rsY4BrR7
+	 j+XoXHK/J6Q9iFuTbBGpPLntcuGne4WYQwTjBJfJxTfUivSDt4i8jIqLZpZN7AKbeJ
+	 LHRGVlsqNf7A0Lvc9T/nHcvOZ3Z1Vs0I6d/o8nYE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727921AbgHTVbB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 20 Aug 2020 17:31:01 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52346 "EHLO mail.kernel.org"
+        id S1728613AbgHUQYj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 12:24:39 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50640 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726435AbgHTVbA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 20 Aug 2020 17:31:00 -0400
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1728464AbgHUQVf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 12:21:35 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 989B82076E;
-        Thu, 20 Aug 2020 21:30:58 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8514C22CB2;
+        Fri, 21 Aug 2020 16:20:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1597959059;
-        bh=0m3kJKDl+90tStC1jWHdYAI2eddjB7Yb9p7PPMeCUzs=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=MoHq/+vT40HLeUutymiZJljXhIaUUBjyxrXPAwrJZjw+0UPxb1gQSU+4gmZLiSLRd
-         ON6k9NN8/wEktznWxMDIWTr35yN8kPyGyCnAaIxyRCWJYn0keWJ+r/TdgFmXHDBmv5
-         W1S39ntxhr7JEFdaeMjO4I5xglzvQ2k0VI+/2eL0=
-Message-ID: <4429ff0fc03ced7ab7ecabeadda913b5a08d1684.camel@kernel.org>
-Subject: Re: [PATCH] ceph: fix inode number handling on arches with 32-bit
- ino_t
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     Ulrich.Weigand@de.ibm.com, Tuan.Hoang1@ibm.com, idryomov@gmail.com
-Date:   Thu, 20 Aug 2020 17:30:57 -0400
-In-Reply-To: <20200819151645.38951-1-jlayton@kernel.org>
-References: <20200818162316.389462-1-jlayton@kernel.org>
-         <20200819151645.38951-1-jlayton@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
+        s=default; t=1598026840;
+        bh=fjmDARNuO3p8EyzzMXvS56Vf8PfN9ySp3dmgUpJE0JM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=kFjBd3vP1hSL0XaIqJ6HR5/8frFgrZQTXmpIWz7Pmc57EpOFsEEHR7hY0KcdP++L2
+         iZSkCqOO8t0Db5fiQxgAuMfevg0uMOrMfMZHx4pMgGQ7NZt4EDt+VIjnUJd4H1VSZJ
+         ylrOm0B6hZd/q7o5yiCAIzVp+ha5Z++fyAOaTxlQ=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.4 20/22] ceph: fix potential mdsc use-after-free crash
+Date:   Fri, 21 Aug 2020 12:20:12 -0400
+Message-Id: <20200821162014.349506-20-sashal@kernel.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200821162014.349506-1-sashal@kernel.org>
+References: <20200821162014.349506-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, 2020-08-19 at 11:16 -0400, Jeff Layton wrote:
-> Tuan and Ulrich mentioned that they were hitting a problem on s390x,
-> which has a 32-bit ino_t value, even though it's a 64-bit arch (for
-> historical reasons).
-> 
-> I think the current handling of inode numbers in the ceph driver is
-> wrong. It tries to use 32-bit inode numbers on 32-bit arches, but that's
-> actually not a problem. 32-bit arches can deal with 64-bit inode numbers
-> just fine when userland code is compiled with LFS support (the common
-> case these days).
-> 
-> What we really want to do is just use 64-bit numbers everywhere, unless
-> someone has mounted with the ino32 mount option. In that case, we want
-> to ensure that we hash the inode number down to something that will fit
-> in 32 bits before presenting the value to userland.
-> 
-> Add new helper functions that do this, and only do the conversion before
-> presenting these values to userland in getattr and readdir.
-> 
-> The inode table hashvalue is changed to just cast the inode number to
-> unsigned long, as low-order bits are the most likely to vary anyway.
-> 
-> While it's not strictly required, we do want to put something in
-> inode->i_ino. Instead of basing it on BITS_PER_LONG, however, base it on
-> the size of the ino_t type.
-> 
-> Reported-by: Tuan Hoang1 <Tuan.Hoang1@ibm.com>
-> Reported-by: Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
-> URL: https://tracker.ceph.com/issues/46828
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  fs/ceph/caps.c       | 14 ++++-----
->  fs/ceph/debugfs.c    |  4 +--
->  fs/ceph/dir.c        | 31 ++++++++-----------
->  fs/ceph/file.c       |  4 +--
->  fs/ceph/inode.c      | 19 ++++++------
->  fs/ceph/mds_client.h |  2 +-
->  fs/ceph/quota.c      |  4 +--
->  fs/ceph/super.h      | 73 +++++++++++++++++++++++---------------------
->  8 files changed, 74 insertions(+), 77 deletions(-)
-> 
-> v4:
-> - flesh out comments in super.h
-> - merge dout messages in ceph_get_inode
-> - rename ceph_vino_to_ino to ceph_vino_to_ino_t
-> 
-> v3:
-> - use ceph_ino instead of ceph_present_ino in most dout() messages
-> 
-> v2:
-> - fix dir_emit inode number for ".."
-> - fix ino_t size test
-> 
+From: Xiubo Li <xiubli@redhat.com>
 
-FWIW, I built an i386 VM and ran a kernel with this patch through
-xfstests and it seems to be ok.
+[ Upstream commit fa9967734227b44acb1b6918033f9122dc7825b9 ]
 
-To be clear though, this _will_ be a user-visible change on 32-bit
-arches:
+Make sure the delayed work stopped before releasing the resources.
 
-1/ inode numbers will be seen to have changed between kernel versions.
-32-bit arches will see large inode numbers now instead of the hashed
-ones they saw before.
+cancel_delayed_work_sync() will only guarantee that the work finishes
+executing if the work is already in the ->worklist.  That means after
+the cancel_delayed_work_sync() returns, it will leave the work requeued
+if it was rearmed at the end. That can lead to a use after free once the
+work struct is freed.
 
-2/ any really old software not built with LFS support may start failing
-stat() calls with -EOVERFLOW on inode numbers >2^32. Nothing much we can
-do about these, but hopefully the intersection of people running such
-code on ceph will be very small.
+Fix it by flushing the delayed work instead of trying to cancel it, and
+ensure that the work doesn't rearm if the mdsc is stopping.
 
-The workaround for both problems will be to mount with "-o ino32".
+URL: https://tracker.ceph.com/issues/46293
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ fs/ceph/mds_client.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a5de8e22629ba..b7fd7d69be075 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3428,6 +3428,9 @@ static void delayed_work(struct work_struct *work)
+ 	dout("mdsc delayed_work\n");
+ 	ceph_check_delayed_caps(mdsc);
+ 
++	if (mdsc->stopping)
++		return;
++
+ 	mutex_lock(&mdsc->mutex);
+ 	renew_interval = mdsc->mdsmap->m_session_timeout >> 2;
+ 	renew_caps = time_after_eq(jiffies, HZ*renew_interval +
+@@ -3752,7 +3755,16 @@ void ceph_mdsc_force_umount(struct ceph_mds_client *mdsc)
+ static void ceph_mdsc_stop(struct ceph_mds_client *mdsc)
+ {
+ 	dout("stop\n");
+-	cancel_delayed_work_sync(&mdsc->delayed_work); /* cancel timer */
++	/*
++	 * Make sure the delayed work stopped before releasing
++	 * the resources.
++	 *
++	 * Because the cancel_delayed_work_sync() will only
++	 * guarantee that the work finishes executing. But the
++	 * delayed work will re-arm itself again after that.
++	 */
++	flush_delayed_work(&mdsc->delayed_work);
++
+ 	if (mdsc->mdsmap)
+ 		ceph_mdsmap_destroy(mdsc->mdsmap);
+ 	kfree(mdsc->sessions);
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.25.1
 
