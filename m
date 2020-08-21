@@ -2,47 +2,50 @@ Return-Path: <SRS0=/ley=B7=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52491C433E3
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC763C433E1
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 37F24230FF
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 91213230FF
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598034558;
-	bh=twZ0xibB1gzq93Rw7bdYpP5BmMSEwShppiwFS164MoI=;
-	h=From:To:Subject:Date:List-ID:From;
-	b=QU278PlCcFOeWdum8kCJPFVW8oPYHJFFZZjYIy90roypXcV0OAK/IZ1hisZOYDW1D
-	 ASLAlB06Hcu8Um1kitsE3cWkueqfEIAUxqGnj68cjI5gFkUnJxQblaHl8KeinOP+rM
-	 ZFcttYRhWeZclwsQ4JP6T1I2pZQWxfO39esKPhwk=
+	s=default; t=1598034566;
+	bh=ND4FcgD/NUSJ8C4KRjBaer7sEEz7pzhowVhqTtPqG0U=;
+	h=From:To:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=Mj31Zmchp5NaA7oH/HrrtqxVCu1z6oJCHKM5s6Du2Nlulan0Iefi+rC9qAYvAMmW9
+	 6JC8TEowwnd8/RNxMfSGxM9QzOjQ7n/mWGiSOJb+bPlJDWxuV5h/OzU1P38+CrnhB7
+	 Dn6l/jDUBnzGlk0IiR/ocx3AokrgkjtpkFtjT9Tg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726612AbgHUS2S (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 14:28:18 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59348 "EHLO mail.kernel.org"
+        id S1726831AbgHUS3Z (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 14:29:25 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59370 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725770AbgHUS2P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 14:28:15 -0400
+        id S1725916AbgHUS2Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 14:28:16 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A63AF22EBF;
-        Fri, 21 Aug 2020 18:28:14 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 378C823101;
+        Fri, 21 Aug 2020 18:28:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598034494;
-        bh=twZ0xibB1gzq93Rw7bdYpP5BmMSEwShppiwFS164MoI=;
-        h=From:To:Subject:Date:From;
-        b=P9iriKvFpIluBm+77xY0388RWR3Nf6QIBWk8pQIKhoClaRhtOD6+TqTGnOzu4Unzb
-         sn4ktgLbwE4no1NwHpz6FcHje30c9na9P6VO0MQY1kNy/T8/tZe5fh1OmrVAY9SAgG
-         wtkTUcWwff8r1HucNyk/9eXXVjDwS5EHdArIppEE=
+        s=default; t=1598034496;
+        bh=ND4FcgD/NUSJ8C4KRjBaer7sEEz7pzhowVhqTtPqG0U=;
+        h=From:To:Subject:Date:In-Reply-To:References:From;
+        b=BbdAviWSwqSwfnEpaHQYLHh/5oyL+NVvNkC/ZgwAFLbVICvQYYCxlb+XkaeU+nlm1
+         r6xd9SLq8ssVootlbvvcjZTrOFrydCzTiAuiVcWPFiJF/vy9m1P9/h2piDF828RwJo
+         kypdvqDmHp0KVCkKz3h+XDB0/ediGyhDGQzgiPTA=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: [RFC PATCH 00/14] ceph+fscrypt: together at last (contexts and filenames)
-Date:   Fri, 21 Aug 2020 14:27:59 -0400
-Message-Id: <20200821182813.52570-1-jlayton@kernel.org>
+Subject: [RFC PATCH 03/14] fscrypt: don't balk when inode is already marked encrypted
+Date:   Fri, 21 Aug 2020 14:28:02 -0400
+Message-Id: <20200821182813.52570-4-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200821182813.52570-1-jlayton@kernel.org>
+References: <20200821182813.52570-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
@@ -50,103 +53,28 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This is a (very rough and incomplete) draft patchset that I've been
-working on to add fscrypt support to cephfs. The main use case is being
-able to allow encryption at the edges, without having to trust your storage
-provider with keys.
+Cephfs (currently) sets this flag early and only fetches the context
+later. Eventually we may not need this, but for now it prevents this
+warning from popping.
 
-Implementing fscrypt on a network filesystem has some challenges that
-you don't have to deal with on a local fs:
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/crypto/keysetup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Ceph (and most other netfs') will need to pre-create a crypto context
-when creating a new inode as we'll need to encrypt some things before we
-have an inode. This patchset stores contexts in an xattr, but that's
-probably not ideal for the final implementation [1].
-
-Storing a binary crypttext filename on the MDS (or most network
-fileservers) may be problematic. We'll probably end up having to base64
-encode the names when storing them. I expect most network filesystems to
-have similar issues. That may limit the effective NAME_MAX for some
-filesystems [2].
-
-For content encryption, Ceph (and probably at least CIFS/SMB) will need
-to deal with writes not aligned on crypto blocks. These filesystems
-sometimes write synchronously to the server instead of going through the
-pagecache [3].
-
-Symlink handling in fscrypt will also need to be refactored a bit, as we
-won't have an inode before we'll need to encrypt its contents.
-
-This draft is _very_ rough and not ready for merge. This only covers the
-context handling and filename encryption. It's missing a lot of stuff
-still, but what's there basically works.
-
-I'm mostly posting this now to get some early feedback on the basic idea
-and approach. In particular, I'd appreciate some feedback from the
-fscrypt maintainers. Please let me know if any of the changes I'm
-proposing there look problematic.
-
-Thanks for looking!
--- Jeff
-
-[1]: We'll likely add a dedicated field to the standard on-the-wire
-inode representation and in the MDS, but that's a separate sub-project.
-
-[2]: For ceph, it looks like it's not a huge problem as the MDS doesn't
-enforce filename lengths at all. Still, we may extend the protocol to
-handle that better.
-
-[3]: For Ceph, I think we'll be able to do a CMPEXT op to do a
-read/modify/write-if-nothing-changed cycle for this case.
-
-Jeff Layton (14):
-  fscrypt: drop unused inode argument from fscrypt_fname_alloc_buffer
-  fscrypt: add fscrypt_new_context_from_parent
-  fscrypt: don't balk when inode is already marked encrypted
-  fscrypt: export fscrypt_d_revalidate
-  lib: lift fscrypt base64 conversion into lib/
-  ceph: add fscrypt ioctls
-  ceph: crypto context handling for ceph
-  ceph: add routine to create context prior to RPC
-  ceph: set S_ENCRYPTED bit if new inode has encryption.ctx xattr
-  ceph: make ceph_msdc_build_path use ref-walk
-  ceph: add encrypted fname handling to ceph_mdsc_build_path
-  ceph: make d_revalidate call fscrypt revalidator for encrypted
-    dentries
-  ceph: add support to readdir for encrypted filenames
-  ceph: add fscrypt support to ceph_fill_trace
-
- fs/ceph/Makefile        |   1 +
- fs/ceph/crypto.c        | 171 ++++++++++++++++++++++++++++++++++++++++
- fs/ceph/crypto.h        |  81 +++++++++++++++++++
- fs/ceph/dir.c           |  97 ++++++++++++++++++++---
- fs/ceph/file.c          |   4 +
- fs/ceph/inode.c         |  62 +++++++++++++--
- fs/ceph/ioctl.c         |  26 ++++++
- fs/ceph/mds_client.c    |  74 ++++++++++++-----
- fs/ceph/super.c         |  37 +++++++++
- fs/ceph/super.h         |  11 ++-
- fs/ceph/xattr.c         |  32 ++++++++
- fs/crypto/Kconfig       |   1 +
- fs/crypto/fname.c       |  67 +---------------
- fs/crypto/hooks.c       |   2 +-
- fs/crypto/keysetup.c    |   2 +-
- fs/crypto/policy.c      |  42 +++++++---
- fs/ext4/dir.c           |   2 +-
- fs/ext4/namei.c         |   7 +-
- fs/f2fs/dir.c           |   2 +-
- fs/ubifs/dir.c          |   2 +-
- include/linux/base64.h  |  11 +++
- include/linux/fscrypt.h |  12 ++-
- lib/Kconfig             |   3 +
- lib/Makefile            |   1 +
- lib/base64.c            |  71 +++++++++++++++++
- 25 files changed, 696 insertions(+), 125 deletions(-)
- create mode 100644 fs/ceph/crypto.c
- create mode 100644 fs/ceph/crypto.h
- create mode 100644 include/linux/base64.h
- create mode 100644 lib/base64.c
-
+diff --git a/fs/crypto/keysetup.c b/fs/crypto/keysetup.c
+index fea6226afc2b..587335dc7cb9 100644
+--- a/fs/crypto/keysetup.c
++++ b/fs/crypto/keysetup.c
+@@ -474,7 +474,7 @@ int fscrypt_get_encryption_info(struct inode *inode)
+ 		const union fscrypt_context *dummy_ctx =
+ 			fscrypt_get_dummy_context(inode->i_sb);
+ 
+-		if (IS_ENCRYPTED(inode) || !dummy_ctx) {
++		if (!dummy_ctx) {
+ 			fscrypt_warn(inode,
+ 				     "Error %d getting encryption context",
+ 				     res);
 -- 
 2.26.2
 
