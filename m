@@ -2,47 +2,47 @@ Return-Path: <SRS0=/ley=B7=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D91A1C433DF
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DA04C433E1
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B75ED22EBF
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1DF6523104
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:29:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598034546;
-	bh=rVGNEkwJRFoafwsqs23yuHpm2uwAcP8LYOC9fqLA4cU=;
+	s=default; t=1598034549;
+	bh=cjzcWCBqDYAC8jfa7JWsBDeyu4qvfdbuM7y+EFHiyZ4=;
 	h=From:To:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=Q9PB7xS7ldDRgWxEg2I1UEuPI0qq0loAlp2RSk+h2HWZSCn80S+KS/PHvCvNkaMzh
-	 W7exAP5ZrXhcoQRB/0o4xssum9B26CPfG3vuGk3dZZZjFuX+NrSk8cTxTDfwgBpmHX
-	 /IaWl4r78AW5qbeScwZivDM9w/hFkEI2P4oE3gUk=
+	b=MSdjkF1AOy7HSrCeD4ufJQ7BS8BitdhPYRQOenxvQHlFTL/b7+PQGhXS+gC22JmuZ
+	 91qqDEhNGivbf8L2yk8bM5K4RL17dtSnSFurfhAnk4/TR7gCJ/IR+eFMllrh2wxFpd
+	 C3SctmeCpvubAD8iMEqU2SnC9tvNmJwbfmwjbQa4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726758AbgHUS2w (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 14:28:52 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59448 "EHLO mail.kernel.org"
+        id S1726752AbgHUS2v (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 14:28:51 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59468 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726638AbgHUS2U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 14:28:20 -0400
+        id S1726646AbgHUS2V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 14:28:21 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CB17523102;
-        Fri, 21 Aug 2020 18:28:19 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id D25E023108;
+        Fri, 21 Aug 2020 18:28:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598034500;
-        bh=rVGNEkwJRFoafwsqs23yuHpm2uwAcP8LYOC9fqLA4cU=;
+        s=default; t=1598034501;
+        bh=cjzcWCBqDYAC8jfa7JWsBDeyu4qvfdbuM7y+EFHiyZ4=;
         h=From:To:Subject:Date:In-Reply-To:References:From;
-        b=oWu9OLw4Sj5UT4K1cMqo52qkq/TbK4xlHih3qz1/FHE9bdRPMA/zw2Uk2o3npPo5E
-         POoQH1ZhPhU/wBspXEzZX7oySqLYUeJmw3HMsT9KhHTwQdrPLef6pXSL25V3o3xnzw
-         2SnLfTsD89OPVQAjf9MeAvwjT1styRx8VVL7g7Uo=
+        b=dse5czlsz8bEjgZwlvTylPNHXJaYQP68GJ3RdAwHGUjSBaFGfzEY6wdo/A5EXq6fd
+         kp7x3YDPOTwIzhRixPbP8MTKYC9k7KDBOfkgn/BYCNp2euBx5Qc0PAivcgPdYG/aGs
+         KnmkcbhfnWCJA4MDDz2ZfuqbxcoFQl6gKtxqUbEg=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: [RFC PATCH 10/14] ceph: make ceph_msdc_build_path use ref-walk
-Date:   Fri, 21 Aug 2020 14:28:09 -0400
-Message-Id: <20200821182813.52570-11-jlayton@kernel.org>
+Subject: [RFC PATCH 12/14] ceph: make d_revalidate call fscrypt revalidator for encrypted dentries
+Date:   Fri, 21 Aug 2020 14:28:11 -0400
+Message-Id: <20200821182813.52570-13-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200821182813.52570-1-jlayton@kernel.org>
 References: <20200821182813.52570-1-jlayton@kernel.org>
@@ -53,94 +53,32 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Encryption potentially requires allocation, at which point we'll need to
-be in a non-atomic context. Convert ceph_msdc_build_path to take dentry
-spinlocks and references instead of using rcu_read_lock to walk the
-path.
-
-This is slightly less efficient, and we may want to eventually allow
-using RCU when the leaf dentry isn't encrypted.
+If we have an encrypted dentry, then we need to test whether a new key
+might have been established or removed. Do that before we test anything
+else about the dentry.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 35 +++++++++++++++++++----------------
- 1 file changed, 19 insertions(+), 16 deletions(-)
+ fs/ceph/dir.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 76d8d9495d1d..c4bfa383e8c4 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2326,7 +2326,8 @@ static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
- char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 			   int stop_on_nosnap)
- {
--	struct dentry *temp;
-+	struct dentry *cur;
-+	struct inode *inode;
- 	char *path;
- 	int pos;
- 	unsigned seq;
-@@ -2343,34 +2344,35 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 	path[pos] = '\0';
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 2e7f2bfa2c12..d2104c115868 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1701,6 +1701,12 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
+ 	dout("d_revalidate %p '%pd' inode %p offset 0x%llx\n", dentry,
+ 	     dentry, inode, ceph_dentry(dentry)->offset);
  
- 	seq = read_seqbegin(&rename_lock);
--	rcu_read_lock();
--	temp = dentry;
-+	cur = dget(dentry);
- 	for (;;) {
--		struct inode *inode;
-+		struct dentry *temp;
++	if (IS_ENCRYPTED(dir)) {
++		valid = fscrypt_d_revalidate(dentry, flags);
++		if (valid <= 0)
++			return valid;
++	}
++
+ 	mdsc = ceph_sb_to_client(dir->i_sb)->mdsc;
  
--		spin_lock(&temp->d_lock);
--		inode = d_inode(temp);
-+		spin_lock(&cur->d_lock);
-+		inode = d_inode(cur);
- 		if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
- 			dout("build_path path+%d: %p SNAPDIR\n",
--			     pos, temp);
--		} else if (stop_on_nosnap && inode && dentry != temp &&
-+			     pos, cur);
-+		} else if (stop_on_nosnap && inode && dentry != cur &&
- 			   ceph_snap(inode) == CEPH_NOSNAP) {
--			spin_unlock(&temp->d_lock);
-+			spin_unlock(&cur->d_lock);
- 			pos++; /* get rid of any prepended '/' */
- 			break;
- 		} else {
--			pos -= temp->d_name.len;
-+			pos -= cur->d_name.len;
- 			if (pos < 0) {
--				spin_unlock(&temp->d_lock);
-+				spin_unlock(&cur->d_lock);
- 				break;
- 			}
--			memcpy(path + pos, temp->d_name.name, temp->d_name.len);
-+			memcpy(path + pos, cur->d_name.name, cur->d_name.len);
- 		}
-+		temp = cur;
-+		cur = dget(temp->d_parent);
- 		spin_unlock(&temp->d_lock);
--		temp = READ_ONCE(temp->d_parent);
-+		dput(temp);
- 
- 		/* Are we at the root? */
--		if (IS_ROOT(temp))
-+		if (IS_ROOT(cur))
- 			break;
- 
- 		/* Are we out of buffer? */
-@@ -2379,8 +2381,9 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 
- 		path[pos] = '/';
- 	}
--	base = ceph_ino(d_inode(temp));
--	rcu_read_unlock();
-+	inode = d_inode(cur);
-+	base = inode ? ceph_ino(inode) : 0;
-+	dput(cur);
- 
- 	if (read_seqretry(&rename_lock, seq))
- 		goto retry;
+ 	/* always trust cached snapped dentries, snapdir dentry */
 -- 
 2.26.2
 
