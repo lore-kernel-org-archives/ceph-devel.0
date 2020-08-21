@@ -7,42 +7,42 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A1C7C433E3
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66013C433E4
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:28:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4551A22EBF
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:28:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 495C0230FF
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 18:28:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598034518;
-	bh=SZwwaY4kzg1f2etJWydeWhfXiR5upplKAGhJlRtoNnA=;
+	s=default; t=1598034519;
+	bh=2iMgd9gzoGbTXYOv5cvo7OTc/B3IdOkCCK31kYZpqAs=;
 	h=From:To:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=bsMGP+VnqaKBC3ZdaBHtaAYgFp7PZaL2HgJpj8krW3nO0y8p9/Ih5IoOI4+gGpe0m
-	 RZE5rd++ag+B+ip0pHZ2rsmkhGd9M+DiNaZYMRUFI8in09pyzUlJwK5fd/bUQgmizH
-	 3TwuYl8ovsYfqldB6Eal6yQQaJD8B93RfOvc9I5Q=
+	b=qkyE7yD6izdfQDdEm0e9dJHogR/+dJ9t+C/93A559AkpW1uwB7v3wjvB5dHGp+dGY
+	 rH1ZX5a//21Bp8VpjZ8wWYvJJ6rAyaRp4UwjKc7dUjkdHjrVr83hw3cj2qITD1Bg/P
+	 Bu2xBCAOa3G/yOJrva0Vb80FjJigViqF3RgMyxPU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725781AbgHUS2e (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 14:28:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59388 "EHLO mail.kernel.org"
+        id S1726709AbgHUS2i (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 14:28:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59416 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726118AbgHUS2S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 14:28:18 -0400
+        id S1726635AbgHUS2T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 14:28:19 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3E92C23105;
-        Fri, 21 Aug 2020 18:28:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id C3CA823100;
+        Fri, 21 Aug 2020 18:28:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598034497;
-        bh=SZwwaY4kzg1f2etJWydeWhfXiR5upplKAGhJlRtoNnA=;
+        s=default; t=1598034499;
+        bh=2iMgd9gzoGbTXYOv5cvo7OTc/B3IdOkCCK31kYZpqAs=;
         h=From:To:Subject:Date:In-Reply-To:References:From;
-        b=XZEx2CU8YW4wKk63ME5WADq6CWBvbjBmFkOTe8PpqgHRKtCS88O5dUdndv9k3wOGW
-         q2sX9fm1nPXkBa4Ycgomm5r4nzyNSQKLL4psiCDzWJT7WjdheAkYav18JRc59jnNZh
-         zE1B96l7cBGPc2qp5dryrkYBrtNjIUjiT33MLljQ=
+        b=fxTJctI3Fa5vwZlSuUzSj0EoOPzHKPMoKFDRf9DI08dOMNrMmlanw0Gkg445rKOiF
+         x0bBYn7LwiKAuwH7Gcb3V9yynOB+NIC3m57DR0gaMgxnuLHxdyW/GNyE4jG7Aoo9lb
+         /9KrdPqUrecRHsbxB0jafzVT7sfVX1Q5qohZl4G4=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: [RFC PATCH 05/14] lib: lift fscrypt base64 conversion into lib/
-Date:   Fri, 21 Aug 2020 14:28:04 -0400
-Message-Id: <20200821182813.52570-6-jlayton@kernel.org>
+Subject: [RFC PATCH 08/14] ceph: add routine to create context prior to RPC
+Date:   Fri, 21 Aug 2020 14:28:07 -0400
+Message-Id: <20200821182813.52570-9-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200821182813.52570-1-jlayton@kernel.org>
 References: <20200821182813.52570-1-jlayton@kernel.org>
@@ -53,235 +53,202 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Once we allow encrypted filenames we'll end up with names that may have
-illegal characters in them (embedded '\0' or '/'), or characters that
-aren't printable.
-
-It'll be safer to use strings that are printable. It turns out that the
-MDS doesn't really care about the length of filenames, so we can just
-base64 encode and decode filenames before writing and reading them.
-
-Lift the base64 implementation that's in fscrypt into lib/. Make fscrypt
-select it when it's enabled.
+Allow the client to create a new encryption context prior to creating a
+new inode, and ensure that we set it in the ceph_acl_sec_ctx (alongside
+acls, selinux contexts, etc.).
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/crypto/Kconfig      |  1 +
- fs/crypto/fname.c      | 59 +----------------------------------
- include/linux/base64.h | 11 +++++++
- lib/Kconfig            |  3 ++
- lib/Makefile           |  1 +
- lib/base64.c           | 71 ++++++++++++++++++++++++++++++++++++++++++
- 6 files changed, 88 insertions(+), 58 deletions(-)
- create mode 100644 include/linux/base64.h
- create mode 100644 lib/base64.c
+ fs/ceph/crypto.c | 55 ++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/crypto.h |  8 +++++++
+ fs/ceph/dir.c    | 15 +++++++++++++
+ fs/ceph/file.c   |  4 ++++
+ fs/ceph/super.h  |  4 ++++
+ 5 files changed, 86 insertions(+)
 
-diff --git a/fs/crypto/Kconfig b/fs/crypto/Kconfig
-index a5f5c30368a2..49219017f7e9 100644
---- a/fs/crypto/Kconfig
-+++ b/fs/crypto/Kconfig
-@@ -6,6 +6,7 @@ config FS_ENCRYPTION
- 	select CRYPTO_SKCIPHER
- 	select CRYPTO_LIB_SHA256
- 	select KEYS
-+	select BASE64
- 	help
- 	  Enable encryption of files and directories.  This
- 	  feature is similar to ecryptfs, but it is more memory
-diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
-index 9440a44e24ac..6a6bbe8f8db7 100644
---- a/fs/crypto/fname.c
-+++ b/fs/crypto/fname.c
-@@ -11,6 +11,7 @@
-  * This has not yet undergone a rigorous security audit.
-  */
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+index 22a09d422b72..0e57497c2e55 100644
+--- a/fs/ceph/crypto.c
++++ b/fs/ceph/crypto.c
+@@ -67,3 +67,58 @@ int ceph_fscrypt_set_ops(struct super_block *sb)
+ 	}
+ 	return 0;
+ }
++
++int ceph_fscrypt_new_context(struct inode *parent, struct ceph_acl_sec_ctx *as)
++{
++	int ret, ctxsize;
++	size_t name_len;
++	char *name;
++	struct ceph_pagelist *pagelist = as->pagelist;
++
++	/* Do nothing if subtree isn't encrypted */
++	if (!IS_ENCRYPTED(parent))
++		return 0;
++
++	ctxsize = fscrypt_new_context_from_parent(parent, as->fscrypt);
++	if (ctxsize <= 0)
++		return ctxsize;
++
++	/* marshal it in page array */
++	if (!pagelist) {
++		pagelist = ceph_pagelist_alloc(GFP_KERNEL);
++		if (!pagelist)
++			return -ENOMEM;
++		ret = ceph_pagelist_reserve(pagelist, PAGE_SIZE);
++		if (ret)
++			goto out;
++		ceph_pagelist_encode_32(pagelist, 1);
++	}
++
++	name = CEPH_XATTR_NAME_ENCRYPTION_CONTEXT;
++	name_len = strlen(name);
++	ret = ceph_pagelist_reserve(pagelist, 4 * 2 + name_len + ctxsize);
++	if (ret)
++		goto out;
++
++	if (as->pagelist) {
++		BUG_ON(pagelist->length <= sizeof(__le32));
++		if (list_is_singular(&pagelist->head)) {
++			le32_add_cpu((__le32*)pagelist->mapped_tail, 1);
++		} else {
++			struct page *page = list_first_entry(&pagelist->head,
++							     struct page, lru);
++			void *addr = kmap_atomic(page);
++			le32_add_cpu((__le32*)addr, 1);
++			kunmap_atomic(addr);
++		}
++	}
++
++	ceph_pagelist_encode_32(pagelist, name_len);
++	ceph_pagelist_append(pagelist, name, name_len);
++	ceph_pagelist_encode_32(pagelist, ctxsize);
++	ceph_pagelist_append(pagelist, as->fscrypt, ctxsize);
++out:
++	if (pagelist && !as->pagelist)
++		ceph_pagelist_release(pagelist);
++	return ret;
++}
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index 309925b345fc..e7d00831ef36 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -8,9 +8,12 @@
  
-+#include <linux/base64.h>
- #include <linux/namei.h>
- #include <linux/scatterlist.h>
- #include <crypto/hash.h>
-@@ -184,64 +185,6 @@ static int fname_decrypt(const struct inode *inode,
+ #ifdef CONFIG_FS_ENCRYPTION
+ 
++#define CEPH_XATTR_NAME_ENCRYPTION_CONTEXT	"encryption.ctx"
++
+ #define DUMMY_ENCRYPTION_ENABLED(fsc) ((fsc)->dummy_enc_ctx.ctx != NULL)
+ 
+ int ceph_fscrypt_set_ops(struct super_block *sb);
++int ceph_fscrypt_new_context(struct inode *parent, struct ceph_acl_sec_ctx *as);
+ 
+ #else /* CONFIG_FS_ENCRYPTION */
+ 
+@@ -21,6 +24,11 @@ static inline int ceph_fscrypt_set_ops(struct super_block *sb)
  	return 0;
  }
  
--static const char lookup_table[65] =
--	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+,";
--
--#define BASE64_CHARS(nbytes)	DIV_ROUND_UP((nbytes) * 4, 3)
--
--/**
-- * base64_encode() - base64-encode some bytes
-- * @src: the bytes to encode
-- * @len: number of bytes to encode
-- * @dst: (output) the base64-encoded string.  Not NUL-terminated.
-- *
-- * Encodes the input string using characters from the set [A-Za-z0-9+,].
-- * The encoded string is roughly 4/3 times the size of the input string.
-- *
-- * Return: length of the encoded string
-- */
--static int base64_encode(const u8 *src, int len, char *dst)
--{
--	int i, bits = 0, ac = 0;
--	char *cp = dst;
--
--	for (i = 0; i < len; i++) {
--		ac += src[i] << bits;
--		bits += 8;
--		do {
--			*cp++ = lookup_table[ac & 0x3f];
--			ac >>= 6;
--			bits -= 6;
--		} while (bits >= 6);
--	}
--	if (bits)
--		*cp++ = lookup_table[ac & 0x3f];
--	return cp - dst;
--}
--
--static int base64_decode(const char *src, int len, u8 *dst)
--{
--	int i, bits = 0, ac = 0;
--	const char *p;
--	u8 *cp = dst;
--
--	for (i = 0; i < len; i++) {
--		p = strchr(lookup_table, src[i]);
--		if (p == NULL || src[i] == 0)
--			return -2;
--		ac += (p - lookup_table) << bits;
--		bits += 6;
--		if (bits >= 8) {
--			*cp++ = ac & 0xff;
--			ac >>= 8;
--			bits -= 8;
--		}
--	}
--	if (ac)
--		return -1;
--	return cp - dst;
--}
--
- bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
- 				  u32 max_len, u32 *encrypted_len_ret)
- {
-diff --git a/include/linux/base64.h b/include/linux/base64.h
-new file mode 100644
-index 000000000000..bde7a936ed21
---- /dev/null
-+++ b/include/linux/base64.h
-@@ -0,0 +1,11 @@
-+// SPDX-License-Identifier: GPL-2.0
++static int ceph_fscrypt_new_context(struct inode *parent, struct ceph_acl_sec_ctx *as)
++{
++	return 0;
++}
 +
-+#ifndef _LIB_BASE64_H
-+#define _LIB_BASE64_H
-+#include <linux/types.h>
-+
-+#define BASE64_CHARS(nbytes)	DIV_ROUND_UP((nbytes) * 4, 3)
-+
-+int base64_encode(const u8 *src, int len, char *dst);
-+int base64_decode(const char *src, int len, u8 *dst);
-+#endif /* _LIB_BASE64_H */
-diff --git a/lib/Kconfig b/lib/Kconfig
-index b4b98a03ff98..507e851d220b 100644
---- a/lib/Kconfig
-+++ b/lib/Kconfig
-@@ -684,3 +684,6 @@ config GENERIC_LIB_UCMPDI2
- config PLDMFW
- 	bool
- 	default n
-+
-+config BASE64
-+	tristate
-diff --git a/lib/Makefile b/lib/Makefile
-index e290fc5707ea..4d76755e609c 100644
---- a/lib/Makefile
-+++ b/lib/Makefile
-@@ -166,6 +166,7 @@ obj-$(CONFIG_LIBCRC32C)	+= libcrc32c.o
- obj-$(CONFIG_CRC8)	+= crc8.o
- obj-$(CONFIG_XXHASH)	+= xxhash.o
- obj-$(CONFIG_GENERIC_ALLOCATOR) += genalloc.o
-+obj-$(CONFIG_BASE64) += base64.o
+ #endif /* CONFIG_FS_ENCRYPTION */
  
- obj-$(CONFIG_842_COMPRESS) += 842/
- obj-$(CONFIG_842_DECOMPRESS) += 842/
-diff --git a/lib/base64.c b/lib/base64.c
-new file mode 100644
-index 000000000000..5f1480da6559
---- /dev/null
-+++ b/lib/base64.c
-@@ -0,0 +1,71 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * base64 encode/decode functions
-+ *
-+ * Originally lifted from fs/crypto/fname.c
-+ *
-+ * Copyright (C) 2015, Jaegeuk Kim
-+ * Copyright (C) 2015, Eric Biggers
-+ */
-+
-+#include <linux/types.h>
-+#include <linux/export.h>
-+#include <linux/string.h>
-+
-+static const char lookup_table[65] =
-+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+,";
-+
-+/**
-+ * base64_encode() - base64-encode some bytes
-+ * @src: the bytes to encode
-+ * @len: number of bytes to encode
-+ * @dst: (output) the base64-encoded string.  Not NUL-terminated.
-+ *
-+ * Encodes the input string using characters from the set [A-Za-z0-9+,].
-+ * The encoded string is roughly 4/3 times the size of the input string.
-+ *
-+ * Return: length of the encoded string
-+ */
-+int base64_encode(const u8 *src, int len, char *dst)
-+{
-+	int i, bits = 0, ac = 0;
-+	char *cp = dst;
-+
-+	for (i = 0; i < len; i++) {
-+		ac += src[i] << bits;
-+		bits += 8;
-+		do {
-+			*cp++ = lookup_table[ac & 0x3f];
-+			ac >>= 6;
-+			bits -= 6;
-+		} while (bits >= 6);
+ #endif
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 34f669220a8b..2e7f2bfa2c12 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -9,6 +9,7 @@
+ 
+ #include "super.h"
+ #include "mds_client.h"
++#include "crypto.h"
+ 
+ /*
+  * Directory operations: readdir, lookup, create, link, unlink,
+@@ -848,6 +849,12 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+ 	if (err < 0)
+ 		goto out;
+ 
++	if (S_ISREG(mode)) {
++		err = ceph_fscrypt_new_context(dir, &as_ctx);
++		if (err < 0)
++			goto out;
 +	}
-+	if (bits)
-+		*cp++ = lookup_table[ac & 0x3f];
-+	return cp - dst;
-+}
-+EXPORT_SYMBOL(base64_encode);
 +
-+int base64_decode(const char *src, int len, u8 *dst)
-+{
-+	int i, bits = 0, ac = 0;
-+	const char *p;
-+	u8 *cp = dst;
+ 	dout("mknod in dir %p dentry %p mode 0%ho rdev %d\n",
+ 	     dir, dentry, mode, rdev);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_MKNOD, USE_AUTH_MDS);
+@@ -907,6 +914,10 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	if (err < 0)
+ 		goto out;
+ 
++	err = ceph_fscrypt_new_context(dir, &as_ctx);
++	if (err < 0)
++		goto out;
 +
-+	for (i = 0; i < len; i++) {
-+		p = strchr(lookup_table, src[i]);
-+		if (p == NULL || src[i] == 0)
-+			return -2;
-+		ac += (p - lookup_table) << bits;
-+		bits += 6;
-+		if (bits >= 8) {
-+			*cp++ = ac & 0xff;
-+			ac >>= 8;
-+			bits -= 8;
-+		}
-+	}
-+	if (ac)
-+		return -1;
-+	return cp - dst;
-+}
-+EXPORT_SYMBOL(base64_decode);
+ 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+@@ -975,6 +986,10 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 	if (err < 0)
+ 		goto out;
+ 
++	err = ceph_fscrypt_new_context(dir, &as_ctx);
++	if (err < 0)
++		goto out;
++
+ 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index cf3f66d75162..94558e04f34a 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -19,6 +19,7 @@
+ #include "cache.h"
+ #include "io.h"
+ #include "metric.h"
++#include "crypto.h"
+ 
+ static __le32 ceph_flags_sys2wire(u32 flags)
+ {
+@@ -686,6 +687,9 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		err = ceph_security_init_secctx(dentry, mode, &as_ctx);
+ 		if (err < 0)
+ 			goto out_ctx;
++		err = ceph_fscrypt_new_context(dir, &as_ctx);
++		if (err < 0)
++			goto out_ctx;
+ 	} else if (!d_in_lookup(dentry)) {
+ 		/* If it's not being looked up, it's negative */
+ 		return -ENOENT;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 6327b5739286..a481cacf775a 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -17,6 +17,7 @@
+ #include <linux/posix_acl.h>
+ #include <linux/refcount.h>
+ #include <linux/security.h>
++#include <linux/fscrypt.h>
+ 
+ #include <linux/ceph/libceph.h>
+ 
+@@ -991,6 +992,9 @@ struct ceph_acl_sec_ctx {
+ #ifdef CONFIG_CEPH_FS_SECURITY_LABEL
+ 	void *sec_ctx;
+ 	u32 sec_ctxlen;
++#endif
++#ifdef CONFIG_FS_ENCRYPTION
++	u8	fscrypt[FSCRYPT_SET_CONTEXT_MAX_SIZE];
+ #endif
+ 	struct ceph_pagelist *pagelist;
+ };
 -- 
 2.26.2
 
