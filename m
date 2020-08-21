@@ -4,51 +4,51 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A633FC433E4
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:32:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35D5FC433E4
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:37:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 86708207DF
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:32:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 08E1620738
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:37:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598027532;
-	bh=fjmDARNuO3p8EyzzMXvS56Vf8PfN9ySp3dmgUpJE0JM=;
+	s=default; t=1598027842;
+	bh=JcKkK6SjWJoKNYSJyFxdo3JBVP64FhLpgWA1lDUivaU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=BucWAeagUHVIi+F40xvnYf3kTb+U8Gh/CsQtoig1DqogHdu/UEF1uD0k/rsY4BrR7
-	 j+XoXHK/J6Q9iFuTbBGpPLntcuGne4WYQwTjBJfJxTfUivSDt4i8jIqLZpZN7AKbeJ
-	 LHRGVlsqNf7A0Lvc9T/nHcvOZ3Z1Vs0I6d/o8nYE=
+	b=cGoyW5E1J86tB2bdSvaGbTVgGNaOtyCyUHurAtj/hSChIw+Tw27FhvH0PpTZVI72D
+	 YCpQk6slwqaEdWCX8Swd21wnD5aOtPXfXWwjYCCQGpcfk5IMePOMz1+fMbzyxw5Pdx
+	 p4wUi5MAAy7KC7UbL3UdpiS5Xxa9nvdiHyCQkhLM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728613AbgHUQYj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 12:24:39 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50640 "EHLO mail.kernel.org"
+        id S1728601AbgHUQhV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 12:37:21 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49958 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728464AbgHUQVf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 12:21:35 -0400
+        id S1728426AbgHUQVG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 12:21:06 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8514C22CB2;
-        Fri, 21 Aug 2020 16:20:39 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id A09C522D06;
+        Fri, 21 Aug 2020 16:20:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598026840;
-        bh=fjmDARNuO3p8EyzzMXvS56Vf8PfN9ySp3dmgUpJE0JM=;
+        s=default; t=1598026810;
+        bh=JcKkK6SjWJoKNYSJyFxdo3JBVP64FhLpgWA1lDUivaU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=kFjBd3vP1hSL0XaIqJ6HR5/8frFgrZQTXmpIWz7Pmc57EpOFsEEHR7hY0KcdP++L2
-         iZSkCqOO8t0Db5fiQxgAuMfevg0uMOrMfMZHx4pMgGQ7NZt4EDt+VIjnUJd4H1VSZJ
-         ylrOm0B6hZd/q7o5yiCAIzVp+ha5Z++fyAOaTxlQ=
+        b=uqywY+NoN9y2drFitNEVE+Aq9jvkX4b2m3nwvlNWHanrY+qn54LH28WQfVlELi0pd
+         13Vrq78KoA321phyEEEtHBPXViIok2VfaHsZnb1w7ix4edKKH7D/8nuuMwiH/X3PSw
+         WH4SPKnCiqoEdvxTEj3/XsqlRGXnm9jNnqFNQVJE=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.4 20/22] ceph: fix potential mdsc use-after-free crash
-Date:   Fri, 21 Aug 2020 12:20:12 -0400
-Message-Id: <20200821162014.349506-20-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 24/26] ceph: fix potential mdsc use-after-free crash
+Date:   Fri, 21 Aug 2020 12:19:35 -0400
+Message-Id: <20200821161938.349246-24-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200821162014.349506-1-sashal@kernel.org>
-References: <20200821162014.349506-1-sashal@kernel.org>
+In-Reply-To: <20200821161938.349246-1-sashal@kernel.org>
+References: <20200821161938.349246-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -83,10 +83,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index a5de8e22629ba..b7fd7d69be075 100644
+index 3139fbd4c34e3..4ec5a109df82b 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -3428,6 +3428,9 @@ static void delayed_work(struct work_struct *work)
+@@ -3386,6 +3386,9 @@ static void delayed_work(struct work_struct *work)
  	dout("mdsc delayed_work\n");
  	ceph_check_delayed_caps(mdsc);
  
@@ -96,7 +96,7 @@ index a5de8e22629ba..b7fd7d69be075 100644
  	mutex_lock(&mdsc->mutex);
  	renew_interval = mdsc->mdsmap->m_session_timeout >> 2;
  	renew_caps = time_after_eq(jiffies, HZ*renew_interval +
-@@ -3752,7 +3755,16 @@ void ceph_mdsc_force_umount(struct ceph_mds_client *mdsc)
+@@ -3717,7 +3720,16 @@ void ceph_mdsc_force_umount(struct ceph_mds_client *mdsc)
  static void ceph_mdsc_stop(struct ceph_mds_client *mdsc)
  {
  	dout("stop\n");
