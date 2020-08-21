@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6C55C433DF
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:54:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6C84C433E1
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 17:06:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B0FBB20702
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 16:54:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 876C320656
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 17:06:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598028875;
-	bh=1v4KHE1+YA41Db40668v7f3dhI/gEuZHXs9BUxbBK0I=;
+	s=default; t=1598029587;
+	bh=NHy1UHvvcpEH4xJoWIdVR/k2ARR+z4EDGVqQNYb3gjE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=QUbInwW1xGwoKM9AdgX2m629yqo4D1RFQJCkej8MresPgt8slROshSPx+7axwZmFK
-	 10LKW8X4qZIpxwdin68Ml2Qmr3cfxIY11BTJRArVYZJPDZN+g08saIHyYOWpVPMVbj
-	 d9foiYVehwJ6KaYN3451snUPyl/UMXBVWF6kF+Vs=
+	b=Mf4l7rkJINAFFJq24lyl0YtMQvYjUAdNE1JV8QtjPL/vFKPrwLHLIJs8MTzH50P7d
+	 SL4oZ9JVxaLgY+O5Xkpf50UiW/9uU9NvlKK4Y8itEw+xqzlQ5yg0pisGx5+pCHbWoq
+	 abl2BUNVmoY3t6otvHfcyGJjYPa0VRY89Demm8Vs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728781AbgHUQwk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 12:52:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50114 "EHLO mail.kernel.org"
+        id S1728835AbgHURGX (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 13:06:23 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50060 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728312AbgHUQTm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 12:19:42 -0400
+        id S1728230AbgHUQSG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 12:18:06 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C95CD22D6E;
-        Fri, 21 Aug 2020 16:18:52 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9F31C22D03;
+        Fri, 21 Aug 2020 16:17:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598026733;
-        bh=1v4KHE1+YA41Db40668v7f3dhI/gEuZHXs9BUxbBK0I=;
+        s=default; t=1598026680;
+        bh=NHy1UHvvcpEH4xJoWIdVR/k2ARR+z4EDGVqQNYb3gjE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IIbhi5t7GAxSlIW9deowyFcOn0xJAlU8i6kOxh2vySfP+Velrx0Q8B2sba2hQq1hP
-         CB5Qbw2B24LWAUNTR6aYVK3hLzXtf2B7ly9p5ps8Nz403v37pHZGO743UxAAuFTQ2o
-         gooaqq/2o8p/5Y1hKhAJ/ulbcxnkxmcU5KlW3CDc=
+        b=bKmPjLSYFOOT+0U8BoOs5Qx7Yebh2Rb7W+T4HBtyuZ8mPQ4hwXRVMgA2NnNsEibSY
+         vLenWteoIdV5VHYAG0b7EOOLsZlgcw8DPSi8rbggn/4rXVChkSEE7tOHpg0QXUBmVx
+         Ph7Jk0EUQaXC+NDS5RdHCzWk8hYTjtsOhW+oCUMc=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 36/38] ceph: fix potential mdsc use-after-free crash
-Date:   Fri, 21 Aug 2020 12:18:05 -0400
-Message-Id: <20200821161807.348600-36-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 44/48] ceph: fix potential mdsc use-after-free crash
+Date:   Fri, 21 Aug 2020 12:17:00 -0400
+Message-Id: <20200821161704.348164-44-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200821161807.348600-1-sashal@kernel.org>
-References: <20200821161807.348600-1-sashal@kernel.org>
+In-Reply-To: <20200821161704.348164-1-sashal@kernel.org>
+References: <20200821161704.348164-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -83,12 +83,12 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index a2e903203bf9f..ff2022b07d1de 100644
+index b79fe6549df6f..b719aa655576a 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -3615,6 +3615,9 @@ static void delayed_work(struct work_struct *work)
+@@ -4066,6 +4066,9 @@ static void delayed_work(struct work_struct *work)
+ 
  	dout("mdsc delayed_work\n");
- 	ceph_check_delayed_caps(mdsc);
  
 +	if (mdsc->stopping)
 +		return;
@@ -96,7 +96,7 @@ index a2e903203bf9f..ff2022b07d1de 100644
  	mutex_lock(&mdsc->mutex);
  	renew_interval = mdsc->mdsmap->m_session_timeout >> 2;
  	renew_caps = time_after_eq(jiffies, HZ*renew_interval +
-@@ -3949,7 +3952,16 @@ void ceph_mdsc_force_umount(struct ceph_mds_client *mdsc)
+@@ -4430,7 +4433,16 @@ void ceph_mdsc_force_umount(struct ceph_mds_client *mdsc)
  static void ceph_mdsc_stop(struct ceph_mds_client *mdsc)
  {
  	dout("stop\n");
