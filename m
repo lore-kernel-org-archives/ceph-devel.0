@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 599C5C433E1
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 17:14:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6B24C433DF
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 17:23:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C18421741
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 17:14:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9C0C92075E
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Aug 2020 17:23:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598030059;
-	bh=ZcIwq8E5zT/sPqpUcMVIzJ0gEKPJkKWKAYqElB2XR5w=;
+	s=default; t=1598030634;
+	bh=8Ehh7V2FSQcjIFlLPGKbe+IttvqyB6gO7LC3jyQuRE0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=WplZgPIfRgtxkM1T+PDTxyiuoEegTPEY7Swg6MFZZ378qLAIDNeIlon+jqG8Vvt3D
-	 REjRKAaravj/vBVb8rN0atuUjjkIm8AROxLB0G3VGlqvYPS6HgqNoL9oFBr/YJ9J9F
-	 j1on5u6UaujVxhcH8VO6zUo1NQ5YiKKcl67tC+8A=
+	b=WEt4JKSmpw9JcYChtszJxmBynsesYjBguQv6FQbjL9xlm9pT7SUVqM3BUGiXWxwOS
+	 WTFVWibVhq1fsyTRloDyQPYtHBNmFz/afMbOv0ayYl1UhAjkDFGLWNjsXmXD1tMM+o
+	 aHtDJBPgkorQ+7e6X6mC7+fRVh4ExDIX87svmGS0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728837AbgHURLs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 13:11:48 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49910 "EHLO mail.kernel.org"
+        id S1729154AbgHURXi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Aug 2020 13:23:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48448 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728141AbgHUQRC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 12:17:02 -0400
+        id S1726300AbgHUQPi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Aug 2020 12:15:38 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9674122CA1;
-        Fri, 21 Aug 2020 16:16:56 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 509C922C9F;
+        Fri, 21 Aug 2020 16:15:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598026617;
-        bh=ZcIwq8E5zT/sPqpUcMVIzJ0gEKPJkKWKAYqElB2XR5w=;
+        s=default; t=1598026538;
+        bh=8Ehh7V2FSQcjIFlLPGKbe+IttvqyB6gO7LC3jyQuRE0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=EOQkIEi/KasdEtbYy/KfARFQd7p2I8pAoh9SbPb7h8IODYG9bA7HGmr4hK+lcclDa
-         KSlQRvHncAhQdU+KjmcM+2NL3+YWpHza/D3npLPPDz2HLEBo/zkk4/b7VKZWR+Ogos
-         hVNs7WEaK71AqXijKffitMlcQRtsZZGaUTi/h9+M=
+        b=CuLdhutp8gMQh9f/keMaD3nWM7sJABFGBTpB6c70LYq8xYNgoKKfVLJnvpvcQLBSM
+         fAoohbW2lp2Q1WW7B0A9uBIixGDUSJpiF3WCit/uokmifdiEL6zfvx4kaDlqcuvDHN
+         v/mX8VRQ2psu9H+scRz2k49+MOdH1We96010thNQ=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.7 57/61] ceph: do not access the kiocb after aio requests
-Date:   Fri, 21 Aug 2020 12:15:41 -0400
-Message-Id: <20200821161545.347622-57-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.8 58/62] ceph: do not access the kiocb after aio requests
+Date:   Fri, 21 Aug 2020 12:14:19 -0400
+Message-Id: <20200821161423.347071-58-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200821161545.347622-1-sashal@kernel.org>
-References: <20200821161545.347622-1-sashal@kernel.org>
+In-Reply-To: <20200821161423.347071-1-sashal@kernel.org>
+References: <20200821161423.347071-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -79,10 +79,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index afdfca965a7fc..599eca249973d 100644
+index 160644ddaeed7..d51c3f2fdca02 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -1508,6 +1508,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+@@ -1538,6 +1538,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
  	struct inode *inode = file_inode(filp);
  	struct ceph_inode_info *ci = ceph_inode(inode);
  	struct page *pinned_page = NULL;
@@ -90,7 +90,7 @@ index afdfca965a7fc..599eca249973d 100644
  	ssize_t ret;
  	int want, got = 0;
  	int retry_op = 0, read = 0;
-@@ -1516,7 +1517,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+@@ -1546,7 +1547,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
  	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
  	     inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len, inode);
  
@@ -99,7 +99,7 @@ index afdfca965a7fc..599eca249973d 100644
  		ceph_start_io_direct(inode);
  	else
  		ceph_start_io_read(inode);
-@@ -1573,7 +1574,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+@@ -1603,7 +1604,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
  	}
  	ceph_put_cap_refs(ci, got);
  
