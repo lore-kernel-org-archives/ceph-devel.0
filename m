@@ -2,149 +2,427 @@ Return-Path: <SRS0=BCBe=CA=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BD66C433DF
-	for <ceph-devel@archiver.kernel.org>; Sat, 22 Aug 2020 02:34:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB387C433E4
+	for <ceph-devel@archiver.kernel.org>; Sat, 22 Aug 2020 04:21:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5317520735
-	for <ceph-devel@archiver.kernel.org>; Sat, 22 Aug 2020 02:34:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598063684;
-	bh=VdTEnShx+GV6E9gjj9TupPVHBN8F/ejyaL4g7GX/E7k=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=IMvkY/8a6RbYeiLvIxBq1qctbdu524V2rF5GVtsGSASGKd51ZPe6yKU8o8uSvnuDR
-	 m0XuezaH3rCN1n/TeJrl9Q7YdGZOZehgn7fRgdp7aMY2Ip6iB05uIVR3g6Az9uBrGp
-	 QHS6dxE8FTQIGbWejcZrO6rSMTFjrHtbjNxsFYUs=
+	by mail.kernel.org (Postfix) with ESMTP id 9DE482071A
+	for <ceph-devel@archiver.kernel.org>; Sat, 22 Aug 2020 04:21:23 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="rgGKXhOL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726698AbgHVCen (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Aug 2020 22:34:43 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54210 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725991AbgHVCen (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Aug 2020 22:34:43 -0400
-Received: from sol.localdomain (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 083FF20735;
-        Sat, 22 Aug 2020 02:34:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598063682;
-        bh=VdTEnShx+GV6E9gjj9TupPVHBN8F/ejyaL4g7GX/E7k=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=PczGZOibddHQvDlsc7SPxjPTfBJtknhVnmJq7jnaIAl1IgU6l1FRU/jocXT8m3slc
-         Tu5VQ2ABESJHHd1yC9SzFjmEQXqc5tsQ0iAVdyc+c3b4xso4UMOdRPfnfcHYr7XxD9
-         L/auklVd9DIbixmV/3NTbaLEjDKYwPJoKr8I+Oa8=
-Date:   Fri, 21 Aug 2020 19:34:40 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: Re: [RFC PATCH 00/14] ceph+fscrypt: together at last (contexts and
- filenames)
-Message-ID: <20200822023440.GD834@sol.localdomain>
-References: <20200821182813.52570-1-jlayton@kernel.org>
- <20200822002301.GA834@sol.localdomain>
- <2a6b92f25325fa95164f418c669883f73a291b77.camel@kernel.org>
+        id S1727076AbgHVEVV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sat, 22 Aug 2020 00:21:21 -0400
+Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:4500 "EHLO
+        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725826AbgHVEVG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 22 Aug 2020 00:21:06 -0400
+Received: from hqpgpgate102.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5f409cf60000>; Fri, 21 Aug 2020 21:20:06 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate102.nvidia.com (PGP Universal service);
+  Fri, 21 Aug 2020 21:21:06 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate102.nvidia.com on Fri, 21 Aug 2020 21:21:06 -0700
+Received: from HQMAIL101.nvidia.com (172.20.187.10) by HQMAIL111.nvidia.com
+ (172.20.187.18) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Sat, 22 Aug
+ 2020 04:21:05 +0000
+Received: from hqnvemgw03.nvidia.com (10.124.88.68) by HQMAIL101.nvidia.com
+ (172.20.187.10) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
+ Transport; Sat, 22 Aug 2020 04:21:05 +0000
+Received: from sandstorm.nvidia.com (Not Verified[10.2.94.162]) by hqnvemgw03.nvidia.com with Trustwave SEG (v7,5,8,10121)
+        id <B5f409d310006>; Fri, 21 Aug 2020 21:21:05 -0700
+From:   John Hubbard <jhubbard@nvidia.com>
+To:     Andrew Morton <akpm@linux-foundation.org>
+CC:     Alexander Viro <viro@zeniv.linux.org.uk>,
+        Christoph Hellwig <hch@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Jens Axboe <axboe@kernel.dk>, Jeff Layton <jlayton@kernel.org>,
+        <linux-xfs@vger.kernel.org>, <linux-fsdevel@vger.kernel.org>,
+        <linux-block@vger.kernel.org>, <ceph-devel@vger.kernel.org>,
+        <linux-mm@kvack.org>, LKML <linux-kernel@vger.kernel.org>,
+        John Hubbard <jhubbard@nvidia.com>
+Subject: [PATCH 3/5] bio: convert get_user_pages_fast() --> pin_user_pages_fast()
+Date:   Fri, 21 Aug 2020 21:20:57 -0700
+Message-ID: <20200822042059.1805541-4-jhubbard@nvidia.com>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20200822042059.1805541-1-jhubbard@nvidia.com>
+References: <20200822042059.1805541-1-jhubbard@nvidia.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2a6b92f25325fa95164f418c669883f73a291b77.camel@kernel.org>
+X-NVConfidentiality: public
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1598070006; bh=W3aFSTwxcsXnvQDT0rb9ATUk6+FImoLZnNsgZkjkrP4=;
+        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
+         In-Reply-To:References:MIME-Version:X-NVConfidentiality:
+         Content-Transfer-Encoding:Content-Type;
+        b=rgGKXhOLVHjC224uNFOv6QV+3giMdke2C5sWlrh0oH5CHu6Mw8nrMdtoCLrZlZ+FM
+         CoJWh4JHw/Q89QXMOGHuOtyRRZRERP3hS6MXjsGQOi9udrkOPWbZReXbxF2DtI3697
+         1OrRLuzpCLfFXBaEDZ67JAz2zwQO0KCFC2EIz2cl9xo6hv7xT2OhaUGJQwRhgFwbI2
+         wt2/OXPDcuuCnXULtHHo7OROsK9KJOl+wZ7R1+7Da5UqsxcP03qdEmqcH/O6vMe4O4
+         S4UY9rcNoK7LOGqE3NmjNUESeq/2L0d5P1GGP4PpY2Eay/1XWpI5+E+oCTANzmE00i
+         QT4OCoyqIYHxw==
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, Aug 21, 2020 at 08:58:35PM -0400, Jeff Layton wrote:
-> > > Ceph (and most other netfs') will need to pre-create a crypto context
-> > > when creating a new inode as we'll need to encrypt some things before we
-> > > have an inode. This patchset stores contexts in an xattr, but that's
-> > > probably not ideal for the final implementation [1].
-> > 
-> > Coincidentally, I've currently working on solving a similar problem.  On ext4,
-> > the inode number can't be assigned, and the encryption xattr can't be set, until
-> > the jbd2 transaction which creates the inode.  Also, if the new inode is a
-> > symlink, then fscrypt_encrypt_symlink() has to be called during the transaction.
-> > Together, these imply that fscrypt_get_encryption_info() has to be called during
-> > the transaction.
-> > 
-> 
-> Yes, similar problem. I started looking at symlinks today, and got a
-> little ways into a patchset to refactor some fscrypt code to handle
-> them, but I don't think it's quite right yet. A more general solution
-> would be nice.
-> 
-> > That's what we do, currently.  However, it's technically wrong and can deadlock,
-> > since fscrypt_get_encryption_info() isn't GFP_NOFS-safe (and it can't be).
-> > 
-> > f2fs appears to have a similar problem, though I'm still investigating.
-> > 
-> > To fix this, I'm planning to add new functions:
-> > 
-> >    - fscrypt_prepare_new_inode() will set up the fscrypt_info for a new
-> >      'struct inode' which hasn't necessarily had an inode number assigned yet.
-> >      It won't set the encryption xattr yet.
-> > 
-> 
-> I more or less have that in 02/14, I think, but if you have something
-> else in mind, I'm happy to follow suit.
-[...]
-> > > Symlink handling in fscrypt will also need to be refactored a bit, as we
-> > > won't have an inode before we'll need to encrypt its contents.
-> > 
-> > Will there be an in-memory inode allocated yet (a 'struct inode'), just with no
-> > inode number assigned yet?  If so, my work-in-progress patchset I mentioned
-> > earlier should be sufficient to address this.  The order would be:
-> > 
-> > 	1. fscrypt_prepare_new_inode()
-> > 	2. fscrypt_encrypt_symlink()
-> > 	3. Assign inode number
-> > 
-> > 
-> > Or does ceph not have a 'struct inode' at all until step (3)?
-> 
-> No, generally ceph doesn't create an inode until the reply comes in. I
-> think we'll need to be able to create a context and encrypt the symlink
-> before we issue the call to the server. I started hacking at the fscrypt
-> code for this today, but I didn't get very far.
-> 
-> FWIW, ceph is a bit of an odd netfs protocol in that there is a standard
-> "trace" that holds info about dentries and inodes that are created or
-> modified as a result of an operation. Most of the dentry/inode cache
-> manipulation is done at that point, which is done as part of the reply
-> processing.
+Change generic block/bio Direct IO routines, to acquire FOLL_PIN user
+pages via the recently added routines:
 
-Your patch "fscrypt: add fscrypt_new_context_from_parent" takes in a directory
-and generates an fscrypt_context (a.k.a. an encryption xattr) for a new file
-that will be created in that directory.
+    iov_iter_pin_user_pages()
+    iov_iter_pin_user_pages_alloc()
+    pin_user_page()
 
-fscrypt_prepare_new_inode() from my work-in-progress patches would do a bit more
-than that.  It would actually set up a "struct fscrypt_info" for a new inode.
-That includes the encryption key and all information needed to build the
-fscrypt_context.  So, afterwards it will be possible to call
-fscrypt_encrypt_symlink() before the fscrypt_context is "saved to disk".
-IIUC, that's part of what ceph will need.
+This effectively converts several file systems (ext4, for example) that
+use the common Direct IO routines.
 
-The catch is that there will still have to be a 'struct inode' to associate the
-'struct fscrypt_info' with.  It won't have to have ->i_ino set yet, but some
-other fields (at least ->i_mode and ->i_sb) will have to be set, since lots of
-code in fs/crypto/ uses those fields.
+Change the corresponding page release calls from put_page() to
+unpin_user_page().
 
-I think it would be possible to refactor things to make 'struct fscrypt_info'
-more separate from 'struct inode', so that filesystems could create a
-'struct fscrypt_info' that isn't associated with an inode yet, then encrypt a
-symlink target using it (not caching it in ->i_link as we currently do).
+Change bio_release_pages() to handle FOLL_PIN pages. In fact, that
+is now the *only* type of pages it handles now.
 
-However, it would require a lot of changes.
+Design notes
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
 
-So I'm wondering if it would be easier to instead change ceph to create and
-start initializing the 'struct inode' earlier.  It doesn't have to have an inode
-number assigned or be added to the inode cache yet; it just needs to be
-allocated in memory and some basic fields need to be initialized.  In theory
-it's possible, right?  I'd expect that local filesystems aren't even that much
-different, in principle; they start initializing a new 'struct inode' in memory
-first, and only later do they *really* create the inode by allocating an inode
-number and saving the changes to disk.
+Quite a few approaches have been considered over the years. This one is
+inspired by Christoph Hellwig's July, 2019 observation that there are
+only 5 ITER_ types, and we can simplify handling of them for Direct IO
+[1]. Accordingly, this patch implements the following pseudocode:
 
-- Eric
+Direct IO behavior:
+
+    ITER_IOVEC:
+        pin_user_pages_fast();
+        break;
+
+    ITER_KVEC:    // already elevated page refcount, leave alone
+    ITER_BVEC:    // already elevated page refcount, leave alone
+    ITER_PIPE:    // just, no :)
+    ITER_DISCARD: // discard
+        return -EFAULT or -ENVALID;
+
+...which works for callers that already have sorted out which case they
+are in. Such as, Direct IO in the block/bio layers.
+
+Now, this does leave ITER_KVEC and ITER_BVEC unconverted, but on the
+other hand, it's not clear that these are actually affected in the real
+world, by the get_user_pages()+filesystem interaction problems of [2].
+If it turns out to matter, then those can be handled too, but it's just
+more refactoring and surgery to do so.
+
+Page acquisition: The iov_iter_get_pages*() routines
+above are at just the right level in the call stack: the callers already
+know which system to use, and so it's a small change to just drop in the
+replacement routines. And it's a fan-in/fan-out point: block/bio call
+sites for Direct IO funnel their page acquisitions through the
+iov_iter_get_pages*() routines, and there are many other callers of
+those. And we can't convert all of the callers at once--too many
+subsystems are involved, and it would be a too large and too risky
+patch.
+
+Page release: there are already separate release routines: put_page()
+vs. unpin_user_page(), so it's already done there.
+
+[1] https://lore.kernel.org/kvm/20190724061750.GA19397@infradead.org/
+
+[2] "Explicit pinning of user-space pages":
+    https://lwn.net/Articles/807108/
+
+Signed-off-by: John Hubbard <jhubbard@nvidia.com>
+---
+ block/bio.c          | 24 ++++++++++++------------
+ block/blk-map.c      |  6 +++---
+ fs/direct-io.c       | 28 ++++++++++++++--------------
+ fs/iomap/direct-io.c |  2 +-
+ 4 files changed, 30 insertions(+), 30 deletions(-)
+
+diff --git a/block/bio.c b/block/bio.c
+index c63ba04bd629..00d548e3c2b8 100644
+--- a/block/bio.c
++++ b/block/bio.c
+@@ -955,7 +955,7 @@ void bio_release_pages(struct bio *bio, bool mark_dirty=
+)
+ 	bio_for_each_segment_all(bvec, bio, iter_all) {
+ 		if (mark_dirty && !PageCompound(bvec->bv_page))
+ 			set_page_dirty_lock(bvec->bv_page);
+-		put_page(bvec->bv_page);
++		unpin_user_page(bvec->bv_page);
+ 	}
+ }
+ EXPORT_SYMBOL_GPL(bio_release_pages);
+@@ -986,9 +986,9 @@ static int __bio_iov_bvec_add_pages(struct bio *bio, st=
+ruct iov_iter *iter)
+  * @iter: iov iterator describing the region to be mapped
+  *
+  * Pins pages from *iter and appends them to @bio's bvec array. The
+- * pages will have to be released using put_page() when done.
+- * For multi-segment *iter, this function only adds pages from the
+- * next non-empty segment of the iov iterator.
++ * pages will have to be released using put_page() or unpin_user_page() wh=
+en
++ * done. For multi-segment *iter, this function only adds pages from the n=
+ext
++ * non-empty segment of the iov iterator.
+  */
+ static int __bio_iov_iter_get_pages(struct bio *bio, struct iov_iter *iter=
+)
+ {
+@@ -1009,7 +1009,7 @@ static int __bio_iov_iter_get_pages(struct bio *bio, =
+struct iov_iter *iter)
+ 	BUILD_BUG_ON(PAGE_PTRS_PER_BVEC < 2);
+ 	pages +=3D entries_left * (PAGE_PTRS_PER_BVEC - 1);
+=20
+-	size =3D iov_iter_get_pages(iter, pages, LONG_MAX, nr_pages, &offset);
++	size =3D iov_iter_pin_user_pages(iter, pages, LONG_MAX, nr_pages, &offset=
+);
+ 	if (unlikely(size <=3D 0))
+ 		return size ? size : -EFAULT;
+=20
+@@ -1020,7 +1020,7 @@ static int __bio_iov_iter_get_pages(struct bio *bio, =
+struct iov_iter *iter)
+=20
+ 		if (__bio_try_merge_page(bio, page, len, offset, &same_page)) {
+ 			if (same_page)
+-				put_page(page);
++				unpin_user_page(page);
+ 		} else {
+ 			if (WARN_ON_ONCE(bio_full(bio, len)))
+                                 return -EINVAL;
+@@ -1056,7 +1056,7 @@ static int __bio_iov_append_get_pages(struct bio *bio=
+, struct iov_iter *iter)
+ 	BUILD_BUG_ON(PAGE_PTRS_PER_BVEC < 2);
+ 	pages +=3D entries_left * (PAGE_PTRS_PER_BVEC - 1);
+=20
+-	size =3D iov_iter_get_pages(iter, pages, LONG_MAX, nr_pages, &offset);
++	size =3D iov_iter_pin_user_pages(iter, pages, LONG_MAX, nr_pages, &offset=
+);
+ 	if (unlikely(size <=3D 0))
+ 		return size ? size : -EFAULT;
+=20
+@@ -1069,7 +1069,7 @@ static int __bio_iov_append_get_pages(struct bio *bio=
+, struct iov_iter *iter)
+ 				max_append_sectors, &same_page) !=3D len)
+ 			return -EINVAL;
+ 		if (same_page)
+-			put_page(page);
++			unpin_user_page(page);
+ 		offset =3D 0;
+ 	}
+=20
+@@ -1113,8 +1113,8 @@ int bio_iov_iter_get_pages(struct bio *bio, struct io=
+v_iter *iter)
+ 		} else {
+ 			if (is_bvec)
+ 				ret =3D __bio_iov_bvec_add_pages(bio, iter);
+-			else
+-				ret =3D __bio_iov_iter_get_pages(bio, iter);
++		else
++			ret =3D __bio_iov_iter_get_pages(bio, iter);
+ 		}
+ 	} while (!ret && iov_iter_count(iter) && !bio_full(bio, 0));
+=20
+@@ -1326,8 +1326,8 @@ void bio_set_pages_dirty(struct bio *bio)
+  * the BIO and re-dirty the pages in process context.
+  *
+  * It is expected that bio_check_pages_dirty() will wholly own the BIO fro=
+m
+- * here on.  It will run one put_page() against each page and will run one
+- * bio_put() against the BIO.
++ * here on.  It will run one unpin_user_page() against each page
++ * and will run one bio_put() against the BIO.
+  */
+=20
+ static void bio_dirty_fn(struct work_struct *work);
+diff --git a/block/blk-map.c b/block/blk-map.c
+index 6e804892d5ec..7a095b4947ea 100644
+--- a/block/blk-map.c
++++ b/block/blk-map.c
+@@ -275,7 +275,7 @@ static struct bio *bio_map_user_iov(struct request_queu=
+e *q,
+ 		size_t offs, added =3D 0;
+ 		int npages;
+=20
+-		bytes =3D iov_iter_get_pages_alloc(iter, &pages, LONG_MAX, &offs);
++		bytes =3D iov_iter_pin_user_pages_alloc(iter, &pages, LONG_MAX, &offs);
+ 		if (unlikely(bytes <=3D 0)) {
+ 			ret =3D bytes ? bytes : -EFAULT;
+ 			goto out_unmap;
+@@ -298,7 +298,7 @@ static struct bio *bio_map_user_iov(struct request_queu=
+e *q,
+ 				if (!bio_add_hw_page(q, bio, page, n, offs,
+ 						     max_sectors, &same_page)) {
+ 					if (same_page)
+-						put_page(page);
++						unpin_user_page(page);
+ 					break;
+ 				}
+=20
+@@ -312,7 +312,7 @@ static struct bio *bio_map_user_iov(struct request_queu=
+e *q,
+ 		 * release the pages we didn't map into the bio, if any
+ 		 */
+ 		while (j < npages)
+-			put_page(pages[j++]);
++			unpin_user_page(pages[j++]);
+ 		kvfree(pages);
+ 		/* couldn't stuff something into bio? */
+ 		if (bytes)
+diff --git a/fs/direct-io.c b/fs/direct-io.c
+index 183299892465..b01c8d003bd3 100644
+--- a/fs/direct-io.c
++++ b/fs/direct-io.c
+@@ -170,7 +170,7 @@ static inline int dio_refill_pages(struct dio *dio, str=
+uct dio_submit *sdio)
+ {
+ 	ssize_t ret;
+=20
+-	ret =3D iov_iter_get_pages(sdio->iter, dio->pages, LONG_MAX, DIO_PAGES,
++	ret =3D iov_iter_pin_user_pages(sdio->iter, dio->pages, LONG_MAX, DIO_PAG=
+ES,
+ 				&sdio->from);
+=20
+ 	if (ret < 0 && sdio->blocks_available && (dio->op =3D=3D REQ_OP_WRITE)) {
+@@ -182,7 +182,7 @@ static inline int dio_refill_pages(struct dio *dio, str=
+uct dio_submit *sdio)
+ 		 */
+ 		if (dio->page_errors =3D=3D 0)
+ 			dio->page_errors =3D ret;
+-		get_page(page);
++		pin_user_page(page);
+ 		dio->pages[0] =3D page;
+ 		sdio->head =3D 0;
+ 		sdio->tail =3D 1;
+@@ -472,7 +472,7 @@ static inline void dio_bio_submit(struct dio *dio, stru=
+ct dio_submit *sdio)
+ static inline void dio_cleanup(struct dio *dio, struct dio_submit *sdio)
+ {
+ 	while (sdio->head < sdio->tail)
+-		put_page(dio->pages[sdio->head++]);
++		unpin_user_page(dio->pages[sdio->head++]);
+ }
+=20
+ /*
+@@ -739,7 +739,7 @@ static inline int dio_bio_add_page(struct dio_submit *s=
+dio)
+ 		 */
+ 		if ((sdio->cur_page_len + sdio->cur_page_offset) =3D=3D PAGE_SIZE)
+ 			sdio->pages_in_io--;
+-		get_page(sdio->cur_page);
++		pin_user_page(sdio->cur_page);
+ 		sdio->final_block_in_bio =3D sdio->cur_page_block +
+ 			(sdio->cur_page_len >> sdio->blkbits);
+ 		ret =3D 0;
+@@ -853,13 +853,13 @@ submit_page_section(struct dio *dio, struct dio_submi=
+t *sdio, struct page *page,
+ 	 */
+ 	if (sdio->cur_page) {
+ 		ret =3D dio_send_cur_page(dio, sdio, map_bh);
+-		put_page(sdio->cur_page);
++		unpin_user_page(sdio->cur_page);
+ 		sdio->cur_page =3D NULL;
+ 		if (ret)
+ 			return ret;
+ 	}
+=20
+-	get_page(page);		/* It is in dio */
++	pin_user_page(page);		/* It is in dio */
+ 	sdio->cur_page =3D page;
+ 	sdio->cur_page_offset =3D offset;
+ 	sdio->cur_page_len =3D len;
+@@ -874,7 +874,7 @@ submit_page_section(struct dio *dio, struct dio_submit =
+*sdio, struct page *page,
+ 		ret =3D dio_send_cur_page(dio, sdio, map_bh);
+ 		if (sdio->bio)
+ 			dio_bio_submit(dio, sdio);
+-		put_page(sdio->cur_page);
++		unpin_user_page(sdio->cur_page);
+ 		sdio->cur_page =3D NULL;
+ 	}
+ 	return ret;
+@@ -974,7 +974,7 @@ static int do_direct_IO(struct dio *dio, struct dio_sub=
+mit *sdio,
+=20
+ 				ret =3D get_more_blocks(dio, sdio, map_bh);
+ 				if (ret) {
+-					put_page(page);
++					unpin_user_page(page);
+ 					goto out;
+ 				}
+ 				if (!buffer_mapped(map_bh))
+@@ -1019,7 +1019,7 @@ static int do_direct_IO(struct dio *dio, struct dio_s=
+ubmit *sdio,
+=20
+ 				/* AKPM: eargh, -ENOTBLK is a hack */
+ 				if (dio->op =3D=3D REQ_OP_WRITE) {
+-					put_page(page);
++					unpin_user_page(page);
+ 					return -ENOTBLK;
+ 				}
+=20
+@@ -1032,7 +1032,7 @@ static int do_direct_IO(struct dio *dio, struct dio_s=
+ubmit *sdio,
+ 				if (sdio->block_in_file >=3D
+ 						i_size_aligned >> blkbits) {
+ 					/* We hit eof */
+-					put_page(page);
++					unpin_user_page(page);
+ 					goto out;
+ 				}
+ 				zero_user(page, from, 1 << blkbits);
+@@ -1072,7 +1072,7 @@ static int do_direct_IO(struct dio *dio, struct dio_s=
+ubmit *sdio,
+ 						  sdio->next_block_for_io,
+ 						  map_bh);
+ 			if (ret) {
+-				put_page(page);
++				unpin_user_page(page);
+ 				goto out;
+ 			}
+ 			sdio->next_block_for_io +=3D this_chunk_blocks;
+@@ -1087,8 +1087,8 @@ static int do_direct_IO(struct dio *dio, struct dio_s=
+ubmit *sdio,
+ 				break;
+ 		}
+=20
+-		/* Drop the ref which was taken in get_user_pages() */
+-		put_page(page);
++		/* Drop the ref which was taken in pin_user_pages() */
++		unpin_user_page(page);
+ 	}
+ out:
+ 	return ret;
+@@ -1327,7 +1327,7 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inod=
+e *inode,
+ 		ret2 =3D dio_send_cur_page(dio, &sdio, &map_bh);
+ 		if (retval =3D=3D 0)
+ 			retval =3D ret2;
+-		put_page(sdio.cur_page);
++		unpin_user_page(sdio.cur_page);
+ 		sdio.cur_page =3D NULL;
+ 	}
+ 	if (sdio.bio)
+diff --git a/fs/iomap/direct-io.c b/fs/iomap/direct-io.c
+index c1aafb2ab990..390f611528ea 100644
+--- a/fs/iomap/direct-io.c
++++ b/fs/iomap/direct-io.c
+@@ -194,7 +194,7 @@ iomap_dio_zero(struct iomap_dio *dio, struct iomap *iom=
+ap, loff_t pos,
+ 	bio->bi_private =3D dio;
+ 	bio->bi_end_io =3D iomap_dio_bio_end_io;
+=20
+-	get_page(page);
++	pin_user_page(page);
+ 	__bio_add_page(bio, page, len, 0);
+ 	bio_set_op_attrs(bio, REQ_OP_WRITE, flags);
+ 	iomap_dio_submit_bio(dio, iomap, bio, pos);
+--=20
+2.28.0
+
