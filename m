@@ -2,70 +2,53 @@ Return-Path: <SRS0=j5Jn=CC=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A604C433E1
-	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 03:01:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20C2EC433E4
+	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 06:35:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19EE4206BE
-	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 03:01:15 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZdGyEdWr"
+	by mail.kernel.org (Postfix) with ESMTP id 133A221775
+	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 06:18:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598249914;
+	bh=QdONhA25GuQQJmapNTQIWWWGH7achN6FFOfpot5lMGg=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=XcYo4DoMP7Cwj+VuywWOnkjQVqPuIXE+3D4nEvdwUuidMz6xNXh7t+KwXbfjer8gq
+	 3A1d46RZ2tEDlp2J9qwgk8pwVUWPFIES9ww+nRaygIE0P1zgS//b3Ln7nvST8HkFjn
+	 +B42DyusHJbAg/RRI+KlPGAZGFyAKhEmvcr4LxDc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728131AbgHXDBK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 23 Aug 2020 23:01:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38918 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727999AbgHXDBJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Aug 2020 23:01:09 -0400
-Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DD4BC061573;
-        Sun, 23 Aug 2020 20:01:09 -0700 (PDT)
-Received: by mail-pl1-x641.google.com with SMTP id y6so3518980plk.10;
-        Sun, 23 Aug 2020 20:01:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Sd+e9mqpssttKPHG4Vmc6RWj6G6G48PRDU4F/RVT5Ho=;
-        b=ZdGyEdWrQTveFGjbRMDO8OjW4bOlMQM5qKDRp3leiKZ51A4hPjROMAfDMggtFBqpZK
-         d7C/TwKkIM4h46aPUIB9e48MiECI07EnmmfpcmlEFkZg6XTVmXN525aXeFItEqlyfKh6
-         p5p4/FknIqY4PvcSJeeCmvW9bogn4f63HDddphzkShoSLoUnPN886F5kpZCYQRmTcL7Z
-         YYsZ4wnP7Idwi5itH2j6BYsGBm6ZMKRxcFlTEkE/byZQvNYCQIEs8A1F4M+49RX9wDB9
-         zDwIr0r8b2NLhY0cLNxKWHdvqRVsoeWs59go1QwpgeYBv0bNddx4m2jLG1M0495anJj8
-         35lw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Sd+e9mqpssttKPHG4Vmc6RWj6G6G48PRDU4F/RVT5Ho=;
-        b=liUqLiOZSKJstgpPrfvXzYfIPlY3ZlVcnThQBMF9n7tOOtuuU1RY8/34pO8oNpjmSZ
-         OxRmWkbLwDFlp9UnMZcomlh0wfq57lm0qw9sek0Wn1xQMgP4qzHY+xeA7BABE6Ug2tOj
-         nmzsEk82QF1yG/VFKsxjzm03yHdhQHeLOFyPJ1m1fZ0EBpQmEcd3cy9gsH6aNTTbm/IE
-         UXccOcEPmu0I7COvJSHiAhdxhL4isjAbErKWJn0qHsSPxqWAYSCcYBuy/0P4szYbg2KX
-         CMlzU86VfDu7+/dOtImEAQ8XL7CRZrPumI0i4Dkk8rjRmiob6Gz2fCRD0zCPD3MhnEQB
-         0Urw==
-X-Gm-Message-State: AOAM530QY2iLwCEfFk/PBpX1/YwytIujcLMHL2Ka/zYJ+nJ+ldGw+76t
-        +jxbKJ3+C2gqgRwsqtMF+vk=
-X-Google-Smtp-Source: ABdhPJzeyhiSO1vJo2MHuImYOXNbsVyKEJazgLqADtaMajhDvY5Q6r8/3E2YNHow3p8CiRT1+AIZjA==
-X-Received: by 2002:a17:90a:c394:: with SMTP id h20mr3092215pjt.22.1598238069049;
-        Sun, 23 Aug 2020 20:01:09 -0700 (PDT)
-Received: from localhost.localdomain ([122.224.153.227])
-        by smtp.gmail.com with ESMTPSA id y65sm9328813pfb.155.2020.08.23.20.01.05
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 23 Aug 2020 20:01:08 -0700 (PDT)
-From:   Yanhu Cao <gmayyyha@gmail.com>
-To:     jlayton@kernel.org
-Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Yanhu Cao <gmayyyha@gmail.com>
-Subject: [PATCH] ceph: add column 'mds' to show caps in more user friendly
-Date:   Mon, 24 Aug 2020 11:00:58 +0800
-Message-Id: <20200824030058.37786-1-gmayyyha@gmail.com>
-X-Mailer: git-send-email 2.24.3 (Apple Git-128)
+        id S1726243AbgHXGSb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 24 Aug 2020 02:18:31 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49716 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726027AbgHXGST (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 24 Aug 2020 02:18:19 -0400
+Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 90CA6207D3;
+        Mon, 24 Aug 2020 06:18:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598249898;
+        bh=QdONhA25GuQQJmapNTQIWWWGH7achN6FFOfpot5lMGg=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=e2050mad+4BMjzCtGT254bX32Y57ZVPtbWQMoQ32OT3m9nxLEs1AyyyqNgsRbiXRZ
+         QT/l38bY56Ows6Dz77k+6jZZieKpGieGImYQ2x0upL1GsY64XNmbcCCuQTqD6nxcy5
+         EOd44g73ySC7xMwhc5Xioy2YrWtVXRk3pKMU+uk4=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-fscrypt@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
+        Jeff Layton <jlayton@kernel.org>
+Subject: [RFC PATCH 2/8] ext4: factor out ext4_xattr_credits_for_new_inode()
+Date:   Sun, 23 Aug 2020 23:17:06 -0700
+Message-Id: <20200824061712.195654-3-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20200824061712.195654-1-ebiggers@kernel.org>
+References: <20200824061712.195654-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
@@ -73,39 +56,130 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-In multi-mds, the 'caps' debugfs file will have duplicate ino,
-add the 'mds' column to indicate which mds session the cap belongs to.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+To compute a new inode's xattr credits, we need to know whether the
+inode will be encrypted or not.  When we switch to use the new helper
+function fscrypt_prepare_new_inode(), we won't find out whether the
+inode will be encrypted until slightly later than is currently the case,
+which requires moving the code block that computes the xattr credits.
+
+To make this easier and reduce the length of __ext4_new_inode(), move
+this code block into a new function ext4_xattr_credits_for_new_inode().
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- fs/ceph/debugfs.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ fs/ext4/ialloc.c | 90 +++++++++++++++++++++++++++---------------------
+ 1 file changed, 51 insertions(+), 39 deletions(-)
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 97539b497e4c..47f8971a9c52 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -202,7 +202,8 @@ static int caps_show_cb(struct inode *inode, struct ceph_cap *cap, void *p)
- {
- 	struct seq_file *s = p;
+diff --git a/fs/ext4/ialloc.c b/fs/ext4/ialloc.c
+index df25d38d65393..0cc576005a923 100644
+--- a/fs/ext4/ialloc.c
++++ b/fs/ext4/ialloc.c
+@@ -742,6 +742,53 @@ static int find_inode_bit(struct super_block *sb, ext4_group_t group,
+ 	return 1;
+ }
  
--	seq_printf(s, "0x%-17lx%-17s%-17s\n", inode->i_ino,
-+	seq_printf(s, "0x%-17lx%-3d%-17s%-17s\n", inode->i_ino,
-+		   cap->session->s_mds,
- 		   ceph_cap_string(cap->issued),
- 		   ceph_cap_string(cap->implemented));
- 	return 0;
-@@ -222,8 +223,8 @@ static int caps_show(struct seq_file *s, void *p)
- 		   "reserved\t%d\n"
- 		   "min\t\t%d\n\n",
- 		   total, avail, used, reserved, min);
--	seq_printf(s, "ino                issued           implemented\n");
--	seq_printf(s, "-----------------------------------------------\n");
-+	seq_printf(s, "ino              mds  issued           implemented\n");
-+	seq_printf(s, "--------------------------------------------------\n");
++static int ext4_xattr_credits_for_new_inode(struct inode *dir, mode_t mode,
++					    bool encrypt)
++{
++	struct super_block *sb = dir->i_sb;
++	int nblocks = 0;
++#ifdef CONFIG_EXT4_FS_POSIX_ACL
++	struct posix_acl *p = get_acl(dir, ACL_TYPE_DEFAULT);
++
++	if (IS_ERR(p))
++		return PTR_ERR(p);
++	if (p) {
++		int acl_size = p->a_count * sizeof(ext4_acl_entry);
++
++		nblocks += (S_ISDIR(mode) ? 2 : 1) *
++			__ext4_xattr_set_credits(sb, NULL /* inode */,
++						 NULL /* block_bh */, acl_size,
++						 true /* is_create */);
++		posix_acl_release(p);
++	}
++#endif
++
++#ifdef CONFIG_SECURITY
++	{
++		int num_security_xattrs = 1;
++
++#ifdef CONFIG_INTEGRITY
++		num_security_xattrs++;
++#endif
++		/*
++		 * We assume that security xattrs are never more than 1k.
++		 * In practice they are under 128 bytes.
++		 */
++		nblocks += num_security_xattrs *
++			__ext4_xattr_set_credits(sb, NULL /* inode */,
++						 NULL /* block_bh */, 1024,
++						 true /* is_create */);
++	}
++#endif
++	if (encrypt)
++		nblocks += __ext4_xattr_set_credits(sb,
++						    NULL /* inode */,
++						    NULL /* block_bh */,
++						    FSCRYPT_SET_CONTEXT_MAX_SIZE,
++						    true /* is_create */);
++	return nblocks;
++}
++
+ /*
+  * There are two policies for allocating an inode.  If the new inode is
+  * a directory, then a forward search is made for a block group with both
+@@ -796,45 +843,10 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
+ 	}
  
- 	mutex_lock(&mdsc->mutex);
- 	for (i = 0; i < mdsc->max_sessions; i++) {
+ 	if (!handle && sbi->s_journal && !(i_flags & EXT4_EA_INODE_FL)) {
+-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+-		struct posix_acl *p = get_acl(dir, ACL_TYPE_DEFAULT);
+-
+-		if (IS_ERR(p))
+-			return ERR_CAST(p);
+-		if (p) {
+-			int acl_size = p->a_count * sizeof(ext4_acl_entry);
+-
+-			nblocks += (S_ISDIR(mode) ? 2 : 1) *
+-				__ext4_xattr_set_credits(sb, NULL /* inode */,
+-					NULL /* block_bh */, acl_size,
+-					true /* is_create */);
+-			posix_acl_release(p);
+-		}
+-#endif
+-
+-#ifdef CONFIG_SECURITY
+-		{
+-			int num_security_xattrs = 1;
+-
+-#ifdef CONFIG_INTEGRITY
+-			num_security_xattrs++;
+-#endif
+-			/*
+-			 * We assume that security xattrs are never
+-			 * more than 1k.  In practice they are under
+-			 * 128 bytes.
+-			 */
+-			nblocks += num_security_xattrs *
+-				__ext4_xattr_set_credits(sb, NULL /* inode */,
+-					NULL /* block_bh */, 1024,
+-					true /* is_create */);
+-		}
+-#endif
+-		if (encrypt)
+-			nblocks += __ext4_xattr_set_credits(sb,
+-					NULL /* inode */, NULL /* block_bh */,
+-					FSCRYPT_SET_CONTEXT_MAX_SIZE,
+-					true /* is_create */);
++		ret2 = ext4_xattr_credits_for_new_inode(dir, mode, encrypt);
++		if (ret2 < 0)
++			return ERR_PTR(ret2);
++		nblocks += ret2;
+ 	}
+ 
+ 	ngroups = ext4_get_groups_count(sb);
 -- 
-2.24.3 (Apple Git-128)
+2.28.0
 
