@@ -2,53 +2,50 @@ Return-Path: <SRS0=j5Jn=CC=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B9EAC433ED
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47A87C433FE
 	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 06:35:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 650D822CA1
-	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 06:18:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5003A2072D
+	for <ceph-devel@archiver.kernel.org>; Mon, 24 Aug 2020 06:18:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598249921;
-	bh=z1QylT8I+NmBP0tutYhzY5oX1yelfT7mim0uD9smtgw=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=PMkjgsW4uE+meal6sQewGkYFFRdd/ZGrGwJfTXGBykogCQN2GhEZNAVl64/0x7usY
-	 OsCG1QbsOkWsTF0FVOSCVdwYrghNSRqhtQ48mByxVqPOVZJa///Ry+ETFQI23wc3EH
-	 T6uIX5UxH9rPu+Ex4NURBlDdN1D5z3kyghLFBvv4=
+	s=default; t=1598249899;
+	bh=5Cg/F/P1MsSIqNAEKm5EcA85tMzmQDFgxtq+BwsOiXY=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=kB1J2c9IndAKo9SemBEbTn4Atgn9/Ip/F15kPCHhIEEjtZGf//I6hZye4HK0+tEW9
+	 VhDMhijQ26NW2kf8sbEgRML6K8Jim+tBbiD2b/FAQxSVEGdjndJXiFMRWWmrHMbPyL
+	 xQJgKzmB+KTjduOOMD+3LcCcciWmpZGa//M4AOeY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726449AbgHXGSk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 24 Aug 2020 02:18:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49786 "EHLO mail.kernel.org"
+        id S1726037AbgHXGSS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 24 Aug 2020 02:18:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49688 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726051AbgHXGSU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 24 Aug 2020 02:18:20 -0400
+        id S1725770AbgHXGSS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 24 Aug 2020 02:18:18 -0400
 Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 92272214F1;
-        Mon, 24 Aug 2020 06:18:19 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id CD6CF206B5;
+        Mon, 24 Aug 2020 06:18:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598249899;
-        bh=z1QylT8I+NmBP0tutYhzY5oX1yelfT7mim0uD9smtgw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=J03KdJQJPdY77kdOSQzv1oF4glUgsguRLqZPw0bmItnjV4mkJE5kE2RoajSp2OA2U
-         27gS97vYGnq70XXtnvPMkPnmelOpJ2j1BFFb6SLZjQ7BCzkaB8YdwP8CBA5bGWNP6A
-         Kp0XyIGXauI0bFNXQVHCYVjI6Ho7Gg6A1rHVfTck=
+        s=default; t=1598249898;
+        bh=5Cg/F/P1MsSIqNAEKm5EcA85tMzmQDFgxtq+BwsOiXY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=f893nZOHOk74YywNd+s2c7KM7U+ApkFK+G5wAxPqs247sQ2FcptH0qP9EtwzvEYBf
+         LROjPrF6b7H17wnj5KGsZaPkgvTF6yctFlLpC0zde7Uvt1Qfhq8ilvE8jBprCzObNr
+         jbaGalIhOAIFifcUwA2qyoWoyI0iCcGdq4CofU6w=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-fscrypt@vger.kernel.org
 Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
         linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
         Jeff Layton <jlayton@kernel.org>
-Subject: [RFC PATCH 5/8] f2fs: use fscrypt_prepare_new_inode() and fscrypt_set_context()
-Date:   Sun, 23 Aug 2020 23:17:09 -0700
-Message-Id: <20200824061712.195654-6-ebiggers@kernel.org>
+Subject: [RFC PATCH 0/8] fscrypt: avoid GFP_NOFS-unsafe key setup during transaction
+Date:   Sun, 23 Aug 2020 23:17:04 -0700
+Message-Id: <20200824061712.195654-1-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20200824061712.195654-1-ebiggers@kernel.org>
-References: <20200824061712.195654-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
@@ -56,94 +53,51 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+This series fixes some deadlocks which are theoretically possible due to
+fscrypt_get_encryption_info() being GFP_NOFS-unsafe, and thus not safe
+to be called from within an ext4 transaction or under f2fs_lock_op().
 
-Convert f2fs to use the new functions fscrypt_prepare_new_inode() and
-fscrypt_set_context().  This avoids calling
-fscrypt_get_encryption_info() from under f2fs_lock_op(), which can
-deadlock because fscrypt_get_encryption_info() isn't GFP_NOFS-safe.
+The problem is solved by new helper functions which allow setting up the
+key for new inodes earlier.  Patch 1 adds these helper functions.  Also
+see that patch for a more detailed description of this problem.
 
-For more details about this problem, see the earlier patch
-"fscrypt: add fscrypt_prepare_new_inode() and fscrypt_set_context()".
+Patches 2-6 then convert ext4, f2fs, and ubifs to use these new helpers.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- fs/f2fs/dir.c   |  2 +-
- fs/f2fs/f2fs.h  | 16 ----------------
- fs/f2fs/namei.c |  7 ++++++-
- 3 files changed, 7 insertions(+), 18 deletions(-)
+Patch 7-8 then clean up a few things afterwards.
 
-diff --git a/fs/f2fs/dir.c b/fs/f2fs/dir.c
-index 069f498af1e38..d627ca97fc500 100644
---- a/fs/f2fs/dir.c
-+++ b/fs/f2fs/dir.c
-@@ -537,7 +537,7 @@ struct page *f2fs_init_inode_metadata(struct inode *inode, struct inode *dir,
- 			goto put_error;
- 
- 		if (IS_ENCRYPTED(inode)) {
--			err = fscrypt_inherit_context(dir, inode, page, false);
-+			err = fscrypt_set_context(inode, page);
- 			if (err)
- 				goto put_error;
- 		}
-diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
-index 16322ea5b4630..eb37d1974ba8e 100644
---- a/fs/f2fs/f2fs.h
-+++ b/fs/f2fs/f2fs.h
-@@ -4022,22 +4022,6 @@ static inline bool f2fs_lfs_mode(struct f2fs_sb_info *sbi)
- 	return F2FS_OPTION(sbi).fs_mode == FS_MODE_LFS;
- }
- 
--static inline bool f2fs_may_encrypt(struct inode *dir, struct inode *inode)
--{
--#ifdef CONFIG_FS_ENCRYPTION
--	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
--	umode_t mode = inode->i_mode;
--
--	/*
--	 * If the directory encrypted or dummy encryption enabled,
--	 * then we should encrypt the inode.
--	 */
--	if (IS_ENCRYPTED(dir) || DUMMY_ENCRYPTION_ENABLED(sbi))
--		return (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode));
--#endif
--	return false;
--}
--
- static inline bool f2fs_may_compress(struct inode *inode)
- {
- 	if (IS_SWAPFILE(inode) || f2fs_is_pinned_file(inode) ||
-diff --git a/fs/f2fs/namei.c b/fs/f2fs/namei.c
-index 84e4bbc1a64de..45f324511a19e 100644
---- a/fs/f2fs/namei.c
-+++ b/fs/f2fs/namei.c
-@@ -28,6 +28,7 @@ static struct inode *f2fs_new_inode(struct inode *dir, umode_t mode)
- 	nid_t ino;
- 	struct inode *inode;
- 	bool nid_free = false;
-+	bool encrypt = false;
- 	int xattr_size = 0;
- 	int err;
- 
-@@ -69,13 +70,17 @@ static struct inode *f2fs_new_inode(struct inode *dir, umode_t mode)
- 		F2FS_I(inode)->i_projid = make_kprojid(&init_user_ns,
- 							F2FS_DEF_PROJID);
- 
-+	err = fscrypt_prepare_new_inode(dir, inode, &encrypt);
-+	if (err)
-+		goto fail_drop;
-+
- 	err = dquot_initialize(inode);
- 	if (err)
- 		goto fail_drop;
- 
- 	set_inode_flag(inode, FI_NEW_INODE);
- 
--	if (f2fs_may_encrypt(dir, inode))
-+	if (encrypt)
- 		f2fs_set_encrypted_inode(inode);
- 
- 	if (f2fs_sb_has_extra_attr(sbi)) {
+Coincidentally, this also solves some of the ordering problems that
+ceph fscrypt support will have.  For more details about this, see the
+discussion on Jeff Layton's RFC patchset for ceph fscrypt support
+(https://lkml.kernel.org/linux-fscrypt/20200821182813.52570-1-jlayton@kernel.org/T/#u)
+However, fscrypt_prepare_new_inode() still requires that the new
+'struct inode' exist already, so it might not be enough for ceph yet.
+
+This patchset applies to v5.9-rc2.
+
+Eric Biggers (8):
+  fscrypt: add fscrypt_prepare_new_inode() and fscrypt_set_context()
+  ext4: factor out ext4_xattr_credits_for_new_inode()
+  ext4: remove some #ifdefs in ext4_xattr_credits_for_new_inode()
+  ext4: use fscrypt_prepare_new_inode() and fscrypt_set_context()
+  f2fs: use fscrypt_prepare_new_inode() and fscrypt_set_context()
+  ubifs: use fscrypt_prepare_new_inode() and fscrypt_set_context()
+  fscrypt: remove fscrypt_inherit_context()
+  fscrypt: stop pretending that key setup is nofs-safe
+
+ fs/crypto/fscrypt_private.h |   3 +
+ fs/crypto/hooks.c           |  10 +-
+ fs/crypto/inline_crypt.c    |   7 +-
+ fs/crypto/keysetup.c        | 190 ++++++++++++++++++++++++++++--------
+ fs/crypto/keysetup_v1.c     |   8 +-
+ fs/crypto/policy.c          |  64 +++++++-----
+ fs/ext4/ialloc.c            | 118 +++++++++++-----------
+ fs/f2fs/dir.c               |   2 +-
+ fs/f2fs/f2fs.h              |  16 ---
+ fs/f2fs/namei.c             |   7 +-
+ fs/ubifs/dir.c              |  26 ++---
+ include/linux/fscrypt.h     |  18 +++-
+ 12 files changed, 293 insertions(+), 176 deletions(-)
+
 -- 
 2.28.0
 
