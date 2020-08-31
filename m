@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DCEEC43461
-	for <ceph-devel@archiver.kernel.org>; Mon, 31 Aug 2020 15:31:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68345C433E2
+	for <ceph-devel@archiver.kernel.org>; Mon, 31 Aug 2020 15:32:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3F8EE21556
-	for <ceph-devel@archiver.kernel.org>; Mon, 31 Aug 2020 15:31:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3B5D321556
+	for <ceph-devel@archiver.kernel.org>; Mon, 31 Aug 2020 15:32:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598887908;
-	bh=vQ8XEpwc50stmnvkX4zSfdoub4klCXtqsUrmoDbVrO4=;
+	s=default; t=1598887932;
+	bh=wo/9jfUs/QsfWHN0aWZWBzIi8v87Qpm/6HXW9VcwsdI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=sHZPYkT0HVAgLPhrwmk/UEkQ6nWo1vRx/kSNp4CuQm11hLHRxBDYyKBL2E8gtdr7F
-	 8TaNV/9ltE3Dymqo4XUw4X34Y0DOZyrv9Mugya/tlm1fPa08bVxKc9sywIpRZyES2c
-	 SbvON035aGPFv68tMwkcJZV67SqDkadj5UmKhMlw=
+	b=lxF7w/kSnR6dJk0Yt+I7a4vu8oeXA3NbUNSF+1OhQ7C4TfcnX3ljhMb1Xgdd7uqjq
+	 lH5IBIWjTa8hHtoFLb3PPz8MI2tU4PGCYeuAoDiaFpKV8nnbry5n5c7VBe0IBuZY2d
+	 8CUQhQfyir/Tj90+i61fY1/GdsuLytGUpNlJG1xQ=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728991AbgHaPbr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 31 Aug 2020 11:31:47 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42942 "EHLO mail.kernel.org"
+        id S1729079AbgHaPcJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 31 Aug 2020 11:32:09 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43570 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728981AbgHaPbp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 31 Aug 2020 11:31:45 -0400
+        id S1729056AbgHaPcG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 31 Aug 2020 11:32:06 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7717D21527;
-        Mon, 31 Aug 2020 15:31:44 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5ACE021556;
+        Mon, 31 Aug 2020 15:32:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598887905;
-        bh=vQ8XEpwc50stmnvkX4zSfdoub4klCXtqsUrmoDbVrO4=;
+        s=default; t=1598887926;
+        bh=wo/9jfUs/QsfWHN0aWZWBzIi8v87Qpm/6HXW9VcwsdI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=BIeQaPrCX+GFIEivxEF/FWUTPD3Li4La346W6kRjeZe+PYNiP2yGvCpYFyx8xz2w1
-         VAPE2sVMT+v9NhFS0RXz9/H/EhRDTjAykPkBRBG3atZXu3b46f1mkhMjCl8SU1L+m3
-         o4/QKZ0Hvccaq9GhOSiCQMOrNAKXsNMCAMyQlksw=
+        b=hA4taY6a67kpk6fQLPB1yClij//6KeJc8GadaWORNCEKrhzAICLKadWTCqFfw1Qvf
+         yEAJPREXuug+T1hKFRcegKMbnN20ECHCIjBNHhBv9dqEHIwoABvNyRsc5f+OGivPZ1
+         5TUmWo/T4Ir98O0l2bhwGS2mUt6v0lk3zWW36OKw=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 6/9] ceph: don't allow setlease on cephfs
-Date:   Mon, 31 Aug 2020 11:31:33 -0400
-Message-Id: <20200831153136.1024676-6-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 3/5] ceph: don't allow setlease on cephfs
+Date:   Mon, 31 Aug 2020 11:31:58 -0400
+Message-Id: <20200831153200.1024898-3-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200831153136.1024676-1-sashal@kernel.org>
-References: <20200831153136.1024676-1-sashal@kernel.org>
+In-Reply-To: <20200831153200.1024898-1-sashal@kernel.org>
+References: <20200831153200.1024898-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -78,10 +78,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 6d653235e323b..1f873034f4691 100644
+index c8222bfe1e566..3e6ebe40f06fb 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -1728,6 +1728,7 @@ const struct file_operations ceph_file_fops = {
+@@ -1433,6 +1433,7 @@ const struct file_operations ceph_file_fops = {
  	.mmap = ceph_mmap,
  	.fsync = ceph_fsync,
  	.lock = ceph_lock,
