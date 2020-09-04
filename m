@@ -2,49 +2,49 @@ Return-Path: <SRS0=kIUs=CN=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B671FC433E2
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CE03C43461
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E48320772
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 506CA2074D
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599235623;
-	bh=DFOG7GZ6OylpP0sQqUAusLwuDKNBcXtVUCDGQyCRqbk=;
+	s=default; t=1599235625;
+	bh=/smS+fRzwQ+NFoRDkSjsX/NZtvVPvW30E41AiiAlYHo=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=hn2ApA1sBQVDUqBGy0Ujso/q4l1ZZETxcKSZnZBfeVejl4M6XOIrpS3G9F1Qu4HKY
-	 oWH53Dhxd2PaBWGswWRKdmGG244hhivQHX+id+1gC6psKcEqOY4iutTEe+WqEbNx60
-	 rhBnEc7XDLHMkg4O+4/dzPey3mybm7I2LkhbZoeQ=
+	b=n7faZHLaeI++m4pv8ZEQ2aWaD3axrlSfKwMx9WHeKdUrh4oOHyU+I5jEQ+Uiuc1DI
+	 1eWMnWdR1vxi0kAWKshprAoT9vLB7FnxL1Tr8L3vBWt8W5p/+FpUWHJug2nuKpyufc
+	 3ZYZTtnyRrRIfl1XFvPMkKwDUqUJtCDLVFvvW/BI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727889AbgIDQG7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 4 Sep 2020 12:06:59 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51384 "EHLO mail.kernel.org"
+        id S1727923AbgIDQFs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 4 Sep 2020 12:05:48 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51280 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727937AbgIDQFu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 4 Sep 2020 12:05:50 -0400
+        id S1726385AbgIDQFn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 4 Sep 2020 12:05:43 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 93C2120796;
-        Fri,  4 Sep 2020 16:05:49 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2513420797;
+        Fri,  4 Sep 2020 16:05:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599235550;
-        bh=DFOG7GZ6OylpP0sQqUAusLwuDKNBcXtVUCDGQyCRqbk=;
+        s=default; t=1599235542;
+        bh=/smS+fRzwQ+NFoRDkSjsX/NZtvVPvW30E41AiiAlYHo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=veB4VermXqsC1eoPTMoZobeYYssvu+MQH3GV9hYpFf3iF1d5kBIrDiS9Y/txZFw/p
-         9tR/qzce/hsajAx8rm/lpWimtU1VbjSBkLXe3iYcsEHCAnHBzLrPHU3AErIaARBt5h
-         u+AwJBXIcxwu65YBDhhBLhYcGeWoSq8lzi0q9cZ4=
+        b=1WpE35cDPqDTl0N5RBMLCTNW98Qt51lJiLCegApavfs07MkIbFyhLCumWR4B9FMG5
+         R6ew32LBrU/q7/TGv0C7DHLyyGlQbHGfv9rt9eZG+69F5BOrHsrxpZwvBNV/2ETvOF
+         PPF6KLEWecDqjkgKUz6ZvHvLud4DLs3FOsO6l/jQ=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         ebiggers@kernel.org
-Subject: [RFC PATCH v2 13/18] ceph: make ceph_msdc_build_path use ref-walk
-Date:   Fri,  4 Sep 2020 12:05:32 -0400
-Message-Id: <20200904160537.76663-14-jlayton@kernel.org>
+Subject: [RFC PATCH v2 02/18] fscrypt: drop unused inode argument from fscrypt_fname_alloc_buffer
+Date:   Fri,  4 Sep 2020 12:05:21 -0400
+Message-Id: <20200904160537.76663-3-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200904160537.76663-1-jlayton@kernel.org>
 References: <20200904160537.76663-1-jlayton@kernel.org>
@@ -55,94 +55,140 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Encryption potentially requires allocation, at which point we'll need to
-be in a non-atomic context. Convert ceph_msdc_build_path to take dentry
-spinlocks and references instead of using rcu_read_lock to walk the
-path.
-
-This is slightly less efficient, and we may want to eventually allow
-using RCU when the leaf dentry isn't encrypted.
-
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 35 +++++++++++++++++++----------------
- 1 file changed, 19 insertions(+), 16 deletions(-)
+ fs/crypto/fname.c       | 5 +----
+ fs/crypto/hooks.c       | 2 +-
+ fs/ext4/dir.c           | 2 +-
+ fs/ext4/namei.c         | 7 +++----
+ fs/f2fs/dir.c           | 2 +-
+ fs/ubifs/dir.c          | 2 +-
+ include/linux/fscrypt.h | 5 ++---
+ 7 files changed, 10 insertions(+), 15 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 4107dc64cc8c..e3dc061252d4 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2327,7 +2327,8 @@ static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
- char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 			   int stop_on_nosnap)
+diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
+index 011830f84d8d..47bcfddb278b 100644
+--- a/fs/crypto/fname.c
++++ b/fs/crypto/fname.c
+@@ -260,8 +260,6 @@ bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
+ 
+ /**
+  * fscrypt_fname_alloc_buffer() - allocate a buffer for presented filenames
+- * @inode: inode of the parent directory (for regular filenames)
+- *	   or of the symlink (for symlink targets)
+  * @max_encrypted_len: maximum length of encrypted filenames the buffer will be
+  *		       used to present
+  * @crypto_str: (output) buffer to allocate
+@@ -271,8 +269,7 @@ bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
+  *
+  * Return: 0 on success, -errno on failure
+  */
+-int fscrypt_fname_alloc_buffer(const struct inode *inode,
+-			       u32 max_encrypted_len,
++int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
+ 			       struct fscrypt_str *crypto_str)
  {
--	struct dentry *temp;
-+	struct dentry *cur;
-+	struct inode *inode;
- 	char *path;
- 	int pos;
- 	unsigned seq;
-@@ -2344,34 +2345,35 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 	path[pos] = '\0';
+ 	const u32 max_encoded_len = BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX);
+diff --git a/fs/crypto/hooks.c b/fs/crypto/hooks.c
+index b69cd29a01a2..c97f914834e6 100644
+--- a/fs/crypto/hooks.c
++++ b/fs/crypto/hooks.c
+@@ -323,7 +323,7 @@ const char *fscrypt_get_symlink(struct inode *inode, const void *caddr,
+ 	if (cstr.len + sizeof(*sd) - 1 > max_size)
+ 		return ERR_PTR(-EUCLEAN);
  
- 	seq = read_seqbegin(&rename_lock);
--	rcu_read_lock();
--	temp = dentry;
-+	cur = dget(dentry);
- 	for (;;) {
--		struct inode *inode;
-+		struct dentry *temp;
+-	err = fscrypt_fname_alloc_buffer(inode, cstr.len, &pstr);
++	err = fscrypt_fname_alloc_buffer(cstr.len, &pstr);
+ 	if (err)
+ 		return ERR_PTR(err);
  
--		spin_lock(&temp->d_lock);
--		inode = d_inode(temp);
-+		spin_lock(&cur->d_lock);
-+		inode = d_inode(cur);
- 		if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
- 			dout("build_path path+%d: %p SNAPDIR\n",
--			     pos, temp);
--		} else if (stop_on_nosnap && inode && dentry != temp &&
-+			     pos, cur);
-+		} else if (stop_on_nosnap && inode && dentry != cur &&
- 			   ceph_snap(inode) == CEPH_NOSNAP) {
--			spin_unlock(&temp->d_lock);
-+			spin_unlock(&cur->d_lock);
- 			pos++; /* get rid of any prepended '/' */
- 			break;
- 		} else {
--			pos -= temp->d_name.len;
-+			pos -= cur->d_name.len;
- 			if (pos < 0) {
--				spin_unlock(&temp->d_lock);
-+				spin_unlock(&cur->d_lock);
- 				break;
- 			}
--			memcpy(path + pos, temp->d_name.name, temp->d_name.len);
-+			memcpy(path + pos, cur->d_name.name, cur->d_name.len);
- 		}
-+		temp = cur;
-+		cur = dget(temp->d_parent);
- 		spin_unlock(&temp->d_lock);
--		temp = READ_ONCE(temp->d_parent);
-+		dput(temp);
- 
- 		/* Are we at the root? */
--		if (IS_ROOT(temp))
-+		if (IS_ROOT(cur))
- 			break;
- 
- 		/* Are we out of buffer? */
-@@ -2380,8 +2382,9 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 
- 		path[pos] = '/';
+diff --git a/fs/ext4/dir.c b/fs/ext4/dir.c
+index 1d82336b1cd4..efe77cffc322 100644
+--- a/fs/ext4/dir.c
++++ b/fs/ext4/dir.c
+@@ -148,7 +148,7 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
  	}
--	base = ceph_ino(d_inode(temp));
--	rcu_read_unlock();
-+	inode = d_inode(cur);
-+	base = inode ? ceph_ino(inode) : 0;
-+	dput(cur);
  
- 	if (read_seqretry(&rename_lock, seq))
- 		goto retry;
+ 	if (IS_ENCRYPTED(inode)) {
+-		err = fscrypt_fname_alloc_buffer(inode, EXT4_NAME_LEN, &fstr);
++		err = fscrypt_fname_alloc_buffer(EXT4_NAME_LEN, &fstr);
+ 		if (err < 0)
+ 			return err;
+ 	}
+diff --git a/fs/ext4/namei.c b/fs/ext4/namei.c
+index 153a9fbe1dd0..0d74615fcce3 100644
+--- a/fs/ext4/namei.c
++++ b/fs/ext4/namei.c
+@@ -663,8 +663,7 @@ static struct stats dx_show_leaf(struct inode *dir,
+ 
+ 					/* Directory is encrypted */
+ 					res = fscrypt_fname_alloc_buffer(
+-						dir, len,
+-						&fname_crypto_str);
++						len, &fname_crypto_str);
+ 					if (res)
+ 						printk(KERN_WARNING "Error "
+ 							"allocating crypto "
+@@ -1016,8 +1015,8 @@ static int htree_dirblock_to_tree(struct file *dir_file,
+ 			brelse(bh);
+ 			return err;
+ 		}
+-		err = fscrypt_fname_alloc_buffer(dir, EXT4_NAME_LEN,
+-						     &fname_crypto_str);
++		err = fscrypt_fname_alloc_buffer(EXT4_NAME_LEN,
++						 &fname_crypto_str);
+ 		if (err < 0) {
+ 			brelse(bh);
+ 			return err;
+diff --git a/fs/f2fs/dir.c b/fs/f2fs/dir.c
+index d627ca97fc50..414bc94fbd54 100644
+--- a/fs/f2fs/dir.c
++++ b/fs/f2fs/dir.c
+@@ -1032,7 +1032,7 @@ static int f2fs_readdir(struct file *file, struct dir_context *ctx)
+ 		if (err)
+ 			goto out;
+ 
+-		err = fscrypt_fname_alloc_buffer(inode, F2FS_NAME_LEN, &fstr);
++		err = fscrypt_fname_alloc_buffer(F2FS_NAME_LEN, &fstr);
+ 		if (err < 0)
+ 			goto out;
+ 	}
+diff --git a/fs/ubifs/dir.c b/fs/ubifs/dir.c
+index 26739ae3ffee..f2f88ddf1dea 100644
+--- a/fs/ubifs/dir.c
++++ b/fs/ubifs/dir.c
+@@ -509,7 +509,7 @@ static int ubifs_readdir(struct file *file, struct dir_context *ctx)
+ 		if (err)
+ 			return err;
+ 
+-		err = fscrypt_fname_alloc_buffer(dir, UBIFS_MAX_NLEN, &fstr);
++		err = fscrypt_fname_alloc_buffer(UBIFS_MAX_NLEN, &fstr);
+ 		if (err)
+ 			return err;
+ 
+diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
+index 4ee636e9e1fc..81d6ded24328 100644
+--- a/include/linux/fscrypt.h
++++ b/include/linux/fscrypt.h
+@@ -198,7 +198,7 @@ static inline void fscrypt_free_filename(struct fscrypt_name *fname)
+ 	kfree(fname->crypto_buf.name);
+ }
+ 
+-int fscrypt_fname_alloc_buffer(const struct inode *inode, u32 max_encrypted_len,
++int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
+ 			       struct fscrypt_str *crypto_str);
+ void fscrypt_fname_free_buffer(struct fscrypt_str *crypto_str);
+ int fscrypt_fname_disk_to_usr(const struct inode *inode,
+@@ -436,8 +436,7 @@ static inline void fscrypt_free_filename(struct fscrypt_name *fname)
+ 	return;
+ }
+ 
+-static inline int fscrypt_fname_alloc_buffer(const struct inode *inode,
+-					     u32 max_encrypted_len,
++static inline int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
+ 					     struct fscrypt_str *crypto_str)
+ {
+ 	return -EOPNOTSUPP;
 -- 
 2.26.2
 
