@@ -4,47 +4,47 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CE03C43461
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29C03C2D0A7
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 506CA2074D
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F100D20772
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:07:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599235625;
-	bh=/smS+fRzwQ+NFoRDkSjsX/NZtvVPvW30E41AiiAlYHo=;
+	s=default; t=1599235635;
+	bh=wsDcZ4XR+68ZukfnEVYNdgpLxaWJy4Nq3uQQP/TS/+A=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=n7faZHLaeI++m4pv8ZEQ2aWaD3axrlSfKwMx9WHeKdUrh4oOHyU+I5jEQ+Uiuc1DI
-	 1eWMnWdR1vxi0kAWKshprAoT9vLB7FnxL1Tr8L3vBWt8W5p/+FpUWHJug2nuKpyufc
-	 3ZYZTtnyRrRIfl1XFvPMkKwDUqUJtCDLVFvvW/BI=
+	b=fTgavIsoL+6noKvGHBv4ZxpiCJGpbGYg6KEKge81m+/j4vSfGKkfpIJnwIgvlKSqj
+	 7WSQSxwHh02nua+rXsKaA/BXgjs4Xi/3p16QVdZxVm04fcFd0cu0+Qy4LOIizmTGma
+	 xIzO0LY7XMMN7tVHlR2RJ9YWOXc2zT9i4eSCaMVU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727923AbgIDQFs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 4 Sep 2020 12:05:48 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51280 "EHLO mail.kernel.org"
+        id S1728075AbgIDQHI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 4 Sep 2020 12:07:08 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51326 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726385AbgIDQFn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 4 Sep 2020 12:05:43 -0400
+        id S1727921AbgIDQFr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 4 Sep 2020 12:05:47 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2513420797;
-        Fri,  4 Sep 2020 16:05:42 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id EBA242084D;
+        Fri,  4 Sep 2020 16:05:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599235542;
-        bh=/smS+fRzwQ+NFoRDkSjsX/NZtvVPvW30E41AiiAlYHo=;
+        s=default; t=1599235547;
+        bh=wsDcZ4XR+68ZukfnEVYNdgpLxaWJy4Nq3uQQP/TS/+A=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=1WpE35cDPqDTl0N5RBMLCTNW98Qt51lJiLCegApavfs07MkIbFyhLCumWR4B9FMG5
-         R6ew32LBrU/q7/TGv0C7DHLyyGlQbHGfv9rt9eZG+69F5BOrHsrxpZwvBNV/2ETvOF
-         PPF6KLEWecDqjkgKUz6ZvHvLud4DLs3FOsO6l/jQ=
+        b=f2sBV44zOumafv2ypv0U35LubffPLvzIAmsLVYTLOFa+YlKup0EdNiuDLMNLIFMkf
+         q+7R99BGS9k1/i/1NdVscyMnnt66kMnF9PlmhVCxVBdSy3aaG23pl+ckhNnyTQjEYZ
+         53OyPc93SVXuXwjrSJFwPGS95ROTYiL760oEAlK4=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         ebiggers@kernel.org
-Subject: [RFC PATCH v2 02/18] fscrypt: drop unused inode argument from fscrypt_fname_alloc_buffer
-Date:   Fri,  4 Sep 2020 12:05:21 -0400
-Message-Id: <20200904160537.76663-3-jlayton@kernel.org>
+Subject: [RFC PATCH v2 09/18] ceph: crypto context handling for ceph
+Date:   Fri,  4 Sep 2020 12:05:28 -0400
+Message-Id: <20200904160537.76663-10-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200904160537.76663-1-jlayton@kernel.org>
 References: <20200904160537.76663-1-jlayton@kernel.org>
@@ -55,140 +55,295 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+Store the fscrypt context for an inode as an encryption.ctx xattr.
+
+Also add support for "dummy" encryption (useful for testing with
+automated test harnesses like xfstests).
+
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/crypto/fname.c       | 5 +----
- fs/crypto/hooks.c       | 2 +-
- fs/ext4/dir.c           | 2 +-
- fs/ext4/namei.c         | 7 +++----
- fs/f2fs/dir.c           | 2 +-
- fs/ubifs/dir.c          | 2 +-
- include/linux/fscrypt.h | 5 ++---
- 7 files changed, 10 insertions(+), 15 deletions(-)
+ fs/ceph/Makefile |  1 +
+ fs/ceph/crypto.c | 69 ++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/crypto.h | 24 +++++++++++++++++
+ fs/ceph/inode.c  |  1 +
+ fs/ceph/super.c  | 37 ++++++++++++++++++++++++++
+ fs/ceph/super.h  |  7 ++++-
+ 6 files changed, 138 insertions(+), 1 deletion(-)
+ create mode 100644 fs/ceph/crypto.c
+ create mode 100644 fs/ceph/crypto.h
 
-diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
-index 011830f84d8d..47bcfddb278b 100644
---- a/fs/crypto/fname.c
-+++ b/fs/crypto/fname.c
-@@ -260,8 +260,6 @@ bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
+diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
+index 50c635dc7f71..1f77ca04c426 100644
+--- a/fs/ceph/Makefile
++++ b/fs/ceph/Makefile
+@@ -12,3 +12,4 @@ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
  
- /**
-  * fscrypt_fname_alloc_buffer() - allocate a buffer for presented filenames
-- * @inode: inode of the parent directory (for regular filenames)
-- *	   or of the symlink (for symlink targets)
-  * @max_encrypted_len: maximum length of encrypted filenames the buffer will be
-  *		       used to present
-  * @crypto_str: (output) buffer to allocate
-@@ -271,8 +269,7 @@ bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
-  *
-  * Return: 0 on success, -errno on failure
-  */
--int fscrypt_fname_alloc_buffer(const struct inode *inode,
--			       u32 max_encrypted_len,
-+int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
- 			       struct fscrypt_str *crypto_str)
- {
- 	const u32 max_encoded_len = BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX);
-diff --git a/fs/crypto/hooks.c b/fs/crypto/hooks.c
-index b69cd29a01a2..c97f914834e6 100644
---- a/fs/crypto/hooks.c
-+++ b/fs/crypto/hooks.c
-@@ -323,7 +323,7 @@ const char *fscrypt_get_symlink(struct inode *inode, const void *caddr,
- 	if (cstr.len + sizeof(*sd) - 1 > max_size)
- 		return ERR_PTR(-EUCLEAN);
+ ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
+ ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
++ceph-$(CONFIG_FS_ENCRYPTION) += crypto.o
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+new file mode 100644
+index 000000000000..22a09d422b72
+--- /dev/null
++++ b/fs/ceph/crypto.c
+@@ -0,0 +1,69 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <linux/ceph/ceph_debug.h>
++#include <linux/xattr.h>
++#include <linux/fscrypt.h>
++
++#include "super.h"
++#include "crypto.h"
++
++static int ceph_crypt_get_context(struct inode *inode, void *ctx, size_t len)
++{
++	int ret = __ceph_getxattr(inode, CEPH_XATTR_NAME_ENCRYPTION_CONTEXT, ctx, len);
++
++	if (ret > 0)
++		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
++	return ret;
++}
++
++static int ceph_crypt_set_context(struct inode *inode, const void *ctx, size_t len, void *fs_data)
++{
++	int ret;
++
++	WARN_ON_ONCE(fs_data);
++	ret = __ceph_setxattr(inode, CEPH_XATTR_NAME_ENCRYPTION_CONTEXT, ctx, len, XATTR_CREATE);
++	if (ret == 0)
++		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
++	return ret;
++}
++
++static bool ceph_crypt_empty_dir(struct inode *inode)
++{
++	struct ceph_inode_info *ci = ceph_inode(inode);
++
++	return ci->i_rsubdirs + ci->i_rfiles == 1;
++}
++
++static const union fscrypt_context *
++ceph_get_dummy_context(struct super_block *sb)
++{
++	return ceph_sb_to_client(sb)->dummy_enc_ctx.ctx;
++}
++
++static struct fscrypt_operations ceph_fscrypt_ops = {
++	.key_prefix		= "ceph:",
++	.get_context		= ceph_crypt_get_context,
++	.set_context		= ceph_crypt_set_context,
++	.get_dummy_context	= ceph_get_dummy_context,
++	.empty_dir		= ceph_crypt_empty_dir,
++	.max_namelen		= NAME_MAX,
++};
++
++int ceph_fscrypt_set_ops(struct super_block *sb)
++{
++	struct ceph_fs_client *fsc = sb->s_fs_info;
++
++	fscrypt_set_ops(sb, &ceph_fscrypt_ops);
++
++	if (ceph_test_mount_opt(fsc, TEST_DUMMY_ENC)) {
++		substring_t arg = { };
++
++		/* Ewwwwwwww */
++		if (fsc->mount_options->test_dummy_encryption) {
++			arg.from = fsc->mount_options->test_dummy_encryption;
++			arg.to = arg.from + strlen(arg.from) - 1;
++		}
++
++		return fscrypt_set_test_dummy_encryption(sb, &arg, &fsc->dummy_enc_ctx);
++	}
++	return 0;
++}
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+new file mode 100644
+index 000000000000..af06dca5f5a6
+--- /dev/null
++++ b/fs/ceph/crypto.h
+@@ -0,0 +1,24 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Ceph fscrypt functionality
++ */
++
++#ifndef _CEPH_CRYPTO_H
++#define _CEPH_CRYPTO_H
++
++#ifdef CONFIG_FS_ENCRYPTION
++
++#define	CEPH_XATTR_NAME_ENCRYPTION_CONTEXT	"encryption.ctx"
++
++int ceph_fscrypt_set_ops(struct super_block *sb);
++
++#else /* CONFIG_FS_ENCRYPTION */
++
++static inline int ceph_fscrypt_set_ops(struct super_block *sb)
++{
++	return 0;
++}
++
++#endif /* CONFIG_FS_ENCRYPTION */
++
++#endif
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 156b98bda6aa..a527c5dbf93f 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -543,6 +543,7 @@ void ceph_evict_inode(struct inode *inode)
  
--	err = fscrypt_fname_alloc_buffer(inode, cstr.len, &pstr);
-+	err = fscrypt_fname_alloc_buffer(cstr.len, &pstr);
- 	if (err)
- 		return ERR_PTR(err);
+ 	dout("evict_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
  
-diff --git a/fs/ext4/dir.c b/fs/ext4/dir.c
-index 1d82336b1cd4..efe77cffc322 100644
---- a/fs/ext4/dir.c
-+++ b/fs/ext4/dir.c
-@@ -148,7 +148,7 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
- 	}
++	fscrypt_put_encryption_info(inode);
+ 	truncate_inode_pages_final(&inode->i_data);
+ 	clear_inode(inode);
  
- 	if (IS_ENCRYPTED(inode)) {
--		err = fscrypt_fname_alloc_buffer(inode, EXT4_NAME_LEN, &fstr);
-+		err = fscrypt_fname_alloc_buffer(EXT4_NAME_LEN, &fstr);
- 		if (err < 0)
- 			return err;
- 	}
-diff --git a/fs/ext4/namei.c b/fs/ext4/namei.c
-index 153a9fbe1dd0..0d74615fcce3 100644
---- a/fs/ext4/namei.c
-+++ b/fs/ext4/namei.c
-@@ -663,8 +663,7 @@ static struct stats dx_show_leaf(struct inode *dir,
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 7ec0e6d03d10..95f5a7cf60f2 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -20,6 +20,7 @@
+ #include "super.h"
+ #include "mds_client.h"
+ #include "cache.h"
++#include "crypto.h"
  
- 					/* Directory is encrypted */
- 					res = fscrypt_fname_alloc_buffer(
--						dir, len,
--						&fname_crypto_str);
-+						len, &fname_crypto_str);
- 					if (res)
- 						printk(KERN_WARNING "Error "
- 							"allocating crypto "
-@@ -1016,8 +1015,8 @@ static int htree_dirblock_to_tree(struct file *dir_file,
- 			brelse(bh);
- 			return err;
- 		}
--		err = fscrypt_fname_alloc_buffer(dir, EXT4_NAME_LEN,
--						     &fname_crypto_str);
-+		err = fscrypt_fname_alloc_buffer(EXT4_NAME_LEN,
-+						 &fname_crypto_str);
- 		if (err < 0) {
- 			brelse(bh);
- 			return err;
-diff --git a/fs/f2fs/dir.c b/fs/f2fs/dir.c
-index d627ca97fc50..414bc94fbd54 100644
---- a/fs/f2fs/dir.c
-+++ b/fs/f2fs/dir.c
-@@ -1032,7 +1032,7 @@ static int f2fs_readdir(struct file *file, struct dir_context *ctx)
- 		if (err)
- 			goto out;
+ #include <linux/ceph/ceph_features.h>
+ #include <linux/ceph/decode.h>
+@@ -44,6 +45,7 @@ static void ceph_put_super(struct super_block *s)
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(s);
  
--		err = fscrypt_fname_alloc_buffer(inode, F2FS_NAME_LEN, &fstr);
-+		err = fscrypt_fname_alloc_buffer(F2FS_NAME_LEN, &fstr);
- 		if (err < 0)
- 			goto out;
- 	}
-diff --git a/fs/ubifs/dir.c b/fs/ubifs/dir.c
-index 26739ae3ffee..f2f88ddf1dea 100644
---- a/fs/ubifs/dir.c
-+++ b/fs/ubifs/dir.c
-@@ -509,7 +509,7 @@ static int ubifs_readdir(struct file *file, struct dir_context *ctx)
- 		if (err)
- 			return err;
- 
--		err = fscrypt_fname_alloc_buffer(dir, UBIFS_MAX_NLEN, &fstr);
-+		err = fscrypt_fname_alloc_buffer(UBIFS_MAX_NLEN, &fstr);
- 		if (err)
- 			return err;
- 
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index 4ee636e9e1fc..81d6ded24328 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -198,7 +198,7 @@ static inline void fscrypt_free_filename(struct fscrypt_name *fname)
- 	kfree(fname->crypto_buf.name);
+ 	dout("put_super\n");
++	fscrypt_free_dummy_context(&fsc->dummy_enc_ctx);
+ 	ceph_mdsc_close_sessions(fsc->mdsc);
  }
  
--int fscrypt_fname_alloc_buffer(const struct inode *inode, u32 max_encrypted_len,
-+int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
- 			       struct fscrypt_str *crypto_str);
- void fscrypt_fname_free_buffer(struct fscrypt_str *crypto_str);
- int fscrypt_fname_disk_to_usr(const struct inode *inode,
-@@ -436,8 +436,7 @@ static inline void fscrypt_free_filename(struct fscrypt_name *fname)
- 	return;
+@@ -159,6 +161,7 @@ enum {
+ 	Opt_quotadf,
+ 	Opt_copyfrom,
+ 	Opt_wsync,
++	Opt_test_dummy_encryption,
+ };
+ 
+ enum ceph_recover_session_mode {
+@@ -197,6 +200,8 @@ static const struct fs_parameter_spec ceph_mount_parameters[] = {
+ 	fsparam_u32	("rsize",			Opt_rsize),
+ 	fsparam_string	("snapdirname",			Opt_snapdirname),
+ 	fsparam_string	("source",			Opt_source),
++	fsparam_flag_no ("test_dummy_encryption",	Opt_test_dummy_encryption),
++	fsparam_string	("test_dummy_encryption",	Opt_test_dummy_encryption),
+ 	fsparam_u32	("wsize",			Opt_wsize),
+ 	fsparam_flag_no	("wsync",			Opt_wsync),
+ 	{}
+@@ -455,6 +460,21 @@ static int ceph_parse_mount_param(struct fs_context *fc,
+ 		else
+ 			fsopt->flags |= CEPH_MOUNT_OPT_ASYNC_DIROPS;
+ 		break;
++	case Opt_test_dummy_encryption:
++		kfree(fsopt->test_dummy_encryption);
++		fsopt->test_dummy_encryption = NULL;
++		if (!result.negated) {
++#ifdef CONFIG_FS_ENCRYPTION
++			fsopt->test_dummy_encryption = param->string;
++			param->string = NULL;
++			fsopt->flags |= CEPH_MOUNT_OPT_TEST_DUMMY_ENC;
++#else
++			return warnfc(fc, "FS encryption not supported: test_dummy_encryption mount option ignored");
++#endif
++		} else {
++			fsopt->flags &= ~CEPH_MOUNT_OPT_TEST_DUMMY_ENC;
++		}
++		break;
+ 	default:
+ 		BUG();
+ 	}
+@@ -474,6 +494,7 @@ static void destroy_mount_options(struct ceph_mount_options *args)
+ 	kfree(args->mds_namespace);
+ 	kfree(args->server_path);
+ 	kfree(args->fscache_uniq);
++	kfree(args->test_dummy_encryption);
+ 	kfree(args);
  }
  
--static inline int fscrypt_fname_alloc_buffer(const struct inode *inode,
--					     u32 max_encrypted_len,
-+static inline int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
- 					     struct fscrypt_str *crypto_str)
- {
- 	return -EOPNOTSUPP;
+@@ -581,6 +602,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_ASYNC_DIROPS)
+ 		seq_puts(m, ",nowsync");
+ 
++	fscrypt_show_test_dummy_encryption(m, ',', root->d_sb);
++
+ 	if (fsopt->wsize != CEPH_MAX_WRITE_SIZE)
+ 		seq_printf(m, ",wsize=%u", fsopt->wsize);
+ 	if (fsopt->rsize != CEPH_MAX_READ_SIZE)
+@@ -984,7 +1007,12 @@ static int ceph_set_super(struct super_block *s, struct fs_context *fc)
+ 	s->s_time_min = 0;
+ 	s->s_time_max = U32_MAX;
+ 
++	ret = ceph_fscrypt_set_ops(s);
++	if (ret)
++		goto out;
++
+ 	ret = set_anon_super_fc(s, fc);
++out:
+ 	if (ret != 0)
+ 		fsc->sb = NULL;
+ 	return ret;
+@@ -1140,6 +1168,15 @@ static int ceph_reconfigure_fc(struct fs_context *fc)
+ 	else
+ 		ceph_clear_mount_opt(fsc, ASYNC_DIROPS);
+ 
++	/* Don't allow test_dummy_encryption to change on remount */
++	if (fsopt->flags & CEPH_MOUNT_OPT_TEST_DUMMY_ENC) {
++		if (!ceph_test_mount_opt(fsc, TEST_DUMMY_ENC))
++			return -EEXIST;
++	} else {
++		if (ceph_test_mount_opt(fsc, TEST_DUMMY_ENC))
++			return -EEXIST;
++	}
++
+ 	sync_filesystem(fc->root->d_sb);
+ 	return 0;
+ }
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index b3aa2395b66e..3b8ffa6aee46 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -17,6 +17,7 @@
+ #include <linux/posix_acl.h>
+ #include <linux/refcount.h>
+ #include <linux/security.h>
++#include <linux/fscrypt.h>
+ 
+ #include <linux/ceph/libceph.h>
+ 
+@@ -44,6 +45,7 @@
+ #define CEPH_MOUNT_OPT_NOQUOTADF       (1<<13) /* no root dir quota in statfs */
+ #define CEPH_MOUNT_OPT_NOCOPYFROM      (1<<14) /* don't use RADOS 'copy-from' op */
+ #define CEPH_MOUNT_OPT_ASYNC_DIROPS    (1<<15) /* allow async directory ops */
++#define CEPH_MOUNT_OPT_TEST_DUMMY_ENC  (1<<16) /* enable dummy encryption (for testing) */
+ 
+ #define CEPH_MOUNT_OPT_DEFAULT			\
+ 	(CEPH_MOUNT_OPT_DCACHE |		\
+@@ -96,6 +98,7 @@ struct ceph_mount_options {
+ 	char *mds_namespace;  /* default NULL */
+ 	char *server_path;    /* default NULL (means "/") */
+ 	char *fscache_uniq;   /* default NULL */
++	char *test_dummy_encryption;	/* default NULL */
+ };
+ 
+ struct ceph_fs_client {
+@@ -135,9 +138,11 @@ struct ceph_fs_client {
+ #ifdef CONFIG_CEPH_FSCACHE
+ 	struct fscache_cookie *fscache;
+ #endif
++#ifdef CONFIG_FS_ENCRYPTION
++	struct fscrypt_dummy_context dummy_enc_ctx;
++#endif
+ };
+ 
+-
+ /*
+  * File i/o capability.  This tracks shared state with the metadata
+  * server that allows us to cache or writeback attributes or to read
 -- 
 2.26.2
 
