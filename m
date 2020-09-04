@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6F74C433E2
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:06:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8769C2BB84
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:06:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8CB732074D
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:06:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C30F22074D
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Sep 2020 16:06:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599235615;
-	bh=S7Q7gkC4y/mbKVLHfu6ItAlaHGFIa0yb/5QJj11p7O4=;
+	s=default; t=1599235619;
+	bh=BQfNQlXBWGlmek8meSrqiCDPcJzfLmLuww5iCSFHPlk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=yOe1+T1V/OJT7voNoR8G41TcXxgfTxil+q0NBQQwrkcJcTuYdv+qUZnXPoi6EwUjB
-	 rKgYV1tYIHdN8AI4sqi+SWdnJ+HOr8FSh+XoHv3PeH6CcSx7agWPP56sThBaziGNSq
-	 cFltyBU92XaJUW8GAUjEREofZx0lNbD7PdVysPFQ=
+	b=Duq8XBSNUH467U2+w+4+4wBfG+uQgiYxjRqHjCOs0ILGJ5FtIVFFQ4kPhjCrOsd70
+	 uLrGjcKVguEJUtzpFhLR+LQtVL8IRfPOET0wHR5rUbdBoGF+DfL5NwQ4lb05gqD8X2
+	 p+66y5ws1X8bJfe6vacV7gnQ+Yi/ttGDP9vcPDo4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727944AbgIDQFv (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 4 Sep 2020 12:05:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51286 "EHLO mail.kernel.org"
+        id S1728070AbgIDQG7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 4 Sep 2020 12:06:59 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51296 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726133AbgIDQFo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 4 Sep 2020 12:05:44 -0400
+        id S1727935AbgIDQFt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 4 Sep 2020 12:05:49 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DB81720829;
-        Fri,  4 Sep 2020 16:05:42 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id EA4572083B;
+        Fri,  4 Sep 2020 16:05:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599235543;
-        bh=S7Q7gkC4y/mbKVLHfu6ItAlaHGFIa0yb/5QJj11p7O4=;
+        s=default; t=1599235549;
+        bh=BQfNQlXBWGlmek8meSrqiCDPcJzfLmLuww5iCSFHPlk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=sF1KHYIOBOk45vkSwYkgisnkVju59uD1dVu+2SDJs1fhTM0AIndCw2vFh5Be5cFKt
-         4C3bz/69k0FNsefEWbAzSTMGM4IW7RIuFFUXIcQRd9aMGHhPwQutWWQGZoT1MOv5Aj
-         pzdV+XbNDpv2dOYLm/+2lT4UXZSDi9nKQcVDyW/0=
+        b=xv0l7EAOyfs0KUTbSLd1j3ELpP1Q6yxaWBl9Bu0mbQYvynqXexJjTXsSTYd1rvLjn
+         Lz/FVgNipDkSuXBEDvGs6A5j0g/gYZiYLyEQnJQlGzdAjndhc05QL2R63ngP9aDITY
+         tz0vJlggOp84rreNIWfT1GXMsDoM35q5ZWkQdpvc=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         ebiggers@kernel.org
-Subject: [RFC PATCH v2 03/18] fscrypt: export fscrypt_d_revalidate
-Date:   Fri,  4 Sep 2020 12:05:22 -0400
-Message-Id: <20200904160537.76663-4-jlayton@kernel.org>
+Subject: [RFC PATCH v2 12/18] ceph: set S_ENCRYPTED bit if new inode has encryption.ctx xattr
+Date:   Fri,  4 Sep 2020 12:05:31 -0400
+Message-Id: <20200904160537.76663-13-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200904160537.76663-1-jlayton@kernel.org>
 References: <20200904160537.76663-1-jlayton@kernel.org>
@@ -55,49 +55,109 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-ceph already has its own d_revalidate op so we can't rely on fscrypt
-using that directly. Export this symbol so filesystems can call it
-from their own d_revalidate op.
+This hack fixes a chicken-and-egg problem when fetching inodes from the
+server. Once we move to a dedicated field in the inode, then this should
+be able to go away.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/crypto/fname.c       | 3 ++-
- include/linux/fscrypt.h | 1 +
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ fs/ceph/crypto.h |  4 ++++
+ fs/ceph/inode.c  |  4 ++++
+ fs/ceph/super.h  |  1 +
+ fs/ceph/xattr.c  | 32 ++++++++++++++++++++++++++++++++
+ 4 files changed, 41 insertions(+)
 
-diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
-index 47bcfddb278b..9440a44e24ac 100644
---- a/fs/crypto/fname.c
-+++ b/fs/crypto/fname.c
-@@ -538,7 +538,7 @@ EXPORT_SYMBOL_GPL(fscrypt_fname_siphash);
-  * Validate dentries in encrypted directories to make sure we aren't potentially
-  * caching stale dentries after a key has been added.
-  */
--static int fscrypt_d_revalidate(struct dentry *dentry, unsigned int flags)
-+int fscrypt_d_revalidate(struct dentry *dentry, unsigned int flags)
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index bf893bd215c3..1b11e9af165e 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -10,12 +10,16 @@
+ 
+ #define	CEPH_XATTR_NAME_ENCRYPTION_CONTEXT	"encryption.ctx"
+ 
++#define DUMMY_ENCRYPTION_ENABLED(fsc) ((fsc)->dummy_enc_ctx.ctx != NULL)
++
+ int ceph_fscrypt_set_ops(struct super_block *sb);
+ int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
+ 				 struct ceph_acl_sec_ctx *as);
+ 
+ #else /* CONFIG_FS_ENCRYPTION */
+ 
++#define DUMMY_ENCRYPTION_ENABLED(fsc) (0)
++
+ static inline int ceph_fscrypt_set_ops(struct super_block *sb)
  {
- 	struct dentry *dir;
- 	int err;
-@@ -577,6 +577,7 @@ static int fscrypt_d_revalidate(struct dentry *dentry, unsigned int flags)
+ 	return 0;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 651148194316..c1c1fe2547f9 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -964,6 +964,10 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 		ceph_forget_all_cached_acls(inode);
+ 		ceph_security_invalidate_secctx(inode);
+ 		xattr_blob = NULL;
++		if ((inode->i_state & I_NEW) &&
++		    (DUMMY_ENCRYPTION_ENABLED(mdsc->fsc) ||
++		     ceph_inode_has_xattr(ci, CEPH_XATTR_NAME_ENCRYPTION_CONTEXT)))
++			inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
+ 	}
  
- 	return valid;
+ 	/* finally update i_version */
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index cf04fcd3de69..7c859824f64c 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -986,6 +986,7 @@ extern ssize_t ceph_listxattr(struct dentry *, char *, size_t);
+ extern struct ceph_buffer *__ceph_build_xattrs_blob(struct ceph_inode_info *ci);
+ extern void __ceph_destroy_xattrs(struct ceph_inode_info *ci);
+ extern const struct xattr_handler *ceph_xattr_handlers[];
++bool ceph_inode_has_xattr(struct ceph_inode_info *ci, char *name);
+ 
+ struct ceph_acl_sec_ctx {
+ #ifdef CONFIG_CEPH_FS_POSIX_ACL
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 3a733ac33d9b..9dcb060cba9a 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -1283,6 +1283,38 @@ void ceph_release_acl_sec_ctx(struct ceph_acl_sec_ctx *as_ctx)
+ 		ceph_pagelist_release(as_ctx->pagelist);
  }
-+EXPORT_SYMBOL_GPL(fscrypt_d_revalidate);
  
- const struct dentry_operations fscrypt_d_ops = {
- 	.d_revalidate = fscrypt_d_revalidate,
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index 81d6ded24328..16d673c50448 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -208,6 +208,7 @@ int fscrypt_fname_disk_to_usr(const struct inode *inode,
- bool fscrypt_match_name(const struct fscrypt_name *fname,
- 			const u8 *de_name, u32 de_name_len);
- u64 fscrypt_fname_siphash(const struct inode *dir, const struct qstr *name);
-+int fscrypt_d_revalidate(struct dentry *dentry, unsigned int flags);
- 
- /* bio.c */
- void fscrypt_decrypt_bio(struct bio *bio);
++/* Return true if inode's xattr blob has an xattr named "name" */
++bool ceph_inode_has_xattr(struct ceph_inode_info *ci, char *name)
++{
++	void *p, *end;
++	u32 numattr;
++	size_t namelen;
++
++	lockdep_assert_held(&ci->i_ceph_lock);
++
++	if (!ci->i_xattrs.blob || ci->i_xattrs.blob->vec.iov_len <= 4)
++		return false;
++
++	namelen = strlen(name);
++	p = ci->i_xattrs.blob->vec.iov_base;
++	end = p + ci->i_xattrs.blob->vec.iov_len;
++	ceph_decode_32_safe(&p, end, numattr, bad);
++
++	while (numattr--) {
++		u32 len;
++
++		ceph_decode_32_safe(&p, end, len, bad);
++		ceph_decode_need(&p, end, len, bad);
++		if (len == namelen && !memcmp(p, name, len))
++			return true;
++		p += len;
++		ceph_decode_32_safe(&p, end, len, bad);
++		ceph_decode_skip_n(&p, end, len, bad);
++	}
++bad:
++	return false;
++}
++
+ /*
+  * List of handlers for synthetic system.* attributes. Other
+  * attributes are handled directly.
 -- 
 2.26.2
 
