@@ -1,324 +1,84 @@
-Return-Path: <SRS0=ZU1U=CQ=vger.kernel.org=ceph-devel-owner@kernel.org>
+Return-Path: <SRS0=ZxPG=CR=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7665FC433E2
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Sep 2020 16:42:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C818FC433E2
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Sep 2020 03:38:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 371F22080A
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Sep 2020 16:42:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 945D82075A
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Sep 2020 03:38:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1599536310;
+	bh=BanmiEvbGMWVIhkeYXUdmPe/vH8P2n26h9sXyKtB4E0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=fF4TiayAZOpNYOVvXiWKQgcjHguhPEFHEDIgHudsE1dDe5jHL/9nZRz4dpNtNEvpF
+	 nVoyt6ebL8Sf8iBadvJus89KiM0BpiVkvv10cGkYWRtooI2b9PRPzX12DHUa84jolS
+	 78EA6W/Fwo9cFe9bOInhVqMemtOZPS2Ck1uVKMaM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730909AbgIGQm5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 7 Sep 2020 12:42:57 -0400
-Received: from mail-qv1-f49.google.com ([209.85.219.49]:42937 "EHLO
-        mail-qv1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730918AbgIGQmv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Sep 2020 12:42:51 -0400
-Received: by mail-qv1-f49.google.com with SMTP id h1so6567184qvo.9
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Sep 2020 09:42:44 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
-        bh=IAhVNU69QWIfxZEeHLZc/uZOmACqqBqPf1OiRBQkNIw=;
-        b=k705pZXNGx+pU3fT07YNfXohQ+hRqO88XvS8A8fy4HhguEgbD6goNfozRUbtJ8sOiC
-         m/UFKHU6lt7jN+klD2cQXIUUjIRdBTumw99O2rP3iaimWEXdxPWRAnQvglQcTU5AUoK7
-         YL0zMApx3JlqWHMlvD+pBS47Tsq8EIN/v3+CJna8JUCoyIhTXPiCyTaU4Rg3dDZQZBsl
-         GEcqQ5fu220YtQ68sKdGa5TJDelUgXgxaHMu6Pr6DnhcJaPbXhKJe/SKTIEO2tLVcqGo
-         KqPl/Jco5usp2h97J+AUxBpiR2FNaY/jnJs9LdLvoypycfiiFidBRlE3lL65EbaSOWc2
-         oeKQ==
-X-Gm-Message-State: AOAM5320dI8LG0NiSf2QZN1sFSuTSryGrgRSx8jaORRCF11ltDYXf72Z
-        /mt5xPTNNs2AUByqLCmrda5iYHQOIPKjb2tO/9xia1LsyuvFzOR9
-X-Google-Smtp-Source: ABdhPJz1DaZj7ax8hCqwvKpJSO8/0aNMQgTgTnMWi1nq0zKGUKm5JjFC42qAoI8DtjmyNCipJaSRWwT1ALh2vKTV0hQ=
-X-Received: by 2002:a0c:baad:: with SMTP id x45mr5192128qvf.108.1599496962836;
- Mon, 07 Sep 2020 09:42:42 -0700 (PDT)
+        id S1728513AbgIHDiY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 7 Sep 2020 23:38:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42152 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728327AbgIHDiV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 7 Sep 2020 23:38:21 -0400
+Received: from sol.localdomain (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1158B2075A;
+        Tue,  8 Sep 2020 03:38:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1599536301;
+        bh=BanmiEvbGMWVIhkeYXUdmPe/vH8P2n26h9sXyKtB4E0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=2Y3vXWeVFofFzu+GH1t0rVmNIMeav5M/KvIEqsAOXfrQ4y6Qmvi+uwQpNRjKER/lj
+         +tG4kb+LIZgfYCWoDI4majUE1eoNE/Y6ahIKRFDNR9AzH7+GUUCGA3m0MMGFklomVn
+         bOBl4FWNCKdfiOWw3r5HbyCbPIuAaFzuiCrXGeBw=
+Date:   Mon, 7 Sep 2020 20:38:19 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org
+Subject: Re: [RFC PATCH v2 01/18] vfs: export new_inode_pseudo
+Message-ID: <20200908033819.GD68127@sol.localdomain>
+References: <20200904160537.76663-1-jlayton@kernel.org>
+ <20200904160537.76663-2-jlayton@kernel.org>
 MIME-Version: 1.0
-From:   Kaarlo Lahtela <kaarlo@lahtela.fi>
-Date:   Mon, 7 Sep 2020 19:42:32 +0300
-Message-ID: <CAPbkstyKYy4OwL2VtO2hkoZGqiFY+qg4oAKvx+FyGC=J6C1eDA@mail.gmail.com>
-Subject: osd crash
-To:     ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200904160537.76663-2-jlayton@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi,
-two of my osds on different nodes do not start.  Now I have one pg
-that is down. This happened on ceph version 14.2.10 and still happens
-after upgrading to 14.2.11. I get this error when starting osd:
+On Fri, Sep 04, 2020 at 12:05:20PM -0400, Jeff Layton wrote:
+> Ceph needs to be able to allocate inodes ahead of a create that might
+> involve a fscrypt-encrypted inode. new_inode() almost fits the bill,
+> but it puts the inode on the sb->s_inodes list, and we don't want to
+> do that until we're ready to insert it into the hash.
+> 
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/inode.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/fs/inode.c b/fs/inode.c
+> index 72c4c347afb7..61554c2477ab 100644
+> --- a/fs/inode.c
+> +++ b/fs/inode.c
+> @@ -935,6 +935,7 @@ struct inode *new_inode_pseudo(struct super_block *sb)
+>  	}
+>  	return inode;
+>  }
+> +EXPORT_SYMBOL(new_inode_pseudo);
+>  
 
-===============8<========================
-root@prox:~# /usr/bin/ceph-osd -f --cluster ceph --id 1 --setuser ceph
---setgroup ceph
-2020-09-05 13:53:15.077 7fd0fca43c80 -1 osd.1 6645 log_to_monitors
-{default=true}
-2020-09-05 13:53:15.189 7fd0f5d4b700 -1 osd.1 6687 set_numa_affinity
-unable to identify public interface 'vmbr0' numa node: (2) No such
-file or directory
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: In function
-'uint64_t SnapSet::get_clone_bytes(snapid_t) const' thread
-7fd0e2524700 time 2020-09-05 13:53:17.980687
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: 5450: FAILED
-ceph_assert(clone_overlap.count(clone))
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x152) [0x562cc5ea83c8]
- 2: (()+0x5115a0) [0x562cc5ea85a0]
- 3: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 4: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 5: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 6: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 7: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 8: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 9: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 10: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 11: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 12: (()+0x7fa3) [0x7fd0fd487fa3]
- 13: (clone()+0x3f) [0x7fd0fd0374cf]
-*** Caught signal (Aborted) **
- in thread 7fd0e2524700 thread_name:tp_osd_tp
-2020-09-05 13:53:17.977 7fd0e2524700 -1
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: In function
-'uint64_t SnapSet::get_clone_bytes(snapid_t) const' thread
-7fd0e2524700 time 2020-09-05 13:53:17.980687
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: 5450: FAILED
-ceph_assert(clone_overlap.count(clone))
+What's the problem with putting the new inode on sb->s_inodes already?
+That's what all the other filesystems do.
 
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x152) [0x562cc5ea83c8]
- 2: (()+0x5115a0) [0x562cc5ea85a0]
- 3: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 4: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 5: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 6: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 7: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 8: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 9: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 10: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 11: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 12: (()+0x7fa3) [0x7fd0fd487fa3]
- 13: (clone()+0x3f) [0x7fd0fd0374cf]
-
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (()+0x12730) [0x7fd0fd492730]
- 2: (gsignal()+0x10b) [0x7fd0fcf757bb]
- 3: (abort()+0x121) [0x7fd0fcf60535]
- 4: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x1a3) [0x562cc5ea8419]
- 5: (()+0x5115a0) [0x562cc5ea85a0]
- 6: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 7: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 8: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 9: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 10: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 11: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 12: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 15: (()+0x7fa3) [0x7fd0fd487fa3]
- 16: (clone()+0x3f) [0x7fd0fd0374cf]
-2020-09-05 13:53:17.981 7fd0e2524700 -1 *** Caught signal (Aborted) **
- in thread 7fd0e2524700 thread_name:tp_osd_tp
-
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (()+0x12730) [0x7fd0fd492730]
- 2: (gsignal()+0x10b) [0x7fd0fcf757bb]
- 3: (abort()+0x121) [0x7fd0fcf60535]
- 4: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x1a3) [0x562cc5ea8419]
- 5: (()+0x5115a0) [0x562cc5ea85a0]
- 6: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 7: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 8: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 9: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 10: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 11: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 12: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 15: (()+0x7fa3) [0x7fd0fd487fa3]
- 16: (clone()+0x3f) [0x7fd0fd0374cf]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-  -469> 2020-09-05 13:53:15.077 7fd0fca43c80 -1 osd.1 6645
-log_to_monitors {default=true}
-  -195> 2020-09-05 13:53:15.189 7fd0f5d4b700 -1 osd.1 6687
-set_numa_affinity unable to identify public interface 'vmbr0' numa
-node: (2) No such file or directory
-    -1> 2020-09-05 13:53:17.977 7fd0e2524700 -1
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: In function
-'uint64_t SnapSet::get_clone_bytes(snapid_t) const' thread
-7fd0e2524700 time 2020-09-05 13:53:17.980687
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: 5450: FAILED
-ceph_assert(clone_overlap.count(clone))
-
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x152) [0x562cc5ea83c8]
- 2: (()+0x5115a0) [0x562cc5ea85a0]
- 3: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 4: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 5: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 6: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 7: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 8: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 9: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 10: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 11: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 12: (()+0x7fa3) [0x7fd0fd487fa3]
- 13: (clone()+0x3f) [0x7fd0fd0374cf]
-
-     0> 2020-09-05 13:53:17.981 7fd0e2524700 -1 *** Caught signal (Aborted) **
- in thread 7fd0e2524700 thread_name:tp_osd_tp
-
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (()+0x12730) [0x7fd0fd492730]
- 2: (gsignal()+0x10b) [0x7fd0fcf757bb]
- 3: (abort()+0x121) [0x7fd0fcf60535]
- 4: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x1a3) [0x562cc5ea8419]
- 5: (()+0x5115a0) [0x562cc5ea85a0]
- 6: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 7: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 8: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 9: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 10: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 11: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 12: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 15: (()+0x7fa3) [0x7fd0fd487fa3]
- 16: (clone()+0x3f) [0x7fd0fd0374cf]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-  -469> 2020-09-05 13:53:15.077 7fd0fca43c80 -1 osd.1 6645
-log_to_monitors {default=true}
-  -195> 2020-09-05 13:53:15.189 7fd0f5d4b700 -1 osd.1 6687
-set_numa_affinity unable to identify public interface 'vmbr0' numa
-node: (2) No such file or directory
-    -1> 2020-09-05 13:53:17.977 7fd0e2524700 -1
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: In function
-'uint64_t SnapSet::get_clone_bytes(snapid_t) const' thread
-7fd0e2524700 time 2020-09-05 13:53:17.980687
-/build/ceph-JY24tx/ceph-14.2.11/src/osd/osd_types.cc: 5450: FAILED
-ceph_assert(clone_overlap.count(clone))
-
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x152) [0x562cc5ea83c8]
- 2: (()+0x5115a0) [0x562cc5ea85a0]
- 3: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 4: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 5: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 6: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 7: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 8: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 9: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 10: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 11: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 12: (()+0x7fa3) [0x7fd0fd487fa3]
- 13: (clone()+0x3f) [0x7fd0fd0374cf]
-
-     0> 2020-09-05 13:53:17.981 7fd0e2524700 -1 *** Caught signal (Aborted) **
- in thread 7fd0e2524700 thread_name:tp_osd_tp
-
- ceph version 14.2.11 (21626754f4563baadc6ba5d50b9cbc48a5730a94)
-nautilus (stable)
- 1: (()+0x12730) [0x7fd0fd492730]
- 2: (gsignal()+0x10b) [0x7fd0fcf757bb]
- 3: (abort()+0x121) [0x7fd0fcf60535]
- 4: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x1a3) [0x562cc5ea8419]
- 5: (()+0x5115a0) [0x562cc5ea85a0]
- 6: (SnapSet::get_clone_bytes(snapid_t) const+0xc2) [0x562cc61dc432]
- 7: (PrimaryLogPG::add_object_context_to_pg_stat(std::shared_ptr<ObjectContext>,
-pg_stat_t*)+0x297) [0x562cc6107fb7]
- 8: (PrimaryLogPG::recover_backfill(unsigned long,
-ThreadPool::TPHandle&, bool*)+0xfdc) [0x562cc6136a3c]
- 9: (PrimaryLogPG::start_recovery_ops(unsigned long,
-ThreadPool::TPHandle&, unsigned long*)+0x1173) [0x562cc613ab43]
- 10: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x302) [0x562cc5f8b622]
- 11: (PGRecovery::run(OSD*, OSDShard*, boost::intrusive_ptr<PG>&,
-ThreadPool::TPHandle&)+0x19) [0x562cc622fac9]
- 12: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x7d7) [0x562cc5fa7ba7]
- 13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x5b4)
-[0x562cc65740c4]
- 14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x562cc6576ad0]
- 15: (()+0x7fa3) [0x7fd0fd487fa3]
- 16: (clone()+0x3f) [0x7fd0fd0374cf]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-Aborted
-===============8<========================
-
-What can I do to recover my osds?
-
--- 
-</kaarlo>
+- Eric
