@@ -1,181 +1,216 @@
-Return-Path: <SRS0=Mkiz=CV=vger.kernel.org=ceph-devel-owner@kernel.org>
+Return-Path: <SRS0=bMPg=CW=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C718AC43461
-	for <ceph-devel@archiver.kernel.org>; Sat, 12 Sep 2020 10:18:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB683C43461
+	for <ceph-devel@archiver.kernel.org>; Sun, 13 Sep 2020 08:38:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 856C5214D8
-	for <ceph-devel@archiver.kernel.org>; Sat, 12 Sep 2020 10:18:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D6F62098B
+	for <ceph-devel@archiver.kernel.org>; Sun, 13 Sep 2020 08:38:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599905891;
-	bh=OF+hVNfMyyA5VO21wxb0KC4fe+IoHLmDQsnwVS+NKpQ=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=pkaLAqTnwIyICmCFwzLORguhN/hmck0gDnV12sEolfvxQrSi+cChjRJ85yx2vUSiz
-	 7Uy7RDO+4uJ6oG8oHXVQaiNNI8Pm3OvDhIM/44WPY8a9rCbKdPb0TvutdY0m7LuWX7
-	 GVlTBVlCqWP3VezwTZXLTbUXDRJmVNlMzdBRfyns=
+	s=default; t=1599986288;
+	bh=zejOgicpkvvmMFhZrMwnmiCb7goGZK7Q97xiTR6JSH8=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=XtgA5tjcIg3qBzVPAj0lXiW/+f4RglDLigXNoUZ1H1ZQx/uPYanOixn/LwU7TDHdA
+	 GzbZdlY7BiXXvYyavNuDyYI740IvEHJlrhLWyNl6CJSdRJVRb5ppZfwLu+d9naJFXQ
+	 AmaCarpIDg162f0uoxgDabqIlV4QyXoBV9qqd4QE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725847AbgILKSJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 12 Sep 2020 06:18:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52034 "EHLO mail.kernel.org"
+        id S1725974AbgIMIiF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 13 Sep 2020 04:38:05 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60770 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725832AbgILKSD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 12 Sep 2020 06:18:03 -0400
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1725952AbgIMIiA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 13 Sep 2020 04:38:00 -0400
+Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 420B4214D8;
-        Sat, 12 Sep 2020 10:18:02 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id CCDDB21655;
+        Sun, 13 Sep 2020 08:37:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599905882;
-        bh=OF+hVNfMyyA5VO21wxb0KC4fe+IoHLmDQsnwVS+NKpQ=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=EWG1EZkQIVq6mvVTm7iZYY8FQvavBuv7kkX7e3+jDFZDpnh7sSsHGjD3k+9h6Fkpm
-         OmXQJv+z+wROFFpYe5Son+WGuBjdbkQ6CYgSJ0eMiIOf4ZV36HUz6Gz4NH5JmNKH2m
-         8bYKsQzm9GPrCC8797hzCnk43+1YNrHnHduuGoGg=
-Message-ID: <f6c10f718fcb7ce2643bea899953516d1df53033.camel@kernel.org>
-Subject: Re: [PATCH v5 0/2] ceph: metrics for opened files, pinned caps and
- opened inodes
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc:     "Yan, Zheng" <zyan@redhat.com>,
-        Patrick Donnelly <pdonnell@redhat.com>,
-        Ceph Development <ceph-devel@vger.kernel.org>
-Date:   Sat, 12 Sep 2020 06:18:01 -0400
-In-Reply-To: <d71bf067-50ce-36f3-a627-409aff755a16@redhat.com>
-References: <20200903130140.799392-1-xiubli@redhat.com>
-         <449a56624f3dd4e2a4a4cf95cd24d69c53700b6d.camel@kernel.org>
-         <ad35f2f8-6692-3918-6137-adc8e95607c6@redhat.com>
-         <CAOi1vP-8rbzZ=-Apir2B4Z6U10ZKrp41d6+BYgvGsyL+ND-JnQ@mail.gmail.com>
-         <cdf40ea5-ecd0-0df6-7db4-7897aa3a5ad0@redhat.com>
-         <CAOi1vP-XxXVcvyZgQF7mWaxm-21hiY5fF4tRYkua-F9ikof7UA@mail.gmail.com>
-         <e291d899acee9f9218fe9a62f7300ab82592c459.camel@kernel.org>
-         <9a5c5d2f-d105-21c4-327e-5ad18bf49518@redhat.com>
-         <a281843181d1c97d099a2dd88c216ca94cf8d544.camel@kernel.org>
-         <d174f7f99b4da9a2959b93bad622792fb693e495.camel@kernel.org>
-         <d71bf067-50ce-36f3-a627-409aff755a16@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
+        s=default; t=1599986279;
+        bh=zejOgicpkvvmMFhZrMwnmiCb7goGZK7Q97xiTR6JSH8=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=n11IT1hhQb77UCP2bEEcG/beILGMlhRe+fSjff5reIPEWW9kdcATSTO9XHz1V4Chi
+         h4xzhbz1a5sYUiKr6b243U/wP/4X+I4AMc3n+bQXWx/m3bS8jTnUO031AbOxjTg2L7
+         vNC21WM7uk+GO93acsK5nw+857QFhbNttSg0o4uk=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-fscrypt@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
+        Jeff Layton <jlayton@kernel.org>,
+        Daniel Rosenberg <drosen@google.com>
+Subject: [PATCH v2 04/11] f2fs: use fscrypt_prepare_new_inode() and fscrypt_set_context()
+Date:   Sun, 13 Sep 2020 01:36:13 -0700
+Message-Id: <20200913083620.170627-5-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20200913083620.170627-1-ebiggers@kernel.org>
+References: <20200913083620.170627-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Sat, 2020-09-12 at 12:04 +0800, Xiubo Li wrote:
-> On 2020/9/12 3:46, Jeff Layton wrote:
-> > On Fri, 2020-09-11 at 07:49 -0400, Jeff Layton wrote:
-> > > On Fri, 2020-09-11 at 11:43 +0800, Xiubo Li wrote:
-> > > > On 2020/9/10 20:13, Jeff Layton wrote:
-> > > > > On Thu, 2020-09-10 at 08:00 +0200, Ilya Dryomov wrote:
-> > > > > > On Thu, Sep 10, 2020 at 2:59 AM Xiubo Li <xiubli@redhat.com> wrote:
-> > > > > > > On 2020/9/10 4:34, Ilya Dryomov wrote:
-> > > > > > > > On Thu, Sep 3, 2020 at 4:22 PM Xiubo Li <xiubli@redhat.com> wrote:
-> > > > > > > > > On 2020/9/3 22:18, Jeff Layton wrote:
-> > > > > > > > > > On Thu, 2020-09-03 at 09:01 -0400, xiubli@redhat.com wrote:
-> > > > > > > > > > > From: Xiubo Li <xiubli@redhat.com>
-> > > > > > > > > > > 
-> > > > > > > > > > > Changed in V5:
-> > > > > > > > > > > - Remove mdsc parsing helpers except the ceph_sb_to_mdsc()
-> > > > > > > > > > > - Remove the is_opened member.
-> > > > > > > > > > > 
-> > > > > > > > > > > Changed in V4:
-> > > > > > > > > > > - A small fix about the total_inodes.
-> > > > > > > > > > > 
-> > > > > > > > > > > Changed in V3:
-> > > > > > > > > > > - Resend for V2 just forgot one patch, which is adding some helpers
-> > > > > > > > > > > support to simplify the code.
-> > > > > > > > > > > 
-> > > > > > > > > > > Changed in V2:
-> > > > > > > > > > > - Add number of inodes that have opened files.
-> > > > > > > > > > > - Remove the dir metrics and fold into files.
-> > > > > > > > > > > 
-> > > > > > > > > > > 
-> > > > > > > > > > > 
-> > > > > > > > > > > Xiubo Li (2):
-> > > > > > > > > > >       ceph: add ceph_sb_to_mdsc helper support to parse the mdsc
-> > > > > > > > > > >       ceph: metrics for opened files, pinned caps and opened inodes
-> > > > > > > > > > > 
-> > > > > > > > > > >      fs/ceph/caps.c    | 41 +++++++++++++++++++++++++++++++++++++----
-> > > > > > > > > > >      fs/ceph/debugfs.c | 11 +++++++++++
-> > > > > > > > > > >      fs/ceph/dir.c     | 20 +++++++-------------
-> > > > > > > > > > >      fs/ceph/file.c    | 13 ++++++-------
-> > > > > > > > > > >      fs/ceph/inode.c   | 11 ++++++++---
-> > > > > > > > > > >      fs/ceph/locks.c   |  2 +-
-> > > > > > > > > > >      fs/ceph/metric.c  | 14 ++++++++++++++
-> > > > > > > > > > >      fs/ceph/metric.h  |  7 +++++++
-> > > > > > > > > > >      fs/ceph/quota.c   | 10 +++++-----
-> > > > > > > > > > >      fs/ceph/snap.c    |  2 +-
-> > > > > > > > > > >      fs/ceph/super.h   |  6 ++++++
-> > > > > > > > > > >      11 files changed, 103 insertions(+), 34 deletions(-)
-> > > > > > > > > > > 
-> > > > > > > > > > Looks good. I went ahead and merge this into testing.
-> > > > > > > > > > 
-> > > > > > > > > > Small merge conflict in quota.c, which I guess is probably due to not
-> > > > > > > > > > basing this on testing branch. I also dropped what looks like an
-> > > > > > > > > > unrelated hunk in the second patch.
-> > > > > > > > > > 
-> > > > > > > > > > In the future, if you can be sure that patches you post apply cleanly to
-> > > > > > > > > > testing branch then that would make things easier.
-> > > > > > > > > Okay, will do it.
-> > > > > > > > Hi Xiubo,
-> > > > > > > > 
-> > > > > > > > There is a problem with lifetimes here.  mdsc isn't guaranteed to exist
-> > > > > > > > when ->free_inode() is called.  This can lead to crashes on a NULL mdsc
-> > > > > > > > in ceph_free_inode() in case of e.g. "umount -f".  I know it was Jeff's
-> > > > > > > > suggestion to move the decrement of total_inodes into ceph_free_inode(),
-> > > > > > > > but it doesn't look like it can be easily deferred past ->evict_inode().
-> > > > > > > Okay, I will take a look.
-> > > > > > Given that it's just a counter which we don't care about if the
-> > > > > > mount is going away, some form of "if (mdsc)" check might do, but
-> > > > > > need to make sure that it covers possible races, if any.
-> > > > > > 
-> > > > > Good catch, Ilya.
-> > > > > 
-> > > > > What may be best is to move the increment out of ceph_alloc_inode and
-> > > > > instead put it in ceph_set_ino_cb. Then the decrement can go back into
-> > > > > ceph_evict_inode.
-> > > > Hi Jeff, Ilya
-> > > > 
-> > > > Checked the code, it seems in the ceph_evict_inode() we will also hit
-> > > > the same issue .
-> > > > 
-> > > > With the '-f' options when umounting, it will skip the inodes whose
-> > > > i_count ref > 0. And then free the fsc/mdsc in ceph. And later the
-> > > > iput_final() will call the ceph_evict_inode() and then ceph_free_inode().
-> > > > 
-> > > > Could we just check if !!(sb->s_flags & SB_ACTIVE) is false will we skip
-> > > > the counting ?
-> > > > 
-> > > Note that umount -f (MNT_FORCE) just means that ceph_umount_begin is
-> > > called before unmounting.
-> > > 
-> > > If what you're saying it true, then we have bigger problems.
-> > > ceph_evict_inode does this today when ci->i_snap_realm is set:
-> > > 
-> > >      struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
-> > > 
-> > > ...and then goes on to use that mdsc pointer.
-> > > 
-> > Now that I look, I don't think that this is a problem. ceph_kill_sb
-> > calls generic_shutdown_super, which calls evict_inodes before the client
-> > is torn down. That should ensure that the mdsc is still good when evict
-> > is called.
-> > 
-> > We will need to move the increment into the iget5_locked "set" function.
-> > Maybe we can squash the patch below into yours?
-> 
-> Yeah, the following patch looks good.
-> 
+From: Eric Biggers <ebiggers@google.com>
 
-Great, folded and re-pushed into testing. Please take a look and make sure the resulting patch looks ok to you.
+Convert f2fs to use the new functions fscrypt_prepare_new_inode() and
+fscrypt_set_context().  This avoids calling
+fscrypt_get_encryption_info() from under f2fs_lock_op(), which can
+deadlock because fscrypt_get_encryption_info() isn't GFP_NOFS-safe.
 
-Thanks!
+For more details about this problem, see the earlier patch
+"fscrypt: add fscrypt_prepare_new_inode() and fscrypt_set_context()".
+
+This also fixes a f2fs-specific deadlock when the filesystem is mounted
+with '-o test_dummy_encryption' and a file is created in an unencrypted
+directory other than the root directory:
+
+    INFO: task touch:207 blocked for more than 30 seconds.
+          Not tainted 5.9.0-rc4-00099-g729e3d0919844 #2
+    "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+    task:touch           state:D stack:    0 pid:  207 ppid:   167 flags:0x00000000
+    Call Trace:
+     [...]
+     lock_page include/linux/pagemap.h:548 [inline]
+     pagecache_get_page+0x25e/0x310 mm/filemap.c:1682
+     find_or_create_page include/linux/pagemap.h:348 [inline]
+     grab_cache_page include/linux/pagemap.h:424 [inline]
+     f2fs_grab_cache_page fs/f2fs/f2fs.h:2395 [inline]
+     f2fs_grab_cache_page fs/f2fs/f2fs.h:2373 [inline]
+     __get_node_page.part.0+0x39/0x2d0 fs/f2fs/node.c:1350
+     __get_node_page fs/f2fs/node.c:35 [inline]
+     f2fs_get_node_page+0x2e/0x60 fs/f2fs/node.c:1399
+     read_inline_xattr+0x88/0x140 fs/f2fs/xattr.c:288
+     lookup_all_xattrs+0x1f9/0x2c0 fs/f2fs/xattr.c:344
+     f2fs_getxattr+0x9b/0x160 fs/f2fs/xattr.c:532
+     f2fs_get_context+0x1e/0x20 fs/f2fs/super.c:2460
+     fscrypt_get_encryption_info+0x9b/0x450 fs/crypto/keysetup.c:472
+     fscrypt_inherit_context+0x2f/0xb0 fs/crypto/policy.c:640
+     f2fs_init_inode_metadata+0xab/0x340 fs/f2fs/dir.c:540
+     f2fs_add_inline_entry+0x145/0x390 fs/f2fs/inline.c:621
+     f2fs_add_dentry+0x31/0x80 fs/f2fs/dir.c:757
+     f2fs_do_add_link+0xcd/0x130 fs/f2fs/dir.c:798
+     f2fs_add_link fs/f2fs/f2fs.h:3234 [inline]
+     f2fs_create+0x104/0x290 fs/f2fs/namei.c:344
+     lookup_open.isra.0+0x2de/0x500 fs/namei.c:3103
+     open_last_lookups+0xa9/0x340 fs/namei.c:3177
+     path_openat+0x8f/0x1b0 fs/namei.c:3365
+     do_filp_open+0x87/0x130 fs/namei.c:3395
+     do_sys_openat2+0x96/0x150 fs/open.c:1168
+     [...]
+
+That happened because f2fs_add_inline_entry() locks the directory
+inode's page in order to add the dentry, then f2fs_get_context() tries
+to lock it recursively in order to read the encryption xattr.  This
+problem is specific to "test_dummy_encryption" because normally the
+directory's fscrypt_info would be set up prior to
+f2fs_add_inline_entry() in order to encrypt the new filename.
+
+Regardless, the new design fixes this test_dummy_encryption deadlock as
+well as potential deadlocks with fs reclaim, by setting up any needed
+fscrypt_info structs prior to taking so many locks.
+
+The test_dummy_encryption deadlock was reported by Daniel Rosenberg.
+
+Reported-by: Daniel Rosenberg <drosen@google.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ fs/f2fs/dir.c   |  2 +-
+ fs/f2fs/f2fs.h  | 23 -----------------------
+ fs/f2fs/namei.c |  7 ++++++-
+ 3 files changed, 7 insertions(+), 25 deletions(-)
+
+diff --git a/fs/f2fs/dir.c b/fs/f2fs/dir.c
+index b2530b9507bd9..414bc94fbd546 100644
+--- a/fs/f2fs/dir.c
++++ b/fs/f2fs/dir.c
+@@ -537,7 +537,7 @@ struct page *f2fs_init_inode_metadata(struct inode *inode, struct inode *dir,
+ 			goto put_error;
+ 
+ 		if (IS_ENCRYPTED(inode)) {
+-			err = fscrypt_inherit_context(dir, inode, page, false);
++			err = fscrypt_set_context(inode, page);
+ 			if (err)
+ 				goto put_error;
+ 		}
+diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
+index d9e52a7f3702f..0503371f88ed4 100644
+--- a/fs/f2fs/f2fs.h
++++ b/fs/f2fs/f2fs.h
+@@ -1315,13 +1315,6 @@ enum fsync_mode {
+ #define IS_IO_TRACED_PAGE(page) (0)
+ #endif
+ 
+-#ifdef CONFIG_FS_ENCRYPTION
+-#define DUMMY_ENCRYPTION_ENABLED(sbi) \
+-	(unlikely(F2FS_OPTION(sbi).dummy_enc_ctx.ctx != NULL))
+-#else
+-#define DUMMY_ENCRYPTION_ENABLED(sbi) (0)
+-#endif
+-
+ /* For compression */
+ enum compress_algorithm_type {
+ 	COMPRESS_LZO,
+@@ -4022,22 +4015,6 @@ static inline bool f2fs_lfs_mode(struct f2fs_sb_info *sbi)
+ 	return F2FS_OPTION(sbi).fs_mode == FS_MODE_LFS;
+ }
+ 
+-static inline bool f2fs_may_encrypt(struct inode *dir, struct inode *inode)
+-{
+-#ifdef CONFIG_FS_ENCRYPTION
+-	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
+-	umode_t mode = inode->i_mode;
+-
+-	/*
+-	 * If the directory encrypted or dummy encryption enabled,
+-	 * then we should encrypt the inode.
+-	 */
+-	if (IS_ENCRYPTED(dir) || DUMMY_ENCRYPTION_ENABLED(sbi))
+-		return (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode));
+-#endif
+-	return false;
+-}
+-
+ static inline bool f2fs_may_compress(struct inode *inode)
+ {
+ 	if (IS_SWAPFILE(inode) || f2fs_is_pinned_file(inode) ||
+diff --git a/fs/f2fs/namei.c b/fs/f2fs/namei.c
+index 84e4bbc1a64de..45f324511a19e 100644
+--- a/fs/f2fs/namei.c
++++ b/fs/f2fs/namei.c
+@@ -28,6 +28,7 @@ static struct inode *f2fs_new_inode(struct inode *dir, umode_t mode)
+ 	nid_t ino;
+ 	struct inode *inode;
+ 	bool nid_free = false;
++	bool encrypt = false;
+ 	int xattr_size = 0;
+ 	int err;
+ 
+@@ -69,13 +70,17 @@ static struct inode *f2fs_new_inode(struct inode *dir, umode_t mode)
+ 		F2FS_I(inode)->i_projid = make_kprojid(&init_user_ns,
+ 							F2FS_DEF_PROJID);
+ 
++	err = fscrypt_prepare_new_inode(dir, inode, &encrypt);
++	if (err)
++		goto fail_drop;
++
+ 	err = dquot_initialize(inode);
+ 	if (err)
+ 		goto fail_drop;
+ 
+ 	set_inode_flag(inode, FI_NEW_INODE);
+ 
+-	if (f2fs_may_encrypt(dir, inode))
++	if (encrypt)
+ 		f2fs_set_encrypted_inode(inode);
+ 
+ 	if (f2fs_sb_has_extra_attr(sbi)) {
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.28.0
 
