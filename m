@@ -2,185 +2,254 @@ Return-Path: <SRS0=bMPg=CW=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77A1DC43461
-	for <ceph-devel@archiver.kernel.org>; Sun, 13 Sep 2020 08:39:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 580AAC433E2
+	for <ceph-devel@archiver.kernel.org>; Sun, 13 Sep 2020 10:43:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 430D8207C3
-	for <ceph-devel@archiver.kernel.org>; Sun, 13 Sep 2020 08:39:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599986387;
-	bh=nVSMprpeSosbO3HIVvYvcbOcUNBMzSOQM0td1dFGCwI=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=IIzcyFCY2BTect+PlD8jVm45mXtHWMdvxoA7LIf/hzMxkfzsC6BGbYwrVMOdexAdK
-	 diPGg99mbQN86+znVAja8yFm1xA/QYTof7BSe0AzAzV444FeBAuGAFz5JuvyrAW57V
-	 nmi1DM3fTKFMax8LIKpLyD629EBp03bGpIl0vat0=
+	by mail.kernel.org (Postfix) with ESMTP id EF097207BB
+	for <ceph-devel@archiver.kernel.org>; Sun, 13 Sep 2020 10:43:19 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="V7nCWdtw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725918AbgIMIjm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 13 Sep 2020 04:39:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60746 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725957AbgIMIiA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 13 Sep 2020 04:38:00 -0400
-Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3FAA52168B;
-        Sun, 13 Sep 2020 08:37:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599986278;
-        bh=nVSMprpeSosbO3HIVvYvcbOcUNBMzSOQM0td1dFGCwI=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=V00kf5XLm9lY1xt1ty/xgqrsenfsXZ6pzt+SXbnRKQ3e9fVR6We4G0EY8hjqo9Ald
-         7n09iIpMN42vGdntBunQgRVEPLY2cfh/w6QreksAz+rvIEV8FQLnt7JmweobGQXsxw
-         p7XoXPrRGWn4KIukK34qwLiwqe0gAihlc1Aj3XQs=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-fscrypt@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
-        Jeff Layton <jlayton@kernel.org>,
-        Daniel Rosenberg <drosen@google.com>
-Subject: [PATCH v2 02/11] ext4: factor out ext4_xattr_credits_for_new_inode()
-Date:   Sun, 13 Sep 2020 01:36:11 -0700
-Message-Id: <20200913083620.170627-3-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20200913083620.170627-1-ebiggers@kernel.org>
-References: <20200913083620.170627-1-ebiggers@kernel.org>
+        id S1725945AbgIMKk0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 13 Sep 2020 06:40:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36166 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725927AbgIMKkZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Sep 2020 06:40:25 -0400
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEE3AC061573
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Sep 2020 03:40:24 -0700 (PDT)
+Received: by mail-io1-xd42.google.com with SMTP id g128so15585068iof.11
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Sep 2020 03:40:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=xqjLVIINUrOLA9J5u/WQxLejxzXxwvU5EXptmFWVCUI=;
+        b=V7nCWdtwxqTJznXtyjZ3T4a2nnEPWIZHWekZ0/sS4Yd0QoYl5OCdp5JYrMjx6HfrFv
+         Q4uY3sCB9I4dZKf2imztwBX5blxH+zcVoPemS2WU/BRu3X0RIwDH/dLWhBsYn5J9snjH
+         P5XdGTsG9RjUd9HfgY4CUy5eyf/GsxWqOf7/xyYIuo/k3tlME78rUsZZmdMFwm+J5rdg
+         Q+S0ucuhX7NVsjkoiGvtKNjFChJIenfUWyppmoQ7C3Ge8n39T22UorAsNn9LVqi563ci
+         C5QDhO4x2CI9kfwWH5ybhUySjfxaJgnVxlzkmYU/KCee4O4Xxy/k2/5eG19O40ORN5RA
+         78cQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=xqjLVIINUrOLA9J5u/WQxLejxzXxwvU5EXptmFWVCUI=;
+        b=eBiYiOc11ig2qAB9hDPYCiufGuV17Nq/bpMsXG4wDU7bFXFix30F75AdvwVjthMHMj
+         Sfmq44DoHBhr33b4bZiJwBTywgVS9ViFY84h0nxQIZqzsUZk5i6oMuWGPFLaVdjJB1PY
+         ebNFbvEmYN7wOX2Yi9DaWlBr2lTB//swnS6Wtp0uAIQTsx28nhUM9HDHHaGoeEPOPBqt
+         Jv0N11dT/ZsCJGfkgPdlp/bI848L3n1eeS3mp3+GjlC3htD307JhvP2amvJgc6ZTNzPh
+         Z1n67UkY4QIpHHtg3CKfxQ45zVRwl3YB5tkZv0CfZdJUQqJ8sLSv4mIbS5XQFtNmDoyS
+         dKDg==
+X-Gm-Message-State: AOAM531j86ZZVMijDb/84L2W9QGu2lW4CuX2Avx3eMNWHl3+ihVMQxI3
+        CXUemrEfXc1Y1aPQ0T/0p0VaFd3nR47+rarm47U=
+X-Google-Smtp-Source: ABdhPJyfYy3c9FPNNftFoKopi9cD95QKEYZjyh5RotqYjoNvNNG0bneaHVPLakFInHXG3FgLv58NFVJdzi3Pk98fTqg=
+X-Received: by 2002:a02:76d5:: with SMTP id z204mr8546993jab.93.1599993623019;
+ Sun, 13 Sep 2020 03:40:23 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200903130140.799392-1-xiubli@redhat.com> <449a56624f3dd4e2a4a4cf95cd24d69c53700b6d.camel@kernel.org>
+ <ad35f2f8-6692-3918-6137-adc8e95607c6@redhat.com> <CAOi1vP-8rbzZ=-Apir2B4Z6U10ZKrp41d6+BYgvGsyL+ND-JnQ@mail.gmail.com>
+ <cdf40ea5-ecd0-0df6-7db4-7897aa3a5ad0@redhat.com> <CAOi1vP-XxXVcvyZgQF7mWaxm-21hiY5fF4tRYkua-F9ikof7UA@mail.gmail.com>
+ <e291d899acee9f9218fe9a62f7300ab82592c459.camel@kernel.org>
+ <9a5c5d2f-d105-21c4-327e-5ad18bf49518@redhat.com> <a281843181d1c97d099a2dd88c216ca94cf8d544.camel@kernel.org>
+ <d174f7f99b4da9a2959b93bad622792fb693e495.camel@kernel.org>
+In-Reply-To: <d174f7f99b4da9a2959b93bad622792fb693e495.camel@kernel.org>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Sun, 13 Sep 2020 12:40:13 +0200
+Message-ID: <CAOi1vP8me7Lda0OZH1297nFqewH5sh0yODF97bqykXPOCkwfuA@mail.gmail.com>
+Subject: Re: [PATCH v5 0/2] ceph: metrics for opened files, pinned caps and
+ opened inodes
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     Xiubo Li <xiubli@redhat.com>, "Yan, Zheng" <zyan@redhat.com>,
+        Patrick Donnelly <pdonnell@redhat.com>,
+        Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On Fri, Sep 11, 2020 at 9:46 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> On Fri, 2020-09-11 at 07:49 -0400, Jeff Layton wrote:
+> > On Fri, 2020-09-11 at 11:43 +0800, Xiubo Li wrote:
+> > > On 2020/9/10 20:13, Jeff Layton wrote:
+> > > > On Thu, 2020-09-10 at 08:00 +0200, Ilya Dryomov wrote:
+> > > > > On Thu, Sep 10, 2020 at 2:59 AM Xiubo Li <xiubli@redhat.com> wrote:
+> > > > > > On 2020/9/10 4:34, Ilya Dryomov wrote:
+> > > > > > > On Thu, Sep 3, 2020 at 4:22 PM Xiubo Li <xiubli@redhat.com> wrote:
+> > > > > > > > On 2020/9/3 22:18, Jeff Layton wrote:
+> > > > > > > > > On Thu, 2020-09-03 at 09:01 -0400, xiubli@redhat.com wrote:
+> > > > > > > > > > From: Xiubo Li <xiubli@redhat.com>
+> > > > > > > > > >
+> > > > > > > > > > Changed in V5:
+> > > > > > > > > > - Remove mdsc parsing helpers except the ceph_sb_to_mdsc()
+> > > > > > > > > > - Remove the is_opened member.
+> > > > > > > > > >
+> > > > > > > > > > Changed in V4:
+> > > > > > > > > > - A small fix about the total_inodes.
+> > > > > > > > > >
+> > > > > > > > > > Changed in V3:
+> > > > > > > > > > - Resend for V2 just forgot one patch, which is adding some helpers
+> > > > > > > > > > support to simplify the code.
+> > > > > > > > > >
+> > > > > > > > > > Changed in V2:
+> > > > > > > > > > - Add number of inodes that have opened files.
+> > > > > > > > > > - Remove the dir metrics and fold into files.
+> > > > > > > > > >
+> > > > > > > > > >
+> > > > > > > > > >
+> > > > > > > > > > Xiubo Li (2):
+> > > > > > > > > >      ceph: add ceph_sb_to_mdsc helper support to parse the mdsc
+> > > > > > > > > >      ceph: metrics for opened files, pinned caps and opened inodes
+> > > > > > > > > >
+> > > > > > > > > >     fs/ceph/caps.c    | 41 +++++++++++++++++++++++++++++++++++++----
+> > > > > > > > > >     fs/ceph/debugfs.c | 11 +++++++++++
+> > > > > > > > > >     fs/ceph/dir.c     | 20 +++++++-------------
+> > > > > > > > > >     fs/ceph/file.c    | 13 ++++++-------
+> > > > > > > > > >     fs/ceph/inode.c   | 11 ++++++++---
+> > > > > > > > > >     fs/ceph/locks.c   |  2 +-
+> > > > > > > > > >     fs/ceph/metric.c  | 14 ++++++++++++++
+> > > > > > > > > >     fs/ceph/metric.h  |  7 +++++++
+> > > > > > > > > >     fs/ceph/quota.c   | 10 +++++-----
+> > > > > > > > > >     fs/ceph/snap.c    |  2 +-
+> > > > > > > > > >     fs/ceph/super.h   |  6 ++++++
+> > > > > > > > > >     11 files changed, 103 insertions(+), 34 deletions(-)
+> > > > > > > > > >
+> > > > > > > > > Looks good. I went ahead and merge this into testing.
+> > > > > > > > >
+> > > > > > > > > Small merge conflict in quota.c, which I guess is probably due to not
+> > > > > > > > > basing this on testing branch. I also dropped what looks like an
+> > > > > > > > > unrelated hunk in the second patch.
+> > > > > > > > >
+> > > > > > > > > In the future, if you can be sure that patches you post apply cleanly to
+> > > > > > > > > testing branch then that would make things easier.
+> > > > > > > > Okay, will do it.
+> > > > > > > Hi Xiubo,
+> > > > > > >
+> > > > > > > There is a problem with lifetimes here.  mdsc isn't guaranteed to exist
+> > > > > > > when ->free_inode() is called.  This can lead to crashes on a NULL mdsc
+> > > > > > > in ceph_free_inode() in case of e.g. "umount -f".  I know it was Jeff's
+> > > > > > > suggestion to move the decrement of total_inodes into ceph_free_inode(),
+> > > > > > > but it doesn't look like it can be easily deferred past ->evict_inode().
+> > > > > > Okay, I will take a look.
+> > > > > Given that it's just a counter which we don't care about if the
+> > > > > mount is going away, some form of "if (mdsc)" check might do, but
+> > > > > need to make sure that it covers possible races, if any.
+> > > > >
+> > > > Good catch, Ilya.
+> > > >
+> > > > What may be best is to move the increment out of ceph_alloc_inode and
+> > > > instead put it in ceph_set_ino_cb. Then the decrement can go back into
+> > > > ceph_evict_inode.
+> > >
+> > > Hi Jeff, Ilya
+> > >
+> > > Checked the code, it seems in the ceph_evict_inode() we will also hit
+> > > the same issue .
+> > >
+> > > With the '-f' options when umounting, it will skip the inodes whose
+> > > i_count ref > 0. And then free the fsc/mdsc in ceph. And later the
+> > > iput_final() will call the ceph_evict_inode() and then ceph_free_inode().
+> > >
+> > > Could we just check if !!(sb->s_flags & SB_ACTIVE) is false will we skip
+> > > the counting ?
+> > >
+> >
+> > Note that umount -f (MNT_FORCE) just means that ceph_umount_begin is
+> > called before unmounting.
+> >
+> > If what you're saying it true, then we have bigger problems.
+> > ceph_evict_inode does this today when ci->i_snap_realm is set:
+> >
+> >     struct ceph_mds_client *mdsc = ceph_inode_to_client(inode)->mdsc;
+> >
+> > ...and then goes on to use that mdsc pointer.
+> >
+>
+> Now that I look, I don't think that this is a problem. ceph_kill_sb
+> calls generic_shutdown_super, which calls evict_inodes before the client
+> is torn down. That should ensure that the mdsc is still good when evict
+> is called.
+>
+> We will need to move the increment into the iget5_locked "set" function.
+> Maybe we can squash the patch below into yours?
+>
+> ----------------------8<---------------------------
+>
+> ceph: use total_inodes to count hashed inodes instead of allocated ones
+>
+> We can't guarantee that the mdsc will still be around when free_inode is
+> called, so move this into evict_inode instead. The increment then will
+> need to be moved when the thing is hashed, so move that into the set
+> callback.
+>
+> Reported-by: Ilya Dryomov <idryomov@gmail.com>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/inode.c | 12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
+>
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 5b9d2ff8af34..39c13fefba8a 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -42,10 +42,13 @@ static void ceph_inode_work(struct work_struct *work);
+>  static int ceph_set_ino_cb(struct inode *inode, void *data)
+>  {
+>         struct ceph_inode_info *ci = ceph_inode(inode);
+> +       struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
+>
+>         ci->i_vino = *(struct ceph_vino *)data;
+>         inode->i_ino = ceph_vino_to_ino_t(ci->i_vino);
+>         inode_set_iversion_raw(inode, 0);
+> +       percpu_counter_inc(&mdsc->metric.total_inodes);
+> +
+>         return 0;
+>  }
+>
+> @@ -425,7 +428,6 @@ static int ceph_fill_fragtree(struct inode *inode,
+>   */
+>  struct inode *ceph_alloc_inode(struct super_block *sb)
+>  {
+> -       struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(sb);
+>         struct ceph_inode_info *ci;
+>         int i;
+>
+> @@ -525,17 +527,12 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+>
+>         ci->i_meta_err = 0;
+>
+> -       percpu_counter_inc(&mdsc->metric.total_inodes);
+> -
+>         return &ci->vfs_inode;
+>  }
+>
+>  void ceph_free_inode(struct inode *inode)
+>  {
+>         struct ceph_inode_info *ci = ceph_inode(inode);
+> -       struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
+> -
+> -       percpu_counter_dec(&mdsc->metric.total_inodes);
+>
+>         kfree(ci->i_symlink);
+>         kmem_cache_free(ceph_inode_cachep, ci);
+> @@ -544,11 +541,14 @@ void ceph_free_inode(struct inode *inode)
+>  void ceph_evict_inode(struct inode *inode)
+>  {
+>         struct ceph_inode_info *ci = ceph_inode(inode);
+> +       struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
 
-To compute a new inode's xattr credits, we need to know whether the
-inode will be encrypted or not.  When we switch to use the new helper
-function fscrypt_prepare_new_inode(), we won't find out whether the
-inode will be encrypted until slightly later than is currently the case.
-That will require moving the code block that computes the xattr credits.
+I'd also remove a duplicate mdsc variable declared in ci->i_snap_realm
+branch.
 
-To make this easier and reduce the length of __ext4_new_inode(), move
-this code block into a new function ext4_xattr_credits_for_new_inode().
+Thanks,
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- fs/ext4/ialloc.c | 90 +++++++++++++++++++++++++++---------------------
- 1 file changed, 51 insertions(+), 39 deletions(-)
-
-diff --git a/fs/ext4/ialloc.c b/fs/ext4/ialloc.c
-index df25d38d65393..0cc576005a923 100644
---- a/fs/ext4/ialloc.c
-+++ b/fs/ext4/ialloc.c
-@@ -742,6 +742,53 @@ static int find_inode_bit(struct super_block *sb, ext4_group_t group,
- 	return 1;
- }
- 
-+static int ext4_xattr_credits_for_new_inode(struct inode *dir, mode_t mode,
-+					    bool encrypt)
-+{
-+	struct super_block *sb = dir->i_sb;
-+	int nblocks = 0;
-+#ifdef CONFIG_EXT4_FS_POSIX_ACL
-+	struct posix_acl *p = get_acl(dir, ACL_TYPE_DEFAULT);
-+
-+	if (IS_ERR(p))
-+		return PTR_ERR(p);
-+	if (p) {
-+		int acl_size = p->a_count * sizeof(ext4_acl_entry);
-+
-+		nblocks += (S_ISDIR(mode) ? 2 : 1) *
-+			__ext4_xattr_set_credits(sb, NULL /* inode */,
-+						 NULL /* block_bh */, acl_size,
-+						 true /* is_create */);
-+		posix_acl_release(p);
-+	}
-+#endif
-+
-+#ifdef CONFIG_SECURITY
-+	{
-+		int num_security_xattrs = 1;
-+
-+#ifdef CONFIG_INTEGRITY
-+		num_security_xattrs++;
-+#endif
-+		/*
-+		 * We assume that security xattrs are never more than 1k.
-+		 * In practice they are under 128 bytes.
-+		 */
-+		nblocks += num_security_xattrs *
-+			__ext4_xattr_set_credits(sb, NULL /* inode */,
-+						 NULL /* block_bh */, 1024,
-+						 true /* is_create */);
-+	}
-+#endif
-+	if (encrypt)
-+		nblocks += __ext4_xattr_set_credits(sb,
-+						    NULL /* inode */,
-+						    NULL /* block_bh */,
-+						    FSCRYPT_SET_CONTEXT_MAX_SIZE,
-+						    true /* is_create */);
-+	return nblocks;
-+}
-+
- /*
-  * There are two policies for allocating an inode.  If the new inode is
-  * a directory, then a forward search is made for a block group with both
-@@ -796,45 +843,10 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
- 	}
- 
- 	if (!handle && sbi->s_journal && !(i_flags & EXT4_EA_INODE_FL)) {
--#ifdef CONFIG_EXT4_FS_POSIX_ACL
--		struct posix_acl *p = get_acl(dir, ACL_TYPE_DEFAULT);
--
--		if (IS_ERR(p))
--			return ERR_CAST(p);
--		if (p) {
--			int acl_size = p->a_count * sizeof(ext4_acl_entry);
--
--			nblocks += (S_ISDIR(mode) ? 2 : 1) *
--				__ext4_xattr_set_credits(sb, NULL /* inode */,
--					NULL /* block_bh */, acl_size,
--					true /* is_create */);
--			posix_acl_release(p);
--		}
--#endif
--
--#ifdef CONFIG_SECURITY
--		{
--			int num_security_xattrs = 1;
--
--#ifdef CONFIG_INTEGRITY
--			num_security_xattrs++;
--#endif
--			/*
--			 * We assume that security xattrs are never
--			 * more than 1k.  In practice they are under
--			 * 128 bytes.
--			 */
--			nblocks += num_security_xattrs *
--				__ext4_xattr_set_credits(sb, NULL /* inode */,
--					NULL /* block_bh */, 1024,
--					true /* is_create */);
--		}
--#endif
--		if (encrypt)
--			nblocks += __ext4_xattr_set_credits(sb,
--					NULL /* inode */, NULL /* block_bh */,
--					FSCRYPT_SET_CONTEXT_MAX_SIZE,
--					true /* is_create */);
-+		ret2 = ext4_xattr_credits_for_new_inode(dir, mode, encrypt);
-+		if (ret2 < 0)
-+			return ERR_PTR(ret2);
-+		nblocks += ret2;
- 	}
- 
- 	ngroups = ext4_get_groups_count(sb);
--- 
-2.28.0
-
+                Ilya
