@@ -4,46 +4,46 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-14.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5927AC433E2
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6ACFC2BC11
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21F662193E
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E258208E4
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600111129;
-	bh=btTEcRUvovo9eM8ALgUeV772dDFfWUN70APNw+oWhmA=;
+	s=default; t=1600111130;
+	bh=xpVBrva7sRk+AFgfdr5dXav+n0Np8UjCF1m/n4gOajU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=wSiTRsNyz/opurILJR5h0W865u5lYfgtb3k83VEAsMExOTrB0E05t/p8ARCHR7PuX
-	 jNil+HXyMW6UB2Zh65YXdDCXN4YmIQVbmrkIgNOxvajdUsgOTbskCptqofVoOcAxGq
-	 ZNHYAb9HwpKsyBPDOFwJRS5CGUcFdcdKH6UFI4rQ=
+	b=Kfh6PHx7g0OTNoGQi+QTGFJ9/R+StmllRbUzWon60IpTGtqUZRx7hphAsL0IrLR7J
+	 /RSvVpQJQyU4mOwtUhM8dqaMbGA1b1dncSvOKSUpG7qfz2+8gmPDmIwDmeLecLp2YY
+	 l39rt6DP3Z8uYwVGuAqS3bgNOxrouHwhKFFALmXY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726093AbgINTSq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 14 Sep 2020 15:18:46 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39012 "EHLO mail.kernel.org"
+        id S1726100AbgINTSt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 14 Sep 2020 15:18:49 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38984 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726011AbgINTRW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S1726022AbgINTRW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Mon, 14 Sep 2020 15:17:22 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3303B21D91;
-        Mon, 14 Sep 2020 19:17:16 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0FFB6221E7;
+        Mon, 14 Sep 2020 19:17:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600111036;
-        bh=btTEcRUvovo9eM8ALgUeV772dDFfWUN70APNw+oWhmA=;
+        s=default; t=1600111039;
+        bh=xpVBrva7sRk+AFgfdr5dXav+n0Np8UjCF1m/n4gOajU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=BNlrjbMCLk61aB7TLVH0W3zo8vgKl2H5zNDHV1Pnt6u5Ri8kai9+wZgdmI0rNbt1F
-         kJiTL7Dj12JSEIxf2BlN/lYRaa2zEoCy4SobmRp7j9fe6nlkkUorPJ4p9J6w2lFSWt
-         hsJE2VgTXyH1fIQj42ND0N5d377E78mYj7612opA=
+        b=pbv2ey8AyBXtMjz8nIgwnxwVK+1lWIHLaklJf3eqxWgzHaGne8oXJPBMasleJ4nL9
+         2nmjR+WlzJccwhNC/eoiUkQrutGK+WdC1PPeFdhp/KEbLreafSARm09ABr2XeUVIzv
+         ifX2tR9ggCGUSJNAjR+R/OVvDL7qJycxkKNcIBXY=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v3 10/16] ceph: add routine to create context prior to RPC
-Date:   Mon, 14 Sep 2020 15:17:01 -0400
-Message-Id: <20200914191707.380444-11-jlayton@kernel.org>
+Subject: [RFC PATCH v3 15/16] ceph: add fscrypt support to ceph_fill_trace
+Date:   Mon, 14 Sep 2020 15:17:06 -0400
+Message-Id: <20200914191707.380444-16-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200914191707.380444-1-jlayton@kernel.org>
 References: <20200914191707.380444-1-jlayton@kernel.org>
@@ -54,159 +54,77 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-After pre-creating a new inode, do an fscrypt prepare on it, fetch a
-new encryption context and then marshal that into the security context
-to be sent along with the RPC.
+When we get a dentry in a trace, decrypt the name so we can properly
+instantiate the dentry.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/crypto.c | 61 ++++++++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/crypto.h |  8 +++++++
- fs/ceph/inode.c  | 10 ++++++--
- fs/ceph/super.h  |  3 +++
- 4 files changed, 80 insertions(+), 2 deletions(-)
+ fs/ceph/inode.c | 26 ++++++++++++++++++++++++--
+ 1 file changed, 24 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 879d9a0d3751..f037a4939026 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -46,3 +46,64 @@ void ceph_fscrypt_set_ops(struct super_block *sb)
- {
- 	fscrypt_set_ops(sb, &ceph_fscrypt_ops);
- }
-+
-+int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
-+				 struct ceph_acl_sec_ctx *as)
-+{
-+	int ret, ctxsize;
-+	size_t name_len;
-+	char *name;
-+	struct ceph_pagelist *pagelist = as->pagelist;
-+	bool encrypted = false;
-+
-+	ret = fscrypt_prepare_new_inode(dir, inode, &encrypted);
-+	if (ret)
-+		return ret;
-+	if (!encrypted)
-+		return 0;
-+
-+	inode->i_flags |= S_ENCRYPTED;
-+
-+	ctxsize = fscrypt_context_for_new_inode(&as->fscrypt, inode);
-+	if (ctxsize < 0)
-+		return ctxsize;
-+
-+	/* marshal it in page array */
-+	if (!pagelist) {
-+		pagelist = ceph_pagelist_alloc(GFP_KERNEL);
-+		if (!pagelist)
-+			return -ENOMEM;
-+		ret = ceph_pagelist_reserve(pagelist, PAGE_SIZE);
-+		if (ret)
-+			goto out;
-+		ceph_pagelist_encode_32(pagelist, 1);
-+	}
-+
-+	name = CEPH_XATTR_NAME_ENCRYPTION_CONTEXT;
-+	name_len = strlen(name);
-+	ret = ceph_pagelist_reserve(pagelist, 4 * 2 + name_len + ctxsize);
-+	if (ret)
-+		goto out;
-+
-+	if (as->pagelist) {
-+		BUG_ON(pagelist->length <= sizeof(__le32));
-+		if (list_is_singular(&pagelist->head)) {
-+			le32_add_cpu((__le32*)pagelist->mapped_tail, 1);
-+		} else {
-+			struct page *page = list_first_entry(&pagelist->head,
-+							     struct page, lru);
-+			void *addr = kmap_atomic(page);
-+			le32_add_cpu((__le32*)addr, 1);
-+			kunmap_atomic(addr);
-+		}
-+	}
-+
-+	ceph_pagelist_encode_32(pagelist, name_len);
-+	ceph_pagelist_append(pagelist, name, name_len);
-+	ceph_pagelist_encode_32(pagelist, ctxsize);
-+	ceph_pagelist_append(pagelist, as->fscrypt, ctxsize);
-+out:
-+	if (pagelist && !as->pagelist)
-+		ceph_pagelist_release(pagelist);
-+	return ret;
-+}
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index b5f38ee80553..c1b6ec4b2961 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -11,6 +11,8 @@
- #define	CEPH_XATTR_NAME_ENCRYPTION_CONTEXT	"encryption.ctx"
- 
- void ceph_fscrypt_set_ops(struct super_block *sb);
-+int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
-+				 struct ceph_acl_sec_ctx *as);
- 
- #else /* CONFIG_FS_ENCRYPTION */
- 
-@@ -19,6 +21,12 @@ static inline int ceph_fscrypt_set_ops(struct super_block *sb)
- 	return 0;
- }
- 
-+static inline int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
-+						struct ceph_acl_sec_ctx *as)
-+{
-+	return 0;
-+}
-+
- #endif /* CONFIG_FS_ENCRYPTION */
- 
- #endif
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index f50e7873bf6e..2fda08518312 100644
+index c3a7a9f5603d..8e9fb1311bb8 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -18,6 +18,7 @@
- #include "super.h"
- #include "mds_client.h"
- #include "cache.h"
-+#include "crypto.h"
- #include <linux/ceph/decode.h>
+@@ -1331,8 +1331,10 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME &&
+ 		    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
+ 		    !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
++			bool is_nokey = false;
+ 			struct qstr dname;
+ 			struct dentry *dn, *parent;
++			struct fscrypt_str oname = FSTR_INIT(NULL, 0);
  
- /*
-@@ -73,12 +74,17 @@ struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
- 			goto out_err;
- 	}
+ 			BUG_ON(!rinfo->head->is_target);
+ 			BUG_ON(req->r_dentry);
+@@ -1340,8 +1342,21 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			parent = d_find_any_alias(dir);
+ 			BUG_ON(!parent);
  
-+	inode->i_state = 0;
-+	inode->i_mode = *mode;
+-			dname.name = rinfo->dname;
+-			dname.len = rinfo->dname_len;
++			err = ceph_fname_alloc_buffer(dir, &oname);
++			if (err < 0) {
++				dput(parent);
++				goto done;
++			}
 +
- 	err = ceph_security_init_secctx(dentry, *mode, as_ctx);
- 	if (err < 0)
- 		goto out_err;
++			err = ceph_fname_to_usr(dir, rinfo->dname, rinfo->dname_len, NULL,
++						&oname, &is_nokey);
++			if (err < 0) {
++				dput(parent);
++				ceph_fname_free_buffer(dir, &oname);
++				goto done;
++			}
++			dname.name = oname.name;
++			dname.len = oname.len;
+ 			dname.hash = full_name_hash(parent, dname.name, dname.len);
+ 			tvino.ino = le64_to_cpu(rinfo->targeti.in->ino);
+ 			tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
+@@ -1356,9 +1371,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				     dname.len, dname.name, dn);
+ 				if (!dn) {
+ 					dput(parent);
++					ceph_fname_free_buffer(dir, &oname);
+ 					err = -ENOMEM;
+ 					goto done;
+ 				}
++				if (is_nokey) {
++					spin_lock(&dn->d_lock);
++					dn->d_flags |= DCACHE_ENCRYPTED_NAME;
++					spin_unlock(&dn->d_lock);
++				}
+ 				err = 0;
+ 			} else if (d_really_is_positive(dn) &&
+ 				   (ceph_ino(d_inode(dn)) != tvino.ino ||
+@@ -1370,6 +1391,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				dput(dn);
+ 				goto retry_lookup;
+ 			}
++			ceph_fname_free_buffer(dir, &oname);
  
--	inode->i_state = 0;
--	inode->i_mode = *mode;
-+	err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
-+	if (err)
-+		goto out_err;
-+
- 	return inode;
- out_err:
- 	iput(inode);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c05ed00035ec..5d5283552c03 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1003,6 +1003,9 @@ struct ceph_acl_sec_ctx {
- #ifdef CONFIG_CEPH_FS_SECURITY_LABEL
- 	void *sec_ctx;
- 	u32 sec_ctxlen;
-+#endif
-+#ifdef CONFIG_FS_ENCRYPTION
-+	u8	fscrypt[FSCRYPT_SET_CONTEXT_MAX_SIZE];
- #endif
- 	struct ceph_pagelist *pagelist;
- };
+ 			req->r_dentry = dn;
+ 			dput(parent);
 -- 
 2.26.2
 
