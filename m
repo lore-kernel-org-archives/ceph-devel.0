@@ -7,43 +7,43 @@ X-Spam-Status: No, score=-14.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A41B7C2BBD1
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87B33C43461
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 664D9217BA
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37098217BA
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:18:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600111100;
-	bh=XBuKIJKYWo4X96EaNBsjlN57O/qWQZFBBji2cS8s4nA=;
+	s=default; t=1600111102;
+	bh=CZSroRiDVlLsR7BnsLG2EcEV6LlW+dVi5ozQK/Yx8lg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=mtP2rLxQXBX50yW4Qkjl2nbIbvv9SeEORI5IFDbXG19XSq2pgLNIISN3L8szFa7/p
-	 habUG5LE6HpimFTeaR97++Dosb90VdzUN2JqvdEjysoXELVOCziCb7nLkiXnNwrzS9
-	 32bHizlHdQG/aCUCMsOEuOErtjTLeH/9pwOZN/Bc=
+	b=w983X6sRaZpANC5DSQcqP1xor1WQq8m9XQ5OYGcmiV34K+sLpjvFBjy/RsQH/lgDq
+	 c9TLhsUfcnF1GVIfo8D35sMsGro7g9BAOyZ3Yop8uMONKZtm/JKOLB2PZfXJSEXMgS
+	 e+TzHclCikaZKdb8JEkcjX1XNnSigKGPenvh9k64=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726046AbgINTSR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 14 Sep 2020 15:18:17 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39016 "EHLO mail.kernel.org"
+        id S1726074AbgINTR5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 14 Sep 2020 15:17:57 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39020 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726019AbgINTRW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 14 Sep 2020 15:17:22 -0400
+        id S1726031AbgINTRX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 14 Sep 2020 15:17:23 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 55756221E3;
-        Mon, 14 Sep 2020 19:17:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9BB95221E8;
+        Mon, 14 Sep 2020 19:17:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600111037;
-        bh=XBuKIJKYWo4X96EaNBsjlN57O/qWQZFBBji2cS8s4nA=;
+        s=default; t=1600111040;
+        bh=CZSroRiDVlLsR7BnsLG2EcEV6LlW+dVi5ozQK/Yx8lg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=r3OAC3hSRtQhtrlGACMNL0A9TwZwl0LY8P48rqRMzEhjjvgvGfAOght8q7n+8WV87
-         h9K8Nyk2ahOhZUuf0NB+JbWoiHKTBJEYVoXBtoDZMcQX3JobEnpRZw9SMh4DoAsM7w
-         vbwuH2szRsxIx9hGRN5RQp1+/Awepe7n53lu4diI=
+        b=bIK8DNgsv1lacrIgFOUNS9nxcB3gWaZdWHEpbF75j+ioM+d22LWoONu88GFBZ4tYj
+         rPi/RZOHvq/7c5YK+VXJAv0gG12NDbMl4h3rfOZNoNisELZ4ik/7bGcf03e8lpkcr6
+         PhcIM1gw9VgWKhCoxi/zOrnfpBqZhzHp+XIHp3zA=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v3 12/16] ceph: add encrypted fname handling to ceph_mdsc_build_path
-Date:   Mon, 14 Sep 2020 15:17:03 -0400
-Message-Id: <20200914191707.380444-13-jlayton@kernel.org>
+Subject: [RFC PATCH v3 16/16] ceph: create symlinks with encrypted and base64-encoded targets
+Date:   Mon, 14 Sep 2020 15:17:07 -0400
+Message-Id: <20200914191707.380444-17-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200914191707.380444-1-jlayton@kernel.org>
 References: <20200914191707.380444-1-jlayton@kernel.org>
@@ -54,130 +54,220 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Allow ceph_mdsc_build_path to encrypt and base64 encode the filename
-when the parent is encrypted and we're sending the path to the MDS.
+When creating symlinks in encrypted directories, encrypt and
+base64-encode the target with the new inode's key before sending to the
+MDS.
+
+When filling a symlinked inode, base64-decode it into a buffer that
+we'll keep in ci->i_symlink. When get_link is called, decrypt the buffer
+into a new one that will hang off i_link.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 70 ++++++++++++++++++++++++++++++++++----------
- 1 file changed, 54 insertions(+), 16 deletions(-)
+ fs/ceph/dir.c   | 32 +++++++++++++++++++---
+ fs/ceph/inode.c | 71 ++++++++++++++++++++++++++++++++++++++-----------
+ fs/ceph/super.h |  2 ++
+ 3 files changed, 86 insertions(+), 19 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index e3dc061252d4..7eb504170981 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2314,18 +2314,27 @@ static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
- 	return mdsc->oldest_tid;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index e9fdb9c07320..65d82ab239b2 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -928,6 +928,7 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(dir->i_sb);
+ 	struct ceph_mds_request *req;
+ 	struct ceph_acl_sec_ctx as_ctx = {};
++	struct fscrypt_str osd_link = FSTR_INIT(NULL, 0);
+ 	umode_t mode = S_IFLNK | 0777;
+ 	int err;
+ 
+@@ -953,11 +954,33 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 		goto out_req;
+ 	}
+ 
+-	req->r_path2 = kstrdup(dest, GFP_KERNEL);
+-	if (!req->r_path2) {
+-		err = -ENOMEM;
+-		goto out_req;
++	if (IS_ENCRYPTED(req->r_new_inode)) {
++		int len = strlen(dest);
++
++		err = fscrypt_prepare_symlink(dir, dest, len, PATH_MAX, &osd_link);
++		if (err)
++			goto out_req;
++
++		err = fscrypt_encrypt_symlink(req->r_new_inode, dest, len, &osd_link);
++		if (err)
++			goto out_req;
++
++		req->r_path2 = kmalloc(FSCRYPT_BASE64_CHARS(osd_link.len) + 1, GFP_KERNEL);
++		if (!req->r_path2) {
++			err = -ENOMEM;
++			goto out_req;
++		}
++
++		len = fscrypt_base64_encode(osd_link.name, osd_link.len, req->r_path2);
++		req->r_path2[len] = '\0';
++	} else {
++		req->r_path2 = kstrdup(dest, GFP_KERNEL);
++		if (!req->r_path2) {
++			err = -ENOMEM;
++			goto out_req;
++		}
+ 	}
++
+ 	req->r_parent = dir;
+ 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_dentry = dget(dentry);
+@@ -977,6 +1000,7 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	if (err)
+ 		d_drop(dentry);
+ 	ceph_release_acl_sec_ctx(&as_ctx);
++	fscrypt_fname_free_buffer(&osd_link);
+ 	return err;
  }
  
--/*
-- * Build a dentry's path.  Allocate on heap; caller must kfree.  Based
-- * on build_path_from_dentry in fs/cifs/dir.c.
-+/**
-+ * ceph_mdsc_build_path - build a path string to a given dentry
-+ * @dentry: dentry to which path should be built
-+ * @plen: returned length of string
-+ * @pbase: returned base inode number
-+ * @for_wire: is this path going to be sent to the MDS?
-+ *
-+ * Build a string that represents the path to the dentry. This is mostly called
-+ * for two different purposes:
-+ *
-+ * 1) we need to build a path string to send to the MDS (for_wire == true)
-+ * 2) we need a path string for local presentation (e.g. debugfs) (for_wire == false)
-  *
-- * If @stop_on_nosnap, generate path relative to the first non-snapped
-- * inode.
-+ * The path is built in reverse, starting with the dentry. Walk back up toward
-+ * the root, building the path until the first non-snapped inode is reached (for_wire)
-+ * or the root inode is reached (!for_wire).
-  *
-  * Encode hidden .snap dirs as a double /, i.e.
-  *   foo/.snap/bar -> foo//bar
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 8e9fb1311bb8..4ac267cc9085 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -33,8 +33,6 @@
+  * (typically because they are in the message handler path).
   */
--char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
--			   int stop_on_nosnap)
-+char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase, int for_wire)
- {
- 	struct dentry *cur;
- 	struct inode *inode;
-@@ -2347,30 +2356,59 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 	seq = read_seqbegin(&rename_lock);
- 	cur = dget(dentry);
- 	for (;;) {
--		struct dentry *temp;
-+		struct dentry *parent;
  
- 		spin_lock(&cur->d_lock);
- 		inode = d_inode(cur);
-+		parent = cur->d_parent;
- 		if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
- 			dout("build_path path+%d: %p SNAPDIR\n",
- 			     pos, cur);
--		} else if (stop_on_nosnap && inode && dentry != cur &&
--			   ceph_snap(inode) == CEPH_NOSNAP) {
-+			dget(parent);
-+			spin_unlock(&cur->d_lock);
-+		} else if (for_wire && inode && dentry != cur && ceph_snap(inode) == CEPH_NOSNAP) {
- 			spin_unlock(&cur->d_lock);
- 			pos++; /* get rid of any prepended '/' */
- 			break;
--		} else {
-+		} else if (!for_wire || !IS_ENCRYPTED(d_inode(parent))) {
- 			pos -= cur->d_name.len;
- 			if (pos < 0) {
- 				spin_unlock(&cur->d_lock);
- 				break;
- 			}
- 			memcpy(path + pos, cur->d_name.name, cur->d_name.len);
-+			dget(parent);
-+			spin_unlock(&cur->d_lock);
-+		} else {
-+			int err;
-+			struct fscrypt_name fname = { };
-+			int len;
-+			char buf[FSCRYPT_BASE64_CHARS(NAME_MAX)];
+-static const struct inode_operations ceph_symlink_iops;
+-
+ static void ceph_inode_work(struct work_struct *work);
+ 
+ /*
+@@ -593,6 +591,7 @@ void ceph_free_inode(struct inode *inode)
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 
+ 	kfree(ci->i_symlink);
++	fscrypt_free_inode(inode);
+ 	kmem_cache_free(ceph_inode_cachep, ci);
+ }
+ 
+@@ -996,26 +995,39 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 		inode->i_fop = &ceph_file_fops;
+ 		break;
+ 	case S_IFLNK:
+-		inode->i_op = &ceph_symlink_iops;
+ 		if (!ci->i_symlink) {
+ 			u32 symlen = iinfo->symlink_len;
+ 			char *sym;
+ 
+ 			spin_unlock(&ci->i_ceph_lock);
+ 
+-			if (symlen != i_size_read(inode)) {
+-				pr_err("%s %llx.%llx BAD symlink "
+-					"size %lld\n", __func__,
+-					ceph_vinop(inode),
+-					i_size_read(inode));
++			if (IS_ENCRYPTED(inode)) {
++				/* Do base64 decode so that we get the right size (maybe?) */
++				err = -ENOMEM;
++				sym = kmalloc(symlen + 1, GFP_NOFS);
++				if (!sym)
++					goto out;
 +
-+			dget(parent);
-+			spin_unlock(&cur->d_lock);
-+
-+			err = fscrypt_setup_filename(d_inode(parent), &cur->d_name, 1, &fname);
-+			if (err) {
-+				dput(parent);
-+				dput(cur);
-+				return ERR_PTR(err);
++				symlen = fscrypt_base64_decode(iinfo->symlink, symlen, sym);
++				/*
++				 * i_size as reported by the MDS may be wrong, due to base64
++				 * inflation and padding. Fix it up here.
++				 */
+ 				i_size_write(inode, symlen);
+ 				inode->i_blocks = calc_inode_blocks(symlen);
+-			}
++			} else {
++				if (symlen != i_size_read(inode)) {
++					pr_err("%s %llx.%llx BAD symlink size %lld\n",
++						__func__, ceph_vinop(inode), i_size_read(inode));
++					i_size_write(inode, symlen);
++					inode->i_blocks = calc_inode_blocks(symlen);
++				}
+ 
+-			err = -ENOMEM;
+-			sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
+-			if (!sym)
+-				goto out;
++				err = -ENOMEM;
++				sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
++				if (!sym)
++					goto out;
 +			}
-+
-+			/* base64 encode the encrypted name */
-+			len = fscrypt_base64_encode(fname.disk_name.name, fname.disk_name.len, buf);
-+			pos -= len;
-+			if (pos < 0) {
-+				dput(parent);
-+				fscrypt_free_filename(&fname);
-+				break;
-+			}
-+			memcpy(path + pos, buf, len);
-+			dout("non-ciphertext name = %.*s\n", len, buf);
-+			fscrypt_free_filename(&fname);
+ 
+ 			spin_lock(&ci->i_ceph_lock);
+ 			if (!ci->i_symlink)
+@@ -1023,7 +1035,18 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 			else
+ 				kfree(sym); /* lost a race */
  		}
--		temp = cur;
--		cur = dget(temp->d_parent);
--		spin_unlock(&temp->d_lock);
--		dput(temp);
-+		dput(cur);
-+		cur = parent;
+-		inode->i_link = ci->i_symlink;
++
++		if (IS_ENCRYPTED(inode)) {
++			/*
++			 * Encrypted symlinks need to be decrypted before we can
++			 * cache their targets in i_link. Leave it blank for now.
++			 */
++			inode->i_link = NULL;
++			inode->i_op = &ceph_encrypted_symlink_iops;
++		} else {
++			inode->i_link = ci->i_symlink;
++			inode->i_op = &ceph_symlink_iops;
++		}
+ 		break;
+ 	case S_IFDIR:
+ 		inode->i_op = &ceph_dir_iops;
+@@ -2124,16 +2147,34 @@ static void ceph_inode_work(struct work_struct *work)
+ 	iput(inode);
+ }
  
- 		/* Are we at the root? */
- 		if (IS_ROOT(cur))
-@@ -2415,7 +2453,7 @@ static int build_dentry_path(struct dentry *dentry, struct inode *dir,
- 	rcu_read_lock();
- 	if (!dir)
- 		dir = d_inode_rcu(dentry->d_parent);
--	if (dir && parent_locked && ceph_snap(dir) == CEPH_NOSNAP) {
-+	if (dir && parent_locked && ceph_snap(dir) == CEPH_NOSNAP && !IS_ENCRYPTED(dir)) {
- 		*pino = ceph_ino(dir);
- 		rcu_read_unlock();
- 		*ppath = dentry->d_name.name;
++static const char *ceph_encrypted_get_link(struct dentry *dentry, struct inode *inode,
++					   struct delayed_call *done)
++{
++	struct ceph_inode_info *ci = ceph_inode(inode);
++
++	if (!dentry)
++		return ERR_PTR(-ECHILD);
++
++	return fscrypt_get_symlink(inode, ci->i_symlink, ksize(ci->i_symlink), done);
++}
++
+ /*
+  * symlinks
+  */
+-static const struct inode_operations ceph_symlink_iops = {
++const struct inode_operations ceph_symlink_iops = {
+ 	.get_link = simple_get_link,
+ 	.setattr = ceph_setattr,
+ 	.getattr = ceph_getattr,
+ 	.listxattr = ceph_listxattr,
+ };
+ 
++const struct inode_operations ceph_encrypted_symlink_iops = {
++	.get_link = ceph_encrypted_get_link,
++	.setattr = ceph_setattr,
++	.getattr = ceph_getattr,
++	.listxattr = ceph_listxattr,
++};
++
+ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ {
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 5d5283552c03..d58296bd8235 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -939,6 +939,8 @@ struct ceph_mds_reply_dirfrag;
+ struct ceph_acl_sec_ctx;
+ 
+ extern const struct inode_operations ceph_file_iops;
++extern const struct inode_operations ceph_symlink_iops;
++extern const struct inode_operations ceph_encrypted_symlink_iops;
+ 
+ extern struct inode *ceph_alloc_inode(struct super_block *sb);
+ extern void ceph_evict_inode(struct inode *inode);
 -- 
 2.26.2
 
