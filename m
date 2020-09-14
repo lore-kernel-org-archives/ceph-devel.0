@@ -2,118 +2,86 @@ Return-Path: <SRS0=7icB=CX=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-14.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 315D3C433E2
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 18:46:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 839EFC43461
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:17:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DCB79208E4
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 18:46:00 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Gd1KC6Mi"
+	by mail.kernel.org (Postfix) with ESMTP id 4B110208E4
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Sep 2020 19:17:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1600111062;
+	bh=ctqcwP3ioEky4uhXdhIOKc7o4iFce41kFOkOTcCjx44=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=FFVa9ezHhljqUEqGUmL7H2putYyFxesgexk7zAbs3ZaACKzeSW4kU7HF/Mid2tDOl
+	 6OgGG+prAnHLB1zaRGXsvCU0oHMgka3/dwOR0LuFXEXRUPDLcWtAGcaZra8H224vSU
+	 jm+k99fsLZmHxO+LE2bgOLHAmg2K3tu3nFBYPZ4o=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725953AbgINSp5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 14 Sep 2020 14:45:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49446 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726020AbgINSph (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Sep 2020 14:45:37 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66971C06174A
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2020 11:45:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=Wslww/E2BpMntIv+oixbMkhUhTyO0tkYpL+xlblkrEU=; b=Gd1KC6MipF1SvQzckpI0flSo8q
-        sJqY6eWpWlwRNicNX5q8X0JDUUh1cx8cuKudNTKgc54Ta108bsycZSmf12E0RwTWhWAaC08XJuChN
-        k36pdTO77HkisOb8eSfqWQzACmQUwpQdg4gZfuYoOQaoEmZeevuW80ekRRfL0vlEtR7PrSNb8m65T
-        mpt27bdtMBz+/hz9jdNZFTsjiknvB378X0Slgc6mhVzcF13nNssAgJb2SydAejKGFJLmsaSs3iGTk
-        NBpeSBU6h1Cn86CqShftEirg2486QtCrES+e2mVugdQSY/qkhD0BioYZXwx+wh70tOzCY0tg6nb0B
-        3hmeHPlw==;
-Received: from willy by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kHtTn-0001do-0z; Mon, 14 Sep 2020 18:45:31 +0000
-Date:   Mon, 14 Sep 2020 19:45:30 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org
-Subject: Re: [PATCH] ceph: have ceph_writepages_start call
- pagevec_lookup_range_tag
-Message-ID: <20200914184530.GV6583@casper.infradead.org>
-References: <20200914183452.378189-1-jlayton@kernel.org>
+        id S1726044AbgINTRi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 14 Sep 2020 15:17:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38946 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725953AbgINTRL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 14 Sep 2020 15:17:11 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 026B5217BA;
+        Mon, 14 Sep 2020 19:17:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1600111031;
+        bh=ctqcwP3ioEky4uhXdhIOKc7o4iFce41kFOkOTcCjx44=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=ii+vO0PvfXW5MLyv9hHOjNg7fgOxZyCatcjvL6iQ/ZAti5W1JeWRh96TX4YDTaP8Y
+         wN5oABh9T/USFtGrAuaxs1CZKXN9sbRllH8cTm2pPzN4+LcCtRvgdI+kAZLWfJcCXk
+         aHB7/UG9zMUr0s24QaRpg/+ejKRMdTatAimo5jBQ=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org
+Subject: [RFC PATCH v3 01/16] vfs: export new_inode_pseudo
+Date:   Mon, 14 Sep 2020 15:16:52 -0400
+Message-Id: <20200914191707.380444-2-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200914191707.380444-1-jlayton@kernel.org>
+References: <20200914191707.380444-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200914183452.378189-1-jlayton@kernel.org>
+Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 02:34:52PM -0400, Jeff Layton wrote:
-> Ceph is also the only caller of pagevec_lookup_range_nr_tag(), so
-> changing this code to use pagevec_lookup_range_tag() should allow us to
-> eliminate that call as well. That may mean that we sometimes find more
-> pages than are needed, but the extra references will just get put at the
-> end regardless.
+Ceph needs to be able to allocate inodes ahead of a create that might
+involve a fscrypt-encrypted inode. new_inode() almost fits the bill,
+but it puts the inode on the sb->s_inodes list and when we go to hash
+it, that might be done again.
 
-That was the part I wasn't clear about!
+We could work around that by setting I_CREATING on the new inode, but
+that causes ilookup5 to return -ESTALE if something tries to find it
+before I_NEW is cleared. To work around all of this, just use
+new_inode_pseudo which doesn't add it to the list.
 
-So, let's suppose max_pages is 10 and we get 15 pages back.
+Cc: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/inode.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-We'll run the
+diff --git a/fs/inode.c b/fs/inode.c
+index 72c4c347afb7..61554c2477ab 100644
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@ -935,6 +935,7 @@ struct inode *new_inode_pseudo(struct super_block *sb)
+ 	}
+ 	return inode;
+ }
++EXPORT_SYMBOL(new_inode_pseudo);
+ 
+ /**
+  *	new_inode 	- obtain an inode
+-- 
+2.26.2
 
-for (i = 0; i < pvec_pages && locked_pages < max_pages; i++) {
-}
-loop ten times, then hit:
-
-if (i) {
-	for (j = 0; j < pvec_pages; j++) {
-		if (!pvec.pages[j])
-			continue;
-OK, we do that ten times, then
-		if (n < j)
-			pvec.pages[n] = pvec.pages[j];
-so we now have five pages clustered at the bottom of pvec
-                        pvec.nr = n;
-... then we do the new_request: stanza ...
-ah, and then we call pagevec_release(&pvec);
-and everything is good!
-
-Excellent.  I was overwhelmed by the amount of code in this function.
-Glad to see the patch was so simple in the end.
-
-Reviewed-by: Matthew Wilcox (Oracle) <willy@infradead.org>
-
-> Reported-by: Matthew Wilcox <willy@infradead.org>
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  fs/ceph/addr.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> I'm still testing this, but it looks good so far. If it's OK, we'll get
-> this in for v5.10, and then I'll send a patch to remove
-> pagevec_lookup_range_nr_tag.
-> 
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 6ea761c84494..b03dbaa9d345 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -962,9 +962,8 @@ static int ceph_writepages_start(struct address_space *mapping,
->  		max_pages = wsize >> PAGE_SHIFT;
->  
->  get_more_pages:
-> -		pvec_pages = pagevec_lookup_range_nr_tag(&pvec, mapping, &index,
-> -						end, PAGECACHE_TAG_DIRTY,
-> -						max_pages - locked_pages);
-> +		pvec_pages = pagevec_lookup_range_tag(&pvec, mapping, &index,
-> +						end, PAGECACHE_TAG_DIRTY);
->  		dout("pagevec_lookup_range_tag got %d\n", pvec_pages);
->  		if (!pvec_pages && !locked_pages)
->  			break;
-> -- 
-> 2.26.2
-> 
