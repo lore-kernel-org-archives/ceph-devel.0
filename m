@@ -7,43 +7,43 @@ X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84C6EC433E2
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:40:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F7DDC433E2
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:40:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 294F020738
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:40:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C41B2206DC
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:40:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600278014;
-	bh=mCPIaWO4Vn8ZYNreZNFnuzE++GAUWvdp8VCShJCibPs=;
+	s=default; t=1600278039;
+	bh=LTIDt2NrL2coWN5soi5Nvk8Ep0rUn7wR8++EYLmk6HQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=x4Kr9ThfciBA4n4KTi4OSLgHu1DIHT1Fa5h8CUUK/5qoh9aj8v+mU5qUC243mP1WR
-	 vMdVCEaGnwWQ7pWI+2GVC6fS7WMWbqBY/95ThfVP6/znJaZ19Aod9/mbPfvYSWycAL
-	 HXT99QBLGAyEPk00kohkKLqTj522zzziuAO1yRoM=
+	b=pyVO7+wcRNPjJR7+qv2jt+NljsAGQiRPq19KkEe+DOf6EVJzA8bUT00VPHCh2S9Kk
+	 f9o2hNeUf82H2blaYT/5MzHqa6+Rb3P5o+oNSjIjwQGiVkECvBRHXxTFWU/sCXmFSG
+	 BseS01PADHlHyDvgtoG69bsw8mMPLbn67MloS9cw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727300AbgIPRkI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 16 Sep 2020 13:40:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52240 "EHLO mail.kernel.org"
+        id S1727306AbgIPRkT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 16 Sep 2020 13:40:19 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53348 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727289AbgIPRi6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Sep 2020 13:38:58 -0400
+        id S1727295AbgIPRjZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 16 Sep 2020 13:39:25 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1AAE920738;
-        Wed, 16 Sep 2020 17:38:58 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id CD41C22207;
+        Wed, 16 Sep 2020 17:38:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600277938;
-        bh=mCPIaWO4Vn8ZYNreZNFnuzE++GAUWvdp8VCShJCibPs=;
+        s=default; t=1600277940;
+        bh=LTIDt2NrL2coWN5soi5Nvk8Ep0rUn7wR8++EYLmk6HQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ic8tQC6vkzKLh2T8BPWWSSUMH2nDE3e2yRr5jpSSelLK4bXMCqFMSr6ddolbHaYF+
-         DD5s3Bm4gI3S/G0wBXcu8mzaWv2wYW305zjlzbq0vGuC59bKUfhd+xvdLIG5IiJQ1Z
-         NfNPQSJaZfI3GB0QR4XHb9DrPKAGcilyPYIYM4TE=
+        b=vHu276ovEaBbAg0gAnYQU9dEy2JjidWw/JQmr/KnP1oshIbOloxtZVFs5fqomh6/z
+         Zimf/WiP4DZfMGj6phlxAbNRRvWzW7vQEbHV08ALyhbDo9jB2u7aUx10LFs/d5ETEh
+         GNS92ZEfH8jgQ4yhD9Uw+7RdyrucRLiHpK4RqlXY=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     ukernel@gmail.com, idryomov@gmail.com
-Subject: [PATCH 2/5] ceph: don't call ceph_update_writeable_page from page_mkwrite
-Date:   Wed, 16 Sep 2020 13:38:51 -0400
-Message-Id: <20200916173854.330265-3-jlayton@kernel.org>
+Subject: [PATCH 5/5] ceph: fold ceph_update_writeable_page into ceph_write_begin
+Date:   Wed, 16 Sep 2020 13:38:54 -0400
+Message-Id: <20200916173854.330265-6-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200916173854.330265-1-jlayton@kernel.org>
 References: <20200916173854.330265-1-jlayton@kernel.org>
@@ -54,57 +54,194 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-page_mkwrite should only be called with Uptodate pages, so we should
-only need to flush incompatible snap contexts.
+...and reorganize the loop for better clarity.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c | 21 ++++++++++++++++++---
- 1 file changed, 18 insertions(+), 3 deletions(-)
+ fs/ceph/addr.c | 148 ++++++++++++++++++++++---------------------------
+ 1 file changed, 65 insertions(+), 83 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index c8e98fee8164..02e286c30d44 100644
+index a6c54cfc3fea..89c4d8a9a5eb 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -1691,6 +1691,8 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 	inode_inc_iversion_raw(inode);
+@@ -1251,6 +1251,8 @@ static int context_is_writeable_or_written(struct inode *inode,
+  * @inode: inode associated with page
+  * @page: page being dirtied
+  *
++ * We are only allowed to write into/dirty the page if the page is
++ * clean, or already dirty within the same snap context.
+  * Returns NULL on success, negative error code on error, and a snapc ref that should be
+  * waited on otherwise.
+  */
+@@ -1307,104 +1309,84 @@ ceph_find_incompatible(struct inode *inode, struct page *page)
+ /*
+  * We are only allowed to write into/dirty the page if the page is
+  * clean, or already dirty within the same snap context.
+- *
+- * called with page locked.
+- * return success with page locked,
+- * or any failure (incl -EAGAIN) with page unlocked.
+  */
+-static int ceph_update_writeable_page(struct file *file,
+-			    loff_t pos, unsigned len,
+-			    struct page *page)
++static int ceph_write_begin(struct file *file, struct address_space *mapping,
++			    loff_t pos, unsigned len, unsigned flags,
++			    struct page **pagep, void **fsdata)
+ {
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_snap_context *snapc;
+-	loff_t page_off = pos & PAGE_MASK;
++	struct page *page = NULL;
++	pgoff_t index = pos >> PAGE_SHIFT;
+ 	int pos_in_page = pos & ~PAGE_MASK;
+-	int end_in_page = pos_in_page + len;
+-	loff_t i_size;
+-	int r;
++	int r = 0;
  
- 	do {
-+		struct ceph_snap_context *snapc;
+-retry_locked:
+-	snapc = ceph_find_incompatible(inode, page);
+-	if (snapc) {
+-		if (IS_ERR(snapc)) {
+-			r = PTR_ERR(snapc);
+-			goto fail_unlock;
++	dout("write_begin file %p inode %p page %p %d~%d\n", file, inode, page, (int)pos, (int)len);
 +
- 		lock_page(page);
- 
- 		if (page_mkwrite_check_truncate(page, inode) < 0) {
-@@ -1699,13 +1701,26 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 			break;
- 		}
- 
--		err = ceph_update_writeable_page(vma->vm_file, off, len, page);
--		if (err >= 0) {
-+		snapc = ceph_find_incompatible(inode, page);
-+		if (!snapc) {
- 			/* success.  we'll keep the page locked. */
- 			set_page_dirty(page);
- 			ret = VM_FAULT_LOCKED;
++	for (;;) {
++		page = grab_cache_page_write_begin(mapping, index, 0);
++		if (!page) {
++			r = -ENOMEM;
 +			break;
  		}
--	} while (err == -EAGAIN);
-+
-+		unlock_page(page);
-+
-+		if (IS_ERR(snapc)) {
-+			ret = VM_FAULT_SIGBUS;
+-		unlock_page(page);
+-		ceph_queue_writeback(inode);
+-		r = wait_event_killable(ci->i_cap_wq,
+-					context_is_writeable_or_written(inode, snapc));
+-		ceph_put_snap_context(snapc);
+-		return -EAGAIN;
+-	}
+ 
+-	if (PageUptodate(page)) {
+-		dout(" page %p already uptodate\n", page);
+-		return 0;
+-	}
++		snapc = ceph_find_incompatible(inode, page);
++		if (snapc) {
++			if (IS_ERR(snapc)) {
++				r = PTR_ERR(snapc);
++				break;
++			}
++			unlock_page(page);
++			ceph_queue_writeback(inode);
++			r = wait_event_killable(ci->i_cap_wq,
++						context_is_writeable_or_written(inode, snapc));
++			ceph_put_snap_context(snapc);
++			put_page(page);
++			page = NULL;
++			if (r != 0)
++				break;
++			continue;
++		}
+ 
+-	/* full page? */
+-	if (pos_in_page == 0 && len == PAGE_SIZE)
+-		return 0;
++		if (PageUptodate(page)) {
++			dout(" page %p already uptodate\n", page);
 +			break;
 +		}
-+
-+		ceph_queue_writeback(inode);
-+		err = wait_event_killable(ci->i_cap_wq,
-+				context_is_writeable_or_written(inode, snapc));
-+		ceph_put_snap_context(snapc);
-+	} while (err == 0);
  
- 	if (ret == VM_FAULT_LOCKED ||
- 	    ci->i_inline_version != CEPH_INLINE_NONE) {
+-	/* past end of file? */
+-	i_size = i_size_read(inode);
+-
+-	if (page_off >= i_size ||
+-	    (pos_in_page == 0 && (pos+len) >= i_size &&
+-	     end_in_page - pos_in_page != PAGE_SIZE)) {
+-		dout(" zeroing %p 0 - %d and %d - %d\n",
+-		     page, pos_in_page, end_in_page, (int)PAGE_SIZE);
+-		zero_user_segments(page,
+-				   0, pos_in_page,
+-				   end_in_page, PAGE_SIZE);
+-		return 0;
+-	}
++		/*
++		 * In some cases we don't need to read at all:
++		 * - full page write
++		 * - write that lies completely beyond EOF
++		 * - write that covers the the page from start to EOF or beyond it
++		 */
++		if ((pos_in_page == 0 && len == PAGE_SIZE) ||
++		    (pos >= i_size_read(inode)) ||
++		    (pos_in_page == 0 && (pos + len) >= i_size_read(inode))) {
++			zero_user_segments(page, 0, pos_in_page,
++					   pos_in_page + len, PAGE_SIZE);
++			break;
++		}
+ 
+-	/* we need to read it. */
+-	r = ceph_do_readpage(file, page);
+-	if (r < 0) {
+-		if (r == -EINPROGRESS)
+-			return -EAGAIN;
+-		goto fail_unlock;
++		/*
++		 * We need to read it. If we get back -EINPROGRESS, then the page was
++		 * handed off to fscache and it will be unlocked when the read completes.
++		 * Refind the page in that case so we can reacquire the page lock. Otherwise
++		 * we got a hard error or the read was completed synchronously.
++		 */
++		r = ceph_do_readpage(file, page);
++		if (r != -EINPROGRESS)
++			break;
+ 	}
+-	goto retry_locked;
+-fail_unlock:
+-	unlock_page(page);
+-	return r;
+-}
+ 
+-/*
+- * We are only allowed to write into/dirty the page if the page is
+- * clean, or already dirty within the same snap context.
+- */
+-static int ceph_write_begin(struct file *file, struct address_space *mapping,
+-			    loff_t pos, unsigned len, unsigned flags,
+-			    struct page **pagep, void **fsdata)
+-{
+-	struct inode *inode = file_inode(file);
+-	struct page *page;
+-	pgoff_t index = pos >> PAGE_SHIFT;
+-	int r;
+-
+-	do {
+-		/* get a page */
+-		page = grab_cache_page_write_begin(mapping, index, 0);
+-		if (!page)
+-			return -ENOMEM;
+-
+-		dout("write_begin file %p inode %p page %p %d~%d\n", file,
+-		     inode, page, (int)pos, (int)len);
+-
+-		r = ceph_update_writeable_page(file, pos, len, page);
+-		if (r < 0)
++	if (r < 0) {
++		if (page) {
++			unlock_page(page);
+ 			put_page(page);
+-		else
+-			*pagep = page;
+-	} while (r == -EAGAIN);
+-
++		}
++	} else {
++		*pagep = page;
++	}
+ 	return r;
+ }
+ 
 -- 
 2.26.2
 
