@@ -2,246 +2,167 @@ Return-Path: <SRS0=hc/W=CZ=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F7DDC433E2
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:40:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAA9FC433E2
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:52:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C41B2206DC
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:40:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8D7312067C
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:52:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600278039;
-	bh=LTIDt2NrL2coWN5soi5Nvk8Ep0rUn7wR8++EYLmk6HQ=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=pyVO7+wcRNPjJR7+qv2jt+NljsAGQiRPq19KkEe+DOf6EVJzA8bUT00VPHCh2S9Kk
-	 f9o2hNeUf82H2blaYT/5MzHqa6+Rb3P5o+oNSjIjwQGiVkECvBRHXxTFWU/sCXmFSG
-	 BseS01PADHlHyDvgtoG69bsw8mMPLbn67MloS9cw=
+	s=default; t=1600278741;
+	bh=ViIzrXI8juxz4GpUaQgw0altL7fO7zi+9yar4pkYCNE=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
+	b=rMxpTcdd+fGozKYJfOWgX3DS4zEeo3E+2AR6CJF3GVAijqE+1Li1mtVQEm4PPb+sZ
+	 IvBvAr3XDn0+FcwLLsiZs91HR1gmaU0xuw3JCwlg9++FmNq+gD5y/MAatV46FdRrYc
+	 So/CoXKegNOm23TXAdZQ2eI+5QFDXOraeLUlz2C8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727306AbgIPRkT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 16 Sep 2020 13:40:19 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53348 "EHLO mail.kernel.org"
+        id S1727360AbgIPRwT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 16 Sep 2020 13:52:19 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42044 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727295AbgIPRjZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Sep 2020 13:39:25 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        id S1727554AbgIPRvX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 16 Sep 2020 13:51:23 -0400
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CD41C22207;
-        Wed, 16 Sep 2020 17:38:59 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1ACC922227;
+        Wed, 16 Sep 2020 12:49:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600277940;
-        bh=LTIDt2NrL2coWN5soi5Nvk8Ep0rUn7wR8++EYLmk6HQ=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=vHu276ovEaBbAg0gAnYQU9dEy2JjidWw/JQmr/KnP1oshIbOloxtZVFs5fqomh6/z
-         Zimf/WiP4DZfMGj6phlxAbNRRvWzW7vQEbHV08ALyhbDo9jB2u7aUx10LFs/d5ETEh
-         GNS92ZEfH8jgQ4yhD9Uw+7RdyrucRLiHpK4RqlXY=
+        s=default; t=1600260588;
+        bh=ViIzrXI8juxz4GpUaQgw0altL7fO7zi+9yar4pkYCNE=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=rWxficUsCHLeQ3JhySbZbqNY9IEiAlEoMoDwazd3cGJzxLQaXogCAswAm3McrBInm
+         JK4ptxbaoSNprHqI3UsP+idhj/J5BVPhgBdOH9/DRgLfbJvbiwVISiqEMNt6J8sTiV
+         1hzG0mv2hRi3YAHbsMqt8DXxU6dTOTSCvOS0+SH8=
+Message-ID: <611ba5851c4d528dd06e21348ec31d0970069431.camel@kernel.org>
+Subject: Re: [RFC PATCH v3 08/16] ceph: implement -o test_dummy_encryption
+ mount option
 From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     ukernel@gmail.com, idryomov@gmail.com
-Subject: [PATCH 5/5] ceph: fold ceph_update_writeable_page into ceph_write_begin
-Date:   Wed, 16 Sep 2020 13:38:54 -0400
-Message-Id: <20200916173854.330265-6-jlayton@kernel.org>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200916173854.330265-1-jlayton@kernel.org>
-References: <20200916173854.330265-1-jlayton@kernel.org>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org
+Date:   Wed, 16 Sep 2020 08:49:47 -0400
+In-Reply-To: <20200915012307.GH899@sol.localdomain>
+References: <20200914191707.380444-1-jlayton@kernel.org>
+         <20200914191707.380444-9-jlayton@kernel.org>
+         <20200915012307.GH899@sol.localdomain>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-...and reorganize the loop for better clarity.
+On Mon, 2020-09-14 at 18:23 -0700, Eric Biggers wrote:
+> On Mon, Sep 14, 2020 at 03:16:59PM -0400, Jeff Layton wrote:
+> > +	case Opt_test_dummy_encryption:
+> > +		kfree(fsopt->test_dummy_encryption);
+> > +#ifdef CONFIG_FS_ENCRYPTION
+> > +		fsopt->test_dummy_encryption = param->string;
+> > +		param->string = NULL;
+> > +		fsopt->flags |= CEPH_MOUNT_OPT_TEST_DUMMY_ENC;
+> > +#else
+> > +		warnfc(fc, "FS encryption not supported: test_dummy_encryption mount option ignored");
+> > +#endif
+> 
+> Seems that the kfree() should go in the CONFIG_FS_ENCRYPTION=y block.
+> 
+> Also, is there much reason to have the CEPH_MOUNT_OPT_TEST_DUMMY_ENC flag
+> instead of just checking fsopt->test_dummy_encryption != NULL?
+> 
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/addr.c | 148 ++++++++++++++++++++++---------------------------
- 1 file changed, 65 insertions(+), 83 deletions(-)
+Yes. That distinguishes between the case where someone has used
+-o test_dummy_encryption and -o test_dummy_encryption=v2.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index a6c54cfc3fea..89c4d8a9a5eb 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1251,6 +1251,8 @@ static int context_is_writeable_or_written(struct inode *inode,
-  * @inode: inode associated with page
-  * @page: page being dirtied
-  *
-+ * We are only allowed to write into/dirty the page if the page is
-+ * clean, or already dirty within the same snap context.
-  * Returns NULL on success, negative error code on error, and a snapc ref that should be
-  * waited on otherwise.
-  */
-@@ -1307,104 +1309,84 @@ ceph_find_incompatible(struct inode *inode, struct page *page)
- /*
-  * We are only allowed to write into/dirty the page if the page is
-  * clean, or already dirty within the same snap context.
-- *
-- * called with page locked.
-- * return success with page locked,
-- * or any failure (incl -EAGAIN) with page unlocked.
-  */
--static int ceph_update_writeable_page(struct file *file,
--			    loff_t pos, unsigned len,
--			    struct page *page)
-+static int ceph_write_begin(struct file *file, struct address_space *mapping,
-+			    loff_t pos, unsigned len, unsigned flags,
-+			    struct page **pagep, void **fsdata)
- {
- 	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_snap_context *snapc;
--	loff_t page_off = pos & PAGE_MASK;
-+	struct page *page = NULL;
-+	pgoff_t index = pos >> PAGE_SHIFT;
- 	int pos_in_page = pos & ~PAGE_MASK;
--	int end_in_page = pos_in_page + len;
--	loff_t i_size;
--	int r;
-+	int r = 0;
- 
--retry_locked:
--	snapc = ceph_find_incompatible(inode, page);
--	if (snapc) {
--		if (IS_ERR(snapc)) {
--			r = PTR_ERR(snapc);
--			goto fail_unlock;
-+	dout("write_begin file %p inode %p page %p %d~%d\n", file, inode, page, (int)pos, (int)len);
-+
-+	for (;;) {
-+		page = grab_cache_page_write_begin(mapping, index, 0);
-+		if (!page) {
-+			r = -ENOMEM;
-+			break;
- 		}
--		unlock_page(page);
--		ceph_queue_writeback(inode);
--		r = wait_event_killable(ci->i_cap_wq,
--					context_is_writeable_or_written(inode, snapc));
--		ceph_put_snap_context(snapc);
--		return -EAGAIN;
--	}
- 
--	if (PageUptodate(page)) {
--		dout(" page %p already uptodate\n", page);
--		return 0;
--	}
-+		snapc = ceph_find_incompatible(inode, page);
-+		if (snapc) {
-+			if (IS_ERR(snapc)) {
-+				r = PTR_ERR(snapc);
-+				break;
-+			}
-+			unlock_page(page);
-+			ceph_queue_writeback(inode);
-+			r = wait_event_killable(ci->i_cap_wq,
-+						context_is_writeable_or_written(inode, snapc));
-+			ceph_put_snap_context(snapc);
-+			put_page(page);
-+			page = NULL;
-+			if (r != 0)
-+				break;
-+			continue;
-+		}
- 
--	/* full page? */
--	if (pos_in_page == 0 && len == PAGE_SIZE)
--		return 0;
-+		if (PageUptodate(page)) {
-+			dout(" page %p already uptodate\n", page);
-+			break;
-+		}
- 
--	/* past end of file? */
--	i_size = i_size_read(inode);
--
--	if (page_off >= i_size ||
--	    (pos_in_page == 0 && (pos+len) >= i_size &&
--	     end_in_page - pos_in_page != PAGE_SIZE)) {
--		dout(" zeroing %p 0 - %d and %d - %d\n",
--		     page, pos_in_page, end_in_page, (int)PAGE_SIZE);
--		zero_user_segments(page,
--				   0, pos_in_page,
--				   end_in_page, PAGE_SIZE);
--		return 0;
--	}
-+		/*
-+		 * In some cases we don't need to read at all:
-+		 * - full page write
-+		 * - write that lies completely beyond EOF
-+		 * - write that covers the the page from start to EOF or beyond it
-+		 */
-+		if ((pos_in_page == 0 && len == PAGE_SIZE) ||
-+		    (pos >= i_size_read(inode)) ||
-+		    (pos_in_page == 0 && (pos + len) >= i_size_read(inode))) {
-+			zero_user_segments(page, 0, pos_in_page,
-+					   pos_in_page + len, PAGE_SIZE);
-+			break;
-+		}
- 
--	/* we need to read it. */
--	r = ceph_do_readpage(file, page);
--	if (r < 0) {
--		if (r == -EINPROGRESS)
--			return -EAGAIN;
--		goto fail_unlock;
-+		/*
-+		 * We need to read it. If we get back -EINPROGRESS, then the page was
-+		 * handed off to fscache and it will be unlocked when the read completes.
-+		 * Refind the page in that case so we can reacquire the page lock. Otherwise
-+		 * we got a hard error or the read was completed synchronously.
-+		 */
-+		r = ceph_do_readpage(file, page);
-+		if (r != -EINPROGRESS)
-+			break;
- 	}
--	goto retry_locked;
--fail_unlock:
--	unlock_page(page);
--	return r;
--}
- 
--/*
-- * We are only allowed to write into/dirty the page if the page is
-- * clean, or already dirty within the same snap context.
-- */
--static int ceph_write_begin(struct file *file, struct address_space *mapping,
--			    loff_t pos, unsigned len, unsigned flags,
--			    struct page **pagep, void **fsdata)
--{
--	struct inode *inode = file_inode(file);
--	struct page *page;
--	pgoff_t index = pos >> PAGE_SHIFT;
--	int r;
--
--	do {
--		/* get a page */
--		page = grab_cache_page_write_begin(mapping, index, 0);
--		if (!page)
--			return -ENOMEM;
--
--		dout("write_begin file %p inode %p page %p %d~%d\n", file,
--		     inode, page, (int)pos, (int)len);
--
--		r = ceph_update_writeable_page(file, pos, len, page);
--		if (r < 0)
-+	if (r < 0) {
-+		if (page) {
-+			unlock_page(page);
- 			put_page(page);
--		else
--			*pagep = page;
--	} while (r == -EAGAIN);
--
-+		}
-+	} else {
-+		*pagep = page;
-+	}
- 	return r;
- }
- 
+> > +#ifdef CONFIG_FS_ENCRYPTION
+> > +static int ceph_set_test_dummy_encryption(struct super_block *sb, struct fs_context *fc,
+> > +						struct ceph_mount_options *fsopt)
+> > +{
+> > +	struct ceph_fs_client *fsc = sb->s_fs_info;
+> > +
+> > +	if (fsopt->flags & CEPH_MOUNT_OPT_TEST_DUMMY_ENC) {
+> > +		substring_t arg = { };
+> > +
+> > +		/*
+> > +		 * No changing encryption context on remount. Note that
+> > +		 * fscrypt_set_test_dummy_encryption will validate the version
+> > +		 * string passed in (if any).
+> > +		 */
+> > +		if (fc->purpose == FS_CONTEXT_FOR_RECONFIGURE && !fsc->dummy_enc_policy.policy)
+> > +			return -EEXIST;
+> 
+> Maybe show an error message here, with errorfc()?
+> See the message that ext4_set_test_dummy_encryption() shows.
+> 
+
+Good idea. I've rolled in error messages similar to the ones in ext4.
+
+> > +
+> > +		/* Ewwwwwwww */
+> > +		if (fsc->mount_options->test_dummy_encryption) {
+> > +			arg.from = fsc->mount_options->test_dummy_encryption;
+> > +			arg.to = arg.from + strlen(arg.from) - 1;
+> > +		}
+> 
+> We should probably make fscrypt_set_test_dummy_encryption() take a
+> 'const char *' to avoid having to create a substring_t here.
+> 
+
+Yes, please. I didn't want to do that with most of the current fscrypt-
+enabled fs using the old mount API. Some of them may need to copy the
+argument so that it's properly terminated.
+
+We could also just add a wrapper that turns the const char * into a
+substring_t before calling fscrypt_set_test_dummy_encryption.
+
+> > +		return fscrypt_set_test_dummy_encryption(sb, &arg, &fsc->dummy_enc_policy);
+> 
+> Likewise, maybe show an error message if this fails.
+> 
+> > +	} else {
+> > +		if (fc->purpose == FS_CONTEXT_FOR_RECONFIGURE && fsc->dummy_enc_policy.policy)
+> > +			return -EEXIST;
+> 
+> If remount on ceph behaves as "don't change options that aren't specified",
+> similar to ext4, then there's no need for this hunk here.
+> 
+
+Good point.
+
+> >  static int ceph_reconfigure_fc(struct fs_context *fc)
+> >  {
+> > +	int err;
+> >  	struct ceph_parse_opts_ctx *pctx = fc->fs_private;
+> >  	struct ceph_mount_options *fsopt = pctx->opts;
+> > -	struct ceph_fs_client *fsc = ceph_sb_to_client(fc->root->d_sb);
+> > +	struct super_block *sb = fc->root->d_sb;
+> > +	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+> >  
+> >  	if (fsopt->flags & CEPH_MOUNT_OPT_ASYNC_DIROPS)
+> >  		ceph_set_mount_opt(fsc, ASYNC_DIROPS);
+> >  	else
+> >  		ceph_clear_mount_opt(fsc, ASYNC_DIROPS);
+> >  
+> > -	sync_filesystem(fc->root->d_sb);
+> > +	err = ceph_set_test_dummy_encryption(sb, fc, fsopt);
+> > +	if (err)
+> > +		return err;
+> > +
+> > +	sync_filesystem(sb);
+> >  	return 0;
+> >  }
+> 
+> Seems that ceph_set_test_dummy_encryption() should go at the beginning, since
+> otherwise it can fail after something was already changed.
+> 
+
+Good catch. Fixed.
+
 -- 
-2.26.2
+Jeff Layton <jlayton@kernel.org>
 
