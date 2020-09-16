@@ -2,88 +2,73 @@ Return-Path: <SRS0=hc/W=CZ=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2205C43461
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 19:54:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A402C2BB84
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 20:39:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4664821973
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 19:54:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600286054;
-	bh=yfe0B96TjNHpcAsawqjrrf7+IjHmy67vaiqa85BWIAA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=ni2APaJt432knUK0aC9N/aDCrkTpOPLvi5PXluejCiE0Hja9sJazU2YDfOi4vHxG9
-	 SdAVxv8CqYvWgoW1jx8+Yg1G9wRn9P1rQJWVxvclNhN1sXKGIGv1OZ0JUSj+4aO4Du
-	 uUSjLiNLsVdaD2rRQfd6L1/+3bzBgCQ8bPTBvqRA=
+	by mail.kernel.org (Postfix) with ESMTP id B9A7821974
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 20:39:04 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FxLfZNeD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728216AbgIPTyG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 16 Sep 2020 15:54:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48200 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727219AbgIPRgU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Sep 2020 13:36:20 -0400
-Received: from sol.localdomain (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id ABEF4206A5;
-        Wed, 16 Sep 2020 17:36:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600277764;
-        bh=yfe0B96TjNHpcAsawqjrrf7+IjHmy67vaiqa85BWIAA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=I+hC2nQ+ZOPA571P2RhI3RjRHIeqnS8CFYsB1rjy8HQTS+a2VSX+648dcZXFLEPOB
-         WDnTByDdKVTjchwSYR66xKed5nxfUPFjAZ0Qm1LU4C6e1Y7zgr/cuvQgnqM/OC4A1Y
-         AtnlSxj8RyhCEw2Sq5daEBAdbWDe4O2SLXgVpGFg=
-Date:   Wed, 16 Sep 2020 10:36:03 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: Re: [RFC PATCH v3 12/16] ceph: add encrypted fname handling to
- ceph_mdsc_build_path
-Message-ID: <20200916173603.GA4373@sol.localdomain>
-References: <20200914191707.380444-1-jlayton@kernel.org>
- <20200914191707.380444-13-jlayton@kernel.org>
- <20200915014159.GK899@sol.localdomain>
- <bd9257732cfd98ee30ccc151125d21d6955d6f66.camel@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bd9257732cfd98ee30ccc151125d21d6955d6f66.camel@kernel.org>
+        id S1726917AbgIPUjC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 16 Sep 2020 16:39:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57470 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726826AbgIPRHz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2020 13:07:55 -0400
+Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 039B6C061352
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2020 09:33:38 -0700 (PDT)
+Received: by mail-pl1-x633.google.com with SMTP id j7so3475800plk.11
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2020 09:33:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:content-transfer-encoding:mime-version:subject:message-id:date
+         :to;
+        bh=47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=;
+        b=FxLfZNeDAWagUFX3HUll33QviaGvB/ysUpT05z3MWWzJIRb9s26f/XuIeG1UyaaaB9
+         NsE58WbO2Rn602dNpDr5bgQ8Etq+Xuk7ns0FSk9RaZpujHzKIQac5pg/WxJpWcDSCa0S
+         Lo74DRfCI5PREcKWzCCxj40hojEDF8/k9S5QjygAaL1HZtNCaOm4Rdl60J4LM9wqocMm
+         Ndcaa9OuY0dr4QoUMwuGUEzZbm6KuyxbCsjOcCTPrBHqCnWfmG227M8lyYhm+Ar+Byb1
+         jFosf3+Qpvg1FtgaxwGm86ORyUILpbCu0aCbskVzIel2MoS5fxbMBK5CIvndLlNnHAKp
+         8HhA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:content-transfer-encoding:mime-version
+         :subject:message-id:date:to;
+        bh=47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=;
+        b=T3erwdDARkHZjFOJfrzX8vZ40GfjmX26UKFHqec9QPZGdzYGbQ5S9qm9ZEWq8TMDyI
+         ETvLbj8o+fEGrl4KD+cpF/e9M9+Dlv+jHp5HBR5oBpUNyntD86j+7AUeUgt3e3cxBJwu
+         /tu/0qWNSYE4hcTjQufqM0bSo3/vGFjVIpZCuB3JaxEQS81E4PVK5oCs043D3Ypmsa48
+         hjM1ScJ6OlhYBa2/cTGbuzdWvbIovpt87Icpj1E+jB+NZp1B03EQ7V2pAF/nLEm2+54T
+         OwMGeaxmd46kSxwnYXVSFmbiWcwrqZK7snjiRQH+YVEQXqEhdLemks1RCFedbLmrl7hO
+         vFcA==
+X-Gm-Message-State: AOAM530nFoklm9WxOf9r2NN0VhvjePdX0ryEkT9kzrJ3hX++RfG5NNPY
+        MrgpnMiqUzQ37yyJzjvvb26bS6OteCDm4A==
+X-Google-Smtp-Source: ABdhPJyVWK39t/+oh4Q/vF44F0OWfn3IllTtrcelhgo7JMFtHNycQT0afMfWYVWGI4IZbe7Vh3li6g==
+X-Received: by 2002:a17:902:a712:b029:d1:cbf4:c583 with SMTP id w18-20020a170902a712b02900d1cbf4c583mr13713831plq.16.1600274017950;
+        Wed, 16 Sep 2020 09:33:37 -0700 (PDT)
+Received: from ?IPv6:2605:e000:1600:d493:74ea:1ed5:f18a:eecb? ([2605:e000:1600:d493:74ea:1ed5:f18a:eecb])
+        by smtp.gmail.com with ESMTPSA id 64sm17315886pfg.98.2020.09.16.09.33.36
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 16 Sep 2020 09:33:37 -0700 (PDT)
+From:   Dan Jakubiec <dan.jakubiec@gmail.com>
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 13.4 \(3608.120.23.2.1\))
+Subject: help
+Message-Id: <2DCDE001-8496-48BE-A2C1-A56117C7D815@gmail.com>
+Date:   Wed, 16 Sep 2020 09:33:35 -0700
+To:     ceph-devel@vger.kernel.org
+X-Mailer: Apple Mail (2.3608.120.23.2.1)
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, Sep 16, 2020 at 08:30:01AM -0400, Jeff Layton wrote:
-> 
-> It sounds like we'll probably need to stabilize some version of the
-> nokey name so that we can allow the MDS to look them up. Would it be a
-> problem for us to use the current version of the nokey name format for
-> this, or would it be better to come up with some other distinct format
-> for this?
-> 
-
-You could use the current version, with the dirhash field changed from u32 to
-__le32 so that it doesn't depend on CPU endianness.  But you should also
-consider using just base64(SHA256(filename)).  The SHA256(filename) approach
-wouldn't include a dirhash, and it would handle short filenames less
-efficiently.  However, it would be simpler.  Would it be any easier for you?
-
-I'm not sure which would be better from a fs/crypto/ perspective.  For *now*, it
-would be easier if you just used the current 'struct fscrypt_nokey_name'.
-However, anything you use would be set in stone, whereas as-is the format can be
-changed at any time.  In fact, we changed it recently; see commit edc440e3d27f.
-
-If we happen to change the nokey name in the future for local filesystems (say,
-to use BLAKE2 instead of SHA256, or to support longer dirhashes), then it would
-be easier if the stable format were just SHA256(filename).
-
-It's not a huge deal though.  So if e.g. you like that the current format avoids
-the cryptographic hash for the vast majority of filenames, and if you're fine
-with the slightly increased complexity, you can just use it.
-
-- Eric
