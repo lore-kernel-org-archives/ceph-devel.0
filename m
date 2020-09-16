@@ -2,146 +2,196 @@ Return-Path: <SRS0=hc/W=CZ=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93E5DC43461
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 16:39:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7C17C43461
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:39:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DA7E223BD
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 16:39:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 82BB320672
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 17:39:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600274374;
-	bh=wpolOvjqW37XvCaJsodanttdPRliCEAotM78Hsp5R6E=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=zKPaRm3XN6pB9J7fq1Oh8XT0YMts5HfEmZTsUwQvwp4rH390gezcBHmF7iuHF2nhL
-	 h1oxzzWJjXVaYFnWjrs4wuzhXZ9Q6c75CmWzQGU++ik2P9O1Wm++RYvFPb0sZebDiO
-	 o8KSfJ/5vyqM3Vpqe03B2A8lLJRdf0st+gXpEUgU=
+	s=default; t=1600277988;
+	bh=LZYKnj28NThBQRi+erHxwD7WsznzhEzi0+MczxXy6CM=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=n5ZxONhg8Eaw2vdfQwJVpNdp8MuxPZH7cDXWgg9dH8oVT/qrRtv6JKpcwGDHjXKC2
+	 3b3yKzFbrIPnA0zk+1utjtHTlNgfywurat+CTy65M8tLUimgtJinufDoWAL/SwU3j7
+	 HCrqzfGN88AZVfch4c/NKKDVDJxDWwg3JaKS7yDk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726566AbgIPQjG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 16 Sep 2020 12:39:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45434 "EHLO mail.kernel.org"
+        id S1727214AbgIPRjn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 16 Sep 2020 13:39:43 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52276 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726558AbgIPQe2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Sep 2020 12:34:28 -0400
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        id S1727291AbgIPRjA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 16 Sep 2020 13:39:00 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4249922241;
-        Wed, 16 Sep 2020 12:41:11 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 40B9B2080C;
+        Wed, 16 Sep 2020 17:38:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600260071;
-        bh=wpolOvjqW37XvCaJsodanttdPRliCEAotM78Hsp5R6E=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=aJoKnzTWuJHYvtYXsXcG8i+W/LVtpUs/iZfGMiRqVYgzR3n+mK7h+dy3F5UuMSojv
-         LhAevAzsHyMqoFGqxCnS48ReY4mvuZnt32iFSrRT0CoW2FZZp/lmSV1H0N4Q+AfeEc
-         jIB9yB3oh7OKBaGw1SHlS2Qz1sJRu3pGJWRAuCy4=
-Message-ID: <37da4f39a987e66bad001f4db75a43661de53919.camel@kernel.org>
-Subject: Re: [RFC PATCH v3 09/16] ceph: preallocate inode for ops that may
- create one
+        s=default; t=1600277939;
+        bh=LZYKnj28NThBQRi+erHxwD7WsznzhEzi0+MczxXy6CM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=G0E5TJu+UDncZJZZ+pnNEI1rgCdogt38alglb9rDErTE01x1aRT5XPRvYVWIoFyHV
+         /KvfjhrtxtcED17v9P1aCkvBL9+z1bZH3wO8L42buUPsUcUliwOtG2TAouCLoHqwFj
+         Jm6pFWCmWySltQ/bMkaY0xCvzX3UjQtoBF/FqPss=
 From:   Jeff Layton <jlayton@kernel.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
-Date:   Wed, 16 Sep 2020 08:41:10 -0400
-In-Reply-To: <20200915013041.GI899@sol.localdomain>
-References: <20200914191707.380444-1-jlayton@kernel.org>
-         <20200914191707.380444-10-jlayton@kernel.org>
-         <20200915013041.GI899@sol.localdomain>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
+To:     ceph-devel@vger.kernel.org
+Cc:     ukernel@gmail.com, idryomov@gmail.com
+Subject: [PATCH 4/5] ceph: fold ceph_sync_writepages into writepage_nounlock
+Date:   Wed, 16 Sep 2020 13:38:53 -0400
+Message-Id: <20200916173854.330265-5-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200916173854.330265-1-jlayton@kernel.org>
+References: <20200916173854.330265-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: ceph-devel-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2020-09-14 at 18:30 -0700, Eric Biggers wrote:
-> On Mon, Sep 14, 2020 at 03:17:00PM -0400, Jeff Layton wrote:
-> > @@ -663,6 +658,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
-> >  	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
-> >  	struct ceph_mds_client *mdsc = fsc->mdsc;
-> >  	struct ceph_mds_request *req;
-> > +	struct inode *new_inode = NULL;
-> >  	struct dentry *dn;
-> >  	struct ceph_acl_sec_ctx as_ctx = {};
-> >  	bool try_async = ceph_test_mount_opt(fsc, ASYNC_DIROPS);
-> > @@ -675,21 +671,21 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
-> >  
-> >  	if (dentry->d_name.len > NAME_MAX)
-> >  		return -ENAMETOOLONG;
-> > -
-> > +retry:
-> >  	if (flags & O_CREAT) {
-> >  		if (ceph_quota_is_max_files_exceeded(dir))
-> >  			return -EDQUOT;
-> > -		err = ceph_pre_init_acls(dir, &mode, &as_ctx);
-> > -		if (err < 0)
-> > -			return err;
-> > -		err = ceph_security_init_secctx(dentry, mode, &as_ctx);
-> > -		if (err < 0)
-> > +
-> > +		new_inode = ceph_new_inode(dir, dentry, &mode, &as_ctx);
-> > +		if (IS_ERR(new_inode)) {
-> > +			err = PTR_ERR(new_inode);
-> >  			goto out_ctx;
-> > +		}
-> 
-> Is the 'goto out_ctx;' correct here?  It looks like it should be
-> 'return PTR_ERR(new_inode)'
-> 
+It's the only caller, and this will make it easier to refactor.
 
-Yes, it's correct...see below.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/addr.c | 93 +++++++++++++++++++-------------------------------
+ 1 file changed, 35 insertions(+), 58 deletions(-)
 
-> > +/**
-> > + * ceph_new_inode - allocate a new inode in advance of an expected create
-> > + * @dir: parent directory for new inode
-> > + * @mode: mode of new inode
-> > + */
-> > +struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
-> > +			     umode_t *mode, struct ceph_acl_sec_ctx *as_ctx)
-> 
-> Some parameters aren't documented.
-> 
-
-Thanks, fixed.
-
-> > +	int err;
-> >  	struct inode *inode;
-> >  
-> > -	inode = iget5_locked(sb, (unsigned long)vino.ino, ceph_ino_compare,
-> > -			     ceph_set_ino_cb, &vino);
-> > +	inode = new_inode_pseudo(dir->i_sb);
-> >  	if (!inode)
-> >  		return ERR_PTR(-ENOMEM);
-> >  
-> > +	if (!S_ISLNK(*mode)) {
-> > +		err = ceph_pre_init_acls(dir, mode, as_ctx);
-> > +		if (err < 0)
-> > +			goto out_err;
-> > +	}
-> > +
-> > +	err = ceph_security_init_secctx(dentry, *mode, as_ctx);
-> > +	if (err < 0)
-> > +		goto out_err;
-> > +
-> > +	inode->i_state = 0;
-> > +	inode->i_mode = *mode;
-> > +	return inode;
-> > +out_err:
-> > +	iput(inode);
-> > +	return ERR_PTR(err);
-> > +}
-> 
-> Should this be freeing anything from the ceph_acl_sec_ctx on error?
-> 
-
-For now, I'm leaving that to the callers. It's arguably uglier to do it
-that way but ceph_release_acl_sec_ctx needs to be called at the end of
-the callers anyway, and it's not currently idempotent.
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 19de3e9ccafe..a6c54cfc3fea 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -590,50 +590,6 @@ static u64 get_writepages_data_length(struct inode *inode,
+ 	return end > start ? end - start : 0;
+ }
+ 
+-/*
+- * do a synchronous write on N pages
+- */
+-static int ceph_sync_writepages(struct ceph_fs_client *fsc,
+-				struct ceph_vino vino,
+-				struct ceph_file_layout *layout,
+-				struct ceph_snap_context *snapc,
+-				u64 off, u64 len,
+-				u32 truncate_seq, u64 truncate_size,
+-				struct timespec64 *mtime,
+-				struct page **pages, int num_pages)
+-{
+-	struct ceph_osd_client *osdc = &fsc->client->osdc;
+-	struct ceph_osd_request *req;
+-	int rc = 0;
+-	int page_align = off & ~PAGE_MASK;
+-
+-	req = ceph_osdc_new_request(osdc, layout, vino, off, &len, 0, 1,
+-				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE,
+-				    snapc, truncate_seq, truncate_size,
+-				    true);
+-	if (IS_ERR(req))
+-		return PTR_ERR(req);
+-
+-	/* it may be a short write due to an object boundary */
+-	osd_req_op_extent_osd_data_pages(req, 0, pages, len, page_align,
+-				false, false);
+-	dout("writepages %llu~%llu (%llu bytes)\n", off, len, len);
+-
+-	req->r_mtime = *mtime;
+-	rc = ceph_osdc_start_request(osdc, req, true);
+-	if (!rc)
+-		rc = ceph_osdc_wait_request(osdc, req);
+-
+-	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_latency,
+-				  req->r_end_latency, rc);
+-
+-	ceph_osdc_put_request(req);
+-	if (rc == 0)
+-		rc = len;
+-	dout("writepages result %d\n", rc);
+-	return rc;
+-}
+-
+ /*
+  * Write a single page, but leave the page locked.
+  *
+@@ -642,20 +598,19 @@ static int ceph_sync_writepages(struct ceph_fs_client *fsc,
+  */
+ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ {
+-	struct inode *inode;
+-	struct ceph_inode_info *ci;
+-	struct ceph_fs_client *fsc;
++	struct inode *inode = page->mapping->host;
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_snap_context *snapc, *oldest;
+ 	loff_t page_off = page_offset(page);
+-	int err, len = PAGE_SIZE;
++	int err;
++	loff_t len = PAGE_SIZE;
+ 	struct ceph_writeback_ctl ceph_wbc;
++	struct ceph_osd_client *osdc = &fsc->client->osdc;
++	struct ceph_osd_request *req;
+ 
+ 	dout("writepage %p idx %lu\n", page, page->index);
+ 
+-	inode = page->mapping->host;
+-	ci = ceph_inode(inode);
+-	fsc = ceph_inode_to_client(inode);
+-
+ 	/* verify this is a writeable snap context */
+ 	snapc = page_snap_context(page);
+ 	if (!snapc) {
+@@ -684,7 +639,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	if (ceph_wbc.i_size < page_off + len)
+ 		len = ceph_wbc.i_size - page_off;
+ 
+-	dout("writepage %p page %p index %lu on %llu~%u snapc %p seq %lld\n",
++	dout("writepage %p page %p index %lu on %llu~%llu snapc %p seq %lld\n",
+ 	     inode, page, page->index, page_off, len, snapc, snapc->seq);
+ 
+ 	if (atomic_long_inc_return(&fsc->writeback_count) >
+@@ -692,11 +647,33 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 		set_bdi_congested(inode_to_bdi(inode), BLK_RW_ASYNC);
+ 
+ 	set_page_writeback(page);
+-	err = ceph_sync_writepages(fsc, ceph_vino(inode),
+-				   &ci->i_layout, snapc, page_off, len,
+-				   ceph_wbc.truncate_seq,
+-				   ceph_wbc.truncate_size,
+-				   &inode->i_mtime, &page, 1);
++	req = ceph_osdc_new_request(osdc, &ci->i_layout, ceph_vino(inode), page_off, &len, 0, 1,
++				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE, snapc,
++				    ceph_wbc.truncate_seq, ceph_wbc.truncate_size,
++				    true);
++	if (IS_ERR(req)) {
++		redirty_page_for_writepage(wbc, page);
++		end_page_writeback(page);
++		return PTR_ERR(req);
++	}
++
++	/* it may be a short write due to an object boundary */
++	WARN_ON_ONCE(len > PAGE_SIZE);
++	osd_req_op_extent_osd_data_pages(req, 0, &page, len, 0, false, false);
++	dout("writepage %llu~%llu (%llu bytes)\n", page_off, len, len);
++
++	req->r_mtime = inode->i_mtime;
++	err = ceph_osdc_start_request(osdc, req, true);
++	if (!err)
++		err = ceph_osdc_wait_request(osdc, req);
++
++	ceph_update_write_latency(&fsc->mdsc->metric, req->r_start_latency,
++				  req->r_end_latency, err);
++
++	ceph_osdc_put_request(req);
++	if (err == 0)
++		err = len;
++
+ 	if (err < 0) {
+ 		struct writeback_control tmp_wbc;
+ 		if (!wbc)
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.26.2
 
