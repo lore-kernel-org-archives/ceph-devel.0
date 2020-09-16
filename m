@@ -4,51 +4,53 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E121C433E2
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 18:58:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B3BCC43461
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 19:04:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C286F20732
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 18:58:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B4F4E206DB
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Sep 2020 19:03:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600282719;
-	bh=n1onCclIHmwMoGh25tLRwWHw0UBcrbgKWpJjkHlSfpg=;
+	s=default; t=1600283039;
+	bh=YwjrKFeCizHh1E75zdoKPRol7rdCFhBLd+n6EntX4lI=;
 	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=Zh8oAS62AK7eY7P3opb4uoS23HBBgMVIL+9Dg3Bhcidi/gS3Dq9WNEzna5Flnd5NJ
-	 Wwl1MXoGIyXPaUa+R2oInKSWXlyXjB1Z1sRaxMRzF/5yls/g37WmiSntM5eb63KaeR
-	 5lu+N+myqRKgyF1/WMWXLsJDMzfFXGbhLHhS6bCc=
+	b=HRXEUlOkwAPWrTbgqyVzWTqOb01rKqwJeMzqFQ+7ed5rx2I66FCZOPgW4pvITU5UQ
+	 sMxX/xSjt867zkCRD3/ax1IFKI/dojs3Y0DWbkGp4DuLOtz1b4AV6sXSu2d6UI5mDg
+	 qqNG1tDLKYhD+x8JCll5uERrtnbuH8CP4eS7tcJo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727591AbgIPS62 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 16 Sep 2020 14:58:28 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42052 "EHLO mail.kernel.org"
+        id S1727300AbgIPRsG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 16 Sep 2020 13:48:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36802 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727556AbgIPRvY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Sep 2020 13:51:24 -0400
+        id S1727426AbgIPRqW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 16 Sep 2020 13:46:22 -0400
 Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 75C2321D24;
-        Wed, 16 Sep 2020 12:30:02 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 75E2720872;
+        Wed, 16 Sep 2020 12:16:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600259402;
-        bh=n1onCclIHmwMoGh25tLRwWHw0UBcrbgKWpJjkHlSfpg=;
+        s=default; t=1600258569;
+        bh=YwjrKFeCizHh1E75zdoKPRol7rdCFhBLd+n6EntX4lI=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=cqY+Hr4E7moccOVxZBfqVvr5zwPPKPAICAHNhqHmOo10IQYl3SHm6IiXA2yZqjP26
-         q5xO1xqN0NVZsHtwKaH5xUOkfzaegkB+4rLyL5tPgz8zsS8of/2XVpeS1ACvpc0Q+a
-         zCjgavaXNHh5KzOwTr7YzJlxu6qS5dbw3i+tmfoU=
-Message-ID: <bd9257732cfd98ee30ccc151125d21d6955d6f66.camel@kernel.org>
-Subject: Re: [RFC PATCH v3 12/16] ceph: add encrypted fname handling to
- ceph_mdsc_build_path
+        b=FwF973/bGsjwAIRYwZ8MTf9VW4AXnViN3IzTm6htJ5hx4QQ6WGUPbInOY5+9thJ6H
+         6eHZctedvKR0eMs6oQijn9pR+WUGT90ACi9iXNCvKHyNUK+4m4ZnXjsQLxX8kESQkC
+         MHfYdGTqEpx82TcSavPRUzvUhvL3E67NiSsSfq8Q=
+Message-ID: <39809abc369f810c9b227f50ae34a33b51a51f01.camel@kernel.org>
+Subject: Re: [RFC PATCH v3 14/16] ceph: add support to readdir for encrypted
+ filenames
 From:   Jeff Layton <jlayton@kernel.org>
 To:     Eric Biggers <ebiggers@kernel.org>
 Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Date:   Wed, 16 Sep 2020 08:30:01 -0400
-In-Reply-To: <20200915014159.GK899@sol.localdomain>
+        linux-fsdevel@vger.kernel.org
+Date:   Wed, 16 Sep 2020 08:16:08 -0400
+In-Reply-To: <20200915204018.GA3999121@gmail.com>
 References: <20200914191707.380444-1-jlayton@kernel.org>
-         <20200914191707.380444-13-jlayton@kernel.org>
-         <20200915014159.GK899@sol.localdomain>
+         <20200914191707.380444-15-jlayton@kernel.org>
+         <20200915015719.GL899@sol.localdomain>
+         <bf448095f9d675bad3adb0ddc2d7652625824bc6.camel@kernel.org>
+         <20200915204018.GA3999121@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
@@ -58,64 +60,40 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2020-09-14 at 18:41 -0700, Eric Biggers wrote:
-> On Mon, Sep 14, 2020 at 03:17:03PM -0400, Jeff Layton wrote:
-> > +		} else {
-> > +			int err;
-> > +			struct fscrypt_name fname = { };
-> > +			int len;
-> > +			char buf[FSCRYPT_BASE64_CHARS(NAME_MAX)];
-> > +
-> > +			dget(parent);
-> > +			spin_unlock(&cur->d_lock);
-> > +
-> > +			err = fscrypt_setup_filename(d_inode(parent), &cur->d_name, 1, &fname);
-> > +			if (err) {
-> > +				dput(parent);
-> > +				dput(cur);
-> > +				return ERR_PTR(err);
-> > +			}
+On Tue, 2020-09-15 at 13:40 -0700, Eric Biggers wrote:
+> On Tue, Sep 15, 2020 at 09:27:49AM -0400, Jeff Layton wrote:
+> > > > +	}
+> > > > +
+> > > > +	declen = fscrypt_base64_decode(name, len, tname->name);
+> > > > +	if (declen < 0 || declen > NAME_MAX) {
+> > > > +		ret = -EIO;
+> > > > +		goto out;
+> > > > +	}
+> > > 
+> > > declen <= 0, to cover the empty name case.
+> > > 
+> > > Also, is there a point in checking for > NAME_MAX?
+> > > 
+> > 
+> > IDK. We're getting these strings from the MDS and they could end up
+> > being corrupt if there are bugs there (or if the MDS is compromised). 
+> > Of course, if we get a name longer than NAME_MAX then we've overrun the
+> > buffer.
+> > 
+> > Maybe we should add a maxlen parameter to fscrypt_base64_encode/decode ?
+> > Or maybe I should just have fscrypt_fname_alloc_buffer allocate a buffer
+> > the same size as "len"? It might be a little larger than necessary, but
+> > that would be safer.
 > 
-> It's still not clear how no-key names are handled here (or if they are even
-> possible here).
+> How about checking that the base64-encoded filename is <= BASE64_CHARS(NAME_MAX)
+> in length?  Then decoding it can't give more than NAME_MAX bytes.
 > 
-
-They're not really handled yet. We need support in the MDS for it, which
-is being worked on by Xiubo (cc'ed):
-
-    https://tracker.ceph.com/issues/47162
-
-For now, working with names > ~149 characters can leave you with bad
-dentries that the client may not be able to work with if you don't have
-the key.
-
-It sounds like we'll probably need to stabilize some version of the
-nokey name so that we can allow the MDS to look them up. Would it be a
-problem for us to use the current version of the nokey name format for
-this, or would it be better to come up with some other distinct format
-for this?
-
-Using the current version of the nokey name is simple as we can just
-pass it as-is to the MDS if someone is working in a directory w/o keys.
-
-> > +
-> > +			/* base64 encode the encrypted name */
-> > +			len = fscrypt_base64_encode(fname.disk_name.name, fname.disk_name.len, buf);
-> > +			pos -= len;
-> > +			if (pos < 0) {
-> > +				dput(parent);
-> > +				fscrypt_free_filename(&fname);
-> > +				break;
-> > +			}
-> > +			memcpy(path + pos, buf, len);
-> > +			dout("non-ciphertext name = %.*s\n", len, buf);
-> > +			fscrypt_free_filename(&fname);
-> 
-> This says "non-ciphertext name", which suggest that it's a plaintext name.  But
-> actually it's a base64-encoded ciphertext name.
+> fscrypt_setup_filename() does a similar check when decoding a no-key name.
 > 
 
-Thanks. I fixed the comment.
+Good idea. I'll roll that in.
+
+Thanks,
 -- 
 Jeff Layton <jlayton@kernel.org>
 
