@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA412C35266
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:20:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 919A4C35267
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:20:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 95EF32067C
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:20:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4EF2A2074B
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:20:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600316440;
-	bh=pcuDTH9STD/mcWVjY9xk4V3olh0O7QdLKYJXVZYhQo8=;
+	s=default; t=1600316441;
+	bh=Zv8MicOcvA0+y63kXTTqywuXMtLNvAnTX16qi88FxYc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=d6tSO3Iy8/DABZyfABWqCcdOpBJ7uumdbBFB5SYouODnMLd6FXMhznCsMsgi3baeQ
-	 4AAlGXi+1uA2tv07KmqFYEkNj57wxZDq0u5PodyRqP+HLoRoPgUyIpFKrGMiSh7azg
-	 8xTGfujvl5WGEPjxMM1GyCIdbndxZXglf5SRfgMQ=
+	b=vSu6WnzeYm7kPAstTgkD3SHIxRN7WQgJ8hXZbcTr9/X2hYWACLaOBSg+v3M72f5XL
+	 O+co9KeS4jvtajG9jdLT+UDFWFW2LJf8n8t6MTU5nmrNjXLNjExI0AK3qbVxvYLOLd
+	 dw9EXgvLYn7wWrLkHwWMHRgpON57vcv2LJoB8CTg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726200AbgIQEUh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Sep 2020 00:20:37 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33818 "EHLO mail.kernel.org"
+        id S1726216AbgIQEUi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Sep 2020 00:20:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:33820 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726115AbgIQEUd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S1726109AbgIQEUd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Thu, 17 Sep 2020 00:20:33 -0400
 Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9750121D41;
-        Thu, 17 Sep 2020 04:13:09 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6C80B21D90;
+        Thu, 17 Sep 2020 04:13:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600315989;
-        bh=pcuDTH9STD/mcWVjY9xk4V3olh0O7QdLKYJXVZYhQo8=;
+        s=default; t=1600315990;
+        bh=Zv8MicOcvA0+y63kXTTqywuXMtLNvAnTX16qi88FxYc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=WjOZn/iFKAnidcOCFe+ysawmOaq+wZI9ahIoTC+JpTCuGheF3T5BHxOwXh1kL3zCZ
-         3bymu2kDogYINSoFHUgY+sOPCKrKs0XS/Hi5wozjy5gL6kj6NUPkMa8IZcCNDveVRT
-         WvDDwm829kBpdreaI9WfPgzWgY3w2UuXhMRU3Kk4=
+        b=PZc7GCUjYD5h/bNMeNcrWQz+gvVcL2w+pv6xfU6b2En26SS8LBtAXV8xXjjRzBpIj
+         YJcuPpLETgZpzhrpZa0X4b5L+Q/8ZidJ4CmeEnoZoW/zona/QfTOXhtHoWHt3+/BqT
+         VhxyefdisJOSDSop/xr7WQru8BqpBRIbiwngobaQ=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-fscrypt@vger.kernel.org
 Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
         linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
         Jeff Layton <jlayton@kernel.org>,
         Daniel Rosenberg <drosen@google.com>
-Subject: [PATCH v3 06/13] fscrypt: adjust logging for in-creation inodes
-Date:   Wed, 16 Sep 2020 21:11:29 -0700
-Message-Id: <20200917041136.178600-7-ebiggers@kernel.org>
+Subject: [PATCH v3 09/13] fscrypt: stop pretending that key setup is nofs-safe
+Date:   Wed, 16 Sep 2020 21:11:32 -0700
+Message-Id: <20200917041136.178600-10-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200917041136.178600-1-ebiggers@kernel.org>
 References: <20200917041136.178600-1-ebiggers@kernel.org>
@@ -58,62 +58,116 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Now that a fscrypt_info may be set up for inodes that are currently
-being created and haven't yet had an inode number assigned, avoid
-logging confusing messages about "inode 0".
+fscrypt_get_encryption_info() has never actually been safe to call in a
+context that needs GFP_NOFS, since it calls crypto_alloc_skcipher().
+
+crypto_alloc_skcipher() isn't GFP_NOFS-safe, even if called under
+memalloc_nofs_save().  This is because it may load kernel modules, and
+also because it internally takes crypto_alg_sem.  Other tasks can do
+GFP_KERNEL allocations while holding crypto_alg_sem for write.
+
+The use of fscrypt_init_mutex isn't GFP_NOFS-safe either.
+
+So, stop pretending that fscrypt_get_encryption_info() is nofs-safe.
+I.e., when it allocates memory, just use GFP_KERNEL instead of GFP_NOFS.
+
+Note, another reason to do this is that GFP_NOFS is deprecated in favor
+of using memalloc_nofs_save() in the proper places.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- fs/crypto/crypto.c  | 4 +++-
- fs/crypto/keyring.c | 9 +++++++--
- 2 files changed, 10 insertions(+), 3 deletions(-)
+ fs/crypto/inline_crypt.c | 7 ++-----
+ fs/crypto/keysetup.c     | 2 +-
+ fs/crypto/keysetup_v1.c  | 8 ++++----
+ 3 files changed, 7 insertions(+), 10 deletions(-)
 
-diff --git a/fs/crypto/crypto.c b/fs/crypto/crypto.c
-index 9212325763b0f..4ef3f714046aa 100644
---- a/fs/crypto/crypto.c
-+++ b/fs/crypto/crypto.c
-@@ -343,9 +343,11 @@ void fscrypt_msg(const struct inode *inode, const char *level,
- 	va_start(args, fmt);
- 	vaf.fmt = fmt;
- 	vaf.va = &args;
--	if (inode)
-+	if (inode && inode->i_ino)
- 		printk("%sfscrypt (%s, inode %lu): %pV\n",
- 		       level, inode->i_sb->s_id, inode->i_ino, &vaf);
-+	else if (inode)
-+		printk("%sfscrypt (%s): %pV\n", level, inode->i_sb->s_id, &vaf);
- 	else
- 		printk("%sfscrypt: %pV\n", level, &vaf);
- 	va_end(args);
-diff --git a/fs/crypto/keyring.c b/fs/crypto/keyring.c
-index e74f239c44280..53cc552a7b8fd 100644
---- a/fs/crypto/keyring.c
-+++ b/fs/crypto/keyring.c
-@@ -817,6 +817,7 @@ static int check_for_busy_inodes(struct super_block *sb,
- 	struct list_head *pos;
- 	size_t busy_count = 0;
- 	unsigned long ino;
-+	char ino_str[50] = "";
+diff --git a/fs/crypto/inline_crypt.c b/fs/crypto/inline_crypt.c
+index faa25541ccb68..89bffa82ed74a 100644
+--- a/fs/crypto/inline_crypt.c
++++ b/fs/crypto/inline_crypt.c
+@@ -106,7 +106,7 @@ int fscrypt_select_encryption_impl(struct fscrypt_info *ci)
+ 	crypto_cfg.data_unit_size = sb->s_blocksize;
+ 	crypto_cfg.dun_bytes = fscrypt_get_dun_bytes(ci);
+ 	num_devs = fscrypt_get_num_devices(sb);
+-	devs = kmalloc_array(num_devs, sizeof(*devs), GFP_NOFS);
++	devs = kmalloc_array(num_devs, sizeof(*devs), GFP_KERNEL);
+ 	if (!devs)
+ 		return -ENOMEM;
+ 	fscrypt_get_devices(sb, num_devs, devs);
+@@ -135,9 +135,8 @@ int fscrypt_prepare_inline_crypt_key(struct fscrypt_prepared_key *prep_key,
+ 	struct fscrypt_blk_crypto_key *blk_key;
+ 	int err;
+ 	int i;
+-	unsigned int flags;
  
- 	spin_lock(&mk->mk_decrypted_inodes_lock);
+-	blk_key = kzalloc(struct_size(blk_key, devs, num_devs), GFP_NOFS);
++	blk_key = kzalloc(struct_size(blk_key, devs, num_devs), GFP_KERNEL);
+ 	if (!blk_key)
+ 		return -ENOMEM;
  
-@@ -838,11 +839,15 @@ static int check_for_busy_inodes(struct super_block *sb,
+@@ -166,10 +165,8 @@ int fscrypt_prepare_inline_crypt_key(struct fscrypt_prepared_key *prep_key,
+ 		}
+ 		queue_refs++;
+ 
+-		flags = memalloc_nofs_save();
+ 		err = blk_crypto_start_using_key(&blk_key->base,
+ 						 blk_key->devs[i]);
+-		memalloc_nofs_restore(flags);
+ 		if (err) {
+ 			fscrypt_err(inode,
+ 				    "error %d starting to use blk-crypto", err);
+diff --git a/fs/crypto/keysetup.c b/fs/crypto/keysetup.c
+index 6159168972146..47f19061ba10e 100644
+--- a/fs/crypto/keysetup.c
++++ b/fs/crypto/keysetup.c
+@@ -488,7 +488,7 @@ fscrypt_setup_encryption_info(struct inode *inode,
+ 	if (res)
+ 		return res;
+ 
+-	crypt_info = kmem_cache_zalloc(fscrypt_info_cachep, GFP_NOFS);
++	crypt_info = kmem_cache_zalloc(fscrypt_info_cachep, GFP_KERNEL);
+ 	if (!crypt_info)
+ 		return -ENOMEM;
+ 
+diff --git a/fs/crypto/keysetup_v1.c b/fs/crypto/keysetup_v1.c
+index a3cb52572b05c..2762c53504323 100644
+--- a/fs/crypto/keysetup_v1.c
++++ b/fs/crypto/keysetup_v1.c
+@@ -60,7 +60,7 @@ static int derive_key_aes(const u8 *master_key,
+ 		goto out;
  	}
- 	spin_unlock(&mk->mk_decrypted_inodes_lock);
+ 	crypto_skcipher_set_flags(tfm, CRYPTO_TFM_REQ_FORBID_WEAK_KEYS);
+-	req = skcipher_request_alloc(tfm, GFP_NOFS);
++	req = skcipher_request_alloc(tfm, GFP_KERNEL);
+ 	if (!req) {
+ 		res = -ENOMEM;
+ 		goto out;
+@@ -99,7 +99,7 @@ find_and_lock_process_key(const char *prefix,
+ 	const struct user_key_payload *ukp;
+ 	const struct fscrypt_key *payload;
  
-+	/* If the inode is currently being created, ino may still be 0. */
-+	if (ino)
-+		snprintf(ino_str, sizeof(ino_str), ", including ino %lu", ino);
-+
- 	fscrypt_warn(NULL,
--		     "%s: %zu inode(s) still busy after removing key with %s %*phN, including ino %lu",
-+		     "%s: %zu inode(s) still busy after removing key with %s %*phN%s",
- 		     sb->s_id, busy_count, master_key_spec_type(&mk->mk_spec),
- 		     master_key_spec_len(&mk->mk_spec), (u8 *)&mk->mk_spec.u,
--		     ino);
-+		     ino_str);
- 	return -EBUSY;
- }
+-	description = kasprintf(GFP_NOFS, "%s%*phN", prefix,
++	description = kasprintf(GFP_KERNEL, "%s%*phN", prefix,
+ 				FSCRYPT_KEY_DESCRIPTOR_SIZE, descriptor);
+ 	if (!description)
+ 		return ERR_PTR(-ENOMEM);
+@@ -228,7 +228,7 @@ fscrypt_get_direct_key(const struct fscrypt_info *ci, const u8 *raw_key)
+ 		return dk;
+ 
+ 	/* Nope, allocate one. */
+-	dk = kzalloc(sizeof(*dk), GFP_NOFS);
++	dk = kzalloc(sizeof(*dk), GFP_KERNEL);
+ 	if (!dk)
+ 		return ERR_PTR(-ENOMEM);
+ 	refcount_set(&dk->dk_refcount, 1);
+@@ -272,7 +272,7 @@ static int setup_v1_file_key_derived(struct fscrypt_info *ci,
+ 	 * This cannot be a stack buffer because it will be passed to the
+ 	 * scatterlist crypto API during derive_key_aes().
+ 	 */
+-	derived_key = kmalloc(ci->ci_mode->keysize, GFP_NOFS);
++	derived_key = kmalloc(ci->ci_mode->keysize, GFP_KERNEL);
+ 	if (!derived_key)
+ 		return -ENOMEM;
  
 -- 
 2.28.0
