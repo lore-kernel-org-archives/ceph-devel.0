@@ -7,35 +7,35 @@ X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD9CFC433E2
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 19:54:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DDDCC43461
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 19:54:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7356B235F8
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 19:54:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ECDA0235F8
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 19:54:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="hL1cKoF+"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="UY+WWn03"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727993AbgIQPMx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Sep 2020 11:12:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37338 "EHLO
+        id S1727967AbgIQPMP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Sep 2020 11:12:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727457AbgIQPL0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Sep 2020 11:11:26 -0400
+        with ESMTP id S1727913AbgIQPL1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Sep 2020 11:11:27 -0400
 Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E28ABC06178B;
-        Thu, 17 Sep 2020 08:10:54 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D00CC061351;
+        Thu, 17 Sep 2020 08:10:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
         References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
         Content-Type:Content-ID:Content-Description;
-        bh=MTLlKe719mgAVscm2w1Ql0nN7cIRPfZQnUskn6+25OA=; b=hL1cKoF+6/UAQwKZIfKnU0NZqr
-        5yu8M7+7C5AX6w2ZPJR/qCXtNh7fJv27Z77Vzg8+rgPWUUAccXm6tDAc3RAjURPkde7Zqjc5//Z0p
-        46Fkcm7nzOM2P9Av5IqEb5DBysNZXaLpSIFI0VmfJzpsEzy4k1mlNLIFBwXItEIIMuEfqHOhCFmD6
-        N9w4+E/bGdCcr5t/UEf/772f/WOi+W3pu/0ob1SVwmgYAGtuCpTkHyVzp2Eii+eUkpm7Y2RVYO8Jh
-        weQ8jbJAdSxLrmFKCtZL5WTufs7vOcOru0MJvs/IwIS8jD/oQYRu/fi5yOyFxJl0fkYD/uFdDqAe/
-        Mdqo87Jg==;
+        bh=jmv1iA6ONHdhBCtewTigT8o0CWZcxoZXOX5KqmVgnTU=; b=UY+WWn03vEnSCFKL2cQHuVM2i1
+        QWe+kigsY5nChj3dZW/h0aA6t4GCygWRYiPrbLnPJyTb6ae0uBq7cwL0EVmUXxakpgq2oapyhxDVe
+        kBTCeumlVxnjVbvMWT8TED6H5Lcw3uow0f5XM1VjF7pOlh95YVKHtIN/5KguGYPRny3fc7WmToepE
+        6Jv3+/5X4HTO12zMC+BPVGhiLP9iGEug/FLiAS+EZQ5RUi5fhnhqUz6TLDBMJmQh4+piAUkJgSqEP
+        GBPJGhPkoKX4qDNExrVMjUWBmj38ZJGRM5eAJLVtOUR4LK3uM6CBTW568DQXcnfRhTgPg5qDs7lV7
+        kS4OBj7Q==;
 Received: from willy by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kIvYi-0001Pa-Tk; Thu, 17 Sep 2020 15:10:52 +0000
+        id 1kIvYj-0001Pz-KI; Thu, 17 Sep 2020 15:10:53 +0000
 From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To:     linux-fsdevel@vger.kernel.org
 Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
@@ -44,9 +44,9 @@ Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
         ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
         ecryptfs@vger.kernel.org, linux-um@lists.infradead.org,
         linux-mtd@lists.infradead.org, Richard Weinberger <richard@nod.at>
-Subject: [PATCH 04/13] ceph: Tell the VFS that readpage was synchronous
-Date:   Thu, 17 Sep 2020 16:10:41 +0100
-Message-Id: <20200917151050.5363-5-willy@infradead.org>
+Subject: [PATCH 07/13] ecryptfs: Tell the VFS that readpage was synchronous
+Date:   Thu, 17 Sep 2020 16:10:44 +0100
+Message-Id: <20200917151050.5363-8-willy@infradead.org>
 X-Mailer: git-send-email 2.21.3
 In-Reply-To: <20200917151050.5363-1-willy@infradead.org>
 References: <20200917151050.5363-1-willy@infradead.org>
@@ -56,34 +56,37 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The ceph readpage implementation was already synchronous, so use
+The ecryptfs readpage implementation was already synchronous, so use
 AOP_UPDATED_PAGE to avoid cycling the page lock.
 
 Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 ---
- fs/ceph/addr.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ fs/ecryptfs/mmap.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 6ea761c84494..b2bf8bf7a312 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -291,10 +291,11 @@ static int ceph_do_readpage(struct file *filp, struct page *page)
- static int ceph_readpage(struct file *filp, struct page *page)
- {
- 	int r = ceph_do_readpage(filp, page);
--	if (r != -EINPROGRESS)
--		unlock_page(page);
+diff --git a/fs/ecryptfs/mmap.c b/fs/ecryptfs/mmap.c
+index 019572c6b39a..dee35181d789 100644
+--- a/fs/ecryptfs/mmap.c
++++ b/fs/ecryptfs/mmap.c
+@@ -219,12 +219,13 @@ static int ecryptfs_readpage(struct file *file, struct page *page)
+ 		}
+ 	}
+ out:
+-	if (rc)
+-		ClearPageUptodate(page);
 -	else
--		r = 0;
-+	if (r == -EINPROGRESS)
-+		return 0;
-+	if (r == 0)
+-		SetPageUptodate(page);
+-	ecryptfs_printk(KERN_DEBUG, "Unlocking page with index = [0x%.16lx]\n",
++	ecryptfs_printk(KERN_DEBUG, "Returning page with index = [0x%.16lx]\n",
+ 			page->index);
++	if (!rc) {
++		SetPageUptodate(page);
 +		return AOP_UPDATED_PAGE;
-+	unlock_page(page);
- 	return r;
++	}
++	ClearPageUptodate(page);
+ 	unlock_page(page);
+ 	return rc;
  }
- 
 -- 
 2.28.0
 
