@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEB62C35268
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:21:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B303C433E2
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:21:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 888BF206A2
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:21:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0875A2074B
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 04:21:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600316473;
-	bh=7wQf9Y1Ge/SR2fWtRDGBHBDQ9VcJIvgAiZJHiDlXVEw=;
+	s=default; t=1600316476;
+	bh=nVSMprpeSosbO3HIVvYvcbOcUNBMzSOQM0td1dFGCwI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=X0GiFzshy5B93TCsq9YwUgQXLar041JrNadxiWM+lc6v8hPR3MLTeF3chMA+BhXUH
-	 EC2OOjJmRuJjgrJfjlmU6RGa12OrW7KcNaOXDVfxHQLaA6y31TkfjLbkPa4AAE9ETA
-	 sv4A+84fTam/FfQxLDIae79TnA1oJog42ctAu4mM=
+	b=ZZy3Cw5TuEvhZwdHIRVSo9BIq2r+aT5qQp5we78SpWqt8sv3aLtWd6p/oZv6mEkam
+	 ZfAhSmqXx7kOm8wwWjeciEVRLOEgKyL2FzsTStjCAxxKIc1sDp/QHUFmF6CqMYU9xl
+	 IZgVBW00Dv22wXyvWnSgTxuMTxi5vxnFFh2auSq4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726298AbgIQEVA (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Sep 2020 00:21:00 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33846 "EHLO mail.kernel.org"
+        id S1726217AbgIQEUu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Sep 2020 00:20:50 -0400
+Received: from mail.kernel.org ([198.145.29.99]:33836 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726180AbgIQEUw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 17 Sep 2020 00:20:52 -0400
+        id S1726149AbgIQEUl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 17 Sep 2020 00:20:41 -0400
 Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id AF604221E7;
-        Thu, 17 Sep 2020 04:13:10 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 781BF208DB;
+        Thu, 17 Sep 2020 04:13:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600315990;
-        bh=7wQf9Y1Ge/SR2fWtRDGBHBDQ9VcJIvgAiZJHiDlXVEw=;
+        s=default; t=1600315988;
+        bh=nVSMprpeSosbO3HIVvYvcbOcUNBMzSOQM0td1dFGCwI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=KuwrpsyKR6Az33Os8au9dNORztVK5lPaO//5B4B9GGkqISAfjzCoMKvSaFMdYkK+H
-         cTfwdylHR5zS/tWU4yj+Sm4uxrUgf/O1/jB19DUFCvaoNPk/KtcTePbae7Dup7hHHg
-         AlchzaMoe4dDGfi2GfcedI9GWx9Qsvh1eLld4LG4=
+        b=W0urzfH3q0MMsp14SUg7JlcaqllmX1jfO7tG13brvInJk91ZUIyf37gd3H1t3Y6N0
+         X0w81XrZ7k0TGIMcy31iKgejPGB3hYwc5PTdSPxQXvlIgL3VPhFS1Ha+S29TQy0A4D
+         oYAc2dvgQn7bST0BPVAK/JGpQb9y9zNOGy8Yxr/Y=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-fscrypt@vger.kernel.org
 Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
         linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
         Jeff Layton <jlayton@kernel.org>,
         Daniel Rosenberg <drosen@google.com>
-Subject: [PATCH v3 10/13] fscrypt: make "#define fscrypt_policy" user-only
-Date:   Wed, 16 Sep 2020 21:11:33 -0700
-Message-Id: <20200917041136.178600-11-ebiggers@kernel.org>
+Subject: [PATCH v3 02/13] ext4: factor out ext4_xattr_credits_for_new_inode()
+Date:   Wed, 16 Sep 2020 21:11:25 -0700
+Message-Id: <20200917041136.178600-3-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200917041136.178600-1-ebiggers@kernel.org>
 References: <20200917041136.178600-1-ebiggers@kernel.org>
@@ -58,73 +58,128 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-The fscrypt UAPI header defines fscrypt_policy to fscrypt_policy_v1,
-for source compatibility with old userspace programs.
+To compute a new inode's xattr credits, we need to know whether the
+inode will be encrypted or not.  When we switch to use the new helper
+function fscrypt_prepare_new_inode(), we won't find out whether the
+inode will be encrypted until slightly later than is currently the case.
+That will require moving the code block that computes the xattr credits.
 
-Internally, the kernel doesn't want that compatibility definition.
-Instead, fscrypt_private.h #undefs it and re-defines it to a union.
-
-That works for now.  However, in order to add
-fscrypt_operations::get_dummy_policy(), we'll need to forward declare
-'union fscrypt_policy' in include/linux/fscrypt.h.  That would cause
-build errors because "fscrypt_policy" is used in ioctl numbers.
-
-To avoid this, modify the UAPI header to make the fscrypt_policy
-compatibility definition conditional on !__KERNEL__, and make the ioctls
-use fscrypt_policy_v1 instead of fscrypt_policy.
-
-Note that this doesn't change the actual ioctl numbers.
+To make this easier and reduce the length of __ext4_new_inode(), move
+this code block into a new function ext4_xattr_credits_for_new_inode().
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- fs/crypto/fscrypt_private.h  | 1 -
- include/uapi/linux/fscrypt.h | 6 +++---
- 2 files changed, 3 insertions(+), 4 deletions(-)
+ fs/ext4/ialloc.c | 90 +++++++++++++++++++++++++++---------------------
+ 1 file changed, 51 insertions(+), 39 deletions(-)
 
-diff --git a/fs/crypto/fscrypt_private.h b/fs/crypto/fscrypt_private.h
-index 355f6d9377517..ac3352086ee44 100644
---- a/fs/crypto/fscrypt_private.h
-+++ b/fs/crypto/fscrypt_private.h
-@@ -97,7 +97,6 @@ static inline const u8 *fscrypt_context_nonce(const union fscrypt_context *ctx)
- 	return NULL;
+diff --git a/fs/ext4/ialloc.c b/fs/ext4/ialloc.c
+index df25d38d65393..0cc576005a923 100644
+--- a/fs/ext4/ialloc.c
++++ b/fs/ext4/ialloc.c
+@@ -742,6 +742,53 @@ static int find_inode_bit(struct super_block *sb, ext4_group_t group,
+ 	return 1;
  }
  
--#undef fscrypt_policy
- union fscrypt_policy {
- 	u8 version;
- 	struct fscrypt_policy_v1 v1;
-diff --git a/include/uapi/linux/fscrypt.h b/include/uapi/linux/fscrypt.h
-index 7875709ccfebf..e5de603369381 100644
---- a/include/uapi/linux/fscrypt.h
-+++ b/include/uapi/linux/fscrypt.h
-@@ -45,7 +45,6 @@ struct fscrypt_policy_v1 {
- 	__u8 flags;
- 	__u8 master_key_descriptor[FSCRYPT_KEY_DESCRIPTOR_SIZE];
- };
--#define fscrypt_policy	fscrypt_policy_v1
- 
++static int ext4_xattr_credits_for_new_inode(struct inode *dir, mode_t mode,
++					    bool encrypt)
++{
++	struct super_block *sb = dir->i_sb;
++	int nblocks = 0;
++#ifdef CONFIG_EXT4_FS_POSIX_ACL
++	struct posix_acl *p = get_acl(dir, ACL_TYPE_DEFAULT);
++
++	if (IS_ERR(p))
++		return PTR_ERR(p);
++	if (p) {
++		int acl_size = p->a_count * sizeof(ext4_acl_entry);
++
++		nblocks += (S_ISDIR(mode) ? 2 : 1) *
++			__ext4_xattr_set_credits(sb, NULL /* inode */,
++						 NULL /* block_bh */, acl_size,
++						 true /* is_create */);
++		posix_acl_release(p);
++	}
++#endif
++
++#ifdef CONFIG_SECURITY
++	{
++		int num_security_xattrs = 1;
++
++#ifdef CONFIG_INTEGRITY
++		num_security_xattrs++;
++#endif
++		/*
++		 * We assume that security xattrs are never more than 1k.
++		 * In practice they are under 128 bytes.
++		 */
++		nblocks += num_security_xattrs *
++			__ext4_xattr_set_credits(sb, NULL /* inode */,
++						 NULL /* block_bh */, 1024,
++						 true /* is_create */);
++	}
++#endif
++	if (encrypt)
++		nblocks += __ext4_xattr_set_credits(sb,
++						    NULL /* inode */,
++						    NULL /* block_bh */,
++						    FSCRYPT_SET_CONTEXT_MAX_SIZE,
++						    true /* is_create */);
++	return nblocks;
++}
++
  /*
-  * Process-subscribed "logon" key description prefix and payload format.
-@@ -156,9 +155,9 @@ struct fscrypt_get_key_status_arg {
- 	__u32 __out_reserved[13];
- };
+  * There are two policies for allocating an inode.  If the new inode is
+  * a directory, then a forward search is made for a block group with both
+@@ -796,45 +843,10 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
+ 	}
  
--#define FS_IOC_SET_ENCRYPTION_POLICY		_IOR('f', 19, struct fscrypt_policy)
-+#define FS_IOC_SET_ENCRYPTION_POLICY		_IOR('f', 19, struct fscrypt_policy_v1)
- #define FS_IOC_GET_ENCRYPTION_PWSALT		_IOW('f', 20, __u8[16])
--#define FS_IOC_GET_ENCRYPTION_POLICY		_IOW('f', 21, struct fscrypt_policy)
-+#define FS_IOC_GET_ENCRYPTION_POLICY		_IOW('f', 21, struct fscrypt_policy_v1)
- #define FS_IOC_GET_ENCRYPTION_POLICY_EX		_IOWR('f', 22, __u8[9]) /* size + version */
- #define FS_IOC_ADD_ENCRYPTION_KEY		_IOWR('f', 23, struct fscrypt_add_key_arg)
- #define FS_IOC_REMOVE_ENCRYPTION_KEY		_IOWR('f', 24, struct fscrypt_remove_key_arg)
-@@ -170,6 +169,7 @@ struct fscrypt_get_key_status_arg {
+ 	if (!handle && sbi->s_journal && !(i_flags & EXT4_EA_INODE_FL)) {
+-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+-		struct posix_acl *p = get_acl(dir, ACL_TYPE_DEFAULT);
+-
+-		if (IS_ERR(p))
+-			return ERR_CAST(p);
+-		if (p) {
+-			int acl_size = p->a_count * sizeof(ext4_acl_entry);
+-
+-			nblocks += (S_ISDIR(mode) ? 2 : 1) *
+-				__ext4_xattr_set_credits(sb, NULL /* inode */,
+-					NULL /* block_bh */, acl_size,
+-					true /* is_create */);
+-			posix_acl_release(p);
+-		}
+-#endif
+-
+-#ifdef CONFIG_SECURITY
+-		{
+-			int num_security_xattrs = 1;
+-
+-#ifdef CONFIG_INTEGRITY
+-			num_security_xattrs++;
+-#endif
+-			/*
+-			 * We assume that security xattrs are never
+-			 * more than 1k.  In practice they are under
+-			 * 128 bytes.
+-			 */
+-			nblocks += num_security_xattrs *
+-				__ext4_xattr_set_credits(sb, NULL /* inode */,
+-					NULL /* block_bh */, 1024,
+-					true /* is_create */);
+-		}
+-#endif
+-		if (encrypt)
+-			nblocks += __ext4_xattr_set_credits(sb,
+-					NULL /* inode */, NULL /* block_bh */,
+-					FSCRYPT_SET_CONTEXT_MAX_SIZE,
+-					true /* is_create */);
++		ret2 = ext4_xattr_credits_for_new_inode(dir, mode, encrypt);
++		if (ret2 < 0)
++			return ERR_PTR(ret2);
++		nblocks += ret2;
+ 	}
  
- /* old names; don't add anything new here! */
- #ifndef __KERNEL__
-+#define fscrypt_policy			fscrypt_policy_v1
- #define FS_KEY_DESCRIPTOR_SIZE		FSCRYPT_KEY_DESCRIPTOR_SIZE
- #define FS_POLICY_FLAGS_PAD_4		FSCRYPT_POLICY_FLAGS_PAD_4
- #define FS_POLICY_FLAGS_PAD_8		FSCRYPT_POLICY_FLAGS_PAD_8
+ 	ngroups = ext4_get_groups_count(sb);
 -- 
 2.28.0
 
