@@ -2,56 +2,56 @@ Return-Path: <SRS0=SvUK=C2=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AD57C43461
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 16:34:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BD65C433E2
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 16:50:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AF138214D8
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 16:34:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0B9CA206CA
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Sep 2020 16:50:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600360456;
-	bh=64guTUZ7EKPT2qpTc7D0yaFTflRcH4pcyFWo+xuAOGU=;
+	s=default; t=1600361444;
+	bh=sF5GNWOZkQ3nf3+Th5gnQt2xcpsdwKBCS7zrVGfmbVw=;
 	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=WEaJI7PvGva8GjP4tDAGGNeIHI3QWqQE2Qe92QGbPUaqOC0IlhanbB31xE6/b4ez4
-	 3OcfWyj2S9RKTRR0Ul94lkkVhusAqrAxXYbj5SNbWEHEBf/XtwPnb3fYOqdTXGQPlB
-	 wm/UvRu381V0loqnvMzN2cBU1YTm6yP/ZZII36rM=
+	b=OP/XDzGNm1U0tQHm4AReKmtGIotOZX9OL4XNVzI28ySdy0ct1sZu+h00CZgeMg8G0
+	 8EGHPgGjQIKrEdtK5K9RQTqgt3tfamThuY3l2oBfA+W2fI03TvGbWju/bLzr1QcRVY
+	 EFfo0HWFNa3Dopku0Dl47IXlnciciGcpe89uahUY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728576AbgIQQdx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Sep 2020 12:33:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43992 "EHLO mail.kernel.org"
+        id S1728674AbgIQQuR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Sep 2020 12:50:17 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54870 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728369AbgIQQdd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 17 Sep 2020 12:33:33 -0400
+        id S1728640AbgIQQtn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 17 Sep 2020 12:49:43 -0400
 Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C27D2214D8;
-        Thu, 17 Sep 2020 16:33:27 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 650562220E;
+        Thu, 17 Sep 2020 16:49:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600360408;
-        bh=64guTUZ7EKPT2qpTc7D0yaFTflRcH4pcyFWo+xuAOGU=;
+        s=default; t=1600361382;
+        bh=sF5GNWOZkQ3nf3+Th5gnQt2xcpsdwKBCS7zrVGfmbVw=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=eU1pP6hgmXz25xyBg9bazb9fKAso0aXmNP2dVveMx2ztmBwOjVdBVik39B9/dsfyi
-         l7B1BELQj4b0ud+U4UFntHF3lCMR/Rq5xrFwpLL3OBQuZckdLAshp7dwLe0wC59tkq
-         GBid0tzn4y03cySN4r38Z/i9cVEe43zaJsX5UFUA=
-Message-ID: <197468586b4a9b933755d2f9a462a234d654e280.camel@kernel.org>
-Subject: Re: [PATCH v3 13/13] fscrypt: make
- fscrypt_set_test_dummy_encryption() take a 'const char *'
+        b=y+iGlgpCeM9xb9d27IMJV7+wkEMiK0mQoV9W7l5UCg8sFTmZkgM99uNvIc2+GWqlH
+         0ZPlY/toTe9JazTgGCZZDIpYPmlLHd2V1m/PsaZcDqBuvctHhOeuwFRx8Pao5bfxG/
+         9CS6yNA1rBp1Aud48qlKW00CelvRgOeuZ6WNzkHg=
+Message-ID: <57d35fdb5ea646f96b70fd8b8a29434761c3f1d3.camel@kernel.org>
+Subject: Re: [PATCH 04/13] ceph: Tell the VFS that readpage was synchronous
 From:   Jeff Layton <jlayton@kernel.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net,
-        linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org,
-        Daniel Rosenberg <drosen@google.com>
-Date:   Thu, 17 Sep 2020 12:33:26 -0400
-In-Reply-To: <20200917152907.GB855@sol.localdomain>
-References: <20200917041136.178600-1-ebiggers@kernel.org>
-         <20200917041136.178600-14-ebiggers@kernel.org>
-         <41ad3cd50f4d213455bef4e7c42143c289690222.camel@kernel.org>
-         <20200917152907.GB855@sol.localdomain>
+To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        linux-fsdevel@vger.kernel.org
+Cc:     linux-mm@kvack.org, v9fs-developer@lists.sourceforge.net,
+        linux-kernel@vger.kernel.org, linux-afs@lists.infradead.org,
+        ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
+        ecryptfs@vger.kernel.org, linux-um@lists.infradead.org,
+        linux-mtd@lists.infradead.org, Richard Weinberger <richard@nod.at>
+Date:   Thu, 17 Sep 2020 12:49:40 -0400
+In-Reply-To: <20200917151050.5363-5-willy@infradead.org>
+References: <20200917151050.5363-1-willy@infradead.org>
+         <20200917151050.5363-5-willy@infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
@@ -60,44 +60,38 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, 2020-09-17 at 08:29 -0700, Eric Biggers wrote:
-> On Thu, Sep 17, 2020 at 08:32:39AM -0400, Jeff Layton wrote:
-> > On Wed, 2020-09-16 at 21:11 -0700, Eric Biggers wrote:
-> > > From: Eric Biggers <ebiggers@google.com>
-> > > 
-> > > fscrypt_set_test_dummy_encryption() requires that the optional argument
-> > > to the test_dummy_encryption mount option be specified as a substring_t.
-> > > That doesn't work well with filesystems that use the new mount API,
-> > > since the new way of parsing mount options doesn't use substring_t.
-> > > 
-> > > Make it take the argument as a 'const char *' instead.
-> > > 
-> > > Instead of moving the match_strdup() into the callers in ext4 and f2fs,
-> > > make them just use arg->from directly.  Since the pattern is
-> > > "test_dummy_encryption=%s", the argument will be null-terminated.
-> > > 
-> > 
-> > Are you sure about that? I thought the point of substring_t was to give
-> > you a token from the string without null terminating it.
-> > 
-> > ISTM that when you just pass in ->from, you might end up with trailing
-> > arguments in your string like this. e.g.:
-> > 
-> >     "v2,foo,bar,baz"
-> > 
-> > ...and then that might fail to match properly
-> > in fscrypt_set_test_dummy_encryption.
-> > 
+On Thu, 2020-09-17 at 16:10 +0100, Matthew Wilcox (Oracle) wrote:
+> The ceph readpage implementation was already synchronous, so use
+> AOP_UPDATED_PAGE to avoid cycling the page lock.
 > 
-> Yes I'm sure, and I had also tested it.  The use of match_token() here is to
-> parse one null-terminated mount option at a time.
+> Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+> ---
+>  fs/ceph/addr.c | 9 +++++----
+>  1 file changed, 5 insertions(+), 4 deletions(-)
 > 
-> The reason that match_token() can return multiple substrings is that the pattern
-> might be something like "foo=%d:%d".
-> 
-> But here it's just "test_dummy_encryption=%s". "%s" matches until end-of-string.
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 6ea761c84494..b2bf8bf7a312 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -291,10 +291,11 @@ static int ceph_do_readpage(struct file *filp, struct page *page)
+>  static int ceph_readpage(struct file *filp, struct page *page)
+>  {
+>  	int r = ceph_do_readpage(filp, page);
+> -	if (r != -EINPROGRESS)
+> -		unlock_page(page);
+> -	else
+> -		r = 0;
+> +	if (r == -EINPROGRESS)
+> +		return 0;
+> +	if (r == 0)
+> +		return AOP_UPDATED_PAGE;
+> +	unlock_page(page);
+>  	return r;
+>  }
+>  
 
-Got it. Thanks for explaining!
--- 
-Jeff Layton <jlayton@kernel.org>
+Looks good to me. I assume you'll merge all of these as a set since the
+early ones are a prerequisite?
+
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
 
