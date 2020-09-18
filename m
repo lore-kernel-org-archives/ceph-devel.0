@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73B99C43465
-	for <ceph-devel@archiver.kernel.org>; Fri, 18 Sep 2020 02:24:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68EB4C43463
+	for <ceph-devel@archiver.kernel.org>; Fri, 18 Sep 2020 02:30:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3315C23447
-	for <ceph-devel@archiver.kernel.org>; Fri, 18 Sep 2020 02:24:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2ABB8206A1
+	for <ceph-devel@archiver.kernel.org>; Fri, 18 Sep 2020 02:30:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600395867;
-	bh=sTH9H5cLkDDkeT7+8BSnxFuTL3G71zT6DoZ7bdCP3GE=;
+	s=default; t=1600396233;
+	bh=NqXmAPguqfn/+CJlyYYOcohnL5NwvrsAg7fbVs1Om6Q=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=bdP4dG82JLAjuQFoXULcIVaYa2AyZk3zJ/gW2OAiyLhDyIjZjPF6hqQiojR1bIT4+
-	 wf9VtUF13KiDOSIS0E+9Gh3ZDRCgzhysTx98s6cxhHlMxcFRqjWZhX8fIVW2KLVJpY
-	 oQXYp6Z6li8nHDFRMkqAkU3Cqj41BG8btK/y3ZQk=
+	b=EcvJsGMjWLExoUR+ML4GA9U6AipLsOqWzLVp+Fju0hl2OIdwFWOJT4oIAAjLLzNCQ
+	 4QtDpnAwtjc/Ooy3VdD6QYy2X/znAYwnChg2+SEnCgDh3ElTpoZ5hTCNdEj+d9B9MJ
+	 1wQglgEKSgH6uy7woAR723ZFAGzstnCjLuKFuyhY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729632AbgIRCYU (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Sep 2020 22:24:20 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46554 "EHLO mail.kernel.org"
+        id S1729122AbgIRCac (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Sep 2020 22:30:32 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42974 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729427AbgIRCQk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 17 Sep 2020 22:16:40 -0400
+        id S1729092AbgIRCOk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 17 Sep 2020 22:14:40 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B9E3E23998;
-        Fri, 18 Sep 2020 02:16:34 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2E8E0239D1;
+        Fri, 18 Sep 2020 02:14:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600395395;
-        bh=sTH9H5cLkDDkeT7+8BSnxFuTL3G71zT6DoZ7bdCP3GE=;
+        s=default; t=1600395279;
+        bh=NqXmAPguqfn/+CJlyYYOcohnL5NwvrsAg7fbVs1Om6Q=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=MY+MXFmquFUUauSDK0NSc3NyaF+BXMtzh25wT0CT9rRMoV8xYdlNHnuLtN43cNQeq
-         JpOGfwe2YT4ngOtxT9KtOdcW2g52STPAp2viIDgG5tJfo8dFntswtQS5AVb8UuPyG9
-         6xz3UJLkUJCfjAk10HPTzVpt1fJ10sDqRGAxlDsk=
+        b=gYJDTSpNZLNcrVd8iw+rMpOCyfrkQweosNQT5BuCTEyPLo4IimoqdtlEHodfGXXZX
+         MnXQ2G8RuL9WdRQEMUJJF4Iu0RujWIh4s8gkynBnUUUasXPBzelQ6yhgDwLMAuXp6x
+         SUb1g2bWFQiTbvtpvbPV4596paFksmarqkods7dM=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 84/90] ceph: fix potential race in ceph_check_caps
-Date:   Thu, 17 Sep 2020 22:14:49 -0400
-Message-Id: <20200918021455.2067301-84-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 116/127] ceph: fix potential race in ceph_check_caps
+Date:   Thu, 17 Sep 2020 22:12:09 -0400
+Message-Id: <20200918021220.2066485-116-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200918021455.2067301-1-sashal@kernel.org>
-References: <20200918021455.2067301-1-sashal@kernel.org>
+In-Reply-To: <20200918021220.2066485-1-sashal@kernel.org>
+References: <20200918021220.2066485-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -75,10 +75,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index e11aacb35d6b5..cbd92dd89de16 100644
+index 589cfe3ed873b..ce94d09f6abf9 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -1807,12 +1807,24 @@ ack:
+@@ -1906,12 +1906,24 @@ ack:
  			if (mutex_trylock(&session->s_mutex) == 0) {
  				dout("inverting session/ino locks on %p\n",
  				     session);
