@@ -2,54 +2,68 @@ Return-Path: <SRS0=2uen=DA=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DB29C4727D
-	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 03:41:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DBAAC4741F
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 08:43:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 202EA2071A
-	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 03:41:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0377E2220D
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 08:43:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726802AbgIWDlg (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 22 Sep 2020 23:41:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46784 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726448AbgIWDlg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2020 23:41:36 -0400
-Received: from ZenIV.linux.org.uk (zeniv.linux.org.uk [IPv6:2002:c35c:fd02::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8354EC061755;
-        Tue, 22 Sep 2020 20:41:36 -0700 (PDT)
-Received: from viro by ZenIV.linux.org.uk with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kKvew-004GoQ-Q1; Wed, 23 Sep 2020 03:41:35 +0000
-Date:   Wed, 23 Sep 2020 04:41:34 +0100
-From:   Al Viro <viro@zeniv.linux.org.uk>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
-Subject: Re: [RFC PATCH v3 01/16] vfs: export new_inode_pseudo
-Message-ID: <20200923034134.GE3421308@ZenIV.linux.org.uk>
-References: <20200914191707.380444-1-jlayton@kernel.org>
- <20200914191707.380444-2-jlayton@kernel.org>
+        id S1726590AbgIWInI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 23 Sep 2020 04:43:08 -0400
+Received: from verein.lst.de ([213.95.11.211]:47725 "EHLO verein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726328AbgIWInH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 23 Sep 2020 04:43:07 -0400
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 813D367357; Wed, 23 Sep 2020 10:43:03 +0200 (CEST)
+Date:   Wed, 23 Sep 2020 10:43:03 +0200
+From:   Christoph Hellwig <hch@lst.de>
+To:     Coly Li <colyli@suse.de>
+Cc:     Christoph Hellwig <hch@lst.de>, linux-block@vger.kernel.org,
+        linux-nvme@lists.infradead.org, netdev@vger.kernel.org,
+        open-iscsi@googlegroups.com, linux-scsi@vger.kernel.org,
+        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>,
+        Hannes Reinecke <hare@suse.de>, Jan Kara <jack@suse.com>,
+        Jens Axboe <axboe@kernel.dk>,
+        Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Sagi Grimberg <sagi@grimberg.me>,
+        Vlastimil Babka <vbabka@suse.com>, stable@vger.kernel.org
+Subject: Re: [PATCH v7 1/6] net: introduce helper sendpage_ok() in
+ include/linux/net.h
+Message-ID: <20200923084303.GA21657@lst.de>
+References: <20200818131227.37020-1-colyli@suse.de> <20200818131227.37020-2-colyli@suse.de> <20200818162404.GA27196@lst.de> <217ec0ec-3c5a-a8ed-27d9-c634f0b9a045@suse.de> <20200818194930.GA31966@lst.de> <04408ff6-f765-8f3e-ead9-aec55043e469@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200914191707.380444-2-jlayton@kernel.org>
-Sender: Al Viro <viro@ftp.linux.org.uk>
+In-Reply-To: <04408ff6-f765-8f3e-ead9-aec55043e469@suse.de>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 03:16:52PM -0400, Jeff Layton wrote:
-> Ceph needs to be able to allocate inodes ahead of a create that might
-> involve a fscrypt-encrypted inode. new_inode() almost fits the bill,
-> but it puts the inode on the sb->s_inodes list and when we go to hash
-> it, that might be done again.
+On Wed, Aug 19, 2020 at 12:22:05PM +0800, Coly Li wrote:
+> On 2020/8/19 03:49, Christoph Hellwig wrote:
+> > On Wed, Aug 19, 2020 at 12:33:37AM +0800, Coly Li wrote:
+> >> On 2020/8/19 00:24, Christoph Hellwig wrote:
+> >>> I think we should go for something simple like this instead:
+> >>
+> >> This idea is fine to me. Should a warning message be through here? IMHO
+> >> the driver still sends an improper page in, fix it in silence is too
+> >> kind or over nice to the buggy driver(s).
+> > 
+> > I don't think a warning is a good idea.  An API that does the right
+> > thing underneath and doesn't require boiler plate code in most callers
+> > is the right API.
+> > 
 > 
-> We could work around that by setting I_CREATING on the new inode, but
-> that causes ilookup5 to return -ESTALE if something tries to find it
-> before I_NEW is cleared. To work around all of this, just use
-> new_inode_pseudo which doesn't add it to the list.
+> Then I don't have more comment.
 
-Er...  Why would you _not_ want -ESTALE in that situation?
+So given the feedback from Dave I suspect we should actually resurrect
+this series, sorry for the noise.  And in this case I think we do need
+the warning in kernel_sendpage.
