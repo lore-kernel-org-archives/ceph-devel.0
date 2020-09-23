@@ -2,69 +2,135 @@ Return-Path: <SRS0=2uen=DA=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD535C2D0A8
-	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E788C4727F
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 801082193E
-	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA1D621D41
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600861925;
-	bh=E2c6JAZSru7S3wPFsTWjmclP6a8Wd/2BesxKOHiiMd4=;
-	h=From:To:Subject:Date:List-ID:From;
-	b=HL4PP0lRWkmCwEj4LPaiB+vFmRixvlGYeWSIWBJrfaJ9cIGLyLL75JIhNvhjYeS27
-	 ua9o9pJAoIAgY9Yg3X0OekfeZurYJ6WW18tQSzl8llO/Wu8C8jdlPSEDzC5fVraK1B
-	 FEN5SJvDB2G3E7G814sELp2eq6RS1DACrnZ0TDKo=
+	s=default; t=1600861926;
+	bh=0XeFjNyigicxYMQLi5vGUXio4MphwvE9Zl8lqI9qdV0=;
+	h=From:To:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=VyOu+TOzhOPVA4YKKa8MiE0aaVeSmoaYDlMtGJz4Q2BzsuVZsPNxHhdpJWGrV0Exw
+	 pI08Huyn9BJTqtxgkRcXu8a+hgDWswbrTuLV6tctT6xUCkBbeMr4InUGqC6zyedi66
+	 QgNNFlRllJEHMdiE/IikdpI+phL4CCNRn1Eo1DaE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726548AbgIWLwE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 23 Sep 2020 07:52:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50560 "EHLO mail.kernel.org"
+        id S1726581AbgIWLwG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 23 Sep 2020 07:52:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50570 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726524AbgIWLwE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 23 Sep 2020 07:52:04 -0400
+        id S1726550AbgIWLwF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 23 Sep 2020 07:52:05 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C51E72193E
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2020 11:52:03 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B11212193E
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2020 11:52:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
         s=default; t=1600861924;
-        bh=E2c6JAZSru7S3wPFsTWjmclP6a8Wd/2BesxKOHiiMd4=;
-        h=From:To:Subject:Date:From;
-        b=F2ym9lg/5FrTh7XBRJMWZmDKYOs/AWnphZu4MLIlyZ2t3FVINVeLAm8KemVdIxIXT
-         aW2yF2zb7891j1hvC+ZKD0RThFtt/sG8XRnaOCle21Z7i2oj7QyQJDR/WAdTHQtyiA
-         mVTlJLuzBUtb+O0nw0msCAyQu4kOzxI40iW0xSgE=
+        bh=0XeFjNyigicxYMQLi5vGUXio4MphwvE9Zl8lqI9qdV0=;
+        h=From:To:Subject:Date:In-Reply-To:References:From;
+        b=VAAGMxMiXMXLfZAUXKfjHV/lhUTKWdpKFl7qr2XBhvcJEq3c7GLli6fzhTJHBvZSD
+         doT7sehAKm/xOmHuxsBgGVmn2j+wt6e/2PFv4CJmLJs3+zs9lQydEyI7JN6b3OYB1D
+         /Fac3cReNqJB+s1N585yncZHEh+vlvufSGIMTx14=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
-Subject: [PATCH v2 0/5] ceph: addr.c cleanups
-Date:   Wed, 23 Sep 2020 07:51:56 -0400
-Message-Id: <20200923115201.15664-1-jlayton@kernel.org>
+Subject: [PATCH v2 2/5] ceph: don't call ceph_update_writeable_page from page_mkwrite
+Date:   Wed, 23 Sep 2020 07:51:58 -0400
+Message-Id: <20200923115201.15664-3-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200923115201.15664-1-jlayton@kernel.org>
+References: <20200923115201.15664-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This is a minor revision to the set that I sent last week to clean up
-some of the addr.c code. The main changes are to comments and
-whitespace, but I also eliminated the unneeded inode argument to
-ceph_find_incompatible.
+page_mkwrite should only be called with Uptodate pages, so we should
+only need to flush incompatible snap contexts.
 
-Jeff Layton (5):
-  ceph: break out writeback of incompatible snap context to separate
-    function
-  ceph: don't call ceph_update_writeable_page from page_mkwrite
-  ceph: fold ceph_sync_readpages into ceph_readpage
-  ceph: fold ceph_sync_writepages into writepage_nounlock
-  ceph: fold ceph_update_writeable_page into ceph_write_begin
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/addr.c | 27 +++++++++++++++++++++------
+ 1 file changed, 21 insertions(+), 6 deletions(-)
 
- fs/ceph/addr.c | 384 ++++++++++++++++++++++---------------------------
- 1 file changed, 175 insertions(+), 209 deletions(-)
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index f8b478237ea8..c2c23b468d13 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1300,7 +1300,6 @@ static int context_is_writeable_or_written(struct inode *inode,
+ 
+ /**
+  * ceph_find_incompatible - find an incompatible context and return it
+- * @inode: inode associated with page
+  * @page: page being dirtied
+  *
+  * We are only allowed to write into/dirty a page if the page is
+@@ -1311,8 +1310,9 @@ static int context_is_writeable_or_written(struct inode *inode,
+  * Must be called with page lock held.
+  */
+ static struct ceph_snap_context *
+-ceph_find_incompatible(struct inode *inode, struct page *page)
++ceph_find_incompatible(struct page *page)
+ {
++	struct inode *inode = page->mapping->host;
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 
+@@ -1376,7 +1376,7 @@ static int ceph_update_writeable_page(struct file *file,
+ 	int r;
+ 
+ retry_locked:
+-	snapc = ceph_find_incompatible(inode, page);
++	snapc = ceph_find_incompatible(page);
+ 	if (snapc) {
+ 		if (IS_ERR(snapc)) {
+ 			r = PTR_ERR(snapc);
+@@ -1689,6 +1689,8 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+ 	inode_inc_iversion_raw(inode);
+ 
+ 	do {
++		struct ceph_snap_context *snapc;
++
+ 		lock_page(page);
+ 
+ 		if (page_mkwrite_check_truncate(page, inode) < 0) {
+@@ -1697,13 +1699,26 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+ 			break;
+ 		}
+ 
+-		err = ceph_update_writeable_page(vma->vm_file, off, len, page);
+-		if (err >= 0) {
++		snapc = ceph_find_incompatible(page);
++		if (!snapc) {
+ 			/* success.  we'll keep the page locked. */
+ 			set_page_dirty(page);
+ 			ret = VM_FAULT_LOCKED;
++			break;
++		}
++
++		unlock_page(page);
++
++		if (IS_ERR(snapc)) {
++			ret = VM_FAULT_SIGBUS;
++			break;
+ 		}
+-	} while (err == -EAGAIN);
++
++		ceph_queue_writeback(inode);
++		err = wait_event_killable(ci->i_cap_wq,
++				context_is_writeable_or_written(inode, snapc));
++		ceph_put_snap_context(snapc);
++	} while (err == 0);
+ 
+ 	if (ret == VM_FAULT_LOCKED ||
+ 	    ci->i_inline_version != CEPH_INLINE_NONE) {
 -- 
 2.26.2
 
