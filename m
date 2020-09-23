@@ -2,211 +2,83 @@ Return-Path: <SRS0=2uen=DA=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4140BC47426
-	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE04FC2D0A8
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 17:46:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED17623787
-	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600861936;
-	bh=od09BW0Qa4/D/CbXljpLsHS8TBJmMyPU1emsEJeQc4M=;
-	h=From:To:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=VMSqGSFM3pUd+yjCDDLozyt5XRKlV7gvZwqhfdc0QkLTAQtdf12gFDGOlYI7bse1v
-	 qP146H7bFGCALgUDh3G6sxXiINOj4TJUXAMx4WR6K5lkxXWF5C4pPbgBQhAn4a7eY/
-	 MLMArZAUniNDr+ylXlHpGK8zjzOrOU/auGTxGDDg=
+	by mail.kernel.org (Postfix) with ESMTP id 52A1F20719
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Sep 2020 17:46:36 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TyAQe4dv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726562AbgIWLwF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 23 Sep 2020 07:52:05 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50564 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726524AbgIWLwF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 23 Sep 2020 07:52:05 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1726545AbgIWRqf (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 23 Sep 2020 13:46:35 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:59331 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726130AbgIWRqf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 23 Sep 2020 13:46:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600883194;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=qiFXF241f9HzGMM4wXsK7NLIond0skn/qjeGBkT4Lyw=;
+        b=TyAQe4dvxQCYOK73gGV1kh2iQ/FaSkT6CLLS9VqgJFfkF1OOcxZDGqQqFm2/F7zz8lKtSL
+        CDHhEfO/PMBYC0/kv3CAna7ytOh46R4nv417vTPoQuBW5Vx8FCQalAHo43w1ynh6saOi5d
+        N19UxknA/yxZM2/uySwMOqb6oKXdi9w=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-228-MAXqEKvMOoudL-gqFjjfQg-1; Wed, 23 Sep 2020 13:46:18 -0400
+X-MC-Unique: MAXqEKvMOoudL-gqFjjfQg-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4633A21BE5
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2020 11:52:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600861924;
-        bh=od09BW0Qa4/D/CbXljpLsHS8TBJmMyPU1emsEJeQc4M=;
-        h=From:To:Subject:Date:In-Reply-To:References:From;
-        b=iMGzmC26o84/2mO0Mvokd8p/dKaAkTtfMxo+O/9KxzEJzDRN4b73ns8wABLK7frfq
-         hWZ06hPSdIw34DyJ7FNorrzDCBYexkzyjD5sZvOCLMjCFfnwMTcf4GwQa0BtV6ds9X
-         4uSVIcjdCz+0iUT5P6hnzqhzDa98PWlCntEg3cVM=
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Subject: [PATCH v2 1/5] ceph: break out writeback of incompatible snap context to separate function
-Date:   Wed, 23 Sep 2020 07:51:57 -0400
-Message-Id: <20200923115201.15664-2-jlayton@kernel.org>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200923115201.15664-1-jlayton@kernel.org>
-References: <20200923115201.15664-1-jlayton@kernel.org>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0D21F9CC00
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2020 17:46:18 +0000 (UTC)
+Received: from [10.3.112.217] (ovpn-112-217.phx2.redhat.com [10.3.112.217])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id D097C55783
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2020 17:46:17 +0000 (UTC)
+To:     Ceph Development <ceph-devel@vger.kernel.org>
+From:   Mark Nelson <mnelson@redhat.com>
+Subject: reminder: Performance meeting paper discussion tomorrow
+Message-ID: <bd082db6-5c1e-998f-5c2d-9c20c3740230@redhat.com>
+Date:   Wed, 23 Sep 2020 12:46:16 -0500
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When dirtying a page, we have to flush incompatible contexts. Move the
-search for an incompatible context into a separate function, and fix up
-the caller to wait and retry if there is one.
+Hi Folks,
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/addr.c | 112 +++++++++++++++++++++++++++++--------------------
- 1 file changed, 67 insertions(+), 45 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 7b1f3dad576f..f8b478237ea8 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1298,74 +1298,96 @@ static int context_is_writeable_or_written(struct inode *inode,
- 	return ret;
- }
- 
--/*
-- * We are only allowed to write into/dirty the page if the page is
-- * clean, or already dirty within the same snap context.
-+/**
-+ * ceph_find_incompatible - find an incompatible context and return it
-+ * @inode: inode associated with page
-+ * @page: page being dirtied
-  *
-- * called with page locked.
-- * return success with page locked,
-- * or any failure (incl -EAGAIN) with page unlocked.
-+ * We are only allowed to write into/dirty a page if the page is
-+ * clean, or already dirty within the same snap context. Returns a
-+ * conflicting context if there is one, NULL if there isn't, or a
-+ * negative error code on other errors.
-+ *
-+ * Must be called with page lock held.
-  */
--static int ceph_update_writeable_page(struct file *file,
--			    loff_t pos, unsigned len,
--			    struct page *page)
-+static struct ceph_snap_context *
-+ceph_find_incompatible(struct inode *inode, struct page *page)
- {
--	struct inode *inode = file_inode(file);
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
--	loff_t page_off = pos & PAGE_MASK;
--	int pos_in_page = pos & ~PAGE_MASK;
--	int end_in_page = pos_in_page + len;
--	loff_t i_size;
--	int r;
--	struct ceph_snap_context *snapc, *oldest;
- 
- 	if (READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
- 		dout(" page %p forced umount\n", page);
--		unlock_page(page);
--		return -EIO;
-+		return ERR_PTR(-EIO);
- 	}
- 
--retry_locked:
--	/* writepages currently holds page lock, but if we change that later, */
--	wait_on_page_writeback(page);
-+	for (;;) {
-+		struct ceph_snap_context *snapc, *oldest;
-+
-+		wait_on_page_writeback(page);
-+
-+		snapc = page_snap_context(page);
-+		if (!snapc || snapc == ci->i_head_snapc)
-+			break;
- 
--	snapc = page_snap_context(page);
--	if (snapc && snapc != ci->i_head_snapc) {
- 		/*
- 		 * this page is already dirty in another (older) snap
- 		 * context!  is it writeable now?
- 		 */
- 		oldest = get_oldest_context(inode, NULL, NULL);
- 		if (snapc->seq > oldest->seq) {
-+			/* not writeable -- return it for the caller to deal with */
- 			ceph_put_snap_context(oldest);
--			dout(" page %p snapc %p not current or oldest\n",
--			     page, snapc);
--			/*
--			 * queue for writeback, and wait for snapc to
--			 * be writeable or written
--			 */
--			snapc = ceph_get_snap_context(snapc);
--			unlock_page(page);
--			ceph_queue_writeback(inode);
--			r = wait_event_killable(ci->i_cap_wq,
--			       context_is_writeable_or_written(inode, snapc));
--			ceph_put_snap_context(snapc);
--			if (r == -ERESTARTSYS)
--				return r;
--			return -EAGAIN;
-+			dout(" page %p snapc %p not current or oldest\n", page, snapc);
-+			return ceph_get_snap_context(snapc);
- 		}
- 		ceph_put_snap_context(oldest);
- 
- 		/* yay, writeable, do it now (without dropping page lock) */
--		dout(" page %p snapc %p not current, but oldest\n",
--		     page, snapc);
--		if (!clear_page_dirty_for_io(page))
--			goto retry_locked;
--		r = writepage_nounlock(page, NULL);
--		if (r < 0)
-+		dout(" page %p snapc %p not current, but oldest\n", page, snapc);
-+		if (clear_page_dirty_for_io(page)) {
-+			int r = writepage_nounlock(page, NULL);
-+			if (r < 0)
-+				return ERR_PTR(r);
-+		}
-+	}
-+	return NULL;
-+}
-+
-+/*
-+ * We are only allowed to write into/dirty the page if the page is
-+ * clean, or already dirty within the same snap context.
-+ *
-+ * called with page locked.
-+ * return success with page locked,
-+ * or any failure (incl -EAGAIN) with page unlocked.
-+ */
-+static int ceph_update_writeable_page(struct file *file,
-+			    loff_t pos, unsigned len,
-+			    struct page *page)
-+{
-+	struct inode *inode = file_inode(file);
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+	struct ceph_snap_context *snapc;
-+	loff_t page_off = pos & PAGE_MASK;
-+	int pos_in_page = pos & ~PAGE_MASK;
-+	int end_in_page = pos_in_page + len;
-+	loff_t i_size;
-+	int r;
-+
-+retry_locked:
-+	snapc = ceph_find_incompatible(inode, page);
-+	if (snapc) {
-+		if (IS_ERR(snapc)) {
-+			r = PTR_ERR(snapc);
- 			goto fail_unlock;
--		goto retry_locked;
-+		}
-+		unlock_page(page);
-+		ceph_queue_writeback(inode);
-+		r = wait_event_killable(ci->i_cap_wq,
-+					context_is_writeable_or_written(inode, snapc));
-+		ceph_put_snap_context(snapc);
-+		return -EAGAIN;
- 	}
- 
- 	if (PageUptodate(page)) {
--- 
-2.26.2
+This is Just a reminder that tomorrow we are going to discuss a paper 
+from FAST20 discussing "Characterizing, Modeling, and Benchmarking 
+RocksDB Key-Value Workloads at Facebook".  Link is here: 
+https://www.usenix.org/system/files/fast20-cao_zhichao.pdf
+
+
+See everyone tomorrow morning at 8AM PST!
+
+
+Etherpad:
+
+https://pad.ceph.com/p/performance_weekly
+
+Bluejeans:
+
+https://bluejeans.com/908675367
+
+
+Mark
 
