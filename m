@@ -2,136 +2,107 @@ Return-Path: <SRS0=txDZ=DC=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 245D2C4741F
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 15:18:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60777C4727E
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 20:54:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9C0E21D42
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 15:18:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601047083;
-	bh=Memmat2QMSKm4nwC6E/N+LYsT2VSLAWg4jqrX9rOxRc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=xeJyifELVh549kWrnhuNEJIJzrEuLxhd0m+p4M9YWdsOsdBcjLkQKd25iZrFOlUIj
-	 veA+DeQyRLMZAd2iZ0joEJoJFgrclVOJ9lEJWCRlG6x9YX60j1TGDwGKWNkh1X0QGC
-	 E3PziSSpDhPFSqDByYI9Kea9Okv/TmW/2AUxKIpA=
+	by mail.kernel.org (Postfix) with ESMTP id 2A40821D42
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 20:54:46 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="t0qzyxZi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729041AbgIYPR7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Sep 2020 11:17:59 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52162 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728818AbgIYPR7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 25 Sep 2020 11:17:59 -0400
-Received: from localhost (83-86-74-64.cable.dynamic.v4.ziggo.nl [83.86.74.64])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B44E920878;
-        Fri, 25 Sep 2020 15:17:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601047078;
-        bh=Memmat2QMSKm4nwC6E/N+LYsT2VSLAWg4jqrX9rOxRc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=0I0jvTv72ihg9+bzMure3BX1lc+87CO5bL9392leVtXnedqMSe5ygE5G4jcX2w1qW
-         xoHSyqw+O8y4wGORU/iFtjKf17BUhMzTBzKdn1CSNW/QQG4RWwA0fbFWc2yeKlC8z5
-         AE3L4akyOt44u/YxCsUo0F4LAURd4D62LpCDsAXE=
-Date:   Fri, 25 Sep 2020 17:18:12 +0200
-From:   Greg KH <gregkh@linuxfoundation.org>
+        id S1727569AbgIYUyi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 25 Sep 2020 16:54:38 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:44806 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725272AbgIYUyh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2020 16:54:37 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08PKn2cc039197;
+        Fri, 25 Sep 2020 20:54:14 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=to : cc : subject :
+ from : message-id : references : date : in-reply-to : mime-version :
+ content-type; s=corp-2020-01-29;
+ bh=KE/6frUW0qLJ4yGqJjxsOBztcMMvJKPi7N6S9765s1A=;
+ b=t0qzyxZi0dl+YKzXtuDuHrMGqOKgH5fIMmpwIJWVMm/U3dTu+P1SS3kJTlx79mD5uwMC
+ A2Edf31HXh7Zjrho5JXRQeOv1ImV1hVmEUYsbtNFLoJL4bYLIxAyhjP+J/0Zp7ifDQzk
+ 3Nx9/VbQNAqiGj7LS7WXYR2mfogIVEGEDnYRbjzFJkRbq3WNPTTAj2pLS3zagmxoYMTV
+ iw0TWXITzP/XF5OpedI74kVNFQzbK4Xkz4lunnpJPRW1Rg6Stg2474URqb04tp+XNqiJ
+ CwLxCCi7uoZ8T0Vakvb3aUzZrxZh3Nt0KvQ9mrqnvOxELTIQV/CUCoVWCkaNPXyc2d99 Xw== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by userp2120.oracle.com with ESMTP id 33ndnuysne-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 25 Sep 2020 20:54:14 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08PKoEmv040658;
+        Fri, 25 Sep 2020 20:54:13 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by aserp3020.oracle.com with ESMTP id 33r28yufem-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 25 Sep 2020 20:54:13 +0000
+Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 08PKsBj6030876;
+        Fri, 25 Sep 2020 20:54:11 GMT
+Received: from ca-mkp.ca.oracle.com (/10.159.214.123)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Fri, 25 Sep 2020 13:54:10 -0700
 To:     Coly Li <colyli@suse.de>
 Cc:     linux-block@vger.kernel.org, linux-nvme@lists.infradead.org,
         netdev@vger.kernel.org, open-iscsi@googlegroups.com,
         linux-scsi@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>,
-        Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.de>,
-        Jan Kara <jack@suse.com>, Jens Axboe <axboe@kernel.dk>,
-        Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Sagi Grimberg <sagi@grimberg.me>,
-        Vlastimil Babka <vbabka@suse.com>, stable@vger.kernel.org
-Subject: Re: [PATCH v8 1/7] net: introduce helper sendpage_ok() in
- include/linux/net.h
-Message-ID: <20200925151812.GA3182427@kroah.com>
+        linux-kernel@vger.kernel.org, Vasily Averin <vvs@virtuozzo.com>,
+        Cong Wang <amwang@redhat.com>,
+        Mike Christie <michaelc@cs.wisc.edu>,
+        Lee Duncan <lduncan@suse.com>, Chris Leech <cleech@redhat.com>,
+        Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.de>
+Subject: Re: [PATCH v8 6/7] scsi: libiscsi: use sendpage_ok() in
+ iscsi_tcp_segment_map()
+From:   "Martin K. Petersen" <martin.petersen@oracle.com>
+Organization: Oracle Corporation
+Message-ID: <yq18scxinmw.fsf@ca-mkp.ca.oracle.com>
 References: <20200925150119.112016-1-colyli@suse.de>
- <20200925150119.112016-2-colyli@suse.de>
+        <20200925150119.112016-7-colyli@suse.de>
+Date:   Fri, 25 Sep 2020 16:54:07 -0400
+In-Reply-To: <20200925150119.112016-7-colyli@suse.de> (Coly Li's message of
+        "Fri, 25 Sep 2020 23:01:18 +0800")
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200925150119.112016-2-colyli@suse.de>
+Content-Type: text/plain
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9755 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 mlxlogscore=845
+ suspectscore=1 adultscore=0 bulkscore=0 malwarescore=0 spamscore=0
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2009250150
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9755 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ lowpriorityscore=0 phishscore=0 adultscore=0 suspectscore=1 bulkscore=0
+ clxscore=1011 impostorscore=0 mlxlogscore=827 mlxscore=0 spamscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009250150
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, Sep 25, 2020 at 11:01:13PM +0800, Coly Li wrote:
-> The original problem was from nvme-over-tcp code, who mistakenly uses
-> kernel_sendpage() to send pages allocated by __get_free_pages() without
-> __GFP_COMP flag. Such pages don't have refcount (page_count is 0) on
-> tail pages, sending them by kernel_sendpage() may trigger a kernel panic
-> from a corrupted kernel heap, because these pages are incorrectly freed
-> in network stack as page_count 0 pages.
-> 
-> This patch introduces a helper sendpage_ok(), it returns true if the
-> checking page,
-> - is not slab page: PageSlab(page) is false.
-> - has page refcount: page_count(page) is not zero
-> 
-> All drivers who want to send page to remote end by kernel_sendpage()
-> may use this helper to check whether the page is OK. If the helper does
-> not return true, the driver should try other non sendpage method (e.g.
-> sock_no_sendpage()) to handle the page.
-> 
-> Signed-off-by: Coly Li <colyli@suse.de>
-> Cc: Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
-> Cc: Christoph Hellwig <hch@lst.de>
-> Cc: Hannes Reinecke <hare@suse.de>
-> Cc: Jan Kara <jack@suse.com>
-> Cc: Jens Axboe <axboe@kernel.dk>
-> Cc: Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>
-> Cc: Philipp Reisner <philipp.reisner@linbit.com>
-> Cc: Sagi Grimberg <sagi@grimberg.me>
-> Cc: Vlastimil Babka <vbabka@suse.com>
-> Cc: stable@vger.kernel.org
-> ---
->  include/linux/net.h | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
-> diff --git a/include/linux/net.h b/include/linux/net.h
-> index d48ff1180879..05db8690f67e 100644
-> --- a/include/linux/net.h
-> +++ b/include/linux/net.h
-> @@ -21,6 +21,7 @@
->  #include <linux/rcupdate.h>
->  #include <linux/once.h>
->  #include <linux/fs.h>
-> +#include <linux/mm.h>
->  #include <linux/sockptr.h>
->  
->  #include <uapi/linux/net.h>
-> @@ -286,6 +287,21 @@ do {									\
->  #define net_get_random_once_wait(buf, nbytes)			\
->  	get_random_once_wait((buf), (nbytes))
->  
-> +/*
-> + * E.g. XFS meta- & log-data is in slab pages, or bcache meta
-> + * data pages, or other high order pages allocated by
-> + * __get_free_pages() without __GFP_COMP, which have a page_count
-> + * of 0 and/or have PageSlab() set. We cannot use send_page for
-> + * those, as that does get_page(); put_page(); and would cause
-> + * either a VM_BUG directly, or __page_cache_release a page that
-> + * would actually still be referenced by someone, leading to some
-> + * obscure delayed Oops somewhere else.
-> + */
-> +static inline bool sendpage_ok(struct page *page)
-> +{
-> +	return  !PageSlab(page) && page_count(page) >= 1;
 
-Do you have one extra ' ' after "return" there?
+Coly,
 
-And this feels like a mm thing, why put it in net.h and not mm.h?
+> In iscsci driver, iscsi_tcp_segment_map() uses the following code to
+> check whether the page should or not be handled by sendpage:
+>     if (!recv && page_count(sg_page(sg)) >= 1 && !PageSlab(sg_page(sg)))
+>
+> The "page_count(sg_page(sg)) >= 1 && !PageSlab(sg_page(sg)" part is to
+> make sure the page can be sent to network layer's zero copy path. This
+> part is exactly what sendpage_ok() does.
+>
+> This patch uses  use sendpage_ok() in iscsi_tcp_segment_map() to replace
+> the original open coded checks.
 
-thanks,
+Looks fine to me.
 
-greg k-h
+Acked-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+-- 
+Martin K. Petersen	Oracle Linux Engineering
