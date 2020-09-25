@@ -2,96 +2,135 @@ Return-Path: <SRS0=txDZ=DC=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8653AC4727C
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 14:09:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 888C1C4741F
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 15:01:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 48BA1208A9
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 14:09:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601042956;
-	bh=dzK5f1+oVyN6ZBey267IGXxdgShC116w1VoBnyfoQSE=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=u+1YbfsjPgMzoxt70W/ofH19xlO7z16gomVAFpltwEGAsT6seCPFBKGv7ZwT55OdF
-	 VQ8vjlRgVnBzp8kH74ODi0FHw4aeHsqDStnJOdjp3h/F164nZ+pmBS8sP+Jgy8V7Gp
-	 cHlN0Z6Ip3vRWc0RSW1QDB8bPIdZ3XAK/EUJKwwE=
+	by mail.kernel.org (Postfix) with ESMTP id 5179121D42
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 15:01:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728978AbgIYOI7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Sep 2020 10:08:59 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45630 "EHLO mail.kernel.org"
+        id S1729231AbgIYPBl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 25 Sep 2020 11:01:41 -0400
+Received: from mx2.suse.de ([195.135.220.15]:33914 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728942AbgIYOI4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 25 Sep 2020 10:08:56 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6E02321D42;
-        Fri, 25 Sep 2020 14:08:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601042935;
-        bh=dzK5f1+oVyN6ZBey267IGXxdgShC116w1VoBnyfoQSE=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ntl1GUotfC4Z+yV3SMOVIu8rrHHuY2vaJU57D+BmzxN6Bqw8mwzAzOAxdapPqjrVL
-         4sDhfxeIwuuPCUzTYPpC2PfiXLU0hXhIDxSJVOTVgT7UR1ZghIq30QMhLtl8NzpYLD
-         7n/V92R/RtVDg36J2GUgike3vTYs7wruADqqdKVw=
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
-Subject: [RFC PATCH 3/4] ceph: remove timeout on allowing reconnect after blocklisting
-Date:   Fri, 25 Sep 2020 10:08:50 -0400
-Message-Id: <20200925140851.320673-4-jlayton@kernel.org>
+        id S1728693AbgIYPBk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 25 Sep 2020 11:01:40 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id AD492B02E;
+        Fri, 25 Sep 2020 15:01:38 +0000 (UTC)
+From:   Coly Li <colyli@suse.de>
+To:     linux-block@vger.kernel.org, linux-nvme@lists.infradead.org,
+        netdev@vger.kernel.org, open-iscsi@googlegroups.com,
+        linux-scsi@vger.kernel.org, ceph-devel@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Coly Li <colyli@suse.de>,
+        Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>,
+        Chris Leech <cleech@redhat.com>,
+        Christoph Hellwig <hch@lst.de>, Cong Wang <amwang@redhat.com>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Dumazet <eric.dumazet@gmail.com>,
+        Hannes Reinecke <hare@suse.de>,
+        Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.com>,
+        Jeff Layton <jlayton@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+        Lee Duncan <lduncan@suse.com>,
+        Mike Christie <michaelc@cs.wisc.edu>,
+        Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Sagi Grimberg <sagi@grimberg.me>,
+        Vasily Averin <vvs@virtuozzo.com>,
+        Vlastimil Babka <vbabka@suse.com>
+Subject: [PATCH v8 0/7] Introduce sendpage_ok() to detect misused sendpage in network related drivers
+Date:   Fri, 25 Sep 2020 23:01:12 +0800
+Message-Id: <20200925150119.112016-1-colyli@suse.de>
 X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200925140851.320673-1-jlayton@kernel.org>
-References: <20200925140851.320673-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-30 minutes is a long time to wait, and this makes it difficult to test
-the feature by manually blocklisting clients. Remove the timeout
-infrastructure and just allow the client to reconnect at will.
+This series was original by a bug fix in nvme-over-tcp driver which only
+checked whether a page was allocated from slab allcoator, but forgot to
+check its page_count: The page handled by sendpage should be neither a
+Slab page nor 0 page_count page.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+As Sagi Grimberg suggested, the original fix is refind to a more common
+inline routine:
+    static inline bool sendpage_ok(struct page *page)
+    {
+        return  (!PageSlab(page) && page_count(page) >= 1);
+    }
+If sendpage_ok() returns true, the checking page can be handled by the
+concrete zero-copy sendpage method in network layer.
+
+The v8 series has 7 patches,
+- The 1st patch in this series introduces sendpage_ok() in header file
+  include/linux/net.h.
+- The 2nd patch adds WARN_ONCE() for improper zero-copy send in
+  kernel_sendpage().
+- The 3rd patch fixes the page checking issue in nvme-over-tcp driver.
+- The 4th patch adds page_count check by using sendpage_ok() in
+  do_tcp_sendpages() as Eric Dumazet suggested.
+- The 5th and 6th patches just replace existing open coded checks with
+  the inline sendpage_ok() routine.
+
+Coly Li
+
+Cc: Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
+Cc: Chris Leech <cleech@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Cong Wang <amwang@redhat.com>
+Cc: David S. Miller <davem@davemloft.net>
+Cc: Eric Dumazet <eric.dumazet@gmail.com>
+Cc: Hannes Reinecke <hare@suse.de>
+Cc: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jan Kara <jack@suse.com>
+Cc: Jeff Layton <jlayton@kernel.org>
+Cc: Jens Axboe <axboe@kernel.dk>
+Cc: Lee Duncan <lduncan@suse.com>
+Cc: Mike Christie <michaelc@cs.wisc.edu>
+Cc: Mikhail Skorzhinskii <mskorzhinskiy@solarflare.com>
+Cc: Philipp Reisner <philipp.reisner@linbit.com>
+Cc: Sagi Grimberg <sagi@grimberg.me>
+Cc: Vasily Averin <vvs@virtuozzo.com>
+Cc: Vlastimil Babka <vbabka@suse.com>
 ---
- fs/ceph/mds_client.c | 5 -----
- fs/ceph/super.h      | 1 -
- 2 files changed, 6 deletions(-)
+Changelog:
+v8: add WARN_ONCE() in kernel_sendpage() as Christoph suggested.
+v7: remove outer brackets from the return line of sendpage_ok() as
+    Eric Dumazet suggested.
+v6: fix page check in do_tcp_sendpages(), as Eric Dumazet suggested.
+    replace other open coded checks with sendpage_ok() in libceph,
+    iscsi drivers.
+v5, include linux/mm.h in include/linux/net.h
+v4, change sendpage_ok() as an inline helper, and post it as
+    separate patch, as Christoph Hellwig suggested.
+v3, introduce a more common sendpage_ok() as Sagi Grimberg suggested.
+v2, fix typo in patch subject
+v1, the initial version.
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 08f1c0c31dc2..fd16db6ecb0a 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4374,12 +4374,7 @@ static void maybe_recover_session(struct ceph_mds_client *mdsc)
- 	if (!READ_ONCE(fsc->blocklisted))
- 		return;
- 
--	if (fsc->last_auto_reconnect &&
--	    time_before(jiffies, fsc->last_auto_reconnect + HZ * 60 * 30))
--		return;
--
- 	pr_info("auto reconnect after blocklisted\n");
--	fsc->last_auto_reconnect = jiffies;
- 	ceph_force_reconnect(fsc->sb);
- }
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 582694899130..cb138e218ab4 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -108,7 +108,6 @@ struct ceph_fs_client {
- 
- 	unsigned long mount_state;
- 
--	unsigned long last_auto_reconnect;
- 	bool blocklisted;
- 
- 	bool have_copy_from2;
+Coly Li (7):
+  net: introduce helper sendpage_ok() in include/linux/net.h
+  net: add WARN_ONCE in kernel_sendpage() for improper zero-copy send
+  nvme-tcp: check page by sendpage_ok() before calling kernel_sendpage()
+  tcp: use sendpage_ok() to detect misused .sendpage
+  drbd: code cleanup by using sendpage_ok() to check page for
+    kernel_sendpage()
+  scsi: libiscsi: use sendpage_ok() in iscsi_tcp_segment_map()
+  libceph: use sendpage_ok() in ceph_tcp_sendpage()
+
+ drivers/block/drbd/drbd_main.c |  2 +-
+ drivers/nvme/host/tcp.c        |  7 +++----
+ drivers/scsi/libiscsi_tcp.c    |  2 +-
+ include/linux/net.h            | 16 ++++++++++++++++
+ net/ceph/messenger.c           |  2 +-
+ net/ipv4/tcp.c                 |  3 ++-
+ net/socket.c                   |  6 ++++--
+ 7 files changed, 28 insertions(+), 10 deletions(-)
+
 -- 
 2.26.2
 
