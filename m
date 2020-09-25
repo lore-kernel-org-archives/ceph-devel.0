@@ -2,107 +2,107 @@ Return-Path: <SRS0=txDZ=DC=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82D43C4363D
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 09:40:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9447C4363D
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 14:08:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1FFB6206CC
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 09:40:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="T9b5OPLq"
+	by mail.kernel.org (Postfix) with ESMTP id 84D9521D91
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Sep 2020 14:08:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1601042937;
+	bh=QwuRINCGtX1bXvsKTty6G1UeJJCNBikXox0OBaxpkUY=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=hCJvVSyMlBM1v3AbQ9usFhzbMGX/aETH12of2N6JtLsf//qELftJKOOLy16dmdotC
+	 4x5doPvOXSUnW5Uc/S+tiMSsS6FX9ArQF9A/Go05TKXG090bwDQ1EII6U4IjJ4zLUj
+	 0emDmhWj1ULDa8KnMmn2hzvkUnJ2ESPAd0RO/wPs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727678AbgIYJk1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Sep 2020 05:40:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37400 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727346AbgIYJk0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2020 05:40:26 -0400
-Received: from mail-il1-x142.google.com (mail-il1-x142.google.com [IPv6:2607:f8b0:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAEF0C0613CE
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2020 02:40:26 -0700 (PDT)
-Received: by mail-il1-x142.google.com with SMTP id y9so1760893ilq.2
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2020 02:40:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=tAYrhy1HXERHn4BgOnV52dJ/oDGS1VG73rZL7zEtL6E=;
-        b=T9b5OPLqcA7Q3gHS64YfQYb7RwqE6uoL1hneUp7psHwUmZ7PcYtZohztZ8XUqwT/UB
-         EtyKX/iUL74A70iGhgV8nPKAHJfx2Ymf78kNpHORTnUw93QmjAGH8WRMsXwauzTFnuLv
-         rXiqu2NugF5VSi0dML87gJMt0MYhNvmoFXJAri68/a1cCr95lCY3g5fWfc57fkgoq7ad
-         J4pxfYoq2e6FKiRTNT46TAD0UoPlN/DThM4XtBlJm2M15BGBbfyuufBFtPspT6HvvmKJ
-         Hh7DatnMpg8fXN6TjVsXBY+Iu6E7GwxiaHLy+7KpnaEf5Moz8zo/FCpWktoUHrpozHVL
-         g06Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=tAYrhy1HXERHn4BgOnV52dJ/oDGS1VG73rZL7zEtL6E=;
-        b=FrBmuwHniZTWk0+GAaBUgmjSSIctO4yHt97QPEYiJDf8ulvOdAwe0NdzdlMPTi7c8m
-         mKoLJfnnjanhiz9/vHrBx1VL9G2bFHs1MzkenjrKLGEvhGsu2P06cnpAyvobEtXLAS+6
-         KhN+m3DvYYMUVvM9oMCrFui15hKPe4WCPYN83fJKEoAoiAyI9qsM+ZuLdagk3YP2i4hn
-         poBsN3YCHfn+I1X9Xm1s6bcqdf6JWRcQHZN45zUtDqW2afenFOAcL36tqMOqlKrXDjjB
-         MAgaliaQFvaRZecSo21DP3rdcso8iX+dzElB40CthhnsRkiucKDNth7QGV7/mhLkB5M6
-         8dGQ==
-X-Gm-Message-State: AOAM533JEgx+SUxOLUWK4xCeDcEW+GFFkEcRUEQoMer7ZGiSIMg7V0so
-        iFi9x6/srloiPhHOXuUJM9SouTzfY1AEMppcfAM=
-X-Google-Smtp-Source: ABdhPJzo2X231xx7+nD8O74iV4Ua03zORdRAY6LcAnuVn3LZ2mQsxuefeI3hmmH0AdAMy2o/Eyv4+BoZPCKl929oWsw=
-X-Received: by 2002:a05:6e02:5cf:: with SMTP id l15mr2334784ils.281.1601026826001;
- Fri, 25 Sep 2020 02:40:26 -0700 (PDT)
+        id S1728957AbgIYOI4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 25 Sep 2020 10:08:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45618 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726990AbgIYOIz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 25 Sep 2020 10:08:55 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id BAD4D21D7A;
+        Fri, 25 Sep 2020 14:08:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1601042935;
+        bh=QwuRINCGtX1bXvsKTty6G1UeJJCNBikXox0OBaxpkUY=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=EXE4kpsE+ZE0QBIePd5hvnJaYjSVEdmMiIomG7KUAEjHAVGiEG7yd4Y/RGLAfL3jJ
+         OtOfJIw+9GbiBeyhXcCQUQBniy0RyPxf+AiRv+wMR9iYk2xhvptolR/AS7h4J43MSG
+         RZGVW1UOW97DHYtDwwbffc10Q9DQXu97rPW8nnKk=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
+Subject: [RFC PATCH 2/4] ceph: don't mark mount as SHUTDOWN when recovering session
+Date:   Fri, 25 Sep 2020 10:08:49 -0400
+Message-Id: <20200925140851.320673-3-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200925140851.320673-1-jlayton@kernel.org>
+References: <20200925140851.320673-1-jlayton@kernel.org>
 MIME-Version: 1.0
-References: <20200925014806.GA1422079@jerryopenix>
-In-Reply-To: <20200925014806.GA1422079@jerryopenix>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Fri, 25 Sep 2020 11:40:21 +0200
-Message-ID: <CAOi1vP_pAZgiQYW=yJjLm6M000Q_iJWwqVYLOZxLhdTW=COzFw@mail.gmail.com>
-Subject: Re: [PATCH] ceph: remove unused macro anywhere
-To:     "Liu, Changcheng" <changcheng.liu@intel.com>
-Cc:     Jeff Layton <jlayton@kernel.org>,
-        Ceph Development <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, Sep 25, 2020 at 3:55 AM Liu, Changcheng
-<changcheng.liu@intel.com> wrote:
->
-> CEPH_PORT_FIRST isn't used anywhere.
-> non-monitors ports are in below range:
->   [CEPH_PORT_START, CEPH_PORT_LAST]
->
-> Signed-off-by: Changcheng Liu <changcheng.liu@aliyun.com>
->
-> diff --git a/include/linux/ceph/msgr.h b/include/linux/ceph/msgr.h
-> index 9e50aede46c8..0e7888665492 100644
-> --- a/include/linux/ceph/msgr.h
-> +++ b/include/linux/ceph/msgr.h
-> @@ -13,7 +13,6 @@
->   * range, simply for the benefit of tools like nmap or wireshark
->   * that would like to identify the protocol.
->   */
-> -#define CEPH_PORT_FIRST  6789
->  #define CEPH_PORT_START  6800  /* non-monitors start here */
->  #define CEPH_PORT_LAST   6900
->
-> --
-> 2.17.1
->
+When recovering a session (a'la recover_session=clean), we want to do
+all of the operations that we do on a forced umount, but changing the
+mount state to SHUTDOWN is wrong and can cause queued MDS requests to
+fail when the session comes back.
 
-Hi Changcheng,
+Only mark it as SHUTDOWN when umount_begin is called.
 
-This is sent from changcheng.liu@intel.com, but the Signed-off-by
-line doesn't cover that address.  It is quite common for people to
-own several addresses, but the Signed-off-by line has to match.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/super.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
 
-Could you please resend from the correct address / with the correct
-Signed-off-by line?
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 2516304379d3..46a0e4e1b177 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -832,6 +832,13 @@ static void destroy_caches(void)
+ 	ceph_fscache_unregister();
+ }
+ 
++static void __ceph_umount_begin(struct ceph_fs_client *fsc)
++{
++	ceph_osdc_abort_requests(&fsc->client->osdc, -EIO);
++	ceph_mdsc_force_umount(fsc->mdsc);
++	fsc->filp_gen++; // invalidate open files
++}
++
+ /*
+  * ceph_umount_begin - initiate forced umount.  Tear down the
+  * mount, skipping steps that may hang while waiting for server(s).
+@@ -844,9 +851,7 @@ static void ceph_umount_begin(struct super_block *sb)
+ 	if (!fsc)
+ 		return;
+ 	fsc->mount_state = CEPH_MOUNT_SHUTDOWN;
+-	ceph_osdc_abort_requests(&fsc->client->osdc, -EIO);
+-	ceph_mdsc_force_umount(fsc->mdsc);
+-	fsc->filp_gen++; // invalidate open files
++	__ceph_umount_begin(fsc);
+ }
+ 
+ static const struct super_operations ceph_super_ops = {
+@@ -1235,7 +1240,7 @@ int ceph_force_reconnect(struct super_block *sb)
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+ 	int err = 0;
+ 
+-	ceph_umount_begin(sb);
++	__ceph_umount_begin(fsc);
+ 
+ 	/* Make sure all page caches get invalidated.
+ 	 * see remove_session_caps_cb() */
+-- 
+2.26.2
 
-Thanks,
-
-                Ilya
