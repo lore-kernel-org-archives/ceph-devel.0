@@ -2,95 +2,210 @@ Return-Path: <SRS0=O9sd=DG=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-4.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1F69C4727C
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 19:55:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17ADAC4727C
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 21:06:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8C27E207F7
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 19:55:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601409311;
-	bh=Ry+IsHRby46BDMgnna99JY+kLtsmnM5PZLFbpm/w1R0=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=KPf1Ho/K2KBJbgbddXXGuCrV9+SXDghIQ7gUx/eYnwRC84XkNp6uaXvSa+Bkw/r8J
-	 5vnZTJ4qN1fspUS4JzPR6LLZGRdvoUx4zEAesWJ1iT6Sj7kRXR1wnFoedYe9GvJCLc
-	 daziXst5bBq3LneJod3WDDEUArUmWCxXhbVMyOGc=
+	by mail.kernel.org (Postfix) with ESMTP id 8DC922075A
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 21:06:04 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cuKRCdHO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728800AbgI2TzK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 29 Sep 2020 15:55:10 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48884 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728226AbgI2TzK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Sep 2020 15:55:10 -0400
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 125D020774;
-        Tue, 29 Sep 2020 19:55:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601409309;
-        bh=Ry+IsHRby46BDMgnna99JY+kLtsmnM5PZLFbpm/w1R0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=IR/pKK5OuMj8uDP3xHpd4v+Thza9sOMf8fxZuuuusIkaYs1FAVl/l0SKnMLbJFPfI
-         U4jNto+o4+LV7EMGf9t5KS6cFiXZmupuaIhIJT8B3a3RgUNu21iybjVTog8ec02YXb
-         ksa5GqeFEbGCyS3xCvWc4jgp++GN/Cz+eJv1yeUs=
-Message-ID: <eb2d601b8b9d7bac8fa5df4c7dc1f6a15bde6b47.camel@kernel.org>
-Subject: Re: [RFC PATCH 4/4] ceph: queue request when CLEANRECOVER is set
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
-Date:   Tue, 29 Sep 2020 15:55:07 -0400
-In-Reply-To: <20200925140851.320673-5-jlayton@kernel.org>
-References: <20200925140851.320673-1-jlayton@kernel.org>
-         <20200925140851.320673-5-jlayton@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
+        id S1729350AbgI2VGD (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 29 Sep 2020 17:06:03 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:38987 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726643AbgI2VGD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 29 Sep 2020 17:06:03 -0400
+Dkim-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1601413561;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Rxl11GptyXftjlILgfJfq5BJPGYwy6P0yDiH+xncc68=;
+        b=cuKRCdHOtAR4HOWGxY0nN/2E9QJRTBhzxLhfi6xo7LXz1QHMFUbKjlPcLn5+JPvCSHfyzQ
+        WZZtoPG5cCCcXB8WY62gEpHB6LMIM4PuP7MR1GxTnPj2fdpuLObW0r4I9FMmddRntu8rNC
+        TX2Mr9U3q+oqoAZGIrpSt05nmROG2NA=
+Received: from mail-ot1-f69.google.com (mail-ot1-f69.google.com
+ [209.85.210.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-222-ekoY9uuyNlWYUbrNQ466mw-1; Tue, 29 Sep 2020 17:05:58 -0400
+X-MC-Unique: ekoY9uuyNlWYUbrNQ466mw-1
+Received: by mail-ot1-f69.google.com with SMTP id d10so3732918otf.17
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2020 14:05:57 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:content-transfer-encoding;
+        bh=Rxl11GptyXftjlILgfJfq5BJPGYwy6P0yDiH+xncc68=;
+        b=HdRoN8r3af6ueqO5YZxVeVafLich2YAZ68uLC9uTANNnMreBwzYg5mEdzpJklJ8yyy
+         8wDr1YO2XavxnPmfrCMdXHAxHiTjeyee9GbxvVWH1K5OdYlDq9gVsgfEW071QuN/BIVX
+         DJRpJa1p6iUucmPWLxHx8hZNbOyLK9n4s51hPeWRGhC1/kcQieNgwH/sq6WKO8zOSKpx
+         ggIbSISgwwhMuEyjdtlIiRKZfU9mUoIIxp8nR6tdXuGm4tqjeGp2sFjb/HyB/pKZpxu7
+         nLpSWHvxaUE3ux2B6fsXkDryKBgnX614YTDTocV7Zg2Hz2pdUIGlaKhXQZukR3xmUPk+
+         43Rw==
+X-Gm-Message-State: AOAM530B+AXuiTbWQY1fnkG5/lWljUs6rz2thowU40jZhF1l/3LpzZqu
+        iGfxapsg1D1DpI4RIBq+wipx9ET1vfBFXJgO+B3oLOZks7JwMrvvOp11ZIh3DqnmMyLjWL1hq0e
+        Ow147EJaT2FPI6ivF9pM/X5AyEfBqd+tbXBS/tQ==
+X-Received: by 2002:a9d:7b48:: with SMTP id f8mr4115356oto.297.1601413557034;
+        Tue, 29 Sep 2020 14:05:57 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwiEDmLOpbLcf3LRryHDzeySWewBEASVixOTKogsnO9CAudchODZl0Pk+IKyeVcnnz9EiSz7YfDXsn+prFbgjI=
+X-Received: by 2002:a9d:7b48:: with SMTP id f8mr4115292oto.297.1601413555966;
+ Tue, 29 Sep 2020 14:05:55 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+References: <CAByD1q-w83TQgCof5TJH0DWXPMobbqQQcbuaKsnE6PqNsaWqVw@mail.gmail.com>
+ <CA+aFP1AsO3CZA37ai6Tpqyd4gEN+BzeaC6BzUT+VnK7JKtxN3w@mail.gmail.com>
+ <CAByD1q89xGQGGj4=ySAw_hrHCq+t3zp9u8CkY-ey0_oo-7ntxA@mail.gmail.com> <CA+aFP1Bxt9NgybrEKGRG2QDsxaoMqcHYyFOzLFeVZqc_AQW1_w@mail.gmail.com>
+In-Reply-To: <CA+aFP1Bxt9NgybrEKGRG2QDsxaoMqcHYyFOzLFeVZqc_AQW1_w@mail.gmail.com>
+From:   Travis Nielsen <tnielsen@redhat.com>
+Date:   Tue, 29 Sep 2020 15:05:45 -0600
+Message-ID: <CAByD1q-TkadH8-qKP_up5AzJjyaBq8-WgyZuU6TVGt_suVC+KQ@mail.gmail.com>
+Subject: Re: Rook orchestrator module
+To:     "Dillaman, Jason" <dillaman@redhat.com>,
+        Sebastian Wagner <swagner@suse.com>,
+        Patrick Donnelly <pdonnell@redhat.com>,
+        Varsha Rao <varao@redhat.com>, Sebastien Han <seb@redhat.com>,
+        Ceph Development List <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, 2020-09-25 at 10:08 -0400, Jeff Layton wrote:
-> Ilya noticed that the first access to a blacklisted mount would often
-> get back -EACCES, but then subsequent calls would be OK. The problem is
-> in __do_request. If the session is marked as REJECTED, a hard error is
-> returned instead of waiting for a new session to come into being.
-> 
-> When the session is REJECTED and the mount was done with
-> recover_session=clean, queue the request to the waiting_for_map queue,
-> which will be awoken after tearing down the old session.
-> 
-> URL: https://tracker.ceph.com/issues/47385
-> Reported-by: Ilya Dryomov <idryomov@gmail.com>
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  fs/ceph/mds_client.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index fd16db6ecb0a..b07e7adf146f 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -2819,7 +2819,10 @@ static void __do_request(struct ceph_mds_client *mdsc,
->  	if (session->s_state != CEPH_MDS_SESSION_OPEN &&
->  	    session->s_state != CEPH_MDS_SESSION_HUNG) {
->  		if (session->s_state == CEPH_MDS_SESSION_REJECTED) {
-> -			err = -EACCES;
-> +			if (ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER))
-> +				list_add(&req->r_wait, &mdsc->waiting_for_map);
-> +			else
-> +				err = -EACCES;
->  			goto out_session;
->  		}
->  		/*
+Adding reply-all this time...
 
-I think this is wrong when CEPH_MDS_R_ASYNC is set. I'll send a v2 set
-if we end up staying with this approach.
--- 
-Jeff Layton <jlayton@kernel.org>
+On Tue, Sep 29, 2020 at 2:53 PM Jason Dillaman <jdillama@redhat.com> wrote:
+>
+> On Tue, Sep 29, 2020 at 4:47 PM Travis Nielsen <tnielsen@redhat.com> wrot=
+e:
+> >
+> > On Tue, Sep 29, 2020 at 1:50 PM Jason Dillaman <jdillama@redhat.com> wr=
+ote:
+> > >
+> > > On Tue, Sep 29, 2020 at 3:33 PM Travis Nielsen <tnielsen@redhat.com> =
+wrote:
+> > > >
+> > > > Sebastian and fellow orchestrators,
+> > > >
+> > > > Some questions have come up recently about issues in the Rook
+> > > > orchestrator module and its state of disrepair. Patrick, Varsha, an=
+d I
+> > > > have been discussing these recently as Varsha has been working on t=
+he
+> > > > module. Before we fix all the issues that are being found, I want t=
+o
+> > > > start a higher level conversation. I=E2=80=99ll join the leads meet=
+ing
+> > > > tomorrow to discuss, and would be good to include in the Monday
+> > > > orchestrator agenda as well, which unfortunately I haven=E2=80=99t =
+been able
+> > > > to attend recently...
+> > > >
+> > > > First, Rook is driven by the K8s APIs, including CRDs, an operator,
+> > > > the CSI driver, etc. When the admin needs to configure the Ceph
+> > > > cluster, they create the CRDs and other resources directly with the
+> > > > K8s tools such as kubectl. Rook does everything with K8s patterns s=
+o
+> > > > that the admin doesn=E2=80=99t need to leave their standard adminis=
+tration
+> > > > sandbox in order to configure Rook or Ceph. If any Ceph-specific
+> > > > command needs to be run, the rook toolbox can be used. However, we
+> > > > prefer to avoid the toolbox for common scenarios that should have C=
+RDs
+> > > > for declaring desired state.
+> > > >
+> > > > The fundamental question then is, **what scenarios require the Rook
+> > > > orchestrator mgr module**? The module is not enabled by default in
+> > > > Rook clusters and I am not aware of upstream users consuming it.
+> > > >
+> > > > The purpose of the orchestrator module was originally to provide a
+> > > > common entry point either for Ceph CLI tools or the dashboard. This
+> > > > would provide the constant interface to work with both Rook or ceph=
+adm
+> > > > clusters. Patrick pointed out that the dashboard isn=E2=80=99t real=
+ly a
+> > > > scenario anymore for the orchestrator module.
+> > >
+> > > Is that true? [1]
+> >
+> > Perhaps I misunderstood. If the dashboard is still a requirement, the
+> > requirements will certainly be much higher to maintain support.
+> >
+> > >
+> > > > If so, the only
+> > > > remaining usage is for CLI tools. And if we only have the CLI
+> > > > scenario, this means that the CLI commands would be run from the
+> > > > toolbox. But we are trying to avoid the toolbox. We should be putti=
+ng
+> > > > our effort into the CRDs, CSI driver, etc.
+> > > >
+> > > > If the orchestrator module is creating CRs, we are likely doing
+> > > > something wrong. We expect the cluster admin to create CRs.
+> > > >
+> > > > Thus, I=E2=80=99d like to understand the scenarios where the rook o=
+rchestrator
+> > > > module is needed. If there isn=E2=80=99t a need anymore since dashb=
+oard
+> > > > requirements have changed, I=E2=80=99d propose the module can be re=
+moved.
+> > >
+> > > I don't have a current stake in the outcome, but I could foresee the
+> > > future need/desire for letting the Ceph cluster itself spin up
+> > > resources on-demand in k8s via Rook. Let's say that I want to convert
+> > > an XFS on RBD image to CephFS, the MGR could instruct the orchestrato=
+r
+> > > to kick off a job to translate between the two formats. I'd imagine
+> > > the same could be argued for on-demand NFS/SMB gateways or anywhere
+> > > else there is a delta between a storage administrator setting up the
+> > > basic Ceph system and Ceph attempting to self-regulate/optimize.
+> >
+> > If Ceph needs to self regulate, I could certainly see the module as
+> > useful, such as auto-scaling the daemons when load is high. But at the
+> > same time, the operator could watch for Ceph events, metrics, or other
+> > indicators and perform the self-regulation according to the CR
+> > settings, instead of it happening inside the mgr module.
+>
+> But then you would be embedding low-level business logic about Ceph
+> inside Rook? Or if you are saying Rook would wait for a special event
+> / alert hook from Ceph to perform some action. If that's the case, it
+> sounds a lot like what the orchestrator purports to do (at least to me
+> and at least as an end-state goal).
+
+Agreed we don't want to embed Ceph logic in Rook. But yes, if Rook can
+have a hook into Ceph to perform the action, the operator could handle
+it. Then if cephadm needed to handle the same scenario, it might use a
+mgr module to implement. But no need for a rook module in that case.
+
+>
+> > At the end of the day, I want to make sure we actually need an
+> > orchestrator interface. K8s and cephadm are very different
+> > environments and their features probably won't ever be at parity with
+> > each other. It may be more appropriate to define the rook and cephadm
+> > module separately. Or at least we need to be very clear why we need
+> > the common interface, that it's tested, and supported.
+>
+> Not going to disagree with that last point.
+>
+> > >
+> > > > Thanks,
+> > > > Travis
+> > > > Rook
+> > > >
+> > >
+> > > [1] https://tracker.ceph.com/issues/46756
+> > >
+> > > --
+> > > Jason
+> > >
+> >
+>
+>
+> --
+> Jason
+>
 
