@@ -2,54 +2,54 @@ Return-Path: <SRS0=O9sd=DG=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE1E5C4727C
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 12:48:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48C1AC4727F
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 12:48:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7C4C52083B
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 12:48:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EF78D2083B
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 12:48:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601383691;
-	bh=rupOkeDxy3oYsnvNpA2aUcNyWe43pYOz/tl4D0t3va0=;
+	s=default; t=1601383717;
+	bh=vbxzyR83QewFUg1q1jRuRlk5dC8cWidPMEgsft8BWtY=;
 	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=1gVPx2kBXjKAiMvXcyi56YYjSIHXo+gDswP9Sy7yyM8nzX3pnnNdx1IS1SejYm9nO
-	 9xEBuVXuVDXP7b9X/Eg3eUOkU7unr/sNwYpSFyw8Z/ET8dV6K3RqPfPN47LuwNOTbb
-	 HDsfyl3YHETcJh8EN3b9Ram9wRWjkV1xZsac2ZKU=
+	b=ZZ99YHlxd6yE4jaQh2O9v9dT8Ja2YnEMj7ZjBzSI/aVHwEDxD/hJwgHQPogV+TEGp
+	 mWIOjrdPzvhRbXv+i8pWc2VhRK+Y2yBrPfDWbK1h0RG9PrxUmYNe83R1mSqBQGBBJs
+	 TBIv7gX3F6BWfARjVJ7U2Odz6OOMhJ1Zo8YeY6fk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387626AbgI2MsK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 29 Sep 2020 08:48:10 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56396 "EHLO mail.kernel.org"
+        id S1730749AbgI2Msa (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 29 Sep 2020 08:48:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57656 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729363AbgI2Mqr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Sep 2020 08:46:47 -0400
+        id S1728632AbgI2MsZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 29 Sep 2020 08:48:25 -0400
 Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B18AC2083B;
-        Tue, 29 Sep 2020 12:46:45 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id EF52A2083B;
+        Tue, 29 Sep 2020 12:48:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601383606;
-        bh=rupOkeDxy3oYsnvNpA2aUcNyWe43pYOz/tl4D0t3va0=;
+        s=default; t=1601383704;
+        bh=vbxzyR83QewFUg1q1jRuRlk5dC8cWidPMEgsft8BWtY=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=GaQWKXb2Y8au5S+VPgcB1nPGrIfWWISQqSQNTncbmzTQ2EBKYSCv3iO3jYCliUVtz
-         CoXYxxJ7cZWk5nMzXUkEc54RBCBwwVyyCk6kcWpb3KWooU8Jlw1aUklVoQiUIcTE48
-         9/xKwqHiXszxAXrJj/INaQkTlLU7PF2Y8np8sS+Q=
-Message-ID: <165246a0e8fb3db114f5b31c9950b51f551b3811.camel@kernel.org>
-Subject: Re: [RFC PATCH 4/4] ceph: queue request when CLEANRECOVER is set
+        b=uxe5LwDD8tafghBMZvtk8OTB0hDt8VZQl0BMR/vme5RiI3yFT4TPb3jk8zWE+rwNk
+         J4wV40ZXE6nN7wLOPXMWFoNp5PdnXGuO8BcHMFuA+3xFdPGN/sstIqQWZUYZ2zRGjn
+         jgTmEMf60y02NJTyOQ96giwDpfwskn8I/Oq9pjJI=
+Message-ID: <3224feb0441327729dc777666c33042b4ced82a8.camel@kernel.org>
+Subject: Re: [RFC PATCH 0/4] ceph: fix spurious recover_session=clean errors
 From:   Jeff Layton <jlayton@kernel.org>
-To:     "Yan, Zheng" <ukernel@gmail.com>
+To:     Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <ukernel@gmail.com>
 Cc:     ceph-devel <ceph-devel@vger.kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>,
         Patrick Donnelly <pdonnell@redhat.com>
-Date:   Tue, 29 Sep 2020 08:46:44 -0400
-In-Reply-To: <CAAM7YAnNQG7-iV_LcV2Uc1qCsUFeVu1j+G426sG4ruZs=E_n+w@mail.gmail.com>
+Date:   Tue, 29 Sep 2020 08:48:22 -0400
+In-Reply-To: <CAOi1vP_E9he3RaTHAZ3qeXGe1xgcSkEXdrCYOY7rjab4-vr=6w@mail.gmail.com>
 References: <20200925140851.320673-1-jlayton@kernel.org>
-         <20200925140851.320673-5-jlayton@kernel.org>
-         <CAAM7YAnNQG7-iV_LcV2Uc1qCsUFeVu1j+G426sG4ruZs=E_n+w@mail.gmail.com>
+         <CAAM7YAmJfNCbt4ON5c44FFVYOUhXu0ipK858aLJK22ZX2E-FdA@mail.gmail.com>
+         <CAOi1vP9Nz2Art=rq06qBuU3DvKzZs+RR7pf+qsGxYZkrbSB-1Q@mail.gmail.com>
+         <CAAM7YA=bo-pdnLuxFAyChtZCoP6VZ3oUJEX_+Sn5r6i6bO_+8Q@mail.gmail.com>
+         <CAOi1vP_E9he3RaTHAZ3qeXGe1xgcSkEXdrCYOY7rjab4-vr=6w@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
@@ -58,61 +58,45 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, 2020-09-29 at 16:31 +0800, Yan, Zheng wrote:
-> On Fri, Sep 25, 2020 at 10:08 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > Ilya noticed that the first access to a blacklisted mount would often
-> > get back -EACCES, but then subsequent calls would be OK. The problem is
-> > in __do_request. If the session is marked as REJECTED, a hard error is
-> > returned instead of waiting for a new session to come into being.
+On Tue, 2020-09-29 at 12:58 +0200, Ilya Dryomov wrote:
+> On Tue, Sep 29, 2020 at 12:44 PM Yan, Zheng <ukernel@gmail.com> wrote:
+> > On Tue, Sep 29, 2020 at 4:55 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+> > > On Tue, Sep 29, 2020 at 10:28 AM Yan, Zheng <ukernel@gmail.com> wrote:
+> > > > On Fri, Sep 25, 2020 at 10:08 PM Jeff Layton <jlayton@kernel.org> wrote:
+> > > > > Ilya noticed that he would get spurious EACCES errors on calls done just
+> > > > > after blocklisting the client on mounts with recover_session=clean. The
+> > > > > session would get marked as REJECTED and that caused in-flight calls to
+> > > > > die with EACCES. This patchset seems to smooth over the problem, but I'm
+> > > > > not fully convinced it's the right approach.
+> > > > > 
+> > > > 
+> > > > the root is cause is that client does not recover session instantly
+> > > > after getting rejected by mds. Before session gets recovered, client
+> > > > continues to return error.
+> > > 
+> > > Hi Zheng,
+> > > 
+> > > I don't think it's about whether that happens instantly or not.
+> > > In the example from [1], the first "ls" would fail even if issued
+> > > minutes after the session reject message and the reconnect.  From
+> > > the user's POV it is well after the automatic recovery promised by
+> > > recover_session=clean.
+> > > 
+> > > [1] https://tracker.ceph.com/issues/47385
 > > 
-> > When the session is REJECTED and the mount was done with
-> > recover_session=clean, queue the request to the waiting_for_map queue,
-> > which will be awoken after tearing down the old session.
-> > 
-> > URL: https://tracker.ceph.com/issues/47385
-> > Reported-by: Ilya Dryomov <idryomov@gmail.com>
-> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > ---
-> >  fs/ceph/mds_client.c | 5 ++++-
-> >  1 file changed, 4 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index fd16db6ecb0a..b07e7adf146f 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -2819,7 +2819,10 @@ static void __do_request(struct ceph_mds_client *mdsc,
-> >         if (session->s_state != CEPH_MDS_SESSION_OPEN &&
-> >             session->s_state != CEPH_MDS_SESSION_HUNG) {
-> >                 if (session->s_state == CEPH_MDS_SESSION_REJECTED) {
-> > -                       err = -EACCES;
-> > +                       if (ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER))
-> > +                               list_add(&req->r_wait, &mdsc->waiting_for_map);
-> > +                       else
-> > +                               err = -EACCES;
+> > Reconnect should close all old session. It's likely because that
+> > client didn't detect it's blacklisted.
 > 
-> During recovering session, client drops all dirty caps and abort all
-> osd requests.  It does not make sense , some operations are waiting,
-> the others get aborted.
+> Sorry, I should have pasted dmesg there as well.  It _does_ detect
+> blacklisting -- notice that I wrote "after the session reject message
+> and the reconnect".
 > 
 
+Yep, this is pretty easy to reproduce too (as Ilya points out in the tracker).
 
-It makes sense to drop the caps and fail writeback of pages that were
-dirty. The issue here is what to do with MDS (metadata) requests that
-come in just after we notice the blocklisting but before the session has
-been reestablished. Most of those aren't going to have any dependency on
-the state of the pagecache.
-
-They also (for the most part) won't have a dependency on caps. The main
-exception I see is async unlink (async creates will be saved by the fact
-we'll be dropping our delegated inode number range). An async unlink
-could end up stalling across a recovery. The new MDS probably won't have
-granted Du caps by the time the call goes out. We could cancel that but
-likely would have already returned success on the unlink() call.
-
-Granted, with all of this we're _way_ outside the realm of POSIX
-behavior, so ultimately the right behavior is whatever we decide it
-should be. Anyone who turns this stuff on should be prepared for some of
-the operations leading up to the blocklisting to vaporize.
+I'm open to other ways of smoothing this over. If we end up with a small
+window where errors can occur, then so be it, but I think we can
+probably do better than we have now.
 
 -- 
 Jeff Layton <jlayton@kernel.org>
