@@ -2,148 +2,95 @@ Return-Path: <SRS0=O9sd=DG=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DC95C4727C
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 19:50:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1F69C4727C
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 19:55:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E2CBA20774
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 19:50:43 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SEeBFxnZ"
+	by mail.kernel.org (Postfix) with ESMTP id 8C27E207F7
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Sep 2020 19:55:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1601409311;
+	bh=Ry+IsHRby46BDMgnna99JY+kLtsmnM5PZLFbpm/w1R0=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
+	b=KPf1Ho/K2KBJbgbddXXGuCrV9+SXDghIQ7gUx/eYnwRC84XkNp6uaXvSa+Bkw/r8J
+	 5vnZTJ4qN1fspUS4JzPR6LLZGRdvoUx4zEAesWJ1iT6Sj7kRXR1wnFoedYe9GvJCLc
+	 daziXst5bBq3LneJod3WDDEUArUmWCxXhbVMyOGc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728844AbgI2Tun (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 29 Sep 2020 15:50:43 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:35578 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728747AbgI2Tum (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Sep 2020 15:50:42 -0400
-Dkim-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1601409041;
-        h=from:from:reply-to:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=6dlJWcDjGgnfbgddPaCo39wIxWcZhx0WuG1gVCYgGQc=;
-        b=SEeBFxnZb3PHC8B6Nvl5guD7Kt5p75Tlv8T0R6aD+Kwcda62KwDeqrKZYgzFoQdPQmsk9F
-        TBDgRftF4n/2XaJOSQXWeZ8iIPABCp0l2XZFRR+SL6+mZfs4448n23cSWXxpgxujbaklFL
-        I1COGCwlRzlvDzZn+aCg3wrh3nzqTzg=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-328-bOcV3eZ7N52UPAV0KXCMuw-1; Tue, 29 Sep 2020 15:50:35 -0400
-X-MC-Unique: bOcV3eZ7N52UPAV0KXCMuw-1
-Received: by mail-wr1-f71.google.com with SMTP id d9so2177690wrv.16
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2020 12:50:35 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=6dlJWcDjGgnfbgddPaCo39wIxWcZhx0WuG1gVCYgGQc=;
-        b=P970fyKwmRQRZtyh5UmSL8Lc+WBJcz76zKCkSmzy2QDmbyeerg6XLIWz+fFbHmRNQm
-         br9Qe5mNZ8YJARgtzTUu8Hyx4yIkCoyaKq81QiFu/LkA0uoNAg7Iym/JBIHEYyLzQh5r
-         BgRMf3TCkK7lb0OY4ek/GBgChwuYktVMlArtscJUtaT+B7/wks0kmPw9tRqbdipGOZCY
-         OhPljYg7wc1NW4T08sJW6GO2dF7o5FZh/H/c16CtshEJ+LdH60tE08h8OVBaUI54QAwo
-         e1V9nz7AIYV0vnOyO3c/74MVR/jYxjIJFNTM+vFx6eIhOFCvL5s/8KBi7GAH3/oVRO6V
-         iwwA==
-X-Gm-Message-State: AOAM533EO6Neyi4rxjs1HBuciDoqgXzEWYxH9nvtoI3BL7ayISTBAL//
-        fHmsMfPgxjYWfCO4fE1l5gQg62IX89zBNLVzy/HDWXTf54nqSKTmOnvspwa6Q4qjDr74dTAa6aG
-        zC9douvncUXS3iAvVWg7B/I8hC/71k0rJpsX8Vw==
-X-Received: by 2002:a1c:e389:: with SMTP id a131mr6416166wmh.181.1601409034393;
-        Tue, 29 Sep 2020 12:50:34 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz+xb/y3go4IZR1751e6x/aLhrMWuUNpLnJUz4Ui598K/wUI+1JqQYmVz2TruvBEJoFmaXkbkz9kXHdOsw59AE=
-X-Received: by 2002:a1c:e389:: with SMTP id a131mr6416151wmh.181.1601409034162;
- Tue, 29 Sep 2020 12:50:34 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAByD1q-w83TQgCof5TJH0DWXPMobbqQQcbuaKsnE6PqNsaWqVw@mail.gmail.com>
-In-Reply-To: <CAByD1q-w83TQgCof5TJH0DWXPMobbqQQcbuaKsnE6PqNsaWqVw@mail.gmail.com>
-Reply-To: dillaman@redhat.com
-From:   Jason Dillaman <jdillama@redhat.com>
-Date:   Tue, 29 Sep 2020 15:50:22 -0400
-Message-ID: <CA+aFP1AsO3CZA37ai6Tpqyd4gEN+BzeaC6BzUT+VnK7JKtxN3w@mail.gmail.com>
-Subject: Re: Rook orchestrator module
-To:     Travis Nielsen <tnielsen@redhat.com>
-Cc:     Sebastian Wagner <swagner@suse.com>,
-        Patrick Donnelly <pdonnell@redhat.com>,
-        Varsha Rao <varao@redhat.com>, Sebastien Han <seb@redhat.com>,
-        Ceph Development List <ceph-devel@vger.kernel.org>
+        id S1728800AbgI2TzK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 29 Sep 2020 15:55:10 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48884 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728226AbgI2TzK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 29 Sep 2020 15:55:10 -0400
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 125D020774;
+        Tue, 29 Sep 2020 19:55:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1601409309;
+        bh=Ry+IsHRby46BDMgnna99JY+kLtsmnM5PZLFbpm/w1R0=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=IR/pKK5OuMj8uDP3xHpd4v+Thza9sOMf8fxZuuuusIkaYs1FAVl/l0SKnMLbJFPfI
+         U4jNto+o4+LV7EMGf9t5KS6cFiXZmupuaIhIJT8B3a3RgUNu21iybjVTog8ec02YXb
+         ksa5GqeFEbGCyS3xCvWc4jgp++GN/Cz+eJv1yeUs=
+Message-ID: <eb2d601b8b9d7bac8fa5df4c7dc1f6a15bde6b47.camel@kernel.org>
+Subject: Re: [RFC PATCH 4/4] ceph: queue request when CLEANRECOVER is set
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
+Date:   Tue, 29 Sep 2020 15:55:07 -0400
+In-Reply-To: <20200925140851.320673-5-jlayton@kernel.org>
+References: <20200925140851.320673-1-jlayton@kernel.org>
+         <20200925140851.320673-5-jlayton@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Sep 29, 2020 at 3:33 PM Travis Nielsen <tnielsen@redhat.com> wrote:
->
-> Sebastian and fellow orchestrators,
->
-> Some questions have come up recently about issues in the Rook
-> orchestrator module and its state of disrepair. Patrick, Varsha, and I
-> have been discussing these recently as Varsha has been working on the
-> module. Before we fix all the issues that are being found, I want to
-> start a higher level conversation. I=E2=80=99ll join the leads meeting
-> tomorrow to discuss, and would be good to include in the Monday
-> orchestrator agenda as well, which unfortunately I haven=E2=80=99t been a=
-ble
-> to attend recently...
->
-> First, Rook is driven by the K8s APIs, including CRDs, an operator,
-> the CSI driver, etc. When the admin needs to configure the Ceph
-> cluster, they create the CRDs and other resources directly with the
-> K8s tools such as kubectl. Rook does everything with K8s patterns so
-> that the admin doesn=E2=80=99t need to leave their standard administratio=
-n
-> sandbox in order to configure Rook or Ceph. If any Ceph-specific
-> command needs to be run, the rook toolbox can be used. However, we
-> prefer to avoid the toolbox for common scenarios that should have CRDs
-> for declaring desired state.
->
-> The fundamental question then is, **what scenarios require the Rook
-> orchestrator mgr module**? The module is not enabled by default in
-> Rook clusters and I am not aware of upstream users consuming it.
->
-> The purpose of the orchestrator module was originally to provide a
-> common entry point either for Ceph CLI tools or the dashboard. This
-> would provide the constant interface to work with both Rook or cephadm
-> clusters. Patrick pointed out that the dashboard isn=E2=80=99t really a
-> scenario anymore for the orchestrator module.
+On Fri, 2020-09-25 at 10:08 -0400, Jeff Layton wrote:
+> Ilya noticed that the first access to a blacklisted mount would often
+> get back -EACCES, but then subsequent calls would be OK. The problem is
+> in __do_request. If the session is marked as REJECTED, a hard error is
+> returned instead of waiting for a new session to come into being.
+> 
+> When the session is REJECTED and the mount was done with
+> recover_session=clean, queue the request to the waiting_for_map queue,
+> which will be awoken after tearing down the old session.
+> 
+> URL: https://tracker.ceph.com/issues/47385
+> Reported-by: Ilya Dryomov <idryomov@gmail.com>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/mds_client.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index fd16db6ecb0a..b07e7adf146f 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2819,7 +2819,10 @@ static void __do_request(struct ceph_mds_client *mdsc,
+>  	if (session->s_state != CEPH_MDS_SESSION_OPEN &&
+>  	    session->s_state != CEPH_MDS_SESSION_HUNG) {
+>  		if (session->s_state == CEPH_MDS_SESSION_REJECTED) {
+> -			err = -EACCES;
+> +			if (ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER))
+> +				list_add(&req->r_wait, &mdsc->waiting_for_map);
+> +			else
+> +				err = -EACCES;
+>  			goto out_session;
+>  		}
+>  		/*
 
-Is that true? [1]
-
-> If so, the only
-> remaining usage is for CLI tools. And if we only have the CLI
-> scenario, this means that the CLI commands would be run from the
-> toolbox. But we are trying to avoid the toolbox. We should be putting
-> our effort into the CRDs, CSI driver, etc.
->
-> If the orchestrator module is creating CRs, we are likely doing
-> something wrong. We expect the cluster admin to create CRs.
->
-> Thus, I=E2=80=99d like to understand the scenarios where the rook orchest=
-rator
-> module is needed. If there isn=E2=80=99t a need anymore since dashboard
-> requirements have changed, I=E2=80=99d propose the module can be removed.
-
-I don't have a current stake in the outcome, but I could foresee the
-future need/desire for letting the Ceph cluster itself spin up
-resources on-demand in k8s via Rook. Let's say that I want to convert
-an XFS on RBD image to CephFS, the MGR could instruct the orchestrator
-to kick off a job to translate between the two formats. I'd imagine
-the same could be argued for on-demand NFS/SMB gateways or anywhere
-else there is a delta between a storage administrator setting up the
-basic Ceph system and Ceph attempting to self-regulate/optimize.
-
-> Thanks,
-> Travis
-> Rook
->
-
-[1] https://tracker.ceph.com/issues/46756
-
---=20
-Jason
+I think this is wrong when CEPH_MDS_R_ASYNC is set. I'll send a v2 set
+if we end up staying with this approach.
+-- 
+Jeff Layton <jlayton@kernel.org>
 
