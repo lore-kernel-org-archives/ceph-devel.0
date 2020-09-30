@@ -2,200 +2,170 @@ Return-Path: <SRS0=DpAl=DH=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B376DC4727E
-	for <ceph-devel@archiver.kernel.org>; Wed, 30 Sep 2020 12:26:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7D2EC4727C
+	for <ceph-devel@archiver.kernel.org>; Wed, 30 Sep 2020 17:55:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 70C072071E
-	for <ceph-devel@archiver.kernel.org>; Wed, 30 Sep 2020 12:26:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 67BBF20706
+	for <ceph-devel@archiver.kernel.org>; Wed, 30 Sep 2020 17:55:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601468770;
-	bh=A+reefeSSN1H48HheKmitm32fTVQLsiRj4IzWR7NorI=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=s8nvFhUSgcqB6QPr+FtpWOtJfhEWL71pP90Qppsa4RhKeZrOjMIDsQq+fBVWvXobr
-	 zqvYN4frlOaJ3m/gS+x9kptHfbgDP8WfqtO06uxpWcjEHJmnSCAEkhEy9XReBd3Esj
-	 MDO6VJrH6pgJGWYY8VkzHDncnUgGruN/5dkhvvKs=
+	s=default; t=1601488504;
+	bh=j3sE66fyqXA3v8uvjFB/9tQ3+EU63dABwffNYqDWUF0=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
+	b=Ec3srJJ4gMyucsVG/MbIKyuPvJXZ8SN61dz68w9F7UD5fFE3ivRTIgA6sv1CtDvBT
+	 mwKfrAOLlVqrW/k+GGTgdjWXh3dLFVgfWWkwAU5KTe4ObBF5XNDHsL9ROZvgzpWdiT
+	 NRBAsXND1yMH3tx8Ac8BmNYT0RcA40f7jqTC0+dc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729708AbgI3M0J (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 30 Sep 2020 08:26:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36570 "EHLO mail.kernel.org"
+        id S1725893AbgI3RzC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 30 Sep 2020 13:55:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50940 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727997AbgI3M0J (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 30 Sep 2020 08:26:09 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        id S1725799AbgI3RzC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 30 Sep 2020 13:55:02 -0400
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4D0A82071E;
-        Wed, 30 Sep 2020 12:26:08 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 44D8420706;
+        Wed, 30 Sep 2020 17:55:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601468768;
-        bh=A+reefeSSN1H48HheKmitm32fTVQLsiRj4IzWR7NorI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=t6Pm2OvlOn+3gVJib7F53iH9dj5uYfLH0r0nZEYKGjJ26M3d7cAl6ze91fea5USG9
-         F2RjPKNojgehwyxLzRByf6c44e7Z8R1Ge37FkT6lDtC7aw5M0Op1dx6s6JUzGeMa1l
-         GtP+PVHzeDK8ebCa/mR8N/spSrWxQ7LcO3KcfKVY=
+        s=default; t=1601488501;
+        bh=j3sE66fyqXA3v8uvjFB/9tQ3+EU63dABwffNYqDWUF0=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=DvwTc4y3Uju+uA653MESJzdKWMkZfpyAN3Z7khbLlX5P0xZ+DsK0lF/47iFGglrs0
+         Eg6IrpPj9BQPaqrnM8hHqF8yhPvAXE9KtAJHOS+SxDsOR2KMCk1dMmgQTLFip8p+WM
+         OOW+GkZvMWcK5j8GADZGR4Bcdb5At/Nt/E1Ydkyg=
+Message-ID: <3723969aaff3f3f66b3b3e9ea8b6e1c5aab5e429.camel@kernel.org>
+Subject: Re: [RFC PATCH 0/4] ceph: fix spurious recover_session=clean errors
 From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com
-Subject: [PATCH] ceph: fix up some warnings on W=1 builds
-Date:   Wed, 30 Sep 2020 08:26:06 -0400
-Message-Id: <20200930122606.16777-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.26.2
+To:     "Yan, Zheng" <ukernel@gmail.com>
+Cc:     Ilya Dryomov <idryomov@gmail.com>,
+        ceph-devel <ceph-devel@vger.kernel.org>,
+        Patrick Donnelly <pdonnell@redhat.com>
+Date:   Wed, 30 Sep 2020 13:55:00 -0400
+In-Reply-To: <CAAM7YAnjtrQAfv9mYpAZev=VRMvgUXtX8Ausa4NAeZpcUbO+LQ@mail.gmail.com>
+References: <20200925140851.320673-1-jlayton@kernel.org>
+         <CAAM7YAmJfNCbt4ON5c44FFVYOUhXu0ipK858aLJK22ZX2E-FdA@mail.gmail.com>
+         <CAOi1vP9Nz2Art=rq06qBuU3DvKzZs+RR7pf+qsGxYZkrbSB-1Q@mail.gmail.com>
+         <CAAM7YA=bo-pdnLuxFAyChtZCoP6VZ3oUJEX_+Sn5r6i6bO_+8Q@mail.gmail.com>
+         <5ba09f6b5493457341aaa273a3d3bddb155a37b4.camel@kernel.org>
+         <CAAM7YAnjtrQAfv9mYpAZev=VRMvgUXtX8Ausa4NAeZpcUbO+LQ@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Convert some decodes into unused variables into skips, and fix up some
-non-kerneldoc comment headers to not start with "/**".
+On Wed, 2020-09-30 at 16:45 +0800, Yan, Zheng wrote:
+> On Wed, Sep 30, 2020 at 3:50 AM Jeff Layton <jlayton@kernel.org> wrote:
+> > On Tue, 2020-09-29 at 18:44 +0800, Yan, Zheng wrote:
+> > > On Tue, Sep 29, 2020 at 4:55 PM Ilya Dryomov <idryomov@gmail.com> wrote:
+> > > > On Tue, Sep 29, 2020 at 10:28 AM Yan, Zheng <ukernel@gmail.com> wrote:
+> > > > > On Fri, Sep 25, 2020 at 10:08 PM Jeff Layton <jlayton@kernel.org> wrote:
+> > > > > > Ilya noticed that he would get spurious EACCES errors on calls done just
+> > > > > > after blocklisting the client on mounts with recover_session=clean. The
+> > > > > > session would get marked as REJECTED and that caused in-flight calls to
+> > > > > > die with EACCES. This patchset seems to smooth over the problem, but I'm
+> > > > > > not fully convinced it's the right approach.
+> > > > > > 
+> > > > > 
+> > > > > the root is cause is that client does not recover session instantly
+> > > > > after getting rejected by mds. Before session gets recovered, client
+> > > > > continues to return error.
+> > > > 
+> > > > Hi Zheng,
+> > > > 
+> > > > I don't think it's about whether that happens instantly or not.
+> > > > In the example from [1], the first "ls" would fail even if issued
+> > > > minutes after the session reject message and the reconnect.  From
+> > > > the user's POV it is well after the automatic recovery promised by
+> > > > recover_session=clean.
+> > > > 
+> > > > [1] https://tracker.ceph.com/issues/47385
+> > > 
+> > > Reconnect should close all old session. It's likely because that
+> > > client didn't detect it's blacklisted.
+> > > 
+> > 
+> > I should have described this better -- let me explain:
+> > 
+> > It did detect that it was blocklisted (almost immediately) because the
+> > MDS shuts down the session. I think it immediately sends a
+> > SESSION_REJECT message when blacklisting and indicates that it has been
+> > blocklisted.
+> > 
+> > At that point the session is CEPH_MDS_SESSION_REJECTED. The next MDS
+> > calls through would see that it was in that state and would return
+> > -EACCES. Eventually, the delayed work runs and then the session gets
+> > reconnected, and further calls proceed normally.
+> > 
+> > So, I think this is just a timing thing for the most part. The workqueue
+> > job runs on a delay of round_jiffies_relative(HZ * 5);, and that's long
+> > enough for the disruption to be noticeable.
+> > 
+> > While this was happening during 'ls' for Ilya, it could happen in
+> > anything that involves sending a request to the MDS. I think we want to
+> > prevent new opens from erroring out during this window if we can.
+> > 
+> > The real question is whether this is safe in all cases. For instance, if
+> > the call that we're idling is dependent on holding certain caps, then
+> > it's possible we will have lost them when we got REJECTED.
+> > 
+> 
+> The session in rejected state is new session. It should hold no caps.
+> 
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c       | 11 ++++-------
- fs/ceph/locks.c      |  8 ++++----
- fs/ceph/mds_client.c | 26 +++++++-------------------
- 3 files changed, 15 insertions(+), 30 deletions(-)
+Right.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 2ee3f316afcf..4c967f176ebd 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -4016,15 +4016,13 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- 	}
- 
- 	if (msg_version >= 8) {
--		u64 flush_tid;
--		u32 caller_uid, caller_gid;
- 		u32 pool_ns_len;
- 
- 		/* version >= 6 */
--		ceph_decode_64_safe(&p, end, flush_tid, bad);
-+		ceph_decode_skip_64(&p, end, bad);	// flush_tid
- 		/* version >= 7 */
--		ceph_decode_32_safe(&p, end, caller_uid, bad);
--		ceph_decode_32_safe(&p, end, caller_gid, bad);
-+		ceph_decode_skip_32(&p, end, bad);	// caller_uid
-+		ceph_decode_skip_32(&p, end, bad);	// caller_gid
- 		/* version >= 8 */
- 		ceph_decode_32_safe(&p, end, pool_ns_len, bad);
- 		if (pool_ns_len > 0) {
-@@ -4047,9 +4045,8 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- 	}
- 
- 	if (msg_version >= 11) {
--		u32 flags;
- 		/* version >= 10 */
--		ceph_decode_32_safe(&p, end, flags, bad);
-+		ceph_decode_skip_32(&p, end, bad);
- 		/* version >= 11 */
- 		extra_info.dirstat_valid = true;
- 		ceph_decode_64_safe(&p, end, extra_info.nfiles, bad);
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index 048a435a29be..fa8a847743d0 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -57,7 +57,7 @@ static const struct file_lock_operations ceph_fl_lock_ops = {
- 	.fl_release_private = ceph_fl_release_lock,
- };
- 
--/**
-+/*
-  * Implement fcntl and flock locking functions.
-  */
- static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
-@@ -225,7 +225,7 @@ static int try_unlock_file(struct file *file, struct file_lock *fl)
- 	return 1;
- }
- 
--/**
-+/*
-  * Attempt to set an fcntl lock.
-  * For now, this just goes away to the server. Later it may be more awesome.
-  */
-@@ -408,7 +408,7 @@ static int lock_to_ceph_filelock(struct file_lock *lock,
- 	return err;
- }
- 
--/**
-+/*
-  * Encode the flock and fcntl locks for the given inode into the ceph_filelock
-  * array. Must be called with inode->i_lock already held.
-  * If we encounter more of a specific lock type than expected, return -ENOSPC.
-@@ -458,7 +458,7 @@ int ceph_encode_locks_to_buffer(struct inode *inode,
- 	return err;
- }
- 
--/**
-+/*
-  * Copy the encoded flock and fcntl locks into the pagelist.
-  * Format is: #fcntl locks, sequential fcntl locks, #flock locks,
-  * sequential flock locks.
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 1190710f63af..a178580e6d40 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -516,13 +516,9 @@ static int parse_reply_info_create(void **p, void *end,
- 			/* Malformed reply? */
- 			info->has_create_ino = false;
- 		} else if (test_bit(CEPHFS_FEATURE_DELEG_INO, &s->s_features)) {
--			u8 struct_v, struct_compat;
--			u32 len;
--
- 			info->has_create_ino = true;
--			ceph_decode_8_safe(p, end, struct_v, bad);
--			ceph_decode_8_safe(p, end, struct_compat, bad);
--			ceph_decode_32_safe(p, end, len, bad);
-+			/* struct_v, struct_compat, and len */
-+			ceph_decode_skip_n(p, end, 2 + sizeof(u32), bad);
- 			ceph_decode_64_safe(p, end, info->ino, bad);
- 			ret = ceph_parse_deleg_inos(p, end, s);
- 			if (ret)
-@@ -4851,10 +4847,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 	void *p = msg->front.iov_base;
- 	void *end = p + msg->front.iov_len;
- 	u32 epoch;
--	u32 map_len;
- 	u32 num_fs;
- 	u32 mount_fscid = (u32)-1;
--	u8 struct_v, struct_cv;
- 	int err = -EINVAL;
- 
- 	ceph_decode_need(&p, end, sizeof(u32), bad);
-@@ -4862,24 +4856,18 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 
- 	dout("handle_fsmap epoch %u\n", epoch);
- 
--	ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
--	struct_v = ceph_decode_8(&p);
--	struct_cv = ceph_decode_8(&p);
--	map_len = ceph_decode_32(&p);
--
--	ceph_decode_need(&p, end, sizeof(u32) * 3, bad);
--	p += sizeof(u32) * 2; /* skip epoch and legacy_client_fscid */
-+	/* struct_v, struct_cv, map_len, epoch, legacy_client_fscid */
-+	ceph_decode_skip_n(&p, end, 2 + sizeof(u32) * 3, bad);
- 
--	num_fs = ceph_decode_32(&p);
-+	ceph_decode_32_safe(&p, end, num_fs, bad);
- 	while (num_fs-- > 0) {
- 		void *info_p, *info_end;
- 		u32 info_len;
--		u8 info_v, info_cv;
- 		u32 fscid, namelen;
- 
- 		ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
--		info_v = ceph_decode_8(&p);
--		info_cv = ceph_decode_8(&p);
-+		p += 1;		// info_v
-+		p += 1;		// info_cv
- 		info_len = ceph_decode_32(&p);
- 		ceph_decode_need(&p, end, info_len, bad);
- 		info_p = p;
+We're actually OK here wrt to async requests as they will return
+EJUKEBOX and the caller will redrive a synchronous request. Other
+MClientRequest calls don't require that the client hold any caps,
+AFAICT, so idling them until we can establish a new session should be
+OK, no?
+
+> > Hmm...so that means patch 4/4 is probably wrong. I'll comment further in
+> > a reply to that patch.
+> > 
+> > > > Thanks,
+> > > > 
+> > > >                 Ilya
+> > > > 
+> > > > > > The potential issue I see is that the client could take cap references to
+> > > > > > do a call on a session that has been blocklisted. We then queue the
+> > > > > > message and reestablish the session, but we may not have been granted
+> > > > > > the same caps by the MDS at that point.
+> > > > > > 
+> > > > > > If this is a problem, then we probably need to rework it so that we
+> > > > > > return a distinct error code in this situation and have the upper layers
+> > > > > > issue a completely new mds request (with new cap refs, etc.)
+> > > > > > 
+> > > > > > Obviously, that's a much more invasive approach though, so it would be
+> > > > > > nice to avoid that if this would suffice.
+> > > > > > 
+> > > > > > Jeff Layton (4):
+> > > > > >   ceph: don't WARN when removing caps due to blocklisting
+> > > > > >   ceph: don't mark mount as SHUTDOWN when recovering session
+> > > > > >   ceph: remove timeout on allowing reconnect after blocklisting
+> > > > > >   ceph: queue request when CLEANRECOVER is set
+> > > > > > 
+> > > > > >  fs/ceph/caps.c       |  2 +-
+> > > > > >  fs/ceph/mds_client.c | 10 ++++------
+> > > > > >  fs/ceph/super.c      | 13 +++++++++----
+> > > > > >  fs/ceph/super.h      |  1 -
+> > > > > >  4 files changed, 14 insertions(+), 12 deletions(-)
+> > > > > > 
+> > > > > > --
+> > > > > > 2.26.2
+> > > > > > 
+> > 
+> > --
+> > Jeff Layton <jlayton@kernel.org>
+> > 
+
 -- 
-2.26.2
+Jeff Layton <jlayton@kernel.org>
 
