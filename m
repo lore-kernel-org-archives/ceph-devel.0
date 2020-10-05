@@ -1,85 +1,72 @@
-Return-Path: <SRS0=CMPl=DL=vger.kernel.org=ceph-devel-owner@kernel.org>
+Return-Path: <SRS0=50+i=DM=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=BAYES_05,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9254EC47095
-	for <ceph-devel@archiver.kernel.org>; Sun,  4 Oct 2020 18:05:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B763AC4363A
+	for <ceph-devel@archiver.kernel.org>; Mon,  5 Oct 2020 08:09:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DA55206B6
-	for <ceph-devel@archiver.kernel.org>; Sun,  4 Oct 2020 18:05:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F7E120774
+	for <ceph-devel@archiver.kernel.org>; Mon,  5 Oct 2020 08:09:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="HgdhaaLk"
+	dkim=pass (2048-bit key) header.d=fastestway24.com header.i=@fastestway24.com header.b="ibp4/Hnb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726564AbgJDSEq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 4 Oct 2020 14:04:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48796 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726237AbgJDSEq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Oct 2020 14:04:46 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB1B8C0613CE;
-        Sun,  4 Oct 2020 11:04:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
-        Content-Type:Content-ID:Content-Description;
-        bh=NrJVJoU7OMcJTi9hemuonuG11U70LFwuvk1JhdPC5Fs=; b=HgdhaaLkSWbHyStH+GfRtwmrjD
-        zS+k9uEIcP9s39jdejViPI1JvnhxyzwZPpVJKU1j5iBxZ4ih/AyNUB1QLTnnWokEIJfLCHiP5EUa1
-        JcPctgY13Hxx7EAOYy6dcJcPaM1neGdFw71nzv9yVKq3gz2mtjN5PQ4WdtEpW8tiNpNQU4srjSzMt
-        bxFsQ6DkBQd2iSJ/TykKd8P5kIuE66LPRjburFcXQVv+MGhOT5PHySwIkGireyH5e8FRbwOhT98ZP
-        Bb/NARhnYvMRRfVaKlUWmfFOUpbPwVMG7gNLDfxH26OdknC+b0xqdDaG756OSNgKtJ6SfGhfUa0aG
-        WCHHvbow==;
-Received: from willy by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kP8N5-0003mk-R4; Sun, 04 Oct 2020 18:04:31 +0000
-From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
-To:     linux-fsdevel@vger.kernel.org
-Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>, ericvh@gmail.com,
-        lucho@ionkov.net, viro@zeniv.linux.org.uk, jlayton@kernel.org,
-        idryomov@gmail.com, mark@fasheh.com, jlbec@evilplan.org,
-        joseph.qi@linux.alibaba.com, v9fs-developer@lists.sourceforge.net,
-        linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
-        ocfs2-devel@oss.oracle.com, linux-btrfs@vger.kernel.org,
-        clm@fb.com, josef@toxicpanda.com, dsterba@suse.com,
-        stable@vger.kernel.org
-Subject: [PATCH 4/7] ocfs2: Promote to unsigned long long before shifting
-Date:   Sun,  4 Oct 2020 19:04:25 +0100
-Message-Id: <20201004180428.14494-5-willy@infradead.org>
-X-Mailer: git-send-email 2.21.3
-In-Reply-To: <20201004180428.14494-1-willy@infradead.org>
-References: <20201004180428.14494-1-willy@infradead.org>
+        id S1725917AbgJEIJw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 5 Oct 2020 04:09:52 -0400
+Received: from mail.fastestway24.com ([5.249.159.217]:34798 "EHLO
+        mail.fastestway24.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725885AbgJEIJv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Oct 2020 04:09:51 -0400
+X-Greylist: delayed 435 seconds by postgrey-1.27 at vger.kernel.org; Mon, 05 Oct 2020 04:09:51 EDT
+Received: by mail.fastestway24.com (Postfix, from userid 1001)
+        id 3C73AA2905; Mon,  5 Oct 2020 09:02:18 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=fastestway24.com;
+        s=mail; t=1601884955;
+        bh=YGOlxoddnI3PXnh41XMWUfU0z9xsorZLZcAPNbcZr/c=;
+        h=Date:From:To:Subject:From;
+        b=ibp4/HnbDyerc78PnE4vC3lRGU2NHSjMe0wVfpS9AepdBzxq6O6B0VTWWiQifwvkG
+         BaXxqmW6xeiE7jMcRDQYoIZOenjRACQ86sKX5QWE1KWK99TfVYptC3qQRJ1BUyo1DC
+         WZ9aarpQc+1NwAprmzBbVj2haiVnPP9JFaxPB07VICBiYffCe/Vc2wzfysEboalK6f
+         ASEoaWURC8F4QNBltdpBh9Hxdtn3RWFz7WGrNFlq1915IptHfbreG6liqP0gjG6uAi
+         PeEuM5fbIo5Acr94FrAezt5h0V/UKDI1S1bXuxsQV9fpgt0nJnDW48Hjp8z+N/9qVf
+         kbaBzL79p6cjQ==
+Received: by mail.fastestway24.com for <ceph-devel@vger.kernel.org>; Mon,  5 Oct 2020 08:02:06 GMT
+Message-ID: <20201005074501-0.1.47.8kfq.0.b2v669jreo@fastestway24.com>
+Date:   Mon,  5 Oct 2020 08:02:06 GMT
+From:   "William Jones" <william.jones@fastestway24.com>
+To:     <ceph-devel@vger.kernel.org>
+Subject: Disinfectant
+X-Mailer: mail.fastestway24.com
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On 32-bit systems, this shift will overflow for files larger than 4GB.
+Good morning,
 
-Cc: stable@vger.kernel.org
-Fixes: 35edec1d52c0 ("ocfs2: update truncate handling of partial clusters")
-Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
----
- fs/ocfs2/alloc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+looking for companies interested in raising additional capital by diversi=
+fying their offer in soaps, liquids and gels for hand disinfection and co=
+smetics for body and hair care.
 
-diff --git a/fs/ocfs2/alloc.c b/fs/ocfs2/alloc.c
-index 4c1b90442d6f..26eff79ecb50 100644
---- a/fs/ocfs2/alloc.c
-+++ b/fs/ocfs2/alloc.c
-@@ -6867,7 +6867,7 @@ static void ocfs2_zero_cluster_pages(struct inode *inode, loff_t start,
- 		ocfs2_map_and_dirty_page(inode, handle, from, to, page, 1,
- 					 &phys);
- 
--		start = (page->index + 1) << PAGE_SHIFT;
-+		start = (page->index + 1ULL) << PAGE_SHIFT;
- 	}
- out:
- 	if (pages)
--- 
-2.28.0
+The distribution of innovative products corresponding to the current pref=
+erences of customers in the field of hygiene and preventive healthcare al=
+lows our partners to gain new markets and achieve better economic results=
+=2E
 
+In addition to products with bactericidal action, our range includes show=
+er gels, shampoos and hair conditioners, as well as efficient, concentrat=
+ed detergents.
+
+The versatility (suitable for all skin types) combined with an affordable=
+ price means that customers make an informed choice of a product among ot=
+hers available on the market.
+
+Are you interested in cooperation?
+
+
+William Jones
