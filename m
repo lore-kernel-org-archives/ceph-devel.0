@@ -2,85 +2,78 @@ Return-Path: <SRS0=Fqvp=DN=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3F3EC41604
-	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 14:52:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70952C41604
+	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 14:55:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4F7A7206CB
-	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 14:52:38 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="sUlepyq/"
+	by mail.kernel.org (Postfix) with ESMTP id 22008206DD
+	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 14:55:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1601996133;
+	bh=W+WRJiA5Dyo40yCBkIH+gN+ujGTSXHZQ4oEjCxbLe9o=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=Owe7qZoqWhJ893YMg5YKjL2Isv+9FMA2wHrSNT2CODLaXaLj21rs1JU6dGg3QOUqt
+	 Bpj1lAMYLqZtzeabiNFIHwJfLHurJ0GSFcQhgqe8VRTh7TwhvTBKTi903JqR54he74
+	 Sqe+mrQuOWiPumbW+fgIXGo3DunPULf/tSBHql3I=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725995AbgJFOwg (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 6 Oct 2020 10:52:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39172 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725906AbgJFOwg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Oct 2020 10:52:36 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C8A1C061755
-        for <ceph-devel@vger.kernel.org>; Tue,  6 Oct 2020 07:52:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=Oec1CGwqELypNA1ej9IuVU/OSeJYgIiL7MqIj7n6QmE=; b=sUlepyq/ntExqVvyy6p2JvZoN4
-        vTZmgV5VUhlFTJVvlQ75Ku9X2M6489hMet8kX8vUWp/oOm4QD7PBEOl7AnocTn5k+djMrfQw0TvVr
-        Eo45LgQemhab9MVj5bhcuEue0SiFGZopXU0vafIoJGqquO4D4iwRQ5QviOSmu60VMh0ChheXX2ryZ
-        WAfhbJ6igUBwBrZ+2bE/0qg93EGHsrMrBJl+TwBvNGCJgBCPk0MCPNGOyjQNrmWaiqr9QwEHYRm11
-        8IBOtML3xcLUjhHVt0GPfKw38hbeacvz+8dQrz9z0Gho0pT4Rh6zsKQYO3rbhyTvcJ2atswsVqhSx
-        SAurL8Hw==;
-Received: from willy by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kPoKQ-0007NF-FN; Tue, 06 Oct 2020 14:52:34 +0000
-Date:   Tue, 6 Oct 2020 15:52:34 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, idryomov@gmail.com, ukernel@gmail.com,
-        David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH] ceph: don't SetPageError on readpage errors
-Message-ID: <20201006145234.GR20115@casper.infradead.org>
-References: <20201006141307.309650-1-jlayton@kernel.org>
+        id S1726139AbgJFOzc (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 6 Oct 2020 10:55:32 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38186 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725906AbgJFOzb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Oct 2020 10:55:31 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 3BE35206DD;
+        Tue,  6 Oct 2020 14:55:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1601996130;
+        bh=W+WRJiA5Dyo40yCBkIH+gN+ujGTSXHZQ4oEjCxbLe9o=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=E6z8sjHtJg5Iv8q5OQ8FstPSCrNnbqHo6UPwlT8Ytj5k5VTJ+adR5p4SPEDX1C5wr
+         +LcMZ23XgaOFUeAKnWUov/NmUR3ZqIFY1iL95/Pj0Lv+aVexrm/RPZD+pCmtou7EOD
+         0M/83kS9s8y3/VcVnKzmDiTXiK7owlVfX75t4EIM=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
+Subject: [PATCH v3 1/5] ceph: don't WARN when removing caps due to blocklisting
+Date:   Tue,  6 Oct 2020 10:55:22 -0400
+Message-Id: <20201006145526.313151-2-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20201006145526.313151-1-jlayton@kernel.org>
+References: <20201006145526.313151-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201006141307.309650-1-jlayton@kernel.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Oct 06, 2020 at 10:13:07AM -0400, Jeff Layton wrote:
-> PageError really only has meaning within a particular subsystem. Nothing
-> looks at this bit in the core kernel code, and ceph itself doesn't care
-> about it. Don't bother setting the PageError bit on error.
+We expect to remove dirty caps when the client is blocklisted. Don't
+throw a warning in that case.
 
-I wondered if fscache might be interested, but it seems like it doesn't
-particularly care.  It's still interested in PageError for backing
-store pages, but not for the filesystem being cached.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/caps.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Reviewed-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index c7e69547628e..2ee3f316afcf 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1149,7 +1149,7 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 	/* remove from inode's cap rbtree, and clear auth cap */
+ 	rb_erase(&cap->ci_node, &ci->i_caps);
+ 	if (ci->i_auth_cap == cap) {
+-		WARN_ON_ONCE(!list_empty(&ci->i_dirty_item));
++		WARN_ON_ONCE(!list_empty(&ci->i_dirty_item) && !mdsc->fsc->blocklisted);
+ 		ci->i_auth_cap = NULL;
+ 	}
+ 
+-- 
+2.26.2
 
-> Cc: Matthew Wilcox <willy@infradead.org>
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  fs/ceph/addr.c | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 97827f68a3e7..137c0a5a2a0d 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -241,7 +241,6 @@ static int ceph_do_readpage(struct file *filp, struct page *page)
->  	if (err == -ENOENT)
->  		err = 0;
->  	if (err < 0) {
-> -		SetPageError(page);
->  		ceph_fscache_readpage_cancel(inode, page);
->  		if (err == -EBLOCKLISTED)
->  			fsc->blocklisted = true;
-> -- 
-> 2.26.2
-> 
