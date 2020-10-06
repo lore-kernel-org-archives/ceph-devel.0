@@ -2,78 +2,95 @@ Return-Path: <SRS0=Fqvp=DN=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78680C41604
-	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 14:55:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F105FC41604
+	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 17:20:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 35831206DD
-	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 14:55:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9612020782
+	for <ceph-devel@archiver.kernel.org>; Tue,  6 Oct 2020 17:20:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601996138;
-	bh=gF3voaBm2copooG2glx9EOo01/CXMpMjhX84fpOBpdQ=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=j+RSsyulh7GHbzA9s9kqfsywcFxX472B8K2ruDD0S75JPkHFT3NAtFVVk8g73p9Yt
-	 NoV+OVO57PsEwh3VP1t0wCBp/15eKn3I+TSz6hppnVIbc5Tr2Ow7b6p0C6WM2R4mH3
-	 jeyStoXMudH4NySTBCf0edd6/1llcYjQ6vrc6/oE=
+	s=default; t=1602004848;
+	bh=4Foc+jU1k/rvfrsLBs93aOS5mcxlAz0t1W5dlS01hRo=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
+	b=X9WhFqhZ31ARbksfG1T/aJyDoqe27lVkBwcghGTck8JkHt048d2eXukdOvVkyyE3s
+	 SQxx18SOuedmm46pLi3g50AQBMoZuOSoeQs2wtmbHd0QKnqT4gDGj9LET1obnVbrz8
+	 Mj4vDK77DoxujgatrceNm5o64zVCGOrWpY3H5IH0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726398AbgJFOzh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 6 Oct 2020 10:55:37 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38200 "EHLO mail.kernel.org"
+        id S1726483AbgJFRUq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 6 Oct 2020 13:20:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43010 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725943AbgJFOzc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Oct 2020 10:55:32 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        id S1725902AbgJFRUq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Oct 2020 13:20:46 -0400
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id F405A20782;
-        Tue,  6 Oct 2020 14:55:30 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B991F20760;
+        Tue,  6 Oct 2020 17:20:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601996131;
-        bh=gF3voaBm2copooG2glx9EOo01/CXMpMjhX84fpOBpdQ=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=0D4KvxfRBCJzH2Erpr4RO9Nl38IlZi5bTbi/7lx4vi30lacUoh9X9SyQ4GD3+PVB9
-         iIrXvu7ZznUbNfo5Y6/VD4FTagZzTFBGi2fTczoDuzHldgBjoTYjnYpScrV9CmFrxw
-         HbSUiz7f6dnbhQKaNlpoHdciTpdhud7fgaaJK5Bg=
+        s=default; t=1602004845;
+        bh=4Foc+jU1k/rvfrsLBs93aOS5mcxlAz0t1W5dlS01hRo=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=yfq1ofdv7rZJ5+ORDfeANL1fIsq8QvuchUDnxEjqXkiwUkrM7f+jjDjX5qOtiLO5H
+         KgoJQ7KK3SEr6FYxnD9spCEDZHYO6JW2VHKg3xA8vU0tmZENoeSzu13L85e+BVMqfp
+         TIMjQvJyW9M69GHv5p0s87KXy50U736GRLHqcUY8=
+Message-ID: <f10381885b6e3ea8af828f1b7be5c2f7035e82df.camel@kernel.org>
+Subject: Re: [PATCH 3/7] ceph: Promote to unsigned long long before shifting
 From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
-Subject: [PATCH v3 2/5] ceph: make fsc->mount_state an int
-Date:   Tue,  6 Oct 2020 10:55:23 -0400
-Message-Id: <20201006145526.313151-3-jlayton@kernel.org>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20201006145526.313151-1-jlayton@kernel.org>
-References: <20201006145526.313151-1-jlayton@kernel.org>
+To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        linux-fsdevel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
+Cc:     ericvh@gmail.com, lucho@ionkov.net, viro@zeniv.linux.org.uk,
+        idryomov@gmail.com, mark@fasheh.com, jlbec@evilplan.org,
+        joseph.qi@linux.alibaba.com, v9fs-developer@lists.sourceforge.net,
+        linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
+        ocfs2-devel@oss.oracle.com, linux-btrfs@vger.kernel.org,
+        clm@fb.com, josef@toxicpanda.com, dsterba@suse.com,
+        stable@vger.kernel.org
+Date:   Tue, 06 Oct 2020 13:20:42 -0400
+In-Reply-To: <20201004180428.14494-4-willy@infradead.org>
+References: <20201004180428.14494-1-willy@infradead.org>
+         <20201004180428.14494-4-willy@infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This field is an unsigned long currently, which is a bit of a waste on
-most arches since this just holds an enum. Make it (signed) int instead.
+On Sun, 2020-10-04 at 19:04 +0100, Matthew Wilcox (Oracle) wrote:
+> On 32-bit systems, this shift will overflow for files larger than 4GB.
+> 
+> Cc: stable@vger.kernel.org
+> Fixes: 61f68816211e ("ceph: check caps in filemap_fault and page_mkwrite")
+> Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+> ---
+>  fs/ceph/addr.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 6ea761c84494..970e5a094035 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -1522,7 +1522,7 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>  	struct ceph_file_info *fi = vma->vm_file->private_data;
+>  	struct page *pinned_page = NULL;
+> -	loff_t off = vmf->pgoff << PAGE_SHIFT;
+> +	loff_t off = (loff_t)vmf->pgoff << PAGE_SHIFT;
+>  	int want, got, err;
+>  	sigset_t oldset;
+>  	vm_fault_t ret = VM_FAULT_SIGBUS;
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/super.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 582694899130..d0cb6a51c6a4 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -106,7 +106,7 @@ struct ceph_fs_client {
- 	struct ceph_mount_options *mount_options;
- 	struct ceph_client *client;
- 
--	unsigned long mount_state;
-+	int mount_state;
- 
- 	unsigned long last_auto_reconnect;
- 	bool blocklisted;
+I went ahead and merged this into the ceph-client/testing branch. Given
+how old this bug is, I don't see a real need to rush this into v5.9, but
+if we have any other patches going in before that ships, then it might
+be good to send this one along too.
 -- 
-2.26.2
+Jeff Layton <jlayton@kernel.org>
 
