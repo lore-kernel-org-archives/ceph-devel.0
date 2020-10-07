@@ -2,174 +2,172 @@ Return-Path: <SRS0=cUke=DO=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C099C41604
-	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 15:53:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5F1AC41604
+	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 17:33:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B3B5F20789
-	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 15:53:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 604162168B
+	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 17:33:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KvXvSonf"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="A6lWZBlZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728798AbgJGPxW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 7 Oct 2020 11:53:22 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:45396 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726129AbgJGPxW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Oct 2020 11:53:22 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1602086000;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=XSBrzBtsZ3pm17O1OH+6g773pIF0WXZCPLM/UYM1ws0=;
-        b=KvXvSonfdsKrbKi5Trs1Fxh8eVk+LKzs7qBiJK91/RXl65Pgzm1hhgI7RkvperSzTsa0Y8
-        b/H/UumwRNO4SBNJjnrsn8L40mB6LnYu9ucDOsztw19UPDnNjSex41dyM7TwKEA63Vl+XM
-        Bp9KN8R9i4cQvHglBT4DG/3Ia4znUfc=
-Received: from mail-il1-f198.google.com (mail-il1-f198.google.com
- [209.85.166.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-529-NjSHHLUxPw6JufV7LFQd4w-1; Wed, 07 Oct 2020 11:53:18 -0400
-X-MC-Unique: NjSHHLUxPw6JufV7LFQd4w-1
-Received: by mail-il1-f198.google.com with SMTP id a14so1919269iln.11
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Oct 2020 08:53:18 -0700 (PDT)
+        id S1727904AbgJGRdR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 7 Oct 2020 13:33:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60380 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726348AbgJGRdR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Oct 2020 13:33:17 -0400
+Received: from mail-il1-x143.google.com (mail-il1-x143.google.com [IPv6:2607:f8b0:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FC7CC061755
+        for <ceph-devel@vger.kernel.org>; Wed,  7 Oct 2020 10:33:17 -0700 (PDT)
+Received: by mail-il1-x143.google.com with SMTP id b2so3053772ilr.1
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Oct 2020 10:33:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=s/hUHpHElna/bonvb/FNbIX8jV/IHxuGzuYJlRi9c9k=;
+        b=A6lWZBlZplukM7kxxdMWwquTpl+ACk4VioQlzGDdgmROJCNvUWPqQ6+mJaGpLwe/gB
+         pwluq3OVs+MpXSfTtHn2PEF6Mm5mpI9SMknGebW5kbpU7r6wXL7YWXMewoXpJ9GgkXnN
+         NW84gMEBkfkjbGAyloScXylkZMrg1ZmSKztun0Lhnh04mzOSgWRWnrdyStnGvo8Cu+Z4
+         WTWv03mxIpzqtmZyLhK/tjb5Wn9kADNXprK113zfZtrH6ZlRjXSfQM/iONb2dLQbZPG9
+         U0XKd/PwZI+VTB0WUXaJoiCx5MC54rKhFNM4aIJ28ws8z2lrRZlNc82lyWDMI9tvuWQI
+         CtcA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=XSBrzBtsZ3pm17O1OH+6g773pIF0WXZCPLM/UYM1ws0=;
-        b=HhRubl1JoHoMKh+aVW8Uxjv/LH4yp2g6f4iwwJR1sBZJHjHcspyivp+U6OR+/Lm0lh
-         jXb4DhO7+L/niZIdNUuwpHAU3RItru+x5qZhvDCxp/uDZjS6fkiv3yYz9DmcnuYFexd4
-         ACWvQAGXwX5KUZxeI6bz7aiAKhUS9RghZnlhUhMHXdjA7xUYl50JBYORORDZxuehZwtn
-         LLJw6gCvk2hWQMytdqSmgptNphKUhCj45YcKkiKtEN6uj4tecZ0+afkdLljOEUOCcjfd
-         yj0f1GEDxsiFjEtLZRzetEKPAdSGsn/ZW+aa2rrEQtG8XCltAF3/gIg5XoYktylcnYn9
-         Xzcg==
-X-Gm-Message-State: AOAM531T4s/08kfUirM2JS3O8FaLTXE86F3eISF5BgiDV/DgMkUKoHVg
-        NB4qJUP1fhreF/+RjGhp1CgVY2CoYaNKgHN9ywY4Nup5jzeUomluSEaL92rRGFA90FN27UB4dRp
-        OktQOW0Cz1Ob8Eta5mk35SE7CUiXD8KiRS7AYqw==
-X-Received: by 2002:a05:6638:24c1:: with SMTP id y1mr3357433jat.119.1602085996738;
-        Wed, 07 Oct 2020 08:53:16 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxrFE7oeAV5IBtyJKr/lIucSLEMcipG5usbTZUIBIFJ6tSMKtbyNtD7Icu8fIdvXheEUSz9A7NYSLfI/U6cPBk=
-X-Received: by 2002:a05:6638:24c1:: with SMTP id y1mr3357410jat.119.1602085996406;
- Wed, 07 Oct 2020 08:53:16 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=s/hUHpHElna/bonvb/FNbIX8jV/IHxuGzuYJlRi9c9k=;
+        b=F7ks9NCaQCpeKO4eb1x9Z1kIt4EP7cYX5Qc/o2aErQkXAZ/3ShmSykZv7TgQNSmMaN
+         ZmFwVGQgRn3WCUXeFRGr0B7Pcn269JI8K6VB+HVeB3x0x0yP2fz7iEY55WyHZbnIbIDL
+         kzzTYgFTUzoofmivTGBbUbxDJlF+BZ//AH22AMlXkFVTeYQtjeksi56cHGqquyKJqQlx
+         X7UQu373LSoNnnnwBzLoarKbviWglSV4zBXguqC6vTGH9egH75iO9FUnOC4yBYa9PJuS
+         Hpq1ELNdwoBgUN+wXgto8dJDWDj7eXq7JK617AYepoGku7epdz1r/PmADRIhTSEn6KHT
+         vyLQ==
+X-Gm-Message-State: AOAM5316ZjYyXaAuM/ulHjMaG+Q0uUctjIAdl4CsDO0ZW7HNQJIx/6O0
+        7JKI7CGsPFM6dcmaM7SyzGv/WEQ/1nsPF/9UqNE=
+X-Google-Smtp-Source: ABdhPJz1EHqAsSimjgGkgi5ohghv2VvA/zm8CnvFqu4Rwh7jFx89Z1M9886aX9vtcCUZwcqFP6FCjfEZmMIGF8XDeP4=
+X-Received: by 2002:a92:6711:: with SMTP id b17mr3850917ilc.100.1602091996389;
+ Wed, 07 Oct 2020 10:33:16 -0700 (PDT)
 MIME-Version: 1.0
-References: <CAByD1q-w83TQgCof5TJH0DWXPMobbqQQcbuaKsnE6PqNsaWqVw@mail.gmail.com>
-In-Reply-To: <CAByD1q-w83TQgCof5TJH0DWXPMobbqQQcbuaKsnE6PqNsaWqVw@mail.gmail.com>
-From:   Patrick Donnelly <pdonnell@redhat.com>
-Date:   Wed, 7 Oct 2020 08:52:50 -0700
-Message-ID: <CA+2bHPaAxh8uy8PW81H63vP3GRWp4NbsDuPSSSX9HH_AMhgR2g@mail.gmail.com>
-Subject: Re: Rook orchestrator module
-To:     Travis Nielsen <tnielsen@redhat.com>
-Cc:     Sebastian Wagner <swagner@suse.com>, Varsha Rao <varao@redhat.com>,
-        Sebastien Han <seb@redhat.com>,
-        Ceph Development List <ceph-devel@vger.kernel.org>,
-        dev <dev@ceph.io>, Venky Shankar <vshankar@redhat.com>
+References: <20201007122536.13354-1-jlayton@kernel.org>
+In-Reply-To: <20201007122536.13354-1-jlayton@kernel.org>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Wed, 7 Oct 2020 19:33:08 +0200
+Message-ID: <CAOi1vP-uJnznmKLSSRymj1FDXWKf4uD1NLuGVse5Nokr=4JQ=w@mail.gmail.com>
+Subject: Re: [PATCH] ceph: break up send_cap_msg
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     Ceph Development <ceph-devel@vger.kernel.org>,
+        "Yan, Zheng" <ukernel@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Adding in dev@ceph.io. ceph-devel is now for kernel development but
-I'm keeping it in the cc list because a lot of discussion already
-happened there.
-
-Also for those interested, there's a recording of a meeting we had on
-this topic here: https://www.youtube.com/watch?v=3D1OSQySElojg
-
-On Tue, Sep 29, 2020 at 12:32 PM Travis Nielsen <tnielsen@redhat.com> wrote=
-:
+On Wed, Oct 7, 2020 at 2:25 PM Jeff Layton <jlayton@kernel.org> wrote:
 >
-> Sebastian and fellow orchestrators,
+> Push the allocation of the msg and the send into the caller. Rename
+> the function to marshal_cap_msg and make it void return.
 >
-> Some questions have come up recently about issues in the Rook
-> orchestrator module and its state of disrepair. Patrick, Varsha, and I
-> have been discussing these recently as Varsha has been working on the
-> module. Before we fix all the issues that are being found, I want to
-> start a higher level conversation. I=E2=80=99ll join the leads meeting
-> tomorrow to discuss, and would be good to include in the Monday
-> orchestrator agenda as well, which unfortunately I haven=E2=80=99t been a=
-ble
-> to attend recently...
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/caps.c | 61 +++++++++++++++++++++++++-------------------------
+>  1 file changed, 30 insertions(+), 31 deletions(-)
 >
-> First, Rook is driven by the K8s APIs, including CRDs, an operator,
-> the CSI driver, etc. When the admin needs to configure the Ceph
-> cluster, they create the CRDs and other resources directly with the
-> K8s tools such as kubectl. Rook does everything with K8s patterns so
-> that the admin doesn=E2=80=99t need to leave their standard administratio=
-n
-> sandbox in order to configure Rook or Ceph. If any Ceph-specific
-> command needs to be run, the rook toolbox can be used. However, we
-> prefer to avoid the toolbox for common scenarios that should have CRDs
-> for declaring desired state.
-
-We're at a crossroads here. Ceph is increasingly learning to manage
-itself with a primary goal of increasing user friendliness. Awareness
-of the deployment technology is key to that.
-
-> The fundamental question then is, **what scenarios require the Rook
-> orchestrator mgr module**? The module is not enabled by default in
-> Rook clusters and I am not aware of upstream users consuming it.
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 4e84b39a6ebd..6f4adfaf761f 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -1222,36 +1222,29 @@ struct cap_msg_args {
+>  };
 >
-> The purpose of the orchestrator module was originally to provide a
-> common entry point either for Ceph CLI tools or the dashboard. This
-> would provide the constant interface to work with both Rook or cephadm
-> clusters. Patrick pointed out that the dashboard isn=E2=80=99t really a
-> scenario anymore for the orchestrator module.
+>  /*
+> - * Build and send a cap message to the given MDS.
+> - *
+> - * Caller should be holding s_mutex.
+> + * cap struct size + flock buffer size + inline version + inline data size +
+> + * osd_epoch_barrier + oldest_flush_tid
+>   */
+> -static int send_cap_msg(struct cap_msg_args *arg)
+> +#define CAP_MSG_SIZE (sizeof(struct ceph_mds_caps) + \
+> +                     4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4)
+> +
+> +/* Marshal up the cap msg to the MDS */
+> +static void marshal_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
 
-As Lenz pointed out in another reply, my understanding was wrong here.
-Dashboard has been using the orchestrator for displaying information
-from the orchestrator.
+Nit: functions like this usually have "encode" or "build" in their
+names across the codebase, so I'd go with "encode_cap_msg".
 
-> If so, the only
-> remaining usage is for CLI tools. And if we only have the CLI
-> scenario, this means that the CLI commands would be run from the
-> toolbox. But we are trying to avoid the toolbox. We should be putting
-> our effort into the CRDs, CSI driver, etc.
 
-I think we need to be careful about looking at the CLI as the sole
-entry point for the orchestrator. The mgr modules (including the
-dashboard) are increasingly using the orchestrator to do tasks. As we
-discussed in the orchestrator meeting (youtube linked earlier in this
-mail) CephFS is planning these scenarios for Pacific:
-
-- mds_autoscaler plugin deploys MDS in response to file system
-degradation (increased max_mds, insufficient standby). Future work [1]
-will look at deploying MDS with more memory in response to load on the
-file system. (Think lots of small file systems with small MDS to
-start.)
-
-- volumes plugin deploys NFS clusters configured via the `ceph nfs
-...` command suite.
-
-- cephfs-mirror daemons deployed to geo-replicate CephFS file systems.
-
-- (Still TBD:) volumes plugin to use an rsync container to copy data
-between two CephFS subvolumes (encrypted or not). Probably include RBD
-mounted images as source or destination, at some point.
-
-> If the orchestrator module is creating CRs, we are likely doing
-> something wrong. We expect the cluster admin to create CRs.
+>  {
+>         struct ceph_mds_caps *fc;
+> -       struct ceph_msg *msg;
+>         void *p;
+> -       size_t extra_len;
+>         struct ceph_osd_client *osdc = &arg->session->s_mdsc->fsc->client->osdc;
 >
-> Thus, I=E2=80=99d like to understand the scenarios where the rook orchest=
-rator
-> module is needed. If there isn=E2=80=99t a need anymore since dashboard
-> requirements have changed, I=E2=80=99d propose the module can be removed.
+> -       dout("send_cap_msg %s %llx %llx caps %s wanted %s dirty %s"
+> +       dout("%s %s %llx %llx caps %s wanted %s dirty %s"
+>              " seq %u/%u tid %llu/%llu mseq %u follows %lld size %llu/%llu"
+> -            " xattr_ver %llu xattr_len %d\n", ceph_cap_op_name(arg->op),
+> -            arg->cid, arg->ino, ceph_cap_string(arg->caps),
+> -            ceph_cap_string(arg->wanted), ceph_cap_string(arg->dirty),
+> -            arg->seq, arg->issue_seq, arg->flush_tid, arg->oldest_flush_tid,
+> -            arg->mseq, arg->follows, arg->size, arg->max_size,
+> -            arg->xattr_version,
+> +            " xattr_ver %llu xattr_len %d\n", __func__,
+> +            ceph_cap_op_name(arg->op), arg->cid, arg->ino,
+> +            ceph_cap_string(arg->caps), ceph_cap_string(arg->wanted),
+> +            ceph_cap_string(arg->dirty), arg->seq, arg->issue_seq,
+> +            arg->flush_tid, arg->oldest_flush_tid, arg->mseq, arg->follows,
+> +            arg->size, arg->max_size, arg->xattr_version,
+>              arg->xattr_buf ? (int)arg->xattr_buf->vec.iov_len : 0);
+>
+> -       /* flock buffer size + inline version + inline data size +
+> -        * osd_epoch_barrier + oldest_flush_tid */
+> -       extra_len = 4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4;
+> -       msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, sizeof(*fc) + extra_len,
+> -                          GFP_NOFS, false);
+> -       if (!msg)
+> -               return -ENOMEM;
+> -
+>         msg->hdr.version = cpu_to_le16(10);
+>         msg->hdr.tid = cpu_to_le64(arg->flush_tid);
+>
+> @@ -1323,9 +1316,6 @@ static int send_cap_msg(struct cap_msg_args *arg)
+>
+>         /* Advisory flags (version 10) */
+>         ceph_encode_32(&p, arg->flags);
+> -
+> -       ceph_con_send(&arg->session->s_con, msg);
+> -       return 0;
+>  }
+>
+>  /*
+> @@ -1456,22 +1446,24 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
+>   */
+>  static void __send_cap(struct cap_msg_args *arg, struct ceph_inode_info *ci)
+>  {
+> +       struct ceph_msg *msg;
+>         struct inode *inode = &ci->vfs_inode;
+> -       int ret;
+>
+> -       ret = send_cap_msg(arg);
+> -       if (ret < 0) {
+> -               pr_err("error sending cap msg, ino (%llx.%llx) "
+> -                      "flushing %s tid %llu, requeue\n",
+> +       msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, CAP_MSG_SIZE, GFP_NOFS, false);
+> +       if (!msg) {
+> +               pr_err("error allocating cap msg: ino (%llx.%llx) "
+> +                      "flushing %s tid %llu, requeuing cap.\n",
 
-Outside of this thread I think we already decided not to do this but
-I'm still interested to hear everyone's thoughts. Hopefully broader
-exposure on dev@ceph.io will get us more voices.
+Don't break new user-visible strings.  This makes grepping harder than
+it should be.
 
-[1] https://tracker.ceph.com/issues/46680
+Thanks,
 
---=20
-Patrick Donnelly, Ph.D.
-He / Him / His
-Principal Software Engineer
-Red Hat Sunnyvale, CA
-GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
-
+                Ilya
