@@ -2,139 +2,78 @@ Return-Path: <SRS0=cUke=DO=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81797C4363C
-	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 08:24:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF3D7C41604
+	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 12:17:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E4DD20872
-	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 08:24:05 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h14ZnWYK"
+	by mail.kernel.org (Postfix) with ESMTP id 623A020789
+	for <ceph-devel@archiver.kernel.org>; Wed,  7 Oct 2020 12:17:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1602073026;
+	bh=W+WRJiA5Dyo40yCBkIH+gN+ujGTSXHZQ4oEjCxbLe9o=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=wCkQiKHVxKty7z06seyi86aXdhh8KZn5UVAEfXLyq363eccT+dmG6EQdm6H0S0sjo
+	 y0x5PT+2mdAB3fHxqsbuxa0colv7DMrAnf1NeBhAAhMK04IBMaE+4c7ABq48x7+Hmg
+	 TK5/+QzA/D3WvcGw63axQI/o2sTBD4rEQxlgHgEA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727862AbgJGIYE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 7 Oct 2020 04:24:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:38317 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726605AbgJGIYD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Oct 2020 04:24:03 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1602059042;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=Zl8D4KVpxLMDNxAi2ILD6WWMQ77PlQXzH2MBTjd0z/s=;
-        b=h14ZnWYKEP68S/yq4kSQyljA8tpEkUM+N7D1YKWX+RfWEpv6vSJllhAW+oAQSVxywADYzM
-        6TpnIoHs9aq3o038eDEKcFAZL4fpRyLKTGC58zyIlOqun9KnDKt5wlI4sla9dqT8lfnH0h
-        p0zhk6WjaGt3gRHH5FjXTiATmJMrVeM=
-Received: from mail-il1-f200.google.com (mail-il1-f200.google.com
- [209.85.166.200]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-494-mlI1lblVN52ts9Fy6-l2lg-1; Wed, 07 Oct 2020 04:24:00 -0400
-X-MC-Unique: mlI1lblVN52ts9Fy6-l2lg-1
-Received: by mail-il1-f200.google.com with SMTP id m1so964707iln.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Oct 2020 01:24:00 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to
-         :content-transfer-encoding;
-        bh=Zl8D4KVpxLMDNxAi2ILD6WWMQ77PlQXzH2MBTjd0z/s=;
-        b=LiU1e/nPUV2xKdZAuG6B1fQCybHlAxGAwCMuDN1x/NEIJap6s/N6KbV+p1o2r4l9k2
-         Dn1COqabhLUuXHPqASvlIm7OnvV6K2VMhXa4GtMV9WuijZ8oBu2v3tHbBYy7QRj3NQYs
-         ZupwMjQb5vns+3gbmhVz4LplEctL0PBVldK/1ldDVrNgD4WJdDLHyBTZPexUD+hwlPKO
-         teYTYjU/ZNHNh9f9z0w07yir/n2uTsGJQ7my8cdIgvzySIHZiOCz5ZLC4/DXYRXo96DQ
-         uGOQaoLbRYpg+/auzdWga01RzpRDMDk8mE9y11P02M49Ge52145uKIinW264PSQsec/w
-         NO8g==
-X-Gm-Message-State: AOAM532KcU+Ecg56vfwYVCmZnbMN9aaT3RsjuEsOnnIvR/hu4liQGgcr
-        gLIiaoxN1X02DOIwWEbY312mbPgJod3rQELo4Hg/YQrrfgprAodT/SKfSSxweNL7061PWwsWECX
-        BiO31WFP/L2+3Zalgd8ycKfw03VWjQqWGSktotA==
-X-Received: by 2002:a92:c949:: with SMTP id i9mr1775628ilq.252.1602059039180;
-        Wed, 07 Oct 2020 01:23:59 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy3rYfWD4+Z3p8J18dJ9yvogUeDQW26LmTv6g/dg4ujeno9Ia+NSXxHNfbEeUqpkW/vkV7NVh7t8fJuwDynfuM=
-X-Received: by 2002:a92:c949:: with SMTP id i9mr1775618ilq.252.1602059038936;
- Wed, 07 Oct 2020 01:23:58 -0700 (PDT)
+        id S1728152AbgJGMRF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 7 Oct 2020 08:17:05 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41374 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727978AbgJGMRF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 7 Oct 2020 08:17:05 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1D6B9207EA;
+        Wed,  7 Oct 2020 12:17:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1602073024;
+        bh=W+WRJiA5Dyo40yCBkIH+gN+ujGTSXHZQ4oEjCxbLe9o=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=DSVKKII5xM9AmVEcUJGz8RKpgR7sQzfReroUEAcGtLTLG1LWFg43NKS45THYxpOHP
+         skUuhUZxW+WmsaC8leOSrgO97u6a3uuQlggvLnE2mwGSbu0UJuQLzL3etwl5ns/AGC
+         6wyteHzJYOkNztuGrz18STHYNeSzx03KfjHYOt04=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com
+Subject: [PATCH v4 1/5] ceph: don't WARN when removing caps due to blocklisting
+Date:   Wed,  7 Oct 2020 08:16:56 -0400
+Message-Id: <20201007121700.10489-2-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20201007121700.10489-1-jlayton@kernel.org>
+References: <20201007121700.10489-1-jlayton@kernel.org>
 MIME-Version: 1.0
-From:   Alfonso Martinez Hidalgo <almartin@redhat.com>
-Date:   Wed, 7 Oct 2020 10:23:48 +0200
-Message-ID: <CAE6AcscPK6DZ+OnTaRQ6WUpKWwzdD5H+v05uf4qEbquHOhmS=w@mail.gmail.com>
-Subject: "Signed-off-by" jenkins job for PRs now failing
-To:     Ceph Devel <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi All,
+We expect to remove dirty caps when the client is blocklisted. Don't
+throw a warning in that case.
 
-It seems that this job has started to fail on several PRs.
-Does anyone have privileges to fix this error?
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/caps.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D test session starts =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-platform linux2 -- Python 2.7.12, pytest-4.6.11, py-1.9.0,
-pluggy-0.13.1 -- /tmp/venv.4M9HM0FOIP/bin/python2.7
-cachedir: .pytest_cache
-rootdir: /home/jenkins-build/build/workspace/ceph-pr-commits
-collecting ... collected 2 items / 1 deselected / 1 selected
-
-ceph-build/ceph-pr-commits/build/test_commits.py::TestCommits::test_signed_=
-off_by
-Running command: git fetch origin
-+refs/heads/master:refs/remotes/origin/master
-Running command: git log -z --no-merges origin/master..HEAD
-FAILED
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D FAILURES =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-________________________ TestCommits.test_signed_off_by ___________________=
-_____
-
-self =3D <test_commits.TestCommits object at 0x7f95779c8190>
-
-    @pytest.mark.code_test
-    def test_signed_off_by(self):
-        signed_off_regex =3D r'Signed-off-by: \S.* <[^@]+@[^@]+\.[^@]+>'
-        # '-z' puts a '\0' between commits, see later split('\0')
-        check_signed_off_commits =3D 'git log -z --no-merges origin/%s..%s'=
- % (
-            self.target_branch, self.source_branch)
-        wrong_commits =3D list(filterfalse(
-            re.compile(signed_off_regex).search,
->           self.command(check_signed_off_commits).split('\0')))
-
-ceph-build/ceph-pr-commits/build/test_commits.py:63:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _=
- _ _
-
-cls =3D <class 'test_commits.TestCommits'>
-command =3D 'git log -z --no-merges origin/master..HEAD'
-
-    @classmethod
-    def command(cls, command):
-        print("Running command:", command)
->       return check_output(shlex.split(command), cwd=3Dcls.ceph_checkout).=
-decode()
-E       UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in
-position 68: ordinal not in range(128)
-
-ceph-build/ceph-pr-commits/build/test_commits.py:29: UnicodeDecodeError
-- generated xml file:
-/home/jenkins-build/build/workspace/ceph-pr-commits/report.xml -
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D 1 failed, 1 de=
-selected in 0.60 seconds =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
-Build step 'Execute shell' marked build as failure
-
-
-Regards,
---=20
-
-Alfonso Mart=C3=ADnez
-Senior Software Engineer, Ceph Storage
-Red Hat
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index c7e69547628e..2ee3f316afcf 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1149,7 +1149,7 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 	/* remove from inode's cap rbtree, and clear auth cap */
+ 	rb_erase(&cap->ci_node, &ci->i_caps);
+ 	if (ci->i_auth_cap == cap) {
+-		WARN_ON_ONCE(!list_empty(&ci->i_dirty_item));
++		WARN_ON_ONCE(!list_empty(&ci->i_dirty_item) && !mdsc->fsc->blocklisted);
+ 		ci->i_auth_cap = NULL;
+ 	}
+ 
+-- 
+2.26.2
 
