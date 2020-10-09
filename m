@@ -7,35 +7,35 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BB95C433DF
-	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:31:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 712BAC4363A
+	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:31:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B2802222B9
-	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:31:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3A5EB2225D
+	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:31:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="OpgwA4h4"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="XNzZbSwQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388803AbgJIObJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 9 Oct 2020 10:31:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53612 "EHLO
+        id S2388875AbgJIObR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 9 Oct 2020 10:31:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731698AbgJIObI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Oct 2020 10:31:08 -0400
+        with ESMTP id S2388846AbgJIObL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Oct 2020 10:31:11 -0400
 Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D40CC0613D2;
-        Fri,  9 Oct 2020 07:31:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0DA7C0613D5;
+        Fri,  9 Oct 2020 07:31:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
         References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
         Content-Type:Content-ID:Content-Description;
-        bh=9pnCDQD7BT3wSOEmQ/ujAa+Hm2ir7A48RB79T7IxK0Q=; b=OpgwA4h4sqP1jU/IETGKZCdM+Q
-        i2z3mUNTVaNMrPcKu/kIEUukM1dt974qFSZx4F1PJP3u9M1SgxVKgcIonjd/aNrK8oJYJJN4oHRk1
-        obdU0/M9Ik9JMH/nzkWE8D3yho4lKnaBpftYWxPJpDwLQo52xiQnfV7kpYc8EtYGLGmDorJ9y8V5N
-        CJcX+ugzQELTPBZdvOkJejfwb3L1y6UeR3FiWZL/sICMMOlGRRiA2qGYtu0wV9jkbIzwzA2oq/dOd
-        H5aqicfp9nwOgncn7C7ET7kxAk5rWlkDprT8RSZwKu9U+B7N0o7spekfqopBUVo/2X+R5nO4vA99R
-        nxNxhJxw==;
+        bh=jmv1iA6ONHdhBCtewTigT8o0CWZcxoZXOX5KqmVgnTU=; b=XNzZbSwQBr1O0Cq9RqMvPhd6Th
+        3/cZhq8AKMqNDl+YLfIMFJ16Mi8FFxIl13HW+TS4wCj+ArkMasaZPuF0/mGpLKUUXuYxafLrMqSHb
+        GoxSJfWliAqjmPOnj3b0ZKft/67A6g9Fr10aR4luuXWMrQ2NR4t8PS/XdVIMXeE1ZS0NxTBE7GnuS
+        4nljrczeHw39ur1ALlok+R9tqGltRa9YMBoWceemPmxeu73aaHuzxMnScDcSq5wwPvWPo6mBaRDyp
+        AcmBkgLjznHCcnIMJfCL6gB8B1l7faHSRU3ubSlA+JJl2CHNImoG5KSRQJ7ZwGlHs3l9m11pvBhVq
+        Bu8cManA==;
 Received: from willy by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kQtQI-0005uX-P8; Fri, 09 Oct 2020 14:31:06 +0000
+        id 1kQtQK-0005vD-9J; Fri, 09 Oct 2020 14:31:08 +0000
 From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To:     linux-fsdevel@vger.kernel.org
 Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
@@ -45,9 +45,9 @@ Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
         ecryptfs@vger.kernel.org, linux-um@lists.infradead.org,
         linux-mtd@lists.infradead.org, Richard Weinberger <richard@nod.at>,
         linux-xfs@vger.kernel.org
-Subject: [PATCH v2 02/16] mm: Inline wait_on_page_read into its one caller
-Date:   Fri,  9 Oct 2020 15:30:50 +0100
-Message-Id: <20201009143104.22673-3-willy@infradead.org>
+Subject: [PATCH v2 08/16] ecryptfs: Tell the VFS that readpage was synchronous
+Date:   Fri,  9 Oct 2020 15:30:56 +0100
+Message-Id: <20201009143104.22673-9-willy@infradead.org>
 X-Mailer: git-send-email 2.21.3
 In-Reply-To: <20201009143104.22673-1-willy@infradead.org>
 References: <20201009143104.22673-1-willy@infradead.org>
@@ -57,58 +57,37 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Having this code inline helps the function read more easily.
+The ecryptfs readpage implementation was already synchronous, so use
+AOP_UPDATED_PAGE to avoid cycling the page lock.
 
 Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 ---
- mm/filemap.c | 20 ++++----------------
- 1 file changed, 4 insertions(+), 16 deletions(-)
+ fs/ecryptfs/mmap.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/mm/filemap.c b/mm/filemap.c
-index 95b68ec1f22c..0ef06d515532 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -2834,18 +2834,6 @@ EXPORT_SYMBOL(filemap_page_mkwrite);
- EXPORT_SYMBOL(generic_file_mmap);
- EXPORT_SYMBOL(generic_file_readonly_mmap);
- 
--static struct page *wait_on_page_read(struct page *page)
--{
--	if (!IS_ERR(page)) {
--		wait_on_page_locked(page);
--		if (!PageUptodate(page)) {
--			put_page(page);
--			page = ERR_PTR(-EIO);
--		}
--	}
--	return page;
--}
--
- static struct page *do_read_cache_page(struct address_space *mapping,
- 				pgoff_t index,
- 				int (*filler)(void *, struct page *),
-@@ -2876,7 +2864,10 @@ static struct page *do_read_cache_page(struct address_space *mapping,
- 			err = mapping->a_ops->readpage(data, page);
- 		if (err == AOP_UPDATED_PAGE) {
- 			unlock_page(page);
--			goto out;
-+		} else if (!err) {
-+			wait_on_page_locked(page);
-+			if (!PageUptodate(page))
-+				err = -EIO;
+diff --git a/fs/ecryptfs/mmap.c b/fs/ecryptfs/mmap.c
+index 019572c6b39a..dee35181d789 100644
+--- a/fs/ecryptfs/mmap.c
++++ b/fs/ecryptfs/mmap.c
+@@ -219,12 +219,13 @@ static int ecryptfs_readpage(struct file *file, struct page *page)
  		}
- 
- 		if (err < 0) {
-@@ -2884,9 +2875,6 @@ static struct page *do_read_cache_page(struct address_space *mapping,
- 			return ERR_PTR(err);
- 		}
- 
--		page = wait_on_page_read(page);
--		if (IS_ERR(page))
--			return page;
- 		goto out;
  	}
- 	if (PageUptodate(page))
+ out:
+-	if (rc)
+-		ClearPageUptodate(page);
+-	else
+-		SetPageUptodate(page);
+-	ecryptfs_printk(KERN_DEBUG, "Unlocking page with index = [0x%.16lx]\n",
++	ecryptfs_printk(KERN_DEBUG, "Returning page with index = [0x%.16lx]\n",
+ 			page->index);
++	if (!rc) {
++		SetPageUptodate(page);
++		return AOP_UPDATED_PAGE;
++	}
++	ClearPageUptodate(page);
+ 	unlock_page(page);
+ 	return rc;
+ }
 -- 
 2.28.0
 
