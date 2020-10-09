@@ -2,97 +2,113 @@ Return-Path: <SRS0=uPiw=DQ=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2DEFC43467
-	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:18:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BB95C433DF
+	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:31:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BD1732222F
-	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:18:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B2802222B9
+	for <ceph-devel@archiver.kernel.org>; Fri,  9 Oct 2020 14:31:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="hxFVkoe9"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="OpgwA4h4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388672AbgJIOSc (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 9 Oct 2020 10:18:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51628 "EHLO
+        id S2388803AbgJIObJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 9 Oct 2020 10:31:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53612 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388654AbgJIOSb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Oct 2020 10:18:31 -0400
-Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F456C0613D7
-        for <ceph-devel@vger.kernel.org>; Fri,  9 Oct 2020 07:18:31 -0700 (PDT)
-Received: by mail-qk1-x741.google.com with SMTP id x20so3685240qkn.1
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Oct 2020 07:18:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=2Nsozhx6Vbc7+gevBK4suxhbi1tLEGMu37jB4LFRAPw=;
-        b=hxFVkoe9fUSNiPI+uQ12JsKm6OjRLbKc/6lbFpVRDpIhsRf4KNWmimf4Uw4bwdRTz5
-         uQebX3pJKZMtpcnAIYfdaL/HusqLmmVCjy1WhA7fNAyfon0iBRnmnTuq2eXAKWGAKu/g
-         /vTH9xfC6VEOLORYAQpLlpSOhlk9U2mh95fmy7zrpVmL8CpQGirmNAr8bviupqSX4BiN
-         JsjOaIWFbd15tmtcIRr9ygyReyr9DpipdN4qGf3pIBBGAQj2KR4tjY8vTI0zqQxk5GwQ
-         Ocn5+xIj9xtTzKOSYGRzic4/Nq4+1UxKLsdYs+sy/07AkRNYMjjoJc4aPs5x3V89ALRG
-         9rTg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=2Nsozhx6Vbc7+gevBK4suxhbi1tLEGMu37jB4LFRAPw=;
-        b=c7kGLx0NjeHWt5gTaoITW+knIfsV65pt04P3qYP8MX+78fErbLcW/hzfRxqQ6uWQ9u
-         UP0QwIs3fA1/wVbpf5zAudelOeyWImmPjfyo7JXjHwOIPSVMcwSStzMj4/vixrFpLh3s
-         ajEkKKwtnldvP2SrEY5hlml8vNq1z5Xql1v9U8QdBpMrYnF9wFl+DIjqUCKtYbb3qwV9
-         9YxnU6+bMSDPBoSgw6pzapVzGkMNxS+ori0gVTkUdgMWoZaTs6GeqKz+anQaQ4KlH1jT
-         GFaaUSvZCT00YXFmiWu1BiHVp6WzSTAOxRQZFirgIAMXIoPk0bTyF3fkjgqOiaPC0UP0
-         /iGw==
-X-Gm-Message-State: AOAM532FHoJVvPvnVpRm4VabNIbaA/dfbULF2RyP6DkdcYLm8kkBqaEv
-        NDTJlPFIFX+nXPNKp/zH2MndWQ==
-X-Google-Smtp-Source: ABdhPJwWctAz3Cj788czTSYpVZIZN+OINVRMuTkx431OvmGfAhyvUvX02fo6IXvszZ32Z1TA67pjlA==
-X-Received: by 2002:a37:4587:: with SMTP id s129mr12042169qka.99.1602253110784;
-        Fri, 09 Oct 2020 07:18:30 -0700 (PDT)
-Received: from ?IPv6:2620:10d:c0a8:11e8::107d? ([2620:10d:c091:480::1:f1f8])
-        by smtp.gmail.com with ESMTPSA id t7sm5107903qkm.130.2020.10.09.07.18.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 09 Oct 2020 07:18:29 -0700 (PDT)
-Subject: Re: [PATCH 6/7] btrfs: Promote to unsigned long long before shifting
-To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
-        linux-fsdevel@vger.kernel.org
-Cc:     ericvh@gmail.com, lucho@ionkov.net, viro@zeniv.linux.org.uk,
-        jlayton@kernel.org, idryomov@gmail.com, mark@fasheh.com,
-        jlbec@evilplan.org, joseph.qi@linux.alibaba.com,
-        v9fs-developer@lists.sourceforge.net, linux-kernel@vger.kernel.org,
-        ceph-devel@vger.kernel.org, ocfs2-devel@oss.oracle.com,
-        linux-btrfs@vger.kernel.org, clm@fb.com, dsterba@suse.com,
-        stable@vger.kernel.org
-References: <20201004180428.14494-1-willy@infradead.org>
- <20201004180428.14494-7-willy@infradead.org>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <84f3800c-445e-6dbf-2381-56840d7bba69@toxicpanda.com>
-Date:   Fri, 9 Oct 2020 10:18:27 -0400
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.3.1
+        with ESMTP id S1731698AbgJIObI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Oct 2020 10:31:08 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D40CC0613D2;
+        Fri,  9 Oct 2020 07:31:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
+        Content-Type:Content-ID:Content-Description;
+        bh=9pnCDQD7BT3wSOEmQ/ujAa+Hm2ir7A48RB79T7IxK0Q=; b=OpgwA4h4sqP1jU/IETGKZCdM+Q
+        i2z3mUNTVaNMrPcKu/kIEUukM1dt974qFSZx4F1PJP3u9M1SgxVKgcIonjd/aNrK8oJYJJN4oHRk1
+        obdU0/M9Ik9JMH/nzkWE8D3yho4lKnaBpftYWxPJpDwLQo52xiQnfV7kpYc8EtYGLGmDorJ9y8V5N
+        CJcX+ugzQELTPBZdvOkJejfwb3L1y6UeR3FiWZL/sICMMOlGRRiA2qGYtu0wV9jkbIzwzA2oq/dOd
+        H5aqicfp9nwOgncn7C7ET7kxAk5rWlkDprT8RSZwKu9U+B7N0o7spekfqopBUVo/2X+R5nO4vA99R
+        nxNxhJxw==;
+Received: from willy by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kQtQI-0005uX-P8; Fri, 09 Oct 2020 14:31:06 +0000
+From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
+To:     linux-fsdevel@vger.kernel.org
+Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        linux-mm@kvack.org, v9fs-developer@lists.sourceforge.net,
+        linux-kernel@vger.kernel.org, linux-afs@lists.infradead.org,
+        ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
+        ecryptfs@vger.kernel.org, linux-um@lists.infradead.org,
+        linux-mtd@lists.infradead.org, Richard Weinberger <richard@nod.at>,
+        linux-xfs@vger.kernel.org
+Subject: [PATCH v2 02/16] mm: Inline wait_on_page_read into its one caller
+Date:   Fri,  9 Oct 2020 15:30:50 +0100
+Message-Id: <20201009143104.22673-3-willy@infradead.org>
+X-Mailer: git-send-email 2.21.3
+In-Reply-To: <20201009143104.22673-1-willy@infradead.org>
+References: <20201009143104.22673-1-willy@infradead.org>
 MIME-Version: 1.0
-In-Reply-To: <20201004180428.14494-7-willy@infradead.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On 10/4/20 2:04 PM, Matthew Wilcox (Oracle) wrote:
-> On 32-bit systems, this shift will overflow for files larger than 4GB.
-> 
-> Cc: stable@vger.kernel.org
-> Fixes: 53b381b3abeb ("Btrfs: RAID5 and RAID6")
-> Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+Having this code inline helps the function read more easily.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+---
+ mm/filemap.c | 20 ++++----------------
+ 1 file changed, 4 insertions(+), 16 deletions(-)
 
-Thanks,
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 95b68ec1f22c..0ef06d515532 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -2834,18 +2834,6 @@ EXPORT_SYMBOL(filemap_page_mkwrite);
+ EXPORT_SYMBOL(generic_file_mmap);
+ EXPORT_SYMBOL(generic_file_readonly_mmap);
+ 
+-static struct page *wait_on_page_read(struct page *page)
+-{
+-	if (!IS_ERR(page)) {
+-		wait_on_page_locked(page);
+-		if (!PageUptodate(page)) {
+-			put_page(page);
+-			page = ERR_PTR(-EIO);
+-		}
+-	}
+-	return page;
+-}
+-
+ static struct page *do_read_cache_page(struct address_space *mapping,
+ 				pgoff_t index,
+ 				int (*filler)(void *, struct page *),
+@@ -2876,7 +2864,10 @@ static struct page *do_read_cache_page(struct address_space *mapping,
+ 			err = mapping->a_ops->readpage(data, page);
+ 		if (err == AOP_UPDATED_PAGE) {
+ 			unlock_page(page);
+-			goto out;
++		} else if (!err) {
++			wait_on_page_locked(page);
++			if (!PageUptodate(page))
++				err = -EIO;
+ 		}
+ 
+ 		if (err < 0) {
+@@ -2884,9 +2875,6 @@ static struct page *do_read_cache_page(struct address_space *mapping,
+ 			return ERR_PTR(err);
+ 		}
+ 
+-		page = wait_on_page_read(page);
+-		if (IS_ERR(page))
+-			return page;
+ 		goto out;
+ 	}
+ 	if (PageUptodate(page))
+-- 
+2.28.0
 
-Josef
