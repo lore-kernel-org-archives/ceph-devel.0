@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 524C6C4363A
-	for <ceph-devel@archiver.kernel.org>; Tue, 27 Oct 2020 00:21:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19547C4363A
+	for <ceph-devel@archiver.kernel.org>; Tue, 27 Oct 2020 00:31:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2382520708
-	for <ceph-devel@archiver.kernel.org>; Tue, 27 Oct 2020 00:21:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D310120882
+	for <ceph-devel@archiver.kernel.org>; Tue, 27 Oct 2020 00:31:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1603758082;
-	bh=wFWhx3aeYQB6qGCKp596fTYiTgcNDh0zcMjaICl9Yyw=;
+	s=default; t=1603758662;
+	bh=QSc82sGQQyqNVs6kY8ANMDdfEHxLu6FOkqtGhOBcoBY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=n1WdeS5j3jUFpmbV59LQtx2WZ/tYO7CSDF/1X3e4yfb9YW9Khhta7Jf0MF05maI8o
-	 cItg/iLSqcXNIS2Ow7OWXEi8LCpsyrTj+X+3LO54Lt3eqMd3H10f1UwVaqNLfVLu/I
-	 C4l7GGI6G+cpJdBC/kT3dMaYnaJJ6YZhQvE3R8N4=
+	b=c2IKe0B3RdFMieQ3N4kk3EpHV25U3H3IzTj4TIQgzR2wjn4pZUpT15ossFRsJNNLO
+	 4u3snYeJX1NYy5ReMpx8wFXyT7LPjsnCR3JhxeFGn3+wC0Pq+vk/5wqkaClCBj5IVa
+	 Cg07YGjIw6rMMBmxdbrsuMT1R24kj1yvXn9+c1zE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2411002AbgJZXz4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 26 Oct 2020 19:55:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60062 "EHLO mail.kernel.org"
+        id S2409435AbgJZXva (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 26 Oct 2020 19:51:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52252 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2410398AbgJZXyU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 26 Oct 2020 19:54:20 -0400
+        id S2409417AbgJZXv2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 26 Oct 2020 19:51:28 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6793D2151B;
-        Mon, 26 Oct 2020 23:54:18 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8BABB20878;
+        Mon, 26 Oct 2020 23:51:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1603756459;
-        bh=wFWhx3aeYQB6qGCKp596fTYiTgcNDh0zcMjaICl9Yyw=;
+        s=default; t=1603756287;
+        bh=QSc82sGQQyqNVs6kY8ANMDdfEHxLu6FOkqtGhOBcoBY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=fTh2sZp35fKRnySSjSlFEburSSDId3FmJRlNFwu1WLEBHpD5YlaOTM4ySRUZpUp/D
-         xl9eGniq8mzyHSrWzLoRYxT0NYMEclhW7V1xUdO0hd2N9C0VBB6qpWerZBnWs/TtUZ
-         fnQO8fJXHpfl5za5BVn0xKPech6E4QbLezYUnY40=
+        b=fb6ivgPpefBzBAjh4aB54+qLWG2jJBsEdG/H1tXrwYLhMUN5ZtUV9druA1GaF0+2r
+         pZA+arXF6vFyuLZjVzT4zEy4UbO1fZJT9D7+6Z6g0nIASWbRDx15GUfgLgLTuT223N
+         OAqLquiqhmMpKdvkzdr+j0UNvbmvme3l+X43k0M4=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     "Yan, Zheng" <zyan@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.8 108/132] ceph: encode inodes' parent/d_name in cap reconnect message
-Date:   Mon, 26 Oct 2020 19:51:40 -0400
-Message-Id: <20201026235205.1023962-108-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.9 116/147] ceph: encode inodes' parent/d_name in cap reconnect message
+Date:   Mon, 26 Oct 2020 19:48:34 -0400
+Message-Id: <20201026234905.1022767-116-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20201026235205.1023962-1-sashal@kernel.org>
-References: <20201026235205.1023962-1-sashal@kernel.org>
+In-Reply-To: <20201026234905.1022767-1-sashal@kernel.org>
+References: <20201026234905.1022767-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -80,10 +80,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 61 insertions(+), 28 deletions(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 903b6a35b321b..862a5b10ab0ee 100644
+index 4a26862d7667e..76d8d9495d1d4 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -3531,6 +3531,39 @@ static int send_reconnect_partial(struct ceph_reconnect_state *recon_state)
+@@ -3612,6 +3612,39 @@ static int send_reconnect_partial(struct ceph_reconnect_state *recon_state)
  	return err;
  }
  
@@ -123,7 +123,7 @@ index 903b6a35b321b..862a5b10ab0ee 100644
  /*
   * Encode information about a cap for a reconnect with the MDS.
   */
-@@ -3544,13 +3577,32 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -3625,13 +3658,32 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
  	struct ceph_inode_info *ci = cap->ci;
  	struct ceph_reconnect_state *recon_state = arg;
  	struct ceph_pagelist *pagelist = recon_state->pagelist;
@@ -157,7 +157,7 @@ index 903b6a35b321b..862a5b10ab0ee 100644
  	spin_lock(&ci->i_ceph_lock);
  	cap->seq = 0;        /* reset cap seq */
  	cap->issue_seq = 0;  /* and issue_seq */
-@@ -3571,7 +3623,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -3652,7 +3704,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
  		rec.v2.wanted = cpu_to_le32(__ceph_caps_wanted(ci));
  		rec.v2.issued = cpu_to_le32(cap->issued);
  		rec.v2.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
@@ -166,7 +166,7 @@ index 903b6a35b321b..862a5b10ab0ee 100644
  		rec.v2.flock_len = (__force __le32)
  			((ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) ? 0 : 1);
  	} else {
-@@ -3582,7 +3634,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -3663,7 +3715,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
  		ceph_encode_timespec64(&rec.v1.mtime, &inode->i_mtime);
  		ceph_encode_timespec64(&rec.v1.atime, &inode->i_atime);
  		rec.v1.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
@@ -175,7 +175,7 @@ index 903b6a35b321b..862a5b10ab0ee 100644
  	}
  
  	if (list_empty(&ci->i_cap_snaps)) {
-@@ -3644,7 +3696,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -3725,7 +3777,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
  			    sizeof(struct ceph_filelock);
  		rec.v2.flock_len = cpu_to_le32(struct_len);
  
@@ -184,7 +184,7 @@ index 903b6a35b321b..862a5b10ab0ee 100644
  
  		if (struct_v >= 2)
  			struct_len += sizeof(u64); /* snap_follows */
-@@ -3668,7 +3720,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -3749,7 +3801,7 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
  			ceph_pagelist_encode_8(pagelist, 1);
  			ceph_pagelist_encode_32(pagelist, struct_len);
  		}
@@ -193,7 +193,7 @@ index 903b6a35b321b..862a5b10ab0ee 100644
  		ceph_pagelist_append(pagelist, &rec, sizeof(rec.v2));
  		ceph_locks_to_pagelist(flocks, pagelist,
  				       num_fcntl_locks, num_flock_locks);
-@@ -3677,39 +3729,20 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -3758,39 +3810,20 @@ static int reconnect_caps_cb(struct inode *inode, struct ceph_cap *cap,
  out_freeflocks:
  		kfree(flocks);
  	} else {
