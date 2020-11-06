@@ -2,144 +2,161 @@ Return-Path: <SRS0=yRa+=EM=vger.kernel.org=ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36D8EC2D0A3
-	for <ceph-devel@archiver.kernel.org>; Fri,  6 Nov 2020 16:09:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EB8AC55ABD
+	for <ceph-devel@archiver.kernel.org>; Fri,  6 Nov 2020 19:04:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CC9D12078B
-	for <ceph-devel@archiver.kernel.org>; Fri,  6 Nov 2020 16:09:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1CB1120882
+	for <ceph-devel@archiver.kernel.org>; Fri,  6 Nov 2020 19:04:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="fX78gnQD"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="kl8AxnoJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726727AbgKFQJZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 6 Nov 2020 11:09:25 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:27836 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726010AbgKFQJZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2020 11:09:25 -0500
-Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0A6G35hd163495;
-        Fri, 6 Nov 2020 11:09:05 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=7W+KlFrvlVCE1tszckPeCRwketIIYuzjK60HHTqUggw=;
- b=fX78gnQDgo0lZRSs4f0TaNTqhWRCEsiCARBBbJmZk56i9nMkHyjydqCTrfL8HFR50oZZ
- V8Jl/H3D2RhII575uqX2745bZSPiDxNJ1wu6/crmy336kMjUYH8h2oDROFomrdS+Vs3z
- IbQ/8ya4s8EZtiW9GqVciH5Kh9iwDZnxx1JD2a02r/yK5eJSuMAgWOkgmDnMxOXQFFVV
- N4Q8/i4A9G4vxxnqmBXr7zhWYCejOYNE068+ui5Nhw1g/ondKoM7B2m0ZIGaLhGuUT0H
- EVGnKHp5POroL6B5d2Wfze3AJ9nuuoBn2M3J/lDI/xUZHE8kIe//coxzDqnVxj31FQev 7Q== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 34n3jpdabb-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 06 Nov 2020 11:09:05 -0500
-Received: from m0098414.ppops.net (m0098414.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.36/8.16.0.36) with SMTP id 0A6G36xm163549;
-        Fri, 6 Nov 2020 11:09:04 -0500
-Received: from ppma06fra.de.ibm.com (48.49.7a9f.ip4.static.sl-reverse.com [159.122.73.72])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 34n3jpdaaj-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 06 Nov 2020 11:09:04 -0500
-Received: from pps.filterd (ppma06fra.de.ibm.com [127.0.0.1])
-        by ppma06fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 0A6G92fS014519;
-        Fri, 6 Nov 2020 16:09:02 GMT
-Received: from b06cxnps4075.portsmouth.uk.ibm.com (d06relay12.portsmouth.uk.ibm.com [9.149.109.197])
-        by ppma06fra.de.ibm.com with ESMTP id 34h01kkecx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 06 Nov 2020 16:09:02 +0000
-Received: from d06av25.portsmouth.uk.ibm.com (d06av25.portsmouth.uk.ibm.com [9.149.105.61])
-        by b06cxnps4075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0A6G907Q4522674
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 6 Nov 2020 16:09:00 GMT
-Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 77CEF11C054;
-        Fri,  6 Nov 2020 16:09:00 +0000 (GMT)
-Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 0DD4611C050;
-        Fri,  6 Nov 2020 16:09:00 +0000 (GMT)
-Received: from imap.linux.ibm.com (unknown [9.152.85.9])
-        by d06av25.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Fri,  6 Nov 2020 16:08:59 +0000 (GMT)
-Date:   Fri, 6 Nov 2020 17:08:58 +0100
-From:   Stefan Haberland <sth@linux.ibm.com>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, Ilya Dryomov <idryomov@gmail.com>,
-        Song Liu <song@kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Jan Hoeppner <hoeppner@linux.ibm.com>,
-        linux-block@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
-Subject: Re: [PATCH 06/10] dasd: implement ->set_read_only to hook into
- BLKROSET processing
-Message-ID: <20201106160858.GA76682@imap.linux.ibm.com>
-References: <20201103100018.683694-1-hch@lst.de>
- <20201103100018.683694-7-hch@lst.de>
- <20201105205634.GA78869@imap.linux.ibm.com>
- <20201106140201.GA23087@lst.de>
+        id S1727828AbgKFTEJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 6 Nov 2020 14:04:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59234 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725868AbgKFTEI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2020 14:04:08 -0500
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7077C0613CF;
+        Fri,  6 Nov 2020 11:04:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
+        Content-Type:Content-ID:Content-Description;
+        bh=GTpuLBfYyo8TaeZo/z07ad7aIfYXt5VjexG6J+Un22Y=; b=kl8AxnoJUKENxdqbmGjtDUBKGr
+        4VvvwsWDbIWXpjZUE80AyVmG5Pw1VqJDYsJwtH7NNnxp0mOGVXqwKxHaePcIX2QLEgCS8sFueGPzE
+        AiTGABB6Xp+kXJg8ish427RVP/SfCFu0d17IOJ1V1HiYBELRoZFB92ZTq6pCfkW0lsJkkJrifhsmZ
+        pmg+34MTaZP2+QSox6FaZ3V/B2bz9YfsUA2FysiawKz4wfLjLQFNhJ856xgqwRX1KDIB3yvZOlRbF
+        NcZ4l5avCx+EDEjbrxqOm6DFPEMZDdVeorTynAxTtJLBiF/5eE5hDbP4cAerzfFjspBXGft5tkdz/
+        xM4wPyUw==;
+Received: from [2001:4bb8:184:9a8d:9e34:f7f4:e59e:ad6f] (helo=localhost)
+        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kb71b-0000th-31; Fri, 06 Nov 2020 19:03:52 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Justin Sanders <justin@coraid.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Jack Wang <jinpu.wang@cloud.ionos.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Stefan Hajnoczi <stefanha@redhat.com>,
+        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
+        =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>,
+        Minchan Kim <minchan@kernel.org>,
+        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        dm-devel@redhat.com, linux-block@vger.kernel.org,
+        drbd-dev@lists.linbit.com, nbd@other.debian.org,
+        ceph-devel@vger.kernel.org, xen-devel@lists.xenproject.org,
+        linux-raid@vger.kernel.org, linux-nvme@lists.infradead.org,
+        linux-scsi@vger.kernel.org, linux-fsdevel@vger.kernel.org
+Subject: [PATCH 02/24] loop: remove loop_set_size
+Date:   Fri,  6 Nov 2020 20:03:14 +0100
+Message-Id: <20201106190337.1973127-3-hch@lst.de>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201106190337.1973127-1-hch@lst.de>
+References: <20201106190337.1973127-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201106140201.GA23087@lst.de>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-TM-AS-GCONF: 00
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
- definitions=2020-11-06_06:2020-11-05,2020-11-06 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 suspectscore=0
- malwarescore=0 phishscore=0 impostorscore=0 clxscore=1015 mlxlogscore=999
- bulkscore=0 adultscore=0 priorityscore=1501 spamscore=0 lowpriorityscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011060114
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Christoph Hellwig <hch@lst.de> schrieb am Fri, 06. Nov 15:02:
-> On Thu, Nov 05, 2020 at 09:56:47PM +0100, Stefan Haberland wrote:
-> > > +	/* do not manipulate hardware state for partitions */
-> > >  	if (bdev_is_partition(bdev))
-> > > -		// ro setting is not allowed for partitions
-> > > -		return -EINVAL;
-> > > -	if (get_user(intval, (int __user *)argp))
-> > > -		return -EFAULT;
-> > > +		return 0;
-> > > +
-> > >  	base = dasd_device_from_gendisk(bdev->bd_disk);
-> > >  	if (!base)
-> > >  		return -ENODEV;
-> > > -	if (!intval && test_bit(DASD_FLAG_DEVICE_RO, &base->flags)) {
-> > > -		dasd_put_device(base);
-> > > -		return -EROFS;
-> > > -	}
-> > > -	set_disk_ro(bdev->bd_disk, intval);
-> > 
-> > 
-> > While testing this patch I just noticed that when I set a device readonly this is
-> > not going to be passed on to the partitions on this device any longer.
-> > 
-> > This is caused by the removed call to set_disk_ro().
-> > 
-> > Is this intentional or was this removed by accident?
-> 
-> It was unintentionally intentional :)
-> 
-> The generic code used already by almost all drivers in mainline only
-> calls set_device_ro from blkdev_roset, that is it only sets the main
-> device read-only.  dasd was the outlier here, and I didn't notice it
-> actually called set_disk_ro instead of set_device_ro.   That being
-> said I think setting all the partitions read-only as well when the
-> full device is set read-only makes perfect sense.  I'm just a little
-> worried it could cause regressions.  Let me prepare a follow on patch
-> on top of the series that switches to that behavior.
+Just use set_capacity_revalidate_and_notify directly, as this function
+can update the block device size as well when the last parameter is set
+to true.
 
-Makes sense.
-I am fine with that.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ drivers/block/loop.c | 37 +++++++------------------------------
+ 1 file changed, 7 insertions(+), 30 deletions(-)
 
-With this in mind:
+diff --git a/drivers/block/loop.c b/drivers/block/loop.c
+index cb1191d6e945f2..86eb7e0691eef5 100644
+--- a/drivers/block/loop.c
++++ b/drivers/block/loop.c
+@@ -241,23 +241,6 @@ loop_validate_block_size(unsigned short bsize)
+ 	return 0;
+ }
+ 
+-/**
+- * loop_set_size() - sets device size and notifies userspace
+- * @lo: struct loop_device to set the size for
+- * @size: new size of the loop device
+- *
+- * Callers must validate that the size passed into this function fits into
+- * a sector_t, eg using loop_validate_size()
+- */
+-static void loop_set_size(struct loop_device *lo, loff_t size)
+-{
+-	struct block_device *bdev = lo->lo_device;
+-
+-	bd_set_nr_sectors(bdev, size);
+-
+-	set_capacity_revalidate_and_notify(lo->lo_disk, size, false);
+-}
+-
+ static inline int
+ lo_do_transfer(struct loop_device *lo, int cmd,
+ 	       struct page *rpage, unsigned roffs,
+@@ -1076,7 +1059,6 @@ static int loop_configure(struct loop_device *lo, fmode_t mode,
+ 	struct address_space *mapping;
+ 	struct block_device *claimed_bdev = NULL;
+ 	int		error;
+-	loff_t		size;
+ 	bool		partscan;
+ 	unsigned short  bsize;
+ 
+@@ -1164,9 +1146,8 @@ static int loop_configure(struct loop_device *lo, fmode_t mode,
+ 	loop_update_dio(lo);
+ 	loop_sysfs_init(lo);
+ 
+-	size = get_loop_size(lo, file);
+-	loop_set_size(lo, size);
+-
++	set_capacity_revalidate_and_notify(lo->lo_disk, get_loop_size(lo, file),
++			true);
+ 	set_blocksize(bdev, S_ISBLK(inode->i_mode) ?
+ 		      block_size(inode->i_bdev) : PAGE_SIZE);
+ 
+@@ -1402,9 +1383,9 @@ loop_set_status(struct loop_device *lo, const struct loop_info64 *info)
+ 	lo->lo_flags |= prev_lo_flags & ~LOOP_SET_STATUS_CLEARABLE_FLAGS;
+ 
+ 	if (size_changed) {
+-		loff_t new_size = get_size(lo->lo_offset, lo->lo_sizelimit,
+-					   lo->lo_backing_file);
+-		loop_set_size(lo, new_size);
++		set_capacity_revalidate_and_notify(lo->lo_disk,
++				get_size(lo->lo_offset, lo->lo_sizelimit,
++					 lo->lo_backing_file), true);
+ 	}
+ 
+ 	loop_config_discard(lo);
+@@ -1580,14 +1561,10 @@ loop_get_status64(struct loop_device *lo, struct loop_info64 __user *arg) {
+ 
+ static int loop_set_capacity(struct loop_device *lo)
+ {
+-	loff_t size;
+-
+ 	if (unlikely(lo->lo_state != Lo_bound))
+ 		return -ENXIO;
+-
+-	size = get_loop_size(lo, lo->lo_backing_file);
+-	loop_set_size(lo, size);
+-
++	set_capacity_revalidate_and_notify(lo->lo_disk,
++			get_loop_size(lo, lo->lo_backing_file), true);
+ 	return 0;
+ }
+ 
+-- 
+2.28.0
 
-Reviewed-by: Stefan Haberland <sth@linux.ibm.com>
