@@ -2,56 +2,55 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E509C388F7
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3ED1C4742C
 	for <ceph-devel@archiver.kernel.org>; Tue, 10 Nov 2020 14:17:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD051207D3
-	for <ceph-devel@archiver.kernel.org>; Tue, 10 Nov 2020 14:17:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7ADA2207D3
+	for <ceph-devel@archiver.kernel.org>; Tue, 10 Nov 2020 14:17:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="U3eZcIi0"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PmDDslTF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730897AbgKJORe (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 10 Nov 2020 09:17:34 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:37724 "EHLO
+        id S1730980AbgKJORf (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 10 Nov 2020 09:17:35 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:28749 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729898AbgKJORe (ORCPT
+        by vger.kernel.org with ESMTP id S1730617AbgKJORf (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 10 Nov 2020 09:17:34 -0500
+        Tue, 10 Nov 2020 09:17:35 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1605017853;
+        s=mimecast20190719; t=1605017854;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=g0S7dlhTFpiv+f4w34Qu/HSTIHq7vT+/VCQkR7YXGFg=;
-        b=U3eZcIi0T4XMksdwazkTjvZMq5UfvqBCIaU6QADvMqFwdOhGNq4DVHmP7EgyZPQv/IvmX7
-        +KFp55JXz3cBBn1PH6cp3LxmVnz8l8Bo0l7cKx+O3U7nhLhp6bJfhCr6mncNs1Q4KCUULk
-        NOgR6AEETPLN9C/gYKl3wWodwlHhi8A=
+        bh=rDyDrI6A1GOkQAQ7mBkZyj9QjY5RXccBqt5w2IxrHNs=;
+        b=PmDDslTFF5mwoKJxx2kaypiDpjHlBOZHtP45DLItFCK1TAz5wbC4PN4Kxq9PhMsFukuEGk
+        s3pWOkqW1vKAQfrQt0zt7YOZeFiJhyEjrdS66ePWx+t14wbyd94LDXtXntGUoQ6ZbN7Bk4
+        xWjMJLIcOHvF6N+BObvu1MgxlFf5qRg=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-250-Zilzw0rxN4a6AdGekHNQuA-1; Tue, 10 Nov 2020 09:17:29 -0500
-X-MC-Unique: Zilzw0rxN4a6AdGekHNQuA-1
+ us-mta-195-kyNilnToPf-bI6fgUy5I_w-1; Tue, 10 Nov 2020 09:17:24 -0500
+X-MC-Unique: kyNilnToPf-bI6fgUy5I_w-1
 Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4FEDF11BD35B;
-        Tue, 10 Nov 2020 14:17:27 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id BC9996198D;
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 43E1B876ECF;
         Tue, 10 Nov 2020 14:17:23 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 54239610F3;
+        Tue, 10 Nov 2020 14:17:14 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     jlayton@kernel.org, idryomov@gmail.com
 Cc:     zyan@redhat.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org,
         Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v3 2/2] ceph: add ceph.{clusterid/clientid} vxattrs suppport
-Date:   Tue, 10 Nov 2020 22:17:03 +0800
-Message-Id: <20201110141703.414211-3-xiubli@redhat.com>
+Subject: [PATCH v3 1/2] ceph: add status debug file support
+Date:   Tue, 10 Nov 2020 22:17:02 +0800
+Message-Id: <20201110141703.414211-2-xiubli@redhat.com>
 In-Reply-To: <20201110141703.414211-1-xiubli@redhat.com>
 References: <20201110141703.414211-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -63,82 +62,70 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Xiubo Li <xiubli@redhat.com>
 
-These two vxattrs will only exist in local client side, with which
-we can easily know which mountpoint the file belongs to and also
-they can help locate the debugfs path quickly.
+This will help list some useful client side info, like the client
+entity address/name and bloclisted status, etc.
 
 URL: https://tracker.ceph.com/issues/48057
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/xattr.c | 42 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 42 insertions(+)
+ fs/ceph/debugfs.c | 20 ++++++++++++++++++++
+ fs/ceph/super.h   |  1 +
+ 2 files changed, 21 insertions(+)
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 0fd05d3d4399..4a41db46e191 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -304,6 +304,23 @@ static ssize_t ceph_vxattrcb_snap_btime(struct ceph_inode_info *ci, char *val,
- 				ci->i_snap_btime.tv_nsec);
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 7a8fbe3e4751..4e498a492de4 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -304,11 +304,25 @@ static int mds_sessions_show(struct seq_file *s, void *ptr)
+ 	return 0;
  }
  
-+static ssize_t ceph_vxattrcb_clusterid(struct ceph_inode_info *ci,
-+				       char *val, size_t size)
++static int status_show(struct seq_file *s, void *p)
 +{
-+	struct ceph_fs_client *fsc = ceph_sb_to_client(ci->vfs_inode.i_sb);
++	struct ceph_fs_client *fsc = s->private;
++	struct ceph_entity_inst *inst = &fsc->client->msgr.inst;
++	struct ceph_entity_addr *client_addr = ceph_client_addr(fsc->client);
 +
-+	return ceph_fmt_xattr(val, size, "%pU", &fsc->client->fsid);
++	seq_printf(s, "inst_str: %s.%lld %s/%u\n", ENTITY_NAME(inst->name),
++		   ceph_pr_addr(client_addr), le32_to_cpu(client_addr->nonce));
++	seq_printf(s, "blocklisted: %s\n", fsc->blocklisted ? "true" : "false");
++
++	return 0;
 +}
 +
-+static ssize_t ceph_vxattrcb_clientid(struct ceph_inode_info *ci,
-+				      char *val, size_t size)
-+{
-+	struct ceph_fs_client *fsc = ceph_sb_to_client(ci->vfs_inode.i_sb);
-+
-+	return ceph_fmt_xattr(val, size, "client%lld",
-+			      ceph_client_gid(fsc->client));
-+}
-+
- #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
- #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
- 	XATTR_CEPH_PREFIX #_type "." #_name "." #_name2
-@@ -407,6 +424,24 @@ static struct ceph_vxattr ceph_file_vxattrs[] = {
- 	{ .name = NULL, 0 }	/* Required table terminator */
- };
+ DEFINE_SHOW_ATTRIBUTE(mdsmap);
+ DEFINE_SHOW_ATTRIBUTE(mdsc);
+ DEFINE_SHOW_ATTRIBUTE(caps);
+ DEFINE_SHOW_ATTRIBUTE(mds_sessions);
+ DEFINE_SHOW_ATTRIBUTE(metric);
++DEFINE_SHOW_ATTRIBUTE(status);
  
-+static struct ceph_vxattr ceph_vxattrs[] = {
-+	{
-+		.name = "ceph.clusterid",
-+		.name_size = sizeof("ceph.clusterid"),
-+		.getxattr_cb = ceph_vxattrcb_clusterid,
-+		.exists_cb = NULL,
-+		.flags = VXATTR_FLAG_READONLY,
-+	},
-+	{
-+		.name = "ceph.clientid",
-+		.name_size = sizeof("ceph.clientid"),
-+		.getxattr_cb = ceph_vxattrcb_clientid,
-+		.exists_cb = NULL,
-+		.flags = VXATTR_FLAG_READONLY,
-+	},
-+	{ .name = NULL, 0 }	/* Required table terminator */
-+};
-+
- static struct ceph_vxattr *ceph_inode_vxattrs(struct inode *inode)
- {
- 	if (S_ISDIR(inode->i_mode))
-@@ -429,6 +464,13 @@ static struct ceph_vxattr *ceph_match_vxattr(struct inode *inode,
- 		}
- 	}
  
-+	vxattr = ceph_vxattrs;
-+	while (vxattr->name) {
-+		if (!strcmp(vxattr->name, name))
-+			return vxattr;
-+		vxattr++;
-+	}
+ /*
+@@ -394,6 +408,12 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
+ 						fsc->client->debugfs_dir,
+ 						fsc,
+ 						&caps_fops);
 +
- 	return NULL;
++	fsc->debugfs_status = debugfs_create_file("status",
++						  0400,
++						  fsc->client->debugfs_dir,
++						  fsc,
++						  &status_fops);
  }
+ 
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index f097237a5ad3..5138b75923f9 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -128,6 +128,7 @@ struct ceph_fs_client {
+ 	struct dentry *debugfs_bdi;
+ 	struct dentry *debugfs_mdsc, *debugfs_mdsmap;
+ 	struct dentry *debugfs_metric;
++	struct dentry *debugfs_status;
+ 	struct dentry *debugfs_mds_sessions;
+ #endif
  
 -- 
 2.27.0
