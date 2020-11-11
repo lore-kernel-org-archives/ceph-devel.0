@@ -2,161 +2,103 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AD7EC388F9
-	for <ceph-devel@archiver.kernel.org>; Wed, 11 Nov 2020 08:29:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3D45C388F9
+	for <ceph-devel@archiver.kernel.org>; Wed, 11 Nov 2020 09:34:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BAC9A206F1
-	for <ceph-devel@archiver.kernel.org>; Wed, 11 Nov 2020 08:29:45 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="J7buGI+/"
+	by mail.kernel.org (Postfix) with ESMTP id 51BD9206CA
+	for <ceph-devel@archiver.kernel.org>; Wed, 11 Nov 2020 09:34:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726962AbgKKI3e (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 11 Nov 2020 03:29:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33506 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726325AbgKKI1W (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2020 03:27:22 -0500
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C01BC0617A7;
-        Wed, 11 Nov 2020 00:27:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
-        Content-Type:Content-ID:Content-Description;
-        bh=GTpuLBfYyo8TaeZo/z07ad7aIfYXt5VjexG6J+Un22Y=; b=J7buGI+/FIE7Z9SkwKpEv6Dzao
-        H6Jb7XY7aLyNJQXzdjS8KYFAIVquuUqCDHM7hyICJO7/G/MCyKCn0iuzxejTcLdTDO2OcEOx0dcDS
-        xhDrtjFYbZTHZdcrjKzLNs7zeWZH6NtDmauWmpSq/4neZW0FKJUBESEe2290E+/sWMUiz2KhrZVe1
-        zSq1a/6hxWMD2sjWBneREarqtdUM/v40hRmP7cNWbUvCbhYM5UtDwGuEnfrwRt02CysygTP9nvqBk
-        hiXdS7b3AluL/i5ahJdcWqTTM/kEXp3nGDMSv/NxeIEiOg6Xnf7cpb5dGWOuvMZ+I/jr2gTe4ccJr
-        Dzzb4ntg==;
-Received: from [2001:4bb8:180:6600:bcde:334f:863c:27b8] (helo=localhost)
-        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kclT4-0007Zh-93; Wed, 11 Nov 2020 08:27:02 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     Justin Sanders <justin@coraid.com>,
-        Josef Bacik <josef@toxicpanda.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Jack Wang <jinpu.wang@cloud.ionos.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Stefan Hajnoczi <stefanha@redhat.com>,
-        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
-        =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        dm-devel@redhat.com, linux-block@vger.kernel.org,
-        drbd-dev@lists.linbit.com, nbd@other.debian.org,
-        ceph-devel@vger.kernel.org, xen-devel@lists.xenproject.org,
-        linux-raid@vger.kernel.org, linux-nvme@lists.infradead.org,
-        linux-scsi@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [PATCH 02/24] loop: remove loop_set_size
-Date:   Wed, 11 Nov 2020 09:26:36 +0100
-Message-Id: <20201111082658.3401686-3-hch@lst.de>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20201111082658.3401686-1-hch@lst.de>
-References: <20201111082658.3401686-1-hch@lst.de>
+        id S1726992AbgKKJeD (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 11 Nov 2020 04:34:03 -0500
+Received: from mx2.suse.de ([195.135.220.15]:43048 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726011AbgKKJeC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 11 Nov 2020 04:34:02 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id B1CEFABD6;
+        Wed, 11 Nov 2020 09:34:01 +0000 (UTC)
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id 44934b85;
+        Wed, 11 Nov 2020 09:34:14 +0000 (UTC)
+From:   Luis Henriques <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, idryomov@gmail.com, pdonnell@redhat.com
+Subject: Re: [PATCH v2] ceph: ensure we have Fs caps when fetching dir link
+ count
+References: <20201110163052.482965-1-jlayton@kernel.org>
+Date:   Wed, 11 Nov 2020 09:34:13 +0000
+In-Reply-To: <20201110163052.482965-1-jlayton@kernel.org> (Jeff Layton's
+        message of "Tue, 10 Nov 2020 11:30:52 -0500")
+Message-ID: <877dqsfd9m.fsf@suse.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Just use set_capacity_revalidate_and_notify directly, as this function
-can update the block device size as well when the last parameter is set
-to true.
+Jeff Layton <jlayton@kernel.org> writes:
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- drivers/block/loop.c | 37 +++++++------------------------------
- 1 file changed, 7 insertions(+), 30 deletions(-)
+> The link count for a directory is defined as inode->i_subdirs + 2,
+> (for "." and ".."). i_subdirs is only populated when Fs caps are held.
+> Ensure we grab Fs caps when fetching the link count for a directory.
+>
 
-diff --git a/drivers/block/loop.c b/drivers/block/loop.c
-index cb1191d6e945f2..86eb7e0691eef5 100644
---- a/drivers/block/loop.c
-+++ b/drivers/block/loop.c
-@@ -241,23 +241,6 @@ loop_validate_block_size(unsigned short bsize)
- 	return 0;
- }
- 
--/**
-- * loop_set_size() - sets device size and notifies userspace
-- * @lo: struct loop_device to set the size for
-- * @size: new size of the loop device
-- *
-- * Callers must validate that the size passed into this function fits into
-- * a sector_t, eg using loop_validate_size()
-- */
--static void loop_set_size(struct loop_device *lo, loff_t size)
--{
--	struct block_device *bdev = lo->lo_device;
--
--	bd_set_nr_sectors(bdev, size);
--
--	set_capacity_revalidate_and_notify(lo->lo_disk, size, false);
--}
--
- static inline int
- lo_do_transfer(struct loop_device *lo, int cmd,
- 	       struct page *rpage, unsigned roffs,
-@@ -1076,7 +1059,6 @@ static int loop_configure(struct loop_device *lo, fmode_t mode,
- 	struct address_space *mapping;
- 	struct block_device *claimed_bdev = NULL;
- 	int		error;
--	loff_t		size;
- 	bool		partscan;
- 	unsigned short  bsize;
- 
-@@ -1164,9 +1146,8 @@ static int loop_configure(struct loop_device *lo, fmode_t mode,
- 	loop_update_dio(lo);
- 	loop_sysfs_init(lo);
- 
--	size = get_loop_size(lo, file);
--	loop_set_size(lo, size);
--
-+	set_capacity_revalidate_and_notify(lo->lo_disk, get_loop_size(lo, file),
-+			true);
- 	set_blocksize(bdev, S_ISBLK(inode->i_mode) ?
- 		      block_size(inode->i_bdev) : PAGE_SIZE);
- 
-@@ -1402,9 +1383,9 @@ loop_set_status(struct loop_device *lo, const struct loop_info64 *info)
- 	lo->lo_flags |= prev_lo_flags & ~LOOP_SET_STATUS_CLEARABLE_FLAGS;
- 
- 	if (size_changed) {
--		loff_t new_size = get_size(lo->lo_offset, lo->lo_sizelimit,
--					   lo->lo_backing_file);
--		loop_set_size(lo, new_size);
-+		set_capacity_revalidate_and_notify(lo->lo_disk,
-+				get_size(lo->lo_offset, lo->lo_sizelimit,
-+					 lo->lo_backing_file), true);
- 	}
- 
- 	loop_config_discard(lo);
-@@ -1580,14 +1561,10 @@ loop_get_status64(struct loop_device *lo, struct loop_info64 __user *arg) {
- 
- static int loop_set_capacity(struct loop_device *lo)
- {
--	loff_t size;
--
- 	if (unlikely(lo->lo_state != Lo_bound))
- 		return -ENXIO;
--
--	size = get_loop_size(lo, lo->lo_backing_file);
--	loop_set_size(lo, size);
--
-+	set_capacity_revalidate_and_notify(lo->lo_disk,
-+			get_loop_size(lo, lo->lo_backing_file), true);
- 	return 0;
- }
- 
+Maybe this would be worth a stable@ tag too...?
+
+Cheers,
 -- 
-2.28.0
+Luis
+
+> URL: https://tracker.ceph.com/issues/48125
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  fs/ceph/inode.c | 16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
+>
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 7c22bc2ea076..ab02966ef0a4 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -2343,15 +2343,23 @@ int ceph_permission(struct inode *inode, int mask)
+>  }
+>  
+>  /* Craft a mask of needed caps given a set of requested statx attrs. */
+> -static int statx_to_caps(u32 want)
+> +static int statx_to_caps(u32 want, umode_t mode)
+>  {
+>  	int mask = 0;
+>  
+>  	if (want & (STATX_MODE|STATX_UID|STATX_GID|STATX_CTIME|STATX_BTIME))
+>  		mask |= CEPH_CAP_AUTH_SHARED;
+>  
+> -	if (want & (STATX_NLINK|STATX_CTIME))
+> -		mask |= CEPH_CAP_LINK_SHARED;
+> +	if (want & (STATX_NLINK|STATX_CTIME)) {
+> +		/*
+> +		 * The link count for directories depends on inode->i_subdirs,
+> +		 * and that is only updated when Fs caps are held.
+> +		 */
+> +		if (S_ISDIR(mode))
+> +			mask |= CEPH_CAP_FILE_SHARED;
+> +		else
+> +			mask |= CEPH_CAP_LINK_SHARED;
+> +	}
+>  
+>  	if (want & (STATX_ATIME|STATX_MTIME|STATX_CTIME|STATX_SIZE|
+>  		    STATX_BLOCKS))
+> @@ -2377,7 +2385,7 @@ int ceph_getattr(const struct path *path, struct kstat *stat,
+>  
+>  	/* Skip the getattr altogether if we're asked not to sync */
+>  	if (!(flags & AT_STATX_DONT_SYNC)) {
+> -		err = ceph_do_getattr(inode, statx_to_caps(request_mask),
+> +		err = ceph_do_getattr(inode, statx_to_caps(request_mask, inode->i_mode),
+>  				      flags & AT_STATX_FORCE_SYNC);
+>  		if (err)
+>  			return err;
 
