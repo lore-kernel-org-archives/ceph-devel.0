@@ -7,40 +7,41 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF7D3C5517A
-	for <ceph-devel@archiver.kernel.org>; Wed, 11 Nov 2020 19:33:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2033EC63697
+	for <ceph-devel@archiver.kernel.org>; Thu, 12 Nov 2020 01:48:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8485220825
-	for <ceph-devel@archiver.kernel.org>; Wed, 11 Nov 2020 19:33:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B431B2076E
+	for <ceph-devel@archiver.kernel.org>; Thu, 12 Nov 2020 01:48:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="R8Jmk/3R"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="l30fHDl+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727442AbgKKTdL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 11 Nov 2020 14:33:11 -0500
-Received: from mail.kernel.org ([198.145.29.99]:42076 "EHLO mail.kernel.org"
+        id S1728587AbgKLBdV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 11 Nov 2020 20:33:21 -0500
+Received: from mail.kernel.org ([198.145.29.99]:57842 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726507AbgKKTdJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 11 Nov 2020 14:33:09 -0500
+        id S1727980AbgKKXvi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 11 Nov 2020 18:51:38 -0500
 Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EDC0420825;
-        Wed, 11 Nov 2020 19:33:07 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 7344F2072E;
+        Wed, 11 Nov 2020 23:51:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605123188;
-        bh=4GloG7gIG0ZPNAcuVKPzisejKT/lI6as/r5Kso12Reg=;
+        s=default; t=1605138698;
+        bh=Bnysz1SWZLS1NXyPCnT4+UuJ3xo5lYN3H57fCgkSVeA=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=R8Jmk/3RGCCCkok8+GNyumxOmO0ea9zh5s3dIlxrcavdX5ugc9h3xU1Mq0tVDbMw1
-         o+82uVvtgGoWN6gE6RedQSG4QfvflR96ydKcU0+lPo5pbPCCrbaTjDt73DaoVoB8eO
-         A/JJ9ZCwxRh0sZZx/RzlvW0QQ60tTT/6gbtS3Vvo=
-Message-ID: <1a24c2117b63c3707fe1da8b4cb86aaf48307e85.camel@kernel.org>
+        b=l30fHDl+Osgo3vJ0PjfanjoDNsl17YpUYU10RqYqG6MyIDK/ijTj4Z9F0r0V6OjI2
+         GOhPfzQMiXnbaRKzKv1AYQUl3+8RzqTUP1dXTeQKxY7SQQr+qbZ0MjzkWFXrmmuOvU
+         Ripk5PSpt2lNAxKk1uOoMyq3ligpl++SDMdvdPX4=
+Message-ID: <925dda9b15044c8a19ac2017d4b135209e1f6184.camel@kernel.org>
 Subject: Re: [RFC PATCH] ceph: fix cross quota realms renames with new
  truncated files
 From:   Jeff Layton <jlayton@kernel.org>
 To:     Luis Henriques <lhenriques@suse.de>
 Cc:     Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Date:   Wed, 11 Nov 2020 14:33:06 -0500
+        linux-kernel@vger.kernel.org,
+        Patrick Donnelly <pdonnell@redhat.com>
+Date:   Wed, 11 Nov 2020 18:51:36 -0500
 In-Reply-To: <87361feojx.fsf@suse.de>
 References: <20201111153915.23426-1-lhenriques@suse.de>
          <0609b9014d4032e4fc4a8c8b74c935bf0cf4524a.camel@kernel.org>
@@ -116,11 +117,17 @@ On Wed, 2020-11-11 at 18:28 +0000, Luis Henriques wrote:
 > Ok, thanks for the suggestion.  That may actually work, although it will
 > make the rename more expensive of course.  I'll test that tomorrow and
 > eventually follow-up with a patch.
+> 
 
-In principle, there should only be an impact when the file being renamed
-has dirty data and is crossing quota realms. I'd much rather slow down
-the rename than truncate in this case. open(..., O_TRUNC) is _very_
-common.
+Patrick pointed out to me on IRC that since you're moving the parent
+directory of the truncated file, flushing the caps on the directory
+won't really help. You'd need to walk the entire subtree and try to
+flush every dirty inode, or basically do a syncfs() prior to renaming
+the directory across quotarealms.
+
+I think we probably will need to revert the change to allow cross-
+quotarealm renames of directories and make those return EXDEV again.
+Anything else sounds like it's probably going to be too expensive.
 -- 
 Jeff Layton <jlayton@kernel.org>
 
