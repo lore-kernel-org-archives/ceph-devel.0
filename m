@@ -2,114 +2,72 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B052BC388F7
-	for <ceph-devel@archiver.kernel.org>; Thu, 12 Nov 2020 13:22:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89AF6C2D0A3
+	for <ceph-devel@archiver.kernel.org>; Thu, 12 Nov 2020 15:18:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50C64207BB
-	for <ceph-devel@archiver.kernel.org>; Thu, 12 Nov 2020 13:22:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1C5072074B
+	for <ceph-devel@archiver.kernel.org>; Thu, 12 Nov 2020 15:18:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="TWJa+JBd"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qUNKtnFY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728219AbgKLNWG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 12 Nov 2020 08:22:06 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54204 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727646AbgKLNWF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 12 Nov 2020 08:22:05 -0500
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3097D22201;
-        Thu, 12 Nov 2020 13:22:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605187324;
-        bh=E03FFk10N59RLyLQTqGfmVdga98+suTAIqgHYMBC3Mo=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=TWJa+JBdlE7HgqNQbOvPjNK2xscH2t3RGe207eeU8sPLUUhkrR1FsvOR1/fOsGC4y
-         BFJO9+b7zN90OEXAPfmvu3S/fWd7D9mdh1GPhg35k0BCrwYxOgxhjWHXE/sECLH+c5
-         2bbXclKRGWIxrpZ+taFYcUfHtv4yTMNMrBhbyGiU=
-Message-ID: <2e81958e92563a568f2b9b5b4d23c4c7bab52f1c.camel@kernel.org>
-Subject: Re: [PATCH] ceph: fix race in concurrent __ceph_remove_cap
- invocations
-From:   Jeff Layton <jlayton@kernel.org>
-To:     "Yan, Zheng" <ukernel@gmail.com>,
-        Luis Henriques <lhenriques@suse.de>
-Cc:     Ilya Dryomov <idryomov@gmail.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Date:   Thu, 12 Nov 2020 08:22:02 -0500
-In-Reply-To: <CAAM7YA=eO-1AdgPJk6-3=FbDFtHJ9e_Rydo+7LDHqVwxtk1-jA@mail.gmail.com>
-References: <20201112104512.17472-1-lhenriques@suse.de>
-         <CAAM7YA=eO-1AdgPJk6-3=FbDFtHJ9e_Rydo+7LDHqVwxtk1-jA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.38.1 (3.38.1-1.fc33) 
+        id S1728345AbgKLPR7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 12 Nov 2020 10:17:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38358 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727796AbgKLPR6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Nov 2020 10:17:58 -0500
+Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD1A5C0613D1
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2020 07:17:58 -0800 (PST)
+Received: by mail-pf1-x434.google.com with SMTP id c20so4804018pfr.8
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2020 07:17:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to;
+        bh=ByBpsYUeNJE4F9ozX9/ObO8RQeu8DVYKPnXQJuXBxAM=;
+        b=qUNKtnFYCrOff6w+Wb+WMmPQROdAdvA1eg6gP7UhDE4i5vhrCOi/zPsOXaXuFx4sWA
+         4utlxoW9Us0XcSaqltcHUNhv9LzOO/ucnfMGN4Y7OXRJOsiX2LxuQDKC9BYCawoECSAI
+         DzIZUlK3YpXwyXGNgWogIPc5wTJGQC5/PtEDgtGeLfVMrVfQOQhBnPXIhtHCMTJ+vmSi
+         NvADSomCvnhh6FDMNU/COAAQyGwCn8RwJ0j0kU8M2pA26MqlFa6EQEFU+7+ECn4zgBO8
+         ssQPxVWbsXoORLa0eGuA6fgg+VWk3PG/Yl6AZuKo+6qS5j432EaK6vPCHicM/ZKgaU/u
+         AFAg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+        bh=ByBpsYUeNJE4F9ozX9/ObO8RQeu8DVYKPnXQJuXBxAM=;
+        b=P6myBlQopylbpu2mZ/tSEWGjGtW7VvOrS4y90T0rBwBE+5F5jphHS1XirMwg7Zf+i6
+         iZgnq7gEjCpw0jJtALSXSUEelCi68xoer8Dy/fbCSzd43+tSOVrF2F0djul6zoDqNe/U
+         DzLT7sf9waP8oSBc1k1pX9odL292UukY8byA3YWBQxeZuB/hCqTmMVU1nzL33ytkkV+1
+         2KtToViYJ5VIqgxlUTZeCiecBc6mUzNNrDNM0T+2g1F6Yw+uNqwKg5mPDz3SssSUFjgQ
+         TIURKM/pOJh8NMDEkqjjqPUAScWvaXLckPDGnX6NOkPbqtRkwARZ/FqNam1IzIKndDNr
+         TJFQ==
+X-Gm-Message-State: AOAM532qdFKj0Su+rJz0BynbPamsA6lNElZhh+5aYyJlLZneMDsYMzR6
+        f2herV6dOU67ZJTdXNNKOAsQ25kodlhuLTHCz2HDHWQ/yOJlww==
+X-Google-Smtp-Source: ABdhPJynaav1i22EqbCswcyALbTwpiqzMOaTjy2tFpjb86WmajNcC2MP9bn9zt0Uedx9nNGniIVuUigk1nV7tSOHy2A=
+X-Received: by 2002:a62:834a:0:b029:18a:e0b1:f0d9 with SMTP id
+ h71-20020a62834a0000b029018ae0b1f0d9mr43580pfe.73.1605194278336; Thu, 12 Nov
+ 2020 07:17:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From:   Sage Meng <lkkey80@gmail.com>
+Date:   Thu, 12 Nov 2020 23:17:45 +0800
+Message-ID: <CAF8vKShnH+xas+kLAcXL-Cxt6C3TF7TbP4Wfm0h48pEGCmsR+w@mail.gmail.com>
+Subject: Is there a way to make Cephfs kernel client to send data to Ceph
+ cluster smoothly with buffer io
+To:     ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, 2020-11-12 at 20:43 +0800, Yan, Zheng wrote:
-> On Thu, Nov 12, 2020 at 6:48 PM Luis Henriques <lhenriques@suse.de> wrote:
-> > 
-> > A NULL pointer dereference may occur in __ceph_remove_cap with some of the
-> > callbacks used in ceph_iterate_session_caps, namely trim_caps_cb and
-> > remove_session_caps_cb.  These aren't protected against the concurrent
-> > execution of __ceph_remove_cap.
-> > 
-> 
-> they are protected by session mutex, never get executed concurrently
-> 
+Hi All,
 
-Maybe not concurrently with one another, but the s_mutex is _not_ held
-when __ceph_remove_caps is called from ceph_evict_inode. We can't rely
-on it to protect this.
-
-> > Since the callers of this function hold the i_ceph_lock, the fix is simply
-> > a matter of returning immediately if caps->ci is NULL.
-> > 
-> > Based on a patch from Jeff Layton.
-> > 
-> > Cc: stable@vger.kernel.org
-> > URL: https://tracker.ceph.com/issues/43272
-> > Link: https://www.spinics.net/lists/ceph-devel/msg47064.html
-> > Signed-off-by: Luis Henriques <lhenriques@suse.de>
-> > ---
-> >  fs/ceph/caps.c | 11 +++++++++--
-> >  1 file changed, 9 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> > index ded4229c314a..443f164760d5 100644
-> > --- a/fs/ceph/caps.c
-> > +++ b/fs/ceph/caps.c
-> > @@ -1140,12 +1140,19 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
-> >  {
-> >         struct ceph_mds_session *session = cap->session;
-> >         struct ceph_inode_info *ci = cap->ci;
-> > -       struct ceph_mds_client *mdsc =
-> > -               ceph_sb_to_client(ci->vfs_inode.i_sb)->mdsc;
-> > +       struct ceph_mds_client *mdsc;
-> >         int removed = 0;
-> > 
-> > +       /* 'ci' being NULL means he remove have already occurred */
-> > +       if (!ci) {
-> > +               dout("%s: cap inode is NULL\n", __func__);
-> > +               return;
-> > +       }
-> > +
-> >         dout("__ceph_remove_cap %p from %p\n", cap, &ci->vfs_inode);
-> > 
-> > +       mdsc = ceph_inode_to_client(&ci->vfs_inode)->mdsc;
-> > +
-> >         /* remove from inode's cap rbtree, and clear auth cap */
-> >         rb_erase(&cap->ci_node, &ci->i_caps);
-> >         if (ci->i_auth_cap == cap) {
-
--- 
-Jeff Layton <jlayton@kernel.org>
-
+      Cephfs kernel client is influenced by kernel page cache when we
+write data to it,  outgoing data will be huge when os starts to flush
+page cache. So Is there a way to make Cephfs kernel client to send
+data to ceph cluster smoothly when buffer io is used ? Better a way
+that only influence Ceph IO not the whole system IO.
