@@ -2,84 +2,105 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E271C64E7D
-	for <ceph-devel@archiver.kernel.org>; Mon, 16 Nov 2020 17:38:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ECF5C63697
+	for <ceph-devel@archiver.kernel.org>; Thu, 19 Nov 2020 02:34:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55F19222E8
-	for <ceph-devel@archiver.kernel.org>; Mon, 16 Nov 2020 17:38:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D0E12246CA
+	for <ceph-devel@archiver.kernel.org>; Thu, 19 Nov 2020 02:34:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="wH0K96ai"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RJ0IjQLg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387474AbgKPRht (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 16 Nov 2020 12:37:49 -0500
-Received: from mail.kernel.org ([198.145.29.99]:49674 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1733098AbgKPRhs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 16 Nov 2020 12:37:48 -0500
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        id S1726340AbgKSCeL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 18 Nov 2020 21:34:11 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:32957 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726163AbgKSCeK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 18 Nov 2020 21:34:10 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1605753249;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:autocrypt:autocrypt;
+        bh=j9VLUqGgGYzRNYpZ+YwJPI/2bA/8Yv8rl6fbYV5bfNY=;
+        b=RJ0IjQLgauMh9Ft27SCcRWZXxbtV5WhK075UrUasCI6hfsKyhPvJzlPYatEOAA1G6ZqhRV
+        z13VxqFAabuq1mjNxeFjMh5jbhiWpc4uTjx2SO0MO9thE3w7rF1tqiHaiCQAFwK+51R0m9
+        q5Pp1uikWG25iOGBhcabduynwJ1bDow=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-394-E7MqmJxiMlyqnG_7HKCq4A-1; Wed, 18 Nov 2020 21:33:59 -0500
+X-MC-Unique: E7MqmJxiMlyqnG_7HKCq4A-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0B33E222EC;
-        Mon, 16 Nov 2020 17:37:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605548267;
-        bh=ftduAERcAIXDqH3TIoaKNDFMaog9lpKkHZKNbYpzPJA=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=wH0K96aiOcV3zWDXEfO4eGXrSbfel4fzpavvJrcvlGnm+IOvE6CCXcyPRZ9CDEpWQ
-         ERyPgn3goZaj4Rjri8kCDsRD2QqVIDrl9bwMtmzAsZXelVyGcoi/J8IVVb6h9ki8ms
-         Nt6zKSXy/JZjbcTnM2HNzH4y+CQMSryqUl+eemUA=
-Received: by mail-wm1-f52.google.com with SMTP id p22so25432wmg.3;
-        Mon, 16 Nov 2020 09:37:46 -0800 (PST)
-X-Gm-Message-State: AOAM532+D7CgVwSiMMWS3UnCwBorA2v4LkI7ZN8sQJ8ZqWXcaPOmRLIQ
-        WKg7/hX4Hr+f4oBq6+kb0J6ZN8cgd7LU/vzhKLk=
-X-Google-Smtp-Source: ABdhPJwSJNXG5A+c75VC7fB+eg5ocrYD0cMopnWErnzA3/FY5Qe4JfgRdEHZElz1KxxX9qTRF1opV72EejXl51sD+G0=
-X-Received: by 2002:a1c:bbc4:: with SMTP id l187mr17490114wmf.133.1605548265533;
- Mon, 16 Nov 2020 09:37:45 -0800 (PST)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B63B21005D51;
+        Thu, 19 Nov 2020 02:33:58 +0000 (UTC)
+Received: from [10.10.113.43] (ovpn-113-43.rdu2.redhat.com [10.10.113.43])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 32AC55D6AB;
+        Thu, 19 Nov 2020 02:33:57 +0000 (UTC)
+To:     ceph-announce@ceph.io, ceph-users@ceph.io, dev@ceph.io,
+        ceph-devel@vger.kernel.org, ceph-maintainers@ceph.io
+From:   David Galloway <dgallowa@redhat.com>
+Subject: v14.2.14 Nautilus released
+Autocrypt: addr=dgallowa@redhat.com; prefer-encrypt=mutual; keydata=
+ xsBNBE60O2sBCADafZy0luRceto63vARvurZ7oepCBc+yBiDHHcFLmdZLs0nugjyYa1V1WW/
+ j/tMPkjmQPGT1IcoXIrhppUXKrwXMkK4JB56GHI3cdximVuRMmHCY45ZbmAL7YnuNXz+5jbs
+ iuzarsc9W3SyovQUx9n1lUymk1lASaPfNVdgzxl0/FHpKMhEqJGo0eQPh8o5M+ybZS9zXKNa
+ QPiXJKLiHuise1hP4529ZTExjCqk+R3x6y7YwySKSFUhEVwY7ksU0rr/Xv5VVEsrLgS4nENe
+ u9UQvJq2hp+RhgBH0ZV9+jLgwoYxjqbifJDlghbDPe7rhAfiD/xvoQFgAy/AOkVPRKHVABEB
+ AAHNJERhdmlkIEdhbGxvd2F5IDxkZ2FsbG93YUByZWRoYXQuY29tPsLAdwQTAQgAIQUCVfr6
+ SAIbAwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgAAKCRA4J2vQ1bgO+m5hB/kBOH7I2uhhhvGH
+ BzGFKSh/1C9NO8ECg5N//b7xu9EtQfoVgNODTYqpG0mhH9phV7Cvld5gAlX3YV/m4lgDwJH9
+ 5fcNB2x7M6OEY2kOI20DxBKxVDmamhmQLQzm2ZFqbfHwh/H6zq3jdXWCbp8LQ9uvta5qbsFp
+ rU4sVg2AhKAPrvr2JoO7MLVCdNfRhwdJFwvxlc6ltilateChU5dHpy2/2aSM3794VLZXQZkD
+ Ei5PIc9XrXOKqqpbwMuizlh/tNA0O1a3jY8ccl9rYpCyELa9nfGw1HxXmfj8hMtndf077Bat
+ 7AxNyUoLu8+C9vD2F0oqXGumYCkcXIoSyiDAPY2IzsBNBE60O2sBCADlXsFRIss3rM3IW9dK
+ 8084c3kktyOyA0JO4cQtXglGVvmALIaqxLlQ8qabibmRgdozjh5YsYFIQwBasmD+0rZVEi7W
+ OMc1pO/dbwAzlhzfmbAvkvzctB4CS2MP6RLkGR9MquiLAAWdfOiRoKeNkgSup8VlSPrvlXwF
+ qsolEbH14LJGtJBF3uRUrhieyV+dQ5wE/UJCmuN/m1KWlZmcUeDbTefNM/NaWxSdycu27QyL
+ PBMIS9bDHPoPAaPjRKoMr80aYbHLZxiXPXlP3wyfirWiN5jqL2mjcCqGqzAC2IPuWftD4oHr
+ P+3w6cBi1noh1ps76iD37IUsU8tZgTX5sE8RABEBAAHCwF8EGAECAAkFAk60O2sCGwwACgkQ
+ OCdr0NW4Dvq5ywf/ZEVxP1LOUnkab+B8ZDQs6L66bBMMuWaoUKp9ngdpSqKfSy6YnbmshKaE
+ SkNBNlpVpdOweSBPnLx4ss2sksLwDxrQTxW71Zui67mUbdurhlkbsG1pM4c1sAcdqa7xG6nB
+ +fkpwgn9bcvv3qQGuKDwit6fdIVnPRJckM1T8w8d0yG+0uNSzOhwKI6h8E0Za2ESLmTyfkr1
+ FtSVF86xVAGMI8jMiccCzKfOlkP89ND84r5EDzeATa3Imv7xKCgcIlSuMQKk45506NFPQQlP
+ nCTgp61XOM4EWjembxD6lWBXHltcm3K1dXvf3JbAxG7v2BSd0hRhnXfQdZoAzRJwYIHh2Q==
+Message-ID: <6b601728-fd52-d4db-c1c6-f57ba57a67e3@redhat.com>
+Date:   Wed, 18 Nov 2020 21:33:57 -0500
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <20201116145809.410558-1-hch@lst.de> <20201116145809.410558-29-hch@lst.de>
-In-Reply-To: <20201116145809.410558-29-hch@lst.de>
-From:   Song Liu <song@kernel.org>
-Date:   Mon, 16 Nov 2020 09:37:34 -0800
-X-Gmail-Original-Message-ID: <CAPhsuW5YeO0-Cb=avHu2osRKjz19Lvk4jWqaCdaqFnjbdPJtrw@mail.gmail.com>
-Message-ID: <CAPhsuW5YeO0-Cb=avHu2osRKjz19Lvk4jWqaCdaqFnjbdPJtrw@mail.gmail.com>
-Subject: Re: [PATCH 28/78] md: implement ->set_read_only to hook into BLKROSET processing
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, Justin Sanders <justin@coraid.com>,
-        Josef Bacik <josef@toxicpanda.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Jack Wang <jinpu.wang@cloud.ionos.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Stefan Hajnoczi <stefanha@redhat.com>,
-        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
-        =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Mike Snitzer <snitzer@redhat.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        dm-devel@redhat.com, linux-block@vger.kernel.org,
-        drbd-dev@lists.linbit.com, nbd@other.debian.org,
-        ceph-devel@vger.kernel.org, xen-devel@lists.xenproject.org,
-        linux-raid <linux-raid@vger.kernel.org>,
-        linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org,
-        Linux-Fsdevel <linux-fsdevel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Nov 16, 2020 at 6:58 AM Christoph Hellwig <hch@lst.de> wrote:
->
-> Implement the ->set_read_only method instead of parsing the actual
-> ioctl command.
->
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+This is the 14th backport release in the Nautilus series. This releases
+fixes a security flaw affecting Messenger V2 for Octopus & Nautilus,
+among other fixes across components. We recommend users to update to
+this release.
 
-Acked-by: Song Liu <song@kernel.org>
+For a detailed release notes with links & changelog please refer to the
+official blog entry at https://ceph.io/releases/v14-2-14-nautilus-released
 
-[...]
+
+Notable Changes
+---------------
+* CVE 2020-25660: Fix a regression in Messenger V2 replay attacks
+
+
+Getting Ceph
+------------
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-14.2.14.tar.gz
+* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
+* Release git sha1: 7e94c5afc28f3eaf36151ad1e1457de5f16c4fdf
+
