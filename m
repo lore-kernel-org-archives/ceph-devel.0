@@ -2,175 +2,266 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F082C64E90
-	for <ceph-devel@archiver.kernel.org>; Fri, 20 Nov 2020 15:19:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89B19C56201
+	for <ceph-devel@archiver.kernel.org>; Fri, 20 Nov 2020 15:30:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DF39B22240
-	for <ceph-devel@archiver.kernel.org>; Fri, 20 Nov 2020 15:19:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 303712245B
+	for <ceph-devel@archiver.kernel.org>; Fri, 20 Nov 2020 15:30:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="APXy1FMZ"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="l7zZ6KiG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729652AbgKTPTw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 20 Nov 2020 10:19:52 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:40348 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728622AbgKTPTv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 20 Nov 2020 10:19:51 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1605885590;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=GuEroWovClf2Gd9dj2EpHluDnXBhlEyesXJwX09INbk=;
-        b=APXy1FMZoYxkPWh6Hn/TsQ9Wy+iXuTb8D1ZpeLSWcrGYYyj8SBQRCj//1LbQB1FeAP+9so
-        Tu9sHs/JQDXKvOXt7yL5DGYmQyhS2ApoC0RYPtjAYG37qwEpwTp+sNPyRuLpFyAwm4nbS9
-        kU8S+8unovmAWSn1f53HiIOJqU6Fhbo=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-518-zOHQpZgrMcWIL2Rf0top9w-1; Fri, 20 Nov 2020 10:19:49 -0500
-X-MC-Unique: zOHQpZgrMcWIL2Rf0top9w-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        id S1728186AbgKTPaL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 20 Nov 2020 10:30:11 -0500
+Received: from mail.kernel.org ([198.145.29.99]:35108 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728059AbgKTPaK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 20 Nov 2020 10:30:10 -0500
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 2A30419251A1;
-        Fri, 20 Nov 2020 15:19:47 +0000 (UTC)
-Received: from warthog.procyon.org.uk (ovpn-112-246.rdu2.redhat.com [10.10.112.246])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4E5B95D6AD;
-        Fri, 20 Nov 2020 15:19:44 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [RFC PATCH 76/76] afs: Fix speculative status fetch going out of
- order wrt to modifications
-From:   David Howells <dhowells@redhat.com>
-To:     Trond Myklebust <trondmy@hammerspace.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>
-Cc:     dhowells@redhat.com, Jeff Layton <jlayton@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        linux-cachefs@redhat.com, linux-afs@lists.infradead.org,
-        linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Fri, 20 Nov 2020 15:19:43 +0000
-Message-ID: <160588558350.3465195.13840089242353769411.stgit@warthog.procyon.org.uk>
-In-Reply-To: <160588455242.3465195.3214733858273019178.stgit@warthog.procyon.org.uk>
-References: <160588455242.3465195.3214733858273019178.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
+        by mail.kernel.org (Postfix) with ESMTPSA id 88F25223BE;
+        Fri, 20 Nov 2020 15:30:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1605886210;
+        bh=sNHtgUYqJsCOaigwU+i2akNaySdXgpLizaz1JdFmCFE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=l7zZ6KiGhXQIJWoalmt8Vjau4sVTELqtlImxRCacWp7Jt5ZtSGAoGVpNypQ3gz73S
+         FPGV94sKd7ookZdr8oEHgSu6GWUb3cQih9oNDyPYtvtMyWiJoxWEbvWjkLYoqpSkxe
+         MayQ50XTQWxkNqwqZ68XgFttB6pMyAR4jD8Uc/ZI=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     linux-cachefs@redhat.com, idryomov@redhat.com, dhowells@redhat.com
+Subject: [PATCH 2/5] ceph: convert readpage to fscache read helper
+Date:   Fri, 20 Nov 2020 10:30:03 -0500
+Message-Id: <20201120153006.304296-3-jlayton@kernel.org>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201120153006.304296-1-jlayton@kernel.org>
+References: <20201120153006.304296-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When doing a lookup in a directory, the afs filesystem uses a bulk status
-fetch to speculatively retrieve the statuses of up to 48 other vnodes found
-in the same directory and it will then either update extant inodes or
-create new ones - effectively doing 'lookup ahead'.
+Have the ceph KConfig select NETFS_SUPPORT. Add a new netfs ops
+structure that and convert ceph_readpage to use the new netfs_readpage
+helper.
 
-To avoid the possibility of deadlocking itself, however, the filesystem
-doesn't lock all of those inodes; rather just the directory inode is locked
-(by the VFS).  When the operation completes, afs_inode_init_from_status()
-or afs_apply_status() is called, depending on whether the inode already
-exists, to commit the new status.
-
-A case exists, however, where the speculative status fetch operation may
-straddle a modification operation on one of those vnodes.  What can then
-happen is that the speculative bulk status RPC retrieves the old status,
-and whilst that is happening, the modification happens - which returns an
-updated status, then the modification status is committed, then we attempt
-to commit the speculative status.
-
-This results in something like the following being seen in dmesg:
-
-	kAFS: vnode modified {100058:861} 8->9 YFS.InlineBulkStatus
-
-showing that for vnode 861 on volume 100058, we saw YFS.InlineBulkStatus
-say that the vnode had data version 8 when we'd already recorded version 9
-due to a local modification.  This was causing the cache to be invalidated
-for that vnode when it shouldn't have been.  If it happens on a data file,
-this might lead to local changes being lost.
-
-Fix this by ignoring speculative status updates if the data version doesn't
-match the expected value.
-
-Note that it is possible to get a DV regression if a volume gets restored
-from a backup - but we should get a callback break in such a case that
-should trigger a recheck anyway.  It might be worth checking the volume
-creation time in the volsync info and, if a change is observed in that (as
-would happen on a restore), invalidate all caches associated with the
-volume.
-
-Fixes: 5cf9dd55a0ec ("afs: Prospectively look up extra files when doing a single lookup")
-Signed-off-by: David Howells <dhowells@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
+ fs/ceph/Kconfig |   1 +
+ fs/ceph/addr.c  | 167 +++++++++++++++++++++++++++++++++++++++++++++---
+ 2 files changed, 158 insertions(+), 10 deletions(-)
 
- fs/afs/dir.c      |    1 +
- fs/afs/inode.c    |    8 ++++++++
- fs/afs/internal.h |    1 +
- 3 files changed, 10 insertions(+)
-
-diff --git a/fs/afs/dir.c b/fs/afs/dir.c
-index 26ac5cfdf3af..157529b0e422 100644
---- a/fs/afs/dir.c
-+++ b/fs/afs/dir.c
-@@ -900,6 +900,7 @@ static struct inode *afs_do_lookup(struct inode *dir, struct dentry *dentry,
- 				vp->cb_break_before = afs_calc_vnode_cb_break(vnode);
- 				vp->vnode = vnode;
- 				vp->put_vnode = true;
-+				vp->speculative = true; /* vnode not locked */
- 			}
- 		}
- 	}
-diff --git a/fs/afs/inode.c b/fs/afs/inode.c
-index 9d8f759f77f7..acb47a862893 100644
---- a/fs/afs/inode.c
-+++ b/fs/afs/inode.c
-@@ -295,6 +295,13 @@ void afs_vnode_commit_status(struct afs_operation *op, struct afs_vnode_param *v
- 			op->flags &= ~AFS_OPERATION_DIR_CONFLICT;
- 		}
- 	} else if (vp->scb.have_status) {
-+		if (vp->dv_before + vp->dv_delta != vp->scb.status.data_version &&
-+		    vp->speculative)
-+			/* Ignore the result of a speculative bulk status fetch
-+			 * if it splits around a modification op, thereby
-+			 * appearing to regress the data version.
-+			 */
-+			goto out;
- 		afs_apply_status(op, vp);
- 		if (vp->scb.have_cb)
- 			afs_apply_callback(op, vp);
-@@ -306,6 +313,7 @@ void afs_vnode_commit_status(struct afs_operation *op, struct afs_vnode_param *v
- 		}
- 	}
+diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
+index e955a38be3c8..77ad452337ee 100644
+--- a/fs/ceph/Kconfig
++++ b/fs/ceph/Kconfig
+@@ -6,6 +6,7 @@ config CEPH_FS
+ 	select LIBCRC32C
+ 	select CRYPTO_AES
+ 	select CRYPTO
++	select NETFS_SUPPORT
+ 	default n
+ 	help
+ 	  Choose Y or M here to include support for mounting the
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 9e657089d56e..9dd9bb3f4696 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -12,6 +12,7 @@
+ #include <linux/signal.h>
+ #include <linux/iversion.h>
+ #include <linux/ktime.h>
++#include <linux/netfs.h>
  
+ #include "super.h"
+ #include "mds_client.h"
+@@ -185,6 +186,162 @@ static int ceph_releasepage(struct page *page, gfp_t gfp_flags)
+ 	return 1;
+ }
+ 
++static bool ceph_netfs_clamp_length(struct netfs_read_subrequest *subreq)
++{
++	struct inode *inode = subreq->rreq->mapping->host;
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	u64 objno, objoff;
++	u32 xlen;
++
++	/* Truncate the extent at the end of the current object */
++	ceph_calc_file_object_mapping(&ci->i_layout, subreq->start, subreq->len,
++				      &objno, &objoff, &xlen);
++	subreq->len = xlen;
++	return true;
++}
++
++static void finish_netfs_read(struct ceph_osd_request *req)
++{
++	struct ceph_fs_client *fsc = ceph_inode_to_client(req->r_inode);
++	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
++	struct netfs_read_subrequest *subreq = req->r_priv;
++	int num_pages;
++	int err = req->r_result;
++
++	ceph_update_read_latency(&fsc->mdsc->metric, req->r_start_latency,
++				 req->r_end_latency, err);
++
++	dout("%s: result %d subreq->len=%zu i_size=%lld\n", __func__, req->r_result,
++	     subreq->len, i_size_read(req->r_inode));
++
++	/* no object means success but no data */
++	if (err == -ENOENT)
++		err = 0;
++	else if (err == -EBLOCKLISTED)
++		fsc->blocklisted = true;
++
++	if (err >= 0 && err < subreq->len)
++		__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
++
++	netfs_subreq_terminated(subreq, err);
++
++	num_pages = calc_pages_for(osd_data->alignment, osd_data->length);
++	ceph_put_page_vector(osd_data->pages, num_pages, false);
++	iput(req->r_inode);
++}
++
++static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
++{
++	struct netfs_read_request *rreq = subreq->rreq;
++	struct inode *inode = rreq->mapping->host;
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
++	struct ceph_osd_request *req = NULL;
++	struct ceph_vino vino = ceph_vino(inode);
++	struct iov_iter iter;
++	struct page **pages;
++	size_t page_off;
++	int err = 0;
++	u64 len = subreq->len;
++
++	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
++			0, 1, CEPH_OSD_OP_READ,
++			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
++			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
++	if (IS_ERR(req)) {
++		err = PTR_ERR(req);
++		goto out;
++	}
++
++	dout("%s: pos=%llu orig_len=%lu len=%llu\n", __func__, subreq->start, subreq->len, len);
++	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, subreq->start, len);
++	len = iov_iter_get_pages_alloc(&iter, &pages, len, &page_off);
++	if (len < 0) {
++		err = len;
++		dout("%s: iov_ter_get_pages_alloc returned %d\n", __func__, err);
++		goto out;
++	}
++
++	/* should always give us a page-aligned read */
++	WARN_ON_ONCE(page_off);
++
++	osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0, false, false);
++	req->r_callback = finish_netfs_read;
++	req->r_priv = subreq;
++	req->r_inode = inode;
++	ihold(inode);
++
++	err = ceph_osdc_start_request(req->r_osdc, req, false);
++	if (err)
++		iput(inode);
 +out:
- 	write_sequnlock(&vnode->cb_lock);
++	if (req)
++		ceph_osdc_put_request(req);
++	if (err)
++		netfs_subreq_terminated(subreq, err);
++	dout("%s: result %d\n", __func__, err);
++}
++
++static void ceph_init_rreq(struct netfs_read_request *rreq, struct file *file)
++{
++	struct ceph_inode_info *ci = ceph_inode(rreq->inode);
++	struct fscache_cookie *cookie = ceph_fscache_cookie(ci);
++
++	if (cookie)
++		rreq->cookie_debug_id = cookie->debug_id;
++}
++
++static bool ceph_is_cache_enabled(struct inode *inode)
++{
++	return fscache_cookie_enabled(ceph_fscache_cookie(ceph_inode(inode)));
++}
++
++static int ceph_begin_cache_operation(struct netfs_read_request *rreq)
++{
++	struct ceph_inode_info *ci = ceph_inode(rreq->inode);
++
++	return fscache_begin_operation(ceph_fscache_cookie(ci), &rreq->cache_resources,
++					FSCACHE_WANT_PARAMS);
++}
++
++const struct netfs_read_request_ops ceph_readpage_netfs_ops = {
++	.init_rreq		= ceph_init_rreq,
++	.is_cache_enabled	= ceph_is_cache_enabled,
++	.begin_cache_operation	= ceph_begin_cache_operation,
++	.issue_op		= ceph_netfs_issue_op,
++	.clamp_length		= ceph_netfs_clamp_length,
++};
++
++/* read a single page, without unlocking it. */
++static int ceph_readpage(struct file *filp, struct page *page)
++{
++	struct inode *inode = file_inode(filp);
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_vino vino = ceph_vino(inode);
++	u64 off = page_offset(page);
++	u64 len = PAGE_SIZE;
++
++	if (ci->i_inline_version != CEPH_INLINE_NONE) {
++		/*
++		 * Uptodate inline data should have been added
++		 * into page cache while getting Fcr caps.
++		 */
++		if (off == 0) {
++			unlock_page(page);
++			return -EINVAL;
++		}
++		zero_user_segment(page, 0, PAGE_SIZE);
++		SetPageUptodate(page);
++		unlock_page(page);
++		return 0;
++	}
++
++	dout("readpage ino %llx.%llx file %p off %llu len %llu page %p index %lu\n",
++	     vino.ino, vino.snap, filp, off, len, page, page->index);
++
++	return netfs_readpage(filp, page, &ceph_readpage_netfs_ops, NULL);
++}
++
+ /* read a single page, without unlocking it. */
+ static int ceph_do_readpage(struct file *filp, struct page *page)
+ {
+@@ -255,16 +412,6 @@ static int ceph_do_readpage(struct file *filp, struct page *page)
+ 	return err < 0 ? err : 0;
+ }
  
- 	if (vp->scb.have_status)
-diff --git a/fs/afs/internal.h b/fs/afs/internal.h
-index e80fb6fe15b3..07471deeb6a8 100644
---- a/fs/afs/internal.h
-+++ b/fs/afs/internal.h
-@@ -760,6 +760,7 @@ struct afs_vnode_param {
- 	bool			update_ctime:1;	/* Need to update the ctime */
- 	bool			set_size:1;	/* Must update i_size */
- 	bool			op_unlinked:1;	/* True if file was unlinked by op */
-+	bool			speculative:1;	/* T if speculative status fetch (no vnode lock) */
- };
- 
+-static int ceph_readpage(struct file *filp, struct page *page)
+-{
+-	int r = ceph_do_readpage(filp, page);
+-	if (r != -EINPROGRESS)
+-		unlock_page(page);
+-	else
+-		r = 0;
+-	return r;
+-}
+-
  /*
-
+  * Finish an async read(ahead) op.
+  */
+-- 
+2.28.0
 
