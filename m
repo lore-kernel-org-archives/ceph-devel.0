@@ -2,189 +2,164 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FCECC83034
-	for <ceph-devel@archiver.kernel.org>; Mon, 23 Nov 2020 16:33:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2771C63697
+	for <ceph-devel@archiver.kernel.org>; Mon, 23 Nov 2020 16:39:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BEA072073C
-	for <ceph-devel@archiver.kernel.org>; Mon, 23 Nov 2020 16:33:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 916AD2073C
+	for <ceph-devel@archiver.kernel.org>; Mon, 23 Nov 2020 16:39:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="taYTQdLW";
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="taYTQdLW"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="EmtS288u"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729940AbgKWQc1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 23 Nov 2020 11:32:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36836 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732928AbgKWQbg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Nov 2020 11:31:36 -0500
-Received: from bedivere.hansenpartnership.com (bedivere.hansenpartnership.com [IPv6:2607:fcd0:100:8a00::2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FC97C061A4D;
-        Mon, 23 Nov 2020 08:31:36 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-        by bedivere.hansenpartnership.com (Postfix) with ESMTP id 7EDBD12808F6;
-        Mon, 23 Nov 2020 08:31:35 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-        d=hansenpartnership.com; s=20151216; t=1606149095;
-        bh=+IhPqZ/v6VfDyyXzj4lMu9axEsbedJZyqBpFfwsfG+g=;
-        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-        b=taYTQdLWt1uKXwIt/3Ve/mEupTdq+Wcpdv+UXp5WQMTWxY34l98m0qHLcdAiwuo2t
-         gwBg46qri78QHRql74q8THMzP+7WPx9XqttvrPch20gBcYUMT4pLXQarcLhIoin1Gp
-         Z+ziweydBKwdaV8ZmrW12X55c5G6vUR8Kiznotik=
-Received: from bedivere.hansenpartnership.com ([127.0.0.1])
-        by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id S05__PC1UR2d; Mon, 23 Nov 2020 08:31:35 -0800 (PST)
-Received: from jarvis.int.hansenpartnership.com (unknown [IPv6:2601:600:8280:66d1::527])
+        id S2390100AbgKWQji (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 23 Nov 2020 11:39:38 -0500
+Received: from mail.kernel.org ([198.145.29.99]:58830 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2390097AbgKWQjh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Nov 2020 11:39:37 -0500
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id 9FAA112808A8;
-        Mon, 23 Nov 2020 08:31:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-        d=hansenpartnership.com; s=20151216; t=1606149095;
-        bh=+IhPqZ/v6VfDyyXzj4lMu9axEsbedJZyqBpFfwsfG+g=;
-        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-        b=taYTQdLWt1uKXwIt/3Ve/mEupTdq+Wcpdv+UXp5WQMTWxY34l98m0qHLcdAiwuo2t
-         gwBg46qri78QHRql74q8THMzP+7WPx9XqttvrPch20gBcYUMT4pLXQarcLhIoin1Gp
-         Z+ziweydBKwdaV8ZmrW12X55c5G6vUR8Kiznotik=
-Message-ID: <8f5611bb015e044fa1c0a48147293923c2d904e4.camel@HansenPartnership.com>
-Subject: Re: [Intel-wired-lan] [PATCH 000/141] Fix fall-through warnings for
- Clang
-From:   James Bottomley <James.Bottomley@HansenPartnership.com>
-To:     "Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc:     Joe Perches <joe@perches.com>, Kees Cook <keescook@chromium.org>,
-        Jakub Kicinski <kuba@kernel.org>, alsa-devel@alsa-project.org,
-        linux-atm-general@lists.sourceforge.net,
-        reiserfs-devel@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linux-fbdev@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        linux-ide@vger.kernel.org, dm-devel@redhat.com,
-        keyrings@vger.kernel.org, linux-mtd@lists.infradead.org,
-        GR-everest-linux-l2@marvell.com, wcn36xx@lists.infradead.org,
-        samba-technical@lists.samba.org, linux-i3c@lists.infradead.org,
-        linux1394-devel@lists.sourceforge.net,
-        linux-afs@lists.infradead.org,
-        usb-storage@lists.one-eyed-alien.net, drbd-dev@lists.linbit.com,
-        devel@driverdev.osuosl.org, linux-cifs@vger.kernel.org,
-        rds-devel@oss.oracle.com,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        linux-scsi@vger.kernel.org, linux-rdma@vger.kernel.org,
-        oss-drivers@netronome.com, bridge@lists.linux-foundation.org,
-        linux-security-module@vger.kernel.org,
-        amd-gfx@lists.freedesktop.org,
-        linux-stm32@st-md-mailman.stormreply.com, cluster-devel@redhat.com,
-        linux-acpi@vger.kernel.org, coreteam@netfilter.org,
-        intel-wired-lan@lists.osuosl.org, linux-input@vger.kernel.org,
-        Miguel Ojeda <ojeda@kernel.org>,
-        tipc-discussion@lists.sourceforge.net, linux-ext4@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        selinux@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        intel-gfx@lists.freedesktop.org, linux-geode@lists.infradead.org,
-        linux-can@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-gpio@vger.kernel.org, op-tee@lists.trustedfirmware.org,
-        linux-mediatek@lists.infradead.org, xen-devel@lists.xenproject.org,
-        nouveau@lists.freedesktop.org, linux-hams@vger.kernel.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-arm-kernel@lists.infradead.org, linux-hwmon@vger.kernel.org,
-        x86@kernel.org, linux-nfs@vger.kernel.org,
-        GR-Linux-NIC-Dev@marvell.com, linux-mm@kvack.org,
-        netdev@vger.kernel.org, linux-decnet-user@lists.sourceforge.net,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-sctp@vger.kernel.org, linux-usb@vger.kernel.org,
-        netfilter-devel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        patches@opensource.cirrus.com, linux-integrity@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-hardening@vger.kernel.org,
-        Jonathan Cameron <Jonathan.Cameron@huawei.com>,
-        Greg KH <gregkh@linuxfoundation.org>
-Date:   Mon, 23 Nov 2020 08:31:30 -0800
-In-Reply-To: <20201123130348.GA3119@embeddedor>
-References: <cover.1605896059.git.gustavoars@kernel.org>
-         <20201120105344.4345c14e@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-         <202011201129.B13FDB3C@keescook>
-         <20201120115142.292999b2@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-         <202011220816.8B6591A@keescook>
-         <9b57fd4914b46f38d54087d75e072d6e947cb56d.camel@HansenPartnership.com>
-         <ca071decb87cc7e905411423c05a48f9fd2f58d7.camel@perches.com>
-         <0147972a72bc13f3629de8a32dee6f1f308994b5.camel@HansenPartnership.com>
-         <d8d1e9add08cdd4158405e77762d4946037208f8.camel@perches.com>
-         <dbd2cb703ed9eefa7dde9281ea26ab0f7acc8afe.camel@HansenPartnership.com>
-         <20201123130348.GA3119@embeddedor>
+        by mail.kernel.org (Postfix) with ESMTPSA id 4B68520717;
+        Mon, 23 Nov 2020 16:39:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1606149576;
+        bh=dvrw3U7i0FbsZUcrV9YFEctfe0OW3C+miUY78sQDrdo=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=EmtS288urWQElUEmlK8kytUUM4cx60hzZjQkJJbIc2PhdQvOvXUhGGzv1jvTJCBIP
+         mvMkc5ipIRcHpWkGvhQBFpb7J9Z919RjsJ63FL8Uct9gSpMfMYQvrlg9Qnfn4YUFJb
+         OdWKiFD3VJX6CSbZwEBTySABHIjLudBw/BNa6BkQ=
+Message-ID: <9b69966cfecc66fe1d8ff02909050ceb2f7b1152.camel@kernel.org>
+Subject: Re: [PATCH v2] ceph: add a new test for cross quota realms renames
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Luis Henriques <lhenriques@suse.de>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        ceph-devel@vger.kernel.org
+Date:   Mon, 23 Nov 2020 11:39:35 -0500
+In-Reply-To: <87eekkrqhh.fsf@suse.de>
+References: <87sg90s8el.fsf@suse.de>
+         <20201123103439.27908-1-lhenriques@suse.de>
+         <adf5a0056e11fe2575915a4d416b2f65cba02ded.camel@kernel.org>
+         <87im9wrv5p.fsf@suse.de>
+         <592a539905ba13d26bd12d8fa74cc4942b68c8ea.camel@kernel.org>
+         <87eekkrqhh.fsf@suse.de>
 Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.34.4 
+User-Agent: Evolution 3.38.1 (3.38.1-1.fc33) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2020-11-23 at 07:03 -0600, Gustavo A. R. Silva wrote:
-> On Sun, Nov 22, 2020 at 11:53:55AM -0800, James Bottomley wrote:
-> > On Sun, 2020-11-22 at 11:22 -0800, Joe Perches wrote:
-> > > On Sun, 2020-11-22 at 11:12 -0800, James Bottomley wrote:
-> > > > On Sun, 2020-11-22 at 10:25 -0800, Joe Perches wrote:
-> > > > > On Sun, 2020-11-22 at 10:21 -0800, James Bottomley wrote:
-> > > > > > Please tell me our reward for all this effort isn't a
-> > > > > > single missing error print.
+On Mon, 2020-11-23 at 16:24 +0000, Luis Henriques wrote:
+> Jeff Layton <jlayton@kernel.org> writes:
+> 
+> > On Mon, 2020-11-23 at 14:43 +0000, Luis Henriques wrote:
+> > > Jeff Layton <jlayton@kernel.org> writes:
+> > > 
+> > > > On Mon, 2020-11-23 at 10:34 +0000, Luis Henriques wrote:
+> > > > > For the moment cross quota realms renames has been disabled in CephFS
+> > > > > after a bug has been found while renaming files created and truncated.
+> > > > > This allowed clients to easily circumvent quotas.
 > > > > > 
-> > > > > There were quite literally dozens of logical defects found
-> > > > > by the fallthrough additions.  Very few were logging only.
+> > > > > Link: https://tracker.ceph.com/issues/48203
+> > > > > Signed-off-by: Luis Henriques <lhenriques@suse.de>
+> > > > > ---
+> > > > > v2: implemented Eryu review comments:
+> > > > > - Added _require_test_program "rename"
+> > > > > - Use _fail instead of _fatal
+> > > > > 
+> > > > >  tests/ceph/004     | 95 ++++++++++++++++++++++++++++++++++++++++++++++
+> > > > >  tests/ceph/004.out |  2 +
+> > > > >  tests/ceph/group   |  1 +
+> > > > >  3 files changed, 98 insertions(+)
+> > > > >  create mode 100755 tests/ceph/004
+> > > > >  create mode 100644 tests/ceph/004.out
+> > > > > 
+> > > > > diff --git a/tests/ceph/004 b/tests/ceph/004
+> > > > > new file mode 100755
+> > > > > index 000000000000..53094d8dfadc
+> > > > > --- /dev/null
+> > > > > +++ b/tests/ceph/004
+> > > > > @@ -0,0 +1,95 @@
+> > > > > +#! /bin/bash
+> > > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > > +# Copyright (c) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> > > > > +#
+> > > > > +# FS QA Test 004
+> > > > > +#
+> > > > > +# Tests a bug fix found in cephfs quotas handling.  Here's a simplified testcase
+> > > > > +# that *should* fail:
+> > > > > +#
+> > > > > +#    mkdir files limit
+> > > > > +#    truncate files/file -s 10G
+> > > > > +#    setfattr limit -n ceph.quota.max_bytes -v 1000000
+> > > > > +#    mv files limit/
+> > > > > +#
+> > > > > +# Because we're creating a new file and truncating it, we have Fx caps and thus
+> > > > > +# the truncate operation will be cached.  This prevents the MDSs from updating
+> > > > > +# the quota realms and thus the client will allow the above rename(2) to happen.
+> > > > > +#
 > > > > 
-> > > > So can you give us the best examples (or indeed all of them if
-> > > > someone is keeping score)?  hopefully this isn't a US election
-> > > > situation ...
+> > > > Note that it can be difficult to predict which caps you get from the
+> > > > MDS. It's not _required_ to pass out anything like Fx if it doesn't want
+> > > > to, but in general, it does if it can.
+> > > > 
+> > > > It's not a blocker for merging this test, but I wonder if we ought to
+> > > > come up with some way to ensure that the client was given the caps we
+> > > > expect when testing stuff like this.
+> > > > 
+> > > > Maybe we ought to consider adding a new ceph.caps vxattr that shows the
+> > > > caps we hold for a particular file? Then we could consult that when
+> > > > doing a test like this to make sure we got what we expected.
 > > > 
-> > > Gustavo?  Are you running for congress now?
+> > > Sure, I can hack a patch for doing that and send it out for review.
+> > > That's actually trivial, I believe.
 > > > 
-> > > https://lwn.net/Articles/794944/
+> > > This test assumes the caps for the truncated file will be 'Fsxcrwb' but I
+> > > didn't confirm with the MDS which conditions are actually required for
+> > > this to happen.  Also, I guess that if the test is executed with several
+> > > clients, these caps may change pretty quickly (and maybe even with a
+> > > single very slow client with a very short caps timeout).
+> > > 
+> > > Obviously, ensuring the client has the caps we expect at the time we do
+> > > the actual rename is racy and they can change in the meantime.  Is it
+> > > worth the trouble?
 > > 
-> > That's 21 reported fixes of which about 50% seem to produce no
-> > change in code behaviour at all, a quarter seem to have no user
-> > visible effect with the remaining quarter producing unexpected
-> > errors on obscure configuration parameters, which is why no-one
-> > really noticed them before.
+> > 
+> > I think it's useful. Cap/mds lock handling is an area where we have
+> > really poor visibility in cephfs.
+> > 
+> > a/ It's not always 100% clear what metadata is under which cap.
+> > Sometimes it's really weird. For example, you need Fs to get the link
+> > count on a directory -- Ls has no meaning there, which is not intuitive
+> > at all.
+> > 
+> > b/ Subtle changes in the MDS or client can affect what caps are granted
+> > or revoked in a given situation. 
+> > 
+> > Having better visibility into the caps held by the client is potentially
+> > very useful for troubleshooting _why_ certain tests might fail, and may
+> > also help us catch subtle changes that prevent problems in the future.
 > 
-> The really important point here is the number of bugs this has
-> prevented and will prevent in the future. See an example of this,
-> below:
+> Sure, I completely agree with this.  My question was more about adding an
+> extra check to the test.  Basically, the new test will be something like:
 > 
-> https://lore.kernel.org/linux-iio/20190813135802.GB27392@kroah.com/
+>  (0. ensure 'getfattr -n ceph.caps' works; skip test if it doesn't)
+>   1. truncate file
+>   2. check that file caps includes Fsxcrwb
+>   3. do the rename
+> 
 
-I think this falls into the same category as the other six bugs: it
-changes the output/input for parameters but no-one has really noticed,
-usually because the command is obscure or the bias effect is minor.
+Sounds reasonable. You may not even need to test for that whole cap set
+either. For this test, you probably just need to ensure that it got Fs.
+I'd be a little leery about failing the test if we got a different set
+of caps that still happened to contain Fs.
 
-> This work is still relevant, even if the total number of issues/bugs
-> we find in the process is zero (which is not the case).
-
-Really, no ... something which produces no improvement has no value at
-all ... we really shouldn't be wasting maintainer time with it because
-it has a cost to merge.  I'm not sure we understand where the balance
-lies in value vs cost to merge but I am confident in the zero value
-case.
-
-> "The sucky thing about doing hard work to deploy hardening is that
-> the result is totally invisible by definition (things not happening)
-> [..]"
-> - Dmitry Vyukov
-
-Really, no.  Something that can't be measured at all doesn't exist.
-
-And actually hardening is one of those things you can measure (which I
-do have to admit isn't true for everything in the security space) ...
-it's number of exploitable bugs found before you did it vs number of
-exploitable bugs found after you did it.  Usually hardening eliminates
-a class of bug, so the way I've measured hardening before is to go
-through the CVE list for the last couple of years for product X, find
-all the bugs that are of the class we're looking to eliminate and say
-if we had hardened X against this class of bug we'd have eliminated Y%
-of the exploits.  It can be quite impressive if Y is a suitably big
-number.
-
-James
-
+-- 
+Jeff Layton <jlayton@kernel.org>
 
