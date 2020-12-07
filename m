@@ -2,84 +2,132 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D3E47C1B0D9
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92043C0018C
+	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 14:58:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A5BAA23436
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5638423601
+	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 14:58:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726327AbgLGNXS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 7 Dec 2020 08:23:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57916 "EHLO
+        id S1727100AbgLGO6J (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 7 Dec 2020 09:58:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44596 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726046AbgLGNXQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2020 08:23:16 -0500
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CA9FC061A51;
-        Mon,  7 Dec 2020 05:21:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:In-Reply-To:References;
-        bh=W03PdcPB+vlMKGBqYsRRQuyZ1LSfMAxcuv9MFZzn4hQ=; b=jiyUndFtmZvRKMeXuCrruwaWhp
-        Z95eJKehelQPebCoVeQCAkPPP6sBjAgZS+IWgJz7aMmumtD3tYZSApO4tJrh0hPh6fAnbBTZO43BH
-        PqglVpskWlGYk+LRdE5mEPHxyaYYOGBeXJbDCrg0Aza5Fo/Ux7JL+FeloCrY7E3aVRQ9obroifmms
-        hsJ9hlOmXVGH80n6cFJZdIicb/ltvLUCUdaXQVw+UHKB/+9ezcqsUmy3S+STWHgPE0bYl0P38lf8A
-        q2IEXd8pY2mLt+BnlSxwP7TxtP54KARfzrDrStVke5Cw6LchV/p76FGQ3jvsF/Q5GXntrYt1xCD9P
-        igM/Dsrg==;
-Received: from 089144200046.atnat0009.highway.a1.net ([89.144.200.46] helo=localhost)
-        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kmGSH-0006Oq-U3; Mon, 07 Dec 2020 13:21:30 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     "Martin K . Petersen" <martin.petersen@oracle.com>,
+        with ESMTP id S1727089AbgLGO6J (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2020 09:58:09 -0500
+Received: from mail-il1-x141.google.com (mail-il1-x141.google.com [IPv6:2607:f8b0:4864:20::141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C0F8C061749;
+        Mon,  7 Dec 2020 06:57:29 -0800 (PST)
+Received: by mail-il1-x141.google.com with SMTP id y9so12448868ilb.0;
+        Mon, 07 Dec 2020 06:57:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=BdzMWmghWMnmqJzPNphPqafzWOiOvEaXvaPDnRpTyig=;
+        b=XAbT0sIGBd/lF/JpvMHWnpZhkY6ndEKj+4VNfzBQa+YwFTpXwWhd82chdPi99aEdtR
+         TJfRyYD7rqsjkjYOtmVR9fkbdH3SXZii52oM+mc7xsE2GI5CyRu3lDB5DFVOX0Af3saH
+         0cjWRLbl/3VTVuxnR1/sgozX4ifKxZUAfq4kodrdjf3JSrfLySW6hU2/h036dSXZpwaB
+         18HvdbtEJo5jUs6y+1SKBCyHRXkiQO7CjoMU6QSHtFzOZBSKYKdTczI+DuJa6vgfQbH2
+         Brt5cucKMyHJWrLnvsxu8EpYRjASHs0KY0TzYcT1fT3m7V1bjRnp79R2unvmGEr9iWbw
+         gVRQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=BdzMWmghWMnmqJzPNphPqafzWOiOvEaXvaPDnRpTyig=;
+        b=UL8X68euvIHcDDz1UE/Hbh7iZ7NqdmC3jgotkGvTqG4vAnfUxJ+Kl/Ey64p34hIv9O
+         60HlJ8/GGUFTLue7jn8NlcpkH4GXe4fdEfNrGMC+wgINlYTMLOI5TAoM83FVywvSVzVS
+         83ouOmNeATWwyZ1PIQHYG7lxQr5qiVHeqlZuj9NQJYrxjGfEB6xlYVy+qXEFFrFEuoMp
+         VnQprKAszDW06I7SUSChzIJjQVpsrYljTp+rj5nQmnZjFfAzD0Lf/0siwbKDt34QzJvA
+         wgJgqSuO+VEcFSIwaXVrajrMnEwAuMPq8Y+KYg/itl5x9ZkevdexkNBzvNGjlZkSWibw
+         6YwA==
+X-Gm-Message-State: AOAM533Y6Vo0ISoYOBYKaM3S3C1yBurbWYoXFsoQJ/JzPH3qX1jF7Ac0
+        r7+dQMsvZeh3Vxs9d/thPxrgrbcykQyYWJsdtd4=
+X-Google-Smtp-Source: ABdhPJzWgUFyUwn4oRQGFwhc7sjEZmk8MIUigwiYjc70guXN2OnSLrKLaIK50f+C57huiWudj+gdKgGdrTXAcHcP4D8=
+X-Received: by 2002:a92:4c3:: with SMTP id 186mr21869621ile.177.1607353048343;
+ Mon, 07 Dec 2020 06:57:28 -0800 (PST)
+MIME-Version: 1.0
+References: <20201207131918.2252553-1-hch@lst.de> <20201207131918.2252553-6-hch@lst.de>
+In-Reply-To: <20201207131918.2252553-6-hch@lst.de>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Mon, 7 Dec 2020 15:57:21 +0100
+Message-ID: <CAOi1vP9q7iGLmDryWJ0Duk2uQODr5W=5RCt2GAAxKk+N_k9OOg@mail.gmail.com>
+Subject: Re: [PATCH 5/6] rbd: remove the ->set_read_only method
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
         Oleksii Kurochko <olkuroch@cisco.com>,
         Sagi Grimberg <sagi@grimberg.me>,
         Mike Snitzer <snitzer@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
         Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        ceph-devel@vger.kernel.org, dm-devel@redhat.com,
-        linux-block@vger.kernel.org, linux-nvme@lists.infradead.org
-Subject: split hard read-only vs read-only policy v2
-Date:   Mon,  7 Dec 2020 14:19:12 +0100
-Message-Id: <20201207131918.2252553-1-hch@lst.de>
-X-Mailer: git-send-email 2.29.2
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+        Ceph Development <ceph-devel@vger.kernel.org>,
+        dm-devel@redhat.com, linux-block <linux-block@vger.kernel.org>,
+        linux-nvme@lists.infradead.org, Hannes Reinecke <hare@suse.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi Jens,
+On Mon, Dec 7, 2020 at 2:21 PM Christoph Hellwig <hch@lst.de> wrote:
+>
+> Now that the hardware read-only state can't be changed by the BLKROSET
+> ioctl, the code in this method is not required anymore.
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Reviewed-by: Hannes Reinecke <hare@suse.de>
+> ---
+>  drivers/block/rbd.c | 19 -------------------
+>  1 file changed, 19 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 2ed79b09439a82..2c64ca15ca079f 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -692,29 +692,10 @@ static void rbd_release(struct gendisk *disk, fmode_t mode)
+>         put_device(&rbd_dev->dev);
+>  }
+>
+> -static int rbd_set_read_only(struct block_device *bdev, bool ro)
+> -{
+> -       struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
+> -
+> -       /*
+> -        * Both images mapped read-only and snapshots can't be marked
+> -        * read-write.
+> -        */
+> -       if (!ro) {
+> -               if (rbd_is_ro(rbd_dev))
+> -                       return -EROFS;
+> -
+> -               rbd_assert(!rbd_is_snap(rbd_dev));
+> -       }
+> -
+> -       return 0;
+> -}
+> -
+>  static const struct block_device_operations rbd_bd_ops = {
+>         .owner                  = THIS_MODULE,
+>         .open                   = rbd_open,
+>         .release                = rbd_release,
+> -       .set_read_only          = rbd_set_read_only,
+>  };
+>
+>  /*
+> --
+> 2.29.2
+>
 
-this series resurrects a patch from Martin to properly split the flag
-indicating a disk has been set read-only by the hardware vs the userspace
-policy set through the BLKROSET ioctl.
+If nothing can mess with read-only state after set_disk_ro(disk, true),
+looks good.
 
-Note that the last patch only applies to for-next and not to
-for-5.11/block.  I can hold it back for the first NVMe pull request after
-Linus pulled the block tree.
+Acked-by: Ilya Dryomov <idryomov@gmail.com>
 
-A git tree is available here:
+Thanks,
 
-    git://git.infradead.org/users/hch/block.git block-hard-ro
-
-Gitweb:
-
-    http://git.infradead.org/users/hch/block.git/shortlog/refs/heads/block-hard-ro
-
-Changes since v2:
- - fix a few typos
- - add a patch to propagate the read-only status from the whole device to
-   partitions
- - add a patch to remove a pointless check from bdev_read_only
-
-Changes since v1:
- - don't propagate the policy flag from the whole disk to partitions
- - rebased on top of the merge block_device and hd_struct series
+                Ilya
