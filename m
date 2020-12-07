@@ -2,94 +2,212 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08BD7C433FE
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Dec 2020 21:14:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70837C4361B
+	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A1B43229C7
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Dec 2020 21:14:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E46123436
+	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726627AbgLDVOL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 4 Dec 2020 16:14:11 -0500
-Received: from mail.kernel.org ([198.145.29.99]:52744 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726021AbgLDVOL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 4 Dec 2020 16:14:11 -0500
-Message-ID: <0920eb110e59b6e3090cde8bd1845ee083d7880a.camel@kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1607116410;
-        bh=vUECHO+Bdt9z+lFD/ClAAxKgebkXbq7b1VL0AYd8LW0=;
-        h=Subject:From:To:Date:In-Reply-To:References:From;
-        b=Tza2lCAWaXzK8iw55Wu3Gd5F1MEU0MiEfoA2LmvDvizqh+VBFpcjt6JwaQoLL87ES
-         9JtRq6hL2Uao94FCXmRh7yduQSi7JtV83HPf5Hc6ADJIzcX5xUmdPnX+8nKAL1vuf/
-         CriEBzmRE4peOXTqWrvM+o4rVhMhFTLE8pGkRkfLIIM+C+vBqkxn3uuC8X4kKvYjW2
-         s9jY0opWbuuys3H2vUpLydxuS8LPj7/x7OykHE0iPYRJlsqJOtD+MSrfBmUvUU4bk+
-         1q5qC4PGnCXPTqbdGnURNJqwRVj1JdKVouqBdZ6HlTIpiiDRUlYsj1BGYBNUhz/GsK
-         PnmBM8F1kIJ+A==
-Subject: Re: Investigate busy ceph-msgr worker thread
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Stefan Kooman <stefan@bit.nl>,
-        Ceph Development <ceph-devel@vger.kernel.org>
-Date:   Fri, 04 Dec 2020 16:13:29 -0500
-In-Reply-To: <945af793-1425-181a-c334-99e6602bc899@bit.nl>
-References: <9afdb763-4cf6-3477-bd32-762840c0c0a5@bit.nl>
-         <ac5253d71ea50c8f5b4e50a07a1a0180abd58562.camel@kernel.org>
-         <945af793-1425-181a-c334-99e6602bc899@bit.nl>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.38.1 (3.38.1-1.fc33) 
+        id S1726206AbgLGNWh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 7 Dec 2020 08:22:37 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57806 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726136AbgLGNWg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2020 08:22:36 -0500
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 226CFC0613D1;
+        Mon,  7 Dec 2020 05:21:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
+        Content-Type:Content-ID:Content-Description;
+        bh=krDTBkn6Fvuu48M0DAGcGJkX1Vh5F9ONgeip8Q2IlTU=; b=oW0FG815AKU0SAD/baFOidcQes
+        s58HY3Sur/51RswtRWwhUaflobxd+ahS2yP3JDCxkvSW5GSaPLOhDGsm/v2iLAdcna7ago7OcPTYN
+        f0TB3An9LbW+c3uvjYjK70N6ZpI1g72xEqzLo2hdVD94CONyoAYezeTSK14NoxaoenDQhzHXp0Hjr
+        vXEW77v5Ax9IeVG6EK0OZBXMvW5gtq6HPPvi0VC/IMCT3l4ndpmaFCZC4hGZDJLcA9LWrkYDuvQW6
+        2B4OEkO8NA+PymvinANn4TcNKPQ+JsnVladewZEBexBOKcwLuRA84rpgyeWjasXiAJzyBLG7gsKVO
+        QdXGzGsw==;
+Received: from [2001:4bb8:188:f36:4fd9:254f:b3b5:5284] (helo=localhost)
+        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kmGSM-0006P8-8i; Mon, 07 Dec 2020 13:21:34 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Oleksii Kurochko <olkuroch@cisco.com>,
+        Sagi Grimberg <sagi@grimberg.me>,
+        Mike Snitzer <snitzer@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        ceph-devel@vger.kernel.org, dm-devel@redhat.com,
+        linux-block@vger.kernel.org, linux-nvme@lists.infradead.org,
+        Hannes Reinecke <hare@suse.de>
+Subject: [PATCH 3/6] block: add a hard-readonly flag to struct gendisk
+Date:   Mon,  7 Dec 2020 14:19:15 +0100
+Message-Id: <20201207131918.2252553-4-hch@lst.de>
+X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20201207131918.2252553-1-hch@lst.de>
+References: <20201207131918.2252553-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, 2020-12-04 at 20:49 +0100, Stefan Kooman wrote:
-> On 12/3/20 5:46 PM, Jeff Layton wrote:
-> > On Thu, 2020-12-03 at 12:01 +0100, Stefan Kooman wrote:
-> > > Hi,
-> > > 
-> > > We have a cephfs linux kernel (5.4.0-53-generic) workload (rsync) that
-> > > seems to be limited by a single ceph-msgr thread (doing close to 100%
-> > > cpu). We would like to investigate what this thread is so busy with.
-> > > What would be the easiest way to do this? On a related note: what would
-> > > be the best way to scale cephfs client performance for a single process
-> > > (if at all possible)?
-> > > 
-> > > Thanks for any pointers.
-> > > 
-> > 
-> > Usually kernel profiling (a'la perf) is the way to go about this. You
-> > may want to consider trying more recent kernels and see if they fare any
-> > better. With a new enough MDS and kernel, you can try enabling async
-> > creates as well, and see whether that helps performance any.
-> 
-> The thread is mostly busy with "build_snap_context":
-> 
-> 
-> +   94.39%    94.23%  kworker/4:1-cep  [kernel.kallsyms]  [k] 
-> build_snap_context
-> 
-> Do I understand correctly if this code is checking for any potential 
-> snapshots? As grepping through linux cephfs code gives a hit on snap.c
-> 
-> Our cephfs filesystem has been created in Luminous, and upgraded through 
-> Mimic to Nautilus. We have never enabled snapshot support (ceph fs set 
-> cephfs allow_new_snaps true). But the filesystem does seem to support it 
-> (.snap dirs present). The data rsync is processing does contain a lot of 
-> directories. It might explain the amount of time spent in this code path.
-> 
-> Would this be a plausible explanation?
-> 
-> Thanks,
-> 
-> Stefan
+Commit 20bd1d026aac ("scsi: sd: Keep disk read-only when re-reading
+partition") addressed a long-standing problem with user read-only
+policy being overridden as a result of a device-initiated revalidate.
+The commit has since been reverted due to a regression that left some
+USB devices read-only indefinitely.
 
-Yes, that sounds plausible. You probably want to stop rsync from
-recursing down into .snap/ directories altogether if you have it doing
-that.
+To fix the underlying problems with revalidate we need to keep track
+of hardware state and user policy separately.
+
+The gendisk has been updated to reflect the current hardware state set
+by the device driver. This is done to allow returning the device to
+the hardware state once the user clears the BLKROSET flag.
+
+The resulting semantics are as follows:
+
+ - If BLKROSET sets a given partition read-only, that partition will
+   remain read-only even if the underlying storage stack initiates a
+   revalidate. However, the BLKRRPART ioctl will cause the partition
+   table to be dropped and any user policy on partitions will be lost.
+
+ - If BLKROSET has not been set, both the whole disk device and any
+   partitions will reflect the current write-protect state of the
+   underlying device.
+
+Based on a patch from Martin K. Petersen <martin.petersen@oracle.com>.
+
+Reported-by: Oleksii Kurochko <olkuroch@cisco.com>
+Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=201221
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Hannes Reinecke <hare@suse.de>
+---
+ block/blk-core.c        |  2 +-
+ block/genhd.c           | 33 +++++++++++++++++++--------------
+ block/partitions/core.c |  3 +--
+ include/linux/genhd.h   |  6 ++++--
+ 4 files changed, 25 insertions(+), 19 deletions(-)
+
+diff --git a/block/blk-core.c b/block/blk-core.c
+index ad041e903b0a8f..ecd68415c6acad 100644
+--- a/block/blk-core.c
++++ b/block/blk-core.c
+@@ -693,7 +693,7 @@ static inline bool should_fail_request(struct block_device *part,
+ 
+ static inline bool bio_check_ro(struct bio *bio)
+ {
+-	if (op_is_write(bio_op(bio)) && bio->bi_bdev->bd_read_only) {
++	if (op_is_write(bio_op(bio)) && bdev_read_only(bio->bi_bdev))
+ 		char b[BDEVNAME_SIZE];
+ 
+ 		if (op_is_flush(bio->bi_opf) && !bio_sectors(bio))
+diff --git a/block/genhd.c b/block/genhd.c
+index c87013879b8650..878f94727aaa96 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -1425,27 +1425,32 @@ static void set_disk_ro_uevent(struct gendisk *gd, int ro)
+ 	kobject_uevent_env(&disk_to_dev(gd)->kobj, KOBJ_CHANGE, envp);
+ }
+ 
+-void set_disk_ro(struct gendisk *disk, int flag)
++/**
++ * set_disk_ro - set a gendisk read-only
++ * @disk:	gendisk to operate on
++ * @ready_only:	%true to set the disk read-only, %false set the disk read/write
++ *
++ * This function is used to indicate whether a given disk device should have its
++ * read-only flag set. set_disk_ro() is typically used by device drivers to
++ * indicate whether the underlying physical device is write-protected.
++ */
++void set_disk_ro(struct gendisk *disk, bool read_only)
+ {
+-	struct disk_part_iter piter;
+-	struct block_device *part;
+-
+-	if (disk->part0->bd_read_only != flag) {
+-		set_disk_ro_uevent(disk, flag);
+-		disk->part0->bd_read_only = flag;
++	if (read_only) {
++		if (test_and_set_bit(GD_READ_ONLY, &disk->state))
++			return;
++	} else {
++		if (!test_and_clear_bit(GD_READ_ONLY, &disk->state))
++			return;
+ 	}
+-
+-	disk_part_iter_init(&piter, disk, DISK_PITER_INCL_EMPTY);
+-	while ((part = disk_part_iter_next(&piter)))
+-		part->bd_read_only = flag;
+-	disk_part_iter_exit(&piter);
++	set_disk_ro_uevent(disk, read_only);
+ }
+-
+ EXPORT_SYMBOL(set_disk_ro);
+ 
+ int bdev_read_only(struct block_device *bdev)
+ {
+-	return bdev->bd_read_only;
++	return bdev->bd_read_only ||
++		test_bit(GD_READ_ONLY, &bdev->bd_disk->state);
+ }
+ EXPORT_SYMBOL(bdev_read_only);
+ 
+diff --git a/block/partitions/core.c b/block/partitions/core.c
+index c88f03ddaefe29..278e2419b163bb 100644
+--- a/block/partitions/core.c
++++ b/block/partitions/core.c
+@@ -194,7 +194,7 @@ static ssize_t part_start_show(struct device *dev,
+ static ssize_t part_ro_show(struct device *dev,
+ 			    struct device_attribute *attr, char *buf)
+ {
+-	return sprintf(buf, "%d\n", dev_to_bdev(dev)->bd_read_only);
++	return sprintf(buf, "%d\n", bdev_read_only(dev_to_bdev(dev)));
+ }
+ 
+ static ssize_t part_alignment_offset_show(struct device *dev,
+@@ -348,7 +348,6 @@ static struct block_device *add_partition(struct gendisk *disk, int partno,
+ 
+ 	bdev->bd_start_sect = start;
+ 	bdev_set_nr_sectors(bdev, len);
+-	bdev->bd_read_only = get_disk_ro(disk);
+ 
+ 	if (info) {
+ 		err = -ENOMEM;
+diff --git a/include/linux/genhd.h b/include/linux/genhd.h
+index e8821bfe07b955..f364619092cca0 100644
+--- a/include/linux/genhd.h
++++ b/include/linux/genhd.h
+@@ -152,6 +152,7 @@ struct gendisk {
+ 	int flags;
+ 	unsigned long state;
+ #define GD_NEED_PART_SCAN		0
++#define GD_READ_ONLY			1
+ 	struct kobject *slave_dir;
+ 
+ 	struct timer_rand_state *random;
+@@ -238,11 +239,12 @@ static inline void add_disk_no_queue_reg(struct gendisk *disk)
+ extern void del_gendisk(struct gendisk *gp);
+ extern struct block_device *bdget_disk(struct gendisk *disk, int partno);
+ 
+-extern void set_disk_ro(struct gendisk *disk, int flag);
++void set_disk_ro(struct gendisk *disk, bool read_only);
+ 
+ static inline int get_disk_ro(struct gendisk *disk)
+ {
+-	return disk->part0->bd_read_only;
++	return disk->part0->bd_read_only ||
++		test_bit(GD_READ_ONLY, &disk->state);
+ }
+ 
+ extern void disk_block_events(struct gendisk *disk);
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.29.2
 
