@@ -7,34 +7,34 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85E4EC433FE
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82085C4167B
+	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5506A23437
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E01A23436
+	for <ceph-devel@archiver.kernel.org>; Mon,  7 Dec 2020 13:23:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726242AbgLGNWn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 7 Dec 2020 08:22:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57808 "EHLO
+        id S1726223AbgLGNWm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 7 Dec 2020 08:22:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726122AbgLGNWh (ORCPT
+        with ESMTP id S1726182AbgLGNWh (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2020 08:22:37 -0500
 Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC3A8C0613D2;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D78B4C0613D3;
         Mon,  7 Dec 2020 05:21:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
         References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
         Content-Type:Content-ID:Content-Description;
-        bh=F7hUBug/BdYTiR2j7Anf/1DeuPCCgmZdqR6ur3MPmh4=; b=uGd5+FaP3T2QFHwzEtHtmAOjwh
-        pJd5+n0tQP26yFPSJClKkFEM40EfvHY83q2RQUGx5i84Xd4dmMqzfxl8kncvFT2tmHbuR47gIqvau
-        RRcMeklhytSqP2GXqtg4RMn0hhfKDOyw4MA60Anpxe1ZAWAbYfZ+yPrcmDhV+jbIdi7+BzC5qKm2Q
-        I+EdSckTRaiyYhFr8Nsk9hdYYVwL4a0NhZAN6Xp5UoS/0aQiysoLa9k6zEIW6Evjd+N6Z1a/xUueZ
-        yL4w58pV7s0LYpqBBErYV9EDKH1MkTYYQjsJ18Tqtt8g5yMpIKHuoXy9j87vFcj2cSJqf1OITPdIE
-        l4XnSBEg==;
+        bh=P+/gCBxIheHJGDi3+bpOjeRK+157ValOVnRejSvOwWE=; b=Z2RKlT+SK7W1QGWnjaBeY3Yjn4
+        +pY6zzOcs8NlwZgg4DL7ZAdyTrRQW6S97qaTP+/QiEpKrROMtXkJblXVRIIr4ZHHa2f7Lcy2c1/Ha
+        8D74zoQHAEablq5XavxTmG9Yw5PWrhuCFpSmM4a+Q21+Lxu9YEjvN09RO4lCNnypqxeJAGP4dD6d2
+        LEt/5W1WpriloeFpS8Lttq2bD2ZEr/SXj2JmbSRb/irg5sb7IPZBydxjUUVoX2DcC1LRozMFelXMp
+        QtnEeoTBM+SADeaKSt/DLqL1M4XWRrh2Y4YfBzC9Zlw2lJ/LvJuf3ML5nYr/zjl6+UbqaaYeg3crL
+        Y5+7TP8w==;
 Received: from [2001:4bb8:188:f36:4fd9:254f:b3b5:5284] (helo=localhost)
         by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kmGSQ-0006Pe-By; Mon, 07 Dec 2020 13:21:38 +0000
+        id 1kmGSK-0006Oz-Te; Mon, 07 Dec 2020 13:21:33 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     "Martin K . Petersen" <martin.petersen@oracle.com>,
@@ -45,9 +45,9 @@ Cc:     "Martin K . Petersen" <martin.petersen@oracle.com>,
         Dongsheng Yang <dongsheng.yang@easystack.cn>,
         ceph-devel@vger.kernel.org, dm-devel@redhat.com,
         linux-block@vger.kernel.org, linux-nvme@lists.infradead.org
-Subject: [PATCH 6/6] nvme: allow revalidate to set a namespace read-only
-Date:   Mon,  7 Dec 2020 14:19:18 +0100
-Message-Id: <20201207131918.2252553-7-hch@lst.de>
+Subject: [PATCH 2/6] block: remove the NULL bdev check in bdev_read_only
+Date:   Mon,  7 Dec 2020 14:19:14 +0100
+Message-Id: <20201207131918.2252553-3-hch@lst.de>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201207131918.2252553-1-hch@lst.de>
 References: <20201207131918.2252553-1-hch@lst.de>
@@ -58,31 +58,44 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Unconditionally call set_disk_ro now that it only updates the hardware
-state.  This allows to properly set up the Linux devices read-only when
-the controller turns a previously writable namespace read-only.
+Only a single caller can end up in bdev_read_only, so move the check there.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/nvme/host/core.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ block/genhd.c | 3 ---
+ fs/super.c    | 3 ++-
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
-index 24d7f64f14cb15..18cbf92fc4f957 100644
---- a/drivers/nvme/host/core.c
-+++ b/drivers/nvme/host/core.c
-@@ -2114,9 +2114,8 @@ static void nvme_update_disk_info(struct gendisk *disk,
- 	nvme_config_discard(disk, ns);
- 	nvme_config_write_zeroes(disk, ns);
+diff --git a/block/genhd.c b/block/genhd.c
+index 09ff6cef028729..c87013879b8650 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -1445,11 +1445,8 @@ EXPORT_SYMBOL(set_disk_ro);
  
--	if ((id->nsattr & NVME_NS_ATTR_RO) ||
--	    test_bit(NVME_NS_FORCE_RO, &ns->flags))
--		set_disk_ro(disk, true);
-+	set_disk_ro(disk, (id->nsattr & NVME_NS_ATTR_RO) ||
-+		test_bit(NVME_NS_FORCE_RO, &ns->flags));
+ int bdev_read_only(struct block_device *bdev)
+ {
+-	if (!bdev)
+-		return 0;
+ 	return bdev->bd_read_only;
  }
+-
+ EXPORT_SYMBOL(bdev_read_only);
  
- static inline bool nvme_first_scan(struct gendisk *disk)
+ /*
+diff --git a/fs/super.c b/fs/super.c
+index 2c6cdea2ab2d9e..5a1f384ffc74f6 100644
+--- a/fs/super.c
++++ b/fs/super.c
+@@ -865,7 +865,8 @@ int reconfigure_super(struct fs_context *fc)
+ 
+ 	if (fc->sb_flags_mask & SB_RDONLY) {
+ #ifdef CONFIG_BLOCK
+-		if (!(fc->sb_flags & SB_RDONLY) && bdev_read_only(sb->s_bdev))
++		if (!(fc->sb_flags & SB_RDONLY) && sb->s_bdev &&
++		    bdev_read_only(sb->s_bdev))
+ 			return -EACCES;
+ #endif
+ 
 -- 
 2.29.2
 
