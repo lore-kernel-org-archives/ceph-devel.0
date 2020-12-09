@@ -2,88 +2,145 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 865BAC4361B
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Dec 2020 01:25:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D956C4361B
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Dec 2020 02:53:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4436623B40
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Dec 2020 01:25:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 382AC2388B
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Dec 2020 02:53:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725910AbgLIBZH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Dec 2020 20:25:07 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:45653 "EHLO
+        id S1726921AbgLICxN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Dec 2020 21:53:13 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:24848 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725789AbgLIBZH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2020 20:25:07 -0500
+        by vger.kernel.org with ESMTP id S1726747AbgLICxN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2020 21:53:13 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1607477021;
+        s=mimecast20190719; t=1607482307;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Ks3Ply4N96m4k2H0dn1kKwtldUSUQfBTesh+Kzg2SfY=;
-        b=QP4Y65M2xtnSp0GawFA8xDwy/C+Ktg9Gyvi4u3RzO09gbMo7s+t/sllOvjntgJtDWt12Hv
-        0LDmiuQLCpQJ7YN+YeRzTr9G5wR9CJq/sDWUU1ijJHaBB76YsP75C1TCKlcJILk+URlMHc
-        Ah70duf0R443FCh888ztbbMoYmUzcJw=
+        bh=8pDCkiQqUQi4Q65srKJy8fmgGe7yBxTF+/wHQ2CwMUo=;
+        b=ZMZjI67tYrQ4keVRGRzw7Pfc1eghKGupuY/+dzAdyDQKzqVIjSPNTIuEnZF/iaxklGafIt
+        bjY2R+cnkS76UDQaxYR9+mlJf3RqpgDWts66Tgf6FAKFUJ1xm2Iadb1alpfI3+mkTcALVE
+        x6Rp151v8MuE8Ewsk4FFetfAizhujhU=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-15-8a_meGOmMGOcPRAitz_oJQ-1; Tue, 08 Dec 2020 20:23:39 -0500
-X-MC-Unique: 8a_meGOmMGOcPRAitz_oJQ-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+ us-mta-535-4E9pikj7Phyndmk0FTVmHw-1; Tue, 08 Dec 2020 21:51:43 -0500
+X-MC-Unique: 4E9pikj7Phyndmk0FTVmHw-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 89BB41005513;
-        Wed,  9 Dec 2020 01:23:37 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8A1F0801FD4;
+        Wed,  9 Dec 2020 02:51:41 +0000 (UTC)
 Received: from T590 (ovpn-12-139.pek2.redhat.com [10.72.12.139])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id EEBD660BE2;
-        Wed,  9 Dec 2020 01:23:21 +0000 (UTC)
-Date:   Wed, 9 Dec 2020 09:23:17 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 40E645D6AB;
+        Wed,  9 Dec 2020 02:51:25 +0000 (UTC)
+Date:   Wed, 9 Dec 2020 10:51:21 +0800
 From:   Ming Lei <ming.lei@redhat.com>
 To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, Sagi Grimberg <sagi@grimberg.me>,
-        Mike Snitzer <snitzer@redhat.com>,
-        Oleksii Kurochko <olkuroch@cisco.com>,
-        Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        linux-block@vger.kernel.org, dm-devel@redhat.com,
-        linux-nvme@lists.infradead.org,
+Cc:     Jens Axboe <axboe@kernel.dk>,
         "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+        Oleksii Kurochko <olkuroch@cisco.com>,
+        Sagi Grimberg <sagi@grimberg.me>,
+        Mike Snitzer <snitzer@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        ceph-devel@vger.kernel.org, dm-devel@redhat.com,
+        linux-block@vger.kernel.org, linux-nvme@lists.infradead.org
 Subject: Re: [PATCH 4/6] block: propagate BLKROSET on the whole device to all
  partitions
-Message-ID: <20201209012317.GC1217988@T590>
-References: <20201207131918.2252553-1-hch@lst.de>
- <20201207131918.2252553-5-hch@lst.de>
- <20201208102923.GD1202995@T590>
- <20201208105927.GB21762@lst.de>
+Message-ID: <20201209025121.GD1217988@T590>
+References: <20201208162829.2424563-1-hch@lst.de>
+ <20201208162829.2424563-5-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201208105927.GB21762@lst.de>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+In-Reply-To: <20201208162829.2424563-5-hch@lst.de>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Dec 08, 2020 at 11:59:27AM +0100, Christoph Hellwig wrote:
-> On Tue, Dec 08, 2020 at 06:29:23PM +0800, Ming Lei wrote:
-> > > -		test_bit(GD_READ_ONLY, &bdev->bd_disk->state);
-> > > +	return bdev->bd_read_only || get_disk_ro(bdev->bd_disk);
-> > >  }
-> > >  EXPORT_SYMBOL(bdev_read_only);
-> > 
-> > I think this patch should be folded into previous one, otherwise
-> > bdev_read_only(part) may return false even though ioctl(BLKROSET)
-> > has been done on the whole disk.
+On Tue, Dec 08, 2020 at 05:28:27PM +0100, Christoph Hellwig wrote:
+> Change the policy so that a BLKROSET on the whole device also affects
+> partitions.  To quote Martin K. Petersen:
 > 
-> The above is the existing behavior going back back very far, and I feel
-> much more comfortable having a small self-contained patch that changes
-> this behavior.
+> It's very common for database folks to twiddle the read-only state of
+> block devices and partitions. I know that our users will find it very
+> counter-intuitive that setting /dev/sda read-only won't prevent writes
+> to /dev/sda1.
 > 
-
-OK, then looks fine:
+> The existing behavior is inconsistent in the sense that doing:
+> 
+>   # blockdev --setro /dev/sda
+>   # echo foo > /dev/sda1
+> 
+> permits writes. But:
+> 
+>   # blockdev --setro /dev/sda
+>   <something triggers revalidate>
+>   # echo foo > /dev/sda1
+> 
+> doesn't.
+> 
+> And a subsequent:
+> 
+>   # blockdev --setrw /dev/sda
+>   # echo foo > /dev/sda1
+> 
+> doesn't work either since sda1's read-only policy has been inherited
+> from the whole-disk device.
+> 
+> You need to do:
+> 
+>   # blockdev --rereadpt
+> 
+> after setting the whole-disk device rw to effectuate the same change on
+> the partitions, otherwise they are stuck being read-only indefinitely.
+> 
+> However, setting the read-only policy on a partition does *not* require
+> the revalidate step. As a matter of fact, doing the revalidate will blow
+> away the policy setting you just made.
+> 
+> So the user needs to take different actions depending on whether they
+> are trying to read-protect a whole-disk device or a partition. Despite
+> using the same ioctl. That is really confusing.
+> 
+> I have lost count how many times our customers have had data clobbered
+> because of ambiguity of the existing whole-disk device policy. The
+> current behavior violates the principle of least surprise by letting the
+> user think they write protected the whole disk when they actually
+> didn't.
+> 
+> Suggested-by: Martin K. Petersen <martin.petersen@oracle.com>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+> ---
+>  block/genhd.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/block/genhd.c b/block/genhd.c
+> index d9f989c1514123..6e51ecb9280aca 100644
+> --- a/block/genhd.c
+> +++ b/block/genhd.c
+> @@ -1656,8 +1656,7 @@ EXPORT_SYMBOL(set_disk_ro);
+>  
+>  int bdev_read_only(struct block_device *bdev)
+>  {
+> -	return bdev->bd_read_only ||
+> -		test_bit(GD_READ_ONLY, &bdev->bd_disk->state);
+> +	return bdev->bd_read_only || get_disk_ro(bdev->bd_disk);
+>  }
+>  EXPORT_SYMBOL(bdev_read_only);
+>  
+> -- 
+> 2.29.2
+> 
 
 Reviewed-by: Ming Lei <ming.lei@redhat.com>
 
