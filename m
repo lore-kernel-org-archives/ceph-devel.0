@@ -2,45 +2,68 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AF3AC4361B
-	for <ceph-devel@archiver.kernel.org>; Thu, 10 Dec 2020 07:50:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0309CC433FE
+	for <ceph-devel@archiver.kernel.org>; Thu, 10 Dec 2020 13:12:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1537B23B99
-	for <ceph-devel@archiver.kernel.org>; Thu, 10 Dec 2020 07:50:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD24323DE8
+	for <ceph-devel@archiver.kernel.org>; Thu, 10 Dec 2020 13:12:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733123AbgLJHuw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 10 Dec 2020 02:50:52 -0500
-Received: from verein.lst.de ([213.95.11.211]:52949 "EHLO verein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727567AbgLJHuv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 10 Dec 2020 02:50:51 -0500
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id DC72568AFE; Thu, 10 Dec 2020 08:50:08 +0100 (CET)
-Date:   Thu, 10 Dec 2020 08:50:08 +0100
-From:   Christoph Hellwig <hch@lst.de>
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Oleksii Kurochko <olkuroch@cisco.com>,
-        Sagi Grimberg <sagi@grimberg.me>,
-        Mike Snitzer <snitzer@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        ceph-devel@vger.kernel.org, dm-devel@redhat.com,
-        linux-block@vger.kernel.org, linux-nvme@lists.infradead.org
-Subject: Re: split hard read-only vs read-only policy v2
-Message-ID: <20201210075008.GA13525@lst.de>
-References: <20201207131918.2252553-1-hch@lst.de>
+        id S2388672AbgLJNKx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 10 Dec 2020 08:10:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48440 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2389082AbgLJNKo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Dec 2020 08:10:44 -0500
+Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85D7EC0613CF
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Dec 2020 05:10:04 -0800 (PST)
+Received: by mail-pf1-x434.google.com with SMTP id 131so4013023pfb.9
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Dec 2020 05:10:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to;
+        bh=sscuBKGZzy9Pz/UQvenJTRSzjBFg3R/i+D72jcogvqs=;
+        b=Cv52YxIqo9avoL1GVAsFF9wWFNqYEU1loRZGdmuH1qUW2aYYYDGflwl4h1olQJRwqp
+         jK73TTuGFnL+YR1rwbrjPpCH4DS3qN4Cc2lGt9CRISnfixNrvDEL4AuYdBNsOL6qNHiw
+         57vx7EYVy6xub/zX4XGnwiIJ0WX8OPFZqOiAm728TwU2ogDdxxIsWKxoR3TfSwzdrLHo
+         OJFuNpNoknOjcmEE8y/hftOS72AqqXGNLYR/3wkPXPj8Me4IDeprJj4QFShkWuAwmsYM
+         uezMil5khbYxuLOGdyL3c+gNUxxV596AMKgYL21GcarsKcNhxoqL9jm6Rh5E2Gl2UQpt
+         v2kA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+        bh=sscuBKGZzy9Pz/UQvenJTRSzjBFg3R/i+D72jcogvqs=;
+        b=OSGShiGv/Fwn8GfqF03cLNrFE7buGjzwb0hRu5GOaXJEaPOiX3wVZqub3A591inS2N
+         Sj0UELxVZVLPNIetTEE0tj0Dpy9UPL9PBz9MtpF92AsT8fTR0BPDwoBvZUI2lDQvqRYQ
+         6RYMkzs6xLuTH2v8j2G2ZFNcwJaRgMIbCFgLBnU6e5PGVISuSR2hK27sZ8QaJCe+exNv
+         j6TMgqgm7xld/8NFT6b8dvmBNTHht30LsuzRJveZJ8wgwjNfeL9lFooiv5PIFnIs6OrZ
+         munuwi7WfLM+v4U2JY23+/iSct1HtTzHH5Dy7S+32PQSauFf6khdAptygTY/EsTH2IzV
+         4LyQ==
+X-Gm-Message-State: AOAM531c+BwDI0cLBF6b0CNBuaJZr5yorky7czzt7GNUenXmIvX26tq+
+        sybnP3Fj0j2SWCFHkuccj417xtMKX2f5+Jh89mwgurjojT/aBQ==
+X-Google-Smtp-Source: ABdhPJzJZBrfVIoVkKJkPL7swlkeC9JSw0Z6TSRTvwhRDfR85HkCsY/sdZkqnZlzfF0j0bPjW6HZ210DfY1/26NNtaI=
+X-Received: by 2002:a17:90a:ec10:: with SMTP id l16mr7718026pjy.127.1607605803962;
+ Thu, 10 Dec 2020 05:10:03 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201207131918.2252553-1-hch@lst.de>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+From:   WeiGuo Ren <rwg1335252904@gmail.com>
+Date:   Thu, 10 Dec 2020 21:09:51 +0800
+Message-ID: <CAPy+zYXDg4xFLiRE6e5iKZLokq2zSRNZrorPsbO68K=OW5SN8w@mail.gmail.com>
+Subject: ceph rgw memleak?
+To:     ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Jens, can you pick this up for 5.11?
+In my ceph version 14.2.5.ceph radosgw mem is high (4.6g use top
+command).when I write 20m.
+I noticed dump_mempools's buffer_anon is very high (3-4g)in
+testing,after test,the buffer_anon has been release(about10m). but rgw
+mem is still high(about 4.6g).So i think maybe some memleak occurred
+in rgw.
+Could someone can help me? or Could someone tell me how to tune rgw-memory?
