@@ -4,39 +4,39 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6AD3C433E6
-	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:42:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66C56C433DB
+	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:42:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6645323432
-	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:42:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3522223406
+	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:42:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404624AbhATSd5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 20 Jan 2021 13:33:57 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51576 "EHLO mail.kernel.org"
+        id S2404511AbhATSdm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 20 Jan 2021 13:33:42 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51500 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2404562AbhATSam (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 20 Jan 2021 13:30:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1B4D123441;
-        Wed, 20 Jan 2021 18:28:58 +0000 (UTC)
+        id S2404412AbhATS3t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 20 Jan 2021 13:29:49 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id D82C223406;
+        Wed, 20 Jan 2021 18:28:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611167338;
-        bh=IMKfJVeb/uPzjiLcJZAZ+0VzvW4o03nInVUkUxf6AGs=;
+        s=k20201202; t=1611167331;
+        bh=SUj/MlQHr88sV3NN5eFNe9q4T8TjqCyDnCTD+64V3NA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=dhiB2fdnrqFJJRk/ajcKXXsRuywTdBh01qafi5CKvphUY8Xi+xcheLmEra3xhsRX+
-         KqCeZBTjvfR0qHKp7d7Va9pG77OXfEjkH9o277OhF255SIq8S8lLwfibHhj/4cWtgL
-         3wTive4jMuBkfCPj6LTdqcN3d5v9/ht/zm3vjea51GNL9HaaiOp/U+SWOLz1kM79aR
-         bd4ypUaKsAd66zd2+Gb83dmaYrc3lo1JC25v8ImcTWs0uKw5mTKzReiGIr3N+Llnjy
-         CczpOhHzYwmkqIkiMD8Q0TrGyIvQq/a5f161oP6CrnlOEBVkkfYv9Dj4Jksm4XQQpF
-         TOjIBIv8rzsbA==
+        b=d0/jk6gTAZFHh7t+yP2WyG3LSuJ/BSMXHM+3lNWzJaGi5lMwZ9szf9jGm7B05VlGL
+         fftcj4eLYh3kxaBwWpK1xWGYEYc/N/LuClGeVDWE47Qc7Pav2+yNbfZfQwv7xKftar
+         xNw/YortTvMIiN20ne5ZNisY1zuwktBjce77Aofr/SJcnk0DBLm5d2eLiDIM8nhuli
+         vwgQimR68xnMZjkwHBMKfUBgw6FTWiXV2NYwixo1N/IrmfHxXfsO0IwyJVUzOfr9O/
+         zB3/Mb0IzwslhF4xbldV+5ISn5RlWThg6mW18njkGYn9CtyRqGal9gnhYzvTgXMxJZ
+         kbAEklXeBrYfQ==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v4 14/17] ceph: add fscrypt support to ceph_fill_trace
-Date:   Wed, 20 Jan 2021 13:28:44 -0500
-Message-Id: <20210120182847.644850-15-jlayton@kernel.org>
+Subject: [RFC PATCH v4 03/17] fscrypt: export fscrypt_fname_encrypt and fscrypt_fname_encrypted_size
+Date:   Wed, 20 Jan 2021 13:28:33 -0500
+Message-Id: <20210120182847.644850-4-jlayton@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20210120182847.644850-1-jlayton@kernel.org>
 References: <20210120182847.644850-1-jlayton@kernel.org>
@@ -46,81 +46,130 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When we get a dentry in a trace, decrypt the name so we can properly
-instantiate the dentry.
+For ceph, we want to use our own scheme for handling filenames that are
+are longer than NAME_MAX after encryption and base64 encoding. This
+allows us to have a consistent view of the encrypted filenames for
+clients that don't support fscrypt and clients that do but that don't
+have the key.
+
+Export fscrypt_fname_encrypt. Rename fscrypt_fname_encrypted_size to
+__fscrypt_fname_encrypted_size and add a new wrapper called
+fscrypt_fname_encrypted_size that takes an inode argument rahter than
+a pointer to a fscrypt_policy union.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 30 ++++++++++++++++++++++++++++--
- 1 file changed, 28 insertions(+), 2 deletions(-)
+ fs/crypto/fname.c           | 19 ++++++++++++++-----
+ fs/crypto/fscrypt_private.h |  9 +++------
+ fs/crypto/hooks.c           |  6 +++---
+ include/linux/fscrypt.h     |  4 ++++
+ 4 files changed, 24 insertions(+), 14 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9863a8818132..063e492ab1da 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1340,8 +1340,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME &&
- 		    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
- 		    !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
-+			bool is_nokey = false;
- 			struct qstr dname;
- 			struct dentry *dn, *parent;
-+			struct fscrypt_str oname = FSTR_INIT(NULL, 0);
-+			struct ceph_fname fname = { .dir	= dir,
-+						    .name	= rinfo->dname,
-+						    .ctext	= rinfo->altname,
-+						    .name_len	= rinfo->dname_len,
-+						    .ctext_len	= rinfo->altname_len };
+diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
+index 32b1f50433ba..5a794de7f61d 100644
+--- a/fs/crypto/fname.c
++++ b/fs/crypto/fname.c
+@@ -126,6 +126,7 @@ int fscrypt_fname_encrypt(const struct inode *inode, const struct qstr *iname,
  
- 			BUG_ON(!rinfo->head->is_target);
- 			BUG_ON(req->r_dentry);
-@@ -1349,8 +1356,20 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 			parent = d_find_any_alias(dir);
- 			BUG_ON(!parent);
+ 	return 0;
+ }
++EXPORT_SYMBOL(fscrypt_fname_encrypt);
  
--			dname.name = rinfo->dname;
--			dname.len = rinfo->dname_len;
-+			err = ceph_fname_alloc_buffer(dir, &oname);
-+			if (err < 0) {
-+				dput(parent);
-+				goto done;
-+			}
+ /**
+  * fname_decrypt() - decrypt a filename
+@@ -244,9 +245,9 @@ int fscrypt_base64_decode(const char *src, int len, u8 *dst)
+ }
+ EXPORT_SYMBOL(fscrypt_base64_decode);
+ 
+-bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
+-				  u32 orig_len, u32 max_len,
+-				  u32 *encrypted_len_ret)
++bool __fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
++				    u32 orig_len, u32 max_len,
++				    u32 *encrypted_len_ret)
+ {
+ 	int padding = 4 << (fscrypt_policy_flags(policy) &
+ 			    FSCRYPT_POLICY_FLAGS_PAD_MASK);
+@@ -260,6 +261,15 @@ bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
+ 	return true;
+ }
+ 
++bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
++				  u32 max_len, u32 *encrypted_len_ret)
++{
++	return __fscrypt_fname_encrypted_size(&inode->i_crypt_info->ci_policy,
++					      orig_len, max_len,
++					      encrypted_len_ret);
++}
++EXPORT_SYMBOL(fscrypt_fname_encrypted_size);
 +
-+			err = ceph_fname_to_usr(&fname, NULL, &oname, &is_nokey);
-+			if (err < 0) {
-+				dput(parent);
-+				ceph_fname_free_buffer(dir, &oname);
-+				goto done;
-+			}
-+			dname.name = oname.name;
-+			dname.len = oname.len;
- 			dname.hash = full_name_hash(parent, dname.name, dname.len);
- 			tvino.ino = le64_to_cpu(rinfo->targeti.in->ino);
- 			tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
-@@ -1365,9 +1384,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 				     dname.len, dname.name, dn);
- 				if (!dn) {
- 					dput(parent);
-+					ceph_fname_free_buffer(dir, &oname);
- 					err = -ENOMEM;
- 					goto done;
- 				}
-+				if (is_nokey) {
-+					spin_lock(&dn->d_lock);
-+					dn->d_flags |= DCACHE_NOKEY_NAME;
-+					spin_unlock(&dn->d_lock);
-+				}
- 				err = 0;
- 			} else if (d_really_is_positive(dn) &&
- 				   (ceph_ino(d_inode(dn)) != tvino.ino ||
-@@ -1379,6 +1404,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 				dput(dn);
- 				goto retry_lookup;
- 			}
-+			ceph_fname_free_buffer(dir, &oname);
+ /**
+  * fscrypt_fname_alloc_buffer() - allocate a buffer for presented filenames
+  * @max_encrypted_len: maximum length of encrypted filenames the buffer will be
+@@ -422,8 +432,7 @@ int fscrypt_setup_filename(struct inode *dir, const struct qstr *iname,
+ 		return ret;
  
- 			req->r_dentry = dn;
- 			dput(parent);
+ 	if (fscrypt_has_encryption_key(dir)) {
+-		if (!fscrypt_fname_encrypted_size(&dir->i_crypt_info->ci_policy,
+-						  iname->len,
++		if (!fscrypt_fname_encrypted_size(dir, iname->len,
+ 						  dir->i_sb->s_cop->max_namelen,
+ 						  &fname->crypto_buf.len))
+ 			return -ENAMETOOLONG;
+diff --git a/fs/crypto/fscrypt_private.h b/fs/crypto/fscrypt_private.h
+index 3fa965eb3336..195de6d0db40 100644
+--- a/fs/crypto/fscrypt_private.h
++++ b/fs/crypto/fscrypt_private.h
+@@ -292,14 +292,11 @@ void fscrypt_generate_iv(union fscrypt_iv *iv, u64 lblk_num,
+ 			 const struct fscrypt_info *ci);
+ 
+ /* fname.c */
+-int fscrypt_fname_encrypt(const struct inode *inode, const struct qstr *iname,
+-			  u8 *out, unsigned int olen);
+-bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
+-				  u32 orig_len, u32 max_len,
+-				  u32 *encrypted_len_ret);
++bool __fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
++				    u32 orig_len, u32 max_len,
++                                    u32 *encrypted_len_ret);
+ 
+ /* hkdf.c */
+-
+ struct fscrypt_hkdf {
+ 	struct crypto_shash *hmac_tfm;
+ };
+diff --git a/fs/crypto/hooks.c b/fs/crypto/hooks.c
+index a73b0376e6f3..e65c19aae041 100644
+--- a/fs/crypto/hooks.c
++++ b/fs/crypto/hooks.c
+@@ -228,9 +228,9 @@ int fscrypt_prepare_symlink(struct inode *dir, const char *target,
+ 	 * counting it (even though it is meaningless for ciphertext) is simpler
+ 	 * for now since filesystems will assume it is there and subtract it.
+ 	 */
+-	if (!fscrypt_fname_encrypted_size(policy, len,
+-					  max_len - sizeof(struct fscrypt_symlink_data),
+-					  &disk_link->len))
++	if (!__fscrypt_fname_encrypted_size(policy, len,
++					    max_len - sizeof(struct fscrypt_symlink_data),
++					    &disk_link->len))
+ 		return -ENAMETOOLONG;
+ 	disk_link->len += sizeof(struct fscrypt_symlink_data);
+ 
+diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
+index e300f6145ddc..b5c31baaa8bf 100644
+--- a/include/linux/fscrypt.h
++++ b/include/linux/fscrypt.h
+@@ -212,6 +212,10 @@ int fscrypt_drop_inode(struct inode *inode);
+ /* fname.c */
+ int fscrypt_base64_encode(const u8 *src, int len, char *dst);
+ int fscrypt_base64_decode(const char *src, int len, u8 *dst);
++bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
++				  u32 max_len, u32 *encrypted_len_ret);
++int fscrypt_fname_encrypt(const struct inode *inode, const struct qstr *iname,
++			  u8 *out, unsigned int olen);
+ int fscrypt_setup_filename(struct inode *inode, const struct qstr *iname,
+ 			   int lookup, struct fscrypt_name *fname);
+ 
 -- 
 2.29.2
 
