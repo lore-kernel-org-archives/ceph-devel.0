@@ -2,124 +2,122 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD156C433DB
-	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:33:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96FCEC433E0
+	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:33:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 69635233FC
-	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:33:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 60ABA23403
+	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:33:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391879AbhATScb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 20 Jan 2021 13:32:31 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51522 "EHLO mail.kernel.org"
+        id S2392002AbhATScs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 20 Jan 2021 13:32:48 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51458 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2404417AbhATS3s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S2404397AbhATS3s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Wed, 20 Jan 2021 13:29:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 864AD2342C;
-        Wed, 20 Jan 2021 18:28:51 +0000 (UTC)
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 01941233FA;
+        Wed, 20 Jan 2021 18:28:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611167331;
-        bh=ZPy7MsX3VP8mNVh0Wc4o/iMp/H7aNB3koRbPlYWauRs=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Ru2hGep58ZTWV1ml83eSbhzQdoy4hbTv3CSB0er10n4F3QyOJx27P8YPZ7sT7Q2Mo
-         7ttjz/TOw+zn6S7yhYmRiFDncyakiwbgr2uJaJCgFSdaNoCUV/SAAyiykMvB68q+Xs
-         JjTCqQ1dovoDMU8f6w5QmAisqSjuXzuIkbEqmKptr/MzDuTC0x7v52SxAeQapuyrWo
-         Mzs3NH4vybDg27s30j71kTjabpW4DZEft2WsGmyu4ZaUcbDxJluTQ9yUEXsmodmB/2
-         Cl93gNZ/VNzRTpM9aKLHo3zX4PpDSEUxzQBxiqVRnKrc0QPen6Rf/pWOjMWaAUlyyA
-         LYBjZvw/E+6Tg==
+        s=k20201202; t=1611167329;
+        bh=K1YSDxxRPudAo9NFhh4HuZune1Ns0JF8rsnF25PcQdA=;
+        h=From:To:Cc:Subject:Date:From;
+        b=pRYgvSwNPhbioE9TkpTCb1CkKWRFF2PM4wJfxfy+7b6FwaiTHLdmNrljPEeLlzxFB
+         18cD3F0d14TVBr6ewsLPgr8hagJGiK262Zlz2zZO2OgcJPJYrye7RKJZiRCRLJqUyZ
+         q8ZDsj88So88w+2LLyua9+pEypHse/xu1J2hwT6dGK1SHwZmbkaEVH1oyc+EwZIsHF
+         /QBQWZTdg3cE7OmBULiZ7XlOAn8vAMEvpNzkIldGf250J69scWTnCQK6/GBcNT+IDA
+         eHmS/JnMD+KwYNb9XOejRnJM2DjnP+i6QwFFv4g/K5c1aQCI8gsfGtm/Di/180o1By
+         pW09sM2fahphA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v4 04/17] fscrypt: add fscrypt_context_for_new_inode
-Date:   Wed, 20 Jan 2021 13:28:34 -0500
-Message-Id: <20210120182847.644850-5-jlayton@kernel.org>
+Subject: [RFC PATCH v4 00/17] ceph+fscrypt: context, filename and symlink support
+Date:   Wed, 20 Jan 2021 13:28:30 -0500
+Message-Id: <20210120182847.644850-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20210120182847.644850-1-jlayton@kernel.org>
-References: <20210120182847.644850-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-CephFS will need to be able to generate a context for a new "prepared"
-inode. Add a new routine for getting the context out of an in-core
-inode.
+It's been a while (September!) since my last posting of this series.
+Main notable changes since then:
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/crypto/policy.c      | 34 ++++++++++++++++++++++++++++------
- include/linux/fscrypt.h |  1 +
- 2 files changed, 29 insertions(+), 6 deletions(-)
+- adapt to latest version of fscrypt API in mainline
+- take advantage of alternate_name feature in MDS to handle long names
+- gate ioctls on MDS support
+- many bugfixes
 
-diff --git a/fs/crypto/policy.c b/fs/crypto/policy.c
-index a51cef6bd27f..44b4236427ba 100644
---- a/fs/crypto/policy.c
-+++ b/fs/crypto/policy.c
-@@ -664,6 +664,31 @@ const union fscrypt_policy *fscrypt_policy_to_inherit(struct inode *dir)
- 	return fscrypt_get_dummy_policy(dir->i_sb);
- }
- 
-+/**
-+ * fscrypt_context_for_new_inode() - create an encryption context for a new inode
-+ * @ctx: where context should be written
-+ * @inode: inode from which to fetch policy and nonce
-+ *
-+ * Given an in-core "prepared" (via fscrypt_prepare_new_inode) inode,
-+ * generate a new context and write it to ctx. ctx _must_ be at least
-+ * FSCRYPT_SET_CONTEXT_MAX_SIZE bytes.
-+ *
-+ * Returns size of the resulting context or a negative error code.
-+ */
-+int fscrypt_context_for_new_inode(void *ctx, struct inode *inode)
-+{
-+	struct fscrypt_info *ci = inode->i_crypt_info;
-+
-+	BUILD_BUG_ON(sizeof(union fscrypt_context) != FSCRYPT_SET_CONTEXT_MAX_SIZE);
-+
-+	/* fscrypt_prepare_new_inode() should have set up the key already. */
-+	if (WARN_ON_ONCE(!ci))
-+		return -ENOKEY;
-+
-+	return fscrypt_new_context(ctx, &ci->ci_policy, ci->ci_nonce);
-+}
-+EXPORT_SYMBOL_GPL(fscrypt_context_for_new_inode);
-+
- /**
-  * fscrypt_set_context() - Set the fscrypt context of a new inode
-  * @inode: a new inode
-@@ -680,12 +705,9 @@ int fscrypt_set_context(struct inode *inode, void *fs_data)
- 	union fscrypt_context ctx;
- 	int ctxsize;
- 
--	/* fscrypt_prepare_new_inode() should have set up the key already. */
--	if (WARN_ON_ONCE(!ci))
--		return -ENOKEY;
--
--	BUILD_BUG_ON(sizeof(ctx) != FSCRYPT_SET_CONTEXT_MAX_SIZE);
--	ctxsize = fscrypt_new_context(&ctx, &ci->ci_policy, ci->ci_nonce);
-+	ctxsize = fscrypt_context_for_new_inode(&ctx, inode);
-+	if (ctxsize < 0)
-+		return ctxsize;
- 
- 	/*
- 	 * This may be the first time the inode number is available, so do any
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index b5c31baaa8bf..087fa87bca0b 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -178,6 +178,7 @@ int fscrypt_ioctl_get_policy(struct file *filp, void __user *arg);
- int fscrypt_ioctl_get_policy_ex(struct file *filp, void __user *arg);
- int fscrypt_ioctl_get_nonce(struct file *filp, void __user *arg);
- int fscrypt_has_permitted_context(struct inode *parent, struct inode *child);
-+int fscrypt_context_for_new_inode(void *ctx, struct inode *inode);
- int fscrypt_set_context(struct inode *inode, void *fs_data);
- 
- struct fscrypt_dummy_policy {
+The set starts by exporting new_inode_pseudo and a few fscrypt
+functions.  Hopefully those aren't too controversial, but please let me
+know if they are. From there, it adds support for crypto contexts in an
+xattr, and then filenames and symlinks.
+
+The alternate name is just an extra field that gets stored in the dentry
+on the MDS on creation and transmitted to clients as part of the dentry
+lease. For fscrypt, we're using it to store the full binary crypttext
+name when it's too long to store without hashing the last characters in
+the name. This allows us to handle long filenames properly, while still
+making the underlying filesystem accessible to clients that don't
+support fscrypt.
+
+Note that we use our own encoding scheme for "nokey names" that is
+similar to the usual fscrypt one but lacks the dirhash fields (which we
+don't use). We don't want to enshrine the fscrypt_nokey_name format onto
+stable storage, and this scheme allows us to avoid that, and preserve
+compatibility with legacy clients that don't support fscrypt.
+
+For now, this is still a RFC. This all works pretty well so far, but
+I don't want to merge any of it until we can handle encrypting the file
+contents as well. I'll (hopefully!) be working toward that end in the
+near future.
+
+Jeff Layton (17):
+  vfs: export new_inode_pseudo
+  fscrypt: export fscrypt_base64_encode and fscrypt_base64_decode
+  fscrypt: export fscrypt_fname_encrypt and fscrypt_fname_encrypted_size
+  fscrypt: add fscrypt_context_for_new_inode
+  ceph: crypto context handling for ceph
+  ceph: implement -o test_dummy_encryption mount option
+  ceph: preallocate inode for ops that may create one
+  ceph: add routine to create fscrypt context prior to RPC
+  ceph: make ceph_msdc_build_path use ref-walk
+  ceph: add encrypted fname handling to ceph_mdsc_build_path
+  ceph: decode alternate_name in lease info
+  ceph: send altname in MClientRequest
+  ceph: add support to readdir for encrypted filenames
+  ceph: add fscrypt support to ceph_fill_trace
+  ceph: make d_revalidate call fscrypt revalidator for encrypted
+    dentries
+  ceph: create symlinks with encrypted and base64-encoded targets
+  ceph: add fscrypt ioctls
+
+ fs/ceph/Makefile            |   1 +
+ fs/ceph/crypto.c            | 185 ++++++++++++++++++++++++
+ fs/ceph/crypto.h            | 101 +++++++++++++
+ fs/ceph/dir.c               | 161 ++++++++++++++++-----
+ fs/ceph/file.c              |  56 +++++---
+ fs/ceph/inode.c             | 246 +++++++++++++++++++++++++++++---
+ fs/ceph/ioctl.c             |  61 ++++++++
+ fs/ceph/mds_client.c        | 275 ++++++++++++++++++++++++++++++------
+ fs/ceph/mds_client.h        |  14 +-
+ fs/ceph/super.c             |  80 ++++++++++-
+ fs/ceph/super.h             |  16 ++-
+ fs/ceph/xattr.c             |  32 +++++
+ fs/crypto/fname.c           |  53 +++++--
+ fs/crypto/fscrypt_private.h |   9 +-
+ fs/crypto/hooks.c           |   6 +-
+ fs/crypto/policy.c          |  34 ++++-
+ fs/inode.c                  |   1 +
+ include/linux/fscrypt.h     |  10 ++
+ 18 files changed, 1181 insertions(+), 160 deletions(-)
+ create mode 100644 fs/ceph/crypto.c
+ create mode 100644 fs/ceph/crypto.h
+
 -- 
 2.29.2
 
