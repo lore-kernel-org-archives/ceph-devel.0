@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75B41C43219
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EC43C43333
 	for <ceph-devel@archiver.kernel.org>; Thu, 21 Jan 2021 02:18:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 56E5B2388C
+	by mail.kernel.org (Postfix) with ESMTP id 1EEBF23787
 	for <ceph-devel@archiver.kernel.org>; Thu, 21 Jan 2021 02:18:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404581AbhATXzb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 20 Jan 2021 18:55:31 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:24440 "EHLO
+        id S2404756AbhATX4A (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 20 Jan 2021 18:56:00 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:34755 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1732135AbhATWZP (ORCPT
+        by vger.kernel.org with ESMTP id S1732826AbhATW1J (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 20 Jan 2021 17:25:15 -0500
+        Wed, 20 Jan 2021 17:27:09 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611181424;
+        s=mimecast20190719; t=1611181538;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=EUKTvdLXEVhbVHp68qlhTGgjcX5l1HnG88KsOB9XsEU=;
-        b=idpekmud7fuznOQfg8OofVylD8o2tYdisC0P7uqS78yBhSp4M5miON3l9dGvIDVqiVmuIO
-        /X7rNbOoIN88ekKFGL1VL8DQHM+s5zcHJd3iQ2AizLjLlohTyPdHzSf6CFzJEsV2dihDd7
-        8d1CdGHNSQURUtXsdv3kIzeV9t9r5+o=
+        bh=+Y11n5/UO8WH8kGS7CUqxbwe9ffMO78jIcPd9LH2q6A=;
+        b=Bzt8JjfdY18tP2aJTCyiD+pnjvpPNhsZZuL1d28cu/HP7MYV2RRj5d0gzPPztyKEKIX3Md
+        z1boJDldWgKzumHVn2QI2hYOw/ie3a2ojVDagUA36OWer4dWL/+UjSXgJQsCmfJfBt0TlY
+        g6zV3YqSf0cmGuV0se62HchlfbUyxLA=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-226-geDbIDOSNwqhMGlhK-vsnw-1; Wed, 20 Jan 2021 17:23:42 -0500
-X-MC-Unique: geDbIDOSNwqhMGlhK-vsnw-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-148-IGdA4UF3NJexqCAoohfjyg-1; Wed, 20 Jan 2021 17:25:33 -0500
+X-MC-Unique: IGdA4UF3NJexqCAoohfjyg-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5FDE6101AFA8;
-        Wed, 20 Jan 2021 22:23:40 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D0FB0107ACE8;
+        Wed, 20 Jan 2021 22:25:31 +0000 (UTC)
 Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7AF36627DD;
-        Wed, 20 Jan 2021 22:23:33 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8DD0360C6C;
+        Wed, 20 Jan 2021 22:25:24 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 11/25] netfs: Define an interface to talk to a cache
+Subject: [PATCH 20/25] afs: Use ITER_XARRAY for writing
 From:   David Howells <dhowells@redhat.com>
 To:     Trond Myklebust <trondmy@hammerspace.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
@@ -60,510 +60,661 @@ Cc:     dhowells@redhat.com, Jeff Layton <jlayton@redhat.com>,
         linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
         ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Wed, 20 Jan 2021 22:23:33 +0000
-Message-ID: <161118141321.1232039.8296910406755622458.stgit@warthog.procyon.org.uk>
+Date:   Wed, 20 Jan 2021 22:25:24 +0000
+Message-ID: <161118152415.1232039.6452879415814850025.stgit@warthog.procyon.org.uk>
 In-Reply-To: <161118128472.1232039.11746799833066425131.stgit@warthog.procyon.org.uk>
 References: <161118128472.1232039.11746799833066425131.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add an interface to the netfs helper library for reading data from the
-cache instead of downloading it from the server and support for writing
-data just downloaded or cleared to the cache.
+Use a single ITER_XARRAY iterator to describe the portion of a file to be
+transmitted to the server rather than generating a series of small
+ITER_BVEC iterators on the fly.  This will make it easier to implement AIO
+in afs.
 
-The API passes an iov_iter to the cache read/write routines to indicate the
-data/buffer to be used.  This is done using the ITER_XARRAY type to provide
-direct access to the netfs inode's pagecache.
-
-When the netfs's ->begin_cache_operation() method is called, this must fill
-in the cache_resources in the netfs_read_request struct, including the
-netfs_cache_ops used by the helper lib to talk to the cache.  The helper
-lib does not directly access the cache.
+In theory we could maybe use one giant ITER_BVEC, but that means
+potentially allocating a huge array of bio_vec structs (max 256 per page)
+when in fact the pagecache already has a structure listing all the relevant
+pages (radix_tree/xarray) that can be walked over.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/netfs/read_helper.c        |  217 +++++++++++++++++++++++++++++++++++++++++
- include/linux/fscache-cache.h |    4 +
- include/linux/fscache.h       |   17 +++
- include/linux/netfs.h         |   48 +++++++++
- 4 files changed, 285 insertions(+), 1 deletion(-)
+ fs/afs/fsclient.c          |   50 +++++++++------------
+ fs/afs/internal.h          |   15 +++---
+ fs/afs/rxrpc.c             |  103 ++++++--------------------------------------
+ fs/afs/write.c             |  100 ++++++++++++++++++++++++-------------------
+ fs/afs/yfsclient.c         |   25 +++--------
+ include/trace/events/afs.h |   51 ++++++++--------------
+ 6 files changed, 126 insertions(+), 218 deletions(-)
 
-diff --git a/fs/netfs/read_helper.c b/fs/netfs/read_helper.c
-index eb34c368617d..ca7593148599 100644
---- a/fs/netfs/read_helper.c
-+++ b/fs/netfs/read_helper.c
-@@ -86,6 +86,8 @@ static void netfs_free_read_request(struct work_struct *work)
- 	if (rreq->netfs_priv)
- 		rreq->netfs_ops->cleanup(rreq->mapping, rreq->netfs_priv);
- 	trace_netfs_rreq(rreq, netfs_rreq_trace_free);
-+	if (rreq->cache_resources.ops)
-+		rreq->cache_resources.ops->end_operation(&rreq->cache_resources);
- 	kfree(rreq);
- 	netfs_stat_d(&netfs_n_rh_rreq);
- }
-@@ -148,6 +150,32 @@ static void netfs_clear_unread(struct netfs_read_subrequest *subreq)
- 	iov_iter_zero(iov_iter_count(&iter), &iter);
- }
- 
-+static void netfs_cache_read_terminated(void *priv, ssize_t transferred_or_error)
-+{
-+	struct netfs_read_subrequest *subreq = priv;
-+
-+	netfs_subreq_terminated(subreq, transferred_or_error);
-+}
-+
-+/*
-+ * Issue a read against the cache.
-+ * - Eats the caller's ref on subreq.
-+ */
-+static void netfs_read_from_cache(struct netfs_read_request *rreq,
-+				  struct netfs_read_subrequest *subreq,
-+				  bool seek_data)
-+{
-+	struct netfs_cache_resources *cres = &rreq->cache_resources;
-+	struct iov_iter iter;
-+
-+	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages,
-+			subreq->start + subreq->transferred,
-+			subreq->len   - subreq->transferred);
-+
-+	cres->ops->read(cres, subreq->start, &iter, seek_data,
-+			netfs_cache_read_terminated, subreq);
-+}
-+
+diff --git a/fs/afs/fsclient.c b/fs/afs/fsclient.c
+index 897b37301851..31e6b3635541 100644
+--- a/fs/afs/fsclient.c
++++ b/fs/afs/fsclient.c
+@@ -1055,8 +1055,7 @@ static const struct afs_call_type afs_RXFSStoreData64 = {
  /*
-  * Fill a subrequest region with zeroes.
+  * store a set of pages to a very large file
   */
-@@ -192,6 +220,128 @@ static void netfs_rreq_completed(struct netfs_read_request *rreq)
- 	netfs_put_read_request(rreq);
- }
- 
-+/*
-+ * Deal with the completion of writing the data to the cache.  We have to clear
-+ * the PG_fscache bits on the pages involved and release the caller's ref.
-+ *
-+ * May be called in softirq mode and we inherit a ref from the caller.
-+ */
-+static void netfs_rreq_unmark_after_write(struct netfs_read_request *rreq)
-+{
-+	struct netfs_read_subrequest *subreq;
-+	struct page *page;
-+	pgoff_t unlocked = 0;
-+	bool have_unlocked = false;
-+
-+	rcu_read_lock();
-+
-+	list_for_each_entry(subreq, &rreq->subrequests, rreq_link) {
-+		XA_STATE(xas, &rreq->mapping->i_pages, subreq->start / PAGE_SIZE);
-+
-+		xas_for_each(&xas, page, (subreq->start + subreq->len - 1) / PAGE_SIZE) {
-+			/* We might have multiple writes from the same huge
-+			 * page, but we mustn't unlock a page more than once.
-+			 */
-+			if (have_unlocked && page->index <= unlocked)
-+				continue;
-+			unlocked = page->index;
-+			unlock_page_fscache(page);
-+			have_unlocked = true;
-+		}
-+	}
-+
-+	rcu_read_unlock();
-+	netfs_rreq_completed(rreq);
-+}
-+
-+static void netfs_rreq_copy_terminated(void *priv, ssize_t transferred_or_error)
-+{
-+	struct netfs_read_subrequest *subreq = priv;
-+	struct netfs_read_request *rreq = subreq->rreq;
-+
-+	if (IS_ERR_VALUE(transferred_or_error))
-+		subreq->error = transferred_or_error;
-+	else
-+		subreq->error = 0;
-+
-+	trace_netfs_sreq(subreq, netfs_sreq_trace_write_term);
-+
-+	/* If we decrement nr_wr_ops to 0, the ref belongs to us. */
-+	if (atomic_dec_and_test(&rreq->nr_wr_ops))
-+		netfs_rreq_unmark_after_write(rreq);
-+
-+	netfs_put_subrequest(subreq);
-+}
-+
-+/*
-+ * Perform any outstanding writes to the cache.  We inherit a ref from the
-+ * caller.
-+ */
-+static void netfs_rreq_do_write_to_cache(struct netfs_read_request *rreq)
-+{
-+	struct netfs_cache_resources *cres = &rreq->cache_resources;
-+	struct netfs_read_subrequest *subreq, *next, *p;
-+	struct iov_iter iter;
-+
-+	trace_netfs_rreq(rreq, netfs_rreq_trace_write);
-+
-+	/* We don't want terminating writes trying to wake us up whilst we're
-+	 * still going through the list.
-+	 */
-+	atomic_inc(&rreq->nr_wr_ops);
-+
-+	list_for_each_entry_safe(subreq, p, &rreq->subrequests, rreq_link) {
-+		if (!test_bit(NETFS_SREQ_WRITE_TO_CACHE, &subreq->flags)) {
-+			list_del_init(&subreq->rreq_link);
-+			netfs_put_subrequest(subreq);
-+		}
-+	}
-+
-+	list_for_each_entry(subreq, &rreq->subrequests, rreq_link) {
-+		/* Amalgamate adjacent writes */
-+		while (!list_is_last(&subreq->rreq_link, &rreq->subrequests)) {
-+			next = list_next_entry(subreq, rreq_link);
-+			if (next->start > subreq->start + subreq->len)
-+				break;
-+			subreq->len += next->len;
-+			list_del_init(&next->rreq_link);
-+			netfs_put_subrequest(next);
-+		}
-+
-+		iov_iter_xarray(&iter, WRITE, &rreq->mapping->i_pages,
-+				subreq->start, subreq->len);
-+
-+		atomic_inc(&rreq->nr_wr_ops);
-+		netfs_get_read_subrequest(subreq);
-+		trace_netfs_sreq(subreq, netfs_sreq_trace_write);
-+		cres->ops->write(cres, subreq->start, &iter,
-+				 netfs_rreq_copy_terminated, subreq);
-+	}
-+
-+	/* If we decrement nr_wr_ops to 0, the usage ref belongs to us. */
-+	if (atomic_dec_and_test(&rreq->nr_wr_ops))
-+		netfs_rreq_unmark_after_write(rreq);
-+}
-+
-+static void netfs_rreq_write_to_cache_work(struct work_struct *work)
-+{
-+	struct netfs_read_request *rreq =
-+		container_of(work, struct netfs_read_request, work);
-+
-+	netfs_rreq_do_write_to_cache(rreq);
-+}
-+
-+static void netfs_rreq_write_to_cache(struct netfs_read_request *rreq)
-+{
-+	if (in_softirq()) {
-+		rreq->work.func = netfs_rreq_write_to_cache_work;
-+		if (!queue_work(system_unbound_wq, &rreq->work))
-+			BUG();
-+	} else {
-+		netfs_rreq_do_write_to_cache(rreq);
-+	}
-+}
-+
- /*
-  * Unlock the pages in a read operation.  We need to set PG_fscache on any
-  * pages we're going to write back before we unlock them.
-@@ -289,7 +439,10 @@ static void netfs_rreq_short_read(struct netfs_read_request *rreq,
- 
- 	netfs_get_read_subrequest(subreq);
- 	atomic_inc(&rreq->nr_rd_ops);
--	netfs_read_from_server(rreq, subreq);
-+	if (subreq->source == NETFS_READ_FROM_CACHE)
-+		netfs_read_from_cache(rreq, subreq, true);
-+	else
-+		netfs_read_from_server(rreq, subreq);
- }
- 
- /*
-@@ -334,6 +487,25 @@ static bool netfs_rreq_perform_resubmissions(struct netfs_read_request *rreq)
- 	return false;
- }
- 
-+/*
-+ * Check to see if the data read is still valid.
-+ */
-+static void netfs_rreq_is_still_valid(struct netfs_read_request *rreq)
-+{
-+	struct netfs_read_subrequest *subreq;
-+
-+	if (!rreq->netfs_ops->is_still_valid ||
-+	    rreq->netfs_ops->is_still_valid(rreq))
-+		return;
-+
-+	list_for_each_entry(subreq, &rreq->subrequests, rreq_link) {
-+		if (subreq->source == NETFS_READ_FROM_CACHE) {
-+			subreq->error = -ESTALE;
-+			__set_bit(NETFS_RREQ_INCOMPLETE_IO, &rreq->flags);
-+		}
-+	}
-+}
-+
- /*
-  * Assess the state of a read request and decide what to do next.
-  *
-@@ -345,6 +517,8 @@ static void netfs_rreq_assess(struct netfs_read_request *rreq)
- 	trace_netfs_rreq(rreq, netfs_rreq_trace_assess);
- 
- again:
-+	netfs_rreq_is_still_valid(rreq);
-+
- 	if (!test_bit(NETFS_RREQ_FAILED, &rreq->flags) &&
- 	    test_bit(NETFS_RREQ_INCOMPLETE_IO, &rreq->flags)) {
- 		if (netfs_rreq_perform_resubmissions(rreq))
-@@ -357,6 +531,9 @@ static void netfs_rreq_assess(struct netfs_read_request *rreq)
- 	clear_bit_unlock(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
- 	wake_up_bit(&rreq->flags, NETFS_RREQ_IN_PROGRESS);
- 
-+	if (test_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags))
-+		return netfs_rreq_write_to_cache(rreq);
-+
- 	netfs_rreq_completed(rreq);
- }
- 
-@@ -486,7 +663,10 @@ static enum netfs_read_source netfs_cache_prepare_read(struct netfs_read_subrequ
- 						       loff_t i_size)
+-static void afs_fs_store_data64(struct afs_operation *op,
+-				loff_t pos, loff_t size, loff_t i_size)
++static void afs_fs_store_data64(struct afs_operation *op)
  {
- 	struct netfs_read_request *rreq = subreq->rreq;
-+	struct netfs_cache_resources *cres = &rreq->cache_resources;
+ 	struct afs_vnode_param *vp = &op->file[0];
+ 	struct afs_call *call;
+@@ -1071,7 +1070,7 @@ static void afs_fs_store_data64(struct afs_operation *op,
+ 	if (!call)
+ 		return afs_op_nomem(op);
  
-+	if (cres->ops)
-+		return cres->ops->prepare_read(subreq, i_size);
- 	if (subreq->start >= rreq->i_size)
- 		return NETFS_FILL_WITH_ZEROES;
- 	return NETFS_DOWNLOAD_FROM_SERVER;
-@@ -578,6 +758,9 @@ static bool netfs_rreq_submit_slice(struct netfs_read_request *rreq,
- 	case NETFS_DOWNLOAD_FROM_SERVER:
- 		netfs_read_from_server(rreq, subreq);
- 		break;
-+	case NETFS_READ_FROM_CACHE:
-+		netfs_read_from_cache(rreq, subreq, false);
-+		break;
- 	default:
- 		BUG();
- 	}
-@@ -590,9 +773,23 @@ static bool netfs_rreq_submit_slice(struct netfs_read_request *rreq,
- 	return false;
+-	call->send_pages = true;
++	call->write_iter = op->store.write_iter;
+ 
+ 	/* marshall the parameters */
+ 	bp = call->request;
+@@ -1087,47 +1086,38 @@ static void afs_fs_store_data64(struct afs_operation *op,
+ 	*bp++ = 0; /* unix mode */
+ 	*bp++ = 0; /* segment size */
+ 
+-	*bp++ = htonl(upper_32_bits(pos));
+-	*bp++ = htonl(lower_32_bits(pos));
+-	*bp++ = htonl(upper_32_bits(size));
+-	*bp++ = htonl(lower_32_bits(size));
+-	*bp++ = htonl(upper_32_bits(i_size));
+-	*bp++ = htonl(lower_32_bits(i_size));
++	*bp++ = htonl(upper_32_bits(op->store.pos));
++	*bp++ = htonl(lower_32_bits(op->store.pos));
++	*bp++ = htonl(upper_32_bits(op->store.size));
++	*bp++ = htonl(lower_32_bits(op->store.size));
++	*bp++ = htonl(upper_32_bits(op->store.i_size));
++	*bp++ = htonl(lower_32_bits(op->store.i_size));
+ 
+ 	trace_afs_make_fs_call(call, &vp->fid);
+ 	afs_make_op_call(op, call, GFP_NOFS);
  }
  
-+static void netfs_cache_expand_readahead(struct netfs_read_request *rreq,
-+					 loff_t *_start, size_t *_len, loff_t i_size)
-+{
-+	struct netfs_cache_resources *cres = &rreq->cache_resources;
-+
-+	if (cres->ops && cres->ops->expand_readahead)
-+		cres->ops->expand_readahead(cres, _start, _len, i_size);
-+}
-+
- static void netfs_rreq_expand(struct netfs_read_request *rreq,
- 			      struct readahead_control *ractl)
+ /*
+- * store a set of pages
++ * Write data to a file on the server.
+  */
+ void afs_fs_store_data(struct afs_operation *op)
  {
-+	/* Give the cache a chance to change the request parameters.  The
-+	 * resultant request must contain the original region.
-+	 */
-+	netfs_cache_expand_readahead(rreq, &rreq->start, &rreq->len, rreq->i_size);
-+
- 	/* Give the netfs a chance to change the request parameters.  The
- 	 * resultant request must contain the original region.
+ 	struct afs_vnode_param *vp = &op->file[0];
+ 	struct afs_call *call;
+-	loff_t size, pos, i_size;
+ 	__be32 *bp;
+ 
+ 	_enter(",%x,{%llx:%llu},,",
+ 	       key_serial(op->key), vp->fid.vid, vp->fid.vnode);
+ 
+-	size = (loff_t)op->store.last_to - (loff_t)op->store.first_offset;
+-	if (op->store.first != op->store.last)
+-		size += (loff_t)(op->store.last - op->store.first) << PAGE_SHIFT;
+-	pos = (loff_t)op->store.first << PAGE_SHIFT;
+-	pos += op->store.first_offset;
+-
+-	i_size = i_size_read(&vp->vnode->vfs_inode);
+-	if (pos + size > i_size)
+-		i_size = size + pos;
+-
+ 	_debug("size %llx, at %llx, i_size %llx",
+-	       (unsigned long long) size, (unsigned long long) pos,
+-	       (unsigned long long) i_size);
++	       (unsigned long long)op->store.size,
++	       (unsigned long long)op->store.pos,
++	       (unsigned long long)op->store.i_size);
+ 
+-	if (upper_32_bits(pos) || upper_32_bits(i_size) || upper_32_bits(size) ||
+-	    upper_32_bits(pos + size))
+-		return afs_fs_store_data64(op, pos, size, i_size);
++	if (upper_32_bits(op->store.pos) ||
++	    upper_32_bits(op->store.size) ||
++	    upper_32_bits(op->store.i_size))
++		return afs_fs_store_data64(op);
+ 
+ 	call = afs_alloc_flat_call(op->net, &afs_RXFSStoreData,
+ 				   (4 + 6 + 3) * 4,
+@@ -1135,7 +1125,7 @@ void afs_fs_store_data(struct afs_operation *op)
+ 	if (!call)
+ 		return afs_op_nomem(op);
+ 
+-	call->send_pages = true;
++	call->write_iter = op->store.write_iter;
+ 
+ 	/* marshall the parameters */
+ 	bp = call->request;
+@@ -1151,9 +1141,9 @@ void afs_fs_store_data(struct afs_operation *op)
+ 	*bp++ = 0; /* unix mode */
+ 	*bp++ = 0; /* segment size */
+ 
+-	*bp++ = htonl(lower_32_bits(pos));
+-	*bp++ = htonl(lower_32_bits(size));
+-	*bp++ = htonl(lower_32_bits(i_size));
++	*bp++ = htonl(lower_32_bits(op->store.pos));
++	*bp++ = htonl(lower_32_bits(op->store.size));
++	*bp++ = htonl(lower_32_bits(op->store.i_size));
+ 
+ 	trace_afs_make_fs_call(call, &vp->fid);
+ 	afs_make_op_call(op, call, GFP_NOFS);
+diff --git a/fs/afs/internal.h b/fs/afs/internal.h
+index 6f1e6badf391..d4163f9babfd 100644
+--- a/fs/afs/internal.h
++++ b/fs/afs/internal.h
+@@ -107,6 +107,7 @@ struct afs_call {
+ 	void			*request;	/* request data (first part) */
+ 	size_t			iov_len;	/* Size of *iter to be used */
+ 	struct iov_iter		def_iter;	/* Default buffer/data iterator */
++	struct iov_iter		*write_iter;	/* Iterator defining write to be made */
+ 	struct iov_iter		*iter;		/* Iterator currently in use */
+ 	union {	/* Convenience for ->def_iter */
+ 		struct kvec	kvec[1];
+@@ -133,7 +134,6 @@ struct afs_call {
+ 	unsigned char		unmarshall;	/* unmarshalling phase */
+ 	unsigned char		addr_ix;	/* Address in ->alist */
+ 	bool			drop_ref;	/* T if need to drop ref for incoming call */
+-	bool			send_pages;	/* T if data from mapping should be sent */
+ 	bool			need_attention;	/* T if RxRPC poked us */
+ 	bool			async;		/* T if asynchronous */
+ 	bool			upgrade;	/* T to request service upgrade */
+@@ -811,12 +811,13 @@ struct afs_operation {
+ 			afs_lock_type_t type;
+ 		} lock;
+ 		struct {
+-			struct address_space *mapping;	/* Pages being written from */
+-			pgoff_t		first;		/* first page in mapping to deal with */
+-			pgoff_t		last;		/* last page in mapping to deal with */
+-			unsigned	first_offset;	/* offset into mapping[first] */
+-			unsigned	last_to;	/* amount of mapping[last] */
+-			bool		laundering;	/* Laundering page, PG_writeback not set */
++			struct iov_iter	*write_iter;
++			loff_t	pos;
++			loff_t	size;
++			loff_t	i_size;
++			pgoff_t	first;		/* first page in mapping to deal with */
++			pgoff_t	last;		/* last page in mapping to deal with */
++			bool	laundering;	/* Laundering page, PG_writeback not set */
+ 		} store;
+ 		struct {
+ 			struct iattr	*attr;
+diff --git a/fs/afs/rxrpc.c b/fs/afs/rxrpc.c
+index ae68576f822f..23a1a92d64bb 100644
+--- a/fs/afs/rxrpc.c
++++ b/fs/afs/rxrpc.c
+@@ -271,40 +271,6 @@ void afs_flat_call_destructor(struct afs_call *call)
+ 	call->buffer = NULL;
+ }
+ 
+-#define AFS_BVEC_MAX 8
+-
+-/*
+- * Load the given bvec with the next few pages.
+- */
+-static void afs_load_bvec(struct afs_call *call, struct msghdr *msg,
+-			  struct bio_vec *bv, pgoff_t first, pgoff_t last,
+-			  unsigned offset)
+-{
+-	struct afs_operation *op = call->op;
+-	struct page *pages[AFS_BVEC_MAX];
+-	unsigned int nr, n, i, to, bytes = 0;
+-
+-	nr = min_t(pgoff_t, last - first + 1, AFS_BVEC_MAX);
+-	n = find_get_pages_contig(op->store.mapping, first, nr, pages);
+-	ASSERTCMP(n, ==, nr);
+-
+-	msg->msg_flags |= MSG_MORE;
+-	for (i = 0; i < nr; i++) {
+-		to = PAGE_SIZE;
+-		if (first + i >= last) {
+-			to = op->store.last_to;
+-			msg->msg_flags &= ~MSG_MORE;
+-		}
+-		bv[i].bv_page = pages[i];
+-		bv[i].bv_len = to - offset;
+-		bv[i].bv_offset = offset;
+-		bytes += to - offset;
+-		offset = 0;
+-	}
+-
+-	iov_iter_bvec(&msg->msg_iter, WRITE, bv, nr, bytes);
+-}
+-
+ /*
+  * Advance the AFS call state when the RxRPC call ends the transmit phase.
+  */
+@@ -317,42 +283,6 @@ static void afs_notify_end_request_tx(struct sock *sock,
+ 	afs_set_call_state(call, AFS_CALL_CL_REQUESTING, AFS_CALL_CL_AWAIT_REPLY);
+ }
+ 
+-/*
+- * attach the data from a bunch of pages on an inode to a call
+- */
+-static int afs_send_pages(struct afs_call *call, struct msghdr *msg)
+-{
+-	struct afs_operation *op = call->op;
+-	struct bio_vec bv[AFS_BVEC_MAX];
+-	unsigned int bytes, nr, loop, offset;
+-	pgoff_t first = op->store.first, last = op->store.last;
+-	int ret;
+-
+-	offset = op->store.first_offset;
+-	op->store.first_offset = 0;
+-
+-	do {
+-		afs_load_bvec(call, msg, bv, first, last, offset);
+-		trace_afs_send_pages(call, msg, first, last, offset);
+-
+-		offset = 0;
+-		bytes = msg->msg_iter.count;
+-		nr = msg->msg_iter.nr_segs;
+-
+-		ret = rxrpc_kernel_send_data(op->net->socket, call->rxcall, msg,
+-					     bytes, afs_notify_end_request_tx);
+-		for (loop = 0; loop < nr; loop++)
+-			put_page(bv[loop].bv_page);
+-		if (ret < 0)
+-			break;
+-
+-		first += nr;
+-	} while (first <= last);
+-
+-	trace_afs_sent_pages(call, op->store.first, last, first, ret);
+-	return ret;
+-}
+-
+ /*
+  * Initiate a call and synchronously queue up the parameters for dispatch.  Any
+  * error is stored into the call struct, which the caller must check for.
+@@ -384,21 +314,8 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ 	 * after the initial fixed part.
  	 */
-@@ -644,6 +841,7 @@ void netfs_readahead(struct readahead_control *ractl,
- 	struct netfs_read_request *rreq;
- 	struct page *page;
- 	unsigned int debug_index = 0;
-+	int ret;
+ 	tx_total_len = call->request_size;
+-	if (call->send_pages) {
+-		struct afs_operation *op = call->op;
+-
+-		if (op->store.last == op->store.first) {
+-			tx_total_len += op->store.last_to - op->store.first_offset;
+-		} else {
+-			/* It looks mathematically like you should be able to
+-			 * combine the following lines with the ones above, but
+-			 * unsigned arithmetic is fun when it wraps...
+-			 */
+-			tx_total_len += PAGE_SIZE - op->store.first_offset;
+-			tx_total_len += op->store.last_to;
+-			tx_total_len += (op->store.last - op->store.first - 1) * PAGE_SIZE;
+-		}
+-	}
++	if (call->write_iter)
++		tx_total_len += iov_iter_count(call->write_iter);
  
- 	_enter("%lx,%x", readahead_index(ractl), readahead_count(ractl));
+ 	/* If the call is going to be asynchronous, we need an extra ref for
+ 	 * the call to hold itself so the caller need not hang on to its ref.
+@@ -440,7 +357,7 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ 	iov_iter_kvec(&msg.msg_iter, WRITE, iov, 1, call->request_size);
+ 	msg.msg_control		= NULL;
+ 	msg.msg_controllen	= 0;
+-	msg.msg_flags		= MSG_WAITALL | (call->send_pages ? MSG_MORE : 0);
++	msg.msg_flags		= MSG_WAITALL | (call->write_iter ? MSG_MORE : 0);
  
-@@ -661,6 +859,11 @@ void netfs_readahead(struct readahead_control *ractl,
- 	trace_netfs_read(rreq, readahead_pos(ractl), readahead_length(ractl),
- 			 netfs_read_trace_readahead);
+ 	ret = rxrpc_kernel_send_data(call->net->socket, rxcall,
+ 				     &msg, call->request_size,
+@@ -448,8 +365,18 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ 	if (ret < 0)
+ 		goto error_do_abort;
  
-+	if (ops->begin_cache_operation) {
-+		ret = ops->begin_cache_operation(rreq);
-+		if (ret == -ENOMEM || ret == -EINTR || ret == -ERESTARTSYS)
-+			goto cleanup_free;
-+	}
- 	netfs_rreq_expand(rreq, ractl);
- 
- 	atomic_set(&rreq->nr_rd_ops, 1);
-@@ -686,6 +889,9 @@ void netfs_readahead(struct readahead_control *ractl,
- 		netfs_rreq_assess(rreq);
- 	return;
- 
-+cleanup_free:
-+	netfs_put_read_request(rreq);
-+	return;
- cleanup:
- 	if (netfs_priv)
- 		ops->cleanup(ractl->mapping, netfs_priv);
-@@ -735,6 +941,14 @@ int netfs_readpage(struct file *file,
- 	netfs_stat(&netfs_n_rh_readpage);
- 	trace_netfs_read(rreq, rreq->start, rreq->len, netfs_read_trace_readpage);
- 
-+	if (ops->begin_cache_operation) {
-+		ret = ops->begin_cache_operation(rreq);
-+		if (ret == -ENOMEM || ret == -EINTR || ret == -ERESTARTSYS) {
-+			unlock_page(page);
-+			goto out;
-+		}
-+	}
+-	if (call->send_pages) {
+-		ret = afs_send_pages(call, &msg);
++	if (call->write_iter) {
++		msg.msg_iter = *call->write_iter;
++		msg.msg_flags &= ~MSG_MORE;
++		trace_afs_send_data(call, &msg);
 +
- 	netfs_get_read_request(rreq);
- 
- 	atomic_set(&rreq->nr_rd_ops, 1);
-@@ -756,6 +970,7 @@ int netfs_readpage(struct file *file,
- 	} while (test_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags));
- 
- 	ret = rreq->error;
-+out:
- 	netfs_put_read_request(rreq);
- 	return ret;
- }
-diff --git a/include/linux/fscache-cache.h b/include/linux/fscache-cache.h
-index 3f0b19dcfae7..3235ddbdcc09 100644
---- a/include/linux/fscache-cache.h
-+++ b/include/linux/fscache-cache.h
-@@ -304,6 +304,10 @@ struct fscache_cache_ops {
- 
- 	/* dissociate a cache from all the pages it was backing */
- 	void (*dissociate_pages)(struct fscache_cache *cache);
++		ret = rxrpc_kernel_send_data(call->net->socket,
++					     call->rxcall, &msg,
++					     iov_iter_count(&msg.msg_iter),
++					     afs_notify_end_request_tx);
++		*call->write_iter = msg.msg_iter;
 +
-+	/* Begin a read operation for the netfs lib */
-+	int (*begin_read_operation)(struct netfs_read_request *rreq,
-+				    struct fscache_retrieval *op);
- };
- 
- extern struct fscache_cookie fscache_fsdef_index;
-diff --git a/include/linux/fscache.h b/include/linux/fscache.h
-index 1f8dc72369ee..0e4161ce347c 100644
---- a/include/linux/fscache.h
-+++ b/include/linux/fscache.h
-@@ -37,6 +37,7 @@ struct pagevec;
- struct fscache_cache_tag;
- struct fscache_cookie;
- struct fscache_netfs;
-+struct netfs_read_request;
- 
- typedef void (*fscache_rw_complete_t)(struct page *page,
- 				      void *context,
-@@ -217,6 +218,7 @@ extern void __fscache_readpages_cancel(struct fscache_cookie *cookie,
- extern void __fscache_disable_cookie(struct fscache_cookie *, const void *, bool);
- extern void __fscache_enable_cookie(struct fscache_cookie *, const void *, loff_t,
- 				    bool (*)(void *), void *);
-+extern int __fscache_begin_read_operation(struct netfs_read_request *, struct fscache_cookie *);
- 
- /**
-  * fscache_register_netfs - Register a filesystem as desiring caching services
-@@ -831,4 +833,19 @@ void fscache_enable_cookie(struct fscache_cookie *cookie,
- 					can_enable, data);
- }
- 
-+/**
-+ * fscache_begin_read_operation - Begin a read operation for the netfs lib
-+ * @rreq: The read request being undertaken
-+ * @cookie: The cookie representing the cache object
-+ */
-+static inline
-+int fscache_begin_read_operation(struct netfs_read_request *rreq,
-+				 struct fscache_cookie *cookie)
-+{
-+	if (fscache_cookie_valid(cookie) && fscache_cookie_enabled(cookie))
-+		return __fscache_begin_read_operation(rreq, cookie);
-+	else
-+		return -ENOBUFS;
-+}
-+
- #endif /* _LINUX_FSCACHE_H */
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 1a81baecb182..9ca64f458f95 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -32,6 +32,17 @@ enum netfs_read_source {
- 	NETFS_INVALID_READ,
- } __mode(byte);
- 
-+typedef void (*netfs_io_terminated_t)(void *priv, ssize_t transferred_or_error);
-+
-+/*
-+ * Resources required to do operations on a cache.
-+ */
-+struct netfs_cache_resources {
-+	const struct netfs_cache_ops	*ops;
-+	void				*cache_priv;
-+	void				*cache_priv2;
-+};
-+
++		trace_afs_sent_data(call, &msg, ret);
+ 		if (ret < 0)
+ 			goto error_do_abort;
+ 	}
+diff --git a/fs/afs/write.c b/fs/afs/write.c
+index e78a9bc3b02d..dd4dc1c868b5 100644
+--- a/fs/afs/write.c
++++ b/fs/afs/write.c
+@@ -325,36 +325,27 @@ static void afs_redirty_pages(struct writeback_control *wbc,
  /*
-  * Descriptor for a single component subrequest.
+  * completion of write to server
   */
-@@ -61,11 +72,13 @@ struct netfs_read_request {
- 	struct work_struct	work;
- 	struct inode		*inode;		/* The file being accessed */
- 	struct address_space	*mapping;	/* The mapping being accessed */
-+	struct netfs_cache_resources cache_resources;
- 	struct list_head	subrequests;	/* Requests to fetch I/O from disk or net */
- 	void			*netfs_priv;	/* Private data for the netfs */
- 	unsigned int		debug_id;
- 	unsigned int		cookie_debug_id;
- 	atomic_t		nr_rd_ops;	/* Number of read ops in progress */
-+	atomic_t		nr_wr_ops;	/* Number of write ops in progress */
- 	size_t			submitted;	/* Amount submitted for I/O so far */
- 	size_t			len;		/* Length of the request */
- 	short			error;		/* 0 or error that occurred */
-@@ -89,6 +102,7 @@ struct netfs_read_request {
- struct netfs_read_request_ops {
- 	bool (*is_cache_enabled)(struct inode *inode);
- 	void (*init_rreq)(struct netfs_read_request *rreq, struct file *file);
-+	int (*begin_cache_operation)(struct netfs_read_request *rreq);
- 	void (*expand_readahead)(struct netfs_read_request *rreq);
- 	bool (*clamp_length)(struct netfs_read_subrequest *subreq);
- 	void (*issue_op)(struct netfs_read_subrequest *subreq);
-@@ -99,6 +113,40 @@ struct netfs_read_request_ops {
- 	void (*cleanup)(struct address_space *mapping, void *netfs_priv);
- };
+-static void afs_pages_written_back(struct afs_vnode *vnode,
+-				   pgoff_t first, pgoff_t last)
++static void afs_pages_written_back(struct afs_vnode *vnode, pgoff_t start, pgoff_t last)
+ {
+-	struct pagevec pv;
+-	unsigned count, loop;
++	struct address_space *mapping = vnode->vfs_inode.i_mapping;
++	struct page *page;
++
++	XA_STATE(xas, &mapping->i_pages, start);
  
-+/*
-+ * Table of operations for access to a cache.  This is obtained by
-+ * rreq->ops->begin_cache_operation().
-+ */
-+struct netfs_cache_ops {
-+	/* End an operation */
-+	void (*end_operation)(struct netfs_cache_resources *cres);
+ 	_enter("{%llx:%llu},{%lx-%lx}",
+-	       vnode->fid.vid, vnode->fid.vnode, first, last);
++	       vnode->fid.vid, vnode->fid.vnode, start, last);
+ 
+-	pagevec_init(&pv);
++	rcu_read_lock();
+ 
+-	do {
+-		_debug("done %lx-%lx", first, last);
++	xas_for_each(&xas, page, last) {
++		ASSERT(PageWriteback(page));
+ 
+-		count = last - first + 1;
+-		if (count > PAGEVEC_SIZE)
+-			count = PAGEVEC_SIZE;
+-		pv.nr = find_get_pages_contig(vnode->vfs_inode.i_mapping,
+-					      first, count, pv.pages);
+-		ASSERTCMP(pv.nr, ==, count);
++		detach_page_private(page);
++		trace_afs_page_dirty(vnode, tracepoint_string("clear"), page);
++		page_endio(page, true, 0);
++	}
+ 
+-		for (loop = 0; loop < count; loop++) {
+-			detach_page_private(pv.pages[loop]);
+-			trace_afs_page_dirty(vnode, tracepoint_string("clear"),
+-					     pv.pages[loop]);
+-			end_page_writeback(pv.pages[loop]);
+-		}
+-		first += count;
+-		__pagevec_release(&pv);
+-	} while (first <= last);
++	rcu_read_unlock();
+ 
+ 	afs_prune_wb_keys(vnode);
+ 	_leave("");
+@@ -411,9 +402,7 @@ static void afs_store_data_success(struct afs_operation *op)
+ 		if (!op->store.laundering)
+ 			afs_pages_written_back(vnode, op->store.first, op->store.last);
+ 		afs_stat_v(vnode, n_stores);
+-		atomic_long_add((op->store.last * PAGE_SIZE + op->store.last_to) -
+-				(op->store.first * PAGE_SIZE + op->store.first_offset),
+-				&afs_v2net(vnode)->n_store_bytes);
++		atomic_long_add(op->store.size, &afs_v2net(vnode)->n_store_bytes);
+ 	}
+ }
+ 
+@@ -426,21 +415,21 @@ static const struct afs_operation_ops afs_store_data_operation = {
+ /*
+  * write to a file
+  */
+-static int afs_store_data(struct address_space *mapping,
+-			  pgoff_t first, pgoff_t last,
+-			  unsigned offset, unsigned to, bool laundering)
++static int afs_store_data(struct afs_vnode *vnode, struct iov_iter *iter,
++			  loff_t pos, pgoff_t first, pgoff_t last,
++			  bool laundering)
+ {
+-	struct afs_vnode *vnode = AFS_FS_I(mapping->host);
+ 	struct afs_operation *op;
+ 	struct afs_wb_key *wbk = NULL;
+-	int ret;
++	loff_t size = iov_iter_count(iter), i_size;
++	int ret = -ENOKEY;
+ 
+-	_enter("%s{%llx:%llu.%u},%lx,%lx,%x,%x",
++	_enter("%s{%llx:%llu.%u},%llx,%llx",
+ 	       vnode->volume->name,
+ 	       vnode->fid.vid,
+ 	       vnode->fid.vnode,
+ 	       vnode->fid.unique,
+-	       first, last, offset, to);
++	       size, pos);
+ 
+ 	ret = afs_get_writeback_key(vnode, &wbk);
+ 	if (ret) {
+@@ -454,13 +443,16 @@ static int afs_store_data(struct address_space *mapping,
+ 		return -ENOMEM;
+ 	}
+ 
++	i_size = i_size_read(&vnode->vfs_inode);
 +
-+	/* Read data from the cache */
-+	int (*read)(struct netfs_cache_resources *cres,
-+		    loff_t start_pos,
-+		    struct iov_iter *iter,
-+		    bool seek_data,
-+		    netfs_io_terminated_t term_func,
-+		    void *term_func_priv);
+ 	afs_op_set_vnode(op, 0, vnode);
+ 	op->file[0].dv_delta = 1;
+-	op->store.mapping = mapping;
++	op->store.write_iter = iter;
++	op->store.pos = pos;
+ 	op->store.first = first;
+ 	op->store.last = last;
+-	op->store.first_offset = offset;
+-	op->store.last_to = to;
++	op->store.size = size;
++	op->store.i_size = max(pos + size, i_size);
+ 	op->store.laundering = laundering;
+ 	op->mtime = vnode->vfs_inode.i_mtime;
+ 	op->flags |= AFS_OPERATION_UNINTR;
+@@ -503,11 +495,12 @@ static int afs_write_back_from_locked_page(struct address_space *mapping,
+ 					   pgoff_t final_page)
+ {
+ 	struct afs_vnode *vnode = AFS_FS_I(mapping->host);
++	struct iov_iter iter;
+ 	struct page *pages[8], *page;
+ 	unsigned long count, priv;
+ 	unsigned n, offset, to, f, t;
+ 	pgoff_t start, first, last;
+-	loff_t i_size, end;
++	loff_t i_size, pos, end;
+ 	int loop, ret;
+ 
+ 	_enter(",%lx", primary_page->index);
+@@ -604,15 +597,28 @@ static int afs_write_back_from_locked_page(struct address_space *mapping,
+ 
+ 	first = primary_page->index;
+ 	last = first + count - 1;
++	_debug("write back %lx[%u..] to %lx[..%u]", first, offset, last, to);
+ 
+-	end = (loff_t)last * PAGE_SIZE + to;
+-	i_size = i_size_read(&vnode->vfs_inode);
++	pos = first;
++	pos <<= PAGE_SHIFT;
++	pos += offset;
++	end = last;
++	end <<= PAGE_SHIFT;
++	end += to;
+ 
+-	_debug("write back %lx[%u..] to %lx[..%u]", first, offset, last, to);
++	/* Trim the actual write down to the EOF */
++	i_size = i_size_read(&vnode->vfs_inode);
+ 	if (end > i_size)
+-		to = i_size & ~PAGE_MASK;
++		end = i_size;
 +
-+	/* Write data to the cache */
-+	int (*write)(struct netfs_cache_resources *cres,
-+		     loff_t start_pos,
-+		     struct iov_iter *iter,
-+		     netfs_io_terminated_t term_func,
-+		     void *term_func_priv);
++	if (pos < i_size) {
++		iov_iter_xarray(&iter, WRITE, &mapping->i_pages, pos, end - pos);
++		ret = afs_store_data(vnode, &iter, pos, first, last, false);
++	} else {
++		/* The dirty region was entirely beyond the EOF. */
++		ret = 0;
++	}
+ 
+-	ret = afs_store_data(mapping, first, last, offset, to, false);
+ 	switch (ret) {
+ 	case 0:
+ 		ret = count;
+@@ -913,6 +919,8 @@ int afs_launder_page(struct page *page)
+ {
+ 	struct address_space *mapping = page->mapping;
+ 	struct afs_vnode *vnode = AFS_FS_I(mapping->host);
++	struct iov_iter iter;
++	struct bio_vec bv[1];
+ 	unsigned long priv;
+ 	unsigned int f, t;
+ 	int ret = 0;
+@@ -928,8 +936,14 @@ int afs_launder_page(struct page *page)
+ 			t = afs_page_dirty_to(page, priv);
+ 		}
+ 
++		bv[0].bv_page = page;
++		bv[0].bv_offset = f;
++		bv[0].bv_len = t - f;
++		iov_iter_bvec(&iter, WRITE, bv, 1, bv[0].bv_len);
 +
-+	/* Expand readahead request */
-+	void (*expand_readahead)(struct netfs_cache_resources *cres,
-+				 loff_t *_start, size_t *_len, loff_t i_size);
-+
-+	/* Prepare a read operation, shortening it to a cached/uncached
-+	 * boundary as appropriate.
-+	 */
-+	enum netfs_read_source (*prepare_read)(struct netfs_read_subrequest *subreq,
-+					       loff_t i_size);
-+};
-+
- struct readahead_control;
- extern void netfs_readahead(struct readahead_control *,
- 			    const struct netfs_read_request_ops *,
+ 		trace_afs_page_dirty(vnode, tracepoint_string("launder"), page);
+-		ret = afs_store_data(mapping, page->index, page->index, t, f, true);
++		ret = afs_store_data(vnode, &iter, (loff_t)page->index << PAGE_SHIFT,
++				     page->index, page->index, true);
+ 	}
+ 
+ 	detach_page_private(page);
+diff --git a/fs/afs/yfsclient.c b/fs/afs/yfsclient.c
+index abcec145db4b..363d6dd276c0 100644
+--- a/fs/afs/yfsclient.c
++++ b/fs/afs/yfsclient.c
+@@ -1078,25 +1078,15 @@ void yfs_fs_store_data(struct afs_operation *op)
+ {
+ 	struct afs_vnode_param *vp = &op->file[0];
+ 	struct afs_call *call;
+-	loff_t size, pos, i_size;
+ 	__be32 *bp;
+ 
+ 	_enter(",%x,{%llx:%llu},,",
+ 	       key_serial(op->key), vp->fid.vid, vp->fid.vnode);
+ 
+-	size = (loff_t)op->store.last_to - (loff_t)op->store.first_offset;
+-	if (op->store.first != op->store.last)
+-		size += (loff_t)(op->store.last - op->store.first) << PAGE_SHIFT;
+-	pos = (loff_t)op->store.first << PAGE_SHIFT;
+-	pos += op->store.first_offset;
+-
+-	i_size = i_size_read(&vp->vnode->vfs_inode);
+-	if (pos + size > i_size)
+-		i_size = size + pos;
+-
+ 	_debug("size %llx, at %llx, i_size %llx",
+-	       (unsigned long long)size, (unsigned long long)pos,
+-	       (unsigned long long)i_size);
++	       (unsigned long long)op->store.size,
++	       (unsigned long long)op->store.pos,
++	       (unsigned long long)op->store.i_size);
+ 
+ 	call = afs_alloc_flat_call(op->net, &yfs_RXYFSStoreData64,
+ 				   sizeof(__be32) +
+@@ -1109,8 +1099,7 @@ void yfs_fs_store_data(struct afs_operation *op)
+ 	if (!call)
+ 		return afs_op_nomem(op);
+ 
+-	call->key = op->key;
+-	call->send_pages = true;
++	call->write_iter = op->store.write_iter;
+ 
+ 	/* marshall the parameters */
+ 	bp = call->request;
+@@ -1118,9 +1107,9 @@ void yfs_fs_store_data(struct afs_operation *op)
+ 	bp = xdr_encode_u32(bp, 0); /* RPC flags */
+ 	bp = xdr_encode_YFSFid(bp, &vp->fid);
+ 	bp = xdr_encode_YFSStoreStatus_mtime(bp, &op->mtime);
+-	bp = xdr_encode_u64(bp, pos);
+-	bp = xdr_encode_u64(bp, size);
+-	bp = xdr_encode_u64(bp, i_size);
++	bp = xdr_encode_u64(bp, op->store.pos);
++	bp = xdr_encode_u64(bp, op->store.size);
++	bp = xdr_encode_u64(bp, op->store.i_size);
+ 	yfs_check_req(call, bp);
+ 
+ 	trace_afs_make_fs_call(call, &vp->fid);
+diff --git a/include/trace/events/afs.h b/include/trace/events/afs.h
+index 9203cf6a8c53..3ccf591b2374 100644
+--- a/include/trace/events/afs.h
++++ b/include/trace/events/afs.h
+@@ -886,65 +886,52 @@ TRACE_EVENT(afs_call_done,
+ 		      __entry->rx_call)
+ 	    );
+ 
+-TRACE_EVENT(afs_send_pages,
+-	    TP_PROTO(struct afs_call *call, struct msghdr *msg,
+-		     pgoff_t first, pgoff_t last, unsigned int offset),
++TRACE_EVENT(afs_send_data,
++	    TP_PROTO(struct afs_call *call, struct msghdr *msg),
+ 
+-	    TP_ARGS(call, msg, first, last, offset),
++	    TP_ARGS(call, msg),
+ 
+ 	    TP_STRUCT__entry(
+ 		    __field(unsigned int,		call		)
+-		    __field(pgoff_t,			first		)
+-		    __field(pgoff_t,			last		)
+-		    __field(unsigned int,		nr		)
+-		    __field(unsigned int,		bytes		)
+-		    __field(unsigned int,		offset		)
+ 		    __field(unsigned int,		flags		)
++		    __field(loff_t,			offset		)
++		    __field(loff_t,			count		)
+ 			     ),
+ 
+ 	    TP_fast_assign(
+ 		    __entry->call = call->debug_id;
+-		    __entry->first = first;
+-		    __entry->last = last;
+-		    __entry->nr = msg->msg_iter.nr_segs;
+-		    __entry->bytes = msg->msg_iter.count;
+-		    __entry->offset = offset;
+ 		    __entry->flags = msg->msg_flags;
++		    __entry->offset = msg->msg_iter.xarray_start + msg->msg_iter.iov_offset;
++		    __entry->count = iov_iter_count(&msg->msg_iter);
+ 			   ),
+ 
+-	    TP_printk(" c=%08x %lx-%lx-%lx b=%x o=%x f=%x",
+-		      __entry->call,
+-		      __entry->first, __entry->first + __entry->nr - 1, __entry->last,
+-		      __entry->bytes, __entry->offset,
++	    TP_printk(" c=%08x o=%llx n=%llx f=%x",
++		      __entry->call, __entry->offset, __entry->count,
+ 		      __entry->flags)
+ 	    );
+ 
+-TRACE_EVENT(afs_sent_pages,
+-	    TP_PROTO(struct afs_call *call, pgoff_t first, pgoff_t last,
+-		     pgoff_t cursor, int ret),
++TRACE_EVENT(afs_sent_data,
++	    TP_PROTO(struct afs_call *call, struct msghdr *msg, int ret),
+ 
+-	    TP_ARGS(call, first, last, cursor, ret),
++	    TP_ARGS(call, msg, ret),
+ 
+ 	    TP_STRUCT__entry(
+ 		    __field(unsigned int,		call		)
+-		    __field(pgoff_t,			first		)
+-		    __field(pgoff_t,			last		)
+-		    __field(pgoff_t,			cursor		)
+ 		    __field(int,			ret		)
++		    __field(loff_t,			offset		)
++		    __field(loff_t,			count		)
+ 			     ),
+ 
+ 	    TP_fast_assign(
+ 		    __entry->call = call->debug_id;
+-		    __entry->first = first;
+-		    __entry->last = last;
+-		    __entry->cursor = cursor;
+ 		    __entry->ret = ret;
++		    __entry->offset = msg->msg_iter.xarray_start + msg->msg_iter.iov_offset;
++		    __entry->count = iov_iter_count(&msg->msg_iter);
+ 			   ),
+ 
+-	    TP_printk(" c=%08x %lx-%lx c=%lx r=%d",
+-		      __entry->call,
+-		      __entry->first, __entry->last,
+-		      __entry->cursor, __entry->ret)
++	    TP_printk(" c=%08x o=%llx n=%llx r=%x",
++		      __entry->call, __entry->offset, __entry->count,
++		      __entry->ret)
+ 	    );
+ 
+ TRACE_EVENT(afs_dir_check_failed,
 
 
