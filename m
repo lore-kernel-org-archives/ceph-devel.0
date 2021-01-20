@@ -4,39 +4,39 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11E23C4332D
-	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:40:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6AD3C433E6
+	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:42:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EA7E8233ED
-	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:40:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6645323432
+	for <ceph-devel@archiver.kernel.org>; Wed, 20 Jan 2021 18:42:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404397AbhATSec (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 20 Jan 2021 13:34:32 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51580 "EHLO mail.kernel.org"
+        id S2404624AbhATSd5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 20 Jan 2021 13:33:57 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51576 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2404560AbhATSam (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S2404562AbhATSam (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Wed, 20 Jan 2021 13:30:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B36EF233FC;
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 1B4D123441;
         Wed, 20 Jan 2021 18:28:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611167339;
-        bh=ntuOc4aKlT0wMcHSt6IL/piAyoR1etQFX/8sCIThbNM=;
+        s=k20201202; t=1611167338;
+        bh=IMKfJVeb/uPzjiLcJZAZ+0VzvW4o03nInVUkUxf6AGs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=McA4hoXO6oXe0QENGNSK8o5aXrO5f7bCjz4i0O8xB8wMJl3wHyvkkmMbl+sL5V1F1
-         gDZ/Unp/Yq37O2j+lfSF+1fVlSWWN1croCNvG9tNSuuH0T+bE1Zu1lBdF/0A99/xln
-         NfZRiRoNyqTlvlvIDjLMtWfR9bHwYTAR34zY3tVIGJoSObcbXVOAk55kz103dr+HTo
-         3ur2w5/AGkOL8mmD0pADMigxWspyAoSBvUwMLLw6GM+l3o3ZBrF3kC7mITKzQ+qaSv
-         LDVmjdt31SUCgoCrsqmtIvHH1ehJBy8FnE8kEHYZTTiCY9d+lK9Dnc7Sh7qHQKr7FS
-         FbL7zEqNhiM5g==
+        b=dhiB2fdnrqFJJRk/ajcKXXsRuywTdBh01qafi5CKvphUY8Xi+xcheLmEra3xhsRX+
+         KqCeZBTjvfR0qHKp7d7Va9pG77OXfEjkH9o277OhF255SIq8S8lLwfibHhj/4cWtgL
+         3wTive4jMuBkfCPj6LTdqcN3d5v9/ht/zm3vjea51GNL9HaaiOp/U+SWOLz1kM79aR
+         bd4ypUaKsAd66zd2+Gb83dmaYrc3lo1JC25v8ImcTWs0uKw5mTKzReiGIr3N+Llnjy
+         CczpOhHzYwmkqIkiMD8Q0TrGyIvQq/a5f161oP6CrnlOEBVkkfYv9Dj4Jksm4XQQpF
+         TOjIBIv8rzsbA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v4 15/17] ceph: make d_revalidate call fscrypt revalidator for encrypted dentries
-Date:   Wed, 20 Jan 2021 13:28:45 -0500
-Message-Id: <20210120182847.644850-16-jlayton@kernel.org>
+Subject: [RFC PATCH v4 14/17] ceph: add fscrypt support to ceph_fill_trace
+Date:   Wed, 20 Jan 2021 13:28:44 -0500
+Message-Id: <20210120182847.644850-15-jlayton@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20210120182847.644850-1-jlayton@kernel.org>
 References: <20210120182847.644850-1-jlayton@kernel.org>
@@ -46,30 +46,81 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-If we have a dentry which represents a no-key name, then we need to test
-whether the parent directory's encryption key has since been added.  Do
-that before we test anything else about the dentry.
+When we get a dentry in a trace, decrypt the name so we can properly
+instantiate the dentry.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/dir.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ fs/ceph/inode.c | 30 ++++++++++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 236c381ab6bd..cb7ff91a243a 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1726,6 +1726,10 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 	dout("d_revalidate %p '%pd' inode %p offset 0x%llx\n", dentry,
- 	     dentry, inode, ceph_dentry(dentry)->offset);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 9863a8818132..063e492ab1da 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1340,8 +1340,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME &&
+ 		    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
+ 		    !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
++			bool is_nokey = false;
+ 			struct qstr dname;
+ 			struct dentry *dn, *parent;
++			struct fscrypt_str oname = FSTR_INIT(NULL, 0);
++			struct ceph_fname fname = { .dir	= dir,
++						    .name	= rinfo->dname,
++						    .ctext	= rinfo->altname,
++						    .name_len	= rinfo->dname_len,
++						    .ctext_len	= rinfo->altname_len };
  
-+	valid = fscrypt_d_revalidate(dentry, flags);
-+	if (valid <= 0)
-+		return valid;
+ 			BUG_ON(!rinfo->head->is_target);
+ 			BUG_ON(req->r_dentry);
+@@ -1349,8 +1356,20 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			parent = d_find_any_alias(dir);
+ 			BUG_ON(!parent);
+ 
+-			dname.name = rinfo->dname;
+-			dname.len = rinfo->dname_len;
++			err = ceph_fname_alloc_buffer(dir, &oname);
++			if (err < 0) {
++				dput(parent);
++				goto done;
++			}
 +
- 	mdsc = ceph_sb_to_client(dir->i_sb)->mdsc;
++			err = ceph_fname_to_usr(&fname, NULL, &oname, &is_nokey);
++			if (err < 0) {
++				dput(parent);
++				ceph_fname_free_buffer(dir, &oname);
++				goto done;
++			}
++			dname.name = oname.name;
++			dname.len = oname.len;
+ 			dname.hash = full_name_hash(parent, dname.name, dname.len);
+ 			tvino.ino = le64_to_cpu(rinfo->targeti.in->ino);
+ 			tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
+@@ -1365,9 +1384,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				     dname.len, dname.name, dn);
+ 				if (!dn) {
+ 					dput(parent);
++					ceph_fname_free_buffer(dir, &oname);
+ 					err = -ENOMEM;
+ 					goto done;
+ 				}
++				if (is_nokey) {
++					spin_lock(&dn->d_lock);
++					dn->d_flags |= DCACHE_NOKEY_NAME;
++					spin_unlock(&dn->d_lock);
++				}
+ 				err = 0;
+ 			} else if (d_really_is_positive(dn) &&
+ 				   (ceph_ino(d_inode(dn)) != tvino.ino ||
+@@ -1379,6 +1404,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				dput(dn);
+ 				goto retry_lookup;
+ 			}
++			ceph_fname_free_buffer(dir, &oname);
  
- 	/* always trust cached snapped dentries, snapdir dentry */
+ 			req->r_dentry = dn;
+ 			dput(parent);
 -- 
 2.29.2
 
