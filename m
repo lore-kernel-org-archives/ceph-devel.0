@@ -2,82 +2,85 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D98FCC433E0
-	for <ceph-devel@archiver.kernel.org>; Fri, 22 Jan 2021 17:52:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24773C433E9
+	for <ceph-devel@archiver.kernel.org>; Fri, 22 Jan 2021 17:52:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B11E323A6A
+	by mail.kernel.org (Postfix) with ESMTP id E556723A6A
 	for <ceph-devel@archiver.kernel.org>; Fri, 22 Jan 2021 17:52:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729154AbhAVRw2 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 22 Jan 2021 12:52:28 -0500
-Received: from mail.kernel.org ([198.145.29.99]:53830 "EHLO mail.kernel.org"
+        id S1729620AbhAVRwm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 22 Jan 2021 12:52:42 -0500
+Received: from mail.kernel.org ([198.145.29.99]:53852 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729400AbhAVRwB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 22 Jan 2021 12:52:01 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B5DFC23A79;
-        Fri, 22 Jan 2021 17:51:20 +0000 (UTC)
+        id S1729481AbhAVRwE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 22 Jan 2021 12:52:04 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5002E23AA1;
+        Fri, 22 Jan 2021 17:51:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611337881;
-        bh=aXohzE1fQDUVmRxIyf/Y3FvhHEDTX6DSYkej4pWfR0U=;
-        h=From:To:Cc:Subject:Date:From;
-        b=JAev7YRmy/xfSN9o/HFB2t4m0B8FzqwnnFmt9R06LKkLn5aF/FbLnYJM27kHekq00
-         RqGa4Zqos8yRvI/QboBQMFUDFsgLnjLSubzzLM95wzWj7spe5lN0YhzkbLab1vLcSM
-         yfgh/bnOyOS6Ftud8OBQxx5MrWBPgE3Y5ytgyWcoUN3u9JCqOj62NPL/pSHD4wQNSs
-         1yxp0L+4BK0iiOJRlrStQCIlTfpA7zWo1wCyY/1n8zhi9Dyj2q23f5HNQ0Q+luZCfB
-         LfSbj8BOHuqmXtZnkNF1NFv00teZuNXNjoWY/ilIqatdnAp/jEY3kI7VUihZxSfzF4
-         SVDdI/4KFuKZg==
+        s=k20201202; t=1611337883;
+        bh=yLO+A1ljIfqO/p2jKFSqSiZv9SibpfihSeI5YzB7Mq0=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=kzh03ULZ551nNc3tCxjeqczVLHHfYMVA5OMJfwS3yvJN/LeW3vZJjP0mRlUAUB5W/
+         crh6N/QwkPHHgB1+HOOwD7GtJYzQ65CRIMvFhpOLMMvzmq+Sz/U6PJlUyQnCUcj666
+         df5D+zasEmkj0YqniXYbHP0I1LJHUmw14gB1k7gYWsRY58xeVr1YWlc0MdMq/WrVE/
+         +LT73p8lMJw89Y+7oOlTm73kKokopbBePXn87T2H3Mg53/UVAQUihfNXz8KsOdr2L3
+         292tebiJoDK0eX2kSmYyuswG6Qd3jF5VssddnruuFj7/+vzLSNRCXNcuLEWOfMmHK1
+         /rKMNY2t/m4yA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org, dhowells@redhat.com,
         willy@infradead.org, linux-cachefs@redhat.com,
         linux-kernel@vger.kernel.org
-Subject: [RFC PATCH 0/6] ceph: convert buffered read codepaths to new netfs API
-Date:   Fri, 22 Jan 2021 12:51:12 -0500
-Message-Id: <20210122175119.364381-1-jlayton@kernel.org>
+Subject: [RFC PATCH 3/6] ceph: fix invalidation
+Date:   Fri, 22 Jan 2021 12:51:15 -0500
+Message-Id: <20210122175119.364381-4-jlayton@kernel.org>
 X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20210122175119.364381-1-jlayton@kernel.org>
+References: <20210122175119.364381-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This patchset coverts ceph to use the new netfs API that David Howells
-has proposed [1]. It's a substantial reduction in code in the ceph layer
-itself, but the main impetus is to allow the VM, filesystem and fscache
-to better work together to optimize readahead on network filesystems.
+Ensure that we invalidate the fscache whenever we go to invalidate the
+pagecache.
 
-I think the resulting code is also easier to understand, and should be
-more maintainable as a lot of the pagecache handling is now done at the
-netfs layer.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/caps.c  | 1 +
+ fs/ceph/inode.c | 1 +
+ 2 files changed, 2 insertions(+)
 
-This has been lightly tested with xfstests. With fscache disabled, I saw
-no regressions. With fscache enabled, I still hit some bugs down in the
-fscache layer itself, but those seem to be present without this set as
-well. This doesn't seem to make any of that worse.
-
-[1]: https://lore.kernel.org/ceph-devel/1856291.1611259704@warthog.procyon.org.uk/T/#t
-
-Jeff Layton (6):
-  ceph: disable old fscache readpage handling
-  ceph: rework PageFsCache handling
-  ceph: fix invalidation
-  ceph: convert readpage to fscache read helper
-  ceph: plug write_begin into read helper
-  ceph: convert ceph_readpages to ceph_readahead
-
- fs/ceph/Kconfig |   1 +
- fs/ceph/addr.c  | 536 +++++++++++++++++++-----------------------------
- fs/ceph/cache.c | 123 -----------
- fs/ceph/cache.h | 101 +++------
- fs/ceph/caps.c  |  10 +-
- fs/ceph/inode.c |   1 +
- 6 files changed, 236 insertions(+), 536 deletions(-)
-
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 21ba949ca2c3..0102221db7bf 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1867,6 +1867,7 @@ static int try_nonblocking_invalidate(struct inode *inode)
+ 	u32 invalidating_gen = ci->i_rdcache_gen;
+ 
+ 	spin_unlock(&ci->i_ceph_lock);
++	ceph_fscache_invalidate(inode);
+ 	invalidate_mapping_pages(&inode->i_data, 0, -1);
+ 	spin_lock(&ci->i_ceph_lock);
+ 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 5d20a620e96c..2d424b41a8b9 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1863,6 +1863,7 @@ static void ceph_do_invalidate_pages(struct inode *inode)
+ 	orig_gen = ci->i_rdcache_gen;
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
++	ceph_fscache_invalidate(inode);
+ 	if (invalidate_inode_pages2(inode->i_mapping) < 0) {
+ 		pr_err("invalidate_pages %p fails\n", inode);
+ 	}
 -- 
 2.29.2
 
