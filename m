@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7949BC433E0
-	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:39:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E700EC433E0
+	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:41:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 35C9320756
-	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:39:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A7E0E20756
+	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:41:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732902AbhAYVf5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 25 Jan 2021 16:35:57 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:58789 "EHLO
+        id S1732648AbhAYWkE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 25 Jan 2021 17:40:04 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:53486 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1732814AbhAYVeC (ORCPT
+        by vger.kernel.org with ESMTP id S1732898AbhAYVfr (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 25 Jan 2021 16:34:02 -0500
+        Mon, 25 Jan 2021 16:35:47 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611610354;
+        s=mimecast20190719; t=1611610459;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=v7fCoJ8HkBfmxmTyjKKl7GkYsc8QfZgtAwp9O5OoZEE=;
-        b=jCamnq/P4WWHczWSkmpjl5E+UrnRH62dDOpxwnN69NfBW1FShhuibDgX7bCK4n6PEtKiNZ
-        dZ2QczrqmnudgE9lcd0tQnsmJcCF58CjVyvZ7gbwfaLWgkuOTAJIFbsqq04ENiW9mTrbZl
-        9jty+2sS/dNHeJ/VVLrEj4SEziv2/h0=
+        bh=J0mEKGhee35FXVNWRVgD7YgCv26NnA0Z4kX0/0iSIo4=;
+        b=a/e2Af0cGPWS7nt21bV+wYAXF6BOf6oK3zCZXOKSMCr2OkHBVV8QsJg93UJ8J8YfnTapr8
+        Vojor4MtwxdOv9w9sytkt3kN7plNNhCkaKL673CfKRvYkY9FgPeb+2l5ltplZjjxbrsfit
+        XbxR/fOOTScazkyR6/itscxOlWtEFMo=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-345-4f-PkSIdM065CBmjMwzDvQ-1; Mon, 25 Jan 2021 16:32:32 -0500
-X-MC-Unique: 4f-PkSIdM065CBmjMwzDvQ-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-467-Nw713UWyPwWz629VSDRsig-1; Mon, 25 Jan 2021 16:34:17 -0500
+X-MC-Unique: Nw713UWyPwWz629VSDRsig-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 30DCFCE649;
-        Mon, 25 Jan 2021 21:32:30 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1A66910054FF;
+        Mon, 25 Jan 2021 21:34:15 +0000 (UTC)
 Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6BC3D5D6AB;
-        Mon, 25 Jan 2021 21:32:27 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EF5F56F98A;
+        Mon, 25 Jan 2021 21:34:06 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 08/32] netfs: Gather stats
+Subject: [PATCH 16/32] afs: Don't truncate iter during data fetch
 From:   David Howells <dhowells@redhat.com>
 To:     Trond Myklebust <trondmy@hammerspace.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
@@ -60,300 +60,244 @@ Cc:     dhowells@redhat.com, Jeff Layton <jlayton@redhat.com>,
         linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
         ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 25 Jan 2021 21:32:26 +0000
-Message-ID: <161161034669.2537118.2761232524997091480.stgit@warthog.procyon.org.uk>
+Date:   Mon, 25 Jan 2021 21:34:06 +0000
+Message-ID: <161161044610.2537118.17908520793806837792.stgit@warthog.procyon.org.uk>
 In-Reply-To: <161161025063.2537118.2009249444682241405.stgit@warthog.procyon.org.uk>
 References: <161161025063.2537118.2009249444682241405.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Gather statistics from the netfs interface that can be exported through a
-seqfile.  This is intended to be called by a later patch when viewing
-/proc/fs/fscache/stats.
+Don't truncate the iterator to correspond to the actual data size when
+fetching the data from the server - rather, pass the length we want to read
+to rxrpc.
+
+This will allow the clear-after-read code in future to simply clear the
+remaining iterator capacity rather than having to reinitialise the
+iterator.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/netfs/Kconfig       |   15 +++++++++++++
- fs/netfs/Makefile      |    3 +--
- fs/netfs/internal.h    |   34 ++++++++++++++++++++++++++++++
- fs/netfs/read_helper.c |   23 ++++++++++++++++++++
- fs/netfs/stats.c       |   54 ++++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/netfs.h  |    1 +
- 6 files changed, 128 insertions(+), 2 deletions(-)
- create mode 100644 fs/netfs/stats.c
+ fs/afs/fsclient.c      |    6 ++++--
+ fs/afs/internal.h      |    6 ++++++
+ fs/afs/rxrpc.c         |   13 +++++++++----
+ fs/afs/yfsclient.c     |    6 ++++--
+ include/net/af_rxrpc.h |    2 +-
+ net/rxrpc/recvmsg.c    |    9 +++++----
+ 6 files changed, 29 insertions(+), 13 deletions(-)
 
-diff --git a/fs/netfs/Kconfig b/fs/netfs/Kconfig
-index 2ebf90e6ca95..578112713703 100644
---- a/fs/netfs/Kconfig
-+++ b/fs/netfs/Kconfig
-@@ -6,3 +6,18 @@ config NETFS_SUPPORT
- 	  This option enables support for network filesystems, including
- 	  helpers for high-level buffered I/O, abstracting out read
- 	  segmentation, local caching and transparent huge page support.
-+
-+config NETFS_STATS
-+	bool "Gather statistical information on local caching"
-+	depends on NETFS_SUPPORT && PROC_FS
-+	help
-+	  This option causes statistical information to be gathered on local
-+	  caching and exported through file:
-+
-+		/proc/fs/fscache/stats
-+
-+	  The gathering of statistics adds a certain amount of overhead to
-+	  execution as there are a quite a few stats gathered, and on a
-+	  multi-CPU system these may be on cachelines that keep bouncing
-+	  between CPUs.  On the other hand, the stats are very useful for
-+	  debugging purposes.  Saying 'Y' here is recommended.
-diff --git a/fs/netfs/Makefile b/fs/netfs/Makefile
-index 4b4eff2ba369..c15bfc966d96 100644
---- a/fs/netfs/Makefile
-+++ b/fs/netfs/Makefile
-@@ -1,6 +1,5 @@
- # SPDX-License-Identifier: GPL-2.0
+diff --git a/fs/afs/fsclient.c b/fs/afs/fsclient.c
+index 1d95ed9dd86e..4a57c6c6f12b 100644
+--- a/fs/afs/fsclient.c
++++ b/fs/afs/fsclient.c
+@@ -305,8 +305,9 @@ static int afs_deliver_fs_fetch_data(struct afs_call *call)
+ 	unsigned int size;
+ 	int ret;
  
--netfs-y := \
--	read_helper.o
-+netfs-y := read_helper.o stats.o
+-	_enter("{%u,%zu/%llu}",
+-	       call->unmarshall, iov_iter_count(call->iter), req->actual_len);
++	_enter("{%u,%zu,%zu/%llu}",
++	       call->unmarshall, call->iov_len, iov_iter_count(call->iter),
++	       req->actual_len);
  
- obj-$(CONFIG_NETFS_SUPPORT) := netfs.o
-diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
-index ee665c0e7dc8..98b6f4516da1 100644
---- a/fs/netfs/internal.h
-+++ b/fs/netfs/internal.h
-@@ -16,8 +16,42 @@
-  */
- extern unsigned int netfs_debug;
+ 	switch (call->unmarshall) {
+ 	case 0:
+@@ -343,6 +344,7 @@ static int afs_deliver_fs_fetch_data(struct afs_call *call)
+ 			size = PAGE_SIZE - req->offset;
+ 		else
+ 			size = req->remain;
++		call->iov_len = size;
+ 		call->bvec[0].bv_len = size;
+ 		call->bvec[0].bv_offset = req->offset;
+ 		call->bvec[0].bv_page = req->pages[req->index];
+diff --git a/fs/afs/internal.h b/fs/afs/internal.h
+index 4b255d10f726..1badc7ed0487 100644
+--- a/fs/afs/internal.h
++++ b/fs/afs/internal.h
+@@ -104,6 +104,7 @@ struct afs_call {
+ 	struct afs_server	*server;	/* The fileserver record if fs op (pins ref) */
+ 	struct afs_vlserver	*vlserver;	/* The vlserver record if vl op */
+ 	void			*request;	/* request data (first part) */
++	size_t			iov_len;	/* Size of *iter to be used */
+ 	struct iov_iter		def_iter;	/* Default buffer/data iterator */
+ 	struct iov_iter		*iter;		/* Iterator currently in use */
+ 	union {	/* Convenience for ->def_iter */
+@@ -1270,6 +1271,7 @@ static inline void afs_make_op_call(struct afs_operation *op, struct afs_call *c
  
-+/*
-+ * stats.c
-+ */
-+#ifdef CONFIG_NETFS_STATS
-+extern atomic_t netfs_n_rh_readahead;
-+extern atomic_t netfs_n_rh_readpage;
-+extern atomic_t netfs_n_rh_rreq;
-+extern atomic_t netfs_n_rh_sreq;
-+extern atomic_t netfs_n_rh_download;
-+extern atomic_t netfs_n_rh_download_done;
-+extern atomic_t netfs_n_rh_download_failed;
-+extern atomic_t netfs_n_rh_download_instead;
-+extern atomic_t netfs_n_rh_read;
-+extern atomic_t netfs_n_rh_read_done;
-+extern atomic_t netfs_n_rh_read_failed;
-+extern atomic_t netfs_n_rh_zero;
-+extern atomic_t netfs_n_rh_short_read;
-+extern atomic_t netfs_n_rh_write;
-+extern atomic_t netfs_n_rh_write_done;
-+extern atomic_t netfs_n_rh_write_failed;
-+
-+
-+static inline void netfs_stat(atomic_t *stat)
-+{
-+	atomic_inc(stat);
-+}
-+
-+static inline void netfs_stat_d(atomic_t *stat)
-+{
-+	atomic_dec(stat);
-+}
-+
-+#else
- #define netfs_stat(x) do {} while(0)
- #define netfs_stat_d(x) do {} while(0)
-+#endif
- 
- /*****************************************************************************/
- /*
-diff --git a/fs/netfs/read_helper.c b/fs/netfs/read_helper.c
-index 2a90314ea36f..275ac37e2834 100644
---- a/fs/netfs/read_helper.c
-+++ b/fs/netfs/read_helper.c
-@@ -55,6 +55,7 @@ static struct netfs_read_request *netfs_alloc_read_request(
- 		refcount_set(&rreq->usage, 1);
- 		__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
- 		ops->init_rreq(rreq, file);
-+		netfs_stat(&netfs_n_rh_rreq);
- 	}
- 
- 	return rreq;
-@@ -86,6 +87,7 @@ static void netfs_free_read_request(struct work_struct *work)
- 		rreq->netfs_ops->cleanup(rreq->mapping, rreq->netfs_priv);
- 	trace_netfs_rreq(rreq, netfs_rreq_trace_free);
- 	kfree(rreq);
-+	netfs_stat_d(&netfs_n_rh_rreq);
- }
- 
- static void netfs_put_read_request(struct netfs_read_request *rreq)
-@@ -114,6 +116,7 @@ static struct netfs_read_subrequest *netfs_alloc_subrequest(
- 		INIT_LIST_HEAD(&subreq->rreq_link);
- 		refcount_set(&subreq->usage, 2);
- 		subreq->rreq = rreq;
-+		netfs_stat(&netfs_n_rh_sreq);
- 	}
- 
- 	return subreq;
-@@ -129,6 +132,7 @@ static void __netfs_put_subrequest(struct netfs_read_subrequest *subreq)
- 	trace_netfs_sreq(subreq, netfs_sreq_trace_free);
- 	netfs_put_read_request(subreq->rreq);
- 	kfree(subreq);
-+	netfs_stat_d(&netfs_n_rh_sreq);
- }
- 
- /*
-@@ -150,6 +154,7 @@ static void netfs_clear_unread(struct netfs_read_subrequest *subreq)
- static void netfs_fill_with_zeroes(struct netfs_read_request *rreq,
- 				   struct netfs_read_subrequest *subreq)
+ static inline void afs_extract_begin(struct afs_call *call, void *buf, size_t size)
  {
-+	netfs_stat(&netfs_n_rh_zero);
- 	__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
- 	netfs_subreq_terminated(subreq, 0);
- }
-@@ -173,6 +178,7 @@ static void netfs_fill_with_zeroes(struct netfs_read_request *rreq,
- static void netfs_read_from_server(struct netfs_read_request *rreq,
- 				   struct netfs_read_subrequest *subreq)
++	call->iov_len = size;
+ 	call->kvec[0].iov_base = buf;
+ 	call->kvec[0].iov_len = size;
+ 	iov_iter_kvec(&call->def_iter, READ, call->kvec, 1, size);
+@@ -1277,21 +1279,25 @@ static inline void afs_extract_begin(struct afs_call *call, void *buf, size_t si
+ 
+ static inline void afs_extract_to_tmp(struct afs_call *call)
  {
-+	netfs_stat(&netfs_n_rh_download);
- 	rreq->netfs_ops->issue_op(subreq);
++	call->iov_len = sizeof(call->tmp);
+ 	afs_extract_begin(call, &call->tmp, sizeof(call->tmp));
  }
  
-@@ -278,6 +284,7 @@ static void netfs_rreq_short_read(struct netfs_read_request *rreq,
- 	__clear_bit(NETFS_SREQ_SHORT_READ, &subreq->flags);
- 	__set_bit(NETFS_SREQ_SEEK_DATA_READ, &subreq->flags);
+ static inline void afs_extract_to_tmp64(struct afs_call *call)
+ {
++	call->iov_len = sizeof(call->tmp64);
+ 	afs_extract_begin(call, &call->tmp64, sizeof(call->tmp64));
+ }
  
-+	netfs_stat(&netfs_n_rh_short_read);
- 	trace_netfs_sreq(subreq, netfs_sreq_trace_resubmit_short);
+ static inline void afs_extract_discard(struct afs_call *call, size_t size)
+ {
++	call->iov_len = size;
+ 	iov_iter_discard(&call->def_iter, READ, size);
+ }
  
- 	netfs_get_read_subrequest(subreq);
-@@ -309,6 +316,7 @@ static bool netfs_rreq_perform_resubmissions(struct netfs_read_request *rreq)
- 				break;
- 			subreq->source = NETFS_DOWNLOAD_FROM_SERVER;
- 			subreq->error = 0;
-+			netfs_stat(&netfs_n_rh_download_instead);
- 			trace_netfs_sreq(subreq, netfs_sreq_trace_download_instead);
- 			netfs_get_read_subrequest(subreq);
- 			atomic_inc(&rreq->nr_rd_ops);
-@@ -399,6 +407,17 @@ void netfs_subreq_terminated(struct netfs_read_subrequest *subreq,
- 	       subreq->debug_index, subreq->start, subreq->flags,
- 	       transferred_or_error);
+ static inline void afs_extract_to_buf(struct afs_call *call, size_t size)
+ {
++	call->iov_len = size;
+ 	afs_extract_begin(call, call->buffer, size);
+ }
  
-+	switch (subreq->source) {
-+	case NETFS_READ_FROM_CACHE:
-+		netfs_stat(&netfs_n_rh_read_done);
-+		break;
-+	case NETFS_DOWNLOAD_FROM_SERVER:
-+		netfs_stat(&netfs_n_rh_download_done);
-+		break;
-+	default:
-+		break;
-+	}
-+
- 	if (IS_ERR_VALUE(transferred_or_error)) {
- 		subreq->error = transferred_or_error;
- 		goto failed;
-@@ -452,8 +471,10 @@ void netfs_subreq_terminated(struct netfs_read_subrequest *subreq,
+diff --git a/fs/afs/rxrpc.c b/fs/afs/rxrpc.c
+index 8be709cb8542..0ec38b758f29 100644
+--- a/fs/afs/rxrpc.c
++++ b/fs/afs/rxrpc.c
+@@ -363,6 +363,7 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ 	struct rxrpc_call *rxcall;
+ 	struct msghdr msg;
+ 	struct kvec iov[1];
++	size_t len;
+ 	s64 tx_total_len;
+ 	int ret;
  
- failed:
- 	if (subreq->source == NETFS_READ_FROM_CACHE) {
-+		netfs_stat(&netfs_n_rh_read_failed);
- 		set_bit(NETFS_RREQ_INCOMPLETE_IO, &rreq->flags);
+@@ -466,9 +467,10 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ 		rxrpc_kernel_abort_call(call->net->socket, rxcall,
+ 					RX_USER_ABORT, ret, "KSD");
  	} else {
-+		netfs_stat(&netfs_n_rh_download_failed);
- 		set_bit(NETFS_RREQ_FAILED, &rreq->flags);
- 		rreq->error = subreq->error;
- 	}
-@@ -636,6 +657,7 @@ void netfs_readahead(struct readahead_control *ractl,
- 	rreq->start	= readahead_pos(ractl);
- 	rreq->len	= readahead_length(ractl);
++		len = 0;
+ 		iov_iter_kvec(&msg.msg_iter, READ, NULL, 0, 0);
+ 		rxrpc_kernel_recv_data(call->net->socket, rxcall,
+-				       &msg.msg_iter, false,
++				       &msg.msg_iter, &len, false,
+ 				       &call->abort_code, &call->service_id);
+ 		ac->abort_code = call->abort_code;
+ 		ac->responded = true;
+@@ -504,6 +506,7 @@ void afs_make_call(struct afs_addr_cursor *ac, struct afs_call *call, gfp_t gfp)
+ static void afs_deliver_to_call(struct afs_call *call)
+ {
+ 	enum afs_call_state state;
++	size_t len;
+ 	u32 abort_code, remote_abort = 0;
+ 	int ret;
  
-+	netfs_stat(&netfs_n_rh_readahead);
- 	trace_netfs_read(rreq, readahead_pos(ractl), readahead_length(ractl),
- 			 netfs_read_trace_readahead);
+@@ -516,10 +519,11 @@ static void afs_deliver_to_call(struct afs_call *call)
+ 	       state == AFS_CALL_SV_AWAIT_ACK
+ 	       ) {
+ 		if (state == AFS_CALL_SV_AWAIT_ACK) {
++			len = 0;
+ 			iov_iter_kvec(&call->def_iter, READ, NULL, 0, 0);
+ 			ret = rxrpc_kernel_recv_data(call->net->socket,
+ 						     call->rxcall, &call->def_iter,
+-						     false, &remote_abort,
++						     &len, false, &remote_abort,
+ 						     &call->service_id);
+ 			trace_afs_receive_data(call, &call->def_iter, false, ret);
  
-@@ -710,6 +732,7 @@ int netfs_readpage(struct file *file,
- 	rreq->start	= page->index * PAGE_SIZE;
- 	rreq->len	= thp_size(page);
+@@ -929,10 +933,11 @@ int afs_extract_data(struct afs_call *call, bool want_more)
+ 	u32 remote_abort = 0;
+ 	int ret;
  
-+	netfs_stat(&netfs_n_rh_readpage);
- 	trace_netfs_read(rreq, rreq->start, rreq->len, netfs_read_trace_readpage);
+-	_enter("{%s,%zu},%d", call->type->name, iov_iter_count(iter), want_more);
++	_enter("{%s,%zu,%zu},%d",
++	       call->type->name, call->iov_len, iov_iter_count(iter), want_more);
  
- 	netfs_get_read_request(rreq);
-diff --git a/fs/netfs/stats.c b/fs/netfs/stats.c
-new file mode 100644
-index 000000000000..df6ff5718f25
---- /dev/null
-+++ b/fs/netfs/stats.c
-@@ -0,0 +1,54 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+/* Netfs support statistics
-+ *
-+ * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
-+ * Written by David Howells (dhowells@redhat.com)
-+ */
-+
-+#include <linux/export.h>
-+#include <linux/seq_file.h>
-+#include <linux/netfs.h>
-+#include "internal.h"
-+
-+atomic_t netfs_n_rh_readahead;
-+atomic_t netfs_n_rh_readpage;
-+atomic_t netfs_n_rh_rreq;
-+atomic_t netfs_n_rh_sreq;
-+atomic_t netfs_n_rh_download;
-+atomic_t netfs_n_rh_download_done;
-+atomic_t netfs_n_rh_download_failed;
-+atomic_t netfs_n_rh_download_instead;
-+atomic_t netfs_n_rh_read;
-+atomic_t netfs_n_rh_read_done;
-+atomic_t netfs_n_rh_read_failed;
-+atomic_t netfs_n_rh_zero;
-+atomic_t netfs_n_rh_short_read;
-+atomic_t netfs_n_rh_write;
-+atomic_t netfs_n_rh_write_done;
-+atomic_t netfs_n_rh_write_failed;
-+
-+void netfs_stats_show(struct seq_file *m)
-+{
-+	seq_printf(m, "RdHelp : RA=%u RP=%u rr=%u sr=%u\n",
-+		   atomic_read(&netfs_n_rh_readahead),
-+		   atomic_read(&netfs_n_rh_readpage),
-+		   atomic_read(&netfs_n_rh_rreq),
-+		   atomic_read(&netfs_n_rh_sreq));
-+	seq_printf(m, "RdHelp : ZR=%u sh=%u\n",
-+		   atomic_read(&netfs_n_rh_zero),
-+		   atomic_read(&netfs_n_rh_short_read));
-+	seq_printf(m, "RdHelp : DL=%u ds=%u df=%u di=%u\n",
-+		   atomic_read(&netfs_n_rh_download),
-+		   atomic_read(&netfs_n_rh_download_done),
-+		   atomic_read(&netfs_n_rh_download_failed),
-+		   atomic_read(&netfs_n_rh_download_instead));
-+	seq_printf(m, "RdHelp : RD=%u rs=%u rf=%u\n",
-+		   atomic_read(&netfs_n_rh_read),
-+		   atomic_read(&netfs_n_rh_read_done),
-+		   atomic_read(&netfs_n_rh_read_failed));
-+	seq_printf(m, "RdHelp : WR=%u ws=%u wf=%u\n",
-+		   atomic_read(&netfs_n_rh_write),
-+		   atomic_read(&netfs_n_rh_write_done),
-+		   atomic_read(&netfs_n_rh_write_failed));
-+}
-+EXPORT_SYMBOL(netfs_stats_show);
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 0779cf082101..92a08d8b8e61 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -106,5 +106,6 @@ extern int netfs_readpage(struct file *,
- 			  void *);
+ 	ret = rxrpc_kernel_recv_data(net->socket, call->rxcall, iter,
+-				     want_more, &remote_abort,
++				     &call->iov_len, want_more, &remote_abort,
+ 				     &call->service_id);
+ 	if (ret == 0 || ret == -EAGAIN)
+ 		return ret;
+diff --git a/fs/afs/yfsclient.c b/fs/afs/yfsclient.c
+index bd787e71a657..6c45d32da13c 100644
+--- a/fs/afs/yfsclient.c
++++ b/fs/afs/yfsclient.c
+@@ -363,8 +363,9 @@ static int yfs_deliver_fs_fetch_data64(struct afs_call *call)
+ 	unsigned int size;
+ 	int ret;
  
- extern void netfs_subreq_terminated(struct netfs_read_subrequest *, ssize_t);
-+extern void netfs_stats_show(struct seq_file *);
+-	_enter("{%u,%zu/%llu}",
+-	       call->unmarshall, iov_iter_count(call->iter), req->actual_len);
++	_enter("{%u,%zu, %zu/%llu}",
++	       call->unmarshall, call->iov_len, iov_iter_count(call->iter),
++	       req->actual_len);
  
- #endif /* _LINUX_NETFS_H */
+ 	switch (call->unmarshall) {
+ 	case 0:
+@@ -396,6 +397,7 @@ static int yfs_deliver_fs_fetch_data64(struct afs_call *call)
+ 			size = PAGE_SIZE - req->offset;
+ 		else
+ 			size = req->remain;
++		call->iov_len = size;
+ 		call->bvec[0].bv_len = size;
+ 		call->bvec[0].bv_offset = req->offset;
+ 		call->bvec[0].bv_page = req->pages[req->index];
+diff --git a/include/net/af_rxrpc.h b/include/net/af_rxrpc.h
+index f6abcc0bbd6e..cee5f83c0f11 100644
+--- a/include/net/af_rxrpc.h
++++ b/include/net/af_rxrpc.h
+@@ -53,7 +53,7 @@ int rxrpc_kernel_send_data(struct socket *, struct rxrpc_call *,
+ 			   struct msghdr *, size_t,
+ 			   rxrpc_notify_end_tx_t);
+ int rxrpc_kernel_recv_data(struct socket *, struct rxrpc_call *,
+-			   struct iov_iter *, bool, u32 *, u16 *);
++			   struct iov_iter *, size_t *, bool, u32 *, u16 *);
+ bool rxrpc_kernel_abort_call(struct socket *, struct rxrpc_call *,
+ 			     u32, int, const char *);
+ void rxrpc_kernel_end_call(struct socket *, struct rxrpc_call *);
+diff --git a/net/rxrpc/recvmsg.c b/net/rxrpc/recvmsg.c
+index fef3573fdc8b..eca6dda26c77 100644
+--- a/net/rxrpc/recvmsg.c
++++ b/net/rxrpc/recvmsg.c
+@@ -669,6 +669,7 @@ int rxrpc_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
+  * @sock: The socket that the call exists on
+  * @call: The call to send data through
+  * @iter: The buffer to receive into
++ * @_len: The amount of data we want to receive (decreased on return)
+  * @want_more: True if more data is expected to be read
+  * @_abort: Where the abort code is stored if -ECONNABORTED is returned
+  * @_service: Where to store the actual service ID (may be upgraded)
+@@ -684,7 +685,7 @@ int rxrpc_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
+  * *_abort should also be initialised to 0.
+  */
+ int rxrpc_kernel_recv_data(struct socket *sock, struct rxrpc_call *call,
+-			   struct iov_iter *iter,
++			   struct iov_iter *iter, size_t *_len,
+ 			   bool want_more, u32 *_abort, u16 *_service)
+ {
+ 	size_t offset = 0;
+@@ -692,7 +693,7 @@ int rxrpc_kernel_recv_data(struct socket *sock, struct rxrpc_call *call,
+ 
+ 	_enter("{%d,%s},%zu,%d",
+ 	       call->debug_id, rxrpc_call_states[call->state],
+-	       iov_iter_count(iter), want_more);
++	       *_len, want_more);
+ 
+ 	ASSERTCMP(call->state, !=, RXRPC_CALL_SERVER_SECURING);
+ 
+@@ -703,8 +704,8 @@ int rxrpc_kernel_recv_data(struct socket *sock, struct rxrpc_call *call,
+ 	case RXRPC_CALL_SERVER_RECV_REQUEST:
+ 	case RXRPC_CALL_SERVER_ACK_REQUEST:
+ 		ret = rxrpc_recvmsg_data(sock, call, NULL, iter,
+-					 iov_iter_count(iter), 0,
+-					 &offset);
++					 *_len, 0, &offset);
++		*_len -= offset;
+ 		if (ret < 0)
+ 			goto out;
+ 
 
 
