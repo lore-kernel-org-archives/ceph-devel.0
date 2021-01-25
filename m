@@ -5,48 +5,49 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0277BC433DB
-	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:50:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 848EFC433E0
+	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:50:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C34B7221EB
-	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:50:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4D236221E7
+	for <ceph-devel@archiver.kernel.org>; Mon, 25 Jan 2021 22:50:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732878AbhAYVfY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 25 Jan 2021 16:35:24 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:43163 "EHLO
+        id S1732619AbhAYWuA (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 25 Jan 2021 17:50:00 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:25699 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1732779AbhAYVd2 (ORCPT
+        by vger.kernel.org with ESMTP id S1732788AbhAYVfU (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 25 Jan 2021 16:33:28 -0500
+        Mon, 25 Jan 2021 16:35:20 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611610321;
+        s=mimecast20190719; t=1611610434;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=CNISbAF0U5wZ9m9Zrmun/ExJzPSZhngRnt467NlbyL4=;
-        b=K6s3iJDqsgrmSCwI0J+LcMEVe5eIuUCW8J2JNr5vVFVwriEYf51XbRUB7HMubWBGbClY9E
-        3J8MMcAn7gtmIUYPpiNyIYMUsxlpVZdnOQ7GJHjKg4P+capTkAXZqt5W4QFJDfickKQ7Kx
-        4q/zmDbIzm2VK8tGG0g0oTX7evzH8Dg=
+        bh=nM2a8DeAh9HxPk5RgsNIX17TXRS7ZHQGpmW+T0T56Vs=;
+        b=brfNtyRqstwmec15hSt6qOuE0ZEvftPYRMnH1hBYMn2ZYVCFhcKSVZQY+6Gn7IWxuIp2tS
+        U5Nd6INiecbkveyratgqQ67ghFxpNARMusSrkiwigULR7aAO+ImP7ATAUpPklerZOno0Fb
+        SgilIhgQ0P8zv7okWaSofDbtlimloSA=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-59-TnCNF7deP7OY0P8aDbEwJw-1; Mon, 25 Jan 2021 16:31:59 -0500
-X-MC-Unique: TnCNF7deP7OY0P8aDbEwJw-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+ us-mta-353-Q4lI2wz9OPuUQNTldPFkoA-1; Mon, 25 Jan 2021 16:33:50 -0500
+X-MC-Unique: Q4lI2wz9OPuUQNTldPFkoA-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A6B9D8735C2;
-        Mon, 25 Jan 2021 21:31:57 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 2F18E18C89C4;
+        Mon, 25 Jan 2021 21:33:48 +0000 (UTC)
 Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1DE7B50C0A;
-        Mon, 25 Jan 2021 21:31:50 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 91BD519C78;
+        Mon, 25 Jan 2021 21:33:42 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 05/32] netfs: Make a netfs helper module
+Subject: [PATCH 14/32] afs: Print the operation debug_id when logging an
+ unexpected data version
 From:   David Howells <dhowells@redhat.com>
 To:     Trond Myklebust <trondmy@hammerspace.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
@@ -60,43 +61,47 @@ Cc:     dhowells@redhat.com, Jeff Layton <jlayton@redhat.com>,
         linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
         ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 25 Jan 2021 21:31:50 +0000
-Message-ID: <161161031028.2537118.1213974428943508753.stgit@warthog.procyon.org.uk>
+Date:   Mon, 25 Jan 2021 21:33:41 +0000
+Message-ID: <161161042180.2537118.2471333561661033316.stgit@warthog.procyon.org.uk>
 In-Reply-To: <161161025063.2537118.2009249444682241405.stgit@warthog.procyon.org.uk>
 References: <161161025063.2537118.2009249444682241405.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Make a netfs helper module to manage read request segmentation, caching
-support and transparent huge page support on behalf of a network
-filesystem.
+Print the afs_operation debug_id when logging an unexpected change in the
+data version.  This allows the logged message to be matched against
+tracelines.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- fs/netfs/Kconfig |    8 ++++++++
- 1 file changed, 8 insertions(+)
- create mode 100644 fs/netfs/Kconfig
+ fs/afs/inode.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/fs/netfs/Kconfig b/fs/netfs/Kconfig
-new file mode 100644
-index 000000000000..2ebf90e6ca95
---- /dev/null
-+++ b/fs/netfs/Kconfig
-@@ -0,0 +1,8 @@
-+# SPDX-License-Identifier: GPL-2.0-only
-+
-+config NETFS_SUPPORT
-+	tristate "Support for network filesystem high-level I/O"
-+	help
-+	  This option enables support for network filesystems, including
-+	  helpers for high-level buffered I/O, abstracting out read
-+	  segmentation, local caching and transparent huge page support.
+diff --git a/fs/afs/inode.c b/fs/afs/inode.c
+index 48edd8d724d2..0bc7273100b8 100644
+--- a/fs/afs/inode.c
++++ b/fs/afs/inode.c
+@@ -215,11 +215,12 @@ static void afs_apply_status(struct afs_operation *op,
+ 
+ 	if (vp->dv_before + vp->dv_delta != status->data_version) {
+ 		if (test_bit(AFS_VNODE_CB_PROMISED, &vnode->flags))
+-			pr_warn("kAFS: vnode modified {%llx:%llu} %llx->%llx %s\n",
++			pr_warn("kAFS: vnode modified {%llx:%llu} %llx->%llx %s (op=%x)\n",
+ 				vnode->fid.vid, vnode->fid.vnode,
+ 				(unsigned long long)vp->dv_before + vp->dv_delta,
+ 				(unsigned long long)status->data_version,
+-				op->type ? op->type->name : "???");
++				op->type ? op->type->name : "???",
++				op->debug_id);
+ 
+ 		vnode->invalid_before = status->data_version;
+ 		if (vnode->status.type == AFS_FTYPE_DIR) {
 
 
