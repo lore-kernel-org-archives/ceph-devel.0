@@ -2,153 +2,164 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C58FC433DB
-	for <ceph-devel@archiver.kernel.org>; Tue, 26 Jan 2021 19:19:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DFCCC433DB
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Jan 2021 00:37:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15C2222228
-	for <ceph-devel@archiver.kernel.org>; Tue, 26 Jan 2021 19:19:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF352206CD
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Jan 2021 00:37:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732080AbhAZFvV convert rfc822-to-8bit (ORCPT
-        <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 26 Jan 2021 00:51:21 -0500
-Received: from mx2.suse.de ([195.135.220.15]:48252 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727389AbhAYKQJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 25 Jan 2021 05:16:09 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 18B10AD8C;
-        Mon, 25 Jan 2021 10:13:57 +0000 (UTC)
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id 2dfa81f0;
-        Mon, 25 Jan 2021 10:14:49 +0000 (UTC)
-From:   Luis Henriques <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
-Subject: Re: [RFC PATCH v4 08/17] ceph: add routine to create fscrypt
- context prior to RPC
-References: <20210120182847.644850-1-jlayton@kernel.org>
-        <20210120182847.644850-9-jlayton@kernel.org> <87tur8532c.fsf@suse.de>
-        <d4f84211f017280cd1dd98bcdee99d11621c5d7f.camel@kernel.org>
-Date:   Mon, 25 Jan 2021 10:14:49 +0000
-In-Reply-To: <d4f84211f017280cd1dd98bcdee99d11621c5d7f.camel@kernel.org> (Jeff
-        Layton's message of "Fri, 22 Jan 2021 12:32:56 -0500")
-Message-ID: <87zh0xuxuu.fsf@suse.de>
+        id S1729287AbhA0Ae4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 26 Jan 2021 19:34:56 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:29203 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2390511AbhAZTMe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 26 Jan 2021 14:12:34 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1611688267;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=dhSDWdgO45oMOw4U14ZD4IpWy4LqGlGQzgyJ+NX3F9s=;
+        b=RV5i8IOr+AD8PVlARWPcj/V3Aef7XJUDwmYp5eA/FXlu1pwjmupvJxXEwK1Uo16ilnfxLn
+        GcXdeVs+2L8BuReRVm+aybpV5CZvGOjSQTbXA2ASq2Q3e+CksGM9aM+gQU8WNiOL0okA5w
+        A4+2vLSlAQ2GZaVbrhEu56Ntl3ONE1M=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-277-RzOmRwUoNm-GrcGAUcK2Wg-1; Tue, 26 Jan 2021 14:11:04 -0500
+X-MC-Unique: RzOmRwUoNm-GrcGAUcK2Wg-1
+Received: by mail-ej1-f72.google.com with SMTP id dc21so5330135ejb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jan 2021 11:11:04 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=dhSDWdgO45oMOw4U14ZD4IpWy4LqGlGQzgyJ+NX3F9s=;
+        b=YptqQ3IxDxQRNIPplxz8wj8RIgCHsZS1n9syPJne1WErJQ5QZ8IMOA1pBbI90wVqP8
+         EhIF21swcOAMLoDyMlfGhpTRoCSru8cEt4tG16NNIt3IZFnpJYrncld08Nxo7x+iusE7
+         qVvGo3pjMK8FEJBwAPpRlMwevYoEL/rKtzN3d/vua2Z87LfsaUh0+oXshX8NG8BpeTM+
+         CvBVZIwCN2z6wcBZ5RHjyIuCNMYMGuk6txyjy1dd8g74wPxZfMUgC55HYOspoGQ2wZqB
+         dP/8I3Ft83+4qlxsd9jQQHe+1oLzWnnEAapvRwsqKrRfPJnTYDjcDfBIKv1nLJNGkmZF
+         ngJg==
+X-Gm-Message-State: AOAM5322/HiFnNiVX0vHUcILHilDf1o+uNE+Knmt/v1vST3LMdd3DHZ1
+        HDqZ3bTbrunbloff3To4RI/QIC4/DN5bmJmoaHnIjKAGsxX82cWzr1sAA5wHDAp+7QXmnHaIQt7
+        gBQug+MlTBf8zjg2OzzSpcpYrdCfJfL5daXszhw==
+X-Received: by 2002:aa7:ce87:: with SMTP id y7mr5760861edv.211.1611688263260;
+        Tue, 26 Jan 2021 11:11:03 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJw9khL2OyLeDGiHbXxhgFxEoiQEWhWSGq0ZEPFvGyzCXtwZceNpjSLzAw970dmzg8NCnH9M4SKeWZSU2be3AaE=
+X-Received: by 2002:aa7:ce87:: with SMTP id y7mr5760842edv.211.1611688263103;
+ Tue, 26 Jan 2021 11:11:03 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+References: <161161025063.2537118.2009249444682241405.stgit@warthog.procyon.org.uk>
+ <161161064956.2537118.3354798147866150631.stgit@warthog.procyon.org.uk>
+ <20210126013611.GI308988@casper.infradead.org> <D6C85B77-17CA-4BA6-9C2C-C63A8AF613AB@oracle.com>
+In-Reply-To: <D6C85B77-17CA-4BA6-9C2C-C63A8AF613AB@oracle.com>
+From:   David Wysochanski <dwysocha@redhat.com>
+Date:   Tue, 26 Jan 2021 14:10:26 -0500
+Message-ID: <CALF+zOm++OzAebR4wu+Hdf8Aa8GpXZu8Am9eVajVUiDMBJE63w@mail.gmail.com>
+Subject: Re: [PATCH 32/32] NFS: Convert readpage to readahead and use
+ netfs_readahead for fscache
+To:     Chuck Lever <chuck.lever@oracle.com>
+Cc:     Matthew Wilcox <willy@infradead.org>,
+        David Howells <dhowells@redhat.com>,
+        Trond Myklebust <trondmy@hammerspace.com>,
+        Anna Schumaker <anna.schumaker@netapp.com>,
+        Steve French <sfrench@samba.org>,
+        Dominique Martinet <asmadeus@codewreck.org>,
+        Jeff Layton <jlayton@redhat.com>,
+        Al Viro <viro@zeniv.linux.org.uk>,
+        linux-cachefs <linux-cachefs@redhat.com>,
+        "linux-afs@lists.infradead.org" <linux-afs@lists.infradead.org>,
+        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
+        CIFS <linux-cifs@vger.kernel.org>,
+        "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
+        "v9fs-developer@lists.sourceforge.net" 
+        <v9fs-developer@lists.sourceforge.net>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Jeff Layton <jlayton@kernel.org> writes:
-
-> On Fri, 2021-01-22 at 16:50 +0000, Luis Henriques wrote:
->> Jeff Layton <jlayton@kernel.org> writes:
->> 
->> > After pre-creating a new inode, do an fscrypt prepare on it, fetch a
->> > new encryption context and then marshal that into the security context
->> > to be sent along with the RPC.
->> > 
->> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
->> > ---
->> >  fs/ceph/crypto.c | 61 ++++++++++++++++++++++++++++++++++++++++++++++++
->> >  fs/ceph/crypto.h | 12 ++++++++++
->> >  fs/ceph/inode.c  |  9 +++++--
->> >  fs/ceph/super.h  |  3 +++
->> >  4 files changed, 83 insertions(+), 2 deletions(-)
->> > 
->> > diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
->> > index 879d9a0d3751..f037a4939026 100644
->> > --- a/fs/ceph/crypto.c
->> > +++ b/fs/ceph/crypto.c
->> > @@ -46,3 +46,64 @@ void ceph_fscrypt_set_ops(struct super_block *sb)
->> >  {
->> >  	fscrypt_set_ops(sb, &ceph_fscrypt_ops);
->> >  }
->> > +
->> > +int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
->> > +				 struct ceph_acl_sec_ctx *as)
->> > +{
->> > +	int ret, ctxsize;
->> > +	size_t name_len;
->> > +	char *name;
->> > +	struct ceph_pagelist *pagelist = as->pagelist;
->> > +	bool encrypted = false;
->> > +
->> > +	ret = fscrypt_prepare_new_inode(dir, inode, &encrypted);
->> > +	if (ret)
->> > +		return ret;
->> > +	if (!encrypted)
->> > +		return 0;
->> > +
->> > +	inode->i_flags |= S_ENCRYPTED;
->> > +
->> > +	ctxsize = fscrypt_context_for_new_inode(&as->fscrypt, inode);
->> > +	if (ctxsize < 0)
->> > +		return ctxsize;
->> > +
->> > +	/* marshal it in page array */
->> > +	if (!pagelist) {
->> > +		pagelist = ceph_pagelist_alloc(GFP_KERNEL);
->> > +		if (!pagelist)
->> > +			return -ENOMEM;
->> > +		ret = ceph_pagelist_reserve(pagelist, PAGE_SIZE);
->> > +		if (ret)
->> > +			goto out;
->> > +		ceph_pagelist_encode_32(pagelist, 1);
->> > +	}
->> > +
->> > +	name = CEPH_XATTR_NAME_ENCRYPTION_CONTEXT;
->> > +	name_len = strlen(name);
->> > +	ret = ceph_pagelist_reserve(pagelist, 4 * 2 + name_len + ctxsize);
->> > +	if (ret)
->> > +		goto out;
->> > +
->> > +	if (as->pagelist) {
->> > +		BUG_ON(pagelist->length <= sizeof(__le32));
->> > +		if (list_is_singular(&pagelist->head)) {
->> > +			le32_add_cpu((__le32*)pagelist->mapped_tail, 1);
->> > +		} else {
->> > +			struct page *page = list_first_entry(&pagelist->head,
->> > +							     struct page, lru);
->> > +			void *addr = kmap_atomic(page);
->> > +			le32_add_cpu((__le32*)addr, 1);
->> > +			kunmap_atomic(addr);
->> > +		}
->> > +	}
->> > +
->> 
->> I've been staring at this function for a bit.  And at this point I would
->> expect something like this:
->> 
->> 	} else
->> 		as->pagelist = pagelist;
->> 
->> as I'm not seeing pagelist being used anywhere if it's allocated in this
->> function.
->> 
+On Tue, Jan 26, 2021 at 10:25 AM Chuck Lever <chuck.lever@oracle.com> wrote:
 >
-> It gets used near the end, in the ceph_pagelist_append calls. Once we've
-> appended the xattr, we don't need the pagelist anymore and can free it.
-
-Doh!  Sorry for the noise ;-)
-
-Cheers,
--- 
-Luis
-
-> That said, the whole way the ceph_pagelist stuff is managed is weird.
-> I'm not clear why it was done that way, and maybe we ought to rework
-> this, SELinux and ACL handling to not use them.
 >
-> I think that's a cleanup for another day.
-> -- 
-> Jeff Layton <jlayton@kernel.org>
 >
+> > On Jan 25, 2021, at 8:36 PM, Matthew Wilcox <willy@infradead.org> wrote:
+> >
+> >
+> > For Subject: s/readpage/readpages/
+> >
+> > On Mon, Jan 25, 2021 at 09:37:29PM +0000, David Howells wrote:
+> >> +int __nfs_readahead_from_fscache(struct nfs_readdesc *desc,
+> >> +                             struct readahead_control *rac)
+> >
+> > I thought you wanted it called ractl instead of rac?  That's what I've
+> > been using in new code.
+> >
+> >> -    dfprintk(FSCACHE, "NFS: nfs_getpages_from_fscache (0x%p/%u/0x%p)\n",
+> >> -             nfs_i_fscache(inode), npages, inode);
+> >> +    dfprintk(FSCACHE, "NFS: nfs_readahead_from_fscache (0x%p/0x%p)\n",
+> >> +             nfs_i_fscache(inode), inode);
+> >
+> > We do have readahead_count() if this is useful information to be logging.
+>
+> As a sidebar, the Linux NFS community is transitioning to tracepoints.
+> It would be helpful (but not completely necessary) to use tracepoints
+> in new code instead of printk.
+>
+
+The netfs API has a lot of good tracepoints and to be honest I think we can
+get rid of fscache's rpcdebug, but let me take a closer look to be
+sure.  I didn't use rpcdebug much, if at all, in the latest rounds of debugging.
+
+
+
+>
+> >> +static inline int nfs_readahead_from_fscache(struct nfs_readdesc *desc,
+> >> +                                         struct readahead_control *rac)
+> >> {
+> >> -    if (NFS_I(inode)->fscache)
+> >> -            return __nfs_readpages_from_fscache(ctx, inode, mapping, pages,
+> >> -                                                nr_pages);
+> >> +    if (NFS_I(rac->mapping->host)->fscache)
+> >> +            return __nfs_readahead_from_fscache(desc, rac);
+> >>      return -ENOBUFS;
+> >> }
+> >
+> > Not entirely sure that it's worth having the two functions separated any more.
+> >
+> >>      /* attempt to read as many of the pages as possible from the cache
+> >>       * - this returns -ENOBUFS immediately if the cookie is negative
+> >>       */
+> >> -    ret = nfs_readpages_from_fscache(desc.ctx, inode, mapping,
+> >> -                                     pages, &nr_pages);
+> >> +    ret = nfs_readahead_from_fscache(&desc, rac);
+> >>      if (ret == 0)
+> >>              goto read_complete; /* all pages were read */
+> >>
+> >>      nfs_pageio_init_read(&desc.pgio, inode, false,
+> >>                           &nfs_async_read_completion_ops);
+> >>
+> >> -    ret = read_cache_pages(mapping, pages, readpage_async_filler, &desc);
+> >> +    while ((page = readahead_page(rac))) {
+> >> +            ret = readpage_async_filler(&desc, page);
+> >> +            put_page(page);
+> >> +    }
+> >
+> > I thought with the new API we didn't need to do this kind of thing
+> > any more?  ie no matter whether fscache is configured in or not, it'll
+> > submit the I/Os.
+>
+> --
+> Chuck Lever
+>
+>
+>
+
