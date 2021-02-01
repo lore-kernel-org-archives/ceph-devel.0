@@ -2,107 +2,66 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1000C433E6
-	for <ceph-devel@archiver.kernel.org>; Thu, 28 Jan 2021 20:50:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1941C433E6
+	for <ceph-devel@archiver.kernel.org>; Mon,  1 Feb 2021 07:53:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B514664DD6
-	for <ceph-devel@archiver.kernel.org>; Thu, 28 Jan 2021 20:50:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5BE1E64E25
+	for <ceph-devel@archiver.kernel.org>; Mon,  1 Feb 2021 07:53:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231295AbhA1Utn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 28 Jan 2021 15:49:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39922 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229646AbhA1Uta (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2021 15:49:30 -0500
-Received: from mail-io1-xd2e.google.com (mail-io1-xd2e.google.com [IPv6:2607:f8b0:4864:20::d2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF979C061574;
-        Thu, 28 Jan 2021 12:48:49 -0800 (PST)
-Received: by mail-io1-xd2e.google.com with SMTP id n2so7031215iom.7;
-        Thu, 28 Jan 2021 12:48:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qdoEjK6WmyZe9D8sv9PM+Lkh5UShPE1H2BMAI6rL4mM=;
-        b=bEMcf+0G8+LpCT33Bdzu4oxYnH9lg3WhORjDhmjqZJlvu8/SjAvLA/ulKCX/guPcj9
-         AXGe6k4RGTPTqLkx6iw1P5zr+U92ek2+wRE11YCfS4oVqIj1uD65nTtHc7su2thWHY7p
-         Rtx1e60brbze3+EfTgtMntaESUSjFNxMF4LmYP38B38sw6O3J7/5p4eY0IxKrmfv20C8
-         wzSklEl6HcSYG6TeQ/fO36tAh8XADiyKrgC31A+4Ua2XLCZJl9avNkQ+vY3mB7EmS4x6
-         pIzsUolto0uGdywGMgC0xGXDqAa2QfpTW+fgysNV8IhykCpAjDfOTSi97md1bHkXhETm
-         lWCA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qdoEjK6WmyZe9D8sv9PM+Lkh5UShPE1H2BMAI6rL4mM=;
-        b=qXvjXevzlnDj3NY3fsQqA5oUEnFWjdPKOlbcv/nkPtDgAQifj5pq9EDXo/n6U6Vznp
-         OSFrPRGX/HEPpDI7YJl2tpR2IgHbDHrQO+va0Lsb0y9fJLVzEJwUj4CHWk8YTWd6Jy6w
-         ldRB0Tu8VTonh5X24ZBwsk+P2FVvmmzm+oB0BL3kXXcGDMp0RLCsa2RJy6HOgGJu+sIc
-         ycmStlRJuQNtrpsCDnw1PNZaNJLlOZFsZpKDJV8Yrvr/jfNdd4rDKmuTwrxokWvzfr/x
-         1lmwsMvk0KsAXjRymnT1b+W8x5YFLtukNRu+a1P4JYeM767emPiQuKln0YmH1zo9oy7j
-         CMmw==
-X-Gm-Message-State: AOAM5325JFKx7b+LjMKD+ShewsRJ3yhFsgUFP9kGzfvjvtG3Iv8m+u5j
-        IZDAY9cYZs3P4lmvp9dJPgGYn0akzQEvcAv7lcrU7MPeHBw=
-X-Google-Smtp-Source: ABdhPJwEfQfxpnmTaXxKdFQhLhUuZKcJjUgIqb4XWB6FsQSdQVE00jXzdZ/moiHqw0bN9zCv9h/LM28RVuL5Uoy9YRA=
-X-Received: by 2002:a6b:2bca:: with SMTP id r193mr1102442ior.167.1611866929271;
- Thu, 28 Jan 2021 12:48:49 -0800 (PST)
-MIME-Version: 1.0
-References: <20210126134103.240031-1-jlayton@kernel.org> <CAOi1vP-3Ma4LdCcu6sPpwVbmrto5HnOAsJ6r9_973hYY3ODBUQ@mail.gmail.com>
- <2301cde67ae7aa54d860fc3962aeb8ed85744c75.camel@kernel.org>
-In-Reply-To: <2301cde67ae7aa54d860fc3962aeb8ed85744c75.camel@kernel.org>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Thu, 28 Jan 2021 21:48:44 +0100
-Message-ID: <CAOi1vP_7dfuKgQxFpyeUDMJBGm=cnQSvYHDnU=6YPTzbB9+d6w@mail.gmail.com>
-Subject: Re: [PATCH 0/6] ceph: convert to new netfs read helpers
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Ceph Development <ceph-devel@vger.kernel.org>,
-        David Howells <dhowells@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>, linux-cachefs@redhat.com
-Content-Type: text/plain; charset="UTF-8"
+        id S232305AbhBAHxH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 1 Feb 2021 02:53:07 -0500
+Received: from out30-42.freemail.mail.aliyun.com ([115.124.30.42]:46253 "EHLO
+        out30-42.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232281AbhBAHxG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Feb 2021 02:53:06 -0500
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R181e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04420;MF=jiapeng.chong@linux.alibaba.com;NM=1;PH=DS;RN=5;SR=0;TI=SMTPD_---0UNWyeD-_1612165931;
+Received: from j63c13417.sqa.eu95.tbsite.net(mailfrom:jiapeng.chong@linux.alibaba.com fp:SMTPD_---0UNWyeD-_1612165931)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Mon, 01 Feb 2021 15:52:22 +0800
+From:   Jiapeng Chong <jiapeng.chong@linux.alibaba.com>
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Jiapeng Chong <jiapeng.chong@linux.alibaba.com>
+Subject: [PATCH] ceph: Replace DEFINE_SIMPLE_ATTRIBUTE with DEFINE_DEBUGFS_ATTRIBUTE
+Date:   Mon,  1 Feb 2021 15:52:10 +0800
+Message-Id: <1612165930-110076-1-git-send-email-jiapeng.chong@linux.alibaba.com>
+X-Mailer: git-send-email 1.8.3.1
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jan 28, 2021 at 1:52 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> On Wed, 2021-01-27 at 23:50 +0100, Ilya Dryomov wrote:
-> > On Tue, Jan 26, 2021 at 2:41 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > >
-> > > This patchset converts ceph to use the new netfs readpage, write_begin,
-> > > and readahead helpers to handle buffered reads. This is a substantial
-> > > reduction in code in ceph, but shouldn't really affect functionality in
-> > > any way.
-> > >
-> > > Ilya, if you don't have any objections, I'll plan to let David pull this
-> > > series into his tree to be merged with the netfs API patches themselves.
-> >
-> > Sure, that works for me.
-> >
-> > I would have expected that the new netfs infrastructure is pushed
-> > to a public branch that individual filesystems could peruse, but since
-> > David's set already includes patches for AFS and NFS, let's tag along.
-> >
-> > Thanks,
-> >
-> >                 Ilya
->
-> David has a fscache-netfs-lib branch that has all of the infrastructure
-> changes. See:
->
->     https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=fscache-netfs-lib
+Fix the following coccicheck warning:
 
-I saw that, but AFAICS it hasn't been declared public (as in suitable
-for other people to base their work on, with the promise that history
-won't get rewritten.  It is branched off of what looks like a random
-snapshot of Linus' tree instead of a release point, etc.
+./fs/ceph/debugfs.c:347:0-23: WARNING: congestion_kb_fops should be
+defined with DEFINE_DEBUGFS_ATTRIBUTE.
 
-Thanks,
+Reported-by: Abaci Robot <abaci@linux.alibaba.com>
+Signed-off-by: Jiapeng Chong <jiapeng.chong@linux.alibaba.com>
+---
+ fs/ceph/debugfs.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-                Ilya
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 66989c8..617327e 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -344,8 +344,8 @@ static int congestion_kb_get(void *data, u64 *val)
+ 	return 0;
+ }
+ 
+-DEFINE_SIMPLE_ATTRIBUTE(congestion_kb_fops, congestion_kb_get,
+-			congestion_kb_set, "%llu\n");
++DEFINE_DEBUGFS_ATTRIBUTE(congestion_kb_fops, congestion_kb_get,
++			  congestion_kb_set, "%llu\n");
+ 
+ 
+ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
+-- 
+1.8.3.1
+
