@@ -2,118 +2,98 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5DFCC433E6
-	for <ceph-devel@archiver.kernel.org>; Mon,  1 Feb 2021 17:18:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15CFEC433E6
+	for <ceph-devel@archiver.kernel.org>; Mon,  1 Feb 2021 18:43:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77CCD64E2A
-	for <ceph-devel@archiver.kernel.org>; Mon,  1 Feb 2021 17:18:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D45BA64E2E
+	for <ceph-devel@archiver.kernel.org>; Mon,  1 Feb 2021 18:43:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232040AbhBARSH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 1 Feb 2021 12:18:07 -0500
-Received: from mx2.suse.de ([195.135.220.15]:58212 "EHLO mx2.suse.de"
+        id S233105AbhBASmq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 1 Feb 2021 13:42:46 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34616 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231864AbhBARR7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 1 Feb 2021 12:17:59 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 5DC5BAC3A;
-        Mon,  1 Feb 2021 17:17:18 +0000 (UTC)
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id b2ac17a6;
-        Mon, 1 Feb 2021 17:18:13 +0000 (UTC)
-From:   Luis Henriques <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
+        id S233082AbhBASmk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 1 Feb 2021 13:42:40 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8ECDE64E2E;
+        Mon,  1 Feb 2021 18:41:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1612204920;
+        bh=69cyJhfV0g/b80psHE1hMu/HLzqH+eYN+aOqwwit1qw=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=um3X1oWmo7HdwRXnoleQkOdc/CEsdpBFhIvi2LRl0JbBapmHvfKxKm30etEupj05r
+         zJaInsvZD0no5OwHJOMnhmxzoUDSAv5iE7J/a8hBGjH564IzLPXTyTmyGlGwhqEGjV
+         xuvDQwQRr3Edix8mYwTcSYgbtQsqWzqIzfY50JwHg8yyfmxgv56++Zqk3utMBngKf7
+         dFLg+KeKtCAMiiKNo1BxTG149jiBhKcNDUv2FCX5zQJmhrzSx3+HG3YX7+0FZLcjpd
+         iYL6W+75hUQbTeC8cvYe8RPWN3bKYANXqjvGrCCVgY5wEBHxbXWNoiGHBjN84n57Sd
+         UHZXxVH4SAPzQ==
+Message-ID: <6afe55b64fc517082f708a83cf2748b59f8548dc.camel@kernel.org>
 Subject: Re: [RFC PATCH v4 15/17] ceph: make d_revalidate call fscrypt
  revalidator for encrypted dentries
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Luis Henriques <lhenriques@suse.de>
+Cc:     ceph-devel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org
+Date:   Mon, 01 Feb 2021 13:41:58 -0500
+In-Reply-To: <87zh0nyaeo.fsf@suse.de>
 References: <20210120182847.644850-1-jlayton@kernel.org>
-        <20210120182847.644850-16-jlayton@kernel.org>
-Date:   Mon, 01 Feb 2021 17:18:07 +0000
-In-Reply-To: <20210120182847.644850-16-jlayton@kernel.org> (Jeff Layton's
-        message of "Wed, 20 Jan 2021 13:28:45 -0500")
-Message-ID: <87zh0nyaeo.fsf@suse.de>
+         <20210120182847.644850-16-jlayton@kernel.org> <87zh0nyaeo.fsf@suse.de>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.38.3 (3.38.3-1.fc33) 
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Jeff Layton <jlayton@kernel.org> writes:
+On Mon, 2021-02-01 at 17:18 +0000, Luis Henriques wrote:
+> Jeff Layton <jlayton@kernel.org> writes:
+> 
+> > If we have a dentry which represents a no-key name, then we need to test
+> > whether the parent directory's encryption key has since been added.  Do
+> > that before we test anything else about the dentry.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >  fs/ceph/dir.c | 4 ++++
+> >  1 file changed, 4 insertions(+)
+> > 
+> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> > index 236c381ab6bd..cb7ff91a243a 100644
+> > --- a/fs/ceph/dir.c
+> > +++ b/fs/ceph/dir.c
+> > @@ -1726,6 +1726,10 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
+> >  	dout("d_revalidate %p '%pd' inode %p offset 0x%llx\n", dentry,
+> >  	     dentry, inode, ceph_dentry(dentry)->offset);
+> >  
+> > 
+> > +	valid = fscrypt_d_revalidate(dentry, flags);
+> > +	if (valid <= 0)
+> > +		return valid;
+> > +
+> 
+> This one took me a while to figure out, but eventually got there.
+> Initially I was seeing this error:
+> 
+> crypt: ceph: 1 inode(s) still busy after removing key with identifier f019f4a1c5d5665675218f89fccfa3c7, including ino 1099511627791
+> 
+> and, when umounting the filesystem I would get the warning in
+> fs/dcache.c:1623.
+> 
+> Anyway, the patch below should fix it.
+> 
+> Unfortunately I didn't had a lot of time to look into the -experimental
+> branch yet.  On my TODO list for the next few days.
+> 
+> Cheers,
 
-> If we have a dentry which represents a no-key name, then we need to test
-> whether the parent directory's encryption key has since been added.  Do
-> that before we test anything else about the dentry.
->
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  fs/ceph/dir.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 236c381ab6bd..cb7ff91a243a 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -1726,6 +1726,10 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
->  	dout("d_revalidate %p '%pd' inode %p offset 0x%llx\n", dentry,
->  	     dentry, inode, ceph_dentry(dentry)->offset);
->  
-> +	valid = fscrypt_d_revalidate(dentry, flags);
-> +	if (valid <= 0)
-> +		return valid;
-> +
-
-This one took me a while to figure out, but eventually got there.
-Initially I was seeing this error:
-
-crypt: ceph: 1 inode(s) still busy after removing key with identifier f019f4a1c5d5665675218f89fccfa3c7, including ino 1099511627791
-
-and, when umounting the filesystem I would get the warning in
-fs/dcache.c:1623.
-
-Anyway, the patch below should fix it.
-
-Unfortunately I didn't had a lot of time to look into the -experimental
-branch yet.  On my TODO list for the next few days.
-
-Cheers,
+Well spotted! I think the better fix though is to just move the
+fscrypt_d_revalidate call up before the point where we take the parent
+reference. I'll fix that up in my tree. Thanks for tracking that down!
 -- 
-Luis
+Jeff Layton <jlayton@kernel.org>
 
-
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index ae0890be0c9d..d3ac39c6645f 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1781,7 +1781,7 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 
- 	valid = fscrypt_d_revalidate(dentry, flags);
- 	if (valid <= 0)
--		return valid;
-+		goto out;
- 
- 	mdsc = ceph_sb_to_client(dir->i_sb)->mdsc;
- 
-@@ -1853,6 +1853,7 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 	if (!valid)
- 		ceph_dir_clear_complete(dir);
- 
-+out:
- 	if (!(flags & LOOKUP_RCU))
- 		dput(parent);
- 	return valid;
-
-
-
->  	mdsc = ceph_sb_to_client(dir->i_sb)->mdsc;
->  
->  	/* always trust cached snapped dentries, snapdir dentry */
-> -- 
->
-> 2.29.2
->
