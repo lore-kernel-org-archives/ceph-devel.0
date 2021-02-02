@@ -2,96 +2,102 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D7D2C433DB
-	for <ceph-devel@archiver.kernel.org>; Tue,  2 Feb 2021 13:11:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E501DC433E0
+	for <ceph-devel@archiver.kernel.org>; Tue,  2 Feb 2021 14:26:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BDEF764ECF
-	for <ceph-devel@archiver.kernel.org>; Tue,  2 Feb 2021 13:11:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD48564E9C
+	for <ceph-devel@archiver.kernel.org>; Tue,  2 Feb 2021 14:26:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232208AbhBBNLj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 2 Feb 2021 08:11:39 -0500
-Received: from mail.kernel.org ([198.145.29.99]:55614 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230091AbhBBNLZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 2 Feb 2021 08:11:25 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 23B1B64EDB;
-        Tue,  2 Feb 2021 13:10:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1612271443;
-        bh=8z5wGmmOwhWEx7/4PjCxZWvsqfsxLlJI88DOQKJYGmE=;
-        h=From:To:Cc:Subject:Date:From;
-        b=CUCvF5DUiHbBP/I4aHvaE9WvjKytXCA92SIL6x9EaL3wsdg/eTCGVcsydqTIZOiNo
-         IgX937CpnVsrGOPSOYXIjyE2x6SEER4zdQaXUK1jXhoyVz4aYEIGHvRVdfQxbVFtZ5
-         ivJuWwFIXJUBIyfhjUJR6kYHJJv++v1YYmMdBdmYSgii+Muwyo+1OPpMAXc+sDcmf6
-         NNcaXN+NmhdgjDI4/MHz2qaVAVt9sJ7oQimRcEUqb/Km+HNkz0j0CN8Pgm9oX293zx
-         JNV/fHGQPFxqToP/c98aT+04lCVCuX1dlb62siMeYs82FDBwR+opt1ryUPSZm2ajVl
-         mPaAl4Ir5OfQg==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     dhowells@redhat.com
-Cc:     dan.carpenter@oracle.com, idryomov@gmail.com,
+        id S234344AbhBBO0l (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 2 Feb 2021 09:26:41 -0500
+Received: from aserp2130.oracle.com ([141.146.126.79]:47046 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234095AbhBBOW0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Feb 2021 09:22:26 -0500
+Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
+        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 112EJWVa141442;
+        Tue, 2 Feb 2021 14:20:57 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=zym7dCMbrQWtny8phtxzYDJHLtNzxPA2RobQi2pE6gk=;
+ b=u9a6c0rjvJHP1TzqGUMatcQr7wLCMoC37iw2MKd7wAD5YH4cGba1iriFtZN8nu9EcdQB
+ rkGW6ET2wSpWCxi7IVgwaNBrJUpW3A3OhRsnhh/ZFw3LfBVp4Ztz6Qv5QEGVIUm9ZKvG
+ Ov4YicUMsyAWP4zxKfly1ibAJhT9+dbQ5lDUuDNXRhbfibqixxiqAMGUG0RPmYUPEUrO
+ kPLbMh3YzXoipzIkG2KMePifcmULfzZiCTgbv97ES+2CN4JcBtU+Pq9+mEMJD1gLxBpU
+ 5ZkR6g5NvAOiXrae3GXS4o94vYWnf5LmJRuJM2LWhyqYPp7j+CxS4gmfNOIMUgXeMCvv eg== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by aserp2130.oracle.com with ESMTP id 36cvyau5m9-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 02 Feb 2021 14:20:57 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 112EKW1a100431;
+        Tue, 2 Feb 2021 14:20:54 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by userp3030.oracle.com with ESMTP id 36dhcwrdwm-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 02 Feb 2021 14:20:54 +0000
+Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 112EKr2H019198;
+        Tue, 2 Feb 2021 14:20:53 GMT
+Received: from kadam (/102.36.221.92)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 02 Feb 2021 06:20:52 -0800
+Date:   Tue, 2 Feb 2021 17:20:45 +0300
+From:   Dan Carpenter <dan.carpenter@oracle.com>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     dhowells@redhat.com, idryomov@gmail.com,
         ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         kernel-janitors@vger.kernel.org
-Subject: [PATCH] ceph: fix an oops in error handling in ceph_netfs_issue_op
-Date:   Tue,  2 Feb 2021 08:10:41 -0500
-Message-Id: <20210202131041.43977-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.29.2
+Subject: Re: [PATCH] ceph: fix an oops in error handling in
+ ceph_netfs_issue_op
+Message-ID: <20210202142045.GD20820@kadam>
+References: <20210202131041.43977-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210202131041.43977-1-jlayton@kernel.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-IMR: 1
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9882 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 mlxlogscore=999 phishscore=0
+ spamscore=0 suspectscore=0 malwarescore=0 adultscore=0 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2102020098
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9882 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1015 impostorscore=0
+ mlxscore=0 spamscore=0 bulkscore=0 priorityscore=1501 adultscore=0
+ lowpriorityscore=0 malwarescore=0 phishscore=0 mlxlogscore=999
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2102020098
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Dan reported a potential oops in the cleanup if ceph_osdc_new_request
-returns an error. Eliminate the unneeded initialization of "req" and
-then just set it to NULL in the case where it holds an ERR_PTR.
+On Tue, Feb 02, 2021 at 08:10:41AM -0500, Jeff Layton wrote:
+> Dan reported a potential oops in the cleanup if ceph_osdc_new_request
+> returns an error. Eliminate the unneeded initialization of "req" and
+> then just set it to NULL in the case where it holds an ERR_PTR.
+> 
+> Also, drop the unneeded NULL check before calling
+> ceph_osdc_put_request.
+> 
+> Fixes: 1cf7fdf52d5a ("ceph: convert readpage to fscache read helper")
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Suggested-by: Ilya Dryomov <idryomov@gmail.com>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 
-Also, drop the unneeded NULL check before calling
-ceph_osdc_put_request.
 
-Fixes: 1cf7fdf52d5a ("ceph: convert readpage to fscache read helper")
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Suggested-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/addr.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Looks good.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 5eec6f66fe52..0dd64d31eff6 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -234,7 +234,7 @@ static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
- 	struct inode *inode = rreq->mapping->host;
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
--	struct ceph_osd_request *req = NULL;
-+	struct ceph_osd_request *req;
- 	struct ceph_vino vino = ceph_vino(inode);
- 	struct iov_iter iter;
- 	struct page **pages;
-@@ -248,6 +248,7 @@ static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
- 			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
- 	if (IS_ERR(req)) {
- 		err = PTR_ERR(req);
-+		req = NULL;
- 		goto out;
- 	}
- 
-@@ -273,8 +274,7 @@ static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
- 	if (err)
- 		iput(inode);
- out:
--	if (req)
--		ceph_osdc_put_request(req);
-+	ceph_osdc_put_request(req);
- 	if (err)
- 		netfs_subreq_terminated(subreq, err);
- 	dout("%s: result %d\n", __func__, err);
--- 
-2.29.2
+Acked-by: Dan Carpenter <dan.carpenter@oracle.com>
+
+regards,
+dan carpenter
 
