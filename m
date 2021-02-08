@@ -2,168 +2,60 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28D1CC433E0
-	for <ceph-devel@archiver.kernel.org>; Fri,  5 Feb 2021 19:44:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8336AC433E0
+	for <ceph-devel@archiver.kernel.org>; Mon,  8 Feb 2021 14:09:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C32A464FB7
-	for <ceph-devel@archiver.kernel.org>; Fri,  5 Feb 2021 19:44:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4135864E2E
+	for <ceph-devel@archiver.kernel.org>; Mon,  8 Feb 2021 14:09:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233242AbhBESBu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 5 Feb 2021 13:01:50 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:48496 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233215AbhBEPWo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Feb 2021 10:22:44 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1612544545;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=2q18CzBcxJvAu8Vj/9Xv+8eYOiYLfIpMMBqp/lRA8Jc=;
-        b=IDrxZfcNiZD0hDja8hPAhsKhWkuqBTlxZ0+c7WVhrwiqhS3ISNphI5YicgYwsdnX+FFjnr
-        AIPKgHu+b37wY7rNX11/uWdxovShduqHor/J79vUS2bzK80MI1ZZUpdOQ1d7Q1yVpQyASg
-        Quc5jO1pqDb/jhV8hzoXlFWHjnckao4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-511-Ui2ao1J7MTWjBnKX2-SeOQ-1; Fri, 05 Feb 2021 12:02:24 -0500
-X-MC-Unique: Ui2ao1J7MTWjBnKX2-SeOQ-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AD1AE100A625;
-        Fri,  5 Feb 2021 17:02:21 +0000 (UTC)
-Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1D00E1A353;
-        Fri,  5 Feb 2021 17:02:14 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-From:   David Howells <dhowells@redhat.com>
-To:     torvalds@linux-foundation.org
-cc:     dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Trond Myklebust <trondmy@hammerspace.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>,
-        Jeff Layton <jlayton@redhat.com>,
-        David Wysochanski <dwysocha@redhat.com>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org,
-        linux-cachefs@redhat.com, linux-cifs@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
-        v9fs-developer@lists.sourceforge.net, linux-kernel@vger.kernel.org
-Subject: Upcoming for next merge window: fscache and netfs lib
+        id S232238AbhBHOHf (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 8 Feb 2021 09:07:35 -0500
+Received: from mail.kernel.org ([198.145.29.99]:39086 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231666AbhBHOFK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 8 Feb 2021 09:05:10 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5791C64E5A;
+        Mon,  8 Feb 2021 14:04:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1612793069;
+        bh=VTh81dpYDhAY3nlO1mevQkEojGsCdaUfX+z96yAPRRs=;
+        h=Subject:From:To:Cc:Date:From;
+        b=r+lDInWDc22OGuzeMv1ytKZqMfzJbiFwbMiqmQp8a5ok/xINWAMGjdqD3/qFUSCvx
+         kU5IzzHZFsaMHOtoop9YXM4A99GD8IGQEcXxlTU/hQYj6uHfbINeJYpCXLrEUEpNLL
+         GrWOnC/FsLNHtv1acplSrCQsuVL82AKrEOSHzXnuSLKVJAED8gldJ0Cvx+In1zgVzd
+         3rjFhpJCFZeqgV3NfaK/Tww1KwrsArBliGt9PkknIlgSsuRPpx2NhjupV0NqHiJ+FQ
+         L86e8+Wl1L7riT8YDDCh5EeeX+XNlTonBIdxHKwLvw70IIuRxZzdSaJOX/cfGIr028
+         FDWN7X8wYeZxw==
+Message-ID: <5476d29f00bacf41ef9ac094096a1627fe9c9a25.camel@kernel.org>
+Subject: netfs-lib changes merged into testing branch
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Ilya Dryomov <idryomov@gmail.com>,
+        Ceph Development <ceph-devel@vger.kernel.org>
+Cc:     David Howells <dhowells@redhat.com>
+Date:   Mon, 08 Feb 2021 09:04:28 -0500
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.38.3 (3.38.3-1.fc33) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date:   Fri, 05 Feb 2021 17:02:14 +0000
-Message-ID: <2522190.1612544534@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+A little later than expected, but I've gone ahead and merged the
+conversion to the netfs read helpers into the ceph-client/testing
+branch. I did this by just merging David's fscache-next branch before
+layering the current patches in testing on top.
 
-Hi Linus,
+This should make it the default kernel to be used on most teuthology
+runs that involve a kclient. Let me know if you see cephfs I/O-related
+issues pop up (but I'm not expecting many -- we've been testing this
+privately for quite a while now).
 
-To apprise you in advance, I'm intending to submit a pull request for a
-partial modernisation of the fscache I/O subsystem, which can be found here:
-
-	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/=
-?h=3Dfscache-next
-
-The main parts of it are:
-
- (1) Institute a helper library for network filesystems.  The first stage of
-     this handles ->readpage(), ->readahead() and part of ->write_begin() on
-     behalf of the netfs, requiring the netfs to provide a vector to perfor=
-m a
-     read to some part of an inode.
-
-     This allows handling of the following to be (at least partially) moved
-     out of all the network filesystems and consolidated in one place:
-
-	- changes in VM vectors (Matthew Wilcox's Grand Plans=E2=84=A2;-)
-	  - transparent huge page support
-	- shaping of reads
-	  - readahead expansion
-	  - fs alignment/granularity (ceph, pnfs)
-	  - cache alignment/granularity
-	- slicing of reads
-	  - rsize
-	  - keeping multiple read in flight	} Steve French would like
-	  - multichannel distribution		} but for the future
-	  - multiserver distribution (ceph, pnfs)
-	  - stitching together reads from the cache and reads from the network
-	- saving data read from the server into the cache
-	- retry/reissue handling
-	  - fallback after cache failure
-     	- short reads
-	- fscrypt data decryption (Jeff Layton is considering for the future)
-
- (2) Add an alternate cache I/O API for use with the netfs lib that makes u=
-se
-     of kiocbs in the cache to do direct I/O between the cache files and the
-     netfs pages.
-
-     This is intended to replace the current I/O API that calls the backing=
- fs
-     readpage op and than snooping the wait queues for completion to read a=
-nd
-     using vfs_write() to write.  It wasn't possible to do in-kernel DIO wh=
-en
-     I first wrote cachefiles - and this makes it a lot simpler and more
-     robust (and uses a lot less memory).
-
- (3) Add an ITER_XARRAY iov_iter that allows I/O iteration to be done on an
-     xarray of pinned pages (such as inode->i_mapping->i_pages), thereby
-     avoiding the need to allocate a bvec array to represent this.
-
-     This is used to present a set of netfs pages to the cache to do DIO on
-     and is also used by afs to present netfs pages to sendmsg.  It could a=
-lso
-     be used by unencrypted cifs to pass the pages to the TCP socket it uses
-     (if it's doing TCP) and my patch for 9p (which isn't included here) can
-     make use of it.
-
- (4) Make afs use the above.  It passes the same xfstests (and has the same
-     failures) as the unpatched afs client.
-
- (5) Make ceph use the above (I've merged a branch from Jeff Layton for thi=
-s).
-     This also passes xfstests.
-
-Dave Wysochanski has a patch series for nfs.  Normal nfs works fine and pas=
-ses
-various tests, but it turned out pnfs has a problem - pnfs does splitting of
-requests itself and sending them to various places, but it needs to coopera=
-te
-more closely with netfs over this.  He's working on this.
-
-I've given Dominique Martinet a patch for 9p and Steve French a partial pat=
-ch
-for cifs, but neither of those is going to be ready this merge window eithe=
-r.
-
--~-
-
-Assuming you're willing to take this, should I submit one pull request for =
-the
-combined lot, or should I break it up into smaller requests (say with a
-separate request from Jeff for the ceph stuff).
-
-If we can get the netfs lib in this merge window, that simplifies dealing w=
-ith
-nfs and cifs particularly as the changes specific to those can go through t=
-he
-maintainer trees.
-
-Thanks,
-David
+Cheers,
+-- 
+Jeff Layton <jlayton@kernel.org>
 
