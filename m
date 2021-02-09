@@ -2,54 +2,72 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B858C433E6
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 22:21:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5ACC9C433E0
+	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 23:43:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E18C0601FF
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 22:21:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 13599601FF
+	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 23:43:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234068AbhBIWU4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 9 Feb 2021 17:20:56 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:55938 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234164AbhBIWPK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2021 17:15:10 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1612908823;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=njyj2XCXYGtI5AX/JV14IYXR8Ipi7RDaSVkhJ8oSglg=;
-        b=DHhyTRoeiBLTGmTnWeKpdGUq+JnvnbHrtNRjpqGZ+t982TUIPqiQWxl5yHNsh1f8hQX5Tw
-        +zfk4Qc/BVo9XwG1FgLD98joGKmJMzB5+A+R4ry4SpBQzHSwY3ld0110uASXgZ0IsK1E7Y
-        7XAYJRzBRugz74vl+xi3LHwwspwW6k4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-166-Ez0mEz_fP32izAfxafFp3w-1; Tue, 09 Feb 2021 16:25:32 -0500
-X-MC-Unique: Ez0mEz_fP32izAfxafFp3w-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B7E8FCC626;
-        Tue,  9 Feb 2021 21:25:30 +0000 (UTC)
-Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E044519C78;
-        Tue,  9 Feb 2021 21:25:23 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-From:   David Howells <dhowells@redhat.com>
+        id S234428AbhBIXm0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 9 Feb 2021 18:42:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55582 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232879AbhBIWHM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2021 17:07:12 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20F19C06178A
+        for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2021 13:19:27 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id f1so30618079lfu.3
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Feb 2021 13:19:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=5NXrj70SaJJJRtMQWC0+3w4cmGywCfZjtndBL9rb8Bo=;
+        b=g8n7RWB/hph+MNS6KsfC0GffC4feoLtbwfzXkMDO5VGlvyK682yT02RPRIOW6hieUR
+         nxG1Mlzbyp5mtI1Do4dwBB4pr2NfNtLSNxuXGIfX+Az+7iAT6uxAH+/kuEuPZoNDiHrT
+         JX8A9+J4I4DIw7KDC1ACDk8XTP+nwuXWBZL+g=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=5NXrj70SaJJJRtMQWC0+3w4cmGywCfZjtndBL9rb8Bo=;
+        b=LKHLfMiRdRhnFUVHShX9Ns6eUlj6Du5NLhMtP+rVi8vxvQLTVQ1rT1vRoOgSweU9in
+         czvHE2ssd3nNna4vKMePiKI33oSsydc7Cz10n15W4IeDqTzrMcmkP9GQ9NIQlFhV5X1H
+         nJ1Q/a/J2+JUTAUhyb71z9uGZHRU1KLlLM2EVggB4wKoUaDCh80+9pik2PK53X6SKDQi
+         O5PhwU24lvYFaP5Q2q5JJdu5h0pfSqTDcj/4hFXhH8zJeLyH64SZLyL0Eg27hyJv93H2
+         glaXBdGZ9nnbYRBjgoAuGUen/Jc6IRSXuA9gfeQXVduDbNiXhe7xp3n7zcePVkZ7hkiC
+         lnKA==
+X-Gm-Message-State: AOAM533UkvPnHL3LhvAzr1iUsU3PbgdmP5x83vuXo9Tu8m6uKHvVJfZc
+        k4UZFvBuMAC/gP7CWTpOWqu2ICXkB5uaRQ==
+X-Google-Smtp-Source: ABdhPJx0Ibj79qHPgfVJxVjHhi6GEtjdHa5WaboiA6aC7MfStqOE8j90k+qLykKYDNntG//+0bDRcg==
+X-Received: by 2002:a05:6512:2341:: with SMTP id p1mr14399912lfu.192.1612905559556;
+        Tue, 09 Feb 2021 13:19:19 -0800 (PST)
+Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com. [209.85.208.182])
+        by smtp.gmail.com with ESMTPSA id c207sm799820lfd.292.2021.02.09.13.19.17
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 09 Feb 2021 13:19:18 -0800 (PST)
+Received: by mail-lj1-f182.google.com with SMTP id s18so25824ljg.7
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Feb 2021 13:19:17 -0800 (PST)
+X-Received: by 2002:a2e:b1c8:: with SMTP id e8mr15253931lja.251.1612905557284;
+ Tue, 09 Feb 2021 13:19:17 -0800 (PST)
+MIME-Version: 1.0
+References: <591237.1612886997@warthog.procyon.org.uk> <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com>
+ <20210209202134.GA308988@casper.infradead.org>
 In-Reply-To: <20210209202134.GA308988@casper.infradead.org>
-References: <20210209202134.GA308988@casper.infradead.org> <591237.1612886997@warthog.procyon.org.uk> <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue, 9 Feb 2021 13:19:01 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wh+2gbF7XEjYc=HV9w_2uVzVf7vs60BPz0gFA=+pUm3ww@mail.gmail.com>
+Message-ID: <CAHk-=wh+2gbF7XEjYc=HV9w_2uVzVf7vs60BPz0gFA=+pUm3ww@mail.gmail.com>
+Subject: Re: [GIT PULL] fscache: I/O API modernisation and netfs helper library
 To:     Matthew Wilcox <willy@infradead.org>
-Cc:     dhowells@redhat.com,
-        Linus Torvalds <torvalds@linux-foundation.org>,
+Cc:     David Howells <dhowells@redhat.com>,
         Jeff Layton <jlayton@redhat.com>,
         David Wysochanski <dwysocha@redhat.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
@@ -63,37 +81,32 @@ Cc:     dhowells@redhat.com,
         "open list:NFS, SUNRPC, AND..." <linux-nfs@vger.kernel.org>,
         v9fs-developer@lists.sourceforge.net,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [GIT PULL] fscache: I/O API modernisation and netfs helper library
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <618608.1612905923.1@warthog.procyon.org.uk>
-Date:   Tue, 09 Feb 2021 21:25:23 +0000
-Message-ID: <618609.1612905923@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Matthew Wilcox <willy@infradead.org> wrote:
-
+On Tue, Feb 9, 2021 at 12:21 PM Matthew Wilcox <willy@infradead.org> wrote:
+>
 > Yeah, I have trouble with the private2 vs fscache bit too.  I've been
 > trying to persuade David that he doesn't actually need an fscache
 > bit at all; he can just increment the page's refcount to prevent it
 > from being freed while he writes data to the cache.
 
-That's not what the bit is primarily being used for.  It's being used to
-prevent the starting of a second write to the cache whilst the first is in
-progress and also to prevent modification whilst DMA to the cache is in
-progress.  This isn't so obvious in this cut-down patchset, but comes more in
-to play with full caching of local writes in my fscache-iter branch.
+Does the code not hold a refcount already?
 
-I can't easily share PG_writeback for this because each bit covers a write to
-a different place.  PG_writeback covers the write to the server and PG_fscache
-the write to the cache.  These writes may get split up differently and will
-most likely finish at different times.
+Honestly, the fact that writeback doesn't take a refcount, and then
+has magic "if writeback is set, don't free" code in other parts of the
+VM layer has been a problem already, when the wakeup ended up
+"leaking" from a previous page to a new allocation.
 
-If I have to share PG_writeback, that will mean storing both states for each
-page somewhere else and then "OR'ing" them together to drive PG_writeback.
+I very much hope the fscache bit does not make similar mistakes,
+because the rest of the VM will _not_ have special "if fscache is set,
+then we won't do X" the way we do for writeback.
 
-David
+So I think the fscache code needs to hold a refcount regardless, and
+that the fscache bit is set the page has to have a reference.
 
+So what are the current lifetime rules for the fscache bit?
+
+             Linus
