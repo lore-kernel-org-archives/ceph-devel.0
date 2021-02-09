@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BF1AC43381
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 21:54:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FAF4C433DB
+	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 22:20:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C888B64E56
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 21:54:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E212164E42
+	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 22:20:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234180AbhBIVwh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 9 Feb 2021 16:52:37 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:40187 "EHLO
+        id S234111AbhBIWUW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 9 Feb 2021 17:20:22 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:35776 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234340AbhBIVM6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2021 16:12:58 -0500
+        by vger.kernel.org with ESMTP id S233900AbhBIWJ2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2021 17:09:28 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1612905053;
+        s=mimecast20190719; t=1612908480;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=GNTsEzyoPupLf8uFnqlZZbYFAgQKr7S0geejlS5p7yc=;
-        b=Ay7euuR9w7yeNisg6K0zODyZ7FZFOU/ZxscQEy5BFxFxxGTDl/VSg9TAKCPHgA+JNz8ISs
-        sl7J1368gXlS6uxDLHmY02vk3EaNkWHcqTos6Reu09KmJQ5jArF8v5Oz4mEk/P7Z8bfekk
-        lNZESASNcVi+d50RLBkR9Pg6LziuqXM=
+        bh=JtpFlXocz3kO5xx1cv2U4rE+tvnYS4ZliCWcM+gS1O4=;
+        b=KrpTxnFzuTPzqS+jxtE1xHqy+VS6iKc+Dcks0j3hrn7xP19rXqVzhlIj5l3HeA/+716Y0f
+        cchMN3+MjaFLlA7A80AQvcM/lGbf/iymdkn75Er+tjoYdgafkbtut2qVm5FvXShGv+go0L
+        bk4k7cDIu/BTw2vqAB9SXm6rIH3ktSA=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-246-zfMDn4FfM1uj1j28ps60sQ-1; Tue, 09 Feb 2021 16:10:52 -0500
-X-MC-Unique: zfMDn4FfM1uj1j28ps60sQ-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+ us-mta-542-0xBnI-LxOQq3zEJ47KXu9A-1; Tue, 09 Feb 2021 16:55:37 -0500
+X-MC-Unique: 0xBnI-LxOQq3zEJ47KXu9A-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 199F0107ACC7;
-        Tue,  9 Feb 2021 21:10:50 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6314C107ACE3;
+        Tue,  9 Feb 2021 21:55:35 +0000 (UTC)
 Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id BDE796062F;
-        Tue,  9 Feb 2021 21:10:43 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id E37C719C78;
+        Tue,  9 Feb 2021 21:55:27 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
 From:   David Howells <dhowells@redhat.com>
-In-Reply-To: <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com>
-References: <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com> <591237.1612886997@warthog.procyon.org.uk>
+In-Reply-To: <CAHk-=wh+2gbF7XEjYc=HV9w_2uVzVf7vs60BPz0gFA=+pUm3ww@mail.gmail.com>
+References: <CAHk-=wh+2gbF7XEjYc=HV9w_2uVzVf7vs60BPz0gFA=+pUm3ww@mail.gmail.com> <591237.1612886997@warthog.procyon.org.uk> <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com> <20210209202134.GA308988@casper.infradead.org>
 To:     Linus Torvalds <torvalds@linux-foundation.org>
 Cc:     dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>,
         Jeff Layton <jlayton@redhat.com>,
@@ -65,46 +65,70 @@ Cc:     dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>,
 Subject: Re: [GIT PULL] fscache: I/O API modernisation and netfs helper library
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-ID: <617684.1612905042.1@warthog.procyon.org.uk>
-Date:   Tue, 09 Feb 2021 21:10:42 +0000
-Message-ID: <617685.1612905042@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+Content-ID: <620723.1612907726.1@warthog.procyon.org.uk>
+Date:   Tue, 09 Feb 2021 21:55:26 +0000
+Message-ID: <620724.1612907726@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
 Linus Torvalds <torvalds@linux-foundation.org> wrote:
 
-> The PG_fscache bit waiting functions are completely crazy. The comment
-> about "this will wake up others" is actively wrong,
+> > Yeah, I have trouble with the private2 vs fscache bit too.  I've been
+> > trying to persuade David that he doesn't actually need an fscache
+> > bit at all; he can just increment the page's refcount to prevent it
+> > from being freed while he writes data to the cache.
+> 
+> Does the code not hold a refcount already?
 
-You mean this?
+AIUI, Willy wanted me to drop the refcount and rely on PG_locked alone during
+I/O triggered by the new ->readahead() method, so when it comes to setting
+PG_fscache after a successful read from the server, I don't hold any page refs
+- the assumption being that the waits in releasepage and invalidatepage
+suffice.  If that isn't sufficient, I can make it take page refs on the pages
+to be written out - that should be easy enough to do.
 
-/**
- * unlock_page_fscache - Unlock a page pinned with PG_fscache
- * @page: The page
- *
- * Unlocks the page and wakes up sleepers in wait_on_page_fscache().  Also
- * wakes those waiting for the lock and writeback bits because the wakeup
- * mechanism is shared.  But that's OK - those sleepers will just go back to
- * sleep.
- */
+> Honestly, the fact that writeback doesn't take a refcount, and then
+> has magic "if writeback is set, don't free" code in other parts of the
+> VM layer has been a problem already, when the wakeup ended up
+> "leaking" from a previous page to a new allocation.
+> 
+> I very much hope the fscache bit does not make similar mistakes,
+> because the rest of the VM will _not_ have special "if fscache is set,
+> then we won't do X" the way we do for writeback.
 
-Actually, you're right.  The wakeup check func is evaluated by the
-waker-upper.  I can fix the comment with a patch.
+The VM can't do that because PG_private_2 might not be being used for
+PG_fscache.  It does, however, treat PG_private_2 like PG_private when
+triggering calls to releasepage and invalidatepage.
 
-> and the waiting function looks insane, because you're mixing the two names
-> for "fscache" which makes the code look totally incomprehensible. Why would
-> we wait for PF_fscache, when PG_private_2 was set? Yes, I know why, but the
-> code looks entirely nonsensical.
+> So I think the fscache code needs to hold a refcount regardless, and
+> that the fscache bit is set the page has to have a reference.
+> 
+> So what are the current lifetime rules for the fscache bit?
 
-IIRC someone insisted that I should make it a generic name and put the
-accessor functions in the fscache headers (which means they aren't available
-to core code), but I don't remember who (maybe Andrew? it was before mid-2007)
-- kind of like PG_checked is an alias for PG_owner_priv_1.
+It depends which 'current' you're referring to.
 
-I'd be quite happy to move the accessors for PG_fscache to the
-linux/page-flags.h as that would simplify things.
+The old fscache I/O API (ie. what's upstream) - in which PG_fscache is set on
+a page to note that fscache knows about the page - does not keep a separate
+ref on such pages.
+
+The new fscache I/O API simplifies things.  With that, pages are only known
+about for the duration of a write to the cache.  I've tried to analogise the
+way PG_writeback works[*], including waiting for it in places like
+invalidation, releasepage, page_mkwrite (though in the netfs, not the core VM)
+as it may represent DMA.
+
+Note that with the new I/O API, fscache and cachefiles know nothing about the
+PG_fscache bit or netfs pages; they just deal with an iov_iter and a
+completion function.  Dealing with PG_fscache is done by the netfs and the new
+netfs helper lib.
+
+[*] Though I see that 073861ed77b6b made a change to end_page_writeback() for
+    an issue that probably affects unlock_page_fscache() too[**].
+
+[**] This may mean that both PG_fscache and PG_writeback need to hold a ref on
+     the page.
 
 David
 
