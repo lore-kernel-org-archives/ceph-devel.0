@@ -2,165 +2,222 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_RED autolearn=no
-	autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08A30C433DB
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 23:44:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99040C433E0
+	for <ceph-devel@archiver.kernel.org>; Wed, 10 Feb 2021 16:31:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BBAC464E0D
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Feb 2021 23:44:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 69A3C64E76
+	for <ceph-devel@archiver.kernel.org>; Wed, 10 Feb 2021 16:31:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233617AbhBIXo1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 9 Feb 2021 18:44:27 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:33716 "EHLO
+        id S232263AbhBJQbM (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 10 Feb 2021 11:31:12 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:48753 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233699AbhBIWob (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2021 17:44:31 -0500
+        by vger.kernel.org with ESMTP id S232314AbhBJQar (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 10 Feb 2021 11:30:47 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1612910567;
+        s=mimecast20190719; t=1612974560;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=GZ7uCNlA2uIi2Zywr96bupyWhGmv/tkzQj/R8fIDK/I=;
-        b=JNmsMqripTu4J9CKnwz3BfoGRwZ1pXp8A4+IHy85OwXq/38j3xPoYnXGbq7z9aXRl9sXAJ
-        vCYdvD2ksmiCOJyjjg93HR0xH3mN6J6X8LRdDBPx1SMfTfCBLPtUjtoflhGfTX7J3trkfI
-        x3Q6SbbeyEdYs86w6mP5ER11VUYSQy8=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-30-JqmfgeSRPTizG8QW8ly_zA-1; Tue, 09 Feb 2021 17:42:41 -0500
-X-MC-Unique: JqmfgeSRPTizG8QW8ly_zA-1
-Received: by mail-ed1-f72.google.com with SMTP id x13so125113edi.7
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Feb 2021 14:42:41 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=GZ7uCNlA2uIi2Zywr96bupyWhGmv/tkzQj/R8fIDK/I=;
-        b=ICycYvWZixh/LAM8QbFHcKwAqBkKO5oL0QXo1yLmi6Km1tCkyErSMqXfTxYa9o6Gwv
-         OVjFrhcQIxm89PaQAAmKCbd8S3EYRoyyu3lp+t7jhO4IrUcX50bsctb2resKNdGG8GlE
-         uerbimzYzVd8AjhG1Vvr6usKwCXiIDGk9JdBXS/TKe3BaSVw3n41SdnbD79CJczo4foF
-         RixNyFJo7zhHvFtcT13Al2CwpiKgSxla/23+ezaxgKnFANQZKYijPi6K+vMq0INPuVnK
-         RBEVYsWe6OGyPcCSLO4K+7Nyw3dHuKldbce/M81NCumL5cP1EeqprOxDbSA9qOOl64E4
-         ZL6A==
-X-Gm-Message-State: AOAM532rxYM4rCUUkhXkUMF1Zy6I/YHHXntc4A2fUDLKwwf13ePJmPB7
-        5KaymqE6K0kblUJgxXMcmE+cEsGW683J1s/W1JuzKdsM4IUtaG/7bnUq5A1WeKDFYqp+U8nHEqs
-        njTLiUv9KJ4k+1yUlR883PFMFP+m2B7YvOmODtQ==
-X-Received: by 2002:a17:906:b351:: with SMTP id cd17mr24871296ejb.110.1612910560580;
-        Tue, 09 Feb 2021 14:42:40 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxWZ/SxMb2EYr3Wx/r9tLm+ytvzx5rNbM3Mu7nYLvi+QXirS/jRZBjDCWHtM3Wa2pEsJ4PdxjPocMuO52GFZ9o=
-X-Received: by 2002:a17:906:b351:: with SMTP id cd17mr24871281ejb.110.1612910560352;
- Tue, 09 Feb 2021 14:42:40 -0800 (PST)
-MIME-Version: 1.0
-References: <591237.1612886997@warthog.procyon.org.uk> <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com>
+        bh=MizTFqaPr9s83orSxyP4M9HI4/HyznwEJQAwf0cC91A=;
+        b=TmZibWHbb7DvB6E0/P/SyloUADQuyFpEB2ikHXEYPUl447OJcJTRxpoNJyAYTZt6GlOXV/
+        hhLh2wJxNr4sKglGtV4R7JwBuQa61U6oK8dKR+5oizUDHYRuAhwWJsnroiwVQmXERC1nNG
+        SwILLMkkdgqtVJabFs94/Szktn2Htdc=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-416-IuDV1FoyPIq_VD0rQY5azw-1; Wed, 10 Feb 2021 11:29:16 -0500
+X-MC-Unique: IuDV1FoyPIq_VD0rQY5azw-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8F6421005501;
+        Wed, 10 Feb 2021 16:29:14 +0000 (UTC)
+Received: from warthog.procyon.org.uk (ovpn-115-23.rdu2.redhat.com [10.10.115.23])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4622660C0F;
+        Wed, 10 Feb 2021 16:29:08 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
 In-Reply-To: <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com>
-From:   David Wysochanski <dwysocha@redhat.com>
-Date:   Tue, 9 Feb 2021 17:42:04 -0500
-Message-ID: <CALF+zOkMKqvidLf8WZD889PUN-KofdiRPOcbO4hxboVmUGiOgw@mail.gmail.com>
-Subject: Re: [GIT PULL] fscache: I/O API modernisation and netfs helper library
+References: <CAHk-=wj-k86FOqAVQ4ScnBkX3YEKuMzqTEB2vixdHgovJpHc9w@mail.gmail.com> <591237.1612886997@warthog.procyon.org.uk>
 To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     David Howells <dhowells@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
+Cc:     dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>,
         Jeff Layton <jlayton@redhat.com>,
+        David Wysochanski <dwysocha@redhat.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
         Trond Myklebust <trondmy@hammerspace.com>,
         Steve French <sfrench@samba.org>,
         Dominique Martinet <asmadeus@codewreck.org>,
         Alexander Viro <viro@zeniv.linux.org.uk>,
         ceph-devel@vger.kernel.org, linux-afs@lists.infradead.org,
-        linux-cachefs <linux-cachefs@redhat.com>,
-        CIFS <linux-cifs@vger.kernel.org>,
+        linux-cachefs@redhat.com, CIFS <linux-cifs@vger.kernel.org>,
         linux-fsdevel <linux-fsdevel@vger.kernel.org>,
         "open list:NFS, SUNRPC, AND..." <linux-nfs@vger.kernel.org>,
         v9fs-developer@lists.sourceforge.net,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [GIT PULL] fscache: I/O API modernisation and netfs helper library
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <1330472.1612974547.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date:   Wed, 10 Feb 2021 16:29:07 +0000
+Message-ID: <1330473.1612974547@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Feb 9, 2021 at 2:07 PM Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> So I'm looking at this early, because I have more time now than I will
-> have during the merge window, and honestly, your pull requests have
-> been problematic in the past.
->
+Linus Torvalds <torvalds@linux-foundation.org> wrote:
+
 > The PG_fscache bit waiting functions are completely crazy. The comment
 > about "this will wake up others" is actively wrong, and the waiting
 > function looks insane, because you're mixing the two names for
 > "fscache" which makes the code look totally incomprehensible. Why
 > would we wait for PF_fscache, when PG_private_2 was set? Yes, I know
 > why, but the code looks entirely nonsensical.
->
-> So just looking at the support infrastructure changes, I get a big "Hmm".
->
-> But the thing that makes me go "No, I won't pull this", is that it has
-> all the same hallmark signs of trouble that I've complained about
-> before: I see absolutely zero sign of "this has more developers
-> involved".
->
-> There's not a single ack from a VM person for the VM changes. There's
-> no sign that this isn't yet another "David Howells went off alone and
-> did something that absolutely nobody else cared about".
->
 
-I care about it.
+How about the attached change to make it more coherent and fix the doc
+comment?
 
-I cannot speak to your concerns about the infrastructure changes, nor
-can I comment about a given maintainers involvement or lack thereof.
-However, I can tell you what my involvement has been.  I got involved
-with it because some of our customers use fscache with NFS and I've
-supported it.  I saw dhowells rewriting it to greatly simplify the
-code and make it easier to debug and wanted to support the effort.
+David
+---
+commit 9a28f7e68602193ce020a41f855f71cc55f693b9
+Author: David Howells <dhowells@redhat.com>
+Date:   Wed Feb 10 10:53:02 2021 +0000
 
-I have been working on the NFS conversion as dhowells has been
-evolving the fscache-iter API.  David first posted the series I think
-in Dec 2019 and I started with NFS about mid-year 2020, and had my
-first post of NFS patches in July:
-https://marc.info/?l=linux-nfs&m=159482591232752&w=2
+    netfs: Rename unlock_page_fscache() and wait_on_page_fscache()
+    =
 
-One thing that came out of the earlier iterations as a result of my
-testing was the need for the network filesystem to be able to 'cap'
-the IO size based on its parameters, hence the "clamp_length()"
-function.  So the next iteration dhowells further evolved it into a
-'netfs' API and a 'fscache' API, and my November post was based on
-that:
-https://marc.info/?l=linux-nfs&m=160596540022461&w=2
+    Rename unlock_page_fscache() to unlock_page_private_2() and
+    wait_on_page_fscache() to wait_on_page_private_2() and change the
+    references to PG_fscache to PG_private_2 also.  This makes these funct=
+ions
+    look more generic and doesn't mix the terminology.
+    =
 
-Each iteration has greatly simplified the interface to the network
-filesystem until today where the API is pretty simple.  I have done
-extensive tests with each iteration with all the main NFS versions,
-specific unit tests, xfstests, etc.  However my test matrix did not
-hit enough fscache + pNFS servers, and I found a problem too late to
-include in his pull request.  This is mostly why my patches were not
-included to convert NFS to the new fscache API, but I intend to work
-out the remaining issues for the next merge window, and I'll have an
-opportunity to do more testing last week of Feb with the NFS "remote
-bakeathon".  My most recent post was at the end of Jan, and Anna is
-taking the first 5 refactoring patches in the next merge window:
-https://marc.info/?l=linux-nfs&m=161184595127618&w=2
+    Fix the kdoc comment as the wake up mechanism doesn't wake up all the
+    sleepers.  Note the example usage case for the functions in conjunctio=
+n
+    with the cache also.
+    =
 
-I do not have the skills of a Trond or Anna NFS developers, but I have
-worked in this in earnest and intend to see it through to completion
-and support NFS and fscache work.  I have received some feedback on
-the NFS patches though it's not been a lot, I do know I have some
-things to address still.  With open source, no feedback is hard to
-draw conclusions other than it's not "super popular" area, but we
-always knew that about fscache - it's an "add on" that some customers
-require but not everyone. I know Trond speaks up when I make a mistake
-and/or something will cause a problem, so I consider the silence
-mostly a positive sign.
+    Alias the functions in linux/netfs.h.
+    =
 
+    Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: David Howells <dhowells@redhat.com>
 
+diff --git a/include/linux/netfs.h b/include/linux/netfs.h
+index 2ffdef1ded91..d4cb6e6f704c 100644
+--- a/include/linux/netfs.h
++++ b/include/linux/netfs.h
+@@ -24,6 +24,8 @@
+ #define ClearPageFsCache(page)		ClearPagePrivate2((page))
+ #define TestSetPageFsCache(page)	TestSetPagePrivate2((page))
+ #define TestClearPageFsCache(page)	TestClearPagePrivate2((page))
++#define wait_on_page_fscache(page)	wait_on_page_private_2((page))
++#define unlock_page_fscache(page)	unlock_page_private_2((page))
+ =
 
-> See my problem? I need to be convinced that this makes sense outside
-> of your world, and it's not yet another thing that will cause problems
-> down the line because nobody else really ever used it or cared about
-> it until we hit a snag.
->
->                   Linus
->
+ enum netfs_read_source {
+ 	NETFS_FILL_WITH_ZEROES,
+diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
+index 4935ad6171c1..a88ccc9ab0b1 100644
+--- a/include/linux/pagemap.h
++++ b/include/linux/pagemap.h
+@@ -591,7 +591,7 @@ extern int __lock_page_async(struct page *page, struct=
+ wait_page_queue *wait);
+ extern int __lock_page_or_retry(struct page *page, struct mm_struct *mm,
+ 				unsigned int flags);
+ extern void unlock_page(struct page *page);
+-extern void unlock_page_fscache(struct page *page);
++extern void unlock_page_private_2(struct page *page);
+ =
+
+ /*
+  * Return true if the page was successfully locked
+@@ -683,16 +683,17 @@ static inline int wait_on_page_locked_killable(struc=
+t page *page)
+ }
+ =
+
+ /**
+- * wait_on_page_fscache - Wait for PG_fscache to be cleared on a page
++ * wait_on_page_private_2 - Wait for PG_private_2 to be cleared on a page
+  * @page: The page
+  *
+- * Wait for the fscache mark to be removed from a page, usually signifyin=
+g the
+- * completion of a write from that page to the cache.
++ * Wait for the PG_private_2 page bit to be removed from a page.  This is=
+, for
++ * example, used to handle a netfs page being written to a local disk cac=
+he,
++ * thereby allowing writes to the cache for the same page to be serialise=
+d.
+  */
+-static inline void wait_on_page_fscache(struct page *page)
++static inline void wait_on_page_private_2(struct page *page)
+ {
+ 	if (PagePrivate2(page))
+-		wait_on_page_bit(compound_head(page), PG_fscache);
++		wait_on_page_bit(compound_head(page), PG_private_2);
+ }
+ =
+
+ extern void put_and_wait_on_page_locked(struct page *page);
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 91fcae006d64..7d321152d579 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -1467,22 +1467,24 @@ void unlock_page(struct page *page)
+ EXPORT_SYMBOL(unlock_page);
+ =
+
+ /**
+- * unlock_page_fscache - Unlock a page pinned with PG_fscache
++ * unlock_page_private_2 - Unlock a page that's locked with PG_private_2
+  * @page: The page
+  *
+- * Unlocks the page and wakes up sleepers in wait_on_page_fscache().  Als=
+o
+- * wakes those waiting for the lock and writeback bits because the wakeup
+- * mechanism is shared.  But that's OK - those sleepers will just go back=
+ to
+- * sleep.
++ * Unlocks a page that's locked with PG_private_2 and wakes up sleepers i=
+n
++ * wait_on_page_private_2().
++ *
++ * This is, for example, used when a netfs page is being written to a loc=
+al
++ * disk cache, thereby allowing writes to the cache for the same page to =
+be
++ * serialised.
+  */
+-void unlock_page_fscache(struct page *page)
++void unlock_page_private_2(struct page *page)
+ {
+ 	page =3D compound_head(page);
+ 	VM_BUG_ON_PAGE(!PagePrivate2(page), page);
+-	clear_bit_unlock(PG_fscache, &page->flags);
+-	wake_up_page_bit(page, PG_fscache);
++	clear_bit_unlock(PG_private_2, &page->flags);
++	wake_up_page_bit(page, PG_private_2);
+ }
+-EXPORT_SYMBOL(unlock_page_fscache);
++EXPORT_SYMBOL(unlock_page_private_2);
+ =
+
+ /**
+  * end_page_writeback - end writeback against a page
 
