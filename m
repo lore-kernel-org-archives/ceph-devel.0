@@ -2,374 +2,153 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C67EC43381
-	for <ceph-devel@archiver.kernel.org>; Mon, 15 Feb 2021 16:02:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4E26C43381
+	for <ceph-devel@archiver.kernel.org>; Mon, 15 Feb 2021 16:11:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7726464DF0
-	for <ceph-devel@archiver.kernel.org>; Mon, 15 Feb 2021 16:02:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A87BD64DEB
+	for <ceph-devel@archiver.kernel.org>; Mon, 15 Feb 2021 16:11:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231815AbhBOQCS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 15 Feb 2021 11:02:18 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:38426 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231810AbhBOPru (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 15 Feb 2021 10:47:50 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1613403982;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=FSeGQPRgQOfnLZQYeacjhtBI6uVsAcX8IrVMZtVQC4Q=;
-        b=VMkHXAoJ96/f4Uu4E2pznKEEyYn+1nwX8wTY/8bbjB/BKDIE2B+1cZFOAVApNCFQAhnW8H
-        u3YBq/RM7VpJvsJ+GYVPPBQywPHxuhPDzjZETnfk/Vz7Z5AGSbe1RlgFZ96AgpNZ3s/aXv
-        5k9d4igA9AQKyFSDMeXe8tGlBg6vMj4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-75-RR9oVwJCMjih5l2RF-Fw4Q-1; Mon, 15 Feb 2021 10:46:20 -0500
-X-MC-Unique: RR9oVwJCMjih5l2RF-Fw4Q-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 711A479EC2;
-        Mon, 15 Feb 2021 15:46:18 +0000 (UTC)
-Received: from warthog.procyon.org.uk (ovpn-119-68.rdu2.redhat.com [10.10.119.68])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id F32BB5D9C0;
-        Mon, 15 Feb 2021 15:46:11 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 10/33] netfs: Gather stats
-From:   David Howells <dhowells@redhat.com>
-To:     Trond Myklebust <trondmy@hammerspace.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>
-Cc:     Jeff Layton <jlayton@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org,
-        linux-cachefs@redhat.com, linux-afs@lists.infradead.org,
-        linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, dhowells@redhat.com,
-        Jeff Layton <jlayton@redhat.com>,
-        David Wysochanski <dwysocha@redhat.com>,
-        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        linux-cachefs@redhat.com, linux-afs@lists.infradead.org,
-        linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 15 Feb 2021 15:46:11 +0000
-Message-ID: <161340397101.1303470.17581910581108378458.stgit@warthog.procyon.org.uk>
-In-Reply-To: <161340385320.1303470.2392622971006879777.stgit@warthog.procyon.org.uk>
-References: <161340385320.1303470.2392622971006879777.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
-MIME-Version: 1.0
+        id S232642AbhBOQK4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 15 Feb 2021 11:10:56 -0500
+Received: from mail-eopbgr770090.outbound.protection.outlook.com ([40.107.77.90]:9518
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S232747AbhBOQDN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 15 Feb 2021 11:03:13 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=N6aLwAVfdxMZjAsWo265D0wP6AioUyOPQkeEqDOnTFyuiXuISZiINRRlpg3KUQbNc6Q66S4Pti2dBKaq1JsW80GXeSq0aszNXdlAOZSEvkY6Jq8KYO4MVeW4VlDAGD4IQQzZxyz+oERyrN6VI1EWUeOVx/pEDfScTFzfr3J7RlK1SCceD63Oh4cdjr/riaUj+X+udEgAfTG7HkXv8E+wUKjUWaWdVRMnvPo4orio6FoDCczhuPCEtV5KnVsRmS+D6Y3oGZpDL1LuEZ85TTS+fNp/btK0SEIjsiwnn/zkW+XLFEc228e+h3rAkFIzvQ3dA/9JwtZ/FEIep9lDFb7d7Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=LaGNQARnwpEkL1xtIrvWd4c7lfcd0NMUQPoWZ/HnLps=;
+ b=RLZbs5mpRkBfBX4bB86c9enmyXl+53IHw/3vuQd2fyBauKG1Go+RkQ/6+v2fJGJKq177pEJzGXbDbaHjAv/oHq6uB2OOjJGZf5eFdZVeslF1GZpG0BCn8brEDEU+mhKnGbuRB5t9T3vmuD7VPxnAxPX76ruGFKyxCj5K41pB4TwxRBRnGNpRYtqeCrKEZsIKtStLQt/EdHnC887w6jxqIIe6z+XyYZE6421NS5/XCnJJ5Z7oWiNlPoWtGRYptfwmltD+K8p9g8EHWER/JUpd1RdAWNR5UAoydlN97MlctNigZVMU535SaCUDif0q9kdOEJz8kWQiDr9rdArLXiPXvA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=hammerspace.com; dmarc=pass action=none
+ header.from=hammerspace.com; dkim=pass header.d=hammerspace.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=hammerspace.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=LaGNQARnwpEkL1xtIrvWd4c7lfcd0NMUQPoWZ/HnLps=;
+ b=P3eOoel3tAJ+g7XCd82wEpMt+y1KxGExfelQrJRWJgT+ZbOy4SxbK+s0uui1jXcgpJHVNMc+GzIVxtgIKNk1fzmwka5Z9pmCTpQ5y+EVJvIcz+kUHs3eKuEt7qH+n3NkInrbaQ+H4ARIRmMV8z0yEmOIygiC28Xb7SB64Dog+1w=
+Received: from CH2PR13MB3525.namprd13.prod.outlook.com (2603:10b6:610:21::29)
+ by CH2PR13MB3847.namprd13.prod.outlook.com (2603:10b6:610:99::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3868.11; Mon, 15 Feb
+ 2021 16:02:20 +0000
+Received: from CH2PR13MB3525.namprd13.prod.outlook.com
+ ([fe80::f453:2dd2:675:d063]) by CH2PR13MB3525.namprd13.prod.outlook.com
+ ([fe80::f453:2dd2:675:d063%3]) with mapi id 15.20.3868.025; Mon, 15 Feb 2021
+ 16:02:20 +0000
+From:   Trond Myklebust <trondmy@hammerspace.com>
+To:     "drinkcat@chromium.org" <drinkcat@chromium.org>,
+        "anna.schumaker@netapp.com" <anna.schumaker@netapp.com>,
+        "iant@google.com" <iant@google.com>,
+        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "dchinner@redhat.com" <dchinner@redhat.com>,
+        "llozano@chromium.org" <llozano@chromium.org>,
+        "lhenriques@suse.de" <lhenriques@suse.de>,
+        "sfrench@samba.org" <sfrench@samba.org>,
+        "darrick.wong@oracle.com" <darrick.wong@oracle.com>,
+        "jlayton@kernel.org" <jlayton@kernel.org>,
+        "amir73il@gmail.com" <amir73il@gmail.com>,
+        "viro@zeniv.linux.org.uk" <viro@zeniv.linux.org.uk>,
+        "miklos@szeredi.hu" <miklos@szeredi.hu>
+CC:     "samba-technical@lists.samba.org" <samba-technical@lists.samba.org>,
+        "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>,
+        "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>
+Subject: Re: [PATCH v2] vfs: prevent copy_file_range to copy across devices
+Thread-Topic: [PATCH v2] vfs: prevent copy_file_range to copy across devices
+Thread-Index: AQHXA7EmiAMwHAQV80CDyBR44E7wi6pZYHkA
+Date:   Mon, 15 Feb 2021 16:02:20 +0000
+Message-ID: <ec3a5337b9da71a7bc9527728067a4a3d027419b.camel@hammerspace.com>
+References: <CAOQ4uxiFGjdvX2-zh5o46pn7RZhvbGHH0wpzLPuPOom91FwWeQ@mail.gmail.com>
+         <20210215154317.8590-1-lhenriques@suse.de>
+In-Reply-To: <20210215154317.8590-1-lhenriques@suse.de>
+Accept-Language: en-US, en-GB
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: chromium.org; dkim=none (message not signed)
+ header.d=none;chromium.org; dmarc=none action=none
+ header.from=hammerspace.com;
+x-originating-ip: [68.36.133.222]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: cce1c63a-bf40-438b-352a-08d8d1cb1335
+x-ms-traffictypediagnostic: CH2PR13MB3847:
+x-microsoft-antispam-prvs: <CH2PR13MB3847F931D8B7941CA1C3D946B8889@CH2PR13MB3847.namprd13.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8882;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: p9ABEgRiSzR5EEdXJSG8JT3ZqLuy+vYu6QX0oSH8q3s9gde3nmI0dwlJ7XtvwWzA8lKsi4NTrLuk9cCPiLGHfLsp5d16JtwYwywovDXcVVPQvZ1H9h88m1PjFoABw2ijX6MXqTt6EAMtjPj7Gp92MWYaCgXUWF/9ZLI5VJIGDKNs1fxx8SJ2BDrGHInDS+jfwrJUOH6v9JC8UdsDu2skR3FxtbzL36H9kpJI0u3nhTp1mNxRfF3KOZ6w9HE0/KrcM8o+1+k6bjncbzCwBioUZNN4AFr6kj/kvY4lnkooxsQnnoXFlZd67m7fxW09A0my3RtZTGPFMpdE7Sw4uPVpg0mewkteToc2ddCk13ujAfpmBvwTAfhwq7sSyEU+8I8jqUgOpzl4XYoGqjmI1BL3fJ2f0gwfpoeUYD39dKIIGsV/DWP0HR0MzTC2Z2CW/MOd2+8a0ejA8MKdzoadpa5c4MJNAGluOYK14Tz0dKz3moSoSBjfObQvjR8eHvSwMeISJ1vpRO+UCWntjwykhaCqnvJ6xOSelb0yEyh5uzpMaRUeFz02hPVsMPGgE25IPKcM
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH2PR13MB3525.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(136003)(376002)(396003)(39830400003)(346002)(4744005)(5660300002)(8676002)(76116006)(66476007)(2616005)(66556008)(71200400001)(921005)(66946007)(64756008)(66446008)(478600001)(8936002)(6512007)(36756003)(2906002)(316002)(186003)(26005)(7416002)(86362001)(4326008)(6506007)(110136005)(6486002)(54906003);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: =?utf-8?B?bXRMME1vZW1YZkR6eXBPaXl0U2hGYkdNQ2FKRmFmZExNYk1mTEptc0kvSUFx?=
+ =?utf-8?B?OU5EYkdBY0VtaElCZ2QzeW50cTB2elgwNE9EaTY4aDVpZkd2MzZVM1lhQzgx?=
+ =?utf-8?B?ei9kM3RsY2V5M3V0bkkvTW5zTlVidjRKZlA3TVhVd1BEdmtUMXJIdGdCaTh4?=
+ =?utf-8?B?SURja3J0N0d2Y09seW4zZUFwWWk2NU9uMlZlUHBrcFN3dXJoY0FXN21BamhJ?=
+ =?utf-8?B?eExxR2VhaCtNYXVrYXplL2RsYlZJbTQ0TmloNHZnRkF2UzdwTmh4bC9sYUs5?=
+ =?utf-8?B?MWI2cU1VNEMrUEwrU2lHblNhb1F5OXdsL3FoVGJTODF5cU8vR3NOK1hvOHJI?=
+ =?utf-8?B?UVcycWN3Y3NYd091TzBEbmhRdTdpeHdYRDdtRFlvaGZtN2E0RGp4ZFBmNndH?=
+ =?utf-8?B?Tk9sckY2cVI1eG0rSWFvaE92VHJrb3A0V0VqZHRQOGp6RG12bXlvTFRVaTJS?=
+ =?utf-8?B?bmNxS2dyQW43QmdXWEZ5aXhzWDFla2ZIdWdlWDROdzVaaWxyMjVmU2lrYy9a?=
+ =?utf-8?B?VHJlc2U2TVNNVzVFTTNiT01DRzEydWR4clkxUndoejc1MGZVSlRHYThDZzRt?=
+ =?utf-8?B?M2VRUk1zT3ppMjBjOWFzbjlURkliU0poZTVVRkNCQ0pXTWNFSUpvQ2sza1Q2?=
+ =?utf-8?B?UHNZczY5WHdRb20zaXlGRGM3OFh1ZklhdnRseU9nT2g3OEVsVTRRbURGbmlY?=
+ =?utf-8?B?aWZQMlhZbHR2bG1rMUZyeW0ybU9FVzgvOExCcXNlYUt6eTNVSFZSNG14dEVp?=
+ =?utf-8?B?ekkzWDV1dHM2akdqY2FDZG1lVHVTS3VZUzA4ek1PNjJnNmwxdDdURFpiTW5D?=
+ =?utf-8?B?eWJicklKSmZSa2dMcEYrNzF1YlFpbjNQRmZFTkhuWTRsdEhVa0EyUkpQcGdz?=
+ =?utf-8?B?U3hSYndFeHRsdEQ2Qjc1dFdaZ0QzbGJLbTVGQWtmWDdINWQvaWtSV1FEc0lV?=
+ =?utf-8?B?QkErOVVuR0tSYUgvYjBxd2ZHK1lPRTVzSGd0SHV1aWs1YUl0M09zTW1DK3Bx?=
+ =?utf-8?B?ZTZPZHdaYk9lR2dVaFBzTGlzajlvdmdzQmhIczFGVEtrVDNxSGgzMmZLTjE2?=
+ =?utf-8?B?bWFSUTVSYkg1RGk5RlhJbWlKMnRDMHl5UzlJTFpyT0dyUEhtTDkvVzErZTNS?=
+ =?utf-8?B?UDN0Ykk5R2RwMTI0N29rSS9LazNZMTdXa0pNcFVOaDdZNU5TWGZvWDJ1OU1o?=
+ =?utf-8?B?RGRJa3JWNTh4WklFQWM4QmIzYVV0VlIvUFUzcGppdXVVaU10a2l3cmpEenV0?=
+ =?utf-8?B?aExqWG92eWFRNWdOY3h6YlpNL0F6WWdsdUg0Wlc4VU9BVndXOHhxVFY0YS9r?=
+ =?utf-8?B?NUhNN1dUdnIwQnBhS1E2Uk4waVZZSkF3Vit1VDVqeXQ2b2lQaHlFWGZCVWRN?=
+ =?utf-8?B?Z0ZNdDJsTHA2bWVrWGlsQWg2SUpNeWszdnhVNGc4UjNsdVlsYkF4aEFQS3Vw?=
+ =?utf-8?B?SG9CMzNnSmNuaWhNSTZpL29TR0ptYzdyck9qTHE1UUZuaWFacTJ3dkFIalM3?=
+ =?utf-8?B?YzJmdUdDbkFYb2JiWElUcW1nM0JmcTNPUFVBWTNKU0pwSUF4OEszVlJLN2U5?=
+ =?utf-8?B?NzBEYnhSM0ZuV0ZmYjJSYk9nYmdSWkxyR2RKRjhodEZ2QnIrakN4M2ZxN1Fj?=
+ =?utf-8?B?c2ZBY2VwOFVnR1FNNzRtSU83MDc4VGE4OXEveld5VE9DNHB0eFJmQUdlWkwr?=
+ =?utf-8?B?SmxLaW5nd2NGcWkyaDdLTnhrN2NUY1E3Sy96MFRxc1MyMEcrMjYwdlFLdm5Q?=
+ =?utf-8?Q?hprbA0Zf+DathyxUfrHvC9JYCcmmNR2LzsEvJA6?=
+x-ms-exchange-transport-forked: True
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+Content-ID: <F8AFBCC046D0CD4A93A0E77383E79F0E@namprd13.prod.outlook.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-OriginatorOrg: hammerspace.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: CH2PR13MB3525.namprd13.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: cce1c63a-bf40-438b-352a-08d8d1cb1335
+X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Feb 2021 16:02:20.2906
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 0d4fed5c-3a70-46fe-9430-ece41741f59e
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: vrWcB+/NEhJ3P1I1hOJLlJrWrtegOKOwavZ0CVt3PhhrjSwet3yO53mLpJ8hxYIIvOZZap6EQDa4v4wqISs1Gw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR13MB3847
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Gather statistics from the netfs interface that can be exported through a
-seqfile.  This is intended to be called by a later patch when viewing
-/proc/fs/fscache/stats.
-
-Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
-cc: Matthew Wilcox <willy@infradead.org>
-cc: linux-mm@kvack.org
-cc: linux-cachefs@redhat.com
-cc: linux-afs@lists.infradead.org
-cc: linux-nfs@vger.kernel.org
-cc: linux-cifs@vger.kernel.org
-cc: ceph-devel@vger.kernel.org
-cc: v9fs-developer@lists.sourceforge.net
-cc: linux-fsdevel@vger.kernel.org
----
-
- fs/netfs/Kconfig       |   15 +++++++++++++
- fs/netfs/Makefile      |    3 +--
- fs/netfs/internal.h    |   34 ++++++++++++++++++++++++++++++
- fs/netfs/read_helper.c |   23 ++++++++++++++++++++
- fs/netfs/stats.c       |   54 ++++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/netfs.h  |    1 +
- 6 files changed, 128 insertions(+), 2 deletions(-)
- create mode 100644 fs/netfs/stats.c
-
-diff --git a/fs/netfs/Kconfig b/fs/netfs/Kconfig
-index 2ebf90e6ca95..578112713703 100644
---- a/fs/netfs/Kconfig
-+++ b/fs/netfs/Kconfig
-@@ -6,3 +6,18 @@ config NETFS_SUPPORT
- 	  This option enables support for network filesystems, including
- 	  helpers for high-level buffered I/O, abstracting out read
- 	  segmentation, local caching and transparent huge page support.
-+
-+config NETFS_STATS
-+	bool "Gather statistical information on local caching"
-+	depends on NETFS_SUPPORT && PROC_FS
-+	help
-+	  This option causes statistical information to be gathered on local
-+	  caching and exported through file:
-+
-+		/proc/fs/fscache/stats
-+
-+	  The gathering of statistics adds a certain amount of overhead to
-+	  execution as there are a quite a few stats gathered, and on a
-+	  multi-CPU system these may be on cachelines that keep bouncing
-+	  between CPUs.  On the other hand, the stats are very useful for
-+	  debugging purposes.  Saying 'Y' here is recommended.
-diff --git a/fs/netfs/Makefile b/fs/netfs/Makefile
-index 4b4eff2ba369..c15bfc966d96 100644
---- a/fs/netfs/Makefile
-+++ b/fs/netfs/Makefile
-@@ -1,6 +1,5 @@
- # SPDX-License-Identifier: GPL-2.0
- 
--netfs-y := \
--	read_helper.o
-+netfs-y := read_helper.o stats.o
- 
- obj-$(CONFIG_NETFS_SUPPORT) := netfs.o
-diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
-index ee665c0e7dc8..98b6f4516da1 100644
---- a/fs/netfs/internal.h
-+++ b/fs/netfs/internal.h
-@@ -16,8 +16,42 @@
-  */
- extern unsigned int netfs_debug;
- 
-+/*
-+ * stats.c
-+ */
-+#ifdef CONFIG_NETFS_STATS
-+extern atomic_t netfs_n_rh_readahead;
-+extern atomic_t netfs_n_rh_readpage;
-+extern atomic_t netfs_n_rh_rreq;
-+extern atomic_t netfs_n_rh_sreq;
-+extern atomic_t netfs_n_rh_download;
-+extern atomic_t netfs_n_rh_download_done;
-+extern atomic_t netfs_n_rh_download_failed;
-+extern atomic_t netfs_n_rh_download_instead;
-+extern atomic_t netfs_n_rh_read;
-+extern atomic_t netfs_n_rh_read_done;
-+extern atomic_t netfs_n_rh_read_failed;
-+extern atomic_t netfs_n_rh_zero;
-+extern atomic_t netfs_n_rh_short_read;
-+extern atomic_t netfs_n_rh_write;
-+extern atomic_t netfs_n_rh_write_done;
-+extern atomic_t netfs_n_rh_write_failed;
-+
-+
-+static inline void netfs_stat(atomic_t *stat)
-+{
-+	atomic_inc(stat);
-+}
-+
-+static inline void netfs_stat_d(atomic_t *stat)
-+{
-+	atomic_dec(stat);
-+}
-+
-+#else
- #define netfs_stat(x) do {} while(0)
- #define netfs_stat_d(x) do {} while(0)
-+#endif
- 
- /*****************************************************************************/
- /*
-diff --git a/fs/netfs/read_helper.c b/fs/netfs/read_helper.c
-index 53b04b105179..4f6f708f8f18 100644
---- a/fs/netfs/read_helper.c
-+++ b/fs/netfs/read_helper.c
-@@ -55,6 +55,7 @@ static struct netfs_read_request *netfs_alloc_read_request(
- 		refcount_set(&rreq->usage, 1);
- 		__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
- 		ops->init_rreq(rreq, file);
-+		netfs_stat(&netfs_n_rh_rreq);
- 	}
- 
- 	return rreq;
-@@ -86,6 +87,7 @@ static void netfs_free_read_request(struct work_struct *work)
- 		rreq->netfs_ops->cleanup(rreq->mapping, rreq->netfs_priv);
- 	trace_netfs_rreq(rreq, netfs_rreq_trace_free);
- 	kfree(rreq);
-+	netfs_stat_d(&netfs_n_rh_rreq);
- }
- 
- static void netfs_put_read_request(struct netfs_read_request *rreq)
-@@ -115,6 +117,7 @@ static struct netfs_read_subrequest *netfs_alloc_subrequest(
- 		refcount_set(&subreq->usage, 2);
- 		subreq->rreq = rreq;
- 		netfs_get_read_request(rreq);
-+		netfs_stat(&netfs_n_rh_sreq);
- 	}
- 
- 	return subreq;
-@@ -130,6 +133,7 @@ static void __netfs_put_subrequest(struct netfs_read_subrequest *subreq)
- 	trace_netfs_sreq(subreq, netfs_sreq_trace_free);
- 	netfs_put_read_request(subreq->rreq);
- 	kfree(subreq);
-+	netfs_stat_d(&netfs_n_rh_sreq);
- }
- 
- /*
-@@ -151,6 +155,7 @@ static void netfs_clear_unread(struct netfs_read_subrequest *subreq)
- static void netfs_fill_with_zeroes(struct netfs_read_request *rreq,
- 				   struct netfs_read_subrequest *subreq)
- {
-+	netfs_stat(&netfs_n_rh_zero);
- 	__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
- 	netfs_subreq_terminated(subreq, 0);
- }
-@@ -174,6 +179,7 @@ static void netfs_fill_with_zeroes(struct netfs_read_request *rreq,
- static void netfs_read_from_server(struct netfs_read_request *rreq,
- 				   struct netfs_read_subrequest *subreq)
- {
-+	netfs_stat(&netfs_n_rh_download);
- 	rreq->netfs_ops->issue_op(subreq);
- }
- 
-@@ -283,6 +289,7 @@ static void netfs_rreq_short_read(struct netfs_read_request *rreq,
- 	__clear_bit(NETFS_SREQ_SHORT_READ, &subreq->flags);
- 	__set_bit(NETFS_SREQ_SEEK_DATA_READ, &subreq->flags);
- 
-+	netfs_stat(&netfs_n_rh_short_read);
- 	trace_netfs_sreq(subreq, netfs_sreq_trace_resubmit_short);
- 
- 	netfs_get_read_subrequest(subreq);
-@@ -314,6 +321,7 @@ static bool netfs_rreq_perform_resubmissions(struct netfs_read_request *rreq)
- 				break;
- 			subreq->source = NETFS_DOWNLOAD_FROM_SERVER;
- 			subreq->error = 0;
-+			netfs_stat(&netfs_n_rh_download_instead);
- 			trace_netfs_sreq(subreq, netfs_sreq_trace_download_instead);
- 			netfs_get_read_subrequest(subreq);
- 			atomic_inc(&rreq->nr_rd_ops);
-@@ -406,6 +414,17 @@ void netfs_subreq_terminated(struct netfs_read_subrequest *subreq,
- 	       subreq->debug_index, subreq->start, subreq->flags,
- 	       transferred_or_error);
- 
-+	switch (subreq->source) {
-+	case NETFS_READ_FROM_CACHE:
-+		netfs_stat(&netfs_n_rh_read_done);
-+		break;
-+	case NETFS_DOWNLOAD_FROM_SERVER:
-+		netfs_stat(&netfs_n_rh_download_done);
-+		break;
-+	default:
-+		break;
-+	}
-+
- 	if (IS_ERR_VALUE(transferred_or_error)) {
- 		subreq->error = transferred_or_error;
- 		goto failed;
-@@ -459,8 +478,10 @@ void netfs_subreq_terminated(struct netfs_read_subrequest *subreq,
- 
- failed:
- 	if (subreq->source == NETFS_READ_FROM_CACHE) {
-+		netfs_stat(&netfs_n_rh_read_failed);
- 		set_bit(NETFS_RREQ_INCOMPLETE_IO, &rreq->flags);
- 	} else {
-+		netfs_stat(&netfs_n_rh_download_failed);
- 		set_bit(NETFS_RREQ_FAILED, &rreq->flags);
- 		rreq->error = subreq->error;
- 	}
-@@ -642,6 +663,7 @@ void netfs_readahead(struct readahead_control *ractl,
- 	rreq->start	= readahead_pos(ractl);
- 	rreq->len	= readahead_length(ractl);
- 
-+	netfs_stat(&netfs_n_rh_readahead);
- 	trace_netfs_read(rreq, readahead_pos(ractl), readahead_length(ractl),
- 			 netfs_read_trace_readahead);
- 
-@@ -716,6 +738,7 @@ int netfs_readpage(struct file *file,
- 	rreq->start	= page->index * PAGE_SIZE;
- 	rreq->len	= thp_size(page);
- 
-+	netfs_stat(&netfs_n_rh_readpage);
- 	trace_netfs_read(rreq, rreq->start, rreq->len, netfs_read_trace_readpage);
- 
- 	netfs_get_read_request(rreq);
-diff --git a/fs/netfs/stats.c b/fs/netfs/stats.c
-new file mode 100644
-index 000000000000..df6ff5718f25
---- /dev/null
-+++ b/fs/netfs/stats.c
-@@ -0,0 +1,54 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+/* Netfs support statistics
-+ *
-+ * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
-+ * Written by David Howells (dhowells@redhat.com)
-+ */
-+
-+#include <linux/export.h>
-+#include <linux/seq_file.h>
-+#include <linux/netfs.h>
-+#include "internal.h"
-+
-+atomic_t netfs_n_rh_readahead;
-+atomic_t netfs_n_rh_readpage;
-+atomic_t netfs_n_rh_rreq;
-+atomic_t netfs_n_rh_sreq;
-+atomic_t netfs_n_rh_download;
-+atomic_t netfs_n_rh_download_done;
-+atomic_t netfs_n_rh_download_failed;
-+atomic_t netfs_n_rh_download_instead;
-+atomic_t netfs_n_rh_read;
-+atomic_t netfs_n_rh_read_done;
-+atomic_t netfs_n_rh_read_failed;
-+atomic_t netfs_n_rh_zero;
-+atomic_t netfs_n_rh_short_read;
-+atomic_t netfs_n_rh_write;
-+atomic_t netfs_n_rh_write_done;
-+atomic_t netfs_n_rh_write_failed;
-+
-+void netfs_stats_show(struct seq_file *m)
-+{
-+	seq_printf(m, "RdHelp : RA=%u RP=%u rr=%u sr=%u\n",
-+		   atomic_read(&netfs_n_rh_readahead),
-+		   atomic_read(&netfs_n_rh_readpage),
-+		   atomic_read(&netfs_n_rh_rreq),
-+		   atomic_read(&netfs_n_rh_sreq));
-+	seq_printf(m, "RdHelp : ZR=%u sh=%u\n",
-+		   atomic_read(&netfs_n_rh_zero),
-+		   atomic_read(&netfs_n_rh_short_read));
-+	seq_printf(m, "RdHelp : DL=%u ds=%u df=%u di=%u\n",
-+		   atomic_read(&netfs_n_rh_download),
-+		   atomic_read(&netfs_n_rh_download_done),
-+		   atomic_read(&netfs_n_rh_download_failed),
-+		   atomic_read(&netfs_n_rh_download_instead));
-+	seq_printf(m, "RdHelp : RD=%u rs=%u rf=%u\n",
-+		   atomic_read(&netfs_n_rh_read),
-+		   atomic_read(&netfs_n_rh_read_done),
-+		   atomic_read(&netfs_n_rh_read_failed));
-+	seq_printf(m, "RdHelp : WR=%u ws=%u wf=%u\n",
-+		   atomic_read(&netfs_n_rh_write),
-+		   atomic_read(&netfs_n_rh_write_done),
-+		   atomic_read(&netfs_n_rh_write_failed));
-+}
-+EXPORT_SYMBOL(netfs_stats_show);
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 24083dc0adfa..b8237b6f17cb 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -134,5 +134,6 @@ extern int netfs_readpage(struct file *,
- 			  void *);
- 
- extern void netfs_subreq_terminated(struct netfs_read_subrequest *, ssize_t);
-+extern void netfs_stats_show(struct seq_file *);
- 
- #endif /* _LINUX_NETFS_H */
-
-
+T24gTW9uLCAyMDIxLTAyLTE1IGF0IDE1OjQzICswMDAwLCBMdWlzIEhlbnJpcXVlcyB3cm90ZToN
+Cj4gTmljb2xhcyBCb2ljaGF0IHJlcG9ydGVkIGFuIGlzc3VlIHdoZW4gdHJ5aW5nIHRvIHVzZSB0
+aGUNCj4gY29weV9maWxlX3JhbmdlDQo+IHN5c2NhbGwgb24gYSB0cmFjZWZzIGZpbGUuwqAgSXQg
+ZmFpbGVkIHNpbGVudGx5IGJlY2F1c2UgdGhlIGZpbGUNCj4gY29udGVudCBpcw0KPiBnZW5lcmF0
+ZWQgb24tdGhlLWZseSAocmVwb3J0aW5nIGEgc2l6ZSBvZiB6ZXJvKSBhbmQgY29weV9maWxlX3Jh
+bmdlDQo+IG5lZWRzDQo+IHRvIGtub3cgaW4gYWR2YW5jZSBob3cgbXVjaCBkYXRhIGlzIHByZXNl
+bnQuDQoNClRoYXQgZXhwbGFuYXRpb24gbWFrZXMgbm8gc2Vuc2Ugd2hhdHNvZXZlci4gY29weV9m
+aWxlX3JhbmdlIGlzIGEgbm9uLQ0KYXRvbWljIG9wZXJhdGlvbiBhbmQgc28gdGhlIGZpbGUgY2Fu
+IGNoYW5nZSB3aGlsZSBiZWluZyBjb3BpZWQuIEFueQ0KZGV0ZXJtaW5hdGlvbiBvZiAnaG93IG11
+Y2ggZGF0YSBpcyBwcmVzZW50JyB0aGF0IGlzIG1hZGUgaW4gYWR2YW5jZQ0Kd291bGQgdGhlcmVm
+b3JlIGJlIGEgZmxhdyBpbiB0aGUgY29weSBwcm9jZXNzIGJlaW5nIHVzZWQgKGkuZS4NCmRvX3Nw
+bGljZV9kaXJlY3QoKSkuIERvZXMgc2VuZGZpbGUoKSBhbHNvICdpc3N1ZScgaW4gdGhlIHNhbWUg
+d2F5Pw0KDQoNCi0tIA0KVHJvbmQgTXlrbGVidXN0DQpMaW51eCBORlMgY2xpZW50IG1haW50YWlu
+ZXIsIEhhbW1lcnNwYWNlDQp0cm9uZC5teWtsZWJ1c3RAaGFtbWVyc3BhY2UuY29tDQoNCg0K
