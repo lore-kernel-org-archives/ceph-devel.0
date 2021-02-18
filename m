@@ -2,125 +2,103 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C3C8C433E0
-	for <ceph-devel@archiver.kernel.org>; Thu, 18 Feb 2021 07:51:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5CDDC433E0
+	for <ceph-devel@archiver.kernel.org>; Thu, 18 Feb 2021 10:27:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EEDF464DE9
-	for <ceph-devel@archiver.kernel.org>; Thu, 18 Feb 2021 07:51:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4268E60235
+	for <ceph-devel@archiver.kernel.org>; Thu, 18 Feb 2021 10:27:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231166AbhBRHuW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 18 Feb 2021 02:50:22 -0500
-Received: from mail.kernel.org ([198.145.29.99]:39566 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231317AbhBRHqH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 Feb 2021 02:46:07 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 4722D64DE0;
-        Thu, 18 Feb 2021 07:34:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1613633693;
-        bh=sjajRiTXns4+pD+gjYTsvSp91C0M53TJNj6vUwdi4zI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=nuuVLco0VtpvNqIZUSpPN0Ndt0DVjY30kFF+9i7jVsea7VCkByEQacOwl8C/FiWbo
-         FAQIIojb/4410HMJVvN09W/dBS/mXtuK9ged/kDsSbarIJ8WOWygRjS6MWt6G9iLLX
-         tPfsDE0sq+g/EQLfVZFTi7Ki/t5dWuwfstyBgdTw=
-Date:   Thu, 18 Feb 2021 08:34:49 +0100
-From:   "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
-To:     Andreas Dilger <adilger@dilger.ca>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
-        Steve French <smfrench@gmail.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Luis Henriques <lhenriques@suse.de>,
-        Trond Myklebust <trondmy@hammerspace.com>,
-        "samba-technical@lists.samba.org" <samba-technical@lists.samba.org>,
-        "drinkcat@chromium.org" <drinkcat@chromium.org>,
-        "iant@google.com" <iant@google.com>,
-        "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>,
-        "darrick.wong@oracle.com" <darrick.wong@oracle.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "jlayton@kernel.org" <jlayton@kernel.org>,
-        "llozano@chromium.org" <llozano@chromium.org>,
-        "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>,
-        "miklos@szeredi.hu" <miklos@szeredi.hu>,
-        "viro@zeniv.linux.org.uk" <viro@zeniv.linux.org.uk>,
-        "dchinner@redhat.com" <dchinner@redhat.com>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "sfrench@samba.org" <sfrench@samba.org>,
-        "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Subject: Re: [PATCH v2] vfs: prevent copy_file_range to copy across devices
-Message-ID: <YC4YmTWtIgeyjZ6h@kroah.com>
-References: <87blckj75z.fsf@suse.de>
- <CAOQ4uxiiy_Jdi3V1ait56=zfDQRBu_5gb+UsCo8GjMZ6XRhozw@mail.gmail.com>
- <874kibkflh.fsf@suse.de>
- <CAOQ4uxgRK3vXH8uAJKy8cFLL8siKnMMN8h6hx4yZeA5Fe0ZZYA@mail.gmail.com>
- <CAFX2Jfk0X=jKBpOzjq7k-U6SEwFn1Atw62BK2DzavM8XgeLUaQ@mail.gmail.com>
- <CAH2r5mvybG3mRUfHUub9B+nk5WrQ5Fvzu5pZ+ZynqZg4c4ct2A@mail.gmail.com>
- <CAOQ4uxhqaTUwD8Lw+9HWWj61EXRv4X-eE3u4DFeWnv_VOUZF5A@mail.gmail.com>
- <CAH2r5msmtuk0f8FuZxdRBQ2d_VKXexctcP0OmnLXoDEBien-nQ@mail.gmail.com>
- <CAOQ4uxii=7KUKv1w32VbjkwS+Z1a0ge0gezNzpn_BiY6MFWkpA@mail.gmail.com>
- <216103D5-0575-4BFC-9802-2C21A1B12DF9@dilger.ca>
+        id S231193AbhBRKY7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 18 Feb 2021 05:24:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36062 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231260AbhBRJS6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Feb 2021 04:18:58 -0500
+Received: from mail-il1-x12f.google.com (mail-il1-x12f.google.com [IPv6:2607:f8b0:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E849C061756;
+        Thu, 18 Feb 2021 01:10:12 -0800 (PST)
+Received: by mail-il1-x12f.google.com with SMTP id a16so852681ilq.5;
+        Thu, 18 Feb 2021 01:10:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=OgQOiOPnq0DRvI2eZdQvsHnaIaMA+0qyu71WaKASe+E=;
+        b=KIj9uV247HXRj8/OdXi7y7ObktVMiQkfY1zBawc3yoqptXXOeQTlt477Lr0LhrSGE9
+         8E18Bxidf9al2BaaL4xQC/16sB1fQQ8/NXtUzgFeb2Tl+lMz/7TeP3pg/dihjZBohG7+
+         Se3QMaNt+hpWGzO7FbyL236gNrhjqG1KqA1QlNO2w/DwML7TfhYsXFaNCZB4laQDaY+F
+         oZkmK4iDfnSJRr1w54d303Bkhc5/PFzSLgJ4odjLMS35jswywGq2QGEUU14unumiNnAN
+         qpHtfXb5gITTwAbd5vZpb18FanWx4e2pmi6XDDLIZ6epHqg+bRzfy3Pt7kKhL+hAezW9
+         +e+g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=OgQOiOPnq0DRvI2eZdQvsHnaIaMA+0qyu71WaKASe+E=;
+        b=kSJOO/Y2azAc3u998nFl7nQ5qNLFNurdH8g+1BiNILdwFp3z/Cbg78Ec3DCYtGUTkW
+         G6TzrJ0qfnjiMtaLJB1p0nZTfLWl5xll32yNzUn9mekD6hDBSvR4+N6ZtNozRa5BeH+D
+         w1SuBK6ayuobWjB6Z0AK5RkI2a5d+yAAx5Vv7QlOvQUZfs03XWVp2Zud57dUClRjg31g
+         PjowJCqgQp9j2ZW+3OKKMQ3KrS5Xrclw6lIdYTSdGpYc/0Fhnm9+tLiE6TXD5jIjyJ7L
+         M0RAANv/Hzs9Uim4X99ye5dx1RKvxfvr0kplb7o0Csom3MGhMJ5N2XaNUQM+2URgCZOa
+         JOtA==
+X-Gm-Message-State: AOAM530FXwNwJvZiX1Idh5R0/zAXMxrgje0AjryZmgQmZWm9alLI+PHZ
+        5vQd2MnwpuMmkt2hwpITPklgq8+0qjAuO5FYR6o=
+X-Google-Smtp-Source: ABdhPJwxXq4k2yVJ6n1V7pcmcKjBIF0kyD/ZKAbc2Dz8lUF9r8GD81APTW8Ak1u3Tadv0KMLHxr+7GYAW078rcvAOLg=
+X-Received: by 2002:a92:8b89:: with SMTP id i131mr2975061ild.9.1613639411616;
+ Thu, 18 Feb 2021 01:10:11 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <216103D5-0575-4BFC-9802-2C21A1B12DF9@dilger.ca>
+References: <CAOQ4uxiFGjdvX2-zh5o46pn7RZhvbGHH0wpzLPuPOom91FwWeQ@mail.gmail.com>
+ <20210215154317.8590-1-lhenriques@suse.de> <20210218074207.GA329605@infradead.org>
+In-Reply-To: <20210218074207.GA329605@infradead.org>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Thu, 18 Feb 2021 11:10:00 +0200
+Message-ID: <CAOQ4uxgreB=TywvWQXfcHYMBcFm5OKSdwUC8YJY1WuVja6PccQ@mail.gmail.com>
+Subject: Re: [PATCH v2] vfs: prevent copy_file_range to copy across devices
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     Luis Henriques <lhenriques@suse.de>,
+        Jeff Layton <jlayton@kernel.org>,
+        Steve French <sfrench@samba.org>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        Anna Schumaker <anna.schumaker@netapp.com>,
+        Alexander Viro <viro@zeniv.linux.org.uk>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Dave Chinner <dchinner@redhat.com>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        Nicolas Boichat <drinkcat@chromium.org>,
+        Ian Lance Taylor <iant@google.com>,
+        Luis Lozano <llozano@chromium.org>,
+        ceph-devel <ceph-devel@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        CIFS <linux-cifs@vger.kernel.org>,
+        samba-technical <samba-technical@lists.samba.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        Linux NFS Mailing List <linux-nfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, Feb 17, 2021 at 05:50:35PM -0700, Andreas Dilger wrote:
-> On Feb 17, 2021, at 1:08 AM, Amir Goldstein <amir73il@gmail.com> wrote:
-> > 
-> > You are missing my point.
-> > Never mind which server. The server does not *need* to rely on
-> > vfs_copy_file_range() to copy files from XFS to ext4.
-> > The server is very capable of implementing the fallback generic copy
-> > in case source/target fs do not support native {copy,remap}_file_range().
-> > 
-> > w.r.t semantics of copy_file_range() syscall vs. the fallback to userespace
-> > 'cp' tool (check source file size before copy or not), please note that the
-> > semantics of CIFS_IOC_COPYCHUNK_FILE are that of the former:
-> > 
-> >        rc = cifs_file_copychunk_range(xid, src_file.file, 0, dst_file, 0,
-> >                                        src_inode->i_size, 0);
-> > 
-> > It will copy zero bytes if advertised source file size if zero.
-> > 
-> > NFS server side copy semantics are currently de-facto the same
-> > because both the client and the server will have to pass through this
-> > line in vfs_copy_file_range():
-> > 
-> >        if (len == 0)
-> >                return 0;
-> > 
-> > IMO, and this opinion was voiced by several other filesystem developers,
-> > the shortend copy semantics are the correct semantics for copy_file_range()
-> > syscall as well as for vfs_copy_file_range() for internal kernel users.
-> > 
-> > I guess what this means is that if the 'cp' tool ever tries an opportunistic
-> > copy_file_range() syscall (e.g. --cfr=auto), it may result in zero size copy.
-> 
-> Having a syscall that does the "wrong thing" when called on two files
-> doesn't make sense.  Expecting userspace to check whether source/target
-> files supports CFR is also not practical.  This is trivial for the
-> kernel to determine and return -EOPNOTSUPP to the caller if the source
-> file (procfs/sysfs/etc) does not work with CFR properly.
+On Thu, Feb 18, 2021 at 9:42 AM Christoph Hellwig <hch@infradead.org> wrote:
+>
+> Looks good:
+>
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+>
+> This whole idea of cross-device copie has always been a horrible idea,
+> and I've been arguing against it since the patches were posted.
 
-How does the kernel "know" that a specific file in a specific filesystem
-will not work with CFR "properly"?  That goes back to the original patch
-which tried to label each and every filesystem type with a
-"supported/not supported" type of flag, which was going to be a mess,
-especially as it seems that this might be a file-specific thing, not a
-filesystem-specific thing.
+Ok. I'm good with this v2 as well, but need to add the fallback to
+do_splice_direct()
+in nfsd_copy_file_range(), because this patch breaks it.
 
-The goal of the patch _should_ be that the kernel figure it out itself,
-but so far no one seems to be able to explain how that can be done :(
+And the commit message of v3 is better in describing the reported issue.
 
-So, any hints?
-
-thanks,
-
-greg k-h
+Thanks,
+Amir.
