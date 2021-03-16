@@ -2,39 +2,54 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B99FC433E6
-	for <ceph-devel@archiver.kernel.org>; Tue, 16 Mar 2021 19:29:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61648C4332B
+	for <ceph-devel@archiver.kernel.org>; Tue, 16 Mar 2021 20:38:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3258464FBD
-	for <ceph-devel@archiver.kernel.org>; Tue, 16 Mar 2021 19:29:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1F55064E4D
+	for <ceph-devel@archiver.kernel.org>; Tue, 16 Mar 2021 20:38:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240477AbhCPT3M (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 16 Mar 2021 15:29:12 -0400
-Received: from casper.infradead.org ([90.155.50.34]:59198 "EHLO
-        casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240460AbhCPT2c (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Mar 2021 15:28:32 -0400
-X-Greylist: delayed 1253 seconds by postgrey-1.27 at vger.kernel.org; Tue, 16 Mar 2021 15:28:32 EDT
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=a+0vOSKhaFyvZ89GWuo3huxCDtu4K+x/0Wx25fIk42U=; b=jt05dHVt86rt/fg//Nd6cO5DVR
-        1G3IYjzp8NmtC3ioV47ZhvEwsVO11uGSJs4d6RoCIe/BcJ/xaLebCaSFyAaRPStsmz5aU3Z0/tTjC
-        i2D7OiygMf3930tWOiLJfa4OdaVC2y2beYtlioE8Uk6T6FlNM29ZnQ8CELwXsvZbjeDKpcF11lhjh
-        fxWoakrSFVJne6ZMS7JRWMDDO0gZO7qnjt44rLaOVOowDrCMDY6XwMEq7NZ3RYp/xCyc/iArZ07hH
-        6dhLiP7mVnkIYcFu7Y/+Bu3gq9ijgn43hiplbkX3GbtJmVLUTJ4dq2oS7nwTEqPpCsU1+5QgJ/TDr
-        8DraJk1w==;
-Received: from willy by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
-        id 1lMF23-000UZR-6Y; Tue, 16 Mar 2021 19:07:08 +0000
-Date:   Tue, 16 Mar 2021 19:07:07 +0000
-From:   Matthew Wilcox <willy@infradead.org>
-To:     David Howells <dhowells@redhat.com>
-Cc:     Trond Myklebust <trondmy@hammerspace.com>,
+        id S231441AbhCPUiZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 16 Mar 2021 16:38:25 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:49055 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231402AbhCPUiP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 16 Mar 2021 16:38:15 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1615927094;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=CMarB3VddjXNLrXwgBbm1Z1YjzBsISepgPDMYK+ct2o=;
+        b=QsQsuz7VYzfdfI/i7mcatqdXA/wdOqN6IKCctxPbb9KCo7cmJ3il7fcnXOKbScQ3Quh17f
+        zatngtwYrOr9cIqnfWm3uPNMBB2g6SiqLIHHxHDZfGR+2w2Qr3WYU+nIDQGLbe0bSDT5/K
+        55ODV1B6EtdUITiGiosJvR5l++BQKuA=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-204-TKLQWn3DPmW8oUP28nVqjQ-1; Tue, 16 Mar 2021 16:38:11 -0400
+X-MC-Unique: TKLQWn3DPmW8oUP28nVqjQ-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6E5511B18BC1;
+        Tue, 16 Mar 2021 20:38:08 +0000 (UTC)
+Received: from warthog.procyon.org.uk (ovpn-118-152.rdu2.redhat.com [10.10.118.152])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 807582BFE7;
+        Tue, 16 Mar 2021 20:38:01 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+In-Reply-To: <20210316190707.GD3420@casper.infradead.org>
+References: <20210316190707.GD3420@casper.infradead.org> <161539526152.286939.8589700175877370401.stgit@warthog.procyon.org.uk> <161539528910.286939.1252328699383291173.stgit@warthog.procyon.org.uk>
+To:     Matthew Wilcox <willy@infradead.org>
+Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
         Steve French <sfrench@samba.org>,
         Dominique Martinet <asmadeus@codewreck.org>,
@@ -47,49 +62,27 @@ Cc:     Trond Myklebust <trondmy@hammerspace.com>,
         linux-fsdevel@vger.kernel.org, Jeff Layton <jlayton@redhat.com>,
         David Wysochanski <dwysocha@redhat.com>,
         linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 02/28] mm: Add an unlock function for
- PG_private_2/PG_fscache
-Message-ID: <20210316190707.GD3420@casper.infradead.org>
-References: <161539526152.286939.8589700175877370401.stgit@warthog.procyon.org.uk>
- <161539528910.286939.1252328699383291173.stgit@warthog.procyon.org.uk>
+Subject: Re: [PATCH v4 02/28] mm: Add an unlock function for PG_private_2/PG_fscache
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <161539528910.286939.1252328699383291173.stgit@warthog.procyon.org.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <3313318.1615927080.1@warthog.procyon.org.uk>
+Date:   Tue, 16 Mar 2021 20:38:00 +0000
+Message-ID: <3313319.1615927080@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, Mar 10, 2021 at 04:54:49PM +0000, David Howells wrote:
-> Add a function, unlock_page_private_2(), to unlock PG_private_2 analogous
-> to that of PG_lock.  Add a kerneldoc banner to that indicating the example
-> usage case.
+Matthew Wilcox <willy@infradead.org> wrote:
 
-This isn't a problem with this patch per se, but I'm concerned about
-private2 and expected page refcounts.
+> So ... a page with both flags cleared should have a refcount of N.
+> A page with one or both flags set should have a refcount of N+1.
+> ...
+> How is a poor filesystem supposed to make that true?  Also btrfs has this
+> problem since it uses private_2 for its own purposes.
 
-static inline int is_page_cache_freeable(struct page *page)
-{
-        /*
-         * A freeable page cache page is referenced only by the caller
-         * that isolated the page, the page cache and optional buffer
-         * heads at page->private.
-         */
-        int page_cache_pins = thp_nr_pages(page);
-        return page_count(page) - page_has_private(page) == 1 + page_cache_pins;
-}
+It's simpler if it's N+2 for both patches set.  Btw, patch 13 adds that - and
+possibly that should be merged into an earlier patch.
 
-static inline int page_has_private(struct page *page)
-{
-        return !!(page->flags & PAGE_FLAGS_PRIVATE);
-}
-
-#define PAGE_FLAGS_PRIVATE                              \
-        (1UL << PG_private | 1UL << PG_private_2)
-
-So ... a page with both flags cleared should have a refcount of N.
-A page with one or both flags set should have a refcount of N+1.
-
-How is a poor filesystem supposed to make that true?  Also btrfs has this
-problem since it uses private_2 for its own purposes.
+David
 
