@@ -2,28 +2,29 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 807ADC433E1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F39FC433E3
 	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50DCD61A12
+	by mail.kernel.org (Postfix) with ESMTP id 67A3B61582
 	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229728AbhCYGhi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 25 Mar 2021 02:37:38 -0400
-Received: from szxga07-in.huawei.com ([45.249.212.35]:14871 "EHLO
-        szxga07-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229619AbhCYGhG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Mar 2021 02:37:06 -0400
-Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.59])
-        by szxga07-in.huawei.com (SkyGuard) with ESMTP id 4F5b1v6cFLz9spF;
-        Thu, 25 Mar 2021 14:34:59 +0800 (CST)
+        id S229836AbhCYGhk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 25 Mar 2021 02:37:40 -0400
+Received: from szxga04-in.huawei.com ([45.249.212.190]:14584 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229629AbhCYGhH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Mar 2021 02:37:07 -0400
+Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.58])
+        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4F5b216Gxtz19JCy;
+        Thu, 25 Mar 2021 14:35:05 +0800 (CST)
 Received: from huawei.com (10.175.101.6) by DGGEMS404-HUB.china.huawei.com
  (10.3.19.204) with Microsoft SMTP Server id 14.3.498.0; Thu, 25 Mar 2021
- 14:36:58 +0800
+ 14:37:02 +0800
 From:   Lu Wei <luwei32@huawei.com>
 To:     <idryomov@gmail.com>, <jlayton@kernel.org>, <davem@davemloft.net>,
         <kuba@kernel.org>, <ceph-devel@vger.kernel.org>,
@@ -34,10 +35,12 @@ To:     <idryomov@gmail.com>, <jlayton@kernel.org>, <davem@davemloft.net>,
         <olteanv@gmail.com>, <steffen.klassert@secunet.com>,
         <herbert@gondor.apana.org.au>, <yoshfuji@linux-ipv6.org>,
         <dsahern@kernel.org>
-Subject: [PATCH -next 0/5]Fix some typos
-Date:   Thu, 25 Mar 2021 14:38:20 +0800
-Message-ID: <20210325063825.228167-1-luwei32@huawei.com>
+Subject: [PATCH -next 4/5] net: dsa: Fix a typo in tag_rtl4_a.c
+Date:   Thu, 25 Mar 2021 14:38:24 +0800
+Message-ID: <20210325063825.228167-5-luwei32@huawei.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210325063825.228167-1-luwei32@huawei.com>
+References: <20210325063825.228167-1-luwei32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [10.175.101.6]
@@ -46,20 +49,27 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Lu Wei (5):
-  net: ceph: Fix a typo in osdmap.c
-  net: core: Fix a typo in dev_addr_lists.c
-  net: decnet: Fix a typo in dn_nsp_in.c
-  net: dsa: Fix a typo in tag_rtl4_a.c
-  net: ipv4: Fix some typos
+Modify "Apparantly" to "Apparently" in net/dsa/tag_rtl4_a.c..
 
- net/ceph/osdmap.c         | 2 +-
- net/core/dev_addr_lists.c | 2 +-
- net/decnet/dn_nsp_in.c    | 2 +-
- net/dsa/tag_rtl4_a.c      | 2 +-
- net/ipv4/esp4.c           | 4 ++--
- 5 files changed, 6 insertions(+), 6 deletions(-)
+Reported-by: Hulk Robot <hulkci@huawei.com>
+Signed-off-by: Lu Wei <luwei32@huawei.com>
+---
+ net/dsa/tag_rtl4_a.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/net/dsa/tag_rtl4_a.c b/net/dsa/tag_rtl4_a.c
+index e9176475bac8..cf8ac316f4c7 100644
+--- a/net/dsa/tag_rtl4_a.c
++++ b/net/dsa/tag_rtl4_a.c
+@@ -79,7 +79,7 @@ static struct sk_buff *rtl4a_tag_rcv(struct sk_buff *skb,
+ 
+ 	/* The RTL4 header has its own custom Ethertype 0x8899 and that
+ 	 * starts right at the beginning of the packet, after the src
+-	 * ethernet addr. Apparantly skb->data always points 2 bytes in,
++	 * ethernet addr. Apparently skb->data always points 2 bytes in,
+ 	 * behind the Ethertype.
+ 	 */
+ 	tag = skb->data - 2;
 -- 
 2.17.1
 
