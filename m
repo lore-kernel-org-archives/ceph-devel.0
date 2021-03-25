@@ -4,27 +4,27 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1B0FC433E5
-	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DC9DC433EB
+	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 911DE61A10
-	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1B36F61A1D
+	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229890AbhCYGhl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 25 Mar 2021 02:37:41 -0400
-Received: from szxga04-in.huawei.com ([45.249.212.190]:14583 "EHLO
-        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229635AbhCYGhI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Mar 2021 02:37:08 -0400
-Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.58])
-        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4F5b215vh0z19JCD;
-        Thu, 25 Mar 2021 14:35:05 +0800 (CST)
+        id S229869AbhCYGhk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 25 Mar 2021 02:37:40 -0400
+Received: from szxga06-in.huawei.com ([45.249.212.32]:14892 "EHLO
+        szxga06-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229624AbhCYGhH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Mar 2021 02:37:07 -0400
+Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.60])
+        by szxga06-in.huawei.com (SkyGuard) with ESMTP id 4F5b2R5LTKzkfYB;
+        Thu, 25 Mar 2021 14:35:27 +0800 (CST)
 Received: from huawei.com (10.175.101.6) by DGGEMS404-HUB.china.huawei.com
  (10.3.19.204) with Microsoft SMTP Server id 14.3.498.0; Thu, 25 Mar 2021
- 14:37:00 +0800
+ 14:37:01 +0800
 From:   Lu Wei <luwei32@huawei.com>
 To:     <idryomov@gmail.com>, <jlayton@kernel.org>, <davem@davemloft.net>,
         <kuba@kernel.org>, <ceph-devel@vger.kernel.org>,
@@ -35,9 +35,9 @@ To:     <idryomov@gmail.com>, <jlayton@kernel.org>, <davem@davemloft.net>,
         <olteanv@gmail.com>, <steffen.klassert@secunet.com>,
         <herbert@gondor.apana.org.au>, <yoshfuji@linux-ipv6.org>,
         <dsahern@kernel.org>
-Subject: [PATCH -next 2/5] net: core: Fix a typo in dev_addr_lists.c
-Date:   Thu, 25 Mar 2021 14:38:22 +0800
-Message-ID: <20210325063825.228167-3-luwei32@huawei.com>
+Subject: [PATCH -next 3/5] net: decnet: Fix a typo in dn_nsp_in.c
+Date:   Thu, 25 Mar 2021 14:38:23 +0800
+Message-ID: <20210325063825.228167-4-luwei32@huawei.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210325063825.228167-1-luwei32@huawei.com>
 References: <20210325063825.228167-1-luwei32@huawei.com>
@@ -49,27 +49,27 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Modify "funciton" to "function" in net/core/dev_addr_lists.c.
+Modify "erronous" to "erroneous" in net/decnet/dn_nsp_in.c.
 
 Reported-by: Hulk Robot <hulkci@huawei.com>
 Signed-off-by: Lu Wei <luwei32@huawei.com>
 ---
- net/core/dev_addr_lists.c | 2 +-
+ net/decnet/dn_nsp_in.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/net/core/dev_addr_lists.c b/net/core/dev_addr_lists.c
-index fa1c37ec40c9..1e5bde241185 100644
---- a/net/core/dev_addr_lists.c
-+++ b/net/core/dev_addr_lists.c
-@@ -228,7 +228,7 @@ EXPORT_SYMBOL(__hw_addr_unsync);
-  *  @sync: function to call if address should be added
-  *  @unsync: function to call if address should be removed
-  *
-- *  This funciton is intended to be called from the ndo_set_rx_mode
-+ *  This function is intended to be called from the ndo_set_rx_mode
-  *  function of devices that require explicit address add/remove
-  *  notifications.  The unsync function may be NULL in which case
-  *  the addresses requiring removal will simply be removed without
+diff --git a/net/decnet/dn_nsp_in.c b/net/decnet/dn_nsp_in.c
+index c97bdca5ec30..1a12912b88d6 100644
+--- a/net/decnet/dn_nsp_in.c
++++ b/net/decnet/dn_nsp_in.c
+@@ -520,7 +520,7 @@ static void dn_nsp_linkservice(struct sock *sk, struct sk_buff *skb)
+ 	fcval = *ptr;
+ 
+ 	/*
+-	 * Here we ignore erronous packets which should really
++	 * Here we ignore erroneous packets which should really
+ 	 * should cause a connection abort. It is not critical
+ 	 * for now though.
+ 	 */
 -- 
 2.17.1
 
