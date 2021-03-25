@@ -4,27 +4,27 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 913D7C433EC
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BFBDC433F7
 	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5BDB761A27
+	by mail.kernel.org (Postfix) with ESMTP id 82DCE61A31
 	for <ceph-devel@archiver.kernel.org>; Thu, 25 Mar 2021 06:38:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229771AbhCYGhj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 25 Mar 2021 02:37:39 -0400
-Received: from szxga06-in.huawei.com ([45.249.212.32]:14891 "EHLO
-        szxga06-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229626AbhCYGhH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Mar 2021 02:37:07 -0400
-Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.60])
-        by szxga06-in.huawei.com (SkyGuard) with ESMTP id 4F5b2R5jMkzkfY4;
-        Thu, 25 Mar 2021 14:35:27 +0800 (CST)
+        id S229653AbhCYGhh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 25 Mar 2021 02:37:37 -0400
+Received: from szxga07-in.huawei.com ([45.249.212.35]:14872 "EHLO
+        szxga07-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229461AbhCYGhG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Mar 2021 02:37:06 -0400
+Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.59])
+        by szxga07-in.huawei.com (SkyGuard) with ESMTP id 4F5b1v6zhQz9spJ;
+        Thu, 25 Mar 2021 14:34:59 +0800 (CST)
 Received: from huawei.com (10.175.101.6) by DGGEMS404-HUB.china.huawei.com
  (10.3.19.204) with Microsoft SMTP Server id 14.3.498.0; Thu, 25 Mar 2021
- 14:37:04 +0800
+ 14:36:59 +0800
 From:   Lu Wei <luwei32@huawei.com>
 To:     <idryomov@gmail.com>, <jlayton@kernel.org>, <davem@davemloft.net>,
         <kuba@kernel.org>, <ceph-devel@vger.kernel.org>,
@@ -35,9 +35,9 @@ To:     <idryomov@gmail.com>, <jlayton@kernel.org>, <davem@davemloft.net>,
         <olteanv@gmail.com>, <steffen.klassert@secunet.com>,
         <herbert@gondor.apana.org.au>, <yoshfuji@linux-ipv6.org>,
         <dsahern@kernel.org>
-Subject: [PATCH -next 5/5] net: ipv4: Fix some typos
-Date:   Thu, 25 Mar 2021 14:38:25 +0800
-Message-ID: <20210325063825.228167-6-luwei32@huawei.com>
+Subject: [PATCH -next 1/5] net: ceph: Fix a typo in osdmap.c
+Date:   Thu, 25 Mar 2021 14:38:21 +0800
+Message-ID: <20210325063825.228167-2-luwei32@huawei.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210325063825.228167-1-luwei32@huawei.com>
 References: <20210325063825.228167-1-luwei32@huawei.com>
@@ -49,36 +49,27 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Modify "accomodate" to "accommodate" in net/ipv4/esp4.c.
+Modify "inital" to "initial" in net/ceph/osdmap.c.
 
 Reported-by: Hulk Robot <hulkci@huawei.com>
 Signed-off-by: Lu Wei <luwei32@huawei.com>
 ---
- net/ipv4/esp4.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ net/ceph/osdmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
-index a3271ec3e162..1ae920b93f39 100644
---- a/net/ipv4/esp4.c
-+++ b/net/ipv4/esp4.c
-@@ -309,7 +309,7 @@ static struct ip_esp_hdr *esp_output_set_extra(struct sk_buff *skb,
- 					       struct esp_output_extra *extra)
- {
- 	/* For ESN we move the header forward by 4 bytes to
--	 * accomodate the high bits.  We will move it back after
-+	 * accommodate the high bits.  We will move it back after
- 	 * encryption.
- 	 */
- 	if ((x->props.flags & XFRM_STATE_ESN)) {
-@@ -854,7 +854,7 @@ static void esp_input_set_header(struct sk_buff *skb, __be32 *seqhi)
- 	struct ip_esp_hdr *esph;
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 2b1dd252f231..c959320c4775 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -1069,7 +1069,7 @@ static struct crush_work *get_workspace(struct workspace_manager *wsm,
  
- 	/* For ESN we move the header forward by 4 bytes to
--	 * accomodate the high bits.  We will move it back after
-+	 * accommodate the high bits.  We will move it back after
- 	 * decryption.
- 	 */
- 	if ((x->props.flags & XFRM_STATE_ESN)) {
+ 		/*
+ 		 * Do not return the error but go back to waiting.  We
+-		 * have the inital workspace and the CRUSH computation
++		 * have the initial workspace and the CRUSH computation
+ 		 * time is bounded so we will get it eventually.
+ 		 */
+ 		WARN_ON(atomic_read(&wsm->total_ws) < 1);
 -- 
 2.17.1
 
