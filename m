@@ -4,39 +4,39 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7CB5C433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A066C433E2
 	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8D0E661A3F
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE90761A28
+	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230334AbhCZRcw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 26 Mar 2021 13:32:52 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48318 "EHLO mail.kernel.org"
+        id S230323AbhCZRcv (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 26 Mar 2021 13:32:51 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48302 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230229AbhCZRch (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Mar 2021 13:32:37 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 681DD61A13;
-        Fri, 26 Mar 2021 17:32:36 +0000 (UTC)
+        id S230195AbhCZRce (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Mar 2021 13:32:34 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 6026961A13;
+        Fri, 26 Mar 2021 17:32:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616779956;
-        bh=MOB3lUzex0arW8xhnrg0Tjc0j91jO80EJ3WeS+U1vVg=;
+        s=k20201202; t=1616779950;
+        bh=Iaj45ElCCWOZw4jfTCgJUxP8Jlh7dU/5VBQsawn972s=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=n7L5D4RdZs+VhR2kjO1Co2pHXRzJyBc/Y8T/c7n1XfOh9jv+ULSUcpPAB140m++CT
-         0OjFSXT1eSuwjsNzz9iDF3HUrR71T+QfDAcmx1kULl/x0M+QiiZuesnR+2wLRL+PFD
-         aslQ8AfzCncj0TLd/0wIMiLutmgHP0TJrQ4fIH0V4kJ+tuYmQUE6ubYhft1c2Ik3/7
-         zvBsdrfDils1JKTdiikAOOOPTHxYQPXlNpT8JvyUpioLUSXKcKqEdofn5OQQS3Unx4
-         80uvOeQsCOJDRtuIYi5vLYYO39oUXQ5LocoU5BEmMS18czQ17lTthRJL1jKs01YK5a
-         PVU9mMk9Z3xEg==
+        b=RmqlGL71PMXydkzgmzQkoJJ10BiYFYdYxLxPbQ9y+oQo4QjT0IcKl4CVcE872nXVn
+         HdU3LGGFxJJs44HjUQeiSmTo5HnXq+twxP7bTCbE4Xk9C1LgcU875tSoZB4z0oLEOg
+         IQqsQmb+Rq9zOb6pKC6/9ytJuEwCIKXkV1e1XsN9+5ab7WD8jyYyE9xAj5S0Gctwtv
+         e05B+hBR4iVbqVYWmcsL7LDNn3JK8F5rHCGPptPPzXBP+uyfbVbSN0AJpJ2a2O782U
+         PlHzHZyCbCu01Xm6hFt7+PIfpfFoldunv6oFFRR1jOqq8MqQ421nqji60WtrN/bhr2
+         Tsxb4N3GSoLMA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v5 11/19] ceph: decode alternate_name in lease info
-Date:   Fri, 26 Mar 2021 13:32:19 -0400
-Message-Id: <20210326173227.96363-12-jlayton@kernel.org>
+Subject: [RFC PATCH v5 02/19] fscrypt: export fscrypt_base64_encode and fscrypt_base64_decode
+Date:   Fri, 26 Mar 2021 13:32:10 -0400
+Message-Id: <20210326173227.96363-3-jlayton@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210326173227.96363-1-jlayton@kernel.org>
 References: <20210326173227.96363-1-jlayton@kernel.org>
@@ -46,152 +46,141 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Ceph is a bit different from local filesystems, in that we don't want
-to store filenames as raw binary data, since we may also be dealing
-with clients that don't support fscrypt.
-
-We could just base64-encode the encrypted filenames, but that could
-leave us with filenames longer than NAME_MAX. It turns out that the
-MDS doesn't care much about filename length, but the clients do.
-
-To manage this, we've added a new "alternate name" field that can be
-optionally added to any dentry that we'll use to store the binary
-crypttext of the filename if its base64-encoded value will be longer
-than NAME_MAX. When a dentry has one of these names attached, the MDS
-will send it along in the lease info, which we can then store for
-later usage.
+Ceph will need to base64-encode some encrypted filenames, so make
+these routines, and FSCRYPT_BASE64_CHARS available to modules.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 40 ++++++++++++++++++++++++++++++----------
- fs/ceph/mds_client.h | 11 +++++++----
- 2 files changed, 37 insertions(+), 14 deletions(-)
+ fs/crypto/fname.c       | 34 ++++++++++++++++++++++++----------
+ include/linux/fscrypt.h |  5 +++++
+ 2 files changed, 29 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 814f74d88748..31a4c9674681 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -256,27 +256,44 @@ static int parse_reply_info_dir(void **p, void *end,
+diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
+index 6ca7d16593ff..32b1f50433ba 100644
+--- a/fs/crypto/fname.c
++++ b/fs/crypto/fname.c
+@@ -178,10 +178,8 @@ static int fname_decrypt(const struct inode *inode,
+ static const char lookup_table[65] =
+ 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+,";
  
- static int parse_reply_info_lease(void **p, void *end,
- 				  struct ceph_mds_reply_lease **lease,
--				  u64 features)
-+				  u64 features, u32 *altname_len, u8 **altname)
- {
-+	u8 struct_v;
-+	u32 struct_len;
-+
- 	if (features == (u64)-1) {
--		u8 struct_v, struct_compat;
--		u32 struct_len;
-+		u8 struct_compat;
-+
- 		ceph_decode_8_safe(p, end, struct_v, bad);
- 		ceph_decode_8_safe(p, end, struct_compat, bad);
-+
- 		/* struct_v is expected to be >= 1. we only understand
- 		 * encoding whose struct_compat == 1. */
- 		if (!struct_v || struct_compat != 1)
- 			goto bad;
-+
- 		ceph_decode_32_safe(p, end, struct_len, bad);
--		ceph_decode_need(p, end, struct_len, bad);
--		end = *p + struct_len;
-+	} else {
-+		struct_len = sizeof(**lease);
-+		*altname_len = 0;
-+		*altname = NULL;
- 	}
- 
--	ceph_decode_need(p, end, sizeof(**lease), bad);
-+	ceph_decode_need(p, end, struct_len, bad);
- 	*lease = *p;
- 	*p += sizeof(**lease);
--	if (features == (u64)-1)
--		*p = end;
-+
-+	if (features == (u64)-1) {
-+		if (struct_v >= 2) {
-+			ceph_decode_32_safe(p, end, *altname_len, bad);
-+			ceph_decode_need(p, end, *altname_len, bad);
-+			*altname = *p;
-+			*p += *altname_len;
-+		} else {
-+			*altname = NULL;
-+			*altname_len = 0;
-+		}
-+	}
- 	return 0;
- bad:
- 	return -EIO;
-@@ -306,7 +323,8 @@ static int parse_reply_info_trace(void **p, void *end,
- 		info->dname = *p;
- 		*p += info->dname_len;
- 
--		err = parse_reply_info_lease(p, end, &info->dlease, features);
-+		err = parse_reply_info_lease(p, end, &info->dlease, features,
-+					     &info->altname_len, &info->altname);
- 		if (err < 0)
- 			goto out_bad;
- 	}
-@@ -373,9 +391,11 @@ static int parse_reply_info_readdir(void **p, void *end,
- 		dout("parsed dir dname '%.*s'\n", rde->name_len, rde->name);
- 
- 		/* dentry lease */
--		err = parse_reply_info_lease(p, end, &rde->lease, features);
-+		err = parse_reply_info_lease(p, end, &rde->lease, features,
-+					     &rde->altname_len, &rde->altname);
- 		if (err)
- 			goto out_bad;
-+
- 		/* inode */
- 		err = parse_reply_info_in(p, end, &rde->inode, features);
- 		if (err < 0)
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 2b18ea24c650..b6aeca9b241b 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -29,8 +29,8 @@ enum ceph_feature_type {
- 	CEPHFS_FEATURE_MULTI_RECONNECT,
- 	CEPHFS_FEATURE_DELEG_INO,
- 	CEPHFS_FEATURE_METRIC_COLLECT,
+-#define BASE64_CHARS(nbytes)	DIV_ROUND_UP((nbytes) * 4, 3)
 -
--	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_METRIC_COLLECT,
-+	CEPHFS_FEATURE_ALTERNATE_NAME,
-+	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_ALTERNATE_NAME,
- };
- 
- /*
-@@ -45,8 +45,7 @@ enum ceph_feature_type {
- 	CEPHFS_FEATURE_MULTI_RECONNECT,		\
- 	CEPHFS_FEATURE_DELEG_INO,		\
- 	CEPHFS_FEATURE_METRIC_COLLECT,		\
--						\
--	CEPHFS_FEATURE_MAX,			\
-+	CEPHFS_FEATURE_ALTERNATE_NAME,		\
+ /**
+- * base64_encode() - base64-encode some bytes
++ * fscrypt_base64_encode() - base64-encode some bytes
+  * @src: the bytes to encode
+  * @len: number of bytes to encode
+  * @dst: (output) the base64-encoded string.  Not NUL-terminated.
+@@ -191,7 +189,7 @@ static const char lookup_table[65] =
+  *
+  * Return: length of the encoded string
+  */
+-static int base64_encode(const u8 *src, int len, char *dst)
++int fscrypt_base64_encode(const u8 *src, int len, char *dst)
+ {
+ 	int i, bits = 0, ac = 0;
+ 	char *cp = dst;
+@@ -209,8 +207,20 @@ static int base64_encode(const u8 *src, int len, char *dst)
+ 		*cp++ = lookup_table[ac & 0x3f];
+ 	return cp - dst;
  }
- #define CEPHFS_FEATURES_CLIENT_REQUIRED {}
++EXPORT_SYMBOL(fscrypt_base64_encode);
  
-@@ -93,7 +92,9 @@ struct ceph_mds_reply_info_in {
+-static int base64_decode(const char *src, int len, u8 *dst)
++/**
++ * fscrypt_base64_decode() - base64-decode some bytes
++ * @src: the bytes to decode
++ * @len: number of bytes to decode
++ * @dst: (output) decoded binary data
++ *
++ * Decode an input string that was previously encoded using
++ * fscrypt_base64_encode.
++ *
++ * Return: length of the decoded binary data
++ */
++int fscrypt_base64_decode(const char *src, int len, u8 *dst)
+ {
+ 	int i, bits = 0, ac = 0;
+ 	const char *p;
+@@ -232,6 +242,7 @@ static int base64_decode(const char *src, int len, u8 *dst)
+ 		return -1;
+ 	return cp - dst;
+ }
++EXPORT_SYMBOL(fscrypt_base64_decode);
  
- struct ceph_mds_reply_dir_entry {
- 	char                          *name;
-+	u8			      *altname;
- 	u32                           name_len;
-+	u32			      altname_len;
- 	struct ceph_mds_reply_lease   *lease;
- 	struct ceph_mds_reply_info_in inode;
- 	loff_t			      offset;
-@@ -112,7 +113,9 @@ struct ceph_mds_reply_info_parsed {
- 	struct ceph_mds_reply_info_in diri, targeti;
- 	struct ceph_mds_reply_dirfrag *dirfrag;
- 	char                          *dname;
-+	u8			      *altname;
- 	u32                           dname_len;
-+	u32                           altname_len;
- 	struct ceph_mds_reply_lease   *dlease;
+ bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
+ 				  u32 orig_len, u32 max_len,
+@@ -263,8 +274,9 @@ bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
+ int fscrypt_fname_alloc_buffer(u32 max_encrypted_len,
+ 			       struct fscrypt_str *crypto_str)
+ {
+-	const u32 max_encoded_len = BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX);
+ 	u32 max_presented_len;
++	const u32 max_encoded_len =
++		FSCRYPT_BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX);
  
- 	/* extra */
+ 	max_presented_len = max(max_encoded_len, max_encrypted_len);
+ 
+@@ -342,7 +354,7 @@ int fscrypt_fname_disk_to_usr(const struct inode *inode,
+ 		     offsetof(struct fscrypt_nokey_name, bytes));
+ 	BUILD_BUG_ON(offsetofend(struct fscrypt_nokey_name, bytes) !=
+ 		     offsetof(struct fscrypt_nokey_name, sha256));
+-	BUILD_BUG_ON(BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX) > NAME_MAX);
++	BUILD_BUG_ON(FSCRYPT_BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX) > NAME_MAX);
+ 
+ 	if (hash) {
+ 		nokey_name.dirhash[0] = hash;
+@@ -362,7 +374,8 @@ int fscrypt_fname_disk_to_usr(const struct inode *inode,
+ 		       nokey_name.sha256);
+ 		size = FSCRYPT_NOKEY_NAME_MAX;
+ 	}
+-	oname->len = base64_encode((const u8 *)&nokey_name, size, oname->name);
++	oname->len = fscrypt_base64_encode((const u8 *)&nokey_name, size,
++					   oname->name);
+ 	return 0;
+ }
+ EXPORT_SYMBOL(fscrypt_fname_disk_to_usr);
+@@ -436,14 +449,15 @@ int fscrypt_setup_filename(struct inode *dir, const struct qstr *iname,
+ 	 * user-supplied name
+ 	 */
+ 
+-	if (iname->len > BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX))
++	if (iname->len > FSCRYPT_BASE64_CHARS(FSCRYPT_NOKEY_NAME_MAX))
+ 		return -ENOENT;
+ 
+ 	fname->crypto_buf.name = kmalloc(FSCRYPT_NOKEY_NAME_MAX, GFP_KERNEL);
+ 	if (fname->crypto_buf.name == NULL)
+ 		return -ENOMEM;
+ 
+-	ret = base64_decode(iname->name, iname->len, fname->crypto_buf.name);
++	ret = fscrypt_base64_decode(iname->name, iname->len,
++				    fname->crypto_buf.name);
+ 	if (ret < (int)offsetof(struct fscrypt_nokey_name, bytes[1]) ||
+ 	    (ret > offsetof(struct fscrypt_nokey_name, sha256) &&
+ 	     ret != FSCRYPT_NOKEY_NAME_MAX)) {
+diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
+index 2ea1387bb497..e300f6145ddc 100644
+--- a/include/linux/fscrypt.h
++++ b/include/linux/fscrypt.h
+@@ -46,6 +46,9 @@ struct fscrypt_name {
+ /* Maximum value for the third parameter of fscrypt_operations.set_context(). */
+ #define FSCRYPT_SET_CONTEXT_MAX_SIZE	40
+ 
++/* Calculate worst-case base64 encoding inflation */
++#define FSCRYPT_BASE64_CHARS(nbytes)	DIV_ROUND_UP((nbytes) * 4, 3)
++
+ #ifdef CONFIG_FS_ENCRYPTION
+ /*
+  * fscrypt superblock flags
+@@ -207,6 +210,8 @@ void fscrypt_free_inode(struct inode *inode);
+ int fscrypt_drop_inode(struct inode *inode);
+ 
+ /* fname.c */
++int fscrypt_base64_encode(const u8 *src, int len, char *dst);
++int fscrypt_base64_decode(const char *src, int len, u8 *dst);
+ int fscrypt_setup_filename(struct inode *inode, const struct qstr *iname,
+ 			   int lookup, struct fscrypt_name *fname);
+ 
 -- 
 2.30.2
 
