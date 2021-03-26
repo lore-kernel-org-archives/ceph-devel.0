@@ -2,292 +2,132 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46568C433F4
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94043C433DB
+	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 18:38:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2283161A32
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 531F061992
+	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 18:38:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230138AbhCZRdT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 26 Mar 2021 13:33:19 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48344 "EHLO mail.kernel.org"
+        id S230134AbhCZSiN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 26 Mar 2021 14:38:13 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39036 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230180AbhCZRcn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Mar 2021 13:32:43 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 293F661A13;
-        Fri, 26 Mar 2021 17:32:41 +0000 (UTC)
+        id S229969AbhCZSiM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Mar 2021 14:38:12 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A620961A13;
+        Fri, 26 Mar 2021 18:38:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616779961;
-        bh=QC+ewAQsNfMghv/CCg+eOqIoYX9cAq41p2CiMpN3v94=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=KoqnFhE8jGLzNBCYSYUUeO16bHXJdcabzDIu/cIGjUDMJFq3u6612BkX4O62itNfS
-         ruyGWWaJkZKBBstaubtVkB+5KrPISOpcTtwxYP89rNwKIhxou9kZx//qv0jVkgYeu6
-         cf9ryGS5AKbr9vIdfGRA6WNf+SEdLsZQNOupMmQurG5XntiVZM6RQ1HFUGyXI74e+4
-         2CC9b5Dn9r9VcMeY26jke8ARnF/0/hKf0gw8MF7C2Sdo/Yo6aUv6YAaY0AQ3RQuMbF
-         QqwOj9yeD5uQ3kShGKuvif3El5yjSd70uV3JkHqPK3fOsV7dsa6/GMxLm9abkvjNYw
-         A/GxJghvC3SUg==
+        s=k20201202; t=1616783892;
+        bh=tl2BnRgFFmTrCujm04id4QN8NI6kqyDBnURR8pQv+I4=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=HoLyiBkFPEI4CqtsPen93c8RmJpJ/0JCOnWBSwUGyhGsx4A5CQZuJ5ojDdDY3cQ3K
+         wPWeHORzlLzSBikwxghrbrHr85pytU3bEl0I0XRE3lBI6LEqyPSPZ5jv4PNgRlr49Z
+         /r+z/WgATkpXcRIJf9FRHXw0FU2pyzcmifFj40kfpTZNbEwLFlrYV7JS7tuFaJsEXQ
+         10V8w4yUf1TBJBvjm1ZTMF7QvxqH29/BeNnPpvK8e8iTahIOTiGRrBMFrk3yYDiY/4
+         uFHGTYSsJV/IQM8gLkOaIcl01OHmBZp6NFiG4N74pSluiFUQ6kn8Vibf3oYkpkWJyW
+         Jk2uGqV5zIp7w==
+Message-ID: <f7e34bd93f8e774cf11ff059d040a7ec19ef0b19.camel@kernel.org>
+Subject: Re: [RFC PATCH v5 00/19] ceph+fscrypt: context, filename and
+ symlink support
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v5 18/19] ceph: create symlinks with encrypted and base64-encoded targets
-Date:   Fri, 26 Mar 2021 13:32:26 -0400
-Message-Id: <20210326173227.96363-19-jlayton@kernel.org>
-X-Mailer: git-send-email 2.30.2
+Date:   Fri, 26 Mar 2021 14:38:10 -0400
 In-Reply-To: <20210326173227.96363-1-jlayton@kernel.org>
 References: <20210326173227.96363-1-jlayton@kernel.org>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.38.4 (3.38.4-1.fc33) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When creating symlinks in encrypted directories, encrypt and
-base64-encode the target with the new inode's key before sending to the
-MDS.
+On Fri, 2021-03-26 at 13:32 -0400, Jeff Layton wrote:
+> I haven't posted this in a while and there were some bugs shaken out of
+> the last posting. This adds (partial) support for fscrypt to kcephfs,
+> including crypto contexts, filenames and encrypted symlink targets. At
+> this point, the xfstests quick tests that generally pass without fscrypt
+> also pass with test_dummy_encryption enabled.
+> 
+> There is one lingering bug that I'm having trouble tracking down: xfstest
+> generic/477 (an open_by_handle_at test) sometimes throws a "Busy inodes
+> after umount" warning. I'm narrowed down the issue a bit, but there is
+> some raciness involved so I haven't quite nailed it down yet.
+> 
+> This set is quite invasive. There is probably some further work to be
+> done to add common code helpers and the like, but the final diffstat
+> probably won't look too different.
+> 
+> This set does not include encryption of file contents. That is turning
+> out to be a bit trickier than first expected owing to the fact that the
+> MDS is usually what handles truncation, and the i_size no longer
+> represents the amount of data stored in the backing store. That will
+> probably require an MDS change to fix, and we're still sorting out the
+> details.
+> 
+> Jeff Layton (19):
+>   vfs: export new_inode_pseudo
+>   fscrypt: export fscrypt_base64_encode and fscrypt_base64_decode
+>   fscrypt: export fscrypt_fname_encrypt and fscrypt_fname_encrypted_size
+>   fscrypt: add fscrypt_context_for_new_inode
+>   ceph: crypto context handling for ceph
+>   ceph: implement -o test_dummy_encryption mount option
+>   ceph: preallocate inode for ops that may create one
+>   ceph: add routine to create fscrypt context prior to RPC
+>   ceph: make ceph_msdc_build_path use ref-walk
+>   ceph: add encrypted fname handling to ceph_mdsc_build_path
+>   ceph: decode alternate_name in lease info
+>   ceph: send altname in MClientRequest
+>   ceph: properly set DCACHE_NOKEY_NAME flag in lookup
+>   ceph: make d_revalidate call fscrypt revalidator for encrypted
+>     dentries
+>   ceph: add helpers for converting names for userland presentation
+>   ceph: add fscrypt support to ceph_fill_trace
+>   ceph: add support to readdir for encrypted filenames
+>   ceph: create symlinks with encrypted and base64-encoded targets
+>   ceph: add fscrypt ioctls
+> 
+>  fs/ceph/Makefile            |   1 +
+>  fs/ceph/crypto.c            | 185 +++++++++++++++++++++++
+>  fs/ceph/crypto.h            | 101 +++++++++++++
+>  fs/ceph/dir.c               | 178 ++++++++++++++++++-----
+>  fs/ceph/file.c              |  56 ++++---
+>  fs/ceph/inode.c             | 255 +++++++++++++++++++++++++++++---
+>  fs/ceph/ioctl.c             |  94 ++++++++++++
+>  fs/ceph/mds_client.c        | 283 ++++++++++++++++++++++++++++++------
+>  fs/ceph/mds_client.h        |  14 +-
+>  fs/ceph/super.c             |  80 +++++++++-
+>  fs/ceph/super.h             |  16 +-
+>  fs/ceph/xattr.c             |  32 ++++
+>  fs/crypto/fname.c           |  53 +++++--
+>  fs/crypto/fscrypt_private.h |   9 +-
+>  fs/crypto/hooks.c           |   6 +-
+>  fs/crypto/policy.c          |  34 ++++-
+>  fs/inode.c                  |   1 +
+>  include/linux/fscrypt.h     |  10 ++
+>  18 files changed, 1246 insertions(+), 162 deletions(-)
+>  create mode 100644 fs/ceph/crypto.c
+>  create mode 100644 fs/ceph/crypto.h
+> 
 
-When filling a symlinked inode, base64-decode it into a buffer that
-we'll keep in ci->i_symlink. When get_link is called, decrypt the buffer
-into a new one that will hang off i_link.
+Oh, I should mention that this is all in my ceph-fscrypt-fnames branch:
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/dir.c   | 52 ++++++++++++++++++++++++---
- fs/ceph/inode.c | 95 ++++++++++++++++++++++++++++++++++++++++++-------
- 2 files changed, 130 insertions(+), 17 deletions(-)
+    https://git.kernel.org/pub/scm/linux/kernel/git/jlayton/linux.git/
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 7fe74c2f3911..e039534a5fab 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -947,6 +947,40 @@ static int ceph_create(struct user_namespace *mnt_userns, struct inode *dir,
- 	return ceph_mknod(mnt_userns, dir, dentry, mode, 0);
- }
- 
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+static int prep_encrypted_symlink_target(struct ceph_mds_request *req, const char *dest)
-+{
-+	int err;
-+	int len = strlen(dest);
-+	struct fscrypt_str osd_link = FSTR_INIT(NULL, 0);
-+
-+	err = fscrypt_prepare_symlink(req->r_parent, dest, len, PATH_MAX, &osd_link);
-+	if (err)
-+		goto out;
-+
-+	err = fscrypt_encrypt_symlink(req->r_new_inode, dest, len, &osd_link);
-+	if (err)
-+		goto out;
-+
-+	req->r_path2 = kmalloc(FSCRYPT_BASE64_CHARS(osd_link.len) + 1, GFP_KERNEL);
-+	if (!req->r_path2) {
-+		err = -ENOMEM;
-+		goto out;
-+	}
-+
-+	len = fscrypt_base64_encode(osd_link.name, osd_link.len, req->r_path2);
-+	req->r_path2[len] = '\0';
-+out:
-+	fscrypt_fname_free_buffer(&osd_link);
-+	return err;
-+}
-+#else
-+static int prep_encrypted_symlink_target(struct ceph_mds_request *req, const char *dest)
-+{
-+	return -EOPNOTSUPP;
-+}
-+#endif
-+
- static int ceph_symlink(struct user_namespace *mnt_userns, struct inode *dir,
- 			struct dentry *dentry, const char *dest)
- {
-@@ -978,12 +1012,20 @@ static int ceph_symlink(struct user_namespace *mnt_userns, struct inode *dir,
- 		goto out_req;
- 	}
- 
--	req->r_path2 = kstrdup(dest, GFP_KERNEL);
--	if (!req->r_path2) {
--		err = -ENOMEM;
--		goto out_req;
--	}
- 	req->r_parent = dir;
-+
-+	if (IS_ENCRYPTED(req->r_new_inode)) {
-+		err = prep_encrypted_symlink_target(req, dest);
-+		if (err)
-+			goto out_req;
-+	} else {
-+		req->r_path2 = kstrdup(dest, GFP_KERNEL);
-+		if (!req->r_path2) {
-+			err = -ENOMEM;
-+			goto out_req;
-+		}
-+	}
-+
- 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index bf2760e53827..a1f731d57883 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -35,6 +35,7 @@
-  */
- 
- static const struct inode_operations ceph_symlink_iops;
-+static const struct inode_operations ceph_encrypted_symlink_iops;
- 
- static void ceph_inode_work(struct work_struct *work);
- 
-@@ -615,6 +616,7 @@ void ceph_free_inode(struct inode *inode)
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 
- 	kfree(ci->i_symlink);
-+	fscrypt_free_inode(inode);
- 	kmem_cache_free(ceph_inode_cachep, ci);
- }
- 
-@@ -814,6 +816,33 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 		     inode, time_warp_seq, ci->i_time_warp_seq);
- }
- 
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+static int decode_encrypted_symlink(const char *encsym, int enclen, u8 **decsym)
-+{
-+	int declen;
-+	u8 *sym;
-+
-+	sym = kmalloc(enclen + 1, GFP_NOFS);
-+	if (!sym)
-+		return -ENOMEM;
-+
-+	declen = fscrypt_base64_decode(encsym, enclen, sym);
-+	if (declen < 0) {
-+		pr_err("%s: can't decode symlink (%d). Content: %.*s\n", __func__, declen, enclen, encsym);
-+		kfree(sym);
-+		return -EIO;
-+	}
-+	sym[declen + 1] = '\0';
-+	*decsym = sym;
-+	return declen;
-+}
-+#else
-+static int decode_encrypted_symlink(const char *encsym, int symlen, u8 **decsym)
-+{
-+	return -EOPNOTSUPP;
-+}
-+#endif
-+
- /*
-  * Populate an inode based on info from mds.  May be called on new or
-  * existing inodes.
-@@ -1046,26 +1075,39 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		inode->i_fop = &ceph_file_fops;
- 		break;
- 	case S_IFLNK:
--		inode->i_op = &ceph_symlink_iops;
- 		if (!ci->i_symlink) {
- 			u32 symlen = iinfo->symlink_len;
- 			char *sym;
- 
- 			spin_unlock(&ci->i_ceph_lock);
- 
--			if (symlen != i_size_read(inode)) {
--				pr_err("%s %llx.%llx BAD symlink "
--					"size %lld\n", __func__,
--					ceph_vinop(inode),
--					i_size_read(inode));
-+			if (IS_ENCRYPTED(inode)) {
-+				if (symlen != i_size_read(inode))
-+					pr_err("%s %llx.%llx BAD symlink size %lld\n",
-+						__func__, ceph_vinop(inode), i_size_read(inode));
-+
-+				err = decode_encrypted_symlink(iinfo->symlink, symlen, (u8 **)&sym);
-+				if (err < 0) {
-+					pr_err("%s decoding encrypted symlink failed: %d\n",
-+						__func__, err);
-+					goto out;
-+				}
-+				symlen = err;
- 				i_size_write(inode, symlen);
- 				inode->i_blocks = calc_inode_blocks(symlen);
--			}
-+			} else {
-+				if (symlen != i_size_read(inode)) {
-+					pr_err("%s %llx.%llx BAD symlink size %lld\n",
-+						__func__, ceph_vinop(inode), i_size_read(inode));
-+					i_size_write(inode, symlen);
-+					inode->i_blocks = calc_inode_blocks(symlen);
-+				}
- 
--			err = -ENOMEM;
--			sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
--			if (!sym)
--				goto out;
-+				err = -ENOMEM;
-+				sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
-+				if (!sym)
-+					goto out;
-+			}
- 
- 			spin_lock(&ci->i_ceph_lock);
- 			if (!ci->i_symlink)
-@@ -1073,7 +1115,18 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 			else
- 				kfree(sym); /* lost a race */
- 		}
--		inode->i_link = ci->i_symlink;
-+
-+		if (IS_ENCRYPTED(inode)) {
-+			/*
-+			 * Encrypted symlinks need to be decrypted before we can
-+			 * cache their targets in i_link. Leave it blank for now.
-+			 */
-+			inode->i_link = NULL;
-+			inode->i_op = &ceph_encrypted_symlink_iops;
-+		} else {
-+			inode->i_link = ci->i_symlink;
-+			inode->i_op = &ceph_symlink_iops;
-+		}
- 		break;
- 	case S_IFDIR:
- 		inode->i_op = &ceph_dir_iops;
-@@ -2145,6 +2198,17 @@ static void ceph_inode_work(struct work_struct *work)
- 	iput(inode);
- }
- 
-+static const char *ceph_encrypted_get_link(struct dentry *dentry, struct inode *inode,
-+					   struct delayed_call *done)
-+{
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+
-+	if (!dentry)
-+		return ERR_PTR(-ECHILD);
-+
-+	return fscrypt_get_symlink(inode, ci->i_symlink, i_size_read(inode), done);
-+}
-+
- /*
-  * symlinks
-  */
-@@ -2155,6 +2219,13 @@ static const struct inode_operations ceph_symlink_iops = {
- 	.listxattr = ceph_listxattr,
- };
- 
-+static const struct inode_operations ceph_encrypted_symlink_iops = {
-+	.get_link = ceph_encrypted_get_link,
-+	.setattr = ceph_setattr,
-+	.getattr = ceph_getattr,
-+	.listxattr = ceph_listxattr,
-+};
-+
- int __ceph_setattr(struct inode *inode, struct iattr *attr)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
+This all still under heavy development, so I'm open to suggestions and
+review. If you're daring and want to test with it, please do.
+
+I do think this has the potential to be a "killer feature" for ceph (and
+maybe other network filesystems). Being able to store data securely on
+an otherwise "public" cluster seems like a very nice thing to have.
+
+Cheers,
 -- 
-2.30.2
+Jeff Layton <jlayton@kernel.org>
 
