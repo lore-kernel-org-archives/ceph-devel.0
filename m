@@ -7,36 +7,36 @@ X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6B89C433E6
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5A8AC433F4
+	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C26C61A49
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B7F4E61999
+	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 17:33:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230188AbhCZRcm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 26 Mar 2021 13:32:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48306 "EHLO mail.kernel.org"
+        id S230288AbhCZRcq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 26 Mar 2021 13:32:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48318 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230196AbhCZRce (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Mar 2021 13:32:34 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A801F61A2B;
-        Fri, 26 Mar 2021 17:32:31 +0000 (UTC)
+        id S230223AbhCZRcg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Mar 2021 13:32:36 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 64A7461A2B;
+        Fri, 26 Mar 2021 17:32:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616779952;
-        bh=VR482yzlvMT+gLplVZHRbSdGQC9G2880SVNfQu7SeBo=;
+        s=k20201202; t=1616779954;
+        bh=3gRPAvJ9pyfsVKUPJKz1HZd4M+bMwwUijVds6ndHDYQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=inIQmdFDgafqeBKLDLgR8QEu37r58pgIEjXdJrSO/JBxYELp/0UHyYRy+aYSyLkbY
-         BUSRyhKfud+FsWvmBCBj8yL5+IOxa9tV96w+dX7IUlmGwaYy2TGqAhm8xFkwvLlVb/
-         pPJ5T0Nuz1KnrFEmP19QV8jpYblpxC4e4ceaoW4i0VdFeAy2r5LcNSqpah+g1EAINV
-         Z45JmRByC6yxPb5jE2rNovOBI4WhyMR9bT0EjsHbQaAQI6u0bKX8uWLDf78efnQNxg
-         rfgukbjJV1b+v2DSXu0HUjXuCPo0XwCgmB6DL5jpldQV/9NSysMJrDGHMltKkS0AvE
-         7dBbL7MHX1NIA==
+        b=q4ch4bcSi8KOyYjrwifXaWaUNjUD6fOutZyp7te4fdElM4H7aC86Rd0kRljgNNuXc
+         ne3x7XZGkTS9RbE0TjgevA/QDClKErQtpsPoS4R/aYGkmgURpTbd+HQUZckCt1/jdq
+         rKvXdV1bjFr/qklzA88y46OuFwxMxLmyDSOsic6NEvkGHnPQ2FD9t7oAeIzHvnPyVY
+         ogayQMNHWmTDSlftSrnkO+LmtGDNsPAyG8f4dsHG+XfUx2jUTT9QEU61dKdGU8Xwdn
+         1sDip+BSzfmRp5poetxIUTYfAIG/EJG2/95kuluf7PZjGmykLZwqxT4At9e6vIL9Kx
+         pW3WTVvp/tBvg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [RFC PATCH v5 04/19] fscrypt: add fscrypt_context_for_new_inode
-Date:   Fri, 26 Mar 2021 13:32:12 -0400
-Message-Id: <20210326173227.96363-5-jlayton@kernel.org>
+Subject: [RFC PATCH v5 08/19] ceph: add routine to create fscrypt context prior to RPC
+Date:   Fri, 26 Mar 2021 13:32:16 -0400
+Message-Id: <20210326173227.96363-9-jlayton@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210326173227.96363-1-jlayton@kernel.org>
 References: <20210326173227.96363-1-jlayton@kernel.org>
@@ -46,80 +46,156 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-CephFS will need to be able to generate a context for a new "prepared"
-inode. Add a new routine for getting the context out of an in-core
-inode.
+After pre-creating a new inode, do an fscrypt prepare on it, fetch a
+new encryption context and then marshal that into the security context
+to be sent along with the RPC. Call the new function from
+ceph_new_inode.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/crypto/policy.c      | 34 ++++++++++++++++++++++++++++------
- include/linux/fscrypt.h |  1 +
- 2 files changed, 29 insertions(+), 6 deletions(-)
+ fs/ceph/crypto.c | 61 ++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/crypto.h | 12 ++++++++++
+ fs/ceph/inode.c  |  9 +++++--
+ fs/ceph/super.h  |  3 +++
+ 4 files changed, 83 insertions(+), 2 deletions(-)
 
-diff --git a/fs/crypto/policy.c b/fs/crypto/policy.c
-index ed3d623724cd..6a895a31560f 100644
---- a/fs/crypto/policy.c
-+++ b/fs/crypto/policy.c
-@@ -664,6 +664,31 @@ const union fscrypt_policy *fscrypt_policy_to_inherit(struct inode *dir)
- 	return fscrypt_get_dummy_policy(dir->i_sb);
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+index 879d9a0d3751..f037a4939026 100644
+--- a/fs/ceph/crypto.c
++++ b/fs/ceph/crypto.c
+@@ -46,3 +46,64 @@ void ceph_fscrypt_set_ops(struct super_block *sb)
+ {
+ 	fscrypt_set_ops(sb, &ceph_fscrypt_ops);
  }
- 
-+/**
-+ * fscrypt_context_for_new_inode() - create an encryption context for a new inode
-+ * @ctx: where context should be written
-+ * @inode: inode from which to fetch policy and nonce
-+ *
-+ * Given an in-core "prepared" (via fscrypt_prepare_new_inode) inode,
-+ * generate a new context and write it to ctx. ctx _must_ be at least
-+ * FSCRYPT_SET_CONTEXT_MAX_SIZE bytes.
-+ *
-+ * Returns size of the resulting context or a negative error code.
-+ */
-+int fscrypt_context_for_new_inode(void *ctx, struct inode *inode)
++
++int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
++				 struct ceph_acl_sec_ctx *as)
 +{
-+	struct fscrypt_info *ci = inode->i_crypt_info;
++	int ret, ctxsize;
++	size_t name_len;
++	char *name;
++	struct ceph_pagelist *pagelist = as->pagelist;
++	bool encrypted = false;
 +
-+	BUILD_BUG_ON(sizeof(union fscrypt_context) != FSCRYPT_SET_CONTEXT_MAX_SIZE);
++	ret = fscrypt_prepare_new_inode(dir, inode, &encrypted);
++	if (ret)
++		return ret;
++	if (!encrypted)
++		return 0;
 +
-+	/* fscrypt_prepare_new_inode() should have set up the key already. */
-+	if (WARN_ON_ONCE(!ci))
-+		return -ENOKEY;
++	inode->i_flags |= S_ENCRYPTED;
 +
-+	return fscrypt_new_context(ctx, &ci->ci_policy, ci->ci_nonce);
-+}
-+EXPORT_SYMBOL_GPL(fscrypt_context_for_new_inode);
-+
- /**
-  * fscrypt_set_context() - Set the fscrypt context of a new inode
-  * @inode: a new inode
-@@ -680,12 +705,9 @@ int fscrypt_set_context(struct inode *inode, void *fs_data)
- 	union fscrypt_context ctx;
- 	int ctxsize;
- 
--	/* fscrypt_prepare_new_inode() should have set up the key already. */
--	if (WARN_ON_ONCE(!ci))
--		return -ENOKEY;
--
--	BUILD_BUG_ON(sizeof(ctx) != FSCRYPT_SET_CONTEXT_MAX_SIZE);
--	ctxsize = fscrypt_new_context(&ctx, &ci->ci_policy, ci->ci_nonce);
-+	ctxsize = fscrypt_context_for_new_inode(&ctx, inode);
++	ctxsize = fscrypt_context_for_new_inode(&as->fscrypt, inode);
 +	if (ctxsize < 0)
 +		return ctxsize;
++
++	/* marshal it in page array */
++	if (!pagelist) {
++		pagelist = ceph_pagelist_alloc(GFP_KERNEL);
++		if (!pagelist)
++			return -ENOMEM;
++		ret = ceph_pagelist_reserve(pagelist, PAGE_SIZE);
++		if (ret)
++			goto out;
++		ceph_pagelist_encode_32(pagelist, 1);
++	}
++
++	name = CEPH_XATTR_NAME_ENCRYPTION_CONTEXT;
++	name_len = strlen(name);
++	ret = ceph_pagelist_reserve(pagelist, 4 * 2 + name_len + ctxsize);
++	if (ret)
++		goto out;
++
++	if (as->pagelist) {
++		BUG_ON(pagelist->length <= sizeof(__le32));
++		if (list_is_singular(&pagelist->head)) {
++			le32_add_cpu((__le32*)pagelist->mapped_tail, 1);
++		} else {
++			struct page *page = list_first_entry(&pagelist->head,
++							     struct page, lru);
++			void *addr = kmap_atomic(page);
++			le32_add_cpu((__le32*)addr, 1);
++			kunmap_atomic(addr);
++		}
++	}
++
++	ceph_pagelist_encode_32(pagelist, name_len);
++	ceph_pagelist_append(pagelist, name, name_len);
++	ceph_pagelist_encode_32(pagelist, ctxsize);
++	ceph_pagelist_append(pagelist, as->fscrypt, ctxsize);
++out:
++	if (pagelist && !as->pagelist)
++		ceph_pagelist_release(pagelist);
++	return ret;
++}
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index 0dd043b56096..cc4e481bf13a 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -18,6 +18,9 @@ static inline void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc)
+ 	fscrypt_free_dummy_policy(&fsc->dummy_enc_policy);
+ }
  
- 	/*
- 	 * This may be the first time the inode number is available, so do any
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index b5c31baaa8bf..087fa87bca0b 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -178,6 +178,7 @@ int fscrypt_ioctl_get_policy(struct file *filp, void __user *arg);
- int fscrypt_ioctl_get_policy_ex(struct file *filp, void __user *arg);
- int fscrypt_ioctl_get_nonce(struct file *filp, void __user *arg);
- int fscrypt_has_permitted_context(struct inode *parent, struct inode *child);
-+int fscrypt_context_for_new_inode(void *ctx, struct inode *inode);
- int fscrypt_set_context(struct inode *inode, void *fs_data);
++int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
++				 struct ceph_acl_sec_ctx *as);
++
+ #else /* CONFIG_FS_ENCRYPTION */
  
- struct fscrypt_dummy_policy {
+ static inline void ceph_fscrypt_set_ops(struct super_block *sb)
+@@ -27,6 +30,15 @@ static inline void ceph_fscrypt_set_ops(struct super_block *sb)
+ static inline void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc)
+ {
+ }
++
++static inline int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
++						struct ceph_acl_sec_ctx *as)
++{
++	if (IS_ENCRYPTED(dir))
++		return -EOPNOTSUPP;
++	return 0;
++}
++
+ #endif /* CONFIG_FS_ENCRYPTION */
+ 
+ #endif
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 7b70187cc564..64cdc4513c8a 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -83,12 +83,17 @@ struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
+ 			goto out_err;
+ 	}
+ 
++	inode->i_state = 0;
++	inode->i_mode = *mode;
++
+ 	err = ceph_security_init_secctx(dentry, *mode, as_ctx);
+ 	if (err < 0)
+ 		goto out_err;
+ 
+-	inode->i_state = 0;
+-	inode->i_mode = *mode;
++	err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
++	if (err)
++		goto out_err;
++
+ 	return inode;
+ out_err:
+ 	iput(inode);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 8a40374f9154..3b85a5154b49 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1034,6 +1034,9 @@ struct ceph_acl_sec_ctx {
+ #ifdef CONFIG_CEPH_FS_SECURITY_LABEL
+ 	void *sec_ctx;
+ 	u32 sec_ctxlen;
++#endif
++#ifdef CONFIG_FS_ENCRYPTION
++	u8	fscrypt[FSCRYPT_SET_CONTEXT_MAX_SIZE];
+ #endif
+ 	struct ceph_pagelist *pagelist;
+ };
 -- 
 2.30.2
 
