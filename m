@@ -2,132 +2,90 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94043C433DB
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 18:38:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01904C433DB
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Mar 2021 03:12:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 531F061992
-	for <ceph-devel@archiver.kernel.org>; Fri, 26 Mar 2021 18:38:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB4DC6193D
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Mar 2021 03:12:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230134AbhCZSiN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 26 Mar 2021 14:38:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39036 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229969AbhCZSiM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Mar 2021 14:38:12 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A620961A13;
-        Fri, 26 Mar 2021 18:38:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616783892;
-        bh=tl2BnRgFFmTrCujm04id4QN8NI6kqyDBnURR8pQv+I4=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=HoLyiBkFPEI4CqtsPen93c8RmJpJ/0JCOnWBSwUGyhGsx4A5CQZuJ5ojDdDY3cQ3K
-         wPWeHORzlLzSBikwxghrbrHr85pytU3bEl0I0XRE3lBI6LEqyPSPZ5jv4PNgRlr49Z
-         /r+z/WgATkpXcRIJf9FRHXw0FU2pyzcmifFj40kfpTZNbEwLFlrYV7JS7tuFaJsEXQ
-         10V8w4yUf1TBJBvjm1ZTMF7QvxqH29/BeNnPpvK8e8iTahIOTiGRrBMFrk3yYDiY/4
-         uFHGTYSsJV/IQM8gLkOaIcl01OHmBZp6NFiG4N74pSluiFUQ6kn8Vibf3oYkpkWJyW
-         Jk2uGqV5zIp7w==
-Message-ID: <f7e34bd93f8e774cf11ff059d040a7ec19ef0b19.camel@kernel.org>
-Subject: Re: [RFC PATCH v5 00/19] ceph+fscrypt: context, filename and
- symlink support
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Date:   Fri, 26 Mar 2021 14:38:10 -0400
-In-Reply-To: <20210326173227.96363-1-jlayton@kernel.org>
-References: <20210326173227.96363-1-jlayton@kernel.org>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.38.4 (3.38.4-1.fc33) 
+        id S229822AbhC2DK5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 28 Mar 2021 23:10:57 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40891 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230243AbhC2DK4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 28 Mar 2021 23:10:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1616987455;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=176hVXBqNsib9v5dmxNV3S8ZkPoDNuGKMCXJqfOIcEM=;
+        b=Nr5wP+zmmz1SSTEezYOFimYWwM5n47qGdtAltY6WXoZFJLsIsAElqyVzZWthauT97+ud1d
+        LybrbnkOzCgkcVcjIneqJmfhKI6MgQCaH/f8umIhvJxQSx0o5EJFxV6qdS9wU7Vjf9p3Q9
+        7sl8HnQTN1VOfaJUWKpiQv8rvHlZg0A=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-18-Wpoi_T3XPJ2vKK5AsbGpBQ-1; Sun, 28 Mar 2021 23:10:51 -0400
+X-MC-Unique: Wpoi_T3XPJ2vKK5AsbGpBQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1529F180FCA0;
+        Mon, 29 Mar 2021 03:10:50 +0000 (UTC)
+Received: from [10.72.12.18] (ovpn-12-18.pek2.redhat.com [10.72.12.18])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 7A5F41037E83;
+        Mon, 29 Mar 2021 03:10:48 +0000 (UTC)
+Subject: Re: [PATCH] ceph: fix inode leak on getattr error in __fh_to_dentry
+To:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, Luis Henriques <lhenriques@suse.de>
+References: <20210326154032.86410-1-jlayton@kernel.org>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <564ba8c9-4e9b-f0f5-0db5-fb961ca47075@redhat.com>
+Date:   Mon, 29 Mar 2021 11:10:44 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.9.0
 MIME-Version: 1.0
+In-Reply-To: <20210326154032.86410-1-jlayton@kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, 2021-03-26 at 13:32 -0400, Jeff Layton wrote:
-> I haven't posted this in a while and there were some bugs shaken out of
-> the last posting. This adds (partial) support for fscrypt to kcephfs,
-> including crypto contexts, filenames and encrypted symlink targets. At
-> this point, the xfstests quick tests that generally pass without fscrypt
-> also pass with test_dummy_encryption enabled.
-> 
-> There is one lingering bug that I'm having trouble tracking down: xfstest
-> generic/477 (an open_by_handle_at test) sometimes throws a "Busy inodes
-> after umount" warning. I'm narrowed down the issue a bit, but there is
-> some raciness involved so I haven't quite nailed it down yet.
-> 
-> This set is quite invasive. There is probably some further work to be
-> done to add common code helpers and the like, but the final diffstat
-> probably won't look too different.
-> 
-> This set does not include encryption of file contents. That is turning
-> out to be a bit trickier than first expected owing to the fact that the
-> MDS is usually what handles truncation, and the i_size no longer
-> represents the amount of data stored in the backing store. That will
-> probably require an MDS change to fix, and we're still sorting out the
-> details.
-> 
-> Jeff Layton (19):
->   vfs: export new_inode_pseudo
->   fscrypt: export fscrypt_base64_encode and fscrypt_base64_decode
->   fscrypt: export fscrypt_fname_encrypt and fscrypt_fname_encrypted_size
->   fscrypt: add fscrypt_context_for_new_inode
->   ceph: crypto context handling for ceph
->   ceph: implement -o test_dummy_encryption mount option
->   ceph: preallocate inode for ops that may create one
->   ceph: add routine to create fscrypt context prior to RPC
->   ceph: make ceph_msdc_build_path use ref-walk
->   ceph: add encrypted fname handling to ceph_mdsc_build_path
->   ceph: decode alternate_name in lease info
->   ceph: send altname in MClientRequest
->   ceph: properly set DCACHE_NOKEY_NAME flag in lookup
->   ceph: make d_revalidate call fscrypt revalidator for encrypted
->     dentries
->   ceph: add helpers for converting names for userland presentation
->   ceph: add fscrypt support to ceph_fill_trace
->   ceph: add support to readdir for encrypted filenames
->   ceph: create symlinks with encrypted and base64-encoded targets
->   ceph: add fscrypt ioctls
-> 
->  fs/ceph/Makefile            |   1 +
->  fs/ceph/crypto.c            | 185 +++++++++++++++++++++++
->  fs/ceph/crypto.h            | 101 +++++++++++++
->  fs/ceph/dir.c               | 178 ++++++++++++++++++-----
->  fs/ceph/file.c              |  56 ++++---
->  fs/ceph/inode.c             | 255 +++++++++++++++++++++++++++++---
->  fs/ceph/ioctl.c             |  94 ++++++++++++
->  fs/ceph/mds_client.c        | 283 ++++++++++++++++++++++++++++++------
->  fs/ceph/mds_client.h        |  14 +-
->  fs/ceph/super.c             |  80 +++++++++-
->  fs/ceph/super.h             |  16 +-
->  fs/ceph/xattr.c             |  32 ++++
->  fs/crypto/fname.c           |  53 +++++--
->  fs/crypto/fscrypt_private.h |   9 +-
->  fs/crypto/hooks.c           |   6 +-
->  fs/crypto/policy.c          |  34 ++++-
->  fs/inode.c                  |   1 +
->  include/linux/fscrypt.h     |  10 ++
->  18 files changed, 1246 insertions(+), 162 deletions(-)
->  create mode 100644 fs/ceph/crypto.c
->  create mode 100644 fs/ceph/crypto.h
-> 
+On 2021/3/26 23:40, Jeff Layton wrote:
+> Cc: Luis Henriques <lhenriques@suse.de>
+> Fixes: 878dabb64117 (ceph: don't return -ESTALE if there's still an open file)
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>   fs/ceph/export.c | 4 +++-
+>   1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> index f22156ee7306..17d8c8f4ec89 100644
+> --- a/fs/ceph/export.c
+> +++ b/fs/ceph/export.c
+> @@ -178,8 +178,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+>   		return ERR_CAST(inode);
+>   	/* We need LINK caps to reliably check i_nlink */
+>   	err = ceph_do_getattr(inode, CEPH_CAP_LINK_SHARED, false);
+> -	if (err)
+> +	if (err) {
+> +		iput(inode);
+>   		return ERR_PTR(err);
+> +	}
+>   	/* -ESTALE if inode as been unlinked and no file is open */
+>   	if ((inode->i_nlink == 0) && (atomic_read(&inode->i_count) == 1)) {
+>   		iput(inode);
 
-Oh, I should mention that this is all in my ceph-fscrypt-fnames branch:
-
-    https://git.kernel.org/pub/scm/linux/kernel/git/jlayton/linux.git/
-
-This all still under heavy development, so I'm open to suggestions and
-review. If you're daring and want to test with it, please do.
-
-I do think this has the potential to be a "killer feature" for ceph (and
-maybe other network filesystems). Being able to store data securely on
-an otherwise "public" cluster seems like a very nice thing to have.
-
-Cheers,
--- 
-Jeff Layton <jlayton@kernel.org>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
 
