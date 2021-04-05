@@ -4,39 +4,39 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26139C433ED
-	for <ceph-devel@archiver.kernel.org>; Mon,  5 Apr 2021 11:32:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C42CC433B4
+	for <ceph-devel@archiver.kernel.org>; Mon,  5 Apr 2021 18:38:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EC82D613AE
-	for <ceph-devel@archiver.kernel.org>; Mon,  5 Apr 2021 11:32:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9A0B61382
+	for <ceph-devel@archiver.kernel.org>; Mon,  5 Apr 2021 18:38:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234760AbhDELdD (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 5 Apr 2021 07:33:03 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58600 "EHLO mail.kernel.org"
+        id S235155AbhDESis (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 5 Apr 2021 14:38:48 -0400
+Received: from mail.kernel.org ([198.145.29.99]:32988 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233431AbhDELdC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Apr 2021 07:33:02 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id DDF1A613AD;
-        Mon,  5 Apr 2021 11:32:55 +0000 (UTC)
+        id S232598AbhDESir (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Apr 2021 14:38:47 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4789E60FD8;
+        Mon,  5 Apr 2021 18:38:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617622376;
-        bh=K8ymqToOUOfJuMFEPg+WxUd22LBku4EBSed0Z04Qwkg=;
+        s=k20201202; t=1617647920;
+        bh=0BW4dKgtW7yRjnqRROod6RR64heEUKkzivE7Ihl10wQ=;
         h=From:To:Cc:Subject:Date:From;
-        b=vMlqI2Gl0Rm7NtJYAlS9ON3N71fwGuIr1Z4nse/LYj2haoPSjW4KaPkjyRcg2Os6m
-         d5ixoi/u6pkZmyETV3SRFAMk9P4rGUiClOUvvajKvmVXtzP46FDHjbGlbDyYTULi+l
-         WuwWMCeZ/WERqQLSGB/UNqv4frK/jc3EdGjdmW+oYIqU/vMbCoxBM5SicK5EAIAX7p
-         hjHKQoSMCcunaLWJQQWiqw71BirZBIS50gC781WG5UqVJb1O+Efmw/A5Inx9xCRCYp
-         bxzTFo1Fyate7HAQwX+rtaX3x5xUt7pIwZB6UEVPQIeE8OK+/llh0ha0OFLjLoafci
-         e6sS398m6h/Ig==
+        b=fv4LAN0d+QF0htMqnJpI4VOSYeBVcCwquJy+SKxTbMrG2G0ML7Y1udz4jx/wjbSy/
+         BVXdPEybe2dK/tLgXo0LsiiTh+wyr568ML/K7mSNhkhfXZ7ynX+8ZwAP/VxTI4da+K
+         TMY0Uv+/CcLtqBZ+CWUjS1QL3yzjQFQKCkFgGoMElZEAij28qJgzguG8ct8CJ90bPS
+         +g5OFcXhvtWghdzRxUsR7RqYYn8p0F7WsQnQF36iv0fh3or4j99TbHHTkzxRMlAf0u
+         K9FamoaTk0oeqiZJdNkIzLhVsiryuuDwwVV5CVmRTOG7+1CENzA49vhBLJ7lLOOR4V
+         Kq/+lQa+Vqd9g==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
-Cc:     pdonnell@redhat.com, ukernel@gmail.com, idryomov@gmail.com
-Subject: [PATCH] ceph: don't allow access to MDS-private inodes
-Date:   Mon,  5 Apr 2021 07:32:54 -0400
-Message-Id: <20210405113254.8085-1-jlayton@kernel.org>
+Cc:     idryomov@gmail.com
+Subject: [PATCH] ceph: drop pinned_page parameter from ceph_get_caps
+Date:   Mon,  5 Apr 2021 14:38:38 -0400
+Message-Id: <20210405183838.93073-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -44,119 +44,173 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The MDS reserves a set of inodes for its own usage, and these should
-never be accessible to clients. Add a new helper to vet a proposed
-inode number against that range, and complain loudly and refuse to
-create or look it up if it's in it.
+All of the existing callers that don't set this to NULL just drop the
+page reference at some arbitrary point later in processing. There's no
+point in keeping a page reference that we don't use, so just drop the
+reference immediately after checking the Uptodate flag.
 
-Also, ensure that the MDS doesn't try to delegate that range to us
-either. Print a warning if it does, and don't save the range in the
-xarray.
-
-URL: https://tracker.ceph.com/issues/49922
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/export.c     |  8 ++++++++
- fs/ceph/inode.c      |  3 +++
- fs/ceph/mds_client.c |  7 +++++++
- fs/ceph/super.h      | 22 ++++++++++++++++++++++
- 4 files changed, 40 insertions(+)
+ fs/ceph/addr.c  |  9 ++-------
+ fs/ceph/caps.c  | 11 +++++------
+ fs/ceph/file.c  | 17 +++++------------
+ fs/ceph/super.h |  2 +-
+ 4 files changed, 13 insertions(+), 26 deletions(-)
 
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index 17d8c8f4ec89..65540a4429b2 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -129,6 +129,10 @@ static struct inode *__lookup_inode(struct super_block *sb, u64 ino)
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 07cbf21099b8..a49f23edae14 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1356,7 +1356,6 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
+ 	struct inode *inode = file_inode(vma->vm_file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_file_info *fi = vma->vm_file->private_data;
+-	struct page *pinned_page = NULL;
+ 	loff_t off = (loff_t)vmf->pgoff << PAGE_SHIFT;
+ 	int want, got, err;
+ 	sigset_t oldset;
+@@ -1372,8 +1371,7 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
+ 		want = CEPH_CAP_FILE_CACHE;
  
- 	vino.ino = ino;
- 	vino.snap = CEPH_NOSNAP;
-+
-+	if (ceph_vino_is_reserved(vino))
-+		return ERR_PTR(-ESTALE);
-+
- 	inode = ceph_find_inode(sb, vino);
- 	if (!inode) {
- 		struct ceph_mds_request *req;
-@@ -214,6 +218,10 @@ static struct dentry *__snapfh_to_dentry(struct super_block *sb,
- 		vino.ino = sfh->ino;
- 		vino.snap = sfh->snapid;
- 	}
-+
-+	if (ceph_vino_is_reserved(vino))
-+		return ERR_PTR(-ESTALE);
-+
- 	inode = ceph_find_inode(sb, vino);
- 	if (inode)
- 		return d_obtain_alias(inode);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 2c512475c170..3f321ba801f1 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -56,6 +56,9 @@ struct inode *ceph_get_inode(struct super_block *sb, struct ceph_vino vino)
+ 	got = 0;
+-	err = ceph_get_caps(vma->vm_file, CEPH_CAP_FILE_RD, want, -1,
+-			    &got, &pinned_page);
++	err = ceph_get_caps(vma->vm_file, CEPH_CAP_FILE_RD, want, -1, &got);
+ 	if (err < 0)
+ 		goto out_restore;
+ 
+@@ -1392,8 +1390,6 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
+ 	} else
+ 		err = -EAGAIN;
+ 
+-	if (pinned_page)
+-		put_page(pinned_page);
+ 	ceph_put_cap_refs(ci, got);
+ 
+ 	if (err != -EAGAIN)
+@@ -1487,8 +1483,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 
+ 	got = 0;
+-	err = ceph_get_caps(vma->vm_file, CEPH_CAP_FILE_WR, want, off + len,
+-			    &got, NULL);
++	err = ceph_get_caps(vma->vm_file, CEPH_CAP_FILE_WR, want, off + len, &got);
+ 	if (err < 0)
+ 		goto out_free;
+ 
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index aebd0d78ee59..e712826ea3f1 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2855,8 +2855,7 @@ int ceph_try_get_caps(struct inode *inode, int need, int want,
+  * due to a small max_size, make sure we check_max_size (and possibly
+  * ask the mds) so we don't get hung up indefinitely.
+  */
+-int ceph_get_caps(struct file *filp, int need, int want,
+-		  loff_t endoff, int *got, struct page **pinned_page)
++int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got)
  {
- 	struct inode *inode;
- 
-+	if (ceph_vino_is_reserved(vino))
-+		return ERR_PTR(-EREMOTEIO);
+ 	struct ceph_file_info *fi = filp->private_data;
+ 	struct inode *inode = file_inode(filp);
+@@ -2954,11 +2953,11 @@ int ceph_get_caps(struct file *filp, int need, int want,
+ 			struct page *page =
+ 				find_get_page(inode->i_mapping, 0);
+ 			if (page) {
+-				if (PageUptodate(page)) {
+-					*pinned_page = page;
+-					break;
+-				}
++				bool uptodate = PageUptodate(page);
 +
- 	inode = iget5_locked(sb, (unsigned long)vino.ino, ceph_ino_compare,
- 			     ceph_set_ino_cb, &vino);
- 	if (!inode)
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 73ecb7d128c9..2d7dcd295bb9 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -433,6 +433,13 @@ static int ceph_parse_deleg_inos(void **p, void *end,
+ 				put_page(page);
++				if (uptodate)
++					break;
+ 			}
+ 			/*
+ 			 * drop cap refs first because getattr while
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 31542eac7e59..77fc037d5beb 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1513,7 +1513,6 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+ 	size_t len = iov_iter_count(to);
+ 	struct inode *inode = file_inode(filp);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	struct page *pinned_page = NULL;
+ 	bool direct_lock = iocb->ki_flags & IOCB_DIRECT;
+ 	ssize_t ret;
+ 	int want, got = 0;
+@@ -1532,8 +1531,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+ 		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+ 	else
+ 		want = CEPH_CAP_FILE_CACHE;
+-	ret = ceph_get_caps(filp, CEPH_CAP_FILE_RD, want, -1,
+-			    &got, &pinned_page);
++	ret = ceph_get_caps(filp, CEPH_CAP_FILE_RD, want, -1, &got);
+ 	if (ret < 0) {
+ 		if (iocb->ki_flags & IOCB_DIRECT)
+ 			ceph_end_io_direct(inode);
+@@ -1574,10 +1572,6 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
  
- 		ceph_decode_64_safe(p, end, start, bad);
- 		ceph_decode_64_safe(p, end, len, bad);
-+
-+		/* Don't accept a delegation of system inodes */
-+		if (start < CEPH_INO_SYSTEM_BASE) {
-+			pr_warn_ratelimited("ceph: ignoring reserved inode range delegation (start=0x%llx len=0x%llx)\n",
-+					start, len);
-+			continue;
-+		}
- 		while (len--) {
- 			int err = xa_insert(&s->s_delegated_inos, ino = start++,
- 					    DELEGATED_INO_AVAILABLE,
+ 	dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
+ 	     inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
+-	if (pinned_page) {
+-		put_page(pinned_page);
+-		pinned_page = NULL;
+-	}
+ 	ceph_put_cap_refs(ci, got);
+ 
+ 	if (direct_lock)
+@@ -1756,8 +1750,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 	else
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 	got = 0;
+-	err = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, pos + count,
+-			    &got, NULL);
++	err = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, pos + count, &got);
+ 	if (err < 0)
+ 		goto out;
+ 
+@@ -2086,7 +2079,7 @@ static long ceph_fallocate(struct file *file, int mode,
+ 	else
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 
+-	ret = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, endoff, &got, NULL);
++	ret = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, endoff, &got);
+ 	if (ret < 0)
+ 		goto unlock;
+ 
+@@ -2124,7 +2117,7 @@ static int get_rd_wr_caps(struct file *src_filp, int *src_got,
+ 
+ retry_caps:
+ 	ret = ceph_get_caps(dst_filp, CEPH_CAP_FILE_WR, CEPH_CAP_FILE_BUFFER,
+-			    dst_endoff, dst_got, NULL);
++			    dst_endoff, dst_got);
+ 	if (ret < 0)
+ 		return ret;
+ 
+@@ -2146,7 +2139,7 @@ static int get_rd_wr_caps(struct file *src_filp, int *src_got,
+ 			return ret;
+ 		}
+ 		ret = ceph_get_caps(src_filp, CEPH_CAP_FILE_RD,
+-				    CEPH_CAP_FILE_SHARED, -1, src_got, NULL);
++				    CEPH_CAP_FILE_SHARED, -1, src_got);
+ 		if (ret < 0)
+ 			return ret;
+ 		/*... drop src_ci caps too, and retry */
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 5e0e1aeee1b5..1fe4cf385481 100644
+index 1fe4cf385481..4808a1458c9b 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -529,10 +529,32 @@ static inline int ceph_ino_compare(struct inode *inode, void *data)
- 		ci->i_vino.snap == pvino->snap;
- }
+@@ -1178,7 +1178,7 @@ extern int ceph_encode_dentry_release(void **p, struct dentry *dn,
+ 				      int mds, int drop, int unless);
  
-+/*
-+ * The MDS reserves a set of inodes for its own usage. These should never
-+ * be accessible by clients, and so the MDS has no reason to ever hand these
-+ * out.
-+ *
-+ * These come from src/mds/mdstypes.h in the ceph sources.
-+ */
-+#define CEPH_MAX_MDS		0x100
-+#define CEPH_NUM_STRAY		10
-+#define CEPH_INO_SYSTEM_BASE	((6*CEPH_MAX_MDS) + (CEPH_MAX_MDS * CEPH_NUM_STRAY))
-+
-+static inline bool ceph_vino_is_reserved(const struct ceph_vino vino)
-+{
-+	if (vino.ino < CEPH_INO_SYSTEM_BASE && vino.ino != CEPH_INO_ROOT) {
-+		WARN_RATELIMIT(1, "Attempt to access reserved inode number 0x%llx", vino.ino);
-+		return true;
-+	}
-+	return false;
-+}
+ extern int ceph_get_caps(struct file *filp, int need, int want,
+-			 loff_t endoff, int *got, struct page **pinned_page);
++			 loff_t endoff, int *got);
+ extern int ceph_try_get_caps(struct inode *inode,
+ 			     int need, int want, bool nonblock, int *got);
  
- static inline struct inode *ceph_find_inode(struct super_block *sb,
- 					    struct ceph_vino vino)
- {
-+	if (ceph_vino_is_reserved(vino))
-+		return NULL;
-+
- 	/*
- 	 * NB: The hashval will be run through the fs/inode.c hash function
- 	 * anyway, so there is no need to squash the inode number down to
 -- 
 2.30.2
 
