@@ -2,138 +2,103 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 399C6C433ED
-	for <ceph-devel@archiver.kernel.org>; Wed, 14 Apr 2021 17:00:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49765C433B4
+	for <ceph-devel@archiver.kernel.org>; Mon, 19 Apr 2021 02:32:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DB7B61154
-	for <ceph-devel@archiver.kernel.org>; Wed, 14 Apr 2021 17:00:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 14EFC61002
+	for <ceph-devel@archiver.kernel.org>; Mon, 19 Apr 2021 02:32:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347203AbhDNRAm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 14 Apr 2021 13:00:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39308 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231834AbhDNRAm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Apr 2021 13:00:42 -0400
-Received: from mail-il1-x131.google.com (mail-il1-x131.google.com [IPv6:2607:f8b0:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DA3FC061574
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Apr 2021 10:00:20 -0700 (PDT)
-Received: by mail-il1-x131.google.com with SMTP id v13so1688773ilj.8
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Apr 2021 10:00:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=f2gKkNgMyA9YBJyIxJ+fwJLbXg5/FwGSkOwffY5GqAY=;
-        b=QNDzchS4zjgUiTd/ZHiiKx1NH/7j8HPOs3RO389Wx0IMOC+GkjqDxQNE/a3afnnFu5
-         vqiXfgkJgi9D+XhdU327Tb7HKSPG1RY/NxGxpDS8VTsRhUxV/Y0GIjBWXL6kjkJ6AJf5
-         VKYjEzRynXpRJbjEHWid5z2KnNG6xO4Q0GwPh+2boLSfjh7Pweg0bf38x2t9joUwXfnm
-         dwzZvXcSlrjgPF81P/kzOyvWguUUgPNTD5ufKIZcN1UZQxwx4+wnszVJ0w2Xzd72OxAj
-         tMipSCYEJnHDuweUcWKdObivluMlkyhOdVb81ObgzPvASEwXiu9GS5zbffcau2XtOW4F
-         cxZw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=f2gKkNgMyA9YBJyIxJ+fwJLbXg5/FwGSkOwffY5GqAY=;
-        b=IOUCT1vpV12QfhRTwJoxmNDmgq47uyzt+BnEVw9UL9bMJgZj+rquqpc15USi74uJgM
-         dqVMxxdBsZ0o9c9P9e274Ur3zzsR7Z70j2pV0g/aGOP7DdrhziwFkHus4QRobCfBwUxM
-         y828ayp/M3JjjK9DTKnJsoxKAVgf2FV1dbxlogLzqhPcT5F4uJLPgIHEhog7GX7neXRO
-         430duM1dmkylrahkl6hIm5a0sZh+4Z18j2Z184wYnWGm2zHkKqJE9GjVREt0DZHqQ6fi
-         eGxrPgxGDOoUF0b9OYwbkKz5x4z8504QuyHlMX2E9uUxHhFfEsqqvHCVIfu40Gti+Rfa
-         vyZw==
-X-Gm-Message-State: AOAM530OxUb4MiRfXS1zjSrtZ85IoriRn7ebpteln6Yz3xAKghvuzPFO
-        3nmeEUu+X5lpQj2HXZJlhcgNGNvBILHRyryRr0Ie2rj//dg2Vw==
-X-Google-Smtp-Source: ABdhPJx4M9rHN0coZZ/9YMH94dRUzNKrV04FKLR+ke+55kGg6dboP73n2YyJ4ZrUgvjE7fEBjMAbX4xpmEDfh/XMntI=
-X-Received: by 2002:a05:6e02:c74:: with SMTP id f20mr32627926ilj.281.1618419619978;
- Wed, 14 Apr 2021 10:00:19 -0700 (PDT)
+        id S233117AbhDSCdV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 18 Apr 2021 22:33:21 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:20600 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232038AbhDSCdU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 18 Apr 2021 22:33:20 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1618799571;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=iFz9n4mBkTaZSyU3SpYrvbFCH+G+UqyCQa9LgBn7/w4=;
+        b=NV/jM2NLYLBQRsKLOn/BIrOCINISJyqRCGMKDhGKowo4tCzYuIQg1dWwn9wKMEnd22nRln
+        ew/bW+nMQiig1lZX3pE76bEnpK7uJdC1PrmgEsN/lllW2fA3RKw9dQQjMUG1tqTZ2kSGN9
+        2/VBIgaP17BxAU/jrnnK7u0Z8gGfZbA=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-589-3cw3uPCHM_uf7jLQwr1HWw-1; Sun, 18 Apr 2021 22:32:42 -0400
+X-MC-Unique: 3cw3uPCHM_uf7jLQwr1HWw-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5EB2518397A3;
+        Mon, 19 Apr 2021 02:32:41 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3DF435D9CD;
+        Mon, 19 Apr 2021 02:32:38 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, pdonnell@redhat.com, ukernel@gmail.com,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] ceph: make the lost+found dir accessible by kernel client
+Date:   Mon, 19 Apr 2021 10:32:37 +0800
+Message-Id: <20210419023237.1177430-1-xiubli@redhat.com>
 MIME-Version: 1.0
-References: <47f0a04ce6664116a11cfdb5a458e252@nl.team.blue>
-In-Reply-To: <47f0a04ce6664116a11cfdb5a458e252@nl.team.blue>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Wed, 14 Apr 2021 19:00:20 +0200
-Message-ID: <CAOi1vP-moRXtL4gKXQF8+NwbPgE11_LoxfSYqYBbJfYYQ7Sv_g@mail.gmail.com>
-Subject: Re: All RBD IO stuck after flapping OSD's
-To:     Robin Geuze <robin.geuze@nl.team.blue>
-Cc:     Ceph Development <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, Apr 14, 2021 at 4:56 PM Robin Geuze <robin.geuze@nl.team.blue> wrot=
-e:
->
-> Hey,
->
-> We've encountered a weird issue when using the kernel RBD module. It star=
-ts with a bunch of OSD's flapping (in our case because of a network card is=
-sue which caused the LACP to constantly flap), which is logged in dmesg:
->
-> Apr 14 05:45:02 hv1 kernel: [647677.112461] libceph: osd56 down
-> Apr 14 05:45:03 hv1 kernel: [647678.114962] libceph: osd54 down
-> Apr 14 05:45:05 hv1 kernel: [647680.127329] libceph: osd50 down
-> (...)
->
-> After a while of that we start getting these errors being spammed in dmes=
-g:
->
-> Apr 14 05:47:35 hv1 kernel: [647830.671263] rbd: rbd14: pre object map up=
-date failed: -16
-> Apr 14 05:47:35 hv1 kernel: [647830.671268] rbd: rbd14: write at objno 19=
-2 2564096~2048 result -16
-> Apr 14 05:47:35 hv1 kernel: [647830.671271] rbd: rbd14: write result -16
->
-> (In this case for two different RBD mounts)
->
-> At this point the IO for these two mounts is completely gone, and the onl=
-y reason we can still perform IO on the other RBD devices is because we use=
- noshare. Unfortunately unmounting the other devices is no longer possible,=
- which means we cannot migrate our VM's to another HV, since to make the me=
-ssages go away we have to reboot the server.
+From: Xiubo Li <xiubli@redhat.com>
 
-Hi Robin,
+Inode number 0x4 is reserved for the lost+found dir, and the app
+or test app need to access it.
 
-Do these messages appear even if no I/O is issued to /dev/rbd14 or only
-if you attempt to write?
+URL: https://tracker.ceph.com/issues/50216
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/super.h              | 3 ++-
+ include/linux/ceph/ceph_fs.h | 7 ++++---
+ 2 files changed, 6 insertions(+), 4 deletions(-)
 
->
-> All of this wouldn't be such a big issue if it recovered once the cluster=
- started behaving normally again, but it doesn't, it just keeps being stuck=
-, and the longer we wait with rebooting this the worse the issue get.
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 4808a1458c9b..0f38e6183ff0 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -542,7 +542,8 @@ static inline int ceph_ino_compare(struct inode *inode, void *data)
+ 
+ static inline bool ceph_vino_is_reserved(const struct ceph_vino vino)
+ {
+-	if (vino.ino < CEPH_INO_SYSTEM_BASE && vino.ino != CEPH_INO_ROOT) {
++	if (vino.ino < CEPH_INO_SYSTEM_BASE && vino.ino != CEPH_INO_ROOT &&
++	    vino.ino != CEPH_INO_LOST_AND_FOUND ) {
+ 		WARN_RATELIMIT(1, "Attempt to access reserved inode number 0x%llx", vino.ino);
+ 		return true;
+ 	}
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index e41a811026f6..57e5bd63fb7a 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -27,9 +27,10 @@
+ #define CEPH_MONC_PROTOCOL   15 /* server/client */
+ 
+ 
+-#define CEPH_INO_ROOT   1
+-#define CEPH_INO_CEPH   2       /* hidden .ceph dir */
+-#define CEPH_INO_DOTDOT 3	/* used by ceph fuse for parent (..) */
++#define CEPH_INO_ROOT           1
++#define CEPH_INO_CEPH           2 /* hidden .ceph dir */
++#define CEPH_INO_DOTDOT         3 /* used by ceph fuse for parent (..) */
++#define CEPH_INO_LOST_AND_FOUND 4 /* lost+found dir */
+ 
+ /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
+ #define CEPH_MAX_MON   31
+-- 
+2.27.0
 
-Please explain how it's getting worse.
-
-I think the problem is that the object map isn't locked.  What
-probably happened is the kernel client lost its watch on the image
-and for some reason can't get it back.   The flapping has likely
-trigged some edge condition in the watch/notify code.
-
-To confirm:
-
-- paste the contents of /sys/bus/rbd/devices/14/client_addr
-
-- paste the contents of /sys/kernel/debug/ceph/<cluster id>.client<id>/osdc
-  for /dev/rbd14.  If you are using noshare, you will have multiple
-  client instances with the same cluster id.  The one you need can be
-  identified with /sys/bus/rbd/devices/14/client_id.
-
-- paste the output of "rbd status <rbd14 image>" (image name can be
-  identified from "rbd showmapped")
-
-I'm also curious who actually has the lock on the header object and the
-object map object.  Paste the output of
-
-$ ID=3D$(bin/rbd info --format=3Djson <rbd14 pool>/<rbd14 image> | jq -r .i=
-d)
-$ rados -p <rbd14 pool> lock info rbd_header.$ID rbd_lock | jq
-$ rados -p <rbd14 pool> lock info rbd_object_map.$ID rbd_lock | jq
-
-Thanks,
-
-                Ilya
