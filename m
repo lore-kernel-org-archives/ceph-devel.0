@@ -2,158 +2,90 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6846CC43470
-	for <ceph-devel@archiver.kernel.org>; Fri,  7 May 2021 17:15:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B045C433ED
+	for <ceph-devel@archiver.kernel.org>; Sat,  8 May 2021 02:13:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 40A7861463
-	for <ceph-devel@archiver.kernel.org>; Fri,  7 May 2021 17:15:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F63F61410
+	for <ceph-devel@archiver.kernel.org>; Sat,  8 May 2021 02:13:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236835AbhEGRQl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 7 May 2021 13:16:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:46621 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230499AbhEGRQj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 May 2021 13:16:39 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1620407739;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0HAZILCN1yodWfNqbs34LSwX0MQUaZxwM3O31KdXtyI=;
-        b=jQdUsRTDh9POo7812xpsgiRPy1UmQusRzkWdhhY5+END8Zlw6MIKfSum12ZvOKTEVeiHW3
-        to9dC3PHzY5l2def60lafeNk1Pd29EtXRB7AYPyxHEr5h6TBgD6sbZpQrS/mUKICD0Vb2C
-        xwQ5iuJo+F3Cbq5+Pv7ktDYU7hWUH9Y=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-12-mKUpCdA-P5eEqwofGnbRDw-1; Fri, 07 May 2021 13:15:37 -0400
-X-MC-Unique: mKUpCdA-P5eEqwofGnbRDw-1
-Received: by mail-ed1-f72.google.com with SMTP id i2-20020a0564020542b02903875c5e7a00so4777149edx.6
-        for <ceph-devel@vger.kernel.org>; Fri, 07 May 2021 10:15:37 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=0HAZILCN1yodWfNqbs34LSwX0MQUaZxwM3O31KdXtyI=;
-        b=UHu3hyXfJz8pxarwPsHTX0A6YCCfyD32ZfcegZ83VlJfPSJy24HNhzmbLRbt73gLk3
-         WGUbjUqbNiOG2vb1LOSxKjURDL0HoeNVJMr9yTTZ2W/NgPJV3L3qSQNyf+DQdk+51dUy
-         Dj5NNx9Vnd820TmfxXssK+bjbFRTmBHhI2vKIFAy0x1T+dao8m4o3st25hPuhZvwg1Tg
-         4ZSWpMgDNv3nII97tBpI7qFQYIHK58++2jCeBpBhqXwi0FWiJuyfubj/DKUZO5NkYXqb
-         kYUyRK9/sRA6O5+dtKSdZckV5YgxcB1pCKxH3EspZeiBpot3J1HlkSPGleoMmOcB0T8H
-         EFRQ==
-X-Gm-Message-State: AOAM533lr10Z7qJWkLUIs1s43mZME5qcIFiMcMepY/jamLBUxxRN5N0r
-        fpWvghD4B4XQ4E/5K29H3DWlk6HWqgIj7jH+vyGBDsPsperS3TduOVhPFkaSwbMKJ3PNnnNEY1K
-        pAmoMsCvmvZaC2+mghURS49F5a+Kd66sfQ1tKGw==
-X-Received: by 2002:a05:6402:c1:: with SMTP id i1mr12553934edu.315.1620407736521;
-        Fri, 07 May 2021 10:15:36 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyOMlt58h03A7joraZW2/bbk5LEIGp1ZkFzu1YZmU2IUC3TJyRokZGpvvSfFGyO2AK52az5BTkrgOLtOarvQwA=
-X-Received: by 2002:a05:6402:c1:: with SMTP id i1mr12553915edu.315.1620407736373;
- Fri, 07 May 2021 10:15:36 -0700 (PDT)
+        id S229970AbhEHCOR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 7 May 2021 22:14:17 -0400
+Received: from mout.gmx.net ([212.227.15.15]:53673 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229775AbhEHCOQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 7 May 2021 22:14:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1620439995;
+        bh=lZyId1GYICZ2ygP+pTZ490926ssNo6EVcWKfbmumiyg=;
+        h=X-UI-Sender-Class:To:From:Subject:Date;
+        b=PRjHOuB63U23Spt4DmqCroS+hqCa2C0FWvhReEa/NJ8zGVykG1A+zfDdeWkCWN2Q4
+         yv8Kbu14FNcHjx0wpkSvNlrYOEEtlc07GqYJbB5hWycGX42/w8lV0TJtrFlS8uZkTY
+         e7Ge4AdWv9PIFO1OBGC+MUtINayAL3Fcirr5mb0E=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [10.10.25.136] ([103.52.188.137]) by mail.gmx.net (mrgmx005
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MNbkv-1lunGj2LP9-00P4iW for
+ <ceph-devel@vger.kernel.org>; Sat, 08 May 2021 04:13:15 +0200
+To:     ceph-devel@vger.kernel.org
+From:   "Norman.Kern" <norman.kern@gmx.com>
+Subject: Ceph Kernel client bad performance for 5.4
+Message-ID: <4badb69d-515f-ec30-5966-d26e145884bd@gmx.com>
+Date:   Sat, 8 May 2021 10:13:12 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-References: <5aac4d2dca148766caf595975570e97ec2241e24.camel@redhat.com>
- <CA+2bHPbtBS2sbJ6=s3TN3+T72POPUR1AdH81STy6tLNnw7Rk3Q@mail.gmail.com>
- <c8bd4aff582850d62a2932d76a5a15b49a7ac6be.camel@redhat.com>
- <CA+2bHPZ72KdFbUw=c-jsjRfYkQZGdHGVDvdn9WjpKjsa7P2p6g@mail.gmail.com>
- <ce49bf7c10f86042a3b48d928f45ce186f0a427e.camel@redhat.com>
- <CA+2bHPbxA+CBeWeSedVc+n_5ZqgUbqfmqqMOP-x8LBZHg2Ldww@mail.gmail.com>
- <5273ea8c01160decc71fd1a06de7bd44f53aea82.camel@redhat.com>
- <CA+2bHPbDi79MZ8KrBGKG8Yi_UrCKMbfYx32TmcJ3Z4Cwzsc+jw@mail.gmail.com> <1988ce8168d06dc9a6273fc1021762ed3e49f11c.camel@redhat.com>
-In-Reply-To: <1988ce8168d06dc9a6273fc1021762ed3e49f11c.camel@redhat.com>
-From:   Patrick Donnelly <pdonnell@redhat.com>
-Date:   Fri, 7 May 2021 10:15:09 -0700
-Message-ID: <CA+2bHPaDTy41f5QWhqJR-b2rUyt=KhD=uoCnC1mtxG054+BL3Q@mail.gmail.com>
-Subject: Re: ceph-mds infrastructure for fscrypt
-To:     Jeff Layton <jlayton@redhat.com>
-Cc:     dev <dev@ceph.io>, Ceph Development <ceph-devel@vger.kernel.org>,
-        Luis Henriques <lhenriques@suse.com>,
-        Xiubo Li <xiubli@redhat.com>,
-        Gregory Farnum <gfarnum@redhat.com>,
-        Douglas Fuller <dfuller@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-US
+X-Provags-ID: V03:K1:sg340bw2rf1ThpvG+8iflvJoDo9O7EQXgjeO52K2labSOa1kqFe
+ uH5fL6PGE53uBfuy3SIOy/ZAkHhXyZiYvODpFYbD1ePd1tIYG9Sps+/2a56blg/r0ZAPYbJ
+ 1+RKATu8D1gxm5UbrAhfDxaBwlKHh5Jpa+Q7FDBpMHm9aVZEIE6BAh9G0gHnlDEKSqKyOKu
+ Us4ZNj9p0gsyaMp0uicsw==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:38nyJsG6EtA=:dbIYTrWiD+tqwnSiJ9nCXW
+ dWtKFP5UFAJMKNTWje3M1vXPcRdXSa2KZAgqR5LPzcdZ7qUiDTcZKhXQrRYLdTJSXmBR1+77t
+ abTDIPsR/wWKdnU8nTWDeBu8gYN3tWOqzOw6XrND2kicB+E1JoppE+whORhVXUa32pehfwg90
+ VDDE78WMyyt4UJPlrhROZ3bRSwfci4th//EdeRbgdZ7jrHcjEueWKvETTPdhdGNCVsWiFwcar
+ PPprliaCT89s1Tg13c0uzS9k8cCxaW8gb5FOg+jWxJEl/1/j+BLHGdO9m1utyALY4YZdHf2SO
+ itmp8CKQyzPm8DQsdDQv93mDHV8El0gGZaBSLW7ngbrwn3XyuzCBczk4n2QDRVtsJJHs9U5y6
+ m9kw6o8jgac/Xx6K25KSebcgS3CJHaR8hHLVhdidr3BH6tAKT3FZQCcvm6sfQHnby7wVWTM6E
+ ndD8j+weTjopQWWfg8pXpc8IF1eEmID1EUIlMiFEVxEt0meSuEvGSJCn2LjIsy7wopvIR+Kw1
+ IN8/O7Y+o8A8NCblTh0atR2CRACgP3okGTHhWi6SoMLhjz+2rkzzEJHSPH3JFSkWl1qEbu4yq
+ /yxMV5FZ8djjY/w5uEhXnDPffIPB3D2k8j/1yS9eWw0WHbymOb2oZk+vAGTptd5lRaHgUv4Wb
+ 8DgPrIva2M7vIzuPZK29k9VhZSrX6xZeFshVgWrtf7/uhQe3Jehhm0iMDpj6M6dzLmL7LEri4
+ qjh3Xip3XBzGr+DzCMN3l5+p5v+NZpzJ8SAGV5tCMSs+pbuOtIQn/jdJYe/YZ0+7FzxgHeL5D
+ ts6RKZPUvULKeFFB6lvG5H96omN7QKAWeWGWV83taqLwHswDII3GR4NHDKvdWHkz4bQq1Ba59
+ QSFWjrJ7SQ5Dj07NNOtGgVXmDUJM9rROqpupYc0+A4qPcRjM/WL1HXx3+Td/cDSOfDPY4sjuP
+ gu++i+solkd1CkyoDff5rAgZ727qQDWevIqZV9zoRV2XlbPtzN/3+CUCD2XNNc+xQ09iI28CS
+ 4cqDaA3GYUc6drRe9oG4wwynlN25bpdz3Qq9g7l1dH/DS2E8ORl5BpNfP47uOpJQbdjHUM4Qw
+ ksP9p92H3ytRo/ZtRH1c+YuDIXl9x8HXDITsu1nV3ZQ1F1kdYekccfu3wl5zORcg4c3qxbpIY
+ 7iJ2TBNjTOCjuJjBf9UQHcXhBSjqImi0Ruf/R3rnWcnRDYJzba9x7Y9eeEqFLN12sSREM=
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, May 7, 2021 at 6:07 AM Jeff Layton <jlayton@redhat.com> wrote:
->
-> On Fri, 2021-04-30 at 18:03 -0700, Patrick Donnelly wrote:
-> > On Fri, Apr 30, 2021 at 8:04 AM Jeff Layton <jlayton@redhat.com> wrote:
-> > >
-> > > On Fri, 2021-04-30 at 07:45 -0700, Patrick Donnelly wrote:
-> > > > On Fri, Apr 30, 2021 at 7:33 AM Jeff Layton <jlayton@redhat.com> wrote:
-> > > > > We specifically need this for directories and symlinks during pathwalks
-> > > > > too. Eventually we may also want to encrypt certain data for other inode
-> > > > > types as well (e.g. block/char devices). That's less critical though.
-> > > > >
-> > > > > The problem with fetching it after the inode is first instantiated is
-> > > > > that we can end up recursing into a separate request while encoding a
-> > > > > path. For instance, see this stack trace that Luis reported:
-> > > > > https://lore.kernel.org/ceph-devel/53d5bebb28c1e0cd354a336a56bf103d5e3a6344.camel@kernel.org/T/#m0f7bbed6280623d761b8b4e70671ed568535d7fa
-> > > > >
-> > > > > While that implementation stored the context in an xattr, the problem
-> > > > > isstill the same if you have to fetch the context in the middle of
-> > > > > building a path. The best solution is just to always ensure it's
-> > > > > available.
-> > > >
-> > > > Got it. Splitting the struct makes sense then. The pin cap would be
-> > > > suitable for the immutable encryption context (if truly
-> > > > immutable?).Otherwise maybe the Axs cap?
-> > > >
-> > >
-> > > Ok. In that case, then we probably need to put the context blob under
-> > > AUTH caps so we can ensure that it's consulted during the permission
-> > > checks for pathwalks. The size will need to live under FILE.
-> > >
-> > > Now for the hard part...what do we name these fields?
-> > >
-> > >     fscrypt_context
-> > >     fscrypt_size
-> > >
-> > > ...or maybe...
-> > >
-> > >     fscrypt_auth
-> > >     fscrypt_file
-> > >
-> > > Since they'll be vector blobs, we can version these too so that we can
-> > > add other fields later if the need arises (even for non-fscrypt stuff).
-> > > Maybe we could consider:
-> > >
-> > >     client_opaque_auth
-> > >     client_opaque_file
-> >
-> > An opaque blob makes sense but you'd want a sentinel indicating it's
-> > an fscrypt blob. Don't think we'd be able to have two competing
-> > use-cases but it'd be nice to have it generic enough for future
-> > encryption libraries maybe.
-> >
->
-> I'm going with fscrypt_auth and fscrypt_file for now. We can rename them
-> later though if we want. What I'll probably do is just declare a
-> versioned format for these blobs. The MDS won't care about it, but the
-> clients can follow that convention.
->
-> I've made a bit of progress on this this week (fixing up the encoding
-> and decoding was a bit of a hassle, fwiw). These fields are associated
-> with the core inodes. The clients will use SETATTR calls to set them,
-> though they will also be updated with cap flushes, etc.
->
-> I need to be able to validate this feature in userland though and I
-> don't really want to roll dedicated functions for them. What I may do is
-> add new vxattrs (ceph.fscrypt_auth and ceph.fscrypt_file) and have those
-> expose these fields. Doing a setxattr on them will do a SETATTR under
-> the hood. The alternative is to declare new libcephfs routines for
-> fetching and setting these.
+Hi, guys,
 
-A client-side vxattr sounds good to me.
 
--- 
-Patrick Donnelly, Ph.D.
-He / Him / His
-Principal Software Engineer
-Red Hat Sunnyvale, CA
-GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
+I'm using ceph nautilus in my production,=C2=A0 the kernel clients include=
+ 5.4 and 4.15, I found a problem in 5.4 sometimes: It's slower than fuse, =
+but when I changed it
+to 4.15, it's recovered.
+for 5.4:
+root@WXRG0432:/mnt/test# rsync -ahHv --progress /root/test test-1
+sending incremental file list
+test
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 58.56M=C2=A0=C2=A0 5%=C2=
+=A0=C2=A0=C2=A0 2.82MB/s=C2=A0=C2=A0=C2=A0 0:05:43=C2=A0 ^C
+for 4.15:
+root@WXRG0433:/mnt/test# rsync -ahHv --progress /root/test=C2=A0 test-2
+sending incremental file list
+test
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 1.05G 100%=C2=A0 31=
+6.25MB/s=C2=A0=C2=A0=C2=A0 0:00:03 (xfr#1, to-chk=3D0/1)
 
+sent 1.05G bytes=C2=A0 received 35 bytes=C2=A0 299.67M bytes/sec
+Anyone have met the same problems with me?
