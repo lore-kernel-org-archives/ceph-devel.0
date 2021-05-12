@@ -7,41 +7,41 @@ X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12485C2B9FC
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44789C41538
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EDA2661446
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16C4C61407
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241174AbhELTua (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 May 2021 15:50:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53126 "EHLO mail.kernel.org"
+        id S1352751AbhELTvW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 May 2021 15:51:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:55756 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S240648AbhELSEw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 May 2021 14:04:52 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 42A326143C;
-        Wed, 12 May 2021 18:03:40 +0000 (UTC)
+        id S1353272AbhELSLH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 May 2021 14:11:07 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 92B8A61943;
+        Wed, 12 May 2021 18:05:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620842621;
-        bh=BgWX0d9h3klkaGXVA7a6ZgusKUgNUKaqRxDr0yosfq4=;
+        s=k20201202; t=1620842755;
+        bh=q9p/jL1dxlKZfVTF1Fv6oBvpVsnuufUQ/yUS+MlceCQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=pKwCAQWsIRxz4VkKLom0yJizftLYMhRbsv7JV7WfDFQ4z/EouvUQZ5Jy6cth6cFFj
-         MhaKMJrY3xaIBtT9qxh2a9UPLPVyTm3S3ULQhh+t1UER0mEiI4Rt/HdgVoSKN2rXKm
-         BWY2Eq0/Tqbe9TWBT/J81C9FPWRQ/AMO64QhlOnF7Sf1ZvxRmznr7/bQzDI0HIimPR
-         JjR8MLSxnVrgjbd+D8xZyBYzlOJGvLanYNQc2RTT84xvk+0rWAMQImsuTztFCHOaej
-         eKPoYZQ1vR1664HbwQcgZ340xe7PwiPnGQV+k44PE4wZEYi3+kdMCAeGrBLxV7cE8s
-         P1Ubn5A/tYQNg==
+        b=CKwMW955/S4btWqT8M5MOn6oMsFJ6b0cu/DLveiFr2l6MclioWZLUorwaL01QEcRF
+         htPRXYXkASjUIa3o1DEfI7fLNWq/QtV5sSMYkznkYVp5Pk5dY2h3IHgTaQPLPA55yW
+         dPXTjA2wnNYWiQiXoh4vHrohVqUlk7sQRLwW+u0RzcRul6zPf1IJhBXDAw5yIRU/gx
+         uBJb/j1hjQY4ulWrl5zHvqm3pXCr5IDx4LPsofKKTYvnxN5gO1VUQgpgj53g/XHDih
+         41MdVggTDnvboILAF3NLdjIIfNJ0kEp/pcZUDN4CsEKarCXLxOTwiLerUqq5q7Bb9A
+         gEaltjsab6Itg==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.10 20/34] ceph: fix fscache invalidation
-Date:   Wed, 12 May 2021 14:02:51 -0400
-Message-Id: <20210512180306.664925-20-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 5/7] ceph: fix fscache invalidation
+Date:   Wed, 12 May 2021 14:05:42 -0400
+Message-Id: <20210512180545.665946-5-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210512180306.664925-1-sashal@kernel.org>
-References: <20210512180306.664925-1-sashal@kernel.org>
+In-Reply-To: <20210512180545.665946-1-sashal@kernel.org>
+References: <20210512180545.665946-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -66,10 +66,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 2 insertions(+)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 576d01275bbd..e4fc99afa25a 100644
+index 2a351821d8f3..0eb2ada032c7 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -1866,6 +1866,7 @@ static int try_nonblocking_invalidate(struct inode *inode)
+@@ -1577,6 +1577,7 @@ static int try_nonblocking_invalidate(struct inode *inode)
  	u32 invalidating_gen = ci->i_rdcache_gen;
  
  	spin_unlock(&ci->i_ceph_lock);
@@ -78,10 +78,10 @@ index 576d01275bbd..e4fc99afa25a 100644
  	spin_lock(&ci->i_ceph_lock);
  
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 2462a9a84b95..6bd2a6ced22a 100644
+index 049cff197d2a..5e12ea92f7cd 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -1912,6 +1912,7 @@ static void ceph_do_invalidate_pages(struct inode *inode)
+@@ -1762,6 +1762,7 @@ static void ceph_invalidate_work(struct work_struct *work)
  	orig_gen = ci->i_rdcache_gen;
  	spin_unlock(&ci->i_ceph_lock);
  
