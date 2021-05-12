@@ -7,42 +7,42 @@ X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B0C6C2B9F6
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAE72C2B9FA
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 45AE8613F7
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9095A61420
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 May 2021 19:53:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235264AbhELTuN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 May 2021 15:50:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50644 "EHLO mail.kernel.org"
+        id S238984AbhELTuW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 May 2021 15:50:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51784 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1352186AbhELSCs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 May 2021 14:02:48 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0FB556142D;
-        Wed, 12 May 2021 18:01:38 +0000 (UTC)
+        id S1352641AbhELSDw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 May 2021 14:03:52 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id CBE0961438;
+        Wed, 12 May 2021 18:02:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620842500;
-        bh=vl1vOu33I/RXXgQL9kciLWCSnKrL1nsrA9Ha0qHy+jA=;
+        s=k20201202; t=1620842563;
+        bh=5MN9HffFvufeYdH7PbM0Tw3wI13Ccqot2r2gf4cvmwM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=QldyYYPdlD28GDEeV3sWdr4LNoAw7ORrkf/ZhEvAq+61x/Ab3zCzdcZoA7ykpYxzh
-         6zcdmduCqsoq4O37Nqdc4FKy1rSq45IUxCy6pjGdRmZ9kfUW8u+vdNru46lNGHIeTC
-         2AQ6R2g0gzQyYwUshtPs7nvlgMxQYMfF04NtgdNISu/dwq8bhjkRyz5mU8uP42dYcX
-         qgtxjHJ+gvM2jHActEfVoFewHj0a6HjunVDoZpZBcwf0J7u/700AE04nEjV8usCP+C
-         JSHpqV71k1y8GwA704e21YTIVI6+9G4g0mvgDFOoHXH8sV4QCAyIw0g6JqHL8cCZ4t
-         EJb0SxeN3YezQ==
+        b=GKl6U8+C6mfRBPw4khWqQBE2TidmEQzfmyK9hSdgGFsSZN6DaDvXw6AM70vgIUy+V
+         YZh2ftSmlQBugiGwnB/YdzFOS5wlK+aF5ROIcmLTxZMKQutinoCC7kSv25nTEAq4E5
+         xp1eDLCokoyvoPZzv8SX+k/ffT0p9i1uwglTAOIoAYQz9iiraAIsPIk695DENL5onT
+         8ZWIxKlsBEoXZuLbRHPmY7zcQDL1cl4dLrVrw/RfvhDhYqVEpxiwYXgqZDkTnhE/hN
+         SoX4PQ5NUU2DCACdAueEQS1HO9yva3cvEdff8bKz0MSyFcol/7ThPvxOYbVx9LuCAJ
+         Bak0URyKiXlqw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jeff Layton <jlayton@kernel.org>,
         Al Viro <viro@zeniv.linux.org.uk>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.12 24/37] ceph: don't clobber i_snap_caps on non-I_NEW inode
-Date:   Wed, 12 May 2021 14:00:51 -0400
-Message-Id: <20210512180104.664121-24-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.11 22/35] ceph: don't clobber i_snap_caps on non-I_NEW inode
+Date:   Wed, 12 May 2021 14:01:52 -0400
+Message-Id: <20210512180206.664536-22-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210512180104.664121-1-sashal@kernel.org>
-References: <20210512180104.664121-1-sashal@kernel.org>
+In-Reply-To: <20210512180206.664536-1-sashal@kernel.org>
+References: <20210512180206.664536-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -73,7 +73,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 4418d4be2907..2fd1c48ac5d7 100644
+index 2caa6df0bcdf..5eb7eeab3828 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
 @@ -87,14 +87,15 @@ struct inode *ceph_get_snapdir(struct inode *parent)
