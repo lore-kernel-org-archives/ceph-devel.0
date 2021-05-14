@@ -2,78 +2,104 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D1C6C433B4
-	for <ceph-devel@archiver.kernel.org>; Fri, 14 May 2021 06:30:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D98FFC433B4
+	for <ceph-devel@archiver.kernel.org>; Fri, 14 May 2021 08:53:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3217561447
-	for <ceph-devel@archiver.kernel.org>; Fri, 14 May 2021 06:30:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE725613E6
+	for <ceph-devel@archiver.kernel.org>; Fri, 14 May 2021 08:53:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232346AbhENGbp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 14 May 2021 02:31:45 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:2595 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230059AbhENGbp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 May 2021 02:31:45 -0400
-Received: from dggems702-chm.china.huawei.com (unknown [172.30.72.58])
-        by szxga05-in.huawei.com (SkyGuard) with ESMTP id 4FhJVb3FnZzkWM4;
-        Fri, 14 May 2021 14:27:51 +0800 (CST)
-Received: from dggeml759-chm.china.huawei.com (10.1.199.138) by
- dggems702-chm.china.huawei.com (10.3.19.179) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.1.2176.2; Fri, 14 May 2021 14:30:32 +0800
-Received: from localhost.localdomain (10.175.102.38) by
- dggeml759-chm.china.huawei.com (10.1.199.138) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2176.2; Fri, 14 May 2021 14:30:32 +0800
-From:   Wei Yongjun <weiyongjun1@huawei.com>
-To:     <weiyongjun1@huawei.com>, Jeff Layton <jlayton@kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>
-CC:     <ceph-devel@vger.kernel.org>, <kernel-janitors@vger.kernel.org>,
-        "Hulk Robot" <hulkci@huawei.com>
-Subject: [PATCH -next] ceph: make symbol 'ceph_netfs_read_ops' static
-Date:   Fri, 14 May 2021 06:39:53 +0000
-Message-ID: <20210514063953.3242049-1-weiyongjun1@huawei.com>
-X-Mailer: git-send-email 2.25.1
+        id S231549AbhENIyR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 14 May 2021 04:54:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33052 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231278AbhENIyR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 May 2021 04:54:17 -0400
+Received: from mail-il1-x133.google.com (mail-il1-x133.google.com [IPv6:2607:f8b0:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46E6BC061574;
+        Fri, 14 May 2021 01:53:05 -0700 (PDT)
+Received: by mail-il1-x133.google.com with SMTP id r5so25239104ilb.2;
+        Fri, 14 May 2021 01:53:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=qayX7zhi1zPzWfW6+6qw+j9s4Gb6sXImv1cPAAHWTPc=;
+        b=NsOSXd5lSsEgESDlXDj+Nzr2yzyy8QbLdeMrHPW+gesGwaAemQY0NqnbhYlo7SGtp7
+         0p8sRUPBuim+yCrGNklS4DfhQDs4isJqz6m/gzUT07HKYgQl2XO49/+LNotGrFiKwNry
+         0q7burohApTyz/cpNFt2PL1nwLYruGM8sc1XrdSVEwIwiSIDKzEzAqYtZ6qLd+XMIRO1
+         VeU4Iz/Z+KeQufMM7cZmeuE8JDEhHpLQVfmmp0pCtf9YMFXhGtSfrzfZvoUUtyreAe7N
+         NpYiUNcb1aAwxvvU+u/gK4R/FnpX6rHrcqcrejoVhgzFL4VKnm+o9Yx0PKsMhsD5Ygfr
+         tyRg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=qayX7zhi1zPzWfW6+6qw+j9s4Gb6sXImv1cPAAHWTPc=;
+        b=GCdcQ7sR5bP8CLk7plQijXHuz4VkHRH7gaYqY/rkyHIWD85YNxCKzWTFWqLb8MRpGQ
+         INljHQ/huRXq4Kuteq+MDIoM6ZgPygQ/KqtmdwKgGBulWGhdnp5TFbY2ByLbwiHPaQtd
+         iEoYdrTgs6ceyRA4I3S6Q4/n/mpvPiacigGwptsUNkzOIh8rR7UClq5Y7XEcdT+/wJhx
+         CsbaFGUcDVnhWg+mAgjMTeCGs81OxNYCLnQ0gZMNn4kts7mcKzD8ijeiIydBPs4/8rUY
+         FKVLhvCLDwJAJxswr+Lumw1NYbCSPBMhNYiBtCVC1NTLC1oVbEKGLI1ZrjrCWtOAJgdL
+         6stw==
+X-Gm-Message-State: AOAM533JGZXtyK8lG5qVdRYTMVjGVu9VFmOfqaf1w/vC/MFFoRiCmjCW
+        d9hYA0pZdvUwinWGazGSPavD37B3MKC57ffT0JY=
+X-Google-Smtp-Source: ABdhPJynVVQ5BLTIsbnyQ2xjJBlWg+YMqKO2eOLz8o6Rj7suiQMI/hLmQVtqhyULHB4J6nYNfScxLV03hSiACROvdpk=
+X-Received: by 2002:a05:6e02:eac:: with SMTP id u12mr40364277ilj.177.1620982384742;
+ Fri, 14 May 2021 01:53:04 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type:   text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-X-Originating-IP: [10.175.102.38]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggeml759-chm.china.huawei.com (10.1.199.138)
-X-CFilter-Loop: Reflected
+References: <20210514063953.3242049-1-weiyongjun1@huawei.com>
+In-Reply-To: <20210514063953.3242049-1-weiyongjun1@huawei.com>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Fri, 14 May 2021 10:53:14 +0200
+Message-ID: <CAOi1vP9h=VNP1NP=Vb3kjoAKYzAGZOaznBgqn5v1RuKeh7zEOg@mail.gmail.com>
+Subject: Re: [PATCH -next] ceph: make symbol 'ceph_netfs_read_ops' static
+To:     Wei Yongjun <weiyongjun1@huawei.com>
+Cc:     Jeff Layton <jlayton@kernel.org>,
+        Ceph Development <ceph-devel@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org, Hulk Robot <hulkci@huawei.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The sparse tool complains as follows:
+On Fri, May 14, 2021 at 8:30 AM Wei Yongjun <weiyongjun1@huawei.com> wrote:
+>
+> The sparse tool complains as follows:
+>
+> fs/ceph/addr.c:316:37: warning:
+>  symbol 'ceph_netfs_read_ops' was not declared. Should it be static?
+>
+> This symbol is not used outside of addr.c, so marks it static.
+>
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+> ---
+>  fs/ceph/addr.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index c1570fada3d8..5dfd18d84a3b 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -313,7 +313,7 @@ static void ceph_readahead_cleanup(struct address_space *mapping, void *priv)
+>                 ceph_put_cap_refs(ci, got);
+>  }
+>
+> -const struct netfs_read_request_ops ceph_netfs_read_ops = {
+> +static const struct netfs_read_request_ops ceph_netfs_read_ops = {
+>         .init_rreq              = ceph_init_rreq,
+>         .is_cache_enabled       = ceph_is_cache_enabled,
+>         .begin_cache_operation  = ceph_begin_cache_operation,
+>
 
-fs/ceph/addr.c:316:37: warning:
- symbol 'ceph_netfs_read_ops' was not declared. Should it be static?
+Applied.
 
-This symbol is not used outside of addr.c, so marks it static.
+Thanks,
 
-Reported-by: Hulk Robot <hulkci@huawei.com>
-Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
----
- fs/ceph/addr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index c1570fada3d8..5dfd18d84a3b 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -313,7 +313,7 @@ static void ceph_readahead_cleanup(struct address_space *mapping, void *priv)
- 		ceph_put_cap_refs(ci, got);
- }
- 
--const struct netfs_read_request_ops ceph_netfs_read_ops = {
-+static const struct netfs_read_request_ops ceph_netfs_read_ops = {
- 	.init_rreq		= ceph_init_rreq,
- 	.is_cache_enabled	= ceph_is_cache_enabled,
- 	.begin_cache_operation	= ceph_begin_cache_operation,
-
+                Ilya
