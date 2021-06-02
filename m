@@ -2,112 +2,159 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FE10C4708F
-	for <ceph-devel@archiver.kernel.org>; Wed,  2 Jun 2021 06:43:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4581C47093
+	for <ceph-devel@archiver.kernel.org>; Wed,  2 Jun 2021 06:54:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6777561242
-	for <ceph-devel@archiver.kernel.org>; Wed,  2 Jun 2021 06:43:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C14EE6135D
+	for <ceph-devel@archiver.kernel.org>; Wed,  2 Jun 2021 06:54:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230253AbhFBGom (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 2 Jun 2021 02:44:42 -0400
-Received: from szxga01-in.huawei.com ([45.249.212.187]:2841 "EHLO
-        szxga01-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229964AbhFBGol (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jun 2021 02:44:41 -0400
-Received: from dggeme760-chm.china.huawei.com (unknown [172.30.72.55])
-        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4Fvzqp2VshzWqsg;
-        Wed,  2 Jun 2021 14:38:14 +0800 (CST)
-Received: from localhost.localdomain (10.175.104.82) by
- dggeme760-chm.china.huawei.com (10.3.19.106) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2176.2; Wed, 2 Jun 2021 14:42:55 +0800
-From:   Zheng Yongjun <zhengyongjun3@huawei.com>
-To:     <davem@davemloft.net>, <kuba@kernel.org>,
-        <ceph-devel@vger.kernel.org>, <netdev@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-CC:     <idryomov@gmail.com>, <jlayton@kernel.org>,
-        Zheng Yongjun <zhengyongjun3@huawei.com>
-Subject: [PATCH net-next] libceph: Fix spelling mistakes
-Date:   Wed, 2 Jun 2021 14:56:35 +0800
-Message-ID: <20210602065635.106561-1-zhengyongjun3@huawei.com>
-X-Mailer: git-send-email 2.25.1
+        id S230099AbhFBG4G (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 2 Jun 2021 02:56:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47520 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230075AbhFBG4D (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jun 2021 02:56:03 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D682C06174A;
+        Tue,  1 Jun 2021 23:54:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=SnRF2RasuO3TzWzCcWD7psRmahwH4O2DjzNGyzgJCxM=; b=RfiXqx1buYxjqGM6Ru6s2uXbtK
+        szP8Lp35KdwoBLpRViL7iCBQHBOTXZ4Qu5LJOvN43OaaHCTJwbYuBSl2SqXNEe3Ty441iVm62zV/q
+        FK7bqtRTYnR/sNzxWhxA2AWxTTSYR0R47li/OgrbNqJ/z/C247XNi+vyVCBUJz2HWLNRhHDg9jROf
+        W37wVhanz0woIFa4DI1Hiypd6xGuMEzMDW+t6oSvgQDur5ioE4KQTAUXWM04CshX1rW4l4k5bAsYt
+        fMWsLaqDTkxSQegnpPyUc9dgQ8DJelIKHSJsddjUREuKapJzcCJM+AP8gSr/w6bRFlEnBsoDVPXvd
+        WWIbvGOQ==;
+Received: from shol69.static.otenet.gr ([83.235.170.67] helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1loKlG-0025Fb-J7; Wed, 02 Jun 2021 06:53:55 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Justin Sanders <justin@coraid.com>,
+        Denis Efremov <efremov@linux.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Tim Waugh <tim@cyberelk.net>,
+        Geoff Levand <geoff@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        "Md. Haris Iqbal" <haris.iqbal@ionos.com>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
+        =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>,
+        Mike Snitzer <snitzer@redhat.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        dm-devel@redhat.com, linux-block@vger.kernel.org,
+        nbd@other.debian.org, linuxppc-dev@lists.ozlabs.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
+Subject: [PATCH 01/30] blk-mq: factor out a blk_mq_alloc_sq_tag_set helper
+Date:   Wed,  2 Jun 2021 09:53:16 +0300
+Message-Id: <20210602065345.355274-2-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20210602065345.355274-1-hch@lst.de>
+References: <20210602065345.355274-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.104.82]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggeme760-chm.china.huawei.com (10.3.19.106)
-X-CFilter-Loop: Reflected
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Fix some spelling mistakes in comments:
-enconding  ==> encoding
-ambigous  ==> ambiguous
-orignal  ==> original
-encyption  ==> encryption
+Factour out a helper to initialize a simple single hw queue tag_set from
+blk_mq_init_sq_queue.  This will allow to phase out blk_mq_init_sq_queue
+in favor of a more symmetric and general API.
 
-Signed-off-by: Zheng Yongjun <zhengyongjun3@huawei.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- net/ceph/auth_x_protocol.h | 2 +-
- net/ceph/mon_client.c      | 2 +-
- net/ceph/osdmap.c          | 4 ++--
- 3 files changed, 4 insertions(+), 4 deletions(-)
+ block/blk-mq.c         | 32 ++++++++++++++++++--------------
+ include/linux/blk-mq.h |  3 +++
+ 2 files changed, 21 insertions(+), 14 deletions(-)
 
-diff --git a/net/ceph/auth_x_protocol.h b/net/ceph/auth_x_protocol.h
-index 792fcb974dc3..9c60feeb1bcb 100644
---- a/net/ceph/auth_x_protocol.h
-+++ b/net/ceph/auth_x_protocol.h
-@@ -87,7 +87,7 @@ struct ceph_x_authorize_reply {
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index f11d4018ce2e..eaacfa963a73 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -3152,24 +3152,12 @@ struct request_queue *blk_mq_init_sq_queue(struct blk_mq_tag_set *set,
+ 	struct request_queue *q;
+ 	int ret;
  
+-	memset(set, 0, sizeof(*set));
+-	set->ops = ops;
+-	set->nr_hw_queues = 1;
+-	set->nr_maps = 1;
+-	set->queue_depth = queue_depth;
+-	set->numa_node = NUMA_NO_NODE;
+-	set->flags = set_flags;
+-
+-	ret = blk_mq_alloc_tag_set(set);
++	ret = blk_mq_alloc_sq_tag_set(set, ops, queue_depth, set_flags);
+ 	if (ret)
+ 		return ERR_PTR(ret);
+-
+ 	q = blk_mq_init_queue(set);
+-	if (IS_ERR(q)) {
++	if (IS_ERR(q))
+ 		blk_mq_free_tag_set(set);
+-		return q;
+-	}
+-
+ 	return q;
+ }
+ EXPORT_SYMBOL(blk_mq_init_sq_queue);
+@@ -3589,6 +3577,22 @@ int blk_mq_alloc_tag_set(struct blk_mq_tag_set *set)
+ }
+ EXPORT_SYMBOL(blk_mq_alloc_tag_set);
  
- /*
-- * encyption bundle
-+ * encryption bundle
-  */
- #define CEPHX_ENC_MAGIC 0xff009cad8826aa55ull
++/* allocate and initialize a tagset for a simple single-queue device */
++int blk_mq_alloc_sq_tag_set(struct blk_mq_tag_set *set,
++		const struct blk_mq_ops *ops, unsigned int queue_depth,
++		unsigned int set_flags)
++{
++	memset(set, 0, sizeof(*set));
++	set->ops = ops;
++	set->nr_hw_queues = 1;
++	set->nr_maps = 1;
++	set->queue_depth = queue_depth;
++	set->numa_node = NUMA_NO_NODE;
++	set->flags = set_flags;
++	return blk_mq_alloc_tag_set(set);
++}
++EXPORT_SYMBOL_GPL(blk_mq_alloc_sq_tag_set);
++
+ void blk_mq_free_tag_set(struct blk_mq_tag_set *set)
+ {
+ 	int i, j;
+diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+index 359486940fa0..bb950fc669ef 100644
+--- a/include/linux/blk-mq.h
++++ b/include/linux/blk-mq.h
+@@ -439,6 +439,9 @@ struct request_queue *blk_mq_init_sq_queue(struct blk_mq_tag_set *set,
+ void blk_mq_unregister_dev(struct device *, struct request_queue *);
  
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index 195ceb8afb06..013cbdb6cfe2 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -1508,7 +1508,7 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
- 			return get_generic_reply(con, hdr, skip);
+ int blk_mq_alloc_tag_set(struct blk_mq_tag_set *set);
++int blk_mq_alloc_sq_tag_set(struct blk_mq_tag_set *set,
++		const struct blk_mq_ops *ops, unsigned int queue_depth,
++		unsigned int set_flags);
+ void blk_mq_free_tag_set(struct blk_mq_tag_set *set);
  
- 		/*
--		 * Older OSDs don't set reply tid even if the orignal
-+		 * Older OSDs don't set reply tid even if the original
- 		 * request had a non-zero tid.  Work around this weirdness
- 		 * by allocating a new message.
- 		 */
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index c959320c4775..75b738083523 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -1309,7 +1309,7 @@ static int get_osdmap_client_data_v(void **p, void *end,
- 			return -EINVAL;
- 		}
- 
--		/* old osdmap enconding */
-+		/* old osdmap encoding */
- 		struct_v = 0;
- 	}
- 
-@@ -3010,7 +3010,7 @@ static bool is_valid_crush_name(const char *name)
-  * parent, returns 0.
-  *
-  * Does a linear search, as there are no parent pointers of any
-- * kind.  Note that the result is ambigous for items that occur
-+ * kind.  Note that the result is ambiguous for items that occur
-  * multiple times in the map.
-  */
- static int get_immediate_parent(struct crush_map *c, int id,
+ void blk_mq_flush_plug_list(struct blk_plug *plug, bool from_schedule);
 -- 
-2.25.1
+2.30.2
 
