@@ -2,170 +2,163 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D02DC47082
-	for <ceph-devel@archiver.kernel.org>; Thu,  3 Jun 2021 15:37:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12115C47097
+	for <ceph-devel@archiver.kernel.org>; Thu,  3 Jun 2021 15:38:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E32E161042
-	for <ceph-devel@archiver.kernel.org>; Thu,  3 Jun 2021 15:37:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ED8316100B
+	for <ceph-devel@archiver.kernel.org>; Thu,  3 Jun 2021 15:38:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229778AbhFCPjK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 3 Jun 2021 11:39:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58756 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229617AbhFCPjI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2021 11:39:08 -0400
-Received: from mail-il1-x133.google.com (mail-il1-x133.google.com [IPv6:2607:f8b0:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED077C061756
-        for <ceph-devel@vger.kernel.org>; Thu,  3 Jun 2021 08:37:23 -0700 (PDT)
-Received: by mail-il1-x133.google.com with SMTP id i13so241454ilk.3
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2021 08:37:23 -0700 (PDT)
+        id S229885AbhFCPkE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 3 Jun 2021 11:40:04 -0400
+Received: from mail-vs1-f53.google.com ([209.85.217.53]:39596 "EHLO
+        mail-vs1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229878AbhFCPkE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2021 11:40:04 -0400
+Received: by mail-vs1-f53.google.com with SMTP id z206so3222398vsz.6
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2021 08:38:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=cGDEFuAPZRnQLcM0Fs5Ee9R0uwGueX8Ps7pyiK4LRRo=;
-        b=fIHiQMRANzOMpGRDF4UjmE4VsXO2Y4QOUe3ujDwkzDYZNOIKI8XUiUgrKKVis3KuyO
-         0QCWvANfMq/4wh1+u4n2Z+Px9HvBKZQ7QsLEWBiyTNDmoCHEXuZRNKDizqdZfBnPvWia
-         N3zaBUjB2D69YPHRy+JWZhkbR8u58AHeRj7P/uF8i4c9I5qBS9ZOFANnYDgNuflzNx7n
-         zf870ajLxIBabAbhToqSGmk7UVzXuTKOffTDAOE1oFZq/cf5OOY1kkTXhaFBp8tBsnBw
-         FjibByjakV7TcRuuPxf/2iBrjnXsoeh40phP5spGJ77fazE2NqrkWMdqDCSHfpqCpYMw
-         +A8w==
+        bh=+W0QahdA5jm5lLp4qGqziVkevJrOYYIsAeli4hbSoMY=;
+        b=Sczm7Uhat9CAttKCKONsBvTvpdWX5VANaO58Cd0mJFcJ+A28Gj9YspGmhSWIpVtNS9
+         gufvY+CGT5FXDIQfjOQ4ExwQIrmSjUqzpGxTG/ZkK/nXRMIOjYsW6gd0+0ljDlvbLbq6
+         AyHgMcG1V7VrDrAancwHixbwlfPPPcOtQ/Us++pps4NpXbaz33l8+avCCapAkCFya/10
+         FcaqevmvQJz8RurkVjboQlMdJ4KLmCFgJ9aWml7eHxoV4e7eWIKwWiCmbJjrhvsDE5K2
+         PLLnqagHSU8ORkIhfE1C9Sx6ZNkln7FGogf+yyT7tKXsIRL7oAHDTXDC0cZ4GcZV2dc7
+         4ZRQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=cGDEFuAPZRnQLcM0Fs5Ee9R0uwGueX8Ps7pyiK4LRRo=;
-        b=bSrsXBIJI9i/FXycaNCtrUWOsxvFUqauRhYJERLzYXmIfJzrl8/yVW7fWw4bN5RI5P
-         /4oWO2XEIKwIVCPnA69OZZgBHf32u065448BCUy9wn/zt/dsyVDSi8VrjNICeXvWfF0v
-         3uUqv5ntR2wEHun1vAxCZDCbgNP4OjWWAWliYMuqvpZ4dEYi0n5XmdH9IiQEAHsRn2Ux
-         mXxRoo0zjv8nJVQ871+MHHTcA82WxAGCrPcdpJVd91Bwioq8uZg3TqHJCZ2ZQULKllFy
-         1ESgBK4K6aXO8NXi9TVM9a4d8v+EslAvmx5ht6cPuQL6PGWDkaxxSFSiJYS8xXEr/DbX
-         /+hw==
-X-Gm-Message-State: AOAM532TyONr+VsIW8QUFxqDGr0Q3l6qBlw9x1Yzaos3xE7NY/3+HkNX
-        vJjWEpLKtsDBgEq6sOvIlbB+pOQwkKx9ooHksNOvR7UD6Ods5w==
-X-Google-Smtp-Source: ABdhPJyKwMCmyJbu4LaxHW2t08ydGMPepaCxunzkKm4stSjrFTgdSvKfYG80Hgdc7LBm9GaFlWmGotT6HCKpXWPkkmQ=
-X-Received: by 2002:a92:c26f:: with SMTP id h15mr375602ild.281.1622734643201;
- Thu, 03 Jun 2021 08:37:23 -0700 (PDT)
+        bh=+W0QahdA5jm5lLp4qGqziVkevJrOYYIsAeli4hbSoMY=;
+        b=qFpUunMjIUEh2WVJcC6SUfgGplaUPi7k/VfHXDQx6W2aPgfyna8u+zCd5X/kRQYGWb
+         4e5TUPrBFFADPUUm9pMpXiZjPdn0YksOgarTcQo3hXIDYnOAAB6ncRxXT6v5jrWYiYFb
+         ya/sNirIIsH/FirCt18mSzlSWCcZGbli8QLZ/7yKxAKC8pf4Qrd04IJ7R5ZURM4Sv14S
+         RqtES4Bzo6phYPnW4s2yGCPyTK3dj987fGrmHo7SEqjX/rtOMrqmzXBtjGDQEaNCfDKM
+         QRsvffZvgmd76o1vyUhTAL377KaU1XiQNNTNHudHHOuGJfS/nol1wA3ECnz6GhvtIUXi
+         Mt0Q==
+X-Gm-Message-State: AOAM530fzC3m+DpZLdAMnIPGZZBU4lhtCuSn4OYUt1rznWazfuN8TmSi
+        uMSnewuCD7J43q2KTqvic6ddnGQfI483WyxbG4LVxw==
+X-Google-Smtp-Source: ABdhPJzM3LSrPJI4FkB0laodTTeEei+m50SowhpqaGtsNgUdvieHcvbYUQloJUD/a79xzNmd816023E4d1PORKHhPJg=
+X-Received: by 2002:a05:6102:3023:: with SMTP id v3mr756919vsa.19.1622734639015;
+ Thu, 03 Jun 2021 08:37:19 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210603133914.79072-1-jlayton@kernel.org> <CAOi1vP_UFhGVP3Nf7chj9J7q12BYdKguPLudddPdJHnd3G_3WQ@mail.gmail.com>
- <cf3be8010edddaf786b761ec98610b0bbe9ccbd3.camel@kernel.org>
- <CAOi1vP-yTHK_wB_akxJxZ5bzrrOGjby00SbvQSn=6c-hkW7RgQ@mail.gmail.com>
- <8a53dc688023bd08b530289fbd4ba502b70f2893.camel@kernel.org>
- <CAOi1vP_kmfVPXNVAip0c99bLBKAC2cCKDPsP3W6=wj4+Vm_osA@mail.gmail.com> <d187d44acaf8ed5ee9d706e9147090ba88ba6759.camel@kernel.org>
-In-Reply-To: <d187d44acaf8ed5ee9d706e9147090ba88ba6759.camel@kernel.org>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Thu, 3 Jun 2021 17:37:26 +0200
-Message-ID: <CAOi1vP-T661YaUL5z1v-xYwXGqZ5BR6qjBjhLD-b3ROzbraWYw@mail.gmail.com>
-Subject: Re: [PATCH] ceph: decoding error in ceph_update_snap_realm should
- return -EIO
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Ceph Development <ceph-devel@vger.kernel.org>
+References: <20210602065345.355274-1-hch@lst.de> <20210602065345.355274-8-hch@lst.de>
+In-Reply-To: <20210602065345.355274-8-hch@lst.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 3 Jun 2021 17:36:42 +0200
+Message-ID: <CAPDyKFoJssCnHv5tmG4vJJ9m0Zj5HkMEVYvnsjamvyemusZaUg@mail.gmail.com>
+Subject: Re: [PATCH 07/30] ms_block: use blk_mq_alloc_disk
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>, Justin Sanders <justin@coraid.com>,
+        Denis Efremov <efremov@linux.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Tim Waugh <tim@cyberelk.net>,
+        Geoff Levand <geoff@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        "Md. Haris Iqbal" <haris.iqbal@ionos.com>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
+        =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
+        Mike Snitzer <snitzer@redhat.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        dm-devel@redhat.com, linux-block <linux-block@vger.kernel.org>,
+        nbd@other.debian.org, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jun 3, 2021 at 5:20 PM Jeff Layton <jlayton@kernel.org> wrote:
+On Wed, 2 Jun 2021 at 08:54, Christoph Hellwig <hch@lst.de> wrote:
 >
-> On Thu, 2021-06-03 at 17:19 +0200, Ilya Dryomov wrote:
-> > On Thu, Jun 3, 2021 at 4:42 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > >
-> > > On Thu, 2021-06-03 at 16:33 +0200, Ilya Dryomov wrote:
-> > > > On Thu, Jun 3, 2021 at 4:02 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > > > >
-> > > > > On Thu, 2021-06-03 at 15:57 +0200, Ilya Dryomov wrote:
-> > > > > > On Thu, Jun 3, 2021 at 3:39 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > > > > > >
-> > > > > > > Currently ceph_update_snap_realm returns -EINVAL when it hits a decoding
-> > > > > > > error, which is the wrong error code. -EINVAL implies that the user gave
-> > > > > > > us a bogus argument to a syscall or something similar. -EIO is more
-> > > > > > > descriptive when we hit a decoding error.
-> > > > > > >
-> > > > > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > > > > > ---
-> > > > > > >  fs/ceph/snap.c | 2 +-
-> > > > > > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > > > > >
-> > > > > > > diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-> > > > > > > index d07c1c6ac8fb..f8cac2abab3f 100644
-> > > > > > > --- a/fs/ceph/snap.c
-> > > > > > > +++ b/fs/ceph/snap.c
-> > > > > > > @@ -807,7 +807,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
-> > > > > > >         return 0;
-> > > > > > >
-> > > > > > >  bad:
-> > > > > > > -       err = -EINVAL;
-> > > > > > > +       err = -EIO;
-> > > > > > >  fail:
-> > > > > > >         if (realm && !IS_ERR(realm))
-> > > > > > >                 ceph_put_snap_realm(mdsc, realm);
-> > > > > >
-> > > > > > Hi Jeff,
-> > > > > >
-> > > > > > Is this error code propagated anywhere important?
-> > > > > >
-> > > > > > The vast majority of functions that have something to do with decoding
-> > > > > > use EINVAL as a default (usually out-of-bounds) error.  I agree that it
-> > > > > > is totally ambiguous, but EIO doesn't seem to be any better to me.  If
-> > > > > > there is a desire to separate these errors, I think we need to pick
-> > > > > > something much more distinctive.
-> > > > > >
-> > > > >
-> > > > > When I see EINVAL, I automatically wonder what bogus argument I passed
-> > > > > in somewhere, so I find that particularly deceptive here where the bug
-> > > > > is either from the MDS or we had some sort of low-level socket handling
-> > > > > problem.
-> > > > >
-> > > > > OTOH, you have a good point. The callers universally ignore the error
-> > > > > code from this function. Perhaps we ought to just log a pr_warn message
-> > > > > or something if the decoding fails here instead?
-> > > >
-> > > > There already is one:
-> > > >
-> > > >  793 bad:
-> > > >  794         err = -EINVAL;
-> > > >  795 fail:
-> > > >  796         if (realm && !IS_ERR(realm))
-> > > >  797                 ceph_put_snap_realm(mdsc, realm);
-> > > >  798         if (first_realm)
-> > > >  799                 ceph_put_snap_realm(mdsc, first_realm);
-> > > >  800         pr_err("update_snap_trace error %d\n", err);
-> > > >  801         return err;
-> > > >
-> > > > Or do you mean specifically the "bad" label?
-> > > >
-> > >
-> > > Well, if we have a distinctive error code there, then we won't need a
-> > > separate pr_err message or anything. I still think that -EINVAL is not
-> > > descriptive of the issue though. I suppose if -EIO is too vague, we
-> > > could use something like -EILSEQ ?
-> >
-> > In a sense it is an invalid argument because the buffer passed to the
-> > decoding function is too short.  This is what would lead to EINVAL here
-> > and in many other decoding-related functions.
-> >
-> > EINVAL is the standard error code for "buffer/message too short" in
-> > many other APIs.  EILSEQ is certainly more distinctive, but I'm not
-> > sure it is the "right" error code for this kind of error.
-> >
+> Use the blk_mq_alloc_disk API to simplify the gendisk and request_queue
+> allocation.
 >
-> The issue is that almost everywhere else, decoding routines use -EIO for
-> this. This function is a special snowflake. Why? I don't see any
-> justification for it.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Ah, indeed I see that there is precedent for using EIO for this in
-fs/ceph (although this particular EINVAL goes back to 2009).  I just
-wanted to keep things consistent with libceph and rbd where it is
-mostly EINVAL.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Sorry for the noise.
+Kind regards
+Uffe
 
-Thanks,
 
-                Ilya
+> ---
+>  drivers/memstick/core/ms_block.c | 25 ++++++++++---------------
+>  1 file changed, 10 insertions(+), 15 deletions(-)
+>
+> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+> index 0bacf4268f83..dac258d12aca 100644
+> --- a/drivers/memstick/core/ms_block.c
+> +++ b/drivers/memstick/core/ms_block.c
+> @@ -2110,21 +2110,17 @@ static int msb_init_disk(struct memstick_dev *card)
+>         if (msb->disk_id  < 0)
+>                 return msb->disk_id;
+>
+> -       msb->disk = alloc_disk(0);
+> -       if (!msb->disk) {
+> -               rc = -ENOMEM;
+> +       rc = blk_mq_alloc_sq_tag_set(&msb->tag_set, &msb_mq_ops, 2,
+> +                                    BLK_MQ_F_SHOULD_MERGE);
+> +       if (rc)
+>                 goto out_release_id;
+> -       }
+>
+> -       msb->queue = blk_mq_init_sq_queue(&msb->tag_set, &msb_mq_ops, 2,
+> -                                               BLK_MQ_F_SHOULD_MERGE);
+> -       if (IS_ERR(msb->queue)) {
+> -               rc = PTR_ERR(msb->queue);
+> -               msb->queue = NULL;
+> -               goto out_put_disk;
+> +       msb->disk = blk_mq_alloc_disk(&msb->tag_set, card);
+> +       if (IS_ERR(msb->disk)) {
+> +               rc = PTR_ERR(msb->disk);
+> +               goto out_free_tag_set;
+>         }
+> -
+> -       msb->queue->queuedata = card;
+> +       msb->queue = msb->disk->queue;
+>
+>         blk_queue_max_hw_sectors(msb->queue, MS_BLOCK_MAX_PAGES);
+>         blk_queue_max_segments(msb->queue, MS_BLOCK_MAX_SEGS);
+> @@ -2135,7 +2131,6 @@ static int msb_init_disk(struct memstick_dev *card)
+>         sprintf(msb->disk->disk_name, "msblk%d", msb->disk_id);
+>         msb->disk->fops = &msb_bdops;
+>         msb->disk->private_data = msb;
+> -       msb->disk->queue = msb->queue;
+>
+>         capacity = msb->pages_in_block * msb->logical_block_count;
+>         capacity *= (msb->page_size / 512);
+> @@ -2155,8 +2150,8 @@ static int msb_init_disk(struct memstick_dev *card)
+>         dbg("Disk added");
+>         return 0;
+>
+> -out_put_disk:
+> -       put_disk(msb->disk);
+> +out_free_tag_set:
+> +       blk_mq_free_tag_set(&msb->tag_set);
+>  out_release_id:
+>         mutex_lock(&msb_disk_lock);
+>         idr_remove(&msb_disk_idr, msb->disk_id);
+> --
+> 2.30.2
+>
