@@ -2,143 +2,86 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 451E2C4743D
-	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 12:23:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7284C48BCD
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 16:06:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 229146128A
-	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 12:23:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B7C5961182
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 16:06:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232516AbhFHMZf (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Jun 2021 08:25:35 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:41262 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232204AbhFHMZf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2021 08:25:35 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 068C71FD4B;
-        Tue,  8 Jun 2021 12:23:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1623155021; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=9bGY+Cp/pA/h7guRE2vnnzMhgDr7PUBan0gj2Iw/ofI=;
-        b=u+SJezkNd+Hoy4TfHmq/mbbx5D8h6raNCIe+MwxggDuvtCqz7pVcD7eM1nbJHaQgq+I3my
-        3i7vDVPXx6oHV/Keus/sL+hjeAgtO00KSyTNORn8Zw+1sEM7AY7JmeY5qIvsBhEF5NtDj8
-        Srd1wuy2dHheynxeRqlgPZLBXH5MniY=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1623155021;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=9bGY+Cp/pA/h7guRE2vnnzMhgDr7PUBan0gj2Iw/ofI=;
-        b=NgBZQfRqJnI6VvgsU0Gc4V+xB5uFCK0ttkDE0YMGzDaZvCRCGQg4CZC2NzMIJNyad41SHa
-        +dBP2rSIDB0nPdAw==
-Received: from quack2.suse.cz (unknown [10.100.200.198])
-        by relay2.suse.de (Postfix) with ESMTP id E3E48A3B81;
-        Tue,  8 Jun 2021 12:23:40 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id CFD9C1F2C94; Tue,  8 Jun 2021 14:23:40 +0200 (CEST)
-Date:   Tue, 8 Jun 2021 14:23:40 +0200
-From:   Jan Kara <jack@suse.cz>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org,
-        Christoph Hellwig <hch@infradead.org>,
-        Dave Chinner <david@fromorbit.com>, ceph-devel@vger.kernel.org,
-        Chao Yu <yuchao0@huawei.com>,
-        Damien Le Moal <damien.lemoal@wdc.com>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>,
-        Johannes Thumshirn <jth@kernel.org>,
-        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-mm@kvack.org,
-        linux-xfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>,
-        Steve French <sfrench@samba.org>, Ted Tso <tytso@mit.edu>,
-        Matthew Wilcox <willy@infradead.org>,
-        Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 08/14] xfs: Convert to use invalidate_lock
-Message-ID: <20210608122340.GH5562@quack2.suse.cz>
-References: <20210607144631.8717-1-jack@suse.cz>
- <20210607145236.31852-8-jack@suse.cz>
- <20210607155633.GI2945738@locust>
+        id S231580AbhFHQIT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Jun 2021 12:08:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52946 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231165AbhFHQIR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2021 12:08:17 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 039A4C061787;
+        Tue,  8 Jun 2021 09:06:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=mxjphJIexdyUP+LgP6QQe1/DAIfJHdL4g4Vg5OxQMzY=; b=hNgm/XKkGW6qS50D9qILkbSbA3
+        ag1xUOBkEaBqGY3BiVOKZGE5bCfd+z0l6QZhFmyK7gOFzLVvRsu/qsETBYA3TnzLaS+oil4N6+zTS
+        NTQMtE/JDlzwR/trspEmleh/87WlxYX4msxtg+R1WobU8kdnPgrsEJy3QCzmAc1dkhJ2L9gNJAyLO
+        G6CxwAp9rJckWNufxaRejzebCCFvkRMee7p07BeU94Osh3HVMv8jPxAfv7X8MPcbd7oKcH0tkJLzT
+        36Voi00g3IQrTciGkP9mUs3b4G/CpF92BIsdK9SLCNipoMLXYiBiraJ7HumR/oOascVon2CdJt5tP
+        DMfEIv9A==;
+Received: from [2001:4bb8:192:ff5f:74ed:7c4f:a5ee:8dcb] (helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1lqeF0-009Ra6-Pg; Tue, 08 Jun 2021 16:06:11 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Geoff Levand <geoff@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        Mike Snitzer <snitzer@redhat.com>,
+        Ira Weiny <ira.weiny@intel.com>, dm-devel@redhat.com,
+        linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-block@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        ceph-devel@vger.kernel.org
+Subject: [PATCH 01/16] mm: use kmap_local_page in memzero_page
+Date:   Tue,  8 Jun 2021 18:05:48 +0200
+Message-Id: <20210608160603.1535935-2-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20210608160603.1535935-1-hch@lst.de>
+References: <20210608160603.1535935-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210607155633.GI2945738@locust>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon 07-06-21 08:56:33, Darrick J. Wong wrote:
-> On Mon, Jun 07, 2021 at 04:52:18PM +0200, Jan Kara wrote:
-> > Use invalidate_lock instead of XFS internal i_mmap_lock. The intended
-> > purpose of invalidate_lock is exactly the same. Note that the locking in
-> > __xfs_filemap_fault() slightly changes as filemap_fault() already takes
-> > invalidate_lock.
-> > 
-> > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > CC: <linux-xfs@vger.kernel.org>
-> > CC: "Darrick J. Wong" <djwong@kernel.org>
-> > Signed-off-by: Jan Kara <jack@suse.cz>
-> > ---
-> >  fs/xfs/xfs_file.c  | 13 +++++++-----
-> >  fs/xfs/xfs_inode.c | 50 ++++++++++++++++++++++++----------------------
-> >  fs/xfs/xfs_inode.h |  1 -
-> >  fs/xfs/xfs_super.c |  2 --
-> >  4 files changed, 34 insertions(+), 32 deletions(-)
-> > 
-> > diff --git a/fs/xfs/xfs_file.c b/fs/xfs/xfs_file.c
-> > index 396ef36dcd0a..7cb7703c2209 100644
-> > --- a/fs/xfs/xfs_file.c
-> > +++ b/fs/xfs/xfs_file.c
-> > @@ -1282,7 +1282,7 @@ xfs_file_llseek(
-> >   *
-> >   * mmap_lock (MM)
-> >   *   sb_start_pagefault(vfs, freeze)
-> > - *     i_mmaplock (XFS - truncate serialisation)
-> > + *     invalidate_lock (vfs/XFS_MMAPLOCK - truncate serialisation)
-> >   *       page_lock (MM)
-> >   *         i_lock (XFS - extent map serialisation)
-> >   */
-> > @@ -1303,24 +1303,27 @@ __xfs_filemap_fault(
-> >  		file_update_time(vmf->vma->vm_file);
-> >  	}
-> >  
-> > -	xfs_ilock(XFS_I(inode), XFS_MMAPLOCK_SHARED);
-> >  	if (IS_DAX(inode)) {
-> >  		pfn_t pfn;
-> >  
-> > +		xfs_ilock(XFS_I(inode), XFS_MMAPLOCK_SHARED);
-> >  		ret = dax_iomap_fault(vmf, pe_size, &pfn, NULL,
-> >  				(write_fault && !vmf->cow_page) ?
-> >  				 &xfs_direct_write_iomap_ops :
-> >  				 &xfs_read_iomap_ops);
-> >  		if (ret & VM_FAULT_NEEDDSYNC)
-> >  			ret = dax_finish_sync_fault(vmf, pe_size, pfn);
-> > +		xfs_iunlock(XFS_I(inode), XFS_MMAPLOCK_SHARED);
-> 
-> I've been wondering if iomap_page_mkwrite and dax_iomap_fault should be
-> taking these locks?  I guess that would violate the premise that iomap
-> requires that callers arrange for concurrency control (i.e. iomap
-> doesn't take locks).
+No need for kmap_atomic here.
 
-Well, iomap does take page locks but I agree that generally it stays away
-from high-level locks. So keeping invalidate_lock out of it makes more
-sense to me as well.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ include/linux/highmem.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-> Code changes look fine, though.
-> 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
-Thanks!
-
-								Honza
+diff --git a/include/linux/highmem.h b/include/linux/highmem.h
+index 832b49b50c7b..0dc0451cf1d1 100644
+--- a/include/linux/highmem.h
++++ b/include/linux/highmem.h
+@@ -334,9 +334,9 @@ static inline void memcpy_to_page(struct page *page, size_t offset,
+ 
+ static inline void memzero_page(struct page *page, size_t offset, size_t len)
+ {
+-	char *addr = kmap_atomic(page);
++	char *addr = kmap_local_page(page);
+ 	memset(addr + offset, 0, len);
+-	kunmap_atomic(addr);
++	kunmap_local(addr);
+ }
+ 
+ #endif /* _LINUX_HIGHMEM_H */
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.30.2
+
