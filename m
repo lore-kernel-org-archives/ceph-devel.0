@@ -2,39 +2,39 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07537C48BCF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87DB4C48BE0
 	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 16:06:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DFC0B61278
-	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 16:06:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6878761182
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Jun 2021 16:06:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231384AbhFHQIS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Jun 2021 12:08:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52944 "EHLO
+        id S231165AbhFHQIW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Jun 2021 12:08:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230523AbhFHQIR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2021 12:08:17 -0400
+        with ESMTP id S231443AbhFHQIT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2021 12:08:19 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D6A1C061574;
-        Tue,  8 Jun 2021 09:06:22 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2F5AC061574;
+        Tue,  8 Jun 2021 09:06:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=Rdgj+Ts6eEAHTRBjOLsHiLNSbIi9S90acEKIrhbynF0=; b=qzFtnNTFmjF8Bait7y64aPFZjN
-        CG2xrZHMA96jvX4qfRKYO5q71QNoW/BKkemB5jooCYQBcQqtahwoHyvnRng4gkQ4p0EjCDnxe+t9+
-        Lw573yQw6PEwJ74VCgSfbMxmrKoah4Fzox9v+HoEW/jDOqe2nHBWUHypRgDL5B/kogWv5Z4Dk97La
-        +Y9hvgpZuOxpkbmkF/VrP06Wn+CZNQ4jEbMhqUXmQj26SUv+5Uagwjfn2tabJrBmUVgS7jcH+mmT2
-        9DPQOluGnmWUso/06e7SWZ/eezBK/hWJ8lN3DjOKZPMmLH+jw9Or7ECR42QNO1i8OPZDLTNnr9+jC
-        R4oNA/TQ==;
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=oWZyuciTMk9Oz4llaN6cnzbuyETlAwlAW/ZL8WXrlPc=; b=fUvQPpV8AGyBRslM8FvxAa8ee0
+        47eWXK3dNc5ZAlrjmamJRRWC4sOdmEagVUA3hMXNZuGYGNzwXRXZmuJw5/7V0aKWpPkhyG5JQWfi8
+        MNcDFWT/E1QnWvENVMH2BpSW3aI00e6CVb4srdu3kf9yHi9p90PlCuCd6rcF486FXU91yUzIEyzFE
+        nC6yga6H3TmGZfyKF58vd2+prfBps0sjiiCR+/GmO0Hy6wtuKSXPcIsPMClX6L7dDDJ4i6X5I3BMa
+        mqe2VKbNbEqxT/t6/RJdVY6MjtQUfSxayVFScRJ93MuEoWPfuqFPvn/2D0kAPXTOgwbHuMhf1oibN
+        KF+gHULA==;
 Received: from [2001:4bb8:192:ff5f:74ed:7c4f:a5ee:8dcb] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1lqeEx-009RZp-AE; Tue, 08 Jun 2021 16:06:08 +0000
+        id 1lqeF7-009Rb7-Hr; Tue, 08 Jun 2021 16:06:18 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
@@ -46,10 +46,12 @@ Cc:     Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-block@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
         ceph-devel@vger.kernel.org
-Subject: switch the block layer to use kmap_local_page
-Date:   Tue,  8 Jun 2021 18:05:47 +0200
-Message-Id: <20210608160603.1535935-1-hch@lst.de>
+Subject: [PATCH 03/16] bvec: fix the include guards for bvec.h
+Date:   Tue,  8 Jun 2021 18:05:50 +0200
+Message-Id: <20210608160603.1535935-4-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20210608160603.1535935-1-hch@lst.de>
+References: <20210608160603.1535935-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
@@ -57,24 +59,34 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi all,
+Fix the include guards to match the file naming.
 
-this series switches the core block layer code and all users of the
-existing bvec kmap helpers to use kmap_local_page.  Drivers that
-currently use open coded kmap_atomic calls will converted in a follow
-on series.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ include/linux/bvec.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-Diffstat:
- arch/mips/include/asm/mach-rc32434/rb.h |    2 -
- block/bio-integrity.c                   |   14 ++++------
- block/bio.c                             |   37 +++++++---------------------
- block/blk-map.c                         |    2 -
- block/bounce.c                          |   35 ++++++--------------------
- block/t10-pi.c                          |   16 ++++--------
- drivers/block/ps3disk.c                 |   19 ++------------
- drivers/block/rbd.c                     |   15 +----------
- drivers/md/dm-writecache.c              |    5 +--
- include/linux/bio.h                     |   42 --------------------------------
- include/linux/bvec.h                    |   27 ++++++++++++++++++--
- include/linux/highmem.h                 |    4 +--
- 12 files changed, 64 insertions(+), 154 deletions(-)
+diff --git a/include/linux/bvec.h b/include/linux/bvec.h
+index ff832e698efb..883faf5f1523 100644
+--- a/include/linux/bvec.h
++++ b/include/linux/bvec.h
+@@ -4,8 +4,8 @@
+  *
+  * Copyright (C) 2001 Ming Lei <ming.lei@canonical.com>
+  */
+-#ifndef __LINUX_BVEC_ITER_H
+-#define __LINUX_BVEC_ITER_H
++#ifndef __LINUX_BVEC_H
++#define __LINUX_BVEC_H
+ 
+ #include <linux/bug.h>
+ #include <linux/errno.h>
+@@ -183,4 +183,4 @@ static inline void bvec_advance(const struct bio_vec *bvec,
+ 	}
+ }
+ 
+-#endif /* __LINUX_BVEC_ITER_H */
++#endif /* __LINUX_BVEC_H */
+-- 
+2.30.2
+
