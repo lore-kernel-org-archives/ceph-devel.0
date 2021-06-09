@@ -2,86 +2,133 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71055C48BCF
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 01:59:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 936E3C48BCF
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 09:37:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5968F6128D
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 01:59:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8130F6124B
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 09:37:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233314AbhFICBj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Jun 2021 22:01:39 -0400
-Received: from mga07.intel.com ([134.134.136.100]:29091 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233303AbhFICBi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Jun 2021 22:01:38 -0400
-IronPort-SDR: QuqK2AfQBH5SR3aZ+/OC+eIwTGcibSsd/qUNvBIFl3jDSyoBaz4k5mJhJiinGtYH1bnYDdP+Gj
- 0kX+kus9ntWg==
-X-IronPort-AV: E=McAfee;i="6200,9189,10009"; a="268841742"
-X-IronPort-AV: E=Sophos;i="5.83,259,1616482800"; 
-   d="scan'208";a="268841742"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jun 2021 18:59:44 -0700
-IronPort-SDR: l5m0zsMDo0S/BY6flob2JC9Z0fcbfXs0snnKIkUOGNUZsN5SIUPiUFSjvaStBruug7QhFYdMqJ
- TyBwGFTSV0lA==
-X-IronPort-AV: E=Sophos;i="5.83,259,1616482800"; 
-   d="scan'208";a="482201365"
-Received: from iweiny-desk2.sc.intel.com (HELO localhost) ([10.3.52.147])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jun 2021 18:59:44 -0700
-Date:   Tue, 8 Jun 2021 18:59:43 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
+        id S238079AbhFIJjn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 9 Jun 2021 05:39:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57962 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234748AbhFIJjm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2021 05:39:42 -0400
+Received: from mail-il1-x12e.google.com (mail-il1-x12e.google.com [IPv6:2607:f8b0:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DA42C061574;
+        Wed,  9 Jun 2021 02:37:47 -0700 (PDT)
+Received: by mail-il1-x12e.google.com with SMTP id b5so24586358ilc.12;
+        Wed, 09 Jun 2021 02:37:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=11paM/1lp22CavDEEN3A/olA+tOS+m0UgIjuNNPMc5c=;
+        b=AUn30ilbL3NzF5q2BCp0QVXHikpm8Vm6yUAM9SdAhos2m9u8xXGwxlhY7L/mh5ETkk
+         xMDLHdDCnvMj9u5VwkHn37GW+ujRpw2uJn/g/RTKxpbLL7paohPJB9BFTIoD6vBOz0FJ
+         wlEZkhAcmqWn9YlRTm67JdkNWHAiNqs9sQF7kLfjGLtZZjwbbdwYYhZL9eEqO6j8XGwT
+         WGtn6z7Ok1u7/f7AJWVfLsFL4AOnd9bBJ2NKdphWe6mO0Sya+xn+4ljLwykvBX8unsLj
+         qDtDo0A3iPuoyVDOa2dKVu/uzCQIFKij1E9QJ4Rpt6+OuJFeAbsxKLDuKg+JVf9eTdvV
+         qvfQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=11paM/1lp22CavDEEN3A/olA+tOS+m0UgIjuNNPMc5c=;
+        b=D+4f2a9eNChSRAA625nVypjPfxAKmgHzYO1PX48Zh64AITQquDEUcgJsuj5a5bt9Pe
+         hom6FP+cbzAgNCSYOESRIYnfS1uG1p5/dEH/Un0rgmryIYpZ+cF2Cfls+nXrjLjil0kX
+         ++Y2rVWNge8GsGQ0wAnyvp6krHA0qhkGyv90uI+kD8OwvMWE61w/X8KIruWRBaVcRbAd
+         8uurSPMiRqj4Glm73UCXY8RjzBGQwPZ7SYck9AWcu9PwzXFyPDGYrI12bS6b/OJp2rcp
+         E4Yanqjz3qv8QMw4JdZalSq7AHWEvkTHUbn32UKVfAaMj0Zid0ki4ydmZGazXirvIWhH
+         wM7A==
+X-Gm-Message-State: AOAM5313/mgOhvCJK8cXznROgr0ZWB9nDI6Rrd2UXhB+50CP7KG6CXx8
+        FkPmpgMQkFRnWwoBUe4/JP3QuYSc9LrmgZKthEs=
+X-Google-Smtp-Source: ABdhPJy5AROZdbsU+O1Vh/bwrnsq7wRpZEor176YD0iLaHDJhsh5Ad6i076nqZiL2In6oQ6aCiJFsx/mBME7wo4cSUc=
+X-Received: by 2002:a05:6638:267:: with SMTP id x7mr7028650jaq.51.1623231466755;
+ Wed, 09 Jun 2021 02:37:46 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210608160603.1535935-1-hch@lst.de> <20210608160603.1535935-8-hch@lst.de>
+In-Reply-To: <20210608160603.1535935-8-hch@lst.de>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Wed, 9 Jun 2021 11:37:45 +0200
+Message-ID: <CAOi1vP-zSAnx5z7EbPNVLoCHWdK5iGjXU7KKrRL8YZF1QfMf3A@mail.gmail.com>
+Subject: Re: [PATCH 07/16] rbd: use memzero_bvec
 To:     Christoph Hellwig <hch@lst.de>
 Cc:     Jens Axboe <axboe@kernel.dk>,
         Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         Geoff Levand <geoff@infradead.org>,
-        Ilya Dryomov <idryomov@gmail.com>,
         Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com,
-        linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-block@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        ceph-devel@vger.kernel.org
-Subject: Re: switch the block layer to use kmap_local_page
-Message-ID: <20210609015943.GV3697498@iweiny-DESK2.sc.intel.com>
-References: <20210608160603.1535935-1-hch@lst.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210608160603.1535935-1-hch@lst.de>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+        Mike Snitzer <snitzer@redhat.com>,
+        Ira Weiny <ira.weiny@intel.com>, dm-devel@redhat.com,
+        linux-mips@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        linuxppc-dev@lists.ozlabs.org,
+        Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Jun 08, 2021 at 06:05:47PM +0200, Christoph Hellwig wrote:
-> Hi all,
-> 
-> this series switches the core block layer code and all users of the
-> existing bvec kmap helpers to use kmap_local_page.  Drivers that
-> currently use open coded kmap_atomic calls will converted in a follow
-> on series.
+On Tue, Jun 8, 2021 at 6:06 PM Christoph Hellwig <hch@lst.de> wrote:
+>
+> Use memzero_bvec instead of reimplementing it.
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  drivers/block/rbd.c | 15 ++-------------
+>  1 file changed, 2 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index bbb88eb009e0..eb243fc4d108 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1219,24 +1219,13 @@ static void rbd_dev_mapping_clear(struct rbd_device *rbd_dev)
+>         rbd_dev->mapping.size = 0;
+>  }
+>
+> -static void zero_bvec(struct bio_vec *bv)
+> -{
+> -       void *buf;
+> -       unsigned long flags;
+> -
+> -       buf = bvec_kmap_irq(bv, &flags);
+> -       memset(buf, 0, bv->bv_len);
+> -       flush_dcache_page(bv->bv_page);
+> -       bvec_kunmap_irq(buf, &flags);
+> -}
+> -
+>  static void zero_bios(struct ceph_bio_iter *bio_pos, u32 off, u32 bytes)
+>  {
+>         struct ceph_bio_iter it = *bio_pos;
+>
+>         ceph_bio_iter_advance(&it, off);
+>         ceph_bio_iter_advance_step(&it, bytes, ({
+> -               zero_bvec(&bv);
+> +               memzero_bvec(&bv);
+>         }));
+>  }
+>
+> @@ -1246,7 +1235,7 @@ static void zero_bvecs(struct ceph_bvec_iter *bvec_pos, u32 off, u32 bytes)
+>
+>         ceph_bvec_iter_advance(&it, off);
+>         ceph_bvec_iter_advance_step(&it, bytes, ({
+> -               zero_bvec(&bv);
+> +               memzero_bvec(&bv);
+>         }));
+>  }
+>
 
-Other than the missing flush_dcache's.
+Ira already brought up the fact that this conversion drops
+flush_dcache_page() calls throughout.  Other than that:
 
-For the series.
+Acked-by: Ilya Dryomov <idryomov@gmail.com>
 
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+Thanks,
 
-> 
-> Diffstat:
->  arch/mips/include/asm/mach-rc32434/rb.h |    2 -
->  block/bio-integrity.c                   |   14 ++++------
->  block/bio.c                             |   37 +++++++---------------------
->  block/blk-map.c                         |    2 -
->  block/bounce.c                          |   35 ++++++--------------------
->  block/t10-pi.c                          |   16 ++++--------
->  drivers/block/ps3disk.c                 |   19 ++------------
->  drivers/block/rbd.c                     |   15 +----------
->  drivers/md/dm-writecache.c              |    5 +--
->  include/linux/bio.h                     |   42 --------------------------------
->  include/linux/bvec.h                    |   27 ++++++++++++++++++--
->  include/linux/highmem.h                 |    4 +--
->  12 files changed, 64 insertions(+), 154 deletions(-)
+                Ilya
