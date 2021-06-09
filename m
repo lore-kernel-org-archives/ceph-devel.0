@@ -2,117 +2,122 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E466CC48BDF
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 09:41:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 858DAC48BCD
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 14:12:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DCF9C61073
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 09:41:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6A64861285
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 14:12:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238151AbhFIJn1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 9 Jun 2021 05:43:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58808 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234720AbhFIJn0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2021 05:43:26 -0400
-Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0D9DC061574;
-        Wed,  9 Jun 2021 02:41:31 -0700 (PDT)
-Received: by mail-pg1-x531.google.com with SMTP id j12so18978861pgh.7;
-        Wed, 09 Jun 2021 02:41:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=mhMcjERsi3wx3J0HCHYpS+goiMXBDBgg8cMNxlYjvGA=;
-        b=ADcj1YVvHTLC+vKMpsqWPDJsBSDbQj9Juth1j7LfkjKpeyQiAv4eLJia7JtZshRFtJ
-         A+TDHANIoo9IOJ4Kh0lYPvrrYa5nHWPVMBPmA405nRsS3sz38uj/ZBeAXl2ZMbNQjV+D
-         mqkGmibxA5nlTggMZR8xaJL9mgWWlN0qvJ13j0sbvH5mcxMOF9754ReExqahIfdHqL2I
-         NGrYqKJ6VLkatC3yXMel7BVvJXeid1JTMV2nRKXWSqgMLC4VnNuNxzIDSde7bQegncwu
-         8i1TuPOBXCJ8KzJ7C/7oFxid3upfTcHVU7lyPDQqvDi7b+rtEOCs4e9uougdvb5+gY72
-         zPtQ==
+        id S237455AbhFIOOx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 9 Jun 2021 10:14:53 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:32698 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234748AbhFIOOw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2021 10:14:52 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1623247977;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=PnpxCpXE+OK/d1mx857yakOYg3PEYfowIxy9riJbP/w=;
+        b=TVxdpIeogunCMTPlu9LrzfEroPsxMmXUHcicovn+WmM0JYoRRm5v2e5Kt9MSLAsjaMRVdB
+        ny1mZrs/n45RjwpNLZAA2yKa35I7mhKCtGhtaZAPWWrJQ5QddO8/wYrPLWtO15op9CFmeJ
+        J7TKKUDn77ZraGE+1tUOzdV+HCzq9Mk=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-35-iXxecqpjNe6S27AMRTz2aA-1; Wed, 09 Jun 2021 10:12:55 -0400
+X-MC-Unique: iXxecqpjNe6S27AMRTz2aA-1
+Received: by mail-qt1-f197.google.com with SMTP id q6-20020a05622a04c6b0290247f5436033so4817577qtx.5
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jun 2021 07:12:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=mhMcjERsi3wx3J0HCHYpS+goiMXBDBgg8cMNxlYjvGA=;
-        b=ZwyFoZ53V0dbFpm6oVmzTiQtyyCEfJTI9z3MPc9OY6EFJpmkkteZ466t9mbB5u0PDr
-         nAZuYLqz0rmGo0DwpVMMQRuQ3SMl8CWcW4PFTX1eUY9CiAZu6tGnMNo2XxHGqmvlddcb
-         sXnh1tIBj+z7ojFXEqIxre4fvESjSTZnpKupLIG/WJHYvUDZofFm6LojcgB+5cJfPl24
-         EwR/p11kAdrynFD3/D8gGUMMKHsGr5UHcWP6LWMZK2nnfnQhjBQTdez7GJl97vntFceA
-         0x7zb2KVcxPmywj4V2S25Jnz70/PJOW5QLnEuVsaYFh0Cf9UOoGvcd6RcxTvmFheJWxi
-         WNjw==
-X-Gm-Message-State: AOAM532QXMwSk4MEFV1rcDXVB7QZVtWxnWlHpHTZg05X2MhAeWTbBR+N
-        XeOnMRYimKy1lcoWHAL7v0u0hhqTCzQuHQS5GOXjkVZ/dhWXvg==
-X-Google-Smtp-Source: ABdhPJwAXk5XLhiYZ2SCv5KKecZJLPTCdFzz10ao0FJv/DCA2fGlPOpnYQTjWTA/Q177jVl11ZJJ3bM2RHXJ7omJZKU=
-X-Received: by 2002:a6b:287:: with SMTP id 129mr18520979ioc.182.1623231195095;
- Wed, 09 Jun 2021 02:33:15 -0700 (PDT)
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:user-agent
+         :mime-version:content-transfer-encoding;
+        bh=PnpxCpXE+OK/d1mx857yakOYg3PEYfowIxy9riJbP/w=;
+        b=e1Cz+b9kfu2zY6acOQjDHSZa79QonKOCqt4eGwCVg9bGXI/H3/E5fE++T+7Zqk/e0A
+         e3Uky7Pt+x+BN15eQoci7NjtDVQkW/2j4Z18nUVN07KM9cK+yAOWyxAj0Ar5KJQ2eFFC
+         Xv9ySXz6be9eHAY74SKQsU6xVcwNAzeTg8Unhu7JK1aqy8SRmpaEiG+bAPYkLBIdBTyQ
+         +ofIG3kNgu03rY5XoaKJ+FBWQe05MCjZUAxRQkXfj3y+Qo0ZkXKaFvyp65Fek+6UY1Mk
+         jtAjOVtSjE3n699fbfCJeasgOISoNMwERexfZY0fYNbJhVMqU8Z9GcBTnricSyalFC6e
+         NkdQ==
+X-Gm-Message-State: AOAM532Zv9vKOoJW9I86tCapPpKZoXuKXU4q6tPW5RfMkpeROAK3ZcgE
+        eL5JnVRVwNkHLE/BdVujKWj/Q8+gLtqaZ5tbYsRQL1MZotozMf9H6X6SE2DprVPbECyN2hNyeSC
+        NS1QBS5fc/XdgbNgJvZTuPg==
+X-Received: by 2002:ac8:7404:: with SMTP id p4mr137294qtq.224.1623247975394;
+        Wed, 09 Jun 2021 07:12:55 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyU+1QtdQdklcTPNEB4o1wjdxD819dTkPpGo3SRZ95NgzpDGxT6HUZ23I2/wz66dMLG6bLHgw==
+X-Received: by 2002:ac8:7404:: with SMTP id p4mr137275qtq.224.1623247975168;
+        Wed, 09 Jun 2021 07:12:55 -0700 (PDT)
+Received: from [192.168.1.3] (68-20-15-154.lightspeed.rlghnc.sbcglobal.net. [68.20.15.154])
+        by smtp.gmail.com with ESMTPSA id 104sm56424qta.90.2021.06.09.07.12.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Jun 2021 07:12:54 -0700 (PDT)
+Message-ID: <f5a0857ebfb703889f7fe9ac48761f13e99c09bb.camel@redhat.com>
+Subject: cephfs kclient session->s_mutex coverage
+From:   Jeff Layton <jlayton@redhat.com>
+To:     Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>,
+        "Yan, Zheng" <ukernel@gmail.com>,
+        "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
+Cc:     Ceph Development <ceph-devel@vger.kernel.org>
+Date:   Wed, 09 Jun 2021 10:12:54 -0400
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.1 (3.40.1-1.fc34) 
 MIME-Version: 1.0
-References: <20210608160603.1535935-1-hch@lst.de> <20210608160603.1535935-5-hch@lst.de>
-In-Reply-To: <20210608160603.1535935-5-hch@lst.de>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Wed, 9 Jun 2021 11:33:13 +0200
-Message-ID: <CAOi1vP8Xe1ZqE8fe=8KcU00xDjRrvaRONAC_TYYctsE1dns0Og@mail.gmail.com>
-Subject: Re: [PATCH 04/16] bvec: add a bvec_kmap_local helper
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Geoff Levand <geoff@infradead.org>,
-        Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        Mike Snitzer <snitzer@redhat.com>,
-        Ira Weiny <ira.weiny@intel.com>, dm-devel@redhat.com,
-        linux-mips@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        linuxppc-dev@lists.ozlabs.org,
-        Ceph Development <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Jun 8, 2021 at 6:06 PM Christoph Hellwig <hch@lst.de> wrote:
->
-> Add a helper to call kmap_local_page on a bvec.  There is no need for
-> an unmap helper given that kunmap_local accept any address in the mapped
-> page.
->
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  include/linux/bvec.h | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/include/linux/bvec.h b/include/linux/bvec.h
-> index 883faf5f1523..d64d6c0ceb77 100644
-> --- a/include/linux/bvec.h
-> +++ b/include/linux/bvec.h
-> @@ -7,6 +7,7 @@
->  #ifndef __LINUX_BVEC_H
->  #define __LINUX_BVEC_H
->
-> +#include <linux/highmem.h>
->  #include <linux/bug.h>
->  #include <linux/errno.h>
->  #include <linux/limits.h>
-> @@ -183,4 +184,9 @@ static inline void bvec_advance(const struct bio_vec *bvec,
->         }
->  }
->
-> +static inline void *bvec_kmap_local(struct bio_vec *bvec)
-> +{
-> +       return kmap_local_page(bvec->bv_page) + bvec->bv_offset;
-> +}
-> +
->  #endif /* __LINUX_BVEC_H */
+Ancient history question for those who worked on the kclient long ago...
 
-Might be useful to add the second sentence of the commit message as
-a comment for bvec_kmap_local().  It could be expanded to mention the
-single-page bvec caveat too.
+I've been seeing some problems during unmounting with the latest kclient
+code and have opened a tracker here:
+
+    https://tracker.ceph.com/issues/51158?issue_count=114&issue_position=1&next_issue_id=51112
+
+The issue is that the client can end up queueing an asynchronous iput()
+call to put an inode reference, but that can happen after the point
+where the workqueues get flushed at unmount time.
+
+We could try to do more workarounds for this, but I keep circling back
+to the fact that the session->s_mutex seems to be held over _way_ too
+much of the kclient code. Reducing its scope would be a much better fix,
+and would probably be beneficial for performance, and we could eliminate
+the workaround that added ceph_async_iput().
+
+I know this is ancient history to most of you who originally worked on
+this code, but does anyone remember what the session->s_mutex was
+intended to protect, particularly in ceph_check_caps() but also in some 
+
+When I've asked in the past, I've gotten some handwavy answers about
+ordering of session messages, but I don't think that's a good enough
+reason to do this. We shouldn't be relying on sleeping locks to order
+messages on the wire. Most of the data that is accessed and altered in
+this code seems to be protected by more fine-grained locks.
+
+There's also this:
+
+/*
+ * Handle mds reply.
+ *
+ * We take the session mutex and parse and process the reply immediately.
+ * This preserves the logical ordering of replies, capabilities, etc., sent
+ * by the MDS as they are applied to our local cache.
+ */
+
+...but again, using sleeping locks to do this ordering is problematic.
+
+Can anyone help identify why it was done this way in the first place? If
+we drop the s_mutex from some of these codepaths, what sort of ordering
+do we need to guarantee? The snap_rwsem seems to have similar issues, so
+the same questions apply to it as well.
 
 Thanks,
+-- 
+Jeff Layton <jlayton@redhat.com>
 
-                Ilya
