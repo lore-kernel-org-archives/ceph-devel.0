@@ -2,122 +2,112 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-15.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 858DAC48BCD
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 14:12:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C76C0C47094
+	for <ceph-devel@archiver.kernel.org>; Thu, 10 Jun 2021 09:07:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A64861285
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Jun 2021 14:12:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B067A61249
+	for <ceph-devel@archiver.kernel.org>; Thu, 10 Jun 2021 09:07:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237455AbhFIOOx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 9 Jun 2021 10:14:53 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:32698 "EHLO
+        id S230248AbhFJJJE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 10 Jun 2021 05:09:04 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:52961 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234748AbhFIOOw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2021 10:14:52 -0400
+        by vger.kernel.org with ESMTP id S230184AbhFJJJB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 10 Jun 2021 05:09:01 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1623247977;
+        s=mimecast20190719; t=1623316024;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=PnpxCpXE+OK/d1mx857yakOYg3PEYfowIxy9riJbP/w=;
-        b=TVxdpIeogunCMTPlu9LrzfEroPsxMmXUHcicovn+WmM0JYoRRm5v2e5Kt9MSLAsjaMRVdB
-        ny1mZrs/n45RjwpNLZAA2yKa35I7mhKCtGhtaZAPWWrJQ5QddO8/wYrPLWtO15op9CFmeJ
-        J7TKKUDn77ZraGE+1tUOzdV+HCzq9Mk=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-35-iXxecqpjNe6S27AMRTz2aA-1; Wed, 09 Jun 2021 10:12:55 -0400
-X-MC-Unique: iXxecqpjNe6S27AMRTz2aA-1
-Received: by mail-qt1-f197.google.com with SMTP id q6-20020a05622a04c6b0290247f5436033so4817577qtx.5
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Jun 2021 07:12:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:subject:from:to:cc:date:user-agent
-         :mime-version:content-transfer-encoding;
-        bh=PnpxCpXE+OK/d1mx857yakOYg3PEYfowIxy9riJbP/w=;
-        b=e1Cz+b9kfu2zY6acOQjDHSZa79QonKOCqt4eGwCVg9bGXI/H3/E5fE++T+7Zqk/e0A
-         e3Uky7Pt+x+BN15eQoci7NjtDVQkW/2j4Z18nUVN07KM9cK+yAOWyxAj0Ar5KJQ2eFFC
-         Xv9ySXz6be9eHAY74SKQsU6xVcwNAzeTg8Unhu7JK1aqy8SRmpaEiG+bAPYkLBIdBTyQ
-         +ofIG3kNgu03rY5XoaKJ+FBWQe05MCjZUAxRQkXfj3y+Qo0ZkXKaFvyp65Fek+6UY1Mk
-         jtAjOVtSjE3n699fbfCJeasgOISoNMwERexfZY0fYNbJhVMqU8Z9GcBTnricSyalFC6e
-         NkdQ==
-X-Gm-Message-State: AOAM532Zv9vKOoJW9I86tCapPpKZoXuKXU4q6tPW5RfMkpeROAK3ZcgE
-        eL5JnVRVwNkHLE/BdVujKWj/Q8+gLtqaZ5tbYsRQL1MZotozMf9H6X6SE2DprVPbECyN2hNyeSC
-        NS1QBS5fc/XdgbNgJvZTuPg==
-X-Received: by 2002:ac8:7404:: with SMTP id p4mr137294qtq.224.1623247975394;
-        Wed, 09 Jun 2021 07:12:55 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyU+1QtdQdklcTPNEB4o1wjdxD819dTkPpGo3SRZ95NgzpDGxT6HUZ23I2/wz66dMLG6bLHgw==
-X-Received: by 2002:ac8:7404:: with SMTP id p4mr137275qtq.224.1623247975168;
-        Wed, 09 Jun 2021 07:12:55 -0700 (PDT)
-Received: from [192.168.1.3] (68-20-15-154.lightspeed.rlghnc.sbcglobal.net. [68.20.15.154])
-        by smtp.gmail.com with ESMTPSA id 104sm56424qta.90.2021.06.09.07.12.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Jun 2021 07:12:54 -0700 (PDT)
-Message-ID: <f5a0857ebfb703889f7fe9ac48761f13e99c09bb.camel@redhat.com>
-Subject: cephfs kclient session->s_mutex coverage
-From:   Jeff Layton <jlayton@redhat.com>
-To:     Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>,
-        "Yan, Zheng" <ukernel@gmail.com>,
-        "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
-Cc:     Ceph Development <ceph-devel@vger.kernel.org>
-Date:   Wed, 09 Jun 2021 10:12:54 -0400
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.40.1 (3.40.1-1.fc34) 
+         in-reply-to:in-reply-to:references:references;
+        bh=361/Mv7Fre9yzH+UkaH8Am6n4w1iJ449u+nGkGfSsgU=;
+        b=ERBgHfqneTUTF/izPs8m4bWArhZ/KsiUfWNCMTkhqaaS7Bm8BUQfFRZR1NCBBOWo2gLm6w
+        oJYrnnamOcm9JZsYXh0kiFRJ4KknRdYmv3A4Z4GsShDN//rGMbX/nL6sb1abG4gT1H0Wb/
+        BgDnq9YJc/OieuX+eC2FQWK+gcPgBHw=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-581-5j4c0fCIN22TQ8P_CUs7aw-1; Thu, 10 Jun 2021 05:07:03 -0400
+X-MC-Unique: 5j4c0fCIN22TQ8P_CUs7aw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BFD06185060A;
+        Thu, 10 Jun 2021 09:06:59 +0000 (UTC)
+Received: from T590 (ovpn-13-145.pek2.redhat.com [10.72.13.145])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0092660917;
+        Thu, 10 Jun 2021 09:06:46 +0000 (UTC)
+Date:   Thu, 10 Jun 2021 17:06:41 +0800
+From:   Ming Lei <ming.lei@redhat.com>
+To:     Jan Kara <jack@suse.cz>
+Cc:     linux-fsdevel@vger.kernel.org,
+        Christoph Hellwig <hch@infradead.org>,
+        Dave Chinner <david@fromorbit.com>, ceph-devel@vger.kernel.org,
+        Chao Yu <yuchao0@huawei.com>,
+        Damien Le Moal <damien.lemoal@wdc.com>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jeff Layton <jlayton@kernel.org>,
+        Johannes Thumshirn <jth@kernel.org>,
+        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, linux-mm@kvack.org,
+        linux-xfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>,
+        Steve French <sfrench@samba.org>, Ted Tso <tytso@mit.edu>,
+        Matthew Wilcox <willy@infradead.org>,
+        Christoph Hellwig <hch@lst.de>, Hugh Dickins <hughd@google.com>
+Subject: Re: [PATCH 01/14] mm: Fix comments mentioning i_mutex
+Message-ID: <YMHWIcbnLPW5AfiC@T590>
+References: <20210607144631.8717-1-jack@suse.cz>
+ <20210607145236.31852-1-jack@suse.cz>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210607145236.31852-1-jack@suse.cz>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Ancient history question for those who worked on the kclient long ago...
+On Mon, Jun 07, 2021 at 04:52:11PM +0200, Jan Kara wrote:
+> inode->i_mutex has been replaced with inode->i_rwsem long ago. Fix
+> comments still mentioning i_mutex.
+> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Acked-by: Hugh Dickins <hughd@google.com>
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
 
-I've been seeing some problems during unmounting with the latest kclient
-code and have opened a tracker here:
+...
 
-    https://tracker.ceph.com/issues/51158?issue_count=114&issue_position=1&next_issue_id=51112
+> diff --git a/mm/rmap.c b/mm/rmap.c
+> index 693a610e181d..a35cbbbded0d 100644
+> --- a/mm/rmap.c
+> +++ b/mm/rmap.c
+> @@ -20,9 +20,9 @@
+>  /*
+>   * Lock ordering in mm:
+>   *
+> - * inode->i_mutex	(while writing or truncating, not reading or faulting)
+> + * inode->i_rwsem	(while writing or truncating, not reading or faulting)
+>   *   mm->mmap_lock
+> - *     page->flags PG_locked (lock_page)   * (see huegtlbfs below)
+> + *     page->flags PG_locked (lock_page)   * (see hugetlbfs below)
+>   *       hugetlbfs_i_mmap_rwsem_key (in huge_pmd_share)
+>   *         mapping->i_mmap_rwsem
+>   *           hugetlb_fault_mutex (hugetlbfs specific page fault mutex)
+> @@ -41,7 +41,7 @@
+>   *                             in arch-dependent flush_dcache_mmap_lock,
+>   *                             within bdi.wb->list_lock in __sync_single_inode)
+>   *
+> - * anon_vma->rwsem,mapping->i_mutex      (memory_failure, collect_procs_anon)
+> + * anon_vma->rwsem,mapping->i_mmap_rwsem   (memory_failure, collect_procs_anon)
 
-The issue is that the client can end up queueing an asynchronous iput()
-call to put an inode reference, but that can happen after the point
-where the workqueues get flushed at unmount time.
+This one looks a typo.
 
-We could try to do more workarounds for this, but I keep circling back
-to the fact that the session->s_mutex seems to be held over _way_ too
-much of the kclient code. Reducing its scope would be a much better fix,
-and would probably be beneficial for performance, and we could eliminate
-the workaround that added ceph_async_iput().
-
-I know this is ancient history to most of you who originally worked on
-this code, but does anyone remember what the session->s_mutex was
-intended to protect, particularly in ceph_check_caps() but also in some 
-
-When I've asked in the past, I've gotten some handwavy answers about
-ordering of session messages, but I don't think that's a good enough
-reason to do this. We shouldn't be relying on sleeping locks to order
-messages on the wire. Most of the data that is accessed and altered in
-this code seems to be protected by more fine-grained locks.
-
-There's also this:
-
-/*
- * Handle mds reply.
- *
- * We take the session mutex and parse and process the reply immediately.
- * This preserves the logical ordering of replies, capabilities, etc., sent
- * by the MDS as they are applied to our local cache.
- */
-
-...but again, using sleeping locks to do this ordering is problematic.
-
-Can anyone help identify why it was done this way in the first place? If
-we drop the s_mutex from some of these codepaths, what sort of ordering
-do we need to guarantee? The snap_rwsem seems to have similar issues, so
-the same questions apply to it as well.
-
-Thanks,
 -- 
-Jeff Layton <jlayton@redhat.com>
+Ming
 
