@@ -2,116 +2,78 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0D90C2B9F4
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 17:18:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A837C48BE8
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 21:11:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8EC0761241
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 17:18:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 152C9611EE
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 21:11:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235536AbhFNRUO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 14 Jun 2021 13:20:14 -0400
-Received: from mail-il1-f171.google.com ([209.85.166.171]:38416 "EHLO
-        mail-il1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235509AbhFNRUM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jun 2021 13:20:12 -0400
-Received: by mail-il1-f171.google.com with SMTP id d1so12832983ils.5;
-        Mon, 14 Jun 2021 10:18:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qQkiC2Boq1enDbw0Bq2sZY++jJ/micvga8E5sa5r6h8=;
-        b=oaHRSDkeNHn3y88GUfUSl+LoUEKIRn0UkitkMvrlsd0qga4MoiaA592YqccF4da9+R
-         QKW1b+YJSLQCJVdiYSQCpiWWYwf+WVMgl9iOhVL/cgl5wX4hncn7eyNFcYb3+2ZZdsou
-         QSP41fxW6jivabswvcq/rzmls56ys2MZ4CWfNdXRhZwqW2Od9Q30bHZpqwX1Oze65Ww3
-         FidiC8bJBtYrqPNETHTfwtkIMqgNv6LBF7Mo2ijyO+W1VT35nq2Oe6vb8/7Blr/3NeP7
-         bjKnTQh13taBxcswZg5RvHo8Att1FPHoonSYx4GoulUkj4GNUwDZ+EKmo62FY0NlAKGW
-         VhMg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qQkiC2Boq1enDbw0Bq2sZY++jJ/micvga8E5sa5r6h8=;
-        b=kClqWH+ENVbFTSHldYRG8lkQaGCdC0a1sgI2iHUOs68nZwZ2JWMLOYUUFb+e5n5w0K
-         KwyL70qa3Ex658lTcbXTzD+/acbgL/y0coem9JBkgTEnA5EoE2Ek/E79cmaYX+z+DpYr
-         WXYkb94udtqGxcpJKXClmbnhdHzJuMngcF1lrg0hEY68EvvJ6bgC0/RDrFdEKuqMqzOf
-         AuQfr1/mBnrxrcrEZS1zUYfUzjIdZGJReqerFMSIyksJ+JtnBICTUJWb8uRBKlCCanZu
-         WfqWVt+EH8L4HCAixTjMizYh9HLss5oX6QB4ifLbQmL1hUs1od5uPS2MJ3T8J24+h6XG
-         4rRQ==
-X-Gm-Message-State: AOAM5305FEEz/SedTyh9bhr6pugzaXoISbmD4u6gtaKMcCme9zx5F0Qb
-        BUnLeq9Qq8NBqhKjXhlxHDQirQHZomQmtN7zY34=
-X-Google-Smtp-Source: ABdhPJwnFA+kS2s8Pa5xN5D5dTnI6Fj1l6zO+N6DVsd7aS+/13vpCxr6vmcTpiFdlRMsnD1ubpNYc7CmKGkDRdqEZD8=
-X-Received: by 2002:a05:6e02:1a03:: with SMTP id s3mr14899111ild.220.1623691029568;
- Mon, 14 Jun 2021 10:17:09 -0700 (PDT)
+        id S234771AbhFNVNg (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 14 Jun 2021 17:13:36 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:32284 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234420AbhFNVNf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 14 Jun 2021 17:13:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1623705091;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=0Mn8+GlgrQdOA/I1bTqxQYRGsb/yRw3f+Z55lqaAtNs=;
+        b=aI7rarQHEkwR3LlFDC/VfLKp3WR+jVEuN5XsfZFEaS5KQxbHDO54/9Tty+dObtRaHoiKA/
+        5wScdsCwqB618zZADH/gdhy8/IpDdz/fwWahEWZp1SQGD3VkuDR4wKVP7RMszPOs617TXi
+        nNtiXuqJwzPw3Rc6qZ8uYCilhfNTPqc=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-33-3bfqkI24OYSv0GZSCObOOQ-1; Mon, 14 Jun 2021 17:11:30 -0400
+X-MC-Unique: 3bfqkI24OYSv0GZSCObOOQ-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C7B7C1084F42;
+        Mon, 14 Jun 2021 21:11:28 +0000 (UTC)
+Received: from warthog.procyon.org.uk (ovpn-118-65.rdu2.redhat.com [10.10.118.65])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8A5445D9CA;
+        Mon, 14 Jun 2021 21:11:27 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+In-Reply-To: <YMd5BqIKucO6rW4R@casper.infradead.org>
+References: <YMd5BqIKucO6rW4R@casper.infradead.org> <YMdpxbYafHnE0F8N@casper.infradead.org> <162367681795.460125.11729955608839747375.stgit@warthog.procyon.org.uk> <162367682522.460125.5652091227576721609.stgit@warthog.procyon.org.uk> <475131.1623685101@warthog.procyon.org.uk>
+To:     Matthew Wilcox <willy@infradead.org>
+Cc:     dhowells@redhat.com, jlayton@kernel.org,
+        linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 2/3] afs: Fix afs_write_end() to handle short writes
 MIME-Version: 1.0
-References: <20210610094505.1341-1-zuoqilin1@163.com>
-In-Reply-To: <20210610094505.1341-1-zuoqilin1@163.com>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Mon, 14 Jun 2021 19:17:03 +0200
-Message-ID: <CAOi1vP89H+D_FDoFEjzqC1ff7ryjBhAYEwtH6NC8YhmXWpyQhQ@mail.gmail.com>
-Subject: Re: [PATCH] net/ceph: Remove unnecessary variables
-To:     zuoqilin1@163.com
-Cc:     Jeff Layton <jlayton@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Ceph Development <ceph-devel@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        zuoqilin <zuoqilin@yulong.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <501526.1623705086.1@warthog.procyon.org.uk>
+Date:   Mon, 14 Jun 2021 22:11:26 +0100
+Message-ID: <501527.1623705086@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jun 10, 2021 at 12:02 PM <zuoqilin1@163.com> wrote:
->
-> From: zuoqilin <zuoqilin@yulong.com>
->
-> There is no necessary to define variable assignment,
-> just return directly to simplify the steps.
->
-> Signed-off-by: zuoqilin <zuoqilin@yulong.com>
-> ---
->  net/ceph/auth.c | 7 +------
->  1 file changed, 1 insertion(+), 6 deletions(-)
->
-> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
-> index de407e8..b824a48 100644
-> --- a/net/ceph/auth.c
-> +++ b/net/ceph/auth.c
-> @@ -58,12 +58,10 @@ struct ceph_auth_client *ceph_auth_init(const char *name,
->                                         const int *con_modes)
->  {
->         struct ceph_auth_client *ac;
-> -       int ret;
->
-> -       ret = -ENOMEM;
->         ac = kzalloc(sizeof(*ac), GFP_NOFS);
->         if (!ac)
-> -               goto out;
-> +               return ERR_PTR(-ENOMEM);
->
->         mutex_init(&ac->mutex);
->         ac->negotiating = true;
-> @@ -78,9 +76,6 @@ struct ceph_auth_client *ceph_auth_init(const char *name,
->         dout("%s name '%s' preferred_mode %d fallback_mode %d\n", __func__,
->              ac->name, ac->preferred_mode, ac->fallback_mode);
->         return ac;
-> -
-> -out:
-> -       return ERR_PTR(ret);
->  }
->
->  void ceph_auth_destroy(struct ceph_auth_client *ac)
+Matthew Wilcox <willy@infradead.org> wrote:
 
-Applied.
+> > means you can't get there unless PageUptodate() is true by that point.
+> 
+> Isn't the point of an assertion to check that this is true?
 
-Thanks,
+The assertion was meant to check that that it was true given that the page was
+set uptodate somewhere else before this function was even called.  With this
+patch, however, it's now set in this function if it wasn't already right at
+the top - so the assertion should now be redundant.  I can put it back if you
+really insist.
 
-                Ilya
+David
+
