@@ -2,83 +2,148 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E894C2B9F4
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 15:43:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 349CEC2B9F4
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 17:17:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 34EB861241
-	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 15:43:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 17118611C0
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Jun 2021 17:17:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233868AbhFNPpf (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 14 Jun 2021 11:45:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44504 "EHLO
+        id S235236AbhFNRT6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 14 Jun 2021 13:19:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37218 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233392AbhFNPpe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jun 2021 11:45:34 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 945E8C061574;
-        Mon, 14 Jun 2021 08:43:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=k+GlvjVi0BRrHEyiA/n5n3EFf4shy2W6VnVssDLXioA=; b=s6ODF9OtR3BlZ9XVnzGicasAeY
-        jlfVoPRVG14lRRMJYIoCdqvGejj20VXBRmKTPwEPzxS4L4lLLzJJfPpHIS69xpFRtsXdnFZvcUmmf
-        VIJHAi4f8Hj7w0SuXn1gGvkVRR6xhFjuvsDcWD9rCyGSjaK/KQg5HEAV6KlA+eAZQZQDeoA/7+fWC
-        VB0I/BoJI1/kpsMFd25OBHVJ5DnorcIYTBZ9LfkHgPretBNDi1v4YLVLU2aFnn7BCyDM5iKNzP0P2
-        kl4bcdjc/BG7rhdGOb33aNMn14/BFV0hwb+MjSEolasxnORciQAD8kzEE2tlW1Zd/z8bpaLY0/iqM
-        57ayFTqg==;
-Received: from willy by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
-        id 1lsoju-005Zja-3U; Mon, 14 Jun 2021 15:43:07 +0000
-Date:   Mon, 14 Jun 2021 16:43:02 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     David Howells <dhowells@redhat.com>
-Cc:     jlayton@kernel.org, linux-afs@lists.infradead.org,
-        ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/3] afs: Fix afs_write_end() to handle short writes
-Message-ID: <YMd5BqIKucO6rW4R@casper.infradead.org>
-References: <YMdpxbYafHnE0F8N@casper.infradead.org>
- <162367681795.460125.11729955608839747375.stgit@warthog.procyon.org.uk>
- <162367682522.460125.5652091227576721609.stgit@warthog.procyon.org.uk>
- <475131.1623685101@warthog.procyon.org.uk>
+        with ESMTP id S232994AbhFNRT5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jun 2021 13:19:57 -0400
+Received: from mail-io1-xd2b.google.com (mail-io1-xd2b.google.com [IPv6:2607:f8b0:4864:20::d2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C6BCC061574;
+        Mon, 14 Jun 2021 10:17:54 -0700 (PDT)
+Received: by mail-io1-xd2b.google.com with SMTP id s26so11284850ioe.9;
+        Mon, 14 Jun 2021 10:17:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=YxPDELQZv5KQu91nvNkyWlai5VfpWwl2aTEBH7Wb1nc=;
+        b=XDOaJdAnxxwX4agHirquiySlTlcaoMZX64px5SotcIJSUajAYiiT1OKggH78t8C210
+         t0x9VuqpeLUmPJTZ4yt0aD/uemDAQTxAEGDhbSlGR7squXnzFmDhZUeT6WdyPtZk8n8y
+         mz3ewakUYJjsr2KnNUL3d0ioOPo0vI69edcxyyRf8fc654RnC51xN9EGlnvFOwRBu7On
+         xl/BuqD3/jVk9j+fEmFmL8Az47Ow/d4RGTGnq10zxYqXcp5g1ldj5qZrC4M2ssyEeUZ8
+         F2z5gRrwfLWjYn+TIefrWatNy4q7uSTJLfd4nomU9fmYABT+qet1weDZwnGdFT2BhwYP
+         ucBA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=YxPDELQZv5KQu91nvNkyWlai5VfpWwl2aTEBH7Wb1nc=;
+        b=Td2mBwsyj8DVw9vGYCR3PdhMT+jg+GvKa/FXZQQhILknmfrN0Jzqa0Sm+J6tPwIAjy
+         RMeetoDsGHLXDUzIxH5J7Qy45gNrW2ITpncYqK+mt2MxqgWJ0lwkCui3zgXLiE7e8QKv
+         0DDFzOHlFewKvZ3mvShNGlmwpGZvW3Xy70sAFBRT4bCug+EzQ0MIRpk26vGM6HNbP1F0
+         989hacwObxL5/dDmfFzdDXZhbP84evf8640t/IInF/ytLxpei43OsZOIW91VHRVLDV+1
+         5S1oMEUAeo0F6O7LhjXL/dt2gz4WwApjk6NVTbTH2tu3uJ/orJrlRKULCwEPLerQTWQO
+         NMzA==
+X-Gm-Message-State: AOAM531d4wQi+fe0QUcUJZOrbcTWUWaJMM9LobBfeCp6wpeXJVtpHt1u
+        2HXOSk6/NqSlGvWtsw77JgzOlxf/TXIvndedtOs=
+X-Google-Smtp-Source: ABdhPJy+yWiwE0T4hi6fct+9hbPY7t+9S9Yah7kKj7u+SKnI66SWvlSYDkK7wuVr8Vm/Dt3DFDgda6G5xeewQfye+2s=
+X-Received: by 2002:a6b:287:: with SMTP id 129mr15514482ioc.182.1623691073584;
+ Mon, 14 Jun 2021 10:17:53 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <475131.1623685101@warthog.procyon.org.uk>
+References: <20210610115058.3779341-1-libaokun1@huawei.com>
+In-Reply-To: <20210610115058.3779341-1-libaokun1@huawei.com>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Mon, 14 Jun 2021 19:17:47 +0200
+Message-ID: <CAOi1vP8rH-Ehq+_4zS7upkqvrdSJjiZw_qCMNomii1vmJ9C=Cw@mail.gmail.com>
+Subject: Re: [PATCH -next] libceph: fix doc warnings in cls_lock_client.c
+To:     Baokun Li <libaokun1@huawei.com>
+Cc:     Jeff Layton <jlayton@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Ceph Development <ceph-devel@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        Wei Yongjun <weiyongjun1@huawei.com>,
+        YueHaibing <yuehaibing@huawei.com>, yangjihong1@huawei.com,
+        yukuai3@huawei.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Jun 14, 2021 at 04:38:21PM +0100, David Howells wrote:
-> Matthew Wilcox <willy@infradead.org> wrote:
-> 
-> > > -	ASSERT(PageUptodate(page));
-> > > -
-> > >  	if (PagePrivate(page)) {
-> > >  		priv = page_private(page);
-> > >  		f = afs_page_dirty_from(page, priv);
-> > 
-> > Why are you removing this assertion?  Does AFS now support dirty,
-> > partially-uptodate pages?  If so, a subsequent read() to that
-> > page is going to need to be careful to only read the parts of the page
-> > from the server that haven't been written ...
-> 
-> Because the previous hunk in the patch:
-> 
-> 	+	if (!PageUptodate(page)) {
-> 	+		if (copied < len) {
-> 	+			copied = 0;
-> 	+			goto out;
-> 	+		}
-> 	+
-> 	+		SetPageUptodate(page);
-> 	+	}
-> 
-> means you can't get there unless PageUptodate() is true by that point.
+On Thu, Jun 10, 2021 at 1:41 PM Baokun Li <libaokun1@huawei.com> wrote:
+>
+> Add description to fixes the following W=1 kernel build warning(s):
+>
+>  net/ceph/cls_lock_client.c:28: warning: Function parameter or
+>   member 'osdc' not described in 'ceph_cls_lock'
+>  net/ceph/cls_lock_client.c:28: warning: Function parameter or
+>   member 'oid' not described in 'ceph_cls_lock'
+>  net/ceph/cls_lock_client.c:28: warning: Function parameter or
+>   member 'oloc' not described in 'ceph_cls_lock'
+>
+>  net/ceph/cls_lock_client.c:93: warning: Function parameter or
+>   member 'osdc' not described in 'ceph_cls_unlock'
+>  net/ceph/cls_lock_client.c:93: warning: Function parameter or
+>   member 'oid' not described in 'ceph_cls_unlock'
+>  net/ceph/cls_lock_client.c:93: warning: Function parameter or
+>   member 'oloc' not described in 'ceph_cls_unlock'
+>
+>  net/ceph/cls_lock_client.c:143: warning: Function parameter or
+>   member 'osdc' not described in 'ceph_cls_break_lock'
+>  net/ceph/cls_lock_client.c:143: warning: Function parameter or
+>   member 'oid' not described in 'ceph_cls_break_lock'
+>  net/ceph/cls_lock_client.c:143: warning: Function parameter or
+>   member 'oloc' not described in 'ceph_cls_break_lock'
+>
+> Signed-off-by: Baokun Li <libaokun1@huawei.com>
+> ---
+>  net/ceph/cls_lock_client.c | 12 +++++++++---
+>  1 file changed, 9 insertions(+), 3 deletions(-)
+>
+> diff --git a/net/ceph/cls_lock_client.c b/net/ceph/cls_lock_client.c
+> index 17447c19d937..82b7f3e3862f 100644
+> --- a/net/ceph/cls_lock_client.c
+> +++ b/net/ceph/cls_lock_client.c
+> @@ -10,7 +10,9 @@
+>
+>  /**
+>   * ceph_cls_lock - grab rados lock for object
+> - * @oid, @oloc: object to lock
+> + * @osdc: working on this ceph osd client
+> + * @oid: object to lock
+> + * @oloc: object to lock
+>   * @lock_name: the name of the lock
+>   * @type: lock type (CEPH_CLS_LOCK_EXCLUSIVE or CEPH_CLS_LOCK_SHARED)
+>   * @cookie: user-defined identifier for this instance of the lock
+> @@ -82,7 +84,9 @@ EXPORT_SYMBOL(ceph_cls_lock);
+>
+>  /**
+>   * ceph_cls_unlock - release rados lock for object
+> - * @oid, @oloc: object to lock
+> + * @osdc: working on this ceph osd client
+> + * @oid: object to lock
+> + * @oloc: object to lock
+>   * @lock_name: the name of the lock
+>   * @cookie: user-defined identifier for this instance of the lock
+>   */
+> @@ -130,7 +134,9 @@ EXPORT_SYMBOL(ceph_cls_unlock);
+>
+>  /**
+>   * ceph_cls_break_lock - release rados lock for object for specified client
+> - * @oid, @oloc: object to lock
+> + * @osdc: working on this ceph osd client
+> + * @oid: object to lock
+> + * @oloc: object to lock
+>   * @lock_name: the name of the lock
+>   * @cookie: user-defined identifier for this instance of the lock
+>   * @locker: current lock owner
 
-Isn't the point of an assertion to check that this is true?
+Applied with a minor tweak.
+
+Thanks,
+
+                Ilya
