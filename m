@@ -2,75 +2,95 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10287C2B9F4
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Jun 2021 11:09:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9ADE5C49361
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Jun 2021 11:12:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E3D7061209
-	for <ceph-devel@archiver.kernel.org>; Thu, 17 Jun 2021 11:09:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D437613BF
+	for <ceph-devel@archiver.kernel.org>; Thu, 17 Jun 2021 11:12:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232358AbhFQLLx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Jun 2021 07:11:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47608 "EHLO
+        id S232410AbhFQLOo (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Jun 2021 07:14:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48224 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229901AbhFQLLx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jun 2021 07:11:53 -0400
-Received: from mail-io1-xd35.google.com (mail-io1-xd35.google.com [IPv6:2607:f8b0:4864:20::d35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A528DC061574
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2021 04:09:45 -0700 (PDT)
-Received: by mail-io1-xd35.google.com with SMTP id k16so2651073ios.10
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2021 04:09:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=QGVQzeUS2Zv7bZ8i9uBdev9UdMVnTUfvxCHrxPfN1+4=;
-        b=ECxLWFTV0/OUSbfYWYi736kfjvkEqQ/fipQGLEw71/YHBqECfUl7ekQQvYFyteQfJa
-         MKm6RtoLOr1KgJDW7wGo63DTLSiiVa0LjwbTXYqGWXUMCCTPnJKeQvQleThpjDzBgeTn
-         tiZPKXPfcDZtdh+3FpWpcY2keIHGhLX2iSzsmrrIJz4+L90SopE7XP2/Sq9Y33sX7LJB
-         ODXseOX+E9RM99rQJ9kvwMOh8Omb+jHo4kMl2CngUJT4bCQWvXeU+spmFnbJtCdCs6bC
-         sd5IiFqMsYGCC6hYgThDgvyn5K4Ndzkk7ZO72TsnZ5Fge4qB8R/EW4HFfnLc9iWVi56X
-         4YFA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=QGVQzeUS2Zv7bZ8i9uBdev9UdMVnTUfvxCHrxPfN1+4=;
-        b=hw/ipqC/nRFXMCDpnCNrn/KArHY1Codr7QCO1VmDVRq1XU9hU+vTC7Cyc+vnuAxbob
-         adIznb6X9bVHJNx4nQZpdvOpzn+adlW8Is9ZkItO0V/lVuV6ogrpqoqefjfSICHWNeBE
-         M+KL3eWlWJSCtjvtG1bhonI/RFuN4nXyFudpCqpYgiY9+k+liP+Z0gwPWrcWxBE5bcsN
-         eqrFJunNHnGGiyNzLBEyxQRnqdc2358t0wGK4apuimC+kMfqB+I3kFN5DSNAdCVocW9W
-         HN6xgdF5ZoAgFfz+xZG1cCuW8JZKGiIXu3aj0P2rnikLBWYf8hlTqe+8LQ8Rr8Cr7cCo
-         quAQ==
-X-Gm-Message-State: AOAM5321hOhtfrx7bHsi0e5vXTli11Zmotog3nujKV8LkICPzVHdbVcO
-        plultTwEzId+6NgKUr7evBaPlCpH7FP/VkEjxi65QpewiuraQQ==
-X-Google-Smtp-Source: ABdhPJy/EmPSHBBL0hO6fAgU7mFCMtY1ZAio02Hwr8v6jOytxJSV42suLaNPTWYcMyOVpCsuvhdeI9/rM1tFXyHrYcI=
-X-Received: by 2002:a6b:8f83:: with SMTP id r125mr3318157iod.123.1623928185064;
- Thu, 17 Jun 2021 04:09:45 -0700 (PDT)
-MIME-Version: 1.0
+        with ESMTP id S232409AbhFQLOg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jun 2021 07:14:36 -0400
+Received: from outbound2.mail.transip.nl (outbound2.mail.transip.nl [IPv6:2a01:7c8:7c8::73])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DAC50C061574
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2021 04:12:27 -0700 (PDT)
+Received: from submission14.mail.transip.nl (unknown [10.103.8.165])
+        by outbound2.mail.transip.nl (Postfix) with ESMTP id 4G5KCF53vKzYcng;
+        Thu, 17 Jun 2021 13:12:25 +0200 (CEST)
+Received: from exchange.transipgroup.nl (unknown [81.4.116.210])
+        by submission14.mail.transip.nl (Postfix) with ESMTPSA id 4G5KCF2jr5z2SSMp;
+        Thu, 17 Jun 2021 13:12:25 +0200 (CEST)
+Received: from VM16171.groupdir.nl (10.131.120.71) by VM16171.groupdir.nl
+ (10.131.120.71) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.15; Thu, 17 Jun
+ 2021 13:12:24 +0200
+Received: from VM16171.groupdir.nl ([81.4.116.210]) by VM16171.groupdir.nl
+ ([81.4.116.210]) with mapi id 15.02.0792.015; Thu, 17 Jun 2021 13:12:24 +0200
+From:   Robin Geuze <robin.geuze@nl.team.blue>
+To:     Ilya Dryomov <idryomov@gmail.com>
+CC:     Ceph Development <ceph-devel@vger.kernel.org>
+Subject: Re: All RBD IO stuck after flapping OSD's
+Thread-Topic: All RBD IO stuck after flapping OSD's
+Thread-Index: AQHXMQs7yqmta0olA0ygBmx0d4s7EKq0G68AgAFka/SABi6BAIBbPDuXgAE5TYCAACJLAv//77AAgAArXHP//+1sAIAAIdhQ
+Date:   Thu, 17 Jun 2021 11:12:23 +0000
+Message-ID: <391efdae70644b71844fe6fa3dceea13@nl.team.blue>
 References: <47f0a04ce6664116a11cfdb5a458e252@nl.team.blue>
  <CAOi1vP-moRXtL4gKXQF8+NwbPgE11_LoxfSYqYBbJfYYQ7Sv_g@mail.gmail.com>
- <8eb12c996e404870803e9a7c77e508d6@nl.team.blue> <CAOi1vP-8i-rKEDd8Emq+MtxCjvK-6VG8KaXdzvQLW89174jUZA@mail.gmail.com>
- <666938090a8746a7ad8ae40ebf116e1c@nl.team.blue> <CAOi1vP8NHYEN-=J4A7mB1dSkaHHf8Gtha-xqPLboZUS5u442hA@mail.gmail.com>
- <21c4b9e08c4d48d6b477fc61d1fccba3@nl.team.blue> <CAOi1vP_fJm5UzSnOmQDKsVHmv-4vebNZTDk7vqLs=bvnf3fwjw@mail.gmail.com>
- <a13af12ab314437bbbffcb23b0513722@nl.team.blue>
-In-Reply-To: <a13af12ab314437bbbffcb23b0513722@nl.team.blue>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Thu, 17 Jun 2021 13:09:36 +0200
-Message-ID: <CAOi1vP8kiGNaNPw=by=TVfJEV1_X-BNYZuVpO_Kxx5xtf40_6w@mail.gmail.com>
-Subject: Re: All RBD IO stuck after flapping OSD's
-To:     Robin Geuze <robin.geuze@nl.team.blue>
-Cc:     Ceph Development <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+ <8eb12c996e404870803e9a7c77e508d6@nl.team.blue>
+ <CAOi1vP-8i-rKEDd8Emq+MtxCjvK-6VG8KaXdzvQLW89174jUZA@mail.gmail.com>
+ <666938090a8746a7ad8ae40ebf116e1c@nl.team.blue>
+ <CAOi1vP8NHYEN-=J4A7mB1dSkaHHf8Gtha-xqPLboZUS5u442hA@mail.gmail.com>
+ <21c4b9e08c4d48d6b477fc61d1fccba3@nl.team.blue>
+ <CAOi1vP_fJm5UzSnOmQDKsVHmv-4vebNZTDk7vqLs=bvnf3fwjw@mail.gmail.com>
+ <a13af12ab314437bbbffcb23b0513722@nl.team.blue>,<CAOi1vP8kiGNaNPw=by=TVfJEV1_X-BNYZuVpO_Kxx5xtf40_6w@mail.gmail.com>
+In-Reply-To: <CAOi1vP8kiGNaNPw=by=TVfJEV1_X-BNYZuVpO_Kxx5xtf40_6w@mail.gmail.com>
+Accept-Language: en-GB, nl-NL, en-US
+Content-Language: en-GB
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [81.4.116.242]
+Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-Scanned-By: ClueGetter at submission14.mail.transip.nl
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+ s=transip-a; d=nl.team.blue; t=1623928345; h=from:subject:to:cc:
+ references:in-reply-to:date:mime-version:content-type;
+ bh=djvrpv9BhKprZyZPvLGuQcRlsAnG9We4XwTVxvqHTUs=;
+ b=mGTO7fP3zIkoXDxTM0sCA9fA4Jzyo77bTWXgIhq1tKWnZ+iNenrET5qqlEPEhSz74beKME
+ gGRsFHSlkSxDXgu9VskthnpOe/rZu/cyOGE3AaLrXODQYiCopuueQvy7pMHEbbXl6Tawir
+ 7eLvvz3y++asW5ux98T+/pcCvAUF3yfkBqgNCnsZwnQFAPYAFeYu8ZcuEwlFkiQwlznUZL
+ A6ws+XiRZOxc6u8/TNuBb1N2HNt1VVfjswCMSkYanWBZPfa5MXQaLTUTZrBbbtVtrdHlOe
+ UAFOXn8yRW83D4TsUE29ErOxnjRYmYy05vLSW5QgkrzhKCBMecoZQPiawcWZsA==
+X-Report-Abuse-To: abuse@transip.nl
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+Hey Ilya,
+
+Yes we can install a custom kernel, or we can apply a patch to the current =
+5.4 kernel if you prefer (we have a build street for the ubuntu kernel set =
+up, so its not a lot of effort).
+
+Regards,
+
+Robin Geuze
+
+From: Ilya Dryomov <idryomov@gmail.com>
+Sent: 17 June 2021 13:09
+To: Robin Geuze
+Cc: Ceph Development
+Subject: Re: All RBD IO stuck after flapping OSD's
+=A0  =20
 On Thu, Jun 17, 2021 at 12:17 PM Robin Geuze <robin.geuze@nl.team.blue> wro=
 te:
 >
@@ -83,101 +103,101 @@ Yup, seems to be exactly https://tracker.ceph.com/issues/42757.
 Here are the relevant tasks listed in the same order as in the
 ticket (you have two tasks in ceph_con_workfn() instead of one):
 
-kworker/5:1     D    0 161820      2 0x80004000
+kworker/5:1=A0=A0=A0=A0 D=A0=A0=A0 0 161820=A0=A0=A0=A0=A0 2 0x80004000
 Workqueue: ceph-msgr ceph_con_workfn [libceph]
 Call Trace:
- __schedule+0x2e3/0x740
- schedule+0x42/0xb0
- rwsem_down_read_slowpath+0x16c/0x4a0
- down_read+0x85/0xa0
- rbd_img_handle_request+0x40/0x1a0 [rbd]
- ? __rbd_obj_handle_request+0x61/0x2f0 [rbd]
- rbd_obj_handle_request+0x34/0x40 [rbd]
- rbd_osd_req_callback+0x44/0x80 [rbd]
- __complete_request+0x28/0x80 [libceph]
- handle_reply+0x2b6/0x460 [libceph]
- ? ceph_crypt+0x1d/0x30 [libceph]
- ? calc_signature+0xdf/0x100 [libceph]
- ? ceph_x_check_message_signature+0x5e/0xd0 [libceph]
- dispatch+0x34/0xb0 [libceph]
- ? dispatch+0x34/0xb0 [libceph]
- try_read+0x566/0x8c0 [libceph]
- ceph_con_workfn+0x130/0x620 [libceph]
- ? __queue_delayed_work+0x8a/0x90
- process_one_work+0x1eb/0x3b0
- worker_thread+0x4d/0x400
- kthread+0x104/0x140
- ? process_one_work+0x3b0/0x3b0
- ? kthread_park+0x90/0x90
- ret_from_fork+0x35/0x40
-kworker/26:1    D    0 226056      2 0x80004000
+=A0__schedule+0x2e3/0x740
+=A0schedule+0x42/0xb0
+=A0rwsem_down_read_slowpath+0x16c/0x4a0
+=A0down_read+0x85/0xa0
+=A0rbd_img_handle_request+0x40/0x1a0 [rbd]
+=A0? __rbd_obj_handle_request+0x61/0x2f0 [rbd]
+=A0rbd_obj_handle_request+0x34/0x40 [rbd]
+=A0rbd_osd_req_callback+0x44/0x80 [rbd]
+=A0__complete_request+0x28/0x80 [libceph]
+=A0handle_reply+0x2b6/0x460 [libceph]
+=A0? ceph_crypt+0x1d/0x30 [libceph]
+=A0? calc_signature+0xdf/0x100 [libceph]
+=A0? ceph_x_check_message_signature+0x5e/0xd0 [libceph]
+=A0dispatch+0x34/0xb0 [libceph]
+=A0? dispatch+0x34/0xb0 [libceph]
+=A0try_read+0x566/0x8c0 [libceph]
+=A0ceph_con_workfn+0x130/0x620 [libceph]
+=A0? __queue_delayed_work+0x8a/0x90
+=A0process_one_work+0x1eb/0x3b0
+=A0worker_thread+0x4d/0x400
+=A0kthread+0x104/0x140
+=A0? process_one_work+0x3b0/0x3b0
+=A0? kthread_park+0x90/0x90
+=A0ret_from_fork+0x35/0x40
+kworker/26:1=A0=A0=A0 D=A0=A0=A0 0 226056=A0=A0=A0=A0=A0 2 0x80004000
 Workqueue: ceph-msgr ceph_con_workfn [libceph]
 Call Trace:
- __schedule+0x2e3/0x740
- schedule+0x42/0xb0
- rwsem_down_read_slowpath+0x16c/0x4a0
- down_read+0x85/0xa0
- rbd_img_handle_request+0x40/0x1a0 [rbd]
- ? __rbd_obj_handle_request+0x61/0x2f0 [rbd]
- rbd_obj_handle_request+0x34/0x40 [rbd]
- rbd_osd_req_callback+0x44/0x80 [rbd]
- __complete_request+0x28/0x80 [libceph]
- handle_reply+0x2b6/0x460 [libceph]
- ? ceph_crypt+0x1d/0x30 [libceph]
- ? calc_signature+0xdf/0x100 [libceph]
- ? ceph_x_check_message_signature+0x5e/0xd0 [libceph]
- dispatch+0x34/0xb0 [libceph]
- ? dispatch+0x34/0xb0 [libceph]
- try_read+0x566/0x8c0 [libceph]
- ? __switch_to_asm+0x40/0x70
- ? __switch_to_asm+0x34/0x70
- ? __switch_to_asm+0x40/0x70
- ? __switch_to+0x7f/0x470
- ? __switch_to_asm+0x40/0x70
- ? __switch_to_asm+0x34/0x70
- ceph_con_workfn+0x130/0x620 [libceph]
- process_one_work+0x1eb/0x3b0
- worker_thread+0x4d/0x400
- kthread+0x104/0x140
- ? process_one_work+0x3b0/0x3b0
- ? kthread_park+0x90/0x90
- ret_from_fork+0x35/0x40
+=A0__schedule+0x2e3/0x740
+=A0schedule+0x42/0xb0
+=A0rwsem_down_read_slowpath+0x16c/0x4a0
+=A0down_read+0x85/0xa0
+=A0rbd_img_handle_request+0x40/0x1a0 [rbd]
+=A0? __rbd_obj_handle_request+0x61/0x2f0 [rbd]
+=A0rbd_obj_handle_request+0x34/0x40 [rbd]
+=A0rbd_osd_req_callback+0x44/0x80 [rbd]
+=A0__complete_request+0x28/0x80 [libceph]
+=A0handle_reply+0x2b6/0x460 [libceph]
+=A0? ceph_crypt+0x1d/0x30 [libceph]
+=A0? calc_signature+0xdf/0x100 [libceph]
+=A0? ceph_x_check_message_signature+0x5e/0xd0 [libceph]
+=A0dispatch+0x34/0xb0 [libceph]
+=A0? dispatch+0x34/0xb0 [libceph]
+=A0try_read+0x566/0x8c0 [libceph]
+=A0? __switch_to_asm+0x40/0x70
+=A0? __switch_to_asm+0x34/0x70
+=A0? __switch_to_asm+0x40/0x70
+=A0? __switch_to+0x7f/0x470
+=A0? __switch_to_asm+0x40/0x70
+=A0? __switch_to_asm+0x34/0x70
+=A0ceph_con_workfn+0x130/0x620 [libceph]
+=A0process_one_work+0x1eb/0x3b0
+=A0worker_thread+0x4d/0x400
+=A0kthread+0x104/0x140
+=A0? process_one_work+0x3b0/0x3b0
+=A0? kthread_park+0x90/0x90
+=A0ret_from_fork+0x35/0x40
 
-kworker/u112:2  D    0 277829      2 0x80004000
+kworker/u112:2=A0 D=A0=A0=A0 0 277829=A0=A0=A0=A0=A0 2 0x80004000
 Workqueue: rbd3-tasks rbd_reregister_watch [rbd]
 Call Trace:
- __schedule+0x2e3/0x740
- schedule+0x42/0xb0
- schedule_timeout+0x10e/0x160
- ? wait_for_completion_interruptible+0xb8/0x160
- wait_for_completion+0xb1/0x120
- ? wake_up_q+0x70/0x70
- rbd_quiesce_lock+0xa1/0xe0 [rbd]
- rbd_reregister_watch+0x109/0x1b0 [rbd]
- process_one_work+0x1eb/0x3b0
- worker_thread+0x4d/0x400
- kthread+0x104/0x140
- ? process_one_work+0x3b0/0x3b0
- ? kthread_park+0x90/0x90
- ret_from_fork+0x35/0x40
+=A0__schedule+0x2e3/0x740
+=A0schedule+0x42/0xb0
+=A0schedule_timeout+0x10e/0x160
+=A0? wait_for_completion_interruptible+0xb8/0x160
+=A0wait_for_completion+0xb1/0x120
+=A0? wake_up_q+0x70/0x70
+=A0rbd_quiesce_lock+0xa1/0xe0 [rbd]
+=A0rbd_reregister_watch+0x109/0x1b0 [rbd]
+=A0process_one_work+0x1eb/0x3b0
+=A0worker_thread+0x4d/0x400
+=A0kthread+0x104/0x140
+=A0? process_one_work+0x3b0/0x3b0
+=A0? kthread_park+0x90/0x90
+=A0ret_from_fork+0x35/0x40
 
-kworker/u112:3  D    0 284466      2 0x80004000
+kworker/u112:3=A0 D=A0=A0=A0 0 284466=A0=A0=A0=A0=A0 2 0x80004000
 Workqueue: ceph-watch-notify do_watch_error [libceph]
 Call Trace:
- __schedule+0x2e3/0x740
- ? wake_up_klogd.part.0+0x34/0x40
- ? sched_clock+0x9/0x10
- schedule+0x42/0xb0
- rwsem_down_write_slowpath+0x244/0x4d0
- down_write+0x41/0x50
- rbd_watch_errcb+0x2a/0x92 [rbd]
- do_watch_error+0x41/0xc0 [libceph]
- process_one_work+0x1eb/0x3b0
- worker_thread+0x4d/0x400
- kthread+0x104/0x140
- ? process_one_work+0x3b0/0x3b0
- ? kthread_park+0x90/0x90
- ret_from_fork+0x35/0x40
+=A0__schedule+0x2e3/0x740
+=A0? wake_up_klogd.part.0+0x34/0x40
+=A0? sched_clock+0x9/0x10
+=A0schedule+0x42/0xb0
+=A0rwsem_down_write_slowpath+0x244/0x4d0
+=A0down_write+0x41/0x50
+=A0rbd_watch_errcb+0x2a/0x92 [rbd]
+=A0do_watch_error+0x41/0xc0 [libceph]
+=A0process_one_work+0x1eb/0x3b0
+=A0worker_thread+0x4d/0x400
+=A0kthread+0x104/0x140
+=A0? process_one_work+0x3b0/0x3b0
+=A0? kthread_park+0x90/0x90
+=A0ret_from_fork+0x35/0x40
 
 Not your original issue but closely related since it revolves around
 exclusive-lock (which object-map depends on) and watches.
@@ -187,7 +207,7 @@ fix once I have it?
 
 Thanks,
 
-                Ilya
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 Ilya
 
 >
 > Regards,
@@ -223,7 +243,7 @@ tes if its broken.
 >
 > Thanks,
 >
->                 Ilya
+>=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 Ilya
 >
 > >
 > > Regards,
@@ -251,7 +271,7 @@ s/RhM3FHLD28EcVJJ2
 > > > The way we reproduce it is that on one of the two ceph machines in th=
 e cluster (its a test cluster) we toggle both the bond NIC ports down, slee=
 p 40 seconds, put them back up, wait another 15 seconds and then put them b=
-ack down, wait another 40 seconds  and   then put them back up.
+ack down, wait another 40 seconds=A0  and=A0=A0 then put them back up.
 > > >
 > > > Exact command line I used on the ceph machine:
 > > > ip l set ens785f1 down; sleep 1 ip l set ens785f0 down; sleep 40; ip =
@@ -277,7 +297,7 @@ eep 5; ip l set ens785f0 up
 > >
 > > Thanks,
 > >
-> >                 Ilya
+> >=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 Ilya
 > >
 > > >
 > > > Regards,
@@ -300,8 +320,8 @@ unable to work with their VM's. We did manage to make a dynamic debugging d=
 ump of an earlier occurence, maybe that can help? I've attached it to this =
 email.
 > > >
-> > > No, I don't see anything to go on there.  Next time, enable logging f=
-or
+> > > No, I don't see anything to go on there.=A0 Next time, enable logging=
+ for
 > > > both libceph and rbd modules and make sure that at least one instance=
  of
 > > > the error (i.e. "pre object map update failed: -16") makes it into th=
@@ -317,8 +337,8 @@ e mount, I guess because there is pending IO which cannot be flushed.
 e often than not the IO for that one also stalls (not always though).
 > > >
 > > > One obvious workaround workaround is to unmap, disable object-map and
-> > > exclusive-lock features with "rbd feature disable", and map back.  Yo=
-u
+> > > exclusive-lock features with "rbd feature disable", and map back.=A0 =
+You
 > > > would lose the benefits of object map, but if it is affecting custome=
 r
 > > > workloads it is probably the best course of action until this thing i=
@@ -327,7 +347,7 @@ s
 > > >
 > > > Thanks,
 > > >
-> > >                 Ilya
+> > >=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 Ilya
 > > >
 > > > >
 > > > > Regards,
@@ -370,8 +390,8 @@ ult -16
 > > > > > At this point the IO for these two mounts is completely gone, and=
  the only reason we can still perform IO on the other RBD devices is becaus=
 e we use noshare. Unfortunately unmounting the other devices is no longer p=
-ossible, which means we cannot migrate    our  VM's to another HV, since to=
- make the messages go away we have to reboot the server.
+ossible, which means we cannot migrate=A0=A0=A0  our=A0 VM's to another HV,=
+ since to make the messages go away we have to reboot the server.
 > > > >
 > > > > Hi Robin,
 > > > >
@@ -387,9 +407,10 @@ t.
 > > > >
 > > > > Please explain how it's getting worse.
 > > > >
-> > > > I think the problem is that the object map isn't locked.  What
+> > > > I think the problem is that the object map isn't locked.=A0 What
 > > > > probably happened is the kernel client lost its watch on the image
-> > > > and for some reason can't get it back.   The flapping has likely
+> > > > and for some reason can't get it back.=A0=A0 The flapping has likel=
+y
 > > > > trigged some edge condition in the watch/notify code.
 > > > >
 > > > > To confirm:
@@ -398,17 +419,18 @@ t.
 > > > >
 > > > > - paste the contents of /sys/kernel/debug/ceph/<cluster id>.client<=
 id>/osdc
-> > > >   for /dev/rbd14.  If you are using noshare, you will have multiple
-> > > >   client instances with the same cluster id.  The one you need can =
-be
-> > > >   identified with /sys/bus/rbd/devices/14/client_id.
+> > > >=A0=A0 for /dev/rbd14.=A0 If you are using noshare, you will have mu=
+ltiple
+> > > >=A0=A0 client instances with the same cluster id.=A0 The one you nee=
+d can be
+> > > >=A0=A0 identified with /sys/bus/rbd/devices/14/client_id.
 > > > >
 > > > > - paste the output of "rbd status <rbd14 image>" (image name can be
-> > > >   identified from "rbd showmapped")
+> > > >=A0=A0 identified from "rbd showmapped")
 > > > >
 > > > > I'm also curious who actually has the lock on the header object and=
  the
-> > > > object map object.  Paste the output of
+> > > > object map object.=A0 Paste the output of
 > > > >
 > > > > $ ID=3D$(bin/rbd info --format=3Djson <rbd14 pool>/<rbd14 image> | =
 jq -r .id)
@@ -417,8 +439,9 @@ jq -r .id)
 > > > >
 > > > > Thanks,
 > > > >
-> > > >                 Ilya
+> > > >=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 Ilya
 > > > >
 > > >
 > >
 >
+    =
