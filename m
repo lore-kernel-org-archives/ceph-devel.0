@@ -2,131 +2,228 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5801C2B9F4
-	for <ceph-devel@archiver.kernel.org>; Sat, 19 Jun 2021 10:51:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 199ABC4743C
+	for <ceph-devel@archiver.kernel.org>; Mon, 21 Jun 2021 11:51:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BA9596120A
-	for <ceph-devel@archiver.kernel.org>; Sat, 19 Jun 2021 10:51:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E838061042
+	for <ceph-devel@archiver.kernel.org>; Mon, 21 Jun 2021 11:51:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233028AbhFSKxZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 19 Jun 2021 06:53:25 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39020 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233143AbhFSKxU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 19 Jun 2021 06:53:20 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 212246120A;
-        Sat, 19 Jun 2021 10:51:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1624099869;
-        bh=aUsPX+nFItWHPd+EdQgT8+dhm7c6uNdqhHhjptNmOss=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=JH4xBrXd9BAC3Lr6WW2Yw6oT09Zeci220I4NDA/EKgK1zDsyxNNszJf0gWFIHuBFc
-         giTbZ8z/zqQPfp+TAFiD8vLwSAYAlzalyZUinyE3vdwT9fBEQi4xbrhQQ/Y1OUNYZe
-         a5TapQqIoN601UmJ8uiBvhr4Wj/Eu+hiQflLWHbf/Rau6cW97a/RC38VsK11ZQy7+j
-         yfeOICVOKKAv4PFi4ixHdO57QfCouJ+acLh43LJ7/wcmdGpWac8k23gO1UgYWQcfza
-         B8S25Au7oNt+xZ/wZseDIqRniZCkzVE6wVoV3sRNVVHgmpqpoOnvj3rWWVBeNnW3dm
-         EF4H1ScNWJJLQ==
-Message-ID: <ca37212d9c848bbb6228cce95ca7f39ef3696437.camel@kernel.org>
-Subject: Re: [PATCH] net: ceph: Use CLOCK_MONOTONIC ktime_get_ts64()
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Yejune Deng <yejune.deng@gmail.com>, idryomov@gmail.com,
-        davem@davemloft.net, kuba@kernel.org
-Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Sat, 19 Jun 2021 06:51:08 -0400
-In-Reply-To: <20210618142740.3345-1-yejune.deng@gmail.com>
-References: <20210618142740.3345-1-yejune.deng@gmail.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.40.2 (3.40.2-1.fc34) 
+        id S229876AbhFULyG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 21 Jun 2021 07:54:06 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:39838 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229610AbhFULyF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2021 07:54:05 -0400
+Received: from imap.suse.de (imap-alt.suse-dmz.suse.de [192.168.254.47])
+        (using TLSv1.2 with cipher ECDHE-ECDSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id E48101FD45;
+        Mon, 21 Jun 2021 11:51:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1624276309; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=DO0n1xtCMYfokrAghlYDGZKONAfMjZxjcOrUBcnA2TY=;
+        b=fANHlnRHzcscmbNIA1fo4fc/EotuCUMXDmK/2jRg1NJDw2vKcvj1BPzcVHPrJqsbKf8wSn
+        oCzFTdIACCEKebyWoX/okk7b9BLL2AwDPttmDN9qfP9em0dVO8crPWjp+oMHmmIfavTMqH
+        dpxJXqiy10Q1YCoRmzMgIjVB+GPZbQg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1624276309;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=DO0n1xtCMYfokrAghlYDGZKONAfMjZxjcOrUBcnA2TY=;
+        b=2FQc3ZLhVZK4mqVpUwj3/ExprX+rm2YKuePPKmCe8eKdPowSPB19rEjWr8vppKObmbQ/Ys
+        YR5oNLndkRSOhJDw==
+Received: from imap3-int (imap-alt.suse-dmz.suse.de [192.168.254.47])
+        by imap.suse.de (Postfix) with ESMTP id 9616F118DD;
+        Mon, 21 Jun 2021 11:51:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1624276309; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=DO0n1xtCMYfokrAghlYDGZKONAfMjZxjcOrUBcnA2TY=;
+        b=fANHlnRHzcscmbNIA1fo4fc/EotuCUMXDmK/2jRg1NJDw2vKcvj1BPzcVHPrJqsbKf8wSn
+        oCzFTdIACCEKebyWoX/okk7b9BLL2AwDPttmDN9qfP9em0dVO8crPWjp+oMHmmIfavTMqH
+        dpxJXqiy10Q1YCoRmzMgIjVB+GPZbQg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1624276309;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=DO0n1xtCMYfokrAghlYDGZKONAfMjZxjcOrUBcnA2TY=;
+        b=2FQc3ZLhVZK4mqVpUwj3/ExprX+rm2YKuePPKmCe8eKdPowSPB19rEjWr8vppKObmbQ/Ys
+        YR5oNLndkRSOhJDw==
+Received: from director2.suse.de ([192.168.254.72])
+        by imap3-int with ESMTPSA
+        id J4uQIVV90GBSGwAALh3uQQ
+        (envelope-from <lhenriques@suse.de>); Mon, 21 Jun 2021 11:51:49 +0000
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id 9605bc73;
+        Mon, 21 Jun 2021 11:51:48 +0000 (UTC)
+Date:   Mon, 21 Jun 2021 12:51:48 +0100
+From:   Luis Henriques <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, idryomov@gmail.com
+Subject: Re: [PATCH] ceph: take reference to req->r_parent at point of
+ assignment
+Message-ID: <YNB9VJTVSkOls1XM@suse.de>
+References: <20210618173959.13998-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210618173959.13998-1-jlayton@kernel.org>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, 2021-06-18 at 22:27 +0800, Yejune Deng wrote:
-> The Documentation/core-api/timekeeping.rst recommend that we should use
-> monotonic time ktime_get_ts64(), to avoid glitches with a concurrent
-> settimeofday().
+On Fri, Jun 18, 2021 at 01:39:59PM -0400, Jeff Layton wrote:
+> Currently, we set the r_parent pointer but then don't take a reference
+> to it until we submit the request. If we end up freeing the req before
+> that point, then we'll do a iput when we shouldn't.
 > 
-> Signed-off-by: Yejune Deng <yejune.deng@gmail.com>
+> Instead, take the inode reference in the callers, so that it's always
+> safe to call ceph_mdsc_put_request on the req, even before submission.
+> 
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 > ---
->  net/ceph/messenger.c    | 2 +-
->  net/ceph/messenger_v1.c | 2 +-
->  net/ceph/messenger_v2.c | 2 +-
->  net/ceph/osd_client.c   | 4 ++--
->  4 files changed, 5 insertions(+), 5 deletions(-)
+>  fs/ceph/dir.c        | 9 +++++++++
+>  fs/ceph/export.c     | 1 +
+>  fs/ceph/file.c       | 1 +
+>  fs/ceph/mds_client.c | 1 -
+>  4 files changed, 11 insertions(+), 1 deletion(-)
 > 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 57d043b..2d07ab5 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1809,7 +1809,7 @@ bool ceph_con_keepalive_expired(struct ceph_connection *con,
->  	    (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2)) {
->  		struct timespec64 now;
->  		struct timespec64 ts;
-> -		ktime_get_real_ts64(&now);
-> +		ktime_get_ts64(&now);
->  		jiffies_to_timespec64(interval, &ts);
->  		ts = timespec64_add(con->last_keepalive_ack, ts);
->  		return timespec64_compare(&now, &ts) >= 0;
-> diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
-> index 2cb5ffd..2ec7b1d 100644
-> --- a/net/ceph/messenger_v1.c
-> +++ b/net/ceph/messenger_v1.c
-> @@ -310,7 +310,7 @@ static void prepare_write_keepalive(struct ceph_connection *con)
->  	if (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2) {
->  		struct timespec64 now;
+> Note that this isn't a problem with the existing code, because we never
+> put the last reference before submission, but with the coming fscrypt
+> patchset, we can end up doing this and this becomes a problem. With ths
+> change, a set r_parent field means a reference *was* taken.
+> 
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index bd508b1aeac2..a656c5c00e65 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -788,6 +788,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+>  		mask |= CEPH_CAP_XATTR_SHARED;
+>  	req->r_args.getattr.mask = cpu_to_le32(mask);
 >  
-> -		ktime_get_real_ts64(&now);
-> +		ktime_get_ts64(&now);
->  		con_out_kvec_add(con, sizeof(tag_keepalive2), &tag_keepalive2);
->  		ceph_encode_timespec64(&con->v1.out_temp_keepalive2, &now);
->  		con_out_kvec_add(con, sizeof(con->v1.out_temp_keepalive2),
-> diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
-> index cc40ce4..2125e77 100644
-> --- a/net/ceph/messenger_v2.c
-> +++ b/net/ceph/messenger_v2.c
-> @@ -1439,7 +1439,7 @@ static int prepare_keepalive2(struct ceph_connection *con)
->  	struct ceph_timespec *ts = CTRL_BODY(con->v2.out_buf);
->  	struct timespec64 now;
->  
-> -	ktime_get_real_ts64(&now);
-> +	ktime_get_ts64(&now);
->  	dout("%s con %p timestamp %lld.%09ld\n", __func__, con, now.tv_sec,
->  	     now.tv_nsec);
->  
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index ff8624a..5192a8a 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -4717,7 +4717,7 @@ ceph_osdc_watch(struct ceph_osd_client *osdc,
->  	ceph_oid_copy(&lreq->t.base_oid, oid);
->  	ceph_oloc_copy(&lreq->t.base_oloc, oloc);
->  	lreq->t.flags = CEPH_OSD_FLAG_WRITE;
-> -	ktime_get_real_ts64(&lreq->mtime);
-> +	ktime_get_ts64(&lreq->mtime);
->  
->  	lreq->reg_req = alloc_watch_request(lreq, CEPH_OSD_WATCH_OP_WATCH);
->  	if (!lreq->reg_req) {
-> @@ -4767,7 +4767,7 @@ int ceph_osdc_unwatch(struct ceph_osd_client *osdc,
->  	ceph_oid_copy(&req->r_base_oid, &lreq->t.base_oid);
->  	ceph_oloc_copy(&req->r_base_oloc, &lreq->t.base_oloc);
->  	req->r_flags = CEPH_OSD_FLAG_WRITE;
-> -	ktime_get_real_ts64(&req->r_mtime);
-> +	ktime_get_ts64(&req->r_mtime);
->  	osd_req_op_watch_init(req, 0, lreq->linger_id,
->  			      CEPH_OSD_WATCH_OP_UNWATCH);
->  
+> +	ihold(dir);
+>  	req->r_parent = dir;
 
-I think this is OK. Most of these timestamps get marshalled onto the
-wire to use as identifiers. Those are almost certainly better off with
-CLOCK_MONOTONIC since you could have a clock jump that caused you to
-send (e.g.) 2 keepalives with the same timestamp otherwise.
+Other than my OCD saying that these two statements should be in the
+reverse order (or maybe all the other should...?), feel free to add my
 
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Reviewed-by: Luis Henriques <lhenriques@suse.de>
+
+Cheers,
+--
+Luís
+
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	err = ceph_mdsc_do_request(mdsc, NULL, req);
+> @@ -861,6 +862,7 @@ static int ceph_mknod(struct user_namespace *mnt_userns, struct inode *dir,
+>  	req->r_dentry = dget(dentry);
+>  	req->r_num_caps = 2;
+>  	req->r_parent = dir;
+> +	ihold(dir);
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	req->r_args.mknod.mode = cpu_to_le32(mode);
+>  	req->r_args.mknod.rdev = cpu_to_le32(rdev);
+> @@ -922,6 +924,8 @@ static int ceph_symlink(struct user_namespace *mnt_userns, struct inode *dir,
+>  		goto out;
+>  	}
+>  	req->r_parent = dir;
+> +	ihold(dir);
+> +
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	req->r_dentry = dget(dentry);
+>  	req->r_num_caps = 2;
+> @@ -986,6 +990,7 @@ static int ceph_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
+>  	req->r_dentry = dget(dentry);
+>  	req->r_num_caps = 2;
+>  	req->r_parent = dir;
+> +	ihold(dir);
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	req->r_args.mkdir.mode = cpu_to_le32(mode);
+>  	req->r_dentry_drop = CEPH_CAP_FILE_SHARED | CEPH_CAP_AUTH_EXCL;
+> @@ -1030,6 +1035,7 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
+>  	req->r_num_caps = 2;
+>  	req->r_old_dentry = dget(old_dentry);
+>  	req->r_parent = dir;
+> +	ihold(dir);
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+>  	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
+> @@ -1151,6 +1157,7 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
+>  	req->r_dentry = dget(dentry);
+>  	req->r_num_caps = 2;
+>  	req->r_parent = dir;
+> +	ihold(dir);
+>  	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+>  	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
+>  	req->r_inode_drop = ceph_drop_caps_for_unlink(inode);
+> @@ -1225,6 +1232,7 @@ static int ceph_rename(struct user_namespace *mnt_userns, struct inode *old_dir,
+>  	req->r_old_dentry = dget(old_dentry);
+>  	req->r_old_dentry_dir = old_dir;
+>  	req->r_parent = new_dir;
+> +	ihold(new_dir);
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	req->r_old_dentry_drop = CEPH_CAP_FILE_SHARED;
+>  	req->r_old_dentry_unless = CEPH_CAP_FILE_EXCL;
+> @@ -1721,6 +1729,7 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
+>  			req->r_dentry = dget(dentry);
+>  			req->r_num_caps = 2;
+>  			req->r_parent = dir;
+> +			ihold(dir);
+>  
+>  			mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
+>  			if (ceph_security_xattr_wanted(dir))
+> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> index 65540a4429b2..1d65934c1262 100644
+> --- a/fs/ceph/export.c
+> +++ b/fs/ceph/export.c
+> @@ -542,6 +542,7 @@ static int ceph_get_name(struct dentry *parent, char *name,
+>  	ihold(inode);
+>  	req->r_ino2 = ceph_vino(d_inode(parent));
+>  	req->r_parent = d_inode(parent);
+> +	ihold(req->r_parent);
+>  	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+>  	req->r_num_caps = 2;
+>  	err = ceph_mdsc_do_request(mdsc, NULL, req);
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index d3874c2df4b1..c8fd11cf4510 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -706,6 +706,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+>  		mask |= CEPH_CAP_XATTR_SHARED;
+>  	req->r_args.open.mask = cpu_to_le32(mask);
+>  	req->r_parent = dir;
+> +	ihold(dir);
+>  
+>  	if (flags & O_CREAT) {
+>  		struct ceph_file_layout lo;
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index c03098c58be3..52ae5373437d 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2983,7 +2983,6 @@ int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc, struct inode *dir,
+>  		ceph_take_cap_refs(ci, CEPH_CAP_PIN, false);
+>  		__ceph_touch_fmode(ci, mdsc, fmode);
+>  		spin_unlock(&ci->i_ceph_lock);
+> -		ihold(req->r_parent);
+>  	}
+>  	if (req->r_old_dentry_dir)
+>  		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
+> -- 
+> 2.31.1
+> 
 
