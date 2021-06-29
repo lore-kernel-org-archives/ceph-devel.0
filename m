@@ -7,119 +7,90 @@ X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5E38C2B9F4
-	for <ceph-devel@archiver.kernel.org>; Mon, 28 Jun 2021 15:34:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85864C11F66
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Jun 2021 04:42:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8243B61949
-	for <ceph-devel@archiver.kernel.org>; Mon, 28 Jun 2021 15:34:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 664F761D8C
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Jun 2021 04:42:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235665AbhF1Pgl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 28 Jun 2021 11:36:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:40781 "EHLO
+        id S230077AbhF2EpR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 29 Jun 2021 00:45:17 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:25483 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S239012AbhF1Peo (ORCPT
+        by vger.kernel.org with ESMTP id S229480AbhF2EpQ (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 28 Jun 2021 11:34:44 -0400
+        Tue, 29 Jun 2021 00:45:16 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1624894338;
+        s=mimecast20190719; t=1624941769;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=JGKUsxvovIGUEmbsGDeIYzDdTAF6B2nf43EXOEpdWIg=;
-        b=FkUbkjBUeYUjzM31DWwT640jNx867O/GC3wGng0zG33zjM0pyin/2u2GadLQ+iWQiCzUCR
-        jHRH3IWctdYv5AtwPhAlEAY22U9M57EU9ucM/vJ5QOHIbnih0faiWzKtZIiUdRbWMONkI/
-        7Y5qzERnv7iMJrrRyyOK9yH1fodLZEw=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-121-LI8DQa38OE-4rwgSy7vwnA-1; Mon, 28 Jun 2021 11:32:16 -0400
-X-MC-Unique: LI8DQa38OE-4rwgSy7vwnA-1
-Received: by mail-qk1-f199.google.com with SMTP id a2-20020a05620a0662b02903ad3598ec02so11303511qkh.17
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jun 2021 08:32:16 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
-         :references:user-agent:mime-version:content-transfer-encoding;
-        bh=JGKUsxvovIGUEmbsGDeIYzDdTAF6B2nf43EXOEpdWIg=;
-        b=Qi+E9jTkpqL9pURUSMjTXY11GbTtCjZhMTEay9DdJRoe3gObyVDCOD/kD5mdnmxino
-         31l2k3sgkGi9ng71jD6XJD7nXFfIDWvQLO+w4BTWbdwpSv0tEugJx3+9UFdRIhI+zlHz
-         UWR+PU72wmLzeei1+yYGGSkjZI/kLA2UmAEL7ZfD6UIDXPdttinEFYYGUXPAYYbhVtt1
-         aB82tIsYyiLNd7U83pCaaLRx6bNcMt0g/uc2b7beouWnpHl7P3SCz9j4rg5K000TS3FU
-         lDGFrfc7wvJXkkR86UCcDUYcyafMcAF0jYDFZGJt3tsDdDReuTa+TTVJGgvBmj4pX0ud
-         s9gw==
-X-Gm-Message-State: AOAM530dS9pF0yICWu0KlYWsUaE8UjtX7OlqODUV5e3k9swgUmgT4P3C
-        8qWKT6agzh/p9xN658fywvYG0UkUqI4OT6uatzyvayqyVBiSuG42EK8IYfFgFhP4lHk3LuzURQF
-        S8nABnvPEyGXM/RyPWzZhIQ==
-X-Received: by 2002:ac8:5ac3:: with SMTP id d3mr19505791qtd.73.1624894336449;
-        Mon, 28 Jun 2021 08:32:16 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwYh1ZgRGJyJFt4DOcKtaXy/ZN+DhUzptOViyd98VyFkqodGEEhdA+6mczU4SvUWm1H8ZCThg==
-X-Received: by 2002:ac8:5ac3:: with SMTP id d3mr19505774qtd.73.1624894336286;
-        Mon, 28 Jun 2021 08:32:16 -0700 (PDT)
-Received: from [192.168.1.3] (68-20-15-154.lightspeed.rlghnc.sbcglobal.net. [68.20.15.154])
-        by smtp.gmail.com with ESMTPSA id u127sm10830048qkh.120.2021.06.28.08.32.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Jun 2021 08:32:16 -0700 (PDT)
-Message-ID: <e9a13548e835f960f899fe302998c2602c7b1256.camel@redhat.com>
-Subject: Re: [PATCH 0/4] ceph: new mount device syntax
-From:   Jeff Layton <jlayton@redhat.com>
-To:     Venky Shankar <vshankar@redhat.com>, idryomov@gmail.com
-Cc:     ceph-devel@vger.kernel.org
-Date:   Mon, 28 Jun 2021 11:32:15 -0400
-In-Reply-To: <20210628075545.702106-1-vshankar@redhat.com>
-References: <20210628075545.702106-1-vshankar@redhat.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.40.2 (3.40.2-1.fc34) 
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=SxY4o22r1uFD8CSk1K2sYCflOJyQmLUA9fqQpgMAQEU=;
+        b=ad9p2xd0P/l0Efmi6+D4eS2s/mEGqX6r4IslQeF/VPvK5ETokv64ac14T72Wn+3ki4Xf/X
+        96o6LR4WaHqnKt5PbnvRDHRSyjKJNGvIWMW0wqO0Z/2PRM75u+3B49Vj+N3uIEcTvNxNEK
+        sow4+/8TGlgtH8INuUyjKAFpbeAawCE=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-234-l6X3fnhgO7eNDBSDydaO5Q-1; Tue, 29 Jun 2021 00:42:47 -0400
+X-MC-Unique: l6X3fnhgO7eNDBSDydaO5Q-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C8B761E17;
+        Tue, 29 Jun 2021 04:42:46 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id E97BD5D9DC;
+        Tue, 29 Jun 2021 04:42:44 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, pdonnell@redhat.com,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH 0/5] flush the mdlog before waiting on unsafe reqs
+Date:   Tue, 29 Jun 2021 12:42:36 +0800
+Message-Id: <20210629044241.30359-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2021-06-28 at 13:25 +0530, Venky Shankar wrote:
-> This series introduces changes Ceph File System mount device string.
-> Old mount device syntax (source) has the following problems:
-> 
-> mounts to the same cluster but with different fsnames
-> and/or creds have identical device string which can
-> confuse xfstests.
-> 
-> Userspace mount helper tool resolves monitor addresses
-> and fill in mon addrs automatically, but that means the
-> device shown in /proc/mounts is different than what was
-> used for mounting.
-> 
-> New device syntax is as follows:
-> 
->   cephuser@fsid.mycephfs2=/path
-> 
-> Note, there is no "monitor address" in the device string.
-> That gets passed in as mount option. This keeps the device
-> string same when monitor addresses change (on remounts).
-> 
-> Also note that the userspace mount helper tool is backward
-> compatible. I.e., the mount helper will fallback to using
-> old syntax after trying to mount with the new syntax.
-> 
-> Venky Shankar (4):
->   ceph: new device mount syntax
->   ceph: validate cluster FSID for new device syntax
->   ceph: record updated mon_addr on remount
->   doc: document new CephFS mount device syntax
-> 
->  Documentation/filesystems/ceph.rst |  23 ++++-
->  fs/ceph/super.c                    | 132 ++++++++++++++++++++++++++---
->  fs/ceph/super.h                    |   4 +
->  include/linux/ceph/libceph.h       |   1 +
->  net/ceph/ceph_common.c             |   3 +-
->  5 files changed, 149 insertions(+), 14 deletions(-)
-> 
+From: Xiubo Li <xiubli@redhat.com>
 
-Nice work, Venky. It needs a few minor changes, but this looks good
-overall. Unless anyone has objections or other suggestions for changes,
-we ought to aim to get this into the testing branch soon and aim for
-merging it in v5.15.
+For the client requests who will have unsafe and safe replies from
+MDS daemons, in the MDS side the MDS daemons won't flush the mdlog
+(journal log) immediatelly, because they think it's unnecessary.
+That's true for most cases but not all, likes the fsync request.
+The fsync will wait until all the unsafe replied requests to be
+safely replied.
 
-Thoughts?
+Normally if there have multiple threads or clients are running, the
+whole mdlog in MDS daemons could be flushed in time if any request
+will trigger the mdlog submit thread. So usually we won't experience
+the normal operations will stuck for a long time. But in case there
+has only one client with only thread is running, the stuck phenomenon
+maybe obvious and the worst case it must wait at most 5 seconds to
+wait the mdlog to be flushed by the MDS's tick thread periodically.
+
+This patch will trigger to flush the mdlog in all the MDSes manually
+just before waiting the unsafe requests to finish.
+
+
+
+
+Xiubo Li (5):
+  ceph: export ceph_create_session_msg
+  ceph: export iterate_sessions
+  ceph: flush mdlog before umounting
+  ceph: flush the mdlog before waiting on unsafe reqs
+  ceph: fix ceph feature bits
+
+ fs/ceph/caps.c               | 35 ++++----------
+ fs/ceph/mds_client.c         | 91 +++++++++++++++++++++++++++---------
+ fs/ceph/mds_client.h         |  9 ++++
+ include/linux/ceph/ceph_fs.h |  1 +
+ 4 files changed, 88 insertions(+), 48 deletions(-)
+
 -- 
-Jeff Layton <jlayton@redhat.com>
+2.27.0
 
