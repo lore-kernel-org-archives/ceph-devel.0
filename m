@@ -4,172 +4,91 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UPPERCASE_50_75 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CCFBC11F69
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Jun 2021 04:43:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84A3CC11F66
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Jun 2021 04:43:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9BAA61D8B
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Jun 2021 04:43:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6EE6261D91
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Jun 2021 04:43:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231932AbhF2Ep3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 29 Jun 2021 00:45:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:50985 "EHLO
+        id S231955AbhF2Epa (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 29 Jun 2021 00:45:30 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:44338 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231598AbhF2Ep0 (ORCPT
+        by vger.kernel.org with ESMTP id S231817AbhF2Ep2 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Jun 2021 00:45:26 -0400
+        Tue, 29 Jun 2021 00:45:28 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1624941779;
+        s=mimecast20190719; t=1624941781;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=4cGzdP+uQ/InHx7d/hJO3OSYFexWfSAiw2xa0UY4JHg=;
-        b=ZB6MO6vIqKoN1m6lRfBqHEqJ2JUXbAxe6CM5Vs6Biko7MWRz8cOBTL3tN3ZwD68OhXLuKI
-        3PDhhB0HXTuyZCgNWD34N7PWBfM6i1yT/b287D2hGe4v/7zt9UWvyC8WAc/8zltygyXWeE
-        YabfB0sviqqsGFzz8RvT6ZNUzJof4Mk=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-427-gDHZXG3BOq6zm4OkPjN41g-1; Tue, 29 Jun 2021 00:42:57 -0400
-X-MC-Unique: gDHZXG3BOq6zm4OkPjN41g-1
-Received: by mail-ej1-f70.google.com with SMTP id lt4-20020a170906fa84b0290481535542e3so5267369ejb.18
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jun 2021 21:42:57 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4cGzdP+uQ/InHx7d/hJO3OSYFexWfSAiw2xa0UY4JHg=;
-        b=obrPMxpMFrZp16h1RVZ9O4dtgIE6tNcoeBND5tbqRpEKdhgcH5Bz5+wwMDKOzXxK10
-         ps8GUHOqw+0NFZfMiNrD8oUyJJzXPakbP/GG1L2kyarkxxTVxTGMRFMmA+TYDghDz2XA
-         4c91AKNZIv/LVSyFYiS8Uh6HU4VNK0GuznwMRzg7siEdVmif3VNHFZJ7v0FUFaIBuZLo
-         d+l0eSSYoNYum8Qsjxr6qcHb8RoGm1wpxC5wLTPdg3zl+LKtu6L6LkWXt3UFPnKpOqnh
-         B+tZh+2n23+U5KZTKkuDEhWnz3DGhHvLqG9xrIW1/ftXKkdHzjt5virEwR/XWV/hMT/9
-         LCag==
-X-Gm-Message-State: AOAM5308cUl1nw4jz7zJZfgQZ5KpR8yuqpr3W67ZGYTU9B8CLgy4LfY2
-        gEoCLrj7v/ymWWfxgM/yo5JRKtvzywbnh2qVT65uKAnoPEAb0EIUm0fyo6k0wu0Rbs24md8PX4p
-        Djv5yETwRv+YwdoYwya7xOgSp6/oZqPexoAP++A==
-X-Received: by 2002:a17:906:1951:: with SMTP id b17mr28237266eje.468.1624941776297;
-        Mon, 28 Jun 2021 21:42:56 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwi2wMh/VrtPYGnDwMzq3DTWovDaKDiBND4S8+6t1T6NoSxakjdV5z4taMLiRv1oKEhUWQrwxR1t78a20vnFb4=
-X-Received: by 2002:a17:906:1951:: with SMTP id b17mr28237260eje.468.1624941776186;
- Mon, 28 Jun 2021 21:42:56 -0700 (PDT)
+        bh=hJ/D38VyZ1HLJDIceujC2Hsih4/uYHo9PLxOWSjHTAM=;
+        b=K1nVx8ngfFjeqGtGfUSm8XvfH1+OXGdgMMbeOcMwkd1/U3MFj0K79VPLDkgAuzz6uhPjR9
+        wXm2uk4D6KlQTJB9PZIIgGSm1vjlKd+b0YMpFpf8rFX22k1lPLMWaOGCEd4URGuVSj5UOe
+        UEhrYJ23cX16fAfwpD2E1T2lL3I/s6A=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-449-cY74hxDJOxa5ptI0cIqdQg-1; Tue, 29 Jun 2021 00:42:59 -0400
+X-MC-Unique: cY74hxDJOxa5ptI0cIqdQg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B37BB100C611;
+        Tue, 29 Jun 2021 04:42:58 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D433F5D9DC;
+        Tue, 29 Jun 2021 04:42:56 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, pdonnell@redhat.com,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH 5/5] ceph: fix ceph feature bits
+Date:   Tue, 29 Jun 2021 12:42:41 +0800
+Message-Id: <20210629044241.30359-6-xiubli@redhat.com>
+In-Reply-To: <20210629044241.30359-1-xiubli@redhat.com>
+References: <20210629044241.30359-1-xiubli@redhat.com>
 MIME-Version: 1.0
-References: <20210628075545.702106-1-vshankar@redhat.com> <20210628075545.702106-3-vshankar@redhat.com>
- <77c1bc3093a7f74c92a1deb35c0e80291c4d9b52.camel@redhat.com>
-In-Reply-To: <77c1bc3093a7f74c92a1deb35c0e80291c4d9b52.camel@redhat.com>
-From:   Venky Shankar <vshankar@redhat.com>
-Date:   Tue, 29 Jun 2021 10:12:20 +0530
-Message-ID: <CACPzV1=BmxmQUCwM1P-hLcY0RcZAXLPTxF=Kj8c3Jgn8Xn8kvA@mail.gmail.com>
-Subject: Re: [PATCH 2/4] ceph: validate cluster FSID for new device syntax
-To:     Jeff Layton <jlayton@redhat.com>
-Cc:     idryomov@gmail.com, ceph-devel <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Jun 28, 2021 at 8:34 PM Jeff Layton <jlayton@redhat.com> wrote:
->
-> On Mon, 2021-06-28 at 13:25 +0530, Venky Shankar wrote:
-> > The new device syntax requires the cluster FSID as part
-> > of the device string. Use this FSID to verify if it matches
-> > the cluster FSID we get back from the monitor, failing the
-> > mount on mismatch.
-> >
-> > Signed-off-by: Venky Shankar <vshankar@redhat.com>
-> > ---
-> >  fs/ceph/super.c              | 9 +++++++++
-> >  fs/ceph/super.h              | 1 +
-> >  include/linux/ceph/libceph.h | 1 +
-> >  net/ceph/ceph_common.c       | 3 ++-
-> >  4 files changed, 13 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> > index 950a28ad9c59..84bc06e51680 100644
-> > --- a/fs/ceph/super.c
-> > +++ b/fs/ceph/super.c
-> > @@ -266,6 +266,9 @@ static int ceph_parse_new_source(const char *dev_name, const char *dev_name_end,
-> >       if (!fs_name_start)
-> >               return invalfc(fc, "missing file system name");
-> >
-> > +     if (parse_fsid(fsid_start, &fsopt->fsid))
-> > +             return invalfc(fc, "invalid fsid format");
-> > +
-> >       ++fs_name_start; /* start of file system name */
-> >       fsopt->mds_namespace = kstrndup(fs_name_start,
-> >                                       dev_name_end - fs_name_start, GFP_KERNEL);
-> > @@ -748,6 +751,12 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
-> >       }
-> >       opt = NULL; /* fsc->client now owns this */
-> >
-> > +     /* help learn fsid */
-> > +     if (fsopt->new_dev_syntax) {
-> > +             ceph_check_fsid(fsc->client, &fsopt->fsid);
-> > +             fsc->client->have_fsid = true;
-> > +     }
-> > +
-> >       fsc->client->extra_mon_dispatch = extra_mon_dispatch;
-> >       ceph_set_opt(fsc->client, ABORT_ON_FULL);
-> >
-> > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> > index 557348ff3203..cfd8ec25a9a8 100644
-> > --- a/fs/ceph/super.h
-> > +++ b/fs/ceph/super.h
-> > @@ -100,6 +100,7 @@ struct ceph_mount_options {
-> >       char *server_path;    /* default NULL (means "/") */
-> >       char *fscache_uniq;   /* default NULL */
-> >       char *mon_addr;
-> > +     struct ceph_fsid fsid;
-> >  };
-> >
-> >  struct ceph_fs_client {
-> > diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> > index 409d8c29bc4f..24c1f4e9144d 100644
-> > --- a/include/linux/ceph/libceph.h
-> > +++ b/include/linux/ceph/libceph.h
-> > @@ -296,6 +296,7 @@ extern bool libceph_compatible(void *data);
-> >  extern const char *ceph_msg_type_name(int type);
-> >  extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid);
-> >  extern void *ceph_kvmalloc(size_t size, gfp_t flags);
-> > +extern int parse_fsid(const char *str, struct ceph_fsid *fsid);
-> >
-> >  struct fs_parameter;
-> >  struct fc_log;
-> > diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> > index 97d6ea763e32..db21734462a4 100644
-> > --- a/net/ceph/ceph_common.c
-> > +++ b/net/ceph/ceph_common.c
-> > @@ -217,7 +217,7 @@ void *ceph_kvmalloc(size_t size, gfp_t flags)
-> >       return p;
-> >  }
-> >
-> > -static int parse_fsid(const char *str, struct ceph_fsid *fsid)
-> > +int parse_fsid(const char *str, struct ceph_fsid *fsid)
-> >  {
-> >       int i = 0;
-> >       char tmp[3];
-> > @@ -247,6 +247,7 @@ static int parse_fsid(const char *str, struct ceph_fsid *fsid)
-> >       dout("parse_fsid ret %d got fsid %pU\n", err, fsid);
-> >       return err;
-> >  }
-> > +EXPORT_SYMBOL(parse_fsid);
->
-> This function name is too generic. Maybe rename it to "ceph_parse_fsid"?
+From: Xiubo Li <xiubli@redhat.com>
 
-Makes sense. ACK.
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/mds_client.h | 4 ++++
+ 1 file changed, 4 insertions(+)
 
->
-> >
-> >  /*
-> >   * ceph options
->
-> --
-> Jeff Layton <jlayton@redhat.com>
->
-
-
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 79d5b8ed62bf..b18eded84ede 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -27,7 +27,9 @@ enum ceph_feature_type {
+ 	CEPHFS_FEATURE_RECLAIM_CLIENT,
+ 	CEPHFS_FEATURE_LAZY_CAP_WANTED,
+ 	CEPHFS_FEATURE_MULTI_RECONNECT,
++	CEPHFS_FEATURE_NAUTILUS,
+ 	CEPHFS_FEATURE_DELEG_INO,
++	CEPHFS_FEATURE_OCTOPUS,
+ 	CEPHFS_FEATURE_METRIC_COLLECT,
+ 
+ 	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_METRIC_COLLECT,
+@@ -43,7 +45,9 @@ enum ceph_feature_type {
+ 	CEPHFS_FEATURE_REPLY_ENCODING,		\
+ 	CEPHFS_FEATURE_LAZY_CAP_WANTED,		\
+ 	CEPHFS_FEATURE_MULTI_RECONNECT,		\
++	CEPHFS_FEATURE_NAUTILUS,		\
+ 	CEPHFS_FEATURE_DELEG_INO,		\
++	CEPHFS_FEATURE_OCTOPUS,			\
+ 	CEPHFS_FEATURE_METRIC_COLLECT,		\
+ 						\
+ 	CEPHFS_FEATURE_MAX,			\
 -- 
-Cheers,
-Venky
+2.27.0
 
