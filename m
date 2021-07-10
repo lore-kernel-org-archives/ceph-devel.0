@@ -5,44 +5,44 @@ X-Spam-Level:
 X-Spam-Status: No, score=-19.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92D27C11F67
-	for <ceph-devel@archiver.kernel.org>; Sat, 10 Jul 2021 23:56:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE24C11F6F
+	for <ceph-devel@archiver.kernel.org>; Sat, 10 Jul 2021 23:58:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7F37C61057
-	for <ceph-devel@archiver.kernel.org>; Sat, 10 Jul 2021 23:56:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 48A04611B0
+	for <ceph-devel@archiver.kernel.org>; Sat, 10 Jul 2021 23:58:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233130AbhGJX7k (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 10 Jul 2021 19:59:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41406 "EHLO mail.kernel.org"
+        id S233183AbhGKAA4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sat, 10 Jul 2021 20:00:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48530 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234357AbhGJX5u (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 10 Jul 2021 19:57:50 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 85A0C61429;
-        Sat, 10 Jul 2021 23:52:53 +0000 (UTC)
+        id S233499AbhGJX6e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 10 Jul 2021 19:58:34 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4B7AE61420;
+        Sat, 10 Jul 2021 23:53:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625961174;
-        bh=UI8arizcMZt0jWWuWkWK+1dPrCxJSzyeFbsb5TRcol0=;
+        s=k20201202; t=1625961194;
+        bh=K/um/lfJ9Ws0nA0pA/xXEP7knKZgHoSKQ7OfxnKKJuY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=irBmwLtkx0h3rOyib1mrhxgT8RyQPxoQ1xy9WxW6V+cD+vdsTRt/b5rO7qVssrDvP
-         kOeuoi+dNpwi2BczSLeabf0TIdJctiKf9HUqHZgpbY3Cy9GKTRVRP13hatZNfeSb7n
-         Ogyq8tCtfpJeY3rSrhwZtZjRLvQqviBTz4cjCZtniiTEblkdDeTRlzxHvP4lmQgx9e
-         PJoK9SgQxXECmbezOq61UAY4jH4h3IHvwyY2qdfQR4FsvjkPqYVUkRq+IWpwMqAsq/
-         w8NrnFPdqQuKqgFvx1XL1EBx4zD9cHqFtVjtcOhY7YsseTP/j8yF7ggk9lGk+9jIwP
-         f+EeiiXgubZ2w==
+        b=mTxwcceT+Q5IBhr+njBNIt8E8u8UaDntX2U9/ic77HVvI/e/QHJvVTCAM/DMfmAC6
+         MVTkHlTvPfdvoh73TTd+vQEpCBQvqfs4uNLzSfM6iSK7FQp8w6NN+XZxImgUtLqX+3
+         kV5yWJqL+xElsbzaHv0V8zuesePj/mO8YRCPKK9AEuCTZg0s4Ot39XRRkJOPMv0u62
+         rbyFjU2K1VKkwSf2ghtKqY2+OhH4yOnczabNmIEAuu7hOq2zhS8AfKFk6Sb+oT0uTj
+         uPifzVx22XjKbXFTCYoyAFb8Eea7iyqlbnBFRTJluiNvFhwkVvxXrF4w39DzB2tTZC
+         cOZsCSR0bLJLw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jeff Layton <jlayton@kernel.org>,
         Matthew Wilcox <willy@infradead.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 10/16] ceph: remove bogus checks and WARN_ONs from ceph_set_page_dirty
-Date:   Sat, 10 Jul 2021 19:52:34 -0400
-Message-Id: <20210710235240.3222618-10-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 08/12] ceph: remove bogus checks and WARN_ONs from ceph_set_page_dirty
+Date:   Sat, 10 Jul 2021 19:52:58 -0400
+Message-Id: <20210710235302.3222809-8-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210710235240.3222618-1-sashal@kernel.org>
-References: <20210710235240.3222618-1-sashal@kernel.org>
+In-Reply-To: <20210710235302.3222809-1-sashal@kernel.org>
+References: <20210710235302.3222809-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -72,7 +72,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 9 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 36aa6d8cdff7..9791de2dc773 100644
+index fbf383048409..26de74684c17 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
 @@ -72,10 +72,6 @@ static int ceph_set_page_dirty(struct page *page)
