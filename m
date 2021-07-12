@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99B14C11F68
-	for <ceph-devel@archiver.kernel.org>; Mon, 12 Jul 2021 16:58:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B38A3C11F6F
+	for <ceph-devel@archiver.kernel.org>; Mon, 12 Jul 2021 16:58:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A623611CD
-	for <ceph-devel@archiver.kernel.org>; Mon, 12 Jul 2021 16:58:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A406461241
+	for <ceph-devel@archiver.kernel.org>; Mon, 12 Jul 2021 16:58:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234856AbhGLQ7D (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 12 Jul 2021 12:59:03 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:54352 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234266AbhGLQ7B (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jul 2021 12:59:01 -0400
+        id S235271AbhGLRAx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 12 Jul 2021 13:00:53 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:34630 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234778AbhGLQ7D (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jul 2021 12:59:03 -0400
 Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id EB86D1FFC4;
-        Mon, 12 Jul 2021 16:56:09 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTP id 4BC5F2212F;
+        Mon, 12 Jul 2021 16:56:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1626108969; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1626108970; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=9yEcA8XH1+Aq+HogCsZ38H71sADSF6n5eh1Yuc7mdUU=;
-        b=idn4FWeQKRJqBP40knKINn6h25aesqwGHAjw7L1RcocMd7xaK5Sdkgkty5sOdKSFlnSjcQ
-        Wx1nQrt2Tl6GrjF3TbktZrEOmbL4tGD4m1Guo8I0S7oA3N6d7tcoVda0FGu0Oa+7Wrxmcy
-        f6k6UuSXjitgQ7/hDl54Nh/bLoWxSPk=
+        bh=aHhQqe8KTjBCv9r4mi6xe2At5YRjoevCFxA6zjCOvEc=;
+        b=ZESWo0+jV0zYOW8UBnDvLHP40wD4Mizkdi3GL2a5tQw4l+5H/3r+WCw8lG38ognWMuzAir
+        tcOcmkCMPX37xr1NU0VCTckY3UvvDDj7tTD3Bu1lsU8C3dGjMa8KO/+dkjOoL7uaQvat0m
+        liWED2/F46K5fur5cg9oAjmpvcw++80=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1626108969;
+        s=susede2_ed25519; t=1626108970;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=9yEcA8XH1+Aq+HogCsZ38H71sADSF6n5eh1Yuc7mdUU=;
-        b=ZtvIBDSSca7WOpnlIlhXywxDagDPFi2VN1PDK6bpSvMFWJOof37XoPjt9IuM2Aa1etLK4d
-        IwxJC8LYfh/IL+AQ==
+        bh=aHhQqe8KTjBCv9r4mi6xe2At5YRjoevCFxA6zjCOvEc=;
+        b=nwaFUtZvJiGfTCuyP2yCuDyUqORKcbdPqKWTp4GjFiBFK+dHUOfXJaNP2sLvWW4bNywxzi
+        Vs5yDOLGBuV5+AAg==
 Received: from quack2.suse.cz (unknown [10.100.224.230])
-        by relay2.suse.de (Postfix) with ESMTP id D6CF2A3B89;
-        Mon, 12 Jul 2021 16:56:09 +0000 (UTC)
+        by relay2.suse.de (Postfix) with ESMTP id 34EB6A3B8C;
+        Mon, 12 Jul 2021 16:56:10 +0000 (UTC)
 Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id B98701F2AA9; Mon, 12 Jul 2021 18:56:09 +0200 (CEST)
+        id EADE31F2CE6; Mon, 12 Jul 2021 18:56:09 +0200 (CEST)
 From:   Jan Kara <jack@suse.cz>
 To:     <linux-fsdevel@vger.kernel.org>
 Cc:     <linux-ext4@vger.kernel.org>,
@@ -55,71 +55,63 @@ Cc:     <linux-ext4@vger.kernel.org>,
         <linux-xfs@vger.kernel.org>,
         linux-f2fs-devel@lists.sourceforge.net, linux-cifs@vger.kernel.org,
         ceph-devel@vger.kernel.org, Jan Kara <jack@suse.cz>,
-        Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 02/14] documentation: Sync file_operations members with reality
-Date:   Mon, 12 Jul 2021 18:55:53 +0200
-Message-Id: <20210712165609.13215-2-jack@suse.cz>
+        Steve French <sfrench@samba.org>
+Subject: [PATCH 14/14] cifs: Fix race between hole punch and page fault
+Date:   Mon, 12 Jul 2021 18:56:05 +0200
+Message-Id: <20210712165609.13215-14-jack@suse.cz>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20210712163901.29514-1-jack@suse.cz>
 References: <20210712163901.29514-1-jack@suse.cz>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2323; h=from:subject; bh=gIg3iIztJVQoIlghVq1+fJXqU7kYO/MEXF6k8jlkFes=; b=owEBbQGS/pANAwAIAZydqgc/ZEDZAcsmYgBg7HQaQHe8HLcxNePecMEKAXHjeRLFAXwNY+MydxMY E0Cx61GJATMEAAEIAB0WIQSrWdEr1p4yirVVKBycnaoHP2RA2QUCYOx0GgAKCRCcnaoHP2RA2R0cCA Ce7oPViJYsHG8/ch4tj9ytaWabFvhU9qAa2Mb8zqfoRMDv3PZSuTmQfeSChslezfK004VtuHfp0Wmq rCIeQ1IA39fD/wH8pHDF9pTRbbS+RuYeuD+Qp2ai2I8WiGbhjmgWmV00gTKQl5q9RO3JOFuE19+kCU I2TmSof6im7HJ0YwA2WBiYNJqOD6I/WhnwSVxfn2Jdzdx+l1Zxo7seV8h6A7AEkjvteEF5JcwNuQN1 TE99lrq1wdG8IDLk8JoAtPO9FRtpNj9iPNjC87pqN4qQl05cjwJVeUJmDQaqcw6lzEOcNP/qUSPbhe i68ih2izUsJFu4lY8I4EhFtvrB9K2g
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1533; h=from:subject; bh=1e9BARQoajJDSgUdYORenFPF3ecMZ7Jduf79ehs8h7w=; b=owEBbQGS/pANAwAIAZydqgc/ZEDZAcsmYgBg7HQkAS6+mJ6okwtt/iRndokM6RsjeRiTUsodrmWd daZifx6JATMEAAEIAB0WIQSrWdEr1p4yirVVKBycnaoHP2RA2QUCYOx0JAAKCRCcnaoHP2RA2a2dB/ sGPl7L7iNC+Ygp3aaAb8TuC+CK7Fa16RT+41tzwVRlQcnfmi7CVZIqfg9wn8dFg+Rwo985dKOjqKBC Rkbj05bjkHH9zmlZ5YZ+X92bgSHksva5hcdPkI3PM5v6sCXvIMGdeKJvQ7OUyLqoS8vAwHFZCA6FfN oKBhzEjKFekquNo/8GdftAgbDSO70kSs2v1iR2SpAHq/DWr1NsJ0/SUel0YbkYCJVK/t1Jybo0fOS3 hzlpdrYgSafKZV1HZ762tDktI+gjO6r/m5sW8bVZitIHHqVxrctKOIPAGfL2NMRnxMzWVNlMBMdoo7 Y6A0YzNG5g9ezVbk8Vutbf63fL3esc
 X-Developer-Key: i=jack@suse.cz; a=openpgp; fpr=93C6099A142276A28BBE35D815BC833443038D8C
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Sync listing of struct file_operations members with the real one in
-fs.h.
+Cifs has a following race between hole punching and page fault:
 
-Acked-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+CPU1                                            CPU2
+smb3_fallocate()
+  smb3_punch_hole()
+    truncate_pagecache_range()
+                                                filemap_fault()
+                                                  - loads old data into the
+                                                    page cache
+    SMB2_ioctl(..., FSCTL_SET_ZERO_DATA, ...)
+
+And now we have stale data in the page cache. Fix the problem by locking
+out faults (as well as reads) using mapping->invalidate_lock while hole
+punch is running.
+
+CC: Steve French <sfrench@samba.org>
+CC: linux-cifs@vger.kernel.org
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- Documentation/filesystems/locking.rst | 15 +++++++++------
- 1 file changed, 9 insertions(+), 6 deletions(-)
+ fs/cifs/smb2ops.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/Documentation/filesystems/locking.rst b/Documentation/filesystems/locking.rst
-index 2183fd8cc350..cdf15492c699 100644
---- a/Documentation/filesystems/locking.rst
-+++ b/Documentation/filesystems/locking.rst
-@@ -506,6 +506,7 @@ prototypes::
- 	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
- 	ssize_t (*read_iter) (struct kiocb *, struct iov_iter *);
- 	ssize_t (*write_iter) (struct kiocb *, struct iov_iter *);
-+	int (*iopoll) (struct kiocb *kiocb, bool spin);
- 	int (*iterate) (struct file *, struct dir_context *);
- 	int (*iterate_shared) (struct file *, struct dir_context *);
- 	__poll_t (*poll) (struct file *, struct poll_table_struct *);
-@@ -518,12 +519,6 @@ prototypes::
- 	int (*fsync) (struct file *, loff_t start, loff_t end, int datasync);
- 	int (*fasync) (int, struct file *, int);
- 	int (*lock) (struct file *, int, struct file_lock *);
--	ssize_t (*readv) (struct file *, const struct iovec *, unsigned long,
--			loff_t *);
--	ssize_t (*writev) (struct file *, const struct iovec *, unsigned long,
--			loff_t *);
--	ssize_t (*sendfile) (struct file *, loff_t *, size_t, read_actor_t,
--			void __user *);
- 	ssize_t (*sendpage) (struct file *, struct page *, int, size_t,
- 			loff_t *, int);
- 	unsigned long (*get_unmapped_area)(struct file *, unsigned long,
-@@ -536,6 +531,14 @@ prototypes::
- 			size_t, unsigned int);
- 	int (*setlease)(struct file *, long, struct file_lock **, void **);
- 	long (*fallocate)(struct file *, int, loff_t, loff_t);
-+	void (*show_fdinfo)(struct seq_file *m, struct file *f);
-+	unsigned (*mmap_capabilities)(struct file *);
-+	ssize_t (*copy_file_range)(struct file *, loff_t, struct file *,
-+			loff_t, size_t, unsigned int);
-+	loff_t (*remap_file_range)(struct file *file_in, loff_t pos_in,
-+			struct file *file_out, loff_t pos_out,
-+			loff_t len, unsigned int remap_flags);
-+	int (*fadvise)(struct file *, loff_t, loff_t, int);
+diff --git a/fs/cifs/smb2ops.c b/fs/cifs/smb2ops.c
+index e4c8f603dd58..458c546ce8cd 100644
+--- a/fs/cifs/smb2ops.c
++++ b/fs/cifs/smb2ops.c
+@@ -3588,6 +3588,7 @@ static long smb3_punch_hole(struct file *file, struct cifs_tcon *tcon,
+ 		return rc;
+ 	}
  
- locking rules:
- 	All may block.
++	filemap_invalidate_lock(inode->i_mapping);
+ 	/*
+ 	 * We implement the punch hole through ioctl, so we need remove the page
+ 	 * caches first, otherwise the data may be inconsistent with the server.
+@@ -3605,6 +3606,7 @@ static long smb3_punch_hole(struct file *file, struct cifs_tcon *tcon,
+ 			sizeof(struct file_zero_data_information),
+ 			CIFSMaxBufSize, NULL, NULL);
+ 	free_xid(xid);
++	filemap_invalidate_unlock(inode->i_mapping);
+ 	return rc;
+ }
+ 
 -- 
 2.26.2
 
