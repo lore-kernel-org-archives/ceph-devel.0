@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FAA5C47E5A
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80F31C49EAF
+	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8338F613C7
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 63F6661167
+	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237919AbhGONnj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 15 Jul 2021 09:43:39 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:59702 "EHLO
+        id S232934AbhGONnm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 15 Jul 2021 09:43:42 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:59720 "EHLO
         smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233076AbhGONn2 (ORCPT
+        with ESMTP id S237209AbhGONn2 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2021 09:43:28 -0400
 Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 7BDA21FE26;
+        by smtp-out2.suse.de (Postfix) with ESMTP id 8C5E920303;
         Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
         t=1626356433; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=QEFMUcS9qjUtKezhyR8KVCgUDuuKy80h1wOdNoRHn94=;
-        b=KBrOk5LequeM0FN8Q5Sy2x0GnG6DR9O0ak7P/8WZ/2ZuU8WWf9rVSrLxNt5eJZLeXOxiCe
-        8r80IozYO7t6LAyRaNUGnaAdzd/FyLtc+hrI4Lu5dYOLeL4cOp+xB+YF/vqF40uzma2Src
-        GGe2Me2h+1aMoZxfFREziM1GDehT15o=
+        bh=aHhQqe8KTjBCv9r4mi6xe2At5YRjoevCFxA6zjCOvEc=;
+        b=RuJfucQ18UcdWSlSoKBS0R02LQqU1/2ikN5fVOsUopTm5nVBDrhxzwoexmEPqEfDpiFR/f
+        h+qcLI/KXCIM5K9dG6BkjTUF9Jd4Z85o20OQyK28wK2Z/X0BOJ8jCdlBKz20WHBt1bCCVb
+        moM3VmI061wTH+Chtl1RODrrlZNEyR0=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
         s=susede2_ed25519; t=1626356433;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=QEFMUcS9qjUtKezhyR8KVCgUDuuKy80h1wOdNoRHn94=;
-        b=h5Q1HCsGJCzTKtWC47Z97uBk3hj2WXAnTbdcqzK0pfMqT/N0yK9yHGV/KvZOpi84vxitRP
-        N43q3QGn2MwAaDDw==
+        bh=aHhQqe8KTjBCv9r4mi6xe2At5YRjoevCFxA6zjCOvEc=;
+        b=okfc6hssx0z1h1XKdCgUrgiqbuGqpuR+6jkXPziR0sbZUxXCsDdVf5LpJxwHEQW8SJ8h69
+        h5gs7zxRdmnrUeCg==
 Received: from quack2.suse.cz (unknown [10.100.200.198])
-        by relay2.suse.de (Postfix) with ESMTP id 68331A3B9F;
+        by relay2.suse.de (Postfix) with ESMTP id 75781A3B9B;
         Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
 Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 224281E0CCF; Thu, 15 Jul 2021 15:40:33 +0200 (CEST)
+        id 34DDA1E110A; Thu, 15 Jul 2021 15:40:33 +0200 (CEST)
 From:   Jan Kara <jack@suse.cz>
 To:     <linux-fsdevel@vger.kernel.org>
 Cc:     <linux-ext4@vger.kernel.org>,
@@ -55,155 +55,63 @@ Cc:     <linux-ext4@vger.kernel.org>,
         <linux-xfs@vger.kernel.org>,
         linux-f2fs-devel@lists.sourceforge.net, linux-cifs@vger.kernel.org,
         ceph-devel@vger.kernel.org, Jan Kara <jack@suse.cz>,
-        Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 09/14] xfs: Convert double locking of MMAPLOCK to use VFS helpers
-Date:   Thu, 15 Jul 2021 15:40:19 +0200
-Message-Id: <20210715134032.24868-9-jack@suse.cz>
+        Steve French <sfrench@samba.org>
+Subject: [PATCH 14/14] cifs: Fix race between hole punch and page fault
+Date:   Thu, 15 Jul 2021 15:40:24 +0200
+Message-Id: <20210715134032.24868-14-jack@suse.cz>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20210715133202.5975-1-jack@suse.cz>
 References: <20210715133202.5975-1-jack@suse.cz>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4962; h=from:subject; bh=BkFIeDQJLt3VUlGxHPiHMbNyQjSPAglxlFXoJSefPwA=; b=owEBbQGS/pANAwAIAZydqgc/ZEDZAcsmYgBg8DrDrmnnYiDuJLkZN6B9soYAFPxL773Kba3F9V27 njF+av+JATMEAAEIAB0WIQSrWdEr1p4yirVVKBycnaoHP2RA2QUCYPA6wwAKCRCcnaoHP2RA2ZwhCA Dl065EY3OZ4xioVDa5sRhZvi9W5w6YVk8vLXfzZDKRb66PCmY+oMO3baxEQDUPCHhhapITjgMTziNv 5w1MmUZL5p7hXqFQm6w6i2zcm9BCZhcAeNCqBKdruxsHGBteGhyBbFyAbQqxqByfNEAIDkF2YylFrS 2wDZw83OIHXDQ61xcwpfKzHMbFXfSLExaxWNKHLlUxKhLwG2WTiwnAuOF/UiKtyG1M6QhQQ4qM96pP i0SpQ0pLa3jYsNIbXwVH6I+wYA9gjZxmaZQIBMmbtCpWvFSryIEveSJ/ah4ysErTcpqKu+m4pJuj7w b/otyB9lNH7lPC2wfP71O8Ekz5Fe1d
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1533; h=from:subject; bh=1e9BARQoajJDSgUdYORenFPF3ecMZ7Jduf79ehs8h7w=; b=owGbwMvMwME4Z+4qdvsUh5uMp9WSGBI+WB1n1Ns3Y96Kydy5/1TSyzp5XkorV0pMDjoluy51bumy pHq5TkZjFgZGDgZZMUWW1ZEXta/NM+raGqohAzOIlQlkCgMXpwBMZOcODoZWJVaREsa87UFlLCyKym 6Jz7/Om7Llk3eCg4bKo9Mz5yQv57j/oybvSLtrzHthh0TB2CtnGXOMp2jfvbtdVV/OezJjU7votVnG llXaMuz16cwaKVErlmcwc4VzuIdkbl1902Oq6ZOkT8+s+dUE8pe2Nt9tuBa4U21Oycx5efGnpy855L RFINhWyEgzMmXDxUCTm0cq2aS+nGqerlR/7EpmjLGTVcWK6GtLV8TYd8XMF9/G6rZlz8qXj1k/yy04 L/70Rm151ZWv8u8jkhOtnzn1qzf+lBRWTmXmyBF9tOJVo+OL20Kxc9zFGqZFbTe1Tpx7f6aT79Rz5+ KYW3iC+t5EbhGRPfjkj5xdzfJSAA==
 X-Developer-Key: i=jack@suse.cz; a=openpgp; fpr=93C6099A142276A28BBE35D815BC833443038D8C
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Convert places in XFS that take MMAPLOCK for two inodes to use helper
-VFS provides for it (filemap_invalidate_down_write_two()). Note that
-this changes lock ordering for MMAPLOCK from inode number based ordering
-to pointer based ordering VFS generally uses.
+Cifs has a following race between hole punching and page fault:
 
-CC: "Darrick J. Wong" <djwong@kernel.org>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+CPU1                                            CPU2
+smb3_fallocate()
+  smb3_punch_hole()
+    truncate_pagecache_range()
+                                                filemap_fault()
+                                                  - loads old data into the
+                                                    page cache
+    SMB2_ioctl(..., FSCTL_SET_ZERO_DATA, ...)
+
+And now we have stale data in the page cache. Fix the problem by locking
+out faults (as well as reads) using mapping->invalidate_lock while hole
+punch is running.
+
+CC: Steve French <sfrench@samba.org>
+CC: linux-cifs@vger.kernel.org
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- fs/xfs/xfs_bmap_util.c | 15 ++++++++-------
- fs/xfs/xfs_inode.c     | 37 +++++++++++--------------------------
- 2 files changed, 19 insertions(+), 33 deletions(-)
+ fs/cifs/smb2ops.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/fs/xfs/xfs_bmap_util.c b/fs/xfs/xfs_bmap_util.c
-index 213a97a921bb..1cd3f940fa6a 100644
---- a/fs/xfs/xfs_bmap_util.c
-+++ b/fs/xfs/xfs_bmap_util.c
-@@ -1626,7 +1626,6 @@ xfs_swap_extents(
- 	struct xfs_bstat	*sbp = &sxp->sx_stat;
- 	int			src_log_flags, target_log_flags;
- 	int			error = 0;
--	int			lock_flags;
- 	uint64_t		f;
- 	int			resblks = 0;
- 	unsigned int		flags = 0;
-@@ -1638,8 +1637,8 @@ xfs_swap_extents(
- 	 * do the rest of the checks.
- 	 */
- 	lock_two_nondirectories(VFS_I(ip), VFS_I(tip));
--	lock_flags = XFS_MMAPLOCK_EXCL;
--	xfs_lock_two_inodes(ip, XFS_MMAPLOCK_EXCL, tip, XFS_MMAPLOCK_EXCL);
-+	filemap_invalidate_lock_two(VFS_I(ip)->i_mapping,
-+				    VFS_I(tip)->i_mapping);
+diff --git a/fs/cifs/smb2ops.c b/fs/cifs/smb2ops.c
+index e4c8f603dd58..458c546ce8cd 100644
+--- a/fs/cifs/smb2ops.c
++++ b/fs/cifs/smb2ops.c
+@@ -3588,6 +3588,7 @@ static long smb3_punch_hole(struct file *file, struct cifs_tcon *tcon,
+ 		return rc;
+ 	}
  
- 	/* Verify that both files have the same format */
- 	if ((VFS_I(ip)->i_mode & S_IFMT) != (VFS_I(tip)->i_mode & S_IFMT)) {
-@@ -1711,7 +1710,6 @@ xfs_swap_extents(
- 	 * or cancel will unlock the inodes from this point onwards.
- 	 */
- 	xfs_lock_two_inodes(ip, XFS_ILOCK_EXCL, tip, XFS_ILOCK_EXCL);
--	lock_flags |= XFS_ILOCK_EXCL;
- 	xfs_trans_ijoin(tp, ip, 0);
- 	xfs_trans_ijoin(tp, tip, 0);
- 
-@@ -1830,13 +1828,16 @@ xfs_swap_extents(
- 	trace_xfs_swap_extent_after(ip, 0);
- 	trace_xfs_swap_extent_after(tip, 1);
- 
-+out_unlock_ilock:
-+	xfs_iunlock(ip, XFS_ILOCK_EXCL);
-+	xfs_iunlock(tip, XFS_ILOCK_EXCL);
- out_unlock:
--	xfs_iunlock(ip, lock_flags);
--	xfs_iunlock(tip, lock_flags);
-+	filemap_invalidate_unlock_two(VFS_I(ip)->i_mapping,
-+				      VFS_I(tip)->i_mapping);
- 	unlock_two_nondirectories(VFS_I(ip), VFS_I(tip));
- 	return error;
- 
- out_trans_cancel:
- 	xfs_trans_cancel(tp);
--	goto out_unlock;
-+	goto out_unlock_ilock;
- }
-diff --git a/fs/xfs/xfs_inode.c b/fs/xfs/xfs_inode.c
-index d6a8ac76b45d..3c0bb21453dc 100644
---- a/fs/xfs/xfs_inode.c
-+++ b/fs/xfs/xfs_inode.c
-@@ -552,12 +552,10 @@ xfs_lock_inodes(
++	filemap_invalidate_lock(inode->i_mapping);
+ 	/*
+ 	 * We implement the punch hole through ioctl, so we need remove the page
+ 	 * caches first, otherwise the data may be inconsistent with the server.
+@@ -3605,6 +3606,7 @@ static long smb3_punch_hole(struct file *file, struct cifs_tcon *tcon,
+ 			sizeof(struct file_zero_data_information),
+ 			CIFSMaxBufSize, NULL, NULL);
+ 	free_xid(xid);
++	filemap_invalidate_unlock(inode->i_mapping);
+ 	return rc;
  }
  
- /*
-- * xfs_lock_two_inodes() can only be used to lock one type of lock at a time -
-- * the mmaplock or the ilock, but not more than one type at a time. If we lock
-- * more than one at a time, lockdep will report false positives saying we have
-- * violated locking orders.  The iolock must be double-locked separately since
-- * we use i_rwsem for that.  We now support taking one lock EXCL and the other
-- * SHARED.
-+ * xfs_lock_two_inodes() can only be used to lock ilock. The iolock and
-+ * mmaplock must be double-locked separately since we use i_rwsem and
-+ * invalidate_lock for that. We now support taking one lock EXCL and the
-+ * other SHARED.
-  */
- void
- xfs_lock_two_inodes(
-@@ -575,15 +573,8 @@ xfs_lock_two_inodes(
- 	ASSERT(hweight32(ip1_mode) == 1);
- 	ASSERT(!(ip0_mode & (XFS_IOLOCK_SHARED|XFS_IOLOCK_EXCL)));
- 	ASSERT(!(ip1_mode & (XFS_IOLOCK_SHARED|XFS_IOLOCK_EXCL)));
--	ASSERT(!(ip0_mode & (XFS_MMAPLOCK_SHARED|XFS_MMAPLOCK_EXCL)) ||
--	       !(ip0_mode & (XFS_ILOCK_SHARED|XFS_ILOCK_EXCL)));
--	ASSERT(!(ip1_mode & (XFS_MMAPLOCK_SHARED|XFS_MMAPLOCK_EXCL)) ||
--	       !(ip1_mode & (XFS_ILOCK_SHARED|XFS_ILOCK_EXCL)));
--	ASSERT(!(ip1_mode & (XFS_MMAPLOCK_SHARED|XFS_MMAPLOCK_EXCL)) ||
--	       !(ip0_mode & (XFS_ILOCK_SHARED|XFS_ILOCK_EXCL)));
--	ASSERT(!(ip0_mode & (XFS_MMAPLOCK_SHARED|XFS_MMAPLOCK_EXCL)) ||
--	       !(ip1_mode & (XFS_ILOCK_SHARED|XFS_ILOCK_EXCL)));
--
-+	ASSERT(!(ip0_mode & (XFS_MMAPLOCK_SHARED|XFS_MMAPLOCK_EXCL)));
-+	ASSERT(!(ip1_mode & (XFS_MMAPLOCK_SHARED|XFS_MMAPLOCK_EXCL)));
- 	ASSERT(ip0->i_ino != ip1->i_ino);
- 
- 	if (ip0->i_ino > ip1->i_ino) {
-@@ -3748,11 +3739,8 @@ xfs_ilock2_io_mmap(
- 	ret = xfs_iolock_two_inodes_and_break_layout(VFS_I(ip1), VFS_I(ip2));
- 	if (ret)
- 		return ret;
--	if (ip1 == ip2)
--		xfs_ilock(ip1, XFS_MMAPLOCK_EXCL);
--	else
--		xfs_lock_two_inodes(ip1, XFS_MMAPLOCK_EXCL,
--				    ip2, XFS_MMAPLOCK_EXCL);
-+	filemap_invalidate_lock_two(VFS_I(ip1)->i_mapping,
-+				    VFS_I(ip2)->i_mapping);
- 	return 0;
- }
- 
-@@ -3762,12 +3750,9 @@ xfs_iunlock2_io_mmap(
- 	struct xfs_inode	*ip1,
- 	struct xfs_inode	*ip2)
- {
--	bool			same_inode = (ip1 == ip2);
--
--	xfs_iunlock(ip2, XFS_MMAPLOCK_EXCL);
--	if (!same_inode)
--		xfs_iunlock(ip1, XFS_MMAPLOCK_EXCL);
-+	filemap_invalidate_unlock_two(VFS_I(ip1)->i_mapping,
-+				      VFS_I(ip2)->i_mapping);
- 	inode_unlock(VFS_I(ip2));
--	if (!same_inode)
-+	if (ip1 != ip2)
- 		inode_unlock(VFS_I(ip1));
- }
 -- 
 2.26.2
 
