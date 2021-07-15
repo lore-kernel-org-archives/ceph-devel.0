@@ -2,364 +2,86 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27EA5C4CC68
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:41:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25F01C07E96
+	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 14:02:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 018EA61279
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:41:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F0E4361289
+	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 14:02:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238245AbhGONnz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 15 Jul 2021 09:43:55 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:59740 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237748AbhGONnf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2021 09:43:35 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 8F65F20304;
-        Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1626356433; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=5kdSAKsBJX05O6PW1p3o6TYA39W8qYt2DGkkk4S4/kQ=;
-        b=3XUFXco26UlIAFoIhyrMAGYKqoaGAtjr5M22ru99fAExwICGu2Aycr1RDo6ZBueuEBmDiK
-        4GySCwEagLTBrS7fwEsO+Yos+/PcaB78d4dJJ7WypEQhIRLReC8MprcO2Dj/NDc3+xlrDI
-        /VGCiOu0xGMHvs/LNB5KN6mwjNATGvQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1626356433;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=5kdSAKsBJX05O6PW1p3o6TYA39W8qYt2DGkkk4S4/kQ=;
-        b=EiTy/ROu2RpSBfAzRKNeIf644SvYpj2g4+7nWUUHkT1bVNogaP4+wRtij4q+bKVc2llvcI
-        JDEJnPgRVVKSG8Bg==
-Received: from quack2.suse.cz (unknown [10.100.200.198])
-        by relay2.suse.de (Postfix) with ESMTP id 70EAEA3BA5;
-        Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 2EF8F1E10D0; Thu, 15 Jul 2021 15:40:33 +0200 (CEST)
-From:   Jan Kara <jack@suse.cz>
-To:     <linux-fsdevel@vger.kernel.org>
-Cc:     <linux-ext4@vger.kernel.org>,
-        Christoph Hellwig <hch@infradead.org>,
-        "Darrick J. Wong" <djwong@kernel.org>, Ted Tso <tytso@mit.edu>,
-        Dave Chinner <david@fromorbit.com>,
-        Matthew Wilcox <willy@infradead.org>, <linux-mm@kvack.org>,
-        <linux-xfs@vger.kernel.org>,
-        linux-f2fs-devel@lists.sourceforge.net, linux-cifs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, Jan Kara <jack@suse.cz>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        Miklos Szeredi <mszeredi@redhat.com>
-Subject: [PATCH 12/14] fuse: Convert to using invalidate_lock
-Date:   Thu, 15 Jul 2021 15:40:22 +0200
-Message-Id: <20210715134032.24868-12-jack@suse.cz>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20210715133202.5975-1-jack@suse.cz>
-References: <20210715133202.5975-1-jack@suse.cz>
+        id S232011AbhGOOFh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 15 Jul 2021 10:05:37 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57410 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229462AbhGOOFg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Jul 2021 10:05:36 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0F5EE6128D;
+        Thu, 15 Jul 2021 14:02:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1626357763;
+        bh=grQW3UgWfXU4yxwPEIzF0tsiYGHqaSRZYJBDNFj47i4=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=h7p/Z2Fh0durFJqN2B8OLm4ac4IMDfIhaepdrfM8ah8taH71CAdxgLR4xH6EaMHJ1
+         cX4bAF5rv16Vzi75kKwQiEC1U66a37cFRuCGHyeRDFrauYUYtQOJOWSCfPKzaxtUeB
+         M8xDD7PvXYXlOacZ7O/2V1sRP8m7Hf4uhQJD3/dZtK5xnC+kjUFg6EDH1rMv+FvRGH
+         qXvOY2sOsjad/4/a58uy/9XzduON8s4l3EbZ4txEtXhkde/TU+3DcbMjV1ZamaGkyl
+         Qj3poUfZSwovsz0XHFsINscwC/c1BCYvzFa8YrpHuD3MNRyLN/FHceDuVeGQ1DrEtR
+         Cu1uuZgpiQPRA==
+Message-ID: <98f3852d84645b88963f987bb3373bb56ddd8d3e.camel@kernel.org>
+Subject: Re: [PATCH] ceph: don't WARN if we're still opening a session to an
+ MDS
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Luis Henriques <lhenriques@suse.de>,
+        Ilya Dryomov <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 15 Jul 2021 10:02:41 -0400
+In-Reply-To: <20210715134039.10466-1-lhenriques@suse.de>
+References: <20210715134039.10466-1-lhenriques@suse.de>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.3 (3.40.3-1.fc34) 
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=11364; h=from:subject; bh=qKqrDpSCySAmtBk8soUR3MiHRWNda/DcWPoF/c1NqFg=; b=owEBbQGS/pANAwAIAZydqgc/ZEDZAcsmYgBg8DrF+GKb68GT3PotXniFusnpGhisHoCXVE8B8x+T nFB1o5SJATMEAAEIAB0WIQSrWdEr1p4yirVVKBycnaoHP2RA2QUCYPA6xQAKCRCcnaoHP2RA2V7cCA CIUmBd6bFD+g9WyXetY5vRLgdICbd2NSjHZ6kvKO354+gGOGwgvlcYf7gFA+PvTSEC8C/d9AFjpc/9 rARsSCI2Vdt7hQRSsnVXqtBD/IO4b1R5pUEVITzXRTqKAi/2lIvtY1Pu/tUCNlpktHkdxqcNGLxMaf jUCqZRfqPCd1BBKdKX5wXLRQ8fD49P6JOyAbwm/nrkY8obhZwTdUZlRiP7thbiIMWyE+Cuk9WtZHke v5bwOv6i6zLPDw1APa2Q48J1ICrW4vvu1qPp8BJik6FL+TPRqdNF+QfuO0TPvCaLuSVAAFcpVk0PVj 0j8Lzdiz71rLUfQPPr389a8bCmTlgj
-X-Developer-Key: i=jack@suse.cz; a=openpgp; fpr=93C6099A142276A28BBE35D815BC833443038D8C
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Use invalidate_lock instead of fuse's private i_mmap_sem. The intended
-purpose is exactly the same. By this conversion we fix a long standing
-race between hole punching and read(2) / readahead(2) paths that can
-lead to stale page cache contents.
+On Thu, 2021-07-15 at 14:40 +0100, Luis Henriques wrote:
+> If MDSs aren't available while mounting a filesystem, the session state will
+> transition from SESSION_OPENING to SESSION_CLOSING.  And in that scenario
+> check_session_state() will be called from delayed_work() and trigger this
+> WARN.
+> 
+> Avoid this by only WARNing after a session has already been established
+> (i.e., the s_ttl will be different from 0).
+> 
+> Fixes: 62575e270f66 ("ceph: check session state after bumping session->s_seq")
+> Signed-off-by: Luis Henriques <lhenriques@suse.de>
+> ---
+>  fs/ceph/mds_client.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index e5af591d3bd4..86f09b1110a2 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -4468,7 +4468,7 @@ bool check_session_state(struct ceph_mds_session *s)
+>  		break;
+>  	case CEPH_MDS_SESSION_CLOSING:
+>  		/* Should never reach this when we're unmounting */
+> -		WARN_ON_ONCE(true);
+> +		WARN_ON_ONCE(s->s_ttl);
+>  		fallthrough;
+>  	case CEPH_MDS_SESSION_NEW:
+>  	case CEPH_MDS_SESSION_RESTARTING:
 
-CC: Miklos Szeredi <miklos@szeredi.hu>
-Reviewed-by: Miklos Szeredi <mszeredi@redhat.com>
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- fs/fuse/dax.c    | 50 +++++++++++++++++++++++-------------------------
- fs/fuse/dir.c    | 11 ++++++-----
- fs/fuse/file.c   | 10 +++++-----
- fs/fuse/fuse_i.h |  7 -------
- fs/fuse/inode.c  |  1 -
- 5 files changed, 35 insertions(+), 44 deletions(-)
+Mea culpa -- I've been meaning to fix that up. I'll plan to merge this
+later today.
 
-diff --git a/fs/fuse/dax.c b/fs/fuse/dax.c
-index e55723744f58..fc05ce59579d 100644
---- a/fs/fuse/dax.c
-+++ b/fs/fuse/dax.c
-@@ -444,12 +444,12 @@ static int fuse_setup_new_dax_mapping(struct inode *inode, loff_t pos,
- 	/*
- 	 * Can't do inline reclaim in fault path. We call
- 	 * dax_layout_busy_page() before we free a range. And
--	 * fuse_wait_dax_page() drops fi->i_mmap_sem lock and requires it.
--	 * In fault path we enter with fi->i_mmap_sem held and can't drop
--	 * it. Also in fault path we hold fi->i_mmap_sem shared and not
--	 * exclusive, so that creates further issues with fuse_wait_dax_page().
--	 * Hence return -EAGAIN and fuse_dax_fault() will wait for a memory
--	 * range to become free and retry.
-+	 * fuse_wait_dax_page() drops mapping->invalidate_lock and requires it.
-+	 * In fault path we enter with mapping->invalidate_lock held and can't
-+	 * drop it. Also in fault path we hold mapping->invalidate_lock shared
-+	 * and not exclusive, so that creates further issues with
-+	 * fuse_wait_dax_page().  Hence return -EAGAIN and fuse_dax_fault()
-+	 * will wait for a memory range to become free and retry.
- 	 */
- 	if (flags & IOMAP_FAULT) {
- 		alloc_dmap = alloc_dax_mapping(fcd);
-@@ -513,7 +513,7 @@ static int fuse_upgrade_dax_mapping(struct inode *inode, loff_t pos,
- 	down_write(&fi->dax->sem);
- 	node = interval_tree_iter_first(&fi->dax->tree, idx, idx);
- 
--	/* We are holding either inode lock or i_mmap_sem, and that should
-+	/* We are holding either inode lock or invalidate_lock, and that should
- 	 * ensure that dmap can't be truncated. We are holding a reference
- 	 * on dmap and that should make sure it can't be reclaimed. So dmap
- 	 * should still be there in tree despite the fact we dropped and
-@@ -660,14 +660,12 @@ static const struct iomap_ops fuse_iomap_ops = {
- 
- static void fuse_wait_dax_page(struct inode *inode)
- {
--	struct fuse_inode *fi = get_fuse_inode(inode);
--
--	up_write(&fi->i_mmap_sem);
-+	filemap_invalidate_unlock(inode->i_mapping);
- 	schedule();
--	down_write(&fi->i_mmap_sem);
-+	filemap_invalidate_lock(inode->i_mapping);
- }
- 
--/* Should be called with fi->i_mmap_sem lock held exclusively */
-+/* Should be called with mapping->invalidate_lock held exclusively */
- static int __fuse_dax_break_layouts(struct inode *inode, bool *retry,
- 				    loff_t start, loff_t end)
- {
-@@ -813,18 +811,18 @@ static vm_fault_t __fuse_dax_fault(struct vm_fault *vmf,
- 	 * we do not want any read/write/mmap to make progress and try
- 	 * to populate page cache or access memory we are trying to free.
- 	 */
--	down_read(&get_fuse_inode(inode)->i_mmap_sem);
-+	filemap_invalidate_lock_shared(inode->i_mapping);
- 	ret = dax_iomap_fault(vmf, pe_size, &pfn, &error, &fuse_iomap_ops);
- 	if ((ret & VM_FAULT_ERROR) && error == -EAGAIN) {
- 		error = 0;
- 		retry = true;
--		up_read(&get_fuse_inode(inode)->i_mmap_sem);
-+		filemap_invalidate_unlock_shared(inode->i_mapping);
- 		goto retry;
- 	}
- 
- 	if (ret & VM_FAULT_NEEDDSYNC)
- 		ret = dax_finish_sync_fault(vmf, pe_size, pfn);
--	up_read(&get_fuse_inode(inode)->i_mmap_sem);
-+	filemap_invalidate_unlock_shared(inode->i_mapping);
- 
- 	if (write)
- 		sb_end_pagefault(sb);
-@@ -960,7 +958,7 @@ inode_inline_reclaim_one_dmap(struct fuse_conn_dax *fcd, struct inode *inode,
- 	int ret;
- 	struct interval_tree_node *node;
- 
--	down_write(&fi->i_mmap_sem);
-+	filemap_invalidate_lock(inode->i_mapping);
- 
- 	/* Lookup a dmap and corresponding file offset to reclaim. */
- 	down_read(&fi->dax->sem);
-@@ -1021,7 +1019,7 @@ inode_inline_reclaim_one_dmap(struct fuse_conn_dax *fcd, struct inode *inode,
- out_write_dmap_sem:
- 	up_write(&fi->dax->sem);
- out_mmap_sem:
--	up_write(&fi->i_mmap_sem);
-+	filemap_invalidate_unlock(inode->i_mapping);
- 	return dmap;
- }
- 
-@@ -1050,10 +1048,10 @@ alloc_dax_mapping_reclaim(struct fuse_conn_dax *fcd, struct inode *inode)
- 		 * had a reference or some other temporary failure,
- 		 * Try again. We want to give up inline reclaim only
- 		 * if there is no range assigned to this node. Otherwise
--		 * if a deadlock is possible if we sleep with fi->i_mmap_sem
--		 * held and worker to free memory can't make progress due
--		 * to unavailability of fi->i_mmap_sem lock. So sleep
--		 * only if fi->dax->nr=0
-+		 * if a deadlock is possible if we sleep with
-+		 * mapping->invalidate_lock held and worker to free memory
-+		 * can't make progress due to unavailability of
-+		 * mapping->invalidate_lock.  So sleep only if fi->dax->nr=0
- 		 */
- 		if (retry)
- 			continue;
-@@ -1061,8 +1059,8 @@ alloc_dax_mapping_reclaim(struct fuse_conn_dax *fcd, struct inode *inode)
- 		 * There are no mappings which can be reclaimed. Wait for one.
- 		 * We are not holding fi->dax->sem. So it is possible
- 		 * that range gets added now. But as we are not holding
--		 * fi->i_mmap_sem, worker should still be able to free up
--		 * a range and wake us up.
-+		 * mapping->invalidate_lock, worker should still be able to
-+		 * free up a range and wake us up.
- 		 */
- 		if (!fi->dax->nr && !(fcd->nr_free_ranges > 0)) {
- 			if (wait_event_killable_exclusive(fcd->range_waitq,
-@@ -1108,7 +1106,7 @@ static int lookup_and_reclaim_dmap_locked(struct fuse_conn_dax *fcd,
- /*
-  * Free a range of memory.
-  * Locking:
-- * 1. Take fi->i_mmap_sem to block dax faults.
-+ * 1. Take mapping->invalidate_lock to block dax faults.
-  * 2. Take fi->dax->sem to protect interval tree and also to make sure
-  *    read/write can not reuse a dmap which we might be freeing.
-  */
-@@ -1122,7 +1120,7 @@ static int lookup_and_reclaim_dmap(struct fuse_conn_dax *fcd,
- 	loff_t dmap_start = start_idx << FUSE_DAX_SHIFT;
- 	loff_t dmap_end = (dmap_start + FUSE_DAX_SZ) - 1;
- 
--	down_write(&fi->i_mmap_sem);
-+	filemap_invalidate_lock(inode->i_mapping);
- 	ret = fuse_dax_break_layouts(inode, dmap_start, dmap_end);
- 	if (ret) {
- 		pr_debug("virtio_fs: fuse_dax_break_layouts() failed. err=%d\n",
-@@ -1134,7 +1132,7 @@ static int lookup_and_reclaim_dmap(struct fuse_conn_dax *fcd,
- 	ret = lookup_and_reclaim_dmap_locked(fcd, inode, start_idx);
- 	up_write(&fi->dax->sem);
- out_mmap_sem:
--	up_write(&fi->i_mmap_sem);
-+	filemap_invalidate_unlock(inode->i_mapping);
- 	return ret;
- }
- 
-diff --git a/fs/fuse/dir.c b/fs/fuse/dir.c
-index eade6f965b2e..d9b977c0f38d 100644
---- a/fs/fuse/dir.c
-+++ b/fs/fuse/dir.c
-@@ -1556,6 +1556,7 @@ int fuse_do_setattr(struct dentry *dentry, struct iattr *attr,
- 	struct fuse_mount *fm = get_fuse_mount(inode);
- 	struct fuse_conn *fc = fm->fc;
- 	struct fuse_inode *fi = get_fuse_inode(inode);
-+	struct address_space *mapping = inode->i_mapping;
- 	FUSE_ARGS(args);
- 	struct fuse_setattr_in inarg;
- 	struct fuse_attr_out outarg;
-@@ -1580,11 +1581,11 @@ int fuse_do_setattr(struct dentry *dentry, struct iattr *attr,
- 	}
- 
- 	if (FUSE_IS_DAX(inode) && is_truncate) {
--		down_write(&fi->i_mmap_sem);
-+		filemap_invalidate_lock(mapping);
- 		fault_blocked = true;
- 		err = fuse_dax_break_layouts(inode, 0, 0);
- 		if (err) {
--			up_write(&fi->i_mmap_sem);
-+			filemap_invalidate_unlock(mapping);
- 			return err;
- 		}
- 	}
-@@ -1694,13 +1695,13 @@ int fuse_do_setattr(struct dentry *dentry, struct iattr *attr,
- 	if ((is_truncate || !is_wb) &&
- 	    S_ISREG(inode->i_mode) && oldsize != outarg.attr.size) {
- 		truncate_pagecache(inode, outarg.attr.size);
--		invalidate_inode_pages2(inode->i_mapping);
-+		invalidate_inode_pages2(mapping);
- 	}
- 
- 	clear_bit(FUSE_I_SIZE_UNSTABLE, &fi->state);
- out:
- 	if (fault_blocked)
--		up_write(&fi->i_mmap_sem);
-+		filemap_invalidate_unlock(mapping);
- 
- 	return 0;
- 
-@@ -1711,7 +1712,7 @@ int fuse_do_setattr(struct dentry *dentry, struct iattr *attr,
- 	clear_bit(FUSE_I_SIZE_UNSTABLE, &fi->state);
- 
- 	if (fault_blocked)
--		up_write(&fi->i_mmap_sem);
-+		filemap_invalidate_unlock(mapping);
- 	return err;
- }
- 
-diff --git a/fs/fuse/file.c b/fs/fuse/file.c
-index 97f860cfc195..621a662c19fb 100644
---- a/fs/fuse/file.c
-+++ b/fs/fuse/file.c
-@@ -243,7 +243,7 @@ int fuse_open_common(struct inode *inode, struct file *file, bool isdir)
- 	}
- 
- 	if (dax_truncate) {
--		down_write(&get_fuse_inode(inode)->i_mmap_sem);
-+		filemap_invalidate_lock(inode->i_mapping);
- 		err = fuse_dax_break_layouts(inode, 0, 0);
- 		if (err)
- 			goto out;
-@@ -255,7 +255,7 @@ int fuse_open_common(struct inode *inode, struct file *file, bool isdir)
- 
- out:
- 	if (dax_truncate)
--		up_write(&get_fuse_inode(inode)->i_mmap_sem);
-+		filemap_invalidate_unlock(inode->i_mapping);
- 
- 	if (is_wb_truncate | dax_truncate) {
- 		fuse_release_nowrite(inode);
-@@ -2920,7 +2920,7 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
- 	if (lock_inode) {
- 		inode_lock(inode);
- 		if (block_faults) {
--			down_write(&fi->i_mmap_sem);
-+			filemap_invalidate_lock(inode->i_mapping);
- 			err = fuse_dax_break_layouts(inode, 0, 0);
- 			if (err)
- 				goto out;
-@@ -2976,7 +2976,7 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
- 		clear_bit(FUSE_I_SIZE_UNSTABLE, &fi->state);
- 
- 	if (block_faults)
--		up_write(&fi->i_mmap_sem);
-+		filemap_invalidate_unlock(inode->i_mapping);
- 
- 	if (lock_inode)
- 		inode_unlock(inode);
-@@ -3045,7 +3045,7 @@ static ssize_t __fuse_copy_file_range(struct file *file_in, loff_t pos_in,
- 	 * modifications.  Yet this does give less guarantees than if the
- 	 * copying was performed with write(2).
- 	 *
--	 * To fix this a i_mmap_sem style lock could be used to prevent new
-+	 * To fix this a mapping->invalidate_lock could be used to prevent new
- 	 * faults while the copy is ongoing.
- 	 */
- 	err = fuse_writeback_range(inode_out, pos_out, pos_out + len - 1);
-diff --git a/fs/fuse/fuse_i.h b/fs/fuse/fuse_i.h
-index 07829ce78695..6fb639b97ea8 100644
---- a/fs/fuse/fuse_i.h
-+++ b/fs/fuse/fuse_i.h
-@@ -149,13 +149,6 @@ struct fuse_inode {
- 	/** Lock to protect write related fields */
- 	spinlock_t lock;
- 
--	/**
--	 * Can't take inode lock in fault path (leads to circular dependency).
--	 * Introduce another semaphore which can be taken in fault path and
--	 * then other filesystem paths can take this to block faults.
--	 */
--	struct rw_semaphore i_mmap_sem;
--
- #ifdef CONFIG_FUSE_DAX
- 	/*
- 	 * Dax specific inode data
-diff --git a/fs/fuse/inode.c b/fs/fuse/inode.c
-index b9beb39a4a18..e07e429f32e1 100644
---- a/fs/fuse/inode.c
-+++ b/fs/fuse/inode.c
-@@ -85,7 +85,6 @@ static struct inode *fuse_alloc_inode(struct super_block *sb)
- 	fi->orig_ino = 0;
- 	fi->state = 0;
- 	mutex_init(&fi->mutex);
--	init_rwsem(&fi->i_mmap_sem);
- 	spin_lock_init(&fi->lock);
- 	fi->forget = fuse_alloc_forget();
- 	if (!fi->forget)
+Thanks!
 -- 
-2.26.2
+Jeff Layton <jlayton@kernel.org>
 
