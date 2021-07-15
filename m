@@ -2,163 +2,94 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 241EBC49EC9
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F5CDC49ECA
 	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0AA0A61167
+	by mail.kernel.org (Postfix) with ESMTP id 89C0661167
 	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238015AbhGONnp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        id S238058AbhGONnp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
         Thu, 15 Jul 2021 09:43:45 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:55808 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237744AbhGONnf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2021 09:43:35 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id 7C7E422A7C;
-        Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1626356433; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3UrWJRrmmZoeFsiXlatgXAwopNmimQ93wkzrLwvaNN0=;
-        b=Vq6zyVi+TmKxjG4E2bDVHqilU05s3T3gkdYPFN9QWrpWbR+GxR6RlxitkuKJ3wa9JjXBuW
-        B4Yb9uaFht7dlYpcJNWLyjXhvkw+6KOQKSuP6DeYLOKvo1MNYISBdsLoRQdzI81/UdPhqM
-        I2TTzsRXYlE9ba20mfbsmM5cP1F37sQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1626356433;
+Received: from smtp-out2.suse.de ([195.135.220.29]:59748 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237823AbhGONng (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2021 09:43:36 -0400
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id A356220305;
+        Thu, 15 Jul 2021 13:40:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1626356442; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=gyZhxHZioQnjZVdJUow5Mw2QUXHysMd4yxvDdw4DGwc=;
+        b=0furoNcuZP5rAqEkjRYeMbZlOvha/jXVBqe3WnohXwO61ArjIXlszycv/AirHzRdvBxBFC
+        lEtQkGiy50HntVcFKQ7JZqIyVTWeEP1qvcSenLoJ4TlfCnEsqn1dSFynzrB5PqKsa93JLY
+        Al6YjAG8kBHvAYpNBNFbmAfVMbO8Ogs=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1626356442;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3UrWJRrmmZoeFsiXlatgXAwopNmimQ93wkzrLwvaNN0=;
-        b=vPvQaBLdn4nF8xM+5K5KEGC/ouomYZFRiTn6m+gZfuSx9Er+5mBus+S5jB9AEbFudY6Ula
-        sWwkbcKSe2BV1QBQ==
-Received: from quack2.suse.cz (unknown [10.100.200.198])
-        by relay2.suse.de (Postfix) with ESMTP id 680CEA3B9D;
-        Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 1B42A1E0C05; Thu, 15 Jul 2021 15:40:33 +0200 (CEST)
-From:   Jan Kara <jack@suse.cz>
-To:     <linux-fsdevel@vger.kernel.org>
-Cc:     <linux-ext4@vger.kernel.org>,
-        Christoph Hellwig <hch@infradead.org>,
-        "Darrick J. Wong" <djwong@kernel.org>, Ted Tso <tytso@mit.edu>,
-        Dave Chinner <david@fromorbit.com>,
-        Matthew Wilcox <willy@infradead.org>, <linux-mm@kvack.org>,
-        <linux-xfs@vger.kernel.org>,
-        linux-f2fs-devel@lists.sourceforge.net, linux-cifs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, Pavel Reichl <preichl@redhat.com>,
-        Dave Chinner <dchinner@redhat.com>,
-        Eric Sandeen <sandeen@redhat.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Christoph Hellwig <hch@lst.de>, Jan Kara <jack@suse.cz>
-Subject: [PATCH 07/14] xfs: Refactor xfs_isilocked()
-Date:   Thu, 15 Jul 2021 15:40:17 +0200
-Message-Id: <20210715134032.24868-7-jack@suse.cz>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20210715133202.5975-1-jack@suse.cz>
-References: <20210715133202.5975-1-jack@suse.cz>
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=gyZhxHZioQnjZVdJUow5Mw2QUXHysMd4yxvDdw4DGwc=;
+        b=xKnyqSKJPZuDSl+zTIK1Gz+oDgi+gVCnrNaJscHgH4ZbSX2CHhE5WN/RaVVt5lqMMincJD
+        2GMZVMbbRWJTrsDA==
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 3848213D89;
+        Thu, 15 Jul 2021 13:40:42 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap1.suse-dmz.suse.de with ESMTPSA
+        id /sSiCto68GCUVwAAGKfGzw
+        (envelope-from <lhenriques@suse.de>); Thu, 15 Jul 2021 13:40:42 +0000
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id aad06e43;
+        Thu, 15 Jul 2021 13:40:41 +0000 (UTC)
+From:   Luis Henriques <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Luis Henriques <lhenriques@suse.de>
+Subject: [PATCH] ceph: don't WARN if we're still opening a session to an MDS
+Date:   Thu, 15 Jul 2021 14:40:39 +0100
+Message-Id: <20210715134039.10466-1-lhenriques@suse.de>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2663; i=jack@suse.cz; h=from:subject; bh=YmQSkQse9NO9b0qrNLfWFR/SLfIwnVnRgr/nYQ5R0lY=; b=owEBbQGS/pANAwAIAZydqgc/ZEDZAcsmYgBg8DrBhJIq6dexPtRN0mRaJPDIgpTC8p8HxaHKF5yv BEL61CyJATMEAAEIAB0WIQSrWdEr1p4yirVVKBycnaoHP2RA2QUCYPA6wQAKCRCcnaoHP2RA2UAQB/ 9rg5NL72FfnXClKh6c0yAIPqCwy+FeNY+kyI9sfxL6MLpfwdAKEG051FlsOzEbC57n9xult0L9NK+a SKIpZNIXKtzDo1mJnXVzFit3q9KrWSykWOR2A6XKyL5yrPuZOQbSj9//39Vukg1Xi9tKW0rln8dsKl DlCCZLnN/Tqou0F0alPiI5z8Ydvx8yvtmYqYg4v+IwtaPWIClc9Cye80/06rUdQ6x12dW0niqMs6zh BJy9iasKMKa4aQ57hQGrUMn05CUfnZVD9qSJnCAMDnJ2aj/BtR1MSwl+UelmZE8EN0xnhbB9RfyV41 3mXYwJHybMymKmoj5OERJOjQ2/asDD
-X-Developer-Key: i=jack@suse.cz; a=openpgp; fpr=93C6099A142276A28BBE35D815BC833443038D8C
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Pavel Reichl <preichl@redhat.com>
+If MDSs aren't available while mounting a filesystem, the session state will
+transition from SESSION_OPENING to SESSION_CLOSING.  And in that scenario
+check_session_state() will be called from delayed_work() and trigger this
+WARN.
 
-Introduce a new __xfs_rwsem_islocked predicate to encapsulate checking
-the state of a rw_semaphore, then refactor xfs_isilocked to use it.
+Avoid this by only WARNing after a session has already been established
+(i.e., the s_ttl will be different from 0).
 
-Signed-off-by: Pavel Reichl <preichl@redhat.com>
-Suggested-by: Dave Chinner <dchinner@redhat.com>
-Suggested-by: Eric Sandeen <sandeen@redhat.com>
-Suggested-by: Darrick J. Wong <darrick.wong@oracle.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Jan Kara <jack@suse.cz>
+Fixes: 62575e270f66 ("ceph: check session state after bumping session->s_seq")
+Signed-off-by: Luis Henriques <lhenriques@suse.de>
 ---
- fs/xfs/xfs_inode.c | 34 ++++++++++++++++++++++++++--------
- fs/xfs/xfs_inode.h |  2 +-
- 2 files changed, 27 insertions(+), 9 deletions(-)
+ fs/ceph/mds_client.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/xfs/xfs_inode.c b/fs/xfs/xfs_inode.c
-index a835ceb79ba5..359e2cd44ad7 100644
---- a/fs/xfs/xfs_inode.c
-+++ b/fs/xfs/xfs_inode.c
-@@ -343,9 +343,29 @@ xfs_ilock_demote(
- }
- 
- #if defined(DEBUG) || defined(XFS_WARN)
--int
-+static inline bool
-+__xfs_rwsem_islocked(
-+	struct rw_semaphore	*rwsem,
-+	bool			shared)
-+{
-+	if (!debug_locks)
-+		return rwsem_is_locked(rwsem);
-+
-+	if (!shared)
-+		return lockdep_is_held_type(rwsem, 0);
-+
-+	/*
-+	 * We are checking that the lock is held at least in shared
-+	 * mode but don't care that it might be held exclusively
-+	 * (i.e. shared | excl). Hence we check if the lock is held
-+	 * in any mode rather than an explicit shared mode.
-+	 */
-+	return lockdep_is_held_type(rwsem, -1);
-+}
-+
-+bool
- xfs_isilocked(
--	xfs_inode_t		*ip,
-+	struct xfs_inode	*ip,
- 	uint			lock_flags)
- {
- 	if (lock_flags & (XFS_ILOCK_EXCL|XFS_ILOCK_SHARED)) {
-@@ -360,15 +380,13 @@ xfs_isilocked(
- 		return rwsem_is_locked(&ip->i_mmaplock.mr_lock);
- 	}
- 
--	if (lock_flags & (XFS_IOLOCK_EXCL|XFS_IOLOCK_SHARED)) {
--		if (!(lock_flags & XFS_IOLOCK_SHARED))
--			return !debug_locks ||
--				lockdep_is_held_type(&VFS_I(ip)->i_rwsem, 0);
--		return rwsem_is_locked(&VFS_I(ip)->i_rwsem);
-+	if (lock_flags & (XFS_IOLOCK_EXCL | XFS_IOLOCK_SHARED)) {
-+		return __xfs_rwsem_islocked(&VFS_I(ip)->i_rwsem,
-+				(lock_flags & XFS_IOLOCK_SHARED));
- 	}
- 
- 	ASSERT(0);
--	return 0;
-+	return false;
- }
- #endif
- 
-diff --git a/fs/xfs/xfs_inode.h b/fs/xfs/xfs_inode.h
-index 4b6703dbffb8..4b5202ae8ebb 100644
---- a/fs/xfs/xfs_inode.h
-+++ b/fs/xfs/xfs_inode.h
-@@ -410,7 +410,7 @@ void		xfs_ilock(xfs_inode_t *, uint);
- int		xfs_ilock_nowait(xfs_inode_t *, uint);
- void		xfs_iunlock(xfs_inode_t *, uint);
- void		xfs_ilock_demote(xfs_inode_t *, uint);
--int		xfs_isilocked(xfs_inode_t *, uint);
-+bool		xfs_isilocked(struct xfs_inode *, uint);
- uint		xfs_ilock_data_map_shared(struct xfs_inode *);
- uint		xfs_ilock_attr_map_shared(struct xfs_inode *);
- 
--- 
-2.26.2
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index e5af591d3bd4..86f09b1110a2 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4468,7 +4468,7 @@ bool check_session_state(struct ceph_mds_session *s)
+ 		break;
+ 	case CEPH_MDS_SESSION_CLOSING:
+ 		/* Should never reach this when we're unmounting */
+-		WARN_ON_ONCE(true);
++		WARN_ON_ONCE(s->s_ttl);
+ 		fallthrough;
+ 	case CEPH_MDS_SESSION_NEW:
+ 	case CEPH_MDS_SESSION_RESTARTING:
