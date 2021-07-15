@@ -2,179 +2,214 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F0FAC07E96
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 11:42:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E010C47E4D
+	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E3F75613BA
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 11:42:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 47EE5613C7
+	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 13:40:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229651AbhGOLpB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 15 Jul 2021 07:45:01 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:57514 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229553AbhGOLpA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2021 07:45:00 -0400
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 8FB201FE14;
-        Thu, 15 Jul 2021 11:42:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1626349326; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
+        id S237738AbhGONne (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 15 Jul 2021 09:43:34 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:55758 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233113AbhGONn2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2021 09:43:28 -0400
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 740C222A7B;
+        Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1626356433; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=3hAmPRhMJ+RTybgNPqzcZqAlp8PBzekHw7e2a95Yenc=;
-        b=Iu9CfXeBuiJIua+wvlTt2OiznYw/sLeIh/hfMsmNHwubjoURPVLXOoLzTE1VaPqHgVq7OX
-        ymGrWSSqPgLtOr/3mnyPKrdZBNIY8PX3lhHzXbkYEte07YX4hjFNRWJbbhBEHmQ0TdTzPx
-        0pBXSy7E/gZ7GELYh52AzKfDFF0buGw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1626349326;
+        bh=VgWT5tfqbtBkDrX2L7CznODEgq2BTXfXClIF6lsIWFg=;
+        b=gGAAOtj/R/fvQnISwpVoNlCX95cynpLxqoTBi7etApByJozAjxDpXsF8d3i30UbXCML7jG
+        fTs5TUqO+ZV0RlC7s0jsNNNhJRcpsrD9cFStpzyKr4P/ExgrJTkDLmaw7zJt/s/IEKfC2m
+        zDr7JrvvwhmB/8NSfDfkbD1Y/7FDypY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1626356433;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
+         mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=3hAmPRhMJ+RTybgNPqzcZqAlp8PBzekHw7e2a95Yenc=;
-        b=P9wIqJEFtH9lDgoPf9yHmHujFXWPP6nEC0tBAjj8hQApYL2TIl1c/glRksKjIwldhdsxcz
-        bVfi9CU10VzRs3DA==
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 0882713D89;
-        Thu, 15 Jul 2021 11:42:05 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap1.suse-dmz.suse.de with ESMTPSA
-        id TPP3OQ0f8GCzMAAAGKfGzw
-        (envelope-from <lhenriques@suse.de>); Thu, 15 Jul 2021 11:42:05 +0000
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id bd73403a;
-        Thu, 15 Jul 2021 11:42:05 +0000 (UTC)
-Date:   Thu, 15 Jul 2021 12:42:04 +0100
-From:   Luis Henriques <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@redhat.com>
-Cc:     Venky Shankar <vshankar@redhat.com>, idryomov@gmail.com,
-        Xiubo Li <xiubli@redhat.com>, pdonnell@redhat.com,
-        ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v4 4/5] ceph: record updated mon_addr on remount
-Message-ID: <YPAfDOanWnNb/UWv@suse.de>
-References: <20210714100554.85978-1-vshankar@redhat.com>
- <20210714100554.85978-5-vshankar@redhat.com>
- <848d919c6a791ab9b7c61d7cb89f759b55195c18.camel@redhat.com>
- <YO8SZ+Q3LaCt3K+V@suse.de>
- <eefa9ad5fa2b8a1e20a2031d622024151240ba70.camel@redhat.com>
+        bh=VgWT5tfqbtBkDrX2L7CznODEgq2BTXfXClIF6lsIWFg=;
+        b=shEPb7ejWp4NsR1zkbD7mwxPzoc5euT22W3fMApWWWKV805FqStp/zNqf6W4W2KXimr60g
+        Kfu9AYj1Y4dekvDw==
+Received: from quack2.suse.cz (unknown [10.100.200.198])
+        by relay2.suse.de (Postfix) with ESMTP id 63481A3B9C;
+        Thu, 15 Jul 2021 13:40:33 +0000 (UTC)
+Received: by quack2.suse.cz (Postfix, from userid 1000)
+        id 16BF81E0BFF; Thu, 15 Jul 2021 15:40:33 +0200 (CEST)
+From:   Jan Kara <jack@suse.cz>
+To:     <linux-fsdevel@vger.kernel.org>
+Cc:     <linux-ext4@vger.kernel.org>,
+        Christoph Hellwig <hch@infradead.org>,
+        "Darrick J. Wong" <djwong@kernel.org>, Ted Tso <tytso@mit.edu>,
+        Dave Chinner <david@fromorbit.com>,
+        Matthew Wilcox <willy@infradead.org>, <linux-mm@kvack.org>,
+        <linux-xfs@vger.kernel.org>,
+        linux-f2fs-devel@lists.sourceforge.net, linux-cifs@vger.kernel.org,
+        ceph-devel@vger.kernel.org, Jan Kara <jack@suse.cz>,
+        Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 06/14] ext2: Convert to using invalidate_lock
+Date:   Thu, 15 Jul 2021 15:40:16 +0200
+Message-Id: <20210715134032.24868-6-jack@suse.cz>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20210715133202.5975-1-jack@suse.cz>
+References: <20210715133202.5975-1-jack@suse.cz>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4727; h=from:subject; bh=ym49Iu4QRUik/RZXy3TKmo1SdbNHjClhswakdveozJ4=; b=owEBbQGS/pANAwAIAZydqgc/ZEDZAcsmYgBg8DrAXqVppyqhs9Kow3gAlNxylsvMUO1Q8weiZrXk EGLnB5OJATMEAAEIAB0WIQSrWdEr1p4yirVVKBycnaoHP2RA2QUCYPA6wAAKCRCcnaoHP2RA2S+qCA CCBAY7LsLaKnOxsZuCxP4VBsac7Lk876C7u73EmUZtNt0EC5qDjOmRB0ATJwzIyVRUh3mHiGmtZ1uG 87F4zRdonHW0OV7lYuIq/jDqMylYcLuNrWsvfy68+3c4JlNG4CTc88aLlAJz1PR+F/oHknHoPSak1w VPjx0Vt7fUH0njMXhC0jG1FSWpZbkTSjiwmKvQMCTi0qyI+C8HIVMZ0HYymDZSg9hhGQQWYetUysOd IP2occRPzhyeNETOyCJt0vKz3NrVNjqxeWIs6WMZwSECHfTj05fJ672DgNM3IeSIBGb6ijVcclHFw5 04GlJM6nay0POEc0+MsPU2TXQ5EHjH
+X-Developer-Key: i=jack@suse.cz; a=openpgp; fpr=93C6099A142276A28BBE35D815BC833443038D8C
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <eefa9ad5fa2b8a1e20a2031d622024151240ba70.camel@redhat.com>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, Jul 14, 2021 at 02:15:50PM -0400, Jeff Layton wrote:
-> On Wed, 2021-07-14 at 17:35 +0100, Luis Henriques wrote:
-> > On Wed, Jul 14, 2021 at 12:17:33PM -0400, Jeff Layton wrote:
-> > > On Wed, 2021-07-14 at 15:35 +0530, Venky Shankar wrote:
-> > > > Note that the new monitors are just shown in /proc/mounts.
-> > > > Ceph does not (re)connect to new monitors yet.
-> > > > 
-> > > > Signed-off-by: Venky Shankar <vshankar@redhat.com>
-> > > > ---
-> > > >  fs/ceph/super.c | 7 +++++++
-> > > >  1 file changed, 7 insertions(+)
-> > > > 
-> > > > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> > > > index d8c6168b7fcd..d3a5a3729c5b 100644
-> > > > --- a/fs/ceph/super.c
-> > > > +++ b/fs/ceph/super.c
-> > > > @@ -1268,6 +1268,13 @@ static int ceph_reconfigure_fc(struct fs_context *fc)
-> > > >  	else
-> > > >  		ceph_clear_mount_opt(fsc, ASYNC_DIROPS);
-> > > >  
-> > > > +	if (strcmp(fsc->mount_options->mon_addr, fsopt->mon_addr)) {
-> > > > +		kfree(fsc->mount_options->mon_addr);
-> > > > +		fsc->mount_options->mon_addr = fsopt->mon_addr;
-> > > > +		fsopt->mon_addr = NULL;
-> > > > +		printk(KERN_NOTICE "ceph: monitor addresses recorded, but not used for reconnection");
-> > > 
-> > > It's currently more in-vogue to use pr_notice() for this. I'll plan to
-> > > make that (minor) change before I merge. No need to resend.
-> > 
-> > Yeah, this was the only comment I had too.  I saw some issues in the
-> > previous revision but the changes to ceph_parse_source() seem to fix it in
-> > this revision.
-> > 
-> > The other annoying thing I found isn't related with this patchset but with
-> > a change that's been done some time ago by Xiubo (added to CC): it looks
-> > like that if we have an invalid parameter (for example, wrong secret)
-> > we'll always get -EHOSTUNREACH.
-> > 
-> > See below a possible fix (although I'm not entirely sure that's the correct
-> > one).
-> > 
-> > Cheers,
-> > --
-> > Luís
-> > 
-> > From a988d24d8e72fc4933459f3dd5d303cbc9a566ed Mon Sep 17 00:00:00 2001
-> > From: Luis Henriques <lhenriques@suse.de>
-> > Date: Wed, 14 Jul 2021 16:56:36 +0100
-> > Subject: [PATCH] ceph: don't hide error code if we don't have mdsmap
-> > 
-> > Since commit 97820058fb28 ("ceph: check availability of mds cluster on mount
-> > after wait timeout") we're returning -EHOSTUNREACH, even if the error isn't
-> > related with the MDSs availability.  For example, we'll get it even if we're
-> > trying to mounting a filesystem with an invalid username or secret.
-> > 
-> > Only return this error if we get -EIO.
-> > 
-> > Fixes: 97820058fb28 ("ceph: check availability of mds cluster on mount after wait timeout")
-> > Signed-off-by: Luis Henriques <lhenriques@suse.de>
-> > ---
-> >  fs/ceph/super.c | 3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> > index 086a1ceec9d8..67d70059ce9f 100644
-> > --- a/fs/ceph/super.c
-> > +++ b/fs/ceph/super.c
-> > @@ -1230,7 +1230,8 @@ static int ceph_get_tree(struct fs_context *fc)
-> >  	return 0;
-> >  
-> >  out_splat:
-> > -	if (!ceph_mdsmap_is_cluster_available(fsc->mdsc->mdsmap)) {
-> > +	if ((err == -EIO) &&
-> > +	    !ceph_mdsmap_is_cluster_available(fsc->mdsc->mdsmap)) {
-> >  		pr_info("No mds server is up or the cluster is laggy\n");
-> >  		err = -EHOSTUNREACH;
-> >  	}
-> 
-> Yeah, I've noticed that message pop up under all sorts of circumstances
-> and it is an annoyance. I'm happy to consider such a patch if you send
-> it separately.
-> 
-> That said, I'm honestly not sure this message is really helpful, and
-> overriding errors like this at a high level seems sort of sketchy. Maybe
-> we should just drop that message, or figure out a way to limit it to
-> _just_ that situation.
+Ext2 has its private dax_sem used for synchronizing page faults and
+truncation. Use mapping->invalidate_lock instead as it is meant for this
+purpose.
 
-I agree that the message isn't really useful but the -EHOSTUNREACH is a
-bit more confusing if we get it in the mount command when we simply have a
-typo in the parameters.
+CC: <linux-ext4@vger.kernel.org>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ fs/ext2/ext2.h  | 11 -----------
+ fs/ext2/file.c  |  7 +++----
+ fs/ext2/inode.c | 12 ++++++------
+ fs/ext2/super.c |  3 ---
+ 4 files changed, 9 insertions(+), 24 deletions(-)
 
-Anyway, after looking closer, I couldn't find a way to reach this code
-and have -EHOSTUNREACH to make sense.  When the MDSs are down/unreachable
-we have already err set to this error code.  This would mean that the
-correct fix would be to simply drop this 'if' statement.  Xiubo, do you
-remember how would this be possible?
+diff --git a/fs/ext2/ext2.h b/fs/ext2/ext2.h
+index b0a694820cb7..81907a041570 100644
+--- a/fs/ext2/ext2.h
++++ b/fs/ext2/ext2.h
+@@ -667,9 +667,6 @@ struct ext2_inode_info {
+ 	struct rw_semaphore xattr_sem;
+ #endif
+ 	rwlock_t i_meta_lock;
+-#ifdef CONFIG_FS_DAX
+-	struct rw_semaphore dax_sem;
+-#endif
+ 
+ 	/*
+ 	 * truncate_mutex is for serialising ext2_truncate() against
+@@ -685,14 +682,6 @@ struct ext2_inode_info {
+ #endif
+ };
+ 
+-#ifdef CONFIG_FS_DAX
+-#define dax_sem_down_write(ext2_inode)	down_write(&(ext2_inode)->dax_sem)
+-#define dax_sem_up_write(ext2_inode)	up_write(&(ext2_inode)->dax_sem)
+-#else
+-#define dax_sem_down_write(ext2_inode)
+-#define dax_sem_up_write(ext2_inode)
+-#endif
+-
+ /*
+  * Inode dynamic state flags
+  */
+diff --git a/fs/ext2/file.c b/fs/ext2/file.c
+index f98466acc672..eb97aa3d700e 100644
+--- a/fs/ext2/file.c
++++ b/fs/ext2/file.c
+@@ -81,7 +81,7 @@ static ssize_t ext2_dax_write_iter(struct kiocb *iocb, struct iov_iter *from)
+  *
+  * mmap_lock (MM)
+  *   sb_start_pagefault (vfs, freeze)
+- *     ext2_inode_info->dax_sem
++ *     address_space->invalidate_lock
+  *       address_space->i_mmap_rwsem or page_lock (mutually exclusive in DAX)
+  *         ext2_inode_info->truncate_mutex
+  *
+@@ -91,7 +91,6 @@ static ssize_t ext2_dax_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ static vm_fault_t ext2_dax_fault(struct vm_fault *vmf)
+ {
+ 	struct inode *inode = file_inode(vmf->vma->vm_file);
+-	struct ext2_inode_info *ei = EXT2_I(inode);
+ 	vm_fault_t ret;
+ 	bool write = (vmf->flags & FAULT_FLAG_WRITE) &&
+ 		(vmf->vma->vm_flags & VM_SHARED);
+@@ -100,11 +99,11 @@ static vm_fault_t ext2_dax_fault(struct vm_fault *vmf)
+ 		sb_start_pagefault(inode->i_sb);
+ 		file_update_time(vmf->vma->vm_file);
+ 	}
+-	down_read(&ei->dax_sem);
++	filemap_invalidate_lock_shared(inode->i_mapping);
+ 
+ 	ret = dax_iomap_fault(vmf, PE_SIZE_PTE, NULL, NULL, &ext2_iomap_ops);
+ 
+-	up_read(&ei->dax_sem);
++	filemap_invalidate_unlock_shared(inode->i_mapping);
+ 	if (write)
+ 		sb_end_pagefault(inode->i_sb);
+ 	return ret;
+diff --git a/fs/ext2/inode.c b/fs/ext2/inode.c
+index dadb121beb22..33f874f0fc4a 100644
+--- a/fs/ext2/inode.c
++++ b/fs/ext2/inode.c
+@@ -1177,7 +1177,7 @@ static void ext2_free_branches(struct inode *inode, __le32 *p, __le32 *q, int de
+ 		ext2_free_data(inode, p, q);
+ }
+ 
+-/* dax_sem must be held when calling this function */
++/* mapping->invalidate_lock must be held when calling this function */
+ static void __ext2_truncate_blocks(struct inode *inode, loff_t offset)
+ {
+ 	__le32 *i_data = EXT2_I(inode)->i_data;
+@@ -1194,7 +1194,7 @@ static void __ext2_truncate_blocks(struct inode *inode, loff_t offset)
+ 	iblock = (offset + blocksize-1) >> EXT2_BLOCK_SIZE_BITS(inode->i_sb);
+ 
+ #ifdef CONFIG_FS_DAX
+-	WARN_ON(!rwsem_is_locked(&ei->dax_sem));
++	WARN_ON(!rwsem_is_locked(&inode->i_mapping->invalidate_lock));
+ #endif
+ 
+ 	n = ext2_block_to_path(inode, iblock, offsets, NULL);
+@@ -1276,9 +1276,9 @@ static void ext2_truncate_blocks(struct inode *inode, loff_t offset)
+ 	if (ext2_inode_is_fast_symlink(inode))
+ 		return;
+ 
+-	dax_sem_down_write(EXT2_I(inode));
++	filemap_invalidate_lock(inode->i_mapping);
+ 	__ext2_truncate_blocks(inode, offset);
+-	dax_sem_up_write(EXT2_I(inode));
++	filemap_invalidate_unlock(inode->i_mapping);
+ }
+ 
+ static int ext2_setsize(struct inode *inode, loff_t newsize)
+@@ -1308,10 +1308,10 @@ static int ext2_setsize(struct inode *inode, loff_t newsize)
+ 	if (error)
+ 		return error;
+ 
+-	dax_sem_down_write(EXT2_I(inode));
++	filemap_invalidate_lock(inode->i_mapping);
+ 	truncate_setsize(inode, newsize);
+ 	__ext2_truncate_blocks(inode, newsize);
+-	dax_sem_up_write(EXT2_I(inode));
++	filemap_invalidate_unlock(inode->i_mapping);
+ 
+ 	inode->i_mtime = inode->i_ctime = current_time(inode);
+ 	if (inode_needs_sync(inode)) {
+diff --git a/fs/ext2/super.c b/fs/ext2/super.c
+index 21e09fbaa46f..987bcf32ed46 100644
+--- a/fs/ext2/super.c
++++ b/fs/ext2/super.c
+@@ -206,9 +206,6 @@ static void init_once(void *foo)
+ 	init_rwsem(&ei->xattr_sem);
+ #endif
+ 	mutex_init(&ei->truncate_mutex);
+-#ifdef CONFIG_FS_DAX
+-	init_rwsem(&ei->dax_sem);
+-#endif
+ 	inode_init_once(&ei->vfs_inode);
+ }
+ 
+-- 
+2.26.2
 
-Cheers,
---
-Luís
