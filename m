@@ -2,66 +2,67 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD6C4C636CA
-	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 06:03:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49970C636CD
+	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 16:43:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ABD6E613AF
-	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 06:03:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E7D3613D4
+	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 16:43:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234418AbhGPGGO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 16 Jul 2021 02:06:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39400 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230088AbhGPGGO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jul 2021 02:06:14 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC657C06175F;
-        Thu, 15 Jul 2021 23:03:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=VqN67i/AkXmoD+IiyttSlo//iBvW+McMPHFuPzEzzmk=; b=GIT7UGi37zY+XOB7QjWwGW3XJ0
-        7qEph9PTVYX9s67VHkRG4pM2K1Afby+1zcT4sTbChUk0zhwAyvHMDjwKoyuHqzaYVj4pcuJsfBlu6
-        Fk8V41n3n/B4RnuWGC7pC0bjPas3++sTAW+DXsW4mH4PMi4H+qc1/Itqs3Mg1NFZmSqbSdLAtprKm
-        VVBCaBmhmAez+Y8TKo54kjUBLyCv/f1C4pNSPf06xj04j6eN/evkGTDW44O/CcnUbF++coSL2tlTe
-        ftIE700GhNS7KbxUeVi0HolIM7XBwDI02Q+6FWVRqI3LsSKOvFhS+z6sl0H15g4PPZ2DyJSyqWuFp
-        6VB9QLWw==;
-Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1m4GvT-004CGX-Py; Fri, 16 Jul 2021 06:02:31 +0000
-Date:   Fri, 16 Jul 2021 07:02:19 +0100
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Jan Kara <jack@suse.cz>
-Cc:     linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Christoph Hellwig <hch@infradead.org>,
-        "Darrick J. Wong" <djwong@kernel.org>, Ted Tso <tytso@mit.edu>,
+        id S230253AbhGPQqP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 16 Jul 2021 12:46:15 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47086 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229498AbhGPQqI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 16 Jul 2021 12:46:08 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 35961613D0;
+        Fri, 16 Jul 2021 16:43:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1626453793;
+        bh=4cf1AnF6M65jEKCZ4DUvlF+jXCvIQBpF34YgrerdDE0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ER33OScu5jXxJL4bBbchkSb43icKDsitlTLzz/ULEuCKhDyvzfruACZnB7KEth/Ea
+         CrHL2LSiOdJ48FNoGdUcRJPztvvlN2R9q/wJJKcgnB4F1BFPAddcRBz30NPyaVNVA/
+         c13g+u1kfK1sYm4jZTlXTgZiWA4uk6IRkbh//2Bk3gR4M1niUW7g70cN+zj01sKUw5
+         w11NLDR1ohyuzzNvoiRCItpM7Kwmua6Mzwh8IqK6FDO3uAqgbL4KU/TlVuM6lEEHgQ
+         owdro4sa6g8ZVQZprvohZ8U0qKtbPZRfpQ+EtiAyzSrv0hMzf/nWGpv1wM1Qur2p+u
+         KJcRDYSgBrojg==
+Date:   Fri, 16 Jul 2021 09:43:11 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org,
+        linux-ext4@vger.kernel.org, Ted Tso <tytso@mit.edu>,
         Dave Chinner <david@fromorbit.com>,
         Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org,
         linux-xfs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
         linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org
 Subject: Re: [PATCH 0/14 v10] fs: Hole punch vs page cache filling races
-Message-ID: <YPEg63TU0pPzK5xB@infradead.org>
+Message-ID: <20210716164311.GA22357@magnolia>
 References: <20210715133202.5975-1-jack@suse.cz>
+ <YPEg63TU0pPzK5xB@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210715133202.5975-1-jack@suse.cz>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <YPEg63TU0pPzK5xB@infradead.org>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jul 15, 2021 at 03:40:10PM +0200, Jan Kara wrote:
-> Hello,
+On Fri, Jul 16, 2021 at 07:02:19AM +0100, Christoph Hellwig wrote:
+> On Thu, Jul 15, 2021 at 03:40:10PM +0200, Jan Kara wrote:
+> > Hello,
+> > 
+> > here is another version of my patches to address races between hole punching
+> > and page cache filling functions for ext4 and other filesystems. The only
+> > change since the last time is a small cleanup applied to changes of
+> > filemap_fault() in patch 3/14 based on Christoph's & Darrick's feedback (thanks
+> > guys!).  Darrick, Christoph, is the patch fine now?
 > 
-> here is another version of my patches to address races between hole punching
-> and page cache filling functions for ext4 and other filesystems. The only
-> change since the last time is a small cleanup applied to changes of
-> filemap_fault() in patch 3/14 based on Christoph's & Darrick's feedback (thanks
-> guys!).  Darrick, Christoph, is the patch fine now?
+> Looks fine to me.
 
-Looks fine to me.
+Me too.
+
+--D
