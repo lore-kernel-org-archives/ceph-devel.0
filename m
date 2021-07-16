@@ -2,86 +2,66 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25F01C07E96
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 14:02:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD6C4C636CA
+	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 06:03:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F0E4361289
-	for <ceph-devel@archiver.kernel.org>; Thu, 15 Jul 2021 14:02:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABD6E613AF
+	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 06:03:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232011AbhGOOFh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 15 Jul 2021 10:05:37 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57410 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229462AbhGOOFg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Jul 2021 10:05:36 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0F5EE6128D;
-        Thu, 15 Jul 2021 14:02:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626357763;
-        bh=grQW3UgWfXU4yxwPEIzF0tsiYGHqaSRZYJBDNFj47i4=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=h7p/Z2Fh0durFJqN2B8OLm4ac4IMDfIhaepdrfM8ah8taH71CAdxgLR4xH6EaMHJ1
-         cX4bAF5rv16Vzi75kKwQiEC1U66a37cFRuCGHyeRDFrauYUYtQOJOWSCfPKzaxtUeB
-         M8xDD7PvXYXlOacZ7O/2V1sRP8m7Hf4uhQJD3/dZtK5xnC+kjUFg6EDH1rMv+FvRGH
-         qXvOY2sOsjad/4/a58uy/9XzduON8s4l3EbZ4txEtXhkde/TU+3DcbMjV1ZamaGkyl
-         Qj3poUfZSwovsz0XHFsINscwC/c1BCYvzFa8YrpHuD3MNRyLN/FHceDuVeGQ1DrEtR
-         Cu1uuZgpiQPRA==
-Message-ID: <98f3852d84645b88963f987bb3373bb56ddd8d3e.camel@kernel.org>
-Subject: Re: [PATCH] ceph: don't WARN if we're still opening a session to an
- MDS
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Luis Henriques <lhenriques@suse.de>,
-        Ilya Dryomov <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>
-Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Thu, 15 Jul 2021 10:02:41 -0400
-In-Reply-To: <20210715134039.10466-1-lhenriques@suse.de>
-References: <20210715134039.10466-1-lhenriques@suse.de>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.40.3 (3.40.3-1.fc34) 
+        id S234418AbhGPGGO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 16 Jul 2021 02:06:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39400 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230088AbhGPGGO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jul 2021 02:06:14 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC657C06175F;
+        Thu, 15 Jul 2021 23:03:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=VqN67i/AkXmoD+IiyttSlo//iBvW+McMPHFuPzEzzmk=; b=GIT7UGi37zY+XOB7QjWwGW3XJ0
+        7qEph9PTVYX9s67VHkRG4pM2K1Afby+1zcT4sTbChUk0zhwAyvHMDjwKoyuHqzaYVj4pcuJsfBlu6
+        Fk8V41n3n/B4RnuWGC7pC0bjPas3++sTAW+DXsW4mH4PMi4H+qc1/Itqs3Mg1NFZmSqbSdLAtprKm
+        VVBCaBmhmAez+Y8TKo54kjUBLyCv/f1C4pNSPf06xj04j6eN/evkGTDW44O/CcnUbF++coSL2tlTe
+        ftIE700GhNS7KbxUeVi0HolIM7XBwDI02Q+6FWVRqI3LsSKOvFhS+z6sl0H15g4PPZ2DyJSyqWuFp
+        6VB9QLWw==;
+Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1m4GvT-004CGX-Py; Fri, 16 Jul 2021 06:02:31 +0000
+Date:   Fri, 16 Jul 2021 07:02:19 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Jan Kara <jack@suse.cz>
+Cc:     linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Christoph Hellwig <hch@infradead.org>,
+        "Darrick J. Wong" <djwong@kernel.org>, Ted Tso <tytso@mit.edu>,
+        Dave Chinner <david@fromorbit.com>,
+        Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org,
+        linux-xfs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org
+Subject: Re: [PATCH 0/14 v10] fs: Hole punch vs page cache filling races
+Message-ID: <YPEg63TU0pPzK5xB@infradead.org>
+References: <20210715133202.5975-1-jack@suse.cz>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210715133202.5975-1-jack@suse.cz>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, 2021-07-15 at 14:40 +0100, Luis Henriques wrote:
-> If MDSs aren't available while mounting a filesystem, the session state will
-> transition from SESSION_OPENING to SESSION_CLOSING.  And in that scenario
-> check_session_state() will be called from delayed_work() and trigger this
-> WARN.
+On Thu, Jul 15, 2021 at 03:40:10PM +0200, Jan Kara wrote:
+> Hello,
 > 
-> Avoid this by only WARNing after a session has already been established
-> (i.e., the s_ttl will be different from 0).
-> 
-> Fixes: 62575e270f66 ("ceph: check session state after bumping session->s_seq")
-> Signed-off-by: Luis Henriques <lhenriques@suse.de>
-> ---
->  fs/ceph/mds_client.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index e5af591d3bd4..86f09b1110a2 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -4468,7 +4468,7 @@ bool check_session_state(struct ceph_mds_session *s)
->  		break;
->  	case CEPH_MDS_SESSION_CLOSING:
->  		/* Should never reach this when we're unmounting */
-> -		WARN_ON_ONCE(true);
-> +		WARN_ON_ONCE(s->s_ttl);
->  		fallthrough;
->  	case CEPH_MDS_SESSION_NEW:
->  	case CEPH_MDS_SESSION_RESTARTING:
+> here is another version of my patches to address races between hole punching
+> and page cache filling functions for ext4 and other filesystems. The only
+> change since the last time is a small cleanup applied to changes of
+> filemap_fault() in patch 3/14 based on Christoph's & Darrick's feedback (thanks
+> guys!).  Darrick, Christoph, is the patch fine now?
 
-Mea culpa -- I've been meaning to fix that up. I'll plan to merge this
-later today.
-
-Thanks!
--- 
-Jeff Layton <jlayton@kernel.org>
-
+Looks fine to me.
