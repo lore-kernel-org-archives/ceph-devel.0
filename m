@@ -2,119 +2,88 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C8C2C07E95
-	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 13:28:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 192F2C12002
+	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 16:57:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 01990613AF
-	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 13:28:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0263761396
+	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jul 2021 16:57:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239927AbhGPNa6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 16 Jul 2021 09:30:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56674 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239391AbhGPNa5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jul 2021 09:30:57 -0400
-Received: from mail-io1-xd30.google.com (mail-io1-xd30.google.com [IPv6:2607:f8b0:4864:20::d30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD95FC06175F
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Jul 2021 06:28:01 -0700 (PDT)
-Received: by mail-io1-xd30.google.com with SMTP id d9so10545711ioo.2
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Jul 2021 06:28:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=558LhAZNzdgXANWhHBIVHbkkjqS4lhyXoVDo+SyKu6Y=;
-        b=pHV3PRF2bGhu+YwxYqzCiyMwV/ssS30bNxzR2O+qUqaePZn7/0/PQwGDUSegCyfIce
-         KqIxpEAoMnE7UZB0qF4uNUzm5NW0KRwKZm0HE+uAk9ggOGDTkMKzdjnAwyYKUxk8jCli
-         FSC/GONbeAMQ8nb6n3/BZQuhuw28xtzBp68qohnsTts05T/UbsiyiYaw8MxRwL9mYB0L
-         yACbnsn9STLLErC6vlQbXshUkUi0nkM39YR3drhXdtV8/ct5CGfm4C7pUEIOYzOUhKYE
-         2MgL1A3457g5EjQGE0coJw0m3mnCF40RkVHOD+cCN6Pkk5iDYHkOBXYU9E7Y6V9Owimv
-         V4lg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=558LhAZNzdgXANWhHBIVHbkkjqS4lhyXoVDo+SyKu6Y=;
-        b=k86Np0P69cNPBnCK3OLu1C9nyY1hUHhJiidhxPGu1UCMTJdrf7qK81SLdg45k/ynsa
-         HLk/iB8z9bDwlVR3j1fOv8uIDA+WwjLx0jKwBfZXqvP6jlpFbAoz4lX7W+NgDfdgTegm
-         QD2AncAwkzGBByOoeJO6rDvomfWiJKONCvV4vK9w1eED5qAZfMA2KTmAXUysX0gp09KL
-         0KlBR+0UGIzYkD1TB/ww7VUx4mHofdWi1+pnuEiy2qsJQOKUNZ74w93St7QqxmVS+oW9
-         qcFCNW9xJeQrIwyplypaXJiIoi967WNnDDKoHuxhJOSRQIS+/cjRMQjd2SwnBNpaY997
-         GcfQ==
-X-Gm-Message-State: AOAM532WSCG16x98211qBiem+hhVeUDZqkQZgbXRGegtRutXbWESUUzI
-        HB5uP51K0xlDNWsi9MDi9aRKXyqgDhVRJ6s4q0I=
-X-Google-Smtp-Source: ABdhPJxG3mMixCFx2GroTU+TU5ZoTyiw8fWOPeiFMAMTIV51r6fiIJ2Y8Xk08zNTgIDi6jvWjzXBB+cyvhphHV1lu2Y=
-X-Received: by 2002:a02:9109:: with SMTP id a9mr9077335jag.93.1626442081382;
- Fri, 16 Jul 2021 06:28:01 -0700 (PDT)
+        id S230498AbhGPRAd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 16 Jul 2021 13:00:33 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:59746 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230425AbhGPRAV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jul 2021 13:00:21 -0400
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 490BB22B0B;
+        Fri, 16 Jul 2021 16:57:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1626454644; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=pxtS5Oudgec4rEwV+dOqiY1lV684Qv1oXIm2Do6XZfk=;
+        b=hiFNsQSKFHqkGL/hKshmGNpZ5ZjicXOhEN/YtCsK88lEdh0idp4zsblQzEdVglXoiKYrdc
+        p6thMlpmVE41Yxl0KhkO7rimQTZLZLGojpDdoiJ9mLxNfdVo5NksjmOqEElW2p9FcTO/dc
+        rWtidrEtmI2xNoBjWEUHSwW4bb+gIwg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1626454644;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=pxtS5Oudgec4rEwV+dOqiY1lV684Qv1oXIm2Do6XZfk=;
+        b=s2c+8kdjfyur3gk7j7C5XyvF5JLV7mAnIM52+3ast7hDDkz7BxCQcxzHI0oLCb040Bok4p
+        kH2nrdw58zKz0qCw==
+Received: from quack2.suse.cz (unknown [10.100.200.198])
+        by relay2.suse.de (Postfix) with ESMTP id 3725FA3BB9;
+        Fri, 16 Jul 2021 16:57:24 +0000 (UTC)
+Received: by quack2.suse.cz (Postfix, from userid 1000)
+        id 12D411E0BF2; Fri, 16 Jul 2021 18:57:24 +0200 (CEST)
+Date:   Fri, 16 Jul 2021 18:57:24 +0200
+From:   Jan Kara <jack@suse.cz>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Christoph Hellwig <hch@infradead.org>, Jan Kara <jack@suse.cz>,
+        linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Ted Tso <tytso@mit.edu>, Dave Chinner <david@fromorbit.com>,
+        Matthew Wilcox <willy@infradead.org>, linux-mm@kvack.org,
+        linux-xfs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org
+Subject: Re: [PATCH 0/14 v10] fs: Hole punch vs page cache filling races
+Message-ID: <20210716165724.GH31920@quack2.suse.cz>
+References: <20210715133202.5975-1-jack@suse.cz>
+ <YPEg63TU0pPzK5xB@infradead.org>
+ <20210716164311.GA22357@magnolia>
 MIME-Version: 1.0
-References: <CAOdVJi3EQ=-3PeX6LvxMVqhpFZVE4TPiPu+H1HoAmiTpEwvh=A@mail.gmail.com>
-In-Reply-To: <CAOdVJi3EQ=-3PeX6LvxMVqhpFZVE4TPiPu+H1HoAmiTpEwvh=A@mail.gmail.com>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Fri, 16 Jul 2021 15:27:28 +0200
-Message-ID: <CAOi1vP8CLJYBR0hBKOGBGc62W1f+8vWQTJ2uh=BhNJBx7Wb0XQ@mail.gmail.com>
-Subject: Re: the issue of rgw sync concurrency
-To:     star fan <jfanix@gmail.com>
-Cc:     dev <dev@ceph.io>, Casey Bodley <cbodley@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210716164311.GA22357@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jul 15, 2021 at 2:25 PM star fan <jfanix@gmail.com> wrote:
->
-> We found some unnormal status of sync status when running multiple
-> rgw(15.2.14) multisize sync, then I dig into the codes about rgw sync.
-> I think there is a issues of rgw sync concurrency implementation if I
-> understand correctly.
-> The implementation of  the critical process which we want it run once,
-> which steps are as below:
-> 1. read shared status object
-> 2. check status
-> 3. lock status
-> 4. critical process
-> 5. store status
-> 6. unlock
->
-> It is a problem in concurrent case that  the critical process would
-> run multiple times because it uses old status, thus it makes no sense.
-> The steps should be as below
-> 1. read shared status object
-> 2. check status
-> 3. lock status
-> 4. read and check status again
-> 5. critical process
-> 6. store status
-> 7. unlock
->
-> one example as below
-> do {
-> r =3D run(new RGWReadSyncStatusCoroutine(&sync_env, &sync_status));
-> if (r < 0 && r !=3D -ENOENT) {
-> tn->log(0, SSTR("ERROR: failed to fetch sync status r=3D" << r));
-> return r;
-> }
->
-> switch ((rgw_meta_sync_info::SyncState)sync_status.sync_info.state) {
-> case rgw_meta_sync_info::StateBuildingFullSyncMaps:
-> tn->log(20, "building full sync maps");
-> r =3D run(new RGWFetchAllMetaCR(&sync_env, num_shards,
-> sync_status.sync_markers, tn));
->
-> And there is no deletion of omapkeys after finishing sync entry in
-> full_sync process, thus full_sync would run multiple times in
-> concurrent case.
->
-> It has  no importance impact on data sync because bucket syncing is
-> idempotence=EF=BC=8Cbut no metadata sync
+On Fri 16-07-21 09:43:11, Darrick J. Wong wrote:
+> On Fri, Jul 16, 2021 at 07:02:19AM +0100, Christoph Hellwig wrote:
+> > On Thu, Jul 15, 2021 at 03:40:10PM +0200, Jan Kara wrote:
+> > > Hello,
+> > > 
+> > > here is another version of my patches to address races between hole punching
+> > > and page cache filling functions for ext4 and other filesystems. The only
+> > > change since the last time is a small cleanup applied to changes of
+> > > filemap_fault() in patch 3/14 based on Christoph's & Darrick's feedback (thanks
+> > > guys!).  Darrick, Christoph, is the patch fine now?
+> > 
+> > Looks fine to me.
+> 
+> Me too.
 
-Moving to dev@ceph.io and adding Casey.
+Thanks guys! I've pushed the patches to linux-next.
 
-Thanks,
-
-                Ilya
+									Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
