@@ -2,287 +2,185 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99D4AC636C9
-	for <ceph-devel@archiver.kernel.org>; Wed, 21 Jul 2021 13:43:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36FEDC636CA
+	for <ceph-devel@archiver.kernel.org>; Wed, 21 Jul 2021 13:45:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 841E760FF4
-	for <ceph-devel@archiver.kernel.org>; Wed, 21 Jul 2021 13:43:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1D20D61249
+	for <ceph-devel@archiver.kernel.org>; Wed, 21 Jul 2021 13:45:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234357AbhGUNDB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 21 Jul 2021 09:03:01 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:40322 "EHLO
+        id S232494AbhGUNEi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 21 Jul 2021 09:04:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:30924 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S238585AbhGUNCT (ORCPT
+        by vger.kernel.org with ESMTP id S238604AbhGUNEU (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Jul 2021 09:02:19 -0400
+        Wed, 21 Jul 2021 09:04:20 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1626874975;
+        s=mimecast20190719; t=1626875092;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=u3iRI6G2PmV2NVzeJOI9b2gH+9mDn8JHQ+/7RFM7IbY=;
-        b=HNu9+Qr19qKd0QjQsrNo38ErkPPKeroMN6A1n5u0r+SA94D+JhEb+1cVmD1Fu4IXgMI5lm
-        e/WrkBwvJ5hbQpZvVCNv2ClpZlHSir4yC4UvoOszkFQaVl4PVlAwGViK9AgxUw2RST9Q2h
-        NPt5MEsL5q4hdS6ka+egN2/1IE+gUHc=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-499-vBjiOsB8Odide-_P5UHktg-1; Wed, 21 Jul 2021 09:42:53 -0400
-X-MC-Unique: vBjiOsB8Odide-_P5UHktg-1
-Received: by mail-pf1-f198.google.com with SMTP id d8-20020a056a001988b02903468678ce14so1789556pfl.22
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jul 2021 06:42:53 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=u3iRI6G2PmV2NVzeJOI9b2gH+9mDn8JHQ+/7RFM7IbY=;
-        b=sQInEc+TDT24OwjpboseAGS/wtlT6B6qUBlyYPkLrRdFiyFLcPcDpJgxkRvnEBeTVH
-         hIebHBvrLJGd4YUn/FqgcLzzim9wOkzBAh7bBJ34+/g6evgT4LsH4ZaK1Hop5eWsNgbS
-         SEdgGFlyZeJMvYUhMIMQdw0wsNDF3GVV9MAtY7fie0Nossh2VaTHEPjQ+RLMa9BOT8Xt
-         XctBtEhYDAzdk7iQYZ/owSOpJfLxAXLtAocFr5dW0GBu2SSeQ6UhAoyq0mZ9kD020Hbs
-         PNLdjsjhwyvRYahWTv2F5Y2C1cvRcP7ZeeyKobjKUahJgjYpFaHKQMV8vbNX9XKbKqHj
-         Lc8g==
-X-Gm-Message-State: AOAM530AiMbDSiBLhdpRP8AcK/KeMxkxJTJh8gWuXMvvdrYJlKHpHREJ
-        XOnBGL2YDwKp02L3foc04FGi97p5CKH0QQVLAtTsf3MY1uy0n7wBZhZJ7RrbWq9kQZPZpblVyJe
-        3UnyXuG2vBX6oxIsmlndrp0do2PlE7TuWoZMgRXz0B06DS39fe1GIWuQjB9uvln5NMHvPnMU=
-X-Received: by 2002:a63:e205:: with SMTP id q5mr35878615pgh.404.1626874972637;
-        Wed, 21 Jul 2021 06:42:52 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzijGVTfwkfdeC5J+hRxbjuNOiLN2UZilpusqEKhC7Zaedh/TzwYtVsMk0XrwCI/yshK8C8tA==
-X-Received: by 2002:a63:e205:: with SMTP id q5mr35878579pgh.404.1626874972241;
-        Wed, 21 Jul 2021 06:42:52 -0700 (PDT)
-Received: from [10.72.12.121] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c2sm29566320pgh.82.2021.07.21.06.42.50
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 21 Jul 2021 06:42:51 -0700 (PDT)
-Subject: Re: [PATCH RFC] ceph: flush the delayed caps in time
-To:     Jeff Layton <jlayton@kernel.org>, idryomov@gmail.com
-Cc:     pdonnell@redhat.com, ceph-devel@vger.kernel.org
-References: <20210721082720.110202-1-xiubli@redhat.com>
- <a2ab96c71ac875bd98efef4f7cb4590fbfae3b82.camel@kernel.org>
- <072b68bd-cb8d-b6a6-cca5-4ca20cfcde99@redhat.com>
- <55730c8c12a60453a8bdb1fc9f9dda0c43f01695.camel@kernel.org>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <da884af8-771a-0eb0-41bc-24239ca3c34e@redhat.com>
-Date:   Wed, 21 Jul 2021 21:42:46 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        bh=dD0k0Pq287Lg2ikVcgHQbQEUjRPU8jmSQuhejIIyzXI=;
+        b=AT4XY8N673hG8+VAv7dM/parF9UGleZqBlMuCJCZ9KYmSaAn4KoxUIxD+fhIzV9nysUbx0
+        LFwDNXezvmveQWImNbmd5Eu6N7cCSivGXoBQR1FUK0/ORSF7T237O9J/jkPAJEbNTsA63Q
+        JgryLjNIb38xuk3INtPDbGvKnAbPOGw=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-252-1-2iTUoAPoiPWa2aZlt75Q-1; Wed, 21 Jul 2021 09:44:50 -0400
+X-MC-Unique: 1-2iTUoAPoiPWa2aZlt75Q-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D3B08100B704;
+        Wed, 21 Jul 2021 13:44:47 +0000 (UTC)
+Received: from warthog.procyon.org.uk (ovpn-112-62.rdu2.redhat.com [10.10.112.62])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 6540D60CEC;
+        Wed, 21 Jul 2021 13:44:40 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+Subject: [RFC PATCH 01/12] afs: Sort out symlink reading
+From:   David Howells <dhowells@redhat.com>
+To:     linux-fsdevel@vger.kernel.org
+Cc:     dhowells@redhat.com, Jeff Layton <jlayton@redhat.com>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        Anna Schumaker <anna.schumaker@netapp.com>,
+        Steve French <sfrench@samba.org>,
+        Dominique Martinet <asmadeus@codewreck.org>,
+        Mike Marshall <hubcap@omnibond.com>,
+        David Wysochanski <dwysocha@redhat.com>,
+        Shyam Prasad N <nspmangalore@gmail.com>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        linux-cachefs@redhat.com, linux-afs@lists.infradead.org,
+        linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
+        ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
+        devel@lists.orangefs.org, linux-mm@kvack.org,
+        linux-kernel@vger.kernel.org
+Date:   Wed, 21 Jul 2021 14:44:40 +0100
+Message-ID: <162687508008.276387.6418924257569297305.stgit@warthog.procyon.org.uk>
+In-Reply-To: <162687506932.276387.14456718890524355509.stgit@warthog.procyon.org.uk>
+References: <162687506932.276387.14456718890524355509.stgit@warthog.procyon.org.uk>
+User-Agent: StGit/0.23
 MIME-Version: 1.0
-In-Reply-To: <55730c8c12a60453a8bdb1fc9f9dda0c43f01695.camel@kernel.org>
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+afs_readpage() doesn't get a file pointer when called for a symlink, so
+separate it from regular file pointer handling.
 
-On 7/21/21 8:57 PM, Jeff Layton wrote:
-> On Wed, 2021-07-21 at 19:54 +0800, Xiubo Li wrote:
->> On 7/21/21 7:23 PM, Jeff Layton wrote:
->>> On Wed, 2021-07-21 at 16:27 +0800, xiubli@redhat.com wrote:
->>>> From: Xiubo Li <xiubli@redhat.com>
->>>>
->>>> The delayed_work will be executed per 5 seconds, during this time
->>>> the cap_delay_list may accumulate thounsands of caps need to flush,
->>>> this will make the MDS's dispatch queue be full and need a very long
->>>> time to handle them. And if there has some other operations, likes
->>>> a rmdir request, it will be add in the tail of dispath queue and
->>>> need to wait for several or tens of seconds.
->>>>
->>>> In client side we shouldn't queue to many of the cap requests and
->>>> flush them if there has more than 100 items.
->>>>
->>> Why 100? My inclination is to say NAK on this.
->> This just from my test that around 100 client_caps requests queued will
->> work fine in most cases, which won't take too long to handle. Some times
->> the client will send thousands of requests in a short time, that will be
->> a problem.
-> What may be a better approach is to figure out why we're holding on to
-> so many caps and trying to flush them all at once. Maybe if we were to
-> more aggressively flush sooner, we'd not end up with such a backlog?
+Signed-off-by: David Howells <dhowells@redhat.com>
+---
 
-Yeah, I am still working on this.
+ fs/afs/file.c     |   14 +++++++++-----
+ fs/afs/inode.c    |    6 +++---
+ fs/afs/internal.h |    3 ++-
+ 3 files changed, 14 insertions(+), 9 deletions(-)
 
- From my analysis, some fixing or improvement like this will help reduce it:
+diff --git a/fs/afs/file.c b/fs/afs/file.c
+index ca0d993add65..c9c21ad0e7c9 100644
+--- a/fs/afs/file.c
++++ b/fs/afs/file.c
+@@ -19,6 +19,7 @@
+ 
+ static int afs_file_mmap(struct file *file, struct vm_area_struct *vma);
+ static int afs_readpage(struct file *file, struct page *page);
++static int afs_symlink_readpage(struct file *file, struct page *page);
+ static void afs_invalidatepage(struct page *page, unsigned int offset,
+ 			       unsigned int length);
+ static int afs_releasepage(struct page *page, gfp_t gfp_flags);
+@@ -46,7 +47,7 @@ const struct inode_operations afs_file_inode_operations = {
+ 	.permission	= afs_permission,
+ };
+ 
+-const struct address_space_operations afs_fs_aops = {
++const struct address_space_operations afs_file_aops = {
+ 	.readpage	= afs_readpage,
+ 	.readahead	= afs_readahead,
+ 	.set_page_dirty	= afs_set_page_dirty,
+@@ -60,6 +61,12 @@ const struct address_space_operations afs_fs_aops = {
+ 	.writepages	= afs_writepages,
+ };
+ 
++const struct address_space_operations afs_symlink_aops = {
++	.readpage	= afs_symlink_readpage,
++	.releasepage	= afs_releasepage,
++	.invalidatepage	= afs_invalidatepage,
++};
++
+ static const struct vm_operations_struct afs_vm_ops = {
+ 	.fault		= filemap_fault,
+ 	.map_pages	= filemap_map_pages,
+@@ -321,7 +328,7 @@ static void afs_req_issue_op(struct netfs_read_subrequest *subreq)
+ 	afs_fetch_data(fsreq->vnode, fsreq);
+ }
+ 
+-static int afs_symlink_readpage(struct page *page)
++static int afs_symlink_readpage(struct file *file, struct page *page)
+ {
+ 	struct afs_vnode *vnode = AFS_FS_I(page->mapping->host);
+ 	struct afs_read *fsreq;
+@@ -386,9 +393,6 @@ const struct netfs_read_request_ops afs_req_ops = {
+ 
+ static int afs_readpage(struct file *file, struct page *page)
+ {
+-	if (!file)
+-		return afs_symlink_readpage(page);
+-
+ 	return netfs_readpage(file, page, &afs_req_ops, NULL);
+ }
+ 
+diff --git a/fs/afs/inode.c b/fs/afs/inode.c
+index bef6f5ccfb09..cf7b66957c6f 100644
+--- a/fs/afs/inode.c
++++ b/fs/afs/inode.c
+@@ -105,7 +105,7 @@ static int afs_inode_init_from_status(struct afs_operation *op,
+ 		inode->i_mode	= S_IFREG | (status->mode & S_IALLUGO);
+ 		inode->i_op	= &afs_file_inode_operations;
+ 		inode->i_fop	= &afs_file_operations;
+-		inode->i_mapping->a_ops	= &afs_fs_aops;
++		inode->i_mapping->a_ops	= &afs_file_aops;
+ 		break;
+ 	case AFS_FTYPE_DIR:
+ 		inode->i_mode	= S_IFDIR |  (status->mode & S_IALLUGO);
+@@ -123,11 +123,11 @@ static int afs_inode_init_from_status(struct afs_operation *op,
+ 			inode->i_mode	= S_IFDIR | 0555;
+ 			inode->i_op	= &afs_mntpt_inode_operations;
+ 			inode->i_fop	= &afs_mntpt_file_operations;
+-			inode->i_mapping->a_ops	= &afs_fs_aops;
++			inode->i_mapping->a_ops	= &afs_symlink_aops;
+ 		} else {
+ 			inode->i_mode	= S_IFLNK | status->mode;
+ 			inode->i_op	= &afs_symlink_inode_operations;
+-			inode->i_mapping->a_ops	= &afs_fs_aops;
++			inode->i_mapping->a_ops	= &afs_symlink_aops;
+ 		}
+ 		inode_nohighmem(inode);
+ 		break;
+diff --git a/fs/afs/internal.h b/fs/afs/internal.h
+index 791cf02e5696..ccdde00ada8a 100644
+--- a/fs/afs/internal.h
++++ b/fs/afs/internal.h
+@@ -1050,7 +1050,8 @@ extern void afs_dynroot_depopulate(struct super_block *);
+ /*
+  * file.c
+  */
+-extern const struct address_space_operations afs_fs_aops;
++extern const struct address_space_operations afs_file_aops;
++extern const struct address_space_operations afs_symlink_aops;
+ extern const struct inode_operations afs_file_inode_operations;
+ extern const struct file_operations afs_file_operations;
+ extern const struct netfs_read_request_ops afs_req_ops;
 
-commit e64f44a884657358812e6c057957be546db03cbe
-Author: Xiubo Li <xiubli@redhat.com>
-Date:   Wed May 27 09:09:27 2020 -0400
-
-     ceph: skip checking caps when session reconnecting and releasing reqs
-
-     It make no sense to check the caps when reconnecting to mds. And
-     for the async dirop caps, they will be put by its _cb() function,
-     so when releasing the requests, it will make no sense too.
-
- From the test result, it seems that some caps related requests were 
-still pending in the cap_delay_list even after the rmdir requests were 
-already sent out and finished for the previous directories. I am still 
-confirming this.
-
-
-
->
->>> I'm not a fan of this sort of arbitrary throttling in order to alleviate
->>> a scalability problem in the MDS. The cap delay logic is already
->>> horrifically complex as well, and this just makes it worse. If the MDS
->>> happens to be processing requests from a lot of clients, this may not
->>> help at all.
->> Yeah, right, in that case the mds dispatch queue possibly will have more
->> in a short time.
->>
->>
->>>> URL: https://tracker.ceph.com/issues/51734
->>> The core problem sounds like the MDS got a call and just took way too
->>> long to get to it. Shouldn't we be addressing this in the MDS instead?
->>> It sounds like it needs to do a better job of parallelizing cap flushes.
->> The problem is that almost all the requests need to acquire the global
->> 'mds_lock', so the parallelizing won't improve much.
->>
-> Yuck. That sounds like the root cause right there. For the record, I'm
-> against papering over that with client patches.
->
->> Currently all the client side requests will have the priority of
->> CEPH_MSG_PRIO_DEFAULT:
->>
->> m->hdr.priority = cpu_to_le16(CEPH_MSG_PRIO_DEFAULT);
->>
->> Not sure whether can we just make the cap flushing request a lower
->> priority ? If this won't introduce other potential issue, that will work
->> because in the MDS dispatch queue it will handle high priority requests
->> first.
->>
-> Tough call. You might mark it for lower priority, but then someone calls
-> fsync() and suddenly you need it to finish sooner. I think that sort of
-> change might backfire in some cases.
-
-Yeah, I am also worrying about this.
-
-
->
-> Usually when faced with this sort of issue, the right answer is to try
-> to work ahead of the "spikes" in activity so that you don't have quite
-> such a backlog when you do need to flush everything out. I'm not sure
-> how possible that is here.
->
-> One underlying issue may be that some of the client's background
-> activity is currently driven by arbitrary timers (e.g. the delayed_work
-> timer). When the timer pops, it suddenly has to do a bunch of work, when
-> some of it could have been done earlier so that the load was spread out.
->
->
->>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->>>> ---
->>>>    fs/ceph/caps.c       | 21 ++++++++++++++++++++-
->>>>    fs/ceph/mds_client.c |  3 ++-
->>>>    fs/ceph/mds_client.h |  3 +++
->>>>    3 files changed, 25 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->>>> index 4b966c29d9b5..064865761d2b 100644
->>>> --- a/fs/ceph/caps.c
->>>> +++ b/fs/ceph/caps.c
->>>> @@ -507,6 +507,8 @@ static void __cap_set_timeouts(struct ceph_mds_client *mdsc,
->>>>    static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
->>>>    				struct ceph_inode_info *ci)
->>>>    {
->>>> +	int num = 0;
->>>> +
->>>>    	dout("__cap_delay_requeue %p flags 0x%lx at %lu\n", &ci->vfs_inode,
->>>>    	     ci->i_ceph_flags, ci->i_hold_caps_max);
->>>>    	if (!mdsc->stopping) {
->>>> @@ -515,12 +517,19 @@ static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
->>>>    			if (ci->i_ceph_flags & CEPH_I_FLUSH)
->>>>    				goto no_change;
->>>>    			list_del_init(&ci->i_cap_delay_list);
->>>> +			mdsc->num_cap_delay--;
->>>>    		}
->>>>    		__cap_set_timeouts(mdsc, ci);
->>>>    		list_add_tail(&ci->i_cap_delay_list, &mdsc->cap_delay_list);
->>>> +		num = ++mdsc->num_cap_delay;
->>>>    no_change:
->>>>    		spin_unlock(&mdsc->cap_delay_lock);
->>>>    	}
->>>> +
->>>> +	if (num > 100) {
->>>> +		flush_delayed_work(&mdsc->delayed_work);
->>>> +		schedule_delayed(mdsc);
->>>> +	}
->>>>    }
->>>>    
->>>>    /*
->>>> @@ -531,13 +540,23 @@ static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
->>>>    static void __cap_delay_requeue_front(struct ceph_mds_client *mdsc,
->>>>    				      struct ceph_inode_info *ci)
->>>>    {
->>>> +	int num;
->>>> +
->>>>    	dout("__cap_delay_requeue_front %p\n", &ci->vfs_inode);
->>>>    	spin_lock(&mdsc->cap_delay_lock);
->>>>    	ci->i_ceph_flags |= CEPH_I_FLUSH;
->>>> -	if (!list_empty(&ci->i_cap_delay_list))
->>>> +	if (!list_empty(&ci->i_cap_delay_list)) {
->>>>    		list_del_init(&ci->i_cap_delay_list);
->>>> +		mdsc->num_cap_delay--;
->>>> +	}
->>>>    	list_add(&ci->i_cap_delay_list, &mdsc->cap_delay_list);
->>>> +	num = ++mdsc->num_cap_delay;
->>>>    	spin_unlock(&mdsc->cap_delay_lock);
->>>> +
->>>> +	if (num > 100) {
->>>> +		flush_delayed_work(&mdsc->delayed_work);
->>>> +		schedule_delayed(mdsc);
->>>> +	}
->>>>    }
->>>>    
->>>>    /*
->>>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->>>> index 79aa4ce3a388..14e44de05812 100644
->>>> --- a/fs/ceph/mds_client.c
->>>> +++ b/fs/ceph/mds_client.c
->>>> @@ -4514,7 +4514,7 @@ void inc_session_sequence(struct ceph_mds_session *s)
->>>>    /*
->>>>     * delayed work -- periodically trim expired leases, renew caps with mds
->>>>     */
->>>> -static void schedule_delayed(struct ceph_mds_client *mdsc)
->>>> +void schedule_delayed(struct ceph_mds_client *mdsc)
->>>>    {
->>>>    	int delay = 5;
->>>>    	unsigned hz = round_jiffies_relative(HZ * delay);
->>>> @@ -4616,6 +4616,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
->>>>    	mdsc->request_tree = RB_ROOT;
->>>>    	INIT_DELAYED_WORK(&mdsc->delayed_work, delayed_work);
->>>>    	mdsc->last_renew_caps = jiffies;
->>>> +	mdsc->num_cap_delay = 0;
->>>>    	INIT_LIST_HEAD(&mdsc->cap_delay_list);
->>>>    	INIT_LIST_HEAD(&mdsc->cap_wait_list);
->>>>    	spin_lock_init(&mdsc->cap_delay_lock);
->>>> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
->>>> index a7af09257382..b4289b8d23ec 100644
->>>> --- a/fs/ceph/mds_client.h
->>>> +++ b/fs/ceph/mds_client.h
->>>> @@ -423,6 +423,7 @@ struct ceph_mds_client {
->>>>    	struct rb_root         request_tree;  /* pending mds requests */
->>>>    	struct delayed_work    delayed_work;  /* delayed work */
->>>>    	unsigned long    last_renew_caps;  /* last time we renewed our caps */
->>>> +	unsigned long    num_cap_delay;    /* caps in the cap_delay_list */
->>>>    	struct list_head cap_delay_list;   /* caps with delayed release */
->>>>    	spinlock_t       cap_delay_lock;   /* protects cap_delay_list */
->>>>    	struct list_head snap_flush_list;  /* cap_snaps ready to flush */
->>>> @@ -568,6 +569,8 @@ extern int ceph_trim_caps(struct ceph_mds_client *mdsc,
->>>>    			  struct ceph_mds_session *session,
->>>>    			  int max_caps);
->>>>    
->>>> +extern void schedule_delayed(struct ceph_mds_client *mdsc);
->>>> +
->>>>    static inline int ceph_wait_on_async_create(struct inode *inode)
->>>>    {
->>>>    	struct ceph_inode_info *ci = ceph_inode(inode);
 
