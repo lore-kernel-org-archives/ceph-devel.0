@@ -2,101 +2,101 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BCFDC4320A
-	for <ceph-devel@archiver.kernel.org>; Mon, 26 Jul 2021 09:58:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C328AC4338F
+	for <ceph-devel@archiver.kernel.org>; Tue, 27 Jul 2021 06:01:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0159A60E0C
-	for <ceph-devel@archiver.kernel.org>; Mon, 26 Jul 2021 09:58:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A57BF60D07
+	for <ceph-devel@archiver.kernel.org>; Tue, 27 Jul 2021 06:01:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232617AbhGZJSP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 26 Jul 2021 05:18:15 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:24942 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232156AbhGZJSO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 26 Jul 2021 05:18:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1627293523;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=emyki0erESW+WqQBrbNucdtV0c/SeusEDE/79NVl018=;
-        b=KTR8krytzwn+YtlWDKbIlVCHx2r7X97+KPTNiIYlcc3FjWw72PJItJVczAvETDckzZFCrD
-        ySJX4t2xFoQn3o+SXUwZDa0F+nP7OXoLLqZHD8WjxVxFubw3tO+u0iXDi5ZsWXBd16wxc7
-        G71Jb/5sX1s0s6TmBUGm5M8yUPHsPMo=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-337-Gc7iHYrsNBOOMq8W_WShOg-1; Mon, 26 Jul 2021 05:58:41 -0400
-X-MC-Unique: Gc7iHYrsNBOOMq8W_WShOg-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BEC05C7440;
-        Mon, 26 Jul 2021 09:58:39 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.22.16.89])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 25662797C0;
-        Mon, 26 Jul 2021 09:58:33 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH] netfs: Fix READ/WRITE confusion when calling
- iov_iter_xarray()
-From:   David Howells <dhowells@redhat.com>
-To:     linux-cachefs@redhat.com
-Cc:     Jeff Layton <jlayton@kernel.org>, linux-afs@lists.infradead.org,
-        ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
-        linux-nfs@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
-        dhowells@redhat.com, linux-kernel@vger.kernel.org
-Date:   Mon, 26 Jul 2021 10:58:33 +0100
-Message-ID: <162729351325.813557.9242842205308443901.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
+        id S235374AbhG0GA6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 27 Jul 2021 02:00:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44416 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233553AbhG0GA5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jul 2021 02:00:57 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BD20C061757;
+        Mon, 26 Jul 2021 23:00:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=r1glimHAK1enYyvXjb7/p34hcH8iizqcqcTqLcbpL40=; b=T5d98nxPB2NSUwaDW1/4ThOw4h
+        mwBZPoHDeyOsBF649ZNNo33MNZQzWi0ZFuhI4eKK0LgULX0MsqgeIQOBYFcVdvKjWetSjsEtcEbgT
+        bzCKnlOCmB9pBMg+vYWLfuVKM/S+kiKgQsy9VXVewqDLm9/kntrDKGQt6AqK5rIL5UbZERIYfa9n9
+        vDtCDAa7QtxDyflxi3fLu6Wx3l7oA/wMF90H2zvKDirZpl6hxERMkCGDdYj1Wn6+0Mu1uCyFRVPZ5
+        Czm9ZKlXm044gwqHaG8d0dmum4I+zX+maX24o8ilAWbmfhZy83uCU/ZwHgs5GqXAZw0JuYosBPpI6
+        2Yvj4Lxg==;
+Received: from [2001:4bb8:184:87c5:b7fb:1299:a9e5:ff56] (helo=localhost)
+        by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1m8G59-00EiCP-1F; Tue, 27 Jul 2021 05:57:15 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>, Thomas Gleixner <tglx@linutronix.de>
+Cc:     Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Geoff Levand <geoff@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        Mike Snitzer <snitzer@redhat.com>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        Ira Weiny <ira.weiny@intel.com>, dm-devel@redhat.com,
+        linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-block@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        ceph-devel@vger.kernel.org, linux-arch@vger.kernel.org
+Subject: switch the block layer to use kmap_local_page v3
+Date:   Tue, 27 Jul 2021 07:56:31 +0200
+Message-Id: <20210727055646.118787-1-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Fix netfs_clear_unread() to pass READ to iov_iter_xarray() instead of WRITE
-(the flag is about the operation accessing the buffer, not what sort of
-access it is doing to the buffer).
+Hi all,
 
-Fixes: 3d3c95046742 ("netfs: Provide readahead and readpage netfs helpers")
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Jeff Layton <jlayton@kernel.org>
-cc: linux-cachefs@redhat.com
-cc: linux-afs@lists.infradead.org
-cc: ceph-devel@vger.kernel.org
-cc: linux-cifs@vger.kernel.org
-cc: linux-nfs@vger.kernel.org
-cc: v9fs-developer@lists.sourceforge.net
-cc: linux-fsdevel@vger.kernel.org
-cc: linux-mm@kvack.org
----
+this series switches the core block layer code and all users of the
+existing bvec kmap helpers to use kmap_local_page.  Drivers that
+currently use open coded kmap_atomic calls will converted in a follow
+on series.
 
- fs/netfs/read_helper.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+To do so a new kunmap variant is added that calls
+flush_kernel_dcache_page.  I'm not entirely sure where to call
+flush_dcache_page vs flush_kernel_dcache_page, so I've tried to follow
+the documentation here, but additional feedback would be welcome.
 
-diff --git a/fs/netfs/read_helper.c b/fs/netfs/read_helper.c
-index 0b6cd3b8734c..994ec22d4040 100644
---- a/fs/netfs/read_helper.c
-+++ b/fs/netfs/read_helper.c
-@@ -150,7 +150,7 @@ static void netfs_clear_unread(struct netfs_read_subrequest *subreq)
- {
- 	struct iov_iter iter;
- 
--	iov_iter_xarray(&iter, WRITE, &subreq->rreq->mapping->i_pages,
-+	iov_iter_xarray(&iter, READ, &subreq->rreq->mapping->i_pages,
- 			subreq->start + subreq->transferred,
- 			subreq->len   - subreq->transferred);
- 	iov_iter_zero(iov_iter_count(&iter), &iter);
+Note that the ps3disk has a minir conflict with the
+flush_kernel_dcache_page removal in linux-next through the -mm tree.
+I had hoped that change would go into 5.14, but it seems like it is
+being held for 5.15.
 
+Changes since v2:
+ - rely on the flush_dcache_helpers in memcpy_to_page and memzero_page
+   that now hit mainline
 
+Changes since v1:
+ - add more/better comments
+ - add a new kunmap_local_dirty helper to feal with
+   flush(_kernel)_dcache_page
+
+Diffstat:
+ arch/mips/include/asm/mach-rc32434/rb.h |    2 -
+ block/bio-integrity.c                   |   14 +++-----
+ block/bio.c                             |   37 ++++++----------------
+ block/blk-map.c                         |    2 -
+ block/bounce.c                          |   39 +++++-------------------
+ block/t10-pi.c                          |   16 +++------
+ drivers/block/ps3disk.c                 |   19 +----------
+ drivers/block/rbd.c                     |   15 +--------
+ drivers/md/dm-writecache.c              |    5 +--
+ include/linux/bio.h                     |   42 -------------------------
+ include/linux/bvec.h                    |   52 ++++++++++++++++++++++++++++++--
+ include/linux/highmem-internal.h        |    7 ++++
+ include/linux/highmem.h                 |   10 ++++--
+ 13 files changed, 102 insertions(+), 158 deletions(-)
