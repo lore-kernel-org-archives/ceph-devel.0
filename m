@@ -7,36 +7,36 @@ X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB530C4338F
-	for <ceph-devel@archiver.kernel.org>; Mon,  9 Aug 2021 16:44:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78CE1C4338F
+	for <ceph-devel@archiver.kernel.org>; Wed, 11 Aug 2021 11:19:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB0F860F56
-	for <ceph-devel@archiver.kernel.org>; Mon,  9 Aug 2021 16:44:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5D3E960EB5
+	for <ceph-devel@archiver.kernel.org>; Wed, 11 Aug 2021 11:19:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231129AbhHIQod (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 9 Aug 2021 12:44:33 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43334 "EHLO mail.kernel.org"
+        id S237317AbhHKLTx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 11 Aug 2021 07:19:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40466 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229456AbhHIQod (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 9 Aug 2021 12:44:33 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 221CF60F35;
-        Mon,  9 Aug 2021 16:44:12 +0000 (UTC)
+        id S237293AbhHKLTw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 11 Aug 2021 07:19:52 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id CFBA26056C;
+        Wed, 11 Aug 2021 11:19:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628527452;
-        bh=zDRTU84UIQdfBCy4ZKMyNF+WQ86KUiaAMKkdOYmz0VA=;
+        s=k20201202; t=1628680769;
+        bh=+Ke3Tyx1TQ53pHhs429DvBwJkYm+ksMi/VSaWaTJeFo=;
         h=From:To:Cc:Subject:Date:From;
-        b=e9j4xKENH315UK4S0u+QRZANg3As+QCerly9ydthSQdgIRAJKdhGFuePmvnAVw3Hl
-         q5aUg15PxqMlyhmT1rcKtOy8TF/JdlWb2BmSxhbu0XKx8KzTi9k5OZh6RACsmj8Mvz
-         DuBj/KslKVPL6oOQaAotPCLNXyfdiBMOFgi3HKBTa3Z2nEJ1mcOTIj9XWdAGTPa3cZ
-         +ulzK+e7adqTY1lE/3M4qHYI4AyD74kfUi4doa13NjV5wwvGjVpRrXDeMn0y5ZCT/x
-         R4gCTJAQb42rk9+DzqVyikKL77PTo3M9LZWcYL/Iki+N5uhqwqVsgv96/AN/GBH+1W
-         /lPlwOl4JF3bQ==
+        b=rTJJI4gVbM0jhq9C+p8cuPEqhRGIoHW7H8A29Dh8WyuF1HFeM1tLBiXgMtfOPqCeo
+         9mrDWg7COiUiaPQtBtZgFvojLkx8TsVHgpbmFJhTWsaXGjQT34Q36UdgX1Jg/Jtwri
+         v7f4It3miUUOP9hM2hhduuI2psDfUMh7c3+rvKp+lcIyQ04Fr8EXSMCt7y+RRYD3JV
+         l/NNFbHeCUmuxZ9HRmZ7SB0jQ1UbzjuXC4be6mku76RwiZU73W/uXzaKnJaLZHAKZ6
+         gV2wgCMQOYjUJQ4o2eLxVZQYq9TPyjFtckqtu6IWF+hd4C5AuN1UIFJ/0UicskUc/C
+         0CdQi5+p35L5A==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, Patrick Donnelly <pdonnell@redhat.com>
-Subject: [PATCH] ceph: enable async dirops by default
-Date:   Mon,  9 Aug 2021 12:44:10 -0400
-Message-Id: <20210809164410.27750-1-jlayton@kernel.org>
+Cc:     idryomov@gmail.com
+Subject: [PATCH] ceph: remove dead code in ceph_sync_write
+Date:   Wed, 11 Aug 2021 07:19:27 -0400
+Message-Id: <20210811111927.8417-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -44,50 +44,32 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Async dirops have been supported in mainline kernels for quite some time
-now, and we've recently (as of June) started doing regular testing in
-teuthology with '-o nowsync'. So far, that hasn't uncovered any issues,
-so I think the time is right to flip the default for this option.
+We've already checked these flags near the top of the function and
+bailed out if either were set.
 
-Enable async dirops by default, and change /proc/mounts to show "wsync"
-when they are disabled rather than "nowsync" when they are enabled.
-
-Cc: Patrick Donnelly <pdonnell@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/super.c | 4 ++--
- fs/ceph/super.h | 3 ++-
- 2 files changed, 4 insertions(+), 3 deletions(-)
+ fs/ceph/file.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 609ffc8c2d78..f517ad9eeb26 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -698,8 +698,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
- 	if (fsopt->flags & CEPH_MOUNT_OPT_CLEANRECOVER)
- 		seq_show_option(m, "recover_session", "clean");
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index d1755ac1d964..f55ca2c4c7de 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1834,12 +1834,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 		goto retry_snap;
+ 	}
  
--	if (fsopt->flags & CEPH_MOUNT_OPT_ASYNC_DIROPS)
--		seq_puts(m, ",nowsync");
-+	if (!(fsopt->flags & CEPH_MOUNT_OPT_ASYNC_DIROPS))
-+		seq_puts(m, ",wsync");
+-	if (written >= 0) {
+-		if ((map_flags & CEPH_OSDMAP_NEARFULL) ||
+-		    (pool_flags & CEPH_POOL_FLAG_NEARFULL))
+-			iocb->ki_flags |= IOCB_DSYNC;
++	if (written >= 0)
+ 		written = generic_write_sync(iocb, written);
+-	}
  
- 	if (fsopt->wsize != CEPH_MAX_WRITE_SIZE)
- 		seq_printf(m, ",wsize=%u", fsopt->wsize);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 389b45ac291b..0bc36cf4c683 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -48,7 +48,8 @@
- 
- #define CEPH_MOUNT_OPT_DEFAULT			\
- 	(CEPH_MOUNT_OPT_DCACHE |		\
--	 CEPH_MOUNT_OPT_NOCOPYFROM)
-+	 CEPH_MOUNT_OPT_NOCOPYFROM |		\
-+	 CEPH_MOUNT_OPT_ASYNC_DIROPS)
- 
- #define ceph_set_mount_opt(fsc, opt) \
- 	(fsc)->mount_options->flags |= CEPH_MOUNT_OPT_##opt
+ 	goto out_unlocked;
+ out:
 -- 
 2.31.1
 
