@@ -2,103 +2,184 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AFB8C00144
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Aug 2021 14:47:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14F19C4338F
+	for <ceph-devel@archiver.kernel.org>; Mon, 16 Aug 2021 12:05:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77FE760F36
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Aug 2021 14:47:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA28C63244
+	for <ceph-devel@archiver.kernel.org>; Mon, 16 Aug 2021 12:05:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240877AbhHMOrz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Aug 2021 10:47:55 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:49153 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S240865AbhHMOry (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 13 Aug 2021 10:47:54 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1628866046;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=+F5e/QJCQvTQyfdm+mXX5RdrWpejQYPMUGSZ/zRGUYg=;
-        b=CKMdo5YDu7cPqnCz1ASWqonbejvQ36sM6+iwSHnyZrTmOX254+6KT5rOMJ/++9b7XrkeAs
-        rJTpDBCN6Xoe54e9mlueJkptLfHRMs3j6+6lBuR5fUj8qYOtxhUe+BAUVZaaQV8HLp0C9e
-        4B2s++AZcTwbBnRVRirx0IisIW/hpHQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-524-lV9q3wEuNu2HaooDE1H1AA-1; Fri, 13 Aug 2021 10:47:23 -0400
-X-MC-Unique: lV9q3wEuNu2HaooDE1H1AA-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A77DC1008061;
-        Fri, 13 Aug 2021 14:47:21 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.22.32.7])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B9DC060853;
-        Fri, 13 Aug 2021 14:47:15 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH] netfs: Fix READ/WRITE confusion when calling
- iov_iter_xarray()
-From:   David Howells <dhowells@redhat.com>
-To:     torvalds@linux-foundation.org
-Cc:     Jeff Layton <jlayton@kernel.org>, linux-cachefs@redhat.com,
-        linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org,
-        v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
-        dhowells@redhat.com, linux-kernel@vger.kernel.org
-Date:   Fri, 13 Aug 2021 15:47:14 +0100
-Message-ID: <162886603464.3940407.3790841170414793899.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
+        id S233130AbhHPMGI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 16 Aug 2021 08:06:08 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34490 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232667AbhHPMGE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 16 Aug 2021 08:06:04 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 3AC1461BF9;
+        Mon, 16 Aug 2021 12:05:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629115532;
+        bh=XSc2ALpZc0B8aNHhMR951uwVDlx5CrZP3jgI1weDNhY=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=WnCeUJfKPukzJwFkcIQVeHb3iFnl9NiwUpEPdbx8XRlTowWJLhvcAviv5dNNHpRyW
+         1QYRHaZw1ys6r5eSqbSkqVU++9CYdEXnBdcI929GKSLUzXI9+u1GeUr+nv7xKtSFRU
+         csjep9AjKQcPk1OacTsBkh/5ckoM2u7bANhDi7Z03EyIQP6T11TfrWjZcUp2R27D4O
+         6SjmJSaaCd7QwZH9oyfFhkzLbZUA8O+GWdzEIX5xEIroKDx8GcmTFNgC1DcesJ23MF
+         UV3/toJ7FJ6ana2u6Hw4oR5IMcQA2+tVHR3dNwupCYym2lwOY/D/Zpo589yweOR+gA
+         U73Nezl/yeQ8Q==
+Message-ID: <bc940c0fe07921d6e63b4a2316e93d84c96da201.camel@kernel.org>
+Subject: Re: [PATCH] ceph: try to reconnect to the export targets
+From:   Jeff Layton <jlayton@kernel.org>
+To:     xiubli@redhat.com
+Cc:     idryomov@gmail.com, pdonnell@redhat.com, ceph-devel@vger.kernel.org
+Date:   Mon, 16 Aug 2021 08:05:31 -0400
+In-Reply-To: <20210812041042.132984-1-xiubli@redhat.com>
+References: <20210812041042.132984-1-xiubli@redhat.com>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.3 (3.40.3-1.fc34) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Fix netfs_clear_unread() to pass READ to iov_iter_xarray() instead of WRITE
-(the flag is about the operation accessing the buffer, not what sort of
-access it is doing to the buffer).
+On Thu, 2021-08-12 at 12:10 +0800, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> In case the export MDS is crashed just after the EImportStart journal
+> is flushed, so when a standby MDS takes over it and when replaying
+> the EImportStart journal the MDS will wait the client to reconnect,
+> but the client may never register/open the sessions yet.
+> 
+> We will try to reconnect that MDSes if they're in the export targets
+> and in RECONNECT state.
+> 
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  fs/ceph/mds_client.c | 58 +++++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 57 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 14e44de05812..7dfe7a804320 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -4182,13 +4182,24 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>  			  struct ceph_mdsmap *newmap,
+>  			  struct ceph_mdsmap *oldmap)
+>  {
+> -	int i;
+> +	int i, err;
+> +	int *export_targets;
+>  	int oldstate, newstate;
+>  	struct ceph_mds_session *s;
+> +	struct ceph_mds_info *m_info;
+>  
+>  	dout("check_new_map new %u old %u\n",
+>  	     newmap->m_epoch, oldmap->m_epoch);
+>  
+> +	m_info = newmap->m_info;
+> +	export_targets = kcalloc(newmap->possible_max_rank, sizeof(int), GFP_NOFS);
+> +	if (export_targets && m_info) {
+> +		for (i = 0; i < m_info->num_export_targets; i++) {
+> +			BUG_ON(m_info->export_targets[i] >= newmap->possible_max_rank);
 
-Fixes: 3d3c95046742 ("netfs: Provide readahead and readpage netfs helpers")
-Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
-cc: linux-cachefs@redhat.com
-cc: linux-afs@lists.infradead.org
-cc: ceph-devel@vger.kernel.org
-cc: linux-cifs@vger.kernel.org
-cc: linux-nfs@vger.kernel.org
-cc: v9fs-developer@lists.sourceforge.net
-cc: linux-fsdevel@vger.kernel.org
-cc: linux-mm@kvack.org
-Link: https://lore.kernel.org/r/162729351325.813557.9242842205308443901.stgit@warthog.procyon.org.uk/
----
+In general, we shouldn't BUG() in response to bad info sent by the MDS.
+It would probably be better to check these values in
+ceph_mdsmap_decode() and return an error there if it doesn't look right.
+That way we can just toss out the new map instead of crashing.
 
- fs/netfs/read_helper.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> +			export_targets[m_info->export_targets[i]] = 1;
+> +		}
+> +	}
+> +
+>  	for (i = 0; i < oldmap->possible_max_rank && i < mdsc->max_sessions; i++) {
+>  		if (!mdsc->sessions[i])
+>  			continue;
+> @@ -4242,6 +4253,8 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>  		if (s->s_state == CEPH_MDS_SESSION_RESTARTING &&
+>  		    newstate >= CEPH_MDS_STATE_RECONNECT) {
+>  			mutex_unlock(&mdsc->mutex);
+> +			if (export_targets)
+> +				export_targets[i] = 0;
+>  			send_mds_reconnect(mdsc, s);
+>  			mutex_lock(&mdsc->mutex);
+>  		}
+> @@ -4264,6 +4277,47 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>  		}
+>  	}
+>  
+> +	for (i = 0; i < newmap->possible_max_rank; i++) {
 
-diff --git a/fs/netfs/read_helper.c b/fs/netfs/read_helper.c
-index 2ad91f9e2a45..9320a42dfaf9 100644
---- a/fs/netfs/read_helper.c
-+++ b/fs/netfs/read_helper.c
-@@ -150,7 +150,7 @@ static void netfs_clear_unread(struct netfs_read_subrequest *subreq)
- {
- 	struct iov_iter iter;
- 
--	iov_iter_xarray(&iter, WRITE, &subreq->rreq->mapping->i_pages,
-+	iov_iter_xarray(&iter, READ, &subreq->rreq->mapping->i_pages,
- 			subreq->start + subreq->transferred,
- 			subreq->len   - subreq->transferred);
- 	iov_iter_zero(iov_iter_count(&iter), &iter);
+The condition on this loop is slightly different from the one below it,
+and I'm not sure why. Should this also be checking this?
 
+    i < newmap->possible_max_rank && i < mdsc->max_sessions
+
+...do we need to look at export targets where i >= mdsc->max_sessions ?
+
+> +		if (!export_targets)
+> +			break;
+> +
+> +		/*
+> +		 * Only open and reconnect sessions that don't
+> +		 * exist yet.
+> +		 */
+> +		if (!export_targets[i] || __have_session(mdsc, i))
+> +			continue;
+> +
+> +		/*
+> +		 * In case the export MDS is crashed just after
+> +		 * the EImportStart journal is flushed, so when
+> +		 * a standby MDS takes over it and is replaying
+> +		 * the EImportStart journal the new MDS daemon
+> +		 * will wait the client to reconnect it, but the
+> +		 * client may never register/open the sessions
+> +		 * yet.
+> +		 *
+> +		 * It will try to reconnect that MDS daemons if
+> +		 * the MDSes are in the export targets and is the
+> +		 * RECONNECT state.
+> +		 */
+> +		newstate = ceph_mdsmap_get_state(newmap, i);
+> +		if (newstate != CEPH_MDS_STATE_RECONNECT)
+> +			continue;
+> +		s = __open_export_target_session(mdsc, i);
+> +		if (IS_ERR(s)) {
+> +			err = PTR_ERR(s);
+> +			pr_err("failed to open export target session, err %d\n",
+> +			       err);
+> +			continue;
+> +		}
+> +		dout("send reconnect to target mds.%d\n", i);
+> +		mutex_unlock(&mdsc->mutex);
+> +		send_mds_reconnect(mdsc, s);
+> +		mutex_lock(&mdsc->mutex);
+> +		ceph_put_mds_session(s);
+
+Suppose we end up in this part of the code, and we have to drop the
+mdsc->mutex like this. What ensures that an earlier session in the array
+won't end up going back into CEPH_MDS_STATE_RECONNECT before we can get
+into the loop below? This looks racy.
+
+> +	}
+> +
+>  	for (i = 0; i < newmap->possible_max_rank && i < mdsc->max_sessions; i++) {
+>  		s = mdsc->sessions[i];
+>  		if (!s)
+> @@ -4278,6 +4332,8 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>  			__open_export_target_sessions(mdsc, s);
+>  		}
+>  	}
+> +
+> +	kfree(export_targets);
+>  }
+>  
+>  
+
+-- 
+Jeff Layton <jlayton@kernel.org>
 
