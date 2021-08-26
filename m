@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 425CBC4320A
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB450C43214
 	for <ceph-devel@archiver.kernel.org>; Thu, 26 Aug 2021 16:20:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2533860551
+	by mail.kernel.org (Postfix) with ESMTP id C880260551
 	for <ceph-devel@archiver.kernel.org>; Thu, 26 Aug 2021 16:20:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243200AbhHZQVp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 26 Aug 2021 12:21:45 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45008 "EHLO mail.kernel.org"
+        id S243202AbhHZQVq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 26 Aug 2021 12:21:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44732 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S243184AbhHZQV0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 26 Aug 2021 12:21:26 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 4431561165;
-        Thu, 26 Aug 2021 16:20:38 +0000 (UTC)
+        id S243150AbhHZQVU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 26 Aug 2021 12:21:20 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id AC63961157;
+        Thu, 26 Aug 2021 16:20:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629994839;
-        bh=cMmlEJ2/VTmeHHrOae4DPK/zfbSFsdZPbcKf9dis2mg=;
+        s=k20201202; t=1629994833;
+        bh=bxPw9/IjvBWN735Tv0FZOQZfWM7OnabC7ZLfvIh0/jw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LmGEZGYzOb7un3U8VtawWPuy1KUvlA4+6CSHRfRc3zWo6evCX9xMWp6k5YFqbxoB/
-         IyncaO4qME9WIsiRuEsVI2PRE4/l6p1sBYHGXJ61BVNP3bHsUyG3uN7BDmEs/NzY8Z
-         R3+SfP/yVBpmdJ8CgvVJI68l4e4Fg3P/bRiPvvXAlWerAzGsFrgAW/O2mmpY6K5eaM
-         dVGYprUcXOQCWIUHXTki83y9TUh9DrAeGj3IpPv1cDztiS8oPimM3chqq2pwuc3NM8
-         ezIne0mpIwZQOnjcWKf6+Sc4HJonmEvwpWGyMiupsPjFFDYys8zhkdiyQE7nBrpOSz
-         oKqt/qXtfTcZQ==
+        b=IAQhr/zxlKAYMdCpfN9T+Hj+BWXIagKruSwiEMdwnWEbKXgD+42XqdrfISzcnGOiI
+         KrIK/UnJ7eCenQkwh/YVwm2ZpE+26QWknxZZ7OB680voFIvvttpKlJeIH7SKByXuyq
+         V1IRuv1C+d5/j7XFMGlq/UslzHU+ID1dc29pjB6/xTjAFnunEjL8FZ5WB8ahHJ4LTL
+         AHIVcx39pPrp7hn4P5EPoMgjJDifrOcsExqEiU2oiRlzGpx2V1UPbelJcEexLzbCRm
+         ZMU9owkvjVFohyOucuhnp2KrUUFF8nDBt4CMdsr2VCZBqttkcs4sEhqdGgLeEXQ72T
+         siny2g3fCgFeA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     linux-fsdevel@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         dhowells@redhat.com, xiubli@redhat.com, lhenriques@suse.de,
         khiremat@redhat.com, ebiggers@kernel.org
-Subject: [RFC PATCH v8 24/24] ceph: add a new ceph.fscrypt.auth vxattr
-Date:   Thu, 26 Aug 2021 12:20:14 -0400
-Message-Id: <20210826162014.73464-25-jlayton@kernel.org>
+Subject: [RFC PATCH v8 18/24] ceph: make d_revalidate call fscrypt revalidator for encrypted dentries
+Date:   Thu, 26 Aug 2021 12:20:08 -0400
+Message-Id: <20210826162014.73464-19-jlayton@kernel.org>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210826162014.73464-1-jlayton@kernel.org>
 References: <20210826162014.73464-1-jlayton@kernel.org>
@@ -48,53 +48,40 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Give the clietn away to get at the xattr from userland, mostly for
-future debugging purposes.
+If we have a dentry which represents a no-key name, then we need to test
+whether the parent directory's encryption key has since been added.  Do
+that before we test anything else about the dentry.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/xattr.c | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+ fs/ceph/dir.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index a2a1b47313f2..bdd2144bacfa 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -352,6 +352,21 @@ static ssize_t ceph_vxattrcb_auth_mds(struct ceph_inode_info *ci,
- 	return ret;
- }
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 4fa776d8fa53..7977484d0317 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1700,6 +1700,10 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
+ 	struct inode *dir, *inode;
+ 	struct ceph_mds_client *mdsc;
  
-+static bool ceph_vxattrcb_fscrypt_auth_exists(struct ceph_inode_info *ci)
-+{
-+	return ci->fscrypt_auth_len;
-+}
++	valid = fscrypt_d_revalidate(dentry, flags);
++	if (valid <= 0)
++		return valid;
 +
-+static ssize_t ceph_vxattrcb_fscrypt_auth(struct ceph_inode_info *ci, char *val, size_t size)
-+{
-+	if (size) {
-+		if (size < ci->fscrypt_auth_len)
-+			return -ERANGE;
-+		memcpy(val, ci->fscrypt_auth, ci->fscrypt_auth_len);
-+	}
-+	return ci->fscrypt_auth_len;
-+}
-+
- #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
- #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
- 	XATTR_CEPH_PREFIX #_type "." #_name "." #_name2
-@@ -492,6 +507,13 @@ static struct ceph_vxattr ceph_common_vxattrs[] = {
- 		.exists_cb = NULL,
- 		.flags = VXATTR_FLAG_READONLY,
- 	},
-+	{
-+		.name = "ceph.fscrypt.auth",
-+		.name_size = sizeof("ceph.fscrypt.auth"),
-+		.getxattr_cb = ceph_vxattrcb_fscrypt_auth,
-+		.exists_cb = ceph_vxattrcb_fscrypt_auth_exists,
-+		.flags = VXATTR_FLAG_READONLY,
-+	},
- 	{ .name = NULL, 0 }	/* Required table terminator */
- };
+ 	if (flags & LOOKUP_RCU) {
+ 		parent = READ_ONCE(dentry->d_parent);
+ 		dir = d_inode_rcu(parent);
+@@ -1712,8 +1716,8 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
+ 		inode = d_inode(dentry);
+ 	}
+ 
+-	dout("d_revalidate %p '%pd' inode %p offset 0x%llx\n", dentry,
+-	     dentry, inode, ceph_dentry(dentry)->offset);
++	dout("d_revalidate %p '%pd' inode %p offset 0x%llx nokey %d\n", dentry,
++	     dentry, inode, ceph_dentry(dentry)->offset, !!(dentry->d_flags & DCACHE_NOKEY_NAME));
+ 
+ 	mdsc = ceph_sb_to_client(dir->i_sb)->mdsc;
  
 -- 
 2.31.1
