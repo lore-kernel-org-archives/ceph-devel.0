@@ -5,110 +5,113 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38B61C43214
-	for <ceph-devel@archiver.kernel.org>; Fri, 27 Aug 2021 09:44:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C56C4C432BE
+	for <ceph-devel@archiver.kernel.org>; Fri, 27 Aug 2021 09:45:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2100360F14
-	for <ceph-devel@archiver.kernel.org>; Fri, 27 Aug 2021 09:44:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A098560F58
+	for <ceph-devel@archiver.kernel.org>; Fri, 27 Aug 2021 09:45:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244881AbhH0JpM (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 27 Aug 2021 05:45:12 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:38329 "EHLO
+        id S245105AbhH0Jpb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 27 Aug 2021 05:45:31 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23984 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S244737AbhH0Jox (ORCPT
+        by vger.kernel.org with ESMTP id S244988AbhH0Jo7 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 27 Aug 2021 05:44:53 -0400
+        Fri, 27 Aug 2021 05:44:59 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1630057444;
+        s=mimecast20190719; t=1630057450;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=umSnYP/WvzHC2yY7lWMQKN/6202Vdgqk8ZmUQWItKQo=;
-        b=d/LtniYE1HsVZhjc6F3Njp2+UzuKy9Mh3PDaJ9Df+CK/WA3MVB6iK/sCNXZb5/mfjsfSKF
-        jhEXX1RSJk6qq/Cvg+yNW3+nKVELbnYa+NbS1mXu7TYwpeCYFhGCHz2ICWfjj7QI5l1TDc
-        jzVnm0NitApByEZyUcT2FAHu5Ivfk9g=
+        bh=iHPR3rkSbihjHvdPEgrYmv+1SJx/f/gtZMk2QO7i4cU=;
+        b=CouVVcY0d+gesrUIYLnot8pa0OZeO7uVGMGAu7fVcVsJI3w14HBnTQ86coCmRWn3aNVXhe
+        aZZkN/Ln9NbLgnMMnTCYSP2llbSk6dr0m3aN/0JN2WcbECTvYxjzgzS3F7Z0GV54IzErP/
+        SNjBUkzhhy+3xdM3+5lOqrY1wJJF3JY=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-516-TTm60KDbOYuMybYev-wCYw-1; Fri, 27 Aug 2021 05:44:02 -0400
-X-MC-Unique: TTm60KDbOYuMybYev-wCYw-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-485-9eK8aRFgO4KC-L8EhLU-Jg-1; Fri, 27 Aug 2021 05:44:08 -0400
+X-MC-Unique: 9eK8aRFgO4KC-L8EhLU-Jg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 70E4F802E73;
-        Fri, 27 Aug 2021 09:43:40 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6F41110A0B69;
+        Fri, 27 Aug 2021 09:43:58 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.33.36.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A19E65D6B1;
-        Fri, 27 Aug 2021 09:43:37 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id CB8E15D9DC;
+        Fri, 27 Aug 2021 09:43:55 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH v2 1/6] afs: Fix afs_launder_page() to set correct start file
- position
+Subject: [PATCH v2 3/6] folio: Add a function to change the private data
+ attached to a folio
 From:   David Howells <dhowells@redhat.com>
 To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
-Cc:     Jeffrey Altman <jaltman@auristor.com>,
-        linux-afs@lists.infradead.org, dhowells@redhat.com,
-        Jeff Layton <jlayton@kernel.org>,
+Cc:     dhowells@redhat.com, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         linux-fsdevel@vger.kernel.org, linux-cachefs@redhat.com,
         linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org,
         linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs-developer@lists.sourceforge.net, devel@lists.orangefs.org,
         linux-mm@kvack.org, linux-kernel@vger.kernel.org
-Date:   Fri, 27 Aug 2021 10:43:36 +0100
-Message-ID: <163005741670.2472992.2073548908229887941.stgit@warthog.procyon.org.uk>
+Date:   Fri, 27 Aug 2021 10:43:54 +0100
+Message-ID: <163005743485.2472992.5100702469503007023.stgit@warthog.procyon.org.uk>
 In-Reply-To: <163005740700.2472992.12365214290752300378.stgit@warthog.procyon.org.uk>
 References: <163005740700.2472992.12365214290752300378.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Fix afs_launder_page() to set the starting position of the StoreData RPC at
-the offset into the page at which the modified data starts instead of at
-the beginning of the page (the iov_iter is correctly offset).
+Add a function, folio_change_private(), that will change the private data
+attached to a folio, without the need to twiddle the private bit or the
+refcount.  It assumes that folio_add_private() has already been called on
+the page.
 
-The offset got lost during the conversion to passing an iov_iter into
-afs_store_data().
-
-Changes:
-ver #2:
- - Use page_offset() rather than manually calculating it[1].
-
-Fixes: bd80d8a80e12 ("afs: Use ITER_XARRAY for writing")
 Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Jeffrey Altman <jaltman@auristor.com>
-cc: linux-afs@lists.infradead.org
-Link: https://lore.kernel.org/r/YST/0e92OdSH0zjg@casper.infradead.org/ [1]
-Link: https://lore.kernel.org/r/162880783179.3421678.7795105718190440134.stgit@warthog.procyon.org.uk/
-Link: https://lore.kernel.org/r/162937512409.1449272.18441473411207824084.stgit@warthog.procyon.org.uk/
-Link: https://lore.kernel.org/r/162981148752.1901565.3663780601682206026.stgit@warthog.procyon.org.uk/
+Reviewed-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+Link: https://lore.kernel.org/r/162981149911.1901565.17776700811659843340.stgit@warthog.procyon.org.uk/
 ---
 
- fs/afs/write.c |    3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ include/linux/pagemap.h |   19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/fs/afs/write.c b/fs/afs/write.c
-index fb7d5c1cabde..5c977deeeee0 100644
---- a/fs/afs/write.c
-+++ b/fs/afs/write.c
-@@ -950,8 +950,7 @@ int afs_launder_page(struct page *page)
- 		iov_iter_bvec(&iter, WRITE, bv, 1, bv[0].bv_len);
+diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
+index f55d8d9001a9..c8d336e62177 100644
+--- a/include/linux/pagemap.h
++++ b/include/linux/pagemap.h
+@@ -229,6 +229,25 @@ static inline void folio_attach_private(struct folio *folio, void *data)
+ 	folio_set_private(folio);
+ }
  
- 		trace_afs_page_dirty(vnode, tracepoint_string("launder"), page);
--		ret = afs_store_data(vnode, &iter, (loff_t)page->index * PAGE_SIZE,
--				     true);
-+		ret = afs_store_data(vnode, &iter, page_offset(page) + f, true);
- 	}
- 
- 	trace_afs_page_dirty(vnode, tracepoint_string("laundered"), page);
++/**
++ * folio_change_private - Change private data on a folio.
++ * @folio: Folio to change the data on.
++ * @data: Data to set on the folio.
++ *
++ * Change the private data attached to a folio and return the old
++ * data.  The page must previously have had data attached and the data
++ * must be detached before the folio will be freed.
++ *
++ * Return: Data that was previously attached to the folio.
++ */
++static inline void *folio_change_private(struct folio *folio, void *data)
++{
++	void *old = folio_get_private(folio);
++
++	folio->private = data;
++	return old;
++}
++
+ /**
+  * folio_detach_private - Detach private data from a folio.
+  * @folio: Folio to detach data from.
 
 
