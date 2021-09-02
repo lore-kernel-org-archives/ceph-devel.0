@@ -2,66 +2,68 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEC8FC433F5
-	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 19:07:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CEA8C433EF
+	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 19:11:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9923C6056B
-	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 19:07:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 23D20601FD
+	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 19:11:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243513AbhIBTIQ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 2 Sep 2021 15:08:16 -0400
-Received: from mail.kernel.org ([198.145.29.99]:55464 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1347348AbhIBTIG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 2 Sep 2021 15:08:06 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D12E96054E;
-        Thu,  2 Sep 2021 19:07:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1630609628;
-        bh=/VUzbhURx1s8b9RV4Amxc5CupQ4K7t2d0n5SCzYtJCc=;
-        h=From:To:Cc:Subject:Date:From;
-        b=WGllVGHdpZA2V3fgW/p7a2hGi59CUAVPQXK8L7V2byhRliiRmNhkesKEd3600SDVV
-         J/rtsR2sZifxlS6Umyfh7A1gQ4c1Ohkb7PoCOBiktMnWDuVNdl+gXFWcBnIIWJycZG
-         KurWIYTXdp+Y8WfLPtZo9GWjE8wfSx9LFoG8yjYBmOaiJpsgZ20sxfpCIZPv4sVxDD
-         1J2Eg+ONdKeWByNA2PfsuZkC0YiXb0aYtdwiIyew6Kp0di8+SzkHrUXLjzDSRCIbmF
-         UX75Rv/PyIEXD/Br8Zq/bW7s6UOQNdBqXcHPJ9Ql29OMgg5N+U0CwUxY2iI9oBALU6
-         PUDnvCwkmxgkA==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com
-Subject: [PATCH] ceph: lockdep annotations for try_nonblocking_invalidate
-Date:   Thu,  2 Sep 2021 15:07:06 -0400
-Message-Id: <20210902190706.46125-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.31.1
+        id S1347285AbhIBTK0 convert rfc822-to-8bit (ORCPT
+        <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 2 Sep 2021 15:10:26 -0400
+Received: from relay8-d.mail.gandi.net ([217.70.183.201]:50395 "EHLO
+        relay8-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1347140AbhIBTKY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Sep 2021 15:10:24 -0400
+Received: (Authenticated sender: miquel.raynal@bootlin.com)
+        by relay8-d.mail.gandi.net (Postfix) with ESMTPSA id B207D1BF206;
+        Thu,  2 Sep 2021 19:09:18 +0000 (UTC)
+Date:   Thu, 2 Sep 2021 21:09:17 +0200
+From:   Miquel Raynal <miquel.raynal@bootlin.com>
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     axboe@kernel.dk, gregkh@linuxfoundation.org,
+        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
+        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
+        colin.king@canonical.com, shubhankarvk@gmail.com,
+        baijiaju1990@gmail.com, trix@redhat.com,
+        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
+        richard@nod.at, vigneshr@ti.com, sth@linux.ibm.com,
+        hoeppner@linux.ibm.com, hca@linux.ibm.com, gor@linux.ibm.com,
+        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
+        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 5/9] mtd: add add_disk() error handling
+Message-ID: <20210902210917.54eb6e26@xps13>
+In-Reply-To: <20210902174105.2418771-6-mcgrof@kernel.org>
+References: <20210902174105.2418771-1-mcgrof@kernel.org>
+        <20210902174105.2418771-6-mcgrof@kernel.org>
+Organization: Bootlin
+X-Mailer: Claws Mail 3.17.7 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/caps.c | 2 ++
- 1 file changed, 2 insertions(+)
+Hi Luis,
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index cdd0ff376c6d..d22db2183d45 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1847,6 +1847,8 @@ static u64 __mark_caps_flushing(struct inode *inode,
-  * try to invalidate mapping pages without blocking.
-  */
- static int try_nonblocking_invalidate(struct inode *inode)
-+	__releases(ci->i_ceph_lock)
-+	__acquires(ci->i_ceph_lock)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	u32 invalidating_gen = ci->i_rdcache_gen;
--- 
-2.31.1
+Luis Chamberlain <mcgrof@kernel.org> wrote on Thu,  2 Sep 2021 10:41:01
+-0700:
 
+> We never checked for errors on add_disk() as this function
+> returned void. Now that this is fixed, use the shiny new
+> error handling.
+> 
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+
+Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+
+Thanks,
+Miquèl
