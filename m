@@ -7,33 +7,33 @@ X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E2E0C8302B
-	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 17:41:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55717C8302C
+	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 17:41:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 22F8761106
-	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 17:41:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3DE7261166
+	for <ceph-devel@archiver.kernel.org>; Thu,  2 Sep 2021 17:41:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346819AbhIBRmW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 2 Sep 2021 13:42:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36922 "EHLO
+        id S1347162AbhIBRmq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 2 Sep 2021 13:42:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346791AbhIBRmR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Sep 2021 13:42:17 -0400
+        with ESMTP id S1347007AbhIBRmT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Sep 2021 13:42:19 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFD7CC061757;
-        Thu,  2 Sep 2021 10:41:18 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF550C061575;
+        Thu,  2 Sep 2021 10:41:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
         Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=7V8FZ80qIliivCO2ypIuGl2Awrc5ZK57tRJ4fo+fTPQ=; b=kjbVAj8y8kqrHOxzh5HG+PkbB9
-        Y6I1Ri0p1OX8ZojE1JOAtx4zNb9br0bIT6kKcK0pwb43OF/nWHFc+nzS0JUAXe3mIT6QK9s5vu4ue
-        fVEEbUgJeTgtw4VwPNvigT+lKIU6Dc8233ERbzZkIIXiwvWz4Hyfz6tf4LrQ28A1u9dDSaA6rYFq9
-        35uMQ4WV2bbPVzdnA4rPEVZgLiAh6l2P8UTq9MmGpEaNGRNmvPKTLrfXBUgdDd1mjX1O5JxBV7YmM
-        e8r3pzUqdi2C5GoAQ05/qJlFjCC4Bdm93rQ4fhe1239c5f20fXZ37R5oExtjYihS2xkkljbg05j1x
-        Sjh2fZXQ==;
+        bh=ilbb48sqogj6iNrSuGXApVFyW8HytSyePznS4TNJN14=; b=WlDDGhUm2tP51IZDetaBHp0k69
+        /ROQQWCQ1zJ4q0H7IO1cOBypaAIBW9SxhYayHD0rItVOO9aEKHgyigbZpIbu0QMRmyOe2jAzPb7TL
+        zLSPoE/dYdBu7Ng3A5Ana6zbunqkTrT7fdiVgIFmQKSs+cDA1xdsGKkvX9+qNEp0h0DY179ebqfEW
+        dRPUx4GD7ZbFeCKktPP34GcUbzVyze9rU3csI66I3x52b+be6IbpWEYzaRQbHr1wcFVh/YMsC4d2z
+        iM10GEFD+gzzIpbV84sZBGYPUDibUf8KOqZoCox9eYK6VzGdJugR+1MiDm+MrgFDN79y050zKGOB+
+        rYtIGjBQ==;
 Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mLqi2-00A9FS-An; Thu, 02 Sep 2021 17:41:06 +0000
+        id 1mLqi2-00A9FM-5Z; Thu, 02 Sep 2021 17:41:06 +0000
 From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
         chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
@@ -48,9 +48,9 @@ To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
 Cc:     linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
         linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
         linux-kernel@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH 9/9] s390/block/xpram: add error handling support for add_disk()
-Date:   Thu,  2 Sep 2021 10:41:05 -0700
-Message-Id: <20210902174105.2418771-10-mcgrof@kernel.org>
+Subject: [PATCH 6/9] s390/block/dasd_genhd: add error handling support for add_disk()
+Date:   Thu,  2 Sep 2021 10:41:02 -0700
+Message-Id: <20210902174105.2418771-7-mcgrof@kernel.org>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210902174105.2418771-1-mcgrof@kernel.org>
 References: <20210902174105.2418771-1-mcgrof@kernel.org>
@@ -67,24 +67,35 @@ error handling.
 
 Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 ---
- drivers/s390/block/xpram.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/s390/block/dasd_genhd.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/s390/block/xpram.c b/drivers/s390/block/xpram.c
-index ce98fab4d43c..ed3904b6a9c8 100644
---- a/drivers/s390/block/xpram.c
-+++ b/drivers/s390/block/xpram.c
-@@ -371,7 +371,9 @@ static int __init xpram_setup_blkdev(void)
- 		disk->private_data = &xpram_devices[i];
- 		sprintf(disk->disk_name, "slram%d", i);
- 		set_capacity(disk, xpram_sizes[i] << 1);
--		add_disk(disk);
-+		rc = add_disk(disk);
-+		if (rc)
-+			goto out;
- 	}
+diff --git a/drivers/s390/block/dasd_genhd.c b/drivers/s390/block/dasd_genhd.c
+index fa966e0db6ca..ba07022283bc 100644
+--- a/drivers/s390/block/dasd_genhd.c
++++ b/drivers/s390/block/dasd_genhd.c
+@@ -33,7 +33,7 @@ int dasd_gendisk_alloc(struct dasd_block *block)
+ {
+ 	struct gendisk *gdp;
+ 	struct dasd_device *base;
+-	int len;
++	int len, rc;
  
+ 	/* Make sure the minor for this device exists. */
+ 	base = block->base;
+@@ -79,7 +79,11 @@ int dasd_gendisk_alloc(struct dasd_block *block)
+ 	dasd_add_link_to_gendisk(gdp, base);
+ 	block->gdp = gdp;
+ 	set_capacity(block->gdp, 0);
+-	device_add_disk(&base->cdev->dev, block->gdp, NULL);
++
++	rc = device_add_disk(&base->cdev->dev, block->gdp, NULL);
++	if (rc)
++		return rc;
++
  	return 0;
+ }
+ 
 -- 
 2.30.2
 
