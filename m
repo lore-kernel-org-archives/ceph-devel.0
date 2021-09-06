@@ -2,131 +2,132 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E332C433EF
-	for <ceph-devel@archiver.kernel.org>; Mon,  6 Sep 2021 14:36:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F236C4332F
+	for <ceph-devel@archiver.kernel.org>; Mon,  6 Sep 2021 17:11:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7F43C60EE6
-	for <ceph-devel@archiver.kernel.org>; Mon,  6 Sep 2021 14:36:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4D7660EE6
+	for <ceph-devel@archiver.kernel.org>; Mon,  6 Sep 2021 17:11:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243483AbhIFOhe (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 6 Sep 2021 10:37:34 -0400
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:7922 "EHLO
-        mx0b-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236950AbhIFOh2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Sep 2021 10:37:28 -0400
-Received: from pps.filterd (m0098421.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 186EB0cd093954;
-        Mon, 6 Sep 2021 10:34:04 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=K9YoRjs+OVJTZWwE3aqGWgWmXGlfnLRk4vE6zXW/7MI=;
- b=pr6D7d1d18e9uwZlU0Ty8GzNce4SEulx18mGcF9L1kEJ+zwvsOlx2ic4beSbSKw26JXq
- +wabtQ6fpEzwdqEUSQHic1lITg/cwVqj2Q9qvwIMCxTPnmi7I9/KTvTxJIpE4M3WM14v
- HYDFATUechLGhhqevTYTmAG5IXFY/tsxIuKqHi3m4r5SPjgAoEk5be+4X9Ttpy82h96g
- fh5avbZFBx/ShTM0cCfRkPrxAMtwX+VSP+LliZEDjWMy+NMGkZhRKG+NSJI4ZCJCUQV+
- gebnm3jalueksIc+cPWp9KV8M6hqjwyRk4edwR6GL+1FQWUA2fUN0+1R8Cr9CPFKM6e2 Nw== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3awhbyn14m-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 06 Sep 2021 10:34:04 -0400
-Received: from m0098421.ppops.net (m0098421.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 186EB02d093867;
-        Mon, 6 Sep 2021 10:34:03 -0400
-Received: from ppma01fra.de.ibm.com (46.49.7a9f.ip4.static.sl-reverse.com [159.122.73.70])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3awhbyn13w-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 06 Sep 2021 10:34:03 -0400
-Received: from pps.filterd (ppma01fra.de.ibm.com [127.0.0.1])
-        by ppma01fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 186EX2rL017980;
-        Mon, 6 Sep 2021 14:34:01 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma01fra.de.ibm.com with ESMTP id 3av0e9chec-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 06 Sep 2021 14:34:01 +0000
-Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 186EXwhM54198718
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 6 Sep 2021 14:33:58 GMT
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 4F4D3AE058;
-        Mon,  6 Sep 2021 14:33:58 +0000 (GMT)
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 49EFEAE05D;
-        Mon,  6 Sep 2021 14:33:57 +0000 (GMT)
-Received: from osiris (unknown [9.145.3.161])
-        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Mon,  6 Sep 2021 14:33:57 +0000 (GMT)
-Date:   Mon, 6 Sep 2021 16:33:55 +0200
-From:   Heiko Carstens <hca@linux.ibm.com>
-To:     Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>, axboe@kernel.dk,
-        gregkh@linuxfoundation.org, chaitanya.kulkarni@wdc.com,
-        atulgopinathan@gmail.com, hare@suse.de, maximlevitsky@gmail.com,
-        oakad@yahoo.com, ulf.hansson@linaro.org, colin.king@canonical.com,
-        shubhankarvk@gmail.com, baijiaju1990@gmail.com, trix@redhat.com,
-        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
-        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
-        sth@linux.ibm.com, hoeppner@linux.ibm.com, gor@linux.ibm.com,
-        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
-        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 7/9] s390/block/dcssblk: add error handling support for
- add_disk()
-Message-ID: <YTYm09U6jZUDtB9l@osiris>
-References: <20210902174105.2418771-1-mcgrof@kernel.org>
- <20210902174105.2418771-8-mcgrof@kernel.org>
- <YTIscKy+jg5L/TMh@osiris>
- <YTLP8mYBX37R++9E@bombadil.infradead.org>
- <20210906134346.19c14246@thinkpad>
+        id S234725AbhIFRMM (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 6 Sep 2021 13:12:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41452 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S243951AbhIFRMJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Sep 2021 13:12:09 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC7C6C061796
+        for <ceph-devel@vger.kernel.org>; Mon,  6 Sep 2021 10:10:58 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id c8so14550468lfi.3
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Sep 2021 10:10:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=CW74dcoV+jr+H/cOee9EJDtMnYKDaAeGSoGkoOfBh0A=;
+        b=fiBYOjOq+VBGQV/Z/w0zPvWtW2UdpSWfKvNcpoxD+K0WhuhAtoceEVoeVxOgsHPOhv
+         efrzRbDV+uvCfhjgMPpEAyHUjdY3TNBRGO2ascjrj0a8sJkn7E+gp/dr4pWniQgzRRQF
+         q98akxIU254+B/rN3gPB3vS2zoJRULAlh32sYQ3MgkDWtN5OmaO+jI6cVC8P0jEcXZjM
+         5J9yOudkRCUkuEmbSVcv7bhsnzpejWiq8jfUXL/v/giNNCifV/BladKTn0Y7v9egF/vN
+         7pklhCc4DE5X6amh2/h+2STJm39f2wwFex5emYYC4FcRMupzl4VSdjFxUGanzZUlpoBw
+         tJyA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=CW74dcoV+jr+H/cOee9EJDtMnYKDaAeGSoGkoOfBh0A=;
+        b=EcgZd7/0X7Xoh9vQgPKQT3adQ8xyuXt+kUk5rlAqH6o16naQBg60RIf/Djm0F0bLsG
+         XO0YwfJ299gjGL7mxe227j/rKXmJWV2sC3gVFzBXmkCClheaF9GHVCZRNVf0txcizjDY
+         +lujpts2i6bYRuppBFKzp4/IPmjTzt6z6V8JW01G9OKg9JRZD5xkLqp6pUdKqQ5+o+ru
+         KeJuMWoc0TxHoXZcLhqXNKjocD3V0xCq6RDBDXsI1zJBKQwAYUu+IxsrkdZYHK+GpQpX
+         CrweZP5nXnw18W+Ehmvfi1YMS6r7y554pDYH4l1MNlWJ77HA0jQr5D5kvRfykW4D5AQW
+         Wq5w==
+X-Gm-Message-State: AOAM532HPub5vJ81Ul7DHjXVoRjlIs8hrA0IhXjDn+RsT6yvluf+kIOJ
+        +cl9TygivdNToOtHF51LIqLi6dIWtKVlN5XGvkPPZg==
+X-Google-Smtp-Source: ABdhPJyhjHArMca68TR5pTBXzBL9tRGf14Q3uN8WTnzHOdYd8ltoCuxOYH+yY9mOHeyJ4NbktZ7AcuCVRlMvz/GSBvU=
+X-Received: by 2002:a19:dc47:: with SMTP id f7mr9888628lfj.71.1630948256412;
+ Mon, 06 Sep 2021 10:10:56 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210906134346.19c14246@thinkpad>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: oSOWQOHMJCB8KRa2gHe6rtDES0-9leq3
-X-Proofpoint-ORIG-GUID: uWvV3nnx5hIse_lWekuNz15Kr0UNPFaR
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-09-06_06:2021-09-03,2021-09-06 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 suspectscore=0
- mlxscore=0 impostorscore=0 phishscore=0 lowpriorityscore=0 clxscore=1015
- mlxlogscore=999 priorityscore=1501 spamscore=0 adultscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2108310000
- definitions=main-2109060090
+References: <20210902174105.2418771-1-mcgrof@kernel.org> <20210902174105.2418771-3-mcgrof@kernel.org>
+In-Reply-To: <20210902174105.2418771-3-mcgrof@kernel.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 6 Sep 2021 19:10:20 +0200
+Message-ID: <CAPDyKFoZ1QqPMYi=N=3s2058mnbzcXYPodNFkexCi0eTbD4NmQ@mail.gmail.com>
+Subject: Re: [PATCH 2/9] ms_block: add error handling support for add_disk()
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com,
+        Hannes Reinecke <hare@suse.de>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Colin King <colin.king@canonical.com>,
+        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
+        Jia-Ju Bai <baijiaju1990@gmail.com>, Tom Rix <trix@redhat.com>,
+        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh R <vigneshr@ti.com>, sth@linux.ibm.com,
+        hoeppner@linux.ibm.com, Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        oberpar@linux.ibm.com, Tejun Heo <tj@kernel.org>,
+        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Sep 06, 2021 at 01:43:46PM +0200, Gerald Schaefer wrote:
-> On Fri, 3 Sep 2021 18:46:26 -0700
-> Luis Chamberlain <mcgrof@kernel.org> wrote:
-> > > > +	rc = device_add_disk(&dev_info->dev, dev_info->gd, NULL);
-> > > > +	if (rc)
-> > > > +		goto put_dev;
-> > > 
-> > > This looks not correct to me. We seem to have now in case of an error:
-> > > 
-> > > - reference count imbalance (= memory leak)
-> > > - dax cleanup is missing
-> > 
-> > Care to provide an alternative?
-> 
-> See patch below:
-> 
-> From 7053b5f8c0a126c3ef450de3668d9963bd68ceaa Mon Sep 17 00:00:00 2001
-> From: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-> Date: Mon, 6 Sep 2021 13:18:53 +0200
-> Subject: [PATCH] s390/block/dcssblk: add error handling support for add_disk()
-> 
-> Signed-off-by: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-> ---
->  drivers/s390/block/dcssblk.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+On Thu, 2 Sept 2021 at 19:41, Luis Chamberlain <mcgrof@kernel.org> wrote:
+>
+> We never checked for errors on add_disk() as this function
+> returned void. Now that this is fixed, use the shiny new
+> error handling.
+>
+> Contrary to the typical removal which delays the put_disk()
+> until later, since we are failing on a probe we immediately
+> put the disk on failure from add_disk by using
+> blk_cleanup_disk().
+>
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 
-Thanks Gerald! FWIW:
-Acked-by: Heiko Carstens <hca@linux.ibm.com>
+Queued for v5.16 on the temporary devel branch, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/memstick/core/ms_block.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+> index 4a4573fa7b0f..86c626933c1a 100644
+> --- a/drivers/memstick/core/ms_block.c
+> +++ b/drivers/memstick/core/ms_block.c
+> @@ -2156,10 +2156,14 @@ static int msb_init_disk(struct memstick_dev *card)
+>                 set_disk_ro(msb->disk, 1);
+>
+>         msb_start(card);
+> -       device_add_disk(&card->dev, msb->disk, NULL);
+> +       rc = device_add_disk(&card->dev, msb->disk, NULL);
+> +       if (rc)
+> +               goto out_cleanup_disk;
+>         dbg("Disk added");
+>         return 0;
+>
+> +out_cleanup_disk:
+> +       blk_cleanup_disk(msb->disk);
+>  out_free_tag_set:
+>         blk_mq_free_tag_set(&msb->tag_set);
+>  out_release_id:
+> --
+> 2.30.2
+>
