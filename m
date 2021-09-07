@@ -2,111 +2,110 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B20E6C4332F
-	for <ceph-devel@archiver.kernel.org>; Mon,  6 Sep 2021 18:03:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5131FC433F5
+	for <ceph-devel@archiver.kernel.org>; Tue,  7 Sep 2021 12:35:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A4F86103B
-	for <ceph-devel@archiver.kernel.org>; Mon,  6 Sep 2021 18:03:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B573610F8
+	for <ceph-devel@archiver.kernel.org>; Tue,  7 Sep 2021 12:35:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244381AbhIFSE6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 6 Sep 2021 14:04:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53294 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244371AbhIFSE5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Sep 2021 14:04:57 -0400
-Received: from mail-io1-xd34.google.com (mail-io1-xd34.google.com [IPv6:2607:f8b0:4864:20::d34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F374DC061757;
-        Mon,  6 Sep 2021 11:03:51 -0700 (PDT)
-Received: by mail-io1-xd34.google.com with SMTP id f6so9692218iox.0;
-        Mon, 06 Sep 2021 11:03:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4H8KJdOpjjzwiqRcJLFHWd3PQAAxrT81eJ9GkExltUo=;
-        b=iEGT4+Q+JXOHwwU9fdZ+0nJsvP0CY1sRAqY4AFrmrfTKeOdLZZCHsVgD3Uys1crhEg
-         3x0b0Iqgr73vQVlkCj6GahFd5q4Hsjic20HUbUbWUMxRU00/EerPViKlkf1gcZUv350H
-         R9gtbgehmuzA52W4+CXODfoFb2PG2YH9gP9kHd8GPSf1m+OzHMh/eYSY4vpyy5mi+F4T
-         mwqMVYAbI0a90fdDqKw1PfdNo9nGrdVqMOQZuKO9CgQGcUPHT9YG9sC2rvuBKDQbdNkw
-         eTiCyFe0COBiW3jk2szaFZLRE3ED+6mehauI0LshOZeb4NztEwKGI1P04w9ZDad3owtj
-         lyXw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4H8KJdOpjjzwiqRcJLFHWd3PQAAxrT81eJ9GkExltUo=;
-        b=pc+a219J7Jg4O0XgY0IgDIkygrmqp4cDj1kjcjcBWMFx54CFULLviAPH6tNOfJTF7k
-         gxw4xMtEoswqKniQ06ZNG9CMwDgHYDbeSAlKVFdRH1mXweVzC7+RA6hPShid8OdbgMEM
-         MGTuKy3r72+fMb9/feIOjEhXhjiacVytkNUX56g0UZbXZdcltREaPi7jzLbu4OUR8Eif
-         HnCu+GysDRI6ksixzFmV7a62xGPYxn/JLU8yFNHp+tFEkJpNkdQTK0RDjVBFMc9VIXYn
-         5l1HJIMh0YwdNYrEDOLaWycwO0MLnnTV6xAXzw73x+faPLoMurCSgJWYsNSy2jRmcg29
-         TM2Q==
-X-Gm-Message-State: AOAM5304OIkb4XcTQmcgytlUaD5O6FvhLGDjC1NtO0eX8S4PYm4rnrk5
-        oYGwVVrZx+/K3O/ZXtCOqmeoHIbKwb1qqn+6ZRo=
-X-Google-Smtp-Source: ABdhPJw783yUnhBinIrQN1PoywcVAxvPqJZP2rGxk3d0PWxbTSrFU4j1s/qRM2lWQnoTCcr8MUgHRd1KAvAW0m0+2TE=
-X-Received: by 2002:a05:6638:2257:: with SMTP id m23mr12049282jas.137.1630951431431;
- Mon, 06 Sep 2021 11:03:51 -0700 (PDT)
+        id S1343816AbhIGMgO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 7 Sep 2021 08:36:14 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43870 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S244785AbhIGMgN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Sep 2021 08:36:13 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4D6D0604AC;
+        Tue,  7 Sep 2021 12:35:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1631018107;
+        bh=7i2jzy/I4I4g/ZUF0B0sIM+Mb11FSNK6NbhlcjQoZKY=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=EB92r4B9+2GARaHSjCvoyyCFPmP7o0T2eWtuW38/V4Nb7FEXJfDdrZzpirXnI3bxu
+         ZrfMNIu8usiK+rIuCth4q/uTIt2InNDFiwZVI9kYeLbyFIbWUPGBCDanMt3mo3ro5R
+         9c4ZKia8sv/NNNAYS6gqahSeNiCnhDm82dsXd2Ju2TxZuE1Q94ZbQreZkBpFB8syX1
+         Psdu7cbIwJnWI2IWXxDQh4ehzfRclphl9nlkwrvGt0xG2MXjCHG91BLPwX2SP5dwBJ
+         zT87Wtsgj/V28dfPSDWtOZaKoRqnHoPqEdOg3xwcM2VTja5oc9DxndjT5LXTMYpRba
+         sYhN90wJ/zpig==
+Message-ID: <02f2f77423ec1e6e5b23b452716b21c36a5b67da.camel@kernel.org>
+Subject: Re: [PATCH RFC 0/2] ceph: size handling for the fscrypt
+From:   Jeff Layton <jlayton@kernel.org>
+To:     xiubli@redhat.com
+Cc:     idryomov@gmail.com, ukernel@gmail.com, pdonnell@redhat.com,
+        ceph-devel@vger.kernel.org
+Date:   Tue, 07 Sep 2021 08:35:06 -0400
+In-Reply-To: <20210903081510.982827-1-xiubli@redhat.com>
+References: <20210903081510.982827-1-xiubli@redhat.com>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.4 (3.40.4-1.fc34) 
 MIME-Version: 1.0
-References: <20210906094301.GB10957@kili>
-In-Reply-To: <20210906094301.GB10957@kili>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Mon, 6 Sep 2021 20:03:24 +0200
-Message-ID: <CAOi1vP9bbs++zmcSJ=hb+PfR5-=QQbicHNNDu0uzcD_7XRG44g@mail.gmail.com>
-Subject: Re: [PATCH] ceph: fix off by one bugs in unsafe_request_wait()
-To:     Dan Carpenter <dan.carpenter@oracle.com>
-Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        Ceph Development <ceph-devel@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Sep 6, 2021 at 11:43 AM Dan Carpenter <dan.carpenter@oracle.com> wrote:
->
-> The "> max" tests should be ">= max" to prevent an out of bounds access
-> on the next lines.
->
-> Fixes: e1a4541ec0b9 ("ceph: flush the mdlog before waiting on unsafe reqs")
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> ---
->  fs/ceph/caps.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 26c5029629a4..ebbad9080422 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2260,7 +2260,7 @@ static int unsafe_request_wait(struct inode *inode)
->                         list_for_each_entry(req, &ci->i_unsafe_dirops,
->                                             r_unsafe_dir_item) {
->                                 s = req->r_session;
-> -                               if (unlikely(s->s_mds > max)) {
-> +                               if (unlikely(s->s_mds >= max)) {
->                                         spin_unlock(&ci->i_unsafe_lock);
->                                         goto retry;
->                                 }
-> @@ -2274,7 +2274,7 @@ static int unsafe_request_wait(struct inode *inode)
->                         list_for_each_entry(req, &ci->i_unsafe_iops,
->                                             r_unsafe_target_item) {
->                                 s = req->r_session;
-> -                               if (unlikely(s->s_mds > max)) {
-> +                               if (unlikely(s->s_mds >= max)) {
->                                         spin_unlock(&ci->i_unsafe_lock);
->                                         goto retry;
->                                 }
-> --
-> 2.20.1
->
+On Fri, 2021-09-03 at 16:15 +0800, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> This patch series is based Jeff's ceph-fscrypt-size-experimental
+> branch in https://git.kernel.org/pub/scm/linux/kernel/git/jlayton/linux.git.
+> 
+> This is just a draft patch and need to rebase or recode after Jeff
+> finished his huge patch set.
+> 
+> Post the patch out for advices and ideas. Thanks.
+> 
 
-Applied.
+I'll take a look. Going forward though, it'd probably be best for you to
+just take over development of the entire ceph-fscrypt-size series
+instead of trying to develop on top of my branch.
 
-Thanks,
+That branch is _very_ rough anyway. Just clone the branch into your tree
+and then you can drop or change patches in it as you see fit.
 
-                Ilya
+> ====
+> 
+> This approach will not do the rmw immediately after the file is
+> truncated. If the truncate size is aligned to the BLOCK SIZE, so
+> there no need to do the rmw and only in unaligned case will the
+> rmw is needed.
+> 
+> And the 'fscrypt_file' field will be cleared after the rmw is done.
+> If the 'fscrypt_file' is none zero that means after the kclient
+> reading that block to local buffer or pagecache it needs to do the
+> zeroing of that block in range of [fscrypt_file, round_up(fscrypt_file,
+> BLOCK SIZE)).
+> 
+> Once any kclient has dirty that block and write it back to ceph, the
+> 'fscrypt_file' field will be cleared and set to 0. More detail please
+> see the commit comments in the second patch.
+> 
+
+That sounds odd. How do you know where the file ends once you zero out
+fscrypt_file?
+
+/me goes to look at the patches...
+
+> There also need on small work in Jeff's MDS PR in cap flushing code
+> to clear the 'fscrypt_file'.
+> 
+> 
+> Xiubo Li (2):
+>   Revert "ceph: make client zero partial trailing block on truncate"
+>   ceph: truncate the file contents when needed when file scrypted
+> 
+>  fs/ceph/addr.c  | 19 ++++++++++++++-
+>  fs/ceph/caps.c  | 24 ++++++++++++++++++
+>  fs/ceph/file.c  | 65 ++++++++++++++++++++++++++++++++++++++++++++++---
+>  fs/ceph/inode.c | 48 +++++++++++++++++++-----------------
+>  fs/ceph/super.h | 13 +++++++---
+>  5 files changed, 138 insertions(+), 31 deletions(-)
+> 
+
+-- 
+Jeff Layton <jlayton@kernel.org>
+
