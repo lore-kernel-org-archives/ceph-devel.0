@@ -5,43 +5,43 @@ X-Spam-Level:
 X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76957C433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 13 Sep 2021 22:36:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44046C433EF
+	for <ceph-devel@archiver.kernel.org>; Mon, 13 Sep 2021 22:36:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 61D36603E7
-	for <ceph-devel@archiver.kernel.org>; Mon, 13 Sep 2021 22:36:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B0A9603E7
+	for <ceph-devel@archiver.kernel.org>; Mon, 13 Sep 2021 22:36:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348703AbhIMWh4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 13 Sep 2021 18:37:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51132 "EHLO mail.kernel.org"
+        id S244024AbhIMWiL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 13 Sep 2021 18:38:11 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50526 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S244387AbhIMWgQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Sep 2021 18:36:16 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C0F6761155;
-        Mon, 13 Sep 2021 22:34:49 +0000 (UTC)
+        id S1343709AbhIMWfO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Sep 2021 18:35:14 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 505D8610D2;
+        Mon, 13 Sep 2021 22:33:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631572490;
-        bh=ishASjhYi/j1l/QK/sNjX0uM7yDLknX8/erzW4H/BmY=;
+        s=k20201202; t=1631572438;
+        bh=eR5mA/KYUgsZO8yBub8XLFdqBGQN4hab0axEDgLGl1M=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=txBkDq3PTncVId6z+huIj38mDS3uPsKJgrlQMSBTqc4CGmyR64q9T56W5HnDnab8a
-         V7TiARChYGQCDLdcsyxUTj/Aeu7Hx/hYckj01WL4hUrcsDxg3lJOXne5zL2mjwSVJP
-         wMQRmuwY++YTX0fIeoRbWrVQ+1HMul9OKLtt3+bgXCPsTlIVQuQvewWGtShmvdc9YR
-         iOcKOK6ROqFiu82svye2nXRHk/FNXnsuURNb+1df0gPJl2eW6AMRkr8Y/QR1e/Mrq9
-         BzpajwRjV50ieyfEeAXpGgGiAvxcW8ZEpIyxEL1EGYZ2yIg4XuH3dDz1VS2FXPRV1E
-         MlKajDyLDZnJQ==
+        b=Rk+nukGG8ZfnsU5tTHRegk5cLG3iiN5RyVRDtbK4UQ78Hcm9phRZymPjRKwmNa/El
+         XbYOrM9V2k7KvylTo13WdQ4Uz9Bhor4ymedFbImb0nKGd8EkGnjIAid49vL/fQnXfQ
+         2sKSvGyw9d7LGuA5MF4g/esUv5wyX/i/96H6MUpQiPB/Lq2oEmUJS3KVBKDXIgWwGk
+         G96/49EAgeB5cn/xmKQFUQjAjncDKOEUc7UwqjsWhirqh244P112DrbZVLFWPwuxAB
+         LA0PuNomUHZ8p0JOQ8IKh1e75aSgDwDLUj9y58TUm3bvznf4A8hVLFBuJ7fuTxd+QM
+         L/QAM+ewf7snA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.10 06/16] ceph: remove the capsnaps when removing caps
-Date:   Mon, 13 Sep 2021 18:34:32 -0400
-Message-Id: <20210913223442.435885-6-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.14 13/25] ceph: remove the capsnaps when removing caps
+Date:   Mon, 13 Sep 2021 18:33:27 -0400
+Message-Id: <20210913223339.435347-13-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210913223442.435885-1-sashal@kernel.org>
-References: <20210913223442.435885-1-sashal@kernel.org>
+In-Reply-To: <20210913223339.435347-1-sashal@kernel.org>
+References: <20210913223339.435347-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -72,10 +72,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  3 files changed, 87 insertions(+), 18 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index b864c9b9e8df..a975a9354ee5 100644
+index c2d654156783..73d8487a71d8 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -3166,7 +3166,16 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+@@ -3114,7 +3114,16 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
  				break;
  			}
  		}
@@ -93,7 +93,7 @@ index b864c9b9e8df..a975a9354ee5 100644
  		capsnap->dirty_pages -= nr;
  		if (capsnap->dirty_pages == 0) {
  			complete_capsnap = true;
-@@ -3188,6 +3197,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+@@ -3136,6 +3145,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
  		     complete_capsnap ? " (complete capsnap)" : "");
  	}
  
@@ -101,7 +101,7 @@ index b864c9b9e8df..a975a9354ee5 100644
  	spin_unlock(&ci->i_ceph_lock);
  
  	if (last) {
-@@ -3654,6 +3664,43 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
+@@ -3606,6 +3616,43 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
  		iput(inode);
  }
  
@@ -145,7 +145,7 @@ index b864c9b9e8df..a975a9354ee5 100644
  /*
   * Handle FLUSHSNAP_ACK.  MDS has flushed snap data to disk and we can
   * throw away our cap_snap.
-@@ -3691,23 +3738,10 @@ static void handle_cap_flushsnap_ack(struct inode *inode, u64 flush_tid,
+@@ -3643,23 +3690,10 @@ static void handle_cap_flushsnap_ack(struct inode *inode, u64 flush_tid,
  			     capsnap, capsnap->follows);
  		}
  	}
@@ -173,10 +173,10 @@ index b864c9b9e8df..a975a9354ee5 100644
  		ceph_put_snap_context(capsnap->context);
  		ceph_put_cap_snap(capsnap);
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 816cea497537..f2c5c264b228 100644
+index 0b69aec23e5c..bbd46b728eeb 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -1585,14 +1585,39 @@ int ceph_iterate_session_caps(struct ceph_mds_session *session,
+@@ -1583,14 +1583,39 @@ int ceph_iterate_session_caps(struct ceph_mds_session *session,
  	return ret;
  }
  
@@ -216,15 +216,15 @@ index 816cea497537..f2c5c264b228 100644
  
  	dout("removing cap %p, ci is %p, inode is %p\n",
  	     cap, ci, &ci->vfs_inode);
-@@ -1600,7 +1625,6 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -1598,7 +1623,6 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
  	__ceph_remove_cap(cap, false);
  	if (!ci->i_auth_cap) {
  		struct ceph_cap_flush *cf;
 -		struct ceph_mds_client *mdsc = fsc->mdsc;
  
- 		if (READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
+ 		if (READ_ONCE(fsc->mount_state) >= CEPH_MOUNT_SHUTDOWN) {
  			if (inode->i_data.nrpages > 0)
-@@ -1664,6 +1688,9 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -1662,6 +1686,9 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
  			list_add(&ci->i_prealloc_cap_flush->i_list, &to_remove);
  			ci->i_prealloc_cap_flush = NULL;
  		}
@@ -234,7 +234,7 @@ index 816cea497537..f2c5c264b228 100644
  	}
  	spin_unlock(&ci->i_ceph_lock);
  	while (!list_empty(&to_remove)) {
-@@ -1680,6 +1707,8 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
+@@ -1678,6 +1705,8 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
  		ceph_queue_invalidate(inode);
  	if (dirty_dropped)
  		iput(inode);
@@ -244,10 +244,10 @@ index 816cea497537..f2c5c264b228 100644
  }
  
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index a8c460393b01..9362eeb5812d 100644
+index b1a363641beb..2200ed76b123 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -1134,6 +1134,12 @@ extern void ceph_put_cap_refs_no_check_caps(struct ceph_inode_info *ci,
+@@ -1163,6 +1163,12 @@ extern void ceph_put_cap_refs_no_check_caps(struct ceph_inode_info *ci,
  					    int had);
  extern void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
  				       struct ceph_snap_context *snapc);
