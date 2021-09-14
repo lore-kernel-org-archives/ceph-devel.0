@@ -2,65 +2,65 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-19.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1607FC433EF
-	for <ceph-devel@archiver.kernel.org>; Tue, 14 Sep 2021 13:09:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C77CC433EF
+	for <ceph-devel@archiver.kernel.org>; Tue, 14 Sep 2021 13:13:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EEB49610CE
-	for <ceph-devel@archiver.kernel.org>; Tue, 14 Sep 2021 13:09:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 004D0610CE
+	for <ceph-devel@archiver.kernel.org>; Tue, 14 Sep 2021 13:13:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233230AbhINNKd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 14 Sep 2021 09:10:33 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:53168 "EHLO
+        id S233129AbhINNPO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 14 Sep 2021 09:15:14 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:33894 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233150AbhINNKc (ORCPT
+        by vger.kernel.org with ESMTP id S232996AbhINNPN (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 14 Sep 2021 09:10:32 -0400
+        Tue, 14 Sep 2021 09:15:13 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1631624955;
+        s=mimecast20190719; t=1631625236;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=/s0aXydf51f9ZVid2WxmFtcfKZyq3N5WyFV1T0HRP9c=;
-        b=SeX7KbueurvSB0wtbCpMsnf/LGTDZBUfpgtNXg3azKw4rAvxe2vjIRgKz7MxpNe/9ldOWx
-        7t1ovhU8zVSJuO/5iLpBeafLk0PV8AAGz8dDdL2lKERrBCJ1SfSfNnpnPHbtkZIHIE1v4x
-        ArFN3BupC5FzPdXUAh8GODzAsqq+JRo=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-135-4PUdOKgKOk2feFYYN0KatQ-1; Tue, 14 Sep 2021 09:09:14 -0400
-X-MC-Unique: 4PUdOKgKOk2feFYYN0KatQ-1
-Received: by mail-pl1-f198.google.com with SMTP id z10-20020a170903018a00b00134def0a883so4555723plg.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Sep 2021 06:09:13 -0700 (PDT)
+        bh=leLSkIrrEsFMo2jZg6kQLxJHDrQI8srJo9wdr/QIasM=;
+        b=R/1s+xJKhbn6RTlH/NpIKahEHsa8+S+caLiNFMwycNIO2AkfRcsaMH81xXVzhBFHGn12hd
+        h7/chQUzG+aIN/pEqKw5sD1m+SH7WxOD1/sFi0Bczzt1/dbPAZPVVKmoADrOIIqrU4HPzG
+        K91Z+SwMITNZ4zn1c6Ar6v5QzrfhUUQ=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-329-j2dcV7HKMXO8yvl0NpQ9zA-1; Tue, 14 Sep 2021 09:13:55 -0400
+X-MC-Unique: j2dcV7HKMXO8yvl0NpQ9zA-1
+Received: by mail-pf1-f200.google.com with SMTP id o130-20020a62cd88000000b004053c6c1765so8259968pfg.6
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Sep 2021 06:13:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-transfer-encoding
          :content-language;
-        bh=/s0aXydf51f9ZVid2WxmFtcfKZyq3N5WyFV1T0HRP9c=;
-        b=bLG6KQMdKZzII6S71zoEKZgAnwBSAaWufMvEzDv11ef+einV1/rnTlw32L44EVP5XU
-         Lc79TwAvh275Jae8Jw0OdLVuLhIZWxCjHN553IZf2//3WQLdszYhMtgT3+GQWtV+VOGh
-         ERTczpeKsCdTVLbIYa56YBO0sXhYCDfRK9GccPaS8SvkHHTUcQ1UqlEYm+5Z8x0ZzUHf
-         VFFNSnI0pZ/vdB2GqMgmb1RWhc9VlEzOJlQ3iIwTMagLmSNhfuDtiST2XkZ8i8R1Vy/8
-         ujekE9l95zVpeTaQ1kNwiHYLnWTwAm2cQXmoe0niu1J7nGbyELdZXwggslj5F7nhimoz
-         4fMQ==
-X-Gm-Message-State: AOAM530B2CTdx98PLDm7Ohe9oa5K5vIw07+lZsnJQJh8SCAcz22pIq8A
-        jSVh0qNP08c+ErmOVorXclMPBkE7EgKSltpeb3PjJZobQXbM6ZVutfjyq156TxzEtol1byIHUOa
-        TkuwcizV6PeH+mpY1+U7mySsR5qkXGv9DUgUaz8q7qOBxS/8U9pgQsZF3ArXAzvqR9CRsqJA=
-X-Received: by 2002:a17:90a:a087:: with SMTP id r7mr2096790pjp.84.1631624952748;
-        Tue, 14 Sep 2021 06:09:12 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy8OyZBJsMRpTa8dOAX3npqRroqBLVrMiTMqr/sL2B2UGFQCNEg9IAf2Nh2IN+4gXT5pU3PoA==
-X-Received: by 2002:a17:90a:a087:: with SMTP id r7mr2096725pjp.84.1631624952103;
-        Tue, 14 Sep 2021 06:09:12 -0700 (PDT)
+        bh=leLSkIrrEsFMo2jZg6kQLxJHDrQI8srJo9wdr/QIasM=;
+        b=UhpF863pawsjTb7nFbr8unkSlT17f6K/difDJK856OL6XFsy3JhnOWFiOkTl+PdTCh
+         djormi0sgsEAM2H4Ug59cO4pErUD6VptF1m6ifTXbUsRbnli+SPwB1CeME6HqO2e1ENm
+         QvxWet4aSfJeGu7udf0WNOo7yQGLFizYWEkjex2RZq9B+HN3xP94qjtwe+hE5eOpl86i
+         AOLuow3xoVYijv+C5bXDX51d+ZVTg6agKH/KlrejXSUtmmD2MuXHaDFKCP6dFyw3PnTs
+         QViaXs3sVHvRDXGtHAhvweUJ54oTFiUx1ZM5xhtwkBLSdjSw0iajLwQpBqAC4fRp/wX9
+         uoUQ==
+X-Gm-Message-State: AOAM5300GIk5FlyDguuEG8u1/8HBHuLbD8XoGcCi5lZQsh2rP7hfyCSh
+        Zu0LNYomJi972dTGdx8fHt3gsGtu2k8A9pX+oYIqZplKVlrz5/egw2wrkZY9qLV10ha8fwEFQ2v
+        ZF09fO28vLq5q+XGNrANu+1a/PxoyxbxrWTF7n101/okrUWIIakKTNLqBaLyCFsZ1sEJ8ccI=
+X-Received: by 2002:a65:44c5:: with SMTP id g5mr15513346pgs.39.1631625234084;
+        Tue, 14 Sep 2021 06:13:54 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzYAJNVHBHah9Av7GtiWidqofHZ0DP3gR6mteLlOBOFFX9pGZIdnXXcXBQ8dN0NGal0StDjng==
+X-Received: by 2002:a65:44c5:: with SMTP id g5mr15513319pgs.39.1631625233663;
+        Tue, 14 Sep 2021 06:13:53 -0700 (PDT)
 Received: from [10.72.12.89] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g16sm11065180pfj.19.2021.09.14.06.09.09
+        by smtp.gmail.com with ESMTPSA id g16sm11078184pfj.19.2021.09.14.06.13.50
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 14 Sep 2021 06:09:11 -0700 (PDT)
+        Tue, 14 Sep 2021 06:13:53 -0700 (PDT)
 Subject: Re: [PATCH v2 2/4] ceph: track average/stdev r/w/m latency
 To:     Venky Shankar <vshankar@redhat.com>, jlayton@redhat.com,
         pdonnell@redhat.com
@@ -68,8 +68,8 @@ Cc:     ceph-devel@vger.kernel.org
 References: <20210914084902.1618064-1-vshankar@redhat.com>
  <20210914084902.1618064-3-vshankar@redhat.com>
 From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <15cd06ae-fe96-c376-854d-738d4a2e70bf@redhat.com>
-Date:   Tue, 14 Sep 2021 21:09:06 +0800
+Message-ID: <7b7a93ad-4a45-4187-5220-709fee38b4ea@redhat.com>
+Date:   Tue, 14 Sep 2021 21:13:48 +0800
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.10.1
 MIME-Version: 1.0
@@ -211,28 +211,15 @@ On 9/14/21 4:49 PM, Venky Shankar wrote:
 > +		avg = *lavg + div64_s64(lat - *lavg, total);
 > +		stdev = *lstdev + (lat - *lavg)*(lat - avg);
 > +		*lstdev = int_sqrt(div64_u64(stdev, total - 1));
+
+In kernel space, won't it a little heavy to run the in_sqrt() every time 
+when updating the latency ?
+
+@Jeff, any idea ?
+
+
 > +		*lavg = avg;
 > +	}
-
-IMO, this is incorrect, the math formula please see:
-
-https://www.investopedia.com/ask/answers/042415/what-difference-between-standard-error-means-and-standard-deviation.asp
-
-The most accurate result should be:
-
-stdev = int_sqrt(sum((X(n) - avg)^2, (X(n-1) - avg)^2, ..., (X(1) - 
-avg)^2) / (n - 1)).
-
-While you are computing it:
-
-stdev_n = int_sqrt(stdev_(n-1) + (X(n-1) - avg)^2)
-
-Though current stdev computing method is not exactly the same the math 
-formula does, but it's closer to it, because the kernel couldn't record 
-all the latency value and do it whenever needed, which will occupy a 
-large amount of memories and cpu resources.
-
-
 >   }
 >   
 >   void ceph_update_read_metrics(struct ceph_client_metric *m,
