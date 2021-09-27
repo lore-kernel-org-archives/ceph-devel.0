@@ -2,33 +2,33 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B452C433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA140C4167B
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 65C1160EB6
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C742B60EB6
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238159AbhI0WFu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 27 Sep 2021 18:05:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50848 "EHLO
+        id S238192AbhI0WFw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 27 Sep 2021 18:05:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238034AbhI0WF3 (ORCPT
+        with ESMTP id S237700AbhI0WF3 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Sep 2021 18:05:29 -0400
 Received: from bombadil.infradead.org (unknown [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57DB8C061235;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E873C061237;
         Mon, 27 Sep 2021 15:02:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
         Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=y0kWvQS67gJE9oH2Tu+3mzoZQKPgF7CjDPD3Aqrkl9E=; b=czcgq8i1+g9A9g+zXiauQIA7Kj
-        pbcCXZYG2uU49Bh9MXwzR4eMtk+Vd3AktD9gnc4BiUDpyy4iQxV2/JvF8DBmWH47Cr2miHslnIT9R
-        hyxzvkr9FA94O+Tw5P7L6DlzcfXn4Px/DZGDRFqjWtgWamOX5q9SvCKacNlgYzcaHRCkzXAcXJzG5
-        vHQLx42LfHZkPRYMmGSG3gLSUwIuDr+XsLW79eCmEuOKvi9YZXC0FRuxTa+lCAXES/zPk9nmKqffx
-        U+Vc1UKWOMktji+o+HOsBfKCbnXOD5KE5TEdqhnK2ZXjs3bdgYZDKgxz6VrS0GSSNUw8Pyc/2N+bC
-        bzxoHKtg==;
+        bh=1bxbk0s3lfDVOxUu9YL+DFpJGCsQmsW80G59PebYRqE=; b=JOIVwBerggyzrPmtHFxFn58ywH
+        /AViPyNwCH3ThT1G85Hhg7E6By7AakeNVzBatgzAFyaXitKHn6L9JxZuguE5/fjWU8eKUoMjSDEGu
+        i1fmqXlzw5xdqu/4EBS3X7DkjarTLked8IRqeDKpc4iIsahClMiV/QUkOYBQEzg0EwUaTtb4ndN7N
+        or+EEDY4U3RfKdrWrZ0l/fe05F0DOuLUvKoKXD7/ouvhqdC9NrreSf8uf4m3zyUwweZmSMZ9CeB9K
+        Ye+CQPia/s1sv5kknNr9S0+/K3w2B/NNglBPpnX4uJexsoFm7WdjSMbcxQJScV7ulYU3z5/Ed43UU
+        lBaywaYQ==;
 Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mUyhl-004Uu2-Rg; Mon, 27 Sep 2021 22:02:33 +0000
+        id 1mUyhl-004Utw-O2; Mon, 27 Sep 2021 22:02:33 +0000
 From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
         chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
@@ -42,12 +42,10 @@ To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
         tj@kernel.org
 Cc:     linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
         linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Gerald Schaefer <gerald.schaefer@linux.ibm.com>,
-        Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH v2 5/6] s390/block/dcssblk: add error handling support for add_disk()
-Date:   Mon, 27 Sep 2021 15:02:31 -0700
-Message-Id: <20210927220232.1071926-6-mcgrof@kernel.org>
+        linux-kernel@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH v2 3/6] mtd: add add_disk() error handling
+Date:   Mon, 27 Sep 2021 15:02:29 -0700
+Message-Id: <20210927220232.1071926-4-mcgrof@kernel.org>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210927220232.1071926-1-mcgrof@kernel.org>
 References: <20210927220232.1071926-1-mcgrof@kernel.org>
@@ -58,44 +56,40 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-
 We never checked for errors on add_disk() as this function
 returned void. Now that this is fixed, use the shiny new
 error handling.
 
+Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
 Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-Signed-off-by: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
 ---
- drivers/s390/block/dcssblk.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ drivers/mtd/mtd_blkdevs.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/s390/block/dcssblk.c b/drivers/s390/block/dcssblk.c
-index 5be3d1c39a78..0741a9321712 100644
---- a/drivers/s390/block/dcssblk.c
-+++ b/drivers/s390/block/dcssblk.c
-@@ -696,7 +696,9 @@ dcssblk_add_store(struct device *dev, struct device_attribute *attr, const char
+diff --git a/drivers/mtd/mtd_blkdevs.c b/drivers/mtd/mtd_blkdevs.c
+index b8ae1ec14e17..4eaba6f4ec68 100644
+--- a/drivers/mtd/mtd_blkdevs.c
++++ b/drivers/mtd/mtd_blkdevs.c
+@@ -384,7 +384,9 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
+ 	if (new->readonly)
+ 		set_disk_ro(gd, 1);
+ 
+-	device_add_disk(&new->mtd->dev, gd, NULL);
++	ret = device_add_disk(&new->mtd->dev, gd, NULL);
++	if (ret)
++		goto out_cleanup_disk;
+ 
+ 	if (new->disk_attributes) {
+ 		ret = sysfs_create_group(&disk_to_dev(gd)->kobj,
+@@ -393,6 +395,8 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
  	}
+ 	return 0;
  
- 	get_device(&dev_info->dev);
--	device_add_disk(&dev_info->dev, dev_info->gd, NULL);
-+	rc = device_add_disk(&dev_info->dev, dev_info->gd, NULL);
-+	if (rc)
-+		goto out_dax;
- 
- 	switch (dev_info->segment_type) {
- 		case SEG_TYPE_SR:
-@@ -712,6 +714,10 @@ dcssblk_add_store(struct device *dev, struct device_attribute *attr, const char
- 	rc = count;
- 	goto out;
- 
-+out_dax:
-+	put_device(&dev_info->dev);
-+	kill_dax(dev_info->dax_dev);
-+	put_dax(dev_info->dax_dev);
- put_dev:
- 	list_del(&dev_info->lh);
- 	blk_cleanup_disk(dev_info->gd);
++out_cleanup_disk:
++	blk_cleanup_disk(new->disk);
+ out_free_tag_set:
+ 	blk_mq_free_tag_set(new->tag_set);
+ out_kfree_tag_set:
 -- 
 2.30.2
 
