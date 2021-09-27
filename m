@@ -2,35 +2,58 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8DF5C4332F
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36D83C433F5
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D59346101A
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 186B561058
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237763AbhI0WGL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 27 Sep 2021 18:06:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50932 "EHLO
+        id S237830AbhI0WeD (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 27 Sep 2021 18:34:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237998AbhI0WFd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Sep 2021 18:05:33 -0400
-Received: from bombadil.infradead.org (unknown [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1E19C0611C0;
-        Mon, 27 Sep 2021 15:02:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
-        Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=+OAfxCoaVOuKuOjWZKvBW/L6IB8523Q0h7o1ENcxwyY=; b=0OtugzOoZWoPNTHgHokvNhlzny
-        LVtyiNlqwmw6UskbWe87APtWwkxhfaTd657hK8Nxf64/0n7+qjsV7SqOENx+Nu2qDlxckAxUmF+Ny
-        AewzZsDualM8Exf0Z4MyhUf6wg4FoGv02lM2+G39XUuNmRy7q4DQjVJAvxnTsLM7wBNG7zW9xiMdt
-        0lGQg/MrOx1MZn++Eo7oAEvY+pQprH6S4mmf137SY8aFgyvffLFv8NL/59vgPhPeBEU9w/iiqI1Oz
-        bp7ic6YX1SV/0CLLDl0CKA8z9XRctV9hZQCOJcirvX+5F2ZSxVAPF0H+0JF5bVRvhnR1IuntUYRrS
-        H5tYNCSA==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mUyhl-004Utz-PR; Mon, 27 Sep 2021 22:02:33 +0000
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
+        with ESMTP id S237847AbhI0WeC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Sep 2021 18:34:02 -0400
+Received: from mail-io1-xd2b.google.com (mail-io1-xd2b.google.com [IPv6:2607:f8b0:4864:20::d2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FB82C061740
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Sep 2021 15:32:21 -0700 (PDT)
+Received: by mail-io1-xd2b.google.com with SMTP id y197so24765407iof.11
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Sep 2021 15:32:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=+UmxU11hST5wQMMsZTOdrPPgQ47TLPa20pybe++XQYM=;
+        b=DYK0QeVSPErU0fdUHY9fTGU4W7LYS3OpstW7jKN2zQIGz6Fg75r2GHQ3mNhW9RIn1l
+         +/XX+0IaT+QuP2WnY1RDSSQe/LzU370EV/dACbM1CoHg6kWxfp4JKYe9NsSJNOZspcJv
+         79kSmVRSpqY6HusQwOsl5Cca71RoZZnxCQ7faeNT+onSgNJoOacMUCqYfldqMMFZnJn1
+         op2n2nb0dzUlxGLwnR76PnSZAQEAPJSGaPxLjQP0iN7EFQdPXw6p08Wye3gAirxio6qw
+         Ay8cPI17oe8ngWi6HmVYmshTvXlSdR08xlvJOMOinmATWt5vmC9kQdW4ky3oHMIbMIRb
+         tKgw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=+UmxU11hST5wQMMsZTOdrPPgQ47TLPa20pybe++XQYM=;
+        b=TLl6AAMw4rzrDEK3Yt9lBJk9l8sm6Ajo8+l36pKKoAIIZMYk5RuOz1/yR8jtvKOzBo
+         i8Bc0GazD3ymwc3DRkx8FV1Fs/2YhfbCPz9vKPj+9xQ3y4keZft3GvuJXFHdcYYc8U85
+         GT40g62Ij9UxuGnGN0Y5/wlaBk8d+zFl/AMt+ognNZcyuza60xgpTrNi6hDM9ydW7aSa
+         MRVGiHX9nqbi18p9ZTmZ7USRwaFpg/yWRyoi8wPontgVvAvYVTbD0PFclSRrFkyLG606
+         qXfNXFOcJMSE7VyPe+ffl19uVt6oyMBfwZYXPaokFp8okbY+qgfC+SzsmMJTKScARYfw
+         1A2g==
+X-Gm-Message-State: AOAM5316elmJCSeEiJhRrJnx3Rw4GcWNaXKVINPjcXa8QeG/UGI9qk7q
+        E6cQbx6g9oi0xfsi7ds3alTKRQ==
+X-Google-Smtp-Source: ABdhPJzCRspGfuZEaibKYg9STMBXwDX6ihxLpFk5STZ/wJRDMFJCRfEhMCvkyfG9LlSO8u6kMpd4Fg==
+X-Received: by 2002:a02:3f4f:: with SMTP id c15mr1841581jaf.1.1632781940669;
+        Mon, 27 Sep 2021 15:32:20 -0700 (PDT)
+Received: from [192.168.1.116] ([66.219.217.159])
+        by smtp.gmail.com with ESMTPSA id p4sm9291645ilj.26.2021.09.27.15.32.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 27 Sep 2021 15:32:19 -0700 (PDT)
+Subject: Re: [PATCH v2 0/6] block: 5th batch of add_disk() error handling
+ conversions
+To:     Luis Chamberlain <mcgrof@kernel.org>, gregkh@linuxfoundation.org,
         chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
         maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
         colin.king@canonical.com, shubhankarvk@gmail.com,
@@ -42,59 +65,29 @@ To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
         tj@kernel.org
 Cc:     linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
         linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH v2 4/6] s390/block/dasd_genhd: add error handling support for add_disk()
-Date:   Mon, 27 Sep 2021 15:02:30 -0700
-Message-Id: <20210927220232.1071926-5-mcgrof@kernel.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210927220232.1071926-1-mcgrof@kernel.org>
+        linux-kernel@vger.kernel.org
 References: <20210927220232.1071926-1-mcgrof@kernel.org>
+From:   Jens Axboe <axboe@kernel.dk>
+Message-ID: <25afa23b-52af-9b79-8bd8-5e31da62c291@kernel.dk>
+Date:   Mon, 27 Sep 2021 16:32:17 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+In-Reply-To: <20210927220232.1071926-1-mcgrof@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-We never checked for errors on add_disk() as this function
-returned void. Now that this is fixed, use the shiny new
-error handling.
+On 9/27/21 4:02 PM, Luis Chamberlain wrote:
+> This is the 5th series of driver conversions for add_disk() error
+> handling. This set along with the entire 7th set of patches can be
+> found on my 20210927-for-axboe-add-disk-error-handling branch [0].
 
-Be sure to call dasd_gendisk_free() on error.
+Applied 1-2.
 
-Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
----
- drivers/s390/block/dasd_genhd.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/s390/block/dasd_genhd.c b/drivers/s390/block/dasd_genhd.c
-index fa966e0db6ca..80673dbfb1f9 100644
---- a/drivers/s390/block/dasd_genhd.c
-+++ b/drivers/s390/block/dasd_genhd.c
-@@ -33,7 +33,7 @@ int dasd_gendisk_alloc(struct dasd_block *block)
- {
- 	struct gendisk *gdp;
- 	struct dasd_device *base;
--	int len;
-+	int len, rc;
- 
- 	/* Make sure the minor for this device exists. */
- 	base = block->base;
-@@ -79,7 +79,13 @@ int dasd_gendisk_alloc(struct dasd_block *block)
- 	dasd_add_link_to_gendisk(gdp, base);
- 	block->gdp = gdp;
- 	set_capacity(block->gdp, 0);
--	device_add_disk(&base->cdev->dev, block->gdp, NULL);
-+
-+	rc = device_add_disk(&base->cdev->dev, block->gdp, NULL);
-+	if (rc) {
-+		dasd_gendisk_free(block);
-+		return rc;
-+	}
-+
- 	return 0;
- }
- 
 -- 
-2.30.2
+Jens Axboe
 
