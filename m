@@ -2,99 +2,106 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9304C4332F
-	for <ceph-devel@archiver.kernel.org>; Tue, 28 Sep 2021 03:11:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE6F4C433F5
+	for <ceph-devel@archiver.kernel.org>; Tue, 28 Sep 2021 06:07:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 92BDB6124B
-	for <ceph-devel@archiver.kernel.org>; Tue, 28 Sep 2021 03:11:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D695061159
+	for <ceph-devel@archiver.kernel.org>; Tue, 28 Sep 2021 06:07:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238817AbhI1DNY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 27 Sep 2021 23:13:24 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:35268 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238748AbhI1DNX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Sep 2021 23:13:23 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 95E6C222DF;
-        Tue, 28 Sep 2021 03:11:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1632798701; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
+        id S239049AbhI1GJa (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 28 Sep 2021 02:09:30 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:53148 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S239800AbhI1GId (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 28 Sep 2021 02:08:33 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1632809213;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=k1irZcE6GgE63UfMaZ69q7wFQxdxy8PkJV1UDRuOwDA=;
-        b=Af8PPYiGG/KoV03reINXBzNVPccmiyHVMrwNt2UIFxlU1jhXBp5nI2Gka9opvfla6EYXOa
-        u9dubE+5BF4AwBJlVzPfA+nwLlAQkhckDkag+FkKT+kBsnwd6qmqqlWA/pOjn0C1Ffe5V9
-        HYSxfFfncwL3S6Y8kijKplmMugjgsEE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1632798701;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=k1irZcE6GgE63UfMaZ69q7wFQxdxy8PkJV1UDRuOwDA=;
-        b=rvEM/v30W6HdMnLZksiPaBfoRjZ8iPYI6P23HeASJG7DpSxpqPRoywlWfOvhpMFCEARX9U
-        W3t0wcFCENMdaDDw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id C1463132D4;
-        Tue, 28 Sep 2021 03:11:32 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id HD3CH+SHUmHafwAAMHmgww
-        (envelope-from <neilb@suse.de>); Tue, 28 Sep 2021 03:11:32 +0000
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+        bh=4DJY4JzvE3GxKzy5PPFP7IFKW/lhu4y2zW523L/Na2o=;
+        b=MBSwOapNSakD0Z26c7fNKgUSz2wdPUb1OIcGDwvfFxFsYT7uTtax8AihzVr4KzQwIH9Uiq
+        guYYd60Z+xuH4NY+kR2OuLAfnndCas3vpalvOWDif49FPjWdkiUevAaLOPlA3fa41miSRg
+        AWD/ohX8eCpGYN+cEZgsZfT5RxDqUjQ=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-597-SdSoeMSbPKWs0730D1rf3Q-1; Tue, 28 Sep 2021 02:06:51 -0400
+X-MC-Unique: SdSoeMSbPKWs0730D1rf3Q-1
+Received: by mail-pf1-f199.google.com with SMTP id i20-20020aa796f4000000b00447c2f4d37bso13739794pfq.22
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Sep 2021 23:06:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=4DJY4JzvE3GxKzy5PPFP7IFKW/lhu4y2zW523L/Na2o=;
+        b=tQUZywM7kzhlBNqlc/pYTRrCNnG+q8ny5ugzTNsKeWUo/K7qZPB19zbAOFkNBL7nz4
+         SRbEv+HpqJOQzWpp2roNdMrsXtZGJ4hFL3geXlgbwEiqB8t5qNLuKWtyvltozQ+dwmfO
+         lNP/ggWz4ThQaP1C+yU1v2nKXUyibiB6eCLUjUFBtOVuF5ggk7p8gZZBJwoNbQtYFNL4
+         IOpIMGIFOUbOzG3j/heTMqglotzJOp4Ev5x/E6GchU26+CpNNG1YzCvdcCakxvnvGEoH
+         Gky6F9d4cmOtgqEKbR17TN+y530Tnh6BELm/RcbUgUUor9OPtBEJRw9HhDI/8bgkqUb2
+         RkuA==
+X-Gm-Message-State: AOAM533UHTwWcKPUQUsddgl9HvWQEBf50mCPoV3leHBSNMNPd+pdRJko
+        uKPL+ZGYgi3967mrjt3V6sJ3dwpcehrPFA5yyGCwl3a+FZb99j2GOr3A+qSJ1gxE9d1XKLAGedG
+        obeVJ1NcrsZqD79CwpPb3jg==
+X-Received: by 2002:aa7:8609:0:b0:44b:346a:7404 with SMTP id p9-20020aa78609000000b0044b346a7404mr3899042pfn.86.1632809210168;
+        Mon, 27 Sep 2021 23:06:50 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJw9eVUPyxcA+HFRSKL5eZyT7Rq0hQEEGEFXnnaInSNUyhIOsbbwcQJAW2tdGImRxnDQB8hdxw==
+X-Received: by 2002:aa7:8609:0:b0:44b:346a:7404 with SMTP id p9-20020aa78609000000b0044b346a7404mr3899027pfn.86.1632809209978;
+        Mon, 27 Sep 2021 23:06:49 -0700 (PDT)
+Received: from localhost.localdomain ([49.207.212.118])
+        by smtp.gmail.com with ESMTPSA id v6sm18855862pfv.83.2021.09.27.23.06.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Sep 2021 23:06:49 -0700 (PDT)
+From:   Venky Shankar <vshankar@redhat.com>
+To:     jlayton@redhat.com, pdonnell@redhat.com
+Cc:     ceph-devel@vger.kernel.org, Venky Shankar <vshankar@redhat.com>
+Subject: [PATCH v3 1/2] libceph: export ceph_debugfs_dir for use in ceph.ko
+Date:   Tue, 28 Sep 2021 11:36:32 +0530
+Message-Id: <20210928060633.349231-2-vshankar@redhat.com>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <20210928060633.349231-1-vshankar@redhat.com>
+References: <20210928060633.349231-1-vshankar@redhat.com>
 MIME-Version: 1.0
-From:   "NeilBrown" <neilb@suse.de>
-To:     "David Howells" <dhowells@redhat.com>
-Cc:     willy@infradead.org, hch@lst.de, trond.myklebust@primarydata.com,
-        "Theodore Ts'o" <tytso@mit.edu>, linux-block@vger.kernel.org,
-        ceph-devel@vger.kernel.org,
-        "Trond Myklebust" <trond.myklebust@hammerspace.com>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        "Jeff Layton" <jlayton@kernel.org>,
-        "Andreas Dilger" <adilger.kernel@dilger.ca>,
-        "Anna Schumaker" <anna.schumaker@netapp.com>, linux-mm@kvack.org,
-        "Bob Liu" <bob.liu@oracle.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        "Josef Bacik" <josef@toxicpanda.com>,
-        "Seth Jennings" <sjenning@linux.vnet.ibm.com>,
-        "Jens Axboe" <axboe@kernel.dk>, linux-fsdevel@vger.kernel.org,
-        linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-cifs@vger.kernel.org, "Chris Mason" <clm@fb.com>,
-        "David Sterba" <dsterba@suse.com>,
-        "Minchan Kim" <minchan@kernel.org>,
-        "Steve French" <sfrench@samba.org>,
-        "Dan Magenheimer" <dan.magenheimer@oracle.com>,
-        linux-nfs@vger.kernel.org, "Ilya Dryomov" <idryomov@gmail.com>,
-        linux-btrfs@vger.kernel.org, dhowells@redhat.com,
-        viro@zeniv.linux.org.uk, torvalds@linux-foundation.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [RFC][PATCH v3 0/9] mm: Use DIO for swap and fix NFS swapfiles
-In-reply-to: <163250387273.2330363.13240781819520072222.stgit@warthog.procyon.org.uk>
-References: <163250387273.2330363.13240781819520072222.stgit@warthog.procyon.org.uk>
-Date:   Tue, 28 Sep 2021 13:11:29 +1000
-Message-id: <163279868982.18792.10448745714922373194@noble.neil.brown.name>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Sat, 25 Sep 2021, David Howells wrote:
-> Whilst trying to make this work, I found that NFS's support for swapfiles
-> seems to have been non-functional since Aug 2019 (I think), so the first
-> patch fixes that.  Question is: do we actually *want* to keep this
-> functionality, given that it seems that no one's tested it with an upstream
-> kernel in the last couple of years?
+Signed-off-by: Venky Shankar <vshankar@redhat.com>
+---
+ include/linux/ceph/debugfs.h | 2 ++
+ net/ceph/debugfs.c           | 3 ++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
-SUSE definitely want to keep this functionality.  We have customers
-using it.
-I agree it would be good if it was being tested somewhere....
+diff --git a/include/linux/ceph/debugfs.h b/include/linux/ceph/debugfs.h
+index 8b3a1a7a953a..464c7dfced87 100644
+--- a/include/linux/ceph/debugfs.h
++++ b/include/linux/ceph/debugfs.h
+@@ -4,6 +4,8 @@
+ 
+ #include <linux/ceph/types.h>
+ 
++extern struct dentry *ceph_debugfs_dir;
++
+ /* debugfs.c */
+ extern void ceph_debugfs_init(void);
+ extern void ceph_debugfs_cleanup(void);
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index 2110439f8a24..774e0c0fd18a 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -29,7 +29,8 @@
+  *      .../bdi         - symlink to ../../bdi/something
+  */
+ 
+-static struct dentry *ceph_debugfs_dir;
++struct dentry *ceph_debugfs_dir;
++EXPORT_SYMBOL(ceph_debugfs_dir);
+ 
+ static int monmap_show(struct seq_file *s, void *p)
+ {
+-- 
+2.27.0
 
-Thanks,
-NeilBrown
