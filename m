@@ -2,116 +2,98 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8DDFC433F5
-	for <ceph-devel@archiver.kernel.org>; Thu, 30 Sep 2021 15:54:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97DF3C433F5
+	for <ceph-devel@archiver.kernel.org>; Thu, 30 Sep 2021 17:03:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE53661555
-	for <ceph-devel@archiver.kernel.org>; Thu, 30 Sep 2021 15:54:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7F0BC61216
+	for <ceph-devel@archiver.kernel.org>; Thu, 30 Sep 2021 17:03:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346923AbhI3P43 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 30 Sep 2021 11:56:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56282 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346577AbhI3P42 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Sep 2021 11:56:28 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0C0AC06176A;
-        Thu, 30 Sep 2021 08:54:45 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id i4so27713049lfv.4;
-        Thu, 30 Sep 2021 08:54:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=8LuCj9+8GFiHaMYgM8A65UudQg+qoOQQ2QUvcQ4XJ6s=;
-        b=PXKNBxqcRYxhwIV2v2X64yZJayzFfGuPEaFJcRpO4WCNqMpCZwI1df/zPBhLNhmRG9
-         7YWtoaofqurtGMdx0tYBEI6UfndHKtDaw4PBX49q9qi3J9QTKWYVNSDazJnLhCwGhWpW
-         sQyH53wtu7PQHWXKpw0IKJFLkzoLewsXUWMxyWUFA0GoZc/geWBr365BCc9DFKmEuqTx
-         QD1UXjg8vOB88FTGI55O4xvrqxi80eDmibsD2swnwubvtT8jN+7r24raClw1eWxICIMn
-         Xqc+xF7xzZT7TnBUA1RA5nmOrLjD64wC+WGfBcYeYx3rm7565L5ZdR6xyKgYS9WfGChU
-         NdlA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=8LuCj9+8GFiHaMYgM8A65UudQg+qoOQQ2QUvcQ4XJ6s=;
-        b=XbBmZKylOYkv9SoXviPKr9BWXkZnTMEhN/fJ51HYr7LvZ50SCBNVHrOfV5SWpjYM2r
-         Y2qiC9CZ/lZsMRA6GQqL2/yNfuvwmt01k+raQ/914z/0iuApGZgUMbKUALfvCbUniGRI
-         gSalxO6Z+kngZPgLhCAU9cS1ehUiZTvEswwuJASnjNdOIUR0Z+riW4QpL82Pr+TXguTS
-         2fDK3wKyn6cI/dVyVPlz5oC6323Y0CaVOJqjzh8gwILnBViU/sGrMjSLtCdVqkbFx6bt
-         8hDoqhoj9aXS9t5aF9sa3JGdoOav5Q8f/6EcjMIWu/mSG6lZ8XF7xAHIVtuMFICV5S9y
-         uQUg==
-X-Gm-Message-State: AOAM530xbUXEPedn3z2RSBSh4SRFgiu7yX3y79mfdsl/iauHJLStOASh
-        TzYK5mmp8+9+DBjHeQ/cTbqVveEdVpYvTtbgkUjRp9WQ
-X-Google-Smtp-Source: ABdhPJyOHnVmMylaeGdsSDUQCs/a7NstziQ8gAm3Iq6Rldf9w/4qe7wGWECjl3a+7RS3TZsUTx6/zgFOVy33MH5VI2M=
-X-Received: by 2002:a05:6512:32c5:: with SMTP id f5mr7091563lfg.234.1633017283958;
- Thu, 30 Sep 2021 08:54:43 -0700 (PDT)
+        id S1345978AbhI3REr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 30 Sep 2021 13:04:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34764 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1345220AbhI3REr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 30 Sep 2021 13:04:47 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C6C69613D0;
+        Thu, 30 Sep 2021 17:03:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1633021384;
+        bh=fZAKLyOUQRksMyEmkyscUDhk7mdnRw+7fwiEtM8mk1g=;
+        h=From:To:Cc:Subject:Date:From;
+        b=LrdU0s4jU6p8RwoFf3BiTXkAExgjU7YCNixJrXOT36mvdttqXUCJsdtL8iJ7b5djC
+         LUPffAm3GcCqCQl0ul7AIWdtEFuOydJMBUjJKJuZJ7odreLDEqIGRGUn0v2NQCFByc
+         IJYXoMS3WL0fWksEPgs5HPNCNFhOxtAuQtfTqTB577H2vSK0fLwPmuQR17MkIPDWni
+         9BZMM1qZS9KauRDIj/N9zMMu7cZ/i/XJoLNlCxhHDx/GLbPnoF+u9wHuyO75RMHSM5
+         4CJjKrJrWy7j0zYi8AFL0SpRdH+qeDdWkSiJVReks8t4BcqzEFpD/0ZtnZ9eHdZ1sY
+         ssjC8d9nVgkiw==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, Patrick Donnelly <pdonnell@redhat.com>,
+        Niels de Vos <ndevos@redhat.com>
+Subject: [PATCH v2] ceph: skip existing superblocks that are blocklisted when mounting
+Date:   Thu, 30 Sep 2021 13:03:02 -0400
+Message-Id: <20210930170302.74924-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <163250387273.2330363.13240781819520072222.stgit@warthog.procyon.org.uk>
- <163279868982.18792.10448745714922373194@noble.neil.brown.name>
-In-Reply-To: <163279868982.18792.10448745714922373194@noble.neil.brown.name>
-From:   Steve French <smfrench@gmail.com>
-Date:   Thu, 30 Sep 2021 10:54:32 -0500
-Message-ID: <CAH2r5msHO9HTQGeO6MoR2_U76B9kLeoFS=FRbMuiNsh=YeFdWg@mail.gmail.com>
-Subject: Re: [RFC][PATCH v3 0/9] mm: Use DIO for swap and fix NFS swapfiles
-To:     NeilBrown <neilb@suse.de>
-Cc:     David Howells <dhowells@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Christoph Hellwig <hch@lst.de>,
-        Trond Myklebust <trond.myklebust@primarydata.com>,
-        "Theodore Ts'o" <tytso@mit.edu>, linux-block@vger.kernel.org,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Jeff Layton <jlayton@kernel.org>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        linux-mm <linux-mm@kvack.org>, Bob Liu <bob.liu@oracle.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Josef Bacik <josef@toxicpanda.com>,
-        Seth Jennings <sjenning@linux.vnet.ibm.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        linux-ext4 <linux-ext4@vger.kernel.org>,
-        CIFS <linux-cifs@vger.kernel.org>, Chris Mason <clm@fb.com>,
-        David Sterba <dsterba@suse.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Steve French <sfrench@samba.org>,
-        Dan Magenheimer <dan.magenheimer@oracle.com>,
-        linux-nfs <linux-nfs@vger.kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Al Viro <viro@zeniv.linux.org.uk>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        LKML <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Sep 27, 2021 at 10:12 PM NeilBrown <neilb@suse.de> wrote:
->
-> On Sat, 25 Sep 2021, David Howells wrote:
-> > Whilst trying to make this work, I found that NFS's support for swapfiles
-> > seems to have been non-functional since Aug 2019 (I think), so the first
-> > patch fixes that.  Question is: do we actually *want* to keep this
-> > functionality, given that it seems that no one's tested it with an upstream
-> > kernel in the last couple of years?
->
-> SUSE definitely want to keep this functionality.  We have customers
-> using it.
-> I agree it would be good if it was being tested somewhere....
->
+Currently when mounting, we may end up finding an existing superblock
+that corresponds to a blocklisted MDS client. This means that the new
+mount ends up being unusable.
 
-I am trying to work through the testing of swap over SMB3 mounts
-since there are use cases where you need to expand the swap
-space to remote storage and so this requirement comes up.  The main difficulty
-I run into is forgetting to mount with the mount options (to store mode bits)
-(so swap file has the right permissions) and debugging some of the
-xfstests relating to swap can be a little confusing.
+If we've found an existing superblock with a client that is already
+blocklisted, and the client is not configured to recover on its own,
+fail the match.
 
+While we're in here, also rename "other" to the more conventional "fsc".
+
+Cc: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Niels de Vos <ndevos@redhat.com>
+URL: https://bugzilla.redhat.com/show_bug.cgi?id=1901499
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/super.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index f517ad9eeb26..a7f1b66a91a7 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1123,16 +1123,16 @@ static int ceph_compare_super(struct super_block *sb, struct fs_context *fc)
+ 	struct ceph_fs_client *new = fc->s_fs_info;
+ 	struct ceph_mount_options *fsopt = new->mount_options;
+ 	struct ceph_options *opt = new->client->options;
+-	struct ceph_fs_client *other = ceph_sb_to_client(sb);
++	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+ 
+ 	dout("ceph_compare_super %p\n", sb);
+ 
+-	if (compare_mount_options(fsopt, opt, other)) {
++	if (compare_mount_options(fsopt, opt, fsc)) {
+ 		dout("monitor(s)/mount options don't match\n");
+ 		return 0;
+ 	}
+ 	if ((opt->flags & CEPH_OPT_FSID) &&
+-	    ceph_fsid_compare(&opt->fsid, &other->client->fsid)) {
++	    ceph_fsid_compare(&opt->fsid, &fsc->client->fsid)) {
+ 		dout("fsid doesn't match\n");
+ 		return 0;
+ 	}
+@@ -1140,6 +1140,11 @@ static int ceph_compare_super(struct super_block *sb, struct fs_context *fc)
+ 		dout("flags differ\n");
+ 		return 0;
+ 	}
++	/* Exclude any blocklisted superblocks */
++	if (fsc->blocklisted && !(fsopt->flags & CEPH_MOUNT_OPT_CLEANRECOVER)) {
++		dout("mds client is blocklisted (and CLEANRECOVER is not set)\n");
++		return 0;
++	}
+ 	return 1;
+ }
+ 
 -- 
-Thanks,
+2.31.1
 
-Steve
