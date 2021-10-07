@@ -2,80 +2,139 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 439D5C433EF
-	for <ceph-devel@archiver.kernel.org>; Tue,  5 Oct 2021 15:30:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3D8EC433F5
+	for <ceph-devel@archiver.kernel.org>; Thu,  7 Oct 2021 16:22:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2521861165
-	for <ceph-devel@archiver.kernel.org>; Tue,  5 Oct 2021 15:30:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A90AA61260
+	for <ceph-devel@archiver.kernel.org>; Thu,  7 Oct 2021 16:22:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233705AbhJEPcN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 5 Oct 2021 11:32:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42024 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229626AbhJEPcL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 5 Oct 2021 11:32:11 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 3CED961159;
-        Tue,  5 Oct 2021 15:30:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1633447820;
-        bh=Xao5G81KefyfLoku0fs2YYIQFHEYjpe5xHDpDyL5y10=;
-        h=From:To:Cc:Subject:Date:From;
-        b=NUzgcDk5aMaZ1Pxjk1+ZmlLFnD4IxxdMEJ9Cqrh9ZykBBpU0YaFmrh6m+k0MeWk8u
-         c2zvNbDPkFoznzac2eTKDAS6phzfSjl1UDZcIFzosafg6F6latrXFQAXeQ/Yt5aRmW
-         5UVax4Xq+lBWstTHWx97JTkbmkKI7oDfMBDOfwD0hgurgYYV7mgI2JOMPSsndYrMmf
-         t6wGKZvRwAfbA6a+VR7Arp9lbmK+ox1UENDD0ARBs1zMh+RPsRhoXRaqylnBTAb0NV
-         9q8QLGFiqEPaePv50TWWiXA5pi72tSTXmJYK3JKv4Fv+EC/TLpJsSIIsf6V9kuGScm
-         6Io0uSqDXLOIA==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, Sachin Prabhu <sprabhu@redhat.com>
-Subject: [PATCH] ceph: properly handle statfs on multifs setups
-Date:   Tue,  5 Oct 2021 11:30:19 -0400
-Message-Id: <20211005153019.79956-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.31.1
+        id S242069AbhJGQYl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 7 Oct 2021 12:24:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:21038 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233590AbhJGQYl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Oct 2021 12:24:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1633623767;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=YlCCMepVWxlDt+ZxOI3nKL7iXR5cvBw/XyYjKdfC9HI=;
+        b=WrlemT10fLZTpI5FuqNcpd/a9y5Al/IxXjvzEIDfuuxcbY4SD+zbQPSpglExkDeDc/qczk
+        2EC8N+uJObLrrKI4EyT9XMG0x97wz+XXukVijEZ0koR2+lRLo6mfFMYdXB/y/GQowSQQZy
+        pFrNUAmokpBUuRUU6oDzKRIrdrx/h1Y=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-38-niXwdHv8Pz2BQVcuslP5yQ-1; Thu, 07 Oct 2021 12:22:45 -0400
+X-MC-Unique: niXwdHv8Pz2BQVcuslP5yQ-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7D97614242DB;
+        Thu,  7 Oct 2021 15:53:13 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.33.36.44])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id ABDA8D1F28;
+        Thu,  7 Oct 2021 15:53:05 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+To:     torvalds@linux-foundation.org
+cc:     dhowells@redhat.com, Dave Wysochanski <dwysocha@redhat.com>,
+        Jeff Layton <jlayton@kernel.org>,
+        Jeffrey Altman <jaltman@auristor.com>,
+        Marc Dionne <marc.dionne@auristor.com>,
+        v9fs-developer@lists.sourceforge.net,
+        linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
+        linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org,
+        linux-mm@kvack.org, linux-kernel@kvack.org
+Subject: [GIT PULL] netfs, cachefiles, afs: Collected fixes
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <1961631.1633621984.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date:   Thu, 07 Oct 2021 16:53:04 +0100
+Message-ID: <1961632.1633621984@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-ceph_statfs currently stuffs the cluster fsid into the f_fsid field.
-This was fine when we only had a single filesystem per cluster, but now
-that we have multiples we need to use something that will vary between
-them.
+Hi Linus,
 
-Change ceph_statfs to mix the current 64 bit hashed fsid down to 32 bits
-using a trivial xor hash. Shift that to be the upper 32 bits in the
-64 bit field and then fold in the fs_cluster_id from the mon client.
+Can you pull this set of collected fixes please?  There are three:
 
-That should give us a value that is guaranteed to be unique between
-filesystems within a cluster, and should minimize the chance of
-collisions between mounts of different clusters.
+ (1) Fix another couple of oopses in cachefiles tracing stemming from the
+     possibility of passing in a NULL object pointer[1].
 
-URL: https://tracker.ceph.com/issues/52812
-Reported-by: Sachin Prabhu <sprabhu@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+ (2) Fix netfs_clear_unread() to set READ on the iov_iter so that source i=
+t
+     is passed to doesn't do the wrong thing (some drivers look at the fla=
+g
+     on iov_iter rather than other available information to determine the
+     direction)[2].
+
+ (3) Fix afs_launder_page() to write back at the correct file position on
+     the server so as not to corrupt data[3].
+
+David
+
+Link: https://lore.kernel.org/r/162729351325.813557.9242842205308443901.st=
+git@warthog.procyon.org.uk/ [1]
+Link: https://lore.kernel.org/r/162886603464.3940407.3790841170414793899.s=
+tgit@warthog.procyon.org.uk [1]
+Link: https://lore.kernel.org/r/163239074602.1243337.14154704004485867017.=
+stgit@warthog.procyon.org.uk [1]
+Link: https://lore.kernel.org/r/162729351325.813557.9242842205308443901.st=
+git@warthog.procyon.org.uk/ [2]
+Link: https://lore.kernel.org/r/162886603464.3940407.3790841170414793899.s=
+tgit@warthog.procyon.org.uk [2]
+Link: https://lore.kernel.org/r/163239074602.1243337.14154704004485867017.=
+stgit@warthog.procyon.org.uk [2]
+Link: https://lore.kernel.org/r/162880783179.3421678.7795105718190440134.s=
+tgit@warthog.procyon.org.uk/ [3]
+Link: https://lore.kernel.org/r/162937512409.1449272.18441473411207824084.=
+stgit@warthog.procyon.org.uk/ [3]
+Link: https://lore.kernel.org/r/162981148752.1901565.3663780601682206026.s=
+tgit@warthog.procyon.org.uk/ [3]
+Link: https://lore.kernel.org/r/163005741670.2472992.2073548908229887941.s=
+tgit@warthog.procyon.org.uk/ [3]
+Link: https://lore.kernel.org/r/163221839087.3143591.14278359695763025231.=
+stgit@warthog.procyon.org.uk/ [3]
+Link: https://lore.kernel.org/r/163292980654.4004896.7134735179887998551.s=
+tgit@warthog.procyon.org.uk/ [3]
+
 ---
- fs/ceph/super.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+The following changes since commit 9e1ff307c779ce1f0f810c7ecce3d95bbae4089=
+6:
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 42c502eee80a..b6d2e20e857b 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -104,6 +104,12 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	       le64_to_cpu(*((__le64 *)&monc->monmap->fsid + 1));
- 	mutex_unlock(&monc->mutex);
- 
-+	/* mix the fsid down to 32 bits */
-+	fsid = *(u32 *)&fsid ^ *((u32 *)&fsid + 1);
-+
-+	/* fold the fs_cluster_id into the upper bits */
-+	fsid |= ((u64)monc->fs_cluster_id << 32);
-+
- 	buf->f_fsid = u64_to_fsid(fsid);
- 
- 	return 0;
--- 
-2.31.1
+  Linux 5.15-rc4 (2021-10-03 14:08:47 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git tags=
+/misc-fixes-20211007
+
+for you to fetch changes up to 5c0522484eb54b90f2e46a5db8d7a4ff3ff86e5d:
+
+  afs: Fix afs_launder_page() to set correct start file position (2021-10-=
+05 11:22:06 +0100)
+
+----------------------------------------------------------------
+netfslib, cachefiles and afs fixes
+
+----------------------------------------------------------------
+Dave Wysochanski (1):
+      cachefiles: Fix oops with cachefiles_cull() due to NULL object
+
+David Howells (2):
+      netfs: Fix READ/WRITE confusion when calling iov_iter_xarray()
+      afs: Fix afs_launder_page() to set correct start file position
+
+ fs/afs/write.c                    | 3 +--
+ fs/netfs/read_helper.c            | 2 +-
+ include/trace/events/cachefiles.h | 4 ++--
+ 3 files changed, 4 insertions(+), 5 deletions(-)
 
