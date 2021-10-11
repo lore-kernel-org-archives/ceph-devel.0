@@ -2,168 +2,105 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C620C433EF
-	for <ceph-devel@archiver.kernel.org>; Mon, 11 Oct 2021 10:48:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1CA5C433EF
+	for <ceph-devel@archiver.kernel.org>; Mon, 11 Oct 2021 11:32:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E77CB60E53
-	for <ceph-devel@archiver.kernel.org>; Mon, 11 Oct 2021 10:48:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CBC5D60EE2
+	for <ceph-devel@archiver.kernel.org>; Mon, 11 Oct 2021 11:32:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235982AbhJKKuJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 11 Oct 2021 06:50:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43594 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235970AbhJKKuI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 11 Oct 2021 06:50:08 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id CD4D960E53;
-        Mon, 11 Oct 2021 10:48:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1633949288;
-        bh=HsJHmola6Ex8Jyfgo6yBjZspiuXkoKWk7C24cpJt0Sw=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=WjgqL2P0BLcvvq3eglqXjH99FXc8iQnBWmZy50EP7zk5cPkUuRWDQwPKl43ZguuaU
-         EZG7uBnQXRwXpB0hWqcVNj/wuuV/8MQ1J3LKIBU07Zey4Tn56d1TGRpUG1J69KN19T
-         yyOGEE1NYAP+Othx93pMKEgh3Oimj8oFuDrrk4DfawolQPhbjjQ7h4TlILeBuGmsvZ
-         8YIlOwr/gXq1GucNPL9RlKl8gsDEhXxQLtY94pwgq1t2onijqjKBa/kj6Qj3R8lf17
-         WcgMHy2L1fJ2U9vI4oPWXtmDHJU+5P8UHrIvHcCOGmraXc+BBA9AreVAUmjaIWp4MX
-         w5hokQ0P1/LSg==
-Message-ID: <24064c5d0298580ba7dbaab78a168d442246bb28.camel@kernel.org>
-Subject: Re: [PATCH v2] ceph: skip existing superblocks that are blocklisted
- when mounting
-From:   Jeff Layton <jlayton@kernel.org>
-To:     "Yan, Zheng" <ukernel@gmail.com>
-Cc:     Ilya Dryomov <idryomov@gmail.com>,
-        Ceph Development <ceph-devel@vger.kernel.org>,
-        Patrick Donnelly <pdonnell@redhat.com>,
-        Niels de Vos <ndevos@redhat.com>
-Date:   Mon, 11 Oct 2021 06:48:06 -0400
-In-Reply-To: <CAAM7YA=eFt5HVc5r=5o6A_0iuzKxNf=M3k_7Ctx0eg-DsO6CxA@mail.gmail.com>
-References: <20210930170302.74924-1-jlayton@kernel.org>
-         <CAOi1vP9YBcxMAMe1yE4v-E6gmK0GbYMKX5yODAYQOXvRd39FFg@mail.gmail.com>
-         <cb422013534ef465e906b45a085e5c79dcd1b201.camel@kernel.org>
-         <CAAM7YA=eFt5HVc5r=5o6A_0iuzKxNf=M3k_7Ctx0eg-DsO6CxA@mail.gmail.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.40.4 (3.40.4-1.fc34) 
+        id S233797AbhJKLeX (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 11 Oct 2021 07:34:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59810 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229824AbhJKLeX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Oct 2021 07:34:23 -0400
+Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86CCFC061570;
+        Mon, 11 Oct 2021 04:32:23 -0700 (PDT)
+Received: by mail-vk1-xa29.google.com with SMTP id h132so7314309vke.8;
+        Mon, 11 Oct 2021 04:32:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=eNa93UMI1KiLker/dCP3o2bqpfQeSaV3eWLJOG/vVio=;
+        b=Rzena0a7V5vrmnlo5hrGRIdiwOk4le7r8evuBSiprGeSp1tonpZL+pOKEZbcKiBv4I
+         cM+V8IxE53CwxcUXAgXRz/6BVMSg3FakemkeBhqIM5JqXEuEPr7psABbP9MEI9pApuZz
+         cb2c97BX+/tez9QVRZzcw6a43fHfLX7gaCO08nLNQ//vymLn13VEJD+DKd88XlShGMf8
+         dwZOQYXPbmSZR5FXUHFbL/YyKhLPJs7Mfvpyon6OAS/Wi3dOs0TJ2sBrt++2ZIpKRfTE
+         WMucrZCpRf8Pk/Ou8zhHDxnxT2nLikZtezAlULxHmKop3+VlizUk72Tm9lbe7RKpETDU
+         8I4Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=eNa93UMI1KiLker/dCP3o2bqpfQeSaV3eWLJOG/vVio=;
+        b=Pa30HDxeift4vVngOnmRGvYfgTZ+qd9JXA7u9peEiaQJ7ecCDKpI8VH/EqOwfHxoZq
+         7SZ2S1ucbbYR04Q7E3VJ9wTyGms8d5gDNzHLi+mnHUumc9isqRz5cJJvpo+XD2CDHift
+         Br3TxBw8dm97OkAXGaL2IFGCOoc4F+g85BFd2BjVmNu79dU7XuaKCRjSJwpxe8KrYDBr
+         Ffklo1Kb1x+Ooh6o8nCTL3Vs5rLEYKRFOAvMbAu7jzmdT3NeKq5kk7IlNr9HEset2HGs
+         3GagSQx6/MO+UTxbZQcYOkwFg5PspiUy4rZ0+38efQTuDhtkmM5zmYsitQ1XDoxhm4Rn
+         1Cag==
+X-Gm-Message-State: AOAM533xAJRSj8I6JR6gHe1Oi4SD+ZOalBw9QD1h9VCQajkuhI5jhcYC
+        3NKybgKHE2gu0WgvLUcjFqtZKvDgWUmSNyueR3I+1vw2xL5T4Q==
+X-Google-Smtp-Source: ABdhPJyIMDsIEZYlK6aJkJqPNpkAlQ027vBCK30OJJFpbXI47dhL9jHszMc5chT9H+l/tMDsLwshj3qs4eRHix8apgA=
+X-Received: by 2002:a1f:ab8f:: with SMTP id u137mr19235637vke.17.1633951942715;
+ Mon, 11 Oct 2021 04:32:22 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20211011064524.20003-1-sakiwit@gmail.com>
+In-Reply-To: <20211011064524.20003-1-sakiwit@gmail.com>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Mon, 11 Oct 2021 13:31:50 +0200
+Message-ID: <CAOi1vP98SM3Z7zr9vZS8C_4-mPHgbSNHiOwkKmfVKXu6xRf0+w@mail.gmail.com>
+Subject: Re: [PATCH net-next] net: ceph: fix ->monmap and err initialization
+To:     =?UTF-8?B?Ss61YW4gU2FjcmVu?= <sakiwit@gmail.com>
+Cc:     Jeff Layton <jlayton@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Ceph Development <ceph-devel@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2021-10-11 at 11:37 +0800, Yan, Zheng wrote:
-> 
-> 
-> On Tue, Oct 5, 2021 at 6:17 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > On Tue, 2021-10-05 at 10:00 +0200, Ilya Dryomov wrote:
-> > > On Thu, Sep 30, 2021 at 7:03 PM Jeff Layton <jlayton@kernel.org>
-> > wrote:
-> > > > 
-> > > > Currently when mounting, we may end up finding an existing
-> > superblock
-> > > > that corresponds to a blocklisted MDS client. This means that
-> > > > the
-> > new
-> > > > mount ends up being unusable.
-> > > > 
-> > > > If we've found an existing superblock with a client that is
-> > already
-> > > > blocklisted, and the client is not configured to recover on its
-> > own,
-> > > > fail the match.
-> > > > 
-> > > > While we're in here, also rename "other" to the more
-> > > > conventional
-> > "fsc".
-> > > > 
-> > 
-> 
-> 
-> Note: we have similar issue for forced umounted superblock 
->  
+On Mon, Oct 11, 2021 at 8:45 AM J=CE=B5an Sacren <sakiwit@gmail.com> wrote:
+>
+> From: Jean Sacren <sakiwit@gmail.com>
+>
+> Call to build_initial_monmap() is one stone two birds.  Explicitly it
+> initializes err variable. Implicitly it initializes ->monmap via call to
+> kzalloc().  We should only declare err and ->monmap is taken care of by
+> ceph_monc_init() prototype.
+>
+> Signed-off-by: Jean Sacren <sakiwit@gmail.com>
+> ---
+>  net/ceph/mon_client.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 013cbdb6cfe2..6a6898ee4049 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -1153,12 +1153,11 @@ static int build_initial_monmap(struct ceph_mon_c=
+lient *monc)
+>
+>  int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
+>  {
+> -       int err =3D 0;
+> +       int err;
+>
+>         dout("init\n");
+>         memset(monc, 0, sizeof(*monc));
+>         monc->client =3D cl;
+> -       monc->monmap =3D NULL;
+>         mutex_init(&monc->mutex);
+>
+>         err =3D build_initial_monmap(monc);
 
-True...
+Applied.
 
-There is a small window of time between when ->umount_begin runs and
-generic_shutdown_super happens. Between that period, you could match a
-superblock that's been forcibly umounted and is on the way to being
-detached from the tree.
+Thanks,
 
-I'm a little less concerned about that because the time window should be
-pretty short, and someone would need to try to make a new mount while
-"umount -f" is still running. I don't think we can fully prevent that
-anyway, as there is some raciness involved (your mount might match the
-thing just before umount_begin runs).
-
-I'm inclined not to worry about that case, unless we have some reports
-of people hitting that problem.
-
-Thoughts?
-
-
-> >  
-> > > > Cc: Patrick Donnelly <pdonnell@redhat.com>
-> > > > Cc: Niels de Vos <ndevos@redhat.com>
-> > > > URL: https://bugzilla.redhat.com/show_bug.cgi?id=1901499
-> > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > > ---
-> > > >   fs/ceph/super.c | 11 ++++++++---
-> > > >   1 file changed, 8 insertions(+), 3 deletions(-)
-> > > > 
-> > > > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> > > > index f517ad9eeb26..a7f1b66a91a7 100644
-> > > > --- a/fs/ceph/super.c
-> > > > +++ b/fs/ceph/super.c
-> > > > @@ -1123,16 +1123,16 @@ static int ceph_compare_super(struct
-> > super_block *sb, struct fs_context *fc)
-> > > >          struct ceph_fs_client *new = fc->s_fs_info;
-> > > >          struct ceph_mount_options *fsopt = new->mount_options;
-> > > >          struct ceph_options *opt = new->client->options;
-> > > > -       struct ceph_fs_client *other = ceph_sb_to_client(sb);
-> > > > +       struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
-> > > > 
-> > > >          dout("ceph_compare_super %p\n", sb);
-> > > > 
-> > > > -       if (compare_mount_options(fsopt, opt, other)) {
-> > > > +       if (compare_mount_options(fsopt, opt, fsc)) {
-> > > >                  dout("monitor(s)/mount options don't match\n");
-> > > >                  return 0;
-> > > >          }
-> > > >          if ((opt->flags & CEPH_OPT_FSID) &&
-> > > > -           ceph_fsid_compare(&opt->fsid, &other->client->fsid))
-> > > > {
-> > > > +           ceph_fsid_compare(&opt->fsid, &fsc->client->fsid)) {
-> > > >                  dout("fsid doesn't match\n");
-> > > >                  return 0;
-> > > >          }
-> > > > @@ -1140,6 +1140,11 @@ static int ceph_compare_super(struct
-> > super_block *sb, struct fs_context *fc)
-> > > >                  dout("flags differ\n");
-> > > >                  return 0;
-> > > >          }
-> > > > +       /* Exclude any blocklisted superblocks */
-> > > > +       if (fsc->blocklisted && !(fsopt->flags &
-> > CEPH_MOUNT_OPT_CLEANRECOVER)) {
-> > > 
-> > > Hi Jeff,
-> > > 
-> > > Nit: This looks a bit weird because fsc is the existing client
-> > > while
-> > > fsopt is the new set of mount options.  They are guaranteed to
-> > > match
-> > at
-> > > that point because of compare_mount_options() but it feels better
-> > > to
-> > > stick to probing the existing client, e.g.
-> > > 
-> > >     if (fsc->blocklisted && !ceph_test_mount_opt(fsc,
-> > > CLEANRECOVER))
-> > > 
-> > 
-> > Yeah, that does look cleaner. I went ahead and made that change in
-> > the
-> > testing branch patch, but I'll skip re-posting it.
-> > 
-> > Thanks,
-
--- 
-Jeff Layton <jlayton@kernel.org>
-
+                Ilya
