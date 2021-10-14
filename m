@@ -2,153 +2,112 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C000C433FE
-	for <ceph-devel@archiver.kernel.org>; Tue, 12 Oct 2021 20:06:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2BCFC433F5
+	for <ceph-devel@archiver.kernel.org>; Thu, 14 Oct 2021 16:50:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DC9961002
-	for <ceph-devel@archiver.kernel.org>; Tue, 12 Oct 2021 20:06:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BF53D6109E
+	for <ceph-devel@archiver.kernel.org>; Thu, 14 Oct 2021 16:50:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234289AbhJLUId (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 12 Oct 2021 16:08:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53228 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233507AbhJLUIb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Oct 2021 16:08:31 -0400
-Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C5EAC061570;
-        Tue, 12 Oct 2021 13:06:28 -0700 (PDT)
-Received: by mail-ua1-x92c.google.com with SMTP id h4so944204uaw.1;
-        Tue, 12 Oct 2021 13:06:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=wdKcDVXA6vAqIyBI6HG7iRr8yhpfW6/IUUuBnFjc/Ko=;
-        b=jzH7BZ2sostp0IMUQJRXq1kZDcpC8rH3Bths0FwXAKs7DbReDBG/RMaj+kIZRqMnPA
-         h3bp7jrBJVrWAhi0rWhcgUzWv8mOLXvFyUvyICxh5Ddi7TdygPEg9bwcW3Hnq+VeQufq
-         ub7GgMq3EnAZS64GSjz47HR2/z5CrioDuPIaevTfpuNUwx5b1s8kNMEa0KFu/AzgA46R
-         Rf4xAYbW14tEqM/A+VzxMLY8V9fOfY9yiE3qXPncsutKQIaB14rGLZAj+L/79UbI+p/X
-         Jl1PXiCdTxYolwgruDXWlD9erzJXbyOK9VBO9Di8Cb73yKDs8/HxkCFqWAqzLetmd1xi
-         ZTSg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=wdKcDVXA6vAqIyBI6HG7iRr8yhpfW6/IUUuBnFjc/Ko=;
-        b=Gw6JB+6/VstyTmFUI8LdBP2Qs8YNsL4aos2upGUK1Mhez+vqtN5ZGx+EANPg5c0kSb
-         DJuBf2hqNV4minBeEcETcgTQc6OjNl5Ji5iZ+Wb+xuWLW9mb336gEG13DyAe7hytsOX+
-         yFbxX4B8e5RBfAV2GgZ9QMqRrgeXmUeOxDuaFQbNlsClUXJq2cpVvxeEQTRuYTtzTVMH
-         yQX5iKUO+26vPxJLJbuixw02USNQ7nFftnCnw34H8292oDal3I+Uw796xrHY0kod4/eW
-         tzcUMXi4U9TR0kcFXLJ84w5eZnwHya/1h7HGiOpxrdHaD0iMKLSqRw9GYURNT2s6Rydp
-         h9Rw==
-X-Gm-Message-State: AOAM533fK4qCZAHIVBCu7SpHoPEQDTArSAbgVR2N246ia6+V9tmyUUdC
-        K7Lhd4vNU0axDryRm8t3v8j1+2FNKyr/EpGgvdw=
-X-Google-Smtp-Source: ABdhPJzYyE2fBqIQcPey9Eru5GAEwZ6pSnvXn/ieRwMnowq6Brkpbtm+ScCXWMhCmyqMYjIZ1Vz2HucYVuv+9iUEAo4=
-X-Received: by 2002:ab0:3d06:: with SMTP id f6mr26026482uax.65.1634069187402;
- Tue, 12 Oct 2021 13:06:27 -0700 (PDT)
+        id S232446AbhJNQwL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 14 Oct 2021 12:52:11 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38016 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231129AbhJNQwJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Oct 2021 12:52:09 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 18BB06109E;
+        Thu, 14 Oct 2021 16:50:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1634230204;
+        bh=rguS+p9ReWy9ScN7XVZPgG/sPYxmove/17TmuJNjH5g=;
+        h=From:To:Cc:Subject:Date:From;
+        b=l8D7VERUwvpPcDKfxTbntK6vH4drT6zSZl7t+ozFWybV3wVCFFyRsevcFFVuBAZfn
+         vpBcUVheZsabtvP/o6dQHyIVCZsXGgAKNxnuRkpDCzxONT4d2CJrx4LY1tU+dCkTxI
+         g18Vlafinckb8UpeOWMvC8QNqwA8akjATVLciOKushnoBQDjWByjqgvOdkWyKa1sBP
+         VF/dany3f8cHyVfWRTLr38NUYGgJ6wx0GuRZ0Gt1rjVjmmDTPXKkyZAI3/tXuq5mlb
+         Xbk0jwJiw3bnIQD80r96gnhKc9P39G0XVNMUBsFDhF7zVCT/wap2j0teeKOcZh9Ut5
+         6MDnnRGN9mDEQ==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, Greg Farnum <gfarnum@redhat.com>
+Subject: [PATCH] ceph: shut down mount on bad mdsmap or fsmap decode
+Date:   Thu, 14 Oct 2021 12:50:02 -0400
+Message-Id: <20211014165002.92052-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <20211012134915.38994-1-jlayton@kernel.org> <CAOi1vP8L74DQAKHrF9FFz00pvqcktOXLdemhFGmXsROZCtNB=w@mail.gmail.com>
- <e69f6a977f01eb8493284395b04981a7def580b2.camel@kernel.org>
-In-Reply-To: <e69f6a977f01eb8493284395b04981a7def580b2.camel@kernel.org>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Tue, 12 Oct 2021 22:05:54 +0200
-Message-ID: <CAOi1vP-jyg1E1eBB7NrtcmQB=2wYFXht669kgFqTsmgVeX-h4w@mail.gmail.com>
-Subject: Re: [PATCH v3] ceph: skip existing superblocks that are blocklisted
- or shut down when mounting
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Ceph Development <ceph-devel@vger.kernel.org>,
-        Patrick Donnelly <pdonnell@redhat.com>,
-        Niels de Vos <ndevos@redhat.com>,
-        "Yan, Zheng" <ukernel@gmail.com>, stable@vger.kernel.org,
-        Xiubo Li <xiubli@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Oct 12, 2021 at 9:42 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> On Tue, 2021-10-12 at 21:05 +0200, Ilya Dryomov wrote:
-> > On Tue, Oct 12, 2021 at 3:49 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > >
-> > > Currently when mounting, we may end up finding an existing superblock
-> > > that corresponds to a blocklisted MDS client. This means that the new
-> > > mount ends up being unusable.
-> > >
-> > > If we've found an existing superblock with a client that is already
-> > > blocklisted, and the client is not configured to recover on its own,
-> > > fail the match. Ditto if the superblock has been forcibly unmounted.
-> > >
-> > > While we're in here, also rename "other" to the more conventional "fsc".
-> > >
-> > > Cc: Patrick Donnelly <pdonnell@redhat.com>
-> > > Cc: Niels de Vos <ndevos@redhat.com>
-> > > Cc: "Yan, Zheng" <ukernel@gmail.com>
-> > > Cc: stable@vger.kernel.org
-> > > URL: https://bugzilla.redhat.com/show_bug.cgi?id=1901499
-> > > Reviewed-by: Xiubo Li <xiubli@redhat.com>
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > >
-> > > ceph: when comparing superblocks, skip ones that have been forcibly unmounted
-> > >
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> >
-> > Hi Jeff,
-> >
-> > This looks like a squashing left-over.
-> >
->
-> Yep, that can be removed.
->
-> > > ---
-> > >  fs/ceph/super.c | 17 ++++++++++++++---
-> > >  1 file changed, 14 insertions(+), 3 deletions(-)
-> > >
-> > > v3: also handle the case where we have a forcibly unmounted superblock
-> > >     that is detached but still extant
-> > >
-> > > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> > > index f517ad9eeb26..b9ba50c9dc95 100644
-> > > --- a/fs/ceph/super.c
-> > > +++ b/fs/ceph/super.c
-> > > @@ -1123,16 +1123,16 @@ static int ceph_compare_super(struct super_block *sb, struct fs_context *fc)
-> > >         struct ceph_fs_client *new = fc->s_fs_info;
-> > >         struct ceph_mount_options *fsopt = new->mount_options;
-> > >         struct ceph_options *opt = new->client->options;
-> > > -       struct ceph_fs_client *other = ceph_sb_to_client(sb);
-> > > +       struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
-> > >
-> > >         dout("ceph_compare_super %p\n", sb);
-> > >
-> > > -       if (compare_mount_options(fsopt, opt, other)) {
-> > > +       if (compare_mount_options(fsopt, opt, fsc)) {
-> > >                 dout("monitor(s)/mount options don't match\n");
-> > >                 return 0;
-> > >         }
-> > >         if ((opt->flags & CEPH_OPT_FSID) &&
-> > > -           ceph_fsid_compare(&opt->fsid, &other->client->fsid)) {
-> > > +           ceph_fsid_compare(&opt->fsid, &fsc->client->fsid)) {
-> > >                 dout("fsid doesn't match\n");
-> > >                 return 0;
-> > >         }
-> > > @@ -1140,6 +1140,17 @@ static int ceph_compare_super(struct super_block *sb, struct fs_context *fc)
-> > >                 dout("flags differ\n");
-> > >                 return 0;
-> > >         }
-> > > +       /* Exclude any blocklisted superblocks */
-> >
-> > Nit: given the dout message that follows, this comment seems useless.
-> >
-> > Thanks,
-> >
-> >                 Ilya
->
-> I'm fine with removing that comment. Would you rather I resend, or do
-> you just want to fix up the nits in-tree?
+As Greg pointed out, if we get a mangled mdsmap or fsmap, then something
+has gone very wrong, and we should avoid doing any activity on the
+filesystem.
 
-The squashing left-over is already fixed.  I'll remove the comment
-later.
+When this occurs, shut down the mount the same way we would with a
+forced umount by calling ceph_umount_begin when decoding fails on either
+map. This causes most operations done against the filesystem to return
+an error. Any dirty data or caps in the cache will be dropped as well.
 
-Thanks,
+The effect is not reversible, so the only remedy is to umount.
 
-                Ilya
+URL: https://tracker.ceph.com/issues/52303
+Cc: Greg Farnum <gfarnum@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/mds_client.c | 6 ++++--
+ fs/ceph/super.c      | 2 +-
+ fs/ceph/super.h      | 1 +
+ 3 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 598425ccd020..5490f3422ae2 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -5011,7 +5011,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+ 	return;
+ 
+ bad:
+-	pr_err("error decoding fsmap\n");
++	pr_err("error decoding fsmap. Shutting down mount.\n");
++	ceph_umount_begin(mdsc->fsc->sb);
+ err_out:
+ 	mutex_lock(&mdsc->mutex);
+ 	mdsc->mdsmap_err = err;
+@@ -5078,7 +5079,8 @@ void ceph_mdsc_handle_mdsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+ bad_unlock:
+ 	mutex_unlock(&mdsc->mutex);
+ bad:
+-	pr_err("error decoding mdsmap %d\n", err);
++	pr_err("error decoding mdsmap %d. Shutting down mount.\n", err);
++	ceph_umount_begin(mdsc->fsc->sb);
+ 	return;
+ }
+ 
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 580dad2c832e..fea6e69b94a0 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -969,7 +969,7 @@ static void __ceph_umount_begin(struct ceph_fs_client *fsc)
+  * ceph_umount_begin - initiate forced umount.  Tear down the
+  * mount, skipping steps that may hang while waiting for server(s).
+  */
+-static void ceph_umount_begin(struct super_block *sb)
++void ceph_umount_begin(struct super_block *sb)
+ {
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 49ca2106f853..7c3990cd3c3b 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -947,6 +947,7 @@ extern void ceph_put_snapid_map(struct ceph_mds_client* mdsc,
+ 				struct ceph_snapid_map *sm);
+ extern void ceph_trim_snapid_map(struct ceph_mds_client *mdsc);
+ extern void ceph_cleanup_snapid_map(struct ceph_mds_client *mdsc);
++void ceph_umount_begin(struct super_block *sb);
+ 
+ 
+ /*
+-- 
+2.31.1
+
