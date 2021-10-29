@@ -2,210 +2,497 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75CF0C433F5
-	for <ceph-devel@archiver.kernel.org>; Fri, 29 Oct 2021 14:09:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AC12C433F5
+	for <ceph-devel@archiver.kernel.org>; Fri, 29 Oct 2021 14:09:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DC15611C0
-	for <ceph-devel@archiver.kernel.org>; Fri, 29 Oct 2021 14:09:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7C7F561184
+	for <ceph-devel@archiver.kernel.org>; Fri, 29 Oct 2021 14:09:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231658AbhJ2OMB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 29 Oct 2021 10:12:01 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:31307 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231544AbhJ2OLu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 29 Oct 2021 10:11:50 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635516561;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=gK1f2sX/Nqb18ZiigNY6DjbIw0YlFX88ZN/1XEK2ndo=;
-        b=dfogpFOxUahqotctDOk6zy5BJ53wjIorRE1FWUHEJmGKDLnqoPGxjb8qii/zxsJZz2EXcw
-        BifR/lsQroY+e9mpaEUv7SCbxzQxlq2voAgLKSKbmyqJO0iOx/tXfXHjKQkGNdJTU7FRrT
-        Tzft7GjbpDaS1AH7RBoi8PsWzD86nvM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-450-0LrvafprOD6VQdhjqIpV_A-1; Fri, 29 Oct 2021 10:09:16 -0400
-X-MC-Unique: 0LrvafprOD6VQdhjqIpV_A-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        id S231431AbhJ2OMF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 29 Oct 2021 10:12:05 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:35748 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231651AbhJ2OMB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Oct 2021 10:12:01 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 2858C80668B;
-        Fri, 29 Oct 2021 14:09:14 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.33.36.19])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id EDED860936;
-        Fri, 29 Oct 2021 14:08:54 +0000 (UTC)
-Subject: [PATCH v4 00/10] fscache: Replace and remove old I/O API
-From:   David Howells <dhowells@redhat.com>
-To:     Trond Myklebust <trondmy@hammerspace.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>
-Cc:     v9fs-developer@lists.sourceforge.net, linux-cifs@vger.kernel.org,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        linux-nfs@vger.kernel.org, linux-cachefs@redhat.com,
-        Dave Wysochanski <dwysocha@redhat.com>,
-        Shyam Prasad N <nspmangalore@gmail.com>, dhowells@redhat.com,
-        Jeff Layton <jlayton@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-cachefs@redhat.com, linux-afs@lists.infradead.org,
-        linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Fri, 29 Oct 2021 15:08:54 +0100
-Message-ID: <163551653404.1877519.12363794970541005441.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
+        by smtp-out1.suse.de (Postfix) with ESMTPS id A153D21978;
+        Fri, 29 Oct 2021 14:09:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1635516571; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Wg1WyIZF1JHgpU42cFygsGx+fcfm4hH99uIWlEVsol8=;
+        b=ZDf9SCC7b/7Lu7zy6e7G5pBPcafo8IzFZEft2Lty4/9T0/fCFTcDnPIk5udBMWg1x9WxD6
+        IpTqxM5oEVoBTyogLOu/k7Mrev6rxXzHU2ioBw+RANYF5fWPtGoZwPNKL+fyBcPxrKuwdD
+        NF1T2bYiiYlwacRlWfsRosF2urr799c=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1635516571;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Wg1WyIZF1JHgpU42cFygsGx+fcfm4hH99uIWlEVsol8=;
+        b=QTYZjveOEH5F5ofruLJ2EO7hf9MQsAwVIQC+4tCpDZ2iHrK2KWCL6oAO5pSzOlib7WNIQp
+        bZ+SAmfelSWW0NAQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 337B113D9F;
+        Fri, 29 Oct 2021 14:09:31 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 3EKdCZsAfGG4LgAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Fri, 29 Oct 2021 14:09:31 +0000
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id 83f6a41c;
+        Fri, 29 Oct 2021 14:09:30 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH] ceph: clean-up metrics data structures to reduce code duplication
+Date:   Fri, 29 Oct 2021 15:09:28 +0100
+Message-Id: <20211029140928.10514-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+This patch modifies struct ceph_client_metric so that each metric block
+(read, write and metadata) becomes an element in a array.  This allows to
+also re-write the helper functions that handle these blocks, making them
+simpler and, above all, reduce the amount of copy&paste every time a new
+metric is added.
 
-Here's a set of patches that removes the old fscache I/O API by the following
-means:
+Thus, for each of these metrics there will be a new struct ceph_metric
+entry that'll will contain all the sizes and latencies fields (and a lock).
+Note however that the metadata metric doesn't really use the size_fields,
+and thus this metric won't be shown in the debugfs '../metrics/size' file.
 
- (1) A simple fallback API is added that can read or write a single page
-     synchronously.  The functions for this have "fallback" in their names
-     as they have to be removed at some point.
-
- (2) An implementation of this is provided in cachefiles.  It creates a kiocb
-     to use DIO to the backing file rather than calling readpage on the
-     backing filesystem page and then snooping the page wait queue.
-
- (3) NFS is switched to use the fallback API.
-
- (4) CIFS is switched to use the fallback API also for the moment.
-
- (5) 9P is switched to using netfslib.
-
- (6) The old I/O API is removed from fscache and the page snooping
-     implementation is removed from cachefiles.
-
-The reasons for doing this are:
-
- (A) Using a kiocb to do asynchronous DIO from/to the pages of the backing
-     file is now a possibility that didn't exist when cachefiles was created.
-     This is much simpler than the snooping mechanism with a proper callback
-     path and it also requires fewer copies and less memory.
-
- (B) We have to stop using bmap() or SEEK_DATA/SEEK_HOLE to work out what
-     blocks are present in the backing file is dangerous and can lead to data
-     corruption if the backing filesystem can insert or remove blocks of zeros
-     arbitrarily in order to optimise its extent list[1].
-
-     Whilst this patchset doesn't fix that yet, it does simplify the code and
-     the fix for that can be made in a subsequent patchset.
-
- (C) In order to fix (B), the cache will need to keep track itself of what
-     data is present.  To make this easier to manage, the intention is to
-     increase the cache block granularity to, say, 256KiB - importantly, a
-     size that will span multiple pages - which means the single-page
-     interface will have to go away.  netfslib is designed to deal with
-     that on behalf of a filesystem, though a filesystem could use raw
-     cache calls instead and manage things itself.
-
-These patches can be found also on:
-
-	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=fscache-remove-old-io
-
-David
-
-Changes
-=======
-ver #4:
-  - Fixed cifs to not check PG_fscache before writing a page to the cache.
-
-ver #3:
-  - Added a patch to make fscache_cookie_enabled() handle a NULL cookie.
-  - Added a patch to make cachefiles_prepare_read() indicate that the
-    caller should fill a block with zeros if it's beyond EOF rather than
-    risking the read get marked invalid and trigger a warning.
-  - Merged fixes from Dave Wysochanski for the NFS patch[4].
-
-ver #2:
-  - Changed "deprecated" to "fallback" in the new function names[2].
-  - Cleaned up some kernel test robot warnings[3].
-  - Made the netfs read helpers use NETFS_READ_HOLE_* flags.
-
-
-References
-==========
-
-Link: https://lore.kernel.org/r/YO17ZNOcq+9PajfQ@mit.edu [1]
-Link: https://lore.kernel.org/r/CAHk-=wiVK+1CyEjW8u71zVPK8msea=qPpznX35gnX+s8sXnJTg@mail.gmail.com/ [2]
-Link: https://lore.kernel.org/r/202109150420.QX7dDzSE-lkp@intel.com/ [3]
-Link: https://listman.redhat.com/archives/linux-cachefs/2021-October/msg00011.html [4]
-
-Older postings
-==============
-
-Link: https://lore.kernel.org/r/163162767601.438332.9017034724960075707.stgit@warthog.procyon.org.uk/ # rfc v1
-Link: https://lore.kernel.org/r/163189104510.2509237.10805032055807259087.stgit@warthog.procyon.org.uk/ # rfc v2
-
-Note that some of this was seen in previous patchsets too:
-
-# [RFC PATCH 00/61] fscache, cachefiles: Rewrite the I/O interface in terms of kiocb/iov_iter
-Link: https://lore.kernel.org/r/158861203563.340223.7585359869938129395.stgit@warthog.procyon.org.uk/
-# [PATCH 00/14] fscache: Rewrite 1: Disable and clean in preparation for rewrite
-Link: https://lore.kernel.org/r/159465766378.1376105.11619976251039287525.stgit@warthog.procyon.org.uk/
-# [RFC PATCH 00/76] fscache: Modernisation
-Link: https://lore.kernel.org/r/160588455242.3465195.3214733858273019178.stgit@warthog.procyon.org.uk/
-
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
 ---
-David Howells (10):
-      fscache: Generalise the ->begin_read_operation method
-      fscache: Fix fscache_cookie_enabled() to handle NULL cookie
-      cachefiles: Always indicate we should fill a post-EOF page with zeros
-      fscache: Implement a fallback I/O interface to replace the old API
-      nfs: Move to using the alternate fallback fscache I/O API
-      9p: Convert to using the netfs helper lib to do reads and caching
-      cifs: Move to using the alternate fallback fscache I/O API
-      fscache: Remove the old I/O API
-      fscache: Remove stats that are no longer used
-      fscache: Update the documentation to reflect I/O API changes
+ fs/ceph/debugfs.c |  87 ++++++++++++++-----------------
+ fs/ceph/metric.c  | 128 ++++++++++++----------------------------------
+ fs/ceph/metric.h  |  80 ++++++++++++++++-------------
+ 3 files changed, 115 insertions(+), 180 deletions(-)
 
-
- .../filesystems/caching/backend-api.rst       |  138 +--
- .../filesystems/caching/netfs-api.rst         |  385 +-----
- fs/9p/Kconfig                                 |    1 +
- fs/9p/cache.c                                 |  137 ---
- fs/9p/cache.h                                 |   98 +-
- fs/9p/v9fs.h                                  |    9 +
- fs/9p/vfs_addr.c                              |  195 ++-
- fs/9p/vfs_file.c                              |   21 +-
- fs/cachefiles/Makefile                        |    1 -
- fs/cachefiles/interface.c                     |   15 -
- fs/cachefiles/internal.h                      |   38 -
- fs/cachefiles/io.c                            |   57 +-
- fs/cachefiles/main.c                          |    1 -
- fs/cachefiles/rdwr.c                          |  972 ---------------
- fs/cifs/file.c                                |   64 +-
- fs/cifs/fscache.c                             |  105 +-
- fs/cifs/fscache.h                             |   76 +-
- fs/fscache/cache.c                            |    6 -
- fs/fscache/cookie.c                           |   10 -
- fs/fscache/internal.h                         |   58 +-
- fs/fscache/io.c                               |  137 ++-
- fs/fscache/object.c                           |    2 -
- fs/fscache/page.c                             | 1066 -----------------
- fs/fscache/stats.c                            |   73 +-
- fs/netfs/read_helper.c                        |    8 +-
- fs/nfs/file.c                                 |   14 +-
- fs/nfs/fscache-index.c                        |   26 -
- fs/nfs/fscache.c                              |  170 +--
- fs/nfs/fscache.h                              |   84 +-
- fs/nfs/read.c                                 |   25 +-
- fs/nfs/write.c                                |    7 +-
- include/linux/fscache-cache.h                 |  131 --
- include/linux/fscache.h                       |  445 ++-----
- include/linux/netfs.h                         |   17 +-
- 34 files changed, 569 insertions(+), 4023 deletions(-)
- delete mode 100644 fs/cachefiles/rdwr.c
-
-
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 55426514491b..72825ed3a0b8 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -164,44 +164,34 @@ static int metrics_file_show(struct seq_file *s, void *p)
+ 	return 0;
+ }
+ 
++static const char * const metric_str[] = {
++	"read",
++	"write",
++	"metadata"
++};
+ static int metrics_latency_show(struct seq_file *s, void *p)
+ {
+ 	struct ceph_fs_client *fsc = s->private;
+-	struct ceph_client_metric *m = &fsc->mdsc->metric;
++	struct ceph_client_metric *cm = &fsc->mdsc->metric;
++	struct ceph_metric *m;
+ 	s64 total, sum, avg, min, max, sq;
++	int i;
+ 
+ 	seq_printf(s, "item          total       avg_lat(us)     min_lat(us)     max_lat(us)     stdev(us)\n");
+ 	seq_printf(s, "-----------------------------------------------------------------------------------\n");
+ 
+-	spin_lock(&m->read_metric_lock);
+-	total = m->total_reads;
+-	sum = m->read_latency_sum;
+-	avg = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
+-	min = m->read_latency_min;
+-	max = m->read_latency_max;
+-	sq = m->read_latency_sq_sum;
+-	spin_unlock(&m->read_metric_lock);
+-	CEPH_LAT_METRIC_SHOW("read", total, avg, min, max, sq);
+-
+-	spin_lock(&m->write_metric_lock);
+-	total = m->total_writes;
+-	sum = m->write_latency_sum;
+-	avg = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
+-	min = m->write_latency_min;
+-	max = m->write_latency_max;
+-	sq = m->write_latency_sq_sum;
+-	spin_unlock(&m->write_metric_lock);
+-	CEPH_LAT_METRIC_SHOW("write", total, avg, min, max, sq);
+-
+-	spin_lock(&m->metadata_metric_lock);
+-	total = m->total_metadatas;
+-	sum = m->metadata_latency_sum;
+-	avg = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
+-	min = m->metadata_latency_min;
+-	max = m->metadata_latency_max;
+-	sq = m->metadata_latency_sq_sum;
+-	spin_unlock(&m->metadata_metric_lock);
+-	CEPH_LAT_METRIC_SHOW("metadata", total, avg, min, max, sq);
++	for (i = 0; i < METRIC_MAX; i++) {
++		m = &cm->metric[i];
++		spin_lock(&m->lock);
++		total = m->total;
++		sum = m->latency_sum;
++		avg = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
++		min = m->latency_min;
++		max = m->latency_max;
++		sq = m->latency_sq_sum;
++		spin_unlock(&m->lock);
++		CEPH_LAT_METRIC_SHOW(metric_str[i], total, avg, min, max, sq);
++	}
+ 
+ 	return 0;
+ }
+@@ -209,30 +199,29 @@ static int metrics_latency_show(struct seq_file *s, void *p)
+ static int metrics_size_show(struct seq_file *s, void *p)
+ {
+ 	struct ceph_fs_client *fsc = s->private;
+-	struct ceph_client_metric *m = &fsc->mdsc->metric;
++	struct ceph_client_metric *cm = &fsc->mdsc->metric;
++	struct ceph_metric *m;
+ 	s64 total;
+-	u64 sum_sz, avg_sz, min_sz, max_sz;
++	u64 sum, avg, min, max;
++	int i;
+ 
+ 	seq_printf(s, "item          total       avg_sz(bytes)   min_sz(bytes)   max_sz(bytes)  total_sz(bytes)\n");
+ 	seq_printf(s, "----------------------------------------------------------------------------------------\n");
+ 
+-	spin_lock(&m->read_metric_lock);
+-	total = m->total_reads;
+-	sum_sz = m->read_size_sum;
+-	avg_sz = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum_sz, total) : 0;
+-	min_sz = m->read_size_min;
+-	max_sz = m->read_size_max;
+-	spin_unlock(&m->read_metric_lock);
+-	CEPH_SZ_METRIC_SHOW("read", total, avg_sz, min_sz, max_sz, sum_sz);
+-
+-	spin_lock(&m->write_metric_lock);
+-	total = m->total_writes;
+-	sum_sz = m->write_size_sum;
+-	avg_sz = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum_sz, total) : 0;
+-	min_sz = m->write_size_min;
+-	max_sz = m->write_size_max;
+-	spin_unlock(&m->write_metric_lock);
+-	CEPH_SZ_METRIC_SHOW("write", total, avg_sz, min_sz, max_sz, sum_sz);
++	for (i = 0; i < METRIC_MAX; i++) {
++		/* skip 'metadata' as it doesn't use the size metric */
++		if (i == METRIC_METADATA)
++			continue;
++		m = &cm->metric[i];
++		spin_lock(&m->lock);
++		total = m->total;
++		sum = m->size_sum;
++		avg = total > 0 ? DIV64_U64_ROUND_CLOSEST(sum, total) : 0;
++		min = m->size_min;
++		max = m->size_max;
++		spin_unlock(&m->lock);
++		CEPH_SZ_METRIC_SHOW(metric_str[i], total, avg, min, max, sum);
++	}
+ 
+ 	return 0;
+ }
+diff --git a/fs/ceph/metric.c b/fs/ceph/metric.c
+index 04d5df29bbbf..c57699d8408d 100644
+--- a/fs/ceph/metric.c
++++ b/fs/ceph/metric.c
+@@ -62,7 +62,7 @@ static bool ceph_mdsc_send_metrics(struct ceph_mds_client *mdsc,
+ 	read->header.ver = 1;
+ 	read->header.compat = 1;
+ 	read->header.data_len = cpu_to_le32(sizeof(*read) - header_len);
+-	sum = m->read_latency_sum;
++	sum = m->metric[METRIC_READ].latency_sum;
+ 	jiffies_to_timespec64(sum, &ts);
+ 	read->sec = cpu_to_le32(ts.tv_sec);
+ 	read->nsec = cpu_to_le32(ts.tv_nsec);
+@@ -74,7 +74,7 @@ static bool ceph_mdsc_send_metrics(struct ceph_mds_client *mdsc,
+ 	write->header.ver = 1;
+ 	write->header.compat = 1;
+ 	write->header.data_len = cpu_to_le32(sizeof(*write) - header_len);
+-	sum = m->write_latency_sum;
++	sum = m->metric[METRIC_WRITE].latency_sum;
+ 	jiffies_to_timespec64(sum, &ts);
+ 	write->sec = cpu_to_le32(ts.tv_sec);
+ 	write->nsec = cpu_to_le32(ts.tv_nsec);
+@@ -86,7 +86,7 @@ static bool ceph_mdsc_send_metrics(struct ceph_mds_client *mdsc,
+ 	meta->header.ver = 1;
+ 	meta->header.compat = 1;
+ 	meta->header.data_len = cpu_to_le32(sizeof(*meta) - header_len);
+-	sum = m->metadata_latency_sum;
++	sum = m->metric[METRIC_METADATA].latency_sum;
+ 	jiffies_to_timespec64(sum, &ts);
+ 	meta->sec = cpu_to_le32(ts.tv_sec);
+ 	meta->nsec = cpu_to_le32(ts.tv_nsec);
+@@ -141,8 +141,8 @@ static bool ceph_mdsc_send_metrics(struct ceph_mds_client *mdsc,
+ 	rsize->header.ver = 1;
+ 	rsize->header.compat = 1;
+ 	rsize->header.data_len = cpu_to_le32(sizeof(*rsize) - header_len);
+-	rsize->total_ops = cpu_to_le64(m->total_reads);
+-	rsize->total_size = cpu_to_le64(m->read_size_sum);
++	rsize->total_ops = cpu_to_le64(m->metric[METRIC_READ].total);
++	rsize->total_size = cpu_to_le64(m->metric[METRIC_READ].size_sum);
+ 	items++;
+ 
+ 	/* encode the write io size metric */
+@@ -151,8 +151,8 @@ static bool ceph_mdsc_send_metrics(struct ceph_mds_client *mdsc,
+ 	wsize->header.ver = 1;
+ 	wsize->header.compat = 1;
+ 	wsize->header.data_len = cpu_to_le32(sizeof(*wsize) - header_len);
+-	wsize->total_ops = cpu_to_le64(m->total_writes);
+-	wsize->total_size = cpu_to_le64(m->write_size_sum);
++	wsize->total_ops = cpu_to_le64(m->metric[METRIC_WRITE].total);
++	wsize->total_size = cpu_to_le64(m->metric[METRIC_WRITE].size_sum);
+ 	items++;
+ 
+ 	put_unaligned_le32(items, &head->num);
+@@ -220,7 +220,8 @@ static void metric_delayed_work(struct work_struct *work)
+ 
+ int ceph_metric_init(struct ceph_client_metric *m)
+ {
+-	int ret;
++	struct ceph_metric *metric;
++	int ret, i;
+ 
+ 	if (!m)
+ 		return -EINVAL;
+@@ -243,32 +244,18 @@ int ceph_metric_init(struct ceph_client_metric *m)
+ 	if (ret)
+ 		goto err_i_caps_mis;
+ 
+-	spin_lock_init(&m->read_metric_lock);
+-	m->read_latency_sq_sum = 0;
+-	m->read_latency_min = KTIME_MAX;
+-	m->read_latency_max = 0;
+-	m->total_reads = 0;
+-	m->read_latency_sum = 0;
+-	m->read_size_min = U64_MAX;
+-	m->read_size_max = 0;
+-	m->read_size_sum = 0;
+-
+-	spin_lock_init(&m->write_metric_lock);
+-	m->write_latency_sq_sum = 0;
+-	m->write_latency_min = KTIME_MAX;
+-	m->write_latency_max = 0;
+-	m->total_writes = 0;
+-	m->write_latency_sum = 0;
+-	m->write_size_min = U64_MAX;
+-	m->write_size_max = 0;
+-	m->write_size_sum = 0;
+-
+-	spin_lock_init(&m->metadata_metric_lock);
+-	m->metadata_latency_sq_sum = 0;
+-	m->metadata_latency_min = KTIME_MAX;
+-	m->metadata_latency_max = 0;
+-	m->total_metadatas = 0;
+-	m->metadata_latency_sum = 0;
++	for (i = 0; i < METRIC_MAX; i++) {
++		metric = &m->metric[i];
++		spin_lock_init(&metric->lock);
++		metric->size_sum = 0;
++		metric->size_min = U64_MAX;
++		metric->size_max = 0;
++		metric->total = 0;
++		metric->latency_sum = 0;
++		metric->latency_sq_sum = 0;
++		metric->latency_min = KTIME_MAX;
++		metric->latency_max = 0;
++	}
+ 
+ 	atomic64_set(&m->opened_files, 0);
+ 	ret = percpu_counter_init(&m->opened_inodes, 0, GFP_KERNEL);
+@@ -338,9 +325,9 @@ static inline void __update_stdev(ktime_t total, ktime_t lsum,
+ 	*sq_sump += sq;
+ }
+ 
+-void ceph_update_read_metrics(struct ceph_client_metric *m,
+-			      ktime_t r_start, ktime_t r_end,
+-			      unsigned int size, int rc)
++void ceph_update_metrics(struct ceph_metric *m,
++			 ktime_t r_start, ktime_t r_end,
++			 unsigned int size, int rc)
+ {
+ 	ktime_t lat = ktime_sub(r_end, r_start);
+ 	ktime_t total;
+@@ -348,63 +335,12 @@ void ceph_update_read_metrics(struct ceph_client_metric *m,
+ 	if (unlikely(rc < 0 && rc != -ENOENT && rc != -ETIMEDOUT))
+ 		return;
+ 
+-	spin_lock(&m->read_metric_lock);
+-	total = ++m->total_reads;
+-	m->read_size_sum += size;
+-	m->read_latency_sum += lat;
+-	METRIC_UPDATE_MIN_MAX(m->read_size_min,
+-			      m->read_size_max,
+-			      size);
+-	METRIC_UPDATE_MIN_MAX(m->read_latency_min,
+-			      m->read_latency_max,
+-			      lat);
+-	__update_stdev(total, m->read_latency_sum,
+-		       &m->read_latency_sq_sum, lat);
+-	spin_unlock(&m->read_metric_lock);
+-}
+-
+-void ceph_update_write_metrics(struct ceph_client_metric *m,
+-			       ktime_t r_start, ktime_t r_end,
+-			       unsigned int size, int rc)
+-{
+-	ktime_t lat = ktime_sub(r_end, r_start);
+-	ktime_t total;
+-
+-	if (unlikely(rc && rc != -ETIMEDOUT))
+-		return;
+-
+-	spin_lock(&m->write_metric_lock);
+-	total = ++m->total_writes;
+-	m->write_size_sum += size;
+-	m->write_latency_sum += lat;
+-	METRIC_UPDATE_MIN_MAX(m->write_size_min,
+-			      m->write_size_max,
+-			      size);
+-	METRIC_UPDATE_MIN_MAX(m->write_latency_min,
+-			      m->write_latency_max,
+-			      lat);
+-	__update_stdev(total, m->write_latency_sum,
+-		       &m->write_latency_sq_sum, lat);
+-	spin_unlock(&m->write_metric_lock);
+-}
+-
+-void ceph_update_metadata_metrics(struct ceph_client_metric *m,
+-				  ktime_t r_start, ktime_t r_end,
+-				  int rc)
+-{
+-	ktime_t lat = ktime_sub(r_end, r_start);
+-	ktime_t total;
+-
+-	if (unlikely(rc && rc != -ENOENT))
+-		return;
+-
+-	spin_lock(&m->metadata_metric_lock);
+-	total = ++m->total_metadatas;
+-	m->metadata_latency_sum += lat;
+-	METRIC_UPDATE_MIN_MAX(m->metadata_latency_min,
+-			      m->metadata_latency_max,
+-			      lat);
+-	__update_stdev(total, m->metadata_latency_sum,
+-		       &m->metadata_latency_sq_sum, lat);
+-	spin_unlock(&m->metadata_metric_lock);
++	spin_lock(&m->lock);
++	total = ++m->total;
++	m->size_sum += size;
++	METRIC_UPDATE_MIN_MAX(m->size_min, m->size_max, size);
++	m->latency_sum += lat;
++	METRIC_UPDATE_MIN_MAX(m->latency_min, m->latency_max, lat);
++	__update_stdev(total, m->latency_sum, &m->latency_sq_sum, lat);
++	spin_unlock(&m->lock);
+ }
+diff --git a/fs/ceph/metric.h b/fs/ceph/metric.h
+index 0133955a3c6a..e67fc997760b 100644
+--- a/fs/ceph/metric.h
++++ b/fs/ceph/metric.h
+@@ -125,6 +125,25 @@ struct ceph_metric_head {
+ 	__le32 num;	/* the number of metrics that will be sent */
+ } __packed;
+ 
++enum metric_type {
++	METRIC_READ,
++	METRIC_WRITE,
++	METRIC_METADATA,
++	METRIC_MAX
++};
++
++struct ceph_metric {
++	spinlock_t lock;
++	u64 total;
++	u64 size_sum;
++	u64 size_min;
++	u64 size_max;
++	ktime_t latency_sum;
++	ktime_t latency_sq_sum;
++	ktime_t latency_min;
++	ktime_t latency_max;
++};
++
+ /* This is the global metrics */
+ struct ceph_client_metric {
+ 	atomic64_t            total_dentries;
+@@ -135,32 +154,7 @@ struct ceph_client_metric {
+ 	struct percpu_counter i_caps_hit;
+ 	struct percpu_counter i_caps_mis;
+ 
+-	spinlock_t read_metric_lock;
+-	u64 total_reads;
+-	u64 read_size_sum;
+-	u64 read_size_min;
+-	u64 read_size_max;
+-	ktime_t read_latency_sum;
+-	ktime_t read_latency_sq_sum;
+-	ktime_t read_latency_min;
+-	ktime_t read_latency_max;
+-
+-	spinlock_t write_metric_lock;
+-	u64 total_writes;
+-	u64 write_size_sum;
+-	u64 write_size_min;
+-	u64 write_size_max;
+-	ktime_t write_latency_sum;
+-	ktime_t write_latency_sq_sum;
+-	ktime_t write_latency_min;
+-	ktime_t write_latency_max;
+-
+-	spinlock_t metadata_metric_lock;
+-	u64 total_metadatas;
+-	ktime_t metadata_latency_sum;
+-	ktime_t metadata_latency_sq_sum;
+-	ktime_t metadata_latency_min;
+-	ktime_t metadata_latency_max;
++	struct ceph_metric metric[METRIC_MAX];
+ 
+ 	/* The total number of directories and files that are opened */
+ 	atomic64_t opened_files;
+@@ -195,13 +189,29 @@ static inline void ceph_update_cap_mis(struct ceph_client_metric *m)
+ 	percpu_counter_inc(&m->i_caps_mis);
+ }
+ 
+-extern void ceph_update_read_metrics(struct ceph_client_metric *m,
+-				     ktime_t r_start, ktime_t r_end,
+-				     unsigned int size, int rc);
+-extern void ceph_update_write_metrics(struct ceph_client_metric *m,
+-				      ktime_t r_start, ktime_t r_end,
+-				      unsigned int size, int rc);
+-extern void ceph_update_metadata_metrics(struct ceph_client_metric *m,
+-				         ktime_t r_start, ktime_t r_end,
+-					 int rc);
++extern void ceph_update_metrics(struct ceph_metric *m,
++				ktime_t r_start, ktime_t r_end,
++				unsigned int size, int rc);
++
++static inline void ceph_update_read_metrics(struct ceph_client_metric *m,
++					    ktime_t r_start, ktime_t r_end,
++					    unsigned int size, int rc)
++{
++	ceph_update_metrics(&m->metric[METRIC_READ],
++			    r_start, r_end, size, rc);
++}
++static inline void ceph_update_write_metrics(struct ceph_client_metric *m,
++					     ktime_t r_start, ktime_t r_end,
++					     unsigned int size, int rc)
++{
++	ceph_update_metrics(&m->metric[METRIC_WRITE],
++			    r_start, r_end, size, rc);
++}
++static inline void ceph_update_metadata_metrics(struct ceph_client_metric *m,
++						ktime_t r_start, ktime_t r_end,
++						int rc)
++{
++	ceph_update_metrics(&m->metric[METRIC_METADATA],
++			    r_start, r_end, 0, rc);
++}
+ #endif /* _FS_CEPH_MDS_METRIC_H */
