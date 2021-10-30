@@ -2,120 +2,185 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F086EC433FE
-	for <ceph-devel@archiver.kernel.org>; Fri, 29 Oct 2021 18:52:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41966C433EF
+	for <ceph-devel@archiver.kernel.org>; Sat, 30 Oct 2021 04:05:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D82AC60F22
-	for <ceph-devel@archiver.kernel.org>; Fri, 29 Oct 2021 18:52:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 150B860187
+	for <ceph-devel@archiver.kernel.org>; Sat, 30 Oct 2021 04:05:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230273AbhJ2Sya (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 29 Oct 2021 14:54:30 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:45788 "EHLO
+        id S229753AbhJ3EIF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sat, 30 Oct 2021 00:08:05 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:24250 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230270AbhJ2Sy2 (ORCPT
+        by vger.kernel.org with ESMTP id S229606AbhJ3EH7 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 29 Oct 2021 14:54:28 -0400
+        Sat, 30 Oct 2021 00:07:59 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635533518;
+        s=mimecast20190719; t=1635566728;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=/vX1aXmgWDOmHXytC/xtmTFfVJMO+hskcobUwtJeMmI=;
-        b=H8seKFppfj7RTniLl8qMPFbNHiBTU/Cx6TGPmDtuYq7STB6GNxpFB/+QjX7t8a4wzfU6SA
-        p2JWZriQeHgAGkSlA3V11yBruuF+HkBR3tgbxZC3CPVge2OsRYNbzZ+EmYgxhDc7oM3GWc
-        Kh0dM4UchE9yJKCS4JjlS00zJFUzE8U=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-475-p1zGB8TrMduU9GKrjace1w-1; Fri, 29 Oct 2021 14:51:55 -0400
-X-MC-Unique: p1zGB8TrMduU9GKrjace1w-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 008188F515;
-        Fri, 29 Oct 2021 18:51:53 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.33.36.19])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E18845D6CF;
-        Fri, 29 Oct 2021 18:51:34 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-From:   David Howells <dhowells@redhat.com>
-In-Reply-To: <CAHk-=wg_C6V_S+Aox5Fn7MuFe13ADiRVnh6UcvY4WX9JjXn3dg@mail.gmail.com>
-References: <CAHk-=wg_C6V_S+Aox5Fn7MuFe13ADiRVnh6UcvY4WX9JjXn3dg@mail.gmail.com> <163551653404.1877519.12363794970541005441.stgit@warthog.procyon.org.uk> <CAHk-=wiy4KNREEqvd10Ku8VVSY1Lb=fxTA1TzGmqnLaHM3gdTg@mail.gmail.com> <1889041.1635530124@warthog.procyon.org.uk>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>,
-        v9fs-developer@lists.sourceforge.net,
-        CIFS <linux-cifs@vger.kernel.org>,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        "open list:NFS, SUNRPC, AND..." <linux-nfs@vger.kernel.org>,
-        linux-cachefs@redhat.com, Dave Wysochanski <dwysocha@redhat.com>,
-        Shyam Prasad N <nspmangalore@gmail.com>,
-        Jeff Layton <jlayton@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v4 00/10] fscache: Replace and remove old I/O API
+        bh=4j+Jdyp/OpHmJkjKTE3iVvlA682mZvQ6l1Nbv/RAKQg=;
+        b=dr5GPei4u8IZKiH4H4wONwlL3iKfZYRWx9fN5L/Ag/kSh99AmyN+lbyR+mUwp1QapNrvVA
+        trgDakqBrXBjzGY+dYQDy81S+Kih/gMm3nDlBcPjX3up7Or+f+9Mo/6Ckf+0daU/tfXTLu
+        MndDZe0ivg/QaxFNU30Dv/tvUubM3Ro=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-407-j_sF41pHO6uXVKWLhJwugA-1; Sat, 30 Oct 2021 00:05:26 -0400
+X-MC-Unique: j_sF41pHO6uXVKWLhJwugA-1
+Received: by mail-pl1-f199.google.com with SMTP id w12-20020a170902d70c00b0014028fd6402so4741707ply.6
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Oct 2021 21:05:25 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=4j+Jdyp/OpHmJkjKTE3iVvlA682mZvQ6l1Nbv/RAKQg=;
+        b=VGQG2ssLEMDNfK6bhZ50OxrBWPzNj/KmroiOSnQ+8OV8MX+EPS/sV8uGjsERr4ufhj
+         S44JzDusrlOTKS5fquJkpIR8CajOlRKNN+vcl+3bS50azBH5oSoUq4jp9DEgT6Bo/H+u
+         +iWEboFtxgAVlu4EG74Dj8+lxxjy4IP9UCu8glAcP8JW7wRPdTT+Rjnkvh8p991TCeEN
+         iDR7njhec5Tak3lS7yps56PhW8NW4FHFJzWfajRiUuIWk9ilXOcUFdT82c4nAs5LztTe
+         hcvhv21KrMd3OZMs7gYCVbk4kKQeDB2GoWBREITFF0TXa56l19O81bXy0Thy8fycJPa8
+         ljpA==
+X-Gm-Message-State: AOAM5305JhJGIiViWGbxiemdaCcmPbZCxQSNImVuUwn/45S7gHsKSN2v
+        QxpGYPhtzXn4XLaBAOp4Xkf6Z1XGvbdeAhPede/ifoYkVzwLwTbWH7epc+2mam3UqaZYlijJsyO
+        zsz9FUXvBLmjB8z7vkrj0V8lXI90MmPz5hlXbNpHFx7ZyGyQktgqlLAxnkf7trWZv7tlE4AI=
+X-Received: by 2002:a05:6a00:1781:b0:44d:faef:f2c0 with SMTP id s1-20020a056a00178100b0044dfaeff2c0mr14715259pfg.68.1635566724569;
+        Fri, 29 Oct 2021 21:05:24 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJymlfHhyIvbxQOfjXyLgtw6tDUqejjvFaVVL8HpQtObMJuu8T6zDNSt81qE7E6GrWkoxkuUEw==
+X-Received: by 2002:a05:6a00:1781:b0:44d:faef:f2c0 with SMTP id s1-20020a056a00178100b0044dfaeff2c0mr14715227pfg.68.1635566724186;
+        Fri, 29 Oct 2021 21:05:24 -0700 (PDT)
+Received: from [10.72.12.190] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id c21sm8895804pfl.15.2021.10.29.21.05.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 29 Oct 2021 21:05:23 -0700 (PDT)
+Subject: Re: [PATCH v3 2/4] ceph: add __ceph_sync_read helper support
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     idryomov@gmail.com, vshankar@redhat.com, pdonnell@redhat.com,
+        khiremat@redhat.com, ceph-devel@vger.kernel.org
+References: <20211028091438.21402-1-xiubli@redhat.com>
+ <20211028091438.21402-3-xiubli@redhat.com>
+ <c824c92834ebcb01867a4fbc4d4bb0cbce95a8ad.camel@kernel.org>
+ <8fcffb2a-416d-374e-0e31-3c742bfc7f27@redhat.com>
+ <009d56d0e59dee1b72492b9e10dd7f0f7e2b7512.camel@kernel.org>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <c851adb1-1209-a83e-900c-1abfaa2ce869@redhat.com>
+Date:   Sat, 30 Oct 2021 12:05:18 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <1891410.1635533494.1@warthog.procyon.org.uk>
-Content-Transfer-Encoding: quoted-printable
-Date:   Fri, 29 Oct 2021 19:51:34 +0100
-Message-ID: <1891411.1635533494@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <009d56d0e59dee1b72492b9e10dd7f0f7e2b7512.camel@kernel.org>
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Linus Torvalds <torvalds@linux-foundation.org> wrote:
 
-> But:
-> =
+On 10/29/21 6:29 PM, Jeff Layton wrote:
+> On Fri, 2021-10-29 at 16:14 +0800, Xiubo Li wrote:
+>> On 10/29/21 2:21 AM, Jeff Layton wrote:
+>>> On Thu, 2021-10-28 at 17:14 +0800, xiubli@redhat.com wrote:
+>>>> From: Xiubo Li <xiubli@redhat.com>
+>>>>
+>>>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>>>> ---
+>>>>    fs/ceph/file.c  | 31 +++++++++++++++++++++----------
+>>>>    fs/ceph/super.h |  2 ++
+>>>>    2 files changed, 23 insertions(+), 10 deletions(-)
+>>>>
+>>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>>> index 6e677b40410e..74db403a4c35 100644
+>>>> --- a/fs/ceph/file.c
+>>>> +++ b/fs/ceph/file.c
+>>>> @@ -901,20 +901,17 @@ static inline void fscrypt_adjust_off_and_len(struct inode *inode, u64 *off, u64
+>>>>     * If we get a short result from the OSD, check against i_size; we need to
+>>>>     * only return a short read to the caller if we hit EOF.
+>>>>     */
+>>>> -static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+>>>> -			      int *retry_op)
+>>>> +ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+>>>> +			 struct iov_iter *to, int *retry_op)
+>>>>    {
+>>>> -	struct file *file = iocb->ki_filp;
+>>>> -	struct inode *inode = file_inode(file);
+>>>>    	struct ceph_inode_info *ci = ceph_inode(inode);
+>>>>    	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+>>>>    	struct ceph_osd_client *osdc = &fsc->client->osdc;
+>>>>    	ssize_t ret;
+>>>> -	u64 off = iocb->ki_pos;
+>>>> +	u64 off = *ki_pos;
+>>>>    	u64 len = iov_iter_count(to);
+>>>>    
+>>>> -	dout("sync_read on file %p %llu~%u %s\n", file, off, (unsigned)len,
+>>>> -	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+>>>> +	dout("sync_read on inode %p %llu~%u\n", inode, *ki_pos, (unsigned)len);
+>>>>    
+>>>>    	if (!len)
+>>>>    		return 0;
+>>>> @@ -1058,18 +1055,32 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+>>>>    			break;
+>>>>    	}
+>>>>    
+>>>> -	if (off > iocb->ki_pos) {
+>>>> +	if (off > *ki_pos) {
+>>>>    		if (ret >= 0 &&
+>>>>    		    iov_iter_count(to) > 0 && off >= i_size_read(inode))
+>>>>    			*retry_op = CHECK_EOF;
+>>>> -		ret = off - iocb->ki_pos;
+>>>> -		iocb->ki_pos = off;
+>>>> +		ret = off - *ki_pos;
+>>>> +		*ki_pos = off;
+>>>>    	}
+>>>>    out:
+>>>>    	dout("sync_read result %zd retry_op %d\n", ret, *retry_op);
+>>>> return ret;
+>>>>     	 }
+>>>>    
+>>>> +static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+>>>> +			      int *retry_op)
+>>>> +{
+>>>> +	struct file *file = iocb->ki_filp;
+>>>> +	struct inode *inode = file_inode(file);
+>>>> +
+>>>> +	dout("sync_read on file %p %llu~%u %s\n", file, iocb->ki_pos,
+>>>> +	     (unsigned)iov_iter_count(to),
+>>>> +	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+>>>> +
+>>>> +	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op);
+>>>> +
+>>>> +}
+>>>> +
+>>>>    struct ceph_aio_request {
+>>>>    	struct kiocb *iocb;
+>>>>    	size_t total_len;
+>>>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+>>>> index 027d5f579ba0..57bc952c54e1 100644
+>>>> --- a/fs/ceph/super.h
+>>>> +++ b/fs/ceph/super.h
+>>>> @@ -1235,6 +1235,8 @@ extern int ceph_renew_caps(struct inode *inode, int fmode);
+>>>>    extern int ceph_open(struct inode *inode, struct file *file);
+>>>>    extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+>>>>    			    struct file *file, unsigned flags, umode_t mode);
+>>>> +extern ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+>>>> +				struct iov_iter *to, int *retry_op);
+>>>>    extern int ceph_release(struct inode *inode, struct file *filp);
+>>>>    extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+>>>>    				  char *data, size_t len);
+>>> I went ahead and picked this patch too since #3 had a dependency on it.
+>>> If we decide we want #3 for stable though, then we probably ought to
+>>> respin these to avoid it.
+>> I saw you have merged these two into the testing branch, should I respin
+>> for the #3 ?
+>>
+>>
+> Yeah, it's probably worthwhile to mark this for stable. It _is_ a data
+> integrity issue after all.
+>
+> Could you respin it so that it doesn't rely on patch #2?
 
-> > However, if you would rather I just removed all of fscache and (most o=
-f[*])
-> > cachefiles, that I can do.
-> =
+Sure.
 
-> I assume and think that if you just do that part first, then the
-> "convert to netfslib" of afs and ceph at that later stage will mean
-> that the fallback code will never be needed?
-
-The netfslib coversions for afs and ceph are already in your tree and I ha=
-ve a
-patch here to do that for 9p (if you're willing to take that in the upcomi=
-ng
-merge window?).
-
-The issue is cifs[*] and nfs.  I could leave caching in those disabled,
-pending approved patches for those filesystems.  This would mean that I
-wouldn't need the fallback code.
-
-An alternative is that I could move the "fallback" code into fs/nfs/fscach=
-e.c
-and fs/cifs/fscache.c if that would be easier and merge it into the functi=
-ons
-there.  The problem will come when the cache wants to do I/O in larger uni=
-ts
-than page size to suit its own block size[**].
-
-David
-
-[*] As it happens, it turns out that cifs seems to have a bug in it that
-causes the entire cache for a superblock to be discarded each time that
-superblock is mounted.
-
-[**] At some point the cache *has* to start keeping track of what data it =
-is
-holding rather than relying on bmap/SEEK_DATA/SEEK_HOLE to get round the
-extent-bridging problem.  I'm trying to take a leaf out of the book of oth=
-er
-caching filesystems and use larger block sizes (e.g. 256K) to reduce the
-overhead of cache metadata.
 
