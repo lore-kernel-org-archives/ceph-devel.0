@@ -2,51 +2,48 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2D50C433EF
-	for <ceph-devel@archiver.kernel.org>; Mon,  1 Nov 2021 02:05:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B511C433F5
+	for <ceph-devel@archiver.kernel.org>; Mon,  1 Nov 2021 02:05:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9BE8B60F24
-	for <ceph-devel@archiver.kernel.org>; Mon,  1 Nov 2021 02:05:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4E0F60FD7
+	for <ceph-devel@archiver.kernel.org>; Mon,  1 Nov 2021 02:05:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230400AbhKACHh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 31 Oct 2021 22:07:37 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:45311 "EHLO
+        id S230396AbhKACHd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 31 Oct 2021 22:07:33 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:49629 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230333AbhKACHf (ORCPT
+        by vger.kernel.org with ESMTP id S230337AbhKACH2 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 31 Oct 2021 22:07:35 -0400
+        Sun, 31 Oct 2021 22:07:28 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635732302;
+        s=mimecast20190719; t=1635732295;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=uzof8A1qRInCZYX4ONpNJOEu4IY+psyAJr3vrozCMe8=;
-        b=G/QsuBL/S9YxyyDBJ2NrwKVbi34hWPIGmKpkRUdf28CO1Ic0KLvEAoWEkXIwNmUZTnsDNl
-        lNvHQYRL0fFYHu0KQj37vRQbvizjz5UwLDpmUW7Vetj6GAcqOnTdcWiViT5CgWTq0TZNQq
-        SEvpvHhbEwV5z9YyAyIxu1hKpDhOMP8=
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Lha4Dk3BKjghL3zuxkn9XNp9+K1QbTbKD8BMbXvdzis=;
+        b=E6hbq5Vh+l90qKi4WY+Fx8CHC4FnEzq9LEjq+hql1vL5dvQ9CTm0Sz9LaScDl0FcNLng1G
+        9Krx5EwonIAF0PWVsaeMut0I/qmpL5PLw8kmu1ux5bWBq/CMVDlYYsNv9PYjLRpTLDogMn
+        1+BoW2TwBWuYVvCHf9ifxgJtdYi42Uo=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-426-e-Ns7uQBOOC_u7LeBI0pkw-1; Sun, 31 Oct 2021 22:04:59 -0400
-X-MC-Unique: e-Ns7uQBOOC_u7LeBI0pkw-1
+ us-mta-429-RzJFm19gMXWLdiKGXk5p5w-1; Sun, 31 Oct 2021 22:04:53 -0400
+X-MC-Unique: RzJFm19gMXWLdiKGXk5p5w-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 647A680668E;
-        Mon,  1 Nov 2021 02:04:58 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9DFDF1882FA3;
+        Mon,  1 Nov 2021 02:04:52 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0AC165D6CF;
-        Mon,  1 Nov 2021 02:04:55 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 41C9A5D6CF;
+        Mon,  1 Nov 2021 02:04:49 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     jlayton@kernel.org
 Cc:     idryomov@gmail.com, vshankar@redhat.com, pdonnell@redhat.com,
         khiremat@redhat.com, ceph-devel@vger.kernel.org,
         Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v4 2/4] ceph: add __ceph_get_caps helper support
-Date:   Mon,  1 Nov 2021 10:04:45 +0800
-Message-Id: <20211101020447.75872-3-xiubli@redhat.com>
-In-Reply-To: <20211101020447.75872-1-xiubli@redhat.com>
-References: <20211101020447.75872-1-xiubli@redhat.com>
+Subject: [PATCH v4 0/4] ceph: size handling for the fscrypt
+Date:   Mon,  1 Nov 2021 10:04:43 +0800
+Message-Id: <20211101020447.75872-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
@@ -56,84 +53,65 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Xiubo Li <xiubli@redhat.com>
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/caps.c  | 19 +++++++++++++------
- fs/ceph/super.h |  2 ++
- 2 files changed, 15 insertions(+), 6 deletions(-)
+This patch series is based on the "fscrypt_size_handling" branch in
+https://github.com/lxbsz/linux.git, which is based Jeff's
+"ceph-fscrypt-content-experimental" branch in
+https://git.kernel.org/pub/scm/linux/kernel/git/jlayton/linux.git
+and added two upstream commits, which should be merged already.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d628dcdbf869..4e2a588465c5 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2876,10 +2876,9 @@ int ceph_try_get_caps(struct inode *inode, int need, int want,
-  * due to a small max_size, make sure we check_max_size (and possibly
-  * ask the mds) so we don't get hung up indefinitely.
-  */
--int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got)
-+int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
-+		    int want, loff_t endoff, int *got)
- {
--	struct ceph_file_info *fi = filp->private_data;
--	struct inode *inode = file_inode(filp);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
- 	int ret, _got, flags;
-@@ -2888,7 +2887,7 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
- 	if (ret < 0)
- 		return ret;
- 
--	if ((fi->fmode & CEPH_FILE_MODE_WR) &&
-+	if (fi && (fi->fmode & CEPH_FILE_MODE_WR) &&
- 	    fi->filp_gen != READ_ONCE(fsc->filp_gen))
- 		return -EBADF;
- 
-@@ -2896,7 +2895,7 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
- 
- 	while (true) {
- 		flags &= CEPH_FILE_MODE_MASK;
--		if (atomic_read(&fi->num_locks))
-+		if (fi && atomic_read(&fi->num_locks))
- 			flags |= CHECK_FILELOCK;
- 		_got = 0;
- 		ret = try_get_cap_refs(inode, need, want, endoff,
-@@ -2941,7 +2940,7 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
- 				continue;
- 		}
- 
--		if ((fi->fmode & CEPH_FILE_MODE_WR) &&
-+		if (fi && (fi->fmode & CEPH_FILE_MODE_WR) &&
- 		    fi->filp_gen != READ_ONCE(fsc->filp_gen)) {
- 			if (ret >= 0 && _got)
- 				ceph_put_cap_refs(ci, _got);
-@@ -3004,6 +3003,14 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
- 	return 0;
- }
- 
-+int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got)
-+{
-+	struct ceph_file_info *fi = filp->private_data;
-+	struct inode *inode = file_inode(filp);
-+
-+	return __ceph_get_caps(inode, fi, need, want, endoff, got);
-+}
-+
- /*
-  * Take cap refs.  Caller must already know we hold at least one ref
-  * on the caps in question or we don't know this is safe.
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 7f3976b3319d..027d5f579ba0 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1208,6 +1208,8 @@ extern int ceph_encode_dentry_release(void **p, struct dentry *dn,
- 				      struct inode *dir,
- 				      int mds, int drop, int unless);
- 
-+extern int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi,
-+			   int need, int want, loff_t endoff, int *got);
- extern int ceph_get_caps(struct file *filp, int need, int want,
- 			 loff_t endoff, int *got);
- extern int ceph_try_get_caps(struct inode *inode,
+These two upstream commits should be removed after Jeff rebase
+his "ceph-fscrypt-content-experimental" branch to upstream code.
+
+====
+
+This approach is based on the discussion from V1 and V2, which will
+pass the encrypted last block contents to MDS along with the truncate
+request.
+
+This will send the encrypted last block contents to MDS along with
+the truncate request when truncating to a smaller size and at the
+same time new size does not align to BLOCK SIZE.
+
+The MDS side patch is raised in PR
+https://github.com/ceph/ceph/pull/43588, which is also based Jeff's
+previous great work in PR https://github.com/ceph/ceph/pull/41284.
+
+The MDS will use the filer.write_trunc(), which could update and
+truncate the file in one shot, instead of filer.truncate().
+
+This just assume kclient won't support the inline data feature, which
+will be remove soon, more detail please see:
+https://tracker.ceph.com/issues/52916
+
+Changed in V4:
+- Retry the truncate request by 20 times before fail it with -EAGAIN.
+- Remove the "fill_last_block" label and move the code to else branch.
+- Remove the #3 patch, which has already been sent out separately, in
+  V3 series.
+- Improve some comments in the code.
+
+
+Changed in V3:
+- Fix possibly corrupting the file just before the MDS acquires the
+  xlock for FILE lock, another client has updated it.
+- Flush the pagecache buffer before reading the last block for the
+  when filling the truncate request.
+- Some other minore fixes.
+
+Xiubo Li (4):
+  Revert "ceph: make client zero partial trailing block on truncate"
+  ceph: add __ceph_get_caps helper support
+  ceph: add __ceph_sync_read helper support
+  ceph: add truncate size handling support for fscrypt
+
+ fs/ceph/caps.c              |  21 ++--
+ fs/ceph/file.c              |  44 +++++---
+ fs/ceph/inode.c             | 203 ++++++++++++++++++++++++++++++------
+ fs/ceph/super.h             |   6 +-
+ include/linux/ceph/crypto.h |  28 +++++
+ 5 files changed, 251 insertions(+), 51 deletions(-)
+ create mode 100644 include/linux/ceph/crypto.h
+
 -- 
 2.27.0
 
