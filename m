@@ -2,195 +2,131 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38DA1C433F5
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Nov 2021 21:31:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5F9EC43217
+	for <ceph-devel@archiver.kernel.org>; Wed, 10 Nov 2021 13:33:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 118B861159
-	for <ceph-devel@archiver.kernel.org>; Tue,  9 Nov 2021 21:31:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CAEF361205
+	for <ceph-devel@archiver.kernel.org>; Wed, 10 Nov 2021 13:33:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239621AbhKIVd5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 9 Nov 2021 16:33:57 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:60397 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S239105AbhKIVd5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Nov 2021 16:33:57 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1636493470;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=PE1VptDeAs6kmOyj4aRTeb4D8eNBBDr4zH9bU+KmOKU=;
-        b=SXoDNr4EvJvWCIPczsmrXqdlBRZ2AYkHgfYUsceWqheYnXvpxIfV0jJlFp6UzS1y1YEhvH
-        /cn7VmUziC/L7Lv0FZg3rUaFtMsIL9qh+CGflCJ7BnnmTDLrMEjDsx12CKEwQrft729RRl
-        oOVCjwnpLiV2f0Xtrawix8cpVg9QkXA=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-446-pbeZtQg6M0m7P3otNU44WQ-1; Tue, 09 Nov 2021 16:27:57 -0500
-X-MC-Unique: pbeZtQg6M0m7P3otNU44WQ-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0906887D542;
-        Tue,  9 Nov 2021 21:27:55 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.33.37.68])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1812319729;
-        Tue,  9 Nov 2021 21:27:44 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH v4 3/5] folio: Add replacements for page_endio()
-From:   David Howells <dhowells@redhat.com>
-To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
-Cc:     Jeff Layton <jlayton@kernel.org>,
+        id S231979AbhKJNfw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 10 Nov 2021 08:35:52 -0500
+Received: from mail.kernel.org ([198.145.29.99]:55484 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231460AbhKJNfv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 10 Nov 2021 08:35:51 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id AA7C6611AD;
+        Wed, 10 Nov 2021 13:33:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1636551184;
+        bh=2fOPQfcnnYGsAAsZbIczysSMHxsigaGOJywncfgF58U=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=aT56LUYcfryK8afAqwV7QUlb1VOXsox2IRfA9k3CQD+AbWS5WrGR5btKvGGSJw1ls
+         kFhWTJ4+M8oryzYoJ2toZRmUpEUUVvY/UgV9dixyoQyLKeGu8HxPOXYfAyY8pjK0C1
+         E6B6e/oPwiOypZoBEsUDC5OkTlSMrm+mkU9bP9KiJ4CWgTtNjS17BjA5xORv9hQvO6
+         vA2R1gri9i/NKNOZ7ocjQy59+mN4hsXC9+Akms+CiFVvMgCjmjjX2tvvhVrq/MplG2
+         6ZbhmUnzqNdRKoO5KEhCc1jpiUMoqZf5GbU82wKzu98hTjWGLqJ5FgkIKysU9v6qAN
+         RqDtNznsE/6YQ==
+Message-ID: <a0212b723317677e8601b3f58927eab03ef784de.camel@kernel.org>
+Subject: Re: [PATCH v4 0/5] netfs, 9p, afs, ceph: Support folios, at least
+ partially
+From:   Jeff Layton <jlayton@kernel.org>
+To:     David Howells <dhowells@redhat.com>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>
+Cc:     kafs-testing@auristor.com, Ilya Dryomov <idryomov@gmail.com>,
+        linux-cachefs@redhat.com, linux-afs@lists.infradead.org,
+        ceph-devel@vger.kernel.org, Marc Dionne <marc.dionne@auristor.com>,
         Dominique Martinet <asmadeus@codewreck.org>,
-        kafs-testing@auristor.com, dhowells@redhat.com,
-        Jeff Layton <jlayton@kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Dominique Martinet <asmadeus@codewreck.org>,
-        linux-fsdevel@vger.kernel.org, linux-cachefs@redhat.com,
         v9fs-developer@lists.sourceforge.net,
-        linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org,
-        devel@lists.orangefs.org, linux-mm@kvack.org,
-        linux-kernel@vger.kernel.org
-Date:   Tue, 09 Nov 2021 21:27:44 +0000
-Message-ID: <163649326420.309189.6029879848780568728.stgit@warthog.procyon.org.uk>
+        linux-fsdevel@vger.kernel.org, linux-cifs@vger.kernel.org,
+        linux-nfs@vger.kernel.org, devel@lists.orangefs.org,
+        linux-mm@kvack.org, linux-kernel@vger.kernel.org
+Date:   Wed, 10 Nov 2021 08:33:01 -0500
 In-Reply-To: <163649323416.309189.4637503793406396694.stgit@warthog.procyon.org.uk>
 References: <163649323416.309189.4637503793406396694.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.1 (3.42.1-1.fc35) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add three functions to replace page_endio():
+On Tue, 2021-11-09 at 21:27 +0000, David Howells wrote:
+> Here's a set of patches to convert netfs, 9p and afs to use folios and to
+> provide sufficient conversion for ceph that it can continue to use the
+> netfs library.  Jeff Layton is working on fully converting ceph.
+> 
+> This has been rebased on to the 9p merge in Linus's tree[5] so that it has
+> access to both the 9p conversion to fscache and folios.
+> 
+> Changes
+> =======
+> ver #4:
+>  - Detached and sent the afs symlink split patch separately.
+>  - Handed the 9p netfslibisation patch off to Dominique Martinet.
+>  - Added a patch to foliate page_endio().
+>  - Fixed a bug in afs_redirty_page() whereby it didn't set the next page
+>    index in the loop and returned too early.
+>  - Simplified a check in v9fs_vfs_write_folio_locked()[4].
+>  - Undid a change to afs_symlink_readpage()[4].
+>  - Used offset_in_folio() in afs_write_end()[4].
+>  - Rebased on 9p-folio merge upstream[5].
+> 
+> ver #3:
+>  - Rebased on upstream as folios have been pulled.
+>  - Imported a patch to convert 9p to netfslib from my
+>    fscache-remove-old-api branch[3].
+>  - Foliated netfslib.
+> 
+> ver #2:
+>  - Reorder the patches to put both non-folio afs patches to the front.
+>  - Use page_offset() rather than manual calculation[1].
+>  - Fix folio_inode() to directly access the inode[2].
+> 
+> David
+> 
+> Link: https://lore.kernel.org/r/YST/0e92OdSH0zjg@casper.infradead.org/ [1]
+> Link: https://lore.kernel.org/r/YST8OcVNy02Rivbm@casper.infradead.org/ [2]
+> Link: https://lore.kernel.org/r/163551653404.1877519.12363794970541005441.stgit@warthog.procyon.org.uk/ [3]
+> Link: https://lore.kernel.org/r/YYKa3bfQZxK5/wDN@casper.infradead.org/ [4]
+> Link: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f89ce84bc33330607a782e47a8b19406ed109b15 [5]
+> Link: https://lore.kernel.org/r/2408234.1628687271@warthog.procyon.org.uk/ # v0
+> Link: https://lore.kernel.org/r/162981147473.1901565.1455657509200944265.stgit@warthog.procyon.org.uk/ # v1
+> Link: https://lore.kernel.org/r/163005740700.2472992.12365214290752300378.stgit@warthog.procyon.org.uk/ # v2
+> Link: https://lore.kernel.org/r/163584174921.4023316.8927114426959755223.stgit@warthog.procyon.org.uk>/ # v3
+> ---
+> David Howells (5):
+>       folio: Add a function to change the private data attached to a folio
+>       folio: Add a function to get the host inode for a folio
+>       folio: Add replacements for page_endio()
+>       netfs, 9p, afs, ceph: Use folios
+>       afs: Use folios in directory handling
+> 
+> 
+>  fs/9p/vfs_addr.c           |  83 +++++----
+>  fs/9p/vfs_file.c           |  20 +--
+>  fs/afs/dir.c               | 229 ++++++++++--------------
+>  fs/afs/dir_edit.c          | 154 ++++++++--------
+>  fs/afs/file.c              |  68 ++++----
+>  fs/afs/internal.h          |  46 ++---
+>  fs/afs/write.c             | 347 ++++++++++++++++++-------------------
+>  fs/ceph/addr.c             |  80 +++++----
+>  fs/netfs/read_helper.c     | 165 +++++++++---------
+>  include/linux/netfs.h      |  12 +-
+>  include/linux/pagemap.h    |  23 ++-
+>  include/trace/events/afs.h |  21 +--
+>  mm/filemap.c               |  64 ++++---
+>  mm/page-writeback.c        |   2 +-
+>  14 files changed, 666 insertions(+), 648 deletions(-)
+> 
+> 
+> 
+> Tested-by: Jeff Layton <jlayton@kernel.org>
+> Tested-by: Dominique Martinet <asmadeus@codewreck.org>
+> Tested-by: kafs-testing@auristor.com
+> 
 
- (1) folio_end_read().  End a read to a folio.
+I know this already has my Tested-by, but I ran some more tests with
+this series yesterday and it did fine:
 
- (2) folio_end_write().  End a write from a folio.
-
- (3) folio_endio().  A switcher that does one or the other of the above.
-
-Change page_endio() to just call folio_endio().  Note that the parameter
-order is switched so that the folio_endio() stub doesn't have to shuffle
-the params around, but can rather just test and jump.
-
-Signed-off-by: David Howells <dhowells@redhat.com>
-Tested-by: Jeff Layton <jlayton@kernel.org>
-Tested-by: Dominique Martinet <asmadeus@codewreck.org>
-Tested-by: kafs-testing@auristor.com
-Link: https://lore.kernel.org/r/1088663.1635955216@warthog.procyon.org.uk/
----
-
- include/linux/pagemap.h |    9 ++++++-
- mm/filemap.c            |   64 ++++++++++++++++++++++++++++++++---------------
- 2 files changed, 51 insertions(+), 22 deletions(-)
-
-diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
-index 1a0c646eb6ff..fd90544bb3e4 100644
---- a/include/linux/pagemap.h
-+++ b/include/linux/pagemap.h
-@@ -895,7 +895,14 @@ static inline int __must_check write_one_page(struct page *page)
- int __set_page_dirty_nobuffers(struct page *page);
- int __set_page_dirty_no_writeback(struct page *page);
- 
--void page_endio(struct page *page, bool is_write, int err);
-+void folio_end_read(struct folio *folio, int err);
-+void folio_end_write(struct folio *folio, int err);
-+void folio_endio(struct folio *folio, int err, bool is_write);
-+
-+static inline void page_endio(struct page *page, bool is_write, int err)
-+{
-+	folio_endio(page_folio(page), err, is_write);
-+}
- 
- void folio_end_private_2(struct folio *folio);
- void folio_wait_private_2(struct folio *folio);
-diff --git a/mm/filemap.c b/mm/filemap.c
-index daa0e23a6ee6..841e87b2d6ab 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -1612,33 +1612,55 @@ void folio_end_writeback(struct folio *folio)
- }
- EXPORT_SYMBOL(folio_end_writeback);
- 
--/*
-- * After completing I/O on a page, call this routine to update the page
-- * flags appropriately
-+/**
-+ * folio_end_read - Update the state of a folio after a read
-+ * @folio: The folio to update
-+ * @err: The error code (or 0) to apply
-  */
--void page_endio(struct page *page, bool is_write, int err)
-+void folio_end_read(struct folio *folio, int err)
- {
--	if (!is_write) {
--		if (!err) {
--			SetPageUptodate(page);
--		} else {
--			ClearPageUptodate(page);
--			SetPageError(page);
--		}
--		unlock_page(page);
-+	if (!err) {
-+		folio_mark_uptodate(folio);
- 	} else {
--		if (err) {
--			struct address_space *mapping;
-+		folio_clear_uptodate(folio);
-+		folio_set_error(folio);
-+	}
-+	folio_unlock(folio);
-+}
-+EXPORT_SYMBOL_GPL(folio_end_read);
- 
--			SetPageError(page);
--			mapping = page_mapping(page);
--			if (mapping)
--				mapping_set_error(mapping, err);
--		}
--		end_page_writeback(page);
-+/**
-+ * folio_end_write - Update the state of a folio after a write
-+ * @folio: The folio to update
-+ * @err: The error code (or 0) to apply
-+ */
-+void folio_end_write(struct folio *folio, int err)
-+{
-+	if (err) {
-+		struct address_space *mapping = folio_mapping(folio);
-+
-+		folio_set_error(folio);
-+		if (mapping)
-+			mapping_set_error(mapping, err);
- 	}
-+	folio_end_writeback(folio);
-+}
-+EXPORT_SYMBOL_GPL(folio_end_write);
-+
-+/**
-+ * folio_endio - Update the state of a folio after a read or write
-+ * @folio: The folio to update
-+ * @err: The error code (or 0) to apply
-+ * @is_write: True if this was a write
-+ */
-+void folio_endio(struct folio *folio, int err, bool is_write)
-+{
-+	if (is_write)
-+		folio_end_write(folio, err);
-+	else
-+		folio_end_read(folio, err);
- }
--EXPORT_SYMBOL_GPL(page_endio);
-+EXPORT_SYMBOL_GPL(folio_endio);
- 
- /**
-  * __folio_lock - Get a lock on the folio, assuming we need to sleep to get it.
-
-
+(Re-)Tested-by: Jeff Layton <jlayton@kernel.org>
