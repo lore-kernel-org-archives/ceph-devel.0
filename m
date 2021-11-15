@@ -2,59 +2,150 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17D5DC433EF
-	for <ceph-devel@archiver.kernel.org>; Sat, 13 Nov 2021 19:44:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92BF2C433F5
+	for <ceph-devel@archiver.kernel.org>; Mon, 15 Nov 2021 02:54:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED52061056
-	for <ceph-devel@archiver.kernel.org>; Sat, 13 Nov 2021 19:44:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6B23E61260
+	for <ceph-devel@archiver.kernel.org>; Mon, 15 Nov 2021 02:54:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236083AbhKMTrO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 13 Nov 2021 14:47:14 -0500
-Received: from mail.kernel.org ([198.145.29.99]:60194 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236057AbhKMTrK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 13 Nov 2021 14:47:10 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPS id 0439A61215;
-        Sat, 13 Nov 2021 19:44:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636832658;
-        bh=SVyeWuTfSD5QrriiasD8VNT+BHbUyOlzTZKcqTmWZMg=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=iksKJqVF5fQAN7ye8iNr9081RcFHCL8qWAk2JeywjTsD2h6IqVvYmdfboSnlizmFu
-         HONzYWWumVUWkdGs6L9thxdLCoqtZEMHEkJZj25zjpeCOOt+sDCs3Aj+qjZES+utCz
-         NkQfEdQkM72FrBdQ377IHEIPsgmDfuLQuS9zyFncF6C+TJXsDJQylLEH6DEa/oqbqg
-         q5J62eecBqPUYrJoY1UD/VC9LcLzt37MXuVlpsmgdC4D03aZwnb8BAlT1di5dx32Fo
-         Uw611QUQOxiCYZ3Po6PlKM56JrfEQNNtBp0ueAuiPMwq2Vc0z5YJk0oaX6xDZqicho
-         qXb1innjV2k6Q==
-Subject: Re: [GIT PULL] Ceph updates for 5.16-rc1
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20211112111132.27316-1-idryomov@gmail.com>
-References: <20211112111132.27316-1-idryomov@gmail.com>
-X-PR-Tracked-List-Id: <ceph-devel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20211112111132.27316-1-idryomov@gmail.com>
-X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-5.16-rc1
-X-PR-Tracked-Commit-Id: c02cb7bdc4501debc3e71a4d2daf7286c48e1d38
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 0ecca62beb12eeb13965ed602905c8bf53ac93d0
-Message-Id: <163683265796.24678.17555720309336887682.pr-tracker-bot@kernel.org>
-Date:   Sat, 13 Nov 2021 19:44:17 +0000
-To:     Ilya Dryomov <idryomov@gmail.com>
-Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+        id S229876AbhKOC5V (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 14 Nov 2021 21:57:21 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:44552 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229588AbhKOC5R (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 14 Nov 2021 21:57:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1636944861;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=jl5/NtO9ElL5IL5PR8hsbteYLA/rmFJOAG/ZAbvQVFs=;
+        b=K5kmmHqdt3FlQMm4MKdhHWVBWcPeb3v8MJ3hRt6YybFVQlvMoVeFNzv5NmPKjb+vPA59YM
+        SiKTDRRRIKZHjWUKu06VZdbG786eX9pZ1wqunqUxa4Y8xEGOUUE+FZc1v2QdZYSGAJXLM/
+        uITgJ1hez0FhYDUvRF59otsZ2lujo2U=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-134-6ogHmA15Pd-B0X6Ujjd1rw-1; Sun, 14 Nov 2021 21:54:20 -0500
+X-MC-Unique: 6ogHmA15Pd-B0X6Ujjd1rw-1
+Received: by mail-pg1-f197.google.com with SMTP id j18-20020a63fc12000000b002dd2237eb1cso8471426pgi.5
+        for <ceph-devel@vger.kernel.org>; Sun, 14 Nov 2021 18:54:20 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=jl5/NtO9ElL5IL5PR8hsbteYLA/rmFJOAG/ZAbvQVFs=;
+        b=FHv7W39T+nsJ62gzakOd6kgzbIZ1zx9zbbFZQL3/WoptTOB4gJ9hgxo0oHyTV6dP87
+         fwqwniTb/rQuTlPJBcsKW/HnYSDXBpG0YQsyt2Ili0U3V0SRiUWqgwatC4+YWy3xRVMS
+         dx1jYVDrpp0FZ6G6pc3ceOQ61GUks7ejH6MrUeFLuVuRDpBgu7UsbBrgE2rTckzNWROt
+         B0lNNOb9PARkzRTMKTlcOEEAtF1X5MBNrTTojcf99OXYKfiPjNoMnk9XnZKBC9d/rKaG
+         Xyl2hKQAN2oLH6PWncLOYQZz8jJ9PU23LKUv/pvUAUNaMPESSuTNDIFx4X5mVBQ3N4Ks
+         rZ9g==
+X-Gm-Message-State: AOAM530tSnK62dDNoLtjyfpaxIS4kzGXXSoApUhXXTnxLRESZNtckQzE
+        6jyytWMWjGhRqnyhj2TLQ/t432k/8SDk2ty0zNdnH3tjhsvd7CFMQ9xn7MuaVhoupI9+tdaTUdu
+        iVBxzUQijFVGEFcPe+l/FEAoVYT7o45H9wvTk3gGkS/LLB4Y/PmmiMV7DnVvKPCCH6FWsZEU=
+X-Received: by 2002:a63:5222:: with SMTP id g34mr21747292pgb.236.1636944859366;
+        Sun, 14 Nov 2021 18:54:19 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJxj4EYfXqEKwwOtZTopVhrHkCrVVwU6gZgckzCDgGFOZoM1SDDUX+eJhcsBCDtA37UtQZ2JxA==
+X-Received: by 2002:a63:5222:: with SMTP id g34mr21747268pgb.236.1636944859056;
+        Sun, 14 Nov 2021 18:54:19 -0800 (PST)
+Received: from [10.72.12.80] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id fw21sm16307041pjb.25.2021.11.14.18.54.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 14 Nov 2021 18:54:18 -0800 (PST)
+Subject: Re: [PATCH v2 1/1] ceph: Fix incorrect statfs report for small quota
+To:     khiremat@redhat.com, jlayton@redhat.com
+Cc:     pdonnell@redhat.com, idryomov@gmail.com, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org
+References: <20211110180021.20876-1-khiremat@redhat.com>
+ <20211110180021.20876-2-khiremat@redhat.com>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <2bbf6340-0814-bbfa-0d35-2e1d1fff23de@redhat.com>
+Date:   Mon, 15 Nov 2021 10:53:59 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
+MIME-Version: 1.0
+In-Reply-To: <20211110180021.20876-2-khiremat@redhat.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The pull request you sent on Fri, 12 Nov 2021 12:11:32 +0100:
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-5.16-rc1
+On 11/11/21 2:00 AM, khiremat@redhat.com wrote:
+> From: Kotresh HR <khiremat@redhat.com>
+>
+> Problem:
+> The statfs reports incorrect free/available space
+> for quota less then CEPH_BLOCK size (4M).
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/0ecca62beb12eeb13965ed602905c8bf53ac93d0
+s/then/than/
 
-Thank you!
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+> Solution:
+> For quota less than CEPH_BLOCK size, smaller block
+> size of 4K is used. But if quota is less than 4K,
+> it is decided to go with binary use/free of 4K
+> block. For quota size less than 4K size, report the
+> total=used=4K,free=0 when quota is full and
+> total=free=4K,used=0 otherwise.
+>
+> Signed-off-by: Kotresh HR <khiremat@redhat.com>
+> ---
+>   fs/ceph/quota.c | 14 ++++++++++++++
+>   fs/ceph/super.h |  1 +
+>   2 files changed, 15 insertions(+)
+>
+> diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+> index 620c691af40e..24ae13ea2241 100644
+> --- a/fs/ceph/quota.c
+> +++ b/fs/ceph/quota.c
+> @@ -494,10 +494,24 @@ bool ceph_quota_update_statfs(struct ceph_fs_client *fsc, struct kstatfs *buf)
+>   		if (ci->i_max_bytes) {
+>   			total = ci->i_max_bytes >> CEPH_BLOCK_SHIFT;
+>   			used = ci->i_rbytes >> CEPH_BLOCK_SHIFT;
+> +			/* For quota size less than 4MB, use 4KB block size */
+> +			if (!total) {
+> +				total = ci->i_max_bytes >> CEPH_4K_BLOCK_SHIFT;
+> +				used = ci->i_rbytes >> CEPH_4K_BLOCK_SHIFT;
+> +	                        buf->f_frsize = 1 << CEPH_4K_BLOCK_SHIFT;
+> +			}
+>   			/* It is possible for a quota to be exceeded.
+>   			 * Report 'zero' in that case
+>   			 */
+>   			free = total > used ? total - used : 0;
+> +			/* For quota size less than 4KB, report the
+> +			 * total=used=4KB,free=0 when quota is full
+> +			 * and total=free=4KB, used=0 otherwise */
+> +			if (!total) {
+> +				total = 1;
+> +				free = ci->i_max_bytes > ci->i_rbytes ? 1 : 0;
+> +	                        buf->f_frsize = 1 << CEPH_4K_BLOCK_SHIFT;
+
+The 'buf->f_frsize' has already been assigned above, this could be removed.
+
+Thanks
+
+-- Xiubo
+
+> +			}
+>   		}
+>   		spin_unlock(&ci->i_ceph_lock);
+>   		if (total) {
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index ed51e04739c4..387ee33894db 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -32,6 +32,7 @@
+>    * large volume sizes on 32-bit machines. */
+>   #define CEPH_BLOCK_SHIFT   22  /* 4 MB */
+>   #define CEPH_BLOCK         (1 << CEPH_BLOCK_SHIFT)
+> +#define CEPH_4K_BLOCK_SHIFT 12  /* 4 KB */
+>   
+>   #define CEPH_MOUNT_OPT_CLEANRECOVER    (1<<1) /* auto reonnect (clean mode) after blocklisted */
+>   #define CEPH_MOUNT_OPT_DIRSTAT         (1<<4) /* `cat dirname` for stats */
+
