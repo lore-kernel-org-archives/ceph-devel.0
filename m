@@ -2,162 +2,187 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09D95C433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 15 Nov 2021 06:31:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FCB4C433F5
+	for <ceph-devel@archiver.kernel.org>; Tue, 16 Nov 2021 04:56:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9E5063217
-	for <ceph-devel@archiver.kernel.org>; Mon, 15 Nov 2021 06:31:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7867861B68
+	for <ceph-devel@archiver.kernel.org>; Tue, 16 Nov 2021 04:56:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229709AbhKOGeq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 15 Nov 2021 01:34:46 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:30936 "EHLO
+        id S237747AbhKPE7u (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 15 Nov 2021 23:59:50 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:23727 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229587AbhKOGep (ORCPT
+        by vger.kernel.org with ESMTP id S232972AbhKPE7s (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 15 Nov 2021 01:34:45 -0500
+        Mon, 15 Nov 2021 23:59:48 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1636957909;
+        s=mimecast20190719; t=1637038611;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=c5AQjtkaxzlyRyCLDFF00dk8QfCp0BsUOmLjJHbbWjY=;
-        b=H05OFxy2q9895K+20UweeU78Xwint5KH4d6Zup0oEV7iH/Ip2XxaY0r+JjlNyxB3KsU8fx
-        2fHmoVROOKRd4xNVLn2iG0b5VJcis4NTdXlNkMtBCUAy5qX4xdO0mbnTQRH44UTstWr39C
-        6moCGzDPeXDw4CZwUqWWs5dwiNF72p0=
-Received: from mail-lf1-f69.google.com (mail-lf1-f69.google.com
- [209.85.167.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-434-4DDVbS0hMMmkbhdYajMyeA-1; Mon, 15 Nov 2021 01:31:48 -0500
-X-MC-Unique: 4DDVbS0hMMmkbhdYajMyeA-1
-Received: by mail-lf1-f69.google.com with SMTP id c40-20020a05651223a800b004018e2f2512so6338313lfv.11
-        for <ceph-devel@vger.kernel.org>; Sun, 14 Nov 2021 22:31:47 -0800 (PST)
+        bh=DFFkVBReW9/cFy15bK2kiplDHjEnlvVxpxggjEtm6FQ=;
+        b=GJgRjXuhbFn0K9WuPZ/uh/yw0rhNCMQ5ttWPu7wMApw12RotNQnmnIjXth99Bs/aFe8SC3
+        +zA64+2XR9P/WATCKwJU+wLxC91fgkrTSaSuCjxD3mqfpx0wHchQpC4rWTEkW0kdoysAJr
+        ZybmXnckJ+WOtuzuVxJ+xC7qmykKEPk=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-3-e1V0c_GmPxaPqIy0h1bKXA-1; Mon, 15 Nov 2021 23:56:50 -0500
+X-MC-Unique: e1V0c_GmPxaPqIy0h1bKXA-1
+Received: by mail-pg1-f198.google.com with SMTP id i25-20020a631319000000b002cce0a43e94so10191234pgl.0
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Nov 2021 20:56:49 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=c5AQjtkaxzlyRyCLDFF00dk8QfCp0BsUOmLjJHbbWjY=;
-        b=KduEU9fKSjfRxlc3TINPDZ31PARxDp+2H+ePSeVPfUBuDU+pwkxcTHqSt5TOU0PprI
-         L8lx0QXeOFHHu/+kj1BOw2UyjcEJv6FcCsVloq+jcIKZs6ucCimQp/1IfseZ1OksUyPw
-         rA3znKNMqSBEiY5Gm+gYC4VaaTfwKYH3Kszt2hmlX9Fw2YroWF437Q+HTAUd80fuqI/V
-         xz55bXi/v7YijUN0+yb027/QE7nBgpr8sjJq4ALuivOOO43V1UlCGeAb3lwh751jzjht
-         WimgLvBk+M978zEViFGhcmT2W1e0fUEuvf3XurF/le3QYnvGL+yq41Yn6KGc4eByIKQu
-         9GQw==
-X-Gm-Message-State: AOAM530exRa8/EHLbyDr9DEFWkZfHpwpLsMQhIQJUbcGTNQ1lR20vh0z
-        Ws6sxKc/z+S6lKZTtyvjMTKxS42j07/vo3tiQvq6Ju8AGiojcV58hJ/kYUFyO2FbASBLf5wljE7
-        irWZVpCyNmR/pjhQxQhzZfX8PiJTKIgS/X9QD
-X-Received: by 2002:a2e:9217:: with SMTP id k23mr36066938ljg.267.1636957906608;
-        Sun, 14 Nov 2021 22:31:46 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxdVgErioBlgexLJDm5yrMSWJ52WrzMoQCcpykUliJYrwDd7k9RuHs2g6s4CgdhNuHi3ubRLn69wlb7f0jovlY=
-X-Received: by 2002:a2e:9217:: with SMTP id k23mr36066927ljg.267.1636957906436;
- Sun, 14 Nov 2021 22:31:46 -0800 (PST)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=DFFkVBReW9/cFy15bK2kiplDHjEnlvVxpxggjEtm6FQ=;
+        b=cNiCZdBPFAxC2pNODgFmyRgyA1ooqhpplspAAYFlz3K+9BS060ZUpEdWBqo68OGbmU
+         BtPgjwbuHhJVvRQ1zpykmdrOpb3/bFxeIqjQ64xYj5J6ndvPJYYyg/P7lq1xKuJZmCAV
+         8lUn1Np4IZqv/lxzCZsANzGjngamzoRwKkSRQSDd6iBxsCWLxnWu4x6Ar/4hqD+pSKnJ
+         r78gpN0uuk0IaCCkMbTJTA7lwn7VhND0++CCEfnSsTSopAIHS4Z+RUv5f+1IvN3gcD+u
+         zff87EQvtrThhVniEWZ/pAsnIsmplVisb62yp945IiDZ4yl1iS+5Oz8WuQaDQEliS0pu
+         8g3g==
+X-Gm-Message-State: AOAM532H+snjmzBUv4wW3+AM7lRWBPYRMtDQBTo2xsuJT99n/UYrV5dQ
+        chEdS3IP6Cw7VvKKutsNAyZLnXKK2wapUced6waMcqBJ+2G6n2RjIRUiTY/9nLVdJx5XelcDUU1
+        ljY/qhc8youTe6wXsyseKpIB2BOWwbF6gOKxGw9QiNVTsY3PElFetEXxiQ4qJPUeaIXGs30k=
+X-Received: by 2002:aa7:8dc6:0:b0:49f:c66e:2d55 with SMTP id j6-20020aa78dc6000000b0049fc66e2d55mr38115996pfr.81.1637038608432;
+        Mon, 15 Nov 2021 20:56:48 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJz8cEO/sc00+1P40zFO9fZTp9VIisOA5BQEk3AEdPo6gWtNn7hUJjCkNu/wKpgynTdzyzrf1Q==
+X-Received: by 2002:aa7:8dc6:0:b0:49f:c66e:2d55 with SMTP id j6-20020aa78dc6000000b0049fc66e2d55mr38115962pfr.81.1637038608000;
+        Mon, 15 Nov 2021 20:56:48 -0800 (PST)
+Received: from [10.72.12.80] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id f15sm18872002pfe.171.2021.11.15.20.56.44
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 15 Nov 2021 20:56:47 -0800 (PST)
+Subject: Re: [PATCH 0/2] ceph: misc fixes for the fscrypt truncate size
+ handling
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     idryomov@gmail.com, vshankar@redhat.com, khiremat@redhat.com,
+        ceph-devel@vger.kernel.org
+References: <20211108135012.79941-1-xiubli@redhat.com>
+ <79e1517f6197185e3aca6b0afa5b810c5b5e8a82.camel@kernel.org>
+ <ec7b0b1e-85de-6a4a-a772-5e00dd787d69@redhat.com>
+ <f2ecc2760733b0cdde950b6a21bbbb8e9fb15f29.camel@kernel.org>
+ <ff4343cc402371813e40695cd556203df753bea0.camel@kernel.org>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <a0a9f6f4-5c49-b072-8161-5d085ab97b89@redhat.com>
+Date:   Tue, 16 Nov 2021 12:56:41 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-References: <20211110180021.20876-1-khiremat@redhat.com> <20211110180021.20876-2-khiremat@redhat.com>
- <2bbf6340-0814-bbfa-0d35-2e1d1fff23de@redhat.com> <CAPgWtC4jv86+hjrBXfDpMm4r0b08sNspCKVsN994qwmHjQx1Ww@mail.gmail.com>
- <1afd1adb-6bda-0714-1d82-33ac4745e4c4@redhat.com>
-In-Reply-To: <1afd1adb-6bda-0714-1d82-33ac4745e4c4@redhat.com>
-From:   Kotresh Hiremath Ravishankar <khiremat@redhat.com>
-Date:   Mon, 15 Nov 2021 12:01:35 +0530
-Message-ID: <CAPgWtC5o5JbWP+F4MpO5a6G2Rs5Kr2pb+d16KErdUWxSnSo89A@mail.gmail.com>
-Subject: Re: [PATCH v2 1/1] ceph: Fix incorrect statfs report for small quota
-To:     Xiubo Li <xiubli@redhat.com>
-Cc:     Jeff Layton <jlayton@redhat.com>,
-        Patrick Donnelly <pdonnell@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Venky Shankar <vshankar@redhat.com>, ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <ff4343cc402371813e40695cd556203df753bea0.camel@kernel.org>
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Nov 15, 2021 at 11:12 AM Xiubo Li <xiubli@redhat.com> wrote:
+
+On 11/9/21 8:33 PM, Jeff Layton wrote:
+> On Mon, 2021-11-08 at 20:57 -0500, Jeff Layton wrote:
+>> On Tue, 2021-11-09 at 08:21 +0800, Xiubo Li wrote:
+>>> On 11/9/21 2:36 AM, Jeff Layton wrote:
+>>>> On Mon, 2021-11-08 at 21:50 +0800, xiubli@redhat.com wrote:
+>>>>> From: Xiubo Li <xiubli@redhat.com>
+>>>>>
+>>>>> Hi Jeff,
+>>>>>
+>>>>> The #1 could be squashed to the previous "ceph: add truncate size handling support for fscrypt" commit.
+>>>>> The #2 could be squashed to the previous "ceph: fscrypt_file field handling in MClientRequest messages" commit.
+>>>>>
+>>>>> Thanks.
+>>>>>
+>>>>> Xiubo Li (2):
+>>>>>     ceph: fix possible crash and data corrupt bugs
+>>>>>     ceph: there is no need to round up the sizes when new size is 0
+>>>>>
+>>>>>    fs/ceph/inode.c | 8 +++++---
+>>>>>    1 file changed, 5 insertions(+), 3 deletions(-)
+>>>>>
+>>>> I'm running xfstests today with the current state of wip-fscrypt-size
+>>>> (including the two patches above) with test_dummy_encryption enabled.
+>>>> generic/030 failed. The expected output of this part of the test was:
+>>>>
+>>>> wrote 5136912/5136912 bytes at offset 0
+>>>> XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>>>> ==== Pre-Remount ===
+>>>> 00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58
+>>>>> XXXXXXXXXXXXXXXX|
+>>>> *
+>>>> 004e6210  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59
+>>>>> YYYYYYYYYYYYYYYY|
+>>>> *
+>>>> 004e6d00  59 59 59 59 59 59 59 59  00 00 00 00 00 00 00 00
+>>>>> YYYYYYYY........|
+>>>> 004e6d10  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+>>>>> ................|
+>>>> *
+>>>> 004e7000
+>>>> ==== Post-Remount ==
+>>>> 00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58
+>>>>> XXXXXXXXXXXXXXXX|
+>>>> *
+>>>> 004e6210  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59
+>>>>> YYYYYYYYYYYYYYYY|
+>>>> *
+>>>> 004e6d00  59 59 59 59 59 59 59 59  00 00 00 00 00 00 00 00
+>>>>> YYYYYYYY........|
+>>>> 004e6d10  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+>>>>> ................|
+>>>> *
+>>>> 004e7000
+>>>>
+>>>> ...but I got this instead:
+>>>>
+>>>> wrote 5136912/5136912 bytes at offset 0
+>>>> XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>>>> ==== Pre-Remount ===
+>>>> 00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58
+>>>>> XXXXXXXXXXXXXXXX|
+>>>> *
+>>>> 00400000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+>>>>> ................|
+>>>> *
+>>>> 004e7000
+>>>> ==== Post-Remount ==
+>>>> 00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58
+>>>>> XXXXXXXXXXXXXXXX|
+>>>> *
+>>>> 00400000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+>>>>> ................|
+>>>> *
+>>>> 004e7000
+>>>>
+>>>>
+>>>> ...I suspect this is related to the 075 failures, but I don't see it on
+>>>> every attempt, which makes me think "race condition". I'll keep hunting.
+>>> Yeah, seems the same issue.
+>>>
+>> I wonder if we're hitting the same problem that this patch was intended
+>> to fix:
+>>
+>>      057ba5b24532 ceph: Fix race between hole punch and page fault
+>>
+>> It seems like the problem is very similar. It may be worth testing a
+>> patch that takes the filemap_invalidate_lock across the on the wire
+>> truncate and the vmtruncate.
 >
->
-> On 11/15/21 1:30 PM, Kotresh Hiremath Ravishankar wrote:
-> > On Mon, Nov 15, 2021 at 8:24 AM Xiubo Li <xiubli@redhat.com> wrote:
-> >>
-> >> On 11/11/21 2:00 AM, khiremat@redhat.com wrote:
-> >>> From: Kotresh HR <khiremat@redhat.com>
-> >>>
-> >>> Problem:
-> >>> The statfs reports incorrect free/available space
-> >>> for quota less then CEPH_BLOCK size (4M).
-> >> s/then/than/
-> >>
-> >>
-> >>> Solution:
-> >>> For quota less than CEPH_BLOCK size, smaller block
-> >>> size of 4K is used. But if quota is less than 4K,
-> >>> it is decided to go with binary use/free of 4K
-> >>> block. For quota size less than 4K size, report the
-> >>> total=used=4K,free=0 when quota is full and
-> >>> total=free=4K,used=0 otherwise.
-> >>>
-> >>> Signed-off-by: Kotresh HR <khiremat@redhat.com>
-> >>> ---
-> >>>    fs/ceph/quota.c | 14 ++++++++++++++
-> >>>    fs/ceph/super.h |  1 +
-> >>>    2 files changed, 15 insertions(+)
-> >>>
-> >>> diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-> >>> index 620c691af40e..24ae13ea2241 100644
-> >>> --- a/fs/ceph/quota.c
-> >>> +++ b/fs/ceph/quota.c
-> >>> @@ -494,10 +494,24 @@ bool ceph_quota_update_statfs(struct ceph_fs_client *fsc, struct kstatfs *buf)
-> >>>                if (ci->i_max_bytes) {
-> >>>                        total = ci->i_max_bytes >> CEPH_BLOCK_SHIFT;
-> >>>                        used = ci->i_rbytes >> CEPH_BLOCK_SHIFT;
-> >>> +                     /* For quota size less than 4MB, use 4KB block size */
-> >>> +                     if (!total) {
-> >>> +                             total = ci->i_max_bytes >> CEPH_4K_BLOCK_SHIFT;
-> >>> +                             used = ci->i_rbytes >> CEPH_4K_BLOCK_SHIFT;
-> >>> +                             buf->f_frsize = 1 << CEPH_4K_BLOCK_SHIFT;
->
-> If the quota size is less than 4MB, the 'buf->f_frsize' will always be
-> set here, including less than 4KB.
-Yes, sorry for the confusion. I will address this.
->
->
-> >>> +                     }
-> >>>                        /* It is possible for a quota to be exceeded.
-> >>>                         * Report 'zero' in that case
-> >>>                         */
-> >>>                        free = total > used ? total - used : 0;
-> >>> +                     /* For quota size less than 4KB, report the
-> >>> +                      * total=used=4KB,free=0 when quota is full
-> >>> +                      * and total=free=4KB, used=0 otherwise */
-> >>> +                     if (!total) {
-> >>> +                             total = 1;
-> >>> +                             free = ci->i_max_bytes > ci->i_rbytes ? 1 : 0;
-> >>> +                             buf->f_frsize = 1 << CEPH_4K_BLOCK_SHIFT;
-> >> The 'buf->f_frsize' has already been assigned above, this could be removed.
-> >>
-> > If the quota size is less than 4KB, the above assignment is not hit.
-> > This is required.
-> >
-> >> Thanks
-> >>
-> >> -- Xiubo
-> >>
-> >>> +                     }
-> >>>                }
-> >>>                spin_unlock(&ci->i_ceph_lock);
-> >>>                if (total) {
-> >>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> >>> index ed51e04739c4..387ee33894db 100644
-> >>> --- a/fs/ceph/super.h
-> >>> +++ b/fs/ceph/super.h
-> >>> @@ -32,6 +32,7 @@
-> >>>     * large volume sizes on 32-bit machines. */
-> >>>    #define CEPH_BLOCK_SHIFT   22  /* 4 MB */
-> >>>    #define CEPH_BLOCK         (1 << CEPH_BLOCK_SHIFT)
-> >>> +#define CEPH_4K_BLOCK_SHIFT 12  /* 4 KB */
-> >>>
-> >>>    #define CEPH_MOUNT_OPT_CLEANRECOVER    (1<<1) /* auto reonnect (clean mode) after blocklisted */
-> >>>    #define CEPH_MOUNT_OPT_DIRSTAT         (1<<4) /* `cat dirname` for stats */
-> >
->
+> Nope. I tried a draft patch that make setattr hold this lock over the
+> MDS call and the vmtruncate and it didn't help.
+
+It's buggy by using the `filer.write_trunc()` caller in MDS side, it 
+works well in case the truncate_from - truncate_size < 4MB, or it will 
+keep the stale file contents without trimming or zeroing them.
+
+I will push the MDS side PR to fix it.
+
+Thanks
+
+-- Xiubo
 
 
--- 
-Thanks and Regards,
-Kotresh H R
+> Cheers,
 
