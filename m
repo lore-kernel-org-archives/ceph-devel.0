@@ -2,181 +2,204 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07380C433F5
-	for <ceph-devel@archiver.kernel.org>; Thu, 18 Nov 2021 10:00:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54F7EC433EF
+	for <ceph-devel@archiver.kernel.org>; Thu, 18 Nov 2021 12:19:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E0EAD61B29
-	for <ceph-devel@archiver.kernel.org>; Thu, 18 Nov 2021 10:00:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 30FF961423
+	for <ceph-devel@archiver.kernel.org>; Thu, 18 Nov 2021 12:19:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245436AbhKRKC6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 18 Nov 2021 05:02:58 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:55525 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S245301AbhKRKCk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 Nov 2021 05:02:40 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1637229578;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=jEbNFwcEE1NGqsh8xaT9ebrNYGASk8g4vfRKcdSWoCc=;
-        b=HsVPqloujj0iHyWyU51wYce+yGAhW/LVlZUGyxuDkNHI6M6UireeBEjpaZqvMNTe9AaGRx
-        aYdlHgZ7vr4qnFoHdes73c//xsrKmIF7nFSZHevaGVxXbODotXF/R3EoQqVPuhRQTWxbrS
-        VspmraF2J7YFc/uptWEGkrsjccpcs1A=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-585-JOU6eiUbMY2ZoO_2WnZ5pg-1; Thu, 18 Nov 2021 04:59:37 -0500
-X-MC-Unique: JOU6eiUbMY2ZoO_2WnZ5pg-1
-Received: by mail-pg1-f200.google.com with SMTP id p30-20020a63951e000000b002fc109f1c72so1387432pgd.3
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Nov 2021 01:59:37 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=jEbNFwcEE1NGqsh8xaT9ebrNYGASk8g4vfRKcdSWoCc=;
-        b=WR5z6lILbZNSO198UpSghXzgYaXrjbwEnjpwxr8Ym7+CNgxFhlI8s8IgDTkDOysgiJ
-         k9o/Pa1mF26S5CUdWytPKoHXS/Jo/mchO11Dw7pD4vpXefa0Vt+6RA5kzlEu9/P+ZXmu
-         54EYK2FH59jIzDQq3Pd6hMhDDLqw8IRKC36qzGRExQ+OaYTkUvh3cX68/vQ19C2pyYqC
-         WfXnoFurBYnQf4Fsl3s7deZI1DKM0ncn1Q/c58JSRxCry0jPlehwWPtx/GCFdrgwqwUO
-         A2bp2N7O2wtEDOpHj+DXihgTJ7YZGkS3aawZ7A3gzd4b+znScGryBETKa+oqULlAlvEc
-         dyiQ==
-X-Gm-Message-State: AOAM530dcOKKDSulaI/YndSyAXJRPeKJOagDzLqSk8u6DVLqlKtvcg44
-        LGohIhX2CRPfHexcsSySNQ9HB4Hu0F6cArhLeF/NvEroFjt2n2ON8tmrJMwi9Oyzx9oVeKgrlfK
-        gK8TcELO1H11SGli421fv+C+hSxw5Ods2K/0iUP6/8he6MGJQZSWTGid1RwcIOlspU5rKLMQ=
-X-Received: by 2002:a17:90b:4a89:: with SMTP id lp9mr9103289pjb.6.1637229575771;
-        Thu, 18 Nov 2021 01:59:35 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxTmGxGh/XM2kyfEZccfWZNx1gn+YwLUuBtRvzeXzQmxNd4P1HeCFDkAZWjCFt6nSydKCI3Dg==
-X-Received: by 2002:a17:90b:4a89:: with SMTP id lp9mr9103256pjb.6.1637229575452;
-        Thu, 18 Nov 2021 01:59:35 -0800 (PST)
-Received: from [10.72.12.80] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id lj15sm2171395pjb.12.2021.11.18.01.59.33
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 18 Nov 2021 01:59:34 -0800 (PST)
-Subject: Re: [PATCH] ceph: do not truncate pagecache if truncate size doesn't
- change
-From:   Xiubo Li <xiubli@redhat.com>
-To:     Jeff Layton <jlayton@kernel.org>
+        id S1344582AbhKRMW4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 18 Nov 2021 07:22:56 -0500
+Received: from mail.kernel.org ([198.145.29.99]:43390 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1344577AbhKRMWw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 Nov 2021 07:22:52 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C0F7961548;
+        Thu, 18 Nov 2021 12:19:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1637237992;
+        bh=IlvSNE4NcSNGiLHbnA6kR2pPXY0Fd/+M6VZjEFuHPlU=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=MDFUJAEOPcmft26dSM4CtjYaymBpofhTfuoow2LkH15BgErdIOtN2W1zPuDWoemWJ
+         SxUfo0HhjbPFAUGzPWCJ/dXJ/wIBW9uZyEDMW6AfzJorylKC9bfLpvK5Zn3Tn/Gaau
+         hwy6RnBLUso5T+g38FMGQJV//0ilXqRVK1dnf5lptbHtuwTXnvgTJzz7fPWwEfLKXe
+         WO5V4TvtiVfIXTY9/MPBe/RPKlvpejaqIUyF5gbDupRFeG0W4wlz/RL6eYlAAO60Bt
+         KOVq58MeMe8CQzXqzgFTetX2qEDQ8cW8yTCztyr1YRqLByVWg/prG0m0Y++ifud+Qb
+         tmFXSg5H5mKVQ==
+Message-ID: <b7d901c7f1c660f2f1ec634e18d17988f0e348eb.camel@kernel.org>
+Subject: Re: [PATCH] ceph: do not truncate pagecache if truncate size
+ doesn't change
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Xiubo Li <xiubli@redhat.com>
 Cc:     idryomov@gmail.com, vshankar@redhat.com, ceph-devel@vger.kernel.org
+Date:   Thu, 18 Nov 2021 07:19:50 -0500
+In-Reply-To: <3eae0499-6ab3-4541-f26e-89b0f518ab46@redhat.com>
 References: <20211116092002.99439-1-xiubli@redhat.com>
- <e1e4365e92281675aad8cd9617e9111d7903564f.camel@kernel.org>
- <2d8dd70e-4f71-9dd8-3ec0-f8e0a5115449@redhat.com>
-Message-ID: <4a8aa249-74f3-fd7c-e88b-c02518d8b931@redhat.com>
-Date:   Thu, 18 Nov 2021 17:59:31 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+         <d37b49e0048ba3cf6763b83c82ad2fd8f8f36663.camel@kernel.org>
+         <672440f9-e812-e97f-1c85-0343d7e8359e@redhat.com>
+         <07f04cd3e3aeedf0d37db4acf4c7e8916c85f2b2.camel@kernel.org>
+         <3eae0499-6ab3-4541-f26e-89b0f518ab46@redhat.com>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.1 (3.42.1-1.fc35) 
 MIME-Version: 1.0
-In-Reply-To: <2d8dd70e-4f71-9dd8-3ec0-f8e0a5115449@redhat.com>
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
 Content-Transfer-Encoding: 8bit
-Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-
-On 11/18/21 12:46 PM, Xiubo Li wrote:
->
-> On 11/18/21 5:10 AM, Jeff Layton wrote:
->> On Tue, 2021-11-16 at 17:20 +0800, xiubli@redhat.com wrote:
->>> From: Xiubo Li <xiubli@redhat.com>
->>>
->>> In case truncating a file to a smaller sizeA, the sizeA will be kept
->>> in truncate_size. And if truncate the file to a bigger sizeB, the
->>> MDS will only increase the truncate_seq, but still using the sizeA as
->>> the truncate_size.
->>>
->>> So when filling the inode it will truncate the pagecache by using
->>> truncate_sizeA again, which makes no sense and will trim the inocent
->>> pages.
->>>
->>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->>> ---
->>>   fs/ceph/inode.c | 5 +++--
->>>   1 file changed, 3 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
->>> index 1b4ce453d397..b4f784684e64 100644
->>> --- a/fs/ceph/inode.c
->>> +++ b/fs/ceph/inode.c
->>> @@ -738,10 +738,11 @@ int ceph_fill_file_size(struct inode *inode, 
->>> int issued,
->>>                * don't hold those caps, then we need to check whether
->>>                * the file is either opened or mmaped
->>>                */
->>> -            if ((issued & (CEPH_CAP_FILE_CACHE|
->>> +            if (ci->i_truncate_size != truncate_size &&
->>> +                ((issued & (CEPH_CAP_FILE_CACHE|
->>>                          CEPH_CAP_FILE_BUFFER)) ||
->>>                   mapping_mapped(inode->i_mapping) ||
->>> -                __ceph_is_file_opened(ci)) {
->>> +                __ceph_is_file_opened(ci))) {
->>>                   ci->i_truncate_pending++;
->>>                   queue_trunc = 1;
->>>               }
->>
->> This patch causes xfstest generic/129 to hang at umount time, when
->> applied on top of the testing branch, and run (w/o fscrypt being
->> enabled). The call stack looks like this:
->>
->>          [<0>] wb_wait_for_completion+0xc3/0x120
->>          [<0>] __writeback_inodes_sb_nr+0x151/0x190
->>          [<0>] sync_filesystem+0x59/0x100
->>          [<0>] generic_shutdown_super+0x44/0x1d0
->>          [<0>] kill_anon_super+0x1e/0x40
->>          [<0>] ceph_kill_sb+0x5f/0xc0 [ceph]
->>          [<0>] deactivate_locked_super+0x5d/0xd0
->>          [<0>] cleanup_mnt+0x1f4/0x260
->>          [<0>] task_work_run+0x8b/0xc0
->>          [<0>] exit_to_user_mode_prepare+0x267/0x270
->>          [<0>] syscall_exit_to_user_mode+0x16/0x50
->>          [<0>] do_syscall_64+0x48/0x90
->>          [<0>] entry_SYSCALL_64_after_hwframe+0x44/0xae
->>
->> I suspect this is causing dirty data to get stuck in the cache somehow,
->> but I haven't tracked down the cause in detail.
->
-> BTW, could you reproduce this every time ?
->
-> I have tried this based the "ceph-client/wip-fscrypt-size" branch by 
-> both enabling and disabling the "test_dummy_encryption" for many 
-> times, all worked well for me.
->
-> And I also tried to test this patch based "testing" branch without 
-> fscrypt being enabled for many times, it also worked well for me:
->
-> [root@lxbceph1 xfstests]# date; ./check generic/129; date
-> Thu Nov 18 12:22:25 CST 2021
+On Thu, 2021-11-18 at 10:38 +0800, Xiubo Li wrote:
+> On 11/17/21 11:06 PM, Jeff Layton wrote:
+> > On Wed, 2021-11-17 at 09:21 +0800, Xiubo Li wrote:
+> > > On 11/17/21 4:06 AM, Jeff Layton wrote:
+> > > > On Tue, 2021-11-16 at 17:20 +0800, xiubli@redhat.com wrote:
+> > > > > From: Xiubo Li <xiubli@redhat.com>
+> > > > > 
+> > > > > In case truncating a file to a smaller sizeA, the sizeA will be kept
+> > > > > in truncate_size. And if truncate the file to a bigger sizeB, the
+> > > > > MDS will only increase the truncate_seq, but still using the sizeA as
+> > > > > the truncate_size.
+> > > > > 
+> > > > Do you mean "kept in ci->i_truncate_size" ?
+> > > Sorry for confusing. It mainly will be kept in the MDS side's
+> > > CInode->inode.truncate_size. And also will be propagated to all the
+> > > clients' ci->i_truncate_size member.
+> > > 
+> > > The MDS will only change CInode->inode.truncate_size when truncating a
+> > > smaller size.
+> > > 
+> > > 
+> > > > If so, is this really the
+> > > > correct fix? I'll note this in the sources:
+> > > > 
+> > > >           u32 i_truncate_seq;        /* last truncate to smaller size */
+> > > >           u64 i_truncate_size;       /*  and the size we last truncated down to */
+> > > > 
+> > > > Maybe the MDS ought not bump the truncate_seq unless it was truncating
+> > > > to a smaller size? If not, then that comment seems wrong at least.
+> > > Yeah, the above comments are inconsistent with what the MDS is doing.
+> > > 
+> > > Okay, I missed reading the code, I found in MDS that is introduced by
+> > > commit :
+> > > 
+> > >        bf39d32d936 mds: bump truncate seq when fscrypt_file changes
+> > > 
+> > > With the size handling feature support, I think this commit will make no
+> > > sense any more since we will calculate the 'truncating_smaller' by not
+> > > only comparing the new_size and old_size, which both are rounded up to
+> > > FSCRYPT BLOCK SIZE, will also check the 'req->get_data().length()' if
+> > > the new_size and old_size are the same.
+> > > 
+> > > 
+> > > > > So when filling the inode it will truncate the pagecache by using
+> > > > > truncate_sizeA again, which makes no sense and will trim the inocent
+> > > > > pages.
+> > > > > 
+> > > > Is there a reproducer for this? It would be nice to put something in
+> > > > xfstests for it if so.
+> > > In xfstests' generic/075 has already testing this, but i didn't see any
+> > > issue it reproduce. I just found this strange logs when it's doing
+> > > something like:
+> > > 
+> > > truncateA 0x10000 --> 0x2000
+> > > 
+> > > truncateB 0x2000   --> 0x8000
+> > > 
+> > > truncateC 0x8000   --> 0x6000
+> > > 
+> > > For the truncateC, the log says:
+> > > 
+> > > ceph:  truncate_size 0x2000 -> 0x6000
+> > > 
+> > > 
+> > > The problem is that the truncateB will also do the vmtruncate by using
+> > > the 0x2000 instead, the vmtruncate will not flush the dirty pages to the
+> > > OSD and will just discard them from the pagecaches. Then we may lost
+> > > some new updated data in case there has any write before the truncateB
+> > > in range [0x2000, 0x8000).
+> > > 
+> > > 
+> > > Thanks
+> > > 
+> > > BRs
+> > > 
+> > > -- Xiubo
+> > > 
+> > > 
+> > I tested this today and was still able to reproduce failures in
+> > generic/029 and generic/075 with test_dummy_encryption enabled.
+> 
+> Hi Jeff,
+> 
+> I tested these two cases many times again today and both worked well for me.
+> 
+> [root@lxbceph1 xfstests]# ./check generic/075
 > FSTYP         -- ceph
 > PLATFORM      -- Linux/x86_64 lxbceph1 5.15.0+
 > MKFS_OPTIONS  -- 10.72.7.17:40543:/testB
 > MOUNT_OPTIONS -- -o 
-> name=admin,secret=AQDS3IFhEtxvORAAxn1d4FVN2bRUsc/TZMpQvQ== -o 
-> context=system_u:object_r:root_t:s0 10.72.47.117:40543:/testB 
+> test_dummy_encryption,name=admin,secret=AQDS3IFhEtxvORAAxn1d4FVN2bRUsc/TZMpQvQ== 
+> -o context=system_u:object_r:root_t:s0 10.72.7.17:40543:/testB 
 > /mnt/kcephfs/testD
->
-> generic/129 648s ... 603s
-> Ran: generic/129
+> 
+> generic/075 106s ... 356s
+> Ran: generic/075
 > Passed all 1 tests
->
-> Thu Nov 18 12:32:33 CST 2021
->
->
-Have run this for several hours, till now no stuck happens locally:
+> 
+> [root@lxbceph1 xfstests]# ./check generic/029
+> FSTYP         -- ceph
+> PLATFORM      -- Linux/x86_64 lxbceph1 5.15.0+
+> MKFS_OPTIONS  -- 10.72.7.17:40543:/testB
+> MOUNT_OPTIONS -- -o 
+> test_dummy_encryption,name=admin,secret=AQDS3IFhEtxvORAAxn1d4FVN2bRUsc/TZMpQvQ== 
+> -o context=system_u:object_r:root_t:s0 10.72.7.17:40543:/testB 
+> /mnt/kcephfs/testD
+> 
+> generic/029 4s ... 3s
+> Ran: generic/029
+> Passed all 1 tests
+> 
+> 
+> > On the cluster-side, I'm using a cephadm cluster built using an image
+> > based on your fsize_support branch, rebased onto master (the Oct 7 base
+> > you're using is not good for cephadm).
+> 
+> I have updated this branch last night by rebasing it onto the latest 
+> upstream master.
+> 
+> And at the same time I have removed the commit:
+> 
+>          bf39d32d936 mds: bump truncate seq when fscrypt_file changes
+> 
+> > On the client side, I'm using the ceph-client/wip-fscrypt-size branch,
+> > along with this patch on top.
+> 
+> This I am also using the same branch from ceph-client repo. Nothing 
+> changed in my side.
+> 
+> To be safe I just deleted my local branches and synced from ceph-client 
+> repo today and test them again, still the same and worked for me.
+> 
 
-   $ while [ 1 ]; do date; ./check generic/129; date; done
+Ok, I think I see the problem. You sent this patch with just a [PATCH]
+prefix and there is no mention in the description that it's only
+intended to work on top of the other fscrypt changes, so I interpreted
+that to mean that this was a pre-existing bug and that this needed to go
+in ahead of those patches.
 
-Is it possible that you were still using the old binaries you built ?
+That's not the case here. This patch does seem to work OK on top of the
+regular fscrypt series (but I did still see some failures in certain
+tests even with that). I'll look more closely at those today.
 
+It would probably have been clearer to send this patch along with the
+rest of the series to make that clear. Alternately, when you post a
+series and then find that it needs a follow-on patch, you can send it as
+if you're continuing the series:
 
-Thanks
+    [PATCH v7 10/9] ceph: do not truncate pagecache if truncate size doesn't change
 
-BRs
+Ideally though, this change would be rolled into one of the other
+patches in your series.
 
--- Xiubo
-
-
-
+Thanks,
+-- 
+Jeff Layton <jlayton@kernel.org>
