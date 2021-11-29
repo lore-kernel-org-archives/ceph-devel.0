@@ -2,246 +2,110 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69AE6C433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 12:31:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3E17C433F5
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:05:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241539AbhK2MfH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 29 Nov 2021 07:35:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41480 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241195AbhK2MdF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2021 07:33:05 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68F27C0619D7;
-        Mon, 29 Nov 2021 03:16:53 -0800 (PST)
+        id S242839AbhK2OI1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 29 Nov 2021 09:08:27 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:52638 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240310AbhK2OG1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2021 09:06:27 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 3AAB9B80EC7;
-        Mon, 29 Nov 2021 11:16:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28B96C53FCB;
-        Mon, 29 Nov 2021 11:16:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1638184610;
-        bh=QS/dc+iFHHUORbW6rXxKbL5S+oSz7TdoE75MLPbXx44=;
-        h=From:To:Cc:Subject:Date:From;
-        b=RbZNx9lP8b6gxBWDywiHsuSVZq491icTPxUgDA4z30ctzMwApf9nCn8OuzVmNt1V/
-         zfEorouVZzU1cytttAMUVBb3CgR4bCPMtAleg7MV0gsESwr9oF0Xpqj8Ft7oBpunul
-         jA4aLYdZxttOGBG3nMu6AEu8fziLHoayUKBLZim+QU0G38j5KTUmvFn0BsyPZKJikr
-         ylwjW9hjtcjnrtZk5vVcC/0Skx2Mdz/pZ0sJspnOFK5mqXEXgqWqM+2emKRMo5+1Z2
-         Tf0LRQhU7Nc/1kYXQAcpTBQsRa8GNCTIwyy6YpcN+b5TGxrt3Oa+reX11EZhY6jCva
-         Pniv2VYDtqebA==
-From:   Christian Brauner <brauner@kernel.org>
-To:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
-Cc:     Ilya Dryomov <idryomov@gmail.com>, Christoph Hellwig <hch@lst.de>,
-        linux-fsdevel@vger.kernel.org, stable@vger.kernel.org,
-        Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH v2] ceph: fix up non-directory creation in SGID directories
-Date:   Mon, 29 Nov 2021 12:16:39 +0100
-Message-Id: <20211129111639.3633764-1-brauner@kernel.org>
-X-Mailer: git-send-email 2.30.2
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6958361538
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Nov 2021 14:03:09 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FEE5C004E1;
+        Mon, 29 Nov 2021 14:03:07 +0000 (UTC)
+Date:   Mon, 29 Nov 2021 15:03:04 +0100
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     Christian Brauner <brauner@kernel.org>, ceph-devel@vger.kernel.org,
+        Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Questions about ceph/cephfs
+Message-ID: <20211129140304.kignvxgyz7ahierj@wittgenstein>
+References: <20211129133625.4ftmctptggvpbm7n@wittgenstein>
+ <78b163c7bbc8ebaebcdc09561df960628447182d.camel@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5742; h=from:subject; bh=l3N/n1JwuANJYaAEOTdVxSkpj6r4Q5aNWtJ/RxXHsa8=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSQu2VZvlLPml1h1I8uWLz9KF9ySzLT8s/3U/gxznbIdN6L/ L2Pf0FHKwiDGxSArpsji0G4SLrecp2KzUaYGzBxWJpAhDFycAjCRP58YfjFvt0zcntHTqZzofGyTjv 2fY+5M3aEvEmX2t8U8zdFsrWJkaA1baTHLfM5ir+iNU9K3p3JbROccv2C+5ErnHcb1vtcP8gMA
-X-Developer-Key: i=christian.brauner@ubuntu.com; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <78b163c7bbc8ebaebcdc09561df960628447182d.camel@kernel.org>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Christian Brauner <christian.brauner@ubuntu.com>
+On Mon, Nov 29, 2021 at 08:57:37AM -0500, Jeff Layton wrote:
+> On Mon, 2021-11-29 at 14:36 +0100, Christian Brauner wrote:
+> > Hey Jeff,
+> > Hey everyone,
+> > 
+> > I have a question about the relationship between the cephfs kernel
+> > client/filesystem and the code in [1].
+> > 
+> > I'm working on patches to let cephfs support mapped mounts. I've got
+> > everything in place and I'm able to run the full mapped mounts/vfs
+> > testsuite against a ceph cluster. So things like:
+> > 
+> > mount -t ceph 1.2.3.4:6789:/ /mnt -o name=admin,secret=wootwoot
+> > mount-idmapped --map-mount b:1000:0:1 /mnt /opt
+> > 
+> 
+> Sounds like a cool feature.
+> 
+> > (Where in /opt all inodes owned by id 1000 are owned by id 0 and callers
+> > with id 0 write files to disk as id 1000.)
+> > 
+> > My next step was to read to the ceph code in github.com/ceph/ceph to
+> > make sure that I don't miss any corner cases that wouldn't work
+> > correctly with mapped mounts after the relevant kernel changes.
+> > 
+> > So I read through [1] and I could use some guidance if possible. The
+> > code in there to me reads like it is a full implementation of cephfs in
+> > userspace and I'm wondering how this related to the cephfs kernel
+> > client/filesystem.
+> > 
+> > The client code in [1] seems to implement full-blown userspace path
+> > lookup and permission checking that seems to reimplement the vfs layer
+> > in userspace.
+> > A lot of the helpers such as ceph_ll_mknod() in addition expose a
+> > UserPerms struct that seems to be settable by the caller which is used
+> > during lookup.
+> > 
+> > How does this permission/path lookup code relate to the cephfs kernel
+> > client/filesystem? Do they interact with each other in any way?
+> > 
+> > Thanks for taking the time to answer!
+> > Christian
+> > 
+> > [1]: https://github.com/ceph/ceph/tree/master/src/client/*
+> 
+> There are really two "official" cephfs clients: the userland client
+> which is (mostly) represented by src/client in the userland ceph tree,
+> and the kernel cephfs client (aka the kclient), which is (mostly)
+> fs/ceph and net/ceph in the Linux kernel tree.
+> 
+> The userland code usually gets compiled into libcephfs.so and is the
+> backend engine for ceph-fuse, the nfs-ganesha FSAL driver, and the samba
+> vfs backend driver, as well as a bunch of testcases in the ceph tree.
+> 
+> libcephfs communicates directly with the cluster without interacting
+> with any of the kernel ceph code, so ceph-fuse, ganesha, etc. do use the
+> userland code for lookups and permission checks.
+> 
+> Technically, the kclient is the reimplentation. Most of the ceph and
+> libceph code in the kernel has been copied/reimplemented from the ceph
+> userland code. There is no real dependency between the kclient and
+> libcephfs.
+> 
+> Maintaining the kclient is a continual game of catchup, unfortunately,
+> though in some cases we do leading edge client development there instead
+> and play catchup in the userland client.
 
-Ceph always inherits the SGID bit if it is set on the parent inode,
-while the generic inode_init_owner does not do this in a few cases where
-it can create a possible security problem (cf. [1]).
+Thank you for answering this so quickly this makes my life a lot easier!
+This is good news as this means that the kernel changes to cephfs should
+be fairly simple and self-contained. I'll continue polishing them and
+will send them out once ready.
 
-Update ceph to strip the SGID bit just as inode_init_owner would.
-
-This bug was detected by the mapped mount testsuite in [3]. The
-testsuite tests all core VFS functionality and semantics with and
-without mapped mounts. That is to say it functions as a generic VFS
-testsuite in addition to a mapped mount testsuite. While working on
-mapped mount support for ceph, SIGD inheritance was the only failing
-test for ceph after the port.
-
-The same bug was detected by the mapped mount testsuite in XFS in
-January 2021 (cf. [2]).
-
-[1]: commit 0fa3ecd87848 ("Fix up non-directory creation in SGID directories")
-[2]: commit 01ea173e103e ("xfs: fix up non-directory creation in SGID directories")
-[3]: https://git.kernel.org/fs/xfs/xfstests-dev.git
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: Christoph Hellwig <hch@lst.de>
-Cc: Jeff Layton <jlayton@kernel.org>
-Cc: ceph-devel@vger.kernel.org
-CC: linux-fsdevel@vger.kernel.org
-Cc: stable@vger.kernel.org
-Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
----
-/* v2 */
-- Christian Brauner <christian.brauner@ubuntu.com>:
-  - Add missing cpu_to_le32() when assigning to in.gid to prevent sparse
-    warnings.
-
-The test used for this is [3]:
-
-/* The following tests are concerned with setgid inheritance. These can be
- * filesystem type specific. For xfs, if a new file or directory is created
- * within a setgid directory and irix_sgid_inhiert is set then inherit the
- * setgid bit if the caller is in the group of the directory.
- */
-static int setgid_create(void)
-{
-	int fret = -1;
-	int file1_fd = -EBADF;
-	pid_t pid;
-
-	if (!caps_supported())
-		return 0;
-
-	if (fchmod(t_dir1_fd, S_IRUSR |
-			      S_IWUSR |
-			      S_IRGRP |
-			      S_IWGRP |
-			      S_IROTH |
-			      S_IWOTH |
-			      S_IXUSR |
-			      S_IXGRP |
-			      S_IXOTH |
-			      S_ISGID), 0) {
-		log_stderr("failure: fchmod");
-		goto out;
-	}
-
-	/* Verify that the setgid bit got raised. */
-	if (!is_setgid(t_dir1_fd, "", AT_EMPTY_PATH)) {
-		log_stderr("failure: is_setgid");
-		goto out;
-	}
-
-	pid = fork();
-	if (pid < 0) {
-		log_stderr("failure: fork");
-		goto out;
-	}
-	if (pid == 0) {
-		/* create regular file via open() */
-		file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
-		if (file1_fd < 0)
-			die("failure: create");
-
-		/* We're capable_wrt_inode_uidgid() and also our fsgid matches
-		 * the directories gid.
-		 */
-		if (!is_setgid(t_dir1_fd, FILE1, 0))
-			die("failure: is_setgid");
-
-		/* create directory */
-		if (mkdirat(t_dir1_fd, DIR1, 0000))
-			die("failure: create");
-
-		/* Directories always inherit the setgid bit. */
-		if (!is_setgid(t_dir1_fd, DIR1, 0))
-			die("failure: is_setgid");
-
-		if (unlinkat(t_dir1_fd, FILE1, 0))
-			die("failure: delete");
-
-		if (unlinkat(t_dir1_fd, DIR1, AT_REMOVEDIR))
-			die("failure: delete");
-
-		exit(EXIT_SUCCESS);
-	}
-	if (wait_for_pid(pid))
-		goto out;
-
-	pid = fork();
-	if (pid < 0) {
-		log_stderr("failure: fork");
-		goto out;
-	}
-	if (pid == 0) {
-		if (!switch_ids(0, 10000))
-			die("failure: switch_ids");
-
-		if (!caps_down())
-			die("failure: caps_down");
-
-		/* create regular file via open() */
-		file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
-		if (file1_fd < 0)
-			die("failure: create");
-
-		/* Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
-		 * bit needs to be stripped.
-		 */
-		if (is_setgid(t_dir1_fd, FILE1, 0))
-			die("failure: is_setgid");
-
-		/* create directory */
-		if (mkdirat(t_dir1_fd, DIR1, 0000))
-			die("failure: create");
-
-		if (xfs_irix_sgid_inherit_enabled()) {
-			/* We're not in_group_p(). */
-			if (is_setgid(t_dir1_fd, DIR1, 0))
-				die("failure: is_setgid");
-		} else {
-			/* Directories always inherit the setgid bit. */
-			if (!is_setgid(t_dir1_fd, DIR1, 0))
-				die("failure: is_setgid");
-		}
-
-		exit(EXIT_SUCCESS);
-	}
-	if (wait_for_pid(pid))
-		goto out;
-
-	fret = 0;
-	log_debug("Ran test");
-out:
-	safe_close(file1_fd);
-
-	return fret;
-}
----
- fs/ceph/file.c | 18 +++++++++++++++---
- 1 file changed, 15 insertions(+), 3 deletions(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 02a0a0fd9ccd..65d65c51d91d 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -605,13 +605,25 @@ static int ceph_finish_async_create(struct inode *dir, struct dentry *dentry,
- 	in.cap.realm = cpu_to_le64(ci->i_snap_realm->ino);
- 	in.cap.flags = CEPH_CAP_FLAG_AUTH;
- 	in.ctime = in.mtime = in.atime = iinfo.btime;
--	in.mode = cpu_to_le32((u32)mode);
- 	in.truncate_seq = cpu_to_le32(1);
- 	in.truncate_size = cpu_to_le64(-1ULL);
- 	in.xattr_version = cpu_to_le64(1);
- 	in.uid = cpu_to_le32(from_kuid(&init_user_ns, current_fsuid()));
--	in.gid = cpu_to_le32(from_kgid(&init_user_ns, dir->i_mode & S_ISGID ?
--				dir->i_gid : current_fsgid()));
-+	if (dir->i_mode & S_ISGID) {
-+		in.gid = cpu_to_le32(from_kgid(&init_user_ns, dir->i_gid));
-+
-+		/* Directories always inherit the setgid bit. */
-+		if (S_ISDIR(mode))
-+			mode |= S_ISGID;
-+		else if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP) &&
-+			 !in_group_p(dir->i_gid) &&
-+			 !capable_wrt_inode_uidgid(&init_user_ns, dir, CAP_FSETID))
-+			mode &= ~S_ISGID;
-+	} else {
-+		in.gid = cpu_to_le32(from_kgid(&init_user_ns, current_fsgid()));
-+	}
-+	in.mode = cpu_to_le32((u32)mode);
-+
- 	in.nlink = cpu_to_le32(1);
- 	in.max_size = cpu_to_le64(lo->stripe_unit);
- 
-
-base-commit: d58071a8a76d779eedab38033ae4c821c30295a5
--- 
-2.30.2
-
+Thanks again!
+Christian
