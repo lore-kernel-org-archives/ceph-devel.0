@@ -2,74 +2,55 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90D7CC433FE
-	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 19:56:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A151AC433F5
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 21:10:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353754AbhK2T7o (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 29 Nov 2021 14:59:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53920 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348799AbhK2T5n (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2021 14:57:43 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26529C07CA27;
-        Mon, 29 Nov 2021 08:29:12 -0800 (PST)
+        id S229768AbhK2VNZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 29 Nov 2021 16:13:25 -0500
+Received: from sin.source.kernel.org ([145.40.73.55]:37570 "EHLO
+        sin.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230146AbhK2VLY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2021 16:11:24 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id D2DC7B80E60;
-        Mon, 29 Nov 2021 16:29:10 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4036C53FC7;
-        Mon, 29 Nov 2021 16:29:08 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 309BACE13E1
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Nov 2021 21:08:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F1C99C53FAD;
+        Mon, 29 Nov 2021 21:08:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1638203349;
-        bh=+1M+cQu0R0D7PANew6bW+Happ/3HJm87Usu6RHYEbxQ=;
-        h=From:To:Cc:Subject:Date:From;
-        b=S1t4BNFH67qHwnVm+sjniIVq1RaDe3TTZr8ez6AXKqI5wu5WrN8KDCs9rdqgCXANd
-         Rp5I9lYN0h74XQBuvaS6kEab3oMlagyIPZaNyusvzeEWSGCeecaALelHDPg5mwXWoE
-         mKnLncafwkwQd8i3260eejvQVItkoEA7uwjkMwitxtne3Sq+f/1IihBicRB5EBc/zC
-         DmbOmick3gBnm1OVoO2ucmTLndu7rf3uAsGowy12RrUlBAFEHmpz+sr2a4TW9XKnvX
-         k8Ob3RElkpX39f5s+GnaeK+ZTQBwyefG9tvajU4jn1fwCn+fokYmx9Ga/UZrySgKwj
-         Uiad1IByDmhSA==
+        s=k20201202; t=1638220083;
+        bh=DK47Wf33UF0qzoXghMPn74HsMKyn2TnbZzsZzSfhdbs=;
+        h=Subject:From:To:Cc:Date:From;
+        b=egOuElKrNg7pVANc5sBJ8CiyG/hvSXXJGubJDoQSxLSmvXS/rQo0u0WVyxg66WFbl
+         eZPugJS/cis30g7Fpyip98fpL3g9Pd59xDbcrdgo5fFZAF03J+qvvsr7TZvvcpBqEl
+         oGf7H4mazNnSsGM78GWGA2d72wzOTKWb4BGS037iIQNFh2Du8B4BgtEyutC+2c/LLx
+         mknR/Bzm/0RUR1fORxw8BQToAWJaAqN0XGg4r3vEcNBZ2ic5ik5r6L2i3mgdzsV8nT
+         en4AixZRqgIUFaj4x+3hYT1UoBoMgLoiNOZYhk0TOzRqclPcofgulNjHndp5uhHGNX
+         DK6hkQSXE0wHw==
+Message-ID: <7e6c95bbb274b701e66432e56617ee9f91ce5012.camel@kernel.org>
+Subject: Testing the Linux Kernel CephFS Client with xfstests
 From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, dhowells@redhat.com,
-        linux-fsdevel@vger.kernel.org, linux-cachefs@redhat.com,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH 0/2] ceph: adapt ceph to the fscache rewrite
-Date:   Mon, 29 Nov 2021 11:29:05 -0500
-Message-Id: <20211129162907.149445-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.33.1
+To:     ceph-devel <ceph-devel@vger.kernel.org>
+Cc:     ymane <ymane@redhat.com>, David Howells <dhowells@redhat.com>
+Date:   Mon, 29 Nov 2021 16:08:01 -0500
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.1 (3.42.1-1.fc35) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This is a follow-on set for David Howells' recent patchset to rewrite
-the fscache and cachefiles infrastructure. This re-enables fscache read
-support in the ceph driver, and also adds support for writing to the
-cache as well.
+I had a few people ask me about how I do my testing with xfstests. This
+blog post should cover the basics of how my test environment is
+configured:
 
-What's the best way to handle these, going forward? David, would it be
-easier for you to carry these in your tree along with the rest of your
-series?
+    https://jtlayton.wordpress.com/2021/11/29/testing-the-linux-kernel-cephfs-client-with-xfstests/
 
-Jeff Layton (2):
-  ceph: conversion to new fscache API
-  ceph: add fscache writeback support
+Questions and corrections are welcome. I'll also plan to update the blog
+post if anything in there is wrong.
 
- fs/ceph/Kconfig |   2 +-
- fs/ceph/addr.c  |  99 +++++++++++++++++++------
- fs/ceph/cache.c | 188 ++++++++++++++++++++----------------------------
- fs/ceph/cache.h |  98 +++++++++++++++++--------
- fs/ceph/caps.c  |   3 +-
- fs/ceph/file.c  |  13 +++-
- fs/ceph/inode.c |  22 ++++--
- fs/ceph/super.c |  10 +--
- fs/ceph/super.h |   2 +-
- 9 files changed, 255 insertions(+), 182 deletions(-)
-
+Cheers!
 -- 
-2.33.1
-
+Jeff Layton <jlayton@kernel.org>
