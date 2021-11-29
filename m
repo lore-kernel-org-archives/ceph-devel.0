@@ -2,90 +2,101 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD43AC433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 21:43:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59487C43217
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 22:43:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232245AbhK2VqY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 29 Nov 2021 16:46:24 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:23962 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232270AbhK2VoX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 29 Nov 2021 16:44:23 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1638222065;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=QCFD7Ah5IiTcd1a6Gpk3m6ibgmYONE5XP5yWvVfmZ5A=;
-        b=TXKNmZYrDvsEW6w3v4r1Sj8VIyxdqWthtfC2vQlArxV9yrcs1AmJv8zdUYzu1JT/grOa4a
-        yPolPjSbU1mwY/OmTbfCud6UPNwdFkecDpIIcyjloePoeclwq9is+LYpZMzAxnAGMUYVPO
-        IrzCgLdAAN641tk/X1LOHjAWhLOtORA=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-115-5Dz_xYvhN12pm6HYXYz0Bg-1; Mon, 29 Nov 2021 16:41:02 -0500
-X-MC-Unique: 5Dz_xYvhN12pm6HYXYz0Bg-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 83E5C1927807;
-        Mon, 29 Nov 2021 21:40:59 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.33.36.25])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 21F1160BF4;
-        Mon, 29 Nov 2021 21:40:55 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-From:   David Howells <dhowells@redhat.com>
-In-Reply-To: <163819627469.215744.3603633690679962985.stgit@warthog.procyon.org.uk>
-References: <163819627469.215744.3603633690679962985.stgit@warthog.procyon.org.uk> <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
-To:     linux-cachefs@redhat.com
-Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
+        id S234866AbhK2WrA (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 29 Nov 2021 17:47:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34894 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234891AbhK2Wo3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2021 17:44:29 -0500
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCB8DC03AD69
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Nov 2021 10:13:13 -0800 (PST)
+Received: by mail-ed1-x52f.google.com with SMTP id y13so75555901edd.13
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Nov 2021 10:13:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=A1KpMLhPpZ3DtBAJ2H7WA1+eK6RBPvYL8JCpapFonpw=;
+        b=hYrTDwhmtIHMqqbXGO1Kse+Z0mztn57tvq1yPxTQ6q8If5SiUN3r2mIlQQuhqQ5Ciu
+         K5ZjiwPNhDNHwoG8b/skXzWnqGGnw5Xo6Kz7rDlvP/WRSBwiwJnbIMXZ+5EJLE2YnPsh
+         8oCcdh7mNJuIoeX8m73ktIFQqXot2Q8wW5BQM=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=A1KpMLhPpZ3DtBAJ2H7WA1+eK6RBPvYL8JCpapFonpw=;
+        b=oZm3jrgsdugIqzg5zeIgf41zJxvtk9hP9ygo2xdWajNdyj6RdTzL63D4JQaBkytK1/
+         2WE0tVGL2ZB+hwC9tmPsuREYCbMiktkIdfnefSJxAC1vPXAK7saRw289XNI24iEMnEuN
+         4bi5bJE/h2R4+BYghNk+7OrejyfT9EmVpBoW25Kc1zvJ5/Pno3Get1MqjtOBCiKaL4Oy
+         8iuM8cBaFr+MYesrirEdC/Y0qhp8cpYd2ATL6aRFueYapoe8aZgHCecAc/tSjxdZSclj
+         4LQwJGkRGyu8IIwSD5askQRICzUDOle4EhClF/n1U49d6ftt3+WhCaxnKgowK2vI0Bp0
+         8/Qg==
+X-Gm-Message-State: AOAM532bhqaeGsvcFM+tP6vrq2lLKKFYfgQzNjRa/dzMRofVsg2OUQih
+        Nh5hGzb63uBNwyC9TLpdWNGRXE/U+gocRoQnVAc=
+X-Google-Smtp-Source: ABdhPJyygeF5O/yHVW9jvfejhPRRaIE86e5Gd0wkhElG+j1AKf8psj7ayok8uPe/jA6x9W1v8dF1ig==
+X-Received: by 2002:a17:906:2bd5:: with SMTP id n21mr62295828ejg.337.1638209592217;
+        Mon, 29 Nov 2021 10:13:12 -0800 (PST)
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com. [209.85.208.44])
+        by smtp.gmail.com with ESMTPSA id w7sm9574668ede.66.2021.11.29.10.13.12
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 29 Nov 2021 10:13:12 -0800 (PST)
+Received: by mail-ed1-f44.google.com with SMTP id r11so75758855edd.9
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Nov 2021 10:13:12 -0800 (PST)
+X-Received: by 2002:adf:9d88:: with SMTP id p8mr36748101wre.140.1638209581186;
+ Mon, 29 Nov 2021 10:13:01 -0800 (PST)
+MIME-Version: 1.0
+References: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
+In-Reply-To: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon, 29 Nov 2021 10:12:45 -0800
+X-Gmail-Original-Message-ID: <CAHk-=whGOEEb4n2_y3mnrmeNx4HYjRA-m=xMPDQD=bHWfB5chw@mail.gmail.com>
+Message-ID: <CAHk-=whGOEEb4n2_y3mnrmeNx4HYjRA-m=xMPDQD=bHWfB5chw@mail.gmail.com>
+Subject: Re: [PATCH 00/64] fscache, cachefiles: Rewrite
+To:     David Howells <dhowells@redhat.com>
+Cc:     linux-cachefs@redhat.com, Jeff Layton <jlayton@kernel.org>,
+        Eric Van Hensbergen <ericvh@gmail.com>,
         Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
+        linux-afs@lists.infradead.org, Steve French <sfrench@samba.org>,
         Dominique Martinet <asmadeus@codewreck.org>,
-        Jeff Layton <jlayton@kernel.org>,
-        Matthew Wilcox <willy@infradead.org>,
+        Dave Wysochanski <dwysocha@redhat.com>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        CIFS <linux-cifs@vger.kernel.org>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        Marc Dionne <marc.dionne@auristor.com>,
+        "open list:NFS, SUNRPC, AND..." <linux-nfs@vger.kernel.org>,
+        Latchesar Ionkov <lucho@ionkov.net>,
+        Shyam Prasad N <nspmangalore@gmail.com>,
+        v9fs-developer@lists.sourceforge.net,
+        Trond Myklebust <trondmy@hammerspace.com>,
         Alexander Viro <viro@zeniv.linux.org.uk>,
         Omar Sandoval <osandov@osandov.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org,
-        linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 35/64] cachefiles: Add security derivation
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <302430.1638222055.1@warthog.procyon.org.uk>
-Date:   Mon, 29 Nov 2021 21:40:55 +0000
-Message-ID: <302431.1638222055@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+        ceph-devel@vger.kernel.org,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-I missed out the patch description:
+On Mon, Nov 29, 2021 at 6:22 AM David Howells <dhowells@redhat.com> wrote:
+>
+> The patchset is structured such that the first few patches disable fscache
+> use by the network filesystems using it, remove the cachefiles driver
+> entirely and as much of the fscache driver as can be got away with without
+> causing build failures in the network filesystems.  The patches after that
+> recreate fscache and then cachefiles, attempting to add the pieces in a
+> logical order.  Finally, the filesystems are reenabled and then the very
+> last patch changes the documentation.
 
-    cachefiles: Add security derivation
-    
-    Implement code to derive a new set of creds for the cachefiles to use when
-    making VFS or I/O calls and to change the auditing info since the
-    application interacting with the network filesystem is not accessing the
-    cache directly.  Cachefiles uses override_creds() to change the effective
-    creds temporarily.
-    
-    set_security_override_from_ctx() is called to derive the LSM 'label' that
-    the cachefiles driver will act with.  set_create_files_as() is called to
-    determine the LSM 'label' that will be applied to files and directories
-    created in the cache.  These functions alter the new creds.
-    
-    Also implement a couple of functions to wrap the calls to begin/end cred
-    overriding.
-    
-    Signed-off-by: David Howells <dhowells@redhat.com>
-    cc: linux-cachefs@redhat.com
+Thanks, this all looks conceptually sane to me.
 
-David
+But I only really scanned the commit messages, not the actual new
+code. That obviously needs all the usual testing and feedback from the
+users of this all..
 
+                    Linus
