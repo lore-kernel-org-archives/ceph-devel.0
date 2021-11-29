@@ -2,44 +2,44 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9244EC433FE
-	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:36:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 601D9C433F5
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:36:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378443AbhK2Oja (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 29 Nov 2021 09:39:30 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:40963 "EHLO
+        id S232512AbhK2Ojt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 29 Nov 2021 09:39:49 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:44753 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1379038AbhK2OhV (ORCPT
+        by vger.kernel.org with ESMTP id S1378633AbhK2Ohs (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 29 Nov 2021 09:37:21 -0500
+        Mon, 29 Nov 2021 09:37:48 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1638196443;
+        s=mimecast20190719; t=1638196469;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=pQOOc9VDFe5vHYRLEKi9FQyVdC+2ADbNA6aARhmEx8U=;
-        b=dzOpiqBlNB9nDH6YIZaM7gKauHvGpl0L6fMCYMq7CTzyHGs3W65aX4c7LbDY3HpGpKulCl
-        zih6VGv9DRxnFyk0tUFliXHf9s4yaCLWa0tZuvSiihB4xzl5LjDdwzGiIupn7a3sf+z80+
-        WUJvSZv3OYjna4cHVNfyJs43kHUSanw=
+        bh=MnjRdH3myeWroPdQDQVvLxC/COJkzqkRYuUq933Ku4k=;
+        b=EVhxYud+JyM6phFm+npt6nd8xkfTofVb0is2WGECitjZtDCIqepevdjFOuQoIZ9URhZmoj
+        WX2r+A4BW2ZN10zeK5mZwvLmTs70pxxB+jibf2lQT/3MtSJEB22ei6tmgGwaXfo/nMvA/t
+        IbzL0xS98kikQl26H5skKNze9gDA4o0=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-569-e4Ei0rWJPn26W2nHjn3qlQ-1; Mon, 29 Nov 2021 09:33:58 -0500
-X-MC-Unique: e4Ei0rWJPn26W2nHjn3qlQ-1
+ us-mta-462-RUgG5_aaPIarbL5ZYzjKMw-1; Mon, 29 Nov 2021 09:34:25 -0500
+X-MC-Unique: RUgG5_aaPIarbL5ZYzjKMw-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BB2CC835E21;
-        Mon, 29 Nov 2021 14:33:55 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 17D41101796A;
+        Mon, 29 Nov 2021 14:34:21 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.33.36.25])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 98D3C60854;
-        Mon, 29 Nov 2021 14:33:52 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2AC5860854;
+        Mon, 29 Nov 2021 14:34:11 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 47/64] cachefiles: Implement culling daemon commands
+Subject: [PATCH 49/64] cachefiles: Implement begin and end I/O operation
 From:   David Howells <dhowells@redhat.com>
 To:     linux-cachefs@redhat.com
 Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
@@ -55,8 +55,8 @@ Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
         linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 29 Nov 2021 14:33:51 +0000
-Message-ID: <163819643179.215744.13641580295708315695.stgit@warthog.procyon.org.uk>
+Date:   Mon, 29 Nov 2021 14:34:10 +0000
+Message-ID: <163819645033.215744.2199344081658268312.stgit@warthog.procyon.org.uk>
 In-Reply-To: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
 References: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
@@ -68,389 +68,174 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Implement the ability for the userspace daemon to try and cull a file or
-directory in the cache.  Two daemon commands are implemented:
+Implement the methods for beginning and ending an I/O operation.
 
- (1) The "inuse" command.  This queries if a file is in use or whether it
-     can be deleted.  It checks the S_KERNEL_FILE flag on the inode
-     referred to by the specified filename.
+When called to begin an I/O operation, we are guaranteed that the cookie
+has reached a certain stage (we're called by fscache after it has done a
+suitable wait).
 
- (2) The "cull" command.  This asks for a file or directory to be removed,
-     where removal means either unlinking it or moving it to the graveyard
-     directory for userspace to dismantle.
+If a file is available, we paste a ref over into the cache resources for
+the I/O routines to use.  This means that the object can be invalidated
+whilst the I/O is ongoing without the need to synchronise as the file
+pointer in the object is replaced, but the file pointer in the cache
+resources is unaffected.
+
+Ending the operation just requires ditching any refs we have and dropping
+the access guarantee that fscache got for us on the cookie.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: linux-cachefs@redhat.com
 ---
 
- fs/cachefiles/daemon.c   |    4 -
- fs/cachefiles/internal.h |   11 ++
- fs/cachefiles/namei.c    |  307 ++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 320 insertions(+), 2 deletions(-)
+ fs/cachefiles/Makefile         |    1 +
+ fs/cachefiles/interface.c      |    1 +
+ fs/cachefiles/internal.h       |   18 +++++++++++++
+ fs/cachefiles/io.c             |   57 ++++++++++++++++++++++++++++++++++++++++
+ include/trace/events/fscache.h |    2 +
+ 5 files changed, 79 insertions(+)
+ create mode 100644 fs/cachefiles/io.c
 
-diff --git a/fs/cachefiles/daemon.c b/fs/cachefiles/daemon.c
-index 337597a4e30c..985c3f3e6767 100644
---- a/fs/cachefiles/daemon.c
-+++ b/fs/cachefiles/daemon.c
-@@ -574,7 +574,7 @@ static int cachefiles_daemon_cull(struct cachefiles_cache *cache, char *args)
- 		goto notdir;
- 
- 	cachefiles_begin_secure(cache, &saved_cred);
--	ret = -ENOANO; // PLACEHOLDER: Do culling
-+	ret = cachefiles_cull(cache, path.dentry, args);
- 	cachefiles_end_secure(cache, saved_cred);
- 
- 	path_put(&path);
-@@ -645,7 +645,7 @@ static int cachefiles_daemon_inuse(struct cachefiles_cache *cache, char *args)
- 		goto notdir;
- 
- 	cachefiles_begin_secure(cache, &saved_cred);
--	ret = -ENOANO; // PLACEHOLDER: Check if in use
-+	ret = cachefiles_check_in_use(cache, path.dentry, args);
- 	cachefiles_end_secure(cache, saved_cred);
- 
- 	path_put(&path);
+diff --git a/fs/cachefiles/Makefile b/fs/cachefiles/Makefile
+index cb7a6bcf51eb..16d811f1a2fa 100644
+--- a/fs/cachefiles/Makefile
++++ b/fs/cachefiles/Makefile
+@@ -7,6 +7,7 @@ cachefiles-y := \
+ 	cache.o \
+ 	daemon.o \
+ 	interface.o \
++	io.o \
+ 	key.o \
+ 	main.o \
+ 	namei.o \
+diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
+index e47c52c34071..ad9d311413ff 100644
+--- a/fs/cachefiles/interface.c
++++ b/fs/cachefiles/interface.c
+@@ -362,5 +362,6 @@ const struct fscache_cache_ops cachefiles_cache_ops = {
+ 	.lookup_cookie		= cachefiles_lookup_cookie,
+ 	.withdraw_cookie	= cachefiles_withdraw_cookie,
+ 	.invalidate_cookie	= cachefiles_invalidate_cookie,
++	.begin_operation	= cachefiles_begin_operation,
+ 	.prepare_to_write	= cachefiles_prepare_to_write,
+ };
 diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
-index ebb39373716b..f2a4ec2f8668 100644
+index c10c04593f5a..77c899b3eaa5 100644
 --- a/fs/cachefiles/internal.h
 +++ b/fs/cachefiles/internal.h
-@@ -189,11 +189,22 @@ extern struct kmem_cache *cachefiles_object_jar;
-  */
- extern void cachefiles_unmark_inode_in_use(struct cachefiles_object *object,
- 					   struct file *file);
-+extern int cachefiles_bury_object(struct cachefiles_cache *cache,
-+				  struct cachefiles_object *object,
-+				  struct dentry *dir,
-+				  struct dentry *rep,
-+				  enum fscache_why_object_killed why);
- extern struct dentry *cachefiles_get_directory(struct cachefiles_cache *cache,
- 					       struct dentry *dir,
- 					       const char *name);
- extern void cachefiles_put_directory(struct dentry *dir);
+@@ -105,6 +105,18 @@ struct cachefiles_cache {
  
-+extern int cachefiles_cull(struct cachefiles_cache *cache, struct dentry *dir,
-+			   char *filename);
+ #include <trace/events/cachefiles.h>
+ 
++static inline
++struct file *cachefiles_cres_file(struct netfs_cache_resources *cres)
++{
++	return cres->cache_priv2;
++}
 +
-+extern int cachefiles_check_in_use(struct cachefiles_cache *cache,
-+				   struct dentry *dir, char *filename);
++static inline
++struct cachefiles_object *cachefiles_cres_object(struct netfs_cache_resources *cres)
++{
++	return fscache_cres_cookie(cres)->cache_priv;
++}
 +
  /*
-  * security.c
+  * note change of state for daemon
   */
-diff --git a/fs/cachefiles/namei.c b/fs/cachefiles/namei.c
-index 2e209e403713..50d0668e54f8 100644
---- a/fs/cachefiles/namei.c
-+++ b/fs/cachefiles/namei.c
-@@ -215,3 +215,310 @@ void cachefiles_put_directory(struct dentry *dir)
- 		dput(dir);
- 	}
- }
+@@ -177,6 +189,12 @@ extern struct cachefiles_object *cachefiles_grab_object(struct cachefiles_object
+ extern void cachefiles_put_object(struct cachefiles_object *object,
+ 				  enum cachefiles_obj_ref_trace why);
+ 
++/*
++ * io.c
++ */
++extern bool cachefiles_begin_operation(struct netfs_cache_resources *cres,
++				       enum fscache_want_state want_state);
++
+ /*
+  * key.c
+  */
+diff --git a/fs/cachefiles/io.c b/fs/cachefiles/io.c
+new file mode 100644
+index 000000000000..adeb9a42fd7b
+--- /dev/null
++++ b/fs/cachefiles/io.c
+@@ -0,0 +1,57 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/* kiocb-using read/write
++ *
++ * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ */
++
++#include <linux/mount.h>
++#include <linux/slab.h>
++#include <linux/file.h>
++#include <linux/uio.h>
++#include <linux/falloc.h>
++#include <linux/sched/mm.h>
++#include <trace/events/fscache.h>
++#include "internal.h"
 +
 +/*
-+ * Remove a regular file from the cache.
++ * Clean up an operation.
 + */
-+static int cachefiles_unlink(struct cachefiles_cache *cache,
-+			     struct cachefiles_object *object,
-+			     struct dentry *dir, struct dentry *dentry,
-+			     enum fscache_why_object_killed why)
++static void cachefiles_end_operation(struct netfs_cache_resources *cres)
 +{
-+	struct path path = {
-+		.mnt	= cache->mnt,
-+		.dentry	= dir,
-+	};
-+	int ret;
++	struct file *file = cachefiles_cres_file(cres);
 +
-+	trace_cachefiles_unlink(object, dentry, why);
-+	ret = security_path_unlink(&path, dentry);
-+	if (ret < 0) {
-+		cachefiles_io_error(cache, "Unlink security error");
-+		return ret;
-+	}
-+
-+	ret = cachefiles_inject_remove_error();
-+	if (ret == 0) {
-+		ret = vfs_unlink(&init_user_ns, d_backing_inode(dir), dentry, NULL);
-+		if (ret == -EIO)
-+			cachefiles_io_error(cache, "Unlink failed");
-+	}
-+	if (ret != 0)
-+		trace_cachefiles_vfs_error(object, d_backing_inode(dir), ret,
-+					   cachefiles_trace_unlink_error);
-+	return ret;
++	if (file)
++		fput(file);
++	fscache_end_cookie_access(fscache_cres_cookie(cres), fscache_access_io_end);
 +}
 +
++static const struct netfs_cache_ops cachefiles_netfs_cache_ops = {
++	.end_operation		= cachefiles_end_operation,
++};
++
 +/*
-+ * Delete an object representation from the cache
-+ * - File backed objects are unlinked
-+ * - Directory backed objects are stuffed into the graveyard for userspace to
-+ *   delete
++ * Open the cache file when beginning a cache operation.
 + */
-+int cachefiles_bury_object(struct cachefiles_cache *cache,
-+			   struct cachefiles_object *object,
-+			   struct dentry *dir,
-+			   struct dentry *rep,
-+			   enum fscache_why_object_killed why)
++bool cachefiles_begin_operation(struct netfs_cache_resources *cres,
++				enum fscache_want_state want_state)
 +{
-+	struct dentry *grave, *trap;
-+	struct path path, path_to_graveyard;
-+	char nbuffer[8 + 8 + 1];
-+	int ret;
++	struct cachefiles_object *object = cachefiles_cres_object(cres);
 +
-+	_enter(",'%pd','%pd'", dir, rep);
-+
-+	if (rep->d_parent != dir) {
-+		inode_unlock(d_inode(dir));
-+		_leave(" = -ESTALE");
-+		return -ESTALE;
-+	}
-+
-+	/* non-directories can just be unlinked */
-+	if (!d_is_dir(rep)) {
-+		dget(rep); /* Stop the dentry being negated if it's only pinned
-+			    * by a file struct.
-+			    */
-+		ret = cachefiles_unlink(cache, object, dir, rep, why);
-+		dput(rep);
-+
-+		inode_unlock(d_inode(dir));
-+		_leave(" = %d", ret);
-+		return ret;
-+	}
-+
-+	/* directories have to be moved to the graveyard */
-+	_debug("move stale object to graveyard");
-+	inode_unlock(d_inode(dir));
-+
-+try_again:
-+	/* first step is to make up a grave dentry in the graveyard */
-+	sprintf(nbuffer, "%08x%08x",
-+		(uint32_t) ktime_get_real_seconds(),
-+		(uint32_t) atomic_inc_return(&cache->gravecounter));
-+
-+	/* do the multiway lock magic */
-+	trap = lock_rename(cache->graveyard, dir);
-+
-+	/* do some checks before getting the grave dentry */
-+	if (rep->d_parent != dir || IS_DEADDIR(d_inode(rep))) {
-+		/* the entry was probably culled when we dropped the parent dir
-+		 * lock */
-+		unlock_rename(cache->graveyard, dir);
-+		_leave(" = 0 [culled?]");
-+		return 0;
-+	}
-+
-+	if (!d_can_lookup(cache->graveyard)) {
-+		unlock_rename(cache->graveyard, dir);
-+		cachefiles_io_error(cache, "Graveyard no longer a directory");
-+		return -EIO;
-+	}
-+
-+	if (trap == rep) {
-+		unlock_rename(cache->graveyard, dir);
-+		cachefiles_io_error(cache, "May not make directory loop");
-+		return -EIO;
-+	}
-+
-+	if (d_mountpoint(rep)) {
-+		unlock_rename(cache->graveyard, dir);
-+		cachefiles_io_error(cache, "Mountpoint in cache");
-+		return -EIO;
-+	}
-+
-+	grave = lookup_one_len(nbuffer, cache->graveyard, strlen(nbuffer));
-+	if (IS_ERR(grave)) {
-+		unlock_rename(cache->graveyard, dir);
-+		trace_cachefiles_vfs_error(object, d_inode(cache->graveyard),
-+					   PTR_ERR(grave),
-+					   cachefiles_trace_lookup_error);
-+
-+		if (PTR_ERR(grave) == -ENOMEM) {
-+			_leave(" = -ENOMEM");
-+			return -ENOMEM;
++	if (!cachefiles_cres_file(cres)) {
++		cres->ops = &cachefiles_netfs_cache_ops;
++		if (object->file) {
++			spin_lock(&object->lock);
++			if (!cres->cache_priv2 && object->file)
++				cres->cache_priv2 = get_file(object->file);
++			spin_unlock(&object->lock);
 +		}
-+
-+		cachefiles_io_error(cache, "Lookup error %ld", PTR_ERR(grave));
-+		return -EIO;
 +	}
 +
-+	if (d_is_positive(grave)) {
-+		unlock_rename(cache->graveyard, dir);
-+		dput(grave);
-+		grave = NULL;
-+		cond_resched();
-+		goto try_again;
++	if (!cachefiles_cres_file(cres) && want_state != FSCACHE_WANT_PARAMS) {
++		pr_err("failed to get cres->file\n");
++		return false;
 +	}
 +
-+	if (d_mountpoint(grave)) {
-+		unlock_rename(cache->graveyard, dir);
-+		dput(grave);
-+		cachefiles_io_error(cache, "Mountpoint in graveyard");
-+		return -EIO;
-+	}
-+
-+	/* target should not be an ancestor of source */
-+	if (trap == grave) {
-+		unlock_rename(cache->graveyard, dir);
-+		dput(grave);
-+		cachefiles_io_error(cache, "May not make directory loop");
-+		return -EIO;
-+	}
-+
-+	/* attempt the rename */
-+	path.mnt = cache->mnt;
-+	path.dentry = dir;
-+	path_to_graveyard.mnt = cache->mnt;
-+	path_to_graveyard.dentry = cache->graveyard;
-+	ret = security_path_rename(&path, rep, &path_to_graveyard, grave, 0);
-+	if (ret < 0) {
-+		cachefiles_io_error(cache, "Rename security error %d", ret);
-+	} else {
-+		struct renamedata rd = {
-+			.old_mnt_userns	= &init_user_ns,
-+			.old_dir	= d_inode(dir),
-+			.old_dentry	= rep,
-+			.new_mnt_userns	= &init_user_ns,
-+			.new_dir	= d_inode(cache->graveyard),
-+			.new_dentry	= grave,
-+		};
-+		trace_cachefiles_rename(object, rep, grave, why);
-+		ret = cachefiles_inject_read_error();
-+		if (ret == 0)
-+			ret = vfs_rename(&rd);
-+		if (ret != 0)
-+			trace_cachefiles_vfs_error(object, d_inode(dir),
-+						   PTR_ERR(grave),
-+						   cachefiles_trace_rename_error);
-+		if (ret != 0 && ret != -ENOMEM)
-+			cachefiles_io_error(cache,
-+					    "Rename failed with error %d", ret);
-+	}
-+
-+	unlock_rename(cache->graveyard, dir);
-+	dput(grave);
-+	_leave(" = 0");
-+	return 0;
++	return true;
 +}
-+
-+/*
-+ * Look up an inode to be checked or culled.  Return -EBUSY if the inode is
-+ * marked in use.
-+ */
-+static struct dentry *cachefiles_lookup_for_cull(struct cachefiles_cache *cache,
-+						 struct dentry *dir,
-+						 char *filename)
-+{
-+	struct dentry *victim;
-+	int ret = -ENOENT;
-+
-+	inode_lock_nested(d_inode(dir), I_MUTEX_PARENT);
-+
-+	victim = lookup_one_len(filename, dir, strlen(filename));
-+	if (IS_ERR(victim))
-+		goto lookup_error;
-+	if (d_is_negative(victim))
-+		goto lookup_put;
-+	if (d_inode(victim)->i_flags & S_KERNEL_FILE)
-+		goto lookup_busy;
-+	return victim;
-+
-+lookup_busy:
-+	ret = -EBUSY;
-+lookup_put:
-+	inode_unlock(d_inode(dir));
-+	dput(victim);
-+	return ERR_PTR(ret);
-+
-+lookup_error:
-+	inode_unlock(d_inode(dir));
-+	ret = PTR_ERR(victim);
-+	if (ret == -ENOENT)
-+		return ERR_PTR(-ESTALE); /* Probably got retired by the netfs */
-+
-+	if (ret == -EIO) {
-+		cachefiles_io_error(cache, "Lookup failed");
-+	} else if (ret != -ENOMEM) {
-+		pr_err("Internal error: %d\n", ret);
-+		ret = -EIO;
-+	}
-+
-+	return ERR_PTR(ret);
-+}
-+
-+/*
-+ * Cull an object if it's not in use
-+ * - called only by cache manager daemon
-+ */
-+int cachefiles_cull(struct cachefiles_cache *cache, struct dentry *dir,
-+		    char *filename)
-+{
-+	struct dentry *victim;
-+	struct inode *inode;
-+	int ret;
-+
-+	_enter(",%pd/,%s", dir, filename);
-+
-+	victim = cachefiles_lookup_for_cull(cache, dir, filename);
-+	if (IS_ERR(victim))
-+		return PTR_ERR(victim);
-+
-+	/* check to see if someone is using this object */
-+	inode = d_inode(victim);
-+	inode_lock(inode);
-+	if (inode->i_flags & S_KERNEL_FILE) {
-+		ret = -EBUSY;
-+	} else {
-+		/* Stop the cache from picking it back up */
-+		inode->i_flags |= S_KERNEL_FILE;
-+		ret = 0;
-+	}
-+	inode_unlock(inode);
-+	if (ret < 0)
-+		goto error_unlock;
-+
-+	ret = cachefiles_bury_object(cache, NULL, dir, victim,
-+				     FSCACHE_OBJECT_WAS_CULLED);
-+	if (ret < 0)
-+		goto error;
-+
-+	dput(victim);
-+	_leave(" = 0");
-+	return 0;
-+
-+error_unlock:
-+	inode_unlock(d_inode(dir));
-+error:
-+	dput(victim);
-+	if (ret == -ENOENT)
-+		return -ESTALE; /* Probably got retired by the netfs */
-+
-+	if (ret != -ENOMEM) {
-+		pr_err("Internal error: %d\n", ret);
-+		ret = -EIO;
-+	}
-+
-+	_leave(" = %d", ret);
-+	return ret;
-+}
-+
-+/*
-+ * Find out if an object is in use or not
-+ * - called only by cache manager daemon
-+ * - returns -EBUSY or 0 to indicate whether an object is in use or not
-+ */
-+int cachefiles_check_in_use(struct cachefiles_cache *cache, struct dentry *dir,
-+			    char *filename)
-+{
-+	struct dentry *victim;
-+	int ret = 0;
-+
-+	victim = cachefiles_lookup_for_cull(cache, dir, filename);
-+	if (IS_ERR(victim))
-+		return PTR_ERR(victim);
-+
-+	inode_unlock(d_inode(dir));
-+	dput(victim);
-+	return ret;
-+}
+diff --git a/include/trace/events/fscache.h b/include/trace/events/fscache.h
+index 7d26388ef9d8..bbdbcf1bf966 100644
+--- a/include/trace/events/fscache.h
++++ b/include/trace/events/fscache.h
+@@ -78,6 +78,7 @@ enum fscache_access_trace {
+ 	fscache_access_cache_unpin,
+ 	fscache_access_invalidate_cookie,
+ 	fscache_access_invalidate_cookie_end,
++	fscache_access_io_end,
+ 	fscache_access_io_not_live,
+ 	fscache_access_io_read,
+ 	fscache_access_io_resize,
+@@ -152,6 +153,7 @@ enum fscache_access_trace {
+ 	EM(fscache_access_cache_unpin,		"UNPIN cache  ")	\
+ 	EM(fscache_access_invalidate_cookie,	"BEGIN inval  ")	\
+ 	EM(fscache_access_invalidate_cookie_end,"END   inval  ")	\
++	EM(fscache_access_io_end,		"END   io     ")	\
+ 	EM(fscache_access_io_not_live,		"END   io_notl")	\
+ 	EM(fscache_access_io_read,		"BEGIN io_read")	\
+ 	EM(fscache_access_io_resize,		"BEGIN io_resz")	\
 
 
