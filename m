@@ -2,45 +2,44 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1878BC433EF
-	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:34:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 640C0C43217
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:34:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378109AbhK2OhR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 29 Nov 2021 09:37:17 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:21051 "EHLO
+        id S1379048AbhK2OhX (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 29 Nov 2021 09:37:23 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:34947 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1378180AbhK2OfP (ORCPT
+        by vger.kernel.org with ESMTP id S1378670AbhK2Oej (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 29 Nov 2021 09:35:15 -0500
+        Mon, 29 Nov 2021 09:34:39 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1638196316;
+        s=mimecast20190719; t=1638196279;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=6lMQD175vSNNiUiPohn1dpVmj2VfjG13raFv8BINW5c=;
-        b=cl/b8gfE13ubpUw5kpDHz4PTo5Knq0k6oX3gznTwLQPycsrkzyTRoMqVtocCwygBem9e1d
-        VgcFgDJaB4YdI3FwslEGD3OYNv7JhaRepybdoiqDXyyjv1LwLHKq4zsp2LtEokTKlV801g
-        z16e8O5GMTeEgHO0pidAbG0Y1UuOV/Y=
+        bh=28AoYG/DiO9/L4ReEpJNA5dg70kmMnpGffYqw6LirdU=;
+        b=HxzVtVKUn4x7ghdOAKFivpMx5N9S5Q/U60+CyXB+VJ+EU7r+8q3NBEP+gzfpnUVgX2GFiX
+        ELzsf8gSvdQ97puWYL78PVculpq/OE7KWmYTEu8kL0lvR0zg1rq1Bo8a4gOGCB1p7zvcg4
+        NQ/a2y0SYGcon2zG/163noOP5YIW10M=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-397-PiYywnTyOQGmO3D2RyHOEw-1; Mon, 29 Nov 2021 09:31:50 -0500
-X-MC-Unique: PiYywnTyOQGmO3D2RyHOEw-1
+ us-mta-38-e1JWW66IMlunIuIcGGwc1A-1; Mon, 29 Nov 2021 09:31:15 -0500
+X-MC-Unique: e1JWW66IMlunIuIcGGwc1A-1
 Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 94DDE593D9;
-        Mon, 29 Nov 2021 14:31:46 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1BB3A921D44;
+        Mon, 29 Nov 2021 14:30:51 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.33.36.25])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6217360BF4;
-        Mon, 29 Nov 2021 14:31:43 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D9D8860BF4;
+        Mon, 29 Nov 2021 14:30:47 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 38/64] vfs,
- cachefiles: Mark a backing file in use with an inode flag
+Subject: [PATCH 32/64] cachefiles: Add some error injection support
 From:   David Howells <dhowells@redhat.com>
 To:     linux-cachefs@redhat.com
 Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
@@ -56,8 +55,8 @@ Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
         linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 29 Nov 2021 14:31:42 +0000
-Message-ID: <163819630256.215744.4815885535039369574.stgit@warthog.procyon.org.uk>
+Date:   Mon, 29 Nov 2021 14:30:47 +0000
+Message-ID: <163819624706.215744.6911916249119962943.stgit@warthog.procyon.org.uk>
 In-Reply-To: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
 References: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
@@ -69,167 +68,190 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Use an inode flag, S_KERNEL_FILE, to mark that a backing file is in use by
-the kernel to prevent cachefiles or other kernel services from interfering
-with that file.
+Add support for injecting ENOSPC or EIO errors.  This needs to be enabled
+by CONFIG_CACHEFILES_ERROR_INJECTION=y.  Once enabled, ENOSPC on things
+like write and mkdir can be triggered by:
 
-Alter rmdir to reject attempts to remove a directory marked with this flag.
-This is used by cachefiles to prevent cachefilesd from removing them.
+        echo 1 >/proc/sys/cachefiles/error_injection
 
-Using S_SWAPFILE instead isn't really viable as that has other effects in
-the I/O paths.
+and EIO can be triggered on most operations by:
+
+        echo 2 >/proc/sys/cachefiles/error_injection
 
 Signed-off-by: David Howells <dhowells@redhat.com>
+cc: linux-cachefs@redhat.com
 ---
 
- fs/cachefiles/Makefile            |    1 +
- fs/cachefiles/namei.c             |   44 +++++++++++++++++++++++++++++++++++++
- fs/namei.c                        |    3 ++-
- include/linux/fs.h                |    1 +
- include/trace/events/cachefiles.h |   42 +++++++++++++++++++++++++++++++++++
- 5 files changed, 90 insertions(+), 1 deletion(-)
- create mode 100644 fs/cachefiles/namei.c
+ fs/cachefiles/Kconfig        |    7 ++++++
+ fs/cachefiles/Makefile       |    2 ++
+ fs/cachefiles/error_inject.c |   46 ++++++++++++++++++++++++++++++++++++++++++
+ fs/cachefiles/internal.h     |   42 +++++++++++++++++++++++++++++++++++++-
+ fs/cachefiles/main.c         |   12 +++++++++++
+ 5 files changed, 108 insertions(+), 1 deletion(-)
+ create mode 100644 fs/cachefiles/error_inject.c
 
+diff --git a/fs/cachefiles/Kconfig b/fs/cachefiles/Kconfig
+index 6827b40f7ddc..719faeeda168 100644
+--- a/fs/cachefiles/Kconfig
++++ b/fs/cachefiles/Kconfig
+@@ -19,3 +19,10 @@ config CACHEFILES_DEBUG
+ 	  caching on files module.  If this is set, the debugging output may be
+ 	  enabled by setting bits in /sys/modules/cachefiles/parameter/debug or
+ 	  by including a debugging specifier in /etc/cachefilesd.conf.
++
++config CACHEFILES_ERROR_INJECTION
++	bool "Provide error injection for cachefiles"
++	depends on CACHEFILES && SYSCTL
++	help
++	  This permits error injection to be enabled in cachefiles whilst a
++	  cache is in service.
 diff --git a/fs/cachefiles/Makefile b/fs/cachefiles/Makefile
-index 463e3d608b75..e0b092ca077f 100644
+index a7f3e982e249..183fb5f3b8b1 100644
 --- a/fs/cachefiles/Makefile
 +++ b/fs/cachefiles/Makefile
-@@ -7,6 +7,7 @@ cachefiles-y := \
- 	cache.o \
- 	daemon.o \
- 	main.o \
-+	namei.o \
- 	security.o
+@@ -6,4 +6,6 @@
+ cachefiles-y := \
+ 	main.o
  
- cachefiles-$(CONFIG_CACHEFILES_ERROR_INJECTION) += error_inject.o
-diff --git a/fs/cachefiles/namei.c b/fs/cachefiles/namei.c
++cachefiles-$(CONFIG_CACHEFILES_ERROR_INJECTION) += error_inject.o
++
+ obj-$(CONFIG_CACHEFILES) := cachefiles.o
+diff --git a/fs/cachefiles/error_inject.c b/fs/cachefiles/error_inject.c
 new file mode 100644
-index 000000000000..fef06d2a88ec
+index 000000000000..58f8aec964e4
 --- /dev/null
-+++ b/fs/cachefiles/namei.c
-@@ -0,0 +1,44 @@
++++ b/fs/cachefiles/error_inject.c
+@@ -0,0 +1,46 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
-+/* CacheFiles path walking and related routines
++/* Error injection handling.
 + *
 + * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
 + * Written by David Howells (dhowells@redhat.com)
 + */
 +
-+#include <linux/fs.h>
++#include <linux/sysctl.h>
 +#include "internal.h"
 +
-+/*
-+ * Mark the backing file as being a cache file if it's not already in use.  The
-+ * mark tells the culling request command that it's not allowed to cull the
-+ * file or directory.  The caller must hold the inode lock.
-+ */
-+static bool __cachefiles_mark_inode_in_use(struct cachefiles_object *object,
-+					   struct dentry *dentry)
++unsigned int cachefiles_error_injection_state;
++
++static struct ctl_table_header *cachefiles_sysctl;
++static struct ctl_table cachefiles_sysctls[] = {
++	{
++		.procname	= "error_injection",
++		.data		= &cachefiles_error_injection_state,
++		.maxlen		= sizeof(unsigned int),
++		.mode		= 0644,
++		.proc_handler	= proc_douintvec,
++	},
++	{}
++};
++
++static struct ctl_table cachefiles_sysctls_root[] = {
++	{
++		.procname	= "cachefiles",
++		.mode		= 0555,
++		.child		= cachefiles_sysctls,
++	},
++	{}
++};
++
++int __init cachefiles_register_error_injection(void)
 +{
-+	struct inode *inode = d_backing_inode(dentry);
-+	bool can_use = false;
++	cachefiles_sysctl = register_sysctl_table(cachefiles_sysctls_root);
++	if (!cachefiles_sysctl)
++		return -ENOMEM;
++	return 0;
 +
-+	if (!(inode->i_flags & S_KERNEL_FILE)) {
-+		inode->i_flags |= S_KERNEL_FILE;
-+		if (object)
-+			trace_cachefiles_mark_active(object, inode);
-+		can_use = true;
-+	} else {
-+		pr_notice("cachefiles: Inode already in use: %pd\n", dentry);
-+	}
-+
-+	return can_use;
 +}
 +
-+/*
-+ * Unmark a backing inode.  The caller must hold the inode lock.
-+ */
-+static void __cachefiles_unmark_inode_in_use(struct cachefiles_object *object,
-+					     struct dentry *dentry)
++void cachefiles_unregister_error_injection(void)
 +{
-+	struct inode *inode = d_backing_inode(dentry);
-+
-+	inode->i_flags &= ~S_KERNEL_FILE;
-+	trace_cachefiles_mark_inactive(object, inode);
++	unregister_sysctl_table(cachefiles_sysctl);
 +}
-diff --git a/fs/namei.c b/fs/namei.c
-index 1f9d2187c765..d81f04f8d818 100644
---- a/fs/namei.c
-+++ b/fs/namei.c
-@@ -3958,7 +3958,8 @@ int vfs_rmdir(struct user_namespace *mnt_userns, struct inode *dir,
- 	inode_lock(dentry->d_inode);
+diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
+index cff4b2a5f928..1f2fea902d3e 100644
+--- a/fs/cachefiles/internal.h
++++ b/fs/cachefiles/internal.h
+@@ -64,7 +64,47 @@ struct cachefiles_cache {
  
- 	error = -EBUSY;
--	if (is_local_mountpoint(dentry))
-+	if (is_local_mountpoint(dentry) ||
-+	    (dentry->d_inode->i_flags & S_KERNEL_FILE))
- 		goto out;
- 
- 	error = security_inode_rmdir(dir, dentry);
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index 473ea3ff0ad4..d4ec20f51129 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -2249,6 +2249,7 @@ struct super_operations {
- #define S_ENCRYPTED	(1 << 14) /* Encrypted file (using fs/crypto/) */
- #define S_CASEFOLD	(1 << 15) /* Casefolded file */
- #define S_VERITY	(1 << 16) /* Verity file (using fs/verity/) */
-+#define S_KERNEL_FILE	(1 << 17) /* File is in use by the kernel (eg. fs/cachefiles) */
  
  /*
-  * Note that nosuid etc flags are inode-specific: setting some file-system
-diff --git a/include/trace/events/cachefiles.h b/include/trace/events/cachefiles.h
-index 9bd5a8a60801..29fdcfddbbc2 100644
---- a/include/trace/events/cachefiles.h
-+++ b/include/trace/events/cachefiles.h
-@@ -83,6 +83,48 @@ cachefiles_error_traces;
- #define E_(a, b)	{ a, b }
+- * Debug tracing.
++ * error_inject.c
++ */
++#ifdef CONFIG_CACHEFILES_ERROR_INJECTION
++extern unsigned int cachefiles_error_injection_state;
++extern int cachefiles_register_error_injection(void);
++extern void cachefiles_unregister_error_injection(void);
++
++#else
++#define cachefiles_error_injection_state 0
++
++static inline int cachefiles_register_error_injection(void)
++{
++	return 0;
++}
++
++static inline void cachefiles_unregister_error_injection(void)
++{
++}
++#endif
++
++
++static inline int cachefiles_inject_read_error(void)
++{
++	return cachefiles_error_injection_state & 2 ? -EIO : 0;
++}
++
++static inline int cachefiles_inject_write_error(void)
++{
++	return cachefiles_error_injection_state & 2 ? -EIO :
++		cachefiles_error_injection_state & 1 ? -ENOSPC :
++		0;
++}
++
++static inline int cachefiles_inject_remove_error(void)
++{
++	return cachefiles_error_injection_state & 2 ? -EIO : 0;
++}
++
++
++/*
++ * Debug tracing
+  */
+ extern unsigned cachefiles_debug;
+ #define CACHEFILES_DEBUG_KENTER	1
+diff --git a/fs/cachefiles/main.c b/fs/cachefiles/main.c
+index 47bc1cc078de..387d42c7185f 100644
+--- a/fs/cachefiles/main.c
++++ b/fs/cachefiles/main.c
+@@ -36,8 +36,18 @@ MODULE_LICENSE("GPL");
+  */
+ static int __init cachefiles_init(void)
+ {
++	int ret;
++
++	ret = cachefiles_register_error_injection();
++	if (ret < 0)
++		goto error_einj;
++
+ 	pr_info("Loaded\n");
+ 	return 0;
++
++error_einj:
++	pr_err("failed to register: %d\n", ret);
++	return ret;
+ }
  
+ fs_initcall(cachefiles_init);
+@@ -48,6 +58,8 @@ fs_initcall(cachefiles_init);
+ static void __exit cachefiles_exit(void)
+ {
+ 	pr_info("Unloading\n");
++
++	cachefiles_unregister_error_injection();
+ }
  
-+TRACE_EVENT(cachefiles_mark_active,
-+	    TP_PROTO(struct cachefiles_object *obj,
-+		     struct inode *inode),
-+
-+	    TP_ARGS(obj, inode),
-+
-+	    /* Note that obj may be NULL */
-+	    TP_STRUCT__entry(
-+		    __field(unsigned int,		obj		)
-+		    __field(ino_t,			inode		)
-+			     ),
-+
-+	    TP_fast_assign(
-+		    __entry->obj	= obj->debug_id;
-+		    __entry->inode	= inode->i_ino;
-+			   ),
-+
-+	    TP_printk("o=%08x i=%lx",
-+		      __entry->obj, __entry->inode)
-+	    );
-+
-+TRACE_EVENT(cachefiles_mark_inactive,
-+	    TP_PROTO(struct cachefiles_object *obj,
-+		     struct inode *inode),
-+
-+	    TP_ARGS(obj, inode),
-+
-+	    /* Note that obj may be NULL */
-+	    TP_STRUCT__entry(
-+		    __field(unsigned int,		obj		)
-+		    __field(ino_t,			inode		)
-+			     ),
-+
-+	    TP_fast_assign(
-+		    __entry->obj	= obj->debug_id;
-+		    __entry->inode	= inode->i_ino;
-+			   ),
-+
-+	    TP_printk("o=%08x i=%lx",
-+		      __entry->obj, __entry->inode)
-+	    );
-+
- TRACE_EVENT(cachefiles_vfs_error,
- 	    TP_PROTO(struct cachefiles_object *obj, struct inode *backer,
- 		     int error, enum cachefiles_error_trace where),
+ module_exit(cachefiles_exit);
 
 
