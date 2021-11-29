@@ -2,44 +2,44 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63392C433EF
-	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:27:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28A4FC433EF
+	for <ceph-devel@archiver.kernel.org>; Mon, 29 Nov 2021 14:28:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243825AbhK2ObE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 29 Nov 2021 09:31:04 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:21721 "EHLO
+        id S244340AbhK2ObO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 29 Nov 2021 09:31:14 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:51093 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S242915AbhK2O3C (ORCPT
+        by vger.kernel.org with ESMTP id S1378028AbhK2O1v (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 29 Nov 2021 09:29:02 -0500
+        Mon, 29 Nov 2021 09:27:51 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1638195943;
+        s=mimecast20190719; t=1638195872;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=PWUVl5WnnqeBsZK3aAVVQ3u6l82Srl3hDMQeyE7ESWA=;
-        b=GkGmqFMGTCnG/WB9WKMb/FYbTwblVDOy4P02SdNrNSSWcRgL5g2cJ1fzclbmEjQfKETJsG
-        6CpjzTQwzI2k709eplGPk+/lw0y5A5IRHUT1bnTHDJKO9WjSCFMKjGNoNFx4dBbixCVBgT
-        32MPBT1Evias6MRIrnbDYoSWCff9wfk=
+        bh=TG0Gbz9D3GUj9CweVWt4l/eSg/X6S3kcbhSt+YltHHQ=;
+        b=DsEHKruVmb4CfH5gUauH37//GbqZltxLG6yfMKtJJI/MoAU6wH+9WCAgz/HurRwS0KwAHu
+        mNGZXSelcYRxSxtcwswD95sksq6ywpISkGHNA+Gg3fPg1EfclJ0rTVCUc/aT6Zsb/BsqS9
+        jC2jVLvoT6cPAC+yu7WjHK8lni9JKQU=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-441-I_191KZ7MKaruGOjuzlXZQ-1; Mon, 29 Nov 2021 09:25:39 -0500
-X-MC-Unique: I_191KZ7MKaruGOjuzlXZQ-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+ us-mta-93-6ieQjub7O_W0iDexGieO5Q-1; Mon, 29 Nov 2021 09:24:28 -0500
+X-MC-Unique: 6ieQjub7O_W0iDexGieO5Q-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5A397100B797;
-        Mon, 29 Nov 2021 14:25:36 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 578E281CD03;
+        Mon, 29 Nov 2021 14:24:26 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.33.36.25])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 3A63567845;
-        Mon, 29 Nov 2021 14:25:33 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 11B016060F;
+        Mon, 29 Nov 2021 14:24:21 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 11/64] fscache: Implement cache-level access helpers
+Subject: [PATCH 07/64] fscache: Implement a hash function
 From:   David Howells <dhowells@redhat.com>
 To:     linux-cachefs@redhat.com
 Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
@@ -55,228 +55,96 @@ Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
         linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 29 Nov 2021 14:25:32 +0000
-Message-ID: <163819593239.215744.7537428720603638088.stgit@warthog.procyon.org.uk>
+Date:   Mon, 29 Nov 2021 14:24:21 +0000
+Message-ID: <163819586113.215744.1699465806130102367.stgit@warthog.procyon.org.uk>
 In-Reply-To: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
 References: <163819575444.215744.318477214576928110.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add a pair of functions to pin/unpin a cache that we're wanting to do a
-high-level access to (such as creating or removing a volume):
+Implement a function to generate hashes.  It needs to be stable over time
+and endianness-independent as the hashes will appear on disk in future
+patches.  It can assume that its input is a multiple of four bytes in size
+and alignment.
 
-	bool fscache_begin_cache_access(struct fscache_cache *cache,
-					enum fscache_access_trace why);
-	void fscache_end_cache_access(struct fscache_cache *cache,
-				      enum fscache_access_trace why);
-
-The way the access gate works/will work is:
-
- (1) If the cache tests as not live (state is not FSCACHE_CACHE_IS_ACTIVE),
-     then we return false to indicate access was not permitted.
-
- (2) If the cache tests as live, then we increment the n_accesses count and
-     then recheck the liveness, ending the access if it ceased to be live.
-
- (3) When we end the access, we decrement n_accesses and wake up the any
-     waiters if it reaches 0.
-
- (4) Whilst the cache is caching, n_accesses is kept artificially
-     incremented to prevent wakeups from happening.
-
- (5) When the cache is taken offline, the state is changed to prevent new
-     accesses, n_accesses is decremented and we wait for n_accesses to
-     become 0.
-
-Note that some of this is implemented in a later patch.
+This is borrowed from the VFS and simplified.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: linux-cachefs@redhat.com
 ---
 
- fs/fscache/cache.c             |   62 ++++++++++++++++++++++++++++++++++++++++
- fs/fscache/internal.h          |    2 +
- fs/fscache/main.c              |    2 +
- include/trace/events/fscache.h |   41 ++++++++++++++++++++++++++
- 4 files changed, 107 insertions(+)
+ fs/fscache/internal.h |    2 ++
+ fs/fscache/main.c     |   39 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 41 insertions(+)
 
-diff --git a/fs/fscache/cache.c b/fs/fscache/cache.c
-index 8db77bb9f8e2..e867cff53a70 100644
---- a/fs/fscache/cache.c
-+++ b/fs/fscache/cache.c
-@@ -216,6 +216,68 @@ void fscache_relinquish_cache(struct fscache_cache *cache)
- }
- EXPORT_SYMBOL(fscache_relinquish_cache);
- 
-+/**
-+ * fscache_begin_cache_access - Pin a cache so it can be accessed
-+ * @cache: The cache-level cookie
-+ * @why: An indication of the circumstances of the access for tracing
-+ *
-+ * Attempt to pin the cache to prevent it from going away whilst we're
-+ * accessing it and returns true if successful.  This works as follows:
-+ *
-+ *  (1) If the cache tests as not live (state is not FSCACHE_CACHE_IS_ACTIVE),
-+ *      then we return false to indicate access was not permitted.
-+ *
-+ *  (2) If the cache tests as live, then we increment the n_accesses count and
-+ *      then recheck the liveness, ending the access if it ceased to be live.
-+ *
-+ *  (3) When we end the access, we decrement n_accesses and wake up the any
-+ *      waiters if it reaches 0.
-+ *
-+ *  (4) Whilst the cache is caching, n_accesses is kept artificially
-+ *      incremented to prevent wakeups from happening.
-+ *
-+ *  (5) When the cache is taken offline, the state is changed to prevent new
-+ *      accesses, n_accesses is decremented and we wait for n_accesses to
-+ *      become 0.
-+ */
-+bool fscache_begin_cache_access(struct fscache_cache *cache, enum fscache_access_trace why)
-+{
-+	int n_accesses;
-+
-+	if (!fscache_cache_is_live(cache))
-+		return false;
-+
-+	n_accesses = atomic_inc_return(&cache->n_accesses);
-+	smp_mb__after_atomic(); /* Reread live flag after n_accesses */
-+	trace_fscache_access_cache(cache->debug_id, refcount_read(&cache->ref),
-+				   n_accesses, why);
-+	if (!fscache_cache_is_live(cache)) {
-+		fscache_end_cache_access(cache, fscache_access_unlive);
-+		return false;
-+	}
-+	return true;
-+}
-+
-+/**
-+ * fscache_end_cache_access - Unpin a cache at the end of an access.
-+ * @cache: The cache-level cookie
-+ * @why: An indication of the circumstances of the access for tracing
-+ *
-+ * Unpin a cache after we've accessed it.  The @why indicator is merely
-+ * provided for tracing purposes.
-+ */
-+void fscache_end_cache_access(struct fscache_cache *cache, enum fscache_access_trace why)
-+{
-+	int n_accesses;
-+
-+	smp_mb__before_atomic();
-+	n_accesses = atomic_dec_return(&cache->n_accesses);
-+	trace_fscache_access_cache(cache->debug_id, refcount_read(&cache->ref),
-+				   n_accesses, why);
-+	if (n_accesses == 0)
-+		wake_up_var(&cache->n_accesses);
-+}
-+
- #ifdef CONFIG_PROC_FS
- static const char fscache_cache_states[NR__FSCACHE_CACHE_STATE] = "-PAEW";
- 
 diff --git a/fs/fscache/internal.h b/fs/fscache/internal.h
-index c9bd4bcd4485..ca035d6be7f9 100644
+index ea52f8594a77..64767992bd15 100644
 --- a/fs/fscache/internal.h
 +++ b/fs/fscache/internal.h
-@@ -23,6 +23,8 @@
- #ifdef CONFIG_PROC_FS
- extern const struct seq_operations fscache_caches_seq_ops;
- #endif
-+bool fscache_begin_cache_access(struct fscache_cache *cache, enum fscache_access_trace why);
-+void fscache_end_cache_access(struct fscache_cache *cache, enum fscache_access_trace why);
- struct fscache_cache *fscache_lookup_cache(const char *name, bool is_cache);
- void fscache_put_cache(struct fscache_cache *cache, enum fscache_cache_trace where);
+@@ -22,6 +22,8 @@
+  */
+ extern unsigned fscache_debug;
  
++extern unsigned int fscache_hash(unsigned int salt, unsigned int *data, unsigned int n);
++
+ /*
+  * proc.c
+  */
 diff --git a/fs/fscache/main.c b/fs/fscache/main.c
-index fad9c1933987..e1f14b29cff4 100644
+index 819de2ee1276..a4afba1b9d3b 100644
 --- a/fs/fscache/main.c
 +++ b/fs/fscache/main.c
-@@ -21,6 +21,8 @@ module_param_named(debug, fscache_debug, uint,
- MODULE_PARM_DESC(fscache_debug,
- 		 "FS-Cache debugging mask");
- 
-+EXPORT_TRACEPOINT_SYMBOL(fscache_access_cache);
-+
+@@ -24,6 +24,45 @@ MODULE_PARM_DESC(fscache_debug,
  struct workqueue_struct *fscache_wq;
  EXPORT_SYMBOL(fscache_wq);
  
-diff --git a/include/trace/events/fscache.h b/include/trace/events/fscache.h
-index 5121d1fb8ff2..0ce0bd88e2b4 100644
---- a/include/trace/events/fscache.h
-+++ b/include/trace/events/fscache.h
-@@ -62,6 +62,12 @@ enum fscache_cookie_trace {
- 	fscache_cookie_see_work,
- };
- 
-+enum fscache_access_trace {
-+	fscache_access_cache_pin,
-+	fscache_access_cache_unpin,
-+	fscache_access_unlive,
-+};
++/*
++ * Mixing scores (in bits) for (7,20):
++ * Input delta: 1-bit      2-bit
++ * 1 round:     330.3     9201.6
++ * 2 rounds:   1246.4    25475.4
++ * 3 rounds:   1907.1    31295.1
++ * 4 rounds:   2042.3    31718.6
++ * Perfect:    2048      31744
++ *            (32*64)   (32*31/2 * 64)
++ */
++#define HASH_MIX(x, y, a)	\
++	(	x ^= (a),	\
++	y ^= x,	x = rol32(x, 7),\
++	x += y,	y = rol32(y,20),\
++	y *= 9			)
 +
- #endif
- 
- /*
-@@ -107,6 +113,11 @@ enum fscache_cookie_trace {
- 	EM(fscache_cookie_see_withdraw,		"-   x-wth")		\
- 	E_(fscache_cookie_see_work,		"-   work ")
- 
-+#define fscache_access_traces		\
-+	EM(fscache_access_cache_pin,		"PIN   cache  ")	\
-+	EM(fscache_access_cache_unpin,		"UNPIN cache  ")	\
-+	E_(fscache_access_unlive,		"END   unlive ")
++static inline unsigned int fold_hash(unsigned long x, unsigned long y)
++{
++	/* Use arch-optimized multiply if one exists */
++	return __hash_32(y ^ __hash_32(x));
++}
++
++/*
++ * Generate a hash.  This is derived from full_name_hash(), but we want to be
++ * sure it is arch independent and that it doesn't change as bits of the
++ * computed hash value might appear on disk.  The caller also guarantees that
++ * the hashed data will be a series of aligned 32-bit words.
++ */
++unsigned int fscache_hash(unsigned int salt, unsigned int *data, unsigned int n)
++{
++	unsigned int a, x = 0, y = salt;
++
++	for (; n; n--) {
++		a = *data++;
++		HASH_MIX(x, y, a);
++	}
++	return fold_hash(x, y);
++}
 +
  /*
-  * Export enum symbols via userspace.
+  * initialise the fs caching module
   */
-@@ -118,6 +129,7 @@ enum fscache_cookie_trace {
- fscache_cache_traces;
- fscache_volume_traces;
- fscache_cookie_traces;
-+fscache_access_traces;
- 
- /*
-  * Now redefine the EM() and E_() macros to map the enums to the strings that
-@@ -204,6 +216,35 @@ TRACE_EVENT(fscache_cookie,
- 		      __entry->ref)
- 	    );
- 
-+TRACE_EVENT(fscache_access_cache,
-+	    TP_PROTO(unsigned int cache_debug_id,
-+		     int ref,
-+		     int n_accesses,
-+		     enum fscache_access_trace why),
-+
-+	    TP_ARGS(cache_debug_id, ref, n_accesses, why),
-+
-+	    TP_STRUCT__entry(
-+		    __field(unsigned int,		cache		)
-+		    __field(int,			ref		)
-+		    __field(int,			n_accesses	)
-+		    __field(enum fscache_access_trace,	why		)
-+			     ),
-+
-+	    TP_fast_assign(
-+		    __entry->cache	= cache_debug_id;
-+		    __entry->ref	= ref;
-+		    __entry->n_accesses	= n_accesses;
-+		    __entry->why	= why;
-+			   ),
-+
-+	    TP_printk("C=%08x %s r=%d a=%d",
-+		      __entry->cache,
-+		      __print_symbolic(__entry->why, fscache_access_traces),
-+		      __entry->ref,
-+		      __entry->n_accesses)
-+	    );
-+
- TRACE_EVENT(fscache_acquire,
- 	    TP_PROTO(struct fscache_cookie *cookie),
- 
 
 
