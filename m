@@ -2,45 +2,45 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8743DC433F5
-	for <ceph-devel@archiver.kernel.org>; Thu, 16 Dec 2021 16:18:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 856CFC433EF
+	for <ceph-devel@archiver.kernel.org>; Thu, 16 Dec 2021 16:19:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239339AbhLPQSv (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 16 Dec 2021 11:18:51 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:54736 "EHLO
+        id S239437AbhLPQTH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 16 Dec 2021 11:19:07 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:36177 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S239396AbhLPQQ5 (ORCPT
+        by vger.kernel.org with ESMTP id S239405AbhLPQTE (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Dec 2021 11:16:57 -0500
+        Thu, 16 Dec 2021 11:19:04 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1639671416;
+        s=mimecast20190719; t=1639671543;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=KLMNgmVAoRi/NMJEjfBUwrT1pdlHf9vhqCbKzHWcqWI=;
-        b=IOjKD9jLHbPGm09pBxp1rab8TYLZ9LKsOFVz4KgtytI7hskXMeXkcYv9I5IZxAjfjL33UE
-        T+HDw2jKECfYwMkvX6YzBc89AbEFnpYzBMxSrED3z71B+hllSe7OVdlqj+a/9l5kQiUWb5
-        ztbFTa5Da0SKRsRJHdBhvai7xikNupw=
+        bh=c99MSw6/7c5WUPQ3iDwior70BHnGN9TmkW710cK3fP8=;
+        b=RtoKhGuQD6vWw/N07FvYGUbRmpYPfz1OCZ7retWumlGleDuMg/8ge5s8KKIf3V/VD6KYTn
+        eSddzH1mbg4nUKVYACVLFiYVYWTXzrMki3uhxUBoBkInXrcyyrhiySL1dOmyEEnytgB46u
+        cmRPXRzraOoD8oRWaKlWcm2bt73B+vY=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-625-EMw59qA4OiC-vGYIqS6Tfw-1; Thu, 16 Dec 2021 11:16:47 -0500
-X-MC-Unique: EMw59qA4OiC-vGYIqS6Tfw-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+ us-mta-480-nHVLS8MuM3ulwPgVB9xtSQ-1; Thu, 16 Dec 2021 11:18:58 -0500
+X-MC-Unique: nHVLS8MuM3ulwPgVB9xtSQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BE065100D844;
-        Thu, 16 Dec 2021 16:16:44 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E9BE0100CFB7;
+        Thu, 16 Dec 2021 16:18:55 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.33.36.122])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 59933795AD;
-        Thu, 16 Dec 2021 16:16:41 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 260C31037F42;
+        Thu, 16 Dec 2021 16:18:37 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
         Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
         Kingdom.
         Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH v3 37/68] cachefiles: Provide a function to check how much
- space there is
+Subject: [PATCH v3 45/68] cachefiles: Implement metadata/coherency data
+ storage in xattrs
 From:   David Howells <dhowells@redhat.com>
 To:     linux-cachefs@redhat.com
 Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
@@ -57,198 +57,386 @@ Cc:     dhowells@redhat.com, Trond Myklebust <trondmy@hammerspace.com>,
         linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs-developer@lists.sourceforge.net,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Thu, 16 Dec 2021 16:16:40 +0000
-Message-ID: <163967140058.1823006.7781243664702837128.stgit@warthog.procyon.org.uk>
+Date:   Thu, 16 Dec 2021 16:18:37 +0000
+Message-ID: <163967151734.1823006.9301249989443622576.stgit@warthog.procyon.org.uk>
 In-Reply-To: <163967073889.1823006.12237147297060239168.stgit@warthog.procyon.org.uk>
 References: <163967073889.1823006.12237147297060239168.stgit@warthog.procyon.org.uk>
 User-Agent: StGit/0.23
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Provide a function to check how much space there is.  This also flips the
-state on the cache and will signal the daemon to inform it of the change
-and to ask it to do some culling if necessary.
+Use an xattr on each backing file in the cache to store some metadata, such
+as the content type and the coherency data.
 
-We will also need to subtract the amount of data currently being written to
-the cache (cache->b_writing) from the amount of available space to avoid
-hitting ENOSPC accidentally.
+Five content types are defined:
+
+ (0) No content stored.
+
+ (1) The file contains a single monolithic blob and must be all or nothing.
+     This would be used for something like an AFS directory or a symlink.
+
+ (2) The file is populated with content completely up to a point with
+     nothing beyond that.
+
+ (3) The file has a map attached and is sparsely populated.  This would be
+     stored in one or more additional xattrs.
+
+ (4) The file is dirty, being in the process of local modification and the
+     contents are not necessarily represented correctly by the metadata.
+     The file should be deleted if this is seen on binding.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: linux-cachefs@redhat.com
-Link: https://lore.kernel.org/r/163819629322.215744.13457425294680841213.stgit@warthog.procyon.org.uk/ # v1
-Link: https://lore.kernel.org/r/163906930100.143852.1681026700865762069.stgit@warthog.procyon.org.uk/ # v2
+Link: https://lore.kernel.org/r/163819641320.215744.16346770087799536862.stgit@warthog.procyon.org.uk/ # v1
+Link: https://lore.kernel.org/r/163906942248.143852.5423738045012094252.stgit@warthog.procyon.org.uk/ # v2
 ---
 
- fs/cachefiles/Makefile   |    1 
- fs/cachefiles/cache.c    |  103 ++++++++++++++++++++++++++++++++++++++++++++++
- fs/cachefiles/daemon.c   |    2 -
- fs/cachefiles/internal.h |    7 +++
- 4 files changed, 112 insertions(+), 1 deletion(-)
- create mode 100644 fs/cachefiles/cache.c
+ fs/cachefiles/Makefile            |    3 -
+ fs/cachefiles/internal.h          |   21 ++++
+ fs/cachefiles/xattr.c             |  181 +++++++++++++++++++++++++++++++++++++
+ include/trace/events/cachefiles.h |   56 +++++++++++
+ 4 files changed, 260 insertions(+), 1 deletion(-)
+ create mode 100644 fs/cachefiles/xattr.c
 
 diff --git a/fs/cachefiles/Makefile b/fs/cachefiles/Makefile
-index f008524bb78f..463e3d608b75 100644
+index 6f025940a65c..cb7a6bcf51eb 100644
 --- a/fs/cachefiles/Makefile
 +++ b/fs/cachefiles/Makefile
-@@ -4,6 +4,7 @@
- #
- 
- cachefiles-y := \
-+	cache.o \
- 	daemon.o \
+@@ -11,7 +11,8 @@ cachefiles-y := \
  	main.o \
- 	security.o
-diff --git a/fs/cachefiles/cache.c b/fs/cachefiles/cache.c
+ 	namei.o \
+ 	security.o \
+-	volume.o
++	volume.o \
++	xattr.o
+ 
+ cachefiles-$(CONFIG_CACHEFILES_ERROR_INJECTION) += error_inject.o
+ 
+diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
+index dbc37f5d4714..01071e7a7c02 100644
+--- a/fs/cachefiles/internal.h
++++ b/fs/cachefiles/internal.h
+@@ -55,6 +55,7 @@ struct cachefiles_object {
+ 	u8				d_name_len;	/* Length of filename */
+ 	enum cachefiles_content		content_info:8;	/* Info about content presence */
+ 	unsigned long			flags;
++#define CACHEFILES_OBJECT_USING_TMPFILE	0		/* Have an unlinked tmpfile */
+ };
+ 
+ /*
+@@ -219,6 +220,17 @@ void cachefiles_acquire_volume(struct fscache_volume *volume);
+ void cachefiles_free_volume(struct fscache_volume *volume);
+ void cachefiles_withdraw_volume(struct cachefiles_volume *volume);
+ 
++/*
++ * xattr.c
++ */
++extern int cachefiles_set_object_xattr(struct cachefiles_object *object);
++extern int cachefiles_check_auxdata(struct cachefiles_object *object,
++				    struct file *file);
++extern int cachefiles_remove_object_xattr(struct cachefiles_cache *cache,
++					  struct cachefiles_object *object,
++					  struct dentry *dentry);
++extern void cachefiles_prepare_to_write(struct fscache_cookie *cookie);
++
+ /*
+  * Error handling
+  */
+@@ -229,6 +241,15 @@ do {							\
+ 	set_bit(CACHEFILES_DEAD, &(___cache)->flags);	\
+ } while (0)
+ 
++#define cachefiles_io_error_obj(object, FMT, ...)			\
++do {									\
++	struct cachefiles_cache *___cache;				\
++									\
++	___cache = (object)->volume->cache;				\
++	cachefiles_io_error(___cache, FMT " [o=%08x]", ##__VA_ARGS__,	\
++			    (object)->debug_id);			\
++} while (0)
++
+ 
+ /*
+  * Debug tracing
+diff --git a/fs/cachefiles/xattr.c b/fs/cachefiles/xattr.c
 new file mode 100644
-index 000000000000..73636f89eefa
+index 000000000000..0601c46a22ef
 --- /dev/null
-+++ b/fs/cachefiles/cache.c
-@@ -0,0 +1,103 @@
++++ b/fs/cachefiles/xattr.c
+@@ -0,0 +1,181 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
-+/* Manage high-level VFS aspects of a cache.
++/* CacheFiles extended attribute management
 + *
-+ * Copyright (C) 2007, 2021 Red Hat, Inc. All Rights Reserved.
++ * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
 + * Written by David Howells (dhowells@redhat.com)
 + */
 +
++#include <linux/module.h>
++#include <linux/sched.h>
++#include <linux/file.h>
++#include <linux/fs.h>
++#include <linux/fsnotify.h>
++#include <linux/quotaops.h>
++#include <linux/xattr.h>
 +#include <linux/slab.h>
-+#include <linux/statfs.h>
-+#include <linux/namei.h>
 +#include "internal.h"
 +
++#define CACHEFILES_COOKIE_TYPE_DATA 1
++
++struct cachefiles_xattr {
++	__be64	object_size;	/* Actual size of the object */
++	__be64	zero_point;	/* Size after which server has no data not written by us */
++	__u8	type;		/* Type of object */
++	__u8	content;	/* Content presence (enum cachefiles_content) */
++	__u8	data[];		/* netfs coherency data */
++} __packed;
++
++static const char cachefiles_xattr_cache[] =
++	XATTR_USER_PREFIX "CacheFiles.cache";
++
 +/*
-+ * See if we have space for a number of pages and/or a number of files in the
-+ * cache
++ * set the state xattr on a cache file
 + */
-+int cachefiles_has_space(struct cachefiles_cache *cache,
-+			 unsigned fnr, unsigned bnr)
++int cachefiles_set_object_xattr(struct cachefiles_object *object)
 +{
-+	struct kstatfs stats;
-+	u64 b_avail, b_writing;
++	struct cachefiles_xattr *buf;
++	struct dentry *dentry;
++	struct file *file = object->file;
++	unsigned int len = object->cookie->aux_len;
 +	int ret;
 +
-+	struct path path = {
-+		.mnt	= cache->mnt,
-+		.dentry	= cache->mnt->mnt_root,
-+	};
++	if (!file)
++		return -ESTALE;
++	dentry = file->f_path.dentry;
 +
-+	//_enter("{%llu,%llu,%llu,%llu,%llu,%llu},%u,%u",
-+	//       (unsigned long long) cache->frun,
-+	//       (unsigned long long) cache->fcull,
-+	//       (unsigned long long) cache->fstop,
-+	//       (unsigned long long) cache->brun,
-+	//       (unsigned long long) cache->bcull,
-+	//       (unsigned long long) cache->bstop,
-+	//       fnr, bnr);
++	_enter("%x,#%d", object->debug_id, len);
 +
-+	/* find out how many pages of blockdev are available */
-+	memset(&stats, 0, sizeof(stats));
++	buf = kmalloc(sizeof(struct cachefiles_xattr) + len, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
 +
-+	ret = vfs_statfs(&path, &stats);
++	buf->object_size	= cpu_to_be64(object->cookie->object_size);
++	buf->zero_point		= 0;
++	buf->type		= CACHEFILES_COOKIE_TYPE_DATA;
++	buf->content		= object->content_info;
++	if (test_bit(FSCACHE_COOKIE_LOCAL_WRITE, &object->cookie->flags))
++		buf->content	= CACHEFILES_CONTENT_DIRTY;
++	if (len > 0)
++		memcpy(buf->data, fscache_get_aux(object->cookie), len);
++
++	ret = cachefiles_inject_write_error();
++	if (ret == 0)
++		ret = vfs_setxattr(&init_user_ns, dentry, cachefiles_xattr_cache,
++				   buf, sizeof(struct cachefiles_xattr) + len, 0);
 +	if (ret < 0) {
-+		trace_cachefiles_vfs_error(NULL, d_inode(path.dentry), ret,
-+					   cachefiles_trace_statfs_error);
-+		if (ret == -EIO)
-+			cachefiles_io_error(cache, "statfs failed");
-+		_leave(" = %d", ret);
-+		return ret;
++		trace_cachefiles_vfs_error(object, file_inode(file), ret,
++					   cachefiles_trace_setxattr_error);
++		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
++					   buf->content,
++					   cachefiles_coherency_set_fail);
++		if (ret != -ENOMEM)
++			cachefiles_io_error_obj(
++				object,
++				"Failed to set xattr with error %d", ret);
++	} else {
++		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
++					   buf->content,
++					   cachefiles_coherency_set_ok);
 +	}
 +
-+	b_avail = stats.f_bavail >> cache->bshift;
-+	b_writing = atomic_long_read(&cache->b_writing);
-+	if (b_avail > b_writing)
-+		b_avail -= b_writing;
-+	else
-+		b_avail = 0;
++	kfree(buf);
++	_leave(" = %d", ret);
++	return ret;
++}
 +
-+	//_debug("avail %llu,%llu",
-+	//       (unsigned long long)stats.f_ffree,
-+	//       (unsigned long long)b_avail);
++/*
++ * check the consistency between the backing cache and the FS-Cache cookie
++ */
++int cachefiles_check_auxdata(struct cachefiles_object *object, struct file *file)
++{
++	struct cachefiles_xattr *buf;
++	struct dentry *dentry = file->f_path.dentry;
++	unsigned int len = object->cookie->aux_len, tlen;
++	const void *p = fscache_get_aux(object->cookie);
++	enum cachefiles_coherency_trace why;
++	ssize_t xlen;
++	int ret = -ESTALE;
 +
-+	/* see if there is sufficient space */
-+	if (stats.f_ffree > fnr)
-+		stats.f_ffree -= fnr;
-+	else
-+		stats.f_ffree = 0;
++	tlen = sizeof(struct cachefiles_xattr) + len;
++	buf = kmalloc(tlen, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
 +
-+	if (b_avail > bnr)
-+		b_avail -= bnr;
-+	else
-+		b_avail = 0;
-+
-+	ret = -ENOBUFS;
-+	if (stats.f_ffree < cache->fstop ||
-+	    b_avail < cache->bstop)
-+		goto begin_cull;
-+
-+	ret = 0;
-+	if (stats.f_ffree < cache->fcull ||
-+	    b_avail < cache->bcull)
-+		goto begin_cull;
-+
-+	if (test_bit(CACHEFILES_CULLING, &cache->flags) &&
-+	    stats.f_ffree >= cache->frun &&
-+	    b_avail >= cache->brun &&
-+	    test_and_clear_bit(CACHEFILES_CULLING, &cache->flags)
-+	    ) {
-+		_debug("cease culling");
-+		cachefiles_state_changed(cache);
++	xlen = cachefiles_inject_read_error();
++	if (xlen == 0)
++		xlen = vfs_getxattr(&init_user_ns, dentry, cachefiles_xattr_cache, buf, tlen);
++	if (xlen != tlen) {
++		if (xlen < 0)
++			trace_cachefiles_vfs_error(object, file_inode(file), xlen,
++						   cachefiles_trace_getxattr_error);
++		if (xlen == -EIO)
++			cachefiles_io_error_obj(
++				object,
++				"Failed to read aux with error %zd", xlen);
++		why = cachefiles_coherency_check_xattr;
++	} else if (buf->type != CACHEFILES_COOKIE_TYPE_DATA) {
++		why = cachefiles_coherency_check_type;
++	} else if (memcmp(buf->data, p, len) != 0) {
++		why = cachefiles_coherency_check_aux;
++	} else if (be64_to_cpu(buf->object_size) != object->cookie->object_size) {
++		why = cachefiles_coherency_check_objsize;
++	} else if (buf->content == CACHEFILES_CONTENT_DIRTY) {
++		// TODO: Begin conflict resolution
++		pr_warn("Dirty object in cache\n");
++		why = cachefiles_coherency_check_dirty;
++	} else {
++		why = cachefiles_coherency_check_ok;
++		ret = 0;
 +	}
 +
-+	//_leave(" = 0");
-+	return 0;
++	trace_cachefiles_coherency(object, file_inode(file)->i_ino,
++				   buf->content, why);
++	kfree(buf);
++	return ret;
++}
 +
-+begin_cull:
-+	if (!test_and_set_bit(CACHEFILES_CULLING, &cache->flags)) {
-+		_debug("### CULL CACHE ###");
-+		cachefiles_state_changed(cache);
++/*
++ * remove the object's xattr to mark it stale
++ */
++int cachefiles_remove_object_xattr(struct cachefiles_cache *cache,
++				   struct cachefiles_object *object,
++				   struct dentry *dentry)
++{
++	int ret;
++
++	ret = cachefiles_inject_remove_error();
++	if (ret == 0)
++		ret = vfs_removexattr(&init_user_ns, dentry, cachefiles_xattr_cache);
++	if (ret < 0) {
++		trace_cachefiles_vfs_error(object, d_inode(dentry), ret,
++					   cachefiles_trace_remxattr_error);
++		if (ret == -ENOENT || ret == -ENODATA)
++			ret = 0;
++		else if (ret != -ENOMEM)
++			cachefiles_io_error(cache,
++					    "Can't remove xattr from %lu"
++					    " (error %d)",
++					    d_backing_inode(dentry)->i_ino, -ret);
 +	}
 +
 +	_leave(" = %d", ret);
 +	return ret;
 +}
-diff --git a/fs/cachefiles/daemon.c b/fs/cachefiles/daemon.c
-index 4cfb7c8b37d0..7d4691614cec 100644
---- a/fs/cachefiles/daemon.c
-+++ b/fs/cachefiles/daemon.c
-@@ -167,7 +167,7 @@ static ssize_t cachefiles_daemon_read(struct file *file, char __user *_buffer,
- 		return 0;
- 
- 	/* check how much space the cache has */
--	// PLACEHOLDER: Check space
-+	cachefiles_has_space(cache, 0, 0);
- 
- 	/* summarise */
- 	f_released = atomic_xchg(&cache->f_released, 0);
-diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
-index 7fd5429715ea..3783a3e01027 100644
---- a/fs/cachefiles/internal.h
-+++ b/fs/cachefiles/internal.h
-@@ -39,6 +39,7 @@ struct cachefiles_cache {
- 	atomic_t			gravecounter;	/* graveyard uniquifier */
- 	atomic_t			f_released;	/* number of objects released lately */
- 	atomic_long_t			b_released;	/* number of blocks released lately */
-+	atomic_long_t			b_writing;	/* Number of blocks being written */
- 	unsigned			frun_percent;	/* when to stop culling (% files) */
- 	unsigned			fcull_percent;	/* when to start culling (% files) */
- 	unsigned			fstop_percent;	/* when to stop allocating (% files) */
-@@ -74,6 +75,12 @@ static inline void cachefiles_state_changed(struct cachefiles_cache *cache)
- 	wake_up_all(&cache->daemon_pollwq);
- }
- 
-+/*
-+ * cache.c
-+ */
-+extern int cachefiles_has_space(struct cachefiles_cache *cache,
-+				unsigned fnr, unsigned bnr);
 +
- /*
-  * daemon.c
-  */
++/*
++ * Stick a marker on the cache object to indicate that it's dirty.
++ */
++void cachefiles_prepare_to_write(struct fscache_cookie *cookie)
++{
++	const struct cred *saved_cred;
++	struct cachefiles_object *object = cookie->cache_priv;
++	struct cachefiles_cache *cache = object->volume->cache;
++
++	_enter("c=%08x", object->cookie->debug_id);
++
++	if (!test_bit(CACHEFILES_OBJECT_USING_TMPFILE, &object->flags)) {
++		cachefiles_begin_secure(cache, &saved_cred);
++		cachefiles_set_object_xattr(object);
++		cachefiles_end_secure(cache, saved_cred);
++	}
++}
+diff --git a/include/trace/events/cachefiles.h b/include/trace/events/cachefiles.h
+index 54815cc776ba..98b1eee4a7a8 100644
+--- a/include/trace/events/cachefiles.h
++++ b/include/trace/events/cachefiles.h
+@@ -42,6 +42,19 @@ enum fscache_why_object_killed {
+ 	FSCACHE_OBJECT_WAS_CULLED,
+ };
+ 
++enum cachefiles_coherency_trace {
++	cachefiles_coherency_check_aux,
++	cachefiles_coherency_check_content,
++	cachefiles_coherency_check_dirty,
++	cachefiles_coherency_check_len,
++	cachefiles_coherency_check_objsize,
++	cachefiles_coherency_check_ok,
++	cachefiles_coherency_check_type,
++	cachefiles_coherency_check_xattr,
++	cachefiles_coherency_set_fail,
++	cachefiles_coherency_set_ok,
++};
++
+ enum cachefiles_trunc_trace {
+ 	cachefiles_trunc_dio_adjust,
+ 	cachefiles_trunc_expand_tmpfile,
+@@ -95,6 +108,18 @@ enum cachefiles_error_trace {
+ 	EM(cachefiles_obj_see_withdraw_cookie,	"SEE withdraw_cookie")	\
+ 	E_(cachefiles_obj_see_withdrawal,	"SEE withdrawal")
+ 
++#define cachefiles_coherency_traces					\
++	EM(cachefiles_coherency_check_aux,	"BAD aux ")		\
++	EM(cachefiles_coherency_check_content,	"BAD cont")		\
++	EM(cachefiles_coherency_check_dirty,	"BAD dirt")		\
++	EM(cachefiles_coherency_check_len,	"BAD len ")		\
++	EM(cachefiles_coherency_check_objsize,	"BAD osiz")		\
++	EM(cachefiles_coherency_check_ok,	"OK      ")		\
++	EM(cachefiles_coherency_check_type,	"BAD type")		\
++	EM(cachefiles_coherency_check_xattr,	"BAD xatt")		\
++	EM(cachefiles_coherency_set_fail,	"SET fail")		\
++	E_(cachefiles_coherency_set_ok,		"SET ok  ")
++
+ #define cachefiles_trunc_traces						\
+ 	EM(cachefiles_trunc_dio_adjust,		"DIOADJ")		\
+ 	EM(cachefiles_trunc_expand_tmpfile,	"EXPTMP")		\
+@@ -130,6 +155,7 @@ enum cachefiles_error_trace {
+ 
+ cachefiles_obj_kill_traces;
+ cachefiles_obj_ref_traces;
++cachefiles_coherency_traces;
+ cachefiles_trunc_traces;
+ cachefiles_error_traces;
+ 
+@@ -287,6 +313,36 @@ TRACE_EVENT(cachefiles_rename,
+ 		      __print_symbolic(__entry->why, cachefiles_obj_kill_traces))
+ 	    );
+ 
++TRACE_EVENT(cachefiles_coherency,
++	    TP_PROTO(struct cachefiles_object *obj,
++		     ino_t ino,
++		     enum cachefiles_content content,
++		     enum cachefiles_coherency_trace why),
++
++	    TP_ARGS(obj, ino, content, why),
++
++	    /* Note that obj may be NULL */
++	    TP_STRUCT__entry(
++		    __field(unsigned int,			obj	)
++		    __field(enum cachefiles_coherency_trace,	why	)
++		    __field(enum cachefiles_content,		content	)
++		    __field(u64,				ino	)
++			     ),
++
++	    TP_fast_assign(
++		    __entry->obj	= obj->debug_id;
++		    __entry->why	= why;
++		    __entry->content	= content;
++		    __entry->ino	= ino;
++			   ),
++
++	    TP_printk("o=%08x %s i=%llx c=%u",
++		      __entry->obj,
++		      __print_symbolic(__entry->why, cachefiles_coherency_traces),
++		      __entry->ino,
++		      __entry->content)
++	    );
++
+ TRACE_EVENT(cachefiles_trunc,
+ 	    TP_PROTO(struct cachefiles_object *obj, struct inode *backer,
+ 		     loff_t from, loff_t to, enum cachefiles_trunc_trace why),
 
 
