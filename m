@@ -2,88 +2,126 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD27DC433F5
-	for <ceph-devel@archiver.kernel.org>; Tue,  4 Jan 2022 12:29:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29F8AC433F5
+	for <ceph-devel@archiver.kernel.org>; Tue,  4 Jan 2022 14:04:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232992AbiADM3K (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 4 Jan 2022 07:29:10 -0500
-Received: from ams.source.kernel.org ([145.40.68.75]:37994 "EHLO
-        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229506AbiADM3K (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jan 2022 07:29:10 -0500
+        id S232680AbiADOEf (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 4 Jan 2022 09:04:35 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:49618 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233981AbiADOEd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jan 2022 09:04:33 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id BC146B811D9;
-        Tue,  4 Jan 2022 12:29:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C3D5C36AE7;
-        Tue,  4 Jan 2022 12:29:07 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D24EE61462
+        for <ceph-devel@vger.kernel.org>; Tue,  4 Jan 2022 14:04:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87738C36AEF;
+        Tue,  4 Jan 2022 14:04:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641299347;
-        bh=67LOQtcueTMAI0ld45ARZL7TA7k11DlREbbqGl7s4x0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=T3r245F93SyjBK61i7mujJxcpAK/z09AVqrAEulvJJZMHyiSX7sgVr0fzbVRZmH3E
-         TBUvvlOlSsDcywgnlhHP7/SLUpHnZjKkyOO/3bLq9RhWreC3Sp35PgmZaQf5cGryqL
-         541ddFp+xgxrcBycBbU0W4Icd9XFOscf+MsHXdYb91hNJV2UZfra4QOvhKeDh7UASn
-         xiDW4d4i4kkIH+sdzE68clCK5zMX99pBvUB7Gqzp5+fKeG40oPJXI08hEPhdYiVUlV
-         wXqf3Z80CyFHJ/3G1HI8dkvWoULvQxo/TWEONkiT1xOa4t563cx1CItbskpTaKe+Ft
-         gJGupiiYg59iw==
-Message-ID: <21d74364d3006b350502067ab5a51f5dd1cd3f31.camel@kernel.org>
-Subject: Re: PROBLEM: SLAB use-after-free with ceph(fs)
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Bastian Blank <bastian.blank@credativ.de>
-Cc:     Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Date:   Tue, 04 Jan 2022 07:29:05 -0500
-In-Reply-To: <YdQ7msXTCF5kKl4V@softhammer.credativ.lan>
-References: <YdQYEF9WCTWTAzOp@softhammer.credativ.lan>
-         <22cf685dbf61e09a4e5e7c3a48d1117a769548a8.camel@kernel.org>
-         <YdQ7msXTCF5kKl4V@softhammer.credativ.lan>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.2 (3.42.2-1.fc35) 
+        s=k20201202; t=1641305072;
+        bh=TqhxcjSSsz5BG2JsZaDV65AFz/oNyLOr2Fc3EaW/w3s=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=TPQJzD29kLiHfavjqwxdK5SGptNHJm1kT4G+F8Jq6bpxJt6suQdLWtHO7Y78w4kzj
+         aQLrv2Ze47VMaFAlpGthA+XO9SZGjNi/EXTT7K22Q709mImdeVD90SBIoskmdhGW9H
+         bNJBN5iZ097DaMubbrY3QGgKTflSo9bci6Fmt4ziNfuZ58KI9obXG6Z+FDEZUkw/So
+         55RFyEPkGFDFZwD1vmwvHYgCQq7L4WP+OUvtdWkjlCLj3wbgefUFbQfMLyyT61FRpV
+         aQrk9ckB7ovsCT75oHg4DRq0YCzkz5BlmkeSXgF+mnpBs/fNpg5W+jySLeRM1Mu/rL
+         SFZnaWRgZs0zw==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
+Cc:     Ilya Dryomov <idryomov@gmail.com>, Christoph Hellwig <hch@lst.de>,
+        Christian Brauner <christian.brauner@ubuntu.com>
+Subject: [PATCH 01/12] ceph: stash idmapping in mdsc request
+Date:   Tue,  4 Jan 2022 15:04:03 +0100
+Message-Id: <20220104140414.155198-2-brauner@kernel.org>
+X-Mailer: git-send-email 2.32.0
+In-Reply-To: <20220104140414.155198-1-brauner@kernel.org>
+References: <20220104140414.155198-1-brauner@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2814; h=from:subject; bh=lUre2FF+bMPoTNWEitmuyN6zfiumvjQNh9FhgakhqbU=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSReCd7AsvLLo2tTUxz2sx8qMJjX+e3szvz5Zyvm7XnQ1Hfe Q/C2bUcpC4MYF4OsmCKLQ7tJuNxynorNRpkaMHNYmUCGMHBxCsBEfNwY/pf8X5gVvEmiRy5mX+XT/4 lBE44r/BHTkoypvPxDQ12oJICR4Z205hTmXU3C+wxPsStNeqi7rPF9Qcr/A1um51jtnV+xiRsA
+X-Developer-Key: i=christian.brauner@ubuntu.com; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, 2022-01-04 at 13:20 +0100, Bastian Blank wrote:
-> Hi
-> 
-> On Tue, Jan 04, 2022 at 07:00:31AM -0500, Jeff Layton wrote:
-> > On Tue, 2022-01-04 at 10:49 +0100, Bastian Blank wrote:
-> > > > [152791.777458] cache_from_obj: Wrong slab cache. jbd2_journal_handle but object is from kmalloc-256
-> 
-> > At first blush, this looks like the same problem as:
-> >     https://tracker.ceph.com/issues/52283
-> > ...but that should have been fixed in v5.14.
-> 
-> Nope, does not make sense.  This reported issue tried to free a
-> "ceph_cap_flush", while mine tries to free "jbd2_journal_handle", which
-> is far away.
-> 
+From: Christian Brauner <christian.brauner@ubuntu.com>
 
-There was some ambiguity in how those objects got freed. What you're
-seeing could just be a different manifestation of the same problem, but
-it could be something else as well.
+When sending a mds request cephfs will send relevant data for the
+requested operation. For creation requests the caller's fs{g,u}id is
+used to set the ownership of the newly created filesystem object. For
+setattr requests the caller can pass in arbitrary {g,u}id values to
+which the relevant filesystem object is supposed to be changed.
 
-> > You may also want to try v5.16-rc8 if you're able to build your own
-> > kernels. There were some patches that went in to improve how the client
-> > handles inodes that become inaccessible.
-> 
-> I try to get them to install a 5.16-rc8 or newer, get a new crash dump
-> and report that to https://tracker.ceph.com/.
-> 
+If the caller is performing the relevant operation via an idmapped mount
+cephfs simply needs to take the idmapping into account when it sends the
+relevant mds request.
 
-Sounds good. I suspect you have more than one problem.
+In order to support idmapped mounts for cephfs we stash the idmapping
+whenever they are relevant for the operation for the duration of the
+request. Since mds requests can be queued and performed asynchronously
+we make sure to keep the idmapping around and release it once the
+request has finished.
 
-The crash is clearly a kernel bug, but it's occurring while the client
-is removing caps due to receiving a session message. It may be that the
-MDS blocklisted the client in this case. You may want to check the MDS
-logs or see if the kernel logged anything to that effect.
+In follow-up patches we will use this to send correct ownership
+information over the wire. This patch just adds the basic infrastructure
+to keep the idmapping around. The actual conversion patches are all
+fairly minimal.
 
-v5.16 may help the client more sanely handle tearing down inodes in this
-situation, but it may not do anything to help whatever is causing the
-blocklisting in the first place.
+Cc: Jeff Layton <jlayton@kernel.org>
+Cc: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org
+Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+---
+ fs/ceph/mds_client.c | 7 +++++++
+ fs/ceph/mds_client.h | 1 +
+ 2 files changed, 8 insertions(+)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index c30eefc0ac19..ae2cc4ce1d48 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -12,6 +12,7 @@
+ #include <linux/bits.h>
+ #include <linux/ktime.h>
+ #include <linux/bitmap.h>
++#include <linux/mnt_idmapping.h>
+ 
+ #include "super.h"
+ #include "mds_client.h"
+@@ -862,6 +863,8 @@ void ceph_mdsc_release_request(struct kref *kref)
+ 	kfree(req->r_path1);
+ 	kfree(req->r_path2);
+ 	put_cred(req->r_cred);
++	if (!initial_idmapping(req->mnt_userns))
++		put_user_ns(req->mnt_userns);
+ 	if (req->r_pagelist)
+ 		ceph_pagelist_release(req->r_pagelist);
+ 	put_request_session(req);
+@@ -918,6 +921,10 @@ static void __register_request(struct ceph_mds_client *mdsc,
+ 	insert_request(&mdsc->request_tree, req);
+ 
+ 	req->r_cred = get_current_cred();
++	if (!req->mnt_userns)
++		req->mnt_userns = &init_user_ns;
++	else
++		get_user_ns(req->mnt_userns);
+ 
+ 	if (mdsc->oldest_tid == 0 && req->r_op != CEPH_MDS_OP_SETFILELOCK)
+ 		mdsc->oldest_tid = req->r_tid;
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 97c7f7bfa55f..1b648645e340 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -275,6 +275,7 @@ struct ceph_mds_request {
+ 	union ceph_mds_request_args r_args;
+ 	int r_fmode;        /* file mode, if expecting cap */
+ 	const struct cred *r_cred;
++	struct user_namespace *mnt_userns;
+ 	int r_request_release_offset;
+ 	struct timespec64 r_stamp;
+ 
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.32.0
+
