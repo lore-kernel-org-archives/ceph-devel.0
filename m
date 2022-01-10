@@ -2,81 +2,97 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54A64C433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 10 Jan 2022 11:32:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C64CC433FE
+	for <ceph-devel@archiver.kernel.org>; Mon, 10 Jan 2022 23:50:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244788AbiAJLc3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 10 Jan 2022 06:32:29 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:25649 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S244751AbiAJLcN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Jan 2022 06:32:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1641814332;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=hrEu87EnXQ6Fg7UvjXggUKw0Jcqes+nBaSmxrmpEEwU=;
-        b=Na8Keg6S0hqNWI8biY0r3XqJygy1yo4X8MajVtNkrjYZ7JkaXEna/RStvL72BrXpcu7NDE
-        XahOiI33eyfF1WIjMQZJ9ZlpcYoRcS8vofZumTqYfCqx7D2HeAtseCkpg848WsjfAVtRto
-        sktfokk7YYiNjV5SS9r2udAHrSKZgjA=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-54-MsPtVj76MgWGNWERMB4MZg-1; Mon, 10 Jan 2022 06:32:09 -0500
-X-MC-Unique: MsPtVj76MgWGNWERMB4MZg-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        id S1345751AbiAJXu1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 10 Jan 2022 18:50:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51950 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1345745AbiAJXu0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jan 2022 18:50:26 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19FF9C061748;
+        Mon, 10 Jan 2022 15:50:26 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4E8BB1898292;
-        Mon, 10 Jan 2022 11:32:06 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.33.36.165])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1F9507B6C9;
-        Mon, 10 Jan 2022 11:31:55 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-From:   David Howells <dhowells@redhat.com>
-In-Reply-To: <Ydvl8Dk8z0mF0KFl@infradead.org>
-References: <Ydvl8Dk8z0mF0KFl@infradead.org> <164021479106.640689.17404516570194656552.stgit@warthog.procyon.org.uk> <164021541207.640689.564689725898537127.stgit@warthog.procyon.org.uk> <CAOQ4uxjEcvffv=rNXS-r+NLz+=6yk4abRuX_AMq9v-M4nf_PtA@mail.gmail.com> <Ydk6jWmFH6TZLPZq@casper.infradead.org>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     dhowells@redhat.com, Matthew Wilcox <willy@infradead.org>,
-        Amir Goldstein <amir73il@gmail.com>, linux-cachefs@redhat.com,
-        Trond Myklebust <trondmy@hammerspace.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>,
-        Jeff Layton <jlayton@kernel.org>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        Omar Sandoval <osandov@osandov.com>,
-        JeffleXu <jefflexu@linux.alibaba.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-afs@lists.infradead.org,
-        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
-        CIFS <linux-cifs@vger.kernel.org>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v4 38/68] vfs, cachefiles: Mark a backing file in use with an inode flag
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0D0E5614A5;
+        Mon, 10 Jan 2022 23:50:25 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0530CC36AE9;
+        Mon, 10 Jan 2022 23:50:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641858624;
+        bh=5jg4ahzCQWXk36E+/pzngm/e3Ie4peBBN/TBo9UVz88=;
+        h=From:To:Cc:Subject:Date:From;
+        b=pXcnv7fjWWdlRBeHFZgiMXyJN5XB35i5B+GdQgu8x+/oowZYdVpm5gP9iwgHoZ8cK
+         cuZ5ZkrPTia5x64NmESgGzImnrkRfDKlL5sbg2ph0m3Uxt1ATdQO8Eiv0gZCMJnCLU
+         17BrRQOuYTXShEuz6xEjolF9fawh7lbUSIFwNvdDUab/jbFY+0KAN7P1gmAnxaeQSo
+         F4ww7jL1wlGDiWY4hFWpJijonVrvzus5582rnuCBI0SZBc6OLJogaWkllxJfuU/xcw
+         aQuoHFkfg1HmkCYfsxxQRXCVMC1IL2BF0CtoMM5O/pE9iQabewoG0wXgboFqxYqXFF
+         KYr3ztYt5rn7A==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, linux-kernel@vger.kernel.org
+Subject: [PATCH] ceph: move CEPH_SUPER_MAGIC definition to magic.h
+Date:   Mon, 10 Jan 2022 18:50:22 -0500
+Message-Id: <20220110235022.138723-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <3735738.1641814315.1@warthog.procyon.org.uk>
-Date:   Mon, 10 Jan 2022 11:31:55 +0000
-Message-ID: <3735739.1641814315@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Christoph Hellwig <hch@infradead.org> wrote:
+The uapi headers are missing the ceph definition. Move it there so
+userland apps can ID cephfs.
 
-> So let's name it that way.  We have plenty of files in kernel use using
-> filp_open and this flag very obviously means something else.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/super.c            | 2 ++
+ fs/ceph/super.h            | 3 ---
+ include/uapi/linux/magic.h | 1 +
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-S_KERNEL_LOCK?
-
-David
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index bab61232dc5a..9679275c875d 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -27,6 +27,8 @@
+ #include <linux/ceph/auth.h>
+ #include <linux/ceph/debugfs.h>
+ 
++#include <uapi/linux/magic.h>
++
+ static DEFINE_SPINLOCK(ceph_fsc_lock);
+ static LIST_HEAD(ceph_fsc_list);
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index ac331aa07cfa..97e150724291 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -25,9 +25,6 @@
+ #include <linux/fscache.h>
+ #endif
+ 
+-/* f_type in struct statfs */
+-#define CEPH_SUPER_MAGIC 0x00c36400
+-
+ /* large granularity for statfs utilization stats to facilitate
+  * large volume sizes on 32-bit machines. */
+ #define CEPH_BLOCK_SHIFT   22  /* 4 MB */
+diff --git a/include/uapi/linux/magic.h b/include/uapi/linux/magic.h
+index 35687dcb1a42..53a3c20394cf 100644
+--- a/include/uapi/linux/magic.h
++++ b/include/uapi/linux/magic.h
+@@ -6,6 +6,7 @@
+ #define AFFS_SUPER_MAGIC	0xadff
+ #define AFS_SUPER_MAGIC                0x5346414F
+ #define AUTOFS_SUPER_MAGIC	0x0187
++#define CEPH_SUPER_MAGIC	0x00c36400
+ #define CODA_SUPER_MAGIC	0x73757245
+ #define CRAMFS_MAGIC		0x28cd3d45	/* some random number */
+ #define CRAMFS_MAGIC_WEND	0x453dcd28	/* magic number with the wrong endianess */
+-- 
+2.34.1
 
