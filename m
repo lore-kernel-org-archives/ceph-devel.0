@@ -2,162 +2,81 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37966C433FE
-	for <ceph-devel@archiver.kernel.org>; Fri, 21 Jan 2022 14:18:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2948EC4332F
+	for <ceph-devel@archiver.kernel.org>; Fri, 21 Jan 2022 14:18:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348447AbiAUOSn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 21 Jan 2022 09:18:43 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:57302 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1381012AbiAUOSm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Jan 2022 09:18:42 -0500
+        id S1350837AbiAUOSo (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 21 Jan 2022 09:18:44 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:53568 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1350813AbiAUOSn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Jan 2022 09:18:43 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 80BF4617AE;
-        Fri, 21 Jan 2022 14:18:42 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CC6EC340E5;
+        by ams.source.kernel.org (Postfix) with ESMTPS id D519CB81FE5;
         Fri, 21 Jan 2022 14:18:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2946AC340E1;
+        Fri, 21 Jan 2022 14:18:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642774721;
-        bh=2u9pe6nwGCKcyCtVd6BRmuJUvlF6F40W1gx18D56fZk=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Vht3QlyWwaIZ7NwwqARRkFgonbUxbEN8fU45cPL6NBA0FCuW8zliu37exdtLGti+l
-         PEWfKySrd4LeHk0aqENtwjGAEj+SXuL3U30KLnVk1TzWTIqyyUHohSJAFRyyOADvG6
-         KLeb7BlbjwNZOmcmg6XjfZ+r1r3o15NiivksqLEGUzerFHy+VugJU3o7nUjJ+0bRAZ
-         fOHkT2NPohx5q9eWqMDCaV+DuhapNxhtV2ss9WzXBfU8vDexb2PBuLzxAGl09/9H18
-         yb5g0iCq2KJazdGxN6u/mxZ5SoDSIMFRXB6olVL/n5NKMFcuTKw+hscf+lxpDR2D2U
-         pTUWbfMxG653Q==
+        s=k20201202; t=1642774720;
+        bh=drXbDDI7Zkm5TxhfNdcieA7XvXno9U2261QKbBkQDhk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Vbgrb8pOE5NJgZkxChBxnfBwnTgRKt0r+2xBHOH8f5bfPaRHyIsuwI6f1b92p3JG1
+         l/oOVI/xzkc173Uk0UQrfwZQkFYX3YEnNQFIfy6krMaWEMUEufHym+VaHLBxzn+4DW
+         tkQt5I55FgOYr64Lja5ki/zWFiJtWVogIk/e8swtbRFt9O8ayCelnsOJ7boab0la+H
+         p+fHymkXso+dbJ9lmlz0qBTA0PtgWgkcJdTgFDDTpkDA/uh+sFDy1VAD/KyCuLo4Hd
+         IhxUvzBP5YCHVsCWiqb34Ce2l4jM6aAg+XSHhvzZT7OBUiUrACRJsFaNNSryIfFB6c
+         g8pMYQPQ32jXA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     idryomov@gmail.com, dhowells@redhat.com,
         linux-fsdevel@vger.kernel.org
-Subject: [PATCH v3 2/3] ceph: Make ceph_netfs_issue_op() handle inlined data
-Date:   Fri, 21 Jan 2022 09:18:37 -0500
-Message-Id: <20220121141838.110954-3-jlayton@kernel.org>
+Subject: [PATCH v3 0/3] ceph: uninline data on open instead of write
+Date:   Fri, 21 Jan 2022 09:18:35 -0500
+Message-Id: <20220121141838.110954-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220121141838.110954-1-jlayton@kernel.org>
-References: <20220121141838.110954-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: David Howells <dhowells@redhat.com>
+The inline_data feature for ceph allowed you to store the first chunk of
+file data in the MDS instead of the OSD, using the cap system to keep
+things in sync. The kernel client implementation has always been a bit
+buggy and racy, and user uptake of this feature was pretty low.
 
-Make ceph_netfs_issue_op() handle inlined data on page 0.
+A couple of years ago, we decided to formally deprecate the inline_data
+feature entirely, and marked it as such in the Octopus release. We're
+still waiting on a few pieces in userland [1] before we can rip out
+support there so we need to keep support for inline_data in the client
+for now.
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/addr.c | 79 +++++++++++++++++++++++++++++++++++++++-----------
- 1 file changed, 62 insertions(+), 17 deletions(-)
+This patch series changes the client from uninlining the data on the
+first write, to doing so at open time. This gets the uninlining out of
+the more fiddly write codepaths, and fits with the larger goal of
+aggressively deprecating inline_data.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index fcba36d2cc23..01d97ab56f71 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -239,6 +239,61 @@ static void finish_netfs_read(struct ceph_osd_request *req)
- 	iput(req->r_inode);
- }
- 
-+static bool ceph_netfs_issue_op_inline(struct netfs_read_subrequest *subreq)
-+{
-+	struct netfs_read_request *rreq = subreq->rreq;
-+	struct inode *inode = rreq->inode;
-+	struct ceph_mds_reply_info_parsed *rinfo;
-+	struct ceph_mds_reply_info_in *iinfo;
-+	struct ceph_mds_request *req;
-+	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+	struct iov_iter iter;
-+	ssize_t err = 0;
-+	size_t len;
-+
-+	__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
-+	__clear_bit(NETFS_SREQ_WRITE_TO_CACHE, &subreq->flags);
-+
-+	if (subreq->start >= inode->i_size)
-+		goto out;
-+
-+	/* We need to fetch the inline data. */
-+	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
-+	if (IS_ERR(req)) {
-+		err = PTR_ERR(req);
-+		goto out;
-+	}
-+	req->r_ino1 = ci->i_vino;
-+	req->r_args.getattr.mask = cpu_to_le32(CEPH_STAT_CAP_INLINE_DATA);
-+	req->r_num_caps = 2;
-+
-+	err = ceph_mdsc_do_request(mdsc, NULL, req);
-+	if (err < 0)
-+		goto out;
-+
-+	rinfo = &req->r_reply_info;
-+	iinfo = &rinfo->targeti;
-+	if (iinfo->inline_version == CEPH_INLINE_NONE) {
-+		/* The data got uninlined */
-+		ceph_mdsc_put_request(req);
-+		return false;
-+	}
-+
-+	len = iinfo->inline_len;
-+	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, subreq->start, len);
-+
-+	err = copy_to_iter(iinfo->inline_data, len, &iter);
-+	if (err == 0)
-+		err = -EFAULT;
-+
-+	ceph_mdsc_put_request(req);
-+
-+out:
-+	netfs_subreq_terminated(subreq, err, false);
-+	return true;
-+}
-+
- static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
- {
- 	struct netfs_read_request *rreq = subreq->rreq;
-@@ -253,6 +308,10 @@ static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
- 	int err = 0;
- 	u64 len = subreq->len;
- 
-+	if (ci->i_inline_version != CEPH_INLINE_NONE &&
-+	    ceph_netfs_issue_op_inline(subreq))
-+		return;
-+
- 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
- 			0, 1, CEPH_OSD_OP_READ,
- 			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
-@@ -326,23 +385,9 @@ static int ceph_readpage(struct file *file, struct page *subpage)
- 	size_t len = folio_size(folio);
- 	u64 off = folio_file_pos(folio);
- 
--	if (ci->i_inline_version != CEPH_INLINE_NONE) {
--		/*
--		 * Uptodate inline data should have been added
--		 * into page cache while getting Fcr caps.
--		 */
--		if (off == 0) {
--			folio_unlock(folio);
--			return -EINVAL;
--		}
--		zero_user_segment(&folio->page, 0, folio_size(folio));
--		folio_mark_uptodate(folio);
--		folio_unlock(folio);
--		return 0;
--	}
--
--	dout("readpage ino %llx.%llx file %p off %llu len %zu folio %p index %lu\n",
--	     vino.ino, vino.snap, file, off, len, folio, folio_index(folio));
-+	dout("readpage ino %llx.%llx file %p off %llu len %zu folio %p index %lu\n inline %d",
-+	     vino.ino, vino.snap, file, off, len, folio, folio_index(folio),
-+	     ci->i_inline_version != CEPH_INLINE_NONE);
- 
- 	return netfs_readpage(file, folio, &ceph_netfs_read_ops, NULL);
- }
+The original series was proposed by David. I added fixes for a few bugs
+found during testing and rolled in a related fix to change how we acquire
+the inode pointer.
+
+[1]: https://tracker.ceph.com/issues/52916
+
+David Howells (2):
+  ceph: Make ceph_netfs_issue_op() handle inlined data
+  ceph: Uninline the data on a file opened for writing
+
+Jeff Layton (1):
+  ceph: switch netfs read ops to use rreq->inode instead of
+    rreq->mapping->host
+
+ fs/ceph/addr.c  | 239 +++++++++++++++++++++++-------------------------
+ fs/ceph/file.c  |  32 +++----
+ fs/ceph/super.h |   2 +-
+ 3 files changed, 129 insertions(+), 144 deletions(-)
+
 -- 
 2.34.1
 
