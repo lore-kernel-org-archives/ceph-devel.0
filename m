@@ -2,136 +2,110 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7915EC433F5
-	for <ceph-devel@archiver.kernel.org>; Sat, 29 Jan 2022 10:36:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44E50C4332F
+	for <ceph-devel@archiver.kernel.org>; Mon, 31 Jan 2022 04:04:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230061AbiA2Kg4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 29 Jan 2022 05:36:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58248 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229484AbiA2Kgz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 29 Jan 2022 05:36:55 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F3A1C061714
-        for <ceph-devel@vger.kernel.org>; Sat, 29 Jan 2022 02:36:55 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1357521AbiAaEEI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 30 Jan 2022 23:04:08 -0500
+Received: from smtp-out2.suse.de ([195.135.220.29]:38096 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237371AbiAaEEH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Jan 2022 23:04:07 -0500
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3DEB560B19
-        for <ceph-devel@vger.kernel.org>; Sat, 29 Jan 2022 10:36:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 42333C340E5;
-        Sat, 29 Jan 2022 10:36:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1643452613;
-        bh=rRvVrtIlD4TPUif66+Orjvg9GzTOg9439FCMyIVWqpk=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=c1JTaYbfv1Fu+QnHVriZSdABgbyAsEVfzklCLhoQ8S/WFbt8c62JqoCgWe0OU6ygJ
-         olAgwLFB2s5JPyOrD/vL5MihE5HkHP3PAlwf929Gh89mol/1CDMOryOPMcxCkPLkZC
-         BPk9LVS0csakk0707j0QzwFzVOS/DVdhF8BHspnx9s7lEkxXg5EdMi5SJJl6Y+Arqe
-         NzSX6MScgZx8VVqNNxN8FREz0Jd1PWqSCcA9lq3cb/OReH0HYjPdwFgjP4pwgvcshH
-         eQj6WNa9DpY8O5twzXc/R65GFDvYEHM+gdER0OBE05bEFgNzpvBG0Is5dwapgE83qQ
-         SLsksDca51fzg==
-Message-ID: <61d982d3a9a3d2ba39de755be5559391221061fb.camel@kernel.org>
-Subject: Re: [PATCH] ceph: wake waiters on any IMPORT that grants new caps
-From:   Jeff Layton <jlayton@kernel.org>
-To:     "Yan, Zheng" <ukernel@gmail.com>
-Cc:     ceph-devel <ceph-devel@vger.kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>
-Date:   Sat, 29 Jan 2022 05:36:52 -0500
-In-Reply-To: <CAAM7YAmcj4JQ64EHWRTAVnEGnhfSN1OSUCSuOoi2PhOT8s_cHg@mail.gmail.com>
-References: <20220127200849.96580-1-jlayton@kernel.org>
-         <CAAM7YAmcj4JQ64EHWRTAVnEGnhfSN1OSUCSuOoi2PhOT8s_cHg@mail.gmail.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.3 (3.42.3-1.fc35) 
+        by smtp-out2.suse.de (Postfix) with ESMTPS id F2A5D1F37B;
+        Mon, 31 Jan 2022 04:04:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1643601846; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=a1hKKv4tQs0IkB2xFQLDfa5QVFGb4OvJBNqopkGrr6k=;
+        b=fiVkEAwxRDflObUldBuKWNJQJVCMu9eTTko+720oBoKH20RkmraMDCjs0Iy00tjy/uphUk
+        128iAjXpmRCycvT2drQM/OATXxz69rsiprFbeB2pPwa9L9eR8aiP2KJRgd4bmESc8+RqhM
+        0lrloqgzFrVvw8R08CSdyUMX4lq4gLg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1643601846;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=a1hKKv4tQs0IkB2xFQLDfa5QVFGb4OvJBNqopkGrr6k=;
+        b=uob4sOy+PK8E9TZ09Wj6Bhv0xAVwnyLeFUUFdeVvKXtH0q63G8ED3ptWJSVL4uJG3uhlu4
+        DO1m665lXtn3d/Cw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id B1220133A4;
+        Mon, 31 Jan 2022 04:04:02 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id B7tCG7Jf92GMCQAAMHmgww
+        (envelope-from <neilb@suse.de>); Mon, 31 Jan 2022 04:04:02 +0000
+Subject: [PATCH 0/3] remove dependence of inode_congested()
+From:   NeilBrown <neilb@suse.de>
+To:     Andrew Morton <akpm@linux-foundation.org>,
+        Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        Anna Schumaker <anna.schumaker@netapp.com>
+Cc:     linux-mm@kvack.org, linux-nfs@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Date:   Mon, 31 Jan 2022 15:03:53 +1100
+Message-ID: <164360127045.4233.2606812444285122570.stgit@noble.brown>
+User-Agent: StGit/0.23
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Sat, 2022-01-29 at 11:14 +0800, Yan, Zheng wrote:
-> On Sat, Jan 29, 2022 at 2:32 AM Jeff Layton <jlayton@kernel.org> wrote:
-> > 
-> > I've noticed an intermittent hang waiting for caps in some testing. What
-> > I see is that the client will try to get caps for an operation (e.g. a
-> > read), and ends up waiting on the waitqueue forever. The caps debugfs
-> > file however shows that the caps it's waiting on have already been
-> > granted.
-> > 
-> > The current grant handling code will wake the waitqueue when it sees
-> > that there are newly-granted caps in the issued set. On an import
-> > however, we'll end up adding a new cap first, which fools the logic into
-> > thinking that nothing has changed. A later hack in the code works around
-> > this, but only for auth caps.
-> 
-> not right. handle_cap_import() saves old issued to extra_info->issued.
-> 
+Miklos pointed out that the filesystems which set the bdi congestion
+flags do gain some value from that, and simply removing the code is not
+appropriate.
 
-It does save the old issued value to extra_info->issued, but handle_cap
-grant consults cap->issued for most of its logic. It does check against
-extra_info->issued for auth caps to determine whether to wake waiters,
-but doesn't do that for non-auth caps. This patch corrects that.
+Specifically, readahead and/or writeback are skipped when the congestion
+flags are set.
 
-If you think this patch isn't right, can you elaborate on why and what
-would make it correct?
+We can mostly move this skipping into the filesystem.
+->readahead can do nothing if reads are congested.
+->writepage and ->wrtepages can do nothing for WB_SYNC_NONE if writes
+  are congested.
+
+Currently only *some* WB_SYNC_NONE writes are skipped due to congestion.
+Those from sync_file_range() and those used for page migration are not.
+Also, shrink_page_list() will now cause PageActive to be set if
+->writepage skips due to congestion.
+
+I don't expect these changes to be a problem, but I have no experience
+to base that on.
+
+Review/comments most welcome,
 
 Thanks,
-Jeff
+NeilBrown
 
-> > 
-> > Ensure we wake the waiters whenever we get an IMPORT that grants new
-> > caps for the inode.
-> > 
-> > URL: https://tracker.ceph.com/issues/54044
-> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > ---
-> >  fs/ceph/caps.c | 23 ++++++++++++-----------
-> >  1 file changed, 12 insertions(+), 11 deletions(-)
-> > 
-> > I'm still testing this patch, but I think this may be the cause of some
-> > mysterious hangs I've hit in testing.
-> > 
-> > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> > index e668cdb9c99e..06b65a68e920 100644
-> > --- a/fs/ceph/caps.c
-> > +++ b/fs/ceph/caps.c
-> > @@ -3541,21 +3541,22 @@ static void handle_cap_grant(struct inode *inode,
-> >                         fill_inline = true;
-> >         }
-> > 
-> > -       if (ci->i_auth_cap == cap &&
-> > -           le32_to_cpu(grant->op) == CEPH_CAP_OP_IMPORT) {
-> > +       if (le32_to_cpu(grant->op) == CEPH_CAP_OP_IMPORT) {
-> >                 if (newcaps & ~extra_info->issued)
-> >                         wake = true;
-> > 
-> > -               if (ci->i_requested_max_size > max_size ||
-> > -                   !(le32_to_cpu(grant->wanted) & CEPH_CAP_ANY_FILE_WR)) {
-> > -                       /* re-request max_size if necessary */
-> > -                       ci->i_requested_max_size = 0;
-> > -                       wake = true;
-> > -               }
-> > +               if (ci->i_auth_cap == cap) {
-> > +                       if (ci->i_requested_max_size > max_size ||
-> > +                           !(le32_to_cpu(grant->wanted) & CEPH_CAP_ANY_FILE_WR)) {
-> > +                               /* re-request max_size if necessary */
-> > +                               ci->i_requested_max_size = 0;
-> > +                               wake = true;
-> > +                       }
-> > 
-> > -               ceph_kick_flushing_inode_caps(session, ci);
-> > -               spin_unlock(&ci->i_ceph_lock);
-> > -               up_read(&session->s_mdsc->snap_rwsem);
-> > +                       ceph_kick_flushing_inode_caps(session, ci);
-> > +                       spin_unlock(&ci->i_ceph_lock);
-> > +                       up_read(&session->s_mdsc->snap_rwsem);
-> > +               }
-> >         } else {
-> >                 spin_unlock(&ci->i_ceph_lock);
-> >         }
-> > --
-> > 2.34.1
-> > 
 
--- 
-Jeff Layton <jlayton@kernel.org>
+
+---
+
+NeilBrown (3):
+      fuse: remove reliance on bdi congestion
+      nfs: remove reliance on bdi congestion
+      ceph: remove reliance on bdi congestion
+
+
+ fs/ceph/addr.c            | 22 +++++++++++++---------
+ fs/ceph/super.c           |  1 +
+ fs/ceph/super.h           |  1 +
+ fs/nfs/write.c            | 12 ++++++++++--
+ include/linux/nfs_fs_sb.h |  1 +
+ 5 files changed, 26 insertions(+), 11 deletions(-)
+
+--
+Signature
+
