@@ -2,97 +2,183 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA907C433FE
-	for <ceph-devel@archiver.kernel.org>; Mon,  7 Feb 2022 17:23:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D0C6C433F5
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Feb 2022 07:56:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238272AbiBGRW6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 7 Feb 2022 12:22:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36186 "EHLO
+        id S239174AbiBHH4a (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Feb 2022 02:56:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1392027AbiBGRMH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Feb 2022 12:12:07 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 853D2C03E943
-        for <ceph-devel@vger.kernel.org>; Mon,  7 Feb 2022 09:11:28 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 2FC01CE1178
-        for <ceph-devel@vger.kernel.org>; Mon,  7 Feb 2022 17:11:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B214DC004E1;
-        Mon,  7 Feb 2022 17:11:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1644253883;
-        bh=ShwbwQx7EGnF5L1MMNLYgeDejhdQ9LxlxtAKzAwAx24=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=ey2/tpPjcUZ3cSThilNwh19k81NR+UMP3Ueq/EXGyajZHFK8NcP2nN090GG5TvFCg
-         rcGMwpTCHIRLSE4GGVAbq5UHOB9lCr7rCWqBgsp4dzr3bdyGd6jv19ngJROO8rSj0w
-         soT14gJ4uZc4iS2OpGID0uSlRf5SqMguNglsYPcPLZSKLx0fy5D0c34KP0Rzif88mI
-         TmzL1lzooC7hTxGNu2Tmfx7z9Y30NETG/i5yOThHXNGbN95LfeFS57mXN8LxWR0sKV
-         nRMcvWq8wFzTDsn5Tf0k/Fj8C5e4hpCl964i5EE6Uq8RXxeTrN/nBRTxD9bVxeKFT9
-         5cDXbz53TOjiw==
-Message-ID: <9ee4afece5bc3445ed19a3344a11eeab697ff37e.camel@kernel.org>
+        with ESMTP id S231454AbiBHH43 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Feb 2022 02:56:29 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 249A7C0401EF
+        for <ceph-devel@vger.kernel.org>; Mon,  7 Feb 2022 23:56:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1644306986;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=01tAi/XJ82TH30JrawmEQIaZ54w7qhk1CUxtQbVHJhU=;
+        b=B4qDqAKhSjgyFYS0T9ZWWA7loZCe3bxp77DE9sYKpIF+R6C0peRu2lxLWQir7HWUVAVQyR
+        QCXg/yA6Q/FAb3I4eDAf66FsEGC0WdVcTIWR1gZ4urAbNgcDZMBTkPn747/vBz0hTRdpsa
+        LAPBfsJ8jB6B6TASBOScgJeKaVRNbO0=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-596-WfRb0auiNZ-6QWD2UKKW9w-1; Tue, 08 Feb 2022 02:56:25 -0500
+X-MC-Unique: WfRb0auiNZ-6QWD2UKKW9w-1
+Received: by mail-pl1-f198.google.com with SMTP id f9-20020a170902684900b0014cd6059ecdso6996106pln.7
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Feb 2022 23:56:25 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=01tAi/XJ82TH30JrawmEQIaZ54w7qhk1CUxtQbVHJhU=;
+        b=aV25lJq/VRobtYgIti89BJ4HhxoDRuVgZhLxTq6Z+JRg1VdcIHcW+Dip9dDiICiYhC
+         rx1P0O06LRGzCJCTCvkX2H/YQZS10H6wwpx23Kwa6foSvuL8KBqDeLnIUC9ceh6y9U36
+         y+bELFVKI1Nm+P2Bgxg0eFkCnG5xcJnYBX7CwHcj0ktE7DojO2bXBB9Lag51tEeRFVhK
+         w2GscKKYGaDLVSKeDR4V7iemCI1dYnONNF/2YxNjy86VXlyGR355NAdWZUfnmGM5b9gf
+         INIijH7GVc78M7VEdsAW8TRLkwkVtMsdopIvs9SCyzTLYr7NI4mZYHA8C9iu6Re6d31n
+         5XWw==
+X-Gm-Message-State: AOAM53193ZNxS7QJNcvdjBe4JzB8c8u+Sfxg13o+Hr3cp+KSH5IWMYF+
+        LhMeLtPC4udMiNOF9qfRS263nLPcZ0MYk8to5Kvad6c12n8++OAyifyYI9p2oCcsnf763ZKRUis
+        ToCEYw8Z5vjwtdjloqVy6MQ==
+X-Received: by 2002:a05:6a00:1953:: with SMTP id s19mr3316221pfk.30.1644306983931;
+        Mon, 07 Feb 2022 23:56:23 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyFfuwLgRLktuC/E2VwkFVGnGTz21fsSOuJ2XC+S2z2WosdBNUZpdUS89ezlVseWJ6JNG/bHQ==
+X-Received: by 2002:a05:6a00:1953:: with SMTP id s19mr3316198pfk.30.1644306983411;
+        Mon, 07 Feb 2022 23:56:23 -0800 (PST)
+Received: from [10.72.12.64] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id rm11sm1811953pjb.21.2022.02.07.23.56.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 07 Feb 2022 23:56:22 -0800 (PST)
 Subject: Re: [PATCH] ceph: fail the request directly if handle_reply gets an
  ESTALE
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Gregory Farnum <gfarnum@redhat.com>
-Cc:     Dan van der Ster <dan@vanderster.com>,
-        Xiubo Li <xiubli@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Venky Shankar <vshankar@redhat.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        Sage Weil <sage@newdream.net>, ukernel <ukernel@gmail.com>
-Date:   Mon, 07 Feb 2022 12:11:21 -0500
-In-Reply-To: <CAJ4mKGb3j_QNMuKmccoj43jswoReb_iP8wnJi3f-mpaN++PC7w@mail.gmail.com>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     idryomov@gmail.com, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>,
+        Gregory Farnum <gfarnum@redhat.com>,
+        ukernel <ukernel@gmail.com>
 References: <20220207050340.872893-1-xiubli@redhat.com>
-         <77bd8ec8fb97107deb57c641b5e471b8eeb828c8.camel@kernel.org>
-         <CAJ4mKGbHyn-oQwL8D3Ove0d2tD++VEXOTMSj5EDbcBk3SFX=2w@mail.gmail.com>
-         <d6f16704da303eca4d62aee58eecacb45f76f45a.camel@kernel.org>
-         <CAJ4mKGb3j_QNMuKmccoj43jswoReb_iP8wnJi3f-mpaN++PC7w@mail.gmail.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.3 (3.42.3-1.fc35) 
+ <77bd8ec8fb97107deb57c641b5e471b8eeb828c8.camel@kernel.org>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <056ab110-9e3f-5d47-0a4b-9ec03afda651@redhat.com>
+Date:   Tue, 8 Feb 2022 15:56:09 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
+In-Reply-To: <77bd8ec8fb97107deb57c641b5e471b8eeb828c8.camel@kernel.org>
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2022-02-07 at 08:28 -0800, Gregory Farnum wrote:
-> On Mon, Feb 7, 2022 at 8:13 AM Jeff Layton <jlayton@kernel.org> wrote:
-> > The tracker bug mentions that this occurs after an MDS is restarted.
-> > Could this be the result of clients relying on delete-on-last-close
-> > behavior?
-> 
-> Oooh, I didn't actually look at the tracker.
-> 
-> > 
-> > IOW, we have a situation where a file is opened and then unlinked, and
-> > userland is actively doing I/O to it. The thing gets moved into the
-> > strays dir, but isn't unlinked yet because we have open files against
-> > it. Everything works fine at this point...
-> > 
-> > Then, the MDS restarts and the inode gets purged altogether. Client
-> > reconnects and tries to reclaim his open, and gets ESTALE.
-> 
-> Uh, okay. So I didn't do a proper audit before I sent my previous
-> reply, but one of the cases I did see was that the MDS returns ESTALE
-> if you try to do a name lookup on an inode in the stray directory. I
-> don't know if that's what is happening here or not? But perhaps that's
-> the root of the problem in this case.
-> 
-> Oh, nope, I see it's issuing getattr requests. That doesn't do ESTALE
-> directly so it must indeed be coming out of MDCache::path_traverse.
-> 
-> The MDS shouldn't move an inode into the purge queue on restart unless
-> there were no clients with caps on it (that state is persisted to disk
-> so it knows). Maybe if the clients don't make the reconnect window
-> it's dropping them all and *then* moves it into purge queue? I think
-> we need to identify what's happening there before we issue kernel
-> client changes, Xiubo?
 
+On 2/7/22 11:12 PM, Jeff Layton wrote:
+> On Mon, 2022-02-07 at 13:03 +0800, xiubli@redhat.com wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> If MDS return ESTALE, that means the MDS has already iterated all
+>> the possible active MDSes including the auth MDS or the inode is
+>> under purging. No need to retry in auth MDS and will just return
+>> ESTALE directly.
+>>
+> When you say "purging" here, do you mean that it's effectively being
+> cleaned up after being unlinked? Or is it just being purged from the
+> MDS's cache?
 
-Agreed. I think we need to understand why he's seeing ESTALE errors in
-the first place, but it sounds like retrying on an ESTALE error isn't
-likely to be helpful.
--- 
-Jeff Layton <jlayton@kernel.org>
+There is one case when the client just removes the file or the file is 
+force overrode via renaming, the related dentry in MDS will be put to 
+stray dir and the Inode will be marked as under purging. So in case when 
+the client try to call getattr, for example, after that, or retries the 
+pending getattr request, which can cause the MDS returns ESTALE errno in 
+theory.
+
+Locally I still haven't reproduced it yet.
+
+>> Or it will cause definite loop for retrying it.
+>>
+>> URL: https://tracker.ceph.com/issues/53504
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   fs/ceph/mds_client.c | 29 -----------------------------
+>>   1 file changed, 29 deletions(-)
+>>
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index 93e5e3c4ba64..c918d2ac8272 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -3368,35 +3368,6 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+>>   
+>>   	result = le32_to_cpu(head->result);
+>>   
+>> -	/*
+>> -	 * Handle an ESTALE
+>> -	 * if we're not talking to the authority, send to them
+>> -	 * if the authority has changed while we weren't looking,
+>> -	 * send to new authority
+>> -	 * Otherwise we just have to return an ESTALE
+>> -	 */
+>> -	if (result == -ESTALE) {
+>> -		dout("got ESTALE on request %llu\n", req->r_tid);
+>> -		req->r_resend_mds = -1;
+>> -		if (req->r_direct_mode != USE_AUTH_MDS) {
+>> -			dout("not using auth, setting for that now\n");
+>> -			req->r_direct_mode = USE_AUTH_MDS;
+>> -			__do_request(mdsc, req);
+>> -			mutex_unlock(&mdsc->mutex);
+>> -			goto out;
+>> -		} else  {
+>> -			int mds = __choose_mds(mdsc, req, NULL);
+>> -			if (mds >= 0 && mds != req->r_session->s_mds) {
+>> -				dout("but auth changed, so resending\n");
+>> -				__do_request(mdsc, req);
+>> -				mutex_unlock(&mdsc->mutex);
+>> -				goto out;
+>> -			}
+>> -		}
+>> -		dout("have to return ESTALE on request %llu\n", req->r_tid);
+>> -	}
+>> -
+>> -
+>>   	if (head->safe) {
+>>   		set_bit(CEPH_MDS_R_GOT_SAFE, &req->r_req_flags);
+>>   		__unregister_request(mdsc, req);
+>
+> (cc'ing Greg, Sage and Zheng)
+>
+> This patch sort of contradicts the original design, AFAICT, and I'm not
+> sure what the correct behavior should be. I could use some
+> clarification.
+>
+> The original code (from the 2009 merge) would tolerate 2 ESTALEs before
+> giving up and returning that to userland. Then in 2010, Greg added this
+> commit:
+>
+>      https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=e55b71f802fd448a79275ba7b263fe1a8639be5f
+>
+> ...which would presumably make it retry indefinitely as long as the auth
+> MDS kept changing. Then, Zheng made this change in 2013:
+>
+>      https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=ca18bede048e95a749d13410ce1da4ad0ffa7938
+>
+> ...which seems to try to do the same thing, but detected the auth mds
+> change in a different way.
+>
+> Is that where livelock detection was broken? Or was there some
+> corresponding change to __choose_mds that should prevent infinitely
+> looping on the same request?
+>
+> In NFS, ESTALE errors mean that the filehandle (inode) no longer exists
+> and that the server has forgotten about it. Does it mean the same thing
+> to the ceph MDS?
+>
+> Has the behavior of the MDS changed such that these retries are no
+> longer necessary on an ESTALE? If so, when did this change, and does the
+> client need to do anything to detect what behavior it should be using?
+
