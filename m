@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5774EC433FE
-	for <ceph-devel@archiver.kernel.org>; Tue, 15 Feb 2022 12:23:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EF7EC433EF
+	for <ceph-devel@archiver.kernel.org>; Tue, 15 Feb 2022 12:23:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236734AbiBOMXr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 15 Feb 2022 07:23:47 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33244 "EHLO
+        id S236814AbiBOMXs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 15 Feb 2022 07:23:48 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236233AbiBOMXq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Feb 2022 07:23:46 -0500
+        with ESMTP id S236233AbiBOMXr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Feb 2022 07:23:47 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C2288107AAA
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Feb 2022 04:23:36 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 21750107AAB
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Feb 2022 04:23:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1644927815;
+        s=mimecast20190719; t=1644927816;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=/wVbFdzcInD1Ozq8OJBYWZw/GucY6weJoxM/Cz+UATY=;
-        b=TFV3oCeVwaQMj/Ik4nr6+1QLocG0irIexhko4KwzAZmaJ5PHHWS8PxVFYI/Qz/hP9BW53R
-        YRckBuE54sb5JZyJKXGSIWyTkcJKgStW9Mkl8pZATIfc7T+h2hSSx6GEz0Z1XdiifEs5If
-        82oEdMmsCRzRJfY2O2FmDMeOudJlp8s=
+        bh=HQ+xivxB43tXo4RERtGauY3YUoCYvZW5H6WAxoSHvXU=;
+        b=crcu2mjoengkWMk2Kg5bvq+veu2cKBWpQ8OL+g9bOdUxcnPVvqEi71eL0s/tZrVMh+WFC2
+        dBedGb828j3kMGVBMhAQdf+4V9TBlMRbxglaicARCZK2OOv9N07iFJOwNxTcK2fxg60zEO
+        yvae8hvX1BnEXc3SV+N1eJGQD3ZhRbE=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-618-JNzHPei0MhyHP83Y5pcUhw-1; Tue, 15 Feb 2022 07:23:30 -0500
-X-MC-Unique: JNzHPei0MhyHP83Y5pcUhw-1
+ us-mta-270-5J2XDh1oPDSiS2Xy13hrwQ-1; Tue, 15 Feb 2022 07:23:35 -0500
+X-MC-Unique: 5J2XDh1oPDSiS2Xy13hrwQ-1
 Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 802C62F26;
-        Tue, 15 Feb 2022 12:23:29 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0666B2F26;
+        Tue, 15 Feb 2022 12:23:34 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B3F0B101F6CF;
-        Tue, 15 Feb 2022 12:23:27 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3FF01101F6CF;
+        Tue, 15 Feb 2022 12:23:32 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     jlayton@kernel.org
 Cc:     idryomov@gmail.com, vshankar@redhat.com,
         ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH 1/3] ceph: move to a dedicated slabcache for ceph_cap_snap
-Date:   Tue, 15 Feb 2022 20:23:14 +0800
-Message-Id: <20220215122316.7625-2-xiubli@redhat.com>
+Subject: [PATCH 3/3] ceph: do no update snapshot context when there is no new snapshot
+Date:   Tue, 15 Feb 2022 20:23:16 +0800
+Message-Id: <20220215122316.7625-4-xiubli@redhat.com>
 In-Reply-To: <20220215122316.7625-1-xiubli@redhat.com>
 References: <20220215122316.7625-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -55,114 +55,73 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Xiubo Li <xiubli@redhat.com>
 
-There could be huge number of capsnap queued in a short time, on
-x86_64 it's 248 bytes, which will be rounded up to 256 bytes by
-kzalloc. Move this to a dedicated slabcache to save 8 bytes for
-each.
+No need to update snapshot context when any of the following two
+cases happens:
+1: if my context seq matches realm's seq and realm has no parent.
+2: if my context seq equals or is larger than my parent's, this
+   works because we rebuild_snap_realms() works _downward_ in
+   hierarchy after each update.
 
-For the kmalloc-256 slab cache, the actual size will be 512 bytes:
-kmalloc-256        21797  74656    512   32    4 : tunables, etc
+This fix will avoid those inodes which accidently calling
+ceph_queue_cap_snap() and make no sense, for exmaple:
 
-For a dedicated slab cache the real size is 312 bytes:
-ceph_cap_snap          0      0    312   52    4 : tunables, etc
+There have 6 directories like:
 
-So actually we can save 200 bytes for each.
+/dir_X1/dir_X2/dir_X3/
+/dir_Y1/dir_Y2/dir_Y3/
 
+Firstly, make a snapshot under /dir_X1/dir_X2/.snap/snap_X2, then
+make a root snapshot under /.snap/root_snap. And every time when
+we make snapshots under /dir_Y1/..., the kclient will always try
+to rebuild the snap context for snap_X2 realm and finally will
+always try to queue cap snaps for dir_Y2 and dir_Y3, which makes
+no sense.
+
+That's because the snap_X2's seq is 2 and root_snap's seq is 3.
+So when creating a new snapshot under /dir_Y1/... the new seq
+will be 4, and then the mds will send kclient a snapshot backtrace
+in _downward_ in hierarchy: seqs 4, 3. Then in ceph_update_snap_trace()
+it will always rebuild the from the last realm, that's the root_snap.
+So later when rebuilding the snap context it will always rebuild
+the snap_X2 realm and then try to queue cap snaps for all the inodes
+related in snap_X2 realm, and we are seeing the logs like:
+
+"ceph:  queue_cap_snap 00000000a42b796b nothing dirty|writing"
+
+URL: https://tracker.ceph.com/issues/44100
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/snap.c               | 5 +++--
- fs/ceph/super.c              | 7 +++++++
- fs/ceph/super.h              | 2 +-
- include/linux/ceph/libceph.h | 1 +
- 4 files changed, 12 insertions(+), 3 deletions(-)
+ fs/ceph/snap.c | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index b41e6724c591..c787775eaf2a 100644
+index d075d3ce5f6d..1f24a5de81e7 100644
 --- a/fs/ceph/snap.c
 +++ b/fs/ceph/snap.c
-@@ -482,7 +482,7 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 	struct ceph_buffer *old_blob = NULL;
- 	int used, dirty;
- 
--	capsnap = kzalloc(sizeof(*capsnap), GFP_NOFS);
-+	capsnap = kmem_cache_alloc(ceph_cap_snap_cachep, GFP_NOFS);
- 	if (!capsnap) {
- 		pr_err("ENOMEM allocating ceph_cap_snap on %p\n", inode);
- 		return;
-@@ -603,7 +603,8 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 	spin_unlock(&ci->i_ceph_lock);
- 
- 	ceph_buffer_put(old_blob);
--	kfree(capsnap);
-+	if (capsnap)
-+		kmem_cache_free(ceph_cap_snap_cachep, capsnap);
- 	ceph_put_snap_context(old_snapc);
- }
- 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index bf79f369aec6..978463fa822c 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -864,6 +864,7 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
-  */
- struct kmem_cache *ceph_inode_cachep;
- struct kmem_cache *ceph_cap_cachep;
-+struct kmem_cache *ceph_cap_snap_cachep;
- struct kmem_cache *ceph_cap_flush_cachep;
- struct kmem_cache *ceph_dentry_cachep;
- struct kmem_cache *ceph_file_cachep;
-@@ -892,6 +893,9 @@ static int __init init_caches(void)
- 	ceph_cap_cachep = KMEM_CACHE(ceph_cap, SLAB_MEM_SPREAD);
- 	if (!ceph_cap_cachep)
- 		goto bad_cap;
-+	ceph_cap_snap_cachep = KMEM_CACHE(ceph_cap_snap, SLAB_MEM_SPREAD);
-+	if (!ceph_cap_snap_cachep)
-+		goto bad_cap_snap;
- 	ceph_cap_flush_cachep = KMEM_CACHE(ceph_cap_flush,
- 					   SLAB_RECLAIM_ACCOUNT|SLAB_MEM_SPREAD);
- 	if (!ceph_cap_flush_cachep)
-@@ -931,6 +935,8 @@ static int __init init_caches(void)
- bad_dentry:
- 	kmem_cache_destroy(ceph_cap_flush_cachep);
- bad_cap_flush:
-+	kmem_cache_destroy(ceph_cap_snap_cachep);
-+bad_cap_snap:
- 	kmem_cache_destroy(ceph_cap_cachep);
- bad_cap:
- 	kmem_cache_destroy(ceph_inode_cachep);
-@@ -947,6 +953,7 @@ static void destroy_caches(void)
- 
- 	kmem_cache_destroy(ceph_inode_cachep);
- 	kmem_cache_destroy(ceph_cap_cachep);
-+	kmem_cache_destroy(ceph_cap_snap_cachep);
- 	kmem_cache_destroy(ceph_cap_flush_cachep);
- 	kmem_cache_destroy(ceph_dentry_cachep);
- 	kmem_cache_destroy(ceph_file_cachep);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c0718d5a8fb8..2d08104c8955 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -231,7 +231,7 @@ static inline void ceph_put_cap_snap(struct ceph_cap_snap *capsnap)
- 	if (refcount_dec_and_test(&capsnap->nref)) {
- 		if (capsnap->xattr_blob)
- 			ceph_buffer_put(capsnap->xattr_blob);
--		kfree(capsnap);
-+		kmem_cache_free(ceph_cap_snap_cachep, capsnap);
+@@ -341,14 +341,16 @@ static int build_snap_context(struct ceph_snap_realm *realm,
+ 		num += parent->cached_context->num_snaps;
  	}
- }
  
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index edf62eaa6285..00af2c98da75 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -284,6 +284,7 @@ DEFINE_RB_LOOKUP_FUNC(name, type, keyfld, nodefld)
- 
- extern struct kmem_cache *ceph_inode_cachep;
- extern struct kmem_cache *ceph_cap_cachep;
-+extern struct kmem_cache *ceph_cap_snap_cachep;
- extern struct kmem_cache *ceph_cap_flush_cachep;
- extern struct kmem_cache *ceph_dentry_cachep;
- extern struct kmem_cache *ceph_file_cachep;
+-	/* do i actually need to update?  not if my context seq
+-	   matches realm seq, and my parents' does to.  (this works
+-	   because we rebuild_snap_realms() works _downward_ in
+-	   hierarchy after each update.) */
++	/* do i actually need to update? No need when any of the following
++	 * two cases:
++	 * #1: if my context seq matches realm's seq and realm has no parent.
++	 * #2: if my context seq equals or is larger than my parent's, this
++	 *     works because we rebuild_snap_realms() works _downward_ in
++	 *     hierarchy after each update.
++	 */
+ 	if (realm->cached_context &&
+-	    realm->cached_context->seq == realm->seq &&
+-	    (!parent ||
+-	     realm->cached_context->seq >= parent->cached_context->seq)) {
++	    ((realm->cached_context->seq == realm->seq && !parent) ||
++	     (parent && realm->cached_context->seq >= parent->cached_context->seq))) {
+ 		dout("build_snap_context %llx %p: %p seq %lld (%u snaps)"
+ 		     " (unchanged)\n",
+ 		     realm->ino, realm, realm->cached_context,
 -- 
 2.27.0
 
