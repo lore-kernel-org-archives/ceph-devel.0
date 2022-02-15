@@ -2,112 +2,177 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A465C433EF
-	for <ceph-devel@archiver.kernel.org>; Tue, 15 Feb 2022 12:27:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0BBAC43219
+	for <ceph-devel@archiver.kernel.org>; Tue, 15 Feb 2022 14:52:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237658AbiBOM13 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 15 Feb 2022 07:27:29 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:35902 "EHLO
+        id S239230AbiBOOwM (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 15 Feb 2022 09:52:12 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237654AbiBOM12 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Feb 2022 07:27:28 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 81D2A107AAB
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Feb 2022 04:27:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1644928037;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=EPA0emrN45sLOLoUZ83X5/DG0RI4rr9kYq9aYKrJ41A=;
-        b=GLVB49uHpULGWCj8t/caOM8Ph3LivpvpxzOuF+7SruKCuKzrUYNu2MWkFaAqEG3G2kb69L
-        GR1gh16zpTG61+Ztzx9f6sUyKP4EHfRwFZZA2cICp8Pe2BAdnJrAI9DPTLHFN15TZ71bEJ
-        zOHBIeD+cEj2cQ6c4oUSytb8uydVEis=
-Received: from mail-lf1-f70.google.com (mail-lf1-f70.google.com
- [209.85.167.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-343-9WYOrwdkPtCFurx8fXWwuw-1; Tue, 15 Feb 2022 07:27:16 -0500
-X-MC-Unique: 9WYOrwdkPtCFurx8fXWwuw-1
-Received: by mail-lf1-f70.google.com with SMTP id 27-20020ac25f1b000000b0043edb7bf7e7so6092644lfq.20
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Feb 2022 04:27:16 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=EPA0emrN45sLOLoUZ83X5/DG0RI4rr9kYq9aYKrJ41A=;
-        b=vmYmeBr1vqNkdnYCwRbp+3TCVR2C74YB38f+tqm0pU6bvbg96U4x5MtwXFFN0HwDq1
-         GwVEi01sBlk2sSCTcvsGoRAjL4uMKuqxaIFbhr45umI1p2aPDbJOUMKTk+9B/PW5alsp
-         jiCL9W6KR8NIqG1bQ8XpCHEzFbmA3UZmeqvcm+Gq/Jh5A68hIPlsOf+1qlG+Mm7GnaDe
-         nRVL3Prs/CMygGEMfjERn9UrW5135lnDv7WywN7lMgsh4c9Bc6+UgMOJe20oJwEUW5Fw
-         WAXPrguiqUlloGDEmdNVWDyZXHjoCXfumFJLTvMQhx9bPsj7VvjPnXBvHFXffinDzmSg
-         sgSw==
-X-Gm-Message-State: AOAM531hfv9yvk3dMkVvg2vj1/VwQR+ywWy7ETYMmfEw8B877bl42ANR
-        EFtK7IQsTNhynKYrlKSv+48/DdIdLchzxIsH7kyPJwkOQk7gnbUjJGRMaNMOj9c0BAkp2vygZIY
-        G4cAzWzSij9bLIfB3/niv4yk7dz5drVYyGgDStg==
-X-Received: by 2002:a2e:880a:: with SMTP id x10mr2337083ljh.310.1644928034963;
-        Tue, 15 Feb 2022 04:27:14 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJz5UJZnxtdQ4xBKrk5ndZ5VI/AER9nWZrGMcAk2I4dmB/jpmoqPPFfe8DtpqFYlP/vpl9ppq1dXS5/naeXJnA0=
-X-Received: by 2002:a2e:880a:: with SMTP id x10mr2337070ljh.310.1644928034746;
- Tue, 15 Feb 2022 04:27:14 -0800 (PST)
+        with ESMTP id S239296AbiBOOvw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Feb 2022 09:51:52 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43313104A63
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Feb 2022 06:50:46 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D748561468
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Feb 2022 14:50:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67BF8C340F2;
+        Tue, 15 Feb 2022 14:50:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1644936645;
+        bh=UmyaSUacADQ0KxQ/KSNDY0tAA+XctOBT3uogoqs4wzc=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=UV9b941qTH24AJTFz+peFrclpQ8WV91HwwVlHmzoxW17IE8iSqBveI4mGkKX1mTkE
+         szssK+MfBA4NQRrXoWw7TYANdWJP/l8mjz7uxTRBDpTPkJpvTD0NCbFoOjh4bpNLIP
+         zdm3PcU8icm6nqs8rvJ8HIdvIRDx5w2r4GxoLJ9tQFa3g408hGWzlT2r0FC6EwBNrK
+         IyNz4X979Z2+gbEfC168j8dqSkH0LCEP4MIYM8ciLXy9nwlQe9/REBVapx9M82h+iH
+         iWmOwmzls4R0InqXOPDGJz3w6Y0RqEHeCzmxeg4b1cz97vn1AznL839fLKclc97T5f
+         DenID+igRY2Nw==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com
+Subject: [RFC PATCH 4/5] libceph: add revoke support for sparse data
+Date:   Tue, 15 Feb 2022 09:50:40 -0500
+Message-Id: <20220215145041.26065-5-jlayton@kernel.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20220215145041.26065-1-jlayton@kernel.org>
+References: <20220215145041.26065-1-jlayton@kernel.org>
 MIME-Version: 1.0
-References: <20220215091657.104079-1-vshankar@redhat.com> <3f74605528367ae8935aaade101c168198e3996f.camel@redhat.com>
-In-Reply-To: <3f74605528367ae8935aaade101c168198e3996f.camel@redhat.com>
-From:   Venky Shankar <vshankar@redhat.com>
-Date:   Tue, 15 Feb 2022 17:56:38 +0530
-Message-ID: <CACPzV1n+LDTzraas9_FCU_xvdoQPMX6t3s6Y10-yPDBYFfFkHQ@mail.gmail.com>
-Subject: Re: [PATCH 0/3] ceph: forward average read/write/metadata latency
-To:     Jeff Layton <jlayton@redhat.com>
-Cc:     Xiubo Li <xiubli@redhat.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Feb 15, 2022 at 5:08 PM Jeff Layton <jlayton@redhat.com> wrote:
->
-> On Tue, 2022-02-15 at 14:46 +0530, Venky Shankar wrote:
-> > Right now, cumulative read/write/metadata latencies are tracked
-> > and are periodically forwarded to the MDS. These meterics are not
-> > particularly useful. A much more useful metric is the average latency
-> > and standard deviation (stdev) which is what this series of patches
-> > aims to do.
-> >
-> > The userspace (libcephfs+tool) changes are here::
-> >
-> >           https://github.com/ceph/ceph/pull/41397
-> >
-> > Note that the cumulative latencies are still forwarded to the MDS but
-> > the tool (cephfs-top) ignores it altogether.
-> >
-> > Latency standard deviation is calculated in `cephfs-top` tool.
-> >
-> > Venky Shankar (3):
-> >   ceph: track average r/w/m latency
-> >   ceph: include average/stdev r/w/m latency in mds metrics
-> >   ceph: use tracked average r/w/m latencies to display metrics in
-> >     debugfs
-> >
-> >  fs/ceph/debugfs.c |  2 +-
-> >  fs/ceph/metric.c  | 44 +++++++++++++++++++++++----------------
-> >  fs/ceph/metric.h  | 52 +++++++++++++++++++++++++++++++++--------------
-> >  3 files changed, 65 insertions(+), 33 deletions(-)
-> >
->
-> Looks good, Venky. Merged into testing branch. I did make a small change
-> to the last patch to fix a compiler warning. PTAL and make sure you're
-> OK with it.
+Since sparse read handling is so complex, add a new field for tracking
+how much data we've read out of the data blob, and decrement that
+whenever we marshal up a new iov_iter for a read off the socket.
 
-Looks good. Thanks for the fix.
+On a revoke, just ensure we skip past whatever remains in the iter, plus
+the remaining data_len and epilogue.
 
->
-> Thanks,
-> --
-> Jeff Layton <jlayton@redhat.com>
->
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ include/linux/ceph/messenger.h |  1 +
+ net/ceph/messenger_v2.c        | 37 +++++++++++++++++++++++++++++++---
+ 2 files changed, 35 insertions(+), 3 deletions(-)
 
-
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 498a1b7bd3c1..206452d8a385 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -413,6 +413,7 @@ struct ceph_connection_v2_info {
+ 
+ 	void *conn_bufs[16];
+ 	int conn_buf_cnt;
++	int data_len_remain;
+ 
+ 	struct kvec in_sign_kvecs[8];
+ 	struct kvec out_sign_kvecs[8];
+diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
+index 16fcac363670..45ba59ce69e6 100644
+--- a/net/ceph/messenger_v2.c
++++ b/net/ceph/messenger_v2.c
+@@ -1866,6 +1866,7 @@ static int prepare_sparse_read_cont(struct ceph_connection *con)
+ 			bv.bv_offset = 0;
+ 		}
+ 		set_in_bvec(con, &bv);
++		con->v2.data_len_remain -= bv.bv_len;
+ 		WARN_ON(con->v2.in_state != IN_S_PREPARE_SPARSE_DATA_CONT);
+ 		return 0;
+ 	}
+@@ -1882,7 +1883,10 @@ static int prepare_sparse_read_cont(struct ceph_connection *con)
+ 		return 0;
+ 	}
+ 
+-	return prepare_read_data_extent(con, off, len);
++	ret = prepare_read_data_extent(con, off, len);
++	if (ret == 0)
++		con->v2.data_len_remain -= len;
++	return ret;
+ }
+ 
+ static int prepare_sparse_read_header(struct ceph_connection *con)
+@@ -1918,19 +1922,24 @@ static int prepare_sparse_read_header(struct ceph_connection *con)
+ 
+ 	if (!buf) {
+ 		ret = prepare_read_data_extent(con, off, len);
+-		if (!ret)
++		if (!ret) {
++			con->v2.data_len_remain -= len;
+ 			con->v2.in_state = IN_S_PREPARE_SPARSE_DATA_CONT;
++		}
+ 		return ret;
+ 	}
+ 
+ 	WARN_ON_ONCE(con->v2.in_state != IN_S_PREPARE_SPARSE_DATA_HDR);
+ 	reset_in_kvecs(con);
+ 	add_in_kvec(con, buf, len);
++	con->v2.data_len_remain -= len;
+ 	return 0;
+ }
+ 
+ static int prepare_sparse_read_data(struct ceph_connection *con)
+ {
++	struct ceph_msg *msg = con->in_msg;
++
+ 	if (WARN_ON_ONCE(!con->ops->sparse_read))
+ 		return -EOPNOTSUPP;
+ 
+@@ -1939,6 +1948,7 @@ static int prepare_sparse_read_data(struct ceph_connection *con)
+ 
+ 	reset_in_kvecs(con);
+ 	con->v2.in_state = IN_S_PREPARE_SPARSE_DATA_HDR;
++	con->v2.data_len_remain = data_len(msg);
+ 	return prepare_sparse_read_header(con);
+ }
+ 
+@@ -3620,6 +3630,23 @@ static void revoke_at_prepare_read_enc_page(struct ceph_connection *con)
+ 	con->v2.in_state = IN_S_FINISH_SKIP;
+ }
+ 
++static void revoke_at_prepare_sparse_data(struct ceph_connection *con)
++{
++	int resid;  /* current piece of data */
++	int remaining;
++
++	WARN_ON(con_secure(con));
++	WARN_ON(!data_len(con->in_msg));
++	WARN_ON(!iov_iter_is_bvec(&con->v2.in_iter));
++	resid = iov_iter_count(&con->v2.in_iter);
++	dout("%s con %p resid %d\n", __func__, con, resid);
++
++	remaining = CEPH_EPILOGUE_PLAIN_LEN + con->v2.data_len_remain;
++	con->v2.in_iter.count -= resid;
++	set_in_skip(con, resid + remaining);
++	con->v2.in_state = IN_S_FINISH_SKIP;
++}
++
+ static void revoke_at_handle_epilogue(struct ceph_connection *con)
+ {
+ 	int resid;
+@@ -3636,7 +3663,7 @@ static void revoke_at_handle_epilogue(struct ceph_connection *con)
+ void ceph_con_v2_revoke_incoming(struct ceph_connection *con)
+ {
+ 	switch (con->v2.in_state) {
+-	case IN_S_PREPARE_SPARSE_DATA:		// FIXME
++	case IN_S_PREPARE_SPARSE_DATA:
+ 	case IN_S_PREPARE_READ_DATA:
+ 		revoke_at_prepare_read_data(con);
+ 		break;
+@@ -3646,6 +3673,10 @@ void ceph_con_v2_revoke_incoming(struct ceph_connection *con)
+ 	case IN_S_PREPARE_READ_ENC_PAGE:
+ 		revoke_at_prepare_read_enc_page(con);
+ 		break;
++	case IN_S_PREPARE_SPARSE_DATA_HDR:
++	case IN_S_PREPARE_SPARSE_DATA_CONT:
++		revoke_at_prepare_sparse_data(con);
++		break;
+ 	case IN_S_HANDLE_EPILOGUE:
+ 		revoke_at_handle_epilogue(con);
+ 		break;
 -- 
-Cheers,
-Venky
+2.34.1
 
