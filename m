@@ -2,108 +2,66 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10E48C433EF
-	for <ceph-devel@archiver.kernel.org>; Tue, 22 Feb 2022 03:21:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01C1DC433EF
+	for <ceph-devel@archiver.kernel.org>; Tue, 22 Feb 2022 06:34:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241253AbiBVDVC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 21 Feb 2022 22:21:02 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:51012 "EHLO
+        id S229804AbiBVGfJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 22 Feb 2022 01:35:09 -0500
+Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:44050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241157AbiBVDU7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Feb 2022 22:20:59 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4390C192B8;
-        Mon, 21 Feb 2022 19:20:26 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229480AbiBVGfI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Feb 2022 01:35:08 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 891F4EBB91
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Feb 2022 22:34:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1645511682;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=KbuWvkqeqHRgZtKbiJeRPY7PoxSpZqWgdvo3OoRDA0Y=;
+        b=ZYoVJPonsaKDiuMB2wpbQuj5+gO/waQYIXRBkaqbzDxZBF5Akz1CUVkDQAG9B1O6z7Rf2X
+        8sbxWdbf2nTLbFvE9YtkUHcVFBSvsKb1TeDjhvCnyvczd6K4wbbrBTF7c0abk1LETWpRqm
+        Dzk9uhq2oDjRqqy5a0vA3ry1RlIAV40=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-463-DjAxpz6oNSSFjIYt97ngjg-1; Tue, 22 Feb 2022 01:34:38 -0500
+X-MC-Unique: DjAxpz6oNSSFjIYt97ngjg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id F1CA8210E6;
-        Tue, 22 Feb 2022 03:20:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1645500024; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ViDG/yMqWZxCAxTaqQtcLcHL6JhRHELXtVbiJuJsPUo=;
-        b=Tmz1uo8woLZXqpnP6AmoA/NTuRgmjrgW2cLueq9/kp9TCyUa6S7R3LyYWeiTFJaHuy3dUM
-        KZRmOxRvt9ZDQSR+hpxKFewxvdZZ9Urtb6en4poxusvXIBIlgrBpBLKDAdWO2ORb+DR1Mi
-        bSVP8TV+gQpT0TCoBjfqhnJf7D5nXLw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1645500024;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ViDG/yMqWZxCAxTaqQtcLcHL6JhRHELXtVbiJuJsPUo=;
-        b=BbqDPkZmtQqupAAVe4rSFiNNNRKLh+0XT0FLFde2mCgSKOwY64NUe64xN29OsgNhaJyglf
-        D4tHxubXuewZC/CA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8B58613BA7;
-        Tue, 22 Feb 2022 03:20:16 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id pLKjEXBWFGI0WwAAMHmgww
-        (envelope-from <neilb@suse.de>); Tue, 22 Feb 2022 03:20:16 +0000
-Subject: [PATCH 10/11] block/bfq-iosched.c: use "false" rather than
- "BLK_RW_ASYNC"
-From:   NeilBrown <neilb@suse.de>
-To:     Andrew Morton <akpm@linux-foundation.org>, Jan Kara <jack@suse.cz>,
-        Wu Fengguang <fengguang.wu@intel.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        Anna Schumaker <anna.schumaker@netapp.com>,
-        Ryusuke Konishi <konishi.ryusuke@gmail.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Lars Ellenberg <lars.ellenberg@linbit.com>,
-        Paolo Valente <paolo.valente@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>
-Cc:     linux-doc@vger.kernel.org, linux-mm@kvack.org,
-        linux-nilfs@vger.kernel.org, linux-nfs@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
-        ceph-devel@vger.kernel.org, drbd-dev@lists.linbit.com,
-        linux-kernel@vger.kernel.org
-Date:   Tue, 22 Feb 2022 14:17:17 +1100
-Message-ID: <164549983746.9187.7949730109246767909.stgit@noble.brown>
-In-Reply-To: <164549971112.9187.16871723439770288255.stgit@noble.brown>
-References: <164549971112.9187.16871723439770288255.stgit@noble.brown>
-User-Agent: StGit/0.23
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D67641808320;
+        Tue, 22 Feb 2022 06:34:37 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 1B185519A0;
+        Tue, 22 Feb 2022 06:34:35 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH 0/2] ceph: create the global dummy snaprealm once
+Date:   Tue, 22 Feb 2022 14:34:31 +0800
+Message-Id: <20220222063433.217466-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-bfq_get_queue() expects a "bool" for the third arg, so pass "false"
-rather than "BLK_RW_ASYNC" which will soon be removed.
+From: Xiubo Li <xiubli@redhat.com>
 
-Acked-by: Jens Axboe <axboe@kernel.dk>
-Signed-off-by: NeilBrown <neilb@suse.de>
----
- block/bfq-iosched.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Xiubo Li (2):
+  ceph: remove incorrect and unused CEPH_INO_DOTDOT macro
+  ceph: do not release the global snaprealm until unmounting
 
-diff --git a/block/bfq-iosched.c b/block/bfq-iosched.c
-index 36a66e97e3c2..ed9bb1054bf2 100644
---- a/block/bfq-iosched.c
-+++ b/block/bfq-iosched.c
-@@ -5448,7 +5448,7 @@ static void bfq_check_ioprio_change(struct bfq_io_cq *bic, struct bio *bio)
- 	bfqq = bic_to_bfqq(bic, false);
- 	if (bfqq) {
- 		bfq_release_process_ref(bfqd, bfqq);
--		bfqq = bfq_get_queue(bfqd, bio, BLK_RW_ASYNC, bic, true);
-+		bfqq = bfq_get_queue(bfqd, bio, false, bic, true);
- 		bic_set_bfqq(bic, bfqq, false);
- 	}
- 
+ fs/ceph/mds_client.c         |  2 +-
+ fs/ceph/snap.c               | 13 +++++++++++--
+ fs/ceph/super.h              |  2 +-
+ include/linux/ceph/ceph_fs.h |  4 ++--
+ 4 files changed, 15 insertions(+), 6 deletions(-)
 
+-- 
+2.27.0
 
