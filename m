@@ -2,137 +2,102 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DC46C433EF
-	for <ceph-devel@archiver.kernel.org>; Wed,  2 Mar 2022 15:40:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8279C433EF
+	for <ceph-devel@archiver.kernel.org>; Wed,  2 Mar 2022 15:41:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235846AbiCBPkr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 2 Mar 2022 10:40:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60336 "EHLO
+        id S237186AbiCBPmC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 2 Mar 2022 10:42:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232555AbiCBPkp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2022 10:40:45 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DDA7CA724
-        for <ceph-devel@vger.kernel.org>; Wed,  2 Mar 2022 07:40:02 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id D04ED21991;
-        Wed,  2 Mar 2022 15:40:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1646235600; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ndH0CI7XX+oMVnGsMdy/Op6QsNyZnnGMM6Xnes6nKJo=;
-        b=I+Yx9B3j+4djYxaumAykjfHAtc6f533fw5QQumLuYaRuqX1h2U6REcsTLd3GWzZkkIomA5
-        MVSdMye8VPydBgP0iRPfUYdJnQe1zz9ZVvQFhZFHF8gJR4C33Yc/sx3/oexR8ySUb3MuPH
-        fXstbBW5Art1RZ/thESg8oyHtwmDwMw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1646235600;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ndH0CI7XX+oMVnGsMdy/Op6QsNyZnnGMM6Xnes6nKJo=;
-        b=+n1phKj9V7F/pofpIlZSpICrtuVoggN2knigeP8tHkBLssdNByK+Z+aixcNRBJBpOo6/gy
-        ItxfPLC2Ei/DqBBQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7539F13A84;
-        Wed,  2 Mar 2022 15:40:00 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id UnqVGdCPH2IBHAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Wed, 02 Mar 2022 15:40:00 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id c9600fcf;
-        Wed, 2 Mar 2022 15:40:16 +0000 (UTC)
-From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
-To:     xiubli@redhat.com
-Cc:     jlayton@kernel.org, idryomov@gmail.com, vshankar@redhat.com,
-        ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v3 0/6] ceph: encrypt the snapshot directories
-References: <20220302121323.240432-1-xiubli@redhat.com>
-Date:   Wed, 02 Mar 2022 15:40:16 +0000
-In-Reply-To: <20220302121323.240432-1-xiubli@redhat.com> (xiubli@redhat.com's
-        message of "Wed, 2 Mar 2022 20:13:17 +0800")
-Message-ID: <87mti88isf.fsf@brahms.olymp>
+        with ESMTP id S233923AbiCBPmB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2022 10:42:01 -0500
+Received: from mail-io1-xd2a.google.com (mail-io1-xd2a.google.com [IPv6:2607:f8b0:4864:20::d2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFD47CB640
+        for <ceph-devel@vger.kernel.org>; Wed,  2 Mar 2022 07:41:17 -0800 (PST)
+Received: by mail-io1-xd2a.google.com with SMTP id q8so2316210iod.2
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Mar 2022 07:41:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ieee.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=4F3aemPFDej+wbO6DzqdopFuHWzJRbqudp3FsgF+CCQ=;
+        b=bV75EIJTGAI/8GJLE1xjlEm5dRi/H0XPxzQPJ2/5rmOBjHG2D3ebSO6yP4rL5nOGhV
+         aLXH7RQHJ4mALaNdRaSH2R3v5PjCS6HaZWzxwZgP8zV81+dNaQAz9l6r9sIBE6P37mKI
+         FBVkrV2NExXTKJllfa2ZDmIOhFPKvzkXbW+b8=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=4F3aemPFDej+wbO6DzqdopFuHWzJRbqudp3FsgF+CCQ=;
+        b=md0PexfYWz+WbUpb0z/TUfg02G69xj/csLokvbAMZqR3n2dAy6Muh9dAePNw1Dfkp5
+         7iWrUcgoC2+GwhSfKpCSdVa1SMSaQ28hgW7BeW/+3h+sBd+ogCecnJrLXq7TgogDCyoq
+         EYoRZ7vO4zWTTSad+imGaQhl/Pda4Z7LWfh8HrtTkdhPMOSIDQH3BiYotU2Po0aVPadH
+         Y/XoXJP9HSKDyjglbZ/WcvWIRErETbbN2klSoliWDVN7Ls1+Flv+LYn9nUvK9uV0P6RM
+         Q4H36LKgoeE7TFEcKciZaAio14aAyn4twEKpOEAB80yo+1lghYQB61c6IA/QqlkfbIDI
+         IXug==
+X-Gm-Message-State: AOAM5311wyqeDz9LsvRTyLWgDQcA8exgmJurRz2GI9yHl/eSAAlxYzoK
+        zPPquKVoBZ6uqNN9Et83Wbcs4Q==
+X-Google-Smtp-Source: ABdhPJx8pOPWFm8Mvchc0e0xIOmXD5vNeNv0kBU7qOpTAQ+lk7Jb1p7qwNggxU71jwg0kO2BozdYvQ==
+X-Received: by 2002:a05:6638:381b:b0:314:8258:39d4 with SMTP id i27-20020a056638381b00b00314825839d4mr25434732jav.172.1646235677264;
+        Wed, 02 Mar 2022 07:41:17 -0800 (PST)
+Received: from [172.22.22.4] (c-73-185-129-58.hsd1.mn.comcast.net. [73.185.129.58])
+        by smtp.googlemail.com with ESMTPSA id s12-20020a92cbcc000000b002bd04428740sm9663676ilq.80.2022.03.02.07.41.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 02 Mar 2022 07:41:16 -0800 (PST)
+Message-ID: <b10682fe-54a9-5103-4921-66f8c0f22382@ieee.org>
+Date:   Wed, 2 Mar 2022 09:41:16 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH] libceph: fix last_piece calculation in
+ ceph_msg_data_pages_advance
+Content-Language: en-US
+To:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
+Cc:     idryomov@gmail.com, xiubli@redhat.com
+References: <20220302153744.43541-1-jlayton@kernel.org>
+From:   Alex Elder <elder@ieee.org>
+In-Reply-To: <20220302153744.43541-1-jlayton@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi Xiubo,
+On 3/2/22 9:37 AM, Jeff Layton wrote:
+> It's possible we'll have less than a page's worth of residual data, that
+> is stradding the last two pages in the array. That will make it
+> incorrectly set the last_piece boolean when it shouldn't.
+> 
+> Account for a non-zero cursor->page_offset when advancing.
 
-xiubli@redhat.com writes:
+It's been quite a while I looked at this code, but isn't
+cursor->resid supposed to be the number of bytes remaining,
+irrespective of the offset?
 
-> From: Xiubo Li <xiubli@redhat.com>
->
-> This patch series is base on the 'wip-fscrypt' branch in ceph-client.
+Have you found this to cause a failure?
 
-I gave this patchset a try but it looks broken.  For example, if 'mydir'
-is an encrypted *and* locked directory doing:
+					-Alex
 
-# ls -l mydir/.snap
-
-will result in:
-
-fscrypt (ceph, inode 1099511627782): Error -105 getting encryption context
-
-My RFC patch had an issue that I haven't fully analyzed (and that I
-"fixed" using the d_drop()).  But why is the much simpler approach I used
-not acceptable? (I.e simply use fscryt_auth from parent in
-ceph_get_snapdir()).
-
-> V3:
-> - Add more detail comments in the commit comments and code comments.
-> - Fix some bugs.
-> - Improved the patches.
-> - Remove the already merged patch.
->
-> V2:
-> - Fix several bugs, such as for the long snap name encrypt/dencrypt
-> - Skip double dencypting dentry names for readdir
->
-> =3D=3D=3D=3D=3D=3D
->
-> NOTE: This patch series won't fix the long snap shot issue as Luis
-> is working on that.
-
-Yeah, I'm getting back to it right now.  Let's see if I can untangle this
-soon ;-)
-
-Cheers,
---=20
-Lu=C3=ADs
-
-
-> Xiubo Li (6):
->   ceph: fail the request when failing to decode dentry names
->   ceph: do not dencrypt the dentry name twice for readdir
->   ceph: add ceph_get_snap_parent_inode() support
->   ceph: use the parent inode of '.snap' to dencrypt the names for
->     readdir
->   ceph: use the parent inode of '.snap' to encrypt name to build path
->   ceph: try to encrypt/decrypt long snap name
->
->  fs/ceph/crypto.c     |  95 ++++++++++++++++++++++++++++++++---
->  fs/ceph/crypto.h     |  10 +++-
->  fs/ceph/dir.c        |  98 ++++++++++++++++++++++--------------
->  fs/ceph/inode.c      | 115 ++++++++++++++++++++++++++++++++++++++-----
->  fs/ceph/mds_client.c |  57 +++++++++++++--------
->  fs/ceph/mds_client.h |   3 ++
->  fs/ceph/snap.c       |  24 +++++++++
->  fs/ceph/super.h      |   2 +
->  8 files changed, 327 insertions(+), 77 deletions(-)
->
-> --=20
-> 2.27.0
->
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>   net/ceph/messenger.c | 3 +--
+>   1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index d3bb656308b4..3f8453773cc8 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -894,10 +894,9 @@ static bool ceph_msg_data_pages_advance(struct ceph_msg_data_cursor *cursor,
+>   		return false;   /* no more data */
+>   
+>   	/* Move on to the next page; offset is already at 0 */
+> -
+>   	BUG_ON(cursor->page_index >= cursor->page_count);
+>   	cursor->page_index++;
+> -	cursor->last_piece = cursor->resid <= PAGE_SIZE;
+> +	cursor->last_piece = cursor->page_offset + cursor->resid <= PAGE_SIZE;
+>   
+>   	return true;
+>   }
 
