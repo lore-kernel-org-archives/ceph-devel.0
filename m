@@ -2,106 +2,119 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BD08C4332F
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Mar 2022 16:13:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91D7DC433F5
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Mar 2022 16:26:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240670AbiCDQOm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 4 Mar 2022 11:14:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48264 "EHLO
+        id S240776AbiCDQ1P (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 4 Mar 2022 11:27:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240183AbiCDQOj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2022 11:14:39 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4F66157207;
-        Fri,  4 Mar 2022 08:13:51 -0800 (PST)
+        with ESMTP id S240718AbiCDQ1O (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2022 11:27:14 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 053451C3D11;
+        Fri,  4 Mar 2022 08:26:27 -0800 (PST)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 876C01F38A;
-        Fri,  4 Mar 2022 16:13:50 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id B85A02113B;
+        Fri,  4 Mar 2022 16:26:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1646410430; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1646411185; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=+3iB4IVSxvoxrgPRlS4xZegvmXLYHfk7btvgwcWOpvg=;
-        b=d2jF9WrhG5m83dax3NIdFlMlkxldqtyWg/OF7qKs/faW68IEoGLltHId6bZgIl6BzLW2sz
-        aD9bu/qz44Kar+SaM6Ei3G2zouTnpOZ0GvwolTfCQgd815vfJ8LOe86dyGETNblhAC8fMc
-        u6zm6N/ciO6n/+Ub+9QOB1Q/HAbjiBs=
+        bh=dnu2uD85M6pG4RSbO3bHxRsefMWNjAfi8wTJU9h1F9M=;
+        b=HtMlRf6D2KRtlwf+bykNHRTiXleeyGfGJyCdK9awWwRMLz3zADKjsEAnnAHQxT/v9r3mN+
+        43iIq5CmCOdtHnYJLB3OtrS99XbY/EvoKk4X2YjWk3Ur3Cw3FiZEqwsLsV+pwx47+lBa2e
+        GY/w/V/l7Dz+16UOLnJfB7XuqKBvXag=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1646410430;
+        s=susede2_ed25519; t=1646411185;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=+3iB4IVSxvoxrgPRlS4xZegvmXLYHfk7btvgwcWOpvg=;
-        b=rJYkoa8Z8Nz0U6cYo52Y0FqpTFa1/XxmMOGsYj4KUxEIV7a8kQf9NqrNmiw2yWSJdDIrzS
-        7hZmItE0lNSzSFDg==
+        bh=dnu2uD85M6pG4RSbO3bHxRsefMWNjAfi8wTJU9h1F9M=;
+        b=XJrU0kq4+ZC/0f/zKPJZqlLviAbda/PZJzbl3BkEs7UCUF0cOCsuvInCII5FVX00mK09Kg
+        GCbWPBOnWQrFgdDA==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1592C13B64;
-        Fri,  4 Mar 2022 16:13:50 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5114613CE6;
+        Fri,  4 Mar 2022 16:26:25 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id cPRhAr46ImKeRAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Fri, 04 Mar 2022 16:13:50 +0000
+        id RIfUELE9ImJGSwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Fri, 04 Mar 2022 16:26:25 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 8db641e2;
-        Fri, 4 Mar 2022 16:14:04 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>
-Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH 2/3] ceph: fix use-after-free in ceph_readdir
-Date:   Fri,  4 Mar 2022 16:14:02 +0000
-Message-Id: <20220304161403.19295-3-lhenriques@suse.de>
-In-Reply-To: <20220304161403.19295-1-lhenriques@suse.de>
+        by brahms.olymp (OpenSMTPD) with ESMTPA id f3a5c227;
+        Fri, 4 Mar 2022 16:26:40 +0000 (UTC)
+From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
+        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 0/3] ceph: minor fixes and encrypted snapshot names
 References: <20220304161403.19295-1-lhenriques@suse.de>
+Date:   Fri, 04 Mar 2022 16:26:40 +0000
+In-Reply-To: <20220304161403.19295-1-lhenriques@suse.de> (=?utf-8?Q?=22Lu?=
+ =?utf-8?Q?=C3=ADs?= Henriques"'s
+        message of "Fri, 4 Mar 2022 16:14:00 +0000")
+Message-ID: <87fsnx4rb3.fsf@brahms.olymp>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-After calling ceph_mdsc_put_request() on dfi->last_readdir, this field
-should be set to NULL, otherwise we may end-up freeing it twince and get
-the following splat:
+Lu=C3=ADs Henriques <lhenriques@suse.de> writes:
 
-  refcount_t: underflow; use-after-free.
-  WARNING: CPU: 0 PID: 229 at lib/refcount.c:28 refcount_warn_saturate+0xa6/0xf0
-  ...
-  Call Trace:
-    <TASK>
-    ceph_readdir+0xd35/0x1460 [ceph]
-    ? _raw_spin_unlock+0x12/0x30
-    ? preempt_count_add+0x73/0xa0
-    ? _raw_spin_unlock+0x12/0x30
-    ? __mark_inode_dirty+0x27c/0x3a0
-    iterate_dir+0x7d/0x190
-    __x64_sys_getdents64+0x80/0x120
-    ? compat_fillonedir+0x160/0x160
-    do_syscall_64+0x43/0x90
-    entry_SYSCALL_64_after_hwframe+0x44/0xae
+> Hi!
+>
+> I'm sending another iteration of the encrypted snapshot names patch.  This
+> patch assumes PR#45224 [1] to be merged as it adds support for the
+> alternate names.
+>
+> Two notes:
+>
+> 1. Patch 0001 is just a small fix from another fscrypt patch.  It's
+>    probably better to simply squash it.
+>
+> 2. I'm not sure how easy it is to hit the UAF fixed by patch 0002.  I can
+>    reproduce it easily by commenting the code that adds the
+>    DCACHE_NOKEY_NAME flag in patch 0003.
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
- fs/ceph/dir.c | 1 +
- 1 file changed, 1 insertion(+)
+Obviously, immediately after sending this patchset I realized I failed to
+mention a very (*VERY*) important note:
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 0bcb677d2199..934402f5e9e6 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -555,6 +555,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 			      le32_to_cpu(rde->inode.in->mode) >> 12)) {
- 			dout("filldir stopping us...\n");
- 			ceph_mdsc_put_request(dfi->last_readdir);
-+			dfi->last_readdir = NULL;
- 			err = 0;
- 			goto out;
- 		}
+Snapshot names can not start with a '_'.  I think the reason is related
+with the 'long snapshot names', but I can't really remember the details
+anymore.  The point is that an encrypted snapshot name base64-encoded
+*may* end-up starting with an '_' as we're using the base64-url variant.
+
+I really don't know if it's possible to fix that.  I guess that in that
+case the user will get an error and fail to create the snapshot but he'll
+be clueless because the reason.  Probably a warning can be added to the
+kernel logs, but maybe there are other ideas.
+
+Cheers,
+--=20
+Lu=C3=ADs
+
+
+> Any comments are welcome (including for the PR mentioned above, of course=
+).
+>
+> [1] https://github.com/ceph/ceph/pull/45224
+>
+> Lu=C3=ADs Henriques (3):
+>   ceph: fix error path in ceph_readdir()
+>   ceph: fix use-after-free in ceph_readdir
+>   ceph: add support for encrypted snapshot names
+>
+>  fs/ceph/dir.c   | 11 ++++++++++-
+>  fs/ceph/inode.c | 13 +++++++++++++
+>  2 files changed, 23 insertions(+), 1 deletion(-)
+>
