@@ -2,96 +2,67 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E056C433EF
-	for <ceph-devel@archiver.kernel.org>; Tue,  8 Mar 2022 13:23:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A408AC433FE
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Mar 2022 13:24:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241950AbiCHNYd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Mar 2022 08:24:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48156 "EHLO
+        id S1347107AbiCHNZI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Mar 2022 08:25:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49602 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232457AbiCHNYc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2022 08:24:32 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 393D13BF87
-        for <ceph-devel@vger.kernel.org>; Tue,  8 Mar 2022 05:23:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1646745815;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=NDxp7H+GcL8hqxYR74DTjafU/P8xgyd3PyijGy7ze3k=;
-        b=RNppp9qL9X12U+m3gzPJUzcdRyom90lpMCbTYBqjW4u1TvY/IdcvJtEo6XXUHXertUBiO9
-        ACsPh0+8LuE74/kxZQBjcD3SQWntJMaAki7oAibfUAvx1m1bnI+R0FGJIXMIAXGE854Xnr
-        JLczRYxgjtH5fcLPtCiHg0SJsUWGbWQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-19-9S7CYMkOM9CdQ1sbB4yGZA-1; Tue, 08 Mar 2022 08:23:32 -0500
-X-MC-Unique: 9S7CYMkOM9CdQ1sbB4yGZA-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S232457AbiCHNZI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2022 08:25:08 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 419F441996;
+        Tue,  8 Mar 2022 05:24:12 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EE1251006AA5;
-        Tue,  8 Mar 2022 13:23:30 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1043976C2B;
-        Tue,  8 Mar 2022 13:23:28 +0000 (UTC)
-From:   xiubli@redhat.com
-To:     jlayton@kernel.org, idryomov@gmail.com
-Cc:     vshankar@redhat.com, ceph-devel@vger.kernel.org,
-        Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v2] libceph: wait for con->work to finish when cancelling con
-Date:   Tue,  8 Mar 2022 21:23:22 +0800
-Message-Id: <20220308132322.1309992-1-xiubli@redhat.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id CE0F961022;
+        Tue,  8 Mar 2022 13:24:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A15BC340EB;
+        Tue,  8 Mar 2022 13:24:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1646745851;
+        bh=oDHR4xnia2ab55zbZtMiwd3YrjCD0H7NlBw6jy8PM3c=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=b/LvEGyIil+W4LLfomC8GoZmyEvYMBjFgmwBIW/ORpafjwlqoJ42a3kC1nR6aD7Qo
+         lY0388n04hIF2+xQMToeV/CiwLqNuyxUUfNrU6MiP4LfNVv4ap93myb2ypWlSejVKe
+         Rt28k1dD+VorawmtOKJEDiPoja1W7CxqxJLmdXX8zEmESwiEylbSvd9itzG28hDbhL
+         iWNKNesx6vKqlrjuAqhhNkxGc4WvVLvuHru/0scL+5+NmuEU7YcBs+b/iu6raRIzwM
+         UrGtBmajVgzxKA087vGAxrXFZPoodurkUAmHnHtSHfrQvu5qxVXBYMFQ28RpzOzK0j
+         M2YmBlX7nDm2A==
+Message-ID: <dae26bb75c456e50b196f41966807d05e92b19ff.camel@kernel.org>
+Subject: Re: [PATCH] ceph: uninitialized variable in debug output
+From:   Jeff Layton <jlayton@kernel.org>
+To:     David Howells <dhowells@redhat.com>,
+        Dan Carpenter <dan.carpenter@oracle.com>
+Cc:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
+        ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Date:   Tue, 08 Mar 2022 08:24:08 -0500
+In-Reply-To: <1019938.1646732163@warthog.procyon.org.uk>
+References: <20220307142121.GB19660@kili>
+         <1019938.1646732163@warthog.procyon.org.uk>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.4 (3.42.4-1.fc35) 
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+On Tue, 2022-03-08 at 09:36 +0000, David Howells wrote:
+> Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> 
+> > +	u64 inline_version = -1;
+> 
+> ULLONG_MAX?
+> 
+> David
+> 
 
-When reconnecting MDS it will reopen the con with new ip address,
-but the when opening the con with new address it couldn't be sure
-that the stale work has finished. So it's possible that the stale
-work queued will use the new data.
+...or maybe CEPH_INLINE_NONE, which is:
 
-This will use cancel_delayed_work_sync() instead.
-
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
-
-V2:
-- Call cancel_con() after dropping the mutex
-
-
- net/ceph/messenger.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index d3bb656308b4..62e39f63f94c 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -581,8 +581,8 @@ void ceph_con_close(struct ceph_connection *con)
- 
- 	ceph_con_reset_protocol(con);
- 	ceph_con_reset_session(con);
--	cancel_con(con);
- 	mutex_unlock(&con->mutex);
-+	cancel_con(con);
- }
- EXPORT_SYMBOL(ceph_con_close);
- 
-@@ -1416,7 +1416,7 @@ static void queue_con(struct ceph_connection *con)
- 
- static void cancel_con(struct ceph_connection *con)
- {
--	if (cancel_delayed_work(&con->work)) {
-+	if (cancel_delayed_work_sync(&con->work)) {
- 		dout("%s %p\n", __func__, con);
- 		con->ops->put(con);
- 	}
+    #define CEPH_INLINE_NONE        ((__u64)-1)      
+                                                   
 -- 
-2.27.0
-
+Jeff Layton <jlayton@kernel.org>
