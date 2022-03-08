@@ -2,320 +2,252 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13C34C433F5
-	for <ceph-devel@archiver.kernel.org>; Tue,  8 Mar 2022 17:47:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77312C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed,  9 Mar 2022 01:01:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349245AbiCHRsb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Mar 2022 12:48:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38428 "EHLO
+        id S229457AbiCIBCC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Mar 2022 20:02:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349246AbiCHRs3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2022 12:48:29 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FD7C238
-        for <ceph-devel@vger.kernel.org>; Tue,  8 Mar 2022 09:47:32 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 079F4210F2;
-        Tue,  8 Mar 2022 17:47:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1646761651; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
+        with ESMTP id S229445AbiCIBCB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2022 20:02:01 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 20A2926B58E
+        for <ceph-devel@vger.kernel.org>; Tue,  8 Mar 2022 16:40:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1646786407;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=HcwDnkh3wCGETBy8KqkUaanNPJ11vRQnNqs9gEadlPU=;
-        b=r64TtE1svUUb8ygKBG2lsnH3NtplR0x3Itus1sBzEXoPmew4McqMCsfvG+TCRyIy3ImYm1
-        C+7X+HC7PlXwlD5OR+U0OwozVgdIA7Q1FO2hrLv9+smI9Y8ygnTAh2sf5bhOirhoUQSpCp
-        kAq0f5HYS/Wz6/iPNmBt/RplhvqJNkA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1646761651;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=HcwDnkh3wCGETBy8KqkUaanNPJ11vRQnNqs9gEadlPU=;
-        b=w1teVX8KFrod7ILGTQX5BRbnKJOdB0Vl05GZrS8/9HZcHaCU/IAinFlM18Ym2/9kelKrVi
-        tYxTvJzMdrfuNtAg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        bh=RoGieC+RX25VwgvD6fhXsJpj8oDo6vUJuIqqJTz1dvM=;
+        b=f3rbJpfiTF6srupGPSZRqp/sLF4yGyZm7GCFjdUYsWRsuwV4OQKJwmI9GltgZ3V4XtrLJk
+        ZxJ9t/HpATebvHP/qdjvZLyyz+24qh/fNSHoc6g/srNrE8Rom0iUh2ugC4f19klbrBy8JO
+        OH0XR0lpMy/Gy+4RMug2lRDEG6f2qug=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-349-5P9QS1iLO0O7rzryZweO6w-1; Tue, 08 Mar 2022 18:28:49 -0500
+X-MC-Unique: 5P9QS1iLO0O7rzryZweO6w-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id A761F13CCE;
-        Tue,  8 Mar 2022 17:47:30 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 79e9JbKWJ2I/GAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 08 Mar 2022 17:47:30 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 19a92530;
-        Tue, 8 Mar 2022 17:47:45 +0000 (UTC)
-From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
-To:     xiubli@redhat.com
-Cc:     jlayton@kernel.org, idryomov@gmail.com, vshankar@redhat.com,
-        ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v5] ceph: do not dencrypt the dentry name twice for readdir
-References: <20220305122527.1102109-1-xiubli@redhat.com>
-Date:   Tue, 08 Mar 2022 17:47:45 +0000
-In-Reply-To: <20220305122527.1102109-1-xiubli@redhat.com> (xiubli@redhat.com's
-        message of "Sat, 5 Mar 2022 20:25:27 +0800")
-Message-ID: <87h788z67y.fsf@brahms.olymp>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F0B471006AA5;
+        Tue,  8 Mar 2022 23:28:47 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.33.36.19])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id DD8B85DBA7;
+        Tue,  8 Mar 2022 23:28:44 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+Subject: [PATCH v2 11/19] netfs: Change ->init_request() to return an error
+ code
+From:   David Howells <dhowells@redhat.com>
+To:     linux-cachefs@redhat.com
+Cc:     dhowells@redhat.com, Anna Schumaker <anna.schumaker@netapp.com>,
+        Steve French <sfrench@samba.org>,
+        Dominique Martinet <asmadeus@codewreck.org>,
+        Jeff Layton <jlayton@redhat.com>,
+        David Wysochanski <dwysocha@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Jeffle Xu <jefflexu@linux.alibaba.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org,
+        linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
+        v9fs-developer@lists.sourceforge.net,
+        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Tue, 08 Mar 2022 23:28:44 +0000
+Message-ID: <164678212401.1200972.16537041523832944934.stgit@warthog.procyon.org.uk>
+In-Reply-To: <164678185692.1200972.597611902374126174.stgit@warthog.procyon.org.uk>
+References: <164678185692.1200972.597611902374126174.stgit@warthog.procyon.org.uk>
+User-Agent: StGit/1.4
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-xiubli@redhat.com writes:
+Change the request initialisation function to return an error code so that
+the network filesystem can return a failure (ENOMEM, for example).
 
-> From: Xiubo Li <xiubli@redhat.com>
->
-> For the readdir request the dentries will be pasred and dencrypted
-> in ceph_readdir_prepopulate(). And in ceph_readdir() we could just
-> get the dentry name from the dentry cache instead of parsing and
-> dencrypting them again. This could improve performance.
->
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->
-> V5:
-> - fix typo of CEPH_ENCRYPTED_LONG_SNAP_NAME_MAX macro
-> - release the rde->dentry in destroy_reply_info
->
->
->  fs/ceph/crypto.h     |  8 ++++++
->  fs/ceph/dir.c        | 59 +++++++++++++++++++++-----------------------
->  fs/ceph/inode.c      |  7 ++++++
->  fs/ceph/mds_client.c |  2 ++
->  fs/ceph/mds_client.h |  1 +
->  5 files changed, 46 insertions(+), 31 deletions(-)
->
-> diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-> index 1e08f8a64ad6..c85cb8c8bd79 100644
-> --- a/fs/ceph/crypto.h
-> +++ b/fs/ceph/crypto.h
-> @@ -83,6 +83,14 @@ static inline u32 ceph_fscrypt_auth_len(struct ceph_fs=
-crypt_auth *fa)
->   */
->  #define CEPH_NOHASH_NAME_MAX (189 - SHA256_DIGEST_SIZE)
->=20=20
-> +/*
-> + * The encrypted long snap name will be in format of
-> + * "_${ENCRYPTED-LONG-SNAP-NAME}_${INODE-NUM}". And will set the max lon=
-gth
-> + * to sizeof('_') + NAME_MAX + sizeof('_') + max of sizeof(${INO}) + ext=
-ra 7
-> + * bytes to align the total size to 8 bytes.
-> + */
-> +#define CEPH_ENCRYPTED_LONG_SNAP_NAME_MAX (1 + 255 + 1 + 16 + 7)
-> +
+This will also allow ceph to abort a ->readahead() op if the server refuses
+to give it a cap allowing local caching from within the netfslib framework
+(errors aren't passed back through ->readahead(), so returning, say,
+-ENOBUFS will cause the op to be aborted).
 
-I think this constant needs to be defined in a different way and we need
-to keep the snapshots names length a bit shorter than NAME_MAX.  And I'm
-not talking just about the encrypted snapshots.
+Signed-off-by: David Howells <dhowells@redhat.com>
+cc: linux-cachefs@redhat.com
+---
 
-Right now, ceph PR#45192 fixes an MDS limitation that is keeping long
-snapshot names smaller than 80 characters.  With this limitation we would
-need to keep the snapshot names < 64:
+ fs/9p/vfs_addr.c       |    3 ++-
+ fs/afs/file.c          |    3 ++-
+ fs/netfs/objects.c     |   41 ++++++++++++++++++++++++-----------------
+ fs/netfs/read_helper.c |   20 ++++++++++++--------
+ include/linux/netfs.h  |    2 +-
+ 5 files changed, 41 insertions(+), 28 deletions(-)
 
-   '_' + <name> + '_' + '<inode#>' '\0'
-    1  +   64   +  1  +    12     +  1 =3D 80
+diff --git a/fs/9p/vfs_addr.c b/fs/9p/vfs_addr.c
+index fdc1033a1546..91d3926c9559 100644
+--- a/fs/9p/vfs_addr.c
++++ b/fs/9p/vfs_addr.c
+@@ -56,12 +56,13 @@ static void v9fs_issue_read(struct netfs_io_subrequest *subreq)
+  * @rreq: The read request
+  * @file: The file being read from
+  */
+-static void v9fs_init_request(struct netfs_io_request *rreq, struct file *file)
++static int v9fs_init_request(struct netfs_io_request *rreq, struct file *file)
+ {
+ 	struct p9_fid *fid = file->private_data;
+ 
+ 	refcount_inc(&fid->count);
+ 	rreq->netfs_priv = fid;
++	return 0;
+ }
+ 
+ /**
+diff --git a/fs/afs/file.c b/fs/afs/file.c
+index b19d635eed12..6469d7f98ef5 100644
+--- a/fs/afs/file.c
++++ b/fs/afs/file.c
+@@ -359,9 +359,10 @@ static int afs_symlink_readpage(struct file *file, struct page *page)
+ 	return ret;
+ }
+ 
+-static void afs_init_request(struct netfs_io_request *rreq, struct file *file)
++static int afs_init_request(struct netfs_io_request *rreq, struct file *file)
+ {
+ 	rreq->netfs_priv = key_get(afs_file_key(file));
++	return 0;
+ }
+ 
+ static bool afs_is_cache_enabled(struct inode *inode)
+diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
+index 986d7a9d25dd..ae18827e156b 100644
+--- a/fs/netfs/objects.c
++++ b/fs/netfs/objects.c
+@@ -20,27 +20,34 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
+ {
+ 	static atomic_t debug_ids;
+ 	struct netfs_io_request *rreq;
++	int ret;
+ 
+ 	rreq = kzalloc(sizeof(struct netfs_io_request), GFP_KERNEL);
+-	if (rreq) {
+-		rreq->start	= start;
+-		rreq->len	= len;
+-		rreq->origin	= origin;
+-		rreq->netfs_ops	= ops;
+-		rreq->netfs_priv = netfs_priv;
+-		rreq->mapping	= mapping;
+-		rreq->inode	= file_inode(file);
+-		rreq->i_size	= i_size_read(rreq->inode);
+-		rreq->debug_id	= atomic_inc_return(&debug_ids);
+-		INIT_LIST_HEAD(&rreq->subrequests);
+-		INIT_WORK(&rreq->work, netfs_rreq_work);
+-		refcount_set(&rreq->ref, 1);
+-		__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
+-		if (ops->init_request)
+-			ops->init_request(rreq, file);
+-		netfs_stat(&netfs_n_rh_rreq);
++	if (!rreq)
++		return ERR_PTR(-ENOMEM);
++
++	rreq->start	= start;
++	rreq->len	= len;
++	rreq->origin	= origin;
++	rreq->netfs_ops	= ops;
++	rreq->netfs_priv = netfs_priv;
++	rreq->mapping	= mapping;
++	rreq->inode	= file_inode(file);
++	rreq->i_size	= i_size_read(rreq->inode);
++	rreq->debug_id	= atomic_inc_return(&debug_ids);
++	INIT_LIST_HEAD(&rreq->subrequests);
++	INIT_WORK(&rreq->work, netfs_rreq_work);
++	refcount_set(&rreq->ref, 1);
++	__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
++	if (rreq->netfs_ops->init_request) {
++		ret = rreq->netfs_ops->init_request(rreq, file);
++		if (ret < 0) {
++			kfree(rreq);
++			return ERR_PTR(ret);
++		}
+ 	}
+ 
++	netfs_stat(&netfs_n_rh_rreq);
+ 	return rreq;
+ }
+ 
+diff --git a/fs/netfs/read_helper.c b/fs/netfs/read_helper.c
+index dea085715286..b5176f4320f4 100644
+--- a/fs/netfs/read_helper.c
++++ b/fs/netfs/read_helper.c
+@@ -768,7 +768,7 @@ void netfs_readahead(struct readahead_control *ractl,
+ 				   readahead_pos(ractl),
+ 				   readahead_length(ractl),
+ 				   NETFS_READAHEAD);
+-	if (!rreq)
++	if (IS_ERR(rreq))
+ 		goto cleanup;
+ 
+ 	if (ops->begin_cache_operation) {
+@@ -842,11 +842,9 @@ int netfs_readpage(struct file *file,
+ 	rreq = netfs_alloc_request(folio->mapping, file, ops, netfs_priv,
+ 				   folio_file_pos(folio), folio_size(folio),
+ 				   NETFS_READPAGE);
+-	if (!rreq) {
+-		if (netfs_priv)
+-			ops->cleanup(folio_file_mapping(folio), netfs_priv);
+-		folio_unlock(folio);
+-		return -ENOMEM;
++	if (IS_ERR(rreq)) {
++		ret = PTR_ERR(rreq);
++		goto alloc_error;
+ 	}
+ 
+ 	if (ops->begin_cache_operation) {
+@@ -887,6 +885,11 @@ int netfs_readpage(struct file *file,
+ out:
+ 	netfs_put_request(rreq, false, netfs_rreq_trace_put_hold);
+ 	return ret;
++alloc_error:
++	if (netfs_priv)
++		ops->cleanup(folio_file_mapping(folio), netfs_priv);
++	folio_unlock(folio);
++	return ret;
+ }
+ EXPORT_SYMBOL(netfs_readpage);
+ 
+@@ -1007,12 +1010,13 @@ int netfs_write_begin(struct file *file, struct address_space *mapping,
+ 		goto have_folio_no_wait;
+ 	}
+ 
+-	ret = -ENOMEM;
+ 	rreq = netfs_alloc_request(mapping, file, ops, netfs_priv,
+ 				   folio_file_pos(folio), folio_size(folio),
+ 				   NETFS_READ_FOR_WRITE);
+-	if (!rreq)
++	if (IS_ERR(rreq)) {
++		ret = PTR_ERR(rreq);
+ 		goto error;
++	}
+ 	rreq->no_unlock_folio	= folio_index(folio);
+ 	__set_bit(NETFS_RREQ_NO_UNLOCK_FOLIO, &rreq->flags);
+ 	netfs_priv = NULL;
+diff --git a/include/linux/netfs.h b/include/linux/netfs.h
+index 7dc741d9b21b..4b99e38f73d9 100644
+--- a/include/linux/netfs.h
++++ b/include/linux/netfs.h
+@@ -193,7 +193,7 @@ struct netfs_io_request {
+  */
+ struct netfs_request_ops {
+ 	bool (*is_cache_enabled)(struct inode *inode);
+-	void (*init_request)(struct netfs_io_request *rreq, struct file *file);
++	int (*init_request)(struct netfs_io_request *rreq, struct file *file);
+ 	int (*begin_cache_operation)(struct netfs_io_request *rreq);
+ 	void (*expand_readahead)(struct netfs_io_request *rreq);
+ 	bool (*clamp_length)(struct netfs_io_subrequest *subreq);
 
-Note however that currently clients *do* allow to create snapshots with
-bigger names.  And if we do that we'll get an error when doing an LSSNAP
-on a .snap subdirectory that will contain the corresponding long name:
 
-  # mkdir a/.snap/123456qwertasdfgzxcvb7890yuiophjklnm123456qwertasdfgzxcvb=
-78912345
-  # ls -li a/b/.snap
-  ls: a/b/.snap/_123456qwertasdfgzxcvb7890yuiophjklnm123456qwertasdfgzxcvb7=
-8912345_109951162777: No such file or directory
-
-We can limit the snapshot names on creation, but this should probably be
-handled on the MDS side (so that old clients won't break anything).  Does
-this make sense?  I can work on an MDS patch for this but... to which
-length should names be limited? NAME_MAX - (2*'_' + <inode len>)?  Or
-should we take base64-encoded names already into account?
-
-(Sorry, I'm jumping around between PRs and patches, and trying to make any
-sense out of the snapshots code :-/ )
-
-Cheers,
---=20
-Lu=C3=ADs
-
-
->  void ceph_fscrypt_set_ops(struct super_block *sb);
->=20=20
->  void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc);
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 6df2a91af236..b30429e2d079 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -316,8 +316,7 @@ static int ceph_readdir(struct file *file, struct dir=
-_context *ctx)
->  	int err;
->  	unsigned frag =3D -1;
->  	struct ceph_mds_reply_info_parsed *rinfo;
-> -	struct fscrypt_str tname =3D FSTR_INIT(NULL, 0);
-> -	struct fscrypt_str oname =3D FSTR_INIT(NULL, 0);
-> +	char *dentry_name =3D NULL;
->=20=20
->  	dout("readdir %p file %p pos %llx\n", inode, file, ctx->pos);
->  	if (dfi->file_info.flags & CEPH_F_ATEND)
-> @@ -369,14 +368,6 @@ static int ceph_readdir(struct file *file, struct di=
-r_context *ctx)
->  		spin_unlock(&ci->i_ceph_lock);
->  	}
->=20=20
-> -	err =3D ceph_fname_alloc_buffer(inode, &tname);
-> -	if (err < 0)
-> -		goto out;
-> -
-> -	err =3D ceph_fname_alloc_buffer(inode, &oname);
-> -	if (err < 0)
-> -		goto out;
-> -
->  	/* proceed with a normal readdir */
->  more:
->  	/* do we have the correct frag content buffered? */
-> @@ -528,31 +519,39 @@ static int ceph_readdir(struct file *file, struct d=
-ir_context *ctx)
->  			}
->  		}
->  	}
-> +
-> +	dentry_name =3D kmalloc(CEPH_ENCRYPTED_LONG_SNAP_NAME_MAX, GFP_KERNEL);
-> +	if (!dentry_name) {
-> +		err =3D -ENOMEM;
-> +		ceph_mdsc_put_request(dfi->last_readdir);
-> +		dfi->last_readdir =3D NULL;
-> +		goto out;
-> +	}
-> +
->  	for (; i < rinfo->dir_nr; i++) {
->  		struct ceph_mds_reply_dir_entry *rde =3D rinfo->dir_entries + i;
-> -		struct ceph_fname fname =3D { .dir	=3D inode,
-> -					    .name	=3D rde->name,
-> -					    .name_len	=3D rde->name_len,
-> -					    .ctext	=3D rde->altname,
-> -					    .ctext_len	=3D rde->altname_len };
-> -		u32 olen =3D oname.len;
-> -
-> -		err =3D ceph_fname_to_usr(&fname, &tname, &oname, NULL);
-> -		if (err) {
-> -			pr_err("%s unable to decode %.*s, got %d\n", __func__,
-> -			       rde->name_len, rde->name, err);
-> -			goto out;
-> -		}
-> +		struct dentry *dn =3D rde->dentry;
-> +		int name_len;
->=20=20
->  		BUG_ON(rde->offset < ctx->pos);
->  		BUG_ON(!rde->inode.in);
-> +		BUG_ON(!rde->dentry);
->=20=20
->  		ctx->pos =3D rde->offset;
-> -		dout("readdir (%d/%d) -> %llx '%.*s' %p\n",
-> -		     i, rinfo->dir_nr, ctx->pos,
-> -		     rde->name_len, rde->name, &rde->inode.in);
->=20=20
-> -		if (!dir_emit(ctx, oname.name, oname.len,
-> +		spin_lock(&dn->d_lock);
-> +		memcpy(dentry_name, dn->d_name.name, dn->d_name.len);
-> +		name_len =3D dn->d_name.len;
-> +		spin_unlock(&dn->d_lock);
-> +
-> +		dentry_name[name_len] =3D '\0';
-> +		dout("readdir (%d/%d) -> %llx '%s' %p\n",
-> +		     i, rinfo->dir_nr, ctx->pos, dentry_name, &rde->inode.in);
-> +
-> +		dput(dn);
-> +		rde->dentry =3D NULL;
-> +
-> +		if (!dir_emit(ctx, dentry_name, name_len,
->  			      ceph_present_ino(inode->i_sb, le64_to_cpu(rde->inode.in->ino)),
->  			      le32_to_cpu(rde->inode.in->mode) >> 12)) {
->  			/*
-> @@ -566,8 +565,6 @@ static int ceph_readdir(struct file *file, struct dir=
-_context *ctx)
->  			goto out;
->  		}
->=20=20
-> -		/* Reset the lengths to their original allocated vals */
-> -		oname.len =3D olen;
->  		ctx->pos++;
->  	}
->=20=20
-> @@ -625,8 +622,8 @@ static int ceph_readdir(struct file *file, struct dir=
-_context *ctx)
->  	err =3D 0;
->  	dout("readdir %p file %p done.\n", inode, file);
->  out:
-> -	ceph_fname_free_buffer(inode, &tname);
-> -	ceph_fname_free_buffer(inode, &oname);
-> +	if (dentry_name)
-> +		kfree(dentry_name);
->  	return err;
->  }
->=20=20
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index e5a9838981ba..dfb7b4461857 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1902,6 +1902,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_reques=
-t *req,
->  			goto out;
->  		}
->=20=20
-> +		rde->dentry =3D NULL;
->  		dname.name =3D oname.name;
->  		dname.len =3D oname.len;
->  		dname.hash =3D full_name_hash(parent, dname.name, dname.len);
-> @@ -1962,6 +1963,12 @@ int ceph_readdir_prepopulate(struct ceph_mds_reque=
-st *req,
->  			goto retry_lookup;
->  		}
->=20=20
-> +		/*
-> +		 * ceph_readdir will use the dentry to get the name
-> +		 * to avoid doing the dencrypt again there.
-> +		 */
-> +		rde->dentry =3D dget(dn);
-> +
->  		/* inode */
->  		if (d_really_is_positive(dn)) {
->  			in =3D d_inode(dn);
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index f0d2442187a3..9de749dd715c 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -733,6 +733,8 @@ static void destroy_reply_info(struct ceph_mds_reply_=
-info_parsed *info)
->=20=20
->  		kfree(rde->inode.fscrypt_auth);
->  		kfree(rde->inode.fscrypt_file);
-> +		dput(rde->dentry);
-> +		rde->dentry =3D NULL;
->  	}
->  	free_pages((unsigned long)info->dir_entries, get_order(info->dir_buf_si=
-ze));
->  }
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index 0dfe24f94567..663d7754d57d 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -96,6 +96,7 @@ struct ceph_mds_reply_info_in {
->  };
->=20=20
->  struct ceph_mds_reply_dir_entry {
-> +	struct dentry		      *dentry;
->  	char                          *name;
->  	u8			      *altname;
->  	u32                           name_len;
-> --=20
->
-> 2.27.0
->
