@@ -2,136 +2,349 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE988C433EF
-	for <ceph-devel@archiver.kernel.org>; Thu, 10 Mar 2022 16:23:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FBA9C433F5
+	for <ceph-devel@archiver.kernel.org>; Thu, 10 Mar 2022 17:26:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244094AbiCJQY1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 10 Mar 2022 11:24:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42104 "EHLO
+        id S233251AbiCJR1J (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 10 Mar 2022 12:27:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243486AbiCJQX1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2022 11:23:27 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A4C67198D0E
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2022 08:21:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1646929289;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+        with ESMTP id S233901AbiCJR1H (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2022 12:27:07 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B12F024F2B;
+        Thu, 10 Mar 2022 09:26:05 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 6917B21106;
+        Thu, 10 Mar 2022 17:26:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1646933164; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=6OEvdGln4GLB/K6WbXv/BIS67SElyOgtgishIXX+IXU=;
-        b=SQo9TRpbuRykNsn+zSkuGI/UeWhQ7D9Zt9GlLfwk4XGiz/VKsEAgnfh78siEt1V5awALOX
-        GEY5u1UMTvHDqb/KVmneZJSBM5XqQELxotEygr+tcLrISsg/nrzhHoJ5tejkmfruSN6Dhl
-        MLf5xqmrW5bpWodFsutdAT427VdGY4A=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-231-ixK_enuePSaw29LoFcSyjg-1; Thu, 10 Mar 2022 11:21:24 -0500
-X-MC-Unique: ixK_enuePSaw29LoFcSyjg-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        bh=y6x0at21h+/Dg2sUoIZKBbHpKNQLxf2+waXR+AsoGPw=;
+        b=vhccKev6ZRzQ3Bgvfasc2rqSaNs1sm1zyzIfHs+Fo2MQYAamafgI7vJQiEpeEItfE07Oig
+        IrvhUqFtaynD2CRZZe/oQt+41XKgiW0qaCj02g8HDqeIalaSa6EMACQlCd5RGM9VaczOLC
+        untX5kd686Xs0vybRZsb/pU1/7fbScI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1646933164;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=y6x0at21h+/Dg2sUoIZKBbHpKNQLxf2+waXR+AsoGPw=;
+        b=6VxqoXSQlSDT90W9BegMo93XD/NfdkXJxN1LDDRaNd5DVyxysMyiyCdqP0QH4/pvo9gVO7
+        ilybb+QKWLLX1JDA==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 25C5F1854E31;
-        Thu, 10 Mar 2022 16:21:04 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.33.36.19])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 089AB7C04D;
-        Thu, 10 Mar 2022 16:20:36 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH v3 20/20] afs: Maintain netfs_i_context::remote_i_size
-From:   David Howells <dhowells@redhat.com>
-To:     linux-cachefs@redhat.com
-Cc:     Jeff Layton <jlayton@kernel.org>, linux-afs@lists.infradead.org,
-        dhowells@redhat.com, Anna Schumaker <anna.schumaker@netapp.com>,
-        Steve French <sfrench@samba.org>,
-        Dominique Martinet <asmadeus@codewreck.org>,
-        Jeff Layton <jlayton@redhat.com>,
-        David Wysochanski <dwysocha@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Jeffle Xu <jefflexu@linux.alibaba.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-afs@lists.infradead.org, linux-nfs@vger.kernel.org,
-        linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        v9fs-developer@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Thu, 10 Mar 2022 16:20:35 +0000
-Message-ID: <164692923592.2099075.5466132542956550401.stgit@warthog.procyon.org.uk>
-In-Reply-To: <164692883658.2099075.5745824552116419504.stgit@warthog.procyon.org.uk>
-References: <164692883658.2099075.5745824552116419504.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/1.4
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 00A9C13A66;
+        Thu, 10 Mar 2022 17:26:03 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id OJvVOKs0KmI0MQAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Thu, 10 Mar 2022 17:26:03 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id a4025dcb;
+        Thu, 10 Mar 2022 17:26:17 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [RFC PATCH 2/2] ceph: add support for handling encrypted snapshot names in subtree
+Date:   Thu, 10 Mar 2022 17:26:16 +0000
+Message-Id: <20220310172616.16212-3-lhenriques@suse.de>
+In-Reply-To: <20220310172616.16212-1-lhenriques@suse.de>
+References: <20220310172616.16212-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Make afs use netfslib's tracking for the server's idea of what the current
-inode size is independently of inode->i_size.  We really want to use this
-value when calculating the new vnode size when initiating a StoreData RPC
-op rather than the size stat() presents to the user (ie. inode->i_size) as
-the latter is affected by as-yet uncommitted writes.
+When creating a snapshot, the .snap directories for every subdirectory will
+show the snapshot name in the "long format":
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
-cc: linux-cachefs@redhat.com
-cc: linux-afs@lists.infradead.org
-Link: https://lore.kernel.org/r/164623014626.3564931.8375344024648265358.stgit@warthog.procyon.org.uk/ # v1
-Link: https://lore.kernel.org/r/164678220204.1200972.17408022517463940584.stgit@warthog.procyon.org.uk/ # v2
+  # mkdir .snap/my-snap
+  # ls my-dir/.snap/
+  _my-snap_1099511627782
+
+Encrypted snapshots will need to be able to handle these snapshot names by
+encrypting/decrypting only the snapshot part of the string ('my-snap').
+
+Also, since the MDS prevents snapshot names to be bigger than 240 characters
+it is necessary to adapt CEPH_NOHASH_NAME_MAX to accommodate this extra
+limitation.
+
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
 ---
+ fs/ceph/crypto.c | 146 +++++++++++++++++++++++++++++++++++++++++------
+ fs/ceph/crypto.h |   9 ++-
+ 2 files changed, 134 insertions(+), 21 deletions(-)
 
- fs/afs/inode.c |    1 +
- fs/afs/write.c |    7 +++----
- 2 files changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/fs/afs/inode.c b/fs/afs/inode.c
-index 5b5e40197655..2fe402483ad5 100644
---- a/fs/afs/inode.c
-+++ b/fs/afs/inode.c
-@@ -246,6 +246,7 @@ static void afs_apply_status(struct afs_operation *op,
- 		 * idea of what the size should be that's not the same as
- 		 * what's on the server.
- 		 */
-+		vnode->netfs_ctx.remote_i_size = status->size;
- 		if (change_size) {
- 			afs_set_i_size(vnode, status->size);
- 			inode->i_ctime = t;
-diff --git a/fs/afs/write.c b/fs/afs/write.c
-index e4b47f67a408..85c9056ba9fb 100644
---- a/fs/afs/write.c
-+++ b/fs/afs/write.c
-@@ -353,9 +353,10 @@ static const struct afs_operation_ops afs_store_data_operation = {
- static int afs_store_data(struct afs_vnode *vnode, struct iov_iter *iter, loff_t pos,
- 			  bool laundering)
- {
-+	struct netfs_i_context *ictx = &vnode->netfs_ctx;
- 	struct afs_operation *op;
- 	struct afs_wb_key *wbk = NULL;
--	loff_t size = iov_iter_count(iter), i_size;
-+	loff_t size = iov_iter_count(iter);
- 	int ret = -ENOKEY;
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+index 5a87e7385d3f..e315e3650ea7 100644
+--- a/fs/ceph/crypto.c
++++ b/fs/ceph/crypto.c
+@@ -128,15 +128,89 @@ void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_se
+ 	swap(req->r_fscrypt_auth, as->fscrypt_auth);
+ }
  
- 	_enter("%s{%llx:%llu.%u},%llx,%llx",
-@@ -377,15 +378,13 @@ static int afs_store_data(struct afs_vnode *vnode, struct iov_iter *iter, loff_t
- 		return -ENOMEM;
+-int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf)
++/*
++ * User-created snapshots can't start with '_'.  Snapshots that start with this
++ * character are special (hint: there aren't real snapshots) and use the
++ * following format:
++ *
++ *   _<SNAPSHOT-NAME>_<INODE-NUMBER>
++ *
++ * where:
++ *  - <SNAPSHOT-NAME> - the real snapshot name that may need to be decrypted,
++ *  - <INODE-NUMBER> - the inode number for the actual snapshot
++ *
++ * This function parses these snapshot names and returns the inode
++ * <INODE-NUMBER>.  'name_len' will also bet set with the <SNAPSHOT-NAME>
++ * length.
++ */
++static struct inode *parse_longname(const struct inode *parent, const char *name,
++				    int *name_len)
++{
++	struct inode *dir = NULL;
++	struct ceph_vino vino = { .snap = CEPH_NOSNAP };
++	char *inode_number;
++	char *name_end;
++	int orig_len = *name_len;
++	int ret = -EIO;
++
++	/* Skip initial '_' */
++	name++;
++	name_end = strrchr(name, '_');
++	if (!name_end) {
++		dout("Failed to parse long snapshot name: %s\n", name);
++		return ERR_PTR(-EIO);
++	}
++	*name_len = (name_end - name);
++	if (*name_len <= 0) {
++		pr_err("Failed to parse long snapshot name\n");
++		return ERR_PTR(-EIO);
++	}
++	/* Get the inode number */
++	inode_number = kmemdup_nul(name_end + 1,
++				   orig_len - *name_len - 2,
++				   GFP_KERNEL);
++	if (!inode_number)
++		return ERR_PTR(-ENOMEM);
++	ret = kstrtou64(inode_number, 0, &vino.ino);
++	if (ret) {
++		dout("Failed to parse inode number: %s\n", name);
++		dir = ERR_PTR(ret);
++		goto out;
++	}
++	/* And finally the inode */
++	dir = ceph_get_inode(parent->i_sb, vino, NULL);
++	if (IS_ERR(dir))
++		dout("Can't find inode %s (%s)\n", inode_number, name);
++
++out:
++	kfree(inode_number);
++	return dir;
++}
++
++int ceph_encode_encrypted_fname(struct inode *parent, struct dentry *dentry, char *buf)
+ {
++	struct inode *dir = parent;
++	struct qstr iname;
++	int name_len = dentry->d_name.len;
+ 	u32 len;
+ 	int elen;
+ 	int ret;
+-	u8 *cryptbuf;
++	u8 *cryptbuf = NULL;
+ 
+ 	WARN_ON_ONCE(!fscrypt_has_encryption_key(parent));
+ 
++	iname.name = dentry->d_name.name;
++	iname.len = dentry->d_name.len;
++
++	/* Handle the special case of snapshot names that start with '_' */
++	if ((ceph_snap(dir) == CEPH_SNAPDIR) && (iname.name[0] == '_')) {
++		dir = parse_longname(parent, iname.name, &name_len);
++		if (IS_ERR(dir))
++			return PTR_ERR(dir);
++		iname.name++; /* skip initial '_' */
++		iname.len = name_len;
++	}
++
+ 	/*
+ 	 * convert cleartext dentry name to ciphertext
+ 	 * if result is longer than CEPH_NOKEY_NAME_MAX,
+@@ -144,18 +218,22 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
+ 	 *
+ 	 * See: fscrypt_setup_filename
+ 	 */
+-	if (!fscrypt_fname_encrypted_size(parent, dentry->d_name.len, NAME_MAX, &len))
+-		return -ENAMETOOLONG;
++	if (!fscrypt_fname_encrypted_size(dir, iname.len, NAME_MAX, &len)) {
++		elen = -ENAMETOOLONG;
++		goto out;
++	}
+ 
+ 	/* Allocate a buffer appropriate to hold the result */
+ 	cryptbuf = kmalloc(len > CEPH_NOHASH_NAME_MAX ? NAME_MAX : len, GFP_KERNEL);
+-	if (!cryptbuf)
+-		return -ENOMEM;
++	if (!cryptbuf) {
++		elen = -ENOMEM;
++		goto out;
++	}
+ 
+-	ret = fscrypt_fname_encrypt(parent, &dentry->d_name, cryptbuf, len);
++	ret = fscrypt_fname_encrypt(dir, &iname, cryptbuf, len);
+ 	if (ret) {
+-		kfree(cryptbuf);
+-		return ret;
++		elen = ret;
++		goto out;
  	}
  
--	i_size = i_size_read(&vnode->vfs_inode);
--
- 	afs_op_set_vnode(op, 0, vnode);
- 	op->file[0].dv_delta = 1;
- 	op->file[0].modification = true;
- 	op->store.write_iter = iter;
- 	op->store.pos = pos;
- 	op->store.size = size;
--	op->store.i_size = max(pos + size, i_size);
-+	op->store.i_size = max(pos + size, ictx->remote_i_size);
- 	op->store.laundering = laundering;
- 	op->mtime = vnode->vfs_inode.i_mtime;
- 	op->flags |= AFS_OPERATION_UNINTR;
-
-
+ 	/* hash the end if the name is long enough */
+@@ -171,8 +249,18 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
+ 
+ 	/* base64 encode the encrypted name */
+ 	elen = fscrypt_base64url_encode(cryptbuf, len, buf);
+-	kfree(cryptbuf);
+ 	dout("base64-encoded ciphertext name = %.*s\n", elen, buf);
++	if ((elen > 0) && (dir != parent)) {
++		char tmp_buf[FSCRYPT_BASE64URL_CHARS(NAME_MAX)];
++
++		elen = sprintf(tmp_buf, "_%.*s_%ld", elen, buf, dir->i_ino);
++		memcpy(buf, tmp_buf, elen);
++	}
++out:
++	kfree(cryptbuf);
++	if (dir != parent)
++		iput(dir);
++
+ 	return elen;
+ }
+ 
+@@ -197,8 +285,11 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 	int ret;
+ 	struct fscrypt_str _tname = FSTR_INIT(NULL, 0);
+ 	struct fscrypt_str iname;
++	struct inode *dir = fname->dir;
++	char *name = fname->name;
++	int name_len = fname->name_len;
+ 
+-	if (!IS_ENCRYPTED(fname->dir)) {
++	if (!IS_ENCRYPTED(dir)) {
+ 		oname->name = fname->name;
+ 		oname->len = fname->name_len;
+ 		return 0;
+@@ -208,20 +299,29 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 	if (fname->name_len > FSCRYPT_BASE64URL_CHARS(NAME_MAX))
+ 		return -EIO;
+ 
+-	ret = __fscrypt_prepare_readdir(fname->dir);
++	/* Handle the special case of snapshot names that start with '_' */
++	if ((ceph_snap(dir) == CEPH_SNAPDIR) && (name[0] == '_')) {
++		dir = parse_longname(dir, name, &name_len);
++		if (IS_ERR(dir))
++			return PTR_ERR(dir);
++		name++; /* skip '_' */
++	}
++
++	ret = __fscrypt_prepare_readdir(dir);
+ 	if (ret)
+-		return ret;
++		goto out_inode;
+ 
+ 	/*
+ 	 * Use the raw dentry name as sent by the MDS instead of
+ 	 * generating a nokey name via fscrypt.
+ 	 */
+-	if (!fscrypt_has_encryption_key(fname->dir)) {
++	if (!fscrypt_has_encryption_key(dir)) {
+ 		memcpy(oname->name, fname->name, fname->name_len);
+ 		oname->len = fname->name_len;
+ 		if (is_nokey)
+ 			*is_nokey = true;
+-		return 0;
++		ret = 0;
++		goto out_inode;
+ 	}
+ 
+ 	if (fname->ctext_len == 0) {
+@@ -230,11 +330,11 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 		if (!tname) {
+ 			ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
+ 			if (ret)
+-				return ret;
++				goto out_inode;
+ 			tname = &_tname;
+ 		}
+ 
+-		declen = fscrypt_base64url_decode(fname->name, fname->name_len, tname->name);
++		declen = fscrypt_base64url_decode(name, name_len, tname->name);
+ 		if (declen <= 0) {
+ 			ret = -EIO;
+ 			goto out;
+@@ -246,9 +346,19 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 		iname.len = fname->ctext_len;
+ 	}
+ 
+-	ret = fscrypt_fname_disk_to_usr(fname->dir, 0, 0, &iname, oname);
++	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, oname);
++	if (!ret && (dir != fname->dir)) {
++		name_len = snprintf(tname->name, tname->len, "_%.*s_%ld",
++				    oname->len, oname->name,
++				    dir->i_ino);
++		memcpy(oname->name, tname->name, name_len);
++		oname->len = name_len;
++	}
+ out:
+ 	fscrypt_fname_free_buffer(&_tname);
++out_inode:
++	if ((dir != fname->dir) && !IS_ERR(dir))
++		iput(dir);
+ 	return ret;
+ }
+ 
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index 1e08f8a64ad6..189af2404165 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -75,13 +75,16 @@ static inline u32 ceph_fscrypt_auth_len(struct ceph_fscrypt_auth *fa)
+  * smaller size. If the ciphertext name is longer than the value below, then
+  * sha256 hash the remaining bytes.
+  *
+- * 189 bytes => 252 bytes base64-encoded, which is <= NAME_MAX (255)
++ * 180 bytes => 240 bytes base64-encoded, which is <= NAME_MAX (255)
++ *
++ * (Note: 240 bytes is the maximum size allowed for snapshot names to take into
++ *  account the format: '_<SNAPSHOT-NAME>_<INODE-NUMBER>')
+  *
+  * Note that for long names that end up having their tail portion hashed, we
+  * must also store the full encrypted name (in the dentry's alternate_name
+  * field).
+  */
+-#define CEPH_NOHASH_NAME_MAX (189 - SHA256_DIGEST_SIZE)
++#define CEPH_NOHASH_NAME_MAX (180 - SHA256_DIGEST_SIZE)
+ 
+ void ceph_fscrypt_set_ops(struct super_block *sb);
+ 
+@@ -90,7 +93,7 @@ void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc);
+ int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
+ 				 struct ceph_acl_sec_ctx *as);
+ void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_sec_ctx *as);
+-int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf);
++int ceph_encode_encrypted_fname(struct inode *parent, struct dentry *dentry, char *buf);
+ 
+ static inline int ceph_fname_alloc_buffer(struct inode *parent, struct fscrypt_str *fname)
+ {
