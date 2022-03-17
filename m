@@ -2,61 +2,65 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 076E9C433EF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEA17C433F5
 	for <ceph-devel@archiver.kernel.org>; Thu, 17 Mar 2022 15:45:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236046AbiCQPqY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 17 Mar 2022 11:46:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32842 "EHLO
+        id S236052AbiCQPqZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 17 Mar 2022 11:46:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32910 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232616AbiCQPqW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2022 11:46:22 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9262E126FA6;
-        Thu, 17 Mar 2022 08:45:05 -0700 (PDT)
+        with ESMTP id S236042AbiCQPqX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2022 11:46:23 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29B0B12A8F9;
+        Thu, 17 Mar 2022 08:45:07 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 52A5C1F390;
-        Thu, 17 Mar 2022 15:45:04 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id D363C21116;
+        Thu, 17 Mar 2022 15:45:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1647531904; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1647531905; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=dN/tRmavsr/5lSp9HA/dteMDA5hXjEWxlRPogS3sLHg=;
-        b=mU/ra/CfSjsWhWo2es6LXXvuJmqF8r9Sv+2yIpOiMvy6QYuHWJx6UQHhQckZIo4MkUOqGC
-        hWJ0y18Ap9pHq7m6GqfykJzzyK41WfYbPO5MdBBz5FGMCQqAhUNAtkg66PZD685tA46pcw
-        /V3+pbwz70sPV50dHMaoY1zQiu85bLw=
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=8zj/qp1HcgBQX+/4vlQAgG9P0stPwQSdbGTrHMd1YsE=;
+        b=rYQpHM1FNWibylWWIfjEnONGPq5nt5+8Y7Vd4pdLjITOdFM40VBiZcWnQQQ4SdJ1EW/sPs
+        iyVdgGhLz1BEDeU5ac3mRjAfwzhAogiCUNLMgTKPz7MVFXCgtCt02fZCaUnw54NgpwFP+8
+        nkxQZeFWtVeW6T2UAzJMCJ8PEoKGvv4=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1647531904;
+        s=susede2_ed25519; t=1647531905;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=dN/tRmavsr/5lSp9HA/dteMDA5hXjEWxlRPogS3sLHg=;
-        b=f61F31Nx1vnyDkSxNto/oBxKO4Fp8Gyp1Kh6DfWD5PbxR9dGNlcQ6elrVJxXaCsGEzQ7lK
-        J5ub59l64miTlNAg==
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=8zj/qp1HcgBQX+/4vlQAgG9P0stPwQSdbGTrHMd1YsE=;
+        b=zxZb1s2Hh5RXwCnwujHIR28DcXe9tHgAy3z6wTHwwY25h8o3H1Wqza1nXBpHQ3Qe5drJ+S
+        cH6dbUULXTUg0OBw==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D2E4D13BB7;
-        Thu, 17 Mar 2022 15:45:03 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6E97713BB7;
+        Thu, 17 Mar 2022 15:45:05 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id vCNVMH9XM2L6UwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Thu, 17 Mar 2022 15:45:03 +0000
+        id WJEDGIFXM2L6UwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Thu, 17 Mar 2022 15:45:05 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id b0c7e6d1;
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 4f41217e;
         Thu, 17 Mar 2022 15:45:22 +0000 (UTC)
 From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
 To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
         Ilya Dryomov <idryomov@gmail.com>
 Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [RFC PATCH v3 0/4] ceph: add support for snapshot names encryption
-Date:   Thu, 17 Mar 2022 15:45:17 +0000
-Message-Id: <20220317154521.6615-1-lhenriques@suse.de>
+Subject: [RFC PATCH v3 3/4] ceph: update documentation regarding snapshot naming limitations
+Date:   Thu, 17 Mar 2022 15:45:20 +0000
+Message-Id: <20220317154521.6615-4-lhenriques@suse.de>
+In-Reply-To: <20220317154521.6615-1-lhenriques@suse.de>
+References: <20220317154521.6615-1-lhenriques@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -64,76 +68,29 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi!
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ Documentation/filesystems/ceph.rst | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-Here's another iteration on my encrypted snapshot names series.  And
-here's the changes since v1:
-
-- Use ceph_find_inode() instead of ceph_get_inode() for finding a snapshot
-  parent in function parse_longname().  I've also added a fallback to
-  ceph_get_inode() in case we fail to find the inode.  This may happen if,
-  for example, the mount root doesn't include that inode.  The iput() was
-  also complemented by a discard_new_inode() if the inode is in the I_NEW
-  state. (patch 0002)
-
-- Move the check for '_' snapshots further up in the ceph_fname_to_usr()
-  and ceph_encode_encrypted_dname().  This fixes the case pointed out by
-  Xiubo in v2. (patch 0002)
-
-- Use NAME_MAX for tmp arrays (patch 0002)
-
-- Added an extra patch for replacing the base64url encoding by a different
-  encoding standard, the one used for IMAP mailboxes (which uses '+' and
-  ',' instead of '-' and '_').  This should fix the issue with snapshot
-  names starting with '_'. (patch 0003)
-
-Regarding this last patch, there are other alternatives:
-
-1. Simply replace any initial '_' in snapshot names by another character
-   (I was using the '=').  This was a bit more hacky because this name
-   could never be sent as-is to the base64 functions, so the '=' would
-   need to be replace back by an '_'.
-
-2. Append an extra (known) char to every snapshot name.  This would also
-   be hacky because it would need to be removed again for base64
-   operations.  And the snapshot name size limitations would need to be
-   adjusted too.
-
-3. Modify the fscrypt base64 encoding/decoding functions to receive an
-   alternative table to use in these operations.  This would need to be
-   accepted by the fscrypt maintainers, of course.
-
-As before, in order to test this code the following PRs are required:
-
-  mds: add protection from clients without fscrypt support #45073
-  mds: use the whole string as the snapshot long name #45192
-  mds: support alternate names for snapshots #45224
-  mds: limit the snapshot names to 240 characters #45312
-
-Changes since v1:
-
-- Dropped the dentry->d_flags change in ceph_mkdir().  Thanks to Xiubo
-  suggestion, patch 0001 now skips calling ceph_fscrypt_prepare_context()
-  if we're handling a snapshot.
-
-- Added error handling to ceph_get_snapdir() in patch 0001 (Jeff had
-  already pointed that out but I forgot to include that change in previous
-  revision).
-
-- Rebased patch 0002 to the latest wip-fscrypt branch.
-
-- Added some documentation regarding snapshots naming restrictions.
-
-Luís Henriques (4):
-  ceph: add support for encrypted snapshot names
-  ceph: handle encrypted snapshot names in subdirectories
-  ceph: update documentation regarding snapshot naming limitations
-  ceph: replace base64url by the encoding used for mailbox names
-
- Documentation/filesystems/ceph.rst |  10 ++
- fs/ceph/crypto.c                   | 238 +++++++++++++++++++++++++----
- fs/ceph/crypto.h                   |  14 +-
- fs/ceph/dir.c                      |   2 +-
- fs/ceph/inode.c                    |  33 +++-
- 5 files changed, 259 insertions(+), 38 deletions(-)
-
+diff --git a/Documentation/filesystems/ceph.rst b/Documentation/filesystems/ceph.rst
+index 4942e018db85..d487cabe792d 100644
+--- a/Documentation/filesystems/ceph.rst
++++ b/Documentation/filesystems/ceph.rst
+@@ -57,6 +57,16 @@ a snapshot on any subdirectory (and its nested contents) in the
+ system.  Snapshot creation and deletion are as simple as 'mkdir
+ .snap/foo' and 'rmdir .snap/foo'.
+ 
++Snapshot names have two limitations:
++
++* They can not start with an underscore ('_'), as these names are reserved
++  for internal usage by the MDS.
++* They can not exceed 240 characters in size.  This is because the MDS makes
++  use of long snapshot names internally, which follow the format:
++  `_<SNAPSHOT-NAME>_<INODE-NUMBER>`.  Since filenames in general can't have
++  more than 255 characters, and `<node-id>` takes 13 characters, the long
++  snapshot names can take as much as 255 - 1 - 1 - 13 = 240.
++
+ Ceph also provides some recursive accounting on directories for nested
+ files and bytes.  That is, a 'getfattr -d foo' on any directory in the
+ system will reveal the total number of nested regular files and
