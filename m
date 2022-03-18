@@ -2,218 +2,122 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FF02C433F5
-	for <ceph-devel@archiver.kernel.org>; Fri, 18 Mar 2022 11:49:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E783C433FE
+	for <ceph-devel@archiver.kernel.org>; Fri, 18 Mar 2022 13:50:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235981AbiCRLup (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 18 Mar 2022 07:50:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48726 "EHLO
+        id S236860AbiCRNvh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 18 Mar 2022 09:51:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235964AbiCRLun (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2022 07:50:43 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C69D3E0F4;
-        Fri, 18 Mar 2022 04:49:21 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S236849AbiCRNvf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2022 09:51:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6BEE12B773
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2022 06:50:16 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 40C5D210FA;
-        Fri, 18 Mar 2022 11:49:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1647604160; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=H2OQ24OsfMwaiN+mK75UNzZhX0XQ5LVCCQJKtfe2W/8=;
-        b=UUPNVyMFr93r9LqLoV52p37b34f6NvDqpC6LqPOamU1ne5XEv7tO7MDBun1AlHw4/QQdWt
-        vshoXcxABKAFtfUHqpef8CrH20TSJMMLBvSlG6bc4f5jbhpZ5wxSMN5Ale6FwOQItlHy0f
-        Yxa4Jy4fb2zWc+o+OICytFhuLoLmxjo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1647604160;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=H2OQ24OsfMwaiN+mK75UNzZhX0XQ5LVCCQJKtfe2W/8=;
-        b=Plk8UN2MVFYExSm1cPVj88gOtxpo9NjEZyGZww1uKnwAjExAQuIcAqcwfa4thscqKjG0Yg
-        Z2dDs2tQzxPVl4Ag==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D94E813B67;
-        Fri, 18 Mar 2022 11:49:19 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id wvMSMr9xNGL9fwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Fri, 18 Mar 2022 11:49:19 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 7e73c2df;
-        Fri, 18 Mar 2022 11:49:38 +0000 (UTC)
-From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
-To:     Xiubo Li <xiubli@redhat.com>
-Cc:     Jeff Layton <jlayton@kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [RFC PATCH v3 2/4] ceph: handle encrypted snapshot names in
- subdirectories
-References: <20220317154521.6615-1-lhenriques@suse.de>
-        <20220317154521.6615-3-lhenriques@suse.de>
-        <61d831de-1589-3a19-8f46-a162099e75df@redhat.com>
-        <878rt7h6qs.fsf@brahms.olymp>
-        <15c60a74-73a9-a509-2b0e-2d9c6bfd9398@redhat.com>
-Date:   Fri, 18 Mar 2022 11:49:38 +0000
-In-Reply-To: <15c60a74-73a9-a509-2b0e-2d9c6bfd9398@redhat.com> (Xiubo Li's
-        message of "Fri, 18 Mar 2022 19:28:46 +0800")
-Message-ID: <87y217fpkd.fsf@brahms.olymp>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 85DFB619E8
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2022 13:50:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 93798C340EC;
+        Fri, 18 Mar 2022 13:50:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647611415;
+        bh=++VpkBOTK0AR7DxRka0G8XCmEZrbWmWi+qYUdLKSPUY=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=KgbVLHLi/QuHRbG/pEdmJlgz6OCYeYjBOIqjfbfozfyLf1SY1+UT0A9r2P3mpoVO3
+         0FiTe+FyBhPRKyJ1IUuukF1bdhIexD/xts2eFM0wemiA8mD2+C43u16WeGs7F5uPrS
+         5qAnmIFcgCQmBds1MYL8TNlhwqru31n1F3XAAMiR4+FFwfH9nLgwLUnT5O/YahR4Ba
+         1Sr2ZdXKnspB4CEpb+d4mPazHCURYntsdz9lLpwkLChbh5qywYWso1ri/dPJA7RwsA
+         m7DEDheL0pY6T0+zfQ6lZDSYeC0YxbO0uvOsWIMRdvz05MUW4yYmwxhWGReRBHZCfs
+         V0WB+IwUPsh8g==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     idryomov@gmail.com, xiubli@redhat.com
+Cc:     ceph-devel@vger.kernel.org
+Subject: [PATCH v3 1/5] libceph: add spinlock around osd->o_requests
+Date:   Fri, 18 Mar 2022 09:50:09 -0400
+Message-Id: <20220318135013.43934-2-jlayton@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220318135013.43934-1-jlayton@kernel.org>
+References: <20220318135013.43934-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Xiubo Li <xiubli@redhat.com> writes:
+In a later patch, we're going to need to search for a request in
+the rbtree, but taking the o_mutex is inconvenient as we already
+hold the con mutex at the point where we need it.
 
-> On 3/18/22 6:53 PM, Lu=C3=ADs Henriques wrote:
->> Xiubo Li <xiubli@redhat.com> writes:
->>
->>> On 3/17/22 11:45 PM, Lu=C3=ADs Henriques wrote:
->>>> When creating a snapshot, the .snap directories for every subdirectory=
- will
->>>> show the snapshot name in the "long format":
->>>>
->>>>     # mkdir .snap/my-snap
->>>>     # ls my-dir/.snap/
->>>>     _my-snap_1099511627782
->>>>
->>>> Encrypted snapshots will need to be able to handle these snapshot name=
-s by
->>>> encrypting/decrypting only the snapshot part of the string ('my-snap').
->>>>
->>>> Also, since the MDS prevents snapshot names to be bigger than 240 char=
-acters
->>>> it is necessary to adapt CEPH_NOHASH_NAME_MAX to accommodate this extra
->>>> limitation.
->>>>
->>>> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
->>>> ---
->>>>    fs/ceph/crypto.c | 189 ++++++++++++++++++++++++++++++++++++++++----=
+Add a new spinlock that we take when inserting and erasing entries from
+the o_requests tree. Search of the rbtree can be done with either the
+mutex or the spinlock, but insertion and removal requires both.
+
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
->>>>    fs/ceph/crypto.h |  11 ++-
->>>>    2 files changed, 169 insertions(+), 31 deletions(-)
->>>>
->>>> diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
->>>> index beb73bbdd868..caa9863dee93 100644
->>>> --- a/fs/ceph/crypto.c
->>>> +++ b/fs/ceph/crypto.c
->>>> @@ -128,16 +128,100 @@ void ceph_fscrypt_as_ctx_to_req(struct ceph_mds=
-_request *req, struct ceph_acl_se
->>>>    	swap(req->r_fscrypt_auth, as->fscrypt_auth);
->>>>    }
->>>>    -int ceph_encode_encrypted_dname(const struct inode *parent, struct=
- qstr
->>>> *d_name, char *buf)
->>>> +/*
->>>> + * User-created snapshots can't start with '_'.  Snapshots that start=
- with this
->>>> + * character are special (hint: there aren't real snapshots) and use =
-the
->>>> + * following format:
->>>> + *
->>>> + *   _<SNAPSHOT-NAME>_<INODE-NUMBER>
->>>> + *
->>>> + * where:
->>>> + *  - <SNAPSHOT-NAME> - the real snapshot name that may need to be de=
-crypted,
->>>> + *  - <INODE-NUMBER> - the inode number for the actual snapshot
->>>> + *
->>>> + * This function parses these snapshot names and returns the inode
->>>> + * <INODE-NUMBER>.  'name_len' will also bet set with the <SNAPSHOT-N=
-AME>
->>>> + * length.
->>>> + */
->>>> +static struct inode *parse_longname(const struct inode *parent, const=
- char *name,
->>>> +				    int *name_len)
->>>>    {
->>>> +	struct inode *dir =3D NULL;
->>>> +	struct ceph_vino vino =3D { .snap =3D CEPH_NOSNAP };
->>>> +	char *inode_number;
->>>> +	char *name_end;
->>>> +	int orig_len =3D *name_len;
->>>> +	int ret =3D -EIO;
->>>> +
->>>> +	/* Skip initial '_' */
->>>> +	name++;
->>>> +	name_end =3D strrchr(name, '_');
->>>> +	if (!name_end) {
->>>> +		dout("Failed to parse long snapshot name: %s\n", name);
->>>> +		return ERR_PTR(-EIO);
->>>> +	}
->>>> +	*name_len =3D (name_end - name);
->>>> +	if (*name_len <=3D 0) {
->>>> +		pr_err("Failed to parse long snapshot name\n");
->>>> +		return ERR_PTR(-EIO);
->>>> +	}
->>>> +
->>>> +	/* Get the inode number */
->>>> +	inode_number =3D kmemdup_nul(name_end + 1,
->>>> +				   orig_len - *name_len - 2,
->>>> +				   GFP_KERNEL);
->>>> +	if (!inode_number)
->>>> +		return ERR_PTR(-ENOMEM);
->>>> +	ret =3D kstrtou64(inode_number, 0, &vino.ino);
->>>> +	if (ret) {
->>>> +		dout("Failed to parse inode number: %s\n", name);
->>>> +		dir =3D ERR_PTR(ret);
->>>> +		goto out;
->>>> +	}
->>>> +
->>>> +	/* And finally the inode */
->>>> +	dir =3D ceph_find_inode(parent->i_sb, vino);
->>>> +	if (!dir) {
->>>> +		/* This can happen if we're not mounting cephfs on the root */
->>>> +		dir =3D ceph_get_inode(parent->i_sb, vino, NULL);
->>> In this case IMO you should lookup the inode from MDS instead create it=
- in the
->>> cache, which won't setup the encryption info needed.
->>>
->>> So later when you try to use this to dencrypt the snapshot names, you w=
-ill hit
->>> errors ? And also the case Jeff mentioned in previous thread could happ=
-en.
->> No, I don't see any errors.  The reason is that if we get a I_NEW inode,
->> we do not have the keys to even decrypt the names.  If you mount a
->> filesystem using as root a directory that is inside an encrypted
->> directory, you'll see the encrypted snapshot name:
->>
->>   # mkdir mydir
->>   # fscrypt encrypt mydir
->>   # mkdir -p mydir/a/b/c/d
->>   # mkdir mydir/a/.snap/myspan
->>   # umount ...
->>   # mount <mon>:<port>:/a
->>   # ls .snap
->>
->> And we simply can't decrypt it because for that we'd need to have access
->> to the .fscrypt in the original filesystem mount root.
->
-> Should we resolve this issue ? Something like try to copy the .fscrypt wh=
-en
-> mounting '/a' ?
+ include/linux/ceph/osd_client.h | 8 +++++++-
+ net/ceph/osd_client.c           | 5 +++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-I don't think this is an issue.  If an admin mounts a filesystem this way,
-he must know what he's doing.  Being unable to decrypt a directory because
-he picked the wrong root is a user error.  (Having documentation will
-help, of course.)
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 3431011f364d..3122c1a3205f 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -29,7 +29,12 @@ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
+ 
+ #define CEPH_HOMELESS_OSD	-1
+ 
+-/* a given osd we're communicating with */
++/*
++ * A given osd we're communicating with.
++ *
++ * Note that the o_requests tree can be searched while holding the "lock" mutex
++ * or the "o_requests_lock" spinlock. Insertion or removal requires both!
++ */
+ struct ceph_osd {
+ 	refcount_t o_ref;
+ 	struct ceph_osd_client *o_osdc;
+@@ -37,6 +42,7 @@ struct ceph_osd {
+ 	int o_incarnation;
+ 	struct rb_node o_node;
+ 	struct ceph_connection o_con;
++	spinlock_t o_requests_lock;
+ 	struct rb_root o_requests;
+ 	struct rb_root o_linger_requests;
+ 	struct rb_root o_backoff_mappings;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 1c5815530e0d..1e8842ef6e63 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1198,6 +1198,7 @@ static void osd_init(struct ceph_osd *osd)
+ {
+ 	refcount_set(&osd->o_ref, 1);
+ 	RB_CLEAR_NODE(&osd->o_node);
++	spin_lock_init(&osd->o_requests_lock);
+ 	osd->o_requests = RB_ROOT;
+ 	osd->o_linger_requests = RB_ROOT;
+ 	osd->o_backoff_mappings = RB_ROOT;
+@@ -1427,7 +1428,9 @@ static void link_request(struct ceph_osd *osd, struct ceph_osd_request *req)
+ 		atomic_inc(&osd->o_osdc->num_homeless);
+ 
+ 	get_osd(osd);
++	spin_lock(&osd->o_requests_lock);
+ 	insert_request(&osd->o_requests, req);
++	spin_unlock(&osd->o_requests_lock);
+ 	req->r_osd = osd;
+ }
+ 
+@@ -1439,7 +1442,9 @@ static void unlink_request(struct ceph_osd *osd, struct ceph_osd_request *req)
+ 	     req, req->r_tid);
+ 
+ 	req->r_osd = NULL;
++	spin_lock(&osd->o_requests_lock);
+ 	erase_request(&osd->o_requests, req);
++	spin_unlock(&osd->o_requests_lock);
+ 	put_osd(osd);
+ 
+ 	if (!osd_homeless(osd))
+-- 
+2.35.1
 
-Also, where would we copy the .fscrypt from?  You can run 'fscrypt setup'
-as many times as you want in a single cephfs, you simply need to use
-different root directories.  So, yeah, my opinion is that we simply need
-to hand this gracefully in the client.
-
-Cheers,
---=20
-Lu=C3=ADs
