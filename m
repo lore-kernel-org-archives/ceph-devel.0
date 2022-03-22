@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E57B7C433EF
-	for <ceph-devel@archiver.kernel.org>; Tue, 22 Mar 2022 14:14:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BDF0C433F5
+	for <ceph-devel@archiver.kernel.org>; Tue, 22 Mar 2022 14:14:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237315AbiCVOQM (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 22 Mar 2022 10:16:12 -0400
+        id S237179AbiCVOQO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 22 Mar 2022 10:16:14 -0400
 Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236830AbiCVOP2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2022 10:15:28 -0400
+        with ESMTP id S236997AbiCVOPs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2022 10:15:48 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 746616C1D4;
-        Tue, 22 Mar 2022 07:13:52 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BADCD8596B;
+        Tue, 22 Mar 2022 07:13:54 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E2DE2615C7;
-        Tue, 22 Mar 2022 14:13:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A3DA1C340F0;
-        Tue, 22 Mar 2022 14:13:50 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C646B615C7;
+        Tue, 22 Mar 2022 14:13:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 88BB8C340EC;
+        Tue, 22 Mar 2022 14:13:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647958431;
-        bh=g+3TErgpBR+P4iTf0U+5WmixGEzQBkI4DHrS3H3uW10=;
+        s=k20201202; t=1647958433;
+        bh=ivm2aAVpqaKmPIFnOCUWQASOdRXkBq52kM+CW/CaRFo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=t235VQFqIY+9hsTVQcnEz0YG3+5X4TZ4tNTxv3yXtE9yBDh1eG66wWHCfFGzyp+mN
-         CZ9omUyTa/2F9AeNrZ3zT/ingpo/x3YK5g2mWPdnu1vxHPy2s2sGLESKZ4zarg8vv/
-         cZa5t42hMnl9B28UJDxxMFfQId55MthciD7dzABijvfIA2+5Ub9/tOkQAZCkJtABSl
-         Ia0wNNOD/hI5QGDsGKjtBpX5IyzbHXKnF+FbU49a0J5EP4CT4BcnNrxL3YrkX3G1YG
-         G3gIRSwtxp58e7DP4LXkEyQt3HHCDhubwJVN/CIKMhxpvDHjSzxVJ5BVme8mk4y7Ex
-         coFbBrketKHcQ==
+        b=JaSidzOO7I8os2ZFyBV/cYDfbFYAS9UXfOKFdaZNCXMuvBCPhehQkjLJdQzHEQ3q7
+         PJY0RK7f2YgAzws8HnPBcKH+o5559Wi7qjS2anJjjR9mC16JQtBK8pKH8P/3siTmtj
+         2D6VNOJYwk4ZNND/+sDtzblRD8Phi11+TihwcmunU081zugr5aFpAMj4kCGfZlXbJB
+         XxI3EtB/QwoZj1+p9VbpZmJN2hmn8gDBZvRAYK5SgjA3qrTHuaWng9YyFOFaOetRhr
+         75HJWsn9dPYbL76bhiL1psecorINSgIJD7HQwxWSzhrPPX/wyxTPIZJDHBgLzrVRiz
+         z02E2GAs37DDw==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [RFC PATCH v11 34/51] ceph: get file size from fscrypt_file when present in inode traces
-Date:   Tue, 22 Mar 2022 10:12:59 -0400
-Message-Id: <20220322141316.41325-35-jlayton@kernel.org>
+Subject: [RFC PATCH v11 36/51] ceph: add __ceph_get_caps helper support
+Date:   Tue, 22 Mar 2022 10:13:01 -0400
+Message-Id: <20220322141316.41325-37-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220322141316.41325-1-jlayton@kernel.org>
 References: <20220322141316.41325-1-jlayton@kernel.org>
@@ -48,86 +48,90 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When we get an inode trace from the MDS, grab the fscrypt_file field if
-the inode is encrypted, and use it to populate the i_size field instead
-of the regular inode size field.
+From: Xiubo Li <xiubli@redhat.com>
 
+Break out the guts of ceph_get_caps into a helper that takes an inode
+and ceph_file_info instead of a file pointer.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 38 +++++++++++++++++++++++++-------------
- 1 file changed, 25 insertions(+), 13 deletions(-)
+ fs/ceph/caps.c  | 19 +++++++++++++------
+ fs/ceph/super.h |  2 ++
+ 2 files changed, 15 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 599e27dae8c8..b905c49fc7a9 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -989,6 +989,16 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		     from_kgid(&init_user_ns, inode->i_gid));
- 		ceph_decode_timespec64(&ci->i_btime, &iinfo->btime);
- 		ceph_decode_timespec64(&ci->i_snap_btime, &iinfo->snap_btime);
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index fbf120a6aa96..2aa338219d27 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2946,10 +2946,9 @@ int ceph_try_get_caps(struct inode *inode, int need, int want,
+  * due to a small max_size, make sure we check_max_size (and possibly
+  * ask the mds) so we don't get hung up indefinitely.
+  */
+-int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got)
++int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
++		    int want, loff_t endoff, int *got)
+ {
+-	struct ceph_file_info *fi = filp->private_data;
+-	struct inode *inode = file_inode(filp);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	int ret, _got, flags;
+@@ -2958,7 +2957,7 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	if ((fi->fmode & CEPH_FILE_MODE_WR) &&
++	if (fi && (fi->fmode & CEPH_FILE_MODE_WR) &&
+ 	    fi->filp_gen != READ_ONCE(fsc->filp_gen))
+ 		return -EBADF;
+ 
+@@ -2966,7 +2965,7 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
+ 
+ 	while (true) {
+ 		flags &= CEPH_FILE_MODE_MASK;
+-		if (atomic_read(&fi->num_locks))
++		if (fi && atomic_read(&fi->num_locks))
+ 			flags |= CHECK_FILELOCK;
+ 		_got = 0;
+ 		ret = try_get_cap_refs(inode, need, want, endoff,
+@@ -3011,7 +3010,7 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
+ 				continue;
+ 		}
+ 
+-		if ((fi->fmode & CEPH_FILE_MODE_WR) &&
++		if (fi && (fi->fmode & CEPH_FILE_MODE_WR) &&
+ 		    fi->filp_gen != READ_ONCE(fsc->filp_gen)) {
+ 			if (ret >= 0 && _got)
+ 				ceph_put_cap_refs(ci, _got);
+@@ -3074,6 +3073,14 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got
+ 	return 0;
+ }
+ 
++int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff, int *got)
++{
++	struct ceph_file_info *fi = filp->private_data;
++	struct inode *inode = file_inode(filp);
 +
-+#ifdef CONFIG_FS_ENCRYPTION
-+		if (iinfo->fscrypt_auth_len && !ci->fscrypt_auth) {
-+			ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
-+			ci->fscrypt_auth = iinfo->fscrypt_auth;
-+			iinfo->fscrypt_auth = NULL;
-+			iinfo->fscrypt_auth_len = 0;
-+			inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
-+		}
-+#endif
- 	}
- 
- 	if ((new_version || (new_issued & CEPH_CAP_LINK_SHARED)) &&
-@@ -1012,6 +1022,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 
- 	if (new_version ||
- 	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
-+		u64 size = le64_to_cpu(info->size);
- 		s64 old_pool = ci->i_layout.pool_id;
- 		struct ceph_string *old_ns;
- 
-@@ -1025,10 +1036,21 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 
- 		pool_ns = old_ns;
- 
-+		if (IS_ENCRYPTED(inode) && size && (iinfo->fscrypt_file_len == sizeof(__le64))) {
-+			u64 fsize = __le64_to_cpu(*(__le64 *)iinfo->fscrypt_file);
++	return __ceph_get_caps(inode, fi, need, want, endoff, got);
++}
 +
-+			if (size == round_up(fsize, CEPH_FSCRYPT_BLOCK_SIZE)) {
-+				size = fsize;
-+			} else {
-+				pr_warn("fscrypt size mismatch: size=%llu fscrypt_file=%llu, discarding fscrypt_file size.\n",
-+					info->size, size);
-+			}
-+		}
-+
- 		queue_trunc = ceph_fill_file_size(inode, issued,
--					le32_to_cpu(info->truncate_seq),
--					le64_to_cpu(info->truncate_size),
--					le64_to_cpu(info->size));
-+						  le32_to_cpu(info->truncate_seq),
-+						  le64_to_cpu(info->truncate_size),
-+						  size);
- 		/* only update max_size on auth cap */
- 		if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
- 		    ci->i_max_size != le64_to_cpu(info->max_size)) {
-@@ -1068,16 +1090,6 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		xattr_blob = NULL;
- 	}
+ /*
+  * Take cap refs.  Caller must already know we hold at least one ref
+  * on the caps in question or we don't know this is safe.
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 8f5fdb59344c..fef4cda44861 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1238,6 +1238,8 @@ extern int ceph_encode_dentry_release(void **p, struct dentry *dn,
+ 				      struct inode *dir,
+ 				      int mds, int drop, int unless);
  
--#ifdef CONFIG_FS_ENCRYPTION
--	if (iinfo->fscrypt_auth_len && !ci->fscrypt_auth) {
--		ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
--		ci->fscrypt_auth = iinfo->fscrypt_auth;
--		iinfo->fscrypt_auth = NULL;
--		iinfo->fscrypt_auth_len = 0;
--		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
--	}
--#endif
--
- 	/* finally update i_version */
- 	if (le64_to_cpu(info->version) > ci->i_version)
- 		ci->i_version = le64_to_cpu(info->version);
++extern int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi,
++			   int need, int want, loff_t endoff, int *got);
+ extern int ceph_get_caps(struct file *filp, int need, int want,
+ 			 loff_t endoff, int *got);
+ extern int ceph_try_get_caps(struct inode *inode,
 -- 
 2.35.1
 
