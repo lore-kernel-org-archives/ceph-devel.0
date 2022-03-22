@@ -2,232 +2,93 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A27EEC433FE
-	for <ceph-devel@archiver.kernel.org>; Tue, 22 Mar 2022 14:16:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BB2FC433EF
+	for <ceph-devel@archiver.kernel.org>; Tue, 22 Mar 2022 14:26:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237215AbiCVOSN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 22 Mar 2022 10:18:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54886 "EHLO
+        id S236966AbiCVO1h (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 22 Mar 2022 10:27:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237216AbiCVOQj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2022 10:16:39 -0400
+        with ESMTP id S239980AbiCVOZH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2022 10:25:07 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88C0E89CF9;
-        Tue, 22 Mar 2022 07:14:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 107475EDD2
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Mar 2022 07:20:26 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id AE038B81D0D;
-        Tue, 22 Mar 2022 14:14:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A94CBC36AE5;
-        Tue, 22 Mar 2022 14:14:06 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id DFFADB81BC2
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Mar 2022 14:20:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4EC7DC340EC;
+        Tue, 22 Mar 2022 14:20:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647958447;
-        bh=q2FxaDAfAnHBclDcB2/yYp0A5ISJF/9lilSDLOkU6dk=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=m66Hmtm2AuxXNSPq7qAdp4eDke5l80yvnoPMrqFusHQk4l555r1ih0G/+19VpJbLz
-         J9EKtbJiXNW9PQp3jt6dWo+R1pVDT3ZOy0TIVXT+LajeXmdBGXgmvXD+UxjbWC5PtQ
-         op4RLaHlAMOVMN8qe4xHSyp6kIqv++GJKA6LUGp67s3nJBATIMfFnmD592WAbfcPIl
-         AaLLL2nD2GVtimoA5kXyxguuXoFqIEZ2lMwepfwwjxWJ8BSwUbihs+7dIr7viiGIme
-         o7AtwoJouA3+HvyAT7iE9Y63QHJZoK939l67ZfbUP2ULnk9QfrJky34POUtQ16Alp5
-         XSRN0SxhHPGKQ==
+        s=k20201202; t=1647958807;
+        bh=X/+G4j46pLAnQ01dk3SFu8GKXZxWQW33G+uvadTVXF4=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=gGKmTO90dPOzGCUS9kafSJQ9bbWD/ZR2tvYsymoPLn2bldO41/79HMibHFY5Acq48
+         /7Oz543SHG7X3UkHErbUEcsUNE65+1AKOADuvh0FBtREUOKm+JdreU4B+/54TzWbnq
+         PkTcOUUorYEueqZrxdEXSsCzLDwoim58UD484wp3Svjne7c7ZxZcuN7AozmJPVGoSt
+         bJQzIcTLl9NXbsDRByjw8XySiCnB3UcZkNNt/qR4YU9gxWDlc7XYkUgUyA5IuTrvw+
+         PSG5a0J6Kj0k4ifEsMi7CvQO503vhOrDIybTqYO7cBlIsvU5s2g11w8v/dl1Dddwol
+         O/GE5SQU9MnrA==
+Message-ID: <1ab0277a318eb50827b9e9415b2f35d648967e79.camel@kernel.org>
+Subject: Re: [PATCH v4 0/5] ceph/libceph: add support for sparse reads to
+ msgr2 crc codepath
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
-Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
-        lhenriques@suse.de
-Subject: [RFC PATCH v11 51/51] ceph: fscrypt support for writepages
-Date:   Tue, 22 Mar 2022 10:13:16 -0400
-Message-Id: <20220322141316.41325-52-jlayton@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220322141316.41325-1-jlayton@kernel.org>
-References: <20220322141316.41325-1-jlayton@kernel.org>
+Cc:     ceph-devel@vger.kernel.org
+Date:   Tue, 22 Mar 2022 10:20:06 -0400
+In-Reply-To: <20220321182618.134202-1-jlayton@kernel.org>
+References: <20220321182618.134202-1-jlayton@kernel.org>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.4 (3.42.4-1.fc35) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add the appropriate machinery to write back dirty data with encryption.
+On Mon, 2022-03-21 at 14:26 -0400, Jeff Layton wrote:
+> This is a revised version of the sparse read code I posted a week or so
+> ago. Sparse read support is required for fscrypt integration work, but
+> may be useful on its own.
+> 
+> The main differences from the v3 set are a couple of small bugfixes, and
+> the addition of a new "sparseread" mount option to force the cephfs
+> client to use sparse reads. I also renamed the sparse_ext_len field to
+> be sparse_ext_cnt (as suggested by Xiubo).
+> 
+> Ilya, at this point I'm mostly looking for feedback from you. Does this
+> approach seem sound? If so, I'll plan to work on implementing the v2-secure
+> and v1 codepaths next.
+> 
+> These patches are currently available in the 'ceph-sparse-read-v4' tag
+> in my kernel tree here:
+> 
+>     https://git.kernel.org/pub/scm/linux/kernel/git/jlayton/linux.git/
+> 
+> Jeff Layton (5):
+>   libceph: add spinlock around osd->o_requests
+>   libceph: define struct ceph_sparse_extent and add some helpers
+>   libceph: add sparse read support to msgr2 crc state machine
+>   libceph: add sparse read support to OSD client
+>   ceph: add new mount option to enable sparse reads
+> 
+>  fs/ceph/addr.c                  |  18 ++-
+>  fs/ceph/file.c                  |  51 ++++++-
+>  fs/ceph/super.c                 |  16 +-
+>  fs/ceph/super.h                 |   8 +
+>  include/linux/ceph/messenger.h  |  29 ++++
+>  include/linux/ceph/osd_client.h |  71 ++++++++-
+>  net/ceph/messenger.c            |   1 +
+>  net/ceph/messenger_v2.c         | 170 +++++++++++++++++++--
+>  net/ceph/osd_client.c           | 255 +++++++++++++++++++++++++++++++-
+>  9 files changed, 593 insertions(+), 26 deletions(-)
+> 
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/addr.c   | 62 ++++++++++++++++++++++++++++++++++++++----------
- fs/ceph/crypto.h | 18 +++++++++++++-
- 2 files changed, 67 insertions(+), 13 deletions(-)
+I've pushed this series into a new branch in the ceph tree called
+"wip-sparseread", if anyone wants to test it. Note that ms_mode=secure
+and ms_mode=legacy settings do not work properly with sparse reads yet.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 403e7a960a4e..cc4f561bd03c 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -556,10 +556,12 @@ static u64 get_writepages_data_length(struct inode *inode,
- 				      struct page *page, u64 start)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
--	struct ceph_snap_context *snapc = page_snap_context(page);
-+	struct ceph_snap_context *snapc;
- 	struct ceph_cap_snap *capsnap = NULL;
- 	u64 end = i_size_read(inode);
-+	u64 ret;
- 
-+	snapc = page_snap_context(ceph_fscrypt_pagecache_page(page));
- 	if (snapc != ci->i_head_snapc) {
- 		bool found = false;
- 		spin_lock(&ci->i_ceph_lock);
-@@ -574,9 +576,12 @@ static u64 get_writepages_data_length(struct inode *inode,
- 		spin_unlock(&ci->i_ceph_lock);
- 		WARN_ON(!found);
- 	}
--	if (end > page_offset(page) + thp_size(page))
--		end = page_offset(page) + thp_size(page);
--	return end > start ? end - start : 0;
-+	if (end > ceph_fscrypt_page_offset(page) + thp_size(page))
-+		end = ceph_fscrypt_page_offset(page) + thp_size(page);
-+	ret = end > start ? end - start : 0;
-+	if (ret && fscrypt_is_bounce_page(page))
-+		ret = round_up(ret, CEPH_FSCRYPT_BLOCK_SIZE);
-+	return ret;
- }
- 
- /*
-@@ -792,6 +797,11 @@ static void writepages_finish(struct ceph_osd_request *req)
- 		total_pages += num_pages;
- 		for (j = 0; j < num_pages; j++) {
- 			page = osd_data->pages[j];
-+			if (fscrypt_is_bounce_page(page)) {
-+				page = fscrypt_pagecache_page(page);
-+				fscrypt_free_bounce_page(osd_data->pages[j]);
-+				osd_data->pages[j] = page;
-+			}
- 			BUG_ON(!page);
- 			WARN_ON(!PageUptodate(page));
- 
-@@ -1050,10 +1060,28 @@ static int ceph_writepages_start(struct address_space *mapping,
- 						  BLK_RW_ASYNC);
- 			}
- 
-+			if (IS_ENCRYPTED(inode)) {
-+				pages[locked_pages] =
-+					fscrypt_encrypt_pagecache_blocks(page,
-+						PAGE_SIZE, 0,
-+						locked_pages ? GFP_NOWAIT : GFP_NOFS);
-+				if (IS_ERR(pages[locked_pages])) {
-+					if (PTR_ERR(pages[locked_pages]) == -EINVAL)
-+						pr_err("%s: inode->i_blkbits=%hhu\n",
-+							__func__, inode->i_blkbits);
-+					/* better not fail on first page! */
-+					BUG_ON(locked_pages == 0);
-+					pages[locked_pages] = NULL;
-+					redirty_page_for_writepage(wbc, page);
-+					unlock_page(page);
-+					break;
-+				}
-+				++locked_pages;
-+			} else {
-+				pages[locked_pages++] = page;
-+			}
- 
--			pages[locked_pages++] = page;
- 			pvec.pages[i] = NULL;
--
- 			len += thp_size(page);
- 		}
- 
-@@ -1081,7 +1109,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- 		}
- 
- new_request:
--		offset = page_offset(pages[0]);
-+		offset = ceph_fscrypt_page_offset(pages[0]);
- 		len = wsize;
- 
- 		req = ceph_osdc_new_request(&fsc->client->osdc,
-@@ -1102,8 +1130,8 @@ static int ceph_writepages_start(struct address_space *mapping,
- 						ceph_wbc.truncate_size, true);
- 			BUG_ON(IS_ERR(req));
- 		}
--		BUG_ON(len < page_offset(pages[locked_pages - 1]) +
--			     thp_size(page) - offset);
-+		BUG_ON(len < ceph_fscrypt_page_offset(pages[locked_pages - 1]) +
-+			     thp_size(pages[locked_pages - 1]) - offset);
- 
- 		req->r_callback = writepages_finish;
- 		req->r_inode = inode;
-@@ -1113,7 +1141,9 @@ static int ceph_writepages_start(struct address_space *mapping,
- 		data_pages = pages;
- 		op_idx = 0;
- 		for (i = 0; i < locked_pages; i++) {
--			u64 cur_offset = page_offset(pages[i]);
-+			struct page *page = ceph_fscrypt_pagecache_page(pages[i]);
-+
-+			u64 cur_offset = page_offset(page);
- 			/*
- 			 * Discontinuity in page range? Ceph can handle that by just passing
- 			 * multiple extents in the write op.
-@@ -1142,9 +1172,9 @@ static int ceph_writepages_start(struct address_space *mapping,
- 				op_idx++;
- 			}
- 
--			set_page_writeback(pages[i]);
-+			set_page_writeback(page);
- 			if (caching)
--				ceph_set_page_fscache(pages[i]);
-+				ceph_set_page_fscache(page);
- 			len += thp_size(page);
- 		}
- 		ceph_fscache_write_to_cache(inode, offset, len, caching);
-@@ -1160,8 +1190,16 @@ static int ceph_writepages_start(struct address_space *mapping,
- 							 offset);
- 			len = max(len, min_len);
- 		}
-+		if (IS_ENCRYPTED(inode))
-+			len = round_up(len, CEPH_FSCRYPT_BLOCK_SIZE);
-+
- 		dout("writepages got pages at %llu~%llu\n", offset, len);
- 
-+		if (IS_ENCRYPTED(inode) &&
-+		    ((offset | len) & ~CEPH_FSCRYPT_BLOCK_MASK))
-+			pr_warn("%s: bad encrypted write offset=%lld len=%llu\n",
-+				__func__, offset, len);
-+
- 		osd_req_op_extent_osd_data_pages(req, op_idx, data_pages, len,
- 						 0, from_pool, false);
- 		osd_req_op_extent_update(req, op_idx, len);
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index 92a7b221a975..0cf526f07567 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -146,6 +146,12 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page, u64 of
- 				 struct ceph_sparse_extent *map, u32 ext_cnt);
- int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **page, u64 off,
- 				int len, gfp_t gfp);
-+
-+static inline struct page *ceph_fscrypt_pagecache_page(struct page *page)
-+{
-+	return fscrypt_is_bounce_page(page) ?  fscrypt_pagecache_page(page) : page;
-+}
-+
- #else /* CONFIG_FS_ENCRYPTION */
- 
- static inline void ceph_fscrypt_set_ops(struct super_block *sb)
-@@ -235,6 +241,16 @@ static inline int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **
- {
- 	return 0;
- }
-+
-+static inline struct page *ceph_fscrypt_pagecache_page(struct page *page)
-+{
-+	return page;
-+}
- #endif /* CONFIG_FS_ENCRYPTION */
- 
--#endif
-+static inline loff_t ceph_fscrypt_page_offset(struct page *page)
-+{
-+	return page_offset(ceph_fscrypt_pagecache_page(page));
-+}
-+
-+#endif /* _CEPH_CRYPTO_H */
 -- 
-2.35.1
-
+Jeff Layton <jlayton@kernel.org>
