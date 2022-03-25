@@ -2,214 +2,202 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C960C433FE
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Mar 2022 09:50:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FD0DC433EF
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Mar 2022 09:58:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358562AbiCYJwY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Mar 2022 05:52:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40120 "EHLO
+        id S1358581AbiCYJ7g (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 25 Mar 2022 05:59:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1358557AbiCYJwS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Mar 2022 05:52:18 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3EE4C4E23
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Mar 2022 02:50:43 -0700 (PDT)
+        with ESMTP id S230496AbiCYJ7f (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Mar 2022 05:59:35 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DF4AC74BB;
+        Fri, 25 Mar 2022 02:58:00 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id CD274CE28E7
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Mar 2022 09:50:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6077C340E9;
-        Fri, 25 Mar 2022 09:50:39 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 05621B82702;
+        Fri, 25 Mar 2022 09:57:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EF830C340F0;
+        Fri, 25 Mar 2022 09:57:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648201840;
-        bh=r5D21Sg0r2RXIUxQ6SWyDFePsufmt2Vyz0RhlTAKorI=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=jrWucczxkQ8gAkkvJwCtdHpXoSaQcijKTlzXSPsBEwUNExAgYNRjS2r7D2nnSz30T
-         Fsz+NamHcxeAMnL5q0PIsuXtJfCBVRcFbGeluxJNBumRSpySJk15c5AmZHJRFCsNGz
-         8uGJqF8Q+GacNaYUNZblFgnE4I+QAeztcTt82nH9kOk7BGVzW5AtMUGkt9GLqzT5Uy
-         /4Rev4r1KVOzfqqYxnFcz4LrZqAD1/IA4KaYe/XU6eezXTSClr3WYU3ARSgsX+WKA6
-         AfvVl92ZHl5eUeBK0Y6xlRYvNFzesPJOSWI3/ekqW1yQm9c3DqMDZWbq17flZMI8hf
-         irF558IDf7BwQ==
+        s=k20201202; t=1648202277;
+        bh=7AKwuxOCbzAfVfHgEgKQcxzXeeV9NWJmAx8V55a9MFo=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=pBJYkZlMoQSN47uqgoePOOUAk3hp3afThPj1LSdRe1WKQFj0cYBnOLCxCMgO+HfJg
+         7uMt2vXy2NcBa463icU9DGdGpmUclLbHB3xACtQIXNDUQdvw2ZPLtQMX0JKadylJeN
+         Ru/A0wPImfrXTn8PcZmLZ2mNRCUquRSLvCc3TWFGPf39AmEnxGHR177k+0tF/3AXTE
+         WmOddX6azRRqchBViw8CNbYJoz8YcGfelWD3yVVswarkKvtZD/IB7G0wMbyoLOGmV+
+         Gi3F1Uj4K0T88wUjmdOYm9iYrq7txYhvxkdQj/QbixAeX8GbTWHMk9YbwrWUSC2nXo
+         glrnW0hk4j2+A==
+Message-ID: <9f685d5160e2c0ed7af4403f6f6c613448fdf41f.camel@kernel.org>
+Subject: Re: [RFC PATCH v11 00/51] ceph+fscrypt : full support
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
-Cc:     ceph-devel@vger.kernel.org
-Subject: [PATCH v5 6/7] libceph: add sparse read support to msgr1
-Date:   Fri, 25 Mar 2022 05:50:33 -0400
-Message-Id: <20220325095034.5217-7-jlayton@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220325095034.5217-1-jlayton@kernel.org>
-References: <20220325095034.5217-1-jlayton@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
+        lhenriques@suse.de
+Date:   Fri, 25 Mar 2022 05:57:55 -0400
+In-Reply-To: <20220322141316.41325-1-jlayton@kernel.org>
+References: <20220322141316.41325-1-jlayton@kernel.org>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.4 (3.42.4-1.fc35) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add 2 new fields to ceph_connection_v1_info to track the necessary info
-in sparse reads. Skip initializing the cursor for a sparse read.
+On Tue, 2022-03-22 at 10:12 -0400, Jeff Layton wrote:
+> This patchset represents a (mostly) working prototype of the
+> ceph+fscrypt work. With this, I'm able run xfstests with
+> test_dummy_encryption, and most of the tests that pass on ceph without
+> fscrypt now pass on it.
+> 
+> When I made the last posting of this series [1], I mentioned that proper
+> support for sparse read support would be necessary to do this. Thus, the
+> biggest difference from the v10 set is that this is now based on top of
+> the patch series that I posted yesterday to implement sparse reads [2].
+> 
+> Aside from that, there are also numerous cleanups all over the tree, as
+> well as an overhaul of the readdir handling by Xiubo.
+> 
+> This series is not yet bug-free, but it's at a point where it is quite
+> usable, providing you're running against the Quincy release of ceph
+> (which should ship sometime in the next few months).
+> 
+> Next Steps:
+> ===========
+> I'm not going to sugar-coat it. This is a huge, invasive patch series
+> that touches a lot of the most sensitive code in ceph.
+> 
+> Eric Biggers has acked the changes we need in fscrypt infrastructure. I
+> still need Al to ack exporting the new_inode_pseudo symbol. The rest is
+> pretty much all ceph and libceph code.
+> 
+> The main piece missing at this point is support for sparse reads with
+> ms_mode settings other than "crc". Once that's complete, I want to merge
+> that and this series into the ceph "testing" branch so we can start
+> running tests against it in teuthology with fscrypt enabled.
+> 
+> If that goes well, I think we could probably merge this into mainline
+> for v5.20 or v5.21. There is also some incoming support for netfs write
+> and DIO read helpers that we may want to convert to as well [3]. That
+> may alter the timing as well.
+> 
+> Review, comments and questions are welcome...
+> 
+> [1]: https://lore.kernel.org/ceph-devel/20220111191608.88762-1-jlayton@kernel.org/
+> 
+> [2]: https://lore.kernel.org/ceph-devel/20220318135013.43934-1-jlayton@kernel.org/
+> 
+> [3]: https://lore.kernel.org/ceph-devel/YixWLJXyWtD+STvl@codewreck.org/T/#maec7e3579f13a45171ad23d7a49183d169fcfcca
+> 
+> Jeff Layton (41):
+>   vfs: export new_inode_pseudo
+>   fscrypt: export fscrypt_base64url_encode and fscrypt_base64url_decode
+>   fscrypt: export fscrypt_fname_encrypt and fscrypt_fname_encrypted_size
+>   fscrypt: add fscrypt_context_for_new_inode
+>   ceph: preallocate inode for ops that may create one
+>   ceph: crypto context handling for ceph
+>   ceph: parse new fscrypt_auth and fscrypt_file fields in inode traces
+>   ceph: add support for fscrypt_auth/fscrypt_file to cap messages
+>   ceph: add ability to set fscrypt_auth via setattr
+>   ceph: implement -o test_dummy_encryption mount option
+>   ceph: decode alternate_name in lease info
+>   ceph: add fscrypt ioctls
+>   ceph: make ceph_msdc_build_path use ref-walk
+>   ceph: add encrypted fname handling to ceph_mdsc_build_path
+>   ceph: send altname in MClientRequest
+>   ceph: encode encrypted name in dentry release
+>   ceph: properly set DCACHE_NOKEY_NAME flag in lookup
+>   ceph: make d_revalidate call fscrypt revalidator for encrypted
+>     dentries
+>   ceph: add helpers for converting names for userland presentation
+>   ceph: add fscrypt support to ceph_fill_trace
+>   ceph: create symlinks with encrypted and base64-encoded targets
+>   ceph: make ceph_get_name decrypt filenames
+>   ceph: add a new ceph.fscrypt.auth vxattr
+>   ceph: add some fscrypt guardrails
+>   libceph: add CEPH_OSD_OP_ASSERT_VER support
+>   ceph: size handling for encrypted inodes in cap updates
+>   ceph: fscrypt_file field handling in MClientRequest messages
+>   ceph: get file size from fscrypt_file when present in inode traces
+>   ceph: handle fscrypt fields in cap messages from MDS
+>   ceph: add infrastructure for file encryption and decryption
+>   libceph: allow ceph_osdc_new_request to accept a multi-op read
+>   ceph: disable fallocate for encrypted inodes
+>   ceph: disable copy offload on encrypted inodes
+>   ceph: don't use special DIO path for encrypted inodes
+>   ceph: align data in pages in ceph_sync_write
+>   ceph: add read/modify/write to ceph_sync_write
+>   ceph: plumb in decryption during sync reads
+>   ceph: add fscrypt decryption support to ceph_netfs_issue_op
+>   ceph: set i_blkbits to crypto block size for encrypted inodes
+>   ceph: add encryption support to writepage
+>   ceph: fscrypt support for writepages
+> 
+> Luis Henriques (1):
+>   ceph: don't allow changing layout on encrypted files/directories
+> 
+> Xiubo Li (9):
+>   ceph: make the ioctl cmd more readable in debug log
+>   ceph: fix base64 encoded name's length check in ceph_fname_to_usr()
+>   ceph: pass the request to parse_reply_info_readdir()
+>   ceph: add ceph_encode_encrypted_dname() helper
+>   ceph: add support to readdir for encrypted filenames
+>   ceph: add __ceph_get_caps helper support
+>   ceph: add __ceph_sync_read helper support
+>   ceph: add object version support for sync read
+>   ceph: add truncate size handling support for fscrypt
+> 
+>  fs/ceph/Makefile                |   1 +
+>  fs/ceph/acl.c                   |   4 +-
+>  fs/ceph/addr.c                  | 128 ++++++--
+>  fs/ceph/caps.c                  | 212 +++++++++++--
+>  fs/ceph/crypto.c                | 432 +++++++++++++++++++++++++
+>  fs/ceph/crypto.h                | 256 +++++++++++++++
+>  fs/ceph/dir.c                   | 182 ++++++++---
+>  fs/ceph/export.c                |  44 ++-
+>  fs/ceph/file.c                  | 530 ++++++++++++++++++++++++++-----
+>  fs/ceph/inode.c                 | 546 +++++++++++++++++++++++++++++---
+>  fs/ceph/ioctl.c                 | 126 +++++++-
+>  fs/ceph/mds_client.c            | 455 ++++++++++++++++++++++----
+>  fs/ceph/mds_client.h            |  24 +-
+>  fs/ceph/super.c                 |  91 +++++-
+>  fs/ceph/super.h                 |  43 ++-
+>  fs/ceph/xattr.c                 |  29 ++
+>  fs/crypto/fname.c               |  44 ++-
+>  fs/crypto/fscrypt_private.h     |   9 +-
+>  fs/crypto/hooks.c               |   6 +-
+>  fs/crypto/policy.c              |  35 +-
+>  fs/inode.c                      |   1 +
+>  include/linux/ceph/ceph_fs.h    |  21 +-
+>  include/linux/ceph/osd_client.h |   6 +-
+>  include/linux/ceph/rados.h      |   4 +
+>  include/linux/fscrypt.h         |  10 +
+>  net/ceph/osd_client.c           |  32 +-
+>  26 files changed, 2907 insertions(+), 364 deletions(-)
+>  create mode 100644 fs/ceph/crypto.c
+>  create mode 100644 fs/ceph/crypto.h
+> 
 
-Break out read_partial_message_section into a wrapper around a new
-read_partial_message_chunk function that doesn't zero out the crc first.
 
-Add new helper functions to drive receiving into the destinations
-provided by the sparse_read state machine.
+I was able to get the sparse reads working on other transports
+yesterday, and I've gone ahead and updated the wip-fscrypt branch with
+the newest sparse read and fscrypt changes.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- include/linux/ceph/messenger.h |  4 ++
- net/ceph/messenger_v1.c        | 98 +++++++++++++++++++++++++++++++---
- 2 files changed, 94 insertions(+), 8 deletions(-)
+For the record, the final diffstat with both patch series is:
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 25213eb1d348..3697049e1465 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -338,6 +338,10 @@ struct ceph_connection_v1_info {
- 
- 	int in_base_pos;     /* bytes read */
- 
-+	/* sparse reads */
-+	struct kvec in_sr_kvec; /* current location to receive into */
-+	u64 in_sr_len;		/* amount of data in this extent */
-+
- 	/* message in temps */
- 	u8 in_tag;           /* protocol control byte */
- 	struct ceph_msg_header in_hdr;
-diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
-index 6b014eca3a13..957ba4d4cae5 100644
---- a/net/ceph/messenger_v1.c
-+++ b/net/ceph/messenger_v1.c
-@@ -160,9 +160,9 @@ static size_t sizeof_footer(struct ceph_connection *con)
- 
- static void prepare_message_data(struct ceph_msg *msg, u32 data_len)
- {
--	/* Initialize data cursor */
--
--	ceph_msg_data_cursor_init(&msg->cursor, msg, data_len);
-+	/* Initialize data cursor if it's not a sparse read */
-+	if (!msg->sparse_read)
-+		ceph_msg_data_cursor_init(&msg->cursor, msg, data_len);
- }
- 
- /*
-@@ -967,9 +967,9 @@ static void process_ack(struct ceph_connection *con)
- 	prepare_read_tag(con);
- }
- 
--static int read_partial_message_section(struct ceph_connection *con,
--					struct kvec *section,
--					unsigned int sec_len, u32 *crc)
-+static int read_partial_message_chunk(struct ceph_connection *con,
-+				      struct kvec *section,
-+				      unsigned int sec_len, u32 *crc)
- {
- 	int ret, left;
- 
-@@ -985,11 +985,91 @@ static int read_partial_message_section(struct ceph_connection *con,
- 		section->iov_len += ret;
- 	}
- 	if (section->iov_len == sec_len)
--		*crc = crc32c(0, section->iov_base, section->iov_len);
-+		*crc = crc32c(*crc, section->iov_base, section->iov_len);
- 
- 	return 1;
- }
- 
-+static inline int read_partial_message_section(struct ceph_connection *con,
-+					       struct kvec *section,
-+					       unsigned int sec_len, u32 *crc)
-+{
-+	*crc = 0;
-+	return read_partial_message_chunk(con, section, sec_len, crc);
-+}
-+
-+static int read_sparse_msg_extent(struct ceph_connection *con, u32 *crc)
-+{
-+	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
-+	bool do_bounce = ceph_test_opt(from_msgr(con->msgr), RXBOUNCE);
-+
-+	if (do_bounce && unlikely(!con->bounce_page)) {
-+		con->bounce_page = alloc_page(GFP_NOIO);
-+		if (!con->bounce_page) {
-+			pr_err("failed to allocate bounce page\n");
-+			return -ENOMEM;
-+		}
-+	}
-+
-+	while (cursor->sr_resid > 0) {
-+		struct page *page, *rpage;
-+		size_t off, len;
-+		int ret;
-+
-+		page = ceph_msg_data_next(cursor, &off, &len, NULL);
-+		rpage = do_bounce ? con->bounce_page : page;
-+
-+		/* clamp to what remains in extent */
-+		len = min_t(int, len, cursor->sr_resid);
-+		ret = ceph_tcp_recvpage(con->sock, rpage, (int)off, len);
-+		if (ret <= 0)
-+			return ret;
-+		*crc = ceph_crc32c_page(*crc, rpage, off, ret);
-+		ceph_msg_data_advance(cursor, (size_t)ret);
-+		cursor->sr_resid -= ret;
-+		if (do_bounce)
-+			memcpy_page(page, off, rpage, off, ret);
-+	}
-+	return 1;
-+}
-+
-+static int read_sparse_msg_data(struct ceph_connection *con)
-+{
-+	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
-+	bool do_datacrc = !ceph_test_opt(from_msgr(con->msgr), NOCRC);
-+	u32 crc = 0;
-+	int ret = 1;
-+
-+	if (do_datacrc)
-+		crc = con->in_data_crc;
-+
-+	do {
-+		if (con->v1.in_sr_kvec.iov_base)
-+			ret = read_partial_message_chunk(con,
-+							 &con->v1.in_sr_kvec,
-+							 con->v1.in_sr_len,
-+							 &crc);
-+		else if (cursor->sr_resid > 0)
-+			ret = read_sparse_msg_extent(con, &crc);
-+
-+		if (ret <= 0) {
-+			if (do_datacrc)
-+				con->in_data_crc = crc;
-+			return ret;
-+		}
-+
-+		memset(&con->v1.in_sr_kvec, 0, sizeof(con->v1.in_sr_kvec));
-+		con->v1.in_sr_len = 0;
-+		ret = con->ops->sparse_read(con, cursor, &con->v1.in_sr_len,
-+					(char **)&con->v1.in_sr_kvec.iov_base);
-+	} while (ret > 0);
-+
-+	if (do_datacrc)
-+		con->in_data_crc = crc;
-+
-+	return ret < 0 ? ret : 1;	/* must return > 0 to indicate success */
-+}
-+
- static int read_partial_msg_data(struct ceph_connection *con)
- {
- 	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
-@@ -1180,7 +1260,9 @@ static int read_partial_message(struct ceph_connection *con)
- 		if (!m->num_data_items)
- 			return -EIO;
- 
--		if (ceph_test_opt(from_msgr(con->msgr), RXBOUNCE))
-+		if (m->sparse_read)
-+			ret = read_sparse_msg_data(con);
-+		else if (ceph_test_opt(from_msgr(con->msgr), RXBOUNCE))
- 			ret = read_partial_msg_data_bounce(con);
- 		else
- 			ret = read_partial_msg_data(con);
+ 30 files changed, 3706 insertions(+), 400 deletions(-)
+
+I'll probably plan to move these into the testing branch next week,
+after I do bit more testing locally today. Another thing we'll need to
+sort out is how to enable fscrypt for teuthology tests.
+
+As always, more testing and review would definitely be welcome.
+
+Thanks!
 -- 
-2.35.1
-
+Jeff Layton <jlayton@kernel.org>
