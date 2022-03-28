@@ -2,112 +2,82 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBA0CC433EF
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Mar 2022 19:15:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59BA7C433EF
+	for <ceph-devel@archiver.kernel.org>; Mon, 28 Mar 2022 02:25:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229504AbiCYTR2 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Mar 2022 15:17:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57622 "EHLO
+        id S237562AbiC1C1d (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 27 Mar 2022 22:27:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229500AbiCYTRZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Mar 2022 15:17:25 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A19A1D7898
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Mar 2022 11:58:08 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S234955AbiC1C1c (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Mar 2022 22:27:32 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 1297B32EC8
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Mar 2022 19:25:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1648434352;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=xsHhfUs66bbbXza3E8A4RMVlljtRM9C2VkSN3/JNqDo=;
+        b=DfIBEDdSW334X2D7mYirbWHMTp/YEGbTNlVI0GxCW/BDxiBdmnS+Dwwf5urxScWYcfWzlY
+        u4m8tYZtYfAsjztjAcX2PBhTFHHiPXvY23nG8N5fvOcoqlycAK4j7JLAy6GonhBq9LQHSn
+        oD6eB60LJ9B4B4E3kpFUGKFST07nErY=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-54-pec7M6aaOvKoHry213u1uQ-1; Sun, 27 Mar 2022 22:25:48 -0400
+X-MC-Unique: pec7M6aaOvKoHry213u1uQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C38C0B82865
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Mar 2022 18:40:49 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DEF96C004DD;
-        Fri, 25 Mar 2022 18:40:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648233648;
-        bh=hSw7t/ht1ptPxvtAHJ/BGfbHvZ5GZjT8xRe9LoN4BSQ=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ajHU0Rl0HUmXadKVltiMoEK/x9CUbQDgfGu9kwQvdhjjBc2/c7C0Dtkt/ZqFDmGJT
-         6ETR0kG0dQ8NpGH6np97y/i8ul2+VbuvbfHiGEmr5BUF9fiB1k7JMtKELtOVdH/uXL
-         pNxhYFsa8TYHiNPM0Up/oBy13X/Jk4Ovj0bPm2L8WKXwwox/zPW4M6Tebhp+JequU9
-         kFgKimUngMiFcd5NPiN5cU7bB7t4DNYG8WgdYf1M1OyWLUcVjWZkLVd5oTtSM+ttJX
-         IIj93dDwe/DaCEqB3xt29rwww+4xRFbMobgu94ZTaA6PwzmUYPpfS3l7vy42V3toFe
-         P4ZRrzjZ7zrtw==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, xiubli@redhat.com,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH] ceph: add a has_stable_inodes operation for ceph
-Date:   Fri, 25 Mar 2022 14:40:46 -0400
-Message-Id: <20220325184046.236663-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.35.1
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 17E6E811E78;
+        Mon, 28 Mar 2022 02:25:48 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 7BE301400B1C;
+        Mon, 28 Mar 2022 02:25:44 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] ceph: remove unused CEPH_MDS_LEASE_RELEASE related code
+Date:   Mon, 28 Mar 2022 10:25:35 +0800
+Message-Id: <20220328022535.847164-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.85 on 10.11.54.7
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-...and just have it return true. It should never change inode numbers
-out from under us, as they are baked into the object names.
+From: Xiubo Li <xiubli@redhat.com>
 
-Reported-by: Luís Henriques <lhenriques@suse.de>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+The ceph_mdsc_lease_release() has been removed by commit(8aa152c77890)
+and the CEPH_MDS_LEASE_RELEASE will never be used.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/crypto.c | 20 +++++++++++++-------
- 1 file changed, 13 insertions(+), 7 deletions(-)
+ fs/ceph/mds_client.c | 6 ------
+ 1 file changed, 6 deletions(-)
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 2a8f95885e7d..3a9214b1e8b3 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -59,6 +59,11 @@ static int ceph_crypt_set_context(struct inode *inode, const void *ctx, size_t l
- 	return ret;
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 459c6f23915f..a89ee866ebbb 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4424,12 +4424,6 @@ void ceph_mdsc_lease_send_msg(struct ceph_mds_session *session,
+ 	memcpy((void *)(lease + 1) + 4,
+ 	       dentry->d_name.name, dentry->d_name.len);
+ 	spin_unlock(&dentry->d_lock);
+-	/*
+-	 * if this is a preemptive lease RELEASE, no need to
+-	 * flush request stream, since the actual request will
+-	 * soon follow.
+-	 */
+-	msg->more_to_follow = (action == CEPH_MDS_LEASE_RELEASE);
+ 
+ 	ceph_con_send(&session->s_con, msg);
  }
- 
-+static const union fscrypt_policy *ceph_get_dummy_policy(struct super_block *sb)
-+{
-+	return ceph_sb_to_client(sb)->dummy_enc_policy.policy;
-+}
-+
- static bool ceph_crypt_empty_dir(struct inode *inode)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
-@@ -66,14 +71,9 @@ static bool ceph_crypt_empty_dir(struct inode *inode)
- 	return ci->i_rsubdirs + ci->i_rfiles == 1;
- }
- 
--void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc)
-+static bool ceph_crypt_has_stable_inodes(struct super_block *sb)
- {
--	fscrypt_free_dummy_policy(&fsc->dummy_enc_policy);
--}
--
--static const union fscrypt_policy *ceph_get_dummy_policy(struct super_block *sb)
--{
--	return ceph_sb_to_client(sb)->dummy_enc_policy.policy;
-+	return true;
- }
- 
- static struct fscrypt_operations ceph_fscrypt_ops = {
-@@ -82,6 +82,7 @@ static struct fscrypt_operations ceph_fscrypt_ops = {
- 	.set_context		= ceph_crypt_set_context,
- 	.get_dummy_policy	= ceph_get_dummy_policy,
- 	.empty_dir		= ceph_crypt_empty_dir,
-+	.has_stable_inodes	= ceph_crypt_has_stable_inodes,
- };
- 
- void ceph_fscrypt_set_ops(struct super_block *sb)
-@@ -89,6 +90,11 @@ void ceph_fscrypt_set_ops(struct super_block *sb)
- 	fscrypt_set_ops(sb, &ceph_fscrypt_ops);
- }
- 
-+void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc)
-+{
-+	fscrypt_free_dummy_policy(&fsc->dummy_enc_policy);
-+}
-+
- int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
- 				 struct ceph_acl_sec_ctx *as)
- {
 -- 
-2.35.1
+2.27.0
 
