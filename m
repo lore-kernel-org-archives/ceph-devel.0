@@ -2,65 +2,179 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71DBFC433FE
-	for <ceph-devel@archiver.kernel.org>; Tue, 29 Mar 2022 22:15:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41AE9C433EF
+	for <ceph-devel@archiver.kernel.org>; Tue, 29 Mar 2022 23:58:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236503AbiC2WR3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 29 Mar 2022 18:17:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45500 "EHLO
+        id S241229AbiC2X7x (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 29 Mar 2022 19:59:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236271AbiC2WR2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2022 18:17:28 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D8220186FA6;
-        Tue, 29 Mar 2022 15:15:43 -0700 (PDT)
-Received: from dread.disaster.area (pa49-180-43-123.pa.nsw.optusnet.com.au [49.180.43.123])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 1E99910E52D8;
-        Wed, 30 Mar 2022 09:15:42 +1100 (AEDT)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nZK7o-00BSP1-D2; Wed, 30 Mar 2022 09:15:40 +1100
-Date:   Wed, 30 Mar 2022 09:15:40 +1100
-From:   Dave Chinner <david@fromorbit.com>
-To:     Christian Brauner <brauner@kernel.org>
-Cc:     Yang Xu <xuyang2018.jy@fujitsu.com>, linux-fsdevel@vger.kernel.org,
-        ceph-devel@vger.kernel.org, viro@zeniv.linux.org.uk,
-        jlayton@kernel.org
-Subject: Re: [PATCH v1 1/3] vfs: Add inode_sgid_strip() api
-Message-ID: <20220329221540.GO1609613@dread.disaster.area>
-References: <1648461389-2225-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <20220329104516.luheugjurxsx5fdq@wittgenstein>
+        with ESMTP id S235624AbiC2X7w (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2022 19:59:52 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8A646B879
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Mar 2022 16:58:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1648598287;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=0lHuWLR0A0axcW9vAThToZhWlrn6GkjFD4BkIf+hz/U=;
+        b=KrgcukY+ZgeonI8FDAxQWu4jP5qnw94crP1Ht56vtFscVeGTDlPodlKKb5ziI4i13ig129
+        uIgzoadPlL+RR5kF1hS+lq9YWO9er+yUPBHQOTwF1v72fJVbFNQu1qSNIfgYQkJCn6bHal
+        yraZw0PEty2ljYVNsX8ABPiYksJyNZ4=
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
+ [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-536-DbmjiOz2OUOgGAtXtHNJiQ-1; Tue, 29 Mar 2022 19:58:06 -0400
+X-MC-Unique: DbmjiOz2OUOgGAtXtHNJiQ-1
+Received: by mail-pg1-f200.google.com with SMTP id s188-20020a6377c5000000b003825c503580so9303167pgc.13
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Mar 2022 16:58:06 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=0lHuWLR0A0axcW9vAThToZhWlrn6GkjFD4BkIf+hz/U=;
+        b=YWz//roJSZx7leRON54daUZ7rc/UprSRvxST91KmNztCZLbljJTWaaUSoeyCpyItQu
+         AdFshsURW++7UvIwQU4JOtTVnV9jnc6b0FDiCYLNPWfTFE44okiXjFGcaptNLgUzFTTe
+         1IdZ2b5EFjts3PRsEIgXSP32ZEHkWmwIWZrBEXGU6QVUArOc8Ggk/iL6BbujzC0z1qH2
+         4xysAJ+CbtBqYw6r4XeP+DLZvHBe7UtgT9x9m/HQY2QBTuSd70ZcHc2si6fDwJ0Oqlti
+         zP+hgKXvpvWo+T8vt/+JATf8sCsEGHrUvsI0u1KCOIlzmQ/y6+bdACyMcJQB3SV9hOl3
+         iYHg==
+X-Gm-Message-State: AOAM531rU2MsohkdbfzOrywe6cnbyTtfmgB/RAxe6OEuu+GEe42W8wKo
+        hL0bb55Du+IEHE3qyqMWM52o/nDfMu1VEMKvKy6S8s0RgqIYTQHFgh3TNV66xJ37iolITxj/7aa
+        7l/Z7zZ5lN4VIR2mJNjGylocMMcC0t9RGDSShnntoYpmYuP5ynl+63dlxIuxpyZHIb/JJCAU=
+X-Received: by 2002:a17:902:ec89:b0:153:f480:5089 with SMTP id x9-20020a170902ec8900b00153f4805089mr31989326plg.166.1648598284697;
+        Tue, 29 Mar 2022 16:58:04 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJx0LAjEADJpiZLK9fodhgr82lz1h1SUUntDyZk0y3aXB2pFvQx2UvRHr7qx29EbC66O7DiDGA==
+X-Received: by 2002:a17:902:ec89:b0:153:f480:5089 with SMTP id x9-20020a170902ec8900b00153f4805089mr31989298plg.166.1648598284298;
+        Tue, 29 Mar 2022 16:58:04 -0700 (PDT)
+Received: from [10.72.12.110] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id d10-20020a056a0024ca00b004fd90388a86sm2739066pfv.173.2022.03.29.16.58.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 29 Mar 2022 16:58:03 -0700 (PDT)
+Subject: Re: [PATCH v2] ceph: stop forwarding the request when exceeding 256
+ times
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     idryomov@gmail.com, vshankar@redhat.com, gfarnum@redhat.com,
+        lhenriques@suse.de, ceph-devel@vger.kernel.org
+References: <20220329122003.77740-1-xiubli@redhat.com>
+ <e3fdf3bcf7ed44d9a0b3f84351f2b72826db15bf.camel@kernel.org>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <5b592840-bb60-9c28-dc40-5ae903b4572a@redhat.com>
+Date:   Wed, 30 Mar 2022 07:57:58 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220329104516.luheugjurxsx5fdq@wittgenstein>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=6243850e
-        a=MV6E7+DvwtTitA3W+3A2Lw==:117 a=MV6E7+DvwtTitA3W+3A2Lw==:17
-        a=kj9zAlcOel0A:10 a=o8Y5sQTvuykA:10 a=7-415B0cAAAA:8 a=omOdbC7AAAAA:8
-        a=BM52z6NN7yLWZOA6Q0AA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <e3fdf3bcf7ed44d9a0b3f84351f2b72826db15bf.camel@kernel.org>
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Mar 29, 2022 at 12:45:16PM +0200, Christian Brauner wrote:
-> On Mon, Mar 28, 2022 at 05:56:27PM +0800, Yang Xu wrote:
-> > inode_sgid_strip() function is used to strip S_ISGID mode
-> > when creat/open/mknod file.
-> > 
-> > Suggested-by: Dave Chinner <david@fromorbit.com>
-> > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> > ---
-> 
-> I would've personally gone for returning umode_t but this work for me
-> too.
 
-Agreed, that's a much nicer API for this function - it makes it
-clear that it can modifying the mode that is passed in.
+On 3/29/22 10:48 PM, Jeff Layton wrote:
+> On Tue, 2022-03-29 at 20:20 +0800, xiubli@redhat.com wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> The type of 'num_fwd' in ceph 'MClientRequestForward' is 'int32_t',
+>> while in 'ceph_mds_request_head' the type is '__u8'. So in case
+>> the request bounces between MDSes exceeding 256 times, the client
+>> will get stuck.
+>>
+>> In this case it's ususally a bug in MDS and continue bouncing the
+>> request makes no sense.
+>>
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>
+>> V2:
+>> - s/EIO/EMULTIHOP/
+>> - Fixed dereferencing NULL seq bug
+>> - Removed the out lable
+>>
+>>
+>>   fs/ceph/mds_client.c | 34 +++++++++++++++++++++++++++++-----
+>>   1 file changed, 29 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index a89ee866ebbb..82c1f783feba 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -3293,6 +3293,7 @@ static void handle_forward(struct ceph_mds_client *mdsc,
+>>   	int err = -EINVAL;
+>>   	void *p = msg->front.iov_base;
+>>   	void *end = p + msg->front.iov_len;
+>> +	bool aborted = false;
+>>   
+>>   	ceph_decode_need(&p, end, 2*sizeof(u32), bad);
+>>   	next_mds = ceph_decode_32(&p);
+>> @@ -3301,16 +3302,36 @@ static void handle_forward(struct ceph_mds_client *mdsc,
+>>   	mutex_lock(&mdsc->mutex);
+>>   	req = lookup_get_request(mdsc, tid);
+>>   	if (!req) {
+>> +		mutex_unlock(&mdsc->mutex);
+>>   		dout("forward tid %llu to mds%d - req dne\n", tid, next_mds);
+>> -		goto out;  /* dup reply? */
+>> +		return;  /* dup reply? */
+>>   	}
+>>   
+>>   	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
+>>   		dout("forward tid %llu aborted, unregistering\n", tid);
+>>   		__unregister_request(mdsc, req);
+>>   	} else if (fwd_seq <= req->r_num_fwd) {
+>> -		dout("forward tid %llu to mds%d - old seq %d <= %d\n",
+>> -		     tid, next_mds, req->r_num_fwd, fwd_seq);
+>> +		/*
+>> +		 * The type of 'num_fwd' in ceph 'MClientRequestForward'
+>> +		 * is 'int32_t', while in 'ceph_mds_request_head' the
+>> +		 * type is '__u8'. So in case the request bounces between
+>> +		 * MDSes exceeding 256 times, the client will get stuck.
+>> +		 *
+>> +		 * In this case it's ususally a bug in MDS and continue
+>> +		 * bouncing the request makes no sense.
+>> +		 */
+>> +		if (req->r_num_fwd == 256) {
+> Can you also fix this to be expressed as "> UCHAR_MAX"? Or preferably,
+> if you have a way to get to the ceph_mds_request_head from here, then
+> express it in terms of sizeof() the field that limits this.
 
-Cheers,
+Sure, let me try the second one first.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+-- Xiubo
+
+>> +			mutex_lock(&req->r_fill_mutex);
+>> +			req->r_err = -EMULTIHOP;
+>> +			set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
+>> +			mutex_unlock(&req->r_fill_mutex);
+>> +			aborted = true;
+>> +			pr_warn_ratelimited("forward tid %llu seq overflow\n",
+>> +					    tid);
+>> +		} else {
+>> +			dout("forward tid %llu to mds%d - old seq %d <= %d\n",
+>> +			     tid, next_mds, req->r_num_fwd, fwd_seq);
+>> +		}
+>>   	} else {
+>>   		/* resend. forward race not possible; mds would drop */
+>>   		dout("forward tid %llu to mds%d (we resend)\n", tid, next_mds);
+>> @@ -3322,9 +3343,12 @@ static void handle_forward(struct ceph_mds_client *mdsc,
+>>   		put_request_session(req);
+>>   		__do_request(mdsc, req);
+>>   	}
+>> -	ceph_mdsc_put_request(req);
+>> -out:
+>>   	mutex_unlock(&mdsc->mutex);
+>> +
+>> +	/* kick calling process */
+>> +	if (aborted)
+>> +		complete_request(mdsc, req);
+>> +	ceph_mdsc_put_request(req);
+>>   	return;
+>>   
+>>   bad:
+> The code looks fine otherwise though...
+
