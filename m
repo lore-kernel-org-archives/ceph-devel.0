@@ -2,42 +2,42 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09820C433FE
-	for <ceph-devel@archiver.kernel.org>; Thu, 31 Mar 2022 15:35:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FA86C433EF
+	for <ceph-devel@archiver.kernel.org>; Thu, 31 Mar 2022 15:39:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239209AbiCaPhm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 31 Mar 2022 11:37:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57376 "EHLO
+        id S238960AbiCaPkx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 31 Mar 2022 11:40:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239060AbiCaPgr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2022 11:36:47 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE1E022AC44;
-        Thu, 31 Mar 2022 08:32:32 -0700 (PDT)
+        with ESMTP id S239161AbiCaPhR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2022 11:37:17 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8F0422B6C7;
+        Thu, 31 Mar 2022 08:32:38 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 451AFB82184;
-        Thu, 31 Mar 2022 15:32:10 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 445CEC34111;
-        Thu, 31 Mar 2022 15:32:08 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 568CB61AEA;
+        Thu, 31 Mar 2022 15:32:19 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 21972C340F3;
+        Thu, 31 Mar 2022 15:32:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648740728;
-        bh=GTGrFk0vQuQvS1CI2TJqnUuIi8XTwlzDEZmexvAeThk=;
+        s=k20201202; t=1648740738;
+        bh=lmWTG2rDKdWATJjrv7Z1WOhsCaXCriPANqr5jvzR8pQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=eNS52XdXLdM1MJBz3irfS5g1mpcBE84UrDBc+ioZJ1UfYNpVPb2B0la0fRm4jV4Jn
-         h717VktLfWeayotvVeqvPMlTWPYGpD7PEb5xNKt68AV+nai71vu4yv6ROXu9i4L5Mt
-         Gulg9JTA/jOdRldM5qTvZeQf0bGEvwnrWWtZ2IjAlLMm0AWxgJZwJtHGrnjntFQthJ
-         5dR0XKAZXYeMOeVHOLBamuwFmjrB2HbaTBmWKpWSmlaDcECUNCYtYxVBezEjO7vAi6
-         2jXvG5gFrT4kgdyu/lceImqBdiKw9mFaALWkdBDnXssH/z5M+id4UZDaS5IDAIIVWz
-         p8unWvPSe7R4A==
+        b=NkzVHaKYAO7Yv8LmFQxsmGuurqT7hT519lOTqhI2k8dRbuInnALf7lw+rxCNH6GBH
+         H9ZPQ1p6TTcrLwvEwgeyvwd3g2TQXHnHoJ8udhG0+uqgn7/DR5twThHl0ZoV+ZBuke
+         LaOxdGRFJ67I1OEwkXvA+4x3LKYJL6TgFc9U3ofOA2NWX3AWlCWfSEhtMyjk0aRHU3
+         mOrdU39YJTriuEiGZeNylE2uQTBQM9KHeDi9ySnj+g1e/PUe3LvxgyNXJcvsupSNxr
+         1a/+56YOj8SWgXzwlXOv2BQffuAg1YKOEpuoQWjIxPOOVrBu4KYYOXL30mGC6M9WIe
+         WFcOdqYZOd8lA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, idryomov@gmail.com, lhenriques@suse.de,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v12 40/54] ceph: add __ceph_sync_read helper support
-Date:   Thu, 31 Mar 2022 11:31:16 -0400
-Message-Id: <20220331153130.41287-41-jlayton@kernel.org>
+Subject: [PATCH v12 51/54] ceph: add fscrypt decryption support to ceph_netfs_issue_op
+Date:   Thu, 31 Mar 2022 11:31:27 -0400
+Message-Id: <20220331153130.41287-52-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220331153130.41287-1-jlayton@kernel.org>
 References: <20220331153130.41287-1-jlayton@kernel.org>
@@ -47,102 +47,94 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+Force the use of sparse reads when the inode is encrypted, and add the
+appropriate code to decrypt the extent map after receiving.
 
-Turn the guts of ceph_sync_read into a new helper that takes an inode
-and an offset instead of a kiocb struct, and make ceph_sync_read call
-the helper as a wrapper.
-
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c  | 33 +++++++++++++++++++++------------
- fs/ceph/super.h |  2 ++
- 2 files changed, 23 insertions(+), 12 deletions(-)
+ fs/ceph/addr.c | 32 +++++++++++++++++++++++---------
+ 1 file changed, 23 insertions(+), 9 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index ca370c628b7f..9aa997bcfacc 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -929,22 +929,19 @@ enum {
-  * If we get a short result from the OSD, check against i_size; we need to
-  * only return a short read to the caller if we hit EOF.
-  */
--static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
--			      int *retry_op)
-+ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
-+			 struct iov_iter *to, int *retry_op)
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 15bc455bc87f..13a37a568a1d 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -18,6 +18,7 @@
+ #include "mds_client.h"
+ #include "cache.h"
+ #include "metric.h"
++#include "crypto.h"
+ #include <linux/ceph/osd_client.h>
+ #include <linux/ceph/striper.h>
+ 
+@@ -217,7 +218,8 @@ static bool ceph_netfs_clamp_length(struct netfs_read_subrequest *subreq)
+ 
+ static void finish_netfs_read(struct ceph_osd_request *req)
  {
--	struct file *file = iocb->ki_filp;
--	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
- 	struct ceph_osd_client *osdc = &fsc->client->osdc;
- 	ssize_t ret;
--	u64 off = iocb->ki_pos;
-+	u64 off = *ki_pos;
- 	u64 len = iov_iter_count(to);
- 	u64 i_size = i_size_read(inode);
- 	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
+-	struct ceph_fs_client *fsc = ceph_inode_to_client(req->r_inode);
++	struct inode *inode = req->r_inode;
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
+ 	struct netfs_read_subrequest *subreq = req->r_priv;
+ 	struct ceph_osd_req_op *op = &req->r_ops[0];
+@@ -232,15 +234,24 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+ 	     subreq->len, i_size_read(req->r_inode));
  
--	dout("sync_read on file %p %llu~%u %s\n", file, off, (unsigned)len,
--	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
-+	dout("sync_read on inode %p %llx~%llx\n", inode, *ki_pos, len);
+ 	/* no object means success but no data */
+-	if (sparse && err >= 0)
+-		err = ceph_sparse_ext_map_end(op);
+-	else if (err == -ENOENT)
++	if (err == -ENOENT)
+ 		err = 0;
+ 	else if (err == -EBLOCKLISTED)
+ 		fsc->blocklisted = true;
  
- 	if (!len)
- 		return 0;
-@@ -1063,14 +1060,14 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
- 			break;
+-	if (err >= 0 && err < subreq->len)
+-		__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
++	if (err >= 0) {
++		if (sparse && err > 0)
++			err = ceph_sparse_ext_map_end(op);
++		if (err < subreq->len)
++			__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
++		if (IS_ENCRYPTED(inode) && err > 0) {
++			err = ceph_fscrypt_decrypt_extents(inode, osd_data->pages,
++					subreq->start, op->extent.sparse_ext,
++					op->extent.sparse_ext_cnt);
++			if (err > subreq->len)
++				err = subreq->len;
++		}
++	}
+ 
+ 	netfs_subreq_terminated(subreq, err, true);
+ 
+@@ -315,13 +326,16 @@ static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
+ 	size_t page_off;
+ 	int err = 0;
+ 	u64 len = subreq->len;
+-	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
++	bool sparse = IS_ENCRYPTED(inode) || ceph_test_mount_opt(fsc, SPARSEREAD);
++	u64 off = subreq->start;
+ 
+ 	if (ci->i_inline_version != CEPH_INLINE_NONE &&
+ 	    ceph_netfs_issue_op_inline(subreq))
+ 		return;
+ 
+-	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
++	ceph_fscrypt_adjust_off_and_len(inode, &off, &len);
++
++	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, off, &len,
+ 			0, 1, sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
+ 			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
+ 			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
+@@ -341,7 +355,7 @@ static void ceph_netfs_issue_op(struct netfs_read_subrequest *subreq)
  	}
  
--	if (off > iocb->ki_pos) {
-+	if (off > *ki_pos) {
- 		if (off >= i_size) {
- 			*retry_op = CHECK_EOF;
--			ret = i_size - iocb->ki_pos;
--			iocb->ki_pos = i_size;
-+			ret = i_size - *ki_pos;
-+			*ki_pos = i_size;
- 		} else {
--			ret = off - iocb->ki_pos;
--			iocb->ki_pos = off;
-+			ret = off - *ki_pos;
-+			*ki_pos = off;
- 		}
- 	}
- 
-@@ -1078,6 +1075,18 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
- 	return ret;
- }
- 
-+static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
-+			      int *retry_op)
-+{
-+	struct file *file = iocb->ki_filp;
-+	struct inode *inode = file_inode(file);
-+
-+	dout("sync_read on file %p %llx~%zx %s\n", file, iocb->ki_pos,
-+	     iov_iter_count(to), (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
-+
-+	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op);
-+}
-+
- struct ceph_aio_request {
- 	struct kiocb *iocb;
- 	size_t total_len;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index fef4cda44861..339284e90cb3 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1266,6 +1266,8 @@ extern int ceph_renew_caps(struct inode *inode, int fmode);
- extern int ceph_open(struct inode *inode, struct file *file);
- extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 			    struct file *file, unsigned flags, umode_t mode);
-+extern ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
-+				struct iov_iter *to, int *retry_op);
- extern int ceph_release(struct inode *inode, struct file *filp);
- extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
- 				  char *data, size_t len);
+ 	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
+-	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, subreq->start, len);
++	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, off, len);
+ 	err = iov_iter_get_pages_alloc(&iter, &pages, len, &page_off);
+ 	if (err < 0) {
+ 		dout("%s: iov_ter_get_pages_alloc returned %d\n", __func__, err);
 -- 
 2.35.1
 
