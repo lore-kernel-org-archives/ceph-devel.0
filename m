@@ -2,92 +2,83 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C583BC433EF
-	for <ceph-devel@archiver.kernel.org>; Thu, 31 Mar 2022 12:15:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8E77C433FE
+	for <ceph-devel@archiver.kernel.org>; Thu, 31 Mar 2022 15:31:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235928AbiCaMRL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 31 Mar 2022 08:17:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36854 "EHLO
+        id S238274AbiCaPdX (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 31 Mar 2022 11:33:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235921AbiCaMRJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2022 08:17:09 -0400
+        with ESMTP id S233539AbiCaPdW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2022 11:33:22 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A558A554A7
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2022 05:15:22 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5A9F21C701;
+        Thu, 31 Mar 2022 08:31:34 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 419B26179F
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2022 12:15:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2CBB6C340EE;
-        Thu, 31 Mar 2022 12:15:21 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 60CA161AE4;
+        Thu, 31 Mar 2022 15:31:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 10C4EC340F3;
+        Thu, 31 Mar 2022 15:31:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648728921;
-        bh=FgK4LTcPqT6PCFGsgaW818Ec9Qdx7eJlHYGx3GwzVoc=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=GA9VofSyLyIZ+SIvVrPmHaMpDCikV7b1mQijnM2sKRMjPeaGL0plURnsjBoJoPP68
-         cLqBki5Lg/AQ0zQTiZkNhCZwjA1InkpkkpArrNpAsDIspWv8vW182nnXDMSO8XL98A
-         yISDIFJOXTVIxVoXSODtba5nkkC6q9KrYeO2mxay0ROypC4fK0OyX7mZ+7afgDK/EW
-         /2lVDLWTks+Z1JWSWwq2feTZSgv47UK5w74oWf+cZ62qYbGcljTFQNZrnbW+FSFOhL
-         vMwyY4WxmxkrrVxFoXEelK7hmqUtCdplqPPsa8n3m+1nFBewajt7x0qKUE7U7uzjey
-         tGm6a2P7zOdUQ==
-Message-ID: <698a6e07098eb391c1ac6cf632f4a4fd20b3bbd4.camel@kernel.org>
-Subject: Re: [PATCH 1/3] ceph: add the Octopus,Pacific,Quency feature bits
+        s=k20201202; t=1648740693;
+        bh=ZlzjrhJwihw4PodPL/miGHnNRfWsGW7gPpCGkZ2TtMQ=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=NMRHPEMaONOOXQBk1kxEbDYqgJgNwaqh0/8/L+Itgg6BiFK6KOZFi70NkAUdNt5/L
+         kI9aj0t9AwtRLeEcpbIXUD+8dJ3gqaarypkdDppBnlYs546tXjrIlAgfRVxzauwGvz
+         hSe0F2mYXc81Tn2+ICopQpyl8zybxyg8Sv1G8tLO03brdFYe1jAYHJxAyn+0oXwrsy
+         k7Z03aTKXOBmixXOzaNsc3oi8pR7pquugA6puOXycDG6EJvXDhPrsGykowpKvkbHms
+         vdhfAJKLvCiXdHBW1EP0zj3ggmOvZ5YcgbpfJJY5xH9ZTrTJdXindmgxGl+Ihfb6GC
+         xkt2U3FvMlWUw==
 From:   Jeff Layton <jlayton@kernel.org>
-To:     xiubli@redhat.com, Patrick Donnelly <pdonnell@redhat.com>
-Cc:     idryomov@gmail.com, vshankar@redhat.com, ceph-devel@vger.kernel.org
-Date:   Thu, 31 Mar 2022 08:15:19 -0400
-In-Reply-To: <20220331065241.27370-2-xiubli@redhat.com>
-References: <20220331065241.27370-1-xiubli@redhat.com>
-         <20220331065241.27370-2-xiubli@redhat.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-1.fc35) 
+To:     ceph-devel@vger.kernel.org
+Cc:     xiubli@redhat.com, idryomov@gmail.com, lhenriques@suse.de,
+        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Al Viro <viro@zeniv.linux.org.uk>
+Subject: [PATCH v12 01/54] vfs: export new_inode_pseudo
+Date:   Thu, 31 Mar 2022 11:30:37 -0400
+Message-Id: <20220331153130.41287-2-jlayton@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220331153130.41287-1-jlayton@kernel.org>
+References: <20220331153130.41287-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, 2022-03-31 at 14:52 +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
-> 
-> URL: https://tracker.ceph.com/issues/54411
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  fs/ceph/mds_client.h | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index 33497846e47e..32107c26f50d 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -27,10 +27,13 @@ enum ceph_feature_type {
->  	CEPHFS_FEATURE_RECLAIM_CLIENT,
->  	CEPHFS_FEATURE_LAZY_CAP_WANTED,
->  	CEPHFS_FEATURE_MULTI_RECONNECT,
-> -	CEPHFS_FEATURE_DELEG_INO,
-> -	CEPHFS_FEATURE_METRIC_COLLECT,
-> +	CEPHFS_FEATURE_OCTOPUS,
-> +	CEPHFS_FEATURE_DELEG_INO = CEPHFS_FEATURE_OCTOPUS,
-> +	CEPHFS_FEATURE_PACIFIC,
-> +	CEPHFS_FEATURE_METRIC_COLLECT = CEPHFS_FEATURE_PACIFIC,
-> +	CEPHFS_FEATURE_QUINCY,
->  
-> -	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_METRIC_COLLECT,
-> +	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_QUINCY,
->  };
->  
->  /*
+Ceph needs to be able to allocate inodes ahead of a create that might
+involve a fscrypt-encrypted inode. new_inode() almost fits the bill,
+but it puts the inode on the sb->s_inodes list and when we go to hash
+it, that might be done again.
 
-(cc'ing Patrick)
+We could work around that by setting I_CREATING on the new inode, but
+that causes ilookup5 to return -ESTALE if something tries to find it
+before I_NEW is cleared. This is desirable behavior for most
+filesystems, but doesn't work for ceph.
 
-I think we decided a while back to move away from "release" feature
-flags like this, because they're ambiguous. We do occasionally backport
-features to later stable versions and then the release flag becomes
-meaningless.
+To work around all of this, just use new_inode_pseudo which doesn't add
+it to the sb->s_inodes list.
 
-If the "feature" here is extended metrics, then this should be something
-like CEPHFS_FEATURE_METRIC_V2 or METRIC_EXTENDED or something. IOW, the
-flag name should describe the feature that we're advertising. 
+Cc: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/inode.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/inode.c b/fs/inode.c
+index 63324df6fa27..9ddf7d1a7359 100644
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@ -1025,6 +1025,7 @@ struct inode *new_inode_pseudo(struct super_block *sb)
+ 	}
+ 	return inode;
+ }
++EXPORT_SYMBOL(new_inode_pseudo);
+ 
+ /**
+  *	new_inode 	- obtain an inode
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.35.1
+
