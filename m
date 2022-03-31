@@ -2,42 +2,42 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97263C43219
-	for <ceph-devel@archiver.kernel.org>; Thu, 31 Mar 2022 15:34:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95AB0C433F5
+	for <ceph-devel@archiver.kernel.org>; Thu, 31 Mar 2022 15:34:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238919AbiCaPgP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 31 Mar 2022 11:36:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57368 "EHLO
+        id S238939AbiCaPg3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 31 Mar 2022 11:36:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238744AbiCaPfr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2022 11:35:47 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DE762274DF;
-        Thu, 31 Mar 2022 08:32:07 -0700 (PDT)
+        with ESMTP id S238477AbiCaPfu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2022 11:35:50 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3EA122320A;
+        Thu, 31 Mar 2022 08:32:10 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 141D061AF2;
-        Thu, 31 Mar 2022 15:31:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D319EC340F3;
-        Thu, 31 Mar 2022 15:31:54 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 496EFB82175;
+        Thu, 31 Mar 2022 15:32:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5625BC36AE3;
+        Thu, 31 Mar 2022 15:31:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648740715;
-        bh=fbH+iQjjahZKCGhi/iL6elcYJfj/gkysklT3Ay9geJI=;
+        s=k20201202; t=1648740720;
+        bh=cDPy0xI578WfkDIktMt8wJvIbPGQCoBzzMq2Fpkpaf4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=HzEWQbx89+QvMXmw4NDQuRUBf8+I90qUcN2PkRsGXmw6JGbH7pdL9u7kqPVGh4b2Z
-         UgBkPw/SkbKeVPwoC/BfQHcOBsfXMFeeO76yeo/uBV5APJWTSwbnYEfX1xm9D/rCCe
-         dPPyLj/E9aTxlYo47YJffShF4bo34y/s3I6Bz0pNha8nIApI5KOFF9ZeMOMAb4dTQ+
-         gfQXn3XsOZZ+5ASP91yd9YZQa3MUNfkBHPZ2PGTV2wKuEliYpsilzOGx0aaDqM04V6
-         EQ/6joDfb1YL2jYVQ5Z4OpPYxR4rYzHVVWSq9ot6X+ULJRsnJbs7IVQg+25C066SvD
-         0F4NU82a5fS+A==
+        b=flRG8eZaMk8K92IwGxz5nAYv6okR9ocSemuxGnxLr6uigCBNWQJAGeWbgHW3wZmaG
+         NHyCIg3nZw9xrb4u49NKU1TD4NslmcRyvvqDjZ6WzL6q82WpVbusAh3T+WaKADqkyH
+         ZUR212LwrnuFwYGt+qBI9ILAU6xtPrII2Ns/CcSEuh9UqLJjjSryXYliG0M6G2KzFM
+         X0yN4Cbd+NuXEae0sqLe0LgnlT6WaGz3n89egF5B0wsEURl7nWgk96M/fcv0mi3KRS
+         WScrmhenCRE3uOmIrGvSNkAgK/qjHfY+nlhtFznL0AAkP5fknAv+6yrLqhpA4pRYJ7
+         ZjlnTsaeGl8ZQ==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, idryomov@gmail.com, lhenriques@suse.de,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v12 25/54] ceph: add fscrypt support to ceph_fill_trace
-Date:   Thu, 31 Mar 2022 11:31:01 -0400
-Message-Id: <20220331153130.41287-26-jlayton@kernel.org>
+Subject: [PATCH v12 30/54] ceph: make ceph_get_name decrypt filenames
+Date:   Thu, 31 Mar 2022 11:31:06 -0400
+Message-Id: <20220331153130.41287-31-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220331153130.41287-1-jlayton@kernel.org>
 References: <20220331153130.41287-1-jlayton@kernel.org>
@@ -47,81 +47,97 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When we get a dentry in a trace, decrypt the name so we can properly
-instantiate the dentry.
+When we do a lookupino to the MDS, we get a filename in the trace.
+ceph_get_name uses that name directly, so we must properly decrypt
+it before copying it to the name buffer.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 30 ++++++++++++++++++++++++++++--
- 1 file changed, 28 insertions(+), 2 deletions(-)
+ fs/ceph/export.c | 44 ++++++++++++++++++++++++++++++++------------
+ 1 file changed, 32 insertions(+), 12 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index c82a02ba6635..684dfc3f006c 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1404,8 +1404,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME &&
- 		    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
- 		    !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
-+			bool is_nokey = false;
- 			struct qstr dname;
- 			struct dentry *dn, *parent;
-+			struct fscrypt_str oname = FSTR_INIT(NULL, 0);
-+			struct ceph_fname fname = { .dir	= dir,
-+						    .name	= rinfo->dname,
-+						    .ctext	= rinfo->altname,
-+						    .name_len	= rinfo->dname_len,
-+						    .ctext_len	= rinfo->altname_len };
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index e0fa66ac8b9f..0ebf2bd93055 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -7,6 +7,7 @@
  
- 			BUG_ON(!rinfo->head->is_target);
- 			BUG_ON(req->r_dentry);
-@@ -1413,8 +1420,20 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 			parent = d_find_any_alias(dir);
- 			BUG_ON(!parent);
+ #include "super.h"
+ #include "mds_client.h"
++#include "crypto.h"
  
--			dname.name = rinfo->dname;
--			dname.len = rinfo->dname_len;
-+			err = ceph_fname_alloc_buffer(dir, &oname);
-+			if (err < 0) {
-+				dput(parent);
-+				goto done;
-+			}
+ /*
+  * Basic fh
+@@ -534,7 +535,9 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ {
+ 	struct ceph_mds_client *mdsc;
+ 	struct ceph_mds_request *req;
++	struct inode *dir = d_inode(parent);
+ 	struct inode *inode = d_inode(child);
++	struct ceph_mds_reply_info_parsed *rinfo;
+ 	int err;
+ 
+ 	if (ceph_snap(inode) != CEPH_NOSNAP)
+@@ -546,30 +549,47 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ 	if (IS_ERR(req))
+ 		return PTR_ERR(req);
+ 
+-	inode_lock(d_inode(parent));
+-
++	inode_lock(dir);
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 	req->r_ino2 = ceph_vino(d_inode(parent));
+-	req->r_parent = d_inode(parent);
+-	ihold(req->r_parent);
++	req->r_parent = dir;
++	ihold(dir);
+ 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_num_caps = 2;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
++	inode_unlock(dir);
+ 
+-	inode_unlock(d_inode(parent));
++	if (err)
++		goto out;
+ 
+-	if (!err) {
+-		struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
++	rinfo = &req->r_reply_info;
++	if (!IS_ENCRYPTED(dir)) {
+ 		memcpy(name, rinfo->dname, rinfo->dname_len);
+ 		name[rinfo->dname_len] = 0;
+-		dout("get_name %p ino %llx.%llx name %s\n",
+-		     child, ceph_vinop(inode), name);
+ 	} else {
+-		dout("get_name %p ino %llx.%llx err %d\n",
+-		     child, ceph_vinop(inode), err);
+-	}
++		struct fscrypt_str oname = FSTR_INIT(NULL, 0);
++		struct ceph_fname fname = { .dir	= dir,
++					    .name	= rinfo->dname,
++					    .ctext	= rinfo->altname,
++					    .name_len	= rinfo->dname_len,
++					    .ctext_len	= rinfo->altname_len };
 +
-+			err = ceph_fname_to_usr(&fname, NULL, &oname, &is_nokey);
-+			if (err < 0) {
-+				dput(parent);
-+				ceph_fname_free_buffer(dir, &oname);
-+				goto done;
-+			}
-+			dname.name = oname.name;
-+			dname.len = oname.len;
- 			dname.hash = full_name_hash(parent, dname.name, dname.len);
- 			tvino.ino = le64_to_cpu(rinfo->targeti.in->ino);
- 			tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
-@@ -1429,9 +1448,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 				     dname.len, dname.name, dn);
- 				if (!dn) {
- 					dput(parent);
-+					ceph_fname_free_buffer(dir, &oname);
- 					err = -ENOMEM;
- 					goto done;
- 				}
-+				if (is_nokey) {
-+					spin_lock(&dn->d_lock);
-+					dn->d_flags |= DCACHE_NOKEY_NAME;
-+					spin_unlock(&dn->d_lock);
-+				}
- 				err = 0;
- 			} else if (d_really_is_positive(dn) &&
- 				   (ceph_ino(d_inode(dn)) != tvino.ino ||
-@@ -1443,6 +1468,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 				dput(dn);
- 				goto retry_lookup;
- 			}
-+			ceph_fname_free_buffer(dir, &oname);
++		err = ceph_fname_alloc_buffer(dir, &oname);
++		if (err < 0)
++			goto out;
  
- 			req->r_dentry = dn;
- 			dput(parent);
++		err = ceph_fname_to_usr(&fname, NULL, &oname, NULL);
++		if (!err) {
++			memcpy(name, oname.name, oname.len);
++			name[oname.len] = 0;
++		}
++		ceph_fname_free_buffer(dir, &oname);
++	}
++out:
++	dout("get_name %p ino %llx.%llx err %d %s%s\n",
++		     child, ceph_vinop(inode), err,
++		     err ? "" : "name ", err ? "" : name);
+ 	ceph_mdsc_put_request(req);
+ 	return err;
+ }
 -- 
 2.35.1
 
