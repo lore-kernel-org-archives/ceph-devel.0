@@ -2,46 +2,46 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B31C8C433EF
-	for <ceph-devel@archiver.kernel.org>; Fri,  1 Apr 2022 15:11:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AEDCC4321E
+	for <ceph-devel@archiver.kernel.org>; Fri,  1 Apr 2022 15:11:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352182AbiDAPHq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 1 Apr 2022 11:07:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59620 "EHLO
+        id S1352782AbiDAPH4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 1 Apr 2022 11:07:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350270AbiDAOrW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2022 10:47:22 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 927FD2A1E9B;
-        Fri,  1 Apr 2022 07:37:30 -0700 (PDT)
+        with ESMTP id S1352538AbiDAOu3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2022 10:50:29 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC9192B3334;
+        Fri,  1 Apr 2022 07:41:53 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id F0B39B82511;
-        Fri,  1 Apr 2022 14:37:29 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C2078C340F2;
-        Fri,  1 Apr 2022 14:37:27 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id AE15460BC2;
+        Fri,  1 Apr 2022 14:41:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57BFCC34111;
+        Fri,  1 Apr 2022 14:41:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648823848;
-        bh=mHKZ7ckdU7TkU9H+n/vpGu0Ah9I3UG0+uNUuTBwQZLc=;
+        s=k20201202; t=1648824113;
+        bh=ZJE+a/pgXS/4JKFi5R+vhx5YJj6QBxc21iT71MnUsbE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=JII1diyuvhjYivXhx7ID9YX4vZGs2JGv+Hnf8Mk6faARb8HOmg43oHK2haf0+URHf
-         UBnxHpsz3/leIXa7Fyiawo73+/klN8VUmSI8gAC1SLCjDXq/VQdGaao8UKYmjON2/Z
-         E9LS16LlNGHZRazgpfK6gnNkLEl1iM5Go+FINVTwHdMAFBIGpUMpBSA7gfOT4FkKuz
-         EJGefpVc4sHL398L6F2RF14NDTz3f/xGMgR/95yes6iuMDwHcXN+5DxgOB1C2GFelG
-         F6Bca2zaHxJ7eBhkel6G9eIPwgDu2CV2LhaqMawDsXneo2PQQ+kzDrvoyeQEK0hx3L
-         SuJe913gr3BvQ==
+        b=jJKrwx0ohLBHZwye1XUu6H61nTc4gWOSuTlQs+UFAuU3idBMWUR7Iv/Yw/1DA2cgT
+         O6BRNLZbLvcOiRp2GHCdRcLT4ajuLkutAysSk2f560ebJ7NJIkT32vfPqg5ygYn9fB
+         HVvg1iuMSJAzZC5oVF7c0sWYIo3t4UmtfVcse4tAvVNo18itqE62aNx7iyRZ30CaWX
+         TwLbSGAc8H9dlMT8+KFvnSgA2L4SMZeV5V8vQ8lHHOgIT0Ukt17Np47OB6VDtGY5qp
+         727xIUufG3TpuEiQQsOxb/kONsfW+oPEOuzCfAceucQFLZ2lLvkZEX8gwHJjF9i6BC
+         CLStUhjWj67ig==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.16 105/109] ceph: fix inode reference leakage in ceph_get_snapdir()
-Date:   Fri,  1 Apr 2022 10:32:52 -0400
-Message-Id: <20220401143256.1950537-105-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.15 94/98] ceph: fix inode reference leakage in ceph_get_snapdir()
+Date:   Fri,  1 Apr 2022 10:37:38 -0400
+Message-Id: <20220401143742.1952163-94-sashal@kernel.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220401143256.1950537-1-sashal@kernel.org>
-References: <20220401143256.1950537-1-sashal@kernel.org>
+In-Reply-To: <20220401143742.1952163-1-sashal@kernel.org>
+References: <20220401143742.1952163-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -69,7 +69,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index e3322fcb2e8d..6d87991cf67e 100644
+index 1c7574105478..42e449d3f18b 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
 @@ -87,13 +87,13 @@ struct inode *ceph_get_snapdir(struct inode *parent)
