@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05274C433EF
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:07:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D4EBC433EF
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:07:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242068AbiDFEIh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:08:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38256 "EHLO
+        id S239518AbiDFEJN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:09:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573598AbiDETXS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:18 -0400
+        with ESMTP id S1573587AbiDETXJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:09 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF0664F45F;
-        Tue,  5 Apr 2022 12:21:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95F234B842;
+        Tue,  5 Apr 2022 12:21:09 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 666ADB81FAA;
-        Tue,  5 Apr 2022 19:21:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EA4AC385A3;
-        Tue,  5 Apr 2022 19:21:16 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 43BAEB81FA5;
+        Tue,  5 Apr 2022 19:21:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 64BBCC385A0;
+        Tue,  5 Apr 2022 19:21:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186477;
-        bh=PJPyqDK6DNMW9F+5wYxGCw3ywIqwNAhCuh2XTGubQow=;
+        s=k20201202; t=1649186467;
+        bh=X85CZobPXWulW9mgO7+FK15JdkLRqeyY4fhr5BUdygo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=VHTfVfFNYI9LHTiG9Bs4cHcpNr/9s3fqIqPmOWNKMB1wC8auyB8ll+7SfvqJDzli0
-         p7l6gtLT6OhJIUYKuj4e7XSoW89v0ZaG99pNkDGtaDadVuh8y00onEOiEp4vMEAITt
-         8V5ko5nOrVYSOYoov7SNqVS+wbgtmhJc+ZCWcarhMC3wmHeFlWoAnjK3e5UJfCInxr
-         6VlQumLqW7w+HwyzsO1tOPPsCXvZArTVj9Vsi9eRrEq/OAy2W9CSl6RBTeh17jRHvm
-         K/QhiYNL3uFmt6BGHGtIjAQ3C8zCztTq+KBh1CjsEqVU7o6TqPUsNOwcEGtGZF1Oi6
-         c5bPPW9kHlBEw==
+        b=FroQz6bZzBiDzl4/Y8m8ivQwBBM15kgJDRQkBcOis27RIWqJXdO/Up+Ja0+ps5+1G
+         lybMxpr+MB0gRbaNM9Op70KXPihW9axLWkrm04rpRfRDHuT1Mp28xgJehOxjpBPHnQ
+         vmi+J8QmBbzd5p39I7Dv75ece+Qil/41XLC4pjfDJajYKp7hAnfjbXHyRlGETbSqAt
+         LoQYbDx2D33rSSgYWZsRVZrlcKs/KF9q8kvoMHh1IDXh5+c0i1N4DIPZs4QZpHPP4g
+         a56POnYOgmaSA8+WsW93I3VRAPJV1W8n7s7nIKHB8s+g7L95PiezKBoDInvKh7JoEK
+         9Mnv85xTgyntg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 49/59] libceph: allow ceph_osdc_new_request to accept a multi-op read
-Date:   Tue,  5 Apr 2022 15:20:20 -0400
-Message-Id: <20220405192030.178326-50-jlayton@kernel.org>
+Subject: [PATCH v13 38/59] libceph: add CEPH_OSD_OP_ASSERT_VER support
+Date:   Tue,  5 Apr 2022 15:20:09 -0400
+Message-Id: <20220405192030.178326-39-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,60 +48,89 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Currently we have some special-casing for multi-op writes, but in the
-case of a read, we can't really handle it. All of the current multi-op
-callers call it with CEPH_OSD_FLAG_WRITE set.
-
-Have ceph_osdc_new_request check for CEPH_OSD_FLAG_READ and if it's set,
-allocate multiple reply ops instead of multiple request ops. If neither
-flag is set, return -EINVAL.
+...and record the user_version in the reply in a new field in
+ceph_osd_request, so we can populate the assert_ver appropriately.
+Shuffle the fields a bit too so that the new field fits in an
+existing hole on x86_64.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- net/ceph/osd_client.c | 27 +++++++++++++++++++++------
- 1 file changed, 21 insertions(+), 6 deletions(-)
+ include/linux/ceph/osd_client.h | 6 +++++-
+ include/linux/ceph/rados.h      | 4 ++++
+ net/ceph/osd_client.c           | 5 +++++
+ 3 files changed, 14 insertions(+), 1 deletion(-)
 
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 4088601beacc..8c7f34df66d3 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -196,6 +196,9 @@ struct ceph_osd_req_op {
+ 			u32 src_fadvise_flags;
+ 			struct ceph_osd_data osd_data;
+ 		} copy_from;
++		struct {
++			u64 ver;
++		} assert_ver;
+ 	};
+ };
+ 
+@@ -250,6 +253,7 @@ struct ceph_osd_request {
+ 	struct ceph_osd_client *r_osdc;
+ 	struct kref       r_kref;
+ 	bool              r_mempool;
++	bool		  r_linger;           /* don't resend on failure */
+ 	struct completion r_completion;       /* private to osd_client.c */
+ 	ceph_osdc_callback_t r_callback;
+ 
+@@ -262,9 +266,9 @@ struct ceph_osd_request {
+ 	struct ceph_snap_context *r_snapc;    /* for writes */
+ 	struct timespec64 r_mtime;            /* ditto */
+ 	u64 r_data_offset;                    /* ditto */
+-	bool r_linger;                        /* don't resend on failure */
+ 
+ 	/* internal */
++	u64 r_version;			      /* data version sent in reply */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
+ 	ktime_t r_start_latency;              /* ktime_t */
+diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+index 43a7a1573b51..73c3efbec36c 100644
+--- a/include/linux/ceph/rados.h
++++ b/include/linux/ceph/rados.h
+@@ -523,6 +523,10 @@ struct ceph_osd_op {
+ 		struct {
+ 			__le64 cookie;
+ 		} __attribute__ ((packed)) notify;
++		struct {
++			__le64 unused;
++			__le64 ver;
++		} __attribute__ ((packed)) assert_ver;
+ 		struct {
+ 			__le64 offset, length;
+ 			__le64 src_offset;
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index febdd728b2fb..39d38b69a953 100644
+index acf6a19b6677..febdd728b2fb 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -1130,15 +1130,30 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
- 	if (flags & CEPH_OSD_FLAG_WRITE)
- 		req->r_data_offset = off;
- 
--	if (num_ops > 1)
-+	if (num_ops > 1) {
-+		int num_req_ops, num_rep_ops;
-+
- 		/*
--		 * This is a special case for ceph_writepages_start(), but it
--		 * also covers ceph_uninline_data().  If more multi-op request
--		 * use cases emerge, we will need a separate helper.
-+		 * If this is a multi-op write request, assume that we'll need
-+		 * request ops. If it's a multi-op read then assume we'll need
-+		 * reply ops. Anything else and call it -EINVAL.
- 		 */
--		r = __ceph_osdc_alloc_messages(req, GFP_NOFS, num_ops, 0);
--	else
-+		if (flags & CEPH_OSD_FLAG_WRITE) {
-+			num_req_ops = num_ops;
-+			num_rep_ops = 0;
-+		} else if (flags & CEPH_OSD_FLAG_READ) {
-+			num_req_ops = 0;
-+			num_rep_ops = num_ops;
-+		} else {
-+			r = -EINVAL;
-+			goto fail;
-+		}
-+
-+		r = __ceph_osdc_alloc_messages(req, GFP_NOFS, num_req_ops,
-+					       num_rep_ops);
-+	} else {
- 		r = ceph_osdc_alloc_messages(req, GFP_NOFS);
-+	}
- 	if (r)
- 		goto fail;
- 
+@@ -1042,6 +1042,10 @@ static u32 osd_req_encode_op(struct ceph_osd_op *dst,
+ 		dst->copy_from.src_fadvise_flags =
+ 			cpu_to_le32(src->copy_from.src_fadvise_flags);
+ 		break;
++	case CEPH_OSD_OP_ASSERT_VER:
++		dst->assert_ver.unused = cpu_to_le64(0);
++		dst->assert_ver.ver = cpu_to_le64(src->assert_ver.ver);
++		break;
+ 	default:
+ 		pr_err("unsupported osd opcode %s\n",
+ 			ceph_osd_op_name(src->op));
+@@ -3804,6 +3808,7 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 	 * one (type of) reply back.
+ 	 */
+ 	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
++	req->r_version = m.user_version;
+ 	req->r_result = m.result ?: data_len;
+ 	finish_request(req);
+ 	mutex_unlock(&osd->lock);
 -- 
 2.35.1
 
