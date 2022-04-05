@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2385C433EF
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:15:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43A04C433EF
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349820AbiDFEK2 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:10:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37518 "EHLO
+        id S1352985AbiDFELn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:11:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573585AbiDETXH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:07 -0400
+        with ESMTP id S1573601AbiDETXV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:21 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C143D4B1EB;
-        Tue,  5 Apr 2022 12:21:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 704B4515BC;
+        Tue,  5 Apr 2022 12:21:23 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 7B4A8B81F6B;
-        Tue,  5 Apr 2022 19:21:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7B24EC385A1;
-        Tue,  5 Apr 2022 19:21:05 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2046BB81FA5;
+        Tue,  5 Apr 2022 19:21:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B237C385A1;
+        Tue,  5 Apr 2022 19:21:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186466;
-        bh=btEIS1j3Ond3ZP9qah9C8gQBs8ZC16Vm5hgbF/uIHr4=;
+        s=k20201202; t=1649186480;
+        bh=aBwSCl+nnd5kUW2zQQtaeshWmlSvmWxl99UF09aY6AQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=eFlKOuSw0cSgBPQB0RlcnyLlamcccO007IB5K9wTb5VNPisX/4Cf3Pn9gEdDRsw4H
-         IY6r5l6CAnWZaSsl3esf9kK0VkAeG8GRhNm2OS4K9hMBKVTH+vm3COFoGjOVmaK2gH
-         v2nWQIT8n5qcckt58lWop10s/ccjos9RPzvMYEz1fViJMrxArI0Lw2oqLwOlvXY7pC
-         bok/BFjrPvYmL53exoHlzMaeKWRmoW08zwFYle2DISIeqRGojpE6Sz5u4TcTtzc5zR
-         qj0ZW0HO9T/vz/ztELK/WSc8YwMHUwhjQjqfa85/WOuvoFKIqRlLEryzCyjW5STrfG
-         s0Ji8x71s/r4A==
+        b=bQB7CfxjNrExI1aJTNY6nAaIMDhbZN1vzkObuQ+dIoqtT1qCNZEnZfSj5ZEdz9DC1
+         zu2WuAhBT1TK+p+0MhGSIDnhIh/hiVRcbH/nuQZuMli8zJ1RZUoXBgK+G9v0uol0IR
+         xeFjXw9fKar9XABvQvUJT+dXKYh+XVFFEN7NHgKr9lu7tDvwTibMvq3AM+M0bwkKiL
+         k75o5H3n3SUxDz4yKncozFnh8S0O9L9gvm/NMSdaJ8A6NuAZQuvuYAPXP5z/xr07gm
+         80bkN+tZUO74+oHRnUJ02bMDhXRX8tzyY2P3JTpBBdFMH3UpmW++cjDBPll8Rr+Pbd
+         kmr7qW1P+vZ1A==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 37/59] ceph: don't allow changing layout on encrypted files/directories
-Date:   Tue,  5 Apr 2022 15:20:08 -0400
-Message-Id: <20220405192030.178326-38-jlayton@kernel.org>
+Subject: [PATCH v13 53/59] ceph: align data in pages in ceph_sync_write
+Date:   Tue,  5 Apr 2022 15:20:24 -0400
+Message-Id: <20220405192030.178326-54-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,32 +48,71 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Luis Henriques <lhenriques@suse.de>
+Encrypted files will need to be dealt with in block-sized chunks and
+once we do that, the way that ceph_sync_write aligns the data in the
+bounce buffer won't be acceptable.
 
-Encryption is currently only supported on files/directories with layouts
-where stripe_count=1.  Forbid changing layouts when encryption is involved.
+Change it to align the data the same way it would be aligned in the
+pagecache.
 
-Signed-off-by: Luis Henriques <lhenriques@suse.de>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/ioctl.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ fs/ceph/file.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-index b9f0f4e460ab..9675ef3a6c47 100644
---- a/fs/ceph/ioctl.c
-+++ b/fs/ceph/ioctl.c
-@@ -294,6 +294,10 @@ static long ceph_set_encryption_policy(struct file *file, unsigned long arg)
- 	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 41b97d32dfcf..69ac67c93552 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1551,6 +1551,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 	bool check_caps = false;
+ 	struct timespec64 mtime = current_time(inode);
+ 	size_t count = iov_iter_count(from);
++	size_t off;
  
-+	/* encrypted directories can't have striped layout */
-+	if (ci->i_layout.stripe_count > 1)
-+		return -EINVAL;
+ 	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
+ 		return -EROFS;
+@@ -1588,12 +1589,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 			break;
+ 		}
+ 
+-		/*
+-		 * write from beginning of first page,
+-		 * regardless of io alignment
+-		 */
+-		num_pages = (len + PAGE_SIZE - 1) >> PAGE_SHIFT;
+-
++		num_pages = calc_pages_for(pos, len);
+ 		pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
+ 		if (IS_ERR(pages)) {
+ 			ret = PTR_ERR(pages);
+@@ -1601,9 +1597,12 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 		}
+ 
+ 		left = len;
++		off = offset_in_page(pos);
+ 		for (n = 0; n < num_pages; n++) {
+-			size_t plen = min_t(size_t, left, PAGE_SIZE);
+-			ret = copy_page_from_iter(pages[n], 0, plen, from);
++			size_t plen = min_t(size_t, left, PAGE_SIZE - off);
 +
- 	ret = vet_mds_for_fscrypt(file);
- 	if (ret)
- 		return ret;
++			ret = copy_page_from_iter(pages[n], off, plen, from);
++			off = 0;
+ 			if (ret != plen) {
+ 				ret = -EFAULT;
+ 				break;
+@@ -1618,8 +1617,9 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 
+ 		req->r_inode = inode;
+ 
+-		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
+-						false, true);
++		osd_req_op_extent_osd_data_pages(req, 0, pages, len,
++						 offset_in_page(pos),
++						 false, true);
+ 
+ 		req->r_mtime = mtime;
+ 		ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
 -- 
 2.35.1
 
