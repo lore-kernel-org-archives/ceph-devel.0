@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B7FCC433EF
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:18:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC44DC433F5
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:18:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1840363AbiDFEQx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:16:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36104 "EHLO
+        id S1586460AbiDFEQp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:16:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573565AbiDETWr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:47 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0685E41996;
-        Tue,  5 Apr 2022 12:20:49 -0700 (PDT)
+        with ESMTP id S1573602AbiDETXY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:24 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17F2E52B16;
+        Tue,  5 Apr 2022 12:21:25 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 98746616C5;
-        Tue,  5 Apr 2022 19:20:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C95FC385A0;
-        Tue,  5 Apr 2022 19:20:47 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id B8121B81FA4;
+        Tue,  5 Apr 2022 19:21:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BAEA5C385A1;
+        Tue,  5 Apr 2022 19:21:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186448;
-        bh=ShhHqYfBpf9JsbMiXI8G2iZFROdQeYH5+nM3VSH0nCI=;
+        s=k20201202; t=1649186483;
+        bh=heaEs/fAbEMBmP6Wk4yEQLXufpxlZz2bCArq5qEYbdg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=dKHViOiZAF8ltnCy75v1geQHPUV3YPHu0rqq8dpG7YpkQs61r73lUO9MHKA/dA5Ko
-         vrpOoJP7fgGvLjlJTaYGbR7CQ8IRQvPC+N3DVZd6guEK8PmgfVB8DocSpjjPx0krPa
-         R0DBwmFqMBBu75AWDTpNRyG2oxYljfYQ62sWfo+AXOEWuzgqqIIEVjKvEuv7h8Z9hR
-         lp7eIdcCsZh6wZjN1B61iDKAwVkAAi+Gv/WOGRfdeCkynnTulGP0cWJufpuHaXI2gg
-         Gl1IQRunszg/NxN8kWmKpLZIZByHcPEO5qh1of3y7yVa8gEQc65CigL426u+LAkK6E
-         y1OLcnVKDWgSw==
+        b=TNvJEiPAWRH4l6rhv/NWdlIf2sqqMXOf2HdAwv7gGpL2AKEwMGhZ5wxe1P/9gkMw/
+         uXorRYG/Rpde59wq8ReMnH8EZRTxd+awAhqhS4BVuRVJHClZpeBA031+daEqKa5Eue
+         yAYiAw0gNNgSE2cZL3tgVeMKbV5SAPfMm3Zm9xQwLRgUX/yz+wlqlTr/8tX08QCZHh
+         3Aue8bC2obiyqHSAp3PfTPw/OJvlfDlGyPD61nQup9vQdVEB8Smi6fAHQ33V+egR4R
+         0kcAKIaoZJp1jFdHtI6E6Qu2mnZfOC49aXd/ZqYvo1jyNaanN+iOAJ1BZIqEQc6iXP
+         o3MttLytL+6Zg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 17/59] ceph: decode alternate_name in lease info
-Date:   Tue,  5 Apr 2022 15:19:48 -0400
-Message-Id: <20220405192030.178326-18-jlayton@kernel.org>
+Subject: [PATCH v13 56/59] ceph: add fscrypt decryption support to ceph_netfs_issue_op
+Date:   Tue,  5 Apr 2022 15:20:27 -0400
+Message-Id: <20220405192030.178326-57-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,156 +48,94 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Ceph is a bit different from local filesystems, in that we don't want
-to store filenames as raw binary data, since we may also be dealing
-with clients that don't support fscrypt.
-
-We could just base64-encode the encrypted filenames, but that could
-leave us with filenames longer than NAME_MAX. It turns out that the
-MDS doesn't care much about filename length, but the clients do.
-
-To manage this, we've added a new "alternate name" field that can be
-optionally added to any dentry that we'll use to store the binary
-crypttext of the filename if its base64-encoded value will be longer
-than NAME_MAX. When a dentry has one of these names attached, the MDS
-will send it along in the lease info, which we can then store for
-later usage.
+Force the use of sparse reads when the inode is encrypted, and add the
+appropriate code to decrypt the extent map after receiving.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/mds_client.c | 43 +++++++++++++++++++++++++++++++++----------
- fs/ceph/mds_client.h | 11 +++++++----
- 2 files changed, 40 insertions(+), 14 deletions(-)
+ fs/ceph/addr.c | 32 +++++++++++++++++++++++---------
+ 1 file changed, 23 insertions(+), 9 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index dcb800675dec..2f2f8221eb25 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -308,27 +308,47 @@ static int parse_reply_info_dir(void **p, void *end,
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 99021431a391..bcb74b1d46bb 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -18,6 +18,7 @@
+ #include "mds_client.h"
+ #include "cache.h"
+ #include "metric.h"
++#include "crypto.h"
+ #include <linux/ceph/osd_client.h>
+ #include <linux/ceph/striper.h>
  
- static int parse_reply_info_lease(void **p, void *end,
- 				  struct ceph_mds_reply_lease **lease,
--				  u64 features)
-+				  u64 features, u32 *altname_len, u8 **altname)
+@@ -216,7 +217,8 @@ static bool ceph_netfs_clamp_length(struct netfs_io_subrequest *subreq)
+ 
+ static void finish_netfs_read(struct ceph_osd_request *req)
  {
-+	u8 struct_v;
-+	u32 struct_len;
-+	void *lend;
-+
- 	if (features == (u64)-1) {
--		u8 struct_v, struct_compat;
--		u32 struct_len;
-+		u8 struct_compat;
-+
- 		ceph_decode_8_safe(p, end, struct_v, bad);
- 		ceph_decode_8_safe(p, end, struct_compat, bad);
-+
- 		/* struct_v is expected to be >= 1. we only understand
- 		 * encoding whose struct_compat == 1. */
- 		if (!struct_v || struct_compat != 1)
- 			goto bad;
-+
- 		ceph_decode_32_safe(p, end, struct_len, bad);
--		ceph_decode_need(p, end, struct_len, bad);
--		end = *p + struct_len;
-+	} else {
-+		struct_len = sizeof(**lease);
-+		*altname_len = 0;
-+		*altname = NULL;
- 	}
+-	struct ceph_fs_client *fsc = ceph_inode_to_client(req->r_inode);
++	struct inode *inode = req->r_inode;
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
+ 	struct netfs_io_subrequest *subreq = req->r_priv;
+ 	struct ceph_osd_req_op *op = &req->r_ops[0];
+@@ -231,15 +233,24 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+ 	     subreq->len, i_size_read(req->r_inode));
  
--	ceph_decode_need(p, end, sizeof(**lease), bad);
-+	lend = *p + struct_len;
-+	ceph_decode_need(p, end, struct_len, bad);
- 	*lease = *p;
- 	*p += sizeof(**lease);
--	if (features == (u64)-1)
--		*p = end;
-+
-+	if (features == (u64)-1) {
-+		if (struct_v >= 2) {
-+			ceph_decode_32_safe(p, end, *altname_len, bad);
-+			ceph_decode_need(p, end, *altname_len, bad);
-+			*altname = *p;
-+			*p += *altname_len;
-+		} else {
-+			*altname = NULL;
-+			*altname_len = 0;
+ 	/* no object means success but no data */
+-	if (sparse && err >= 0)
+-		err = ceph_sparse_ext_map_end(op);
+-	else if (err == -ENOENT)
++	if (err == -ENOENT)
+ 		err = 0;
+ 	else if (err == -EBLOCKLISTED)
+ 		fsc->blocklisted = true;
+ 
+-	if (err >= 0 && err < subreq->len)
+-		__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
++	if (err >= 0) {
++		if (sparse && err > 0)
++			err = ceph_sparse_ext_map_end(op);
++		if (err < subreq->len)
++			__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
++		if (IS_ENCRYPTED(inode) && err > 0) {
++			err = ceph_fscrypt_decrypt_extents(inode, osd_data->pages,
++					subreq->start, op->extent.sparse_ext,
++					op->extent.sparse_ext_cnt);
++			if (err > subreq->len)
++				err = subreq->len;
 +		}
 +	}
-+	*p = lend;
- 	return 0;
- bad:
- 	return -EIO;
-@@ -358,7 +378,8 @@ static int parse_reply_info_trace(void **p, void *end,
- 		info->dname = *p;
- 		*p += info->dname_len;
  
--		err = parse_reply_info_lease(p, end, &info->dlease, features);
-+		err = parse_reply_info_lease(p, end, &info->dlease, features,
-+					     &info->altname_len, &info->altname);
- 		if (err < 0)
- 			goto out_bad;
- 	}
-@@ -425,9 +446,11 @@ static int parse_reply_info_readdir(void **p, void *end,
- 		dout("parsed dir dname '%.*s'\n", rde->name_len, rde->name);
+ 	netfs_subreq_terminated(subreq, err, true);
  
- 		/* dentry lease */
--		err = parse_reply_info_lease(p, end, &rde->lease, features);
-+		err = parse_reply_info_lease(p, end, &rde->lease, features,
-+					     &rde->altname_len, &rde->altname);
- 		if (err)
- 			goto out_bad;
+@@ -314,13 +325,16 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+ 	size_t page_off;
+ 	int err = 0;
+ 	u64 len = subreq->len;
+-	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
++	bool sparse = IS_ENCRYPTED(inode) || ceph_test_mount_opt(fsc, SPARSEREAD);
++	u64 off = subreq->start;
+ 
+ 	if (ci->i_inline_version != CEPH_INLINE_NONE &&
+ 	    ceph_netfs_issue_op_inline(subreq))
+ 		return;
+ 
+-	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
++	ceph_fscrypt_adjust_off_and_len(inode, &off, &len);
 +
- 		/* inode */
- 		err = parse_reply_info_in(p, end, &rde->inode, features);
- 		if (err < 0)
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index aab3ab284fce..2cc75f9ae7c7 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -29,8 +29,8 @@ enum ceph_feature_type {
- 	CEPHFS_FEATURE_MULTI_RECONNECT,
- 	CEPHFS_FEATURE_DELEG_INO,
- 	CEPHFS_FEATURE_METRIC_COLLECT,
--
--	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_METRIC_COLLECT,
-+	CEPHFS_FEATURE_ALTERNATE_NAME,
-+	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_ALTERNATE_NAME,
- };
++	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, off, &len,
+ 			0, 1, sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
+ 			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
+ 			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
+@@ -339,7 +353,7 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+ 	}
  
- /*
-@@ -45,8 +45,7 @@ enum ceph_feature_type {
- 	CEPHFS_FEATURE_MULTI_RECONNECT,		\
- 	CEPHFS_FEATURE_DELEG_INO,		\
- 	CEPHFS_FEATURE_METRIC_COLLECT,		\
--						\
--	CEPHFS_FEATURE_MAX,			\
-+	CEPHFS_FEATURE_ALTERNATE_NAME,		\
- }
- #define CEPHFS_FEATURES_CLIENT_REQUIRED {}
- 
-@@ -98,7 +97,9 @@ struct ceph_mds_reply_info_in {
- 
- struct ceph_mds_reply_dir_entry {
- 	char                          *name;
-+	u8			      *altname;
- 	u32                           name_len;
-+	u32			      altname_len;
- 	struct ceph_mds_reply_lease   *lease;
- 	struct ceph_mds_reply_info_in inode;
- 	loff_t			      offset;
-@@ -122,7 +123,9 @@ struct ceph_mds_reply_info_parsed {
- 	struct ceph_mds_reply_info_in diri, targeti;
- 	struct ceph_mds_reply_dirfrag *dirfrag;
- 	char                          *dname;
-+	u8			      *altname;
- 	u32                           dname_len;
-+	u32                           altname_len;
- 	struct ceph_mds_reply_lease   *dlease;
- 	struct ceph_mds_reply_xattr   xattr_info;
- 
+ 	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
+-	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, subreq->start, len);
++	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, off, len);
+ 	err = iov_iter_get_pages_alloc(&iter, &pages, len, &page_off);
+ 	if (err < 0) {
+ 		dout("%s: iov_ter_get_pages_alloc returned %d\n", __func__, err);
 -- 
 2.35.1
 
