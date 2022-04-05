@@ -2,155 +2,200 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EA05C4321E
-	for <ceph-devel@archiver.kernel.org>; Tue,  5 Apr 2022 11:08:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1766C4167B
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:01:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237171AbiDELJQ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 5 Apr 2022 07:09:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52538 "EHLO
+        id S236884AbiDFEAL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:00:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349449AbiDEJtx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 05:49:53 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34B07BC21;
-        Tue,  5 Apr 2022 02:46:13 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S1573561AbiDETWr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:47 -0400
+Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EFEE41F83;
+        Tue,  5 Apr 2022 12:20:47 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id CC66F1F745;
-        Tue,  5 Apr 2022 09:46:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1649151971; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=0uwiZrHoEAwcm/6E7Q4jt1XioHQJ0mFo4nPx9wPkC7M=;
-        b=vTn7v+5eE15F5XfHC49KXH+GbYNHajNpptQnF+HdxDHcDqC5/E2zq7VyorIH4WHv63ULg0
-        2qJRneUAxahohw9lAX3IV44S+WYD2+SWA+no5R8erN+S7hS3XIX957vJ1TOCi3jKmTJHSR
-        SWjo/6/b2npudNu3Ns72QZN9LNLe/HU=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1649151971;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=0uwiZrHoEAwcm/6E7Q4jt1XioHQJ0mFo4nPx9wPkC7M=;
-        b=ZURMVzrBie0K8SUtopzCCv8PIes2tV/5g2C0ME6LLs4Ml3WuF6n5XCnsd0H6HVf4kETvx6
-        KzpG7Mc4JuhDEADw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6B3D813A04;
-        Tue,  5 Apr 2022 09:46:11 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 6i9RF+MPTGKdPQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 05 Apr 2022 09:46:11 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 33f2eaf2;
-        Tue, 5 Apr 2022 09:46:34 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Eric Biggers <ebiggers@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v3] common/encrypt: allow the use of 'fscrypt:' as key prefix
-Date:   Tue,  5 Apr 2022 10:46:33 +0100
-Message-Id: <20220405094633.17285-1-lhenriques@suse.de>
+        by sin.source.kernel.org (Postfix) with ESMTPS id 92C8DCE1D71;
+        Tue,  5 Apr 2022 19:20:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A9D6C385A1;
+        Tue,  5 Apr 2022 19:20:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649186446;
+        bh=JFvTVs1Mbafak7cqDVajlAdBW/VajKmPl0TjxjOhC9A=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=jOQ4rwMLcxSJ+KzBlsVwSdACTUyHVXMLWlnNXixgc2Ys0RFTc1MFAYk/XRRtd34SS
+         6liEE8OFkbJK6I9ZQz2HNxdvfqWfDtMSVMi6PiwHbnHGKakTOoqSHD4YXE76RDmQw8
+         cljWq7jemrrhvSAzg175Fpc/KJL+r9YtLwZuyXp3MzK9WqR6mvctp1tyqLLhMHv1fC
+         idAGEt865IuVoFODfFckykDVaRlhQMcDlPqtPrTyGejx44aWJTjKDqWR9ZOmOhTomU
+         g7x9HwOiHNRHa+a9DBhfb049r/05L/p5xfcg4ZwBwM7UaKn+hNrcuqjz//ZnjM/HJW
+         B0dEjfbzwy72A==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     idryomov@gmail.com, xiubli@redhat.com
+Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
+        lhenriques@suse.de
+Subject: [PATCH v13 15/59] ceph: add support for fscrypt_auth/fscrypt_file to cap messages
+Date:   Tue,  5 Apr 2022 15:19:46 -0400
+Message-Id: <20220405192030.178326-16-jlayton@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
+References: <20220405192030.178326-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-fscrypt keys have used the $FSTYP as prefix.  However this format is being
-deprecated and newer kernels are expected to use the generic 'fscrypt:'
-prefix instead.  This patch adds support for this new prefix, and only
-uses $FSTYP on filesystems that didn't initially supported it, i.e. ext4 and
-f2fs.  This will allow old kernels to be tested.
+Add support for new version 12 cap messages that carry the new
+fscrypt_auth and fscrypt_file fields from the inode.
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- common/encrypt | 36 +++++++++++++++++++++++++-----------
- 1 file changed, 25 insertions(+), 11 deletions(-)
+ fs/ceph/caps.c | 76 +++++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 63 insertions(+), 13 deletions(-)
 
-Changes since v2:
-- updated _get_fs_keyprefix() and commit description
-
-Changes since v1:
-- ubifs now follows into the default case (i.e. to use the 'fscrypt' key
-  prefix)
-- dropped local variable from _get_fs_keyprefix()
-
-diff --git a/common/encrypt b/common/encrypt
-index f90c4ef05a3f..e2683f99dcc2 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -250,6 +250,25 @@ _num_to_hex()
- 	fi
- }
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 042d4ca75253..3b31d77eb1ea 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -13,6 +13,7 @@
+ #include "super.h"
+ #include "mds_client.h"
+ #include "cache.h"
++#include "crypto.h"
+ #include <linux/ceph/decode.h>
+ #include <linux/ceph/messenger.h>
  
-+# When fscrypt keys are added using the legacy mechanism (process-subscribed
-+# keyrings rather than filesystem keyrings), they are normally named
-+# "fscrypt:KEYDESC" where KEYDESC is the 16-character key descriptor hex string.
-+# However, ext4 and f2fs didn't add support for the "fscrypt" prefix until
-+# kernel v4.8 and v4.6, respectively.  Before that, they used "ext4" and "f2fs",
-+# respectively.  To allow testing ext4 and f2fs encryption on kernels older than
-+# this, we use these filesystem-specific prefixes for ext4 and f2fs.
-+_get_fs_keyprefix()
-+{
-+	case $FSTYP in
-+	ext4|f2fs)
-+		echo $FSTYP
-+		;;
-+	*)
-+		echo fscrypt
-+		;;
-+	esac
-+}
+@@ -1214,15 +1215,12 @@ struct cap_msg_args {
+ 	umode_t			mode;
+ 	bool			inline_data;
+ 	bool			wake;
++	u32			fscrypt_auth_len;
++	u32			fscrypt_file_len;
++	u8			fscrypt_auth[sizeof(struct ceph_fscrypt_auth)]; // for context
++	u8			fscrypt_file[sizeof(u64)]; // for size
+ };
+ 
+-/*
+- * cap struct size + flock buffer size + inline version + inline data size +
+- * osd_epoch_barrier + oldest_flush_tid
+- */
+-#define CAP_MSG_SIZE (sizeof(struct ceph_mds_caps) + \
+-		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4)
+-
+ /* Marshal up the cap msg to the MDS */
+ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
+ {
+@@ -1238,7 +1236,7 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
+ 	     arg->size, arg->max_size, arg->xattr_version,
+ 	     arg->xattr_buf ? (int)arg->xattr_buf->vec.iov_len : 0);
+ 
+-	msg->hdr.version = cpu_to_le16(10);
++	msg->hdr.version = cpu_to_le16(12);
+ 	msg->hdr.tid = cpu_to_le64(arg->flush_tid);
+ 
+ 	fc = msg->front.iov_base;
+@@ -1309,6 +1307,21 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
+ 
+ 	/* Advisory flags (version 10) */
+ 	ceph_encode_32(&p, arg->flags);
 +
- # Add the specified raw encryption key to the session keyring, using the
- # specified key descriptor.
- _add_session_encryption_key()
-@@ -268,18 +287,11 @@ _add_session_encryption_key()
- 	#	};
- 	#
- 	# The kernel ignores 'mode' but requires that 'size' be 64.
--	#
--	# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key
--	# descriptor hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6
--	# and later) also allow the common key prefix "fscrypt:" in addition to
--	# their filesystem-specific key prefix ("ext4:", "f2fs:").  It would be
--	# nice to use the common key prefix, but for now use the filesystem-
--	# specific prefix to make it possible to test older kernels...
--	#
- 	local mode=$(_num_to_hex 0 4)
- 	local size=$(_num_to_hex 64 4)
-+	local prefix=$(_get_fs_keyprefix)
- 	echo -n -e "${mode}${raw}${size}" |
--		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
-+		$KEYCTL_PROG padd logon $prefix:$keydesc @s >>$seqres.full
++	/* dirstats (version 11) - these are r/o on the client */
++	ceph_encode_64(&p, 0);
++	ceph_encode_64(&p, 0);
++
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++	/* fscrypt_auth and fscrypt_file (version 12) */
++	ceph_encode_32(&p, arg->fscrypt_auth_len);
++	ceph_encode_copy(&p, arg->fscrypt_auth, arg->fscrypt_auth_len);
++	ceph_encode_32(&p, arg->fscrypt_file_len);
++	ceph_encode_copy(&p, arg->fscrypt_file, arg->fscrypt_file_len);
++#else /* CONFIG_FS_ENCRYPTION */
++	ceph_encode_32(&p, 0);
++	ceph_encode_32(&p, 0);
++#endif /* CONFIG_FS_ENCRYPTION */
  }
  
- #
-@@ -302,7 +314,8 @@ _generate_session_encryption_key()
- _unlink_session_encryption_key()
- {
- 	local keydesc=$1
--	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-+	local prefix=$(_get_fs_keyprefix)
-+	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
- 	$KEYCTL_PROG unlink $keyid >>$seqres.full
+ /*
+@@ -1430,8 +1443,37 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
+ 		}
+ 	}
+ 	arg->flags = flags;
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++	if (ci->fscrypt_auth_len &&
++	    WARN_ON_ONCE(ci->fscrypt_auth_len > sizeof(struct ceph_fscrypt_auth))) {
++		/* Don't set this if it's too big */
++		arg->fscrypt_auth_len = 0;
++	} else {
++		arg->fscrypt_auth_len = ci->fscrypt_auth_len;
++		memcpy(arg->fscrypt_auth, ci->fscrypt_auth,
++			min_t(size_t, ci->fscrypt_auth_len, sizeof(arg->fscrypt_auth)));
++	}
++	/* FIXME: use this to track "real" size */
++	arg->fscrypt_file_len = 0;
++#endif /* CONFIG_FS_ENCRYPTION */
  }
  
-@@ -310,7 +323,8 @@ _unlink_session_encryption_key()
- _revoke_session_encryption_key()
- {
- 	local keydesc=$1
--	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-+	local prefix=$(_get_fs_keyprefix)
-+	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
- 	$KEYCTL_PROG revoke $keyid >>$seqres.full
- }
++#define CAP_MSG_FIXED_FIELDS (sizeof(struct ceph_mds_caps) + \
++		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4 + 8 + 8 + 4 + 4)
++
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++static inline int cap_msg_size(struct cap_msg_args *arg)
++{
++	return CAP_MSG_FIXED_FIELDS + arg->fscrypt_auth_len +
++			arg->fscrypt_file_len;
++}
++#else
++static inline int cap_msg_size(struct cap_msg_args *arg)
++{
++	return CAP_MSG_FIXED_FIELDS;
++}
++#endif /* CONFIG_FS_ENCRYPTION */
++
+ /*
+  * Send a cap msg on the given inode.
+  *
+@@ -1442,7 +1484,7 @@ static void __send_cap(struct cap_msg_args *arg, struct ceph_inode_info *ci)
+ 	struct ceph_msg *msg;
+ 	struct inode *inode = &ci->vfs_inode;
  
+-	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, CAP_MSG_SIZE, GFP_NOFS, false);
++	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, cap_msg_size(arg), GFP_NOFS, false);
+ 	if (!msg) {
+ 		pr_err("error allocating cap msg: ino (%llx.%llx) flushing %s tid %llu, requeuing cap.\n",
+ 		       ceph_vinop(inode), ceph_cap_string(arg->dirty),
+@@ -1468,10 +1510,6 @@ static inline int __send_flush_snap(struct inode *inode,
+ 	struct cap_msg_args	arg;
+ 	struct ceph_msg		*msg;
+ 
+-	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, CAP_MSG_SIZE, GFP_NOFS, false);
+-	if (!msg)
+-		return -ENOMEM;
+-
+ 	arg.session = session;
+ 	arg.ino = ceph_vino(inode).ino;
+ 	arg.cid = 0;
+@@ -1509,6 +1547,18 @@ static inline int __send_flush_snap(struct inode *inode,
+ 	arg.flags = 0;
+ 	arg.wake = false;
+ 
++	/*
++	 * No fscrypt_auth changes from a capsnap. It will need
++	 * to update fscrypt_file on size changes (TODO).
++	 */
++	arg.fscrypt_auth_len = 0;
++	arg.fscrypt_file_len = 0;
++
++	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, cap_msg_size(&arg),
++			   GFP_NOFS, false);
++	if (!msg)
++		return -ENOMEM;
++
+ 	encode_cap_msg(msg, &arg);
+ 	ceph_con_send(&arg.session->s_con, msg);
+ 	return 0;
+-- 
+2.35.1
+
