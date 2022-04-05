@@ -2,152 +2,178 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 869CBC433F5
-	for <ceph-devel@archiver.kernel.org>; Mon,  4 Apr 2022 10:25:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 224CCC433EF
+	for <ceph-devel@archiver.kernel.org>; Tue,  5 Apr 2022 02:18:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357615AbiDDK1e (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 4 Apr 2022 06:27:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57274 "EHLO
+        id S229637AbiDECUm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 4 Apr 2022 22:20:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237925AbiDDK13 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2022 06:27:29 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77C4A3C720;
-        Mon,  4 Apr 2022 03:25:33 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229628AbiDECUl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2022 22:20:41 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A904D1AC41F;
+        Mon,  4 Apr 2022 18:15:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 166B6210EF;
-        Mon,  4 Apr 2022 10:25:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1649067932; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=3LM5PNUZKHWZTEzzuZ62klwLDh0By7F8hBNvXQABbb0=;
-        b=ZFWb2ucQCnaEWxAwUAWgrZaEwGtSirbPRXJKvHn5qYcs6M4rWqt0U/kcayiSLRXSHUzUwn
-        QGCUksthtp5S6MUt1DxHFwgvuj8xvDsEOco34XvcdJKlnSVbnZchDJxOPwvhg/AWKb1evm
-        bfsrdjKtbcot5JxKZop2Eaa0tPHh9Cg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1649067932;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=3LM5PNUZKHWZTEzzuZ62klwLDh0By7F8hBNvXQABbb0=;
-        b=HQH4OpeVUyZaLa6/nILa4jmQpx37y1lHvISMTdRUGg7prJfqdAgCOc5hkeKE7owGF532Ph
-        lc6OxU0hvgmcxgCw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id A12C712FC5;
-        Mon,  4 Apr 2022 10:25:31 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id wxkUJJvHSmIjQgAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Mon, 04 Apr 2022 10:25:31 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 433e0e59;
-        Mon, 4 Apr 2022 10:25:55 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Eric Biggers <ebiggers@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v2] common/encrypt: allow the use of 'fscrypt:' as key prefix
-Date:   Mon,  4 Apr 2022 11:25:54 +0100
-Message-Id: <20220404102554.6616-1-lhenriques@suse.de>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7C05D61794;
+        Tue,  5 Apr 2022 01:10:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5985C2BBE4;
+        Tue,  5 Apr 2022 01:10:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649121043;
+        bh=/wQGv+a5YNqAzNePjyG4n29JhJYDL+Zyw5nRut7cPrc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=q8VfEa/oASHdKAkWs2vcgyr8IFyfZpgeO+2YxRec8fu1S5I/16C+2g1X8fOEDJ/dB
+         64eOp+fLrNCiX4pmDDz89Fvaz28wO5peHW1tvH8Q+ANFh8+b3JSAnWgTGSQNUnuMfY
+         GvDS3RbRdDy3f0v35lJ6CsuXQxnlXMq+uHCcECfkLY8apdfr3xbR7Nrm4TC6erTq1u
+         x8aKSIeDPdXmMZqU0KAZEKjtNJN/2enPWNfDMlHiU3yzn+DlIZORiMljEtv48rXNZN
+         +xS+ZQcGnl+E3Z37rSp9+BvQxGB7G7gIziWS54dIpEFGfYRYNpyU3TlXt9kBNrnKtT
+         rjU1AZVFsuHyQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-fscrypt@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        linux-mtd@lists.infradead.org, ceph-devel@vger.kernel.org
+Subject: [PATCH] fscrypt: split up FS_CRYPTO_BLOCK_SIZE
+Date:   Mon,  4 Apr 2022 18:09:14 -0700
+Message-Id: <20220405010914.18519-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-fscrypt keys have used the $FSTYP as prefix.  However this format is being
-deprecated -- newer kernels already allow the usage of the generic
-'fscrypt:' prefix for ext4 and f2fs.  This patch allows the usage of this
-new prefix for testing filesystems that have never supported the old
-format, but keeping the $FSTYP prefix for filesystems that support it, so
-that old kernels can be tested.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+FS_CRYPTO_BLOCK_SIZE is neither the filesystem block size nor the
+granularity of encryption.  Rather, it defines two logically separate
+constraints that both arise from the block size of the AES cipher:
+
+- The alignment required for the lengths of file contents blocks
+- The minimum input/output length for the filenames encryption modes
+
+Since there are way too many things called the "block size", and the
+connection with the AES block size is not easily understood, split
+FS_CRYPTO_BLOCK_SIZE into two constants FSCRYPT_CONTENTS_ALIGNMENT and
+FSCRYPT_FNAME_MIN_MSG_LEN that more clearly describe what they are.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- common/encrypt | 35 ++++++++++++++++++++++++-----------
- 1 file changed, 24 insertions(+), 11 deletions(-)
+ fs/crypto/crypto.c      | 10 +++++-----
+ fs/crypto/fname.c       | 11 +++++++++--
+ fs/ubifs/ubifs.h        |  2 +-
+ include/linux/fscrypt.h | 12 +++++++++++-
+ 4 files changed, 26 insertions(+), 9 deletions(-)
 
-Changes since v1:
-- ubifs now follows into the default case (i.e. to use the 'fscrypt' key
-  prefix)
-- dropped local variable from _get_fs_keyprefix()
-
-diff --git a/common/encrypt b/common/encrypt
-index f90c4ef05a3f..6dae7708d52b 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -250,6 +250,24 @@ _num_to_hex()
- 	fi
- }
+diff --git a/fs/crypto/crypto.c b/fs/crypto/crypto.c
+index 526a4c1bed994..e78be66bbf015 100644
+--- a/fs/crypto/crypto.c
++++ b/fs/crypto/crypto.c
+@@ -113,7 +113,7 @@ int fscrypt_crypt_block(const struct inode *inode, fscrypt_direction_t rw,
  
-+# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key descriptor
-+# hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6 and later) also allow
-+# the common key prefix "fscrypt:" in addition to their filesystem-specific key
-+# prefix ("ext4:", "f2fs:").  It would be nice to use the common key prefix, but
-+# for now use the filesystem- specific prefix for these 2 filesystems to make it
-+# possible to test older kernels, and the "fscrypt" prefix for anything else.
-+_get_fs_keyprefix()
-+{
-+	case $FSTYP in
-+	ext4|f2fs)
-+		echo $FSTYP
-+		;;
-+	*)
-+		echo fscrypt
-+		;;
-+	esac
-+}
+ 	if (WARN_ON_ONCE(len <= 0))
+ 		return -EINVAL;
+-	if (WARN_ON_ONCE(len % FS_CRYPTO_BLOCK_SIZE != 0))
++	if (WARN_ON_ONCE(len % FSCRYPT_CONTENTS_ALIGNMENT != 0))
+ 		return -EINVAL;
+ 
+ 	fscrypt_generate_iv(&iv, lblk_num, ci);
+@@ -213,8 +213,8 @@ EXPORT_SYMBOL(fscrypt_encrypt_pagecache_blocks);
+  * fscrypt_encrypt_block_inplace() - Encrypt a filesystem block in-place
+  * @inode:     The inode to which this block belongs
+  * @page:      The page containing the block to encrypt
+- * @len:       Size of block to encrypt.  Doesn't need to be a multiple of the
+- *		fs block size, but must be a multiple of FS_CRYPTO_BLOCK_SIZE.
++ * @len:       Size of block to encrypt.  This must be a multiple of
++ *		FSCRYPT_CONTENTS_ALIGNMENT.
+  * @offs:      Byte offset within @page at which the block to encrypt begins
+  * @lblk_num:  Filesystem logical block number of the block, i.e. the 0-based
+  *		number of the block within the file
+@@ -283,8 +283,8 @@ EXPORT_SYMBOL(fscrypt_decrypt_pagecache_blocks);
+  * fscrypt_decrypt_block_inplace() - Decrypt a filesystem block in-place
+  * @inode:     The inode to which this block belongs
+  * @page:      The page containing the block to decrypt
+- * @len:       Size of block to decrypt.  Doesn't need to be a multiple of the
+- *		fs block size, but must be a multiple of FS_CRYPTO_BLOCK_SIZE.
++ * @len:       Size of block to decrypt.  This must be a multiple of
++ *		FSCRYPT_CONTENTS_ALIGNMENT.
+  * @offs:      Byte offset within @page at which the block to decrypt begins
+  * @lblk_num:  Filesystem logical block number of the block, i.e. the 0-based
+  *		number of the block within the file
+diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
+index a9be4bc74a94a..14e0ef5e9a20a 100644
+--- a/fs/crypto/fname.c
++++ b/fs/crypto/fname.c
+@@ -18,6 +18,13 @@
+ #include <crypto/skcipher.h>
+ #include "fscrypt_private.h"
+ 
++/*
++ * The minimum message length (input and output length), in bytes, for all
++ * filenames encryption modes.  Filenames shorter than this will be zero-padded
++ * before being encrypted.
++ */
++#define FSCRYPT_FNAME_MIN_MSG_LEN 16
 +
- # Add the specified raw encryption key to the session keyring, using the
- # specified key descriptor.
- _add_session_encryption_key()
-@@ -268,18 +286,11 @@ _add_session_encryption_key()
- 	#	};
- 	#
- 	# The kernel ignores 'mode' but requires that 'size' be 64.
--	#
--	# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key
--	# descriptor hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6
--	# and later) also allow the common key prefix "fscrypt:" in addition to
--	# their filesystem-specific key prefix ("ext4:", "f2fs:").  It would be
--	# nice to use the common key prefix, but for now use the filesystem-
--	# specific prefix to make it possible to test older kernels...
--	#
- 	local mode=$(_num_to_hex 0 4)
- 	local size=$(_num_to_hex 64 4)
-+	local prefix=$(_get_fs_keyprefix)
- 	echo -n -e "${mode}${raw}${size}" |
--		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
-+		$KEYCTL_PROG padd logon $prefix:$keydesc @s >>$seqres.full
- }
+ /*
+  * struct fscrypt_nokey_name - identifier for directory entry when key is absent
+  *
+@@ -267,7 +274,7 @@ bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
  
- #
-@@ -302,7 +313,8 @@ _generate_session_encryption_key()
- _unlink_session_encryption_key()
- {
- 	local keydesc=$1
--	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-+	local prefix=$(_get_fs_keyprefix)
-+	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
- 	$KEYCTL_PROG unlink $keyid >>$seqres.full
- }
+ 	if (orig_len > max_len)
+ 		return false;
+-	encrypted_len = max(orig_len, (u32)FS_CRYPTO_BLOCK_SIZE);
++	encrypted_len = max_t(u32, orig_len, FSCRYPT_FNAME_MIN_MSG_LEN);
+ 	encrypted_len = round_up(encrypted_len, padding);
+ 	*encrypted_len_ret = min(encrypted_len, max_len);
+ 	return true;
+@@ -350,7 +357,7 @@ int fscrypt_fname_disk_to_usr(const struct inode *inode,
+ 		return 0;
+ 	}
  
-@@ -310,7 +322,8 @@ _unlink_session_encryption_key()
- _revoke_session_encryption_key()
- {
- 	local keydesc=$1
--	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-+	local prefix=$(_get_fs_keyprefix)
-+	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
- 	$KEYCTL_PROG revoke $keyid >>$seqres.full
- }
+-	if (iname->len < FS_CRYPTO_BLOCK_SIZE)
++	if (iname->len < FSCRYPT_FNAME_MIN_MSG_LEN)
+ 		return -EUCLEAN;
  
+ 	if (fscrypt_has_encryption_key(inode))
+diff --git a/fs/ubifs/ubifs.h b/fs/ubifs/ubifs.h
+index 008fa46ef61e7..7d6d2f152e039 100644
+--- a/fs/ubifs/ubifs.h
++++ b/fs/ubifs/ubifs.h
+@@ -132,7 +132,7 @@
+ #define WORST_COMPR_FACTOR 2
+ 
+ #ifdef CONFIG_FS_ENCRYPTION
+-#define UBIFS_CIPHER_BLOCK_SIZE FS_CRYPTO_BLOCK_SIZE
++#define UBIFS_CIPHER_BLOCK_SIZE FSCRYPT_CONTENTS_ALIGNMENT
+ #else
+ #define UBIFS_CIPHER_BLOCK_SIZE 0
+ #endif
+diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
+index 50d92d805bd8c..efc7f96e5e26b 100644
+--- a/include/linux/fscrypt.h
++++ b/include/linux/fscrypt.h
+@@ -18,7 +18,17 @@
+ #include <linux/slab.h>
+ #include <uapi/linux/fscrypt.h>
+ 
+-#define FS_CRYPTO_BLOCK_SIZE		16
++/*
++ * The lengths of all file contents blocks must be divisible by this value.
++ * This is needed to ensure that all contents encryption modes will work, as
++ * some of the supported modes don't support arbitrarily byte-aligned messages.
++ *
++ * Since the needed alignment is 16 bytes, most filesystems will meet this
++ * requirement naturally, as typical block sizes are powers of 2.  However, if a
++ * filesystem can generate arbitrarily byte-aligned block lengths (e.g., via
++ * compression), then it will need to pad to this alignment before encryption.
++ */
++#define FSCRYPT_CONTENTS_ALIGNMENT 16
+ 
+ union fscrypt_policy;
+ struct fscrypt_info;
+-- 
+2.35.1
+
