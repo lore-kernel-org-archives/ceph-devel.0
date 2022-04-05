@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 242D4C433F5
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:18:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42744C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:18:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1580154AbiDFEQh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:16:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37942 "EHLO
+        id S1836138AbiDFEQr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:16:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36574 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573594AbiDETXO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:14 -0400
+        with ESMTP id S1573572AbiDETWx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:53 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4CB3B4C788;
-        Tue,  5 Apr 2022 12:21:15 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BE7847551;
+        Tue,  5 Apr 2022 12:20:55 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id DE896618CD;
-        Tue,  5 Apr 2022 19:21:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A36F0C385A5;
-        Tue,  5 Apr 2022 19:21:13 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id F09E260A5F;
+        Tue,  5 Apr 2022 19:20:54 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B1686C385A1;
+        Tue,  5 Apr 2022 19:20:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186474;
-        bh=X1L6/wSKaDTpim1XpoJnpAgGMETaa+8EmWzAIXZ00gU=;
+        s=k20201202; t=1649186454;
+        bh=40bz7fgcSkfmSJmWJDKxd9JZxineBbUvX30XOIb7qbk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=WAbgfrhtoy5Sg+CRvEU3jPw5dlTccrhLVEjqBezzHxrwoRfdA4Sugg7I5/we2/5qh
-         VjYiVx+SkN6deDnpy0CG/hTJ1D+OKnWhYD4PZ8/UjNQ66ynQ+QgAuKhx3sTXRBeJ/m
-         6eO+VQsKQMYYNaWLSpcocP93NoL3TE+hDJLx4uZT/NDQkLnxHCBEC+Mrw4ncARdX09
-         YYQK3BfJs0lsBHx7P/esthLyd9mG/NTAtIpGUc8c4y7jF6rT4JUpFWvO2CMiqg8iPR
-         nAvtMobnrz25BZm33+RP4eG7bwJr3SQ2w0nGpqPAnQ/dmiS5kcj2Ma4UDtX7CdIZtH
-         UrOzn7R1rr4Jg==
+        b=ScUndJsO1iIF8TZnZGyatLX8D1Sre9qw03pcugwOP94pa2shH71KCYubeRtwLcte8
+         q9RYFCVt+6ZMZu+QFNAqmtzeaZqPzTNzF+0MMe1HSjLzlKAUfQJOCwSn5IPQyvFZwA
+         Vih4e+llhlS//shafvtvaB0Z5W9Dp2d+KmN/zlOSYwX9QOC2RhLZzyzN8RTJeMrYOv
+         hpyzzA2FW6n9d9mp4bD/8vGRDgPflyQ83mZ5r+BySLJASgExrd54G46yrVdy9Ui5KN
+         DXSaIWV0SsLsQ8K4bfs044u75kf+1m/5jdjNBj+fbaDli3Pysk4GHIOYY/Jhud32+3
+         2fSg1Jk/m2S2Q==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 46/59] ceph: add object version support for sync read
-Date:   Tue,  5 Apr 2022 15:20:17 -0400
-Message-Id: <20220405192030.178326-47-jlayton@kernel.org>
+Subject: [PATCH v13 24/59] ceph: properly set DCACHE_NOKEY_NAME flag in lookup
+Date:   Tue,  5 Apr 2022 15:19:55 -0400
+Message-Id: <20220405192030.178326-25-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,82 +48,36 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+This is required so that we know to invalidate these dentries when the
+directory is unlocked.
 
-Always return the last object's version.
-
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c  | 12 ++++++++++--
- fs/ceph/super.h |  3 ++-
- 2 files changed, 12 insertions(+), 3 deletions(-)
+ fs/ceph/dir.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index c4300381851e..175a59277726 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -928,7 +928,8 @@ enum {
-  * only return a short read to the caller if we hit EOF.
-  */
- ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
--			 struct iov_iter *to, int *retry_op)
-+			 struct iov_iter *to, int *retry_op,
-+			 u64 *last_objver)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
-@@ -938,6 +939,7 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
- 	u64 len = iov_iter_count(to);
- 	u64 i_size = i_size_read(inode);
- 	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
-+	u64 objver = 0;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 8cc7a49ee508..897f8618151b 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -760,6 +760,17 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 	if (dentry->d_name.len > NAME_MAX)
+ 		return ERR_PTR(-ENAMETOOLONG);
  
- 	dout("sync_read on inode %p %llx~%llx\n", inode, *ki_pos, len);
- 
-@@ -1008,6 +1010,9 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
- 					 req->r_end_latency,
- 					 len, ret);
- 
-+		if (ret > 0)
-+			objver = req->r_version;
++	if (IS_ENCRYPTED(dir)) {
++		err = __fscrypt_prepare_readdir(dir);
++		if (err)
++			return ERR_PTR(err);
++		if (!fscrypt_has_encryption_key(dir)) {
++			spin_lock(&dentry->d_lock);
++			dentry->d_flags |= DCACHE_NOKEY_NAME;
++			spin_unlock(&dentry->d_lock);
++		}
++	}
 +
- 		i_size = i_size_read(inode);
- 		dout("sync_read %llu~%llu got %zd i_size %llu%s\n",
- 		     off, len, ret, i_size, (more ? " MORE" : ""));
-@@ -1069,6 +1074,9 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
- 		}
- 	}
- 
-+	if (last_objver && ret > 0)
-+		*last_objver = objver;
-+
- 	dout("sync_read result %zd retry_op %d\n", ret, *retry_op);
- 	return ret;
- }
-@@ -1082,7 +1090,7 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
- 	dout("sync_read on file %p %llx~%zx %s\n", file, iocb->ki_pos,
- 	     iov_iter_count(to), (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
- 
--	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op);
-+	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op, NULL);
- }
- 
- struct ceph_aio_request {
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index d7ab820aed34..9809bc97b89e 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1259,7 +1259,8 @@ extern int ceph_open(struct inode *inode, struct file *file);
- extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 			    struct file *file, unsigned flags, umode_t mode);
- extern ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
--				struct iov_iter *to, int *retry_op);
-+				struct iov_iter *to, int *retry_op,
-+				u64 *last_objver);
- extern int ceph_release(struct inode *inode, struct file *filp);
- extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
- 				  char *data, size_t len);
+ 	/* can we conclude ENOENT locally? */
+ 	if (d_really_is_negative(dentry)) {
+ 		struct ceph_inode_info *ci = ceph_inode(dir);
 -- 
 2.35.1
 
