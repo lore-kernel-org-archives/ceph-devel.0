@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4255AC433F5
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:01:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FF4CC433FE
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:02:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245197AbiDFEDu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:03:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36512 "EHLO
+        id S230188AbiDFED4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:03:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573570AbiDETWw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:52 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D4AA47050;
-        Tue,  5 Apr 2022 12:20:54 -0700 (PDT)
+        with ESMTP id S1573551AbiDETWf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:35 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C65443B2B0;
+        Tue,  5 Apr 2022 12:20:36 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 4AA77CE1FB6;
-        Tue,  5 Apr 2022 19:20:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 18778C385A1;
-        Tue,  5 Apr 2022 19:20:50 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 59D9EB81F6B;
+        Tue,  5 Apr 2022 19:20:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 611E1C385A0;
+        Tue,  5 Apr 2022 19:20:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186450;
-        bh=4gK8ZAn+TacGcAjwCDK5lhYYnjJ7LL+dT0yZHFaadd0=;
+        s=k20201202; t=1649186434;
+        bh=WUMUKws9bRjZTrkHwsGynA7tUQA6j+UO+nipvx8/Pxc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=h3vPiIxfkK6OiYb/165G98js1mP4pade1hlyPqwCLOvWG47or0gv3JuZz2PzrhdeW
-         LEGz361/FC7O/xfSPkIV/SJG0WEwEk98VAFZ3Tvk2MFbkwJsljtP1Tueh4ji9g/UpZ
-         WfOKEqy9nSA4+mDWZl+mGCxzFyeYrQSYLvFbhEtBnk2ctUsiJsC+N63QUwbmi9YTdr
-         C7kv5ohRf44g1IoriEV3OgQVzt7/5bWnQ2RpSESLGg1L9erv90p18H0cJ33Sm+/FyI
-         LuATH4VtQJt47boufQaIYAOWq3jdd/BnQHnHQdHz8hD3byTOgfG5bC61qqfGM+MnQ3
-         aaDVyC2xxMFgw==
+        b=ViqzZ1njQjHURsQFB+bQws/EXFJXBVZ0713Vy6dx/7ZW2JLu/xJiUvM59gv19WtuH
+         jfUpil6gly2i2pNknMzzqQLgdSP/9zSp1jWAsMzq31/yBk1ZmtSHwQo8W93YF+gpoH
+         q6gA5ImURC+5w6E7ZP7KxFXbq5yPmvGsDpR55YX9rpAnUorWYz8YyWWxca89/CYEGb
+         dCmAQsLRhI+xEKB9lYpcxr7hUR7Dp1hQy01Plzo+DQB9eu66rhzwF1tqLuh0RVcn/E
+         8dUtp6FjBKqDcfNtEjqOTl56bgrKgfjt0ySudygn2hIFJ1pt3dBuGefss3n3vS2CxR
+         5uhc00PJzXdlQ==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 20/59] ceph: make ceph_msdc_build_path use ref-walk
-Date:   Tue,  5 Apr 2022 15:19:51 -0400
-Message-Id: <20220405192030.178326-21-jlayton@kernel.org>
+Subject: [PATCH v13 02/59] libceph: define struct ceph_sparse_extent and add some helpers
+Date:   Tue,  5 Apr 2022 15:19:33 -0400
+Message-Id: <20220405192030.178326-3-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,94 +48,124 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Encryption potentially requires allocation, at which point we'll need to
-be in a non-atomic context. Convert ceph_msdc_build_path to take dentry
-spinlocks and references instead of using rcu_read_lock to walk the
-path.
+When the OSD sends back a sparse read reply, it contains an array of
+these structures. Define the structure and add a couple of helpers for
+dealing with them.
 
-This is slightly less efficient, and we may want to eventually allow
-using RCU when the leaf dentry isn't encrypted.
+Also add a place in struct ceph_osd_req_op to store the extent buffer,
+and code to free it if it's populated when the req is torn down.
 
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/mds_client.c | 35 +++++++++++++++++++----------------
- 1 file changed, 19 insertions(+), 16 deletions(-)
+ include/linux/ceph/osd_client.h | 43 ++++++++++++++++++++++++++++++++-
+ net/ceph/osd_client.c           | 13 ++++++++++
+ 2 files changed, 55 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 2f2f8221eb25..28315053e116 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2398,7 +2398,8 @@ static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
- char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 			   int stop_on_nosnap)
- {
--	struct dentry *temp;
-+	struct dentry *cur;
-+	struct inode *inode;
- 	char *path;
- 	int pos;
- 	unsigned seq;
-@@ -2415,34 +2416,35 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
- 	path[pos] = '\0';
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 3122c1a3205f..1dd02240d00d 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -29,6 +29,17 @@ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
  
- 	seq = read_seqbegin(&rename_lock);
--	rcu_read_lock();
--	temp = dentry;
-+	cur = dget(dentry);
- 	for (;;) {
--		struct inode *inode;
-+		struct dentry *temp;
+ #define CEPH_HOMELESS_OSD	-1
  
--		spin_lock(&temp->d_lock);
--		inode = d_inode(temp);
-+		spin_lock(&cur->d_lock);
-+		inode = d_inode(cur);
- 		if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
- 			dout("build_path path+%d: %p SNAPDIR\n",
--			     pos, temp);
--		} else if (stop_on_nosnap && inode && dentry != temp &&
-+			     pos, cur);
-+		} else if (stop_on_nosnap && inode && dentry != cur &&
- 			   ceph_snap(inode) == CEPH_NOSNAP) {
--			spin_unlock(&temp->d_lock);
-+			spin_unlock(&cur->d_lock);
- 			pos++; /* get rid of any prepended '/' */
- 			break;
- 		} else {
--			pos -= temp->d_name.len;
-+			pos -= cur->d_name.len;
- 			if (pos < 0) {
--				spin_unlock(&temp->d_lock);
-+				spin_unlock(&cur->d_lock);
- 				break;
- 			}
--			memcpy(path + pos, temp->d_name.name, temp->d_name.len);
-+			memcpy(path + pos, cur->d_name.name, cur->d_name.len);
- 		}
-+		temp = cur;
- 		spin_unlock(&temp->d_lock);
--		temp = READ_ONCE(temp->d_parent);
-+		cur = dget_parent(temp);
-+		dput(temp);
++/*
++ * A single extent in a SPARSE_READ reply.
++ *
++ * Note that these come from the OSD as little-endian values. On BE arches,
++ * we convert them in-place after receipt.
++ */
++struct ceph_sparse_extent {
++	u64	off;
++	u64	len;
++} __packed;
++
+ /*
+  * A given osd we're communicating with.
+  *
+@@ -104,6 +115,8 @@ struct ceph_osd_req_op {
+ 			u64 offset, length;
+ 			u64 truncate_size;
+ 			u32 truncate_seq;
++			int sparse_ext_cnt;
++			struct ceph_sparse_extent *sparse_ext;
+ 			struct ceph_osd_data osd_data;
+ 		} extent;
+ 		struct {
+@@ -507,6 +520,20 @@ extern struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *,
+ 				      u32 truncate_seq, u64 truncate_size,
+ 				      bool use_mempool);
  
- 		/* Are we at the root? */
--		if (IS_ROOT(temp))
-+		if (IS_ROOT(cur))
- 			break;
++int __ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op, int cnt);
++
++/*
++ * How big an extent array should we preallocate for a sparse read? This is
++ * just a starting value.  If we get more than this back from the OSD, the
++ * receiver will reallocate.
++ */
++#define CEPH_SPARSE_EXT_ARRAY_INITIAL  16
++
++static inline int ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op)
++{
++	return __ceph_alloc_sparse_ext_map(op, CEPH_SPARSE_EXT_ARRAY_INITIAL);
++}
++
+ extern void ceph_osdc_get_request(struct ceph_osd_request *req);
+ extern void ceph_osdc_put_request(struct ceph_osd_request *req);
  
- 		/* Are we out of buffer? */
-@@ -2451,8 +2453,9 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
+@@ -562,5 +589,19 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 			    struct ceph_object_locator *oloc,
+ 			    struct ceph_watch_item **watchers,
+ 			    u32 *num_watchers);
+-#endif
  
- 		path[pos] = '/';
- 	}
--	base = ceph_ino(d_inode(temp));
--	rcu_read_unlock();
-+	inode = d_inode(cur);
-+	base = inode ? ceph_ino(inode) : 0;
-+	dput(cur);
++/* Find offset into the buffer of the end of the extent map */
++static inline u64 ceph_sparse_ext_map_end(struct ceph_osd_req_op *op)
++{
++	struct ceph_sparse_extent *ext;
++
++	/* No extents? No data */
++	if (op->extent.sparse_ext_cnt == 0)
++		return 0;
++
++	ext = &op->extent.sparse_ext[op->extent.sparse_ext_cnt - 1];
++
++	return ext->off + ext->len - op->extent.offset;
++}
++
++#endif
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 17c792b32343..c150683f2a2f 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -378,6 +378,7 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
+ 	case CEPH_OSD_OP_READ:
+ 	case CEPH_OSD_OP_WRITE:
+ 	case CEPH_OSD_OP_WRITEFULL:
++		kfree(op->extent.sparse_ext);
+ 		ceph_osd_data_release(&op->extent.osd_data);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+@@ -1141,6 +1142,18 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ }
+ EXPORT_SYMBOL(ceph_osdc_new_request);
  
- 	if (read_seqretry(&rename_lock, seq))
- 		goto retry;
++int __ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op, int cnt)
++{
++	op->extent.sparse_ext_cnt = cnt;
++	op->extent.sparse_ext = kmalloc_array(cnt,
++					      sizeof(*op->extent.sparse_ext),
++					      GFP_NOFS);
++	if (!op->extent.sparse_ext)
++		return -ENOMEM;
++	return 0;
++}
++EXPORT_SYMBOL(__ceph_alloc_sparse_ext_map);
++
+ /*
+  * We keep osd requests in an rbtree, sorted by ->r_tid.
+  */
 -- 
 2.35.1
 
