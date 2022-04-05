@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35211C4332F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 242D4C433F5
 	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:18:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1584743AbiDFEQk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:16:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37710 "EHLO
+        id S1580154AbiDFEQh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:16:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573591AbiDETXL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D7E64BB9E;
-        Tue,  5 Apr 2022 12:21:12 -0700 (PDT)
+        with ESMTP id S1573594AbiDETXO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:14 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4CB3B4C788;
+        Tue,  5 Apr 2022 12:21:15 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2A8C9618CD;
-        Tue,  5 Apr 2022 19:21:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6F01C385A3;
-        Tue,  5 Apr 2022 19:21:10 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DE896618CD;
+        Tue,  5 Apr 2022 19:21:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A36F0C385A5;
+        Tue,  5 Apr 2022 19:21:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186471;
-        bh=jKwrnkur/UZMWNKLAXoBHYovRwFcYZx33jY+OjyVk3E=;
+        s=k20201202; t=1649186474;
+        bh=X1L6/wSKaDTpim1XpoJnpAgGMETaa+8EmWzAIXZ00gU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=RPdd6h+UwAmG5ptt3N35Odgi0Sooj/kK0G16AHRqHv8TZlXi147IQ4ahU1akYUygP
-         Vqr5OVJt0PsE/dtEc68wxF6mXwNpdMLn7vKQImajKbCCdNw3gtsyoDWVOXzKU10OnM
-         IMXtG1oQ1+LpDIs4zFpHdt1IqTgJ8ullm1HdOE0GlHqN1ISu6dwNvbe+d2u9A99uPx
-         XHSRP8R4wTkdJ6nb4xVoAXfZBRMXmk9kYEhdiCf60k4jbr9CNPH3iddgP22SjkQ8XE
-         lVS96ElhxKCb6rfdRV/2wiT/Tcy7JjNfVPkAOPaBhLyo/exVWmrPwwQRxRDkcCTlOx
-         zbho0Ojtgx3Xw==
+        b=WAbgfrhtoy5Sg+CRvEU3jPw5dlTccrhLVEjqBezzHxrwoRfdA4Sugg7I5/we2/5qh
+         VjYiVx+SkN6deDnpy0CG/hTJ1D+OKnWhYD4PZ8/UjNQ66ynQ+QgAuKhx3sTXRBeJ/m
+         6eO+VQsKQMYYNaWLSpcocP93NoL3TE+hDJLx4uZT/NDQkLnxHCBEC+Mrw4ncARdX09
+         YYQK3BfJs0lsBHx7P/esthLyd9mG/NTAtIpGUc8c4y7jF6rT4JUpFWvO2CMiqg8iPR
+         nAvtMobnrz25BZm33+RP4eG7bwJr3SQ2w0nGpqPAnQ/dmiS5kcj2Ma4UDtX7CdIZtH
+         UrOzn7R1rr4Jg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 43/59] ceph: update WARN_ON message to pr_warn
-Date:   Tue,  5 Apr 2022 15:20:14 -0400
-Message-Id: <20220405192030.178326-44-jlayton@kernel.org>
+Subject: [PATCH v13 46/59] ceph: add object version support for sync read
+Date:   Tue,  5 Apr 2022 15:20:17 -0400
+Message-Id: <20220405192030.178326-47-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,35 +48,82 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Give some more helpful info
+From: Xiubo Li <xiubli@redhat.com>
 
+Always return the last object's version.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+ fs/ceph/file.c  | 12 ++++++++++--
+ fs/ceph/super.h |  3 ++-
+ 2 files changed, 12 insertions(+), 3 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 1f3a2135214c..cb2c18d43946 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3473,10 +3473,13 @@ static void handle_cap_grant(struct inode *inode,
- 		dout("%p mode 0%o uid.gid %d.%d\n", inode, inode->i_mode,
- 		     from_kuid(&init_user_ns, inode->i_uid),
- 		     from_kgid(&init_user_ns, inode->i_gid));
--
--		WARN_ON_ONCE(ci->fscrypt_auth_len != extra_info->fscrypt_auth_len ||
--			     memcmp(ci->fscrypt_auth, extra_info->fscrypt_auth,
--				     ci->fscrypt_auth_len));
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+		if (ci->fscrypt_auth_len != extra_info->fscrypt_auth_len ||
-+		    memcmp(ci->fscrypt_auth, extra_info->fscrypt_auth,
-+			   ci->fscrypt_auth_len))
-+			pr_warn_ratelimited("%s: cap grant attempt to change fscrypt_auth on non-I_NEW inode (old len %d new len %d)\n",
-+				__func__, ci->fscrypt_auth_len, extra_info->fscrypt_auth_len);
-+#endif
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index c4300381851e..175a59277726 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -928,7 +928,8 @@ enum {
+  * only return a short read to the caller if we hit EOF.
+  */
+ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+-			 struct iov_iter *to, int *retry_op)
++			 struct iov_iter *to, int *retry_op,
++			 u64 *last_objver)
+ {
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+@@ -938,6 +939,7 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+ 	u64 len = iov_iter_count(to);
+ 	u64 i_size = i_size_read(inode);
+ 	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
++	u64 objver = 0;
+ 
+ 	dout("sync_read on inode %p %llx~%llx\n", inode, *ki_pos, len);
+ 
+@@ -1008,6 +1010,9 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+ 					 req->r_end_latency,
+ 					 len, ret);
+ 
++		if (ret > 0)
++			objver = req->r_version;
++
+ 		i_size = i_size_read(inode);
+ 		dout("sync_read %llu~%llu got %zd i_size %llu%s\n",
+ 		     off, len, ret, i_size, (more ? " MORE" : ""));
+@@ -1069,6 +1074,9 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+ 		}
  	}
  
- 	if ((newcaps & CEPH_CAP_LINK_SHARED) &&
++	if (last_objver && ret > 0)
++		*last_objver = objver;
++
+ 	dout("sync_read result %zd retry_op %d\n", ret, *retry_op);
+ 	return ret;
+ }
+@@ -1082,7 +1090,7 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 	dout("sync_read on file %p %llx~%zx %s\n", file, iocb->ki_pos,
+ 	     iov_iter_count(to), (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+ 
+-	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op);
++	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op, NULL);
+ }
+ 
+ struct ceph_aio_request {
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index d7ab820aed34..9809bc97b89e 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1259,7 +1259,8 @@ extern int ceph_open(struct inode *inode, struct file *file);
+ extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 			    struct file *file, unsigned flags, umode_t mode);
+ extern ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
+-				struct iov_iter *to, int *retry_op);
++				struct iov_iter *to, int *retry_op,
++				u64 *last_objver);
+ extern int ceph_release(struct inode *inode, struct file *filp);
+ extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+ 				  char *data, size_t len);
 -- 
 2.35.1
 
