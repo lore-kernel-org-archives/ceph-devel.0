@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B216C35280
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B94BC4167D
 	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1454048AbiDFEQF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:16:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36096 "EHLO
+        id S1452848AbiDFEQD (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:16:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573564AbiDETWr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:47 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FFC54348E;
-        Tue,  5 Apr 2022 12:20:48 -0700 (PDT)
+        with ESMTP id S1573581AbiDETXD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:03 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65A4549F92;
+        Tue,  5 Apr 2022 12:21:04 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id E0B2ECE1FB7;
-        Tue,  5 Apr 2022 19:20:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1BD2C385A3;
-        Tue,  5 Apr 2022 19:20:44 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 03FDF618A0;
+        Tue,  5 Apr 2022 19:21:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C13BEC385A1;
+        Tue,  5 Apr 2022 19:21:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186445;
-        bh=nvrYBFsMkCxOJYreXafVsZm50vgOwttkKvH8dbufqbg=;
+        s=k20201202; t=1649186463;
+        bh=cDPy0xI578WfkDIktMt8wJvIbPGQCoBzzMq2Fpkpaf4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=h78EXZniuHV8uJZW+m9ZcNnHcwLs/seGKD6Sf0UDtGyfbwa9teJx1xJXdl65OZdoF
-         yGRlvEXx2WfdB7h+bkZKEntAFnDZmrCbDJXzZvVFX47OuX5tZO6mem+V4q3kNtYpQI
-         i4C0WdUm9ekJrnFHMJPTm5isdsKT+Jy4L5YpbRRlWAuAdom4i0sIuYiydKEj+B10VO
-         31N35FUe/NEdoJksaliieTdPOOd6DP46wuCJ9we0kEA854/BqHO7oUjiweOREhMqhf
-         hU35sWpoRyLLpdfF+BDLNzQ4rAL4mPs9ZT6qnnffIaeCFem+Ql2zdmZQRA+/uubJbZ
-         0O/Nfmzsoc29w==
+        b=O58UFv1Xdgf5DMHZT5h+btU7dWQqw0aMYUPwmFYCQ177ViMlNAkPvRYNs2VrT2VMB
+         8Mljj04e8YcFXzFo2t2PaNyunOFVx/R1Wc0hPzMy86axMHWVmIlWtkEfuSwkvLL8hE
+         kwmXQgSqsd3DsSeYqz7PIf6w1aEl4K0GRzUGgEak5/5HB84YBomMs+o7D+0DoBajIv
+         N4UgUQGJUZu0oGvdp61sTfpLziUZcaLxbQ7xXa4Y8Kf9Lhm39z5TRIzEwz/9SEF2DT
+         vtblc3YJofL+1otmKbBz/whZEc2vI7ojdqvSHusBhkDPl8eCm0g0Z/nW07kURihgOm
+         UJM+I/hw93PWg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 14/59] ceph: ensure that we accept a new context from MDS for new inodes
-Date:   Tue,  5 Apr 2022 15:19:45 -0400
-Message-Id: <20220405192030.178326-15-jlayton@kernel.org>
+Subject: [PATCH v13 34/59] ceph: make ceph_get_name decrypt filenames
+Date:   Tue,  5 Apr 2022 15:20:05 -0400
+Message-Id: <20220405192030.178326-35-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,50 +48,97 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+When we do a lookupino to the MDS, we get a filename in the trace.
+ceph_get_name uses that name directly, so we must properly decrypt
+it before copying it to the name buffer.
+
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 21 +++++++++++----------
- 1 file changed, 11 insertions(+), 10 deletions(-)
+ fs/ceph/export.c | 44 ++++++++++++++++++++++++++++++++------------
+ 1 file changed, 32 insertions(+), 12 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 2d9bade892cc..9a5641b37978 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -944,6 +944,17 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index e0fa66ac8b9f..0ebf2bd93055 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -7,6 +7,7 @@
  
- 	__ceph_update_quota(ci, iinfo->max_bytes, iinfo->max_files);
+ #include "super.h"
+ #include "mds_client.h"
++#include "crypto.h"
  
-+#ifdef CONFIG_FS_ENCRYPTION
-+	if (iinfo->fscrypt_auth_len && (inode->i_state & I_NEW)) {
-+		kfree(ci->fscrypt_auth);
-+		ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
-+		ci->fscrypt_auth = iinfo->fscrypt_auth;
-+		iinfo->fscrypt_auth = NULL;
-+		iinfo->fscrypt_auth_len = 0;
-+		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
-+	}
-+#endif
-+
- 	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
- 	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
- 		inode->i_mode = mode;
-@@ -1033,16 +1044,6 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		xattr_blob = NULL;
- 	}
+ /*
+  * Basic fh
+@@ -534,7 +535,9 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ {
+ 	struct ceph_mds_client *mdsc;
+ 	struct ceph_mds_request *req;
++	struct inode *dir = d_inode(parent);
+ 	struct inode *inode = d_inode(child);
++	struct ceph_mds_reply_info_parsed *rinfo;
+ 	int err;
  
--#ifdef CONFIG_FS_ENCRYPTION
--	if (iinfo->fscrypt_auth_len && !ci->fscrypt_auth) {
--		ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
--		ci->fscrypt_auth = iinfo->fscrypt_auth;
--		iinfo->fscrypt_auth = NULL;
--		iinfo->fscrypt_auth_len = 0;
--		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
--	}
--#endif
+ 	if (ceph_snap(inode) != CEPH_NOSNAP)
+@@ -546,30 +549,47 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ 	if (IS_ERR(req))
+ 		return PTR_ERR(req);
+ 
+-	inode_lock(d_inode(parent));
 -
- 	/* finally update i_version */
- 	if (le64_to_cpu(info->version) > ci->i_version)
- 		ci->i_version = le64_to_cpu(info->version);
++	inode_lock(dir);
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 	req->r_ino2 = ceph_vino(d_inode(parent));
+-	req->r_parent = d_inode(parent);
+-	ihold(req->r_parent);
++	req->r_parent = dir;
++	ihold(dir);
+ 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_num_caps = 2;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
++	inode_unlock(dir);
+ 
+-	inode_unlock(d_inode(parent));
++	if (err)
++		goto out;
+ 
+-	if (!err) {
+-		struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
++	rinfo = &req->r_reply_info;
++	if (!IS_ENCRYPTED(dir)) {
+ 		memcpy(name, rinfo->dname, rinfo->dname_len);
+ 		name[rinfo->dname_len] = 0;
+-		dout("get_name %p ino %llx.%llx name %s\n",
+-		     child, ceph_vinop(inode), name);
+ 	} else {
+-		dout("get_name %p ino %llx.%llx err %d\n",
+-		     child, ceph_vinop(inode), err);
+-	}
++		struct fscrypt_str oname = FSTR_INIT(NULL, 0);
++		struct ceph_fname fname = { .dir	= dir,
++					    .name	= rinfo->dname,
++					    .ctext	= rinfo->altname,
++					    .name_len	= rinfo->dname_len,
++					    .ctext_len	= rinfo->altname_len };
++
++		err = ceph_fname_alloc_buffer(dir, &oname);
++		if (err < 0)
++			goto out;
+ 
++		err = ceph_fname_to_usr(&fname, NULL, &oname, NULL);
++		if (!err) {
++			memcpy(name, oname.name, oname.len);
++			name[oname.len] = 0;
++		}
++		ceph_fname_free_buffer(dir, &oname);
++	}
++out:
++	dout("get_name %p ino %llx.%llx err %d %s%s\n",
++		     child, ceph_vinop(inode), err,
++		     err ? "" : "name ", err ? "" : name);
+ 	ceph_mdsc_put_request(req);
+ 	return err;
+ }
 -- 
 2.35.1
 
