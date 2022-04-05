@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1049EC433F5
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D034C433FE
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1445687AbiDFEOs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:14:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35496 "EHLO
+        id S1446398AbiDFEPB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:15:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573554AbiDETWj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:39 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 632473E0DB;
-        Tue,  5 Apr 2022 12:20:40 -0700 (PDT)
+        with ESMTP id S1573571AbiDETWx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:53 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DD38473A6;
+        Tue,  5 Apr 2022 12:20:54 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 0AB56B81F6B;
-        Tue,  5 Apr 2022 19:20:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0503FC385A1;
-        Tue,  5 Apr 2022 19:20:36 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0EBED616C5;
+        Tue,  5 Apr 2022 19:20:54 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8763C385A0;
+        Tue,  5 Apr 2022 19:20:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186437;
-        bh=gFp0s2+yOcXsxdx+8FwxESNn106vn66cOvnAIMvKYsk=;
+        s=k20201202; t=1649186453;
+        bh=PU5u4snQwa0Fwp4GmEqydtyCCMY0ChecXgE22UELz48=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=VsI1yGO5xbYAMRP+i5E4Cubrv3Faw4rfQwY+423rZ6IyILXWi/UVtF9IXBaZ74/cY
-         YZEUqMyQk4EMV9V3S3jSi2IAM7DqaPSbNcDfW0Ejr/z/0dJdfQAQ0ixi+kvNt514kE
-         bgAahZ/++1hP+6TyivNQ8X4bEpOxYz4r8ptcfSeE+kHI56pwrnkiLWYe1MXkJcO6Xu
-         VSlJPqyYzNm+VMd+4EQX7NUfEiruPnZ+46ahMdmpGqjGjqmaCijz55i2ea1VlGKnjF
-         jyTCJPP6/RZac+VTbaqI8Kv149wFgV6jpJ8trlqdSOYGunrAt5aD4ANDjKiu8jyDVw
-         Q3NtEK2o+UCZg==
+        b=VMO3jsZ6ER6o742l7qQ9XxwghEoYIPEQ1yIwI3X+LKmcnZLAHqBidj2U/mczA5pUN
+         YCMhngbC2z7ELti+GWe8K4zN2RqUOtmLtaHA1ieT2tUJwrV93Ud8VJwaOICOXXFytW
+         DVUv6GgkLiusm41ulTinFXCK5fIplzu9p+w9UaiRwjNZgsvyACWCLAeRDVsb36y6fG
+         rJ0kWgfbnvboH4JyLnLHAmGj4mmondgJyPHxv3pHn9hpGWfFCKUDWd75oDBSWQe+Ty
+         +Gv7knwN6bc7jVRh7B9wY9XIEFgNL9fzOUKjCKpCV3Rj9HLKu8L9c8CJx4N4IJfUL7
+         YJ9h5yiP8BWuQ==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 06/59] libceph: add sparse read support to msgr1
-Date:   Tue,  5 Apr 2022 15:19:37 -0400
-Message-Id: <20220405192030.178326-7-jlayton@kernel.org>
+Subject: [PATCH v13 23/59] ceph: encode encrypted name in dentry release
+Date:   Tue,  5 Apr 2022 15:19:54 -0400
+Message-Id: <20220405192030.178326-24-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,170 +48,111 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add 2 new fields to ceph_connection_v1_info to track the necessary info
-in sparse reads. Skip initializing the cursor for a sparse read.
-
-Break out read_partial_message_section into a wrapper around a new
-read_partial_message_chunk function that doesn't zero out the crc first.
-
-Add new helper functions to drive receiving into the destinations
-provided by the sparse_read state machine.
+Encode encrypted dentry names when sending a dentry release request.
+Also add a more helpful comment over ceph_encode_dentry_release.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- include/linux/ceph/messenger.h |  4 ++
- net/ceph/messenger_v1.c        | 98 +++++++++++++++++++++++++++++++---
- 2 files changed, 94 insertions(+), 8 deletions(-)
+ fs/ceph/caps.c       | 32 ++++++++++++++++++++++++++++----
+ fs/ceph/mds_client.c | 20 ++++++++++++++++----
+ 2 files changed, 44 insertions(+), 8 deletions(-)
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 7f09a4213834..f4adbfee56d5 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -337,6 +337,10 @@ struct ceph_connection_v1_info {
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 3b31d77eb1ea..22bf3e2696cb 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -4618,6 +4618,18 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+ 	return ret;
+ }
  
- 	int in_base_pos;     /* bytes read */
- 
-+	/* sparse reads */
-+	struct kvec in_sr_kvec; /* current location to receive into */
-+	u64 in_sr_len;		/* amount of data in this extent */
++/**
++ * ceph_encode_dentry_release - encode a dentry release into an outgoing request
++ * @p: outgoing request buffer
++ * @dentry: dentry to release
++ * @dir: dir to release it from
++ * @mds: mds that we're speaking to
++ * @drop: caps being dropped
++ * @unless: unless we have these caps
++ *
++ * Encode a dentry release into an outgoing request buffer. Returns 1 if the
++ * thing was released, or a negative error code otherwise.
++ */
+ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 			       struct inode *dir,
+ 			       int mds, int drop, int unless)
+@@ -4650,13 +4662,25 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 	if (ret && di->lease_session && di->lease_session->s_mds == mds) {
+ 		dout("encode_dentry_release %p mds%d seq %d\n",
+ 		     dentry, mds, (int)di->lease_seq);
+-		rel->dname_len = cpu_to_le32(dentry->d_name.len);
+-		memcpy(*p, dentry->d_name.name, dentry->d_name.len);
+-		*p += dentry->d_name.len;
+ 		rel->dname_seq = cpu_to_le32(di->lease_seq);
+ 		__ceph_mdsc_drop_dentry_lease(dentry);
++		spin_unlock(&dentry->d_lock);
++		if (IS_ENCRYPTED(dir) && fscrypt_has_encryption_key(dir)) {
++			int ret2 = ceph_encode_encrypted_fname(dir, dentry, *p);
 +
- 	/* message in temps */
- 	u8 in_tag;           /* protocol control byte */
- 	struct ceph_msg_header in_hdr;
-diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
-index 6b014eca3a13..bf385e458a01 100644
---- a/net/ceph/messenger_v1.c
-+++ b/net/ceph/messenger_v1.c
-@@ -160,9 +160,9 @@ static size_t sizeof_footer(struct ceph_connection *con)
++			if (ret2 < 0)
++				return ret2;
++
++			rel->dname_len = cpu_to_le32(ret2);
++			*p += ret2;
++		} else {
++			rel->dname_len = cpu_to_le32(dentry->d_name.len);
++			memcpy(*p, dentry->d_name.name, dentry->d_name.len);
++			*p += dentry->d_name.len;
++		}
++	} else {
++		spin_unlock(&dentry->d_lock);
+ 	}
+-	spin_unlock(&dentry->d_lock);
+ 	return ret;
+ }
  
- static void prepare_message_data(struct ceph_msg *msg, u32 data_len)
- {
--	/* Initialize data cursor */
--
--	ceph_msg_data_cursor_init(&msg->cursor, msg, data_len);
-+	/* Initialize data cursor if it's not a sparse read */
-+	if (!msg->sparse_read)
-+		ceph_msg_data_cursor_init(&msg->cursor, msg, data_len);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 0be1668b2c32..750a67643850 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2819,15 +2819,23 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
+ 		      req->r_inode ? req->r_inode : d_inode(req->r_dentry),
+ 		      mds, req->r_inode_drop, req->r_inode_unless,
+ 		      req->r_op == CEPH_MDS_OP_READDIR);
+-	if (req->r_dentry_drop)
+-		releases += ceph_encode_dentry_release(&p, req->r_dentry,
++	if (req->r_dentry_drop) {
++		ret = ceph_encode_dentry_release(&p, req->r_dentry,
+ 				req->r_parent, mds, req->r_dentry_drop,
+ 				req->r_dentry_unless);
+-	if (req->r_old_dentry_drop)
+-		releases += ceph_encode_dentry_release(&p, req->r_old_dentry,
++		if (ret < 0)
++			goto out_err;
++		releases += ret;
++	}
++	if (req->r_old_dentry_drop) {
++		ret = ceph_encode_dentry_release(&p, req->r_old_dentry,
+ 				req->r_old_dentry_dir, mds,
+ 				req->r_old_dentry_drop,
+ 				req->r_old_dentry_unless);
++		if (ret < 0)
++			goto out_err;
++		releases += ret;
++	}
+ 	if (req->r_old_inode_drop)
+ 		releases += ceph_encode_inode_release(&p,
+ 		      d_inode(req->r_old_dentry),
+@@ -2869,6 +2877,10 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
+ 		ceph_mdsc_free_path((char *)path1, pathlen1);
+ out:
+ 	return msg;
++out_err:
++	ceph_msg_put(msg);
++	msg = ERR_PTR(ret);
++	goto out_free2;
  }
  
  /*
-@@ -967,9 +967,9 @@ static void process_ack(struct ceph_connection *con)
- 	prepare_read_tag(con);
- }
- 
--static int read_partial_message_section(struct ceph_connection *con,
--					struct kvec *section,
--					unsigned int sec_len, u32 *crc)
-+static int read_partial_message_chunk(struct ceph_connection *con,
-+				      struct kvec *section,
-+				      unsigned int sec_len, u32 *crc)
- {
- 	int ret, left;
- 
-@@ -985,11 +985,91 @@ static int read_partial_message_section(struct ceph_connection *con,
- 		section->iov_len += ret;
- 	}
- 	if (section->iov_len == sec_len)
--		*crc = crc32c(0, section->iov_base, section->iov_len);
-+		*crc = crc32c(*crc, section->iov_base, section->iov_len);
- 
- 	return 1;
- }
- 
-+static inline int read_partial_message_section(struct ceph_connection *con,
-+					       struct kvec *section,
-+					       unsigned int sec_len, u32 *crc)
-+{
-+	*crc = 0;
-+	return read_partial_message_chunk(con, section, sec_len, crc);
-+}
-+
-+static int read_sparse_msg_extent(struct ceph_connection *con, u32 *crc)
-+{
-+	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
-+	bool do_bounce = ceph_test_opt(from_msgr(con->msgr), RXBOUNCE);
-+
-+	if (do_bounce && unlikely(!con->bounce_page)) {
-+		con->bounce_page = alloc_page(GFP_NOIO);
-+		if (!con->bounce_page) {
-+			pr_err("failed to allocate bounce page\n");
-+			return -ENOMEM;
-+		}
-+	}
-+
-+	while (cursor->sr_resid > 0) {
-+		struct page *page, *rpage;
-+		size_t off, len;
-+		int ret;
-+
-+		page = ceph_msg_data_next(cursor, &off, &len, NULL);
-+		rpage = do_bounce ? con->bounce_page : page;
-+
-+		/* clamp to what remains in extent */
-+		len = min_t(int, len, cursor->sr_resid);
-+		ret = ceph_tcp_recvpage(con->sock, rpage, (int)off, len);
-+		if (ret <= 0)
-+			return ret;
-+		*crc = ceph_crc32c_page(*crc, rpage, off, ret);
-+		ceph_msg_data_advance(cursor, (size_t)ret);
-+		cursor->sr_resid -= ret;
-+		if (do_bounce)
-+			memcpy_page(page, off, rpage, off, ret);
-+	}
-+	return 1;
-+}
-+
-+static int read_sparse_msg_data(struct ceph_connection *con)
-+{
-+	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
-+	bool do_datacrc = !ceph_test_opt(from_msgr(con->msgr), NOCRC);
-+	u32 crc = 0;
-+	int ret = 1;
-+
-+	if (do_datacrc)
-+		crc = con->in_data_crc;
-+
-+	do {
-+		if (con->v1.in_sr_kvec.iov_base)
-+			ret = read_partial_message_chunk(con,
-+							 &con->v1.in_sr_kvec,
-+							 con->v1.in_sr_len,
-+							 &crc);
-+		else if (cursor->sr_resid > 0)
-+			ret = read_sparse_msg_extent(con, &crc);
-+
-+		if (ret <= 0) {
-+			if (do_datacrc)
-+				con->in_data_crc = crc;
-+			return ret;
-+		}
-+
-+		memset(&con->v1.in_sr_kvec, 0, sizeof(con->v1.in_sr_kvec));
-+		ret = con->ops->sparse_read(con, cursor,
-+				(char **)&con->v1.in_sr_kvec.iov_base);
-+		con->v1.in_sr_len = ret;
-+	} while (ret > 0);
-+
-+	if (do_datacrc)
-+		con->in_data_crc = crc;
-+
-+	return ret < 0 ? ret : 1;	/* must return > 0 to indicate success */
-+}
-+
- static int read_partial_msg_data(struct ceph_connection *con)
- {
- 	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
-@@ -1180,7 +1260,9 @@ static int read_partial_message(struct ceph_connection *con)
- 		if (!m->num_data_items)
- 			return -EIO;
- 
--		if (ceph_test_opt(from_msgr(con->msgr), RXBOUNCE))
-+		if (m->sparse_read)
-+			ret = read_sparse_msg_data(con);
-+		else if (ceph_test_opt(from_msgr(con->msgr), RXBOUNCE))
- 			ret = read_partial_msg_data_bounce(con);
- 		else
- 			ret = read_partial_msg_data(con);
 -- 
 2.35.1
 
