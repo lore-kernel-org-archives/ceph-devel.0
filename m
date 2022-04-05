@@ -2,73 +2,66 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A02EC433FE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E33AC4167B
 	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1449298AbiDFEPs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:15:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38178 "EHLO
+        id S1449898AbiDFEPy (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:15:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573597AbiDETXR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:23:17 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EED174EA31;
-        Tue,  5 Apr 2022 12:21:18 -0700 (PDT)
+        with ESMTP id S1573208AbiDESR5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 14:17:57 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0084EF087;
+        Tue,  5 Apr 2022 11:15:57 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8B3BB616C5;
-        Tue,  5 Apr 2022 19:21:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4707FC385A5;
-        Tue,  5 Apr 2022 19:21:17 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 54562B81F75;
+        Tue,  5 Apr 2022 18:15:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 084D6C385A4;
+        Tue,  5 Apr 2022 18:15:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186478;
-        bh=SRirXv6SjAaxHj9D42MDkbHJyqzjojeWbzUc3GlPdFI=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=bMJ9UC+uMVUgQ9XDVmV67ithHJZhOUeNimcvXXlRYJv7dSBOr8tDIzQVPFOHSmuQz
-         D9EfAD4BsUZYE9K36AoPR5uE8d8Cr7sFXI1oKvBr2uBGxNij1ICRH/FXWpmvcPDzHZ
-         ZFFJ1gIvj3iZGUZoTcosy9SJpxqgX2LYrbhaclW+I8DuThSkuIJYeFtS6atPBr+CFl
-         uqrVKYolaomVNhdyb7phcSqnKK2i9QxK3DSSKE+3mkhrDoQ3RH+M9+cwrA61JizQ7b
-         2ou149hHAvxKOJUL3cUNtUNog5ROmrLOZfpqjIGcavFIUxXjkKtGLa32zulA/28X/E
-         f3vGHJ2sTEqAg==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     idryomov@gmail.com, xiubli@redhat.com
-Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
-        lhenriques@suse.de
-Subject: [PATCH v13 50/59] ceph: disable fallocate for encrypted inodes
-Date:   Tue,  5 Apr 2022 15:20:21 -0400
-Message-Id: <20220405192030.178326-51-jlayton@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
-References: <20220405192030.178326-1-jlayton@kernel.org>
+        s=k20201202; t=1649182555;
+        bh=grVOlI0gDn9zG4TjD5iKDe9tR2JypV1oh7YQii31Iuk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Fnkvmzqbb0B/XQwwWGVpd59Ws2GnuaDI1TiSd1CW9rRk0TSfLtInY+/ECFhOFXwL7
+         PLNgWV85mznPUOvgJKyQs8KCgigWtMOIF4TmxmDvBAJSqoiPTTcQLrFeEMfyuB6erY
+         kpY3ZCMR6DA0pQLwO1SnMADaEC2/i9s/OSysv5Sw0HzqDxNmx5/LXs+y0c7tFJdWUr
+         qfSAB8j8mbh8j/PhI7w8p8yBGzVdN4+XdQFJeC2HGyIIleMWWpX9AGvVStrJpLfehG
+         8PYSHD/vFFqGZnOpNv4bZD+SqonrKNj5BUcNanM3TdIBx6Hq2oB9Nhpj2FSKNN4MYe
+         B/X2Px+NNAjSQ==
+Date:   Tue, 5 Apr 2022 18:15:53 +0000
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
+Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v3] common/encrypt: allow the use of 'fscrypt:' as key
+ prefix
+Message-ID: <YkyHWXKySNU00XB6@gmail.com>
+References: <20220405094633.17285-1-lhenriques@suse.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220405094633.17285-1-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-...hopefully, just for now.
+On Tue, Apr 05, 2022 at 10:46:33AM +0100, Luís Henriques wrote:
+> fscrypt keys have used the $FSTYP as prefix.  However this format is being
+> deprecated and newer kernels are expected to use the generic 'fscrypt:'
+> prefix instead.  This patch adds support for this new prefix, and only
+> uses $FSTYP on filesystems that didn't initially supported it, i.e. ext4 and
+> f2fs.  This will allow old kernels to be tested.
+> 
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
+>  common/encrypt | 36 +++++++++++++++++++++++++-----------
+>  1 file changed, 25 insertions(+), 11 deletions(-)
+> 
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- fs/ceph/file.c | 3 +++
- 1 file changed, 3 insertions(+)
+Reviewed-by: Eric Biggers <ebiggers@google.com>
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 175a59277726..f74563e11058 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -2207,6 +2207,9 @@ static long ceph_fallocate(struct file *file, int mode,
- 	if (!S_ISREG(inode->i_mode))
- 		return -EOPNOTSUPP;
- 
-+	if (IS_ENCRYPTED(inode))
-+		return -EOPNOTSUPP;
-+
- 	prealloc_cf = ceph_alloc_cap_flush();
- 	if (!prealloc_cf)
- 		return -ENOMEM;
--- 
-2.35.1
-
+- Eric
