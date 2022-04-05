@@ -2,84 +2,127 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06A6FC433FE
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:02:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4A3DC433EF
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:02:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231449AbiDFEEC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:04:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36664 "EHLO
+        id S237830AbiDFEEa (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:04:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36932 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573573AbiDETWy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:54 -0400
+        with ESMTP id S1573575AbiDETW6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:58 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4489347ACB;
-        Tue,  5 Apr 2022 12:20:56 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFDBE4889E;
+        Tue,  5 Apr 2022 12:20:59 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D6299617EE;
-        Tue,  5 Apr 2022 19:20:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B7EBC385A3;
-        Tue,  5 Apr 2022 19:20:54 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7CD35617EE;
+        Tue,  5 Apr 2022 19:20:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 40754C385A1;
+        Tue,  5 Apr 2022 19:20:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186455;
-        bh=wuel0yRpvqoH42Shg0phMCGGxQASot3eqVV2HwOD7gc=;
+        s=k20201202; t=1649186458;
+        bh=twu3E557bdskprsD4Fr6VDO4t+mWqQiy+j+WCNte8Sw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=VKJuTRiHJZSsnavBh4ApUesE7dAteXIDTW0TI5t1JbNUsVsjzWFNsDdsKvPP3855c
-         M6i7YsE8mD9NgZCGl0hlLG8U6iqmjGturZFM09UvpopaTwhFFGH1I/lofFP2ZT9wPf
-         6lp/9beYBIE4Cnn9PzAJM+wjpb9vyD92BuSyD6y9lsf9nWOJ3R83BJoFbbLaKnp9KL
-         SeVlDrYh6+U1FnmXz0nvlBM7bCJyX8Y2fw2dVzQpJzVnpVC3X5PuUetkuxxUrMePhm
-         cAcSlYaHNPqJ5TaulfkqLMyQUcCJbYUAnIPHjkur3pplzKxsySPTxKyGnB5ImO6R61
-         XKkHmM/apDlug==
+        b=ZsvE035ygkqMuo6WSFvyNQL7hM6B4SFQMns+aN2FKQuEDNrQ8sK6+MK/v2pbhDvmB
+         hWXnxsP7f4dSp0oPlV51sHq0TP1Fwp+s7icdvPR/6fd5tBbnNW+wrDKWHVzurlAPGu
+         oEuPNCV3HI2TnQiBKbgJjQT7McqN+6V9WAcsey2+pq2T/2Ml+y5Jy7epWS1agBFpeV
+         O2cdZ1MyoUnF/UHyErGewmMhtLI+v3JRkRa1fMBds6if7AZ+wyOipGriZXtDfF3YCH
+         JeGQ9Vwqg+Fo6VTRzFyHthKBhlMoizgJPmPW2VRBKMiUNUl3Hv9g1lIhq2TGEDZpa3
+         eRzXrOzQ7N4/g==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 25/59] ceph: set DCACHE_NOKEY_NAME in atomic open
-Date:   Tue,  5 Apr 2022 15:19:56 -0400
-Message-Id: <20220405192030.178326-26-jlayton@kernel.org>
+Subject: [PATCH v13 29/59] ceph: add fscrypt support to ceph_fill_trace
+Date:   Tue,  5 Apr 2022 15:20:00 -0400
+Message-Id: <20220405192030.178326-30-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Atomic open can act as a lookup if handed a dentry that is negative on
-the MDS. Ensure that we set DCACHE_NOKEY_NAME on the dentry in
-atomic_open, if we don't have the key for the parent. Otherwise, we can
-end up validating the dentry inappropriately if someone later adds a
-key.
+When we get a dentry in a trace, decrypt the name so we can properly
+instantiate the dentry.
 
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-Reviewed-by: Luís Henriques <lhenriques@suse.de>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ fs/ceph/inode.c | 30 ++++++++++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index dd183d12a3bd..dfc02caf4229 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -758,6 +758,13 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	req->r_args.open.mask = cpu_to_le32(mask);
- 	req->r_parent = dir;
- 	ihold(dir);
-+	if (IS_ENCRYPTED(dir)) {
-+		if (!fscrypt_has_encryption_key(dir)) {
-+			spin_lock(&dentry->d_lock);
-+			dentry->d_flags |= DCACHE_NOKEY_NAME;
-+			spin_unlock(&dentry->d_lock);
-+		}
-+	}
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 4cbc303730ef..37c2c2977235 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1405,8 +1405,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME &&
+ 		    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
+ 		    !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
++			bool is_nokey = false;
+ 			struct qstr dname;
+ 			struct dentry *dn, *parent;
++			struct fscrypt_str oname = FSTR_INIT(NULL, 0);
++			struct ceph_fname fname = { .dir	= dir,
++						    .name	= rinfo->dname,
++						    .ctext	= rinfo->altname,
++						    .name_len	= rinfo->dname_len,
++						    .ctext_len	= rinfo->altname_len };
  
- 	if (flags & O_CREAT) {
- 		struct ceph_file_layout lo;
+ 			BUG_ON(!rinfo->head->is_target);
+ 			BUG_ON(req->r_dentry);
+@@ -1414,8 +1421,20 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			parent = d_find_any_alias(dir);
+ 			BUG_ON(!parent);
+ 
+-			dname.name = rinfo->dname;
+-			dname.len = rinfo->dname_len;
++			err = ceph_fname_alloc_buffer(dir, &oname);
++			if (err < 0) {
++				dput(parent);
++				goto done;
++			}
++
++			err = ceph_fname_to_usr(&fname, NULL, &oname, &is_nokey);
++			if (err < 0) {
++				dput(parent);
++				ceph_fname_free_buffer(dir, &oname);
++				goto done;
++			}
++			dname.name = oname.name;
++			dname.len = oname.len;
+ 			dname.hash = full_name_hash(parent, dname.name, dname.len);
+ 			tvino.ino = le64_to_cpu(rinfo->targeti.in->ino);
+ 			tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
+@@ -1430,9 +1449,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				     dname.len, dname.name, dn);
+ 				if (!dn) {
+ 					dput(parent);
++					ceph_fname_free_buffer(dir, &oname);
+ 					err = -ENOMEM;
+ 					goto done;
+ 				}
++				if (is_nokey) {
++					spin_lock(&dn->d_lock);
++					dn->d_flags |= DCACHE_NOKEY_NAME;
++					spin_unlock(&dn->d_lock);
++				}
+ 				err = 0;
+ 			} else if (d_really_is_positive(dn) &&
+ 				   (ceph_ino(d_inode(dn)) != tvino.ino ||
+@@ -1444,6 +1469,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				dput(dn);
+ 				goto retry_lookup;
+ 			}
++			ceph_fname_free_buffer(dir, &oname);
+ 
+ 			req->r_dentry = dn;
+ 			dput(parent);
 -- 
 2.35.1
 
