@@ -2,43 +2,43 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C855C433EF
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FE99C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 04:16:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1380568AbiDFEMp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:12:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35094 "EHLO
+        id S1381361AbiDFEM6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:12:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36234 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573549AbiDETWd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:33 -0400
+        with ESMTP id S1573566AbiDETWt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2022 15:22:49 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B03638DB9;
-        Tue,  5 Apr 2022 12:20:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDA414475E;
+        Tue,  5 Apr 2022 12:20:50 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B0E03616C5;
-        Tue,  5 Apr 2022 19:20:33 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7792EC385A3;
-        Tue,  5 Apr 2022 19:20:32 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6AC90616C5;
+        Tue,  5 Apr 2022 19:20:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F7E8C385A0;
+        Tue,  5 Apr 2022 19:20:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649186433;
-        bh=KPIMaUrv3ahVDlTZhvKlbu0p7ZyDL3VrkfH0rCRjpXk=;
+        s=k20201202; t=1649186449;
+        bh=Xr5WwpOdJDLAwJ1HnaAMUsOMgwdZ2fjReZF8iNdzeus=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ifF09hyIaGUTiC7bnjvc9J8UYXHxi2eZKOPa+cWWIGInOKj6kdGzAV65rtAvzN8G7
-         /ZT1UExzLMCQJikWl4O9Ga3D5x39CE9fnFPXBEoHk+6lK4/bCaCNVRvDO1cls43kOZ
-         OvmShbiUM7hNU2Op2QytzzWoVfj1b63pE2G81W0KKovHXp4emOXc2EC+EJK+fVMaQj
-         EZ/YVtZUVtEYO74b0R89kL4XmHjsUS8PFnqDJn4AOsEAbLrTeO9GeVmfrukjlIFQNU
-         7NGbldoE85LoiViOuZ8SEjExCaSw4HaQ0FUa5SWtd4Kt47R7g4PhPflpGGN5wKEpq0
-         DfLefq6jHJTFQ==
+        b=t6ktD3Gf8m3isqykAADxjB4s7e/ZmGzmA1FScx37me5fgYi0+ZbEBJ8tJ8FfeF6cw
+         eaazxKuv0r6cplyinrSmRVjmIRNo1dV3DKgvXiiYtJfZIMgohom5VSu7DLIBy5l07v
+         Q6hZLEMyHXF77eePB7xumNy7eF8TIvywCpWcCWqjlYtxc4QzUgUodtFLSLg1U3Z1RV
+         X4fZXPuwnwLcCiOy+PVrt7o0Na88BpZNuQJ8XgoBbIx/17rvFz2H3Mx13SjEdqt5dD
+         5zo/LKcQa1h1BfFlnbiy2aDHZLbWtyhuZ9nVYV35LA3O8RNchBhb7KcUfJaEpUGilz
+         hPr8q0VEzR44A==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     idryomov@gmail.com, xiubli@redhat.com
 Cc:     ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-fscrypt@vger.kernel.org, linux-kernel@vger.kernel.org,
         lhenriques@suse.de
-Subject: [PATCH v13 01/59] libceph: add spinlock around osd->o_requests
-Date:   Tue,  5 Apr 2022 15:19:32 -0400
-Message-Id: <20220405192030.178326-2-jlayton@kernel.org>
+Subject: [PATCH v13 19/59] ceph: make the ioctl cmd more readable in debug log
+Date:   Tue,  5 Apr 2022 15:19:50 -0400
+Message-Id: <20220405192030.178326-20-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405192030.178326-1-jlayton@kernel.org>
 References: <20220405192030.178326-1-jlayton@kernel.org>
@@ -48,79 +48,73 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-In a later patch, we're going to need to search for a request in
-the rbtree, but taking the o_mutex is inconvenient as we already
-hold the con mutex at the point where we need it.
+From: Xiubo Li <xiubli@redhat.com>
 
-Add a new spinlock that we take when inserting and erasing entries from
-the o_requests tree. Search of the rbtree can be done with either the
-mutex or the spinlock, but insertion and removal requires both.
+    ioctl file 0000000004e6b054 cmd 2148296211 arg 824635143532
 
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
+The numerical cmd valye in the ioctl debug log message is too hard to
+understand even when you look at it in the code. Make it more readable.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- include/linux/ceph/osd_client.h | 8 +++++++-
- net/ceph/osd_client.c           | 5 +++++
- 2 files changed, 12 insertions(+), 1 deletion(-)
+ fs/ceph/ioctl.c | 39 ++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 38 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 3431011f364d..3122c1a3205f 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -29,7 +29,12 @@ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
- 
- #define CEPH_HOMELESS_OSD	-1
- 
--/* a given osd we're communicating with */
-+/*
-+ * A given osd we're communicating with.
-+ *
-+ * Note that the o_requests tree can be searched while holding the "lock" mutex
-+ * or the "o_requests_lock" spinlock. Insertion or removal requires both!
-+ */
- struct ceph_osd {
- 	refcount_t o_ref;
- 	struct ceph_osd_client *o_osdc;
-@@ -37,6 +42,7 @@ struct ceph_osd {
- 	int o_incarnation;
- 	struct rb_node o_node;
- 	struct ceph_connection o_con;
-+	spinlock_t o_requests_lock;
- 	struct rb_root o_requests;
- 	struct rb_root o_linger_requests;
- 	struct rb_root o_backoff_mappings;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 83eb97c94e83..17c792b32343 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1198,6 +1198,7 @@ static void osd_init(struct ceph_osd *osd)
- {
- 	refcount_set(&osd->o_ref, 1);
- 	RB_CLEAR_NODE(&osd->o_node);
-+	spin_lock_init(&osd->o_requests_lock);
- 	osd->o_requests = RB_ROOT;
- 	osd->o_linger_requests = RB_ROOT;
- 	osd->o_backoff_mappings = RB_ROOT;
-@@ -1427,7 +1428,9 @@ static void link_request(struct ceph_osd *osd, struct ceph_osd_request *req)
- 		atomic_inc(&osd->o_osdc->num_homeless);
- 
- 	get_osd(osd);
-+	spin_lock(&osd->o_requests_lock);
- 	insert_request(&osd->o_requests, req);
-+	spin_unlock(&osd->o_requests_lock);
- 	req->r_osd = osd;
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index 477ecc667aee..b9f0f4e460ab 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -313,11 +313,48 @@ static long ceph_set_encryption_policy(struct file *file, unsigned long arg)
+ 	return ret;
  }
  
-@@ -1439,7 +1442,9 @@ static void unlink_request(struct ceph_osd *osd, struct ceph_osd_request *req)
- 	     req, req->r_tid);
++static const char *ceph_ioctl_cmd_name(const unsigned int cmd)
++{
++	switch (cmd) {
++	case CEPH_IOC_GET_LAYOUT:
++		return "get_layout";
++	case CEPH_IOC_SET_LAYOUT:
++		return "set_layout";
++	case CEPH_IOC_SET_LAYOUT_POLICY:
++		return "set_layout_policy";
++	case CEPH_IOC_GET_DATALOC:
++		return "get_dataloc";
++	case CEPH_IOC_LAZYIO:
++		return "lazyio";
++	case CEPH_IOC_SYNCIO:
++		return "syncio";
++	case FS_IOC_SET_ENCRYPTION_POLICY:
++		return "set encryption_policy";
++	case FS_IOC_GET_ENCRYPTION_POLICY:
++		return "get_encryption_policy";
++	case FS_IOC_GET_ENCRYPTION_POLICY_EX:
++		return "get_encryption_policy_ex";
++	case FS_IOC_ADD_ENCRYPTION_KEY:
++		return "add_encryption_key";
++	case FS_IOC_REMOVE_ENCRYPTION_KEY:
++		return "remove_encryption_key";
++	case FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS:
++		return "remove_encryption_key_all_users";
++	case FS_IOC_GET_ENCRYPTION_KEY_STATUS:
++		return "get_encryption_key_status";
++	case FS_IOC_GET_ENCRYPTION_NONCE:
++		return "get_encryption_nonce";
++	default:
++		return "unknown";
++	}
++}
++
+ long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ {
+ 	int ret;
  
- 	req->r_osd = NULL;
-+	spin_lock(&osd->o_requests_lock);
- 	erase_request(&osd->o_requests, req);
-+	spin_unlock(&osd->o_requests_lock);
- 	put_osd(osd);
- 
- 	if (!osd_homeless(osd))
+-	dout("ioctl file %p cmd %u arg %lu\n", file, cmd, arg);
++	dout("ioctl file %p cmd %s arg %lu\n", file,
++	     ceph_ioctl_cmd_name(cmd), arg);
+ 	switch (cmd) {
+ 	case CEPH_IOC_GET_LAYOUT:
+ 		return ceph_ioctl_get_layout(file, (void __user *)arg);
 -- 
 2.35.1
 
