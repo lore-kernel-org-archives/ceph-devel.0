@@ -2,179 +2,130 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5AE0C433FE
-	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 09:11:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F294C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 09:59:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1455861AbiDFJJt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:09:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52344 "EHLO
+        id S242619AbiDFKBj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 06:01:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1441971AbiDFJEX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:04:23 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91A5147D58B;
-        Tue,  5 Apr 2022 23:06:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
-        :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=QrovNweyJZRj1GFp6iCnhs45fbus+PzPDKXpCmbtDwo=; b=z5LFDFUbPWb3WO37mO8MwjoQU9
-        uS3ZTdwAnf66Lx+zcAQQUC3qALjNiBk8vq/QdAnBrT+kiIx7+bGfq0K3/JsrX94g6GOI1PxnGLDP0
-        TpbSMnVMCM12vlH2ieULysyOQ8eqGhAM7WSZgubyaijH46PkBLtZHwMl/DJ+SL/fL62RhXRHRBZ07
-        gPidH4d0GBhOycIbS6/qs679s/JDzVaH5pxN2YMNY1qvOfu3TMWQ9LeQbRMDybW1HFyANyEbyeoY8
-        bjiiLGRwO/33fN9Ma7LaMPzza6Yu9DF6RQqn94ZGs2knBiL0yIxk5iak06Qk6gWjflRAaNPj9+l6R
-        kccMsInA==;
-Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbyoX-003vn4-0d; Wed, 06 Apr 2022 06:06:45 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-um@lists.infradead.org,
-        linux-block@vger.kernel.org, drbd-dev@lists.linbit.com,
-        nbd@other.debian.org, ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
-        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
-        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 22/27] block: refactor discard bio size limiting
-Date:   Wed,  6 Apr 2022 08:05:11 +0200
-Message-Id: <20220406060516.409838-23-hch@lst.de>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20220406060516.409838-1-hch@lst.de>
-References: <20220406060516.409838-1-hch@lst.de>
+        with ESMTP id S243452AbiDFKAY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 06:00:24 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 199741A9CB5
+        for <ceph-devel@vger.kernel.org>; Tue,  5 Apr 2022 23:28:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1649226529;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=l/O6WJnzHeES5MzV1iHizq7+45V776U6yPTcrafzRys=;
+        b=F3MBjAZxdmG7U0BXiXbyjSLxdakTuLOO8ABuOd5kNDIdCC6GQkvxfyfmuF2nfA+7u9D0KO
+        SqEsgXDzGitHRlNZVjfmq/dPX7qgYeHcrLDPPz9FLeRkw1YaOGyeXnGsTzJXBWBHLSVhqH
+        k18newDT0wFNLzheKFK/DhFtsz+L8GA=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-554-F1jcfXAUPxeqtH_v1cHP9w-1; Wed, 06 Apr 2022 02:28:47 -0400
+X-MC-Unique: F1jcfXAUPxeqtH_v1cHP9w-1
+Received: by mail-pl1-f199.google.com with SMTP id l9-20020a170902f68900b0015692da3c77so668221plg.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2022 23:28:47 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=l/O6WJnzHeES5MzV1iHizq7+45V776U6yPTcrafzRys=;
+        b=nUbSe73vcJEkgA+O5snt9yaj7CFBgqGfXuWzBga1ZDBGpRDt9O7WJ1PBSC0KOIrr2j
+         Lt2ZxNfRs2JpjiHHVs6MjXps6F+LUb5Ks2bYUYYKyUWDlOc4qzdX9uvXEUd9A99Xnzk0
+         ZpkZsRr0fAFRWVamveLwrwI6PkTsdoBThOa/w83iwL4qDW24EMhksRJnY5j6xD9U4feG
+         o3lh/iHKLW7NaD5DJUCFxs34W1zlsxkRL5IxZUmNwqTBqv0jUopN4IwIVA+2tGPwAcYa
+         WeHY6gkz47XcIwO2i3QLmFpbiuCq0dHzhA6XtEH3bMwsxz+kMRLG4X031DmmltLSv8AX
+         q4aw==
+X-Gm-Message-State: AOAM530TtMkZCo6DjroWDUQCEsPMlFWpJrgB0nKLeihpN/YlzL9BGHDo
+        JyxoMF5hHhYJifmtdfD/wJZHwvV5BWd/vhvCJReS+hNRzefh8CBkWmqq2kEZ2fXQ1710HXUOTrZ
+        YDZs4u7Dbv442Qz3LvIdgdw==
+X-Received: by 2002:a17:903:1210:b0:151:fa59:95ef with SMTP id l16-20020a170903121000b00151fa5995efmr7366382plh.57.1649226526715;
+        Tue, 05 Apr 2022 23:28:46 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxZvWs4H8FX933o5QmfCgBqAZoT7G4kIpX1kSIZuQfv64mCK+4K29iDcIHPX48Uz7K6jAic+g==
+X-Received: by 2002:a17:903:1210:b0:151:fa59:95ef with SMTP id l16-20020a170903121000b00151fa5995efmr7366376plh.57.1649226526509;
+        Tue, 05 Apr 2022 23:28:46 -0700 (PDT)
+Received: from [10.72.13.31] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id f15-20020a056a001acf00b004fb2ad05521sm17845124pfv.215.2022.04.05.23.28.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 05 Apr 2022 23:28:45 -0700 (PDT)
+Subject: Re: [PATCH v2] ceph: invalidate pages when doing DIO in encrypted
+ inodes
+To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
+        Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220401133243.1075-1-lhenriques@suse.de>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <d6407dd1-b6df-4de4-fe37-71b765b2088a@redhat.com>
+Date:   Wed, 6 Apr 2022 14:28:27 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
+In-Reply-To: <20220401133243.1075-1-lhenriques@suse.de>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Move all the logic to limit the discard bio size into a common helper
-so that it is better documented.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- block/blk-lib.c | 59 ++++++++++++++++++++++++-------------------------
- block/blk.h     | 14 ------------
- 2 files changed, 29 insertions(+), 44 deletions(-)
+On 4/1/22 9:32 PM, Luís Henriques wrote:
+> When doing DIO on an encrypted node, we need to invalidate the page cache in
+> the range being written to, otherwise the cache will include invalid data.
+>
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
+>   fs/ceph/file.c | 11 ++++++++++-
+>   1 file changed, 10 insertions(+), 1 deletion(-)
+>
+> Changes since v1:
+> - Replaced truncate_inode_pages_range() by invalidate_inode_pages2_range
+> - Call fscache_invalidate with FSCACHE_INVAL_DIO_WRITE if we're doing DIO
+>
+> Note: I'm not really sure this last change is required, it doesn't really
+> affect generic/647 result, but seems to be the most correct.
+>
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 5072570c2203..b2743c342305 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -1605,7 +1605,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+>   	if (ret < 0)
+>   		return ret;
+>   
+> -	ceph_fscache_invalidate(inode, false);
+> +	ceph_fscache_invalidate(inode, (iocb->ki_flags & IOCB_DIRECT));
+>   	ret = invalidate_inode_pages2_range(inode->i_mapping,
+>   					    pos >> PAGE_SHIFT,
+>   					    (pos + count - 1) >> PAGE_SHIFT);
 
-diff --git a/block/blk-lib.c b/block/blk-lib.c
-index 237d60d8b5857..2ae32a722851c 100644
---- a/block/blk-lib.c
-+++ b/block/blk-lib.c
-@@ -10,6 +10,32 @@
- 
- #include "blk.h"
- 
-+static sector_t bio_discard_limit(struct block_device *bdev, sector_t sector)
-+{
-+	unsigned int discard_granularity =
-+		bdev_get_queue(bdev)->limits.discard_granularity;
-+	sector_t granularity_aligned_sector;
-+
-+	if (bdev_is_partition(bdev))
-+		sector += bdev->bd_start_sect;
-+
-+	granularity_aligned_sector =
-+		round_up(sector, discard_granularity >> SECTOR_SHIFT);
-+
-+	/*
-+	 * Make sure subsequent bios start aligned to the discard granularity if
-+	 * it needs to be split.
-+	 */
-+	if (granularity_aligned_sector != sector)
-+		return granularity_aligned_sector - sector;
-+
-+	/*
-+	 * Align the bio size to the discard granularity to make splitting the bio
-+	 * at discard granularity boundaries easier in the driver if needed.
-+	 */
-+	return round_down(UINT_MAX, discard_granularity) >> SECTOR_SHIFT;
-+}
-+
- int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 		sector_t nr_sects, gfp_t gfp_mask, int flags,
- 		struct bio **biop)
-@@ -17,7 +43,7 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 	struct request_queue *q = bdev_get_queue(bdev);
- 	struct bio *bio = *biop;
- 	unsigned int op;
--	sector_t bs_mask, part_offset = 0;
-+	sector_t bs_mask;
- 
- 	if (bdev_read_only(bdev))
- 		return -EPERM;
-@@ -48,36 +74,9 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 	if (!nr_sects)
- 		return -EINVAL;
- 
--	/* In case the discard request is in a partition */
--	if (bdev_is_partition(bdev))
--		part_offset = bdev->bd_start_sect;
--
- 	while (nr_sects) {
--		sector_t granularity_aligned_lba, req_sects;
--		sector_t sector_mapped = sector + part_offset;
--
--		granularity_aligned_lba = round_up(sector_mapped,
--				q->limits.discard_granularity >> SECTOR_SHIFT);
--
--		/*
--		 * Check whether the discard bio starts at a discard_granularity
--		 * aligned LBA,
--		 * - If no: set (granularity_aligned_lba - sector_mapped) to
--		 *   bi_size of the first split bio, then the second bio will
--		 *   start at a discard_granularity aligned LBA on the device.
--		 * - If yes: use bio_aligned_discard_max_sectors() as the max
--		 *   possible bi_size of the first split bio. Then when this bio
--		 *   is split in device drive, the split ones are very probably
--		 *   to be aligned to discard_granularity of the device's queue.
--		 */
--		if (granularity_aligned_lba == sector_mapped)
--			req_sects = min_t(sector_t, nr_sects,
--					  bio_aligned_discard_max_sectors(q));
--		else
--			req_sects = min_t(sector_t, nr_sects,
--					  granularity_aligned_lba - sector_mapped);
--
--		WARN_ON_ONCE((req_sects << 9) > UINT_MAX);
-+		sector_t req_sects =
-+			min(nr_sects, bio_discard_limit(bdev, sector));
- 
- 		bio = blk_next_bio(bio, bdev, 0, op, gfp_mask);
- 		bio->bi_iter.bi_sector = sector;
-diff --git a/block/blk.h b/block/blk.h
-index 8ccbc6e076369..1fdc1d28e6d60 100644
---- a/block/blk.h
-+++ b/block/blk.h
-@@ -346,20 +346,6 @@ static inline unsigned int bio_allowed_max_sectors(struct request_queue *q)
- 	return round_down(UINT_MAX, queue_logical_block_size(q)) >> 9;
- }
- 
--/*
-- * The max bio size which is aligned to q->limits.discard_granularity. This
-- * is a hint to split large discard bio in generic block layer, then if device
-- * driver needs to split the discard bio into smaller ones, their bi_size can
-- * be very probably and easily aligned to discard_granularity of the device's
-- * queue.
-- */
--static inline unsigned int bio_aligned_discard_max_sectors(
--					struct request_queue *q)
--{
--	return round_down(UINT_MAX, q->limits.discard_granularity) >>
--			SECTOR_SHIFT;
--}
--
- /*
-  * Internal io_context interface
-  */
--- 
-2.30.2
+The above has already invalidated the pages, why doesn't it work ?
+
+-- Xiubo
+
+> @@ -1895,6 +1895,15 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+>   		req->r_inode = inode;
+>   		req->r_mtime = mtime;
+>   
+> +		if (IS_ENCRYPTED(inode) && (iocb->ki_flags & IOCB_DIRECT)) {
+> +			ret = invalidate_inode_pages2_range(
+> +				inode->i_mapping,
+> +				write_pos >> PAGE_SHIFT,
+> +				(write_pos + write_len - 1) >> PAGE_SHIFT);
+> +			if (ret < 0)
+> +				dout("invalidate_inode_pages2_range returned %d\n", ret);
+> +		}
+> +
+>   		/* Set up the assertion */
+>   		if (rmw) {
+>   			/*
+>
 
