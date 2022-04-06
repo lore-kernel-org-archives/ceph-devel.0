@@ -2,31 +2,31 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7206DC433EF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3B5EC43217
 	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 09:11:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1451246AbiDFJJj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:09:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52816 "EHLO
+        id S1456648AbiDFJJy (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:09:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356308AbiDFJDF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:03:05 -0400
+        with ESMTP id S1359501AbiDFJDX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:03:23 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C8C948F716;
-        Tue,  5 Apr 2022 23:06:11 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA943478A54;
+        Tue,  5 Apr 2022 23:06:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=6QVq+WRTbBiZAGVnN7IJPNcrDbkE5gjblRwCavAMwLY=; b=iYaG9VkUCm4D5TSOODWzio+3DR
-        ytZ5+1QAyty9m+UBWG1IlrNmfBUfcieyEgGbnGvY+TeziydmDWxyUyplf08DqEXPrSA6ogGWlWBdc
-        eN+NdSm2eI+GluAazic6ThRfk6EDWhUlwAFB1sgAiTcA0zTyVy4xoxDN7lNirp1PXWPDjCYKA8P/e
-        a8Slx22YjqPgPpaGfnOLHtBTxMkfAK1Qngg3xOt/ieRRfzMYcYXFMoAX7pejVqOX04vm+E3B6daNl
-        No56Cgl46IA8J2O0CAKFddZqGLAK02p4IZLzzaiPdfWcvculhrlYOGpmXilPV0+0lJWjaiLUMp8xe
-        qYLNQzvg==;
+        bh=65vdZDv/Oyhj9d7BIFQpxpieHFePRtIOo5rSsdbnvJY=; b=fnclFxf748Yk+HJEP8iaRVW3WB
+        aWWIhphvzxhVY6FZKXEjV9bmsgZxn1Kj0ojlUoEizIay0h/EV1KlYq6LYsLwUZoiL+Fz08VFbrmWJ
+        BYNbJJT671L+8hPCaASzQ9hicWQta9jTVuyI55rgNvXk3KOf4lbIG1gDSvXVJwm3aMnDnl4JurT3R
+        S8cYXnLnqA9S0vlUcqmBeds07qoRbn35ezQfJ8pyS1RE387ITcgzq6PHUXXwRZqcO/Sk1L5arJMLy
+        E+9ofKyWiYPnidQ8zD5I0ZyEozinv4MmGtOr/LudVUr7xp27guzf7u4zI6ERWqMoK3aOeUdBrl0mu
+        xcCu0PRw==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbynq-003v9s-8N; Wed, 06 Apr 2022 06:06:02 +0000
+        id 1nbyoD-003vVW-6V; Wed, 06 Apr 2022 06:06:25 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,9 +43,9 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 11/27] block: add a bdev_write_cache helper
-Date:   Wed,  6 Apr 2022 08:05:00 +0200
-Message-Id: <20220406060516.409838-12-hch@lst.de>
+Subject: [PATCH 17/27] block: use bdev_alignment_offset in disk_alignment_offset_show
+Date:   Wed,  6 Apr 2022 08:05:06 +0200
+Message-Id: <20220406060516.409838-18-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220406060516.409838-1-hch@lst.de>
 References: <20220406060516.409838-1-hch@lst.de>
@@ -56,100 +56,47 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add a helper to check the write cache flag based on the block_device
-instead of having to poke into the block layer internal request_queue.
+This does the same as the open coded variant except for an extra branch,
+and allows to remove queue_alignment_offset entirely.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/block/rnbd/rnbd-srv.c       | 2 +-
- drivers/block/xen-blkback/xenbus.c  | 2 +-
- drivers/target/target_core_iblock.c | 8 ++------
- fs/btrfs/disk-io.c                  | 3 +--
- include/linux/blkdev.h              | 5 +++++
- 5 files changed, 10 insertions(+), 10 deletions(-)
+ block/genhd.c          | 2 +-
+ include/linux/blkdev.h | 8 --------
+ 2 files changed, 1 insertion(+), 9 deletions(-)
 
-diff --git a/drivers/block/rnbd/rnbd-srv.c b/drivers/block/rnbd/rnbd-srv.c
-index f04df6294650b..f8cc3c5fecb4b 100644
---- a/drivers/block/rnbd/rnbd-srv.c
-+++ b/drivers/block/rnbd/rnbd-srv.c
-@@ -558,7 +558,7 @@ static void rnbd_srv_fill_msg_open_rsp(struct rnbd_msg_open_rsp *rsp,
- 	rsp->secure_discard =
- 		cpu_to_le16(rnbd_dev_get_secure_discard(rnbd_dev));
- 	rsp->cache_policy = 0;
--	if (test_bit(QUEUE_FLAG_WC, &q->queue_flags))
-+	if (bdev_write_cache(rnbd_dev->bdev))
- 		rsp->cache_policy |= RNBD_WRITEBACK;
- 	if (blk_queue_fua(q))
- 		rsp->cache_policy |= RNBD_FUA;
-diff --git a/drivers/block/xen-blkback/xenbus.c b/drivers/block/xen-blkback/xenbus.c
-index f09040435e2e5..8b691fe50475f 100644
---- a/drivers/block/xen-blkback/xenbus.c
-+++ b/drivers/block/xen-blkback/xenbus.c
-@@ -517,7 +517,7 @@ static int xen_vbd_create(struct xen_blkif *blkif, blkif_vdev_t handle,
- 		vbd->type |= VDISK_REMOVABLE;
- 
- 	q = bdev_get_queue(bdev);
--	if (q && test_bit(QUEUE_FLAG_WC, &q->queue_flags))
-+	if (bdev_write_cache(bdev))
- 		vbd->flush_support = true;
- 
- 	if (q && blk_queue_secure_erase(q))
-diff --git a/drivers/target/target_core_iblock.c b/drivers/target/target_core_iblock.c
-index b41ee5c3b5b82..03013e85ffc03 100644
---- a/drivers/target/target_core_iblock.c
-+++ b/drivers/target/target_core_iblock.c
-@@ -737,7 +737,7 @@ iblock_execute_rw(struct se_cmd *cmd, struct scatterlist *sgl, u32 sgl_nents,
- 		if (test_bit(QUEUE_FLAG_FUA, &q->queue_flags)) {
- 			if (cmd->se_cmd_flags & SCF_FUA)
- 				opf |= REQ_FUA;
--			else if (!test_bit(QUEUE_FLAG_WC, &q->queue_flags))
-+			else if (!bdev_write_cache(ib_dev->ibd_bd))
- 				opf |= REQ_FUA;
- 		}
- 	} else {
-@@ -886,11 +886,7 @@ iblock_parse_cdb(struct se_cmd *cmd)
- 
- static bool iblock_get_write_cache(struct se_device *dev)
+diff --git a/block/genhd.c b/block/genhd.c
+index b8b6759d670f0..712031ce19070 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -1010,7 +1010,7 @@ static ssize_t disk_alignment_offset_show(struct device *dev,
  {
--	struct iblock_dev *ib_dev = IBLOCK_DEV(dev);
--	struct block_device *bd = ib_dev->ibd_bd;
--	struct request_queue *q = bdev_get_queue(bd);
--
--	return test_bit(QUEUE_FLAG_WC, &q->queue_flags);
-+	return bdev_write_cache(IBLOCK_DEV(dev)->ibd_bd);
+ 	struct gendisk *disk = dev_to_disk(dev);
+ 
+-	return sprintf(buf, "%d\n", queue_alignment_offset(disk->queue));
++	return sprintf(buf, "%d\n", bdev_alignment_offset(disk->part0));
  }
  
- static const struct target_backend_ops iblock_ops = {
-diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
-index b30309f187cf0..d80adee32128d 100644
---- a/fs/btrfs/disk-io.c
-+++ b/fs/btrfs/disk-io.c
-@@ -4247,8 +4247,7 @@ static void write_dev_flush(struct btrfs_device *device)
- 	 * of simplicity, since this is a debug tool and not meant for use in
- 	 * non-debug builds.
- 	 */
--	struct request_queue *q = bdev_get_queue(device->bdev);
--	if (!test_bit(QUEUE_FLAG_WC, &q->queue_flags))
-+	if (bdev_write_cache(device->bdev))
- 		return;
- #endif
- 
+ static ssize_t disk_discard_alignment_show(struct device *dev,
 diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 3a9578e14a6b0..807a49aa5a27a 100644
+index f8c50b77543eb..d5346e72e3645 100644
 --- a/include/linux/blkdev.h
 +++ b/include/linux/blkdev.h
-@@ -1331,6 +1331,11 @@ static inline bool bdev_nonrot(struct block_device *bdev)
- 	return blk_queue_nonrot(bdev_get_queue(bdev));
+@@ -1251,14 +1251,6 @@ bdev_zone_write_granularity(struct block_device *bdev)
+ 	return queue_zone_write_granularity(bdev_get_queue(bdev));
  }
  
-+static inline bool bdev_write_cache(struct block_device *bdev)
-+{
-+	return test_bit(QUEUE_FLAG_WC, &bdev_get_queue(bdev)->queue_flags);
-+}
-+
- static inline enum blk_zoned_model bdev_zoned_model(struct block_device *bdev)
+-static inline int queue_alignment_offset(const struct request_queue *q)
+-{
+-	if (q->limits.misaligned)
+-		return -1;
+-
+-	return q->limits.alignment_offset;
+-}
+-
+ static inline int queue_limit_alignment_offset(struct queue_limits *lim, sector_t sector)
  {
- 	struct request_queue *q = bdev_get_queue(bdev);
+ 	unsigned int granularity = max(lim->physical_block_size, lim->io_min);
 -- 
 2.30.2
 
