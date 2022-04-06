@@ -2,31 +2,31 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D32F0C4321E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 866BCC433F5
 	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 09:11:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1457109AbiDFJJ6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:09:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52082 "EHLO
+        id S1452879AbiDFJJl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:09:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1389884AbiDFJEN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:04:13 -0400
+        with ESMTP id S1451870AbiDFJEr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:04:47 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 445DF485E5D;
-        Tue,  5 Apr 2022 23:06:49 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27510214057;
+        Tue,  5 Apr 2022 23:07:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=M87611C6i/ov1/eZb42tZHfhB+4TDGyoM3tVyFqdBW8=; b=K8zhFyJNpfgn61EWvQNSpZGhoz
-        IsW4d6jPg/o8RKdUEsY2I/0tp3DUigRRARrtQZS25XHPg6Ev8uZ5v/1QUVxcxn0UGRSq3QsUvtq8v
-        m/wMNTUuZ0otna4wKyCKR9KuxhJuJrTxMCeQTsVHCLUaBLTq/yY7C/2YjXGPofV9QR6/pigrTQvyL
-        +7FqGR+5akCXPC49M0KmVYykqYBaCN6qbVITFsaW/p3jcsFmAJQrrYOqAHtx2ogkbDQplnGNGSG9t
-        hp4bnoEMlp1dxurHyPf38IfpaJHQv16bHjbw1cMsHDW5/ZArceH5PRjetepYbBzoAtUPy5j6Xetj9
-        Onlv8nZg==;
+        bh=eypoqjBCbHteIGJMjEE77faduCfiNIsAQ0ydQeu7OQ0=; b=VptJyLJo1YdsSUby4Fd8E+r4Wf
+        u75rPubQZZ/yn7kcXtNA66cq//o6wORmNO306ozoa8JQt9/98VP+qYdEokdi0gKerj4PE3OuPTu8Q
+        h26M8bnuUyy+YQCYjo1RqpA3/aCzFHGcLsWag2ZHixgBhRcZoEIlcW3opNjmON+bZ+OgC/YI0u6sz
+        aGLKxbaAYtZUWCf6s02YkSBuNI+7SEUA0M0G1MZlz1sCKQq4Roo8U5n9rz4bFVVcw6Xtsem6nRg0D
+        kLp1HHY2R8qfLsl/g0pBVddgXjUpubdbXmsxIgH4DU7KvKflDKEXJplNCCWhXhcgX+rKhGC3+ptTE
+        sV6rOXrg==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbyoS-003vjO-9L; Wed, 06 Apr 2022 06:06:41 +0000
+        id 1nbyow-003w6T-7D; Wed, 06 Apr 2022 06:07:11 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,9 +43,9 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 21/27] block: move {bdev,queue_limit}_discard_alignment out of line
-Date:   Wed,  6 Apr 2022 08:05:10 +0200
-Message-Id: <20220406060516.409838-22-hch@lst.de>
+Subject: [PATCH 27/27] direct-io: remove random prefetches
+Date:   Wed,  6 Apr 2022 08:05:16 +0200
+Message-Id: <20220406060516.409838-28-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220406060516.409838-1-hch@lst.de>
 References: <20220406060516.409838-1-hch@lst.de>
@@ -56,110 +56,66 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-No need to inline these fairly larger helpers.  Also fix the return value
-to be unsigned, just like the field in struct queue_limits.
+Randomly poking into block device internals for manual prefetches isn't
+exactly a very maintainable thing to do.  And none of the performance
+criticil direct I/O implementations still use this library function
+anyway, so just drop it.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- block/blk-settings.c   | 35 +++++++++++++++++++++++++++++++++++
- include/linux/blkdev.h | 34 +---------------------------------
- 2 files changed, 36 insertions(+), 33 deletions(-)
+ fs/direct-io.c | 32 ++++----------------------------
+ 1 file changed, 4 insertions(+), 28 deletions(-)
 
-diff --git a/block/blk-settings.c b/block/blk-settings.c
-index 94410a13c0dee..fd83d674afd0a 100644
---- a/block/blk-settings.c
-+++ b/block/blk-settings.c
-@@ -478,6 +478,30 @@ static int queue_limit_alignment_offset(struct queue_limits *lim,
- 	return (granularity + lim->alignment_offset - alignment) % granularity;
- }
- 
-+static unsigned int queue_limit_discard_alignment(struct queue_limits *lim,
-+		sector_t sector)
-+{
-+	unsigned int alignment, granularity, offset;
-+
-+	if (!lim->max_discard_sectors)
-+		return 0;
-+
-+	/* Why are these in bytes, not sectors? */
-+	alignment = lim->discard_alignment >> SECTOR_SHIFT;
-+	granularity = lim->discard_granularity >> SECTOR_SHIFT;
-+	if (!granularity)
-+		return 0;
-+
-+	/* Offset of the partition start in 'granularity' sectors */
-+	offset = sector_div(sector, granularity);
-+
-+	/* And why do we do this modulus *again* in blkdev_issue_discard()? */
-+	offset = (granularity + alignment - offset) % granularity;
-+
-+	/* Turn it back into bytes, gaah */
-+	return offset << SECTOR_SHIFT;
-+}
-+
- static unsigned int blk_round_down_sectors(unsigned int sectors, unsigned int lbs)
+diff --git a/fs/direct-io.c b/fs/direct-io.c
+index aef06e607b405..840752006f601 100644
+--- a/fs/direct-io.c
++++ b/fs/direct-io.c
+@@ -1115,11 +1115,10 @@ static inline int drop_refcount(struct dio *dio)
+  * individual fields and will generate much worse code. This is important
+  * for the whole file.
+  */
+-static inline ssize_t
+-do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
+-		      struct block_device *bdev, struct iov_iter *iter,
+-		      get_block_t get_block, dio_iodone_t end_io,
+-		      dio_submit_t submit_io, int flags)
++ssize_t __blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
++		struct block_device *bdev, struct iov_iter *iter,
++		get_block_t get_block, dio_iodone_t end_io,
++		dio_submit_t submit_io, int flags)
  {
- 	sectors = round_down(sectors, lbs >> SECTOR_SHIFT);
-@@ -924,3 +948,14 @@ int bdev_alignment_offset(struct block_device *bdev)
- 	return q->limits.alignment_offset;
+ 	unsigned i_blkbits = READ_ONCE(inode->i_blkbits);
+ 	unsigned blkbits = i_blkbits;
+@@ -1334,29 +1333,6 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
+ 	kmem_cache_free(dio_cache, dio);
+ 	return retval;
  }
- EXPORT_SYMBOL_GPL(bdev_alignment_offset);
-+
-+unsigned int bdev_discard_alignment(struct block_device *bdev)
-+{
-+	struct request_queue *q = bdev_get_queue(bdev);
-+
-+	if (bdev_is_partition(bdev))
-+		return queue_limit_discard_alignment(&q->limits,
-+				bdev->bd_start_sect);
-+	return q->limits.discard_alignment;
-+}
-+EXPORT_SYMBOL_GPL(bdev_discard_alignment);
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 5a9b7aeda010b..34b1cfd067421 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -1252,39 +1252,7 @@ bdev_zone_write_granularity(struct block_device *bdev)
- }
- 
- int bdev_alignment_offset(struct block_device *bdev);
 -
--static inline int queue_limit_discard_alignment(struct queue_limits *lim, sector_t sector)
+-ssize_t __blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
+-			     struct block_device *bdev, struct iov_iter *iter,
+-			     get_block_t get_block,
+-			     dio_iodone_t end_io, dio_submit_t submit_io,
+-			     int flags)
 -{
--	unsigned int alignment, granularity, offset;
+-	/*
+-	 * The block device state is needed in the end to finally
+-	 * submit everything.  Since it's likely to be cache cold
+-	 * prefetch it here as first thing to hide some of the
+-	 * latency.
+-	 *
+-	 * Attempt to prefetch the pieces we likely need later.
+-	 */
+-	prefetch(&bdev->bd_disk->part_tbl);
+-	prefetch(bdev->bd_disk->queue);
+-	prefetch((char *)bdev->bd_disk->queue + SMP_CACHE_BYTES);
 -
--	if (!lim->max_discard_sectors)
--		return 0;
--
--	/* Why are these in bytes, not sectors? */
--	alignment = lim->discard_alignment >> SECTOR_SHIFT;
--	granularity = lim->discard_granularity >> SECTOR_SHIFT;
--	if (!granularity)
--		return 0;
--
--	/* Offset of the partition start in 'granularity' sectors */
--	offset = sector_div(sector, granularity);
--
--	/* And why do we do this modulus *again* in blkdev_issue_discard()? */
--	offset = (granularity + alignment - offset) % granularity;
--
--	/* Turn it back into bytes, gaah */
--	return offset << SECTOR_SHIFT;
+-	return do_blockdev_direct_IO(iocb, inode, bdev, iter, get_block,
+-				     end_io, submit_io, flags);
 -}
 -
--static inline int bdev_discard_alignment(struct block_device *bdev)
--{
--	struct request_queue *q = bdev_get_queue(bdev);
--
--	if (bdev_is_partition(bdev))
--		return queue_limit_discard_alignment(&q->limits,
--				bdev->bd_start_sect);
--	return q->limits.discard_alignment;
--}
-+unsigned int bdev_discard_alignment(struct block_device *bdev);
+ EXPORT_SYMBOL(__blockdev_direct_IO);
  
- static inline unsigned int bdev_write_zeroes_sectors(struct block_device *bdev)
- {
+ static __init int dio_init(void)
 -- 
 2.30.2
 
