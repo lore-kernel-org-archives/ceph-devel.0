@@ -2,31 +2,31 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4871C43219
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5AE0C433FE
 	for <ceph-devel@archiver.kernel.org>; Wed,  6 Apr 2022 09:11:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1456199AbiDFJJw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:09:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39038 "EHLO
+        id S1455861AbiDFJJt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:09:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349283AbiDFJCq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:02:46 -0400
+        with ESMTP id S1441971AbiDFJEX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2022 05:04:23 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E113948EC7A;
-        Tue,  5 Apr 2022 23:05:25 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91A5147D58B;
+        Tue,  5 Apr 2022 23:06:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=eIMQeXXWWkWx5FDwNbE0TlkL2lmBU9S9LJMrY9Onkc8=; b=VZ+7ypRmFaBJu2hWoqIAVoWmYj
-        4xuOKPhldWs90pyh7ymg8zDgtPiY3fUX65YZt7O8odlZK2biQektgi2RBU0M6b67r5qzYVAWooKMG
-        RUcSTyL9JbVdK+NxQGE8XxOqcy/ecJseZVyWJSGGYU9geNZke8bWZ+0hwzP7GapHHPs8RfgfuSXJe
-        Y6P+Puu3Utc5OgunETt6hMAarqS36XMC4GrXZMgHCqwyaBIKi8AV3Se7oh/6MaZCw/a19Dt2QCcAQ
-        3dQhNCC9soJ3UjvoF59FChYkHOkYI2VJYBUrVQVE7FpoCLMPp5lZq0dB9zF2n/zhNS+Ksy6vRUvVU
-        mD8TTxXw==;
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=QrovNweyJZRj1GFp6iCnhs45fbus+PzPDKXpCmbtDwo=; b=z5LFDFUbPWb3WO37mO8MwjoQU9
+        uS3ZTdwAnf66Lx+zcAQQUC3qALjNiBk8vq/QdAnBrT+kiIx7+bGfq0K3/JsrX94g6GOI1PxnGLDP0
+        TpbSMnVMCM12vlH2ieULysyOQ8eqGhAM7WSZgubyaijH46PkBLtZHwMl/DJ+SL/fL62RhXRHRBZ07
+        gPidH4d0GBhOycIbS6/qs679s/JDzVaH5pxN2YMNY1qvOfu3TMWQ9LeQbRMDybW1HFyANyEbyeoY8
+        bjiiLGRwO/33fN9Ma7LaMPzza6Yu9DF6RQqn94ZGs2knBiL0yIxk5iak06Qk6gWjflRAaNPj9+l6R
+        kccMsInA==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbynA-003ukl-9g; Wed, 06 Apr 2022 06:05:20 +0000
+        id 1nbyoX-003vn4-0d; Wed, 06 Apr 2022 06:06:45 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,10 +43,12 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: use block_device based APIs in block layer consumers
-Date:   Wed,  6 Apr 2022 08:04:49 +0200
-Message-Id: <20220406060516.409838-1-hch@lst.de>
+Subject: [PATCH 22/27] block: refactor discard bio size limiting
+Date:   Wed,  6 Apr 2022 08:05:11 +0200
+Message-Id: <20220406060516.409838-23-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20220406060516.409838-1-hch@lst.de>
+References: <20220406060516.409838-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
@@ -54,104 +56,125 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi Jens,
+Move all the logic to limit the discard bio size into a common helper
+so that it is better documented.
 
-this series cleanups up the block layer API so that APIs consumed
-by file systems are (almost) only struct block_devic based, so that
-file systems don't have to poke into block layer internals like the
-request_queue.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ block/blk-lib.c | 59 ++++++++++++++++++++++++-------------------------
+ block/blk.h     | 14 ------------
+ 2 files changed, 29 insertions(+), 44 deletions(-)
 
-I also found a bunch of existing bugs related to partition offsets
-and discard so these are fixed while going along.
+diff --git a/block/blk-lib.c b/block/blk-lib.c
+index 237d60d8b5857..2ae32a722851c 100644
+--- a/block/blk-lib.c
++++ b/block/blk-lib.c
+@@ -10,6 +10,32 @@
+ 
+ #include "blk.h"
+ 
++static sector_t bio_discard_limit(struct block_device *bdev, sector_t sector)
++{
++	unsigned int discard_granularity =
++		bdev_get_queue(bdev)->limits.discard_granularity;
++	sector_t granularity_aligned_sector;
++
++	if (bdev_is_partition(bdev))
++		sector += bdev->bd_start_sect;
++
++	granularity_aligned_sector =
++		round_up(sector, discard_granularity >> SECTOR_SHIFT);
++
++	/*
++	 * Make sure subsequent bios start aligned to the discard granularity if
++	 * it needs to be split.
++	 */
++	if (granularity_aligned_sector != sector)
++		return granularity_aligned_sector - sector;
++
++	/*
++	 * Align the bio size to the discard granularity to make splitting the bio
++	 * at discard granularity boundaries easier in the driver if needed.
++	 */
++	return round_down(UINT_MAX, discard_granularity) >> SECTOR_SHIFT;
++}
++
+ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+ 		sector_t nr_sects, gfp_t gfp_mask, int flags,
+ 		struct bio **biop)
+@@ -17,7 +43,7 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+ 	struct request_queue *q = bdev_get_queue(bdev);
+ 	struct bio *bio = *biop;
+ 	unsigned int op;
+-	sector_t bs_mask, part_offset = 0;
++	sector_t bs_mask;
+ 
+ 	if (bdev_read_only(bdev))
+ 		return -EPERM;
+@@ -48,36 +74,9 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+ 	if (!nr_sects)
+ 		return -EINVAL;
+ 
+-	/* In case the discard request is in a partition */
+-	if (bdev_is_partition(bdev))
+-		part_offset = bdev->bd_start_sect;
+-
+ 	while (nr_sects) {
+-		sector_t granularity_aligned_lba, req_sects;
+-		sector_t sector_mapped = sector + part_offset;
+-
+-		granularity_aligned_lba = round_up(sector_mapped,
+-				q->limits.discard_granularity >> SECTOR_SHIFT);
+-
+-		/*
+-		 * Check whether the discard bio starts at a discard_granularity
+-		 * aligned LBA,
+-		 * - If no: set (granularity_aligned_lba - sector_mapped) to
+-		 *   bi_size of the first split bio, then the second bio will
+-		 *   start at a discard_granularity aligned LBA on the device.
+-		 * - If yes: use bio_aligned_discard_max_sectors() as the max
+-		 *   possible bi_size of the first split bio. Then when this bio
+-		 *   is split in device drive, the split ones are very probably
+-		 *   to be aligned to discard_granularity of the device's queue.
+-		 */
+-		if (granularity_aligned_lba == sector_mapped)
+-			req_sects = min_t(sector_t, nr_sects,
+-					  bio_aligned_discard_max_sectors(q));
+-		else
+-			req_sects = min_t(sector_t, nr_sects,
+-					  granularity_aligned_lba - sector_mapped);
+-
+-		WARN_ON_ONCE((req_sects << 9) > UINT_MAX);
++		sector_t req_sects =
++			min(nr_sects, bio_discard_limit(bdev, sector));
+ 
+ 		bio = blk_next_bio(bio, bdev, 0, op, gfp_mask);
+ 		bio->bi_iter.bi_sector = sector;
+diff --git a/block/blk.h b/block/blk.h
+index 8ccbc6e076369..1fdc1d28e6d60 100644
+--- a/block/blk.h
++++ b/block/blk.h
+@@ -346,20 +346,6 @@ static inline unsigned int bio_allowed_max_sectors(struct request_queue *q)
+ 	return round_down(UINT_MAX, queue_logical_block_size(q)) >> 9;
+ }
+ 
+-/*
+- * The max bio size which is aligned to q->limits.discard_granularity. This
+- * is a hint to split large discard bio in generic block layer, then if device
+- * driver needs to split the discard bio into smaller ones, their bi_size can
+- * be very probably and easily aligned to discard_granularity of the device's
+- * queue.
+- */
+-static inline unsigned int bio_aligned_discard_max_sectors(
+-					struct request_queue *q)
+-{
+-	return round_down(UINT_MAX, q->limits.discard_granularity) >>
+-			SECTOR_SHIFT;
+-}
+-
+ /*
+  * Internal io_context interface
+  */
+-- 
+2.30.2
 
-Diffstat:
- arch/um/drivers/ubd_kern.c           |    2 
- block/blk-core.c                     |    4 -
- block/blk-lib.c                      |  124 ++++++++++++++++++++---------------
- block/blk-mq-debugfs.c               |    2 
- block/blk-settings.c                 |   74 ++++++++++++++++++++
- block/blk.h                          |   14 ---
- block/fops.c                         |    2 
- block/genhd.c                        |    4 -
- block/ioctl.c                        |   48 ++++++++++---
- block/partitions/core.c              |   12 ---
- drivers/block/drbd/drbd_main.c       |   53 +++++++-------
- drivers/block/drbd/drbd_nl.c         |   94 +++++++++++---------------
- drivers/block/drbd/drbd_receiver.c   |   13 +--
- drivers/block/loop.c                 |   15 +---
- drivers/block/nbd.c                  |    3 
- drivers/block/null_blk/main.c        |    1 
- drivers/block/rbd.c                  |    1 
- drivers/block/rnbd/rnbd-clt.c        |    6 -
- drivers/block/rnbd/rnbd-srv-dev.h    |    8 --
- drivers/block/rnbd/rnbd-srv.c        |    5 -
- drivers/block/virtio_blk.c           |    2 
- drivers/block/xen-blkback/blkback.c  |   15 ++--
- drivers/block/xen-blkback/xenbus.c   |    9 --
- drivers/block/xen-blkfront.c         |    7 -
- drivers/block/zram/zram_drv.c        |    1 
- drivers/md/bcache/alloc.c            |    2 
- drivers/md/bcache/request.c          |    4 -
- drivers/md/bcache/super.c            |    3 
- drivers/md/bcache/sysfs.c            |    2 
- drivers/md/dm-cache-target.c         |    9 --
- drivers/md/dm-clone-target.c         |    9 --
- drivers/md/dm-io.c                   |    2 
- drivers/md/dm-log-writes.c           |    3 
- drivers/md/dm-raid.c                 |    9 --
- drivers/md/dm-table.c                |   25 +------
- drivers/md/dm-thin.c                 |   15 ----
- drivers/md/dm.c                      |    3 
- drivers/md/md-linear.c               |   11 ---
- drivers/md/md.c                      |    5 -
- drivers/md/raid0.c                   |    7 -
- drivers/md/raid1.c                   |   18 -----
- drivers/md/raid10.c                  |   20 -----
- drivers/md/raid5-cache.c             |    8 +-
- drivers/md/raid5.c                   |   14 +--
- drivers/mmc/core/queue.c             |    3 
- drivers/mtd/mtd_blkdevs.c            |    1 
- drivers/nvme/host/core.c             |    6 -
- drivers/nvme/target/io-cmd-bdev.c    |    2 
- drivers/nvme/target/zns.c            |    3 
- drivers/s390/block/dasd_fba.c        |    1 
- drivers/scsi/sd.c                    |    2 
- drivers/target/target_core_device.c  |   19 ++---
- drivers/target/target_core_file.c    |   10 +-
- drivers/target/target_core_iblock.c  |   17 +---
- fs/btrfs/disk-io.c                   |    3 
- fs/btrfs/extent-tree.c               |    8 +-
- fs/btrfs/ioctl.c                     |   12 +--
- fs/btrfs/volumes.c                   |    4 -
- fs/btrfs/zoned.c                     |    3 
- fs/direct-io.c                       |   32 +--------
- fs/exfat/file.c                      |    5 -
- fs/exfat/super.c                     |   10 --
- fs/ext4/ioctl.c                      |   10 --
- fs/ext4/mballoc.c                    |   10 +-
- fs/ext4/super.c                      |   10 --
- fs/f2fs/f2fs.h                       |    3 
- fs/f2fs/file.c                       |   19 ++---
- fs/f2fs/segment.c                    |    8 --
- fs/fat/file.c                        |    5 -
- fs/fat/inode.c                       |   10 --
- fs/gfs2/rgrp.c                       |    7 -
- fs/iomap/direct-io.c                 |    3 
- fs/jbd2/journal.c                    |    9 --
- fs/jfs/ioctl.c                       |    5 -
- fs/jfs/super.c                       |    8 --
- fs/nilfs2/ioctl.c                    |    6 -
- fs/nilfs2/sufile.c                   |    4 -
- fs/nilfs2/the_nilfs.c                |    4 -
- fs/ntfs3/file.c                      |    6 -
- fs/ntfs3/super.c                     |   10 +-
- fs/ocfs2/ioctl.c                     |    5 -
- fs/super.c                           |    2 
- fs/xfs/xfs_discard.c                 |    8 +-
- fs/xfs/xfs_log_cil.c                 |    2 
- fs/xfs/xfs_super.c                   |   12 +--
- fs/zonefs/super.c                    |    3 
- include/linux/blkdev.h               |  112 +++++++++++--------------------
- include/target/target_core_backend.h |    4 -
- mm/swapfile.c                        |   31 ++------
- 89 files changed, 493 insertions(+), 652 deletions(-)
