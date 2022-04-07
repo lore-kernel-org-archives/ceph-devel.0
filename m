@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F873C433FE
-	for <ceph-devel@archiver.kernel.org>; Thu,  7 Apr 2022 12:02:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C808FC433EF
+	for <ceph-devel@archiver.kernel.org>; Thu,  7 Apr 2022 12:02:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238356AbiDGMEc (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 7 Apr 2022 08:04:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53766 "EHLO
+        id S238463AbiDGMEd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 7 Apr 2022 08:04:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232114AbiDGMEa (ORCPT
+        with ESMTP id S231937AbiDGMEa (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2022 08:04:30 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D264BF52D
-        for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2022 05:02:31 -0700 (PDT)
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20EB18BF01
+        for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2022 05:02:30 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 01C5161EE9
-        for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2022 12:02:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5AEB8C385A4;
-        Thu,  7 Apr 2022 12:02:29 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 9221FB82191
+        for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2022 12:02:29 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9AA9C385A0;
+        Thu,  7 Apr 2022 12:02:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649332949;
-        bh=CPa5JPmMCr2as2BhwpEOLP8cez+M0rhvf4j7pKVjsMc=;
+        s=k20201202; t=1649332948;
+        bh=8M9PvelXpi/voVPfiWCg+hio8GT7wj8QBNTnPOOTN74=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=QTuebCXLPwv12472hf9b9c+j5UxzczO0hACqxTvomMIJJ+nO0gDErfd3c+dEVxmqh
-         nOirJvXAKW6paF3KIEUq1Hc9l2KYzg6j+9iKil8O4nnWU1rO+4A9U65K2WM6NF9wZ8
-         GDHVJImB20B0v1AFYgSB28y5a9gFEaJABCssTCmawKHnOksz0z8rWQWc/Y5bUTVb6l
-         dqqWy8uOk/g+oUt5z5mQaDDxF62KU2LUZjHF36q4S10i24rrTQN99k9LXX+aXA5u+r
-         6WKWLI6w2hiKL+jr+myRsTayO3WS8GF2gybZdLI0lM1naZI1rlu7ad+eBZxBWlbSwr
-         IRnwgBIGGrLvQ==
+        b=qyFERYgofFl/JOiNSPPaicLx2qwdtKSwvbpUuzwaCzpjMJaYo1pgMKu244BID/1KP
+         2liV/tlI0Do7q5HUsk79Lof5PVXuF04p2cK6E9v3aQLTZRBYPfGW24n4dG8GPkqveH
+         KEfrUDqH+f/yKYZCq59sgMSl8XCNxES9uQ9GoUjUyBpzUE+6cc+RXS7CjdLzYupP+u
+         h35kzFf974YZ94BlpD3IiOZ1tGLywIJVrmPGH1equ9fv9IDAexB3GHROOTHizzVQxU
+         FWsCVIda+rgt2bBn30riwmVeuncMpi95DHpxosMwjgZq7AxuQRNgqiFcrUBp5Rd6SE
+         N2HgRCt1pXrUw==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org, dhowells@redhat.com
 Cc:     idryomov@gmail.com, xiubli@redhat.com, linux-cachefs@redhat.com
-Subject: [RFC PATCH 4/5] ceph: enhance dout messages in issue_read codepaths
-Date:   Thu,  7 Apr 2022 08:02:23 -0400
-Message-Id: <20220407120224.76156-5-jlayton@kernel.org>
+Subject: [RFC PATCH 2/5] ceph: set rsize in netfs_i_context from mount options
+Date:   Thu,  7 Apr 2022 08:02:21 -0400
+Message-Id: <20220407120224.76156-3-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220407120224.76156-1-jlayton@kernel.org>
 References: <20220407120224.76156-1-jlayton@kernel.org>
@@ -48,33 +48,30 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ fs/ceph/inode.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e7a7b5d29c7d..0726494a0981 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -190,6 +190,8 @@ static bool ceph_netfs_clamp_length(struct netfs_io_subrequest *subreq)
- 	/* Truncate the extent at the end of the current block */
- 	ceph_calc_file_object_mapping(&ci->i_layout, subreq->start, subreq->len,
- 				      &objno, &objoff, &xlen);
-+	dout("%s: subreq->len=0x%zx xlen=0x%x rsize=0x%x",
-+		__func__, subreq->len, xlen, fsc->mount_options->rsize);
- 	subreq->len = min(xlen, fsc->mount_options->rsize);
- 	return true;
- }
-@@ -302,7 +304,9 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 		goto out;
- 	}
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 1dad69a0ab70..8ea1b53b6ce9 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -450,6 +450,7 @@ static int ceph_fill_fragtree(struct inode *inode,
+  */
+ struct inode *ceph_alloc_inode(struct super_block *sb)
+ {
++	struct ceph_mount_options *fsopt = ceph_sb_to_client(sb)->mount_options;
+ 	struct ceph_inode_info *ci;
+ 	struct netfs_i_context *ctx;
+ 	int i;
+@@ -463,7 +464,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	/* Set parameters for the netfs library */
+ 	ctx = netfs_i_context(&ci->vfs_inode);
+ 	netfs_i_context_init(&ci->vfs_inode, &ceph_netfs_ops);
+-	ctx->rsize = 1024 * 1024;
++	ctx->rsize = fsopt->rsize;
  
--	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
-+	dout("%s: pos=%llu orig_len=%zu len=%llu debug_id=%x debug_idx=%hx iter->count=%zx\n",
-+		__func__, subreq->start, subreq->len, len, rreq->debug_id,
-+		subreq->debug_index, iov_iter_count(&subreq->iter));
+ 	spin_lock_init(&ci->i_ceph_lock);
  
- 	err = iov_iter_get_pages_alloc(&subreq->iter, &pages, len, &page_off);
- 	if (err < 0) {
 -- 
 2.35.1
 
