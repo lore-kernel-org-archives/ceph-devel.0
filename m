@@ -2,82 +2,112 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E17AC433F5
-	for <ceph-devel@archiver.kernel.org>; Tue, 12 Apr 2022 09:54:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2C85C433F5
+	for <ceph-devel@archiver.kernel.org>; Tue, 12 Apr 2022 10:19:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351684AbiDLJwo (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 12 Apr 2022 05:52:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43184 "EHLO
+        id S237698AbiDLKVW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 12 Apr 2022 06:21:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46572 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351230AbiDLH2A (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2022 03:28:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 797C94EF5F
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2022 00:08:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1649747279;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=IRF6LVwJSHJOWFm7I1F+YrA+lOMpLLhwycut1OVWExo=;
-        b=eAFR3iuBPcRl+TmQ/4lSNwjhh/25VexeKDNpe3teqaTeboqHIDZ4ZqnsQ4VQ5AqJSjwOzo
-        0IgyHTBYJQZD0ohSV6gu7emg6bahGRZXzkHNKJBmwCP5RNy77Utn3gHzGB2/Dw6U+HIUph
-        Re4/l1Da0Tq9/d4kYoKwH9BeSpEIQX4=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-460-ZDLDB1h0PJa-m8ZfoBguNg-1; Tue, 12 Apr 2022 03:07:55 -0400
-X-MC-Unique: ZDLDB1h0PJa-m8ZfoBguNg-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 45451185A7B2;
-        Tue, 12 Apr 2022 07:07:55 +0000 (UTC)
-Received: from localhost (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 9FDE140CF91A;
-        Tue, 12 Apr 2022 07:07:54 +0000 (UTC)
-From:   Xiubo Li <xiubli@redhat.com>
-To:     jlayton@kernel.org
-Cc:     idryomov@gmail.com, vshankar@redhat.com, lhenriques@suse.de,
-        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v3 1/3] ceph: flush small range instead of the whole map for truncate
-Date:   Tue, 12 Apr 2022 15:07:43 +0800
-Message-Id: <20220412070745.22795-2-xiubli@redhat.com>
-In-Reply-To: <20220412070745.22795-1-xiubli@redhat.com>
-References: <20220412070745.22795-1-xiubli@redhat.com>
+        with ESMTP id S1354330AbiDLKDX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2022 06:03:23 -0400
+Received: from mail-vs1-xe2c.google.com (mail-vs1-xe2c.google.com [IPv6:2607:f8b0:4864:20::e2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FE786E8F6;
+        Tue, 12 Apr 2022 02:10:30 -0700 (PDT)
+Received: by mail-vs1-xe2c.google.com with SMTP id u2so13636675vsl.6;
+        Tue, 12 Apr 2022 02:10:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=LmC2G1kIC2bjPYIdvitbx5KXueFp/+sexGyQ4odL7qI=;
+        b=WBvobLH5KLi6Jflqi4+K9mLcfHiASYqCcI9tr6wtc5F8ebkEW2Hp2dBLHpaJID78hB
+         XMzIYXVY/guqlwBP5rwvCPA/w/ZaLgMrdJTscqTkmRGIBLEajBtLrZGVOmqpyCFe5n4N
+         xZPTbjnLKiuJGye6o0olrzZrmj9XlEFJ1rnjErRXGo/eRgkgGStcZnHy+2tKZr2QppyE
+         szBMAoOmPDyvDSRYwCJiM7CxbthSHwTPQFvrQQpRJP/nlOHXwwogt/WKkUKiVhqHiM45
+         cIsRmm/VTJB4qT/zml8EVFdVXo23lgGIEEO4ugfKw2NEN3ISysd1mTvWX1AXvlgSfnA6
+         sUzg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=LmC2G1kIC2bjPYIdvitbx5KXueFp/+sexGyQ4odL7qI=;
+        b=N1iazT2sqe36XDrIS1QnRuOLHZZAYMKkEiACFBEF5cjxtL6gW0Gu76xW0vlvERQoOq
+         IB63b/K3zUZXOi2vlkcBXdtA65bKXT5ufWlM79rhuco+BBnmNmkk2ZyfNOrOf2mFDjPp
+         ZlESYac75GIi7x525NH9+JCpjz+3a1XP2B1uV2vWPAKtHFqeqwm+goUN9t/OYVRRqFSO
+         NIFmJSNFGoSQpyL77Z2SwjEddQqSe4YdPk7dvCj4BD6sULR0q/F8Hjp47j6O8nazVyov
+         cFO32h8TsRFts6SwTvOWnrwV1eHm/+JVbDtCP5VQ0raR4qDjHa1VV22lHVuG+21vgst3
+         YNgA==
+X-Gm-Message-State: AOAM5310m45UMjHBb/ABWsbWt/Uw839UCbKFdaPBZPqJXvP+879+NRtY
+        By3qEEZ8hzlBeQQpvTrBtRukjlbf7ydz/BUalJc=
+X-Google-Smtp-Source: ABdhPJxHCqelE2YrKMEsQ3BujCVr7G3u5Mo/6g1Tf9IHCCWKPVh24iVU3I84se8WdJ9gaTZ+Xv/N27J+Sp7Es95QiHA=
+X-Received: by 2002:a67:cd85:0:b0:329:c97:af2f with SMTP id
+ r5-20020a67cd85000000b003290c97af2fmr524126vsl.6.1649754629222; Tue, 12 Apr
+ 2022 02:10:29 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.11.54.1
+References: <20220412064940.14798-1-guozhengkui@vivo.com>
+In-Reply-To: <20220412064940.14798-1-guozhengkui@vivo.com>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Tue, 12 Apr 2022 11:11:11 +0200
+Message-ID: <CAOi1vP-OQFQ9-PmUnv_qO6Yy4iMKCWDXX+jupfKSZKYnHnb66w@mail.gmail.com>
+Subject: Re: [PATCH linux-next] net: ceph: use swap() macro instead of taking
+ tmp variable
+To:     Guo Zhengkui <guozhengkui@vivo.com>
+Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        "open list:CEPH COMMON CODE (LIBCEPH)" <ceph-devel@vger.kernel.org>,
+        "open list:NETWORKING [GENERAL]" <netdev@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        zhengkui_guo@outlook.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/inode.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+On Tue, Apr 12, 2022 at 9:01 AM Guo Zhengkui <guozhengkui@vivo.com> wrote:
+>
+> Fix the following coccicheck warning:
+> net/ceph/crush/mapper.c:1077:8-9: WARNING opportunity for swap()
+>
+> by using swap() for the swapping of variable values and drop
+> the tmp variable that is not needed any more.
+>
+> Signed-off-by: Guo Zhengkui <guozhengkui@vivo.com>
+> ---
+>  net/ceph/crush/mapper.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+>
+> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
+> index 7057f8db4f99..1daf95e17d67 100644
+> --- a/net/ceph/crush/mapper.c
+> +++ b/net/ceph/crush/mapper.c
+> @@ -906,7 +906,6 @@ int crush_do_rule(const struct crush_map *map,
+>         int recurse_to_leaf;
+>         int wsize = 0;
+>         int osize;
+> -       int *tmp;
+>         const struct crush_rule *rule;
+>         __u32 step;
+>         int i, j;
+> @@ -1073,9 +1072,7 @@ int crush_do_rule(const struct crush_map *map,
+>                                 memcpy(o, c, osize*sizeof(*o));
+>
+>                         /* swap o and w arrays */
+> -                       tmp = o;
+> -                       o = w;
+> -                       w = tmp;
+> +                       swap(o, w);
+>                         wsize = osize;
+>                         break;
+>
+> --
+> 2.20.1
+>
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index fa0d3018d981..a5145a2b7228 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2274,8 +2274,13 @@ static int fill_fscrypt_truncate(struct inode *inode,
- 	     ceph_cap_string(issued));
- 
- 	/* Try to writeback the dirty pagecaches */
--	if (issued & (CEPH_CAP_FILE_BUFFER))
--		filemap_write_and_wait(inode->i_mapping);
-+	if (issued & (CEPH_CAP_FILE_BUFFER)) {
-+		loff_t lend = orig_pos + CEPH_FSCRYPT_BLOCK_SHIFT - 1;
-+		ret = filemap_write_and_wait_range(inode->i_mapping,
-+						   orig_pos, lend);
-+		if (ret < 0)
-+			goto out;
-+	}
- 
- 	page = __page_cache_alloc(GFP_KERNEL);
- 	if (page == NULL) {
--- 
-2.36.0.rc1
+Applied.
 
+Thanks,
+
+                Ilya
