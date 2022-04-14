@@ -2,108 +2,135 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8D4DC433EF
-	for <ceph-devel@archiver.kernel.org>; Thu, 14 Apr 2022 05:45:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9910C433EF
+	for <ceph-devel@archiver.kernel.org>; Thu, 14 Apr 2022 06:56:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236408AbiDNFsC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 14 Apr 2022 01:48:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44840 "EHLO
+        id S240172AbiDNG7N (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 14 Apr 2022 02:59:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239972AbiDNFrn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2022 01:47:43 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 836544BBAA
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2022 22:45:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1649915118;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=7DoeHEYa8sI7M8hiGeiEV9eh2+pjEJ8yej8Ju/AWbfM=;
-        b=JVYqeefDx1O+i7x2xn8WDlzElhJAm19jRlF/23rMc3Fbv0hLYKisdJ7zkR2vw+sFYutRgK
-        4yh/x2xsEw3NbI5PWaVTaEEAkGEGBlBCRD0Zf7PszAn+N1mx8SsnwNts4cgnvw75c72jMO
-        aNdNEAV8Lp/ic/7gPhMenmD3NKwiPkA=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-317-R1P8SOXoOGy7UB2mkKsSzA-1; Thu, 14 Apr 2022 01:45:17 -0400
-X-MC-Unique: R1P8SOXoOGy7UB2mkKsSzA-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S239661AbiDNG7M (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2022 02:59:12 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2579553B6A;
+        Wed, 13 Apr 2022 23:56:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1649919404; i=@fujitsu.com;
+        bh=smQK4tppl/0P9em1n4iYPJctoNQAJ0+xEhuhlGR6/yo=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=dNssRrL8fwslrgqW+PO0yGjf9kORsjhaLDTfviMxuaZKFNz6npRlsUkRygC8ygEAH
+         0GvWr8VPlDf62bbfYzsqOhATAU7INj+TRMviadPB5hpdZkkRlQ/uKT2JntEQJCg0Uu
+         1WsO3K5QHCNx+KllaZGuD0bKB4hYDeNB3+YguNmdrnUKgeQtrwbzakLDrU4R5NAcJx
+         h2LeN46ITYIOh1KUxE26FBoce4k2B+Aj0a5aeknNT4Irt5K3olLtHvU8vkx6Vi2FGu
+         jNEMJB5bjsrIF3v6q0x2kAVfXjzZkd+fK3Hy6DaOID3WN+TmTZ34UoBSPS0sSqS35/
+         hA9etSp39u4NQ==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrBIsWRWlGSWpSXmKPExsViZ8MxSXf10fA
+  kgyUzLSxeH/7EaPHh5iQmiy3H7jFaXH7CZ/Fz2Sp2iz17T7JY7Hpzjt3i/N/jrA4cHqcWSXhs
+  WtXJ5nFh2Rs2j8+b5Dw2PXnLFMAaxZqZl5RfkcCa0fRermAdb8W63YuZGxjXcXcxcnEICWxhl
+  Li3eB4rhLOASeLk5XmMEM4eRomnjdvZuhg5OdgENCWedS5gBrFFBBIkXt9azAxSxCwwh1Hi8Y
+  nbYEXCAuYSG7cfYwGxWQRUJf51zGYHsXkFPCR+vH0AViMhoCAx5eF7Zoi4oMTJmU/A6pkFJCQ
+  OvnjBDFGjKHGp4xsjhF0hMWtWGxOErSZx9dwm5gmM/LOQtM9C0r6AkWkVo3VSUWZ6RkluYmaO
+  rqGBga6hoamusZGuoYWlXmKVbqJeaqlueWpxia6RXmJ5sV5qcbFecWVuck6KXl5qySZGYASkF
+  Cvs3cF4eeVPvUOMkhxMSqK8TcDYEOJLyk+pzEgszogvKs1JLT7EKMPBoSTB+/8IUE6wKDU9tS
+  ItMwcYjTBpCQ4eJRFeP5BW3uKCxNzizHSI1ClGRSlx3tUgfQIgiYzSPLg2WAK4xCgrJczLyMD
+  AIMRTkFqUm1mCKv+KUZyDUUmY9wLIFJ7MvBK46a+AFjMBLf62KhRkcUkiQkqqgUn/3vOLi/O7
+  pZX7dq1a8ntJlvDHMnFnRYHgJ1Pl1+3uTj543P1B//28XckTPEOPFFy16OjOS/rR9+t90/WGu
+  Q/+mDB4lqlfuaJv33Sc21D5hZpFRH2Z99qKR743TeVzXxy6vLtFs2t6UsOjv9cKW3uncUcVsb
+  ncX3JOWM7+rIjk/SD/rcz5aWx6VldY5uj82BbnG9rlUPP5rrjnw0+beS9L3XRPvnyjZ7egL3N
+  H3Ow9Ljw/rnAuUGWYHCrMVhfFzfq/bZKQe7b48q3vFon5z6hVv5sYl/nqVefTMqH6u8z/FZyP
+  +zhYaRfONPWIl//YUsdQaP5ig2Zp15a9c07s2+5R3F2doiIf+Hl3eUWvEktxRqKhFnNRcSIAZ
+  wmOD3sDAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-11.tower-548.messagelabs.com!1649919403!222910!1
+X-Originating-IP: [62.60.8.146]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.85.8; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 22917 invoked from network); 14 Apr 2022 06:56:43 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-11.tower-548.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 14 Apr 2022 06:56:43 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 818E7100472;
+        Thu, 14 Apr 2022 07:56:43 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C7B7C3800E81;
-        Thu, 14 Apr 2022 05:45:16 +0000 (UTC)
-Received: from localhost (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2CDCF2166B4F;
-        Thu, 14 Apr 2022 05:45:15 +0000 (UTC)
-From:   Xiubo Li <xiubli@redhat.com>
-To:     jlayton@kernel.org
-Cc:     idryomov@gmail.com, vshankar@redhat.com,
-        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v2] ceph: flush the mdlog for filesystem sync
-Date:   Thu, 14 Apr 2022 13:45:12 +0800
-Message-Id: <20220414054512.386293-1-xiubli@redhat.com>
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 743A6100467;
+        Thu, 14 Apr 2022 07:56:43 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Thu, 14 Apr 2022 07:56:32 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <linux-fsdevel@vger.kernel.org>, <ceph-devel@vger.kernel.org>,
+        <ocfs2-devel@oss.oracle.com>
+CC:     <viro@zeniv.linux.org.uk>, <david@fromorbit.com>,
+        <brauner@kernel.org>, <djwong@kernel.org>, <jlayton@kernel.org>,
+        Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2 1/3] vfs: Add inode_sgid_strip() api
+Date:   Thu, 14 Apr 2022 15:57:17 +0800
+Message-ID: <1649923039-2273-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.78 on 10.11.54.6
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Before waiting for a request's safe reply, we will send the mdlog
-flush request to the relevant MDS. And this will also flush the
-mdlog for all the other unsafe requests in the same session, so
-we can record the last session and no need to flush mdlog again
-in the next loop. But there still have cases that it may send the
-mdlog flush requst twice or more, but that should be not often.
+inode_sgid_strip() function is used to strip S_ISGID mode
+when creat/open/mknod file.
 
-URL: https://tracker.ceph.com/issues/55284
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
+ fs/inode.c         | 18 ++++++++++++++++++
+ include/linux/fs.h |  3 ++-
+ 2 files changed, 20 insertions(+), 1 deletion(-)
 
-V2:
-- Fixed possible NULL pointer dereference for the req->r_session
-
-
- fs/ceph/mds_client.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 0da85c9ce73a..4aaa7b14136e 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -5098,6 +5098,7 @@ void ceph_mdsc_pre_umount(struct ceph_mds_client *mdsc)
- static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
- {
- 	struct ceph_mds_request *req = NULL, *nextreq;
-+	struct ceph_mds_session *last_session = NULL, *s;
- 	struct rb_node *n;
- 
- 	mutex_lock(&mdsc->mutex);
-@@ -5117,6 +5118,15 @@ static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
- 			ceph_mdsc_get_request(req);
- 			if (nextreq)
- 				ceph_mdsc_get_request(nextreq);
-+
-+			/* send flush mdlog request to MDS */
-+			s = req->r_session;
-+			if (s && last_session != s) {
-+				send_flush_mdlog(s);
-+				ceph_put_mds_session(last_session);
-+				last_session = ceph_get_mds_session(s);
-+			}
-+
- 			mutex_unlock(&mdsc->mutex);
- 			dout("wait_unsafe_requests  wait on %llu (want %llu)\n",
- 			     req->r_tid, want_tid);
-@@ -5135,6 +5145,7 @@ static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
- 		req = nextreq;
- 	}
- 	mutex_unlock(&mdsc->mutex);
-+	ceph_put_mds_session(last_session);
- 	dout("wait_unsafe_requests done\n");
+diff --git a/fs/inode.c b/fs/inode.c
+index 9d9b422504d1..d63264998855 100644
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@ -2405,3 +2405,21 @@ struct timespec64 current_time(struct inode *inode)
+ 	return timestamp_truncate(now, inode);
  }
- 
+ EXPORT_SYMBOL(current_time);
++
++void inode_sgid_strip(struct user_namespace *mnt_userns, struct inode *dir,
++		      umode_t *mode)
++{
++	if (!dir || !(dir->i_mode & S_ISGID))
++		return;
++	if ((*mode & (S_ISGID | S_IXGRP)) != (S_ISGID | S_IXGRP))
++		return;
++	if (S_ISDIR(*mode))
++		return;
++	if (in_group_p(i_gid_into_mnt(mnt_userns, dir)))
++		return;
++	if (capable_wrt_inode_uidgid(mnt_userns, dir, CAP_FSETID))
++		return;
++
++	*mode &= ~S_ISGID;
++}
++EXPORT_SYMBOL(inode_sgid_strip);
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index bbde95387a23..94d94219fe7c 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -1897,7 +1897,8 @@ extern long compat_ptr_ioctl(struct file *file, unsigned int cmd,
+ void inode_init_owner(struct user_namespace *mnt_userns, struct inode *inode,
+ 		      const struct inode *dir, umode_t mode);
+ extern bool may_open_dev(const struct path *path);
+-
++void inode_sgid_strip(struct user_namespace *mnt_userns, struct inode *dir,
++		      umode_t *mode);
+ /*
+  * This is the "filldir" function type, used by readdir() to let
+  * the kernel specify what kind of dirent layout it wants to have.
 -- 
-2.36.0.rc1
+2.27.0
 
