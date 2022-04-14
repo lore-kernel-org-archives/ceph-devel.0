@@ -2,63 +2,63 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74F07C433EF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A569C4332F
 	for <ceph-devel@archiver.kernel.org>; Thu, 14 Apr 2022 14:41:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230236AbiDNOnU (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 14 Apr 2022 10:43:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43374 "EHLO
+        id S234278AbiDNOnR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 14 Apr 2022 10:43:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43414 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347657AbiDNN7Z (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2022 09:59:25 -0400
+        with ESMTP id S1347667AbiDNN70 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2022 09:59:26 -0400
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 293CB338AB;
-        Thu, 14 Apr 2022 06:51:01 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFECF4707F;
+        Thu, 14 Apr 2022 06:51:02 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id DA51121613;
-        Thu, 14 Apr 2022 13:50:59 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 5AE2A21615;
+        Thu, 14 Apr 2022 13:51:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1649944259; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1649944261; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=w48CeVx/KrAp2wYmVlzeqrFMXv/esKDNwCLFBwxR02s=;
-        b=uaeMI/WNT2E/95xcEZ4JcQ06Tm3X0TddvO3ah9jLlN9Oyu476ryR9nE/gc0hsoQMF9Xwet
-        42oI+/ew7Nt4soJEztWKc0aUUJgjzRCuWPMawiC+Zip4wPYybteVu1qcHlzXuqwFUSBR5f
-        QkCHiQFPi3/MVQY1tUAblYHf2Cb8UKg=
+        bh=dYu8vIYx3wq/1oLGXfYf1q5L4rYJ/h1RWxYRhBgaOaI=;
+        b=nSNFWtCWGsgU2i333wP83WKVbq6mXMux4ySlC/iJnBopR6jAdOGpE3BEV16w3rdyfj6l7x
+        HvA5jO54f4V6xcfNtvDZz03xtviqi9ZSvJnZguW9UIX7URb6U4a0KYCToOTI5j7u+EEZ6r
+        fMLl5ppXBi/lw4zyMNvcaJJrCnnIoDs=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1649944259;
+        s=susede2_ed25519; t=1649944261;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=w48CeVx/KrAp2wYmVlzeqrFMXv/esKDNwCLFBwxR02s=;
-        b=eatG4gJ5bW2m1wSrnnkUmuPzvJUWTkADZ8rmg6fn0riFO4RrBXCPQqc8ISHqJQUVX8puMA
-        +oACCwSr942bhbCw==
+        bh=dYu8vIYx3wq/1oLGXfYf1q5L4rYJ/h1RWxYRhBgaOaI=;
+        b=s8qiFMJDSx2Kl/uVuz0kHJgJvH6hKF/Zwm9eIrCyDjgDDdy0g444QHix3TiRD+gj6dF8/I
+        1U2FPkocLdicipAA==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6A822132C0;
-        Thu, 14 Apr 2022 13:50:59 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id EA5AB132C0;
+        Thu, 14 Apr 2022 13:51:00 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id yBMNF8MmWGJnTgAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Thu, 14 Apr 2022 13:50:59 +0000
+        id 8EJLNsQmWGJnTgAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Thu, 14 Apr 2022 13:51:00 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 527b0df8;
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 4d1c80aa;
         Thu, 14 Apr 2022 13:51:24 +0000 (UTC)
 From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
 To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
         Ilya Dryomov <idryomov@gmail.com>
 Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v4 1/4] ceph: add support for encrypted snapshot names
-Date:   Thu, 14 Apr 2022 14:51:19 +0100
-Message-Id: <20220414135122.26821-2-lhenriques@suse.de>
+Subject: [PATCH v4 4/4] ceph: replace base64url by the encoding used for mailbox names
+Date:   Thu, 14 Apr 2022 14:51:22 +0100
+Message-Id: <20220414135122.26821-5-lhenriques@suse.de>
 In-Reply-To: <20220414135122.26821-1-lhenriques@suse.de>
 References: <20220414135122.26821-1-lhenriques@suse.de>
 MIME-Version: 1.0
@@ -68,75 +68,150 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Since filenames in encrypted directories are already encrypted and shown
-as a base64-encoded string when the directory is locked, snapshot names
-should show a similar behaviour.
+The base64url encoding includes the '_' character, which may cause problems
+in snapshot names (if the name starts with '_').  Thus, use the base64
+encoding defined for IMAP mailbox names (RFC 3501), which uses '+' and ','
+instead of '-' and '_'.
 
 Signed-off-by: Luís Henriques <lhenriques@suse.de>
 ---
- fs/ceph/inode.c | 31 +++++++++++++++++++++++++++----
- 1 file changed, 27 insertions(+), 4 deletions(-)
+ fs/ceph/crypto.c | 64 ++++++++++++++++++++++++++++++++++++++++++++++--
+ fs/ceph/crypto.h |  3 +++
+ fs/ceph/dir.c    |  2 +-
+ fs/ceph/inode.c  |  2 +-
+ 4 files changed, 67 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index fa0d3018d981..8e97efa2b1a7 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -91,9 +91,15 @@ struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
- 	if (err < 0)
- 		goto out_err;
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+index 1fa9dd634a6f..1adf97b00a4f 100644
+--- a/fs/ceph/crypto.c
++++ b/fs/ceph/crypto.c
+@@ -1,4 +1,11 @@
+ // SPDX-License-Identifier: GPL-2.0
++/*
++ * The base64 encode/decode code was copied from fscrypt:
++ * Copyright (C) 2015, Google, Inc.
++ * Copyright (C) 2015, Motorola Mobility
++ * Written by Uday Savagaonkar, 2014.
++ * Modified by Jaegeuk Kim, 2015.
++ */
+ #include <linux/ceph/ceph_debug.h>
+ #include <linux/xattr.h>
+ #include <linux/fscrypt.h>
+@@ -8,6 +15,59 @@
+ #include "mds_client.h"
+ #include "crypto.h"
  
--	err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
--	if (err)
--		goto out_err;
-+	/*
-+	 * We'll skip setting fscrypt context for snapshots, leaving that for
-+	 * the handle_reply().
-+	 */
-+	if (ceph_snap(dir) != CEPH_SNAPDIR) {
-+		err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
-+		if (err)
-+			goto out_err;
-+	}
- 
- 	return inode;
- out_err:
-@@ -157,6 +163,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 	};
- 	struct inode *inode = ceph_get_inode(parent->i_sb, vino, NULL);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
-+	int ret = -ENOTDIR;
- 
- 	if (IS_ERR(inode))
- 		return inode;
-@@ -182,6 +189,22 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 	ci->i_rbytes = 0;
- 	ci->i_btime = ceph_inode(parent)->i_btime;
- 
-+	/* if encrypted, just borrow fscrypt_auth from parent */
-+	if (IS_ENCRYPTED(parent)) {
-+		struct ceph_inode_info *pci = ceph_inode(parent);
++/*
++ * The base64url encoding used by fscrypt includes the '_' character, which may
++ * cause problems in snapshot names (which can not starts with '_').  Thus, we
++ * used the base64 encoding defined for IMAP mailbox names (RFC 3501) instead,
++ * which replaces '-' and '_' by '+' and ','.
++ */
++static const char base64_table[65] =
++        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+,";
 +
-+		ci->fscrypt_auth = kmemdup(pci->fscrypt_auth,
-+					   pci->fscrypt_auth_len,
-+					   GFP_KERNEL);
-+		if (ci->fscrypt_auth) {
-+			inode->i_flags |= S_ENCRYPTED;
-+			ci->fscrypt_auth_len = pci->fscrypt_auth_len;
-+		} else {
-+			dout("Failed to alloc snapdir fscrypt_auth\n");
-+			ret = -ENOMEM;
-+			goto err;
++int ceph_base64_encode(const u8 *src, int srclen, char *dst)
++{
++	u32 ac = 0;
++	int bits = 0;
++	int i;
++	char *cp = dst;
++
++	for (i = 0; i < srclen; i++) {
++		ac = (ac << 8) | src[i];
++		bits += 8;
++		do {
++			bits -= 6;
++			*cp++ = base64_table[(ac >> bits) & 0x3f];
++		} while (bits >= 6);
++	}
++	if (bits)
++		*cp++ = base64_table[(ac << (6 - bits)) & 0x3f];
++	return cp - dst;
++}
++
++int ceph_base64_decode(const char *src, int srclen, u8 *dst)
++{
++	u32 ac = 0;
++	int bits = 0;
++	int i;
++	u8 *bp = dst;
++
++	for (i = 0; i < srclen; i++) {
++		const char *p = strchr(base64_table, src[i]);
++
++		if (p == NULL || src[i] == 0)
++			return -1;
++		ac = (ac << 6) | (p - base64_table);
++		bits += 6;
++		if (bits >= 8) {
++			bits -= 8;
++			*bp++ = (u8)(ac >> bits);
 +		}
 +	}
- 	if (inode->i_state & I_NEW) {
- 		inode->i_op = &ceph_snapdir_iops;
- 		inode->i_fop = &ceph_snapdir_fops;
-@@ -195,7 +218,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 		discard_new_inode(inode);
- 	else
- 		iput(inode);
--	return ERR_PTR(-ENOTDIR);
-+	return ERR_PTR(ret);
- }
++	if (ac & ((1 << bits) - 1))
++		return -1;
++	return bp - dst;
++}
++
+ static int ceph_crypt_get_context(struct inode *inode, void *ctx, size_t len)
+ {
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+@@ -261,7 +321,7 @@ int ceph_encode_encrypted_dname(struct inode *parent, struct qstr *d_name, char
+ 	}
  
- const struct inode_operations ceph_file_iops = {
+ 	/* base64 encode the encrypted name */
+-	elen = fscrypt_base64url_encode(cryptbuf, len, buf);
++	elen = ceph_base64_encode(cryptbuf, len, buf);
+ 	dout("base64-encoded ciphertext name = %.*s\n", elen, buf);
+ 
+ 	/* To understand the 240 limit, see CEPH_NOHASH_NAME_MAX comments */
+@@ -367,7 +427,7 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 			tname = &_tname;
+ 		}
+ 
+-		declen = fscrypt_base64url_decode(name, name_len, tname->name);
++		declen = ceph_base64_decode(name, name_len, tname->name);
+ 		if (declen <= 0) {
+ 			ret = -EIO;
+ 			goto out;
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index 0e10f934af5c..63fb230fcb41 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -89,6 +89,9 @@ static inline u32 ceph_fscrypt_auth_len(struct ceph_fscrypt_auth *fa)
+  */
+ #define CEPH_NOHASH_NAME_MAX (180 - SHA256_DIGEST_SIZE)
+ 
++int ceph_base64_encode(const u8 *src, int srclen, char *dst);
++int ceph_base64_decode(const char *src, int srclen, u8 *dst);
++
+ void ceph_fscrypt_set_ops(struct super_block *sb);
+ 
+ void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc);
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 5ccf6453f02f..f48f1ff20927 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -966,7 +966,7 @@ static int prep_encrypted_symlink_target(struct ceph_mds_request *req, const cha
+ 		goto out;
+ 	}
+ 
+-	len = fscrypt_base64url_encode(osd_link.name, osd_link.len, req->r_path2);
++	len = ceph_base64_encode(osd_link.name, osd_link.len, req->r_path2);
+ 	req->r_path2[len] = '\0';
+ out:
+ 	fscrypt_fname_free_buffer(&osd_link);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 8e97efa2b1a7..1df2eab767ef 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -876,7 +876,7 @@ static int decode_encrypted_symlink(const char *encsym, int enclen, u8 **decsym)
+ 	if (!sym)
+ 		return -ENOMEM;
+ 
+-	declen = fscrypt_base64url_decode(encsym, enclen, sym);
++	declen = ceph_base64_decode(encsym, enclen, sym);
+ 	if (declen < 0) {
+ 		pr_err("%s: can't decode symlink (%d). Content: %.*s\n",
+ 		       __func__, declen, enclen, encsym);
