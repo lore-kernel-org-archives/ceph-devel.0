@@ -2,63 +2,63 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1026C4332F
-	for <ceph-devel@archiver.kernel.org>; Mon, 18 Apr 2022 15:05:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D727C433F5
+	for <ceph-devel@archiver.kernel.org>; Mon, 18 Apr 2022 15:05:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240795AbiDRPHz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 18 Apr 2022 11:07:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41476 "EHLO
+        id S1344829AbiDRPH6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 18 Apr 2022 11:07:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345368AbiDRPHk (ORCPT
+        with ESMTP id S1345393AbiDRPHk (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2022 11:07:40 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A52A98D6AF;
-        Mon, 18 Apr 2022 06:59:33 -0700 (PDT)
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6D438E1A6;
+        Mon, 18 Apr 2022 06:59:35 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 4D30B2161E;
-        Mon, 18 Apr 2022 13:59:32 +0000 (UTC)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 527D01F75D;
+        Mon, 18 Apr 2022 13:59:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1650290372; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1650290374; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=w48CeVx/KrAp2wYmVlzeqrFMXv/esKDNwCLFBwxR02s=;
-        b=pr2NAXORpTCN9H4i4uu1CgRitWVIHuflD+mLP1RWzNLMmDiiP84azY0SIE4xd1+7zcLQWg
-        UPEZFmI2E5i2lpd51FPG1DslEw7hAJdDnd4zU9V3oQ578diO50Lw/mEjo147NjOKN5UPbo
-        rioWf07kGRio4Jwi7W1W4Ip0eh7QZPA=
+        bh=KPeaGa1p82s2eYcsNFRY7rxYiJ/jMxjPDAxuhJ07BsU=;
+        b=A13IgqmZyHKzM+crWTQFObajY7Z7rQ1XCDSx+f53UgTovUeOGHIBEBv9BGq/Z6nJosb1MG
+        4WDddD9QfFL1m1ZCFZi1rgxK+fDjEMQx/vtMPm1VdXYXLf/wJhdjlSmL641JNycp/OJqO0
+        ZG4w9Y5GkvB9kwuevQX4UT0EkDp/TUQ=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1650290372;
+        s=susede2_ed25519; t=1650290374;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=w48CeVx/KrAp2wYmVlzeqrFMXv/esKDNwCLFBwxR02s=;
-        b=+8DiB6588M/JDN5lzbGa2LIiznV4uQvovQiNysa1xv7kBLcJr2RFQWzjC6KPIExky9IipK
-        72dBZtCAEr1xyADA==
+        bh=KPeaGa1p82s2eYcsNFRY7rxYiJ/jMxjPDAxuhJ07BsU=;
+        b=hotTrITyhaslQ9exb3WDWbwSnGcDWIGWRE+MQv+m8sXkDjYDoRme0yk7Kk7YAqnDzcpbvL
+        lrmLghpAx8vZlyCQ==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D9E2B13A9B;
-        Mon, 18 Apr 2022 13:59:31 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id DF8C913A9B;
+        Mon, 18 Apr 2022 13:59:33 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id QElEMsNuXWLiOwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Mon, 18 Apr 2022 13:59:31 +0000
+        id cNGjM8VuXWLiOwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 18 Apr 2022 13:59:33 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id a863637e;
+        by brahms.olymp (OpenSMTPD) with ESMTPA id c21201d9;
         Mon, 18 Apr 2022 13:59:58 +0000 (UTC)
 From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
 To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
         Ilya Dryomov <idryomov@gmail.com>
 Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v5 1/5] ceph: add support for encrypted snapshot names
-Date:   Mon, 18 Apr 2022 14:59:53 +0100
-Message-Id: <20220418135957.12056-2-lhenriques@suse.de>
+Subject: [PATCH v5 5/5] ceph: prevent snapshots to be created in encrypted locked directories
+Date:   Mon, 18 Apr 2022 14:59:57 +0100
+Message-Id: <20220418135957.12056-6-lhenriques@suse.de>
 In-Reply-To: <20220418135957.12056-1-lhenriques@suse.de>
 References: <20220418135957.12056-1-lhenriques@suse.de>
 MIME-Version: 1.0
@@ -68,75 +68,28 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Since filenames in encrypted directories are already encrypted and shown
-as a base64-encoded string when the directory is locked, snapshot names
-should show a similar behaviour.
+With snapshot names encryption we can not allow snapshots to be created in
+locked directories because the names wouldn't be encrypted.  This patch
+forces the directory to be unlocked to allow a snapshot to be created.
 
 Signed-off-by: Luís Henriques <lhenriques@suse.de>
 ---
- fs/ceph/inode.c | 31 +++++++++++++++++++++++++++----
- 1 file changed, 27 insertions(+), 4 deletions(-)
+ fs/ceph/dir.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index fa0d3018d981..8e97efa2b1a7 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -91,9 +91,15 @@ struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
- 	if (err < 0)
- 		goto out_err;
- 
--	err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
--	if (err)
--		goto out_err;
-+	/*
-+	 * We'll skip setting fscrypt context for snapshots, leaving that for
-+	 * the handle_reply().
-+	 */
-+	if (ceph_snap(dir) != CEPH_SNAPDIR) {
-+		err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
-+		if (err)
-+			goto out_err;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index f48f1ff20927..44b7114ca267 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1071,6 +1071,11 @@ static int ceph_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
+ 		err = -EDQUOT;
+ 		goto out;
+ 	}
++	if ((op == CEPH_MDS_OP_MKSNAP) && IS_ENCRYPTED(dir) &&
++	    !fscrypt_has_encryption_key(dir)) {
++		err = -ENOKEY;
++		goto out;
 +	}
  
- 	return inode;
- out_err:
-@@ -157,6 +163,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 	};
- 	struct inode *inode = ceph_get_inode(parent->i_sb, vino, NULL);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
-+	int ret = -ENOTDIR;
  
- 	if (IS_ERR(inode))
- 		return inode;
-@@ -182,6 +189,22 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 	ci->i_rbytes = 0;
- 	ci->i_btime = ceph_inode(parent)->i_btime;
- 
-+	/* if encrypted, just borrow fscrypt_auth from parent */
-+	if (IS_ENCRYPTED(parent)) {
-+		struct ceph_inode_info *pci = ceph_inode(parent);
-+
-+		ci->fscrypt_auth = kmemdup(pci->fscrypt_auth,
-+					   pci->fscrypt_auth_len,
-+					   GFP_KERNEL);
-+		if (ci->fscrypt_auth) {
-+			inode->i_flags |= S_ENCRYPTED;
-+			ci->fscrypt_auth_len = pci->fscrypt_auth_len;
-+		} else {
-+			dout("Failed to alloc snapdir fscrypt_auth\n");
-+			ret = -ENOMEM;
-+			goto err;
-+		}
-+	}
- 	if (inode->i_state & I_NEW) {
- 		inode->i_op = &ceph_snapdir_iops;
- 		inode->i_fop = &ceph_snapdir_fops;
-@@ -195,7 +218,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 		discard_new_inode(inode);
- 	else
- 		iput(inode);
--	return ERR_PTR(-ENOTDIR);
-+	return ERR_PTR(ret);
- }
- 
- const struct inode_operations ceph_file_iops = {
+ 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
