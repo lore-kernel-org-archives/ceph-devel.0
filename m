@@ -2,88 +2,141 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E05AC433F5
-	for <ceph-devel@archiver.kernel.org>; Mon, 18 Apr 2022 14:23:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1026C4332F
+	for <ceph-devel@archiver.kernel.org>; Mon, 18 Apr 2022 15:05:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245534AbiDRO0E (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 18 Apr 2022 10:26:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49130 "EHLO
+        id S240795AbiDRPHz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 18 Apr 2022 11:07:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345172AbiDROYp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2022 10:24:45 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6127D4F46D;
-        Mon, 18 Apr 2022 06:19:33 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S1345368AbiDRPHk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2022 11:07:40 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A52A98D6AF;
+        Mon, 18 Apr 2022 06:59:33 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 91A6860F6C;
-        Mon, 18 Apr 2022 13:19:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73C82C385A8;
-        Mon, 18 Apr 2022 13:19:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650287972;
-        bh=qwW+KXmZ4MpkbXf5CjQzDRPBp7owf1X79RhEF+DEUgI=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=uY4DneylPE3wC7Cbk/kBwKtUJakpBeGILDpwfzSS/Ilq73esZIHZPEwzcDUWaGvcH
-         wI3aMlkQxqHffITqhsadwpQJw0plsH/aGW+jhgpqdPuElzcyDQCPPyyYMUm4VbxUiA
-         knaIew8MkzgCv7gl393zpRIYzzJEy55kDJWhFdA7xHqWIZpJBvQi9BVT85Sx0jUe5N
-         B+p6lVoF/HGTkl/np7jY1JCm/dLnpxDqPJQNY53EUhQDNSUutY+N0J74Lq4+Q58luS
-         Y79dQArcL6YYenzKzTBsPzpV5jMjSFK1XpyhrrAGTBf0FKBrur+yCT/84BqfqgsFN2
-         gQw0KXn5Ew6VQ==
-Message-ID: <73141a7e395ba9d78d5acded91c3658d78b4dca0.camel@kernel.org>
-Subject: Re: [PATCH] ceph: prevent snapshots to be created in encrypted
- locked directories
-From:   Jeff Layton <jlayton@kernel.org>
-To:     =?ISO-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>,
-        Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date:   Mon, 18 Apr 2022 09:19:30 -0400
-In-Reply-To: <0c5c361c6d65f5b2fdb1dc89fd4317f22cbc3e74.camel@kernel.org>
-References: <20220414135122.26821-1-lhenriques@suse.de>
-         <20220418130839.9862-1-lhenriques@suse.de>
-         <0c5c361c6d65f5b2fdb1dc89fd4317f22cbc3e74.camel@kernel.org>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-2.fc35) 
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 4D30B2161E;
+        Mon, 18 Apr 2022 13:59:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1650290372; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=w48CeVx/KrAp2wYmVlzeqrFMXv/esKDNwCLFBwxR02s=;
+        b=pr2NAXORpTCN9H4i4uu1CgRitWVIHuflD+mLP1RWzNLMmDiiP84azY0SIE4xd1+7zcLQWg
+        UPEZFmI2E5i2lpd51FPG1DslEw7hAJdDnd4zU9V3oQ578diO50Lw/mEjo147NjOKN5UPbo
+        rioWf07kGRio4Jwi7W1W4Ip0eh7QZPA=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1650290372;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=w48CeVx/KrAp2wYmVlzeqrFMXv/esKDNwCLFBwxR02s=;
+        b=+8DiB6588M/JDN5lzbGa2LIiznV4uQvovQiNysa1xv7kBLcJr2RFQWzjC6KPIExky9IipK
+        72dBZtCAEr1xyADA==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D9E2B13A9B;
+        Mon, 18 Apr 2022 13:59:31 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id QElEMsNuXWLiOwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 18 Apr 2022 13:59:31 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id a863637e;
+        Mon, 18 Apr 2022 13:59:58 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v5 1/5] ceph: add support for encrypted snapshot names
+Date:   Mon, 18 Apr 2022 14:59:53 +0100
+Message-Id: <20220418135957.12056-2-lhenriques@suse.de>
+In-Reply-To: <20220418135957.12056-1-lhenriques@suse.de>
+References: <20220418135957.12056-1-lhenriques@suse.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, 2022-04-18 at 09:17 -0400, Jeff Layton wrote:
-> On Mon, 2022-04-18 at 14:08 +0100, Luís Henriques wrote:
-> > With snapshot names encryption we can not allow snapshots to be created in
-> > locked directories because the names wouldn't be encrypted.  This patch
-> > forces the directory to be unlocked to allow a snapshot to be created.
-> > 
-> > Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> > ---
-> >  fs/ceph/dir.c | 4 ++++
-> >  1 file changed, 4 insertions(+)
-> > 
-> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> > index f48f1ff20927..93e2f08102a1 100644
-> > --- a/fs/ceph/dir.c
-> > +++ b/fs/ceph/dir.c
-> > @@ -1071,6 +1071,10 @@ static int ceph_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
-> >  		err = -EDQUOT;
-> >  		goto out;
-> >  	}
-> > +	if ((op == CEPH_MDS_OP_MKSNAP) && !fscrypt_has_encryption_key(dir)) {
-> > +		err = -ENOKEY;
-> > +		goto out;
-> > +	}
-> >  
-> >  
-> >  	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
-> 
-> Looks good. I'll pull this and the v4 series into the wip-fscrypt later
-> todat.  
+Since filenames in encrypted directories are already encrypted and shown
+as a base64-encoded string when the directory is locked, snapshot names
+should show a similar behaviour.
 
-Actually, I take it back...
+Signed-off-by: LuÃ­s Henriques <lhenriques@suse.de>
+---
+ fs/ceph/inode.c | 31 +++++++++++++++++++++++++++----
+ 1 file changed, 27 insertions(+), 4 deletions(-)
 
-This check doesn't test whether the parent is encrypted. Doesn't it need
-to do that too before checking for the key?
--- 
-Jeff Layton <jlayton@kernel.org>
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index fa0d3018d981..8e97efa2b1a7 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -91,9 +91,15 @@ struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
+ 	if (err < 0)
+ 		goto out_err;
+ 
+-	err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
+-	if (err)
+-		goto out_err;
++	/*
++	 * We'll skip setting fscrypt context for snapshots, leaving that for
++	 * the handle_reply().
++	 */
++	if (ceph_snap(dir) != CEPH_SNAPDIR) {
++		err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
++		if (err)
++			goto out_err;
++	}
+ 
+ 	return inode;
+ out_err:
+@@ -157,6 +163,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
+ 	};
+ 	struct inode *inode = ceph_get_inode(parent->i_sb, vino, NULL);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
++	int ret = -ENOTDIR;
+ 
+ 	if (IS_ERR(inode))
+ 		return inode;
+@@ -182,6 +189,22 @@ struct inode *ceph_get_snapdir(struct inode *parent)
+ 	ci->i_rbytes = 0;
+ 	ci->i_btime = ceph_inode(parent)->i_btime;
+ 
++	/* if encrypted, just borrow fscrypt_auth from parent */
++	if (IS_ENCRYPTED(parent)) {
++		struct ceph_inode_info *pci = ceph_inode(parent);
++
++		ci->fscrypt_auth = kmemdup(pci->fscrypt_auth,
++					   pci->fscrypt_auth_len,
++					   GFP_KERNEL);
++		if (ci->fscrypt_auth) {
++			inode->i_flags |= S_ENCRYPTED;
++			ci->fscrypt_auth_len = pci->fscrypt_auth_len;
++		} else {
++			dout("Failed to alloc snapdir fscrypt_auth\n");
++			ret = -ENOMEM;
++			goto err;
++		}
++	}
+ 	if (inode->i_state & I_NEW) {
+ 		inode->i_op = &ceph_snapdir_iops;
+ 		inode->i_fop = &ceph_snapdir_fops;
+@@ -195,7 +218,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
+ 		discard_new_inode(inode);
+ 	else
+ 		iput(inode);
+-	return ERR_PTR(-ENOTDIR);
++	return ERR_PTR(ret);
+ }
+ 
+ const struct inode_operations ceph_file_iops = {
