@@ -2,127 +2,151 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF9E2C433EF
-	for <ceph-devel@archiver.kernel.org>; Thu, 21 Apr 2022 06:55:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 688DDC433EF
+	for <ceph-devel@archiver.kernel.org>; Thu, 21 Apr 2022 07:03:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1385388AbiDUG6b (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 21 Apr 2022 02:58:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57132 "EHLO
+        id S1385529AbiDUHGJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 21 Apr 2022 03:06:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38604 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1385489AbiDUG5G (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2022 02:57:06 -0400
-Received: from mail1.bemta32.messagelabs.com (mail1.bemta32.messagelabs.com [195.245.230.66])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6E6E15A2C;
-        Wed, 20 Apr 2022 23:54:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1650524052; i=@fujitsu.com;
-        bh=Tzs2F8+0DEjTwEaGrFc3SQdIHq8vdHXoRQd3UlmB4t8=;
-        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-         MIME-Version:Content-Type;
-        b=Kk+2svfqG4dXOjjngB0W6PWR4WlqURmkUJEFsCS4vOmhsPBv7cFk3r2yv1pCyTjIh
-         UA7GlzboV/wwU+WicaIbnqbCzA+jORyrl1byk4lFJ6l8lbpvzTi9tnshjeq7o+MmRO
-         61gqLBCta4zuU78RURI0vol6fPej+hmO1uWe32+lQ/qtF2zYUbSIeOcgqPrbjwAm6H
-         oOWpLoFpCRsgNyHLNzTYTLzFyhMq87TBTR19Cc0/aLk1qZKF6kIyOfwz+gWtHaLnjQ
-         bmrsZuOdatlF9tSB84YmEuz9ZF4/NbwpAP8X/CRmGBqjYEdBc2CLcZwsSTIvcCO457
-         1oYRkNR3sq9aw==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrLIsWRWlGSWpSXmKPExsViZ8MxSXfy/4Q
-  kg6Z3MhavD39itPhwcxKTxZZj9xgtLj/hs/i5bBW7xZ69J1kszv89zmrx+8ccNgcOj1OLJDw2
-  r9Dy2LSqk83j8yY5j01P3jIFsEaxZuYl5VcksGa0nlnPXHCEs2LFoX8sDYz72LsYuTiEBLYwS
-  rTsWMkI4Sxgkrh58iELhLOHUeLQvI1ADicHm4CmxLPOBcwgtoiAo8SL9hlgcWaBzYwSyx6Hdz
-  FycAgLBEus/lgDEmYRUJWYf3o9I4jNK+Ah8brtM1irhICCxJSH78FsTgFPia2fOllBbCGgmtu
-  bjjFB1AtKnJz5BGq8hMTBFy+gehUlLnV8Y4SwKyRmzWpjgrDVJK6e28Q8gVFwFpL2WUjaFzAy
-  rWK0SirKTM8oyU3MzNE1NDDQNTQ01TXUNTI010us0k3USy3VLU8tLtE11EssL9ZLLS7WK67MT
-  c5J0ctLLdnECIyVlGLGmzsYW/t+6h1ilORgUhLlvfgrIUmILyk/pTIjsTgjvqg0J7X4EKMMB4
-  eSBG/vZ6CcYFFqempFWmYOMG5h0hIcPEoivMr/gNK8xQWJucWZ6RCpU4yKUuK8ViAJAZBERmk
-  eXBssVVxilJUS5mVkYGAQ4ilILcrNLEGVf8UozsGoJMx74y/QFJ7MvBK46a+AFjMBLa6eEguy
-  uCQRISXVwCTGoLM6j1NCovjWglmJ238f7bt26PiS8jxje5XaF9XGodlci7nU5Jc0TFBh3+b3w
-  uUkr4r0tADFuwENWlNYSgxj5Di89L5ydwdujfO7tGazr3PapKxTPF2ffYT3bn2ZlpwtkrayTN
-  qHc6Jb2afdv4pvT6xmsy/43zCx43fJAdaaozzvYx+GPNVg1tm9bvpdHevv+fHnlb/ZvAqZb8H
-  3YcKH5X/zJmre/Liec/23mffN7T/59T5fsVWLLX7PT4upB28FdUU9PXVWNFlCuGZll+qS28+z
-  O/b/2iqhvmj5ObEeZ8WtwuuOcaV+O1RfrFJim2ihEX5vzeMbZhOmfZPsWzVX63BaUE/68drwF
-  S+NpiixFGckGmoxFxUnAgDVLxvtkAMAAA==
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-3.tower-587.messagelabs.com!1650524051!11495!1
-X-Originating-IP: [62.60.8.146]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.85.8; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 24026 invoked from network); 21 Apr 2022 06:54:11 -0000
-Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
-  by server-3.tower-587.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 21 Apr 2022 06:54:11 -0000
-Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id F22A410045E;
-        Thu, 21 Apr 2022 07:54:10 +0100 (BST)
-Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        with ESMTP id S242436AbiDUHGF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2022 03:06:05 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2C81E140BE
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2022 00:03:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1650524595;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=sDz8PPwEanUm41iQ1KOjhctQANit6asnn9KfttoOvZw=;
+        b=QbaPYZbbM7JgmBq531HBmMyKyXVO8Bej+PMoA6swZYFzCs8xCTa2LTM6iiYV82S01QQrY0
+        FwE3oIREnJbvJXHy36mpOubHt3UNmvl72hrMZUtoP7W52ILFYsTavIObvW2W0nLYlxnQiE
+        bB1/B61QJoX/PhHIW7WASvT+yTBRHOg=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-631-_NCOjJMuOcCgp1TzV3c9xg-1; Thu, 21 Apr 2022 03:03:09 -0400
+X-MC-Unique: _NCOjJMuOcCgp1TzV3c9xg-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id E167E100478;
-        Thu, 21 Apr 2022 07:54:10 +0100 (BST)
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Thu, 21 Apr 2022 07:53:57 +0100
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <linux-fsdevel@vger.kernel.org>, <ceph-devel@vger.kernel.org>
-CC:     <viro@zeniv.linux.org.uk>, <david@fromorbit.com>,
-        <djwong@kernel.org>, <brauner@kernel.org>, <willy@infradead.org>,
-        <jlayton@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v5 4/4] ceph: Remove S_ISGID clear code in ceph_finish_async_create
-Date:   Thu, 21 Apr 2022 15:54:18 +0800
-Message-ID: <1650527658-2218-4-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1650527658-2218-1-git-send-email-xuyang2018.jy@fujitsu.com>
-References: <1650527658-2218-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id E450485A5A8;
+        Thu, 21 Apr 2022 07:03:08 +0000 (UTC)
+Received: from localhost (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4AA7540D016A;
+        Thu, 21 Apr 2022 07:03:07 +0000 (UTC)
+From:   Xiubo Li <xiubli@redhat.com>
+To:     jlayton@kernel.org
+Cc:     idryomov@gmail.com, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH v2] ceph: try to choose the auth MDS if possible for getattr
+Date:   Thu, 21 Apr 2022 15:03:05 +0800
+Message-Id: <20220421070305.140107-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.84 on 10.11.54.1
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Since vfs has stripped S_ISGID in the previous patch, the calltrace
-as below:
+If any 'x' caps is issued we can just choose the auth MDS instead
+of the random replica MDSes. Because only when the Locker is in
+LOCK_EXEC state will the loner client could get the 'x' caps. And
+if we send the getattr requests to any replica MDS it must auth pin
+and tries to rdlock from the auth MDS, and then the auth MDS need
+to do the Locker state transition to LOCK_SYNC. And after that the
+lock state will change back.
 
-vfs:	lookup_open
-	...
-	  if (open_flag & O_CREAT) {
-                if (open_flag & O_EXCL)
-                        open_flag &= ~O_TRUNC;
-                mode = prepare_mode(mnt_userns, dir->d_inode, mode);
-	...
-	   dir_inode->i_op->atomic_open
+This cost much when doing the Locker state transition and usually
+will need to revoke caps from clients.
 
-ceph:	ceph_atomic_open
-	...
-	      if (flags & O_CREAT)
-            		ceph_finish_async_create
-
-We have stripped sgid in prepare_mode, so remove this useless clear
-code directly.
-
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+URL: https://tracker.ceph.com/issues/55240
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/file.c | 4 ----
- 1 file changed, 4 deletions(-)
+ fs/ceph/addr.c  |  4 +++-
+ fs/ceph/inode.c | 26 +++++++++++++++++++++++++-
+ fs/ceph/super.h |  1 +
+ 3 files changed, 29 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 6c9e837aa1d3..8e3b99853333 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -651,10 +651,6 @@ static int ceph_finish_async_create(struct inode *dir, struct dentry *dentry,
- 		/* Directories always inherit the setgid bit. */
- 		if (S_ISDIR(mode))
- 			mode |= S_ISGID;
--		else if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP) &&
--			 !in_group_p(dir->i_gid) &&
--			 !capable_wrt_inode_uidgid(&init_user_ns, dir, CAP_FSETID))
--			mode &= ~S_ISGID;
- 	} else {
- 		in.gid = cpu_to_le32(from_kgid(&init_user_ns, current_fsgid()));
- 	}
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 02722ac86d73..261bc8bb2ab8 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -256,6 +256,7 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
+ 	struct iov_iter iter;
+ 	ssize_t err = 0;
+ 	size_t len;
++	int mode;
+ 
+ 	__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
+ 	__clear_bit(NETFS_SREQ_COPY_TO_CACHE, &subreq->flags);
+@@ -264,7 +265,8 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
+ 		goto out;
+ 
+ 	/* We need to fetch the inline data. */
+-	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
++	mode = ceph_try_to_choose_auth_mds(inode, CEPH_STAT_CAP_INLINE_DATA);
++	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, mode);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+ 		goto out;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index b45f321910af..d05b91391f17 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -2260,6 +2260,30 @@ int ceph_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
+ 	return err;
+ }
+ 
++int ceph_try_to_choose_auth_mds(struct inode *inode, int mask)
++{
++	int issued = ceph_caps_issued(ceph_inode(inode));
++
++	/*
++	 * If any 'x' caps is issued we can just choose the auth MDS
++	 * instead of the random replica MDSes. Because only when the
++	 * Locker is in LOCK_EXEC state will the loner client could
++	 * get the 'x' caps. And if we send the getattr requests to
++	 * any replica MDS it must auth pin and tries to rdlock from
++	 * the auth MDS, and then the auth MDS need to do the Locker
++	 * state transition to LOCK_SYNC. And after that the lock state
++	 * will change back.
++	 *
++	 * This cost much when doing the Locker state transition and
++	 * usually will need to revoke caps from clients.
++	 */
++	if (((mask & CEPH_CAP_ANY_SHARED) && (issued & CEPH_CAP_ANY_EXCL))
++	    || (mask & CEPH_STAT_RSTAT))
++		return USE_AUTH_MDS;
++	else
++		return USE_ANY_MDS;
++}
++
+ /*
+  * Verify that we have a lease on the given mask.  If not,
+  * do a getattr against an mds.
+@@ -2283,7 +2307,7 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
+ 	if (!force && ceph_caps_issued_mask_metric(ceph_inode(inode), mask, 1))
+ 			return 0;
+ 
+-	mode = (mask & CEPH_STAT_RSTAT) ? USE_AUTH_MDS : USE_ANY_MDS;
++	mode = ceph_try_to_choose_auth_mds(inode, mask);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, mode);
+ 	if (IS_ERR(req))
+ 		return PTR_ERR(req);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 73db7f6021f3..669036ebef1e 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1024,6 +1024,7 @@ static inline void ceph_queue_flush_snaps(struct inode *inode)
+ 	ceph_queue_inode_work(inode, CEPH_I_WORK_FLUSH_SNAPS);
+ }
+ 
++extern int ceph_try_to_choose_auth_mds(struct inode *inode, int mask);
+ extern int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
+ 			     int mask, bool force);
+ static inline int ceph_do_getattr(struct inode *inode, int mask, bool force)
 -- 
-2.27.0
+2.36.0.rc1
 
