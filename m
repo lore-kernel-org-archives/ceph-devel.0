@@ -2,80 +2,160 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67584C433F5
-	for <ceph-devel@archiver.kernel.org>; Sun, 24 Apr 2022 09:40:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7EA0C433EF
+	for <ceph-devel@archiver.kernel.org>; Mon, 25 Apr 2022 02:09:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238869AbiDXJnC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 24 Apr 2022 05:43:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57860 "EHLO
+        id S240266AbiDYCMO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 24 Apr 2022 22:12:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238876AbiDXJmk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Apr 2022 05:42:40 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id AF5A025C62
-        for <ceph-devel@vger.kernel.org>; Sun, 24 Apr 2022 02:39:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1650793179;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=t5jG9BUkSt9yM+i43EaxQ9dfSHOmx/YuDzmH80vHjC0=;
-        b=W0hZLrRebamA+bIkK2hJybeKAD1+HZcogFtDWeB/+Adrdrk26BLFTfXyJHbhflDP7csoDw
-        I86n1NQfECiz0CqcOt9gwNPQ6flN/iFBJeCeObec5PEfDePfz35kvZoAIIf/MML+4krBwh
-        ysr9NXNmqvymCtuTxXtv011nhS3EJWc=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-517-GRk9bGSmPCCpZJhSw--f7w-1; Sun, 24 Apr 2022 05:39:38 -0400
-X-MC-Unique: GRk9bGSmPCCpZJhSw--f7w-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S234055AbiDYCMJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Apr 2022 22:12:09 -0400
+Received: from mail1.bemta36.messagelabs.com (mail1.bemta36.messagelabs.com [85.158.142.112])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEDB5245A0;
+        Sun, 24 Apr 2022 19:09:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1650852545; i=@fujitsu.com;
+        bh=ZrLMonqkrdZQn/R0EhmdFYUjKu36GBpTyAZAImamfa4=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=LYi3+cfCoJOyr/4gtgSX8PZZ9suTS2RLafNZrwPDy+md7k6HoOhJmByyawp1S+qCC
+         bJ3nw9vI3CUCXhfMuDCeIAAsx0OcUSGagBGQkMyAypYqBEu/jt0U0ZExD4uQo66QIa
+         T/zEhN61W6thS00gBg04OLb7R0F7G7+X4kC0/nid6JtS1haQ0LAFdUszbgIQnJ6fNZ
+         ALgTXHby7vBseST+sIL/zv/SwsZ7lM0k0zCN2b3z11Ghlz4xhDFBQq6aQgrxXpeR0i
+         H0SdBZFfduTVbEaHLoCRBZcWTzjzKi59n3OIHQLpOnC8CDd812Vkt15rEBRPJo1FmD
+         TphgKcvLyNntw==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrFIsWRWlGSWpSXmKPExsViZ8MxSXcfU1q
+  SQdduG4vXhz8xWny4OYnJYsuxe4wWl5/wWfxctordYs/ekywW5/8eZ7X4/WMOmwOHx6lFEh6b
+  V2h5bFrVyebxeZOcx6Ynb5kCWKNYM/OS8isSWDN+n+9kL2gQr/j3dD5LA+MC4S5GLg4hgS2ME
+  kenL2WDcBYwSRxe3MsC4exhlJhz9yNjFyMnB5uApsSzzgXMILaIgKPEi/YZLCA2s8BmRollj8
+  NBbGGBRImFq3vZQGwWAVWJVfMgbF4BT4n3F86B1UsIKEhMefieGSIuKHFy5hOoORISB1+8YIa
+  oUZS41PGNEcKukJg1q40JwlaTuHpuE/MERv5ZSNpnIWlfwMi0itEuqSgzPaMkNzEzR9fQwEDX
+  0NBU18xM19DCTC+xSjdRL7VUNzk1r6QoESitl1herJdaXKxXXJmbnJOil5dasokRGAUpxU67d
+  jAe7Pupd4hRkoNJSZQ3gzEtSYgvKT+lMiOxOCO+qDQntfgQowwHh5IEb9j/1CQhwaLU9NSKtM
+  wcYETCpCU4eJREeH/8AErzFhck5hZnpkOkTjEqSonzOoDMFABJZJTmwbXBksAlRlkpYV5GBgY
+  GIZ6C1KLczBJU+VeM4hyMSsK8VSBTeDLzSuCmvwJazAS0+FMt2OKSRISUVANT1LplW7S3JF59
+  66W5IfzDv5dJ7ot8d3S+OlibL950T2K3jZxWqH4ky6ZAb6OMxfybdc43veTmSW06UvV6fmLq0
+  8fl93e47q/ZsE7vDfdZy5aLTeGGVXmdZxsE77HYF/xYbdHseZBH4s7VK/79Yuunqz4vfOH1OE
+  TOfp35tLR1BRO+/OO/vk+/ryIoLffCzJRk9v1s56WcHL59Opdd+GbRzFL73rUVGhMUjuc/5Cx
+  5OnFdzOH3D5ysXGZUT7KVTRUS/Pdk1iSfhWd+XtDt+duoWtbX5ROy6kTd+uZ9lQ+KBWcGb2Nj
+  2/fMUid4oeRNo/53hhoaEp9cCr9If939kPfE2rIVV4zKtbcuStpXruGuxFKckWioxVxUnAgAH
+  eBKtH0DAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-10.tower-528.messagelabs.com!1650852542!64942!1
+X-Originating-IP: [62.60.8.146]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.85.8; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 6987 invoked from network); 25 Apr 2022 02:09:02 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-10.tower-528.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 25 Apr 2022 02:09:02 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 79CB910034F;
+        Mon, 25 Apr 2022 03:09:02 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 0435980159B;
-        Sun, 24 Apr 2022 09:39:38 +0000 (UTC)
-Received: from localhost (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5AF7440D017E;
-        Sun, 24 Apr 2022 09:39:37 +0000 (UTC)
-From:   Xiubo Li <xiubli@redhat.com>
-To:     jlayton@kernel.org
-Cc:     idryomov@gmail.com, vshankar@redhat.com,
-        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH] ceph: redirty the page for wirtepage if fails
-Date:   Sun, 24 Apr 2022 17:39:24 +0800
-Message-Id: <20220424093924.32691-1-xiubli@redhat.com>
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 6C1BD10033A;
+        Mon, 25 Apr 2022 03:09:02 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Mon, 25 Apr 2022 03:08:34 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <linux-fsdevel@vger.kernel.org>, <ceph-devel@vger.kernel.org>
+CC:     <viro@zeniv.linux.org.uk>, <david@fromorbit.com>,
+        <djwong@kernel.org>, <brauner@kernel.org>, <willy@infradead.org>,
+        <jlayton@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v6 1/4] fs: move sgid strip operation from inode_init_owner into inode_sgid_strip
+Date:   Mon, 25 Apr 2022 11:09:38 +0800
+Message-ID: <1650856181-21350-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.11.54.1
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When run out of memories we should redirty the page before failing
-the writepage. Or we will hit BUG_ON(folio_get_private(folio)) in
-ceph_dirty_folio().
+This has no functional change. Just create and export inode_sgid_strip
+api for the subsequent patch. This function is used to strip inode's
+S_ISGID mode when init a new inode.
 
-URL: https://tracker.ceph.com/issues/55421
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- fs/ceph/addr.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ fs/inode.c         | 37 +++++++++++++++++++++++++++++++++----
+ include/linux/fs.h |  2 ++
+ 2 files changed, 35 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 261bc8bb2ab8..656bc0ca7a78 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -606,8 +606,10 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
- 				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE, snapc,
- 				    ceph_wbc.truncate_seq, ceph_wbc.truncate_size,
- 				    true);
--	if (IS_ERR(req))
-+	if (IS_ERR(req)) {
-+		redirty_page_for_writepage(wbc, page);
- 		return PTR_ERR(req);
-+	}
+diff --git a/fs/inode.c b/fs/inode.c
+index 9d9b422504d1..78e7ef567e04 100644
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@ -2246,10 +2246,8 @@ void inode_init_owner(struct user_namespace *mnt_userns, struct inode *inode,
+ 		/* Directories are special, and always inherit S_ISGID */
+ 		if (S_ISDIR(mode))
+ 			mode |= S_ISGID;
+-		else if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP) &&
+-			 !in_group_p(i_gid_into_mnt(mnt_userns, dir)) &&
+-			 !capable_wrt_inode_uidgid(mnt_userns, dir, CAP_FSETID))
+-			mode &= ~S_ISGID;
++		else
++			mode = inode_sgid_strip(mnt_userns, dir, mode);
+ 	} else
+ 		inode_fsgid_set(inode, mnt_userns);
+ 	inode->i_mode = mode;
+@@ -2405,3 +2403,34 @@ struct timespec64 current_time(struct inode *inode)
+ 	return timestamp_truncate(now, inode);
+ }
+ EXPORT_SYMBOL(current_time);
++
++/**
++ * inode_sgid_strip - handle the sgid bit for non-directories
++ * @mnt_userns: User namespace of the mount the inode was created from
++ * @dir: parent directory inode
++ * @mode: mode of the file to be created in @dir
++ *
++ * If the @mode of the new file has both the S_ISGID and S_IXGRP bit
++ * raised and @dir has the S_ISGID bit raised ensure that the caller is
++ * either in the group of the parent directory or they have CAP_FSETID
++ * in their user namespace and are privileged over the parent directory.
++ * In all other cases, strip the S_ISGID bit from @mode.
++ *
++ * Return: the new mode to use for the file
++ */
++umode_t inode_sgid_strip(struct user_namespace *mnt_userns,
++			 const struct inode *dir, umode_t mode)
++{
++	if (S_ISDIR(mode) || !dir || !(dir->i_mode & S_ISGID))
++		return mode;
++	if ((mode & (S_ISGID | S_IXGRP)) != (S_ISGID | S_IXGRP))
++		return mode;
++	if (in_group_p(i_gid_into_mnt(mnt_userns, dir)))
++		return mode;
++	if (capable_wrt_inode_uidgid(mnt_userns, dir, CAP_FSETID))
++		return mode;
++
++	mode &= ~S_ISGID;
++	return mode;
++}
++EXPORT_SYMBOL(inode_sgid_strip);
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index bbde95387a23..532de76c9b91 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -1897,6 +1897,8 @@ extern long compat_ptr_ioctl(struct file *file, unsigned int cmd,
+ void inode_init_owner(struct user_namespace *mnt_userns, struct inode *inode,
+ 		      const struct inode *dir, umode_t mode);
+ extern bool may_open_dev(const struct path *path);
++umode_t inode_sgid_strip(struct user_namespace *mnt_userns,
++			 const struct inode *dir, umode_t mode);
  
- 	set_page_writeback(page);
- 	if (caching)
+ /*
+  * This is the "filldir" function type, used by readdir() to let
 -- 
-2.36.0.rc1
+2.27.0
 
