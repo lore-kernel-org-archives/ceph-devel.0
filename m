@@ -2,75 +2,74 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11EB0C4332F
-	for <ceph-devel@archiver.kernel.org>; Tue, 26 Apr 2022 10:31:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03453C433FE
+	for <ceph-devel@archiver.kernel.org>; Tue, 26 Apr 2022 10:31:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349174AbiDZKdw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 26 Apr 2022 06:33:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36160 "EHLO
+        id S1348896AbiDZKeX (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 26 Apr 2022 06:34:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35930 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349130AbiDZKda (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2022 06:33:30 -0400
-Received: from mail1.bemta36.messagelabs.com (mail1.bemta36.messagelabs.com [85.158.142.2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17E13152796;
-        Tue, 26 Apr 2022 03:10:54 -0700 (PDT)
+        with ESMTP id S1349070AbiDZKdh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2022 06:33:37 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64FFFCA0CF;
+        Tue, 26 Apr 2022 03:11:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1650967853; i=@fujitsu.com;
-        bh=8H4EYBmAmvlD4ppPy7czpIZvvSugYPtrUgavqYgtwHU=;
+        s=170520fj; t=1650967873; i=@fujitsu.com;
+        bh=AmdaMYwdMPjs5w7+yq5w0jM1iN47ZxSrdRA++43KWF0=;
         h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
          MIME-Version:Content-Type;
-        b=gjIsZW/AWk7M/XjvMS2pZ8n9BXA1IqIEqdxvSlJmIoP6+U0NTbD1JqJxiF1yg6ZzL
-         E9z83my0iCXePoD31kRpR1zcgtDmOFMpHnVyYI7E3JnTqZeT2GDFVdaCiBcO0b2iO0
-         0jW0WYOz5968oFYxGFefHphj9vpxBhARifxwUCl5y5/SznhLCyurJx84mWtkFAcRUa
-         Xc+PKzgyMv4ZE1PXJZhrooMC3Sa40+JYgQRVWethGgCXZmoUaEoQ0iQX1Vrm0RvpSR
-         dZyO/vvLh5bHpKE4KJJRGSVc7oUHOnH0EfuuPWTaQcFE1xNSBH0SDL8/kBfXi6f43X
-         I8qL4VnexuZ1Q==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpnleJIrShJLcpLzFFi42Kxs+FI1NU5mp5
-  k8GWeusXrw58YLT7cnMRkseXYPUaLy0/4LH4uW8VusWfvSRaLBRsfMVqc/3uc1eL3jzlsDpwe
-  pxZJeGxeoeWxaVUnm8fnTXIem568ZQpgjWLNzEvKr0hgzZi79y1zwSbOig0TdrE3MHZwdDFyc
-  QgJbGGUuDz5JBOEs4BJYvW5Q4xdjJxAzh5GiZ8bokFsNgFNiWedC5hBbBEBR4kX7TNYQBqYBc
-  4ySnTMWMQOkhAWcJL4dnsTE4jNIqAq8XTVWjYQm1fAQ6L1zEWwZgkBBYkpD9+D2ZwCnhJv+6d
-  ALfOQuLW8jwmiXlDi5MwnLCA2s4CExMEXL6B6FSUudXxjhLArJGbNamOCsNUkrp7bxDyBUXAW
-  kvZZSNoXMDKtYrRLKspMzyjJTczM0TU0MNA1NDTVNTPTNbQw00us0k3USy3VTU7NKylKBErrJ
-  ZYX66UWF+sVV+Ym56To5aWWbGIExk9KsdOuHYwH+37qHWKU5GBSEuXV2ZeeJMSXlJ9SmZFYnB
-  FfVJqTWnyIUYaDQ0mCN/AQUE6wKDU9tSItMwcYyzBpCQ4eJRHet4eB0rzFBYm5xZnpEKlTjIp
-  S4rzL9wIlBEASGaV5cG2w9HGJUVZKmJeRgYFBiKcgtSg3swRV/hWjOAejkjDEeJ7MvBK46a+A
-  FjMBLf5UmwqyuCQRISXVwKTiqe2+ZdlRq+D6dR3PQq+4WpzUq/x54+AqgcxHcwyNlkTNPZ52/
-  cwe4/UVS0r+8mZbSYoELBPbdCX+do/P/jqtr87XmQR0Nus9UHrt+26C+EQOTY4DCifkbbQ8Hl
-  R6SXXfnvPTKv7at/cHGgMNg75w27pwSd3z/GP0T5f9lt+rA918MfzVapFVL5VvvdfZcWPZlvl
-  5QuHiRXtubdV5I3lUsjLr5eFP+09yrqu5WGF2zkrSUMJhNc9KvwcXQvQ/P6rbsKP5eFVpj7pX
-  y/nfmw1aDjxVPF84xXV/a9n5O/2+POF3tvFELpty0kRpufFbDf11YhlH29KPCegZntfXWj1Le
-  kroRDbLi/XzNt7xO6bEUpyRaKjFXFScCABvv5xnmgMAAA==
+        b=vlGgzz8PK+ffYzUO1U3DrA+7wry3AKiSGGUvtJFR0ihAQwrKWcSVT/JZi1rpbjsx6
+         +FjaWArD9wvDct6SFHB1AaAy3IZCWdS07/iefHja1RDAYVh6LcLyYxQSRJZFkRScx2
+         Gb66BRSlkAcdtrcXWm6V02iG6JcppYs4YgTCg6t+nap89sy73NT7lc1z9AoEFGjzJL
+         ugT+38QYneEafy0CCE8RNLzYDDzzegkRgs9Vk/xvqhl4CNjxbAoxwOuI5gs/HgriNI
+         P623aDxzxlhoKXzaMd1L5C8Ta83V3aIU0yhcnTvYq5dKsxiaORcqxG72DRj3FRuHUw
+         Vvfr1ulDlojXQ==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFupmleJIrShJLcpLzFFi42Kxs+GYpOt4ND3
+  J4E8rl8Xrw58YLT7cnMRkseXYPUaLy0/4LH4uW8VusWfvSRaL83+Ps1r8/jGHzYHD49QiCY/N
+  K7Q8Nq3qZPP4vEnOY9OTt0wBrFGsmXlJ+RUJrBkLjm9jLejgqJh8+TJTA+Mrti5GLg4hgS2ME
+  nOeTWCGcBYwSayZ+IEJwtnDKHFnzz2gDCcHm4CmxLPOBWC2iICjxIv2GSwgNrPAZkaJZY/DQW
+  xhATuJm7Ma2EFsFgFVie+rz4HV8Ap4SJx+dRysV0JAQWLKw/dgNqeAp8Tb/imMILYQUM2t5X1
+  MEPWCEidnPoGaLyFx8MULqF5FiUsd3xgh7AqJWbPamCBsNYmr5zYxT2AUnIWkfRaS9gWMTKsY
+  rZOKMtMzSnITM3N0DQ0MdA0NTXWNTXUNLUz0Eqt0E/VSS3XLU4tLdI30EsuL9VKLi/WKK3OTc
+  1L08lJLNjEC4yWlWHnHDsa2VT/1DjFKcjApifLq7EtPEuJLyk+pzEgszogvKs1JLT7EKMPBoS
+  TBG3gIKCdYlJqeWpGWmQOMXZi0BAePkgjv28NAad7igsTc4sx0iNQpRl2Op89P7GUWYsnLz0u
+  VEuddvheoSACkKKM0D24ELI1cYpSVEuZlZGBgEOIpSC3KzSxBlX/FKM7BqCQMsYonM68EbtMr
+  oCOYgI74VJsKckRJIkJKqoHJY+vBnprk2Qq5rJrTdiuw71394p5ZxeWga45b/J95LvV5wJp6b
+  r6m1xMbLeadX3fWasgLJE75uKfM2+TWgbvXWKaXT9iuX6Q55+hSw1TlR2eKJAWncyuePKTd/X
+  RB3DUJq4Vblv06eGpB7ulHzMd2xKW9ORb48oD1vV+XmmfGsLB5BR8qE3u1OOdh5OFvVyVCXMO
+  W3lr1JLRFeUa0c8/qaQY3jVav3e7Y02VwY+njimZmFzuvCXWrCk+6Ckk/2r6zLaR3s6i78IY5
+  k3780jzpNltVs/r44n8qUflXZ3D9zvnzROeBh9XUaXcmzckwnHi3lI09av5Lzp02Z7hyZ7Dee
+  1DZmyTF9NZ1UZTgqiTZ9UosxRmJhlrMRcWJALzRAESeAwAA
 X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-17.tower-545.messagelabs.com!1650967852!237794!1
-X-Originating-IP: [62.60.8.97]
+X-Msg-Ref: server-6.tower-571.messagelabs.com!1650967872!244513!1
+X-Originating-IP: [62.60.8.146]
 X-SYMC-ESS-Client-Auth: outbound-route-from=pass
 X-StarScan-Received: 
 X-StarScan-Version: 9.85.8; banners=-,-,-
 X-VirusChecked: Checked
-Received: (qmail 18532 invoked from network); 26 Apr 2022 10:10:52 -0000
-Received: from unknown (HELO n03ukasimr01.n03.fujitsu.local) (62.60.8.97)
-  by server-17.tower-545.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 26 Apr 2022 10:10:52 -0000
-Received: from n03ukasimr01.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTP id EF25F1001A2;
-        Tue, 26 Apr 2022 11:10:51 +0100 (BST)
+Received: (qmail 11979 invoked from network); 26 Apr 2022 10:11:13 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-6.tower-571.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 26 Apr 2022 10:11:13 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id BA15C10046D;
+        Tue, 26 Apr 2022 11:11:12 +0100 (BST)
 Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTPS id CCFB9100181;
-        Tue, 26 Apr 2022 11:10:51 +0100 (BST)
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 9FA95100466;
+        Tue, 26 Apr 2022 11:11:12 +0100 (BST)
 Received: from localhost.localdomain (10.167.220.84) by
  R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Tue, 26 Apr 2022 11:10:39 +0100
+ (TLS) id 15.0.1497.32; Tue, 26 Apr 2022 11:11:01 +0100
 From:   Yang Xu <xuyang2018.jy@fujitsu.com>
 To:     <linux-fsdevel@vger.kernel.org>, <ceph-devel@vger.kernel.org>
 CC:     <viro@zeniv.linux.org.uk>, <david@fromorbit.com>,
         <djwong@kernel.org>, <brauner@kernel.org>, <willy@infradead.org>,
-        <jlayton@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>,
-        <stable@vger.kernel.org>
-Subject: [PATCH v8 2/4] fs: Add missing umask strip in vfs_tmpfile
-Date:   Tue, 26 Apr 2022 19:11:28 +0800
-Message-ID: <1650971490-4532-2-git-send-email-xuyang2018.jy@fujitsu.com>
+        <jlayton@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v8 4/4] ceph: rely on vfs for setgid stripping
+Date:   Tue, 26 Apr 2022 19:11:30 +0800
+Message-ID: <1650971490-4532-4-git-send-email-xuyang2018.jy@fujitsu.com>
 X-Mailer: git-send-email 1.8.3.1
 In-Reply-To: <1650971490-4532-1-git-send-email-xuyang2018.jy@fujitsu.com>
 References: <1650971490-4532-1-git-send-email-xuyang2018.jy@fujitsu.com>
@@ -84,35 +83,32 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-All creation paths except for O_TMPFILE handle umask in the vfs directly
-if the filesystem doesn't support or enable POSIX ACLs. If the filesystem
-does then umask handling is deferred until posix_acl_create().
-Because, O_TMPFILE misses umask handling in the vfs it will not honor
-umask settings. Fix this by adding the missing umask handling.
+Now that we finished moving setgid stripping for regular files in setgid
+directories into the vfs, individual filesystem don't need to manually
+strip the setgid bit anymore. Drop the now unneeded code from ceph.
 
-Fixes: 60545d0d4610 ("[O_TMPFILE] it's still short a few helpers, but infrastructure should be OK now...")
-Cc: <stable@vger.kernel.org> # 4.19+
-Reported-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-Acked-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Christian Brauner (Microsoft)<brauner@kernel.org>
 Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- fs/namei.c | 2 ++
- 1 file changed, 2 insertions(+)
+ fs/ceph/file.c | 4 ----
+ 1 file changed, 4 deletions(-)
 
-diff --git a/fs/namei.c b/fs/namei.c
-index 509657fdf4f5..73646e28fae0 100644
---- a/fs/namei.c
-+++ b/fs/namei.c
-@@ -3521,6 +3521,8 @@ struct dentry *vfs_tmpfile(struct user_namespace *mnt_userns,
- 	child = d_alloc(dentry, &slash_name);
- 	if (unlikely(!child))
- 		goto out_err;
-+	if (!IS_POSIXACL(dir))
-+		mode &= ~current_umask();
- 	error = dir->i_op->tmpfile(mnt_userns, dir, child, mode);
- 	if (error)
- 		goto out_err;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 6c9e837aa1d3..8e3b99853333 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -651,10 +651,6 @@ static int ceph_finish_async_create(struct inode *dir, struct dentry *dentry,
+ 		/* Directories always inherit the setgid bit. */
+ 		if (S_ISDIR(mode))
+ 			mode |= S_ISGID;
+-		else if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP) &&
+-			 !in_group_p(dir->i_gid) &&
+-			 !capable_wrt_inode_uidgid(&init_user_ns, dir, CAP_FSETID))
+-			mode &= ~S_ISGID;
+ 	} else {
+ 		in.gid = cpu_to_le32(from_kgid(&init_user_ns, current_fsgid()));
+ 	}
 -- 
 2.27.0
 
