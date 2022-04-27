@@ -2,42 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBB55C4332F
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:24:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EB46C433FE
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:25:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233533AbiD0T2I (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:28:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53040 "EHLO
+        id S232710AbiD0T2K (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:28:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232851AbiD0TTN (ORCPT
+        with ESMTP id S232958AbiD0TTN (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:13 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE54B12087
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:23 -0700 (PDT)
+Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13C0B6B0BB
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:25 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8787C619D0
+        by sin.source.kernel.org (Postfix) with ESMTPS id 72BA2CE26AE
         for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD58DC385AF;
-        Wed, 27 Apr 2022 19:13:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 45ED5C385AE;
+        Wed, 27 Apr 2022 19:13:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086803;
-        bh=jvhwpr6zQ0iD64FSGF53I1XMRVCJuJIgn4750kTQHkQ=;
+        s=k20201202; t=1651086801;
+        bh=trOGwfW0dpuka6lVn4FyjgWAwHGV8whpehGIyBn/Kcw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LQl2RKgn7BwYf+gDnKpmps8JTUFPelh82wMQV388s6xt+sAI5f/VDbfhpPWvHqgp2
-         Sn9dwcvmTqwjaPLMmZVBoaRk2NWPmNJAus5zoGMbQ6sLuOqn4zzscSf+Lj3RcLBpDK
-         NpU1SxJ6lYDzG1alS92QMCB0IWWpTrYrSG3WC/UNGqKsNseXUGfUvrpWc8jBZoOiWw
-         XTNsE1uVRlYce+osS1E6sAP5BBmrJzsj+4PxmXH3rg2EyJGELft+jXA9rf9Ur9Q9mK
-         ZmXYWJVRT+dC71R43b9/d56kztcdzrSPFQqaSEsq+SnMnIR/dUVEYieCHKITiNlNkP
-         jz+xbJ50yDhKw==
+        b=fdSfBkOOHecT7y7RQfW8wqcQ+rMgWJ4sbZtxChGShOqGW4xytI+R1JMw3osgj+Yok
+         rC6omT7xGxLVq8hZTZAybsJkIEwg6AFwcjF6NTyvrKUKeC4Ys+fB4FXtlcwc3aNYaP
+         oKFUbmTdS5zGjkoWqlEbvZdAwSvjTxEyeC8WwgfGOSh3Ubz4Hi7r+6bAHxkqfD13Eb
+         h7iEyFAaysVGwpn9RJ2gxGMTOUIMutqfQcUVNDFflU0z57GFww4VqClNq+5EaCDUdq
+         DlQfaIhs8pkZFG/hjrAD3Cv9K13+5v9w+S2UwJ4kriv6szUypnupkhGQqbs8P+NGbl
+         zE9DgwB2esBVQ==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
-Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com,
-        Eric Biggers <ebiggers@google.com>
-Subject: [PATCH v14 09/64] fscrypt: export fscrypt_fname_encrypt and fscrypt_fname_encrypted_size
-Date:   Wed, 27 Apr 2022 15:12:19 -0400
-Message-Id: <20220427191314.222867-10-jlayton@kernel.org>
+Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
+Subject: [PATCH v14 07/64] ceph: add new mount option to enable sparse reads
+Date:   Wed, 27 Apr 2022 15:12:17 -0400
+Message-Id: <20220427191314.222867-8-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -47,159 +46,298 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-For ceph, we want to use our own scheme for handling filenames that are
-are longer than NAME_MAX after encryption and Base64 encoding. This
-allows us to have a consistent view of the encrypted filenames for
-clients that don't support fscrypt and clients that do but that don't
-have the key.
+Add a new mount option that has the client issue sparse reads instead of
+normal ones. The callers now preallocate an sparse extent buffer that
+the libceph receive code can populate and hand back after the operation
+completes.
 
-Currently, fs/crypto only supports encrypting filenames using
-fscrypt_setup_filename, but that also handles encoding nokey names. Ceph
-can't use that because it handles nokey names in a different way.
+After a successful sparse read, we can't use the req->r_result value to
+determine the amount of data "read", so instead we set the received
+length to be from the end of the last extent in the buffer. Any
+interstitial holes will have been filled by the receive code.
 
-Export fscrypt_fname_encrypt. Rename fscrypt_fname_encrypted_size to
-__fscrypt_fname_encrypted_size and add a new wrapper called
-fscrypt_fname_encrypted_size that takes an inode argument rather than a
-pointer to a fscrypt_policy union.
-
-Acked-by: Eric Biggers <ebiggers@google.com>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/crypto/fname.c           | 36 ++++++++++++++++++++++++++++++------
- fs/crypto/fscrypt_private.h |  9 +++------
- fs/crypto/hooks.c           |  6 +++---
- include/linux/fscrypt.h     |  4 ++++
- 4 files changed, 40 insertions(+), 15 deletions(-)
+ fs/ceph/addr.c  | 17 +++++++++++++++--
+ fs/ceph/file.c  | 51 +++++++++++++++++++++++++++++++++++++++++--------
+ fs/ceph/super.c | 16 +++++++++++++++-
+ fs/ceph/super.h |  1 +
+ 4 files changed, 74 insertions(+), 11 deletions(-)
 
-diff --git a/fs/crypto/fname.c b/fs/crypto/fname.c
-index a9be4bc74a94..a1d4ee4f1a98 100644
---- a/fs/crypto/fname.c
-+++ b/fs/crypto/fname.c
-@@ -79,7 +79,8 @@ static inline bool fscrypt_is_dot_dotdot(const struct qstr *str)
- /**
-  * fscrypt_fname_encrypt() - encrypt a filename
-  * @inode: inode of the parent directory (for regular filenames)
-- *	   or of the symlink (for symlink targets)
-+ *	   or of the symlink (for symlink targets). Key must already be
-+ *	   set up.
-  * @iname: the filename to encrypt
-  * @out: (output) the encrypted filename
-  * @olen: size of the encrypted filename.  It must be at least @iname->len.
-@@ -130,6 +131,7 @@ int fscrypt_fname_encrypt(const struct inode *inode, const struct qstr *iname,
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 04a6c3f02f0c..84d0b52010d9 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -219,8 +219,10 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(req->r_inode);
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
+ 	struct netfs_io_subrequest *subreq = req->r_priv;
++	struct ceph_osd_req_op *op = &req->r_ops[0];
+ 	int num_pages;
+ 	int err = req->r_result;
++	bool sparse = (op->op == CEPH_OSD_OP_SPARSE_READ);
  
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(fscrypt_fname_encrypt);
+ 	ceph_update_read_metrics(&fsc->mdsc->metric, req->r_start_latency,
+ 				 req->r_end_latency, osd_data->length, err);
+@@ -229,7 +231,9 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+ 	     subreq->len, i_size_read(req->r_inode));
  
- /**
-  * fname_decrypt() - decrypt a filename
-@@ -257,9 +259,9 @@ static int fscrypt_base64url_decode(const char *src, int srclen, u8 *dst)
- 	return bp - dst;
- }
+ 	/* no object means success but no data */
+-	if (err == -ENOENT)
++	if (sparse && err >= 0)
++		err = ceph_sparse_ext_map_end(op);
++	else if (err == -ENOENT)
+ 		err = 0;
+ 	else if (err == -EBLOCKLISTED)
+ 		fsc->blocklisted = true;
+@@ -312,13 +316,14 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+ 	size_t page_off;
+ 	int err = 0;
+ 	u64 len = subreq->len;
++	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
  
--bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
--				  u32 orig_len, u32 max_len,
--				  u32 *encrypted_len_ret)
-+bool __fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
-+				    u32 orig_len, u32 max_len,
-+				    u32 *encrypted_len_ret)
- {
- 	int padding = 4 << (fscrypt_policy_flags(policy) &
- 			    FSCRYPT_POLICY_FLAGS_PAD_MASK);
-@@ -273,6 +275,29 @@ bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
- 	return true;
- }
+ 	if (ci->i_inline_version != CEPH_INLINE_NONE &&
+ 	    ceph_netfs_issue_op_inline(subreq))
+ 		return;
  
-+/**
-+ * fscrypt_fname_encrypted_size() - calculate length of encrypted filename
-+ * @inode:		parent inode of dentry name being encrypted. Key must
-+ *			already be set up.
-+ * @orig_len:		length of the original filename
-+ * @max_len:		maximum length to return
-+ * @encrypted_len_ret:	where calculated length should be returned (on success)
-+ *
-+ * Filenames that are shorter than the maximum length may have their lengths
-+ * increased slightly by encryption, due to padding that is applied.
-+ *
-+ * Return: false if the orig_len is greater than max_len. Otherwise, true and
-+ *	   fill out encrypted_len_ret with the length (up to max_len).
-+ */
-+bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
-+				  u32 max_len, u32 *encrypted_len_ret)
-+{
-+	return __fscrypt_fname_encrypted_size(&inode->i_crypt_info->ci_policy,
-+					      orig_len, max_len,
-+					      encrypted_len_ret);
-+}
-+EXPORT_SYMBOL_GPL(fscrypt_fname_encrypted_size);
+ 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
+-			0, 1, CEPH_OSD_OP_READ,
++			0, 1, sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
+ 			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
+ 			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
+ 	if (IS_ERR(req)) {
+@@ -327,6 +332,14 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+ 		goto out;
+ 	}
+ 
++	if (sparse) {
++		err = ceph_alloc_sparse_ext_map(&req->r_ops[0]);
++		if (err) {
++			ceph_osdc_put_request(req);
++			goto out;
++		}
++	}
 +
- /**
-  * fscrypt_fname_alloc_buffer() - allocate a buffer for presented filenames
-  * @max_encrypted_len: maximum length of encrypted filenames the buffer will be
-@@ -428,8 +453,7 @@ int fscrypt_setup_filename(struct inode *dir, const struct qstr *iname,
- 		return ret;
+ 	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
+ 	iov_iter_xarray(&iter, READ, &rreq->mapping->i_pages, subreq->start, len);
+ 	err = iov_iter_get_pages_alloc(&iter, &pages, len, &page_off);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 8c8226c0feac..c805a5f5a6d1 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -915,6 +915,7 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 	u64 off = iocb->ki_pos;
+ 	u64 len = iov_iter_count(to);
+ 	u64 i_size = i_size_read(inode);
++	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
  
- 	if (fscrypt_has_encryption_key(dir)) {
--		if (!fscrypt_fname_encrypted_size(&dir->i_crypt_info->ci_policy,
--						  iname->len, NAME_MAX,
-+		if (!fscrypt_fname_encrypted_size(dir, iname->len, NAME_MAX,
- 						  &fname->crypto_buf.len))
- 			return -ENAMETOOLONG;
- 		fname->crypto_buf.name = kmalloc(fname->crypto_buf.len,
-diff --git a/fs/crypto/fscrypt_private.h b/fs/crypto/fscrypt_private.h
-index 5b0a9e6478b5..f3e6e566daff 100644
---- a/fs/crypto/fscrypt_private.h
-+++ b/fs/crypto/fscrypt_private.h
-@@ -297,14 +297,11 @@ void fscrypt_generate_iv(union fscrypt_iv *iv, u64 lblk_num,
- 			 const struct fscrypt_info *ci);
+ 	dout("sync_read on file %p %llu~%u %s\n", file, off, (unsigned)len,
+ 	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+@@ -941,10 +942,12 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 		bool more;
+ 		int idx;
+ 		size_t left;
++		struct ceph_osd_req_op *op;
  
- /* fname.c */
--int fscrypt_fname_encrypt(const struct inode *inode, const struct qstr *iname,
--			  u8 *out, unsigned int olen);
--bool fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
--				  u32 orig_len, u32 max_len,
--				  u32 *encrypted_len_ret);
-+bool __fscrypt_fname_encrypted_size(const union fscrypt_policy *policy,
-+				    u32 orig_len, u32 max_len,
-+				    u32 *encrypted_len_ret);
+ 		req = ceph_osdc_new_request(osdc, &ci->i_layout,
+ 					ci->i_vino, off, &len, 0, 1,
+-					CEPH_OSD_OP_READ, CEPH_OSD_FLAG_READ,
++					sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
++					CEPH_OSD_FLAG_READ,
+ 					NULL, ci->i_truncate_seq,
+ 					ci->i_truncate_size, false);
+ 		if (IS_ERR(req)) {
+@@ -965,6 +968,16 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
  
- /* hkdf.c */
+ 		osd_req_op_extent_osd_data_pages(req, 0, pages, len, page_off,
+ 						 false, false);
++
++		op = &req->r_ops[0];
++		if (sparse) {
++			ret = ceph_alloc_sparse_ext_map(op);
++			if (ret) {
++				ceph_osdc_put_request(req);
++				break;
++			}
++		}
++
+ 		ret = ceph_osdc_start_request(osdc, req, false);
+ 		if (!ret)
+ 			ret = ceph_osdc_wait_request(osdc, req);
+@@ -974,19 +987,24 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 					 req->r_end_latency,
+ 					 len, ret);
+ 
+-		ceph_osdc_put_request(req);
 -
- struct fscrypt_hkdf {
- 	struct crypto_shash *hmac_tfm;
+ 		i_size = i_size_read(inode);
+ 		dout("sync_read %llu~%llu got %zd i_size %llu%s\n",
+ 		     off, len, ret, i_size, (more ? " MORE" : ""));
+ 
+-		if (ret == -ENOENT)
++		/* Fix it to go to end of extent map */
++		if (sparse && ret >= 0)
++			ret = ceph_sparse_ext_map_end(op);
++		else if (ret == -ENOENT)
+ 			ret = 0;
++
++		ceph_osdc_put_request(req);
++
+ 		if (ret >= 0 && ret < len && (off + ret < i_size)) {
+ 			int zlen = min(len - ret, i_size - off - ret);
+ 			int zoff = page_off + ret;
++
+ 			dout("sync_read zero gap %llu~%llu\n",
+-                             off + ret, off + ret + zlen);
++				off + ret, off + ret + zlen);
+ 			ceph_zero_page_vector_range(zoff, zlen, pages);
+ 			ret += zlen;
+ 		}
+@@ -1105,8 +1123,10 @@ static void ceph_aio_complete_req(struct ceph_osd_request *req)
+ 	struct inode *inode = req->r_inode;
+ 	struct ceph_aio_request *aio_req = req->r_priv;
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
++	struct ceph_osd_req_op *op = &req->r_ops[0];
+ 	struct ceph_client_metric *metric = &ceph_sb_to_mdsc(inode->i_sb)->metric;
+ 	unsigned int len = osd_data->bvec_pos.iter.bi_size;
++	bool sparse = (op->op == CEPH_OSD_OP_SPARSE_READ);
+ 
+ 	BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_BVECS);
+ 	BUG_ON(!osd_data->num_bvecs);
+@@ -1127,6 +1147,8 @@ static void ceph_aio_complete_req(struct ceph_osd_request *req)
+ 		}
+ 		rc = -ENOMEM;
+ 	} else if (!aio_req->write) {
++		if (sparse && rc >= 0)
++			rc = ceph_sparse_ext_map_end(op);
+ 		if (rc == -ENOENT)
+ 			rc = 0;
+ 		if (rc >= 0 && len > rc) {
+@@ -1263,6 +1285,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 	loff_t pos = iocb->ki_pos;
+ 	bool write = iov_iter_rw(iter) == WRITE;
+ 	bool should_dirty = !write && iter_is_iovec(iter);
++	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
+ 
+ 	if (write && ceph_snap(file_inode(file)) != CEPH_NOSNAP)
+ 		return -EROFS;
+@@ -1290,6 +1313,8 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 	while (iov_iter_count(iter) > 0) {
+ 		u64 size = iov_iter_count(iter);
+ 		ssize_t len;
++		struct ceph_osd_req_op *op;
++		int readop = sparse ?  CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ;
+ 
+ 		if (write)
+ 			size = min_t(u64, size, fsc->mount_options->wsize);
+@@ -1300,8 +1325,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+ 					    vino, pos, &size, 0,
+ 					    1,
+-					    write ? CEPH_OSD_OP_WRITE :
+-						    CEPH_OSD_OP_READ,
++					    write ? CEPH_OSD_OP_WRITE : readop,
+ 					    flags, snapc,
+ 					    ci->i_truncate_seq,
+ 					    ci->i_truncate_size,
+@@ -1352,6 +1376,14 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		}
+ 
+ 		osd_req_op_extent_osd_data_bvecs(req, 0, bvecs, num_pages, len);
++		op = &req->r_ops[0];
++		if (sparse) {
++			ret = ceph_alloc_sparse_ext_map(op);
++			if (ret) {
++				ceph_osdc_put_request(req);
++				break;
++			}
++		}
+ 
+ 		if (aio_req) {
+ 			aio_req->total_len += len;
+@@ -1380,8 +1412,11 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 
+ 		size = i_size_read(inode);
+ 		if (!write) {
+-			if (ret == -ENOENT)
++			if (sparse && ret >= 0)
++				ret = ceph_sparse_ext_map_end(op);
++			else if (ret == -ENOENT)
+ 				ret = 0;
++
+ 			if (ret >= 0 && ret < len && pos + ret < size) {
+ 				struct iov_iter i;
+ 				int zlen = min_t(size_t, len - ret,
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index b73b4f75462c..b03cd54006db 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -163,6 +163,7 @@ enum {
+ 	Opt_copyfrom,
+ 	Opt_wsync,
+ 	Opt_pagecache,
++	Opt_sparseread,
  };
-diff --git a/fs/crypto/hooks.c b/fs/crypto/hooks.c
-index af74599ae1cf..7c01025879b3 100644
---- a/fs/crypto/hooks.c
-+++ b/fs/crypto/hooks.c
-@@ -228,9 +228,9 @@ int fscrypt_prepare_symlink(struct inode *dir, const char *target,
- 	 * counting it (even though it is meaningless for ciphertext) is simpler
- 	 * for now since filesystems will assume it is there and subtract it.
- 	 */
--	if (!fscrypt_fname_encrypted_size(policy, len,
--					  max_len - sizeof(struct fscrypt_symlink_data),
--					  &disk_link->len))
-+	if (!__fscrypt_fname_encrypted_size(policy, len,
-+					    max_len - sizeof(struct fscrypt_symlink_data),
-+					    &disk_link->len))
- 		return -ENAMETOOLONG;
- 	disk_link->len += sizeof(struct fscrypt_symlink_data);
  
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index 50d92d805bd8..c79c4333f769 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -305,6 +305,10 @@ void fscrypt_free_inode(struct inode *inode);
- int fscrypt_drop_inode(struct inode *inode);
+ enum ceph_recover_session_mode {
+@@ -205,6 +206,7 @@ static const struct fs_parameter_spec ceph_mount_parameters[] = {
+ 	fsparam_u32	("wsize",			Opt_wsize),
+ 	fsparam_flag_no	("wsync",			Opt_wsync),
+ 	fsparam_flag_no	("pagecache",			Opt_pagecache),
++	fsparam_flag_no	("sparseread",			Opt_sparseread),
+ 	{}
+ };
  
- /* fname.c */
-+int fscrypt_fname_encrypt(const struct inode *inode, const struct qstr *iname,
-+			  u8 *out, unsigned int olen);
-+bool fscrypt_fname_encrypted_size(const struct inode *inode, u32 orig_len,
-+				  u32 max_len, u32 *encrypted_len_ret);
- int fscrypt_setup_filename(struct inode *inode, const struct qstr *iname,
- 			   int lookup, struct fscrypt_name *fname);
+@@ -574,6 +576,12 @@ static int ceph_parse_mount_param(struct fs_context *fc,
+ 		else
+ 			fsopt->flags &= ~CEPH_MOUNT_OPT_NOPAGECACHE;
+ 		break;
++	case Opt_sparseread:
++		if (result.negated)
++			fsopt->flags &= ~CEPH_MOUNT_OPT_SPARSEREAD;
++		else
++			fsopt->flags |= CEPH_MOUNT_OPT_SPARSEREAD;
++		break;
+ 	default:
+ 		BUG();
+ 	}
+@@ -708,9 +716,10 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
  
+ 	if (!(fsopt->flags & CEPH_MOUNT_OPT_ASYNC_DIROPS))
+ 		seq_puts(m, ",wsync");
+-
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_NOPAGECACHE)
+ 		seq_puts(m, ",nopagecache");
++	if (fsopt->flags & CEPH_MOUNT_OPT_SPARSEREAD)
++		seq_puts(m, ",sparseread");
+ 
+ 	if (fsopt->wsize != CEPH_MAX_WRITE_SIZE)
+ 		seq_printf(m, ",wsize=%u", fsopt->wsize);
+@@ -1291,6 +1300,11 @@ static int ceph_reconfigure_fc(struct fs_context *fc)
+ 	else
+ 		ceph_clear_mount_opt(fsc, ASYNC_DIROPS);
+ 
++	if (fsopt->flags & CEPH_MOUNT_OPT_SPARSEREAD)
++		ceph_set_mount_opt(fsc, SPARSEREAD);
++	else
++		ceph_clear_mount_opt(fsc, SPARSEREAD);
++
+ 	if (strcmp_null(fsc->mount_options->mon_addr, fsopt->mon_addr)) {
+ 		kfree(fsc->mount_options->mon_addr);
+ 		fsc->mount_options->mon_addr = fsopt->mon_addr;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 669036ebef1e..0c7a6fedc58a 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -41,6 +41,7 @@
+ #define CEPH_MOUNT_OPT_NOCOPYFROM      (1<<14) /* don't use RADOS 'copy-from' op */
+ #define CEPH_MOUNT_OPT_ASYNC_DIROPS    (1<<15) /* allow async directory ops */
+ #define CEPH_MOUNT_OPT_NOPAGECACHE     (1<<16) /* bypass pagecache altogether */
++#define CEPH_MOUNT_OPT_SPARSEREAD      (1<<17) /* always do sparse reads */
+ 
+ #define CEPH_MOUNT_OPT_DEFAULT			\
+ 	(CEPH_MOUNT_OPT_DCACHE |		\
 -- 
 2.35.1
 
