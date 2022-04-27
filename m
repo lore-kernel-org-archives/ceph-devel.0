@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88FD0C433EF
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:24:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16F38C433FE
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:24:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231532AbiD0T1k (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:27:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43846 "EHLO
+        id S231555AbiD0T1l (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:27:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233807AbiD0TTX (ORCPT
+        with ESMTP id S232853AbiD0TTX (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:23 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86CE26246
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:54 -0700 (PDT)
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB18DE21
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:53 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1AB14619E1
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 149ECC385A9;
-        Wed, 27 Apr 2022 19:13:53 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 9818FB8291B
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:52 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E7FAAC385AF;
+        Wed, 27 Apr 2022 19:13:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086833;
-        bh=axX5BkqLZDK6roGl5PQHu8P5am5/8hnJSh4Bqgb3oGo=;
+        s=k20201202; t=1651086831;
+        bh=PJPyqDK6DNMW9F+5wYxGCw3ywIqwNAhCuh2XTGubQow=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=SmWpwveIV6FX4AeX7CGCZzrOL5iwqtRWn9/5d8AaBryYfNQxxg0BKIVYCODRqmNrg
-         Nuv70WUUFL3bJbVITLR25Ejz7Tgp5/Pl0gricvoURwy4A1kHFt5bcLaZCE7d68m/GD
-         F9ZN6HwqzvyWvDWVdR7eBMFbXCyi9/Dg7Yzd9w1uXgjGvtfuIShgPNanCaNavclULA
-         qjXPHvVh3Puq9aRwvDi4ZLSG0s+YgDKJf/BX0WPv3GkEAAhGazHnRHpHf4UgaGxAW6
-         aANeu1OTolTXM9RwthuAz4sDQoCvH3cdQ9LCQiQ3z7FAKL79seNqCxB2VW6kbjRDbw
-         PP92bxDOvgt5w==
+        b=ghX+X3aMANPw789oiQii7VS9OwQpodEqkLrbvJ3GHBu+V0McAMP3SMbHrnWMvn4wq
+         gNKgAjV4z5EXFZ8ESryjfq+LE2xsWgQYLIzbkMn2AoiiibQSLCq35gxDmYLZ5aLZV+
+         UWQKrGuo9NVYFOgE9VRTWUmDOLyFe+JSfTN2mhdq1HuO2nGacaJCmAm210efoYQPv0
+         eaJWON3HB3Ojiezsr8MTkW8xV+bp9wLu6YdQPWR+Tb8hcHchgmgD2/TkkY6O5M77FL
+         lkTXauDwjEMK0nHKTpxELxOaKMTrLK9OsyGzBkwHr9bnM6tLcPNgk8XuHLmY4D51sX
+         EBLQPX+uRI/eA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 52/64] ceph: don't use special DIO path for encrypted inodes
-Date:   Wed, 27 Apr 2022 15:13:02 -0400
-Message-Id: <20220427191314.222867-53-jlayton@kernel.org>
+Subject: [PATCH v14 49/64] libceph: allow ceph_osdc_new_request to accept a multi-op read
+Date:   Wed, 27 Apr 2022 15:12:59 -0400
+Message-Id: <20220427191314.222867-50-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -46,39 +46,60 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Eventually I want to merge the synchronous and direct read codepaths,
-possibly via new netfs infrastructure. For now, the direct path is not
-crypto-enabled, so use the sync read/write paths instead.
+Currently we have some special-casing for multi-op writes, but in the
+case of a read, we can't really handle it. All of the current multi-op
+callers call it with CEPH_OSD_FLAG_WRITE set.
+
+Have ceph_osdc_new_request check for CEPH_OSD_FLAG_READ and if it's set,
+allocate multiple reply ops instead of multiple request ops. If neither
+flag is set, return -EINVAL.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ net/ceph/osd_client.c | 27 +++++++++++++++++++++------
+ 1 file changed, 21 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 483d7d016ad6..edeb74f57b73 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1719,7 +1719,9 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 		     ceph_cap_string(got));
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index febdd728b2fb..39d38b69a953 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1130,15 +1130,30 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 	if (flags & CEPH_OSD_FLAG_WRITE)
+ 		req->r_data_offset = off;
  
- 		if (ci->i_inline_version == CEPH_INLINE_NONE) {
--			if (!retry_op && (iocb->ki_flags & IOCB_DIRECT)) {
-+			if (!retry_op &&
-+			    (iocb->ki_flags & IOCB_DIRECT) &&
-+			    !IS_ENCRYPTED(inode)) {
- 				ret = ceph_direct_read_write(iocb, to,
- 							     NULL, NULL);
- 				if (ret >= 0 && ret < len)
-@@ -1945,7 +1947,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+-	if (num_ops > 1)
++	if (num_ops > 1) {
++		int num_req_ops, num_rep_ops;
++
+ 		/*
+-		 * This is a special case for ceph_writepages_start(), but it
+-		 * also covers ceph_uninline_data().  If more multi-op request
+-		 * use cases emerge, we will need a separate helper.
++		 * If this is a multi-op write request, assume that we'll need
++		 * request ops. If it's a multi-op read then assume we'll need
++		 * reply ops. Anything else and call it -EINVAL.
+ 		 */
+-		r = __ceph_osdc_alloc_messages(req, GFP_NOFS, num_ops, 0);
+-	else
++		if (flags & CEPH_OSD_FLAG_WRITE) {
++			num_req_ops = num_ops;
++			num_rep_ops = 0;
++		} else if (flags & CEPH_OSD_FLAG_READ) {
++			num_req_ops = 0;
++			num_rep_ops = num_ops;
++		} else {
++			r = -EINVAL;
++			goto fail;
++		}
++
++		r = __ceph_osdc_alloc_messages(req, GFP_NOFS, num_req_ops,
++					       num_rep_ops);
++	} else {
+ 		r = ceph_osdc_alloc_messages(req, GFP_NOFS);
++	}
+ 	if (r)
+ 		goto fail;
  
- 		/* we might need to revert back to that point */
- 		data = *from;
--		if (iocb->ki_flags & IOCB_DIRECT)
-+		if ((iocb->ki_flags & IOCB_DIRECT) && !IS_ENCRYPTED(inode))
- 			written = ceph_direct_read_write(iocb, &data, snapc,
- 							 &prealloc_cf);
- 		else
 -- 
 2.35.1
 
