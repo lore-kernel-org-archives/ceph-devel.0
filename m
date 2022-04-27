@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49257C433FE
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:16:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6789AC433EF
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:16:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232990AbiD0TTx (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:19:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49688 "EHLO
+        id S233478AbiD0TT4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:19:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43848 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230212AbiD0TTP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:15 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AC5689333
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:35 -0700 (PDT)
+        with ESMTP id S233499AbiD0TTS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:18 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3544E38D9D
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:43 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 98AFFB8291D
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CBF77C385AF;
-        Wed, 27 Apr 2022 19:13:32 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id EA6D4B8294E
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F96DC385AE;
+        Wed, 27 Apr 2022 19:13:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086813;
-        bh=4tZ05g/FJhXyVnjkVAE3L9bGcTJl59SqdTzNrr3EHzg=;
+        s=k20201202; t=1651086821;
+        bh=lVmRbo/Yqwtaeh9CAL98bk9QWDa/T4bzwxEXkoS7RR8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=mpcO2lPmgStkMnDADQZbW94zvD3A1hgXf1+HOQiWLxEyqJSCiRi1lTZ8irk/yujub
-         AA0ndrGPF1wyjtEi3N9Ak7+vDOGS18G5OxcfXgjmPihye2imM0cCZAqd1MkbFiHr33
-         Jq8LSP7YotCTtvz04hwEa2+c6HVQ4ZVBqU7CqlMOd9XBWRs7O4eRKOZdlmXbOcXD4d
-         KdF9KKJAB5PmuvjSpNMGM6qTjzo7h1LrBSLWqDHFBuOciJXil0VS0cBLAO73MTbBlk
-         ikB/Axcp8zTxXsBLYHlkG+uXlm9r5hw8Hwb/Ioc4FNfg9KDjB7AADw0W7zSLpdGzUa
-         CVIS2h39ldANw==
+        b=pExlNmvJ4XJyDcxz525ZrBiNDAUBxXh/kJBvmkfVevdWGS9U0EJQaA0dOmbBmrLAc
+         OYEukGvurjsXSmjOBdyWeK6Qx3Wxk9RiRR7ihj8zZpptNooAiug1pIlf7UrMH0Aqju
+         HXaxqgHzBdzdgptK7eSBoLVzlJ0JZgKX1euSO72C8Lk6+pcPA5QG2EsrmthmWmxrP8
+         PD9iWvjB/D/qc+tsCzmJ5xn2T4oM8isTuh6V1noGYg5qiDGE25k6Pe9SHMcJxPwH4m
+         J1KCTcOL0CGVG+UDW2DExE6p6VyWbzckBkGErSW860Pa7X2mQZlNxhKC9gWE5c/6ND
+         HqgF1aUJDCYng==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 23/64] ceph: encode encrypted name in dentry release
-Date:   Wed, 27 Apr 2022 15:12:33 -0400
-Message-Id: <20220427191314.222867-24-jlayton@kernel.org>
+Subject: [PATCH v14 35/64] ceph: add a new ceph.fscrypt.auth vxattr
+Date:   Wed, 27 Apr 2022 15:12:45 -0400
+Message-Id: <20220427191314.222867-36-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -46,111 +46,58 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Encode encrypted dentry names when sending a dentry release request.
-Also add a more helpful comment over ceph_encode_dentry_release.
+Give the client a way to get at the xattr from userland, mostly for
+future debugging purposes.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c       | 32 ++++++++++++++++++++++++++++----
- fs/ceph/mds_client.c | 20 ++++++++++++++++----
- 2 files changed, 44 insertions(+), 8 deletions(-)
+ fs/ceph/xattr.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index c49053e36112..98230fd58b07 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -4622,6 +4622,18 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 58628cef4207..e080116608b2 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -352,6 +352,23 @@ static ssize_t ceph_vxattrcb_auth_mds(struct ceph_inode_info *ci,
  	return ret;
  }
  
-+/**
-+ * ceph_encode_dentry_release - encode a dentry release into an outgoing request
-+ * @p: outgoing request buffer
-+ * @dentry: dentry to release
-+ * @dir: dir to release it from
-+ * @mds: mds that we're speaking to
-+ * @drop: caps being dropped
-+ * @unless: unless we have these caps
-+ *
-+ * Encode a dentry release into an outgoing request buffer. Returns 1 if the
-+ * thing was released, or a negative error code otherwise.
-+ */
- int ceph_encode_dentry_release(void **p, struct dentry *dentry,
- 			       struct inode *dir,
- 			       int mds, int drop, int unless)
-@@ -4654,13 +4666,25 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
- 	if (ret && di->lease_session && di->lease_session->s_mds == mds) {
- 		dout("encode_dentry_release %p mds%d seq %d\n",
- 		     dentry, mds, (int)di->lease_seq);
--		rel->dname_len = cpu_to_le32(dentry->d_name.len);
--		memcpy(*p, dentry->d_name.name, dentry->d_name.len);
--		*p += dentry->d_name.len;
- 		rel->dname_seq = cpu_to_le32(di->lease_seq);
- 		__ceph_mdsc_drop_dentry_lease(dentry);
-+		spin_unlock(&dentry->d_lock);
-+		if (IS_ENCRYPTED(dir) && fscrypt_has_encryption_key(dir)) {
-+			int ret2 = ceph_encode_encrypted_fname(dir, dentry, *p);
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++static bool ceph_vxattrcb_fscrypt_auth_exists(struct ceph_inode_info *ci)
++{
++	return ci->fscrypt_auth_len;
++}
 +
-+			if (ret2 < 0)
-+				return ret2;
++static ssize_t ceph_vxattrcb_fscrypt_auth(struct ceph_inode_info *ci, char *val, size_t size)
++{
++	if (size) {
++		if (size < ci->fscrypt_auth_len)
++			return -ERANGE;
++		memcpy(val, ci->fscrypt_auth, ci->fscrypt_auth_len);
++	}
++	return ci->fscrypt_auth_len;
++}
++#endif /* CONFIG_FS_ENCRYPTION */
 +
-+			rel->dname_len = cpu_to_le32(ret2);
-+			*p += ret2;
-+		} else {
-+			rel->dname_len = cpu_to_le32(dentry->d_name.len);
-+			memcpy(*p, dentry->d_name.name, dentry->d_name.len);
-+			*p += dentry->d_name.len;
-+		}
-+	} else {
-+		spin_unlock(&dentry->d_lock);
- 	}
--	spin_unlock(&dentry->d_lock);
- 	return ret;
- }
+ #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
+ #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
+ 	XATTR_CEPH_PREFIX #_type "." #_name "." #_name2
+@@ -500,6 +517,15 @@ static struct ceph_vxattr ceph_common_vxattrs[] = {
+ 		.exists_cb = NULL,
+ 		.flags = VXATTR_FLAG_READONLY,
+ 	},
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++	{
++		.name = "ceph.fscrypt.auth",
++		.name_size = sizeof("ceph.fscrypt.auth"),
++		.getxattr_cb = ceph_vxattrcb_fscrypt_auth,
++		.exists_cb = ceph_vxattrcb_fscrypt_auth_exists,
++		.flags = VXATTR_FLAG_READONLY,
++	},
++#endif /* CONFIG_FS_ENCRYPTION */
+ 	{ .name = NULL, 0 }	/* Required table terminator */
+ };
  
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index cc3c507c03eb..af54a6164bba 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2819,15 +2819,23 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 		      req->r_inode ? req->r_inode : d_inode(req->r_dentry),
- 		      mds, req->r_inode_drop, req->r_inode_unless,
- 		      req->r_op == CEPH_MDS_OP_READDIR);
--	if (req->r_dentry_drop)
--		releases += ceph_encode_dentry_release(&p, req->r_dentry,
-+	if (req->r_dentry_drop) {
-+		ret = ceph_encode_dentry_release(&p, req->r_dentry,
- 				req->r_parent, mds, req->r_dentry_drop,
- 				req->r_dentry_unless);
--	if (req->r_old_dentry_drop)
--		releases += ceph_encode_dentry_release(&p, req->r_old_dentry,
-+		if (ret < 0)
-+			goto out_err;
-+		releases += ret;
-+	}
-+	if (req->r_old_dentry_drop) {
-+		ret = ceph_encode_dentry_release(&p, req->r_old_dentry,
- 				req->r_old_dentry_dir, mds,
- 				req->r_old_dentry_drop,
- 				req->r_old_dentry_unless);
-+		if (ret < 0)
-+			goto out_err;
-+		releases += ret;
-+	}
- 	if (req->r_old_inode_drop)
- 		releases += ceph_encode_inode_release(&p,
- 		      d_inode(req->r_old_dentry),
-@@ -2869,6 +2877,10 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 		ceph_mdsc_free_path((char *)path1, pathlen1);
- out:
- 	return msg;
-+out_err:
-+	ceph_msg_put(msg);
-+	msg = ERR_PTR(ret);
-+	goto out_free2;
- }
- 
- /*
 -- 
 2.35.1
 
