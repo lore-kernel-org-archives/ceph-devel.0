@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5F41C433FE
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:17:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 446E8C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:17:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233712AbiD0TUT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:20:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47562 "EHLO
+        id S229461AbiD0TUR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:20:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233155AbiD0TTP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AE8089CEF
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:36 -0700 (PDT)
+        with ESMTP id S233264AbiD0TTT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:19 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCB7549277
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:46 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E402361A00
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0A61C385A7;
-        Wed, 27 Apr 2022 19:13:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6347B619E1
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B921C385AF;
+        Wed, 27 Apr 2022 19:13:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086815;
-        bh=QSQJwXnQ26aopltanKUAuklulNeW880EC3N09Fc3UKo=;
+        s=k20201202; t=1651086825;
+        bh=vJLDHbtT13mhryEotWQYEflQwUADw6c3JX3gik+rhUQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ic7SrVAlA2lxQkIXjJfNO2fSvDvhrNa/G1MoaKfflzmYybf7ak0/0BxXNTJ+CrFB4
-         oqHv707CGNlAlovW5W5VZD23oYkBLadkrH2o6Dv75FIs3jKIHUf3QXOkPPNkNMttS/
-         OZDgyES1rIrZteEjUILmGYpLVIuAyeTnVaIqNo5bMU5aZ17ycEbPBvwKtBISFVJQ3G
-         WZVMmZS+gezbIEHWAQ12dprNfO9TBLZKA50RqUCIKl1Hx4VK6vZEkc+JH5RKVlm2bI
-         BHUGWFclRGY7DbG0muMSp2KN/LbpItBW4NyjznxA8vchRSaaAUk3ZAHn07c9U2St1n
-         iB6OkMiHNcq3Q==
+        b=P/UGaeXk3ZHT18BRDBmb9Apws2XP5YgW+ViaD9Wr8qwKdMvPXPJKiCv9vygwMLcC5
+         AJzZfcRVBnEAmVqWQihxlvxgtD8ror4w7Twzb9HK+qkbFBWCHAw/+N2jbH9B0ulwKo
+         o7iO1UpJYXkI6wOQ0ZSM3H65wX/lCstJEDXJ/nd9ZDCfkg/PFrPBYn42U3T2fwhxCh
+         JZ08t3uujW9fOJ9ENgSYvZR/ybS4vTdahUlt+uQtzzrZirwGUMsSijP5BQOuny/tRQ
+         nv0/RNonQWjTgKpF8tCkd8H+mUORpFKZCf1hzv+SV5ike3IqLH8FrTO35NRhouALiK
+         CSf1x5ma7QwXg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 26/64] ceph: make d_revalidate call fscrypt revalidator for encrypted dentries
-Date:   Wed, 27 Apr 2022 15:12:36 -0400
-Message-Id: <20220427191314.222867-27-jlayton@kernel.org>
+Subject: [PATCH v14 41/64] ceph: get file size from fscrypt_file when present in inode traces
+Date:   Wed, 27 Apr 2022 15:12:51 -0400
+Message-Id: <20220427191314.222867-42-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -46,41 +46,52 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-If we have a dentry which represents a no-key name, then we need to test
-whether the parent directory's encryption key has since been added.  Do
-that before we test anything else about the dentry.
+When we get an inode trace from the MDS, grab the fscrypt_file field if
+the inode is encrypted, and use it to populate the i_size field instead
+of the regular inode size field.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/dir.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ fs/ceph/inode.c | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 897f8618151b..caf2547c3fe1 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1709,6 +1709,10 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 	struct inode *dir, *inode;
- 	struct ceph_mds_client *mdsc;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 4fa4e206e8f4..d606dd7c093b 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1024,6 +1024,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
  
-+	valid = fscrypt_d_revalidate(dentry, flags);
-+	if (valid <= 0)
-+		return valid;
+ 	if (new_version ||
+ 	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
++		u64 size = le64_to_cpu(info->size);
+ 		s64 old_pool = ci->i_layout.pool_id;
+ 		struct ceph_string *old_ns;
+ 
+@@ -1037,10 +1038,21 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 
+ 		pool_ns = old_ns;
+ 
++		if (IS_ENCRYPTED(inode) && size && (iinfo->fscrypt_file_len == sizeof(__le64))) {
++			u64 fsize = __le64_to_cpu(*(__le64 *)iinfo->fscrypt_file);
 +
- 	if (flags & LOOKUP_RCU) {
- 		parent = READ_ONCE(dentry->d_parent);
- 		dir = d_inode_rcu(parent);
-@@ -1721,8 +1725,8 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 		inode = d_inode(dentry);
- 	}
- 
--	dout("d_revalidate %p '%pd' inode %p offset 0x%llx\n", dentry,
--	     dentry, inode, ceph_dentry(dentry)->offset);
-+	dout("d_revalidate %p '%pd' inode %p offset 0x%llx nokey %d\n", dentry,
-+	     dentry, inode, ceph_dentry(dentry)->offset, !!(dentry->d_flags & DCACHE_NOKEY_NAME));
- 
- 	mdsc = ceph_sb_to_client(dir->i_sb)->mdsc;
- 
++			if (size == round_up(fsize, CEPH_FSCRYPT_BLOCK_SIZE)) {
++				size = fsize;
++			} else {
++				pr_warn("fscrypt size mismatch: size=%llu fscrypt_file=%llu, discarding fscrypt_file size.\n",
++					info->size, size);
++			}
++		}
++
+ 		queue_trunc = ceph_fill_file_size(inode, issued,
+-					le32_to_cpu(info->truncate_seq),
+-					le64_to_cpu(info->truncate_size),
+-					le64_to_cpu(info->size));
++						  le32_to_cpu(info->truncate_seq),
++						  le64_to_cpu(info->truncate_size),
++						  size);
+ 		/* only update max_size on auth cap */
+ 		if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
+ 		    ci->i_max_size != le64_to_cpu(info->max_size)) {
 -- 
 2.35.1
 
