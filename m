@@ -2,132 +2,77 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E872EC433FE
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:16:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39358C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:16:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234064AbiD0TUE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:20:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53294 "EHLO
+        id S234139AbiD0TUF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:20:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41600 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233430AbiD0TTS (ORCPT
+        with ESMTP id S233519AbiD0TTS (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:18 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DBFCCE3
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:41 -0700 (PDT)
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 344953E5F8
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:44 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 207D0B82929
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 62C4EC385AA;
-        Wed, 27 Apr 2022 19:13:38 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 9A3CE619D0
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:43 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F85DC385A9;
+        Wed, 27 Apr 2022 19:13:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086818;
-        bh=/0CfgyAPUscvaYlX3rNncpXUN3aimP3LK9zqrBKh1zA=;
+        s=k20201202; t=1651086823;
+        bh=055bRGvY8Rd9//uY4MNk52HNCIW2YMD+cbIrSeHBb+4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=DGd5k1cEP9A8qlOjPJU+qS5OTYQNPvgNVFSG1ZbXwJJgW19jpCn1TKiQttha6/Dec
-         QxR9mIGQ8FffIueIoke/QKDwr3E10J4+edOXevqTTpylL+ARtr3etBKVHv4JZJdKnR
-         eY5ZMFI1L5kbE+lSwHauJaCd05zbZBdN/RNEV855Gi1TdgRVMQuFtj+7PAno0REKrt
-         z1xV35Lgt18PDUeAwtmK+3KvTJhGlIFhH9yiGzTxTMQKWLvjw7rNqZBqq8evF7fAxi
-         kfTHAXN0hCqyWsa4Y0s6SDAWwM83N5r95PLEz9WGq6dG3ZUve/0BNnB3rU+skgMzfD
-         fGVj/t7VDWoDQ==
+        b=UIkuPKZqIQ3M7JV2O39PNLsFcE1uRZmyNf2t+q6yz40y8/Oo+ZVYkkmVdy9PiMxIO
+         q/YlWMgpLNvm2PN3Pj0rYQ+k+yqsl69VmMBh1B7mMdn8J6sRF9oVj8NHb1CpK9Wq0Z
+         m4BAJ7twv9eLPQUphs7S0KGsxGx6yDKy6utjlaGJOCr9dDy0ZWpoqDfloAAQiJ2gTs
+         OTEruhSFe0/nDEY1a1ox5B0CnaH63xfVDXukpS3KGhB3TCpt7ieBKwNztdOxcN/CuU
+         nEggBpKcanumMfArofuAKnUhAtBFoo0yrbMGJExWCmVxec2aN6Rq9CoDgVXHOGISBE
+         Jk1K5g1KR3Y5g==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 31/64] ceph: add ceph_encode_encrypted_dname() helper
-Date:   Wed, 27 Apr 2022 15:12:41 -0400
-Message-Id: <20220427191314.222867-32-jlayton@kernel.org>
+Subject: [PATCH v14 37/64] ceph: don't allow changing layout on encrypted files/directories
+Date:   Wed, 27 Apr 2022 15:12:47 -0400
+Message-Id: <20220427191314.222867-38-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+From: Luís Henriques <lhenriques@suse.de>
 
-Add a new helper that basically calls ceph_encode_encrypted_fname, but
-with a qstr pointer instead of a dentry pointer. This will make it
-simpler to decrypt names in a readdir reply, before we have a dentry.
+Encryption is currently only supported on files/directories with layouts
+where stripe_count=1.  Forbid changing layouts when encryption is involved.
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Luis Henriques <lhenriques@suse.de>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/crypto.c | 11 ++++++++---
- fs/ceph/crypto.h |  8 ++++++++
- 2 files changed, 16 insertions(+), 3 deletions(-)
+ fs/ceph/ioctl.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 6fb2fd1a8af0..05498859eef5 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -188,7 +188,7 @@ void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_se
- 	swap(req->r_fscrypt_auth, as->fscrypt_auth);
- }
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index b9f0f4e460ab..9675ef3a6c47 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -294,6 +294,10 @@ static long ceph_set_encryption_policy(struct file *file, unsigned long arg)
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
  
--int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf)
-+int ceph_encode_encrypted_dname(const struct inode *parent, struct qstr *d_name, char *buf)
- {
- 	u32 len;
- 	int elen;
-@@ -203,7 +203,7 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
- 	 *
- 	 * See: fscrypt_setup_filename
- 	 */
--	if (!fscrypt_fname_encrypted_size(parent, dentry->d_name.len, NAME_MAX, &len))
-+	if (!fscrypt_fname_encrypted_size(parent, d_name->len, NAME_MAX, &len))
- 		return -ENAMETOOLONG;
- 
- 	/* Allocate a buffer appropriate to hold the result */
-@@ -211,7 +211,7 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
- 	if (!cryptbuf)
- 		return -ENOMEM;
- 
--	ret = fscrypt_fname_encrypt(parent, &dentry->d_name, cryptbuf, len);
-+	ret = fscrypt_fname_encrypt(parent, d_name, cryptbuf, len);
- 	if (ret) {
- 		kfree(cryptbuf);
++	/* encrypted directories can't have striped layout */
++	if (ci->i_layout.stripe_count > 1)
++		return -EINVAL;
++
+ 	ret = vet_mds_for_fscrypt(file);
+ 	if (ret)
  		return ret;
-@@ -235,6 +235,11 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
- 	return elen;
- }
- 
-+int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf)
-+{
-+	return ceph_encode_encrypted_dname(parent, &dentry->d_name, buf);
-+}
-+
- /**
-  * ceph_fname_to_usr - convert a filename for userland presentation
-  * @fname: ceph_fname to be converted
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index f231d6e3ba0f..704e5a0e96f7 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -75,6 +75,7 @@ void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc);
- int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
- 				 struct ceph_acl_sec_ctx *as);
- void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_sec_ctx *as);
-+int ceph_encode_encrypted_dname(const struct inode *parent, struct qstr *d_name, char *buf);
- int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf);
- 
- static inline int ceph_fname_alloc_buffer(struct inode *parent, struct fscrypt_str *fname)
-@@ -116,6 +117,13 @@ static inline void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req,
- {
- }
- 
-+static inline int ceph_encode_encrypted_dname(const struct inode *parent,
-+					      struct qstr *d_name, char *buf)
-+{
-+	memcpy(buf, d_name->name, d_name->len);
-+	return d_name->len;
-+}
-+
- static inline int ceph_encode_encrypted_fname(const struct inode *parent,
- 						struct dentry *dentry, char *buf)
- {
 -- 
 2.35.1
 
