@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 446E8C433F5
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:17:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E8BEC433EF
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:17:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229461AbiD0TUR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:20:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53546 "EHLO
+        id S230282AbiD0TUV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:20:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233264AbiD0TTT (ORCPT
+        with ESMTP id S232664AbiD0TTT (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:19 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCB7549277
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CF4B165BA
         for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:46 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6347B619E1
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B921C385AF;
-        Wed, 27 Apr 2022 19:13:45 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1D666B8294C
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4573AC385AE;
+        Wed, 27 Apr 2022 19:13:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086825;
-        bh=vJLDHbtT13mhryEotWQYEflQwUADw6c3JX3gik+rhUQ=;
+        s=k20201202; t=1651086823;
+        bh=X85CZobPXWulW9mgO7+FK15JdkLRqeyY4fhr5BUdygo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=P/UGaeXk3ZHT18BRDBmb9Apws2XP5YgW+ViaD9Wr8qwKdMvPXPJKiCv9vygwMLcC5
-         AJzZfcRVBnEAmVqWQihxlvxgtD8ror4w7Twzb9HK+qkbFBWCHAw/+N2jbH9B0ulwKo
-         o7iO1UpJYXkI6wOQ0ZSM3H65wX/lCstJEDXJ/nd9ZDCfkg/PFrPBYn42U3T2fwhxCh
-         JZ08t3uujW9fOJ9ENgSYvZR/ybS4vTdahUlt+uQtzzrZirwGUMsSijP5BQOuny/tRQ
-         nv0/RNonQWjTgKpF8tCkd8H+mUORpFKZCf1hzv+SV5ike3IqLH8FrTO35NRhouALiK
-         CSf1x5ma7QwXg==
+        b=IssPKZEVvWKZH3igNNy02uBcpHlxNC2gk6t1b35Aln3iTI2Rev2OkuMdEGJXsFeVe
+         n0F71E499mGib6uJ2itE3S+XPF+9rMbFXb5YpqDkpYqSJXBtwDYvd4Od+OSNHOIxhm
+         iFNiKXrPx9ZBSsmqQBr315tt75iPVwkG7Nt4w0/NnaT3Uh0cgajQLQiuQLFxyaKIdJ
+         DH+LYcgPcsY7O5Pvatph8BadBc0I49o6DgzH2pWFakJSRjltqT8xuPKMrvT7LRQtNU
+         MOBEvUq1Rxx96vJX0UJrBcbSewHP3sPFjrMe7qAGGxdcyFgEtPqQqSvdUQWr7IipfH
+         8NpfGOxMT2cjw==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 41/64] ceph: get file size from fscrypt_file when present in inode traces
-Date:   Wed, 27 Apr 2022 15:12:51 -0400
-Message-Id: <20220427191314.222867-42-jlayton@kernel.org>
+Subject: [PATCH v14 38/64] libceph: add CEPH_OSD_OP_ASSERT_VER support
+Date:   Wed, 27 Apr 2022 15:12:48 -0400
+Message-Id: <20220427191314.222867-39-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -46,52 +46,89 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When we get an inode trace from the MDS, grab the fscrypt_file field if
-the inode is encrypted, and use it to populate the i_size field instead
-of the regular inode size field.
+...and record the user_version in the reply in a new field in
+ceph_osd_request, so we can populate the assert_ver appropriately.
+Shuffle the fields a bit too so that the new field fits in an
+existing hole on x86_64.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 18 +++++++++++++++---
- 1 file changed, 15 insertions(+), 3 deletions(-)
+ include/linux/ceph/osd_client.h | 6 +++++-
+ include/linux/ceph/rados.h      | 4 ++++
+ net/ceph/osd_client.c           | 5 +++++
+ 3 files changed, 14 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 4fa4e206e8f4..d606dd7c093b 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1024,6 +1024,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 4088601beacc..8c7f34df66d3 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -196,6 +196,9 @@ struct ceph_osd_req_op {
+ 			u32 src_fadvise_flags;
+ 			struct ceph_osd_data osd_data;
+ 		} copy_from;
++		struct {
++			u64 ver;
++		} assert_ver;
+ 	};
+ };
  
- 	if (new_version ||
- 	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
-+		u64 size = le64_to_cpu(info->size);
- 		s64 old_pool = ci->i_layout.pool_id;
- 		struct ceph_string *old_ns;
+@@ -250,6 +253,7 @@ struct ceph_osd_request {
+ 	struct ceph_osd_client *r_osdc;
+ 	struct kref       r_kref;
+ 	bool              r_mempool;
++	bool		  r_linger;           /* don't resend on failure */
+ 	struct completion r_completion;       /* private to osd_client.c */
+ 	ceph_osdc_callback_t r_callback;
  
-@@ -1037,10 +1038,21 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+@@ -262,9 +266,9 @@ struct ceph_osd_request {
+ 	struct ceph_snap_context *r_snapc;    /* for writes */
+ 	struct timespec64 r_mtime;            /* ditto */
+ 	u64 r_data_offset;                    /* ditto */
+-	bool r_linger;                        /* don't resend on failure */
  
- 		pool_ns = old_ns;
- 
-+		if (IS_ENCRYPTED(inode) && size && (iinfo->fscrypt_file_len == sizeof(__le64))) {
-+			u64 fsize = __le64_to_cpu(*(__le64 *)iinfo->fscrypt_file);
-+
-+			if (size == round_up(fsize, CEPH_FSCRYPT_BLOCK_SIZE)) {
-+				size = fsize;
-+			} else {
-+				pr_warn("fscrypt size mismatch: size=%llu fscrypt_file=%llu, discarding fscrypt_file size.\n",
-+					info->size, size);
-+			}
-+		}
-+
- 		queue_trunc = ceph_fill_file_size(inode, issued,
--					le32_to_cpu(info->truncate_seq),
--					le64_to_cpu(info->truncate_size),
--					le64_to_cpu(info->size));
-+						  le32_to_cpu(info->truncate_seq),
-+						  le64_to_cpu(info->truncate_size),
-+						  size);
- 		/* only update max_size on auth cap */
- 		if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
- 		    ci->i_max_size != le64_to_cpu(info->max_size)) {
+ 	/* internal */
++	u64 r_version;			      /* data version sent in reply */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
+ 	ktime_t r_start_latency;              /* ktime_t */
+diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+index 43a7a1573b51..73c3efbec36c 100644
+--- a/include/linux/ceph/rados.h
++++ b/include/linux/ceph/rados.h
+@@ -523,6 +523,10 @@ struct ceph_osd_op {
+ 		struct {
+ 			__le64 cookie;
+ 		} __attribute__ ((packed)) notify;
++		struct {
++			__le64 unused;
++			__le64 ver;
++		} __attribute__ ((packed)) assert_ver;
+ 		struct {
+ 			__le64 offset, length;
+ 			__le64 src_offset;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index acf6a19b6677..febdd728b2fb 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1042,6 +1042,10 @@ static u32 osd_req_encode_op(struct ceph_osd_op *dst,
+ 		dst->copy_from.src_fadvise_flags =
+ 			cpu_to_le32(src->copy_from.src_fadvise_flags);
+ 		break;
++	case CEPH_OSD_OP_ASSERT_VER:
++		dst->assert_ver.unused = cpu_to_le64(0);
++		dst->assert_ver.ver = cpu_to_le64(src->assert_ver.ver);
++		break;
+ 	default:
+ 		pr_err("unsupported osd opcode %s\n",
+ 			ceph_osd_op_name(src->op));
+@@ -3804,6 +3808,7 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 	 * one (type of) reply back.
+ 	 */
+ 	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
++	req->r_version = m.user_version;
+ 	req->r_result = m.result ?: data_len;
+ 	finish_request(req);
+ 	mutex_unlock(&osd->lock);
 -- 
 2.35.1
 
