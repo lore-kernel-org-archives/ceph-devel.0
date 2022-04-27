@@ -2,82 +2,137 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C24A2C433F5
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:17:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51F4EC433FE
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:17:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230193AbiD0TU1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:20:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51664 "EHLO
+        id S230212AbiD0TUb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:20:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233141AbiD0TTP (ORCPT
+        with ESMTP id S233170AbiD0TTP (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 444AA89CC9
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:35 -0700 (PDT)
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1C2C36E3B
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:38 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D077D619FE
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 372AAC385AE;
-        Wed, 27 Apr 2022 19:13:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B342C619D0
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC933C385A9;
+        Wed, 27 Apr 2022 19:13:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086814;
-        bh=U24PxxvQ6v89QmCZ/efk298RUKYN48wbTknFX6iZrs0=;
+        s=k20201202; t=1651086818;
+        bh=kJHSkODlFxYVfUSIYGfMMprvjVHq65Y77ErwOetIDoo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=OK4AiQp58XCNd7IZouSyoTZXpOhHCJWEC3jIGZWk0e3zUSei9T8BBKK1w8MpkqeVi
-         rCSkBIIkrmWwgoSbTK0a64u3RApE0QOF+JGS/8jVr2JM0JpE7tVkbcDgfOS/z/zJXm
-         ajGmUdke2nTBqGs1tfHwCkH6JHhWAITB+I6vjdBSwsbSZPXCR6LLYW7YIfX+iy9Ysy
-         YPspRk/tVk0okBaogXixj9CakNbGsCZovOxpAyVfZNAJtmYzt+3r9cGCDNdNILQ+pI
-         s+Ajzc/5cMMcrV/vV+k003V4CIhSXaXulsCnChyaUPCqqv1JYadazoT+frfFLOrSpl
-         0vBALL+0t9I+A==
+        b=eOvShGopQAkKRd35pEtfhVzEmWD9vMlCKmDiVaFQK6S11n1Q0IFKiYoUUwc37BO02
+         fxHC6neTvfG2nqHs60ctjY0WCv+6hQPMPuzdvwLi1F97EuVHBbmSyn+pwktLvN5TW/
+         lFzSiLu0IE0f6dGK8HlVwBt/VWPCmHaVFevNPHpMSM6kxi1bsQT1jou0aMKX9qE0pO
+         ktXZaNV2JLlh3M8t3cyTNq/aYcMUauvscopGV2dkRZpA04doCrbYIV5RTKCBvFW3TW
+         5pw4Z0mFYzyffHaRlAV/M2vn1bdq7AL6+FyewQxbpTqq2Ufttu9EeuwbJmuPdEMyMK
+         I4UyrBMavC2aA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 25/64] ceph: set DCACHE_NOKEY_NAME in atomic open
-Date:   Wed, 27 Apr 2022 15:12:35 -0400
-Message-Id: <20220427191314.222867-26-jlayton@kernel.org>
+Subject: [PATCH v14 30/64] ceph: pass the request to parse_reply_info_readdir()
+Date:   Wed, 27 Apr 2022 15:12:40 -0400
+Message-Id: <20220427191314.222867-31-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Atomic open can act as a lookup if handed a dentry that is negative on
-the MDS. Ensure that we set DCACHE_NOKEY_NAME on the dentry in
-atomic_open, if we don't have the key for the parent. Otherwise, we can
-end up validating the dentry inappropriately if someone later adds a
-key.
+From: Xiubo Li <xiubli@redhat.com>
 
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-Reviewed-by: Luís Henriques <lhenriques@suse.de>
+Instead of passing just the r_reply_info to the readdir reply parser,
+pass the request pointer directly instead. This will facilitate
+implementing readdir on fscrypted directories.
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ fs/ceph/mds_client.c | 22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 391de38fa489..a519218ef942 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -768,6 +768,13 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	req->r_args.open.mask = cpu_to_le32(mask);
- 	req->r_parent = dir;
- 	ihold(dir);
-+	if (IS_ENCRYPTED(dir)) {
-+		if (!fscrypt_has_encryption_key(dir)) {
-+			spin_lock(&dentry->d_lock);
-+			dentry->d_flags |= DCACHE_NOKEY_NAME;
-+			spin_unlock(&dentry->d_lock);
-+		}
-+	}
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index af54a6164bba..609bee0e576f 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -406,9 +406,10 @@ static int parse_reply_info_trace(void **p, void *end,
+  * parse readdir results
+  */
+ static int parse_reply_info_readdir(void **p, void *end,
+-				struct ceph_mds_reply_info_parsed *info,
+-				u64 features)
++				    struct ceph_mds_request *req,
++				    u64 features)
+ {
++	struct ceph_mds_reply_info_parsed *info = &req->r_reply_info;
+ 	u32 num, i = 0;
+ 	int err;
  
- 	if (flags & O_CREAT) {
- 		struct ceph_file_layout lo;
+@@ -650,15 +651,16 @@ static int parse_reply_info_getvxattr(void **p, void *end,
+  * parse extra results
+  */
+ static int parse_reply_info_extra(void **p, void *end,
+-				  struct ceph_mds_reply_info_parsed *info,
++				  struct ceph_mds_request *req,
+ 				  u64 features, struct ceph_mds_session *s)
+ {
++	struct ceph_mds_reply_info_parsed *info = &req->r_reply_info;
+ 	u32 op = le32_to_cpu(info->head->op);
+ 
+ 	if (op == CEPH_MDS_OP_GETFILELOCK)
+ 		return parse_reply_info_filelock(p, end, info, features);
+ 	else if (op == CEPH_MDS_OP_READDIR || op == CEPH_MDS_OP_LSSNAP)
+-		return parse_reply_info_readdir(p, end, info, features);
++		return parse_reply_info_readdir(p, end, req, features);
+ 	else if (op == CEPH_MDS_OP_CREATE)
+ 		return parse_reply_info_create(p, end, info, features, s);
+ 	else if (op == CEPH_MDS_OP_GETVXATTR)
+@@ -671,9 +673,9 @@ static int parse_reply_info_extra(void **p, void *end,
+  * parse entire mds reply
+  */
+ static int parse_reply_info(struct ceph_mds_session *s, struct ceph_msg *msg,
+-			    struct ceph_mds_reply_info_parsed *info,
+-			    u64 features)
++			    struct ceph_mds_request *req, u64 features)
+ {
++	struct ceph_mds_reply_info_parsed *info = &req->r_reply_info;
+ 	void *p, *end;
+ 	u32 len;
+ 	int err;
+@@ -695,7 +697,7 @@ static int parse_reply_info(struct ceph_mds_session *s, struct ceph_msg *msg,
+ 	ceph_decode_32_safe(&p, end, len, bad);
+ 	if (len > 0) {
+ 		ceph_decode_need(&p, end, len, bad);
+-		err = parse_reply_info_extra(&p, p+len, info, features, s);
++		err = parse_reply_info_extra(&p, p+len, req, features, s);
+ 		if (err < 0)
+ 			goto out_bad;
+ 	}
+@@ -3440,14 +3442,14 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 	}
+ 
+ 	dout("handle_reply tid %lld result %d\n", tid, result);
+-	rinfo = &req->r_reply_info;
+ 	if (test_bit(CEPHFS_FEATURE_REPLY_ENCODING, &session->s_features))
+-		err = parse_reply_info(session, msg, rinfo, (u64)-1);
++		err = parse_reply_info(session, msg, req, (u64)-1);
+ 	else
+-		err = parse_reply_info(session, msg, rinfo, session->s_con.peer_features);
++		err = parse_reply_info(session, msg, req, session->s_con.peer_features);
+ 	mutex_unlock(&mdsc->mutex);
+ 
+ 	/* Must find target inode outside of mutexes to avoid deadlocks */
++	rinfo = &req->r_reply_info;
+ 	if ((err >= 0) && rinfo->head->is_target) {
+ 		struct inode *in = xchg(&req->r_new_inode, NULL);
+ 		struct ceph_vino tvino = {
 -- 
 2.35.1
 
