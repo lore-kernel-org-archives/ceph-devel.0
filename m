@@ -2,42 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA7B9C433EF
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:16:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 581FDC433F5
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:16:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233719AbiD0TTW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:19:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49660 "EHLO
+        id S233409AbiD0TTY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:19:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232853AbiD0TTN (ORCPT
+        with ESMTP id S232854AbiD0TTN (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:13 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27BF028E10
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:25 -0700 (PDT)
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66C961CB12
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:24 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B4EB061A00
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:24 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 972B1C385A7;
-        Wed, 27 Apr 2022 19:13:23 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id B41A5CE2759
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FCCCC385A9;
+        Wed, 27 Apr 2022 19:13:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086804;
-        bh=AL8GiMWUOKq04yGI7r7aMJqU4jt3Jz8zt+t2KqAdU5U=;
+        s=k20201202; t=1651086801;
+        bh=gFp0s2+yOcXsxdx+8FwxESNn106vn66cOvnAIMvKYsk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=UV6Qs3W/IwOVQRUzzgky5s8pQYYLT/oHqmhuPyMmq3t4DijC1u+Sa4+dJA0/MZ67h
-         Re/i9puf9f254Hn5OgzOPWs0LRvoixao5bl0yIuSPtXZqCSS2ZGpxqrngP96asm/X7
-         pJ4cvgup2z2S1pvubzXpxt8rdw4J5zhVyt7XAf7zMe5o+Bf/B2lYSTdswJnMedIZ3b
-         eS4OPsJU0RvaEb81jSyQH0GtFlZPnT1KBqYTWsHTqOA0lsONaoAoSWIlMQx4HtW1Ga
-         E+9HcyYi3fspLzRWEYYfrQCWslufKuJaXogNxMJIJ2OfXh+lTpK8ZXeWZXuQZKAsKp
-         LHNzFx15mS6zg==
+        b=DnfwRbZNh4F9gux4nMgBO7fEyWvVVA8Nl1gubxT8EuNOtBNJaYYdKE8uKgOEUw1Lk
+         rR+Fr/TsL+mwznmW1jsvNBi7MA/Zj5nPaJdUlbYQsKmA9G1KkDJCz+MyZ81MMdH0BN
+         vCJyQFz2+OyIuoyr8KPsOPVVXg06fUtFIQ08xGMEEztXzRXxX1Oj2T/xxcXgST4Xhy
+         M/haZys8DM8/SKU9Yj3yHJrA5cxFSk19omUZXzRruBxa4fjE3KU0r4pnJLUaJXlR/S
+         YfQvRaH5orlBR7bOviZ1FV1sceiLAOsffm98WKs02JRxEgjU6cJ7XRSIu0K/nLfX99
+         uz272JJ/37KVQ==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
-Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com,
-        Eric Biggers <ebiggers@google.com>
-Subject: [PATCH v14 10/64] fscrypt: add fscrypt_context_for_new_inode
-Date:   Wed, 27 Apr 2022 15:12:20 -0400
-Message-Id: <20220427191314.222867-11-jlayton@kernel.org>
+Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
+Subject: [PATCH v14 06/64] libceph: add sparse read support to msgr1
+Date:   Wed, 27 Apr 2022 15:12:16 -0400
+Message-Id: <20220427191314.222867-7-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -47,91 +46,170 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Most filesystems just call fscrypt_set_context on new inodes, which
-usually causes a setxattr. That's a bit late for ceph, which can send
-along a full set of attributes with the create request.
+Add 2 new fields to ceph_connection_v1_info to track the necessary info
+in sparse reads. Skip initializing the cursor for a sparse read.
 
-Doing so allows it to avoid race windows that where the new inode could
-be seen by other clients without the crypto context attached. It also
-avoids the separate round trip to the server.
+Break out read_partial_message_section into a wrapper around a new
+read_partial_message_chunk function that doesn't zero out the crc first.
 
-Refactor the fscrypt code a bit to allow us to create a new crypto
-context, attach it to the inode, and write it to the buffer, but without
-calling set_context on it. ceph can later use this to marshal the
-context into the attributes we send along with the create request.
+Add new helper functions to drive receiving into the destinations
+provided by the sparse_read state machine.
 
-Acked-by: Eric Biggers <ebiggers@google.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/crypto/policy.c      | 35 +++++++++++++++++++++++++++++------
- include/linux/fscrypt.h |  1 +
- 2 files changed, 30 insertions(+), 6 deletions(-)
+ include/linux/ceph/messenger.h |  4 ++
+ net/ceph/messenger_v1.c        | 98 +++++++++++++++++++++++++++++++---
+ 2 files changed, 94 insertions(+), 8 deletions(-)
 
-diff --git a/fs/crypto/policy.c b/fs/crypto/policy.c
-index ed3d623724cd..ec861af96252 100644
---- a/fs/crypto/policy.c
-+++ b/fs/crypto/policy.c
-@@ -664,6 +664,32 @@ const union fscrypt_policy *fscrypt_policy_to_inherit(struct inode *dir)
- 	return fscrypt_get_dummy_policy(dir->i_sb);
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 7f09a4213834..f4adbfee56d5 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -337,6 +337,10 @@ struct ceph_connection_v1_info {
+ 
+ 	int in_base_pos;     /* bytes read */
+ 
++	/* sparse reads */
++	struct kvec in_sr_kvec; /* current location to receive into */
++	u64 in_sr_len;		/* amount of data in this extent */
++
+ 	/* message in temps */
+ 	u8 in_tag;           /* protocol control byte */
+ 	struct ceph_msg_header in_hdr;
+diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
+index 6b014eca3a13..bf385e458a01 100644
+--- a/net/ceph/messenger_v1.c
++++ b/net/ceph/messenger_v1.c
+@@ -160,9 +160,9 @@ static size_t sizeof_footer(struct ceph_connection *con)
+ 
+ static void prepare_message_data(struct ceph_msg *msg, u32 data_len)
+ {
+-	/* Initialize data cursor */
+-
+-	ceph_msg_data_cursor_init(&msg->cursor, msg, data_len);
++	/* Initialize data cursor if it's not a sparse read */
++	if (!msg->sparse_read)
++		ceph_msg_data_cursor_init(&msg->cursor, msg, data_len);
  }
  
-+/**
-+ * fscrypt_context_for_new_inode() - create an encryption context for a new inode
-+ * @ctx: where context should be written
-+ * @inode: inode from which to fetch policy and nonce
-+ *
-+ * Given an in-core "prepared" (via fscrypt_prepare_new_inode) inode,
-+ * generate a new context and write it to ctx. ctx _must_ be at least
-+ * FSCRYPT_SET_CONTEXT_MAX_SIZE bytes.
-+ *
-+ * Return: size of the resulting context or a negative error code.
-+ */
-+int fscrypt_context_for_new_inode(void *ctx, struct inode *inode)
+ /*
+@@ -967,9 +967,9 @@ static void process_ack(struct ceph_connection *con)
+ 	prepare_read_tag(con);
+ }
+ 
+-static int read_partial_message_section(struct ceph_connection *con,
+-					struct kvec *section,
+-					unsigned int sec_len, u32 *crc)
++static int read_partial_message_chunk(struct ceph_connection *con,
++				      struct kvec *section,
++				      unsigned int sec_len, u32 *crc)
+ {
+ 	int ret, left;
+ 
+@@ -985,11 +985,91 @@ static int read_partial_message_section(struct ceph_connection *con,
+ 		section->iov_len += ret;
+ 	}
+ 	if (section->iov_len == sec_len)
+-		*crc = crc32c(0, section->iov_base, section->iov_len);
++		*crc = crc32c(*crc, section->iov_base, section->iov_len);
+ 
+ 	return 1;
+ }
+ 
++static inline int read_partial_message_section(struct ceph_connection *con,
++					       struct kvec *section,
++					       unsigned int sec_len, u32 *crc)
 +{
-+	struct fscrypt_info *ci = inode->i_crypt_info;
-+
-+	BUILD_BUG_ON(sizeof(union fscrypt_context) !=
-+			FSCRYPT_SET_CONTEXT_MAX_SIZE);
-+
-+	/* fscrypt_prepare_new_inode() should have set up the key already. */
-+	if (WARN_ON_ONCE(!ci))
-+		return -ENOKEY;
-+
-+	return fscrypt_new_context(ctx, &ci->ci_policy, ci->ci_nonce);
++	*crc = 0;
++	return read_partial_message_chunk(con, section, sec_len, crc);
 +}
-+EXPORT_SYMBOL_GPL(fscrypt_context_for_new_inode);
 +
- /**
-  * fscrypt_set_context() - Set the fscrypt context of a new inode
-  * @inode: a new inode
-@@ -680,12 +706,9 @@ int fscrypt_set_context(struct inode *inode, void *fs_data)
- 	union fscrypt_context ctx;
- 	int ctxsize;
++static int read_sparse_msg_extent(struct ceph_connection *con, u32 *crc)
++{
++	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
++	bool do_bounce = ceph_test_opt(from_msgr(con->msgr), RXBOUNCE);
++
++	if (do_bounce && unlikely(!con->bounce_page)) {
++		con->bounce_page = alloc_page(GFP_NOIO);
++		if (!con->bounce_page) {
++			pr_err("failed to allocate bounce page\n");
++			return -ENOMEM;
++		}
++	}
++
++	while (cursor->sr_resid > 0) {
++		struct page *page, *rpage;
++		size_t off, len;
++		int ret;
++
++		page = ceph_msg_data_next(cursor, &off, &len, NULL);
++		rpage = do_bounce ? con->bounce_page : page;
++
++		/* clamp to what remains in extent */
++		len = min_t(int, len, cursor->sr_resid);
++		ret = ceph_tcp_recvpage(con->sock, rpage, (int)off, len);
++		if (ret <= 0)
++			return ret;
++		*crc = ceph_crc32c_page(*crc, rpage, off, ret);
++		ceph_msg_data_advance(cursor, (size_t)ret);
++		cursor->sr_resid -= ret;
++		if (do_bounce)
++			memcpy_page(page, off, rpage, off, ret);
++	}
++	return 1;
++}
++
++static int read_sparse_msg_data(struct ceph_connection *con)
++{
++	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
++	bool do_datacrc = !ceph_test_opt(from_msgr(con->msgr), NOCRC);
++	u32 crc = 0;
++	int ret = 1;
++
++	if (do_datacrc)
++		crc = con->in_data_crc;
++
++	do {
++		if (con->v1.in_sr_kvec.iov_base)
++			ret = read_partial_message_chunk(con,
++							 &con->v1.in_sr_kvec,
++							 con->v1.in_sr_len,
++							 &crc);
++		else if (cursor->sr_resid > 0)
++			ret = read_sparse_msg_extent(con, &crc);
++
++		if (ret <= 0) {
++			if (do_datacrc)
++				con->in_data_crc = crc;
++			return ret;
++		}
++
++		memset(&con->v1.in_sr_kvec, 0, sizeof(con->v1.in_sr_kvec));
++		ret = con->ops->sparse_read(con, cursor,
++				(char **)&con->v1.in_sr_kvec.iov_base);
++		con->v1.in_sr_len = ret;
++	} while (ret > 0);
++
++	if (do_datacrc)
++		con->in_data_crc = crc;
++
++	return ret < 0 ? ret : 1;	/* must return > 0 to indicate success */
++}
++
+ static int read_partial_msg_data(struct ceph_connection *con)
+ {
+ 	struct ceph_msg_data_cursor *cursor = &con->in_msg->cursor;
+@@ -1180,7 +1260,9 @@ static int read_partial_message(struct ceph_connection *con)
+ 		if (!m->num_data_items)
+ 			return -EIO;
  
--	/* fscrypt_prepare_new_inode() should have set up the key already. */
--	if (WARN_ON_ONCE(!ci))
--		return -ENOKEY;
--
--	BUILD_BUG_ON(sizeof(ctx) != FSCRYPT_SET_CONTEXT_MAX_SIZE);
--	ctxsize = fscrypt_new_context(&ctx, &ci->ci_policy, ci->ci_nonce);
-+	ctxsize = fscrypt_context_for_new_inode(&ctx, inode);
-+	if (ctxsize < 0)
-+		return ctxsize;
- 
- 	/*
- 	 * This may be the first time the inode number is available, so do any
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index c79c4333f769..2b892376d325 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -273,6 +273,7 @@ int fscrypt_ioctl_get_policy(struct file *filp, void __user *arg);
- int fscrypt_ioctl_get_policy_ex(struct file *filp, void __user *arg);
- int fscrypt_ioctl_get_nonce(struct file *filp, void __user *arg);
- int fscrypt_has_permitted_context(struct inode *parent, struct inode *child);
-+int fscrypt_context_for_new_inode(void *ctx, struct inode *inode);
- int fscrypt_set_context(struct inode *inode, void *fs_data);
- 
- struct fscrypt_dummy_policy {
+-		if (ceph_test_opt(from_msgr(con->msgr), RXBOUNCE))
++		if (m->sparse_read)
++			ret = read_sparse_msg_data(con);
++		else if (ceph_test_opt(from_msgr(con->msgr), RXBOUNCE))
+ 			ret = read_partial_msg_data_bounce(con);
+ 		else
+ 			ret = read_partial_msg_data(con);
 -- 
 2.35.1
 
