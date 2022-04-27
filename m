@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBA48C433F5
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:19:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24022C433EF
+	for <ceph-devel@archiver.kernel.org>; Wed, 27 Apr 2022 19:19:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233952AbiD0TWS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Apr 2022 15:22:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43858 "EHLO
+        id S233414AbiD0TWU (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 27 Apr 2022 15:22:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233826AbiD0TTX (ORCPT
+        with ESMTP id S233829AbiD0TTX (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2022 15:19:23 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C080562C8
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9D5E562D1
         for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 12:13:55 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 27AF8B8291D
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EE22C385AA;
-        Wed, 27 Apr 2022 19:13:52 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 7B4EAB8291B
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2022 19:13:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BDF85C385AE;
+        Wed, 27 Apr 2022 19:13:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651086832;
-        bh=qhce0OEg+JNVepHokYTlytSJKJrB4yhKGHHYs3Z054Q=;
+        s=k20201202; t=1651086834;
+        bh=1GZdFwPJnHRaCmLrZ8gcfHMVClDGacJnpLewBq48pO0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=hqvh/Up3ruXLX9tNu8fxLsmb+CR4iNIkeETD9Zpro1iK1Ni0r1TpsStgkN3tScSy6
-         iStrErmYYX649G7B9QzC+6KsvyUJY0vZt55aWy8Unuvh9niCSmidCjOiEPhXi0+2Nu
-         Y6Q6uapt1/QZKlKCGk0cmGL3iSCV4P03CSYIkXhTaddd6ozVwM5uYBb2zsn6Ct/Fhq
-         DeLsDEIkfq4CNqK0iHEkkumN0ySGWzkCXtW75ZU5Pv4g3Muw1N7xzSYGefXV8NcdTl
-         JQibwCT7L6I7EjDM/5Ea7QyGUFG0CGZ2us2lfn9God6jVKvvFiwZgHTf62i7TKskBT
-         S5GNfh6WMMrhg==
+        b=ndWq8IyopaiptnAvb+4BDUaeYMdVfZbiTMai5hG+kugHFOY7z/19Ov4bDehB5zbiC
+         mRF+4aRs2bzQam1FI4igIxmYbaG2i1GBp/yE7ivdu2XPUxiCA4uRT3x6mVNqDKFoIC
+         jLAPEfxNJ5Ddr5f0IUiaIjzC9d5Nq2M9JTZH28sgFLQQVeQFD48nZEIsu7SU7ujOI+
+         98RvKHkNtI83uodlBbijUdW9tV7XzMjVLtGvOZ+Dwt7DPGDCAhOfuAf0QiuqPRZzkm
+         UBRQles8LJ6Yx2PK37+2lqiigm5sIV70hRiTI6fLl9UZGDrGE3Ea1ZxS7YQX4AVAcQ
+         3OwvfUQsT/sCA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     ceph-devel@vger.kernel.org
 Cc:     xiubli@redhat.com, lhenriques@suse.de, idryomov@gmail.com
-Subject: [PATCH v14 51/64] ceph: disable copy offload on encrypted inodes
-Date:   Wed, 27 Apr 2022 15:13:01 -0400
-Message-Id: <20220427191314.222867-52-jlayton@kernel.org>
+Subject: [PATCH v14 53/64] ceph: align data in pages in ceph_sync_write
+Date:   Wed, 27 Apr 2022 15:13:03 -0400
+Message-Id: <20220427191314.222867-54-jlayton@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220427191314.222867-1-jlayton@kernel.org>
 References: <20220427191314.222867-1-jlayton@kernel.org>
@@ -46,30 +46,71 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-If we have an encrypted inode, then the client will need to re-encrypt
-the contents of the new object. Disable copy offload to or from
-encrypted inodes.
+Encrypted files will need to be dealt with in block-sized chunks and
+once we do that, the way that ceph_sync_write aligns the data in the
+bounce buffer won't be acceptable.
+
+Change it to align the data the same way it would be aligned in the
+pagecache.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ fs/ceph/file.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 1024dc57898d..483d7d016ad6 100644
+index edeb74f57b73..596f133b63ec 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -2536,6 +2536,10 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
- 		return -EOPNOTSUPP;
- 	}
+@@ -1561,6 +1561,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 	bool check_caps = false;
+ 	struct timespec64 mtime = current_time(inode);
+ 	size_t count = iov_iter_count(from);
++	size_t off;
  
-+	/* Every encrypted inode gets its own key, so we can't offload them */
-+	if (IS_ENCRYPTED(src_inode) || IS_ENCRYPTED(dst_inode))
-+		return -EOPNOTSUPP;
+ 	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
+ 		return -EROFS;
+@@ -1598,12 +1599,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 			break;
+ 		}
+ 
+-		/*
+-		 * write from beginning of first page,
+-		 * regardless of io alignment
+-		 */
+-		num_pages = (len + PAGE_SIZE - 1) >> PAGE_SHIFT;
+-
++		num_pages = calc_pages_for(pos, len);
+ 		pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
+ 		if (IS_ERR(pages)) {
+ 			ret = PTR_ERR(pages);
+@@ -1611,9 +1607,12 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 		}
+ 
+ 		left = len;
++		off = offset_in_page(pos);
+ 		for (n = 0; n < num_pages; n++) {
+-			size_t plen = min_t(size_t, left, PAGE_SIZE);
+-			ret = copy_page_from_iter(pages[n], 0, plen, from);
++			size_t plen = min_t(size_t, left, PAGE_SIZE - off);
 +
- 	if (len < src_ci->i_layout.object_size)
- 		return -EOPNOTSUPP; /* no remote copy will be done */
++			ret = copy_page_from_iter(pages[n], off, plen, from);
++			off = 0;
+ 			if (ret != plen) {
+ 				ret = -EFAULT;
+ 				break;
+@@ -1628,8 +1627,9 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
  
+ 		req->r_inode = inode;
+ 
+-		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
+-						false, true);
++		osd_req_op_extent_osd_data_pages(req, 0, pages, len,
++						 offset_in_page(pos),
++						 false, true);
+ 
+ 		req->r_mtime = mtime;
+ 		ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
 -- 
 2.35.1
 
