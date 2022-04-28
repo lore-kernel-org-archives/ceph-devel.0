@@ -2,85 +2,92 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5ECFBC433EF
-	for <ceph-devel@archiver.kernel.org>; Thu, 28 Apr 2022 08:08:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C618BC433EF
+	for <ceph-devel@archiver.kernel.org>; Thu, 28 Apr 2022 08:25:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239625AbiD1ILu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 28 Apr 2022 04:11:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47278 "EHLO
+        id S1344093AbiD1I3I (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 28 Apr 2022 04:29:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343868AbiD1IK6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2022 04:10:58 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12329633BB
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2022 01:07:37 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id n14so7160273lfu.13
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2022 01:07:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=b3ZjQZG2T09sX84KZoMmaZgnceJT8vxnozrBMwBfGNM=;
-        b=gjBRtDH70b5jo6u2b6jgMARq3Xjk0ClteRYVgsuMp8BtED+/Z/vPm5ATwITAxImkoG
-         BsE3HfMu9OH3CiguvPjuCC3FNd8i3PqppQqnksKquSntLwl6s7O3k3Ge26XgdpgnW7Z4
-         qkTJl1jqfBPfbr0g9ILY3OXYt+I1kkESS8lit7avLeCSsy5yfkkJNhdw4dpRMmuc8JqS
-         yq+zKzLMon0K0ae9qrZ7ndNC2IBJ8uyENtjkr5P8FbPSpgDaNvlHj5YOm75iakuz5nu0
-         XLygSDMAsIFm+gNsGKeReiIAh9LZ2YXTHiCYLPlAVcPIms94BzLz7MaThii3nrSZrbxd
-         J0Aw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=b3ZjQZG2T09sX84KZoMmaZgnceJT8vxnozrBMwBfGNM=;
-        b=vsdTIG50bZ6EU9CY9zMsSo3hC9KHfxzRRpW6heDnO1Ojb4DVXOYJMRofooOUrq3Zw0
-         vWhff5ylj4O6m2gJJxYqhu3GDqntUcJ+6z+rddSJvb1UFpFL5fUdDMWvlomQTBgdMUmw
-         aWDNgTHwe9vtoCleqWG2q7p5zhrS+4nji8FDEewZVP/oHkmzcTtVqpx044Y4FP8oIDcZ
-         5ZBx3m//HFHIVvhH0JSBMNXA1jmMeTov7bxsdB+6pCY080/mXs5uRZzpqfI/BfUU3OcG
-         7ExIsSFAVHGDV6d3eERtsihJs+5M1aZCitS3dkGy7+tdxIz175mjYlcWyg0gN7teSMel
-         Fygg==
-X-Gm-Message-State: AOAM532yohrEnRdq2bB/BeC1ekmNzR9/08g0FX3v+N6fR5vxFQ85m8tN
-        uPi/6+Le6qMyvDr5G6Dx1EWwQ/D8zuIsuPj9U5yWqQ==
-X-Google-Smtp-Source: ABdhPJzGnYj50OoGGT/MGdQXvjVOVHLw2nhp6+XJqKPeN3Gww7x+4GV9YNC3NiaQRtmbnXOtwA+kqjFugNxiNe4OFf0=
-X-Received: by 2002:a05:6512:3484:b0:472:13f9:4aee with SMTP id
- v4-20020a056512348400b0047213f94aeemr9831999lfr.288.1651133255155; Thu, 28
- Apr 2022 01:07:35 -0700 (PDT)
-MIME-Version: 1.0
-References: <1650971490-4532-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <Ymn05eNgOnaYy36R@zeniv-ca.linux.org.uk> <Ymn4xPXXWe4LFhPZ@zeniv-ca.linux.org.uk>
- <626A08DA.3060802@fujitsu.com> <YmoAp+yWBpH5T8rt@zeniv-ca.linux.org.uk> <YmoGHrNVtfXsl6vM@zeniv-ca.linux.org.uk>
-In-Reply-To: <YmoGHrNVtfXsl6vM@zeniv-ca.linux.org.uk>
-From:   Jann Horn <jannh@google.com>
-Date:   Thu, 28 Apr 2022 10:06:58 +0200
-Message-ID: <CAG48ez0LAF1NX+SBNNpzNrLMyccZEAS1GLrzYdhn_NoDFr=DLg@mail.gmail.com>
-Subject: Re: [PATCH v8 1/4] fs: add mode_strip_sgid() helper
+        with ESMTP id S1344180AbiD1I3F (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2022 04:29:05 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B72FC972D6;
+        Thu, 28 Apr 2022 01:25:51 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5757361F96;
+        Thu, 28 Apr 2022 08:25:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2CBAFC385A0;
+        Thu, 28 Apr 2022 08:25:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651134350;
+        bh=7D++5Uv1MA0/29UijH6YdgqAj4cFjcElEo1390Ba2/w=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Jzu6n7X3wtUlKGcTd/+UrSmnw4n9c1GbiQHq1k6EMOJ0s1VRDexzY6MyyRERdLZQf
+         4abKNFoBPSLUVUVUrC95DK2iLqbW39pcZSf34t/kCSIK08+mX6bcEd/JwQifT2BM1t
+         zSJWqSzhgVrDCaTr3HboKt0S6LPXwgrP4X6OUMa38M7NXBPfSUeNCxxzory7tDWedU
+         yHPgGX93pgqsj40clqenqZR8kRA5l52HTPQeaGORleJm2KjSHS/hanTsOBFLPgi+z0
+         68MpJJ1P0jDL+ac/HXXNO4lnfCeL50zCaghvZPsG4ffXf9HF7Oea2IzrInzwWvO0bW
+         dUmVjOjIUGaFw==
+Date:   Thu, 28 Apr 2022 10:25:44 +0200
+From:   Christian Brauner <brauner@kernel.org>
 To:     Al Viro <viro@zeniv.linux.org.uk>
-Cc:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-        "david@fromorbit.com" <david@fromorbit.com>,
-        "djwong@kernel.org" <djwong@kernel.org>,
-        "brauner@kernel.org" <brauner@kernel.org>,
-        "willy@infradead.org" <willy@infradead.org>,
-        "jlayton@kernel.org" <jlayton@kernel.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>
-Content-Type: text/plain; charset="UTF-8"
+Cc:     Yang Xu <xuyang2018.jy@fujitsu.com>, linux-fsdevel@vger.kernel.org,
+        ceph-devel@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
+        willy@infradead.org, jlayton@kernel.org,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Jann Horn <jannh@google.com>
+Subject: Re: [PATCH v8 1/4] fs: add mode_strip_sgid() helper
+Message-ID: <20220428082544.7v5s3dfgtsda6hll@wittgenstein>
+References: <1650971490-4532-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <Ymn05eNgOnaYy36R@zeniv-ca.linux.org.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <Ymn05eNgOnaYy36R@zeniv-ca.linux.org.uk>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Apr 28, 2022 at 5:12 AM Al Viro <viro@zeniv.linux.org.uk> wrote:
-> On Thu, Apr 28, 2022 at 02:49:11AM +0000, Al Viro wrote:
-> > Let's try to separate the issues here.  Jann, could you explain what makes
-> > empty sgid files dangerous?
->
-> Found the original thread in old mailbox, and the method of avoiding the
-> SGID removal on modification is usable.  Which answers the question above...
+On Thu, Apr 28, 2022 at 01:59:01AM +0000, Al Viro wrote:
+> On Tue, Apr 26, 2022 at 07:11:27PM +0800, Yang Xu wrote:
+> > Add a dedicated helper to handle the setgid bit when creating a new file
+> > in a setgid directory. This is a preparatory patch for moving setgid
+> > stripping into the vfs. The patch contains no functional changes.
+> > 
+> > Currently the setgid stripping logic is open-coded directly in
+> > inode_init_owner() and the individual filesystems are responsible for
+> > handling setgid inheritance. Since this has proven to be brittle as
+> > evidenced by old issues we uncovered over the last months (see [1] to
+> > [3] below) we will try to move this logic into the vfs.
+> 
+> First of all, inode_init_owner() is (and always had been) an optional helper.
 
-As context for everyone on the thread who isn't on security@, you can see a
-public copy of the bug report here:
-https://bugs.chromium.org/p/project-zero/issues/detail?id=1611
-and also here:
-https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1779923
+The whole patch series was triggered because ever since I added setgid
+inheritance tests (see [1]) as part of the idmapped mounts test suite
+into xfstests we found 3 setgid inheritance bugs (The bugs are linked in
+the commit messages.).
+The bugs showed up whenever a filesystem didn't call inode_init_owner()
+or had custom code in place that deviated from expectations.
 
-And the kernel patch in question is this one:
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=0fa3ecd87848c9c93c2c828ef4c3a8ca36ce46c7
+That's what triggered this whole patch series. Yang took it on and seems
+here to see it through.
+
+I should point out that it was rather unclear what expectations are btw
+because of the ordering dependency between umask and POSIX ACLs and
+setgid stripping. I've describe this at length in the commit message I
+gave Yang.
+
+It took a lot of digging and over the course of me reviewing this patch
+series more and more corner-cases pop up that we haven't handled.
+
+> Filesystems are *NOT* required to call it, so putting any common functionality
+> in there had always been a mistake.
+
+See above. I pointed this out in earlier version.
+I very much agree which is why we should move it into the vfs proper if
+we can with reasonably minimal regression risk.
+
+[1]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/src/idmapped-mounts/idmapped-mounts.c#n7812
