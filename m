@@ -2,60 +2,94 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37E96C433EF
-	for <ceph-devel@archiver.kernel.org>; Sun,  8 May 2022 11:01:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76468C4167B
+	for <ceph-devel@archiver.kernel.org>; Mon,  9 May 2022 09:45:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231503AbiEHLEt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 8 May 2022 07:04:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36692 "EHLO
+        id S232711AbiEIJsb (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 9 May 2022 05:48:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230432AbiEHLEr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 8 May 2022 07:04:47 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C18EDF1B;
-        Sun,  8 May 2022 04:00:57 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S230089AbiEIJQe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 May 2022 05:16:34 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C632E187077;
+        Mon,  9 May 2022 02:12:40 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E9529B80CF6;
-        Sun,  8 May 2022 11:00:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D4182C385AC;
-        Sun,  8 May 2022 11:00:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652007654;
-        bh=EZfKEEIU6fwh+g3DA99Vxb5EFnmexu4Vm1FFiHIGZTY=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=caQv8XOk06qog+i2uX6Gcsuf2+7HKtS8azHf0B48MEiK2Es2buQRgcBi4bt9Yq1jB
-         ekoxPo8VIkSQrlfQp2ut8Gh24KTTjQ5eG/Cdxz/1f/Kv0Z+2HBGCS64jUiAugx7j3T
-         BrGsV9OQsS2phjKMFa0czJlo8t1xb1XZXpcXye3QLFXwOHY1Bz3ZkgDPHa5I7L7e81
-         afitPbQuu/bqjN15fPyD2hVXgmVrjQXac5055pHhgBoSoP3SDRz6QeJU7PXuSrRErA
-         GgTUDu4qio04xXEeVtAbvTg7H/8+X+r4MuXFV5DDrmAR4Kdy/6SsKgEMglAmgsnEaz
-         izn4F0psWe9gQ==
-Message-ID: <b106e3661a104a08672cd1b9b97bd1f4bec85740.camel@kernel.org>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 58D361F74D;
+        Mon,  9 May 2022 09:12:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1652087559; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=ORL0sjIv21RXFZv9oa4wRY3ouTS64KfJhQLnQPlf25s=;
+        b=d2Jok/Pt6bT3/GWHZNc3EvRZ04DsgCmXwnWmFms5mKw6G+Wke5lrZV5/LiW4+sduYGQy2v
+        IOXYLU1jAI88ohZzPx0qroQPJHctEO5H0QGXT4rTA/Crw/DcZKbdC3xNMPKxOC0lLzBTVm
+        dFL1msfkcyudRMRgqS8cUqc882UNxIg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1652087559;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=ORL0sjIv21RXFZv9oa4wRY3ouTS64KfJhQLnQPlf25s=;
+        b=JWMFvMFhbaLyZ5423OYrEuTqyQ6AkpcxYDKUgjGMzcAuXWrwXkVldCeHRk1Pvt7uO3IRLF
+        VKAt4hLalWWp1BDw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E55E413AA5;
+        Mon,  9 May 2022 09:12:38 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id dJkENQbbeGKNWQAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 09 May 2022 09:12:38 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 903922d5;
+        Mon, 9 May 2022 09:13:11 +0000 (UTC)
+Date:   Mon, 9 May 2022 10:13:11 +0100
+From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
+To:     Xiubo Li <xiubli@redhat.com>
+Cc:     jlayton@kernel.org, idryomov@gmail.com, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org, stable@vger.kernel.org
 Subject: Re: [PATCH] ceph: check folio PG_private bit instead of
  folio->private
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Xiubo Li <xiubli@redhat.com>
-Cc:     lhenriques@suse.de, idryomov@gmail.com, vshankar@redhat.com,
-        ceph-devel@vger.kernel.org, stable@vger.kernel.org
-Date:   Sun, 08 May 2022 07:00:52 -0400
-In-Reply-To: <20220508061543.318394-1-xiubli@redhat.com>
+Message-ID: <YnjbJ/2DbPkTAKnI@suse.de>
 References: <20220508061543.318394-1-xiubli@redhat.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-2.fc35) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220508061543.318394-1-xiubli@redhat.com>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Sun, 2022-05-08 at 14:15 +0800, Xiubo Li wrote:
+On Sun, May 08, 2022 at 02:15:43PM +0800, Xiubo Li wrote:
 > The pages in the file mapping maybe reclaimed and reused by other
 > subsystems and the page->private maybe used as flags field or
 > something else, if later that pages are used by page caches again
 > the page->private maybe not cleared as expected.
 > 
 > Here will check the PG_private bit instead of the folio->private.
+
+I thought that a patch to set ->private to NULL in the folio code (maybe
+in folio_end_private_2()) would make sense.  But then... it probably
+wouldn't get accepted as we're probably not supposed to assume these
+fields are initialised.
+
+Anyway, thanks Xiubo!
+
+Reviewed-by: Luís Henriques <lhenriques@suse.de>
+
+Cheers,
+--
+Luís
+
 > 
 > Cc: stable@vger.kernel.org
 > URL: https://tracker.ceph.com/issues/55421
@@ -95,5 +129,6 @@ On Sun, 2022-05-08 at 14:15 +0800, Xiubo Li wrote:
 >  		dout("%p invalidate_folio idx %lu full dirty page\n",
 >  		     inode, folio->index);
 >  
-
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+> -- 
+> 2.36.0.rc1
+> 
