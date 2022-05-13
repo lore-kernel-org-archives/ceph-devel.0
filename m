@@ -2,123 +2,88 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15B22C4332F
-	for <ceph-devel@archiver.kernel.org>; Thu, 12 May 2022 15:51:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 673F0C433EF
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 May 2022 14:39:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356125AbiELPvS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 12 May 2022 11:51:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37290 "EHLO
+        id S1378210AbiEMOjV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 May 2022 10:39:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356149AbiELPvP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 May 2022 11:51:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EA686163C;
-        Thu, 12 May 2022 08:51:13 -0700 (PDT)
+        with ESMTP id S1381518AbiEMOgP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2022 10:36:15 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20EA21C197D;
+        Fri, 13 May 2022 07:29:57 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B3CD961F2A;
-        Thu, 12 May 2022 15:51:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 669F6C385B8;
-        Thu, 12 May 2022 15:51:11 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id BC13CB83069;
+        Fri, 13 May 2022 14:29:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 00BACC34116;
+        Fri, 13 May 2022 14:29:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652370672;
-        bh=SY3HhOlt8o1bUewRQx+K0orgNTHhXBQwjaz2B7myxlY=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=AZdmZeHCebeN39/ldc1IOfxo2xQHd6qyyIk1XGDid37NhqrAknKVDehjnEd702hC5
-         x/QuJLcVE3yoFoG2uiaOml2zItw0R39PkZIoR6meqRdx2Pl0uZoI2evsYrb5EaZ3pG
-         5ikGVOjRhJzUh/QJrNo75qtxYVRrzGwSMmCMTWFrDqkwzTMzfycFaLShKlRAxB1ga6
-         xxnQAU+S/42QKziJsJB/1++TnbbBzWuNBgU5DWHy549D8pPif3uy4kSXBEkrQA8VXs
-         1k/r/VQtKXKtLcfX4cackUDJfyHoXnAttwZjRpeqxYMdesstJ9MRu/QjNRpVBFoCFB
-         xoeTaiUowdGrw==
-Message-ID: <80a5081af6c284f7bc37fb88b8c26687e3267679.camel@kernel.org>
-Subject: Re: [PATCH v2] fs: change test in inode_insert5 for adding to the
- sb list
+        s=k20201202; t=1652452194;
+        bh=VhZ2iWd9LyrpSB6VS8GblLNN/hlfPXXuf235P2NBAi0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Yxr3bzCFvCEppxh/L2ckxfhuDDVKEvIk9IKbZ0tjgkObTa+wh3joJj5/Ijn4HfHZB
+         G+h4wvxwel9DzzhTvrsFdl3J234RGgyHdo/NAEOhqb74k+vHz+iwjMcNdcjBtVFFvn
+         /sbUuqTiMdg5Pl0Y5p4BBPFAEwnWK7WQkZ33AgcBX06iQOq5bc9CAT1OLH3tH1fuiq
+         owIN6hJ9FVP/tJluKnGp7+Qb+K/V/maPbae8ESQCrzNqYx0xHl82aJw7zd771NipLP
+         AzrRcVsLIupCF9wVKwFv/ky6oXFRlYGH9uIACsmB/RirdfkzheqpJ3j8ymjjOJT74G
+         jnQVlp3yMR6kw==
 From:   Jeff Layton <jlayton@kernel.org>
-To:     Dave Chinner <dchinner@redhat.com>
-Cc:     linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org,
-        idryomov@gmail.com, xiubli@redhat.com,
-        Al Viro <viro@zeniv.linux.org.uk>,
-        Christoph Hellwig <hch@lst.de>
-Date:   Thu, 12 May 2022 11:51:09 -0400
-In-Reply-To: <Yn0X6FyrosBlGnMq@rh>
-References: <20220511165339.85614-1-jlayton@kernel.org>
-         <Yn0X6FyrosBlGnMq@rh>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-2.fc35) 
+To:     ceph-devel@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org,
+        Matthew Wilcox <willy@infradead.org>,
+        Xiubo Li <xiubli@redhat.com>,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH] mm: BUG if filemap_alloc_folio gives us a folio with a non-NULL ->private
+Date:   Fri, 13 May 2022 10:29:52 -0400
+Message-Id: <20220513142952.27853-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, 2022-05-13 at 00:21 +1000, Dave Chinner wrote:
-> On Wed, May 11, 2022 at 12:53:39PM -0400, Jeff Layton wrote:
-> > The inode_insert5 currently looks at I_CREATING to decide whether to
-> > insert the inode into the sb list. This test is a bit ambiguous though
-> > as I_CREATING state is not directly related to that list.
-> > 
-> > This test is also problematic for some upcoming ceph changes to add
-> > fscrypt support. We need to be able to allocate an inode using new_inode
-> > and insert it into the hash later if we end up using it, and doing that
-> > now means that we double add it and corrupt the list.
-> > 
-> > What we really want to know in this test is whether the inode is already
-> > in its superblock list, and then add it if it isn't. Have it test for
-> > list_empty instead and ensure that we always initialize the list by
-> > doing it in inode_init_once. It's only ever removed from the list with
-> > list_del_init, so that should be sufficient.
-> > 
-> > There doesn't seem to be any need to hold the inode_hash_lock for this
-> > operation either, so drop that before adding to to the list.
-> > 
-> > Suggested-by: Al Viro <viro@zeniv.linux.org.uk>
-> > Cc: Dave Chinner <dchinner@redhat.com>
-> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> > ---
-> >  fs/inode.c | 13 +++++++++----
-> >  1 file changed, 9 insertions(+), 4 deletions(-)
-> > 
-> > A small revision to the patch that I sent as part of the ceph+fscrypt
-> > series. I didn't see any need to hold the inode_hash_lock when adding
-> > the inode to the sb list, so do that outside the lock. I also revised
-> > the comment to be more clear.
-> 
-> I'm not sure that's valid. The moment the hash lock is dropped,
-> other lookups can find this inode in the cache. Hence there's no
-> guarantee that someone else isn't already accessing the inode
-> once the hash lock is dropped. Hence it's not clear to me that this
-> is a safe modification to make.
-> 
-> Given that we already do the list add under the hash lock, I don't
-> see any real gain to removing it from that context and it isn't
-> necessary to address the problem.
-> 
-> If you are concerned about reducing inode_has_lock contention, then
-> the answer to that is to convert the global lock to bit list locks
-> as the dentry cache uses. I wrote a patch a while back to do this:
-> 
-> https://lore.kernel.org/linux-fsdevel/20210406123343.1739669-1-david@fromorbit.com/
-> 
-> Hence at this stage, I prefer the original version that doesn't
-> change locking because there's much less risk associated with it.
-> 
+We've seen some instances where we call __filemap_get_folio and get back
+one with a ->private value that is non-NULL. Let's have the allocator
+bug if that happens.
 
-I didn't see anything that cares about the i_sb_list while
-simultaneously holding the inode_hash_lock. It gets removed from the
-list in evict, but we hold a reference to it at this point, so
-nothingThe thing also has I_NEW set on it so there had better not be
-anyone.
+URL: https://tracker.ceph.com/issues/55421
+Cc: Matthew Wilcox <willy@infradead.org>
+Cc: Xiubo Li <xiubli@redhat.com>
+Cc: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ mm/filemap.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-That said, iget_locked also holds it while adding it to the list and
-you're correct that it's not required to fix the problem. I'll plan to
-revert it to the v1 version. We can always experiment with moving it
-outside the lock later if we think that's useful.
+It might not hurt to merge this into mainline. If it pops then we know
+something is very wrong.
 
-Christoph, are you OK with the original version of that patch as well? I
-can resend it again if you missed it the first time.
-
-Thanks,
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 9a1eef6c5d35..74c3fb062ef7 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -990,10 +990,12 @@ struct folio *filemap_alloc_folio(gfp_t gfp, unsigned int order)
+ 			n = cpuset_mem_spread_node();
+ 			folio = __folio_alloc_node(gfp, order, n);
+ 		} while (!folio && read_mems_allowed_retry(cpuset_mems_cookie));
+-
+-		return folio;
++	} else {
++		folio = folio_alloc(gfp, order);
+ 	}
+-	return folio_alloc(gfp, order);
++	if (folio)
++		VM_BUG_ON_FOLIO(folio->private, folio);
++	return folio;
+ }
+ EXPORT_SYMBOL(filemap_alloc_folio);
+ #endif
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.36.1
+
