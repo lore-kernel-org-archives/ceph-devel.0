@@ -2,86 +2,67 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD86EC433EF
-	for <ceph-devel@archiver.kernel.org>; Fri, 20 May 2022 15:23:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F382CC433F5
+	for <ceph-devel@archiver.kernel.org>; Fri, 20 May 2022 18:36:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350751AbiETPX3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 20 May 2022 11:23:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59360 "EHLO
+        id S1352845AbiETSga (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 20 May 2022 14:36:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229864AbiETPX1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2022 11:23:27 -0400
-Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FF8A13B8E7;
-        Fri, 20 May 2022 08:23:26 -0700 (PDT)
-Received: by mail-wm1-x330.google.com with SMTP id 67-20020a1c1946000000b00397382b44f4so1316920wmz.2;
-        Fri, 20 May 2022 08:23:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=y8jCixj/3v6rQoWkQuP8PEbezmpzhkjMJ/xpsL9DATM=;
-        b=CvcMmakbrXcQhAC5ZBIn6iVBJ/mlPrcdigP2pWDXVLURmrUXy8rUfDWxE7rCuPbEQU
-         R7KAPPgTc42HNc4nQ9UzeXyakfl5fKVBGi5B0ChNqHCDWwDTXS9gSVLyS8ALP0YzuTIN
-         QzPlc6DUYdvUZa30MD33+wHeMtUbkth/YjTOlEaag4g+ra/2S59vFkIR4qErStg81HVS
-         QtpwVfKZEUMoTJ2pu1mU/ZZD3bsNk7bE9BjHfzRuO6cTGo720JLrIlC+3v4iH5VgBQvm
-         xt/mcZXrsqCqbVgVxngEuFtLFYE7ebG1zYxbVRSkChkJDEIENJrgvFGykjw6D9kfynQp
-         Xo6w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=y8jCixj/3v6rQoWkQuP8PEbezmpzhkjMJ/xpsL9DATM=;
-        b=kQ0RH9xItt0g4Pm/XrcW+BIXICyJP9eFIkSAin7l9aj66dv+anemSJl7D51MKe1oDg
-         7Gfl3mwANWHefzF7R67qBp8p7WboAf8bk0mtO7spvcD0GPKatNX1vl+PK/Rdl9SKlmWw
-         MGwu2ofdExKlTfX2vr5RlRzS5ZBmfRAz31E8V8sdH6rgXmkGHL8GVlB1ZHZxHDc5eiuN
-         JOQc7k4b9pCpqwn1zJZ0aAsBdQ/ejJusbZ4GmtEOtHrYqRRN8rsDvr+qpoSqUQW5vPQ9
-         n+Z+LEPq9nc4JHkhmaqni438Yv0Cs04XgFLrXP94DiMF1GH2BjT0oiw1L0RGb5LlS+kU
-         QUdQ==
-X-Gm-Message-State: AOAM530Wef9RMclsci8Ljx0ToZ0gCpOEScU25H0R5DCwzo2ak5r7AVeT
-        NlYg4yQUPdG9iTaigizd2lM=
-X-Google-Smtp-Source: ABdhPJzXGgeCQc1J0FMkHZR4RorhL2bFOkNyacqzH+huVj7yLJvr9l9Z3k6yzNni3QpVs2ldufT4Cw==
-X-Received: by 2002:a7b:cf33:0:b0:397:347e:88e0 with SMTP id m19-20020a7bcf33000000b00397347e88e0mr5259710wmg.52.1653060204579;
-        Fri, 20 May 2022 08:23:24 -0700 (PDT)
-Received: from kwango.local (ip-89-102-68-162.net.upcbroadband.cz. [89.102.68.162])
-        by smtp.gmail.com with ESMTPSA id b11-20020adfc74b000000b0020e68218048sm2911717wrh.93.2022.05.20.08.23.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 May 2022 08:23:23 -0700 (PDT)
-From:   Ilya Dryomov <idryomov@gmail.com>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [GIT PULL] Ceph fix for 5.18-rc8
-Date:   Fri, 20 May 2022 17:23:06 +0200
-Message-Id: <20220520152306.10106-1-idryomov@gmail.com>
-X-Mailer: git-send-email 2.19.2
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S1347361AbiETSg2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2022 14:36:28 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D83D54D9EC;
+        Fri, 20 May 2022 11:36:25 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2174FB80DDE;
+        Fri, 20 May 2022 18:36:24 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id DEC68C385A9;
+        Fri, 20 May 2022 18:36:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653071782;
+        bh=DXVqJd3SRjpi6b2quKUyVAoo9yDXVPV8JWxe0CSJUJA=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=GeZCKxrbjqylsu5rmPP0qZbv9/nbAU00GYd124zXAqMjPb3hS8vms4XyEOIUekHJZ
+         tkMnArvhyhdKR7YYIhTPi3oE4nZff9rs2yTJ6P3ZBWEv75E27ZbrckcCL8om0qMedt
+         vD7prlJkyagTclOWcXMz7mSSGkLqgmH7Chk25kt+54TT7+RUbuLsJrMqm6jSr9aLn9
+         H4riyLYSEtE8fbK884uszfryDm2Nm2hBn/1q3whfX3ai0wPv2D21wDXP85I34JzIY8
+         NFUVFSk68ZCvJ48s7r7KtesJTgeekhkUIkbk2ufirDWZpolcoIvOUTYw66e0QEB3Hw
+         fEdcioRz7B3pA==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id C686FF0383D;
+        Fri, 20 May 2022 18:36:22 +0000 (UTC)
+Subject: Re: [GIT PULL] Ceph fix for 5.18-rc8
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20220520152306.10106-1-idryomov@gmail.com>
+References: <20220520152306.10106-1-idryomov@gmail.com>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20220520152306.10106-1-idryomov@gmail.com>
+X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-5.18-rc8
+X-PR-Tracked-Commit-Id: d0bb883c6355bcb2cc149fb4d5c3b28ccd327a5e
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: b851c1f8e02a16e86ad8f2c18aa50fd017a8ad3b
+Message-Id: <165307178280.15282.5533681081228162312.pr-tracker-bot@kernel.org>
+Date:   Fri, 20 May 2022 18:36:22 +0000
+To:     Ilya Dryomov <idryomov@gmail.com>
+Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
+        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Fri, 20 May 2022 17:23:06 +0200:
 
-The following changes since commit 42226c989789d8da4af1de0c31070c96726d990c:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-5.18-rc8
 
-  Linux 5.18-rc7 (2022-05-15 18:08:58 -0700)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/b851c1f8e02a16e86ad8f2c18aa50fd017a8ad3b
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-5.18-rc8
-
-for you to fetch changes up to d0bb883c6355bcb2cc149fb4d5c3b28ccd327a5e:
-
-  libceph: fix misleading ceph_osdc_cancel_request() comment (2022-05-18 21:21:29 +0200)
-
-----------------------------------------------------------------
-A fix for a nasty use-after-free, marked for stable.
-
-----------------------------------------------------------------
-Ilya Dryomov (2):
-      libceph: fix potential use-after-free on linger ping and resends
-      libceph: fix misleading ceph_osdc_cancel_request() comment
-
- include/linux/ceph/osd_client.h |   3 +
- net/ceph/osd_client.c           | 311 ++++++++++++++++------------------------
- 2 files changed, 129 insertions(+), 185 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
