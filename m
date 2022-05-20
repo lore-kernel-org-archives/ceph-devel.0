@@ -2,74 +2,77 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 902E7C433F5
-	for <ceph-devel@archiver.kernel.org>; Fri, 20 May 2022 15:10:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7712C433F5
+	for <ceph-devel@archiver.kernel.org>; Fri, 20 May 2022 15:10:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350622AbiETPK1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 20 May 2022 11:10:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59214 "EHLO
+        id S1350199AbiETPKy (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 20 May 2022 11:10:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59892 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244681AbiETPKX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2022 11:10:23 -0400
+        with ESMTP id S1350639AbiETPKw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2022 11:10:52 -0400
 Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81657170657;
-        Fri, 20 May 2022 08:10:21 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBB6163A0;
+        Fri, 20 May 2022 08:10:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1653059420; i=@fujitsu.com;
-        bh=e8B5juuhS5toG5hw6zygxw/VPuvjMx9f/RS70eZ4JIA=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=WElLPHirCQ6ngd84DCKP3el7h+G1GXwPAhd+2s+qMNcjnQ9u/a4C/UNcv6wv6xvFZ
-         FLy3hC48lZaowJGrnjZ+HFk9/Q3jSMCsnKTLHAIWM+5P25un+wDllF4qv7Yf23W28J
-         +CC2weXtVrKXxYayda25+wYNBbfogcJMXgyXSn72mfXqHTChNoX+DCGHXfldpMf9qQ
-         SHyqKUUXU4FmHTaOOTMaQBQnZTSxENVY/yCyMNXMCN4zottHY+OMnAHKen6XlyGAkG
-         IO7m45cfY5iLx/gGvb9HYH3wXLVAEufb0iIHnm+stSN3eQHzgh+T2sRGZeQ+zN4sgj
-         Lq4JFvMQ1//rQ==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrGIsWRWlGSWpSXmKPExsViZ8MxSTd6fXu
-  SwcpnXBavD39itPhwcxKTxZZj9xgtLj/hs/i5bBW7xZ69J1kszv89zmrx+8ccNgcOj1OLJDw2
-  r9Dy2LSqk83j8yY5j01P3jIFsEaxZuYl5VcksGbcv/6TpeCUbMXMJ/eZGxh/SnQxcnEICWxhl
-  Pj97zUjhLOASWLts9+sEM4eRonmm4tYuhg5OdgENCWedS5gBrFFBBwlXrTPAIszC2xmlFj2OB
-  zEFhawkDh3YhkbiM0ioCqx5/cdRhCbV8BD4tCPZiYQW0JAQWLKw/fMEHFBiZMzn0DNkZA4+OI
-  FM0SNosSljm+MEHaFxOvDl6DiahJXz21insDIPwtJ+ywk7QsYmVYxWiUVZaZnlOQmZuboGhoY
-  6BoamuoaW+paGOklVukm6qWW6panFpfoArnlxXqpxcV6xZW5yTkpenmpJZsYgcGfUqwetIPx2
-  4qfeocYJTmYlER5S1e0JwnxJeWnVGYkFmfEF5XmpBYfYpTh4FCS4M1ZA5QTLEpNT61Iy8wBRi
-  JMWoKDR0mEV34tUJq3uCAxtzgzHSJ1ilFRSpzXbh1QQgAkkVGaB9cGi/5LjLJSwryMDAwMQjw
-  FqUW5mSWo8q8YxTkYlYR5VVcDTeHJzCuBm/4KaDET0OJbyq0gi0sSEVJSDUzFTxJcdT1CIvc+
-  57Au+q88Q55RaMelRb90hYofex68dyZK+kNncRL3qdZlbZP745RPl99VyZstw5oW99Pz5PodH
-  j0HWH5p7r139PXx7t0bWxrZZ88JEopaE+cxzXK/it/S3zMX6waeXtHg8khydaRf7WzhAt+yx6
-  v87undO/PvqkmaQGC1Qb1nLPvuaaJKvA/Y+f4zlOxb1n7jrlC3yxvFj7tWhx2PKVYsvlxm/YY
-  h4dEtJp477zWS/+008slb7DN1lumWaZ1alhz5DSqHwn72LxG5OSVg82uXu9Zi03TdJd4/iWaZ
-  bLTYhO2PAkNQaesVXSaV741PrDnPa2kmbNyxyPFoT9BqofXpS42bC5VYijMSDbWYi4oTAV6i+
-  5Z5AwAA
+        s=170520fj; t=1653059446; i=@fujitsu.com;
+        bh=AVZvvk8By7v5SnMkr9rpDYtWLxmKN2qhcVg7w2Ws7Pk=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=h5mjKwiGdcrY1dSiefe34rZzXhdQ+9Sm38mtkRjdUTckAAgQw+5sEB6/tY7N9s+J3
+         UHQi7zCvT3C2kLScv8BHJHJvGUJgm5QzD6s2njXMCXswhJBYGD71jAZmLIaFrXFkKP
+         9tuvweKbNTVPje+qQx/jdjPyjHEwB/kOUYAWmTMNWisoVpatuY1m4w3327QbuFo1LL
+         6qMwuSq7Jd9AqzDlhQLhXFDFNpnVOQDmRiL5kDc+dvU0NzvYiu9OU/J/u9kWjOiF7s
+         +nOhgsX/pf55PaQbRQ0GoFizKLHPxRFjn1gjnVej8xyiM8uMmE622C8RK+xfpJetf3
+         Tmetq0x62o7Ng==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFupkleJIrShJLcpLzFFi42Kxs+FI0i1d355
+  kMGGHnsXrw58YLT7cnMRkseXYPUaLy0/4LH4uW8VusWfvSRaL83+Ps1r8/jGHzYHD49QiCY/N
+  K7Q8Nq3qZPP4vEnOY9OTt0wBrFGsmXlJ+RUJrBkLprxnKjjIUXGw/RNbA+N89i5GLg4hgY2ME
+  l9e7GCBcOYySUyfewwqs4dRYv67HUxdjJwcbAKaEs86FzCD2CICjhIv2mewgNjMApsZJZY9Dg
+  exhQXsJG5du8/WxcjBwSKgKvF2lz1ImFfAQ2L9hB1sILaEgILElIfvwcZwCnhKLLjeDVYuBFS
+  zZIEMRLmgxMmZT6CmS0gcfPGCGaJVUeJSxzdGCLtC4vXhS1BxNYmr5zYxT2AUnIWkfRaS9gWM
+  TKsYrZOKMtMzSnITM3N0DQ0MdA0NTXWNjYBME73EKt1EvdRS3fLU4hJdI73E8mK91OJiveLK3
+  OScFL281JJNjMBYSSlWyNjB+H3lT71DjJIcTEqivKUr2pOE+JLyUyozEosz4otKc1KLDzHKcH
+  AoSfDmrAHKCRalpqdWpGXmAOMWJi3BwaMkwiu/FijNW1yQmFucmQ6ROsWoy/H0+Ym9zEIsefl
+  5qVLivHbrgIoEQIoySvPgRsBSyCVGWSlhXkYGBgYhnoLUotzMElT5V4ziHIxKwryqq4Gm8GTm
+  lcBtegV0BBPQEbeUW0GOKElESEk1MCVICcRH7dqxt0yEKaw1uWR3xpkrzxdLbDqwV7ap98f0y
+  5f/RFS/yVRKfjMnc2NJpEgt0x2FTfeCjH96MWs4Sk/cdWa9j3y1k4Hj7vm3GhXmbZmcsaMksa
+  yFV97MnqVmeRJv9BEZPtmGDmXuM33tHfE/vgvz1MzzdH8YN+Vh3JXXy4wMNU7LiVdtcbzsNWn
+  3GaUEluOS1zevepwZJPV9xmP2kgJNMyWePZmNV64etY5YuTDd7R8v45ecxmcZJrqB8z8cW7R/
+  4Zqilid9hxNr/Cd9+hA3e53tItmytw/lUuyTc6ZXfTPQ8nferfZ0/xlN+R+/7hnYrS7cyev5/
+  eqNVtmZj1faL2c1i7hmvG/lVCWW4oxEQy3mouJEANr3H0GcAwAA
 X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-7.tower-571.messagelabs.com!1653059418!68365!1
-X-Originating-IP: [62.60.8.146]
+X-Msg-Ref: server-9.tower-571.messagelabs.com!1653059445!68088!1
+X-Originating-IP: [62.60.8.98]
 X-SYMC-ESS-Client-Auth: outbound-route-from=pass
 X-StarScan-Received: 
 X-StarScan-Version: 9.86.4; banners=-,-,-
 X-VirusChecked: Checked
-Received: (qmail 462 invoked from network); 20 May 2022 15:10:19 -0000
-Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
-  by server-7.tower-571.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 20 May 2022 15:10:19 -0000
-Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id B6A63100359;
-        Fri, 20 May 2022 16:10:18 +0100 (BST)
+Received: (qmail 6459 invoked from network); 20 May 2022 15:10:45 -0000
+Received: from unknown (HELO n03ukasimr03.n03.fujitsu.local) (62.60.8.98)
+  by server-9.tower-571.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 20 May 2022 15:10:45 -0000
+Received: from n03ukasimr03.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTP id 13A2AD75;
+        Fri, 20 May 2022 16:10:45 +0100 (BST)
 Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id A8F9D1000FB;
-        Fri, 20 May 2022 16:10:18 +0100 (BST)
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTPS id D635BB5C;
+        Fri, 20 May 2022 16:10:44 +0100 (BST)
 Received: from localhost.localdomain (10.167.220.84) by
  R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Fri, 20 May 2022 16:09:55 +0100
+ (TLS) id 15.0.1497.32; Fri, 20 May 2022 16:10:32 +0100
 From:   Yang Xu <xuyang2018.jy@fujitsu.com>
 To:     <linux-fsdevel@vger.kernel.org>, <ceph-devel@vger.kernel.org>
 CC:     <viro@zeniv.linux.org.uk>, <david@fromorbit.com>,
         <djwong@kernel.org>, <brauner@kernel.org>, <willy@infradead.org>,
         <jlayton@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v9 1/4] fs: add mode_strip_sgid() helper
-Date:   Sat, 21 May 2022 00:10:34 +0800
-Message-ID: <1653063037-2461-1-git-send-email-xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v9 4/4] ceph: rely on vfs for setgid stripping
+Date:   Sat, 21 May 2022 00:10:37 +0800
+Message-ID: <1653063037-2461-4-git-send-email-xuyang2018.jy@fujitsu.com>
 X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <1653063037-2461-1-git-send-email-xuyang2018.jy@fujitsu.com>
+References: <1653063037-2461-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [10.167.220.84]
@@ -80,97 +83,33 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add a dedicated helper to handle the setgid bit when creating a new file
-in a setgid directory. This is a preparatory patch for moving setgid
-stripping into the vfs. The patch contains no functional changes.
+Now that we finished moving setgid stripping for regular files in setgid
+directories into the vfs, individual filesystem don't need to manually
+strip the setgid bit anymore. Drop the now unneeded code from ceph.
 
-Currently the setgid stripping logic is open-coded directly in
-inode_init_owner() and the individual filesystems are responsible for
-handling setgid inheritance. Since this has proven to be brittle as
-evidenced by old issues we uncovered over the last months (see [1] to
-[3] below) we will try to move this logic into the vfs.
-
-Link: e014f37db1a2 ("xfs: use setattr_copy to set vfs inode attributes") [1]
-Link: 01ea173e103e ("xfs: fix up non-directory creation in SGID directories") [2]
-Link: fd84bfdddd16 ("ceph: fix up non-directory creation in SGID directories") [3]
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Christian Brauner (Microsoft)<brauner@kernel.org>
 Reviewed-and-Tested-by: Jeff Layton <jlayton@kernel.org>
 Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
-v8->v9: 
-1.move if orders in mode_strip_sgid helper
-2.xfstests testcase url
-https://patchwork.kernel.org/project/fstests/list/?series=643643
- fs/inode.c         | 37 +++++++++++++++++++++++++++++++++----
- include/linux/fs.h |  2 ++
- 2 files changed, 35 insertions(+), 4 deletions(-)
+ fs/ceph/file.c | 4 ----
+ 1 file changed, 4 deletions(-)
 
-diff --git a/fs/inode.c b/fs/inode.c
-index 9d9b422504d1..37bd85981d38 100644
---- a/fs/inode.c
-+++ b/fs/inode.c
-@@ -2246,10 +2246,8 @@ void inode_init_owner(struct user_namespace *mnt_userns, struct inode *inode,
- 		/* Directories are special, and always inherit S_ISGID */
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 8c8226c0feac..257ec53b1765 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -657,10 +657,6 @@ static int ceph_finish_async_create(struct inode *dir, struct dentry *dentry,
+ 		/* Directories always inherit the setgid bit. */
  		if (S_ISDIR(mode))
  			mode |= S_ISGID;
 -		else if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP) &&
--			 !in_group_p(i_gid_into_mnt(mnt_userns, dir)) &&
--			 !capable_wrt_inode_uidgid(mnt_userns, dir, CAP_FSETID))
+-			 !in_group_p(dir->i_gid) &&
+-			 !capable_wrt_inode_uidgid(&init_user_ns, dir, CAP_FSETID))
 -			mode &= ~S_ISGID;
-+		else
-+			mode = mode_strip_sgid(mnt_userns, dir, mode);
- 	} else
- 		inode_fsgid_set(inode, mnt_userns);
- 	inode->i_mode = mode;
-@@ -2405,3 +2403,34 @@ struct timespec64 current_time(struct inode *inode)
- 	return timestamp_truncate(now, inode);
- }
- EXPORT_SYMBOL(current_time);
-+
-+/**
-+ * mode_strip_sgid - handle the sgid bit for non-directories
-+ * @mnt_userns: User namespace of the mount the inode was created from
-+ * @dir: parent directory inode
-+ * @mode: mode of the file to be created in @dir
-+ *
-+ * If the @mode of the new file has both the S_ISGID and S_IXGRP bit
-+ * raised and @dir has the S_ISGID bit raised ensure that the caller is
-+ * either in the group of the parent directory or they have CAP_FSETID
-+ * in their user namespace and are privileged over the parent directory.
-+ * In all other cases, strip the S_ISGID bit from @mode.
-+ *
-+ * Return: the new mode to use for the file
-+ */
-+umode_t mode_strip_sgid(struct user_namespace *mnt_userns,
-+			const struct inode *dir, umode_t mode)
-+{
-+	if ((mode & (S_ISGID | S_IXGRP)) != (S_ISGID | S_IXGRP))
-+		return mode;
-+	if (S_ISDIR(mode) || !dir || !(dir->i_mode & S_ISGID))
-+		return mode;
-+	if (in_group_p(i_gid_into_mnt(mnt_userns, dir)))
-+		return mode;
-+	if (capable_wrt_inode_uidgid(mnt_userns, dir, CAP_FSETID))
-+		return mode;
-+
-+	mode &= ~S_ISGID;
-+	return mode;
-+}
-+EXPORT_SYMBOL(mode_strip_sgid);
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index bbde95387a23..3bccb7ba44a5 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -1897,6 +1897,8 @@ extern long compat_ptr_ioctl(struct file *file, unsigned int cmd,
- void inode_init_owner(struct user_namespace *mnt_userns, struct inode *inode,
- 		      const struct inode *dir, umode_t mode);
- extern bool may_open_dev(const struct path *path);
-+umode_t mode_strip_sgid(struct user_namespace *mnt_userns,
-+			const struct inode *dir, umode_t mode);
- 
- /*
-  * This is the "filldir" function type, used by readdir() to let
+ 	} else {
+ 		in.gid = cpu_to_le32(from_kgid(&init_user_ns, current_fsgid()));
+ 	}
 -- 
 2.27.0
 
