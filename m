@@ -2,45 +2,48 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA0B5C4332F
-	for <ceph-devel@archiver.kernel.org>; Mon, 23 May 2022 20:12:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3EF5C433EF
+	for <ceph-devel@archiver.kernel.org>; Mon, 23 May 2022 20:19:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232568AbiEWUMC (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 23 May 2022 16:12:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43698 "EHLO
+        id S232740AbiEWUTg (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 23 May 2022 16:19:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232932AbiEWULt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2022 16:11:49 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A08C72FE75;
-        Mon, 23 May 2022 13:11:47 -0700 (PDT)
+        with ESMTP id S229594AbiEWUTe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2022 16:19:34 -0400
+X-Greylist: delayed 2991 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 23 May 2022 13:19:32 PDT
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5369BC6C1;
+        Mon, 23 May 2022 13:19:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
         Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=LbEcr7zqhWPFnXoF/KuL5Wkx22JBJ3c2clwbQUl5zn8=; b=YcCYg3bARqXOKkr9KCnYiIVA/O
-        4kCGq1j7NQnK1rCwBYjYcBp79yCaa+veSl2Dx1quLuGeDujO4BSEVcsIJGp+a5QSK2RSosFhG3hjW
-        xMKesUVI3DHJzHAD6RzkDdbXBW7hElXVml8xn3gObBiogi3m/SAMCruazsCZFCQi0CtlYy+m25fRB
-        GdrhCmxTa54gy4NdhbEa5uiYAFKqPXLSZDUoPwg3i3ujBkmThEqmmRcFfV5FH8FYiLnW1rC06isEs
-        gxhmy88B4LOk1iYVg8NmSU4PzSUEtrzQx8JtrCSV1UcEQ9kp/mviuzgA9wrsqNlGmevPCjJQzStwY
-        X8M8EN4Q==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1ntEOy-00GVbU-0B; Mon, 23 May 2022 20:11:40 +0000
-Date:   Mon, 23 May 2022 21:11:39 +0100
-From:   Matthew Wilcox <willy@infradead.org>
+        bh=BEjCKmEEMSSOtJMVmqVfIC+RkZgNI8u3xBenZK+hUro=; b=XRTrc4lAUy9jkpgVFOq2TSxezd
+        I3wKs11DSNWPt0smYy84y8nX4OQpi2ShTNU+G9tW+Yllwv6rMJhJQ7BXgKVp1vNon4qhiH1MqoODT
+        l/Z0+UcxTluUmD/IPXWAYoogG+L7bdnoCFn41igpJqE+Z0iBqPr6hgZahTLWZDS1Hs5bTMGfphH8F
+        XO5iqaxMoV2nZbBszT3k9ljMldkb1qdaL4+ZUE91w5xsku3P8VN18E/atgx0/LbcuB5y8eG65c+zb
+        8J/dPbRR92XSx0HQiulEuZ4Sjx1DrsRys+Q+UVF9bIaUIPS+JwEisoXZvd78Aoa+iG3xZ0t7m7ri2
+        Y+kik54w==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1ntCIl-005SSl-Cr; Mon, 23 May 2022 17:57:07 +0000
+Date:   Mon, 23 May 2022 10:57:07 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     Xiubo Li <xiubli@redhat.com>
 Cc:     jlayton@kernel.org, idryomov@gmail.com, viro@zeniv.linux.org.uk,
-        vshankar@redhat.com, ceph-devel@vger.kernel.org, arnd@arndb.de,
-        mcgrof@kernel.org, akpm@linux-foundation.org,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+        willy@infradead.org, vshankar@redhat.com,
+        ceph-devel@vger.kernel.org, arnd@arndb.de,
+        akpm@linux-foundation.org, linux-fsdevel@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Subject: Re: [PATCH v5 1/2] fs/dcache: add d_compare() helper support
-Message-ID: <YovqeybXUKEmhvsi@casper.infradead.org>
+Message-ID: <YovK86vEmOUUoBn6@bombadil.infradead.org>
 References: <20220519101847.87907-1-xiubli@redhat.com>
  <20220519101847.87907-2-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20220519101847.87907-2-xiubli@redhat.com>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -48,9 +51,6 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 On Thu, May 19, 2022 at 06:18:45PM +0800, Xiubo Li wrote:
 > Reviewed-by: Jeff Layton <jlayton@kernel.org>
 > Signed-off-by: Xiubo Li <xiubli@redhat.com>
-
-... empty commit message?
-
 > ---
 >  fs/dcache.c            | 15 +++++++++++++++
 >  include/linux/dcache.h |  2 ++
@@ -76,25 +76,14 @@ On Thu, May 19, 2022 at 06:18:45PM +0800, Xiubo Li wrote:
 > +	       const struct qstr *name)
 > +{
 > +	return !d_same_name(dentry, parent, name);
+
+What's wrong with d_same_name()? Why introduce a whole new operation
+and export it when you the same prototype except first and second
+argument moved with an even more confusing name?
+
 > +}
 > +EXPORT_SYMBOL(d_compare);
-> +
->  /**
->   * __d_lookup_rcu - search for a dentry (racy, store-free)
->   * @parent: parent dentry
-> diff --git a/include/linux/dcache.h b/include/linux/dcache.h
-> index f5bba51480b2..444b2230e5c3 100644
-> --- a/include/linux/dcache.h
-> +++ b/include/linux/dcache.h
-> @@ -233,6 +233,8 @@ extern struct dentry * d_alloc_parallel(struct dentry *, const struct qstr *,
->  					wait_queue_head_t *);
->  extern struct dentry * d_splice_alias(struct inode *, struct dentry *);
->  extern struct dentry * d_add_ci(struct dentry *, struct inode *, struct qstr *);
-> +extern bool d_compare(const struct dentry *parent, const struct dentry *dentry,
-> +		      const struct qstr *name);
->  extern struct dentry * d_exact_alias(struct dentry *, struct inode *);
->  extern struct dentry *d_find_any_alias(struct inode *inode);
->  extern struct dentry * d_obtain_alias(struct inode *);
-> -- 
-> 2.36.0.rc1
-> 
+
+New symbols should go with EXPORT_SYMBOL_GPL() instead.
+
+  Luis
