@@ -2,68 +2,67 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DBE5C433FE
-	for <ceph-devel@archiver.kernel.org>; Wed, 25 May 2022 14:25:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3B29C433F5
+	for <ceph-devel@archiver.kernel.org>; Wed, 25 May 2022 14:47:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243347AbiEYOZn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 25 May 2022 10:25:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52982 "EHLO
+        id S240790AbiEYOrN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 25 May 2022 10:47:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236722AbiEYOZm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2022 10:25:42 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1106ABF;
-        Wed, 25 May 2022 07:25:41 -0700 (PDT)
+        with ESMTP id S239403AbiEYOrL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2022 10:47:11 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF9F25D5FE;
+        Wed, 25 May 2022 07:47:10 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id C13951F45E;
-        Wed, 25 May 2022 14:25:39 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 6EA2D219FD;
+        Wed, 25 May 2022 14:47:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1653488739; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1653490029; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=OcyUlkvRGFEW/ULXmTtgvKKFJcJyrBkqOjuEy8zAx28=;
-        b=06KoSj8lKddJaGaN4+0+oY7wtQB+63MaXmxxtnnFGXr/ePn3gEl1kbV2vstFtLIK3UnACf
-        cuIyB3uHIKNlkaM/bPsKmUb2sjig/ljmzJF8auCzz3dtdBS9AabeILrQVaxL0hL6hKXZXR
-        cnDPB78x6CDQm4qTZ28mzLTYscM/r0M=
+        bh=rIDzkReVN+pdZ+BgwCcwddX46oH6yoiP8xzU8MKX+Sc=;
+        b=eskaoy3P5ipVbP6okWkh8aCPvKIGtdRohB87QTZlq6PsFO1qJ//z2GXSyyydmjMRXyd7Ue
+        uvdwPs0ggD8xEHpfuaD3tmJb1jGdnQXQ6sXVJKCCQvwyYhu3Nd0DZMGCAdVo+pJ9XRKcDF
+        CwFM12OGPlL+/MOzIw4kqaQTOjyfkdI=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1653488739;
+        s=susede2_ed25519; t=1653490029;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=OcyUlkvRGFEW/ULXmTtgvKKFJcJyrBkqOjuEy8zAx28=;
-        b=S1cldFVF2yAA5MrFeG9i8mtR4FZ7Du4esMvuhkF+Cs+x1OFib8TLIim13GWx3ycjenanAw
-        lGtAbwtTMSTcFaAw==
+        bh=rIDzkReVN+pdZ+BgwCcwddX46oH6yoiP8xzU8MKX+Sc=;
+        b=cybgz6lRxNpkpps2ih8wOMk+fPSnVVBL2mAvUUwc9atsaieedpkkVxoepyXmSV8NwE1pRJ
+        WkeMGlnT6SvQ+BCA==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5309313487;
-        Wed, 25 May 2022 14:25:39 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0968F13487;
+        Wed, 25 May 2022 14:47:08 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id ZI1rEWM8jmI8awAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Wed, 25 May 2022 14:25:39 +0000
+        id BFEFO2xBjmKOdQAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Wed, 25 May 2022 14:47:08 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 88802603;
-        Wed, 25 May 2022 14:26:16 +0000 (UTC)
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 86076555;
+        Wed, 25 May 2022 14:47:45 +0000 (UTC)
 From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
-To:     David Disseldorp <ddiss@suse.de>
+To:     Zorro Lang <zlang@redhat.com>
 Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
         Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
         fstests@vger.kernel.org
 Subject: Re: [PATCH] ceph/005: verify correct statfs behaviour with quotas
 References: <20220427143409.987-1-lhenriques@suse.de>
-        <20220525001142.0a17a41a@suse.de> <87pmk2kn6m.fsf@brahms.olymp>
-        <20220525123659.65270735@suse.de>
-Date:   Wed, 25 May 2022 15:26:15 +0100
-In-Reply-To: <20220525123659.65270735@suse.de> (David Disseldorp's message of
-        "Wed, 25 May 2022 12:36:59 +0200")
-Message-ID: <87tu9dwuwo.fsf@brahms.olymp>
+        <20220525101932.2dnpi3ehhakhxdnp@zlang-mailbox>
+Date:   Wed, 25 May 2022 15:47:45 +0100
+In-Reply-To: <20220525101932.2dnpi3ehhakhxdnp@zlang-mailbox> (Zorro Lang's
+        message of "Wed, 25 May 2022 18:19:32 +0800")
+Message-ID: <87pmk1wtwu.fsf@brahms.olymp>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
@@ -71,109 +70,164 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-David Disseldorp <ddiss@suse.de> writes:
+Zorro Lang <zlang@redhat.com> writes:
 
-> On Wed, 25 May 2022 09:53:53 +0100, Lu=C3=ADs Henriques wrote:
+> On Wed, Apr 27, 2022 at 03:34:09PM +0100, Lu=C3=ADs Henriques wrote:
+>> When using a directory with 'max_bytes' quota as a base for a mount,
+>> statfs shall use that 'max_bytes' value as the total disk size.  That
+>> value shall be used even when using subdirectory as base for the mount.
+>>=20
+>> A bug was found where, when this subdirectory also had a 'max_files'
+>> quota, the real filesystem size would be returned instead of the parent
+>> 'max_bytes' quota value.  This test case verifies this bug is fixed.
+>>=20
+>> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
+>> ---
+>>  tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
+>>  tests/ceph/005.out |  2 ++
+>>  2 files changed, 42 insertions(+)
+>>  create mode 100755 tests/ceph/005
+>>  create mode 100644 tests/ceph/005.out
+>>=20
+>> diff --git a/tests/ceph/005 b/tests/ceph/005
+>> new file mode 100755
+>> index 000000000000..0763a235a677
+>> --- /dev/null
+>> +++ b/tests/ceph/005
+>> @@ -0,0 +1,40 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+>> +#
+>> +# FS QA Test 005
+>> +#
+>> +# Make sure statfs reports correct total size when:
+>> +# 1. using a directory with 'max_byte' quota as base for a mount
+>> +# 2. using a subdirectory of the above directory with 'max_files' quota
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick quota
+>> +
+>> +_supported_fs generic
 >
->> David Disseldorp <ddiss@suse.de> writes:
->>=20
->> > Hi Lu=C3=ADs,
->> >
->> > It looks like this one is still in need of review...=20=20
->>=20
->> Ah! Thanks for reminding me about it, David!
->>=20
->> >
->> > On Wed, 27 Apr 2022 15:34:09 +0100, Lu=C3=ADs Henriques wrote:
->> >=20=20
->> >> When using a directory with 'max_bytes' quota as a base for a mount,
->> >> statfs shall use that 'max_bytes' value as the total disk size.  That
->> >> value shall be used even when using subdirectory as base for the moun=
-t.
->> >>=20
->> >> A bug was found where, when this subdirectory also had a 'max_files'
->> >> quota, the real filesystem size would be returned instead of the pare=
-nt
->> >> 'max_bytes' quota value.  This test case verifies this bug is fixed.
->> >>=20
->> >> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
->> >> ---
->> >>  tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
->> >>  tests/ceph/005.out |  2 ++
->> >>  2 files changed, 42 insertions(+)
->> >>  create mode 100755 tests/ceph/005
->> >>  create mode 100644 tests/ceph/005.out
->> >>=20
->> >> diff --git a/tests/ceph/005 b/tests/ceph/005
->> >> new file mode 100755
->> >> index 000000000000..0763a235a677
->> >> --- /dev/null
->> >> +++ b/tests/ceph/005
->> >> @@ -0,0 +1,40 @@
->> >> +#! /bin/bash
->> >> +# SPDX-License-Identifier: GPL-2.0
->> >> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
->> >> +#
->> >> +# FS QA Test 005
->> >> +#
->> >> +# Make sure statfs reports correct total size when:
->> >> +# 1. using a directory with 'max_byte' quota as base for a mount
->> >> +# 2. using a subdirectory of the above directory with 'max_files' qu=
-ota
->> >> +#
->> >> +. ./common/preamble
->> >> +_begin_fstest auto quick quota
->> >> +
->> >> +_supported_fs generic
->> >> +_require_scratch
->> >> +
->> >> +_scratch_mount
->> >> +mkdir -p $SCRATCH_MNT/quota-dir/subdir
->> >> +
->> >> +# set quotas
->> >> +quota=3D$((1024*10000))
->> >> +$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-=
-dir
->> >> +$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-=
-dir/subdir
->> >> +_scratch_unmount
->> >> +
->> >> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir _scratch_mount=20=20
->> >
->> > Aside from the standard please-quote-your-variables gripe, I'm a littl=
-e=20=20
->>=20
->> Sure, I'll fix those in next iteration.
->>=20
->> > confused with the use of SCRATCH_DEV for this test. Network FSes where
->> > mkfs isn't provided don't generally use it. Is there any way that this
->> > could be run against TEST_DEV, or does the umount / mount complicate
->> > things too much?=20=20
->>=20
->> When I looked at other tests doing similar things (i.e. changing the mou=
-nt
->> device during the test), they all seemed to be using SCRATCH_DEV.  I gue=
-ss
->> that I could change TEST_DEV instead.  I'll revisit this and see if that
->> works.
->>=20
->> Anyway, regarding the usage of SCRATCH_DEV in cephfs, I've used several
->> different approaches:
->>=20
->> - Use 2 different filesystems created on the same cluster,
->> - Use 2 volumes on the same filesystem, or
->> - Simply use 2 directories in the same filesystem.
+> As this case name is ceph/005, so I suppose you'd like to support 'ceph' =
+only.
+
+Yep, my mistake, sorry.  I'll fix it in next rev.
+
+>> +_require_scratch
+>> +
+>> +_scratch_mount
+>> +mkdir -p $SCRATCH_MNT/quota-dir/subdir
+>> +
+>> +# set quotas
+>> +quota=3D$((1024*10000))
+>> +$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-dir
+>> +$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-dir=
+/subdir
+>> +_scratch_unmount
+>> +
+>> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir _scratch_mount
 >
-> Looking at _scratch_mkfs($FSTYP=3Dceph) there is support for scratch
-> filesystem reinitialization, so I suppose this should be okay. With
-> cephfs we could actually go one step further and call "ceph fs rm/new",
-> but that's something for another day :-).
+> Try to not use SCRATCH_DEV like this.
 
-Right, that would require a more complex test setup, with user-space tools
-on the test box/VM.  It definitely would be desirable to have such an
-option for example in teuthology (the ceph testing framework), but for the
-simple runs I usually do on VMs, I'd rather keep the default as-is.
+I used this because I saw other tests doing something similar.  Basically,
+I need to remount a filesystem with a different base directory.  Changing
+the SCRATCH_DEV looked like a simple solution.
 
-Cheers,
+>> +total=3D`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $2}'`
+>           ^^ $DF_PROG
+>
+> As we have _get_total_inode(), _get_used_inode(), _get_used_inode_percent=
+(),
+> _get_free_inode() and _get_available_space() in common/rc, I don't mind a=
+dd
+> one more:
+>
+> _get_total_space()
+> {
+> 	if [ -z "$1" ]; then
+> 		echo "Usage: _get_total_space <mnt>"
+> 		exit 1
+> 	fi
+> 	local total_kb;
+> 	total_kb=3D`$DF_PROG $1 | tail -n1 | awk '{ print $2 }'`
+> 	echo $((total_kb * 1024))
+> }
+
+Right, this makes sense.
+
+>> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir _scratch_unmount
+>> +[ $total -eq 8192 ] || _fail "Incorrect statfs for quota-dir: $total"
+>                 ^^^^
+> I'm not familar with ceph, I just found "quota=3D$((1024*10000))" in this=
+ case,
+> didn't find any place metioned 8192. So may you help to demystify why we =
+expect
+> "8192" at here?
+>
+> And if "8192" is a fixed expected number at here, then we can print it di=
+rectly,
+> as golden image, see below ...
+
+Hmm... OK, I'm struggling to remember the details about this, and it was
+only a month ago I wrote this test!  Which is a sign that I should have,
+at least, added a comment explaining this value.
+
+I'll need to dig into the statfs code again to explain why we're setting
+quotas to 10M and 'df' shows 8M (which is the default size for 2 ceph
+objects btw).  I'll revisit this test in the next few days and sort this
+mystery.
+
+Thanks a lot for your review.
+
+Cheers
 --=20
 Lu=C3=ADs
+
+>> +
+>> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir/subdir _scratch_mount
+>> +total=3D`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $2}'`
+>> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir/subdir _scratch_unmount
+>> +[ $total -eq 8192 ] || _fail "Incorrect statfs for quota-dir/subdir: $t=
+otal"
+>
+> May below code helps?
+>
+> _require_test
+>
+> localdir=3D$TEST_DIR/ceph-quota-dir-$seq
+> rm -rf $localdir
+> mkdir -p ${localdir}/subdir
+> ...
+> $SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $localdir
+> $SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $localdir/subdir
+> ...
+>
+> SCRATCH_DEV=3D$localdir _scratch_mount
+> echo ceph quota size is $(_get_total_space $SCRATCH_MNT)
+> SCRATCH_DEV=3D$localdir _scratch_unmount
+>
+> SCRATCH_DEV=3D$localdir/subdir _scratch_mount
+> echo subdir ceph quota size is $(_get_total_space $SCRATCH_MNT)
+> SCRATCH_DEV=3D$localdir/subdir _scratch_unmount
+>
+> Thanks,
+> Zorro
+>
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/ceph/005.out b/tests/ceph/005.out
+>> new file mode 100644
+>> index 000000000000..a5027f127cf0
+>> --- /dev/null
+>> +++ b/tests/ceph/005.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 005
+>> +Silence is golden
+>>=20
+>
