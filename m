@@ -2,149 +2,80 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64638C433F5
-	for <ceph-devel@archiver.kernel.org>; Fri, 27 May 2022 09:28:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50EB9C433F5
+	for <ceph-devel@archiver.kernel.org>; Fri, 27 May 2022 12:40:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350551AbiE0J2R (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 27 May 2022 05:28:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48966 "EHLO
+        id S1352147AbiE0Mk0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 27 May 2022 08:40:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240627AbiE0J2N (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 27 May 2022 05:28:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 833A2DFE9
-        for <ceph-devel@vger.kernel.org>; Fri, 27 May 2022 02:28:12 -0700 (PDT)
+        with ESMTP id S237444AbiE0Mj4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 27 May 2022 08:39:56 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4C9F711CB4B
+        for <ceph-devel@vger.kernel.org>; Fri, 27 May 2022 05:27:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653643691;
+        s=mimecast20190719; t=1653654464;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=SOlTxwJJvUVKxrD2wVdvDhFovGyJP5J2OHX4mkZ+Kc0=;
-        b=EISWOmbBju5Chlj73gIWHLhOHOj8vRcgo6TYrL2IL2zor9FDkdXTiyGWFtX3DFW6Cnhf/r
-        2dMMDmddv+tstHl/5oowbf7jOZf76hfIlsdwbG+XDpM6y9P3Jt19fLm2QYL9pzMiXCQc7W
-        vtXChSZReaQ3KlbKObltyC7IpTx4gnY=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=RJxrf4ooyTqpiAItg7I/Q/q7XnsebEkQQNQ2A5YOD9I=;
+        b=Y7GFu+D67F3eWP27RIfvBCxs33FnVNXY0omDhB9Mw/XsxnsQSDqxZe3pYlvwo3aXnK6djs
+        OQnfu6mgvoaiTkg+YVU8EA38N44tVKrpKvMoWvQK+1OMM21wUBsbafa6hETQ10zBJhLX0f
+        mHKapFd8wVdYrevKrJZbPRXVSHr8SZw=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-612-1k_uc4rHMjCLHYdLIjCjPA-1; Fri, 27 May 2022 05:28:10 -0400
-X-MC-Unique: 1k_uc4rHMjCLHYdLIjCjPA-1
-Received: by mail-pf1-f200.google.com with SMTP id j23-20020aa78017000000b005180c6e4ef2so2260409pfi.12
-        for <ceph-devel@vger.kernel.org>; Fri, 27 May 2022 02:28:10 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=SOlTxwJJvUVKxrD2wVdvDhFovGyJP5J2OHX4mkZ+Kc0=;
-        b=BtyiqcCojxJ/DKjWx618D+9fzjRP61i12FBeusigpyeKxujnP8+B3MkjbF6a+/JZsQ
-         F7fdbQjitwPxgD2XLqX0c5GbC602O0I9r+5okYIyZBoht0jnI1PLqiZqaDijQkyLOzwr
-         mkFnCdW82EHHTMiCsdq6tubod+y6GOnAYmpBj3FpC7cqzON0pFxTteksXjLKEvvVW/52
-         RGwzr3r9rL732Gfi6LIIm3ClJSofVeTIYlZ7s4CDPOACzMVp4XVk0MU3frpEpPGwANCd
-         BDaiH1CFQ0LkwbiUJDCLnZB7gMQkQ5MFqA+oK2VRrZ3opvnWSlELtt07CXlJC1ybpei9
-         UV5A==
-X-Gm-Message-State: AOAM532NifrwfAshxzSbXiXnWo3q7cNBRenqEHvlhQDUqmxwoKO6AFqW
-        pmBmjAIHpI4LP+So49lUxe/Cg+KmJ3oqyy416fjeVed0nks4xNdrr8yBmN7IovLD5X0+XO4z0X+
-        jpFMOkqgTBogEsIbvuECeKQ==
-X-Received: by 2002:a17:902:748c:b0:163:6c22:8ca0 with SMTP id h12-20020a170902748c00b001636c228ca0mr9332291pll.159.1653643688979;
-        Fri, 27 May 2022 02:28:08 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxqMccbNeTb/akIZGXdPSkzZmLiAB5yTAJbv9ot4Ol43Q+helUHoQO1lhAjP9SdmNjmsFpG2g==
-X-Received: by 2002:a17:902:748c:b0:163:6c22:8ca0 with SMTP id h12-20020a170902748c00b001636c228ca0mr9332274pll.159.1653643688720;
-        Fri, 27 May 2022 02:28:08 -0700 (PDT)
-Received: from [10.72.12.81] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id by5-20020a056a00400500b005107a4d5096sm2931200pfb.30.2022.05.27.02.28.05
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 27 May 2022 02:28:08 -0700 (PDT)
-Subject: Re: [RFC PATCH v2] ceph: prevent a client from exceeding the MDS
- maximum xattr size
-To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
-        Gregory Farnum <gfarnum@redhat.com>
-Cc:     Jeff Layton <jlayton@kernel.org>,
+ us-mta-251-jXjVmR17Pi2O2lmDWrKoXw-1; Fri, 27 May 2022 08:27:38 -0400
+X-MC-Unique: jXjVmR17Pi2O2lmDWrKoXw-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 29875101AA45;
+        Fri, 27 May 2022 12:27:37 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.33.36.8])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2504E1410DD5;
+        Fri, 27 May 2022 12:27:34 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+In-Reply-To: <202205190704.1DC660E5E@keescook>
+References: <202205190704.1DC660E5E@keescook> <165296786831.3591209.12111293034669289733.stgit@warthog.procyon.org.uk>
+To:     Kees Cook <keescook@chromium.org>
+Cc:     dhowells@redhat.com, jlayton@kernel.org,
+        Jonathan Corbet <corbet@lwn.net>,
+        Eric Van Hensbergen <ericvh@gmail.com>,
+        Latchesar Ionkov <lucho@ionkov.net>,
+        Dominique Martinet <asmadeus@codewreck.org>,
+        Christian Schoenebeck <linux_oss@crudebyte.com>,
+        Marc Dionne <marc.dionne@auristor.com>,
+        Xiubo Li <xiubli@redhat.com>,
         Ilya Dryomov <idryomov@gmail.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>
-References: <20220525172427.3692-1-lhenriques@suse.de>
- <fb3d817d8b6235472e517a9fc9ad0956fb4e8cf2.camel@kernel.org>
- <3cb96552-9747-c6b4-c8d3-81af60e5ae6a@redhat.com>
- <ca4928507bdf329bbe5b32a7b71f4a4295e5bba1.camel@kernel.org>
- <f238e4a1-ef98-ccfe-6345-51b6d9a34319@redhat.com>
- <CAJ4mKGZyw+uKjwkSBseETtKXwJOSV2D8J9mLH-8yB8w98Ow=fA@mail.gmail.com>
- <87leunwd5z.fsf@brahms.olymp>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <852c5941-3ae9-2f37-6742-5801fdb025ed@redhat.com>
-Date:   Fri, 27 May 2022 17:28:02 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        Steve French <smfrench@gmail.com>,
+        William Kucharski <william.kucharski@oracle.com>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        linux-doc@vger.kernel.org, v9fs-developer@lists.sourceforge.net,
+        linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
+        linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
+        linux-fsdevek@vger.kernel.org, linux-hardening@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] netfs: Fix gcc-12 warning by embedding vfs inode in netfs_i_context
 MIME-Version: 1.0
-In-Reply-To: <87leunwd5z.fsf@brahms.olymp>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <3598051.1653654453.1@warthog.procyon.org.uk>
+Date:   Fri, 27 May 2022 13:27:33 +0100
+Message-ID: <3598052.1653654453@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 2.85 on 10.11.54.7
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+Hi Kees,
 
-On 5/27/22 5:14 PM, Luís Henriques wrote:
-> Gregory Farnum <gfarnum@redhat.com> writes:
->
->> On Thu, May 26, 2022 at 6:10 PM Xiubo Li <xiubli@redhat.com> wrote:
->>>
->>> On 5/27/22 8:44 AM, Jeff Layton wrote:
->>>> On Fri, 2022-05-27 at 08:36 +0800, Xiubo Li wrote:
->>>>> On 5/27/22 2:39 AM, Jeff Layton wrote:
->>>>>> A question:
->>>>>>
->>>>>> How do the MDS's discover this setting? Do they get it from the mons? If
->>>>>> so, I wonder if there is a way for the clients to query the mon for this
->>>>>> instead of having to extend the MDS protocol?
->>>>> It sounds like what the "max_file_size" does, which will be recorded in
->>>>> the 'mdsmap'.
->>>>>
->>>>> While currently the "max_xattr_pairs_size" is one MDS's option for each
->>>>> daemon and could set different values for each MDS.
->>>>>
->>>>>
->>>> Right, but the MDS's in general don't use local config files. Where are
->>>> these settings stored? Could the client (potentially) query for them?
->>> AFAIK, each process in ceph it will have its own copy of the
->>> "CephContext". I don't know how to query all of them but I know there
->>> have some API such as "rados_conf_set/get" could do similar things.
->>>
->>> Not sure whether will it work in our case.
->>>
->>>> I'm pretty sure the client does fetch and parse the mdsmap. If it's
->>>> there then it could grab the setting for all of the MDS's at mount time
->>>> and settle on the lowest one.
->>>>
->>>> I think a solution like that might be more resilient than having to
->>>> fiddle with feature bits and such...
->>> Yeah, IMO just making this option to be like the "max_file_size" is more
->>> appropriate.
->> Makes sense to me — this is really a property of the filesystem, not a
->> daemon, so it should be propagated through common filesystem state.
-> Right now the max_xattr_pairs_size seems to be something that can be set
-> on each MDS, so definitely not a filesystem property.  To be honest, I
-> think it's nasty to have this knob in the first place because it will
-> allow an admin to set it to a value that will allow clients to blowup the
-> MDS cluster.
->
->> I guess Luis' https://github.com/ceph/ceph/pull/46357 should be
->> updated to do it that way?
-> Just to confirm, by "to do it that way" you mean to move that setting into
-> the mdsmap, right?
+Is v2 good for you?  I realise I left your R-b attached to it when I posted
+it, but I can remove that if you don't have time to review it.
 
-Yeah, I think so.
-
--- XIubo
-
->
->> I see some discussion there about handling
->> old clients which don't recognize these limits as well.
-> Yeah, this is where the feature bit came from.  This would allow old
-> clients to be identified so that the MDS would not give them 'Xx'
-> capabilities.  Old clients would be able to set xattrs but not to buffer
-> them, i.e. they'd be forced to do the SETXATTR synchronously.
->
-> Cheers,
+David
 
