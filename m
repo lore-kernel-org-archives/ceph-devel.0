@@ -2,46 +2,46 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A930CCCA47C
-	for <ceph-devel@archiver.kernel.org>; Tue,  7 Jun 2022 18:23:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F1CECCA48A
+	for <ceph-devel@archiver.kernel.org>; Tue,  7 Jun 2022 18:27:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351419AbiFGSX0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 7 Jun 2022 14:23:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41768 "EHLO
+        id S1350518AbiFGS1s (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 7 Jun 2022 14:27:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352268AbiFGSRA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2022 14:17:00 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DB457A82A;
-        Tue,  7 Jun 2022 10:51:18 -0700 (PDT)
+        with ESMTP id S1351789AbiFGSZA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2022 14:25:00 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F96CED8C4;
+        Tue,  7 Jun 2022 10:54:41 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8F856616A3;
-        Tue,  7 Jun 2022 17:51:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1AB2DC34115;
-        Tue,  7 Jun 2022 17:51:16 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 16141B82375;
+        Tue,  7 Jun 2022 17:54:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0137BC385A5;
+        Tue,  7 Jun 2022 17:54:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654624277;
-        bh=W1dWzICFRP6sYvlkV3Ti3k7/EiLaFrobnxuCwIq+YeY=;
+        s=k20201202; t=1654624476;
+        bh=JOgQfKsk4lnzYzLZ2hqnQAoqsKCIfymaPjmRrx2OWVM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Y5p4uW5JSiicqumzkUPCXQXVYFQY4a/I1UFt1X4vYQVHwAfymRd3bpHXViBuSyaGX
-         IMYLn8oXaSmrBHN2VbLRq+8hfcmnNSIY05R/6W06sXr5HEA3a0iJXhLhCT398uHt1v
-         +DsOIZf1EzOqxpIZC2pOGim4e056Z+XUZssbcEdDt62VMtwWjhGUHzX6KzabHhXgoz
-         CHqoNW2+EVim8iEHlagcvT/m3ckhrV3iGEhS6nDigeqJ59hgAZgenqALGosIgMbXm0
-         P3kj5H5seSyxEmZDF3vnQBx5Ex/KZXG7wYHlPktr6f7pFHW6zy73hEvdwJncXwEQXh
-         8685hWkNTBHiQ==
+        b=dprTLKVpgul6EEr+KQW9I2LlyamqCphE+cmKTyvTjq98BVLDK/TRZegFJjuFfxqrc
+         Jd0KSomvc2s/SUAbboA6X+U9CxiPWU37VGwAQeDcF/4rG4LrLHGyjBM4SBn0Um/Jzb
+         heddnWqb3+4HWjaOojZ7GHOVp05f9V0GtND68bst4CnrjWBAhuRs32PnD/kLX07B/3
+         +VzLSxqz9ILE55bpkd1sf1wCSmZ136LIOuohVUlXtAfPIZkBjiB2ndET1WSuooAlLj
+         VWv56BjoK+4iAnlyrqspTw6/d9S403aifvmY5Ag/JsLRyW5Js2AvmtAJt5Vg9cyQWm
+         mYX0l2/paOS8w==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.18 42/68] ceph: flush the mdlog for filesystem sync
-Date:   Tue,  7 Jun 2022 13:48:08 -0400
-Message-Id: <20220607174846.477972-42-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.17 39/60] ceph: flush the mdlog for filesystem sync
+Date:   Tue,  7 Jun 2022 13:52:36 -0400
+Message-Id: <20220607175259.478835-39-sashal@kernel.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220607174846.477972-1-sashal@kernel.org>
-References: <20220607174846.477972-1-sashal@kernel.org>
+In-Reply-To: <20220607175259.478835-1-sashal@kernel.org>
+References: <20220607175259.478835-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -78,10 +78,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 27 insertions(+), 6 deletions(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 00c3de177dd6..86215822e84e 100644
+index c30eefc0ac19..97098920b305 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -4696,15 +4696,17 @@ void ceph_mdsc_pre_umount(struct ceph_mds_client *mdsc)
+@@ -4705,15 +4705,17 @@ void ceph_mdsc_pre_umount(struct ceph_mds_client *mdsc)
  }
  
  /*
@@ -102,7 +102,7 @@ index 00c3de177dd6..86215822e84e 100644
  restart:
  	req = __get_oldest_req(mdsc);
  	while (req && req->r_tid <= want_tid) {
-@@ -4716,14 +4718,32 @@ static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
+@@ -4725,14 +4727,32 @@ static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
  			nextreq = NULL;
  		if (req->r_op != CEPH_MDS_OP_SETFILELOCK &&
  		    (req->r_op & CEPH_MDS_OP_WRITE)) {
@@ -136,7 +136,7 @@ index 00c3de177dd6..86215822e84e 100644
  			mutex_lock(&mdsc->mutex);
  			ceph_mdsc_put_request(req);
  			if (!nextreq)
-@@ -4738,7 +4758,8 @@ static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
+@@ -4747,7 +4767,8 @@ static void wait_unsafe_requests(struct ceph_mds_client *mdsc, u64 want_tid)
  		req = nextreq;
  	}
  	mutex_unlock(&mdsc->mutex);
@@ -146,7 +146,7 @@ index 00c3de177dd6..86215822e84e 100644
  }
  
  void ceph_mdsc_sync(struct ceph_mds_client *mdsc)
-@@ -4767,7 +4788,7 @@ void ceph_mdsc_sync(struct ceph_mds_client *mdsc)
+@@ -4776,7 +4797,7 @@ void ceph_mdsc_sync(struct ceph_mds_client *mdsc)
  	dout("sync want tid %lld flush_seq %lld\n",
  	     want_tid, want_flush);
  
