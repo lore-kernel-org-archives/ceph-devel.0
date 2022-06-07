@@ -2,98 +2,200 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59E0CC43334
-	for <ceph-devel@archiver.kernel.org>; Tue,  7 Jun 2022 16:51:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4608C433EF
+	for <ceph-devel@archiver.kernel.org>; Tue,  7 Jun 2022 18:18:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345160AbiFGQvS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 7 Jun 2022 12:51:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41044 "EHLO
+        id S1351399AbiFGSSu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 7 Jun 2022 14:18:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235555AbiFGQvQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2022 12:51:16 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 876A1F5D37;
-        Tue,  7 Jun 2022 09:51:15 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S1352287AbiFGSRB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2022 14:17:01 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D9257CB02;
+        Tue,  7 Jun 2022 10:51:19 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 4860D1F989;
-        Tue,  7 Jun 2022 16:51:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1654620674; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=shFOWPg68Uwfa4tVZjUM5dOMRJq90YtpwIjmrRmGpPo=;
-        b=t1ojOnn5jcQS5iyPgsK2IgVRD06NDn8Wlx1oeTZQJU3wW6SCcoUz9SpdjTYzCa8T7oUYPC
-        Mih6orQFPbLub+mVZApYXc/yy+tC7ThwsPrhBbteYZ1mRh0ri9kkp+G7CXWWT4n/fy9YTu
-        3Lz3/y1KxRMr2dhXJUn/Zj5WzhwubkI=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1654620674;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=shFOWPg68Uwfa4tVZjUM5dOMRJq90YtpwIjmrRmGpPo=;
-        b=c0iiTrFjea4UEkWLV5XzqMPf2suuifZc87N0BX4XGZcA1rMhuk94r8xipLoMWRkkFXV/wU
-        fqda68qOMDVWNyBA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id CACFB13638;
-        Tue,  7 Jun 2022 16:51:13 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id ikBFLgGCn2J6BAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 16:51:13 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 4e2cb5fe;
-        Tue, 7 Jun 2022 16:51:54 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        ceph-devel@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v2] src/attr_replace_test: dynamically adjust the max xattr size
-Date:   Tue,  7 Jun 2022 17:51:53 +0100
-Message-Id: <20220607165153.27797-1-lhenriques@suse.de>
-In-Reply-To: <87wnds8mxv.fsf@brahms.olymp>
-References: <87wnds8mxv.fsf@brahms.olymp>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EBAC5617A6;
+        Tue,  7 Jun 2022 17:51:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73121C341C0;
+        Tue,  7 Jun 2022 17:51:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1654624278;
+        bh=GJNqqOKr0NBTjxoklh0NXy0vOn2yoYx8voMPjGc1T3A=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=t/eaIiZrpxwFiZ9E47qYT9MYNl9dizMZtMDfd4pXenG2B8iXssijQ/ZhYvAHB5PjK
+         hBxXyDiplbO3wSTE8FpOokUjy7c6d9yyoywL8KnR78M1QpixbYw4ILkuN50SwKoZvA
+         3B6kYe2okADzwSKR2QSK6RzBID4dOczWJuw/hadNxflK4mldSWKIf+CiRdm3kDfzfD
+         Nfmh/L2RHVMPbTe+Yn9GumU6mjDjo+1SAy1cZhm50UYiwSz2VctfDNNQjecMEHkGO7
+         HCRehk7noHGdlarmZ7kPXklFOlS3D4e5UkJRJ1c8MfiOSax/zn3slrCHxTQHK3YLp+
+         cjeXidV/TbSuQ==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.18 43/68] ceph: fix possible deadlock when holding Fwb to get inline_data
+Date:   Tue,  7 Jun 2022 13:48:09 -0400
+Message-Id: <20220607174846.477972-43-sashal@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220607174846.477972-1-sashal@kernel.org>
+References: <20220607174846.477972-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+X-stable: review
+X-Patchwork-Hint: Ignore
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-CephFS doesn't had a maximum xattr size.  Instead, it imposes a maximum size
-for the full set of xattrs names+values, which by default is 64K but may be
-changed.
+From: Xiubo Li <xiubli@redhat.com>
 
-Test generic/486 started to fail after fixing a ceph bug where this limit
-wasn't being imposed.  Adjust dynamically the size of the xattr being set
-if the error returned is -ENOSPC.
+[ Upstream commit 825978fd6a0defc3c29d8a38b6cea76a0938d21e ]
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+1, mount with wsync.
+2, create a file with O_RDWR, and the request was sent to mds.0:
+
+   ceph_atomic_open()-->
+     ceph_mdsc_do_request(openc)
+     finish_open(file, dentry, ceph_open)-->
+       ceph_open()-->
+         ceph_init_file()-->
+           ceph_init_file_info()-->
+             ceph_uninline_data()-->
+             {
+               ...
+               if (inline_version == 1 || /* initial version, no data */
+                   inline_version == CEPH_INLINE_NONE)
+                     goto out_unlock;
+               ...
+             }
+
+The inline_version will be 1, which is the initial version for the
+new create file. And here the ci->i_inline_version will keep with 1,
+it's buggy.
+
+3, buffer write to the file immediately:
+
+   ceph_write_iter()-->
+     ceph_get_caps(file, need=Fw, want=Fb, ...);
+     generic_perform_write()-->
+       a_ops->write_begin()-->
+         ceph_write_begin()-->
+           netfs_write_begin()-->
+             netfs_begin_read()-->
+               netfs_rreq_submit_slice()-->
+                 netfs_read_from_server()-->
+                   rreq->netfs_ops->issue_read()-->
+                     ceph_netfs_issue_read()-->
+                     {
+                       ...
+                       if (ci->i_inline_version != CEPH_INLINE_NONE &&
+                           ceph_netfs_issue_op_inline(subreq))
+                         return;
+                       ...
+                     }
+     ceph_put_cap_refs(ci, Fwb);
+
+The ceph_netfs_issue_op_inline() will send a getattr(Fsr) request to
+mds.1.
+
+4, then the mds.1 will request the rd lock for CInode::filelock from
+the auth mds.0, the mds.0 will do the CInode::filelock state transation
+from excl --> sync, but it need to revoke the Fxwb caps back from the
+clients.
+
+While the kernel client has aleady held the Fwb caps and waiting for
+the getattr(Fsr).
+
+It's deadlock!
+
+URL: https://tracker.ceph.com/issues/55377
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- src/attr_replace_test.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ fs/ceph/addr.c | 33 +++++++++++++++++++--------------
+ 1 file changed, 19 insertions(+), 14 deletions(-)
 
-diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
-index cca8dcf8ff60..d1b92703ba2a 100644
---- a/src/attr_replace_test.c
-+++ b/src/attr_replace_test.c
-@@ -62,7 +62,10 @@ int main(int argc, char *argv[])
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index b6edcf89a429..adef10a6e5c7 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1644,7 +1644,7 @@ int ceph_uninline_data(struct file *file)
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+-	struct ceph_osd_request *req;
++	struct ceph_osd_request *req = NULL;
+ 	struct ceph_cap_flush *prealloc_cf;
+ 	struct folio *folio = NULL;
+ 	u64 inline_version = CEPH_INLINE_NONE;
+@@ -1652,10 +1652,23 @@ int ceph_uninline_data(struct file *file)
+ 	int err = 0;
+ 	u64 len;
  
- 	/* Then, replace it with bigger one, forcing short form to leaf conversion. */
- 	memset(value, '1', size);
--	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
-+	do {
-+		ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
-+		size -= 256;
-+	} while ((ret < 0) && (errno == ENOSPC) && (size > 256));
- 	if (ret < 0) die();
- 	close(fd);
++	spin_lock(&ci->i_ceph_lock);
++	inline_version = ci->i_inline_version;
++	spin_unlock(&ci->i_ceph_lock);
++
++	dout("uninline_data %p %llx.%llx inline_version %llu\n",
++	     inode, ceph_vinop(inode), inline_version);
++
++	if (inline_version == CEPH_INLINE_NONE)
++		return 0;
++
+ 	prealloc_cf = ceph_alloc_cap_flush();
+ 	if (!prealloc_cf)
+ 		return -ENOMEM;
  
++	if (inline_version == 1) /* initial version, no data */
++		goto out_uninline;
++
+ 	folio = read_mapping_folio(inode->i_mapping, 0, file);
+ 	if (IS_ERR(folio)) {
+ 		err = PTR_ERR(folio);
+@@ -1664,17 +1677,6 @@ int ceph_uninline_data(struct file *file)
+ 
+ 	folio_lock(folio);
+ 
+-	spin_lock(&ci->i_ceph_lock);
+-	inline_version = ci->i_inline_version;
+-	spin_unlock(&ci->i_ceph_lock);
+-
+-	dout("uninline_data %p %llx.%llx inline_version %llu\n",
+-	     inode, ceph_vinop(inode), inline_version);
+-
+-	if (inline_version == 1 || /* initial version, no data */
+-	    inline_version == CEPH_INLINE_NONE)
+-		goto out_unlock;
+-
+ 	len = i_size_read(inode);
+ 	if (len > folio_size(folio))
+ 		len = folio_size(folio);
+@@ -1739,6 +1741,7 @@ int ceph_uninline_data(struct file *file)
+ 	ceph_update_write_metrics(&fsc->mdsc->metric, req->r_start_latency,
+ 				  req->r_end_latency, len, err);
+ 
++out_uninline:
+ 	if (!err) {
+ 		int dirty;
+ 
+@@ -1757,8 +1760,10 @@ int ceph_uninline_data(struct file *file)
+ 	if (err == -ECANCELED)
+ 		err = 0;
+ out_unlock:
+-	folio_unlock(folio);
+-	folio_put(folio);
++	if (folio) {
++		folio_unlock(folio);
++		folio_put(folio);
++	}
+ out:
+ 	ceph_free_cap_flush(prealloc_cf);
+ 	dout("uninline_data %p %llx.%llx inline_version %llu = %d\n",
+-- 
+2.35.1
+
