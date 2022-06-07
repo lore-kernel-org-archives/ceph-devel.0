@@ -2,127 +2,98 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 348B0C43334
-	for <ceph-devel@archiver.kernel.org>; Tue,  7 Jun 2022 15:05:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17ACFC433EF
+	for <ceph-devel@archiver.kernel.org>; Tue,  7 Jun 2022 15:14:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343848AbiFGPF4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 7 Jun 2022 11:05:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47768 "EHLO
+        id S1343886AbiFGPOi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 7 Jun 2022 11:14:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39336 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343845AbiFGPFz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2022 11:05:55 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44443F68B0
-        for <ceph-devel@vger.kernel.org>; Tue,  7 Jun 2022 08:05:54 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S245023AbiFGPOg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2022 11:14:36 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9530D69B6D;
+        Tue,  7 Jun 2022 08:14:35 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 03F16B820C0
-        for <ceph-devel@vger.kernel.org>; Tue,  7 Jun 2022 15:05:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66CF8C385A5;
-        Tue,  7 Jun 2022 15:05:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654614351;
-        bh=R39JnPbaq99/3qI5et3y8kdZ/iEDKB2XtRlk56mHlCA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=hdWJpKA2pcXhBxjHRhnAFWbJoc77c3J/ZEchCRkVsitWOPC8VE0916dIYSCr1AVK9
-         LfoEmcH+/T3yf27/55oFO7SA9frtF15HTWcryOOLLo8qCFQknKBBiOOET+bl6KRPZO
-         EzSwwq1ANCs1x4KDkGz9h3S4Js9ztFTnmrE7Uo34VBwXfq4y9vGcJ1zf/5dODxg7AQ
-         RcBeoL/+7YeybETsd0f2Dv4SeFz0BURt2M3l5kOBsHWrCev7Fk3t/g9g4ydSHIxd2k
-         Txi3FOglW/qZdt/vw/UImJf88AfHn4wmSI7QmUf8TXziSPGYdawwkzaG65zYHgmR9h
-         dWmQmFJEEZGXA==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     xiubli@redhat.com
-Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org
-Subject: [PATCH] ceph: convert to generic_file_llseek
-Date:   Tue,  7 Jun 2022 11:05:49 -0400
-Message-Id: <20220607150549.217390-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.36.1
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 55D9B219EE;
+        Tue,  7 Jun 2022 15:14:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1654614874; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=wpjPIR+wUVjX3PE+Tq8yv5deHvOVU6vemMV4suTxgb4=;
+        b=yEgZbTYk1KA3ZQ5251qfmquIzZkdhELMkNs2C0gCFRA8JsVpmmjJPDlVs7UGYb/gJTc5px
+        RV6/SMJO1u11Eodmccf6t9+PS3NwxULdwcKNEn6ZPfyBlackYjTHxY2LtauLrZOxYFh/zU
+        au7tA7w+12BkjKgLuuod5pF4u2fUMWM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1654614874;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=wpjPIR+wUVjX3PE+Tq8yv5deHvOVU6vemMV4suTxgb4=;
+        b=2dnF1mWJ5ERAGxQAI3XU1cNAUIe7gZwhxHCNx0s2mE2PjO01ft8Obs/dtlfuwIzVTl1UL9
+        MjUQ+ukZ4XQc7PAw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E6C8A13A88;
+        Tue,  7 Jun 2022 15:14:33 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id sDckNVlrn2JRWwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 15:14:33 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 0ef3a077;
+        Tue, 7 Jun 2022 15:15:14 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH 2/2] src/attr_replace_test: dynamically adjust the max xattr size
+Date:   Tue,  7 Jun 2022 16:15:13 +0100
+Message-Id: <20220607151513.26347-3-lhenriques@suse.de>
+In-Reply-To: <20220607151513.26347-1-lhenriques@suse.de>
+References: <20220607151513.26347-1-lhenriques@suse.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-There's no reason we need to lock the inode for write in order to handle
-an llseek. I suspect this should have been dropped in 2013 when we
-stopped doing vmtruncate in llseek.
+CephFS doesn't had a maximum xattr size.  Instead, it imposes a maximum
+size for the full set of an inode's xattrs names+values, which by default
+is 64K but it can be changed by a cluster admin.
 
-With that gone, ceph_llseek is functionally equivalent to
-generic_file_llseek, so just call that after getting the size.
+Test generic/486 started to fail after fixing a ceph bug where this limit
+wasn't being imposed.  Adjust dynamically the size of the xattr being set
+if the error returned is -ENOSPC.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
 ---
- fs/ceph/file.c | 52 +++++---------------------------------------------
- 1 file changed, 5 insertions(+), 47 deletions(-)
+ src/attr_replace_test.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 0c13a3f23c99..0e82a1c383ca 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1989,57 +1989,15 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-  */
- static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
- {
--	struct inode *inode = file->f_mapping->host;
--	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
--	loff_t i_size;
--	loff_t ret;
--
--	inode_lock(inode);
--
- 	if (whence == SEEK_END || whence == SEEK_DATA || whence == SEEK_HOLE) {
-+		struct inode *inode = file_inode(file);
-+		int ret;
-+
- 		ret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE, false);
- 		if (ret < 0)
--			goto out;
--	}
--
--	i_size = i_size_read(inode);
--	switch (whence) {
--	case SEEK_END:
--		offset += i_size;
--		break;
--	case SEEK_CUR:
--		/*
--		 * Here we special-case the lseek(fd, 0, SEEK_CUR)
--		 * position-querying operation.  Avoid rewriting the "same"
--		 * f_pos value back to the file because a concurrent read(),
--		 * write() or lseek() might have altered it
--		 */
--		if (offset == 0) {
--			ret = file->f_pos;
--			goto out;
--		}
--		offset += file->f_pos;
--		break;
--	case SEEK_DATA:
--		if (offset < 0 || offset >= i_size) {
--			ret = -ENXIO;
--			goto out;
--		}
--		break;
--	case SEEK_HOLE:
--		if (offset < 0 || offset >= i_size) {
--			ret = -ENXIO;
--			goto out;
--		}
--		offset = i_size;
--		break;
-+			return ret;
- 	}
--
--	ret = vfs_setpos(file, offset, max(i_size, fsc->max_file_size));
--
--out:
--	inode_unlock(inode);
--	return ret;
-+	return generic_file_llseek(file, offset, whence);
- }
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index cca8dcf8ff60..de18e643f469 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -62,7 +62,10 @@ int main(int argc, char *argv[])
  
- static inline void ceph_zero_partial_page(
--- 
-2.36.1
-
+ 	/* Then, replace it with bigger one, forcing short form to leaf conversion. */
+ 	memset(value, '1', size);
+-	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
++	do {
++		ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
++		size -= 256;
++	} while ((ret < 0) && (errno == ENOSPC) && (size > 0));
+ 	if (ret < 0) die();
+ 	close(fd);
+ 
