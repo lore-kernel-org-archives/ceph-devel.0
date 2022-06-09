@@ -2,52 +2,54 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 021D4C43334
-	for <ceph-devel@archiver.kernel.org>; Thu,  9 Jun 2022 10:53:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3C93C43334
+	for <ceph-devel@archiver.kernel.org>; Thu,  9 Jun 2022 10:53:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242955AbiFIKxL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 9 Jun 2022 06:53:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49568 "EHLO
+        id S243153AbiFIKxO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 9 Jun 2022 06:53:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230108AbiFIKxG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2022 06:53:06 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE01DA464;
-        Thu,  9 Jun 2022 03:53:04 -0700 (PDT)
+        with ESMTP id S242966AbiFIKxL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2022 06:53:11 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52CEBE085;
+        Thu,  9 Jun 2022 03:53:05 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 6F57D21DB9;
-        Thu,  9 Jun 2022 10:53:03 +0000 (UTC)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 90A261F909;
+        Thu,  9 Jun 2022 10:53:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1654771983; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1654771984; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=PpmQVxjR9EHUStcV+aF59APVHwIa7j+nyVOSQFjuOYk=;
-        b=ifHgm9e2xYrEfBNtQ2MFninUZV4j4wYZtULaJkEfvDApf99uKg6N32eeHNlFfgt2xQKUVd
-        T3pBAHgg94JhBN58N3kSaMoQQn7la/OJQqigidrgW/TdB1Tw95U0Le8kSq6PKqcWqH68C7
-        WqzNMJEyxcfYIBmFoq9RUuAdqw6VzA0=
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=rEmJn680m/TQKB4Uu9ncMP6P+6Qq9FOSqC0c0ffBrNQ=;
+        b=kvFwpF0xpDVIUkb6DFF2EPAltgZHnU1UhjGdNOSb6YL4T+qzYZrVO/H7eDKtbrqaDAJnaj
+        RxV4Q8pvZxJJIrEqHOnhIKNuTfaSr5cnTpxQXXCEe3Wg3BIIIHMC0eKzeosT6ExrRqeas+
+        bOTUA+G52MZZxJCwBe9R77AXtRw7pnE=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1654771983;
+        s=susede2_ed25519; t=1654771984;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=PpmQVxjR9EHUStcV+aF59APVHwIa7j+nyVOSQFjuOYk=;
-        b=x8VQrCKQNG0pNnPHeIOv1AyfbUjGDzm1H0RLgh2oUg8OkyB8sjMSmoZlk1W/u9oI/ANb16
-        t3ADgAkZt1SjqcBw==
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=rEmJn680m/TQKB4Uu9ncMP6P+6Qq9FOSqC0c0ffBrNQ=;
+        b=YV/LYmVrKiXcNCqezPvErvJg3qZYMGFCifHpRGfU6XqqlLHh+PPsaW+6GBsb5h2pJTMPVj
+        HBM7HCwUG3TErsDA==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id EA9E213456;
-        Thu,  9 Jun 2022 10:53:02 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1AB1513456;
+        Thu,  9 Jun 2022 10:53:04 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id pbU5Ng7RoWK1EAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Thu, 09 Jun 2022 10:53:02 +0000
+        id iPSEAxDRoWK1EAAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Thu, 09 Jun 2022 10:53:04 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id e222422d;
+        by brahms.olymp (OpenSMTPD) with ESMTPA id b14799e5;
         Thu, 9 Jun 2022 10:53:44 +0000 (UTC)
 From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
 To:     fstests@vger.kernel.org
@@ -56,9 +58,11 @@ Cc:     Dave Chinner <david@fromorbit.com>,
         Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
         ceph-devel@vger.kernel.org,
         =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v2 0/2] Two xattrs-related fixes for ceph
-Date:   Thu,  9 Jun 2022 11:53:41 +0100
-Message-Id: <20220609105343.13591-1-lhenriques@suse.de>
+Subject: [PATCH v2 2/2] generic/486: adjust the max xattr size
+Date:   Thu,  9 Jun 2022 11:53:43 +0100
+Message-Id: <20220609105343.13591-3-lhenriques@suse.de>
+In-Reply-To: <20220609105343.13591-1-lhenriques@suse.de>
+References: <20220609105343.13591-1-lhenriques@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -66,27 +70,42 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi!
+CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
+size for the full set of xattrs names+values, which by default is 64K.
+And since ceph reports 4M as the blocksize (the default ceph object size),
+generic/486 will fail in this filesystem because it will end up using
+XATTR_SIZE_MAX to set the size of the 2nd (big) xattr value.
 
-A bug fix in ceph has made some changes in the way xattr limits are
-enforced on the client side.  This requires some fixes on tests
-generic/020 and generic/486.
+The fix is to adjust the max size in attr_replace_test so that it takes
+into account the initial xattr name and value lengths.
 
-* Changes since v1:
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ src/attr_replace_test.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-  - patch 0001:
-    Set the max size for xattrs values to a 65000, so that it is close to
-    the maximum, but still able to accommodate any pre-existing xattr
-
-  - patch 0002:
-    Same thing as patch 0001, but in a more precise way: actually take
-    into account the exact sizes for name+value of a pre-existing xattr.
-
-Luís Henriques (2):
-  generic/020: adjust max_attrval_size for ceph
-  generic/486: adjust the max xattr size
-
- src/attr_replace_test.c |  7 ++++++-
- tests/generic/020       | 10 +++++++++-
- 2 files changed, 15 insertions(+), 2 deletions(-)
-
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index cca8dcf8ff60..1c8d1049a1d8 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -29,6 +29,11 @@ int main(int argc, char *argv[])
+ 	char *value;
+ 	struct stat sbuf;
+ 	size_t size = sizeof(value);
++	/*
++	 * Take into account the initial (small) xattr name and value sizes and
++	 * subtract them from the XATTR_SIZE_MAX maximum.
++	 */
++	size_t maxsize = XATTR_SIZE_MAX - strlen(name) - 1;
+ 
+ 	if (argc != 2)
+ 		fail("Usage: %s <file>\n", argv[0]);
+@@ -46,7 +51,7 @@ int main(int argc, char *argv[])
+ 	size = sbuf.st_blksize * 3 / 4;
+ 	if (!size)
+ 		fail("Invalid st_blksize(%ld)\n", sbuf.st_blksize);
+-	size = MIN(size, XATTR_SIZE_MAX);
++	size = MIN(size, maxsize);
+ 	value = malloc(size);
+ 	if (!value)
+ 		fail("Failed to allocate memory\n");
