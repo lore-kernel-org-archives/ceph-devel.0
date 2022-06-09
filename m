@@ -2,125 +2,110 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9560ACCA47F
-	for <ceph-devel@archiver.kernel.org>; Thu,  9 Jun 2022 10:31:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C30EC433EF
+	for <ceph-devel@archiver.kernel.org>; Thu,  9 Jun 2022 10:53:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233351AbiFIKbv (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 9 Jun 2022 06:31:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40168 "EHLO
+        id S242949AbiFIKxH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 9 Jun 2022 06:53:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233862AbiFIKbt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2022 06:31:49 -0400
+        with ESMTP id S236400AbiFIKxG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2022 06:53:06 -0400
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4411220EE96;
-        Thu,  9 Jun 2022 03:31:48 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48351D12E;
+        Thu,  9 Jun 2022 03:53:05 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 03B3421E10;
-        Thu,  9 Jun 2022 10:31:47 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 04FD421E0E;
+        Thu,  9 Jun 2022 10:53:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1654770707; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1654771984; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=5I3kwWcGF0sqQZ0z5uVggswDypPeJhM7ZrZj3hd+LuM=;
-        b=J+lNWprMqaVvOo4qdBkM+rsyO8pZRIzH5/O8gextgyxs2+zgc56O9kOvSckmp45i2ks/7B
-        gV/oUe9wBMqqbBsd9f2xVSAyB9/GI3bOonQHhFY4qAanLQ6qIPGIu7E9POfX3xl36qReYe
-        1yPLc/pyRAtbu8QmrkAT5tiwexJevu0=
+        bh=nHo1V4OXl1fsgoJ0X4r6OgxS7vBNLp6zrOgtEoQsT7A=;
+        b=g5yHi3cy0wdKjPTR4+KFch0zqU9rZcFXZpJp5xZR+T2x5WEwq6PdDMT2Sf1qrQscAc2F49
+        Ux8FWUhOw4bxic4/LLa8+3UTL2sGB6atDT3kOk9M4hYIfbfCwDVJyBEBLMxjm+//CRpxPE
+        GDB4ZJdjet4+6WvaQPtjf22efpXt7Co=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1654770707;
+        s=susede2_ed25519; t=1654771984;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=5I3kwWcGF0sqQZ0z5uVggswDypPeJhM7ZrZj3hd+LuM=;
-        b=728j16rk7HcpisXxo5EfqPdVq0i9pNfcbmXXLgkfYoWgFp25immNhPeFwV4aaYLvLe7kJu
-        bxtdtsShUarTZ0DQ==
+        bh=nHo1V4OXl1fsgoJ0X4r6OgxS7vBNLp6zrOgtEoQsT7A=;
+        b=pu9H7YpgArBP/0N9t6Go4PzfhmsI1KZ4HU2qGPN79W7OrcLqb20F0vokdQcruFM6PfecVo
+        h2ccF5/zPZFo/JAw==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 9437113A8C;
-        Thu,  9 Jun 2022 10:31:46 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 831A013456;
+        Thu,  9 Jun 2022 10:53:03 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id 5TExIRLMoWJgBwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Thu, 09 Jun 2022 10:31:46 +0000
+        id CET7HA/RoWK1EAAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Thu, 09 Jun 2022 10:53:03 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id f9d9d251;
-        Thu, 9 Jun 2022 10:32:28 +0000 (UTC)
-Date:   Thu, 9 Jun 2022 11:32:28 +0100
-From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests@vger.kernel.org, Jeff Layton <jlayton@kernel.org>,
-        Xiubo Li <xiubli@redhat.com>, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH 2/2] src/attr_replace_test: dynamically adjust the max
- xattr size
-Message-ID: <YqHMPEZemvpuMAut@suse.de>
-References: <20220607151513.26347-1-lhenriques@suse.de>
- <20220607151513.26347-3-lhenriques@suse.de>
- <20220608002315.GT1098723@dread.disaster.area>
- <YqByggmCzXGAosM+@suse.de>
- <20220608215950.GV1098723@dread.disaster.area>
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 456a2098;
+        Thu, 9 Jun 2022 10:53:44 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     Dave Chinner <david@fromorbit.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v2 1/2] generic/020: adjust max_attrval_size for ceph
+Date:   Thu,  9 Jun 2022 11:53:42 +0100
+Message-Id: <20220609105343.13591-2-lhenriques@suse.de>
+In-Reply-To: <20220609105343.13591-1-lhenriques@suse.de>
+References: <20220609105343.13591-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220608215950.GV1098723@dread.disaster.area>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jun 09, 2022 at 07:59:50AM +1000, Dave Chinner wrote:
-> On Wed, Jun 08, 2022 at 10:57:22AM +0100, Luís Henriques wrote:
-> > On Wed, Jun 08, 2022 at 10:23:15AM +1000, Dave Chinner wrote:
-> > > On Tue, Jun 07, 2022 at 04:15:13PM +0100, Luís Henriques wrote:
-> > > > CephFS doesn't had a maximum xattr size.  Instead, it imposes a maximum
-> > > > size for the full set of an inode's xattrs names+values, which by default
-> > > > is 64K but it can be changed by a cluster admin.
-> > > > 
-> > > > Test generic/486 started to fail after fixing a ceph bug where this limit
-> > > > wasn't being imposed.  Adjust dynamically the size of the xattr being set
-> > > > if the error returned is -ENOSPC.
-> > > 
-> > > Ah, this shouldn't be getting anywhere near the 64kB limit unless
-> > > ceph is telling userspace it's block size is > 64kB:
-> > > 
-> > > size = sbuf.st_blksize * 3 / 4;
-> > > .....
-> > > size = MIN(size, XATTR_SIZE_MAX);
-> > 
-> > Yep, that's exactly what is happening.  The cephfs kernel client reports
-> > here the value that is being used for ceph "object size", which defaults
-> > to 4M.  Hence, we'll set size to XATTR_SIZE_MAX.
-> 
-> Yikes. This is known to break random applications that size buffers
-> based on a multiple of sbuf.st_blksize and assume that it is going
-> to be roughly 4kB. e.g. size a buffer at 1024 * sbuf.st_blksize,
-> expecting to get a ~4MB buffer, and instead it tries to allocate
-> a 4GB buffer....
-> 
-> > > Regardless, the correct thing to do here is pass the max supported
-> > > xattr size from the command line (because fstests knows what that it
-> > > for each filesystem type) rather than hard coding
-> > > XATTR_SIZE_MAX in the test.
-> > 
-> > OK, makes sense.  But then, for the ceph case, it becomes messy because we
-> > also need to know the attribute name to compute the maximum size.  I guess
-> > we'll need an extra argument for that too.
-> 
-> Just pass in a size for ceph that has enough spare space for the
-> attribute names in it, like for g/020. Don't make it more
-> complex than it needs to be.
+CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
+size for the full set of xattrs names+values, which by default is 64K.
 
-Well, in that case it's just easier for attr_replace_test.c to simply set
-the ceiling to (XATTR_SIZE_MAX - strlen(name+value)).  This is because the
-fstests don't really know anymore the max xattr size for each filesystem
-type; that knowledge is local to generic/020.  The other option is to move
-that code (back) to common/attr.
+This patch fixes the max_attrval_size so that it is slightly < 64K in
+order to accommodate any already existing xattrs in the file.
 
-Cheers,
---
-Luís
+Signed-off-by: LuÃ­s Henriques <lhenriques@suse.de>
+---
+ tests/generic/020 | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/tests/generic/020 b/tests/generic/020
+index d8648e96286e..76f13220fe85 100755
+--- a/tests/generic/020
++++ b/tests/generic/020
+@@ -128,7 +128,7 @@ _attr_get_max()
+ 	pvfs2)
+ 		max_attrval_size=8192
+ 		;;
+-	xfs|udf|9p|ceph)
++	xfs|udf|9p)
+ 		max_attrval_size=65536
+ 		;;
+ 	bcachefs)
+@@ -139,6 +139,14 @@ _attr_get_max()
+ 		# the underlying filesystem, so just use the lowest value above.
+ 		max_attrval_size=1024
+ 		;;
++	ceph)
++		# CephFS does not have a maximum value for attributes.  Instead,
++		# it imposes a maximum size for the full set of xattrs
++		# names+values, which by default is 64K.  Set this to a value
++		# that is slightly smaller than 64K so that it can accommodate
++		# already existing xattrs.
++		max_attrval_size=65000
++		;;
+ 	*)
+ 		# Assume max ~1 block of attrs
+ 		BLOCK_SIZE=`_get_block_size $TEST_DIR`
