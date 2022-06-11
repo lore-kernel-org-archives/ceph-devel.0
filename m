@@ -2,110 +2,157 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2DB3C43334
-	for <ceph-devel@archiver.kernel.org>; Sat, 11 Jun 2022 00:30:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 74746C433EF
+	for <ceph-devel@archiver.kernel.org>; Sat, 11 Jun 2022 15:11:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243193AbiFKAaP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 10 Jun 2022 20:30:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34102 "EHLO
+        id S237853AbiFKPLY (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sat, 11 Jun 2022 11:11:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44464 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229693AbiFKAaN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2022 20:30:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0CC22A455
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2022 17:30:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1654907411;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=5OL6vaR29CSd0C0Wg6l0H8lMEbOsp7IS06owvkzJSJc=;
-        b=N4y+pnLy+0fM0C5cfd38vpFMPzvzJlWaY/ey/3c0cWKy2TCzvZW5Ue/h1MOQtQiYSdgKXn
-        lb4SW715t+atCH/6i9O8rE+oa6AbKoTp0DkHebT7fxv+j+Z4M8lJKs9al39n0+/ArJ8Snn
-        Gviy7Si7JIY3qVGTpVP0HZjXEXMunwU=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-251-DjFV7Wi5P6i9uABw07_zDw-1; Fri, 10 Jun 2022 20:30:09 -0400
-X-MC-Unique: DjFV7Wi5P6i9uABw07_zDw-1
-Received: by mail-pf1-f200.google.com with SMTP id 144-20020a621496000000b0051ba2e95df2so333766pfu.11
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2022 17:30:09 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=5OL6vaR29CSd0C0Wg6l0H8lMEbOsp7IS06owvkzJSJc=;
-        b=j0/ixaKFbhHqNjYzWTNFQ80JsVK1qkEKf5UZT+AiRZS3i99TaXSqkOZxK68BQq3AxP
-         lsacmO8WjKJxqqP8friGe333gJA3ZyTGFYVCmsEXlsmUZ1YDFkK20Tv0yDexlWmdkdaN
-         lgHYmp8MxzEuLspaQ7JKU8P5S0YKYIr6IXA/5CFsEsnTY+cKtRKvZXpb/tMge1pyAvYP
-         UAIlsK0Sg+GXPwgzqVZzFsY+zwLfFdlHoZ0EJAF+SPGTWVXLkUvSNvDnPgY0lyTsG7ab
-         Rvrmt3SY3hRDbvQFxgaSFUGIEQMRXQwAYVp54XeF/Y7fSzks2ZNnunEKlM0kieY3oDY3
-         M/tw==
-X-Gm-Message-State: AOAM531vhqZcr/NgN0TwJXzQjvGp4JdyV6NmXbjd9dJvNnbLFIaLApYN
-        CDH69FUSohsC3jTKGBD3GCCGEslJ0udhxp84fVusoAkREwGGrQ+4ppug3poWBkIGgX7RpIkUvnL
-        qk29AHzXBbTwPATLNsNgVRw==
-X-Received: by 2002:a17:902:d652:b0:168:bffe:e5fe with SMTP id y18-20020a170902d65200b00168bffee5femr4491562plh.81.1654907408737;
-        Fri, 10 Jun 2022 17:30:08 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxP0cVNtxNZgxGQUvFDzyRGFnacdSCJcsyUB1BEZWXu/kYMhTyBgSPE7t00vH1Xo8n3R65h8w==
-X-Received: by 2002:a17:902:d652:b0:168:bffe:e5fe with SMTP id y18-20020a170902d65200b00168bffee5femr4491547plh.81.1654907408482;
-        Fri, 10 Jun 2022 17:30:08 -0700 (PDT)
-Received: from [10.72.12.41] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g2-20020aa78182000000b0051bf246ca2bsm157688pfi.100.2022.06.10.17.30.05
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Jun 2022 17:30:07 -0700 (PDT)
-Subject: Re: [PATCH] ceph: call netfs_subreq_terminated with was_async ==
- false
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org,
-        David Howells <dhowells@redhat.com>
-References: <20220607182218.234138-1-jlayton@kernel.org>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <7d3bb725-8f37-3088-52c4-ba22bc93445c@redhat.com>
-Date:   Sat, 11 Jun 2022 08:30:02 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S235964AbiFKPLW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Jun 2022 11:11:22 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8FDC2611
+        for <ceph-devel@vger.kernel.org>; Sat, 11 Jun 2022 08:11:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1654960281; x=1686496281;
+  h=date:from:to:cc:subject:message-id:mime-version;
+  bh=ed9bTYR0nyjmJR2+k0jBVpXtKnsbpVI4upqyWb1Dflw=;
+  b=hw4eloXoqf4hMmhTgp1ituveXWLlkkSYt22Zs5IQed/rfcblsz86eBPR
+   jXQFCBGcwy219KfwC9NV/fRGZAuHHblarGbF7B558WQol3+td43ioGN7D
+   UahhFmKFHdnipvFGK3R0p2d2m6X4ccojCYkbiFu/8oHWwlFfutn8WIE6N
+   ppVCfqyne8lHrhbIOBNOkVNz9JtH4kcbjuUuwvvlndutF5n2LRSA8Ztel
+   KrZFriFD32+yIrTuXLgyf4FctM2HzAEmXZ8n2aGCF4Ajn0U7s89hVFhNy
+   mGoJdIqsL60JKAHCA4HqoZONdTE2w9erYuMFaOcv4MG1fU4h6WkxTyglB
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10375"; a="278673129"
+X-IronPort-AV: E=Sophos;i="5.91,293,1647327600"; 
+   d="scan'208";a="278673129"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jun 2022 08:11:21 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.91,293,1647327600"; 
+   d="scan'208";a="611133218"
+Received: from lkp-server01.sh.intel.com (HELO 60dabacc1df6) ([10.239.97.150])
+  by orsmga008.jf.intel.com with ESMTP; 11 Jun 2022 08:11:18 -0700
+Received: from kbuild by 60dabacc1df6 with local (Exim 4.95)
+        (envelope-from <lkp@intel.com>)
+        id 1o02lh-000J09-UH;
+        Sat, 11 Jun 2022 15:11:17 +0000
+Date:   Sat, 11 Jun 2022 23:10:30 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     David Howells <dhowells@redhat.com>
+Cc:     llvm@lists.linux.dev, kbuild-all@lists.01.org,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>,
+        Jeff Layton <jlayton@kernel.org>
+Subject: [ceph-client:testing 7/9] lib/iov_iter.c:1464:9: warning: comparison
+ of distinct pointer types ('typeof (nr * ((1UL) << (12)) - offset) *' (aka
+ 'unsigned long *') and 'typeof (maxsize) *' (aka 'unsigned int *'))
+Message-ID: <202206112305.4DdsErK8-lkp@intel.com>
 MIME-Version: 1.0
-In-Reply-To: <20220607182218.234138-1-jlayton@kernel.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+tree:   https://github.com/ceph/ceph-client.git testing
+head:   7b864d005b1f7f6a144420e180891b6401078407
+commit: 3adeefbfca0fd57cc943b7ec0330385f48041f0c [7/9] [DO NOT MERGE] iov_iter: Fix iter_xarray_get_pages{,_alloc}()
+config: riscv-randconfig-r034-20220611 (https://download.01.org/0day-ci/archive/20220611/202206112305.4DdsErK8-lkp@intel.com/config)
+compiler: clang version 15.0.0 (https://github.com/llvm/llvm-project ff4abe755279a3a47cc416ef80dbc900d9a98a19)
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # install riscv cross compiling tool for clang build
+        # apt-get install binutils-riscv-linux-gnu
+        # https://github.com/ceph/ceph-client/commit/3adeefbfca0fd57cc943b7ec0330385f48041f0c
+        git remote add ceph-client https://github.com/ceph/ceph-client.git
+        git fetch --no-tags ceph-client testing
+        git checkout 3adeefbfca0fd57cc943b7ec0330385f48041f0c
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=riscv SHELL=/bin/bash
 
-On 6/8/22 2:22 AM, Jeff Layton wrote:
-> "was_async" is a bit misleadingly named. It's supposed to indicate
-> whether it's safe to call blocking operations from the context you're
-> calling it from, but it sounds like it's asking whether this was done
-> via async operation. For ceph, this it's always called from kernel
-> thread context so it should be safe to set this to false.
->
-> Cc: David Howells <dhowells@redhat.com>
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->   fs/ceph/addr.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 3489444c55b9..39e2c64d008f 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -241,7 +241,7 @@ static void finish_netfs_read(struct ceph_osd_request *req)
->   	if (err >= 0 && err < subreq->len)
->   		__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
->   
-> -	netfs_subreq_terminated(subreq, err, true);
-> +	netfs_subreq_terminated(subreq, err, false);
->   
->   	num_pages = calc_pages_for(osd_data->alignment, osd_data->length);
->   	ceph_put_page_vector(osd_data->pages, num_pages, false);
+If you fix the issue, kindly add following tag where applicable
+Reported-by: kernel test robot <lkp@intel.com>
 
-Sorry, I think I missed this one.
+All warnings (new ones prefixed by >>):
 
-LGTM. Thanks Jeff !
+>> lib/iov_iter.c:1464:9: warning: comparison of distinct pointer types ('typeof (nr * ((1UL) << (12)) - offset) *' (aka 'unsigned long *') and 'typeof (maxsize) *' (aka 'unsigned int *')) [-Wcompare-distinct-pointer-types]
+           return min(nr * PAGE_SIZE - offset, maxsize);
+                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/linux/minmax.h:45:19: note: expanded from macro 'min'
+   #define min(x, y)       __careful_cmp(x, y, <)
+                           ^~~~~~~~~~~~~~~~~~~~~~
+   include/linux/minmax.h:36:24: note: expanded from macro '__careful_cmp'
+           __builtin_choose_expr(__safe_cmp(x, y), \
+                                 ^~~~~~~~~~~~~~~~
+   include/linux/minmax.h:26:4: note: expanded from macro '__safe_cmp'
+                   (__typecheck(x, y) && __no_side_effects(x, y))
+                    ^~~~~~~~~~~~~~~~~
+   include/linux/minmax.h:20:28: note: expanded from macro '__typecheck'
+           (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+                      ~~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~~~
+   lib/iov_iter.c:1628:9: warning: comparison of distinct pointer types ('typeof (nr * ((1UL) << (12)) - offset) *' (aka 'unsigned long *') and 'typeof (maxsize) *' (aka 'unsigned int *')) [-Wcompare-distinct-pointer-types]
+           return min(nr * PAGE_SIZE - offset, maxsize);
+                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/linux/minmax.h:45:19: note: expanded from macro 'min'
+   #define min(x, y)       __careful_cmp(x, y, <)
+                           ^~~~~~~~~~~~~~~~~~~~~~
+   include/linux/minmax.h:36:24: note: expanded from macro '__careful_cmp'
+           __builtin_choose_expr(__safe_cmp(x, y), \
+                                 ^~~~~~~~~~~~~~~~
+   include/linux/minmax.h:26:4: note: expanded from macro '__safe_cmp'
+                   (__typecheck(x, y) && __no_side_effects(x, y))
+                    ^~~~~~~~~~~~~~~~~
+   include/linux/minmax.h:20:28: note: expanded from macro '__typecheck'
+           (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+                      ~~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~~~
+   2 warnings generated.
 
--- Xiubo
 
+vim +1464 lib/iov_iter.c
+
+  1430	
+  1431	static ssize_t iter_xarray_get_pages(struct iov_iter *i,
+  1432					     struct page **pages, size_t maxsize,
+  1433					     unsigned maxpages, size_t *_start_offset)
+  1434	{
+  1435		unsigned nr, offset;
+  1436		pgoff_t index, count;
+  1437		size_t size = maxsize;
+  1438		loff_t pos;
+  1439	
+  1440		if (!size || !maxpages)
+  1441			return 0;
+  1442	
+  1443		pos = i->xarray_start + i->iov_offset;
+  1444		index = pos >> PAGE_SHIFT;
+  1445		offset = pos & ~PAGE_MASK;
+  1446		*_start_offset = offset;
+  1447	
+  1448		count = 1;
+  1449		if (size > PAGE_SIZE - offset) {
+  1450			size -= PAGE_SIZE - offset;
+  1451			count += size >> PAGE_SHIFT;
+  1452			size &= ~PAGE_MASK;
+  1453			if (size)
+  1454				count++;
+  1455		}
+  1456	
+  1457		if (count > maxpages)
+  1458			count = maxpages;
+  1459	
+  1460		nr = iter_xarray_populate_pages(pages, i->xarray, index, count);
+  1461		if (nr == 0)
+  1462			return 0;
+  1463	
+> 1464		return min(nr * PAGE_SIZE - offset, maxsize);
+  1465	}
+  1466	
+
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
