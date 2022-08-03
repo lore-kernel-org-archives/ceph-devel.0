@@ -2,190 +2,135 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D62DC04A68
-	for <ceph-devel@archiver.kernel.org>; Wed, 27 Jul 2022 09:41:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64AE9C19F28
+	for <ceph-devel@archiver.kernel.org>; Wed,  3 Aug 2022 07:13:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231192AbiG0Jlr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 27 Jul 2022 05:41:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54152 "EHLO
+        id S234782AbiHCHNP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 3 Aug 2022 03:13:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230473AbiG0Jlp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2022 05:41:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CBEA93FA1D
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2022 02:41:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658914904;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=vsvynYbqkPPdTRXo4wkF9+QVinJY3aAsTXELJJ2UK3w=;
-        b=RV6Ra0qJ4ty3tXciyfx2O1aNMadUSg8yxe6rwYmuo8Eb4PVi1ZB1UfWrcOBZ7ZFgmAS5Qj
-        lxaoeTw/gbaBAWKKqWqHSWeLoUw5/4JAQXJert4OA1HMhIbo+mKfhKmudwHVPYhaJmBXIj
-        rsdv1RnOm5uFek7FowQ7qBt40v57Iys=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-210-iUDEkrmZN6-4YCuly6_8FA-1; Wed, 27 Jul 2022 05:41:42 -0400
-X-MC-Unique: iUDEkrmZN6-4YCuly6_8FA-1
-Received: by mail-pg1-f198.google.com with SMTP id d66-20020a636845000000b0040a88edd9c1so7664743pgc.13
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2022 02:41:42 -0700 (PDT)
+        with ESMTP id S234150AbiHCHNO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2022 03:13:14 -0400
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4B5713E36
+        for <ceph-devel@vger.kernel.org>; Wed,  3 Aug 2022 00:13:13 -0700 (PDT)
+Received: by mail-vs1-xe29.google.com with SMTP id 66so16965856vse.4
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Aug 2022 00:13:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=q9b79jY/u17GYRFU9G4m0npY134fiHh7X1IiD0DxvRU=;
+        b=glX3OPmzpAb9xAIS3vJ0fPg8xdHVf/DJouN1WE5ehgvpKsk68Hn4+Uir3vEwgT/uuh
+         03G/ZytF4ucSugLOoE9RmYpimTXB2n4FQ8966od8Yp/PI0KNm2vXp8Kwqu9zxuQmuy2t
+         WJs9zeNK5QWrzrnsW8wMOLXJTOx6wJH9yDrpDUBg0K+A63ehCA83Q0rr8vCYLTi/FXkF
+         prTwgO2slN50AhBD2Qil/JgZQuDdDrG1lN42vOns37GToId4EQ7wlpHRPHdeH7FI+DH4
+         sLXJlYFn/tNMT8fjFNEyRQB42PZYov1LUcJ+2lFY7gTQZggfN/0NpP/RdAiMLg/FxQtq
+         w1SQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=vsvynYbqkPPdTRXo4wkF9+QVinJY3aAsTXELJJ2UK3w=;
-        b=wff+VyCqApkqqy4Bcxk5lmrP5ZGyhq70quei3XFq60GUeuHdI9TPLsxlrGjEnbhcrn
-         B5cP3KMLJLGK03I8kM+kpc1NKlZqhJKWlBWTcOGEzy+uqDvZgKE0cUjMU114dMsVS6hg
-         PiHxUPZiZd4kL8l26X4cCutbjeZFy9K7DIZFO9jMqJUdydrb8JOYZwAQnso8SnEuWHgq
-         VUhBiU5++DmQyy2LNRHb4pHbnQGivQA5B8T/AvCeqcY3DADXArJT5WanWWbVt5QsxzXJ
-         7QFDfQO3znK1WzzQHPGtBOF+CkyW7OcI00H/XKZlh6whCSreTij4I1UveDBqlaRhRPGM
-         gM/w==
-X-Gm-Message-State: AJIora/FviAA3Eimiu3HIaWvbIjX8mTiGft0ctOTi3AasXyV6iIh7Uwc
-        BcJN4FFoC8fGtjJkIjuUs18aWm/HCFnec2V92UKYiaLRzbNWUrmHkyBG3nc/OwdOcUoYjSM2KKm
-        TSXpUkOdpJGQGklzDJtyYYPRs9DTNfWD6BuBTC9RqyoegrsrycBKIv8OLcn4BhxOK/sYNpxY=
-X-Received: by 2002:a63:86c2:0:b0:415:eb:d166 with SMTP id x185-20020a6386c2000000b0041500ebd166mr17829027pgd.124.1658914901364;
-        Wed, 27 Jul 2022 02:41:41 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1ufPgpa+QLaBG7DBUHLy2BWSR2s3Q966u2qHwTg/NKMSRxZp8J6sCc+Dt8ZTgZ8EF2L1hndLw==
-X-Received: by 2002:a63:86c2:0:b0:415:eb:d166 with SMTP id x185-20020a6386c2000000b0041500ebd166mr17829001pgd.124.1658914900888;
-        Wed, 27 Jul 2022 02:41:40 -0700 (PDT)
-Received: from [10.72.13.152] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id p16-20020a170902e75000b0016b81679c1fsm13451806plf.216.2022.07.27.02.41.38
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 27 Jul 2022 02:41:40 -0700 (PDT)
-Subject: Re: [PATCH] ceph: fall back to use old method to get xattr
-To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>
-Cc:     ceph-devel@vger.kernel.org
-References: <20220727055637.11949-1-xiubli@redhat.com>
- <YuD/yDOwJaqg7q+X@suse.de>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <e6acea1f-0e80-9628-43a3-a9261248ad06@redhat.com>
-Date:   Wed, 27 Jul 2022 17:41:35 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=q9b79jY/u17GYRFU9G4m0npY134fiHh7X1IiD0DxvRU=;
+        b=ZbMFY2tH1MElwAltVlFD4Fg9jggFISqhoftNduvpjp8neSZqtk5m7Qkwon4O4c39Wm
+         6ALbXPiGqXGewOYbEcUmPeZFg4GUYUaamt41XfSg9xqIUg99eBSu+62ZNaaj7RKWrfg2
+         WQsdJEQURzW1HFVRp+lKR2RqLpfREEzSeQFhPQMJy0hjIA2sk33nHH+sXqqNs+tH/rCH
+         wilbvEgVaL6VvBO7ev55ZSnozUKAgoN/xTL8FDkdVTdSR2/ixrjcOywFYQ7KpJ86tU20
+         MQbNeMWxCrtUyXN3glayjyjleqodJrJ2Yky18pa5otPrFx1zjpgMGa8JC1LkdfARAi2L
+         kOYg==
+X-Gm-Message-State: AJIora9dTbj3A1sqTd6yvRkQzb/v4lD7cykxzcm6Zb4g0NIosQvEunKt
+        V4c1xHH2M5YYsZfsod1ckd4wbzpvVTcVippI1EQ=
+X-Google-Smtp-Source: AGRyM1vkzZonf/Zj7tXptc3bBzaAD9r5AhbzTpxh9x2q6/53xcm77wkWsHSKXYeU6d+hTJJXtBe0a5pFG7aBtJTz5uw=
+X-Received: by 2002:a67:af07:0:b0:358:3951:343e with SMTP id
+ v7-20020a67af07000000b003583951343emr8542385vsl.6.1659510792812; Wed, 03 Aug
+ 2022 00:13:12 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <YuD/yDOwJaqg7q+X@suse.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+References: <20220630202150.653547-1-jlayton@kernel.org>
+In-Reply-To: <20220630202150.653547-1-jlayton@kernel.org>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Wed, 3 Aug 2022 09:13:01 +0200
+Message-ID: <CAOi1vP_PETHhCm3nUm5B_t0tMJQdmdBxsAmMpbPoGTD1WimMpg@mail.gmail.com>
+Subject: Re: [PATCH] libceph: clean up ceph_osdc_start_request prototype
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     xiubli@redhat.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-
-On 7/27/22 5:05 PM, Luís Henriques wrote:
-> On Wed, Jul 27, 2022 at 01:56:37PM +0800, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> If the peer MDS doesn't support getvxattr op then just fall back to
->> use old getattr method to get it. Or for the old MDSs they will crash
->> when receive an unknown op.
->>
->> URL: https://tracker.ceph.com/issues/56529
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   fs/ceph/mds_client.c | 10 ++++++++++
->>   fs/ceph/mds_client.h |  4 +++-
->>   fs/ceph/xattr.c      |  9 ++++++---
->>   3 files changed, 19 insertions(+), 4 deletions(-)
->>
->> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->> index 598012ddc401..bfe6d6393eba 100644
->> --- a/fs/ceph/mds_client.c
->> +++ b/fs/ceph/mds_client.c
->> @@ -3255,6 +3255,16 @@ static void __do_request(struct ceph_mds_client *mdsc,
->>   
->>   	dout("do_request mds%d session %p state %s\n", mds, session,
->>   	     ceph_session_state_name(session->s_state));
->> +
->> +	/*
->> +	 * The old ceph will crash the MDSs when see unknown OPs
->> +	 */
->> +	if (req->r_op == CEPH_MDS_OP_GETVXATTR &&
->> +	    !test_bit(CEPHFS_FEATURE_OP_GETVXATTR, &session->s_features)) {
->> +		err = -EOPNOTSUPP;
->> +		goto out_session;
->> +	}
->> +
->>   	if (session->s_state != CEPH_MDS_SESSION_OPEN &&
->>   	    session->s_state != CEPH_MDS_SESSION_HUNG) {
->>   		/*
->> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
->> index e15ee2858fef..0e03efab872a 100644
->> --- a/fs/ceph/mds_client.h
->> +++ b/fs/ceph/mds_client.h
->> @@ -31,8 +31,9 @@ enum ceph_feature_type {
->>   	CEPHFS_FEATURE_METRIC_COLLECT,
->>   	CEPHFS_FEATURE_ALTERNATE_NAME,
->>   	CEPHFS_FEATURE_NOTIFY_SESSION_STATE,
->> +	CEPHFS_FEATURE_OP_GETVXATTR,
->>   
->> -	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_NOTIFY_SESSION_STATE,
->> +	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_OP_GETVXATTR,
->>   };
->>   
->>   #define CEPHFS_FEATURES_CLIENT_SUPPORTED {	\
->> @@ -45,6 +46,7 @@ enum ceph_feature_type {
->>   	CEPHFS_FEATURE_METRIC_COLLECT,		\
->>   	CEPHFS_FEATURE_ALTERNATE_NAME,		\
->>   	CEPHFS_FEATURE_NOTIFY_SESSION_STATE,	\
->> +	CEPHFS_FEATURE_OP_GETVXATTR,		\
->>   }
->>   
->>   /*
->> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
->> index b10d459c2326..8f8db621772a 100644
->> --- a/fs/ceph/xattr.c
->> +++ b/fs/ceph/xattr.c
->> @@ -984,9 +984,12 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
->>   		return err;
->>   	} else {
->>   		err = ceph_do_getvxattr(inode, name, value, size);
->> -		/* this would happen with a new client and old server combo */
->> +		/*
->> +		 * This would happen with a new client and old server combo,
->> +		 * then fall back to use old method to get it
->> +		 */
->>   		if (err == -EOPNOTSUPP)
->> -			err = -ENODATA;
->> +			goto handle_non_vxattrs;
->>   		return err;
-> Nit: maybe just do:
+On Thu, Jun 30, 2022 at 10:21 PM Jeff Layton <jlayton@kernel.org> wrote:
 >
-> 		if (err != -EOPNOTSUPP)
-> 			return err
+> This function always returns 0, and ignores the nofail boolean. Drop the
+> nofail argument, make the function void return and fix up the callers.
 >
-> instead of using a 'goto' statement.
-
-Sounds better.
-
->>   	}
->>   handle_non_vxattrs:
->> @@ -996,7 +999,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
->>   	dout("getxattr %p name '%s' ver=%lld index_ver=%lld\n", inode, name,
->>   	     ci->i_xattrs.version, ci->i_xattrs.index_version);
->>   
->> -	if (ci->i_xattrs.version == 0 ||
->> +	if (ci->i_xattrs.version == 0 || err == -EOPNOTSUPP ||
-> You'll need to initialise 'err' when declaring it.
-
-Yeah, will fix it.
-
-Thanks Luis!
-
--- Xiubo
-
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  drivers/block/rbd.c             |  6 +++---
+>  fs/ceph/addr.c                  | 32 ++++++++++++--------------------
+>  fs/ceph/file.c                  | 32 +++++++++++++-------------------
+>  include/linux/ceph/osd_client.h |  5 ++---
+>  net/ceph/osd_client.c           | 15 ++++++---------
+>  5 files changed, 36 insertions(+), 54 deletions(-)
 >
-> Cheers,
-> --
-> Luís
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 91e541aa1f64..a8af0329ab77 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1297,7 +1297,7 @@ static void rbd_osd_submit(struct ceph_osd_request *osd_req)
+>         dout("%s osd_req %p for obj_req %p objno %llu %llu~%llu\n",
+>              __func__, osd_req, obj_req, obj_req->ex.oe_objno,
+>              obj_req->ex.oe_off, obj_req->ex.oe_len);
+> -       ceph_osdc_start_request(osd_req->r_osdc, osd_req, false);
+> +       ceph_osdc_start_request(osd_req->r_osdc, osd_req);
+>  }
 >
->>   	    !((req_mask & CEPH_CAP_XATTR_SHARED) ||
->>   	      __ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 1))) {
->>   		spin_unlock(&ci->i_ceph_lock);
->> -- 
->> 2.36.0.rc1
->>
+>  /*
+> @@ -2081,7 +2081,7 @@ static int rbd_object_map_update(struct rbd_obj_request *obj_req, u64 snap_id,
+>         if (ret)
+>                 return ret;
+>
+> -       ceph_osdc_start_request(osdc, req, false);
+> +       ceph_osdc_start_request(osdc, req);
+>         return 0;
+>  }
+>
+> @@ -4768,7 +4768,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+>         if (ret)
+>                 goto out_req;
+>
+> -       ceph_osdc_start_request(osdc, req, false);
+> +       ceph_osdc_start_request(osdc, req);
+>         ret = ceph_osdc_wait_request(osdc, req);
+>         if (ret >= 0)
+>                 ceph_copy_from_page_vector(pages, buf, 0, ret);
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index fe6147f20dee..66dc7844fcc6 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -357,9 +357,7 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+>         req->r_inode = inode;
+>         ihold(inode);
+>
+> -       err = ceph_osdc_start_request(req->r_osdc, req, false);
+> -       if (err)
+> -               iput(inode);
+> +       ceph_osdc_start_request(req->r_osdc, req);
+>  out:
+>         ceph_osdc_put_request(req);
+>         if (err)
 
+Hi Jeff,
+
+I'm confused by this err != 0 check.  Previously err was set to 0
+by ceph_osdc_start_request() and netfs_subreq_terminated() was never
+called after an OSD request submission.  Now it is called, but only if
+len != 0?
+
+I see that netfs_subreq_terminated() accepts either the amount of data
+transferred or an error code but it also has some transferred_or_error
+== 0 handling which this check effectively disables.  And do we really
+want to account for transferred data before the transfer occurs?
+
+Thanks,
+
+                Ilya
