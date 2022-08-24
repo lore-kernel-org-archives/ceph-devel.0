@@ -2,41 +2,72 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BC2BC32772
-	for <ceph-devel@archiver.kernel.org>; Tue, 23 Aug 2022 16:48:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 633DDC00140
+	for <ceph-devel@archiver.kernel.org>; Wed, 24 Aug 2022 13:24:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245543AbiHWQsJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 23 Aug 2022 12:48:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41272 "EHLO
+        id S237051AbiHXNYv (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 24 Aug 2022 09:24:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241849AbiHWQrG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2022 12:47:06 -0400
-X-Greylist: delayed 4157 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 23 Aug 2022 06:15:36 PDT
-Received: from 38029-79404.cloudwaysapps.com (unknown [178.62.95.98])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id F2E467CB7F
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Aug 2022 06:15:36 -0700 (PDT)
-Received: by 38029-79404.cloudwaysapps.com (Postfix, from userid 1084)
-        id 7E930128788; Tue, 23 Aug 2022 10:46:56 +0000 (UTC)
-To:     Douglasbus <ceph-devel@vger.kernel.org>
-Subject: Website Email:  - The Telegraph: Mude von Arbeit und Schulden? Raus aus dieser Scheie?
-Date:   Tue, 23 Aug 2022 14:46:56 +0400
-From:   Caragak <Info@caragak.com>
-Message-ID: <dd24b16bd8e75c4f2d3ef0e316992fd1@caragak.com>
-X-Priority: 1
-X-Mailer: PHPMailer 5.2.9 (https://github.com/PHPMailer/PHPMailer/)
+        with ESMTP id S237983AbiHXNYt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2022 09:24:49 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5157A10BF
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2022 06:24:47 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id EAE34B8238B
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2022 13:24:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2B854C433D6;
+        Wed, 24 Aug 2022 13:24:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1661347484;
+        bh=PG5lfbg3TOCBmuiyPvFsbkZfQVYqZeycmTlg3ScmjoI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=nOF3C0hmnYChpgh4b0BniSGTSQQ0+oeXRWyLDRwfQLjzgOvat5GGytD/g0zCjRnIp
+         gqkMcKwmDx9dCFZK3aKWOAiCq/Z3lpv/OG6Rh78t3N5uD+BBssKVCU4Ih3eGphjy6K
+         SYxEOpDNEJbKSlIXUH1DHywK1Qf0pLnwA/F2oDLETLRcS99RzWTudd8AKPUkYYJgfe
+         /H3jUv9z6zHHQ/JTopxG9yoeTg6AaWkIKhJv6A+XxadBEr/ngzFSUTGfIHkjtsxt+i
+         v29MaE/NpSnrXW+RzCN/NYTADdaATkfwGhjrcZkdqbUcfoNYisaPEPrdLx73VEXpQB
+         amzKB3hG6zQSw==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     xiubli@redhat.com
+Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org
+Subject: [PATCH] ceph: increment i_version when doing a setattr with caps
+Date:   Wed, 24 Aug 2022 09:24:42 -0400
+Message-Id: <20220824132442.102062-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.37.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-IERvdWdsYXNidXMgd2FudCB0byBjb250YWN0IENhcmFnYWs6CgpOYW1lIFotQSAgICAgICAgICA6
-IERvdWdsYXNidXMKRW1haWwgICAgICAgICA6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCgpN
-ZXNzYWdlOgoKU2llIG1vY2h0ZW4gYmVxdWVtIHdvaG5lbiB1bmQgYWIgMTUwMCBFdXJvIHBybyBU
-YWcgZWluIHBhc3NpdmVzIEVpbmtvbW1lbiBlcnppZWxlbj8gaHR0cDovL29uLXRoZS1uZXdzLXRv
-ZGF5LmRvcmF5YXppbGltLmNvbS9iaWxkLW5ld3MtMjc2MwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tCgpUaGlzIG1lc3NhZ2UgaGFzIGJlZW4gc2VudCBhdXRvbWF0
-aWNhbGx5IGJ5IHRoZSBDYXJhZ2FrIHN5c3RlbS4KSWYgeW91IG5lZWQgdG8gY29udGFjdCB1cywg
-Z28gdG8gaHR0cHM6Ly9jYXJhZ2FrLmNvbS9jb250YWN0IA==
+When the client has enough caps to satisfy a setattr locally without
+having to talk to the server, we currently do the setattr without
+incrementing the change attribute.
+
+Ensure that if the ctime changes locally, then the change attribute
+does too.
+
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/ceph/inode.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index ccc926a7dcb0..65161296d449 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -2192,6 +2192,7 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ 		inode_dirty_flags = __ceph_mark_dirty_caps(ci, dirtied,
+ 							   &prealloc_cf);
+ 		inode->i_ctime = attr->ia_ctime;
++		inode_inc_iversion_raw(inode);
+ 	}
+ 
+ 	release &= issued;
+-- 
+2.37.2
 
