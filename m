@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F469C28D13
-	for <ceph-devel@archiver.kernel.org>; Thu, 25 Aug 2022 13:31:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAB33C04AA5
+	for <ceph-devel@archiver.kernel.org>; Thu, 25 Aug 2022 13:31:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239879AbiHYNbs (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 25 Aug 2022 09:31:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36344 "EHLO
+        id S242744AbiHYNbt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 25 Aug 2022 09:31:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242708AbiHYNbl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2022 09:31:41 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C044B14DD
+        with ESMTP id S241609AbiHYNbn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2022 09:31:43 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1366B14DF
         for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2022 06:31:41 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 7B0C7CE286B
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2022 13:31:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E306C433D6;
-        Thu, 25 Aug 2022 13:31:37 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 97D87B829C1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2022 13:31:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E74FCC433B5;
+        Thu, 25 Aug 2022 13:31:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661434298;
-        bh=JUbps6WhScdG4ogDZHupzh/QCqB+s08fsl6NLWoH+08=;
+        s=k20201202; t=1661434299;
+        bh=81rPHGnOO/YZTjmemrMzzO3lxPX5A36FISmuWbYvtb8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IjQ1CbVda5nlXrlF5PMnQ85BioWXA6zCpdxw8S7T+RcV9Wp60p476v8U3gwQe+uXX
-         fFnxYt4w0gRWxHnGMtj0ZFzje7tLCK8SWZXmw/Q6XXiY1GobJpO9wUc4PUAZ6/ZSGo
-         yvehnSEJPvLVG8tNxFpG0b2D4jYdK1Ze3zPvg45Jm3G5N2PBA64fASYY75SJ21x5M1
-         2TXO9/FroE30qKlR+cRM91zm4KuUjBSpp+ZcXq/uhiXaw+xa5QprSbvYjsdoG0ueap
-         XPXu8GiRnHqdekIYwD1pfNXbZOAqhnWtvvQ2f99kB5qtjB5h12ylQHe8FTkwS7Oabq
-         YGlAo50ChGUFQ==
+        b=XDkphbV2rfwQph51LB50P0MW7fQsXZfu1vxc6ZHAGKkHPeYGhRCAJ4EUo/okDzPjl
+         iRaZWF/qQPbYV4pTwB8v8gzsZ2e/wvG/d0PLXgL9hw8wwyEu18kgfEw2pFaym2L5/X
+         GLbFBjtHu67Mdid/PlN5FTUNtO81Zn05M4eR48TCF0/4MUDVgtPccsvViPtPCLDJGs
+         xbQ0MBaYdZwUKZM1pvxIbdbrPg1m6UUVlqeroo/wmjjHk4znTHGc0O74+W47TiPv4w
+         lXWmBC/6JLnoTK0z3hJZFxjxjo3WeDK1VGwGfbV/s0JTJSDmI2ZHSmr7ON13Ux3KLa
+         ifQiOHMeVnbYA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     xiubli@redhat.com, idryomov@gmail.com
 Cc:     lhenriques@suse.de, ceph-devel@vger.kernel.org
-Subject: [PATCH v15 05/29] ceph: get file size from fscrypt_file when present in inode traces
-Date:   Thu, 25 Aug 2022 09:31:08 -0400
-Message-Id: <20220825133132.153657-6-jlayton@kernel.org>
+Subject: [PATCH v15 07/29] ceph: update WARN_ON message to pr_warn
+Date:   Thu, 25 Aug 2022 09:31:10 -0400
+Message-Id: <20220825133132.153657-8-jlayton@kernel.org>
 X-Mailer: git-send-email 2.37.2
 In-Reply-To: <20220825133132.153657-1-jlayton@kernel.org>
 References: <20220825133132.153657-1-jlayton@kernel.org>
@@ -46,52 +46,36 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-When we get an inode trace from the MDS, grab the fscrypt_file field if
-the inode is encrypted, and use it to populate the i_size field instead
-of the regular inode size field.
+Give some more helpful info
 
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 15 +++++++++++++--
- 1 file changed, 13 insertions(+), 2 deletions(-)
+ fs/ceph/caps.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 67a2421ed092..4db19fc341a4 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1036,6 +1036,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 448125edd76b..e09bc49809cf 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3503,10 +3503,13 @@ static void handle_cap_grant(struct inode *inode,
+ 		dout("%p mode 0%o uid.gid %d.%d\n", inode, inode->i_mode,
+ 		     from_kuid(&init_user_ns, inode->i_uid),
+ 		     from_kgid(&init_user_ns, inode->i_gid));
+-
+-		WARN_ON_ONCE(ci->fscrypt_auth_len != extra_info->fscrypt_auth_len ||
+-			     memcmp(ci->fscrypt_auth, extra_info->fscrypt_auth,
+-				     ci->fscrypt_auth_len));
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++		if (ci->fscrypt_auth_len != extra_info->fscrypt_auth_len ||
++		    memcmp(ci->fscrypt_auth, extra_info->fscrypt_auth,
++			   ci->fscrypt_auth_len))
++			pr_warn_ratelimited("%s: cap grant attempt to change fscrypt_auth on non-I_NEW inode (old len %d new len %d)\n",
++				__func__, ci->fscrypt_auth_len, extra_info->fscrypt_auth_len);
++#endif
+ 	}
  
- 	if (new_version ||
- 	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
-+		u64 size = le64_to_cpu(info->size);
- 		s64 old_pool = ci->i_layout.pool_id;
- 		struct ceph_string *old_ns;
- 
-@@ -1049,11 +1050,21 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 
- 		pool_ns = old_ns;
- 
-+		if (IS_ENCRYPTED(inode) && size && (iinfo->fscrypt_file_len == sizeof(__le64))) {
-+			u64 fsize = __le64_to_cpu(*(__le64 *)iinfo->fscrypt_file);
-+
-+			if (size == round_up(fsize, CEPH_FSCRYPT_BLOCK_SIZE)) {
-+				size = fsize;
-+			} else {
-+				pr_warn("fscrypt size mismatch: size=%llu fscrypt_file=%llu, discarding fscrypt_file size.\n",
-+					info->size, size);
-+			}
-+		}
-+
- 		queue_trunc = ceph_fill_file_size(inode, issued,
- 					le32_to_cpu(info->truncate_seq),
- 					le64_to_cpu(info->truncate_size),
--					le64_to_cpu(info->size),
--					info_caps);
-+					size, info_caps);
- 		/* only update max_size on auth cap */
- 		if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
- 		    ci->i_max_size != le64_to_cpu(info->max_size)) {
+ 	if ((newcaps & CEPH_CAP_LINK_SHARED) &&
 -- 
 2.37.2
 
