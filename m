@@ -2,186 +2,78 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84614C3F6B0
-	for <ceph-devel@archiver.kernel.org>; Thu, 25 Aug 2022 13:31:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5703FC04AA5
+	for <ceph-devel@archiver.kernel.org>; Thu, 25 Aug 2022 13:31:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242677AbiHYNbk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 25 Aug 2022 09:31:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36224 "EHLO
+        id S242697AbiHYNbl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 25 Aug 2022 09:31:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242655AbiHYNbi (ORCPT
+        with ESMTP id S237455AbiHYNbi (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2022 09:31:38 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81C7424087
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 888A0AE86A
         for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2022 06:31:37 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1F93561D0A
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2022 13:31:37 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 14C42C433D6;
-        Thu, 25 Aug 2022 13:31:35 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 4A40EB829AB
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2022 13:31:36 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DD09C433D7;
+        Thu, 25 Aug 2022 13:31:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661434296;
-        bh=b+uwLKHMSse+ULWMYrDr/EOmvVcWriZ0oTFzFfMBkpA=;
+        s=k20201202; t=1661434295;
+        bh=b6q/dgHZqMFAdJscDxeo6FAPg7tPcikrLJzB0zEnC9s=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=DS9Jk3j1m8lecF4XO1tRe0VXaOMQoQl5+0U+VWeOxmv2SU5AwfFx+GiQJCT7lFDko
-         XVAX+VvDClOcoeNoEkc317zRFis5afspZIIjQ8pysnqOZTsgm0fSn0e/VqN+snu1RK
-         rNsWJ1X54GbU4xVDcuSEaoBYBKRZg/BVlmHfppgciOnuDxutF55F1m8Hrvkm76Sm8K
-         KyH37TxPPXRwkeaVeC7pADl3Znl0mwo5i2WbEW7L8L/MeEA6Uvy3/uWewhSt1AIKy2
-         0zkG5SZ2DZwrrAb8tRx2cq9O6dYuxXzOsVOe/CRQfaSaXVw2jsVMuc8om04pM0HWcR
-         t1MeztnZKk2pQ==
+        b=qV0jIuovUwadHnDpsJjqtu4cTCFVHxvenm+x+Kqbrlb4RplZboLCncV8W7cpFBwG5
+         fnPJcVFzlvdryHokPlair7JRm7RLpF9t/TWizndDvIRHdaYOGy8yKEYcu9T4Fp7Gxx
+         7iFa3FiiGJAQJ3j4rrN1N0QnNCVu4/iwWc//3n72pYwUPOhRfcXyjfBTov4DKHtjgy
+         iB1PqcSsIkKLrc3bk0UEvYf7CpSeOHcli3dIAqty8JUhT47e+AI9wsMpzcdkCSQlLM
+         9PaV+YH6NsG0Vjn+zp9Gsm1/7ovFeWkiNDd4Gpp/8QmhyTiqsjt1d8dAD2x1DFWeHY
+         s8A1iR+GFnLwg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     xiubli@redhat.com, idryomov@gmail.com
 Cc:     lhenriques@suse.de, ceph-devel@vger.kernel.org
-Subject: [PATCH v15 03/29] ceph: size handling for encrypted inodes in cap updates
-Date:   Thu, 25 Aug 2022 09:31:06 -0400
-Message-Id: <20220825133132.153657-4-jlayton@kernel.org>
+Subject: [PATCH v15 01/29] ceph: don't allow changing layout on encrypted files/directories
+Date:   Thu, 25 Aug 2022 09:31:04 -0400
+Message-Id: <20220825133132.153657-2-jlayton@kernel.org>
 X-Mailer: git-send-email 2.37.2
 In-Reply-To: <20220825133132.153657-1-jlayton@kernel.org>
 References: <20220825133132.153657-1-jlayton@kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Transmit the rounded-up size as the normal size, and fill out the
-fscrypt_file field with the real file size.
+From: Luís Henriques <lhenriques@suse.de>
 
+Encryption is currently only supported on files/directories with layouts
+where stripe_count=1.  Forbid changing layouts when encryption is involved.
+
+Signed-off-by: Luis Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c   | 43 +++++++++++++++++++++++++------------------
- fs/ceph/crypto.h |  4 ++++
- 2 files changed, 29 insertions(+), 18 deletions(-)
+ fs/ceph/ioctl.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 441e3c2ff042..e36dadb6e572 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1216,10 +1216,9 @@ struct cap_msg_args {
- 	umode_t			mode;
- 	bool			inline_data;
- 	bool			wake;
-+	bool			encrypted;
- 	u32			fscrypt_auth_len;
--	u32			fscrypt_file_len;
- 	u8			fscrypt_auth[sizeof(struct ceph_fscrypt_auth)]; // for context
--	u8			fscrypt_file[sizeof(u64)]; // for size
- };
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index b9f0f4e460ab..9675ef3a6c47 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -294,6 +294,10 @@ static long ceph_set_encryption_policy(struct file *file, unsigned long arg)
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
  
- /* Marshal up the cap msg to the MDS */
-@@ -1254,7 +1253,12 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
- 	fc->ino = cpu_to_le64(arg->ino);
- 	fc->snap_follows = cpu_to_le64(arg->follows);
- 
--	fc->size = cpu_to_le64(arg->size);
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+	if (arg->encrypted)
-+		fc->size = cpu_to_le64(round_up(arg->size, CEPH_FSCRYPT_BLOCK_SIZE));
-+	else
-+#endif
-+		fc->size = cpu_to_le64(arg->size);
- 	fc->max_size = cpu_to_le64(arg->max_size);
- 	ceph_encode_timespec64(&fc->mtime, &arg->mtime);
- 	ceph_encode_timespec64(&fc->atime, &arg->atime);
-@@ -1314,11 +1318,17 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
- 	ceph_encode_64(&p, 0);
- 
- #if IS_ENABLED(CONFIG_FS_ENCRYPTION)
--	/* fscrypt_auth and fscrypt_file (version 12) */
-+	/*
-+	 * fscrypt_auth and fscrypt_file (version 12)
-+	 *
-+	 * fscrypt_auth holds the crypto context (if any). fscrypt_file
-+	 * tracks the real i_size as an __le64 field (and we use a rounded-up
-+	 * i_size in * the traditional size field).
-+	 */
- 	ceph_encode_32(&p, arg->fscrypt_auth_len);
- 	ceph_encode_copy(&p, arg->fscrypt_auth, arg->fscrypt_auth_len);
--	ceph_encode_32(&p, arg->fscrypt_file_len);
--	ceph_encode_copy(&p, arg->fscrypt_file, arg->fscrypt_file_len);
-+	ceph_encode_32(&p, sizeof(__le64));
-+	ceph_encode_64(&p, arg->size);
- #else /* CONFIG_FS_ENCRYPTION */
- 	ceph_encode_32(&p, 0);
- 	ceph_encode_32(&p, 0);
-@@ -1390,7 +1400,6 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 	arg->follows = flushing ? ci->i_head_snapc->seq : 0;
- 	arg->flush_tid = flush_tid;
- 	arg->oldest_flush_tid = oldest_flush_tid;
--
- 	arg->size = i_size_read(inode);
- 	ci->i_reported_size = arg->size;
- 	arg->max_size = ci->i_wanted_max_size;
-@@ -1444,6 +1453,7 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 		}
- 	}
- 	arg->flags = flags;
-+	arg->encrypted = IS_ENCRYPTED(inode);
- #if IS_ENABLED(CONFIG_FS_ENCRYPTION)
- 	if (ci->fscrypt_auth_len &&
- 	    WARN_ON_ONCE(ci->fscrypt_auth_len > sizeof(struct ceph_fscrypt_auth))) {
-@@ -1454,21 +1464,21 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 		memcpy(arg->fscrypt_auth, ci->fscrypt_auth,
- 			min_t(size_t, ci->fscrypt_auth_len, sizeof(arg->fscrypt_auth)));
- 	}
--	/* FIXME: use this to track "real" size */
--	arg->fscrypt_file_len = 0;
- #endif /* CONFIG_FS_ENCRYPTION */
- }
- 
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
- #define CAP_MSG_FIXED_FIELDS (sizeof(struct ceph_mds_caps) + \
--		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4 + 8 + 8 + 4 + 4)
-+		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4 + 8 + 8 + 4 + 4 + 8)
- 
--#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
- static inline int cap_msg_size(struct cap_msg_args *arg)
- {
--	return CAP_MSG_FIXED_FIELDS + arg->fscrypt_auth_len +
--			arg->fscrypt_file_len;
-+	return CAP_MSG_FIXED_FIELDS + arg->fscrypt_auth_len;
- }
- #else
-+#define CAP_MSG_FIXED_FIELDS (sizeof(struct ceph_mds_caps) + \
-+		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4 + 8 + 8 + 4 + 4)
++	/* encrypted directories can't have striped layout */
++	if (ci->i_layout.stripe_count > 1)
++		return -EINVAL;
 +
- static inline int cap_msg_size(struct cap_msg_args *arg)
- {
- 	return CAP_MSG_FIXED_FIELDS;
-@@ -1547,13 +1557,10 @@ static inline int __send_flush_snap(struct inode *inode,
- 	arg.inline_data = capsnap->inline_data;
- 	arg.flags = 0;
- 	arg.wake = false;
-+	arg.encrypted = IS_ENCRYPTED(inode);
- 
--	/*
--	 * No fscrypt_auth changes from a capsnap. It will need
--	 * to update fscrypt_file on size changes (TODO).
--	 */
-+	/* No fscrypt_auth changes from a capsnap.*/
- 	arg.fscrypt_auth_len = 0;
--	arg.fscrypt_file_len = 0;
- 
- 	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, cap_msg_size(&arg),
- 			   GFP_NOFS, false);
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index 05db33f1a421..918da2be4165 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -9,6 +9,10 @@
- #include <crypto/sha2.h>
- #include <linux/fscrypt.h>
- 
-+#define CEPH_FSCRYPT_BLOCK_SHIFT   12
-+#define CEPH_FSCRYPT_BLOCK_SIZE    (_AC(1, UL) << CEPH_FSCRYPT_BLOCK_SHIFT)
-+#define CEPH_FSCRYPT_BLOCK_MASK	   (~(CEPH_FSCRYPT_BLOCK_SIZE-1))
-+
- struct ceph_fs_client;
- struct ceph_acl_sec_ctx;
- struct ceph_mds_request;
+ 	ret = vet_mds_for_fscrypt(file);
+ 	if (ret)
+ 		return ret;
 -- 
 2.37.2
 
