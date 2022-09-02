@@ -2,117 +2,108 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37140ECAAD2
-	for <ceph-devel@archiver.kernel.org>; Thu,  1 Sep 2022 22:07:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D49CECAAD2
+	for <ceph-devel@archiver.kernel.org>; Fri,  2 Sep 2022 01:55:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235227AbiIAWHO (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 1 Sep 2022 18:07:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40430 "EHLO
+        id S230091AbiIBBzt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 1 Sep 2022 21:55:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234700AbiIAWGJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2022 18:06:09 -0400
-Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BCF09F0EC;
-        Thu,  1 Sep 2022 15:03:30 -0700 (PDT)
-Received: by mail-pj1-x1029.google.com with SMTP id fa2so274130pjb.2;
-        Thu, 01 Sep 2022 15:03:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date;
-        bh=6jEJW/hdf8NlYILH28nH262i/WrC/eObbm9U3wHW7N0=;
-        b=N9gi0ek73D6+Ob4gJQTCenTIizkASUjD+NGWnY0SxFC164jHY2z+KDjngS5u8a5ea1
-         pTnBRJWlclL9jxrutcaq59svND4AAi3Mu6zjZ5R0ZdTzg7WkwILrexZuQIgRHx4yncJe
-         OCQ0GP35CE39948Jkx+DdsWr/hVemLW0aPd8pHpB8mjZW2hr0avHI7FZaniFXz2bEU5c
-         8rj/3cGG0sHkP+Xg1vHbPyhxWGLC3ZGSwUXEq4Bo3qDVM63ON1NgwYw3KkUKbds8fRoP
-         Z5oZrMmJFM7HBd6JNC8OlP+eYzpgfFP4AsKvNF+23CtWe3kx/Wqjrlwut0YprghhKCzN
-         8ZkA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=6jEJW/hdf8NlYILH28nH262i/WrC/eObbm9U3wHW7N0=;
-        b=Yw+B58Bx3KjaDVUIp22F0b09mWlJ9vVWqOWidEERczs4qMmRG7eaxhL4k+ABI+XzxL
-         PWv77w5/oZzZWQqOEAtUoyJksGr8A4LDtf+PRKLl7s8516OBWp6Z+HVwlhmrsig/EJ42
-         ETtwimDbhO0GTVcFRYDto7FiBldLT+6ZGr+XLXuMYm8pLq7Eb+mwOnWBdwb0gM65dDIU
-         sch+ZROfR1WW7SgGE2u26vds8cbtztCBtpvtNdTqgMElpGju6HUUNG38ACEmbyQz7sgy
-         a+gI6BWnZhBOxq/GocPfHGbtPXrDKji6czshDBJ46SN0wx5LH6qka6BDQ022RpNf44AD
-         HYXA==
-X-Gm-Message-State: ACgBeo0fQVNFDsFRjAZHPLkWozmScDx4/KL8q1OkjiyyoykpB1e9zOgQ
-        A8vPendCOaU04nXlJRi/GcfZwqh8VZ4hgg==
-X-Google-Smtp-Source: AA6agR6ueb+SpLMpe0ENf809+aslBhtpdEEwbT3aRvZt/q/0zk6S/BuXNiziVl4cLeo0K8hj5HTpaw==
-X-Received: by 2002:a17:903:40d2:b0:174:e086:c748 with SMTP id t18-20020a17090340d200b00174e086c748mr19496625pld.108.1662069786179;
-        Thu, 01 Sep 2022 15:03:06 -0700 (PDT)
-Received: from vmfolio.. (c-73-189-111-8.hsd1.ca.comcast.net. [73.189.111.8])
-        by smtp.googlemail.com with ESMTPSA id fv4-20020a17090b0e8400b001fb350026f1sm128894pjb.4.2022.09.01.15.03.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Sep 2022 15:03:05 -0700 (PDT)
-From:   "Vishal Moola (Oracle)" <vishal.moola@gmail.com>
-To:     linux-fsdevel@vger.kernel.org
-Cc:     linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
-        linux-nilfs@vger.kernel.org, linux-mm@kvack.org,
-        "Vishal Moola (Oracle)" <vishal.moola@gmail.com>
-Subject: [PATCH 22/23] nilfs2: Convert nilfs_clear_dirty_pages() to use filemap_get_folios_tag()
-Date:   Thu,  1 Sep 2022 15:01:37 -0700
-Message-Id: <20220901220138.182896-23-vishal.moola@gmail.com>
-X-Mailer: git-send-email 2.36.1
-In-Reply-To: <20220901220138.182896-1-vishal.moola@gmail.com>
-References: <20220901220138.182896-1-vishal.moola@gmail.com>
+        with ESMTP id S232390AbiIBBzs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2022 21:55:48 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE6376C10C
+        for <ceph-devel@vger.kernel.org>; Thu,  1 Sep 2022 18:55:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1662083746;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=9VSbocV0ObqiwbP8CHpHn6N+YRK0NSLfdFwiXVyKoto=;
+        b=RvyL2Es/G655bPXlOg7wI7n/NQL7AGXy47gyE7COhDGRA6VR4DU3o/cwaWJW0eZemDEjZj
+        6tdU0+e9FYQ+W7ksB1aU2GwQD0fRPuNrOlN6FeNzjuGL8X0fxzQFzRWixRRqf9ib7nwjvr
+        wQs0nJey3v+8M5JeVh+vVa8/sslwySo=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-459-G5ETFGavO1uVCYiXpJnjWA-1; Thu, 01 Sep 2022 21:55:44 -0400
+X-MC-Unique: G5ETFGavO1uVCYiXpJnjWA-1
+Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 8A0403C0E22D;
+        Fri,  2 Sep 2022 01:55:43 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 96BBE492CA2;
+        Fri,  2 Sep 2022 01:55:40 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     ceph-devel@vger.kernel.org
+Cc:     jlayton@kernel.org, idryomov@gmail.com, lhenriques@suse.de,
+        rraja@redhat.com, mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH v2] ceph: force sending open requests to MDS for root user for root_squash
+Date:   Fri,  2 Sep 2022 09:55:35 +0800
+Message-Id: <20220902015535.305294-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.85 on 10.11.54.9
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Convert function to use folios throughout. This is in preparation for
-the removal of find_get_pages_range_tag().
+From: Xiubo Li <xiubli@redhat.com>
 
-Signed-off-by: Vishal Moola (Oracle) <vishal.moola@gmail.com>
+With the root_squash MDS caps enabled and for a root user it should
+fail to write the file. But currently the kclient will just skip
+sending a open request and check_caps() instead even with the root
+user. This will skip checking the MDS caps in MDS server.
+
+We should force sending a open request to MDS for root user if the
+cephx is enabled.
+
+URL: https://tracker.ceph.com/issues/56067
+URL: https://tracker.ceph.com/issues/57154
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/nilfs2/page.c | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
+ fs/ceph/file.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
 
-diff --git a/fs/nilfs2/page.c b/fs/nilfs2/page.c
-index 5c96084e829f..b66f4e988016 100644
---- a/fs/nilfs2/page.c
-+++ b/fs/nilfs2/page.c
-@@ -358,22 +358,22 @@ void nilfs_copy_back_pages(struct address_space *dmap,
-  */
- void nilfs_clear_dirty_pages(struct address_space *mapping, bool silent)
- {
--	struct pagevec pvec;
-+	struct folio_batch fbatch;
- 	unsigned int i;
- 	pgoff_t index = 0;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 86265713a743..d51c98412a30 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -360,6 +360,7 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
+ 	struct ceph_file_info *fi = file->private_data;
++	uid_t uid = from_kuid(&init_user_ns, get_current_cred()->fsuid);
+ 	int err;
+ 	int flags, fmode, wanted;
  
--	pagevec_init(&pvec);
-+	folio_batch_init(&fbatch);
- 
--	while (pagevec_lookup_tag(&pvec, mapping, &index,
--					PAGECACHE_TAG_DIRTY)) {
--		for (i = 0; i < pagevec_count(&pvec); i++) {
--			struct page *page = pvec.pages[i];
-+	while (filemap_get_folios_tag(mapping, &index, (pgoff_t)-1,
-+				PAGECACHE_TAG_DIRTY, &fbatch)) {
-+		for (i = 0; i < folio_batch_count(&fbatch); i++) {
-+			struct folio *folio = fbatch.folios[i];
- 
--			lock_page(page);
--			nilfs_clear_dirty_page(page, silent);
--			unlock_page(page);
-+			folio_lock(folio);
-+			nilfs_clear_dirty_page(&folio->page, silent);
-+			folio_unlock(folio);
- 		}
--		pagevec_release(&pvec);
-+		folio_batch_release(&fbatch);
- 		cond_resched();
+@@ -393,13 +394,19 @@ int ceph_open(struct inode *inode, struct file *file)
  	}
- }
+ 
+ 	/*
+-	 * No need to block if we have caps on the auth MDS (for
+-	 * write) or any MDS (for read).  Update wanted set
+-	 * asynchronously.
++	 * If the caller is root user and the Fw caps is required
++	 * it will force sending a open request to MDS to let
++	 * the MDS do the root_squash MDS caps check.
++	 *
++	 * Otherwise no need to block if we have caps on the auth
++	 * MDS (for write) or any MDS (for read). Update wanted
++	 * set asynchronously.
+ 	 */
+ 	spin_lock(&ci->i_ceph_lock);
+-	if (__ceph_is_any_real_caps(ci) &&
+-	    (((fmode & CEPH_FILE_MODE_WR) == 0) || ci->i_auth_cap)) {
++	if (!((fmode & CEPH_FILE_MODE_WR) && !uid) &&
++	    (__ceph_is_any_real_caps(ci) &&
++	     (((fmode & CEPH_FILE_MODE_WR) == 0) || ci->i_auth_cap))) {
++
+ 		int mds_wanted = __ceph_caps_mds_wanted(ci, true);
+ 		int issued = __ceph_caps_issued(ci, NULL);
+ 
 -- 
-2.36.1
+2.36.0.rc1
 
