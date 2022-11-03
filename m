@@ -2,121 +2,209 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E22ADC4332F
-	for <ceph-devel@archiver.kernel.org>; Wed,  2 Nov 2022 16:13:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82E19C4332F
+	for <ceph-devel@archiver.kernel.org>; Thu,  3 Nov 2022 03:20:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231669AbiKBQNV (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 2 Nov 2022 12:13:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52114 "EHLO
+        id S230305AbiKCDT6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 2 Nov 2022 23:19:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231631AbiKBQMI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2022 12:12:08 -0400
-Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8808B2C674;
-        Wed,  2 Nov 2022 09:11:40 -0700 (PDT)
-Received: by mail-pj1-x1029.google.com with SMTP id b1-20020a17090a7ac100b00213fde52d49so2314784pjl.3;
-        Wed, 02 Nov 2022 09:11:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=T3e61Fb9Dqh0rLEzgpxaQ/B901JahzW9QwTImcYRDNk=;
-        b=pqx1PJqOgEaKfUss0nxJak4n84vFKOvzq3ESyrjGFD8v8ROxU3CQGdvwQuKFd1I/w3
-         dCJ41EX/Bok9xslgktz6xXZZB5vDFu5BXOoWGO34UzLTcVVzuhGdIGcQHvEi5gNg3GSQ
-         gscxO1Gb4psr/vsFsU/1JpKGLnKfg3l6eDymWIA8qk7+XrNzqRLz/vgtPRF4DPnVnb4T
-         PW63xls+m/+8H/fBE5siUOyqDVnX5GNrTviD0Y18uYcvd2toxW0MDmiLDFy+p7D7UQQ6
-         IBU8URj3sypjIFT2nA8r21p6YwsgewrtbGGcm7sfWsWRu0sZsqZoVeMOaVhnUYxkI+jf
-         hvVQ==
+        with ESMTP id S230337AbiKCDTy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2022 23:19:54 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B888213F74
+        for <ceph-devel@vger.kernel.org>; Wed,  2 Nov 2022 20:18:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1667445535;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=rbroNESV1PQ7IaQsCKEABPmwn7Oc2TG7Zrit7suqSrg=;
+        b=cRmx4nK1BNsaY2unWNcRo2pp5RzTIgIrRxq8eSSd7BxL0k4brrzA9DR7LJx3vBThw9u3e5
+        8DoIVPsMPf3us0g2LH4ymjqRjc5VVxfL8MZalYNMliwASG5C+fQMBSXmZfN7eUT1n5tiFz
+        KlE6lV4jMlEjXg0hEmnFPs0VGG089Nw=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-230-N-bFWE7nOlONsytxOTsF1w-1; Wed, 02 Nov 2022 23:18:54 -0400
+X-MC-Unique: N-bFWE7nOlONsytxOTsF1w-1
+Received: by mail-pg1-f199.google.com with SMTP id f19-20020a63f113000000b0046fde69a09dso310784pgi.10
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2022 20:18:54 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=T3e61Fb9Dqh0rLEzgpxaQ/B901JahzW9QwTImcYRDNk=;
-        b=YmUupG7+40vpkFo5FeZHeZnyBRgb0unk3+IU0m9KM5NHl9y6ROwcmCSUppd0EEDalu
-         +W1hmKxby4hrpumwcvQoj4kx0DRgVslNeMWmvCcdj4XK5pG46B4S1cje9EeGX6ewEG3N
-         7XdL8KSM1lnk8K+ALUvlFDeBafim3mVmdtHwaIBINvPZ18QH/BEqnRUnj+ZUXigDzieG
-         BvSbBGjp/4hrAQCfXRaybXRn2TNF9yyNaTx48fKnbnT4U/kC9HfRmer/4f885HkFaoyP
-         fhcq1hUwxbE0I50ikAUP9eWVO66ERYjiFPdrn7xl/WvWeP4A/NwLGCY+C30nPnNy2vQx
-         81wg==
-X-Gm-Message-State: ACrzQf3k/7kEwfKo9QksgZqWKkqzuFEwwTo23NnDvK6HCfm99WDqtq8L
-        /T0Vr61yF909TJX7prGCx/zsU4NRkbfStw==
-X-Google-Smtp-Source: AMsMyM4+pj++Af4Edyb2QUG36sMaov5LKSRDOi2tknVjdB5MdIhE6lghLouhN9qeqBdhiOHeQb9nDw==
-X-Received: by 2002:a17:90a:9a8f:b0:212:ea8d:dc34 with SMTP id e15-20020a17090a9a8f00b00212ea8ddc34mr45089840pjp.30.1667405500003;
-        Wed, 02 Nov 2022 09:11:40 -0700 (PDT)
-Received: from fedora.hsd1.ca.comcast.net ([2601:644:8002:1c20::8080])
-        by smtp.googlemail.com with ESMTPSA id ms4-20020a17090b234400b00210c84b8ae5sm1632101pjb.35.2022.11.02.09.11.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Nov 2022 09:11:39 -0700 (PDT)
-From:   "Vishal Moola (Oracle)" <vishal.moola@gmail.com>
-To:     linux-fsdevel@vger.kernel.org
-Cc:     linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
-        linux-nilfs@vger.kernel.org, linux-mm@kvack.org,
-        "Vishal Moola (Oracle)" <vishal.moola@gmail.com>,
-        Ryusuke Konishi <konishi.ryusuke@gmail.com>
-Subject: [PATCH v4 22/23] nilfs2: Convert nilfs_clear_dirty_pages() to use filemap_get_folios_tag()
-Date:   Wed,  2 Nov 2022 09:10:30 -0700
-Message-Id: <20221102161031.5820-23-vishal.moola@gmail.com>
-X-Mailer: git-send-email 2.38.1
-In-Reply-To: <20221102161031.5820-1-vishal.moola@gmail.com>
-References: <20221102161031.5820-1-vishal.moola@gmail.com>
+        h=content-language:content-transfer-encoding:in-reply-to:mime-version
+         :user-agent:date:message-id:from:references:cc:to:subject
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=rbroNESV1PQ7IaQsCKEABPmwn7Oc2TG7Zrit7suqSrg=;
+        b=qqjSrpZH5fs7zKaDYzTLGPXqAUEafSiI3gsfgZuWP2Il9ff5/4Ajef91oLT2n3T4a8
+         aQ0aX9ia9CCscJJAIJbW+N3M2cSaFkvK1BWRMAdIydkjWgNmsLbiMtMXLoq/gBNbCJPJ
+         K8m/GKSFGhVozwyDlHAss3Sg4sNxZED6LJ/A0DK6vHLRElTl/Tu2bYKJP9Nt7JlyL73H
+         3346V6jS/22jXxQLJMeKzpOqypse+afwih6Ri28ymt17xo+YGX8fKyAaomj+FGmFg25R
+         NkkScVYC39Yw1jK1BN28Lw5qpxdIVUtj4yj0A/PAY90oLv4eSc2FKdxobCl1ivS5rNw/
+         uHPQ==
+X-Gm-Message-State: ACrzQf2DYVrqu+Xub7AtWmzhU8n2SgalsoQ95Mf0M3Ic2olQW6tPIWdf
+        17jPbWkkWDLkICboyTKd+Gp9AJjUgvYsM0nNf4CQMBMRBdMG+RyzsYZ+uOIkhj0T+rJPBu70Dr6
+        pAy/zb6RcY6b88NE9VCxG8A==
+X-Received: by 2002:a17:90a:578c:b0:213:b509:9474 with SMTP id g12-20020a17090a578c00b00213b5099474mr26301437pji.45.1667445533573;
+        Wed, 02 Nov 2022 20:18:53 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM6S03GbdpE+nfumLcVgqIjZIHkemKQ8mMluPstprGpGtqtpDUheObxILn4dKv/oNy4eDsEnLA==
+X-Received: by 2002:a17:90a:578c:b0:213:b509:9474 with SMTP id g12-20020a17090a578c00b00213b5099474mr26301425pji.45.1667445533325;
+        Wed, 02 Nov 2022 20:18:53 -0700 (PDT)
+Received: from [10.72.12.172] ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id z9-20020a1709027e8900b00186b5c1a715sm9004081pla.182.2022.11.02.20.18.50
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 02 Nov 2022 20:18:52 -0700 (PDT)
+Subject: Re: [RFC PATCH] ceph: allow encrypting a directory while not having
+ Ax caps
+To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>
+Cc:     Ilya Dryomov <idryomov@gmail.com>,
+        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20221027112653.12122-1-lhenriques@suse.de>
+ <a992d844-6d75-e134-60e1-acb8c8972ff3@redhat.com> <Y2JZI1QOl3dXBVUb@suse.de>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <8e1eecb7-1b54-2459-efc9-2f410ad0a904@redhat.com>
+Date:   Thu, 3 Nov 2022 11:18:48 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
+In-Reply-To: <Y2JZI1QOl3dXBVUb@suse.de>
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Convert function to use folios throughout. This is in preparation for
-the removal of find_get_pages_range_tag(). This change removes 2 calls
-to compound_head().
 
-Signed-off-by: Vishal Moola (Oracle) <vishal.moola@gmail.com>
-Acked-by: Ryusuke Konishi <konishi.ryusuke@gmail.com>
----
- fs/nilfs2/page.c | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
+On 02/11/2022 19:48, Luís Henriques wrote:
+> On Mon, Oct 31, 2022 at 05:15:51PM +0800, Xiubo Li wrote:
+>> On 27/10/2022 19:26, Luís Henriques wrote:
+>>> If a client doesn't have Fx caps on a directory, it will get errors while
+>>> trying encrypt it:
+>>>
+>>> ceph: handle_cap_grant: cap grant attempt to change fscrypt_auth on non-I_NEW inode (old len 0 new len 48)
+>>> fscrypt (ceph, inode 1099511627812): Error -105 getting encryption context
+>>>
+>>> A simple way to reproduce this is to use two clients:
+>>>
+>>>       client1 # mkdir /mnt/mydir
+>>>
+>>>       client2 # ls /mnt/mydir
+>>>
+>>>       client1 # fscrypt encrypt /mnt/mydir
+>>>       client1 # echo hello > /mnt/mydir/world
+>>>
+>>> This happens because, in __ceph_setattr(), we only initialize
+>>> ci->fscrypt_auth if we have Ax.  If we don't have, we'll need to do that
+>>> later, in handle_cap_grant().
+>>>
+>>> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+>>> ---
+>>> Hi!
+>>>
+>>> To be honest, I'm not really sure about the conditions in the 'if': shall
+>>> I bother checking it's really a dir and that it is empty?
+>>>
+>>> Cheers,
+>>> --
+>>> Luís
+>>>
+>>>    fs/ceph/caps.c | 26 +++++++++++++++++++++++---
+>>>    1 file changed, 23 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>>> index 443fce066d42..e33b5c276cf3 100644
+>>> --- a/fs/ceph/caps.c
+>>> +++ b/fs/ceph/caps.c
+>>> @@ -3511,9 +3511,29 @@ static void handle_cap_grant(struct inode *inode,
+>>>    		     from_kuid(&init_user_ns, inode->i_uid),
+>>>    		     from_kgid(&init_user_ns, inode->i_gid));
+>>>    #if IS_ENABLED(CONFIG_FS_ENCRYPTION)
+>>> -		if (ci->fscrypt_auth_len != extra_info->fscrypt_auth_len ||
+>>> -		    memcmp(ci->fscrypt_auth, extra_info->fscrypt_auth,
+>>> -			   ci->fscrypt_auth_len))
+>>> +		if ((ci->fscrypt_auth_len == 0) &&
+>>> +		    (extra_info->fscrypt_auth_len > 0) &&
+>>> +		    S_ISDIR(inode->i_mode) &&
+>>> +		    (ci->i_rsubdirs + ci->i_rfiles == 1)) {
+>>> +			/*
+>>> +			 * We'll get here when setting up an encrypted directory
+>>> +			 * but we don't have Fx in that directory, i.e. other
+>>> +			 * clients have accessed this directory too.
+>>> +			 */
+>>> +			ci->fscrypt_auth = kmemdup(extra_info->fscrypt_auth,
+>>> +						   extra_info->fscrypt_auth_len,
+>>> +						   GFP_KERNEL);
+>>> +			if (ci->fscrypt_auth) {
+>>> +				inode->i_flags |= S_ENCRYPTED;
+>>> +				ci->fscrypt_auth_len = extra_info->fscrypt_auth_len;
+>>> +			} else {
+>>> +				pr_err("Failed to alloc memory for %llx.%llx fscrypt_auth\n",
+>>> +					ceph_vinop(inode));
+>>> +			}
+>>> +			dout("ino %llx.%llx is now encrypted\n", ceph_vinop(inode));
+>>> +		} else if (ci->fscrypt_auth_len != extra_info->fscrypt_auth_len ||
+>>> +			   memcmp(ci->fscrypt_auth, extra_info->fscrypt_auth,
+>>> +				  ci->fscrypt_auth_len))
+>>>    			pr_warn_ratelimited("%s: cap grant attempt to change fscrypt_auth on non-I_NEW inode (old len %d new len %d)\n",
+>>>    				__func__, ci->fscrypt_auth_len, extra_info->fscrypt_auth_len);
+>>>    #endif
+>> Hi Luis,
+>>
+>> Thanks for your time on this bug.
+>>
+>> IMO we should fix this in ceph_fill_inode():
+>>
+>>   995 #ifdef CONFIG_FS_ENCRYPTION
+>>   996         if (iinfo->fscrypt_auth_len && (inode->i_state & I_NEW)) {
+>>   997                 kfree(ci->fscrypt_auth);
+>>   998                 ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
+>>   999                 ci->fscrypt_auth = iinfo->fscrypt_auth;
+>> 1000                 iinfo->fscrypt_auth = NULL;
+>> 1001                 iinfo->fscrypt_auth_len = 0;
+>> 1002                 inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
+>> 1003         }
+>> 1004 #endif
+>>
+>> The setattr will get a reply from MDS including the fscrypt auth info, I
+>> think the kclient just drop it here.
+> I've done some testing and I don't really see this code kfree'ing a valid
+> fscrypt_auth here.  However, I guess it is possible to fix this issue here
+> too, but in a different way, by changing that 'if' condition to:
+>
+> 	if (iinfo->fscrypt_auth_len &&
+> 	    ((inode->i_state & I_NEW) || (ci->fscrypt_auth_len == 0))) {
+> 	...
+> 	}
+>
+> I'm not really sure if this is sane though.  When we loose the 'Ax' caps
+> (another client as accessed the directory we're encrypting), we also seem
+> to loose the I_NEW state.  Using the above code seems to work for the
+> testcase in my patch, but I'm not sure it won't break something else.
 
-diff --git a/fs/nilfs2/page.c b/fs/nilfs2/page.c
-index d921542a9593..41ccd43cd979 100644
---- a/fs/nilfs2/page.c
-+++ b/fs/nilfs2/page.c
-@@ -358,22 +358,22 @@ void nilfs_copy_back_pages(struct address_space *dmap,
-  */
- void nilfs_clear_dirty_pages(struct address_space *mapping, bool silent)
- {
--	struct pagevec pvec;
-+	struct folio_batch fbatch;
- 	unsigned int i;
- 	pgoff_t index = 0;
- 
--	pagevec_init(&pvec);
-+	folio_batch_init(&fbatch);
- 
--	while (pagevec_lookup_tag(&pvec, mapping, &index,
--					PAGECACHE_TAG_DIRTY)) {
--		for (i = 0; i < pagevec_count(&pvec); i++) {
--			struct page *page = pvec.pages[i];
-+	while (filemap_get_folios_tag(mapping, &index, (pgoff_t)-1,
-+				PAGECACHE_TAG_DIRTY, &fbatch)) {
-+		for (i = 0; i < folio_batch_count(&fbatch); i++) {
-+			struct folio *folio = fbatch.folios[i];
- 
--			lock_page(page);
--			nilfs_clear_dirty_page(page, silent);
--			unlock_page(page);
-+			folio_lock(folio);
-+			nilfs_clear_dirty_page(&folio->page, silent);
-+			folio_unlock(folio);
- 		}
--		pagevec_release(&pvec);
-+		folio_batch_release(&fbatch);
- 		cond_resched();
- 	}
- }
--- 
-2.38.1
+It should be okay IMO.
+
+The I_NEW is for new created directories, such as for mkdir request,etc. 
+But currently the code didn't consider the setattr case.
+
+Please send you patch let's check and discuss there.
+
+Thanks!
+
+- Xiubo
+
+> Cheers,
+> --
+> Luís
+>
+>> If we fix it in handle_cap_grant() I am afraid this bug still exists. What
+>> if there is no any new caps will be issued or revoked recently and then
+>> access to the directory ?
+>>
+>> Thanks
+>>
+>> - Xiubo
+>>
 
