@@ -2,104 +2,100 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFED3C4332F
-	for <ceph-devel@archiver.kernel.org>; Tue,  8 Nov 2022 14:17:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7A52C43219
+	for <ceph-devel@archiver.kernel.org>; Tue,  8 Nov 2022 14:33:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235312AbiKHORH (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 8 Nov 2022 09:17:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55294 "EHLO
+        id S233916AbiKHOdp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 8 Nov 2022 09:33:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235403AbiKHORD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2022 09:17:03 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA739686B1;
-        Tue,  8 Nov 2022 06:17:02 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S233938AbiKHOdZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2022 09:33:25 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6D22CEB;
+        Tue,  8 Nov 2022 06:33:24 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 941A9B81ADB;
-        Tue,  8 Nov 2022 14:17:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D493AC433D6;
-        Tue,  8 Nov 2022 14:16:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1667917020;
-        bh=SkB5aLz1qjfg7V47DCksPUeqsYxcIM9XVs+tPQyecP4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=upUiGcqot+U553MthzNmGvuEi1FlvfUlbEtFYyvSOocWPWBtChFpAJE8GMSHoL/fJ
-         Q5Uv9udNJwoGxAoS54KqUuZwXUVVfU/pRL0tQg8zMpIDQ45eAC4j7dfjZ76Dv4OCdV
-         LML5vfuJMUuapNOSm38Bu1qDnVsAREtVoNMLWn2M=
-Date:   Tue, 8 Nov 2022 14:51:41 +0100
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     xiubli@redhat.com
-Cc:     ceph-devel@vger.kernel.org, idryomov@gmail.com, lhenriques@suse.de,
-        jlayton@kernel.org, mchangir@redhat.com, stable@vger.kernel.org
-Subject: Re: [PATCH v3] ceph: avoid putting the realm twice when decoding
- snaps fails
-Message-ID: <Y2pe7evnz0fw1FZh@kroah.com>
-References: <20221108134633.557928-1-xiubli@redhat.com>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 359631F8E3;
+        Tue,  8 Nov 2022 14:33:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1667918003; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=bsCWcDyBc5BTfKnK5tb7UxOWSDPa58fCHAcnTLeBXms=;
+        b=y+2nS0vKe7LmELq2vRSmSOEf/AMQtUENZ5rsieWBjEqNWWKUIZgnlhq6h2c3S0QX4n1Mfw
+        CAOSFDuMOKWYaHURp3/q1w1cBob1r5n1jNnhkazpheK4Pdiy1DPJr63XxU4cN3ZrHvYDZ+
+        KgciMrp9LQTL0cdyTC+1SRJMKiGuFiI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1667918003;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=bsCWcDyBc5BTfKnK5tb7UxOWSDPa58fCHAcnTLeBXms=;
+        b=jyLT7Vu1KKl0H4Nq4QzbhAEQEx/lhP1iUiYdPGzAfLNBQkoilo1/c8RYXDq5xs+w//XF/h
+        gNT7ffrXs8GE+gDw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id C53B313398;
+        Tue,  8 Nov 2022 14:33:22 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id bPopLbJoamPyMgAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 08 Nov 2022 14:33:22 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 59105061;
+        Tue, 8 Nov 2022 14:34:23 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
+        Jeff Layton <jlayton@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v2] ceph: fix memory leak in mount error path when using test_dummy_encryption
+Date:   Tue,  8 Nov 2022 14:34:21 +0000
+Message-Id: <20221108143421.30993-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221108134633.557928-1-xiubli@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Tue, Nov 08, 2022 at 09:46:33PM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
-> 
-> When decoding the snaps fails it maybe leaving the 'first_realm'
-> and 'realm' pointing to the same snaprealm memory. And then it'll
-> put it twice and could cause random use-after-free, BUG_ON, etc
-> issues.
-> 
-> Cc: stable@vger.kernel.org
-> URL: https://tracker.ceph.com/issues/57686
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  fs/ceph/snap.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-> index 9bceed2ebda3..f5b0fa1ff705 100644
-> --- a/fs/ceph/snap.c
-> +++ b/fs/ceph/snap.c
-> @@ -775,6 +775,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
->  
->  	dout("%s deletion=%d\n", __func__, deletion);
->  more:
-> +	realm = NULL;
->  	rebuild_snapcs = 0;
->  	ceph_decode_need(&p, e, sizeof(*ri), bad);
->  	ri = p;
-> -- 
-> 2.31.1
-> 
+Because ceph_init_fs_context() will never be invoced in case we get a
+mount error, destroy_mount_options() won't be releasing fscrypt resources
+with fscrypt_free_dummy_policy().  This will result in a memory leak.  Add
+an invocation to this function in the mount error path.
 
-Hi,
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+* Changes since v1:
 
-This is the friendly patch-bot of Greg Kroah-Hartman.  You have sent him
-a patch that has triggered this response.  He used to manually respond
-to these common problems, but in order to save his sanity (he kept
-writing the same thing over and over, yet to different people), I was
-created.  Hopefully you will not take offence and will fix the problem
-in your patch and resubmit it so that it can be accepted into the Linux
-kernel tree.
+As suggested by Xiubo, moved fscrypt free from ceph_get_tree() to
+ceph_real_mount().
 
-You are receiving this message because of the following common error(s)
-as indicated below:
+(Also used 'git format-patch' with '--base' so that the bots know what to
+(not) do with this patch.)
 
-- This looks like a new version of a previously submitted patch, but you
-  did not list below the --- line any changes from the previous version.
-  Please read the section entitled "The canonical patch format" in the
-  kernel file, Documentation/SubmittingPatches for what needs to be done
-  here to properly describe this.
+ fs/ceph/super.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-If you wish to discuss this problem further, or you have questions about
-how to resolve this issue, please feel free to respond to this email and
-Greg will reply once he has dug out from the pending patches received
-from other developers.
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 2224d44d21c0..f10a076f47e5 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1196,6 +1196,7 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc,
+ 
+ out:
+ 	mutex_unlock(&fsc->client->mount_mutex);
++	ceph_fscrypt_free_dummy_policy(fsc);
+ 	return ERR_PTR(err);
+ }
+ 
 
-thanks,
-
-greg k-h's patch email bot
+base-commit: 8b9ee21dfceadd4cc35a87bbe7f0ad547cffa1be
+prerequisite-patch-id: 34ba9e6b37b68668d261ddbda7858ee6f83c82fa
+prerequisite-patch-id: 87f1b323c29ab8d0a6d012d30fdc39bc49179624
+prerequisite-patch-id: c94f448ef026375b10748457a3aa46070aa7046e
