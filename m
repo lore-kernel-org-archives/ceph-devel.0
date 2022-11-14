@@ -2,145 +2,177 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED75DC433FE
-	for <ceph-devel@archiver.kernel.org>; Thu, 10 Nov 2022 18:52:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26557C4332F
+	for <ceph-devel@archiver.kernel.org>; Mon, 14 Nov 2022 05:20:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230098AbiKJSwF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 10 Nov 2022 13:52:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43370 "EHLO
+        id S234060AbiKNFU0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 14 Nov 2022 00:20:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229566AbiKJSwE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2022 13:52:04 -0500
-Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCDC818362;
-        Thu, 10 Nov 2022 10:52:02 -0800 (PST)
-Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-3775545dc24so23851037b3.7;
-        Thu, 10 Nov 2022 10:52:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ahiLR+0HYqx9Hj3q85kkyLXkS2RfP6cywR4r1/bj6Ic=;
-        b=BuLNNyZA6RGJSro1aFTVvKQfJXFXyp5VR6864NrwvkzbzqRoktCJVw6N/Doca5qBcu
-         30j7oqGhfYMC/2wwo+CnxYyRIcfIpMO1i3CANPIDzCZ/35eph3JNnXqbXZVpyVeE6nwC
-         2rgiZ/WGg8qdiA9Wx3EmD01ybzYII1H7SmMVjyiHJ0HXfk4CMj8BCtPoDkfwrzn3wjsG
-         tMQ34M0n3gr3bNTVHM2h6CnhVhIFHKJD1ZCvcWbyUbhDpvhP6XUbvTgwPEhVyNT1WYj4
-         2KOVt0eemsENinf1T7NLvlf2zR8Rak8qZXX3U/QTi6IKzLl/llUNyWZD4jBYY5o/Cbo9
-         gdkA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ahiLR+0HYqx9Hj3q85kkyLXkS2RfP6cywR4r1/bj6Ic=;
-        b=UbaJ7IxyJAo/gs3qMYuXXqhRI6APoHvxXj9tDDtMvMzDNkUPI7E3RMj3S8gyqGUnlk
-         pYVSMkY2wpsmQK0v7UvKmmcCHT0xifcg7n3fTSUHpA7EETOeNra+KdPBx4nGZkKo8WDA
-         fs8hoB1awRu8dmhofafzprtsyqcIXsw5LwpOgDRaVjHpDT4Pd0yADH9OePyCVzSDME1z
-         0Y71J5liAF9MtJYZtLZDailvOWBzBVQrYQ6lRpbDzDkrc7BiSU5QwHWVikLiUzFZdPvo
-         qhJj4EOfAHTX7t+G3dAAvpyFsOcIN9oD08mkCxFICJS6IEn9/DPd7H0FM2HMu38QtqnR
-         2QRA==
-X-Gm-Message-State: ACrzQf3R8a2w6DocMwqefmKPyt5Yw0LqSnmlds7dhJPs3kndKch3izf/
-        +murK67EoKV5Z/6OmmKtdVdXmOhazeYBkYTINOHWZCf2SzI=
-X-Google-Smtp-Source: AMsMyM6qbhoDq4EuNlT/sFztZuNh18/AZoQGojI1IWj/9MWKt4lI+zofGQOcHJnd2iNJiiAFP0Po3i1fYNOJTKFQ5/8=
-X-Received: by 2002:a81:63c6:0:b0:349:37f7:73dd with SMTP id
- x189-20020a8163c6000000b0034937f773ddmr62868232ywb.368.1668106321899; Thu, 10
- Nov 2022 10:52:01 -0800 (PST)
+        with ESMTP id S229689AbiKNFUY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2022 00:20:24 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D59912AD5
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Nov 2022 21:19:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1668403169;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=7TWhTxoz7ZCoWrDk02O5ObxSYgKtRZs5v5SIwfgUViA=;
+        b=OAYzP37MHVHKXm9LkcOHkf/Av7gQDGSBuU3DVld3VCYcOGaHqRF8aWP8bjE9kxsu5Jaqmd
+        GIzMTss6axVLIEX3ZpySZnxUgHYoba084oIfhpzxsIZbcGLeCnB5jWslTW0HwXUBx4EUYe
+        c68F+jSQj1yFCMlijYVE8LkVAiBj/yo=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-616-OU_lYuh-O6SoP8jkClJS1A-1; Mon, 14 Nov 2022 00:19:28 -0500
+X-MC-Unique: OU_lYuh-O6SoP8jkClJS1A-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 83B74806001;
+        Mon, 14 Nov 2022 05:19:27 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B2310200BA7B;
+        Mon, 14 Nov 2022 05:19:23 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     ceph-devel@vger.kernel.org, jlayton@kernel.org, idryomov@gmail.com,
+        viro@zeniv.linux.org.uk
+Cc:     lhenriques@suse.de, mchangir@redhat.com,
+        linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        Xiubo Li <xiubli@redhat.com>, stable@vger.kernel.org
+Subject: [PATCH 1/2 v2] ceph: add ceph_lock_info support for file_lock
+Date:   Mon, 14 Nov 2022 13:19:00 +0800
+Message-Id: <20221114051901.15371-2-xiubli@redhat.com>
+In-Reply-To: <20221114051901.15371-1-xiubli@redhat.com>
+References: <20221114051901.15371-1-xiubli@redhat.com>
 MIME-Version: 1.0
-References: <20221017202451.4951-1-vishal.moola@gmail.com> <20221017202451.4951-12-vishal.moola@gmail.com>
- <CAOzc2pwKoyy4i4zBKhvoKmN8cezUxjDhjYZnK9GLcJniQVPoGA@mail.gmail.com>
-In-Reply-To: <CAOzc2pwKoyy4i4zBKhvoKmN8cezUxjDhjYZnK9GLcJniQVPoGA@mail.gmail.com>
-From:   Vishal Moola <vishal.moola@gmail.com>
-Date:   Thu, 10 Nov 2022 10:51:50 -0800
-Message-ID: <CAOzc2pwuUZRK-qMFBhPEENUid-NBSfa9YyJ_FCcFHgwFf4mOuQ@mail.gmail.com>
-Subject: Re: [PATCH v3 11/23] f2fs: Convert f2fs_fsync_node_pages() to use filemap_get_folios_tag()
-To:     linux-fsdevel@vger.kernel.org
-Cc:     linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
-        linux-nilfs@vger.kernel.org, linux-mm@kvack.org,
-        jaegeuk@kernel.org, chao@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.4
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Mon, Oct 24, 2022 at 12:31 PM Vishal Moola <vishal.moola@gmail.com> wrote:
->
-> On Mon, Oct 17, 2022 at 1:25 PM Vishal Moola (Oracle)
-> <vishal.moola@gmail.com> wrote:
-> >
-> > Convert function to use a folio_batch instead of pagevec. This is in
-> > preparation for the removal of find_get_pages_range_tag().
-> >
-> > Signed-off-by: Vishal Moola (Oracle) <vishal.moola@gmail.com>
-> > ---
-> >  fs/f2fs/node.c | 19 ++++++++++---------
-> >  1 file changed, 10 insertions(+), 9 deletions(-)
-> >
-> > diff --git a/fs/f2fs/node.c b/fs/f2fs/node.c
-> > index 983572f23896..e8b72336c096 100644
-> > --- a/fs/f2fs/node.c
-> > +++ b/fs/f2fs/node.c
-> > @@ -1728,12 +1728,12 @@ int f2fs_fsync_node_pages(struct f2fs_sb_info *sbi, struct inode *inode,
-> >                         unsigned int *seq_id)
-> >  {
-> >         pgoff_t index;
-> > -       struct pagevec pvec;
-> > +       struct folio_batch fbatch;
-> >         int ret = 0;
-> >         struct page *last_page = NULL;
-> >         bool marked = false;
-> >         nid_t ino = inode->i_ino;
-> > -       int nr_pages;
-> > +       int nr_folios;
-> >         int nwritten = 0;
-> >
-> >         if (atomic) {
-> > @@ -1742,20 +1742,21 @@ int f2fs_fsync_node_pages(struct f2fs_sb_info *sbi, struct inode *inode,
-> >                         return PTR_ERR_OR_ZERO(last_page);
-> >         }
-> >  retry:
-> > -       pagevec_init(&pvec);
-> > +       folio_batch_init(&fbatch);
-> >         index = 0;
-> >
-> > -       while ((nr_pages = pagevec_lookup_tag(&pvec, NODE_MAPPING(sbi), &index,
-> > -                               PAGECACHE_TAG_DIRTY))) {
-> > +       while ((nr_folios = filemap_get_folios_tag(NODE_MAPPING(sbi), &index,
-> > +                                       (pgoff_t)-1, PAGECACHE_TAG_DIRTY,
-> > +                                       &fbatch))) {
-> >                 int i;
-> >
-> > -               for (i = 0; i < nr_pages; i++) {
-> > -                       struct page *page = pvec.pages[i];
-> > +               for (i = 0; i < nr_folios; i++) {
-> > +                       struct page *page = &fbatch.folios[i]->page;
-> >                         bool submitted = false;
-> >
-> >                         if (unlikely(f2fs_cp_error(sbi))) {
-> >                                 f2fs_put_page(last_page, 0);
-> > -                               pagevec_release(&pvec);
-> > +                               folio_batch_release(&fbatch);
-> >                                 ret = -EIO;
-> >                                 goto out;
-> >                         }
-> > @@ -1821,7 +1822,7 @@ int f2fs_fsync_node_pages(struct f2fs_sb_info *sbi, struct inode *inode,
-> >                                 break;
-> >                         }
-> >                 }
-> > -               pagevec_release(&pvec);
-> > +               folio_batch_release(&fbatch);
-> >                 cond_resched();
-> >
-> >                 if (ret || marked)
-> > --
-> > 2.36.1
-> >
->
-> Following up on these f2fs patches (11/23, 12/23, 13/23, 14/23, 15/23,
-> 16/23). Does anyone have time to review them this week?
+From: Xiubo Li <xiubli@redhat.com>
 
-Chao, thank you for taking a look at some of these patches!
-If you have time to look over the remaining patches (14, 15, 16)
-feedback on those would be appreciated as well.
+When ceph releasing the file_lock it will try to get the inode pointer
+from the fl->fl_file, which the memory could already be released by
+another thread in filp_close(). Because in VFS layer the fl->fl_file
+doesn't increase the file's reference counter.
+
+Will switch to use ceph dedicate lock info to track the inode.
+
+And in ceph_fl_release_lock() we should skip all the operations if
+the fl->fl_u.ceph_fl.fl_inode is not set, which should come from
+the request file_lock. And we will set fl->fl_u.ceph_fl.fl_inode when
+inserting it to the inode lock list, which is when copying the lock.
+
+Cc: stable@vger.kernel.org
+URL: https://tracker.ceph.com/issues/57986
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/locks.c                 | 18 +++++++++++++++---
+ include/linux/ceph/ceph_fs_fl.h | 26 ++++++++++++++++++++++++++
+ include/linux/fs.h              |  2 ++
+ 3 files changed, 43 insertions(+), 3 deletions(-)
+ create mode 100644 include/linux/ceph/ceph_fs_fl.h
+
+diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+index 3e2843e86e27..d8385dd0076e 100644
+--- a/fs/ceph/locks.c
++++ b/fs/ceph/locks.c
+@@ -34,22 +34,34 @@ static void ceph_fl_copy_lock(struct file_lock *dst, struct file_lock *src)
+ {
+ 	struct ceph_file_info *fi = dst->fl_file->private_data;
+ 	struct inode *inode = file_inode(dst->fl_file);
++
+ 	atomic_inc(&ceph_inode(inode)->i_filelock_ref);
+ 	atomic_inc(&fi->num_locks);
++	dst->fl_u.ceph_fl.fl_inode = igrab(inode);
+ }
+ 
+ static void ceph_fl_release_lock(struct file_lock *fl)
+ {
+ 	struct ceph_file_info *fi = fl->fl_file->private_data;
+-	struct inode *inode = file_inode(fl->fl_file);
+-	struct ceph_inode_info *ci = ceph_inode(inode);
+-	atomic_dec(&fi->num_locks);
++	struct inode *inode = fl->fl_u.ceph_fl.fl_inode;
++	struct ceph_inode_info *ci;
++
++	/*
++	 * If inode is NULL it should be a request file_lock,
++	 * nothing we can do.
++	 */
++	if (!inode)
++		return;
++
++	ci = ceph_inode(inode);
+ 	if (atomic_dec_and_test(&ci->i_filelock_ref)) {
+ 		/* clear error when all locks are released */
+ 		spin_lock(&ci->i_ceph_lock);
+ 		ci->i_ceph_flags &= ~CEPH_I_ERROR_FILELOCK;
+ 		spin_unlock(&ci->i_ceph_lock);
+ 	}
++	iput(inode);
++	atomic_dec(&fi->num_locks);
+ }
+ 
+ static const struct file_lock_operations ceph_fl_lock_ops = {
+diff --git a/include/linux/ceph/ceph_fs_fl.h b/include/linux/ceph/ceph_fs_fl.h
+new file mode 100644
+index 000000000000..02a412b26095
+--- /dev/null
++++ b/include/linux/ceph/ceph_fs_fl.h
+@@ -0,0 +1,26 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * ceph_fs.h - Ceph constants and data types to share between kernel and
++ * user space.
++ *
++ * Most types in this file are defined as little-endian, and are
++ * primarily intended to describe data structures that pass over the
++ * wire or that are stored on disk.
++ *
++ * LGPL2
++ */
++
++#ifndef CEPH_FS_FL_H
++#define CEPH_FS_FL_H
++
++#include <linux/fs.h>
++
++/*
++ * Ceph lock info
++ */
++
++struct ceph_lock_info {
++	struct inode *fl_inode;
++};
++
++#endif
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index e654435f1651..db4810d19e26 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -1066,6 +1066,7 @@ bool opens_in_grace(struct net *);
+ 
+ /* that will die - we need it for nfs_lock_info */
+ #include <linux/nfs_fs_i.h>
++#include <linux/ceph/ceph_fs_fl.h>
+ 
+ /*
+  * struct file_lock represents a generic "file lock". It's used to represent
+@@ -1119,6 +1120,7 @@ struct file_lock {
+ 			int state;		/* state of grant or error if -ve */
+ 			unsigned int	debug_id;
+ 		} afs;
++		struct ceph_lock_info	ceph_fl;
+ 	} fl_u;
+ } __randomize_layout;
+ 
+-- 
+2.31.1
+
