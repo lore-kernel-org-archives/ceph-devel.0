@@ -2,150 +2,190 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E6D4C433FE
-	for <ceph-devel@archiver.kernel.org>; Wed, 16 Nov 2022 13:28:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92270C4321E
+	for <ceph-devel@archiver.kernel.org>; Wed, 16 Nov 2022 15:17:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232986AbiKPN22 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 16 Nov 2022 08:28:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43140 "EHLO
+        id S233561AbiKPPRe (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 16 Nov 2022 10:17:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238678AbiKPN1q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Nov 2022 08:27:46 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B15CDAD
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Nov 2022 05:26:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1668605209;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Crhfvdh/6hwfHAYMQFKTfoyNarKH4ZK6jMrps7b+KPM=;
-        b=Av66lq/ovsGBTDLwCs/KhFbXI4zmdV3/pqBt5eDbGgzXV4m8solKmaBUBXotu9Ckfwzz0b
-        UpP3HRpER3RbNnP2V8wglFMsjFEFCTtGxTzmOgpiv6vfeurrcebt05HYvr2+vhgYHkDLFa
-        9UXPcINiXEuCS96JPFf5phFEZh9zn2k=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-639-I9hRQQKNPyi0YyfpPl4g2w-1; Wed, 16 Nov 2022 08:26:48 -0500
-X-MC-Unique: I9hRQQKNPyi0YyfpPl4g2w-1
-Received: by mail-pl1-f199.google.com with SMTP id n12-20020a170902e54c00b00188515e81a6so13960188plf.23
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Nov 2022 05:26:48 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-language:content-transfer-encoding:in-reply-to:mime-version
-         :user-agent:date:message-id:from:references:cc:to:subject
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Crhfvdh/6hwfHAYMQFKTfoyNarKH4ZK6jMrps7b+KPM=;
-        b=Yg9H/mFhu2HEN3Bs8EG2IADv4MQRgeOS/JqAHaZVwbORSMDIub/oeRvA7AX1uyLE+p
-         L35mtNuKH2VjHHzXbeDDTlHRbBSO8C0ylokUuFynanSjQOqBLIOovzZdyWQYDMbOz4xl
-         Kx1hDVhou/KagaqfzHsj+LXmu7IAHB9nBoVOHrwR7T7lDiZOKEhB8xi+/nCWgPvUkmJx
-         gPgE7Vjh5yF0nUxwEgZO5gFkUTeG0c9XM4N0q4mOkRR+xnOB5c74NrPM2FCj5xb02gO2
-         y9O17jGjlXxduR/YJglCYduqIxIA7gz+XJAufq2XTAraAOx4LG4hyRvlcFQf16u+vOi0
-         lAGQ==
-X-Gm-Message-State: ANoB5plsOCtzfqwq89GgyRifgH3RfAK0QFncbv6ZX4QCNGOL4oEH/9jT
-        //NSOrw73NfjZD2z9W9ZERXFjp6OCWLZZ+5LE8BM5PCAF32rphoPHErBHUswfHO87VUd9CGFAbv
-        jW5oDZSBoZTZJlVW4PKKtdQ==
-X-Received: by 2002:a17:90a:df03:b0:213:1a9f:8d77 with SMTP id gp3-20020a17090adf0300b002131a9f8d77mr3669597pjb.102.1668605207232;
-        Wed, 16 Nov 2022 05:26:47 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf7QXEEGdnuKOERdbmDwc3Y5g2vioSr+xkjZ0IMpKUe3ir/xKyLgTu3dg5u0UrvgmK0rkh171w==
-X-Received: by 2002:a17:90a:df03:b0:213:1a9f:8d77 with SMTP id gp3-20020a17090adf0300b002131a9f8d77mr3669582pjb.102.1668605206964;
-        Wed, 16 Nov 2022 05:26:46 -0800 (PST)
-Received: from [10.72.12.148] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id p188-20020a6342c5000000b0047685ed724dsm5753795pga.40.2022.11.16.05.26.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 16 Nov 2022 05:26:46 -0800 (PST)
-Subject: Re: [PATCH] filelock: new helper: vfs_inode_has_locks
-To:     Jeff Layton <jlayton@kernel.org>, linux-fsdevel@vger.kernel.org
-Cc:     ceph-devel@vger.kernel.org, chuck.lever@oracle.com,
-        Christoph Hellwig <hch@infradead.org>
-References: <20221116112658.8793-1-jlayton@kernel.org>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <141e657d-4182-f945-4827-a931e3b0e769@redhat.com>
-Date:   Wed, 16 Nov 2022 21:26:42 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S233424AbiKPPRc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Nov 2022 10:17:32 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F4704FF8B;
+        Wed, 16 Nov 2022 07:17:31 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id F2CE261E83;
+        Wed, 16 Nov 2022 15:17:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9CA1EC433D7;
+        Wed, 16 Nov 2022 15:17:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1668611850;
+        bh=p23e5m8DB+OKwKhVmD1O6yeNHkOhWzyyqsVD65vSeBI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=p0HQqOExoOnjBN1V8PkV04km2Y9lGdedL8CkqrITCb/VFyvbRXCXPbPhoxgJqh/G1
+         /48k+c/B41BxHsbc4m9N98fSkWBzEu9Eq3LDsmEyZOREfTw1PHLV6VuV2r9YoLQvxH
+         /QHAjsu/I0r/PCrF0Z5WnvjbZtlf5WPathtxXailBPUEOIiOZS1M3ehgVpZr79WoF7
+         +ZN39A23hWVkcul/OO2mOh6ghaIAniyZ0gwUjj8QsQmyD46cLMsB9C1HhKOIjMWYat
+         biLuw5WRkfVzZBGk3FsVhTUwsAGSKtKCofKdO9VEMRnrteEcSLi5xnsINyUaymcWr3
+         SiL554x2Bg59A==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     linux-fsdevel@vger.kernel.org
+Cc:     linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-cifs@vger.kernel.org, chuck.lever@oracle.com,
+        viro@zeniv.linux.org.uk, hch@lst.de
+Subject: [PATCH 1/7] filelock: add a new locks_inode_context accessor function
+Date:   Wed, 16 Nov 2022 10:17:20 -0500
+Message-Id: <20221116151726.129217-2-jlayton@kernel.org>
+X-Mailer: git-send-email 2.38.1
+In-Reply-To: <20221116151726.129217-1-jlayton@kernel.org>
+References: <20221116151726.129217-1-jlayton@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20221116112658.8793-1-jlayton@kernel.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+There are a number of places in the kernel that are accessing the
+inode->i_flctx field without smp_load_acquire. This is required to
+ensure that the caller doesn't see a partially-initialized structure.
 
-On 16/11/2022 19:26, Jeff Layton wrote:
-> Ceph has a need to know whether a particular inode has any locks set on
-> it. It's currently tracking that by a num_locks field in its
-> filp->private_data, but that's problematic as it tries to decrement this
-> field when releasing locks and that can race with the file being torn
-> down.
->
-> Add a new vfs_inode_has_locks helper that just returns whether any locks
-> are currently held on the inode.
->
-> Cc: Xiubo Li <xiubli@redhat.com>
-> Reviewed-by: Christoph Hellwig <hch@infradead.org>
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->   fs/locks.c         | 23 +++++++++++++++++++++++
->   include/linux/fs.h |  1 +
->   2 files changed, 24 insertions(+)
->
-> diff --git a/fs/locks.c b/fs/locks.c
-> index 5876c8ff0edc..9ccf89b6c95d 100644
-> --- a/fs/locks.c
-> +++ b/fs/locks.c
-> @@ -2672,6 +2672,29 @@ int vfs_cancel_lock(struct file *filp, struct file_lock *fl)
->   }
->   EXPORT_SYMBOL_GPL(vfs_cancel_lock);
->   
-> +/**
-> + * vfs_inode_has_locks - are any file locks held on @inode?
-> + * @inode: inode to check for locks
-> + *
-> + * Return true if there are any FL_POSIX or FL_FLOCK locks currently
-> + * set on @inode.
-> + */
-> +bool vfs_inode_has_locks(struct inode *inode)
-> +{
-> +	struct file_lock_context *ctx;
-> +	bool ret;
-> +
-> +	ctx = smp_load_acquire(&inode->i_flctx);
-> +	if (!ctx)
-> +		return false;
-> +
-> +	spin_lock(&ctx->flc_lock);
-> +	ret = !list_empty(&ctx->flc_posix) || !list_empty(&ctx->flc_flock);
-> +	spin_unlock(&ctx->flc_lock);
-> +	return ret;
-> +}
-> +EXPORT_SYMBOL_GPL(vfs_inode_has_locks);
-> +
->   #ifdef CONFIG_PROC_FS
->   #include <linux/proc_fs.h>
->   #include <linux/seq_file.h>
-> diff --git a/include/linux/fs.h b/include/linux/fs.h
-> index e654435f1651..d6cb42b7e91c 100644
-> --- a/include/linux/fs.h
-> +++ b/include/linux/fs.h
-> @@ -1170,6 +1170,7 @@ extern int locks_delete_block(struct file_lock *);
->   extern int vfs_test_lock(struct file *, struct file_lock *);
->   extern int vfs_lock_file(struct file *, unsigned int, struct file_lock *, struct file_lock *);
->   extern int vfs_cancel_lock(struct file *filp, struct file_lock *fl);
-> +bool vfs_inode_has_locks(struct inode *inode);
->   extern int locks_lock_inode_wait(struct inode *inode, struct file_lock *fl);
->   extern int __break_lease(struct inode *inode, unsigned int flags, unsigned int type);
->   extern void lease_get_mtime(struct inode *, struct timespec64 *time);
+Add a new accessor function for it to make this clear.
 
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ fs/locks.c         | 20 ++++++++++----------
+ include/linux/fs.h | 14 ++++++++++++++
+ 2 files changed, 24 insertions(+), 10 deletions(-)
 
-I will send the V3 patch series to fix the ceph's filelock bug basing on 
-this.
-
-Thanks Jeff.
-
-- Xiubo
+diff --git a/fs/locks.c b/fs/locks.c
+index 9ccf89b6c95d..07436328dd0a 100644
+--- a/fs/locks.c
++++ b/fs/locks.c
+@@ -175,7 +175,7 @@ locks_get_lock_context(struct inode *inode, int type)
+ 	struct file_lock_context *ctx;
+ 
+ 	/* paired with cmpxchg() below */
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (likely(ctx) || type == F_UNLCK)
+ 		goto out;
+ 
+@@ -194,7 +194,7 @@ locks_get_lock_context(struct inode *inode, int type)
+ 	 */
+ 	if (cmpxchg(&inode->i_flctx, NULL, ctx)) {
+ 		kmem_cache_free(flctx_cache, ctx);
+-		ctx = smp_load_acquire(&inode->i_flctx);
++		ctx = locks_inode_context(inode);
+ 	}
+ out:
+ 	trace_locks_get_lock_context(inode, type, ctx);
+@@ -891,7 +891,7 @@ posix_test_lock(struct file *filp, struct file_lock *fl)
+ 	void *owner;
+ 	void (*func)(void);
+ 
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (!ctx || list_empty_careful(&ctx->flc_posix)) {
+ 		fl->fl_type = F_UNLCK;
+ 		return;
+@@ -1483,7 +1483,7 @@ int __break_lease(struct inode *inode, unsigned int mode, unsigned int type)
+ 	new_fl->fl_flags = type;
+ 
+ 	/* typically we will check that ctx is non-NULL before calling */
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (!ctx) {
+ 		WARN_ON_ONCE(1);
+ 		goto free_lock;
+@@ -1588,7 +1588,7 @@ void lease_get_mtime(struct inode *inode, struct timespec64 *time)
+ 	struct file_lock_context *ctx;
+ 	struct file_lock *fl;
+ 
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (ctx && !list_empty_careful(&ctx->flc_lease)) {
+ 		spin_lock(&ctx->flc_lock);
+ 		fl = list_first_entry_or_null(&ctx->flc_lease,
+@@ -1634,7 +1634,7 @@ int fcntl_getlease(struct file *filp)
+ 	int type = F_UNLCK;
+ 	LIST_HEAD(dispose);
+ 
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (ctx && !list_empty_careful(&ctx->flc_lease)) {
+ 		percpu_down_read(&file_rwsem);
+ 		spin_lock(&ctx->flc_lock);
+@@ -1823,7 +1823,7 @@ static int generic_delete_lease(struct file *filp, void *owner)
+ 	struct file_lock_context *ctx;
+ 	LIST_HEAD(dispose);
+ 
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (!ctx) {
+ 		trace_generic_delete_lease(inode, NULL);
+ 		return error;
+@@ -2563,7 +2563,7 @@ void locks_remove_posix(struct file *filp, fl_owner_t owner)
+ 	 * posix_lock_file().  Another process could be setting a lock on this
+ 	 * file at the same time, but we wouldn't remove that lock anyway.
+ 	 */
+-	ctx =  smp_load_acquire(&inode->i_flctx);
++	ctx =  locks_inode_context(inode);
+ 	if (!ctx || list_empty(&ctx->flc_posix))
+ 		return;
+ 
+@@ -2684,7 +2684,7 @@ bool vfs_inode_has_locks(struct inode *inode)
+ 	struct file_lock_context *ctx;
+ 	bool ret;
+ 
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (!ctx)
+ 		return false;
+ 
+@@ -2865,7 +2865,7 @@ void show_fd_locks(struct seq_file *f,
+ 	struct file_lock_context *ctx;
+ 	int id = 0;
+ 
+-	ctx = smp_load_acquire(&inode->i_flctx);
++	ctx = locks_inode_context(inode);
+ 	if (!ctx)
+ 		return;
+ 
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index d6cb42b7e91c..092673178e13 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -1187,6 +1187,13 @@ extern void show_fd_locks(struct seq_file *f,
+ 			 struct file *filp, struct files_struct *files);
+ extern bool locks_owner_has_blockers(struct file_lock_context *flctx,
+ 			fl_owner_t owner);
++
++static inline struct file_lock_context *
++locks_inode_context(const struct inode *inode)
++{
++	return smp_load_acquire(&inode->i_flctx);
++}
++
+ #else /* !CONFIG_FILE_LOCKING */
+ static inline int fcntl_getlk(struct file *file, unsigned int cmd,
+ 			      struct flock __user *user)
+@@ -1327,6 +1334,13 @@ static inline bool locks_owner_has_blockers(struct file_lock_context *flctx,
+ {
+ 	return false;
+ }
++
++static inline struct file_lock_context *
++locks_inode_context(const struct inode *inode)
++{
++	return NULL;
++}
++
+ #endif /* !CONFIG_FILE_LOCKING */
+ 
+ static inline struct inode *file_inode(const struct file *f)
+-- 
+2.38.1
 
