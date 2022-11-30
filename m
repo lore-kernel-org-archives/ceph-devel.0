@@ -2,158 +2,99 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1A47C4332F
-	for <ceph-devel@archiver.kernel.org>; Fri,  2 Dec 2022 07:05:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AE3FC433FE
+	for <ceph-devel@archiver.kernel.org>; Wed, 30 Nov 2022 07:00:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231897AbiLBHFy (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 2 Dec 2022 02:05:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52542 "EHLO
+        id S233235AbiK3HAB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 30 Nov 2022 02:00:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33026 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230094AbiLBHFy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2022 02:05:54 -0500
+        with ESMTP id S229648AbiK3HAA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2022 02:00:00 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5871841987
-        for <ceph-devel@vger.kernel.org>; Thu,  1 Dec 2022 23:05:07 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A715D45EDA
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Nov 2022 22:59:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1669964706;
+        s=mimecast20190719; t=1669791542;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=ywjUkxDk68xBaDXV19jmqPCrfdHbQq1/CxC+D56LHc0=;
-        b=do9eLfPtiFuvxOsGmI+Rg94q4b7Kk/N+iqfoM9W2mhE5ffClAN0CbvnGu1fqc477nDBTx6
-        HPmAaQJDBAs/u/rEbplVh987NFr5YQv9hJTsXPXXNOB3TpxhClWwUHZfopowP+WKVkRHWj
-        bRTLWEdZQVzRQGrixd5ye6YRaQlpmtc=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=n+lvfxRF/QBwjY5l736R42OTu9NqWHaCKr92yPIrz+k=;
+        b=KZc4OHVrKD5Xg2mTNDgnR0R6q89IPYBYqKNTQPi2iy2MMHuoyluVV6OUaabxixg1NFH3rS
+        YGpEXm3i9iCuUu8SS/KvtcwwYySdld6BC6/NiSaYXs9IMPn6DKmwG5qSM758lIX+lYvhS6
+        PSNmSA5ypY6kSTLNAFXNT7yGByPWt8I=
+Received: from mail-io1-f69.google.com (mail-io1-f69.google.com
+ [209.85.166.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-108-jVZJEXy_MqyJnq4GpQiwTA-1; Fri, 02 Dec 2022 02:05:04 -0500
-X-MC-Unique: jVZJEXy_MqyJnq4GpQiwTA-1
-Received: by mail-pf1-f198.google.com with SMTP id g13-20020a056a000b8d00b0056e28b15757so4282315pfj.1
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Dec 2022 23:05:04 -0800 (PST)
+ us-mta-530-K9JiE_EwPHmflwVHrKia1w-1; Wed, 30 Nov 2022 01:59:01 -0500
+X-MC-Unique: K9JiE_EwPHmflwVHrKia1w-1
+Received: by mail-io1-f69.google.com with SMTP id x5-20020a6bda05000000b006db3112c1deso10424736iob.0
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Nov 2022 22:59:01 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-language:content-transfer-encoding:in-reply-to:mime-version
-         :user-agent:date:message-id:from:references:cc:to:subject
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ywjUkxDk68xBaDXV19jmqPCrfdHbQq1/CxC+D56LHc0=;
-        b=0UEXUzbelLXaJLIzp1Dexkpeoe6cjqQxVvnN3ushfdp/pNHqBMyhqaYXAC4df17dq0
-         1Wg/NQGCpLMqo55oDbSQ+8YRYA2cUQ+cncr+lXVw6yuTtQzrTUFCDNisghhD3T1cgmJ+
-         l6KY9sbkBNxVWykagM4MJGWAohsM5M6nxK1bW0rv22UzCHdvtEO4OoRiKwPFUeWKe+Ot
-         8AKZdxzzP2Ms/WmRJF1br/7rslq0HiMRiBGoMe6s2fjXawSj8Q/wS3otIYkXan8wnQs4
-         4pfggVnwoPoeE3xzCV8Qz3u+ncYKtk6b9eHVCYfecoOVKvZbqVmiSpyjxcw5NtEtittc
-         koNA==
-X-Gm-Message-State: ANoB5pnRPREY7EtVNhT7cugIc7z6wNux2wIIH7uqONSm2RzxPV13iIvv
-        ngtZyoBZ1pxvElEYZzi5Tmn7Jw4NUA0aQoav4CrYqFq04LGKcmoec7S0hzJW6cqSvRxECtNrWAw
-        1eETKS+Q1Th3YSKKV6KQ1GA==
-X-Received: by 2002:aa7:988b:0:b0:574:c00f:7df4 with SMTP id r11-20020aa7988b000000b00574c00f7df4mr34335302pfl.49.1669964703757;
-        Thu, 01 Dec 2022 23:05:03 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf6+uOPbsV0aKVJWVBn/VPtaF7qkmBZAZgVT8Fwp1K6n4GRw4u+9BljLZ+yDyj8wuyl3DTDEPQ==
-X-Received: by 2002:aa7:988b:0:b0:574:c00f:7df4 with SMTP id r11-20020aa7988b000000b00574c00f7df4mr34335288pfl.49.1669964703486;
-        Thu, 01 Dec 2022 23:05:03 -0800 (PST)
-Received: from [10.72.12.244] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a14-20020a170902ecce00b00186b1bfbe79sm4832643plh.66.2022.12.01.23.05.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 01 Dec 2022 23:05:03 -0800 (PST)
-Subject: Re: [PATCH] ceph: make sure all the files successfully put before
- unmounting
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        khiremat@redhat.com, linux-fscrypt@vger.kernel.org
-References: <20221201065800.18149-1-xiubli@redhat.com>
- <Y4j+Ccqzi6JxWchv@sol.localdomain> <Y4kYN8FPeq6NDe5i@gmail.com>
- <b30e579d-6919-d35b-aaa5-b71129a32810@redhat.com>
- <Y4l8vDmKIpypc8I3@sol.localdomain>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <c0925b4f-ef5f-31fc-1bd0-05fa097b6b34@redhat.com>
-Date:   Fri, 2 Dec 2022 15:04:58 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        bh=n+lvfxRF/QBwjY5l736R42OTu9NqWHaCKr92yPIrz+k=;
+        b=lf3BWbIqPYn7WIZBwNiXzRlWWgOgO+Df2DJE0o0KtONsUsmkmBd1KYLAppGgrPQVvD
+         ln636LjUliDoSbUFKqg4tHewAkhLz+U4vPdNtd4enkLRdWKdrzcuHK42m3iXSRMB2PkD
+         PEvVYe1JMoScJwkuVfR4V1R9gOFhHJIhIM8NbMk8pmH7bPOv6a4QPskRsK1j4W5x7rxF
+         pvasOLICCFKORPfFdXpCP2N5lIPjEKnmQKGMdxTW4RqdSWr/WFsCnpqkL9URy/s9dGV0
+         W5tpulxKtYelLZfFw1kI0R1F3ao30p5hgCfqTEyX/QECuLM6j3fHKkN5k8VZ2eE8hFMp
+         vk0w==
+X-Gm-Message-State: ANoB5pllWg0aQkV+Pk85gQBvIxR14HVox9HWVUdUxIleDmfIkYeapuJF
+        TjMPsDyrgDR75M3BCwD5gSWODRb4y7ADG9XVoaj8jVG25kMBZgjh1Yvg6FAglq4HWvjUm8MVM9E
+        4OT8/ygczuHulk6+SvBGAZmEOmHA5s4UqYObpOw==
+X-Received: by 2002:a05:6602:2105:b0:6d8:de69:14b4 with SMTP id x5-20020a056602210500b006d8de6914b4mr28838147iox.140.1669791540293;
+        Tue, 29 Nov 2022 22:59:00 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf593pfofgA5+r571Qta9MdwlFrrhy8GN3B+TJ4RukBkv0xNPMKzN6MuYTqRDZJ+5lpztaEqye+Vn2Az4IUiTGU=
+X-Received: by 2002:a05:6602:2105:b0:6d8:de69:14b4 with SMTP id
+ x5-20020a056602210500b006d8de6914b4mr28838140iox.140.1669791539905; Tue, 29
+ Nov 2022 22:58:59 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <Y4l8vDmKIpypc8I3@sol.localdomain>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+References: <CAMym5wv3pxf09OMOFn8ZcCJL=gi0dstaeTTLCngghVvqb7-zPw@mail.gmail.com>
+In-Reply-To: <CAMym5wv3pxf09OMOFn8ZcCJL=gi0dstaeTTLCngghVvqb7-zPw@mail.gmail.com>
+From:   Gregory Farnum <gfarnum@redhat.com>
+Date:   Tue, 29 Nov 2022 22:58:52 -0800
+Message-ID: <CAJ4mKGZ-ACGJXW+sQRD+1uphco0a-EY3eHN3EJgis=qswMNc3Q@mail.gmail.com>
+Subject: Re: Does the official QA process use HDD for OSD?
+To:     Satoru Takeuchi <satoru.takeuchi@gmail.com>, dev <dev@ceph.io>,
+        Yuri Weinstein <yweinste@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+[ Moving to Ceph dev list instead of kernel ceph-devel. ]
 
-On 02/12/2022 12:19, Eric Biggers wrote:
-> On Fri, Dec 02, 2022 at 09:49:49AM +0800, Xiubo Li wrote:
->> On 02/12/2022 05:10, Eric Biggers wrote:
->>> On Thu, Dec 01, 2022 at 11:18:33AM -0800, Eric Biggers wrote:
->>>> On Thu, Dec 01, 2022 at 02:58:00PM +0800, xiubli@redhat.com wrote:
->>>>> From: Xiubo Li <xiubli@redhat.com>
->>>>>
->>>>> When close a file it will be deferred to call the fput(), which
->>>>> will hold the inode's i_count. And when unmounting the mountpoint
->>>>> the evict_inodes() may skip evicting some inodes.
->>>>>
->>>>> If encrypt is enabled the kernel generate a warning when removing
->>>>> the encrypt keys when the skipped inodes still hold the keyring:
->>>> This does not make sense.  Unmounting is only possible once all the files on the
->>>> filesystem have been closed.
->>>>
->>> Specifically, __fput() puts the reference to the dentry (and thus the inode)
->>> *before* it puts the reference to the mount.  And an unmount cannot be done
->>> while the mount still has references.  So there should not be any issue here.
->> Eric,
->>
->> When I unmounting I can see the following logs, which I added a debug log in
->> the evcit_inodes():
->>
->> diff --git a/fs/inode.c b/fs/inode.c
->> index b608528efd3a..f6e69b778d9c 100644
->> --- a/fs/inode.c
->> +++ b/fs/inode.c
->> @@ -716,8 +716,11 @@ void evict_inodes(struct super_block *sb)
->>   again:
->>          spin_lock(&sb->s_inode_list_lock);
->>          list_for_each_entry_safe(inode, next, &sb->s_inodes, i_sb_list) {
->> -               if (atomic_read(&inode->i_count))
->> +               if (atomic_read(&inode->i_count)) {
->> +                       printk("evict_inodes inode %p, i_count = %d, was
->> skipped!\n",
->> +                              inode, atomic_read(&inode->i_count));
->>                          continue;
->> +               }
->>
->>                  spin_lock(&inode->i_lock);
->>                  if (inode->i_state & (I_NEW | I_FREEING | I_WILL_FREE)) {
->>
->> The logs:
->>
->> <4>[   95.977395] evict_inodes inode 00000000f90aab7b, i_count = 1, was
->> skipped!
->>
->> Any reason could cause this ? Since the inode couldn't be evicted in time
->> and then when removing the master keys it will print this warning.
->>
-> It is expected for evict_inodes() to see some inodes with nonzero refcount, but
-> they should only be filesystem internal inodes.  For example, with ext4 this
-> happens with the journal inode.
+On Mon, Nov 28, 2022 at 6:51 PM Satoru Takeuchi
+<satoru.takeuchi@gmail.com> wrote:
 >
-> However, filesystem internal inodes cannot be encrypted, so they are irrelevant
-> here.
+> Hi,
 >
-> I'd guess that CephFS has a bug where it is leaking a reference to a user inode
-> somewhere.
-
-I also added some debug logs to tracker all the inodes in ceph, and all 
-the requests has been finished.
-
-I will debug it more to see whether it's leaking a reference here.
-
-Thanks Eric.
-
-- Xiubo
-
-
-> (Based on the code, it might also be possible for evict_inodes() to also see
-> nonzero refcount inodes due to fsnotify.  However, fsnotify_sb_delete() runs
-> before fscrypt_destroy_keyring(), so likewise it seems irrelevant here.)
+> I shared my knowledge about the bugs which my team encountered and two
+> proposals to improve the official QA process in Ceph Virtual.
 >
-> - Eric
+> https://www.youtube.com/watch?v=ENvDbgX4n38
+> https://speakerdeck.com/sat/revealing-bluestore-corruption-bugs-in-containerized-ceph-clusters
+>
+> One of my proposals depends on the assumption that the official QA
+> doesn't use HDD.
+> It's because my team revealed many bugs in OSD creation/restart only
+> in HDD-based clusters.
+> Could you tell me whether my assumption is correct or not?
+
+It's possible to run the test on hard drives, and developers still
+schedule them there sometimes, but doing so is quite expensive at this
+point (just because it takes a while to set up hard-drive based test
+nodes and takes longer to get a suite run completed against your
+branch) and so most of the lab is SSD/NVME based.
+
+I'm not sure if we run any HDD-based tests prior to releases or on a
+regular basis; I think Yuri can answer that question.
+-Greg
+
+>
+> Thanks,
+> Satoru
 >
 
