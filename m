@@ -2,103 +2,176 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBA5EC4321E
-	for <ceph-devel@archiver.kernel.org>; Mon,  5 Dec 2022 06:16:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2D4CC352A1
+	for <ceph-devel@archiver.kernel.org>; Tue,  6 Dec 2022 10:33:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231411AbiLEGQT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 5 Dec 2022 01:16:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46660 "EHLO
+        id S233708AbiLFKdh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 6 Dec 2022 05:33:37 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231239AbiLEGQS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2022 01:16:18 -0500
+        with ESMTP id S233849AbiLFKdf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2022 05:33:35 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EABC21117E
-        for <ceph-devel@vger.kernel.org>; Sun,  4 Dec 2022 22:15:23 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 534CEC03
+        for <ceph-devel@vger.kernel.org>; Tue,  6 Dec 2022 02:32:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1670220923;
+        s=mimecast20190719; t=1670322755;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=WYpChL7GKa3f/mbGcsa78Y6HNzeeW+i9xuzFhMaiRqQ=;
-        b=hNaaH4l5YAnEOAcMqcmpu2v8rMpmXGdhplpxn+hxD7xIpNkS3EV+DMj8TnDBwZPKhYNZPp
-        1m0bpaK26aRn0W+U3lBaHBM51N0Z6NYD7seylQBdFaLFcwfKfWXLVKIPAKzdjlhVchYleJ
-        d7vRZ2OQrBQr3K2BUlByHOooYYRASgk=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-190-o0bVh7L-MxSicfDj7iTJ1A-1; Mon, 05 Dec 2022 01:15:21 -0500
-X-MC-Unique: o0bVh7L-MxSicfDj7iTJ1A-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 4AA5C85A59D;
-        Mon,  5 Dec 2022 06:15:21 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 11E63140EBF3;
-        Mon,  5 Dec 2022 06:15:18 +0000 (UTC)
-From:   xiubli@redhat.com
-To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
-Cc:     jlayton@kernel.org, mchangir@redhat.com,
-        Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH] ceph: blocklist the kclient when receiving corrupt snap trace
-Date:   Mon,  5 Dec 2022 14:15:14 +0800
-Message-Id: <20221205061514.50423-1-xiubli@redhat.com>
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=MT/X0jn/YRuT9U1tXxUdXTYVr3v2yKQ9v/unPJajPKQ=;
+        b=Yv8DF71DkPm+JHwb/aFNCQLqJxmZwEQJAYFNfMeYapzEcTiVEuoaJfvmsf+vwsv6J9b5uw
+        XzJECP9PQH/Vhg7twVCWbg4Hf4Ve9YgAcKoatvX20wmsgzF3B8pmtD+xTph+G+5KJqXxBO
+        NBD2c9q6hCbxdai2CX1cTyAH3xTmmWQ=
+Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
+ [209.85.221.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-314-X8F0WX3uO3OVan-VXZJGGw-1; Tue, 06 Dec 2022 05:32:34 -0500
+X-MC-Unique: X8F0WX3uO3OVan-VXZJGGw-1
+Received: by mail-wr1-f69.google.com with SMTP id x1-20020adfbb41000000b002426b33b618so1209808wrg.7
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2022 02:32:34 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=MT/X0jn/YRuT9U1tXxUdXTYVr3v2yKQ9v/unPJajPKQ=;
+        b=K8PDZULSL7pAWkUEIBjMhy/3gC/JzfJE43pFVLBjzrUHcew8y8xZUkBbp7ikptFHNn
+         acJULGtKnv6xWE+lUM1rQ2GH1PlBSezGAZWuEfvUqL7gKyaAPg3jtUTWZfwRBSRMFLzc
+         mkyezy/mLSLWkvDxdsWR7Nb/IQ8UkJO5TjWzstDQSNBRUFfIxHQemOQ0YMVFf0gi5Kuu
+         T2brEvrpWiaqfRjLEApU/ehWxRuksXBxLqRCNjlxqa4R3dxAcAnB1iXvrJH7TnFBJgFk
+         NzI5I17FCuOfgiDVk11Xq5q/QZZ8pUYd3RgwQ0GA2Jb/AvxZgwEk0i6xfsL6NkRq1e/P
+         bI9g==
+X-Gm-Message-State: ANoB5pnnrvewxbz6xqxU8/5M0E2toIyYJfrMBdyIhAnHPBtniQOVZdeP
+        RDoUHLhUNEQPLICnS4HLHK2BdRyZjdjzemY/DzUtzlaar5bizRAyqUnlQtLm+mdTH0cLnQIztcF
+        vj19FhCW+jf62cTV1jhSs
+X-Received: by 2002:adf:f54d:0:b0:242:9e6:ea4d with SMTP id j13-20020adff54d000000b0024209e6ea4dmr29141160wrp.251.1670322753115;
+        Tue, 06 Dec 2022 02:32:33 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf6VCd51WHLIt52IV8MU3BuH0wLBi2rE1OjDxVmwF8++y07V7UzwIQ+jtDFwRX9LF5ezKnH5PQ==
+X-Received: by 2002:adf:f54d:0:b0:242:9e6:ea4d with SMTP id j13-20020adff54d000000b0024209e6ea4dmr29141144wrp.251.1670322752850;
+        Tue, 06 Dec 2022 02:32:32 -0800 (PST)
+Received: from localhost (cpc111743-lutn13-2-0-cust979.9-3.cable.virginm.net. [82.17.115.212])
+        by smtp.gmail.com with ESMTPSA id m21-20020a05600c4f5500b003b4fe03c881sm26797112wmq.48.2022.12.06.02.32.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 06 Dec 2022 02:32:32 -0800 (PST)
+Date:   Tue, 6 Dec 2022 10:32:31 +0000
+From:   Aaron Tomlin <atomlin@redhat.com>
+To:     xiubli@redhat.com
+Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org, jlayton@kernel.org,
+        mchangir@redhat.com, atomlin@atomlin.com
+Subject: Re: [PATCH] ceph: blocklist the kclient when receiving corrupt snap
+ trace
+Message-ID: <20221206103231.5cqwbti42oevwert@ava.usersys.com>
+X-PGP-Key: http://pgp.mit.edu/pks/lookup?search=atomlin%40redhat.com
+X-PGP-Fingerprint: 7906 84EB FA8A 9638 8D1E  6E9B E2DE 9658 19CC 77D6
+References: <20221205061514.50423-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20221205061514.50423-1-xiubli@redhat.com>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+On Mon 2022-12-05 14:15 +0800, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> When received corrupted snap trace we don't know what exactly has
+> happened in MDS side. And we shouldn't continue writing to OSD,
+> which may corrupt the snapshot contents.
+> 
+> Just try to blocklist this client and If fails we need to crash the
+> client instead of leaving it writeable to OSDs.
+> 
+> URL: https://tracker.ceph.com/issues/57686
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+>  fs/ceph/mds_client.c |  3 ++-
+>  fs/ceph/mds_client.h |  1 +
+>  fs/ceph/snap.c       | 25 +++++++++++++++++++++++++
+>  3 files changed, 28 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index cbbaf334b6b8..59094944af28 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -5648,7 +5648,8 @@ static void mds_peer_reset(struct ceph_connection *con)
+>  	struct ceph_mds_client *mdsc = s->s_mdsc;
+>  
+>  	pr_warn("mds%d closed our session\n", s->s_mds);
+> -	send_mds_reconnect(mdsc, s);
+> +	if (!mdsc->no_reconnect)
+> +		send_mds_reconnect(mdsc, s);
+>  }
+>  
+>  static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index 728b7d72bf76..8e8f0447c0ad 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -413,6 +413,7 @@ struct ceph_mds_client {
+>  	atomic_t		num_sessions;
+>  	int                     max_sessions;  /* len of sessions array */
+>  	int                     stopping;      /* true if shutting down */
+> +	int                     no_reconnect;  /* true if snap trace is corrupted */
+>  
+>  	atomic64_t		quotarealms_count; /* # realms with quota */
+>  	/*
+> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+> index c1c452afa84d..5b211ec7d7f7 100644
+> --- a/fs/ceph/snap.c
+> +++ b/fs/ceph/snap.c
+> @@ -767,8 +767,10 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+>  	struct ceph_snap_realm *realm;
+>  	struct ceph_snap_realm *first_realm = NULL;
+>  	struct ceph_snap_realm *realm_to_rebuild = NULL;
+> +	struct ceph_client *client = mdsc->fsc->client;
+>  	int rebuild_snapcs;
+>  	int err = -ENOMEM;
+> +	int ret;
+>  	LIST_HEAD(dirty_realms);
+>  
+>  	lockdep_assert_held_write(&mdsc->snap_rwsem);
+> @@ -885,6 +887,29 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+>  	if (first_realm)
+>  		ceph_put_snap_realm(mdsc, first_realm);
+>  	pr_err("%s error %d\n", __func__, err);
+> +
+> +	/*
+> +	 * When received corrupted snap trace we don't know what
+> +	 * exactly has happened in MDS side. And we shouldn't continue
+> +	 * writing to OSD, which may corrupt the snapshot contents.
+> +	 *
+> +	 * Just try to blocklist this client and if fails we need to
+> +	 * crash the client instead of leaving it writeable to OSDs.
+> +	 *
+> +	 * Then this kclient must be remounted to continue after the
+> +	 * corrupted metadata fixed in MDS side.
+> +	 */
+> +	mdsc->no_reconnect = 1;
+> +	ret = ceph_monc_blocklist_add(&client->monc, &client->msgr.inst.addr);
+> +	if (ret) {
+> +		pr_err("%s blocklist of %s failed: %d", __func__,
+> +		       ceph_pr_addr(&client->msgr.inst.addr), ret);
+> +		BUG();
+> +	}
+> +	pr_err("%s %s was blocklisted, do remount to continue%s",
+> +	       __func__, ceph_pr_addr(&client->msgr.inst.addr),
+> +	       err == -EIO ? " after corrupted snaptrace fixed": "");
+> +
+>  	return err;
+>  }
 
-When received corrupted snap trace we don't know what exactly has
-happened in MDS side. And we shouldn't continue writing to OSD,
-which may corrupt the snapshot contents.
+Hi Xiubo,
 
-Just try to blocklist this client and If fails we need to crash the
-client instead of leaving it writeable to OSDs.
+How about using a WARN() so that we taint the Linux kernel too:
 
-URL: https://tracker.ceph.com/issues/57686
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/mds_client.c |  3 ++-
- fs/ceph/mds_client.h |  1 +
- fs/ceph/snap.c       | 25 +++++++++++++++++++++++++
- 3 files changed, 28 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index cbbaf334b6b8..59094944af28 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -5648,7 +5648,8 @@ static void mds_peer_reset(struct ceph_connection *con)
- 	struct ceph_mds_client *mdsc = s->s_mdsc;
- 
- 	pr_warn("mds%d closed our session\n", s->s_mds);
--	send_mds_reconnect(mdsc, s);
-+	if (!mdsc->no_reconnect)
-+		send_mds_reconnect(mdsc, s);
- }
- 
- static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *msg)
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 728b7d72bf76..8e8f0447c0ad 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -413,6 +413,7 @@ struct ceph_mds_client {
- 	atomic_t		num_sessions;
- 	int                     max_sessions;  /* len of sessions array */
- 	int                     stopping;      /* true if shutting down */
-+	int                     no_reconnect;  /* true if snap trace is corrupted */
- 
- 	atomic64_t		quotarealms_count; /* # realms with quota */
- 	/*
 diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index c1c452afa84d..5b211ec7d7f7 100644
+index 864cdaa0d2bd..1941584b8fdb 100644
 --- a/fs/ceph/snap.c
 +++ b/fs/ceph/snap.c
-@@ -767,8 +767,10 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 	struct ceph_snap_realm *realm;
+@@ -766,8 +766,10 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 	struct ceph_snap_realm *realm = NULL;
  	struct ceph_snap_realm *first_realm = NULL;
  	struct ceph_snap_realm *realm_to_rebuild = NULL;
 +	struct ceph_client *client = mdsc->fsc->client;
@@ -108,10 +181,11 @@ index c1c452afa84d..5b211ec7d7f7 100644
  	LIST_HEAD(dirty_realms);
  
  	lockdep_assert_held_write(&mdsc->snap_rwsem);
-@@ -885,6 +887,29 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+@@ -883,6 +885,31 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
  	if (first_realm)
  		ceph_put_snap_realm(mdsc, first_realm);
  	pr_err("%s error %d\n", __func__, err);
++
 +
 +	/*
 +	 * When received corrupted snap trace we don't know what
@@ -131,13 +205,15 @@ index c1c452afa84d..5b211ec7d7f7 100644
 +		       ceph_pr_addr(&client->msgr.inst.addr), ret);
 +		BUG();
 +	}
-+	pr_err("%s %s was blocklisted, do remount to continue%s",
-+	       __func__, ceph_pr_addr(&client->msgr.inst.addr),
-+	       err == -EIO ? " after corrupted snaptrace fixed": "");
++
++	WARN(1, "%s %s was blocklisted, do remount to continue%s",
++	     __func__, ceph_pr_addr(&client->msgr.inst.addr),
++	     err == -EIO ? " after corrupted snaptrace fixed": "");
 +
  	return err;
  }
- 
+
+
 -- 
-2.31.1
+Aaron Tomlin
 
