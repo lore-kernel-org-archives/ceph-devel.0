@@ -2,112 +2,93 @@ Return-Path: <ceph-devel-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4865C4332F
-	for <ceph-devel@archiver.kernel.org>; Wed, 14 Dec 2022 13:14:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A1E4C4332F
+	for <ceph-devel@archiver.kernel.org>; Wed, 14 Dec 2022 17:28:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238172AbiLNNOR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 14 Dec 2022 08:14:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40630 "EHLO
+        id S238316AbiLNR2o (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 14 Dec 2022 12:28:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238526AbiLNNOM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2022 08:14:12 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CB74F12
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2022 05:13:21 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1671023600;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=tnY3LmLlLBt6rd5j5rYEchSWLdK3pgj1yadT46BPLZ8=;
-        b=gqQp8iE6cOG3uoUIa9hbwweIvny030u5IP8JY2pGOczMiR1PNEos2plyb9+lfG9eT7OPO2
-        nEsdP2gmSjZ9pxTcv8ttMcFAHf9DsebvwltJSOEQuspOF9EeHWmKtnRGXGedZT6r6UilEN
-        LOcdamJOSSeDohWqjdp+60PVQ3HdGDQ=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-21-RhmTpw8wNYKHBimoz7jN-Q-1; Wed, 14 Dec 2022 08:13:17 -0500
-X-MC-Unique: RhmTpw8wNYKHBimoz7jN-Q-1
-Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id B4F3B100F904;
-        Wed, 14 Dec 2022 13:13:16 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D902749BB6A;
-        Wed, 14 Dec 2022 13:13:13 +0000 (UTC)
-From:   xiubli@redhat.com
-To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
-Cc:     jlayton@kernel.org, mchangir@redhat.com, vshankar@redhat.com,
-        Xiubo Li <xiubli@redhat.com>, stable@vger.kernel.org
-Subject: [PATCH v4 1/2] ceph: move mount state enum to fs/ceph/super.h
-Date:   Wed, 14 Dec 2022 21:13:06 +0800
-Message-Id: <20221214131307.42618-2-xiubli@redhat.com>
-In-Reply-To: <20221214131307.42618-1-xiubli@redhat.com>
-References: <20221214131307.42618-1-xiubli@redhat.com>
+        with ESMTP id S237749AbiLNR2n (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2022 12:28:43 -0500
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 329FBB68;
+        Wed, 14 Dec 2022 09:28:41 -0800 (PST)
+Received: by mail-lj1-x236.google.com with SMTP id x11so7315102ljh.7;
+        Wed, 14 Dec 2022 09:28:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=VLmoAaTp6wol86VtBLyFlQuLv7H9atQ1IdPrQrK6e1U=;
+        b=gUniewjYrsFEVx4VVGgw3BZkpdBKd3E2uBxGvTkRe5GM6xMCAsiy7emDJGFOu/Hiqz
+         /gBNj1OpoC6u1WihZ9Eg2tHJlL0SLD/5VTZLWa4ms/MapQM/fdJl5B/jJ10kV48UbwyN
+         NgucQ/9Zdk3xSYxKkATrqeegdeHrWAocaGF77YeneWVnzF+1t0tyifBdRNbrltdMvUfI
+         laUAb0eMurKECC7Mke0Olw2VOkfhRD5yjtEwuCTnjzM7t8fobjppfc6LgVhSQc/4TctG
+         E4EdsyzSQykEpgtbM60RMIu7mDyV0I2s071H7/My7o/UuZZgt/iV1Y8fAi0nS38Gm0Ze
+         CB0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VLmoAaTp6wol86VtBLyFlQuLv7H9atQ1IdPrQrK6e1U=;
+        b=Q3G/jJ2B0SMu4DgCLvezOrolpnBQulcOjLtO3YEhZGAwghhe7T0OoPsJcRdEzFlx7r
+         UrUMFnQEPCJaPKeVkG/KWeWwJJvwgwlMZSB2JYppbPxhb2Z7Q10lEDBuMUbiKeb51jbX
+         43XZY5yCyn5YVz0wOkAWIf6PLRXKcObreCt37HTIVgp0nO01nAErlmjaYCDF+P908Jsk
+         nVmA83envgdXIrCni9QwySbytr8IkEIbsw0RVC2yc7Tu/z9OsG11+6B6ZzzH12mXDX7D
+         l13DvZPwLxQvq1MNwuYy4nG20Jyw2BHsVub8hrm4BYZWCyR7rJ0hOJwMWh7clJUbVx/3
+         Jzbw==
+X-Gm-Message-State: ANoB5pk7hLtWPDUIpYM3olbD44PgBBIRReYhaT3jjpu9ei2jak+mMOSp
+        dSRESSyzFU5sSrmfl5V1bBX+BcO1Z9A=
+X-Google-Smtp-Source: AA0mqf5CXR6iO1+0lw0M469LBnHPvB7gKa2hJ+p3S3J6mZvi40oITIMqbSGiNWEdDfg2poLfW6vX7Q==
+X-Received: by 2002:a17:907:a409:b0:7b8:947e:61c3 with SMTP id sg9-20020a170907a40900b007b8947e61c3mr27839753ejc.77.1671038907503;
+        Wed, 14 Dec 2022 09:28:27 -0800 (PST)
+Received: from zambezi.redhat.com (ip-94-112-104-28.bb.vodafone.cz. [94.112.104.28])
+        by smtp.gmail.com with ESMTPSA id c2-20020a17090618a200b007aed2057eacsm6110711ejf.221.2022.12.14.09.28.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 14 Dec 2022 09:28:27 -0800 (PST)
+From:   Ilya Dryomov <idryomov@gmail.com>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [GIT PULL] Ceph fix for 6.2-rc1
+Date:   Wed, 14 Dec 2022 18:28:20 +0100
+Message-Id: <20221214172820.96191-1-idryomov@gmail.com>
+X-Mailer: git-send-email 2.38.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+Hi Linus,
 
-These flags are only used in ceph filesystem in fs/ceph, so just
-move it to the place it should be.
+The following changes since commit 830b3c68c1fb1e9176028d02ef86f3cf76aa2476:
 
-Cc: stable@vger.kernel.org
-URL: https://tracker.ceph.com/issues/57686
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/super.h              | 10 ++++++++++
- include/linux/ceph/libceph.h | 10 ----------
- 2 files changed, 10 insertions(+), 10 deletions(-)
+  Linux 6.1 (2022-12-11 14:15:18 -0800)
 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index e7662ff6f149..0d5cb0983831 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -103,6 +103,16 @@ struct ceph_mount_options {
- 	struct fscrypt_dummy_policy dummy_enc_policy;
- };
- 
-+/* mount state */
-+enum {
-+	CEPH_MOUNT_MOUNTING,
-+	CEPH_MOUNT_MOUNTED,
-+	CEPH_MOUNT_UNMOUNTING,
-+	CEPH_MOUNT_UNMOUNTED,
-+	CEPH_MOUNT_SHUTDOWN,
-+	CEPH_MOUNT_RECOVER,
-+};
-+
- #define CEPH_ASYNC_CREATE_CONFLICT_BITS 8
- 
- struct ceph_fs_client {
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 00af2c98da75..4497d0a6772c 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -99,16 +99,6 @@ struct ceph_options {
- 
- #define CEPH_AUTH_NAME_DEFAULT   "guest"
- 
--/* mount state */
--enum {
--	CEPH_MOUNT_MOUNTING,
--	CEPH_MOUNT_MOUNTED,
--	CEPH_MOUNT_UNMOUNTING,
--	CEPH_MOUNT_UNMOUNTED,
--	CEPH_MOUNT_SHUTDOWN,
--	CEPH_MOUNT_RECOVER,
--};
--
- static inline unsigned long ceph_timeout_jiffies(unsigned long timeout)
- {
- 	return timeout ?: MAX_SCHEDULE_TIMEOUT;
--- 
-2.31.1
+are available in the Git repository at:
 
+  https://github.com/ceph/ceph-client.git tags/ceph-for-6.2-rc1
+
+for you to fetch changes up to 68c62bee9d081cf815310b3a96e38d94fc16007d:
+
+  ceph: try to check caps immediately after async creating finishes (2022-12-12 19:15:39 +0100)
+
+----------------------------------------------------------------
+A fix to facilitate prompt cap releases on async creates from Xiubo.
+This should address sporadic "client isn't responding to mclientcaps
+(revoke) ..." warnings and potential associated MDS hangs.
+
+----------------------------------------------------------------
+Xiubo Li (2):
+      ceph: remove useless session parameter for check_caps()
+      ceph: try to check caps immediately after async creating finishes
+
+ fs/ceph/addr.c  |  2 +-
+ fs/ceph/caps.c  | 25 +++++++++++--------------
+ fs/ceph/file.c  | 26 ++++++++++++++++----------
+ fs/ceph/inode.c |  6 +++---
+ fs/ceph/ioctl.c |  2 +-
+ fs/ceph/super.h |  5 +++--
+ 6 files changed, 35 insertions(+), 31 deletions(-)
