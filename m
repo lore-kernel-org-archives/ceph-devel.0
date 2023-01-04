@@ -2,52 +2,53 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87CD2C677F0
-	for <ceph-devel@archiver.kernel.org>; Wed,  4 Jan 2023 21:15:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F00F7C54EF1
+	for <ceph-devel@archiver.kernel.org>; Wed,  4 Jan 2023 21:16:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240251AbjADVO7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 4 Jan 2023 16:14:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57364 "EHLO
+        id S240374AbjADVPk (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 4 Jan 2023 16:15:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235287AbjADVO5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2023 16:14:57 -0500
-Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 689731B9DA;
-        Wed,  4 Jan 2023 13:14:56 -0800 (PST)
-Received: by mail-pj1-x102b.google.com with SMTP id cp9-20020a17090afb8900b00226a934e0e5so1873607pjb.1;
-        Wed, 04 Jan 2023 13:14:56 -0800 (PST)
+        with ESMTP id S240306AbjADVPG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2023 16:15:06 -0500
+Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A27351DDC1;
+        Wed,  4 Jan 2023 13:15:05 -0800 (PST)
+Received: by mail-pl1-x632.google.com with SMTP id y1so1704170plb.2;
+        Wed, 04 Jan 2023 13:15:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=XF0rWcwOaeOy9W3XDndGOlTI6VOcqMAlw6Z0kSP+ZIE=;
-        b=mwUaRHyXO3QpRK5P0JqCEjtDjkmGl7YgUMaT1I2YjsKhseOwqNkNS33mOlEf/eRTXu
-         Dx4cepCH0DpI7UZias9hAXzrqhmP9FqJPQ5SpCcrNsEip5tDid5QCJ8rq3xSJ7zfXgzS
-         VkkY41Iwf5a5gzpho+eHq9V7JD1kKJVPOfzCuRJq6ljFPE+NlmpfzNYoSMe4wocuCgzf
-         S6i7hTWrnSsU5BeCV3tLAdKHoc+E6ZXdQXMGE1pFenz1nLeHJTOMKZAollRFOqAqS7OZ
-         auFae1eJ8Ii2yGyYjhvy6b6WvXd1YJI0BgZbYV7R5btP09Ol+PqZuvdKcR/Dbg+8nqw5
-         sxBQ==
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=h/F8d0ryK33J83PP3KTKD8iJBJ7iw3NcsaZlwvBQl84=;
+        b=CNESCgcUv9kyk6ZyuvoP2d6/MvhM1pCGilvS2/lZfNbmctlSZWFKUqCSvhFIz1agh0
+         MrXYUY/IjeyZdKqV04XP1+w+s563MfL6+BGDibaZYFnnmEIV6pxQQi6KtEvnE/Zh6S9x
+         N3YHOD+Wv8qtv3qvpXgMLZUQwwOCEW7H7eRmd/WlRcZhTkbK/UvDIqsoezAJMA0lHvvS
+         kWJCDRpjIbsqJnvVQ/ULbh6fTn6+ffdvyUTkqPbElybf60JgjpuMKt4o2uXOPIr/TfNE
+         +OyO0tT4kunau+qPwxmhXHoh0V+QCydNCNYwJsT/xGh1U9dwCtvIvQ+8IlclyBNEC2Z1
+         /zNw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=XF0rWcwOaeOy9W3XDndGOlTI6VOcqMAlw6Z0kSP+ZIE=;
-        b=VXUdT2qJNV2+51ymPdStnnbXkLEO+YYaaZqRzKkqvwyTrB8ZiM5kvLPWDZuyIkp40t
-         KwuvYPgYLdFs/AUWR1oj/IwdEjYnv62J6K63fw4Nbou1Kn2jEe2nc+rE1fyYps2SiMUC
-         fp6hb2ErAaJvfFtth+DS50MmNNkmUzIiOzsGMPQqtFI/SSMdMyAe43GLUzqGHTILSa51
-         tOnjlpsIH3s3BHucazaHZuRefdP1Ck0jooQbGJrg93ia6AE0opLYo1RLoXeIXAPXz8iU
-         lRRg350TTraGEnL8udJCWl0NpSfUElVywgRHTY3nPau69R8Js2uGBvSw8TSVckoJAFvB
-         X3dA==
-X-Gm-Message-State: AFqh2kpDWAd7wjlled99pb0sBQSDjMptgWcma3nf84rFxSYBdwaC6ju8
-        TTv6m3s2goEH2Fqi5mlXfd6hHv/26T0=
-X-Google-Smtp-Source: AMrXdXuHWcLr2ISD1AWLN6noveXBmNIMzDKhC6iHCDPkCElkMLkDu5P/j13SKsDU15gZnXatqrr41A==
-X-Received: by 2002:a17:90a:cc0b:b0:219:5955:7570 with SMTP id b11-20020a17090acc0b00b0021959557570mr23943541pju.46.1672866895416;
-        Wed, 04 Jan 2023 13:14:55 -0800 (PST)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=h/F8d0ryK33J83PP3KTKD8iJBJ7iw3NcsaZlwvBQl84=;
+        b=q4f1hkm98Dwi+UZde+0UJnVERislHakYdoWY9mO9MZTv3exAIyxAYrV+/W+BiV1qqo
+         1XQKTSMgcLWkBT8OVqg9XvSUvSeIcptSUvJK3FBDtfrudwVK4RvCoY8FCDEXALh3PK8X
+         djIwLMN32NAj4LsEsIBPDyOMPKp2btXIZUyYXFly+VTiOyo93PbyHwvo2yA14+a82dOF
+         fijSRZKOg4B9SHl9T1+kv5K33YcE83omiX81vRwuUX7Xp7hzTUxYOFlf0vfipcsIfdhk
+         qLWdxIXjIPWpc5L2PbCd7bXWyq7Pgq9Bctym47hBq65zoC7l9A+uJZmcyzXU0Lm2JAnN
+         ie5w==
+X-Gm-Message-State: AFqh2kpqT42V8fWqNhX7z8G3ySoOshO5i+dY9H5hVmlv01TAOv+PvoD+
+        lDUqP5uAXTbdcOKpvZuH1of13M8JKkUXSg==
+X-Google-Smtp-Source: AMrXdXuAX7hDzmiQPGibqegiPGsPttVBZ/qOOsjXqjfaA/v0yCiadzuJ0YGwzrUP0RByey/eocKZSw==
+X-Received: by 2002:a17:90a:8b05:b0:226:7fcb:c215 with SMTP id y5-20020a17090a8b0500b002267fcbc215mr10576703pjn.17.1672866904962;
+        Wed, 04 Jan 2023 13:15:04 -0800 (PST)
 Received: from fedora.hsd1.ca.comcast.net ([2601:644:8002:1c20::a55d])
-        by smtp.googlemail.com with ESMTPSA id i8-20020a17090a138800b00226369149cesm6408pja.21.2023.01.04.13.14.53
+        by smtp.googlemail.com with ESMTPSA id i8-20020a17090a138800b00226369149cesm6408pja.21.2023.01.04.13.15.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Jan 2023 13:14:54 -0800 (PST)
+        Wed, 04 Jan 2023 13:15:04 -0800 (PST)
 From:   "Vishal Moola (Oracle)" <vishal.moola@gmail.com>
 To:     linux-fsdevel@vger.kernel.org
 Cc:     linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
@@ -55,107 +56,81 @@ Cc:     linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
         linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
         linux-nilfs@vger.kernel.org, linux-mm@kvack.org,
-        "Vishal Moola (Oracle)" <vishal.moola@gmail.com>
-Subject: [PATCH v5 00/23] Convert to filemap_get_folios_tag()
-Date:   Wed,  4 Jan 2023 13:14:25 -0800
-Message-Id: <20230104211448.4804-1-vishal.moola@gmail.com>
+        "Vishal Moola (Oracle)" <vishal.moola@gmail.com>,
+        David Sterba <dsterba@suse.com>
+Subject: [PATCH v5 06/23] btrfs: Convert btree_write_cache_pages() to use filemap_get_folio_tag()
+Date:   Wed,  4 Jan 2023 13:14:31 -0800
+Message-Id: <20230104211448.4804-7-vishal.moola@gmail.com>
 X-Mailer: git-send-email 2.38.1
+In-Reply-To: <20230104211448.4804-1-vishal.moola@gmail.com>
+References: <20230104211448.4804-1-vishal.moola@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This patch series replaces find_get_pages_range_tag() with
-filemap_get_folios_tag(). This also allows the removal of multiple
-calls to compound_head() throughout.
-It also makes a good chunk of the straightforward conversions to folios,
-and takes the opportunity to introduce a function that grabs a folio
-from the pagecache.
+Converted function to use folios throughout. This is in preparation for
+the removal of find_get_pages_range_tag().
 
-I've run xfstests on xfs, btrfs, ext4, f2fs, and nilfs2, but more testing may
-be beneficial. The page-writeback and filemap changes implicitly work. Still
-looking for review of cifs, gfs2, and ext4.
-
+Signed-off-by: Vishal Moola (Oracle) <vishal.moola@gmail.com>
+Acked-by: David Sterba <dsterba@suse.com>
 ---
-v5:
-  Rebased onto upstream 6.2-rc2
-  Filesystems modified to use folio_get() instead of folio_ref_inc()
-  F2fs modified to maintain use of F2FS_ONSTACK_PAGES
+ fs/btrfs/extent_io.c | 19 ++++++++++---------
+ 1 file changed, 10 insertions(+), 9 deletions(-)
 
-v4:
-  Fixed a bug with reference counting in cifs changes
-  - Reported-by: kernel test robot <oliver.sang@intel.com> 
-  Improved commit messages to be more meaningful
-  Got some Acked-bys and Reviewed-bys
-
-v3:
-  Rebased onto upstream 6.1
-  Simplified the ceph patch to only necessary changes
-  Changed commit messages throughout to be clearer
-  Got an Acked-by for another nilfs patch
-  Got Tested-by for afs
-
-v2:
-  Got Acked-By tags for nilfs and btrfs changes
-  Fixed an error arising in f2fs
-  - Reported-by: kernel test robot <lkp@intel.com>
-
-Vishal Moola (Oracle) (23):
-  pagemap: Add filemap_grab_folio()
-  filemap: Added filemap_get_folios_tag()
-  filemap: Convert __filemap_fdatawait_range() to use
-    filemap_get_folios_tag()
-  page-writeback: Convert write_cache_pages() to use
-    filemap_get_folios_tag()
-  afs: Convert afs_writepages_region() to use filemap_get_folios_tag()
-  btrfs: Convert btree_write_cache_pages() to use
-    filemap_get_folio_tag()
-  btrfs: Convert extent_write_cache_pages() to use
-    filemap_get_folios_tag()
-  ceph: Convert ceph_writepages_start() to use filemap_get_folios_tag()
-  cifs: Convert wdata_alloc_and_fillpages() to use
-    filemap_get_folios_tag()
-  ext4: Convert mpage_prepare_extent_to_map() to use
-    filemap_get_folios_tag()
-  f2fs: Convert f2fs_fsync_node_pages() to use filemap_get_folios_tag()
-  f2fs: Convert f2fs_flush_inline_data() to use filemap_get_folios_tag()
-  f2fs: Convert f2fs_sync_node_pages() to use filemap_get_folios_tag()
-  f2fs: Convert f2fs_write_cache_pages() to use filemap_get_folios_tag()
-  f2fs: Convert last_fsync_dnode() to use filemap_get_folios_tag()
-  f2fs: Convert f2fs_sync_meta_pages() to use filemap_get_folios_tag()
-  gfs2: Convert gfs2_write_cache_jdata() to use filemap_get_folios_tag()
-  nilfs2: Convert nilfs_lookup_dirty_data_buffers() to use
-    filemap_get_folios_tag()
-  nilfs2: Convert nilfs_lookup_dirty_node_buffers() to use
-    filemap_get_folios_tag()
-  nilfs2: Convert nilfs_btree_lookup_dirty_buffers() to use
-    filemap_get_folios_tag()
-  nilfs2: Convert nilfs_copy_dirty_pages() to use
-    filemap_get_folios_tag()
-  nilfs2: Convert nilfs_clear_dirty_pages() to use
-    filemap_get_folios_tag()
-  filemap: Remove find_get_pages_range_tag()
-
- fs/afs/write.c          | 116 ++++++++++++++++++++--------------------
- fs/btrfs/extent_io.c    |  57 ++++++++++----------
- fs/ceph/addr.c          |  58 ++++++++++----------
- fs/cifs/file.c          |  32 +++++++++--
- fs/ext4/inode.c         |  65 +++++++++++-----------
- fs/f2fs/checkpoint.c    |  49 +++++++++--------
- fs/f2fs/data.c          |  84 ++++++++++++++++++++---------
- fs/f2fs/node.c          |  72 +++++++++++++------------
- fs/gfs2/aops.c          |  64 ++++++++++++----------
- fs/nilfs2/btree.c       |  14 ++---
- fs/nilfs2/page.c        |  59 ++++++++++----------
- fs/nilfs2/segment.c     |  44 +++++++--------
- include/linux/pagemap.h |  32 +++++++----
- include/linux/pagevec.h |   8 ---
- mm/filemap.c            |  84 ++++++++++++++---------------
- mm/page-writeback.c     |  44 +++++++--------
- mm/swap.c               |  10 ----
- 17 files changed, 481 insertions(+), 411 deletions(-)
-
+diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
+index 83dd3aa59663..64fbafc70822 100644
+--- a/fs/btrfs/extent_io.c
++++ b/fs/btrfs/extent_io.c
+@@ -2845,14 +2845,14 @@ int btree_write_cache_pages(struct address_space *mapping,
+ 	int ret = 0;
+ 	int done = 0;
+ 	int nr_to_write_done = 0;
+-	struct pagevec pvec;
+-	int nr_pages;
++	struct folio_batch fbatch;
++	unsigned int nr_folios;
+ 	pgoff_t index;
+ 	pgoff_t end;		/* Inclusive */
+ 	int scanned = 0;
+ 	xa_mark_t tag;
+ 
+-	pagevec_init(&pvec);
++	folio_batch_init(&fbatch);
+ 	if (wbc->range_cyclic) {
+ 		index = mapping->writeback_index; /* Start from prev offset */
+ 		end = -1;
+@@ -2875,14 +2875,15 @@ int btree_write_cache_pages(struct address_space *mapping,
+ 	if (wbc->sync_mode == WB_SYNC_ALL)
+ 		tag_pages_for_writeback(mapping, index, end);
+ 	while (!done && !nr_to_write_done && (index <= end) &&
+-	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
+-			tag))) {
++	       (nr_folios = filemap_get_folios_tag(mapping, &index, end,
++					    tag, &fbatch))) {
+ 		unsigned i;
+ 
+-		for (i = 0; i < nr_pages; i++) {
+-			struct page *page = pvec.pages[i];
++		for (i = 0; i < nr_folios; i++) {
++			struct folio *folio = fbatch.folios[i];
+ 
+-			ret = submit_eb_page(page, wbc, &bio_ctrl, &eb_context);
++			ret = submit_eb_page(&folio->page, wbc, &bio_ctrl,
++					&eb_context);
+ 			if (ret == 0)
+ 				continue;
+ 			if (ret < 0) {
+@@ -2897,7 +2898,7 @@ int btree_write_cache_pages(struct address_space *mapping,
+ 			 */
+ 			nr_to_write_done = wbc->nr_to_write <= 0;
+ 		}
+-		pagevec_release(&pvec);
++		folio_batch_release(&fbatch);
+ 		cond_resched();
+ 	}
+ 	if (!scanned && !done) {
 -- 
 2.38.1
 
