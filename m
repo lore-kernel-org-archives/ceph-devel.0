@@ -2,196 +2,76 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32252C54E76
-	for <ceph-devel@archiver.kernel.org>; Wed,  4 Jan 2023 21:17:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42AF6C3DA7A
+	for <ceph-devel@archiver.kernel.org>; Thu,  5 Jan 2023 11:02:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239580AbjADVPi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 4 Jan 2023 16:15:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57396 "EHLO
+        id S232689AbjAELBu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 5 Jan 2023 06:01:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240294AbjADVPD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2023 16:15:03 -0500
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EBBE1CFEA;
-        Wed,  4 Jan 2023 13:15:02 -0800 (PST)
-Received: by mail-pj1-x1033.google.com with SMTP id n12so24639998pjp.1;
-        Wed, 04 Jan 2023 13:15:02 -0800 (PST)
+        with ESMTP id S231871AbjAELBR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2023 06:01:17 -0500
+Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2257F50E7E
+        for <ceph-devel@vger.kernel.org>; Thu,  5 Jan 2023 03:01:16 -0800 (PST)
+Received: by mail-pl1-x62e.google.com with SMTP id g16so29325371plq.12
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jan 2023 03:01:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=uFWiZotH2hHO/dqZz3ekRRXvMmeZ6crkehTB/0Ti1xA=;
-        b=PJJR7HrEap3tSH1Krm3xKRqYuv2+ZnILQzCAZ4FvA6g7y0di41mF1AmB7b4LucnLPW
-         9SnkknLaQi9JPN7HiqQursF5IJIh8x4Go7xxIzVvYbBtPjzAmZtsns33bPkPsrt+hy50
-         mCiKeevBosZyzcK2IMA4wvhDdxllKMI0cCC9SxOGeZRrOeURvnO4TDKbleugnCd9p6Lb
-         743pneGz2xpnNZHO7fCMj35WHO1f/RGQIweETnZKQ8XOTIemf3fMpTvzMTMPSOgKVRuz
-         JEcncOEIDLTioi5zOdKBwUNvJ1hrNSt/h0sKN3+bcLYhECKpZRcloIieHM2fofEPAV8A
-         w3mg==
+        d=agencysonic.com; s=google;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=jMPeVdVw0BvFdT1czFRYHv4p6/nusLoyjLFoWIDBzbg=;
+        b=D0JK33LyBIHI5KlDV5NfG+tUa9D0AgvRwJVUlCnOO+NdMVrxNFoLFyzDyiLNoPcJt6
+         N/Rakc5msmT20CGl4WEQ088IDFAtFeGa7yiF5GLB7md+gJkAOM+EPVnzPv/uwkWbmoz+
+         DKnBWXJhNS1LWwW0++Fqne6tA4mt+aPS51Ssn49wubYXy6cMNcaL/mz2LOVkJB/k+kQN
+         oIkis+GmcvX0groLu7G34RVQemUm+MubGXZrpaYDdlxEF1UvxvXrUe2uhy7v5jrLB22+
+         mBSZfsvUBUykkvY2h5vgvDLonIH/m6NZRBENb9pLH/DcjIIIEsLqYRpIFPIPqkwVmSDC
+         MhnQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=uFWiZotH2hHO/dqZz3ekRRXvMmeZ6crkehTB/0Ti1xA=;
-        b=TAhajz+KGR8Vgk8ahfWn8eJNQoYTfPFn18skZY4p/l4WdAjjap6Bp+BcHDQ2wOMK11
-         nC1tB16o9klTdwzfj4ddfLoyUIrYyzIo/6Ve7rM7RErZC6hsu1cirl3xx2dtnucjAz+u
-         VYygiok8Mx1hNhqAwZFusYvpnsjfuwlZfhG4EQ8kbVoGi8azRggMaE4NnKhPqyaQiiyh
-         BB0wIjfocjXXX6vmosfvl24RnSvpcXhacgkij9xE/3uvjSErARH0a9aQSMvppGrYfchR
-         mkLCiJQgUAFgz1n3WuO96c3oKsKipwuSNGdpqCiFgFt0ic7DbDy0DDIhud7q92twGhK+
-         s7JQ==
-X-Gm-Message-State: AFqh2kqHhd4bCTKY3l3r1J9qFThgEqGl3t9AMYTyfTjAYIxOS7BrVOHX
-        psNhZ3T+zCcFnnfykoRuiw+/M+uOO/c0sw==
-X-Google-Smtp-Source: AMrXdXs3J6LoGMu8noxjtrKyXAiquvbz4xl3hf/x2raO3jwqWxe++Tv6pvIGcV6rBxNIAYQX5K7/nQ==
-X-Received: by 2002:a17:90b:4d8c:b0:21d:ef10:d6ca with SMTP id oj12-20020a17090b4d8c00b0021def10d6camr50592886pjb.45.1672866901534;
-        Wed, 04 Jan 2023 13:15:01 -0800 (PST)
-Received: from fedora.hsd1.ca.comcast.net ([2601:644:8002:1c20::a55d])
-        by smtp.googlemail.com with ESMTPSA id i8-20020a17090a138800b00226369149cesm6408pja.21.2023.01.04.13.14.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Jan 2023 13:15:01 -0800 (PST)
-From:   "Vishal Moola (Oracle)" <vishal.moola@gmail.com>
-To:     linux-fsdevel@vger.kernel.org
-Cc:     linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
-        linux-nilfs@vger.kernel.org, linux-mm@kvack.org,
-        "Vishal Moola (Oracle)" <vishal.moola@gmail.com>,
-        Matthew Wilcow <willy@infradead.org>
-Subject: [PATCH v5 04/23] page-writeback: Convert write_cache_pages() to use filemap_get_folios_tag()
-Date:   Wed,  4 Jan 2023 13:14:29 -0800
-Message-Id: <20230104211448.4804-5-vishal.moola@gmail.com>
-X-Mailer: git-send-email 2.38.1
-In-Reply-To: <20230104211448.4804-1-vishal.moola@gmail.com>
-References: <20230104211448.4804-1-vishal.moola@gmail.com>
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=jMPeVdVw0BvFdT1czFRYHv4p6/nusLoyjLFoWIDBzbg=;
+        b=1dcvz5i+sMkOMKbP90WgXF5eG0EzuZvHkx9bjqEIR0El318AyAflZjGa/YP+KGUK1t
+         MpGT9FL6CUGRno6jRj5X0UK9JLzV/XLz7VR8y+gJbf8K98YnYZlgWoXksbFAbU1xS6Yh
+         p7VxflNrXL6Mm8/52YSSWahoQbGJo226sGkgB32jUvtLtXSFQMx9PL76E7LXRM0X5flP
+         c/xPRZ3jQPDRRxzDtBqUemKX+gUFcEiDStCzlICmoZb6GTytkX6nbqa76HVhpyrzmerK
+         eXdMBOT6I4v5zRTZr7txsyiMv1S+gtm2yo/aEZrMgY6+eCVHyRzuyyZH/yr0/tX1P4tU
+         ajFw==
+X-Gm-Message-State: AFqh2krH1r9zIMp46vzGk1gJwOOMIna8c9XZ30NCVFWvEda38n8hZw9C
+        RZz5ICWbDWi7S0i/KYZeFLV5f0R6VO+mOrOw4ukHwQnbcmaQnDCgMdr9uA==
+X-Google-Smtp-Source: AMrXdXtZlwv25wHMP2pe40hMyfk0rUZftwcMwetOLN97NefgMkpZEFXMEV1sFN/C23xotlMPmQpnJ5b+IHKzQfllymw=
+X-Received: by 2002:a17:90a:bd0e:b0:225:cd98:1651 with SMTP id
+ y14-20020a17090abd0e00b00225cd981651mr3630730pjr.93.1672916475296; Thu, 05
+ Jan 2023 03:01:15 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From:   Office AgencySonic <office@agencysonic.com>
+Date:   Thu, 5 Jan 2023 16:31:02 +0530
+Message-ID: <CAFPuWw2aLmvesEMn6zjF-X4HfB5ytJLk36paajV-eb4D4gU7Kw@mail.gmail.com>
+Subject: We want to advertise on your website
+To:     ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Converted function to use folios throughout. This is in preparation for
-the removal of find_get_pages_range_tag(). This change removes 8 calls
-to compound_head(), and the function now supports large folios.
+Hello,
 
-Signed-off-by: Vishal Moola (Oracle) <vishal.moola@gmail.com>
-Reviewed-by: Matthew Wilcow (Oracle) <willy@infradead.org>
----
- mm/page-writeback.c | 44 +++++++++++++++++++++++---------------------
- 1 file changed, 23 insertions(+), 21 deletions(-)
+We have a client in the gambling industry who is interested in
+advertising on your website.
+ https://ceph.io
+They are interested in a sponsored article or in a homepage text ad, as fol=
+lows:
 
-diff --git a/mm/page-writeback.c b/mm/page-writeback.c
-index ad608ef2a243..5d61fa9eecc0 100644
---- a/mm/page-writeback.c
-+++ b/mm/page-writeback.c
-@@ -2398,15 +2398,15 @@ int write_cache_pages(struct address_space *mapping,
- 	int ret = 0;
- 	int done = 0;
- 	int error;
--	struct pagevec pvec;
--	int nr_pages;
-+	struct folio_batch fbatch;
-+	int nr_folios;
- 	pgoff_t index;
- 	pgoff_t end;		/* Inclusive */
- 	pgoff_t done_index;
- 	int range_whole = 0;
- 	xa_mark_t tag;
- 
--	pagevec_init(&pvec);
-+	folio_batch_init(&fbatch);
- 	if (wbc->range_cyclic) {
- 		index = mapping->writeback_index; /* prev offset */
- 		end = -1;
-@@ -2426,17 +2426,18 @@ int write_cache_pages(struct address_space *mapping,
- 	while (!done && (index <= end)) {
- 		int i;
- 
--		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--				tag);
--		if (nr_pages == 0)
-+		nr_folios = filemap_get_folios_tag(mapping, &index, end,
-+				tag, &fbatch);
-+
-+		if (nr_folios == 0)
- 			break;
- 
--		for (i = 0; i < nr_pages; i++) {
--			struct page *page = pvec.pages[i];
-+		for (i = 0; i < nr_folios; i++) {
-+			struct folio *folio = fbatch.folios[i];
- 
--			done_index = page->index;
-+			done_index = folio->index;
- 
--			lock_page(page);
-+			folio_lock(folio);
- 
- 			/*
- 			 * Page truncated or invalidated. We can freely skip it
-@@ -2446,30 +2447,30 @@ int write_cache_pages(struct address_space *mapping,
- 			 * even if there is now a new, dirty page at the same
- 			 * pagecache address.
- 			 */
--			if (unlikely(page->mapping != mapping)) {
-+			if (unlikely(folio->mapping != mapping)) {
- continue_unlock:
--				unlock_page(page);
-+				folio_unlock(folio);
- 				continue;
- 			}
- 
--			if (!PageDirty(page)) {
-+			if (!folio_test_dirty(folio)) {
- 				/* someone wrote it for us */
- 				goto continue_unlock;
- 			}
- 
--			if (PageWriteback(page)) {
-+			if (folio_test_writeback(folio)) {
- 				if (wbc->sync_mode != WB_SYNC_NONE)
--					wait_on_page_writeback(page);
-+					folio_wait_writeback(folio);
- 				else
- 					goto continue_unlock;
- 			}
- 
--			BUG_ON(PageWriteback(page));
--			if (!clear_page_dirty_for_io(page))
-+			BUG_ON(folio_test_writeback(folio));
-+			if (!folio_clear_dirty_for_io(folio))
- 				goto continue_unlock;
- 
- 			trace_wbc_writepage(wbc, inode_to_bdi(mapping->host));
--			error = (*writepage)(page, wbc, data);
-+			error = writepage(&folio->page, wbc, data);
- 			if (unlikely(error)) {
- 				/*
- 				 * Handle errors according to the type of
-@@ -2484,11 +2485,12 @@ int write_cache_pages(struct address_space *mapping,
- 				 * the first error.
- 				 */
- 				if (error == AOP_WRITEPAGE_ACTIVATE) {
--					unlock_page(page);
-+					folio_unlock(folio);
- 					error = 0;
- 				} else if (wbc->sync_mode != WB_SYNC_ALL) {
- 					ret = error;
--					done_index = page->index + 1;
-+					done_index = folio->index +
-+						folio_nr_pages(folio);
- 					done = 1;
- 					break;
- 				}
-@@ -2508,7 +2510,7 @@ int write_cache_pages(struct address_space *mapping,
- 				break;
- 			}
- 		}
--		pagevec_release(&pvec);
-+		folio_batch_release(&fbatch);
- 		cond_resched();
- 	}
- 
--- 
-2.38.1
+=E2=80=A2 Sponsored Article: An article written by us, published on your
+website. (Including our client=E2=80=99s do-follow hyperlink )
+=E2=80=A2 Homepage text ad:  A small text ad with a hyperlink, placed anywh=
+ere
+on your homepage.
 
+If you are interested in our proposition, send us an offer via e-mail
+and let=E2=80=99s make a deal!
+Best regards, Derek
+AgencySonic
