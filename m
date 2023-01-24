@@ -2,35 +2,35 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1C35C61D9D
-	for <ceph-devel@archiver.kernel.org>; Tue, 24 Jan 2023 19:30:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B636C54EED
+	for <ceph-devel@archiver.kernel.org>; Tue, 24 Jan 2023 19:31:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234255AbjAXTak (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 24 Jan 2023 14:30:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32946 "EHLO
+        id S233990AbjAXTa7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 24 Jan 2023 14:30:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233798AbjAXTah (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Jan 2023 14:30:37 -0500
+        with ESMTP id S234361AbjAXTam (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Jan 2023 14:30:42 -0500
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C8874DBDB;
-        Tue, 24 Jan 2023 11:30:34 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3C1F4FC08;
+        Tue, 24 Jan 2023 11:30:40 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C8FC8B816AC;
-        Tue, 24 Jan 2023 19:30:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 922E9C433D2;
-        Tue, 24 Jan 2023 19:30:29 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 6B955B816BF;
+        Tue, 24 Jan 2023 19:30:39 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3B12DC4339C;
+        Tue, 24 Jan 2023 19:30:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1674588631;
-        bh=yV3t1oc2mIc6UQl4grQoFozaSbqgHuC2qyMyJ9ivPAk=;
+        s=k20201202; t=1674588638;
+        bh=yDVwbSk1G8DS4yHpQ7gC5EwIRzaFxGi8gk+oumcC//k=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=QKajcuifCAg51Up9S3ifMhx72LK+AgoAV1YWzhuUijPZWXHqy0T8ENQ2itgt9RkEO
-         7LZbHaiO8ClQPdfCMbRtDTbnKiSO4ymH9SiL0+eFtpUtb4pIosuTDRRbUTDj01/EAs
-         o92msCtTjV65+0+JvCMiva9v0C+gYzd64TbM1j10bjcq8f7IIRVw2+KfW02vvep2CU
-         xST6f0H4ZeqxKPQWfYtDfBp995d963U1si+A+CTLF2qDxiTQvDA1NTVBBfosbltpHb
-         z/tSIbhJauoc5gE/0a2Olb3rmDz2IIaJ2ubfRHX9JX8+Dr+eVkJMNHYFdHKrWLwUiM
-         fq/i9WVj+ry2A==
+        b=Q6zRsn2Tr6iCnqSH928m6R0lDRsD3DQyaplO0RptbM3aI2V1HNKQGGca5uYPTkJJQ
+         q2VBCOoq/EQJwInWM0p0AOQqeWZ+4cT+sJ0WgRWzajpgQGsO/rA3HyNkX+O5+pSlPd
+         MD6gi0QNNbae39amVCaOsJCeGjBxOpsxB4A2sXeuVfW1jDEXofXkH3nl0VoiO0Q1ev
+         R3hWWmvuBXW3ppZHwAzMah1suxo8LPDe+yafIX/Zo5fnG3ZnrNPL5/huswno15uJ2F
+         Q6g/SdeWVvJeQ3JZU4c+EKXnXRHZ9K1nvn9A5+8Nr+zajGWrHmcugS+neNRipm6ysx
+         WSQBPIpAnE/Fw==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     tytso@mit.edu, adilger.kernel@dilger.ca, djwong@kernel.org,
         david@fromorbit.com, trondmy@hammerspace.com, neilb@suse.de,
@@ -41,9 +41,9 @@ Cc:     linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
         linux-ext4@vger.kernel.org, linux-nfs@vger.kernel.org,
         linux-xfs@vger.kernel.org
-Subject: [PATCH v8 RESEND 1/8] fs: uninline inode_query_iversion
-Date:   Tue, 24 Jan 2023 14:30:18 -0500
-Message-Id: <20230124193025.185781-2-jlayton@kernel.org>
+Subject: [PATCH v8 RESEND 4/8] nfs: report the inode version in getattr if requested
+Date:   Tue, 24 Jan 2023 14:30:21 -0500
+Message-Id: <20230124193025.185781-5-jlayton@kernel.org>
 X-Mailer: git-send-email 2.39.1
 In-Reply-To: <20230124193025.185781-1-jlayton@kernel.org>
 References: <20230124193025.185781-1-jlayton@kernel.org>
@@ -53,113 +53,72 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+Allow NFS to report the i_version in getattr requests. Since the cost to
+fetch it is relatively cheap, do it unconditionally and just set the
+flag if it looks like it's valid. Also, conditionally enable the
+MONOTONIC flag when the server reports its change attr type as such.
+
 Reviewed-by: NeilBrown <neilb@suse.de>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/libfs.c               | 36 ++++++++++++++++++++++++++++++++++++
- include/linux/iversion.h | 38 ++------------------------------------
- 2 files changed, 38 insertions(+), 36 deletions(-)
+ fs/nfs/inode.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
-diff --git a/fs/libfs.c b/fs/libfs.c
-index aada4e7c8713..17ecc47696e1 100644
---- a/fs/libfs.c
-+++ b/fs/libfs.c
-@@ -1582,3 +1582,39 @@ bool inode_maybe_inc_iversion(struct inode *inode, bool force)
- 	return true;
- }
- EXPORT_SYMBOL(inode_maybe_inc_iversion);
-+
-+/**
-+ * inode_query_iversion - read i_version for later use
-+ * @inode: inode from which i_version should be read
-+ *
-+ * Read the inode i_version counter. This should be used by callers that wish
-+ * to store the returned i_version for later comparison. This will guarantee
-+ * that a later query of the i_version will result in a different value if
-+ * anything has changed.
-+ *
-+ * In this implementation, we fetch the current value, set the QUERIED flag and
-+ * then try to swap it into place with a cmpxchg, if it wasn't already set. If
-+ * that fails, we try again with the newly fetched value from the cmpxchg.
-+ */
-+u64 inode_query_iversion(struct inode *inode)
-+{
-+	u64 cur, new;
-+
-+	cur = inode_peek_iversion_raw(inode);
-+	do {
-+		/* If flag is already set, then no need to swap */
-+		if (cur & I_VERSION_QUERIED) {
-+			/*
-+			 * This barrier (and the implicit barrier in the
-+			 * cmpxchg below) pairs with the barrier in
-+			 * inode_maybe_inc_iversion().
-+			 */
-+			smp_mb();
-+			break;
-+		}
-+
-+		new = cur | I_VERSION_QUERIED;
-+	} while (!atomic64_try_cmpxchg(&inode->i_version, &cur, new));
-+	return cur >> I_VERSION_QUERIED_SHIFT;
-+}
-+EXPORT_SYMBOL(inode_query_iversion);
-diff --git a/include/linux/iversion.h b/include/linux/iversion.h
-index e27bd4f55d84..6755d8b4f20b 100644
---- a/include/linux/iversion.h
-+++ b/include/linux/iversion.h
-@@ -234,42 +234,6 @@ inode_peek_iversion(const struct inode *inode)
- 	return inode_peek_iversion_raw(inode) >> I_VERSION_QUERIED_SHIFT;
+diff --git a/fs/nfs/inode.c b/fs/nfs/inode.c
+index e98ee7599eeb..756ad4fa6f2a 100644
+--- a/fs/nfs/inode.c
++++ b/fs/nfs/inode.c
+@@ -825,6 +825,8 @@ static u32 nfs_get_valid_attrmask(struct inode *inode)
+ 		reply_mask |= STATX_UID | STATX_GID;
+ 	if (!(cache_validity & NFS_INO_INVALID_BLOCKS))
+ 		reply_mask |= STATX_BLOCKS;
++	if (!(cache_validity & NFS_INO_INVALID_CHANGE))
++		reply_mask |= STATX_CHANGE_COOKIE;
+ 	return reply_mask;
  }
  
--/**
-- * inode_query_iversion - read i_version for later use
-- * @inode: inode from which i_version should be read
-- *
-- * Read the inode i_version counter. This should be used by callers that wish
-- * to store the returned i_version for later comparison. This will guarantee
-- * that a later query of the i_version will result in a different value if
-- * anything has changed.
-- *
-- * In this implementation, we fetch the current value, set the QUERIED flag and
-- * then try to swap it into place with a cmpxchg, if it wasn't already set. If
-- * that fails, we try again with the newly fetched value from the cmpxchg.
-- */
--static inline u64
--inode_query_iversion(struct inode *inode)
--{
--	u64 cur, new;
--
--	cur = inode_peek_iversion_raw(inode);
--	do {
--		/* If flag is already set, then no need to swap */
--		if (cur & I_VERSION_QUERIED) {
--			/*
--			 * This barrier (and the implicit barrier in the
--			 * cmpxchg below) pairs with the barrier in
--			 * inode_maybe_inc_iversion().
--			 */
--			smp_mb();
--			break;
--		}
--
--		new = cur | I_VERSION_QUERIED;
--	} while (!atomic64_try_cmpxchg(&inode->i_version, &cur, new));
--	return cur >> I_VERSION_QUERIED_SHIFT;
--}
--
- /*
-  * For filesystems without any sort of change attribute, the best we can
-  * do is fake one up from the ctime:
-@@ -283,6 +247,8 @@ static inline u64 time_to_chattr(struct timespec64 *t)
- 	return chattr;
- }
+@@ -843,7 +845,8 @@ int nfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
  
-+u64 inode_query_iversion(struct inode *inode);
-+
- /**
-  * inode_eq_iversion_raw - check whether the raw i_version counter has changed
-  * @inode: inode to check
+ 	request_mask &= STATX_TYPE | STATX_MODE | STATX_NLINK | STATX_UID |
+ 			STATX_GID | STATX_ATIME | STATX_MTIME | STATX_CTIME |
+-			STATX_INO | STATX_SIZE | STATX_BLOCKS;
++			STATX_INO | STATX_SIZE | STATX_BLOCKS | STATX_BTIME |
++			STATX_CHANGE_COOKIE;
+ 
+ 	if ((query_flags & AT_STATX_DONT_SYNC) && !force_sync) {
+ 		if (readdirplus_enabled)
+@@ -851,8 +854,8 @@ int nfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
+ 		goto out_no_revalidate;
+ 	}
+ 
+-	/* Flush out writes to the server in order to update c/mtime.  */
+-	if ((request_mask & (STATX_CTIME | STATX_MTIME)) &&
++	/* Flush out writes to the server in order to update c/mtime/version.  */
++	if ((request_mask & (STATX_CTIME | STATX_MTIME | STATX_CHANGE_COOKIE)) &&
+ 	    S_ISREG(inode->i_mode))
+ 		filemap_write_and_wait(inode->i_mapping);
+ 
+@@ -872,7 +875,8 @@ int nfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
+ 	/* Is the user requesting attributes that might need revalidation? */
+ 	if (!(request_mask & (STATX_MODE|STATX_NLINK|STATX_ATIME|STATX_CTIME|
+ 					STATX_MTIME|STATX_UID|STATX_GID|
+-					STATX_SIZE|STATX_BLOCKS)))
++					STATX_SIZE|STATX_BLOCKS|
++					STATX_CHANGE_COOKIE)))
+ 		goto out_no_revalidate;
+ 
+ 	/* Check whether the cached attributes are stale */
+@@ -910,6 +914,10 @@ int nfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
+ 
+ 	generic_fillattr(&init_user_ns, inode, stat);
+ 	stat->ino = nfs_compat_user_ino64(NFS_FILEID(inode));
++	stat->change_cookie = inode_peek_iversion_raw(inode);
++	stat->attributes_mask |= STATX_ATTR_CHANGE_MONOTONIC;
++	if (server->change_attr_type != NFS4_CHANGE_TYPE_IS_UNDEFINED)
++		stat->attributes |= STATX_ATTR_CHANGE_MONOTONIC;
+ 	if (S_ISDIR(inode->i_mode))
+ 		stat->blksize = NFS_SERVER(inode)->dtsize;
+ out:
 -- 
 2.39.1
 
