@@ -2,31 +2,31 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20029C636D0
-	for <ceph-devel@archiver.kernel.org>; Mon, 30 Jan 2023 09:23:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64F86C64EC4
+	for <ceph-devel@archiver.kernel.org>; Mon, 30 Jan 2023 09:23:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235759AbjA3JXd (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 30 Jan 2023 04:23:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54930 "EHLO
+        id S236162AbjA3JXo (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 30 Jan 2023 04:23:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54980 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234878AbjA3JXc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jan 2023 04:23:32 -0500
+        with ESMTP id S230335AbjA3JXi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jan 2023 04:23:38 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23D701024A;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23F2510276;
         Mon, 30 Jan 2023 01:23:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=lCuBrdiApHtnAzdlL9jd8/orKVtuLY/i0Sero01PH48=; b=gUt9fXuq6v7ElJkjGIu4Bt2k6I
-        aie9JrU1FF7iS8hNoPZplHZMIg/mjCy9+CuXAh/U/DNgLjS6V1ufgxJp2NQMex5tHZQGfnrKiKRKo
-        caqpxM1HRuxRxX61XnnyxOSlZ2/Jq47eap8gN/lH6+L4ZPbDi3w4YLBF5OHjyJWW13xcFRDWCqAUZ
-        NKpMf5yhHzm/uS9x384Srna47NYmLZm+gDq7sZpO/NDG+BHvojVyEMNCK01EInd7TUHZ7+Fo+Bd26
-        ywRu7rwlcWBFPjfGdWJeRjwhamdKyIPJEjKoaPO4rYQ0QXObm0HMjgFoMXTg096Bm2LCYjvYSlGAx
-        FW6FwsxA==;
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=C+v5jKduF/6CPyL8Gd3IL/7SXabgum11sMqCASR0Rjw=; b=Dia0dS4DHkPCJzEQ3GL2aBg3Jf
+        0FzC/sN3iLUP+N8J/1A/U87NBJ+uyEpKkpnh+GuSWq6sEuXcf5jfTNBBOYnUnu05pKwV+mnr+dBW+
+        l0jnhp5PE+zCcWsLLECOowRAOnKIGdMtYEAr62jvNYfNktvspZGptBMO1NjlmVs4DyDbGSYB+KmII
+        HfShoMOrXlSn1TvP3kFHgvZeJnAgNWIbRUDvtlJJtj0z9JYqIs7xD4hBcx6o2hbcuHX9I8P5ctpcD
+        xaxVcGiDk4JK0m74OCpuzA/189QfcEoJAAt91OlSeRWPyROrJOO9qX+PqmUAJXTwLAZqU7f0l1PqF
+        PvDhAwFw==;
 Received: from [2001:4bb8:19a:272a:732e:e417:47d7:2f4a] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pMQMS-002nyI-W6; Mon, 30 Jan 2023 09:22:01 +0000
+        id 1pMQMe-002o0P-Jq; Mon, 30 Jan 2023 09:22:13 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     Ilya Dryomov <idryomov@gmail.com>,
@@ -59,10 +59,12 @@ Cc:     Ilya Dryomov <idryomov@gmail.com>,
         linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
         devel@lists.orangefs.org, io-uring@vger.kernel.org,
         linux-mm@kvack.org
-Subject: add bvec initialization helpers
-Date:   Mon, 30 Jan 2023 10:21:34 +0100
-Message-Id: <20230130092157.1759539-1-hch@lst.de>
+Subject: [PATCH 02/23] block: add a bvec_set_folio helper
+Date:   Mon, 30 Jan 2023 10:21:36 +0100
+Message-Id: <20230130092157.1759539-3-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
+In-Reply-To: <20230130092157.1759539-1-hch@lst.de>
+References: <20230130092157.1759539-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
@@ -70,40 +72,39 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Hi all,
+A smaller wrapper around bvec_set_page that takes a folio instead.
+There are only two potential users for this in the tree, but the number
+will grow in the future.
 
-this series adds the helpers to initalize a bvec.  These remove open coding of
-bvec internals and help with experimenting with other representations like
-a phys_addr_t instead of page + offset.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ include/linux/bvec.h | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-Diffstat:
- block/bio-integrity.c             |    7 ------
- block/bio.c                       |   12 +----------
- drivers/block/rbd.c               |    7 ++----
- drivers/block/virtio_blk.c        |    4 ---
- drivers/block/zram/zram_drv.c     |   15 +++-----------
- drivers/nvme/host/core.c          |    4 ---
- drivers/nvme/target/io-cmd-file.c |   10 +--------
- drivers/nvme/target/tcp.c         |    5 +---
- drivers/scsi/sd.c                 |   36 ++++++++++++++++------------------
- drivers/target/target_core_file.c |   18 +++++------------
- drivers/vhost/vringh.c            |    5 +---
- fs/afs/write.c                    |    8 ++-----
- fs/ceph/file.c                    |   10 ++++-----
- fs/cifs/connect.c                 |    5 ++--
- fs/cifs/fscache.c                 |   16 +++++----------
- fs/cifs/misc.c                    |    5 +---
- fs/cifs/smb2ops.c                 |    6 ++---
- fs/coredump.c                     |    7 +-----
- fs/nfs/fscache.c                  |   16 +++++----------
- fs/orangefs/inode.c               |   22 ++++++--------------
- fs/splice.c                       |    5 +---
- include/linux/bvec.h              |   40 ++++++++++++++++++++++++++++++++++++++
- io_uring/rsrc.c                   |    4 ---
- mm/page_io.c                      |    8 +------
- net/ceph/messenger_v1.c           |    7 +-----
- net/ceph/messenger_v2.c           |   28 ++++++++++----------------
- net/rxrpc/rxperf.c                |    8 ++-----
- net/sunrpc/svcsock.c              |    7 +-----
- net/sunrpc/xdr.c                  |    5 +---
- 29 files changed, 143 insertions(+), 187 deletions(-)
+diff --git a/include/linux/bvec.h b/include/linux/bvec.h
+index 9e3dac51eb26b6..f094512ce3bda9 100644
+--- a/include/linux/bvec.h
++++ b/include/linux/bvec.h
+@@ -50,6 +50,19 @@ static inline void bvec_set_page(struct bio_vec *bv, struct page *page,
+ 	bv->bv_offset = offset;
+ }
+ 
++/**
++ * bvec_set_folio - initialize a bvec based off a struct folio
++ * @bv:		bvec to initialize
++ * @page:	folio the bvec should point to
++ * @len:	length of the bvec
++ * @offset:	offset into the folio
++ */
++static inline void bvec_set_folio(struct bio_vec *bv, struct folio *folio,
++		unsigned int len, unsigned int offset)
++{
++	bvec_set_page(bv, &folio->page, len, offset);
++}
++
+ struct bvec_iter {
+ 	sector_t		bi_sector;	/* device address in 512 byte
+ 						   sectors */
+-- 
+2.39.0
+
