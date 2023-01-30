@@ -2,144 +2,187 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CDB9DC61D97
-	for <ceph-devel@archiver.kernel.org>; Sun, 29 Jan 2023 01:59:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88DB5C54EAA
+	for <ceph-devel@archiver.kernel.org>; Mon, 30 Jan 2023 08:43:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230523AbjA2B7r (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 28 Jan 2023 20:59:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52784 "EHLO
+        id S236002AbjA3Inn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 30 Jan 2023 03:43:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229999AbjA2B7q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jan 2023 20:59:46 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9388D22A12
-        for <ceph-devel@vger.kernel.org>; Sat, 28 Jan 2023 17:58:58 -0800 (PST)
+        with ESMTP id S229728AbjA3Inm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jan 2023 03:43:42 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E5B7868B
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jan 2023 00:42:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1674957537;
+        s=mimecast20190719; t=1675068176;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=Lm/zleevAOHfhvldCPeoe9BMwYFKEqLFrBFPxs3/KEc=;
-        b=B8gAt7xL7l3VYY+6qylCtk7j5SXbgq7avJ4JaJHTy/IcaZvss7M5LNvG69cNcDNLTHKa4o
-        uldvoCQLAyW53r8ZsPbzXqoLCtGziGLjvpH0RoV5qM4+pBfC+OAWZ+H6DMgV4b4sR/NRtr
-        q8pil2muC8HVQv9hVSqXEBnE0JFBjJI=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-152-OCC8c0lBP-G-AOwkzG5cLQ-1; Sat, 28 Jan 2023 20:58:55 -0500
-X-MC-Unique: OCC8c0lBP-G-AOwkzG5cLQ-1
-Received: by mail-pj1-f72.google.com with SMTP id y6-20020a17090ad70600b0022c755b04fcso807622pju.1
-        for <ceph-devel@vger.kernel.org>; Sat, 28 Jan 2023 17:58:55 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Lm/zleevAOHfhvldCPeoe9BMwYFKEqLFrBFPxs3/KEc=;
-        b=obSd9NHuoIfilV6ybwqeSmj8cJh+XyM4MTF1nUpyfjoipD6APhtIcyDSQwXIlbBbt2
-         Kd7uH0u/gc3Y8Lsp6WOhRMD3jv++WIm18AxeJcUFxsIZuL1EnFaPdj1vcFtxwrAAdjjS
-         +IDbiYRr3/+SB39jEircwV0HJzVoR3ukLhNh4TW7Sl2/kbCi7OLgHYPRvuwqJtRbya+Q
-         G0jXSabuELCoFtRwMrc6FxpIN0U4K69FOScQkcEJesSI1Rl9XVkNWO+FcErKJxA/kflp
-         bu2qJfNAWxEpPdNNZ4iJ0AFdmK9biNeboNCYTI+fprMXXRUUyKorarkPaRzAiTy+MKjb
-         RTGQ==
-X-Gm-Message-State: AO0yUKUXgluosRM3eL4vOTQAJJHOPN8v0TvHb4LFukSCHfi91gj1QyAt
-        c7lIInOcUpGO9DyUzOkDhxATH8g8y+MY4BIxuROazB/UJKijmZSTG07BJhCE3eosFqLz/TujIW2
-        uYFcrNkrIDEYz1aHBEHukgw==
-X-Received: by 2002:a17:90b:33ca:b0:22c:8161:5143 with SMTP id lk10-20020a17090b33ca00b0022c81615143mr1820631pjb.31.1674957534919;
-        Sat, 28 Jan 2023 17:58:54 -0800 (PST)
-X-Google-Smtp-Source: AK7set+0eABGxp7P0r69pDt8iQjz6/XQJEhFNcULQp0eOZnRElg6OTXH7uyrlt9e64oz2AHPfsSkgQ==
-X-Received: by 2002:a17:90b:33ca:b0:22c:8161:5143 with SMTP id lk10-20020a17090b33ca00b0022c81615143mr1820618pjb.31.1674957534635;
-        Sat, 28 Jan 2023 17:58:54 -0800 (PST)
-Received: from [10.72.13.156] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id q95-20020a17090a1b6800b0022698aa22d9sm5357735pjq.31.2023.01.28.17.58.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 28 Jan 2023 17:58:54 -0800 (PST)
-Message-ID: <6c931f0e-45ca-725e-02ab-403e0031fa74@redhat.com>
-Date:   Sun, 29 Jan 2023 09:58:48 +0800
+        bh=7xmmmZIvExNK+mf4h+0PoIqx3ZCItJavRQgySFI+NHw=;
+        b=erDkk1UJx7RU/UzripDPKSFecZHwY7ezPrapBzOiSSlt1ClcUirKKZFhx8h0LKU+Cma4JL
+        j/HaNCmPlg2IrkaaIw3qBbf7qAeMNsjezzrdj0f//eEYnt4+Ihv/U31HNxGyoAaMaoeybs
+        bPQUUdBsR0m5DTlrh50qirkXIrCNK20=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-567-QqsDAJ5TMnmWxx8V6dM5Sw-1; Mon, 30 Jan 2023 03:42:55 -0500
+X-MC-Unique: QqsDAJ5TMnmWxx8V6dM5Sw-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D895D3806118;
+        Mon, 30 Jan 2023 08:42:54 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2CFCB401531A;
+        Mon, 30 Jan 2023 08:42:51 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
+Cc:     jlayton@kernel.org, mchangir@redhat.com, vshankar@redhat.com,
+        lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH v3 1/2] libceph: defer removing the req from osdc just after req->r_callback
+Date:   Mon, 30 Jan 2023 16:41:45 +0800
+Message-Id: <20230130084147.122440-2-xiubli@redhat.com>
+In-Reply-To: <20230130084147.122440-1-xiubli@redhat.com>
+References: <20230130084147.122440-1-xiubli@redhat.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [PATCH v2] ceph: drop the messages from MDS when unmouting
-Content-Language: en-US
-To:     Ilya Dryomov <idryomov@gmail.com>
-Cc:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
-        ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        mchangir@redhat.com, vshankar@redhat.com
-References: <20221221093031.132792-1-xiubli@redhat.com>
- <Y8lvXRmHKGdORhs5@suse.de> <Y8pus+5ZciJa/apW@suse.de>
- <cfd149ba-69cb-6514-db03-5cbd113bf5dc@redhat.com> <Y85eRQlbwt4Z4xko@suse.de>
- <e11c7958-62c6-d960-77db-e4fae33543e0@redhat.com> <Y8/P0kg4VtC6UtD9@suse.de>
- <85021e1d-6668-47cf-e1b6-6cde8d0fe46d@redhat.com>
- <CAOi1vP8DtKgsuDjzu7otp2HB41nbtUAydfcpNzJQUCk=V_xaUw@mail.gmail.com>
- <05ce0c89-6b40-20eb-a2f3-af1fdd5bc516@redhat.com>
- <CAOi1vP8jSHtseVveGegXOCbFyjrbamJ=WUunA3L0OrxBEnTaEQ@mail.gmail.com>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <CAOi1vP8jSHtseVveGegXOCbFyjrbamJ=WUunA3L0OrxBEnTaEQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.2
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+From: Xiubo Li <xiubli@redhat.com>
 
-On 29/01/2023 01:41, Ilya Dryomov wrote:
-> On Sat, Jan 28, 2023 at 4:12 AM Xiubo Li <xiubli@redhat.com> wrote:
-[...]
->>> Hi Xiubo,
->>>
->>> I haven't looked into the actual problem that you trying to fix here
->>> but this patch seems wrong and very unlikely to fly.  The messenger
->>> invokes the OSD request callback outside of osd->lock and osdc->lock
->>> critical sections on purpose to avoid deadlocks.  This goes way back
->>> and also consistent with how Objecter behaves in userspace.
->> Hi Ilya
->>
->> This is just a draft patch here.
->>
->> I didn't test other cases yet and only tested the issue here in cephfs
->> and it succeeded.
->>
->> The root cause is the sequence issue to make the sync_filesystem()
->> failing to wait the last osd request, which is the last
->> req->r_callback() isn't finished yet the waiter is woke up. And more
->> detail please see my comment in
->> https://tracker.ceph.com/issues/58126?issue_count=405&issue_position=3&next_issue_id=58082&prev_issue_id=58564#note-7.
-> Hi Xiubo,
->
-> This seems to boil down to an expectation mismatch.  The diagram in the
-> tracker comment seems to point the finger at ceph_osdc_sync() because
-> it appears to return while req->r_callback is still running.  This can
-> indeed be the case but note that ceph_osdc_sync() has never waited for
-> any higher-level callback -- req->r_callback could schedule some
-> delayed work which the OSD client would know nothing about, after all.
-> ceph_osdc_sync() just waits for a safe/commit reply from an OSD (and
-> nowadays all replies are safe -- unsafe/ack replies aren't really
-> a thing anymore).
+The sync_filesystem() will flush all the dirty buffer and submit the
+osd reqs to the osdc and then is blocked to wait for all the reqs to
+finish. But the when the reqs' replies come, the reqs will be removed
+from osdc just before the req->r_callback()s are called. Which means
+the sync_filesystem() will be woke up by leaving the req->r_callback()s
+are still running.
 
-Hi Ilya,
+This will be buggy when the waiter require the req->r_callback()s to
+release some resources before continuing. So we need to make sure the
+req->r_callback()s are called before removing the reqs from the osdc.
 
-Yeah, for cephfs the req->r_callback() will release all the resources 
-directly the unmounting thread is waiting for and it's enough.
+WARNING: CPU: 4 PID: 168846 at fs/crypto/keyring.c:242 fscrypt_destroy_keyring+0x7e/0xd0
+CPU: 4 PID: 168846 Comm: umount Tainted: G S  6.1.0-rc5-ceph-g72ead199864c #1
+Hardware name: Supermicro SYS-5018R-WR/X10SRW-F, BIOS 2.0 12/17/2015
+RIP: 0010:fscrypt_destroy_keyring+0x7e/0xd0
+RSP: 0018:ffffc9000b277e28 EFLAGS: 00010202
+RAX: 0000000000000002 RBX: ffff88810d52ac00 RCX: ffff88810b56aa00
+RDX: 0000000080000000 RSI: ffffffff822f3a09 RDI: ffff888108f59000
+RBP: ffff8881d394fb88 R08: 0000000000000028 R09: 0000000000000000
+R10: 0000000000000001 R11: 11ff4fe6834fcd91 R12: ffff8881d394fc40
+R13: ffff888108f59000 R14: ffff8881d394f800 R15: 0000000000000000
+FS:  00007fd83f6f1080(0000) GS:ffff88885fd00000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007f918d417000 CR3: 000000017f89a005 CR4: 00000000003706e0
+DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+Call Trace:
+<TASK>
+generic_shutdown_super+0x47/0x120
+kill_anon_super+0x14/0x30
+ceph_kill_sb+0x36/0x90 [ceph]
+deactivate_locked_super+0x29/0x60
+cleanup_mnt+0xb8/0x140
+task_work_run+0x67/0xb0
+exit_to_user_mode_prepare+0x23d/0x240
+syscall_exit_to_user_mode+0x25/0x60
+do_syscall_64+0x40/0x80
+entry_SYSCALL_64_after_hwframe+0x63/0xcd
+RIP: 0033:0x7fd83dc39e9b
 
-For the higher-level callback you mentioned above in cephfs it should be 
-at the same time the last req->r_callback() will flush the dirty 
-cap/snap to MDSs, which may send some ack replies back later and will 
-ihold() the inodes, and this will cause another crash in 
-https://tracker.ceph.com/issues/58126?issue_count=405&issue_position=3&next_issue_id=58082&prev_issue_id=58564#note-5. 
-This is another story, if the unmounting finishes just before the acks 
-come they will be dropped directly, if the acks come faster while the 
-unmouting is not finished yet it will update the inodes and then the 
-inodes will be evicted. So the acks makes no sense any more and this is 
-why I need this patch to drop the ack replies.
+URL: https://tracker.ceph.com/issues/58126
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ net/ceph/osd_client.c | 43 +++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 35 insertions(+), 8 deletions(-)
 
-Thanks
-
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 78b622178a3d..db3d93d3e692 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2507,7 +2507,7 @@ static void submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	__submit_request(req, wrlocked);
+ }
+ 
+-static void finish_request(struct ceph_osd_request *req)
++static void __finish_request(struct ceph_osd_request *req)
+ {
+ 	struct ceph_osd_client *osdc = req->r_osdc;
+ 
+@@ -2516,12 +2516,6 @@ static void finish_request(struct ceph_osd_request *req)
+ 
+ 	req->r_end_latency = ktime_get();
+ 
+-	if (req->r_osd) {
+-		ceph_init_sparse_read(&req->r_osd->o_sparse_read);
+-		unlink_request(req->r_osd, req);
+-	}
+-	atomic_dec(&osdc->num_requests);
+-
+ 	/*
+ 	 * If an OSD has failed or returned and a request has been sent
+ 	 * twice, it's possible to get a reply and end up here while the
+@@ -2532,13 +2526,46 @@ static void finish_request(struct ceph_osd_request *req)
+ 	ceph_msg_revoke_incoming(req->r_reply);
+ }
+ 
++static void __remove_request(struct ceph_osd_request *req)
++{
++	struct ceph_osd_client *osdc = req->r_osdc;
++
++	dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
++
++	if (req->r_osd) {
++		ceph_init_sparse_read(&req->r_osd->o_sparse_read);
++		unlink_request(req->r_osd, req);
++	}
++	atomic_dec(&osdc->num_requests);
++}
++
++static void finish_request(struct ceph_osd_request *req)
++{
++	__finish_request(req);
++	__remove_request(req);
++}
++
+ static void __complete_request(struct ceph_osd_request *req)
+ {
++	struct ceph_osd_client *osdc = req->r_osdc;
++	struct ceph_osd *osd = req->r_osd;
++
+ 	dout("%s req %p tid %llu cb %ps result %d\n", __func__, req,
+ 	     req->r_tid, req->r_callback, req->r_result);
+ 
+ 	if (req->r_callback)
+ 		req->r_callback(req);
++
++	down_read(&osdc->lock);
++	if (osd) {
++		mutex_lock(&osd->lock);
++		__remove_request(req);
++		mutex_unlock(&osd->lock);
++	} else {
++		atomic_dec(&osdc->num_requests);
++	}
++	up_read(&osdc->lock);
++
+ 	complete_all(&req->r_completion);
+ 	ceph_osdc_put_request(req);
+ }
+@@ -3873,7 +3900,7 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
+ 	req->r_version = m.user_version;
+ 	req->r_result = m.result ?: data_len;
+-	finish_request(req);
++	__finish_request(req);
+ 	mutex_unlock(&osd->lock);
+ 	up_read(&osdc->lock);
+ 
 -- 
-Best Regards,
-
-Xiubo Li (李秀波)
-
-Email: xiubli@redhat.com/xiubli@ibm.com
-Slack: @Xiubo Li
+2.31.1
 
