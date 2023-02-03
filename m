@@ -2,31 +2,31 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A2B9C6FA9E
-	for <ceph-devel@archiver.kernel.org>; Fri,  3 Feb 2023 15:07:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 436D0C742A7
+	for <ceph-devel@archiver.kernel.org>; Fri,  3 Feb 2023 15:07:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233815AbjBCPHh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 3 Feb 2023 10:07:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47910 "EHLO
+        id S233893AbjBCPHt (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 3 Feb 2023 10:07:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47916 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233785AbjBCPHd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2023 10:07:33 -0500
+        with ESMTP id S233857AbjBCPHl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2023 10:07:41 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F304A2A5E;
-        Fri,  3 Feb 2023 07:07:31 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FBCAA2A51;
+        Fri,  3 Feb 2023 07:07:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=nFCgusCGETcddag92jej4sXk0TvWuHs0ZPKsULSCPb4=; b=VvdE+ZMNDitBJaDdEp8YyznFtB
-        iN9Z/tIQLsz5kAYFso0Gnb29VhMIMMjq0Xa52Hg2oAwra3qYJ8leh61xv2WRAmp6eYYEnF9rPB0hn
-        CGP4sJszmLXtbIu3oxAhBi+tVJRqU5ijKNzXBSeXgn0S5/8UNYECoUx1AT2C6CQWflLpHcHO3elmk
-        uhkrh15eFLQWZt0+lFjCIzywMB3BS5yrZHdPmDhECnToZPgve299mjDhwNv3YpUc90wJVBRSay8qM
-        5KPFXtBhcrG0zPARc13WWewfCF4RKRRehkdJ7hfXkiFxiBJGOoWmbWiCdqrOOO2VdL9nKra4pLm23
-        DC1xa06w==;
+        bh=qOELs8Cf+3DRHH4YZ5i8Y7BY08du3RSg74OTiYB5sHQ=; b=aF5Qbqrg1yclOtyaI4gTKBWydF
+        RggQAyGRBco620c8Fi869LlPO2pe8evEIqDoV1ozOXdNfytn1MRinE/6QYY5k2oPlPJhB01no6VtD
+        eldvco5iwWgUqJuF6Ln9UEwZNa6v1GVbT/6Kwoxq6v6E47EA3+X0x/5UWmfkwWrsPlCary6PtwIur
+        8CI+Wl9GP1YyGgxKum6MPQS4lap8xnIx1Ov95K0LpqVrUkLoMLragJkM0cWq7Yw5U2U5JFh4+zQgw
+        adzFS91VzTwjl1q4AJys+nyWOqDq0dqD/Ug/qOVE9Xw8ZapK+WSEj6v0Tc7w/kwwgNzmawXYW/9S4
+        JiaBbcyQ==;
 Received: from [2001:4bb8:19a:272a:910:bb67:7287:f956] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pNxeL-002afR-1b; Fri, 03 Feb 2023 15:06:49 +0000
+        id 1pNxeR-002aju-IY; Fri, 03 Feb 2023 15:06:56 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     Ilya Dryomov <idryomov@gmail.com>,
@@ -58,10 +58,10 @@ Cc:     Ilya Dryomov <idryomov@gmail.com>,
         linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
         linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
         devel@lists.orangefs.org, io-uring@vger.kernel.org,
-        linux-mm@kvack.org
-Subject: [PATCH 04/23] sd: factor out a sd_set_special_bvec helper
-Date:   Fri,  3 Feb 2023 16:06:15 +0100
-Message-Id: <20230203150634.3199647-5-hch@lst.de>
+        linux-mm@kvack.org, Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH 06/23] nvmet: use bvec_set_page to initialize bvecs
+Date:   Fri,  3 Feb 2023 16:06:17 +0100
+Message-Id: <20230203150634.3199647-7-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20230203150634.3199647-1-hch@lst.de>
 References: <20230203150634.3199647-1-hch@lst.de>
@@ -72,92 +72,60 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add a helper for setting up the special_bvec instead of open coding it
-in three place, and use the new bvec_set_page helper to initialize
-special_vec.
+Use the bvec_set_page helper to initialize bvecs.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 Reviewed-by: Chaitanya Kulkarni <kch@nvidia.com>
+Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 ---
- drivers/scsi/sd.c | 36 +++++++++++++++++-------------------
- 1 file changed, 17 insertions(+), 19 deletions(-)
+ drivers/nvme/target/io-cmd-file.c | 10 ++--------
+ drivers/nvme/target/tcp.c         |  5 ++---
+ 2 files changed, 4 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 47dafe6b8a66d1..277960decc104b 100644
---- a/drivers/scsi/sd.c
-+++ b/drivers/scsi/sd.c
-@@ -831,6 +831,19 @@ static void sd_config_discard(struct scsi_disk *sdkp, unsigned int mode)
- 	blk_queue_max_discard_sectors(q, max_blocks * (logical_block_size >> 9));
+diff --git a/drivers/nvme/target/io-cmd-file.c b/drivers/nvme/target/io-cmd-file.c
+index 871c4f32f443f5..2d068439b129c5 100644
+--- a/drivers/nvme/target/io-cmd-file.c
++++ b/drivers/nvme/target/io-cmd-file.c
+@@ -73,13 +73,6 @@ int nvmet_file_ns_enable(struct nvmet_ns *ns)
+ 	return ret;
  }
  
-+static void *sd_set_special_bvec(struct request *rq, unsigned int data_len)
-+{
-+	struct page *page;
-+
-+	page = mempool_alloc(sd_page_pool, GFP_ATOMIC);
-+	if (!page)
-+		return NULL;
-+	clear_highpage(page);
-+	bvec_set_page(&rq->special_vec, page, data_len, 0);
-+	rq->rq_flags |= RQF_SPECIAL_PAYLOAD;
-+	return bvec_virt(&rq->special_vec);
-+}
-+
- static blk_status_t sd_setup_unmap_cmnd(struct scsi_cmnd *cmd)
+-static void nvmet_file_init_bvec(struct bio_vec *bv, struct scatterlist *sg)
+-{
+-	bv->bv_page = sg_page(sg);
+-	bv->bv_offset = sg->offset;
+-	bv->bv_len = sg->length;
+-}
+-
+ static ssize_t nvmet_file_submit_bvec(struct nvmet_req *req, loff_t pos,
+ 		unsigned long nr_segs, size_t count, int ki_flags)
  {
- 	struct scsi_device *sdp = cmd->device;
-@@ -841,19 +854,14 @@ static blk_status_t sd_setup_unmap_cmnd(struct scsi_cmnd *cmd)
- 	unsigned int data_len = 24;
- 	char *buf;
+@@ -146,7 +139,8 @@ static bool nvmet_file_execute_io(struct nvmet_req *req, int ki_flags)
  
--	rq->special_vec.bv_page = mempool_alloc(sd_page_pool, GFP_ATOMIC);
--	if (!rq->special_vec.bv_page)
-+	buf = sd_set_special_bvec(rq, data_len);
-+	if (!buf)
- 		return BLK_STS_RESOURCE;
--	clear_highpage(rq->special_vec.bv_page);
--	rq->special_vec.bv_offset = 0;
--	rq->special_vec.bv_len = data_len;
--	rq->rq_flags |= RQF_SPECIAL_PAYLOAD;
+ 	memset(&req->f.iocb, 0, sizeof(struct kiocb));
+ 	for_each_sg(req->sg, sg, req->sg_cnt, i) {
+-		nvmet_file_init_bvec(&req->f.bvec[bv_cnt], sg);
++		bvec_set_page(&req->f.bvec[bv_cnt], sg_page(sg), sg->length,
++			      sg->offset);
+ 		len += req->f.bvec[bv_cnt].bv_len;
+ 		total_len += req->f.bvec[bv_cnt].bv_len;
+ 		bv_cnt++;
+diff --git a/drivers/nvme/target/tcp.c b/drivers/nvme/target/tcp.c
+index cc05c094de221d..c5759eb503d004 100644
+--- a/drivers/nvme/target/tcp.c
++++ b/drivers/nvme/target/tcp.c
+@@ -321,9 +321,8 @@ static void nvmet_tcp_build_pdu_iovec(struct nvmet_tcp_cmd *cmd)
+ 	while (length) {
+ 		u32 iov_len = min_t(u32, length, sg->length - sg_offset);
  
- 	cmd->cmd_len = 10;
- 	cmd->cmnd[0] = UNMAP;
- 	cmd->cmnd[8] = 24;
+-		iov->bv_page = sg_page(sg);
+-		iov->bv_len = sg->length;
+-		iov->bv_offset = sg->offset + sg_offset;
++		bvec_set_page(iov, sg_page(sg), sg->length,
++				sg->offset + sg_offset);
  
--	buf = bvec_virt(&rq->special_vec);
- 	put_unaligned_be16(6 + 16, &buf[0]);
- 	put_unaligned_be16(16, &buf[2]);
- 	put_unaligned_be64(lba, &buf[8]);
-@@ -876,13 +884,8 @@ static blk_status_t sd_setup_write_same16_cmnd(struct scsi_cmnd *cmd,
- 	u32 nr_blocks = sectors_to_logical(sdp, blk_rq_sectors(rq));
- 	u32 data_len = sdp->sector_size;
- 
--	rq->special_vec.bv_page = mempool_alloc(sd_page_pool, GFP_ATOMIC);
--	if (!rq->special_vec.bv_page)
-+	if (!sd_set_special_bvec(rq, data_len))
- 		return BLK_STS_RESOURCE;
--	clear_highpage(rq->special_vec.bv_page);
--	rq->special_vec.bv_offset = 0;
--	rq->special_vec.bv_len = data_len;
--	rq->rq_flags |= RQF_SPECIAL_PAYLOAD;
- 
- 	cmd->cmd_len = 16;
- 	cmd->cmnd[0] = WRITE_SAME_16;
-@@ -908,13 +911,8 @@ static blk_status_t sd_setup_write_same10_cmnd(struct scsi_cmnd *cmd,
- 	u32 nr_blocks = sectors_to_logical(sdp, blk_rq_sectors(rq));
- 	u32 data_len = sdp->sector_size;
- 
--	rq->special_vec.bv_page = mempool_alloc(sd_page_pool, GFP_ATOMIC);
--	if (!rq->special_vec.bv_page)
-+	if (!sd_set_special_bvec(rq, data_len))
- 		return BLK_STS_RESOURCE;
--	clear_highpage(rq->special_vec.bv_page);
--	rq->special_vec.bv_offset = 0;
--	rq->special_vec.bv_len = data_len;
--	rq->rq_flags |= RQF_SPECIAL_PAYLOAD;
- 
- 	cmd->cmd_len = 10;
- 	cmd->cmnd[0] = WRITE_SAME;
+ 		length -= iov_len;
+ 		sg = sg_next(sg);
 -- 
 2.39.0
 
