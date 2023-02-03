@@ -2,31 +2,31 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C3CBC6FD18
-	for <ceph-devel@archiver.kernel.org>; Fri,  3 Feb 2023 15:08:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70D7DC636D6
+	for <ceph-devel@archiver.kernel.org>; Fri,  3 Feb 2023 15:09:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234078AbjBCPI1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 3 Feb 2023 10:08:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48780 "EHLO
+        id S234134AbjBCPI6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 3 Feb 2023 10:08:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233857AbjBCPIM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2023 10:08:12 -0500
+        with ESMTP id S234038AbjBCPIP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2023 10:08:15 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 529D422785;
-        Fri,  3 Feb 2023 07:08:10 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A65345BAE;
+        Fri,  3 Feb 2023 07:08:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=iTork4lgSqwAnNzEK3lzK1UwHk37chVOVoUGPRhe1ko=; b=30k+iDgncAPWoIs1asbdJ9AypT
-        pITGuCJcL7UjH77N0dHLrWCTR4iipsDLVSW1QkzBjl3E2+n1+Xe4dpJ+eb12NdzBrOfqIv3wyv73u
-        0B5GW0AkghrWW2KBjdcpriHbaq67fty0PDv5EFHX1PNPyTXgz54iiBjDGBvM6y6LkzWeilykH2Oee
-        NaDGnsn4CsqXIde+48ZnjSRU7C6ug5s0+Gn27MqKY0Us8YXKsPBEPH+CPwhJFQTz+s60KM0HlDquy
-        RajcB2tsdJjsrHGRty4MY961bDPOHyuiO74hKxUINUfu4DP1ybIQAYnV766eoXhGVLyK/brlG2Q0D
-        dPD5YyZw==;
+        bh=kORmqO/9LhO3glrNFnQu4Hg9yMGINb4dC3Y3cN2SyCY=; b=41bYhxy4j/IlMzxFEoHx+Uxb/Q
+        AoA7/uGEehM9h47lmjn1p7wMCxt9YN2chQRTwM9T0U2R33+6P5uw3dFU034X2phyy1FaKZr6D6uZm
+        Iyou7KFZCyjd3dhhg9p+jbvkL4Nxb6yurGLVKQNvr7SNXOMsbnNpwH65HvZRyfpPA1+nugxrw2oX8
+        3pBDdo50wrWXKZ0GhYhG/bn2vy2Q2l9fNSxBr73HSlVDIWqwtCuv2e6F0W3sVOzyMhe3c85OjeDqi
+        nGFDVsH+onY5nUtibJnC/vm3UzB7E89Fvv+DR2t9yt7brPMGQYvg04XXc1+uC6uVfGrrzMou4bMyC
+        6VNrGmvQ==;
 Received: from [2001:4bb8:19a:272a:910:bb67:7287:f956] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pNxeu-002b0b-M3; Fri, 03 Feb 2023 15:07:25 +0000
+        id 1pNxf1-002b5b-7k; Fri, 03 Feb 2023 15:07:31 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     Ilya Dryomov <idryomov@gmail.com>,
@@ -59,9 +59,9 @@ Cc:     Ilya Dryomov <idryomov@gmail.com>,
         linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
         devel@lists.orangefs.org, io-uring@vger.kernel.org,
         linux-mm@kvack.org
-Subject: [PATCH 14/23] coredump: use bvec_set_page to initialize a bvec
-Date:   Fri,  3 Feb 2023 16:06:25 +0100
-Message-Id: <20230203150634.3199647-15-hch@lst.de>
+Subject: [PATCH 16/23] orangefs: use bvec_set_{page,folio} to initialize bvecs
+Date:   Fri,  3 Feb 2023 16:06:27 +0100
+Message-Id: <20230203150634.3199647-17-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20230203150634.3199647-1-hch@lst.de>
 References: <20230203150634.3199647-1-hch@lst.de>
@@ -72,38 +72,61 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Use the bvec_set_page helper to initialize a bvec.
+Use the bvec_set_page and bvec_set_folio helpers to initialize bvecs.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- fs/coredump.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ fs/orangefs/inode.c | 22 +++++++---------------
+ 1 file changed, 7 insertions(+), 15 deletions(-)
 
-diff --git a/fs/coredump.c b/fs/coredump.c
-index de78bde2991beb..0a6873a9c4d0cd 100644
---- a/fs/coredump.c
-+++ b/fs/coredump.c
-@@ -840,11 +840,7 @@ static int __dump_skip(struct coredump_params *cprm, size_t nr)
+diff --git a/fs/orangefs/inode.c b/fs/orangefs/inode.c
+index 4df56089438664..215f6cb3dc4129 100644
+--- a/fs/orangefs/inode.c
++++ b/fs/orangefs/inode.c
+@@ -49,10 +49,8 @@ static int orangefs_writepage_locked(struct page *page,
+ 	/* Should've been handled in orangefs_invalidate_folio. */
+ 	WARN_ON(off == len || off + wlen > len);
  
- static int dump_emit_page(struct coredump_params *cprm, struct page *page)
- {
--	struct bio_vec bvec = {
--		.bv_page	= page,
--		.bv_offset	= 0,
--		.bv_len		= PAGE_SIZE,
--	};
-+	struct bio_vec bvec;
- 	struct iov_iter iter;
- 	struct file *file = cprm->file;
- 	loff_t pos;
-@@ -860,6 +856,7 @@ static int dump_emit_page(struct coredump_params *cprm, struct page *page)
- 	if (dump_interrupted())
- 		return 0;
- 	pos = file->f_pos;
-+	bvec_set_page(&bvec, page, PAGE_SIZE, 0);
- 	iov_iter_bvec(&iter, ITER_SOURCE, &bvec, 1, PAGE_SIZE);
- 	n = __kernel_write_iter(cprm->file, &iter, &pos);
- 	if (n != PAGE_SIZE)
+-	bv.bv_page = page;
+-	bv.bv_len = wlen;
+-	bv.bv_offset = off % PAGE_SIZE;
+ 	WARN_ON(wlen == 0);
++	bvec_set_page(&bv, page, wlen, off % PAGE_SIZE);
+ 	iov_iter_bvec(&iter, ITER_SOURCE, &bv, 1, wlen);
+ 
+ 	ret = wait_for_direct_io(ORANGEFS_IO_WRITE, inode, &off, &iter, wlen,
+@@ -102,15 +100,11 @@ static int orangefs_writepages_work(struct orangefs_writepages *ow,
+ 
+ 	for (i = 0; i < ow->npages; i++) {
+ 		set_page_writeback(ow->pages[i]);
+-		ow->bv[i].bv_page = ow->pages[i];
+-		ow->bv[i].bv_len = min(page_offset(ow->pages[i]) + PAGE_SIZE,
+-		    ow->off + ow->len) -
+-		    max(ow->off, page_offset(ow->pages[i]));
+-		if (i == 0)
+-			ow->bv[i].bv_offset = ow->off -
+-			    page_offset(ow->pages[i]);
+-		else
+-			ow->bv[i].bv_offset = 0;
++		bvec_set_page(&ow->bv[i], ow->pages[i],
++			      min(page_offset(ow->pages[i]) + PAGE_SIZE,
++			          ow->off + ow->len) -
++			      max(ow->off, page_offset(ow->pages[i])),
++			      i == 0 ? ow->off - page_offset(ow->pages[i]) : 0);
+ 	}
+ 	iov_iter_bvec(&iter, ITER_SOURCE, ow->bv, ow->npages, ow->len);
+ 
+@@ -300,9 +294,7 @@ static int orangefs_read_folio(struct file *file, struct folio *folio)
+ 		orangefs_launder_folio(folio);
+ 
+ 	off = folio_pos(folio);
+-	bv.bv_page = &folio->page;
+-	bv.bv_len = folio_size(folio);
+-	bv.bv_offset = 0;
++	bvec_set_folio(&bv, folio, folio_size(folio), 0);
+ 	iov_iter_bvec(&iter, ITER_DEST, &bv, 1, folio_size(folio));
+ 
+ 	ret = wait_for_direct_io(ORANGEFS_IO_READ, inode, &off, &iter,
 -- 
 2.39.0
 
