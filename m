@@ -2,67 +2,116 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0776C6379F
-	for <ceph-devel@archiver.kernel.org>; Fri,  3 Feb 2023 18:45:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E971C05027
+	for <ceph-devel@archiver.kernel.org>; Mon,  6 Feb 2023 11:58:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233250AbjBCSpU (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 3 Feb 2023 13:45:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37222 "EHLO
+        id S229995AbjBFL6t (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 6 Feb 2023 06:58:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233540AbjBCSpS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2023 13:45:18 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DBEC9D59D;
-        Fri,  3 Feb 2023 10:45:18 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9E56E61FCC;
-        Fri,  3 Feb 2023 18:45:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 13B5EC4339C;
-        Fri,  3 Feb 2023 18:45:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1675449917;
-        bh=ykX6ZQiBmOKmiR2+55NILGaqptYs0bs05t54KLmifkw=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=A5s2oOpQ4TyxyHW3MhIqsCwqFEMi84cZNbCW66Ore0qr7R8dqrRFyEIqq4jrftcfu
-         b5vy5ZCdGlC9WdmKNKfL5hwJGFU8+uk81M2E3BH1QkwcD2ej+Ott0PvG69R8mW3P2o
-         nVQcolpwtlyJig8lY5BqGNAoOhm/d7Ok52yZuH1zZ+bvp6pfJan9DAcM/V8eyMwmAB
-         wod+T/t2jVN73SbC+n7mTFgA+tUK4PZACaJOtPojPIwvJHkRlHHUf3GI7B59sOiUs+
-         ul3rp5tVaNioT+L30TQ9iUPfAAR7vMNF2vHGwEpIsPfK/J+/aZhktPZFmPU/kY/NWE
-         dGOOnnMJ6iKsA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 01964E270C4;
-        Fri,  3 Feb 2023 18:45:17 +0000 (UTC)
-Subject: Re: [GIT PULL] Ceph fix for 6.2-rc7
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20230203181313.452449-1-idryomov@gmail.com>
-References: <20230203181313.452449-1-idryomov@gmail.com>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20230203181313.452449-1-idryomov@gmail.com>
-X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-6.2-rc7
-X-PR-Tracked-Commit-Id: a68e564adcaa69b0930809fb64d9d5f7d9c32ba9
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 7b753a909f426f2789d9db6f357c3d59180a9354
-Message-Id: <167544991700.32203.2575132313753824824.pr-tracker-bot@kernel.org>
-Date:   Fri, 03 Feb 2023 18:45:17 +0000
-To:     Ilya Dryomov <idryomov@gmail.com>
-Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+        with ESMTP id S229841AbjBFL6s (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2023 06:58:48 -0500
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB50E12F28;
+        Mon,  6 Feb 2023 03:58:46 -0800 (PST)
+Received: by mail-ed1-x529.google.com with SMTP id r3so1654445edq.13;
+        Mon, 06 Feb 2023 03:58:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ppxjTfPrt+fO380TECKEc+9j8f0qNsSPRjIV/2FlqhQ=;
+        b=aDm4q22FFAJMiLL7psWLsdmiCHHEWeaqe9df4Cj2D05wF/rp53Il86syfJA1cqw67v
+         HUOvdu1YcgM4SPClp8Dd2doiCfEznIjnrbzAqn82morUSGeNbGooGE9blGu0FeFs+gEE
+         7C3zyIBGTzIdj2oEZWCS/ncOj6bKDeXn6VU6W4JdYX/vP6w3pMnjyLdXUV0DCklJxq2i
+         mLc3nyKE4ZwMaVsPqIPEcEldIKluga7OBFj21jfHwkzJJFOYhCl41bMQTcJbpPYdRfsY
+         +otpM+3upWgko7msDXMRnG/EHjeNvmzBNYgrT8P5Z/2kPKEpdDUJZBmNn9TP3swBwqI0
+         yovA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ppxjTfPrt+fO380TECKEc+9j8f0qNsSPRjIV/2FlqhQ=;
+        b=ukBcN+91KNb46B82Emjl3KNpUG8g4QRMIM2rGZKAhn1X3KB/BJbIUwaPqTaLqbtznS
+         2Hi9eQyX2o19kAGKN/m2mUDSCvgo+mvz4TwARFR2SCaAREnMKZQbKcaLSi/fYGfwoJsj
+         gMfIwo7dloZUBOnUNmYbV0Y3t3rYZolN8ukrFi+ZtUlYxu7ZfMjyUuGLHl+L2fSPVpfU
+         2xkSoedXqrqP5Z+hhjJgqNUeqoQ3hHiugSZpF4ogvVOK8z5HSKYjzU+xirqGRo2PLrTa
+         vh/v3GIai+FM9ziTD6V2/3LHYU5g4QBX721jXikdi5SEDONgvmM8R0DEugYIWpqfI+Z6
+         ZTLQ==
+X-Gm-Message-State: AO0yUKVPQ0AAPqtmJkzAtPmtorTw2fbOdz5s+1V/mDu7uEBHq2X+ZX4B
+        MhkhCXHuXI95ol7tijfPGoAvSZem/H8hcSWCFOFrZcAyj/o=
+X-Google-Smtp-Source: AK7set8dT1GLWLBBhtdwxzc0ZvOt+xNblBgmSsJtrdZ2/k4U93LHXST34508M3qaGnCip1/HHUWhGEzFRzwQ5P5nDX0=
+X-Received: by 2002:a50:d71b:0:b0:4aa:ab5b:99e7 with SMTP id
+ t27-20020a50d71b000000b004aaab5b99e7mr10418edi.0.1675684725237; Mon, 06 Feb
+ 2023 03:58:45 -0800 (PST)
+MIME-Version: 1.0
+References: <20230203141515.125205-1-n.petrova@fintech.ru>
+In-Reply-To: <20230203141515.125205-1-n.petrova@fintech.ru>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Mon, 6 Feb 2023 12:58:33 +0100
+Message-ID: <CAOi1vP_7Oaw8O-p2X1xymzym1Xf_RZeN0u=SeE4Zbc2y+AfgYA@mail.gmail.com>
+Subject: Re: [PATCH] rbd: avoid double free memory on error path in rbd_dev_create()
+To:     Natalia Petrova <n.petrova@fintech.ru>
+Cc:     Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        lvc-project@linuxtesting.org,
+        Alexey Khoroshilov <khoroshilov@ispras.ru>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The pull request you sent on Fri,  3 Feb 2023 19:13:13 +0100:
+On Fri, Feb 3, 2023 at 3:15 PM Natalia Petrova <n.petrova@fintech.ru> wrote:
+>
+> If rbd_dev_create() fails after assignment 'opts' to 'rbd_dev->opts',
+> double free of 'rbd_options' happens:
+> one is in rbd_dev_free() and another one is in do_rbd_add().
+>
+> Found by Linux Verification Center (linuxtesting.org) with SVACE.
+>
+> Fixes: 1643dfa4c2c8 ("rbd: introduce a per-device ordered workqueue")
+> Signed-off-by: Natalia Petrova <n.petrova@fintech.ru>
+> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+> ---
+>  drivers/block/rbd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 04453f4a319c..ab6bfc352cde 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -5357,7 +5357,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+>         if (!rbd_dev)
+>                 return NULL;
+>
+> -       rbd_dev->opts = opts;
+>
+>         /* get an id and fill in device name */
+>         rbd_dev->dev_id = ida_simple_get(&rbd_dev_id_ida, 0,
+> @@ -5372,6 +5371,7 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+>         if (!rbd_dev->task_wq)
+>                 goto fail_dev_id;
+>
+> +       rbd_dev->opts = opts;
+>         /* we have a ref from do_rbd_add() */
+>         __module_get(THIS_MODULE);
+>
+> --
+> 2.34.1
+>
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-6.2-rc7
+Hi Natalia,
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/7b753a909f426f2789d9db6f357c3d59180a9354
+It seems like a similar issue is affecting rbd_dev->rbd_client and
+rbd_dev->spec.  Unlike rbd_dev->opts, they are ref-counted and I'm
+guessing that the verification tool doesn't go that deep.
 
-Thank you!
+I'd prefer all three to be addressed in the same change, since it's the
+same error path.  Would you be willing to look into that and post a new
+revision or should I treat just this patch as a bug report?
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Thanks,
+
+                Ilya
