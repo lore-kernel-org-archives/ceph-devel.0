@@ -2,112 +2,121 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30EA9C636D4
-	for <ceph-devel@archiver.kernel.org>; Thu,  9 Feb 2023 11:23:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3067C05027
+	for <ceph-devel@archiver.kernel.org>; Thu,  9 Feb 2023 12:11:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230478AbjBILXS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 9 Feb 2023 06:23:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51854 "EHLO
+        id S229646AbjBIMLq (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 9 Feb 2023 07:11:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49692 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230476AbjBILW1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2023 06:22:27 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 327AC5FB7F;
-        Thu,  9 Feb 2023 03:18:29 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 87C44B82102;
-        Thu,  9 Feb 2023 11:17:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 94321C4339B;
-        Thu,  9 Feb 2023 11:17:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1675941447;
-        bh=AiUFxwgP6JG71yEWTBEA9ukmIi5IsJRhe5/HEhzoA5s=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Uyed2p/L3bFwXoThpFzQoIOw+cCd3u/wOjkNW8MleNwC9Exriz7fcdwURVD3GQssh
-         Hzv1S2c5Waeae0LsXqZ920MjwI9gYWQCvI+4dvZO1SHkKJ83yojiJgpmAqf/vWVLb2
-         AWMzrLLeFxTLHM5JUlwL2IXjChMgj4oIj8TKA9OETFARfNK8VXvk4jhBiG9CbzfcYl
-         PCiPwb+tB1gU4Tm892s8rWz3RPsN5G8MkhxhS9y8omr4lK7TdXVh8cmKru4GoG6qSm
-         +4BKlXaLIO3c4xcKeh5RUpbESsAPTIrVZYhdqgVEYUKs661ZHvHt6GoU1hf3HgejGD
-         qGn9xZuCkFH8w==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Xiubo Li <xiubli@redhat.com>, Venky Shankar <vshankar@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.1 37/38] ceph: move mount state enum to super.h
-Date:   Thu,  9 Feb 2023 06:14:56 -0500
-Message-Id: <20230209111459.1891941-37-sashal@kernel.org>
-X-Mailer: git-send-email 2.39.0
-In-Reply-To: <20230209111459.1891941-1-sashal@kernel.org>
-References: <20230209111459.1891941-1-sashal@kernel.org>
+        with ESMTP id S229798AbjBIMLS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2023 07:11:18 -0500
+Received: from exchange.fintech.ru (exchange.fintech.ru [195.54.195.159])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50E4161B4;
+        Thu,  9 Feb 2023 04:09:29 -0800 (PST)
+Received: from Ex16-01.fintech.ru (10.0.10.18) by exchange.fintech.ru
+ (195.54.195.169) with Microsoft SMTP Server (TLS) id 14.3.498.0; Thu, 9 Feb
+ 2023 15:09:26 +0300
+Received: from KANASHIN1.fintech.ru (10.0.253.125) by Ex16-01.fintech.ru
+ (10.0.10.18) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2242.4; Thu, 9 Feb 2023
+ 15:09:25 +0300
+From:   Natalia Petrova <n.petrova@fintech.ru>
+To:     Ilya Dryomov <idryomov@gmail.com>
+CC:     Natalia Petrova <n.petrova@fintech.ru>,
+        Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        Jens Axboe <axboe@kernel.dk>, <ceph-devel@vger.kernel.org>,
+        <linux-block@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <lvc-project@linuxtesting.org>,
+        "Alexey Khoroshilov" <khoroshilov@ispras.ru>,
+        Nikita Zhandarovich <n.zhandarovich@fintech.ru>
+Subject: [PATCH v2] rbd: fix freeing memory of 'rbd_dev->opts', 'rbd_dev->spec', 'rbd_dev->rbd_client'
+Date:   Thu, 9 Feb 2023 15:09:23 +0300
+Message-ID: <20230209120923.331111-1-n.petrova@fintech.ru>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <06f51bab-42e1-975a-ad4f-6815c2063adb@redhat.com>
+References: 
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.0.253.125]
+X-ClientProxiedBy: Ex16-01.fintech.ru (10.0.10.18) To Ex16-01.fintech.ru
+ (10.0.10.18)
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+If the rbd_dev_create() fails after assignment 'opts' to 'rbd_dev->opts',
+double free of 'rbd_options' happens:
+one is in rbd_dev_free() and another one is in do_rbd_add().
 
-[ Upstream commit b38b17b6a01ca4e738af097a1529910646ef4270 ]
+If the rbd_dev_create() fails, for 'spec' it will be freed in
+rbd_dev_create()->rbd_spec_put() first and then in do_rbd_add()
+it will call rbd_spec_put() again. The same for 'rbd_client'.
+Unlike 'rbd_dev->opts', 'rbd_dev->spec' and 'rbd_dev->rbd_client'
+are ref-counted, that's why the ref-count underflow warning
+should be generated in rbd_spec_put() and rbd_put_client()
+to handle the return values of kref_put().
 
-These flags are only used in ceph filesystem in fs/ceph, so just
-move it to the place it should be.
+Found by Linux Verification Center (linuxtesting.org) with SVACE.
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
-Reviewed-by: Venky Shankar <vshankar@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Fixes: 1643dfa4c2c8 ("rbd: introduce a per-device ordered workqueue")
+Signed-off-by: Natalia Petrova <n.petrova@fintech.ru>
+Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+Signed-off-by: Nikita Zhandarovich <n.zhandarovich@fintech.ru>
 ---
- fs/ceph/super.h              | 10 ++++++++++
- include/linux/ceph/libceph.h | 10 ----------
- 2 files changed, 10 insertions(+), 10 deletions(-)
+v2: Remarks on the processing of 'rbd_dev->spec' and 'rbd_dev->rbd_client' 
+by Ilya Dryomov <idryomov@gmail.com> and Xiubo Li <xiubli@redhat.com> 
+were taken into account.
+ drivers/block/rbd.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index ae4126f634101..735279b2ceb55 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -100,6 +100,16 @@ struct ceph_mount_options {
- 	char *mon_addr;
- };
- 
-+/* mount state */
-+enum {
-+	CEPH_MOUNT_MOUNTING,
-+	CEPH_MOUNT_MOUNTED,
-+	CEPH_MOUNT_UNMOUNTING,
-+	CEPH_MOUNT_UNMOUNTED,
-+	CEPH_MOUNT_SHUTDOWN,
-+	CEPH_MOUNT_RECOVER,
-+};
-+
- #define CEPH_ASYNC_CREATE_CONFLICT_BITS 8
- 
- struct ceph_fs_client {
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 00af2c98da75a..4497d0a6772cd 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -99,16 +99,6 @@ struct ceph_options {
- 
- #define CEPH_AUTH_NAME_DEFAULT   "guest"
- 
--/* mount state */
--enum {
--	CEPH_MOUNT_MOUNTING,
--	CEPH_MOUNT_MOUNTED,
--	CEPH_MOUNT_UNMOUNTING,
--	CEPH_MOUNT_UNMOUNTED,
--	CEPH_MOUNT_SHUTDOWN,
--	CEPH_MOUNT_RECOVER,
--};
--
- static inline unsigned long ceph_timeout_jiffies(unsigned long timeout)
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 04453f4a319c..f3f253febe0f 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -889,8 +889,10 @@ static void rbd_client_release(struct kref *kref)
+  */
+ static void rbd_put_client(struct rbd_client *rbdc)
  {
- 	return timeout ?: MAX_SCHEDULE_TIMEOUT;
+-	if (rbdc)
+-		kref_put(&rbdc->kref, rbd_client_release);
++	if (rbdc) {
++		if (!kref_put(&rbdc->kref, rbd_client_release))
++			pr_warn("The reference count underflow\n");
++	}
+ }
+ 
+ /*
+@@ -5225,8 +5227,10 @@ static struct rbd_spec *rbd_spec_get(struct rbd_spec *spec)
+ static void rbd_spec_free(struct kref *kref);
+ static void rbd_spec_put(struct rbd_spec *spec)
+ {
+-	if (spec)
+-		kref_put(&spec->kref, rbd_spec_free);
++	if (spec) {
++		if (!kref_put(&spec->kref, rbd_spec_free))
++			pr_warn("The reference count underflow\n");
++	}
+ }
+ 
+ static struct rbd_spec *rbd_spec_alloc(void)
+@@ -5357,7 +5361,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 	if (!rbd_dev)
+ 		return NULL;
+ 
+-	rbd_dev->opts = opts;
+ 
+ 	/* get an id and fill in device name */
+ 	rbd_dev->dev_id = ida_simple_get(&rbd_dev_id_ida, 0,
+@@ -5372,6 +5375,7 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 	if (!rbd_dev->task_wq)
+ 		goto fail_dev_id;
+ 
++	rbd_dev->opts = opts;
+ 	/* we have a ref from do_rbd_add() */
+ 	__module_get(THIS_MODULE);
+ 
 -- 
-2.39.0
+2.34.1
 
