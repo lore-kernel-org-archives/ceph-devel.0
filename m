@@ -2,167 +2,107 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAF46C636D7
-	for <ceph-devel@archiver.kernel.org>; Sat, 11 Feb 2023 09:41:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CFA58C64ED9
+	for <ceph-devel@archiver.kernel.org>; Mon, 13 Feb 2023 11:29:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229863AbjBKJlF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sat, 11 Feb 2023 04:41:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36982 "EHLO
+        id S230095AbjBML35 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 13 Feb 2023 06:29:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229477AbjBKJlE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Feb 2023 04:41:04 -0500
-Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 799453C29D;
-        Sat, 11 Feb 2023 01:41:03 -0800 (PST)
-Received: by mail-ej1-x636.google.com with SMTP id sa10so21319386ejc.9;
-        Sat, 11 Feb 2023 01:41:03 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=PKTTB4KrCAiL8SRqB2lSSGDnA1+HoHmmXJxC0p1EX7w=;
-        b=n8shbWQqvG5ZrwU7/06sMCBiVo+lHWO2xDR2rSNdC5TUWcTDu8JVVL3+jAYNL0h2oF
-         dHDftU1DzWK75WDjq1INxacyNDYK0Q/iDQdcP4uvGVWN3tW6ARxtvCql/MW+MsrA3NpY
-         C6rBX/bGjAl4tvi0Bhri6EhDob/XEI3wooouNTEm/4+8N8fFj7QgNT05RKDZNbal34Go
-         7T8JWXXlbikvuyCW2EN6iQi9cIsQYoOUfq4EgarUHco5jG0Eqfl2DmxfMVNLxgJmpt9n
-         Gi5Ew4Z/2/tAosrbLjGItjvz3OIrHwmIoZcutnRcEg7K0OD8KT/E3fH/epyHsbcPOUTH
-         W+2Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=PKTTB4KrCAiL8SRqB2lSSGDnA1+HoHmmXJxC0p1EX7w=;
-        b=Xjyv+4XtyO7GaJMEhB0zgTOxBqXsF4A11YJYpPZl4Ewm0yny8c4m8twgvmu6mIfwMK
-         o0HcnkjADB6RknRZP1DVTq0xuQ13rjHFGfuz1rrlbC50CUyPiZZsb9Jgc94XCK/wAO4N
-         R7OXKzLkZmjfG2HAfVfv6BlV2xsG6Gel4e+h+KVTnnE8MudBQgi+HNuLscQAi/CKtS/2
-         pdMkaJh0U26zKbLFr3N2YJ70tTdD/ilLlk7UYKUy7x3bn76zWUgYbeNGjSxVkzgJWcm8
-         E91KKVm0ixsufoek+7iqrbsvNIDWEAJe0JXLk6WC6wSvDKcHjGUIstqGUZVaGyz+pon2
-         AU5w==
-X-Gm-Message-State: AO0yUKX4pZPQ7mPQNclPfFVjUgzX7FCjV8PcxNXkn44SS9INYnzD+P36
-        hi3tdtLboxRi0sZ2K0hY6qgtc345GPRzvGBfKTucEnHsiqs=
-X-Google-Smtp-Source: AK7set86j/BnrX9H2DMZ1YIqefpYkzcgEtuGz0ePMJhYcApjmjxiU6GJLRZcJYPTlsHhKm/FMBWKAnGW8e0DQsc/CKU=
-X-Received: by 2002:a17:907:20b3:b0:87b:d79f:9953 with SMTP id
- pw19-20020a17090720b300b0087bd79f9953mr2041563ejb.11.1676108461930; Sat, 11
- Feb 2023 01:41:01 -0800 (PST)
+        with ESMTP id S231276AbjBML3y (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2023 06:29:54 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22C2D18163
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2023 03:28:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1676287732;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=91axYkgwIMCEz1WKAFTJX5qVVuOGqFHheqUFcZuc9sQ=;
+        b=JguSrXLJ53agJtnRY7xPM1qB08lSEAssFIscLiH+g83RK3W4PDgt92X+OrB4egyGCpEMAV
+        UIUEQsbeecE0TulCC3T5MXWbiS66J4xmrm4iY3I67ucuyWeXNJ60YeEgtU4E8y11XDfy9e
+        ljuYnvX6JWIGEiteUmrZ/vQNZWV7tDU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-557-WOIPIWVZMvSFn63JcUHuBw-1; Mon, 13 Feb 2023 06:28:51 -0500
+X-MC-Unique: WOIPIWVZMvSFn63JcUHuBw-1
+Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D88E2101A55E;
+        Mon, 13 Feb 2023 11:28:50 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 045D8492B15;
+        Mon, 13 Feb 2023 11:28:47 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
+Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
+        Xiubo Li <xiubli@redhat.com>, stable@vger.kernel.org
+Subject: [PATCH] ceph: update the time stamps and try to drop the suid/sgid
+Date:   Mon, 13 Feb 2023 19:28:34 +0800
+Message-Id: <20230213112834.15714-1-xiubli@redhat.com>
 MIME-Version: 1.0
-References: <06f51bab-42e1-975a-ad4f-6815c2063adb@redhat.com> <20230209120923.331111-1-n.petrova@fintech.ru>
-In-Reply-To: <20230209120923.331111-1-n.petrova@fintech.ru>
-From:   Ilya Dryomov <idryomov@gmail.com>
-Date:   Sat, 11 Feb 2023 10:40:50 +0100
-Message-ID: <CAOi1vP9Wuzsx81O+yu_w5P-W=GHdXNv-LfL1dD6O0NxkdedCMw@mail.gmail.com>
-Subject: Re: [PATCH v2] rbd: fix freeing memory of 'rbd_dev->opts',
- 'rbd_dev->spec', 'rbd_dev->rbd_client'
-To:     Natalia Petrova <n.petrova@fintech.ru>
-Cc:     Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        Jens Axboe <axboe@kernel.dk>, ceph-devel@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        lvc-project@linuxtesting.org,
-        Alexey Khoroshilov <khoroshilov@ispras.ru>,
-        Nikita Zhandarovich <n.zhandarovich@fintech.ru>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Feb 9, 2023 at 1:09 PM Natalia Petrova <n.petrova@fintech.ru> wrote:
->
-> If the rbd_dev_create() fails after assignment 'opts' to 'rbd_dev->opts',
-> double free of 'rbd_options' happens:
-> one is in rbd_dev_free() and another one is in do_rbd_add().
->
-> If the rbd_dev_create() fails, for 'spec' it will be freed in
-> rbd_dev_create()->rbd_spec_put() first and then in do_rbd_add()
-> it will call rbd_spec_put() again. The same for 'rbd_client'.
-> Unlike 'rbd_dev->opts', 'rbd_dev->spec' and 'rbd_dev->rbd_client'
-> are ref-counted, that's why the ref-count underflow warning
-> should be generated in rbd_spec_put() and rbd_put_client()
-> to handle the return values of kref_put().
+From: Xiubo Li <xiubli@redhat.com>
 
-Hi Natalia,
+The fallocate will try to clear the suid/sgid if a unprevileged user
+changed the file.
 
-I think you misinterpreted Xiubo.  The underflow warning would be
-printed by kref_put() (if one is lucky and the freed memory doesn't get
-immediately reallocated and overwritten in which case straight memory
-corruption would occur).  There is no need to attempt to print another
-warning here.
+There is no Posix item requires that we should clear the suid/sgid
+in fallocate code path but this is the default behaviour for most of
+the filesystems and the VFS layer. And also the same for the write
+code path, which have already support it.
 
-The problem is potential use-after-free on struct rbd_spec and struct
-rbd_client (which is what the warning is for).  This use-after-free is
-very similar in nature to what the tool that you are using found for
-struct rbd_options (the same bug on the same error path) except that
-reference counting is involved: instead of kfree() being called
-directly, it's called indirectly from rbd_spec_free() and
-rbd_client_release() through rbd_spec_put() and rbd_put_client()
-respectively.  Both of these structs have a refcount of 1 here which
-means that the first rbd_spec_free() or rbd_client_release() call is
-equivalent to kfree() and, when either of them is called again from
-do_rbd_add(), use-after-free would occur.
+And also we need to update the time stamps since the fallocate will
+change the file contents.
 
-Hope this helps,
+Cc: stable@vger.kernel.org
+URL: https://tracker.ceph.com/issues/58054
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/file.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-                Ilya
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 903de296f0d3..dee3b445f415 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -2502,6 +2502,9 @@ static long ceph_fallocate(struct file *file, int mode,
+ 	loff_t endoff = 0;
+ 	loff_t size;
+ 
++	dout("%s %p %llx.%llx mode %x, offset %llu length %llu\n", __func__,
++	     inode, ceph_vinop(inode), mode, offset, length);
++
+ 	if (mode != (FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE))
+ 		return -EOPNOTSUPP;
+ 
+@@ -2539,6 +2542,10 @@ static long ceph_fallocate(struct file *file, int mode,
+ 	if (ret < 0)
+ 		goto unlock;
+ 
++	ret = file_modified(file);
++	if (ret)
++		goto put_caps;
++
+ 	filemap_invalidate_lock(inode->i_mapping);
+ 	ceph_fscache_invalidate(inode, false);
+ 	ceph_zero_pagecache_range(inode, offset, length);
+@@ -2554,6 +2561,7 @@ static long ceph_fallocate(struct file *file, int mode,
+ 	}
+ 	filemap_invalidate_unlock(inode->i_mapping);
+ 
++put_caps:
+ 	ceph_put_cap_refs(ci, got);
+ unlock:
+ 	inode_unlock(inode);
+-- 
+2.31.1
 
->
-> Found by Linux Verification Center (linuxtesting.org) with SVACE.
->
-> Fixes: 1643dfa4c2c8 ("rbd: introduce a per-device ordered workqueue")
-> Signed-off-by: Natalia Petrova <n.petrova@fintech.ru>
-> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
-> Signed-off-by: Nikita Zhandarovich <n.zhandarovich@fintech.ru>
-> ---
-> v2: Remarks on the processing of 'rbd_dev->spec' and 'rbd_dev->rbd_client'
-> by Ilya Dryomov <idryomov@gmail.com> and Xiubo Li <xiubli@redhat.com>
-> were taken into account.
->  drivers/block/rbd.c | 14 +++++++++-----
->  1 file changed, 9 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 04453f4a319c..f3f253febe0f 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -889,8 +889,10 @@ static void rbd_client_release(struct kref *kref)
->   */
->  static void rbd_put_client(struct rbd_client *rbdc)
->  {
-> -       if (rbdc)
-> -               kref_put(&rbdc->kref, rbd_client_release);
-> +       if (rbdc) {
-> +               if (!kref_put(&rbdc->kref, rbd_client_release))
-> +                       pr_warn("The reference count underflow\n");
-> +       }
->  }
->
->  /*
-> @@ -5225,8 +5227,10 @@ static struct rbd_spec *rbd_spec_get(struct rbd_spec *spec)
->  static void rbd_spec_free(struct kref *kref);
->  static void rbd_spec_put(struct rbd_spec *spec)
->  {
-> -       if (spec)
-> -               kref_put(&spec->kref, rbd_spec_free);
-> +       if (spec) {
-> +               if (!kref_put(&spec->kref, rbd_spec_free))
-> +                       pr_warn("The reference count underflow\n");
-> +       }
->  }
->
->  static struct rbd_spec *rbd_spec_alloc(void)
-> @@ -5357,7 +5361,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
->         if (!rbd_dev)
->                 return NULL;
->
-> -       rbd_dev->opts = opts;
->
->         /* get an id and fill in device name */
->         rbd_dev->dev_id = ida_simple_get(&rbd_dev_id_ida, 0,
-> @@ -5372,6 +5375,7 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
->         if (!rbd_dev->task_wq)
->                 goto fail_dev_id;
->
-> +       rbd_dev->opts = opts;
->         /* we have a ref from do_rbd_add() */
->         __module_get(THIS_MODULE);
->
-> --
-> 2.34.1
->
