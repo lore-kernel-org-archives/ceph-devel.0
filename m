@@ -2,144 +2,85 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B1F4C64ED6
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:32:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0870BC64ED6
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:32:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230200AbjB0DcE (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 26 Feb 2023 22:32:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39658 "EHLO
+        id S230266AbjB0DcM (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 26 Feb 2023 22:32:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39926 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230040AbjB0Dby (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:31:54 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 458161CAD7
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:30:53 -0800 (PST)
+        with ESMTP id S230209AbjB0DcL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:32:11 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 123F51CF52
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:31:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677468625;
+        s=mimecast20190719; t=1677468638;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=+okoHS2VXh/0VKXh66IaVRuzJrzkc8zpC32RZwjOcX0=;
-        b=JPwtVarv7NG8YgZuC0bW9woyD5v6HEnDR/cBvA9YLL+cge7iX2RYH3uXtzie543Da6f/aF
-        YlICjjmwboIoU9c/Ggzj55Zctxr+h89kTCoI/nu0wISr8+W5eWKpSUbDA6yIeHVGsaZvrq
-        Mg+3fc5lctPxTtgO6cNIoNzQBUH8Rto=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=n7ZMGIMZC4aPGF/DohxQ7KeEY7YZ8BGEFgJt4BDmlb0=;
+        b=RwcfAnG+hKSZ1097eB36rkOnLMXGAWneKnW4rX0bvEN7Mo1IIX8HmZtvoBdxEPmS9z8Feg
+        GPlsm28pmigieVxDnHJh0b3rwAleT+8POUacOqOad03HenA4a/XIBv/OIhiR64NWLiG4u2
+        hxVMhx7ycaTheCMc0wO9jl1oEzM8xUE=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-347-I1TWNZVnNcClMIdfkaTWVg-1; Sun, 26 Feb 2023 22:30:23 -0500
-X-MC-Unique: I1TWNZVnNcClMIdfkaTWVg-1
+ us-mta-54-2pKg4Hr9NyaIHwmLqmL9eg-1; Sun, 26 Feb 2023 22:30:33 -0500
+X-MC-Unique: 2pKg4Hr9NyaIHwmLqmL9eg-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D79D1800B23;
-        Mon, 27 Feb 2023 03:30:22 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 18FA12A59556;
+        Mon, 27 Feb 2023 03:30:33 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1578A35454;
-        Mon, 27 Feb 2023 03:30:19 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4B4881731B;
+        Mon, 27 Feb 2023 03:30:29 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, lhenriques@suse.de, vshankar@redhat.com,
         mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v16 35/68] ceph: add some fscrypt guardrails
-Date:   Mon, 27 Feb 2023 11:27:40 +0800
-Message-Id: <20230227032813.337906-36-xiubli@redhat.com>
+Subject: [PATCH v16 38/68] ceph: don't allow changing layout on encrypted files/directories
+Date:   Mon, 27 Feb 2023 11:27:43 +0800
+Message-Id: <20230227032813.337906-39-xiubli@redhat.com>
 In-Reply-To: <20230227032813.337906-1-xiubli@redhat.com>
 References: <20230227032813.337906-1-xiubli@redhat.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Jeff Layton <jlayton@kernel.org>
+From: Luís Henriques <lhenriques@suse.de>
 
-Add the appropriate calls into fscrypt for various actions, including
-link, rename, setattr, and the open codepaths.
+Encryption is currently only supported on files/directories with layouts
+where stripe_count=1.  Forbid changing layouts when encryption is involved.
 
+Signed-off-by: Luis Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/dir.c   |  8 ++++++++
- fs/ceph/file.c  | 14 +++++++++++++-
- fs/ceph/inode.c |  4 ++++
- 3 files changed, 25 insertions(+), 1 deletion(-)
+ fs/ceph/ioctl.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 3fb76a86241e..9842cc7012ad 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1138,6 +1138,10 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return -EROFS;
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index 7f0e181d4329..679402bd80ba 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -294,6 +294,10 @@ static long ceph_set_encryption_policy(struct file *file, unsigned long arg)
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
  
-+	err = fscrypt_prepare_link(old_dentry, dir, dentry);
-+	if (err)
-+		return err;
++	/* encrypted directories can't have striped layout */
++	if (ci->i_layout.stripe_count > 1)
++		return -EINVAL;
 +
- 	dout("link in dir %p old_dentry %p dentry %p\n", dir,
- 	     old_dentry, dentry);
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LINK, USE_AUTH_MDS);
-@@ -1379,6 +1383,10 @@ static int ceph_rename(struct user_namespace *mnt_userns, struct inode *old_dir,
- 	if (err)
- 		return err;
- 
-+	err = fscrypt_prepare_rename(old_dir, old_dentry, new_dir, new_dentry, flags);
-+	if (err)
-+		return err;
-+
- 	dout("rename dir %p dentry %p to dir %p dentry %p\n",
- 	     old_dir, old_dentry, new_dir, new_dentry);
- 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 05fd27230e05..dff2587e5c4e 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -370,8 +370,13 @@ int ceph_open(struct inode *inode, struct file *file)
- 
- 	/* filter out O_CREAT|O_EXCL; vfs did that already.  yuck. */
- 	flags = file->f_flags & ~(O_CREAT|O_EXCL);
--	if (S_ISDIR(inode->i_mode))
-+	if (S_ISDIR(inode->i_mode)) {
- 		flags = O_DIRECTORY;  /* mds likes to know */
-+	} else if (S_ISREG(inode->i_mode)) {
-+		err = fscrypt_file_open(inode, file);
-+		if (err)
-+			return err;
-+	}
- 
- 	dout("open inode %p ino %llx.%llx file %p flags %d (%d)\n", inode,
- 	     ceph_vinop(inode), file, flags, file->f_flags);
-@@ -880,6 +885,13 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 		dout("atomic_open finish_no_open on dn %p\n", dn);
- 		err = finish_no_open(file, dn);
- 	} else {
-+		if (IS_ENCRYPTED(dir) &&
-+		    !fscrypt_has_permitted_context(dir, d_inode(dentry))) {
-+			pr_warn("Inconsistent encryption context (parent %llx:%llx child %llx:%llx)\n",
-+				ceph_vinop(dir), ceph_vinop(d_inode(dentry)));
-+			goto out_req;
-+		}
-+
- 		dout("atomic_open finish_open on dn %p\n", dn);
- 		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
- 			struct inode *newino = d_inode(dentry);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index cec86aae24d8..a6e408da783d 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2487,6 +2487,10 @@ int ceph_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
- 	if (ceph_inode_is_shutdown(inode))
- 		return -ESTALE;
- 
-+	err = fscrypt_prepare_setattr(dentry, attr);
-+	if (err)
-+		return err;
-+
- 	err = setattr_prepare(&init_user_ns, dentry, attr);
- 	if (err != 0)
- 		return err;
+ 	ret = vet_mds_for_fscrypt(file);
+ 	if (ret)
+ 		return ret;
 -- 
 2.31.1
 
