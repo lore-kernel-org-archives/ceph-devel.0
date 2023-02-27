@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EBC1C64ED6
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:34:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC8EAC6FA8E
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:34:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230426AbjB0DeF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 26 Feb 2023 22:34:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42532 "EHLO
+        id S230444AbjB0DeP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 26 Feb 2023 22:34:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230032AbjB0DeE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:34:04 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9AC21CAE0
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:32:46 -0800 (PST)
+        with ESMTP id S230003AbjB0DeN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:34:13 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FEC213DEE
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:32:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677468702;
+        s=mimecast20190719; t=1677468710;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=+IeZzOcGT/InNkVVGF5PK1LsJIyScybCxE6SuEYspn8=;
-        b=ipypX4+FPLpC5HLRvEcebjqg/CddCZ3q5vgp5qUib/HaffrW7n30xwmtwfTodaCpjULCTz
-        1uiYlVT0Qc483R4EexWU3jkstPJ6avnJlNoifJVoKJDVFO4m98c1Hrc6ptKyISb93iNS3Q
-        gLOYtar6P4eETeAkRzv0NxQ+6g1YQqs=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=lOTJ5pSFOK9Zv5w5UAo2l864k4/o2cRcKoAmi0iI83k=;
+        b=bIkvjpuvgUKlrk0C5Z6Tz0qFs/a5gXPa9qLOzhRrP6xJ/ZypEBQjpzCIOdp9Z0TrWXCEt/
+        LlKVOJNdxiuGFpXAFiMODuCpgabb8sXBirPaqilJ+sUEmZAH+5vS0zULduqxok/+K4T6Yf
+        uXAyRXsDrYgp0Jo3rzVEqUFzM1+uXc0=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-664-dIhpum8OPMS7_9tQuQvA5Q-1; Sun, 26 Feb 2023 22:31:39 -0500
-X-MC-Unique: dIhpum8OPMS7_9tQuQvA5Q-1
+ us-mta-227-wrQqLgBlPdi8TVPOiESksQ-1; Sun, 26 Feb 2023 22:31:49 -0500
+X-MC-Unique: wrQqLgBlPdi8TVPOiESksQ-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id CC434800B23;
-        Mon, 27 Feb 2023 03:31:38 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1094D380670B;
+        Mon, 27 Feb 2023 03:31:49 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 09DE135454;
-        Mon, 27 Feb 2023 03:31:35 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 42AE61731B;
+        Mon, 27 Feb 2023 03:31:45 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, lhenriques@suse.de, vshankar@redhat.com,
         mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v16 57/68] ceph: add fscrypt decryption support to ceph_netfs_issue_op
-Date:   Mon, 27 Feb 2023 11:28:02 +0800
-Message-Id: <20230227032813.337906-58-xiubli@redhat.com>
+Subject: [PATCH v16 60/68] ceph: fscrypt support for writepages
+Date:   Mon, 27 Feb 2023 11:28:05 +0800
+Message-Id: <20230227032813.337906-61-xiubli@redhat.com>
 In-Reply-To: <20230227032813.337906-1-xiubli@redhat.com>
 References: <20230227032813.337906-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -55,131 +55,187 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-Force the use of sparse reads when the inode is encrypted, and add the
-appropriate code to decrypt the extent map after receiving.
+Add the appropriate machinery to write back dirty data with encryption.
 
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c | 64 +++++++++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 55 insertions(+), 9 deletions(-)
+ fs/ceph/addr.c   | 63 +++++++++++++++++++++++++++++++++++++++---------
+ fs/ceph/crypto.h | 18 +++++++++++++-
+ 2 files changed, 68 insertions(+), 13 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 13d1c24d2f53..8ee7e5451d5f 100644
+index 45e80c51f486..5731b82bf368 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -18,6 +18,7 @@
- #include "mds_client.h"
- #include "cache.h"
- #include "metric.h"
-+#include "crypto.h"
- #include <linux/ceph/osd_client.h>
- #include <linux/ceph/striper.h>
- 
-@@ -216,7 +217,8 @@ static bool ceph_netfs_clamp_length(struct netfs_io_subrequest *subreq)
- 
- static void finish_netfs_read(struct ceph_osd_request *req)
+@@ -562,10 +562,12 @@ static u64 get_writepages_data_length(struct inode *inode,
+ 				      struct page *page, u64 start)
  {
--	struct ceph_fs_client *fsc = ceph_inode_to_client(req->r_inode);
-+	struct inode *inode = req->r_inode;
-+	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
- 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
- 	struct netfs_io_subrequest *subreq = req->r_priv;
- 	struct ceph_osd_req_op *op = &req->r_ops[0];
-@@ -230,16 +232,30 @@ static void finish_netfs_read(struct ceph_osd_request *req)
- 	     subreq->len, i_size_read(req->r_inode));
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	struct ceph_snap_context *snapc = page_snap_context(page);
++	struct ceph_snap_context *snapc;
+ 	struct ceph_cap_snap *capsnap = NULL;
+ 	u64 end = i_size_read(inode);
++	u64 ret;
  
- 	/* no object means success but no data */
--	if (sparse && err >= 0)
--		err = ceph_sparse_ext_map_end(op);
--	else if (err == -ENOENT)
-+	if (err == -ENOENT)
- 		err = 0;
- 	else if (err == -EBLOCKLISTED)
- 		fsc->blocklisted = true;
- 
--	if (err >= 0 && err < subreq->len)
--		__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
-+	if (err >= 0) {
-+		if (sparse && err > 0)
-+			err = ceph_sparse_ext_map_end(op);
-+		if (err < subreq->len)
-+			__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
-+		if (IS_ENCRYPTED(inode) && err > 0) {
-+			err = ceph_fscrypt_decrypt_extents(inode, osd_data->pages,
-+					subreq->start, op->extent.sparse_ext,
-+					op->extent.sparse_ext_cnt);
-+			if (err > subreq->len)
-+				err = subreq->len;
-+		}
-+	}
- 
-+	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-+		ceph_put_page_vector(osd_data->pages,
-+				     calc_pages_for(osd_data->alignment,
-+					osd_data->length), false);
-+	}
- 	netfs_subreq_terminated(subreq, err, false);
- 	iput(req->r_inode);
- }
-@@ -310,7 +326,8 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 	struct iov_iter iter;
- 	int err = 0;
- 	u64 len = subreq->len;
--	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
-+	bool sparse = IS_ENCRYPTED(inode) || ceph_test_mount_opt(fsc, SPARSEREAD);
-+	u64 off = subreq->start;
- 
- 	if (ceph_inode_is_shutdown(inode)) {
- 		err = -EIO;
-@@ -320,7 +337,9 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 	if (ceph_has_inline_data(ci) && ceph_netfs_issue_op_inline(subreq))
- 		return;
- 
--	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
-+	ceph_fscrypt_adjust_off_and_len(inode, &off, &len);
-+
-+	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, off, &len,
- 			0, 1, sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
- 			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
- 			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
-@@ -337,8 +356,35 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
++	snapc = page_snap_context(ceph_fscrypt_pagecache_page(page));
+ 	if (snapc != ci->i_head_snapc) {
+ 		bool found = false;
+ 		spin_lock(&ci->i_ceph_lock);
+@@ -580,9 +582,12 @@ static u64 get_writepages_data_length(struct inode *inode,
+ 		spin_unlock(&ci->i_ceph_lock);
+ 		WARN_ON(!found);
  	}
+-	if (end > page_offset(page) + thp_size(page))
+-		end = page_offset(page) + thp_size(page);
+-	return end > start ? end - start : 0;
++	if (end > ceph_fscrypt_page_offset(page) + thp_size(page))
++		end = ceph_fscrypt_page_offset(page) + thp_size(page);
++	ret = end > start ? end - start : 0;
++	if (ret && fscrypt_is_bounce_page(page))
++		ret = round_up(ret, CEPH_FSCRYPT_BLOCK_SIZE);
++	return ret;
+ }
  
- 	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
+ /*
+@@ -812,6 +817,11 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 		total_pages += num_pages;
+ 		for (j = 0; j < num_pages; j++) {
+ 			page = osd_data->pages[j];
++			if (fscrypt_is_bounce_page(page)) {
++				page = fscrypt_pagecache_page(page);
++				fscrypt_free_bounce_page(osd_data->pages[j]);
++				osd_data->pages[j] = page;
++			}
+ 			BUG_ON(!page);
+ 			WARN_ON(!PageUptodate(page));
+ 
+@@ -1073,9 +1083,28 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 				    fsc->mount_options->congestion_kb))
+ 				fsc->write_congested = true;
+ 
+-			pages[locked_pages++] = page;
+-			pvec.pages[i] = NULL;
++			if (IS_ENCRYPTED(inode)) {
++				pages[locked_pages] =
++					fscrypt_encrypt_pagecache_blocks(page,
++						PAGE_SIZE, 0,
++						locked_pages ? GFP_NOWAIT : GFP_NOFS);
++				if (IS_ERR(pages[locked_pages])) {
++					if (PTR_ERR(pages[locked_pages]) == -EINVAL)
++						pr_err("%s: inode->i_blkbits=%hhu\n",
++							__func__, inode->i_blkbits);
++					/* better not fail on first page! */
++					BUG_ON(locked_pages == 0);
++					pages[locked_pages] = NULL;
++					redirty_page_for_writepage(wbc, page);
++					unlock_page(page);
++					break;
++				}
++				++locked_pages;
++			} else {
++				pages[locked_pages++] = page;
++			}
+ 
++			pvec.pages[i] = NULL;
+ 			len += thp_size(page);
+ 		}
+ 
+@@ -1103,7 +1132,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 		}
+ 
+ new_request:
+-		offset = page_offset(pages[0]);
++		offset = ceph_fscrypt_page_offset(pages[0]);
+ 		len = wsize;
+ 
+ 		req = ceph_osdc_new_request(&fsc->client->osdc,
+@@ -1124,8 +1153,8 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 						ceph_wbc.truncate_size, true);
+ 			BUG_ON(IS_ERR(req));
+ 		}
+-		BUG_ON(len < page_offset(pages[locked_pages - 1]) +
+-			     thp_size(page) - offset);
++		BUG_ON(len < ceph_fscrypt_page_offset(pages[locked_pages - 1]) +
++			     thp_size(pages[locked_pages - 1]) - offset);
+ 
+ 		req->r_callback = writepages_finish;
+ 		req->r_inode = inode;
+@@ -1135,7 +1164,9 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 		data_pages = pages;
+ 		op_idx = 0;
+ 		for (i = 0; i < locked_pages; i++) {
+-			u64 cur_offset = page_offset(pages[i]);
++			struct page *page = ceph_fscrypt_pagecache_page(pages[i]);
 +
- 	iov_iter_xarray(&iter, ITER_DEST, &rreq->mapping->i_pages, subreq->start, len);
--	osd_req_op_extent_osd_iter(req, 0, &iter);
++			u64 cur_offset = page_offset(page);
+ 			/*
+ 			 * Discontinuity in page range? Ceph can handle that by just passing
+ 			 * multiple extents in the write op.
+@@ -1164,9 +1195,9 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 				op_idx++;
+ 			}
+ 
+-			set_page_writeback(pages[i]);
++			set_page_writeback(page);
+ 			if (caching)
+-				ceph_set_page_fscache(pages[i]);
++				ceph_set_page_fscache(page);
+ 			len += thp_size(page);
+ 		}
+ 		ceph_fscache_write_to_cache(inode, offset, len, caching);
+@@ -1182,8 +1213,16 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 							 offset);
+ 			len = max(len, min_len);
+ 		}
++		if (IS_ENCRYPTED(inode))
++			len = round_up(len, CEPH_FSCRYPT_BLOCK_SIZE);
 +
-+	/*
-+	 * FIXME: For now, use CEPH_OSD_DATA_TYPE_PAGES instead of _ITER for
-+	 * encrypted inodes. We'd need infrastructure that handles an iov_iter
-+	 * instead of page arrays, and we don't have that as of yet. Once the
-+	 * dust settles on the write helpers and encrypt/decrypt routines for
-+	 * netfs, we should be able to rework this.
-+	 */
-+	if (IS_ENCRYPTED(inode)) {
-+		struct page **pages;
-+		size_t page_off;
+ 		dout("writepages got pages at %llu~%llu\n", offset, len);
+ 
++		if (IS_ENCRYPTED(inode) &&
++		    ((offset | len) & ~CEPH_FSCRYPT_BLOCK_MASK))
++			pr_warn("%s: bad encrypted write offset=%lld len=%llu\n",
++				__func__, offset, len);
 +
-+		err = iov_iter_get_pages_alloc2(&iter, &pages, len, &page_off);
-+		if (err < 0) {
-+			dout("%s: iov_ter_get_pages_alloc returned %d\n", __func__, err);
-+			goto out;
-+		}
+ 		osd_req_op_extent_osd_data_pages(req, op_idx, data_pages, len,
+ 						 0, from_pool, false);
+ 		osd_req_op_extent_update(req, op_idx, len);
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index db6b399645ba..0d0343906d29 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -155,6 +155,12 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page, u64 of
+ 				 struct ceph_sparse_extent *map, u32 ext_cnt);
+ int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **page, u64 off,
+ 				int len, gfp_t gfp);
 +
-+		/* should always give us a page-aligned read */
-+		WARN_ON_ONCE(page_off);
-+		len = err;
-+		err = 0;
++static inline struct page *ceph_fscrypt_pagecache_page(struct page *page)
++{
++	return fscrypt_is_bounce_page(page) ?  fscrypt_pagecache_page(page) : page;
++}
 +
-+		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0, false, false);
-+	} else {
-+		osd_req_op_extent_osd_iter(req, 0, &iter);
-+	}
- 	req->r_callback = finish_netfs_read;
- 	req->r_priv = subreq;
- 	req->r_inode = inode;
+ #else /* CONFIG_FS_ENCRYPTION */
+ 
+ static inline void ceph_fscrypt_set_ops(struct super_block *sb)
+@@ -249,6 +255,16 @@ static inline int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **
+ {
+ 	return 0;
+ }
++
++static inline struct page *ceph_fscrypt_pagecache_page(struct page *page)
++{
++	return page;
++}
+ #endif /* CONFIG_FS_ENCRYPTION */
+ 
+-#endif
++static inline loff_t ceph_fscrypt_page_offset(struct page *page)
++{
++	return page_offset(ceph_fscrypt_pagecache_page(page));
++}
++
++#endif /* _CEPH_CRYPTO_H */
 -- 
 2.31.1
 
