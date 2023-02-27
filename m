@@ -2,114 +2,88 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 113B2C64ED6
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:40:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BF5BC64ED8
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 04:15:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230261AbjB0DkL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 26 Feb 2023 22:40:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49786 "EHLO
+        id S229622AbjB0EPN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 26 Feb 2023 23:15:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47818 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231166AbjB0Dj6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:39:58 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFB0918AB0
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:39:10 -0800 (PST)
+        with ESMTP id S229606AbjB0EPM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 23:15:12 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 519EAEB74
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 20:14:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677469149;
+        s=mimecast20190719; t=1677471248;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=yk/BsT+2tseNLFTXvjlY32g1kYPKH3UafyDua0aw31E=;
-        b=FEev0Wbss0VLVAeWlOew55EJUvonCBZ9y3gdq7KHIAN0T1O4KZ7hEX/1TkAzmY4O4iz7ZZ
-        qp1+jXpIjqs8Jjk83DP4ZFqwKoB/Ezfpc1fNrq3zYNrDCJqAdAZp34VlW3Q+Xu3ctYqiB+
-        6hfKr1r16nXKNlifupU7FwFCcAdxclg=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=o6eBJd3hpO6XAkHQyGbYVPkc1JFXUxjDTT6VMs25oxw=;
+        b=M/Iq3WyAKPUyM1nt7zdAcuPjI1wH2Dnbcr9nXvOmjHxDnKP8Dhrw+rxraHXpuugCoDaGDi
+        gPZXoyfvtJD+xwbJ47TiiH6h/LcwTM2gjEt8QTAxf809c3zMoyOmOjcSLYv8oCanq8uMB3
+        wZOct8cTskNStE4bNjaW66L0HGmVFFA=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-447-HGkr9-xENz6aW2xONqnPfg-1; Sun, 26 Feb 2023 22:31:52 -0500
-X-MC-Unique: HGkr9-xENz6aW2xONqnPfg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+ us-mta-474-ELOP_AqoPq2cKrwNN--TjA-1; Sun, 26 Feb 2023 23:14:07 -0500
+X-MC-Unique: ELOP_AqoPq2cKrwNN--TjA-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 74B38380670B;
-        Mon, 27 Feb 2023 03:31:52 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BD1C695D600;
+        Mon, 27 Feb 2023 04:14:06 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A5D511731B;
-        Mon, 27 Feb 2023 03:31:49 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EACAF1121314;
+        Mon, 27 Feb 2023 04:14:03 +0000 (UTC)
 From:   xiubli@redhat.com
-To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
-Cc:     jlayton@kernel.org, lhenriques@suse.de, vshankar@redhat.com,
-        mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v16 61/68] ceph: invalidate pages when doing direct/sync writes
-Date:   Mon, 27 Feb 2023 11:28:06 +0800
-Message-Id: <20230227032813.337906-62-xiubli@redhat.com>
-In-Reply-To: <20230227032813.337906-1-xiubli@redhat.com>
-References: <20230227032813.337906-1-xiubli@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     david@fromorbit.com, djwong@kernel.org, ceph-devel@vger.kernel.org,
+        vshankar@redhat.com, zlang@redhat.com, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH v2] generic/020: fix really long attr test failure for ceph
+Date:   Mon, 27 Feb 2023 12:13:58 +0800
+Message-Id: <20230227041358.350309-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.3
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Luís Henriques <lhenriques@suse.de>
+From: Xiubo Li <xiubli@redhat.com>
 
-When doing a direct/sync write, we need to invalidate the page cache in
-the range being written to. If we don't do this, the cache will include
-invalid data as we just did a write that avoided the page cache.
+If the CONFIG_CEPH_FS_SECURITY_LABEL is enabled the kernel ceph
+itself will set the security.selinux extended attribute to MDS.
+And it will also eat some space of the total size.
 
-In the event that invalidation fails, just ignore the error. That likely
-just means that we raced with another task doing a buffered write, in
-which case we want to leave the page intact anyway.
-
-[ jlayton: minor comment update ]
-
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Fixes: https://tracker.ceph.com/issues/58742
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/file.c | 19 ++++++++++++++-----
- 1 file changed, 14 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index c1f75e78f921..dee3b445f415 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1636,11 +1636,6 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 		return ret;
- 
- 	ceph_fscache_invalidate(inode, false);
--	ret = invalidate_inode_pages2_range(inode->i_mapping,
--					    pos >> PAGE_SHIFT,
--					    (pos + count - 1) >> PAGE_SHIFT);
--	if (ret < 0)
--		dout("invalidate_inode_pages2_range returned %d\n", ret);
- 
- 	while ((len = iov_iter_count(from)) > 0) {
- 		size_t left;
-@@ -1966,6 +1961,20 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 		}
- 
- 		ceph_clear_error_write(ci);
-+
-+		/*
-+		 * We successfully wrote to a range of the file. Declare
-+		 * that region of the pagecache invalid.
-+		 */
-+		ret = invalidate_inode_pages2_range(
-+				inode->i_mapping,
-+				pos >> PAGE_SHIFT,
-+				(pos + len - 1) >> PAGE_SHIFT);
-+		if (ret < 0) {
-+			dout("invalidate_inode_pages2_range returned %d\n",
-+			     ret);
-+			ret = 0;
-+		}
- 		pos += len;
- 		written += len;
- 		dout("sync_write written %d\n", written);
+V2:
+- make the 'size' and the 'selinux_size' to be local
+
+ tests/generic/020 | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tests/generic/020 b/tests/generic/020
+index be5cecad..538a24c6 100755
+--- a/tests/generic/020
++++ b/tests/generic/020
+@@ -150,9 +150,11 @@ _attr_get_maxval_size()
+ 		# it imposes a maximum size for the full set of xattrs
+ 		# names+values, which by default is 64K.  Compute the maximum
+ 		# taking into account the already existing attributes
+-		max_attrval_size=$(getfattr --dump -e hex $filename 2>/dev/null | \
++		local size=$(getfattr --dump -e hex $filename 2>/dev/null | \
+ 			awk -F "=0x" '/^user/ {len += length($1) + length($2) / 2} END {print len}')
+-		max_attrval_size=$((65536 - $max_attrval_size - $max_attrval_namelen))
++		local selinux_size=$(getfattr -n 'security.selinux' --dump -e hex $filename 2>/dev/null | \
++			awk -F "=0x" '/^security/ {len += length($1) + length($2) / 2} END {print len}')
++		max_attrval_size=$((65536 - $size - $selinux_size - $max_attrval_namelen))
+ 		;;
+ 	*)
+ 		# Assume max ~1 block of attrs
 -- 
 2.31.1
 
