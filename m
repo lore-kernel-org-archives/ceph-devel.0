@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42791C64ED6
-	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:30:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 528F3C64ED6
+	for <ceph-devel@archiver.kernel.org>; Mon, 27 Feb 2023 03:30:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229798AbjB0DaA (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 26 Feb 2023 22:30:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36978 "EHLO
+        id S230043AbjB0DaG (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 26 Feb 2023 22:30:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36972 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230034AbjB0D37 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:29:59 -0500
+        with ESMTP id S230040AbjB0DaC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Feb 2023 22:30:02 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13CB9B758
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:29:13 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C77913DDF
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2023 19:29:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677468553;
+        s=mimecast20190719; t=1677468551;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=K6p2Hvwek92EB532X3+3VWUMZHQtl4l+yOVJm1mIEjA=;
-        b=Mx0a7kEcTrrDWiO8YN2KnNAf0O2LlRCbHuqIWFZ8o2aIYz9pdWpgabkgEhBy3zFmj9qY3O
-        Rw7hJThXpruLmA1ivQpH/WWK8NLhUrgQkQWsNBm1CjJ7ZNpLeY4XAB40tTc5j2MmV2+JV0
-        SgS01zmAo72fPHlNHQsPgeVdKxYwSVk=
+        bh=6TO8I592qYuYSzoKGI8ikPIqIBz47GHob7F+85XQvTA=;
+        b=axo0MWAMaJ0f/jlqjVESdAzm3xN3b2tO8zf+m/fzOky2JPQlHFvKGHhSoEHmE+u/bB0Wf1
+        9Ldc2HRyjiANLCLVPEAcBsR6MqnYfyKJTZk8echuY3sgKF3Ans1sirP1U8n8ryivdl9sFW
+        eOF9acW/QcnNPrR+D5nN1Whlsf/RaY4=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-230-Fo3BySCxOseblIb8Y_tNuQ-1; Sun, 26 Feb 2023 22:29:01 -0500
-X-MC-Unique: Fo3BySCxOseblIb8Y_tNuQ-1
+ us-mta-84-0mXHjlwZMTK7Fh83Am9zsg-1; Sun, 26 Feb 2023 22:29:08 -0500
+X-MC-Unique: 0mXHjlwZMTK7Fh83Am9zsg-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id AF2B985A5B1;
-        Mon, 27 Feb 2023 03:29:00 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BD87285CBE0;
+        Mon, 27 Feb 2023 03:29:07 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id DF3441731B;
-        Mon, 27 Feb 2023 03:28:57 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EEDDA35454;
+        Mon, 27 Feb 2023 03:29:04 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, lhenriques@suse.de, vshankar@redhat.com,
         mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v16 11/68] ceph: use osd_req_op_extent_osd_iter for netfs reads
-Date:   Mon, 27 Feb 2023 11:27:16 +0800
-Message-Id: <20230227032813.337906-12-xiubli@redhat.com>
+Subject: [PATCH v16 13/68] ceph: ensure that we accept a new context from MDS for new inodes
+Date:   Mon, 27 Feb 2023 11:27:18 +0800
+Message-Id: <20230227032813.337906-14-xiubli@redhat.com>
 In-Reply-To: <20230227032813.337906-1-xiubli@redhat.com>
 References: <20230227032813.337906-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -55,70 +55,51 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-The netfs layer has already pinned the pages involved before calling
-issue_op, so we can just pass down the iter directly instead of calling
-iov_iter_get_pages_alloc.
-
-Instead of having to allocate a page array, use CEPH_MSG_DATA_ITER and
-pass it the iov_iter directly to clone.
-
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/addr.c | 19 +------------------
- 1 file changed, 1 insertion(+), 18 deletions(-)
+ fs/ceph/inode.c | 21 +++++++++++----------
+ 1 file changed, 11 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e4fcfcf938d5..13d1c24d2f53 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -220,7 +220,6 @@ static void finish_netfs_read(struct ceph_osd_request *req)
- 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
- 	struct netfs_io_subrequest *subreq = req->r_priv;
- 	struct ceph_osd_req_op *op = &req->r_ops[0];
--	int num_pages;
- 	int err = req->r_result;
- 	bool sparse = (op->op == CEPH_OSD_OP_SPARSE_READ);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index cbdb65c530f0..0991647ba6c2 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -944,6 +944,17 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
  
-@@ -242,9 +241,6 @@ static void finish_netfs_read(struct ceph_osd_request *req)
- 		__set_bit(NETFS_SREQ_CLEAR_TAIL, &subreq->flags);
+ 	__ceph_update_quota(ci, iinfo->max_bytes, iinfo->max_files);
  
- 	netfs_subreq_terminated(subreq, err, false);
--
--	num_pages = calc_pages_for(osd_data->alignment, osd_data->length);
--	ceph_put_page_vector(osd_data->pages, num_pages, false);
- 	iput(req->r_inode);
- }
++#ifdef CONFIG_FS_ENCRYPTION
++	if (iinfo->fscrypt_auth_len && (inode->i_state & I_NEW)) {
++		kfree(ci->fscrypt_auth);
++		ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
++		ci->fscrypt_auth = iinfo->fscrypt_auth;
++		iinfo->fscrypt_auth = NULL;
++		iinfo->fscrypt_auth_len = 0;
++		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
++	}
++#endif
++
+ 	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
+ 	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
+ 		inode->i_mode = mode;
+@@ -1033,16 +1044,6 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 		xattr_blob = NULL;
+ 	}
  
-@@ -312,8 +308,6 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 	struct ceph_osd_request *req = NULL;
- 	struct ceph_vino vino = ceph_vino(inode);
- 	struct iov_iter iter;
--	struct page **pages;
--	size_t page_off;
- 	int err = 0;
- 	u64 len = subreq->len;
- 	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
-@@ -344,18 +338,7 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 
- 	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
- 	iov_iter_xarray(&iter, ITER_DEST, &rreq->mapping->i_pages, subreq->start, len);
--	err = iov_iter_get_pages_alloc2(&iter, &pages, len, &page_off);
--	if (err < 0) {
--		dout("%s: iov_ter_get_pages_alloc returned %d\n", __func__, err);
--		goto out;
+-#ifdef CONFIG_FS_ENCRYPTION
+-	if (iinfo->fscrypt_auth_len && !ci->fscrypt_auth) {
+-		ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
+-		ci->fscrypt_auth = iinfo->fscrypt_auth;
+-		iinfo->fscrypt_auth = NULL;
+-		iinfo->fscrypt_auth_len = 0;
+-		inode_set_flags(inode, S_ENCRYPTED, S_ENCRYPTED);
 -	}
+-#endif
 -
--	/* should always give us a page-aligned read */
--	WARN_ON_ONCE(page_off);
--	len = err;
--	err = 0;
--
--	osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0, false, false);
-+	osd_req_op_extent_osd_iter(req, 0, &iter);
- 	req->r_callback = finish_netfs_read;
- 	req->r_priv = subreq;
- 	req->r_inode = inode;
+ 	/* finally update i_version */
+ 	if (le64_to_cpu(info->version) > ci->i_version)
+ 		ci->i_version = le64_to_cpu(info->version);
 -- 
 2.31.1
 
