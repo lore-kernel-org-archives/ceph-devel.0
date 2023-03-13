@@ -2,160 +2,122 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D69DC6FD19
-	for <ceph-devel@archiver.kernel.org>; Mon, 13 Mar 2023 12:33:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B945EC61DA4
+	for <ceph-devel@archiver.kernel.org>; Mon, 13 Mar 2023 17:13:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229779AbjCMMdW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 13 Mar 2023 08:33:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58628 "EHLO
+        id S231558AbjCMRNr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 13 Mar 2023 13:13:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229734AbjCMMdR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Mar 2023 08:33:17 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5B091969F;
-        Mon, 13 Mar 2023 05:33:14 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S231311AbjCMRNd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Mar 2023 13:13:33 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5426C8698;
+        Mon, 13 Mar 2023 10:13:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 78D4C1FE0C;
-        Mon, 13 Mar 2023 12:33:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1678710793; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=bc2iGS3vObLzmQ9MIUXqwa39aRJrh3amfgSHRWBj7bQ=;
-        b=HBhJiQauaNSAKXRLDJb4C7AN5y6XV0PAD4EEEx2JLMUMBp+an4mWFkMLojnQVNSmxJgMJh
-        aGaV6v48u3t1lZdzBwVD68G9CsNELpiOe+bULzVR4nuT0u7cs+IrPAe+hevLfRl81pOIgC
-        VYJqVLTp2Ef34aSqeSAvnznhZBuaGf4=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1678710793;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=bc2iGS3vObLzmQ9MIUXqwa39aRJrh3amfgSHRWBj7bQ=;
-        b=eBB7qNSiDz9RNbMBX1zyQcYZ0ITMLS1WEE/w/sPjr+8d47mKjBdyHcIu2ZIrv/mqYecZOW
-        Tme07aX8VkAPeiCw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id CBB8F13582;
-        Mon, 13 Mar 2023 12:33:12 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 4LfeLggYD2RnCQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Mon, 13 Mar 2023 12:33:12 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 0119dc8c;
-        Mon, 13 Mar 2023 12:33:11 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Eric Biggers <ebiggers@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>
+        by ams.source.kernel.org (Postfix) with ESMTPS id 848FAB811B2;
+        Mon, 13 Mar 2023 17:12:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44E2FC43443;
+        Mon, 13 Mar 2023 17:11:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1678727520;
+        bh=evjksweuySXgB4DScaJo8MCH4+Y8CDvl7iHHX6kfrZg=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=dwvFahGLtRm1zbdrEs7N/sqNgcd1edz1J5baI6XvubBA5KVbHenKWPmdsogqnAcJ6
+         JHUaeB0c3oVC3yqZFsadXF4+El5Z+Wf/Sta+4q5NOWYfb/fZ0gp9ArmZ8Vjep3jx9/
+         MaNDJzgJ5W/qxdj8wFY66DCuz3DEnbIrrsPglQpGUWaLK+VDrR8ZXHoq7qo+EzuTHs
+         6/qMIEEQHqvNHb0ZVHKe7EyLeQsJ6pasOLr0CsuzT/SsvZ7kE3hCNBpbFGfk3uein4
+         SL6u5b0GHFvuuKugpC50DqmeOz8Eow9JwgP2sszFifGCRLOTJmI5nfoZP7u2U12r2m
+         XVXUyAyO7k9vw==
+Message-ID: <6a7591c133208a11b24169ed74124dca3c11c7fe.camel@kernel.org>
+Subject: Re: [PATCH 0/2] ceph: fscrypt: fix atomic open bug for encrypted
+ directories
+From:   Jeff Layton <jlayton@kernel.org>
+To:     =?ISO-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>,
+        Eric Biggers <ebiggers@kernel.org>,
+        Xiubo Li <xiubli@redhat.com>
 Cc:     "Theodore Y. Ts'o" <tytso@mit.edu>,
         Jaegeuk Kim <jaegeuk@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         linux-fscrypt@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH 1/2] fscrypt: new helper function - fscrypt_prepare_atomic_open()
-Date:   Mon, 13 Mar 2023 12:33:09 +0000
-Message-Id: <20230313123310.13040-2-lhenriques@suse.de>
+        linux-kernel@vger.kernel.org
+Date:   Mon, 13 Mar 2023 13:11:57 -0400
 In-Reply-To: <20230313123310.13040-1-lhenriques@suse.de>
 References: <20230313123310.13040-1-lhenriques@suse.de>
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4 (3.46.4-1.fc37) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-This patch introduces a new helper function which prepares an atomic_open.
-Because atomic open can act as a lookup if handed a dentry that is negative,
-we need to set DCACHE_NOKEY_NAME if the key for the parent isn't available.
+On Mon, 2023-03-13 at 12:33 +0000, Lu=EDs Henriques wrote:
+> Hi!
+>=20
+> I started seeing fstest generic/123 failing in ceph fscrypt, when running=
+ it
+> with 'test_dummy_encryption'.  This test is quite simple:
+>=20
+> 1. Creates a directory with write permissions for root only
+> 2. Writes into a file in that directory
+> 3. Uses 'su' to try to modify that file as a different user, and
+>    gets -EPERM
+>=20
+> All the test steps succeed, but the test fails to cleanup: 'rm -rf <dir>'
+> will fail with -ENOTEMPTY.  'strace' shows that calling unlinkat() to rem=
+ove
+> the file got a -ENOENT and then -ENOTEMPTY for the directory.
+>=20
+> This is because 'su' does a drop_caches ('su (874): drop_caches: 2' in
+> dmesg), and ceph's atomic open will do:
+>=20
+> 	if (IS_ENCRYPTED(dir)) {
+> 		set_bit(CEPH_MDS_R_FSCRYPT_FILE, &req->r_req_flags);
+> 		if (!fscrypt_has_encryption_key(dir)) {
+> 			spin_lock(&dentry->d_lock);
+> 			dentry->d_flags |=3D DCACHE_NOKEY_NAME;
+> 			spin_unlock(&dentry->d_lock);
+> 		}
+> 	}
+>=20
+> Although 'dir' has the encryption key available, fscrypt_has_encryption_k=
+ey()
+> will return 'false' because fscrypt info isn't yet set after the cache
+> cleanup.
+>=20
+> The first patch will add a new helper for the atomic_open that will force
+> the fscrypt info to be loaded into an inode that has been evicted recentl=
+y
+> but for which the key is still available.
+>=20
+> The second patch switches ceph atomic_open to use the new fscrypt helper.
+>=20
+> Cheers,
+> --
+> Lu=EDs
+>=20
+> Changes since initial RFC (after Eric's review):
+> - Added kerneldoc comments to the new fscrypt helper
+> - Dropped '__' from helper name (now fscrypt_prepare_atomic_open())
+> - Added IS_ENCRYPTED() check in helper
+> - DCACHE_NOKEY_NAME is not set if fscrypt_get_encryption_info() returns a=
+n
+>   error
+> - Fixed helper for !CONFIG_FS_ENCRYPTION (now defined 'static inline')
+>=20
+> Lu=EDs Henriques (2):
+>   fscrypt: new helper function - fscrypt_prepare_atomic_open()
+>   ceph: switch atomic open to use new fscrypt helper
+>=20
+>  fs/ceph/file.c          |  8 +++-----
+>  fs/crypto/hooks.c       | 35 +++++++++++++++++++++++++++++++++++
+>  include/linux/fscrypt.h |  7 +++++++
+>  3 files changed, 45 insertions(+), 5 deletions(-)
+>=20
 
-The reason for getting the encryption info before checking if the directory
-has the encryption key is because we may have the key available but the
-encryption info isn't yet set (maybe due to a drop_caches).  The regular
-open path will use fscrypt_file_open for that but in the atomic open a
-different approach is required.
+Looks like a nice cleanup.
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
- fs/crypto/hooks.c       | 35 +++++++++++++++++++++++++++++++++++
- include/linux/fscrypt.h |  7 +++++++
- 2 files changed, 42 insertions(+)
-
-diff --git a/fs/crypto/hooks.c b/fs/crypto/hooks.c
-index 7b8c5a1104b5..8be1e35984f1 100644
---- a/fs/crypto/hooks.c
-+++ b/fs/crypto/hooks.c
-@@ -117,6 +117,41 @@ int __fscrypt_prepare_readdir(struct inode *dir)
- }
- EXPORT_SYMBOL_GPL(__fscrypt_prepare_readdir);
- 
-+/**
-+ * fscrypt_prepare_atomic_open() - prepare an atomic open on an encrypted directory
-+ * @dir: inode of parent directory
-+ * @dentry: dentry being open
-+ *
-+ * Because atomic open can act as a lookup if handed a dentry that is negative,
-+ * we need to set DCACHE_NOKEY_NAME if the key for the parent isn't available.
-+ *
-+ * The reason for getting the encryption info before checking if the directory
-+ * has the encryption key is because the key may be available but the encryption
-+ * info isn't yet set (maybe due to a drop_caches).  The regular open path will
-+ * use fscrypt_file_open for that, but in the atomic open a different approach
-+ * is required.
-+ *
-+ * Return: 0 on success, or an error code if fscrypt_get_encryption_info()
-+ * fails.
-+ */
-+int fscrypt_prepare_atomic_open(struct inode *dir, struct dentry *dentry)
-+{
-+	int err;
-+
-+	if (!IS_ENCRYPTED(dir))
-+		return 0;
-+
-+	err = fscrypt_get_encryption_info(dir, true);
-+	if (!err && !fscrypt_has_encryption_key(dir)) {
-+		spin_lock(&dentry->d_lock);
-+		dentry->d_flags |= DCACHE_NOKEY_NAME;
-+		spin_unlock(&dentry->d_lock);
-+	}
-+
-+	return err;
-+}
-+EXPORT_SYMBOL_GPL(fscrypt_prepare_atomic_open);
-+
- int __fscrypt_prepare_setattr(struct dentry *dentry, struct iattr *attr)
- {
- 	if (attr->ia_valid & ATTR_SIZE)
-diff --git a/include/linux/fscrypt.h b/include/linux/fscrypt.h
-index 4f5f8a651213..c70acb2a737a 100644
---- a/include/linux/fscrypt.h
-+++ b/include/linux/fscrypt.h
-@@ -362,6 +362,7 @@ int __fscrypt_prepare_rename(struct inode *old_dir, struct dentry *old_dentry,
- int __fscrypt_prepare_lookup(struct inode *dir, struct dentry *dentry,
- 			     struct fscrypt_name *fname);
- int __fscrypt_prepare_readdir(struct inode *dir);
-+int fscrypt_prepare_atomic_open(struct inode *dir, struct dentry *dentry);
- int __fscrypt_prepare_setattr(struct dentry *dentry, struct iattr *attr);
- int fscrypt_prepare_setflags(struct inode *inode,
- 			     unsigned int oldflags, unsigned int flags);
-@@ -688,6 +689,12 @@ static inline int __fscrypt_prepare_readdir(struct inode *dir)
- 	return -EOPNOTSUPP;
- }
- 
-+static inline int fscrypt_prepare_atomic_open(struct inode *dir,
-+					      struct dentry *dentry)
-+{
-+	return -EOPNOTSUPP;
-+}
-+
- static inline int __fscrypt_prepare_setattr(struct dentry *dentry,
- 					    struct iattr *attr)
- {
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
