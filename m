@@ -2,103 +2,86 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46A83C6FD1F
-	for <ceph-devel@archiver.kernel.org>; Thu, 16 Mar 2023 18:14:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34D21C7618E
+	for <ceph-devel@archiver.kernel.org>; Sun, 19 Mar 2023 06:31:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230023AbjCPSOZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 16 Mar 2023 14:14:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36408 "EHLO
+        id S229845AbjCSGbP (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 19 Mar 2023 02:31:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229673AbjCPSOX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Mar 2023 14:14:23 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 318C03C29;
-        Thu, 16 Mar 2023 11:14:21 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229652AbjCSGbN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Mar 2023 02:31:13 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C356E19109
+        for <ceph-devel@vger.kernel.org>; Sat, 18 Mar 2023 23:30:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1679207413;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=oQdoYneqxB38oSnnXNvER25kilgSQblF3svLTyKprLQ=;
+        b=R6DllbriQFu4KHEMXcRbQxXv6mz3y7uZsgQR/tCTVcKGlppeE/YjqZ2lyfPSNcpZXSw8Jc
+        m0edXhl0aM90qtWeWtyEDhCcPm0b4urco7AWuXIrXkvGTHYlrYZdbGL4PGK45cBwtxFDYF
+        GWk0Ymc6bSxLg/fSjbmFFy2Wy99ESMU=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-314-5rrFs7nzNIOfAZ0MHRqnlQ-1; Sun, 19 Mar 2023 02:30:08 -0400
+X-MC-Unique: 5rrFs7nzNIOfAZ0MHRqnlQ-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 5FEB121A3E;
-        Thu, 16 Mar 2023 18:14:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1678990460; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Ys7W/BlXDmm4G821Jj5LyZgWOPhf76cJGQQhxQ4c34I=;
-        b=kAQMTgf1sddeWIlVDf3bOv/6ZY7B8wPHVNdWEWzblQm0Pu4DTeRJnr0ksZV6QLqQV/SYFR
-        +YIl0wRkXPHmD/v64a7A3iCQCLQZwMtIdRNANyco4cy85j/JcdVSx1paUlp2sLSPBGrQ2v
-        eSvRW5xCItvoHcry8/EpvksC8imVPQU=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1678990460;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Ys7W/BlXDmm4G821Jj5LyZgWOPhf76cJGQQhxQ4c34I=;
-        b=oay+gei83CZIKC6CB+aSWoub6wLIe7wrGA3olEGCmukQGJgp0VLBA+NTRWILb0+PT7Wx5Q
-        I8pm3uruKntyKrDw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id AD58913A71;
-        Thu, 16 Mar 2023 18:14:19 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id /lyoJntcE2SDXAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Thu, 16 Mar 2023 18:14:19 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 04237c26;
-        Thu, 16 Mar 2023 18:14:14 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Eric Biggers <ebiggers@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>
-Cc:     "Theodore Y. Ts'o" <tytso@mit.edu>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        linux-fscrypt@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v3 3/3] ceph: switch ceph_open_atomic() to use the new fscrypt helper
-Date:   Thu, 16 Mar 2023 18:14:13 +0000
-Message-Id: <20230316181413.26916-4-lhenriques@suse.de>
-In-Reply-To: <20230316181413.26916-1-lhenriques@suse.de>
-References: <20230316181413.26916-1-lhenriques@suse.de>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 641943C0252E;
+        Sun, 19 Mar 2023 06:30:08 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 99EF5C15BA0;
+        Sun, 19 Mar 2023 06:30:00 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     fstests@vger.kernel.org
+Cc:     david@fromorbit.com, djwong@kernel.org, ceph-devel@vger.kernel.org,
+        zlang@redhat.com, vshankar@redhat.com, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] generic/020: fix another really long attr test failure for ceph
+Date:   Sun, 19 Mar 2023 14:29:27 +0800
+Message-Id: <20230319062928.278235-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.8
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Switch ceph_atomic_open() to use new fscrypt helper function
-fscrypt_prepare_lookup_partial().  This fixes a bug in the atomic open
-operation where a dentry is incorrectly set with DCACHE_NOKEY_NAME when
-'dir' has been evicted but the key is still available (for example, where
-there's a drop_caches).
+From: Xiubo Li <xiubli@redhat.com>
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+If the CONFIG_CEPH_FS_SECURITY_LABEL is disabled the kernel ceph
+the 'selinux_size' will be empty and then:
+max_attrval_size=$((65536 - $size - $selinux_size - $max_attrval_namelen))
+will be:
+max_attrval_size=$((65536 - $size - - $max_attrval_namelen))
+which equals to:
+max_attrval_size=$((65536 - $size + $max_attrval_namelen))
+
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/file.c | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ tests/generic/020 | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index dee3b445f415..2448d0f1a9ea 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -795,11 +795,9 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	ihold(dir);
- 	if (IS_ENCRYPTED(dir)) {
- 		set_bit(CEPH_MDS_R_FSCRYPT_FILE, &req->r_req_flags);
--		if (!fscrypt_has_encryption_key(dir)) {
--			spin_lock(&dentry->d_lock);
--			dentry->d_flags |= DCACHE_NOKEY_NAME;
--			spin_unlock(&dentry->d_lock);
--		}
-+		err = fscrypt_prepare_lookup_partial(dir, dentry);
-+		if (err < 0)
-+			goto out_req;
- 	}
- 
- 	if (flags & O_CREAT) {
+diff --git a/tests/generic/020 b/tests/generic/020
+index 538a24c6..e00365a9 100755
+--- a/tests/generic/020
++++ b/tests/generic/020
+@@ -154,6 +154,12 @@ _attr_get_maxval_size()
+ 			awk -F "=0x" '/^user/ {len += length($1) + length($2) / 2} END {print len}')
+ 		local selinux_size=$(getfattr -n 'security.selinux' --dump -e hex $filename 2>/dev/null | \
+ 			awk -F "=0x" '/^security/ {len += length($1) + length($2) / 2} END {print len}')
++		if [ -z $size ]; then
++			size=0
++		fi
++		if [ -z $selinux_size ]; then
++			selinux_size=0
++		fi
+ 		max_attrval_size=$((65536 - $size - $selinux_size - $max_attrval_namelen))
+ 		;;
+ 	*)
+-- 
+2.31.1
+
