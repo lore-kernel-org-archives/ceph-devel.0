@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11017C6FD1D
-	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:01:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3289AC6FD1C
+	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:02:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230282AbjCWHBw (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 23 Mar 2023 03:01:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40348 "EHLO
+        id S230445AbjCWHB7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 23 Mar 2023 03:01:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230488AbjCWHBf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:01:35 -0400
+        with ESMTP id S230506AbjCWHBk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:01:40 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F7994C13
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2023 00:00:29 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2FFC22DC7
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2023 00:00:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679554764;
+        s=mimecast20190719; t=1679554783;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=G94oRvHjL3Co0cHnwuIxM5CwftRB1MWIBEmdKPLLu6U=;
-        b=W+bmmQGCaQ4vHtVkLEUPGcQhBi+7i0VmNc0zwcsJLjY6Rsrh4BzEpEr15374zx1ZVUGwOF
-        YR/6QFtmqGDLEJS1kkIwoH/H1KTg3qzzE96kShyqaJpTnUkbOguZhd781WadEW7X+e4szH
-        kthMOJdm+FEHVkpD5n8XOByDLLHrlPE=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=opQRUmOsBPc96enzB+QnTmCAkuwuNDIlk2PuuTcUk1I=;
+        b=bkrVFSUYOEAiFWk0o4O9kJ/HefXM6XyifJCly7ZFlWxWzV6jBvhcKbm+DZWG50MFpwvlL9
+        0z35T/nvfpQM1qDpB/XtXXlRfF+VmGUNkxo9VBZmSK9H33cTU/kKoAZaFT7KR/Gjd56eZG
+        4MXCL+71IBdqlAS5W8+c2ujgxFKYffQ=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-668-1yMOJPgiNW-MffpLFzg0hg-1; Thu, 23 Mar 2023 02:59:21 -0400
-X-MC-Unique: 1yMOJPgiNW-MffpLFzg0hg-1
+ us-mta-310-VnAGfj76MTiLb9M2HDeWdw-1; Thu, 23 Mar 2023 02:59:41 -0400
+X-MC-Unique: VnAGfj76MTiLb9M2HDeWdw-1
 Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id A55993C0F19A;
-        Thu, 23 Mar 2023 06:59:20 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 112BC101A54F;
+        Thu, 23 Mar 2023 06:59:41 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D785A492B01;
-        Thu, 23 Mar 2023 06:59:17 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 44C0F492B01;
+        Thu, 23 Mar 2023 06:59:37 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v17 64/71] ceph: update documentation regarding snapshot naming limitations
-Date:   Thu, 23 Mar 2023 14:55:18 +0800
-Message-Id: <20230323065525.201322-65-xiubli@redhat.com>
+Subject: [PATCH v17 70/71] ceph: switch ceph_open() to use new fscrypt helper
+Date:   Thu, 23 Mar 2023 14:55:24 +0800
+Message-Id: <20230323065525.201322-71-xiubli@redhat.com>
 In-Reply-To: <20230323065525.201322-1-xiubli@redhat.com>
 References: <20230323065525.201322-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -56,34 +56,42 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Luís Henriques <lhenriques@suse.de>
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- Documentation/filesystems/ceph.rst | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Instead of setting the no-key dentry in ceph_lookup(), use the new
+fscrypt_prepare_lookup_partial() helper.  We still need to mark the
+directory as incomplete if the directory was just unlocked.
 
-diff --git a/Documentation/filesystems/ceph.rst b/Documentation/filesystems/ceph.rst
-index 76ce938e7024..085f309ece60 100644
---- a/Documentation/filesystems/ceph.rst
-+++ b/Documentation/filesystems/ceph.rst
-@@ -57,6 +57,16 @@ a snapshot on any subdirectory (and its nested contents) in the
- system.  Snapshot creation and deletion are as simple as 'mkdir
- .snap/foo' and 'rmdir .snap/foo'.
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/dir.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index fe48a5d26c1d..c28de23e12a1 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -784,14 +784,15 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 		return ERR_PTR(-ENAMETOOLONG);
  
-+Snapshot names have two limitations:
+ 	if (IS_ENCRYPTED(dir)) {
+-		err = ceph_fscrypt_prepare_readdir(dir);
++		bool had_key = fscrypt_has_encryption_key(dir);
 +
-+* They can not start with an underscore ('_'), as these names are reserved
-+  for internal usage by the MDS.
-+* They can not exceed 240 characters in size.  This is because the MDS makes
-+  use of long snapshot names internally, which follow the format:
-+  `_<SNAPSHOT-NAME>_<INODE-NUMBER>`.  Since filenames in general can't have
-+  more than 255 characters, and `<node-id>` takes 13 characters, the long
-+  snapshot names can take as much as 255 - 1 - 1 - 13 = 240.
++		err = fscrypt_prepare_lookup_partial(dir, dentry);
+ 		if (err < 0)
+ 			return ERR_PTR(err);
+-		if (!fscrypt_has_encryption_key(dir)) {
+-			spin_lock(&dentry->d_lock);
+-			dentry->d_flags |= DCACHE_NOKEY_NAME;
+-			spin_unlock(&dentry->d_lock);
+-		}
 +
- Ceph also provides some recursive accounting on directories for nested
- files and bytes.  That is, a 'getfattr -d foo' on any directory in the
- system will reveal the total number of nested regular files and
++		/* mark directory as incomplete if it has been unlocked */
++		if (!had_key && fscrypt_has_encryption_key(dir))
++			ceph_dir_clear_complete(dir);
+ 	}
+ 
+ 	/* can we conclude ENOENT locally? */
 -- 
 2.31.1
 
