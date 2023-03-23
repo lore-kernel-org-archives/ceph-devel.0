@@ -2,147 +2,132 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCAE7C6FD20
-	for <ceph-devel@archiver.kernel.org>; Wed, 22 Mar 2023 02:25:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 367B7C6FD1D
+	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 06:56:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229950AbjCVCZg (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 21 Mar 2023 22:25:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42078 "EHLO
+        id S230119AbjCWG4e (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 23 Mar 2023 02:56:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57490 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229726AbjCVCZf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Mar 2023 22:25:35 -0400
+        with ESMTP id S229639AbjCWG4d (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 02:56:33 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C42595A1AC
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Mar 2023 19:24:46 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8CF82005B
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:55:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679451886;
+        s=mimecast20190719; t=1679554544;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=s6oMSGUJAZpBPKFcO2fZJsIWmoX+5e2Lx0/usfbhCWE=;
-        b=ciVTJClB/bAYARWjukep2RlFgmN82T9PEgozPcexrSbfGX7Oe8LBbOmyRKLgdQeqqUtofr
-        cpN0DVKWUnfBnTt4KwqVRE745xknAH6n0doK958k+0PA8xpgi9jnc9BBLdBLp6OhZR2LYN
-        CtKecnwKv2bFD4WwjndTi/ixadGXKxQ=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-20-VWJGYdoMOh68gzk-6jfIew-1; Tue, 21 Mar 2023 22:24:44 -0400
-X-MC-Unique: VWJGYdoMOh68gzk-6jfIew-1
-Received: by mail-pj1-f72.google.com with SMTP id o10-20020a17090ac08a00b0023f3196fa6fso6076468pjs.2
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Mar 2023 19:24:44 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679451883;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=s6oMSGUJAZpBPKFcO2fZJsIWmoX+5e2Lx0/usfbhCWE=;
-        b=5GSEIBiuhEcLumBglNVLbjS+uCaFXoVAOC2it2OnINEW4AYaKXHstfA71lVajOfFoV
-         63yAG87qopMJHxMcBTj7Ibo8a1VAbzoziU15q8hPhDagnpf7opL1wXfZTvANhc1+JxaX
-         djYg6reie3UAibhJgga2ZWnayEtwxWDo5NDjZeKxPaGj8ABrvEmid5r8gWlkpTEUuG7f
-         J/rLGcrJM2Qq3SvCTKxBlev0rSIIo13lG42sYyP8QVYyHO+8fS0ELrUidgJRbpd7cuNc
-         jCnrhjZVLRSXyG5/UM39g3xAv3P/JC0dU1tP8wIvmSqbB1sVXqvNwq6fvCjHb/umA1Gw
-         N6hw==
-X-Gm-Message-State: AO0yUKVqlHcWLh9Ygu3T/jsmmEU8Sh2muX40eTqWLsP+5OxDwerfwhLY
-        y87BlaUbJz57Tc3crMb1D8g1KYE8kZeUroK0ca2tKmS4sknIzh3cWD71lXKhHIazXv0dv/uIs81
-        aBZheWfX9gVnr9qs0oN2jAL2Kkh+YrhrA
-X-Received: by 2002:a05:6a20:b72a:b0:da:eabf:eec2 with SMTP id fg42-20020a056a20b72a00b000daeabfeec2mr2458789pzb.48.1679451883312;
-        Tue, 21 Mar 2023 19:24:43 -0700 (PDT)
-X-Google-Smtp-Source: AK7set8YARSWpxNdxlY+7LJCN/GQYk3RwnttToqtb+dUv2NSZUziLQhzwSi+UsZuWzBOjJOxq2Mf2Q==
-X-Received: by 2002:a05:6a20:b72a:b0:da:eabf:eec2 with SMTP id fg42-20020a056a20b72a00b000daeabfeec2mr2458776pzb.48.1679451882962;
-        Tue, 21 Mar 2023 19:24:42 -0700 (PDT)
-Received: from [10.72.12.98] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c3-20020aa78e03000000b00593c1c5bd0esm5260611pfr.164.2023.03.21.19.24.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 21 Mar 2023 19:24:42 -0700 (PDT)
-Message-ID: <829cd072-271b-b22a-4ab3-74a786d41e58@redhat.com>
-Date:   Wed, 22 Mar 2023 10:24:36 +0800
+        bh=CpeCPekZsjYaI1jVgCMT8eHMLfZsRscJiDoldDof2fY=;
+        b=F1h8/5ID1c9Pg8UfOJ8Ik+YntdoBxpRA07SxIOtO+zIj6X3tG2eYXKT1jfoALzYDbwAuEJ
+        9jvmxhItBmO5plvaO6lUYb8aDPReLUoCjxfuRkg9YIu03CtiusfZ62leiZWaw3Ua5RyNRf
+        e0xGq7KWYRma4eKXuSWRuJujbvtL1DU=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-118-kwzqvHAAMY-luKW5xDmQNw-1; Thu, 23 Mar 2023 02:55:42 -0400
+X-MC-Unique: kwzqvHAAMY-luKW5xDmQNw-1
+Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 2BEE03C0ED67;
+        Thu, 23 Mar 2023 06:55:42 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 60241492B01;
+        Thu, 23 Mar 2023 06:55:39 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
+Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
+        lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH v17 01/71] libceph: add spinlock around osd->o_requests
+Date:   Thu, 23 Mar 2023 14:54:15 +0800
+Message-Id: <20230323065525.201322-2-xiubli@redhat.com>
+In-Reply-To: <20230323065525.201322-1-xiubli@redhat.com>
+References: <20230323065525.201322-1-xiubli@redhat.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [PATCH] generic/075: no need to move the .fsxlog to the same
- directory
-Content-Language: en-US
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
-        ceph-devel@vger.kernel.org, vshankar@redhat.com
-References: <20230301020730.92354-1-xiubli@redhat.com>
- <20230320143703.dv5ab4tnwrs5cnwl@zlang-mailbox>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20230320143703.dv5ab4tnwrs5cnwl@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.9
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+From: Jeff Layton <jlayton@kernel.org>
 
-On 20/03/2023 22:37, Zorro Lang wrote:
-> On Wed, Mar 01, 2023 at 10:07:30AM +0800, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> Actually it was trying to move the '075.$_n.fsxlog' from results
->> directory to the same results directory.
->>
->> Fixes: https://tracker.ceph.com/issues/58834
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   tests/generic/075 | 1 -
->>   1 file changed, 1 deletion(-)
->>
->> diff --git a/tests/generic/075 b/tests/generic/075
->> index 9f24ad41..03a394a6 100755
->> --- a/tests/generic/075
->> +++ b/tests/generic/075
->> @@ -57,7 +57,6 @@ _do_test()
->>       then
->>   	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
->>   	mv $out/$seq.$_n $seqres.$_n.full
->> -	mv "$RESULT_DIR"/$seq.$_n.fsxlog $seqres.$_n.fsxlog
-> Hmm... Thoese $seq, $seqnum, $seqres, $RESULT_DIR and $REPORT_DIR are mess for
-> me too :-D
->
->  From the logic of xfstests/check:
->
->    if $OPTIONS_HAVE_SECTIONS; then
->            export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
->            REPORT_DIR="$RESULT_BASE/$section"
->    else
->            export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
->            REPORT_DIR="$RESULT_BASE"
->    fi
->    seqres="$REPORT_DIR/$seqnum"
->
->
-> I think "$RESULT_DIR"/$seq equal to "$seqres", so this change makes sense to me.
-> (Not sure if there're some special situations which I don't know :)
->
-> The generic/075 is too old, lots of code in it can be removed or refactored, so
-> I think it's not worth changing it bit by bit, I can refactor it totally, or if
-> you'd like, you can do that.
+In a later patch, we're going to need to search for a request in
+the rbtree, but taking the o_mutex is inconvenient as we already
+hold the con mutex at the point where we need it.
 
-Yeah, I can do that later, but not recently.
+Add a new spinlock that we take when inserting and erasing entries from
+the o_requests tree. Search of the rbtree can be done with either the
+mutex or the spinlock, but insertion and removal requires both.
 
-I may add some more tests in future and then I can improve this together.
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ include/linux/ceph/osd_client.h | 8 +++++++-
+ net/ceph/osd_client.c           | 5 +++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-Thanks Zorro,
-
-- Xiubo
-
-> Thanks,
-> Zorro
->
->>   	od -xAx $seqres.$_n.full > $seqres.$_n.bad
->>   	od -xAx "$RESULT_DIR"/$seq.$_n.fsxgood > $seqres.$_n.good
->>   	rm -f "$RESULT_DIR"/$seq.$_n.fsxgood
->> -- 
->> 2.31.1
->>
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index fb6be72104df..92addef18738 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -29,7 +29,12 @@ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
+ 
+ #define CEPH_HOMELESS_OSD	-1
+ 
+-/* a given osd we're communicating with */
++/*
++ * A given osd we're communicating with.
++ *
++ * Note that the o_requests tree can be searched while holding the "lock" mutex
++ * or the "o_requests_lock" spinlock. Insertion or removal requires both!
++ */
+ struct ceph_osd {
+ 	refcount_t o_ref;
+ 	struct ceph_osd_client *o_osdc;
+@@ -37,6 +42,7 @@ struct ceph_osd {
+ 	int o_incarnation;
+ 	struct rb_node o_node;
+ 	struct ceph_connection o_con;
++	spinlock_t o_requests_lock;
+ 	struct rb_root o_requests;
+ 	struct rb_root o_linger_requests;
+ 	struct rb_root o_backoff_mappings;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 11c04e7d928e..a827995faba7 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1177,6 +1177,7 @@ static void osd_init(struct ceph_osd *osd)
+ {
+ 	refcount_set(&osd->o_ref, 1);
+ 	RB_CLEAR_NODE(&osd->o_node);
++	spin_lock_init(&osd->o_requests_lock);
+ 	osd->o_requests = RB_ROOT;
+ 	osd->o_linger_requests = RB_ROOT;
+ 	osd->o_backoff_mappings = RB_ROOT;
+@@ -1406,7 +1407,9 @@ static void link_request(struct ceph_osd *osd, struct ceph_osd_request *req)
+ 		atomic_inc(&osd->o_osdc->num_homeless);
+ 
+ 	get_osd(osd);
++	spin_lock(&osd->o_requests_lock);
+ 	insert_request(&osd->o_requests, req);
++	spin_unlock(&osd->o_requests_lock);
+ 	req->r_osd = osd;
+ }
+ 
+@@ -1418,7 +1421,9 @@ static void unlink_request(struct ceph_osd *osd, struct ceph_osd_request *req)
+ 	     req, req->r_tid);
+ 
+ 	req->r_osd = NULL;
++	spin_lock(&osd->o_requests_lock);
+ 	erase_request(&osd->o_requests, req);
++	spin_unlock(&osd->o_requests_lock);
+ 	put_osd(osd);
+ 
+ 	if (!osd_homeless(osd))
 -- 
-Best Regards,
-
-Xiubo Li (李秀波)
-
-Email: xiubli@redhat.com/xiubli@ibm.com
-Slack: @Xiubo Li
+2.31.1
 
