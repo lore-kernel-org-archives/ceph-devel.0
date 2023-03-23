@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BF5AC6FD1C
-	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:00:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09ACAC6FD1C
+	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:00:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230425AbjCWHAA (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 23 Mar 2023 03:00:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35894 "EHLO
+        id S230505AbjCWHAR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 23 Mar 2023 03:00:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230519AbjCWG77 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 02:59:59 -0400
+        with ESMTP id S230487AbjCWHAK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:00:10 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F415EC4F
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:58:54 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7F7DAF17
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:59:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679554719;
+        s=mimecast20190719; t=1679554724;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=iG3EnjDXq+JEFwRjZbUEbjLdcxs2AmHqVXyHhHwTObQ=;
-        b=brCAlbFL8U4yn8kSBC4VJut+DIqvMWYod78cw/TwdT7ChfWI/iXUbfyQSxX7O5h7dC6+jv
-        9Bh/qbDwlMZ0GuctfLpSNp6QU6awuwIDgxL1POeNL8Sc53F1/fwA9KcK9EZ+2VaqP/IArF
-        uXI/56V87ThXT+yU3lgJxHR1dn5qNmA=
+        bh=vAImxmF4FJHelmMGgUoTSMeN/lIjh6Dlt+8XvLAAt10=;
+        b=OCqFItGPSI4/QtrsAEXNS9FEM3hwMmnEgMRDmnqFhpIVFCv9lsOQzJUOREa56NGCU4y0Bn
+        y8+l+7RryyiWCtg48cZ8BY4bIUoRWE2W5575EtVbza5Jiqyn5zE4m/bCzhG2abm3T26NFc
+        J/hSPkCh+ib955+rJ0QXpcfhOL+X2mY=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-259-88KYOtoQNSiotlUMfIPYLg-1; Thu, 23 Mar 2023 02:58:36 -0400
-X-MC-Unique: 88KYOtoQNSiotlUMfIPYLg-1
+ us-mta-541-d22HwmSDMSmoFnq7pmGvoQ-1; Thu, 23 Mar 2023 02:58:43 -0400
+X-MC-Unique: d22HwmSDMSmoFnq7pmGvoQ-1
 Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id E7B358028AD;
-        Thu, 23 Mar 2023 06:58:34 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id B77798028B2;
+        Thu, 23 Mar 2023 06:58:42 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 26501492B01;
-        Thu, 23 Mar 2023 06:58:31 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EB0D3492B01;
+        Thu, 23 Mar 2023 06:58:39 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v17 51/71] ceph: disable fallocate for encrypted inodes
-Date:   Thu, 23 Mar 2023 14:55:05 +0800
-Message-Id: <20230323065525.201322-52-xiubli@redhat.com>
+Subject: [PATCH v17 53/71] ceph: don't use special DIO path for encrypted inodes
+Date:   Thu, 23 Mar 2023 14:55:07 +0800
+Message-Id: <20230323065525.201322-54-xiubli@redhat.com>
 In-Reply-To: <20230323065525.201322-1-xiubli@redhat.com>
 References: <20230323065525.201322-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -55,28 +55,40 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-...hopefully, just for now.
+Eventually I want to merge the synchronous and direct read codepaths,
+possibly via new netfs infrastructure. For now, the direct path is not
+crypto-enabled, so use the sync read/write paths instead.
 
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 3 +++
- 1 file changed, 3 insertions(+)
+ fs/ceph/file.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index df321933153a..e3d07f4049df 100644
+index f621f733898e..70c9b9d7dc33 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -2195,6 +2195,9 @@ static long ceph_fallocate(struct file *file, int mode,
- 	if (!S_ISREG(inode->i_mode))
- 		return -EOPNOTSUPP;
+@@ -1735,7 +1735,9 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+ 		     ceph_cap_string(got));
  
-+	if (IS_ENCRYPTED(inode))
-+		return -EOPNOTSUPP;
-+
- 	prealloc_cf = ceph_alloc_cap_flush();
- 	if (!prealloc_cf)
- 		return -ENOMEM;
+ 		if (!ceph_has_inline_data(ci)) {
+-			if (!retry_op && (iocb->ki_flags & IOCB_DIRECT)) {
++			if (!retry_op &&
++			    (iocb->ki_flags & IOCB_DIRECT) &&
++			    !IS_ENCRYPTED(inode)) {
+ 				ret = ceph_direct_read_write(iocb, to,
+ 							     NULL, NULL);
+ 				if (ret >= 0 && ret < len)
+@@ -1961,7 +1963,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 
+ 		/* we might need to revert back to that point */
+ 		data = *from;
+-		if (iocb->ki_flags & IOCB_DIRECT)
++		if ((iocb->ki_flags & IOCB_DIRECT) && !IS_ENCRYPTED(inode))
+ 			written = ceph_direct_read_write(iocb, &data, snapc,
+ 							 &prealloc_cf);
+ 		else
 -- 
 2.31.1
 
