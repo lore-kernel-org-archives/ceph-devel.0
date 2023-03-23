@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09ACAC6FD1C
-	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:00:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69881C76196
+	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:00:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230505AbjCWHAR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 23 Mar 2023 03:00:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36666 "EHLO
+        id S231126AbjCWHAT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 23 Mar 2023 03:00:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230487AbjCWHAK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:00:10 -0400
+        with ESMTP id S230495AbjCWHAL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:00:11 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7F7DAF17
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:59:04 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3B053C2B
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:59:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679554724;
+        s=mimecast20190719; t=1679554723;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=vAImxmF4FJHelmMGgUoTSMeN/lIjh6Dlt+8XvLAAt10=;
-        b=OCqFItGPSI4/QtrsAEXNS9FEM3hwMmnEgMRDmnqFhpIVFCv9lsOQzJUOREa56NGCU4y0Bn
-        y8+l+7RryyiWCtg48cZ8BY4bIUoRWE2W5575EtVbza5Jiqyn5zE4m/bCzhG2abm3T26NFc
-        J/hSPkCh+ib955+rJ0QXpcfhOL+X2mY=
+        bh=hnsNODnhVLhzTaOpSFohC/ZsWnVYvsbHIU9kEmI39mY=;
+        b=DfKNWFpg3TEEUE9SIwtxSYd1F84LVYdRZXx6Z4JNcf/ahqBOohpGOuokBBuIQiwmurz1Gc
+        0tZiHVphDyO/yf/MclO1U7PdzmK74KXsKsACiyQHWsgyyOxkPr1fqjvFGQsqKJ5+oRiG2A
+        nviEnQpQ12IbJYKXnZCtaG8ZuBRw8UM=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-541-d22HwmSDMSmoFnq7pmGvoQ-1; Thu, 23 Mar 2023 02:58:43 -0400
-X-MC-Unique: d22HwmSDMSmoFnq7pmGvoQ-1
+ us-mta-445-jwLGd80VNFCJS5WvmvIUjA-1; Thu, 23 Mar 2023 02:58:39 -0400
+X-MC-Unique: jwLGd80VNFCJS5WvmvIUjA-1
 Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id B77798028B2;
-        Thu, 23 Mar 2023 06:58:42 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id EB0D3492B01;
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 55944101A531;
         Thu, 23 Mar 2023 06:58:39 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 89036492B01;
+        Thu, 23 Mar 2023 06:58:35 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v17 53/71] ceph: don't use special DIO path for encrypted inodes
-Date:   Thu, 23 Mar 2023 14:55:07 +0800
-Message-Id: <20230323065525.201322-54-xiubli@redhat.com>
+Subject: [PATCH v17 52/71] ceph: disable copy offload on encrypted inodes
+Date:   Thu, 23 Mar 2023 14:55:06 +0800
+Message-Id: <20230323065525.201322-53-xiubli@redhat.com>
 In-Reply-To: <20230323065525.201322-1-xiubli@redhat.com>
 References: <20230323065525.201322-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -55,40 +55,31 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-Eventually I want to merge the synchronous and direct read codepaths,
-possibly via new netfs infrastructure. For now, the direct path is not
-crypto-enabled, so use the sync read/write paths instead.
+If we have an encrypted inode, then the client will need to re-encrypt
+the contents of the new object. Disable copy offload to or from
+encrypted inodes.
 
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ fs/ceph/file.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index f621f733898e..70c9b9d7dc33 100644
+index e3d07f4049df..f621f733898e 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -1735,7 +1735,9 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 		     ceph_cap_string(got));
+@@ -2519,6 +2519,10 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
+ 		return -EOPNOTSUPP;
+ 	}
  
- 		if (!ceph_has_inline_data(ci)) {
--			if (!retry_op && (iocb->ki_flags & IOCB_DIRECT)) {
-+			if (!retry_op &&
-+			    (iocb->ki_flags & IOCB_DIRECT) &&
-+			    !IS_ENCRYPTED(inode)) {
- 				ret = ceph_direct_read_write(iocb, to,
- 							     NULL, NULL);
- 				if (ret >= 0 && ret < len)
-@@ -1961,7 +1963,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
++	/* Every encrypted inode gets its own key, so we can't offload them */
++	if (IS_ENCRYPTED(src_inode) || IS_ENCRYPTED(dst_inode))
++		return -EOPNOTSUPP;
++
+ 	if (len < src_ci->i_layout.object_size)
+ 		return -EOPNOTSUPP; /* no remote copy will be done */
  
- 		/* we might need to revert back to that point */
- 		data = *from;
--		if (iocb->ki_flags & IOCB_DIRECT)
-+		if ((iocb->ki_flags & IOCB_DIRECT) && !IS_ENCRYPTED(inode))
- 			written = ceph_direct_read_write(iocb, &data, snapc,
- 							 &prealloc_cf);
- 		else
 -- 
 2.31.1
 
