@@ -2,101 +2,143 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB207C6FD1C
-	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 06:59:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0FD4C6FD1C
+	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 06:59:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230320AbjCWG7J (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 23 Mar 2023 02:59:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34152 "EHLO
+        id S230371AbjCWG7N (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 23 Mar 2023 02:59:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230318AbjCWG7F (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 02:59:05 -0400
+        with ESMTP id S230373AbjCWG7L (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 02:59:11 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21CEB6192
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:57:59 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7825C768C
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:58:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679554670;
+        s=mimecast20190719; t=1679554677;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=Tz7+OdyKe1VwKYb4OXcr4LCJtqf+7Kk4sqL3p/DjlSc=;
-        b=I2mp24sk8/XfpRKCTl0zRTRpzKmVzNE8NESTEDaaFHx/Q3jOMXH/EkZvJq8nhSy062jt0G
-        +j+i1O85ymkyQM/d4SuUbBzNsIyYi1fsSC0oc++EkZ8GrV6cDX4pLMxNkS0XYN2P/mn/D0
-        BMBec+6qWoji+XIzzwbMTwAIT0HUfA8=
+        bh=efa6VGPC1i5dmTGRWx7OBjU47M8M8JD2Tx03IESmZ+U=;
+        b=P/iqL9BFhLvtlJ1GXTX8xd+vtJea1EDjR8FxookVgvWgSeM4IpF8IkkXbgroGCealb55Sp
+        vtYGGlg6XTWUF3JY8/FQSob9Ra2n0+YYSJRImVD5eZnJt3dtfQxWvI3wyQeYQb5XlkS+6n
+        DbhDaYJYs9agW6yoRB2IBvL6QezMNrQ=
 Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
  [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-433-sdb4Y60SPOmzCfg_2gNOHw-1; Thu, 23 Mar 2023 02:57:43 -0400
-X-MC-Unique: sdb4Y60SPOmzCfg_2gNOHw-1
+ us-mta-561-ZvXB27olPguYx5OjRRT4fA-1; Thu, 23 Mar 2023 02:57:54 -0400
+X-MC-Unique: ZvXB27olPguYx5OjRRT4fA-1
 Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id DD8853814952;
-        Thu, 23 Mar 2023 06:57:42 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1CDFE2A5954A;
+        Thu, 23 Mar 2023 06:57:54 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1D336492B03;
-        Thu, 23 Mar 2023 06:57:39 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 503F6492B03;
+        Thu, 23 Mar 2023 06:57:50 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v17 36/71] ceph: allow encrypting a directory while not having Ax caps
-Date:   Thu, 23 Mar 2023 14:54:50 +0800
-Message-Id: <20230323065525.201322-37-xiubli@redhat.com>
+Subject: [PATCH v17 39/71] libceph: add CEPH_OSD_OP_ASSERT_VER support
+Date:   Thu, 23 Mar 2023 14:54:53 +0800
+Message-Id: <20230323065525.201322-40-xiubli@redhat.com>
 In-Reply-To: <20230323065525.201322-1-xiubli@redhat.com>
 References: <20230323065525.201322-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.1 on 10.11.54.9
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Luís Henriques <lhenriques@suse.de>
+From: Jeff Layton <jlayton@kernel.org>
 
-If a client doesn't have Fx caps on a directory, it will get errors while
-trying encrypt it:
+...and record the user_version in the reply in a new field in
+ceph_osd_request, so we can populate the assert_ver appropriately.
+Shuffle the fields a bit too so that the new field fits in an
+existing hole on x86_64.
 
-ceph: handle_cap_grant: cap grant attempt to change fscrypt_auth on non-I_NEW inode (old len 0 new len 48)
-fscrypt (ceph, inode 1099511627812): Error -105 getting encryption context
-
-A simple way to reproduce this is to use two clients:
-
-    client1 # mkdir /mnt/mydir
-
-    client2 # ls /mnt/mydir
-
-    client1 # fscrypt encrypt /mnt/mydir
-    client1 # echo hello > /mnt/mydir/world
-
-This happens because, in __ceph_setattr(), we only initialize
-ci->fscrypt_auth if we have Ax and ceph_fill_inode() won't use the
-fscrypt_auth received if the inode state isn't I_NEW.  Fix it by allowing
-ceph_fill_inode() to also set ci->fscrypt_auth if the inode doesn't have
-it set already.
-
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/inode.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ include/linux/ceph/osd_client.h | 6 +++++-
+ include/linux/ceph/rados.h      | 4 ++++
+ net/ceph/osd_client.c           | 5 +++++
+ 3 files changed, 14 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 282c8af0a49c..e88335e05b74 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -981,7 +981,8 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 	__ceph_update_quota(ci, iinfo->max_bytes, iinfo->max_files);
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 680b4a70f6d4..41bcd71cfa7a 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -198,6 +198,9 @@ struct ceph_osd_req_op {
+ 			u32 src_fadvise_flags;
+ 			struct ceph_osd_data osd_data;
+ 		} copy_from;
++		struct {
++			u64 ver;
++		} assert_ver;
+ 	};
+ };
  
- #ifdef CONFIG_FS_ENCRYPTION
--	if (iinfo->fscrypt_auth_len && (inode->i_state & I_NEW)) {
-+	if (iinfo->fscrypt_auth_len &&
-+	    ((inode->i_state & I_NEW) || (ci->fscrypt_auth_len == 0))) {
- 		kfree(ci->fscrypt_auth);
- 		ci->fscrypt_auth_len = iinfo->fscrypt_auth_len;
- 		ci->fscrypt_auth = iinfo->fscrypt_auth;
+@@ -252,6 +255,7 @@ struct ceph_osd_request {
+ 	struct ceph_osd_client *r_osdc;
+ 	struct kref       r_kref;
+ 	bool              r_mempool;
++	bool		  r_linger;           /* don't resend on failure */
+ 	struct completion r_completion;       /* private to osd_client.c */
+ 	ceph_osdc_callback_t r_callback;
+ 
+@@ -264,9 +268,9 @@ struct ceph_osd_request {
+ 	struct ceph_snap_context *r_snapc;    /* for writes */
+ 	struct timespec64 r_mtime;            /* ditto */
+ 	u64 r_data_offset;                    /* ditto */
+-	bool r_linger;                        /* don't resend on failure */
+ 
+ 	/* internal */
++	u64 r_version;			      /* data version sent in reply */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
+ 	ktime_t r_start_latency;              /* ktime_t */
+diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+index 43a7a1573b51..73c3efbec36c 100644
+--- a/include/linux/ceph/rados.h
++++ b/include/linux/ceph/rados.h
+@@ -523,6 +523,10 @@ struct ceph_osd_op {
+ 		struct {
+ 			__le64 cookie;
+ 		} __attribute__ ((packed)) notify;
++		struct {
++			__le64 unused;
++			__le64 ver;
++		} __attribute__ ((packed)) assert_ver;
+ 		struct {
+ 			__le64 offset, length;
+ 			__le64 src_offset;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 9138abc07f45..2dcb1140ed21 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1048,6 +1048,10 @@ static u32 osd_req_encode_op(struct ceph_osd_op *dst,
+ 		dst->copy_from.src_fadvise_flags =
+ 			cpu_to_le32(src->copy_from.src_fadvise_flags);
+ 		break;
++	case CEPH_OSD_OP_ASSERT_VER:
++		dst->assert_ver.unused = cpu_to_le64(0);
++		dst->assert_ver.ver = cpu_to_le64(src->assert_ver.ver);
++		break;
+ 	default:
+ 		pr_err("unsupported osd opcode %s\n",
+ 			ceph_osd_op_name(src->op));
+@@ -3852,6 +3856,7 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 	 * one (type of) reply back.
+ 	 */
+ 	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
++	req->r_version = m.user_version;
+ 	req->r_result = m.result ?: data_len;
+ 	finish_request(req);
+ 	mutex_unlock(&osd->lock);
 -- 
 2.31.1
 
