@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69881C76196
-	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:00:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A669C6FD1C
+	for <ceph-devel@archiver.kernel.org>; Thu, 23 Mar 2023 07:00:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231126AbjCWHAT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 23 Mar 2023 03:00:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36680 "EHLO
+        id S230260AbjCWHA3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 23 Mar 2023 03:00:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230495AbjCWHAL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:00:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3B053C2B
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:59:02 -0700 (PDT)
+        with ESMTP id S231124AbjCWHAT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2023 03:00:19 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B92A612047
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2023 23:59:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679554723;
+        s=mimecast20190719; t=1679554729;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=hnsNODnhVLhzTaOpSFohC/ZsWnVYvsbHIU9kEmI39mY=;
-        b=DfKNWFpg3TEEUE9SIwtxSYd1F84LVYdRZXx6Z4JNcf/ahqBOohpGOuokBBuIQiwmurz1Gc
-        0tZiHVphDyO/yf/MclO1U7PdzmK74KXsKsACiyQHWsgyyOxkPr1fqjvFGQsqKJ5+oRiG2A
-        nviEnQpQ12IbJYKXnZCtaG8ZuBRw8UM=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=u5TDviXiwk8bmB4U+S5uC0979UifmVMVWdkrhXUaQ30=;
+        b=a6xiIVIRoLqR3i+3mPLxsrk0fI3O6Untkl+WowgoeLghN75PGnsUXvhY/pUIm2rF17YvXh
+        mzByESuTEloMCioS05WnID0qr9GjL2Su5ilXIwpNdYPsO/OaDQGbXxIA2qPwBV0OcYrUwW
+        8dZo8KhY4Ia9HeuZXhHoXQYsgx+ReLg=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-445-jwLGd80VNFCJS5WvmvIUjA-1; Thu, 23 Mar 2023 02:58:39 -0400
-X-MC-Unique: jwLGd80VNFCJS5WvmvIUjA-1
+ us-mta-130-r88lqEegMZS8PV3XU25zfg-1; Thu, 23 Mar 2023 02:58:46 -0400
+X-MC-Unique: r88lqEegMZS8PV3XU25zfg-1
 Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 55944101A531;
-        Thu, 23 Mar 2023 06:58:39 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 2458D3804525;
+        Thu, 23 Mar 2023 06:58:46 +0000 (UTC)
 Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 89036492B01;
-        Thu, 23 Mar 2023 06:58:35 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 57EA8492B01;
+        Thu, 23 Mar 2023 06:58:43 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v17 52/71] ceph: disable copy offload on encrypted inodes
-Date:   Thu, 23 Mar 2023 14:55:06 +0800
-Message-Id: <20230323065525.201322-53-xiubli@redhat.com>
+Subject: [PATCH v17 54/71] ceph: align data in pages in ceph_sync_write
+Date:   Thu, 23 Mar 2023 14:55:08 +0800
+Message-Id: <20230323065525.201322-55-xiubli@redhat.com>
 In-Reply-To: <20230323065525.201322-1-xiubli@redhat.com>
 References: <20230323065525.201322-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -55,31 +55,72 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-If we have an encrypted inode, then the client will need to re-encrypt
-the contents of the new object. Disable copy offload to or from
-encrypted inodes.
+Encrypted files will need to be dealt with in block-sized chunks and
+once we do that, the way that ceph_sync_write aligns the data in the
+bounce buffer won't be acceptable.
+
+Change it to align the data the same way it would be aligned in the
+pagecache.
 
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ fs/ceph/file.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index e3d07f4049df..f621f733898e 100644
+index 70c9b9d7dc33..c9d83e87e58a 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -2519,6 +2519,10 @@ static ssize_t __ceph_copy_file_range(struct file *src_file, loff_t src_off,
- 		return -EOPNOTSUPP;
- 	}
+@@ -1579,6 +1579,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 	bool check_caps = false;
+ 	struct timespec64 mtime = current_time(inode);
+ 	size_t count = iov_iter_count(from);
++	size_t off;
  
-+	/* Every encrypted inode gets its own key, so we can't offload them */
-+	if (IS_ENCRYPTED(src_inode) || IS_ENCRYPTED(dst_inode))
-+		return -EOPNOTSUPP;
+ 	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
+ 		return -EROFS;
+@@ -1616,12 +1617,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 			break;
+ 		}
+ 
+-		/*
+-		 * write from beginning of first page,
+-		 * regardless of io alignment
+-		 */
+-		num_pages = (len + PAGE_SIZE - 1) >> PAGE_SHIFT;
+-
++		num_pages = calc_pages_for(pos, len);
+ 		pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
+ 		if (IS_ERR(pages)) {
+ 			ret = PTR_ERR(pages);
+@@ -1629,9 +1625,12 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 		}
+ 
+ 		left = len;
++		off = offset_in_page(pos);
+ 		for (n = 0; n < num_pages; n++) {
+-			size_t plen = min_t(size_t, left, PAGE_SIZE);
+-			ret = copy_page_from_iter(pages[n], 0, plen, from);
++			size_t plen = min_t(size_t, left, PAGE_SIZE - off);
 +
- 	if (len < src_ci->i_layout.object_size)
- 		return -EOPNOTSUPP; /* no remote copy will be done */
++			ret = copy_page_from_iter(pages[n], off, plen, from);
++			off = 0;
+ 			if (ret != plen) {
+ 				ret = -EFAULT;
+ 				break;
+@@ -1646,8 +1645,9 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
  
+ 		req->r_inode = inode;
+ 
+-		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
+-						false, true);
++		osd_req_op_extent_osd_data_pages(req, 0, pages, len,
++						 offset_in_page(pos),
++						 false, true);
+ 
+ 		req->r_mtime = mtime;
+ 		ceph_osdc_start_request(&fsc->client->osdc, req);
 -- 
 2.31.1
 
