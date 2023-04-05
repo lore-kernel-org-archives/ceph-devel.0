@@ -2,112 +2,63 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D581C77B74
-	for <ceph-devel@archiver.kernel.org>; Thu,  6 Apr 2023 14:17:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CFF9EC7618D
+	for <ceph-devel@archiver.kernel.org>; Thu,  6 Apr 2023 19:09:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239074AbjDFORg (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 6 Apr 2023 10:17:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38136 "EHLO
+        id S240065AbjDFTJI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 6 Apr 2023 15:09:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237723AbjDFORe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Apr 2023 10:17:34 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1731180;
-        Thu,  6 Apr 2023 07:17:33 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 4EE761F898;
-        Thu,  6 Apr 2023 14:17:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1680790652;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=XIwFAYmq+ddhYZF0Zfe4K0b1+UJuE82HHInNFEctczc=;
-        b=ZeJlivpALd8nO/1+mor0TCnnNBCMsJ16FUvMbjtBENF8lESP30O3UQN0FbK8ak1vh1Omwl
-        9TT+BNH6w2K4aPeYip1Ds2fvoITG3Q8Fm+KvriE04i9alnRCUvhm69FhfCLv5mocbumPb1
-        0G+YcC5Y0BrrKYEE3HWcPauZDd0rLVE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1680790652;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=XIwFAYmq+ddhYZF0Zfe4K0b1+UJuE82HHInNFEctczc=;
-        b=57+ei+nga6/9LWL0dAtibPJpgEe7tVSlAh13SWgoLWDg91xKuwog3XYPUrzIaZgUJ974ZK
-        mnJ0Dn3Ki8c7xoBQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E50021351F;
-        Thu,  6 Apr 2023 14:17:31 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id auwvN3vULmQXJwAAMHmgww
-        (envelope-from <dsterba@suse.cz>); Thu, 06 Apr 2023 14:17:31 +0000
-Date:   Thu, 6 Apr 2023 16:17:29 +0200
-From:   David Sterba <dsterba@suse.cz>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
-        ocfs2-devel@oss.oracle.com, linux-unionfs@vger.kernel.org,
-        jack@suse.com, linux-xfs@vger.kernel.org, fdmanana@suse.com,
-        ebiggers@google.com, brauner@kernel.org, amir73il@gmail.com,
-        djwong@kernel.org, anand.jain@oracle.com
-Subject: Re: [PATCH 5/5] fstests/MAINTAINERS: add a co-maintainer for btrfs
- testing part
-Message-ID: <20230406141729.GP19619@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20230404171411.699655-1-zlang@kernel.org>
- <20230404171411.699655-6-zlang@kernel.org>
+        with ESMTP id S240106AbjDFTJH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Apr 2023 15:09:07 -0400
+X-Greylist: delayed 105324 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 06 Apr 2023 12:09:05 PDT
+Received: from mail.dufert24.com (mail.dufert24.com [38.242.205.183])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 675294C17
+        for <ceph-devel@vger.kernel.org>; Thu,  6 Apr 2023 12:09:05 -0700 (PDT)
+Received: by mail.dufert24.com (Postfix, from userid 1001)
+        id 1BA05419C5; Wed,  5 Apr 2023 10:05:33 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dufert24.com; s=mail;
+        t=1680681938; bh=ny+p4XIhL27PiFULKVw7iLEmU7ZwucMvITzNrmwTaWI=;
+        h=Date:From:To:Subject:From;
+        b=EzXP5cGqPbIBi4o8nRQAilOH/uy72owMTUJyxccf5UGPTy3XATLs2HeNLL6iAaYGJ
+         /drdytLdHt9EiSmgCpD+kcvBkUZuUdyspQW37+7WnJ1FhKLHQhenXlUGum6IB5xG7S
+         5BQHU2AEQpky09W46Ld55Ksq3uhyUHCFgbju4O+ukD+LFRmNY8am0lCfZJH9xFWs47
+         7AOw2BfEYPY54p8DGCUGtRDHtec4++yVm664wIu4ryQiihjKGKB2/++/jvEAaioHLq
+         dxGKrk6HeA/dMLxOzdP89G4eUGxeEoB4xECtpH4D3b8mBGpwDKU4Ek5wap2DRDnehv
+         YMPE/521qCluw==
+Received: by mail.dufert24.com for <ceph-devel@vger.kernel.org>; Wed,  5 Apr 2023 08:05:26 GMT
+Message-ID: <20230405084500-0.1.30.91nt.0.q19b5775c9@dufert24.com>
+Date:   Wed,  5 Apr 2023 08:05:26 GMT
+From:   "Nikolaus Mazal" <nikolaus.mazal@dufert24.com>
+To:     <ceph-devel@vger.kernel.org>
+Subject: =?UTF-8?Q?Dropshipping_-_spolupr=C3=A1ce?=
+X-Mailer: mail.dufert24.com
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230404171411.699655-6-zlang@kernel.org>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Wed, Apr 05, 2023 at 01:14:11AM +0800, Zorro Lang wrote:
-> Darrick J. Wong would like to nominate Anand Jain to help more on
-> btrfs testing part (tests/btrfs and common/btrfs). He would like to
-> be a co-maintainer of btrfs part, will help to review and test
-> fstests btrfs related patches, and I might merge from him if there's
-> big patchset. So CC him besides send to fstests@ list, when you have
-> a btrfs fstests patch.
-> 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
-> 
-> Please btrfs list help to review this change, if you agree (or no objection),
-> then I'll push this change.
-> 
-> A co-maintainer will do:
-> 1) Review patches are related with him.
-> 2) Merge and test patches in his local git repo, and give the patch an ACK.
-> 3) Maintainer will trust the ack from co-maintainer more (might merge directly).
-> 4) Maintainer might merge from co-maintainer when he has a big patchset wait for
->    merging.
-> 
-> Thanks,
-> Zorro
-> 
->  MAINTAINERS | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 0ad12a38..9fc6c6b5 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -108,6 +108,7 @@ Maintainers List
->  	  or reviewer or co-maintainer can be in cc list.
->  
->  BTRFS
-> +M:	Anand Jain <anand.jain@oracle.com>
+Dobr=C3=A9 r=C3=A1no,
 
-Acked-by: David Sterba <dsterba@suse.com>
+Zastupuji spole=C4=8Dnost vyr=C3=A1b=C4=9Bj=C3=ADc=C3=AD =C5=BEaluzie a z=
+=C3=A1v=C4=9Bsy, kter=C3=A1 ji=C5=BE l=C3=A9ta komplexn=C4=9B podporuje o=
+dv=C4=9Btv=C3=AD e-commerce a poskytuje v=C3=BDrobc=C5=AFm, dodavatel=C5=AF=
+m, design=C3=A9r=C5=AFm a prodejc=C5=AFm inovativn=C3=AD prodejn=C3=AD n=C3=
+=A1stroje v syst=C3=A9mu dropshipping.
+
+Ji=C5=BE t=C3=A9m=C4=9B=C5=99 20 let poskytujeme na=C5=A1im z=C3=A1kazn=C3=
+=ADk=C5=AFm vysoce kvalitn=C3=AD produkty, realizujeme B2B prodej.
+
+D=C3=ADky spolupr=C3=A1ci s n=C3=A1mi m=C3=A1te =C5=A1anci rozv=C3=ADjet =
+sv=C3=A9 podnik=C3=A1n=C3=AD, zvy=C5=A1ovat tr=C5=BEby bez nutnosti m=C3=AD=
+t sklad a nakupovat zbo=C5=BE=C3=AD na sklad.
+
+Chcete-li se sezn=C3=A1mit s na=C5=A1=C3=ADm sortimentem a ov=C4=9B=C5=99=
+it si rozmanitost a kvalitu na=C5=A1ich v=C3=BDrobk=C5=AF - zvu v=C3=A1s =
+ke spolupr=C3=A1ci.
+
+
+Pozdravy
+Nikolaus Mazal
