@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E427C7619A
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:16:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E754C77B71
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:17:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230077AbjDLLQz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:16:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41110 "EHLO
+        id S230123AbjDLLQ7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:16:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230103AbjDLLQx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:16:53 -0400
+        with ESMTP id S230100AbjDLLQ6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:16:58 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F51759F3
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:15:41 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E837E7D97
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:15:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681298052;
+        s=mimecast20190719; t=1681298092;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=Hgce5a3AGaR9CiTtAuonYnc1lVfPuXmUoEacFtylQeM=;
-        b=E/u+J3WJDhYpAUmgap+ZSWP+Ij5LG8jRo9GWrU3ZAnI8QyoNST52vD1VPNGgstcybn6JUS
-        y2sqsPlzx5O0bRHDHAdjfSQIdgM9uZcTJ9rOcHd8enN49Xtem6YB2tMAlOCPFAIB3otnSN
-        4oUfQJM81V04nf9QmX0iWAXnqQ2R3sY=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=u9QXSIk7CwnJq7ykYRU87CVgpNlN/H86m0d0EXQa9GY=;
+        b=Us6f2Mo6WmIxlNffbhYfti1tJ8UjevPrw0bMrstDWMINYzz8bWMoxNuJXDsBd/SMp6hqbR
+        y95WtBHwy0V9Sa8MQnoKQXOPpx2OuDsU2StUKdmoPO7oC3UghFiLJy0O8DLm3wDji6Tc23
+        GF8BFskXRtuIVTaL15FD4sR36jOsgdY=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-612-tqKZhL3OMWysFqsq-IKw1w-1; Wed, 12 Apr 2023 07:14:11 -0400
-X-MC-Unique: tqKZhL3OMWysFqsq-IKw1w-1
+ us-mta-550-InUpm0WlMt2jN5GklOt2hg-1; Wed, 12 Apr 2023 07:14:49 -0400
+X-MC-Unique: InUpm0WlMt2jN5GklOt2hg-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 4FC4E101A531;
-        Wed, 12 Apr 2023 11:14:11 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 29D543C0F362;
+        Wed, 12 Apr 2023 11:14:49 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E586DC15BB8;
-        Wed, 12 Apr 2023 11:14:06 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 571B9C15BB8;
+        Wed, 12 Apr 2023 11:14:44 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 54/71] ceph: align data in pages in ceph_sync_write
-Date:   Wed, 12 Apr 2023 19:09:13 +0800
-Message-Id: <20230412110930.176835-55-xiubli@redhat.com>
+Subject: [PATCH v18 62/71] ceph: add support for encrypted snapshot names
+Date:   Wed, 12 Apr 2023 19:09:21 +0800
+Message-Id: <20230412110930.176835-63-xiubli@redhat.com>
 In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
 References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -54,77 +54,86 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Jeff Layton <jlayton@kernel.org>
+From: Luís Henriques <lhenriques@suse.de>
 
-Encrypted files will need to be dealt with in block-sized chunks and
-once we do that, the way that ceph_sync_write aligns the data in the
-bounce buffer won't be acceptable.
-
-Change it to align the data the same way it would be aligned in the
-pagecache.
+Since filenames in encrypted directories are already encrypted and shown
+as a base64-encoded string when the directory is locked, snapshot names
+should show a similar behaviour.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
-Reviewed-by: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
+ fs/ceph/inode.c | 33 +++++++++++++++++++++++++++++----
+ 1 file changed, 29 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 70c9b9d7dc33..c9d83e87e58a 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1579,6 +1579,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 	bool check_caps = false;
- 	struct timespec64 mtime = current_time(inode);
- 	size_t count = iov_iter_count(from);
-+	size_t off;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index bf05110f8532..be3936b28f57 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -91,9 +91,15 @@ struct inode *ceph_new_inode(struct inode *dir, struct dentry *dentry,
+ 	if (err < 0)
+ 		goto out_err;
  
- 	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
- 		return -EROFS;
-@@ -1616,12 +1617,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 			break;
- 		}
+-	err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
+-	if (err)
+-		goto out_err;
++	/*
++	 * We'll skip setting fscrypt context for snapshots, leaving that for
++	 * the handle_reply().
++	 */
++	if (ceph_snap(dir) != CEPH_SNAPDIR) {
++		err = ceph_fscrypt_prepare_context(dir, inode, as_ctx);
++		if (err)
++			goto out_err;
++	}
  
--		/*
--		 * write from beginning of first page,
--		 * regardless of io alignment
--		 */
--		num_pages = (len + PAGE_SIZE - 1) >> PAGE_SHIFT;
--
-+		num_pages = calc_pages_for(pos, len);
- 		pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
- 		if (IS_ERR(pages)) {
- 			ret = PTR_ERR(pages);
-@@ -1629,9 +1625,12 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 		}
+ 	return inode;
+ out_err:
+@@ -157,6 +163,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
+ 	};
+ 	struct inode *inode = ceph_get_inode(parent->i_sb, vino, NULL);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
++	int ret = -ENOTDIR;
  
- 		left = len;
-+		off = offset_in_page(pos);
- 		for (n = 0; n < num_pages; n++) {
--			size_t plen = min_t(size_t, left, PAGE_SIZE);
--			ret = copy_page_from_iter(pages[n], 0, plen, from);
-+			size_t plen = min_t(size_t, left, PAGE_SIZE - off);
+ 	if (IS_ERR(inode))
+ 		return inode;
+@@ -182,6 +189,24 @@ struct inode *ceph_get_snapdir(struct inode *parent)
+ 	ci->i_rbytes = 0;
+ 	ci->i_btime = ceph_inode(parent)->i_btime;
+ 
++#ifdef CONFIG_FS_ENCRYPTION
++	/* if encrypted, just borrow fscrypt_auth from parent */
++	if (IS_ENCRYPTED(parent)) {
++		struct ceph_inode_info *pci = ceph_inode(parent);
 +
-+			ret = copy_page_from_iter(pages[n], off, plen, from);
-+			off = 0;
- 			if (ret != plen) {
- 				ret = -EFAULT;
- 				break;
-@@ -1646,8 +1645,9 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
++		ci->fscrypt_auth = kmemdup(pci->fscrypt_auth,
++					   pci->fscrypt_auth_len,
++					   GFP_KERNEL);
++		if (ci->fscrypt_auth) {
++			inode->i_flags |= S_ENCRYPTED;
++			ci->fscrypt_auth_len = pci->fscrypt_auth_len;
++		} else {
++			dout("Failed to alloc snapdir fscrypt_auth\n");
++			ret = -ENOMEM;
++			goto err;
++		}
++	}
++#endif
+ 	if (inode->i_state & I_NEW) {
+ 		inode->i_op = &ceph_snapdir_iops;
+ 		inode->i_fop = &ceph_snapdir_fops;
+@@ -195,7 +220,7 @@ struct inode *ceph_get_snapdir(struct inode *parent)
+ 		discard_new_inode(inode);
+ 	else
+ 		iput(inode);
+-	return ERR_PTR(-ENOTDIR);
++	return ERR_PTR(ret);
+ }
  
- 		req->r_inode = inode;
- 
--		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
--						false, true);
-+		osd_req_op_extent_osd_data_pages(req, 0, pages, len,
-+						 offset_in_page(pos),
-+						 false, true);
- 
- 		req->r_mtime = mtime;
- 		ceph_osdc_start_request(&fsc->client->osdc, req);
+ const struct inode_operations ceph_file_iops = {
 -- 
 2.39.2
 
