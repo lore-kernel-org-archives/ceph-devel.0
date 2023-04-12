@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 864E1C77B6E
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:13:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 899E9C77B6E
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:14:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229971AbjDLLNr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:13:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36536 "EHLO
+        id S230052AbjDLLOJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:14:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38086 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229810AbjDLLNp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:13:45 -0400
+        with ESMTP id S229886AbjDLLOG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:14:06 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 445596E9A
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:12:28 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3610376A9
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:13:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681297915;
+        s=mimecast20190719; t=1681297927;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=VahqIYWbeVWTl/tnPE8MOrQgib481Em0csjEISf1KFk=;
-        b=W9nbsSKUQPbyi2XIczKC0/MIztV5CSQc7hf8Sm1feEMrpsBwCp3f+4CPPOHhm5wKLlsxbN
-        F3nPigRd2Il5Pu75rolqQja22PhQ58xu3rX+FhbAlVYozxTTthchzcaSF4o1vyvlGdvY/v
-        jub9RyRksy/nsPv1I1w89NHGqih0828=
+        bh=WMQ3u7g01qDSths6JY2KCp6r8JttFjC6BKuIl5Zkfs0=;
+        b=CpPAoSdCWULz+gA7VaHynsxDmPyU/Yox65/rjoefB0MQ1gVLDZT5IlwvHYq2rtaGtg6+Sm
+        H5LzupVI0tpRVB+evjrw3Sg9y73kJouwIP9+k5MyaHhTbIvzNou+tYZOnLYuwalOguH/lV
+        N7WhqcvQhCLpxoEOJWNFFNFmCWQ9rsU=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-558-jIekjrFpNzGE_r-Qz2a93g-1; Wed, 12 Apr 2023 07:11:52 -0400
-X-MC-Unique: jIekjrFpNzGE_r-Qz2a93g-1
+ us-mta-588-wpFICgTbPw-UtHzQjkULfQ-1; Wed, 12 Apr 2023 07:12:04 -0400
+X-MC-Unique: wpFICgTbPw-UtHzQjkULfQ-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C41C7858F09;
-        Wed, 12 Apr 2023 11:11:51 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id AAB0C857FBD;
+        Wed, 12 Apr 2023 11:12:03 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 231E4C15BB8;
-        Wed, 12 Apr 2023 11:11:47 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 53A6CC15BBA;
+        Wed, 12 Apr 2023 11:11:57 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 26/71] ceph: add helpers for converting names for userland presentation
-Date:   Wed, 12 Apr 2023 19:08:45 +0800
-Message-Id: <20230412110930.176835-27-xiubli@redhat.com>
+Subject: [PATCH v18 28/71] ceph: add fscrypt support to ceph_fill_trace
+Date:   Wed, 12 Apr 2023 19:08:47 +0800
+Message-Id: <20230412110930.176835-29-xiubli@redhat.com>
 In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
 References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -56,13 +56,8 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-Define a new ceph_fname struct that we can use to carry information
-about encrypted dentry names. Add helpers for working with these
-objects, including ceph_fname_to_usr which formats an encrypted filename
-for userland presentation.
-
-[ xiubli: s/FSCRYPT_BASE64URL_CHARS/CEPH_BASE64_CHARS/ reported by
-  kernel test robot <lkp@intel.com> ]
+When we get a dentry in a trace, decrypt the name so we can properly
+instantiate the dentry.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
@@ -70,160 +65,76 @@ Reviewed-by: Luís Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/crypto.c | 76 ++++++++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/crypto.h | 41 ++++++++++++++++++++++++++
- 2 files changed, 117 insertions(+)
+ fs/ceph/inode.c | 30 ++++++++++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index e54ea4c3e478..03f4b9e73884 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -234,3 +234,79 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
- 	dout("base64-encoded ciphertext name = %.*s\n", elen, buf);
- 	return elen;
- }
-+
-+/**
-+ * ceph_fname_to_usr - convert a filename for userland presentation
-+ * @fname: ceph_fname to be converted
-+ * @tname: temporary name buffer to use for conversion (may be NULL)
-+ * @oname: where converted name should be placed
-+ * @is_nokey: set to true if key wasn't available during conversion (may be NULL)
-+ *
-+ * Given a filename (usually from the MDS), format it for presentation to
-+ * userland. If @parent is not encrypted, just pass it back as-is.
-+ *
-+ * Otherwise, base64 decode the string, and then ask fscrypt to format it
-+ * for userland presentation.
-+ *
-+ * Returns 0 on success or negative error code on error.
-+ */
-+int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
-+		      struct fscrypt_str *oname, bool *is_nokey)
-+{
-+	int ret;
-+	struct fscrypt_str _tname = FSTR_INIT(NULL, 0);
-+	struct fscrypt_str iname;
-+
-+	if (!IS_ENCRYPTED(fname->dir)) {
-+		oname->name = fname->name;
-+		oname->len = fname->name_len;
-+		return 0;
-+	}
-+
-+	/* Sanity check that the resulting name will fit in the buffer */
-+	if (fname->name_len > CEPH_BASE64_CHARS(NAME_MAX))
-+		return -EIO;
-+
-+	ret = __fscrypt_prepare_readdir(fname->dir);
-+	if (ret)
-+		return ret;
-+
-+	/*
-+	 * Use the raw dentry name as sent by the MDS instead of
-+	 * generating a nokey name via fscrypt.
-+	 */
-+	if (!fscrypt_has_encryption_key(fname->dir)) {
-+		memcpy(oname->name, fname->name, fname->name_len);
-+		oname->len = fname->name_len;
-+		if (is_nokey)
-+			*is_nokey = true;
-+		return 0;
-+	}
-+
-+	if (fname->ctext_len == 0) {
-+		int declen;
-+
-+		if (!tname) {
-+			ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
-+			if (ret)
-+				return ret;
-+			tname = &_tname;
-+		}
-+
-+		declen = fscrypt_base64url_decode(fname->name, fname->name_len, tname->name);
-+		if (declen <= 0) {
-+			ret = -EIO;
-+			goto out;
-+		}
-+		iname.name = tname->name;
-+		iname.len = declen;
-+	} else {
-+		iname.name = fname->ctext;
-+		iname.len = fname->ctext_len;
-+	}
-+
-+	ret = fscrypt_fname_disk_to_usr(fname->dir, 0, 0, &iname, oname);
-+out:
-+	fscrypt_fname_free_buffer(&_tname);
-+	return ret;
-+}
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index 8abf10604722..f231d6e3ba0f 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -13,6 +13,14 @@ struct ceph_fs_client;
- struct ceph_acl_sec_ctx;
- struct ceph_mds_request;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 8b6b12a5a5e2..9a1d8ad9bf86 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1405,8 +1405,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME &&
+ 		    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
+ 		    !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
++			bool is_nokey = false;
+ 			struct qstr dname;
+ 			struct dentry *dn, *parent;
++			struct fscrypt_str oname = FSTR_INIT(NULL, 0);
++			struct ceph_fname fname = { .dir	= dir,
++						    .name	= rinfo->dname,
++						    .ctext	= rinfo->altname,
++						    .name_len	= rinfo->dname_len,
++						    .ctext_len	= rinfo->altname_len };
  
-+struct ceph_fname {
-+	struct inode	*dir;
-+	char		*name;		// b64 encoded, possibly hashed
-+	unsigned char	*ctext;		// binary crypttext (if any)
-+	u32		name_len;	// length of name buffer
-+	u32		ctext_len;	// length of crypttext
-+};
-+
- struct ceph_fscrypt_auth {
- 	__le32	cfa_version;
- 	__le32	cfa_blob_len;
-@@ -69,6 +77,22 @@ int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
- void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_sec_ctx *as);
- int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf);
+ 			BUG_ON(!rinfo->head->is_target);
+ 			BUG_ON(req->r_dentry);
+@@ -1414,8 +1421,20 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 			parent = d_find_any_alias(dir);
+ 			BUG_ON(!parent);
  
-+static inline int ceph_fname_alloc_buffer(struct inode *parent, struct fscrypt_str *fname)
-+{
-+	if (!IS_ENCRYPTED(parent))
-+		return 0;
-+	return fscrypt_fname_alloc_buffer(NAME_MAX, fname);
-+}
+-			dname.name = rinfo->dname;
+-			dname.len = rinfo->dname_len;
++			err = ceph_fname_alloc_buffer(dir, &oname);
++			if (err < 0) {
++				dput(parent);
++				goto done;
++			}
 +
-+static inline void ceph_fname_free_buffer(struct inode *parent, struct fscrypt_str *fname)
-+{
-+	if (IS_ENCRYPTED(parent))
-+		fscrypt_fname_free_buffer(fname);
-+}
-+
-+int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
-+			struct fscrypt_str *oname, bool *is_nokey);
-+
- #else /* CONFIG_FS_ENCRYPTION */
++			err = ceph_fname_to_usr(&fname, NULL, &oname, &is_nokey);
++			if (err < 0) {
++				dput(parent);
++				ceph_fname_free_buffer(dir, &oname);
++				goto done;
++			}
++			dname.name = oname.name;
++			dname.len = oname.len;
+ 			dname.hash = full_name_hash(parent, dname.name, dname.len);
+ 			tvino.ino = le64_to_cpu(rinfo->targeti.in->ino);
+ 			tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
+@@ -1430,9 +1449,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				     dname.len, dname.name, dn);
+ 				if (!dn) {
+ 					dput(parent);
++					ceph_fname_free_buffer(dir, &oname);
+ 					err = -ENOMEM;
+ 					goto done;
+ 				}
++				if (is_nokey) {
++					spin_lock(&dn->d_lock);
++					dn->d_flags |= DCACHE_NOKEY_NAME;
++					spin_unlock(&dn->d_lock);
++				}
+ 				err = 0;
+ 			} else if (d_really_is_positive(dn) &&
+ 				   (ceph_ino(d_inode(dn)) != tvino.ino ||
+@@ -1444,6 +1469,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				dput(dn);
+ 				goto retry_lookup;
+ 			}
++			ceph_fname_free_buffer(dir, &oname);
  
- static inline void ceph_fscrypt_set_ops(struct super_block *sb)
-@@ -97,6 +121,23 @@ static inline int ceph_encode_encrypted_fname(const struct inode *parent,
- {
- 	return -EOPNOTSUPP;
- }
-+
-+static inline int ceph_fname_alloc_buffer(struct inode *parent, struct fscrypt_str *fname)
-+{
-+	return 0;
-+}
-+
-+static inline void ceph_fname_free_buffer(struct inode *parent, struct fscrypt_str *fname)
-+{
-+}
-+
-+static inline int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
-+				    struct fscrypt_str *oname, bool *is_nokey)
-+{
-+	oname->name = fname->name;
-+	oname->len = fname->name_len;
-+	return 0;
-+}
- #endif /* CONFIG_FS_ENCRYPTION */
- 
- #endif
+ 			req->r_dentry = dn;
+ 			dput(parent);
 -- 
 2.39.2
 
