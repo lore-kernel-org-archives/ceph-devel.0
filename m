@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BE83C77B6E
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:21:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40E1CC77B6E
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:21:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230113AbjDLLVT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:21:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47382 "EHLO
+        id S229966AbjDLLVv (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:21:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229963AbjDLLVS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:21:18 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF0167AB8
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:20:07 -0700 (PDT)
+        with ESMTP id S229963AbjDLLVu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:21:50 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CBDC76A4
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:20:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681298298;
+        s=mimecast20190719; t=1681298401;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=Bg9tgxRmpOgUeMZi/dkjA6rDXqD71GLVfoeAufhHYYM=;
-        b=ep8KxNWLMu8j9uMeqTk2qXwascOBng+yRbcz85cBvTS5V0J70d8cMU7nuJk6kPG0bVfGm1
-        hTHM4R/50p+HHbfMMw+nxjhytytBBVNp7G2NoBebBOFcqptG1em24Hme2a42pDiw+8hc1E
-        DshVYTpXXVBmc3K3gYWnpT0Owv/cIi4=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=p1PU9hlaWbPkXdb+MWviNoq7BYFxon0yCNUC3EqHWlM=;
+        b=jOw45wo1HcehJToQT4R/05N4Bq9Ybjw7b43EYt6EohcRGOVlel2JRlCi+32a2RBwPH6NVV
+        qVgIlV6oG3O2pvY8piMHbwnUGBXurlYZH76OA2b+n5arusXw6dIuHfguzvelJaltIJXT4N
+        dDop5pO+KfxSBUI/HcW5kXuesjZNlBg=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-377-Pq0_RiRyM_Oew7jO5LcP-g-1; Wed, 12 Apr 2023 07:15:04 -0400
-X-MC-Unique: Pq0_RiRyM_Oew7jO5LcP-g-1
+ us-mta-618-TpcXxLFpPL-OGIy68uA6YQ-1; Wed, 12 Apr 2023 07:13:32 -0400
+X-MC-Unique: TpcXxLFpPL-OGIy68uA6YQ-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C69D1886474;
-        Wed, 12 Apr 2023 11:15:03 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 4BD8A3C0F37F;
+        Wed, 12 Apr 2023 11:13:32 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4CFB6C15BC0;
-        Wed, 12 Apr 2023 11:14:58 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id A0557C15BB8;
+        Wed, 12 Apr 2023 11:13:28 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 65/71] ceph: prevent snapshots to be created in encrypted locked directories
-Date:   Wed, 12 Apr 2023 19:09:24 +0800
-Message-Id: <20230412110930.176835-66-xiubli@redhat.com>
+Subject: [PATCH v18 46/71] ceph: add __ceph_sync_read helper support
+Date:   Wed, 12 Apr 2023 19:09:05 +0800
+Message-Id: <20230412110930.176835-47-xiubli@redhat.com>
 In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
 References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -54,37 +54,108 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Luís Henriques <lhenriques@suse.de>
+From: Xiubo Li <xiubli@redhat.com>
 
-With snapshot names encryption we can not allow snapshots to be created in
-locked directories because the names wouldn't be encrypted.  This patch
-forces the directory to be unlocked to allow a snapshot to be created.
+Turn the guts of ceph_sync_read into a new helper that takes an inode
+and an offset instead of a kiocb struct, and make ceph_sync_read call
+the helper as a wrapper.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+Reviewed-by: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/dir.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ fs/ceph/file.c  | 36 ++++++++++++++++++++++++------------
+ fs/ceph/super.h |  2 ++
+ 2 files changed, 26 insertions(+), 12 deletions(-)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 98a9b1592ba6..fe48a5d26c1d 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1084,6 +1084,11 @@ static int ceph_mkdir(struct mnt_idmap *idmap, struct inode *dir,
- 		err = -EDQUOT;
- 		goto out;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index f869ab31685a..ab55caeed2c6 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -956,22 +956,22 @@ enum {
+  * If we get a short result from the OSD, check against i_size; we need to
+  * only return a short read to the caller if we hit EOF.
+  */
+-static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+-			      int *retry_op)
++ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
++			 struct iov_iter *to, int *retry_op)
+ {
+-	struct file *file = iocb->ki_filp;
+-	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	struct ceph_osd_client *osdc = &fsc->client->osdc;
+ 	ssize_t ret;
+-	u64 off = iocb->ki_pos;
++	u64 off = *ki_pos;
+ 	u64 len = iov_iter_count(to);
+ 	u64 i_size = i_size_read(inode);
+ 	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
+ 
+-	dout("sync_read on file %p %llu~%u %s\n", file, off, (unsigned)len,
+-	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
++	dout("sync_read on inode %p %llx~%llx\n", inode, *ki_pos, len);
++
++	if (ceph_inode_is_shutdown(inode))
++		return -EIO;
+ 
+ 	if (!len)
+ 		return 0;
+@@ -1089,14 +1089,14 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 			break;
  	}
-+	if ((op == CEPH_MDS_OP_MKSNAP) && IS_ENCRYPTED(dir) &&
-+	    !fscrypt_has_encryption_key(dir)) {
-+		err = -ENOKEY;
-+		goto out;
-+	}
  
+-	if (off > iocb->ki_pos) {
++	if (off > *ki_pos) {
+ 		if (off >= i_size) {
+ 			*retry_op = CHECK_EOF;
+-			ret = i_size - iocb->ki_pos;
+-			iocb->ki_pos = i_size;
++			ret = i_size - *ki_pos;
++			*ki_pos = i_size;
+ 		} else {
+-			ret = off - iocb->ki_pos;
+-			iocb->ki_pos = off;
++			ret = off - *ki_pos;
++			*ki_pos = off;
+ 		}
+ 	}
  
- 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
+@@ -1104,6 +1104,18 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 	return ret;
+ }
+ 
++static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
++			      int *retry_op)
++{
++	struct file *file = iocb->ki_filp;
++	struct inode *inode = file_inode(file);
++
++	dout("sync_read on file %p %llx~%zx %s\n", file, iocb->ki_pos,
++	     iov_iter_count(to), (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
++
++	return __ceph_sync_read(inode, &iocb->ki_pos, to, retry_op);
++}
++
+ struct ceph_aio_request {
+ 	struct kiocb *iocb;
+ 	size_t total_len;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 844b6bed616d..09cf4a4351dc 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1286,6 +1286,8 @@ extern int ceph_renew_caps(struct inode *inode, int fmode);
+ extern int ceph_open(struct inode *inode, struct file *file);
+ extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 			    struct file *file, unsigned flags, umode_t mode);
++extern ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
++				struct iov_iter *to, int *retry_op);
+ extern int ceph_release(struct inode *inode, struct file *filp);
+ extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+ 				  char *data, size_t len);
 -- 
 2.39.2
 
