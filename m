@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 001EAC77B71
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:18:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62981C7619A
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:18:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230217AbjDLLS0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:18:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42632 "EHLO
+        id S230199AbjDLLS1 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:18:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42312 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230253AbjDLLSM (ORCPT
+        with ESMTP id S230254AbjDLLSM (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:18:12 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7762C76A4
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:17:06 -0700 (PDT)
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DCFF8685
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:17:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681298128;
+        s=mimecast20190719; t=1681298161;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=2f4Wd4+1hMmAQHKrBiPbcRBlPeFpE/suerg34gbQisk=;
-        b=NSKCDBKKMgk4FIzWAvGxKcLEfWYcOTlN8ESnAlKzf8h8uUbHcR8aNz1kvRo4DbNrxv4G1G
-        fNBM8pEsdPvHn4EeEe78MAb6sLPkKUcYnzCafKteCjPkr+6ropKSvJPXnFXqwypuEv6fr9
-        7Ui5aTxMSNQyiztk9u5zwXGiXQyajmc=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=MlCH+rzxZabFiLMQk+HCe5kjPrXg0DThVZA8JtN41BA=;
+        b=ITkkAJcITlCAKwPIcJn4hRMkRoMYcHuirS3/aJZJILRxW/RodJfmP9SjQ9KUmps3cGnVPY
+        wWN4vh+0vQmipinPndbf2v7KbHY9raAz84ZZlDtQnOX2+BcRaAlGiZognq7Afg0uJmfwWs
+        OIWiMBi1aMXeS+hSexzSggIPUt1CMCg=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-84-rLxPDxSMOCKIS_GUcallkw-1; Wed, 12 Apr 2023 07:15:25 -0400
-X-MC-Unique: rLxPDxSMOCKIS_GUcallkw-1
+ us-mta-564-zb6NmuslNeSYF322DxGU-w-1; Wed, 12 Apr 2023 07:12:34 -0400
+X-MC-Unique: zb6NmuslNeSYF322DxGU-w-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1302588B7A6;
-        Wed, 12 Apr 2023 11:15:25 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id B6D421C08795;
+        Wed, 12 Apr 2023 11:12:33 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id BD565C15BB8;
-        Wed, 12 Apr 2023 11:15:20 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9E20AC15BB8;
+        Wed, 12 Apr 2023 11:12:29 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 69/71] ceph: fix updating the i_truncate_pagecache_size for fscrypt
-Date:   Wed, 12 Apr 2023 19:09:28 +0800
-Message-Id: <20230412110930.176835-70-xiubli@redhat.com>
+Subject: [PATCH v18 34/71] ceph: add a new ceph.fscrypt.auth vxattr
+Date:   Wed, 12 Apr 2023 19:08:53 +0800
+Message-Id: <20230412110930.176835-35-xiubli@redhat.com>
 In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
 References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -54,127 +54,63 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+From: Jeff Layton <jlayton@kernel.org>
 
-When fscrypt is enabled we will align the truncate size up to the
-CEPH_FSCRYPT_BLOCK_SIZE always, so if we truncate the size in the
-same block more than once, the latter ones will be skipped being
-invalidated from the page caches.
+Give the client a way to get at the xattr from userland, mostly for
+future debugging purposes.
 
-This will force invalidating the page caches by using the smaller
-size than the real file size.
-
-At the same time add more debug log and fix the debug log for
-truncate code.
-
-URL: https://tracker.ceph.com/issues/58834
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
 Reviewed-by: Luís Henriques <lhenriques@suse.de>
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/caps.c  |  4 ++--
- fs/ceph/inode.c | 35 ++++++++++++++++++++++++-----------
- 2 files changed, 26 insertions(+), 13 deletions(-)
+ fs/ceph/xattr.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index e1bb6d9c16f8..3c5450f9d825 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3929,8 +3929,8 @@ static bool handle_cap_trunc(struct inode *inode,
- 	if (IS_ENCRYPTED(inode) && size)
- 		size = extra_info->fscrypt_file_size;
- 
--	dout("handle_cap_trunc inode %p mds%d seq %d to %lld seq %d\n",
--	     inode, mds, seq, truncate_size, truncate_seq);
-+	dout("%s inode %p mds%d seq %d to %lld truncate seq %d\n",
-+	     __func__, inode, mds, seq, truncate_size, truncate_seq);
- 	queue_trunc = ceph_fill_file_size(inode, issued,
- 					  truncate_seq, truncate_size, size);
- 	return queue_trunc;
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 1cfcbc39f7c6..059ebe42367c 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -763,7 +763,7 @@ int ceph_fill_file_size(struct inode *inode, int issued,
- 			ceph_fscache_update(inode);
- 		ci->i_reported_size = size;
- 		if (truncate_seq != ci->i_truncate_seq) {
--			dout("truncate_seq %u -> %u\n",
-+			dout("%s truncate_seq %u -> %u\n", __func__,
- 			     ci->i_truncate_seq, truncate_seq);
- 			ci->i_truncate_seq = truncate_seq;
- 
-@@ -787,15 +787,26 @@ int ceph_fill_file_size(struct inode *inode, int issued,
- 			}
- 		}
- 	}
--	if (ceph_seq_cmp(truncate_seq, ci->i_truncate_seq) >= 0 &&
--	    ci->i_truncate_size != truncate_size) {
--		dout("truncate_size %lld -> %llu\n", ci->i_truncate_size,
--		     truncate_size);
-+
-+	/*
-+	 * It's possible that the new sizes of the two consecutive
-+	 * size truncations will be in the same fscrypt last block,
-+	 * and we need to truncate the corresponding page caches
-+	 * anyway.
-+	 */
-+	if (ceph_seq_cmp(truncate_seq, ci->i_truncate_seq) >= 0) {
-+		dout("%s truncate_size %lld -> %llu, encrypted %d\n", __func__,
-+		     ci->i_truncate_size, truncate_size, !!IS_ENCRYPTED(inode));
-+
- 		ci->i_truncate_size = truncate_size;
--		if (IS_ENCRYPTED(inode))
-+
-+		if (IS_ENCRYPTED(inode)) {
-+			dout("%s truncate_pagecache_size %lld -> %llu\n",
-+			     __func__, ci->i_truncate_pagecache_size, size);
- 			ci->i_truncate_pagecache_size = size;
--		else
-+		} else {
- 			ci->i_truncate_pagecache_size = truncate_size;
-+		}
- 	}
- 	return queue_trunc;
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index d2242d7b082e..69500ac96d43 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -352,6 +352,23 @@ static ssize_t ceph_vxattrcb_auth_mds(struct ceph_inode_info *ci,
+ 	return ret;
  }
-@@ -2150,7 +2161,7 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
- retry:
- 	spin_lock(&ci->i_ceph_lock);
- 	if (ci->i_truncate_pending == 0) {
--		dout("__do_pending_vmtruncate %p none pending\n", inode);
-+		dout("%s %p none pending\n", __func__, inode);
- 		spin_unlock(&ci->i_ceph_lock);
- 		mutex_unlock(&ci->i_truncate_mutex);
- 		return;
-@@ -2162,8 +2173,7 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
- 	 */
- 	if (ci->i_wrbuffer_ref_head < ci->i_wrbuffer_ref) {
- 		spin_unlock(&ci->i_ceph_lock);
--		dout("__do_pending_vmtruncate %p flushing snaps first\n",
--		     inode);
-+		dout("%s %p flushing snaps first\n", __func__, inode);
- 		filemap_write_and_wait_range(&inode->i_data, 0,
- 					     inode->i_sb->s_maxbytes);
- 		goto retry;
-@@ -2174,7 +2184,7 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
  
- 	to = ci->i_truncate_pagecache_size;
- 	wrbuffer_refs = ci->i_wrbuffer_ref;
--	dout("__do_pending_vmtruncate %p (%d) to %lld\n", inode,
-+	dout("%s %p (%d) to %lld\n", __func__, inode,
- 	     ci->i_truncate_pending, to);
- 	spin_unlock(&ci->i_ceph_lock);
- 
-@@ -2361,6 +2371,9 @@ static int fill_fscrypt_truncate(struct inode *inode,
- 		header.data_len = cpu_to_le32(8 + 8 + 4 + CEPH_FSCRYPT_BLOCK_SIZE);
- 		header.file_offset = cpu_to_le64(orig_pos);
- 
-+		dout("%s encrypt block boff/bsize %d/%lu\n", __func__,
-+		     boff, CEPH_FSCRYPT_BLOCK_SIZE);
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++static bool ceph_vxattrcb_fscrypt_auth_exists(struct ceph_inode_info *ci)
++{
++	return ci->fscrypt_auth_len;
++}
 +
- 		/* truncate and zero out the extra contents for the last block */
- 		memset(iov.iov_base + boff, 0, PAGE_SIZE - boff);
++static ssize_t ceph_vxattrcb_fscrypt_auth(struct ceph_inode_info *ci, char *val, size_t size)
++{
++	if (size) {
++		if (size < ci->fscrypt_auth_len)
++			return -ERANGE;
++		memcpy(val, ci->fscrypt_auth, ci->fscrypt_auth_len);
++	}
++	return ci->fscrypt_auth_len;
++}
++#endif /* CONFIG_FS_ENCRYPTION */
++
+ #define CEPH_XATTR_NAME(_type, _name)	XATTR_CEPH_PREFIX #_type "." #_name
+ #define CEPH_XATTR_NAME2(_type, _name, _name2)	\
+ 	XATTR_CEPH_PREFIX #_type "." #_name "." #_name2
+@@ -500,6 +517,15 @@ static struct ceph_vxattr ceph_common_vxattrs[] = {
+ 		.exists_cb = NULL,
+ 		.flags = VXATTR_FLAG_READONLY,
+ 	},
++#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
++	{
++		.name = "ceph.fscrypt.auth",
++		.name_size = sizeof("ceph.fscrypt.auth"),
++		.getxattr_cb = ceph_vxattrcb_fscrypt_auth,
++		.exists_cb = ceph_vxattrcb_fscrypt_auth_exists,
++		.flags = VXATTR_FLAG_READONLY,
++	},
++#endif /* CONFIG_FS_ENCRYPTION */
+ 	{ .name = NULL, 0 }	/* Required table terminator */
+ };
  
 -- 
 2.39.2
