@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1803C7619A
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:18:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 001EAC77B71
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:18:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230295AbjDLLSW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:18:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42220 "EHLO
+        id S230217AbjDLLS0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:18:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230176AbjDLLSL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:18:11 -0400
+        with ESMTP id S230253AbjDLLSM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:18:12 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 423C97D87
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:17:10 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7762C76A4
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:17:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681298160;
+        s=mimecast20190719; t=1681298128;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=ZAUwhOl1JeoVeE5cTt/xFQqlLbZZqncCkROe459a9Oc=;
-        b=euKeeL/QOWpTfVDCYj6XRjCPp6/AWEG+qpYjPGDptkPptb/3QnCG59GkyDuLi5HyEphJgJ
-        KeUSJdxogNZtAOOsdw8y4UgZWyd+40Zk+xEPEkIrsMpCkamsltdieCS9jjSuOx8Kyzx/y9
-        jz3e+Vm16NSNE/F/tbBvK5iWcUaNt3s=
+        bh=2f4Wd4+1hMmAQHKrBiPbcRBlPeFpE/suerg34gbQisk=;
+        b=NSKCDBKKMgk4FIzWAvGxKcLEfWYcOTlN8ESnAlKzf8h8uUbHcR8aNz1kvRo4DbNrxv4G1G
+        fNBM8pEsdPvHn4EeEe78MAb6sLPkKUcYnzCafKteCjPkr+6ropKSvJPXnFXqwypuEv6fr9
+        7Ui5aTxMSNQyiztk9u5zwXGiXQyajmc=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-487-kuZgHUnuMwKlGymd8o3Flg-1; Wed, 12 Apr 2023 07:12:23 -0400
-X-MC-Unique: kuZgHUnuMwKlGymd8o3Flg-1
+ us-mta-84-rLxPDxSMOCKIS_GUcallkw-1; Wed, 12 Apr 2023 07:15:25 -0400
+X-MC-Unique: rLxPDxSMOCKIS_GUcallkw-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 8927588B7A0;
-        Wed, 12 Apr 2023 11:12:23 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1302588B7A6;
+        Wed, 12 Apr 2023 11:15:25 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 9C58AC15BB8;
-        Wed, 12 Apr 2023 11:12:19 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BD565C15BB8;
+        Wed, 12 Apr 2023 11:15:20 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 32/71] ceph: create symlinks with encrypted and base64-encoded targets
-Date:   Wed, 12 Apr 2023 19:08:51 +0800
-Message-Id: <20230412110930.176835-33-xiubli@redhat.com>
+Subject: [PATCH v18 69/71] ceph: fix updating the i_truncate_pagecache_size for fscrypt
+Date:   Wed, 12 Apr 2023 19:09:28 +0800
+Message-Id: <20230412110930.176835-70-xiubli@redhat.com>
 In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
 References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -54,281 +54,128 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Jeff Layton <jlayton@kernel.org>
+From: Xiubo Li <xiubli@redhat.com>
 
-When creating symlinks in encrypted directories, encrypt and
-base64-encode the target with the new inode's key before sending to the
-MDS.
+When fscrypt is enabled we will align the truncate size up to the
+CEPH_FSCRYPT_BLOCK_SIZE always, so if we truncate the size in the
+same block more than once, the latter ones will be skipped being
+invalidated from the page caches.
 
-When filling a symlinked inode, base64-decode it into a buffer that
-we'll keep in ci->i_symlink. When get_link is called, decrypt the buffer
-into a new one that will hang off i_link.
+This will force invalidating the page caches by using the smaller
+size than the real file size.
 
+At the same time add more debug log and fix the debug log for
+truncate code.
+
+URL: https://tracker.ceph.com/issues/58834
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
 Reviewed-by: Luís Henriques <lhenriques@suse.de>
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/crypto.c |   2 +-
- fs/ceph/dir.c    |  51 +++++++++++++++++++---
- fs/ceph/inode.c  | 107 +++++++++++++++++++++++++++++++++++++++++------
- 3 files changed, 142 insertions(+), 18 deletions(-)
+ fs/ceph/caps.c  |  4 ++--
+ fs/ceph/inode.c | 35 ++++++++++++++++++++++++-----------
+ 2 files changed, 26 insertions(+), 13 deletions(-)
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 1803ec7a69a9..5b807f8f4c69 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -306,7 +306,7 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
- 			tname = &_tname;
- 		}
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index e1bb6d9c16f8..3c5450f9d825 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3929,8 +3929,8 @@ static bool handle_cap_trunc(struct inode *inode,
+ 	if (IS_ENCRYPTED(inode) && size)
+ 		size = extra_info->fscrypt_file_size;
  
--		declen = fscrypt_base64url_decode(fname->name, fname->name_len, tname->name);
-+		declen = ceph_base64_decode(fname->name, fname->name_len, tname->name);
- 		if (declen <= 0) {
- 			ret = -EIO;
- 			goto out;
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index b3add6cbc8dd..3784fdd77e3e 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -946,6 +946,40 @@ static int ceph_create(struct mnt_idmap *idmap, struct inode *dir,
- 	return ceph_mknod(idmap, dir, dentry, mode, 0);
- }
- 
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+static int prep_encrypted_symlink_target(struct ceph_mds_request *req, const char *dest)
-+{
-+	int err;
-+	int len = strlen(dest);
-+	struct fscrypt_str osd_link = FSTR_INIT(NULL, 0);
-+
-+	err = fscrypt_prepare_symlink(req->r_parent, dest, len, PATH_MAX, &osd_link);
-+	if (err)
-+		goto out;
-+
-+	err = fscrypt_encrypt_symlink(req->r_new_inode, dest, len, &osd_link);
-+	if (err)
-+		goto out;
-+
-+	req->r_path2 = kmalloc(CEPH_BASE64_CHARS(osd_link.len) + 1, GFP_KERNEL);
-+	if (!req->r_path2) {
-+		err = -ENOMEM;
-+		goto out;
-+	}
-+
-+	len = ceph_base64_encode(osd_link.name, osd_link.len, req->r_path2);
-+	req->r_path2[len] = '\0';
-+out:
-+	fscrypt_fname_free_buffer(&osd_link);
-+	return err;
-+}
-+#else
-+static int prep_encrypted_symlink_target(struct ceph_mds_request *req, const char *dest)
-+{
-+	return -EOPNOTSUPP;
-+}
-+#endif
-+
- static int ceph_symlink(struct mnt_idmap *idmap, struct inode *dir,
- 			struct dentry *dentry, const char *dest)
- {
-@@ -981,14 +1015,21 @@ static int ceph_symlink(struct mnt_idmap *idmap, struct inode *dir,
- 		goto out_req;
- 	}
- 
--	req->r_path2 = kstrdup(dest, GFP_KERNEL);
--	if (!req->r_path2) {
--		err = -ENOMEM;
--		goto out_req;
--	}
- 	req->r_parent = dir;
- 	ihold(dir);
- 
-+	if (IS_ENCRYPTED(req->r_new_inode)) {
-+		err = prep_encrypted_symlink_target(req, dest);
-+		if (err)
-+			goto out_req;
-+	} else {
-+		req->r_path2 = kstrdup(dest, GFP_KERNEL);
-+		if (!req->r_path2) {
-+			err = -ENOMEM;
-+			goto out_req;
-+		}
-+	}
-+
- 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
+-	dout("handle_cap_trunc inode %p mds%d seq %d to %lld seq %d\n",
+-	     inode, mds, seq, truncate_size, truncate_seq);
++	dout("%s inode %p mds%d seq %d to %lld truncate seq %d\n",
++	     __func__, inode, mds, seq, truncate_size, truncate_seq);
+ 	queue_trunc = ceph_fill_file_size(inode, issued,
+ 					  truncate_seq, truncate_size, size);
+ 	return queue_trunc;
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 85507b057a64..17de62acb5d4 100644
+index 1cfcbc39f7c6..059ebe42367c 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -35,6 +35,7 @@
-  */
+@@ -763,7 +763,7 @@ int ceph_fill_file_size(struct inode *inode, int issued,
+ 			ceph_fscache_update(inode);
+ 		ci->i_reported_size = size;
+ 		if (truncate_seq != ci->i_truncate_seq) {
+-			dout("truncate_seq %u -> %u\n",
++			dout("%s truncate_seq %u -> %u\n", __func__,
+ 			     ci->i_truncate_seq, truncate_seq);
+ 			ci->i_truncate_seq = truncate_seq;
  
- static const struct inode_operations ceph_symlink_iops;
-+static const struct inode_operations ceph_encrypted_symlink_iops;
- 
- static void ceph_inode_work(struct work_struct *work);
- 
-@@ -639,6 +640,7 @@ void ceph_free_inode(struct inode *inode)
- #ifdef CONFIG_FS_ENCRYPTION
- 	kfree(ci->fscrypt_auth);
- #endif
-+	fscrypt_free_inode(inode);
- 	kmem_cache_free(ceph_inode_cachep, ci);
- }
- 
-@@ -836,6 +838,34 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 		     inode, time_warp_seq, ci->i_time_warp_seq);
- }
- 
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+static int decode_encrypted_symlink(const char *encsym, int enclen, u8 **decsym)
-+{
-+	int declen;
-+	u8 *sym;
-+
-+	sym = kmalloc(enclen + 1, GFP_NOFS);
-+	if (!sym)
-+		return -ENOMEM;
-+
-+	declen = ceph_base64_decode(encsym, enclen, sym);
-+	if (declen < 0) {
-+		pr_err("%s: can't decode symlink (%d). Content: %.*s\n",
-+		       __func__, declen, enclen, encsym);
-+		kfree(sym);
-+		return -EIO;
-+	}
-+	sym[declen + 1] = '\0';
-+	*decsym = sym;
-+	return declen;
-+}
-+#else
-+static int decode_encrypted_symlink(const char *encsym, int symlen, u8 **decsym)
-+{
-+	return -EOPNOTSUPP;
-+}
-+#endif
-+
- /*
-  * Populate an inode based on info from mds.  May be called on new or
-  * existing inodes.
-@@ -1070,26 +1100,39 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		inode->i_fop = &ceph_file_fops;
- 		break;
- 	case S_IFLNK:
--		inode->i_op = &ceph_symlink_iops;
- 		if (!ci->i_symlink) {
- 			u32 symlen = iinfo->symlink_len;
- 			char *sym;
- 
- 			spin_unlock(&ci->i_ceph_lock);
- 
--			if (symlen != i_size_read(inode)) {
--				pr_err("%s %llx.%llx BAD symlink "
--					"size %lld\n", __func__,
--					ceph_vinop(inode),
--					i_size_read(inode));
-+			if (IS_ENCRYPTED(inode)) {
-+				if (symlen != i_size_read(inode))
-+					pr_err("%s %llx.%llx BAD symlink size %lld\n",
-+						__func__, ceph_vinop(inode), i_size_read(inode));
-+
-+				err = decode_encrypted_symlink(iinfo->symlink, symlen, (u8 **)&sym);
-+				if (err < 0) {
-+					pr_err("%s decoding encrypted symlink failed: %d\n",
-+						__func__, err);
-+					goto out;
-+				}
-+				symlen = err;
- 				i_size_write(inode, symlen);
- 				inode->i_blocks = calc_inode_blocks(symlen);
--			}
-+			} else {
-+				if (symlen != i_size_read(inode)) {
-+					pr_err("%s %llx.%llx BAD symlink size %lld\n",
-+						__func__, ceph_vinop(inode), i_size_read(inode));
-+					i_size_write(inode, symlen);
-+					inode->i_blocks = calc_inode_blocks(symlen);
-+				}
- 
--			err = -ENOMEM;
--			sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
--			if (!sym)
--				goto out;
-+				err = -ENOMEM;
-+				sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
-+				if (!sym)
-+					goto out;
-+			}
- 
- 			spin_lock(&ci->i_ceph_lock);
- 			if (!ci->i_symlink)
-@@ -1097,7 +1140,17 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 			else
- 				kfree(sym); /* lost a race */
+@@ -787,15 +787,26 @@ int ceph_fill_file_size(struct inode *inode, int issued,
+ 			}
  		}
--		inode->i_link = ci->i_symlink;
+ 	}
+-	if (ceph_seq_cmp(truncate_seq, ci->i_truncate_seq) >= 0 &&
+-	    ci->i_truncate_size != truncate_size) {
+-		dout("truncate_size %lld -> %llu\n", ci->i_truncate_size,
+-		     truncate_size);
++
++	/*
++	 * It's possible that the new sizes of the two consecutive
++	 * size truncations will be in the same fscrypt last block,
++	 * and we need to truncate the corresponding page caches
++	 * anyway.
++	 */
++	if (ceph_seq_cmp(truncate_seq, ci->i_truncate_seq) >= 0) {
++		dout("%s truncate_size %lld -> %llu, encrypted %d\n", __func__,
++		     ci->i_truncate_size, truncate_size, !!IS_ENCRYPTED(inode));
++
+ 		ci->i_truncate_size = truncate_size;
+-		if (IS_ENCRYPTED(inode))
 +
 +		if (IS_ENCRYPTED(inode)) {
-+			/*
-+			 * Encrypted symlinks need to be decrypted before we can
-+			 * cache their targets in i_link. Don't touch it here.
-+			 */
-+			inode->i_op = &ceph_encrypted_symlink_iops;
++			dout("%s truncate_pagecache_size %lld -> %llu\n",
++			     __func__, ci->i_truncate_pagecache_size, size);
+ 			ci->i_truncate_pagecache_size = size;
+-		else
 +		} else {
-+			inode->i_link = ci->i_symlink;
-+			inode->i_op = &ceph_symlink_iops;
+ 			ci->i_truncate_pagecache_size = truncate_size;
 +		}
- 		break;
- 	case S_IFDIR:
- 		inode->i_op = &ceph_dir_iops;
-@@ -2125,6 +2178,29 @@ static void ceph_inode_work(struct work_struct *work)
- 	iput(inode);
+ 	}
+ 	return queue_trunc;
  }
+@@ -2150,7 +2161,7 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
+ retry:
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (ci->i_truncate_pending == 0) {
+-		dout("__do_pending_vmtruncate %p none pending\n", inode);
++		dout("%s %p none pending\n", __func__, inode);
+ 		spin_unlock(&ci->i_ceph_lock);
+ 		mutex_unlock(&ci->i_truncate_mutex);
+ 		return;
+@@ -2162,8 +2173,7 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
+ 	 */
+ 	if (ci->i_wrbuffer_ref_head < ci->i_wrbuffer_ref) {
+ 		spin_unlock(&ci->i_ceph_lock);
+-		dout("__do_pending_vmtruncate %p flushing snaps first\n",
+-		     inode);
++		dout("%s %p flushing snaps first\n", __func__, inode);
+ 		filemap_write_and_wait_range(&inode->i_data, 0,
+ 					     inode->i_sb->s_maxbytes);
+ 		goto retry;
+@@ -2174,7 +2184,7 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
  
-+static const char *ceph_encrypted_get_link(struct dentry *dentry, struct inode *inode,
-+					   struct delayed_call *done)
-+{
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+
-+	if (!dentry)
-+		return ERR_PTR(-ECHILD);
-+
-+	return fscrypt_get_symlink(inode, ci->i_symlink, i_size_read(inode), done);
-+}
-+
-+static int ceph_encrypted_symlink_getattr(struct mnt_idmap *idmap,
-+					  const struct path *path, struct kstat *stat,
-+					  u32 request_mask, unsigned int query_flags)
-+{
-+	int ret;
-+
-+	ret = ceph_getattr(idmap, path, stat, request_mask, query_flags);
-+	if (ret)
-+		return ret;
-+	return fscrypt_symlink_getattr(path, stat);
-+}
-+
- /*
-  * symlinks
-  */
-@@ -2135,6 +2211,13 @@ static const struct inode_operations ceph_symlink_iops = {
- 	.listxattr = ceph_listxattr,
- };
+ 	to = ci->i_truncate_pagecache_size;
+ 	wrbuffer_refs = ci->i_wrbuffer_ref;
+-	dout("__do_pending_vmtruncate %p (%d) to %lld\n", inode,
++	dout("%s %p (%d) to %lld\n", __func__, inode,
+ 	     ci->i_truncate_pending, to);
+ 	spin_unlock(&ci->i_ceph_lock);
  
-+static const struct inode_operations ceph_encrypted_symlink_iops = {
-+	.get_link = ceph_encrypted_get_link,
-+	.setattr = ceph_setattr,
-+	.getattr = ceph_encrypted_symlink_getattr,
-+	.listxattr = ceph_listxattr,
-+};
+@@ -2361,6 +2371,9 @@ static int fill_fscrypt_truncate(struct inode *inode,
+ 		header.data_len = cpu_to_le32(8 + 8 + 4 + CEPH_FSCRYPT_BLOCK_SIZE);
+ 		header.file_offset = cpu_to_le64(orig_pos);
+ 
++		dout("%s encrypt block boff/bsize %d/%lu\n", __func__,
++		     boff, CEPH_FSCRYPT_BLOCK_SIZE);
 +
- int __ceph_setattr(struct inode *inode, struct iattr *attr, struct ceph_iattr *cia)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 		/* truncate and zero out the extra contents for the last block */
+ 		memset(iov.iov_base + boff, 0, PAGE_SIZE - boff);
+ 
 -- 
 2.39.2
 
