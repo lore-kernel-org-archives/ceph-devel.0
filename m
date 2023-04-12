@@ -2,47 +2,50 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54F5FC77B6E
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:11:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5397C77B6E
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:12:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229551AbjDLLLZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:11:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35146 "EHLO
+        id S229562AbjDLLMN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:12:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229482AbjDLLLY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:11:24 -0400
+        with ESMTP id S229706AbjDLLML (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:12:11 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E896E7680
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:10:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC6544231
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:10:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681297790;
+        s=mimecast20190719; t=1681297798;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=jDPU7Rz/wQZEhm39bsUvWuI1sVw1B/zuPKgoRwKfTwU=;
-        b=M/PylWGo9uw46sDRzydsCcorTWOWeufUN6TOy/02y99ZuGuLYf1jfJ+CSwYDVxJuU7t8Q3
-        UkN6u6ITxOP2FPw1mwlhvBVXkzKMXIowtQnESirvj7nK/cGusZ1iGekK4lkyvFanVKHvg1
-        1K2uzybpBR4jANMRfXcy5vGGCWGgOeY=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=WxTAmDMYgzgLkWMI/WAhc/godkDRKr+m/AcMachmlaQ=;
+        b=QkL5aU8qLIRbW8eJnsVoRlHvirc09/K2ZmwBBIB1Bg13c8AFn9VGOuYwVhb2Cb9e1s2Kmm
+        Nfs5FIIAahkPE4vL1SeeQB4MuscgD74JuIlmrw7NS5hVm8FlYQCuay0/NFFtahu43smil6
+        +izJLlWMgtxy2bXOZiZdgzj0kp3eNJE=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-61-kDXpE8nqOHuAuU-Ng__ikA-1; Wed, 12 Apr 2023 07:09:47 -0400
-X-MC-Unique: kDXpE8nqOHuAuU-Ng__ikA-1
+ us-mta-55-a0dupIXXM7OYPHZZAWt5TQ-1; Wed, 12 Apr 2023 07:09:57 -0400
+X-MC-Unique: a0dupIXXM7OYPHZZAWt5TQ-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id E78391C0514A;
-        Wed, 12 Apr 2023 11:09:46 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9A086101A531;
+        Wed, 12 Apr 2023 11:09:56 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D0C4DC15BBA;
-        Wed, 12 Apr 2023 11:09:42 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id AD341C16029;
+        Wed, 12 Apr 2023 11:09:52 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 00/71] ceph+fscrypt: full support
-Date:   Wed, 12 Apr 2023 19:08:19 +0800
-Message-Id: <20230412110930.176835-1-xiubli@redhat.com>
+Subject: [PATCH v18 02/71] libceph: define struct ceph_sparse_extent and add some helpers
+Date:   Wed, 12 Apr 2023 19:08:21 +0800
+Message-Id: <20230412110930.176835-3-xiubli@redhat.com>
+In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
+References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -51,152 +54,129 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+From: Jeff Layton <jlayton@kernel.org>
 
-This patch series is based on Jeff Layton's previous great work and effort
-on this and all the patches bas been in the testing branch since this
-Monday(20 Mar)
+When the OSD sends back a sparse read reply, it contains an array of
+these structures. Define the structure and add a couple of helpers for
+dealing with them.
 
-Since v15 we have added the ceph qa teuthology test cases for this [1][2],
-which will test both the file name and contents encryption features and at
-the same time they will also test the IO benchmarks.
+Also add a place in struct ceph_osd_req_op to store the extent buffer,
+and code to free it if it's populated when the req is torn down.
 
-To support the fscrypt we also have some other work in ceph [3][4][5][6][7][8][9]:
+Tested-by: Luís Henriques <lhenriques@suse.de>
+Tested-by: Venky Shankar <vshankar@redhat.com>
+Reviewed-by: Luís Henriques <lhenriques@suse.de>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ include/linux/ceph/osd_client.h | 43 ++++++++++++++++++++++++++++++++-
+ net/ceph/osd_client.c           | 13 ++++++++++
+ 2 files changed, 55 insertions(+), 1 deletion(-)
 
-[1] https://github.com/ceph/ceph/pull/48628
-[2] https://github.com/ceph/ceph/pull/49934
-[3] https://github.com/ceph/ceph/pull/43588
-[4] https://github.com/ceph/ceph/pull/37297
-[5] https://github.com/ceph/ceph/pull/45192
-[6] https://github.com/ceph/ceph/pull/45312
-[7] https://github.com/ceph/ceph/pull/40828
-[8] https://github.com/ceph/ceph/pull/45224
-[9] https://github.com/ceph/ceph/pull/45073
-
-The [9] is still undering testing and will soon be merged after that. All
-the others had been merged.
-
-This will depend on Eric's [10] which is a [DO NOT MERGE] patch in the
-ceph-client's testing branch temporarily.
-
-[10] https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=for-next
-
-The main changes since v17:
-
-- A bug fix for "ceph: drop the messages from MDS when unmounting" patch.
-- This patch series has been tested by Luis, Venky and me.
-
-
-Jeff Layton (47):
-  libceph: add spinlock around osd->o_requests
-  libceph: define struct ceph_sparse_extent and add some helpers
-  libceph: add sparse read support to msgr2 crc state machine
-  libceph: add sparse read support to OSD client
-  libceph: support sparse reads on msgr2 secure codepath
-  libceph: add sparse read support to msgr1
-  ceph: add new mount option to enable sparse reads
-  ceph: preallocate inode for ops that may create one
-  ceph: make ceph_msdc_build_path use ref-walk
-  libceph: add new iov_iter-based ceph_msg_data_type and
-    ceph_osd_data_type
-  ceph: use osd_req_op_extent_osd_iter for netfs reads
-  ceph: fscrypt_auth handling for ceph
-  ceph: ensure that we accept a new context from MDS for new inodes
-  ceph: add support for fscrypt_auth/fscrypt_file to cap messages
-  ceph: implement -o test_dummy_encryption mount option
-  ceph: decode alternate_name in lease info
-  ceph: add fscrypt ioctls
-  ceph: add encrypted fname handling to ceph_mdsc_build_path
-  ceph: send altname in MClientRequest
-  ceph: encode encrypted name in dentry release
-  ceph: properly set DCACHE_NOKEY_NAME flag in lookup
-  ceph: set DCACHE_NOKEY_NAME in atomic open
-  ceph: make d_revalidate call fscrypt revalidator for encrypted
-    dentries
-  ceph: add helpers for converting names for userland presentation
-  ceph: add fscrypt support to ceph_fill_trace
-  ceph: create symlinks with encrypted and base64-encoded targets
-  ceph: make ceph_get_name decrypt filenames
-  ceph: add a new ceph.fscrypt.auth vxattr
-  ceph: add some fscrypt guardrails
-  libceph: add CEPH_OSD_OP_ASSERT_VER support
-  ceph: size handling for encrypted inodes in cap updates
-  ceph: fscrypt_file field handling in MClientRequest messages
-  ceph: handle fscrypt fields in cap messages from MDS
-  ceph: update WARN_ON message to pr_warn
-  ceph: add infrastructure for file encryption and decryption
-  libceph: allow ceph_osdc_new_request to accept a multi-op read
-  ceph: disable fallocate for encrypted inodes
-  ceph: disable copy offload on encrypted inodes
-  ceph: don't use special DIO path for encrypted inodes
-  ceph: align data in pages in ceph_sync_write
-  ceph: add read/modify/write to ceph_sync_write
-  ceph: plumb in decryption during sync reads
-  ceph: add fscrypt decryption support to ceph_netfs_issue_op
-  ceph: set i_blkbits to crypto block size for encrypted inodes
-  ceph: add encryption support to writepage
-  ceph: fscrypt support for writepages
-  ceph: report STATX_ATTR_ENCRYPTED on encrypted inodes
-
-Luís Henriques (11):
-  ceph: add base64 endcoding routines for encrypted names
-  ceph: allow encrypting a directory while not having Ax caps
-  ceph: mark directory as non-complete after loading key
-  ceph: don't allow changing layout on encrypted files/directories
-  ceph: invalidate pages when doing direct/sync writes
-  ceph: add support for encrypted snapshot names
-  ceph: add support for handling encrypted snapshot names
-  ceph: update documentation regarding snapshot naming limitations
-  ceph: prevent snapshots to be created in encrypted locked directories
-  ceph: switch ceph_open() to use new fscrypt helper
-  ceph: switch ceph_open_atomic() to use the new fscrypt helper
-
-Xiubo Li (13):
-  ceph: make the ioctl cmd more readable in debug log
-  ceph: fix base64 encoded name's length check in ceph_fname_to_usr()
-  ceph: pass the request to parse_reply_info_readdir()
-  ceph: add ceph_encode_encrypted_dname() helper
-  ceph: add support to readdir for encrypted filenames
-  ceph: get file size from fscrypt_file when present in inode traces
-  ceph: add __ceph_get_caps helper support
-  ceph: add __ceph_sync_read helper support
-  ceph: add object version support for sync read
-  ceph: add truncate size handling support for fscrypt
-  libceph: defer removing the req from osdc just after req->r_callback
-  ceph: drop the messages from MDS when unmounting
-  ceph: fix updating the i_truncate_pagecache_size for fscrypt
-
- Documentation/filesystems/ceph.rst |  10 +
- fs/ceph/Makefile                   |   1 +
- fs/ceph/acl.c                      |   4 +-
- fs/ceph/addr.c                     | 182 ++++++--
- fs/ceph/caps.c                     | 227 ++++++++--
- fs/ceph/crypto.c                   | 669 +++++++++++++++++++++++++++++
- fs/ceph/crypto.h                   | 270 ++++++++++++
- fs/ceph/dir.c                      | 188 ++++++--
- fs/ceph/export.c                   |  44 +-
- fs/ceph/file.c                     | 593 +++++++++++++++++++++----
- fs/ceph/inode.c                    | 613 +++++++++++++++++++++++---
- fs/ceph/ioctl.c                    | 126 +++++-
- fs/ceph/mds_client.c               | 479 +++++++++++++++++----
- fs/ceph/mds_client.h               |  29 +-
- fs/ceph/quota.c                    |  14 +-
- fs/ceph/snap.c                     |  10 +-
- fs/ceph/super.c                    | 167 ++++++-
- fs/ceph/super.h                    |  45 +-
- fs/ceph/xattr.c                    |  29 ++
- include/linux/ceph/ceph_fs.h       |  21 +-
- include/linux/ceph/messenger.h     |  40 ++
- include/linux/ceph/osd_client.h    |  93 +++-
- include/linux/ceph/rados.h         |   4 +
- net/ceph/messenger.c               |  79 ++++
- net/ceph/messenger_v1.c            |  98 ++++-
- net/ceph/messenger_v2.c            | 286 +++++++++++-
- net/ceph/osd_client.c              | 369 +++++++++++++++-
- 27 files changed, 4269 insertions(+), 421 deletions(-)
- create mode 100644 fs/ceph/crypto.c
- create mode 100644 fs/ceph/crypto.h
-
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 92addef18738..05da1e755b7b 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -29,6 +29,17 @@ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
+ 
+ #define CEPH_HOMELESS_OSD	-1
+ 
++/*
++ * A single extent in a SPARSE_READ reply.
++ *
++ * Note that these come from the OSD as little-endian values. On BE arches,
++ * we convert them in-place after receipt.
++ */
++struct ceph_sparse_extent {
++	u64	off;
++	u64	len;
++} __packed;
++
+ /*
+  * A given osd we're communicating with.
+  *
+@@ -104,6 +115,8 @@ struct ceph_osd_req_op {
+ 			u64 offset, length;
+ 			u64 truncate_size;
+ 			u32 truncate_seq;
++			int sparse_ext_cnt;
++			struct ceph_sparse_extent *sparse_ext;
+ 			struct ceph_osd_data osd_data;
+ 		} extent;
+ 		struct {
+@@ -510,6 +523,20 @@ extern struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *,
+ 				      u32 truncate_seq, u64 truncate_size,
+ 				      bool use_mempool);
+ 
++int __ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op, int cnt);
++
++/*
++ * How big an extent array should we preallocate for a sparse read? This is
++ * just a starting value.  If we get more than this back from the OSD, the
++ * receiver will reallocate.
++ */
++#define CEPH_SPARSE_EXT_ARRAY_INITIAL  16
++
++static inline int ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op)
++{
++	return __ceph_alloc_sparse_ext_map(op, CEPH_SPARSE_EXT_ARRAY_INITIAL);
++}
++
+ extern void ceph_osdc_get_request(struct ceph_osd_request *req);
+ extern void ceph_osdc_put_request(struct ceph_osd_request *req);
+ 
+@@ -564,5 +591,19 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 			    struct ceph_object_locator *oloc,
+ 			    struct ceph_watch_item **watchers,
+ 			    u32 *num_watchers);
+-#endif
+ 
++/* Find offset into the buffer of the end of the extent map */
++static inline u64 ceph_sparse_ext_map_end(struct ceph_osd_req_op *op)
++{
++	struct ceph_sparse_extent *ext;
++
++	/* No extents? No data */
++	if (op->extent.sparse_ext_cnt == 0)
++		return 0;
++
++	ext = &op->extent.sparse_ext[op->extent.sparse_ext_cnt - 1];
++
++	return ext->off + ext->len - op->extent.offset;
++}
++
++#endif
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index a827995faba7..e2f1d1dcbb84 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -378,6 +378,7 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
+ 	case CEPH_OSD_OP_READ:
+ 	case CEPH_OSD_OP_WRITE:
+ 	case CEPH_OSD_OP_WRITEFULL:
++		kfree(op->extent.sparse_ext);
+ 		ceph_osd_data_release(&op->extent.osd_data);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+@@ -1120,6 +1121,18 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ }
+ EXPORT_SYMBOL(ceph_osdc_new_request);
+ 
++int __ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op, int cnt)
++{
++	op->extent.sparse_ext_cnt = cnt;
++	op->extent.sparse_ext = kmalloc_array(cnt,
++					      sizeof(*op->extent.sparse_ext),
++					      GFP_NOFS);
++	if (!op->extent.sparse_ext)
++		return -ENOMEM;
++	return 0;
++}
++EXPORT_SYMBOL(__ceph_alloc_sparse_ext_map);
++
+ /*
+  * We keep osd requests in an rbtree, sorted by ->r_tid.
+  */
 -- 
 2.39.2
 
