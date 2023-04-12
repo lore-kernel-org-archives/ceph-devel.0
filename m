@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3FACC77B6E
-	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:12:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32D8DC77B6E
+	for <ceph-devel@archiver.kernel.org>; Wed, 12 Apr 2023 11:12:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229745AbjDLLMa (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 12 Apr 2023 07:12:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35800 "EHLO
+        id S229788AbjDLLMe (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 12 Apr 2023 07:12:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229721AbjDLLM2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:12:28 -0400
+        with ESMTP id S229721AbjDLLMd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2023 07:12:33 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 557497EF2
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:11:10 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C852783E7
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2023 04:11:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681297816;
+        s=mimecast20190719; t=1681297834;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=dtSaDEsZvchqiCmw9DWFV0kmpllOWAWB56w6zWV3gU8=;
-        b=XCoa8GyyMerA5vcwcdi/8BLlmKhSjCMzJUl8999oNCeNlkVlUqXb4dGY335padknE4zDeH
-        B8v9zXNt/WoLW80jEPSBkHF22VaqWbIej0+9l7IDnL1rd3K72wVxDDPSPvg+9IBt4N5eMY
-        ghW0vhcNMQSBNzHdUhvlT9ontV/PG5U=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=LlTCD3+Z87yxA2E+H+VHEghSNKkZRUv9GKLQzyqryIk=;
+        b=doTgu+Uxi/pjH3vWkb2Iulx0n2KFkbA2Yd0/MuZT4+6NpgNJEH3/WdvkSG3xV0h5JM+Zeu
+        Cf2ef7QMpERZW2JEAPJ5mz2ICQSoLAv1vQ0BySw6GN+LGAYKSbgXEhuDf/MaFp4iVGVaLG
+        JMBF020rfB7WGCmQ7MK6LE1V4++8+5k=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-454-uoI4-kSiNYm6bu3l6mZ10Q-1; Wed, 12 Apr 2023 07:10:12 -0400
-X-MC-Unique: uoI4-kSiNYm6bu3l6mZ10Q-1
+ us-mta-578-3dQxY2AnO0usHskVMMOaWg-1; Wed, 12 Apr 2023 07:10:31 -0400
+X-MC-Unique: 3dQxY2AnO0usHskVMMOaWg-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id EE1088996E1;
-        Wed, 12 Apr 2023 11:10:11 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9D0C028237F3;
+        Wed, 12 Apr 2023 11:10:30 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-131.pek2.redhat.com [10.72.12.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 06D77C15BB8;
-        Wed, 12 Apr 2023 11:10:06 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id AEBE4C15BB8;
+        Wed, 12 Apr 2023 11:10:26 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v18 05/71] libceph: support sparse reads on msgr2 secure codepath
-Date:   Wed, 12 Apr 2023 19:08:24 +0800
-Message-Id: <20230412110930.176835-6-xiubli@redhat.com>
+Subject: [PATCH v18 09/71] ceph: make ceph_msdc_build_path use ref-walk
+Date:   Wed, 12 Apr 2023 19:08:28 +0800
+Message-Id: <20230412110930.176835-10-xiubli@redhat.com>
 In-Reply-To: <20230412110930.176835-1-xiubli@redhat.com>
 References: <20230412110930.176835-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -56,19 +56,13 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-Add a new init_sgs_pages helper that populates the scatterlist from
-an arbitrary point in an array of pages.
+Encryption potentially requires allocation, at which point we'll need to
+be in a non-atomic context. Convert ceph_msdc_build_path to take dentry
+spinlocks and references instead of using rcu_read_lock to walk the
+path.
 
-Change setup_message_sgs to take an optional pointer to an array of
-pages. If that's set, then the scatterlist will be set using that
-array instead of the cursor.
-
-When given a sparse read on a secure connection, decrypt the data
-in-place rather than into the final destination, by passing it the
-in_enc_pages array.
-
-After decrypting, run the sparse_read state machine in a loop, copying
-data from the decrypted pages until it's complete.
+This is slightly less efficient, and we may want to eventually allow
+using RCU when the leaf dentry isn't encrypted.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
@@ -76,191 +70,84 @@ Reviewed-by: Luís Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- net/ceph/messenger_v2.c | 119 ++++++++++++++++++++++++++++++++++++----
- 1 file changed, 109 insertions(+), 10 deletions(-)
+ fs/ceph/mds_client.c | 35 +++++++++++++++++++----------------
+ 1 file changed, 19 insertions(+), 16 deletions(-)
 
-diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
-index a0becd553d7c..a31ac13d5451 100644
---- a/net/ceph/messenger_v2.c
-+++ b/net/ceph/messenger_v2.c
-@@ -959,12 +959,48 @@ static void init_sgs_cursor(struct scatterlist **sg,
- 	}
- }
- 
-+/**
-+ * init_sgs_pages: set up scatterlist on an array of page pointers
-+ * @sg: 	scatterlist to populate
-+ * @pages: 	pointer to page array
-+ * @dpos:	position in the array to start (bytes)
-+ * @dlen:	len to add to sg (bytes)
-+ * @pad:	pointer to pad destination (if any)
-+ *
-+ * Populate the scatterlist from the page array, starting at an arbitrary
-+ * byte in the array and running for a specified length.
-+ */
-+static void init_sgs_pages(struct scatterlist **sg, struct page **pages,
-+			     int dpos, int dlen, u8 *pad)
-+{
-+	int idx = dpos >> PAGE_SHIFT;
-+	int off = offset_in_page(dpos);
-+	int resid = dlen;
-+
-+	do {
-+		int len = min(resid, (int)PAGE_SIZE - off);
-+
-+		sg_set_page(*sg, pages[idx], len, off);
-+		*sg = sg_next(*sg);
-+		off = 0;
-+		++idx;
-+		resid -= len;
-+	} while (resid);
-+
-+	if (need_padding(dlen)) {
-+		sg_set_buf(*sg, pad, padding_len(dlen));
-+		*sg = sg_next(*sg);
-+	}
-+}
-+
- static int setup_message_sgs(struct sg_table *sgt, struct ceph_msg *msg,
- 			     u8 *front_pad, u8 *middle_pad, u8 *data_pad,
--			     void *epilogue, bool add_tag)
-+			     void *epilogue, struct page **pages, int dpos,
-+			     bool add_tag)
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index dcb25724b693..0aa2c97a0460 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2400,7 +2400,8 @@ static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
+ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
+ 			   int stop_on_nosnap)
  {
- 	struct ceph_msg_data_cursor cursor;
- 	struct scatterlist *cur_sg;
-+	int dlen = data_len(msg);
- 	int sg_cnt;
- 	int ret;
+-	struct dentry *temp;
++	struct dentry *cur;
++	struct inode *inode;
+ 	char *path;
+ 	int pos;
+ 	unsigned seq;
+@@ -2417,34 +2418,35 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
+ 	path[pos] = '\0';
  
-@@ -978,9 +1014,15 @@ static int setup_message_sgs(struct sg_table *sgt, struct ceph_msg *msg,
- 	if (middle_len(msg))
- 		sg_cnt += calc_sg_cnt(msg->middle->vec.iov_base,
- 				      middle_len(msg));
--	if (data_len(msg)) {
--		ceph_msg_data_cursor_init(&cursor, msg, data_len(msg));
--		sg_cnt += calc_sg_cnt_cursor(&cursor);
-+	if (dlen) {
-+		if (pages) {
-+			sg_cnt += calc_pages_for(dpos, dlen);
-+			if (need_padding(dlen))
-+				sg_cnt++;
-+		} else {
-+			ceph_msg_data_cursor_init(&cursor, msg, dlen);
-+			sg_cnt += calc_sg_cnt_cursor(&cursor);
-+		}
+ 	seq = read_seqbegin(&rename_lock);
+-	rcu_read_lock();
+-	temp = dentry;
++	cur = dget(dentry);
+ 	for (;;) {
+-		struct inode *inode;
++		struct dentry *temp;
+ 
+-		spin_lock(&temp->d_lock);
+-		inode = d_inode(temp);
++		spin_lock(&cur->d_lock);
++		inode = d_inode(cur);
+ 		if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
+ 			dout("build_path path+%d: %p SNAPDIR\n",
+-			     pos, temp);
+-		} else if (stop_on_nosnap && inode && dentry != temp &&
++			     pos, cur);
++		} else if (stop_on_nosnap && inode && dentry != cur &&
+ 			   ceph_snap(inode) == CEPH_NOSNAP) {
+-			spin_unlock(&temp->d_lock);
++			spin_unlock(&cur->d_lock);
+ 			pos++; /* get rid of any prepended '/' */
+ 			break;
+ 		} else {
+-			pos -= temp->d_name.len;
++			pos -= cur->d_name.len;
+ 			if (pos < 0) {
+-				spin_unlock(&temp->d_lock);
++				spin_unlock(&cur->d_lock);
+ 				break;
+ 			}
+-			memcpy(path + pos, temp->d_name.name, temp->d_name.len);
++			memcpy(path + pos, cur->d_name.name, cur->d_name.len);
+ 		}
++		temp = cur;
+ 		spin_unlock(&temp->d_lock);
+-		temp = READ_ONCE(temp->d_parent);
++		cur = dget_parent(temp);
++		dput(temp);
+ 
+ 		/* Are we at the root? */
+-		if (IS_ROOT(temp))
++		if (IS_ROOT(cur))
+ 			break;
+ 
+ 		/* Are we out of buffer? */
+@@ -2453,8 +2455,9 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase,
+ 
+ 		path[pos] = '/';
  	}
+-	base = ceph_ino(d_inode(temp));
+-	rcu_read_unlock();
++	inode = d_inode(cur);
++	base = inode ? ceph_ino(inode) : 0;
++	dput(cur);
  
- 	ret = sg_alloc_table(sgt, sg_cnt, GFP_NOIO);
-@@ -994,9 +1036,13 @@ static int setup_message_sgs(struct sg_table *sgt, struct ceph_msg *msg,
- 	if (middle_len(msg))
- 		init_sgs(&cur_sg, msg->middle->vec.iov_base, middle_len(msg),
- 			 middle_pad);
--	if (data_len(msg)) {
--		ceph_msg_data_cursor_init(&cursor, msg, data_len(msg));
--		init_sgs_cursor(&cur_sg, &cursor, data_pad);
-+	if (dlen) {
-+		if (pages) {
-+			init_sgs_pages(&cur_sg, pages, dpos, dlen, data_pad);
-+		} else {
-+			ceph_msg_data_cursor_init(&cursor, msg, dlen);
-+			init_sgs_cursor(&cur_sg, &cursor, data_pad);
-+		}
- 	}
- 
- 	WARN_ON(!sg_is_last(cur_sg));
-@@ -1031,10 +1077,52 @@ static int decrypt_control_remainder(struct ceph_connection *con)
- 			 padded_len(rem_len) + CEPH_GCM_TAG_LEN);
- }
- 
-+/* Process sparse read data that lives in a buffer */
-+static int process_v2_sparse_read(struct ceph_connection *con, struct page **pages, int spos)
-+{
-+	struct ceph_msg_data_cursor *cursor = &con->v2.in_cursor;
-+	int ret;
-+
-+	for (;;) {
-+		char *buf = NULL;
-+
-+		ret = con->ops->sparse_read(con, cursor, &buf);
-+		if (ret <= 0)
-+			return ret;
-+
-+		dout("%s: sparse_read return %x buf %p\n", __func__, ret, buf);
-+
-+		do {
-+			int idx = spos >> PAGE_SHIFT;
-+			int soff = offset_in_page(spos);
-+			struct page *spage = con->v2.in_enc_pages[idx];
-+			int len = min_t(int, ret, PAGE_SIZE - soff);
-+
-+			if (buf) {
-+				memcpy_from_page(buf, spage, soff, len);
-+				buf += len;
-+			} else {
-+				struct bio_vec bv;
-+
-+				get_bvec_at(cursor, &bv);
-+				len = min_t(int, len, bv.bv_len);
-+				memcpy_page(bv.bv_page, bv.bv_offset,
-+					    spage, soff, len);
-+				ceph_msg_data_advance(cursor, len);
-+			}
-+			spos += len;
-+			ret -= len;
-+		} while (ret);
-+	}
-+}
-+
- static int decrypt_tail(struct ceph_connection *con)
- {
- 	struct sg_table enc_sgt = {};
- 	struct sg_table sgt = {};
-+	struct page **pages = NULL;
-+	bool sparse = con->in_msg->sparse_read;
-+	int dpos = 0;
- 	int tail_len;
- 	int ret;
- 
-@@ -1045,9 +1133,14 @@ static int decrypt_tail(struct ceph_connection *con)
- 	if (ret)
- 		goto out;
- 
-+	if (sparse) {
-+		dpos = padded_len(front_len(con->in_msg) + padded_len(middle_len(con->in_msg)));
-+		pages = con->v2.in_enc_pages;
-+	}
-+
- 	ret = setup_message_sgs(&sgt, con->in_msg, FRONT_PAD(con->v2.in_buf),
--			MIDDLE_PAD(con->v2.in_buf), DATA_PAD(con->v2.in_buf),
--			con->v2.in_buf, true);
-+				MIDDLE_PAD(con->v2.in_buf), DATA_PAD(con->v2.in_buf),
-+				con->v2.in_buf, pages, dpos, true);
- 	if (ret)
- 		goto out;
- 
-@@ -1057,6 +1150,12 @@ static int decrypt_tail(struct ceph_connection *con)
- 	if (ret)
- 		goto out;
- 
-+	if (sparse && data_len(con->in_msg)) {
-+		ret = process_v2_sparse_read(con, con->v2.in_enc_pages, dpos);
-+		if (ret)
-+			goto out;
-+	}
-+
- 	WARN_ON(!con->v2.in_enc_page_cnt);
- 	ceph_release_page_vector(con->v2.in_enc_pages,
- 				 con->v2.in_enc_page_cnt);
-@@ -1580,7 +1679,7 @@ static int prepare_message_secure(struct ceph_connection *con)
- 
- 	encode_epilogue_secure(con, false);
- 	ret = setup_message_sgs(&sgt, con->out_msg, zerop, zerop, zerop,
--				&con->v2.out_epil, false);
-+				&con->v2.out_epil, NULL, 0, false);
- 	if (ret)
- 		goto out;
- 
+ 	if (read_seqretry(&rename_lock, seq))
+ 		goto retry;
 -- 
 2.39.2
 
