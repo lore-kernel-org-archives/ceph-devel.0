@@ -2,115 +2,210 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 223A6C77B6E
-	for <ceph-devel@archiver.kernel.org>; Fri, 14 Apr 2023 04:29:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E514C77B61
+	for <ceph-devel@archiver.kernel.org>; Sun, 16 Apr 2023 19:49:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229618AbjDNE3W (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 14 Apr 2023 00:29:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56636 "EHLO
+        id S229732AbjDPTt2 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 16 Apr 2023 15:49:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229540AbjDNE3U (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Apr 2023 00:29:20 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8F8844B2
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Apr 2023 21:28:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681446512;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=nupoZ/NBqH5ZbvoXope7ANgV6bto6D/JxRLpEXNNT/E=;
-        b=Sz8VQ4H012EklriQyYA5FdUHUHvQRvQXYGJJE3/IBrV704hjhumuB82z+LWX22BziDLLWQ
-        F7JugfKHIulDHrpv05SgJOcrYM2d9vDpTBDP+BrQpy1d0sjQI5GPJ1xpNKuRjkWAkQQXEX
-        TJE6GWvIqgPSTVueHOERq6A6RQpz76o=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-223-fhpXLT6VPFq9R_bLehAG6Q-1; Fri, 14 Apr 2023 00:28:31 -0400
-X-MC-Unique: fhpXLT6VPFq9R_bLehAG6Q-1
-Received: by mail-pg1-f198.google.com with SMTP id k191-20020a6384c8000000b0051b6cf91f74so432481pgd.2
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Apr 2023 21:28:30 -0700 (PDT)
+        with ESMTP id S229593AbjDPTt1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 15:49:27 -0400
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 869C510F1
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 12:49:24 -0700 (PDT)
+Received: by mail-ej1-x629.google.com with SMTP id vc20so3971737ejc.10
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 12:49:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1681674563; x=1684266563;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=yMoof6hLl9fQAvUBM3Pz6SB0XfGA0bNURNO+NO7ypLA=;
+        b=dbbmYFEmAUrfYWah5HBCvdASP1caY43aQE6YTzKYT1VheW2GqjV0mId8M8K5Zu+QWH
+         yLFa/8DQq6/37DyGlAmq6xn5jNwvxMzL10bqWRt0NsOuibTcadYbZq8Zo6Cg7CNvpIJ9
+         mgD1SHicDKLzpGEn+C9wBYlkY6YMopTXNAbdvmeXecIS25xHwySAGrhVpcOpIKndxdru
+         OGhxXeK5clS+SVBZ7Hh3KskG6cX/K1Y44/NtKLiKMe8sNlA6rf+4NJGu+KLCO+z1y0MD
+         zJ03cbU5/B352kJ8XjvO9MUDx9XaqAhF46YXInjT1YEHoLASzddHE+Y+UeRR+1mziaBn
+         jnGg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681446510; x=1684038510;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=nupoZ/NBqH5ZbvoXope7ANgV6bto6D/JxRLpEXNNT/E=;
-        b=MarOxKZ3qBrHFWO66QfgUFoWgkdlx2tJ4VxidGy/fxN/WDofNnpus0PVyTGgADVC6A
-         9/1XDUrsJg8tj///z8Dqpto1NxwhIp4+iAb1e/bcNK1vvfYifbT5uYOWMQMGHuUnSMdm
-         ww0nI7UcCV1Rd+XG+zZpWTBgyls1tcSlM/7N2pO7IDdJD5nxsBuJbflosGLajMVx7MK+
-         Vksokph4xEP+aBEJYIVMCF+H+P9FQVGWjRRdlu2hJ8hfkyQ3c8GVaVM6gbfnhnY6jKI7
-         oxUbdV+OQiAW8NABbLLbmjgLAZ2BlxCRbdN26rm10VfyLMsGru5oeerYLl0XPAkZtyM0
-         5tLQ==
-X-Gm-Message-State: AAQBX9dEXogXOApO/huzq075XonegtF1unjuW8ouiY/BUrj/YQffYevK
-        LNnbEeC9ZYLT/VDrOq9USCeT6ivOo9fBrWXb/hOpp0pTA4l0Xe16ZXfnyBFe1VlMe9a1zda/tqo
-        htyRM3eIlyIFVnsCoGq0RpA==
-X-Received: by 2002:a17:90a:4598:b0:247:471:143b with SMTP id v24-20020a17090a459800b002470471143bmr4015600pjg.26.1681446510156;
-        Thu, 13 Apr 2023 21:28:30 -0700 (PDT)
-X-Google-Smtp-Source: AKy350bdpV+1o2F1sLfVCVTgt5LjrBPEPywyWBSeporUhxdEiBKvEAB6qhYC8dfDOKcsaQ84ctwU7w==
-X-Received: by 2002:a17:90a:4598:b0:247:471:143b with SMTP id v24-20020a17090a459800b002470471143bmr4015590pjg.26.1681446509881;
-        Thu, 13 Apr 2023 21:28:29 -0700 (PDT)
-Received: from [10.72.12.157] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r10-20020a63d90a000000b0051b72ef978fsm183355pgg.20.2023.04.13.21.28.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Apr 2023 21:28:29 -0700 (PDT)
-Message-ID: <9cfedcd7-f7f8-60b2-e362-872b29e387de@redhat.com>
-Date:   Fri, 14 Apr 2023 12:28:23 +0800
+        d=1e100.net; s=20221208; t=1681674563; x=1684266563;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=yMoof6hLl9fQAvUBM3Pz6SB0XfGA0bNURNO+NO7ypLA=;
+        b=HFwg1sfj4ifTyO9LuOe1ux45radBSz2UKjma5NaWGW95AmTsj8TzExSkqzlBEF/sO/
+         dURoQVRqDipEP6SygAZ9DlRbkzimi5ulx8d/RdFsF46f7VYywA8nH0yFoWPq9XEgQxB2
+         TYL/xQHkqQUih16irAfdHc8n9PyLoMrRwmDTLaQrp2Uvz4d/a9e0ffYIB/zNuPgol/hn
+         B5zogF9tuuNZZ0retG2i1PGaZ/vxpePZfC06ix4YbQpYGuDR/LXz/tl/84ueSSvdq6bw
+         4qdgX9Omdgq4zSxyzpCH6taD29WAwiBdnh3Y/LQyeaCpql9V+68hdcku9J0GGI+VuyA1
+         hA9A==
+X-Gm-Message-State: AAQBX9dBWlfOp4M4z6sw7tPRndEhC/rgeNQch/XBy5s1rdRsQtx3b2tg
+        /8jQnxmWBs9UNher7ycXxRmopEGACKG43+vudkY=
+X-Google-Smtp-Source: AKy350a1oBadphDYcPj4SS9Ct3eYq/+VAxgqKzE7r0x9ygOp9VrPH1eAKn4RU0bZRx1VEul0UcuZW7eNc12VPmt/azc=
+X-Received: by 2002:a17:906:c355:b0:94f:b5c:a254 with SMTP id
+ ci21-20020a170906c35500b0094f0b5ca254mr5009609ejb.49.1681674562728; Sun, 16
+ Apr 2023 12:49:22 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.1
-Subject: Re: [PATCH] ceph: do not touch cap when trimming the caps
-Content-Language: en-US
-To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
-Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
-        stable@vger.kernel.org
-References: <20230414024123.263120-1-xiubli@redhat.com>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20230414024123.263120-1-xiubli@redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20230412110930.176835-1-xiubli@redhat.com> <20230412110930.176835-68-xiubli@redhat.com>
+In-Reply-To: <20230412110930.176835-68-xiubli@redhat.com>
+From:   Ilya Dryomov <idryomov@gmail.com>
+Date:   Sun, 16 Apr 2023 21:49:10 +0200
+Message-ID: <CAOi1vP_AY=R4w9BZbEXAZwr2MUNjJJXyWzji0EPSgbhL25ip=w@mail.gmail.com>
+Subject: Re: [PATCH v18 67/71] libceph: defer removing the req from osdc just
+ after req->r_callback
+To:     xiubli@redhat.com
+Cc:     ceph-devel@vger.kernel.org, jlayton@kernel.org,
+        vshankar@redhat.com, mchangir@redhat.com, lhenriques@suse.de
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-
-On 4/14/23 10:41, xiubli@redhat.com wrote:
+On Wed, Apr 12, 2023 at 1:15=E2=80=AFPM <xiubli@redhat.com> wrote:
+>
 > From: Xiubo Li <xiubli@redhat.com>
 >
-> When trimming the caps it maybe queued to release in the next loop,
-> and just after the 'session->s_cap_lock' lock is released the
-> 'session->s_cap_iterator' will be set to NULL and the cap also has
-> been removed from 'session->s_caps' list, then the '__touch_cap()'
-> could continue and add the cap back to the 'session->s_caps' list.
+> The sync_filesystem() will flush all the dirty buffer and submit the
+> osd reqs to the osdc and then is blocked to wait for all the reqs to
+> finish. But the when the reqs' replies come, the reqs will be removed
+> from osdc just before the req->r_callback()s are called. Which means
+> the sync_filesystem() will be woke up by leaving the req->r_callback()s
+> are still running.
 >
-> That means this cap could be iterated twice to call 'trim_caps_cb()'
-> and the second time will trigger use-after-free bug.
+> This will be buggy when the waiter require the req->r_callback()s to
+> release some resources before continuing. So we need to make sure the
+> req->r_callback()s are called before removing the reqs from the osdc.
 >
-> Cc: stable@vger.kernel.org
-> URL: https://bugzilla.redhat.com/show_bug.cgi?id=2186264
+> WARNING: CPU: 4 PID: 168846 at fs/crypto/keyring.c:242 fscrypt_destroy_ke=
+yring+0x7e/0xd0
+> CPU: 4 PID: 168846 Comm: umount Tainted: G S  6.1.0-rc5-ceph-g72ead199864=
+c #1
+> Hardware name: Supermicro SYS-5018R-WR/X10SRW-F, BIOS 2.0 12/17/2015
+> RIP: 0010:fscrypt_destroy_keyring+0x7e/0xd0
+> RSP: 0018:ffffc9000b277e28 EFLAGS: 00010202
+> RAX: 0000000000000002 RBX: ffff88810d52ac00 RCX: ffff88810b56aa00
+> RDX: 0000000080000000 RSI: ffffffff822f3a09 RDI: ffff888108f59000
+> RBP: ffff8881d394fb88 R08: 0000000000000028 R09: 0000000000000000
+> R10: 0000000000000001 R11: 11ff4fe6834fcd91 R12: ffff8881d394fc40
+> R13: ffff888108f59000 R14: ffff8881d394f800 R15: 0000000000000000
+> FS:  00007fd83f6f1080(0000) GS:ffff88885fd00000(0000) knlGS:0000000000000=
+000
+> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> CR2: 00007f918d417000 CR3: 000000017f89a005 CR4: 00000000003706e0
+> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+> Call Trace:
+> <TASK>
+> generic_shutdown_super+0x47/0x120
+> kill_anon_super+0x14/0x30
+> ceph_kill_sb+0x36/0x90 [ceph]
+> deactivate_locked_super+0x29/0x60
+> cleanup_mnt+0xb8/0x140
+> task_work_run+0x67/0xb0
+> exit_to_user_mode_prepare+0x23d/0x240
+> syscall_exit_to_user_mode+0x25/0x60
+> do_syscall_64+0x40/0x80
+> entry_SYSCALL_64_after_hwframe+0x63/0xcd
+> RIP: 0033:0x7fd83dc39e9b
+>
+> URL: https://tracker.ceph.com/issues/58126
+> Tested-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
+> Tested-by: Venky Shankar <vshankar@redhat.com>
+> Reviewed-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
 > Signed-off-by: Xiubo Li <xiubli@redhat.com>
 > ---
->   fs/ceph/caps.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
+>  net/ceph/osd_client.c | 43 +++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 35 insertions(+), 8 deletions(-)
 >
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index cf29e395af23..186c9818ab0d 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -846,7 +846,7 @@ static void __touch_cap(struct ceph_cap *cap)
->   	struct ceph_mds_session *s = cap->session;
->   
->   	spin_lock(&s->s_cap_lock);
-> -	if (!s->s_cap_iterator) {
-> +	if (!s->s_cap_iterator && !list_empty(&cap->session_caps) && !cap->queue_release) {
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 78b622178a3d..db3d93d3e692 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2507,7 +2507,7 @@ static void submit_request(struct ceph_osd_request =
+*req, bool wrlocked)
+>         __submit_request(req, wrlocked);
+>  }
+>
+> -static void finish_request(struct ceph_osd_request *req)
+> +static void __finish_request(struct ceph_osd_request *req)
+>  {
+>         struct ceph_osd_client *osdc =3D req->r_osdc;
+>
+> @@ -2516,12 +2516,6 @@ static void finish_request(struct ceph_osd_request=
+ *req)
+>
+>         req->r_end_latency =3D ktime_get();
+>
+> -       if (req->r_osd) {
+> -               ceph_init_sparse_read(&req->r_osd->o_sparse_read);
+> -               unlink_request(req->r_osd, req);
+> -       }
+> -       atomic_dec(&osdc->num_requests);
+> -
+>         /*
+>          * If an OSD has failed or returned and a request has been sent
+>          * twice, it's possible to get a reply and end up here while the
+> @@ -2532,13 +2526,46 @@ static void finish_request(struct ceph_osd_reques=
+t *req)
+>         ceph_msg_revoke_incoming(req->r_reply);
+>  }
+>
+> +static void __remove_request(struct ceph_osd_request *req)
+> +{
+> +       struct ceph_osd_client *osdc =3D req->r_osdc;
+> +
+> +       dout("%s req %p tid %llu\n", __func__, req, req->r_tid);
+> +
+> +       if (req->r_osd) {
+> +               ceph_init_sparse_read(&req->r_osd->o_sparse_read);
+> +               unlink_request(req->r_osd, req);
+> +       }
+> +       atomic_dec(&osdc->num_requests);
+> +}
+> +
+> +static void finish_request(struct ceph_osd_request *req)
+> +{
+> +       __finish_request(req);
+> +       __remove_request(req);
+> +}
+> +
+>  static void __complete_request(struct ceph_osd_request *req)
+>  {
+> +       struct ceph_osd_client *osdc =3D req->r_osdc;
+> +       struct ceph_osd *osd =3D req->r_osd;
+> +
+>         dout("%s req %p tid %llu cb %ps result %d\n", __func__, req,
+>              req->r_tid, req->r_callback, req->r_result);
+>
+>         if (req->r_callback)
+>                 req->r_callback(req);
+> +
+> +       down_read(&osdc->lock);
+> +       if (osd) {
+> +               mutex_lock(&osd->lock);
+> +               __remove_request(req);
+> +               mutex_unlock(&osd->lock);
+> +       } else {
+> +               atomic_dec(&osdc->num_requests);
+> +       }
+> +       up_read(&osdc->lock);
 
-Comment it myself.
+Hi Xiubo,
 
-The s_cap_iterator will always be true during trimming the caps. So this 
-check here is incorrect.
+I think it was highlighted before that this patch is wrong so I'm
+surprised to see it in this series, broken out and with a different
+subject.
 
->   		dout("__touch_cap %p cap %p mds%d\n", &cap->ci->netfs.inode, cap,
->   		     s->s_mds);
->   		list_move_tail(&cap->session_caps, &s->s_caps);
+On top of changing long-standing behavior which is purposefully
+consistent with Objecter behavior in userspace, it also seems to
+introduce a race condition with ceph_osdc_cancel_request() which can
+lead, among other things, to a use-after-free on req.  Consider what
+would happen if the request is cancelled while the callback is running:
+since it would still be linked at that point, cancel_request() would be
+allowed to go through and eventually put the messenger's reference.
 
+Thanks,
+
+                Ilya
