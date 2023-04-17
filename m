@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2CA1C77B61
-	for <ceph-devel@archiver.kernel.org>; Mon, 17 Apr 2023 03:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A2E0C77B61
+	for <ceph-devel@archiver.kernel.org>; Mon, 17 Apr 2023 03:30:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230062AbjDQD3w (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 16 Apr 2023 23:29:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46922 "EHLO
+        id S230142AbjDQDaF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 16 Apr 2023 23:30:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229484AbjDQD3b (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 23:29:31 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6640E3C20
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 20:28:30 -0700 (PDT)
+        with ESMTP id S230013AbjDQD3m (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 23:29:42 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11C8A3AB0
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 20:28:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681702109;
+        s=mimecast20190719; t=1681702120;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=6MXTQPKr3K8Sz4dibWeBTPRHraDULc1CytVyHakKzoI=;
-        b=fQy66mKrOsx3w7tXVJFspW0Pfz/F/X4oGyJgVUf4QL71uZthoZK8xYiDQoOYdfzmyRqIZT
-        mks1kJgy8W5oBR3V6sHlqn/FEdo1ne7a4+x/y1ePDDupZqUDQnCdbAI7FeditKrXsVtMKo
-        YaET++srVEmrrn0CnBgzIZdaMH6k74E=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=z1NdtqBx/l37pyhWaYf+jWz/WKsGP2/DhcJheliViNQ=;
+        b=VxJB8n/OSYCIQLCENGrg1cTyINxsTYQWBpOU8citi4k+floOqMyvBlK3XMyYUhpnEoyS7X
+        e6wPgGy2eEJBU/wM4fYD9WEJj+iCZrHBUcpZwFIuKtZXWSoaXs4cWDYMffbtkpGYTVu71A
+        fsOKMZUKbytMsRwRvzpn5SZAJ7YRnII=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-346--3PCQzXiOVm_ZZD14QExnQ-1; Sun, 16 Apr 2023 23:28:26 -0400
-X-MC-Unique: -3PCQzXiOVm_ZZD14QExnQ-1
+ us-mta-371-WGYoT8aDN0ujbjkuF-Nw0w-1; Sun, 16 Apr 2023 23:28:37 -0400
+X-MC-Unique: WGYoT8aDN0ujbjkuF-Nw0w-1
 Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 09434100DDD5;
-        Mon, 17 Apr 2023 03:28:26 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id A3B7E29ABA18;
+        Mon, 17 Apr 2023 03:28:36 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-181.pek2.redhat.com [10.72.12.181])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id AA38C2027044;
-        Mon, 17 Apr 2023 03:28:21 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BF0632027144;
+        Mon, 17 Apr 2023 03:28:32 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, lhenriques@suse.de,
         mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v19 14/70] ceph: add support for fscrypt_auth/fscrypt_file to cap messages
-Date:   Mon, 17 Apr 2023 11:25:58 +0800
-Message-Id: <20230417032654.32352-15-xiubli@redhat.com>
+Subject: [PATCH v19 16/70] ceph: decode alternate_name in lease info
+Date:   Mon, 17 Apr 2023 11:26:00 +0800
+Message-Id: <20230417032654.32352-17-xiubli@redhat.com>
 In-Reply-To: <20230417032654.32352-1-xiubli@redhat.com>
 References: <20230417032654.32352-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -56,158 +56,146 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-Add support for new version 12 cap messages that carry the new
-fscrypt_auth and fscrypt_file fields from the inode.
+Ceph is a bit different from local filesystems, in that we don't want
+to store filenames as raw binary data, since we may also be dealing
+with clients that don't support fscrypt.
+
+We could just base64-encode the encrypted filenames, but that could
+leave us with filenames longer than NAME_MAX. It turns out that the
+MDS doesn't care much about filename length, but the clients do.
+
+To manage this, we've added a new "alternate name" field that can be
+optionally added to any dentry that we'll use to store the binary
+crypttext of the filename if its base64-encoded value will be longer
+than NAME_MAX. When a dentry has one of these names attached, the MDS
+will send it along in the lease info, which we can then store for
+later usage.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
 Reviewed-by: Luís Henriques <lhenriques@suse.de>
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- fs/ceph/caps.c | 76 +++++++++++++++++++++++++++++++++++++++++---------
- 1 file changed, 63 insertions(+), 13 deletions(-)
+ fs/ceph/mds_client.c | 43 +++++++++++++++++++++++++++++++++----------
+ fs/ceph/mds_client.h |  5 +++++
+ 2 files changed, 38 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index e02c5ea3f108..3cca23394769 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -14,6 +14,7 @@
- #include "super.h"
- #include "mds_client.h"
- #include "cache.h"
-+#include "crypto.h"
- #include <linux/ceph/decode.h>
- #include <linux/ceph/messenger.h>
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a72f1961d3e1..d371e8bfe19d 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -308,27 +308,47 @@ static int parse_reply_info_dir(void **p, void *end,
  
-@@ -1216,15 +1217,12 @@ struct cap_msg_args {
- 	umode_t			mode;
- 	bool			inline_data;
- 	bool			wake;
-+	u32			fscrypt_auth_len;
-+	u32			fscrypt_file_len;
-+	u8			fscrypt_auth[sizeof(struct ceph_fscrypt_auth)]; // for context
-+	u8			fscrypt_file[sizeof(u64)]; // for size
- };
- 
--/*
-- * cap struct size + flock buffer size + inline version + inline data size +
-- * osd_epoch_barrier + oldest_flush_tid
-- */
--#define CAP_MSG_SIZE (sizeof(struct ceph_mds_caps) + \
--		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4)
--
- /* Marshal up the cap msg to the MDS */
- static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
+ static int parse_reply_info_lease(void **p, void *end,
+ 				  struct ceph_mds_reply_lease **lease,
+-				  u64 features)
++				  u64 features, u32 *altname_len, u8 **altname)
  {
-@@ -1240,7 +1238,7 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
- 	     arg->size, arg->max_size, arg->xattr_version,
- 	     arg->xattr_buf ? (int)arg->xattr_buf->vec.iov_len : 0);
- 
--	msg->hdr.version = cpu_to_le16(10);
-+	msg->hdr.version = cpu_to_le16(12);
- 	msg->hdr.tid = cpu_to_le64(arg->flush_tid);
- 
- 	fc = msg->front.iov_base;
-@@ -1311,6 +1309,21 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
- 
- 	/* Advisory flags (version 10) */
- 	ceph_encode_32(&p, arg->flags);
++	u8 struct_v;
++	u32 struct_len;
++	void *lend;
 +
-+	/* dirstats (version 11) - these are r/o on the client */
-+	ceph_encode_64(&p, 0);
-+	ceph_encode_64(&p, 0);
+ 	if (features == (u64)-1) {
+-		u8 struct_v, struct_compat;
+-		u32 struct_len;
++		u8 struct_compat;
 +
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+	/* fscrypt_auth and fscrypt_file (version 12) */
-+	ceph_encode_32(&p, arg->fscrypt_auth_len);
-+	ceph_encode_copy(&p, arg->fscrypt_auth, arg->fscrypt_auth_len);
-+	ceph_encode_32(&p, arg->fscrypt_file_len);
-+	ceph_encode_copy(&p, arg->fscrypt_file, arg->fscrypt_file_len);
-+#else /* CONFIG_FS_ENCRYPTION */
-+	ceph_encode_32(&p, 0);
-+	ceph_encode_32(&p, 0);
-+#endif /* CONFIG_FS_ENCRYPTION */
- }
- 
- /*
-@@ -1432,8 +1445,37 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 		}
- 	}
- 	arg->flags = flags;
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+	if (ci->fscrypt_auth_len &&
-+	    WARN_ON_ONCE(ci->fscrypt_auth_len > sizeof(struct ceph_fscrypt_auth))) {
-+		/* Don't set this if it's too big */
-+		arg->fscrypt_auth_len = 0;
+ 		ceph_decode_8_safe(p, end, struct_v, bad);
+ 		ceph_decode_8_safe(p, end, struct_compat, bad);
++
+ 		/* struct_v is expected to be >= 1. we only understand
+ 		 * encoding whose struct_compat == 1. */
+ 		if (!struct_v || struct_compat != 1)
+ 			goto bad;
++
+ 		ceph_decode_32_safe(p, end, struct_len, bad);
+-		ceph_decode_need(p, end, struct_len, bad);
+-		end = *p + struct_len;
 +	} else {
-+		arg->fscrypt_auth_len = ci->fscrypt_auth_len;
-+		memcpy(arg->fscrypt_auth, ci->fscrypt_auth,
-+			min_t(size_t, ci->fscrypt_auth_len, sizeof(arg->fscrypt_auth)));
++		struct_len = sizeof(**lease);
++		*altname_len = 0;
++		*altname = NULL;
+ 	}
+ 
+-	ceph_decode_need(p, end, sizeof(**lease), bad);
++	lend = *p + struct_len;
++	ceph_decode_need(p, end, struct_len, bad);
+ 	*lease = *p;
+ 	*p += sizeof(**lease);
+-	if (features == (u64)-1)
+-		*p = end;
++
++	if (features == (u64)-1) {
++		if (struct_v >= 2) {
++			ceph_decode_32_safe(p, end, *altname_len, bad);
++			ceph_decode_need(p, end, *altname_len, bad);
++			*altname = *p;
++			*p += *altname_len;
++		} else {
++			*altname = NULL;
++			*altname_len = 0;
++		}
 +	}
-+	/* FIXME: use this to track "real" size */
-+	arg->fscrypt_file_len = 0;
-+#endif /* CONFIG_FS_ENCRYPTION */
- }
- 
-+#define CAP_MSG_FIXED_FIELDS (sizeof(struct ceph_mds_caps) + \
-+		      4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 4 + 8 + 8 + 4 + 4)
-+
-+#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-+static inline int cap_msg_size(struct cap_msg_args *arg)
-+{
-+	return CAP_MSG_FIXED_FIELDS + arg->fscrypt_auth_len +
-+			arg->fscrypt_file_len;
-+}
-+#else
-+static inline int cap_msg_size(struct cap_msg_args *arg)
-+{
-+	return CAP_MSG_FIXED_FIELDS;
-+}
-+#endif /* CONFIG_FS_ENCRYPTION */
-+
- /*
-  * Send a cap msg on the given inode.
-  *
-@@ -1444,7 +1486,7 @@ static void __send_cap(struct cap_msg_args *arg, struct ceph_inode_info *ci)
- 	struct ceph_msg *msg;
- 	struct inode *inode = &ci->netfs.inode;
- 
--	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, CAP_MSG_SIZE, GFP_NOFS, false);
-+	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, cap_msg_size(arg), GFP_NOFS, false);
- 	if (!msg) {
- 		pr_err("error allocating cap msg: ino (%llx.%llx) flushing %s tid %llu, requeuing cap.\n",
- 		       ceph_vinop(inode), ceph_cap_string(arg->dirty),
-@@ -1470,10 +1512,6 @@ static inline int __send_flush_snap(struct inode *inode,
- 	struct cap_msg_args	arg;
- 	struct ceph_msg		*msg;
- 
--	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, CAP_MSG_SIZE, GFP_NOFS, false);
--	if (!msg)
--		return -ENOMEM;
--
- 	arg.session = session;
- 	arg.ino = ceph_vino(inode).ino;
- 	arg.cid = 0;
-@@ -1511,6 +1549,18 @@ static inline int __send_flush_snap(struct inode *inode,
- 	arg.flags = 0;
- 	arg.wake = false;
- 
-+	/*
-+	 * No fscrypt_auth changes from a capsnap. It will need
-+	 * to update fscrypt_file on size changes (TODO).
-+	 */
-+	arg.fscrypt_auth_len = 0;
-+	arg.fscrypt_file_len = 0;
-+
-+	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, cap_msg_size(&arg),
-+			   GFP_NOFS, false);
-+	if (!msg)
-+		return -ENOMEM;
-+
- 	encode_cap_msg(msg, &arg);
- 	ceph_con_send(&arg.session->s_con, msg);
++	*p = lend;
  	return 0;
+ bad:
+ 	return -EIO;
+@@ -358,7 +378,8 @@ static int parse_reply_info_trace(void **p, void *end,
+ 		info->dname = *p;
+ 		*p += info->dname_len;
+ 
+-		err = parse_reply_info_lease(p, end, &info->dlease, features);
++		err = parse_reply_info_lease(p, end, &info->dlease, features,
++					     &info->altname_len, &info->altname);
+ 		if (err < 0)
+ 			goto out_bad;
+ 	}
+@@ -425,9 +446,11 @@ static int parse_reply_info_readdir(void **p, void *end,
+ 		dout("parsed dir dname '%.*s'\n", rde->name_len, rde->name);
+ 
+ 		/* dentry lease */
+-		err = parse_reply_info_lease(p, end, &rde->lease, features);
++		err = parse_reply_info_lease(p, end, &rde->lease, features,
++					     &rde->altname_len, &rde->altname);
+ 		if (err)
+ 			goto out_bad;
++
+ 		/* inode */
+ 		err = parse_reply_info_in(p, end, &rde->inode, features);
+ 		if (err < 0)
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 00838adaf694..b3e3fcefef4a 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -44,6 +44,7 @@ enum ceph_feature_type {
+ 	CEPHFS_FEATURE_MULTI_RECONNECT,		\
+ 	CEPHFS_FEATURE_DELEG_INO,		\
+ 	CEPHFS_FEATURE_METRIC_COLLECT,		\
++	CEPHFS_FEATURE_ALTERNATE_NAME,		\
+ 	CEPHFS_FEATURE_NOTIFY_SESSION_STATE,	\
+ 	CEPHFS_FEATURE_OP_GETVXATTR,		\
+ }
+@@ -96,7 +97,9 @@ struct ceph_mds_reply_info_in {
+ 
+ struct ceph_mds_reply_dir_entry {
+ 	char                          *name;
++	u8			      *altname;
+ 	u32                           name_len;
++	u32			      altname_len;
+ 	struct ceph_mds_reply_lease   *lease;
+ 	struct ceph_mds_reply_info_in inode;
+ 	loff_t			      offset;
+@@ -120,7 +123,9 @@ struct ceph_mds_reply_info_parsed {
+ 	struct ceph_mds_reply_info_in diri, targeti;
+ 	struct ceph_mds_reply_dirfrag *dirfrag;
+ 	char                          *dname;
++	u8			      *altname;
+ 	u32                           dname_len;
++	u32                           altname_len;
+ 	struct ceph_mds_reply_lease   *dlease;
+ 	struct ceph_mds_reply_xattr   xattr_info;
+ 
 -- 
 2.39.1
 
