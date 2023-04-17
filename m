@@ -2,79 +2,181 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9229EC77B73
-	for <ceph-devel@archiver.kernel.org>; Mon, 17 Apr 2023 02:42:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 882A4C77B61
+	for <ceph-devel@archiver.kernel.org>; Mon, 17 Apr 2023 03:28:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229902AbjDQCmj (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 16 Apr 2023 22:42:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50884 "EHLO
+        id S229699AbjDQD2C (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 16 Apr 2023 23:28:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229615AbjDQCmi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 22:42:38 -0400
+        with ESMTP id S229498AbjDQD2A (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 23:28:00 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F7F71FFE
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 19:41:51 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53644CA
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 20:27:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681699311;
+        s=mimecast20190719; t=1681702040;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=KbJ6n4UfhhFF14KmQ6w4Essp4HqkF6U7SnLMXZ66cQs=;
-        b=F7xi+1e+vHvEsg2EeNjKiFoxxSdN0FOdG5RqQ/l2EJ5gh6F9V9Xf5Acif57Cz9nHtX94ou
-        vlXY7vkhn3/Pm5khpA24H5dSoTNsVaj0kQ3j/nAYgjCRXSdu1O2wn/2Hj+MbDu/2oi9ECX
-        XrSnHVGV3SFCQaLgfFklWAwZzearDY4=
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=MpmI+x40t/NY5q1J79n9fwojeb1wSpZ6SpXaJSMyJjc=;
+        b=AOi1GgPK5SnIQju9gg7lD7Wwddo8rY4W2x5SdsCjUTbJ6aF2X95yw7rDfJB3bDeYTnPBOh
+        /n89KRTHYAMJfvjjX/lV6rWKCY8d8Su2izuNCVY1Xw5VI4SVYQ1Eyqq6tZ2JdzDNXmZApc
+        349ubjQpdxKgTMN82SmDbqwqzp0TwZA=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-646-GSnOc7-yMvuZcK-weXw5kQ-1; Sun, 16 Apr 2023 22:41:47 -0400
-X-MC-Unique: GSnOc7-yMvuZcK-weXw5kQ-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+ us-mta-594-SmOxo06bPFi5zri82nB65A-1; Sun, 16 Apr 2023 23:27:17 -0400
+X-MC-Unique: SmOxo06bPFi5zri82nB65A-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 81CDF85A588;
-        Mon, 17 Apr 2023 02:41:47 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 0BD3C811E7C;
+        Mon, 17 Apr 2023 03:27:17 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-181.pek2.redhat.com [10.72.12.181])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 987FB728FC;
-        Mon, 17 Apr 2023 02:41:43 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D00A92027044;
+        Mon, 17 Apr 2023 03:27:12 +0000 (UTC)
 From:   xiubli@redhat.com
-To:     fstests@vger.kernel.org
-Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
-        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH] common/rc: skip ceph when atime is required
-Date:   Mon, 17 Apr 2023 10:41:34 +0800
-Message-Id: <20230417024134.30560-1-xiubli@redhat.com>
+To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
+Cc:     jlayton@kernel.org, vshankar@redhat.com, lhenriques@suse.de,
+        mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH v19 02/70] libceph: define struct ceph_sparse_extent and add some helpers
+Date:   Mon, 17 Apr 2023 11:25:46 +0800
+Message-Id: <20230417032654.32352-3-xiubli@redhat.com>
+In-Reply-To: <20230417032654.32352-1-xiubli@redhat.com>
+References: <20230417032654.32352-1-xiubli@redhat.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.4
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+From: Jeff Layton <jlayton@kernel.org>
 
-Ceph won't maintain the atime, so just skip the tests when the atime
-is required.
+When the OSD sends back a sparse read reply, it contains an array of
+these structures. Define the structure and add a couple of helpers for
+dealing with them.
 
-URL: https://tracker.ceph.com/issues/53844
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Also add a place in struct ceph_osd_req_op to store the extent buffer,
+and code to free it if it's populated when the req is torn down.
+
+Tested-by: Luís Henriques <lhenriques@suse.de>
+Tested-by: Venky Shankar <vshankar@redhat.com>
+Reviewed-by: Luís Henriques <lhenriques@suse.de>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- common/rc | 3 +++
- 1 file changed, 3 insertions(+)
+ include/linux/ceph/osd_client.h | 43 ++++++++++++++++++++++++++++++++-
+ net/ceph/osd_client.c           | 13 ++++++++++
+ 2 files changed, 55 insertions(+), 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index 90749343..3238842e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3999,6 +3999,9 @@ _require_atime()
- 	nfs|cifs|virtiofs)
- 		_notrun "atime related mount options have no effect on $FSTYP"
- 		;;
-+	ceph)
-+                _notrun "atime not maintained by $FSTYP"
-+		;;
- 	esac
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 92addef18738..05da1e755b7b 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -29,6 +29,17 @@ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
  
+ #define CEPH_HOMELESS_OSD	-1
+ 
++/*
++ * A single extent in a SPARSE_READ reply.
++ *
++ * Note that these come from the OSD as little-endian values. On BE arches,
++ * we convert them in-place after receipt.
++ */
++struct ceph_sparse_extent {
++	u64	off;
++	u64	len;
++} __packed;
++
+ /*
+  * A given osd we're communicating with.
+  *
+@@ -104,6 +115,8 @@ struct ceph_osd_req_op {
+ 			u64 offset, length;
+ 			u64 truncate_size;
+ 			u32 truncate_seq;
++			int sparse_ext_cnt;
++			struct ceph_sparse_extent *sparse_ext;
+ 			struct ceph_osd_data osd_data;
+ 		} extent;
+ 		struct {
+@@ -510,6 +523,20 @@ extern struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *,
+ 				      u32 truncate_seq, u64 truncate_size,
+ 				      bool use_mempool);
+ 
++int __ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op, int cnt);
++
++/*
++ * How big an extent array should we preallocate for a sparse read? This is
++ * just a starting value.  If we get more than this back from the OSD, the
++ * receiver will reallocate.
++ */
++#define CEPH_SPARSE_EXT_ARRAY_INITIAL  16
++
++static inline int ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op)
++{
++	return __ceph_alloc_sparse_ext_map(op, CEPH_SPARSE_EXT_ARRAY_INITIAL);
++}
++
+ extern void ceph_osdc_get_request(struct ceph_osd_request *req);
+ extern void ceph_osdc_put_request(struct ceph_osd_request *req);
+ 
+@@ -564,5 +591,19 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 			    struct ceph_object_locator *oloc,
+ 			    struct ceph_watch_item **watchers,
+ 			    u32 *num_watchers);
+-#endif
+ 
++/* Find offset into the buffer of the end of the extent map */
++static inline u64 ceph_sparse_ext_map_end(struct ceph_osd_req_op *op)
++{
++	struct ceph_sparse_extent *ext;
++
++	/* No extents? No data */
++	if (op->extent.sparse_ext_cnt == 0)
++		return 0;
++
++	ext = &op->extent.sparse_ext[op->extent.sparse_ext_cnt - 1];
++
++	return ext->off + ext->len - op->extent.offset;
++}
++
++#endif
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index a827995faba7..e2f1d1dcbb84 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -378,6 +378,7 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
+ 	case CEPH_OSD_OP_READ:
+ 	case CEPH_OSD_OP_WRITE:
+ 	case CEPH_OSD_OP_WRITEFULL:
++		kfree(op->extent.sparse_ext);
+ 		ceph_osd_data_release(&op->extent.osd_data);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+@@ -1120,6 +1121,18 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
  }
+ EXPORT_SYMBOL(ceph_osdc_new_request);
+ 
++int __ceph_alloc_sparse_ext_map(struct ceph_osd_req_op *op, int cnt)
++{
++	op->extent.sparse_ext_cnt = cnt;
++	op->extent.sparse_ext = kmalloc_array(cnt,
++					      sizeof(*op->extent.sparse_ext),
++					      GFP_NOFS);
++	if (!op->extent.sparse_ext)
++		return -ENOMEM;
++	return 0;
++}
++EXPORT_SYMBOL(__ceph_alloc_sparse_ext_map);
++
+ /*
+  * We keep osd requests in an rbtree, sorted by ->r_tid.
+  */
 -- 
 2.39.1
 
