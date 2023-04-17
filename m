@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DF6FC77B70
-	for <ceph-devel@archiver.kernel.org>; Mon, 17 Apr 2023 03:28:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CA9BC77B70
+	for <ceph-devel@archiver.kernel.org>; Mon, 17 Apr 2023 03:28:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229743AbjDQD21 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 16 Apr 2023 23:28:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45988 "EHLO
+        id S229908AbjDQD2g (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 16 Apr 2023 23:28:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46022 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229593AbjDQD2Y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 23:28:24 -0400
+        with ESMTP id S229771AbjDQD22 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2023 23:28:28 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16E3F2684
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 20:27:37 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37734270C
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2023 20:27:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681702056;
+        s=mimecast20190719; t=1681702065;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=f26hkmpli7I84xdkXC1xW5KUKMBlWaw/xg3K8cZVnjc=;
-        b=aQ8SSmajbgLcluRaGtXGYk3O/Y6rwsv70ZImGPPBfxTomL7hJDodom/ieNYVKxHLMRxeg/
-        Sf7NqOqEXhEoNH0CtBASsRc6ebI0FXDILLT6BU/bdldnvKgQctV51smS0QQ0UCezXaKhq7
-        /a5bk7oW8H4CvWrj0Hvzmkfw5iFQ2DA=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=WYUj4nMVo47Z+2T9SbrS4WCXT4L37ROl/ora3hOybQM=;
+        b=Yjwh2JElfWUjOHhLLHMEa0kiOq8IJll5+3j5Gtt4QMi2nKQaoxwJ4S5NnI4f4xjmIgX1dX
+        W1l65yKHVnOnLnXG//nT0r9jrcSZ80evHFd5gjAySgYZc5WbmkWlzWaNnef43d+o+qWiWq
+        Ukw1BvNscKLPk/Til7bC7BSdNDy5VsQ=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-321-5YytOASlNcesX3xGzXbwZw-1; Sun, 16 Apr 2023 23:27:33 -0400
-X-MC-Unique: 5YytOASlNcesX3xGzXbwZw-1
+ us-mta-231-d2kRiru4MwKu8PrP2otN5Q-1; Sun, 16 Apr 2023 23:27:43 -0400
+X-MC-Unique: d2kRiru4MwKu8PrP2otN5Q-1
 Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C00CD8996F7;
-        Mon, 17 Apr 2023 03:27:32 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 69BB83C0F662;
+        Mon, 17 Apr 2023 03:27:43 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-181.pek2.redhat.com [10.72.12.181])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 9D6AB2027144;
-        Mon, 17 Apr 2023 03:27:28 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C93A02027044;
+        Mon, 17 Apr 2023 03:27:38 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, lhenriques@suse.de,
         mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v19 05/70] libceph: support sparse reads on msgr2 secure codepath
-Date:   Mon, 17 Apr 2023 11:25:49 +0800
-Message-Id: <20230417032654.32352-6-xiubli@redhat.com>
+Subject: [PATCH v19 07/70] ceph: add new mount option to enable sparse reads
+Date:   Mon, 17 Apr 2023 11:25:51 +0800
+Message-Id: <20230417032654.32352-8-xiubli@redhat.com>
 In-Reply-To: <20230417032654.32352-1-xiubli@redhat.com>
 References: <20230417032654.32352-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -56,19 +56,17 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Jeff Layton <jlayton@kernel.org>
 
-Add a new init_sgs_pages helper that populates the scatterlist from
-an arbitrary point in an array of pages.
+Add a new mount option that has the client issue sparse reads instead of
+normal ones. The callers now preallocate an sparse extent buffer that
+the libceph receive code can populate and hand back after the operation
+completes.
 
-Change setup_message_sgs to take an optional pointer to an array of
-pages. If that's set, then the scatterlist will be set using that
-array instead of the cursor.
+After a successful sparse read, we can't use the req->r_result value to
+determine the amount of data "read", so instead we set the received
+length to be from the end of the last extent in the buffer. Any
+interstitial holes will have been filled by the receive code.
 
-When given a sparse read on a secure connection, decrypt the data
-in-place rather than into the final destination, by passing it the
-in_enc_pages array.
-
-After decrypting, run the sparse_read state machine in a loop, copying
-data from the decrypted pages until it's complete.
+[Xiubo: fix a double free for req bug reported by Ilya]
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
@@ -76,191 +74,284 @@ Reviewed-by: Luís Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- net/ceph/messenger_v2.c | 119 ++++++++++++++++++++++++++++++++++++----
- 1 file changed, 109 insertions(+), 10 deletions(-)
+ fs/ceph/addr.c  | 15 +++++++++++++--
+ fs/ceph/file.c  | 51 +++++++++++++++++++++++++++++++++++++++++--------
+ fs/ceph/super.c | 16 +++++++++++++++-
+ fs/ceph/super.h |  1 +
+ 4 files changed, 72 insertions(+), 11 deletions(-)
 
-diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
-index a0becd553d7c..a31ac13d5451 100644
---- a/net/ceph/messenger_v2.c
-+++ b/net/ceph/messenger_v2.c
-@@ -959,12 +959,48 @@ static void init_sgs_cursor(struct scatterlist **sg,
- 	}
- }
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index d5335f445233..7e6abec82be8 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -219,8 +219,10 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(req->r_inode);
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
+ 	struct netfs_io_subrequest *subreq = req->r_priv;
++	struct ceph_osd_req_op *op = &req->r_ops[0];
+ 	int num_pages;
+ 	int err = req->r_result;
++	bool sparse = (op->op == CEPH_OSD_OP_SPARSE_READ);
  
-+/**
-+ * init_sgs_pages: set up scatterlist on an array of page pointers
-+ * @sg: 	scatterlist to populate
-+ * @pages: 	pointer to page array
-+ * @dpos:	position in the array to start (bytes)
-+ * @dlen:	len to add to sg (bytes)
-+ * @pad:	pointer to pad destination (if any)
-+ *
-+ * Populate the scatterlist from the page array, starting at an arbitrary
-+ * byte in the array and running for a specified length.
-+ */
-+static void init_sgs_pages(struct scatterlist **sg, struct page **pages,
-+			     int dpos, int dlen, u8 *pad)
-+{
-+	int idx = dpos >> PAGE_SHIFT;
-+	int off = offset_in_page(dpos);
-+	int resid = dlen;
-+
-+	do {
-+		int len = min(resid, (int)PAGE_SIZE - off);
-+
-+		sg_set_page(*sg, pages[idx], len, off);
-+		*sg = sg_next(*sg);
-+		off = 0;
-+		++idx;
-+		resid -= len;
-+	} while (resid);
-+
-+	if (need_padding(dlen)) {
-+		sg_set_buf(*sg, pad, padding_len(dlen));
-+		*sg = sg_next(*sg);
-+	}
-+}
-+
- static int setup_message_sgs(struct sg_table *sgt, struct ceph_msg *msg,
- 			     u8 *front_pad, u8 *middle_pad, u8 *data_pad,
--			     void *epilogue, bool add_tag)
-+			     void *epilogue, struct page **pages, int dpos,
-+			     bool add_tag)
- {
- 	struct ceph_msg_data_cursor cursor;
- 	struct scatterlist *cur_sg;
-+	int dlen = data_len(msg);
- 	int sg_cnt;
- 	int ret;
+ 	ceph_update_read_metrics(&fsc->mdsc->metric, req->r_start_latency,
+ 				 req->r_end_latency, osd_data->length, err);
+@@ -229,7 +231,9 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+ 	     subreq->len, i_size_read(req->r_inode));
  
-@@ -978,9 +1014,15 @@ static int setup_message_sgs(struct sg_table *sgt, struct ceph_msg *msg,
- 	if (middle_len(msg))
- 		sg_cnt += calc_sg_cnt(msg->middle->vec.iov_base,
- 				      middle_len(msg));
--	if (data_len(msg)) {
--		ceph_msg_data_cursor_init(&cursor, msg, data_len(msg));
--		sg_cnt += calc_sg_cnt_cursor(&cursor);
-+	if (dlen) {
-+		if (pages) {
-+			sg_cnt += calc_pages_for(dpos, dlen);
-+			if (need_padding(dlen))
-+				sg_cnt++;
-+		} else {
-+			ceph_msg_data_cursor_init(&cursor, msg, dlen);
-+			sg_cnt += calc_sg_cnt_cursor(&cursor);
-+		}
- 	}
+ 	/* no object means success but no data */
+-	if (err == -ENOENT)
++	if (sparse && err >= 0)
++		err = ceph_sparse_ext_map_end(op);
++	else if (err == -ENOENT)
+ 		err = 0;
+ 	else if (err == -EBLOCKLISTED)
+ 		fsc->blocklisted = true;
+@@ -312,6 +316,7 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+ 	size_t page_off;
+ 	int err = 0;
+ 	u64 len = subreq->len;
++	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
  
- 	ret = sg_alloc_table(sgt, sg_cnt, GFP_NOIO);
-@@ -994,9 +1036,13 @@ static int setup_message_sgs(struct sg_table *sgt, struct ceph_msg *msg,
- 	if (middle_len(msg))
- 		init_sgs(&cur_sg, msg->middle->vec.iov_base, middle_len(msg),
- 			 middle_pad);
--	if (data_len(msg)) {
--		ceph_msg_data_cursor_init(&cursor, msg, data_len(msg));
--		init_sgs_cursor(&cur_sg, &cursor, data_pad);
-+	if (dlen) {
-+		if (pages) {
-+			init_sgs_pages(&cur_sg, pages, dpos, dlen, data_pad);
-+		} else {
-+			ceph_msg_data_cursor_init(&cursor, msg, dlen);
-+			init_sgs_cursor(&cur_sg, &cursor, data_pad);
-+		}
- 	}
+ 	if (ceph_inode_is_shutdown(inode)) {
+ 		err = -EIO;
+@@ -322,7 +327,7 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+ 		return;
  
- 	WARN_ON(!sg_is_last(cur_sg));
-@@ -1031,10 +1077,52 @@ static int decrypt_control_remainder(struct ceph_connection *con)
- 			 padded_len(rem_len) + CEPH_GCM_TAG_LEN);
- }
- 
-+/* Process sparse read data that lives in a buffer */
-+static int process_v2_sparse_read(struct ceph_connection *con, struct page **pages, int spos)
-+{
-+	struct ceph_msg_data_cursor *cursor = &con->v2.in_cursor;
-+	int ret;
-+
-+	for (;;) {
-+		char *buf = NULL;
-+
-+		ret = con->ops->sparse_read(con, cursor, &buf);
-+		if (ret <= 0)
-+			return ret;
-+
-+		dout("%s: sparse_read return %x buf %p\n", __func__, ret, buf);
-+
-+		do {
-+			int idx = spos >> PAGE_SHIFT;
-+			int soff = offset_in_page(spos);
-+			struct page *spage = con->v2.in_enc_pages[idx];
-+			int len = min_t(int, ret, PAGE_SIZE - soff);
-+
-+			if (buf) {
-+				memcpy_from_page(buf, spage, soff, len);
-+				buf += len;
-+			} else {
-+				struct bio_vec bv;
-+
-+				get_bvec_at(cursor, &bv);
-+				len = min_t(int, len, bv.bv_len);
-+				memcpy_page(bv.bv_page, bv.bv_offset,
-+					    spage, soff, len);
-+				ceph_msg_data_advance(cursor, len);
-+			}
-+			spos += len;
-+			ret -= len;
-+		} while (ret);
-+	}
-+}
-+
- static int decrypt_tail(struct ceph_connection *con)
- {
- 	struct sg_table enc_sgt = {};
- 	struct sg_table sgt = {};
-+	struct page **pages = NULL;
-+	bool sparse = con->in_msg->sparse_read;
-+	int dpos = 0;
- 	int tail_len;
- 	int ret;
- 
-@@ -1045,9 +1133,14 @@ static int decrypt_tail(struct ceph_connection *con)
- 	if (ret)
+ 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout, vino, subreq->start, &len,
+-			0, 1, CEPH_OSD_OP_READ,
++			0, 1, sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
+ 			CEPH_OSD_FLAG_READ | fsc->client->osdc.client->options->read_from_replica,
+ 			NULL, ci->i_truncate_seq, ci->i_truncate_size, false);
+ 	if (IS_ERR(req)) {
+@@ -331,6 +336,12 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
  		goto out;
+ 	}
  
 +	if (sparse) {
-+		dpos = padded_len(front_len(con->in_msg) + padded_len(middle_len(con->in_msg)));
-+		pages = con->v2.in_enc_pages;
-+	}
-+
- 	ret = setup_message_sgs(&sgt, con->in_msg, FRONT_PAD(con->v2.in_buf),
--			MIDDLE_PAD(con->v2.in_buf), DATA_PAD(con->v2.in_buf),
--			con->v2.in_buf, true);
-+				MIDDLE_PAD(con->v2.in_buf), DATA_PAD(con->v2.in_buf),
-+				con->v2.in_buf, pages, dpos, true);
- 	if (ret)
- 		goto out;
- 
-@@ -1057,6 +1150,12 @@ static int decrypt_tail(struct ceph_connection *con)
- 	if (ret)
- 		goto out;
- 
-+	if (sparse && data_len(con->in_msg)) {
-+		ret = process_v2_sparse_read(con, con->v2.in_enc_pages, dpos);
-+		if (ret)
++		err = ceph_alloc_sparse_ext_map(&req->r_ops[0]);
++		if (err)
 +			goto out;
 +	}
 +
- 	WARN_ON(!con->v2.in_enc_page_cnt);
- 	ceph_release_page_vector(con->v2.in_enc_pages,
- 				 con->v2.in_enc_page_cnt);
-@@ -1580,7 +1679,7 @@ static int prepare_message_secure(struct ceph_connection *con)
+ 	dout("%s: pos=%llu orig_len=%zu len=%llu\n", __func__, subreq->start, subreq->len, len);
+ 	iov_iter_xarray(&iter, ITER_DEST, &rreq->mapping->i_pages, subreq->start, len);
+ 	err = iov_iter_get_pages_alloc2(&iter, &pages, len, &page_off);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index f4d8bf7dec88..1e2a306aafe4 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -935,6 +935,7 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 	u64 off = iocb->ki_pos;
+ 	u64 len = iov_iter_count(to);
+ 	u64 i_size = i_size_read(inode);
++	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
  
- 	encode_epilogue_secure(con, false);
- 	ret = setup_message_sgs(&sgt, con->out_msg, zerop, zerop, zerop,
--				&con->v2.out_epil, false);
-+				&con->v2.out_epil, NULL, 0, false);
- 	if (ret)
- 		goto out;
+ 	dout("sync_read on file %p %llu~%u %s\n", file, off, (unsigned)len,
+ 	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+@@ -961,10 +962,12 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 		bool more;
+ 		int idx;
+ 		size_t left;
++		struct ceph_osd_req_op *op;
  
+ 		req = ceph_osdc_new_request(osdc, &ci->i_layout,
+ 					ci->i_vino, off, &len, 0, 1,
+-					CEPH_OSD_OP_READ, CEPH_OSD_FLAG_READ,
++					sparse ? CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ,
++					CEPH_OSD_FLAG_READ,
+ 					NULL, ci->i_truncate_seq,
+ 					ci->i_truncate_size, false);
+ 		if (IS_ERR(req)) {
+@@ -985,6 +988,16 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 
+ 		osd_req_op_extent_osd_data_pages(req, 0, pages, len, page_off,
+ 						 false, false);
++
++		op = &req->r_ops[0];
++		if (sparse) {
++			ret = ceph_alloc_sparse_ext_map(op);
++			if (ret) {
++				ceph_osdc_put_request(req);
++				break;
++			}
++		}
++
+ 		ceph_osdc_start_request(osdc, req);
+ 		ret = ceph_osdc_wait_request(osdc, req);
+ 
+@@ -993,19 +1006,24 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *to,
+ 					 req->r_end_latency,
+ 					 len, ret);
+ 
+-		ceph_osdc_put_request(req);
+-
+ 		i_size = i_size_read(inode);
+ 		dout("sync_read %llu~%llu got %zd i_size %llu%s\n",
+ 		     off, len, ret, i_size, (more ? " MORE" : ""));
+ 
+-		if (ret == -ENOENT)
++		/* Fix it to go to end of extent map */
++		if (sparse && ret >= 0)
++			ret = ceph_sparse_ext_map_end(op);
++		else if (ret == -ENOENT)
+ 			ret = 0;
++
++		ceph_osdc_put_request(req);
++
+ 		if (ret >= 0 && ret < len && (off + ret < i_size)) {
+ 			int zlen = min(len - ret, i_size - off - ret);
+ 			int zoff = page_off + ret;
++
+ 			dout("sync_read zero gap %llu~%llu\n",
+-                             off + ret, off + ret + zlen);
++				off + ret, off + ret + zlen);
+ 			ceph_zero_page_vector_range(zoff, zlen, pages);
+ 			ret += zlen;
+ 		}
+@@ -1124,8 +1142,10 @@ static void ceph_aio_complete_req(struct ceph_osd_request *req)
+ 	struct inode *inode = req->r_inode;
+ 	struct ceph_aio_request *aio_req = req->r_priv;
+ 	struct ceph_osd_data *osd_data = osd_req_op_extent_osd_data(req, 0);
++	struct ceph_osd_req_op *op = &req->r_ops[0];
+ 	struct ceph_client_metric *metric = &ceph_sb_to_mdsc(inode->i_sb)->metric;
+ 	unsigned int len = osd_data->bvec_pos.iter.bi_size;
++	bool sparse = (op->op == CEPH_OSD_OP_SPARSE_READ);
+ 
+ 	BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_BVECS);
+ 	BUG_ON(!osd_data->num_bvecs);
+@@ -1146,6 +1166,8 @@ static void ceph_aio_complete_req(struct ceph_osd_request *req)
+ 		}
+ 		rc = -ENOMEM;
+ 	} else if (!aio_req->write) {
++		if (sparse && rc >= 0)
++			rc = ceph_sparse_ext_map_end(op);
+ 		if (rc == -ENOENT)
+ 			rc = 0;
+ 		if (rc >= 0 && len > rc) {
+@@ -1282,6 +1304,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 	loff_t pos = iocb->ki_pos;
+ 	bool write = iov_iter_rw(iter) == WRITE;
+ 	bool should_dirty = !write && user_backed_iter(iter);
++	bool sparse = ceph_test_mount_opt(fsc, SPARSEREAD);
+ 
+ 	if (write && ceph_snap(file_inode(file)) != CEPH_NOSNAP)
+ 		return -EROFS;
+@@ -1309,6 +1332,8 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 	while (iov_iter_count(iter) > 0) {
+ 		u64 size = iov_iter_count(iter);
+ 		ssize_t len;
++		struct ceph_osd_req_op *op;
++		int readop = sparse ?  CEPH_OSD_OP_SPARSE_READ : CEPH_OSD_OP_READ;
+ 
+ 		if (write)
+ 			size = min_t(u64, size, fsc->mount_options->wsize);
+@@ -1319,8 +1344,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+ 					    vino, pos, &size, 0,
+ 					    1,
+-					    write ? CEPH_OSD_OP_WRITE :
+-						    CEPH_OSD_OP_READ,
++					    write ? CEPH_OSD_OP_WRITE : readop,
+ 					    flags, snapc,
+ 					    ci->i_truncate_seq,
+ 					    ci->i_truncate_size,
+@@ -1371,6 +1395,14 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		}
+ 
+ 		osd_req_op_extent_osd_data_bvecs(req, 0, bvecs, num_pages, len);
++		op = &req->r_ops[0];
++		if (sparse) {
++			ret = ceph_alloc_sparse_ext_map(op);
++			if (ret) {
++				ceph_osdc_put_request(req);
++				break;
++			}
++		}
+ 
+ 		if (aio_req) {
+ 			aio_req->total_len += len;
+@@ -1398,8 +1430,11 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+ 
+ 		size = i_size_read(inode);
+ 		if (!write) {
+-			if (ret == -ENOENT)
++			if (sparse && ret >= 0)
++				ret = ceph_sparse_ext_map_end(op);
++			else if (ret == -ENOENT)
+ 				ret = 0;
++
+ 			if (ret >= 0 && ret < len && pos + ret < size) {
+ 				struct iov_iter i;
+ 				int zlen = min_t(size_t, len - ret,
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 3fc48b43cab0..7aaf40669509 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -165,6 +165,7 @@ enum {
+ 	Opt_copyfrom,
+ 	Opt_wsync,
+ 	Opt_pagecache,
++	Opt_sparseread,
+ };
+ 
+ enum ceph_recover_session_mode {
+@@ -207,6 +208,7 @@ static const struct fs_parameter_spec ceph_mount_parameters[] = {
+ 	fsparam_u32	("wsize",			Opt_wsize),
+ 	fsparam_flag_no	("wsync",			Opt_wsync),
+ 	fsparam_flag_no	("pagecache",			Opt_pagecache),
++	fsparam_flag_no	("sparseread",			Opt_sparseread),
+ 	{}
+ };
+ 
+@@ -576,6 +578,12 @@ static int ceph_parse_mount_param(struct fs_context *fc,
+ 		else
+ 			fsopt->flags &= ~CEPH_MOUNT_OPT_NOPAGECACHE;
+ 		break;
++	case Opt_sparseread:
++		if (result.negated)
++			fsopt->flags &= ~CEPH_MOUNT_OPT_SPARSEREAD;
++		else
++			fsopt->flags |= CEPH_MOUNT_OPT_SPARSEREAD;
++		break;
+ 	default:
+ 		BUG();
+ 	}
+@@ -710,9 +718,10 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 
+ 	if (!(fsopt->flags & CEPH_MOUNT_OPT_ASYNC_DIROPS))
+ 		seq_puts(m, ",wsync");
+-
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_NOPAGECACHE)
+ 		seq_puts(m, ",nopagecache");
++	if (fsopt->flags & CEPH_MOUNT_OPT_SPARSEREAD)
++		seq_puts(m, ",sparseread");
+ 
+ 	if (fsopt->wsize != CEPH_MAX_WRITE_SIZE)
+ 		seq_printf(m, ",wsize=%u", fsopt->wsize);
+@@ -1296,6 +1305,11 @@ static int ceph_reconfigure_fc(struct fs_context *fc)
+ 	else
+ 		ceph_clear_mount_opt(fsc, ASYNC_DIROPS);
+ 
++	if (fsopt->flags & CEPH_MOUNT_OPT_SPARSEREAD)
++		ceph_set_mount_opt(fsc, SPARSEREAD);
++	else
++		ceph_clear_mount_opt(fsc, SPARSEREAD);
++
+ 	if (strcmp_null(fsc->mount_options->mon_addr, fsopt->mon_addr)) {
+ 		kfree(fsc->mount_options->mon_addr);
+ 		fsc->mount_options->mon_addr = fsopt->mon_addr;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 0fe76427d314..5d6a1872fef5 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -42,6 +42,7 @@
+ #define CEPH_MOUNT_OPT_NOCOPYFROM      (1<<14) /* don't use RADOS 'copy-from' op */
+ #define CEPH_MOUNT_OPT_ASYNC_DIROPS    (1<<15) /* allow async directory ops */
+ #define CEPH_MOUNT_OPT_NOPAGECACHE     (1<<16) /* bypass pagecache altogether */
++#define CEPH_MOUNT_OPT_SPARSEREAD      (1<<17) /* always do sparse reads */
+ 
+ #define CEPH_MOUNT_OPT_DEFAULT			\
+ 	(CEPH_MOUNT_OPT_DCACHE |		\
 -- 
 2.39.1
 
