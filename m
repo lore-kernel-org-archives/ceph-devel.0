@@ -2,57 +2,77 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 174B2C77B73
-	for <ceph-devel@archiver.kernel.org>; Thu, 20 Apr 2023 08:31:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81EE9C7EE20
+	for <ceph-devel@archiver.kernel.org>; Mon, 24 Apr 2023 05:49:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234072AbjDTIbz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 20 Apr 2023 04:31:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60334 "EHLO
+        id S230384AbjDXFtn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 24 Apr 2023 01:49:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234251AbjDTIbu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Apr 2023 04:31:50 -0400
-X-Greylist: delayed 609 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 20 Apr 2023 01:31:47 PDT
-Received: from mail.colfax.pl (mail.colfax.pl [217.61.105.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E73A3AA6
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Apr 2023 01:31:47 -0700 (PDT)
-Received: by mail.colfax.pl (Postfix, from userid 1002)
-        id 705D8890BE; Thu, 20 Apr 2023 10:16:29 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=colfax.pl; s=mail;
-        t=1681978603; bh=W5KacXR7qMQNPol382NFmR4DcXdTs8e7H00r3hAlqT0=;
-        h=Date:From:To:Subject:From;
-        b=XVUQcyr1qqCR+lNoUy47WsAtlg8Y4x8s/ONIHyrZb5rNHSeYjSm3yYf7TxkPMbKjz
-         KpVagRH9dTRIG1UWfcASyxSayx1i9al+CQdRTIOcWl1lqJRRFMbF7cQHaQpLOGRInS
-         HmrkKgVYbvxTeqqyIwdKZues3TfItVsuwxQqqHJTCiuKCJQZfC0+UmpdwoGLZQmDhP
-         4QyTXCNfz0uYok/W5167JmTkJbib4slX3+bYbF0kIDKGmVqBH6fdqhmPflInBfRn+Y
-         vOIruH/zjQhJThtnuWF62CQNc99l67pf+HtuUaHf06WoASYQwVkV+qNNKtNimNr98S
-         edop65J3uRQSA==
-Received: by mail.colfax.pl for <ceph-devel@vger.kernel.org>; Thu, 20 Apr 2023 08:16:07 GMT
-Message-ID: <20230420084500-0.1.9.2jhc.0.aq7onj6hgk@colfax.pl>
-Date:   Thu, 20 Apr 2023 08:16:07 GMT
-From:   =?UTF-8?Q? "Mi=C5=82osz_G=C3=B3recki" ?= 
-        <milosz.gorecki@colfax.pl>
-To:     <ceph-devel@vger.kernel.org>
-Subject: Zapytanie ofertowe 
-X-Mailer: mail.colfax.pl
+        with ESMTP id S229478AbjDXFtl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2023 01:49:41 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 244E210CE;
+        Sun, 23 Apr 2023 22:49:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=EScWBpUly43XmjjjdD4wwdvXMFWqSgBIztZj7g+ZMe8=; b=MLLALFsGBXb0yEP6gMC+osLHIV
+        LxXX9DY2kTS2XEw2wLe6CXDUGRoxAMHBwXzobLE9Y9zji+azCMLR5NU8y8TLrvKuOMasdYzfEdAbx
+        YS0O7LEmtvCsE+U0cmWHT4J2ADCxI6QWaoyVaWpQVUefmWLPSuNZO42MVhHQwB3WxcfClsmoL0JNN
+        tN4fQtJUEXSg3i8MJ/wAy3B6Z6igVb8BVPomdBmnhj9Z4ZWBCDswm59W3TtI08owaBDS0Vnv8Jt+Y
+        NyKD0hmhBS+Tx5z7HnU1WPDVW85bTSHltv+c4f8A4YPMvyYVqQ6G4LsKmHiql/CpLvwdMS1O4lk1U
+        I4zba1cA==;
+Received: from [2001:4bb8:189:a74f:e8a5:5f73:6d2:23b8] (helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
+        id 1pqp4v-00FOuH-2z;
+        Mon, 24 Apr 2023 05:49:34 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        David Howells <dhowells@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>,
+        linux-block@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-mm@kvack.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 01/17] fs: unexport buffer_check_dirty_writeback
+Date:   Mon, 24 Apr 2023 07:49:10 +0200
+Message-Id: <20230424054926.26927-2-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230424054926.26927-1-hch@lst.de>
+References: <20230424054926.26927-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Szanowni Pa=C5=84stwo,
+buffer_check_dirty_writeback is only used by the block device aops,
+remove the export.
 
-Od blisko 8 lat skutecznie wspieramy naszych partner=C3=B3w w pozyskiwani=
-u klient=C3=B3w. =C5=9Awiadczymy us=C5=82ug=C4=99 generowania lead=C3=B3w=
- z kilkoma unikalnymi cechami jak gwarancja realnego uruchomienia rozm=C3=
-=B3w lub wymiana kontaktu. Nadmieni=C4=99 tak=C5=BCe, i=C5=BC kontakty pr=
-zekazywane s=C4=85 na wy=C5=82=C4=85czno=C5=9B=C4=87.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ fs/buffer.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-Je=C5=9Bli w chwili obecnej poszukujecie Pa=C5=84stwo nowych zapyta=C5=84=
- i lead=C3=B3w sprzeda=C5=BCowych prosz=C4=99 o kontakt lub wskazanie ter=
-minu rozmowy.
+diff --git a/fs/buffer.c b/fs/buffer.c
+index 9e1e2add541e07..eb14fbaa7d35f7 100644
+--- a/fs/buffer.c
++++ b/fs/buffer.c
+@@ -111,7 +111,6 @@ void buffer_check_dirty_writeback(struct folio *folio,
+ 		bh = bh->b_this_page;
+ 	} while (bh != head);
+ }
+-EXPORT_SYMBOL(buffer_check_dirty_writeback);
+ 
+ /*
+  * Block until a buffer comes unlocked.  This doesn't stop it
+-- 
+2.39.2
 
-
-Pozdrawiam
-Mi=C5=82osz G=C3=B3recki
