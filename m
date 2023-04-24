@@ -2,32 +2,32 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 756F6C7EE2A
-	for <ceph-devel@archiver.kernel.org>; Mon, 24 Apr 2023 05:49:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7172C7EE24
+	for <ceph-devel@archiver.kernel.org>; Mon, 24 Apr 2023 05:50:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230046AbjDXFty (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 24 Apr 2023 01:49:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47028 "EHLO
+        id S230477AbjDXFuB (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 24 Apr 2023 01:50:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230482AbjDXFtq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2023 01:49:46 -0400
+        with ESMTP id S231177AbjDXFtz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2023 01:49:55 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58FE919B3;
-        Sun, 23 Apr 2023 22:49:45 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3AB81726;
+        Sun, 23 Apr 2023 22:49:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=bS05QMoD6j6YpGz1rHCHZCzEMuRJxwEBMPELLNqMvVM=; b=QAuUTMs9c0fPPuxtegrv+eZFd7
-        m1Lb/Zn2oEdFxGNTL6MyQ1wn8x4GTSTmoDmXSEpvoQtz2+8sgXF6o1xdmIGxAfsSLMFUF2Rdb/QCw
-        QELH8/3nG4bNASqOdAHA35mLeydY1xzz4dUPnNEsh0dTA/um5YWXh/LZcV75W2WYGokrA0cEhf1qA
-        KKw6r1pxS24iVwx30XkH6ewxhXLH1nN6hYHJDiHEFB82PfR4sJADmcttvzNs0seHtisbFo0Bbqa9V
-        n3yxCEfgi9duwfR5Ke4/YsTw+fVVP3Ub8FBS1iXniGGQbGngJEVnnvGoIEv6ORCKaN3u1LbDCqCFv
-        PHlgzFNw==;
+        bh=LInMwgmm7juakhqMJmUm/pISuBKmyhtj1h64RTxGVFE=; b=ksnjCNaaIYILtAb94qr1FTT2Wz
+        kZRuCMhWL9racZ9eP9X8K5p9+krm6xIvaHOewtdjyif7/XMRozz4R7mpRrFqpSzaYOYZZp+hz9j64
+        ccya7w488Ktn5XvstbBsAUFLV2jC6akCFOTNSUsoO0g72ip2tieVyNrcMOs/bqwhYxlcGZnjpO8P8
+        p+tTKt17x8IxnhUcRLwo01cYYILh46k+ybO9S5xEZSDgd33UCHppPSdPVnIHFLtlAPgyTTg0J5cIP
+        VsGdLLnL5NPrn4LLLxCrWgG5kPHsLi0NxWZb5LKRKHJgnMP5ZYVjS6xFc2Hlea4qeMAV15N77hydj
+        ZnQ3LaDg==;
 Received: from [2001:4bb8:189:a74f:e8a5:5f73:6d2:23b8] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-        id 1pqp54-00FOuy-17;
-        Mon, 24 Apr 2023 05:49:42 +0000
+        id 1pqp5C-00FOwD-39;
+        Mon, 24 Apr 2023 05:49:51 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     Miklos Szeredi <miklos@szeredi.hu>,
@@ -40,9 +40,9 @@ Cc:     Miklos Szeredi <miklos@szeredi.hu>,
         linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
         linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org,
         linux-mm@kvack.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 04/17] fs: remove emergency_thaw_bdev
-Date:   Mon, 24 Apr 2023 07:49:13 +0200
-Message-Id: <20230424054926.26927-5-hch@lst.de>
+Subject: [PATCH 07/17] filemap: add a kiocb_invalidate_pages helper
+Date:   Mon, 24 Apr 2023 07:49:16 +0200
+Message-Id: <20230424054926.26927-8-hch@lst.de>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230424054926.26927-1-hch@lst.de>
 References: <20230424054926.26927-1-hch@lst.de>
@@ -53,69 +53,99 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Fold emergency_thaw_bdev into it's only caller, to prepare for buffer.c
-to be built only when buffer_head support is enabled.
+Factor out a helper that calls filemap_write_and_wait_range and
+invalidate_inode_pages2_rangefor a the range covered by a write kiocb or
+returns -EAGAIN if the kiocb is marked as nowait and there would be pages
+to write or invalidate.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- fs/buffer.c   | 6 ------
- fs/internal.h | 6 ------
- fs/super.c    | 4 +++-
- 3 files changed, 3 insertions(+), 13 deletions(-)
+ include/linux/pagemap.h |  1 +
+ mm/filemap.c            | 48 ++++++++++++++++++++++++-----------------
+ 2 files changed, 29 insertions(+), 20 deletions(-)
 
-diff --git a/fs/buffer.c b/fs/buffer.c
-index eb14fbaa7d35f7..58e0007892b1c7 100644
---- a/fs/buffer.c
-+++ b/fs/buffer.c
-@@ -563,12 +563,6 @@ static int osync_buffers_list(spinlock_t *lock, struct list_head *list)
- 	return err;
+diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
+index 51f7aea51169c4..f6c5ef9d3d7646 100644
+--- a/include/linux/pagemap.h
++++ b/include/linux/pagemap.h
+@@ -30,6 +30,7 @@ static inline void invalidate_remote_inode(struct inode *inode)
+ int invalidate_inode_pages2(struct address_space *mapping);
+ int invalidate_inode_pages2_range(struct address_space *mapping,
+ 		pgoff_t start, pgoff_t end);
++int kiocb_invalidate_pages(struct kiocb *iocb, size_t count);
+ 
+ int write_inode_now(struct inode *, int sync);
+ int filemap_fdatawrite(struct address_space *);
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 28ea9804191d6b..afb3b0169a9173 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -2780,6 +2780,33 @@ int kiocb_write_and_wait(struct kiocb *iocb, size_t count)
+ 	return filemap_write_and_wait_range(mapping, pos, end);
  }
  
--void emergency_thaw_bdev(struct super_block *sb)
--{
--	while (sb->s_bdev && !thaw_bdev(sb->s_bdev))
--		printk(KERN_WARNING "Emergency Thaw on %pg\n", sb->s_bdev);
--}
--
++int kiocb_invalidate_pages(struct kiocb *iocb, size_t count)
++{
++	struct address_space *mapping = iocb->ki_filp->f_mapping;
++	loff_t pos = iocb->ki_pos;
++	loff_t end = pos + count - 1;
++	int ret;
++
++	if (iocb->ki_flags & IOCB_NOWAIT) {
++		/* we could block if there are any pages in the range */
++		if (filemap_range_has_page(mapping, pos, end))
++			return -EAGAIN;
++	} else {
++		ret = filemap_write_and_wait_range(mapping, pos, end);
++		if (ret)
++			return ret;
++	}
++
++	/*
++	 * After a write we want buffered reads to be sure to go to disk to get
++	 * the new data.  We invalidate clean cached page from the region we're
++	 * about to write.  We do this *before* the write so that we can return
++	 * without clobbering -EIOCBQUEUED from ->direct_IO().
++	 */
++	return invalidate_inode_pages2_range(mapping, pos >> PAGE_SHIFT,
++					     end >> PAGE_SHIFT);
++}
++
  /**
-  * sync_mapping_buffers - write out & wait upon a mapping's "associated" buffers
-  * @mapping: the mapping which wants those buffers written
-diff --git a/fs/internal.h b/fs/internal.h
-index dc4eb91a577a80..cad87784eb5e0f 100644
---- a/fs/internal.h
-+++ b/fs/internal.h
-@@ -23,16 +23,10 @@ struct mnt_idmap;
-  */
- #ifdef CONFIG_BLOCK
- extern void __init bdev_cache_init(void);
--
--void emergency_thaw_bdev(struct super_block *sb);
- #else
- static inline void bdev_cache_init(void)
- {
- }
--static inline int emergency_thaw_bdev(struct super_block *sb)
--{
--	return 0;
--}
- #endif /* CONFIG_BLOCK */
+  * generic_file_read_iter - generic filesystem read routine
+  * @iocb:	kernel I/O control block
+@@ -3823,30 +3850,11 @@ generic_file_direct_write(struct kiocb *iocb, struct iov_iter *from)
+ 	write_len = iov_iter_count(from);
+ 	end = (pos + write_len - 1) >> PAGE_SHIFT;
  
- /*
-diff --git a/fs/super.c b/fs/super.c
-index 04bc62ab7dfea9..d8f0a28d1850b1 100644
---- a/fs/super.c
-+++ b/fs/super.c
-@@ -1026,7 +1026,9 @@ static void do_thaw_all_callback(struct super_block *sb)
- {
- 	down_write(&sb->s_umount);
- 	if (sb->s_root && sb->s_flags & SB_BORN) {
--		emergency_thaw_bdev(sb);
-+		if (IS_ENABLED(CONFIG_BLOCK))
-+			while (sb->s_bdev && !thaw_bdev(sb->s_bdev))
-+				pr_warn("Emergency Thaw on %pg\n", sb->s_bdev);
- 		thaw_super_locked(sb);
- 	} else {
- 		up_write(&sb->s_umount);
+-	if (iocb->ki_flags & IOCB_NOWAIT) {
+-		/* If there are pages to writeback, return */
+-		if (filemap_range_has_page(file->f_mapping, pos,
+-					   pos + write_len - 1))
+-			return -EAGAIN;
+-	} else {
+-		written = filemap_write_and_wait_range(mapping, pos,
+-							pos + write_len - 1);
+-		if (written)
+-			goto out;
+-	}
+-
+-	/*
+-	 * After a write we want buffered reads to be sure to go to disk to get
+-	 * the new data.  We invalidate clean cached page from the region we're
+-	 * about to write.  We do this *before* the write so that we can return
+-	 * without clobbering -EIOCBQUEUED from ->direct_IO().
+-	 */
+-	written = invalidate_inode_pages2_range(mapping,
+-					pos >> PAGE_SHIFT, end);
+ 	/*
+ 	 * If a page can not be invalidated, return 0 to fall back
+ 	 * to buffered write.
+ 	 */
++	written = kiocb_invalidate_pages(iocb, write_len);
+ 	if (written) {
+ 		if (written == -EBUSY)
+ 			return 0;
 -- 
 2.39.2
 
