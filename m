@@ -2,57 +2,62 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2D7DC7EE20
-	for <ceph-devel@archiver.kernel.org>; Mon, 24 Apr 2023 06:22:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30F54C77B61
+	for <ceph-devel@archiver.kernel.org>; Mon, 24 Apr 2023 11:49:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230459AbjDXGWZ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 24 Apr 2023 02:22:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43364 "EHLO
+        id S231549AbjDXLtp (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 24 Apr 2023 07:49:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229516AbjDXGWY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2023 02:22:24 -0400
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D65010C8;
-        Sun, 23 Apr 2023 23:22:23 -0700 (PDT)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 50A3B68B05; Mon, 24 Apr 2023 08:22:20 +0200 (CEST)
-Date:   Mon, 24 Apr 2023 08:22:20 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        David Howells <dhowells@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        linux-block@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
-        linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org,
-        linux-mm@kvack.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 11/17] iomap: assign current->backing_dev_info in
- iomap_file_buffered_write
-Message-ID: <20230424062220.GA10368@lst.de>
-References: <20230424054926.26927-1-hch@lst.de> <20230424054926.26927-12-hch@lst.de> <20230424061825.GO360889@frogsfrogsfrogs>
+        with ESMTP id S231576AbjDXLto (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2023 07:49:44 -0400
+Received: from mail-vk1-xa32.google.com (mail-vk1-xa32.google.com [IPv6:2607:f8b0:4864:20::a32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F5DA421A
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Apr 2023 04:49:37 -0700 (PDT)
+Received: by mail-vk1-xa32.google.com with SMTP id 71dfb90a1353d-4403aef7f1fso1522907e0c.2
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Apr 2023 04:49:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1682336976; x=1684928976;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=VNyu6CeR1v7eOKdhR+7FYRtqpjhTov8RoGdraKq+664=;
+        b=AleCIb2lkLWG994h4VHcVE4IPdacmWZx6EmDsXSDjzsckfsJcpAwRqXK9ZmbiE/hYP
+         2l3JpRq4iFMPh2hkF5UXlGvx5DcC52xJ/r2J8aEfDKT+r0oqMnbkQFHKwj7/EiY3E0MG
+         n29+b2WQ7TQ/VwsiSrAIvkHlrTJDIaxWsji4l4uXkKHRzIoCSePMaaAb0au3tfRAytUp
+         KhLqZHKbnrJSw8hmlpwC+FXD+VxP96CBQXJJkYZol1CX6NuKBnIu3MQoDFE3rfHGNrQh
+         ZjUHs0EBvq9l9NtlbirjvrFGvOPQXBa2QeCCfaMnuQIUkIB6p9xoorxgYv5JQLx+cnuo
+         k7Hg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1682336976; x=1684928976;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=VNyu6CeR1v7eOKdhR+7FYRtqpjhTov8RoGdraKq+664=;
+        b=SBCfLn8AJCMkyMbH5htV2ItPiXu7a2faJl4e68SXaX8PUR+P20wFByhlZ/wG6lmb3j
+         oo4wBJyF38vJieE/lv0Ul9G/dIVVtjizIx2TZ+abPuOF0X+WeGYUofeeqNCz1Ao5iFMm
+         p5zALKQAZHE5MdOHHfXHVtU3XElBmO97Tp194iPxqBC3yPdQsv/LNOKGG06ZFu+TCO/W
+         Rhcn+/WLqOkWf5QSApQ8VhoQAJbZIszs+BRjaRuIYIM1pZkYQOpUUXSuojpjR32VZZ1k
+         +re+QOd6U/SpdJakFp+wQygXucLF7f6hZaIIVnNniJj8PdvdHnkUPFZX+6a7c567xd5x
+         ldSA==
+X-Gm-Message-State: AAQBX9fPHeAu1MdIvusC5lX2ne55FqvZSrRK8rvvT1VgEHHTU+eEepGc
+        XgQT1OdCIy3wkgC5+IYovcQwcyFwIHKX+9xQvqZ2hyaMcR0=
+X-Google-Smtp-Source: AKy350ZzT0UkGd1Scz2iVcw03rhVSh0l6bAtl6qbk0RVGFATGq02c5yW+CHgutlZAgq4DG0VLJT3Qqz5UblY69HKTGc=
+X-Received: by 2002:a1f:3dc4:0:b0:3ea:7af1:9ea4 with SMTP id
+ k187-20020a1f3dc4000000b003ea7af19ea4mr2806355vka.12.1682336976438; Mon, 24
+ Apr 2023 04:49:36 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230424061825.GO360889@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+From:   WeiGuo Ren <rwg1335252904@gmail.com>
+Date:   Mon, 24 Apr 2023 19:49:26 +0800
+Message-ID: <CAPy+zYVpqE6T0V=7Sq4TdaziF+Azgph00FyJ8W+tARBb57Vo0A@mail.gmail.com>
+Subject: =?UTF-8?Q?How_to_control_omap_capacity=EF=BC=9F?=
+To:     Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Sun, Apr 23, 2023 at 11:18:25PM -0700, Darrick J. Wong wrote:
-> > @@ -876,8 +877,11 @@ iomap_file_buffered_write(struct kiocb *iocb, struct iov_iter *i,
-> >  	if (iocb->ki_flags & IOCB_NOWAIT)
-> >  		iter.flags |= IOMAP_NOWAIT;
-> >  
-> > +	current->backing_dev_info = inode_to_bdi(iter.inode);
-> 
-> Dumb question from me late on a Sunday night, but does the iomap_unshare
-> code need to set this too?  Since it works by dirtying pagecache folios
-> without actually changing the contents?
-
-A very good question that I have no answer for.  The
-current->backing_dev_info mechanism confuses the heck out of me and
-appears basically undocumented.
+I have two osds. these  osd are used to rgw index pool. After a lot of
+stress tests, these two osds were written to 99.90%. The full ratio
+(95%) did not take effect? I don't know much. Could it be that if the
+osd of omap is fully stored, it cannot be limited by the full ratio?
+ALSO I use ceph-bluestore-tool to expand it . Before I add a partition
+. But i failed, I dont know why.
