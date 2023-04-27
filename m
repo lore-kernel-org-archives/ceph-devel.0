@@ -2,69 +2,131 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17081C77B78
-	for <ceph-devel@archiver.kernel.org>; Wed, 26 Apr 2023 17:06:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E66FC77B61
+	for <ceph-devel@archiver.kernel.org>; Thu, 27 Apr 2023 07:22:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236201AbjDZRGl (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 26 Apr 2023 13:06:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60396 "EHLO
+        id S242691AbjD0HWI (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 27 Apr 2023 03:22:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236152AbjDZRGc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Apr 2023 13:06:32 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC9327AAC;
-        Wed, 26 Apr 2023 10:06:30 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S229601AbjD0HVz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Apr 2023 03:21:55 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96BD04C11
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Apr 2023 00:20:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1682579967;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=pxByNbyYmigbMvHkeeP50vSiQrdPc2d2oR8XdIluuEU=;
+        b=GK3KY/ODL7iFcGEzima0Lz3Fs73UKXM0Zg3KiXnRCuydwOl56fVq/bcZQqzhFwyhGJ0EF4
+        oXB3hsROUp3Xk8qErzunldr9KldJANvOnHiWVFmYmOjrFpIwaQYb5o9opDLjDP3gJwLzZu
+        0mbeohubjj8OIMvVLau6pKJKWqO7NPg=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-570-K1X4Yvz2MIS_gqlyKwuUZg-1; Thu, 27 Apr 2023 03:19:23 -0400
+X-MC-Unique: K1X4Yvz2MIS_gqlyKwuUZg-1
+Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id ADD8062121;
-        Wed, 26 Apr 2023 17:06:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 1FBFCC433D2;
-        Wed, 26 Apr 2023 17:06:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1682528790;
-        bh=bjUeFdcrAPb6A1XLGJ1j7sM0jVBuDpKaMnhSHeosS5I=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=Iqq0WscNVI6OfeqZpBBsOsQCtyfn6tFPQWoOIk/G9A8a4gr209P0D57zA9QtdfhzI
-         49RaBH9nRFcgPDD6ddvzi+WfoimjGXhfSLVxWSYEzJxcvx/5plXsoZ+QhmxLuwrST7
-         eD6X1Mr5jEjfZCeBtD0KNH29XEby92m1S0da8FnJcIa+fl0NlFosXTsrPDU7KMNTA8
-         q3SN7tYFlTF78RcpnQY1ci7wpm9MU7KnwPz9VuCIOs7x9+6W4XO3dpySWta8z6gC4q
-         WWUWyLC4cRohyYUDT38pybFHffocovxMs7LVwjNgB7nGDayFGUXBsQL492P7KeFlZO
-         tJ8eLWmAMjyMQ==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 008B5C43158;
-        Wed, 26 Apr 2023 17:06:30 +0000 (UTC)
-Subject: Re: [GIT PULL] fscrypt updates for 6.4
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20230425062451.GA77408@sol.localdomain>
-References: <20230425062451.GA77408@sol.localdomain>
-X-PR-Tracked-List-Id: <ceph-devel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20230425062451.GA77408@sol.localdomain>
-X-PR-Tracked-Remote: https://git.kernel.org/pub/scm/fs/fscrypt/linux.git tags/fscrypt-for-linus
-X-PR-Tracked-Commit-Id: 83e57e47906ce0e99bd61c70fae514e69960d274
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: dbe0e78d0e3a83dd924ea01bebf6c45313c81607
-Message-Id: <168252878999.19907.1457554584879249111.pr-tracker-bot@kernel.org>
-Date:   Wed, 26 Apr 2023 17:06:29 +0000
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 660B485A5A3;
+        Thu, 27 Apr 2023 07:19:23 +0000 (UTC)
+Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-41.pek2.redhat.com [10.72.12.41])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 05207492B03;
+        Thu, 27 Apr 2023 07:19:18 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
+Cc:     jlayton@kernel.org, vshankar@redhat.com, lhenriques@suse.de,
+        mchangir@redhat.com, frans@dtu.dk, gfarnum@redhat.com,
+        Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] ceph: pass the ino# instead if the old_dentry is DCACHE_DISCONNECTED
+Date:   Thu, 27 Apr 2023 15:19:06 +0800
+Message-Id: <20230427071906.59037-1-xiubli@redhat.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The pull request you sent on Mon, 24 Apr 2023 23:24:51 -0700:
+From: Xiubo Li <xiubli@redhat.com>
 
-> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git tags/fscrypt-for-linus
+When exporting the kceph to NFS it may pass a DCACHE_DISCONNECTED
+dentry for the link operation. Then it will parse this dentry as a
+snapdir, and the mds will fail the link request as -EROFS.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/dbe0e78d0e3a83dd924ea01bebf6c45313c81607
+MDS allow clients to pass a ino# instead of a path.
 
-Thank you!
+URL: https://tracker.ceph.com/issues/59515
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/dir.c        | 13 +++++++++++--
+ fs/ceph/mds_client.c |  5 ++++-
+ 2 files changed, 15 insertions(+), 3 deletions(-)
 
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index c28de23e12a1..09bbd0ffbf4f 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1140,6 +1140,9 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
+ 	struct ceph_mds_request *req;
+ 	int err;
+ 
++	if (dentry->d_flags & DCACHE_DISCONNECTED)
++		return -EINVAL;
++
+ 	err = ceph_wait_on_conflict_unlink(dentry);
+ 	if (err)
+ 		return err;
+@@ -1151,8 +1154,8 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
+ 	if (err)
+ 		return err;
+ 
+-	dout("link in dir %p old_dentry %p dentry %p\n", dir,
+-	     old_dentry, dentry);
++	dout("link in dir %p %llx.%llx old_dentry %p:'%pd' dentry %p:'%pd'\n",
++	     dir, ceph_vinop(dir), old_dentry, old_dentry, dentry, dentry);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LINK, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+ 		d_drop(dentry);
+@@ -1161,6 +1164,12 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	req->r_old_dentry = dget(old_dentry);
++	/*
++	 * The old_dentry maybe a DCACHE_DISCONNECTED dentry, then we
++	 * will just pass the ino# to MDSs.
++	 */
++	if (old_dentry->d_flags & DCACHE_DISCONNECTED)
++		req->r_ino2 = ceph_vino(d_inode(old_dentry));
+ 	req->r_parent = dir;
+ 	ihold(dir);
+ 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 70bbd344e3d9..35eb0ce141ba 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2875,6 +2875,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
+ 	u64 ino1 = 0, ino2 = 0;
+ 	int pathlen1 = 0, pathlen2 = 0;
+ 	bool freepath1 = false, freepath2 = false;
++	struct dentry *r_old_dentry = NULL;
+ 	int len;
+ 	u16 releases;
+ 	void *p, *end;
+@@ -2892,7 +2893,9 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
+ 	}
+ 
+ 	/* If r_old_dentry is set, then assume that its parent is locked */
+-	ret = set_request_path_attr(NULL, req->r_old_dentry,
++	if (req->r_old_dentry && !(req->r_old_dentry->d_flags & DCACHE_DISCONNECTED))
++		r_old_dentry = req->r_old_dentry;
++	ret = set_request_path_attr(NULL, r_old_dentry,
+ 			      req->r_old_dentry_dir,
+ 			      req->r_path2, req->r_ino2.ino,
+ 			      &path2, &pathlen2, &ino2, &freepath2, true);
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.40.0
+
