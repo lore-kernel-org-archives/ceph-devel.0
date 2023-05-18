@@ -2,100 +2,67 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFAA8C77B7F
-	for <ceph-devel@archiver.kernel.org>; Thu, 18 May 2023 01:49:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41FF7C77B7A
+	for <ceph-devel@archiver.kernel.org>; Thu, 18 May 2023 08:01:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229587AbjERBtm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 17 May 2023 21:49:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42820 "EHLO
+        id S230007AbjERIBR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 18 May 2023 04:01:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43848 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229498AbjERBtl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 17 May 2023 21:49:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5D0230C1
-        for <ceph-devel@vger.kernel.org>; Wed, 17 May 2023 18:48:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1684374536;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=7mNItRunzXktZzmomOwmCwa87E9KiZDSCQNWYrpAb80=;
-        b=KF3MKRgKISf1Mwh6poyvCvexVYoAPfk5tko2QoHM33zivJgNgeAzWsPU1vQc6JtyYg64rh
-        lAzUbOOsIagIZR+JL+IJ3hKV9XVpjHntxTFjKTcsjBAMXDb3qfq8+ZqC0RRQcm3Qh9tFHi
-        iIZJC1D0R8/6OjjSx4gEMFv5v+T+qLE=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-590-9BrxVHWjOdudt_oScXUJ2g-1; Wed, 17 May 2023 21:48:53 -0400
-X-MC-Unique: 9BrxVHWjOdudt_oScXUJ2g-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id AFEBA381458E;
-        Thu, 18 May 2023 01:48:52 +0000 (UTC)
-Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-110.pek2.redhat.com [10.72.12.110])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7E28163F8E;
-        Thu, 18 May 2023 01:48:49 +0000 (UTC)
-From:   xiubli@redhat.com
-To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
-Cc:     jlayton@kernel.org, vshankar@redhat.com,
-        Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH] ceph: try to dump the msgs when decoding fails
-Date:   Thu, 18 May 2023 09:48:42 +0800
-Message-Id: <20230518014842.148580-1-xiubli@redhat.com>
+        with ESMTP id S229822AbjERIBC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2023 04:01:02 -0400
+X-Greylist: delayed 574 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 18 May 2023 01:00:56 PDT
+Received: from mail.quaich.pl (mail.quaich.pl [51.38.112.58])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B3F626BF
+        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2023 01:00:56 -0700 (PDT)
+Received: by mail.quaich.pl (Postfix, from userid 1002)
+        id 282B8A3E16; Thu, 18 May 2023 07:50:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=quaich.pl; s=mail;
+        t=1684396234; bh=wfvwbFJA200jrsHeP2otbNIBGUSi9OMiPBdlGaZSRdc=;
+        h=Date:From:To:Subject:From;
+        b=m13zpjH/Cv8UWWn6j1FV5znOVr7btvnHMaIQN8CH6jG2zK8eGAgdzno9ntl2KUgqv
+         vJ4jMDJhgQ7D2uzoEkhPOK2iHLQXrF+XgGgSJ/U+/eLlTNttjHoTeg2D7R0CzDfS94
+         8AMMzFMWIiTP631C9bIds9kkO1QXSDXp1yViwfWXZAPFM9DFbhI9hz4AJCgdq2YYGp
+         GS0aR7p6vE6tnEBuBsvfc/MOMK0V8KSIud6Rh2w77qEWKmWvo1WsPizbC4H6kl9ZT7
+         gFxN/F/CUsUYX/0lfKMiYZYaoM3geuzFLLOMbNSHp8bF4ZzEJTSMOpIpTRDgWgKiFR
+         GMo1CtBf5N1GA==
+Received: by mail.quaich.pl for <ceph-devel@vger.kernel.org>; Thu, 18 May 2023 07:50:23 GMT
+Message-ID: <20230518064500-0.1.88.fvqm.0.8smiqqmqik@quaich.pl>
+Date:   Thu, 18 May 2023 07:50:23 GMT
+From:   =?UTF-8?Q? "Tomasz_Wiewi=C3=B3r" ?= <tomasz.wiewior@quaich.pl>
+To:     <ceph-devel@vger.kernel.org>
+Subject: =?UTF-8?Q?Negocjacje-wska=C5=BAnik_skuteczno=C5=9Bci?=
+X-Mailer: mail.quaich.pl
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+Szanowni Pa=C5=84stwo,
 
-When the msgs are corrupted we need to dump them and then it will
-be easier to dig what has happened and where the issue is.
+jako specjali=C5=9Bci w dziedzinie badania potrzeb i projektowania progra=
+m=C3=B3w szkoleniowych, wiemy, jak wa=C5=BCne jest zapewnienie odpowiedni=
+ch narz=C4=99dzi i wiedzy, aby skutecznie zwi=C4=99kszy=C4=87 efektywno=C5=
+=9B=C4=87 zespo=C5=82u, szczeg=C3=B3lnie w du=C5=BCych organizacjach.
 
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/mds_client.c | 4 ++++
- 1 file changed, 4 insertions(+)
+Zamkni=C4=99te szkolenia s=C4=85 najlepszym rozwi=C4=85zaniem dla tych, k=
+t=C3=B3rzy chc=C4=85 skupi=C4=87 si=C4=99 na konkretnych potrzebach i zag=
+adnieniach.=20
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index d6467fe7e5fa..0dd44747f5b4 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -783,6 +783,7 @@ static int parse_reply_info(struct ceph_mds_session *s, struct ceph_msg *msg,
- 	err = -EIO;
- out_bad:
- 	pr_err("mds parse_reply err %d\n", err);
-+	ceph_msg_dump(msg);
- 	return err;
- }
- 
-@@ -3892,6 +3893,7 @@ static void handle_forward(struct ceph_mds_client *mdsc,
- 
- bad:
- 	pr_err("mdsc_handle_forward decode error err=%d\n", err);
-+	ceph_msg_dump(msg);
- }
- 
- static int __decode_session_metadata(void **p, void *end,
-@@ -5620,6 +5622,7 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- bad:
- 	pr_err("error decoding fsmap %d. Shutting down mount.\n", err);
- 	ceph_umount_begin(mdsc->fsc->sb);
-+	ceph_msg_dump(msg);
- err_out:
- 	mutex_lock(&mdsc->mutex);
- 	mdsc->mdsmap_err = err;
-@@ -5688,6 +5691,7 @@ void ceph_mdsc_handle_mdsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- bad:
- 	pr_err("error decoding mdsmap %d. Shutting down mount.\n", err);
- 	ceph_umount_begin(mdsc->fsc->sb);
-+	ceph_msg_dump(msg);
- 	return;
- }
- 
--- 
-2.40.1
+Nasza metodyka opiera si=C4=99 na identyfikacji obszar=C3=B3w, kt=C3=B3re=
+ wymagaj=C4=85 poprawy, a nast=C4=99pnie dostarczaniu spersonalizowanych =
+rozwi=C4=85za=C5=84, kt=C3=B3re pomagaj=C4=85 osi=C4=85gn=C4=85=C4=87 cel=
+e biznesowe.
 
+Z powodzeniem prowadzili=C5=9Bmy projekty szkoleniowe dla renomowanych ma=
+rek, takich jak: PZU, Bank Pekao S.A., PWC, Ronson Development, Gedeon Ri=
+chter i wielu innych.
+
+Mo=C5=BCemy niezobowi=C4=85zuj=C4=85co porozmawia=C4=87 o mo=C5=BCliwo=C5=
+=9Bciach zorganizowania szkolenia dla Pa=C5=84stwa firmy?
+
+
+Pozdrawiam
+Tomasz Wiewi=C3=B3r
