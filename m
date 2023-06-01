@@ -2,102 +2,171 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDFDAC7EE2A
-	for <ceph-devel@archiver.kernel.org>; Thu,  1 Jun 2023 09:52:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F03BBC7EE33
+	for <ceph-devel@archiver.kernel.org>; Thu,  1 Jun 2023 15:00:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233040AbjFAJwK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 1 Jun 2023 05:52:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35272 "EHLO
+        id S234702AbjFAPAL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 1 Jun 2023 11:00:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233049AbjFAJwH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2023 05:52:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EAC0E134
-        for <ceph-devel@vger.kernel.org>; Thu,  1 Jun 2023 02:51:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1685613076;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=OzIlMFRG7JVgyYici9Bt6+3TtN9Mm4P63XnmoTugrLk=;
-        b=PLGpcG6NlKaAuWCLAM9Bi7uIqw0BYhKOHobG1aplzXo1TA6jsCvh9mbckiW/Kv3DefSvp1
-        UNQ4t+G8/6Uq/hpD6alg5XStApTcAw1IB59T2t4s0W7QqAWc6yZzGEzCCShWgLcOHOkoYP
-        ojJGJv6FMQ8IEGxvuYobwvceg779wQI=
-Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
- [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-556-JgUvvGOkOHuxlfmNeGj4Fg-1; Thu, 01 Jun 2023 05:51:14 -0400
-X-MC-Unique: JgUvvGOkOHuxlfmNeGj4Fg-1
-Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-33b4cbdd21aso5394215ab.2
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Jun 2023 02:51:14 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685613074; x=1688205074;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=OzIlMFRG7JVgyYici9Bt6+3TtN9Mm4P63XnmoTugrLk=;
-        b=OIsHLvTLh1dct9el6pyocw398WMRG+x5bxYCkTKZS5SnfHe2YyrrUcrG+NKvTW9vcc
-         wVJCSiU2jUsUiwPyCnSMzVPpP4MtqzKLLAvMoewiKnzPyyimpnvZhB2UT52eeS8oKbSf
-         qrIvOQ8Ev8NVeJTuxt1erjdZJ5ORg1ucR/+lzqA6HpZbn23XDv4oE/xueNptXN44B8yq
-         Uzl3oNJHYsphafItG/kDP36MPf32NKLxJ9Iw3FUeOrpm+4qPYStlfHkiVARjy18nHRb+
-         QloiZrbIYpYLtdfx6e+HdQ7HBjW9hyhJ8X8rCpM2F2RRAqbAAq7NNO8JvASTRiYAVNOc
-         jWLA==
-X-Gm-Message-State: AC+VfDxn7kAkolkE9pO9WgbXInOnB9PpBk/l2/vcmE+DSP948i5xcZ1A
-        mqa9/mLdJbOvDg2OguEcDaIeIxarBI/gOvxlzkDHcA26pJd2Neo34XlUBmWAnPS7biSmwXS84Gh
-        OARh+AAucUSyfule8vRJkAw==
-X-Received: by 2002:a92:c708:0:b0:33b:abaf:d493 with SMTP id a8-20020a92c708000000b0033babafd493mr5590429ilp.16.1685613073958;
-        Thu, 01 Jun 2023 02:51:13 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ7qPXazSRAYRxqRw6piwj80oKyUTmO7apVm4+a2/Fd4B4wcVr99CGP2dt0Y2TsYe7FsVLE+DQ==
-X-Received: by 2002:a92:c708:0:b0:33b:abaf:d493 with SMTP id a8-20020a92c708000000b0033babafd493mr5590423ilp.16.1685613073692;
-        Thu, 01 Jun 2023 02:51:13 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l7-20020a656807000000b0051416609fb7sm2521765pgt.61.2023.06.01.02.51.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Jun 2023 02:51:12 -0700 (PDT)
-Date:   Thu, 1 Jun 2023 17:51:09 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     xiubli@redhat.com
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH] common/rc: skip ceph-fuse when atime is required
-Message-ID: <20230601095109.bzdb2nithqngngwd@zlang-mailbox>
-References: <20230601025207.857009-1-xiubli@redhat.com>
+        with ESMTP id S234787AbjFAO7v (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2023 10:59:51 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EB3F10EA;
+        Thu,  1 Jun 2023 07:59:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=ZRItUXupBovRcfIWu1PXzjUpMlDPoKckJxwBPLvHxXM=; b=Z6B8hLcNPVcsBtiLOfzTdbtOYY
+        4XVDWAeP1eEjxL4gUbMlPNbmgOx92mWMGqts7P/pveyWOoXvbc6AhLZL7g6hTImUtvN6wOWF2JPwH
+        p3/Vr1oVZkfmk4tfvN1f8on8FQpO+NmczbptGOiOjqs+k1VmC1JD2xYrkcf2KX2AWIbuuXf8fYdAy
+        ErX/ByalZ+bAyNhpXOUVN20nKHHVTBC5Z9h1cfSEj0rdMuEKRiRX/bSaIG/BDEGGwLhdlJ3hcR09H
+        byveVHiEIxaWh+ys4GrgIYic/xGf5lARNyPFzud2LxJGQfIjCmbBAy52q0lk5Mci8WQS+G+8sxOZe
+        Ndb2yNKw==;
+Received: from [2001:4bb8:182:6d06:eacb:c751:971:73eb] (helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
+        id 1q4jli-003w4C-0i;
+        Thu, 01 Jun 2023 14:59:14 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Matthew Wilcox <willy@infradead.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Alexander Viro <viro@zeniv.linux.org.uk>,
+        Christian Brauner <brauner@kernel.org>,
+        "Theodore Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>,
+        Chao Yu <chao@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>,
+        Andreas Gruenbacher <agruenba@redhat.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        Anna Schumaker <anna@kernel.org>,
+        Damien Le Moal <dlemoal@kernel.org>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        linux-block@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-mm@kvack.org, Hannes Reinecke <hare@suse.de>
+Subject: [PATCH 03/12] filemap: update ki_pos in generic_perform_write
+Date:   Thu,  1 Jun 2023 16:58:55 +0200
+Message-Id: <20230601145904.1385409-4-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230601145904.1385409-1-hch@lst.de>
+References: <20230601145904.1385409-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230601025207.857009-1-xiubli@redhat.com>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Thu, Jun 01, 2023 at 10:52:07AM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
-> 
-> Ceph won't maintain the atime, so just skip the tests when the atime
-> is required.
-> 
-> Fixes: https://tracker.ceph.com/issues/61551
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
+All callers of generic_perform_write need to updated ki_pos, move it into
+common code.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Damien Le Moal <dlemoal@kernel.org>
+Reviewed-by: Hannes Reinecke <hare@suse.de>
+Acked-by: Theodore Ts'o <tytso@mit.edu>
+Acked-by: Darrick J. Wong <djwong@kernel.org>
+---
+ fs/ceph/file.c | 2 --
+ fs/ext4/file.c | 9 +++------
+ fs/f2fs/file.c | 1 -
+ fs/nfs/file.c  | 1 -
+ mm/filemap.c   | 8 ++++----
+ 5 files changed, 7 insertions(+), 14 deletions(-)
 
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 37074371..f3b92741 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4089,7 +4089,7 @@ _require_atime()
->  	nfs|afs|cifs|virtiofs)
->  		_notrun "atime related mount options have no effect on $FSTYP"
->  		;;
-> -	ceph)
-> +	ceph|ceph-fuse)
->  		_notrun "atime not maintained by $FSTYP"
->  		;;
->  	esac
-> -- 
-> 2.40.1
-> 
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index c8ef72f723badd..767f4dfe7def64 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1891,8 +1891,6 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 		 * can not run at the same time
+ 		 */
+ 		written = generic_perform_write(iocb, from);
+-		if (likely(written >= 0))
+-			iocb->ki_pos = pos + written;
+ 		ceph_end_io_write(inode);
+ 	}
+ 
+diff --git a/fs/ext4/file.c b/fs/ext4/file.c
+index bc430270c23c19..ea0ada3985cba2 100644
+--- a/fs/ext4/file.c
++++ b/fs/ext4/file.c
+@@ -289,12 +289,9 @@ static ssize_t ext4_buffered_write_iter(struct kiocb *iocb,
+ 
+ out:
+ 	inode_unlock(inode);
+-	if (likely(ret > 0)) {
+-		iocb->ki_pos += ret;
+-		ret = generic_write_sync(iocb, ret);
+-	}
+-
+-	return ret;
++	if (unlikely(ret <= 0))
++		return ret;
++	return generic_write_sync(iocb, ret);
+ }
+ 
+ static ssize_t ext4_handle_inode_extension(struct inode *inode, loff_t offset,
+diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
+index 4f423d367a44b9..7134fe8bd008cb 100644
+--- a/fs/f2fs/file.c
++++ b/fs/f2fs/file.c
+@@ -4520,7 +4520,6 @@ static ssize_t f2fs_buffered_write_iter(struct kiocb *iocb,
+ 	ret = generic_perform_write(iocb, from);
+ 
+ 	if (ret > 0) {
+-		iocb->ki_pos += ret;
+ 		f2fs_update_iostat(F2FS_I_SB(inode), inode,
+ 						APP_BUFFERED_IO, ret);
+ 	}
+diff --git a/fs/nfs/file.c b/fs/nfs/file.c
+index 665ce3fc62eaf4..e8bb4c48a3210a 100644
+--- a/fs/nfs/file.c
++++ b/fs/nfs/file.c
+@@ -655,7 +655,6 @@ ssize_t nfs_file_write(struct kiocb *iocb, struct iov_iter *from)
+ 		goto out;
+ 
+ 	written = result;
+-	iocb->ki_pos += written;
+ 	nfs_add_stats(inode, NFSIOS_NORMALWRITTENBYTES, written);
+ 
+ 	if (mntflags & NFS_MOUNT_WRITE_EAGER) {
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 33b54660ad2b39..15907af4a57ff5 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -3957,7 +3957,10 @@ ssize_t generic_perform_write(struct kiocb *iocb, struct iov_iter *i)
+ 		balance_dirty_pages_ratelimited(mapping);
+ 	} while (iov_iter_count(i));
+ 
+-	return written ? written : status;
++	if (!written)
++		return status;
++	iocb->ki_pos += written;
++	return written;
+ }
+ EXPORT_SYMBOL(generic_perform_write);
+ 
+@@ -4034,7 +4037,6 @@ ssize_t __generic_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 		endbyte = pos + status - 1;
+ 		err = filemap_write_and_wait_range(mapping, pos, endbyte);
+ 		if (err == 0) {
+-			iocb->ki_pos = endbyte + 1;
+ 			written += status;
+ 			invalidate_mapping_pages(mapping,
+ 						 pos >> PAGE_SHIFT,
+@@ -4047,8 +4049,6 @@ ssize_t __generic_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 		}
+ 	} else {
+ 		written = generic_perform_write(iocb, from);
+-		if (likely(written > 0))
+-			iocb->ki_pos += written;
+ 	}
+ out:
+ 	return written ? written : err;
+-- 
+2.39.2
 
