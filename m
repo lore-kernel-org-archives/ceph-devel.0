@@ -2,144 +2,239 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96908C7EE2E
-	for <ceph-devel@archiver.kernel.org>; Mon,  5 Jun 2023 20:27:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00BA9C7EE2C
+	for <ceph-devel@archiver.kernel.org>; Tue,  6 Jun 2023 00:04:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232412AbjFEU1a (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 5 Jun 2023 16:27:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51058 "EHLO
+        id S232916AbjFFAES (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 5 Jun 2023 20:04:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232133AbjFEU11 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2023 16:27:27 -0400
-Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B99DEC
-        for <ceph-devel@vger.kernel.org>; Mon,  5 Jun 2023 13:27:26 -0700 (PDT)
-Received: by mail-ej1-x631.google.com with SMTP id a640c23a62f3a-9741a0fd134so875855466b.0
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jun 2023 13:27:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1685996845; x=1688588845;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=rTXKmlUfaxsweCr9txnhSwKRBLs4KBaD4wqyu/rzXwA=;
-        b=E1we858Hhh8gQG8m+/zb1bAdNY8ZSoOLEd5tNO7RJDwOQEGm+wmykVbZ1TxMaL6jLx
-         Xu+LYVo+N3PLspECnzPTbIb+qYwbxxhQCL1u4JpKyfvz6uTAcKxzIUYIhs/CLBjhwhms
-         4mY7mp+eeeCQOe72xN3qOrpFdmnCJD6J0KA8pUcjx/gqF0UTU6bsHYlAc7Y89xSeD7Bb
-         yahbNfuPY5wo192HwcVZXcCG8VRYcLITbe04RAzg6CHJQOlmSrdFd//tCYDfEd8pCg1z
-         CLxKrGeWWBLVWB2O10LbM88d7sR88vTUj/zNVoWhHGwXSJlYLYkFINwTfw/CKeKvgpwG
-         Eorg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685996845; x=1688588845;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=rTXKmlUfaxsweCr9txnhSwKRBLs4KBaD4wqyu/rzXwA=;
-        b=NbZbdGVjzmfCLS4jDb1Ruha1a0MXKvbZMsAmPMCb75pfWfRPA+nYRC/KPXBJnh00kH
-         O2aL/+dKbsSKx6UuhjMrBhbLCpG1ITtPrsIANZ6WUI0M5DWV02F440/MrhAGQCG6T1UM
-         Ce2k9hebTUopvSBwAUEcUT9RKXle66q7N6zrM3i+9oMjwxyXDGSzIdWRj+L9hQzX1LEn
-         tUcD/Ob2N6WDLOe4/lzLtv6oS/qtQ5RJzSrKjyUTo14nMrrX8yHxHDK0tbfULjLq9puZ
-         dXa2IHB+fqlCplpvCe7+R82tCMX3MQ8lNaoN3kROBkYCZnCSzAfBc8E8a9pt62k7WVnI
-         Kd6w==
-X-Gm-Message-State: AC+VfDwByglnsMOc0a6Ku2wMq9GbX8K7Pbk2j9KuA9EsfxOxkDf2F/Af
-        oNbame9HtLk+imA3MQKKDw25p/u1vmg=
-X-Google-Smtp-Source: ACHHUZ6fQ1I3kuPRuFBRqM5W25cToIrTZ1n2neJC1lIt3vSEAWYE47RHuSl89BzUUTgxwUr8dFUyww==
-X-Received: by 2002:a17:906:730c:b0:96a:f09b:373e with SMTP id di12-20020a170906730c00b0096af09b373emr23663ejc.15.1685996844870;
-        Mon, 05 Jun 2023 13:27:24 -0700 (PDT)
-Received: from zambezi.redhat.com (ip-94-112-104-28.bb.vodafone.cz. [94.112.104.28])
-        by smtp.gmail.com with ESMTPSA id i15-20020a170906a28f00b00968242f8c37sm4619808ejz.50.2023.06.05.13.27.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Jun 2023 13:27:24 -0700 (PDT)
-From:   Ilya Dryomov <idryomov@gmail.com>
-To:     ceph-devel@vger.kernel.org
-Cc:     Dongsheng Yang <dongsheng.yang@easystack.cn>
-Subject: [PATCH 1/2] rbd: move RBD_OBJ_FLAG_COPYUP_ENABLED flag setting
-Date:   Mon,  5 Jun 2023 22:27:14 +0200
-Message-Id: <20230605202715.968962-2-idryomov@gmail.com>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230605202715.968962-1-idryomov@gmail.com>
-References: <20230605202715.968962-1-idryomov@gmail.com>
+        with ESMTP id S230376AbjFFAER (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2023 20:04:17 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32B69F9;
+        Mon,  5 Jun 2023 17:04:16 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BA1BC62915;
+        Tue,  6 Jun 2023 00:04:15 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D1C3C433D2;
+        Tue,  6 Jun 2023 00:04:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1686009855;
+        bh=xPqDBnA9crfcda+QJHDEogmu65T/ezefUhM18Debbm0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ddPmBSXSMvlY9x94xIIznZYGaNuipQq3VI72KC0oXDBKaGeDQjKtRJmfrsGmehWvO
+         +dPcgrPTfGtR6It+kcXJltBdEm6/kbNCqegUMdcjJLpThWScaZHuyrI92e+KxL5eSE
+         6UYfqRlb93ixurnxyFXwOAH/gstR61UDyavP5IbH3jiHC6gYnE66jfhBxNASdfvKoO
+         3g91Y67k3IwVIP5kIbGlNmjoUpg38PKL0tJCWBDOdkxq0zpo0hU4ztLFtuUy69XDvZ
+         pgOw60wCPj40tpC46Ad5a91ebl7gCGcJ/iJcwmK8v80Pnvc61AL6XuQN4t+34IdDjQ
+         mC0Xvp8bW0hvA==
+Date:   Mon, 5 Jun 2023 17:04:14 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Matthew Wilcox <willy@infradead.org>, Jens Axboe <axboe@kernel.dk>,
+        Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Alexander Viro <viro@zeniv.linux.org.uk>,
+        Christian Brauner <brauner@kernel.org>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Andreas Gruenbacher <agruenba@redhat.com>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        Anna Schumaker <anna@kernel.org>,
+        Damien Le Moal <dlemoal@kernel.org>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        linux-block@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-mm@kvack.org, Miklos Szeredi <mszeredi@redhat.com>
+Subject: Re: [PATCH 09/12] fs: factor out a direct_write_fallback helper
+Message-ID: <20230606000414.GJ1325469@frogsfrogsfrogs>
+References: <20230601145904.1385409-1-hch@lst.de>
+ <20230601145904.1385409-10-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230601145904.1385409-10-hch@lst.de>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Move RBD_OBJ_FLAG_COPYUP_ENABLED flag setting into the object request
-state machine to allow for the snapshot context to be captured in the
-image request state machine rather than in rbd_queue_workfn().
+On Thu, Jun 01, 2023 at 04:59:01PM +0200, Christoph Hellwig wrote:
+> Add a helper dealing with handling the syncing of a buffered write fallback
+> for direct I/O.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Reviewed-by: Damien Le Moal <dlemoal@kernel.org>
+> Reviewed-by: Miklos Szeredi <mszeredi@redhat.com>
 
-Cc: stable@vger.kernel.org
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 32 +++++++++++++++++++++-----------
- 1 file changed, 21 insertions(+), 11 deletions(-)
+Looks good to me; whose tree do you want this to go through?
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 84ad3b17956f..6c847db6ee2c 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1334,14 +1334,28 @@ static bool rbd_obj_is_tail(struct rbd_obj_request *obj_req)
- /*
-  * Must be called after rbd_obj_calc_img_extents().
-  */
--static bool rbd_obj_copyup_enabled(struct rbd_obj_request *obj_req)
-+static void rbd_obj_set_copyup_enabled(struct rbd_obj_request *obj_req)
- {
--	if (!obj_req->num_img_extents ||
--	    (rbd_obj_is_entire(obj_req) &&
--	     !obj_req->img_request->snapc->num_snaps))
--		return false;
-+	if (obj_req->img_request->op_type == OBJ_OP_DISCARD) {
-+		dout("%s %p objno %llu discard\n", __func__, obj_req,
-+		     obj_req->ex.oe_objno);
-+		return;
-+	}
- 
--	return true;
-+	if (!obj_req->num_img_extents) {
-+		dout("%s %p objno %llu not overlapping\n", __func__, obj_req,
-+		     obj_req->ex.oe_objno);
-+		return;
-+	}
-+
-+	if (rbd_obj_is_entire(obj_req) &&
-+	    !obj_req->img_request->snapc->num_snaps) {
-+		dout("%s %p objno %llu entire\n", __func__, obj_req,
-+		     obj_req->ex.oe_objno);
-+		return;
-+	}
-+
-+	obj_req->flags |= RBD_OBJ_FLAG_COPYUP_ENABLED;
- }
- 
- static u64 rbd_obj_img_extents_bytes(struct rbd_obj_request *obj_req)
-@@ -2233,9 +2247,6 @@ static int rbd_obj_init_write(struct rbd_obj_request *obj_req)
- 	if (ret)
- 		return ret;
- 
--	if (rbd_obj_copyup_enabled(obj_req))
--		obj_req->flags |= RBD_OBJ_FLAG_COPYUP_ENABLED;
--
- 	obj_req->write_state = RBD_OBJ_WRITE_START;
- 	return 0;
- }
-@@ -2341,8 +2352,6 @@ static int rbd_obj_init_zeroout(struct rbd_obj_request *obj_req)
- 	if (ret)
- 		return ret;
- 
--	if (rbd_obj_copyup_enabled(obj_req))
--		obj_req->flags |= RBD_OBJ_FLAG_COPYUP_ENABLED;
- 	if (!obj_req->num_img_extents) {
- 		obj_req->flags |= RBD_OBJ_FLAG_NOOP_FOR_NONEXISTENT;
- 		if (rbd_obj_is_entire(obj_req))
-@@ -3286,6 +3295,7 @@ static bool rbd_obj_advance_write(struct rbd_obj_request *obj_req, int *result)
- 	case RBD_OBJ_WRITE_START:
- 		rbd_assert(!*result);
- 
-+		rbd_obj_set_copyup_enabled(obj_req);
- 		if (rbd_obj_write_is_noop(obj_req))
- 			return true;
- 
--- 
-2.39.2
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
+--D
+
+> ---
+>  fs/libfs.c         | 41 ++++++++++++++++++++++++++++
+>  include/linux/fs.h |  2 ++
+>  mm/filemap.c       | 66 +++++++++++-----------------------------------
+>  3 files changed, 58 insertions(+), 51 deletions(-)
+> 
+> diff --git a/fs/libfs.c b/fs/libfs.c
+> index 89cf614a327158..5b851315eeed03 100644
+> --- a/fs/libfs.c
+> +++ b/fs/libfs.c
+> @@ -1613,3 +1613,44 @@ u64 inode_query_iversion(struct inode *inode)
+>  	return cur >> I_VERSION_QUERIED_SHIFT;
+>  }
+>  EXPORT_SYMBOL(inode_query_iversion);
+> +
+> +ssize_t direct_write_fallback(struct kiocb *iocb, struct iov_iter *iter,
+> +		ssize_t direct_written, ssize_t buffered_written)
+> +{
+> +	struct address_space *mapping = iocb->ki_filp->f_mapping;
+> +	loff_t pos = iocb->ki_pos - buffered_written;
+> +	loff_t end = iocb->ki_pos - 1;
+> +	int err;
+> +
+> +	/*
+> +	 * If the buffered write fallback returned an error, we want to return
+> +	 * the number of bytes which were written by direct I/O, or the error
+> +	 * code if that was zero.
+> +	 *
+> +	 * Note that this differs from normal direct-io semantics, which will
+> +	 * return -EFOO even if some bytes were written.
+> +	 */
+> +	if (unlikely(buffered_written < 0)) {
+> +		if (direct_written)
+> +			return direct_written;
+> +		return buffered_written;
+> +	}
+> +
+> +	/*
+> +	 * We need to ensure that the page cache pages are written to disk and
+> +	 * invalidated to preserve the expected O_DIRECT semantics.
+> +	 */
+> +	err = filemap_write_and_wait_range(mapping, pos, end);
+> +	if (err < 0) {
+> +		/*
+> +		 * We don't know how much we wrote, so just return the number of
+> +		 * bytes which were direct-written
+> +		 */
+> +		if (direct_written)
+> +			return direct_written;
+> +		return err;
+> +	}
+> +	invalidate_mapping_pages(mapping, pos >> PAGE_SHIFT, end >> PAGE_SHIFT);
+> +	return direct_written + buffered_written;
+> +}
+> +EXPORT_SYMBOL_GPL(direct_write_fallback);
+> diff --git a/include/linux/fs.h b/include/linux/fs.h
+> index 91021b4e1f6f48..6af25137543824 100644
+> --- a/include/linux/fs.h
+> +++ b/include/linux/fs.h
+> @@ -2738,6 +2738,8 @@ extern ssize_t __generic_file_write_iter(struct kiocb *, struct iov_iter *);
+>  extern ssize_t generic_file_write_iter(struct kiocb *, struct iov_iter *);
+>  extern ssize_t generic_file_direct_write(struct kiocb *, struct iov_iter *);
+>  ssize_t generic_perform_write(struct kiocb *, struct iov_iter *);
+> +ssize_t direct_write_fallback(struct kiocb *iocb, struct iov_iter *iter,
+> +		ssize_t direct_written, ssize_t buffered_written);
+>  
+>  ssize_t vfs_iter_read(struct file *file, struct iov_iter *iter, loff_t *ppos,
+>  		rwf_t flags);
+> diff --git a/mm/filemap.c b/mm/filemap.c
+> index ddb6f8aa86d6ca..137508da5525b6 100644
+> --- a/mm/filemap.c
+> +++ b/mm/filemap.c
+> @@ -4006,23 +4006,19 @@ ssize_t __generic_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
+>  {
+>  	struct file *file = iocb->ki_filp;
+>  	struct address_space *mapping = file->f_mapping;
+> -	struct inode 	*inode = mapping->host;
+> -	ssize_t		written = 0;
+> -	ssize_t		err;
+> -	ssize_t		status;
+> +	struct inode *inode = mapping->host;
+> +	ssize_t ret;
+>  
+> -	err = file_remove_privs(file);
+> -	if (err)
+> -		goto out;
+> +	ret = file_remove_privs(file);
+> +	if (ret)
+> +		return ret;
+>  
+> -	err = file_update_time(file);
+> -	if (err)
+> -		goto out;
+> +	ret = file_update_time(file);
+> +	if (ret)
+> +		return ret;
+>  
+>  	if (iocb->ki_flags & IOCB_DIRECT) {
+> -		loff_t pos, endbyte;
+> -
+> -		written = generic_file_direct_write(iocb, from);
+> +		ret = generic_file_direct_write(iocb, from);
+>  		/*
+>  		 * If the write stopped short of completing, fall back to
+>  		 * buffered writes.  Some filesystems do this for writes to
+> @@ -4030,45 +4026,13 @@ ssize_t __generic_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
+>  		 * not succeed (even if it did, DAX does not handle dirty
+>  		 * page-cache pages correctly).
+>  		 */
+> -		if (written < 0 || !iov_iter_count(from) || IS_DAX(inode))
+> -			goto out;
+> -
+> -		pos = iocb->ki_pos;
+> -		status = generic_perform_write(iocb, from);
+> -		/*
+> -		 * If generic_perform_write() returned a synchronous error
+> -		 * then we want to return the number of bytes which were
+> -		 * direct-written, or the error code if that was zero.  Note
+> -		 * that this differs from normal direct-io semantics, which
+> -		 * will return -EFOO even if some bytes were written.
+> -		 */
+> -		if (unlikely(status < 0)) {
+> -			err = status;
+> -			goto out;
+> -		}
+> -		/*
+> -		 * We need to ensure that the page cache pages are written to
+> -		 * disk and invalidated to preserve the expected O_DIRECT
+> -		 * semantics.
+> -		 */
+> -		endbyte = pos + status - 1;
+> -		err = filemap_write_and_wait_range(mapping, pos, endbyte);
+> -		if (err == 0) {
+> -			written += status;
+> -			invalidate_mapping_pages(mapping,
+> -						 pos >> PAGE_SHIFT,
+> -						 endbyte >> PAGE_SHIFT);
+> -		} else {
+> -			/*
+> -			 * We don't know how much we wrote, so just return
+> -			 * the number of bytes which were direct-written
+> -			 */
+> -		}
+> -	} else {
+> -		written = generic_perform_write(iocb, from);
+> +		if (ret < 0 || !iov_iter_count(from) || IS_DAX(inode))
+> +			return ret;
+> +		return direct_write_fallback(iocb, from, ret,
+> +				generic_perform_write(iocb, from));
+>  	}
+> -out:
+> -	return written ? written : err;
+> +
+> +	return generic_perform_write(iocb, from);
+>  }
+>  EXPORT_SYMBOL(__generic_file_write_iter);
+>  
+> -- 
+> 2.39.2
+> 
