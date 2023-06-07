@@ -2,217 +2,181 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5E84C77B7A
-	for <ceph-devel@archiver.kernel.org>; Wed,  7 Jun 2023 15:40:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 693A7C7EE23
+	for <ceph-devel@archiver.kernel.org>; Wed,  7 Jun 2023 18:10:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241418AbjFGPj7 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 7 Jun 2023 11:39:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49326 "EHLO
+        id S232474AbjFGSKi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 7 Jun 2023 14:10:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241446AbjFGPjr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jun 2023 11:39:47 -0400
+        with ESMTP id S230461AbjFGSKf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jun 2023 14:10:35 -0400
 Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA75F83
-        for <ceph-devel@vger.kernel.org>; Wed,  7 Jun 2023 08:39:45 -0700 (PDT)
-Received: from mail-yb1-f199.google.com (mail-yb1-f199.google.com [209.85.219.199])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80119E46
+        for <ceph-devel@vger.kernel.org>; Wed,  7 Jun 2023 11:10:31 -0700 (PDT)
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com [209.85.218.71])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 07B303F0F8
-        for <ceph-devel@vger.kernel.org>; Wed,  7 Jun 2023 15:28:19 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 100563F166
+        for <ceph-devel@vger.kernel.org>; Wed,  7 Jun 2023 18:10:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1686151699;
-        bh=3vCORCdIt84ymcJq2QXtA1bADojH7gUQhxriR3OVIVk=;
-        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-         To:Cc:Content-Type;
-        b=fTV2O95ie4FBjyNmbrA0A5gMBRf+1kHR2RR1N0J0PrLbSLmm8yzYpoxv+c7OQlZLr
-         yZheKLOYWvoER47AdIqKmsu8ZeNOP9d5pSVp6HRPYcgHuqLMWR5R4/T87O/+yA0gHB
-         REbyTgCwmSTHxQvdaELksQ5SmIiXHOA1As0NGSghjrxJwJgGxS8Dyz6ikJCY4R20y1
-         2XNP3HTRY+CgwGmkE6zeWeNN+Ntkq/ez8h3P4sQTnkYgD1psN+2ZfHKB1/Bxz0GJOX
-         EoJh46czmKD1Dv5HZbUlVh8qYlIuyTwYkBL14NzAUGLQ86MIhuQWEezezjyW91qBnD
-         6GhU8RcH+xRqQ==
-Received: by mail-yb1-f199.google.com with SMTP id 3f1490d57ef6-ba88ec544ddso12419342276.1
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Jun 2023 08:28:18 -0700 (PDT)
+        s=20210705; t=1686161429;
+        bh=OHIZE55DRONU2M77dhxlQwcXUrc0vedFNZBupvTYJA8=;
+        h=From:To:Cc:Subject:Date:Message-Id:MIME-Version;
+        b=Th2M6SrMZucEpfnTH71I81TQWrSOpNWFimS9QRHY78U4vJ8r2aeL+D/dFvvXx+F3r
+         UwJZx0+b8+0RE5Djnc32Hj4Mtj6nYTA73JlP88IZp5e03494dPempiINw6MPYpH/1G
+         mVZlmBTEg8UlA9G6X/i+awTvyKmjWl086ko1JndwoI22x8wQrY2rt33GuZhYdP9HsI
+         bnPrN8O1Ug51tn3HBTfnjomSj4URRGntjRB0H2dIeaTxSSDKO1++VViE6yzg0CiZS+
+         RTAlIgUJhpRhOcORUa8FzOcoosjDvYXL7dkemqIkoZHCIAq0+g3+BNXAk7brUiE9EU
+         cToYkHtzHLbFQ==
+Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-97467e06580so610435666b.1
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Jun 2023 11:10:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686151697; x=1688743697;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=3vCORCdIt84ymcJq2QXtA1bADojH7gUQhxriR3OVIVk=;
-        b=BD/vdcPGwTL3uuebaG/hanhtcYFQBagWZKr4pLNfdt/RYRELO5nLErFMARSgUghCsu
-         3n1GvG9UXX8xinF274vd9FLz2nbvdNiLJnl2YzXtq1Ts5ZMGOsrsZmdUv/bDuEdmSilm
-         2A2FnV2x3CqiIkQI9xXmly3E5z88nlkgrG59f1ajFj7u1AMoaYLlENYcfAVz0keVQCXu
-         fvMKHs6z+PBvVjYoQ5XYQyHE80sznsI6x+BeSM5gvsIGkIxv7iKwffystzl9iB0Yszq0
-         Mof+Mdgv8Qc4hpNYcLSjJzsMT06osybacOAEs+48qsBGXXLDutX4D30F5Qsl9l4ws0qU
-         De5w==
-X-Gm-Message-State: AC+VfDwMFEoDy3Mvl5NIFNlJjrZIsI/cCtEK9jZ0u4JZpVlnDGG0Mtxy
-        w1VWKbjHIsKBE263jBFHK712IcYRzGC4R85tSoHhWVa0z0+5y+d54Ix0CjuXCKQfddBw6HSeVEB
-        V+q/zYoJVmvWupBsm0K52QdeE9DQMpOD2epC9iG8+6xa9lWnRFOOCyM8=
-X-Received: by 2002:a25:be05:0:b0:ba7:3b95:2d31 with SMTP id h5-20020a25be05000000b00ba73b952d31mr7526049ybk.20.1686151697708;
-        Wed, 07 Jun 2023 08:28:17 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ4I89JSFT+RB4I/6veWq35DuZPfkd05FYRdCZ7GyPx6heVJ5+e8FvkoXQqkzKGLPITkKdKZEWk9q8wFyiL2g3c=
-X-Received: by 2002:a25:be05:0:b0:ba7:3b95:2d31 with SMTP id
- h5-20020a25be05000000b00ba73b952d31mr7526037ybk.20.1686151697473; Wed, 07 Jun
- 2023 08:28:17 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230524153316.476973-1-aleksandr.mikhalitsyn@canonical.com>
- <20230524153316.476973-11-aleksandr.mikhalitsyn@canonical.com>
- <b3b1b8dc-9903-c4ff-0a63-9a31a311ff0b@redhat.com> <CAEivzxfxug8kb7_SzJGvEZMcYwGM8uW25gKa_osFqUCpF_+Lhg@mail.gmail.com>
- <20230602-vorzeichen-praktikum-f17931692301@brauner>
-In-Reply-To: <20230602-vorzeichen-praktikum-f17931692301@brauner>
-From:   Aleksandr Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
-Date:   Wed, 7 Jun 2023 17:28:06 +0200
-Message-ID: <CAEivzxfEw3RVhz717MYin91gvv4LctzGWUkDH8GJN_PjWoLgCQ@mail.gmail.com>
-Subject: Re: [PATCH v2 10/13] ceph: allow idmapped setattr inode op
-To:     Christian Brauner <brauner@kernel.org>
-Cc:     Xiubo Li <xiubli@redhat.com>, stgraber@ubuntu.com,
+        d=1e100.net; s=20221208; t=1686161427; x=1688753427;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=OHIZE55DRONU2M77dhxlQwcXUrc0vedFNZBupvTYJA8=;
+        b=aNL/7RkgBUOgkj1AEWqD3haR7D+FjeBVOwuJxf9gpQM2XFMEx6UXtTAhZON4X7BYAb
+         DzSGjbtx0d93HbjREQDmhwCmiyaV/b+oGj1hNqH5tFBqQ2vVIu5H4ntKgrQCc+PxVbTQ
+         VB5EUBzQZrpMMHNkNPCMCgL7Gev4olJwH3N74J0u6ghSGDPD1sAjCT4IjU5L1Q/6NdhJ
+         XUFmunjP0QbLkQXEKVOV7+OR+264iXmPUQN/jrGW+KACPcS86pkwbf5+VYLddScp/f1d
+         MS8hse2NOInDWN8o3QDHAb6BBp07JgJC+bYljeaYYB9j0jQ8XUD+jRz0VNA3a7ROKNP+
+         A9LA==
+X-Gm-Message-State: AC+VfDwlPTkkqOHYxd+THJkksYfYAlVoq4oZxDYa20yD+wt5SvpWRCdb
+        kJwOnvwQJWlxpFgb9SKeFAypAzpbIDKSFVga6QBY+RqfFMh9zYIQWGIGionsqwyaJ+KUYmruAX3
+        IEcWgLcThlpu5JMWJwyS1FpSoVnJIhGy5t2E3XSE3YYG7bNY=
+X-Received: by 2002:a17:907:7214:b0:961:2956:2ed9 with SMTP id dr20-20020a170907721400b0096129562ed9mr7225601ejc.25.1686161427444;
+        Wed, 07 Jun 2023 11:10:27 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ7TzQDMnY9ZtzKPlEgYEISnubYKzZaXxCRQdVkWZzOxtVRNf+KG9DQRnjRHSU58QLBt6djIow==
+X-Received: by 2002:a17:907:7214:b0:961:2956:2ed9 with SMTP id dr20-20020a170907721400b0096129562ed9mr7225583ejc.25.1686161427163;
+        Wed, 07 Jun 2023 11:10:27 -0700 (PDT)
+Received: from amikhalitsyn.local (dslb-002-205-064-187.002.205.pools.vodafone-ip.de. [2.205.64.187])
+        by smtp.gmail.com with ESMTPSA id oz17-20020a170906cd1100b009745edfb7cbsm7170494ejb.45.2023.06.07.11.10.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Jun 2023 11:10:26 -0700 (PDT)
+From:   Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
+To:     xiubli@redhat.com
+Cc:     brauner@kernel.org, stgraber@ubuntu.com,
         linux-fsdevel@vger.kernel.org,
-        Christian Brauner <christian.brauner@ubuntu.com>,
-        Jeff Layton <jlayton@kernel.org>,
-        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+        Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: [PATCH v4 00/14] ceph: support idmapped mounts
+Date:   Wed,  7 Jun 2023 20:09:43 +0200
+Message-Id: <20230607180958.645115-1-aleksandr.mikhalitsyn@canonical.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-On Fri, Jun 2, 2023 at 2:54=E2=80=AFPM Christian Brauner <brauner@kernel.or=
-g> wrote:
->
-> On Fri, Jun 02, 2023 at 02:45:30PM +0200, Aleksandr Mikhalitsyn wrote:
-> > On Fri, Jun 2, 2023 at 3:30=E2=80=AFAM Xiubo Li <xiubli@redhat.com> wro=
-te:
-> > >
-> > >
-> > > On 5/24/23 23:33, Alexander Mikhalitsyn wrote:
-> > > > From: Christian Brauner <christian.brauner@ubuntu.com>
-> > > >
-> > > > Enable __ceph_setattr() to handle idmapped mounts. This is just a m=
-atter
-> > > > of passing down the mount's idmapping.
-> > > >
-> > > > Cc: Jeff Layton <jlayton@kernel.org>
-> > > > Cc: Ilya Dryomov <idryomov@gmail.com>
-> > > > Cc: ceph-devel@vger.kernel.org
-> > > > Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
-> > > > Signed-off-by: Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonic=
-al.com>
-> > > > ---
-> > > >   fs/ceph/inode.c | 11 +++++++++--
-> > > >   1 file changed, 9 insertions(+), 2 deletions(-)
-> > > >
-> > > > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> > > > index 37e1cbfc7c89..f1f934439be0 100644
-> > > > --- a/fs/ceph/inode.c
-> > > > +++ b/fs/ceph/inode.c
-> > > > @@ -2050,6 +2050,13 @@ int __ceph_setattr(struct inode *inode, stru=
-ct iattr *attr)
-> > > >
-> > > >       dout("setattr %p issued %s\n", inode, ceph_cap_string(issued)=
-);
-> > > >
-> > > > +     /*
-> > > > +      * The attr->ia_{g,u}id members contain the target {g,u}id we=
-'re
->
-> This is now obsolete... In earlier imlementations attr->ia_{g,u}id was
-> used and contained the filesystem wide value, not the idmapped mount
-> value.
->
-> However, this was misleading and we changed that in commit b27c82e12965
-> ("attr: port attribute changes to new types") and introduced dedicated
-> new types into struct iattr->ia_vfs{g,u}id. So the you need to use
-> attr->ia_vfs{g,u}id as documented in include/linux/fs.h and you need to
-> transform them into filesystem wide values and then to raw values you
-> send over the wire.
->
-> Alex should be able to figure this out though.
+Dear friends,
 
-Hi Christian,
+This patchset was originally developed by Christian Brauner but I'll continue
+to push it forward. Christian allowed me to do that :)
 
-Reworked in v3:
-https://lore.kernel.org/lkml/20230607152038.469739-12-aleksandr.mikhalitsyn=
-@canonical.com/#t
+This feature is already actively used/tested with LXD/LXC project.
 
-The only thing is that I've forgotten to remove the comment, but I'll
-do that in v4.
+Git tree (based on https://github.com/ceph/ceph-client.git master):
+https://github.com/mihalicyn/linux/tree/fs.idmapped.ceph
+
+In the version 3 I've changed only two commits:
+- fs: export mnt_idmap_get/mnt_idmap_put
+- ceph: allow idmapped setattr inode op
+and added a new one:
+- ceph: pass idmap to __ceph_setattr
+
+In the version 4 I've reworked the ("ceph: stash idmapping in mdsc request")
+commit. Now we take idmap refcounter just in place where req->r_mnt_idmap
+is filled. It's more safer approach and prevents possible refcounter underflow
+on error paths where __register_request wasn't called but ceph_mdsc_release_request is
+called.
+
+I can confirm that this version passes xfstests.
+
+Links to previous versions:
+v1: https://lore.kernel.org/all/20220104140414.155198-1-brauner@kernel.org/
+v2: https://lore.kernel.org/lkml/20230524153316.476973-1-aleksandr.mikhalitsyn@canonical.com/
+v3: https://lore.kernel.org/lkml/20230607152038.469739-1-aleksandr.mikhalitsyn@canonical.com/#t
 
 Kind regards,
 Alex
 
->
-> > > > +      * sending over the wire. The mount idmapping only matters wh=
-en we
-> > > > +      * create new filesystem objects based on the caller's mapped
-> > > > +      * fs{g,u}id.
-> > > > +      */
-> > > > +     req->r_mnt_idmap =3D &nop_mnt_idmap;
-> > >
-> > > For example with an idmapping 1000:0 and in the /mnt/idmapped_ceph/.
-> > >
-> > > This means the "__ceph_setattr()" will always use UID 0 to set the
-> > > caller_uid, right ? If it is then the client auth checking for the
-> >
-> > Yes, if you have a mapping like b:1000:0:1 (the last number is a
-> > length of a mapping). It means even more,
-> > the only user from which you can create something on the filesystem
-> > will be UID =3D 0,
-> > because all other UIDs/GIDs are not mapped and you'll instantly get
-> > -EOVERFLOW from the kernel.
-> >
-> > > setattr requests in cephfs MDS will succeed, since the UID 0 is root.
-> > > But if you use a different idmapping, such as 1000:2000, it will fail=
-.
-> >
-> > If you have a mapping b:1000:2000:1 then the only valid UID/GID from
-> > which you can create something
-> > on an idmapped mount will be UID/GID =3D 2000:2000 (and this will be
-> > mapped to 1000:1000 and sent over the wire,
-> > because we performing an idmapping procedure for requests those are
-> > creating inodes).
-> > So, even root with UID =3D 0 will not be able to create a file on such =
-a
-> > mount and get -EOVERFLOW.
-> >
-> > >
-> > > So here IMO we should set it to 'idmap' too ?
-> >
-> > Good question. I can't see any obvious issue with setting an actual
-> > idmapping here.
-> > It will be interesting to know Christian's opinion about this.
-> >
-> > Kind regards,
-> > Alex
-> >
-> > >
-> > > Thanks
-> > >
-> > > - Xiubo
-> > >
-> > > >       if (ia_valid & ATTR_UID) {
-> > > >               dout("setattr %p uid %d -> %d\n", inode,
-> > > >                    from_kuid(&init_user_ns, inode->i_uid),
-> > > > @@ -2240,7 +2247,7 @@ int ceph_setattr(struct mnt_idmap *idmap, str=
-uct dentry *dentry,
-> > > >       if (ceph_inode_is_shutdown(inode))
-> > > >               return -ESTALE;
-> > > >
-> > > > -     err =3D setattr_prepare(&nop_mnt_idmap, dentry, attr);
-> > > > +     err =3D setattr_prepare(idmap, dentry, attr);
-> > > >       if (err !=3D 0)
-> > > >               return err;
-> > > >
-> > > > @@ -2255,7 +2262,7 @@ int ceph_setattr(struct mnt_idmap *idmap, str=
-uct dentry *dentry,
-> > > >       err =3D __ceph_setattr(inode, attr);
-> > > >
-> > > >       if (err >=3D 0 && (attr->ia_valid & ATTR_MODE))
-> > > > -             err =3D posix_acl_chmod(&nop_mnt_idmap, dentry, attr-=
->ia_mode);
-> > > > +             err =3D posix_acl_chmod(idmap, dentry, attr->ia_mode)=
-;
-> > > >
-> > > >       return err;
-> > > >   }
-> > >
+Original description from Christian:
+========================================================================
+This patch series enables cephfs to support idmapped mounts, i.e. the
+ability to alter ownership information on a per-mount basis.
+
+Container managers such as LXD support sharaing data via cephfs between
+the host and unprivileged containers and between unprivileged containers.
+They may all use different idmappings. Idmapped mounts can be used to
+create mounts with the idmapping used for the container (or a different
+one specific to the use-case).
+
+There are in fact more use-cases such as remapping ownership for
+mountpoints on the host itself to grant or restrict access to different
+users or to make it possible to enforce that programs running as root
+will write with a non-zero {g,u}id to disk.
+
+The patch series is simple overall and few changes are needed to cephfs.
+There is one cephfs specific issue that I would like to discuss and
+solve which I explain in detail in:
+
+[PATCH 02/12] ceph: handle idmapped mounts in create_request_message()
+
+It has to do with how to handle mds serves which have id-based access
+restrictions configured. I would ask you to please take a look at the
+explanation in the aforementioned patch.
+
+The patch series passes the vfs and idmapped mount testsuite as part of
+xfstests. To run it you will need a config like:
+
+[ceph]
+export FSTYP=ceph
+export TEST_DIR=/mnt/test
+export TEST_DEV=10.103.182.10:6789:/
+export TEST_FS_MOUNT_OPTS="-o name=admin,secret=$password
+
+and then simply call
+
+sudo ./check -g idmapped
+
+========================================================================
+
+Alexander Mikhalitsyn (2):
+  fs: export mnt_idmap_get/mnt_idmap_put
+  ceph: pass idmap to __ceph_setattr
+
+Christian Brauner (12):
+  ceph: stash idmapping in mdsc request
+  ceph: handle idmapped mounts in create_request_message()
+  ceph: allow idmapped mknod inode op
+  ceph: allow idmapped symlink inode op
+  ceph: allow idmapped mkdir inode op
+  ceph: allow idmapped rename inode op
+  ceph: allow idmapped getattr inode op
+  ceph: allow idmapped permission inode op
+  ceph: allow idmapped setattr inode op
+  ceph/acl: allow idmapped set_acl inode op
+  ceph/file: allow idmapped atomic_open inode op
+  ceph: allow idmapped mounts
+
+ fs/ceph/acl.c                 |  6 +++---
+ fs/ceph/dir.c                 |  4 ++++
+ fs/ceph/file.c                | 10 ++++++++--
+ fs/ceph/inode.c               | 29 +++++++++++++++++------------
+ fs/ceph/mds_client.c          | 27 +++++++++++++++++++++++----
+ fs/ceph/mds_client.h          |  1 +
+ fs/ceph/super.c               |  2 +-
+ fs/ceph/super.h               |  3 ++-
+ fs/mnt_idmapping.c            |  2 ++
+ include/linux/mnt_idmapping.h |  3 +++
+ 10 files changed, 64 insertions(+), 23 deletions(-)
+
+-- 
+2.34.1
+
