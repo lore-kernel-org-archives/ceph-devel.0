@@ -2,61 +2,61 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 088D2C7EE2E
-	for <ceph-devel@archiver.kernel.org>; Fri,  9 Jun 2023 09:40:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D5A6C87FDC
+	for <ceph-devel@archiver.kernel.org>; Fri,  9 Jun 2023 09:41:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241583AbjFIJk4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 9 Jun 2023 05:40:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33584 "EHLO
+        id S240375AbjFIJk6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 9 Jun 2023 05:40:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33386 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241689AbjFIJjf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2023 05:39:35 -0400
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D6884207
-        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 02:34:02 -0700 (PDT)
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com [209.85.218.72])
+        with ESMTP id S241942AbjFIJkD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2023 05:40:03 -0400
+Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E26C4683
+        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 02:35:02 -0700 (PDT)
+Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com [209.85.208.71])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 2699F3F513
-        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 09:32:50 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id B9DB53F37D
+        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 09:32:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1686303170;
-        bh=/ZEyoJlFLaVuWVBzkT1cBDONkmXP3qyfK5/dTNb2H5c=;
+        s=20210705; t=1686303175;
+        bh=kRtya9vNnJsHnlJFsQiUMmcKKT8ZGQqP3swgCnXRiRw=;
         h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
          MIME-Version;
-        b=cvK+95elo2k3/jMqYxyonrhw0wwys5ZUxNM3rjPC98l3y4IZy7TRombROSqa/FWs5
-         tLhldCVPYTrK5o9lpuOqZvdxti+Whh7ueQnqUClwX8A6Ws5pJBDY4YwikJSmifqxBh
-         Ao6MF5fZKP9kcqwZTe9tY86C2TX0TnvEtpRrT8KRVaBZzgeabrlaRg8wGInbAeryyp
-         +AzhvQujwDPp5BRF0XdAVHAIOrYuP44HjYPmUbLB3Je0I8hVmsroYNUU6Bi0MhCvYP
-         4qX39swt+bfa7qEGP6eiu7PFnecUACgG006PO+nNXg2KEdEFIQwD7aaAs7gLyIqrhA
-         whEu5fLO+2D3w==
-Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-977e50b0120so183262466b.0
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Jun 2023 02:32:50 -0700 (PDT)
+        b=I480jqjgTHO+N8GD2mnA2TB7qcTsCHkLUsvfTKkrRvRcDIzDbpb8IwtAJxg8MLQYX
+         xucTQCkq+/ee9bCI4I9CjlXN1vZusZR2W2jV+2xsYPg3kxqlAMcVdtJD78YGcSTqUC
+         B8yzSXdoi4pxQVG0Y53nNGnJG6RLx+JNYOiburjBPCBshrd18xlKQjZbN11lKXIGa5
+         DPEyBpvHTQCG3fAH/0OY+zq4yy8iisHFmqAJRJKI/jcvLzxXKlp2kq/SpT1yMQkOkI
+         UJSEYOo9MfkLafDZe1Vr2b/J/k4c+hy0L05+i3qW0RqrUXChvy94wvkh7sQyzYvQgC
+         pZe13DNR0Go4w==
+Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-516302ba604so1585011a12.2
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Jun 2023 02:32:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686303167; x=1688895167;
+        d=1e100.net; s=20221208; t=1686303174; x=1688895174;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=/ZEyoJlFLaVuWVBzkT1cBDONkmXP3qyfK5/dTNb2H5c=;
-        b=TC+li3/IMOA7GfJTAkthhNN4e+TGc4hY8Inq0evBX9HdlBMQSvaeURT7wBfiZMhvuH
-         YgyWxLu2jnCSwZI1yu72WX3DujDav7oOtYUXJgCYrEo+R8XAscqPILbVhbTMKnKyDlQ4
-         DV6yXHu0Of8+VZ8pFF/o1pISfH59TJz3JtgYomSOVWtA3NwSiMmlk3ZOjqpyo0q/HA1D
-         LakZV06vugkb6rkV1i/t5I3A8EdP+pYdJSsFlCcNtuY43nCQc9bz4bzx6SVg/vkoY/Nn
-         ZjoxhWCcipeX4awv0vlqPB/LwMjc+bnc7j9WHBXWUnqyYEdhNQmimqrCbnzd+FHO+qFf
-         aPpg==
-X-Gm-Message-State: AC+VfDyZlp5qecD1Gpyx9KtRlohBkh9DwGsk2fdJk2a/tilXuLUnpgpW
-        J/Tp5o0fG1BS/oBH5eEkQIT1FmcHMxFe/Qapeg0uFT3G82IbGA3abYGibCHSHGsUm/y9eYzVCae
-        bOv7XnsHVuGp6cNQ73FylfEs8pAUpMtbym0gAd38=
-X-Received: by 2002:a17:906:4792:b0:96f:608c:5bdf with SMTP id cw18-20020a170906479200b0096f608c5bdfmr1229547ejc.64.1686303166888;
-        Fri, 09 Jun 2023 02:32:46 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ40M5L5XkhSQA/QnoBcPEpFPgOUlmKAwDqyV+kolDwTxZ11t7xizkzr5a/UJGRyxfZTZYD9xg==
-X-Received: by 2002:a17:906:4792:b0:96f:608c:5bdf with SMTP id cw18-20020a170906479200b0096f608c5bdfmr1229533ejc.64.1686303166625;
-        Fri, 09 Jun 2023 02:32:46 -0700 (PDT)
+        bh=kRtya9vNnJsHnlJFsQiUMmcKKT8ZGQqP3swgCnXRiRw=;
+        b=gmP35N5GBOrEUV+d7lNWL3sAALeMSH6ubWv2bEYwjUanHk3oB5aOuz3Fe276U/CEOa
+         BY0hKMbcACWjz9fMeWLyygIJvhRivy4y469vE/NhVoS4KDnvCDKDPi470/QXpD+oL/yF
+         lZuiEfgwOaZzItVuydX2N3gPQPFfH6c1nZ1g+KqROHA5dhnqOPelx0Cag4YHvSLnLzOX
+         GA+WAmohqrvGOx+1mv2biEHh/eNhNZxQQIsX68OhLyb/wahGyy/bCA7ixTcOydf66ucp
+         8OSWVUJTumeQhUEh0wEKq94c/m7DgVXh2xvFqyV0ipBKqfhtfkTugM4zLaEbjOCI2crC
+         fYlw==
+X-Gm-Message-State: AC+VfDxSwgjGRgvY20q9w4jX+fRZtNVWNMaE5IYQ0r/9sEtgA+RKEHpw
+        Y3SnPD7NA8vgLPqSEtUx440RxoEPZSI9z69FP5152tPNEPOGPyw4Kafc6S/q4NOs8bQFqBXoTxV
+        6V74EJoPgVAL9E2CbJqZqMWDa8doYIbR3m4Aw4Rs=
+X-Received: by 2002:a17:907:9801:b0:973:fd02:a40f with SMTP id ji1-20020a170907980100b00973fd02a40fmr1311019ejc.59.1686303174470;
+        Fri, 09 Jun 2023 02:32:54 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ4b1muZvFfgb/c2k7vkkSmRjeDpssO36RsAZdwjRFiNmZVFVAU5M9RWcnkHYxbMHbPnv7UcuQ==
+X-Received: by 2002:a17:907:9801:b0:973:fd02:a40f with SMTP id ji1-20020a170907980100b00973fd02a40fmr1310997ejc.59.1686303174276;
+        Fri, 09 Jun 2023 02:32:54 -0700 (PDT)
 Received: from amikhalitsyn.local (dslb-002-205-064-187.002.205.pools.vodafone-ip.de. [2.205.64.187])
-        by smtp.gmail.com with ESMTPSA id e25-20020a170906081900b0094ee3e4c934sm1031248ejd.221.2023.06.09.02.32.45
+        by smtp.gmail.com with ESMTPSA id e25-20020a170906081900b0094ee3e4c934sm1031248ejd.221.2023.06.09.02.32.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Jun 2023 02:32:46 -0700 (PDT)
+        Fri, 09 Jun 2023 02:32:53 -0700 (PDT)
 From:   Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
 To:     xiubli@redhat.com
 Cc:     brauner@kernel.org, stgraber@ubuntu.com,
@@ -66,9 +66,9 @@ Cc:     brauner@kernel.org, stgraber@ubuntu.com,
         Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
         Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v6 06/15] ceph: allow idmapped permission inode op
-Date:   Fri,  9 Jun 2023 11:31:17 +0200
-Message-Id: <20230609093125.252186-7-aleksandr.mikhalitsyn@canonical.com>
+Subject: [PATCH v6 09/15] ceph/acl: allow idmapped set_acl inode op
+Date:   Fri,  9 Jun 2023 11:31:20 +0200
+Message-Id: <20230609093125.252186-10-aleksandr.mikhalitsyn@canonical.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230609093125.252186-1-aleksandr.mikhalitsyn@canonical.com>
 References: <20230609093125.252186-1-aleksandr.mikhalitsyn@canonical.com>
@@ -80,8 +80,8 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Christian Brauner <christian.brauner@ubuntu.com>
 
-Enable ceph_permission() to handle idmapped mounts. This is just a
-matter of passing down the mount's idmapping.
+Enable ceph_set_acl() to handle idmapped mounts. This is just a matter
+of passing down the mount's idmapping.
 
 Cc: Xiubo Li <xiubli@redhat.com>
 Cc: Jeff Layton <jlayton@kernel.org>
@@ -90,22 +90,22 @@ Cc: ceph-devel@vger.kernel.org
 Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 Signed-off-by: Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
 ---
- fs/ceph/inode.c | 2 +-
+ fs/ceph/acl.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 533349fe542f..f45d9c066523 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2922,7 +2922,7 @@ int ceph_permission(struct mnt_idmap *idmap, struct inode *inode,
- 	err = ceph_do_getattr(inode, CEPH_CAP_AUTH_SHARED, false);
- 
- 	if (!err)
--		err = generic_permission(&nop_mnt_idmap, inode, mask);
-+		err = generic_permission(idmap, inode, mask);
- 	return err;
- }
- 
+diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+index f53f7a758c05..d4be4c2d63c3 100644
+--- a/fs/ceph/acl.c
++++ b/fs/ceph/acl.c
+@@ -105,7 +105,7 @@ int ceph_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
+ 	case ACL_TYPE_ACCESS:
+ 		name = XATTR_NAME_POSIX_ACL_ACCESS;
+ 		if (acl) {
+-			ret = posix_acl_update_mode(&nop_mnt_idmap, inode,
++			ret = posix_acl_update_mode(idmap, inode,
+ 						    &new_mode, &acl);
+ 			if (ret)
+ 				goto out;
 -- 
 2.34.1
 
