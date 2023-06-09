@@ -2,73 +2,72 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1F4EC7EE2E
-	for <ceph-devel@archiver.kernel.org>; Fri,  9 Jun 2023 09:53:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 480FBC7EE2E
+	for <ceph-devel@archiver.kernel.org>; Fri,  9 Jun 2023 09:58:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241419AbjFIJxQ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 9 Jun 2023 05:53:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43466 "EHLO
+        id S241939AbjFIJ6S (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 9 Jun 2023 05:58:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241413AbjFIJwd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2023 05:52:33 -0400
+        with ESMTP id S241825AbjFIJ5t (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2023 05:57:49 -0400
 Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF6A34201
-        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 02:44:59 -0700 (PDT)
-Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com [209.85.208.70])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09F024C37
+        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 02:49:47 -0700 (PDT)
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com [209.85.218.70])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 9C0733F378
-        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 09:32:55 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 41FF43F374
+        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2023 09:33:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1686303175;
-        bh=d5khlOcPOkR48ashhbagswr/xnjgstKG+L7ceqQR68I=;
+        s=20210705; t=1686303188;
+        bh=NTRbvFaxBJiBjzqaGA2aiDfNbGvJPFM8L4tecTGSATY=;
         h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
          MIME-Version;
-        b=t6MJJajGgpqhLtt2ZIK2Vrind5EIIpdL8fNbYVs7VFf0zyttJSFkc6tCUp9F3vRMq
-         meT9Ahciak7NE/P/GJfLTHFU4mq2spljEYmk0E7c/KPwsCzpOjUiZeYdVrpuJ3DI8P
-         dfW8WCTp5hYRXhWQuEFVyEp6E81zp+fUEoBxYZvYQlLnIyq79+ieYytla7giiHMlz0
-         XpAWF/TXM6t6eaplHF9oBKbBP5iiUZB3QD9CgbLlB4Dd8amhfOOF9XQ5D4MHh9teG/
-         8vNYKBU9sXHB4aISSk/VFp5ILxlO2yNEEkxWVcVKmdnJcFq1o+tGp8paKIT1fogCfp
-         E/UA+s5ZGVW4A==
-Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-5149e1bd242so1360458a12.3
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Jun 2023 02:32:55 -0700 (PDT)
+        b=c81609pkRXrliN6J5+Wk08J9hlXSHMh/dHTCxQpCjJKCfgDAXMkq860l1M77DEYS+
+         cHMCcIr6znlMT647dDztb2Tdaqzv2MiXJ/XRN7KCMza1+n+h0rgKKLaz3N9tTb11gw
+         XLUFcULb+uFSYARLC0mJXzhf8lvMtl7eBFphdlcYAnpCuLCCuegM/5U9siOH8Iancw
+         Si4Qng4q211NFijfYEUm0JpfFhA4JrugY8UzlctkyofBZ92Q+3m5xQaUIZVcpOv9gc
+         BWOsg2N5Idr8hsvMyyX0U5lpS5qKcV9htOxI34SK32aHI/jBvSQ7ndEPknzuo1beUt
+         MalpqFXNSqoZQ==
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-9744659b7b5so187411266b.3
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Jun 2023 02:33:08 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686303172; x=1688895172;
+        d=1e100.net; s=20221208; t=1686303188; x=1688895188;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=d5khlOcPOkR48ashhbagswr/xnjgstKG+L7ceqQR68I=;
-        b=cIBpaZhD59HyKOrfJWcNpvL4dSvdx0LsJHQ3BuhH8bmugl6mFBgcx8c1eH66kVu6Sm
-         K4Ya8Sjx7KwGqguZYto2wz3FtepjolXOQlVopy644OxlaCak0zj3JncXiJqMn6SyVcT3
-         ARF8eBIEj668sKbbyBh6iu0KdU6V+7pjC8A5MvbYAf/cHYe/K7fXwoiYrl7glL52DSAY
-         7H6tzZyrOamkKhG8rSjRy6ShE5FYuEjEt+Xv+IoBnK4TPwedjkwetHDtPKWZw8Qk5Ssf
-         ioqX6VApFKaV/xs+E2soyTEdXPF3201PfxV4SL9M0ndRUpeXbLmsrt9inEPbp/z0Y6eq
-         bLiA==
-X-Gm-Message-State: AC+VfDyYOP0Ro96qaemeREUh74aVS1ZKuS3qeqOG31BXzdidAMcY9I7A
-        aw8DLn8N6H3M7v3ciwuYNzkc5q25N0rYYmgtdUItoZPfC1vKQKYvcrI5LkAsjasj3N78jlyL6/O
-        BlN6K/WCMvfpP775wXCoYka2eHkByd42gltmJpqo=
-X-Received: by 2002:a17:907:2d0f:b0:965:6075:d0e1 with SMTP id gs15-20020a1709072d0f00b009656075d0e1mr1243442ejc.72.1686303171875;
-        Fri, 09 Jun 2023 02:32:51 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ59kDZebVrWioHVCJrl8ktxJliY7MnEjejxAd9hrZlN9hAJ/qDACsG7YUf21ymnpatNXrM/eQ==
-X-Received: by 2002:a17:907:2d0f:b0:965:6075:d0e1 with SMTP id gs15-20020a1709072d0f00b009656075d0e1mr1243429ejc.72.1686303171703;
-        Fri, 09 Jun 2023 02:32:51 -0700 (PDT)
+        bh=NTRbvFaxBJiBjzqaGA2aiDfNbGvJPFM8L4tecTGSATY=;
+        b=mIjrwUTU6QIlvzQsM+fOikToA2KPGycbF809VTGKOAvPvbKytQl0BWwh9Cuyg9CEjI
+         /dJEgO044nTgfvUfLTAQXhObZUE2JR+14tPbNIMKnEWu0o0xqnJ7gtlghi6TkdXsWu9z
+         S6gaoW3i3iM/IQ5aoCdhMb2qgvKbzfKeiGNaqMUzxGwV5iVfu/FQ1J3LZf+QkkdSqGdK
+         zl/in+3q7h1pRRjwRPiX7ewVgGiSl2lcL1M1f8LG46H688kXn5su6/VlB/JJ5lDp+E35
+         9tKDF4oSqL56x9bKer4ST8jj6qNjN9BjY29XpfYmUW4PD/IGr0hteJubfK7xptPM5lnV
+         vCLg==
+X-Gm-Message-State: AC+VfDxV8HelsJIcjQfQYoQVAJpp7VpKZEChWMoXXAVSlsJ1F04tU467
+        PFitbB6dXwH1aML+uUsRZQK9y4xlL28UwPPPkDyaC80gXXR0keKAmpQ589mUUGvSB0CKCRVJwyp
+        rZxKhHtdkVZXQABISMw5exhnOFc0rzW3pp2pqx0U=
+X-Received: by 2002:a17:907:2d86:b0:96a:ee54:9f19 with SMTP id gt6-20020a1709072d8600b0096aee549f19mr1483420ejc.48.1686303187976;
+        Fri, 09 Jun 2023 02:33:07 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ5Z2fKxESvTokZxAA6jO95MDJ55kXGYQIvSjdgXaLQkL7P4nGYdW+Kjdz5sh7oS5H5q3aYmyA==
+X-Received: by 2002:a17:907:2d86:b0:96a:ee54:9f19 with SMTP id gt6-20020a1709072d8600b0096aee549f19mr1483409ejc.48.1686303187841;
+        Fri, 09 Jun 2023 02:33:07 -0700 (PDT)
 Received: from amikhalitsyn.local (dslb-002-205-064-187.002.205.pools.vodafone-ip.de. [2.205.64.187])
-        by smtp.gmail.com with ESMTPSA id e25-20020a170906081900b0094ee3e4c934sm1031248ejd.221.2023.06.09.02.32.50
+        by smtp.gmail.com with ESMTPSA id e25-20020a170906081900b0094ee3e4c934sm1031248ejd.221.2023.06.09.02.33.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Jun 2023 02:32:51 -0700 (PDT)
+        Fri, 09 Jun 2023 02:33:07 -0700 (PDT)
 From:   Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
 To:     xiubli@redhat.com
 Cc:     brauner@kernel.org, stgraber@ubuntu.com,
         linux-fsdevel@vger.kernel.org,
-        Christian Brauner <christian.brauner@ubuntu.com>,
+        Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>,
         Jeff Layton <jlayton@kernel.org>,
         Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
-        Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v6 08/15] ceph: allow idmapped setattr inode op
-Date:   Fri,  9 Jun 2023 11:31:19 +0200
-Message-Id: <20230609093125.252186-9-aleksandr.mikhalitsyn@canonical.com>
+Subject: [PATCH v6 13/15] ceph: pass idmap to ceph_open/ioctl_set_layout/readdir
+Date:   Fri,  9 Jun 2023 11:31:24 +0200
+Message-Id: <20230609093125.252186-14-aleksandr.mikhalitsyn@canonical.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230609093125.252186-1-aleksandr.mikhalitsyn@canonical.com>
 References: <20230609093125.252186-1-aleksandr.mikhalitsyn@canonical.com>
@@ -78,92 +77,150 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Christian Brauner <christian.brauner@ubuntu.com>
-
-Enable __ceph_setattr() to handle idmapped mounts. This is just a matter
-of passing down the mount's idmapping.
+Pass an idmapping to:
+- ceph_open
+- ceph_ioctl_set_layout
+- ceph_readdir
 
 Cc: Xiubo Li <xiubli@redhat.com>
 Cc: Jeff Layton <jlayton@kernel.org>
 Cc: Ilya Dryomov <idryomov@gmail.com>
+Cc: brauner@kernel.org
 Cc: ceph-devel@vger.kernel.org
-Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
-[ adapted to b27c82e12965 ("attr: port attribute changes to new types") ]
 Signed-off-by: Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
 ---
-v4:
-	- introduced fsuid/fsgid local variables
-v3:
-	- reworked as Christian suggested here:
-	https://lore.kernel.org/lkml/20230602-vorzeichen-praktikum-f17931692301@brauner/
+v6:
+	- pass idmap to ceph_readdir
 ---
- fs/ceph/inode.c | 20 ++++++++++++--------
- 1 file changed, 12 insertions(+), 8 deletions(-)
+ fs/ceph/caps.c  | 2 +-
+ fs/ceph/dir.c   | 2 ++
+ fs/ceph/file.c  | 9 +++++++--
+ fs/ceph/ioctl.c | 3 +++
+ fs/ceph/super.h | 2 +-
+ 5 files changed, 14 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9a4579da32f8..6a8aeb4b8fb8 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2509,31 +2509,35 @@ int __ceph_setattr(struct mnt_idmap *idmap, struct inode *inode,
- #endif /* CONFIG_FS_ENCRYPTION */
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index b432f29e80dd..13c231258153 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3042,7 +3042,7 @@ int __ceph_get_caps(struct mnt_idmap *idmap, struct inode *inode,
+ 			}
+ 			if (ret == -EUCLEAN) {
+ 				/* session was killed, try renew caps */
+-				ret = ceph_renew_caps(inode, flags);
++				ret = ceph_renew_caps(idmap, inode, flags);
+ 				if (ret == 0)
+ 					continue;
+ 			}
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 2c0c2c98085b..26335c025f50 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -308,6 +308,7 @@ static bool need_send_readdir(struct ceph_dir_file_info *dfi, loff_t pos)
+ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ {
+ 	struct ceph_dir_file_info *dfi = file->private_data;
++	struct mnt_idmap *idmap = file_mnt_idmap(file);
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+@@ -440,6 +441,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 		req->r_inode = inode;
+ 		ihold(inode);
+ 		req->r_dentry = dget(file->f_path.dentry);
++		req->r_mnt_idmap = mnt_idmap_get(idmap);
+ 		err = ceph_mdsc_do_request(mdsc, NULL, req);
+ 		if (err < 0) {
+ 			ceph_mdsc_put_request(req);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index c2bb8f5fd345..9671b0e77faf 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -175,7 +175,8 @@ static void put_bvecs(struct bio_vec *bvecs, int num_bvecs, bool should_dirty)
+  * inopportune ENOMEM later.
+  */
+ static struct ceph_mds_request *
+-prepare_open_request(struct super_block *sb, int flags, int create_mode)
++prepare_open_request(struct super_block *sb,
++		     int flags, int create_mode)
+ {
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(sb);
+ 	struct ceph_mds_request *req;
+@@ -293,7 +294,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
+ /*
+  * try renew caps after session gets killed.
+  */
+-int ceph_renew_caps(struct inode *inode, int fmode)
++int ceph_renew_caps(struct mnt_idmap *idmap, struct inode *inode, int fmode)
+ {
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+@@ -336,6 +337,8 @@ int ceph_renew_caps(struct inode *inode, int fmode)
+ 	ihold(inode);
+ 	req->r_num_caps = 1;
  
- 	if (ia_valid & ATTR_UID) {
-+		kuid_t fsuid = from_vfsuid(idmap, i_user_ns(inode), attr->ia_vfsuid);
++	req->r_mnt_idmap = mnt_idmap_get(idmap);
 +
- 		dout("setattr %p uid %d -> %d\n", inode,
- 		     from_kuid(&init_user_ns, inode->i_uid),
- 		     from_kuid(&init_user_ns, attr->ia_uid));
- 		if (issued & CEPH_CAP_AUTH_EXCL) {
--			inode->i_uid = attr->ia_uid;
-+			inode->i_uid = fsuid;
- 			dirtied |= CEPH_CAP_AUTH_EXCL;
- 		} else if ((issued & CEPH_CAP_AUTH_SHARED) == 0 ||
--			   !uid_eq(attr->ia_uid, inode->i_uid)) {
-+			   !uid_eq(fsuid, inode->i_uid)) {
- 			req->r_args.setattr.uid = cpu_to_le32(
--				from_kuid(&init_user_ns, attr->ia_uid));
-+				from_kuid(&init_user_ns, fsuid));
- 			mask |= CEPH_SETATTR_UID;
- 			release |= CEPH_CAP_AUTH_SHARED;
- 		}
- 	}
- 	if (ia_valid & ATTR_GID) {
-+		kgid_t fsgid = from_vfsgid(idmap, i_user_ns(inode), attr->ia_vfsgid);
-+
- 		dout("setattr %p gid %d -> %d\n", inode,
- 		     from_kgid(&init_user_ns, inode->i_gid),
- 		     from_kgid(&init_user_ns, attr->ia_gid));
- 		if (issued & CEPH_CAP_AUTH_EXCL) {
--			inode->i_gid = attr->ia_gid;
-+			inode->i_gid = fsgid;
- 			dirtied |= CEPH_CAP_AUTH_EXCL;
- 		} else if ((issued & CEPH_CAP_AUTH_SHARED) == 0 ||
--			   !gid_eq(attr->ia_gid, inode->i_gid)) {
-+			   !gid_eq(fsgid, inode->i_gid)) {
- 			req->r_args.setattr.gid = cpu_to_le32(
--				from_kgid(&init_user_ns, attr->ia_gid));
-+				from_kgid(&init_user_ns, fsgid));
- 			mask |= CEPH_SETATTR_GID;
- 			release |= CEPH_CAP_AUTH_SHARED;
- 		}
-@@ -2756,7 +2760,7 @@ int ceph_setattr(struct mnt_idmap *idmap, struct dentry *dentry,
- 	if (err)
- 		return err;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
+ 	ceph_mdsc_put_request(req);
+ out:
+@@ -356,6 +359,7 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
+ 	struct ceph_file_info *fi = file->private_data;
++	struct mnt_idmap *idmap = file_mnt_idmap(file);
+ 	int err;
+ 	int flags, fmode, wanted;
  
--	err = setattr_prepare(&nop_mnt_idmap, dentry, attr);
-+	err = setattr_prepare(idmap, dentry, attr);
- 	if (err != 0)
- 		return err;
+@@ -431,6 +435,7 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	ihold(inode);
  
-@@ -2771,7 +2775,7 @@ int ceph_setattr(struct mnt_idmap *idmap, struct dentry *dentry,
- 	err = __ceph_setattr(idmap, inode, attr, NULL);
+ 	req->r_num_caps = 1;
++	req->r_mnt_idmap = mnt_idmap_get(idmap);
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
+ 	if (!err)
+ 		err = ceph_init_file(inode, file, req->r_fmode);
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index 6fa021b973e5..69efd446a9e1 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -114,6 +114,7 @@ static long ceph_ioctl_set_layout(struct file *file, void __user *arg)
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 	req->r_num_caps = 1;
++	req->r_mnt_idmap = mnt_idmap_get(idmap);
  
- 	if (err >= 0 && (attr->ia_valid & ATTR_MODE))
--		err = posix_acl_chmod(&nop_mnt_idmap, dentry, attr->ia_mode);
-+		err = posix_acl_chmod(idmap, dentry, attr->ia_mode);
+ 	req->r_inode_drop = CEPH_CAP_FILE_SHARED | CEPH_CAP_FILE_EXCL;
  
- 	return err;
- }
+@@ -139,6 +140,7 @@ static long ceph_ioctl_set_layout(struct file *file, void __user *arg)
+ static long ceph_ioctl_set_layout_policy (struct file *file, void __user *arg)
+ {
+ 	struct inode *inode = file_inode(file);
++	struct mnt_idmap *idmap = file_mnt_idmap(file);
+ 	struct ceph_mds_request *req;
+ 	struct ceph_ioctl_layout l;
+ 	int err;
+@@ -160,6 +162,7 @@ static long ceph_ioctl_set_layout_policy (struct file *file, void __user *arg)
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 	req->r_num_caps = 1;
++	req->r_mnt_idmap = mnt_idmap_get(idmap);
+ 
+ 	req->r_args.setlayout.layout.fl_stripe_unit =
+ 			cpu_to_le32(l.stripe_unit);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 05dbae76087c..d89e7b99ac5f 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1308,7 +1308,7 @@ static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
+ /* file.c */
+ extern const struct file_operations ceph_file_fops;
+ 
+-extern int ceph_renew_caps(struct inode *inode, int fmode);
++extern int ceph_renew_caps(struct mnt_idmap *idmap, struct inode *inode, int fmode);
+ extern int ceph_open(struct inode *inode, struct file *file);
+ extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 			    struct file *file, unsigned flags, umode_t mode);
 -- 
 2.34.1
 
