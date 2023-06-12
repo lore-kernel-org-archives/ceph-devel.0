@@ -2,48 +2,51 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D353C7EE23
-	for <ceph-devel@archiver.kernel.org>; Mon, 12 Jun 2023 11:52:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEC32C7EE45
+	for <ceph-devel@archiver.kernel.org>; Mon, 12 Jun 2023 11:52:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232926AbjFLLwQ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 12 Jun 2023 07:52:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38066 "EHLO
+        id S234747AbjFLLwS (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 12 Jun 2023 07:52:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232898AbjFLLv5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jun 2023 07:51:57 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D20D065A5
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2023 04:46:24 -0700 (PDT)
+        with ESMTP id S230147AbjFLLv7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jun 2023 07:51:59 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A43C73ABB
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2023 04:46:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686570379;
+        s=mimecast20190719; t=1686570406;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=MmFf7qGpYwWBTxaZWrYUPNGhZ0DNhu+ssRfG8uzJxr0=;
-        b=BeUFj9qkuAzH9mKe+mhWmnw0E3LX89Gued5xBD/UkvrTIyMxuD7o9Bm3EG8kXe8LDyL9jI
-        9NPAOQKejbvgxkD4c0GmR++kCDcM8N9hVRsg/MAQJ1Zw7BeckPzaP3onARqebls96093Ct
-        JFN0iHFYndZv8uxirq9JyXAUV0wUutk=
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=7LuwbI5j+v+8gMX7hpvRFGlxD/ph/1k7l5n4ubaK8GA=;
+        b=QCsdeYVCrHWhTPvURczaAgdFYQ/LULsiJ2ZELNLmF0LXsWNUvyy2YrSslRwT6nYFZQMrtZ
+        HoXpnlZq7bQvJ6gcZUVEWWVD1m8YMtfJAIW3lBtbKt04NKN2ZqazCtco+uYqiO2UTYVTiX
+        jDJmpbWNvVuWh48fpnkX1cly/AJq6qQ=
 Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
  [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-572-f2aBwJY-MAGaUa1xkKjPbQ-1; Mon, 12 Jun 2023 07:46:17 -0400
-X-MC-Unique: f2aBwJY-MAGaUa1xkKjPbQ-1
+ us-mta-311-isFe3tlQOzqJgN4myOfX9Q-1; Mon, 12 Jun 2023 07:46:43 -0400
+X-MC-Unique: isFe3tlQOzqJgN4myOfX9Q-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 8758F3C0E447;
-        Mon, 12 Jun 2023 11:46:17 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 6567A3C0BE3C;
+        Mon, 12 Jun 2023 11:46:43 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-125.pek2.redhat.com [10.72.12.125])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A35881121314;
-        Mon, 12 Jun 2023 11:46:13 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B28B21121314;
+        Mon, 12 Jun 2023 11:46:39 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, khiremat@redhat.com,
         mchangir@redhat.com, pdonnell@redhat.com,
         Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v2 0/6] ceph: print the client global id for debug logs
-Date:   Mon, 12 Jun 2023 19:43:53 +0800
-Message-Id: <20230612114359.220895-1-xiubli@redhat.com>
+Subject: [PATCH v2 5/6] ceph: add ceph_inode_to_client() helper support
+Date:   Mon, 12 Jun 2023 19:43:58 +0800
+Message-Id: <20230612114359.220895-6-xiubli@redhat.com>
+In-Reply-To: <20230612114359.220895-1-xiubli@redhat.com>
+References: <20230612114359.220895-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.1 on 10.11.54.3
@@ -53,46 +56,66 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Xiubo Li <xiubli@redhat.com>
 
-V2:
-- print the client global id for all the dout()/pr_warn(),etc.
+This will covert the inode to ceph_client.
 
-This is based the testing branch.
+URL: https://tracker.ceph.com/issues/61590
+Cc: Patrick Donnelly <pdonnell@redhat.com>
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ fs/ceph/snap.c  | 8 +++++---
+ fs/ceph/super.h | 6 ++++++
+ 2 files changed, 11 insertions(+), 3 deletions(-)
 
-
-Xiubo Li (6):
-  ceph: add the *_client debug macros support
-  ceph: pass the mdsc to several helpers
-  ceph: rename _to_client() to _to_fs_client()
-  ceph: move mdsmap.h to fs/ceph/
-  ceph: add ceph_inode_to_client() helper support
-  ceph: print the client global_id in all the debug logs
-
- fs/ceph/acl.c                       |   6 +-
- fs/ceph/addr.c                      | 320 +++++++-----
- fs/ceph/cache.c                     |   2 +-
- fs/ceph/caps.c                      | 762 ++++++++++++++++------------
- fs/ceph/crypto.c                    |  47 +-
- fs/ceph/debugfs.c                   |   8 +-
- fs/ceph/dir.c                       | 242 +++++----
- fs/ceph/export.c                    |  49 +-
- fs/ceph/file.c                      | 294 ++++++-----
- fs/ceph/inode.c                     | 542 +++++++++++---------
- fs/ceph/ioctl.c                     |  18 +-
- fs/ceph/locks.c                     |  62 ++-
- fs/ceph/mds_client.c                | 655 ++++++++++++++----------
- fs/ceph/mds_client.h                |   5 +-
- fs/ceph/mdsmap.c                    |  30 +-
- {include/linux => fs}/ceph/mdsmap.h |   5 +-
- fs/ceph/metric.c                    |   5 +-
- fs/ceph/quota.c                     |  31 +-
- fs/ceph/snap.c                      | 204 ++++----
- fs/ceph/super.c                     |  86 ++--
- fs/ceph/super.h                     |  19 +-
- fs/ceph/xattr.c                     | 109 ++--
- include/linux/ceph/ceph_debug.h     |  38 +-
- 23 files changed, 2078 insertions(+), 1461 deletions(-)
- rename {include/linux => fs}/ceph/mdsmap.h (92%)
-
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 09939ec0d1ee..9dde4b5f513d 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -329,7 +329,8 @@ static int cmpu64_rev(const void *a, const void *b)
+ /*
+  * build the snap context for a given realm.
+  */
+-static int build_snap_context(struct ceph_snap_realm *realm,
++static int build_snap_context(struct ceph_mds_client *mdsc,
++			      struct ceph_snap_realm *realm,
+ 			      struct list_head *realm_queue,
+ 			      struct list_head *dirty_realms)
+ {
+@@ -425,7 +426,8 @@ static int build_snap_context(struct ceph_snap_realm *realm,
+ /*
+  * rebuild snap context for the given realm and all of its children.
+  */
+-static void rebuild_snap_realms(struct ceph_snap_realm *realm,
++static void rebuild_snap_realms(struct ceph_mds_client *mdsc,
++				struct ceph_snap_realm *realm,
+ 				struct list_head *dirty_realms)
+ {
+ 	LIST_HEAD(realm_queue);
+@@ -858,7 +860,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 
+ 	/* rebuild_snapcs when we reach the _end_ (root) of the trace */
+ 	if (realm_to_rebuild && p >= e)
+-		rebuild_snap_realms(realm_to_rebuild, &dirty_realms);
++		rebuild_snap_realms(mdsc, realm_to_rebuild, &dirty_realms);
+ 
+ 	if (!first_realm)
+ 		first_realm = realm;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 9655ea46e6ca..4e78de1be23e 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -507,6 +507,12 @@ ceph_sb_to_mdsc(const struct super_block *sb)
+ 	return (struct ceph_mds_client *)ceph_sb_to_fs_client(sb)->mdsc;
+ }
+ 
++static inline struct ceph_client *
++ceph_inode_to_client(const struct inode *inode)
++{
++	return (struct ceph_client *)ceph_inode_to_fs_client(inode)->client;
++}
++
+ static inline struct ceph_vino
+ ceph_vino(const struct inode *inode)
+ {
 -- 
 2.40.1
 
