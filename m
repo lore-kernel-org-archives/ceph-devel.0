@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46373C7EE2E
-	for <ceph-devel@archiver.kernel.org>; Tue, 13 Jun 2023 05:31:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BAD9C7EE29
+	for <ceph-devel@archiver.kernel.org>; Tue, 13 Jun 2023 05:31:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240164AbjFMFbJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 13 Jun 2023 01:31:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39672 "EHLO
+        id S240147AbjFMFbL (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 13 Jun 2023 01:31:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39534 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240165AbjFMFap (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2023 01:30:45 -0400
+        with ESMTP id S240178AbjFMFaq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2023 01:30:46 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D60FB1BC6
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2023 22:29:24 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB30F1BD9
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2023 22:29:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686634164;
+        s=mimecast20190719; t=1686634170;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=dkCYC9I9pGjs9OlnB70fMh7AYTeXATxhVSDntfNqPig=;
-        b=EkggtdZHO1t4TS73MKOFAiei/DJ7JBSQ+VoJXt7zleLwp2dPuOqMXmZpPn+CF8g424HuzW
-        f+J9mfC5kdBcDHNTukeKyU/YEik7KdmmnT3EBLoPS+EDRTHCM4dKoGZeF8WGhNDRclpAXP
-        QCnixgvwAW+hEBcGZUVqyiGZOdZt2/Y=
+        bh=CKjuhqJd92a7mmAZq3evqt5k4d/0ycaYS2Mjm8QJ3vM=;
+        b=DJq+ugiLd8HRS5bWzBWzOdHr6tA834H2J+Qz4OgzlYwxQ7nHqhlym+NeGsHadrJSjiizqw
+        diMu0EoGYwtDgmRVvD2OD6xeoA8AS3A/ZVMR97fF+pbW4Kgvv6WRScYwziMb+Ex0cxfMHW
+        wmPnfZY+pPY4qLdkSr2quOxs0UUH9GI=
 Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
  [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-290-dRSq0ZLcO1mc0PhQysrgTQ-1; Tue, 13 Jun 2023 01:29:20 -0400
-X-MC-Unique: dRSq0ZLcO1mc0PhQysrgTQ-1
+ us-mta-36-sE2kOhmXMCCKlj8i_7TwWQ-1; Tue, 13 Jun 2023 01:29:28 -0400
+X-MC-Unique: sE2kOhmXMCCKlj8i_7TwWQ-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 7BC5A3814955;
-        Tue, 13 Jun 2023 05:29:20 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 87BC328EC102;
+        Tue, 13 Jun 2023 05:29:28 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-155.pek2.redhat.com [10.72.12.155])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C7A951121314;
-        Tue, 13 Jun 2023 05:29:16 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2892E1121315;
+        Tue, 13 Jun 2023 05:29:24 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v20 37/71] ceph: mark directory as non-complete after loading key
-Date:   Tue, 13 Jun 2023 13:23:50 +0800
-Message-Id: <20230613052424.254540-38-xiubli@redhat.com>
+Subject: [PATCH v20 39/71] libceph: add CEPH_OSD_OP_ASSERT_VER support
+Date:   Tue, 13 Jun 2023 13:23:52 +0800
+Message-Id: <20230613052424.254540-40-xiubli@redhat.com>
 In-Reply-To: <20230613052424.254540-1-xiubli@redhat.com>
 References: <20230613052424.254540-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -54,152 +54,95 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Luís Henriques <lhenriques@suse.de>
+From: Jeff Layton <jlayton@kernel.org>
 
-When setting a directory's crypt context, ceph_dir_clear_complete() needs to
-be called otherwise if it was complete before, any existing (old) dentry will
-still be valid.
-
-This patch adds a wrapper around __fscrypt_prepare_readdir() which will
-ensure a directory is marked as non-complete if key status changes.
-
-[ xiubli: revise the commit title as Milind pointed out ]
+...and record the user_version in the reply in a new field in
+ceph_osd_request, so we can populate the assert_ver appropriately.
+Shuffle the fields a bit too so that the new field fits in an
+existing hole on x86_64.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
+Reviewed-by: Luís Henriques <lhenriques@suse.de>
+Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/crypto.c     | 35 +++++++++++++++++++++++++++++++++--
- fs/ceph/crypto.h     |  6 ++++++
- fs/ceph/dir.c        |  8 ++++----
- fs/ceph/mds_client.c |  6 +++---
- 4 files changed, 46 insertions(+), 9 deletions(-)
+ include/linux/ceph/osd_client.h | 6 +++++-
+ include/linux/ceph/rados.h      | 4 ++++
+ net/ceph/osd_client.c           | 5 +++++
+ 3 files changed, 14 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 5b807f8f4c69..fe47fbdaead9 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -277,8 +277,8 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
- 	if (fname->name_len > NAME_MAX || fname->ctext_len > NAME_MAX)
- 		return -EIO;
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 680b4a70f6d4..41bcd71cfa7a 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -198,6 +198,9 @@ struct ceph_osd_req_op {
+ 			u32 src_fadvise_flags;
+ 			struct ceph_osd_data osd_data;
+ 		} copy_from;
++		struct {
++			u64 ver;
++		} assert_ver;
+ 	};
+ };
  
--	ret = __fscrypt_prepare_readdir(fname->dir);
--	if (ret)
-+	ret = ceph_fscrypt_prepare_readdir(fname->dir);
-+	if (ret < 0)
- 		return ret;
+@@ -252,6 +255,7 @@ struct ceph_osd_request {
+ 	struct ceph_osd_client *r_osdc;
+ 	struct kref       r_kref;
+ 	bool              r_mempool;
++	bool		  r_linger;           /* don't resend on failure */
+ 	struct completion r_completion;       /* private to osd_client.c */
+ 	ceph_osdc_callback_t r_callback;
  
- 	/*
-@@ -323,3 +323,34 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
- 	fscrypt_fname_free_buffer(&_tname);
- 	return ret;
- }
-+
-+/**
-+ * ceph_fscrypt_prepare_readdir - simple __fscrypt_prepare_readdir() wrapper
-+ * @dir: directory inode for readdir prep
-+ *
-+ * Simple wrapper around __fscrypt_prepare_readdir() that will mark directory as
-+ * non-complete if this call results in having the directory unlocked.
-+ *
-+ * Returns:
-+ *     1 - if directory was locked and key is now loaded (i.e. dir is unlocked)
-+ *     0 - if directory is still locked
-+ *   < 0 - if __fscrypt_prepare_readdir() fails
-+ */
-+int ceph_fscrypt_prepare_readdir(struct inode *dir)
-+{
-+	bool had_key = fscrypt_has_encryption_key(dir);
-+	int err;
-+
-+	if (!IS_ENCRYPTED(dir))
-+		return 0;
-+
-+	err = __fscrypt_prepare_readdir(dir);
-+	if (err)
-+		return err;
-+	if (!had_key && fscrypt_has_encryption_key(dir)) {
-+		/* directory just got unlocked, mark it as not complete */
-+		ceph_dir_clear_complete(dir);
-+		return 1;
-+	}
-+	return 0;
-+}
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index 05db33f1a421..f8d5f33f708a 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -94,6 +94,7 @@ static inline void ceph_fname_free_buffer(struct inode *parent, struct fscrypt_s
+@@ -264,9 +268,9 @@ struct ceph_osd_request {
+ 	struct ceph_snap_context *r_snapc;    /* for writes */
+ 	struct timespec64 r_mtime;            /* ditto */
+ 	u64 r_data_offset;                    /* ditto */
+-	bool r_linger;                        /* don't resend on failure */
  
- int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
- 			struct fscrypt_str *oname, bool *is_nokey);
-+int ceph_fscrypt_prepare_readdir(struct inode *dir);
- 
- #else /* CONFIG_FS_ENCRYPTION */
- 
-@@ -147,6 +148,11 @@ static inline int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscry
- 	oname->len = fname->name_len;
- 	return 0;
- }
-+
-+static inline int ceph_fscrypt_prepare_readdir(struct inode *dir)
-+{
-+	return 0;
-+}
- #endif /* CONFIG_FS_ENCRYPTION */
- 
- #endif
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index edd2763d279e..7d71366f87b7 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -343,8 +343,8 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 		ctx->pos = 2;
- 	}
- 
--	err = fscrypt_prepare_readdir(inode);
--	if (err)
-+	err = ceph_fscrypt_prepare_readdir(inode);
-+	if (err < 0)
- 		return err;
- 
- 	spin_lock(&ci->i_ceph_lock);
-@@ -784,8 +784,8 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
- 		return ERR_PTR(-ENAMETOOLONG);
- 
- 	if (IS_ENCRYPTED(dir)) {
--		err = __fscrypt_prepare_readdir(dir);
--		if (err)
-+		err = ceph_fscrypt_prepare_readdir(dir);
-+		if (err < 0)
- 			return ERR_PTR(err);
- 		if (!fscrypt_has_encryption_key(dir)) {
- 			spin_lock(&dentry->d_lock);
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 383515e20a8f..886b80564d66 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2572,8 +2572,8 @@ static u8 *get_fscrypt_altname(const struct ceph_mds_request *req, u32 *plen)
- 	if (!IS_ENCRYPTED(dir))
- 		goto success;
- 
--	ret = __fscrypt_prepare_readdir(dir);
--	if (ret)
-+	ret = ceph_fscrypt_prepare_readdir(dir);
-+	if (ret < 0)
- 		return ERR_PTR(ret);
- 
- 	/* No key? Just ignore it. */
-@@ -2689,7 +2689,7 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *pbase, int for
- 			spin_unlock(&cur->d_lock);
- 			parent = dget_parent(cur);
- 
--			ret = __fscrypt_prepare_readdir(d_inode(parent));
-+			ret = ceph_fscrypt_prepare_readdir(d_inode(parent));
- 			if (ret < 0) {
- 				dput(parent);
- 				dput(cur);
+ 	/* internal */
++	u64 r_version;			      /* data version sent in reply */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
+ 	ktime_t r_start_latency;              /* ktime_t */
+diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+index 43a7a1573b51..73c3efbec36c 100644
+--- a/include/linux/ceph/rados.h
++++ b/include/linux/ceph/rados.h
+@@ -523,6 +523,10 @@ struct ceph_osd_op {
+ 		struct {
+ 			__le64 cookie;
+ 		} __attribute__ ((packed)) notify;
++		struct {
++			__le64 unused;
++			__le64 ver;
++		} __attribute__ ((packed)) assert_ver;
+ 		struct {
+ 			__le64 offset, length;
+ 			__le64 src_offset;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 9138abc07f45..2dcb1140ed21 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1048,6 +1048,10 @@ static u32 osd_req_encode_op(struct ceph_osd_op *dst,
+ 		dst->copy_from.src_fadvise_flags =
+ 			cpu_to_le32(src->copy_from.src_fadvise_flags);
+ 		break;
++	case CEPH_OSD_OP_ASSERT_VER:
++		dst->assert_ver.unused = cpu_to_le64(0);
++		dst->assert_ver.ver = cpu_to_le64(src->assert_ver.ver);
++		break;
+ 	default:
+ 		pr_err("unsupported osd opcode %s\n",
+ 			ceph_osd_op_name(src->op));
+@@ -3852,6 +3856,7 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 	 * one (type of) reply back.
+ 	 */
+ 	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
++	req->r_version = m.user_version;
+ 	req->r_result = m.result ?: data_len;
+ 	finish_request(req);
+ 	mutex_unlock(&osd->lock);
 -- 
 2.40.1
 
