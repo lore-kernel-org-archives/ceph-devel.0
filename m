@@ -2,48 +2,48 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E36EC7EE2E
-	for <ceph-devel@archiver.kernel.org>; Tue, 13 Jun 2023 05:35:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31AFCC7EE29
+	for <ceph-devel@archiver.kernel.org>; Tue, 13 Jun 2023 05:35:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240299AbjFMFfu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 13 Jun 2023 01:35:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44826 "EHLO
+        id S240001AbjFMFf4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 13 Jun 2023 01:35:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45090 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240549AbjFMFfL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2023 01:35:11 -0400
+        with ESMTP id S240032AbjFMFfQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2023 01:35:16 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96820420F
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2023 22:31:42 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0A0F2127
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2023 22:31:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686634274;
+        s=mimecast20190719; t=1686634281;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=OeFUfp3btJDx/OqddO/PmBoqSSRd11R3ZQ0UpnROw1Q=;
-        b=CXxXDpaWHBaSXvicmkJuTALS5GjWSuJ9kFX0/vg+9VHVkPPczNFhyN5cIOeXsUf+ocTRzh
-        +FjBdWkGO9scmiT2Ii/ZHSyc5CyP+Rvjt+0j6JCaU9HhUykNijgy262tZK/p4Wb8moH/U1
-        ubGcA4/2Xp9keVEsygb8/r6xEXkmuDo=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=RnRm0zRgoLj107svnITfs7ID4W4b6YM4YSVK1gWKY3E=;
+        b=Ir9YyvMf1aIPWXByFeOe1vIKaV9OGOBr60QhtrPnaPFo/bufKxhmGaku747dfcVxYDT9i1
+        tAtilVN0CvfknXACsFITuW1IJCFgWpcUgfx0jRDkNm/sNQLmEabkYuYfcHnweiPuAh5RIp
+        8tPKR+RZBgjPsjOji022hzwdmD8Vv8k=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-587-1E0g1J07ODa-nh1nj-adQw-1; Tue, 13 Jun 2023 01:31:10 -0400
-X-MC-Unique: 1E0g1J07ODa-nh1nj-adQw-1
+ us-mta-189-QU8ANRWyPcGzP15HqXFOZQ-1; Tue, 13 Jun 2023 01:31:18 -0400
+X-MC-Unique: QU8ANRWyPcGzP15HqXFOZQ-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 4237D3C0ED46;
-        Tue, 13 Jun 2023 05:31:10 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 359FA101A590;
+        Tue, 13 Jun 2023 05:31:18 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-155.pek2.redhat.com [10.72.12.155])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 660061121314;
-        Tue, 13 Jun 2023 05:31:06 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id E76611121318;
+        Tue, 13 Jun 2023 05:31:14 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v20 61/71] ceph: invalidate pages when doing direct/sync writes
-Date:   Tue, 13 Jun 2023 13:24:14 +0800
-Message-Id: <20230613052424.254540-62-xiubli@redhat.com>
+Subject: [PATCH v20 63/71] ceph: add support for handling encrypted snapshot names
+Date:   Tue, 13 Jun 2023 13:24:16 +0800
+Message-Id: <20230613052424.254540-64-xiubli@redhat.com>
 In-Reply-To: <20230613052424.254540-1-xiubli@redhat.com>
 References: <20230613052424.254540-1-xiubli@redhat.com>
 MIME-Version: 1.0
@@ -56,15 +56,19 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Luís Henriques <lhenriques@suse.de>
 
-When doing a direct/sync write, we need to invalidate the page cache in
-the range being written to. If we don't do this, the cache will include
-invalid data as we just did a write that avoided the page cache.
+When creating a snapshot, the .snap directories for every subdirectory will
+show the snapshot name in the "long format":
 
-In the event that invalidation fails, just ignore the error. That likely
-just means that we raced with another task doing a buffered write, in
-which case we want to leave the page intact anyway.
+  # mkdir .snap/my-snap
+  # ls my-dir/.snap/
+  _my-snap_1099511627782
 
-[ jlayton: minor comment update ]
+Encrypted snapshots will need to be able to handle these snapshot names by
+encrypting/decrypting only the snapshot part of the string ('my-snap').
+
+Also, since the MDS prevents snapshot names to be bigger than 240 characters
+it is necessary to adapt CEPH_NOHASH_NAME_MAX to accommodate this extra
+limitation.
 
 Tested-by: Luís Henriques <lhenriques@suse.de>
 Tested-by: Venky Shankar <vshankar@redhat.com>
@@ -72,46 +76,302 @@ Signed-off-by: Luís Henriques <lhenriques@suse.de>
 Reviewed-by: Xiubo Li <xiubli@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/file.c | 19 ++++++++++++++-----
- 1 file changed, 14 insertions(+), 5 deletions(-)
+ fs/ceph/crypto.c | 192 ++++++++++++++++++++++++++++++++++++++++-------
+ fs/ceph/crypto.h |   4 +-
+ 2 files changed, 166 insertions(+), 30 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 0adaa89d0604..317087ea017e 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1632,11 +1632,6 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 		return ret;
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+index 21b705c2cf40..e72bab29d5e1 100644
+--- a/fs/ceph/crypto.c
++++ b/fs/ceph/crypto.c
+@@ -189,16 +189,100 @@ void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_se
+ 	swap(req->r_fscrypt_auth, as->fscrypt_auth);
+ }
  
- 	ceph_fscache_invalidate(inode, false);
--	ret = invalidate_inode_pages2_range(inode->i_mapping,
--					    pos >> PAGE_SHIFT,
--					    (pos + count - 1) >> PAGE_SHIFT);
+-int ceph_encode_encrypted_dname(const struct inode *parent, struct qstr *d_name, char *buf)
++/*
++ * User-created snapshots can't start with '_'.  Snapshots that start with this
++ * character are special (hint: there aren't real snapshots) and use the
++ * following format:
++ *
++ *   _<SNAPSHOT-NAME>_<INODE-NUMBER>
++ *
++ * where:
++ *  - <SNAPSHOT-NAME> - the real snapshot name that may need to be decrypted,
++ *  - <INODE-NUMBER> - the inode number (in decimal) for the actual snapshot
++ *
++ * This function parses these snapshot names and returns the inode
++ * <INODE-NUMBER>.  'name_len' will also bet set with the <SNAPSHOT-NAME>
++ * length.
++ */
++static struct inode *parse_longname(const struct inode *parent, const char *name,
++				    int *name_len)
++{
++	struct inode *dir = NULL;
++	struct ceph_vino vino = { .snap = CEPH_NOSNAP };
++	char *inode_number;
++	char *name_end;
++	int orig_len = *name_len;
++	int ret = -EIO;
++
++	/* Skip initial '_' */
++	name++;
++	name_end = strrchr(name, '_');
++	if (!name_end) {
++		dout("Failed to parse long snapshot name: %s\n", name);
++		return ERR_PTR(-EIO);
++	}
++	*name_len = (name_end - name);
++	if (*name_len <= 0) {
++		pr_err("Failed to parse long snapshot name\n");
++		return ERR_PTR(-EIO);
++	}
++
++	/* Get the inode number */
++	inode_number = kmemdup_nul(name_end + 1,
++				   orig_len - *name_len - 2,
++				   GFP_KERNEL);
++	if (!inode_number)
++		return ERR_PTR(-ENOMEM);
++	ret = kstrtou64(inode_number, 10, &vino.ino);
++	if (ret) {
++		dout("Failed to parse inode number: %s\n", name);
++		dir = ERR_PTR(ret);
++		goto out;
++	}
++
++	/* And finally the inode */
++	dir = ceph_find_inode(parent->i_sb, vino);
++	if (!dir) {
++		/* This can happen if we're not mounting cephfs on the root */
++		dir = ceph_get_inode(parent->i_sb, vino, NULL);
++		if (!dir)
++			dir = ERR_PTR(-ENOENT);
++	}
++	if (IS_ERR(dir))
++		dout("Can't find inode %s (%s)\n", inode_number, name);
++
++out:
++	kfree(inode_number);
++	return dir;
++}
++
++int ceph_encode_encrypted_dname(struct inode *parent, struct qstr *d_name, char *buf)
+ {
++	struct inode *dir = parent;
++	struct qstr iname;
+ 	u32 len;
++	int name_len;
+ 	int elen;
+ 	int ret;
+-	u8 *cryptbuf;
++	u8 *cryptbuf = NULL;
++
++	iname.name = d_name->name;
++	name_len = d_name->len;
++
++	/* Handle the special case of snapshot names that start with '_' */
++	if ((ceph_snap(dir) == CEPH_SNAPDIR) && (name_len > 0) &&
++	    (iname.name[0] == '_')) {
++		dir = parse_longname(parent, iname.name, &name_len);
++		if (IS_ERR(dir))
++			return PTR_ERR(dir);
++		iname.name++; /* skip initial '_' */
++	}
++	iname.len = name_len;
+ 
+-	if (!fscrypt_has_encryption_key(parent)) {
++	if (!fscrypt_has_encryption_key(dir)) {
+ 		memcpy(buf, d_name->name, d_name->len);
+-		return d_name->len;
++		elen = d_name->len;
++		goto out;
+ 	}
+ 
+ 	/*
+@@ -207,18 +291,22 @@ int ceph_encode_encrypted_dname(const struct inode *parent, struct qstr *d_name,
+ 	 *
+ 	 * See: fscrypt_setup_filename
+ 	 */
+-	if (!fscrypt_fname_encrypted_size(parent, d_name->len, NAME_MAX, &len))
+-		return -ENAMETOOLONG;
++	if (!fscrypt_fname_encrypted_size(dir, iname.len, NAME_MAX, &len)) {
++		elen = -ENAMETOOLONG;
++		goto out;
++	}
+ 
+ 	/* Allocate a buffer appropriate to hold the result */
+ 	cryptbuf = kmalloc(len > CEPH_NOHASH_NAME_MAX ? NAME_MAX : len, GFP_KERNEL);
+-	if (!cryptbuf)
+-		return -ENOMEM;
++	if (!cryptbuf) {
++		elen = -ENOMEM;
++		goto out;
++	}
+ 
+-	ret = fscrypt_fname_encrypt(parent, d_name, cryptbuf, len);
++	ret = fscrypt_fname_encrypt(dir, &iname, cryptbuf, len);
+ 	if (ret) {
+-		kfree(cryptbuf);
+-		return ret;
++		elen = ret;
++		goto out;
+ 	}
+ 
+ 	/* hash the end if the name is long enough */
+@@ -234,12 +322,30 @@ int ceph_encode_encrypted_dname(const struct inode *parent, struct qstr *d_name,
+ 
+ 	/* base64 encode the encrypted name */
+ 	elen = ceph_base64_encode(cryptbuf, len, buf);
+-	kfree(cryptbuf);
+ 	dout("base64-encoded ciphertext name = %.*s\n", elen, buf);
++
++	/* To understand the 240 limit, see CEPH_NOHASH_NAME_MAX comments */
++	WARN_ON(elen > 240);
++	if ((elen > 0) && (dir != parent)) {
++		char tmp_buf[NAME_MAX];
++
++		elen = snprintf(tmp_buf, sizeof(tmp_buf), "_%.*s_%ld",
++				elen, buf, dir->i_ino);
++		memcpy(buf, tmp_buf, elen);
++	}
++
++out:
++	kfree(cryptbuf);
++	if (dir != parent) {
++		if ((dir->i_state & I_NEW))
++			discard_new_inode(dir);
++		else
++			iput(dir);
++	}
+ 	return elen;
+ }
+ 
+-int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf)
++int ceph_encode_encrypted_fname(struct inode *parent, struct dentry *dentry, char *buf)
+ {
+ 	WARN_ON_ONCE(!fscrypt_has_encryption_key(parent));
+ 
+@@ -264,29 +370,42 @@ int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentr
+ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 		      struct fscrypt_str *oname, bool *is_nokey)
+ {
+-	int ret;
++	struct inode *dir = fname->dir;
+ 	struct fscrypt_str _tname = FSTR_INIT(NULL, 0);
+ 	struct fscrypt_str iname;
+-
+-	if (!IS_ENCRYPTED(fname->dir)) {
+-		oname->name = fname->name;
+-		oname->len = fname->name_len;
+-		return 0;
+-	}
++	char *name = fname->name;
++	int name_len = fname->name_len;
++	int ret;
+ 
+ 	/* Sanity check that the resulting name will fit in the buffer */
+ 	if (fname->name_len > NAME_MAX || fname->ctext_len > NAME_MAX)
+ 		return -EIO;
+ 
+-	ret = ceph_fscrypt_prepare_readdir(fname->dir);
 -	if (ret < 0)
--		dout("invalidate_inode_pages2_range returned %d\n", ret);
+-		return ret;
++	/* Handle the special case of snapshot names that start with '_' */
++	if ((ceph_snap(dir) == CEPH_SNAPDIR) && (name_len > 0) &&
++	    (name[0] == '_')) {
++		dir = parse_longname(dir, name, &name_len);
++		if (IS_ERR(dir))
++			return PTR_ERR(dir);
++		name++; /* skip initial '_' */
++	}
++
++	if (!IS_ENCRYPTED(dir)) {
++		oname->name = fname->name;
++		oname->len = fname->name_len;
++		ret = 0;
++		goto out_inode;
++	}
++
++	ret = ceph_fscrypt_prepare_readdir(dir);
++	if (ret)
++		goto out_inode;
  
- 	while ((len = iov_iter_count(from)) > 0) {
- 		size_t left;
-@@ -1962,6 +1957,20 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 	/*
+ 	 * Use the raw dentry name as sent by the MDS instead of
+ 	 * generating a nokey name via fscrypt.
+ 	 */
+-	if (!fscrypt_has_encryption_key(fname->dir)) {
++	if (!fscrypt_has_encryption_key(dir)) {
+ 		if (fname->no_copy)
+ 			oname->name = fname->name;
+ 		else
+@@ -294,7 +413,8 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 		oname->len = fname->name_len;
+ 		if (is_nokey)
+ 			*is_nokey = true;
+-		return 0;
++		ret = 0;
++		goto out_inode;
+ 	}
+ 
+ 	if (fname->ctext_len == 0) {
+@@ -303,11 +423,11 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 		if (!tname) {
+ 			ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
+ 			if (ret)
+-				return ret;
++				goto out_inode;
+ 			tname = &_tname;
  		}
  
- 		ceph_clear_error_write(ci);
+-		declen = ceph_base64_decode(fname->name, fname->name_len, tname->name);
++		declen = ceph_base64_decode(name, name_len, tname->name);
+ 		if (declen <= 0) {
+ 			ret = -EIO;
+ 			goto out;
+@@ -319,9 +439,25 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, struct fscrypt_str *tname,
+ 		iname.len = fname->ctext_len;
+ 	}
+ 
+-	ret = fscrypt_fname_disk_to_usr(fname->dir, 0, 0, &iname, oname);
++	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, oname);
++	if (!ret && (dir != fname->dir)) {
++		char tmp_buf[CEPH_BASE64_CHARS(NAME_MAX)];
 +
-+		/*
-+		 * We successfully wrote to a range of the file. Declare
-+		 * that region of the pagecache invalid.
-+		 */
-+		ret = invalidate_inode_pages2_range(
-+				inode->i_mapping,
-+				pos >> PAGE_SHIFT,
-+				(pos + len - 1) >> PAGE_SHIFT);
-+		if (ret < 0) {
-+			dout("invalidate_inode_pages2_range returned %d\n",
-+			     ret);
-+			ret = 0;
-+		}
- 		pos += len;
- 		written += len;
- 		dout("sync_write written %d\n", written);
++		name_len = snprintf(tmp_buf, sizeof(tmp_buf), "_%.*s_%ld",
++				    oname->len, oname->name, dir->i_ino);
++		memcpy(oname->name, tmp_buf, name_len);
++		oname->len = name_len;
++	}
++
+ out:
+ 	fscrypt_fname_free_buffer(&_tname);
++out_inode:
++	if ((dir != fname->dir) && !IS_ERR(dir)) {
++		if ((dir->i_state & I_NEW))
++			discard_new_inode(dir);
++		else
++			iput(dir);
++	}
+ 	return ret;
+ }
+ 
+diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
+index 0d0343906d29..d0e88f6d254d 100644
+--- a/fs/ceph/crypto.h
++++ b/fs/ceph/crypto.h
+@@ -101,8 +101,8 @@ void ceph_fscrypt_free_dummy_policy(struct ceph_fs_client *fsc);
+ int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
+ 				 struct ceph_acl_sec_ctx *as);
+ void ceph_fscrypt_as_ctx_to_req(struct ceph_mds_request *req, struct ceph_acl_sec_ctx *as);
+-int ceph_encode_encrypted_dname(const struct inode *parent, struct qstr *d_name, char *buf);
+-int ceph_encode_encrypted_fname(const struct inode *parent, struct dentry *dentry, char *buf);
++int ceph_encode_encrypted_dname(struct inode *parent, struct qstr *d_name, char *buf);
++int ceph_encode_encrypted_fname(struct inode *parent, struct dentry *dentry, char *buf);
+ 
+ static inline int ceph_fname_alloc_buffer(struct inode *parent, struct fscrypt_str *fname)
+ {
 -- 
 2.40.1
 
