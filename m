@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1ECBCEB64DD
-	for <ceph-devel@archiver.kernel.org>; Fri, 16 Jun 2023 16:15:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEE9AEB64DB
+	for <ceph-devel@archiver.kernel.org>; Sat, 17 Jun 2023 12:14:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344059AbjFPQPW (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 16 Jun 2023 12:15:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40676 "EHLO
+        id S236152AbjFQMOA (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sat, 17 Jun 2023 08:14:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229471AbjFPQOW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jun 2023 12:14:22 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57FA13599
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Jun 2023 09:13:30 -0700 (PDT)
+        with ESMTP id S231603AbjFQMN5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Jun 2023 08:13:57 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D877F1BDB
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Jun 2023 05:12:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686932009;
+        s=mimecast20190719; t=1687003949;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
         bh=1DmsLXNf6UEopicQGVGHzvB3R+Io/k4xNBk1zidfJPQ=;
-        b=YYS034GKDySecOdrK/ijkCT1/wJ/bhRWcrqNTpCuyQ+IvlWvQPVggCdbxldkyAL+xQe11e
-        VW0YyvgjLEotxk9j2Ir1LWOvpVd5ODGEQ+/pgN4X3OpNnp9bc3T0sHVjUIcb+4YEwCFQoT
-        BySp6tO7dC/5GoAOxQFRxaZKirQoC2M=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+        b=WK6Rhk0hUsNh7r/nEn5rqq1NVKay1422026u2ydmNJei3hXqcts5AstoCKRCYpXN1w6P0/
+        0Ys99LXqORD/4UjKdXrJzARLE3Ok+rFsf4Dql7haXvREbTpLYI2pv4Kdvet6imXc+LmuNe
+        7lO9uWWUVH2iR340w44GU8r9xPECDH8=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-280-lvR3TEYCMuWBlcKwIOkPGg-1; Fri, 16 Jun 2023 12:13:25 -0400
-X-MC-Unique: lvR3TEYCMuWBlcKwIOkPGg-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
+ us-mta-373-vtLjC08lOWSLLrXv76NNIw-1; Sat, 17 Jun 2023 08:12:25 -0400
+X-MC-Unique: vtLjC08lOWSLLrXv76NNIw-1
+Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 70E1938041D5;
-        Fri, 16 Jun 2023 16:13:24 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id B9013185A78E;
+        Sat, 17 Jun 2023 12:12:24 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.42.28.51])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id BA8442026D49;
-        Fri, 16 Jun 2023 16:13:21 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D391840C5C1;
+        Sat, 17 Jun 2023 12:12:22 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     netdev@vger.kernel.org
 Cc:     David Howells <dhowells@redhat.com>,
@@ -52,14 +52,14 @@ Cc:     David Howells <dhowells@redhat.com>,
         linux-kernel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>,
         Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         ceph-devel@vger.kernel.org
-Subject: [PATCH net-next 05/17] ceph: Use sendmsg(MSG_SPLICE_PAGES) rather than sendpage
-Date:   Fri, 16 Jun 2023 17:12:48 +0100
-Message-ID: <20230616161301.622169-6-dhowells@redhat.com>
-In-Reply-To: <20230616161301.622169-1-dhowells@redhat.com>
-References: <20230616161301.622169-1-dhowells@redhat.com>
+Subject: [PATCH net-next v2 05/17] ceph: Use sendmsg(MSG_SPLICE_PAGES) rather than sendpage
+Date:   Sat, 17 Jun 2023 13:11:34 +0100
+Message-ID: <20230617121146.716077-6-dhowells@redhat.com>
+In-Reply-To: <20230617121146.716077-1-dhowells@redhat.com>
+References: <20230617121146.716077-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.4
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.9
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
