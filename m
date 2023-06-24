@@ -2,199 +2,119 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 249ABC0015E
-	for <ceph-devel@archiver.kernel.org>; Fri, 23 Jun 2023 22:56:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04526EB64D7
+	for <ceph-devel@archiver.kernel.org>; Sat, 24 Jun 2023 01:37:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230492AbjFWW44 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 23 Jun 2023 18:56:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37748 "EHLO
+        id S230036AbjFXBh4 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 23 Jun 2023 21:37:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232039AbjFWW44 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jun 2023 18:56:56 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CBF32728
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Jun 2023 15:55:37 -0700 (PDT)
+        with ESMTP id S229512AbjFXBhz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jun 2023 21:37:55 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3CABE5B
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Jun 2023 18:37:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1687560936;
+        s=mimecast20190719; t=1687570630;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=+W533yCSJmnbFAFKHcDDwIUi7AghOBKSEvqiVzDK1MA=;
-        b=Hjd/tehivrZCFqsBNb3dyhg+biw8Q/ZfbnPJ/s0LwH26BUW/6KuSbmxkLIPQdxsVVQbK92
-        hGASvi2aNgCDcPLruTzhljcYqEYBYCCpyeUY7KArJY7U9M8YC53+euOc3390XAJ3YHwI06
-        Vs+PnjRxNlv8XRA2t27YpFdaJZf6eKQ=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-319-HB5p8tLTOPecSH-Xsdm32Q-1; Fri, 23 Jun 2023 18:55:28 -0400
-X-MC-Unique: HB5p8tLTOPecSH-Xsdm32Q-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 22F78101A54E;
-        Fri, 23 Jun 2023 22:55:27 +0000 (UTC)
-Received: from warthog.procyon.org.com (unknown [10.42.28.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5690840C2063;
-        Fri, 23 Jun 2023 22:55:25 +0000 (UTC)
-From:   David Howells <dhowells@redhat.com>
-To:     netdev@vger.kernel.org
-Cc:     David Howells <dhowells@redhat.com>,
-        Alexander Duyck <alexander.duyck@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Willem de Bruijn <willemdebruijn.kernel@gmail.com>,
-        David Ahern <dsahern@kernel.org>,
-        Matthew Wilcox <willy@infradead.org>,
-        Jens Axboe <axboe@kernel.dk>, linux-mm@kvack.org,
-        linux-kernel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>,
-        Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
-        ceph-devel@vger.kernel.org
-Subject: [PATCH net-next v5 03/16] ceph: Use sendmsg(MSG_SPLICE_PAGES) rather than sendpage
-Date:   Fri, 23 Jun 2023 23:55:00 +0100
-Message-ID: <20230623225513.2732256-4-dhowells@redhat.com>
-In-Reply-To: <20230623225513.2732256-1-dhowells@redhat.com>
-References: <20230623225513.2732256-1-dhowells@redhat.com>
+        bh=SWrf17db78ezE6/aH1TL74NU60boy/nUbrBlOEfT/sU=;
+        b=hMclPX1M8U+zpt+kUJc30oAJaKRydBzPfTNyaZQ32GCqNSON1J5iSfRPSJlAnFW6qkY2la
+        87VYSk5gIRhtRj6Z4VxvTcTFj2CTi8I76mjutifaKDaDxTDQ+bXowQJo3aXo9zcuoFRu5/
+        ryW/qDFqsoiL6EiHrhGN/v4Ml+TiDLA=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-10-6itIH-7SMEqhEjzAe_NHGg-1; Fri, 23 Jun 2023 21:37:09 -0400
+X-MC-Unique: 6itIH-7SMEqhEjzAe_NHGg-1
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1b52498ece5so8819195ad.1
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Jun 2023 18:37:08 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687570628; x=1690162628;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=SWrf17db78ezE6/aH1TL74NU60boy/nUbrBlOEfT/sU=;
+        b=Aq2L+N2P8vzlwIXk2zxa/7ul9vj4YoN4PCBc6/Bc81rswd/O2WDKwAa0FC31Thfvcc
+         VPt0alxUTk029QnKTqijKRHJZt4VCeW9OFDYeOlGkbVHcJyAh6vStddLkbJexXUEoUdr
+         FFcfcjgWp71IXohZ4MjnA/FM/0jNXS702qlmJjPFjKYuhGkW3MCXmM8PI7Xjr03ME+5g
+         0YTQ98bMe7cSRnxHFGijf9lx790DLr9zbag6VX3OLvAIaZD8OxM90X5QoP+Cuj8A9mfX
+         NITfAmmGGn3DPjxreqF6p09zSVdMWpggfqnP4jMDrZk8KTb08J6TZXU5jvLPJOeoRLmi
+         uLMQ==
+X-Gm-Message-State: AC+VfDzxphZvt7KIxklaCD0c/qMmY3ol+NW40xh7ChQeWvZF+allUHdl
+        jw5n9I8d2caAVMS/MjJyvuEWcrr/7rsZQhwD0DOMn4xJyvw+WM7omrTd9eqgo4I3zWH3wx77Y2G
+        ONRwHijV5wpwcijiM38K0LA==
+X-Received: by 2002:a17:903:24d:b0:1ae:8595:153 with SMTP id j13-20020a170903024d00b001ae85950153mr1087397plh.20.1687570628100;
+        Fri, 23 Jun 2023 18:37:08 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ70F87Rbv/R9XMaSzZcQtw3TRpiFahOhZs33X4KSJY20FL+t3G4c1wHrNU4qH+U5MgkwpyEHA==
+X-Received: by 2002:a17:903:24d:b0:1ae:8595:153 with SMTP id j13-20020a170903024d00b001ae85950153mr1087385plh.20.1687570627829;
+        Fri, 23 Jun 2023 18:37:07 -0700 (PDT)
+Received: from [10.72.12.106] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id gf4-20020a17090ac7c400b00256dff5f8e3sm259169pjb.49.2023.06.23.18.37.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 23 Jun 2023 18:37:07 -0700 (PDT)
+Message-ID: <64241ff0-9af3-6817-478f-c24a0b9de9b3@redhat.com>
+Date:   Sat, 24 Jun 2023 09:36:54 +0800
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.0
+From:   Xiubo Li <xiubli@redhat.com>
+Subject: Re: [PATCH v5 00/14] ceph: support idmapped mounts
+To:     Aleksandr Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
+Cc:     Gregory Farnum <gfarnum@redhat.com>,
+        Christian Brauner <brauner@kernel.org>, stgraber@ubuntu.com,
+        linux-fsdevel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>,
+        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20230608154256.562906-1-aleksandr.mikhalitsyn@canonical.com>
+ <f3864ed6-8c97-8a7a-f268-dab29eb2fb21@redhat.com>
+ <CAEivzxcRsHveuW3nrPnSBK6_2-eT4XPvza3kN2oogvnbVXBKvQ@mail.gmail.com>
+ <20230609-alufolie-gezaubert-f18ef17cda12@brauner>
+ <CAEivzxc_LW6mTKjk46WivrisnnmVQs0UnRrh6p0KxhqyXrErBQ@mail.gmail.com>
+ <ac1c6817-9838-fcf3-edc8-224ff85691e0@redhat.com>
+ <CAJ4mKGby71qfb3gd696XH3AazeR0Qc_VGYupMznRH3Piky+VGA@mail.gmail.com>
+ <977d8133-a55f-0667-dc12-aa6fd7d8c3e4@redhat.com>
+ <CAEivzxcr99sERxZX17rZ5jW9YSzAWYvAjOOhBH+FqRoso2=yng@mail.gmail.com>
+ <626175e2-ee91-0f1a-9e5d-e506aea366fa@redhat.com>
+Content-Language: en-US
+In-Reply-To: <626175e2-ee91-0f1a-9e5d-e506aea366fa@redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Use sendmsg() and MSG_SPLICE_PAGES rather than sendpage in ceph when
-transmitting data.  For the moment, this can only transmit one page at a
-time because of the architecture of net/ceph/, but if
-write_partial_message_data() can be given a bvec[] at a time by the
-iteration code, this would allow pages to be sent in a batch.
+[...]
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Ilya Dryomov <idryomov@gmail.com>
-cc: Xiubo Li <xiubli@redhat.com>
-cc: Jeff Layton <jlayton@kernel.org>
-cc: "David S. Miller" <davem@davemloft.net>
-cc: Eric Dumazet <edumazet@google.com>
-cc: Jakub Kicinski <kuba@kernel.org>
-cc: Paolo Abeni <pabeni@redhat.com>
-cc: Jens Axboe <axboe@kernel.dk>
-cc: Matthew Wilcox <willy@infradead.org>
-cc: ceph-devel@vger.kernel.org
-cc: netdev@vger.kernel.org
----
+ > > >
+ > > > I thought about this too and came to the same conclusion, that 
+UID/GID
+ > > > based
+ > > > restriction can be applied dynamically, so detecting it on mount-time
+ > > > helps not so much.
+ > > >
+ > > For this you please raise one PR to ceph first to support this, and in
+ > > the PR we can discuss more for the MDS auth caps. And after the PR
+ > > getting merged then in this patch series you need to check the
+ > > corresponding option or flag to determine whether could the idmap
+ > > mounting succeed.
+ >
+ > I'm sorry but I don't understand what we want to support here. Do we 
+want to
+ > add some new ceph request that allows to check if UID/GID-based
+ > permissions are applied for
+ > a particular ceph client user?
 
-Notes:
-    ver #5)
-     - Switch condition for setting MSG_MORE in write_partial_message_data()
+IMO we should prevent user to set UID/GID-based permisions caps from 
+ceph side.
 
- net/ceph/messenger_v1.c | 60 ++++++++++++++---------------------------
- 1 file changed, 20 insertions(+), 40 deletions(-)
+As I know currently there is no way to prevent users to set MDS auth 
+caps, IMO in ceph side at least we need one flag or option to disable 
+this once users want this fs cluster sever for idmap mounts use case.
 
-diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
-index d664cb1593a7..814579f27f04 100644
---- a/net/ceph/messenger_v1.c
-+++ b/net/ceph/messenger_v1.c
-@@ -74,37 +74,6 @@ static int ceph_tcp_sendmsg(struct socket *sock, struct kvec *iov,
- 	return r;
- }
- 
--/*
-- * @more: either or both of MSG_MORE and MSG_SENDPAGE_NOTLAST
-- */
--static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
--			     int offset, size_t size, int more)
--{
--	ssize_t (*sendpage)(struct socket *sock, struct page *page,
--			    int offset, size_t size, int flags);
--	int flags = MSG_DONTWAIT | MSG_NOSIGNAL | more;
--	int ret;
--
--	/*
--	 * sendpage cannot properly handle pages with page_count == 0,
--	 * we need to fall back to sendmsg if that's the case.
--	 *
--	 * Same goes for slab pages: skb_can_coalesce() allows
--	 * coalescing neighboring slab objects into a single frag which
--	 * triggers one of hardened usercopy checks.
--	 */
--	if (sendpage_ok(page))
--		sendpage = sock->ops->sendpage;
--	else
--		sendpage = sock_no_sendpage;
--
--	ret = sendpage(sock, page, offset, size, flags);
--	if (ret == -EAGAIN)
--		ret = 0;
--
--	return ret;
--}
--
- static void con_out_kvec_reset(struct ceph_connection *con)
- {
- 	BUG_ON(con->v1.out_skip);
-@@ -464,7 +433,6 @@ static int write_partial_message_data(struct ceph_connection *con)
- 	struct ceph_msg *msg = con->out_msg;
- 	struct ceph_msg_data_cursor *cursor = &msg->cursor;
- 	bool do_datacrc = !ceph_test_opt(from_msgr(con->msgr), NOCRC);
--	int more = MSG_MORE | MSG_SENDPAGE_NOTLAST;
- 	u32 crc;
- 
- 	dout("%s %p msg %p\n", __func__, con, msg);
-@@ -482,6 +450,10 @@ static int write_partial_message_data(struct ceph_connection *con)
- 	 */
- 	crc = do_datacrc ? le32_to_cpu(msg->footer.data_crc) : 0;
- 	while (cursor->total_resid) {
-+		struct bio_vec bvec;
-+		struct msghdr msghdr = {
-+			.msg_flags = MSG_SPLICE_PAGES,
-+		};
- 		struct page *page;
- 		size_t page_offset;
- 		size_t length;
-@@ -493,10 +465,13 @@ static int write_partial_message_data(struct ceph_connection *con)
- 		}
- 
- 		page = ceph_msg_data_next(cursor, &page_offset, &length);
--		if (length == cursor->total_resid)
--			more = MSG_MORE;
--		ret = ceph_tcp_sendpage(con->sock, page, page_offset, length,
--					more);
-+		if (length != cursor->total_resid)
-+			msghdr.msg_flags |= MSG_MORE;
-+
-+		bvec_set_page(&bvec, page, length, page_offset);
-+		iov_iter_bvec(&msghdr.msg_iter, ITER_SOURCE, &bvec, 1, length);
-+
-+		ret = sock_sendmsg(con->sock, &msghdr);
- 		if (ret <= 0) {
- 			if (do_datacrc)
- 				msg->footer.data_crc = cpu_to_le32(crc);
-@@ -526,7 +501,10 @@ static int write_partial_message_data(struct ceph_connection *con)
-  */
- static int write_partial_skip(struct ceph_connection *con)
- {
--	int more = MSG_MORE | MSG_SENDPAGE_NOTLAST;
-+	struct bio_vec bvec;
-+	struct msghdr msghdr = {
-+		.msg_flags = MSG_SPLICE_PAGES | MSG_MORE,
-+	};
- 	int ret;
- 
- 	dout("%s %p %d left\n", __func__, con, con->v1.out_skip);
-@@ -534,9 +512,11 @@ static int write_partial_skip(struct ceph_connection *con)
- 		size_t size = min(con->v1.out_skip, (int)PAGE_SIZE);
- 
- 		if (size == con->v1.out_skip)
--			more = MSG_MORE;
--		ret = ceph_tcp_sendpage(con->sock, ceph_zero_page, 0, size,
--					more);
-+			msghdr.msg_flags &= ~MSG_MORE;
-+		bvec_set_page(&bvec, ZERO_PAGE(0), size, 0);
-+		iov_iter_bvec(&msghdr.msg_iter, ITER_SOURCE, &bvec, 1, size);
-+
-+		ret = sock_sendmsg(con->sock, &msghdr);
- 		if (ret <= 0)
- 			goto out;
- 		con->v1.out_skip -= ret;
+Thanks
+
+- Xiubo
 
