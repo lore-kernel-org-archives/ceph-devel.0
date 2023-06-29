@@ -2,99 +2,137 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4DD8EB64DA
-	for <ceph-devel@archiver.kernel.org>; Thu, 29 Jun 2023 02:34:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9E4AEB64DC
+	for <ceph-devel@archiver.kernel.org>; Thu, 29 Jun 2023 03:38:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229667AbjF2Ced (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 28 Jun 2023 22:34:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56040 "EHLO
+        id S230382AbjF2Diy (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 28 Jun 2023 23:38:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39066 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230382AbjF2Cec (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2023 22:34:32 -0400
+        with ESMTP id S230466AbjF2Dix (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2023 23:38:53 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB49C2684
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jun 2023 19:33:43 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82E78C0
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jun 2023 20:38:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1688006023;
+        s=mimecast20190719; t=1688009880;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding;
-        bh=Xt4QpJwHtZ2z5SP7fR1XZYOucvt4Vw4XYwAS8NoDqGA=;
-        b=AaWHtlBTh2RY70DnseplL8/Oh7BelAHhgkSGHpHXz6A+GfYKBARtLef3jb1A6Kn5WZt40T
-        S1L9BPjSNIZn9VTzISyh0LkcMYeMqS52aK3yr4z1/abUrF4EC6g7MmeyJR4JoXo2UfhL9A
-        UiKmbmkdXdNaqrPfHUnzidzVA308AMs=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=4ysiqyRGDJPv7mFwqkPDxDhYuunIT2meZ9lzoXm+YkI=;
+        b=HU12pZR2asxPbbtnteZIbyFlUUK232r79v1oXoZ4tQf5oIef6nXlwgHDQndeoimJsplYvd
+        DaQUseE3hP05NIkMPVYlMmh2wsP/iaj1RE5/sRV5+amwMQyNGM7mi4GXiV/3QJ1ozmzr3U
+        xG9/bdEYpA3orvN21FOjuQY5S2NKbGI=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-422-dqXuHYknNFuWCsQulumePA-1; Wed, 28 Jun 2023 22:33:35 -0400
-X-MC-Unique: dqXuHYknNFuWCsQulumePA-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+ us-mta-606-Ki5cCneHPT23ADHF_wKpZg-1; Wed, 28 Jun 2023 23:37:56 -0400
+X-MC-Unique: Ki5cCneHPT23ADHF_wKpZg-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 0E86388D0F3;
-        Thu, 29 Jun 2023 02:33:35 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 054B93806736;
+        Thu, 29 Jun 2023 03:37:56 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-13-91.pek2.redhat.com [10.72.13.91])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 81E27F41C9;
-        Thu, 29 Jun 2023 02:33:31 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 42FAF111F3B0;
+        Thu, 29 Jun 2023 03:37:50 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     idryomov@gmail.com, ceph-devel@vger.kernel.org
 Cc:     jlayton@kernel.org, vshankar@redhat.com, mchangir@redhat.com,
         Xiubo Li <xiubli@redhat.com>, stable@vger.kernel.org
-Subject: [PATCH v3] ceph: don't let check_caps skip sending responses for revoke msgs
-Date:   Thu, 29 Jun 2023 10:31:18 +0800
-Message-Id: <20230629023118.267295-1-xiubli@redhat.com>
+Subject: [PATCH] ceph: defer stopping the mdsc delayed_work
+Date:   Thu, 29 Jun 2023 11:35:33 +0800
+Message-Id: <20230629033533.270535-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.3
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
 From: Xiubo Li <xiubli@redhat.com>
 
-If a client sends out a cap update dropping caps with the prior 'seq'
-just before an incoming cap revoke request, then the client may drop
-the revoke because it believes it's already released the requested
-capabilities.
-
-This causes the MDS to wait indefinitely for the client to respond
-to the revoke. It's therefore always a good idea to ack the cap
-revoke request with the bumped up 'seq'.
+Flushing the dirty buffer may take a long time if the Rados is
+overloaded or if there is network issue. So we should ping the
+MDSs perioudically to keep alive, else the MDS will blocklist
+the kclient.
 
 Cc: stable@vger.kernel.org
-Link: https://tracker.ceph.com/issues/61782
+Cc: Venky Shankar <vshankar@redhat.com>
+URL: https://tracker.ceph.com/issues/61843
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
-Reviewed-by: Milind Changire <mchangir@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
+ fs/ceph/mds_client.c | 2 +-
+ fs/ceph/mds_client.h | 3 ++-
+ fs/ceph/super.c      | 7 ++++---
+ 3 files changed, 7 insertions(+), 5 deletions(-)
 
-V3:
-- Updated the commit message from Patrick. Thanks!
-
-
- fs/ceph/caps.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index cef91dd5ef83..e2bb0d0072da 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3566,6 +3566,15 @@ static void handle_cap_grant(struct inode *inode,
- 	}
- 	BUG_ON(cap->issued & ~cap->implemented);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 65230ebefd51..70987b3c198a 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -5192,7 +5192,7 @@ static void delayed_work(struct work_struct *work)
  
-+	/* don't let check_caps skip sending a response to MDS for revoke msgs */
-+	if (le32_to_cpu(grant->op) == CEPH_CAP_OP_REVOKE) {
-+		cap->mds_wanted = 0;
-+		if (cap == ci->i_auth_cap)
-+			check_caps = 1; /* check auth cap only */
-+		else
-+			check_caps = 2; /* check all caps */
-+	}
-+
- 	if (extra_info->inline_version > 0 &&
- 	    extra_info->inline_version >= ci->i_inline_version) {
- 		ci->i_inline_version = extra_info->inline_version;
+ 	doutc(mdsc->fsc->client, "mdsc delayed_work\n");
+ 
+-	if (mdsc->stopping)
++	if (mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHED)
+ 		return;
+ 
+ 	mutex_lock(&mdsc->mutex);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 5d02c8c582fd..befbd384428e 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -400,7 +400,8 @@ struct cap_wait {
+ 
+ enum {
+ 	CEPH_MDSC_STOPPING_BEGIN = 1,
+-	CEPH_MDSC_STOPPING_FLUSHED = 2,
++	CEPH_MDSC_STOPPING_FLUSHING = 2,
++	CEPH_MDSC_STOPPING_FLUSHED = 3,
+ };
+ 
+ /*
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 8e1e517a45db..fb694ba72955 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1488,7 +1488,7 @@ static int ceph_init_fs_context(struct fs_context *fc)
+ static bool __inc_stopping_blocker(struct ceph_mds_client *mdsc)
+ {
+ 	spin_lock(&mdsc->stopping_lock);
+-	if (mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHED) {
++	if (mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHING) {
+ 		spin_unlock(&mdsc->stopping_lock);
+ 		return false;
+ 	}
+@@ -1501,7 +1501,7 @@ static void __dec_stopping_blocker(struct ceph_mds_client *mdsc)
+ {
+ 	spin_lock(&mdsc->stopping_lock);
+ 	if (!atomic_dec_return(&mdsc->stopping_blockers) &&
+-	    mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHED)
++	    mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHING)
+ 		complete_all(&mdsc->stopping_waiter);
+ 	spin_unlock(&mdsc->stopping_lock);
+ }
+@@ -1562,7 +1562,7 @@ static void ceph_kill_sb(struct super_block *s)
+ 	sync_filesystem(s);
+ 
+ 	spin_lock(&mdsc->stopping_lock);
+-	mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHED;
++	mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHING;
+ 	wait = !!atomic_read(&mdsc->stopping_blockers);
+ 	spin_unlock(&mdsc->stopping_lock);
+ 
+@@ -1576,6 +1576,7 @@ static void ceph_kill_sb(struct super_block *s)
+ 			pr_warn_client(cl, "umount was killed, %ld\n", timeleft);
+ 	}
+ 
++	mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHED;
+ 	kill_anon_super(s);
+ 
+ 	fsc->client->extra_mon_dispatch = NULL;
 -- 
 2.40.1
 
