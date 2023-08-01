@@ -2,195 +2,165 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40E5AEB64DD
-	for <ceph-devel@archiver.kernel.org>; Tue,  1 Aug 2023 08:34:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60AC6C0015E
+	for <ceph-devel@archiver.kernel.org>; Tue,  1 Aug 2023 22:23:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232315AbjHAIef (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 1 Aug 2023 04:34:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44426 "EHLO
+        id S232432AbjHAWXR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Tue, 1 Aug 2023 18:23:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232086AbjHAIec (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2023 04:34:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0945D1B6
-        for <ceph-devel@vger.kernel.org>; Tue,  1 Aug 2023 01:33:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1690878824;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=U10B98Pu0R9R3HFUTiKyBXM5NGzVEuqPCXUhwAIdJEU=;
-        b=Uc0OuD66ZgVwvo3/NcZ/kmTopCXrAq/WDGoM8H7VoXJi8skGmfC3K5MQKwxw7Ue2WGMCzG
-        7EUcy0RjJJ9Dulm4H93wojWhAiyOvoARL8QMwUjo39PFe6B8gNbEq1KxJQ/2KllBxHNQ4x
-        PvvaTYB81FkpprrF4ugc4G8cZ4N9dCk=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-674-jajTZ4T3MWu8rJWid_gqNw-1; Tue, 01 Aug 2023 04:33:42 -0400
-X-MC-Unique: jajTZ4T3MWu8rJWid_gqNw-1
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-993c2d9e496so325302966b.0
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Aug 2023 01:33:42 -0700 (PDT)
+        with ESMTP id S231987AbjHAWXJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2023 18:23:09 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B5EB270D
+        for <ceph-devel@vger.kernel.org>; Tue,  1 Aug 2023 15:22:59 -0700 (PDT)
+Received: by mail-ej1-x62f.google.com with SMTP id a640c23a62f3a-99c3d3c3db9so60711866b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Aug 2023 15:22:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1690928578; x=1691533378;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=2dN1eAzWWOg9JQJNB1duk9oA9ZHIyD9quKkdE3bQkdc=;
+        b=NRSbTjHqnY/NQqwrr1hmRnOxAC+3DqifC5yf0TE4pQ1YAmnYgTA7cF4rySNFYOvwpk
+         NZcLpOZnS8nX4WLZYxIg56zZWW7E5lurGgHdNUiWDd8rCutx9cKCpuEqbhMwRXFolMI8
+         AaXGrXwTJC9aGN5VdzMzOQ62knP8GeT02bc7mMl6dtkXCcZZ5m0Sm3PFydBFL+3DeDf9
+         YSE6QCr7gmv+1/7pzlCOWqE0zRysXS3msfYeHH/nZhmV1w/SrhskF4cXyZnfY4EfrQmu
+         muNZ+E5yQv2TcxbrJTsuC1vkK5CRBwYrIW2vK9mAWZI41GFAg3NCWVnNdKWS4ivrT3HR
+         x50g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690878821; x=1691483621;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=U10B98Pu0R9R3HFUTiKyBXM5NGzVEuqPCXUhwAIdJEU=;
-        b=ZVGetAP3hwHV9pKOWCnuRlR9hmpwWmKY3m2F4+JTtwEaWfuMb50O9ni0NSXw6L1loB
-         iwcNlirvg9v/eyM+DvkK+IA3Km6q+y3fa7+fk/Bqr5H5PDgML4j+uzSjbQ3nKo8PjZgp
-         I9Wwjg9A/eY3hxDMBGBQNmXIyI0Lnh1x4SUCUMmPNquklhuK9wOT1PUMWDOJPLLdWe2K
-         F2UYtc5Rci1e34OfN4iT8fJARH0G0lcie/xvvvCVFROI4gHEGjbeevpoGnMpca2IGoFm
-         g4W43DnE69+gGH44cA2wvDfoJLp+czTZeBHeSWLakcYpf1r6JICc9B7K0puX4UIB6f0J
-         HW3A==
-X-Gm-Message-State: ABy/qLZRR8elya8WzWd+CyZtc0EsWdCLoKSJoqu7eWhwBW/nzKrLK5/4
-        ts0hmK9AUDZ/YZC3k9su8z5wwIXvMTWt2TEDz2SyTlic25r2KloR7O7+SHHFeEmvWyZJ2z2YsAb
-        QHXt5bbhTGxT8xhlq9Bv1QNJelbg35+Js+ADKPA==
-X-Received: by 2002:a17:907:77cd:b0:98d:4000:1bf9 with SMTP id kz13-20020a17090777cd00b0098d40001bf9mr1969986ejc.65.1690878821772;
-        Tue, 01 Aug 2023 01:33:41 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlFNMNRn1iF2TmzoOed+zM+IVfM+BzLPy7r5L/98BVYcEiwbUAOLvgT0xb7ZuUsPU5TczZEAeV1Gwsx8RJCh/wQ=
-X-Received: by 2002:a17:907:77cd:b0:98d:4000:1bf9 with SMTP id
- kz13-20020a17090777cd00b0098d40001bf9mr1969966ejc.65.1690878821385; Tue, 01
- Aug 2023 01:33:41 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1690928578; x=1691533378;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=2dN1eAzWWOg9JQJNB1duk9oA9ZHIyD9quKkdE3bQkdc=;
+        b=gIJSFKX8lhkGlRlwrFMv9xo7l6Pks3ovp1vu/2w+K1lQdCqHpRnO7SxHD4+RRfvucx
+         R9SxhhI36TxQ2RIq3Q01AaHhWJ2ylOCz401rVnxH+FE+tjpi/geWmnaNbntRK9nwqsFb
+         6qHjhaI8T0+c8Tem4ApDERHUXBwb6N+7HQ+XgppjGi4cpn8kL6RfTKIu9TQPp472+Dfy
+         s6kIUXpNArIYuGaIOdu/uTHMohvPvLUt8Ha/KXczrMneIfxt3FKLshJGwvz2rkfG2BLo
+         Sa/M89BGGvArD4kVJUqvD7FXIlXhNNyXTe8H4ua0d6m59vwHZVGIi+A06DYiZ/anDWnx
+         JpQQ==
+X-Gm-Message-State: ABy/qLbN9AQez+JBXoIZ27/NV1iQjgsrvtVO+JGqxnYMWkGgccFO2EBy
+        rq36e5pj6sYvQ0v1/IjvMIS4NJxIAhc=
+X-Google-Smtp-Source: APBJJlGZyXb+yQJi3PMm+NEFt4V1fIkDJdPUoYud8xt4u+OWnDAakvoOYpBqvO2MM14u0NRWJw7ixg==
+X-Received: by 2002:a17:906:32cd:b0:99b:e5c3:2e55 with SMTP id k13-20020a17090632cd00b0099be5c32e55mr3475912ejk.38.1690928577678;
+        Tue, 01 Aug 2023 15:22:57 -0700 (PDT)
+Received: from localhost.localdomain (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
+        by smtp.gmail.com with ESMTPSA id ov38-20020a170906fc2600b009929ab17bdfsm8123352ejb.168.2023.08.01.15.22.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 01 Aug 2023 15:22:56 -0700 (PDT)
+From:   Ilya Dryomov <idryomov@gmail.com>
+To:     ceph-devel@vger.kernel.org
+Cc:     Dongsheng Yang <dongsheng.yang@easystack.cn>
+Subject: [PATCH] rbd: prevent busy loop when requesting exclusive lock
+Date:   Wed,  2 Aug 2023 00:22:37 +0200
+Message-ID: <20230801222238.674641-1-idryomov@gmail.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-References: <20230725040359.363444-1-xiubli@redhat.com> <CAED=hWDNP2AsnqHWxyHxuQij1KWVoT+oEETD7r3GqtBP=k7yBA@mail.gmail.com>
- <b4766f81-faf6-2df5-8fea-51b0c5a772ab@redhat.com>
-In-Reply-To: <b4766f81-faf6-2df5-8fea-51b0c5a772ab@redhat.com>
-From:   Milind Changire <mchangir@redhat.com>
-Date:   Tue, 1 Aug 2023 14:03:05 +0530
-Message-ID: <CAED=hWCT6aSQLkk9Go5WhXxWTZxUW3mVnibh70G=2QFb=2LkjQ@mail.gmail.com>
-Subject: Re: [PATCH v3] ceph: defer stopping the mdsc delayed_work
-To:     Xiubo Li <xiubli@redhat.com>
-Cc:     idryomov@gmail.com, ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        vshankar@redhat.com, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Looks good to me.
+Due to rbd_try_acquire_lock() effectively swallowing all but
+EBLOCKLISTED error from rbd_try_lock() ("request lock anyway") and
+rbd_request_lock() returning ETIMEDOUT error not only for an actual
+notify timeout but also when the lock owner doesn't respond, a busy
+loop inside of rbd_acquire_lock() between rbd_try_acquire_lock() and
+rbd_request_lock() is possible.
 
-Reviewed-by: Milind Changire <mchangir@redhat.com>
+Requesting the lock on EBUSY error (returned by get_lock_owner_info()
+if an incompatible lock or invalid lock owner is detected) makes very
+little sense.  The same goes for ETIMEDOUT error (might pop up pretty
+much anywhere if osd_request_timeout option is set) and many others.
 
-On Mon, Jul 31, 2023 at 5:29=E2=80=AFPM Xiubo Li <xiubli@redhat.com> wrote:
->
->
-> On 7/31/23 19:47, Milind Changire wrote:
-> > On Tue, Jul 25, 2023 at 9:36=E2=80=AFAM <xiubli@redhat.com> wrote:
-> >> From: Xiubo Li <xiubli@redhat.com>
-> >>
-> >> Flushing the dirty buffer may take a long time if the Rados is
-> >> overloaded or if there is network issue. So we should ping the
-> >> MDSs periodically to keep alive, else the MDS will blocklist
-> >> the kclient.
-> >>
-> >> Cc: stable@vger.kernel.org
-> >> Cc: Venky Shankar <vshankar@redhat.com>
-> >> URL: https://tracker.ceph.com/issues/61843
-> >> Reviewed-by: Milind Changire <mchangir@redhat.com>
-> >> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> >> ---
-> >>
-> >> V3:
-> >> - Rebased to the master branch
-> >>
-> >>
-> >>   fs/ceph/mds_client.c |  4 ++--
-> >>   fs/ceph/mds_client.h |  5 +++++
-> >>   fs/ceph/super.c      | 10 ++++++++++
-> >>   3 files changed, 17 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> >> index 66048a86c480..5fb367b1d4b0 100644
-> >> --- a/fs/ceph/mds_client.c
-> >> +++ b/fs/ceph/mds_client.c
-> >> @@ -4764,7 +4764,7 @@ static void delayed_work(struct work_struct *wor=
-k)
-> >>
-> >>          dout("mdsc delayed_work\n");
-> >>
-> >> -       if (mdsc->stopping)
-> >> +       if (mdsc->stopping >=3D CEPH_MDSC_STOPPING_FLUSHED)
-> >>                  return;
-> > Do we want to continue to accept/perform delayed work when
-> > mdsc->stopping is set to CEPH_MDSC_STOPPING_BEGIN ?
-> >
-> > I thought setting the STOPPING_BEGIN flag would immediately bar any
-> > further new activity and STOPPING_FLUSHED would mark safe deletion of
-> > the superblock.
->
-> Yes,  we need.
->
-> Locally I can reproduce this very easy with fsstress.sh script, please
-> see https://tracker.ceph.com/issues/61843#note-1.
->
-> That's because when umounting and flushing the dirty buffer it could be
-> blocked by the Rados dues to the lower disk space or MM reasons. And
-> during this we need to ping MDS to keep alive to make sure the MDS won't
-> evict us before we close the sessions later.
->
-> Thanks
->
-> - Xiubo
->
-> >
-> >
-> >>          mutex_lock(&mdsc->mutex);
-> >> @@ -4943,7 +4943,7 @@ void send_flush_mdlog(struct ceph_mds_session *s=
-)
-> >>   void ceph_mdsc_pre_umount(struct ceph_mds_client *mdsc)
-> >>   {
-> >>          dout("pre_umount\n");
-> >> -       mdsc->stopping =3D 1;
-> >> +       mdsc->stopping =3D CEPH_MDSC_STOPPING_BEGIN;
-> >>
-> >>          ceph_mdsc_iterate_sessions(mdsc, send_flush_mdlog, true);
-> >>          ceph_mdsc_iterate_sessions(mdsc, lock_unlock_session, false);
-> >> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> >> index 724307ff89cd..86d2965e68a1 100644
-> >> --- a/fs/ceph/mds_client.h
-> >> +++ b/fs/ceph/mds_client.h
-> >> @@ -380,6 +380,11 @@ struct cap_wait {
-> >>          int                     want;
-> >>   };
-> >>
-> >> +enum {
-> >> +       CEPH_MDSC_STOPPING_BEGIN =3D 1,
-> >> +       CEPH_MDSC_STOPPING_FLUSHED =3D 2,
-> >> +};
-> >> +
-> >>   /*
-> >>    * mds client state
-> >>    */
-> >> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> >> index 3fc48b43cab0..a5f52013314d 100644
-> >> --- a/fs/ceph/super.c
-> >> +++ b/fs/ceph/super.c
-> >> @@ -1374,6 +1374,16 @@ static void ceph_kill_sb(struct super_block *s)
-> >>          ceph_mdsc_pre_umount(fsc->mdsc);
-> >>          flush_fs_workqueues(fsc);
-> >>
-> >> +       /*
-> >> +        * Though the kill_anon_super() will finally trigger the
-> >> +        * sync_filesystem() anyway, we still need to do it here
-> >> +        * and then bump the stage of shutdown to stop the work
-> >> +        * queue as earlier as possible.
-> >> +        */
-> >> +       sync_filesystem(s);
-> >> +
-> >> +       fsc->mdsc->stopping =3D CEPH_MDSC_STOPPING_FLUSHED;
-> >> +
-> >>          kill_anon_super(s);
-> >>
-> >>          fsc->client->extra_mon_dispatch =3D NULL;
-> >> --
-> >> 2.39.1
-> >>
-> >
->
+Just fail I/O requests on rbd_dev->acquiring_list immediately on any
+error from rbd_try_lock().
 
+Cc: stable@vger.kernel.org # 588159009d5b: rbd: retrieve and check lock owner twice before blocklisting
+Cc: stable@vger.kernel.org
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 28 +++++++++++++++-------------
+ 1 file changed, 15 insertions(+), 13 deletions(-)
 
---=20
-Milind
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 24afcc93ac01..2328cc05be36 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3675,7 +3675,7 @@ static int rbd_lock(struct rbd_device *rbd_dev)
+ 	ret = ceph_cls_lock(osdc, &rbd_dev->header_oid, &rbd_dev->header_oloc,
+ 			    RBD_LOCK_NAME, CEPH_CLS_LOCK_EXCLUSIVE, cookie,
+ 			    RBD_LOCK_TAG, "", 0);
+-	if (ret)
++	if (ret && ret != -EEXIST)
+ 		return ret;
+ 
+ 	__rbd_lock(rbd_dev, cookie);
+@@ -3878,7 +3878,7 @@ static struct ceph_locker *get_lock_owner_info(struct rbd_device *rbd_dev)
+ 				 &rbd_dev->header_oloc, RBD_LOCK_NAME,
+ 				 &lock_type, &lock_tag, &lockers, &num_lockers);
+ 	if (ret) {
+-		rbd_warn(rbd_dev, "failed to retrieve lockers: %d", ret);
++		rbd_warn(rbd_dev, "failed to get header lockers: %d", ret);
+ 		return ERR_PTR(ret);
+ 	}
+ 
+@@ -3940,8 +3940,10 @@ static int find_watcher(struct rbd_device *rbd_dev,
+ 	ret = ceph_osdc_list_watchers(osdc, &rbd_dev->header_oid,
+ 				      &rbd_dev->header_oloc, &watchers,
+ 				      &num_watchers);
+-	if (ret)
++	if (ret) {
++		rbd_warn(rbd_dev, "failed to get watchers: %d", ret);
+ 		return ret;
++	}
+ 
+ 	sscanf(locker->id.cookie, RBD_LOCK_COOKIE_PREFIX " %llu", &cookie);
+ 	for (i = 0; i < num_watchers; i++) {
+@@ -3985,8 +3987,12 @@ static int rbd_try_lock(struct rbd_device *rbd_dev)
+ 		locker = refreshed_locker = NULL;
+ 
+ 		ret = rbd_lock(rbd_dev);
+-		if (ret != -EBUSY)
++		if (!ret)
++			goto out;
++		if (ret != -EBUSY) {
++			rbd_warn(rbd_dev, "failed to lock header: %d", ret);
+ 			goto out;
++		}
+ 
+ 		/* determine if the current lock holder is still alive */
+ 		locker = get_lock_owner_info(rbd_dev);
+@@ -4089,11 +4095,8 @@ static int rbd_try_acquire_lock(struct rbd_device *rbd_dev)
+ 
+ 	ret = rbd_try_lock(rbd_dev);
+ 	if (ret < 0) {
+-		rbd_warn(rbd_dev, "failed to lock header: %d", ret);
+-		if (ret == -EBLOCKLISTED)
+-			goto out;
+-
+-		ret = 1; /* request lock anyway */
++		rbd_warn(rbd_dev, "failed to acquire lock: %d", ret);
++		goto out;
+ 	}
+ 	if (ret > 0) {
+ 		up_write(&rbd_dev->lock_rwsem);
+@@ -6627,12 +6630,11 @@ static int rbd_add_acquire_lock(struct rbd_device *rbd_dev)
+ 		cancel_delayed_work_sync(&rbd_dev->lock_dwork);
+ 		if (!ret)
+ 			ret = -ETIMEDOUT;
+-	}
+ 
+-	if (ret) {
+-		rbd_warn(rbd_dev, "failed to acquire exclusive lock: %ld", ret);
+-		return ret;
++		rbd_warn(rbd_dev, "failed to acquire lock: %ld", ret);
+ 	}
++	if (ret)
++		return ret;
+ 
+ 	/*
+ 	 * The lock may have been released by now, unless automatic lock
+-- 
+2.41.0
 
