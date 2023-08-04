@@ -2,272 +2,96 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5136DC04A94
-	for <ceph-devel@archiver.kernel.org>; Fri,  4 Aug 2023 13:17:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A92BC04A6A
+	for <ceph-devel@archiver.kernel.org>; Fri,  4 Aug 2023 14:53:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230140AbjHDNRh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 4 Aug 2023 09:17:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56410 "EHLO
+        id S229812AbjHDOxQ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 4 Aug 2023 10:53:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229885AbjHDNQo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Aug 2023 09:16:44 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C48C34ED6
-        for <ceph-devel@vger.kernel.org>; Fri,  4 Aug 2023 06:14:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1691154849;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=rCroQnGwP6ReYl8bRAbrswP6dCB/MYi7V8I25lVTiBY=;
-        b=cmT/bzpeEiQP1Z+eLoJR2/EJ77LrXDo5nQkRLSxO3oQFIK4ikCDzSs5eDlrwEwPG+HQCF8
-        5aBXokegNPxvyAQXtwwWuLZ0nqCtZqaVJLka80U9DqN6DDJF0LTIXA37yZ6VTCigcmATkA
-        szrT9YwOUEyZOvZs3hI33w9BaWj+70s=
-Received: from mimecast-mx02.redhat.com (66.187.233.73 [66.187.233.73]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-255-fdGOafsgOcWmy19g8uwIkA-1; Fri, 04 Aug 2023 09:14:05 -0400
-X-MC-Unique: fdGOafsgOcWmy19g8uwIkA-1
-Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S230517AbjHDOxO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Aug 2023 10:53:14 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CE6249C6;
+        Fri,  4 Aug 2023 07:53:13 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 7CA741C060E6;
-        Fri,  4 Aug 2023 13:14:04 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.42.28.131])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5F81B40282C;
-        Fri,  4 Aug 2023 13:14:03 +0000 (UTC)
-From:   David Howells <dhowells@redhat.com>
-To:     Ilya Dryomov <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>
-Cc:     David Howells <dhowells@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>,
-        Dongsheng Yang <dongsheng.yang@easystack.cn>,
-        ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [RFC PATCH 17/18] ceph: Remove CEPH_MSG_DATA_PAGES and its helpers
-Date:   Fri,  4 Aug 2023 14:13:26 +0100
-Message-ID: <20230804131327.2574082-18-dhowells@redhat.com>
-In-Reply-To: <20230804131327.2574082-1-dhowells@redhat.com>
-References: <20230804131327.2574082-1-dhowells@redhat.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 022196202B;
+        Fri,  4 Aug 2023 14:53:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 84358C433C8;
+        Fri,  4 Aug 2023 14:53:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1691160792;
+        bh=i8frHjWssprhpqflEJzk6UJ9+pA/7h0hxhFuqQQSANA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=KVFNg+BHtMnxXyFuN6oOmmIFpEUkKftUrVowYVMSMKRBpYchss3ecC3vHLpw6P6Dy
+         lBCB7b06NhjmnsJma5e3lt01sn8uCwR4Wtm+/vWn7MQMOgS7Tsm+8jNGcQHKoxM/G3
+         6AZ+bjD58DV9vzU7aYAcg4CW1URu9+kVCB+L0kLKt/u727d7BCIGSbx8RkyImBlmLY
+         d8KowtFBkHkDz6EEmnMDBMRqxgOA3/eIRm9m3AbIl7RSY0gWiqZLO2UZySJWyMnMQH
+         fEBkAft5AeAjiWFwW4WkSaaaHeaMl3sN2f8q50gFbPI1jB9G4OyXia7emXgwt+QP7V
+         NkRvxfZYHft5Q==
+Date:   Fri, 4 Aug 2023 16:53:02 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
+Cc:     xiubli@redhat.com, stgraber@ubuntu.com,
+        linux-fsdevel@vger.kernel.org, Jeff Layton <jlayton@kernel.org>,
+        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v9 03/12] ceph: handle idmapped mounts in
+ create_request_message()
+Message-ID: <20230804-paket-zuziehen-8615127094f3@brauner>
+References: <20230804084858.126104-1-aleksandr.mikhalitsyn@canonical.com>
+ <20230804084858.126104-4-aleksandr.mikhalitsyn@canonical.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20230804084858.126104-4-aleksandr.mikhalitsyn@canonical.com>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
----
- include/linux/ceph/messenger.h | 26 ++-------
- net/ceph/messenger.c           | 98 +---------------------------------
- net/ceph/osd_client.c          |  2 -
- 3 files changed, 5 insertions(+), 121 deletions(-)
+On Fri, Aug 04, 2023 at 10:48:49AM +0200, Alexander Mikhalitsyn wrote:
+> From: Christian Brauner <brauner@kernel.org>
+> 
+> Inode operations that create a new filesystem object such as ->mknod,
+> ->create, ->mkdir() and others don't take a {g,u}id argument explicitly.
+> Instead the caller's fs{g,u}id is used for the {g,u}id of the new
+> filesystem object.
+> 
+> In order to ensure that the correct {g,u}id is used map the caller's
+> fs{g,u}id for creation requests. This doesn't require complex changes.
+> It suffices to pass in the relevant idmapping recorded in the request
+> message. If this request message was triggered from an inode operation
+> that creates filesystem objects it will have passed down the relevant
+> idmaping. If this is a request message that was triggered from an inode
+> operation that doens't need to take idmappings into account the initial
+> idmapping is passed down which is an identity mapping.
+> 
+> This change uses a new cephfs protocol extension CEPHFS_FEATURE_HAS_OWNER_UIDGID
+> which adds two new fields (owner_{u,g}id) to the request head structure.
+> So, we need to ensure that MDS supports it otherwise we need to fail
+> any IO that comes through an idmapped mount because we can't process it
+> in a proper way. MDS server without such an extension will use caller_{u,g}id
+> fields to set a new inode owner UID/GID which is incorrect because caller_{u,g}id
+> values are unmapped. At the same time we can't map these fields with an
+> idmapping as it can break UID/GID-based permission checks logic on the
+> MDS side. This problem was described with a lot of details at [1], [2].
+> 
+> [1] https://lore.kernel.org/lkml/CAEivzxfw1fHO2TFA4dx3u23ZKK6Q+EThfzuibrhA3RKM=ZOYLg@mail.gmail.com/
+> [2] https://lore.kernel.org/all/20220104140414.155198-3-brauner@kernel.org/
+> 
+> Link: https://github.com/ceph/ceph/pull/52575
+> Link: https://tracker.ceph.com/issues/62217
+> Cc: Xiubo Li <xiubli@redhat.com>
+> Cc: Jeff Layton <jlayton@kernel.org>
+> Cc: Ilya Dryomov <idryomov@gmail.com>
+> Cc: ceph-devel@vger.kernel.org
+> Co-Developed-by: Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
+> Signed-off-by: Christian Brauner <brauner@kernel.org>
+> Signed-off-by: Alexander Mikhalitsyn <aleksandr.mikhalitsyn@canonical.com>
+> ---
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index a2489e266bff..f48657eef648 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -118,23 +118,14 @@ struct ceph_messenger {
- enum ceph_msg_data_type {
- 	CEPH_MSG_DATA_NONE,	/* message contains no data payload */
- 	CEPH_MSG_DATA_DATABUF,	/* data source/destination is a data buffer */
--	CEPH_MSG_DATA_PAGES,	/* data source/destination is a page array */
- 	CEPH_MSG_DATA_ITER,	/* data source/destination is an iov_iter */
- };
- 
- struct ceph_msg_data {
- 	enum ceph_msg_data_type		type;
--	struct iov_iter			iter;
- 	bool				release_dbuf;
--	union {
--		struct ceph_databuf	*dbuf;
--		struct {
--			struct page	**pages;
--			size_t		length;		/* total # bytes */
--			unsigned int	offset;		/* first page */
--			bool		own_pages;
--		};
--	};
-+	struct iov_iter			iter;
-+	struct ceph_databuf		*dbuf;
- };
- 
- struct ceph_msg_data_cursor {
-@@ -144,17 +135,8 @@ struct ceph_msg_data_cursor {
- 	size_t			resid;		/* bytes not yet consumed */
- 	int			sr_resid;	/* residual sparse_read len */
- 	bool			need_crc;	/* crc update needed */
--	union {
--		struct {				/* pages */
--			unsigned int	page_offset;	/* offset in page */
--			unsigned short	page_index;	/* index in array */
--			unsigned short	page_count;	/* pages in array */
--		};
--		struct {
--			struct iov_iter		iov_iter;
--			unsigned int		lastlen;
--		};
--	};
-+	struct iov_iter		iov_iter;
-+	unsigned int		lastlen;
- };
- 
- /*
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 5b28c27858b2..acbdd086cd7a 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -710,70 +710,6 @@ void ceph_con_discard_requeued(struct ceph_connection *con, u64 reconnect_seq)
- 	}
- }
- 
--/*
-- * For a page array, a piece comes from the first page in the array
-- * that has not already been fully consumed.
-- */
--static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data_cursor *cursor,
--					size_t length)
--{
--	struct ceph_msg_data *data = cursor->data;
--	int page_count;
--
--	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
--
--	BUG_ON(!data->pages);
--	BUG_ON(!data->length);
--
--	cursor->resid = min(length, data->length);
--	page_count = calc_pages_for(data->offset, (u64)data->length);
--	cursor->page_offset = data->offset & ~PAGE_MASK;
--	cursor->page_index = 0;
--	BUG_ON(page_count > (int)USHRT_MAX);
--	cursor->page_count = (unsigned short)page_count;
--	BUG_ON(length > SIZE_MAX - cursor->page_offset);
--}
--
--static struct page *
--ceph_msg_data_pages_next(struct ceph_msg_data_cursor *cursor,
--					size_t *page_offset, size_t *length)
--{
--	struct ceph_msg_data *data = cursor->data;
--
--	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
--
--	BUG_ON(cursor->page_index >= cursor->page_count);
--	BUG_ON(cursor->page_offset >= PAGE_SIZE);
--
--	*page_offset = cursor->page_offset;
--	*length = min_t(size_t, cursor->resid, PAGE_SIZE - *page_offset);
--	return data->pages[cursor->page_index];
--}
--
--static bool ceph_msg_data_pages_advance(struct ceph_msg_data_cursor *cursor,
--						size_t bytes)
--{
--	BUG_ON(cursor->data->type != CEPH_MSG_DATA_PAGES);
--
--	BUG_ON(cursor->page_offset + bytes > PAGE_SIZE);
--
--	/* Advance the cursor page offset */
--
--	cursor->resid -= bytes;
--	cursor->page_offset = (cursor->page_offset + bytes) & ~PAGE_MASK;
--	if (!bytes || cursor->page_offset)
--		return false;	/* more bytes to process in the current page */
--
--	if (!cursor->resid)
--		return false;   /* no more data */
--
--	/* Move on to the next page; offset is already at 0 */
--
--	BUG_ON(cursor->page_index >= cursor->page_count);
--	cursor->page_index++;
--	return true;
--}
--
- static void ceph_msg_data_iter_cursor_init(struct ceph_msg_data_cursor *cursor,
- 					size_t length)
- {
-@@ -844,9 +780,6 @@ static void __ceph_msg_data_cursor_init(struct ceph_msg_data_cursor *cursor)
- 	size_t length = cursor->total_resid;
- 
- 	switch (cursor->data->type) {
--	case CEPH_MSG_DATA_PAGES:
--		ceph_msg_data_pages_cursor_init(cursor, length);
--		break;
- 	case CEPH_MSG_DATA_ITER:
- 		ceph_msg_data_iter_cursor_init(cursor, length);
- 		break;
-@@ -883,9 +816,6 @@ struct page *ceph_msg_data_next(struct ceph_msg_data_cursor *cursor,
- 	struct page *page;
- 
- 	switch (cursor->data->type) {
--	case CEPH_MSG_DATA_PAGES:
--		page = ceph_msg_data_pages_next(cursor, page_offset, length);
--		break;
- 	case CEPH_MSG_DATA_ITER:
- 		page = ceph_msg_data_iter_next(cursor, page_offset, length);
- 		break;
-@@ -913,9 +843,6 @@ void ceph_msg_data_advance(struct ceph_msg_data_cursor *cursor, size_t bytes)
- 
- 	BUG_ON(bytes > cursor->resid);
- 	switch (cursor->data->type) {
--	case CEPH_MSG_DATA_PAGES:
--		new_piece = ceph_msg_data_pages_advance(cursor, bytes);
--		break;
- 	case CEPH_MSG_DATA_ITER:
- 		new_piece = ceph_msg_data_iter_advance(cursor, bytes);
- 		break;
-@@ -1644,12 +1571,8 @@ static struct ceph_msg_data *ceph_msg_data_add(struct ceph_msg *msg)
- 
- static void ceph_msg_data_destroy(struct ceph_msg_data *data)
- {
--	if (data->release_dbuf) {
-+	if (data->release_dbuf)
- 		ceph_databuf_release(data->dbuf);
--	} else if (data->type == CEPH_MSG_DATA_PAGES && data->own_pages) {
--		int num_pages = calc_pages_for(data->offset, data->length);
--		ceph_release_page_vector(data->pages, num_pages);
--	}
- }
- 
- void ceph_msg_data_add_databuf(struct ceph_msg *msg, struct ceph_databuf *dbuf)
-@@ -1670,25 +1593,6 @@ void ceph_msg_data_add_databuf(struct ceph_msg *msg, struct ceph_databuf *dbuf)
- }
- EXPORT_SYMBOL(ceph_msg_data_add_databuf);
- 
--void ceph_msg_data_add_pages(struct ceph_msg *msg, struct page **pages,
--			     size_t length, size_t offset, bool own_pages)
--{
--	struct ceph_msg_data *data;
--
--	BUG_ON(!pages);
--	BUG_ON(!length);
--
--	data = ceph_msg_data_add(msg);
--	data->type = CEPH_MSG_DATA_PAGES;
--	data->pages = pages;
--	data->length = length;
--	data->offset = offset & ~PAGE_MASK;
--	data->own_pages = own_pages;
--
--	msg->data_length += length;
--}
--EXPORT_SYMBOL(ceph_msg_data_add_pages);
--
- void ceph_msg_data_add_iter(struct ceph_msg *msg,
- 			    struct iov_iter *iter)
- {
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 70f81a0b62c0..6fb78ae14f03 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -829,8 +829,6 @@ EXPORT_SYMBOL(osd_req_op_alloc_hint_init);
- static void ceph_osdc_msg_data_add(struct ceph_msg *msg,
- 				struct ceph_osd_data *osd_data)
- {
--	u64 length = ceph_osd_data_length(osd_data);
--
- 	if (osd_data->type == CEPH_OSD_DATA_TYPE_ITER) {
- 		ceph_msg_data_add_iter(msg, &osd_data->iter);
- 	} else {
-
+I like the new extension,
+Acked-by: Christian Brauner <brauner@kernel.org>
