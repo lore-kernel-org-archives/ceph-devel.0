@@ -2,174 +2,137 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDD27C41513
-	for <ceph-devel@archiver.kernel.org>; Wed,  9 Aug 2023 22:38:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 484FCC04A6A
+	for <ceph-devel@archiver.kernel.org>; Sun, 13 Aug 2023 16:00:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233069AbjHIWiJ (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 9 Aug 2023 18:38:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36410 "EHLO
+        id S231433AbjHMQAh (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 13 Aug 2023 12:00:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60592 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232937AbjHIWiE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Aug 2023 18:38:04 -0400
-Received: from mail.parknet.co.jp (mail.parknet.co.jp [210.171.160.6])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 51AA5138;
-        Wed,  9 Aug 2023 15:38:00 -0700 (PDT)
-Received: from ibmpc.myhome.or.jp (server.parknet.ne.jp [210.171.168.39])
-        by mail.parknet.co.jp (Postfix) with ESMTPSA id 3CD87205DB98;
-        Thu, 10 Aug 2023 07:38:00 +0900 (JST)
-Received: from devron.myhome.or.jp (foobar@devron.myhome.or.jp [192.168.0.3])
-        by ibmpc.myhome.or.jp (8.17.2/8.17.2/Debian-1) with ESMTPS id 379Mbwf6230731
-        (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-        Thu, 10 Aug 2023 07:38:00 +0900
-Received: from devron.myhome.or.jp (foobar@localhost [127.0.0.1])
-        by devron.myhome.or.jp (8.17.2/8.17.2/Debian-1) with ESMTPS id 379MbwGI248785
-        (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-        Thu, 10 Aug 2023 07:37:58 +0900
-Received: (from hirofumi@localhost)
-        by devron.myhome.or.jp (8.17.2/8.17.2/Submit) id 379MbqTh248778;
-        Thu, 10 Aug 2023 07:37:52 +0900
-From:   OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Frank Sorenson <sorenson@redhat.com>, Jan Kara <jack@suse.cz>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        Christian Brauner <brauner@kernel.org>,
-        Eric Van Hensbergen <ericvh@kernel.org>,
-        Latchesar Ionkov <lucho@ionkov.net>,
-        Dominique Martinet <asmadeus@codewreck.org>,
-        Christian Schoenebeck <linux_oss@crudebyte.com>,
-        David Howells <dhowells@redhat.com>,
-        Marc Dionne <marc.dionne@auristor.com>,
-        Chris Mason <clm@fb.com>, Josef Bacik <josef@toxicpanda.com>,
-        David Sterba <dsterba@suse.com>, Xiubo Li <xiubli@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu,
-        Tyler Hicks <code@tyhicks.com>, Gao Xiang <xiang@kernel.org>,
-        Chao Yu <chao@kernel.org>,
-        Yue Hu <huyue2@gl0jj8bn.sched.sma.tdnsstic1.cn>,
-        Jeffle Xu <jefflexu@linux.alibaba.com>,
-        Namjae Jeon <linkinjeon@kernel.org>,
-        Sungjong Seo <sj1557.seo@samsung.com>,
-        Jan Kara <jack@suse.com>, "Theodore Ts'o" <tytso@mit.edu>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        Bob Peterson <rpeterso@redhat.com>,
-        Andreas Gruenbacher <agruenba@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Tejun Heo <tj@kernel.org>,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        Anna Schumaker <anna@kernel.org>,
-        Konstantin Komarov <almaz.alexandrovich@paragon-software.com>,
-        Mark Fasheh <mark@fasheh.com>,
-        Joel Becker <jlbec@evilplan.org>,
-        Joseph Qi <joseph.qi@linux.alibaba.com>,
-        Mike Marshall <hubcap@omnibond.com>,
-        Martin Brandenburg <martin@omnibond.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Iurii Zaikin <yzaikin@google.com>,
-        Steve French <sfrench@samba.org>,
-        Paulo Alcantara <pc@manguebit.com>,
-        Ronnie Sahlberg <ronniesahlberg@gmail.com>,
-        Shyam Prasad N <sprasad@microsoft.com>,
-        Tom Talpey <tom@talpey.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Richard Weinberger <richard@nod.at>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Hugh Dickins <hughd@google.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Amir Goldstein <amir73il@gmail.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Benjamin Coddington <bcodding@redhat.com>,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        v9fs@lists.linux.dev, linux-afs@lists.infradead.org,
-        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        codalist@telemann.coda.cs.cmu.edu, ecryptfs@vger.kernel.org,
-        linux-erofs@lists.ozlabs.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, cluster-devel@redhat.com,
-        linux-nfs@vger.kernel.org, ntfs3@lists.linux.dev,
-        ocfs2-devel@lists.linux.dev, devel@lists.orangefs.org,
-        linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
-        linux-mtd@lists.infradead.org, linux-mm@kvack.org,
-        linux-unionfs@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v7 05/13] fat: make fat_update_time get its own timestamp
-In-Reply-To: <e4cee2590f5cb9a13a8d4445e550e155d551670d.camel@kernel.org> (Jeff
-        Layton's message of "Wed, 09 Aug 2023 18:07:29 -0400")
-References: <20230807-mgctime-v7-0-d1dec143a704@kernel.org>
-        <20230807-mgctime-v7-5-d1dec143a704@kernel.org>
-        <87msz08vc7.fsf@mail.parknet.co.jp>
-        <52bead1d6a33fec89944b96e2ec20d1ea8747a9a.camel@kernel.org>
-        <878rak8hia.fsf@mail.parknet.co.jp>
-        <20230809150041.452w7gucjmvjnvbg@quack3>
-        <87v8do6y8q.fsf@mail.parknet.co.jp>
-        <2cb998ff14ace352a9dd553e82cfa0aa92ec09ce.camel@kernel.org>
-        <87leek6rh1.fsf@mail.parknet.co.jp>
-        <ccffe6ca3397c8374352b002fe01d55b09d84ef4.camel@kernel.org>
-        <87h6p86p9z.fsf@mail.parknet.co.jp>
-        <edf8e8ca3b38e56f30e0d24ac7293f848ffee371.camel@kernel.org>
-        <87a5v06kij.fsf@mail.parknet.co.jp>
-        <e4cee2590f5cb9a13a8d4445e550e155d551670d.camel@kernel.org>
-Date:   Thu, 10 Aug 2023 07:37:52 +0900
-Message-ID: <87zg2z3kqn.fsf@mail.parknet.co.jp>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+        with ESMTP id S230411AbjHMQAg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Aug 2023 12:00:36 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A76FF1AA;
+        Sun, 13 Aug 2023 09:00:16 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5B68663369;
+        Sun, 13 Aug 2023 15:52:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F217C433C7;
+        Sun, 13 Aug 2023 15:52:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1691941959;
+        bh=NPEAUS5UERZKzGHUYw8YYedeTDArOelPvY/JM33AHd8=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=kYaCHpxrDObBLy/+riT7UqdjYbrrJRieeXTkYZH3UAQ58N+BRUyOJsQ/ll+5Vi0Wr
+         b2A29ua1mWSGcG+yTQtoftefmGW20HR8yxDBdAgyIqOKg6IKqPazH/7LRwj76vV22g
+         CXMERTZEF/uUf+zMkYBv6X+bgNOs/RllJqEBHYQCtcizGr9RXWSit5CGcyc9KrpcWP
+         BgdO/16C/wbgVCTL4XNmoa+SdtEnVQoZoRYFeSz+IA2e9g9f0n7ixFNzWo2sxBmtoW
+         H4DgwBtCQxATVJKIwqb/09L+hDBnnH+K/BCvNBpfuWSoBCMflyY5nQ1IfLYs38g74z
+         WivTHggCv5+kQ==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Ilya Dryomov <idryomov@gmail.com>,
+        Dongsheng Yang <dongsheng.yang@easystack.cn>,
+        Sasha Levin <sashal@kernel.org>, axboe@kernel.dk,
+        xiubli@redhat.com, davem@davemloft.net, edumazet@google.com,
+        kuba@kernel.org, pabeni@redhat.com, ceph-devel@vger.kernel.org,
+        linux-block@vger.kernel.org, netdev@vger.kernel.org
+Subject: [PATCH AUTOSEL 6.4 48/54] rbd: harden get_lock_owner_info() a bit
+Date:   Sun, 13 Aug 2023 11:49:27 -0400
+Message-Id: <20230813154934.1067569-48-sashal@kernel.org>
+X-Mailer: git-send-email 2.40.1
+In-Reply-To: <20230813154934.1067569-1-sashal@kernel.org>
+References: <20230813154934.1067569-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+X-stable: review
+X-Patchwork-Hint: Ignore
+X-stable-base: Linux 6.4.10
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Jeff Layton <jlayton@kernel.org> writes:
+From: Ilya Dryomov <idryomov@gmail.com>
 
-> If you do that then the i_version counter would never be incremented.
-> But...I think I see what you're getting at.
->
-> Most filesystems that support the i_version counter have an on-disk
-> field for it. FAT obviously has no such thing. I suspect the i_version
-> bits in fat_update_time were added by mistake. FAT doesn't set
-> SB_I_VERSION so there's no need to do anything to the i_version field at
-> all.
->
-> Also, given that the mtime and ctime are always kept in sync on FAT,
-> we're probably fine to have it look something like this:
+[ Upstream commit 8ff2c64c9765446c3cef804fb99da04916603e27 ]
 
-Yes.
+- we want the exclusive lock type, so test for it directly
+- use sscanf() to actually parse the lock cookie and avoid admitting
+  invalid handles
+- bail if locker has a blank address
 
-IIRC, when I wrote, I decided to make it keep similar with generic
-function, instead of heavily customize for FAT (for maintenance
-reason). It is why. There would be other places with same reason.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Reviewed-by: Dongsheng Yang <dongsheng.yang@easystack.cn>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/block/rbd.c  | 21 +++++++++++++++------
+ net/ceph/messenger.c |  1 +
+ 2 files changed, 16 insertions(+), 6 deletions(-)
 
-E.g. LAZYTIME check is same reason too. (current FAT doesn't support it)
-
-So I personally I would prefer to leave it. But if you want to remove
-it, it would be ok too.
-
-Thanks.
-
-> --------------------8<------------------
-> int fat_update_time(struct inode *inode, int flags) 
-> { 
->         int dirty_flags = 0;
->
->         if (inode->i_ino == MSDOS_ROOT_INO) 
->                 return 0;
->
->         fat_truncate_time(inode, NULL, flags);
->         if (inode->i_sb->s_flags & SB_LAZYTIME)
->                 dirty_flags |= I_DIRTY_TIME;
->         else
->                 dirty_flags |= I_DIRTY_SYNC;
->
->         __mark_inode_dirty(inode, dirty_flags);
->         return 0;
-> } 
-> --------------------8<------------------
->
-> ...and we should probably do that in a separate patch in advance of the
-> update_time rework, since it's really a different change.
->
-> If you're in agreement, then I'll plan to respin the series with this
-> fixed and resend.
->
-> Thanks for being patient!
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 7c37c047dbea2..a6210dfae0012 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3862,10 +3862,9 @@ static struct ceph_locker *get_lock_owner_info(struct rbd_device *rbd_dev)
+ 	u32 num_lockers;
+ 	u8 lock_type;
+ 	char *lock_tag;
++	u64 handle;
+ 	int ret;
+ 
+-	dout("%s rbd_dev %p\n", __func__, rbd_dev);
+-
+ 	ret = ceph_cls_lock_info(osdc, &rbd_dev->header_oid,
+ 				 &rbd_dev->header_oloc, RBD_LOCK_NAME,
+ 				 &lock_type, &lock_tag, &lockers, &num_lockers);
+@@ -3886,18 +3885,28 @@ static struct ceph_locker *get_lock_owner_info(struct rbd_device *rbd_dev)
+ 		goto err_busy;
+ 	}
+ 
+-	if (lock_type == CEPH_CLS_LOCK_SHARED) {
+-		rbd_warn(rbd_dev, "shared lock type detected");
++	if (lock_type != CEPH_CLS_LOCK_EXCLUSIVE) {
++		rbd_warn(rbd_dev, "incompatible lock type detected");
+ 		goto err_busy;
+ 	}
+ 
+ 	WARN_ON(num_lockers != 1);
+-	if (strncmp(lockers[0].id.cookie, RBD_LOCK_COOKIE_PREFIX,
+-		    strlen(RBD_LOCK_COOKIE_PREFIX))) {
++	ret = sscanf(lockers[0].id.cookie, RBD_LOCK_COOKIE_PREFIX " %llu",
++		     &handle);
++	if (ret != 1) {
+ 		rbd_warn(rbd_dev, "locked by external mechanism, cookie %s",
+ 			 lockers[0].id.cookie);
+ 		goto err_busy;
+ 	}
++	if (ceph_addr_is_blank(&lockers[0].info.addr)) {
++		rbd_warn(rbd_dev, "locker has a blank address");
++		goto err_busy;
++	}
++
++	dout("%s rbd_dev %p got locker %s%llu@%pISpc/%u handle %llu\n",
++	     __func__, rbd_dev, ENTITY_NAME(lockers[0].id.name),
++	     &lockers[0].info.addr.in_addr,
++	     le32_to_cpu(lockers[0].info.addr.nonce), handle);
+ 
+ out:
+ 	kfree(lock_tag);
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index cd7b0bf5369ec..5eb4898cccd4c 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1123,6 +1123,7 @@ bool ceph_addr_is_blank(const struct ceph_entity_addr *addr)
+ 		return true;
+ 	}
+ }
++EXPORT_SYMBOL(ceph_addr_is_blank);
+ 
+ int ceph_addr_port(const struct ceph_entity_addr *addr)
+ {
 -- 
-OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+2.40.1
+
