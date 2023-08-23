@@ -2,78 +2,68 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6934EE49A5
-	for <ceph-devel@archiver.kernel.org>; Tue, 22 Aug 2023 20:38:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EFF02EE49B5
+	for <ceph-devel@archiver.kernel.org>; Wed, 23 Aug 2023 10:31:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229930AbjHVUik (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Tue, 22 Aug 2023 16:38:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52190 "EHLO
+        id S233778AbjHWKb5 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Wed, 23 Aug 2023 06:31:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36234 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229486AbjHVUij (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Aug 2023 16:38:39 -0400
-X-Greylist: delayed 903 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 22 Aug 2023 13:38:35 PDT
-Received: from symantec4.comsats.net.pk (symantec4.comsats.net.pk [203.124.41.30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 229D4A8
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Aug 2023 13:38:34 -0700 (PDT)
-X-AuditID: cb7c291e-06dff70000002aeb-80-64e5045c3d3a
-Received: from iesco.comsatshosting.com (iesco.comsatshosting.com [210.56.28.11])
-        (using TLS with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (Client did not present a certificate)
-        by symantec4.comsats.net.pk (Symantec Messaging Gateway) with SMTP id CB.54.10987.C5405E46; Tue, 22 Aug 2023 23:54:20 +0500 (PKT)
-DomainKey-Signature: a=rsa-sha1; c=nofws; q=dns;
-        d=iesco.com.pk; s=default;
-        h=received:content-type:mime-version:content-transfer-encoding
-          :content-description:subject:to:from:date:reply-to;
-        b=b9osrGICc3cW5ihA4hVd6ulPzw2RwGl8tZGWm2pvv75Cx0y0byYIRcbFIfhyx6Tso
-          H0WcgV6O4uE2Zwv9kKPDbXDugfHNZU+bzKayp3/HbHwr+ezz6GlKE/w1InwqilckK
-          nOlKo9kU/xpad65Va7r2OpR81RqBAdKWVCnfZr+SM=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=iesco.com.pk; s=default;
-        h=reply-to:date:from:to:subject:content-description
-          :content-transfer-encoding:mime-version:content-type;
-        bh=GMzYzcyTxDsE6wX/XHG6MHqAdAiHrhqbmmLQ/TZ1QnQ=;
-        b=NUtRAh/hemQC7T6IaRoKPIGWV/pJ+ZbtZYspTvZY8/uD2F7b0BfxYTBHLSoyVokOH
-          l3aWNfBcZjMlbMIaCMPNBEotWNRkkNWClO0bwbtXgMRjz0lTWLMe/v8E4ig1+/iMs
-          +OBM8SUhhPBqO3wRT6m5QSqkX5BaEEftZQT16IWeo=
-Received: from [94.156.6.90] (UnknownHost [94.156.6.90]) by iesco.comsatshosting.com with SMTP;
-   Wed, 23 Aug 2023 00:28:28 +0500
-Message-ID: <CB.54.10987.C5405E46@symantec4.comsats.net.pk>
-Content-Type: text/plain; charset="iso-8859-1"
+        with ESMTP id S230372AbjHWKb4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2023 06:31:56 -0400
+Received: from 167-179-156-38.a7b39c.syd.nbn.aussiebb.net (167-179-156-38.a7b39c.syd.nbn.aussiebb.net [167.179.156.38])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14B49CD1;
+        Wed, 23 Aug 2023 03:31:52 -0700 (PDT)
+Received: from loth.rohan.me.apana.org.au ([192.168.167.2])
+        by formenos.hmeau.com with smtp (Exim 4.94.2 #2 (Debian))
+        id 1qYl8V-006v6F-7y; Wed, 23 Aug 2023 18:30:52 +0800
+Received: by loth.rohan.me.apana.org.au (sSMTP sendmail emulation); Wed, 23 Aug 2023 18:30:52 +0800
+Date:   Wed, 23 Aug 2023 18:30:52 +0800
+From:   Herbert Xu <herbert@gondor.apana.org.au>
+To:     Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
+        Eric Biggers <ebiggers@kernel.org>,
+        "Theodore Y. Ts'o" <tytso@mit.edu>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        linux-fscrypt@vger.kernel.org, Richard Weinberger <richard@nod.at>,
+        linux-mtd@lists.infradead.org,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        linux-bluetooth@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>,
+        Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
+        ceph-devel@vger.kernel.org,
+        Steffen Klassert <steffen.klassert@secunet.com>,
+        "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org,
+        Johannes Berg <johannes@sipsolutions.net>,
+        linux-wireless@vger.kernel.org,
+        Matthieu Baerts <matthieu.baerts@tessares.net>,
+        Mat Martineau <martineau@kernel.org>,
+        Chuck Lever <chuck.lever@oracle.com>,
+        Neil Brown <neilb@suse.de>, linux-nfs@vger.kernel.org,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        linux-integrity@vger.kernel.org,
+        "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        Ayush Sawal <ayush.sawal@chelsio.com>
+Subject: [PATCH 0/12] Do not include crypto/algapi.h
+Message-ID: <ZOXf3JTIqhRLbn5j@gondor.apana.org.au>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Description: Mail message body
-Subject: Re; Interest,
-To:     ceph-devel@vger.kernel.org
-From:   "Chen Yun" <pso.chairmanbod@iesco.com.pk>
-Date:   Tue, 22 Aug 2023 12:28:42 -0700
-Reply-To: chnyne@gmail.com
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrDLMWRmVeSWpSXmKPExsVyyUKGWzeG5WmKwaYjOhYfbk5icmD0+LxJ
-        LoAxissmJTUnsyy1SN8ugStjyboLLAW7mSva+hexNDA+Zupi5OSQEDCROLxrJksXIxeHkMAe
-        JonVm2+zgjgsAquZJU4efs4I4Txklnjz6QszRFkzo8TkjQeYQfp5Bawl1jz/xgZiMwvoSdyY
-        OoUNIi4ocXLmExaIuLbEsoWvgeo5gGw1ia9dJSBhYQExiU/TlrGD2CICchIHt80Cs9kE9CVW
-        fG1mBClnEVCVuDvbCCQsJCAlsfHKerYJjPyzkCybhWTZLCTLZiEsW8DIsopRorgyNxEYaskm
-        esn5ucWJJcV6eaklegXZmxiBYXi6RlNuB+PSS4mHGAU4GJV4eH+ue5IixJpYBtR1iFGCg1lJ
-        hFf6+8MUId6UxMqq1KL8+KLSnNTiQ4zSHCxK4ry2Qs+ShQTSE0tSs1NTC1KLYLJMHJxSDYyF
-        Xp9y1DhTf872dN7hPTvhTVSZ8LJNM78HnHPat9z9vHKG0JIopaPm4j82M2td7ns+d56n1VFZ
-        kWQdjTuPy+4YM4dbcMQ6f/hn5/xC/fLXj066/ObG8Vff39VQdH9sE3vmzuzkHSpcVlnPq4SY
-        s80S1vSuTd+n3LjgnVCcROkOCdvfd3QvJCmxFGckGmoxFxUnAgBhxlc4PwIAAA==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Re; Interest,
+Hi:
 
-I am interested in discussing the Investment proposal as I explained
-in my previous mail. May you let me know your interest and the
-possibility of a cooperation aimed for mutual interest.
+The header file crypto/algapi.h is for internal use only.  There is
+no reason to use it outside of the Crypto API.  Most uses of it
+outside of the API should use crypto/utils.h instead.
 
-Looking forward to your mail for further discussion.
+Feel free to apply this patch to your tree directly.  Just send me
+a reply and I'll drop it from my patch queue.
 
-Regards
-
-------
-Chen Yun - Chairman of CREC
-China Railway Engineering Corporation - CRECG
-China Railway Plaza, No.69 Fuxing Road, Haidian District, Beijing, P.R.
-China
-
+Thanks,
+-- 
+Email: Herbert Xu <herbert@gondor.apana.org.au>
+Home Page: http://gondor.apana.org.au/~herbert/
+PGP Key: http://gondor.apana.org.au/~herbert/pubkey.txt
