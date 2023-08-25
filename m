@@ -2,156 +2,99 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFF7DC83EC6
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Aug 2023 20:13:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E146EE49A0
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Aug 2023 21:15:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230363AbjHYUNN (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Aug 2023 16:13:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51290 "EHLO
+        id S231362AbjHYVO3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 25 Aug 2023 17:14:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40630 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229607AbjHYUMk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Aug 2023 16:12:40 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 022F22689;
-        Fri, 25 Aug 2023 13:12:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
-        Content-Type:Content-ID:Content-Description;
-        bh=A9e9J+dnjCMMc42iX3zzfqVkWCVEH8VUZ/HYaNwAhhc=; b=CagZXzLXuThc8baN2nwM8XfRJN
-        YbdQX6dtKhmbFS05r0NgijXYb3fAT98IPpHszGOlgO88v4SswgP9vHxD36boL3hsVFdBxD+zLH3gb
-        /67Ng23CL7XEAfPnlWPlgps895UvfIevcOvGEOg7soNsWbkYewo8VGjLelwJFFAG747jIiDqmVfwF
-        qYWEfcDLaEGZvcpjhCZ/kDyAm0nROWwy0TcDKJtmlxkiUMPHJ1VpGwhb5p8qsSr379zeknq9JR420
-        SlkWcFE3YxORScNkSuTJnNiMyEtjyY5ioXZE3HianNXgqgXv7pCcxZEfVtR2pg7KV/RY0pxpQ5Np1
-        QJJMM5Hw==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1qZdAW-001SaN-9p; Fri, 25 Aug 2023 20:12:32 +0000
-From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
-To:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
-        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
-        David Howells <dhowells@redhat.com>,
-        linux-fsdevel@vger.kernel.org
-Subject: [PATCH 13/15] ceph: Convert ceph_fill_inline_data() to take a folio
-Date:   Fri, 25 Aug 2023 21:12:23 +0100
-Message-Id: <20230825201225.348148-14-willy@infradead.org>
-X-Mailer: git-send-email 2.37.1
-In-Reply-To: <20230825201225.348148-1-willy@infradead.org>
-References: <20230825201225.348148-1-willy@infradead.org>
+        with ESMTP id S229610AbjHYVN6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Aug 2023 17:13:58 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F4AD211E;
+        Fri, 25 Aug 2023 14:13:56 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0D28A62FFA;
+        Fri, 25 Aug 2023 21:13:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8B0ECC433C7;
+        Fri, 25 Aug 2023 21:13:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692998035;
+        bh=uiXkyRVOSV4tA0Dr9xfhgTNwejV2oZiBsqM/hZn5yPg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=UgSWvtl49FkDkaRYO3r0z4VzYK/yDU2hQmm5FUy/saN2DaYbzz5vuhxj+oTpq/YEz
+         6iPySb9lNptNeguxiheMPfLw58USp34CyI6yLgGfRUu28v0iNMZb16krVHW1DR7eer
+         X7/UJR9hvVw1WO8f9x3khDGmYa5/plHR8kM491NKMqEuNO4Pw9iZDNRrB6DqgVa63r
+         +IjWV8he6N0kCyEWrQbC5VfgXNT058QGjrBf2pO6OG6y8NaLAaMZTNAT4pmMeyQyKD
+         eh10XcSY2us9pZi/URLX1z5VvUzlXT9gvz7Jlc/CvSoA1f7ssDARtN21vNHvUsEQko
+         AuIIYRR5eP06A==
+Date:   Fri, 25 Aug 2023 14:13:52 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Herbert Xu <herbert@gondor.apana.org.au>
+Cc:     Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
+        "Theodore Y. Ts'o" <tytso@mit.edu>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        linux-fscrypt@vger.kernel.org, Richard Weinberger <richard@nod.at>,
+        linux-mtd@lists.infradead.org,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        linux-bluetooth@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>,
+        Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
+        ceph-devel@vger.kernel.org,
+        Steffen Klassert <steffen.klassert@secunet.com>,
+        "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org,
+        Johannes Berg <johannes@sipsolutions.net>,
+        linux-wireless@vger.kernel.org,
+        Matthieu Baerts <matthieu.baerts@tessares.net>,
+        Mat Martineau <martineau@kernel.org>,
+        Chuck Lever <chuck.lever@oracle.com>,
+        Neil Brown <neilb@suse.de>, linux-nfs@vger.kernel.org,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        linux-integrity@vger.kernel.org,
+        "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        Ayush Sawal <ayush.sawal@chelsio.com>
+Subject: Re: [PATCH 1/12] fscrypt: Do not include crypto/algapi.h
+Message-ID: <20230825211352.GB1366@sol.localdomain>
+References: <ZOXf3JTIqhRLbn5j@gondor.apana.org.au>
+ <E1qYl9q-006vDd-FJ@formenos.hmeau.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <E1qYl9q-006vDd-FJ@formenos.hmeau.com>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Its one caller now has a folio, so use the folio API within this
-function.
+On Wed, Aug 23, 2023 at 06:32:15PM +0800, Herbert Xu wrote:
+> The header file crypto/algapi.h is for internal use only.  Use the
+> header file crypto/utils.h instead.
+> 
+> Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+> ---
+> 
+>  fs/crypto/keysetup_v1.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/crypto/keysetup_v1.c b/fs/crypto/keysetup_v1.c
+> index 75dabd9b27f9..d698ecb9ad44 100644
+> --- a/fs/crypto/keysetup_v1.c
+> +++ b/fs/crypto/keysetup_v1.c
+> @@ -20,8 +20,8 @@
+>   *    managed alongside the master keys in the filesystem-level keyring)
+>   */
+>  
+> -#include <crypto/algapi.h>
+>  #include <crypto/skcipher.h>
+> +#include <crypto/utils.h>
+>  #include <keys/user-type.h>
+>  #include <linux/hashtable.h>
+>  #include <linux/scatterlist.h>
 
-Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
----
- fs/ceph/addr.c  | 44 ++++++++++++++++++++------------------------
- fs/ceph/inode.c |  2 +-
- fs/ceph/super.h |  2 +-
- 3 files changed, 22 insertions(+), 26 deletions(-)
+Acked-by: Eric Biggers <ebiggers@google.com>
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 09178a8ebbde..79d8f2fddd49 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1748,47 +1748,43 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 	return ret;
- }
- 
--void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
-+void ceph_fill_inline_data(struct inode *inode, struct folio *locked_folio,
- 			   char	*data, size_t len)
- {
- 	struct address_space *mapping = inode->i_mapping;
--	struct page *page;
-+	struct folio *folio;
- 
--	if (locked_page) {
--		page = locked_page;
-+	if (locked_folio) {
-+		folio = locked_folio;
- 	} else {
- 		if (i_size_read(inode) == 0)
- 			return;
--		page = find_or_create_page(mapping, 0,
--					   mapping_gfp_constraint(mapping,
--					   ~__GFP_FS));
--		if (!page)
-+		folio = __filemap_get_folio(mapping, 0,
-+				FGP_LOCK | FGP_ACCESSED | FGP_CREAT,
-+				mapping_gfp_constraint(mapping, ~__GFP_FS));
-+		if (IS_ERR(folio))
- 			return;
--		if (PageUptodate(page)) {
--			unlock_page(page);
--			put_page(page);
-+		if (folio_test_uptodate(folio)) {
-+			folio_unlock(folio);
-+			folio_put(folio);
- 			return;
- 		}
- 	}
- 
--	dout("fill_inline_data %p %llx.%llx len %zu locked_page %p\n",
--	     inode, ceph_vinop(inode), len, locked_page);
-+	dout("fill_inline_data %p %llx.%llx len %zu locked_folio %lu\n",
-+	     inode, ceph_vinop(inode), len, locked_folio->index);
- 
--	if (len > 0) {
--		void *kaddr = kmap_atomic(page);
--		memcpy(kaddr, data, len);
--		kunmap_atomic(kaddr);
--	}
-+	memcpy_to_folio(folio, 0, data, len);
- 
--	if (page != locked_page) {
-+	if (folio != locked_folio) {
- 		if (len < PAGE_SIZE)
--			zero_user_segment(page, len, PAGE_SIZE);
-+			folio_zero_segment(folio, len, PAGE_SIZE);
- 		else
--			flush_dcache_page(page);
-+			flush_dcache_folio(folio);
- 
--		SetPageUptodate(page);
--		unlock_page(page);
--		put_page(page);
-+		folio_mark_uptodate(folio);
-+		folio_unlock(folio);
-+		folio_put(folio);
- 	}
- }
- 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index d5f0fe39b92f..70f7f68ba078 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1277,7 +1277,7 @@ int ceph_fill_inode(struct inode *inode, struct folio *locked_folio,
- 	ceph_fscache_register_inode_cookie(inode);
- 
- 	if (fill_inline)
--		ceph_fill_inline_data(inode, &locked_folio->page,
-+		ceph_fill_inline_data(inode, locked_folio,
- 				      iinfo->inline_data, iinfo->inline_len);
- 
- 	if (wake)
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index d741a9d15f52..a986928c3000 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1311,7 +1311,7 @@ extern ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
- 				struct iov_iter *to, int *retry_op,
- 				u64 *last_objver);
- extern int ceph_release(struct inode *inode, struct file *filp);
--extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
-+void ceph_fill_inline_data(struct inode *inode, struct folio *locked_folio,
- 				  char *data, size_t len);
- 
- /* dir.c */
--- 
-2.40.1
-
+- Eric
