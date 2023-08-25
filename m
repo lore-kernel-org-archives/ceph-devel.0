@@ -2,70 +2,89 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA47BFC616B
-	for <ceph-devel@archiver.kernel.org>; Fri, 25 Aug 2023 20:13:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D422C83EC0
+	for <ceph-devel@archiver.kernel.org>; Fri, 25 Aug 2023 20:13:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230511AbjHYUNT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 25 Aug 2023 16:13:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32778 "EHLO
+        id S230519AbjHYUNU (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 25 Aug 2023 16:13:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230309AbjHYUM6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Aug 2023 16:12:58 -0400
+        with ESMTP id S230311AbjHYUNB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Aug 2023 16:13:01 -0400
 Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ABE4A2689;
-        Fri, 25 Aug 2023 13:12:56 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 631E2268A;
+        Fri, 25 Aug 2023 13:12:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
-        Content-Type:Content-ID:Content-Description;
-        bh=ZIXbxbmWrTOUb6mh+hr1l56LloeqSAYd7MvHY9X30AE=; b=PjsxjRjlgunQfDgdcbQe11qeaU
-        JEgmj/e8JGFhVzrLK2w0f5lGIUY4iAyPpdYGwaGHm6Xz+eobMovp2Rw3PYD084ahFz5Ziw1NqPu/5
-        bC1KFcVY3guT8PwXyOPW5pcEKBhPt4Y1DvzZi/48yeIH5jZ6SUMiLkpG49puz6E3H5k4scS9rNPYu
-        iFo5lHHy5JgmZy7UxvODxsP/8gHF4f4jukuz/cNtZNtNTzqzmTdhORC3eBdhQOt4pVS/jPnxYHOER
-        DD1ExqVHEqc44s55KQ0AgWLRGBW0bTf/0t3etxACeNIRM/6DOvqDHR/G8zohNfX8qZYrXpMbsMFyX
-        lhqFq9xA==;
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=F1WbLqbj42rFKdEfNHbvyp//mIEsUiihUVG1zG6jIzA=; b=psJ91V+gEIAI8q58w+arOFw/9X
+        2iJBN7dUWDw9a9jp/ybHV81BjxPitQgfyMYlVFq1QavFs6ZDw8MsEydVhPne/fUEHePmrArx5TuLG
+        dkukVniPCyf6k+Rh0BMhWMMpkG4xIbbonZ4Gi0MPE6zxPVlZhjEXvv8n4FPTMSPFGsFyCo00Trne6
+        ASHSVL0JVCHd7QFzBLhVI+i2WG3uqVesQUeaMo2rYJp3MFE7p579OW5PiDlfIAV6Op0BYbzyrgIOp
+        jlJoQ3czrzOAbMNnAWObD4QfrtbqSPA8ItTOfGW09U/V7AiCLJJaskYjRBXoklxTBvGkJWFi2IvHG
+        SioK4tqA==;
 Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1qZdAV-001SZk-CS; Fri, 25 Aug 2023 20:12:31 +0000
+        id 1qZdAU-001SZc-VB; Fri, 25 Aug 2023 20:12:30 +0000
 From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
 Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
         Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
         David Howells <dhowells@redhat.com>,
         linux-fsdevel@vger.kernel.org
-Subject: [PATCH 04/15] ceph: Add a migrate_folio method
-Date:   Fri, 25 Aug 2023 21:12:14 +0100
-Message-Id: <20230825201225.348148-5-willy@infradead.org>
+Subject: [PATCH 00/15] Many folio conversions for ceph
+Date:   Fri, 25 Aug 2023 21:12:10 +0100
+Message-Id: <20230825201225.348148-1-willy@infradead.org>
 X-Mailer: git-send-email 2.37.1
-In-Reply-To: <20230825201225.348148-1-willy@infradead.org>
-References: <20230825201225.348148-1-willy@infradead.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-The ceph_snap_context is independent of the address of the data, so we
-can implement folio migration by just removing the ceph_snap_context
-from the existing folio and attach it to the new one, which is exactly
-what filemap_migrate_folio() does.
+I know David is working to make ceph large-folio-aware from the bottom up.
+Here's my attempt at making the top (ie the part of ceph that interacts
+with the page cache) folio-aware.  Mostly this is just phasing out use
+of struct page in favour of struct folio and using the new APIs.
 
-Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
----
- fs/ceph/addr.c | 1 +
- 1 file changed, 1 insertion(+)
+The fscrypt interaction still needs a bit of work, but it should be a
+little easier now.  There's still some weirdness in how ceph interacts
+with the page cache; for example it holds folios locked while doing
+writeback instead of dropping the folio lock after setting the writeback
+flag.  I'm not sure why it does that, but I don't want to try fixing that
+as part of this series.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 7c7dfcd63cd1..a0a1fac1a0db 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1563,6 +1563,7 @@ const struct address_space_operations ceph_aops = {
- 	.invalidate_folio = ceph_invalidate_folio,
- 	.release_folio = ceph_release_folio,
- 	.direct_IO = noop_direct_IO,
-+	.migrate_folio = filemap_migrate_folio,
- };
- 
- static void ceph_block_sigs(sigset_t *oldset)
+I don't have a ceph setup, so these patches are only compile tested.
+I really want to be rid of some compat code, and cecph is sometimes the
+last user (or really close to being the last user).
+
+Matthew Wilcox (Oracle) (15):
+  ceph: Convert ceph_writepages_start() to use folios a little more
+  ceph: Convert ceph_page_mkwrite() to use a folio
+  mm: Delete page_mkwrite_check_truncate()
+  ceph: Add a migrate_folio method
+  ceph: Remove ceph_writepage()
+  ceph: Convert ceph_find_incompatible() to take a folio
+  ceph: Convert writepage_nounlock() to take a folio
+  ceph: Convert writepages_finish() to use a folio
+  ceph: Use a folio in ceph_filemap_fault()
+  ceph: Convert ceph_read_iter() to use a folio to read inline data
+  ceph: Convert __ceph_do_getattr() to take a folio
+  ceph: Convert ceph_fill_inode() to take a folio
+  ceph: Convert ceph_fill_inline_data() to take a folio
+  ceph: Convert ceph_set_page_fscache() to ceph_folio_start_fscache()
+  netfs: Remove unused functions
+
+ .../filesystems/caching/netfs-api.rst         |  30 +-
+ fs/ceph/addr.c                                | 351 ++++++++----------
+ fs/ceph/file.c                                |  20 +-
+ fs/ceph/inode.c                               |  14 +-
+ fs/ceph/mds_client.h                          |   2 +-
+ fs/ceph/super.h                               |   8 +-
+ include/linux/netfs.h                         |  15 -
+ include/linux/pagemap.h                       |  28 --
+ 8 files changed, 197 insertions(+), 271 deletions(-)
+
 -- 
 2.40.1
 
