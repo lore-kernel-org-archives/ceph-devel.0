@@ -2,66 +2,65 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6935C83F01
-	for <ceph-devel@archiver.kernel.org>; Mon, 28 Aug 2023 01:21:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3EB2C83F14
+	for <ceph-devel@archiver.kernel.org>; Mon, 28 Aug 2023 01:22:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229483AbjH1BT6 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Sun, 27 Aug 2023 21:19:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43266 "EHLO
+        id S229574AbjH1BWF (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Sun, 27 Aug 2023 21:22:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229561AbjH1BTe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Aug 2023 21:19:34 -0400
+        with ESMTP id S229568AbjH1BWB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Aug 2023 21:22:01 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64815107
-        for <ceph-devel@vger.kernel.org>; Sun, 27 Aug 2023 18:18:46 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AB13107
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Aug 2023 18:21:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693185525;
+        s=mimecast20190719; t=1693185679;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=Lo/qwGlASNgjwZN1ZcYZMm77/Y/UVTy6Lh/rIRtGSfM=;
-        b=gpQ23In7WocmdnMhFbs1mqZQ7vMMkU8H+o/prt5WvmAcL28ZN8tBzaiN9EBRSWWZ1+IQEb
-        Ljug0HTRiXBEpSrQ3EFNYHH0jiiz49Hi3RENuE2k/hZgH54Vll5RYRhdnD3TBuVjJVJZ7Y
-        zZPOdWRUZ4ZyQzMP4+s65g5XURbap9Q=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=xmja/1PLodDJgYWKao/T5BYA/P9CEUYhsXxvzaEDO84=;
+        b=ERJ4Cnpg4rUjZlxMO11kIcu4Y2fmG66VK30Sz/ZIw392vH7ZY5j/xnTzecHUxyV195sMXK
+        YY6SkQYw7nX583AS6sgWt6HK9ll/Xr1F+YWepbTG5vB5UcqA6zR6ef9ScKP+EBeW6s14wc
+        ZkpIYCE1tlxDucto4rdP19Mb4Cbjr2c=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-477-ROSYtO2kMv6-Lro4T4TYHQ-1; Sun, 27 Aug 2023 21:18:44 -0400
-X-MC-Unique: ROSYtO2kMv6-Lro4T4TYHQ-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1c097e8a175so23628265ad.3
-        for <ceph-devel@vger.kernel.org>; Sun, 27 Aug 2023 18:18:43 -0700 (PDT)
+ us-mta-595-LepiybCZMZypyvvWKdrHAw-1; Sun, 27 Aug 2023 21:21:18 -0400
+X-MC-Unique: LepiybCZMZypyvvWKdrHAw-1
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-26d4ca4ba09so2966918a91.3
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Aug 2023 18:21:18 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693185523; x=1693790323;
+        d=1e100.net; s=20221208; t=1693185677; x=1693790477;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Lo/qwGlASNgjwZN1ZcYZMm77/Y/UVTy6Lh/rIRtGSfM=;
-        b=gRXy+YakJzfM/9SUkx/RZHD4w7G/hFSoEJV7PakMHWIpcrg058jkTdyAaxHvDVb3Ia
-         tzZPA1+vVOXJjnnVQkytNxk+k87ApTELuS1cFDu/pnH/LIFu4qIVDu2HC7SMkKJQc2De
-         2/tqKiHsMR7UhGKmTGFxoW5XOp0lG92YEGue/U2kCg0XajpX7kRLlNiLkZQowazW0Xnd
-         eF+Z8vI+XpWX/Ai8t59UDmD4SxliGZPfX5PMWMt7FBXOHRFs/UMOiJK+mty9YqSUhQOY
-         B0XgDJNgsd639/blIUZC3EthdwwU8gQTw/lQL24mnvihUDRUZWJbbsUslkj93rIqD7Zx
-         IKqA==
-X-Gm-Message-State: AOJu0YyW6rqMp9o6k+KyfIqakMg16CF3D6W+SbnUVekiEQuhh/ojK3kP
-        35/lvVj9WvOLWf7Mj1kc8+GNH9tFJnT6/gR/KmgfOljkAlo1st/4QzWjxz6LlI/qH/CP9/9v1aU
-        yjRQIDa9fttPCNcXcSGoR/Q==
-X-Received: by 2002:a17:903:2441:b0:1c0:9d5a:9b06 with SMTP id l1-20020a170903244100b001c09d5a9b06mr14030551pls.63.1693185522888;
-        Sun, 27 Aug 2023 18:18:42 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEiD/bp7yU3A1gMsmBvXdDIRGeuFZg+R8TD/tQZEeA4+sLck7OanAwxl79Ewk3OMsukqoJUhQ==
-X-Received: by 2002:a17:903:2441:b0:1c0:9d5a:9b06 with SMTP id l1-20020a170903244100b001c09d5a9b06mr14030539pls.63.1693185522480;
-        Sun, 27 Aug 2023 18:18:42 -0700 (PDT)
+        bh=xmja/1PLodDJgYWKao/T5BYA/P9CEUYhsXxvzaEDO84=;
+        b=LY0N07K/qwCRY+eiIID74pS5luHK7oEojODPSF/eTcpaa6FOtE0VlLjF2dX3HEx94E
+         P8/eO+0Pjy7BjfbjMUw0PX7QTanfEYGWu90h0yZE480+h12QKSeZ/odVb6rwpYEqpVR2
+         4nat5ARLKKMPNvx07UdDltCqDHB1xDVTXcEge8Abxwdr7fep03z5ZDwX0fYfTMawniOn
+         NxIyBEg3TAHJ+30v1/fJl9NobxKpVHXZmj42D0fL3g1bHTCNWwNsF+kIH/dQ0wUML+H1
+         AlMyu97F2qb82OX8+kIhWz3cMUHVNGSrxWtVLQguU0Z/sYVDgjs9xWdLCj+zjQY5nGex
+         +lLg==
+X-Gm-Message-State: AOJu0Yx5WeMfE71hi636/TzroK7AlzlKuaPKL/4FQq7NOxigt3/NB0dH
+        k7r6roipsnDiP5c7p+AbVnDl2OABx5j2Tk1GxqvK6nh+v3easmIX4sSylYXGXZR5VdrIu+XonCq
+        97gNkzfZfvaslrguxMQKKlw==
+X-Received: by 2002:a17:902:7c94:b0:1bb:cf58:531d with SMTP id y20-20020a1709027c9400b001bbcf58531dmr24304264pll.10.1693185677418;
+        Sun, 27 Aug 2023 18:21:17 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFk7z2kv2pO70y4enOxW6mKR03gcRasV88Uo9MokFbyZ79hWpRSjOtbgeIVRTN8HiEMpDLkug==
+X-Received: by 2002:a17:902:7c94:b0:1bb:cf58:531d with SMTP id y20-20020a1709027c9400b001bbcf58531dmr24304256pll.10.1693185677109;
+        Sun, 27 Aug 2023 18:21:17 -0700 (PDT)
 Received: from [10.72.112.71] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a10-20020a170902900a00b001b850c9d7b3sm5880394plp.249.2023.08.27.18.18.40
+        by smtp.gmail.com with ESMTPSA id d20-20020a170902c19400b001bd41b70b65sm5918115pld.49.2023.08.27.18.21.14
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 27 Aug 2023 18:18:41 -0700 (PDT)
-Message-ID: <467fef8f-8383-1385-dedc-b97ea7c56e47@redhat.com>
-Date:   Mon, 28 Aug 2023 09:18:38 +0800
+        Sun, 27 Aug 2023 18:21:16 -0700 (PDT)
+Message-ID: <ac005096-defd-0c3f-e5ef-37ca8dae9ed4@redhat.com>
+Date:   Mon, 28 Aug 2023 09:21:13 +0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.13.0
-Subject: Re: [PATCH 01/15] ceph: Convert ceph_writepages_start() to use folios
- a little more
+Subject: Re: [PATCH 02/15] ceph: Convert ceph_page_mkwrite() to use a folio
 Content-Language: en-US
 To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
         Ilya Dryomov <idryomov@gmail.com>
@@ -69,9 +68,9 @@ Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
         David Howells <dhowells@redhat.com>,
         linux-fsdevel@vger.kernel.org
 References: <20230825201225.348148-1-willy@infradead.org>
- <20230825201225.348148-2-willy@infradead.org>
+ <20230825201225.348148-3-willy@infradead.org>
 From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20230825201225.348148-2-willy@infradead.org>
+In-Reply-To: <20230825201225.348148-3-willy@infradead.org>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -80,277 +79,106 @@ X-Mailing-List: ceph-devel@vger.kernel.org
 
 
 On 8/26/23 04:12, Matthew Wilcox (Oracle) wrote:
-> After we iterate through the locked folios using filemap_get_folios_tag(),
-> we currently convert back to a page (and then in some circumstaces back
-> to a folio again!).  Just use a folio throughout and avoid various hidden
-> calls to compound_head().  Ceph still uses a page array to interact with
-> the OSD which should be cleaned up in a subsequent patch.
+> Operate on the entire folio instead of just the page.  There was an
+> earlier effort to do this with thp_size(), but it had the exact type
+> confusion between head & tail pages that folios are designed to avoid.
 >
 > Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 > ---
->   fs/ceph/addr.c | 100 ++++++++++++++++++++++++-------------------------
->   1 file changed, 49 insertions(+), 51 deletions(-)
+>   fs/ceph/addr.c | 35 +++++++++++++++++------------------
+>   1 file changed, 17 insertions(+), 18 deletions(-)
 >
 > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index f4863078f7fe..9a0a79833eb0 100644
+> index 9a0a79833eb0..7c7dfcd63cd1 100644
 > --- a/fs/ceph/addr.c
 > +++ b/fs/ceph/addr.c
-> @@ -1018,7 +1018,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->   		int num_ops = 0, op_idx;
->   		unsigned i, nr_folios, max_pages, locked_pages = 0;
->   		struct page **pages = NULL, **data_pages;
-> -		struct page *page;
-> +		struct folio *folio;
->   		pgoff_t strip_unit_end = 0;
->   		u64 offset = 0, len = 0;
->   		bool from_pool = false;
-> @@ -1032,22 +1032,22 @@ static int ceph_writepages_start(struct address_space *mapping,
->   		if (!nr_folios && !locked_pages)
+> @@ -1677,8 +1677,8 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+>   	struct ceph_inode_info *ci = ceph_inode(inode);
+>   	struct ceph_file_info *fi = vma->vm_file->private_data;
+>   	struct ceph_cap_flush *prealloc_cf;
+> -	struct page *page = vmf->page;
+> -	loff_t off = page_offset(page);
+> +	struct folio *folio = page_folio(vmf->page);
+> +	loff_t pos = folio_pos(folio);
+>   	loff_t size = i_size_read(inode);
+>   	size_t len;
+>   	int want, got, err;
+> @@ -1695,50 +1695,49 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+>   	sb_start_pagefault(inode->i_sb);
+>   	ceph_block_sigs(&oldset);
+>   
+> -	if (off + thp_size(page) <= size)
+> -		len = thp_size(page);
+> -	else
+> -		len = offset_in_thp(page, size);
+> +	len = folio_size(folio);
+> +	if (pos + folio_size(folio) > size)
+
+s/folio_size(folio)/len/ ?
+
+
+> +		len = size - pos;
+>   
+>   	dout("page_mkwrite %p %llx.%llx %llu~%zd getting caps i_size %llu\n",
+> -	     inode, ceph_vinop(inode), off, len, size);
+> +	     inode, ceph_vinop(inode), pos, len, size);
+>   	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+>   		want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
+>   	else
+>   		want = CEPH_CAP_FILE_BUFFER;
+>   
+>   	got = 0;
+> -	err = ceph_get_caps(vma->vm_file, CEPH_CAP_FILE_WR, want, off + len, &got);
+> +	err = ceph_get_caps(vma->vm_file, CEPH_CAP_FILE_WR, want, pos + len, &got);
+>   	if (err < 0)
+>   		goto out_free;
+>   
+>   	dout("page_mkwrite %p %llu~%zd got cap refs on %s\n",
+> -	     inode, off, len, ceph_cap_string(got));
+> +	     inode, pos, len, ceph_cap_string(got));
+>   
+> -	/* Update time before taking page lock */
+> +	/* Update time before taking folio lock */
+>   	file_update_time(vma->vm_file);
+>   	inode_inc_iversion_raw(inode);
+>   
+>   	do {
+>   		struct ceph_snap_context *snapc;
+>   
+> -		lock_page(page);
+> +		folio_lock(folio);
+>   
+> -		if (page_mkwrite_check_truncate(page, inode) < 0) {
+> -			unlock_page(page);
+> +		if (folio_mkwrite_check_truncate(folio, inode) < 0) {
+> +			folio_unlock(folio);
+>   			ret = VM_FAULT_NOPAGE;
 >   			break;
->   		for (i = 0; i < nr_folios && locked_pages < max_pages; i++) {
-> -			page = &fbatch.folios[i]->page;
-> -			dout("? %p idx %lu\n", page, page->index);
-> +			folio = fbatch.folios[i];
-> +			dout("? %p idx %lu\n", folio, folio->index);
->   			if (locked_pages == 0)
-> -				lock_page(page);  /* first page */
-> -			else if (!trylock_page(page))
-> +				folio_lock(folio);  /* first folio */
-> +			else if (!folio_trylock(folio))
->   				break;
->   
->   			/* only dirty pages, or our accounting breaks */
-> -			if (unlikely(!PageDirty(page)) ||
-> -			    unlikely(page->mapping != mapping)) {
-> -				dout("!dirty or !mapping %p\n", page);
-> -				unlock_page(page);
-> +			if (unlikely(!folio_test_dirty(folio)) ||
-> +			    unlikely(folio->mapping != mapping)) {
-> +				dout("!dirty or !mapping %p\n", folio);
-> +				folio_unlock(folio);
->   				continue;
->   			}
->   			/* only if matching snap context */
-> -			pgsnapc = page_snap_context(page);
-> +			pgsnapc = folio->private;
->   			if (pgsnapc != snapc) {
->   				dout("page snapc %p %lld != oldest %p %lld\n",
->   				     pgsnapc, pgsnapc->seq, snapc, snapc->seq);
-> @@ -1055,12 +1055,10 @@ static int ceph_writepages_start(struct address_space *mapping,
->   				    !ceph_wbc.head_snapc &&
->   				    wbc->sync_mode != WB_SYNC_NONE)
->   					should_loop = true;
-> -				unlock_page(page);
-> +				folio_unlock(folio);
->   				continue;
->   			}
-> -			if (page_offset(page) >= ceph_wbc.i_size) {
-> -				struct folio *folio = page_folio(page);
-> -
-> +			if (folio_pos(folio) >= ceph_wbc.i_size) {
->   				dout("folio at %lu beyond eof %llu\n",
->   				     folio->index, ceph_wbc.i_size);
->   				if ((ceph_wbc.size_stable ||
-> @@ -1071,31 +1069,32 @@ static int ceph_writepages_start(struct address_space *mapping,
->   				folio_unlock(folio);
->   				continue;
->   			}
-> -			if (strip_unit_end && (page->index > strip_unit_end)) {
-> -				dout("end of strip unit %p\n", page);
-> -				unlock_page(page);
-> +			if (strip_unit_end && (folio->index > strip_unit_end)) {
-> +				dout("end of strip unit %p\n", folio);
-> +				folio_unlock(folio);
->   				break;
->   			}
-> -			if (PageWriteback(page) || PageFsCache(page)) {
-> +			if (folio_test_writeback(folio) ||
-> +			    folio_test_fscache(folio)) {
->   				if (wbc->sync_mode == WB_SYNC_NONE) {
-> -					dout("%p under writeback\n", page);
-> -					unlock_page(page);
-> +					dout("%p under writeback\n", folio);
-> +					folio_unlock(folio);
->   					continue;
->   				}
-> -				dout("waiting on writeback %p\n", page);
-> -				wait_on_page_writeback(page);
-> -				wait_on_page_fscache(page);
-> +				dout("waiting on writeback %p\n", folio);
-> +				folio_wait_writeback(folio);
-> +				folio_wait_fscache(folio);
->   			}
->   
-> -			if (!clear_page_dirty_for_io(page)) {
-> -				dout("%p !clear_page_dirty_for_io\n", page);
-> -				unlock_page(page);
-> +			if (!folio_clear_dirty_for_io(folio)) {
-> +				dout("%p !folio_clear_dirty_for_io\n", folio);
-> +				folio_unlock(folio);
->   				continue;
->   			}
->   
->   			/*
->   			 * We have something to write.  If this is
-> -			 * the first locked page this time through,
-> +			 * the first locked folio this time through,
->   			 * calculate max possinle write size and
->   			 * allocate a page array
->   			 */
-> @@ -1105,7 +1104,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->   				u32 xlen;
->   
->   				/* prepare async write request */
-> -				offset = (u64)page_offset(page);
-> +				offset = folio_pos(folio);
->   				ceph_calc_file_object_mapping(&ci->i_layout,
->   							      offset, wsize,
->   							      &objnum, &objoff,
-> @@ -1113,7 +1112,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->   				len = xlen;
->   
->   				num_ops = 1;
-> -				strip_unit_end = page->index +
-> +				strip_unit_end = folio->index +
->   					((len - 1) >> PAGE_SHIFT);
->   
->   				BUG_ON(pages);
-> @@ -1128,23 +1127,23 @@ static int ceph_writepages_start(struct address_space *mapping,
->   				}
->   
->   				len = 0;
-> -			} else if (page->index !=
-> +			} else if (folio->index !=
->   				   (offset + len) >> PAGE_SHIFT) {
->   				if (num_ops >= (from_pool ?  CEPH_OSD_SLAB_OPS :
->   							     CEPH_OSD_MAX_OPS)) {
-> -					redirty_page_for_writepage(wbc, page);
-> -					unlock_page(page);
-> +					folio_redirty_for_writepage(wbc, folio);
-> +					folio_unlock(folio);
->   					break;
->   				}
->   
->   				num_ops++;
-> -				offset = (u64)page_offset(page);
-> +				offset = (u64)folio_pos(folio);
->   				len = 0;
->   			}
->   
->   			/* note position of first page in fbatch */
-> -			dout("%p will write page %p idx %lu\n",
-> -			     inode, page, page->index);
-> +			dout("%p will write folio %p idx %lu\n",
-> +			     inode, folio, folio->index);
->   
->   			if (atomic_long_inc_return(&fsc->writeback_count) >
->   			    CONGESTION_ON_THRESH(
-> @@ -1153,7 +1152,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->   
->   			if (IS_ENCRYPTED(inode)) {
->   				pages[locked_pages] =
-> -					fscrypt_encrypt_pagecache_blocks(page,
-> +					fscrypt_encrypt_pagecache_blocks(&folio->page,
->   						PAGE_SIZE, 0,
->   						locked_pages ? GFP_NOWAIT : GFP_NOFS);
->   				if (IS_ERR(pages[locked_pages])) {
-> @@ -1163,17 +1162,17 @@ static int ceph_writepages_start(struct address_space *mapping,
->   					/* better not fail on first page! */
->   					BUG_ON(locked_pages == 0);
->   					pages[locked_pages] = NULL;
-> -					redirty_page_for_writepage(wbc, page);
-> -					unlock_page(page);
-> +					folio_redirty_for_writepage(wbc, folio);
-> +					folio_unlock(folio);
->   					break;
->   				}
->   				++locked_pages;
->   			} else {
-> -				pages[locked_pages++] = page;
-> +				pages[locked_pages++] = &folio->page;
->   			}
->   
->   			fbatch.folios[i] = NULL;
-> -			len += thp_size(page);
-> +			len += folio_size(folio);
 >   		}
 >   
->   		/* did we get anything? */
-> @@ -1222,7 +1221,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->   			BUG_ON(IS_ERR(req));
+> -		snapc = ceph_find_incompatible(page);
+> +		snapc = ceph_find_incompatible(&folio->page);
+>   		if (!snapc) {
+> -			/* success.  we'll keep the page locked. */
+> -			set_page_dirty(page);
+> +			/* success.  we'll keep the folio locked. */
+> +			folio_mark_dirty(folio);
+>   			ret = VM_FAULT_LOCKED;
+>   			break;
 >   		}
->   		BUG_ON(len < ceph_fscrypt_page_offset(pages[locked_pages - 1]) +
-> -			     thp_size(pages[locked_pages - 1]) - offset);
-> +			     folio_size(folio) - offset);
 >   
->   		if (!ceph_inc_osd_stopping_blocker(fsc->mdsc)) {
->   			rc = -EIO;
-> @@ -1236,9 +1235,9 @@ static int ceph_writepages_start(struct address_space *mapping,
->   		data_pages = pages;
->   		op_idx = 0;
->   		for (i = 0; i < locked_pages; i++) {
-> -			struct page *page = ceph_fscrypt_pagecache_page(pages[i]);
-> +			struct folio *folio = page_folio(ceph_fscrypt_pagecache_page(pages[i]));
+> -		unlock_page(page);
+> +		folio_unlock(folio);
 >   
-> -			u64 cur_offset = page_offset(page);
-> +			u64 cur_offset = folio_pos(folio);
->   			/*
->   			 * Discontinuity in page range? Ceph can handle that by just passing
->   			 * multiple extents in the write op.
-> @@ -1267,10 +1266,10 @@ static int ceph_writepages_start(struct address_space *mapping,
->   				op_idx++;
->   			}
+>   		if (IS_ERR(snapc)) {
+>   			ret = VM_FAULT_SIGBUS;
+> @@ -1762,7 +1761,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+>   	}
 >   
-> -			set_page_writeback(page);
-> +			folio_start_writeback(folio);
->   			if (caching)
-> -				ceph_set_page_fscache(page);
-> -			len += thp_size(page);
-> +				ceph_set_page_fscache(pages[i]);
-> +			len += folio_size(folio);
->   		}
->   		ceph_fscache_write_to_cache(inode, offset, len, caching);
->   
-> @@ -1280,7 +1279,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->   			/* writepages_finish() clears writeback pages
->   			 * according to the data length, so make sure
->   			 * data length covers all locked pages */
-> -			u64 min_len = len + 1 - thp_size(page);
-> +			u64 min_len = len + 1 - folio_size(folio);
->   			len = get_writepages_data_length(inode, pages[i - 1],
->   							 offset);
->   			len = max(len, min_len);
-> @@ -1360,7 +1359,6 @@ static int ceph_writepages_start(struct address_space *mapping,
->   		if (wbc->sync_mode != WB_SYNC_NONE &&
->   		    start_index == 0 && /* all dirty pages were checked */
->   		    !ceph_wbc.head_snapc) {
-> -			struct page *page;
->   			unsigned i, nr;
->   			index = 0;
->   			while ((index <= end) &&
-> @@ -1369,10 +1367,10 @@ static int ceph_writepages_start(struct address_space *mapping,
->   						PAGECACHE_TAG_WRITEBACK,
->   						&fbatch))) {
->   				for (i = 0; i < nr; i++) {
-> -					page = &fbatch.folios[i]->page;
-> -					if (page_snap_context(page) != snapc)
-> +					struct folio *folio = fbatch.folios[i];
-> +					if (folio->private != snapc)
-
-Here IMO we should reuse and rename 'page_snap_context()' --> 
-'folio_snap_context()' instead of 'folio->private' directly. As I 
-remembered if the dirty bit is not set the `page->private` still could 
-be non-NULL in some cases ?
-
-Thanks
-
-- Xiubo
-
-
->   						continue;
-> -					wait_on_page_writeback(page);
-> +					folio_wait_writeback(folio);
->   				}
->   				folio_batch_release(&fbatch);
->   				cond_resched();
+>   	dout("page_mkwrite %p %llu~%zd dropping cap refs on %s ret %x\n",
+> -	     inode, off, len, ceph_cap_string(got), ret);
+> +	     inode, pos, len, ceph_cap_string(got), ret);
+>   	ceph_put_cap_refs_async(ci, got);
+>   out_free:
+>   	ceph_restore_sigs(&oldset);
 
