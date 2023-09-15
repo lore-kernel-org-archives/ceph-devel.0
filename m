@@ -2,422 +2,114 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A68EEE021E
-	for <ceph-devel@archiver.kernel.org>; Thu, 14 Sep 2023 01:55:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2829ECD37A9
+	for <ceph-devel@archiver.kernel.org>; Fri, 15 Sep 2023 20:17:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233974AbjINBzz (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 13 Sep 2023 21:55:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39472 "EHLO
+        id S237158AbjIOURT (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 15 Sep 2023 16:17:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233747AbjINBzj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2023 21:55:39 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A28A12134;
-        Wed, 13 Sep 2023 18:55:29 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 357C9C433C9;
-        Thu, 14 Sep 2023 01:55:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1694656529;
-        bh=gPsbVbbOLjqHxClnjm6T+44OngN2s1m3k6gdCmcyv+0=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=r/pBrUwr2UHhM+2yD5r0w8QZG7MVHdIvwPF3VpnmoijVzIoREKJe75blTbj/f2AcR
-         KqLl9orQ7cAdbWjQKAJCbMCUidqdqf9LGRJcS76MPx/8JXO8v51oefIegdWdigQNoU
-         LC78WZr2nyTKlLh1FPFs8WWcY6R74SqTIzNpLVkxCCjQQwReiE42+RFo7Q9QLKMe5R
-         gSSm8PnKhqd2+2kpiAAZ5NwVMSGoPpcNk+3hpeIFU5YuVxxhIt5395AQYag9G11ryE
-         i/79c4GUhxSfqxCMoSaSvjYx4GopIcdzlKSZDzQhahbBH2z0cEenE0w/XxwLsphcsD
-         Hegra7foWe7Vw==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Xiubo Li <xiubli@redhat.com>,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>,
-        Milind Changire <mchangir@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Sasha Levin <sashal@kernel.org>, ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.1 2/6] ceph: drop messages from MDS when unmounting
-Date:   Wed, 13 Sep 2023 21:55:12 -0400
-Message-Id: <20230914015523.51894-2-sashal@kernel.org>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20230914015523.51894-1-sashal@kernel.org>
-References: <20230914015523.51894-1-sashal@kernel.org>
+        with ESMTP id S237329AbjIOUQu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2023 16:16:50 -0400
+Received: from mail-pf1-x431.google.com (mail-pf1-x431.google.com [IPv6:2607:f8b0:4864:20::431])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F07330FB
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2023 13:15:19 -0700 (PDT)
+Received: by mail-pf1-x431.google.com with SMTP id d2e1a72fcca58-68fb2e9ebcdso2120680b3a.2
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2023 13:15:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google; t=1694808919; x=1695413719; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=4w8pbHszfCpVRKvLNW5+32KFz2EZUD5ueTN7U1w8HFo=;
+        b=FmbvkYu6ddu7F8+G0qKxVJtXzvvyKCz/QtF8GtkDdOX4HFpslz29FPPy+heyqNtbLm
+         zygfbCgGs53K8yYIGIx42vzDrvEX1OSTstulkUceWp4x1/cMmel3eQaZPQkQE8v3pdi0
+         jldbwSHeNsDy/K1trR1dI1tDNvBnVwSjpA8Xs=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694808919; x=1695413719;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4w8pbHszfCpVRKvLNW5+32KFz2EZUD5ueTN7U1w8HFo=;
+        b=umGcEBPGul1p7f1XbdnxyttGdaUzGiYpzu890ed7FCqF/WAm6vhdRNumjPrGXYh04r
+         +n1ehhtqx2FEw9lSWxJGxd7hhmeDOOmPeGi1IUezpNYtWBlolJ66vo57wf1BMCchM5tf
+         WUulwfvK1Ux+5ZlyTfxsTnKBIX4aR66cv1PkNN3SORFO4G6FQYEbSsqVIsemNljLTLFO
+         HIncDfU04a1dCRSpQzOIWVu9ynkfLH/St4HZyzDiANEZRNCPtB62btAc2UKsaMHXnnQe
+         DWcw48tosdzRyrl+bSBzr1hcX00RUZZKmvYGrWmH3Y4B2+TvdIXmI4OprX/huC3Uxq/e
+         FCkQ==
+X-Gm-Message-State: AOJu0YzGCtaNZKLN1tDPSS9NZvtOGeY1E42IvmoNGe8OUV2HwtKagwdP
+        w3PSlWE5lvlYaGf1pWCeRZtaow==
+X-Google-Smtp-Source: AGHT+IHfuqeJ9ZAn3MunxwHrKU8GKe2P/Qfi2HE+t5E4znmmL9cdXh/Hh8gnRQA+06Ej6GKlNU+m9w==
+X-Received: by 2002:a05:6a00:1949:b0:68e:417c:ed5c with SMTP id s9-20020a056a00194900b0068e417ced5cmr2901197pfk.32.1694808919258;
+        Fri, 15 Sep 2023 13:15:19 -0700 (PDT)
+Received: from www.outflux.net (198-0-35-241-static.hfc.comcastbusiness.net. [198.0.35.241])
+        by smtp.gmail.com with ESMTPSA id z15-20020aa785cf000000b0069029a3196dsm3320094pfn.184.2023.09.15.13.15.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 Sep 2023 13:15:18 -0700 (PDT)
+From:   Kees Cook <keescook@chromium.org>
+To:     Ilya Dryomov <idryomov@gmail.com>
+Cc:     Kees Cook <keescook@chromium.org>, Xiubo Li <xiubli@redhat.com>,
+        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        Nathan Chancellor <nathan@kernel.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Tom Rix <trix@redhat.com>, linux-kernel@vger.kernel.org,
+        llvm@lists.linux.dev, linux-hardening@vger.kernel.org
+Subject: [PATCH] ceph: Annotate struct ceph_osd_request with __counted_by
+Date:   Fri, 15 Sep 2023 13:15:17 -0700
+Message-Id: <20230915201517.never.373-kees@kernel.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-X-stable: review
-X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.1.53
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1212; i=keescook@chromium.org;
+ h=from:subject:message-id; bh=AmH8bN4F2ziXz0Z5YnlEPY0FFmz4WBV4Hrt1uqyDRes=;
+ b=owEBbQKS/ZANAwAKAYly9N/cbcAmAcsmYgBlBLtVT5VsBXPgep3O4AyayotxNhxeQbO4Z6caq
+ 4bgXJt2IN2JAjMEAAEKAB0WIQSlw/aPIp3WD3I+bhOJcvTf3G3AJgUCZQS7VQAKCRCJcvTf3G3A
+ JvG8D/kBmR4/73WcqLcQcfZ5AAGQQBpqE9J7q/mjZ+UbsQV2m9A0SBCDX97Li8f/0Rla/QjMJgW
+ y1kNPx8A5IGfqso+ErmEX/jvCkSP/PfjbTUrZlmNHUHNkiSrUJCzxNLmxaY6zOXydzU/lh8hmek
+ u3A7Exe2D6NgGiFDY55GwrNFgFTdS1HxnyURJ4cQJDQHH7boXlfeO4YVl+nOMBL2nlrF3lphm1I
+ Zl49zmIoznpwf6gbDjLul0AeIVrgHmeZo8VM1mdX3ow3M6JcX4J8T6UhhLK64mrQBXcfhEHYbbf
+ VNK7Me1ZOj3g24mq6ik1bWOGfFPlzXKJNObFtlssYMHbH6fSTax10K0lQeIrrg9WOQTZZT8WIxx
+ yiW7XSqoGv4ddDLzNl44ISWOsfpny0i9nRi0daL0pay2CYh9ahAAsnJ1DfegWJ/7TmWtDDciVtj
+ i9N+up7jzsKNv67ubYZWQb62DWKMy+dfuH5T3jYJ2dD3+jZTh+bCJEVqJVVsWvm89uQjJmgqQOJ
+ gBMiML59Ky/UIbQ2mRak98NeiXIHVxrlbtduo4ihoM+jbZLFK2CFgmwzi3KXyvaNTt7L6h5iJ6Y
+ ghMet33KklOxTWy0tvwEGn0e9b8jiPQzWC4fWwKO4u3cQ0QTCnuOx7AYPqxubNnWz6eos8IF8AG
+ ECH0vz6 +J8OtTTQ==
+X-Developer-Key: i=keescook@chromium.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+Prepare for the coming implementation by GCC and Clang of the __counted_by
+attribute. Flexible array members annotated with __counted_by can have
+their accesses bounds-checked at run-time checking via CONFIG_UBSAN_BOUNDS
+(for array indexing) and CONFIG_FORTIFY_SOURCE (for strcpy/memcpy-family
+functions).
 
-[ Upstream commit e3dfcab2080dc1f9a4b09cc1327361bc2845bfcd ]
+As found with Coccinelle[1], add __counted_by for struct ceph_osd_request.
 
-When unmounting all the dirty buffers will be flushed and after
-the last osd request is finished the last reference of the i_count
-will be released. Then it will flush the dirty cap/snap to MDSs,
-and the unmounting won't wait the possible acks, which will ihold
-the inodes when updating the metadata locally but makes no sense
-any more, of this. This will make the evict_inodes() to skip these
-inodes.
+[1] https://github.com/kees/kernel-tools/blob/trunk/coccinelle/examples/counted_by.cocci
 
-If encrypt is enabled the kernel generate a warning when removing
-the encrypt keys when the skipped inodes still hold the keyring:
-
-WARNING: CPU: 4 PID: 168846 at fs/crypto/keyring.c:242 fscrypt_destroy_keyring+0x7e/0xd0
-CPU: 4 PID: 168846 Comm: umount Tainted: G S  6.1.0-rc5-ceph-g72ead199864c #1
-Hardware name: Supermicro SYS-5018R-WR/X10SRW-F, BIOS 2.0 12/17/2015
-RIP: 0010:fscrypt_destroy_keyring+0x7e/0xd0
-RSP: 0018:ffffc9000b277e28 EFLAGS: 00010202
-RAX: 0000000000000002 RBX: ffff88810d52ac00 RCX: ffff88810b56aa00
-RDX: 0000000080000000 RSI: ffffffff822f3a09 RDI: ffff888108f59000
-RBP: ffff8881d394fb88 R08: 0000000000000028 R09: 0000000000000000
-R10: 0000000000000001 R11: 11ff4fe6834fcd91 R12: ffff8881d394fc40
-R13: ffff888108f59000 R14: ffff8881d394f800 R15: 0000000000000000
-FS:  00007fd83f6f1080(0000) GS:ffff88885fd00000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007f918d417000 CR3: 000000017f89a005 CR4: 00000000003706e0
-DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-Call Trace:
-<TASK>
-generic_shutdown_super+0x47/0x120
-kill_anon_super+0x14/0x30
-ceph_kill_sb+0x36/0x90 [ceph]
-deactivate_locked_super+0x29/0x60
-cleanup_mnt+0xb8/0x140
-task_work_run+0x67/0xb0
-exit_to_user_mode_prepare+0x23d/0x240
-syscall_exit_to_user_mode+0x25/0x60
-do_syscall_64+0x40/0x80
-entry_SYSCALL_64_after_hwframe+0x63/0xcd
-RIP: 0033:0x7fd83dc39e9b
-
-Later the kernel will crash when iput() the inodes and dereferencing
-the "sb->s_master_keys", which has been released by the
-generic_shutdown_super().
-
-Link: https://tracker.ceph.com/issues/59162
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
-Reviewed-and-tested-by: Luís Henriques <lhenriques@suse.de>
-Reviewed-by: Milind Changire <mchangir@redhat.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Cc: Ilya Dryomov <idryomov@gmail.com>
+Cc: Xiubo Li <xiubli@redhat.com>
+Cc: Jeff Layton <jlayton@kernel.org>
+Cc: ceph-devel@vger.kernel.org
+Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- fs/ceph/caps.c       |  6 +++-
- fs/ceph/mds_client.c | 12 +++++--
- fs/ceph/mds_client.h | 11 +++++--
- fs/ceph/quota.c      | 14 ++++-----
- fs/ceph/snap.c       | 10 +++---
- fs/ceph/super.c      | 75 +++++++++++++++++++++++++++++++++++++++++---
- fs/ceph/super.h      |  3 ++
- 7 files changed, 109 insertions(+), 22 deletions(-)
+ include/linux/ceph/osd_client.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 4a9ad5ff726d4..36052a3626830 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -4100,6 +4100,9 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index bf9823956758..b8610e9d2471 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -278,7 +278,7 @@ struct ceph_osd_request {
+ 	int r_attempts;
+ 	u32 r_map_dne_bound;
  
- 	dout("handle_caps from mds%d\n", session->s_mds);
- 
-+	if (!ceph_inc_mds_stopping_blocker(mdsc, session))
-+		return;
-+
- 	/* decode */
- 	end = msg->front.iov_base + msg->front.iov_len;
- 	if (msg->front.iov_len < sizeof(*h))
-@@ -4196,7 +4199,6 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- 	     vino.snap, inode);
- 
- 	mutex_lock(&session->s_mutex);
--	inc_session_sequence(session);
- 	dout(" mds%d seq %lld cap seq %u\n", session->s_mds, session->s_seq,
- 	     (unsigned)seq);
- 
-@@ -4299,6 +4301,8 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- done_unlocked:
- 	iput(inode);
- out:
-+	ceph_dec_mds_stopping_blocker(mdsc);
-+
- 	ceph_put_string(extra_info.pool_ns);
- 
- 	/* Defer closing the sessions after s_mutex lock being released */
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 5399a9ea5b4f1..f6a7fd47efd7a 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4546,6 +4546,9 @@ static void handle_lease(struct ceph_mds_client *mdsc,
- 
- 	dout("handle_lease from mds%d\n", mds);
- 
-+	if (!ceph_inc_mds_stopping_blocker(mdsc, session))
-+		return;
-+
- 	/* decode */
- 	if (msg->front.iov_len < sizeof(*h) + sizeof(u32))
- 		goto bad;
-@@ -4564,8 +4567,6 @@ static void handle_lease(struct ceph_mds_client *mdsc,
- 	     dname.len, dname.name);
- 
- 	mutex_lock(&session->s_mutex);
--	inc_session_sequence(session);
--
- 	if (!inode) {
- 		dout("handle_lease no inode %llx\n", vino.ino);
- 		goto release;
-@@ -4627,9 +4628,13 @@ static void handle_lease(struct ceph_mds_client *mdsc,
- out:
- 	mutex_unlock(&session->s_mutex);
- 	iput(inode);
-+
-+	ceph_dec_mds_stopping_blocker(mdsc);
- 	return;
- 
- bad:
-+	ceph_dec_mds_stopping_blocker(mdsc);
-+
- 	pr_err("corrupt lease message\n");
- 	ceph_msg_dump(msg);
- }
-@@ -4825,6 +4830,9 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	}
- 
- 	init_completion(&mdsc->safe_umount_waiters);
-+	spin_lock_init(&mdsc->stopping_lock);
-+	atomic_set(&mdsc->stopping_blockers, 0);
-+	init_completion(&mdsc->stopping_waiter);
- 	init_waitqueue_head(&mdsc->session_close_wq);
- 	INIT_LIST_HEAD(&mdsc->waiting_for_map);
- 	mdsc->quotarealms_inodes = RB_ROOT;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 9a80658f41679..0913959ccfa64 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -381,8 +381,9 @@ struct cap_wait {
+-	struct ceph_osd_req_op r_ops[];
++	struct ceph_osd_req_op r_ops[] __counted_by(r_num_ops);
  };
  
- enum {
--       CEPH_MDSC_STOPPING_BEGIN = 1,
--       CEPH_MDSC_STOPPING_FLUSHED = 2,
-+	CEPH_MDSC_STOPPING_BEGIN = 1,
-+	CEPH_MDSC_STOPPING_FLUSHING = 2,
-+	CEPH_MDSC_STOPPING_FLUSHED = 3,
- };
- 
- /*
-@@ -401,7 +402,11 @@ struct ceph_mds_client {
- 	struct ceph_mds_session **sessions;    /* NULL for mds if no session */
- 	atomic_t		num_sessions;
- 	int                     max_sessions;  /* len of sessions array */
--	int                     stopping;      /* true if shutting down */
-+
-+	spinlock_t              stopping_lock;  /* protect snap_empty */
-+	int                     stopping;      /* the stage of shutting down */
-+	atomic_t                stopping_blockers;
-+	struct completion	stopping_waiter;
- 
- 	atomic64_t		quotarealms_count; /* # realms with quota */
- 	/*
-diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-index 64592adfe48fb..f7fcf7f08ec64 100644
---- a/fs/ceph/quota.c
-+++ b/fs/ceph/quota.c
-@@ -47,25 +47,23 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
- 	struct inode *inode;
- 	struct ceph_inode_info *ci;
- 
-+	if (!ceph_inc_mds_stopping_blocker(mdsc, session))
-+		return;
-+
- 	if (msg->front.iov_len < sizeof(*h)) {
- 		pr_err("%s corrupt message mds%d len %d\n", __func__,
- 		       session->s_mds, (int)msg->front.iov_len);
- 		ceph_msg_dump(msg);
--		return;
-+		goto out;
- 	}
- 
--	/* increment msg sequence number */
--	mutex_lock(&session->s_mutex);
--	inc_session_sequence(session);
--	mutex_unlock(&session->s_mutex);
--
- 	/* lookup inode */
- 	vino.ino = le64_to_cpu(h->ino);
- 	vino.snap = CEPH_NOSNAP;
- 	inode = ceph_find_inode(sb, vino);
- 	if (!inode) {
- 		pr_warn("Failed to find inode %llu\n", vino.ino);
--		return;
-+		goto out;
- 	}
- 	ci = ceph_inode(inode);
- 
-@@ -78,6 +76,8 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
- 	spin_unlock(&ci->i_ceph_lock);
- 
- 	iput(inode);
-+out:
-+	ceph_dec_mds_stopping_blocker(mdsc);
- }
- 
- static struct ceph_quotarealm_inode *
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 2e73ba62bd7aa..82f7592e1747b 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -1012,6 +1012,9 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 	int locked_rwsem = 0;
- 	bool close_sessions = false;
- 
-+	if (!ceph_inc_mds_stopping_blocker(mdsc, session))
-+		return;
-+
- 	/* decode */
- 	if (msg->front.iov_len < sizeof(*h))
- 		goto bad;
-@@ -1027,10 +1030,6 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 	dout("%s from mds%d op %s split %llx tracelen %d\n", __func__,
- 	     mds, ceph_snap_op_name(op), split, trace_len);
- 
--	mutex_lock(&session->s_mutex);
--	inc_session_sequence(session);
--	mutex_unlock(&session->s_mutex);
--
- 	down_write(&mdsc->snap_rwsem);
- 	locked_rwsem = 1;
- 
-@@ -1148,6 +1147,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 	up_write(&mdsc->snap_rwsem);
- 
- 	flush_snaps(mdsc);
-+	ceph_dec_mds_stopping_blocker(mdsc);
- 	return;
- 
- bad:
-@@ -1157,6 +1157,8 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 	if (locked_rwsem)
- 		up_write(&mdsc->snap_rwsem);
- 
-+	ceph_dec_mds_stopping_blocker(mdsc);
-+
- 	if (close_sessions)
- 		ceph_mdsc_close_sessions(mdsc);
- 	return;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index a5f52013314d6..281b493fdac8e 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -1365,25 +1365,90 @@ static int ceph_init_fs_context(struct fs_context *fc)
- 	return -ENOMEM;
- }
- 
-+/*
-+ * Return true if it successfully increases the blocker counter,
-+ * or false if the mdsc is in stopping and flushed state.
-+ */
-+static bool __inc_stopping_blocker(struct ceph_mds_client *mdsc)
-+{
-+	spin_lock(&mdsc->stopping_lock);
-+	if (mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHING) {
-+		spin_unlock(&mdsc->stopping_lock);
-+		return false;
-+	}
-+	atomic_inc(&mdsc->stopping_blockers);
-+	spin_unlock(&mdsc->stopping_lock);
-+	return true;
-+}
-+
-+static void __dec_stopping_blocker(struct ceph_mds_client *mdsc)
-+{
-+	spin_lock(&mdsc->stopping_lock);
-+	if (!atomic_dec_return(&mdsc->stopping_blockers) &&
-+	    mdsc->stopping >= CEPH_MDSC_STOPPING_FLUSHING)
-+		complete_all(&mdsc->stopping_waiter);
-+	spin_unlock(&mdsc->stopping_lock);
-+}
-+
-+/* For metadata IO requests */
-+bool ceph_inc_mds_stopping_blocker(struct ceph_mds_client *mdsc,
-+				   struct ceph_mds_session *session)
-+{
-+	mutex_lock(&session->s_mutex);
-+	inc_session_sequence(session);
-+	mutex_unlock(&session->s_mutex);
-+
-+	return __inc_stopping_blocker(mdsc);
-+}
-+
-+void ceph_dec_mds_stopping_blocker(struct ceph_mds_client *mdsc)
-+{
-+	__dec_stopping_blocker(mdsc);
-+}
-+
- static void ceph_kill_sb(struct super_block *s)
- {
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(s);
-+	struct ceph_mds_client *mdsc = fsc->mdsc;
-+	bool wait;
- 
- 	dout("kill_sb %p\n", s);
- 
--	ceph_mdsc_pre_umount(fsc->mdsc);
-+	ceph_mdsc_pre_umount(mdsc);
- 	flush_fs_workqueues(fsc);
- 
- 	/*
- 	 * Though the kill_anon_super() will finally trigger the
--	 * sync_filesystem() anyway, we still need to do it here
--	 * and then bump the stage of shutdown to stop the work
--	 * queue as earlier as possible.
-+	 * sync_filesystem() anyway, we still need to do it here and
-+	 * then bump the stage of shutdown. This will allow us to
-+	 * drop any further message, which will increase the inodes'
-+	 * i_count reference counters but makes no sense any more,
-+	 * from MDSs.
-+	 *
-+	 * Without this when evicting the inodes it may fail in the
-+	 * kill_anon_super(), which will trigger a warning when
-+	 * destroying the fscrypt keyring and then possibly trigger
-+	 * a further crash in ceph module when the iput() tries to
-+	 * evict the inodes later.
- 	 */
- 	sync_filesystem(s);
- 
--	fsc->mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHED;
-+	spin_lock(&mdsc->stopping_lock);
-+	mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHING;
-+	wait = !!atomic_read(&mdsc->stopping_blockers);
-+	spin_unlock(&mdsc->stopping_lock);
-+
-+	if (wait && atomic_read(&mdsc->stopping_blockers)) {
-+		long timeleft = wait_for_completion_killable_timeout(
-+					&mdsc->stopping_waiter,
-+					fsc->client->options->mount_timeout);
-+		if (!timeleft) /* timed out */
-+			pr_warn("umount timed out, %ld\n", timeleft);
-+		else if (timeleft < 0) /* killed */
-+			pr_warn("umount was killed, %ld\n", timeleft);
-+	}
- 
-+	mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHED;
- 	kill_anon_super(s);
- 
- 	fsc->client->extra_mon_dispatch = NULL;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 562f42f4a77d7..7ca74f5f70be5 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1374,4 +1374,7 @@ extern bool ceph_quota_update_statfs(struct ceph_fs_client *fsc,
- 				     struct kstatfs *buf);
- extern void ceph_cleanup_quotarealms_inodes(struct ceph_mds_client *mdsc);
- 
-+bool ceph_inc_mds_stopping_blocker(struct ceph_mds_client *mdsc,
-+			       struct ceph_mds_session *session);
-+void ceph_dec_mds_stopping_blocker(struct ceph_mds_client *mdsc);
- #endif /* _FS_CEPH_SUPER_H */
+ struct ceph_request_redirect {
 -- 
-2.40.1
+2.34.1
 
