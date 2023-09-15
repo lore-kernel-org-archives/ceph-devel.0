@@ -2,53 +2,59 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BBC4CD379F
-	for <ceph-devel@archiver.kernel.org>; Fri, 15 Sep 2023 20:17:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DC0BCD37AC
+	for <ceph-devel@archiver.kernel.org>; Fri, 15 Sep 2023 20:51:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237126AbjIOURR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 15 Sep 2023 16:17:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41702 "EHLO
+        id S237574AbjIOUvc (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 15 Sep 2023 16:51:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237547AbjIOUQp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2023 16:16:45 -0400
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17B0E272A
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2023 13:15:13 -0700 (PDT)
-Received: by mail-pl1-x634.google.com with SMTP id d9443c01a7336-1c39a4f14bcso23426355ad.3
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2023 13:15:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1694808912; x=1695413712; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=DD0PB0X4P5RpnzepdYBK20P6YgyKEeTbO8VvW3SzPE0=;
-        b=bj9GANvp8YMMDuzcyMnE4zefjLBFuDD33Jq2y3Phwq7y9R7lwZIczNSCqX4LThWcOJ
-         9Khb33XoLSMbUtZdO4wfd5q2Lw9YSy5Df2WV5q8aYt8f0ZwUulF2JbFrucv2Q/e8E689
-         +oCl9AIiLj3uEQFpgJZkCDRVN/JRnzz86fj2o=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694808912; x=1695413712;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=DD0PB0X4P5RpnzepdYBK20P6YgyKEeTbO8VvW3SzPE0=;
-        b=YtVbnpXQKiu2mUKsnmKiuKwQmO2flTyZLz+Rl3aPKNXALcZHTotmJv+gq+lW1UtRWJ
-         Z4xPDmV20rR7z2nXbOBYf2wYZuw1vWwMRD5JO37fU8ew1A98V+H8Mpxsmc6o4xIpS4NA
-         o1F7MCwWzATlDqLcMVO3Ca6P93JiUqEnuXn0SoHaciqjeWB4UfVQvZGPNhmUAB3epvPG
-         rMJZqDQAqVpRrqGYn7m35na7IQR+UvbhKfd01TAP7MYMTDPw+xbttUVJXMF3IjaXObX0
-         18i94n0j2VussQLI2/y6VudDUb/sfclI/QRUVu0yMlVXUOGrk7prVpn7Q1HFUVrnLzw4
-         FL/A==
-X-Gm-Message-State: AOJu0Yypx9+uze8DW+7ZqQL6YX1dT1KjXYmljnvzeKaXHdhy7mJmJC8s
-        KLeEJf5o3T4gWC/7hz7Y6CclLQ==
-X-Google-Smtp-Source: AGHT+IFr13PLzk1XhNPHi5wQPBvpKN+JrCaS1AIy+WjDkGW+MxaOGCJr4sl9jUsUrz+Gxv7u4wWN9Q==
-X-Received: by 2002:a17:902:dac7:b0:1bf:4582:90d with SMTP id q7-20020a170902dac700b001bf4582090dmr3499033plx.46.1694808912608;
-        Fri, 15 Sep 2023 13:15:12 -0700 (PDT)
-Received: from www.outflux.net (198-0-35-241-static.hfc.comcastbusiness.net. [198.0.35.241])
-        by smtp.gmail.com with ESMTPSA id u5-20020a170902b28500b001bb750189desm3860366plr.255.2023.09.15.13.15.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Sep 2023 13:15:12 -0700 (PDT)
-From:   Kees Cook <keescook@chromium.org>
-To:     Ilya Dryomov <idryomov@gmail.com>
-Cc:     Kees Cook <keescook@chromium.org>, Xiubo Li <xiubli@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>,
+        with ESMTP id S237787AbjIOUvT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2023 16:51:19 -0400
+Received: from omta36.uswest2.a.cloudfilter.net (omta36.uswest2.a.cloudfilter.net [35.89.44.35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A20F244A0
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2023 13:50:27 -0700 (PDT)
+Received: from eig-obgw-6003a.ext.cloudfilter.net ([10.0.30.151])
+        by cmsmtp with ESMTP
+        id hFjkqMNjiEoVshFljqHz21; Fri, 15 Sep 2023 20:50:27 +0000
+Received: from gator4166.hostgator.com ([108.167.133.22])
+        by cmsmtp with ESMTPS
+        id hFliq6JbWlWQAhFljqzWVF; Fri, 15 Sep 2023 20:50:27 +0000
+X-Authority-Analysis: v=2.4 cv=INMRtyjG c=1 sm=1 tr=0 ts=6504c393
+ a=1YbLdUo/zbTtOZ3uB5T3HA==:117 a=WzbPXH4gqzPVN0x6HrNMNA==:17
+ a=OWjo9vPv0XrRhIrVQ50Ab3nP57M=:19 a=dLZJa+xiwSxG16/P+YVxDGlgEgI=:19
+ a=IkcTkHD0fZMA:10 a=zNV7Rl7Rt7sA:10 a=wYkD_t78qR0A:10 a=NEAV23lmAAAA:8
+ a=pGLkceISAAAA:8 a=20KFwNOVAAAA:8 a=VwQbUJbxAAAA:8 a=J1Y8HTJGAAAA:8
+ a=1XWaLZrsAAAA:8 a=cm27Pg_UAAAA:8 a=6UV5UrL1aO4bJEFlmkAA:9 a=QEXdDO2ut3YA:10
+ a=AjGcO6oz07-iQ99wixmX:22 a=y1Q9-5lHfBjTkpIzbSAN:22 a=xmb-EsYY8bH0VWELuYED:22
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=embeddedor.com; s=default; h=Content-Transfer-Encoding:Content-Type:
+        In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender
+        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
+        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
+        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+        bh=t1igbisZY4JCWWgBASjQDcN1v+RkxDKKqSatW1+S9XM=; b=sKPpkHuMAovyz+fDocXbW2MFAa
+        ywDePibb21uafX2s669sT+OE2D58ARk4umNIBaQAtiV/Qm0rKtU/I1Z8Ix7s7treFlOFVzDmN/3W/
+        p9YbuFyfcNYHAkt++bR2FUpVoI7mnwORg+F92gB3RzU6JpVBAqRrQh1LLj2ycUDSbZQT0XbFwik4T
+        CO3kaQcZEiIfRC3LxVT4khAA1YS4XZExZo5nt85QERzvr84DWcgQbikuyZtdPq2f5SVG/CeiUYyO5
+        D8c3YJE6PLSZ+Le1B2+Tqm1nAw0QiLokMLIfM2IN6w3vMY6bcmCNUM3ZiANJZP/gXCssZxRDE29iL
+        XMGWUxIQ==;
+Received: from 187-162-21-192.static.axtel.net ([187.162.21.192]:38950 helo=[192.168.15.8])
+        by gator4166.hostgator.com with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        (Exim 4.96)
+        (envelope-from <gustavo@embeddedor.com>)
+        id 1qhFlh-002fk4-1a;
+        Fri, 15 Sep 2023 15:50:25 -0500
+Message-ID: <8e9b414f-52bb-bf47-873b-4bc537e62da6@embeddedor.com>
+Date:   Fri, 15 Sep 2023 14:51:20 -0600
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH] ceph: Annotate struct ceph_monmap with __counted_by
+Content-Language: en-US
+To:     Kees Cook <keescook@chromium.org>,
+        Ilya Dryomov <idryomov@gmail.com>
+Cc:     Xiubo Li <xiubli@redhat.com>, Jeff Layton <jlayton@kernel.org>,
         "David S. Miller" <davem@davemloft.net>,
         Eric Dumazet <edumazet@google.com>,
         Jakub Kicinski <kuba@kernel.org>,
@@ -57,91 +63,102 @@ Cc:     Kees Cook <keescook@chromium.org>, Xiubo Li <xiubli@redhat.com>,
         Nick Desaulniers <ndesaulniers@google.com>,
         Tom Rix <trix@redhat.com>, linux-kernel@vger.kernel.org,
         llvm@lists.linux.dev, linux-hardening@vger.kernel.org
-Subject: [PATCH] ceph: Annotate struct ceph_monmap with __counted_by
-Date:   Fri, 15 Sep 2023 13:15:10 -0700
-Message-Id: <20230915201510.never.365-kees@kernel.org>
-X-Mailer: git-send-email 2.34.1
-MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2263; i=keescook@chromium.org;
- h=from:subject:message-id; bh=459xt744zpKd86AyMgpOkR51nqx31Cb+Bg+uK/o0T7M=;
- b=owEBbQKS/ZANAwAKAYly9N/cbcAmAcsmYgBlBLtO5BRclquwJun9hzXP0EWlZ+GoTdZhGJ3lG
- aGjx/Zz1HyJAjMEAAEKAB0WIQSlw/aPIp3WD3I+bhOJcvTf3G3AJgUCZQS7TgAKCRCJcvTf3G3A
- JsmGEACL2A1XKUQWibswLmpq3EltVpG/A8eKgv6ea2LwVOAXy0x4SXG4cHd9Cu0nk/qHBUbSafm
- /LRlD5lO/9C+ATYOdVAn9t0V3au/VIjn21sAW1gMsSMXTEBt4RYva6+8ekRrcCE6zJyxKRcZ8FV
- 1TP0oLZ+aZEmq83/afsOUMhAKZ73EU1YJrP2y7qEuhd9AasIKJxUVGM7DVcfrya6r/JmudEniQ/
- slYEzs/iOWTdsEj98u6gHbxVZWi3l4+Z2chqEOmaA47jYTbgLzIPmPYPYPcWB1kjzGWo7sTENSL
- snWzCkLtSJUMzl4dC2P8qEjNTs9Z97Zfy+yyMAePSR5RQLGtIWKXITcZgFCekUIF7vLjevaPaV1
- +LaCKf+sOzA2EWId/vEIG/kxz8h8dHLkrY/QRUmyY/uVFzbwLiOZE7DHTIBX2RKoIZGZEJUzBeR
- WNBaLF/w+lrRYldhG58wFjnEbGbgvVMya2tw0RpvwrbwceT8tHUcSV7MEFW5AduNfn/W80+XcU3
- WDRvge5QEdCUPgTXx/dF6CwMbzLuJM8bVq/JMoDpnZhUBciUwbOy/Mj2aVFC17+IUS36d5chuol
- RHp8X04Aun56SGx2HOl8Y46SbRFH50UsjBo4xWwVLeRAjb1uW/Qjq7Ps3DWovxlJ5RdT/+l0n1p
- IJga5Lu zADa1NNA==
-X-Developer-Key: i=keescook@chromium.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
-Content-Transfer-Encoding: 8bit
+References: <20230915201510.never.365-kees@kernel.org>
+From:   "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+In-Reply-To: <20230915201510.never.365-kees@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - gator4166.hostgator.com
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - embeddedor.com
+X-BWhitelist: no
+X-Source-IP: 187.162.21.192
+X-Source-L: No
+X-Exim-ID: 1qhFlh-002fk4-1a
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-Source-Sender: 187-162-21-192.static.axtel.net ([192.168.15.8]) [187.162.21.192]:38950
+X-Source-Auth: gustavo@embeddedor.com
+X-Email-Count: 471
+X-Org:  HG=hgshared;ORG=hostgator;
+X-Source-Cap: Z3V6aWRpbmU7Z3V6aWRpbmU7Z2F0b3I0MTY2Lmhvc3RnYXRvci5jb20=
+X-Local-Domain: yes
+X-CMAE-Envelope: MS4xfOfL5krMrxzF/p6uWFAg5EG2RxbaM9JLUDpi8V1mohpUjkx4YcEoliJeckNHxqB9FDNWbHmoB+FpPo1KV3DKzOP+gJhths9D+V8AkPxJLF5RATNEBVOn
+ Ahr+/r/as9zzOo01I9JU8rEzwxhCyPeB65mH9rZ5wG4nC1uqLCtRAiYFNQsOSAz4mmDXg8QMySSCPbO1u5MF7P9Ibb+Y48vTob9qNqq6O4NZ4sa/q6iggzBn
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Prepare for the coming implementation by GCC and Clang of the __counted_by
-attribute. Flexible array members annotated with __counted_by can have
-their accesses bounds-checked at run-time checking via CONFIG_UBSAN_BOUNDS
-(for array indexing) and CONFIG_FORTIFY_SOURCE (for strcpy/memcpy-family
-functions).
 
-As found with Coccinelle[1], add __counted_by for struct ceph_monmap.
-Additionally, since the element count member must be set before accessing
-the annotated flexible array member, move its initialization earlier.
 
-[1] https://github.com/kees/kernel-tools/blob/trunk/coccinelle/examples/counted_by.cocci
+On 9/15/23 14:15, Kees Cook wrote:
+> Prepare for the coming implementation by GCC and Clang of the __counted_by
+> attribute. Flexible array members annotated with __counted_by can have
+> their accesses bounds-checked at run-time checking via CONFIG_UBSAN_BOUNDS
+> (for array indexing) and CONFIG_FORTIFY_SOURCE (for strcpy/memcpy-family
+> functions).
+> 
+> As found with Coccinelle[1], add __counted_by for struct ceph_monmap.
+> Additionally, since the element count member must be set before accessing
+> the annotated flexible array member, move its initialization earlier.
+> 
+> [1] https://github.com/kees/kernel-tools/blob/trunk/coccinelle/examples/counted_by.cocci
+> 
+> Cc: Ilya Dryomov <idryomov@gmail.com>
+> Cc: Xiubo Li <xiubli@redhat.com>
+> Cc: Jeff Layton <jlayton@kernel.org>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Eric Dumazet <edumazet@google.com>
+> Cc: Jakub Kicinski <kuba@kernel.org>
+> Cc: Paolo Abeni <pabeni@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Cc: netdev@vger.kernel.org
+> Signed-off-by: Kees Cook <keescook@chromium.org>
 
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: Xiubo Li <xiubli@redhat.com>
-Cc: Jeff Layton <jlayton@kernel.org>
-Cc: "David S. Miller" <davem@davemloft.net>
-Cc: Eric Dumazet <edumazet@google.com>
-Cc: Jakub Kicinski <kuba@kernel.org>
-Cc: Paolo Abeni <pabeni@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Cc: netdev@vger.kernel.org
-Signed-off-by: Kees Cook <keescook@chromium.org>
----
- include/linux/ceph/mon_client.h | 2 +-
- net/ceph/mon_client.c           | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+Reviewed-by: Gustavo A. R. Silva <gustavoars@kernel.org>
 
-diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
-index b658961156a0..7a9a40163c0f 100644
---- a/include/linux/ceph/mon_client.h
-+++ b/include/linux/ceph/mon_client.h
-@@ -19,7 +19,7 @@ struct ceph_monmap {
- 	struct ceph_fsid fsid;
- 	u32 epoch;
- 	u32 num_mon;
--	struct ceph_entity_inst mon_inst[];
-+	struct ceph_entity_inst mon_inst[] __counted_by(num_mon);
- };
- 
- struct ceph_mon_client;
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index faabad6603db..f263f7e91a21 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -1136,6 +1136,7 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
- 			       GFP_KERNEL);
- 	if (!monc->monmap)
- 		return -ENOMEM;
-+	monc->monmap->num_mon = num_mon;
- 
- 	for (i = 0; i < num_mon; i++) {
- 		struct ceph_entity_inst *inst = &monc->monmap->mon_inst[i];
-@@ -1147,7 +1148,6 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
- 		inst->name.type = CEPH_ENTITY_TYPE_MON;
- 		inst->name.num = cpu_to_le64(i);
- 	}
--	monc->monmap->num_mon = num_mon;
- 	return 0;
- }
- 
+Thanks
 -- 
-2.34.1
+Gustavo
 
+> ---
+>   include/linux/ceph/mon_client.h | 2 +-
+>   net/ceph/mon_client.c           | 2 +-
+>   2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+> index b658961156a0..7a9a40163c0f 100644
+> --- a/include/linux/ceph/mon_client.h
+> +++ b/include/linux/ceph/mon_client.h
+> @@ -19,7 +19,7 @@ struct ceph_monmap {
+>   	struct ceph_fsid fsid;
+>   	u32 epoch;
+>   	u32 num_mon;
+> -	struct ceph_entity_inst mon_inst[];
+> +	struct ceph_entity_inst mon_inst[] __counted_by(num_mon);
+>   };
+>   
+>   struct ceph_mon_client;
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index faabad6603db..f263f7e91a21 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -1136,6 +1136,7 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
+>   			       GFP_KERNEL);
+>   	if (!monc->monmap)
+>   		return -ENOMEM;
+> +	monc->monmap->num_mon = num_mon;
+>   
+>   	for (i = 0; i < num_mon; i++) {
+>   		struct ceph_entity_inst *inst = &monc->monmap->mon_inst[i];
+> @@ -1147,7 +1148,6 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
+>   		inst->name.type = CEPH_ENTITY_TYPE_MON;
+>   		inst->name.num = cpu_to_le64(i);
+>   	}
+> -	monc->monmap->num_mon = num_mon;
+>   	return 0;
+>   }
+>   
