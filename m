@@ -2,148 +2,142 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 197B1CD493C
-	for <ceph-devel@archiver.kernel.org>; Thu, 21 Sep 2023 00:52:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3882E7D0B9
+	for <ceph-devel@archiver.kernel.org>; Fri, 22 Sep 2023 06:26:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229716AbjIUAwm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Wed, 20 Sep 2023 20:52:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58776 "EHLO
+        id S231370AbjIVG0Z (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 22 Sep 2023 02:26:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229621AbjIUAwl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Sep 2023 20:52:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA56ADD
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Sep 2023 17:51:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695257508;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=TFI5WmIh4My0R+y7lKbpmUV46PPypYnH5zMhfJ0bQVY=;
-        b=MoUIaWd3HkS/6H2v3g2U6xksOHXcDd5gMV2liXhQfTaNBsgOi9Vl/K9b1iCOLiMqRYYY6U
-        KSq4bXUtV1gIpjeZL78GnVIsrH/qKP+75CLX63xhBYzM4ULDZV15NpuapzljOuHD968Blw
-        Ir6P5U+cgXApf+sJO6Du5sW+XZO0fTE=
-Received: from mail-oa1-f70.google.com (mail-oa1-f70.google.com
- [209.85.160.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-88-lIsh646JNI-BLPgSRp0PNw-1; Wed, 20 Sep 2023 20:51:47 -0400
-X-MC-Unique: lIsh646JNI-BLPgSRp0PNw-1
-Received: by mail-oa1-f70.google.com with SMTP id 586e51a60fabf-1bf2e81ce17so616665fac.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Sep 2023 17:51:47 -0700 (PDT)
+        with ESMTP id S231532AbjIVG0U (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Sep 2023 02:26:20 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2AE4C1BB
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Sep 2023 23:26:09 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id a640c23a62f3a-9ad8bf9bfabso214550466b.3
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Sep 2023 23:26:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ionos.com; s=google; t=1695363967; x=1695968767; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Hc1EfM4Ltnso0WZLWYNawQf+V2mMDzvf7BDBSh0CjLs=;
+        b=Xi3hU7u3ESXKPnQypKv7hQWrvchrgwjc24rjyV9hebdbC3qHo2ymQU/g2fiYKVttl5
+         dcXnxAEenT0ykxocx7998TSKHSfvqPlaLoLyJUsSm9vMVQXzUYYos1foB26VSQvsE10p
+         f5vZKgpakp9najw2bSztkQ8jU6gWMjL0uhTMdZAY3dlqPRW94ZLa2SBuKsfTx1gK++ZH
+         i0o5r1YHr8jmSdg04xVSvWhPCjzDGXD4y8hODAnWb/WqV5WWeFK1YcKIAC0YlhN2esWz
+         3Iv/TSRbuMHer79kkzCu9IEydQOMJgK3LOY6C71SOFrfe5zWuVm30DGAnqloK8/ULkQQ
+         iIRA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695257507; x=1695862307;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=TFI5WmIh4My0R+y7lKbpmUV46PPypYnH5zMhfJ0bQVY=;
-        b=XNggquJYlryXs+h5nuntrC58J2dnBolrxDJsdLpNmsTuHhISkWrXmhYsns/7uXSmNd
-         G1dd6EtqtB2ioDn9H7RNYhRX8UKC8EZ2I3yG1biA7Ite4lDB5NVuHddz3XlG/C5xw3xA
-         mwClsBwZuugTbE+foYxkGyeZpSJyb58iwvQoDYN2acWCRvfP4rEoE94HH5KanB2z059x
-         NNCVtkBABADwrr339rjE4qN2acRrFRYZ71xUaAHom3sfIfpU56GTuEQQm9ScgTZwgNaY
-         MVEkCCPAlWWGrnZI3R1C5LBKxFwvWQsmqXh9MiqgS3lTWqaEfZcNYlfrZF9HVXQ/FBDD
-         yJ9w==
-X-Gm-Message-State: AOJu0Yy+imRgJIrUsW2FGZ9vhW43k8ojfCJR4zQXgiFj1uR8eeXd7IaF
-        KPxKc9MCoV5qci0Ogwtnhg4ySOe8L/ylpOhDvI9F361ISLebkjnhWMegmArw7xcdQ3zJu46g9NZ
-        33kcF3bU5p5ORMgiGbJgHQg==
-X-Received: by 2002:a05:6870:5622:b0:1be:f23f:99b with SMTP id m34-20020a056870562200b001bef23f099bmr4401516oao.42.1695257507064;
-        Wed, 20 Sep 2023 17:51:47 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IH7X444xzNTr4txbg0xM0A5uyV0tfIQjl2wXSUHMAGPu5TLRpN4bMw26THHBcBC+GsfKNwKjA==
-X-Received: by 2002:a05:6870:5622:b0:1be:f23f:99b with SMTP id m34-20020a056870562200b001bef23f099bmr4401508oao.42.1695257506782;
-        Wed, 20 Sep 2023 17:51:46 -0700 (PDT)
-Received: from [10.72.113.125] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id bi17-20020a056a00311100b00682bec0b680sm127170pfb.89.2023.09.20.17.51.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 20 Sep 2023 17:51:46 -0700 (PDT)
-Message-ID: <2ed5afa7-7ca7-87d2-ea84-5e80485bae97@redhat.com>
-Date:   Thu, 21 Sep 2023 08:51:41 +0800
+        d=1e100.net; s=20230601; t=1695363967; x=1695968767;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Hc1EfM4Ltnso0WZLWYNawQf+V2mMDzvf7BDBSh0CjLs=;
+        b=DlqAbUUif/nr5pERIn2+tqjVfJZwQA1qRsy+CUr4SVSXznfi+uKdBK/PODmqR6ziEX
+         Lath6jlex5KMGigyV4QoHw71yn0Bccwped9vAzab1dAfBR8SCBLXjp1tOpuydU4SSeW3
+         /IZ7TYiDuN+Wzon0+R14aUj2y2zDb0pnzSt1DeXfG0KBVFsEcEofRRfeXziCHZYgSop3
+         nwhBWOg+0LxQXY0PUja/Q+NbueBy+pOTf3NeC5TubBnhAWxkAYrfIU5sUm///vjIuQbA
+         mTA+/66/ngocVl+D9x734uGkmHVoUyPCj2FJIee3E9/q2aIbEdGBJX3C0VEVi0F0v7Vr
+         4y6w==
+X-Gm-Message-State: AOJu0YxXwDksFp3bqCBHWcNwSb1K1dZLBCp4MkzUpi5yl4DK7OpcynZZ
+        mxchfpc8w4mYzqwDQMmQf32VeA==
+X-Google-Smtp-Source: AGHT+IHshGX6wjH7dpeUCyrvBXH7IlLquPjC5dKAorG5dmp9neFw6do3Ta3KBKMZjb0B6XijMUahKw==
+X-Received: by 2002:a17:906:2096:b0:9ae:1de:f4fb with SMTP id 22-20020a170906209600b009ae01def4fbmr6180280ejq.46.1695363967557;
+        Thu, 21 Sep 2023 23:26:07 -0700 (PDT)
+Received: from heron.intern.cm-ag (p200300dc6f209c00529a4cfffe3dd983.dip0.t-ipconnect.de. [2003:dc:6f20:9c00:529a:4cff:fe3d:d983])
+        by smtp.gmail.com with ESMTPSA id gy6-20020a170906f24600b00992afee724bsm2195519ejb.76.2023.09.21.23.26.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 21 Sep 2023 23:26:07 -0700 (PDT)
+From:   Max Kellermann <max.kellermann@ionos.com>
+To:     Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
+        Jeff Layton <jlayton@kernel.org>
+Cc:     Max Kellermann <max.kellermann@ionos.com>,
+        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 1/2] fs/ceph/debugfs: make all files world-readable
+Date:   Fri, 22 Sep 2023 08:25:57 +0200
+Message-Id: <20230922062558.1739642-1-max.kellermann@ionos.com>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH] fs: apply umask if POSIX ACL support is disabled
-Content-Language: en-US
-To:     Max Kellermann <max.kellermann@ionos.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Jeff Layton <jlayton@kernel.org>, Jan Kara <jack@suse.com>,
-        Dave Kleikamp <shaggy@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net
-References: <20230919081900.1096840-1-max.kellermann@ionos.com>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20230919081900.1096840-1-max.kellermann@ionos.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+I'd like to be able to run metrics collector processes without special
+privileges
 
-On 9/19/23 16:18, Max Kellermann wrote:
-> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
-> ---
->   fs/ceph/super.h           | 1 +
->   fs/ext2/acl.h             | 1 +
->   fs/jfs/jfs_acl.h          | 1 +
->   include/linux/posix_acl.h | 1 +
->   4 files changed, 4 insertions(+)
->
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 51c7f2b14f6f..e7e2f264acf4 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -1194,6 +1194,7 @@ static inline void ceph_forget_all_cached_acls(struct inode *inode)
->   static inline int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
->   				     struct ceph_acl_sec_ctx *as_ctx)
->   {
-> +	*mode &= ~current_umask();
->   	return 0;
->   }
+In the kernel, there is a mix of debugfs files being world-readable
+and not world-readable is; with a naive "git grep", I found 723
+world-readable debugfs_create_file() calls and 582 calls which were
+only accessible to privileged processe.
 
-This LGTM.
+From the code, I cannot derive a consistent policy for that, but the
+ceph statistics seem harmless (and useful) enough.
 
-Shouldn't we also do this in 'ceph_pre_init_acls()' when we couldn't get 
-'acl' from 'posix_acl_create()' ?
+Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+---
+ fs/ceph/debugfs.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
 
-Thanks!
-
-- Xiubo
-
-
->   static inline void ceph_init_inode_acls(struct inode *inode,
-> diff --git a/fs/ext2/acl.h b/fs/ext2/acl.h
-> index 4a8443a2b8ec..694af789c614 100644
-> --- a/fs/ext2/acl.h
-> +++ b/fs/ext2/acl.h
-> @@ -67,6 +67,7 @@ extern int ext2_init_acl (struct inode *, struct inode *);
->   
->   static inline int ext2_init_acl (struct inode *inode, struct inode *dir)
->   {
-> +	inode->i_mode &= ~current_umask();
->   	return 0;
->   }
->   #endif
-> diff --git a/fs/jfs/jfs_acl.h b/fs/jfs/jfs_acl.h
-> index f892e54d0fcd..10791e97a46f 100644
-> --- a/fs/jfs/jfs_acl.h
-> +++ b/fs/jfs/jfs_acl.h
-> @@ -17,6 +17,7 @@ int jfs_init_acl(tid_t, struct inode *, struct inode *);
->   static inline int jfs_init_acl(tid_t tid, struct inode *inode,
->   			       struct inode *dir)
->   {
-> +	inode->i_mode &= ~current_umask();
->   	return 0;
->   }
->   
-> diff --git a/include/linux/posix_acl.h b/include/linux/posix_acl.h
-> index 0e65b3d634d9..54bc9b1061ca 100644
-> --- a/include/linux/posix_acl.h
-> +++ b/include/linux/posix_acl.h
-> @@ -128,6 +128,7 @@ static inline void cache_no_acl(struct inode *inode)
->   static inline int posix_acl_create(struct inode *inode, umode_t *mode,
->   		struct posix_acl **default_acl, struct posix_acl **acl)
->   {
-> +	*mode &= ~current_umask();
->   	*default_acl = *acl = NULL;
->   	return 0;
->   }
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 3904333fa6c3..2abee7e18144 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -429,31 +429,31 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
+ 				       name);
+ 
+ 	fsc->debugfs_mdsmap = debugfs_create_file("mdsmap",
+-					0400,
++					0444,
+ 					fsc->client->debugfs_dir,
+ 					fsc,
+ 					&mdsmap_fops);
+ 
+ 	fsc->debugfs_mds_sessions = debugfs_create_file("mds_sessions",
+-					0400,
++					0444,
+ 					fsc->client->debugfs_dir,
+ 					fsc,
+ 					&mds_sessions_fops);
+ 
+ 	fsc->debugfs_mdsc = debugfs_create_file("mdsc",
+-						0400,
++						0444,
+ 						fsc->client->debugfs_dir,
+ 						fsc,
+ 						&mdsc_fops);
+ 
+ 	fsc->debugfs_caps = debugfs_create_file("caps",
+-						0400,
++						0444,
+ 						fsc->client->debugfs_dir,
+ 						fsc,
+ 						&caps_fops);
+ 
+ 	fsc->debugfs_status = debugfs_create_file("status",
+-						  0400,
++						  0444,
+ 						  fsc->client->debugfs_dir,
+ 						  fsc,
+ 						  &status_fops);
+@@ -461,13 +461,13 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
+ 	fsc->debugfs_metrics_dir = debugfs_create_dir("metrics",
+ 						      fsc->client->debugfs_dir);
+ 
+-	debugfs_create_file("file", 0400, fsc->debugfs_metrics_dir, fsc,
++	debugfs_create_file("file", 0444, fsc->debugfs_metrics_dir, fsc,
+ 			    &metrics_file_fops);
+-	debugfs_create_file("latency", 0400, fsc->debugfs_metrics_dir, fsc,
++	debugfs_create_file("latency", 0444, fsc->debugfs_metrics_dir, fsc,
+ 			    &metrics_latency_fops);
+-	debugfs_create_file("size", 0400, fsc->debugfs_metrics_dir, fsc,
++	debugfs_create_file("size", 0444, fsc->debugfs_metrics_dir, fsc,
+ 			    &metrics_size_fops);
+-	debugfs_create_file("caps", 0400, fsc->debugfs_metrics_dir, fsc,
++	debugfs_create_file("caps", 0444, fsc->debugfs_metrics_dir, fsc,
+ 			    &metrics_caps_fops);
+ }
+ 
+-- 
+2.39.2
 
