@@ -2,136 +2,147 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1272CE7A8C
-	for <ceph-devel@archiver.kernel.org>; Mon, 25 Sep 2023 05:31:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34A26CE7A81
+	for <ceph-devel@archiver.kernel.org>; Mon, 25 Sep 2023 10:24:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231937AbjIYFbn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Mon, 25 Sep 2023 01:31:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33170 "EHLO
+        id S231301AbjIYKY3 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Mon, 25 Sep 2023 06:24:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231925AbjIYFbm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Sep 2023 01:31:42 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 563EBE8
-        for <ceph-devel@vger.kernel.org>; Sun, 24 Sep 2023 22:30:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695619848;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=/+uGUxfHp02RCcRe6BcbF819hU3YIlzLr1cT6smnWaA=;
-        b=g6VE8ldAGbEMyVYXZtgyNbOREoOMt2bUlfh+X9pn3v55Z33IyPR/LBqf1P3zNgbuJiTGTc
-        Q2fD2+R44ZVZeJT2U2ncYFAdYFvjxNDvr6uybC2mW4eyJ+cENYehxUiO3ZQ098JXU4RsSs
-        GR1WHqMcAMankU91Cc7XNRDLHOXDmME=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-16-bGoeUqeQPSmND2aeMV_qLA-1; Mon, 25 Sep 2023 01:30:46 -0400
-X-MC-Unique: bGoeUqeQPSmND2aeMV_qLA-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 6BB611C060C4;
-        Mon, 25 Sep 2023 05:30:46 +0000 (UTC)
-Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (unknown [10.72.112.123])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id AD54F51E3;
-        Mon, 25 Sep 2023 05:30:43 +0000 (UTC)
-From:   xiubli@redhat.com
-To:     ceph-devel@vger.kernel.org
-Cc:     idryomov@gmail.com, jlayton@kernel.org, vshankar@redhat.com,
-        mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH 2/3] ceph: always queue a writeback when revoking the Fb caps
-Date:   Mon, 25 Sep 2023 13:28:09 +0800
-Message-ID: <20230925052810.21914-3-xiubli@redhat.com>
-In-Reply-To: <20230925052810.21914-1-xiubli@redhat.com>
-References: <20230925052810.21914-1-xiubli@redhat.com>
+        with ESMTP id S231332AbjIYKY1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Sep 2023 06:24:27 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCDADCE;
+        Mon, 25 Sep 2023 03:24:21 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D85E9C433C9;
+        Mon, 25 Sep 2023 10:24:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695637461;
+        bh=xtN3D4LDUTuzosYJZbPIt8Z5GN0XuqQyg+i3+r1+uDg=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=ZKRD+5pK4lzKLgR38tk5sKPQnKG/1rAffQZN9kAZ1SD7JgfqRN+VFCgPyxfdX8JDg
+         BGiNbVmxYjXQW30mvuE8RntvGRm5iTnjxD7lO/RxwqCzEBf8QpuQQCWF+JMjB9XUuC
+         xv1ibO3Ka64tGcoAJ3NVRakrdKi1GlcDz7e1otKVBg5sn4q9hIkbg6Wy9hj5ZMiNu3
+         iZ8dXDIs9qMomVWxjOBKaIHZcNHmYQv0jNB+icS0hmrEbXYG5wCVownbvN26qUNl5R
+         T+dShGaKk7Ud+jTKb2fHNkWp5fljDcvEDKtgocZ3UDVpz5gwxXsZuDDDSDp5PB+9MM
+         fVt/IkG2Jpu8Q==
+Message-ID: <09b36d06bf75aa8264ea31c76911bbd53ada6ab4.camel@kernel.org>
+Subject: Re: [PATCH 1/2] fs/ceph/debugfs: make all files world-readable
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Xiubo Li <xiubli@redhat.com>,
+        Max Kellermann <max.kellermann@ionos.com>,
+        Ilya Dryomov <idryomov@gmail.com>
+Cc:     ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Mon, 25 Sep 2023 06:24:19 -0400
+In-Reply-To: <fd88660f-0d23-16fb-2408-ac18ad01778e@redhat.com>
+References: <20230922062558.1739642-1-max.kellermann@ionos.com>
+         <fd88660f-0d23-16fb-2408-ac18ad01778e@redhat.com>
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.48.4 (3.48.4-1.fc38) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+On Mon, 2023-09-25 at 13:18 +0800, Xiubo Li wrote:
+> On 9/22/23 14:25, Max Kellermann wrote:
+> > I'd like to be able to run metrics collector processes without special
+> > privileges
+> >=20
+> > In the kernel, there is a mix of debugfs files being world-readable
+> > and not world-readable is; with a naive "git grep", I found 723
+> > world-readable debugfs_create_file() calls and 582 calls which were
+> > only accessible to privileged processe.
+> >=20
+> >  From the code, I cannot derive a consistent policy for that, but the
+> > ceph statistics seem harmless (and useful) enough.
+>=20
+> I am not sure whether will this make sense. Because the 'debug' under=20
+> '/sys/kernel/' is also only accessible by privileged process.
+>=20
+> Ilya, Jeff
+>=20
+> Any idea ?
+>=20
 
-In case there is 'Fw' dirty caps and 'CHECK_CAPS_FLUSH' is set we
-will always ignore queue a writeback. Queue a writeback is very
-important because it will block kclient flushing the snapcaps to
-MDS and which will block MDS waiting for revoking the 'Fb' caps.
+Yeah, I don't think this makes much sense. At least on my machine:
 
-URL: https://tracker.ceph.com/issues/50223
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- fs/ceph/caps.c | 48 ++++++++++++++++++++++++------------------------
- 1 file changed, 24 insertions(+), 24 deletions(-)
+# stat -c '%A' /sys/kernel/debug
+drwx------
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index efa036e7619f..7ce275838007 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2156,6 +2156,30 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
- 		      ceph_cap_string(cap->implemented),
- 		      ceph_cap_string(revoking));
- 
-+		/* completed revocation? going down and there are no caps? */
-+		if (revoking) {
-+			if ((revoking & cap_used) == 0) {
-+				doutc(cl, "completed revocation of %s\n",
-+				      ceph_cap_string(cap->implemented & ~cap->issued));
-+				goto ack;
-+			}
-+
-+			/*
-+			 * If the "i_wrbuffer_ref" was increased by mmap or generic
-+			 * cache write just before the ceph_check_caps() is called,
-+			 * the Fb capability revoking will fail this time. Then we
-+			 * must wait for the BDI's delayed work to flush the dirty
-+			 * pages and to release the "i_wrbuffer_ref", which will cost
-+			 * at most 5 seconds. That means the MDS needs to wait at
-+			 * most 5 seconds to finished the Fb capability's revocation.
-+			 *
-+			 * Let's queue a writeback for it.
-+			 */
-+			if (S_ISREG(inode->i_mode) && ci->i_wrbuffer_ref &&
-+			    (revoking & CEPH_CAP_FILE_BUFFER))
-+				queue_writeback = true;
-+		}
-+
- 		if (cap == ci->i_auth_cap &&
- 		    (cap->issued & CEPH_CAP_FILE_WR)) {
- 			/* request larger max_size from MDS? */
-@@ -2183,30 +2207,6 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
- 			}
- 		}
- 
--		/* completed revocation? going down and there are no caps? */
--		if (revoking) {
--			if ((revoking & cap_used) == 0) {
--				doutc(cl, "completed revocation of %s\n",
--				      ceph_cap_string(cap->implemented & ~cap->issued));
--				goto ack;
--			}
--
--			/*
--			 * If the "i_wrbuffer_ref" was increased by mmap or generic
--			 * cache write just before the ceph_check_caps() is called,
--			 * the Fb capability revoking will fail this time. Then we
--			 * must wait for the BDI's delayed work to flush the dirty
--			 * pages and to release the "i_wrbuffer_ref", which will cost
--			 * at most 5 seconds. That means the MDS needs to wait at
--			 * most 5 seconds to finished the Fb capability's revocation.
--			 *
--			 * Let's queue a writeback for it.
--			 */
--			if (S_ISREG(inode->i_mode) && ci->i_wrbuffer_ref &&
--			    (revoking & CEPH_CAP_FILE_BUFFER))
--				queue_writeback = true;
--		}
--
- 		/* want more caps from mds? */
- 		if (want & ~cap->mds_wanted) {
- 			if (want & ~(cap->mds_wanted | cap->issued))
--- 
-2.39.1
+Without at least x permissions, an unprivileged user can't pathwalk
+through there. Max, how are you testing this?
 
+
+>=20
+> > Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+> > ---
+> >   fs/ceph/debugfs.c | 18 +++++++++---------
+> >   1 file changed, 9 insertions(+), 9 deletions(-)
+> >=20
+> > diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+> > index 3904333fa6c3..2abee7e18144 100644
+> > --- a/fs/ceph/debugfs.c
+> > +++ b/fs/ceph/debugfs.c
+> > @@ -429,31 +429,31 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *=
+fsc)
+> >   				       name);
+> >  =20
+> >   	fsc->debugfs_mdsmap =3D debugfs_create_file("mdsmap",
+> > -					0400,
+> > +					0444,
+> >   					fsc->client->debugfs_dir,
+> >   					fsc,
+> >   					&mdsmap_fops);
+> >  =20
+> >   	fsc->debugfs_mds_sessions =3D debugfs_create_file("mds_sessions",
+> > -					0400,
+> > +					0444,
+> >   					fsc->client->debugfs_dir,
+> >   					fsc,
+> >   					&mds_sessions_fops);
+> >  =20
+> >   	fsc->debugfs_mdsc =3D debugfs_create_file("mdsc",
+> > -						0400,
+> > +						0444,
+> >   						fsc->client->debugfs_dir,
+> >   						fsc,
+> >   						&mdsc_fops);
+> >  =20
+> >   	fsc->debugfs_caps =3D debugfs_create_file("caps",
+> > -						0400,
+> > +						0444,
+> >   						fsc->client->debugfs_dir,
+> >   						fsc,
+> >   						&caps_fops);
+> >  =20
+> >   	fsc->debugfs_status =3D debugfs_create_file("status",
+> > -						  0400,
+> > +						  0444,
+> >   						  fsc->client->debugfs_dir,
+> >   						  fsc,
+> >   						  &status_fops);
+> > @@ -461,13 +461,13 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *=
+fsc)
+> >   	fsc->debugfs_metrics_dir =3D debugfs_create_dir("metrics",
+> >   						      fsc->client->debugfs_dir);
+> >  =20
+> > -	debugfs_create_file("file", 0400, fsc->debugfs_metrics_dir, fsc,
+> > +	debugfs_create_file("file", 0444, fsc->debugfs_metrics_dir, fsc,
+> >   			    &metrics_file_fops);
+> > -	debugfs_create_file("latency", 0400, fsc->debugfs_metrics_dir, fsc,
+> > +	debugfs_create_file("latency", 0444, fsc->debugfs_metrics_dir, fsc,
+> >   			    &metrics_latency_fops);
+> > -	debugfs_create_file("size", 0400, fsc->debugfs_metrics_dir, fsc,
+> > +	debugfs_create_file("size", 0444, fsc->debugfs_metrics_dir, fsc,
+> >   			    &metrics_size_fops);
+> > -	debugfs_create_file("caps", 0400, fsc->debugfs_metrics_dir, fsc,
+> > +	debugfs_create_file("caps", 0444, fsc->debugfs_metrics_dir, fsc,
+> >   			    &metrics_caps_fops);
+> >   }
+> >  =20
+>=20
+
+--=20
+Jeff Layton <jlayton@kernel.org>
