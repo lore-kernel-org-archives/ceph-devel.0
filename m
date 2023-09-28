@@ -2,300 +2,249 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95032E732C4
-	for <ceph-devel@archiver.kernel.org>; Thu, 28 Sep 2023 11:05:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A389E732C6
+	for <ceph-devel@archiver.kernel.org>; Thu, 28 Sep 2023 11:19:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232302AbjI1LFi (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Thu, 28 Sep 2023 07:05:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38408 "EHLO
+        id S232328AbjI1LTK (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Thu, 28 Sep 2023 07:19:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231984AbjI1LEl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Sep 2023 07:04:41 -0400
+        with ESMTP id S232043AbjI1LTA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Sep 2023 07:19:00 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 682E81AB;
-        Thu, 28 Sep 2023 04:04:39 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B68B1C433CC;
-        Thu, 28 Sep 2023 11:04:38 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E9953C0E;
+        Thu, 28 Sep 2023 04:06:10 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B45DC433C8;
+        Thu, 28 Sep 2023 11:05:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695899079;
-        bh=f+KhDIHOxIa1n1MMHNaiM6YmAE7E9DXw6UiXfKfhTa4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=YNrUSYYU8jNgpS5scvoKJxnSx6tH8i6Jupyb+gbEF7HUcxycLMAq+G0EZ/up7Eo3g
-         E3GVhL6duynF+8d1epGM2k4duLdAmpn8IBpBaNs0gYNihfNMo4CATW8g/ISkcj75dQ
-         FwZEgEKsPq94vI1sE/pN0XbvDziCcIS9dCVIiqX2tjCWF3691sx10xeoXTxzepiYg/
-         RbnAFGfD7sne+NILTxyRkfIhk8RwCf+vDapaOGQL7P+uUvUw9FZ9mTZZDJrcX6ucww
-         sEmE/DcL0bqbnDsXOKwqOLgtF9lyiDcT/Ntqmm5n3wW5Lb0KeXS2LtkRqE7bG2Uqtk
-         PStQcL3CU7QNg==
+        s=k20201202; t=1695899170;
+        bh=AhfBjRw4Zieo7d/UWgS6g+DDX4jTgfxPdqjByEx9qhM=;
+        h=From:To:Cc:Subject:Date:From;
+        b=V+wOzFncXPhDXQFQdHny1CsSK9qUJSENwQ3KCibIzAaql9xTx9HnhDcijW4/7BOtC
+         kszW/YDyA0AMr7XQAUyJiZeb60fme2uDkyobxKoT8cY6VhZHy5eoMPnsaN6X7TtxCq
+         QTaef29MEouz7MkE+tPPdhmCepxFcMdSgkZxMJFkcJInXSuCSMx/JWDM3dr1kZYemo
+         enoSOcU6aqdkN9wSvXmqf6Z9xnaErzYq51O9jQbKnwkBY5wjm/kE01rgGkYxHItLa5
+         5cRJCieL6/r3mfMz8yZQYtWkWaXM39nIwleCYU584hrkq3VtvO021SVUVEZ1qpwd4S
+         nSI/tWahGoeXg==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     Alexander Viro <viro@zeniv.linux.org.uk>,
         Christian Brauner <brauner@kernel.org>,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     ceph-devel@vger.kernel.org
-Subject: [PATCH 23/87] fs/ceph: convert to new inode {a,m}time accessors
-Date:   Thu, 28 Sep 2023 07:02:32 -0400
-Message-ID: <20230928110413.33032-22-jlayton@kernel.org>
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        David Sterba <dsterba@suse.cz>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Eric Biederman <ebiederm@xmission.com>,
+        Kees Cook <keescook@chromium.org>, Jeremy Kerr <jk@ozlabs.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Alexander Gordeev <agordeev@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@linux.ibm.com>,
+        Sven Schnelle <svens@linux.ibm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?UTF-8?q?Arve=20Hj=C3=B8nnev=C3=A5g?= <arve@android.com>,
+        Todd Kjos <tkjos@android.com>,
+        Martijn Coenen <maco@android.com>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Carlos Llamas <cmllamas@google.com>,
+        Suren Baghdasaryan <surenb@google.com>,
+        Mattia Dongili <malattia@linux.it>,
+        Dennis Dalessandro <dennis.dalessandro@cornelisnetworks.com>,
+        Jason Gunthorpe <jgg@ziepe.ca>,
+        Leon Romanovsky <leon@kernel.org>,
+        Brad Warrum <bwarrum@linux.ibm.com>,
+        Ritu Agarwal <rituagar@linux.ibm.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+        Mark Gross <markgross@kernel.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Eric Van Hensbergen <ericvh@kernel.org>,
+        Latchesar Ionkov <lucho@ionkov.net>,
+        Dominique Martinet <asmadeus@codewreck.org>,
+        Christian Schoenebeck <linux_oss@crudebyte.com>,
+        David Sterba <dsterba@suse.com>,
+        David Howells <dhowells@redhat.com>,
+        Marc Dionne <marc.dionne@auristor.com>,
+        Ian Kent <raven@themaw.net>,
+        Luis de Bethencourt <luisbg@kernel.org>,
+        Salah Triki <salah.triki@gmail.com>,
+        "Tigran A. Aivazian" <aivazian.tigran@gmail.com>,
+        Chris Mason <clm@fb.com>, Josef Bacik <josef@toxicpanda.com>,
+        Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu,
+        Joel Becker <jlbec@evilplan.org>,
+        Christoph Hellwig <hch@lst.de>,
+        Nicolas Pitre <nico@fluxnic.net>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Ard Biesheuvel <ardb@kernel.org>, Gao Xiang <xiang@kernel.org>,
+        Chao Yu <chao@kernel.org>, Yue Hu <huyue2@coolpad.com>,
+        Jeffle Xu <jefflexu@linux.alibaba.com>,
+        Namjae Jeon <linkinjeon@kernel.org>,
+        Sungjong Seo <sj1557.seo@samsung.com>,
+        Jan Kara <jack@suse.com>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
+        Christoph Hellwig <hch@infradead.org>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Bob Peterson <rpeterso@redhat.com>,
+        Andreas Gruenbacher <agruenba@redhat.com>,
+        Richard Weinberger <richard@nod.at>,
+        Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Mikulas Patocka <mikulas@artax.karlin.mff.cuni.cz>,
+        Mike Kravetz <mike.kravetz@oracle.com>,
+        Muchun Song <muchun.song@linux.dev>, Jan Kara <jack@suse.cz>,
+        David Woodhouse <dwmw2@infradead.org>,
+        Dave Kleikamp <shaggy@kernel.org>, Tejun Heo <tj@kernel.org>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        Anna Schumaker <anna@kernel.org>,
+        Chuck Lever <chuck.lever@oracle.com>,
+        Neil Brown <neilb@suse.de>,
+        Olga Kornievskaia <kolga@netapp.com>,
+        Dai Ngo <Dai.Ngo@oracle.com>, Tom Talpey <tom@talpey.com>,
+        Ryusuke Konishi <konishi.ryusuke@gmail.com>,
+        Anton Altaparmakov <anton@tuxera.com>,
+        Konstantin Komarov <almaz.alexandrovich@paragon-software.com>,
+        Mark Fasheh <mark@fasheh.com>,
+        Joseph Qi <joseph.qi@linux.alibaba.com>,
+        Bob Copeland <me@bobcopeland.com>,
+        Mike Marshall <hubcap@omnibond.com>,
+        Martin Brandenburg <martin@omnibond.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Iurii Zaikin <yzaikin@google.com>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        Anders Larsen <al@alarsen.net>,
+        Steve French <sfrench@samba.org>,
+        Paulo Alcantara <pc@manguebit.com>,
+        Ronnie Sahlberg <lsahlber@redhat.com>,
+        Shyam Prasad N <sprasad@microsoft.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Phillip Lougher <phillip@squashfs.org.uk>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Masami Hiramatsu <mhiramat@kernel.org>,
+        Evgeniy Dushistov <dushistov@mail.ru>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Damien Le Moal <dlemoal@kernel.org>,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <jth@kernel.org>,
+        Alexei Starovoitov <ast@kernel.org>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Andrii Nakryiko <andrii@kernel.org>,
+        Martin KaFai Lau <martin.lau@linux.dev>,
+        Song Liu <song@kernel.org>,
+        Yonghong Song <yonghong.song@linux.dev>,
+        John Fastabend <john.fastabend@gmail.com>,
+        KP Singh <kpsingh@kernel.org>,
+        Stanislav Fomichev <sdf@google.com>,
+        Hao Luo <haoluo@google.com>, Jiri Olsa <jolsa@kernel.org>,
+        Hugh Dickins <hughd@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        John Johansen <john.johansen@canonical.com>,
+        Paul Moore <paul@paul-moore.com>,
+        James Morris <jmorris@namei.org>,
+        "Serge E. Hallyn" <serge@hallyn.com>,
+        Stephen Smalley <stephen.smalley.work@gmail.com>,
+        Eric Paris <eparis@parisplace.org>
+Cc:     linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mm@kvack.org, linuxppc-dev@lists.ozlabs.org,
+        linux-s390@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-usb@vger.kernel.org, v9fs@lists.linux.dev,
+        linux-afs@lists.infradead.org, autofs@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+        codalist@coda.cs.cmu.edu, linux-efi@vger.kernel.org,
+        linux-erofs@lists.ozlabs.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, gfs2@lists.linux.dev,
+        linux-um@lists.infradead.org, linux-mtd@lists.infradead.org,
+        jfs-discussion@lists.sourceforge.net, linux-nfs@vger.kernel.org,
+        linux-nilfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net,
+        ntfs3@lists.linux.dev, ocfs2-devel@lists.linux.dev,
+        linux-karma-devel@lists.sourceforge.net, devel@lists.orangefs.org,
+        linux-unionfs@vger.kernel.org, linux-hardening@vger.kernel.org,
+        reiserfs-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
+        samba-technical@lists.samba.org,
+        linux-trace-kernel@vger.kernel.org, linux-xfs@vger.kernel.org,
+        bpf@vger.kernel.org, netdev@vger.kernel.org,
+        apparmor@lists.ubuntu.com, linux-security-module@vger.kernel.org,
+        selinux@vger.kernel.org
+Subject: [PATCH 85/87] fs: rename i_atime and i_mtime fields to __i_atime and __i_mtime
+Date:   Thu, 28 Sep 2023 07:05:52 -0400
+Message-ID: <20230928110554.34758-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.41.0
-In-Reply-To: <20230928110413.33032-1-jlayton@kernel.org>
-References: <20230928110300.32891-1-jlayton@kernel.org>
- <20230928110413.33032-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
+Make it clear that these fields are private now, and that the accessors
+should be used instead.
+
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- fs/ceph/addr.c       | 10 ++++----
- fs/ceph/caps.c       |  4 +--
- fs/ceph/file.c       |  2 +-
- fs/ceph/inode.c      | 60 ++++++++++++++++++++++++--------------------
- fs/ceph/mds_client.c |  8 ++++--
- fs/ceph/snap.c       |  4 +--
- 6 files changed, 49 insertions(+), 39 deletions(-)
+ include/linux/fs.h | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index f4863078f7fe..936b9e0b351d 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -750,7 +750,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
- 	dout("writepage %llu~%llu (%llu bytes, %sencrypted)\n",
- 	     page_off, len, wlen, IS_ENCRYPTED(inode) ? "" : "not ");
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 12d247b82aa0..831657011036 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -671,9 +671,9 @@ struct inode {
+ 	};
+ 	dev_t			i_rdev;
+ 	loff_t			i_size;
+-	struct timespec64	i_atime;
+-	struct timespec64	i_mtime;
+-	struct timespec64	__i_ctime; /* use inode_*_ctime accessors! */
++	struct timespec64	__i_atime; /* use inode_*_atime accessors */
++	struct timespec64	__i_mtime; /* use inode_*_mtime accessors */
++	struct timespec64	__i_ctime; /* use inode_*_ctime accessors */
+ 	spinlock_t		i_lock;	/* i_blocks, i_bytes, maybe i_size */
+ 	unsigned short          i_bytes;
+ 	u8			i_blkbits;
+@@ -1555,13 +1555,13 @@ static inline struct timespec64 inode_set_ctime(struct inode *inode,
  
--	req->r_mtime = inode->i_mtime;
-+	req->r_mtime = inode_get_mtime(inode);
- 	ceph_osdc_start_request(osdc, req);
- 	err = ceph_osdc_wait_request(osdc, req);
+ static inline struct timespec64 inode_get_atime(const struct inode *inode)
+ {
+-	return inode->i_atime;
++	return inode->__i_atime;
+ }
  
-@@ -1327,7 +1327,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- 			pages = NULL;
- 		}
+ static inline struct timespec64 inode_set_atime_to_ts(struct inode *inode,
+ 						      struct timespec64 ts)
+ {
+-	inode->i_atime = ts;
++	inode->__i_atime = ts;
+ 	return ts;
+ }
  
--		req->r_mtime = inode->i_mtime;
-+		req->r_mtime = inode_get_mtime(inode);
- 		ceph_osdc_start_request(&fsc->client->osdc, req);
- 		req = NULL;
+@@ -1575,13 +1575,13 @@ static inline struct timespec64 inode_set_atime(struct inode *inode,
  
-@@ -1875,7 +1875,7 @@ int ceph_uninline_data(struct file *file)
- 		goto out_unlock;
- 	}
+ static inline struct timespec64 inode_get_mtime(const struct inode *inode)
+ {
+-	return inode->i_mtime;
++	return inode->__i_mtime;
+ }
  
--	req->r_mtime = inode->i_mtime;
-+	req->r_mtime = inode_get_mtime(inode);
- 	ceph_osdc_start_request(&fsc->client->osdc, req);
- 	err = ceph_osdc_wait_request(&fsc->client->osdc, req);
- 	ceph_osdc_put_request(req);
-@@ -1917,7 +1917,7 @@ int ceph_uninline_data(struct file *file)
- 			goto out_put_req;
- 	}
+ static inline struct timespec64 inode_set_mtime_to_ts(struct inode *inode,
+ 						      struct timespec64 ts)
+ {
+-	inode->i_mtime = ts;
++	inode->__i_mtime = ts;
+ 	return ts;
+ }
  
--	req->r_mtime = inode->i_mtime;
-+	req->r_mtime = inode_get_mtime(inode);
- 	ceph_osdc_start_request(&fsc->client->osdc, req);
- 	err = ceph_osdc_wait_request(&fsc->client->osdc, req);
- 
-@@ -2092,7 +2092,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 				     0, false, true);
- 	ceph_osdc_start_request(&fsc->client->osdc, rd_req);
- 
--	wr_req->r_mtime = ci->netfs.inode.i_mtime;
-+	wr_req->r_mtime = inode_get_mtime(&ci->netfs.inode);
- 	ceph_osdc_start_request(&fsc->client->osdc, wr_req);
- 
- 	err = ceph_osdc_wait_request(&fsc->client->osdc, rd_req);
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 14215ec646f7..a104669fcf4c 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1421,8 +1421,8 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 		arg->old_xattr_buf = NULL;
- 	}
- 
--	arg->mtime = inode->i_mtime;
--	arg->atime = inode->i_atime;
-+	arg->mtime = inode_get_mtime(inode);
-+	arg->atime = inode_get_atime(inode);
- 	arg->ctime = inode_get_ctime(inode);
- 	arg->btime = ci->i_btime;
- 	arg->change_attr = inode_peek_iversion_raw(inode);
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index b1da02f5dbe3..b96d4e74ae99 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -2489,7 +2489,7 @@ static int ceph_zero_partial_object(struct inode *inode,
- 		goto out;
- 	}
- 
--	req->r_mtime = inode->i_mtime;
-+	req->r_mtime = inode_get_mtime(inode);
- 	ceph_osdc_start_request(&fsc->client->osdc, req);
- 	ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
- 	if (ret == -ENOENT)
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 800ab7920513..6a51db29ed57 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -185,9 +185,9 @@ struct inode *ceph_get_snapdir(struct inode *parent)
- 	inode->i_mode = parent->i_mode;
- 	inode->i_uid = parent->i_uid;
- 	inode->i_gid = parent->i_gid;
--	inode->i_mtime = parent->i_mtime;
-+	inode_set_mtime_to_ts(inode, inode_get_mtime(parent));
- 	inode_set_ctime_to_ts(inode, inode_get_ctime(parent));
--	inode->i_atime = parent->i_atime;
-+	inode_set_atime_to_ts(inode, inode_get_atime(parent));
- 	ci->i_rbytes = 0;
- 	ci->i_btime = ceph_inode(parent)->i_btime;
- 
-@@ -837,28 +837,31 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 			/* the MDS did a utimes() */
- 			dout("mtime %lld.%09ld -> %lld.%09ld "
- 			     "tw %d -> %d\n",
--			     inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
-+			     inode_get_mtime(inode).tv_sec,
-+			     inode_get_mtime(inode).tv_nsec,
- 			     mtime->tv_sec, mtime->tv_nsec,
- 			     ci->i_time_warp_seq, (int)time_warp_seq);
- 
--			inode->i_mtime = *mtime;
--			inode->i_atime = *atime;
-+			inode_set_mtime_to_ts(inode, *mtime);
-+			inode_set_atime_to_ts(inode, *atime);
- 			ci->i_time_warp_seq = time_warp_seq;
- 		} else if (time_warp_seq == ci->i_time_warp_seq) {
-+			struct timespec64	ts;
-+
- 			/* nobody did utimes(); take the max */
--			if (timespec64_compare(mtime, &inode->i_mtime) > 0) {
-+			ts = inode_get_mtime(inode);
-+			if (timespec64_compare(mtime, &ts) > 0) {
- 				dout("mtime %lld.%09ld -> %lld.%09ld inc\n",
--				     inode->i_mtime.tv_sec,
--				     inode->i_mtime.tv_nsec,
-+				     ts.tv_sec, ts.tv_nsec,
- 				     mtime->tv_sec, mtime->tv_nsec);
--				inode->i_mtime = *mtime;
-+				inode_set_mtime_to_ts(inode, *mtime);
- 			}
--			if (timespec64_compare(atime, &inode->i_atime) > 0) {
-+			ts = inode_get_atime(inode);
-+			if (timespec64_compare(atime, &ts) > 0) {
- 				dout("atime %lld.%09ld -> %lld.%09ld inc\n",
--				     inode->i_atime.tv_sec,
--				     inode->i_atime.tv_nsec,
-+				     ts.tv_sec, ts.tv_nsec,
- 				     atime->tv_sec, atime->tv_nsec);
--				inode->i_atime = *atime;
-+				inode_set_atime_to_ts(inode, *atime);
- 			}
- 		} else if (issued & CEPH_CAP_FILE_EXCL) {
- 			/* we did a utimes(); ignore mds values */
-@@ -869,8 +872,8 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 		/* we have no write|excl caps; whatever the MDS says is true */
- 		if (ceph_seq_cmp(time_warp_seq, ci->i_time_warp_seq) >= 0) {
- 			inode_set_ctime_to_ts(inode, *ctime);
--			inode->i_mtime = *mtime;
--			inode->i_atime = *atime;
-+			inode_set_mtime_to_ts(inode, *mtime);
-+			inode_set_atime_to_ts(inode, *atime);
- 			ci->i_time_warp_seq = time_warp_seq;
- 		} else {
- 			warn = 1;
-@@ -2553,20 +2556,22 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr,
- 	}
- 
- 	if (ia_valid & ATTR_ATIME) {
-+		struct timespec64 atime = inode_get_atime(inode);
-+
- 		dout("setattr %p atime %lld.%ld -> %lld.%ld\n", inode,
--		     inode->i_atime.tv_sec, inode->i_atime.tv_nsec,
-+		     atime.tv_sec, atime.tv_nsec,
- 		     attr->ia_atime.tv_sec, attr->ia_atime.tv_nsec);
- 		if (issued & CEPH_CAP_FILE_EXCL) {
- 			ci->i_time_warp_seq++;
--			inode->i_atime = attr->ia_atime;
-+			inode_set_atime_to_ts(inode, attr->ia_atime);
- 			dirtied |= CEPH_CAP_FILE_EXCL;
- 		} else if ((issued & CEPH_CAP_FILE_WR) &&
--			   timespec64_compare(&inode->i_atime,
--					    &attr->ia_atime) < 0) {
--			inode->i_atime = attr->ia_atime;
-+			   timespec64_compare(&atime,
-+					      &attr->ia_atime) < 0) {
-+			inode_set_atime_to_ts(inode, attr->ia_atime);
- 			dirtied |= CEPH_CAP_FILE_WR;
- 		} else if ((issued & CEPH_CAP_FILE_SHARED) == 0 ||
--			   !timespec64_equal(&inode->i_atime, &attr->ia_atime)) {
-+			   !timespec64_equal(&atime, &attr->ia_atime)) {
- 			ceph_encode_timespec64(&req->r_args.setattr.atime,
- 					       &attr->ia_atime);
- 			mask |= CEPH_SETATTR_ATIME;
-@@ -2626,20 +2631,21 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr,
- 		}
- 	}
- 	if (ia_valid & ATTR_MTIME) {
-+		struct timespec64 mtime = inode_get_mtime(inode);
-+
- 		dout("setattr %p mtime %lld.%ld -> %lld.%ld\n", inode,
--		     inode->i_mtime.tv_sec, inode->i_mtime.tv_nsec,
-+		     mtime.tv_sec, mtime.tv_nsec,
- 		     attr->ia_mtime.tv_sec, attr->ia_mtime.tv_nsec);
- 		if (issued & CEPH_CAP_FILE_EXCL) {
- 			ci->i_time_warp_seq++;
--			inode->i_mtime = attr->ia_mtime;
-+			inode_set_mtime_to_ts(inode, attr->ia_mtime);
- 			dirtied |= CEPH_CAP_FILE_EXCL;
- 		} else if ((issued & CEPH_CAP_FILE_WR) &&
--			   timespec64_compare(&inode->i_mtime,
--					    &attr->ia_mtime) < 0) {
--			inode->i_mtime = attr->ia_mtime;
-+			   timespec64_compare(&mtime, &attr->ia_mtime) < 0) {
-+			inode_set_mtime_to_ts(inode, attr->ia_mtime);
- 			dirtied |= CEPH_CAP_FILE_WR;
- 		} else if ((issued & CEPH_CAP_FILE_SHARED) == 0 ||
--			   !timespec64_equal(&inode->i_mtime, &attr->ia_mtime)) {
-+			   !timespec64_equal(&mtime, &attr->ia_mtime)) {
- 			ceph_encode_timespec64(&req->r_args.setattr.mtime,
- 					       &attr->ia_mtime);
- 			mask |= CEPH_SETATTR_MTIME;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 615db141b6c4..e4cfa3b02187 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4353,12 +4353,16 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 		rec.v2.flock_len = (__force __le32)
- 			((ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) ? 0 : 1);
- 	} else {
-+		struct timespec64 ts;
-+
- 		rec.v1.cap_id = cpu_to_le64(cap->cap_id);
- 		rec.v1.wanted = cpu_to_le32(__ceph_caps_wanted(ci));
- 		rec.v1.issued = cpu_to_le32(cap->issued);
- 		rec.v1.size = cpu_to_le64(i_size_read(inode));
--		ceph_encode_timespec64(&rec.v1.mtime, &inode->i_mtime);
--		ceph_encode_timespec64(&rec.v1.atime, &inode->i_atime);
-+		ts = inode_get_mtime(inode);
-+		ceph_encode_timespec64(&rec.v1.mtime, &ts);
-+		ts = inode_get_atime(inode);
-+		ceph_encode_timespec64(&rec.v1.atime, &ts);
- 		rec.v1.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
- 		rec.v1.pathbase = cpu_to_le64(pathbase);
- 	}
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 813f21add992..6732e1ea97d9 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -658,8 +658,8 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
- 
- 	BUG_ON(capsnap->writing);
- 	capsnap->size = i_size_read(inode);
--	capsnap->mtime = inode->i_mtime;
--	capsnap->atime = inode->i_atime;
-+	capsnap->mtime = inode_get_mtime(inode);
-+	capsnap->atime = inode_get_atime(inode);
- 	capsnap->ctime = inode_get_ctime(inode);
- 	capsnap->btime = ci->i_btime;
- 	capsnap->change_attr = inode_peek_iversion_raw(inode);
 -- 
 2.41.0
 
