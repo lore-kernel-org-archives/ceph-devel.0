@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE53CCDB484
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:27:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05719CDB47E
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:27:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232158AbjJMQ1T (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:27:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58604 "EHLO
+        id S232640AbjJMQ1Y (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:27:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58152 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232022AbjJMQ0k (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:40 -0400
+        with ESMTP id S230500AbjJMQ0n (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:43 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E32126A6
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:45 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 839CA1FC4
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213203;
+        s=mimecast20190719; t=1697213182;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=uT/Mhdx8sQf5PESeJ8Rr2IswwVlQVrc+dpLVfyRgQ2c=;
-        b=hlfYHIW2Co9GysjRfHZtJvROgW+abMFYA/45shzb4Wzjcn4H41IVh398qrBtxMhm8iqptl
-        0PcCxLivzdDrrtuIVPwG/yISx669CZQh/29LVI5updQqdTPigdO63dmDApLww1yTZXNN7e
-        Z6elbhXhP1aOZOq6421dP22V82JXEgc=
+        bh=xgDLRrlPZ+fbYBYQqYIYXWKYaa9HMgYZfbqZFNilvm4=;
+        b=AuP4rcQRHmNM/1JcRMbkXSmhWYVtm1SjeXvTJx/uWFPvZQFbB75FnUmjp4Rn66kuvxVQ6A
+        Q15Ew5hiM1t9cgzYuJrDU3RvRrv54lUxJVMFQd41uGlpXMiinLT/+g6BYOfhT00iO+qPau
+        afiAGm4HhCwHIDh+ZH93yQbyB/0mhB8=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-640-oOqr7qHpOt-wp8G5blDJHw-1; Fri, 13 Oct 2023 12:06:23 -0400
-X-MC-Unique: oOqr7qHpOt-wp8G5blDJHw-1
+ us-mta-128-YyJ4fOlmM3q6kor9W6-rTQ-1; Fri, 13 Oct 2023 12:06:16 -0400
+X-MC-Unique: YyJ4fOlmM3q6kor9W6-rTQ-1
 Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 259D588B7B8;
-        Fri, 13 Oct 2023 16:06:22 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 28C4C185A795;
+        Fri, 13 Oct 2023 16:06:15 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 61A841C060DF;
-        Fri, 13 Oct 2023 16:06:19 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 950EF1C060DF;
+        Fri, 13 Oct 2023 16:06:12 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -53,9 +53,9 @@ Cc:     David Howells <dhowells@redhat.com>,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
-Subject: [RFC PATCH 33/53] netfs: Provide minimum blocksize parameter
-Date:   Fri, 13 Oct 2023 17:04:02 +0100
-Message-ID: <20231013160423.2218093-34-dhowells@redhat.com>
+Subject: [RFC PATCH 31/53] netfs: Provide netfs_file_read_iter()
+Date:   Fri, 13 Oct 2023 17:04:00 +0100
+Message-ID: <20231013160423.2218093-32-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
@@ -65,10 +65,8 @@ Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add a parameter for minimum blocksize in the netfs_i_context struct.  This
-can be used, for instance, to force I/O alignment for content encryption.
-It also requires the use of an RMW cycle if a write we want to do doesn't
-meet the block alignment requirements.
+Provide a top-level-ish function that can be pointed to directly by
+->read_iter file op.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -76,107 +74,61 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/buffered_read.c  | 26 ++++++++++++++++++++++----
- fs/netfs/buffered_write.c |  3 ++-
- fs/netfs/direct_read.c    |  3 ++-
- include/linux/netfs.h     |  2 ++
- 4 files changed, 28 insertions(+), 6 deletions(-)
+ fs/netfs/buffered_read.c | 33 +++++++++++++++++++++++++++++++++
+ include/linux/netfs.h    |  1 +
+ 2 files changed, 34 insertions(+)
 
 diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index ab9f8e123245..e06461ef0bfa 100644
+index 374707df6575..ab9f8e123245 100644
 --- a/fs/netfs/buffered_read.c
 +++ b/fs/netfs/buffered_read.c
-@@ -527,14 +527,26 @@ int netfs_prefetch_for_write(struct file *file, struct folio *folio,
- 	struct address_space *mapping = folio_file_mapping(folio);
- 	struct netfs_inode *ctx = netfs_inode(mapping->host);
- 	unsigned long long start = folio_pos(folio);
--	size_t flen = folio_size(folio);
-+	unsigned long long i_size, rstart, end;
-+	size_t rlen;
- 	int ret;
- 
--	_enter("%zx @%llx", flen, start);
-+	DEFINE_READAHEAD(ractl, file, NULL, mapping, folio_index(folio));
+@@ -564,3 +564,36 @@ int netfs_prefetch_for_write(struct file *file, struct folio *folio,
+ 	_leave(" = %d", ret);
+ 	return ret;
+ }
 +
-+	_enter("%zx @%llx", len, start);
- 
- 	ret = -ENOMEM;
- 
--	rreq = netfs_alloc_request(mapping, file, start, flen,
-+	i_size = i_size_read(mapping->host);
-+	end = round_up(start + len, 1U << ctx->min_bshift);
-+	if (end > i_size) {
-+		unsigned long long limit = round_up(start + len, PAGE_SIZE);
-+		end = max(limit, round_up(i_size, PAGE_SIZE));
-+	}
-+	rstart = round_down(start, 1U << ctx->min_bshift);
-+	rlen   = end - rstart;
++/**
++ * netfs_file_read_iter - Generic filesystem read routine
++ * @iocb: kernel I/O control block
++ * @iter: destination for the data read
++ *
++ * This is the ->read_iter() routine for all filesystems that can use the page
++ * cache directly.
++ *
++ * The IOCB_NOWAIT flag in iocb->ki_flags indicates that -EAGAIN shall be
++ * returned when no data can be read without waiting for I/O requests to
++ * complete; it doesn't prevent readahead.
++ *
++ * The IOCB_NOIO flag in iocb->ki_flags indicates that no new I/O requests
++ * shall be made for the read or for readahead.  When no data can be read,
++ * -EAGAIN shall be returned.  When readahead would be triggered, a partial,
++ * possibly empty read shall be returned.
++ *
++ * Return:
++ * * number of bytes copied, even for partial reads
++ * * negative error code (or 0 if IOCB_NOIO) if nothing was read
++ */
++ssize_t netfs_file_read_iter(struct kiocb *iocb, struct iov_iter *iter)
++{
++	struct netfs_inode *ictx = netfs_inode(iocb->ki_filp->f_mapping->host);
 +
-+	rreq = netfs_alloc_request(mapping, file, rstart, rlen,
- 				   NETFS_READ_FOR_WRITE);
- 	if (IS_ERR(rreq)) {
- 		ret = PTR_ERR(rreq);
-@@ -548,7 +560,13 @@ int netfs_prefetch_for_write(struct file *file, struct folio *folio,
- 		goto error_put;
- 
- 	netfs_stat(&netfs_n_rh_write_begin);
--	trace_netfs_read(rreq, start, flen, netfs_read_trace_prefetch_for_write);
-+	trace_netfs_read(rreq, rstart, rlen, netfs_read_trace_prefetch_for_write);
++	if ((iocb->ki_flags & IOCB_DIRECT) ||
++	    test_bit(NETFS_ICTX_UNBUFFERED, &ictx->flags))
++		return netfs_unbuffered_read_iter(iocb, iter);
 +
-+	/* Expand the request to meet caching requirements and download
-+	 * preferences.
-+	 */
-+	ractl._nr_pages = folio_nr_pages(folio);
-+	netfs_rreq_expand(rreq, &ractl);
- 
- 	/* Set up the output buffer */
- 	iov_iter_xarray(&rreq->iter, ITER_DEST, &mapping->i_pages,
-diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
-index d5a5a315fbd3..7163fcc05206 100644
---- a/fs/netfs/buffered_write.c
-+++ b/fs/netfs/buffered_write.c
-@@ -80,7 +80,8 @@ static enum netfs_how_to_modify netfs_how_to_modify(struct netfs_inode *ctx,
- 	if (file->f_mode & FMODE_READ)
- 		return NETFS_JUST_PREFETCH;
- 
--	if (netfs_is_cache_enabled(ctx))
-+	if (netfs_is_cache_enabled(ctx) ||
-+	    ctx->min_bshift > 0)
- 		return NETFS_JUST_PREFETCH;
- 
- 	if (!finfo)
-diff --git a/fs/netfs/direct_read.c b/fs/netfs/direct_read.c
-index 1d26468aafd9..52ad8fa66dd5 100644
---- a/fs/netfs/direct_read.c
-+++ b/fs/netfs/direct_read.c
-@@ -185,7 +185,8 @@ static ssize_t netfs_unbuffered_read_iter_locked(struct kiocb *iocb, struct iov_
- 	 * will then need to pad the request out to the minimum block size.
- 	 */
- 	if (test_bit(NETFS_RREQ_USE_BOUNCE_BUFFER, &rreq->flags)) {
--		start = rreq->start;
-+		min_bsize = 1ULL << ctx->min_bshift;
-+		start = round_down(rreq->start, min_bsize);
- 		end = min_t(unsigned long long,
- 			    round_up(rreq->start + rreq->len, min_bsize),
- 			    ctx->remote_i_size);
++	return filemap_read(iocb, iter, 0);
++}
++EXPORT_SYMBOL(netfs_file_read_iter);
 diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index fb4f4f826b93..6244f7a9a44a 100644
+index e2a5a441b7fc..6e02a68a51f7 100644
 --- a/include/linux/netfs.h
 +++ b/include/linux/netfs.h
-@@ -141,6 +141,7 @@ struct netfs_inode {
- 	unsigned long		flags;
- #define NETFS_ICTX_ODIRECT	0		/* The file has DIO in progress */
- #define NETFS_ICTX_UNBUFFERED	1		/* I/O should not use the pagecache */
-+	unsigned char		min_bshift;	/* log2 min block size for bounding box or 0 */
- };
+@@ -384,6 +384,7 @@ struct netfs_cache_ops {
  
- /*
-@@ -462,6 +463,7 @@ static inline void netfs_inode_init(struct netfs_inode *ctx,
- 	ctx->remote_i_size = i_size_read(&ctx->inode);
- 	ctx->zero_point = ctx->remote_i_size;
- 	ctx->flags = 0;
-+	ctx->min_bshift = 0;
- #if IS_ENABLED(CONFIG_FSCACHE)
- 	ctx->cache = NULL;
- #endif
+ /* High-level read API. */
+ ssize_t netfs_unbuffered_read_iter(struct kiocb *iocb, struct iov_iter *iter);
++ssize_t netfs_file_read_iter(struct kiocb *iocb, struct iov_iter *iter);
+ 
+ /* High-level write API */
+ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
 
