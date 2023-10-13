@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98C48CDB482
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:26:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D94CCDB483
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:26:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230281AbjJMQ0m (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:26:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58136 "EHLO
+        id S232274AbjJMQ0q (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:26:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229924AbjJMQ0S (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:18 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6489B198C
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:10 -0700 (PDT)
+        with ESMTP id S230469AbjJMQ0U (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:20 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 677572129
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213168;
+        s=mimecast20190719; t=1697213191;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=YCXtE3Gqov3oA1rKgjLh+er5qsDXpT3dWhNn5qjdKp8=;
-        b=GA5+rYD7VWonDrJOLuS5i505X2YLSYoDuHxIPeCZXCNq+RpxZanjGk6fupKyawwMgP6bYM
-        gV+eQ5otgHR7kH59ENZMs03Szdn64snIEJ7/y41KpoP8BE9t9g9ZxwUjvicdP7mHhzFYdv
-        lr184Vf4EV32QyXHVI1/a7LzDMmXeZE=
+        bh=yJ0EH3j50U389igBFANhTwAFPV4cR9SbiJMpaWBP0sQ=;
+        b=hjFkuXf1waJGP1JZnutgKacRDuUasZ7cm59sq07hZwx9GQYr2HTrpTQKjm6jm80+4mvF8G
+        hXQDJYl19wWTSedSuBMVMK1Il6hxNGKVBw0G2ULENj5NDqzIQMVA1HPx+s89tOXqQbjO0W
+        HfMvCzeyUy2Zd1mpTSsfRKxlSB/+dOo=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-173-TJDkM4R1O72X3owEh91uEg-1; Fri, 13 Oct 2023 12:05:59 -0400
-X-MC-Unique: TJDkM4R1O72X3owEh91uEg-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+ us-mta-646-YdQnHyJONxOiGOy-PV0Gow-1; Fri, 13 Oct 2023 12:06:27 -0400
+X-MC-Unique: YdQnHyJONxOiGOy-PV0Gow-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 93274801E62;
-        Fri, 13 Oct 2023 16:05:58 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 6D0E085A5BF;
+        Fri, 13 Oct 2023 16:06:25 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 11660C15BBC;
-        Fri, 13 Oct 2023 16:05:55 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id DDB741C060DF;
+        Fri, 13 Oct 2023 16:06:22 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -53,20 +53,20 @@ Cc:     David Howells <dhowells@redhat.com>,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
-Subject: [RFC PATCH 26/53] netfs: Allocate multipage folios in the writepath
-Date:   Fri, 13 Oct 2023 17:03:55 +0100
-Message-ID: <20231013160423.2218093-27-dhowells@redhat.com>
+Subject: [RFC PATCH 34/53] netfs: Make netfs_skip_folio_read() take account of blocksize
+Date:   Fri, 13 Oct 2023 17:04:03 +0100
+Message-ID: <20231013160423.2218093-35-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.8
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Allocate a multipage folio when copying data into the pagecache if possible
-if there's sufficient data to warrant it.
+Make netfs_skip_folio_read() take account of blocksize such as crypto
+blocksize.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -74,33 +74,80 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/buffered_write.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ fs/netfs/buffered_read.c | 32 +++++++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 11 deletions(-)
 
-diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
-index 406c3f3666fa..4de6a12149e4 100644
---- a/fs/netfs/buffered_write.c
-+++ b/fs/netfs/buffered_write.c
-@@ -84,14 +84,19 @@ static enum netfs_how_to_modify netfs_how_to_modify(struct netfs_inode *ctx,
- }
+diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
+index e06461ef0bfa..de696aaaefbd 100644
+--- a/fs/netfs/buffered_read.c
++++ b/fs/netfs/buffered_read.c
+@@ -337,6 +337,7 @@ EXPORT_SYMBOL(netfs_read_folio);
  
  /*
-- * Grab a folio for writing and lock it.
-+ * Grab a folio for writing and lock it.  Attempt to allocate as large a folio
-+ * as possible to hold as much of the remaining length as possible in one go.
+  * Prepare a folio for writing without reading first
++ * @ctx: File context
+  * @folio: The folio being prepared
+  * @pos: starting position for the write
+  * @len: length of write
+@@ -350,32 +351,41 @@ EXPORT_SYMBOL(netfs_read_folio);
+  * If any of these criteria are met, then zero out the unwritten parts
+  * of the folio and return true. Otherwise, return false.
   */
- static struct folio *netfs_grab_folio_for_write(struct address_space *mapping,
- 						loff_t pos, size_t part)
+-static bool netfs_skip_folio_read(struct folio *folio, loff_t pos, size_t len,
+-				 bool always_fill)
++static bool netfs_skip_folio_read(struct netfs_inode *ctx, struct folio *folio,
++				  loff_t pos, size_t len, bool always_fill)
  {
- 	pgoff_t index = pos / PAGE_SIZE;
-+	fgf_t fgp_flags = FGP_WRITEBEGIN;
- 
--	return __filemap_get_folio(mapping, index, FGP_WRITEBEGIN,
-+	if (mapping_large_folio_support(mapping))
-+		fgp_flags |= fgf_set_order(pos % PAGE_SIZE + part);
+ 	struct inode *inode = folio_inode(folio);
+-	loff_t i_size = i_size_read(inode);
++	loff_t i_size = i_size_read(inode), low, high;
+ 	size_t offset = offset_in_folio(folio, pos);
+ 	size_t plen = folio_size(folio);
++	size_t min_bsize = 1UL << ctx->min_bshift;
 +
-+	return __filemap_get_folio(mapping, index, fgp_flags,
- 				   mapping_gfp_mask(mapping));
- }
++	if (likely(min_bsize == 1)) {
++		low = folio_file_pos(folio);
++		high = low + plen;
++	} else {
++		low = round_down(pos, min_bsize);
++		high = round_up(pos + len, min_bsize);
++	}
  
+ 	if (unlikely(always_fill)) {
+-		if (pos - offset + len <= i_size)
+-			return false; /* Page entirely before EOF */
++		if (low < i_size)
++			return false; /* Some part of the block before EOF */
+ 		zero_user_segment(&folio->page, 0, plen);
+ 		folio_mark_uptodate(folio);
+ 		return true;
+ 	}
+ 
+-	/* Full folio write */
+-	if (offset == 0 && len >= plen)
++	/* Full page write */
++	if (pos == low && high == pos + len)
+ 		return true;
+ 
+-	/* Page entirely beyond the end of the file */
+-	if (pos - offset >= i_size)
++	/* pos beyond last page in the file */
++	if (low >= i_size)
+ 		goto zero_out;
+ 
+ 	/* Write that covers from the start of the folio to EOF or beyond */
+-	if (offset == 0 && (pos + len) >= i_size)
++	if (pos == low && (pos + len) >= i_size)
+ 		goto zero_out;
+ 
+ 	return false;
+@@ -454,7 +464,7 @@ int netfs_write_begin(struct netfs_inode *ctx,
+ 	 * to preload the granule.
+ 	 */
+ 	if (!netfs_is_cache_enabled(ctx) &&
+-	    netfs_skip_folio_read(folio, pos, len, false)) {
++	    netfs_skip_folio_read(ctx, folio, pos, len, false)) {
+ 		netfs_stat(&netfs_n_rh_write_zskip);
+ 		goto have_folio_no_wait;
+ 	}
 
