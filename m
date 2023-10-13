@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F2D3C41513
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:07:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7495FCDB47E
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:07:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231598AbjJMQHr (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:07:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47602 "EHLO
+        id S232166AbjJMQHu (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:07:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233079AbjJMQGs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:06:48 -0400
+        with ESMTP id S232808AbjJMQG4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:06:56 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E13B1A7
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:05:40 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A49E5D4A
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:05:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213139;
+        s=mimecast20190719; t=1697213143;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=eZnc3j734khDGwXznc6wh2xPv7mSRAABdKA6EQBsCg4=;
-        b=efNuvxdOSPIBAEUzeQ0IYXpYObIDiClUepnZPuRFMqb5hLj9vRS4xpgHfJLpA2gjeg3zMG
-        X1LPrH7JRWRatRoBNQc4vq87IZz7aWagnxwsIyv79Byhfi8InYIGSWkuFYEA8nPC45Ma5c
-        vGRDF2SRO3eu8T3WKJSgK7zDZKGOqxI=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-319-Jzb0pISoMpSdZfj-hqrYxg-1; Fri, 13 Oct 2023 12:05:24 -0400
-X-MC-Unique: Jzb0pISoMpSdZfj-hqrYxg-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+        bh=F0Ay07c0Gz72YNYgMd2laEIR/IQCWOWvRbIa7ptaL9M=;
+        b=OvuRUzy7qQtutclkpzoLeQug+Ca1uZtYbuOQJ1naWJ6A5iA0jziHsIrPfT4IWosITIu1nn
+        Ycy+tDvjjILXO3ZbdoKf1FGSEWwFQAIZq25ThgS/GQ/SnOjzhchCSk4fBqWEgv+pTyKlNE
+        b5hX0JnbpyBonw0TyW6QpYoIASMafxQ=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-549-ySrH6GjHO9Ka3rsox-_Ymw-1; Fri, 13 Oct 2023 12:05:40 -0400
+X-MC-Unique: ySrH6GjHO9Ka3rsox-_Ymw-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BC5CF1C113E2;
-        Fri, 13 Oct 2023 16:05:23 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C482187B2BB;
+        Fri, 13 Oct 2023 16:05:38 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 3BDEFC15BBC;
-        Fri, 13 Oct 2023 16:05:21 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 41C051C06535;
+        Fri, 13 Oct 2023 16:05:36 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -53,25 +53,24 @@ Cc:     David Howells <dhowells@redhat.com>,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
-Subject: [RFC PATCH 17/53] netfs: Extend the netfs_io_*request structs to handle writes
-Date:   Fri, 13 Oct 2023 17:03:46 +0100
-Message-ID: <20231013160423.2218093-18-dhowells@redhat.com>
+Subject: [RFC PATCH 20/53] fscache: Add a function to begin an cache op from a netfslib request
+Date:   Fri, 13 Oct 2023 17:03:49 +0100
+Message-ID: <20231013160423.2218093-21-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.8
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Modify the netfs_io_request struct to act as a point around which writes
-can be coordinated.  It represents and pins a range of pages that need
-writing and a list of regions of dirty data in that range of pages.
+Add a function to begin an cache read or write operation from a netfslib
+I/O request.  This function can then be pointed to directly by the network
+filesystem's netfs_request_ops::begin_cache_operation op pointer.
 
-If RMW is required, the original data can be downloaded into the bounce
-buffer, decrypted if necessary, the modifications made, then the modified
-data can be reencrypted/recompressed and sent back to the server.
+Ideally, netfslib would just call into fscache directly, but that would
+cause dependency cycles as fscache calls into netfslib directly.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -79,202 +78,196 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/internal.h          |  6 ++++++
- fs/netfs/main.c              |  3 ++-
- fs/netfs/objects.c           |  6 ++++++
- fs/netfs/stats.c             | 18 ++++++++++++++----
- include/linux/netfs.h        | 15 ++++++++++++++-
- include/trace/events/netfs.h |  8 ++++++--
- 6 files changed, 48 insertions(+), 8 deletions(-)
+ fs/9p/vfs_addr.c        | 18 ++----------------
+ fs/afs/file.c           | 14 +-------------
+ fs/ceph/addr.c          |  2 +-
+ fs/ceph/cache.h         | 12 ------------
+ fs/fscache/io.c         | 42 +++++++++++++++++++++++++++++++++++++++++
+ include/linux/fscache.h |  6 ++++++
+ 6 files changed, 52 insertions(+), 42 deletions(-)
 
-diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
-index 00e01278316f..46183dad4d50 100644
---- a/fs/netfs/internal.h
-+++ b/fs/netfs/internal.h
-@@ -109,6 +109,12 @@ extern atomic_t netfs_n_rh_write_begin;
- extern atomic_t netfs_n_rh_write_done;
- extern atomic_t netfs_n_rh_write_failed;
- extern atomic_t netfs_n_rh_write_zskip;
-+extern atomic_t netfs_n_wh_upload;
-+extern atomic_t netfs_n_wh_upload_done;
-+extern atomic_t netfs_n_wh_upload_failed;
-+extern atomic_t netfs_n_wh_write;
-+extern atomic_t netfs_n_wh_write_done;
-+extern atomic_t netfs_n_wh_write_failed;
+diff --git a/fs/9p/vfs_addr.c b/fs/9p/vfs_addr.c
+index 18a666c43e4a..516572bad412 100644
+--- a/fs/9p/vfs_addr.c
++++ b/fs/9p/vfs_addr.c
+@@ -17,6 +17,7 @@
+ #include <linux/swap.h>
+ #include <linux/uio.h>
+ #include <linux/netfs.h>
++#include <linux/fscache.h>
+ #include <net/9p/9p.h>
+ #include <net/9p/client.h>
  
- 
- static inline void netfs_stat(atomic_t *stat)
-diff --git a/fs/netfs/main.c b/fs/netfs/main.c
-index 0f0c6e70aa44..e990738c2213 100644
---- a/fs/netfs/main.c
-+++ b/fs/netfs/main.c
-@@ -28,10 +28,11 @@ MODULE_PARM_DESC(netfs_debug, "Netfs support debugging mask");
- LIST_HEAD(netfs_io_requests);
- DEFINE_SPINLOCK(netfs_proc_lock);
- 
--static const char *netfs_origins[] = {
-+static const char *netfs_origins[nr__netfs_io_origin] = {
- 	[NETFS_READAHEAD]	= "RA",
- 	[NETFS_READPAGE]	= "RP",
- 	[NETFS_READ_FOR_WRITE]	= "RW",
-+	[NETFS_WRITEBACK]	= "WB",
- };
- 
- /*
-diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
-index 9b965a509e5a..30ec42566966 100644
---- a/fs/netfs/objects.c
-+++ b/fs/netfs/objects.c
-@@ -20,6 +20,7 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
- 	struct inode *inode = file ? file_inode(file) : mapping->host;
- 	struct netfs_inode *ctx = netfs_inode(inode);
- 	struct netfs_io_request *rreq;
-+	bool cached = netfs_is_cache_enabled(ctx);
- 	int ret;
- 
- 	rreq = kzalloc(ctx->ops->io_request_size ?: sizeof(struct netfs_io_request),
-@@ -38,7 +39,10 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
- 	xa_init(&rreq->bounce);
- 	INIT_LIST_HEAD(&rreq->subrequests);
- 	refcount_set(&rreq->ref, 1);
-+
- 	__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
-+	if (cached)
-+		__set_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags);
- 	if (file && file->f_flags & O_NONBLOCK)
- 		__set_bit(NETFS_RREQ_NONBLOCK, &rreq->flags);
- 	if (rreq->netfs_ops->init_request) {
-@@ -50,6 +54,7 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
- 		}
- 	}
- 
-+	trace_netfs_rreq_ref(rreq->debug_id, 1, netfs_rreq_trace_new);
- 	netfs_proc_add_rreq(rreq);
- 	netfs_stat(&netfs_n_rh_rreq);
- 	return rreq;
-@@ -134,6 +139,7 @@ struct netfs_io_subrequest *netfs_alloc_subrequest(struct netfs_io_request *rreq
- 			 sizeof(struct netfs_io_subrequest),
- 			 GFP_KERNEL);
- 	if (subreq) {
-+		INIT_WORK(&subreq->work, NULL);
- 		INIT_LIST_HEAD(&subreq->rreq_link);
- 		refcount_set(&subreq->ref, 2);
- 		subreq->rreq = rreq;
-diff --git a/fs/netfs/stats.c b/fs/netfs/stats.c
-index 5510a7a14a40..ce2a1a983280 100644
---- a/fs/netfs/stats.c
-+++ b/fs/netfs/stats.c
-@@ -27,6 +27,12 @@ atomic_t netfs_n_rh_write_begin;
- atomic_t netfs_n_rh_write_done;
- atomic_t netfs_n_rh_write_failed;
- atomic_t netfs_n_rh_write_zskip;
-+atomic_t netfs_n_wh_upload;
-+atomic_t netfs_n_wh_upload_done;
-+atomic_t netfs_n_wh_upload_failed;
-+atomic_t netfs_n_wh_write;
-+atomic_t netfs_n_wh_write_done;
-+atomic_t netfs_n_wh_write_failed;
- 
- void netfs_stats_show(struct seq_file *m)
- {
-@@ -50,9 +56,13 @@ void netfs_stats_show(struct seq_file *m)
- 		   atomic_read(&netfs_n_rh_read),
- 		   atomic_read(&netfs_n_rh_read_done),
- 		   atomic_read(&netfs_n_rh_read_failed));
--	seq_printf(m, "RdHelp : WR=%u ws=%u wf=%u\n",
--		   atomic_read(&netfs_n_rh_write),
--		   atomic_read(&netfs_n_rh_write_done),
--		   atomic_read(&netfs_n_rh_write_failed));
-+	seq_printf(m, "WrHelp : UL=%u us=%u uf=%u\n",
-+		   atomic_read(&netfs_n_wh_upload),
-+		   atomic_read(&netfs_n_wh_upload_done),
-+		   atomic_read(&netfs_n_wh_upload_failed));
-+	seq_printf(m, "WrHelp : WR=%u ws=%u wf=%u\n",
-+		   atomic_read(&netfs_n_wh_write),
-+		   atomic_read(&netfs_n_wh_write_done),
-+		   atomic_read(&netfs_n_wh_write_failed));
+@@ -82,25 +83,10 @@ static void v9fs_free_request(struct netfs_io_request *rreq)
+ 	p9_fid_put(fid);
  }
- EXPORT_SYMBOL(netfs_stats_show);
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index aaf1c1d4de51..4115274e3129 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -118,6 +118,9 @@ enum netfs_io_source {
- 	NETFS_DOWNLOAD_FROM_SERVER,
- 	NETFS_READ_FROM_CACHE,
- 	NETFS_INVALID_READ,
-+	NETFS_UPLOAD_TO_SERVER,
-+	NETFS_WRITE_TO_CACHE,
-+	NETFS_INVALID_WRITE,
- } __mode(byte);
  
- typedef void (*netfs_io_terminated_t)(void *priv, ssize_t transferred_or_error,
-@@ -151,9 +154,14 @@ struct netfs_cache_resources {
+-/**
+- * v9fs_begin_cache_operation - Begin a cache operation for a read
+- * @rreq: The read request
+- */
+-static int v9fs_begin_cache_operation(struct netfs_io_request *rreq)
+-{
+-#ifdef CONFIG_9P_FSCACHE
+-	struct fscache_cookie *cookie = v9fs_inode_cookie(V9FS_I(rreq->inode));
+-
+-	return fscache_begin_read_operation(&rreq->cache_resources, cookie);
+-#else
+-	return -ENOBUFS;
+-#endif
+-}
+-
+ const struct netfs_request_ops v9fs_req_ops = {
+ 	.init_request		= v9fs_init_request,
+ 	.free_request		= v9fs_free_request,
+-	.begin_cache_operation	= v9fs_begin_cache_operation,
++	.begin_cache_operation	= fscache_begin_cache_operation,
+ 	.issue_read		= v9fs_issue_read,
  };
  
- /*
-- * Descriptor for a single component subrequest.
-+ * Descriptor for a single component subrequest.  Each operation represents an
-+ * individual read/write from/to a server, a cache, a journal, etc..
+diff --git a/fs/afs/file.c b/fs/afs/file.c
+index 3e39a2ebcad6..5bb78d874292 100644
+--- a/fs/afs/file.c
++++ b/fs/afs/file.c
+@@ -360,18 +360,6 @@ static int afs_init_request(struct netfs_io_request *rreq, struct file *file)
+ 	return 0;
+ }
+ 
+-static int afs_begin_cache_operation(struct netfs_io_request *rreq)
+-{
+-#ifdef CONFIG_AFS_FSCACHE
+-	struct afs_vnode *vnode = AFS_FS_I(rreq->inode);
+-
+-	return fscache_begin_read_operation(&rreq->cache_resources,
+-					    afs_vnode_cache(vnode));
+-#else
+-	return -ENOBUFS;
+-#endif
+-}
+-
+ static int afs_check_write_begin(struct file *file, loff_t pos, unsigned len,
+ 				 struct folio **foliop, void **_fsdata)
+ {
+@@ -388,7 +376,7 @@ static void afs_free_request(struct netfs_io_request *rreq)
+ const struct netfs_request_ops afs_req_ops = {
+ 	.init_request		= afs_init_request,
+ 	.free_request		= afs_free_request,
+-	.begin_cache_operation	= afs_begin_cache_operation,
++	.begin_cache_operation	= fscache_begin_cache_operation,
+ 	.check_write_begin	= afs_check_write_begin,
+ 	.issue_read		= afs_issue_read,
+ };
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 92a5ddcd9a76..4841b06df78c 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -488,7 +488,7 @@ static void ceph_netfs_free_request(struct netfs_io_request *rreq)
+ const struct netfs_request_ops ceph_netfs_ops = {
+ 	.init_request		= ceph_init_request,
+ 	.free_request		= ceph_netfs_free_request,
+-	.begin_cache_operation	= ceph_begin_cache_operation,
++	.begin_cache_operation	= fscache_begin_cache_operation,
+ 	.issue_read		= ceph_netfs_issue_read,
+ 	.expand_readahead	= ceph_netfs_expand_readahead,
+ 	.clamp_length		= ceph_netfs_clamp_length,
+diff --git a/fs/ceph/cache.h b/fs/ceph/cache.h
+index dc502daac49a..b804f1094764 100644
+--- a/fs/ceph/cache.h
++++ b/fs/ceph/cache.h
+@@ -57,13 +57,6 @@ static inline int ceph_fscache_dirty_folio(struct address_space *mapping,
+ 	return fscache_dirty_folio(mapping, folio, ceph_fscache_cookie(ci));
+ }
+ 
+-static inline int ceph_begin_cache_operation(struct netfs_io_request *rreq)
+-{
+-	struct fscache_cookie *cookie = ceph_fscache_cookie(ceph_inode(rreq->inode));
+-
+-	return fscache_begin_read_operation(&rreq->cache_resources, cookie);
+-}
+-
+ static inline bool ceph_is_cache_enabled(struct inode *inode)
+ {
+ 	return fscache_cookie_enabled(ceph_fscache_cookie(ceph_inode(inode)));
+@@ -135,11 +128,6 @@ static inline bool ceph_is_cache_enabled(struct inode *inode)
+ 	return false;
+ }
+ 
+-static inline int ceph_begin_cache_operation(struct netfs_io_request *rreq)
+-{
+-	return -ENOBUFS;
+-}
+-
+ static inline void ceph_fscache_note_page_release(struct inode *inode)
+ {
+ }
+diff --git a/fs/fscache/io.c b/fs/fscache/io.c
+index 0d2b8dec8f82..cb602dd651e6 100644
+--- a/fs/fscache/io.c
++++ b/fs/fscache/io.c
+@@ -158,6 +158,48 @@ int __fscache_begin_write_operation(struct netfs_cache_resources *cres,
+ }
+ EXPORT_SYMBOL(__fscache_begin_write_operation);
+ 
++/**
++ * fscache_begin_cache_operation - Begin a cache op for netfslib
++ * @rreq: The netfs request that wants to access the cache.
 + *
-+ * The buffer iterator is persistent for the life of the subrequest struct and
-+ * the pages it points to can be relied on to exist for the duration.
-  */
- struct netfs_io_subrequest {
-+	struct work_struct	work;
- 	struct netfs_io_request *rreq;		/* Supervising I/O request */
- 	struct list_head	rreq_link;	/* Link in rreq->subrequests */
- 	struct iov_iter		io_iter;	/* Iterator for this subrequest */
-@@ -178,6 +186,8 @@ enum netfs_io_origin {
- 	NETFS_READAHEAD,		/* This read was triggered by readahead */
- 	NETFS_READPAGE,			/* This read is a synchronous read */
- 	NETFS_READ_FOR_WRITE,		/* This read is to prepare a write */
-+	NETFS_WRITEBACK,		/* This write was triggered by writepages */
-+	nr__netfs_io_origin
- } __mode(byte);
++ * Begin an I/O operation on behalf of the netfs helper library, read or write.
++ * @rreq indicates the netfs operation that wishes to access the cache.
++ *
++ * This is intended to be pointed to directly by the ->begin_cache_operation()
++ * netfs lib operation for the network filesystem.
++ *
++ * @cres->inval_counter is set from @cookie->inval_counter for comparison at
++ * the end of the operation.  This allows invalidation during the operation to
++ * be detected by the caller.
++ *
++ * Returns:
++ * * 0		- Success
++ * * -ENOBUFS	- No caching available
++ * * Other error code from the cache, such as -ENOMEM.
++ */
++int fscache_begin_cache_operation(struct netfs_io_request *rreq)
++{
++	struct netfs_inode *ctx = netfs_inode(rreq->inode);
++
++	switch (rreq->origin) {
++	case NETFS_READAHEAD:
++	case NETFS_READPAGE:
++	case NETFS_READ_FOR_WRITE:
++		return fscache_begin_operation(&rreq->cache_resources,
++					       netfs_i_cookie(ctx),
++					       FSCACHE_WANT_PARAMS,
++					       fscache_access_io_read);
++	case NETFS_WRITEBACK:
++		return fscache_begin_operation(&rreq->cache_resources,
++					       netfs_i_cookie(ctx),
++					       FSCACHE_WANT_PARAMS,
++					       fscache_access_io_write);
++	default:
++		return -ENOBUFS;
++	}
++}
++EXPORT_SYMBOL(fscache_begin_cache_operation);
++
+ /**
+  * fscache_dirty_folio - Mark folio dirty and pin a cache object for writeback
+  * @mapping: The mapping the folio belongs to.
+diff --git a/include/linux/fscache.h b/include/linux/fscache.h
+index 8e312c8323a8..9c389adaf286 100644
+--- a/include/linux/fscache.h
++++ b/include/linux/fscache.h
+@@ -177,6 +177,12 @@ extern void __fscache_write_to_cache(struct fscache_cookie *, struct address_spa
+ 				     bool);
+ extern void __fscache_clear_page_bits(struct address_space *, loff_t, size_t);
  
- /*
-@@ -202,6 +212,7 @@ struct netfs_io_request {
- 	unsigned int		direct_bv_count; /* Number of elements in bv[] */
- 	unsigned int		debug_id;
- 	unsigned int		rsize;		/* Maximum read size (0 for none) */
-+	unsigned int		subreq_counter;	/* Next subreq->debug_index */
- 	atomic_t		nr_outstanding;	/* Number of ops in progress */
- 	atomic_t		nr_copy_ops;	/* Number of copy-to-cache ops in progress */
- 	size_t			submitted;	/* Amount submitted for I/O so far */
-@@ -223,6 +234,8 @@ struct netfs_io_request {
- #define NETFS_RREQ_NONBLOCK		6	/* Don't block if possible (O_NONBLOCK) */
- #define NETFS_RREQ_BLOCKED		7	/* We blocked */
- #define NETFS_RREQ_USE_BOUNCE_BUFFER	8	/* Use bounce buffer */
-+#define NETFS_RREQ_WRITE_TO_CACHE	9	/* Need to write to the cache */
-+#define NETFS_RREQ_UPLOAD_TO_SERVER	10	/* Need to write to the server */
- 	const struct netfs_request_ops *netfs_ops;
- };
- 
-diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
-index fce6d0bc78e5..4ea4e34d279f 100644
---- a/include/trace/events/netfs.h
-+++ b/include/trace/events/netfs.h
-@@ -24,7 +24,8 @@
- #define netfs_rreq_origins					\
- 	EM(NETFS_READAHEAD,			"RA")		\
- 	EM(NETFS_READPAGE,			"RP")		\
--	E_(NETFS_READ_FOR_WRITE,		"RW")
-+	EM(NETFS_READ_FOR_WRITE,		"RW")		\
-+	E_(NETFS_WRITEBACK,			"WB")
- 
- #define netfs_rreq_traces					\
- 	EM(netfs_rreq_trace_assess,		"ASSESS ")	\
-@@ -39,7 +40,10 @@
- 	EM(NETFS_FILL_WITH_ZEROES,		"ZERO")		\
- 	EM(NETFS_DOWNLOAD_FROM_SERVER,		"DOWN")		\
- 	EM(NETFS_READ_FROM_CACHE,		"READ")		\
--	E_(NETFS_INVALID_READ,			"INVL")		\
-+	EM(NETFS_INVALID_READ,			"INVL")		\
-+	EM(NETFS_UPLOAD_TO_SERVER,		"UPLD")		\
-+	EM(NETFS_WRITE_TO_CACHE,		"WRIT")		\
-+	E_(NETFS_INVALID_WRITE,			"INVL")
- 
- #define netfs_sreq_traces					\
- 	EM(netfs_sreq_trace_download_instead,	"RDOWN")	\
++#if __fscache_available
++extern int fscache_begin_cache_operation(struct netfs_io_request *rreq);
++#else
++#define fscache_begin_cache_operation NULL
++#endif
++
+ /**
+  * fscache_acquire_volume - Register a volume as desiring caching services
+  * @volume_key: An identification string for the volume
 
