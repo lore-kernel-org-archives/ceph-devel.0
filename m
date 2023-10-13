@@ -2,45 +2,35 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 656E5CDB483
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CA5CCDB483
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 17:28:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232756AbjJMQ2g (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:28:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58306 "EHLO
+        id S231224AbjJMR2X (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 13:28:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232658AbjJMQ2E (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:28:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED01110C8
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:07:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213228;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=TOWBTb7dSiEX2Zo576hGEWbl47hY2TK0ZPUPW+cuiow=;
-        b=dykz6u7P/ypMNjawxOiEDPFDmklnKrvDIpiibU/eitWaM8MVfcp93ECAu5H1sfOJH3ad8i
-        l44M4eNx0rylFXXxDzOGB5jRvkJzwi+ileSl9FHq+vJ0HCFSLQiKnb3URNAwNaT3DTcsJI
-        8BHJfzMyIRmfNYx6h48XoejiHoIaD4M=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-70-mlred8r2Ooqa8GL90Jlipg-1; Fri, 13 Oct 2023 12:07:03 -0400
-X-MC-Unique: mlred8r2Ooqa8GL90Jlipg-1
-Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C93F288B7AD;
-        Fri, 13 Oct 2023 16:07:01 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id EB8EB492BD9;
-        Fri, 13 Oct 2023 16:06:58 +0000 (UTC)
-From:   David Howells <dhowells@redhat.com>
-To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
-Cc:     David Howells <dhowells@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
+        with ESMTP id S229697AbjJMR2W (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 13:28:22 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AC10A9;
+        Fri, 13 Oct 2023 10:28:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=Imrv7hD55Mkc+SEoB4XVFrWjYvya+wwXsMRtGt0H5rA=; b=LfICwqNBIzNu3ioIqF7lzF8PE1
+        DNNDcUO+WN6s+RP2OMkJT/qU5k3RBo3ANrYkhAsydqGKT4ioL2RtakBCc/WjI9nTOwQif69iGoPrM
+        LIItLhrydjykR5FjKmttU+4/HwxH3uPMKcW4OygWjeOzbFRQPkvG/O43/t6okeN2/i09crXEZFKzi
+        k8D4OvY2OQU2yIehhAKYO9ouGdyvJ4MFCcMfiy3X2M3RigM5HJi6BJl951Sd53Ypx8tChN8KFZLHk
+        lxrVWGWMbWdDCC0v6yBYd6sAPv/6oLJTbIGWhm8cJL7F7vnRHhJQBHkL0w7AwREstcKxvFjdi2A5A
+        So6VZ8xg==;
+Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1qrLwx-006d2F-Oz; Fri, 13 Oct 2023 17:27:47 +0000
+Date:   Fri, 13 Oct 2023 18:27:47 +0100
+From:   Matthew Wilcox <willy@infradead.org>
+To:     David Howells <dhowells@redhat.com>
+Cc:     Jeff Layton <jlayton@kernel.org>,
+        Steve French <smfrench@gmail.com>,
         Marc Dionne <marc.dionne@auristor.com>,
         Paulo Alcantara <pc@manguebit.com>,
         Shyam Prasad N <sprasad@microsoft.com>,
@@ -52,158 +42,38 @@ Cc:     David Howells <dhowells@redhat.com>,
         linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Steve French <sfrench@samba.org>,
-        Shyam Prasad N <nspmangalore@gmail.com>,
-        Rohith Surabattula <rohiths.msft@gmail.com>,
-        linux-cachefs@redhat.com
-Subject: [RFC PATCH 44/53] cifs: Share server EOF pos with netfslib
-Date:   Fri, 13 Oct 2023 17:04:13 +0100
-Message-ID: <20231013160423.2218093-45-dhowells@redhat.com>
-In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
+        linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
+Subject: Re: [RFC PATCH 12/53] netfs: Provide tools to create a buffer in an
+ xarray
+Message-ID: <ZSl+Ezh3Av3LLyEf@casper.infradead.org>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
+ <20231013160423.2218093-13-dhowells@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231013160423.2218093-13-dhowells@redhat.com>
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Use cifsi->netfs_ctx.remote_i_size instead of cifsi->server_eof so that
-netfslib can refer to it to.
+On Fri, Oct 13, 2023 at 05:03:41PM +0100, David Howells wrote:
+> +int netfs_xa_store_and_mark(struct xarray *xa, unsigned long index,
+> +			    struct folio *folio, bool put_mark,
+> +			    bool pagecache_mark, gfp_t gfp_mask);
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Steve French <sfrench@samba.org>
-cc: Shyam Prasad N <nspmangalore@gmail.com>
-cc: Rohith Surabattula <rohiths.msft@gmail.com>
-cc: Jeff Layton <jlayton@kernel.org>
-cc: linux-cifs@vger.kernel.org
-cc: linux-cachefs@redhat.com
-cc: linux-fsdevel@vger.kernel.org
-cc: linux-mm@kvack.org
----
- fs/smb/client/cifsfs.c   |  2 +-
- fs/smb/client/cifsglob.h |  1 -
- fs/smb/client/file.c     |  8 ++++----
- fs/smb/client/inode.c    |  6 +++---
- fs/smb/client/smb2ops.c  | 10 +++++-----
- 5 files changed, 13 insertions(+), 14 deletions(-)
+Linus has been unhappy recently with functions that take two bools.
+When you're reading the caller, you see:
 
-diff --git a/fs/smb/client/cifsfs.c b/fs/smb/client/cifsfs.c
-index 22869cda1356..85799e9e0f4c 100644
---- a/fs/smb/client/cifsfs.c
-+++ b/fs/smb/client/cifsfs.c
-@@ -395,7 +395,7 @@ cifs_alloc_inode(struct super_block *sb)
- 	spin_lock_init(&cifs_inode->writers_lock);
- 	cifs_inode->writers = 0;
- 	cifs_inode->netfs.inode.i_blkbits = 14;  /* 2**14 = CIFS_MAX_MSGSIZE */
--	cifs_inode->server_eof = 0;
-+	cifs_inode->netfs.remote_i_size = 0;
- 	cifs_inode->uniqueid = 0;
- 	cifs_inode->createtime = 0;
- 	cifs_inode->epoch = 0;
-diff --git a/fs/smb/client/cifsglob.h b/fs/smb/client/cifsglob.h
-index 22fa98428845..1943d035b8d3 100644
---- a/fs/smb/client/cifsglob.h
-+++ b/fs/smb/client/cifsglob.h
-@@ -1527,7 +1527,6 @@ struct cifsInodeInfo {
- 	spinlock_t writers_lock;
- 	unsigned int writers;		/* Number of writers on this inode */
- 	unsigned long time;		/* jiffies of last update of inode */
--	u64  server_eof;		/* current file size on server -- protected by i_lock */
- 	u64  uniqueid;			/* server inode number */
- 	u64  createtime;		/* creation time on server */
- 	__u8 lease_key[SMB2_LEASE_KEY_SIZE];	/* lease key for this inode */
-diff --git a/fs/smb/client/file.c b/fs/smb/client/file.c
-index b4f16ef62115..0383ce61ac35 100644
---- a/fs/smb/client/file.c
-+++ b/fs/smb/client/file.c
-@@ -2117,8 +2117,8 @@ cifs_update_eof(struct cifsInodeInfo *cifsi, loff_t offset,
- {
- 	loff_t end_of_write = offset + bytes_written;
- 
--	if (end_of_write > cifsi->server_eof)
--		cifsi->server_eof = end_of_write;
-+	if (end_of_write > cifsi->netfs.remote_i_size)
-+		netfs_resize_file(&cifsi->netfs, end_of_write);
- }
- 
- static ssize_t
-@@ -3246,8 +3246,8 @@ cifs_uncached_writev_complete(struct work_struct *work)
- 
- 	spin_lock(&inode->i_lock);
- 	cifs_update_eof(cifsi, wdata->offset, wdata->bytes);
--	if (cifsi->server_eof > inode->i_size)
--		i_size_write(inode, cifsi->server_eof);
-+	if (cifsi->netfs.remote_i_size > inode->i_size)
-+		i_size_write(inode, cifsi->netfs.remote_i_size);
- 	spin_unlock(&inode->i_lock);
- 
- 	complete(&wdata->done);
-diff --git a/fs/smb/client/inode.c b/fs/smb/client/inode.c
-index d7c302442c1e..6815b50ec56c 100644
---- a/fs/smb/client/inode.c
-+++ b/fs/smb/client/inode.c
-@@ -102,7 +102,7 @@ cifs_revalidate_cache(struct inode *inode, struct cifs_fattr *fattr)
- 	 /* revalidate if mtime or size have changed */
- 	fattr->cf_mtime = timestamp_truncate(fattr->cf_mtime, inode);
- 	if (timespec64_equal(&inode->i_mtime, &fattr->cf_mtime) &&
--	    cifs_i->server_eof == fattr->cf_eof) {
-+	    cifs_i->netfs.remote_i_size == fattr->cf_eof) {
- 		cifs_dbg(FYI, "%s: inode %llu is unchanged\n",
- 			 __func__, cifs_i->uniqueid);
- 		return;
-@@ -191,7 +191,7 @@ cifs_fattr_to_inode(struct inode *inode, struct cifs_fattr *fattr)
- 	else
- 		clear_bit(CIFS_INO_DELETE_PENDING, &cifs_i->flags);
- 
--	cifs_i->server_eof = fattr->cf_eof;
-+	cifs_i->netfs.remote_i_size = fattr->cf_eof;
- 	/*
- 	 * Can't safely change the file size here if the client is writing to
- 	 * it due to potential races.
-@@ -2776,7 +2776,7 @@ cifs_set_file_size(struct inode *inode, struct iattr *attrs,
- 
- set_size_out:
- 	if (rc == 0) {
--		cifsInode->server_eof = attrs->ia_size;
-+		netfs_resize_file(&cifsInode->netfs, attrs->ia_size);
- 		cifs_setsize(inode, attrs->ia_size);
- 		/*
- 		 * i_blocks is not related to (i_size / i_blksize), but instead
-diff --git a/fs/smb/client/smb2ops.c b/fs/smb/client/smb2ops.c
-index dc18130db9b3..e7f765673246 100644
---- a/fs/smb/client/smb2ops.c
-+++ b/fs/smb/client/smb2ops.c
-@@ -3554,7 +3554,7 @@ static long smb3_simple_falloc(struct file *file, struct cifs_tcon *tcon,
- 		rc = SMB2_set_eof(xid, tcon, cfile->fid.persistent_fid,
- 				  cfile->fid.volatile_fid, cfile->pid, &eof);
- 		if (rc == 0) {
--			cifsi->server_eof = off + len;
-+			netfs_resize_file(&cifsi->netfs, off + len);
- 			cifs_setsize(inode, off + len);
- 			cifs_truncate_page(inode->i_mapping, inode->i_size);
- 			truncate_setsize(inode, off + len);
-@@ -3646,8 +3646,8 @@ static long smb3_collapse_range(struct file *file, struct cifs_tcon *tcon,
- 	int rc;
- 	unsigned int xid;
- 	struct inode *inode = file_inode(file);
--	struct cifsFileInfo *cfile = file->private_data;
- 	struct cifsInodeInfo *cifsi = CIFS_I(inode);
-+	struct cifsFileInfo *cfile = file->private_data;
- 	__le64 eof;
- 	loff_t old_eof;
- 
-@@ -3682,9 +3682,9 @@ static long smb3_collapse_range(struct file *file, struct cifs_tcon *tcon,
- 
- 	rc = 0;
- 
--	cifsi->server_eof = i_size_read(inode) - len;
--	truncate_setsize(inode, cifsi->server_eof);
--	fscache_resize_cookie(cifs_inode_cookie(inode), cifsi->server_eof);
-+	netfs_resize_file(&cifsi->netfs, eof);
-+	truncate_setsize(inode, eof);
-+	fscache_resize_cookie(cifs_inode_cookie(inode), eof);
- out_2:
- 	filemap_invalidate_unlock(inode->i_mapping);
-  out:
+	netfs_xa_store_and_mark(xa, index, true, false, GFP_FOO);
+
+and you don't know instantly what true and false mean.  He prefers
+
+#define NETFS_FLAG_PUT		(1 << 0)
+#define NETFS_FLAG_PAGECACHE	(1 << 1)
+
+and then the caller looks like:
+
+	netfs_xa_store_and_mark(xa, index, NETFS_FLAG_PUT, GFP_FOO);
+
+and you know exactly what it's doing.
 
