@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D57B9CDB47E
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:15:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 026C6CDB47E
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:22:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231418AbjJMQPR (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:15:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54356 "EHLO
+        id S229694AbjJMQW0 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:22:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231758AbjJMQPP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:15:15 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33AA24487
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:12:14 -0700 (PDT)
+        with ESMTP id S231567AbjJMQWB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:22:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29E7059FB
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:09:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213406;
+        s=mimecast20190719; t=1697213281;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=siiUCfm/6wTPe3NeddwK5MIcndctwu37QkcVcSF/dvI=;
-        b=It0PHCv03UcNF+hgx7d7p4BNVCJPZeg5MMEi4knZmV5O8g1r8b5dndd4So56nAN8Zyx9uD
-        xUtNc1bHPX94AI291/W7JUW8EbMq14Bp/Wy8xoDsvdjUzO6xmmkYF9Nv8hYjCOPp9j/21F
-        W/2SSa6fmYRTwqnkPe90DEmvS1ZBQtM=
+        bh=UOuHGM4ycbvjj38l0WSkUP2aqRFFc0lkv8Oh1G3x/FU=;
+        b=BvUGcWW4FJ2Gf/qMtXx8muJzP9oLEH+RTkRf3lg0E4K/71/vBTwJnnoLNDOuRMYILizllE
+        L6OgIOV27fty+KYRJjpXweBjG1Y7nKd/VRlOYCkhgbLV/amVFlJ/bfmv0hZSQGrdlrjjsf
+        hf2T42vjA51LClNtKxZdQs3x2acOKS0=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-312-Vll3KhhUMQuYBLcsr0GY-w-1; Fri, 13 Oct 2023 12:07:21 -0400
-X-MC-Unique: Vll3KhhUMQuYBLcsr0GY-w-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
+ us-mta-74-Whk-vkIlNHKs64JvpVrt_w-1; Fri, 13 Oct 2023 12:06:45 -0400
+X-MC-Unique: Whk-vkIlNHKs64JvpVrt_w-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 502851029F42;
-        Fri, 13 Oct 2023 16:07:20 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 0F46085829F;
+        Fri, 13 Oct 2023 16:06:44 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6C4DE20267FC;
-        Fri, 13 Oct 2023 16:07:17 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 83A9F1C060DF;
+        Fri, 13 Oct 2023 16:06:41 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -52,182 +52,170 @@ Cc:     David Howells <dhowells@redhat.com>,
         linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Steve French <sfrench@samba.org>,
-        Shyam Prasad N <nspmangalore@gmail.com>,
-        Rohith Surabattula <rohiths.msft@gmail.com>,
-        linux-cachefs@redhat.com
-Subject: [RFC PATCH 49/53] cifs: Move cifs_loose_read_iter() and cifs_file_write_iter() to file.c
-Date:   Fri, 13 Oct 2023 17:04:18 +0100
-Message-ID: <20231013160423.2218093-50-dhowells@redhat.com>
+        linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
+Subject: [RFC PATCH 39/53] netfs: Provide a launder_folio implementation
+Date:   Fri, 13 Oct 2023 17:04:08 +0100
+Message-ID: <20231013160423.2218093-40-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.4
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Move cifs_loose_read_iter() and cifs_file_write_iter() to file.c so that
-they are colocated with similar functions rather than being split with
-cifsfs.c.
+Provide a launder_folio implementation for netfslib.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Steve French <sfrench@samba.org>
-cc: Shyam Prasad N <nspmangalore@gmail.com>
-cc: Rohith Surabattula <rohiths.msft@gmail.com>
 cc: Jeff Layton <jlayton@kernel.org>
-cc: linux-cifs@vger.kernel.org
 cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/smb/client/cifsfs.c | 55 ------------------------------------------
- fs/smb/client/cifsfs.h |  2 ++
- fs/smb/client/file.c   | 53 ++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 55 insertions(+), 55 deletions(-)
+ fs/netfs/buffered_write.c    | 71 ++++++++++++++++++++++++++++++++++++
+ fs/netfs/main.c              |  1 +
+ include/linux/netfs.h        |  2 +
+ include/trace/events/netfs.h |  3 ++
+ 4 files changed, 77 insertions(+)
 
-diff --git a/fs/smb/client/cifsfs.c b/fs/smb/client/cifsfs.c
-index 85799e9e0f4c..0c19b65206f6 100644
---- a/fs/smb/client/cifsfs.c
-+++ b/fs/smb/client/cifsfs.c
-@@ -982,61 +982,6 @@ cifs_smb3_do_mount(struct file_system_type *fs_type,
- 	return root;
+diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
+index b81d807f89f0..5695bc3acf6c 100644
+--- a/fs/netfs/buffered_write.c
++++ b/fs/netfs/buffered_write.c
+@@ -1101,3 +1101,74 @@ int netfs_writepages(struct address_space *mapping,
+ 	return ret;
  }
- 
--
--static ssize_t
--cifs_loose_read_iter(struct kiocb *iocb, struct iov_iter *iter)
--{
--	ssize_t rc;
--	struct inode *inode = file_inode(iocb->ki_filp);
--
--	if (iocb->ki_flags & IOCB_DIRECT)
--		return cifs_user_readv(iocb, iter);
--
--	rc = cifs_revalidate_mapping(inode);
--	if (rc)
--		return rc;
--
--	return generic_file_read_iter(iocb, iter);
--}
--
--static ssize_t cifs_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
--{
--	struct inode *inode = file_inode(iocb->ki_filp);
--	struct cifsInodeInfo *cinode = CIFS_I(inode);
--	ssize_t written;
--	int rc;
--
--	if (iocb->ki_filp->f_flags & O_DIRECT) {
--		written = cifs_user_writev(iocb, from);
--		if (written > 0 && CIFS_CACHE_READ(cinode)) {
--			cifs_zap_mapping(inode);
--			cifs_dbg(FYI,
--				 "Set no oplock for inode=%p after a write operation\n",
--				 inode);
--			cinode->oplock = 0;
--		}
--		return written;
--	}
--
--	written = cifs_get_writer(cinode);
--	if (written)
--		return written;
--
--	written = generic_file_write_iter(iocb, from);
--
--	if (CIFS_CACHE_WRITE(CIFS_I(inode)))
--		goto out;
--
--	rc = filemap_fdatawrite(inode->i_mapping);
--	if (rc)
--		cifs_dbg(FYI, "cifs_file_write_iter: %d rc on %p inode\n",
--			 rc, inode);
--
--out:
--	cifs_put_writer(cinode);
--	return written;
--}
--
- static loff_t cifs_llseek(struct file *file, loff_t offset, int whence)
- {
- 	struct cifsFileInfo *cfile = file->private_data;
-diff --git a/fs/smb/client/cifsfs.h b/fs/smb/client/cifsfs.h
-index 41daebd220ff..24d5bac07f87 100644
---- a/fs/smb/client/cifsfs.h
-+++ b/fs/smb/client/cifsfs.h
-@@ -100,6 +100,8 @@ extern ssize_t cifs_strict_readv(struct kiocb *iocb, struct iov_iter *to);
- extern ssize_t cifs_user_writev(struct kiocb *iocb, struct iov_iter *from);
- extern ssize_t cifs_direct_writev(struct kiocb *iocb, struct iov_iter *from);
- extern ssize_t cifs_strict_writev(struct kiocb *iocb, struct iov_iter *from);
-+ssize_t cifs_file_write_iter(struct kiocb *iocb, struct iov_iter *from);
-+ssize_t cifs_loose_read_iter(struct kiocb *iocb, struct iov_iter *iter);
- extern int cifs_flock(struct file *pfile, int cmd, struct file_lock *plock);
- extern int cifs_lock(struct file *, int, struct file_lock *);
- extern int cifs_fsync(struct file *, loff_t, loff_t, int);
-diff --git a/fs/smb/client/file.c b/fs/smb/client/file.c
-index 6c7b91728dd4..3112233c4835 100644
---- a/fs/smb/client/file.c
-+++ b/fs/smb/client/file.c
-@@ -4584,6 +4584,59 @@ ssize_t cifs_user_readv(struct kiocb *iocb, struct iov_iter *to)
- 	return __cifs_readv(iocb, to, false);
- }
- 
-+ssize_t cifs_loose_read_iter(struct kiocb *iocb, struct iov_iter *iter)
+ EXPORT_SYMBOL(netfs_writepages);
++
++/*
++ * Deal with the disposition of a laundered folio.
++ */
++static void netfs_cleanup_launder_folio(struct netfs_io_request *wreq)
 +{
-+	ssize_t rc;
-+	struct inode *inode = file_inode(iocb->ki_filp);
-+
-+	if (iocb->ki_flags & IOCB_DIRECT)
-+		return cifs_user_readv(iocb, iter);
-+
-+	rc = cifs_revalidate_mapping(inode);
-+	if (rc)
-+		return rc;
-+
-+	return generic_file_read_iter(iocb, iter);
++	if (wreq->error) {
++		pr_notice("R=%08x Laundering error %d\n", wreq->debug_id, wreq->error);
++		mapping_set_error(wreq->mapping, wreq->error);
++	}
 +}
 +
-+ssize_t cifs_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
++/**
++ * netfs_launder_folio - Clean up a dirty folio that's being invalidated
++ * @folio: The folio to clean
++ *
++ * This is called to write back a folio that's being invalidated when an inode
++ * is getting torn down.  Ideally, writepages would be used instead.
++ */
++int netfs_launder_folio(struct folio *folio)
 +{
-+	struct inode *inode = file_inode(iocb->ki_filp);
-+	struct cifsInodeInfo *cinode = CIFS_I(inode);
-+	ssize_t written;
-+	int rc;
++	struct netfs_io_request *wreq;
++	struct address_space *mapping = folio->mapping;
++	struct netfs_folio *finfo;
++	struct bio_vec bvec;
++	unsigned long long i_size = i_size_read(mapping->host);
++	unsigned long long start = folio_pos(folio);
++	size_t offset = 0, len;
++	int ret = 0;
 +
-+	if (iocb->ki_filp->f_flags & O_DIRECT) {
-+		written = cifs_user_writev(iocb, from);
-+		if (written > 0 && CIFS_CACHE_READ(cinode)) {
-+			cifs_zap_mapping(inode);
-+			cifs_dbg(FYI,
-+				 "Set no oplock for inode=%p after a write operation\n",
-+				 inode);
-+			cinode->oplock = 0;
-+		}
-+		return written;
++	finfo = netfs_folio_info(folio);
++	if (finfo) {
++		offset = finfo->dirty_offset;
++		start += offset;
++		len = finfo->dirty_len;
++	} else {
++		len = folio_size(folio);
++	}
++	len = min_t(unsigned long long, len, i_size - start);
++
++	wreq = netfs_alloc_request(mapping, NULL, start, len, NETFS_LAUNDER_WRITE);
++	if (IS_ERR(wreq)) {
++		ret = PTR_ERR(wreq);
++		goto out;
 +	}
 +
-+	written = cifs_get_writer(cinode);
-+	if (written)
-+		return written;
++	if (!folio_clear_dirty_for_io(folio))
++		goto out_put;
 +
-+	written = generic_file_write_iter(iocb, from);
++	trace_netfs_folio(folio, netfs_folio_trace_launder);
 +
-+	if (CIFS_CACHE_WRITE(CIFS_I(inode)))
-+		goto out;
++	_debug("launder %llx-%llx", start, start + len - 1);
 +
-+	rc = filemap_fdatawrite(inode->i_mapping);
-+	if (rc)
-+		cifs_dbg(FYI, "cifs_file_write_iter: %d rc on %p inode\n",
-+			 rc, inode);
++	/* Speculatively write to the cache.  We have to fix this up later if
++	 * the store fails.
++	 */
++	wreq->cleanup = netfs_cleanup_launder_folio;
 +
++	bvec_set_folio(&bvec, folio, len, offset);
++	iov_iter_bvec(&wreq->iter, ITER_SOURCE, &bvec, 1, len);
++	__set_bit(NETFS_RREQ_UPLOAD_TO_SERVER, &wreq->flags);
++	ret = netfs_begin_write(wreq, true, netfs_write_trace_launder);
++
++out_put:
++	netfs_put_request(wreq, false, netfs_rreq_trace_put_return);
 +out:
-+	cifs_put_writer(cinode);
-+	return written;
++	folio_wait_fscache(folio);
++	_leave(" = %d", ret);
++	return ret;
 +}
-+
- ssize_t
- cifs_strict_readv(struct kiocb *iocb, struct iov_iter *to)
- {
++EXPORT_SYMBOL(netfs_launder_folio);
+diff --git a/fs/netfs/main.c b/fs/netfs/main.c
+index b335e6a50f9c..577c8a9fc0f2 100644
+--- a/fs/netfs/main.c
++++ b/fs/netfs/main.c
+@@ -33,6 +33,7 @@ static const char *netfs_origins[nr__netfs_io_origin] = {
+ 	[NETFS_READPAGE]		= "RP",
+ 	[NETFS_READ_FOR_WRITE]		= "RW",
+ 	[NETFS_WRITEBACK]		= "WB",
++	[NETFS_LAUNDER_WRITE]		= "LW",
+ 	[NETFS_RMW_READ]		= "RM",
+ 	[NETFS_UNBUFFERED_WRITE]	= "UW",
+ 	[NETFS_DIO_READ]		= "DR",
+diff --git a/include/linux/netfs.h b/include/linux/netfs.h
+index 9661ae24120f..d4a1073cc541 100644
+--- a/include/linux/netfs.h
++++ b/include/linux/netfs.h
+@@ -234,6 +234,7 @@ enum netfs_io_origin {
+ 	NETFS_READPAGE,			/* This read is a synchronous read */
+ 	NETFS_READ_FOR_WRITE,		/* This read is to prepare a write */
+ 	NETFS_WRITEBACK,		/* This write was triggered by writepages */
++	NETFS_LAUNDER_WRITE,		/* This is triggered by ->launder_folio() */
+ 	NETFS_RMW_READ,			/* This is an unbuffered read for RMW */
+ 	NETFS_UNBUFFERED_WRITE,		/* This is an unbuffered write */
+ 	NETFS_DIO_READ,			/* This is a direct I/O read */
+@@ -422,6 +423,7 @@ int netfs_writepages(struct address_space *mapping,
+ 		     struct writeback_control *wbc);
+ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length);
+ bool netfs_release_folio(struct folio *folio, gfp_t gfp);
++int netfs_launder_folio(struct folio *folio);
+ 
+ /* VMA operations API. */
+ vm_fault_t netfs_page_mkwrite(struct vm_fault *vmf, struct netfs_group *netfs_group);
+diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
+index 825946f510ee..54b2d781d3a9 100644
+--- a/include/trace/events/netfs.h
++++ b/include/trace/events/netfs.h
+@@ -25,6 +25,7 @@
+ 
+ #define netfs_write_traces					\
+ 	EM(netfs_write_trace_dio_write,		"DIO-WRITE")	\
++	EM(netfs_write_trace_launder,		"LAUNDER  ")	\
+ 	EM(netfs_write_trace_unbuffered_write,	"UNB-WRITE")	\
+ 	E_(netfs_write_trace_writeback,		"WRITEBACK")
+ 
+@@ -33,6 +34,7 @@
+ 	EM(NETFS_READPAGE,			"RP")		\
+ 	EM(NETFS_READ_FOR_WRITE,		"RW")		\
+ 	EM(NETFS_WRITEBACK,			"WB")		\
++	EM(NETFS_LAUNDER_WRITE,			"LW")		\
+ 	EM(NETFS_RMW_READ,			"RM")		\
+ 	EM(NETFS_UNBUFFERED_WRITE,		"UW")		\
+ 	EM(NETFS_DIO_READ,			"DR")		\
+@@ -129,6 +131,7 @@
+ 	EM(netfs_folio_trace_clear_g,		"clear-g")	\
+ 	EM(netfs_folio_trace_filled_gaps,	"filled-gaps")	\
+ 	EM(netfs_folio_trace_kill,		"kill")		\
++	EM(netfs_folio_trace_launder,		"launder")	\
+ 	EM(netfs_folio_trace_mkwrite,		"mkwrite")	\
+ 	EM(netfs_folio_trace_mkwrite_plus,	"mkwrite+")	\
+ 	EM(netfs_folio_trace_read_gaps,		"read-gaps")	\
 
