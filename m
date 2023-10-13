@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E46F7C46CA1
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 15:59:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 849C8CDB482
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 15:59:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232554AbjJMP73 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 11:59:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48072 "EHLO
+        id S232748AbjJMP7l (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 11:59:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232572AbjJMP7P (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 11:59:15 -0400
+        with ESMTP id S232777AbjJMP7W (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 11:59:22 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B16BBE0
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 08:57:52 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BA12D9
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 08:57:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697212671;
+        s=mimecast20190719; t=1697212676;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=VdTOgUT9KIMzQnxrll+Ln7vU3lh7L6xf921vj9gXc+g=;
-        b=OCnqreGwMWekQPunXplYSSrmHUzzCHkmKnkUbanitA9pTN4jtbZ7ea4CQ5F4quGHYH0ZNW
-        tWBwhojm1NPNzj6HY/0039l8wWS8bsHTP10TBr4Adqwpp/MXWLy5SotIS8pZTTiJVgy67v
-        9TR9tWPg31tvxwctf1FASr1XKZnJlJg=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-690-sPJ3XQAXMnmyAp7uFZgrmw-1; Fri, 13 Oct 2023 11:57:43 -0400
-X-MC-Unique: sPJ3XQAXMnmyAp7uFZgrmw-1
-Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
+        bh=qZVSDRhH8TCwDqqtYYaWhbNXvdmkKJuIxH0fFLIHYlQ=;
+        b=Jd6GImB/lpxMqhx1FsYEhaL0lQuOA/zDC3pe2VTQ4eTbvFSs7lzKm+I3WoM18WZqF7NaQz
+        g/rvyIJv7cUymKSJG6Hky0LvvoQ3ruqxP0095DX8N/K8AgwWlgZ5OmUKE7EVriowCciuXh
+        yDaNUIn/ZFgbk8RhHyEdO5RmLpz2lVE=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-358-qqDjH4-bPva_BatiZBcR7A-1; Fri, 13 Oct 2023 11:57:50 -0400
+X-MC-Unique: qqDjH4-bPva_BatiZBcR7A-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 591821029F45;
-        Fri, 13 Oct 2023 15:57:42 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 26A151E441D8;
+        Fri, 13 Oct 2023 15:57:49 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B58C2492BD9;
-        Fri, 13 Oct 2023 15:57:39 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 63FD71C06535;
+        Fri, 13 Oct 2023 15:57:46 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -54,20 +54,20 @@ Cc:     David Howells <dhowells@redhat.com>,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
-Subject: [RFC PATCH 03/53] netfs: Note nonblockingness in the netfs_io_request struct
-Date:   Fri, 13 Oct 2023 16:56:36 +0100
-Message-ID: <20231013155727.2217781-4-dhowells@redhat.com>
+Subject: [RFC PATCH 05/53] netfs: Add a ->free_subrequest() op
+Date:   Fri, 13 Oct 2023 16:56:38 +0100
+Message-ID: <20231013155727.2217781-6-dhowells@redhat.com>
 In-Reply-To: <20231013155727.2217781-1-dhowells@redhat.com>
 References: <20231013155727.2217781-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.9
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Allow O_NONBLOCK to be noted in the netfs_io_request struct.  Also add a
-flag, NETFS_RREQ_BLOCKED to record if we did block.
+Add a ->free_subrequest() op so that the netfs can clean up data attached
+to a subrequest.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -76,33 +76,32 @@ cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
  fs/netfs/objects.c    | 2 ++
- include/linux/netfs.h | 2 ++
- 2 files changed, 4 insertions(+)
+ include/linux/netfs.h | 1 +
+ 2 files changed, 3 insertions(+)
 
 diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
-index 85f428fc52e6..e41f9fc9bdd2 100644
+index 2f1865ff7cce..8e92b8401aaa 100644
 --- a/fs/netfs/objects.c
 +++ b/fs/netfs/objects.c
-@@ -37,6 +37,8 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
- 	INIT_LIST_HEAD(&rreq->subrequests);
- 	refcount_set(&rreq->ref, 1);
- 	__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
-+	if (file && file->f_flags & O_NONBLOCK)
-+		__set_bit(NETFS_RREQ_NONBLOCK, &rreq->flags);
- 	if (rreq->netfs_ops->init_request) {
- 		ret = rreq->netfs_ops->init_request(rreq, file);
- 		if (ret < 0) {
+@@ -147,6 +147,8 @@ static void netfs_free_subrequest(struct netfs_io_subrequest *subreq,
+ 	struct netfs_io_request *rreq = subreq->rreq;
+ 
+ 	trace_netfs_sreq(subreq, netfs_sreq_trace_free);
++	if (rreq->netfs_ops->free_subrequest)
++		rreq->netfs_ops->free_subrequest(subreq);
+ 	kfree(subreq);
+ 	netfs_stat_d(&netfs_n_rh_sreq);
+ 	netfs_put_request(rreq, was_async, netfs_rreq_trace_put_subreq);
 diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 282511090ead..b92e982ac4a0 100644
+index 6942b8cf03dc..ed64d1034afa 100644
 --- a/include/linux/netfs.h
 +++ b/include/linux/netfs.h
-@@ -205,6 +205,8 @@ struct netfs_io_request {
- #define NETFS_RREQ_DONT_UNLOCK_FOLIOS	3	/* Don't unlock the folios on completion */
- #define NETFS_RREQ_FAILED		4	/* The request failed */
- #define NETFS_RREQ_IN_PROGRESS		5	/* Unlocked when the request completes */
-+#define NETFS_RREQ_NONBLOCK		6	/* Don't block if possible (O_NONBLOCK) */
-+#define NETFS_RREQ_BLOCKED		7	/* We blocked */
- 	const struct netfs_request_ops *netfs_ops;
- };
+@@ -218,6 +218,7 @@ struct netfs_request_ops {
+ 	unsigned int	io_subrequest_size;	/* Alloc size for netfs_io_subrequest struct */
+ 	int (*init_request)(struct netfs_io_request *rreq, struct file *file);
+ 	void (*free_request)(struct netfs_io_request *rreq);
++	void (*free_subrequest)(struct netfs_io_subrequest *rreq);
+ 	int (*begin_cache_operation)(struct netfs_io_request *rreq);
  
+ 	void (*expand_readahead)(struct netfs_io_request *rreq);
 
