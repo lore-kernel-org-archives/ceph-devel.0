@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B300DC41513
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:06:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1518CCDB485
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:06:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233049AbjJMQGm (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:06:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40904 "EHLO
+        id S232991AbjJMQGn (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:06:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40890 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232783AbjJMQGL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:06:11 -0400
+        with ESMTP id S232906AbjJMQGO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:06:14 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F831129
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:05:09 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6515B1B8
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:05:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213109;
+        s=mimecast20190719; t=1697213117;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=ntUQ/reWYDAgg2miRGVf+hR8qevYgo6i7or36auU25I=;
-        b=QkUMsCdFmYcgezhYZ3qOYa74kMHRbgJes3Frc8pS+lA9Ltn7nBmBNCiuIb7eFVBDQiCHcf
-        AlloG7XceJj2A7rBvajfm8q+OyHMyPr+3W55Ukm33smrhP8bJY/yEG384qx4ayRQFLokKQ
-        9sJHmSO6B92ZEM6PE2tuQghg5aiW6h8=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-681--Tly13tIP_OoFZmS3aBALw-1; Fri, 13 Oct 2023 12:05:05 -0400
-X-MC-Unique: -Tly13tIP_OoFZmS3aBALw-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        bh=/wI2ukAfhLlByZQe0rXpGLnwelltmScQCYU5cYtls1s=;
+        b=RM6S2Fr9fO3DTMh5s/GlNpFpQ4ZjQz4KwFa+lff8lvZU7ffPmidalGqvkXAxDIQAwMyvlZ
+        Sxb339E3QmsYRyeGTsYE5C/6l4wrx0DCaQzwypBWPdqUpsjBct5PVlUmBXzapfSYH/1gH7
+        bBZP0y27tbGUFWUWliDA4fp8nSn/cSU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-393-Y3JGXtQpP-C4R3eDg4Xd4A-1; Fri, 13 Oct 2023 12:05:12 -0400
+X-MC-Unique: Y3JGXtQpP-C4R3eDg4Xd4A-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 6FBB83C40C20;
-        Fri, 13 Oct 2023 16:05:04 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D4C5A88B7A8;
+        Fri, 13 Oct 2023 16:05:10 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E4F5C1C06535;
-        Fri, 13 Oct 2023 16:05:01 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 5A8DB201F457;
+        Fri, 13 Oct 2023 16:05:08 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -53,31 +53,21 @@ Cc:     David Howells <dhowells@redhat.com>,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
-Subject: [RFC PATCH 11/53] netfs: Add support for DIO buffering
-Date:   Fri, 13 Oct 2023 17:03:40 +0100
-Message-ID: <20231013160423.2218093-12-dhowells@redhat.com>
+Subject: [RFC PATCH 13/53] netfs: Add bounce buffering support
+Date:   Fri, 13 Oct 2023 17:03:42 +0100
+Message-ID: <20231013160423.2218093-14-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.4
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Add a bvec array pointer and an iterator to netfs_io_request for either
-holding a copy of a DIO iterator or a list of all the bits of buffer
-pointed to by a DIO iterator.
-
-There are two problems:  Firstly, if an iovec-class iov_iter is passed to
-->read_iter() or ->write_iter(), this cannot be passed directly to
-kernel_sendmsg() or kernel_recvmsg() as that may cause locking recursion if
-a fault is generated, so we need to keep track of the pages involved
-separately.
-
-Secondly, if the I/O is asynchronous, we must copy the iov_iter describing
-the buffer before returning to the caller as it may be immediately
-deallocated.
+Add a second xarray struct to netfs_io_request for the purposes of holding
+a bounce buffer for when we have to deal with encrypted/compressed data or
+if we have to up/download data in blocks larger than we were asked for.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -85,58 +75,74 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/objects.c    | 10 ++++++++++
- include/linux/netfs.h |  3 +++
- 2 files changed, 13 insertions(+)
+ fs/netfs/io.c         | 6 +++++-
+ fs/netfs/objects.c    | 3 +++
+ include/linux/netfs.h | 2 ++
+ 3 files changed, 10 insertions(+), 1 deletion(-)
 
+diff --git a/fs/netfs/io.c b/fs/netfs/io.c
+index e9d408e211b8..d8e9cd6ce338 100644
+--- a/fs/netfs/io.c
++++ b/fs/netfs/io.c
+@@ -643,7 +643,11 @@ int netfs_begin_read(struct netfs_io_request *rreq, bool sync)
+ 		return -EIO;
+ 	}
+ 
+-	rreq->io_iter = rreq->iter;
++	if (test_bit(NETFS_RREQ_USE_BOUNCE_BUFFER, &rreq->flags))
++		iov_iter_xarray(&rreq->io_iter, ITER_DEST, &rreq->bounce,
++				rreq->start, rreq->len);
++	else
++		rreq->io_iter = rreq->iter;
+ 
+ 	INIT_WORK(&rreq->work, netfs_rreq_work);
+ 
 diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
-index 8e92b8401aaa..4396318081bf 100644
+index 4396318081bf..0782a284dda8 100644
 --- a/fs/netfs/objects.c
 +++ b/fs/netfs/objects.c
-@@ -78,6 +78,7 @@ static void netfs_free_request(struct work_struct *work)
- {
- 	struct netfs_io_request *rreq =
- 		container_of(work, struct netfs_io_request, work);
-+	unsigned int i;
- 
- 	trace_netfs_rreq(rreq, netfs_rreq_trace_free);
- 	netfs_proc_del_rreq(rreq);
-@@ -86,6 +87,15 @@ static void netfs_free_request(struct work_struct *work)
- 		rreq->netfs_ops->free_request(rreq);
- 	if (rreq->cache_resources.ops)
- 		rreq->cache_resources.ops->end_operation(&rreq->cache_resources);
-+	if (rreq->direct_bv) {
-+		for (i = 0; i < rreq->direct_bv_count; i++) {
-+			if (rreq->direct_bv[i].bv_page) {
-+				if (rreq->direct_bv_unpin)
-+					unpin_user_page(rreq->direct_bv[i].bv_page);
-+			}
-+		}
-+		kvfree(rreq->direct_bv);
-+	}
+@@ -35,6 +35,7 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
+ 	rreq->inode	= inode;
+ 	rreq->i_size	= i_size_read(inode);
+ 	rreq->debug_id	= atomic_inc_return(&debug_ids);
++	xa_init(&rreq->bounce);
+ 	INIT_LIST_HEAD(&rreq->subrequests);
+ 	refcount_set(&rreq->ref, 1);
+ 	__set_bit(NETFS_RREQ_IN_PROGRESS, &rreq->flags);
+@@ -43,6 +44,7 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
+ 	if (rreq->netfs_ops->init_request) {
+ 		ret = rreq->netfs_ops->init_request(rreq, file);
+ 		if (ret < 0) {
++			xa_destroy(&rreq->bounce);
+ 			kfree(rreq);
+ 			return ERR_PTR(ret);
+ 		}
+@@ -96,6 +98,7 @@ static void netfs_free_request(struct work_struct *work)
+ 		}
+ 		kvfree(rreq->direct_bv);
+ 	}
++	netfs_clear_buffer(&rreq->bounce);
  	kfree_rcu(rreq, rcu);
  	netfs_stat_d(&netfs_n_rh_rreq);
  }
 diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index bd0437088f0e..66479a61ad00 100644
+index e8d702ac6968..a7220e906287 100644
 --- a/include/linux/netfs.h
 +++ b/include/linux/netfs.h
-@@ -191,7 +191,9 @@ struct netfs_io_request {
- 	struct list_head	subrequests;	/* Contributory I/O operations */
+@@ -196,6 +196,7 @@ struct netfs_io_request {
  	struct iov_iter		iter;		/* Unencrypted-side iterator */
  	struct iov_iter		io_iter;	/* I/O (Encrypted-side) iterator */
-+	struct bio_vec		*direct_bv;	/* DIO buffer list (when handling iovec-iter) */
+ 	struct bio_vec		*direct_bv;	/* DIO buffer list (when handling iovec-iter) */
++	struct xarray		bounce;		/* Bounce buffer (eg. for crypto/compression) */
  	void			*netfs_priv;	/* Private data for the netfs */
-+	unsigned int		direct_bv_count; /* Number of elements in bv[] */
+ 	unsigned int		direct_bv_count; /* Number of elements in bv[] */
  	unsigned int		debug_id;
- 	unsigned int		rsize;		/* Maximum read size (0 for none) */
- 	atomic_t		nr_outstanding;	/* Number of ops in progress */
-@@ -200,6 +202,7 @@ struct netfs_io_request {
- 	size_t			len;		/* Length of the request */
- 	short			error;		/* 0 or error that occurred */
- 	enum netfs_io_origin	origin;		/* Origin of the request */
-+	bool			direct_bv_unpin; /* T if direct_bv[] must be unpinned */
- 	loff_t			i_size;		/* Size of the file */
- 	loff_t			start;		/* Start position */
- 	pgoff_t			no_unlock_folio; /* Don't unlock this folio after read */
+@@ -220,6 +221,7 @@ struct netfs_io_request {
+ #define NETFS_RREQ_IN_PROGRESS		5	/* Unlocked when the request completes */
+ #define NETFS_RREQ_NONBLOCK		6	/* Don't block if possible (O_NONBLOCK) */
+ #define NETFS_RREQ_BLOCKED		7	/* We blocked */
++#define NETFS_RREQ_USE_BOUNCE_BUFFER	8	/* Use bounce buffer */
+ 	const struct netfs_request_ops *netfs_ops;
+ };
+ 
 
