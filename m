@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05719CDB47E
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:27:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF095CDB47E
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:27:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232640AbjJMQ1Y (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:27:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58152 "EHLO
+        id S231694AbjJMQ13 (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:27:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230500AbjJMQ0n (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:43 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 839CA1FC4
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:24 -0700 (PDT)
+        with ESMTP id S231359AbjJMQ04 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:56 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A853CD5D
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213182;
+        s=mimecast20190719; t=1697213157;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=xgDLRrlPZ+fbYBYQqYIYXWKYaa9HMgYZfbqZFNilvm4=;
-        b=AuP4rcQRHmNM/1JcRMbkXSmhWYVtm1SjeXvTJx/uWFPvZQFbB75FnUmjp4Rn66kuvxVQ6A
-        Q15Ew5hiM1t9cgzYuJrDU3RvRrv54lUxJVMFQd41uGlpXMiinLT/+g6BYOfhT00iO+qPau
-        afiAGm4HhCwHIDh+ZH93yQbyB/0mhB8=
+        bh=28kgPZMsHEWnVwc0vT6VK3Ue5Bj5q+rjSv2U7JFM+9k=;
+        b=cn+8DeBEgZv/5FVL0Iu0ZdDxK9y2OMNrR+O94rXZaLhRl9QOszKgHturHSuY5m3CISxzae
+        O4t5ouuJpknH4KaVcjX1lj57IP8mmh4TShMwLtT6asHpKUMK/vMxI5xSdf/Jsfv0wUJBQs
+        6U/q2PUiz9fufGVlKCe5VpBUABdMCWA=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-128-YyJ4fOlmM3q6kor9W6-rTQ-1; Fri, 13 Oct 2023 12:06:16 -0400
-X-MC-Unique: YyJ4fOlmM3q6kor9W6-rTQ-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+ us-mta-93-P-Ft7OcvOIWG1ggPzh_5og-1; Fri, 13 Oct 2023 12:05:56 -0400
+X-MC-Unique: P-Ft7OcvOIWG1ggPzh_5og-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 28C4C185A795;
-        Fri, 13 Oct 2023 16:06:15 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 4C57B858293;
+        Fri, 13 Oct 2023 16:05:55 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 950EF1C060DF;
-        Fri, 13 Oct 2023 16:06:12 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9012925C0;
+        Fri, 13 Oct 2023 16:05:52 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -53,20 +53,30 @@ Cc:     David Howells <dhowells@redhat.com>,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
-Subject: [RFC PATCH 31/53] netfs: Provide netfs_file_read_iter()
-Date:   Fri, 13 Oct 2023 17:04:00 +0100
-Message-ID: <20231013160423.2218093-32-dhowells@redhat.com>
+Subject: [RFC PATCH 25/53] netfs: Make netfs_read_folio() handle streaming-write pages
+Date:   Fri, 13 Oct 2023 17:03:54 +0100
+Message-ID: <20231013160423.2218093-26-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.1
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Provide a top-level-ish function that can be pointed to directly by
-->read_iter file op.
+netfs_read_folio() needs to handle partially-valid pages that are marked
+dirty, but not uptodate in the event that someone tries to read a page was
+used to cache data by a streaming write.
+
+In such a case, make netfs_read_folio() set up a bvec iterator that points
+to the parts of the folio that need filling and to a sink page for the data
+that should be discarded and use that instead of i_pages as the iterator to
+be written to.
+
+This requires netfs_rreq_unlock_folios() to convert the page into a normal
+dirty uptodate page, getting rid of the partial write record and bumping
+the group pointer over to folio->private.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -74,61 +84,120 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/buffered_read.c | 33 +++++++++++++++++++++++++++++++++
- include/linux/netfs.h    |  1 +
- 2 files changed, 34 insertions(+)
+ fs/netfs/buffered_read.c     | 61 ++++++++++++++++++++++++++++++++++--
+ include/trace/events/netfs.h |  2 ++
+ 2 files changed, 60 insertions(+), 3 deletions(-)
 
 diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index 374707df6575..ab9f8e123245 100644
+index 2f06344bba21..374707df6575 100644
 --- a/fs/netfs/buffered_read.c
 +++ b/fs/netfs/buffered_read.c
-@@ -564,3 +564,36 @@ int netfs_prefetch_for_write(struct file *file, struct folio *folio,
- 	_leave(" = %d", ret);
- 	return ret;
- }
-+
-+/**
-+ * netfs_file_read_iter - Generic filesystem read routine
-+ * @iocb: kernel I/O control block
-+ * @iter: destination for the data read
-+ *
-+ * This is the ->read_iter() routine for all filesystems that can use the page
-+ * cache directly.
-+ *
-+ * The IOCB_NOWAIT flag in iocb->ki_flags indicates that -EAGAIN shall be
-+ * returned when no data can be read without waiting for I/O requests to
-+ * complete; it doesn't prevent readahead.
-+ *
-+ * The IOCB_NOIO flag in iocb->ki_flags indicates that no new I/O requests
-+ * shall be made for the read or for readahead.  When no data can be read,
-+ * -EAGAIN shall be returned.  When readahead would be triggered, a partial,
-+ * possibly empty read shall be returned.
-+ *
-+ * Return:
-+ * * number of bytes copied, even for partial reads
-+ * * negative error code (or 0 if IOCB_NOIO) if nothing was read
-+ */
-+ssize_t netfs_file_read_iter(struct kiocb *iocb, struct iov_iter *iter)
-+{
-+	struct netfs_inode *ictx = netfs_inode(iocb->ki_filp->f_mapping->host);
-+
-+	if ((iocb->ki_flags & IOCB_DIRECT) ||
-+	    test_bit(NETFS_ICTX_UNBUFFERED, &ictx->flags))
-+		return netfs_unbuffered_read_iter(iocb, iter);
-+
-+	return filemap_read(iocb, iter, 0);
-+}
-+EXPORT_SYMBOL(netfs_file_read_iter);
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index e2a5a441b7fc..6e02a68a51f7 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -384,6 +384,7 @@ struct netfs_cache_ops {
+@@ -16,6 +16,7 @@
+ void netfs_rreq_unlock_folios(struct netfs_io_request *rreq)
+ {
+ 	struct netfs_io_subrequest *subreq;
++	struct netfs_folio *finfo;
+ 	struct folio *folio;
+ 	pgoff_t start_page = rreq->start / PAGE_SIZE;
+ 	pgoff_t last_page = ((rreq->start + rreq->len) / PAGE_SIZE) - 1;
+@@ -86,6 +87,15 @@ void netfs_rreq_unlock_folios(struct netfs_io_request *rreq)
  
- /* High-level read API. */
- ssize_t netfs_unbuffered_read_iter(struct kiocb *iocb, struct iov_iter *iter);
-+ssize_t netfs_file_read_iter(struct kiocb *iocb, struct iov_iter *iter);
+ 		if (!pg_failed) {
+ 			flush_dcache_folio(folio);
++			finfo = netfs_folio_info(folio);
++			if (finfo) {
++				trace_netfs_folio(folio, netfs_folio_trace_filled_gaps);
++				if (finfo->netfs_group)
++					folio_change_private(folio, finfo->netfs_group);
++				else
++					folio_detach_private(folio);
++				kfree(finfo);
++			}
+ 			folio_mark_uptodate(folio);
+ 		}
  
- /* High-level write API */
- ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+@@ -245,6 +255,7 @@ int netfs_read_folio(struct file *file, struct folio *folio)
+ 	struct address_space *mapping = folio_file_mapping(folio);
+ 	struct netfs_io_request *rreq;
+ 	struct netfs_inode *ctx = netfs_inode(mapping->host);
++	struct folio *sink = NULL;
+ 	int ret;
+ 
+ 	_enter("%lx", folio_index(folio));
+@@ -265,12 +276,56 @@ int netfs_read_folio(struct file *file, struct folio *folio)
+ 	trace_netfs_read(rreq, rreq->start, rreq->len, netfs_read_trace_readpage);
+ 
+ 	/* Set up the output buffer */
+-	iov_iter_xarray(&rreq->iter, ITER_DEST, &mapping->i_pages,
+-			rreq->start, rreq->len);
++	if (folio_test_dirty(folio)) {
++		/* Handle someone trying to read from an unflushed streaming
++		 * write.  We fiddle the buffer so that a gap at the beginning
++		 * and/or a gap at the end get copied to, but the middle is
++		 * discarded.
++		 */
++		struct netfs_folio *finfo = netfs_folio_info(folio);
++		struct bio_vec *bvec;
++		unsigned int from = finfo->dirty_offset;
++		unsigned int to = from + finfo->dirty_len;
++		unsigned int off = 0, i = 0;
++		size_t flen = folio_size(folio);
++		size_t nr_bvec = flen / PAGE_SIZE + 2;
++		size_t part;
++
++		ret = -ENOMEM;
++		bvec = kmalloc_array(nr_bvec, sizeof(*bvec), GFP_KERNEL);
++		if (!bvec)
++			goto discard;
++
++		sink = folio_alloc(GFP_KERNEL, 0);
++		if (!sink)
++			goto discard;
++
++		trace_netfs_folio(folio, netfs_folio_trace_read_gaps);
++
++		rreq->direct_bv = bvec;
++		rreq->direct_bv_count = nr_bvec;
++		if (from > 0) {
++			bvec_set_folio(&bvec[i++], folio, from, 0);
++			off = from;
++		}
++		while (off < to) {
++			part = min_t(size_t, to - off, PAGE_SIZE);
++			bvec_set_folio(&bvec[i++], sink, part, 0);
++			off += part;
++		}
++		if (to < flen)
++			bvec_set_folio(&bvec[i++], folio, flen - to, to);
++		iov_iter_bvec(&rreq->iter, ITER_DEST, bvec, i, rreq->len);
++	} else {
++		iov_iter_xarray(&rreq->iter, ITER_DEST, &mapping->i_pages,
++				rreq->start, rreq->len);
++	}
+ 
+ 	ret = netfs_begin_read(rreq, true);
++	if (sink)
++		folio_put(sink);
+ 	netfs_put_request(rreq, false, netfs_rreq_trace_put_return);
+-	return ret;
++	return ret < 0 ? ret : 0;
+ 
+ discard:
+ 	netfs_put_request(rreq, false, netfs_rreq_trace_put_discard);
+diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
+index 94793f842000..b7426f455086 100644
+--- a/include/trace/events/netfs.h
++++ b/include/trace/events/netfs.h
+@@ -115,9 +115,11 @@
+ 	EM(netfs_folio_trace_clear,		"clear")	\
+ 	EM(netfs_folio_trace_clear_s,		"clear-s")	\
+ 	EM(netfs_folio_trace_clear_g,		"clear-g")	\
++	EM(netfs_folio_trace_filled_gaps,	"filled-gaps")	\
+ 	EM(netfs_folio_trace_kill,		"kill")		\
+ 	EM(netfs_folio_trace_mkwrite,		"mkwrite")	\
+ 	EM(netfs_folio_trace_mkwrite_plus,	"mkwrite+")	\
++	EM(netfs_folio_trace_read_gaps,		"read-gaps")	\
+ 	EM(netfs_folio_trace_redirty,		"redirty")	\
+ 	EM(netfs_folio_trace_redirtied,		"redirtied")	\
+ 	EM(netfs_folio_trace_store,		"store")	\
 
