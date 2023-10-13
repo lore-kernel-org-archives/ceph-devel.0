@@ -2,41 +2,41 @@ Return-Path: <ceph-devel-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7ECDCCDB484
-	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:26:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98C48CDB482
+	for <ceph-devel@archiver.kernel.org>; Fri, 13 Oct 2023 16:26:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230128AbjJMQ0e (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
-        Fri, 13 Oct 2023 12:26:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58792 "EHLO
+        id S230281AbjJMQ0m (ORCPT <rfc822;ceph-devel@archiver.kernel.org>);
+        Fri, 13 Oct 2023 12:26:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58136 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231989AbjJMQ0N (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A66930D7
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:07:02 -0700 (PDT)
+        with ESMTP id S229924AbjJMQ0S (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2023 12:26:18 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6489B198C
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2023 09:06:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697213216;
+        s=mimecast20190719; t=1697213168;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=BY0IZ1puEbWlqmZjAm/oiBzHHsszrgyhlAY+cvlLt1A=;
-        b=A3ChbNiHi9MGfzvm9abT2ZIZA8B2S3W9iE/LhkME9+dmgv/hYi1ZQyss38SPAx6qSE746m
-        n6SXT37on466jmrGUZ/5gOcZkhL9pG0pYm8Roa0dVfBs/eF0frAmBBfwG2uyBZmI/X5/qe
-        KLF8H6MhwjXyzydJUhJXbIgQXDNqkxM=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-682-Ht3YwKPqOXqHHVTwg42j_A-1; Fri, 13 Oct 2023 12:06:52 -0400
-X-MC-Unique: Ht3YwKPqOXqHHVTwg42j_A-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
+        bh=YCXtE3Gqov3oA1rKgjLh+er5qsDXpT3dWhNn5qjdKp8=;
+        b=GA5+rYD7VWonDrJOLuS5i505X2YLSYoDuHxIPeCZXCNq+RpxZanjGk6fupKyawwMgP6bYM
+        gV+eQ5otgHR7kH59ENZMs03Szdn64snIEJ7/y41KpoP8BE9t9g9ZxwUjvicdP7mHhzFYdv
+        lr184Vf4EV32QyXHVI1/a7LzDMmXeZE=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-173-TJDkM4R1O72X3owEh91uEg-1; Fri, 13 Oct 2023 12:05:59 -0400
+X-MC-Unique: TJDkM4R1O72X3owEh91uEg-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 11633380670B;
-        Fri, 13 Oct 2023 16:06:51 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 93274801E62;
+        Fri, 13 Oct 2023 16:05:58 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.42.28.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1556125C1;
-        Fri, 13 Oct 2023 16:06:47 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 11660C15BBC;
+        Fri, 13 Oct 2023 16:05:55 +0000 (UTC)
 From:   David Howells <dhowells@redhat.com>
 To:     Jeff Layton <jlayton@kernel.org>, Steve French <smfrench@gmail.com>
 Cc:     David Howells <dhowells@redhat.com>,
@@ -52,51 +52,55 @@ Cc:     David Howells <dhowells@redhat.com>,
         linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
         v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
         linux-mm@kvack.org, netdev@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Steve French <sfrench@samba.org>,
-        Shyam Prasad N <nspmangalore@gmail.com>,
-        Rohith Surabattula <rohiths.msft@gmail.com>,
-        linux-cachefs@redhat.com
-Subject: [RFC PATCH 41/53] netfs: Rearrange netfs_io_subrequest to put request pointer first
-Date:   Fri, 13 Oct 2023 17:04:10 +0100
-Message-ID: <20231013160423.2218093-42-dhowells@redhat.com>
+        linux-kernel@vger.kernel.org, linux-cachefs@redhat.com
+Subject: [RFC PATCH 26/53] netfs: Allocate multipage folios in the writepath
+Date:   Fri, 13 Oct 2023 17:03:55 +0100
+Message-ID: <20231013160423.2218093-27-dhowells@redhat.com>
 In-Reply-To: <20231013160423.2218093-1-dhowells@redhat.com>
 References: <20231013160423.2218093-1-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.1
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.8
 Precedence: bulk
 List-ID: <ceph-devel.vger.kernel.org>
 X-Mailing-List: ceph-devel@vger.kernel.org
 
-Rearrange the netfs_io_subrequest struct to put the netfs_io_request
-pointer (rreq) first.  This then allows netfs_io_subrequest to be put in a
-union with a pointer to a wrapper around netfs_io_request for cifs.
+Allocate a multipage folio when copying data into the pagecache if possible
+if there's sufficient data to warrant it.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Steve French <sfrench@samba.org>
-cc: Shyam Prasad N <nspmangalore@gmail.com>
-cc: Rohith Surabattula <rohiths.msft@gmail.com>
 cc: Jeff Layton <jlayton@kernel.org>
-cc: linux-cifs@vger.kernel.org
 cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- include/linux/netfs.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ fs/netfs/buffered_write.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index c416645649e1..ff4f86ae64e4 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -209,8 +209,8 @@ struct netfs_cache_resources {
-  * the pages it points to can be relied on to exist for the duration.
+diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
+index 406c3f3666fa..4de6a12149e4 100644
+--- a/fs/netfs/buffered_write.c
++++ b/fs/netfs/buffered_write.c
+@@ -84,14 +84,19 @@ static enum netfs_how_to_modify netfs_how_to_modify(struct netfs_inode *ctx,
+ }
+ 
+ /*
+- * Grab a folio for writing and lock it.
++ * Grab a folio for writing and lock it.  Attempt to allocate as large a folio
++ * as possible to hold as much of the remaining length as possible in one go.
   */
- struct netfs_io_subrequest {
--	struct work_struct	work;
- 	struct netfs_io_request *rreq;		/* Supervising I/O request */
-+	struct work_struct	work;
- 	struct list_head	rreq_link;	/* Link in rreq->subrequests */
- 	struct iov_iter		io_iter;	/* Iterator for this subrequest */
- 	loff_t			start;		/* Where to start the I/O */
+ static struct folio *netfs_grab_folio_for_write(struct address_space *mapping,
+ 						loff_t pos, size_t part)
+ {
+ 	pgoff_t index = pos / PAGE_SIZE;
++	fgf_t fgp_flags = FGP_WRITEBEGIN;
+ 
+-	return __filemap_get_folio(mapping, index, FGP_WRITEBEGIN,
++	if (mapping_large_folio_support(mapping))
++		fgp_flags |= fgf_set_order(pos % PAGE_SIZE + part);
++
++	return __filemap_get_folio(mapping, index, fgp_flags,
+ 				   mapping_gfp_mask(mapping));
+ }
+ 
 
