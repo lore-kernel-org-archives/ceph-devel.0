@@ -1,32 +1,32 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ah8D5PMN"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jQdY5aUq"
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F3C71BEA
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Nov 2023 13:18:12 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA37830C4
+	for <ceph-devel@vger.kernel.org>; Fri, 17 Nov 2023 13:18:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700255891;
+	s=mimecast20190719; t=1700255929;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=5Qasw+3DRr0CW1YV8TSL9wIAaCWlUGU8d7+6bcjpE3Y=;
-	b=Ah8D5PMNThPUAV06G+e6YiRyO6KprItGlsK9tFZloPMXQHRG1kNOrOPHIwv6c+tHxxBUR0
-	0V4AO76eG/MNlBRJr8MKLxfOOz0F6Uk1zBi+xXdCcsMfeAcjDyrA6uDAdQrjC7y9eft9Sw
-	i1j+MpyxCjqhquQm1FpOywXUPpvv/mY=
+	bh=F1Bu22gnjoTinDIEaWTyZ/Cz7QBpdn6BKVutBUI1hCg=;
+	b=jQdY5aUqjnG2FfKiNMHS6t2VEuOGNlLrgV36UEGCZfkv89xbxmOq/CKdgUVMqBxeLNoJmq
+	s67kK8B8YzTrpAVM8rVuPgs7kqC02e3dFeT4CSE/zCOfpVBLqPvEFaCTZI0gh6zBXpSN2A
+	b+PtA8VdSYXFWbvOym5XemtF/qBuPIs=
 Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
  by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-453-rAZg2Yx3M1y0duiuqxkUIg-1; Fri,
- 17 Nov 2023 16:18:08 -0500
-X-MC-Unique: rAZg2Yx3M1y0duiuqxkUIg-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-81-WAZa6l5HPW2_g-HIm8AyKQ-1; Fri,
+ 17 Nov 2023 16:18:45 -0500
+X-MC-Unique: WAZa6l5HPW2_g-HIm8AyKQ-1
+Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BD1A33C0C48C;
-	Fri, 17 Nov 2023 21:18:06 +0000 (UTC)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 0CB4C1C068C3;
+	Fri, 17 Nov 2023 21:18:44 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.42.28.16])
-	by smtp.corp.redhat.com (Postfix) with ESMTP id 29E541121306;
-	Fri, 17 Nov 2023 21:18:04 +0000 (UTC)
+	by smtp.corp.redhat.com (Postfix) with ESMTP id 1EB31492BE0;
+	Fri, 17 Nov 2023 21:18:41 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Jeff Layton <jlayton@kernel.org>,
 	Steve French <smfrench@gmail.com>
@@ -48,10 +48,13 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-fsdevel@vger.kernel.org,
 	linux-mm@kvack.org,
 	netdev@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 35/51] netfs: Support decryption on ubuffered/DIO read
-Date: Fri, 17 Nov 2023 21:15:27 +0000
-Message-ID: <20231117211544.1740466-36-dhowells@redhat.com>
+	linux-kernel@vger.kernel.org,
+	Steve French <sfrench@samba.org>,
+	Shyam Prasad N <nspmangalore@gmail.com>,
+	Rohith Surabattula <rohiths.msft@gmail.com>
+Subject: [PATCH v2 45/51] cifs: Make wait_mtu_credits take size_t args
+Date: Fri, 17 Nov 2023 21:15:37 +0000
+Message-ID: <20231117211544.1740466-46-dhowells@redhat.com>
 In-Reply-To: <20231117211544.1740466-1-dhowells@redhat.com>
 References: <20231117211544.1740466-1-dhowells@redhat.com>
 Precedence: bulk
@@ -61,70 +64,157 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.3
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.9
 
-Support unbuffered and direct I/O reads from an encrypted file.  This may
-require making a larger read than is required into a bounce buffer and
-copying out the required bits.  We don't decrypt in-place in the user
-buffer lest userspace interfere and muck up the decryption.
+Make the wait_mtu_credits functions use size_t for the size and num
+arguments rather than unsigned int as netfslib uses size_t/ssize_t for
+arguments and return values to allow for extra capacity.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
+cc: Steve French <sfrench@samba.org>
+cc: Shyam Prasad N <nspmangalore@gmail.com>
+cc: Rohith Surabattula <rohiths.msft@gmail.com>
 cc: Jeff Layton <jlayton@kernel.org>
+cc: linux-cifs@vger.kernel.org
 cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/direct_read.c | 10 ++++++++++
- fs/netfs/internal.h    | 17 +++++++++++++++++
- 2 files changed, 27 insertions(+)
+ fs/smb/client/cifsglob.h  |  4 ++--
+ fs/smb/client/cifsproto.h |  2 +-
+ fs/smb/client/file.c      | 18 ++++++++++--------
+ fs/smb/client/smb2ops.c   |  4 ++--
+ fs/smb/client/transport.c |  4 ++--
+ 5 files changed, 17 insertions(+), 15 deletions(-)
 
-diff --git a/fs/netfs/direct_read.c b/fs/netfs/direct_read.c
-index 52ad8fa66dd5..158719b56900 100644
---- a/fs/netfs/direct_read.c
-+++ b/fs/netfs/direct_read.c
-@@ -181,6 +181,16 @@ static ssize_t netfs_unbuffered_read_iter_locked(struct kiocb *iocb, struct iov_
- 		iov_iter_advance(iter, orig_count);
- 	}
+diff --git a/fs/smb/client/cifsglob.h b/fs/smb/client/cifsglob.h
+index 9c2bb0fc58e8..e02044f0f458 100644
+--- a/fs/smb/client/cifsglob.h
++++ b/fs/smb/client/cifsglob.h
+@@ -507,8 +507,8 @@ struct smb_version_operations {
+ 	/* writepages retry size */
+ 	unsigned int (*wp_retry_size)(struct inode *);
+ 	/* get mtu credits */
+-	int (*wait_mtu_credits)(struct TCP_Server_Info *, unsigned int,
+-				unsigned int *, struct cifs_credits *);
++	int (*wait_mtu_credits)(struct TCP_Server_Info *, size_t,
++				size_t *, struct cifs_credits *);
+ 	/* adjust previously taken mtu credits to request size */
+ 	int (*adjust_credits)(struct TCP_Server_Info *server,
+ 			      struct cifs_credits *credits,
+diff --git a/fs/smb/client/cifsproto.h b/fs/smb/client/cifsproto.h
+index be46efbbf7ac..824a84f14f4a 100644
+--- a/fs/smb/client/cifsproto.h
++++ b/fs/smb/client/cifsproto.h
+@@ -121,7 +121,7 @@ extern struct mid_q_entry *cifs_setup_async_request(struct TCP_Server_Info *,
+ extern int cifs_check_receive(struct mid_q_entry *mid,
+ 			struct TCP_Server_Info *server, bool log_error);
+ extern int cifs_wait_mtu_credits(struct TCP_Server_Info *server,
+-				 unsigned int size, unsigned int *num,
++				 size_t size, size_t *num,
+ 				 struct cifs_credits *credits);
+ extern int SendReceive2(const unsigned int /* xid */ , struct cifs_ses *,
+ 			struct kvec *, int /* nvec to send */,
+diff --git a/fs/smb/client/file.c b/fs/smb/client/file.c
+index 497429eec942..7621eb7a544d 100644
+--- a/fs/smb/client/file.c
++++ b/fs/smb/client/file.c
+@@ -2733,9 +2733,9 @@ static ssize_t cifs_write_back_from_locked_folio(struct address_space *mapping,
+ 	struct cifs_credits credits_on_stack;
+ 	struct cifs_credits *credits = &credits_on_stack;
+ 	struct cifsFileInfo *cfile = NULL;
+-	unsigned int xid, wsize, len;
++	unsigned int xid, len;
+ 	loff_t i_size = i_size_read(inode);
+-	size_t max_len;
++	size_t max_len, wsize;
+ 	long count = wbc->nr_to_write;
+ 	int rc;
  
-+	/* If we're going to do decryption or decompression, we're going to
-+	 * need a bounce buffer - and if the data is misaligned for the crypto
-+	 * algorithm, we decrypt in place and then copy.
-+	 */
-+	if (test_bit(NETFS_RREQ_CONTENT_ENCRYPTION, &rreq->flags)) {
-+		if (!netfs_is_crypto_aligned(rreq, iter))
-+			__set_bit(NETFS_RREQ_CRYPT_IN_PLACE, &rreq->flags);
-+		__set_bit(NETFS_RREQ_USE_BOUNCE_BUFFER, &rreq->flags);
-+	}
-+
- 	/* If we're going to use a bounce buffer, we need to set it up.  We
- 	 * will then need to pad the request out to the minimum block size.
+@@ -3247,7 +3247,7 @@ static int
+ cifs_resend_wdata(struct cifs_io_subrequest *wdata, struct list_head *wdata_list,
+ 	struct cifs_aio_ctx *ctx)
+ {
+-	unsigned int wsize;
++	size_t wsize;
+ 	struct cifs_credits credits;
+ 	int rc;
+ 	struct TCP_Server_Info *server = wdata->server;
+@@ -3381,7 +3381,8 @@ cifs_write_from_iter(loff_t fpos, size_t len, struct iov_iter *from,
+ 	do {
+ 		struct cifs_credits credits_on_stack;
+ 		struct cifs_credits *credits = &credits_on_stack;
+-		unsigned int wsize, nsegs = 0;
++		unsigned int nsegs = 0;
++		size_t wsize;
+ 
+ 		if (signal_pending(current)) {
+ 			rc = -EINTR;
+@@ -3818,7 +3819,7 @@ static int cifs_resend_rdata(struct cifs_io_subrequest *rdata,
+ 			struct list_head *rdata_list,
+ 			struct cifs_aio_ctx *ctx)
+ {
+-	unsigned int rsize;
++	size_t rsize;
+ 	struct cifs_credits credits;
+ 	int rc;
+ 	struct TCP_Server_Info *server;
+@@ -3892,10 +3893,10 @@ cifs_send_async_read(loff_t fpos, size_t len, struct cifsFileInfo *open_file,
+ 		     struct cifs_aio_ctx *ctx)
+ {
+ 	struct cifs_io_subrequest *rdata;
+-	unsigned int rsize, nsegs, max_segs = INT_MAX;
++	unsigned int nsegs, max_segs = INT_MAX;
+ 	struct cifs_credits credits_on_stack;
+ 	struct cifs_credits *credits = &credits_on_stack;
+-	size_t cur_len, max_len;
++	size_t cur_len, max_len, rsize;
+ 	int rc;
+ 	pid_t pid;
+ 	struct TCP_Server_Info *server;
+@@ -4491,12 +4492,13 @@ static void cifs_readahead(struct readahead_control *ractl)
+ 	 * Chop the readahead request up into rsize-sized read requests.
  	 */
-diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
-index fbecfd9b3174..447a67301329 100644
---- a/fs/netfs/internal.h
-+++ b/fs/netfs/internal.h
-@@ -193,6 +193,23 @@ static inline void netfs_put_group_many(struct netfs_group *netfs_group, int nr)
- 		netfs_group->free(netfs_group);
+ 	while ((nr_pages = ra_pages)) {
+-		unsigned int i, rsize;
++		unsigned int i;
+ 		struct cifs_io_subrequest *rdata;
+ 		struct cifs_credits credits_on_stack;
+ 		struct cifs_credits *credits = &credits_on_stack;
+ 		struct folio *folio;
+ 		pgoff_t fsize;
++		size_t rsize;
+ 
+ 		/*
+ 		 * Find out if we have anything cached in the range of
+diff --git a/fs/smb/client/smb2ops.c b/fs/smb/client/smb2ops.c
+index 5d8566ba4d20..d80026a50f62 100644
+--- a/fs/smb/client/smb2ops.c
++++ b/fs/smb/client/smb2ops.c
+@@ -216,8 +216,8 @@ smb2_get_credits(struct mid_q_entry *mid)
  }
  
-+/*
-+ * Check to see if a buffer aligns with the crypto unit block size.  If it
-+ * doesn't the crypto layer is going to copy all the data - in which case
-+ * relying on the crypto op for a free copy is pointless.
-+ */
-+static inline bool netfs_is_crypto_aligned(struct netfs_io_request *rreq,
-+					   struct iov_iter *iter)
-+{
-+	struct netfs_inode *ctx = netfs_inode(rreq->inode);
-+	unsigned long align, mask = (1UL << ctx->min_bshift) - 1;
-+
-+	if (!ctx->min_bshift)
-+		return true;
-+	align = iov_iter_alignment(iter);
-+	return (align & mask) == 0;
-+}
-+
- /*****************************************************************************/
- /*
-  * debug tracing
+ static int
+-smb2_wait_mtu_credits(struct TCP_Server_Info *server, unsigned int size,
+-		      unsigned int *num, struct cifs_credits *credits)
++smb2_wait_mtu_credits(struct TCP_Server_Info *server, size_t size,
++		      size_t *num, struct cifs_credits *credits)
+ {
+ 	int rc = 0;
+ 	unsigned int scredits, in_flight;
+diff --git a/fs/smb/client/transport.c b/fs/smb/client/transport.c
+index 3048516573e8..5cf653463c55 100644
+--- a/fs/smb/client/transport.c
++++ b/fs/smb/client/transport.c
+@@ -684,8 +684,8 @@ wait_for_compound_request(struct TCP_Server_Info *server, int num,
+ }
+ 
+ int
+-cifs_wait_mtu_credits(struct TCP_Server_Info *server, unsigned int size,
+-		      unsigned int *num, struct cifs_credits *credits)
++cifs_wait_mtu_credits(struct TCP_Server_Info *server, size_t size,
++		      size_t *num, struct cifs_credits *credits)
+ {
+ 	*num = size;
+ 	credits->value = 0;
 
