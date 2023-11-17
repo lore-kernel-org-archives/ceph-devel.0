@@ -1,32 +1,32 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TQaxh9yp"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="a2ybHmbO"
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59FA33245
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Nov 2023 13:17:46 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9BB4384A
+	for <ceph-devel@vger.kernel.org>; Fri, 17 Nov 2023 13:18:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700255865;
+	s=mimecast20190719; t=1700255885;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=GawAUyJ9iP0gj2PbHUjDCEhyVAdgsUqdjSUQK91ytDA=;
-	b=TQaxh9ypTVpMrBLaMYysc4Ho4n6bivmJE8WbHFNmZ9Yb5XBOIQf4y/7DXyEskBSVxLoIvt
-	5ILK3KkXzNnQ2B9nI/giM9fMXWElQq4mN5OQvN/RrKacwCHLcyXFu5b7y4JSAa2CYMHjoA
-	EwMRoAh2q9iHTDByabQmbr/sNSBBvdw=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-554-QpEPVGaUPRqKx6AAAOAUBQ-1; Fri,
- 17 Nov 2023 16:17:41 -0500
-X-MC-Unique: QpEPVGaUPRqKx6AAAOAUBQ-1
-Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
+	bh=PmfXBVlMsm2chMbQyKBBe8+lheiIqsV1CsACyw5IYTE=;
+	b=a2ybHmbOu0bIxC+z6v4Sl5uOoxlJMdvxbqKlSJyI1ZzI9vkIxLxIYV7LHlKH0AwWafZKNa
+	XgSowGttlZPvwlyw7rqGBJGPvYikqajVkh3uOLRfFfmyKERzLYjSgidMByO6g6BgRYlkgp
+	FCKdaCkdAriLlTWKABg1A8uPyLYodAU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-372-e8H8Un-WMimv7o6BGwG5zw-1; Fri, 17 Nov 2023 16:18:04 -0500
+X-MC-Unique: e8H8Un-WMimv7o6BGwG5zw-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id F17E828040C0;
-	Fri, 17 Nov 2023 21:17:39 +0000 (UTC)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 77ACD185A784;
+	Fri, 17 Nov 2023 21:18:03 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.42.28.16])
-	by smtp.corp.redhat.com (Postfix) with ESMTP id 59660492BE0;
-	Fri, 17 Nov 2023 21:17:37 +0000 (UTC)
+	by smtp.corp.redhat.com (Postfix) with ESMTP id DBCAC5036;
+	Fri, 17 Nov 2023 21:18:00 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Jeff Layton <jlayton@kernel.org>,
 	Steve French <smfrench@gmail.com>
@@ -49,9 +49,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-mm@kvack.org,
 	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 27/51] netfs: Implement buffered write API
-Date: Fri, 17 Nov 2023 21:15:19 +0000
-Message-ID: <20231117211544.1740466-28-dhowells@redhat.com>
+Subject: [PATCH v2 34/51] netfs: Decrypt encrypted content
+Date: Fri, 17 Nov 2023 21:15:26 +0000
+Message-ID: <20231117211544.1740466-35-dhowells@redhat.com>
 In-Reply-To: <20231117211544.1740466-1-dhowells@redhat.com>
 References: <20231117211544.1740466-1-dhowells@redhat.com>
 Precedence: bulk
@@ -61,12 +61,16 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.9
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.5
 
-Institute a netfs write helper, netfs_file_write_iter(), to be pointed at
-by the network filesystem ->write_iter() call.  Make it handled buffered
-writes by calling the previously defined netfs_perform_write() to copy the
-source data into the pagecache.
+Implement a facility to provide decryption for encrypted content to a whole
+read-request in one go (which might have been stitched together from
+disparate sources with divisions that don't match page boundaries).
+
+Note that this doesn't necessarily gain the best throughput if the crypto
+block size is equal to or less than the size of a page (in which case we
+might be better doing it as pages become read), but it will handle crypto
+blocks larger than the size of a page.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -74,114 +78,148 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/buffered_write.c | 83 +++++++++++++++++++++++++++++++++++++++
- include/linux/netfs.h     |  3 ++
- 2 files changed, 86 insertions(+)
+ fs/netfs/crypto.c            | 59 ++++++++++++++++++++++++++++++++++++
+ fs/netfs/internal.h          |  1 +
+ fs/netfs/io.c                |  6 +++-
+ include/linux/netfs.h        |  3 ++
+ include/trace/events/netfs.h |  2 ++
+ 5 files changed, 70 insertions(+), 1 deletion(-)
 
-diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
-index 4de6a12149e4..60e7da53cbd2 100644
---- a/fs/netfs/buffered_write.c
-+++ b/fs/netfs/buffered_write.c
-@@ -330,3 +330,86 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
- 	goto out;
+diff --git a/fs/netfs/crypto.c b/fs/netfs/crypto.c
+index 943d01f430e2..6729bcda4f47 100644
+--- a/fs/netfs/crypto.c
++++ b/fs/netfs/crypto.c
+@@ -87,3 +87,62 @@ bool netfs_encrypt(struct netfs_io_request *wreq)
+ 	wreq->error = ret;
+ 	return false;
  }
- EXPORT_SYMBOL(netfs_perform_write);
 +
-+/**
-+ * netfs_buffered_write_iter_locked - write data to a file
-+ * @iocb:	IO state structure (file, offset, etc.)
-+ * @from:	iov_iter with data to write
-+ * @netfs_group: Grouping for dirty pages (eg. ceph snaps).
-+ *
-+ * This function does all the work needed for actually writing data to a
-+ * file. It does all basic checks, removes SUID from the file, updates
-+ * modification times and calls proper subroutines depending on whether we
-+ * do direct IO or a standard buffered write.
-+ *
-+ * The caller must hold appropriate locks around this function and have called
-+ * generic_write_checks() already.  The caller is also responsible for doing
-+ * any necessary syncing afterwards.
-+ *
-+ * This function does *not* take care of syncing data in case of O_SYNC write.
-+ * A caller has to handle it. This is mainly due to the fact that we want to
-+ * avoid syncing under i_rwsem.
-+ *
-+ * Return:
-+ * * number of bytes written, even for truncated writes
-+ * * negative error code if no data has been written at all
++/*
++ * Decrypt the result of a read request.
 + */
-+ssize_t netfs_buffered_write_iter_locked(struct kiocb *iocb, struct iov_iter *from,
-+					 struct netfs_group *netfs_group)
++void netfs_decrypt(struct netfs_io_request *rreq)
 +{
-+	struct file *file = iocb->ki_filp;
-+	ssize_t ret;
++	struct netfs_inode *ctx = netfs_inode(rreq->inode);
++	struct scatterlist source_sg[16], dest_sg[16];
++	unsigned int n_source;
++	size_t n, chunk, bsize = 1UL << ctx->crypto_bshift;
++	loff_t pos;
++	int ret;
 +
-+	trace_netfs_write_iter(iocb, from);
++	trace_netfs_rreq(rreq, netfs_rreq_trace_decrypt);
++	if (rreq->start >= rreq->i_size)
++		return;
 +
-+	ret = file_remove_privs(file);
-+	if (ret)
-+		return ret;
++	n = min_t(unsigned long long, rreq->len, rreq->i_size - rreq->start);
 +
-+	ret = file_update_time(file);
-+	if (ret)
-+		return ret;
++	_debug("DECRYPT %llx-%llx f=%lx",
++	       rreq->start, rreq->start + n, rreq->flags);
 +
-+	return netfs_perform_write(iocb, from, netfs_group);
++	pos = rreq->start;
++	for (; n > 0; n -= chunk, pos += chunk) {
++		chunk = min(n, bsize);
++
++		ret = netfs_iter_to_sglist(&rreq->io_iter, chunk,
++					   source_sg, ARRAY_SIZE(source_sg));
++		if (ret < 0)
++			goto error;
++		n_source = ret;
++
++		if (test_bit(NETFS_RREQ_CRYPT_IN_PLACE, &rreq->flags)) {
++			ret = ctx->ops->decrypt_block(rreq, pos, chunk,
++						      source_sg, n_source,
++						      source_sg, n_source);
++		} else {
++			ret = netfs_iter_to_sglist(&rreq->iter, chunk,
++						   dest_sg, ARRAY_SIZE(dest_sg));
++			if (ret < 0)
++				goto error;
++			ret = ctx->ops->decrypt_block(rreq, pos, chunk,
++						      source_sg, n_source,
++						      dest_sg, ret);
++		}
++
++		if (ret < 0)
++			goto error_failed;
++	}
++
++	return;
++
++error_failed:
++	trace_netfs_failure(rreq, NULL, ret, netfs_fail_decryption);
++error:
++	rreq->error = ret;
++	set_bit(NETFS_RREQ_FAILED, &rreq->flags);
++	return;
 +}
-+EXPORT_SYMBOL(netfs_buffered_write_iter_locked);
-+
-+/**
-+ * netfs_file_write_iter - write data to a file
-+ * @iocb: IO state structure
-+ * @from: iov_iter with data to write
-+ *
-+ * Perform a write to a file, writing into the pagecache if possible and doing
-+ * an unbuffered write instead if not.
-+ *
-+ * Return:
-+ * * Negative error code if no data has been written at all of
-+ *   vfs_fsync_range() failed for a synchronous write
-+ * * Number of bytes written, even for truncated writes
-+ */
-+ssize_t netfs_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
-+{
-+	struct file *file = iocb->ki_filp;
-+	struct inode *inode = file->f_mapping->host;
-+	struct netfs_inode *ictx = netfs_inode(inode);
-+	ssize_t ret;
-+
-+	_enter("%llx,%zx,%llx", iocb->ki_pos, iov_iter_count(from), i_size_read(inode));
-+
-+	if ((iocb->ki_flags & IOCB_DIRECT) ||
-+	    test_bit(NETFS_ICTX_UNBUFFERED, &ictx->flags))
-+		return netfs_unbuffered_write_iter(iocb, from);
-+
-+	ret = netfs_start_io_write(inode);
-+	if (ret < 0)
-+		return ret;
-+
-+	ret = generic_write_checks(iocb, from);
-+	if (ret > 0)
-+		ret = netfs_buffered_write_iter_locked(iocb, from, NULL);
-+	netfs_end_io_write(inode);
-+	if (ret > 0)
-+		ret = generic_write_sync(iocb, ret);
-+	return ret;
-+}
-+EXPORT_SYMBOL(netfs_file_write_iter);
+diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
+index d3e74ad478ce..fbecfd9b3174 100644
+--- a/fs/netfs/internal.h
++++ b/fs/netfs/internal.h
+@@ -26,6 +26,7 @@ int netfs_prefetch_for_write(struct file *file, struct folio *folio,
+  * crypto.c
+  */
+ bool netfs_encrypt(struct netfs_io_request *wreq);
++void netfs_decrypt(struct netfs_io_request *rreq);
+ 
+ /*
+  * direct_write.c
+diff --git a/fs/netfs/io.c b/fs/netfs/io.c
+index 36a3f720193a..9887b22e4cb3 100644
+--- a/fs/netfs/io.c
++++ b/fs/netfs/io.c
+@@ -398,6 +398,9 @@ static void netfs_rreq_assess(struct netfs_io_request *rreq, bool was_async)
+ 		return;
+ 	}
+ 
++	if (!test_bit(NETFS_RREQ_FAILED, &rreq->flags) &&
++	    test_bit(NETFS_RREQ_CONTENT_ENCRYPTION, &rreq->flags))
++		netfs_decrypt(rreq);
+ 	if (rreq->origin != NETFS_DIO_READ)
+ 		netfs_rreq_unlock_folios(rreq);
+ 	else
+@@ -427,7 +430,8 @@ static void netfs_rreq_work(struct work_struct *work)
+ static void netfs_rreq_terminated(struct netfs_io_request *rreq,
+ 				  bool was_async)
+ {
+-	if (test_bit(NETFS_RREQ_INCOMPLETE_IO, &rreq->flags) &&
++	if ((test_bit(NETFS_RREQ_INCOMPLETE_IO, &rreq->flags) ||
++	     test_bit(NETFS_RREQ_CONTENT_ENCRYPTION, &rreq->flags)) &&
+ 	    was_async) {
+ 		if (!queue_work(system_unbound_wq, &rreq->work))
+ 			BUG();
 diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 4f9a46a21c28..4cdadd1ce328 100644
+index 639f1f9cb7e0..364361cc93be 100644
 --- a/include/linux/netfs.h
 +++ b/include/linux/netfs.h
-@@ -389,7 +389,10 @@ ssize_t netfs_unbuffered_read_iter(struct kiocb *iocb, struct iov_iter *iter);
- /* High-level write API */
- ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
- 			    struct netfs_group *netfs_group);
-+ssize_t netfs_buffered_write_iter_locked(struct kiocb *iocb, struct iov_iter *from,
-+					 struct netfs_group *netfs_group);
- ssize_t netfs_unbuffered_write_iter(struct kiocb *iocb, struct iov_iter *from);
-+ssize_t netfs_file_write_iter(struct kiocb *iocb, struct iov_iter *from);
+@@ -327,6 +327,9 @@ struct netfs_request_ops {
+ 	int (*encrypt_block)(struct netfs_io_request *wreq, loff_t pos, size_t len,
+ 			     struct scatterlist *source_sg, unsigned int n_source,
+ 			     struct scatterlist *dest_sg, unsigned int n_dest);
++	int (*decrypt_block)(struct netfs_io_request *rreq, loff_t pos, size_t len,
++			     struct scatterlist *source_sg, unsigned int n_source,
++			     struct scatterlist *dest_sg, unsigned int n_dest);
+ };
  
- /* Address operations API */
- struct readahead_control;
+ /*
+diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
+index 70e2f9a48f24..2f35057602fa 100644
+--- a/include/trace/events/netfs.h
++++ b/include/trace/events/netfs.h
+@@ -40,6 +40,7 @@
+ #define netfs_rreq_traces					\
+ 	EM(netfs_rreq_trace_assess,		"ASSESS ")	\
+ 	EM(netfs_rreq_trace_copy,		"COPY   ")	\
++	EM(netfs_rreq_trace_decrypt,		"DECRYPT")	\
+ 	EM(netfs_rreq_trace_done,		"DONE   ")	\
+ 	EM(netfs_rreq_trace_encrypt,		"ENCRYPT")	\
+ 	EM(netfs_rreq_trace_free,		"FREE   ")	\
+@@ -75,6 +76,7 @@
+ #define netfs_failures							\
+ 	EM(netfs_fail_check_write_begin,	"check-write-begin")	\
+ 	EM(netfs_fail_copy_to_cache,		"copy-to-cache")	\
++	EM(netfs_fail_decryption,		"decryption")		\
+ 	EM(netfs_fail_dio_read_short,		"dio-read-short")	\
+ 	EM(netfs_fail_dio_read_zero,		"dio-read-zero")	\
+ 	EM(netfs_fail_encryption,		"encryption")		\
 
