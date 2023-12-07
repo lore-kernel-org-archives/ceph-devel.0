@@ -1,32 +1,32 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="P/xFSjSt"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26484385A
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Dec 2023 13:24:08 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CWDme+1e"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4FEC3C0D
+	for <ceph-devel@vger.kernel.org>; Thu,  7 Dec 2023 13:24:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1701984247;
+	s=mimecast20190719; t=1701984261;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=YcUt6Wlq9qFzNGrM+VViKKkJSoOctikTKew3FuWO+5w=;
-	b=P/xFSjSt9pJ0BjFmQbFZyVdec272NjKmp6u2N5SbEVT1Bd/dn7YqHq5cFFhuHM7YJ7sP7D
-	Y3fw2/u/Yth1T9Wk+RCNUxc9SzKmra3Gw08upII1pmVL8oGpNotMtKvyQc8HkYai6cT+d9
-	N6RrYfHCZadytgR0WzzobEAOoFeQrMo=
+	bh=C7Yf3Gyz2poDrlJ/i6bRFpW4r3T86H5wARr3qsse2RM=;
+	b=CWDme+1ekjhtrVS6iDAqvMCwDF6Kp1KXMq+algqyi2q3qa+Exoi73uKQ5KSiJzzlvhnLed
+	I+rMsMDTocM15RpZ6kmIpevS1JLWxthAaPttEToDJNXtMIjqwgGqMm7MtwIAYa/rPBPrIL
+	fiD/IN23tOnFoW0Tw9zxHAZfO7Ft5BE=
 Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
  by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-50-YYix5oYnM_O-H5lo0OEt7w-1; Thu,
- 07 Dec 2023 16:23:59 -0500
-X-MC-Unique: YYix5oYnM_O-H5lo0OEt7w-1
-Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-441-8zEOlF5DPGemNRiwVlcCcg-1; Thu,
+ 07 Dec 2023 16:24:17 -0500
+X-MC-Unique: 8zEOlF5DPGemNRiwVlcCcg-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BE76F1C5407F;
-	Thu,  7 Dec 2023 21:23:58 +0000 (UTC)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id A78C93C40B58;
+	Thu,  7 Dec 2023 21:24:15 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.42.28.161])
-	by smtp.corp.redhat.com (Postfix) with ESMTP id 2968C492BE6;
-	Thu,  7 Dec 2023 21:23:56 +0000 (UTC)
+	by smtp.corp.redhat.com (Postfix) with ESMTP id 1024B1C060AF;
+	Thu,  7 Dec 2023 21:24:12 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Jeff Layton <jlayton@kernel.org>,
 	Steve French <smfrench@gmail.com>
@@ -50,9 +50,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-mm@kvack.org,
 	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v3 31/59] netfs: Allow buffered shared-writeable mmap through netfs_page_mkwrite()
-Date: Thu,  7 Dec 2023 21:21:38 +0000
-Message-ID: <20231207212206.1379128-32-dhowells@redhat.com>
+Subject: [PATCH v3 36/59] netfs: Make netfs_skip_folio_read() take account of blocksize
+Date: Thu,  7 Dec 2023 21:21:43 +0000
+Message-ID: <20231207212206.1379128-37-dhowells@redhat.com>
 In-Reply-To: <20231207212206.1379128-1-dhowells@redhat.com>
 References: <20231207212206.1379128-1-dhowells@redhat.com>
 Precedence: bulk
@@ -62,11 +62,10 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.10
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 
-Provide an entry point to delegate a filesystem's ->page_mkwrite() to.
-This checks for conflicting writes, then attached any netfs-specific group
-marking (e.g. ceph snap) to the page to be considered dirty.
+Make netfs_skip_folio_read() take account of blocksize such as crypto
+blocksize.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Jeff Layton <jlayton@kernel.org>
@@ -74,90 +73,80 @@ cc: linux-cachefs@redhat.com
 cc: linux-fsdevel@vger.kernel.org
 cc: linux-mm@kvack.org
 ---
- fs/netfs/buffered_write.c | 59 +++++++++++++++++++++++++++++++++++++++
- include/linux/netfs.h     |  4 +++
- 2 files changed, 63 insertions(+)
+ fs/netfs/buffered_read.c | 32 +++++++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 11 deletions(-)
 
-diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
-index f244123ab568..70cb8e98d068 100644
---- a/fs/netfs/buffered_write.c
-+++ b/fs/netfs/buffered_write.c
-@@ -416,3 +416,62 @@ ssize_t netfs_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 	return ret;
- }
- EXPORT_SYMBOL(netfs_file_write_iter);
-+
-+/*
-+ * Notification that a previously read-only page is about to become writable.
-+ * Note that the caller indicates a single page of a multipage folio.
-+ */
-+vm_fault_t netfs_page_mkwrite(struct vm_fault *vmf, struct netfs_group *netfs_group)
-+{
-+	struct folio *folio = page_folio(vmf->page);
-+	struct file *file = vmf->vma->vm_file;
-+	struct inode *inode = file_inode(file);
-+	vm_fault_t ret = VM_FAULT_RETRY;
-+	int err;
-+
-+	_enter("%lx", folio->index);
-+
-+	sb_start_pagefault(inode->i_sb);
-+
-+	if (folio_wait_writeback_killable(folio))
-+		goto out;
-+
-+	if (folio_lock_killable(folio) < 0)
-+		goto out;
-+
-+	/* Can we see a streaming write here? */
-+	if (WARN_ON(!folio_test_uptodate(folio))) {
-+		ret = VM_FAULT_SIGBUS | VM_FAULT_LOCKED;
-+		goto out;
-+	}
-+
-+	if (netfs_folio_group(folio) != netfs_group) {
-+		folio_unlock(folio);
-+		err = filemap_fdatawait_range(inode->i_mapping,
-+					      folio_pos(folio),
-+					      folio_pos(folio) + folio_size(folio));
-+		switch (err) {
-+		case 0:
-+			ret = VM_FAULT_RETRY;
-+			goto out;
-+		case -ENOMEM:
-+			ret = VM_FAULT_OOM;
-+			goto out;
-+		default:
-+			ret = VM_FAULT_SIGBUS;
-+			goto out;
-+		}
-+	}
-+
-+	if (folio_test_dirty(folio))
-+		trace_netfs_folio(folio, netfs_folio_trace_mkwrite_plus);
-+	else
-+		trace_netfs_folio(folio, netfs_folio_trace_mkwrite);
-+	netfs_set_group(folio, netfs_group);
-+	file_update_time(file);
-+	ret = VM_FAULT_LOCKED;
-+out:
-+	sb_end_pagefault(inode->i_sb);
-+	return ret;
-+}
-+EXPORT_SYMBOL(netfs_page_mkwrite);
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 702b864a4993..46c0a6b45bb8 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -403,6 +403,10 @@ void netfs_clear_inode_writeback(struct inode *inode, const void *aux);
- void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length);
- bool netfs_release_folio(struct folio *folio, gfp_t gfp);
+diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
+index 0d47e5ea6870..8b27ef2e78ca 100644
+--- a/fs/netfs/buffered_read.c
++++ b/fs/netfs/buffered_read.c
+@@ -331,6 +331,7 @@ EXPORT_SYMBOL(netfs_read_folio);
  
-+/* VMA operations API. */
-+vm_fault_t netfs_page_mkwrite(struct vm_fault *vmf, struct netfs_group *netfs_group);
+ /*
+  * Prepare a folio for writing without reading first
++ * @ctx: File context
+  * @folio: The folio being prepared
+  * @pos: starting position for the write
+  * @len: length of write
+@@ -344,32 +345,41 @@ EXPORT_SYMBOL(netfs_read_folio);
+  * If any of these criteria are met, then zero out the unwritten parts
+  * of the folio and return true. Otherwise, return false.
+  */
+-static bool netfs_skip_folio_read(struct folio *folio, loff_t pos, size_t len,
+-				 bool always_fill)
++static bool netfs_skip_folio_read(struct netfs_inode *ctx, struct folio *folio,
++				  loff_t pos, size_t len, bool always_fill)
+ {
+ 	struct inode *inode = folio_inode(folio);
+-	loff_t i_size = i_size_read(inode);
++	loff_t i_size = i_size_read(inode), low, high;
+ 	size_t offset = offset_in_folio(folio, pos);
+ 	size_t plen = folio_size(folio);
++	size_t min_bsize = 1UL << ctx->min_bshift;
 +
-+/* (Sub)request management API. */
- void netfs_subreq_terminated(struct netfs_io_subrequest *, ssize_t, bool);
- void netfs_get_subrequest(struct netfs_io_subrequest *subreq,
- 			  enum netfs_sreq_ref_trace what);
++	if (likely(min_bsize == 1)) {
++		low = folio_file_pos(folio);
++		high = low + plen;
++	} else {
++		low = round_down(pos, min_bsize);
++		high = round_up(pos + len, min_bsize);
++	}
+ 
+ 	if (unlikely(always_fill)) {
+-		if (pos - offset + len <= i_size)
+-			return false; /* Page entirely before EOF */
++		if (low < i_size)
++			return false; /* Some part of the block before EOF */
+ 		zero_user_segment(&folio->page, 0, plen);
+ 		folio_mark_uptodate(folio);
+ 		return true;
+ 	}
+ 
+-	/* Full folio write */
+-	if (offset == 0 && len >= plen)
++	/* Full page write */
++	if (pos == low && high == pos + len)
+ 		return true;
+ 
+-	/* Page entirely beyond the end of the file */
+-	if (pos - offset >= i_size)
++	/* pos beyond last page in the file */
++	if (low >= i_size)
+ 		goto zero_out;
+ 
+ 	/* Write that covers from the start of the folio to EOF or beyond */
+-	if (offset == 0 && (pos + len) >= i_size)
++	if (pos == low && (pos + len) >= i_size)
+ 		goto zero_out;
+ 
+ 	return false;
+@@ -448,7 +458,7 @@ int netfs_write_begin(struct netfs_inode *ctx,
+ 	 * to preload the granule.
+ 	 */
+ 	if (!netfs_is_cache_enabled(ctx) &&
+-	    netfs_skip_folio_read(folio, pos, len, false)) {
++	    netfs_skip_folio_read(ctx, folio, pos, len, false)) {
+ 		netfs_stat(&netfs_n_rh_write_zskip);
+ 		goto have_folio_no_wait;
+ 	}
 
