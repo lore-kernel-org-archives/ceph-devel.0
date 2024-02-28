@@ -1,31 +1,30 @@
-Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [195.130.137.89])
+Received: from andre.telenet-ops.be (andre.telenet-ops.be [195.130.132.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C550714F998
-	for <ceph-devel@vger.kernel.org>; Wed, 28 Feb 2024 14:00:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.130.137.89
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0357814DFD6
+	for <ceph-devel@vger.kernel.org>; Wed, 28 Feb 2024 14:05:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.130.132.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709128825; cv=none; b=tE2qaYeyIRRuq9G+VknbLipmYq6uA6WoDVJFtXrsjbBbUzZK+5u4N47xgevVz6KWXiNvt7x6MsUElWMR6pqO7LWtR18bOQ15u0dQR7xfGqLWAlw25czn3JwPHbWWb/+w2hIeCxZ05i+REQLYQu2euEFMuztn2kC5wq3tzMOOqEw=
+	t=1709129113; cv=none; b=IXiCBRUz+gERNynz5Gfd3URB//7bcLnVVACa1XmRxjQCRb129nlMwUlPPBhdV0tIG5mKrB8pHs55lVFXPZFDO5IgQEt9yA26O9LjqdXkIh/+xyKQzlCEPGlbwIe/pT9N9Cw17bbHj9SmnwIgW4464UU0Gzd9nQ+7Fg/rLVcLQ5k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709128825; c=relaxed/simple;
-	bh=G6EOV4ZQQfHL4BuKa3yWbKTAxpwYG330vI+JSSZwK9g=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=mqTCSaDEL3n7ZhTZ+0qtIO/7TIwNW1M1v5LaCFQButWNqOM+/uFF0dCYnhWfgfQP2cB2389MSGtE4Iy0ZFko1IjClOSH1KI4KKk3fsc6u7n2oIXwpf5uSQ4t7gF7ycG/V5TT5CcyPZO2ZeLMZUu0x7Z0MPTvEE2rJtieD7HWRxE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be; spf=none smtp.mailfrom=linux-m68k.org; arc=none smtp.client-ip=195.130.137.89
+	s=arc-20240116; t=1709129113; c=relaxed/simple;
+	bh=L3K4rtzy6gxBJUGpTTcskVWOegBL2LVnvlohsA27NJs=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=PfbOzvfpdWWxVqKLNRGuoLnwtUejpb/mQ8Ij37avd850+Dn3YaQEOpHKdO5m6gbX4GcJ+TsmBUZUzG1yi4mBD25BDiY8ubTLL231wnXQQObGLdNAI7Zpt6jWJHdsmDQ10fExjv5bsejsuFb3DCjZcS+zT7cCwpTL8wVliAbyzFo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be; spf=none smtp.mailfrom=linux-m68k.org; arc=none smtp.client-ip=195.130.132.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux-m68k.org
 Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed40:48c4:26a9:d9ec:22cb])
-	by laurent.telenet-ops.be with bizsmtp
-	id se072B0034gWvPH01e07CA; Wed, 28 Feb 2024 15:00:13 +0100
+	by andre.telenet-ops.be with bizsmtp
+	id se542B0064gWvPH01e54PF; Wed, 28 Feb 2024 15:05:10 +0100
 Received: from rox.of.borg ([192.168.97.57])
 	by ramsan.of.borg with esmtp (Exim 4.95)
 	(envelope-from <geert@linux-m68k.org>)
-	id 1rfKTV-001tZ9-DK;
-	Wed, 28 Feb 2024 15:00:07 +0100
+	id 1rfKYI-001tZa-F6;
+	Wed, 28 Feb 2024 15:05:04 +0100
 Received: from geert by rox.of.borg with local (Exim 4.95)
 	(envelope-from <geert@linux-m68k.org>)
-	id 1rfKTe-006hl9-S8;
-	Wed, 28 Feb 2024 15:00:06 +0100
+	id 1rfKYR-006hqA-UZ;
+	Wed, 28 Feb 2024 15:05:03 +0100
 From: Geert Uytterhoeven <geert+renesas@glider.be>
 To: Chris Down <chris@chrisdown.name>,
 	Petr Mladek <pmladek@suse.com>,
@@ -43,12 +42,10 @@ To: Chris Down <chris@chrisdown.name>,
 Cc: linux-kernel@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
 	Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH 1/4] printk: Let no_printk() use _printk()
-Date: Wed, 28 Feb 2024 15:00:02 +0100
-Message-Id: <56cf92edccffea970e1f40a075334dd6cf5bb2a4.1709127473.git.geert+renesas@glider.be>
+Subject: [PATCH net-next] Simplify net_dbg_ratelimited() dummy
+Date: Wed, 28 Feb 2024 15:05:02 +0100
+Message-Id: <5d75ce122b5cbfe62b018a7719960e34cfcbb1f2.1709128975.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1709127473.git.geert+renesas@glider.be>
-References: <cover.1709127473.git.geert+renesas@glider.be>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -57,42 +54,30 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-When printk-indexing is enabled, each printk() invocation emits a
-pi_entry structure, containing the format string and other information
-related to its location in the kernel sources.  This is even true for
-no_printk(): while the actual code to print the message is optimized out
-by the compiler due to the always-false check, the pi_entry structure is
-still emitted.
+There is no need to wrap calls to the no_printk() helper inside an
+always-false check, as no_printk() already does that internally.
 
-As the main purpose of no_printk() is to provide a helper to maintain
-printf()-style format checking when debugging is disabled, this leads to
-the inclusion in the index of lots of printk formats that cannot be
-emitted by the current kernel.
-
-Fix this by switching no_printk() from printk() to _printk().
-
-This reduces the size of an arm64 defconfig kernel with
-CONFIG_PRINTK_INDEX=y by 576 KiB.
-
-Fixes: 337015573718b161 ("printk: Userspace format indexing support")
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- include/linux/printk.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ include/linux/net.h | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/include/linux/printk.h b/include/linux/printk.h
-index 8ef499ab3c1ed2ec..e4878bb58f663370 100644
---- a/include/linux/printk.h
-+++ b/include/linux/printk.h
-@@ -126,7 +126,7 @@ struct va_format {
- #define no_printk(fmt, ...)				\
- ({							\
- 	if (0)						\
--		printk(fmt, ##__VA_ARGS__);		\
-+		_printk(fmt, ##__VA_ARGS__);		\
- 	0;						\
- })
+diff --git a/include/linux/net.h b/include/linux/net.h
+index c9b4a63791a45948..15df6d5f27a7badc 100644
+--- a/include/linux/net.h
++++ b/include/linux/net.h
+@@ -299,10 +299,7 @@ do {									\
+ 	net_ratelimited_function(pr_debug, fmt, ##__VA_ARGS__)
+ #else
+ #define net_dbg_ratelimited(fmt, ...)				\
+-	do {							\
+-		if (0)						\
+-			no_printk(KERN_DEBUG pr_fmt(fmt), ##__VA_ARGS__); \
+-	} while (0)
++	no_printk(KERN_DEBUG pr_fmt(fmt), ##__VA_ARGS__)
+ #endif
  
+ #define net_get_random_once(buf, nbytes)			\
 -- 
 2.34.1
 
