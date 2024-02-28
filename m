@@ -1,30 +1,30 @@
-Received: from albert.telenet-ops.be (albert.telenet-ops.be [195.130.137.90])
+Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [195.130.137.89])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E00151509AB
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C550714F998
 	for <ceph-devel@vger.kernel.org>; Wed, 28 Feb 2024 14:00:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.130.137.90
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.130.137.89
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709128824; cv=none; b=ShmYrJnJpO9+1iK4zt4AU7ruYBXWRUA0pr+yUrCE4Q4KOT5YhKkyzNNSUplRQMx7xIoycp0HjIAIp0lFJUnrVM6uoNa8NwXjw8eadAY3ojDl2/qOGzIcipoVRz7MkFE+D9WTeVx3xGwSSN3j+9lnIPIzs0RRyj6ToLao1EUdOGk=
+	t=1709128825; cv=none; b=tE2qaYeyIRRuq9G+VknbLipmYq6uA6WoDVJFtXrsjbBbUzZK+5u4N47xgevVz6KWXiNvt7x6MsUElWMR6pqO7LWtR18bOQ15u0dQR7xfGqLWAlw25czn3JwPHbWWb/+w2hIeCxZ05i+REQLYQu2euEFMuztn2kC5wq3tzMOOqEw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709128824; c=relaxed/simple;
-	bh=D8NXY2ItVpwUES37gGIiU5wimOI8cGreVo83CtoNigw=;
+	s=arc-20240116; t=1709128825; c=relaxed/simple;
+	bh=G6EOV4ZQQfHL4BuKa3yWbKTAxpwYG330vI+JSSZwK9g=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=WHMBh1Urbtd+dLmvqp/kF4AEw4I0hzrPSP41v/POv28iDsiQLzl5VWpFV1PxuWvBfDgURpGnp/se24pCFPZddOtiH4JEdORSg2YqnVu7M4TzP2neHlPtZKhyl1YGQeFL7II1YTAaoOlH2AEhcOD2SkrSpaLHMFH71si6Bw3hBjU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be; spf=none smtp.mailfrom=linux-m68k.org; arc=none smtp.client-ip=195.130.137.90
+	 MIME-Version; b=mqTCSaDEL3n7ZhTZ+0qtIO/7TIwNW1M1v5LaCFQButWNqOM+/uFF0dCYnhWfgfQP2cB2389MSGtE4Iy0ZFko1IjClOSH1KI4KKk3fsc6u7n2oIXwpf5uSQ4t7gF7ycG/V5TT5CcyPZO2ZeLMZUu0x7Z0MPTvEE2rJtieD7HWRxE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be; spf=none smtp.mailfrom=linux-m68k.org; arc=none smtp.client-ip=195.130.137.89
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux-m68k.org
 Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed40:48c4:26a9:d9ec:22cb])
-	by albert.telenet-ops.be with bizsmtp
-	id se072B0044gWvPH06e07Y7; Wed, 28 Feb 2024 15:00:13 +0100
+	by laurent.telenet-ops.be with bizsmtp
+	id se072B0034gWvPH01e07CA; Wed, 28 Feb 2024 15:00:13 +0100
 Received: from rox.of.borg ([192.168.97.57])
 	by ramsan.of.borg with esmtp (Exim 4.95)
 	(envelope-from <geert@linux-m68k.org>)
-	id 1rfKTV-001tZG-EJ;
+	id 1rfKTV-001tZ9-DK;
 	Wed, 28 Feb 2024 15:00:07 +0100
 Received: from geert by rox.of.borg with local (Exim 4.95)
 	(envelope-from <geert@linux-m68k.org>)
-	id 1rfKTe-006hlI-Vc;
+	id 1rfKTe-006hl9-S8;
 	Wed, 28 Feb 2024 15:00:06 +0100
 From: Geert Uytterhoeven <geert+renesas@glider.be>
 To: Chris Down <chris@chrisdown.name>,
@@ -43,9 +43,9 @@ To: Chris Down <chris@chrisdown.name>,
 Cc: linux-kernel@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
 	Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH 4/4] ceph: Use no_printk() helper
-Date: Wed, 28 Feb 2024 15:00:05 +0100
-Message-Id: <a21767eccb823435a7f18cdf115d7d572b4e945d.1709127473.git.geert+renesas@glider.be>
+Subject: [PATCH 1/4] printk: Let no_printk() use _printk()
+Date: Wed, 28 Feb 2024 15:00:02 +0100
+Message-Id: <56cf92edccffea970e1f40a075334dd6cf5bb2a4.1709127473.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <cover.1709127473.git.geert+renesas@glider.be>
 References: <cover.1709127473.git.geert+renesas@glider.be>
@@ -58,50 +58,41 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
 When printk-indexing is enabled, each printk() invocation emits a
-pi_entry structure.  This is even true when the call is protected by an
-always-false check: while the actual code to print the message is
-optimized out by the compiler, the pi_entry structure is still emitted.
+pi_entry structure, containing the format string and other information
+related to its location in the kernel sources.  This is even true for
+no_printk(): while the actual code to print the message is optimized out
+by the compiler due to the always-false check, the pi_entry structure is
+still emitted.
 
-Fix this by replacing "if (0) printk(...)" constructs by calls to the
-no_printk() helper.
+As the main purpose of no_printk() is to provide a helper to maintain
+printf()-style format checking when debugging is disabled, this leads to
+the inclusion in the index of lots of printk formats that cannot be
+emitted by the current kernel.
 
-This reduces the size of an arm64 kernel with CONFIG_PRINTK_INDEX=y and
-CONFIG_CEPH_FS=y by ca. 4 KiB.
+Fix this by switching no_printk() from printk() to _printk().
 
+This reduces the size of an arm64 defconfig kernel with
+CONFIG_PRINTK_INDEX=y by 576 KiB.
+
+Fixes: 337015573718b161 ("printk: Userspace format indexing support")
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- include/linux/ceph/ceph_debug.h | 18 +++++++-----------
- 1 file changed, 7 insertions(+), 11 deletions(-)
+ include/linux/printk.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/include/linux/ceph/ceph_debug.h b/include/linux/ceph/ceph_debug.h
-index 11a92a946016eab5..5f904591fa5f9e57 100644
---- a/include/linux/ceph/ceph_debug.h
-+++ b/include/linux/ceph/ceph_debug.h
-@@ -27,17 +27,13 @@
- 		 ##__VA_ARGS__)
- # else
- /* faux printk call just to see any compiler warnings. */
--#  define dout(fmt, ...)	do {				\
--		if (0)						\
--			printk(KERN_DEBUG fmt, ##__VA_ARGS__);	\
--	} while (0)
--#  define doutc(client, fmt, ...)	do {			\
--		if (0)						\
--			printk(KERN_DEBUG "[%pU %llu] " fmt,	\
--			&client->fsid,				\
--			client->monc.auth->global_id,		\
--			##__VA_ARGS__);				\
--		} while (0)
-+#  define dout(fmt, ...)					\
-+		no_printk(KERN_DEBUG fmt, ##__VA_ARGS__)
-+#  define doutc(client, fmt, ...)				\
-+		no_printk(KERN_DEBUG "[%pU %llu] " fmt,		\
-+			  &client->fsid,			\
-+			  client->monc.auth->global_id,		\
-+			  ##__VA_ARGS__)
- # endif
+diff --git a/include/linux/printk.h b/include/linux/printk.h
+index 8ef499ab3c1ed2ec..e4878bb58f663370 100644
+--- a/include/linux/printk.h
++++ b/include/linux/printk.h
+@@ -126,7 +126,7 @@ struct va_format {
+ #define no_printk(fmt, ...)				\
+ ({							\
+ 	if (0)						\
+-		printk(fmt, ##__VA_ARGS__);		\
++		_printk(fmt, ##__VA_ARGS__);		\
+ 	0;						\
+ })
  
- #else
 -- 
 2.34.1
 
