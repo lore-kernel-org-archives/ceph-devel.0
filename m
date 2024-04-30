@@ -1,45 +1,45 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50C691C0DEC
-	for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2024 14:03:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 164151C2307
+	for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2024 14:03:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714485787; cv=none; b=ktfYr6tnJWrchFe1t66T0/pw9495fy9RILyW47aQ/zvqgsCffvlTgqNUdKrYRorUUzrx2iNRfU6tAFG+605mERwpCaMOCvIGM8ST7/Jw9LTQZO65eu484evnjzPcyqjzlTCOX+hxnzildQXgpa1L1plzjsEo0BVmDLhMnNh6BGo=
+	t=1714485790; cv=none; b=Ruccee73lmB0FIEA14c3e2IQXEJ1RduC/ZsJ+6Un7uZKr0G+7KKoBJMKFScBAcDrxjmgRnDNo4tMMmfLZirS7GYv945RrJ1XtX/wMeePSuheDVTev5fAsZuVDnqP2QGGnQ+6kuatNhzLTOSwc13R1lccZdxU5TnJdnI+4IYR/F4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714485787; c=relaxed/simple;
-	bh=1jcywdFFIj6PVu7haQO4pjpdjJMILtdNqUtDZkKjiFk=;
+	s=arc-20240116; t=1714485790; c=relaxed/simple;
+	bh=E/ivUfkmIyl4ZjgkCSb7BSDvBomq0Vmk2KQ3GmFIX44=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=aI3NHk0vfu3qrIW7NMPu4isg2RF/YQdvVVRldrxNZ1FF3FXyfA5kZr+s/vWrZ8hQSI44I7ZOEmyslGtBAR0K9mU60LmSZiGoB1xmrflkDiOQDYxA/FAZXLC0FEpzAtT0PyEQllZqOR2MsNLVl1K2lW9L0BO4/Hiwy8JTgxpT8+8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JduDY4ce; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=PYG/DZjZl3X1ZGbbY3c2fQ4HIbhFKyZaCs33hKd+grMBA6oTK9Y/rVLvv/jHO0fzy96mqT5upkLXAbe8/JofJgGveWfjD4BVSXJ2G09RGneWBo8lPeP+xuuKC9owaziFeRu8RNDlxjZwnPU4X2huvwQVuuyg63ie5Shy0H0+cpY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EEnnPn2f; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JduDY4ce"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EEnnPn2f"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714485784;
+	s=mimecast20190719; t=1714485786;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Odg3aZxytikbkfbMJrl0CzuPexMShHC0Kl20ZMSfA0U=;
-	b=JduDY4ceBGBHae8Q9RKfwFJT/PwdD4jbcLVvnOs8ZKXJtQ0iyFW/UyBQlkGN6GIgsfAh/F
-	bvbwWXS9LL7pp8ySrW02/Ho3ZuWdZz4SUgnb7HhJEYIob5PNNpJjdLJFzLrYv9QVdau8wz
-	j9gLDUDcu9xFrZ7vhQUn7n8IG9BPlZI=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-445-MRk4RIKmNLehtOWuC76kKg-1; Tue, 30 Apr 2024 10:03:00 -0400
-X-MC-Unique: MRk4RIKmNLehtOWuC76kKg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+	bh=RVKnlQo0k8LYSKy/5xkID19zXhvzF8VfogUxkP/ClX8=;
+	b=EEnnPn2fO7O4HSWRf4BXHnE0cQpI2QG9DmTZOmNGze4ZipqbqrFV5p75Rnsmg6xjJU95pI
+	Y1CoiVXhqLUSBAii3CgN7iSsOIIM88oI+qx69IhPq7p6bSJtlqsr1jtcygMin8jEOaB6pB
+	Ptr2Ty4kxlfIJjHEg4qJgOdpTQTb32Q=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-611-0FXqmQelOLGG4J2V-HVVnQ-1; Tue,
+ 30 Apr 2024 10:03:00 -0400
+X-MC-Unique: 0FXqmQelOLGG4J2V-HVVnQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id EF5AD18065DC;
-	Tue, 30 Apr 2024 14:02:19 +0000 (UTC)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 20E123819C42;
+	Tue, 30 Apr 2024 14:02:12 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.42.28.22])
-	by smtp.corp.redhat.com (Postfix) with ESMTP id 9AF33EC680;
-	Tue, 30 Apr 2024 14:02:16 +0000 (UTC)
+	by smtp.corp.redhat.com (Postfix) with ESMTP id 417FE1121312;
+	Tue, 30 Apr 2024 14:02:09 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>,
 	Jeff Layton <jlayton@kernel.org>,
@@ -66,9 +66,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-mm@kvack.org,
 	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 18/22] netfs, cachefiles: Implement helpers for new write code
-Date: Tue, 30 Apr 2024 15:00:49 +0100
-Message-ID: <20240430140056.261997-19-dhowells@redhat.com>
+Subject: [PATCH v2 16/22] netfs, afs: Implement helpers for new write code
+Date: Tue, 30 Apr 2024 15:00:47 +0100
+Message-ID: <20240430140056.261997-17-dhowells@redhat.com>
 In-Reply-To: <20240430140056.261997-1-dhowells@redhat.com>
 References: <20240430140056.261997-1-dhowells@redhat.com>
 Precedence: bulk
@@ -78,9 +78,9 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.5
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.3
 
-Implement the helpers for the new write code in cachefiles.  There's now an
+Implement the helpers for the new write code in afs.  There's now an
 optional ->prepare_write() that allows the filesystem to set the parameters
 for the next write, such as maximum size and maximum segment count, and an
 ->issue_write() that is called to initiate an (asynchronous) write
@@ -88,8 +88,9 @@ operation.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 Reviewed-by: Jeff Layton <jlayton@kernel.org>
+cc: Marc Dionne <marc.dionne@auristor.com>
+cc: linux-afs@lists.infradead.org
 cc: netfs@lists.linux.dev
-cc: linux-erofs@lists.ozlabs.org
 cc: linux-fsdevel@vger.kernel.org
 ---
 
@@ -97,110 +98,104 @@ Notes:
     Changes
     =======
     ver #2)
-     - Add missing linux/bio.h for BIO_MAX_VECS.
+     - Don't do the StoreData RPC inline, but keep doing it from a workqueue.
 
- fs/cachefiles/io.c | 74 ++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 74 insertions(+)
+ fs/afs/file.c     |  3 +++
+ fs/afs/internal.h |  3 +++
+ fs/afs/write.c    | 54 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 60 insertions(+)
 
-diff --git a/fs/cachefiles/io.c b/fs/cachefiles/io.c
-index 5ba5c7814fe4..e667dbcd20e8 100644
---- a/fs/cachefiles/io.c
-+++ b/fs/cachefiles/io.c
-@@ -9,6 +9,7 @@
- #include <linux/slab.h>
- #include <linux/file.h>
- #include <linux/uio.h>
-+#include <linux/bio.h>
- #include <linux/falloc.h>
- #include <linux/sched/mm.h>
- #include <trace/events/fscache.h>
-@@ -622,6 +623,77 @@ static int cachefiles_prepare_write(struct netfs_cache_resources *cres,
- 	return ret;
+diff --git a/fs/afs/file.c b/fs/afs/file.c
+index dfd8f60f5e1f..db9ebae84fa2 100644
+--- a/fs/afs/file.c
++++ b/fs/afs/file.c
+@@ -400,6 +400,9 @@ const struct netfs_request_ops afs_req_ops = {
+ 	.update_i_size		= afs_update_i_size,
+ 	.invalidate_cache	= afs_netfs_invalidate_cache,
+ 	.create_write_requests	= afs_create_write_requests,
++	.begin_writeback	= afs_begin_writeback,
++	.prepare_write		= afs_prepare_write,
++	.issue_write		= afs_issue_write,
+ };
+ 
+ static void afs_add_open_mmap(struct afs_vnode *vnode)
+diff --git a/fs/afs/internal.h b/fs/afs/internal.h
+index b93aa026daa4..dcf0ae0323d3 100644
+--- a/fs/afs/internal.h
++++ b/fs/afs/internal.h
+@@ -1598,6 +1598,9 @@ extern int afs_check_volume_status(struct afs_volume *, struct afs_operation *);
+ /*
+  * write.c
+  */
++void afs_prepare_write(struct netfs_io_subrequest *subreq);
++void afs_issue_write(struct netfs_io_subrequest *subreq);
++void afs_begin_writeback(struct netfs_io_request *wreq);
+ extern int afs_writepages(struct address_space *, struct writeback_control *);
+ extern int afs_fsync(struct file *, loff_t, loff_t, int);
+ extern vm_fault_t afs_page_mkwrite(struct vm_fault *vmf);
+diff --git a/fs/afs/write.c b/fs/afs/write.c
+index 1bc26466eb72..34595f482718 100644
+--- a/fs/afs/write.c
++++ b/fs/afs/write.c
+@@ -194,6 +194,60 @@ void afs_create_write_requests(struct netfs_io_request *wreq, loff_t start, size
+ 		netfs_queue_write_request(subreq);
  }
  
-+static void cachefiles_prepare_write_subreq(struct netfs_io_subrequest *subreq)
++/*
++ * Writeback calls this when it finds a folio that needs uploading.  This isn't
++ * called if writeback only has copy-to-cache to deal with.
++ */
++void afs_begin_writeback(struct netfs_io_request *wreq)
 +{
-+	struct netfs_io_request *wreq = subreq->rreq;
-+	struct netfs_cache_resources *cres = &wreq->cache_resources;
-+
-+	_enter("W=%x[%x] %llx", wreq->debug_id, subreq->debug_index, subreq->start);
-+
-+	subreq->max_len = ULONG_MAX;
-+	subreq->max_nr_segs = BIO_MAX_VECS;
-+
-+	if (!cachefiles_cres_file(cres)) {
-+		if (!fscache_wait_for_operation(cres, FSCACHE_WANT_WRITE))
-+			return netfs_prepare_write_failed(subreq);
-+		if (!cachefiles_cres_file(cres))
-+			return netfs_prepare_write_failed(subreq);
-+	}
++	wreq->io_streams[0].avail = true;
 +}
 +
-+static void cachefiles_issue_write(struct netfs_io_subrequest *subreq)
++/*
++ * Prepare a subrequest to write to the server.  This sets the max_len
++ * parameter.
++ */
++void afs_prepare_write(struct netfs_io_subrequest *subreq)
 +{
-+	struct netfs_io_request *wreq = subreq->rreq;
-+	struct netfs_cache_resources *cres = &wreq->cache_resources;
-+	struct cachefiles_object *object = cachefiles_cres_object(cres);
-+	struct cachefiles_cache *cache = object->volume->cache;
-+	const struct cred *saved_cred;
-+	size_t off, pre, post, len = subreq->len;
-+	loff_t start = subreq->start;
-+	int ret;
++	//if (test_bit(NETFS_SREQ_RETRYING, &subreq->flags))
++	//	subreq->max_len = 512 * 1024;
++	//else
++	subreq->max_len = 256 * 1024 * 1024;
++}
 +
-+	_enter("W=%x[%x] %llx-%llx",
-+	       wreq->debug_id, subreq->debug_index, start, start + len - 1);
++/*
++ * Issue a subrequest to write to the server.
++ */
++static void afs_issue_write_worker(struct work_struct *work)
++{
++	struct netfs_io_subrequest *subreq = container_of(work, struct netfs_io_subrequest, work);
++	struct afs_vnode *vnode = AFS_FS_I(subreq->rreq->inode);
++	ssize_t ret;
 +
-+	/* We need to start on the cache granularity boundary */
-+	off = start & (CACHEFILES_DIO_BLOCK_SIZE - 1);
-+	if (off) {
-+		pre = CACHEFILES_DIO_BLOCK_SIZE - off;
-+		if (pre >= len) {
-+			netfs_write_subrequest_terminated(subreq, len, false);
-+			return;
-+		}
-+		subreq->transferred += pre;
-+		start += pre;
-+		len -= pre;
-+		iov_iter_advance(&subreq->io_iter, pre);
++	_enter("%x[%x],%zx",
++	       subreq->rreq->debug_id, subreq->debug_index, subreq->io_iter.count);
++
++#if 0 // Error injection
++	if (subreq->debug_index == 3)
++		return netfs_write_subrequest_terminated(subreq, -ENOANO, false);
++
++	if (!test_bit(NETFS_SREQ_RETRYING, &subreq->flags)) {
++		set_bit(NETFS_SREQ_NEED_RETRY, &subreq->flags);
++		return netfs_write_subrequest_terminated(subreq, -EAGAIN, false);
 +	}
++#endif
 +
-+	/* We also need to end on the cache granularity boundary */
-+	post = len & (CACHEFILES_DIO_BLOCK_SIZE - 1);
-+	if (post) {
-+		len -= post;
-+		if (len == 0) {
-+			netfs_write_subrequest_terminated(subreq, post, false);
-+			return;
-+		}
-+		iov_iter_truncate(&subreq->io_iter, len);
-+	}
++	ret = afs_store_data(vnode, &subreq->io_iter, subreq->start);
++	netfs_write_subrequest_terminated(subreq, ret < 0 ? ret : subreq->len, false);
++}
 +
-+	cachefiles_begin_secure(cache, &saved_cred);
-+	ret = __cachefiles_prepare_write(object, cachefiles_cres_file(cres),
-+					 &start, &len, len, true);
-+	cachefiles_end_secure(cache, saved_cred);
-+	if (ret < 0) {
-+		netfs_write_subrequest_terminated(subreq, ret, false);
-+		return;
-+	}
-+
-+	cachefiles_write(&subreq->rreq->cache_resources,
-+			 subreq->start, &subreq->io_iter,
-+			 netfs_write_subrequest_terminated, subreq);
++void afs_issue_write(struct netfs_io_subrequest *subreq)
++{
++	subreq->work.func = afs_issue_write_worker;
++	if (!queue_work(system_unbound_wq, &subreq->work))
++		WARN_ON_ONCE(1);
 +}
 +
  /*
-  * Clean up an operation.
+  * write some of the pending data back to the server
   */
-@@ -638,8 +710,10 @@ static const struct netfs_cache_ops cachefiles_netfs_cache_ops = {
- 	.end_operation		= cachefiles_end_operation,
- 	.read			= cachefiles_read,
- 	.write			= cachefiles_write,
-+	.issue_write		= cachefiles_issue_write,
- 	.prepare_read		= cachefiles_prepare_read,
- 	.prepare_write		= cachefiles_prepare_write,
-+	.prepare_write_subreq	= cachefiles_prepare_write_subreq,
- 	.prepare_ondemand_read	= cachefiles_prepare_ondemand_read,
- 	.query_occupancy	= cachefiles_query_occupancy,
- };
 
