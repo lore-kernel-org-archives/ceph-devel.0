@@ -1,63 +1,101 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FAE012A144;
-	Sat, 25 May 2024 21:32:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49E0415B569;
+	Wed, 29 May 2024 05:05:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716672729; cv=none; b=Z3eirmT3rMh1R7h65EgGJgRjAcLNjkmfQsc/AnoGtVI5E2G7A4fkO4xpxI3Pndy8bdMxwl0qSBHaNbVf1P9owX4Po2vASZQFTUIXSv6qs0xN31X4kUvf9RTMciX0RfiKXdHbKeL/2qKU0Vl/gB+J1uboPZyixpWxhepuPIwYw+s=
+	t=1716959122; cv=none; b=b9MPHFgTCdJtE9HM59qTQITEL9jGn+op2QiEx44HBuwu24zkwT/woE9O17Dkur4BdmHX6aemZNRDabHd5BhojbufJJIM7ZYZDg7gbGiUh13jtW077IdboDh6Y3JKKJXiu9VoBZrWn0ge8Zf6miI+OYjpkBD9oTOhufJf1/FKpX8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716672729; c=relaxed/simple;
-	bh=9Eg1k3p8BipcszsZLNndHQqZpvewIp55QoJUVm1TvSc=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=r2muv19H7v77lHJYlmSl4ElhigQ0qvjJjqjMELFzYDUl1MO65sQOVinYn73rL4rV+b/kaYQXxqxPjdg0nZyorGA9FNpMmAqLJ3pUJgOIg+ozIYigAvTLF5l2zr1aAfwgrr0q1VPN/mD4FfTBf9FHoxN+WXET1xURRJjVV5QXQFU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NqZb+B0R; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1716959122; c=relaxed/simple;
+	bh=BKqjRgAUBDAEkcY3F8nYF+/jiJdinAAzSez7/+1I6I0=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=THXPqd3VQqmlNqvRF4SeGoCbSj28wzFXOLLBrUOtAjw81oYNKliUs+qCyE8pgVuZBhvdK7kww7gT8gt25IQL0g/Q5XxzFaFEQkcEvYItlaJzLGEcTA/vrOHtVju407da+MgQT1huYzFky4ZDv8LQZZGI9ZzGtchaWraVkP4hBWg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=OeadjJJG; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NqZb+B0R"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 61EC8C32789;
-	Sat, 25 May 2024 21:32:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1716672729;
-	bh=9Eg1k3p8BipcszsZLNndHQqZpvewIp55QoJUVm1TvSc=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=NqZb+B0RDBuKl7bf3VXA9zgKu0YDPmn1teyJDs9qQo2BEMVElzwsmKWiH4+UGvZuW
-	 4IaLJUMU4ewOLry4H8p10G9yOgxvAMDxKJaI66uruVbJfim/sA1F1ExB/4Ak6lFHBN
-	 x+swwn/0pUdG4RTv4uriNjaXuJymjfkRrFEG5VEafDq1iuliiVJIAtU+LVeIpNijFc
-	 k0PUZX00dmjxYx6RIWyS81bShFjKkTaaB5SVnqLqQ+UjIDMcrtP9eoE9VNO083Yb6v
-	 ZYsIibv++lObGod2dRHXurRp0QWoOjoHjAnF5Si+p1CHbk0MIDbX+SA58CJJViBVni
-	 EYwfhzGFNN3VQ==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 5A3E0C433F2;
-	Sat, 25 May 2024 21:32:09 +0000 (UTC)
-Subject: Re: [GIT PULL] Ceph updates for 6.10-rc1
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20240525095738.3046298-1-idryomov@gmail.com>
-References: <20240525095738.3046298-1-idryomov@gmail.com>
-X-PR-Tracked-List-Id: <ceph-devel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20240525095738.3046298-1-idryomov@gmail.com>
-X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-6.10-rc1
-X-PR-Tracked-Commit-Id: 93a2221c9c1ae32643df67c482dc4c4c591b7514
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 74eca356f6d4429497a097a8ed4dfa76c441bab9
-Message-Id: <171667272936.25058.2908553170380448829.pr-tracker-bot@kernel.org>
-Date: Sat, 25 May 2024 21:32:09 +0000
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="OeadjJJG"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
+	:Reply-To:Content-Type:Content-ID:Content-Description;
+	bh=/OLpY6jO6BGmZUZluvnHNfe+GDP4sT7VwC1y29SpC6U=; b=OeadjJJGioCa4ge9VNZLLPIeJ8
+	O9S5rUx9FafsfCUd/nVJdDPOpkJsv/E9yKCxbOOv290nnhE62p3wpyYQNPmrOmNyU3hzVOzhGPQxa
+	5a4T1lTIFSW+n3MtalzxAOCYtI3DQHhzspZ8bYnEdLFBuQ+bNkNK5b871ug/c8Zf1MXixhuq1fwcL
+	BxKay23FFqMmNqBL5VSxy6HUEZFvyI7zrsX4GqEOmWHd2HuIc7ZktQuuiNYT9hnqC19jbRgfOjXtD
+	KR9+Ssjbvj0F4kFxGdIepfLmbgfwNS35I/CDczeE6V2t2s7vUtO9/Gkm7F3aD4SXdu4zuGlpm8kbx
+	t86dAPmA==;
+Received: from 2a02-8389-2341-5b80-7775-b725-99f7-3344.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:7775:b725:99f7:3344] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sCBUv-00000002pSP-1Lzk;
+	Wed, 29 May 2024 05:05:13 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Jens Axboe <axboe@kernel.dk>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>
+Cc: Richard Weinberger <richard@nod.at>,
+	Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+	Johannes Berg <johannes@sipsolutions.net>,
+	Josef Bacik <josef@toxicpanda.com>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	Dongsheng Yang <dongsheng.yang@easystack.cn>,
+	=?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>,
+	linux-um@lists.infradead.org,
+	linux-block@vger.kernel.org,
+	nbd@other.debian.org,
+	ceph-devel@vger.kernel.org,
+	xen-devel@lists.xenproject.org,
+	linux-scsi@vger.kernel.org
+Subject: [PATCH 01/12] ubd: untagle discard vs write zeroes not support handling
+Date: Wed, 29 May 2024 07:04:03 +0200
+Message-ID: <20240529050507.1392041-2-hch@lst.de>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20240529050507.1392041-1-hch@lst.de>
+References: <20240529050507.1392041-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-The pull request you sent on Sat, 25 May 2024 11:57:37 +0200:
+Discard and Write Zeroes are different operation and implemented
+by different fallocate opcodes for ubd.  If one fails the other one
+can work and vice versa.
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-6.10-rc1
+Split the code to disable the operations in ubd_handler to only
+disable the operation that actually failed.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/74eca356f6d4429497a097a8ed4dfa76c441bab9
+Fixes: 50109b5a03b4 ("um: Add support for DISCARD in the UBD Driver")
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ arch/um/drivers/ubd_kern.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
 
-Thank you!
-
+diff --git a/arch/um/drivers/ubd_kern.c b/arch/um/drivers/ubd_kern.c
+index ef805eaa9e013d..a79a3b7c33a647 100644
+--- a/arch/um/drivers/ubd_kern.c
++++ b/arch/um/drivers/ubd_kern.c
+@@ -471,9 +471,14 @@ static void ubd_handler(void)
+ 		for (count = 0; count < n/sizeof(struct io_thread_req *); count++) {
+ 			struct io_thread_req *io_req = (*irq_req_buffer)[count];
+ 
+-			if ((io_req->error == BLK_STS_NOTSUPP) && (req_op(io_req->req) == REQ_OP_DISCARD)) {
+-				blk_queue_max_discard_sectors(io_req->req->q, 0);
+-				blk_queue_max_write_zeroes_sectors(io_req->req->q, 0);
++			if (io_req->error == BLK_STS_NOTSUPP) {
++				struct request_queue *q = io_req->req->q;
++
++				if (req_op(io_req->req) == REQ_OP_DISCARD)
++					blk_queue_max_discard_sectors(q, 0);
++				if (req_op(io_req->req) == REQ_OP_WRITE_ZEROES)
++					blk_queue_max_write_zeroes_sectors(q,
++							0);
+ 			}
+ 			blk_mq_end_request(io_req->req, io_req->error);
+ 			kfree(io_req);
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.43.0
+
