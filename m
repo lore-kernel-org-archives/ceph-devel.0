@@ -1,179 +1,137 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D7868488
-	for <ceph-devel@vger.kernel.org>; Tue, 11 Jun 2024 02:12:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7C3F8C04;
+	Tue, 11 Jun 2024 05:19:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718071934; cv=none; b=I54qrhclZcQsXeSiG+3hsRIx1N7gv7BjepTZk5D4CPdO8s+WakIhZHsOTDoRR3Cu1qjo/7/UzX13ek5lfX4iLj1HYYVDBDjEdnoEOLFYX3Mr7U2cE8zX+1vXBH4bOOwsbDSqLiW1XDb1omvSH9Oilrd35ca4SV2vRPSAIZSCrl0=
+	t=1718083188; cv=none; b=I/S/koMU/tjEFElJFDL86bu5pKIY2QqIHnTXty0FQ/1IB99n5GfgmkqKLGHyUXDFrnUGiUbHhjrsFwWAxwWOmuebCxngVoUSb1df9MTmVWH/Eh3GbW0PYFYZ2YLUwvRaSTMdjUXerJBESClwYJHayVU/63DuT4GFNoO3Wgq6ebI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718071934; c=relaxed/simple;
-	bh=6xP1ei76jr5aHAJqlhhcWItU2AXyK4KV8+AWVUgjv+A=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=QK02aYxz/kRhJiABFGNQbLSbVTtVT7QggA8HY3OI37ugT8kLJZl8sx+16pydA0z8d7ZZ/T1izH3FMAnGRmRzAuFB9zglhgsuljfscDYl7EiWIEIRknsXlvGp46VWRODBEI9MXoZPZ/MeZoMIZ0n4UH5kSUuM5GGizZ4XSPTfh+o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gZMoXNjV; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1718083188; c=relaxed/simple;
+	bh=pJHJWcNs/pJcnRM22ACgcER3q2shJV55AlIb3h7/28E=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=piQLpDRc+vLSU6w1LvAdWuJmNy0VD5ijkVvERRp+DvxQohI4+02XKxWU4tPPvz5QGZUpbqo7pZuHMEML6EGw5pbcuNJYon0cffukJzwg/V4T5dIF73he9m8qhARn7cwN7Fquwahp9YHxT4FxYjvW6K0KVN6oZJbqwUqNbmDsgDI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=rUA9ZaXU; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gZMoXNjV"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1718071932;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Rl1gGO4UgKTAEFs1CZF/0wGX2Tf6+LMOtr2l88VGC+Q=;
-	b=gZMoXNjVhxjk0PT466nrnFlzIlgeAYV1k3WdRRZsrDrrTx8aCw8ejl4BJNlWMjxp28woiX
-	qLesmXre/HQt0ESuTah1JJ1TANfu1kz1P+GNNMtbQvgC9PyFfYPTLkvUtcPk2Smm7VO1Sj
-	6rQ8JVloB8MbRrOuRbzHzF0HGvIc0BU=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-77-zAVULFTkN1asltxu777H9w-1; Mon, 10 Jun 2024 22:12:06 -0400
-X-MC-Unique: zAVULFTkN1asltxu777H9w-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-681907af573so4088323a12.1
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Jun 2024 19:12:06 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718071926; x=1718676726;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Rl1gGO4UgKTAEFs1CZF/0wGX2Tf6+LMOtr2l88VGC+Q=;
-        b=ceE5ua9T/ogL+ZD+TSzvqOMkOXk0N10iK2GbYmEJRY9Sp4EuQd4ql+n8hobxPb1AiU
-         47i4NFVAgmHQ3Oen015S0lAI/ln/OkyZ6J9DfLt4kNQC6knodBawH7fmW5/31O/6RsQt
-         OMGlTxHuslTEaErEV+DXV6x1jCduusRLdkDWrdp5YAzbbjSb0lSQrnOyBrd98vDWYFKt
-         AAss4ymM540/rA4H0q90/AhC3lJxEX1CwNK4mQ4rMDbkD9RE+Tm+IUSeLkd2ON4pTTLm
-         VASrwhs7bSJ3kP9QuoWuUQhkbCeRaSVdr+8wQaivZJEsRmR9pybJyemNGCd+S7loFC+E
-         hdNg==
-X-Forwarded-Encrypted: i=1; AJvYcCWqWasq/uZKv6R0eYYfgh++AckR/Q/mffZk9t7ChYppwxeXVE9Fo7xl6H70pfpe5M5V/+AcPkD8YtdIlUDYoEg1phMCVOhpZUEFkw==
-X-Gm-Message-State: AOJu0Yx9n1QMCPTDMF6zbCeiJEPU4q5H0MECKCkRqkRTshPLIBsufGxa
-	FLZhKP+jfM1LWzWRWqg4wPku8CJPHy4/puXfhV7i5lVe8r9eYlE4pPXbK8KVkKTviGTiU4aG9I2
-	m2DTB48ygQRNgGm7mXW1VaMQRvj0LJ0F+cgp2lEn33A38nhCUNoroyXZCRtk=
-X-Received: by 2002:a17:902:d2c8:b0:1f2:fc8b:ebfe with SMTP id d9443c01a7336-1f6d0389353mr119517835ad.48.1718071925837;
-        Mon, 10 Jun 2024 19:12:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEHdprNhnBBG8Q7R+GJT6+3TiYFLUc4wINGfuZT0vXuCOjJzIKH6fw+aACuUgHH/+RFZfCiNQ==
-X-Received: by 2002:a17:902:d2c8:b0:1f2:fc8b:ebfe with SMTP id d9443c01a7336-1f6d0389353mr119517745ad.48.1718071925468;
-        Mon, 10 Jun 2024 19:12:05 -0700 (PDT)
-Received: from [10.72.116.2] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f6bd778fc2sm89270965ad.119.2024.06.10.19.12.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 10 Jun 2024 19:12:05 -0700 (PDT)
-Message-ID: <a72e754a-3e72-491c-935c-ca5c1f21a8f7@redhat.com>
-Date: Tue, 11 Jun 2024 10:11:44 +0800
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="rUA9ZaXU"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
+	:Reply-To:Content-Type:Content-ID:Content-Description;
+	bh=lvXE5gTUk5P3TVKgX5q5Q8J1/DjEMwO75JeCg7ieY7s=; b=rUA9ZaXUx5MpyhS2j5LBHsyXxQ
+	KbTuAJUR1haH+9S1m8G4GZVBD1g7bx2ayPONElMYjcxYJ0QDJPl5o5zOp4k78Qgw0XyFdjZCPo5wp
+	vIgPX59oPcfHLDliRB8Y+Bi/vjpbtw2V1cwzkbepDA/QzMJIwAsmVAdMFC3UF8wgtmukkiprCLdOG
+	RnSyiCv+Mvh3ga6qyL+ash+wP6WvC9+JDwisvTf85QvcZuGjp66L5kSvkUkgxcMfJHjnZZ91k2qO0
+	ThG6qMn0y6iW42CQt05TqF0tEm3cI9aOk07AkgbKRZMt1CIdlg2QNDBGCgPEgHOzn7Iuc8T8ztdEX
+	0c6zkTmg==;
+Received: from 2a02-8389-2341-5b80-cdb4-8e7d-405d-6b77.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:cdb4:8e7d:405d:6b77] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sGtux-00000007Qnu-0nLE;
+	Tue, 11 Jun 2024 05:19:35 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>,
+	Richard Weinberger <richard@nod.at>,
+	Philipp Reisner <philipp.reisner@linbit.com>,
+	Lars Ellenberg <lars.ellenberg@linbit.com>,
+	=?UTF-8?q?Christoph=20B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
+	Josef Bacik <josef@toxicpanda.com>,
+	Ming Lei <ming.lei@redhat.com>,
+	"Michael S. Tsirkin" <mst@redhat.com>,
+	Jason Wang <jasowang@redhat.com>,
+	=?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>,
+	Alasdair Kergon <agk@redhat.com>,
+	Mike Snitzer <snitzer@kernel.org>,
+	Mikulas Patocka <mpatocka@redhat.com>,
+	Song Liu <song@kernel.org>,
+	Yu Kuai <yukuai3@huawei.com>,
+	Vineeth Vijayan <vneethv@linux.ibm.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	linux-m68k@lists.linux-m68k.org,
+	linux-um@lists.infradead.org,
+	drbd-dev@lists.linbit.com,
+	nbd@other.debian.org,
+	linuxppc-dev@lists.ozlabs.org,
+	ceph-devel@vger.kernel.org,
+	virtualization@lists.linux.dev,
+	xen-devel@lists.xenproject.org,
+	linux-bcache@vger.kernel.org,
+	dm-devel@lists.linux.dev,
+	linux-raid@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-mtd@lists.infradead.org,
+	nvdimm@lists.linux.dev,
+	linux-nvme@lists.infradead.org,
+	linux-s390@vger.kernel.org,
+	linux-scsi@vger.kernel.org,
+	linux-block@vger.kernel.org
+Subject: [PATCH 01/26] sd: fix sd_is_zoned
+Date: Tue, 11 Jun 2024 07:19:01 +0200
+Message-ID: <20240611051929.513387-2-hch@lst.de>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20240611051929.513387-1-hch@lst.de>
+References: <20240611051929.513387-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fs/ceph/mds_client: use cap_wait_list only if debugfs is
- enabled
-To: Max Kellermann <max.kellermann@ionos.com>, idryomov@gmail.com,
- ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-References: <20240606164157.3765143-1-max.kellermann@ionos.com>
-Content-Language: en-US
-From: Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20240606164157.3765143-1-max.kellermann@ionos.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
+Since commit 7437bb73f087 ("block: remove support for the host aware zone
+model"), only ZBC devices expose a zoned access model.  sd_is_zoned is
+used to check for that and thus return false for host aware devices.
 
-On 6/7/24 00:41, Max Kellermann wrote:
-> Only debugfs uses this list.  By omitting it, we save some memory and
-> reduce lock contention on `caps_list_lock`.
->
-> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
-> ---
->   fs/ceph/caps.c       | 6 ++++++
->   fs/ceph/mds_client.c | 2 ++
->   fs/ceph/mds_client.h | 6 ++++++
->   3 files changed, 14 insertions(+)
->
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index c4941ba245ac..772879aa26ee 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -3067,10 +3067,13 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
->   				       flags, &_got);
->   		WARN_ON_ONCE(ret == -EAGAIN);
->   		if (!ret) {
-> +#ifdef CONFIG_DEBUG_FS
->   			struct ceph_mds_client *mdsc = fsc->mdsc;
->   			struct cap_wait cw;
-> +#endif
->   			DEFINE_WAIT_FUNC(wait, woken_wake_function);
->   
-> +#ifdef CONFIG_DEBUG_FS
->   			cw.ino = ceph_ino(inode);
->   			cw.tgid = current->tgid;
->   			cw.need = need;
-> @@ -3079,6 +3082,7 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
->   			spin_lock(&mdsc->caps_list_lock);
->   			list_add(&cw.list, &mdsc->cap_wait_list);
->   			spin_unlock(&mdsc->caps_list_lock);
-> +#endif // CONFIG_DEBUG_FS
->   
->   			/* make sure used fmode not timeout */
->   			ceph_get_fmode(ci, flags, FMODE_WAIT_BIAS);
-> @@ -3097,9 +3101,11 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
->   			remove_wait_queue(&ci->i_cap_wq, &wait);
->   			ceph_put_fmode(ci, flags, FMODE_WAIT_BIAS);
->   
-> +#ifdef CONFIG_DEBUG_FS
->   			spin_lock(&mdsc->caps_list_lock);
->   			list_del(&cw.list);
->   			spin_unlock(&mdsc->caps_list_lock);
-> +#endif
->   
->   			if (ret == -EAGAIN)
->   				continue;
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index c2157f6e0c69..62238f3e6e19 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -5505,7 +5505,9 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
->   	INIT_DELAYED_WORK(&mdsc->delayed_work, delayed_work);
->   	mdsc->last_renew_caps = jiffies;
->   	INIT_LIST_HEAD(&mdsc->cap_delay_list);
-> +#ifdef CONFIG_DEBUG_FS
->   	INIT_LIST_HEAD(&mdsc->cap_wait_list);
-> +#endif
->   	spin_lock_init(&mdsc->cap_delay_lock);
->   	INIT_LIST_HEAD(&mdsc->cap_unlink_delay_list);
->   	INIT_LIST_HEAD(&mdsc->snap_flush_list);
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index cfa18cf915a0..13dd83f783ec 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -416,6 +416,8 @@ struct ceph_quotarealm_inode {
->   	struct inode *inode;
->   };
->   
-> +#ifdef CONFIG_DEBUG_FS
-> +
->   struct cap_wait {
->   	struct list_head	list;
->   	u64			ino;
-> @@ -424,6 +426,8 @@ struct cap_wait {
->   	int			want;
->   };
->   
-> +#endif // CONFIG_DEBUG_FS
-> +
->   enum {
->   	CEPH_MDSC_STOPPING_BEGIN = 1,
->   	CEPH_MDSC_STOPPING_FLUSHING = 2,
-> @@ -512,7 +516,9 @@ struct ceph_mds_client {
->   	spinlock_t	caps_list_lock;
->   	struct		list_head caps_list; /* unused (reserved or
->   						unreserved) */
-> +#ifdef CONFIG_DEBUG_FS
->   	struct		list_head cap_wait_list;
-> +#endif
->   	int		caps_total_count;    /* total caps allocated */
->   	int		caps_use_count;      /* in use */
->   	int		caps_use_max;	     /* max used caps */
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
+Fixes: 7437bb73f087 ("block: remove support for the host aware zone model")
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ drivers/scsi/sd.h     | 7 ++++++-
+ drivers/scsi/sd_zbc.c | 7 +------
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/scsi/sd.h b/drivers/scsi/sd.h
+index 726f1613f6cb56..65dff3c2108926 100644
+--- a/drivers/scsi/sd.h
++++ b/drivers/scsi/sd.h
+@@ -222,9 +222,14 @@ static inline sector_t sectors_to_logical(struct scsi_device *sdev, sector_t sec
+ 
+ void sd_dif_config_host(struct scsi_disk *sdkp, struct queue_limits *lim);
+ 
++/*
++ * Check if we support a zoned model for this device.
++ *
++ * Note that host aware devices are treated as conventional by Linux.
++ */
+ static inline int sd_is_zoned(struct scsi_disk *sdkp)
+ {
+-	return sdkp->zoned == 1 || sdkp->device->type == TYPE_ZBC;
++	return sdkp->device->type == TYPE_ZBC;
+ }
+ 
+ #ifdef CONFIG_BLK_DEV_ZONED
+diff --git a/drivers/scsi/sd_zbc.c b/drivers/scsi/sd_zbc.c
+index f685838d9ed214..422eaed8457227 100644
+--- a/drivers/scsi/sd_zbc.c
++++ b/drivers/scsi/sd_zbc.c
+@@ -598,13 +598,8 @@ int sd_zbc_read_zones(struct scsi_disk *sdkp, struct queue_limits *lim,
+ 	u32 zone_blocks = 0;
+ 	int ret;
+ 
+-	if (!sd_is_zoned(sdkp)) {
+-		/*
+-		 * Device managed or normal SCSI disk, no special handling
+-		 * required.
+-		 */
++	if (!sd_is_zoned(sdkp))
+ 		return 0;
+-	}
+ 
+ 	/* READ16/WRITE16/SYNC16 is mandatory for ZBC devices */
+ 	sdkp->device->use_16_for_rw = 1;
+-- 
+2.43.0
 
