@@ -1,46 +1,46 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9D811993BA
-	for <ceph-devel@vger.kernel.org>; Fri, 23 Aug 2024 20:08:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82B7E19ADA8
+	for <ceph-devel@vger.kernel.org>; Fri, 23 Aug 2024 20:09:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724443733; cv=none; b=gWmW8Uu80Jq8TKV6xT+Zu/b729JaXLXAn/szEDkGT2iUOyXhHf+Zrcq5kl3ScX3K/HVheEqbHaDCLFfX5BWTHvbkbbcFdCKeEckT7p/pblUICOvWpymbGrtvaIoaqaThzI9LVMrqWChA2w/WOrM6blFclWY6O/GH5KINXjq0s8E=
+	t=1724443744; cv=none; b=f6y2cH4S5RzXZGUbMhx7NtK8gV9N6AzERD3FBtmv1n4nsIut0hrKhQC4gimkER6TkGnQMItXWUNM1jRxh9UMrvkrpVPCE1WGdLY3n5Y4rYOy6JaZv0VUZXzxAFScudCe1zDyT7bFHBX+tTtKP5EyUizHX3FndonF9YxoTs13S1U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724443733; c=relaxed/simple;
-	bh=g8vGiYgfUHHfeHz8oFJMF7SqHkz4KAmGdS17s4e9lUI=;
+	s=arc-20240116; t=1724443744; c=relaxed/simple;
+	bh=tpadh5ijkCCOsa7M3OJjST6sL5scalK1OFyRewofsGo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=W0P0RpPA71nbKwowjGD4loo/2Eo4CvPwVtLKvxkuYwTcE4GpXALZj68w60S5MtHk6FA5iNJHEl2SfvspKzQ6Yq5lcHc937wqwktZB7BRpKvUG+VpBwum6ZWZ0wp4LFiYumSeoEACTCwwwnxdlVse8PfaLfPS7lmry3bVbjzWfVg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ISqPTdQS; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=MlTb1s/BwbDoEmzRtB51S5juQZVjqGRr0abN2kMAXmJrUaTUt1v+uGru2zs3ZBVD0OcHkR7sBhi7Y1UbG4oEsl+Q+LH4bUNVC9PdhDdJpgs8xJf+0Ol2qU3JEJVX9VBxGQkKLJd6zGTT03x5OCdGsIrBovKsMb8+9CC4z5K75Nk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KDyqb4ii; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ISqPTdQS"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KDyqb4ii"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1724443730;
+	s=mimecast20190719; t=1724443741;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=LLNXobqu9Lr51n4CzgcItZvbbRppxWdYVF89daxGYJk=;
-	b=ISqPTdQS48YLnhgpEnwONrCYBaClmgpCC/qOr9NPUcGt2nclAc0xY1klVdL0x9EaTq2LlL
-	dnNCMGr9pVtPg5pSGFfbweClzECnh527uYunmWA4CVUvRFPbTOoso5FxFmVr/LlmEuUW6n
-	lDZNAq2xNB1ehtjOGr5bBPkyP0Y4YvA=
-Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
+	bh=9pcRiiH/lYTDVoni9WSyylXIzj+0iyqYBGBDYoCG5zI=;
+	b=KDyqb4iiIX4v+uz9pi9cOp44FdJGHKfGzzB+E1sOSPutNRSrU0ysVN27EBCZpEVo8dfGMl
+	7luCFWL/8vlwM5cPGzKYjM91Ymm2HMktxz8Z8YioC++2kw01CYsagxlDvwg58riZJRttVn
+	kHvGnzqQ5AxNnulPygPGCMi4jFWLuBs=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-122-xMba_EeYPL-FTD2gDob40w-1; Fri,
- 23 Aug 2024 16:08:44 -0400
-X-MC-Unique: xMba_EeYPL-FTD2gDob40w-1
-Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-461-Sz3wsQBWNzSGl0B-Sn23dQ-1; Fri,
+ 23 Aug 2024 16:08:56 -0400
+X-MC-Unique: Sz3wsQBWNzSGl0B-Sn23dQ-1
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 96CB019560AD;
-	Fri, 23 Aug 2024 20:08:40 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 4EEA41955BED;
+	Fri, 23 Aug 2024 20:08:53 +0000 (UTC)
 Received: from warthog.procyon.org.uk.com (unknown [10.42.28.30])
-	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id DE7901955E8C;
-	Fri, 23 Aug 2024 20:08:35 +0000 (UTC)
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 5B0903001FE5;
+	Fri, 23 Aug 2024 20:08:48 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>,
 	Steve French <sfrench@samba.org>
@@ -60,9 +60,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-mm@kvack.org,
 	linux-kernel@vger.kernel.org,
 	Marc Dionne <marc.dionne@auristor.com>
-Subject: [PATCH 2/9] afs: Fix post-setattr file edit to do truncation correctly
-Date: Fri, 23 Aug 2024 21:08:10 +0100
-Message-ID: <20240823200819.532106-3-dhowells@redhat.com>
+Subject: [PATCH 4/9] netfs: Fix trimming of streaming-write folios in netfs_inval_folio()
+Date: Fri, 23 Aug 2024 21:08:12 +0100
+Message-ID: <20240823200819.532106-5-dhowells@redhat.com>
 In-Reply-To: <20240823200819.532106-1-dhowells@redhat.com>
 References: <20240823200819.532106-1-dhowells@redhat.com>
 Precedence: bulk
@@ -72,23 +72,25 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-At the end of an kAFS RPC operation, there is an "edit" phase (originally
-intended for post-directory modification ops to edit the local image) that
-the setattr VFS op uses to fix up the pagecache if the RPC that requested
-truncation of a file was successful.
+When netfslib writes to a folio that it doesn't have data for, but that
+data exists on the server, it will make a 'streaming write' whereby it
+stores data in a folio that is marked dirty, but not uptodate.  When it
+does this, it attaches a record to folio->private to track the dirty
+region.
 
-afs_setattr_edit_file() calls truncate_setsize() which sets i_size, expands
-the pagecache if needed and truncates the pagecache.  The first two of
-those, however, are redundant as they've already been done by
-afs_setattr_success() under the io_lock and the first is also done under
-the callback lock (cb_lock).
+When truncate() or fallocate() wants to invalidate part of such a folio, it
+will call into ->invalidate_folio(), specifying the part of the folio that
+is to be invalidated.  netfs_invalidate_folio(), on behalf of the
+filesystem, must then determine how to trim the streaming write record.  In
+a couple of cases, however, it does this incorrectly (the reduce-length and
+move-start cases are switched over and don't, in any case, calculate the
+value correctly).
 
-Fix afs_setattr_edit_file() to call truncate_pagecache() instead (which is
-called by truncate_setsize(), thereby skipping the redundant parts.
+Fix this by making the logic tree more obvious and fixing the cases.
 
-Fixes: 100ccd18bb41 ("netfs: Optimise away reads above the point at which there can be no data")
+Fixes: 9ebff83e6481 ("netfs: Prep to use folio->private for write grouping and streaming write")
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Matthew Wilcox (Oracle) <willy@infradead.org>
 cc: Pankaj Raghav <p.raghav@samsung.com>
@@ -99,33 +101,97 @@ cc: netfs@lists.linux.dev
 cc: linux-mm@kvack.org
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/afs/inode.c | 11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+ fs/netfs/misc.c | 50 ++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 35 insertions(+), 15 deletions(-)
 
-diff --git a/fs/afs/inode.c b/fs/afs/inode.c
-index 3acf5e050072..a95e77670b49 100644
---- a/fs/afs/inode.c
-+++ b/fs/afs/inode.c
-@@ -695,13 +695,18 @@ static void afs_setattr_edit_file(struct afs_operation *op)
+diff --git a/fs/netfs/misc.c b/fs/netfs/misc.c
+index 69324761fcf7..c1f321cf5999 100644
+--- a/fs/netfs/misc.c
++++ b/fs/netfs/misc.c
+@@ -97,10 +97,20 @@ EXPORT_SYMBOL(netfs_clear_inode_writeback);
+ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
  {
- 	struct afs_vnode_param *vp = &op->file[0];
- 	struct afs_vnode *vnode = vp->vnode;
-+	struct inode *inode = &vnode->netfs.inode;
+ 	struct netfs_folio *finfo;
++	struct netfs_inode *ctx = netfs_inode(folio_inode(folio));
+ 	size_t flen = folio_size(folio);
  
- 	if (op->setattr.attr->ia_valid & ATTR_SIZE) {
- 		loff_t size = op->setattr.attr->ia_size;
--		loff_t i_size = op->setattr.old_i_size;
-+		loff_t old = op->setattr.old_i_size;
+ 	_enter("{%lx},%zx,%zx", folio->index, offset, length);
+ 
++	if (offset == 0 && length == flen) {
++		unsigned long long i_size = i_size_read(&ctx->inode);
++		unsigned long long fpos = folio_pos(folio), end;
 +
-+		/* Note: inode->i_size was updated by afs_apply_status() inside
-+		 * the I/O and callback locks.
-+		 */
++		end = umin(fpos + flen, i_size);
++		if (fpos < i_size && end > ctx->zero_point)
++			ctx->zero_point = end;
++	}
++
+ 	folio_wait_private_2(folio); /* [DEPRECATED] */
  
--		if (size != i_size) {
--			truncate_setsize(&vnode->netfs.inode, size);
-+		if (size != old) {
-+			truncate_pagecache(inode, size);
- 			netfs_resize_file(&vnode->netfs, size, true);
- 			fscache_resize_cookie(afs_vnode_cache(vnode), size);
- 		}
+ 	if (!folio_test_private(folio))
+@@ -115,18 +125,34 @@ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
+ 		/* We have a partially uptodate page from a streaming write. */
+ 		unsigned int fstart = finfo->dirty_offset;
+ 		unsigned int fend = fstart + finfo->dirty_len;
+-		unsigned int end = offset + length;
++		unsigned int iend = offset + length;
+ 
+ 		if (offset >= fend)
+ 			return;
+-		if (end <= fstart)
++		if (iend <= fstart)
++			return;
++
++		/* The invalidation region overlaps the data.  If the region
++		 * covers the start of the data, we either move along the start
++		 * or just erase the data entirely.
++		 */
++		if (offset <= fstart) {
++			if (iend >= fend)
++				goto erase_completely;
++			/* Move the start of the data. */
++			finfo->dirty_len = fend - iend;
++			finfo->dirty_offset = offset;
++			return;
++		}
++
++		/* Reduce the length of the data if the invalidation region
++		 * covers the tail part.
++		 */
++		if (iend >= fend) {
++			finfo->dirty_len = offset - fstart;
+ 			return;
+-		if (offset <= fstart && end >= fend)
+-			goto erase_completely;
+-		if (offset <= fstart && end > fstart)
+-			goto reduce_len;
+-		if (offset > fstart && end >= fend)
+-			goto move_start;
++		}
++
+ 		/* A partial write was split.  The caller has already zeroed
+ 		 * it, so just absorb the hole.
+ 		 */
+@@ -139,12 +165,6 @@ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
+ 	folio_clear_uptodate(folio);
+ 	kfree(finfo);
+ 	return;
+-reduce_len:
+-	finfo->dirty_len = offset + length - finfo->dirty_offset;
+-	return;
+-move_start:
+-	finfo->dirty_len -= offset - finfo->dirty_offset;
+-	finfo->dirty_offset = offset;
+ }
+ EXPORT_SYMBOL(netfs_invalidate_folio);
+ 
+@@ -164,7 +184,7 @@ bool netfs_release_folio(struct folio *folio, gfp_t gfp)
+ 	if (folio_test_dirty(folio))
+ 		return false;
+ 
+-	end = folio_pos(folio) + folio_size(folio);
++	end = umin(folio_pos(folio) + folio_size(folio), i_size_read(&ctx->inode));
+ 	if (end > ctx->zero_point)
+ 		ctx->zero_point = end;
+ 
 
