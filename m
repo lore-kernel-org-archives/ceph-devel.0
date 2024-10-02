@@ -1,106 +1,77 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 119C419992D
-	for <ceph-devel@vger.kernel.org>; Mon, 30 Sep 2024 19:00:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4C3B15D1;
+	Wed,  2 Oct 2024 04:01:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.50.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727722823; cv=none; b=sdlinNbbihpXLT0vq2KnZ2IEBi4D+xVljJtljAil5TynDj0qrvA6hHHBVUM9/HLy0mBXkQH9a4eF7ZqwfDmfWuJwKhJB88kpQvQhfKN2LKH4VkiKK1kUWT2wMKfDn1yqARRdTGaWrtJNBHbgtolw6W6XMRmcZ9EqcRgZkWeWXxU=
+	t=1727841677; cv=none; b=ee9iB1c/d2By4Z/OK7b7L3LwU7i53Tdqfd0cvtYzyz8wwH6wokktt3kKTue/fa7W5UicVbq9cJZeYRAHMzTyN9iNVa5zAfiozwaiKJB65Q/pioIYmfy4OVf72HOwI52cvFutIw7vRnAgN1LEizXhB1l9eAc97w20jWDzMpvJVE4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727722823; c=relaxed/simple;
-	bh=UTeuYgMehmLJA/arPzgIQes3j/4SwwxcY8cev10CXXE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=p+45T/17UUwnDD9n+z6BYwnlhMoF4bmy7W6M+snDu3REzDmakxUSpEX6zVmy4H2q2H2hTVgLX/LzkCBokHF1xdj/aZzj8A+Ux+s+Z6AIH9W7WTrILVGUXMdZEtfJqqneLMXd+vM2FvZv38hCrWra++vQpMwNjmLSI8ZKWqEwDV4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com; spf=none smtp.mailfrom=osandov.com; dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b=AD2ZcWHJ; arc=none smtp.client-ip=209.85.210.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=osandov.com
+	s=arc-20240116; t=1727841677; c=relaxed/simple;
+	bh=OjJNayQyIsOxVaiwEevcOS/xZRvyvgv2MlGE6rZoHRI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=iCK4v8i53BiXDQfMo03C42Y0+fDNBNemXsWmK7uDC2HO2rpdisYuYvhQwgmbDfhAekcTTwQTPkbAMLrswdnndI42eL9ogEQ7LwUkND4/u9ug8+QShY4bL7R4bQXgYBwO484LxEH1ptUm3uP9e1gD8GD+S31MAEb920w0tVhe66U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=p6MdfR+L; arc=none smtp.client-ip=90.155.50.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b="AD2ZcWHJ"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-71790698b22so645256b3a.1
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Sep 2024 12:00:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1727722818; x=1728327618; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=tK4zHMv9BgdsXfJFkQFkyqT5Q9MVxMalN7pOJK+VYMc=;
-        b=AD2ZcWHJT/Eh8QCoGwtR2mU/72Hn5PXbAqIORnZDyFQ12uCk5B6tgPR0gvJL4FDpmJ
-         ulZzhaj/oQ9sKYNODSjhgVv94UWmTt9EA+rp3AZxM3D7FuMreK9zLBVPVKWu3uh3+yR+
-         vy+EFC32Ma8cvowRGq+XAGeEadeMV+x3qYlOPzmGn6BqAD76WPYrQPop8bkeDhZ4ERpK
-         1UNXgJ0vFc4lVx8afjUXBo0LvvB6Rd4zof4t3Zc6Vy61FsDUmw+QDwS60x7YioxFUGH3
-         CoTsxWXSnHhGL7i7+cVMdkBzfJQ1pVAYBQUJy/0cBhT0hau1JKlewvZ94VVeJ6zOGv4q
-         0Crg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727722818; x=1728327618;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tK4zHMv9BgdsXfJFkQFkyqT5Q9MVxMalN7pOJK+VYMc=;
-        b=Pce3EMOxcS/cHbfJ9FM7nGdJvO3Mgu4lBSrH3kft8RinvWgDqR6+zSzhxEuq9wpcxj
-         5a498gkJpyc8qiG8d8Z716N3XFmOaMKdNNFjDdyoAJ4dgC/tMTi+0UpePieB10j8LFvL
-         d1Pd6/BSy5G1nSJM+ChliRf4kd9yz2Tb+AsW1zq3/nDGnmTTvUdkhKYUDlOO6o6C1AVQ
-         jQJyunq5E01SHwn8l/Uir3QjetlDm6dQTZ6DUFHLFUTk0Rfnd71JX4ZB2PmtfxULV0/W
-         KUu18RSOtGCaEjE9KY9ilWUVftoym0kI576VrNzs1JsSIdLbdB5nKUt4ijByBkR3hswT
-         SnEg==
-X-Forwarded-Encrypted: i=1; AJvYcCV5bzS77eIADkGf6Xtidq0PjeKUkA0OWL9Z1ovsGCcs44wNYi2NCTPm0O0EObM+fW7u0LMXXFu6VNtY@vger.kernel.org
-X-Gm-Message-State: AOJu0YwUkUhL2j0ydPVseQVW66SWLwHF/q9fr3xHDkRgIIx5cID+xD9x
-	HglJaiNivV7ttaFgOqO2ZzoxPKJqihTB7J2Zs6SLf+CMNu62DrPByHwPFw/22s4=
-X-Google-Smtp-Source: AGHT+IHr3t4octArrJkwK4KlggdiRYNEixY4E7CvOHzMJxxuBtEfGjyLTrjjT9DROP00qxEU234jog==
-X-Received: by 2002:a05:6a00:2392:b0:718:e49f:246e with SMTP id d2e1a72fcca58-71b260a8a3fmr8397735b3a.6.1727722818090;
-        Mon, 30 Sep 2024 12:00:18 -0700 (PDT)
-Received: from telecaster.dhcp.thefacebook.com ([2620:10d:c090:500::6:e49b])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71b2652a622sm6544654b3a.164.2024.09.30.12.00.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Sep 2024 12:00:17 -0700 (PDT)
-Date: Mon, 30 Sep 2024 12:00:13 -0700
-From: Omar Sandoval <osandov@osandov.com>
-To: David Howells <dhowells@redhat.com>
-Cc: Eduard Zingerman <eddyz87@gmail.com>, Leon Romanovsky <leon@kernel.org>,
-	Christian Brauner <brauner@kernel.org>,
-	Manu Bretelle <chantr4@gmail.com>, asmadeus@codewreck.org,
-	ceph-devel@vger.kernel.org, christian@brauner.io, ericvh@kernel.org,
-	hsiangkao@linux.alibaba.com, idryomov@gmail.com, jlayton@kernel.org,
-	linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
-	linux-erofs@lists.ozlabs.org, linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-	linux-nfs@vger.kernel.org, marc.dionne@auristor.com,
-	netdev@vger.kernel.org, netfs@lists.linux.dev, pc@manguebit.com,
-	smfrench@gmail.com, sprasad@microsoft.com, tom@talpey.com,
-	v9fs@lists.linux.dev, willy@infradead.org
-Subject: Re: [PATCH v2 19/25] netfs: Speed up buffered reading
-Message-ID: <Zvr1PVRpC33aaUdt@telecaster.dhcp.thefacebook.com>
-References: <423fbd9101dab18ba772f24db4ab2fecf5de2261.camel@gmail.com>
- <2968940.1727700270@warthog.procyon.org.uk>
- <20240925103118.GE967758@unreal>
- <20240923183432.1876750-1-chantr4@gmail.com>
- <20240814203850.2240469-20-dhowells@redhat.com>
- <1279816.1727220013@warthog.procyon.org.uk>
- <4b5621958a758da830c1cf09c6f6893aed371f9d.camel@gmail.com>
- <2969660.1727700717@warthog.procyon.org.uk>
- <3007428.1727721302@warthog.procyon.org.uk>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="p6MdfR+L"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
+	Content-Type:Content-ID:Content-Description;
+	bh=RZtLvBtTcdvfSoyXcG5LTLDVsxK5mD1QMTXUY1VvVY0=; b=p6MdfR+LNPnRPI/OEyTwrpvMUq
+	tsBnav1lqFiVSXudJ8Zq6EKC3QZLrdtheHJ+BzBZMFXIf3JZ2DwCp9CgwNlEl07aevt6ZHFM73/sq
+	zrCWD9jWC2LSHyoGCiX1lCu0e+sgAS0/UHNwXjeFvN7sGaAlPmDEREPK/mIpYafLU6h09isyY58vm
+	Z33AkjNKYlB4QrcxeamNvEPDZqJBnd7JHpnx0juN7a15Q5nJQvEQFZL2RByf9UB7pzdycS+da/suk
+	nPxxcinkIAWJl2+t1ZDs9CmWkDahoJDxIWsSZrKUnYwUH11I2LuMonIYZ005MzY13WJYRVa1AY3Mu
+	THXtD+Gw==;
+Received: from willy by casper.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1svqY5-00000004I8X-3Vr7;
+	Wed, 02 Oct 2024 04:01:13 +0000
+From: "Matthew Wilcox (Oracle)" <willy@infradead.org>
+To: Christian Brauner <brauner@kernel.org>
+Cc: "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+	linux-fsdevel@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	linux-nilfs@vger.kernel.org,
+	linux-mm@kvack.org
+Subject: [PATCH 3/6] mm: Remove PageMappedToDisk
+Date: Wed,  2 Oct 2024 05:01:05 +0100
+Message-ID: <20241002040111.1023018-4-willy@infradead.org>
+X-Mailer: git-send-email 2.46.0
+In-Reply-To: <20241002040111.1023018-1-willy@infradead.org>
+References: <20241002040111.1023018-1-willy@infradead.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3007428.1727721302@warthog.procyon.org.uk>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Sep 30, 2024 at 07:35:02PM +0100, David Howells wrote:
-> Eduard Zingerman <eddyz87@gmail.com> wrote:
-> 
-> > Are there any hacks possible to printout tracelog before complete boot
-> > somehow?
-> 
-> You could try setting CONFIG_NETFS_DEBUG=y.  That'll print some stuff to
-> dmesg.
-> 
-> David
+All callers have now been converted to the folio APIs, so remove
+the page API for this flag.
 
-I hit this in drgn's VM test setup, too, and just sent a patch that
-fixed it for me and Manu:
-https://lore.kernel.org/linux-fsdevel/cbaf141ba6c0e2e209717d02746584072844841a.1727722269.git.osandov@fb.com/
+Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+---
+ include/linux/page-flags.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks,
-Omar
+diff --git a/include/linux/page-flags.h b/include/linux/page-flags.h
+index 1b3a76710487..35d08c30d4a6 100644
+--- a/include/linux/page-flags.h
++++ b/include/linux/page-flags.h
+@@ -554,7 +554,7 @@ FOLIO_FLAG(owner_2, FOLIO_HEAD_PAGE)
+  */
+ TESTPAGEFLAG(Writeback, writeback, PF_NO_TAIL)
+ 	TESTSCFLAG(Writeback, writeback, PF_NO_TAIL)
+-PAGEFLAG(MappedToDisk, mappedtodisk, PF_NO_TAIL)
++FOLIO_FLAG(mappedtodisk, FOLIO_HEAD_PAGE)
+ 
+ /* PG_readahead is only used for reads; PG_reclaim is only for writes */
+ PAGEFLAG(Reclaim, reclaim, PF_NO_TAIL)
+-- 
+2.43.0
+
