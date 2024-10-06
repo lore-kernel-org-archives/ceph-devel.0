@@ -1,43 +1,46 @@
 Received: from mx.treblig.org (mx.treblig.org [46.235.229.95])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5659C125;
-	Sun,  6 Oct 2024 01:20:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C7578F5A;
+	Sun,  6 Oct 2024 01:20:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.235.229.95
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728177606; cv=none; b=sGOPIb17PQB8dSv/PubYw/OR9LrSqUbJ1E1bL5Mkk8aBE/mZ6PKDWiBQ4QvioKbclaIenSdcbhcCFdvPGVjuncp3hYQeNtQpnEiZ/qO9mRDLBk542CFaKLzMSPnFDeUTu2v8RwGWv9kWljL2ub3ViF9ISdn5ViBXqqtZhzVzAbg=
+	t=1728177608; cv=none; b=A/dBRUBf3tMMpX+XPEdDLrlJ0HMWAu0L0QMmqI2zDNINmotD4sfMBORhYL919DZ1O4CKxCW4qlLIO0xX4LowjAxkpiGwCK0eEoLpNuw6cheMVezfZ1vfY4OIinZvNbMp9xMMw/T/9sZFPJlEcxJBpiGd5jTPo2UxhmrHF0Fo3XA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728177606; c=relaxed/simple;
-	bh=K5QznJ7oLJq0CHCu1m0LWOUpKLw/YOlJ7Q+ZHactze8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LAXQ2vdhePQCI4m1sTQzEkp61MzsAbWje2J3m0Law6mDh0J9NbIQwo5Wy6B1iPdSENEpGRIp/+55isyFKwIFWFl7wCjs6ppdSZ2kBKMW26uy5wQlcgFdCeRn0E494QuRPwx4DGeYkhDG6tnhGA8Nz79zxE7ARYqRmvp3gljApC8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org; spf=pass smtp.mailfrom=treblig.org; dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b=dBKnlPGp; arc=none smtp.client-ip=46.235.229.95
+	s=arc-20240116; t=1728177608; c=relaxed/simple;
+	bh=AMhJWtDJ3DmzilqLovKPEDl9iPQ/8NhBRi8PAwhpUvI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=ufo2gzjjk9+pz7V+S+2Er1rwzPn7JjWuJ0dWZPvqeOHqc+AqRqTVteSOIHwGIDyOD31wp8hrBAvgG/wrOA0QRh0msEYFsxYn3oynQIDNMDj61that4oh3OU2UCcMAJscApbqRwA3IZMP9/rCEAKkABzzvVRGNN8G7Qmbea++KEc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org; spf=pass smtp.mailfrom=treblig.org; dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b=ONLdQOm0; arc=none smtp.client-ip=46.235.229.95
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=treblig.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b="dBKnlPGp"
+	dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b="ONLdQOm0"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=treblig.org
 	; s=bytemarkmx; h=MIME-Version:Message-ID:Date:Subject:From:Content-Type:From
-	:Subject; bh=zOmjNsQeGB4gYpz+P8xM7+JLeAOzJIzD4/EaLpDFxLM=; b=dBKnlPGpwTOaOJ5j
-	rG+6ndepMBFdUKMltOTg8395YbJWBik5wvnXyuTBIeibl8VMdmAAxE1dGJqQcAlNHy79mD/iRBwPg
-	JfuU+9MEMUg+q1qjrN8KYGwR0zbYwO56jN44TksVolrMX+ZoWDJ4avWr04eKwOjcGeMAjxHaGavPh
-	zrCjGTF9a3NGEN/kk/E/4kbeQ0P7nxbTiadBZkKOFtK5OuBujlrXaBRegV/bzwpaQytX6pMMTOlef
-	NAJHbt5IEygigZSz+JgxBmELBc5zhCZbSWeGo2lPuVyYY4PjkAmAcYmNhfDyrJTmOGH+1VDNtWdlj
-	H/frKNzc/IICNLiK/Q==;
+	:Subject; bh=MBiF799tS1XTKKBb+cgx7wzKHjzYh+/tYFwc8HgQmQg=; b=ONLdQOm0N/tzF3tx
+	s1Ij7raGrn0g92/9J3eznWbCx2R+1+t21GzH5abDBTTMN+LoSsDoErcBQpU/UfRM/FMSg9SKLBdrw
+	AL33d77AhekdXjL+Z7QG5TqTVAvSpKSKWU6GLyQDkDTblCbGJACnbsXglYDflIOzeomOGOVSEN+c+
+	rqrbsmxELV4IjT9E8b5znraK44qnyduck3rdD1C+3/BbqNbZ/VxTjhDyNA+0P/5LLEo8X8y457ka4
+	pjZ6FqQWxMg/bEXjc2JpaNuovoAbg4iSekleoljWo2sOtlXs1VYVHLhRGq/fdVzqHj7DV+y4d7fT6
+	5CLXQrNnvaQgl19rzA==;
 Received: from localhost ([127.0.0.1] helo=dalek.home.treblig.org)
 	by mx.treblig.org with esmtp (Exim 4.96)
 	(envelope-from <linux@treblig.org>)
-	id 1sxFwD-009DsK-27;
-	Sun, 06 Oct 2024 01:19:57 +0000
+	id 1sxFwG-009DsK-1v;
+	Sun, 06 Oct 2024 01:20:00 +0000
 From: linux@treblig.org
 To: xiubli@redhat.com,
 	idryomov@gmail.com,
 	ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	"Dr. David Alan Gilbert" <linux@treblig.org>
-Subject: [PATCH 0/5] Ceph deadcoding
-Date: Sun,  6 Oct 2024 02:19:51 +0100
-Message-ID: <20241006011956.373622-1-linux@treblig.org>
+Subject: [PATCH 5/5] ceph: Remove fs/ceph deadcode
+Date: Sun,  6 Oct 2024 02:19:56 +0100
+Message-ID: <20241006011956.373622-6-linux@treblig.org>
 X-Mailer: git-send-email 2.46.2
+In-Reply-To: <20241006011956.373622-1-linux@treblig.org>
+References: <20241006011956.373622-1-linux@treblig.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -48,39 +51,91 @@ Content-Transfer-Encoding: 8bit
 
 From: "Dr. David Alan Gilbert" <linux@treblig.org>
 
-Hi,
-  This series is a set of deadcoding in fs/ceph and net/ceph.
-It's strictly function deletion so should have no change
-in behaviour.
+ceph_caps_revoking() has been unused since 2017's commit
+3fb99d483e61 ("ceph: nuke startsync op")
 
-(get_maintainer was suggesting the netdev team as well
-as ceph? Is that correct???)
+ceph_mdsc_open_export_target_sessions() has been unused since 2013's
+commit 11df2dfb610d ("ceph: add imported caps when handling cap export message")
 
-Build & boot tested on x86-64.
+Remove them.
 
-Dave
+Signed-off-by: Dr. David Alan Gilbert <linux@treblig.org>
+---
+ fs/ceph/caps.c       | 14 --------------
+ fs/ceph/mds_client.c |  8 --------
+ fs/ceph/mds_client.h |  2 --
+ fs/ceph/super.h      |  1 -
+ 4 files changed, 25 deletions(-)
 
-Dr. David Alan Gilbert (5):
-  libceph: Remove unused ceph_pagelist functions
-  libceph: Remove unused pagevec functions
-  libceph: Remove unused ceph_osdc_watch_check
-  libceph: Remove unused ceph_crypto_key_encode
-  ceph: Remove fs/ceph deadcode
-
- fs/ceph/caps.c                  | 14 ---------
- fs/ceph/mds_client.c            |  8 -----
- fs/ceph/mds_client.h            |  2 --
- fs/ceph/super.h                 |  1 -
- include/linux/ceph/libceph.h    |  6 ----
- include/linux/ceph/osd_client.h |  2 --
- include/linux/ceph/pagelist.h   | 12 --------
- net/ceph/crypto.c               | 12 --------
- net/ceph/crypto.h               |  1 -
- net/ceph/osd_client.c           | 34 ---------------------
- net/ceph/pagelist.c             | 38 ------------------------
- net/ceph/pagevec.c              | 52 ---------------------------------
- 12 files changed, 182 deletions(-)
-
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index bed34fc11c91..0d6b2c0269bf 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -978,20 +978,6 @@ int __ceph_caps_revoking_other(struct ceph_inode_info *ci,
+ 	return 0;
+ }
+ 
+-int ceph_caps_revoking(struct ceph_inode_info *ci, int mask)
+-{
+-	struct inode *inode = &ci->netfs.inode;
+-	struct ceph_client *cl = ceph_inode_to_client(inode);
+-	int ret;
+-
+-	spin_lock(&ci->i_ceph_lock);
+-	ret = __ceph_caps_revoking_other(ci, NULL, mask);
+-	spin_unlock(&ci->i_ceph_lock);
+-	doutc(cl, "%p %llx.%llx %s = %d\n", inode, ceph_vinop(inode),
+-	      ceph_cap_string(mask), ret);
+-	return ret;
+-}
+-
+ int __ceph_caps_used(struct ceph_inode_info *ci)
+ {
+ 	int used = 0;
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index c4a5fd94bbbb..923635532f03 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1747,14 +1747,6 @@ static void __open_export_target_sessions(struct ceph_mds_client *mdsc,
+ 	}
+ }
+ 
+-void ceph_mdsc_open_export_target_sessions(struct ceph_mds_client *mdsc,
+-					   struct ceph_mds_session *session)
+-{
+-	mutex_lock(&mdsc->mutex);
+-	__open_export_target_sessions(mdsc, session);
+-	mutex_unlock(&mdsc->mutex);
+-}
+-
+ /*
+  * session caps
+  */
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 3dd54587944a..38bb7e0d2d79 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -634,8 +634,6 @@ extern void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc,
+ 
+ extern struct ceph_mds_session *
+ ceph_mdsc_open_export_target_session(struct ceph_mds_client *mdsc, int target);
+-extern void ceph_mdsc_open_export_target_sessions(struct ceph_mds_client *mdsc,
+-					  struct ceph_mds_session *session);
+ 
+ extern int ceph_trim_caps(struct ceph_mds_client *mdsc,
+ 			  struct ceph_mds_session *session,
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 037eac35a9e0..b0b15e87251d 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -796,7 +796,6 @@ extern int __ceph_mark_dirty_caps(struct ceph_inode_info *ci, int mask,
+ 
+ extern int __ceph_caps_revoking_other(struct ceph_inode_info *ci,
+ 				      struct ceph_cap *ocap, int mask);
+-extern int ceph_caps_revoking(struct ceph_inode_info *ci, int mask);
+ extern int __ceph_caps_used(struct ceph_inode_info *ci);
+ 
+ static inline bool __ceph_is_file_opened(struct ceph_inode_info *ci)
 -- 
 2.46.2
 
