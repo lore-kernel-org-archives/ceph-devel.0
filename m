@@ -1,63 +1,144 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx.treblig.org (mx.treblig.org [46.235.229.95])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B79F11DACBE;
-	Fri,  4 Oct 2024 17:50:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E561EBE6C;
+	Sun,  6 Oct 2024 01:20:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.235.229.95
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728064207; cv=none; b=aGHGwmmfdbO4wMVJEaE4HjLvcZKKuPJ7isYhVz4Hkaff7F1ubJNCs81dXNdXbeWvzeIqcwHC2Fvua332yLuGS6VZqBGAZ9qzeMQkn2gFfH+Y+grlCA7EPoMoEWsYYN6M5Ux+FoC4KbKurfOomic9vfkQ5oxKKDC34Lo7PzlPiMA=
+	t=1728177602; cv=none; b=n98pig9T6xTG8UnDxC+YdznMUlzg0osPpR4mdcU4mDA9Ds5CO3PY4th9Yep4VO3aJGZkGBp12kO4hwYIedoa3cvWFoVqhVHMGVm8XAzAqsOU7UbzIPFdZX4+ScRaqKUSvBaqFkpqUKbfcrgCEI1TLPPJomLxGCASEyXggMG9WB4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728064207; c=relaxed/simple;
-	bh=jgdML/3ztlQAG27D/LlMyBH91rSZzIgfhSi9pIlvEyQ=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=qyLyvrKBglXHGeuQiV08ZA8nQWG1jyn0fidLUuktTuMy6iFIvdhkta5XIATkcJjR5fC36c0mgscWWbJLCi4exLt8xfPMoYeWXsStjvDdzbhkgOwsW++KfyYrXQqdhrUN9HcnSCAutKA1Vi28o6wBSuMnkaoodhJPs9Q8GwAHmis=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FBKgm563; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728177602; c=relaxed/simple;
+	bh=UJViJazAd2ZGpzntsVOHSEhvQLlHJxCERyFncInudHI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=hI/J1OgwEYjDSNN2EPQqzd5w6q/Q9qWU61uYMnl8X1c0MHKYYurVTuXCWYFLl/hWGHe9sKBJyPICCaAVQGxb9tuT9//DUeijTTEl7CIB4Vq/ivOfQhdWigTJk4EJwr4C8D1q7KEQU5YV+NKswhImhimvdgORIUTiXMR1RB6Xqb8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org; spf=pass smtp.mailfrom=treblig.org; dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b=TUS8utDz; arc=none smtp.client-ip=46.235.229.95
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=treblig.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FBKgm563"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99BB1C4CEC6;
-	Fri,  4 Oct 2024 17:50:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728064207;
-	bh=jgdML/3ztlQAG27D/LlMyBH91rSZzIgfhSi9pIlvEyQ=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=FBKgm563VPHnYts9pwPkLhhvEvHt5cXY0ixDbfBuEiCXVNNkmEj/a49lq7dDsKbYi
-	 kd2qaOazhPublxSlG4Q+ed48gIFBQtPGkwAjlpXF6yN9/hVZYXGyVo4VKfrs7xhbvM
-	 nTNHaf8kzETuXrh8KV+wzPUJEQoacfoAzh1+xfGzx/dWpkiKG8MTl4G+/3oNa+x8js
-	 a7j8G7jPBml2AllWmvLmfnfSJhT2Muh/lO0cRhPxZPn44o1TjHKY8BeISJfaFa18Yb
-	 y/cACq7mQjZcZCKoqj/92A9vgiSDvLQ8tl3PO87hMUWyaYhC4er9wTMX32Pwz57L26
-	 ToJtG8jQue3Dg==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 716BE3ACF641;
-	Fri,  4 Oct 2024 17:50:12 +0000 (UTC)
-Subject: Re: [GIT PULL] Ceph fixes for 6.12-rc2
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20241004170658.479285-1-idryomov@gmail.com>
-References: <20241004170658.479285-1-idryomov@gmail.com>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20241004170658.479285-1-idryomov@gmail.com>
-X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-6.12-rc2
-X-PR-Tracked-Commit-Id: ccda9910d8490f4fb067131598e4b2e986faa5a0
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: a3a37691e662b76d9c8a4d74cd856b5a4ae8286e
-Message-Id: <172806421120.2676326.10147533197506663248.pr-tracker-bot@kernel.org>
-Date: Fri, 04 Oct 2024 17:50:11 +0000
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+	dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b="TUS8utDz"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=treblig.org
+	; s=bytemarkmx; h=MIME-Version:Message-ID:Date:Subject:From:Content-Type:From
+	:Subject; bh=vC4l2UYKZpyNu5umgYrgsjnU5De5FjNDCKiJd63mSeI=; b=TUS8utDzeN3s+pkB
+	ef6wovvrv2TUOt8gb9fAx8kc0bshTeL8PSP5GzgsANf2Jc79VgieFbPflYDq4YlQAoPnX2adwpQQ0
+	BdzaqkcT+GRA8fMbFOfrqkX2ywM0gkUbN6OUtqVPUKpChuFcI9rgzfi734PxUcHTMDx0L2sdfeP1p
+	dUKvTKeWU3yHWtVmzEF1qwPDjNbvXglsQvTqGJfjPX+zJfYT/v+1z0wdPCditCmzevMbgzXxdpEJ+
+	dp39Z7l/y71em2lCa9kekBwxF9aNSlmmn9JZpxXEWKF/tv0yUSj+pctLoDY8//6uq3/QszIe6hR98
+	9eSR5YwkZCvNZruCCQ==;
+Received: from localhost ([127.0.0.1] helo=dalek.home.treblig.org)
+	by mx.treblig.org with esmtp (Exim 4.96)
+	(envelope-from <linux@treblig.org>)
+	id 1sxFwE-009DsK-0V;
+	Sun, 06 Oct 2024 01:19:58 +0000
+From: linux@treblig.org
+To: xiubli@redhat.com,
+	idryomov@gmail.com,
+	ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	"Dr. David Alan Gilbert" <linux@treblig.org>
+Subject: [PATCH 1/5] libceph: Remove unused ceph_pagelist functions
+Date: Sun,  6 Oct 2024 02:19:52 +0100
+Message-ID: <20241006011956.373622-2-linux@treblig.org>
+X-Mailer: git-send-email 2.46.2
+In-Reply-To: <20241006011956.373622-1-linux@treblig.org>
+References: <20241006011956.373622-1-linux@treblig.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-The pull request you sent on Fri,  4 Oct 2024 19:06:56 +0200:
+From: "Dr. David Alan Gilbert" <linux@treblig.org>
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-6.12-rc2
+ceph_pagelist_truncate() and ceph_pagelist_set_cursor() have been unused
+since commit
+39be95e9c8c0 ("ceph: ceph_pagelist_append might sleep while atomic")
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/a3a37691e662b76d9c8a4d74cd856b5a4ae8286e
+Remove them.
 
-Thank you!
+Signed-off-by: Dr. David Alan Gilbert <linux@treblig.org>
+---
+ include/linux/ceph/pagelist.h | 12 -----------
+ net/ceph/pagelist.c           | 38 -----------------------------------
+ 2 files changed, 50 deletions(-)
 
+diff --git a/include/linux/ceph/pagelist.h b/include/linux/ceph/pagelist.h
+index 5dead8486fd8..879bec0863aa 100644
+--- a/include/linux/ceph/pagelist.h
++++ b/include/linux/ceph/pagelist.h
+@@ -17,12 +17,6 @@ struct ceph_pagelist {
+ 	refcount_t refcnt;
+ };
+ 
+-struct ceph_pagelist_cursor {
+-	struct ceph_pagelist *pl;   /* pagelist, for error checking */
+-	struct list_head *page_lru; /* page in list */
+-	size_t room;		    /* room remaining to reset to */
+-};
+-
+ struct ceph_pagelist *ceph_pagelist_alloc(gfp_t gfp_flags);
+ 
+ extern void ceph_pagelist_release(struct ceph_pagelist *pl);
+@@ -33,12 +27,6 @@ extern int ceph_pagelist_reserve(struct ceph_pagelist *pl, size_t space);
+ 
+ extern int ceph_pagelist_free_reserve(struct ceph_pagelist *pl);
+ 
+-extern void ceph_pagelist_set_cursor(struct ceph_pagelist *pl,
+-				     struct ceph_pagelist_cursor *c);
+-
+-extern int ceph_pagelist_truncate(struct ceph_pagelist *pl,
+-				  struct ceph_pagelist_cursor *c);
+-
+ static inline int ceph_pagelist_encode_64(struct ceph_pagelist *pl, u64 v)
+ {
+ 	__le64 ev = cpu_to_le64(v);
+diff --git a/net/ceph/pagelist.c b/net/ceph/pagelist.c
+index 74622b278d57..5a9c4be5f222 100644
+--- a/net/ceph/pagelist.c
++++ b/net/ceph/pagelist.c
+@@ -131,41 +131,3 @@ int ceph_pagelist_free_reserve(struct ceph_pagelist *pl)
+ 	return 0;
+ }
+ EXPORT_SYMBOL(ceph_pagelist_free_reserve);
+-
+-/* Create a truncation point. */
+-void ceph_pagelist_set_cursor(struct ceph_pagelist *pl,
+-			      struct ceph_pagelist_cursor *c)
+-{
+-	c->pl = pl;
+-	c->page_lru = pl->head.prev;
+-	c->room = pl->room;
+-}
+-EXPORT_SYMBOL(ceph_pagelist_set_cursor);
+-
+-/* Truncate a pagelist to the given point. Move extra pages to reserve.
+- * This won't sleep.
+- * Returns: 0 on success,
+- *          -EINVAL if the pagelist doesn't match the trunc point pagelist
+- */
+-int ceph_pagelist_truncate(struct ceph_pagelist *pl,
+-			   struct ceph_pagelist_cursor *c)
+-{
+-	struct page *page;
+-
+-	if (pl != c->pl)
+-		return -EINVAL;
+-	ceph_pagelist_unmap_tail(pl);
+-	while (pl->head.prev != c->page_lru) {
+-		page = list_entry(pl->head.prev, struct page, lru);
+-		/* move from pagelist to reserve */
+-		list_move_tail(&page->lru, &pl->free_list);
+-		++pl->num_pages_free;
+-	}
+-	pl->room = c->room;
+-	if (!list_empty(&pl->head)) {
+-		page = list_entry(pl->head.prev, struct page, lru);
+-		pl->mapped_tail = kmap(page);
+-	}
+-	return 0;
+-}
+-EXPORT_SYMBOL(ceph_pagelist_truncate);
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.46.2
+
