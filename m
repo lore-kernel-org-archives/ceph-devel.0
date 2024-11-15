@@ -1,33 +1,33 @@
 Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 8CE71201103;
-	Fri, 15 Nov 2024 21:22:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id C48EE20400E;
+	Fri, 15 Nov 2024 21:22:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731705777; cv=none; b=nWWz/u9THpWtyM6AqxLnFCVMSYXzjzfr8TU5KSG4fgZQixWCIp8OC5+LLwbK/AFSS29zCE/Snfz+87SpwJKCJowMTdGXYSuy8gnBb+Vn62XqKA/vSFlCiA8qTKvzHx0sSY1ZCzN/R2+Z+3CdOGz1lIlr9o5HQivD+r84ol2CJAs=
+	t=1731705778; cv=none; b=t3i0GNcMbYRni8lcyhR2zD41nYy5G4Gj+J06+X3cSXefHVM0oCNdYU1sX/lRLeLIYBkjJjXJJZcsQQnjTA4/6ynj2YWPRwfXX5jSIyo4uwPmvh8Aee3147JiND+lDtLXgNV2t+pZ7sFRt5liNaxtZ2PwPelk5J3KWwe1EzOZsnY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731705777; c=relaxed/simple;
-	bh=tmAYCWjhLkw5g/uSWwIrD4KksooU7OX7AbatcQXppIM=;
+	s=arc-20240116; t=1731705778; c=relaxed/simple;
+	bh=ljBwxM/5o+6XMjhfz+VeOPJwTB8D67s5tBfs+GUmAGM=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=u06thyqKik7Zam3TBq7+4iM4OabbcbsxUqzEjoOnitEJ/lKux6xI+mfwLM8C2VYBPMmtuzgmj39Qobp/NIKZrks29wW9yOP4CjgUwz6wZua5D5gpXTpWC8JS2l7uQArabwjf97FMu5dTMIUj2AUXJ3MNktLhI/yOo6diIr4Nr/c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=hyUr4x0S; arc=none smtp.client-ip=13.77.154.182
+	 In-Reply-To:To:Cc; b=gyNJZ41SuBCzkb3us8p4Qf/kn2EZlvc6YDdtqVLH53hCVNeh0Uhj+ihDwKlghe0hkWOFo7DdOIwQvodJkUyeu3PpMYdepgZzj24DSMyEk21tI+y1PwkpasmVKFLZURYe20fYTREM7wrDwB8wMq4H4FNRpCrXO2JIZXp1zRkzcgg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=PgOujrsx; arc=none smtp.client-ip=13.77.154.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="hyUr4x0S"
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="PgOujrsx"
 Received: from eahariha-devbox.internal.cloudapp.net (unknown [40.91.112.99])
-	by linux.microsoft.com (Postfix) with ESMTPSA id 06C52206BCEC;
+	by linux.microsoft.com (Postfix) with ESMTPSA id 6D0F7206BCEF;
 	Fri, 15 Nov 2024 13:22:46 -0800 (PST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 06C52206BCEC
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 6D0F7206BCEF
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
 	s=default; t=1731705766;
-	bh=DChbJW+DaqGHGWE0sMF41tmxT4FReQ1FKA/KDyHL32Y=;
+	bh=C//qZdfJfhN40N7nu/AQ5wmq+hj+onzvFzX2KrlsiOc=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=hyUr4x0SmruhyF9c/vR8v3QoqKPaKNqXRHaN80CQA/ABgyerOHG1uC/FlE1BJG1ZJ
-	 CRMPkjTTeOQg/xepSHO+SvOjz7TT6Fsw5oiwX3exTqn3S8Lu3Gz0gW082RgBKg6fy9
-	 2WD2Rqjpa40SDuhEDGd3pTV1EDPYLPZRKnHzJ7/U=
+	b=PgOujrsxbS3CIW2HtLS/dd5ya7VtRG8QHhCZQdBAsTM3cx+kDkUAOUPnWwMnerztw
+	 8X+Y81upKcxyh16cr7IomUwsyHP2XT7qOxm2nnfHsDBJOEcmEz0gtoHQc1mKP3Fi67
+	 1u154eT7RN/hsmnSsi2wJWAYt//zpJk5MiSg9/YM=
 From: Easwar Hariharan <eahariha@linux.microsoft.com>
-Date: Fri, 15 Nov 2024 21:22:49 +0000
-Subject: [PATCH 19/22] livepatch: Convert timeouts to secs_to_jiffies()
+Date: Fri, 15 Nov 2024 21:22:51 +0000
+Subject: [PATCH 21/22] nfp: Convert timeouts to secs_to_jiffies()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -36,7 +36,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20241115-converge-secs-to-jiffies-v1-19-19aadc34941b@linux.microsoft.com>
+Message-Id: <20241115-converge-secs-to-jiffies-v1-21-19aadc34941b@linux.microsoft.com>
 References: <20241115-converge-secs-to-jiffies-v1-0-19aadc34941b@linux.microsoft.com>
 In-Reply-To: <20241115-converge-secs-to-jiffies-v1-0-19aadc34941b@linux.microsoft.com>
 To: Pablo Neira Ayuso <pablo@netfilter.org>, 
@@ -120,78 +120,22 @@ Changes made with the following Coccinelle rules:
 
 Signed-off-by: Easwar Hariharan <eahariha@linux.microsoft.com>
 ---
- samples/livepatch/livepatch-callbacks-busymod.c |  2 +-
- samples/livepatch/livepatch-shadow-fix1.c       |  2 +-
- samples/livepatch/livepatch-shadow-mod.c        | 10 +++++-----
- 3 files changed, 7 insertions(+), 7 deletions(-)
+ drivers/net/ethernet/netronome/nfp/nfp_net_common.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/samples/livepatch/livepatch-callbacks-busymod.c b/samples/livepatch/livepatch-callbacks-busymod.c
-index 378e2d40271a9717d09eff51d3d3612c679736fc..d0fd801a7c21b7d7939c29d83f9d993badcc9aba 100644
---- a/samples/livepatch/livepatch-callbacks-busymod.c
-+++ b/samples/livepatch/livepatch-callbacks-busymod.c
-@@ -45,7 +45,7 @@ static int livepatch_callbacks_mod_init(void)
- {
- 	pr_info("%s\n", __func__);
- 	schedule_delayed_work(&work,
--		msecs_to_jiffies(1000 * 0));
-+		secs_to_jiffies(0));
- 	return 0;
- }
+diff --git a/drivers/net/ethernet/netronome/nfp/nfp_net_common.c b/drivers/net/ethernet/netronome/nfp/nfp_net_common.c
+index 6e0929af0f725b2b3855c69bbe894e6626c566b3..6925ad985fc9e2d5641feea41ff277107a8dee9c 100644
+--- a/drivers/net/ethernet/netronome/nfp/nfp_net_common.c
++++ b/drivers/net/ethernet/netronome/nfp/nfp_net_common.c
+@@ -2779,7 +2779,7 @@ static void nfp_net_netdev_init(struct nfp_net *nn)
+ 		break;
+ 	}
  
-diff --git a/samples/livepatch/livepatch-shadow-fix1.c b/samples/livepatch/livepatch-shadow-fix1.c
-index 6701641bf12d454a770e49abeeb0dea92560e55e..948ea1f5760fed2fa27baf478c97cf98ad5c99a8 100644
---- a/samples/livepatch/livepatch-shadow-fix1.c
-+++ b/samples/livepatch/livepatch-shadow-fix1.c
-@@ -73,7 +73,7 @@ static struct dummy *livepatch_fix1_dummy_alloc(void)
- 		return NULL;
+-	netdev->watchdog_timeo = msecs_to_jiffies(5 * 1000);
++	netdev->watchdog_timeo = secs_to_jiffies(5);
  
- 	d->jiffies_expire = jiffies +
--		msecs_to_jiffies(1000 * EXPIRE_PERIOD);
-+		secs_to_jiffies(EXPIRE_PERIOD);
- 
- 	/*
- 	 * Patch: save the extra memory location into a SV_LEAK shadow
-diff --git a/samples/livepatch/livepatch-shadow-mod.c b/samples/livepatch/livepatch-shadow-mod.c
-index 7e753b0d2fa611524c9e2adbe02c8fa3e9b6015e..79296e6ccb119f521e86a121623855d841c9fc5e 100644
---- a/samples/livepatch/livepatch-shadow-mod.c
-+++ b/samples/livepatch/livepatch-shadow-mod.c
-@@ -102,7 +102,7 @@ static __used noinline struct dummy *dummy_alloc(void)
- 		return NULL;
- 
- 	d->jiffies_expire = jiffies +
--		msecs_to_jiffies(1000 * EXPIRE_PERIOD);
-+		secs_to_jiffies(EXPIRE_PERIOD);
- 
- 	/* Oops, forgot to save leak! */
- 	leak = kzalloc(sizeof(*leak), GFP_KERNEL);
-@@ -153,7 +153,7 @@ static void alloc_work_func(struct work_struct *work)
- 	mutex_unlock(&dummy_list_mutex);
- 
- 	schedule_delayed_work(&alloc_dwork,
--		msecs_to_jiffies(1000 * ALLOC_PERIOD));
-+		secs_to_jiffies(ALLOC_PERIOD));
- }
- 
- /*
-@@ -185,15 +185,15 @@ static void cleanup_work_func(struct work_struct *work)
- 	mutex_unlock(&dummy_list_mutex);
- 
- 	schedule_delayed_work(&cleanup_dwork,
--		msecs_to_jiffies(1000 * CLEANUP_PERIOD));
-+		secs_to_jiffies(CLEANUP_PERIOD));
- }
- 
- static int livepatch_shadow_mod_init(void)
- {
- 	schedule_delayed_work(&alloc_dwork,
--		msecs_to_jiffies(1000 * ALLOC_PERIOD));
-+		secs_to_jiffies(ALLOC_PERIOD));
- 	schedule_delayed_work(&cleanup_dwork,
--		msecs_to_jiffies(1000 * CLEANUP_PERIOD));
-+		secs_to_jiffies(CLEANUP_PERIOD));
- 
- 	return 0;
- }
+ 	/* MTU range: 68 - hw-specific max */
+ 	netdev->min_mtu = ETH_MIN_MTU;
 
 -- 
 2.34.1
