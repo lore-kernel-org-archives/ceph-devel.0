@@ -1,33 +1,33 @@
 Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1805D1547FF;
-	Fri, 29 Nov 2024 05:51:08 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC9361547FF;
+	Fri, 29 Nov 2024 05:51:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.50.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732859470; cv=none; b=Z/drqd1ar8JIRZAyh07bYgq57AY3m71Bokx0ZSbffgW370cXPeYmPA9XH7oW/q3KNwHy/90HL+nfVboCqE9k5KI01RJGFzANj6QKfUqE1sBj4syKRgfi2OuLXofDPYRerMYYED5IP/DuEfaDTyY7T8BAhrgnuYhlHi46ghlnCuc=
+	t=1732859473; cv=none; b=A2NA0R9fxDbBhAwaxO969jF6/Bf4vEvAQx3CzqoZxi7LuhBYFVClFrWkucwiU24SfRat0H1yC13ZVtSPDEfSzGQOuSzTmiQoRFR0y4RdpH9ck49l9Uz3dSwXqwa1dLOcQJT1muv5Y+lOhDXABrjLoJacPitXXdUn/Db0q+8YEyQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732859470; c=relaxed/simple;
-	bh=D92FE35Fk/CFs1/lSYl2/RKgdMp2Jonrjc12LbHhgTo=;
+	s=arc-20240116; t=1732859473; c=relaxed/simple;
+	bh=aDtdq9caWDRhpliU4N7JPTCsamZ1q2ke8PI42WXds1U=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ozsqHRU8yP/+XqnSk+0howFhAKm9KR8OQFOJwu3yYSmDBtokTI5iNG4IXeXUrz7c1wlUrHCx6S7BuKCMZfGIFQ0uzch0j77zHv8vYhBJGcMMcNnRySMmLWiTiG9w1JOBK2hTtXgENYZeoUWmRgsKYHpcjStBCAuXCZc4rdMCIhQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=RnPPorrB; arc=none smtp.client-ip=90.155.50.34
+	 MIME-Version; b=j/oqaJqo45dSe4UKeCnQbN/fFN/nDq2EIHThg/BawM2dKbiOYoY/7TpLdkJJrD44Owg1gg4fapj+O+YMARlzwuzuelPTWU5sUQ7iU/tn6R/GVnsnsGo+CMoBjfaf3VFCd0HTh87s9eYojgwC6dT14LPV1YZ7syeQ35rk4EX5z2k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=oWoqSeft; arc=none smtp.client-ip=90.155.50.34
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="RnPPorrB"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="oWoqSeft"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
 	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
 	Content-Type:Content-ID:Content-Description;
-	bh=L6RYcpip9PIPAEEeJcaJdFO0izrVL0D7iO1BcmZeoNI=; b=RnPPorrBOIH4lq0yIUnXyeciZp
-	t7xQMkVKxdSbHVTsS5JAeIOOD7BA2EJKY+wreRpfUb33xAGiZ/4YfW1aDmc+Utfl+IdRtkq7QT7O6
-	IpiATPj43WBJI9v1WImwT1ShvTyQuf0ifns3LkF5DcYVDlmji4k/S4trdWo9uOYbkMDzOr+O0eUCF
-	E0zR9NDhLPZw/szgU5i18ag6K2hfesH97NdoPTfp+A1dLUjwXNI8gadBbOYK6Tz8nyCyK1G0pwbla
-	g/7mDmcLTBNL1xT5JU4/qCd7/HBh3Y3nuO4cdZK5PRbZRxBRB5kssxfhgZnOgzNjRNTnr4gPU6viH
-	lTTmw3KA==;
+	bh=uWZkCEwwYb4dP6PPOM0IVSKbmg2RK8kTAbzH0C95S7g=; b=oWoqSeftByZWcIP+U4SR7tF/Hj
+	XzSBb/cuP1d6VK7vaVo+f5fJOsOLTcPIhSxrFPtdTSWF7iaj7wQ8y+HGYAC+vrUXLOAPLBMs46Qou
+	OJoBE/zIoQZt1MyvokLyo5RMolw+dsWbg+wlk40MNi/fotKEov4TsAux9GP40CZZJXyWlZcMbDWgA
+	6VkLHQK83TxiKxKt1Z851FbqCZQwi8C+4c2Hk9Y+B3w+GTWB7VluBXvkUBWIbZcztNaKxANqxRVEU
+	jO0501MqHamEW6FX5DryhFuP5zqE5JW6jzPLOhfPHhKoV0M2KNRYMmBb2lu98guIS8xCh76dz+2Rz
+	Qt6Ye+OA==;
 Received: from willy by casper.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tGtu9-00000003bSA-15BV;
+	id 1tGtu9-00000003bSE-1mXv;
 	Fri, 29 Nov 2024 05:51:01 +0000
 From: "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To: Ilya Dryomov <idryomov@gmail.com>
@@ -37,9 +37,9 @@ Cc: "Matthew Wilcox (Oracle)" <willy@infradead.org>,
 	Jeff Layton <jlayton@kernel.org>,
 	linux-fsdevel@vger.kernel.org,
 	David Howells <dhowells@redhat.com>
-Subject: [PATCH 2/5] ceph: Use a folio in ceph_page_mkwrite()
-Date: Fri, 29 Nov 2024 05:50:53 +0000
-Message-ID: <20241129055058.858940-3-willy@infradead.org>
+Subject: [PATCH 4/5] ceph: Use a folio throughout writepage_nounlock()
+Date: Fri, 29 Nov 2024 05:50:55 +0000
+Message-ID: <20241129055058.858940-5-willy@infradead.org>
 X-Mailer: git-send-email 2.47.0
 In-Reply-To: <20241129055058.858940-1-willy@infradead.org>
 References: <20241129055058.858940-1-willy@infradead.org>
@@ -51,84 +51,153 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Convert the passed page to a folio and use it
-throughout ceph_page_mkwrite().  Removes the last call to
-page_mkwrite_check_truncate(), the last call to offset_in_thp() and one
-of the last calls to thp_size().  Saves a few calls to compound_head().
+Remove references to page->index, page->mapping, thp_size(),
+page_offset() and other page APIs in favour of their more efficient
+folio replacements.
 
 Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 ---
- fs/ceph/addr.c | 26 +++++++++++++-------------
- 1 file changed, 13 insertions(+), 13 deletions(-)
+ fs/ceph/addr.c | 50 +++++++++++++++++++++++++-------------------------
+ 1 file changed, 25 insertions(+), 25 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 284a6244fcdf..a5c59fec8a76 100644
+index a5c59fec8a76..aba8d55bd533 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -1711,8 +1711,8 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+@@ -664,14 +664,14 @@ static u64 get_writepages_data_length(struct inode *inode,
+ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ {
+ 	struct folio *folio = page_folio(page);
+-	struct inode *inode = page->mapping->host;
++	struct inode *inode = folio->mapping->host;
  	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_file_info *fi = vma->vm_file->private_data;
- 	struct ceph_cap_flush *prealloc_cf;
--	struct page *page = vmf->page;
--	loff_t off = page_offset(page);
-+	struct folio *folio = page_folio(vmf->page);
-+	loff_t off = folio_pos(folio);
- 	loff_t size = i_size_read(inode);
- 	size_t len;
- 	int want, got, err;
-@@ -1729,10 +1729,10 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 	sb_start_pagefault(inode->i_sb);
- 	ceph_block_sigs(&oldset);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_client *cl = fsc->client;
+ 	struct ceph_snap_context *snapc, *oldest;
+-	loff_t page_off = page_offset(page);
++	loff_t page_off = folio_pos(folio);
+ 	int err;
+-	loff_t len = thp_size(page);
++	loff_t len = folio_size(folio);
+ 	loff_t wlen;
+ 	struct ceph_writeback_ctl ceph_wbc;
+ 	struct ceph_osd_client *osdc = &fsc->client->osdc;
+@@ -679,8 +679,8 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	bool caching = ceph_is_cache_enabled(inode);
+ 	struct page *bounce_page = NULL;
  
--	if (off + thp_size(page) <= size)
--		len = thp_size(page);
-+	if (off + folio_size(folio) <= size)
-+		len = folio_size(folio);
- 	else
--		len = offset_in_thp(page, size);
-+		len = offset_in_folio(folio, size);
+-	doutc(cl, "%llx.%llx page %p idx %lu\n", ceph_vinop(inode), page,
+-	      page->index);
++	doutc(cl, "%llx.%llx folio %p idx %lu\n", ceph_vinop(inode), folio,
++	      folio->index);
  
- 	doutc(cl, "%llx.%llx %llu~%zd getting caps i_size %llu\n",
- 	      ceph_vinop(inode), off, len, size);
-@@ -1749,30 +1749,30 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 	doutc(cl, "%llx.%llx %llu~%zd got cap refs on %s\n", ceph_vinop(inode),
- 	      off, len, ceph_cap_string(got));
+ 	if (ceph_inode_is_shutdown(inode))
+ 		return -EIO;
+@@ -688,18 +688,18 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	/* verify this is a writeable snap context */
+ 	snapc = page_snap_context(page);
+ 	if (!snapc) {
+-		doutc(cl, "%llx.%llx page %p not dirty?\n", ceph_vinop(inode),
+-		      page);
++		doutc(cl, "%llx.%llx folio %p not dirty?\n", ceph_vinop(inode),
++		      folio);
+ 		return 0;
+ 	}
+ 	oldest = get_oldest_context(inode, &ceph_wbc, snapc);
+ 	if (snapc->seq > oldest->seq) {
+-		doutc(cl, "%llx.%llx page %p snapc %p not writeable - noop\n",
+-		      ceph_vinop(inode), page, snapc);
++		doutc(cl, "%llx.%llx folio %p snapc %p not writeable - noop\n",
++		      ceph_vinop(inode), folio, snapc);
+ 		/* we should only noop if called by kswapd */
+ 		WARN_ON(!(current->flags & PF_MEMALLOC));
+ 		ceph_put_snap_context(oldest);
+-		redirty_page_for_writepage(wbc, page);
++		folio_redirty_for_writepage(wbc, folio);
+ 		return 0;
+ 	}
+ 	ceph_put_snap_context(oldest);
+@@ -716,8 +716,8 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 		len = ceph_wbc.i_size - page_off;
  
--	/* Update time before taking page lock */
-+	/* Update time before taking folio lock */
- 	file_update_time(vma->vm_file);
- 	inode_inc_iversion_raw(inode);
+ 	wlen = IS_ENCRYPTED(inode) ? round_up(len, CEPH_FSCRYPT_BLOCK_SIZE) : len;
+-	doutc(cl, "%llx.%llx page %p index %lu on %llu~%llu snapc %p seq %lld\n",
+-	      ceph_vinop(inode), page, page->index, page_off, wlen, snapc,
++	doutc(cl, "%llx.%llx folio %p index %lu on %llu~%llu snapc %p seq %lld\n",
++	      ceph_vinop(inode), folio, folio->index, page_off, wlen, snapc,
+ 	      snapc->seq);
  
- 	do {
- 		struct ceph_snap_context *snapc;
+ 	if (atomic_long_inc_return(&fsc->writeback_count) >
+@@ -730,14 +730,14 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 				    ceph_wbc.truncate_seq,
+ 				    ceph_wbc.truncate_size, true);
+ 	if (IS_ERR(req)) {
+-		redirty_page_for_writepage(wbc, page);
++		folio_redirty_for_writepage(wbc, folio);
+ 		return PTR_ERR(req);
+ 	}
  
--		lock_page(page);
-+		folio_lock(folio);
+ 	if (wlen < len)
+ 		len = wlen;
  
--		if (page_mkwrite_check_truncate(page, inode) < 0) {
--			unlock_page(page);
-+		if (folio_mkwrite_check_truncate(folio, inode) < 0) {
-+			folio_unlock(folio);
- 			ret = VM_FAULT_NOPAGE;
- 			break;
+-	set_page_writeback(page);
++	folio_start_writeback(folio);
+ 	if (caching)
+ 		ceph_set_page_fscache(page);
+ 	ceph_fscache_write_to_cache(inode, page_off, len, caching);
+@@ -747,15 +747,15 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 						    CEPH_FSCRYPT_BLOCK_SIZE, 0,
+ 						    GFP_NOFS);
+ 		if (IS_ERR(bounce_page)) {
+-			redirty_page_for_writepage(wbc, page);
+-			end_page_writeback(page);
++			folio_redirty_for_writepage(wbc, folio);
++			folio_end_writeback(folio);
+ 			ceph_osdc_put_request(req);
+ 			return PTR_ERR(bounce_page);
  		}
+ 	}
  
--		snapc = ceph_find_incompatible(page);
-+		snapc = ceph_find_incompatible(&folio->page);
- 		if (!snapc) {
--			/* success.  we'll keep the page locked. */
--			set_page_dirty(page);
-+			/* success.  we'll keep the folio locked. */
-+			folio_mark_dirty(folio);
- 			ret = VM_FAULT_LOCKED;
- 			break;
+ 	/* it may be a short write due to an object boundary */
+-	WARN_ON_ONCE(len > thp_size(page));
++	WARN_ON_ONCE(len > folio_size(folio));
+ 	osd_req_op_extent_osd_data_pages(req, 0,
+ 			bounce_page ? &bounce_page : &page, wlen, 0,
+ 			false, false);
+@@ -781,25 +781,25 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 		if (err == -ERESTARTSYS) {
+ 			/* killed by SIGKILL */
+ 			doutc(cl, "%llx.%llx interrupted page %p\n",
+-			      ceph_vinop(inode), page);
+-			redirty_page_for_writepage(wbc, page);
+-			end_page_writeback(page);
++			      ceph_vinop(inode), folio);
++			folio_redirty_for_writepage(wbc, folio);
++			folio_end_writeback(folio);
+ 			return err;
  		}
+ 		if (err == -EBLOCKLISTED)
+ 			fsc->blocklisted = true;
+-		doutc(cl, "%llx.%llx setting page/mapping error %d %p\n",
+-		      ceph_vinop(inode), err, page);
++		doutc(cl, "%llx.%llx setting mapping error %d %p\n",
++		      ceph_vinop(inode), err, folio);
+ 		mapping_set_error(&inode->i_data, err);
+ 		wbc->pages_skipped++;
+ 	} else {
+ 		doutc(cl, "%llx.%llx cleaned page %p\n",
+-		      ceph_vinop(inode), page);
++		      ceph_vinop(inode), folio);
+ 		err = 0;  /* vfs expects us to return 0 */
+ 	}
+-	oldest = detach_page_private(page);
++	oldest = folio_detach_private(folio);
+ 	WARN_ON_ONCE(oldest != snapc);
+-	end_page_writeback(page);
++	folio_end_writeback(folio);
+ 	ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+ 	ceph_put_snap_context(snapc);  /* page's reference */
  
--		unlock_page(page);
-+		folio_unlock(folio);
- 
- 		if (IS_ERR(snapc)) {
- 			ret = VM_FAULT_SIGBUS;
 -- 
 2.45.2
 
