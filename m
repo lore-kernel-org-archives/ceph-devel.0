@@ -1,33 +1,33 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8434B1E25F8;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA9201E2614;
 	Fri, 10 Jan 2025 02:43:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736476989; cv=none; b=pF1uU+MsRmPVerEd/Co9SVOFDiVpL4gyrZxO7MQXwxDp3JKYU/J5w9gbYEpAsvycoR4E/KsZdgY2AkyQ/8iC4Nq7IclvVb2HK3D74BDz+RbeHg262wrQsXXNxST3ywEcMpoaZ4howggsdeA7mZyd1eSEOV+nQW4BPAdA8Ed7A78=
+	t=1736476988; cv=none; b=nzSCYxc0x9ZNo0vdS4We4f8rTOp6n24sZnySWBCHue+BbDBjydfWiQF7LBuqwGiyWBcM+9kvHHm+uOcnZ2uDpeg+kad4/CRnitU488rj4S8xZewme2vkZkVvIMzKc6UxEad6dTy7OkAKe9hVYSsGR64/f2Xdl2ZMAhvbzTSksK4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736476989; c=relaxed/simple;
-	bh=7GOuq5TBwi2YnJylO4jjAKPDlBh3SzN5LK5elhPSkPE=;
+	s=arc-20240116; t=1736476988; c=relaxed/simple;
+	bh=L4CuPi5jJc1MGAvCcr4lIwWYxLvWgzHZ6Xiyc9X0t6k=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rNSBJmJtnT/74jsJGdDHbD15YJdFJ3gFHnNSDhHlxPEeAOWPxcz7bTJ7NxDNwYGCxuMLpXBKzb0Ebb1b7H+KBVZbNhMYTeP8+/GhLNJX/UO48felAzfbJwaHEF1fej16MOm9LrdduS2L+g4W5uJQOa6nIxX02lkSV5snYtGT7Mo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=uvrqqUuP; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=ghGy7wYUsJodWTsBlM4vaa7Z7y79+TNvUDxKAmjOfffvaTI8A43ZS6OncxgOYE4d7bu4cKzDTb96Orp4owTJ5nCqJkr09NC0I45q1j1oZSsPpU0cAm+rh7bAjxPC5LQ083z/mb/6Z0UqcfC8lrmdXS0ONNh885Hg22/0trRMYEU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=m1NrTMUC; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="uvrqqUuP"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="m1NrTMUC"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=/1Eley4l5qG4/I/feyZqZ395nNqz7ND1A6aomzIKqMI=; b=uvrqqUuPnAHQu9JPjs/JXPac5T
-	QNKACkSBY8Z4klpgIl7CUKpbHX9aQpp0QOAUOy4/XwfW7d7+FEpH/nMt4VfY4X6fx36ZuDLaR7tec
-	USFBEI3XgjrGKFu00J5F+sJtdT6+vHtnJOlPXPUjiSx9+IDKXV63AW8Dv2ZGGfIVhz063DYRL6dib
-	PwmdmmHS6HDyjiGV0F0DOioEUw6mRgMcLOwzSMDncOjCdzqjMe7NInX5UWnbh2jjjCvbitTqui7Bj
-	SJGfE+/hYpoY8wCqIKJA/rLSHN0SgITvdGGo8bosqBpeSHIjRc6Zm37LY2mOtflaAi/GqSMKuUoXO
-	f1Abx/GQ==;
+	bh=nNa75NB+AlX0KHLw/H1Is4u5y+bHPU/WREt2toMBY8E=; b=m1NrTMUCYL9gGcOMMPzANhIjch
+	9TAvogLfXqb7nsOEf4kW1qBZKiPXlDIge2ds8H9PC+lUSnMtuD+dS1AO0qxUuYw4rBK0O/zRz8ZDy
+	XUeAUH/+54dfV/XLl9NgKzEKsx0zV8aN2xw79VlWlHsipBZYnZKAH3I6aCOP7Xg8ZFeybGUTuRv5m
+	hiKcQ5Z7pkqbJjyi8easI08Xd2c4RMouqQOuYv4t8vf2GJN0OAnpEGaMVoxUdxe94xvwTIFfi0L+P
+	5TV6fQX84K5u1XbtFjQ6WlPiKzaP2ZPL5u60yxSIphaeRJJ/iYKXZ5E5S3K4CSfY7JL4JHYcZoc19
+	UAXwIE/w==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tW4zJ-0000000HRcQ-0052;
+	id 1tW4zJ-0000000HRce-0wPF;
 	Fri, 10 Jan 2025 02:43:05 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
@@ -42,9 +42,9 @@ Cc: agruenba@redhat.com,
 	linux-nfs@vger.kernel.org,
 	miklos@szeredi.hu,
 	torvalds@linux-foundation.org
-Subject: [PATCH 13/20] vfat_revalidate{,_ci}(): use stable parent inode passed by caller
-Date: Fri, 10 Jan 2025 02:42:56 +0000
-Message-ID: <20250110024303.4157645-13-viro@zeniv.linux.org.uk>
+Subject: [PATCH 15/20] gfs2_drevalidate(): use stable parent inode and name passed by caller
+Date: Fri, 10 Jan 2025 02:42:58 +0000
+Message-ID: <20250110024303.4157645-15-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <20250110024303.4157645-1-viro@zeniv.linux.org.uk>
 References: <20250110023854.GS1977892@ZenIV>
@@ -58,50 +58,75 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
+No need to mess with dget_parent() for the former; for the latter we really should
+not rely upon ->d_name.name remaining stable.  Again, a UAF there.
+
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- fs/fat/namei_vfat.c | 13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
+ fs/gfs2/dentry.c | 24 ++++++++----------------
+ 1 file changed, 8 insertions(+), 16 deletions(-)
 
-diff --git a/fs/fat/namei_vfat.c b/fs/fat/namei_vfat.c
-index f9cbd5c6f932..926c26e90ef8 100644
---- a/fs/fat/namei_vfat.c
-+++ b/fs/fat/namei_vfat.c
-@@ -43,14 +43,9 @@ static inline void vfat_d_version_set(struct dentry *dentry,
-  * If it happened, the negative dentry isn't actually negative
-  * anymore.  So, drop it.
-  */
--static int vfat_revalidate_shortname(struct dentry *dentry)
-+static bool vfat_revalidate_shortname(struct dentry *dentry, struct inode *dir)
+diff --git a/fs/gfs2/dentry.c b/fs/gfs2/dentry.c
+index 86c338901fab..95050e719233 100644
+--- a/fs/gfs2/dentry.c
++++ b/fs/gfs2/dentry.c
+@@ -35,48 +35,40 @@
+ static int gfs2_drevalidate(struct inode *dir, const struct qstr *name,
+ 			    struct dentry *dentry, unsigned int flags)
  {
--	int ret = 1;
--	spin_lock(&dentry->d_lock);
--	if (!inode_eq_iversion(d_inode(dentry->d_parent), vfat_d_version(dentry)))
--		ret = 0;
--	spin_unlock(&dentry->d_lock);
--	return ret;
-+	return inode_eq_iversion(dir, vfat_d_version(dentry));
+-	struct dentry *parent;
+-	struct gfs2_sbd *sdp;
+-	struct gfs2_inode *dip;
++	struct gfs2_sbd *sdp = GFS2_SB(dir);
++	struct gfs2_inode *dip = GFS2_I(dir);
+ 	struct inode *inode;
+ 	struct gfs2_holder d_gh;
+ 	struct gfs2_inode *ip = NULL;
+-	int error, valid = 0;
++	int error, valid;
+ 	int had_lock = 0;
+ 
+ 	if (flags & LOOKUP_RCU)
+ 		return -ECHILD;
+ 
+-	parent = dget_parent(dentry);
+-	sdp = GFS2_SB(d_inode(parent));
+-	dip = GFS2_I(d_inode(parent));
+ 	inode = d_inode(dentry);
+ 
+ 	if (inode) {
+ 		if (is_bad_inode(inode))
+-			goto out;
++			return 0;
+ 		ip = GFS2_I(inode);
+ 	}
+ 
+-	if (sdp->sd_lockstruct.ls_ops->lm_mount == NULL) {
+-		valid = 1;
+-		goto out;
+-	}
++	if (sdp->sd_lockstruct.ls_ops->lm_mount == NULL)
++		return 1;
+ 
+ 	had_lock = (gfs2_glock_is_locked_by_me(dip->i_gl) != NULL);
+ 	if (!had_lock) {
+ 		error = gfs2_glock_nq_init(dip->i_gl, LM_ST_SHARED, 0, &d_gh);
+ 		if (error)
+-			goto out;
++			return 0;
+ 	}
+ 
+-	error = gfs2_dir_check(d_inode(parent), &dentry->d_name, ip);
++	error = gfs2_dir_check(dir, name, ip);
+ 	valid = inode ? !error : (error == -ENOENT);
+ 
+ 	if (!had_lock)
+ 		gfs2_glock_dq_uninit(&d_gh);
+-out:
+-	dput(parent);
+ 	return valid;
  }
  
- static int vfat_revalidate(struct inode *dir, const struct qstr *name,
-@@ -62,7 +57,7 @@ static int vfat_revalidate(struct inode *dir, const struct qstr *name,
- 	/* This is not negative dentry. Always valid. */
- 	if (d_really_is_positive(dentry))
- 		return 1;
--	return vfat_revalidate_shortname(dentry);
-+	return vfat_revalidate_shortname(dentry, dir);
- }
- 
- static int vfat_revalidate_ci(struct inode *dir, const struct qstr *name,
-@@ -99,7 +94,7 @@ static int vfat_revalidate_ci(struct inode *dir, const struct qstr *name,
- 	if (flags & (LOOKUP_CREATE | LOOKUP_RENAME_TARGET))
- 		return 0;
- 
--	return vfat_revalidate_shortname(dentry);
-+	return vfat_revalidate_shortname(dentry, dir);
- }
- 
- /* returns the length of a struct qstr, ignoring trailing dots */
 -- 
 2.39.5
 
