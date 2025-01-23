@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52889F9D9;
-	Thu, 23 Jan 2025 01:46:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F86E1EA65;
+	Thu, 23 Jan 2025 01:46:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737596807; cv=none; b=NdqqjzMkSOeFrEMVBOMELyi4hhAbjNg7YZYLikkIQCfCkY6TcfnBqCbBv2Q/Ua0mrXq2jD5b+zzltvEMWt6Ntxsf+qj6m31F0UK0Y6cGrrOeIHyOWKs5nVPm05/ODfOeAWJk7CJ8g22pdfxbsj9VMXBoj3ugY7iEcA5sCkt1Onc=
+	t=1737596808; cv=none; b=HndlS2/BR/JKGTObUwXPF3wxm17x79XchazNYYz/U6YJvjE4/4gSLTVrjlkgXbCkM4UP6oP85z0e2OGYcutgp5UYwgw2Po3Va8I43TCDG4qXJQZgUSnYVx+dGyiZ2a58tyojHbDiwkgY54Ed+bFEHRC0TZbPTtfDk+nTKgUSmaM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737596807; c=relaxed/simple;
-	bh=fM8WLHNlALR/LLdSBJHnn04WHFTQgxgtPk6755PDSuc=;
+	s=arc-20240116; t=1737596808; c=relaxed/simple;
+	bh=kqFfX1nPZXJZNNKbEnE+/GNLUWhf5phXSz/N3PFAcVo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=btUd0H3QNrwfoYOBuXoD9zMmqmfie9zA0b+MJvkeCkj0Ua3KT3V7bEqeD5pwYsk9kdi8osjH/CneLho7H1Aew18N/uoZTVX9YyP9V54WstGmq+SSCzOswBTEb+l90UwS7P7fcYJ3iIPf4fP8V1k3e+gljDr5X7P1I7Cg16DDgXI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=t9ETNA/I; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=Qm9Zi7oaz7Si/M7il905jgHVZ1TCJRA5U5vqZ6bAIesAaCyDMyl8W1NdReJP6UGF6tWRawuSg8sTt5ATV3APQwXn6PcxonKFgLWP227k+YnDWtmrIM1EdEuuwCahwTBEWvyOfxPFyqJ72gMiMH/RNwXNcRyS2aA2s7BV6Hhfcd0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=Dm86EaJT; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="t9ETNA/I"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="Dm86EaJT"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=VsC8I1IRaODOdgwfZbw41czkSHJDCJwIYNglUO5FxZU=; b=t9ETNA/IuDkIlB46Ncy2rNi3IM
-	Bg6r6QeZRdUN4DLX9ob97PmuGhrKyiGLUQVhRVhBQjoOSt/NgTHTtLgJrevvt5ZCZStZXp9C6FChX
-	aqNMPj99wZMusRSvV6UI72J6bUfGB/mVc2ZupNEpr9ose2QS2gqd3mToLABfJENyHKo8C5m9vrRYU
-	01+QhbfPI6WNYgzgA9PHb7zwdPIc0o+kZrM8qqmxEHmQjsukYz4nF50jk4N8+tbfe7D2TLgtJfFrs
-	UL8tIg52zJh8zXTzBZ0IgsYtIrHtW+Ki8NdadVKJm21xZZTuqQ8aMdeHq6g25nDPhwxpaLDQLesPB
-	Z/uS0GZg==;
+	bh=/KyGJPYFIJ6kdYhT9qcSpG/tCgyIASfflXizlRjFIS0=; b=Dm86EaJTGI2difOy5rxiE3bmCb
+	Qp1Hog/PaaGU3REU2eI4PNKlrhQGpMBrPCRCTy4Pf37LfVGAi9S2TdFeuqrWE+2X5dfBhPXkI7lFb
+	k0Z+cIuBEuvcxdmsDbK4NjPrkKs5EbH4IPkcgzLj6Gx/6pUbMXlOjIkynd5VSazs3jVgi4thHlBxc
+	z4fKsV6vRzaQ1vhjfoXEhKTbMGNuNhHo81VQ8y7r/Cw6TW0swHIeMIxualzV9jMHW9ekZWHYDkYBo
+	/bMsx19Cm7LL0jGwYo/mBK2pWhTuD9Pw+IMonIxgSG8zydn00I+cZALn1oCLR8E2f4n7rOuxBbqIf
+	20BSZ+CA==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tamIt-00000008F1k-370O;
-	Thu, 23 Jan 2025 01:46:43 +0000
+	id 1tamIv-00000008F2r-00XY;
+	Thu, 23 Jan 2025 01:46:45 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: agruenba@redhat.com,
@@ -42,9 +42,9 @@ Cc: agruenba@redhat.com,
 	linux-nfs@vger.kernel.org,
 	miklos@szeredi.hu,
 	torvalds@linux-foundation.org
-Subject: [PATCH v3 04/20] dissolve external_name.u into separate members
-Date: Thu, 23 Jan 2025 01:46:27 +0000
-Message-ID: <20250123014643.1964371-4-viro@zeniv.linux.org.uk>
+Subject: [PATCH v3 12/20] exfat_d_revalidate(): use stable parent inode passed by caller
+Date: Thu, 23 Jan 2025 01:46:35 +0000
+Message-ID: <20250123014643.1964371-12-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <20250123014643.1964371-1-viro@zeniv.linux.org.uk>
 References: <20250123014511.GA1962481@ZenIV>
@@ -58,90 +58,40 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-kept separate from the previous commit to keep the noise separate
-from actual changes...
+... no need to bother with ->d_lock and ->d_parent->d_inode.
 
 Reviewed-by: Jeff Layton <jlayton@kernel.org>
-Reviewed-by: Jan Kara <jack@suse.cz>
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- fs/dcache.c | 22 ++++++++++------------
- 1 file changed, 10 insertions(+), 12 deletions(-)
+ fs/exfat/namei.c | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
-diff --git a/fs/dcache.c b/fs/dcache.c
-index f387dc97df86..6f36d3e8c739 100644
---- a/fs/dcache.c
-+++ b/fs/dcache.c
-@@ -296,10 +296,8 @@ static inline int dentry_cmp(const struct dentry *dentry, const unsigned char *c
+diff --git a/fs/exfat/namei.c b/fs/exfat/namei.c
+index e3b4feccba07..61c7164b85b3 100644
+--- a/fs/exfat/namei.c
++++ b/fs/exfat/namei.c
+@@ -34,8 +34,6 @@ static inline void exfat_d_version_set(struct dentry *dentry,
+ static int exfat_d_revalidate(struct inode *dir, const struct qstr *name,
+ 			      struct dentry *dentry, unsigned int flags)
+ {
+-	int ret;
+-
+ 	if (flags & LOOKUP_RCU)
+ 		return -ECHILD;
+ 
+@@ -59,11 +57,7 @@ static int exfat_d_revalidate(struct inode *dir, const struct qstr *name,
+ 	if (flags & (LOOKUP_CREATE | LOOKUP_RENAME_TARGET))
+ 		return 0;
+ 
+-	spin_lock(&dentry->d_lock);
+-	ret = inode_eq_iversion(d_inode(dentry->d_parent),
+-			exfat_d_version(dentry));
+-	spin_unlock(&dentry->d_lock);
+-	return ret;
++	return inode_eq_iversion(dir, exfat_d_version(dentry));
  }
  
- struct external_name {
--	struct {
--		atomic_t count;		// ->count and ->head can't be combined
--		struct rcu_head head;	// see take_dentry_name_snapshot()
--	} u;
-+	struct rcu_head head;	// ->head and ->count can't be combined
-+	atomic_t count;		// see take_dentry_name_snapshot()
- 	unsigned char name[];
- };
- 
-@@ -344,7 +342,7 @@ void take_dentry_name_snapshot(struct name_snapshot *name, struct dentry *dentry
- 		struct external_name *p;
- 		p = container_of(s, struct external_name, name[0]);
- 		// get a valid reference
--		if (unlikely(!atomic_inc_not_zero(&p->u.count)))
-+		if (unlikely(!atomic_inc_not_zero(&p->count)))
- 			goto retry;
- 		name->name.name = s;
- 	}
-@@ -361,8 +359,8 @@ void release_dentry_name_snapshot(struct name_snapshot *name)
- 	if (unlikely(name->name.name != name->inline_name.string)) {
- 		struct external_name *p;
- 		p = container_of(name->name.name, struct external_name, name[0]);
--		if (unlikely(atomic_dec_and_test(&p->u.count)))
--			kfree_rcu(p, u.head);
-+		if (unlikely(atomic_dec_and_test(&p->count)))
-+			kfree_rcu(p, head);
- 	}
- }
- EXPORT_SYMBOL(release_dentry_name_snapshot);
-@@ -400,7 +398,7 @@ static void dentry_free(struct dentry *dentry)
- 	WARN_ON(!hlist_unhashed(&dentry->d_u.d_alias));
- 	if (unlikely(dname_external(dentry))) {
- 		struct external_name *p = external_name(dentry);
--		if (likely(atomic_dec_and_test(&p->u.count))) {
-+		if (likely(atomic_dec_and_test(&p->count))) {
- 			call_rcu(&dentry->d_u.d_rcu, __d_free_external);
- 			return;
- 		}
-@@ -1681,7 +1679,7 @@ static struct dentry *__d_alloc(struct super_block *sb, const struct qstr *name)
- 			kmem_cache_free(dentry_cache, dentry); 
- 			return NULL;
- 		}
--		atomic_set(&p->u.count, 1);
-+		atomic_set(&p->count, 1);
- 		dname = p->name;
- 	} else  {
- 		dname = dentry->d_shortname.string;
-@@ -2774,15 +2772,15 @@ static void copy_name(struct dentry *dentry, struct dentry *target)
- 	if (unlikely(dname_external(dentry)))
- 		old_name = external_name(dentry);
- 	if (unlikely(dname_external(target))) {
--		atomic_inc(&external_name(target)->u.count);
-+		atomic_inc(&external_name(target)->count);
- 		dentry->d_name = target->d_name;
- 	} else {
- 		dentry->d_shortname = target->d_shortname;
- 		dentry->d_name.name = dentry->d_shortname.string;
- 		dentry->d_name.hash_len = target->d_name.hash_len;
- 	}
--	if (old_name && likely(atomic_dec_and_test(&old_name->u.count)))
--		kfree_rcu(old_name, u.head);
-+	if (old_name && likely(atomic_dec_and_test(&old_name->count)))
-+		kfree_rcu(old_name, head);
- }
- 
- /*
+ /* returns the length of a struct qstr, ignoring trailing dots if necessary */
 -- 
 2.39.5
 
