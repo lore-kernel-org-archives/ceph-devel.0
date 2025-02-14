@@ -1,33 +1,32 @@
 Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3A7226738A;
-	Fri, 14 Feb 2025 15:57:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C187926770A;
+	Fri, 14 Feb 2025 15:57:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.50.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739548639; cv=none; b=pShSc42SugjA+OVk3xJ+f1U5XtiaQHZ7zM+WJL/XoYVHlztwrhg1NCps4Cq26+Jw4kNpcrlIj9Bxd0lYYuKI/EY4YpQC55xFASLvzrgwdCvS0DFQYL5IHSLVrHXUlDhj+QGzEtWyXOrF6+EYwClBhLyFG6mmyJni3ymv0BqUfGE=
+	t=1739548640; cv=none; b=EPX2DlIiIFvRVFGJ+xKyECjcmhpyjD9bOPSC3k8mcQ8VKKT4E7vIPXzAx+fl2id73m5SdPpqRBzWTug5HOtsQ54I3BmXvpvxna3SZPnwqUN9ojKjmkVgPU71uLIX+i2kCVQwaHtRDgXfMKwY2qBzL6hP1mdkbpeqXUJPKRLUOro=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739548639; c=relaxed/simple;
-	bh=jKe5to7vakjmiEbUlPI0tWTh7WmIT2vDKVWRZYqNtWg=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=lPC8tf5xvjU9bavN5dnBe5a6t/46d5IADqx+kPgwqW98GpYEf/ut3t1NG4PrKLKssIwbPgM5WfIlqzJ82n9L5gLs/ljgSxRHeC9sK9hwuiDCmKDkwLM/HU881Cl1+Vc8ZNG9IoClHlwk5HckPkUWR4uKl1QCmHmPw5lWAg0kJX8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=FsNaH9NT; arc=none smtp.client-ip=90.155.50.34
+	s=arc-20240116; t=1739548640; c=relaxed/simple;
+	bh=XNgbG1zMI7UoF0mxdU2YRvp3YIrcbdP5wEyJha0nWt4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qGTWILZ1nia4VLG/WuqVEl0DdTFUNQf65V5W6QSP6SQJKHn/VjFbH9K+B2B/Cf9u2k2GHB7Cil4NcZNCws+A2BKB1Xz1s6z6oCNxxGDVf0CVv5TkIk2y27Q94Q16gAOpZQRwgr5rR1F+a+zUorJnLqZn6mbpkYAEWXJqLJa2xZE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=ca8A/UHD; arc=none smtp.client-ip=90.155.50.34
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="FsNaH9NT"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ca8A/UHD"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
-	Content-Type:Content-ID:Content-Description;
-	bh=CBgvTZFwisU0hNpixuf6QfQQPek/Bppv2tG5FWlyK9E=; b=FsNaH9NTmq3kV6dZkArkqdonPg
-	ibQ8mFiiFx8kZNF8spTBDkeUuHwmaXwEYdKJrptF2w6BkjGL9MXBxQBnEBq+Hg29P5zctP7a75/Yf
-	Vl/J0CNp4cAUYls0u82d1V1KGW9vMahQcP6uKWr6jUHTvwwj8v4Y0ANKD5UQYYydKTQMLUI9rWINK
-	6AfmX1a+6T8vCVXooPv2X4TcXYayVIEOgFI7wg+znNqjQxrkb25cDqfH8jFSlelwbkN5M2hPD+Ou3
-	puwCxSgaqphYl3foq1KXeBRO67+VXYS+XS8VhYeW22ukcXDJ/CLtFRnz97mDKJYLA68gB5UOixVc9
-	oVE0E82A==;
+	Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+	Content-Description:In-Reply-To:References;
+	bh=azWlzhNcRk6YIClEheIyNJuukxKnhh7eEfcNy8j+HRk=; b=ca8A/UHDDTejE0G1C9fLbJgU0V
+	f/JD4z8FigWAKvRSuJkBa8M7gk9ke1UEVX4nfGvj0eK3k4h/Q2YsWAULXbH622zeZ16joYlGPhMkF
+	aFqca069wefFNe+3SHzchsleRNMUnfNwbpD8eAKhCceWloVMTa7bCqGdjRI0KZC0EtWAFnNLgfN3n
+	KTpfqvVoJU5Ca1kdU2yBkIDpyqKMmKSuC6AnLnxCHX4AVuMEF0FtwKL4scm7n31kzp836a7jwI/gn
+	sz/3JpsIKigN+e1aB7onhCf5gP3J6WnKqUhmrWHygQgEUUHtUUZtmyfclRGRzqxTRj54e8YdD8LEk
+	qEGSA6kw==;
 Received: from willy by casper.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tiy40-0000000Bhyu-2kaH;
+	id 1tiy40-0000000BhxZ-1FRQ;
 	Fri, 14 Feb 2025 15:57:12 +0000
 From: "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To: Ilya Dryomov <idryomov@gmail.com>
@@ -35,12 +34,10 @@ Cc: "Matthew Wilcox (Oracle)" <willy@infradead.org>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	David Howells <dhowells@redhat.com>
-Subject: [PATCH v2 4/7] ceph: Convert ceph_find_incompatible() to take a folio
-Date: Fri, 14 Feb 2025 15:57:06 +0000
-Message-ID: <20250214155710.2790505-5-willy@infradead.org>
+Subject: [PATCH v2 0/7] Remove accesses to page->index from ceph
+Date: Fri, 14 Feb 2025 15:57:02 +0000
+Message-ID: <20250214155710.2790505-1-willy@infradead.org>
 X-Mailer: git-send-email 2.48.1
-In-Reply-To: <20250214155710.2790505-1-willy@infradead.org>
-References: <20250214155710.2790505-1-willy@infradead.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -49,111 +46,33 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Both callers already have the folio.  Pass it in and use it throughout.
-Removes some hidden calls to compound_head() and a reference to
-page->mapping.
+The first patch is a bugfix.  I'm not quite clear on the consequences
+of looking at the wrong index; possibly some pages get written back
+that shouldn't be, or some pages don't get written back that should be.
+Anyway, I think it deserves to go in and get backported.
 
-Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
----
- fs/ceph/addr.c | 38 +++++++++++++++++++-------------------
- 1 file changed, 19 insertions(+), 19 deletions(-)
+The other six patches I would like to see merged for v6.15.  Unless
+Dave finishes his rewrite first.  I have only compile tested this,
+but it's _mostly_ a one-to-one transformation.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index b659100f290a..7a2aa81b20eb 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1424,56 +1424,56 @@ static int context_is_writeable_or_written(struct inode *inode,
- 
- /**
-  * ceph_find_incompatible - find an incompatible context and return it
-- * @page: page being dirtied
-+ * @folio: folio being dirtied
-  *
-- * We are only allowed to write into/dirty a page if the page is
-+ * We are only allowed to write into/dirty a folio if the folio is
-  * clean, or already dirty within the same snap context. Returns a
-  * conflicting context if there is one, NULL if there isn't, or a
-  * negative error code on other errors.
-  *
-- * Must be called with page lock held.
-+ * Must be called with folio lock held.
-  */
- static struct ceph_snap_context *
--ceph_find_incompatible(struct page *page)
-+ceph_find_incompatible(struct folio *folio)
- {
--	struct inode *inode = page->mapping->host;
-+	struct inode *inode = folio->mapping->host;
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 
- 	if (ceph_inode_is_shutdown(inode)) {
--		doutc(cl, " %llx.%llx page %p is shutdown\n",
--		      ceph_vinop(inode), page);
-+		doutc(cl, " %llx.%llx folio %p is shutdown\n",
-+		      ceph_vinop(inode), folio);
- 		return ERR_PTR(-ESTALE);
- 	}
- 
- 	for (;;) {
- 		struct ceph_snap_context *snapc, *oldest;
- 
--		wait_on_page_writeback(page);
-+		folio_wait_writeback(folio);
- 
--		snapc = page_snap_context(page);
-+		snapc = page_snap_context(&folio->page);
- 		if (!snapc || snapc == ci->i_head_snapc)
- 			break;
- 
- 		/*
--		 * this page is already dirty in another (older) snap
-+		 * this folio is already dirty in another (older) snap
- 		 * context!  is it writeable now?
- 		 */
- 		oldest = get_oldest_context(inode, NULL, NULL);
- 		if (snapc->seq > oldest->seq) {
- 			/* not writeable -- return it for the caller to deal with */
- 			ceph_put_snap_context(oldest);
--			doutc(cl, " %llx.%llx page %p snapc %p not current or oldest\n",
--			      ceph_vinop(inode), page, snapc);
-+			doutc(cl, " %llx.%llx folio %p snapc %p not current or oldest\n",
-+			      ceph_vinop(inode), folio, snapc);
- 			return ceph_get_snap_context(snapc);
- 		}
- 		ceph_put_snap_context(oldest);
- 
--		/* yay, writeable, do it now (without dropping page lock) */
--		doutc(cl, " %llx.%llx page %p snapc %p not current, but oldest\n",
--		      ceph_vinop(inode), page, snapc);
--		if (clear_page_dirty_for_io(page)) {
--			int r = writepage_nounlock(page, NULL);
-+		/* yay, writeable, do it now (without dropping folio lock) */
-+		doutc(cl, " %llx.%llx folio %p snapc %p not current, but oldest\n",
-+		      ceph_vinop(inode), folio, snapc);
-+		if (folio_clear_dirty_for_io(folio)) {
-+			int r = writepage_nounlock(&folio->page, NULL);
- 			if (r < 0)
- 				return ERR_PTR(r);
- 		}
-@@ -1488,7 +1488,7 @@ static int ceph_netfs_check_write_begin(struct file *file, loff_t pos, unsigned
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_snap_context *snapc;
- 
--	snapc = ceph_find_incompatible(folio_page(*foliop, 0));
-+	snapc = ceph_find_incompatible(*foliop);
- 	if (snapc) {
- 		int r;
- 
-@@ -1748,7 +1748,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 			break;
- 		}
- 
--		snapc = ceph_find_incompatible(&folio->page);
-+		snapc = ceph_find_incompatible(folio);
- 		if (!snapc) {
- 			/* success.  we'll keep the folio locked. */
- 			folio_mark_dirty(folio);
+v1: https://lore.kernel.org/linux-fsdevel/20241129055058.858940-1-willy@infradead.org/
+
+Matthew Wilcox (Oracle) (7):
+  ceph: Do not look at the index of an encrypted page
+  ceph: Remove ceph_writepage()
+  ceph: Use a folio in ceph_page_mkwrite()
+  ceph: Convert ceph_find_incompatible() to take a folio
+  ceph: Convert ceph_readdir_cache_control to store a folio
+  ceph: Convert writepage_nounlock() to write_folio_nounlock()
+  ceph: Use a folio in ceph_writepages_start()
+
+ fs/ceph/addr.c   | 223 +++++++++++++++++++++--------------------------
+ fs/ceph/crypto.h |   7 ++
+ fs/ceph/dir.c    |  13 +--
+ fs/ceph/inode.c  |  26 +++---
+ fs/ceph/super.h  |   2 +-
+ 5 files changed, 129 insertions(+), 142 deletions(-)
+
 -- 
 2.47.2
 
