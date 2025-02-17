@@ -1,33 +1,33 @@
 Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C269235BF4;
-	Mon, 17 Feb 2025 18:51:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26FA7237708;
+	Mon, 17 Feb 2025 18:51:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.50.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739818286; cv=none; b=tZWW93gkf87y69DZgEEniRb9y3PdDiD+lFAQ8bXj9+e8WC6Caz3BT9VSEsqfedX3HkE131zz5OpbpTxbYC+R87IFeL6ZEVu67Ka+FmhuGXzFZO+FOGvvl7WkSIGhyHaaKgBU92iYKE1i9IqRmcjpzS6/fZMa9CGhmoe6G0Qb5kA=
+	t=1739818287; cv=none; b=dFAMUNQS1Zz9EA3oKD/q47FPDqqOwoWrFpRfI+sOzQvcq8TtaOVibtQJH4A1s1IFl4tvh4PU6ouHgmPFywRd5eLzJA4Uh5Zf5FtX2woEitBc625f1XVpNUKdFwl+J5np+zYDZVU4xUb7VyhTnhWmUvcs2ZWKvObvxsEKQQJWuDc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739818286; c=relaxed/simple;
-	bh=wYI++/sj5jglu3sNsTpH9O7Oed02NPw6gudP5qqChXg=;
+	s=arc-20240116; t=1739818287; c=relaxed/simple;
+	bh=/aZ9KxDO0+CT55cwnMECln9jnRuyUJUkGYCOCvBjWvs=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ZQaAkWoTuxLp63mE1epgM+JTcGPpSrvrgNMkm8n/nlhK/VrJK4lleNgPUx9jOGqjwkogvpoK8XIVWK9ujooZleVd7tiqQmEGF2ZtmD3nwsJrdSE26xVb4Wg1iHexWc7x/agwNs5LGJMSONqRZpwFaIqnRbyyikt8rHhKqp50nK0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=XgskMAF4; arc=none smtp.client-ip=90.155.50.34
+	 MIME-Version; b=VNgvYEOU6BM2dwpauJ9dOM7TH990uhegTfhY6No9oN32TTKe95x+Edop6SbjZm4aZbTOtlb35mOxv1gNpzR9mUcy8+C/LzEYDuC/B24rWlbwBvmUarWL2iJPPRRcaBthko9JgD43Jw3Z9TbUAM4V3ONgDLUl87apno+woeTAbaM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=WjHNGbd+; arc=none smtp.client-ip=90.155.50.34
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="XgskMAF4"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="WjHNGbd+"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
 	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
 	Content-Type:Content-ID:Content-Description;
-	bh=Hm9fjCN/JKEwkIkZRTE4nmENLJqXTwaxoFhpMzpe+34=; b=XgskMAF4Yz9Dy8DtS3Pg5Yd2Sp
-	tcpbjcX33+NMQ8ZrxWOkr1LE7Tg4HG0PmvqHskPO2b/cLAug/VX2T7vcS4gYcw2PvhRJ4eRgQ327k
-	pUipyr1VCvq7Zh3FOa+Gk+7ue4lK8tbRrsc6p2N3FKQl3x1jyNx008Wd2hsng9gsXktWgp4snPgEh
-	Gn+Pw2Vsnkmzg88a4xVfZN4OQIR10xOtIdLp0hGhJp1dbwPAnJe6eHp/Q7atFTTpNE2wPkJiW/M/O
-	v43mBSuCG0zkdmz+zXLOce/5cZzg13w4gU1B7l+JcqjleH9qRUGfqrvhzfUisotOosCHS+BNCQRli
-	F89ct7ww==;
+	bh=43YiqePgIAjXaPnBKT44VEq/hCrHaFMvycXoABjek6Q=; b=WjHNGbd+g2rGOaD0RYrT/iut09
+	HW4vRxuYWprDjZxJN8FVotFeMct8SwsKXGL9vdqYHbknOqZy3Q3v5fLy95ZeREZDBv6/favfr330E
+	/NHBpUC3niFQKF68fYwujX936RSNEHih/Vp00O/0KU5QAKjHgulaeyZQwW6V+Hwx/9mlvADX4j13Z
+	U1HQ/NsE9Z707mEfhPd5AOPaRzwcMbXZ1X2i4pjX2VliZ5+4wFcHcVcT+F3RRrA8A/r7tQRd64F6f
+	OMij92q76sbh7o05LEMSGxarbGdeU0GLEbsMsd1l3ynJsAV5L81Cc9GCWRnc0B/UZlxaXiHdy6E9j
+	5ppacodg==;
 Received: from willy by casper.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tk6DB-00000001nw3-3Vra;
+	id 1tk6DB-00000001nvc-0rmG;
 	Mon, 17 Feb 2025 18:51:21 +0000
 From: "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
@@ -35,9 +35,9 @@ Cc: "Matthew Wilcox (Oracle)" <willy@infradead.org>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	David Howells <dhowells@redhat.com>
-Subject: [PATCH v3 7/9] ceph: Remove uses of page from ceph_process_folio_batch()
-Date: Mon, 17 Feb 2025 18:51:15 +0000
-Message-ID: <20250217185119.430193-8-willy@infradead.org>
+Subject: [PATCH v3 1/9] ceph: Remove ceph_writepage()
+Date: Mon, 17 Feb 2025 18:51:09 +0000
+Message-ID: <20250217185119.430193-2-willy@infradead.org>
 X-Mailer: git-send-email 2.48.1
 In-Reply-To: <20250217185119.430193-1-willy@infradead.org>
 References: <20250217185119.430193-1-willy@infradead.org>
@@ -49,138 +49,71 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Remove uses of page->index and deprecated page APIs.  Saves a lot of
-hidden calls to compound_head().
-
-Also convert is_page_index_contiguous() to is_folio_index_contiguous()
-and make its arguments const.
+Ceph already has a writepages operation which is preferred over writepage
+in all situations except for page migration.  By adding a migrate_folio
+operation, there will be no situations in which ->writepage should
+be called.  filemap_migrate_folio() is an appropriate operation to use
+because the ceph data stored in folio->private does not contain any
+reference to the memory address of the folio.
 
 Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 ---
- fs/ceph/addr.c | 47 ++++++++++++++++++++++-------------------------
- 1 file changed, 22 insertions(+), 25 deletions(-)
+ fs/ceph/addr.c | 28 +---------------------------
+ 1 file changed, 1 insertion(+), 27 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 90d154bc4808..fd46eab12ded 100644
+index f4e43fe5bb5e..200dca1ff2d6 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -1226,10 +1226,10 @@ void ceph_allocate_page_array(struct address_space *mapping,
+@@ -862,32 +862,6 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	return err;
  }
  
- static inline
--bool is_page_index_contiguous(struct ceph_writeback_ctl *ceph_wbc,
--			      struct page *page)
-+bool is_folio_index_contiguous(const struct ceph_writeback_ctl *ceph_wbc,
-+			      const struct folio *folio)
- {
--	return page->index == (ceph_wbc->offset + ceph_wbc->len) >> PAGE_SHIFT;
-+	return folio->index == (ceph_wbc->offset + ceph_wbc->len) >> PAGE_SHIFT;
- }
- 
- static inline
-@@ -1294,7 +1294,6 @@ int ceph_process_folio_batch(struct address_space *mapping,
- 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
- 	struct ceph_client *cl = fsc->client;
- 	struct folio *folio = NULL;
--	struct page *page = NULL;
- 	unsigned i;
- 	int rc = 0;
- 
-@@ -1304,11 +1303,9 @@ int ceph_process_folio_batch(struct address_space *mapping,
- 		if (!folio)
- 			continue;
- 
--		page = &folio->page;
+-static int ceph_writepage(struct page *page, struct writeback_control *wbc)
+-{
+-	int err;
+-	struct inode *inode = page->mapping->host;
+-	BUG_ON(!inode);
+-	ihold(inode);
 -
- 		doutc(cl, "? %p idx %lu, folio_test_writeback %#x, "
- 			"folio_test_dirty %#x, folio_test_locked %#x\n",
--			page, page->index, folio_test_writeback(folio),
-+			folio, folio->index, folio_test_writeback(folio),
- 			folio_test_dirty(folio),
- 			folio_test_locked(folio));
+-	if (wbc->sync_mode == WB_SYNC_NONE &&
+-	    ceph_inode_to_fs_client(inode)->write_congested) {
+-		redirty_page_for_writepage(wbc, page);
+-		return AOP_WRITEPAGE_ACTIVATE;
+-	}
+-
+-	folio_wait_private_2(page_folio(page)); /* [DEPRECATED] */
+-
+-	err = writepage_nounlock(page, wbc);
+-	if (err == -ERESTARTSYS) {
+-		/* direct memory reclaimer was killed by SIGKILL. return 0
+-		 * to prevent caller from setting mapping/page error */
+-		err = 0;
+-	}
+-	unlock_page(page);
+-	iput(inode);
+-	return err;
+-}
+-
+ /*
+  * async writeback completion handler.
+  *
+@@ -1954,7 +1928,6 @@ static int ceph_write_end(struct file *file, struct address_space *mapping,
+ const struct address_space_operations ceph_aops = {
+ 	.read_folio = netfs_read_folio,
+ 	.readahead = netfs_readahead,
+-	.writepage = ceph_writepage,
+ 	.writepages = ceph_writepages_start,
+ 	.write_begin = ceph_write_begin,
+ 	.write_end = ceph_write_end,
+@@ -1962,6 +1935,7 @@ const struct address_space_operations ceph_aops = {
+ 	.invalidate_folio = ceph_invalidate_folio,
+ 	.release_folio = netfs_release_folio,
+ 	.direct_IO = noop_direct_IO,
++	.migrate_folio = filemap_migrate_folio,
+ };
  
-@@ -1321,27 +1318,27 @@ int ceph_process_folio_batch(struct address_space *mapping,
- 		}
- 
- 		if (ceph_wbc->locked_pages == 0)
--			lock_page(page);  /* first page */
--		else if (!trylock_page(page))
-+			folio_lock(folio);
-+		else if (!folio_trylock(folio))
- 			break;
- 
- 		rc = ceph_check_page_before_write(mapping, wbc,
- 						  ceph_wbc, folio);
- 		if (rc == -ENODATA) {
- 			rc = 0;
--			unlock_page(page);
-+			folio_unlock(folio);
- 			ceph_wbc->fbatch.folios[i] = NULL;
- 			continue;
- 		} else if (rc == -E2BIG) {
- 			rc = 0;
--			unlock_page(page);
-+			folio_unlock(folio);
- 			ceph_wbc->fbatch.folios[i] = NULL;
- 			break;
- 		}
- 
--		if (!clear_page_dirty_for_io(page)) {
--			doutc(cl, "%p !clear_page_dirty_for_io\n", page);
--			unlock_page(page);
-+		if (!folio_clear_dirty_for_io(folio)) {
-+			doutc(cl, "%p !folio_clear_dirty_for_io\n", folio);
-+			folio_unlock(folio);
- 			ceph_wbc->fbatch.folios[i] = NULL;
- 			continue;
- 		}
-@@ -1353,35 +1350,35 @@ int ceph_process_folio_batch(struct address_space *mapping,
- 		 * allocate a page array
- 		 */
- 		if (ceph_wbc->locked_pages == 0) {
--			ceph_allocate_page_array(mapping, ceph_wbc, page);
--		} else if (!is_page_index_contiguous(ceph_wbc, page)) {
-+			ceph_allocate_page_array(mapping, ceph_wbc, &folio->page);
-+		} else if (!is_folio_index_contiguous(ceph_wbc, folio)) {
- 			if (is_num_ops_too_big(ceph_wbc)) {
--				redirty_page_for_writepage(wbc, page);
--				unlock_page(page);
-+				folio_redirty_for_writepage(wbc, folio);
-+				folio_unlock(folio);
- 				break;
- 			}
- 
- 			ceph_wbc->num_ops++;
--			ceph_wbc->offset = (u64)page_offset(page);
-+			ceph_wbc->offset = (u64)folio_pos(folio);
- 			ceph_wbc->len = 0;
- 		}
- 
- 		/* note position of first page in fbatch */
--		doutc(cl, "%llx.%llx will write page %p idx %lu\n",
--		      ceph_vinop(inode), page, page->index);
-+		doutc(cl, "%llx.%llx will write folio %p idx %lu\n",
-+		      ceph_vinop(inode), folio, folio->index);
- 
- 		fsc->write_congested = is_write_congestion_happened(fsc);
- 
- 		rc = ceph_move_dirty_page_in_page_array(mapping, wbc,
--							ceph_wbc, page);
-+							ceph_wbc, &folio->page);
- 		if (rc) {
--			redirty_page_for_writepage(wbc, page);
--			unlock_page(page);
-+			folio_redirty_for_writepage(wbc, folio);
-+			folio_unlock(folio);
- 			break;
- 		}
- 
- 		ceph_wbc->fbatch.folios[i] = NULL;
--		ceph_wbc->len += thp_size(page);
-+		ceph_wbc->len += folio_size(folio);
- 	}
- 
- 	ceph_wbc->processed_in_fbatch = i;
+ static void ceph_block_sigs(sigset_t *oldset)
 -- 
 2.47.2
 
