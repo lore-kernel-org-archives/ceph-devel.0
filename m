@@ -1,33 +1,34 @@
 Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 726AC211A02;
-	Tue, 25 Feb 2025 20:17:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id F36AF210185;
+	Tue, 25 Feb 2025 20:17:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740514644; cv=none; b=Y5T0FxJGpZczL6cNCsm1n6k+m5wkHmoeGcnkdH8qbjePvjA9dpVFFzlBDNOrDjm6j/AHHtDYEmu2lbY1ubaNZVN8Y2gFiUS8zewbcPHQ02xSI5ouONyln/Yar/KisJQFIOKJqR1c0bKawC0V8s2d610plx/snME+BEpSjx9FEy8=
+	t=1740514646; cv=none; b=cVNvk1ZniHSerhwe4JSBOYOjxxKNO15PicdVn2cEkT9MZ41LCdXl2DhDoRsrRBO4X4EufBU2vZs1+XEppGj2sSyHsQSDu1CbLMv+fIZppLCTnMsXogbPtDjtZseNnR3lKV1QtwO19oTN5qQA78XFn6usy1Fzv8TL5S+V9qEbbFs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740514644; c=relaxed/simple;
-	bh=3LUZyKvUuiQDxZdTUOmOjoAT+zQDi2cCf9D0g7tuMR0=;
+	s=arc-20240116; t=1740514646; c=relaxed/simple;
+	bh=Zh1ugJArC6NURl/3D54pL3hnWv5kXqxTF/RGRxBfK6g=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=sbBLrWc5+TjcGkBvPBodQYaVCY283NZ7mjmoKrECFnpJrDzlNyjnQd1J+YhMdQuTpDqQBis3oS4oJDYoltLM0TTkxGi6CLSeB4NQp00K/TDwfOW46IzCX9BmMbqvflere13yRR+wEVVmcnKi3Pb+MR7oPCHKNRBTO2Q1A8Rwvdo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=pk0xnKO9; arc=none smtp.client-ip=13.77.154.182
+	 In-Reply-To:To:Cc; b=uCHpYeOQErCZryNoy56CcSVF0GRTPSAUv0VA8u0gEdi/ow55FFZlGfzoY0uVZtvVCYYXL40ZOPcZPPsj6gsRaXIj0o96gwz49LZmCKHfFlarBquPUnWHCySDmqFosSsAHNs3PT+IWGS9Weslrwai2A928hMfIV0g7Gg/1H34C64=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=PDr+Ydzw; arc=none smtp.client-ip=13.77.154.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="pk0xnKO9"
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="PDr+Ydzw"
 Received: from eahariha-devbox.internal.cloudapp.net (unknown [40.91.112.99])
-	by linux.microsoft.com (Postfix) with ESMTPSA id 6E76620460A8;
+	by linux.microsoft.com (Postfix) with ESMTPSA id EE0A12069413;
 	Tue, 25 Feb 2025 12:17:20 -0800 (PST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 6E76620460A8
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com EE0A12069413
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-	s=default; t=1740514640;
-	bh=43Vrmw689COEddN2FS9b3k4xJeLol8HtOHP5G9OUfEI=;
+	s=default; t=1740514641;
+	bh=IkZhwQnmhk/3MZ3WmRVfeHWvCbna6N7BrQR1jWwYokU=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=pk0xnKO9WBFe46q3Ywjq7JsVadxRRKjvYrB9zIzbdZYd66bY8+Mfl+SOuW98ovT8m
-	 RZ9T82wwrWfEpvwsx9UKS0c/nfb81Mr/DBVwwYUcW+0kbutViK4+XjzpCBl7z2tJAL
-	 gU7qljh7WuzOn/DH6zvRyvuT2mG0Zr/ppFF0MI78=
+	b=PDr+YdzwKTpyZBicDKqcQQUqPL1iwuSQme5BjsML0hXlTVF9AZr0RQ2wXUwNPrDi5
+	 2fLTg4V0dpM1tBw+RLkMSD0aTsmmkxoeSBgL2Xo1cPwMxPo/cff0ffzHQNbO3K0hfD
+	 6uIhiei0TRTMFdIWngeYvXNz/apT7GwtHrM4bEfU=
 From: Easwar Hariharan <eahariha@linux.microsoft.com>
-Date: Tue, 25 Feb 2025 20:17:19 +0000
-Subject: [PATCH v3 05/16] btrfs: convert timeouts to secs_to_jiffies()
+Date: Tue, 25 Feb 2025 20:17:22 +0000
+Subject: [PATCH v3 08/16] ata: libata-zpodd: convert timeouts to
+ secs_to_jiffies()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -36,7 +37,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250225-converge-secs-to-jiffies-part-two-v3-5-a43967e36c88@linux.microsoft.com>
+Message-Id: <20250225-converge-secs-to-jiffies-part-two-v3-8-a43967e36c88@linux.microsoft.com>
 References: <20250225-converge-secs-to-jiffies-part-two-v3-0-a43967e36c88@linux.microsoft.com>
 In-Reply-To: <20250225-converge-secs-to-jiffies-part-two-v3-0-a43967e36c88@linux.microsoft.com>
 To: Andrew Morton <akpm@linux-foundation.org>, 
@@ -95,37 +96,25 @@ expression E;
 - * \( 1000 \| MSEC_PER_SEC \)
 )
 
-Acked-by: David Sterba <dsterba@suse.com>
 Signed-off-by: Easwar Hariharan <eahariha@linux.microsoft.com>
 ---
- fs/btrfs/disk-io.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/ata/libata-zpodd.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
-index c0b40dedceb53d6f1452b4dafea6b76eac08b932..606b004001bd8720f2aef059d435afb2d7b975d1 100644
---- a/fs/btrfs/disk-io.c
-+++ b/fs/btrfs/disk-io.c
-@@ -1567,7 +1567,7 @@ static int transaction_kthread(void *arg)
+diff --git a/drivers/ata/libata-zpodd.c b/drivers/ata/libata-zpodd.c
+index 4b83b517caec66c82b126666f6dffd09729bf845..799531218ea2d5cc1b7e693a2b2aff7f376f7d76 100644
+--- a/drivers/ata/libata-zpodd.c
++++ b/drivers/ata/libata-zpodd.c
+@@ -160,8 +160,7 @@ void zpodd_on_suspend(struct ata_device *dev)
+ 		return;
+ 	}
  
- 	do {
- 		cannot_commit = false;
--		delay = msecs_to_jiffies(fs_info->commit_interval * 1000);
-+		delay = secs_to_jiffies(fs_info->commit_interval);
- 		mutex_lock(&fs_info->transaction_kthread_mutex);
+-	expires = zpodd->last_ready +
+-		  msecs_to_jiffies(zpodd_poweroff_delay * 1000);
++	expires = zpodd->last_ready + secs_to_jiffies(zpodd_poweroff_delay);
+ 	if (time_before(jiffies, expires))
+ 		return;
  
- 		spin_lock(&fs_info->trans_lock);
-@@ -1582,9 +1582,9 @@ static int transaction_kthread(void *arg)
- 		    cur->state < TRANS_STATE_COMMIT_PREP &&
- 		    delta < fs_info->commit_interval) {
- 			spin_unlock(&fs_info->trans_lock);
--			delay -= msecs_to_jiffies((delta - 1) * 1000);
-+			delay -= secs_to_jiffies(delta - 1);
- 			delay = min(delay,
--				    msecs_to_jiffies(fs_info->commit_interval * 1000));
-+				    secs_to_jiffies(fs_info->commit_interval));
- 			goto sleep;
- 		}
- 		transid = cur->transid;
 
 -- 
 2.43.0
