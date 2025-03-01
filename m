@@ -1,44 +1,33 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 680BD25BADA;
-	Fri, 28 Feb 2025 10:22:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id B1B3E2C9A;
+	Sat,  1 Mar 2025 04:23:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740738173; cv=none; b=R6vKQ22axQ+uFkUhVwH+VMVJ+s8zrFVnlCRh9Rz9NK8yMnJNPuAVX86+b76pp36hzZYTPof7ksiJ0qRCAce8dfQTpDS+/bhu8R4Jk0CdLYy6/MKryVpTk9wWaUvZmmcFpVkTj48G2Vqwl/1fgx3KEw1x713usozLvSzQrt5yj5Y=
+	t=1740802986; cv=none; b=BRezp4iGCPK5Fmnrh0JXaAxz1kFrDgCMM5Jbjp3udivLksRxTIR6942NFuv03hQxLSTqdzCYRPEC8xHUFGV8ahiOio2k3YxNct/P7cb4A2D7FsWUkWPfUIpOBSiy8Bx36onVkfFPEpzgN2GGMMS6hm3MoQ+F7Q7WEe21UBrUkmA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740738173; c=relaxed/simple;
-	bh=TDGi4nu6CBnjZ08J2SjCtYhqNzs7LnfkQBYG9bn62X0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=oS4ELLcJALQ940wASgql0Iry+azD2NZ1cmFxeI7CHJpD6w6/OKNLQtWWd+0i7T5cVtLouu7EhAkrBXgboSVF1EpJAirlS5LzmUDTbyZ6M3E9LJNuj5SUboCxiEZKE+Giqv4/iJnIBLCjCRQ7F+qeDm8h5pIHgXkLPX36ApskiNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AZy1Ll95; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1740802986; c=relaxed/simple;
+	bh=p8VM9Bl0ApB7gurlDfnc5ERgWv0qjUanc6mf2uHC3aI=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=eBUX98Wy+IsX51PDIik8KwPAuHqNtFts6zxdKIplpPrGU6ZeMHRrT0G/iBg8p044iE3ci0X+q/eVIYs3ZgKWW1yYil2Sq2+mAW6MPaEmMP8q3J54TfMaOt4P/7xWjuIo+ASyckACE8uTewfnI6QxbrEVyUnGhd22zC4UBCPz7ok=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=HyEJE2kg; arc=none smtp.client-ip=13.77.154.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AZy1Ll95"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5A9E2C4CED6;
-	Fri, 28 Feb 2025 10:22:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740738172;
-	bh=TDGi4nu6CBnjZ08J2SjCtYhqNzs7LnfkQBYG9bn62X0=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=AZy1Ll95a0QCSjG0lUGu0FevLb+DA3eYbfs6ZK0uv0ZKbqivkDfECLiIE61JGmU3j
-	 HF52yuH4hG42PVOaJ3kqkzzqWn1YRH4XZjINkJ3JfWq1ai22RBH6ohq/YU+EXbL3Dt
-	 2SUiymUqk3VdulEDcm1fQ6iKTrQa6v1BEjph9Hy0KcE5JLzwUGpyDWYYVyPSaj8jF7
-	 WITTy2mGWOK3tZ1nNWonJf9iE5vPrC7qWUszy5KAGaSzsO/jf5oW6ZMcfOYw+wHRBP
-	 OrbyuTgFjCOOLUPofj7vTEFT2qLaLUrpm1+6y5Zlv0OM3rP+TSbWBuJjoGt9Tki0L8
-	 B5rHl3Jg/aTLA==
-From: Christian Brauner <brauner@kernel.org>
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	"Matthew Wilcox (Oracle)" <willy@infradead.org>
-Cc: Christian Brauner <brauner@kernel.org>,
-	ceph-devel@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH v3 0/9] Remove accesses to page->index from ceph
-Date: Fri, 28 Feb 2025 11:22:38 +0100
-Message-ID: <20250228-witzfigur-geerntet-589bdf7ae13f@brauner>
-X-Mailer: git-send-email 2.47.2
-In-Reply-To: <20250217185119.430193-1-willy@infradead.org>
-References: <20250217185119.430193-1-willy@infradead.org>
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="HyEJE2kg"
+Received: from eahariha-devbox.internal.cloudapp.net (unknown [40.91.112.99])
+	by linux.microsoft.com (Postfix) with ESMTPSA id 54CED2038A28;
+	Fri, 28 Feb 2025 20:23:04 -0800 (PST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 54CED2038A28
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+	s=default; t=1740802984;
+	bh=3jHYa/0Xarc29iomR76KgYiKvPwnE0MNnWeMmBfBZWk=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
+	b=HyEJE2kghS30G13zEV2j4oV/PdhuWKfaBvtF3ETmd9B3SdS38oITvwLfSMzQZ+tZy
+	 dKeOxA1llHMf3jcgK7clLp2zTZXKXfuZzt3KGVl8OsarJrxu5dr38c8fXAtphcMvvx
+	 HSkXif3K1ieDai/11Fct5h/so6j/gQNrXloYsnkY=
+From: Easwar Hariharan <eahariha@linux.microsoft.com>
+Date: Sat, 01 Mar 2025 04:22:52 +0000
+Subject: [PATCH v4 1/2] rbd: convert timeouts to secs_to_jiffies()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -46,53 +35,80 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2235; i=brauner@kernel.org; h=from:subject:message-id; bh=TDGi4nu6CBnjZ08J2SjCtYhqNzs7LnfkQBYG9bn62X0=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMaQf7Cu6ba2x5eu1GWcdZadcdXftPjhJfdvXPy6Tzmi4H uM5Jqe8raOUhUGMi0FWTJHFod0kXG45T8Vmo0wNmDmsTCBDGLg4BWAiF+YxMlxa+klF6uZjuecV nZ2al1bPuXQm8ajFsppvRt6FW+bwTbvH8N/RbM+85TX37b88DStO2fKcgXuF6pWqzO9yBSuNy/o WSrICAA==
-X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+Message-Id: <20250301-converge-secs-to-jiffies-part-two-v4-1-c9226df9e4ed@linux.microsoft.com>
+References: <20250301-converge-secs-to-jiffies-part-two-v4-0-c9226df9e4ed@linux.microsoft.com>
+In-Reply-To: <20250301-converge-secs-to-jiffies-part-two-v4-0-c9226df9e4ed@linux.microsoft.com>
+To: Andrew Morton <akpm@linux-foundation.org>, 
+ Christophe JAILLET <christophe.jaillet@wanadoo.fr>, 
+ Daniel Vacek <neelx@suse.com>, Ilya Dryomov <idryomov@gmail.com>, 
+ Dongsheng Yang <dongsheng.yang@easystack.cn>, Jens Axboe <axboe@kernel.dk>, 
+ Xiubo Li <xiubli@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, 
+ Easwar Hariharan <eahariha@linux.microsoft.com>
+X-Mailer: b4 0.14.2
 
-On Mon, 17 Feb 2025 18:51:08 +0000, Matthew Wilcox (Oracle) wrote:
-> This is a rebase of Friday's patchset onto
-> git://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git netfs-fixes
-> as requested by Dave.
-> 
-> The original patch 1/7 is gone as it is no longer necessary.
-> Patches 2-6 are retained intact as patches 1-5 in this patchset.
-> Patch 7 is hopefully patches 6-9 in this patchset.
-> 
-> [...]
+Commit b35108a51cf7 ("jiffies: Define secs_to_jiffies()") introduced
+secs_to_jiffies().  As the value here is a multiple of 1000, use
+secs_to_jiffies() instead of msecs_to_jiffies() to avoid the multiplication
 
-Applied to the vfs-6.15.ceph branch of the vfs/vfs.git tree.
-Patches in the vfs-6.15.ceph branch should appear in linux-next soon.
+This is converted using scripts/coccinelle/misc/secs_to_jiffies.cocci with
+the following Coccinelle rules:
 
-Please report any outstanding bugs that were missed during review in a
-new review to the original patch series allowing us to drop it.
+@depends on patch@ expression E; @@
 
-It's encouraged to provide Acked-bys and Reviewed-bys even though the
-patch has now been applied. If possible patch trailers will be updated.
+-msecs_to_jiffies(E * 1000)
++secs_to_jiffies(E)
 
-Note that commit hashes shown below are subject to change due to rebase,
-trailer updates or similar. If in doubt, please check the listed branch.
+@depends on patch@ expression E; @@
 
-tree:   https://git.kernel.org/pub/scm/linux/kernel/git/vfs/vfs.git
-branch: vfs-6.15.ceph
+-msecs_to_jiffies(E * MSEC_PER_SEC)
++secs_to_jiffies(E)
 
-[1/9] ceph: Remove ceph_writepage()
-      https://git.kernel.org/vfs/vfs/c/19a288110435
-[2/9] ceph: Use a folio in ceph_page_mkwrite()
-      https://git.kernel.org/vfs/vfs/c/88a59bda3f37
-[3/9] ceph: Convert ceph_find_incompatible() to take a folio
-      https://git.kernel.org/vfs/vfs/c/f9707a8b5b9d
-[4/9] ceph: Convert ceph_readdir_cache_control to store a folio
-      https://git.kernel.org/vfs/vfs/c/baff9740bc8f
-[5/9] ceph: Convert writepage_nounlock() to write_folio_nounlock()
-      https://git.kernel.org/vfs/vfs/c/62171c16da60
-[6/9] ceph: Convert ceph_check_page_before_write() to use a folio
-      https://git.kernel.org/vfs/vfs/c/15fdaf2fd60d
-[7/9] ceph: Remove uses of page from ceph_process_folio_batch()
-      https://git.kernel.org/vfs/vfs/c/a55cf4fd8fae
-[8/9] ceph: Convert ceph_move_dirty_page_in_page_array() to move_dirty_folio_in_page_array()
-      https://git.kernel.org/vfs/vfs/c/ad49fe2b3d54
-[9/9] ceph: Pass a folio to ceph_allocate_page_array()
-      https://git.kernel.org/vfs/vfs/c/d1b452673af4
-[10/10] fs: Remove page_mkwrite_check_truncate()
-        https://git.kernel.org/vfs/vfs/c/9dcef93363e7
+Change the check for range to check against HZ.
+
+Acked-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Easwar Hariharan <eahariha@linux.microsoft.com>
+---
+ drivers/block/rbd.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index faafd7ff43d6ef53110ab3663cc7ac322214cc8c..1c406b17f3cee741b7bdd9f742958b3f1d5b1bbe 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -108,7 +108,7 @@ static int atomic_dec_return_safe(atomic_t *v)
+ #define RBD_OBJ_PREFIX_LEN_MAX	64
+ 
+ #define RBD_NOTIFY_TIMEOUT	5	/* seconds */
+-#define RBD_RETRY_DELAY		msecs_to_jiffies(1000)
++#define RBD_RETRY_DELAY		secs_to_jiffies(1)
+ 
+ /* Feature bits */
+ 
+@@ -4162,7 +4162,7 @@ static void rbd_acquire_lock(struct work_struct *work)
+ 		dout("%s rbd_dev %p requeuing lock_dwork\n", __func__,
+ 		     rbd_dev);
+ 		mod_delayed_work(rbd_dev->task_wq, &rbd_dev->lock_dwork,
+-		    msecs_to_jiffies(2 * RBD_NOTIFY_TIMEOUT * MSEC_PER_SEC));
++		    secs_to_jiffies(2 * RBD_NOTIFY_TIMEOUT));
+ 	}
+ }
+ 
+@@ -6283,9 +6283,9 @@ static int rbd_parse_param(struct fs_parameter *param,
+ 		break;
+ 	case Opt_lock_timeout:
+ 		/* 0 is "wait forever" (i.e. infinite timeout) */
+-		if (result.uint_32 > INT_MAX / 1000)
++		if (result.uint32 > INT_MAX / HZ)
+ 			goto out_of_range;
+-		opt->lock_timeout = msecs_to_jiffies(result.uint_32 * 1000);
++		opt->lock_timeout = secs_to_jiffies(result.uint_32);
+ 		break;
+ 	case Opt_pool_ns:
+ 		kfree(pctx->spec->pool_ns);
+
+-- 
+2.43.0
+
