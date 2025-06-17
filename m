@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC36E2DE1E0;
-	Tue, 17 Jun 2025 12:22:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7344F2DE1E7;
+	Tue, 17 Jun 2025 12:22:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750162925; cv=none; b=HEIYtkLjJCEWkTsJm8P+7/yet7EbBIURzdM/EcbhjVB2vhykd17G7y65mwavIDpQUAY4ExfH9kqRJp6zppsMN+mCpgF0UxMmavYmN0/YO69R2t7Pv055TLlCKW99kxDqzmBo0nmPEW7GEYyB3hM53nBn70ol0waf5q5EYXZ/c8Q=
+	t=1750162956; cv=none; b=ECtWawyee3t0MudmGMIZ7WGl1QvlMtlC7XpJTLctmxbwO8CFhZxeWmx75M46XcODyoGSyTsNhUoMeT9jPTQTebEt5fqt3SfVh9+ANymBi2jWY5JoaotfYEn0WG4zEusy30bzzc7Dx0B7sE/mpYyF2PexiFLiEKRVFJBWwXRCBY4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750162925; c=relaxed/simple;
+	s=arc-20240116; t=1750162956; c=relaxed/simple;
 	bh=K/3He4YlzTS0OS4zmzm19ApC83LDJtal0YLT3Vtwj88=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=eR2fSHw1JSzBdrQsNnVPA/IWO5f4P/dgaway6YYxdI0m1GRKx4ZKnKvkcsp2aue4UQIOsyRQhvUYK5r2RZ8qqcXoaB6AUX4u2fjUStBtsMdUJRWNYeb2R5ENrnDZHJuodfWG5d4JNWuNrIfUD2SX4hQWyUWktsL745iOIUnOIkQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fsObfe4j; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=llHcsSlk1JvasNROriJ3OgH718AhKEwaI+u1xqAlthKkaZadF1TGnAvfPotMXY0u9PVrKXqQLPZJqe0PeYL/5nCM1A0w+t4JDhmP31GUUNPnaiELqGZDfnKqZwc5Bg1WAHva8Ho58zHedNoLrJlTwIgFEoDl1TFYaCkY+zpzxIM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KSm2ViAH; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fsObfe4j"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9054FC4CEE3;
-	Tue, 17 Jun 2025 12:22:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KSm2ViAH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13A9EC4CEEE;
+	Tue, 17 Jun 2025 12:22:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750162924;
+	s=k20201202; t=1750162955;
 	bh=K/3He4YlzTS0OS4zmzm19ApC83LDJtal0YLT3Vtwj88=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=fsObfe4jYMor49AdDgq/xuKCyHakJciPVm3aEEYmFiz46UWObWpFW23Hm+BXmZd2m
-	 3/6UDpvC3xu10nJp850w3qvFNjSzYMI1S2+gcYcmRdU6PmeDxkYBE02FO0vOCmyZBq
-	 uEzxB82RV4jm+0IhYypFtX9d+xpYF9IPhrmrP6YcEYmupcsemkOxB88v39V/krqcSH
-	 E9Q+qrkSYEwNb/wGubSJKMS3lC3O8UkfHjieIF3ketlAd3d/6H0q+T0d4+rrCK7JGb
-	 RZP+M5VnNoJSICOOlq99r/fPVBQly3QP+joBfQ72zmT9shxem1SI6MgcfbJ5JVoUVp
-	 FswfJ4G5d1EkQ==
+	b=KSm2ViAHTe8ySHE/ITDGNP2wHIevcq3cnzhGLGtDbrEZq9I/ZaNuOzRQSjehukVRp
+	 mSeXfeE9rX8Y+q+IwuCBSgOLZqw1TvKEkFi1egDObFiiP5LPJymxebsNmPFUYCNs7p
+	 +/unntdD+FZKYRmYPIZHMeeQGRrxEy2wsIwjv+NZmQPLRPoT4oPSpxFLE6Pqw8cckS
+	 sPCQkfw5ila4i7mAo8eJshn7SHVbQbs8ectqoVZoaPmw8Tpix5BDzgtoZS4HdF6m6v
+	 Ba0nMAwbM1foOgMFELsdvlvXFmiJt5qpp8NFZBfc0DFicuR5BzaZtKPfpEBp/N+VVU
+	 4th2YzPoY44iw==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
@@ -35,12 +35,12 @@ Cc: Dmitry Kandybka <d.kandybka@gmail.com>,
 	Sasha Levin <sashal@kernel.org>,
 	xiubli@redhat.com,
 	ceph-devel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.15 08/15] ceph: fix possible integer overflow in ceph_zero_objects()
-Date: Tue, 17 Jun 2025 08:21:38 -0400
-Message-Id: <20250617122147.1968355-8-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.12 06/12] ceph: fix possible integer overflow in ceph_zero_objects()
+Date: Tue, 17 Jun 2025 08:22:15 -0400
+Message-Id: <20250617122222.1968832-6-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250617122147.1968355-1-sashal@kernel.org>
-References: <20250617122147.1968355-1-sashal@kernel.org>
+In-Reply-To: <20250617122222.1968832-1-sashal@kernel.org>
+References: <20250617122222.1968832-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -49,7 +49,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.15.2
+X-stable-base: Linux 6.12.33
 Content-Transfer-Encoding: 8bit
 
 From: Dmitry Kandybka <d.kandybka@gmail.com>
