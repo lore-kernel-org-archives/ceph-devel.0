@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0EDE2EB5A1
-	for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2025 16:43:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B8332ED15A
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2025 16:43:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750869802; cv=none; b=QH5+O7Xhc5dPNGYH5OAiDn3cOwWVpN5XePZJqMIZAUHnYl3rAM7+mBWS4yCnKCwcVJMdocH9U5Eb0XNyIJ/5Qxxof+Y6C3slEb99ih+hxaIa/ic1Tz1ZxdoOONlVKn8me7nwa+miFOczt3eaMWdQZ+J1Y1ENXHWZIHiBAPLEbg4=
+	t=1750869810; cv=none; b=E8kG3VpYXNlhOZ+RfvNY0ttOMtbziV0YMyzMjf5q/uCLxZ8j76LeHfY+UdTzqTnUXHzsr/MBcsYv5qR3TyFOL/OHK3qJHCOeXP/1ebfLESixvcsWa32sY/MA1QTAzVyGxr8oRhzNIrFmq6br34XCNxBTi/LomWBkJVSsk0sV/gM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750869802; c=relaxed/simple;
-	bh=Iaaav3T6nJBDFhHbPKVsXwalLRAcwYlRj02SQ9HB17k=;
+	s=arc-20240116; t=1750869810; c=relaxed/simple;
+	bh=0S7Wb2Ayru7zxU3qzn80qEG3N84qFnB6/qthu5wYMpo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=YKEQx/k+rUg9mvEhJ4Bb3RmbkgORAjEJivjLuxMN9mexFdZk13v1HG9/1t+3OBNTRa0uI+2f9ENHXC9fV88SHlgf2LC7HDXmSXyKFwWPpbsPHu3xeNoK56jKHLffvFSctZEMg1fU/+x2n63Twx1QelMkkU1bVTFt2tQeGa5FWUI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q4FlZKnX; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=VHQyHOtyIZMPj3O6wkhc4/A564rFVEG7lU5akjcXkmeQssNYYwXBg6FaqFca10nuGzb2RQZPBqgbKKOW6A4QBvFW4O2YTCqhLVJOF2sQuVIHOilTjSeruyzyFAqKJYaRaB+HkE32RwtGXBVENcg+vYHw5qaA5fYjBAC6c6fG0X0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Yq3gDLKg; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q4FlZKnX"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Yq3gDLKg"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1750869798;
+	s=mimecast20190719; t=1750869807;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=SheY32pXE9zTXtwtlEtE2N2cmqkYRXORBzV4ANgeYMc=;
-	b=Q4FlZKnXSvOCtlBIpEjl9DM6h5aeZlfGk+DqSjeJ6drrcZAkhMupIr/xpiDpi36WfVtiAO
-	Rt3tHbtwciHJnWZNglL6k1JEspFiCTV5SaxyySkTr7I4EeUx91sZri/aqC0KKZ3UAU3RpX
-	BUcN2SIvO5W/T4yzfa8eMoDhHZiLOTE=
-Received: from mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+	bh=4v+u+1rM8Ekf5NVVpiW18gc8WO84+L9XnF1ABQbI6tU=;
+	b=Yq3gDLKg9CA4NJHJEN+fPp86s6K8e1W5ge5KHLCZdG6jQrgmqsNi7C/nVXc5k9P8VbyiZA
+	Bql7OVGuB32ReiuK02nhoxD/2jV7tnDQm9j33acpOFm0pDGL+4thkClbuu4gdLTSysZS1z
+	qdcgamb3aDd9BTeepJBRrsM/wryTmhM=
+Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-139-yE5LAO04OYCv89DecXUnIw-1; Wed,
- 25 Jun 2025 12:43:15 -0400
-X-MC-Unique: yE5LAO04OYCv89DecXUnIw-1
-X-Mimecast-MFC-AGG-ID: yE5LAO04OYCv89DecXUnIw_1750869793
-Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-652-0vhc79CuOq6KNev3OCSRqw-1; Wed,
+ 25 Jun 2025 12:43:26 -0400
+X-MC-Unique: 0vhc79CuOq6KNev3OCSRqw-1
+X-Mimecast-MFC-AGG-ID: 0vhc79CuOq6KNev3OCSRqw_1750869804
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 687FC19560AA;
-	Wed, 25 Jun 2025 16:43:13 +0000 (UTC)
+	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 105CF1800268;
+	Wed, 25 Jun 2025 16:43:24 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.42.28.81])
-	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 866821956096;
-	Wed, 25 Jun 2025 16:43:09 +0000 (UTC)
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id EBC3A195608D;
+	Wed, 25 Jun 2025 16:43:19 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>,
 	Steve French <sfrench@samba.org>
@@ -55,10 +55,13 @@ Cc: David Howells <dhowells@redhat.com>,
 	v9fs@lists.linux.dev,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Paulo Alcantara <pc@manguebit.org>
-Subject: [PATCH v2 10/16] smb: client: fix warning when reconnecting channel
-Date: Wed, 25 Jun 2025 17:42:05 +0100
-Message-ID: <20250625164213.1408754-11-dhowells@redhat.com>
+	Stefan Metzmacher <metze@samba.org>,
+	Steve French <stfrench@microsoft.com>,
+	Tom Talpey <tom@talpey.com>,
+	Matthew Wilcox <willy@infradead.org>
+Subject: [PATCH v2 12/16] cifs: Fix reading into an ITER_FOLIOQ from the smbdirect code
+Date: Wed, 25 Jun 2025 17:42:07 +0100
+Message-ID: <20250625164213.1408754-13-dhowells@redhat.com>
 In-Reply-To: <20250625164213.1408754-1-dhowells@redhat.com>
 References: <20250625164213.1408754-1-dhowells@redhat.com>
 Precedence: bulk
@@ -68,121 +71,204 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-From: Paulo Alcantara <pc@manguebit.org>
+When performing a file read from RDMA, smbd_recv() prints an "Invalid msg
+type 4" error and fails the I/O.  This is due to the switch-statement there
+not handling the ITER_FOLIOQ handed down from netfslib.
 
-When reconnecting a channel in smb2_reconnect_server(), a dummy tcon
-is passed down to smb2_reconnect() with ->query_interface
-uninitialized, so we can't call queue_delayed_work() on it.
+Fix this by collapsing smbd_recv_buf() and smbd_recv_page() into
+smbd_recv() and just using copy_to_iter() instead of memcpy().  This
+future-proofs the function too, in case more ITER_* types are added.
 
-Fix the following warning by ensuring that we're queueing the delayed
-worker from correct tcon.
-
-WARNING: CPU: 4 PID: 1126 at kernel/workqueue.c:2498 __queue_delayed_work+0x1d2/0x200
-Modules linked in: cifs cifs_arc4 nls_ucs2_utils cifs_md4 [last unloaded: cifs]
-CPU: 4 UID: 0 PID: 1126 Comm: kworker/4:0 Not tainted 6.16.0-rc3 #5 PREEMPT(voluntary)
-Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.16.3-4.fc42 04/01/2014
-Workqueue: cifsiod smb2_reconnect_server [cifs]
-RIP: 0010:__queue_delayed_work+0x1d2/0x200
-Code: 41 5e 41 5f e9 7f ee ff ff 90 0f 0b 90 e9 5d ff ff ff bf 02 00
-00 00 e8 6c f3 07 00 89 c3 eb bd 90 0f 0b 90 e9 57 f> 0b 90 e9 65 fe
-ff ff 90 0f 0b 90 e9 72 fe ff ff 90 0f 0b 90 e9
-RSP: 0018:ffffc900014afad8 EFLAGS: 00010003
-RAX: 0000000000000000 RBX: ffff888124d99988 RCX: ffffffff81399cc1
-RDX: dffffc0000000000 RSI: ffff888114326e00 RDI: ffff888124d999f0
-RBP: 000000000000ea60 R08: 0000000000000001 R09: ffffed10249b3331
-R10: ffff888124d9998f R11: 0000000000000004 R12: 0000000000000040
-R13: ffff888114326e00 R14: ffff888124d999d8 R15: ffff888114939020
-FS:  0000000000000000(0000) GS:ffff88829f7fe000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007ffe7a2b4038 CR3: 0000000120a6f000 CR4: 0000000000750ef0
-PKRU: 55555554
-Call Trace:
- <TASK>
- queue_delayed_work_on+0xb4/0xc0
- smb2_reconnect+0xb22/0xf50 [cifs]
- smb2_reconnect_server+0x413/0xd40 [cifs]
- ? __pfx_smb2_reconnect_server+0x10/0x10 [cifs]
- ? local_clock_noinstr+0xd/0xd0
- ? local_clock+0x15/0x30
- ? lock_release+0x29b/0x390
- process_one_work+0x4c5/0xa10
- ? __pfx_process_one_work+0x10/0x10
- ? __list_add_valid_or_report+0x37/0x120
- worker_thread+0x2f1/0x5a0
- ? __kthread_parkme+0xde/0x100
- ? __pfx_worker_thread+0x10/0x10
- kthread+0x1fe/0x380
- ? kthread+0x10f/0x380
- ? __pfx_kthread+0x10/0x10
- ? local_clock_noinstr+0xd/0xd0
- ? ret_from_fork+0x1b/0x1f0
- ? local_clock+0x15/0x30
- ? lock_release+0x29b/0x390
- ? rcu_is_watching+0x20/0x50
- ? __pfx_kthread+0x10/0x10
- ret_from_fork+0x15b/0x1f0
- ? __pfx_kthread+0x10/0x10
- ret_from_fork_asm+0x1a/0x30
- </TASK>
-irq event stamp: 1116206
-hardirqs last  enabled at (1116205): [<ffffffff8143af42>] __up_console_sem+0x52/0x60
-hardirqs last disabled at (1116206): [<ffffffff81399f0e>] queue_delayed_work_on+0x6e/0xc0
-softirqs last  enabled at (1116138): [<ffffffffc04562fd>] __smb_send_rqst+0x42d/0x950 [cifs]
-softirqs last disabled at (1116136): [<ffffffff823d35e1>] release_sock+0x21/0xf0
-
-Cc: linux-cifs@vger.kernel.org
-Reported-by: David Howells <dhowells@redhat.com>
-Fixes: 42ca547b13a2 ("cifs: do not disable interface polling on failure")
-Reviewed-by: David Howells <dhowells@redhat.com>
-Tested-by: David Howells <dhowells@redhat.com>
-Signed-off-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
+Fixes: ee4cdf7ba857 ("netfs: Speed up buffered reading")
+Reported-by: Stefan Metzmacher <metze@samba.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
+cc: Steve French <stfrench@microsoft.com>
+cc: Tom Talpey <tom@talpey.com>
+cc: Paulo Alcantara (Red Hat) <pc@manguebit.com>
+cc: Matthew Wilcox <willy@infradead.org>
+cc: linux-cifs@vger.kernel.org
+cc: netfs@lists.linux.dev
+cc: linux-fsdevel@vger.kernel.org
 ---
- fs/smb/client/cifsglob.h |  1 +
- fs/smb/client/smb2pdu.c  | 10 ++++------
- 2 files changed, 5 insertions(+), 6 deletions(-)
+ fs/smb/client/smbdirect.c | 114 +++++++-------------------------------
+ 1 file changed, 19 insertions(+), 95 deletions(-)
 
-diff --git a/fs/smb/client/cifsglob.h b/fs/smb/client/cifsglob.h
-index 45e94e18f4d5..da963294a573 100644
---- a/fs/smb/client/cifsglob.h
-+++ b/fs/smb/client/cifsglob.h
-@@ -1302,6 +1302,7 @@ struct cifs_tcon {
- 	bool use_persistent:1; /* use persistent instead of durable handles */
- 	bool no_lease:1;    /* Do not request leases on files or directories */
- 	bool use_witness:1; /* use witness protocol */
-+	bool dummy:1; /* dummy tcon used for reconnecting channels */
- 	__le32 capabilities;
- 	__u32 share_flags;
- 	__u32 maximal_access;
-diff --git a/fs/smb/client/smb2pdu.c b/fs/smb/client/smb2pdu.c
-index 084ee66e73fd..572cfc42dda8 100644
---- a/fs/smb/client/smb2pdu.c
-+++ b/fs/smb/client/smb2pdu.c
-@@ -424,9 +424,9 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon,
- 		free_xid(xid);
- 		ses->flags &= ~CIFS_SES_FLAGS_PENDING_QUERY_INTERFACES;
+diff --git a/fs/smb/client/smbdirect.c b/fs/smb/client/smbdirect.c
+index a976bcf61226..5fa46b2e682c 100644
+--- a/fs/smb/client/smbdirect.c
++++ b/fs/smb/client/smbdirect.c
+@@ -1770,35 +1770,39 @@ struct smbd_connection *smbd_get_connection(
+ }
  
--		/* regardless of rc value, setup polling */
--		queue_delayed_work(cifsiod_wq, &tcon->query_interfaces,
--				   (SMB_INTERFACE_POLL_INTERVAL * HZ));
-+		if (!tcon->ipc && !tcon->dummy)
-+			queue_delayed_work(cifsiod_wq, &tcon->query_interfaces,
-+					   (SMB_INTERFACE_POLL_INTERVAL * HZ));
+ /*
+- * Receive data from receive reassembly queue
++ * Receive data from the transport's receive reassembly queue
+  * All the incoming data packets are placed in reassembly queue
+- * buf: the buffer to read data into
++ * iter: the buffer to read data into
+  * size: the length of data to read
+  * return value: actual data read
+- * Note: this implementation copies the data from reassebmly queue to receive
++ *
++ * Note: this implementation copies the data from reassembly queue to receive
+  * buffers used by upper layer. This is not the optimal code path. A better way
+  * to do it is to not have upper layer allocate its receive buffers but rather
+  * borrow the buffer from reassembly queue, and return it after data is
+  * consumed. But this will require more changes to upper layer code, and also
+  * need to consider packet boundaries while they still being reassembled.
+  */
+-static int smbd_recv_buf(struct smbd_connection *info, char *buf,
+-		unsigned int size)
++int smbd_recv(struct smbd_connection *info, struct msghdr *msg)
+ {
+ 	struct smbdirect_socket *sc = &info->socket;
+ 	struct smbd_response *response;
+ 	struct smbdirect_data_transfer *data_transfer;
++	size_t size = iov_iter_count(&msg->msg_iter);
+ 	int to_copy, to_read, data_read, offset;
+ 	u32 data_length, remaining_data_length, data_offset;
+ 	int rc;
  
- 		mutex_unlock(&ses->session_mutex);
++	if (WARN_ON_ONCE(iov_iter_rw(&msg->msg_iter) == WRITE))
++		return -EINVAL; /* It's a bug in upper layer to get there */
++
+ again:
+ 	/*
+ 	 * No need to hold the reassembly queue lock all the time as we are
+ 	 * the only one reading from the front of the queue. The transport
+ 	 * may add more entries to the back of the queue at the same time
+ 	 */
+-	log_read(INFO, "size=%d info->reassembly_data_length=%d\n", size,
++	log_read(INFO, "size=%zd info->reassembly_data_length=%d\n", size,
+ 		info->reassembly_data_length);
+ 	if (info->reassembly_data_length >= size) {
+ 		int queue_length;
+@@ -1836,7 +1840,10 @@ static int smbd_recv_buf(struct smbd_connection *info, char *buf,
+ 			if (response->first_segment && size == 4) {
+ 				unsigned int rfc1002_len =
+ 					data_length + remaining_data_length;
+-				*((__be32 *)buf) = cpu_to_be32(rfc1002_len);
++				__be32 rfc1002_hdr = cpu_to_be32(rfc1002_len);
++				if (copy_to_iter(&rfc1002_hdr, sizeof(rfc1002_hdr),
++						 &msg->msg_iter) != sizeof(rfc1002_hdr))
++					return -EFAULT;
+ 				data_read = 4;
+ 				response->first_segment = false;
+ 				log_read(INFO, "returning rfc1002 length %d\n",
+@@ -1845,10 +1852,9 @@ static int smbd_recv_buf(struct smbd_connection *info, char *buf,
+ 			}
  
-@@ -4229,10 +4229,8 @@ void smb2_reconnect_server(struct work_struct *work)
- 		}
- 		goto done;
+ 			to_copy = min_t(int, data_length - offset, to_read);
+-			memcpy(
+-				buf + data_read,
+-				(char *)data_transfer + data_offset + offset,
+-				to_copy);
++			if (copy_to_iter((char *)data_transfer + data_offset + offset,
++					 to_copy, &msg->msg_iter) != to_copy)
++				return -EFAULT;
+ 
+ 			/* move on to the next buffer? */
+ 			if (to_copy == data_length - offset) {
+@@ -1893,6 +1899,8 @@ static int smbd_recv_buf(struct smbd_connection *info, char *buf,
+ 			 data_read, info->reassembly_data_length,
+ 			 info->first_entry_offset);
+ read_rfc1002_done:
++		/* SMBDirect will read it all or nothing */
++		msg->msg_iter.count = 0;
+ 		return data_read;
  	}
--
- 	tcon->status = TID_GOOD;
--	tcon->retry = false;
--	tcon->need_reconnect = false;
-+	tcon->dummy = true;
  
- 	/* now reconnect sessions for necessary channels */
- 	list_for_each_entry_safe(ses, ses2, &tmp_ses_list, rlist) {
+@@ -1913,90 +1921,6 @@ static int smbd_recv_buf(struct smbd_connection *info, char *buf,
+ 	goto again;
+ }
+ 
+-/*
+- * Receive a page from receive reassembly queue
+- * page: the page to read data into
+- * to_read: the length of data to read
+- * return value: actual data read
+- */
+-static int smbd_recv_page(struct smbd_connection *info,
+-		struct page *page, unsigned int page_offset,
+-		unsigned int to_read)
+-{
+-	struct smbdirect_socket *sc = &info->socket;
+-	int ret;
+-	char *to_address;
+-	void *page_address;
+-
+-	/* make sure we have the page ready for read */
+-	ret = wait_event_interruptible(
+-		info->wait_reassembly_queue,
+-		info->reassembly_data_length >= to_read ||
+-			sc->status != SMBDIRECT_SOCKET_CONNECTED);
+-	if (ret)
+-		return ret;
+-
+-	/* now we can read from reassembly queue and not sleep */
+-	page_address = kmap_atomic(page);
+-	to_address = (char *) page_address + page_offset;
+-
+-	log_read(INFO, "reading from page=%p address=%p to_read=%d\n",
+-		page, to_address, to_read);
+-
+-	ret = smbd_recv_buf(info, to_address, to_read);
+-	kunmap_atomic(page_address);
+-
+-	return ret;
+-}
+-
+-/*
+- * Receive data from transport
+- * msg: a msghdr point to the buffer, can be ITER_KVEC or ITER_BVEC
+- * return: total bytes read, or 0. SMB Direct will not do partial read.
+- */
+-int smbd_recv(struct smbd_connection *info, struct msghdr *msg)
+-{
+-	char *buf;
+-	struct page *page;
+-	unsigned int to_read, page_offset;
+-	int rc;
+-
+-	if (iov_iter_rw(&msg->msg_iter) == WRITE) {
+-		/* It's a bug in upper layer to get there */
+-		cifs_dbg(VFS, "Invalid msg iter dir %u\n",
+-			 iov_iter_rw(&msg->msg_iter));
+-		rc = -EINVAL;
+-		goto out;
+-	}
+-
+-	switch (iov_iter_type(&msg->msg_iter)) {
+-	case ITER_KVEC:
+-		buf = msg->msg_iter.kvec->iov_base;
+-		to_read = msg->msg_iter.kvec->iov_len;
+-		rc = smbd_recv_buf(info, buf, to_read);
+-		break;
+-
+-	case ITER_BVEC:
+-		page = msg->msg_iter.bvec->bv_page;
+-		page_offset = msg->msg_iter.bvec->bv_offset;
+-		to_read = msg->msg_iter.bvec->bv_len;
+-		rc = smbd_recv_page(info, page, page_offset, to_read);
+-		break;
+-
+-	default:
+-		/* It's a bug in upper layer to get there */
+-		cifs_dbg(VFS, "Invalid msg type %d\n",
+-			 iov_iter_type(&msg->msg_iter));
+-		rc = -EINVAL;
+-	}
+-
+-out:
+-	/* SMBDirect will read it all or nothing */
+-	if (rc > 0)
+-		msg->msg_iter.count = 0;
+-	return rc;
+-}
+-
+ /*
+  * Send data to transport
+  * Each rqst is transported as a SMBDirect payload
 
