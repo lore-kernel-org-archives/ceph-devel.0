@@ -1,226 +1,396 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E011E2798FF;
-	Mon, 11 Aug 2025 23:29:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754954968; cv=fail; b=EestGF3DeIzsiCSTbsDTbQvlo/1vKNTA6Dpw8DKPHxC1Q4xj3hf1SP8+T738mLkkFS1vSC1WWEgn31Yc5RdL19r5KkLAg9jcAxkLZPFtjiv/mttjTxGQ/Fu0apSmesLgSvz6T32GoTOdnmp0axuEH6Sfbat7/4gS3GvoeJvHsUY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754954968; c=relaxed/simple;
-	bh=fatk42r6RCfAILUDiev1ZvKQMvlGGfsp+nF80JHI834=;
-	h=From:To:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=FBUbbWu47LFB6Fwl5/VyRbImHs4M0rGzFW0mRAi1sLBmqazGZHl3JK6dZIq+oq1tq5jV0d5W+NYmOojPo+FbZDIYLKUCCAGzX3GrfjDlcLiPOtxaG1frbTj9d4+LLmBkeJj1pGDRCANzgBBHI4xwFxfBsgsZemD7qboiaMzTtjA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=hZERenkF; arc=fail smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C16182E7628
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 09:07:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1754989640; cv=none; b=QpPm/FgijYKZxqbmSXNeSr5KO+pWDul0767jWmsxeTkIlKeVaRX6BAaqyvvP+GQWcg6UVDWNGr8M9QN0dH26j+Ef2vZzjbLs83jvHk1AuGmrP9V9zt0VLDpKFYfvDhAacQctWY7SQjBVq/YJXPq/AbpQnUzlm2ZhGMokw208S0c=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1754989640; c=relaxed/simple;
+	bh=jBa8QlNQLfMd0qeeYKGmF16GJzviVnykiEWgJtTk6V0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=IvdRD/TUjyjhTnOmd+/atlpLhBoBxdsQQVvAR2ACWCYtpjpu3MvvFBsQKNIdWh+MrZfgXpArwgvSpfiuClCQZA3DZMKDDceH0Kyl56/8SUgSckFHptteOepWk0Rigtp5NjAH2mGJsjIg1w/rvmYGx/CpGyMUacV2INgCJhp5ymE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MzxtelQk; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="hZERenkF"
-Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57BERWwJ004417;
-	Mon, 11 Aug 2025 23:29:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=
-	content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=fatk42r6RCfAILUDiev1ZvKQMvlGGfsp+nF80JHI834=; b=hZERenkF
-	JptY+wK4o+COWKeYtpNDe81WRhBjIKIRhAw+inx1uIiA3I6syh5D3Lj1/vmZn0UY
-	XOcM1TAqiFcGZlGScIV94w3UxEqFWPRuE7lpnS6SHI1m3ZhFW2fmhr8wefY3MrYM
-	BpuOdc5EbSyDDz+UR+deQOFO3pb8j6MNwtQVdgXc/5Vyf40/TLhkY5rVMVagJaG6
-	4l7w7ZytT5hbxdmB+XV691Vm9zobDD9YKcSv1SuVTkvTpbBY8Oj2tl5GXnmm/rKY
-	cvAevrrAGjG7KUuNNohfGiWpV6Hq4whTY294a6YP0OmtWcU10WlL5P78yXd0uaz9
-	6qrT7WVqKal9ag==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48duru3qe6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 11 Aug 2025 23:29:22 +0000 (GMT)
-Received: from m0356516.ppops.net (m0356516.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57BNTMPm026348;
-	Mon, 11 Aug 2025 23:29:22 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12on2055.outbound.protection.outlook.com [40.107.243.55])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48duru3qe4-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 11 Aug 2025 23:29:22 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=dGlZ5IqIPTl6UIUjpwqb26DvHewNx3JP+ddJhWLwREu0sZ8klUzgvTLmGiIf82m6h4Eo+xCxDQfjkl9QOJRDm7y2TiTTWmJd4XyTCrNqxmo+CbwLlbJvtKJJmyIMSmpdnn7DCWYPdQln7bx8IRjFmzvC1JacqnoX5hByt2cWrusevNwsdju0Nv3+EFlQJpaB7zGxZCQpKnBV0/6DtHuVL+1qMijVBu+Ez8L/jIkeU54Z1bgxY3Sga3zq1wr0xsZnKTehHXdK5v0JqPp+c+IeAZchkYWbk5XDqE/dHl8ZEFytRalabTLpFVy4VpGhZTuxaUbosE3oXC+cRcttWxOlyw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=fatk42r6RCfAILUDiev1ZvKQMvlGGfsp+nF80JHI834=;
- b=iF6XGyNN33ZeT6UGdOxyN4A1iCDZjuvQM9XOoeFYeV+FgPfI/YfYMUTosC2yJTB14sfNeJ7sRzHb8VfbdyrruMewfSRbzXw4PWwLmxKPLZlA5jLddo2LSVUebN+xqpT5O0HMH1GixSdtIfb9FVddWV2jFfX5kOqFaOiW7nQqDUaZEyPmXcdxMUm3pJNkv8zPE578X7/MSWm2+S/j5ptZHEBnNJdsfV3VuIT3sSoj8XFRyUMmLmHNm83jGrbIHfzPgozXhaq5biAbe/Zb2HMpb0FqbXYjnTHmPOxLSEDIsPTbgoe0eelU/Er/SUXKVrYeBv5o3VoDPVcTBStTFuWOWg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by DS0PR15MB6301.namprd15.prod.outlook.com (2603:10b6:8:168::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9009.21; Mon, 11 Aug
- 2025 23:29:20 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::6fd6:67be:7178:d89b]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::6fd6:67be:7178:d89b%3]) with mapi id 15.20.9009.017; Mon, 11 Aug 2025
- 23:29:20 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: Alex Markuze <amarkuze@redhat.com>,
-        "max.kellermann@ionos.com"
-	<max.kellermann@ionos.com>,
-        "ceph-devel@vger.kernel.org"
-	<ceph-devel@vger.kernel.org>,
-        Xiubo Li <xiubli@redhat.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "idryomov@gmail.com" <idryomov@gmail.com>
-Thread-Topic: [EXTERNAL] Re:  [PATCH 3/3] net/ceph/messenger: add empty check
- to ceph_con_get_out_msg()
-Thread-Index: AQHcCxfDgPqdllw8zUCbN+/82/SLLA==
-Date: Mon, 11 Aug 2025 23:29:20 +0000
-Message-ID: <65cffb7bddf7652e1d7c25bf98a42b78a7ef8c39.camel@ibm.com>
-References: <20250806094855.268799-1-max.kellermann@ionos.com>
-		 <20250806094855.268799-4-max.kellermann@ionos.com>
-	 <57af9acc17e333c80f07e2b15478088b4f14ba12.camel@ibm.com>
-In-Reply-To: <57af9acc17e333c80f07e2b15478088b4f14ba12.camel@ibm.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|DS0PR15MB6301:EE_
-x-ms-office365-filtering-correlation-id: 2497e0cb-6b01-4707-600b-08ddd92ee5c5
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|1800799024|366016|10070799003|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?a1JtMGdNSWkvdkJwV2l0YkJLVkZEVEdhKzJhdHMycXdjMlJ2Vlk0VzlRSzJk?=
- =?utf-8?B?UTF1bUM0VmNMbDgrUERPTDByUDVMczlUVCtNSGtBSGRTNm9jMTN2UlRyM0xl?=
- =?utf-8?B?QXJzZjVhUCs5QWNZbEFzSklJNmNjL1d0QlhxY2xwdUdaOGxRL3F5V1lwUjY4?=
- =?utf-8?B?MGkva2E1ejBlTkdvYkdZdWRsOFI0eWl3dDY2Szg0ZWxDLy9VejlVc1U3N3pl?=
- =?utf-8?B?RXdwbG5uUGI3QXdKTDRPd0VJNmFDSzZiaFdySTQ2bUh2Z0hzU2R2ZGlMdFQz?=
- =?utf-8?B?aFFiNWVTVDFRaTdYN0FEc0RFU2FEZ2hEQzZnRnNZcXRMMFFLVXg1UERpbVpm?=
- =?utf-8?B?MFZtSDlwVFlSdVVYVkVHUmpJaFVzVWlTcXh0b3hpTnFodk5BTThmbG5WY3BM?=
- =?utf-8?B?TzNHZUlsYmZtc1o1ZDR5VTkyODVmSlZCUWpvTWhNSTF0TDdlaUIwNEVRMFdN?=
- =?utf-8?B?NElUQllZSDVBYU5zVjY5WW1PQkx0eWJlSXcwbW9xRWF1Y2thbmFycDl5UUVB?=
- =?utf-8?B?RHV2cjNiQjhEa1BoOUswZm5UYXdqTStKb0RHd3BHVUdEK1RQUTBSTVlHN01N?=
- =?utf-8?B?TjN6d1VGT281ZGgyQ01XcE1rZ1U4OHFEZGRROFpIV05CNGRFbXVNL0VhdWFY?=
- =?utf-8?B?M3dTaTBQL1NzL3FYb3BmZ3ZWZTgvei9OVmtCSkliNnhsWXFmWml6b05DUVBp?=
- =?utf-8?B?L25qUHdaOXFod1dQMVpWRHo1Mm1yTk9jRTY3WXNWUUlmbVhFQXJkbE12N3FL?=
- =?utf-8?B?a2UrT1BWWkUwWkZtaEFoWGg3aE52cTg0akNWaUk3ckZCVmlKZmxXV2Q3MkR4?=
- =?utf-8?B?SC9lMVZpeXBoODFZdlVDcGwrcE1oZU9teFBkRGNZQThjZENBYmcxRVVjaGQ3?=
- =?utf-8?B?Y3A4a3B1dWRMRE1GRndsTHVWc3laZlZzbDRsVlRnTjRMY0x1Mi9jSHpPZ2VZ?=
- =?utf-8?B?dGxHTUhWV1dKSzl1UGNVMjlLZmJDNDRvSmxlMXdxTEV4TXMzaS9uREVvcUxy?=
- =?utf-8?B?ZWhiWThMQzhOa3lJN3o3NkNDTEFFZkg5OU9WSFppSi8vOHFvZDhoeWd3Rk4z?=
- =?utf-8?B?WVFVUUZPS0FaSlFSSjZtTzJpZlFZclpYQmNZZzZKeEJ3YVNSNUgvT2JnRWVD?=
- =?utf-8?B?RzZ3NnNvUUJSMkRGYlQ3QzROU0lzM2l0NTBGOUpiaE1pYnpWQmkvY1VTM0xD?=
- =?utf-8?B?UVJ3UEZzNUpCYW9kL1YzS0VHaUg5M2MwRjdoMllReHNzdHhTRDdqb1I2YXFN?=
- =?utf-8?B?cU9mNVQ5b1pRem9Ua0FJTllHS1R5QTg5Smx2bis3L1I3emFJY2dqS3J3NzN1?=
- =?utf-8?B?VVFpSmRRd1JVa1dEeXMxSllsWDQwdkYyZUtSSE1aU3p4MVlVSktyN1NQcWk4?=
- =?utf-8?B?ZktEakljV0h1VTduY3o1Y3ROTkt3d0ZmeGFhM3g4SC9EZzV4ZXBVMkhIK0F4?=
- =?utf-8?B?WFhOaWk5TGdlYitqb0tWNVdQTk1aa0lSdmtJd0hRSEEyNEQ2VDVqaHhaYU5o?=
- =?utf-8?B?MzNUS2VLWjBrZVEyTU1yU2hhRVAyQmVJdXRmejhwZFZJRS9uTlo1ckhhL0tP?=
- =?utf-8?B?UmFjQ3dneGZaL3Zpc1hFWWg3S2svb0lHMkZiQkl2dVBZZHdNaGpLb2o5b2Q4?=
- =?utf-8?B?RE9OWmI5bE9UTkZkV3dxZlVDVHEyS2M0c2g0dko3T2gzbThZQ3JaNGVtRDlj?=
- =?utf-8?B?NU1SVkdzMCs5VzFBMnBLRDJVMTFFbXhlZVhqa1JWK0JLQWN1VmlXVFQzUjJi?=
- =?utf-8?B?a3JPR2EwNXRDa2dBWmQwU2l6L0J5MitLL2xhQkxVbXIrQWY4ME04aGpoTTMw?=
- =?utf-8?B?OFIrSHlKN3BsMmlRdHFkWW9uR3FDVmVLWXI0aEo5QjNmVVpwUmhSbkI2TFYw?=
- =?utf-8?B?TGlieWtmSjdPQXF2c1lIaFZTNVkya081UWtTUmR4ZHJ4QWRYaU9ReWwyZ3Uy?=
- =?utf-8?B?aWphUEtwQTJwbS9talI2MVUvYnVzb0psbDUwL3lWckRuVWNRRVZRcXBBN0V5?=
- =?utf-8?B?aG84bEp1U0pRPT0=?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(10070799003)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?Qk9pdHVXVTFUSFRmc3NRYWprZGl2SlZIT3lhK2pvUHFhalUvTGljcC9oK3g0?=
- =?utf-8?B?QmtoUTY0R3RTV0RtaE9XZzRhbVlRUVpkN2V2YXJhQ2k0UHZOMnN6T3QyZFhq?=
- =?utf-8?B?UWRyc0krTERiVDlhRE1Nc1NoNHc0SXY3VDcwZUJHcEZWeDhnWVZGK1ZkOUc3?=
- =?utf-8?B?Vm5yM2NEQ0pQK2JOWlB4M20xL3JERVRyVkRtTUlLbzdWbnE5TVFWSElTdi81?=
- =?utf-8?B?SmQ2U2lIUGVYQjlaUTE0VUoyaWYzLzd0elkyM3p4M0FFS1N6NkpwTGU3VUly?=
- =?utf-8?B?dXN4ODBRU1doOGxxUE5LRjkzeERGUGxqbmdydmtGRXNackZsa1VUSlRydE1S?=
- =?utf-8?B?SFNNbnZMcEo2MkZKVGhrbmpJUlp1U004N0ptOVpydkxYQUMvMWlVd0c0SGdw?=
- =?utf-8?B?emVzek15eEFITzEyVk9LR3lVZVJ1cmkxNjdDNVFRTmF1WE1zOHlDbUJFa2Uw?=
- =?utf-8?B?Y055M01XVDN6STRHSjF3Y3VsVWJsNHpTb1htWkJBK2t4Z0tjeW02TjhJTnRV?=
- =?utf-8?B?QVZ6aGRBVjR1R0lWR3piZExyWnZ6VkZ4WWZ2aEpqQ1dWUmpHRzJqVFBtRDUy?=
- =?utf-8?B?ZHdZdlRtQ2pMU0ZQdG1hcklyQ1VpdlVXYUpqQ201eXY1R3J2MFlxOUp6ZVBO?=
- =?utf-8?B?ZFdZRkZxSFdlUkhiYXdxUWt1b1pMbmxsQzROQnZGejF2YnZrN01RTjlGM1JY?=
- =?utf-8?B?N2g0OERGSWI3WG81TDVYUFo3VjdxdTBublBYL3cvVjZCZzc5emUvOGR6VnZL?=
- =?utf-8?B?dHJ4a09JY2ZPeng3TkFiaFVjOS9pL1dnZGRIdnZCd05tOE1odTNvKzM5amY0?=
- =?utf-8?B?bUlRVTNHaWZxdm1yTVl2RzlRWUpWdytpRFZ3em1MNFRyWnRIckhua3pLYXQx?=
- =?utf-8?B?OXdOY2JFMVptaEVDeEVNdFZqWjBmMzUzcTl5NUQ0YXBRdVVFUW53ZEwrRVVo?=
- =?utf-8?B?c296QktoUXNWVjBGb2lzcmVERm9xR1dhTFZZUGhMRlphWG9odHJvVnFpanND?=
- =?utf-8?B?cnIvOWkrWDVTRTYremJmRWRuZWMvMVBPSktkT3dLNjk5YTdjb1pIbTFrWE1k?=
- =?utf-8?B?QkFueHdyQzd1MGN5S2w1eTBlOUhNdkpXbUZqMDhBaDdUSnBNQlY3OGpPSXBG?=
- =?utf-8?B?dlBqbldGUVdxbVA5SU5GSUJ0SjJPZEdGbnpHNmpZdG8ycjhtbzAzbzErdVhM?=
- =?utf-8?B?ZG1jYnc4TGJRYTV3Mm5Mamg1RzVRaEtFWjJEV1JPcEFxZWJGanB4ckpnT3R6?=
- =?utf-8?B?M25TaWhvVHlhQWRuaW5yM0Q1bGdTckJDalJ4WjNSdHh3RVRjaTVrRTJyNWp5?=
- =?utf-8?B?VXNYQjduQ1cySmZaY3kzWEd3N0FwYWZhN2hLOGs5SGxXZG9tY0g5cnRyMm9H?=
- =?utf-8?B?U3ludGFiZTc5T0k4R1c2ZHQ0UDF1SmU2TFZrVEpEazcrWW1vZEQxa21PRWsy?=
- =?utf-8?B?ODRJQ2xjaHNEdFczQnBMTGRQdWo4NEQwRDJMdTRtWTkySEVYT1ROeGJ1Qklu?=
- =?utf-8?B?NmQ2UHkyMEx3SVkvaGJJandFWEJ3aS96RFhpdXJ5OUJjaCtNKzh2SjBnQ2Rh?=
- =?utf-8?B?Q3djUXEvb0lFN0tEb2lLZExkTm03Y1B5NjF0dHpJTjdobUVsdnBMM1JsSk1W?=
- =?utf-8?B?cFVBL1VRTmJrMWMyV2JrVFFDaVhDT1ZBQnMvclN3Rm81UHQvSlBKeEpNQVoz?=
- =?utf-8?B?MVRjNHZOeUp1VUZiTit0WGMrZ0NKSHV4RlpSaTBUSmxYRHBOZjUybDVLVm1Y?=
- =?utf-8?B?WlNBZzkvd3llZlV2L2tTVjJtYU1iekNaY3ZCZEM1ZFlCaEF4NzErcFB4dkVm?=
- =?utf-8?B?RnIvZzBJaTlwbDF6cm1aeXROR2FFdk5vL1FQcWpSM054TUtlNDF0eERjRjVt?=
- =?utf-8?B?SVFCVUVwUllwOXI5Vm4veHI1ZDZiMTBLd2t1ZHN3cWNNb3RzY3JtT3V0NUo0?=
- =?utf-8?B?cFEvVUZFSHV6L0VVUnJNSWM2L3IxUzhXZHBwd0RDTENDdUFabEkrbFhOTmVy?=
- =?utf-8?B?Rmh6SWdVS1NUU0d6YUZXZDBSTmZiTm13b1ZRT3R3ZkNRd0FMTEVwVUhOUXp2?=
- =?utf-8?B?dW8zVVE0MjJ5UHNRS08yS25SM0QrenE1WnNKbG04WXZmN2IvMzRCSlRBMFlC?=
- =?utf-8?B?Rk5vamw0cFFxL0dWaXJWc0NveXRmNWo1Q3NMMkZ4Z3JEd21NSXVLS3pDQTZT?=
- =?utf-8?Q?T/f+kj5RPT62huJHEDkELq0=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <FA82CFB3B62D0B4791ABD55F19E73C4B@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MzxtelQk"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1754989637;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=6rutRIXHAPRWJ6z84S1clvZ1Wylqad9SKaRZUqiEkzQ=;
+	b=MzxtelQkaMWD00NGfrZbLb16PgbWSZCplKvV5lOSKjImvjnUWZ/dPXzHGE4r9XU/mAVpoD
+	HXesjSypOtE8sh2ItYSwHC2eHewxT4q5FGIK2fLECKBNlOXWw+eiFIdF+1ZvWTX/lll0Aj
+	4tB5U80JHQsIUbxgcjfJ+cCEPK1rXhY=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-511-vaWJk2OdMKSfNfDnxaFrOw-1; Tue, 12 Aug 2025 05:07:16 -0400
+X-MC-Unique: vaWJk2OdMKSfNfDnxaFrOw-1
+X-Mimecast-MFC-AGG-ID: vaWJk2OdMKSfNfDnxaFrOw_1754989635
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-31eec17b5acso6179602a91.2
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 02:07:15 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1754989635; x=1755594435;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=6rutRIXHAPRWJ6z84S1clvZ1Wylqad9SKaRZUqiEkzQ=;
+        b=STa8qAXGt2mQJnTDSKtCVg7EQld11XxjvtO6vuIut5ZTr/wQ8m6wzKOrSW4oABRxkX
+         inEVvsrA/V5Q/up2uODWU1Gj/lh+7r1hZ71+2CE39dm/QNhfeW0V7MsydBJBpLmxI0jp
+         uywqUi59SEAJat9ed75hZxr4YejMtPMPW5GUNZ8w+r6wpj2OexrEA3BT30eraNF4XyUb
+         lGN0OWEqYY3KulgYuxgsVIB5e0+i5Xd5qu6J0rP6L+sCt9w9OVhXC1zfJHCVm6I5olwR
+         gTFOvzzJK1FG7y0PUg9rNgz5RgR6iza/obRMCla23JdzFEII2FGSibX4mN85z7wqmXgP
+         LAsQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVUDwvQ+GhmxM9WzttUYQg4ArPiSYeLuqHeH4nX1GuCd6V3v+HBggtn+JNJmPKj+2DekXNGQEO8ldj1@vger.kernel.org
+X-Gm-Message-State: AOJu0YyIO81eO5hQS/LUFmeO92NzROQEcHb5zxBFpkuV5OYAORKfbm9a
+	prHd4OCfvc1GS6X2fbQmsJlXzH5QJQYq0pFRKGxs5bllvTGl5dVGsWVb3NsQBQiNLS32baQOl+T
+	SyZYAgu2XJk70uwELGRKVGaopwGPbGLlw5L5kYc27UrEEN+vL/dQWNH/oHktv5LJK044WYD9luU
+	BzoAonGHHtGJYQfLCGdbw03ItjyKyIqOrK7wjr
+X-Gm-Gg: ASbGncv3PjHp0aBZBfV8oWBl0wg6oAxMT1Cx6eP6N4O481K/IMfUsBgFAKAM/efhxlJ
+	9v+8Z/bXI4Wv+Ia2XaUjjLEdb4bzEqTdcMkN5fj4xQbUjy6Dji50+46W00wbPrE614+h7w1MJ4n
+	ABq2p0uhfIaxyDiv3h3NqiFw==
+X-Received: by 2002:a17:90b:2e84:b0:313:f6fa:5bca with SMTP id 98e67ed59e1d1-321c0b2b72fmr2998057a91.22.1754989634891;
+        Tue, 12 Aug 2025 02:07:14 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGk1pRcj8sOmkRTf7bU0IP/Nq61NDrOEh7kIRK+n3hmso/d/K1V8N+Q4baqOHw9cv54FJOqVDQncQaSX5OB6w4=
+X-Received: by 2002:a17:90b:2e84:b0:313:f6fa:5bca with SMTP id
+ 98e67ed59e1d1-321c0b2b72fmr2998026a91.22.1754989634342; Tue, 12 Aug 2025
+ 02:07:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2497e0cb-6b01-4707-600b-08ddd92ee5c5
-X-MS-Exchange-CrossTenant-originalarrivaltime: 11 Aug 2025 23:29:20.2624
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 2HmVu5yZdSypa52QmZcVAhhwaEJN9IShqZZ+Bwwy4PikBhBKHORjRTGhceeyGDjBe96b9zZYQZHodghNO0UPOg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR15MB6301
-X-Proofpoint-GUID: 1qeXViS0kuXSXuoYQK7chcFT-qBkbcpv
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODExMDE3MCBTYWx0ZWRfX64MvkRT2RI5K
- ahYj24l1KyQdEpkm3WksK3ln8sRmZ7iEe4o8n4Z0Wub85cHB//Hd5JoMFnBISq9EysraCwH1RwN
- N198EuVBIhw0BcnzXjhxg1iviN6ufeS91YarY+0r8ZymiFmtvwyzHCBOdfZD9B/ZdAg/lskPtD4
- C1tPestP+WX9CNcWROFyP0mUUoYx/R+JBOaLXNZ2YUUwl3HssMvgshOMu7hyky6XB+DHO7UX05d
- ddLn113cznt8iurqmiYAWRXt1lpYMqlRxm5ro8hLMDM44pGg0Be4ibk1C0fOOfizBvPNzqT76oa
- eA3pyDvb7MY/UJtqT3j29TwyMfFT+B8YCD3h0VeCLRotZ+qQfhNuCtQfJry6MDL6nCYwM2rycIT
- j+SKQ8Up3XZWhe+xQD0cmPAkF4M0Hgz17QWl03AzIkSeKYVk9WV+PvhfFrUzrxsJUgLnkeov
-X-Authority-Analysis: v=2.4 cv=QtNe3Uyd c=1 sm=1 tr=0 ts=689a7cd2 cx=c_pps
- a=6kUXyxSL3GSgDGyJuzBerg==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
- a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=2OwXVqhp2XgA:10 a=UgJECxHJAAAA:8 a=VnNF1IyMAAAA:8 a=4gJQrt2zwPapI98DJosA:9
- a=QEXdDO2ut3YA:10 a=0lgtpPvCYYIA:10 a=-El7cUbtino8hM1DCn8D:22
-X-Proofpoint-ORIG-GUID: -WuS8q8ot-pcWxMP8hv_DAO96L1aWa8o
-Subject: RE:  [PATCH 3/3] net/ceph/messenger: add empty check to
- ceph_con_get_out_msg()
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-08-11_05,2025-08-11_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 priorityscore=1501 lowpriorityscore=0 clxscore=1015
- mlxlogscore=871 impostorscore=0 suspectscore=0 bulkscore=0 mlxscore=0
- phishscore=0 malwarescore=0 spamscore=0 classifier=spam authscore=0
- authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2507300000 definitions=main-2508110170
+References: <20250729170240.118794-1-khiremat@redhat.com> <3dbbabbd68b58c95a73d02380ce6e48b5803adf2.camel@ibm.com>
+ <CAPgWtC4s6Yhjp0_pnrcU5Cv3ptLe+4uL6+whQK4y398JCcNLnA@mail.gmail.com>
+ <6ec6e3f45e4b90c2b56f4732e0e56fb389442c6e.camel@ibm.com> <CAPgWtC5muDGHsd5A=5bE4OCxYtiKRTLUa1KjU348qnfPDb54_Q@mail.gmail.com>
+ <75632a861cf3c3fe77bbc384a805e9e4e77b95a8.camel@ibm.com>
+In-Reply-To: <75632a861cf3c3fe77bbc384a805e9e4e77b95a8.camel@ibm.com>
+From: Kotresh Hiremath Ravishankar <khiremat@redhat.com>
+Date: Tue, 12 Aug 2025 14:37:03 +0530
+X-Gm-Features: Ac12FXyrJ_qSg4ybG28cjNn_zTzUEvgARBY4rGwO-EDqsUhGKjmRlfuB5rxThCU
+Message-ID: <CAPgWtC4z2G5GuWjzTf4oRc=h=Vx7_0=S4FHvRMe-fmKFgrAdUQ@mail.gmail.com>
+Subject: Re: [PATCH] ceph: Fix multifs mds auth caps issue
+To: Viacheslav Dubeyko <slava.dubeyko@ibm.com>
+Cc: Alex Markuze <amarkuze@redhat.com>, Venky Shankar <vshankar@redhat.com>, 
+	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>, 
+	"idryomov@gmail.com" <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-T24gRnJpLCAyMDI1LTA4LTA4IGF0IDE3OjQxICswMDAwLCBWaWFjaGVzbGF2IER1YmV5a28gd3Jv
-dGU6DQo+IE9uIFdlZCwgMjAyNS0wOC0wNiBhdCAxMTo0OCArMDIwMCwgTWF4IEtlbGxlcm1hbm4g
-d3JvdGU6DQo+ID4gVGhpcyBtb3ZlcyB0aGUgbGlzdF9lbXB0eSgpIGNoZWNrcyBmcm9tIHRoZSB0
-d28gY2FsbGVycyAodjEgYW5kIHYyKQ0KPiA+IGludG8gdGhlIGJhc2UgbWVzc2VuZ2VyLmMgbGli
-cmFyeS4gIE5vdyB0aGUgdjEvdjIgc3BlY2lhbGl6YXRpb25zIGRvDQo+ID4gbm90IG5lZWQgdG8g
-a25vdyBhYm91dCBjb24tPm91dF9xdWV1ZTsgdGhhdCBpbXBsZW1lbnRhdGlvbiBkZXRhaWwgaXMN
-Cj4gPiBub3cgaGlkZGVuIGJlaGluZCB0aGUgY2VwaF9jb25fZ2V0X291dF9tc2coKSBmdW5jdGlv
-bi4NCj4gPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBNYXggS2VsbGVybWFubiA8bWF4LmtlbGxlcm1h
-bm5AaW9ub3MuY29tPg0KPiANCj4gTG9va3MgZ29vZC4NCj4gDQo+IFJldmlld2VkLWJ5OiBWaWFj
-aGVzbGF2IER1YmV5a28gPFNsYXZhLkR1YmV5a29AaWJtLmNvbT4NCj4gDQo+IA0KDQpUZXN0ZWQt
-Ynk6IFZpYWNoZXNsYXYgRHViZXlrbyA8U2xhdmEuRHViZXlrb0BpYm0uY29tPg0KDQpUaGFua3Ms
-DQpTbGF2YS4NCg==
+On Tue, Aug 12, 2025 at 2:50=E2=80=AFAM Viacheslav Dubeyko
+<Slava.Dubeyko@ibm.com> wrote:
+>
+> On Wed, 2025-08-06 at 14:23 +0530, Kotresh Hiremath Ravishankar wrote:
+> > On Sat, Aug 2, 2025 at 1:=E2=80=8A31 AM Viacheslav Dubeyko <Slava.=E2=
+=80=8ADubeyko@=E2=80=8Aibm.=E2=80=8Acom> wrote: > > On Fri, 2025-08-01 at 2=
+2:=E2=80=8A59 +0530, Kotresh Hiremath Ravishankar wrote: > > > > Hi, > > > =
+> 1. I will modify the commit message
+> >
+> > On Sat, Aug 2, 2025 at 1:31=E2=80=AFAM Viacheslav Dubeyko <Slava.Dubeyk=
+o@ibm.com> wrote:
+> > >
+> > > On Fri, 2025-08-01 at 22:59 +0530, Kotresh Hiremath Ravishankar wrote=
+:
+> > > >
+> > > > Hi,
+> > > >
+> > > > 1. I will modify the commit message to clearly explain the issue in=
+ the next revision.
+> > > > 2. The maximum possible length for the fsname is not defined in mds=
+ side. I didn't find any restriction imposed on the length. So we need to l=
+ive with it.
+> > >
+> > > We have two constants in Linux kernel [1]:
+> > >
+> > > #define NAME_MAX         255    /* # chars in a file name */
+> > > #define PATH_MAX        4096    /* # chars in a path name including n=
+ul */
+> > >
+> > > I don't think that fsname can be bigger than PATH_MAX.
+> >
+> > As I had mentioned earlier, the CephFS server side code is not restrict=
+ing the filesystem name
+> > during creation. I validated the creation of a filesystem name with a l=
+ength of 5000.
+> > Please try the following.
+> >
+> > [kotresh@fedora build]$ alpha_str=3D$(< /dev/urandom tr -dc 'a-zA-Z' | =
+head -c 5000)
+> > [kotresh@fedora build]$ ceph fs new $alpha_str cephfs_data cephfs_metad=
+ata
+> > [kotresh@fedora build]$ bin/ceph fs ls
+> >
+> > So restricting the fsname length in the kclient would likely cause issu=
+es. If we need to enforce the limitation, I think, it should be done at ser=
+ver side first and it=E2=80=99s a separate effort.
+> >
+>
+> I am not sure that Linux kernel is capable to digest any name bigger than
+> NAME_MAX. Are you sure that we can pass xfstests with filesystem name big=
+ger
+> than NAME_MAX? Another point here that we can put buffer with name inline
+> into struct ceph_mdsmap if the name cannot be bigger than NAME_MAX, for e=
+xample.
+> In this case we don't need to allocate fs_name memory for every
+> ceph_mdsmap_decode() call.
+
+Well, I haven't tried xfstests with a filesystem name bigger than
+NAME_MAX. But I did try mounting a ceph filesystem name bigger than
+NAME_MAX and it works.
+But mounting a ceph filesystem name bigger than PATH_MAX didn't work.
+Note that the creation of a ceph filesystem name bigger than PATH_MAX
+works and
+mounting with the same using fuse client works as well.
+
+I was going through ceph kernel client code, historically, the
+filesystem name is stored as a char pointer. The filesystem name from
+mount options is stored
+into 'struct ceph_mount_options' in 'ceph_parse_new_source' and the
+same is used to compare against the fsmap received from the mds in
+'ceph_mdsc_handle_fsmap'
+
+struct ceph_mount_options {
+    ...
+    char *mds_namespace;  /* default NULL */
+    ...
+};
+
+I am not sure what's the right approach to choose here. In kclient,
+assuming ceph fsname not to be bigger than PATH_MAX seems to be safe
+as the kclient today is
+not able to mount the ceph fsname bigger than PATH_MAX. I also
+observed that the kclient failed to mount the ceph fsname with length
+little less than
+PATH_MAX (4090). So it's breaking somewhere with the entire path
+component being considered. Anyway, I will open the discussion to
+everyone here.
+If we are restricting the max fsname length, we need to restrict it
+while creating it in my opinion and fix it across the project both in
+kclient fuse.
+
+
+>
+> > >
+> > > > 3. I will fix up doutc in the next revision.
+> > > > 4. The fs_name is part of the mdsmap in the server side [1]. The ke=
+rnel client decodes only necessary fields from the mdsmap sent by the serve=
+r. Until now, the fs_name
+> > > >     was not being decoded, as part of this fix, it's required and b=
+eing decoded.
+> > > >
+> > >
+> > > Correct me if I am wrong. I can create a Ceph cluster with several MD=
+S servers.
+> > > In this cluster, I can create multiple file system volumes. And every=
+ file
+> > > system volume will have some name (fs_name). So, if we store fs_name =
+into
+> > > mdsmap, then which name do we imply here? Do we imply cluster name as=
+ fs_name or
+> > > name of particular file system volume?
+> >
+> > In CephFS, we mainly deal with two maps MDSMap[1] and FSMap[2]. The MDS=
+Map represents
+> > the state for a particular single filesystem. So the =E2=80=98fs_name=
+=E2=80=99 in the MDSMap points to a file system
+> > name that the MDSMap represents. Each filesystem will have a distinct M=
+DSMap. The FSMap was
+> > introduced to support multiple filesystems in the cluster. The FSMap ho=
+lds all the filesystems in the
+> > cluster using the MDSMap of each file system. The clients subscribe to =
+these maps. So when kclient
+> > is receiving a mdsmap, it=E2=80=99s corresponding to the filesystem it=
+=E2=80=99s dealing with.
+> >
+>
+> So, it's sounds to me that MDS keeps multiple MDSMaps for multiple file s=
+ystems.
+> And kernel side receives only MDSMap for operations. The FSMap is kept on=
+ MDS
+> side and kernel never receives it. Am I right here?
+
+No, not really. The kclient decodes the FSMap as well. The fsname and
+monitor ip are passed in the mount command, the kclient
+contacts the monitor and receives the list of the file systems in the
+cluster via FSMap. The passed fsname from the
+mount command is compared against the list of file systems in the
+FSMap decoded. If the fsname is found, it fetches
+the fscid and requests the corresponding mdsmap from the respective
+mds using fscid.
+
+>
+> Thanks,
+> Slava.
+>
+> > [1] https://github.com/ceph/ceph/blob/main/src/mds/MDSMap.h
+> > [2] https://github.com/ceph/ceph/blob/main/src/mds/FSMap.h
+> >
+> > Thanks,
+> > Kotresh H R
+> >
+> > >
+> > > Thanks,
+> > > Slava.
+> > >
+> > > >
+> > > >
+> > >
+> > > [1]
+> > > https://elixir.bootlin.com/linux/v6.16/source/include/uapi/linux/limi=
+ts.h#L12
+> > >
+> > > > [1] https://github.com/ceph/ceph/blob/main/src/mds/MDSMap.h#L596
+> > > >
+> > > > On Tue, Jul 29, 2025 at 11:57=E2=80=AFPM Viacheslav Dubeyko <Slava.=
+Dubeyko@ibm.com> wrote:
+> > > > > On Tue, 2025-07-29 at 22:32 +0530, khiremat@redhat.com wrote:
+> > > > > > From: Kotresh HR <khiremat@redhat.com>
+> > > > > >
+> > > > > > The mds auth caps check should also validate the
+> > > > > > fsname along with the associated caps. Not doing
+> > > > > > so would result in applying the mds auth caps of
+> > > > > > one fs on to the other fs in a multifs ceph cluster.
+> > > > > > The patch fixes the same.
+> > > > > >
+> > > > > > Steps to Reproduce (on vstart cluster):
+> > > > > > 1. Create two file systems in a cluster, say 'a' and 'b'
+> > > > > > 2. ceph fs authorize a client.usr / r
+> > > > > > 3. ceph fs authorize b client.usr / rw
+> > > > > > 4. ceph auth get client.usr >> ./keyring
+> > > > > > 5. sudo bin/mount.ceph usr@.a=3D/ /kmnt_a_usr/
+> > > > > > 6. touch /kmnt_a_usr/file1 (SHOULD NOT BE ALLOWED)
+> > > > > > 7. sudo bin/mount.ceph admin@.a=3D/ /kmnt_a_admin
+> > > > > > 8. echo "data" > /kmnt_a_admin/admin_file1
+> > > > > > 9. rm -f /kmnt_a_usr/admin_file1 (SHOULD NOT BE ALLOWED)
+> > > > > >
+> > > > >
+> > > > > I think we are missing to explain here which problem or
+> > > > > symptoms will see the user that has this issue. I assume that
+> > > > > this will be seen as the issue reproduction:
+> > > > >
+> > > > > With client_3 which has only 1 filesystem in caps is working as e=
+xpected
+> > > > > mkdir /mnt/client_3/test_3
+> > > > > mkdir: cannot create directory =E2=80=98/mnt/client_3/test_3=E2=
+=80=99: Permission denied
+> > > > >
+> > > > > Am I correct here?
+> > > > >
+> > > > > > URL: https://tracker.ceph.com/issues/72167
+> > > > > > Signed-off-by: Kotresh HR <khiremat@redhat.com>
+> > > > > > ---
+> > > > > >   fs/ceph/mds_client.c | 10 ++++++++++
+> > > > > >   fs/ceph/mdsmap.c     | 11 ++++++++++-
+> > > > > >   fs/ceph/mdsmap.h     |  1 +
+> > > > > >   3 files changed, 21 insertions(+), 1 deletion(-)
+> > > > > >
+> > > > > > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > > > > > index 9eed6d73a508..ba91f3360ff6 100644
+> > > > > > --- a/fs/ceph/mds_client.c
+> > > > > > +++ b/fs/ceph/mds_client.c
+> > > > > > @@ -5640,11 +5640,21 @@ static int ceph_mds_auth_match(struct c=
+eph_mds_client *mdsc,
+> > > > > >        u32 caller_uid =3D from_kuid(&init_user_ns, cred->fsuid)=
+;
+> > > > > >        u32 caller_gid =3D from_kgid(&init_user_ns, cred->fsgid)=
+;
+> > > > > >        struct ceph_client *cl =3D mdsc->fsc->client;
+> > > > > > +     const char *fs_name =3D mdsc->mdsmap->fs_name;
+> > > > > >        const char *spath =3D mdsc->fsc->mount_options->server_p=
+ath;
+> > > > > >        bool gid_matched =3D false;
+> > > > > >        u32 gid, tlen, len;
+> > > > > >        int i, j;
+> > > > > >
+> > > > > > +     if (auth->match.fs_name && strcmp(auth->match.fs_name, fs=
+_name)) {
+> > > > >
+> > > > > Should we consider to use strncmp() here?
+> > > > > We should have the limitation of maximum possible name length.
+> > > > >
+> > > > > > +             doutc(cl, "fsname check failed fs_name=3D%s  matc=
+h.fs_name=3D%s\n",
+> > > > > > +                   fs_name, auth->match.fs_name);
+> > > > > > +             return 0;
+> > > > > > +     } else {
+> > > > > > +             doutc(cl, "fsname check passed fs_name=3D%s  matc=
+h.fs_name=3D%s\n",
+> > > > > > +                   fs_name, auth->match.fs_name);
+> > > > >
+> > > > > I assume that we could call the doutc with auth->match.fs_name =
+=3D=3D NULL. So, I am
+> > > > > expecting to have a crash here.
+> > > > >
+> > > > > > +     }
+> > > > > > +
+> > > > > >        doutc(cl, "match.uid %lld\n", auth->match.uid);
+> > > > > >        if (auth->match.uid !=3D MDS_AUTH_UID_ANY) {
+> > > > > >                if (auth->match.uid !=3D caller_uid)
+> > > > > > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+> > > > > > index 8109aba66e02..f1431ba0b33e 100644
+> > > > > > --- a/fs/ceph/mdsmap.c
+> > > > > > +++ b/fs/ceph/mdsmap.c
+> > > > > > @@ -356,7 +356,15 @@ struct ceph_mdsmap *ceph_mdsmap_decode(str=
+uct ceph_mds_client *mdsc, void **p,
+> > > > > >                /* enabled */
+> > > > > >                ceph_decode_8_safe(p, end, m->m_enabled, bad_ext=
+);
+> > > > > >                /* fs_name */
+> > > > > > -             ceph_decode_skip_string(p, end, bad_ext);
+> > > > > > +             m->fs_name =3D ceph_extract_encoded_string(p, end=
+, NULL, GFP_NOFS);
+> > > > > > +             if (IS_ERR(m->fs_name)) {
+> > > > > > +                     err =3D PTR_ERR(m->fs_name);
+> > > > > > +                     m->fs_name =3D NULL;
+> > > > > > +                     if (err =3D=3D -ENOMEM)
+> > > > > > +                             goto out_err;
+> > > > > > +                     else
+> > > > > > +                             goto bad;
+> > > > > > +             }
+> > > > > >        }
+> > > > > >        /* damaged */
+> > > > > >        if (mdsmap_ev >=3D 9) {
+> > > > > > @@ -418,6 +426,7 @@ void ceph_mdsmap_destroy(struct ceph_mdsmap=
+ *m)
+> > > > > >                kfree(m->m_info);
+> > > > > >        }
+> > > > > >        kfree(m->m_data_pg_pools);
+> > > > > > +     kfree(m->fs_name);
+> > > > > >        kfree(m);
+> > > > > >   }
+> > > > > >
+> > > > > > diff --git a/fs/ceph/mdsmap.h b/fs/ceph/mdsmap.h
+> > > > > > index 1f2171dd01bf..acb0a2a3627a 100644
+> > > > > > --- a/fs/ceph/mdsmap.h
+> > > > > > +++ b/fs/ceph/mdsmap.h
+> > > > > > @@ -45,6 +45,7 @@ struct ceph_mdsmap {
+> > > > > >        bool m_enabled;
+> > > > > >        bool m_damaged;
+> > > > > >        int m_num_laggy;
+> > > > > > +     char *fs_name;
+> > > > >
+> > > > > The ceph_mdsmap structure describes servers in the mds cluster [1=
+].
+> > > > > Semantically, I don't see any relation of fs_name with this struc=
+ture.
+> > > > > As a result, I don't see the point to keep this pointer in this s=
+tructure.
+> > > > > Why the fs_name has been placed in this structure?
+> > > > >
+> > > > > Thanks,
+> > > > > Slava.
+> > > > >
+> > > > > >   };
+> > > > > >
+> > > > > >   static inline struct ceph_entity_addr *
+> > > > >
+> > > > > [1] https://elixir.bootlin.com/linux/v6.16/source/fs/ceph/mdsmap.=
+h#L11
+> > > > >
+
