@@ -1,705 +1,572 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B11752EA730
-	for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 09:57:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754992673; cv=none; b=GuAaBHz0G5j5cwdp+g+yOc1ZbGsTSPrD0kvEN7u21T9zrMmjEBFbUK+/mqY03Me67YDRdOBGVSV/OvjOXF8PuNi+q7jHr7kOGdgV0gXQAVvSii3INaWq9lhY+OJog6rwMSPpYsTR1rb/mrXl0r8x38GIx6jXcolp6FyiISe5MWA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754992673; c=relaxed/simple;
-	bh=SklPlbBvDoSPnXKeDj95J8xaphdcnRklEvsYG5qYoik=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=ewLobNpBHnpHvqvLNgvgF34TS3MeNtTN7gfuXT7HSyt5iz8WRQSmXs5G9yYtZHMryhLOTCAtHAkafE5znHkAcMGOdoXTm9wecGPqztRhnySu+P+YDDUqRVtfj5kNvrg07CajQZ4eZOkLvbhGTUnKRral9Yzv7j6F0e+gr5LaK24=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QMtM2cQG; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A5AF74420
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 19:52:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1755028362; cv=fail; b=WTJlOZqvLbEtfFH4VLgQR9L6/5QlsL8EDaEDE8qnBfTTzs1l/qVhnwAcbx4soVmAYtde2gMzmx27POh2TXT5Q/ZK+yhnZ6TOGPlJtgNgNAl6d/1pfdBQ0cuZvRtFbuVH5+UY0srlNAULuh91oSdW0NTFJVBTubyujHYTN+jk3Bk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1755028362; c=relaxed/simple;
+	bh=NmBhE3Bkkq0KfjaOe01DMozKVlXudDLt/dQ5uQbqN9w=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=H7dV2bOUeH+/rgGIXGSERqJhqcwE/3PQgqQQ4xtoqEs7xbpuo824YhXJ91Rzt9oxndRjCFRbuyv1ntCdilNuMXoX6OzF5VhVeUayD7vbIqEDx2wZ4oDDx5IPdyrsWYy28G3OPzsSRe/yB+wqcXpa5JKj+98WViAo8xnrLtdd9qU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=F1VCVB3t; arc=fail smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QMtM2cQG"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1754992668;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=8/+35zgVMREp5iu4WHb0LfnIA1EFTWDo15YR87u+kvI=;
-	b=QMtM2cQGruZe4WWnM4e1tjOICyEKChtfnLZ9GqWOB077c8v8rGri3UyaPGT8mxpTGl9J+0
-	C24+1DyCCDc7+S4P4L3neNPe9wijJrkkhDsiaatIYQpeSGIbhH1oHCX1sY2u6Nj78OSLzD
-	Y6JjYKIvGVI2AalqmYvja12I6WriMpY=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-16-tB3C4Ce5PZuNxmnlBPFl-w-1; Tue, 12 Aug 2025 05:57:47 -0400
-X-MC-Unique: tB3C4Ce5PZuNxmnlBPFl-w-1
-X-Mimecast-MFC-AGG-ID: tB3C4Ce5PZuNxmnlBPFl-w_1754992666
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-af9a8a53e75so317449766b.0
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 02:57:46 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1754992666; x=1755597466;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=8/+35zgVMREp5iu4WHb0LfnIA1EFTWDo15YR87u+kvI=;
-        b=rMZ7n6jTzBJB4HTtumdFGhM3uJaJlih4Lga0BHsgjwsKWdh0eIEoTDE/MNPSxYWsb5
-         DUwSw/Noq7eoUtylmB0qF4PXcCOVyZ2dTr7Qvm4tul+kSPiCFhEoXFbFJXGMsqsZZJkh
-         CC0XlOomMStjFrABNJN5/zMAqn491eimfT5RLy3Gmq7Z3QI/YXdFAAFl99GHPgC/VnP8
-         OVzis1RzJVFNBsS9TdNnRJ+JQxS68dMqPWmDPbAq5jQKQkivIRyrzaQuPlDOgge6J/k5
-         tqsIxfGpetl/hVPAyvZJcbFfmHqgMcrhZ8VYFzPuygq6jpXfkrfPivTHPLDt7h9LU/P4
-         qdig==
-X-Gm-Message-State: AOJu0YwTiJx2OA3+IbtaCcvv37zlCiE3CHcdnCxNXxmVEQcIsdH/JBbS
-	KA9PLXntUfJDdDl1si4+bNoML2FIgqWseJEIGNXayfXw944tct8jeKNVtyda8E3D9na0Fg05zJB
-	1GlG3FIgn5OF5+ffjjUZRgSqTe9WMrlCiPi/auTSrVMOBrfKKFiTc/t+sCuBW80yDijLpOeNKeb
-	5i1BLue6E3R8rLTuzjYwMNrC7PznHubf57y/cUhXH1ObRX4Sz3Pw==
-X-Gm-Gg: ASbGncvYUQRA+39aOHDZtdj8Opw9Gr1kFpRDEN5fg2/v/MDycazJsp1UiNjs1mr8RAp
-	X/J2e/dlweIf2p/rNVQfpmaXs0DVdTuFjyncMnzHh1lPGHYOx9rB8/tvpcQk2lXFe6nSltW2OL4
-	ipZ5WhPqpTB6RFk41PMy2S9O03pEiHOiUd3uy0QPpmGcUArAOHle/MDEfUnK512EcTQ10hip0vG
-	rLcR8orkoAo+sEpiocNI7ya8rGp0Va9EjFX2piL/W1kv88KYdOuph7m7w3uQC/+wa80d6NSdsV+
-	RfsblxPxYqb7WiGJisawlr8hfD4blM1+NeSVpf58iz+ll9n6cDdLy4CX84oaTCVerkpSayU+Qw=
-	=
-X-Received: by 2002:a17:907:3e94:b0:af9:a4de:f092 with SMTP id a640c23a62f3a-afa1e1279a7mr263601866b.55.1754992665325;
-        Tue, 12 Aug 2025 02:57:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFbp8tb+iGKIzm9Y8BOOySGRPuBHGHBQarfskNX2G2WxlpFe/XIuH3JTRIQ3ji8UW0emz5hXw==
-X-Received: by 2002:a17:907:3e94:b0:af9:a4de:f092 with SMTP id a640c23a62f3a-afa1e1279a7mr263598566b.55.1754992664739;
-        Tue, 12 Aug 2025 02:57:44 -0700 (PDT)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-af91a21c0a4sm2180821466b.109.2025.08.12.02.57.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Aug 2025 02:57:44 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org,
-	Slava.Dubeyko@ibm.com,
-	idryomov@gmail.com,
-	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v4 1/2] ceph: fix client race condition validating r_parent before applying state
-Date: Tue, 12 Aug 2025 09:57:38 +0000
-Message-Id: <20250812095739.3194337-2-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20250812095739.3194337-1-amarkuze@redhat.com>
-References: <20250812095739.3194337-1-amarkuze@redhat.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="F1VCVB3t"
+Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57CDBkag030834
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 19:52:36 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
+	:in-reply-to:message-id:mime-version:references:subject:to; s=
+	pp1; bh=SWpQ3q2SiC6Pb8LWvqgQDxl6PLwzhtzrv6a/Ri+XNP8=; b=F1VCVB3t
+	W0mcE9vmZ8aqDmHdfbqWSWw16yfnHO6PxIaizTu518P+lMRs44zrnB6jBMiFKuEf
+	UaOrY/JWhApF6uOwNzn1BSycUH/sVy9p/szDw+XtruDwyRRRN2O0faUFizuuDUU7
+	Q4JA9z+nHVzGAGUNBn85uXNrZXCHLfl/rhKgDNcBhcgu0xYz9YNnYFwL05ehVrgE
+	B2Fs1pUcrTLegh+FOlhbTLDgZVAc+70jNCCFqGH/UZt2YqbgIDbMt1lhHZYPP87A
+	zOADD8m5TvE0HncUyDrkzXMb07PpD3KrUv+Vsy77KVTD9JOVUkCLhcpvdu3650t3
+	1H5Adxi7rGhtnQ==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48ehaa4vpd-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 19:52:36 +0000 (GMT)
+Received: from m0360072.ppops.net (m0360072.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57CJqaCL007653
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2025 19:52:36 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48ehaa4vp6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 12 Aug 2025 19:52:35 +0000 (GMT)
+Received: from m0360072.ppops.net (m0360072.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57CJc063011872;
+	Tue, 12 Aug 2025 19:52:35 GMT
+Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12on2084.outbound.protection.outlook.com [40.107.243.84])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48ehaa4vp3-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 12 Aug 2025 19:52:34 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=aB5sEsM4nvJMMvDMRNqZRMez7HMWAb/K87JY83cAdCZv2LMpOQSoOtbm7ymhcA6kn/vNxmJBNjOcgGOoIGbs2ufImSEaaDT3YklADLdFq7sPjxremClqm+6LvxHvaLXVwFMkdJbU4pw+5ep9BhBvoDsEZYbPZfkNLIz0lXgPVtY19in0x5HnmTxRoX0v8CVJHaqLMeggGbfAioyh1z/6+XsV2RcceXYLAavks7FRTR6CVXg3xgfB5M7sq6X6Pz9jvwMyijoKZafTpGSLCUId9p6ZX9LadSvvuW94eiU1vQm+G3EzUWdpG86Dqeq5es/vtznok9UPYeGeRuytu2k/zg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=2Hl27DR1ZSAOvYUTGj5pjmjm7W//O9t0cA+YWPD+9HQ=;
+ b=Tr2PXtQOGECnwqIJq7sIp2FZrVmWgz7jeySyQIBLh5aBGAuDxNlZ+qK4HXyS87/rYF4jO3Awc4OmIY3RgFaQR1cQ9V/UsyYQYZDo2I8/wcw9LSOMonJawIcgY8tVdNE6xy+rXIWPeVsXU5OrNeY7GcjYezFV1VhB4pHvbDlraO6T1/l6Uu4CA8sQidffIleP0hjZ23AEM0OHhkHu8FUJX9jknm0HhV3wdSDFgcGpF8zwWmVrhRJbxY3RmkIaBoi6Np5jzEbbtLv5WmXH6sNPCcyEEv0ECE5iCmRJfxXzsnOoUp+CAvbpkdrqu1oSrEjCzSDnPzhn6kp+uArmZS1B4w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
+ by BLAPR15MB3763.namprd15.prod.outlook.com (2603:10b6:208:254::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9009.18; Tue, 12 Aug
+ 2025 19:52:30 +0000
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::6fd6:67be:7178:d89b]) by SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::6fd6:67be:7178:d89b%3]) with mapi id 15.20.9009.017; Tue, 12 Aug 2025
+ 19:52:30 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: Kotresh Hiremath Ravishankar <khiremat@redhat.com>
+CC: "idryomov@gmail.com" <idryomov@gmail.com>,
+        Alex Markuze
+	<amarkuze@redhat.com>,
+        Venky Shankar <vshankar@redhat.com>,
+        Patrick Donnelly
+	<pdonnell@redhat.com>,
+        "ceph-devel@vger.kernel.org"
+	<ceph-devel@vger.kernel.org>,
+        Gregory Farnum <gfarnum@redhat.com>
+Thread-Topic: [EXTERNAL] Re: [PATCH] ceph: Fix multifs mds auth caps issue
+Thread-Index: AQHcAwnX8VFv10r3BUWfP7rTtDMVw7RON+EAgAchUwCACKxSAIAAxVaAgAC0VYA=
+Date: Tue, 12 Aug 2025 19:52:30 +0000
+Message-ID: <185b42f5e88db732e299ca5f8323306951b08c88.camel@ibm.com>
+References: <20250729170240.118794-1-khiremat@redhat.com>
+	 <3dbbabbd68b58c95a73d02380ce6e48b5803adf2.camel@ibm.com>
+	 <CAPgWtC4s6Yhjp0_pnrcU5Cv3ptLe+4uL6+whQK4y398JCcNLnA@mail.gmail.com>
+	 <6ec6e3f45e4b90c2b56f4732e0e56fb389442c6e.camel@ibm.com>
+	 <CAPgWtC5muDGHsd5A=5bE4OCxYtiKRTLUa1KjU348qnfPDb54_Q@mail.gmail.com>
+	 <75632a861cf3c3fe77bbc384a805e9e4e77b95a8.camel@ibm.com>
+	 <CAPgWtC4z2G5GuWjzTf4oRc=h=Vx7_0=S4FHvRMe-fmKFgrAdUQ@mail.gmail.com>
+In-Reply-To:
+ <CAPgWtC4z2G5GuWjzTf4oRc=h=Vx7_0=S4FHvRMe-fmKFgrAdUQ@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|BLAPR15MB3763:EE_
+x-ms-office365-filtering-correlation-id: cad4344a-0366-4f25-bb25-08ddd9d9c5d0
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|376014|10070799003|1800799024|366016|38070700018;
+x-microsoft-antispam-message-info:
+ =?utf-8?B?bnk1L2dFRVB6STdUeWJlTi8zZktrRUtaYTA4SGw0bk00R3FydWxRZlR2WlpP?=
+ =?utf-8?B?Qm1GSGllL2VsWjh3R1RYWElna0FYYUhpM1l3aVFIZTM4UUI3em9QdUVXZ3Z2?=
+ =?utf-8?B?MTA1L1pxQ3FqRHVOeXRUM3RnWHpGL3Q2NlJpM1VWdGZjWE9KaHBrOWVuRy8v?=
+ =?utf-8?B?YzU4dC9zeS8reS92NDE1K0I5K1FNUFFrRjA4OVBnanVrSm9VTVB6eGc3TE14?=
+ =?utf-8?B?YTROajh0RnZ5UzhZdCt3T1ExaVNMSUVSbDRKUWJmZTNPcVduanQvQm1MR2RJ?=
+ =?utf-8?B?dU04bklZc2NZWFBrdHVlaXd3blNMOWtiQ2IvaUVxWE1RTGR6cHl4YTdBSjVt?=
+ =?utf-8?B?THFDQWJsMGpGeVhUcy9Vb3ppQzdkTFFnanFwaEtFcVlzVlhxOWQ3OEtMUW5u?=
+ =?utf-8?B?TnJPcVpJdWJQSmJZMHFVckhOdnpaM3FNVDVVMzZzNXZETDFLT0lxUkpFQjBv?=
+ =?utf-8?B?MVJqQlBCUTdub1pzZStQYWR4TkJCWC9vbWl6VFFRMmJoUmJNTS9PclNPdVk5?=
+ =?utf-8?B?M3FKK0NST0twVWc5YzdZVU5MK3laNWVjYlA5dk1YK0R5OU5CMlZXZzdQZmRW?=
+ =?utf-8?B?MW9PUmxrYkt6QUVOSVJJNTM1WkZmZEtQWUM0V0lGMkNZVmErWWM5d2VaU01F?=
+ =?utf-8?B?cFF2WncxcmMxTEpEa09qdlFsSFc2TmZtdUtkdHVDcFZ4eXlOS1FnSDZ2SGt3?=
+ =?utf-8?B?ZDF1bVFQdktxQTE1aFByZkozQkZFcTN5TmpralZHWlV0ajJiZ2RvVFFzMDNt?=
+ =?utf-8?B?MlRaRU5VbnFxdGtnTFRyZXRTM0g2MkV6V2NYeThTNkR0R3JJUG15RFFkVkZI?=
+ =?utf-8?B?ek53WFc5SnFYbmFEVW1UZEJpakVzcDRnNW5NeVpESGRxWW0zUER3SC9sYVBR?=
+ =?utf-8?B?NTh3V2l0elhKR2dncUErY1Y5MTFXblpDOU43NmljeVlqejYxUjBsOEVvNFA2?=
+ =?utf-8?B?bnhwYkhsTEZaS3pMWEM0NGJaam53OC8wcFpDTHJocFRJcUgzcW5yNVgwK2dO?=
+ =?utf-8?B?SGdzMHRtY1Rjc1cxZkQvSFFNamNpc09GaWxJNUFiR2J4MmQxK2FqZFhqNHdW?=
+ =?utf-8?B?MllDWndxTmZ4WGRPdk1BUXMvVEJmVGsxcUcwalBYaE1GTWxTZXJsMC9ZR2h6?=
+ =?utf-8?B?ZHJPY0VUV3ZrWXZzZ3REK2lmVnF6SkYyaWlmbUd0dG92TzZBNlpLN2crWjRD?=
+ =?utf-8?B?Y1NkRmgvV0doeTdOSTcwdHQ4eEI4SWxMUllNMWFja1ZOOG1SeVJmVEpsdnBP?=
+ =?utf-8?B?RzY3ZVFrRDdJdVliWFNGcDFpRDhjSU9VdE9uaGd6UG9mVHNxRStqYkVlUzVD?=
+ =?utf-8?B?RVF5VTJTUGcwQ2paOEhRWEpvU3ZZVVUzWGpXZVBCRmhRWC9CZndCaUI0cXhI?=
+ =?utf-8?B?UTJrSXlkV2tsb09KZk5hQXZBK2EwT3FkT2ptcTM2UWlIdm5pckhtVGZXalkz?=
+ =?utf-8?B?d2lBR3A3YjBrM2dZSG55bGlUdnlTQlZwZGkxVnA3bkVmOTMrVTRza0V3Y3A2?=
+ =?utf-8?B?WG9uNklYUis5Z0ZlNE51dHYxRGoyYkxWc3RkZzczaFNmK3oxM0VUT29EcUpu?=
+ =?utf-8?B?S0QvL2NFd1EyU1FCL2lYVWNWcmhTSWw2MDZuU2FIcUFnQWlBc0U2Q3h2eTgz?=
+ =?utf-8?B?dHB3ek10UUJYa1NJK1Y4d0JNVFMwZFg4a0hpQ2RVWCtwaURQUnhMQTlLc2lF?=
+ =?utf-8?B?dlRqeElnc0FQSnhjb1hmSHE4eVJYTy9hK0dYMnRFbHpuZ1JsVENsY1ZmWWZG?=
+ =?utf-8?B?SllRVGMxVEZOVHNObUhEZG5mejdyeEZHYzd5YkttZGI0Vm5xZTFTTFNPVVdE?=
+ =?utf-8?B?VVBpVG5PL0piZDBzc3lYUFliaE9BMmE5MUxiczFESy9wRDBDM1VIQkN6ZnBp?=
+ =?utf-8?B?V1F4UlVBbnpZMEt0WGI4UHQ1Yld5MEY2dDloQXdWQmlqU1pSWGZuTzRiY2RU?=
+ =?utf-8?Q?e8Sb5ls72l8lni+wWaRszYQEmV3FwVOG?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(10070799003)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?ZFJySTQycndqYXZXTW9nY0E0NFQxUmluZGxEanBseFJSaVJvYVd4cDd6R1N4?=
+ =?utf-8?B?Wm1yWnNuaFpmMDlyNDNRNEJVeUQwSkFtcENsK2d0Z2EyWlpSblpYYXdvTFVi?=
+ =?utf-8?B?RWl5TGlDT1R4cExMTFFxMDdzRHpOQll3dTB3VDJiTlhydGxydUtZVHhmZzA5?=
+ =?utf-8?B?a1VPUldpOC9uYXlTSGN3SEh3VWJoNndqWXcyeWhvbkdvZDZjVWdUM3l5eVZY?=
+ =?utf-8?B?dm5iUk92eFBObVNzVnRBakFoVTBYejlUdUZTUWNEWm51Ky9ucWtTUUNld1Yr?=
+ =?utf-8?B?VjRqTkgvbGgva3IvYlZVTzZhek15RExuWUFLL2xNdmFaUGlGb0hCMjJnd2ZD?=
+ =?utf-8?B?RjJZbFIyZGd4Sld0SWptV1lleWZwMkhkWkwrTWVxOGRsUTNCcmxZRUNmTFd2?=
+ =?utf-8?B?alhEczNrQWhKYmZSdDVxdGVXNUt3VUhMajB5b3BLY3J1ZUx2OGtqNlZsSEVF?=
+ =?utf-8?B?SEE4aXREbS9QZE5VVEhFTzJ2MFhQL1dHZ01GTWdGUWFpQ3locGFTQUZDTFJt?=
+ =?utf-8?B?ZS84SUttbmQwMG1QRzQ4Z1h5UlQxNThubWR1dHZrdVFnc01RSUdpNTRTMHA4?=
+ =?utf-8?B?MDhwck44eGxFVWFPcGdweWhESklwYmxwa2J5YUJPS0M3TVY1S3hsbXFFNnFs?=
+ =?utf-8?B?ZUF3a01tajNlSE1uQ2VrQ0lCbGhBRG54K2pIeDZFbnlvZ1RKV3ZCaC95M1o5?=
+ =?utf-8?B?SS9jWFVYcW00YUhVSzcxMEZvMXJUTk5XdFFHSnByRzlBWDZsRFVZeklmSDl4?=
+ =?utf-8?B?ODBCdE4yYlJTSHMrUlRBazFxT2R1Tjd3c3NXRkdpWENIaC9oa1FzVTFYMFgr?=
+ =?utf-8?B?TS8vbko0T3FZbU9iRndYelo0c093TXREdDZWRkJSdk9BSy9IU2NWZzVodE0r?=
+ =?utf-8?B?cUJhWWJ2dUdLd01BTHFZZC9IVVhCbXZtek5RYXlrT1JBQTVMN0R0VkJKcTFv?=
+ =?utf-8?B?QldOWm1FSTRqNTlZblpOL0FQYloxR2lYRkRPSktGbHVleDlSd0g1OUpVbWlM?=
+ =?utf-8?B?V2NudlM5WDNBVFk3Q2RkQllYSURwOFBlNzdycER6WjRIRm5ZSTd1VE8zbDdJ?=
+ =?utf-8?B?ZkdaREdIUy9pejZFTEFYMHZ4UTRtamcrRWZ6T1FsMWMwMWRuTFdWa3JZNTlR?=
+ =?utf-8?B?TVZNZlpMYllYV0ltUTd5ajFVZ3ArUEMxNy9TNXR2WWo5ZzM2M3NVc3BKNWRB?=
+ =?utf-8?B?YjFxZG9wclh2QlppTW5IU2hjT3NqWDNyV28zKytOVnhRV29MWDhuMVZ4S3Jr?=
+ =?utf-8?B?TXhXeHBCMXRSSkpOOGtzTTlTc1BIZjlFRi9Ba0xCbHVxcTlZQ2MvSE9tWUlM?=
+ =?utf-8?B?dDd6bEc3Zy9EOHNaMFlyT3duVzZTYU41V0hiMDN1R1NJZFJjVCtOQkZVZ3RS?=
+ =?utf-8?B?YytDRTd3dnpOUExqUjB3b010U05MS1RudVBEUFV4REtqY1RpZTQ0OEhtUkUz?=
+ =?utf-8?B?VHRqVkYwbzNZQXJVem54aVU3eFM1RzR4QTJVVlMwOElpMUNVWDdydi9CQzR4?=
+ =?utf-8?B?SDJxWUJMU05yamJNZDRWWlRuNXhCRXBOYU9udDhReWJCTm9aZEVuS0cxOEQ3?=
+ =?utf-8?B?Mm9FZU1PRzBXQXZOMFpDbGplclRuMWhTWHoxbjVIMk1la1pFM1F2eFUrMWdQ?=
+ =?utf-8?B?OEZHNUVqNWFLVTM0cCtSbVhlbER0bUJqc0RFNTlOVk1OMjllU1lPU2NyYkVn?=
+ =?utf-8?B?a0xIam4wTG9jSUhBYkdhSkxmODcvMTFZQi9WUzhzRXlwcENMSUtnVmhidmtC?=
+ =?utf-8?B?M1FVUS9seXdzVHJMd2ZJZGgwVUdEZVlzdnNxMldub05BeWVpcjZSbytHZC9E?=
+ =?utf-8?B?RTZxenVxVVZEdmFXUmsvTFhXb3p4WldQNm5KWnhzNEZEcE9WSVdoMEVQTFE1?=
+ =?utf-8?B?dkhwMExYbjhQMUZTbzM0bXZGdGU5dnd1YlBjTytmOVBPTEY1ZlVwSmJyZGpr?=
+ =?utf-8?B?VkNxNzV6TTBtREc4amRtWlQ4Q2xXSC95cFJoNTVyNEpNaU8zY29vKzNISGNn?=
+ =?utf-8?B?Q3MzT1ZFNnlTRmtudWpoM01JY2FsbExWK0NlbENHUkV2M1N0K3k0VUt3WTRZ?=
+ =?utf-8?B?cHNVUWhTdVF2eHc4K2RXTCtqN1U4b3JPRk52a1NFaFZvUjZ0V3NuODdxY1N1?=
+ =?utf-8?B?Y29ZSkNNOGppQXFmL21TSUZnZS9ncldRZC95YkZPVE41QXh6K0NIYVVMaTZI?=
+ =?utf-8?Q?o3RgXwNPWjPp/cxLPxPtl/w=3D?=
+X-OriginatorOrg: ibm.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: cad4344a-0366-4f25-bb25-08ddd9d9c5d0
+X-MS-Exchange-CrossTenant-originalarrivaltime: 12 Aug 2025 19:52:30.5930
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: UPYi0giC/uV2CyPeHutk0fCeaA2oqeI235fhK9mPMtLPsUyDJaxASFSD/2f32zUAO7V0fYmyUYDn+HKqjtaiOQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR15MB3763
+X-Authority-Analysis: v=2.4 cv=KPRaDEFo c=1 sm=1 tr=0 ts=689b9b83 cx=c_pps
+ a=KB7kLzfingIg7eHt7PrfOA==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
+ a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=2OwXVqhp2XgA:10 a=NEAV23lmAAAA:8 a=P-IC7800AAAA:8 a=4u6H09k7AAAA:8
+ a=VnNF1IyMAAAA:8 a=20KFwNOVAAAA:8 a=AUGs6VgNBE38fgUbwY0A:9 a=QEXdDO2ut3YA:10
+ a=d3PnA9EDa4IxuAV0gXij:22 a=5yerskEF2kbSkDMynNst:22
+X-Proofpoint-ORIG-GUID: ET8fb44kLDYCmeJUY5IHZVfnGDFpFJXQ
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODEyMDE4OSBTYWx0ZWRfX/GSYzvQx9TKw
+ pAh4zwDqeDYMfg+d9kqMrJ17EvtPMO5DPvGeo4jEyQK1cjlmv7N732hBBhIluo5QuvQAUEuEtgO
+ 9IzZCk4wWiSTu1ffCk5neNbmpzrEFUc77QGAoknFfNG+MrD10RCl6QxICqk2S774I0zMFFlEDgh
+ lyHbd/vPic70upJpV0UVegl4jQKALz8oIbFcBhOWeWdSTpGUkcz/2JvlU1kIVzshUwAfh1Odc0Q
+ WvxxhFnntP+8EbarbS8FW18D+Vq43l3mF5sTUyjbPiTFaBRjBzZc1Ukromnj3h5ost1GKyebrEL
+ bQxvMMcLRXpINwVd5gMmZCkaG3fy1XjuIha2qPdcVF0uonGvo0+uKrKki+1LJOSjGl0L8xLnTGQ
+ McsNZk804iTqcmGiWpMCJzkPZEhXYwmzSLCL/IpeccxpaRUZBj84Qvy5hf2lKHly+b7PabxL
+X-Proofpoint-GUID: H3g_ZV46UcQVyeEketlyzvodUBQP8EdS
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <7B2A07899F9E6242B4DC6E3B5FA9BB8E@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Subject: RE: [PATCH] ceph: Fix multifs mds auth caps issue
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-12_07,2025-08-11_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 bulkscore=0 impostorscore=0 mlxlogscore=999 spamscore=0
+ clxscore=1015 adultscore=0 priorityscore=1501 malwarescore=0
+ lowpriorityscore=0 mlxscore=0 suspectscore=0 classifier=spam authscore=0
+ authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=2
+ engine=8.19.0-2507300000 definitions=main-2508120189
 
-Add validation to ensure the cached parent directory inode matches the
-directory info in MDS replies. This prevents client-side race conditions
-where concurrent operations (e.g. rename) cause r_parent to become stale
-between request initiation and reply processing, which could lead to
-applying state changes to incorrect directory inodes.
+On Tue, 2025-08-12 at 14:37 +0530, Kotresh Hiremath Ravishankar wrote:
+> On Tue, Aug 12, 2025 at 2:50=E2=80=AFAM Viacheslav Dubeyko
+> <Slava.Dubeyko@ibm.com> wrote:
+> >=20
+> > On Wed, 2025-08-06 at 14:23 +0530, Kotresh Hiremath Ravishankar wrote:
+> > > On Sat, Aug 2, 2025 at 1:=E2=80=8A31 AM Viacheslav Dubeyko <Slava.=E2=
+=80=8ADubeyko@=E2=80=8Aibm.=E2=80=8Acom> wrote: > > On Fri, 2025-08-01 at 2=
+2:=E2=80=8A59 +0530, Kotresh Hiremath Ravishankar wrote: > > > > Hi, > > > =
+> 1. I will modify the commit message
+> > >=20
+> > > On Sat, Aug 2, 2025 at 1:31=E2=80=AFAM Viacheslav Dubeyko <Slava.Dube=
+yko@ibm.com> wrote:
+> > > >=20
+> > > > On Fri, 2025-08-01 at 22:59 +0530, Kotresh Hiremath Ravishankar wro=
+te:
+> > > > >=20
+> > > > > Hi,
+> > > > >=20
+> > > > > 1. I will modify the commit message to clearly explain the issue =
+in the next revision.
+> > > > > 2. The maximum possible length for the fsname is not defined in m=
+ds side. I didn't find any restriction imposed on the length. So we need to=
+ live with it.
+> > > >=20
+> > > > We have two constants in Linux kernel [1]:
+> > > >=20
+> > > > #define NAME_MAX         255    /* # chars in a file name */
+> > > > #define PATH_MAX        4096    /* # chars in a path name including=
+ nul */
+> > > >=20
+> > > > I don't think that fsname can be bigger than PATH_MAX.
+> > >=20
+> > > As I had mentioned earlier, the CephFS server side code is not restri=
+cting the filesystem name
+> > > during creation. I validated the creation of a filesystem name with a=
+ length of 5000.
+> > > Please try the following.
+> > >=20
+> > > [kotresh@fedora build]$ alpha_str=3D$(< /dev/urandom tr -dc 'a-zA-Z' =
+| head -c 5000)
+> > > [kotresh@fedora build]$ ceph fs new $alpha_str cephfs_data cephfs_met=
+adata
+> > > [kotresh@fedora build]$ bin/ceph fs ls
+> > >=20
+> > > So restricting the fsname length in the kclient would likely cause is=
+sues. If we need to enforce the limitation, I think, it should be done at s=
+erver side first and it=E2=80=99s a separate effort.
+> > >=20
+> >=20
+> > I am not sure that Linux kernel is capable to digest any name bigger th=
+an
+> > NAME_MAX. Are you sure that we can pass xfstests with filesystem name b=
+igger
+> > than NAME_MAX? Another point here that we can put buffer with name inli=
+ne
+> > into struct ceph_mdsmap if the name cannot be bigger than NAME_MAX, for=
+ example.
+> > In this case we don't need to allocate fs_name memory for every
+> > ceph_mdsmap_decode() call.
+>=20
+> Well, I haven't tried xfstests with a filesystem name bigger than
+> NAME_MAX. But I did try mounting a ceph filesystem name bigger than
+> NAME_MAX and it works.
+> But mounting a ceph filesystem name bigger than PATH_MAX didn't work.
+> Note that the creation of a ceph filesystem name bigger than PATH_MAX
+> works and
+> mounting with the same using fuse client works as well.
+>=20
 
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
----
- fs/ceph/debugfs.c    |  14 ++--
- fs/ceph/dir.c        |  17 ++---
- fs/ceph/file.c       |  24 +++----
- fs/ceph/inode.c      |   7 +-
- fs/ceph/mds_client.c | 165 ++++++++++++++++++++++++++-----------------
- fs/ceph/mds_client.h |  18 +++--
- 6 files changed, 139 insertions(+), 106 deletions(-)
+The mount operation creates only root folder. So, probably, kernel can surv=
+ive
+by creating root folder if filesystem name fits into PATH_MAX. However, if =
+we
+will try to create another folders and files in the root folder, then path
+becomes bigger and bigger. And I think that total path name length should be
+lesser than PATH_MAX. So, I could say that it is much safer to assume that
+filesystem name should fit into NAME_MAX.
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index fdd404fc8112..f3fe786b4143 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -55,8 +55,6 @@ static int mdsc_show(struct seq_file *s, void *p)
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_mds_request *req;
- 	struct rb_node *rp;
--	int pathlen = 0;
--	u64 pathbase;
- 	char *path;
- 
- 	mutex_lock(&mdsc->mutex);
-@@ -81,8 +79,8 @@ static int mdsc_show(struct seq_file *s, void *p)
- 		if (req->r_inode) {
- 			seq_printf(s, " #%llx", ceph_ino(req->r_inode));
- 		} else if (req->r_dentry) {
--			path = ceph_mdsc_build_path(mdsc, req->r_dentry, &pathlen,
--						    &pathbase, 0);
-+			struct ceph_path_info path_info;
-+			path = ceph_mdsc_build_path(mdsc, req->r_dentry, &path_info, 0);
- 			if (IS_ERR(path))
- 				path = NULL;
- 			spin_lock(&req->r_dentry->d_lock);
-@@ -91,7 +89,7 @@ static int mdsc_show(struct seq_file *s, void *p)
- 				   req->r_dentry,
- 				   path ? path : "");
- 			spin_unlock(&req->r_dentry->d_lock);
--			ceph_mdsc_free_path(path, pathlen);
-+			ceph_mdsc_free_path_info(&path_info);
- 		} else if (req->r_path1) {
- 			seq_printf(s, " #%llx/%s", req->r_ino1.ino,
- 				   req->r_path1);
-@@ -100,8 +98,8 @@ static int mdsc_show(struct seq_file *s, void *p)
- 		}
- 
- 		if (req->r_old_dentry) {
--			path = ceph_mdsc_build_path(mdsc, req->r_old_dentry, &pathlen,
--						    &pathbase, 0);
-+			struct ceph_path_info path_info;
-+			path = ceph_mdsc_build_path(mdsc, req->r_old_dentry, &path_info, 0);
- 			if (IS_ERR(path))
- 				path = NULL;
- 			spin_lock(&req->r_old_dentry->d_lock);
-@@ -111,7 +109,7 @@ static int mdsc_show(struct seq_file *s, void *p)
- 				   req->r_old_dentry,
- 				   path ? path : "");
- 			spin_unlock(&req->r_old_dentry->d_lock);
--			ceph_mdsc_free_path(path, pathlen);
-+			ceph_mdsc_free_path_info(&path_info);
- 		} else if (req->r_path2 && req->r_op != CEPH_MDS_OP_SYMLINK) {
- 			if (req->r_ino2.ino)
- 				seq_printf(s, " #%llx/%s", req->r_ino2.ino,
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 1535b6540e9d..08c3129cd25d 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1271,10 +1271,8 @@ static void ceph_async_unlink_cb(struct ceph_mds_client *mdsc,
- 
- 	/* If op failed, mark everyone involved for errors */
- 	if (result) {
--		int pathlen = 0;
--		u64 base = 0;
--		char *path = ceph_mdsc_build_path(mdsc, dentry, &pathlen,
--						  &base, 0);
-+		struct ceph_path_info path_info = {0};
-+		char *path = ceph_mdsc_build_path(mdsc, dentry, &path_info, 0);
- 
- 		/* mark error on parent + clear complete */
- 		mapping_set_error(req->r_parent->i_mapping, result);
-@@ -1288,8 +1286,8 @@ static void ceph_async_unlink_cb(struct ceph_mds_client *mdsc,
- 		mapping_set_error(req->r_old_inode->i_mapping, result);
- 
- 		pr_warn_client(cl, "failure path=(%llx)%s result=%d!\n",
--			       base, IS_ERR(path) ? "<<bad>>" : path, result);
--		ceph_mdsc_free_path(path, pathlen);
-+			       path_info.vino.ino, IS_ERR(path) ? "<<bad>>" : path, result);
-+		ceph_mdsc_free_path_info(&path_info);
- 	}
- out:
- 	iput(req->r_old_inode);
-@@ -1347,8 +1345,6 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
- 	int err = -EROFS;
- 	int op;
- 	char *path;
--	int pathlen;
--	u64 pathbase;
- 
- 	if (ceph_snap(dir) == CEPH_SNAPDIR) {
- 		/* rmdir .snap/foo is RMSNAP */
-@@ -1367,14 +1363,15 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
- 	if (!dn) {
- 		try_async = false;
- 	} else {
--		path = ceph_mdsc_build_path(mdsc, dn, &pathlen, &pathbase, 0);
-+		struct ceph_path_info path_info;
-+		path = ceph_mdsc_build_path(mdsc, dn, &path_info, 0);
- 		if (IS_ERR(path)) {
- 			try_async = false;
- 			err = 0;
- 		} else {
- 			err = ceph_mds_check_access(mdsc, path, MAY_WRITE);
- 		}
--		ceph_mdsc_free_path(path, pathlen);
-+		ceph_mdsc_free_path_info(&path_info);
- 		dput(dn);
- 
- 		/* For none EACCES cases will let the MDS do the mds auth check */
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index c92ef1fc5b8a..d222dd192fec 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -368,8 +368,6 @@ int ceph_open(struct inode *inode, struct file *file)
- 	int flags, fmode, wanted;
- 	struct dentry *dentry;
- 	char *path;
--	int pathlen;
--	u64 pathbase;
- 	bool do_sync = false;
- 	int mask = MAY_READ;
- 
-@@ -399,14 +397,15 @@ int ceph_open(struct inode *inode, struct file *file)
- 	if (!dentry) {
- 		do_sync = true;
- 	} else {
--		path = ceph_mdsc_build_path(mdsc, dentry, &pathlen, &pathbase, 0);
-+		struct ceph_path_info path_info;
-+		path = ceph_mdsc_build_path(mdsc, dentry, &path_info, 0);
- 		if (IS_ERR(path)) {
- 			do_sync = true;
- 			err = 0;
- 		} else {
- 			err = ceph_mds_check_access(mdsc, path, mask);
- 		}
--		ceph_mdsc_free_path(path, pathlen);
-+		ceph_mdsc_free_path_info(&path_info);
- 		dput(dentry);
- 
- 		/* For none EACCES cases will let the MDS do the mds auth check */
-@@ -613,15 +612,13 @@ static void ceph_async_create_cb(struct ceph_mds_client *mdsc,
- 	mapping_set_error(req->r_parent->i_mapping, result);
- 
- 	if (result) {
--		int pathlen = 0;
--		u64 base = 0;
--		char *path = ceph_mdsc_build_path(mdsc, req->r_dentry, &pathlen,
--						  &base, 0);
-+		struct ceph_path_info path_info = {0};
-+		char *path = ceph_mdsc_build_path(mdsc, req->r_dentry, &path_info, 0);
- 
- 		pr_warn_client(cl,
- 			"async create failure path=(%llx)%s result=%d!\n",
--			base, IS_ERR(path) ? "<<bad>>" : path, result);
--		ceph_mdsc_free_path(path, pathlen);
-+			path_info.vino.ino, IS_ERR(path) ? "<<bad>>" : path, result);
-+		ceph_mdsc_free_path_info(&path_info);
- 
- 		ceph_dir_clear_complete(req->r_parent);
- 		if (!d_unhashed(dentry))
-@@ -789,8 +786,6 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	int mask;
- 	int err;
- 	char *path;
--	int pathlen;
--	u64 pathbase;
- 
- 	doutc(cl, "%p %llx.%llx dentry %p '%pd' %s flags %d mode 0%o\n",
- 	      dir, ceph_vinop(dir), dentry, dentry,
-@@ -812,7 +807,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	if (!dn) {
- 		try_async = false;
- 	} else {
--		path = ceph_mdsc_build_path(mdsc, dn, &pathlen, &pathbase, 0);
-+		struct ceph_path_info path_info;
-+		path = ceph_mdsc_build_path(mdsc, dn, &path_info, 0);
- 		if (IS_ERR(path)) {
- 			try_async = false;
- 			err = 0;
-@@ -824,7 +820,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 				mask |= MAY_WRITE;
- 			err = ceph_mds_check_access(mdsc, path, mask);
- 		}
--		ceph_mdsc_free_path(path, pathlen);
-+		ceph_mdsc_free_path_info(&path_info);
- 		dput(dn);
- 
- 		/* For none EACCES cases will let the MDS do the mds auth check */
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 4365d17ce6d7..36981950a368 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -2502,22 +2502,21 @@ int __ceph_setattr(struct mnt_idmap *idmap, struct inode *inode,
- 	int truncate_retry = 20; /* The RMW will take around 50ms */
- 	struct dentry *dentry;
- 	char *path;
--	int pathlen;
--	u64 pathbase;
- 	bool do_sync = false;
- 
- 	dentry = d_find_alias(inode);
- 	if (!dentry) {
- 		do_sync = true;
- 	} else {
--		path = ceph_mdsc_build_path(mdsc, dentry, &pathlen, &pathbase, 0);
-+		struct ceph_path_info path_info;
-+		path = ceph_mdsc_build_path(mdsc, dentry, &path_info, 0);
- 		if (IS_ERR(path)) {
- 			do_sync = true;
- 			err = 0;
- 		} else {
- 			err = ceph_mds_check_access(mdsc, path, MAY_WRITE);
- 		}
--		ceph_mdsc_free_path(path, pathlen);
-+		ceph_mdsc_free_path_info(&path_info);
- 		dput(dentry);
- 
- 		/* For none EACCES cases will let the MDS do the mds auth check */
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 9eed6d73a508..f31278859119 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2729,7 +2729,7 @@ static u8 *get_fscrypt_altname(const struct ceph_mds_request *req, u32 *plen)
-  *   foo/.snap/bar -> foo//bar
-  */
- char *ceph_mdsc_build_path(struct ceph_mds_client *mdsc, struct dentry *dentry,
--			   int *plen, u64 *pbase, int for_wire)
-+			   struct ceph_path_info *path_info, int for_wire)
- {
- 	struct ceph_client *cl = mdsc->fsc->client;
- 	struct dentry *cur;
-@@ -2839,16 +2839,30 @@ char *ceph_mdsc_build_path(struct ceph_mds_client *mdsc, struct dentry *dentry,
- 		return ERR_PTR(-ENAMETOOLONG);
- 	}
- 
--	*pbase = base;
--	*plen = PATH_MAX - 1 - pos;
-+	/* Initialize the output structure */
-+	memset(path_info, 0, sizeof(*path_info));
-+
-+	path_info->vino.ino = base;
-+	path_info->pathlen = PATH_MAX - 1 - pos;
-+	path_info->path = path + pos;
-+	path_info->freepath = true;
-+
-+	/* Set snap from dentry if available */
-+	if (d_inode(dentry))
-+		path_info->vino.snap = ceph_snap(d_inode(dentry));
-+	else
-+		path_info->vino.snap = CEPH_NOSNAP;
-+
- 	doutc(cl, "on %p %d built %llx '%.*s'\n", dentry, d_count(dentry),
--	      base, *plen, path + pos);
-+	      base, PATH_MAX - 1 - pos, path + pos);
- 	return path + pos;
- }
- 
-+
-+
- static int build_dentry_path(struct ceph_mds_client *mdsc, struct dentry *dentry,
--			     struct inode *dir, const char **ppath, int *ppathlen,
--			     u64 *pino, bool *pfreepath, bool parent_locked)
-+			     struct inode *dir, struct ceph_path_info *path_info,
-+			     bool parent_locked)
- {
- 	char *path;
- 
-@@ -2857,41 +2871,47 @@ static int build_dentry_path(struct ceph_mds_client *mdsc, struct dentry *dentry
- 		dir = d_inode_rcu(dentry->d_parent);
- 	if (dir && parent_locked && ceph_snap(dir) == CEPH_NOSNAP &&
- 	    !IS_ENCRYPTED(dir)) {
--		*pino = ceph_ino(dir);
-+		path_info->vino.ino = ceph_ino(dir);
-+		path_info->vino.snap = ceph_snap(dir);
- 		rcu_read_unlock();
--		*ppath = dentry->d_name.name;
--		*ppathlen = dentry->d_name.len;
-+		path_info->path = dentry->d_name.name;
-+		path_info->pathlen = dentry->d_name.len;
-+		path_info->freepath = false;
- 		return 0;
- 	}
- 	rcu_read_unlock();
--	path = ceph_mdsc_build_path(mdsc, dentry, ppathlen, pino, 1);
-+	path = ceph_mdsc_build_path(mdsc, dentry, path_info, 1);
- 	if (IS_ERR(path))
- 		return PTR_ERR(path);
--	*ppath = path;
--	*pfreepath = true;
-+	/*
-+	 * ceph_mdsc_build_path already fills path_info, including snap handling.
-+	 */
- 	return 0;
- }
- 
--static int build_inode_path(struct inode *inode,
--			    const char **ppath, int *ppathlen, u64 *pino,
--			    bool *pfreepath)
-+static int build_inode_path(struct inode *inode, struct ceph_path_info *path_info)
- {
- 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
- 	struct dentry *dentry;
- 	char *path;
- 
- 	if (ceph_snap(inode) == CEPH_NOSNAP) {
--		*pino = ceph_ino(inode);
--		*ppathlen = 0;
-+		path_info->vino.ino = ceph_ino(inode);
-+		path_info->vino.snap = ceph_snap(inode);
-+		path_info->pathlen = 0;
-+		path_info->freepath = false;
- 		return 0;
- 	}
- 	dentry = d_find_alias(inode);
--	path = ceph_mdsc_build_path(mdsc, dentry, ppathlen, pino, 1);
-+	path = ceph_mdsc_build_path(mdsc, dentry, path_info, 1);
- 	dput(dentry);
- 	if (IS_ERR(path))
- 		return PTR_ERR(path);
--	*ppath = path;
--	*pfreepath = true;
-+	/*
-+	 * ceph_mdsc_build_path already fills path_info, including snap from dentry.
-+	 * Override with inode's snap since that's what this function is for.
-+	 */
-+	path_info->vino.snap = ceph_snap(inode);
- 	return 0;
- }
- 
-@@ -2901,26 +2921,31 @@ static int build_inode_path(struct inode *inode,
-  */
- static int set_request_path_attr(struct ceph_mds_client *mdsc, struct inode *rinode,
- 				 struct dentry *rdentry, struct inode *rdiri,
--				 const char *rpath, u64 rino, const char **ppath,
--				 int *pathlen, u64 *ino, bool *freepath,
-+				 const char *rpath, u64 rino, struct ceph_path_info *path_info,
- 				 bool parent_locked)
- {
- 	struct ceph_client *cl = mdsc->fsc->client;
- 	int r = 0;
- 
-+	/* Initialize the output structure */
-+	memset(path_info, 0, sizeof(*path_info));
-+
- 	if (rinode) {
--		r = build_inode_path(rinode, ppath, pathlen, ino, freepath);
-+		r = build_inode_path(rinode, path_info);
- 		doutc(cl, " inode %p %llx.%llx\n", rinode, ceph_ino(rinode),
- 		      ceph_snap(rinode));
- 	} else if (rdentry) {
--		r = build_dentry_path(mdsc, rdentry, rdiri, ppath, pathlen, ino,
--					freepath, parent_locked);
--		doutc(cl, " dentry %p %llx/%.*s\n", rdentry, *ino, *pathlen, *ppath);
-+		r = build_dentry_path(mdsc, rdentry, rdiri, path_info, parent_locked);
-+		doutc(cl, " dentry %p %llx/%.*s\n", rdentry, path_info->vino.ino,
-+		      path_info->pathlen, path_info->path);
- 	} else if (rpath || rino) {
--		*ino = rino;
--		*ppath = rpath;
--		*pathlen = rpath ? strlen(rpath) : 0;
--		doutc(cl, " path %.*s\n", *pathlen, rpath);
-+		path_info->vino.ino = rino;
-+		path_info->vino.snap = CEPH_NOSNAP;
-+		path_info->path = rpath;
-+		path_info->pathlen = rpath ? strlen(rpath) : 0;
-+		path_info->freepath = false;
-+
-+		doutc(cl, " path %.*s\n", path_info->pathlen, rpath);
- 	}
- 
- 	return r;
-@@ -2997,11 +3022,8 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 	struct ceph_client *cl = mdsc->fsc->client;
- 	struct ceph_msg *msg;
- 	struct ceph_mds_request_head_legacy *lhead;
--	const char *path1 = NULL;
--	const char *path2 = NULL;
--	u64 ino1 = 0, ino2 = 0;
--	int pathlen1 = 0, pathlen2 = 0;
--	bool freepath1 = false, freepath2 = false;
-+	struct ceph_path_info path_info1 = {0};
-+	struct ceph_path_info path_info2 = {0};
- 	struct dentry *old_dentry = NULL;
- 	int len;
- 	u16 releases;
-@@ -3011,25 +3033,42 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 	u16 request_head_version = mds_supported_head_version(session);
- 	kuid_t caller_fsuid = req->r_cred->fsuid;
- 	kgid_t caller_fsgid = req->r_cred->fsgid;
-+	bool parent_locked = test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
- 
--	ret = set_request_path_attr(mdsc, req->r_inode, req->r_dentry,
--			      req->r_parent, req->r_path1, req->r_ino1.ino,
--			      &path1, &pathlen1, &ino1, &freepath1,
--			      test_bit(CEPH_MDS_R_PARENT_LOCKED,
--					&req->r_req_flags));
-+		ret = set_request_path_attr(mdsc, req->r_inode, req->r_dentry,
-+		      req->r_parent, req->r_path1, req->r_ino1.ino,
-+		      &path_info1, parent_locked);
- 	if (ret < 0) {
- 		msg = ERR_PTR(ret);
- 		goto out;
- 	}
- 
-+	/*
-+	 * When the parent directory's i_rwsem is *not* locked, req->r_parent may
-+	 * have become stale (e.g. after a concurrent rename) between the time the
-+	 * dentry was looked up and now.  If we detect that the stored r_parent
-+	 * does not match the inode number we just encoded for the request, switch
-+	 * to the correct inode so that the MDS receives a valid parent reference.
-+	 */
-+	if (!parent_locked &&
-+	    	req->r_parent && path_info1.vino.ino && ceph_ino(req->r_parent) != path_info1.vino.ino) {
-+		struct inode *correct_dir = ceph_get_inode(mdsc->fsc->sb, path_info1.vino, NULL);
-+		if (!IS_ERR(correct_dir)) {
-+				WARN_ONCE(1, "ceph: r_parent mismatch (had %llx wanted %llx) - updating\n",
-+				  ceph_ino(req->r_parent), path_info1.vino.ino);
-+			iput(req->r_parent);
-+			req->r_parent = correct_dir;
-+		}
-+	}
-+
- 	/* If r_old_dentry is set, then assume that its parent is locked */
- 	if (req->r_old_dentry &&
- 	    !(req->r_old_dentry->d_flags & DCACHE_DISCONNECTED))
- 		old_dentry = req->r_old_dentry;
- 	ret = set_request_path_attr(mdsc, NULL, old_dentry,
--			      req->r_old_dentry_dir,
--			      req->r_path2, req->r_ino2.ino,
--			      &path2, &pathlen2, &ino2, &freepath2, true);
-+		      req->r_old_dentry_dir,
-+		      req->r_path2, req->r_ino2.ino,
-+		      &path_info2, true);
- 	if (ret < 0) {
- 		msg = ERR_PTR(ret);
- 		goto out_free1;
-@@ -3060,7 +3099,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 
- 	/* filepaths */
- 	len += 2 * (1 + sizeof(u32) + sizeof(u64));
--	len += pathlen1 + pathlen2;
-+	len += path_info1.pathlen + path_info2.pathlen;
- 
- 	/* cap releases */
- 	len += sizeof(struct ceph_mds_request_release) *
-@@ -3068,9 +3107,9 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 		 !!req->r_old_inode_drop + !!req->r_old_dentry_drop);
- 
- 	if (req->r_dentry_drop)
--		len += pathlen1;
-+		len += path_info1.pathlen;
- 	if (req->r_old_dentry_drop)
--		len += pathlen2;
-+		len += path_info2.pathlen;
- 
- 	/* MClientRequest tail */
- 
-@@ -3183,8 +3222,8 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 	lhead->ino = cpu_to_le64(req->r_deleg_ino);
- 	lhead->args = req->r_args;
- 
--	ceph_encode_filepath(&p, end, ino1, path1);
--	ceph_encode_filepath(&p, end, ino2, path2);
-+	ceph_encode_filepath(&p, end, path_info1.vino.ino, path_info1.path);
-+	ceph_encode_filepath(&p, end, path_info2.vino.ino, path_info2.path);
- 
- 	/* make note of release offset, in case we need to replay */
- 	req->r_request_release_offset = p - msg->front.iov_base;
-@@ -3247,11 +3286,9 @@ static struct ceph_msg *create_request_message(struct ceph_mds_session *session,
- 	msg->hdr.data_off = cpu_to_le16(0);
- 
- out_free2:
--	if (freepath2)
--		ceph_mdsc_free_path((char *)path2, pathlen2);
-+	ceph_mdsc_free_path_info(&path_info2);
- out_free1:
--	if (freepath1)
--		ceph_mdsc_free_path((char *)path1, pathlen1);
-+	ceph_mdsc_free_path_info(&path_info1);
- out:
- 	return msg;
- out_err:
-@@ -4608,24 +4645,20 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 	struct ceph_pagelist *pagelist = recon_state->pagelist;
- 	struct dentry *dentry;
- 	struct ceph_cap *cap;
--	char *path;
--	int pathlen = 0, err;
--	u64 pathbase;
-+	struct ceph_path_info path_info = {0};
-+	int err;
- 	u64 snap_follows;
- 
- 	dentry = d_find_primary(inode);
- 	if (dentry) {
- 		/* set pathbase to parent dir when msg_version >= 2 */
--		path = ceph_mdsc_build_path(mdsc, dentry, &pathlen, &pathbase,
-+		char *path = ceph_mdsc_build_path(mdsc, dentry, &path_info,
- 					    recon_state->msg_version >= 2);
- 		dput(dentry);
- 		if (IS_ERR(path)) {
- 			err = PTR_ERR(path);
- 			goto out_err;
- 		}
--	} else {
--		path = NULL;
--		pathbase = 0;
- 	}
- 
- 	spin_lock(&ci->i_ceph_lock);
-@@ -4658,7 +4691,7 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 		rec.v2.wanted = cpu_to_le32(__ceph_caps_wanted(ci));
- 		rec.v2.issued = cpu_to_le32(cap->issued);
- 		rec.v2.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
--		rec.v2.pathbase = cpu_to_le64(pathbase);
-+		rec.v2.pathbase = cpu_to_le64(path_info.vino.ino);
- 		rec.v2.flock_len = (__force __le32)
- 			((ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) ? 0 : 1);
- 	} else {
-@@ -4673,7 +4706,7 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 		ts = inode_get_atime(inode);
- 		ceph_encode_timespec64(&rec.v1.atime, &ts);
- 		rec.v1.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
--		rec.v1.pathbase = cpu_to_le64(pathbase);
-+		rec.v1.pathbase = cpu_to_le64(path_info.vino.ino);
- 	}
- 
- 	if (list_empty(&ci->i_cap_snaps)) {
-@@ -4735,7 +4768,7 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 			    sizeof(struct ceph_filelock);
- 		rec.v2.flock_len = cpu_to_le32(struct_len);
- 
--		struct_len += sizeof(u32) + pathlen + sizeof(rec.v2);
-+		struct_len += sizeof(u32) + path_info.pathlen + sizeof(rec.v2);
- 
- 		if (struct_v >= 2)
- 			struct_len += sizeof(u64); /* snap_follows */
-@@ -4759,7 +4792,7 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 			ceph_pagelist_encode_8(pagelist, 1);
- 			ceph_pagelist_encode_32(pagelist, struct_len);
- 		}
--		ceph_pagelist_encode_string(pagelist, path, pathlen);
-+		ceph_pagelist_encode_string(pagelist, (char *)path_info.path, path_info.pathlen);
- 		ceph_pagelist_append(pagelist, &rec, sizeof(rec.v2));
- 		ceph_locks_to_pagelist(flocks, pagelist,
- 				       num_fcntl_locks, num_flock_locks);
-@@ -4770,17 +4803,17 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 	} else {
- 		err = ceph_pagelist_reserve(pagelist,
- 					    sizeof(u64) + sizeof(u32) +
--					    pathlen + sizeof(rec.v1));
-+					    path_info.pathlen + sizeof(rec.v1));
- 		if (err)
- 			goto out_err;
- 
- 		ceph_pagelist_encode_64(pagelist, ceph_ino(inode));
--		ceph_pagelist_encode_string(pagelist, path, pathlen);
-+		ceph_pagelist_encode_string(pagelist, (char *)path_info.path, path_info.pathlen);
- 		ceph_pagelist_append(pagelist, &rec, sizeof(rec.v1));
- 	}
- 
- out_err:
--	ceph_mdsc_free_path(path, pathlen);
-+	ceph_mdsc_free_path_info(&path_info);
- 	if (!err)
- 		recon_state->nr_caps++;
- 	return err;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 3e2a6fa7c19a..0428a5eaf28c 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -617,14 +617,24 @@ extern int ceph_mds_check_access(struct ceph_mds_client *mdsc, char *tpath,
- 
- extern void ceph_mdsc_pre_umount(struct ceph_mds_client *mdsc);
- 
--static inline void ceph_mdsc_free_path(char *path, int len)
-+/*
-+ * Structure to group path-related output parameters for build_*_path functions
-+ */
-+struct ceph_path_info {
-+	const char *path;
-+	int pathlen;
-+	struct ceph_vino vino;
-+	bool freepath;
-+};
-+
-+static inline void ceph_mdsc_free_path_info(const struct ceph_path_info *path_info)
- {
--	if (!IS_ERR_OR_NULL(path))
--		__putname(path - (PATH_MAX - 1 - len));
-+	if (path_info && path_info->freepath && !IS_ERR_OR_NULL(path_info->path))
-+		__putname((char *)path_info->path - (PATH_MAX - 1 - path_info->pathlen));
- }
- 
- extern char *ceph_mdsc_build_path(struct ceph_mds_client *mdsc,
--				  struct dentry *dentry, int *plen, u64 *base,
-+				  struct dentry *dentry, struct ceph_path_info *path_info,
- 				  int for_wire);
- 
- extern void __ceph_mdsc_drop_dentry_lease(struct dentry *dentry);
--- 
-2.34.1
+> I was going through ceph kernel client code, historically, the
+> filesystem name is stored as a char pointer. The filesystem name from
+> mount options is stored
+> into 'struct ceph_mount_options' in 'ceph_parse_new_source' and the
+> same is used to compare against the fsmap received from the mds in
+> 'ceph_mdsc_handle_fsmap'
+>=20
+> struct ceph_mount_options {
+>     ...
+>     char *mds_namespace;  /* default NULL */
+>     ...
+> };
+>=20
 
+There is no historical traditions here. :) It is only question of efficienc=
+y. If
+we know the limit of name, then it could be more efficient to have static n=
+ame
+buffer embedded into the structure instead of dynamic memory allocation.
+Because, we allocate memory for frequently accessed objects from kmem_cache=
+ or
+memory_pool. And allocating memory from SLUB allocator could be not only
+inefficient but the allocation request could fail if the system is under me=
+mory
+pressure.
+
+> I am not sure what's the right approach to choose here. In kclient,
+> assuming ceph fsname not to be bigger than PATH_MAX seems to be safe
+> as the kclient today is
+> not able to mount the ceph fsname bigger than PATH_MAX. I also
+> observed that the kclient failed to mount the ceph fsname with length
+> little less than
+> PATH_MAX (4090). So it's breaking somewhere with the entire path
+> component being considered. Anyway, I will open the discussion to
+> everyone here.
+> If we are restricting the max fsname length, we need to restrict it
+> while creating it in my opinion and fix it across the project both in
+> kclient fuse.
+>=20
+>=20
+
+I could say that it is much safer to assume that filesystem name should fit=
+ into
+NAME_MAX.
+
+
+Thanks,
+Slava.
+
+> >=20
+> > > >=20
+> > > > > 3. I will fix up doutc in the next revision.
+> > > > > 4. The fs_name is part of the mdsmap in the server side [1]. The =
+kernel client decodes only necessary fields from the mdsmap sent by the ser=
+ver. Until now, the fs_name
+> > > > >     was not being decoded, as part of this fix, it's required and=
+ being decoded.
+> > > > >=20
+> > > >=20
+> > > > Correct me if I am wrong. I can create a Ceph cluster with several =
+MDS servers.
+> > > > In this cluster, I can create multiple file system volumes. And eve=
+ry file
+> > > > system volume will have some name (fs_name). So, if we store fs_nam=
+e into
+> > > > mdsmap, then which name do we imply here? Do we imply cluster name =
+as fs_name or
+> > > > name of particular file system volume?
+> > >=20
+> > > In CephFS, we mainly deal with two maps MDSMap[1] and FSMap[2]. The M=
+DSMap represents
+> > > the state for a particular single filesystem. So the =E2=80=98fs_name=
+=E2=80=99 in the MDSMap points to a file system
+> > > name that the MDSMap represents. Each filesystem will have a distinct=
+ MDSMap. The FSMap was
+> > > introduced to support multiple filesystems in the cluster. The FSMap =
+holds all the filesystems in the
+> > > cluster using the MDSMap of each file system. The clients subscribe t=
+o these maps. So when kclient
+> > > is receiving a mdsmap, it=E2=80=99s corresponding to the filesystem i=
+t=E2=80=99s dealing with.
+> > >=20
+> >=20
+> > So, it's sounds to me that MDS keeps multiple MDSMaps for multiple file=
+ systems.
+> > And kernel side receives only MDSMap for operations. The FSMap is kept =
+on MDS
+> > side and kernel never receives it. Am I right here?
+>=20
+> No, not really. The kclient decodes the FSMap as well. The fsname and
+> monitor ip are passed in the mount command, the kclient
+> contacts the monitor and receives the list of the file systems in the
+> cluster via FSMap. The passed fsname from the
+> mount command is compared against the list of file systems in the
+> FSMap decoded. If the fsname is found, it fetches
+> the fscid and requests the corresponding mdsmap from the respective
+> mds using fscid.
+>=20
+> >=20
+> > Thanks,
+> > Slava.
+> >=20
+> > > [1] https://github.com/ceph/ceph/blob/main/src/mds/MDSMap.h =20
+> > > [2] https://github.com/ceph/ceph/blob/main/src/mds/FSMap.h =20
+> > >=20
+> > > Thanks,
+> > > Kotresh H R
+> > >=20
+> > > >=20
+> > > > Thanks,
+> > > > Slava.
+> > > >=20
+> > > > >=20
+> > > > >=20
+> > > >=20
+> > > > [1]
+> > > > https://elixir.bootlin.com/linux/v6.16/source/include/uapi/linux/li=
+mits.h#L12 =20
+> > > >=20
+> > > > > [1] https://github.com/ceph/ceph/blob/main/src/mds/MDSMap.h#L596 =
+=20
+> > > > >=20
+> > > > > On Tue, Jul 29, 2025 at 11:57=E2=80=AFPM Viacheslav Dubeyko <Slav=
+a.Dubeyko@ibm.com> wrote:
+> > > > > > On Tue, 2025-07-29 at 22:32 +0530, khiremat@redhat.com wrote:
+> > > > > > > From: Kotresh HR <khiremat@redhat.com>
+> > > > > > >=20
+> > > > > > > The mds auth caps check should also validate the
+> > > > > > > fsname along with the associated caps. Not doing
+> > > > > > > so would result in applying the mds auth caps of
+> > > > > > > one fs on to the other fs in a multifs ceph cluster.
+> > > > > > > The patch fixes the same.
+> > > > > > >=20
+> > > > > > > Steps to Reproduce (on vstart cluster):
+> > > > > > > 1. Create two file systems in a cluster, say 'a' and 'b'
+> > > > > > > 2. ceph fs authorize a client.usr / r
+> > > > > > > 3. ceph fs authorize b client.usr / rw
+> > > > > > > 4. ceph auth get client.usr >> ./keyring
+> > > > > > > 5. sudo bin/mount.ceph usr@.a=3D/ /kmnt_a_usr/
+> > > > > > > 6. touch /kmnt_a_usr/file1 (SHOULD NOT BE ALLOWED)
+> > > > > > > 7. sudo bin/mount.ceph admin@.a=3D/ /kmnt_a_admin
+> > > > > > > 8. echo "data" > /kmnt_a_admin/admin_file1
+> > > > > > > 9. rm -f /kmnt_a_usr/admin_file1 (SHOULD NOT BE ALLOWED)
+> > > > > > >=20
+> > > > > >=20
+> > > > > > I think we are missing to explain here which problem or
+> > > > > > symptoms will see the user that has this issue. I assume that
+> > > > > > this will be seen as the issue reproduction:
+> > > > > >=20
+> > > > > > With client_3 which has only 1 filesystem in caps is working as=
+ expected
+> > > > > > mkdir /mnt/client_3/test_3
+> > > > > > mkdir: cannot create directory =E2=80=98/mnt/client_3/test_3=E2=
+=80=99: Permission denied
+> > > > > >=20
+> > > > > > Am I correct here?
+> > > > > >=20
+> > > > > > > URL: https://tracker.ceph.com/issues/72167 =20
+> > > > > > > Signed-off-by: Kotresh HR <khiremat@redhat.com>
+> > > > > > > ---
+> > > > > > >   fs/ceph/mds_client.c | 10 ++++++++++
+> > > > > > >   fs/ceph/mdsmap.c     | 11 ++++++++++-
+> > > > > > >   fs/ceph/mdsmap.h     |  1 +
+> > > > > > >   3 files changed, 21 insertions(+), 1 deletion(-)
+> > > > > > >=20
+> > > > > > > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > > > > > > index 9eed6d73a508..ba91f3360ff6 100644
+> > > > > > > --- a/fs/ceph/mds_client.c
+> > > > > > > +++ b/fs/ceph/mds_client.c
+> > > > > > > @@ -5640,11 +5640,21 @@ static int ceph_mds_auth_match(struct=
+ ceph_mds_client *mdsc,
+> > > > > > >        u32 caller_uid =3D from_kuid(&init_user_ns, cred->fsui=
+d);
+> > > > > > >        u32 caller_gid =3D from_kgid(&init_user_ns, cred->fsgi=
+d);
+> > > > > > >        struct ceph_client *cl =3D mdsc->fsc->client;
+> > > > > > > +     const char *fs_name =3D mdsc->mdsmap->fs_name;
+> > > > > > >        const char *spath =3D mdsc->fsc->mount_options->server=
+_path;
+> > > > > > >        bool gid_matched =3D false;
+> > > > > > >        u32 gid, tlen, len;
+> > > > > > >        int i, j;
+> > > > > > >=20
+> > > > > > > +     if (auth->match.fs_name && strcmp(auth->match.fs_name, =
+fs_name)) {
+> > > > > >=20
+> > > > > > Should we consider to use strncmp() here?
+> > > > > > We should have the limitation of maximum possible name length.
+> > > > > >=20
+> > > > > > > +             doutc(cl, "fsname check failed fs_name=3D%s  ma=
+tch.fs_name=3D%s\n",
+> > > > > > > +                   fs_name, auth->match.fs_name);
+> > > > > > > +             return 0;
+> > > > > > > +     } else {
+> > > > > > > +             doutc(cl, "fsname check passed fs_name=3D%s  ma=
+tch.fs_name=3D%s\n",
+> > > > > > > +                   fs_name, auth->match.fs_name);
+> > > > > >=20
+> > > > > > I assume that we could call the doutc with auth->match.fs_name =
+=3D=3D NULL. So, I am
+> > > > > > expecting to have a crash here.
+> > > > > >=20
+> > > > > > > +     }
+> > > > > > > +
+> > > > > > >        doutc(cl, "match.uid %lld\n", auth->match.uid);
+> > > > > > >        if (auth->match.uid !=3D MDS_AUTH_UID_ANY) {
+> > > > > > >                if (auth->match.uid !=3D caller_uid)
+> > > > > > > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+> > > > > > > index 8109aba66e02..f1431ba0b33e 100644
+> > > > > > > --- a/fs/ceph/mdsmap.c
+> > > > > > > +++ b/fs/ceph/mdsmap.c
+> > > > > > > @@ -356,7 +356,15 @@ struct ceph_mdsmap *ceph_mdsmap_decode(s=
+truct ceph_mds_client *mdsc, void **p,
+> > > > > > >                /* enabled */
+> > > > > > >                ceph_decode_8_safe(p, end, m->m_enabled, bad_e=
+xt);
+> > > > > > >                /* fs_name */
+> > > > > > > -             ceph_decode_skip_string(p, end, bad_ext);
+> > > > > > > +             m->fs_name =3D ceph_extract_encoded_string(p, e=
+nd, NULL, GFP_NOFS);
+> > > > > > > +             if (IS_ERR(m->fs_name)) {
+> > > > > > > +                     err =3D PTR_ERR(m->fs_name);
+> > > > > > > +                     m->fs_name =3D NULL;
+> > > > > > > +                     if (err =3D=3D -ENOMEM)
+> > > > > > > +                             goto out_err;
+> > > > > > > +                     else
+> > > > > > > +                             goto bad;
+> > > > > > > +             }
+> > > > > > >        }
+> > > > > > >        /* damaged */
+> > > > > > >        if (mdsmap_ev >=3D 9) {
+> > > > > > > @@ -418,6 +426,7 @@ void ceph_mdsmap_destroy(struct ceph_mdsm=
+ap *m)
+> > > > > > >                kfree(m->m_info);
+> > > > > > >        }
+> > > > > > >        kfree(m->m_data_pg_pools);
+> > > > > > > +     kfree(m->fs_name);
+> > > > > > >        kfree(m);
+> > > > > > >   }
+> > > > > > >=20
+> > > > > > > diff --git a/fs/ceph/mdsmap.h b/fs/ceph/mdsmap.h
+> > > > > > > index 1f2171dd01bf..acb0a2a3627a 100644
+> > > > > > > --- a/fs/ceph/mdsmap.h
+> > > > > > > +++ b/fs/ceph/mdsmap.h
+> > > > > > > @@ -45,6 +45,7 @@ struct ceph_mdsmap {
+> > > > > > >        bool m_enabled;
+> > > > > > >        bool m_damaged;
+> > > > > > >        int m_num_laggy;
+> > > > > > > +     char *fs_name;
+> > > > > >=20
+> > > > > > The ceph_mdsmap structure describes servers in the mds cluster =
+[1].
+> > > > > > Semantically, I don't see any relation of fs_name with this str=
+ucture.
+> > > > > > As a result, I don't see the point to keep this pointer in this=
+ structure.
+> > > > > > Why the fs_name has been placed in this structure?
+> > > > > >=20
+> > > > > > Thanks,
+> > > > > > Slava.
+> > > > > >=20
+> > > > > > >   };
+> > > > > > >=20
+> > > > > > >   static inline struct ceph_entity_addr *
+> > > > > >=20
+> > > > > > [1] https://elixir.bootlin.com/linux/v6.16/source/fs/ceph/mdsma=
+p.h#L11 =20
+> > > > > >=20
