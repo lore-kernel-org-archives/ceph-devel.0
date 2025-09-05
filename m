@@ -1,63 +1,63 @@
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2173A29C321
-	for <ceph-devel@vger.kernel.org>; Fri,  5 Sep 2025 20:01:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19F1829C321
+	for <ceph-devel@vger.kernel.org>; Fri,  5 Sep 2025 20:01:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757102516; cv=none; b=JGi0jHO2H0cOBhu1GAgsvPdnQRDaT2MdpM9Z4SxANE6X0/JgN6Muy2yy0dmhh5Z7yHmi2Enkg2a+14SkEtOUSxDHD7TzMRQiiXU/Qrc7kP5K6VQFQGTwsiSDPQcoJP3c4vfjAW3/nzlRI2q/86AN+cBqy6HpySzmi/uIuyPvbgg=
+	t=1757102519; cv=none; b=Tq9mIGV6D2obg8MkVYnBcdtZYrSSP+S6WQl6AurnoBz+84xGzcw+Yh/9fKbv4q41IagBfyIFK3fAgFSVBtp5zeCjkWSi6hqfRvLc/PATWlLe/cggOGH0adCglFJnn4tbOACFwYxYo9GOzF6u/jecG2KdD3yJuZYsI4yl/58EqB0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757102516; c=relaxed/simple;
-	bh=TD4uknfHvyPGUWgQU96h069eDMk/ujCkG8PZe8GS5dY=;
+	s=arc-20240116; t=1757102519; c=relaxed/simple;
+	bh=0CFy/0Cs+Y7quQKD6SDFhQDSufoV4lFWsciwm37yuaU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=serSbF0ObeSMCgGv1trFRHk5gFVOdD3wy/T87NEpR6OB5Rb3+S6r73UILcwqJYhk2BUC3pAzAkvE/FAOOnNEstxfdQvaVQ1L9BTesxuB9Kj4vAreOGFX11KclUFxfz7YhRDoFGuM1w1lPAlcJ6ZBfjLwaEZ5eruvjQM1580tI40=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b=Lwhn3tmE; arc=none smtp.client-ip=209.85.128.178
+	 MIME-Version; b=r8zTg5dTO0OMOXtCS4TgTVMrYrUOHUZiyhKhGsNYDzinPJ/OtUjdcoUzFpnHA7lyUV4lyAevGabhfhSGylxGiwoHnoKk60Kx8jpuE8UXthPg8MVGdbMoKi/BWoePD1SG78wZ0FxWeaMZuThif/wKQJ0SQrNq2IKLaWjZyVhq8qs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b=OiHI4qZU; arc=none smtp.client-ip=209.85.219.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b="Lwhn3tmE"
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-71d60528734so22810417b3.2
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Sep 2025 13:01:54 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b="OiHI4qZU"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e98a18faa35so2799564276.0
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Sep 2025 13:01:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20230601.gappssmtp.com; s=20230601; t=1757102513; x=1757707313; darn=vger.kernel.org;
+        d=dubeyko-com.20230601.gappssmtp.com; s=20230601; t=1757102517; x=1757707317; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ZSqTzH3Ilr3whep/qZ6sUBtuPUtJ/C3y9flz5RvNoos=;
-        b=Lwhn3tmETD5YIO+8I42jJXqA++lpkeGu6GHVXPsPUuDWwmNHlhdEE1yf3EIfujcIUl
-         r2uLUeNCDYUqZPTCaRc7TII7+IEIuemVeK7Co7WZt28F1ZQnbe8dLFrv0Cd4TnONjcHM
-         3idZOjgiXgbMQNGNYZg/V9pMOwNlQ9WgZ1kJizouADBZBPUsLGUifHx4uIe5LsvPljUR
-         3mp3ry3t9yWH7pXB+gIHKBiA4udUfKdMQ4saB/qxt1hQUsQkAoyCY4okNyD5Wl3TJhkq
-         W5bcFOrr6pW8CX5XLHoHxcXLg2HY/TG/MFMkUhzRIDv1iWyxxH2Qyq47to/TMueV0cGK
-         wCYw==
+        bh=/v+RXdEOPuTMu7zTp8TzJPMfk4pVB2xdVlKUf9qqy3U=;
+        b=OiHI4qZU1MThjYKlVoEKCIO1pWTz8LdP7wA/e/xqlzhONzga8OA6ewjUfROXKevHKw
+         nhi7GFrBYh1Piwgb7/r1cimbKD4+WsiomwgCC1iu9ZzddrgYlfKCQ6fSTDiaBydB7tvb
+         utQSn2jAuqVV1NPb+oDPGlnb94uQinXIHTkF6NySYcIHeoBQknJoubvYKVegGPXNUxhT
+         9JY0aza+HpHi8s7irlIWQ7pJbZRPSY7kBZU8tSRydgcVA+ib3m0Z7we65vXnQLooZFny
+         1YkEd+jWTKtcbB0zCzBVvxZJd1PR88YtzIPC8UtF46m3Rww8g46AtG683hBMxv4grn43
+         202w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757102513; x=1757707313;
+        d=1e100.net; s=20230601; t=1757102517; x=1757707317;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=ZSqTzH3Ilr3whep/qZ6sUBtuPUtJ/C3y9flz5RvNoos=;
-        b=J66uT2hcht96/L1snUYgksUZsojCsB0QBmlsWjycFG5J/kAsWf+1Lh/sbmWnc4GC7G
-         7iC6rasu9J0FPf5EQotviw28Ydose0E7czngOAzJwIWuOmtDuZ8gJ/ivh5sS0Rf5iz9g
-         FKgcxsLOWaZHLGjQsPZ5PQIcuZRDC/K+q7k99T/uy+UVEYS1UUZKoiQ89o6Ipez8zBzp
-         Z7/lbgI7x2b6NBjbIr90qXtgtAlaOt2FBn0bR7ZXRmyg+mpPcjUEpJXU3Md9HwD42jwM
-         c3mNsTNwPkcO7lhNyZCqztsTbsi7/wAQQ4F8/DFhzAtywVHufWERO0ypmpr0oPoukMKY
-         kLlA==
-X-Gm-Message-State: AOJu0YwjAJ6JR4VjzjSiMKbQsa9qJCCRjYuLT8KTNkJYskjakDHMpd/P
-	re0VoQ1rxQvggLRtf33AA3pudRNees/9WIRxzjULOJmQtOPdMg8pTlJ71USiFdqAJBRmvMUgJIR
-	Y55mFvJE=
-X-Gm-Gg: ASbGncvecUBRY+n0SI9BdSQ36oSB6vN7VB+VkfYOJiBKeRa1PdaKe1ESxAxtkvMspzd
-	yqTmv+cw0r/uBf9PHxstPgipaWbPXnT+YvChheWf8aWHkEzKeOU97UcD7X2sFaueLX/oly+F1m4
-	/u8esOl8htu17ajrwoC3nCjm+RNkLJ4gVp2XacT3figKyQs1TmmsMdfX1g5f72YkS/VFISy6Qf8
-	z2cFpl8kQoTfpL4hTgCzwFVm8KEhoUfiiNHv1092HqO64okVJX+2DTlGuyt/OFgVKbSYA9cijWd
-	aCdemC16xEbIKzvZm4xrm/K6zfNtDDjJ0BQrYwh0ZVt4ZRI6tfdiFvIgNrxkRbRIezc7tj0hl51
-	eQ9u4RLbBKgUdXeQbAQ65mmvkDhZEVBuS24D3uRM5aaVoszyS/wQ=
-X-Google-Smtp-Source: AGHT+IFasCo/NGSnZMQPhBzzposVJlw626v/3OHTnJGkyA8sFBQZu70NSBtyDPT8k4ZRmMSHloRwRA==
-X-Received: by 2002:a05:690c:9689:b0:724:bbca:c028 with SMTP id 00721157ae682-727f5f43be7mr1273707b3.53.1757102513083;
-        Fri, 05 Sep 2025 13:01:53 -0700 (PDT)
+        bh=/v+RXdEOPuTMu7zTp8TzJPMfk4pVB2xdVlKUf9qqy3U=;
+        b=jirUkgqKKyRSBJSHRh5bloKkVW8RaBuNj6LvJESMLQIPqOgue+HMAmz6SqZLynZDoh
+         q4R68e7yMXpKJ6bN68Ctz3oQjn1XUp0DV8h5eW3LMamGilHEZcG7NgS87wp6bCh9aplZ
+         P39EYHvT50dl3tPmZQyXt19PPsQPGIQ8WxULkfSckUT4POwoz94y+bOII5VYE5jp/HOU
+         ygOdCgjwuOBIf5nWfhi5HxYNMRXvSc+qAZ2yf26irXBI+9uQLxygpBxp/Gbe6h1iFDw7
+         Q5JFX0wTvCadE6ZbJKoLCUzOBp3wgOSnqz60ZpBXiV60IwPpMxsHU/g7jJ/VfOFVJqRS
+         RB2g==
+X-Gm-Message-State: AOJu0YyhOP5UG6z/c/PRQPXD1TDVZ2oPJC1Ommg/UV03XcXb1lNq3+eW
+	Le3DavvtlWcogDQ/eqk/toMzzI7rdCp6k4MC7OyOJSMIleKEL3p4O0IP9zch7aaKm4QI5GuQ10z
+	M9oErzJM=
+X-Gm-Gg: ASbGncvvoKs1r1uWnyOXAR9JgUCRO6tYOf65+9NxUYKxmEqHVa6XNPeIKnocWRVk1ra
+	/vIHEzr7MxpLUhf8VcsBkSRmKDZQZSHia7p1kJGIq3/zPTpKwP/eyvB6nNBXCtydDnt1c7t5Ck3
+	6RwbBE/+azCjCfuLEfJxLVf8eHT5sjE0bRgSKOCz+36G17OZYqAIkrIJjM/QPKmNKToapRX3iZ2
+	VhVRByowmUdzCacDBoQ1HVecVsXWiTdl7Gefw+xyjSwDnrWBf+S6wp8SCrvWMVxY5X8uG3NvL4n
+	XTbklOeHuVbHdwzp5tdbaesnUydmjtbQHwEvo8VgqtA7Eerbho3b9QyOUgFUPQs1VdphrwtopPT
+	FzK3WFtoF948BMh9RX5cUShN/EJdbhEMX5PPHHJXj
+X-Google-Smtp-Source: AGHT+IGr8DwZF1PvcbqpOiyYBvyhBdtZeQn8WgiALoHnJmBlYollBjIPtOtZEOVzyz1uGxYtwpohfg==
+X-Received: by 2002:a53:dc82:0:b0:5f3:316d:1cf4 with SMTP id 956f58d0204a3-61027e48ca5mr211143d50.19.1757102516728;
+        Fri, 05 Sep 2025 13:01:56 -0700 (PDT)
 Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:2479:21e9:a32d:d3ee])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-723a834c9adsm32360857b3.28.2025.09.05.13.01.51
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-723a834c9adsm32360857b3.28.2025.09.05.13.01.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 05 Sep 2025 13:01:52 -0700 (PDT)
+        Fri, 05 Sep 2025 13:01:55 -0700 (PDT)
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
@@ -67,9 +67,9 @@ Cc: idryomov@gmail.com,
 	Slava.Dubeyko@ibm.com,
 	slava@dubeyko.com,
 	vdubeyko@redhat.com
-Subject: [RFC PATCH 05/20] ceph: rework comments in ceph_frag.h
-Date: Fri,  5 Sep 2025 13:00:53 -0700
-Message-ID: <20250905200108.151563-6-slava@dubeyko.com>
+Subject: [RFC PATCH 07/20] ceph: add comments in ceph_hash.h
+Date: Fri,  5 Sep 2025 13:00:55 -0700
+Message-ID: <20250905200108.151563-8-slava@dubeyko.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250905200108.151563-1-slava@dubeyko.com>
 References: <20250905200108.151563-1-slava@dubeyko.com>
@@ -90,67 +90,54 @@ Claude AI generated comments for CephFS metadata structure
 declarations in include/linux/ceph/*.h. These comments
 have been reviewed, checked, and corrected.
 
-This patch reworks comments for ceph_frag_make() and
-ceph_frag_compare() in include/linux/ceph/ceph_frag.h.
+This patch adds comments for constant and method declarations
+in /include/linux/ceph/ceph_hash.h.
 
 Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 cc: Alex Markuze <amarkuze@redhat.com>
 cc: Ilya Dryomov <idryomov@gmail.com>
 cc: Ceph Development <ceph-devel@vger.kernel.org>
 ---
- include/linux/ceph/ceph_frag.h | 24 ++++++++++++++++--------
- 1 file changed, 16 insertions(+), 8 deletions(-)
+ include/linux/ceph/ceph_hash.h | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ceph/ceph_frag.h b/include/linux/ceph/ceph_frag.h
-index 97bab0adc58a..c88c0e68727d 100644
---- a/include/linux/ceph/ceph_frag.h
-+++ b/include/linux/ceph/ceph_frag.h
-@@ -3,20 +3,26 @@
- #define FS_CEPH_FRAG_H
+diff --git a/include/linux/ceph/ceph_hash.h b/include/linux/ceph/ceph_hash.h
+index fda474c7a5d6..8ea203f6fbfa 100644
+--- a/include/linux/ceph/ceph_hash.h
++++ b/include/linux/ceph/ceph_hash.h
+@@ -2,13 +2,30 @@
+ #ifndef FS_CEPH_HASH_H
+ #define FS_CEPH_HASH_H
  
- /*
-+ * Directory fragment metadata encoding: CephFS uses "frags" to partition
-+ * directory namespace for distributed metadata management. Each fragment
-+ * represents a contiguous range of the directory's hash space, allowing
-+ * directories to be split across multiple metadata servers (MDSs).
-+ *
-  * "Frags" are a way to describe a subset of a 32-bit number space,
-- * using a mask and a value to match against that mask.  Any given frag
-+ * using a mask and a value to match against that mask. Any given frag
-  * (subset of the number space) can be partitioned into 2^n sub-frags.
-  *
-  * Frags are encoded into a 32-bit word:
-- *   8 upper bits = "bits"
-- *  24 lower bits = "value"
-+ *   8 upper bits = "bits" (depth of partitioning)
-+ *  24 lower bits = "value" (fragment identifier within the partition)
-  * (We could go to 5+27 bits, but who cares.)
-  *
-- * We use the _most_ significant bits of the 24 bit value.  This makes
-- * values logically sort.
-+ * We use the _most_ significant bits of the 24 bit value. This makes
-+ * values logically sort, enabling efficient traversal of the directory
-+ * namespace in hash order.
-  *
-  * Unfortunately, because the "bits" field is still in the high bits, we
-- * can't sort encoded frags numerically.  However, it does allow you
-+ * can't sort encoded frags numerically. However, it does allow you
-  * to feed encoded frags as values into frag_contains_value.
-  */
- static inline __u32 ceph_frag_make(__u32 b, __u32 v)
-@@ -67,8 +73,10 @@ static inline __u32 ceph_frag_next(__u32 f)
- }
+-#define CEPH_STR_HASH_LINUX      0x1  /* linux dcache hash */
+-#define CEPH_STR_HASH_RJENKINS   0x2  /* robert jenkins' */
++/*
++ * String hashing algorithm type constants used for Ceph directory layout hashing.
++ * These determine how directory entries are distributed across metadata servers.
++ */
++/* Linux dcache hash algorithm - matches kernel dcache string hashing */
++#define CEPH_STR_HASH_LINUX      0x1
++/* Robert Jenkins' hash algorithm - provides good distribution properties */
++#define CEPH_STR_HASH_RJENKINS   0x2
  
- /*
-- * comparator to sort frags logically, as when traversing the
-- * number space in ascending order...
-+ * Fragment comparison function: Comparator to sort frags logically for
-+ * ordered traversal of the directory namespace. Since encoded frags cannot
-+ * be sorted numerically due to the bit field layout, this function provides
-+ * the correct logical ordering for directory fragment processing.
-  */
- int ceph_frag_compare(__u32 a, __u32 b);
++/*
++ * String hashing function interfaces for Ceph filesystem operations.
++ * Used primarily for consistent directory entry placement across MDS nodes.
++ */
++
++/* Compute Linux dcache-style hash of a string */
+ extern unsigned ceph_str_hash_linux(const char *s, unsigned len);
++
++/* Compute Robert Jenkins hash of a string */
+ extern unsigned ceph_str_hash_rjenkins(const char *s, unsigned len);
  
++/* Generic hash function dispatcher - calls appropriate algorithm based on type */
+ extern unsigned ceph_str_hash(int type, const char *s, unsigned len);
++
++/* Get human-readable name for a hash algorithm type */
+ extern const char *ceph_str_hash_name(int type);
+ 
+ #endif
 -- 
 2.51.0
 
