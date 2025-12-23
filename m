@@ -1,95 +1,90 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AF4033554E
-	for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2025 12:35:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 631D4336EFE
+	for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2025 12:35:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766493324; cv=none; b=XanuY59mbWRhTv+pCiakYBF1DLcYSz3xByX0U/GpRi1+pQZby27BlacEXUygbid8Jg1vq17rxYdGovE1kmOFKlOgfSgJD0MECu8MwTHwZt315EsWidXSHfs4LJr5VLCg1kwOM7Fd6/YD46lM/wQA6Xyi5Se9saPFBUJHn0TxFw4=
+	t=1766493326; cv=none; b=qqMBacO8ZXDTlZoWPfCHJqoqVkCQBWij2iLUrymA4jt5XNRz3fQRSUXB/C+rKRGkugy9/L1M7HEuszuzNNLDcNQehHC2TsUMNU/84z9oPL5RQ3Pk99WhfLDOPDz9hVf0HP4ZPewPqzWAKq9y16DJTgWWSsGEjK3pvdUnIhq6en0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766493324; c=relaxed/simple;
-	bh=kaqBof1sKgiJIPiV/1INPtCHKMqmsKcOUSYudAkYT+8=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Al/3HsySUtNGivnA3JY4TBeW1zM/bYETbbrLRhvaSHqwRA2CXH7WoP4pY1A9UWhiHlnIeJqglmYefXtkszTqHlDyq8glWp6CTyqQoYTAMp2XJ9QzAbvlo+ljx6PedpE3s9efTZL6eGkF8Laze3Jz3RgaHxJZ387uOmrw59QvPMU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VaCrADG5; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=nMmS+h4t; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1766493326; c=relaxed/simple;
+	bh=Zp7ZrL2wpTgCqD6NJHJeQG5+50UDDeLVh65DlTT+dUs=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=GanQjdntnJfgAvSK5ui3Ep7/k0ZhuGow8GgDTIVVkTdiXy4ncRO8ubtNzaKF244joMzSlreAbGJb2qvldY0pYNwLOkTA04lmOIXbZVDpxBxL/i5NLxVDDacW+QIq4/od/c6SKe+Bg2nTnKKbFVkO9L1BG4V5i2iQ16C3m090WiM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CgcBtOvI; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ys72Qdq6; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VaCrADG5";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="nMmS+h4t"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CgcBtOvI";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ys72Qdq6"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1766493320;
+	s=mimecast20190719; t=1766493323;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hqMxPL5XkVhI64/cXZFXyo1vJ+jSBIkFaN8ilwgpRVI=;
-	b=VaCrADG5/v2BlH8oOotFuL7WQorwyIqgzFt272+9N8eMmsc0hyTz3jjNsPRQErn0T2WYoK
-	7hCIXJiPt/Gt42qsWDTN9OI/zsyl6QVBMn+tDLCnuL+bZEEkbpIW+m3smWhLyxYNM3ZKqG
-	gkD4SsTN6hjKLFjLvZ0uAtMBuoyllQU=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=DSdWHgvhJGn7RbB2GAuzD8Ky9Z74RCwiMxPz6+Zvz2U=;
+	b=CgcBtOvIo0Kt+KP4lSs7ZEXt5eWPuSbL/RYdZqRRVKLxgSYi5EVdGnQHX4clhlzb+6P3XE
+	tlxrDFHhWXaXipJIkbjOBc6bPAos9hOxgCgFjXEj71PVR+mg6Nq4IUoXFUn4NjKq5x2GOu
+	UkLtU+fMhT/jzKEn4Wvxb647vD66or8=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-494-wSpIpPuSNcmiGNSxWSxMJw-1; Tue, 23 Dec 2025 07:35:18 -0500
-X-MC-Unique: wSpIpPuSNcmiGNSxWSxMJw-1
-X-Mimecast-MFC-AGG-ID: wSpIpPuSNcmiGNSxWSxMJw_1766493318
-Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-b7ce2f26824so464573466b.1
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2025 04:35:18 -0800 (PST)
+ us-mta-413-apWZiWqoOZWjfRX1RJp3NA-1; Tue, 23 Dec 2025 07:35:22 -0500
+X-MC-Unique: apWZiWqoOZWjfRX1RJp3NA-1
+X-Mimecast-MFC-AGG-ID: apWZiWqoOZWjfRX1RJp3NA_1766493321
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-b70b1778687so448322366b.0
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2025 04:35:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1766493317; x=1767098117; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=hqMxPL5XkVhI64/cXZFXyo1vJ+jSBIkFaN8ilwgpRVI=;
-        b=nMmS+h4te88S9H+1hJTi1wj4pzVMbk165LXzWQa8fHIBJ7Pm9ZyQhtG+voD11pvkjN
-         UN8FSk/Pj8EKUh+NH1X2MHzt6LZV8H3/FRNKYBWZXxwTjBjhBvweV3BKI0zHQMvQdZ12
-         e4Y3Cfp+XW4IxW/yUmnOZ6UeaucQAAXkDF3zaWrS+zemp25NlHaFDHf+5FujPmzVOkNK
-         2iKGBeweDSu+3FZ37e6YBBrerW6somYhia6mBPFIGRKXvay+WMoz3dZvgrIbUg1evXfj
-         wp+I3iVi5Me4XiAYhK+/+y19v06yVpMXNjse+pyFk/ZAhzsUMLp2OPwJhzpRatUOhXL1
-         yxIA==
+        d=redhat.com; s=google; t=1766493321; x=1767098121; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=DSdWHgvhJGn7RbB2GAuzD8Ky9Z74RCwiMxPz6+Zvz2U=;
+        b=Ys72Qdq6MflKu8mb9RHlev1G4tszGDNp/iE4CuWamV+IuojpG9EiDFMrKqCFO+4U//
+         DP/ZPALI+FzaeW486BuebLop7hYxx3JOp6rxOtNYtp/QatzG3sZOysoS4lE80Md4/L6n
+         EVN57SHCZ0g6j0GF2U97sIBUUhtxSMEpaNg0qFUPNeBfgCLw6wRbILOIq5wgpI9GfCho
+         7QL/Iu9nbD/KwwRVB/vxb2zzYtYybYfH34yFaeiKuseJYhtPxe9grTBVYMPw92jSzFn3
+         UQY25Ew5QAUYeqBzLl1BTQzoR5VapIei36BXF+wOZ8vxyTPf0hRarr41vox5zNIHZZCq
+         Ez/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766493317; x=1767098117;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=hqMxPL5XkVhI64/cXZFXyo1vJ+jSBIkFaN8ilwgpRVI=;
-        b=me12K5+kZ9XJgh8bnKMpZkMMcEv93E5uBxbYYSCC4tRzAKoWafisXx4PwD2oPvFScJ
-         Ofp7xlZWRmwbSesNlTpXy2dvM4Dg6aLJc431FDxHesoSHaI9k7Hh5JTZ094KdA2gipX6
-         66Wi+QR6JiFK+GoEz5hkGrlOcHw4WzDmLdVsxE87o5ig1vHbwVKpr9BjtyffO5Nx2rNy
-         ZAR/DLEM8VTxI4RpoL2RM17Xcd7lPNiYF1WhCXE1TXXf2LV/mpb28u7M2sylmmIOVkWl
-         B6hZpet3jFaVTmANvQ8mugDe/HX3EDEs/ey0vmlletoICqdConX9W2Y2jxMNKTcqIWz8
-         gbAg==
-X-Gm-Message-State: AOJu0YxsTXs4vEJKPeEp1vOcrbrK+6GEvNfyFx2d2eqXD9KVlnyBzYMi
-	tSvRcWL5DU/Ln+q3vnLDMqNCEibX+PpSXzahIji7sk252V1zZYxS3XGIYhpTe2XzjlmQb2i+Do7
-	SzT9PEv0he99FI5+q2kujlWmBrl2MAfDEAexGI3FhWZnt0ej6hjPz040MGURsRu285kvC8Hv5RX
-	LjH2fnQrMvJJQe791bdrPDpXyYxidclbSrFuWHa0P9MEaJNlL2cA==
-X-Gm-Gg: AY/fxX4MmT9PGQ7YD4zXGeWfiJ3SmmrufgdYeCmEbWQGlez+Ecff7uX8RHJfxZFTQcr
-	Dds+FNOAMoPpxIJibt0Vlz84jv6qXQSaOWWGRlWUGb8Tk73xpGdRolz6pQHnuj24w4OmFAWKhLW
-	5kFtR8UVO/v5Xh3XXiMM51kkCwJ5e7dW30h/Nz8XmcW6Muh9l2vJyE2pAR5wHYA3Kfnujt+W5WC
-	89rEQgNh5aikD9MOF2bgJjhVORwlNd0UIcJt25QcwVxz/92YEB4bCJzL6L7t/0R6wCBHiuq36tk
-	JxSgn3Uv53ddkkMdojFOkVtCgMvgtOUGeNlNRMjoGPId4VoXpNrjk2JCyC7cdsZD9R9ayVLMWeM
-	WHf4ERP23lNgFcjOVTZRv1h1yK+BNMZ7mkOM7Vp1t0rA=
-X-Received: by 2002:a17:906:c147:b0:b73:6b24:14ba with SMTP id a640c23a62f3a-b8036f31e99mr1390798766b.8.1766493317346;
-        Tue, 23 Dec 2025 04:35:17 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEgWe8eXxEiIOXCMyC1LFicRQ8TXqNXrmDQ2idetyZDBM6I0eOtlJ/NAaWd+DTAXovl0Gh6/w==
-X-Received: by 2002:a17:906:c147:b0:b73:6b24:14ba with SMTP id a640c23a62f3a-b8036f31e99mr1390794666b.8.1766493316735;
-        Tue, 23 Dec 2025 04:35:16 -0800 (PST)
+        d=1e100.net; s=20230601; t=1766493321; x=1767098121;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DSdWHgvhJGn7RbB2GAuzD8Ky9Z74RCwiMxPz6+Zvz2U=;
+        b=MXtiscDEi3EijOtsggWrJ8bXUuY/3vdtpe+wf6ijmFjyN/rMsaehvb8LEs6E1CjUfM
+         JXsDl2ZkZQcroqnt/PU8LdXmM+kWsnp9ZiQAwL7UtlKsFRyUVqi39ESZPoMw8fAcMlM/
+         azPdEIP5lIiReb5eGdJzTkFaEunBn5Hc6A1Kq9ZiWh+U2zCDOMyb0ZcQlbudieRRZsQ1
+         kZbzw8KNlh7yATnpL8s6pHW2AZXK1TqJ8fec3o4h8Z3JF6lQ/E2BghpoIE1DtsXp8J5g
+         HuGkclIp8E0ndhCDEKYmA4BDY3aSl4fIK+WPdnKgR4qyt8QgmqeBcz8ZBh+2zahAtEm6
+         mZDw==
+X-Gm-Message-State: AOJu0Yzn3nXTEOaz5KPOxI9kL3zIc8OS4oCxK4bfhF1PtN2BrCTPEdoI
+	IWtXbIKVL0euDqxji7SCiB8hNajSphzOekINcQgMUOiot4mDV5UUlznliqnXVO+yZC9ZttXmFIn
+	aGUDeWvgjAfveYZyIMfZunujaLWVrHfJ60p4/tL+zl6skbKRX9FGPFlitWPgz5prAna5uoBlk+z
+	KEOcHyeUq92I048/+AKdiqFhRMwh1gstvQV6O58AHpjdvNN/m2RN0k
+X-Gm-Gg: AY/fxX6bCKo6zd80n3SUFprx7RUgNIiE+GnNmk+MnLlzpFanYTQy3Elw4SnGbkSkkE4
+	Z8qsCZfccThoIUK9VbujMFRv0OAZFeevDzl1O/x98f17QbEx/UjnJpeGp6svlQL801qObL2axHJ
+	1bn0fIrQi2Rauhvx00nFXE6Aqjqr7msSDGG/N9m5KoRrl6t9P0qi0olUk1KynNzZt+9ZStQJLjD
+	ykBlKadsozsJsLxk/DBZwwQMJff7DE8nk8IjPJcxUhspOySuhZU+NndmTgaFfxbkSVfnF4cxBz9
+	jBpXrpp6PZislXWRfMWUJ3zEsGWK34Q1KBPh6MhONROti5SJJ4CPhj1uC7guThfOgN8zPStY7O7
+	twCk6vdAqylMP2DqRL7OJoMlLudtcCBgLa+bQIsJvqT0=
+X-Received: by 2002:a17:907:1b1d:b0:b76:5393:758d with SMTP id a640c23a62f3a-b8037155d9bmr1284616466b.34.1766493315745;
+        Tue, 23 Dec 2025 04:35:15 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGCy7k4ESHeDFd6TWUY2NNtfU0x+/Yhc1CTnCq/hakeZ5Idg+9TpsHj8IPpnNy89S/S1lnDrw==
+X-Received: by 2002:a17:907:1b1d:b0:b76:5393:758d with SMTP id a640c23a62f3a-b8037155d9bmr1284614366b.34.1766493315210;
+        Tue, 23 Dec 2025 04:35:15 -0800 (PST)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b8037f13847sm1353357366b.57.2025.12.23.04.35.16
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b8037f13847sm1353357366b.57.2025.12.23.04.35.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Dec 2025 04:35:16 -0800 (PST)
+        Tue, 23 Dec 2025 04:35:14 -0800 (PST)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
 	linux-fsdevel@vger.kernel.org,
 	amarkuze@redhat.com,
 	vdubeyko@redhat.com
-Subject: [PATCH v4 2/3] ceph: parse subvolume_id from InodeStat v9 and store in inode
-Date: Tue, 23 Dec 2025 12:35:09 +0000
-Message-Id: <20251223123510.796459-3-amarkuze@redhat.com>
+Subject: [PATCH v4 0/3]  ceph: add subvolume metrics reporting support
+Date: Tue, 23 Dec 2025 12:35:07 +0000
+Message-Id: <20251223123510.796459-1-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20251223123510.796459-1-amarkuze@redhat.com>
-References: <20251223123510.796459-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -98,160 +93,103 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add support for parsing the subvolume_id field from InodeStat v9 and
-storing it in the inode for later use by subvolume metrics tracking.
+This patch series adds support for per-subvolume I/O metrics collection
+and reporting to the MDS. This enables administrators to monitor I/O
+patterns at the subvolume granularity, which is useful for multi-tenant
+CephFS deployments where different subvolumes may be allocated to
+different users or applications.
 
-The subvolume_id identifies which CephFS subvolume an inode belongs to,
-enabling per-subvolume I/O metrics collection and reporting.
+The implementation requires protocol changes to receive the subvolume_id
+from the MDS (InodeStat v9), and introduces a new metrics type
+(CLIENT_METRIC_TYPE_SUBVOLUME_METRICS) for reporting aggregated I/O
+statistics back to the MDS.
 
-This patch:
-- Adds subvolume_id field to struct ceph_mds_reply_info_in
-- Adds i_subvolume_id field to struct ceph_inode_info
-- Parses subvolume_id from v9 InodeStat in parse_reply_info_in()
-- Adds ceph_inode_set_subvolume() helper to propagate the ID to inodes
-- Initializes i_subvolume_id in inode allocation and clears on destroy
+Patch 1 adds forward-compatible handling for InodeStat v8. The MDS v8
+encoding added a versioned optmetadata field containing optional inode
+metadata such as charmap (for case-insensitive/case-preserving file
+systems). The kernel client does not currently support case-insensitive
+lookups, so this field is skipped rather than parsed. This ensures
+forward compatibility with newer MDS servers without requiring the
+full case-insensitivity feature implementation.
 
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
----
- fs/ceph/inode.c      | 23 +++++++++++++++++++++++
- fs/ceph/mds_client.c |  7 +++++++
- fs/ceph/mds_client.h |  1 +
- fs/ceph/super.h      |  2 ++
- 4 files changed, 33 insertions(+)
+Patch 2 adds support for parsing the subvolume_id field from InodeStat
+v9 and storing it in the inode structure for later use.
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index a6e260d9e420..835049004047 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -638,6 +638,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 
- 	ci->i_max_bytes = 0;
- 	ci->i_max_files = 0;
-+	ci->i_subvolume_id = 0;
- 
- 	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
- 	memset(&ci->i_cached_layout, 0, sizeof(ci->i_cached_layout));
-@@ -742,6 +743,8 @@ void ceph_evict_inode(struct inode *inode)
- 
- 	percpu_counter_dec(&mdsc->metric.total_inodes);
- 
-+	ci->i_subvolume_id = 0;
-+
- 	netfs_wait_for_outstanding_io(inode);
- 	truncate_inode_pages_final(&inode->i_data);
- 	if (inode->i_state & I_PINNING_NETFS_WB)
-@@ -873,6 +876,22 @@ int ceph_fill_file_size(struct inode *inode, int issued,
- 	return queue_trunc;
- }
- 
-+/*
-+ * Set the subvolume ID for an inode. Following the FUSE client convention,
-+ * 0 means unknown/unset (MDS only sends non-zero IDs for subvolume inodes).
-+ */
-+void ceph_inode_set_subvolume(struct inode *inode, u64 subvolume_id)
-+{
-+	struct ceph_inode_info *ci;
-+
-+	if (!inode || !subvolume_id)
-+		return;
-+
-+	ci = ceph_inode(inode);
-+	if (READ_ONCE(ci->i_subvolume_id) != subvolume_id)
-+		WRITE_ONCE(ci->i_subvolume_id, subvolume_id);
-+}
-+
- void ceph_fill_file_time(struct inode *inode, int issued,
- 			 u64 time_warp_seq, struct timespec64 *ctime,
- 			 struct timespec64 *mtime, struct timespec64 *atime)
-@@ -1087,6 +1106,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 	new_issued = ~issued & info_caps;
- 
- 	__ceph_update_quota(ci, iinfo->max_bytes, iinfo->max_files);
-+	ceph_inode_set_subvolume(inode, iinfo->subvolume_id);
- 
- #ifdef CONFIG_FS_ENCRYPTION
- 	if (iinfo->fscrypt_auth_len &&
-@@ -1594,6 +1614,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 			goto done;
- 		}
- 		if (parent_dir) {
-+			ceph_inode_set_subvolume(parent_dir,
-+						 rinfo->diri.subvolume_id);
- 			err = ceph_fill_inode(parent_dir, NULL, &rinfo->diri,
- 					      rinfo->dirfrag, session, -1,
- 					      &req->r_caps_reservation);
-@@ -1682,6 +1704,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		BUG_ON(!req->r_target_inode);
- 
- 		in = req->r_target_inode;
-+		ceph_inode_set_subvolume(in, rinfo->targeti.subvolume_id);
- 		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
- 				NULL, session,
- 				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index d7d8178e1f9a..099b8f22683b 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -105,6 +105,8 @@ static int parse_reply_info_in(void **p, void *end,
- 	int err = 0;
- 	u8 struct_v = 0;
- 
-+	info->subvolume_id = 0;
-+
- 	if (features == (u64)-1) {
- 		u32 struct_len;
- 		u8 struct_compat;
-@@ -251,6 +253,10 @@ static int parse_reply_info_in(void **p, void *end,
- 			ceph_decode_skip_n(p, end, v8_struct_len, bad);
- 		}
- 
-+		/* struct_v 9 added subvolume_id */
-+		if (struct_v >= 9)
-+			ceph_decode_64_safe(p, end, info->subvolume_id, bad);
-+
- 		*p = end;
- 	} else {
- 		/* legacy (unversioned) struct */
-@@ -3970,6 +3976,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 			goto out_err;
- 		}
- 		req->r_target_inode = in;
-+		ceph_inode_set_subvolume(in, rinfo->targeti.subvolume_id);
- 	}
- 
- 	mutex_lock(&session->s_mutex);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 0428a5eaf28c..bd3690baa65c 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -118,6 +118,7 @@ struct ceph_mds_reply_info_in {
- 	u32 fscrypt_file_len;
- 	u64 rsnaps;
- 	u64 change_attr;
-+	u64 subvolume_id;
- };
- 
- struct ceph_mds_reply_dir_entry {
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index a1f781c46b41..c0372a725960 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -385,6 +385,7 @@ struct ceph_inode_info {
- 
- 	/* quotas */
- 	u64 i_max_bytes, i_max_files;
-+	u64 i_subvolume_id;	/* 0 = unknown/unset, matches FUSE client */
- 
- 	s32 i_dir_pin;
- 
-@@ -1057,6 +1058,7 @@ extern struct inode *ceph_get_inode(struct super_block *sb,
- extern struct inode *ceph_get_snapdir(struct inode *parent);
- extern int ceph_fill_file_size(struct inode *inode, int issued,
- 			       u32 truncate_seq, u64 truncate_size, u64 size);
-+extern void ceph_inode_set_subvolume(struct inode *inode, u64 subvolume_id);
- extern void ceph_fill_file_time(struct inode *inode, int issued,
- 				u64 time_warp_seq, struct timespec64 *ctime,
- 				struct timespec64 *mtime,
+Patch 3 adds the complete subvolume metrics infrastructure:
+- CEPHFS_FEATURE_SUBVOLUME_METRICS feature flag for MDS negotiation
+- Red-black tree based metrics tracker for efficient per-subvolume
+  aggregation with kmem_cache for entry allocations
+- Wire format encoding matching the MDS C++ AggregatedIOMetrics struct
+- Integration with the existing CLIENT_METRICS message
+- Recording of I/O operations from file read/write and writeback paths
+- Debugfs interfaces for monitoring
+
+Metrics tracked per subvolume include:
+- Read/write operation counts
+- Read/write byte counts
+- Read/write latency sums (for average calculation)
+
+The metrics are periodically sent to the MDS as part of the existing
+metrics reporting infrastructure when the MDS advertises support for
+the SUBVOLUME_METRICS feature.
+
+Debugfs additions in Patch 3:
+- metrics/subvolumes: displays last sent and pending subvolume metrics
+- metrics/metric_features: displays MDS session feature negotiation
+  status, showing which metric-related features are enabled (including
+  METRIC_COLLECT and SUBVOLUME_METRICS)
+
+Patch 3 introduces CEPH_SUBVOLUME_ID_NONE constant and enforces
+subvolume_id immutability. Following the FUSE client convention,
+0 means unknown/unset. Once an inode has a valid (non-zero) subvolume_id,
+it should not change during the inode's lifetime.
+
+Changes since v3:
+- merged CEPH_SUBVOLUME_ID_NONE patch into its prediseccor
+
+Changes since v2:
+- Add CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset state
+- Add WARN_ON_ONCE if attempting to change already-set subvolume_id
+- Add documentation for struct ceph_session_feature_desc ('bit' field)
+- Change pr_err() to pr_info() for "metrics disabled" message
+- Use pr_warn_ratelimited() instead of manual __ratelimit()
+- Add documentation comments to ceph_subvol_metric_snapshot and
+  ceph_subvolume_metrics_tracker structs
+- Use kmemdup_array() instead of kmemdup() for overflow checking
+- Add comments explaining ret > 0 checks for read metrics (EOF handling)
+- Use kmem_cache for struct ceph_subvol_metric_rb_entry allocations
+- Add comment explaining seq_file error handling in dump function
+
+Changes since v1:
+- Fixed unused variable warnings (v8_struct_v, v8_struct_compat) by
+  using ceph_decode_skip_8() instead of ceph_decode_8_safe()
+- Added detailed comment explaining InodeStat encoding versions v1-v9
+- Clarified that "optmetadata" is the actual field name in MDS C++ code
+- Aligned subvolume_id handling with FUSE client convention (0 = unknown)
+
+
+Alex Markuze (3):
+  ceph: handle InodeStat v8 versioned field in reply parsing
+  ceph: parse subvolume_id from InodeStat v9 and store in inode
+  ceph: add subvolume metrics collection and reporting
+
+ fs/ceph/Makefile            |   2 +-
+ fs/ceph/addr.c              |  10 +
+ fs/ceph/debugfs.c           | 159 +++++++++++++
+ fs/ceph/file.c              |  68 +++++-
+ fs/ceph/inode.c             |  41 ++++
+ fs/ceph/mds_client.c        |  94 ++++++--
+ fs/ceph/mds_client.h        |  14 +-
+ fs/ceph/metric.c            | 173 ++++++++++++++-
+ fs/ceph/metric.h            |  27 ++-
+ fs/ceph/subvolume_metrics.c | 432 ++++++++++++++++++++++++++++++++++++
+ fs/ceph/subvolume_metrics.h |  97 ++++++++
+ fs/ceph/super.c             |   8 +
+ fs/ceph/super.h             |  11 +
+ 13 files changed, 1108 insertions(+), 28 deletions(-)
+ create mode 100644 fs/ceph/subvolume_metrics.c
+ create mode 100644 fs/ceph/subvolume_metrics.h
+
 -- 
 2.34.1
 
