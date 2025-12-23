@@ -1,357 +1,146 @@
-Received: from mail.chaospixel.com (mail.chaospixel.com [78.46.244.255])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01D0463CB
-	for <ceph-devel@vger.kernel.org>; Mon, 22 Dec 2025 21:27:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.46.244.255
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2545F336EFE
+	for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2025 12:35:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766438826; cv=none; b=CLkEa82UEaocHNx1egkaE1wn0nvo8Ai8h/c8aZY2mAWdnvoErkJtoqwMz+ZHJm5MABFFgJjpnk8oILkDLY6mVCv3FNPvNxatR4DLzNKuflCyvci/VNx44Lm8BG39mGR8ws2zUIIz2MMTCaa8ydvmF0ZkLMCjePfd0ddRbwbXwn8=
+	t=1766493322; cv=none; b=MTt2gCpBodaKlf0TJFJzCEcOwiTG13WTL+qQ1/s9K/88xGvWrMBMak2a3ugK9g9LeKPxcneW9x3v6sPyI+j/uZhHS1VB7L+Pnp0pJPQsiTwDHAaKLTYYMefDhNvR0dmsdDBDsav1uNCwrrpeSQhBMWFWGeqjk/JMwHO3YjbQzj0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766438826; c=relaxed/simple;
-	bh=oRZrKEC1sNvyT2Anpqf+ASkxoaEvAGQm8ymytAFoSj4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=t3G9SsGNku437N2d9epqvAeql/7Dghe4xZL1HR7u25RBfhv3sxTLuB9ssRu29n+vvOpHiObIPCZQ11SZhsMfDEmt18uYUdG85apH6fMBmTi22zgbVoiBk+k7ikPcvbg0GqH+rOxspDYJKAp4n78xuIzYNP73N02z6+9WbureSPg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chaospixel.com; spf=pass smtp.mailfrom=chaospixel.com; dkim=pass (2048-bit key) header.d=chaospixel.com header.i=@chaospixel.com header.b=LZKkhV4F; arc=none smtp.client-ip=78.46.244.255
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chaospixel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chaospixel.com
+	s=arc-20240116; t=1766493322; c=relaxed/simple;
+	bh=B4xyzwDKGxq/vyrw5rw3MiyV1PFc/MXbtlIPEadsNuw=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=Mq4GDVgUCKH4g3lRBDCxRTUyKapk461esc4kRkiOD5+OlXfiEyPY/iBRw3m/V0OrBQszOUTWifB3A+20QKFmpAaELoA1jLO+olRzZGHTi1JaFOQjGKOjA3xz3A6BSaBGgqyaQhRWMvCuX/WREYrakYmzRGGnnm2I4PAMlXFvJxM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HPmUhukL; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=fmeTWbfb; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=chaospixel.com header.i=@chaospixel.com header.b="LZKkhV4F"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=chaospixel.com;
-	s=201811; t=1766438813;
-	bh=oRZrKEC1sNvyT2Anpqf+ASkxoaEvAGQm8ymytAFoSj4=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=LZKkhV4F80FSC1gVxQ8klxyu4Prd8X5u2Abe7C8gl+hnunu80WKvpC4jBJLkeL3QW
-	 CPCQ8/KeK/XODG99AZkeHVR/9GFiu8GBG82FEC2Twq2+EQf1sJMJO+KXUuD4CGWf/b
-	 FvcqGDpWJ6GAa8bcQhH6aNdXamCd4MvQPukMjlDrXM6FdgmOCzXmccoQY56sNThrc4
-	 182gOEGK9camRUJ7cIMYWDCzpIRm8lRJR+rrqrYLYk15C+FM7CiWk9UiipVJ5x/ylj
-	 L47hhMIGr6ExA7kqHOZ6OxGnc3RebuHslojK49QKiCqr6DPFGsgKEmc8Iv0IsfZpNO
-	 grZzkt1bIV1iQ==
-Received: from [IPV6:2a02:8071:b8a:89e1:595d:a46b:455d:953c] (unknown [IPv6:2a02:8071:b8a:89e1:595d:a46b:455d:953c])
-	by mail.chaospixel.com (Postfix) with ESMTPSA id 933AC6420F7F;
-	Mon, 22 Dec 2025 22:26:53 +0100 (CET)
-Message-ID: <95555273-fa9a-48fa-855e-ca1e71f4c903@chaospixel.com>
-Date: Mon, 22 Dec 2025 22:26:53 +0100
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HPmUhukL";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="fmeTWbfb"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1766493319;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=jcDCLLxng0aZwTmIpvTEU2QWfymaHSnvSLSvvAB+tII=;
+	b=HPmUhukLm73eOAeqE0V5YujP/jNLNWKte1UWe/dyyWL12ZlPgGu2Eob3VWSWPqRJfYji1S
+	Z8/V7j4E1oU3qFrWzbC1qvLNBL5zHPl7Mu4zduKx80HZFImQaW4N5EQPVSiUL0u4vcyyaI
+	0oQLq59GsAiR6q8Kq9sciQWZEheatvk=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-29-VaxJZoc-PhCSxz_CK55_lw-1; Tue, 23 Dec 2025 07:35:17 -0500
+X-MC-Unique: VaxJZoc-PhCSxz_CK55_lw-1
+X-Mimecast-MFC-AGG-ID: VaxJZoc-PhCSxz_CK55_lw_1766493317
+Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-b7ff8a27466so570305566b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2025 04:35:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1766493316; x=1767098116; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jcDCLLxng0aZwTmIpvTEU2QWfymaHSnvSLSvvAB+tII=;
+        b=fmeTWbfbgVJoJMDuiSRZCwCXMQiikuA/IoAACTkk7uPGtohWm3gh/WrmCahH4TysOZ
+         aEWHxKNhULlkaPLjN2JMuBYS/qAd3aTmCAJIzz9bM1AuOtSkcNMFmUHfYK+wgzknH3U7
+         BQW5Xc9iP/xpVgVlbZj+pnkyzGF7kl4pTxgqp+6edsY53NhFVA0wgg0k1rKk57WHpRtE
+         Cs/Zck95WG2B3BFN/t6Q9lBvuecez3e6jOXOtgeuhz0aLA/w4aWaj6nfmbE88f/fWEjL
+         EGdQEhElIQR8o2c81TYpr0h74qiK4Wu7xMszP+cEP4a0ZQjrvp16L3dHZv3xziHg7AnM
+         LtQA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1766493316; x=1767098116;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=jcDCLLxng0aZwTmIpvTEU2QWfymaHSnvSLSvvAB+tII=;
+        b=m8VVAy5dfgjapdcL7C8UQNQo777MXWN9ch5Q8c9idf03vKOXSBUvs0Y/4/Nvl2ltmF
+         J+suV75lHZhyVEYrN7Og6XoWbVB9AO+1V7cZTRSbWymAaAi77pseAsm0AbCFWEzokbE9
+         Sei0RQhRho2Mt17/PMJttCSBqURlRokaAlWGSDTRiduV+LVNOEa6JhFtLL1dbGgczu4m
+         llWeSDMWj0HDfU0Dx9f+O0ZbUW5lXLWWmIfwrQC32QS5OYkCfyQXZia/VtuyLlsrQBiz
+         2hnkVrsVV9Ba6at6gismdUjEeGKY0y5mNFNVLnDrvjLLZw+XkrstvSzBJ+9Vuh2qB1mb
+         ia7g==
+X-Gm-Message-State: AOJu0YxWYtvyK/VVoSSQgjnIx1xtWJ37I66VSfqGGJwkJz4nhjpt5Lxg
+	jw0Smmj87zuBgt54GVpQjGMR92uI9a6HOUIbmS9SVQNtaA8MXx0OA9SK+/ODmZMMSN+C1Py4iIk
+	/yvEAqEm2Ouo6FbUyFWj5j13Fnw/TaJVF0dcshNRWXgY45bbcdXLscV/GxCp+eXhinXRXYenuTF
+	qbx8hJbZORjh03lYhhgtpTzuKjC+Ko8Af+cOAPD0HtnILlC2gokg==
+X-Gm-Gg: AY/fxX4ARvGzJrVPjqw923aPM+RGCG2rgyaY18atWd8F0k9OaDOO5hW62iXyHkViA68
+	bg+sNJex3WfG9DKH0UmeSl1Z6i0W0JerrULsn7HtCGJ6o9UfMVmYaWvl080PToXPlQDFV5PWjnu
+	fQrUn35Q9I72QSM7thKH/QGgiKBKsOpC/EkFq+7975kZyutXzq8vmQIA5pMYCqHzKhruCD5S5Co
+	621AutM2J5QuGgPqlpWZUbiOvIDdiN2JC84uXpdq+fxBWDPfEKgAopiefeQwrDDCW7gI3a/+A2/
+	qo2PV8BiNCjZIkeGh2EdMA4ScXSOSR79Ruku7p+HNOK0sjg/H3rLPlN8e+MS8fzbbF2Y2rmd8fP
+	hlqzO53lRQnF3DlEM4jHSemPwMeYUUhToDDWHrQfc19k=
+X-Received: by 2002:a17:907:3d42:b0:b73:a0b9:181a with SMTP id a640c23a62f3a-b80371df391mr1542383666b.54.1766493316428;
+        Tue, 23 Dec 2025 04:35:16 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IExrun+Zq0TkoEnG1zYuJwmjwgqz7edHNFpN5rqW3xzlyjFGy/KN5Wd1rXi9RQhM5Hdz3CgBQ==
+X-Received: by 2002:a17:907:3d42:b0:b73:a0b9:181a with SMTP id a640c23a62f3a-b80371df391mr1542380666b.54.1766493315965;
+        Tue, 23 Dec 2025 04:35:15 -0800 (PST)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b8037f13847sm1353357366b.57.2025.12.23.04.35.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 23 Dec 2025 04:35:15 -0800 (PST)
+From: Alex Markuze <amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	amarkuze@redhat.com,
+	vdubeyko@redhat.com
+Subject: [PATCH v4 1/3] ceph: handle InodeStat v8 versioned field in reply parsing
+Date: Tue, 23 Dec 2025 12:35:08 +0000
+Message-Id: <20251223123510.796459-2-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20251223123510.796459-1-amarkuze@redhat.com>
+References: <20251223123510.796459-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fs/ceph: Fix kernel oops due invalid pointer for kfree()
- in parse_longname()
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
- "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Xiubo Li <xiubli@redhat.com>, "idryomov@gmail.com" <idryomov@gmail.com>
-References: <20251220140153.1523907-1-daniel@chaospixel.com>
- <62924ea8997fb174034e6333db3a52b2f30f0e68.camel@ibm.com>
-Content-Language: en-US
-From: Daniel Vogelbacher <daniel@chaospixel.com>
-In-Reply-To: <62924ea8997fb174034e6333db3a52b2f30f0e68.camel@ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
-On 12/22/25 21:08, Viacheslav Dubeyko wrote:
-> On Sat, 2025-12-20 at 15:01 +0100, Daniel Vogelbacher wrote:
->> This fixes a kernel oops when reading ceph snapshot directories (.snap),
->> for example by simply run `ls /mnt/my_ceph/.snap`.
->>
-> 
-> Frankly speaking, it's completely not clear how this kernel oops can happen.
-> Could you please explain in more details how it can happen and what is the
-> nature of the issue? How the issue can be reproduced?
+Add forward-compatible handling for the new versioned field introduced
+in InodeStat v8. This patch only skips the field without using it,
+preparing for future protocol extensions.
 
-All I need to reproduce the issue is to run `ls .snap/` on any mounted 
-cephfs mountpoint that contains scheduled snapshots. I've one prod VM 
-(KVM) where I hit the issue after a Debian Trixie upgrade. To isolate 
-it, I've created a fresh Trixie VM, dropped the distribution kernel and 
-built a vanilla kernel to isolate the buggy commit by using git-bisect - 
-and to ensure the bug was not introduced by any Debian patches. If that 
-helps, it's a Squid 19.2.3 cluster.
+The v8 encoding adds a versioned sub-structure that needs to be properly
+decoded and skipped to maintain compatibility with newer MDS versions.
 
-So basically the steps are:
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/mds_client.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-  * Setup a Ceph cluster with 19.2.3
-  * Create a pool and cephfs
-  * Create schedule snapshots for the fs
-  * Mount the fs and populate it with a few files on any kernel version 
-that contains bb80f7618832, that is >=6.12.41
-  * Wait until there are scheduled snapshots created
-  * run `ls /mnt/my/cephfs/.snap`
-
-This should result in a kernel oops like:
-
-[   53.703013] Oops: general protection fault, probably for 
-non-canonical address 0xd0c22857c0000000: 0000 [#1] SMP PTI
-[   53.703201] CPU: 11 UID: 0 PID: 360 Comm: kworker/11:2 Not tainted 
-6.18.0-rc7 #41 PREEMPT(voluntary)
-[   53.703281] Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 
-1.16.2-debian-1.16.2-1 04/01/2014
-[   53.703317] Workqueue: ceph-msgr ceph_con_workfn [libceph]
-[   53.703424] RIP: 0010:rb_insert_color 
-(/usr/src/linux/lib/rbtree.c:185 (discriminator 1) 
-/usr/src/linux/lib/rbtree.c:436 (discriminator 1))
-[   53.704503] Code: 76 17 48 83 e1 fc 48 3b 51 10 0f 84 b7 00 00 00 48 
-89 41 08 c3 cc cc cc cc 48 89 06 c3 cc cc cc cc 48 8b 4a 10 48 85 c9 74 
-05 <f6> 01 01 74 1b 48 8b 48 10 48 39 f9 74 68 48 89 c7 48 89 4a 08 48
-All code
-========
-    0:	76 17                	jbe    0x19
-    2:	48 83 e1 fc          	and    $0xfffffffffffffffc,%rcx
-    6:	48 3b 51 10          	cmp    0x10(%rcx),%rdx
-    a:	0f 84 b7 00 00 00    	je     0xc7
-   10:	48 89 41 08          	mov    %rax,0x8(%rcx)
-   14:	c3                   	ret
-   15:	cc                   	int3
-   16:	cc                   	int3
-   17:	cc                   	int3
-   18:	cc                   	int3
-   19:	48 89 06             	mov    %rax,(%rsi)
-   1c:	c3                   	ret
-   1d:	cc                   	int3
-   1e:	cc                   	int3
-   1f:	cc                   	int3
-   20:	cc                   	int3
-   21:	48 8b 4a 10          	mov    0x10(%rdx),%rcx
-   25:	48 85 c9             	test   %rcx,%rcx
-   28:	74 05                	je     0x2f
-   2a:*	f6 01 01             	testb  $0x1,(%rcx)		<-- trapping instruction
-   2d:	74 1b                	je     0x4a
-   2f:	48 8b 48 10          	mov    0x10(%rax),%rcx
-   33:	48 39 f9             	cmp    %rdi,%rcx
-   36:	74 68                	je     0xa0
-   38:	48 89 c7             	mov    %rax,%rdi
-   3b:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
-   3f:	48                   	rex.W
-
-Code starting with the faulting instruction
-===========================================
-    0:	f6 01 01             	testb  $0x1,(%rcx)
-    3:	74 1b                	je     0x20
-    5:	48 8b 48 10          	mov    0x10(%rax),%rcx
-    9:	48 39 f9             	cmp    %rdi,%rcx
-    c:	74 68                	je     0x76
-    e:	48 89 c7             	mov    %rax,%rdi
-   11:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
-   15:	48                   	rex.W
-[   53.704559] RSP: 0018:ffff9ab7c07579e0 EFLAGS: 00010286
-[   53.704591] RAX: ffff8bd0c2285b40 RBX: ffff8bd0c2285240 RCX: 
-d0c22857c0000000
-[   53.704616] RDX: ffff8bd0c2285910 RSI: ffff8bd0c3e695c0 RDI: 
-ffff8bd0c22855c0
-[   53.704645] RBP: 0000000000002139 R08: 0000000000000000 R09: 
-0000000000000000
-[   53.704668] R10: 0000000000000000 R11: ffff8bd0c16244e0 R12: 
-ffff8bd0c3e695b8
-[   53.704691] R13: ffff8bd0c3b62000 R14: ffff8bd0c22857c0 R15: 
-ffff8bd0c3e695c0
-[   53.704714] FS:  0000000000000000(0000) GS:ffff8bd1815ca000(0000) 
-knlGS:0000000000000000
-[   53.704741] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[   53.704762] CR2: 000055667ef28e10 CR3: 0000000106cc2005 CR4: 
-0000000000772ef0
-[   53.704790] PKRU: 55555554
-[   53.704803] Call Trace:
-[   53.704844]  <TASK>
-[   53.704862] ceph_get_snapid_map 
-(/usr/src/linux/./include/linux/spinlock.h:391 
-/usr/src/linux/fs/ceph/snap.c:1255) ceph
-[   53.704957] ceph_fill_inode (/usr/src/linux/fs/ceph/inode.c:1062 
-(discriminator 2)) ceph
-[   53.705019]  ? __pfx_ceph_set_ino_cb 
-(/usr/src/linux/fs/ceph/inode.c:46) ceph
-[   53.705074]  ? __pfx_ceph_ino_compare 
-(/usr/src/linux/fs/ceph/super.h:595) ceph
-[   53.705132] ceph_readdir_prepopulate 
-(/usr/src/linux/fs/ceph/inode.c:2113) ceph
-[   53.705191] mds_dispatch (/usr/src/linux/fs/ceph/mds_client.c:3993 
-/usr/src/linux/fs/ceph/mds_client.c:6299) ceph
-[   53.705253]  ? sock_recvmsg (/usr/src/linux/net/socket.c:1078 
-(discriminator 1) /usr/src/linux/net/socket.c:1100 (discriminator 1))
-[   53.705279] ceph_con_process_message 
-(/usr/src/linux/net/ceph/messenger.c:1427) libceph
-[   53.705347] process_message 
-(/usr/src/linux/net/ceph/messenger_v2.c:2879) libceph
-[   53.705406] ceph_con_v2_try_read 
-(/usr/src/linux/net/ceph/messenger_v2.c:3043 
-/usr/src/linux/net/ceph/messenger_v2.c:3099 
-/usr/src/linux/net/ceph/messenger_v2.c:3148) libceph
-[   53.705467]  ? psi_group_change (/usr/src/linux/kernel/sched/psi.c:876)
-[   53.705488]  ? sched_balance_newidle 
-(/usr/src/linux/kernel/sched/fair.c:12902 (discriminator 2))
-[   53.705512]  ? psi_task_switch (/usr/src/linux/kernel/sched/psi.c:984 
-(discriminator 2))
-[   53.705532]  ? _raw_spin_unlock 
-(/usr/src/linux/./arch/x86/include/asm/paravirt.h:562 
-/usr/src/linux/./arch/x86/include/asm/qspinlock.h:57 
-/usr/src/linux/./include/linux/spinlock.h:204 
-/usr/src/linux/./include/linux/spinlock_api_smp.h:142 
-/usr/src/linux/kernel/locking/spinlock.c:186)
-[   53.705550]  ? finish_task_switch.isra.0 
-(/usr/src/linux/./arch/x86/include/asm/paravirt.h:671 
-/usr/src/linux/kernel/sched/sched.h:1559 
-/usr/src/linux/kernel/sched/core.c:5073 
-/usr/src/linux/kernel/sched/core.c:5191)
-[   53.705575] ceph_con_workfn 
-(/usr/src/linux/net/ceph/messenger.c:1578) libceph
-[   53.705627]  process_one_work 
-(/usr/src/linux/./arch/x86/include/asm/jump_label.h:36 
-/usr/src/linux/./include/trace/events/workqueue.h:110 
-/usr/src/linux/kernel/workqueue.c:3268)
-[   53.705657]  worker_thread (/usr/src/linux/kernel/workqueue.c:3340 
-(discriminator 2) /usr/src/linux/kernel/workqueue.c:3427 (discriminator 2))
-[   53.705679]  ? __pfx_worker_thread 
-(/usr/src/linux/kernel/workqueue.c:3373)
-[   53.705700]  kthread (/usr/src/linux/kernel/kthread.c:463)
-[   53.705717]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
-[   53.705734]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
-[   53.705752]  ret_from_fork (/usr/src/linux/arch/x86/kernel/process.c:164)
-[   53.705776]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
-[   53.705793]  ret_from_fork_asm 
-(/usr/src/linux/arch/x86/entry/entry_64.S:255)
-[   53.705826]  </TASK>
-[   53.705842] Modules linked in: ceph netfs libceph cfg80211 rfkill 
-8021q garp stp mrp llc binfmt_misc intel_rapl_msr intel_rapl_common 
-intel_uncore_frequency_common kvm_intel virtio_gpu joydev kvm 
-drm_client_lib virtio_dma_buf evdev drm_shmem_helper sg drm_kms_helper 
-virtio_balloon button irqbypass ghash_clmulni_intel aesni_intel rapl 
-pcspkr drm configfs efi_pstore nfnetlink vsock_loopback 
-vmw_vsock_virtio_transport_common vmw_vsock_vmci_transport vmw_vmci 
-vsock qemu_fw_cfg virtio_rng autofs4 ext4 crc16 mbcache jbd2 hid_generic 
-usbhid hid sr_mod cdrom dm_mod ahci libahci libata xhci_pci iTCO_wdt 
-intel_pmc_bxt xhci_hcd iTCO_vendor_support scsi_mod psmouse virtio_net 
-i2c_i801 watchdog serio_raw i2c_smbus lpc_ich scsi_common usbcore 
-net_failover failover virtio_blk usb_common
-[   53.708740] ---[ end trace 0000000000000000 ]---
-[   53.709462] RIP: 0010:rb_insert_color 
-(/usr/src/linux/lib/rbtree.c:185 (discriminator 1) 
-/usr/src/linux/lib/rbtree.c:436 (discriminator 1))
-[   53.710118] Code: 76 17 48 83 e1 fc 48 3b 51 10 0f 84 b7 00 00 00 48 
-89 41 08 c3 cc cc cc cc 48 89 06 c3 cc cc cc cc 48 8b 4a 10 48 85 c9 74 
-05 <f6> 01 01 74 1b 48 8b 48 10 48 39 f9 74 68 48 89 c7 48 89 4a 08 48
-All code
-========
-    0:	76 17                	jbe    0x19
-    2:	48 83 e1 fc          	and    $0xfffffffffffffffc,%rcx
-    6:	48 3b 51 10          	cmp    0x10(%rcx),%rdx
-    a:	0f 84 b7 00 00 00    	je     0xc7
-   10:	48 89 41 08          	mov    %rax,0x8(%rcx)
-   14:	c3                   	ret
-   15:	cc                   	int3
-   16:	cc                   	int3
-   17:	cc                   	int3
-   18:	cc                   	int3
-   19:	48 89 06             	mov    %rax,(%rsi)
-   1c:	c3                   	ret
-   1d:	cc                   	int3
-   1e:	cc                   	int3
-   1f:	cc                   	int3
-   20:	cc                   	int3
-   21:	48 8b 4a 10          	mov    0x10(%rdx),%rcx
-   25:	48 85 c9             	test   %rcx,%rcx
-   28:	74 05                	je     0x2f
-   2a:*	f6 01 01             	testb  $0x1,(%rcx)		<-- trapping instruction
-   2d:	74 1b                	je     0x4a
-   2f:	48 8b 48 10          	mov    0x10(%rax),%rcx
-   33:	48 39 f9             	cmp    %rdi,%rcx
-   36:	74 68                	je     0xa0
-   38:	48 89 c7             	mov    %rax,%rdi
-   3b:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
-   3f:	48                   	rex.W
-
-Code starting with the faulting instruction
-===========================================
-    0:	f6 01 01             	testb  $0x1,(%rcx)
-    3:	74 1b                	je     0x20
-    5:	48 8b 48 10          	mov    0x10(%rax),%rcx
-    9:	48 39 f9             	cmp    %rdi,%rcx
-    c:	74 68                	je     0x76
-    e:	48 89 c7             	mov    %rax,%rdi
-   11:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
-   15:	48                   	rex.W
-[   53.711453] RSP: 0018:ffff9ab7c07579e0 EFLAGS: 00010286
-[   53.712112] RAX: ffff8bd0c2285b40 RBX: ffff8bd0c2285240 RCX: 
-d0c22857c0000000
-[   53.712798] RDX: ffff8bd0c2285910 RSI: ffff8bd0c3e695c0 RDI: 
-ffff8bd0c22855c0
-[   53.713423] RBP: 0000000000002139 R08: 0000000000000000 R09: 
-0000000000000000
-[   53.714061] R10: 0000000000000000 R11: ffff8bd0c16244e0 R12: 
-ffff8bd0c3e695b8
-[   53.714696] R13: ffff8bd0c3b62000 R14: ffff8bd0c22857c0 R15: 
-ffff8bd0c3e695c0
-[   53.715321] FS:  0000000000000000(0000) GS:ffff8bd1815ca000(0000) 
-knlGS:0000000000000000
-[   53.715956] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[   53.716651] CR2: 000055667ef28e10 CR3: 0000000106cc2005 CR4: 
-0000000000772ef0
-[   53.717295] PKRU: 55555554
-[   53.717918] note: kworker/11:2[360] exited with preempt_count 1
-
-
->> The bug was introduced in commit:
->>
->> bb80f7618832 - parse_longname(): strrchr() expects NUL-terminated string
->>
->> str is guarded by __free(kfree), but advanced later for skipping
->> the initial '_' in snapshot names.
->> This patch removes the need for advancing the pointer so kfree()
->> could do proper memory cleanup.
->>
-> 
-> I cannot follow of this explanation. What is the wrong? Why should we fix
-> something here?
-
-In bb80f7618832, the pointer in variable "str" is guarded by 
-__free(kfree), which means the pointer returned by kmemdup_nul() is 
-automatically freed. kfree() should receive the same pointer as returned 
-by kmemdump_nul(), but this is not the case, as the pointer is advanced 
-by one. kmemdup_nul() may return for example 0x1234000, but kfree() is 
-called with 0x1234001. I don't know the exact behavior of kfree(), but I 
-assume calling kfree() with random pointers leads to UB?
-
->> Closes: https://bugzilla.kernel.org/show_bug.cgi?id=220807
->>
-> 
-> Why the issue had not been reported to CephFS community through email or by
-> means of https://tracker.ceph.com?
-It's a kernel bug and not related to any ceph packages, so I've reported 
-it to the kernel issue tracking system.
-
-> Have you run xfstests for your patch?
-No, not aware of it. How is xfs related to cephfs?
-
-
->> Fixes: bb80f7618832 - parse_longname(): strrchr() expects NUL-terminated string
->>
->> Cc: stable@vger.kernel.org
->> Suggested-by: Helge Deller <deller@gmx.de>
->> Signed-off-by: Daniel Vogelbacher <daniel@chaospixel.com>
->> ---
->>   fs/ceph/crypto.c | 8 ++++----
->>   1 file changed, 4 insertions(+), 4 deletions(-)
->>
->> diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
->> index 0ea4db650f85..3e051972e49d 100644
->> --- a/fs/ceph/crypto.c
->> +++ b/fs/ceph/crypto.c
->> @@ -166,12 +166,12 @@ static struct inode *parse_longname(const struct inode *parent,
->>   	struct ceph_vino vino = { .snap = CEPH_NOSNAP };
->>   	char *name_end, *inode_number;
->>   	int ret = -EIO;
->> -	/* NUL-terminate */
->> -	char *str __free(kfree) = kmemdup_nul(name, *name_len, GFP_KERNEL);
->> +	if (*name_len <= 1)
-> 
-> I believe that even if we have *name_len <= 1, then current logic can manage it.
-> Why do we need this fix? The commit message sounds really unclear for my taste.
-> Could you prove that we really need this fix?
-
-I've added this protection because otherwise I do pointer arithmetic 
-without checking bounds. I couldn't give you a better excuse :) I could
-simply remove it on your request.
-
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 1740047aef0f..d7d8178e1f9a 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -231,6 +231,26 @@ static int parse_reply_info_in(void **p, void *end,
+ 						      info->fscrypt_file_len, bad);
+ 			}
+ 		}
++
++		/*
++		 * InodeStat encoding versions:
++		 *   v1-v7: various fields added over time
++		 *   v8: added optmetadata (versioned sub-structure containing
++		 *       optional inode metadata like charmap for case-insensitive
++		 *       filesystems). The kernel client doesn't support
++		 *       case-insensitive lookups, so we skip this field.
++		 *   v9: added subvolume_id (parsed below)
++		 */
++		if (struct_v >= 8) {
++			u32 v8_struct_len;
++
++			/* skip optmetadata versioned sub-structure */
++			ceph_decode_skip_8(p, end, bad);  /* struct_v */
++			ceph_decode_skip_8(p, end, bad);  /* struct_compat */
++			ceph_decode_32_safe(p, end, v8_struct_len, bad);
++			ceph_decode_skip_n(p, end, v8_struct_len, bad);
++		}
++
+ 		*p = end;
+ 	} else {
+ 		/* legacy (unversioned) struct */
 -- 
-Best regards / Mit freundlichen Grüßen
-Daniel Vogelbacher
+2.34.1
+
