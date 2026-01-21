@@ -1,527 +1,238 @@
-Received: from mail.chaospixel.com (mail.chaospixel.com [78.46.244.255])
+Received: from flow-b6-smtp.messagingengine.com (flow-b6-smtp.messagingengine.com [202.12.124.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 157B33921D0
-	for <ceph-devel@vger.kernel.org>; Wed, 21 Jan 2026 21:38:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.46.244.255
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9291A3A9D98;
+	Wed, 21 Jan 2026 22:48:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769031527; cv=none; b=FkUHAVn2PSnjuTt6YWa+WCDQY9FScH8B9CPdcteqdQLbstC/NOluQv1XeSk0g81nMI+HFvM4FAX4K4N7QXAj4vJpa8wXtf9lAZWXVDsTSzvTjb2Fgqsef73H5EtGrnQxx9ijxrFIZznv9ZZLsZeB06nYikskVvneyNC9UpEMIkA=
+	t=1769035693; cv=none; b=KqgwEG6JVJzgwc9uvSJTBljPfDe3iYYx3gwZ1TZwXMR7Y0VKp+nZVRPXDcOixwGVRcrcA3ud+3UP+Fo0l5nszSvcRJtw9i5VtQiDb6nKGjjPkEAw+0tHc5vC+OYwxc3+W3cSv6uVUUAMGlQcv3h10fmZqABVVk3xAPufMAy+3uo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769031527; c=relaxed/simple;
-	bh=+5icO35ZP2GPxiz0mjcbtPEyt/JiKgJCYlc5Slk50ic=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MtYa05N203/YgmTYKAvuUr87CPu1clrND+v9QxB/uqbf4Y9xvl3KD6R8tLH5csLqmxhTwYgWCisS8+2hUgeZCL9prDi67OmPH1UwJs4qtlKHa9D/D4HnRM9Mik/m+n0ZOjZK4wv79HgfL9DFU5lb92pVp8SOyA+/xglOQ2Cc45g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chaospixel.com; spf=pass smtp.mailfrom=chaospixel.com; dkim=pass (2048-bit key) header.d=chaospixel.com header.i=@chaospixel.com header.b=WCPGPLOa; arc=none smtp.client-ip=78.46.244.255
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chaospixel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chaospixel.com
+	s=arc-20240116; t=1769035693; c=relaxed/simple;
+	bh=qPvaj1CJudRWH8TWXb/DPXHF0yJiMz7RI8byLvamKBE=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=R4AHi9qgrXEZU56Br+ruKeD9+p0Xz8grKPbPfLi9yHZNys4amZJZCZRwrJMLoPYz1lG/qG1QeTjeV0e3oOP8pBryqa0DUcJ9eVaXDlxD4gqvrT78uGdirUa//3sGlupJvmSQGScKiQflIOovMZanTAYjw0FRjEvxRXKfotTghdk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=GuovOWXR; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=GQln8ftB; arc=none smtp.client-ip=202.12.124.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=chaospixel.com header.i=@chaospixel.com header.b="WCPGPLOa"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=chaospixel.com;
-	s=201811; t=1769031515;
-	bh=+5icO35ZP2GPxiz0mjcbtPEyt/JiKgJCYlc5Slk50ic=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=WCPGPLOaUWeW6R9A0/ygznWp5/5WE2IYCDpYrHK2w5WCY7vSsDV7Im2zjbOISvKQg
-	 HyMGHnPtUOh0kjaG3wwREuXKr2Hi10fnUGr9yXvfjwBTTCyWXTEu5Zkkf2djRthdTu
-	 nvRoLENMbJodrUlcoAauDoANJV4s57P8spfZai+vT2rqyuLqEmKXYksIdzYoy3PqAT
-	 TRpOmjCHn28A9ZRYg37BbN3AiXfsxws1LIqAsYsytvGyJPwD62ZnHMvzucZOUp3bum
-	 ZTMkD3FeFGmGc3eTArUbRy+d8r8jOBqupXjKZCeL8VsdAPluEAC9sUcm8IggT7qB/R
-	 3IDPODhsbkhrQ==
-Received: from [IPV6:2a02:8071:b8a:89e1:d21b:2c7f:abdf:58b8] (unknown [IPv6:2a02:8071:b8a:89e1:d21b:2c7f:abdf:58b8])
-	by mail.chaospixel.com (Postfix) with ESMTPSA id D6EB564A32CB;
-	Wed, 21 Jan 2026 22:38:34 +0100 (CET)
-Message-ID: <16e7b23c-48d2-4a53-adbe-5908337748e8@chaospixel.com>
-Date: Wed, 21 Jan 2026 22:38:34 +0100
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="GuovOWXR";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="GQln8ftB"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailflow.stl.internal (Postfix) with ESMTP id 8D6A31300F24;
+	Wed, 21 Jan 2026 17:48:08 -0500 (EST)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-05.internal (MEProxy); Wed, 21 Jan 2026 17:48:10 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm2; t=
+	1769035688; x=1769042888; bh=5coOyJl4iosEMxvKLf9pz/D+NbUu48dkiDD
+	9Y2kxJME=; b=GuovOWXRBLUE5OJcSyLnE/2eveX/36uTx36j9P93zjQcQRBZQL2
+	hrnzBjQOgzs/f0q+zVSV1tWHCGJeldpGO5tNxzbNYGAmGERTI/74rC4AhDEcwnbN
+	3EK+IxK9Da7qBxTZ0cL7/5RdElCmK5xx1WEmeVCQTAdbEDCJzhvLIyYH/VUBXRn2
+	h49SQEqoXX9n4peKNOiWNTGeGPiK9qsGhIMzVRsfQ8nV0r0CSHnLs3nYhgIfpNL3
+	aRQdXpKb6VS0ww0j3QddijYoBo1Kwrkcj+Ox1b+DG22Mrte7SY069e+GdbfIhnlj
+	3VqqpOkLrd4aGQop2LrD926E4486pl+anPw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1769035688; x=
+	1769042888; bh=5coOyJl4iosEMxvKLf9pz/D+NbUu48dkiDD9Y2kxJME=; b=G
+	Qln8ftBpavKFAA+sJNEPaaNr8oKurXmo3q4BaVp9GwaWB1fm8C563yxGcgYW93DS
+	2xtNzCjbtolaXD67qz6Qutqe5geB5bsD8Ugeg6j/LWjxuo9XwZj1mmfo4drLgUP2
+	yKqhpGLcalZ4u5NUgfoc97greSYLp54DwzSB4S6wHw4u2msQsbGk5ZA8IJMGNIbQ
+	ngZ+8m6ZYaIowc/dHLMNgP5a1uqvjsJX/qkbUxNoCKOD6a2oW1oaQNc62xAi1nw9
+	1ilzAzJcDO41rfb5T7w8GgYR5Vyc6IoiPl6WjnE4pmvyLFxhbYKi59Pm07XkqffD
+	MH3MYMODbYPIXIIlLoSWg==
+X-ME-Sender: <xms:o1dxaZ-cMFc_o0d43ug7z0kzLEBmcLr7-qnETyPvdBZuqqtXE2bH3w>
+    <xme:o1dxaWu_cgJpAPDvXRifHWGeBvpSKMc12f7rFBgOoG_tMemlpn3xQTXYgCwgfa7tz
+    OXDCzuK93xla979oqbjqOFhStCl3Vabm505SJATmkmL4XzdyA>
+X-ME-Received: <xmr:o1dxaTxZPCOrm1mlblqPiWzOX285XPSCGpXm-fKvOvS9y7eJCkfR7O9aWP_lCWxHfYgXgfjqf3Vws4y9gRuwORW00qGz0381O1TtjVlRJXe1>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgddugeeghedvucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurheptgfgggfhvfevufgjfhffkfhrsehtqhertddttdejnecuhfhrohhmpefpvghilheu
+    rhhofihnuceonhgvihhlsgesohifnhhmrghilhdrnhgvtheqnecuggftrfgrthhtvghrnh
+    epleejtdefgeeukeeiteduveehudevfeffvedutefgteduhfegvdfgtdeigeeuudejnecu
+    vehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepnhgvihhlsg
+    esohifnhhmrghilhdrnhgvthdpnhgspghrtghpthhtohepjeejpdhmohguvgepshhmthhp
+    ohhuthdprhgtphhtthhopehvihhrohesiigvnhhivhdrlhhinhhugidrohhrghdruhhkpd
+    hrtghpthhtohepghhuohgthhhunhhhrghisehvihhvohdrtghomhdprhgtphhtthhopehl
+    ihhnuhigqdigfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinh
+    hugidquhhnihhonhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehl
+    ihhnuhigqdhnihhlfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplh
+    hinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhn
+    uhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlih
+    hnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtohep
+    lhhinhhugidqvgigthegsehvghgvrhdrkhgvrhhnvghlrdhorhhg
+X-ME-Proxy: <xmx:o1dxabxtlAdkhpwCkINTEBpxmOYNyzwJPUiM41SluU32_hzzNA9XZQ>
+    <xmx:o1dxafCKgd9STI3lGSZvVjQToHTy1h7liCKSrmU9waffzwMuC1NFUA>
+    <xmx:o1dxaY793FR_a6LdPfr_ZHshxnAh_1jwBDA6jddarcyZMxIXycacjw>
+    <xmx:o1dxaRMf9cXehnUejISjAclfFWLd7Zsy6-U0xLPbufXx8cPynQ1yZw>
+    <xmx:qFdxaSd_vulaCSCn1gwPqzAJtzBUIYK-Pjhk-xVuA_6gzPYpL8lA2saQ>
+Feedback-ID: iab3e480c:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
+ 21 Jan 2026 17:47:43 -0500 (EST)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fs/ceph: Fix kernel oops due invalid pointer for kfree()
- in parse_longname()
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
- Xiubo Li <xiubli@redhat.com>, "idryomov@gmail.com" <idryomov@gmail.com>
-References: <20251220140153.1523907-1-daniel@chaospixel.com>
- <62924ea8997fb174034e6333db3a52b2f30f0e68.camel@ibm.com>
- <95555273-fa9a-48fa-855e-ca1e71f4c903@chaospixel.com>
- <180a7f3f6965b69298fbfd90806aee3102c5abb8.camel@ibm.com>
- <4ubz2itqxjbq4ubpqcwgv6hsaszbxo5tqjjucfpfrpkho4gc5a@xhzucdi5eepg>
- <0efe1bf76b0ee85fef60c1508e0e2877bce752cc.camel@ibm.com>
-Content-Language: de-DE
-From: Daniel Vogelbacher <daniel@chaospixel.com>
-In-Reply-To: <0efe1bf76b0ee85fef60c1508e0e2877bce752cc.camel@ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: NeilBrown <neilb@ownmail.net>
+To: "Jeff Layton" <jlayton@kernel.org>
+Cc: "Christoph Hellwig" <hch@infradead.org>,
+ "Christian Brauner" <brauner@kernel.org>,
+ "Alexander Viro" <viro@zeniv.linux.org.uk>,
+ "Chuck Lever" <chuck.lever@oracle.com>,
+ "Olga Kornievskaia" <okorniev@redhat.com>,
+ "Dai Ngo" <Dai.Ngo@oracle.com>, "Tom Talpey" <tom@talpey.com>,
+ "Amir Goldstein" <amir73il@gmail.com>, "Hugh Dickins" <hughd@google.com>,
+ "Baolin Wang" <baolin.wang@linux.alibaba.com>,
+ "Andrew Morton" <akpm@linux-foundation.org>,
+ "Theodore Ts'o" <tytso@mit.edu>,
+ "Andreas Dilger" <adilger.kernel@dilger.ca>, "Jan Kara" <jack@suse.com>,
+ "Gao Xiang" <xiang@kernel.org>, "Chao Yu" <chao@kernel.org>,
+ "Yue Hu" <zbestahu@gmail.com>, "Jeffle Xu" <jefflexu@linux.alibaba.com>,
+ "Sandeep Dhavale" <dhavale@google.com>,
+ "Hongbo Li" <lihongbo22@huawei.com>, "Chunhai Guo" <guochunhai@vivo.com>,
+ "Carlos Maiolino" <cem@kernel.org>, "Ilya Dryomov" <idryomov@gmail.com>,
+ "Alex Markuze" <amarkuze@redhat.com>,
+ "Viacheslav Dubeyko" <slava@dubeyko.com>, "Chris Mason" <clm@fb.com>,
+ "David Sterba" <dsterba@suse.com>,
+ "Luis de Bethencourt" <luisbg@kernel.org>,
+ "Salah Triki" <salah.triki@gmail.com>,
+ "Phillip Lougher" <phillip@squashfs.org.uk>,
+ "Steve French" <sfrench@samba.org>, "Paulo Alcantara" <pc@manguebit.org>,
+ "Ronnie Sahlberg" <ronniesahlberg@gmail.com>,
+ "Shyam Prasad N" <sprasad@microsoft.com>,
+ "Bharath SM" <bharathsm@microsoft.com>,
+ "Miklos Szeredi" <miklos@szeredi.hu>,
+ "Mike Marshall" <hubcap@omnibond.com>,
+ "Martin Brandenburg" <martin@omnibond.com>,
+ "Mark Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>,
+ "Joseph Qi" <joseph.qi@linux.alibaba.com>,
+ "Konstantin Komarov" <almaz.alexandrovich@paragon-software.com>,
+ "Ryusuke Konishi" <konishi.ryusuke@gmail.com>,
+ "Trond Myklebust" <trondmy@kernel.org>,
+ "Anna Schumaker" <anna@kernel.org>, "Dave Kleikamp" <shaggy@kernel.org>,
+ "David Woodhouse" <dwmw2@infradead.org>,
+ "Richard Weinberger" <richard@nod.at>, "Jan Kara" <jack@suse.cz>,
+ "Andreas Gruenbacher" <agruenba@redhat.com>,
+ "OGAWA Hirofumi" <hirofumi@mail.parknet.co.jp>,
+ "Jaegeuk Kim" <jaegeuk@kernel.org>, "Jonathan Corbet" <corbet@lwn.net>,
+ "David Laight" <david.laight.linux@gmail.com>,
+ "Dave Chinner" <david@fromorbit.com>, linux-nfs@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ linux-mm@kvack.org, linux-ext4@vger.kernel.org,
+ linux-erofs@lists.ozlabs.org, linux-xfs@vger.kernel.org,
+ ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
+ linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
+ linux-unionfs@vger.kernel.org, devel@lists.orangefs.org,
+ ocfs2-devel@lists.linux.dev, ntfs3@lists.linux.dev,
+ linux-nilfs@vger.kernel.org, jfs-discussion@lists.sourceforge.net,
+ linux-mtd@lists.infradead.org, gfs2@lists.linux.dev,
+ linux-f2fs-devel@lists.sourceforge.net, linux-doc@vger.kernel.org
+Subject: Re: [PATCH v2 01/31] Documentation: document EXPORT_OP_NOLOCKS
+In-reply-to: <d8d68d1df6838c382799ce58345cfb5366585a8f.camel@kernel.org>
+References: <>, <d8d68d1df6838c382799ce58345cfb5366585a8f.camel@kernel.org>
+Date: Thu, 22 Jan 2026 09:47:41 +1100
+Message-id: <176903566115.16766.12892778448343562390@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-On 1/21/26 21:44, Viacheslav Dubeyko wrote:
-> On Tue, 2026-01-20 at 14:42 +0100, Daniel Vogelbacher wrote:
->> On Tue, Dec 23, 2025 at 10:49:36PM +0000, Viacheslav Dubeyko wrote:
->>> On Mon, 2025-12-22 at 22:26 +0100, Daniel Vogelbacher wrote:
->>>> On 12/22/25 21:08, Viacheslav Dubeyko wrote:
->>>>> On Sat, 2025-12-20 at 15:01 +0100, Daniel Vogelbacher wrote:
->>>>>> This fixes a kernel oops when reading ceph snapshot directories (.snap),
->>>>>> for example by simply run `ls /mnt/my_ceph/.snap`.
->>>>>>
->>>>>
->>>>> Frankly speaking, it's completely not clear how this kernel oops can happen.
->>>>> Could you please explain in more details how it can happen and what is the
->>>>> nature of the issue? How the issue can be reproduced?
->>>>
->>>> All I need to reproduce the issue is to run `ls .snap/` on any mounted
->>>> cephfs mountpoint that contains scheduled snapshots. I've one prod VM
->>>> (KVM) where I hit the issue after a Debian Trixie upgrade. To isolate
->>>> it, I've created a fresh Trixie VM, dropped the distribution kernel and
->>>> built a vanilla kernel to isolate the buggy commit by using git-bisect -
->>>> and to ensure the bug was not introduced by any Debian patches. If that
->>>> helps, it's a Squid 19.2.3 cluster.
->>>>
->>>> So basically the steps are:
->>>>
->>>>    * Setup a Ceph cluster with 19.2.3
->>>>    * Create a pool and cephfs
->>>>    * Create schedule snapshots for the fs
->>>>    * Mount the fs and populate it with a few files on any kernel version
->>>> that contains bb80f7618832, that is >=6.12.41
->>>>    * Wait until there are scheduled snapshots created
->>>>    * run `ls /mnt/my/cephfs/.snap`
->>>
->>> It will be good to see the particular command that everyone can run to reproduce
->>> the issue. You don't need to share the command for setup Ceph cluster, creating
->>> pool and CephFS instance. But the rest steps are really important because mount
->>> options and details of command that you run can change everything.
->>
->> These are the steps to reproduce on a new VM:
->>
->> # echo "samba-fileserver@.files=/volumes/datapool/stuff/3461082b-ecc9-4e82-8549-3fd2590d3fb6      /mnt/test/stuff   ceph     acl,noatime,_netdev    0       0" >> /etc/fstab
->>
->> Reboot the system
->> # systemctl reboot
->>
->> Check if it's really mounted
->> # mount | grep stuff
->>
->> List snapshots (expected 63 snapshots)
->> # ls /mnt/test/stuff/.snap
->>
-> 
-> If I will do something like this on my side, then I will have no snapshots at
-> all. How have you created the snapshots? How many snapshots (1, 2, ..., 63)
-> should be created to reproduce the issue? This explanation completely missed.
+On Wed, 21 Jan 2026, Jeff Layton wrote:
+> On Wed, 2026-01-21 at 20:58 +1100, NeilBrown wrote:
+> > On Wed, 21 Jan 2026, Jeff Layton wrote:
+> > > On Tue, 2026-01-20 at 09:12 -0500, Jeff Layton wrote:
+> > > > On Tue, 2026-01-20 at 08:20 -0500, Jeff Layton wrote:
+> > > > > On Mon, 2026-01-19 at 23:44 -0800, Christoph Hellwig wrote:
+> > > > > > On Mon, Jan 19, 2026 at 11:26:18AM -0500, Jeff Layton wrote:
+> > > > > > > +  EXPORT_OP_NOLOCKS - Disable file locking on this filesystem.=
+ Some
+> > > > > > > +    filesystems cannot properly support file locking as implem=
+ented by
+> > > > > > > +    nfsd. A case in point is reexport of NFS itself, which can=
+'t be done
+> > > > > > > +    safely without coordinating the grace period handling. Oth=
+er clustered
+> > > > > > > +    and networked filesystems can be problematic here as well.
+> > > > > >=20
+> > > > > > I'm not sure this is very useful.  It really needs to document wh=
+at
+> > > > > > locking semantics nfs expects, because otherwise no reader will k=
+now
+> > > > > > if they set this or not.
+> > > > >=20
+> > > > > Fair point. I'll see if I can draft something better. Suggestions
+> > > > > welcome.
+> > > >=20
+> > > > How about this?
+> > > >=20
+> > > > +  EXPORT_OP_NOLOCKS - Disable file locking on this filesystem. Files=
+ystems
+> > > > +    that want to support locking over NFS must support POSIX file lo=
+cking
+> > > > +    semantics and must handle lock recovery requests from clients af=
+ter a
+> > > > +    reboot. Most local disk, RAM, or pseudo-filesystems use the gene=
+ric POSIX
+> > > > +    locking support in the kernel and naturally provide this capabil=
+ity. Network
+> > > > +    or clustered filesystems usually need special handling to do thi=
+s properly.
+> > >=20
+> > > Even better, I think?
+> > >=20
+> > > +
+> > > +  EXPORT_OP_NOLOCKS - Disable file locking on this filesystem. Filesys=
+tems
+> > > +    that want to support locking over NFS must support POSIX file lock=
+ing
+> > > +    semantics. When the server reboots, the clients will issue request=
+s to
+> > > +    recover their locks, which nfsd will issue to the filesystem as ne=
+w lock
+> > > +    requests. Those must succeed in order for lock recovery to work. M=
+ost
+> > > +    local disk, RAM, or pseudo-filesystems use the generic POSIX locki=
+ng
+> > > +    support in the kernel and naturally provide this capability. Netwo=
+rk or
+> > > +    clustered filesystems usually need special handling to do this pro=
+perly.
+> > > +    Set this flag on filesystems that can't guarantee the proper seman=
+tics
+> > > +    (e.g. reexported NFS).
+> >=20
+> > I think this is quite thorough, which it good ...  maybe too good :-) It
+> > reminds me that for true NFS compatibility the fs shouldn't allow local
+> > locks (or file opens!) until the grace period has passed.  I don't think
+> > any local filesystems enforce that - it would have to be locks.c that
+> > does I expect.  I doubt there would be much appetite for doing that
+> > though.
+> >=20
+>=20
+> Yeah, I don't see us ever doing that. It'd be a tricky chicken-and-egg
+> problem, given the demand-driven way that the mountd upcalls work
+> today. We don't even know that anything is exported until something
+> asks for it.
 
-Do you have created a cephfs snapshot schedule like I described in my 
-previous mail? I assume creating manually snapshots with ceph cmd should 
-be fine, too.
+statd keeps state in /var/lib/nfs/sm, and nfsd keeps v4 state elsewhere
+in /var/lib/nfs.  This state effectively records if any NFS client might
+try to recover a lock.
+I think the v4 state is granular enough to identify the filesystem.
+lockd could be enhanced to use the same state I suspect.
 
->> Now ls hangs forever and the kernel log shows the oops.
->>
->>>
->>>>
->>>> This should result in a kernel oops like:
->>>
->>> The commit message could include oops details.
->>>
->>>>
->>>> [   53.703013] Oops: general protection fault, probably for
->>>> non-canonical address 0xd0c22857c0000000: 0000 [#1] SMP PTI
->>>> [   53.703201] CPU: 11 UID: 0 PID: 360 Comm: kworker/11:2 Not tainted
->>>> 6.18.0-rc7 #41 PREEMPT(voluntary)
->>>> [   53.703281] Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS
->>>> 1.16.2-debian-1.16.2-1 04/01/2014
->>>> [   53.703317] Workqueue: ceph-msgr ceph_con_workfn [libceph]
->>>> [   53.703424] RIP: 0010:rb_insert_color
->>>> (/usr/src/linux/lib/rbtree.c:185 (discriminator 1)
->>>> /usr/src/linux/lib/rbtree.c:436 (discriminator 1))
->>>> [   53.704503] Code: 76 17 48 83 e1 fc 48 3b 51 10 0f 84 b7 00 00 00 48
->>>> 89 41 08 c3 cc cc cc cc 48 89 06 c3 cc cc cc cc 48 8b 4a 10 48 85 c9 74
->>>> 05 <f6> 01 01 74 1b 48 8b 48 10 48 39 f9 74 68 48 89 c7 48 89 4a 08 48
->>>> All code
->>>> ========
->>>>      0:	76 17                	jbe    0x19
->>>>      2:	48 83 e1 fc          	and    $0xfffffffffffffffc,%rcx
->>>>      6:	48 3b 51 10          	cmp    0x10(%rcx),%rdx
->>>>      a:	0f 84 b7 00 00 00    	je     0xc7
->>>>     10:	48 89 41 08          	mov    %rax,0x8(%rcx)
->>>>     14:	c3                   	ret
->>>>     15:	cc                   	int3
->>>>     16:	cc                   	int3
->>>>     17:	cc                   	int3
->>>>     18:	cc                   	int3
->>>>     19:	48 89 06             	mov    %rax,(%rsi)
->>>>     1c:	c3                   	ret
->>>>     1d:	cc                   	int3
->>>>     1e:	cc                   	int3
->>>>     1f:	cc                   	int3
->>>>     20:	cc                   	int3
->>>>     21:	48 8b 4a 10          	mov    0x10(%rdx),%rcx
->>>>     25:	48 85 c9             	test   %rcx,%rcx
->>>>     28:	74 05                	je     0x2f
->>>>     2a:*	f6 01 01             	testb  $0x1,(%rcx)		<-- trapping instruction
->>>>     2d:	74 1b                	je     0x4a
->>>>     2f:	48 8b 48 10          	mov    0x10(%rax),%rcx
->>>>     33:	48 39 f9             	cmp    %rdi,%rcx
->>>>     36:	74 68                	je     0xa0
->>>>     38:	48 89 c7             	mov    %rax,%rdi
->>>>     3b:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
->>>>     3f:	48                   	rex.W
->>>>
->>>> Code starting with the faulting instruction
->>>> ===========================================
->>>>      0:	f6 01 01             	testb  $0x1,(%rcx)
->>>>      3:	74 1b                	je     0x20
->>>>      5:	48 8b 48 10          	mov    0x10(%rax),%rcx
->>>>      9:	48 39 f9             	cmp    %rdi,%rcx
->>>>      c:	74 68                	je     0x76
->>>>      e:	48 89 c7             	mov    %rax,%rdi
->>>>     11:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
->>>>     15:	48                   	rex.W
->>>> [   53.704559] RSP: 0018:ffff9ab7c07579e0 EFLAGS: 00010286
->>>> [   53.704591] RAX: ffff8bd0c2285b40 RBX: ffff8bd0c2285240 RCX:
->>>> d0c22857c0000000
->>>> [   53.704616] RDX: ffff8bd0c2285910 RSI: ffff8bd0c3e695c0 RDI:
->>>> ffff8bd0c22855c0
->>>> [   53.704645] RBP: 0000000000002139 R08: 0000000000000000 R09:
->>>> 0000000000000000
->>>> [   53.704668] R10: 0000000000000000 R11: ffff8bd0c16244e0 R12:
->>>> ffff8bd0c3e695b8
->>>> [   53.704691] R13: ffff8bd0c3b62000 R14: ffff8bd0c22857c0 R15:
->>>> ffff8bd0c3e695c0
->>>> [   53.704714] FS:  0000000000000000(0000) GS:ffff8bd1815ca000(0000)
->>>> knlGS:0000000000000000
->>>> [   53.704741] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
->>>> [   53.704762] CR2: 000055667ef28e10 CR3: 0000000106cc2005 CR4:
->>>> 0000000000772ef0
->>>> [   53.704790] PKRU: 55555554
->>>> [   53.704803] Call Trace:
->>>> [   53.704844]  <TASK>
->>>> [   53.704862] ceph_get_snapid_map
->>>> (/usr/src/linux/./include/linux/spinlock.h:391
->>>> /usr/src/linux/fs/ceph/snap.c:1255) ceph
->>>> [   53.704957] ceph_fill_inode (/usr/src/linux/fs/ceph/inode.c:1062
->>>> (discriminator 2)) ceph
->>>> [   53.705019]  ? __pfx_ceph_set_ino_cb
->>>> (/usr/src/linux/fs/ceph/inode.c:46) ceph
->>>> [   53.705074]  ? __pfx_ceph_ino_compare
->>>> (/usr/src/linux/fs/ceph/super.h:595) ceph
->>>> [   53.705132] ceph_readdir_prepopulate
->>>> (/usr/src/linux/fs/ceph/inode.c:2113) ceph
->>>> [   53.705191] mds_dispatch (/usr/src/linux/fs/ceph/mds_client.c:3993
->>>> /usr/src/linux/fs/ceph/mds_client.c:6299) ceph
->>>> [   53.705253]  ? sock_recvmsg (/usr/src/linux/net/socket.c:1078
->>>> (discriminator 1) /usr/src/linux/net/socket.c:1100 (discriminator 1))
->>>> [   53.705279] ceph_con_process_message
->>>> (/usr/src/linux/net/ceph/messenger.c:1427) libceph
->>>> [   53.705347] process_message
->>>> (/usr/src/linux/net/ceph/messenger_v2.c:2879) libceph
->>>> [   53.705406] ceph_con_v2_try_read
->>>> (/usr/src/linux/net/ceph/messenger_v2.c:3043
->>>> /usr/src/linux/net/ceph/messenger_v2.c:3099
->>>> /usr/src/linux/net/ceph/messenger_v2.c:3148) libceph
->>>> [   53.705467]  ? psi_group_change (/usr/src/linux/kernel/sched/psi.c:876)
->>>> [   53.705488]  ? sched_balance_newidle
->>>> (/usr/src/linux/kernel/sched/fair.c:12902 (discriminator 2))
->>>> [   53.705512]  ? psi_task_switch (/usr/src/linux/kernel/sched/psi.c:984
->>>> (discriminator 2))
->>>> [   53.705532]  ? _raw_spin_unlock
->>>> (/usr/src/linux/./arch/x86/include/asm/paravirt.h:562
->>>> /usr/src/linux/./arch/x86/include/asm/qspinlock.h:57
->>>> /usr/src/linux/./include/linux/spinlock.h:204
->>>> /usr/src/linux/./include/linux/spinlock_api_smp.h:142
->>>> /usr/src/linux/kernel/locking/spinlock.c:186)
->>>> [   53.705550]  ? finish_task_switch.isra.0
->>>> (/usr/src/linux/./arch/x86/include/asm/paravirt.h:671
->>>> /usr/src/linux/kernel/sched/sched.h:1559
->>>> /usr/src/linux/kernel/sched/core.c:5073
->>>> /usr/src/linux/kernel/sched/core.c:5191)
->>>> [   53.705575] ceph_con_workfn
->>>> (/usr/src/linux/net/ceph/messenger.c:1578) libceph
->>>> [   53.705627]  process_one_work
->>>> (/usr/src/linux/./arch/x86/include/asm/jump_label.h:36
->>>> /usr/src/linux/./include/trace/events/workqueue.h:110
->>>> /usr/src/linux/kernel/workqueue.c:3268)
->>>> [   53.705657]  worker_thread (/usr/src/linux/kernel/workqueue.c:3340
->>>> (discriminator 2) /usr/src/linux/kernel/workqueue.c:3427 (discriminator 2))
->>>> [   53.705679]  ? __pfx_worker_thread
->>>> (/usr/src/linux/kernel/workqueue.c:3373)
->>>> [   53.705700]  kthread (/usr/src/linux/kernel/kthread.c:463)
->>>> [   53.705717]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
->>>> [   53.705734]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
->>>> [   53.705752]  ret_from_fork (/usr/src/linux/arch/x86/kernel/process.c:164)
->>>> [   53.705776]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
->>>> [   53.705793]  ret_from_fork_asm
->>>> (/usr/src/linux/arch/x86/entry/entry_64.S:255)
->>>> [   53.705826]  </TASK>
->>>> [   53.705842] Modules linked in: ceph netfs libceph cfg80211 rfkill
->>>> 8021q garp stp mrp llc binfmt_misc intel_rapl_msr intel_rapl_common
->>>> intel_uncore_frequency_common kvm_intel virtio_gpu joydev kvm
->>>> drm_client_lib virtio_dma_buf evdev drm_shmem_helper sg drm_kms_helper
->>>> virtio_balloon button irqbypass ghash_clmulni_intel aesni_intel rapl
->>>> pcspkr drm configfs efi_pstore nfnetlink vsock_loopback
->>>> vmw_vsock_virtio_transport_common vmw_vsock_vmci_transport vmw_vmci
->>>> vsock qemu_fw_cfg virtio_rng autofs4 ext4 crc16 mbcache jbd2 hid_generic
->>>> usbhid hid sr_mod cdrom dm_mod ahci libahci libata xhci_pci iTCO_wdt
->>>> intel_pmc_bxt xhci_hcd iTCO_vendor_support scsi_mod psmouse virtio_net
->>>> i2c_i801 watchdog serio_raw i2c_smbus lpc_ich scsi_common usbcore
->>>> net_failover failover virtio_blk usb_common
->>>> [   53.708740] ---[ end trace 0000000000000000 ]---
->>>> [   53.709462] RIP: 0010:rb_insert_color
->>>> (/usr/src/linux/lib/rbtree.c:185 (discriminator 1)
->>>> /usr/src/linux/lib/rbtree.c:436 (discriminator 1))
->>>> [   53.710118] Code: 76 17 48 83 e1 fc 48 3b 51 10 0f 84 b7 00 00 00 48
->>>> 89 41 08 c3 cc cc cc cc 48 89 06 c3 cc cc cc cc 48 8b 4a 10 48 85 c9 74
->>>> 05 <f6> 01 01 74 1b 48 8b 48 10 48 39 f9 74 68 48 89 c7 48 89 4a 08 48
->>>> All code
->>>> ========
->>>>      0:	76 17                	jbe    0x19
->>>>      2:	48 83 e1 fc          	and    $0xfffffffffffffffc,%rcx
->>>>      6:	48 3b 51 10          	cmp    0x10(%rcx),%rdx
->>>>      a:	0f 84 b7 00 00 00    	je     0xc7
->>>>     10:	48 89 41 08          	mov    %rax,0x8(%rcx)
->>>>     14:	c3                   	ret
->>>>     15:	cc                   	int3
->>>>     16:	cc                   	int3
->>>>     17:	cc                   	int3
->>>>     18:	cc                   	int3
->>>>     19:	48 89 06             	mov    %rax,(%rsi)
->>>>     1c:	c3                   	ret
->>>>     1d:	cc                   	int3
->>>>     1e:	cc                   	int3
->>>>     1f:	cc                   	int3
->>>>     20:	cc                   	int3
->>>>     21:	48 8b 4a 10          	mov    0x10(%rdx),%rcx
->>>>     25:	48 85 c9             	test   %rcx,%rcx
->>>>     28:	74 05                	je     0x2f
->>>>     2a:*	f6 01 01             	testb  $0x1,(%rcx)		<-- trapping instruction
->>>>     2d:	74 1b                	je     0x4a
->>>>     2f:	48 8b 48 10          	mov    0x10(%rax),%rcx
->>>>     33:	48 39 f9             	cmp    %rdi,%rcx
->>>>     36:	74 68                	je     0xa0
->>>>     38:	48 89 c7             	mov    %rax,%rdi
->>>>     3b:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
->>>>     3f:	48                   	rex.W
->>>>
->>>> Code starting with the faulting instruction
->>>> ===========================================
->>>>      0:	f6 01 01             	testb  $0x1,(%rcx)
->>>>      3:	74 1b                	je     0x20
->>>>      5:	48 8b 48 10          	mov    0x10(%rax),%rcx
->>>>      9:	48 39 f9             	cmp    %rdi,%rcx
->>>>      c:	74 68                	je     0x76
->>>>      e:	48 89 c7             	mov    %rax,%rdi
->>>>     11:	48 89 4a 08          	mov    %rcx,0x8(%rdx)
->>>>     15:	48                   	rex.W
->>>> [   53.711453] RSP: 0018:ffff9ab7c07579e0 EFLAGS: 00010286
->>>> [   53.712112] RAX: ffff8bd0c2285b40 RBX: ffff8bd0c2285240 RCX:
->>>> d0c22857c0000000
->>>> [   53.712798] RDX: ffff8bd0c2285910 RSI: ffff8bd0c3e695c0 RDI:
->>>> ffff8bd0c22855c0
->>>> [   53.713423] RBP: 0000000000002139 R08: 0000000000000000 R09:
->>>> 0000000000000000
->>>> [   53.714061] R10: 0000000000000000 R11: ffff8bd0c16244e0 R12:
->>>> ffff8bd0c3e695b8
->>>> [   53.714696] R13: ffff8bd0c3b62000 R14: ffff8bd0c22857c0 R15:
->>>> ffff8bd0c3e695c0
->>>> [   53.715321] FS:  0000000000000000(0000) GS:ffff8bd1815ca000(0000)
->>>> knlGS:0000000000000000
->>>> [   53.715956] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
->>>> [   53.716651] CR2: 000055667ef28e10 CR3: 0000000106cc2005 CR4:
->>>> 0000000000772ef0
->>>> [   53.717295] PKRU: 55555554
->>>> [   53.717918] note: kworker/11:2[360] exited with preempt_count 1
->>>>
->>>>
->>>>>> The bug was introduced in commit:
->>>>>>
->>>>>> bb80f7618832 - parse_longname(): strrchr() expects NUL-terminated string
->>>>>>
->>>>>> str is guarded by __free(kfree), but advanced later for skipping
->>>>>> the initial '_' in snapshot names.
->>>>>> This patch removes the need for advancing the pointer so kfree()
->>>>>> could do proper memory cleanup.
->>>>>>
->>>>>
->>>>> I cannot follow of this explanation. What is the wrong? Why should we fix
->>>>> something here?
->>>>
->>>> In bb80f7618832, the pointer in variable "str" is guarded by
->>>> __free(kfree), which means the pointer returned by kmemdup_nul() is
->>>> automatically freed. kfree() should receive the same pointer as returned
->>>> by kmemdump_nul(), but this is not the case, as the pointer is advanced
->>>> by one. kmemdup_nul() may return for example 0x1234000, but kfree() is
->>>> called with 0x1234001. I don't know the exact behavior of kfree(), but I
->>>> assume calling kfree() with random pointers leads to UB?
->>>
->>> Please, see my comments below.
->>>
->>>>
->>>>>> Closes: https://bugzilla.kernel.org/show_bug.cgi?id=220807
->>>>>>
->>>>>
->>>>> Why the issue had not been reported to CephFS community through email or by
->>>>> means of https://tracker.ceph.com?
->>>> It's a kernel bug and not related to any ceph packages, so I've reported
->>>> it to the kernel issue tracking system.
->>>>
->>>>> Have you run xfstests for your patch?
->>>> No, not aware of it. How is xfs related to cephfs?
->>>
->>> The xfstests is the regression testing suite that is used for testing all of
->>> Linux file systems (and CephFS too). But if you are not file system guy, then
->>> it's OK that you didn't run the xfstests.
->>>
->>>>
->>>>
->>>>>> Fixes: bb80f7618832 - parse_longname(): strrchr() expects NUL-terminated string
->>>>>>
->>>>>> Cc: stable@vger.kernel.org
->>>>>> Suggested-by: Helge Deller <deller@gmx.de>
->>>>>> Signed-off-by: Daniel Vogelbacher <daniel@chaospixel.com>
->>>>>> ---
->>>>>>    fs/ceph/crypto.c | 8 ++++----
->>>>>>    1 file changed, 4 insertions(+), 4 deletions(-)
->>>>>>
->>>>>> diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
->>>>>> index 0ea4db650f85..3e051972e49d 100644
->>>>>> --- a/fs/ceph/crypto.c
->>>>>> +++ b/fs/ceph/crypto.c
->>>>>> @@ -166,12 +166,12 @@ static struct inode *parse_longname(const struct inode *parent,
->>>>>>    	struct ceph_vino vino = { .snap = CEPH_NOSNAP };
->>>>>>    	char *name_end, *inode_number;
->>>>>>    	int ret = -EIO;
->>>>>> -	/* NUL-terminate */
->>>>>> -	char *str __free(kfree) = kmemdup_nul(name, *name_len, GFP_KERNEL);
->>>>>> +	if (*name_len <= 1)
->>>>>
->>>>> I believe that even if we have *name_len <= 1, then current logic can manage it.
->>>>> Why do we need this fix? The commit message sounds really unclear for my taste.
->>>>> Could you prove that we really need this fix?
->>>>
->>>> I've added this protection because otherwise I do pointer arithmetic
->>>> without checking bounds. I couldn't give you a better excuse :) I could
->>>> simply remove it on your request.
->>>>
->>>
->>> OK. Let's analyze the code again.
->>>
->>> 	char *str __free(kfree) = kmemdup_nul(name, *name_len, GFP_KERNEL);
->>> 	if (!str)
->>> 		return ERR_PTR(-ENOMEM);
->>> 	/* Skip initial '_' */
->>> 	str++;
->>> 	name_end = strrchr(str, '_');
->>> 	if (!name_end) {
->>> 		doutc(cl, "failed to parse long snapshot name: %s\n", str);
->>> 		return ERR_PTR(-EIO);
->>> 	}
->>> 	*name_len = (name_end - str);
->>> 	if (*name_len <= 0) {
->>> 		pr_err_client(cl, "failed to parse long snapshot name\n");
->>> 		return ERR_PTR(-EIO);
->>> 	}
->>>
->>> First of all, we try to create a NULL-terminated string from unterminated data.
->>> If we provide name_len == 0, then we should allocate 1 byte/symbol string that
->>> contains only termination symbol. Potentially, we could not allocate memory at
->>> all if we are under memory pressure (this situation is managed by !str check).
->>> However, it doesn't make sense to try to allocate memory at that case. So, the
->>> length check at the beginning makes sense:
->>>
->>> 	if (*name_len <= 0)
->>> 		return ERR_PTR(-EIO);
->>>
->>> Next, we expect to have '_' at the beginning. Let's imagine that we don't have
->>> any '_' in the provided string, then it make sense to try to allocate memory. I
->>> suggest to call this next:
->>>
->>>          name_end = strnchr(name, *name_len, '_');
->>>          if (!name_end) {
->>> 		doutc(cl, "failed to parse long snapshot name: %s\n", str);
->>> 		return ERR_PTR(-EIO);
->>> 	} else if (name != name_end) {
->>>                  /* we expect '_' at the beginning */
->>> 		doutc(cl, "failed to parse long snapshot name: %s\n", str);
->>> 		return ERR_PTR(-EIO);
->>>          }
->>
->> We don't have the `str` variable here yet. I suggest I can simplify this all by:
->>
->> @ -166,7 +166,8 @@ static struct inode *parse_longname(const struct inode *parent,
->>          struct ceph_vino vino = { .snap = CEPH_NOSNAP };
->>          char *name_end, *inode_number;
->>          int ret = -EIO;
->> -       if (*name_len <= 1)
->> +       /* Snapshot name must start with an underscore */
->> +       if (*name_len <= 0 || name[0] != '_')
->>                  return ERR_PTR(-EIO);
->>          /* Skip initial '_' and NUL-terminate */
->>          char *str __free(kfree) = kmemdup_nul(name + 1, *name_len - 1, GFP_KERNEL);
->>
->>
->>
->>> If we have found the first instance of '_' at the beginning of name, then it
->>> makes sense to continue logic.
->>>
->>>          if (*name_len <= 1)
->>> 		return ERR_PTR(-EIO);
->>
->> See my comment above.
->>
->>> And here we can continue the existing logic:
->>>
->>> 	char *str __free(kfree) = kmemdup_nul(name, *name_len, GFP_KERNEL);
->>> 	if (!str)
->>> 		return ERR_PTR(-ENOMEM);
->>> 	/* Skip initial '_' */
->>> 	str++;
->>> 	name_end = strrchr(str, '_');
->>> 	if (!name_end) {
->>> 		doutc(cl, "failed to parse long snapshot name: %s\n", str);
->>> 		return ERR_PTR(-EIO);
->>> 	}
->>> 	*name_len = (name_end - str);
->>> 	if (*name_len <= 0) {
->>> 		pr_err_client(cl, "failed to parse long snapshot name\n");
->>> 		return ERR_PTR(-EIO);
->>> 	}
->>>
->>> Does this logic make sense to you?
->>
->> My simplified logic comes with the cost of potentially allocating memory for a
->> snapshot name that has no second underscore. But from my understanding, this
->> naming scheme is by convention for Ceph snapshot names, so this should not
->> happen in practice.
-> 
-> OK. I need to see the second version of the patch. I am completely lost myself
-> in the discussion details. Could you please send the new version of the patch?
-> Then, it will be clear if it's good enough already or we need to continue polish
-> the code.
+We would need to generalise that state and load it at mount time and
+block new state creation accordingly.
 
-I will prepare the v2 patch in the next few days.
+i.e. this would have to be a vfs-level thing which nfsd makes use of.
 
-> 
->>
->>>
->>> However, I have started to think... Could we completely remove the kmemdup_nul()
->>> and to operate with the initial name only? I think it's possible, we simply need
->>> to use much smarter technique of string analysis. What do you think? It will be
->>> good to exclude the memory allocation here.
->>
->> I'm not a kernel nor ceph developer and it seems that most functions used here
->> don't have a variant for non null terminated strings. I assume it would be much extra
->> work just to remove the allocation entirely.
->>
->>
-> 
-> If you try to suggest any fix for CephFS kernel client, then you cannot excuse
-> yourself by this "I'm not a kernel nor ceph developer". :) You should work on
-> the patch until it will be good enough. :) The whole Ceph community could
-> benefit from your fix. ;)
-> 
-> Thanks,
-> Slava.
+Possibly, but there are other things better worth our time.
 
+NeilBrown
 
--- 
-Best regards / Mit freundlichen Grüßen
-Daniel Vogelbacher
