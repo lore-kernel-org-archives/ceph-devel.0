@@ -1,234 +1,382 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from flow-a3-smtp.messagingengine.com (flow-a3-smtp.messagingengine.com [103.168.172.138])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D4B9288D0
-	for <ceph-devel@vger.kernel.org>; Wed, 21 Jan 2026 00:30:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 850C833D50C;
+	Wed, 21 Jan 2026 03:58:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.138
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768955436; cv=none; b=Fl7B1LD89qAPsPO0OW+xwRL94h0tQE3EXhfb1vKGr2i+dBrNDfHTHq74uiHfxXgaaGfBjfLW/7nEzd5lPDpGauThBy0k0kpplqwHz8aZoEBZnfxjyZNcFeMzZOJ/fMQTBjZUPRPHWDSi0Rm1f5HXayyxwV5ZuNEvwlB5jXuN+eU=
+	t=1768967944; cv=none; b=I23Syzi0ej0D3jBZBqNZ/ucl8HnU/f4IiUwD7gYFCMLvaHUYkoFXdexBx5SBm5AYhOz9fXHorIXnqiPqua3nJ/EUhoFqCJDyJg/Rf+8n40uEud/WiY7SLzihHzDMVzKB7Zb2KLtwLjyvKM3gNill0XtIX7r/Oy8QHOr5PXQn3MA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768955436; c=relaxed/simple;
-	bh=kqA7hFp0b5pOlAT5k4slsR0tFyV4F1zhBk7jCl4+Sk8=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=r5F2dXaGCP8xngbY76vKJgVajUv24wd/sOiX5vMzGxNAdgOJ5ert192RlgfFaY+c/f7TDAxDfkX6kvQVd63gKvR33UlKwEs2TjCEsXL5gGG/xfcnDCr1tsmZYUi3dfO150JbVreNnJyD5OEm/XAUGJSFcZxx6OSBrotOQnew3Qg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=b7fRy6X2; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ishrvz1Q; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1768967944; c=relaxed/simple;
+	bh=1DJQUEOUnj9KAwbZv2Hc+tLIGvXute4oJWQnX3cNwrY=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=HALgvbszliwKdW1S1peMfMZRqkAMwTsHf/WPCeOXOR1EB8QLrP3eZrUvmEhPs3Oi9JsK0UVtSHsV7VX5gUynery8lZX56Rp1mLEQMjXmIqg4RlTyIwLAl+tT+M400vC1KkQUNzoMBunL0DDfXP5fK2okok87kKczLmURvm4aMiA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=YYEr2VjW; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=Y4kSyYfn; arc=none smtp.client-ip=103.168.172.138
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="b7fRy6X2";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ishrvz1Q"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1768955434;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5nxjbXT0xnBHhhZgM6DIUEflr+8xamjmOI0ttVCQ4KI=;
-	b=b7fRy6X2pvkrqHnNA6r6mc+VdqmrciH+MoD3SwdwphDTo+5qUQrfONjp45eXrSBPxYFZ6J
-	+q3tUEsYgWJnKW11+Lbf5nTSPh1NFb9gQSztvlCGOPMFW/2FUeE9nJ/IW4nNlRzFlP/w/v
-	fr3bklVC6m1isW7l++z1SqocDKM6T6M=
-Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
- [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-400-sOTeIDCkMLGg5iZ_lMGIIA-1; Tue, 20 Jan 2026 19:30:30 -0500
-X-MC-Unique: sOTeIDCkMLGg5iZ_lMGIIA-1
-X-Mimecast-MFC-AGG-ID: sOTeIDCkMLGg5iZ_lMGIIA_1768955430
-Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-792738a717fso69641057b3.1
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2026 16:30:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1768955430; x=1769560230; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:references
-         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=5nxjbXT0xnBHhhZgM6DIUEflr+8xamjmOI0ttVCQ4KI=;
-        b=Ishrvz1QqY2yHzLGZxecr21latunvaF3VSBorqdACzmeit3PAUHt5Div/GTiE4a6R+
-         M3js5Q1XQU3OjwQjY7f4I73y6HeYZ3sigDVtfavneElIB+QGDqQ+nsYN/lf/63jbWGa/
-         AkR1QpsHYDdWObUR5El0F4rhclAYiXWGJ0M/cVmkpMBIGNI2iBy8z4gLxtnvBcS4FXS4
-         jGi+i/tSEcHQk4kdd3KvKKde1+iuv8rSgxb6oZEwzY9bXrLKv7b07GQ2Rw5quAAC6pkq
-         wycMrBSXZq5W0wI0ERgGam2EwtE9ZTfn7L5+JZcj1f0tD/Gq2MvOyV+cN8VlUtoKfyBY
-         ViJw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768955430; x=1769560230;
-        h=mime-version:user-agent:content-transfer-encoding:references
-         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=5nxjbXT0xnBHhhZgM6DIUEflr+8xamjmOI0ttVCQ4KI=;
-        b=ZB4VnsLvJOvEnO7twc3ZQuW8JXxSoSw/DM5EsF42jncHmbQQUuv48cOzxqUcD9tN7C
-         Pl3P1q7MiMV7Ly3wSf8J4blVG+ANxy61lFuCHCc1qeuHDsIehxj1pjrEWJ/lhGV2o4TS
-         lMiI5o+yvyKgXd0t1yuONBDFQpjw+gSVfDpRTYyUNdcTwcZDGqe13DukDWAlOWxkKcy2
-         B46oXl4izqoMFpNmlpxkmEL2S3fTyCnJ/Fu1qCLmYLKUcjnPFl8LysY5cpb9Yc/9sMgJ
-         hKTRX01AEHyCw6o4hPtKEW84K7iaDjuuCXVtJFDkO/dfH7A7CxKiQK421lgUVFxVHHeQ
-         ME7Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUrncsBoEaXr5E4Nh48uhvenNO8HNpnsGX+idAnY+y7ovAf/FgRpCiWGIT2BqNTX3wEeXi7LqVLYX/k@vger.kernel.org
-X-Gm-Message-State: AOJu0Yymj+n0x8UMIMaorMDjbwVu2RRYF6/OK6AonkvVwf1iR/amJ9wt
-	uF9FuxDkadG1SN2JSizEAH76OOiAvMKIIcMiWWU+guDyXclOo7QOVijlDPYocs7UsnqsxKqU4dN
-	m2RQkb8oBHke2N1eVarBTHRipdolRXyn+ISm4r+o0syT3Wrofk5ZA4/wjqsUqvxs=
-X-Gm-Gg: AZuq6aJh0thotcjgDwyNuaj20tw02waOhIWpux6d+P/v+2NLcQ5mEpwKbDxoOVNtt14
-	jNMtMXmWdimcasPJR/6qdPabVfP+uI6TXp77Jqc0iY15In0QQxFC8iNnKz+lYYGUf6Xy8hsyc6G
-	SQ/WPuD+qOLVOAWwQ6kQ021XDXkO/rVTRYaCewF/aR8XqOLtLqbK/4FWRXV1ck9S4gg8EsMrhx4
-	M2j0ogX05BQcxSQb73DyejJmQQoa6CdUZYj+mXsi8r6VSnPJ7ZWhOXwPAH1YafSjd8zKtDMd8qc
-	jhgFkYP2g4+Ky1ik0F4gGVbHDXvGXDVjwdRmpj7MTBkV0gMumBf5Iv/SoTAczy04Dd2zcZcuZJm
-	stzjSHgkftssv0Ln6QJ23Mmks0XNPD9v0+Yz+2Mgy
-X-Received: by 2002:a05:690c:4b85:b0:793:d0b5:9bcb with SMTP id 00721157ae682-7940a153cf5mr30151077b3.24.1768955429900;
-        Tue, 20 Jan 2026 16:30:29 -0800 (PST)
-X-Received: by 2002:a05:690c:4b85:b0:793:d0b5:9bcb with SMTP id 00721157ae682-7940a153cf5mr30150937b3.24.1768955429529;
-        Tue, 20 Jan 2026 16:30:29 -0800 (PST)
-Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::41])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-793c66c70f4sm59096427b3.7.2026.01.20.16.30.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Jan 2026 16:30:29 -0800 (PST)
-Message-ID: <8dce90cb96a33a123e5baa1613fde06658523495.camel@redhat.com>
-Subject: Re: [EXTERNAL] Re: [PATCH v5 0/2] ceph: add subvolume metrics
- reporting support
-From: Viacheslav Dubeyko <vdubeyko@redhat.com>
-To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, linux-fsdevel@vger.kernel.org
-Date: Tue, 20 Jan 2026 16:30:28 -0800
-In-Reply-To: <721bc15d532ea4dd03e079bd516f332208fa48c2.camel@redhat.com>
-References: <20260118182446.3514417-1-amarkuze@redhat.com>
-	 <721bc15d532ea4dd03e079bd516f332208fa48c2.camel@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="YYEr2VjW";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="Y4kSyYfn"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailflow.phl.internal (Postfix) with ESMTP id 59F6C1380787;
+	Tue, 20 Jan 2026 22:58:51 -0500 (EST)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-05.internal (MEProxy); Tue, 20 Jan 2026 22:58:51 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm2; t=
+	1768967931; x=1768975131; bh=HPgiNusZcZTF/ZTl66piD/9BsmWo5Gc2+jA
+	KaL+zbjo=; b=YYEr2VjWIaKtDqIQ9vfEWExooQB7WdoWCHPbIyCUEJI6BAxeQcQ
+	Lbk8vsbd4GXH0kYHJaGcChinGdfj9GfFjBP2dVOEb1g7c0vP40XWPDTq6qbmdX+f
+	q8U4adtBeg5EFoL6E5HUF62j7hOUy4j8XFCT0i4fYg4se8kZH51qgrZqOSAUlTga
+	rl7CFzO8J+PeDJ7M2JSUWHisN0sDH8S0NMXRz8qdtkwm9W98zD3C3gklDbkWIXrK
+	vRegxtY4BxrRjprMIjBdoVNMCKrXQqfmvm/+rjsgzuPUZ23gzBTcc6UXYC33cLAY
+	vFj8n0R7qJgD5zcyYlJT/0wZ8oNx4to8Sng==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1768967931; x=
+	1768975131; bh=HPgiNusZcZTF/ZTl66piD/9BsmWo5Gc2+jAKaL+zbjo=; b=Y
+	4kSyYfnUGNoNeVLU3ka40YnKW2sl+45SitUqyg7vTCZpQcxFqZev1sh8sHAo4DzB
+	LJJuIPm7kr1a2T2O/jCPPqyfpx1RyAZnMeJxrzQuzh0MJ2v9HwC0x1U/ypjUALTY
+	LkBS/sHDc8LkvX0vZjnTUcBNoleBEEaONsgjyNXSYbPCsyTNNhNqwnjeRYEYWhC0
+	Keyf4hXJLJ2uIP8nM1JZTI64DK90fYZcMdZmLKhtCiDOLF6zK0pOuLIFL3efcAnh
+	U7QNK8cCXtqL4iHqmwf38GI0o4feHmUs9gVmK1fgy3LCnOLy087fTAjf+2UjG0tL
+	Zxk2nmIhddHGej/ASyZkw==
+X-ME-Sender: <xms:9k5waa6xGMlhNWG7OiNFHfIpLvabWA1DAPtyEn94taKAb8B-mUoW7w>
+    <xme:9k5waRR7ItrMgf6WBso9qWSvOzTjS1gqDa4US3nP2_YPOGpBhCwjdwQRddvH-EWFV
+    V57p5_-4xzEl4CNusEssTAjoVs4ZFelbrYFxoXbJ50yHbQn>
+X-ME-Received: <xmr:9k5waeoZsLXtAC9WGWMpKfuL6jcuFf0eBU9OKagBSlfpxrmBa-z1UpdKQRgAi22TvEjMRNRptGtFkHbPbhda8VF8Vv99_8wlEjUQv-qrj4y4>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgddugedvvdeiucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurheptgfgggfhvfevufgjfhffkfhrsehtqhertddttdejnecuhfhrohhmpefpvghilheu
+    rhhofihnuceonhgvihhlsgesohifnhhmrghilhdrnhgvtheqnecuggftrfgrthhtvghrnh
+    epleejtdefgeeukeeiteduveehudevfeffvedutefgteduhfegvdfgtdeigeeuudejnecu
+    vehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepnhgvihhlsg
+    esohifnhhmrghilhdrnhgvthdpnhgspghrtghpthhtohepjedvpdhmohguvgepshhmthhp
+    ohhuthdprhgtphhtthhopehvihhrohesiigvnhhivhdrlhhinhhugidrohhrghdruhhkpd
+    hrtghpthhtohepghhuohgthhhunhhhrghisehvihhvohdrtghomhdprhgtphhtthhopehl
+    ihhnuhigqdigfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinh
+    hugidquhhnihhonhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehl
+    ihhnuhigqdhnihhlfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplh
+    hinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhn
+    uhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlih
+    hnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtohep
+    lhhinhhugidqvgigthegsehvghgvrhdrkhgvrhhnvghlrdhorhhg
+X-ME-Proxy: <xmx:9k5waUhf0LUODlL_PQYsCPf5h1Hz9YtKoS8AL4OAL0YUoX9vGv32rg>
+    <xmx:905waSCsyLL7f6fuPyvb6LM-a8AMULf8pIsT5TNPUcN888plxn2vJQ>
+    <xmx:905waT9XbBSmLAgfzGT6kRdfvn_ApgSn62i1cNhe3-zAYtSYAOgBDQ>
+    <xmx:905waTEUm6W92v2m08NAsDI3Dm--lHbflm-x_CKDQ7Y36cOw-DiEBA>
+    <xmx:-05waa7eNM5AFWgAvsYRXTN-gn5rTHGxvGEPMtNHM76v4SM6_x2afNUS>
+Feedback-ID: iab3e480c:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 20 Jan 2026 22:58:29 -0500 (EST)
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.58.2 (3.58.2-1.fc43) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+From: NeilBrown <neilb@ownmail.net>
+To: "Jeff Layton" <jlayton@kernel.org>
+Cc: "Christian Brauner" <brauner@kernel.org>,
+ "Christoph Hellwig" <hch@infradead.org>,
+ "Amir Goldstein" <amir73il@gmail.com>,
+ "Alexander Viro" <viro@zeniv.linux.org.uk>,
+ "Chuck Lever" <chuck.lever@oracle.com>,
+ "Olga Kornievskaia" <okorniev@redhat.com>,
+ "Dai Ngo" <Dai.Ngo@oracle.com>, "Tom Talpey" <tom@talpey.com>,
+ "Hugh Dickins" <hughd@google.com>,
+ "Baolin Wang" <baolin.wang@linux.alibaba.com>,
+ "Andrew Morton" <akpm@linux-foundation.org>,
+ "Theodore Ts'o" <tytso@mit.edu>,
+ "Andreas Dilger" <adilger.kernel@dilger.ca>, "Jan Kara" <jack@suse.com>,
+ "Gao Xiang" <xiang@kernel.org>, "Chao Yu" <chao@kernel.org>,
+ "Yue Hu" <zbestahu@gmail.com>, "Jeffle Xu" <jefflexu@linux.alibaba.com>,
+ "Sandeep Dhavale" <dhavale@google.com>,
+ "Hongbo Li" <lihongbo22@huawei.com>, "Chunhai Guo" <guochunhai@vivo.com>,
+ "Carlos Maiolino" <cem@kernel.org>, "Ilya Dryomov" <idryomov@gmail.com>,
+ "Alex Markuze" <amarkuze@redhat.com>,
+ "Viacheslav Dubeyko" <slava@dubeyko.com>, "Chris Mason" <clm@fb.com>,
+ "David Sterba" <dsterba@suse.com>,
+ "Luis de Bethencourt" <luisbg@kernel.org>,
+ "Salah Triki" <salah.triki@gmail.com>,
+ "Phillip Lougher" <phillip@squashfs.org.uk>,
+ "Steve French" <sfrench@samba.org>, "Paulo Alcantara" <pc@manguebit.org>,
+ "Ronnie Sahlberg" <ronniesahlberg@gmail.com>,
+ "Shyam Prasad N" <sprasad@microsoft.com>,
+ "Bharath SM" <bharathsm@microsoft.com>,
+ "Miklos Szeredi" <miklos@szeredi.hu>,
+ "Mike Marshall" <hubcap@omnibond.com>,
+ "Martin Brandenburg" <martin@omnibond.com>,
+ "Mark Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>,
+ "Joseph Qi" <joseph.qi@linux.alibaba.com>,
+ "Konstantin Komarov" <almaz.alexandrovich@paragon-software.com>,
+ "Ryusuke Konishi" <konishi.ryusuke@gmail.com>,
+ "Trond Myklebust" <trondmy@kernel.org>,
+ "Anna Schumaker" <anna@kernel.org>, "Dave Kleikamp" <shaggy@kernel.org>,
+ "David Woodhouse" <dwmw2@infradead.org>,
+ "Richard Weinberger" <richard@nod.at>, "Jan Kara" <jack@suse.cz>,
+ "Andreas Gruenbacher" <agruenba@redhat.com>,
+ "OGAWA Hirofumi" <hirofumi@mail.parknet.co.jp>,
+ "Jaegeuk Kim" <jaegeuk@kernel.org>, linux-nfs@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ linux-mm@kvack.org, linux-ext4@vger.kernel.org,
+ linux-erofs@lists.ozlabs.org, linux-xfs@vger.kernel.org,
+ ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
+ linux-cifs@vger.kernel.org, linux-unionfs@vger.kernel.org,
+ devel@lists.orangefs.org, ocfs2-devel@lists.linux.dev,
+ ntfs3@lists.linux.dev, linux-nilfs@vger.kernel.org,
+ jfs-discussion@lists.sourceforge.net, linux-mtd@lists.infradead.org,
+ gfs2@lists.linux.dev, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH 00/29] fs: require filesystems to explicitly opt-in to
+ nfsd export support
+In-reply-to: <a35ac736d9ebc6c92a6e7d61aeb5198234102442.camel@kernel.org>
+References: <20260115-exportfs-nfsd-v1-0-8e80160e3c0c@kernel.org>,
+ <CAOQ4uxjOJMwv_hRVTn3tJHDLMQHbeaCGsdLupiZYcwm7M2rm3g@mail.gmail.com>,
+ <9c99197dde2eafa55a1b55dce2f0d4d02c77340a.camel@kernel.org>,
+ <176877859306.16766.15009835437490907207@noble.neil.brown.name>,
+ <aW3SAKIr_QsnEE5Q@infradead.org>,
+ <176880736225.16766.4203157325432990313@noble.neil.brown.name>,
+ <20260119-kanufahren-meerjungfrau-775048806544@brauner>,
+ <176885553525.16766.291581709413217562@noble.neil.brown.name>,
+ <20260120-entmilitarisieren-wanken-afd04b910897@brauner>,
+ <176890211061.16766.16354247063052030403@noble.neil.brown.name>,
+ <20260120-hacken-revision-88209121ac2c@brauner>,
+ <a35ac736d9ebc6c92a6e7d61aeb5198234102442.camel@kernel.org>
+Date: Wed, 21 Jan 2026 14:58:25 +1100
+Message-id: <176896790525.16766.11792073987699294594@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-On Tue, 2026-01-20 at 16:18 -0800, Viacheslav Dubeyko wrote:
-> On Sun, 2026-01-18 at 18:24 +0000, Alex Markuze wrote:
-> > This patch series adds support for per-subvolume I/O metrics collection
-> > and reporting to the MDS. This enables administrators to monitor I/O
-> > patterns at the subvolume granularity, which is useful for multi-tenant
-> > CephFS deployments where different subvolumes may be allocated to
-> > different users or applications.
+On Tue, 20 Jan 2026, Jeff Layton wrote:
+> On Tue, 2026-01-20 at 11:31 +0100, Christian Brauner wrote:
+> > On Tue, Jan 20, 2026 at 08:41:50PM +1100, NeilBrown wrote:
+> > > On Tue, 20 Jan 2026, Christian Brauner wrote:
+> > > > On Tue, Jan 20, 2026 at 07:45:35AM +1100, NeilBrown wrote:
+> > > > > On Mon, 19 Jan 2026, Christian Brauner wrote:
+> > > > > > On Mon, Jan 19, 2026 at 06:22:42PM +1100, NeilBrown wrote:
+> > > > > > > On Mon, 19 Jan 2026, Christoph Hellwig wrote:
+> > > > > > > > On Mon, Jan 19, 2026 at 10:23:13AM +1100, NeilBrown wrote:
+> > > > > > > > > > This was Chuck's suggested name. His point was that STABL=
+E means that
+> > > > > > > > > > the FH's don't change during the lifetime of the file.
+> > > > > > > > > >=20
+> > > > > > > > > > I don't much care about the flag name, so if everyone lik=
+es PERSISTENT
+> > > > > > > > > > better I'll roll with that.
+> > > > > > > > >=20
+> > > > > > > > > I don't like PERSISTENT.
+> > > > > > > > > I'd rather call a spade a spade.
+> > > > > > > > >=20
+> > > > > > > > >   EXPORT_OP_SUPPORTS_NFS_EXPORT
+> > > > > > > > > or
+> > > > > > > > >   EXPORT_OP_NOT_NFS_COMPATIBLE
+> > > > > > > > >=20
+> > > > > > > > > The issue here is NFS export and indirection doesn't bring =
+any benefits.
+> > > > > > > >=20
+> > > > > > > > No, it absolutely is not.  And the whole concept of calling s=
+omething
+> > > > > > > > after the initial or main use is a recipe for a mess.
+> > > > > > >=20
+> > > > > > > We are calling it for it's only use.  If there was ever another=
+ use, we
+> > > > > > > could change the name if that made sense.  It is not a public n=
+ame, it
+> > > > > > > is easy to change.
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > Pick a name that conveys what the flag is about, and document=
+ those
+> > > > > > > > semantics well.  This flag is about the fact that for a given=
+ file,
+> > > > > > > > as long as that file exists in the file system the handle is =
+stable.
+> > > > > > > > Both stable and persistent are suitable for that, nfs is ever=
+ything
+> > > > > > > > but.
+> > > > > > >=20
+> > > > > > > My understanding is that kernfs would not get the flag.
+> > > > > > > kernfs filehandles do not change as long as the file exist.
+> > > > > > > But this is not sufficient for the files to be usefully exporte=
+d.
+> > > > > > >=20
+> > > > > > > I suspect kernfs does re-use filehandles relatively soon after =
+the
+> > > > > > > file/object has been destroyed.  Maybe that is the real problem=
+ here:
+> > > > > > > filehandle reuse, not filehandle stability.
+> > > > > > >=20
+> > > > > > > Jeff: could you please give details (and preserve them in futur=
+e cover
+> > > > > > > letters) of which filesystems are known to have problems and wh=
+at
+> > > > > > > exactly those problems are?
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > Remember nfs also support volatile file handles, and other ap=
+plications
+> > > > > > > > might rely on this (I know of quite a few user space applicat=
+ions that
+> > > > > > > > do, but they are kinda hardwired to xfs anyway).
+> > > > > > >=20
+> > > > > > > The NFS protocol supports volatile file handles.  knfsd does no=
+t.
+> > > > > > > So maybe
+> > > > > > >   EXPORT_OP_NOT_NFSD_COMPATIBLE
+> > > > > > > might be better.  or EXPORT_OP_NOT_LINUX_NFSD_COMPATIBLE.
+> > > > > > > (I prefer opt-out rather than opt-in because nfsd export was the
+> > > > > > > original purpose of export_operations, but it isn't something
+> > > > > > > I would fight for)
+> > > > > >=20
+> > > > > > I prefer one of the variants you proposed here but I don't partic=
+ularly
+> > > > > > care. It's not a hill worth dying on. So if Christoph insists on =
+the
+> > > > > > other name then I say let's just go with it.
+> > > > > >=20
+> > > > >=20
+> > > > > This sounds like you are recommending that we give in to bullying.
+> > > > > I would rather the decision be made based on the facts of the case,=
+ not
+> > > > > the opinions that are stated most bluntly.
+> > > > >=20
+> > > > > I actually think that what Christoph wants is actually quite differ=
+ent
+> > > > > from what Jeff wants, and maybe two flags are needed.  But I don't =
+yet
+> > > > > have a clear understanding of what Christoph wants, so I cannot be =
+sure.
+> > > >=20
+> > > > I've tried to indirectly ask whether you would be willing to compromi=
+se
+> > > > here or whether you want to insist on your alternative name. Apparent=
+ly
+> > > > that didn't come through.
+> > >=20
+> > > This would be the "not a hill worthy dying on" part of your statement.
+> > > I think I see that implication now.
+> > > But no, I don't think compromise is relevant.  I think the problem
+> > > statement as originally given by Jeff is misleading, and people have
+> > > been misled to an incorrect name.
+> > >=20
+> > > >=20
+> > > > I'm unclear what your goal is in suggesting that I recommend "we" give
+> > > > into bullying. All it achieved was to further derail this thread.
+> > > >=20
+> > >=20
+> > > The "We" is the same as the "us" in "let's just go with it".
+> > >=20
+> > >=20
+> > > > I also think it's not very helpful at v6 of the discussion to start
+> > > > figuring out what the actual key rift between Jeff's and Christoph's
+> > > > position is. If you've figured it out and gotten an agreement and this
+> > > > is already in, send a follow-up series.
+> > >=20
+> > > v6?  v2 was posted today.  But maybe you are referring the some other
+> > > precursors.
+> > >=20
+> > > The introductory statement in v2 is
+> > >=20
+> > >    This patchset adds a flag that indicates whether the filesystem supp=
+orts
+> > >    stable filehandles (i.e. that they don't change over the life of the
+> > >    file). It then makes any filesystem that doesn't set that flag
+> > >    ineligible for nfsd export.
+> > >=20
+> > > Nobody else questioned the validity of that.  I do.
+> > > No evidence was given that there are *any* filesystems that don't
+> > > support stable filehandles.  The only filesystem mentioned is cgroups
+> > > and it DOES provide stable filehandles.
 > >=20
-> > The implementation requires protocol changes to receive the subvolume_i=
-d
-> > from the MDS (InodeStat v9), and introduces a new metrics type
-> > (CLIENT_METRIC_TYPE_SUBVOLUME_METRICS) for reporting aggregated I/O
-> > statistics back to the MDS.
-> >=20
-> > Note: The InodeStat v8 handling patch (forward-compatible handling for
-> > the versioned optmetadata field) is now in the base tree, so this serie=
-s
-> > starts with v9 parsing.
-> >=20
-> > Patch 1 adds support for parsing the subvolume_id field from InodeStat
-> > v9 and storing it in the inode structure for later use. This patch also
-> > introduces CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset
-> > state and enforces subvolume_id immutability with WARN_ON_ONCE if
-> > attempting to change an already-set subvolume_id.
-> >=20
-> > Patch 2 adds the complete subvolume metrics infrastructure:
-> > - CEPHFS_FEATURE_SUBVOLUME_METRICS feature flag for MDS negotiation
-> > - Red-black tree based metrics tracker for efficient per-subvolume
-> >   aggregation with kmem_cache for entry allocations
-> > - Wire format encoding matching the MDS C++ AggregatedIOMetrics struct
-> > - Integration with the existing CLIENT_METRICS message
-> > - Recording of I/O operations from file read/write and writeback paths
-> > - Debugfs interfaces for monitoring
-> >=20
-> > Metrics tracked per subvolume include:
-> > - Read/write operation counts
-> > - Read/write byte counts
-> > - Read/write latency sums (for average calculation)
-> >=20
-> > The metrics are periodically sent to the MDS as part of the existing
-> > metrics reporting infrastructure when the MDS advertises support for
-> > the SUBVOLUME_METRICS feature.
-> >=20
-> > Debugfs additions in Patch 2:
-> > - metrics/subvolumes: displays last sent and pending subvolume metrics
-> > - metrics/metric_features: displays MDS session feature negotiation
-> >   status, showing which metric-related features are enabled (including
-> >   METRIC_COLLECT and SUBVOLUME_METRICS)
-> >=20
-> > Changes since v4:
-> > - Merged CEPH_SUBVOLUME_ID_NONE and WARN_ON_ONCE immutability check
-> >   into patch 1 (previously split across patches 2 and 3)
-> > - Removed unused 'cl' variable from parse_reply_info_in() that would
-> >   cause compiler warning
-> > - Added read I/O recording in finish_netfs_read() for netfs read path
-> > - Simplified subvolume_metrics_dump() to use direct rb-tree iteration
-> >   instead of intermediate snapshot allocation
-> > - InodeStat v8 patch now in base tree, reducing series from 3 to 2
-> >   patches
-> >=20
-> > Changes since v3:
-> > - merged CEPH_SUBVOLUME_ID_NONE patch into its predecessor
-> >=20
-> > Changes since v2:
-> > - Add CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset state
-> > - Add WARN_ON_ONCE if attempting to change already-set subvolume_id
-> > - Add documentation for struct ceph_session_feature_desc ('bit' field)
-> > - Change pr_err() to pr_info() for "metrics disabled" message
-> > - Use pr_warn_ratelimited() instead of manual __ratelimit()
-> > - Add documentation comments to ceph_subvol_metric_snapshot and
-> >   ceph_subvolume_metrics_tracker structs
-> > - Use kmemdup_array() instead of kmemdup() for overflow checking
-> > - Add comments explaining ret > 0 checks for read metrics (EOF handling=
-)
-> > - Use kmem_cache for struct ceph_subvol_metric_rb_entry allocations
-> > - Add comment explaining seq_file error handling in dump function
-> >=20
-> > Changes since v1:
-> > - Fixed unused variable warnings (v8_struct_v, v8_struct_compat) by
-> >   using ceph_decode_skip_8() instead of ceph_decode_8_safe()
-> > - Added detailed comment explaining InodeStat encoding versions v1-v9
-> > - Clarified that "optmetadata" is the actual field name in MDS C++ code
-> > - Aligned subvolume_id handling with FUSE client convention (0 =3D unkn=
-own)
-> >=20
-> >=20
-> > Alex Markuze (2):
-> >   ceph: parse subvolume_id from InodeStat v9 and store in inode
-> >   ceph: add subvolume metrics collection and reporting
-> >=20
-> >  fs/ceph/Makefile            |   2 +-
-> >  fs/ceph/addr.c              |  14 ++
-> >  fs/ceph/debugfs.c           | 157 +++++++++++++++++
-> >  fs/ceph/file.c              |  68 +++++++-
-> >  fs/ceph/inode.c             |  41 +++++
-> >  fs/ceph/mds_client.c        |  72 ++++++--
-> >  fs/ceph/mds_client.h        |  14 +-
-> >  fs/ceph/metric.c            | 183 ++++++++++++++++++-
-> >  fs/ceph/metric.h            |  39 ++++-
-> >  fs/ceph/subvolume_metrics.c | 416 ++++++++++++++++++++++++++++++++++++=
-++++++++
-> >  fs/ceph/subvolume_metrics.h |  97 +++++++++++
-> >  fs/ceph/super.c             |   8 +
-> >  fs/ceph/super.h             |  11 ++
-> >  13 files changed, 1094 insertions(+), 28 deletions(-)
-> >  create mode 100644 fs/ceph/subvolume_metrics.c
-> >  create mode 100644 fs/ceph/subvolume_metrics.h
-> >=20
-> > --
-> > 2.34.1
 >=20
-> Let me run xfstests on the patchset. I'll be back with the results ASAP.
+> Across reboot? Not really.
+
+Across reboot all the files are deleted and then new ones are created.
+So there is nothing that needs to be stable.
+
 >=20
+> It's quite possible that we may end up with the same "id" numbers in
+> cgroupfs on a new incarnation of the filesystem after a reboot. The
+> files in there are not the same ones as the ones before, but their
+> filehandles may match because kernfs doesn't factor in an i_generation
+> number.
 
-I have troubles to apply your pathset on Linux kernel 6.19-rc6:
+That is is about filehandle re-use, not about filehandle stability.
 
-git am ./v5_20260118_amarkuze_ceph_add_subvolume_metrics_reporting_support.=
-mbx
-Applying: ceph: handle InodeStat v8 versioned field in reply parsing
-Applying: ceph: parse subvolume_id from InodeStat v9 and store in inode
-error: patch failed: fs/ceph/inode.c:742
-error: fs/ceph/inode.c: patch does not apply
-Patch failed at 0002 ceph: parse subvolume_id from InodeStat v9 and store i=
-n
-inode
-hint: Use 'git am --show-current-patch=3Ddiff' to see the failed patch
-When you have resolved this problem, run "git am --continue".
-If you prefer to skip this patch, run "git am --skip" instead.
-To restore the original branch and stop patching, run "git am --abort".
+>=20
+> Could we fix it by adding a random i_generation value or something?
+> Possibly, but there really isn't a good use-case that I can see for
+> allowing cgroupfs to be exported via nfsd. Best to disallow it until
+> someone comes up with one.
 
-Which is your code base? Which branch have you used as base one?
+100% agree.
+
+>=20
+> > Oh yes we did. And this is a merry-go-round.
+> >=20
+> > It is very much fine for a filesystems to support file handles without
+> > wanting to support exporting via NFS. That is especially true for
+> > in-kernel pseudo filesystems.
+> >=20
+> > As I've said before multiple times I want a way to allow filesystems
+> > such as pidfs and nsfs to use file handles without supporting export.
+> > Whatever that fscking flag is called at this point I fundamentally don't
+> > care. And we are reliving the same arguments over and over.
+> >=20
+> > I will _hard NAK_ anything that starts mandating that export of
+> > filesystems must be allowed simply because their file handles fit export
+> > criteria. I do not care whether pidfs or nsfs file handles fit the bill.
+> > They will not be exported.
+>=20
+> I don't really care what we call the flag. I do care a little about
+> what its semantics are, but the effect should be to ensure that fs
+> maintainers make a conscious decision about whether nfsd export should
+> be allowed on the filesystem.=C2=A0
+
+Why do you need a conscious decision so much that you want to try to
+force it.
+Of course we want conscious decisions and hope they are always made, but
+trying to manipulate people to doing things often fails.  How sure are
+you that fs developers won't just copy-paste some other implementation
+and not think about the implications of the flag?
+
+What is the down side?  What is the harm from allowing export (should the
+admin attempt it)?
+If there were serious security concerns - then sure, make it harder to
+do the dangerous thing.
+But if it is just "it doesn't make sense", then there is no harm in
+letting people get away with not reading the documentation, and fixing
+things later as complaints arrive.  That is generally how the process
+works.
+
+But if you really really want to set this new flag on almost every
+export_operations, can I ask that you please set it on EVERY export
+operations, then allow maintainers to remove it as they see fit.
+I think that approach would be much easier to review.
+
+With your current series it is non-trivial to determine which
+export_operations you have chosen not to set the flag on.  If you had
+one patch that set it everywhere, then individual patches to remove it,
+that would be a lot easier to review.
 
 Thanks,
-Slava.
+NeilBrown
+
+
+>=20
+> At this point, maybe we should just go with Neil's=20
+> EXPORT_OP_SUPPORTS_NFS_EXPORT or something. It's much more arbitrary,
+> than trying to base this on criteria about filehandle stability, but it
+> would give us the effect we want.
+>=20
+> --=20
+> Jeff Layton <jlayton@kernel.org>
+>=20
 
