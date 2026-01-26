@@ -1,595 +1,161 @@
-Received: from mail-dl1-f54.google.com (mail-dl1-f54.google.com [74.125.82.54])
+Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com [209.85.222.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CB9E3370FA
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2026 13:01:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.54
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769432517; cv=pass; b=nMzGzYXRy9l0pxmludF5tlyIkHrICXNbblWW1Ce/tDx+acOUE7qAcFBh5uxJo1ej9h4F74hVvsypHxyVMXEz1JeAKZ2auWhqn68OvRwKRWX7HDB1rfLYtAyRTS1eHAgz4GACmZmIdWWAnjKp4Jee3L+IDlTLLpBphpZUr4YTtkI=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769432517; c=relaxed/simple;
-	bh=qaCLsbWGIDsR3Grsx/hSZLgYnuinRIZL+p1IvL8ow30=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=NY+1a9ut/+R3atL7jrN/gqyS5Ozz5m/FMIiBDRsJZAXlE5WRajSJOxDSReqkvN2wGbL3isNHkP3Z+PFUvxmSGgs4zBBR+TrHDMwQpn9WEPOssz78GEvMRnl070ETWw73kG+61V4wP4tJgNjDnExdX4g11bkd+qXNASAMSrN14Dc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Jqp7Bx+m; arc=pass smtp.client-ip=74.125.82.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0F721DED57
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2026 13:37:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.172
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769434666; cv=none; b=ORK72Y6eLUWC2fb8qQqf0/CSIOvORis68vFisQ2hOEQP8Zee/nZ8yVWm2B8+1bDwD2VZBm36S0YosbIDO4QZ4cHyfP5aLl5wbt1FKYOtTMyv90XTfr7oUp5SbipEjJEyKDH+Ps8jwVZo3w1sBLBTSXvIAvAyYYGPtDMQtX14YsM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769434666; c=relaxed/simple;
+	bh=5wNrdP+SVkbfGyZLnq2bAoMphi6wq9lCW2QwQ/DWmUY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=XP60VugtaYCwi91OvZgwHnZr/OgqhvNKayd3mjfTuPFJnU1VivbIgCFNwQt7EMSGn+g38+xv319RAafR+MztSnGyNBASI3BFDyEOTubh1/pMUWCO6h6zlOdjCznRua+CpGYFwxEv0kSy44NMhzRMnGNyvNH0gTBI4Fdx7fpCrxU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=N3oLVPMW; arc=none smtp.client-ip=209.85.222.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Jqp7Bx+m"
-Received: by mail-dl1-f54.google.com with SMTP id a92af1059eb24-1248d27f293so3156118c88.0
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2026 05:01:54 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769432513; cv=none;
-        d=google.com; s=arc-20240605;
-        b=daPxKIPh1+xoZnD1hcuWSLrc3ArlCtcRhXDUXCUzEUm6J4Hcz5NWlgjiEoc7C18ZnV
-         VZQqbSOA9zv3LpgkLu74jh15zyJXY4qsH48aE4yuQ7mrMy2YLOYnVtGctQUnriw14EtI
-         KX/Tb1nyUrA4h4plTCgxGiRLLAXu4/1UdzNzwoGun0NANjDh2vH2tAgdvO6xgVrSbxSg
-         hdMxwRnlhpZOYQVc8DeHFslJKwh31GC3SZJe9OQoT40xPYcFMGJdH7q1nr8bdipa6u73
-         phR2O/1gpE2FXD25Vkey2Q/mirEDabKeg9zzE+fo1rt85Obxm5bC6NaNrqYoivU8LvrX
-         1XFg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=QsFKvRjjX/maDWrKTfcneVC8SSbrRGlFogp/w/fEBLw=;
-        fh=nLnhR/oUbsIhjFPyh+5gkZOnjyiEx9OSNfaCeeSEAgg=;
-        b=I13Hwd5eRMbkjLwVBd0oEzP2LvoBotYfAxEtdJIOtYdE/FlqKFRK+JiiZvHVl+GZvs
-         MSW4T/D0wuYpSswLBLqWcMQZIDJ/mSFiNCpOFN/amK6JC4ui1/27G6bgHRy+tF2fQQ7D
-         qi1fls6x1lMnvzBdAOnpbywKL5nrWa/9nJQ9vjKzapD7/MIBss+4k195xd6V1hEwRvB0
-         OtncC4pm3T11qqLQ8pi2rAfHfthlN2VS9xESBD4PSFq9xmkEll74Xn+2vaWSwHqxQF12
-         YPvNX/7tOfMcz34EM4HQDH9UrAjmA4LALPw9zN9p+BuJAtlwKb1mh6vUefJgDCwK2qVs
-         PE3Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="N3oLVPMW"
+Received: by mail-qk1-f172.google.com with SMTP id af79cd13be357-8c6c922850cso469481985a.2
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2026 05:37:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1769432513; x=1770037313; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QsFKvRjjX/maDWrKTfcneVC8SSbrRGlFogp/w/fEBLw=;
-        b=Jqp7Bx+m6UcJx/eA5tcBC069iWv5W9RlGcM+uOmhEuWcVubz80/A4BlLEYjS55UKSU
-         H1pSxvMU7MBkohuMlJPg7QY4tVs3bMdhaL0iUK/uHjA+ZFa6JbDna2cO8viQ2nlHvkmz
-         +whwNsXmdnYG9BOfUGCpZPOGjICSRkI8fVzVEqwuxoG/p0ZBswqqzDP6mqAiRM0Eg+DC
-         jp55XA6jzWmBv1u4CPPA8L2Rcul8txZt1T6wGW5GtB5peapwWYujuaVXK5xgQsyZsgmo
-         /+orcBV6xFJRXWvRTRWTVsydO9c0Pm35tzlAL45Zlzmx8q/C+NC1YrS87DQaBFG3HfQm
-         zRHA==
+        d=gmail.com; s=20230601; t=1769434663; x=1770039463; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=CXcqhBLddkz8IEL1C4auddh0XCHUVpurWT8W+/cLh7Q=;
+        b=N3oLVPMWamg2UwVVa/BC6qCM2KvVPOx9LG44TLA3KRkJOEEvkz5EAuAKfjx5GrLrWK
+         ctKLr27dPs7II6xOlmVfrYI38aYVLqydPWBx2hFHaZ68EKtDWUmuwu8Oz1DUAwFiO0uh
+         B2iO/Ttig8xICycrXNpgG4lu+6zEIZTCSNATzuZi8nyCM3uks7yutZhXdBGeocGIgYvW
+         s0pv/g1U/Dzq3AGBOElf/zYRuI23oD4Cn8EqcIoEyz8623G1rviwWOH5yNCjs5tXUfmw
+         fIrST+u36tyhr5OT7NOSYkgQ1ta6HTnSIxalzf/jz2e2o2Iw6FiqColJvdlM+qH3WQpA
+         pNnA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769432513; x=1770037313;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=QsFKvRjjX/maDWrKTfcneVC8SSbrRGlFogp/w/fEBLw=;
-        b=Lk6KxpBU6nfrlFZNrrqcLAJ6MLy/r4t/YUwdgydzXkoPU7AOKOiojZ8dX59JzWGPf9
-         h80VazIOuobGXX/hZfUCOllGlRXMUT2bCHwTqKbD3wQSQ0pOyFvlkYMqJQVBQlfLSrkk
-         DG5wEsaDZeAqWGJIzDS/q35FjvOD/XmbO35yHEGa2Rkz9CS/FwAaq0lvC5hRoZWo4Lc3
-         G6t+S8Zasw/JkfZV4pWvwQcBy1v4r+9685ezsAPTLYs9cFzwJaPDayramDB265GUn3KW
-         lFEtHmyDovjJY4lC7E1HuiXc92wx5DGKvjU9cjIaeLD46/z29ISyo18hd7fYvW7LZM2a
-         3iJA==
-X-Forwarded-Encrypted: i=1; AJvYcCXn2pBxf68K0l+FJ9VEwL+HNfinWiiZtlY0heKrBhnT3cJfdr25ZrREcyADIgLm06r9hF1R1RIjxQlk@vger.kernel.org
-X-Gm-Message-State: AOJu0YwqXh/FyBUuHblEsNu59Sm4ZSAaS31H/bJSZ1iDgxaQpF93RUay
-	gbxEsVwxD64Xyqq/GKWbQUyKKBl9480X6giQOF7P3lUE0uYk3gqxMVTf2xUOKarG9MHTck4wJxT
-	m5vpgr/Dxzgymw9Gs31N12VPxLKkxcs8=
-X-Gm-Gg: AZuq6aIaNdkf4sQDBbRARCknQciBW+KNhMU3QSkAeVkB6P+OnSTYaBLx52M/zgSaFgy
-	4JJsjuru+GCUqc1VO06u2gglfmrHGOT+1lPTyDC4eaBVlR9NkjxRt0CkFnJQIafLiyG/Rh5pixC
-	L98C+THwUa6cCaAPKVD4KiKL6SmI641IvpUnd3APCNtAm2qk02zlLDyS6xJeikKpRKAZanCb6SS
-	Cq2KDFzja6FnqiO5akgqgA3PhRmggWBsH4DwNBSafa+h1JqDlt1YU+1zbEr0ZY2uxiTcQk=
-X-Received: by 2002:a05:7022:2206:b0:11d:f462:78ac with SMTP id
- a92af1059eb24-1248ec8d53bmr1963808c88.28.1769432513183; Mon, 26 Jan 2026
- 05:01:53 -0800 (PST)
+        d=1e100.net; s=20230601; t=1769434663; x=1770039463;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CXcqhBLddkz8IEL1C4auddh0XCHUVpurWT8W+/cLh7Q=;
+        b=cgWFjUfVptOKI8/Ih7NcF7VRDQTCOr63esB+xcSm0/axXBRNQm2i0jgkPUqQxrYz+v
+         apCiloamU2Z1+67lvI8eZ85CI4s3Zsg0NHE5LfUbe2KqXCnk7j5Rg5Ur+oxEI8OncmEf
+         MJX/S6U1Q4P3UpqLYs4YuDsDtV8K58QbQMm9HOzpp9Mf0DEJ/1x689n4iuYW+ZXY3qT8
+         gS1y4Tm2NRdEHEgiam4hj6kex/vGDGgX+U9PV5Z7Eb8QHaXQ4RyRgt7XKqmh/rkx6b7W
+         pzdaASvX0su0BJcmArzeYeLN3sTPR59qHnCJ7HD2sZT9F7UTpiY3nQVds9qnqx5XlQ1o
+         JejA==
+X-Gm-Message-State: AOJu0YwmqGV4phYtMo5NzsLAIO8bFe2JAaz3Nribh1fv80Vkx+6hx8xF
+	4APdwMEV7moK+CCtT7BxQmmn+4b5a6pPPhCiQDu8ZZS+ykq01bNtSll+aasaKA==
+X-Gm-Gg: AZuq6aK5s6cFrNzxJRa8jO39vQfcrqFZDnTDXFbbVKs4b9Pa77T9Pynt2a4X1h1lBcJ
+	SNlxiKjHV1szL7NGQdPm5x5LbXQdqNHBhM6WT5b4PzDmlYqJDTGiOrrtEOKfOFAjIEe3ISYfP/K
+	e4cbPz1ib9TGtZZpmM2bibsboO9J3J1BVR5BrTimSYpEXw4+0EM9Jub4pyYi2fNYWQFVUQevL/j
+	9/AWcbJWehMNOD6+Zekr7NnlTv3YT5OKRdBzaWJ6XoC7lNpyKG+3Kqh4oPtHqR3bH7Ry2zHcUmf
+	D5JI9VcSYYLKxE84+6k4/Vh74/pRciwAPKu/nQoRjY4iFsXiCe9kwvnYtHhpyVpL546q3akS8BB
+	kBwB5mb+84epqlNXkJxreQyIfTzeOqWGVJ1KOLc5t/gnHGMoAovjSS+BVi1HoIOcVOKrfAgKQ/3
+	JWi+o7MUIRavpSnjzmoff/wzLoflaPSCFhLeX07bp59EWESI8dUZmKRtbwhImg/PI=
+X-Received: by 2002:ac8:7f92:0:b0:501:40af:96c4 with SMTP id d75a77b69052e-50314c5ca44mr56571401cf.54.1769434663443;
+        Mon, 26 Jan 2026 05:37:43 -0800 (PST)
+Received: from zambezi.front.sepia.ceph.com (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-502f7ec610asm87814361cf.10.2026.01.26.05.37.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 26 Jan 2026 05:37:42 -0800 (PST)
+From: Ilya Dryomov <idryomov@gmail.com>
+To: ceph-devel@vger.kernel.org
+Cc: Dongsheng Yang <dongsheng.yang@linux.dev>
+Subject: [PATCH] rbd: check for EOD after exclusive lock is ensured to be held
+Date: Mon, 26 Jan 2026 14:37:28 +0100
+Message-ID: <20260126133729.867488-1-idryomov@gmail.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260114195524.1025067-2-slava@dubeyko.com> <CA+2bHPb66HKDZ2DX7TvzvfjW_Ym1TBeVNcPn9w_tnwytje85Nw@mail.gmail.com>
-In-Reply-To: <CA+2bHPb66HKDZ2DX7TvzvfjW_Ym1TBeVNcPn9w_tnwytje85Nw@mail.gmail.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Mon, 26 Jan 2026 14:01:40 +0100
-X-Gm-Features: AZwV_Qhigqt9gFiGrF6N86oyG27EJ4EOimooalRQ645GK-SeIam8ucuWxU2zaIY
-Message-ID: <CAOi1vP-G_0vPyMOyx6HvJX7VwN8_9FCe9V4Vg9zvg8gbbJNNHw@mail.gmail.com>
-Subject: Re: [PATCH v5] ceph: fix kernel crash in ceph_open()
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org, amarkuze@redhat.com, Slava.Dubeyko@ibm.com, 
-	vdubeyko@redhat.com, khiremat@redhat.com, Pavan.Rallabhandi@ibm.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Wed, Jan 14, 2026 at 10:27=E2=80=AFPM Patrick Donnelly <pdonnell@redhat.=
-com> wrote:
->
-> Reviewed-by: Patrick Donnelly <pdonnell@ibm.com>
->
-> On Wed, Jan 14, 2026 at 2:56=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyko=
-.com> wrote:
-> >
-> > From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-> >
-> > The CephFS kernel client has regression starting from 6.18-rc1.
-> >
-> > sudo ./check -g quick
-> > FSTYP         -- ceph
-> > PLATFORM      -- Linux/x86_64 ceph-0005 6.18.0-rc5+ #52 SMP PREEMPT_DYN=
-AMIC Fri
-> > Nov 14 11:26:14 PST 2025
-> > MKFS_OPTIONS  -- 192.168.1.213:3300:/scratch
-> > MOUNT_OPTIONS -- -o name=3Dadmin,ms_mode=3Dsecure 192.168.1.213:3300:/s=
-cratch
-> > /mnt/cephfs/scratch
-> >
-> > Killed
-> >
-> > Nov 14 11:48:10 ceph-0005 kernel: [  154.723902] libceph: mon0
-> > (2)192.168.1.213:3300 session established
-> > Nov 14 11:48:10 ceph-0005 kernel: [  154.727225] libceph: client167616
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.087260] BUG: kernel NULL point=
-er
-> > dereference, address: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.087756] #PF: supervisor read a=
-ccess in
-> > kernel mode
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.088043] #PF: error_code(0x0000=
-) - not-
-> > present page
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.088302] PGD 0 P4D 0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.088688] Oops: Oops: 0000 [#1] =
-SMP KASAN
-> > NOPTI
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.090080] CPU: 4 UID: 0 PID: 345=
-3 Comm:
-> > xfs_io Not tainted 6.18.0-rc5+ #52 PREEMPT(voluntary)
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.091245] Hardware name: QEMU St=
-andard PC
-> > (i440FX + PIIX, 1996), BIOS 1.17.0-5.fc42 04/01/2014
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.092103] RIP: 0010:strcmp+0x1c/=
-0x40
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.092493] Code: 90 90 90 90 90 9=
-0 90 90
-> > 90 90 90 90 90 90 31 c0 eb 14 66 66 2e 0f 1f 84 00 00 00 00 00 90 48 83=
- c0 01 84
-> > d2 74 19 0f b6 14 07 <3a> 14 06 74 ef 19 c0 83 c8 01 31 d2 31 f6 31 ff =
-c3 cc cc
-> > cc cc 31
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.094057] RSP: 0018:ffff88815368=
-75c0
-> > EFLAGS: 00010246
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.094522] RAX: 0000000000000000 =
-RBX:
-> > ffff888116003200 RCX: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.095114] RDX: 0000000000000063 =
-RSI:
-> > 0000000000000000 RDI: ffff88810126c900
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.095714] RBP: ffff8881536876a8 =
-R08:
-> > 0000000000000000 R09: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.096297] R10: 0000000000000000 =
-R11:
-> > 0000000000000000 R12: dffffc0000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.096889] R13: ffff8881061d0000 =
-R14:
-> > 0000000000000000 R15: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.097490] FS:  000074a85c082840(=
-0000)
-> > GS:ffff8882401a4000(0000) knlGS:0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.098146] CS:  0010 DS: 0000 ES:=
- 0000
-> > CR0: 0000000080050033
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.098630] CR2: 0000000000000000 =
-CR3:
-> > 0000000110ebd001 CR4: 0000000000772ef0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.099219] PKRU: 55555554
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.099476] Call Trace:
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.099686]  <TASK>
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.099873]  ?
-> > ceph_mds_check_access+0x348/0x1760
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.100267]  ?
-> > __kasan_check_write+0x14/0x30
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.100671]  ? lockref_get+0xb1/0x=
-170
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.100979]  ?
-> > __pfx__raw_spin_lock+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.101372]  ceph_open+0x322/0xef0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.101669]  ? __pfx_ceph_open+0x1=
-0/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.101996]  ?
-> > __pfx_apparmor_file_open+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.102434]  ?
-> > __ceph_caps_issued_mask_metric+0xd6/0x180
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.102911]  do_dentry_open+0x7bf/=
-0x10e0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.103249]  ? __pfx_ceph_open+0x1=
-0/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.103508]  vfs_open+0x6d/0x450
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.103697]  ? may_open+0xec/0x370
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.103893]  path_openat+0x2017/0x=
-50a0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.104110]  ? __pfx_path_openat+0=
-x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.104345]  ?
-> > __pfx_stack_trace_save+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.104599]  ?
-> > stack_depot_save_flags+0x28/0x8f0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.104865]  ? stack_depot_save+0x=
-e/0x20
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.105063]  do_filp_open+0x1b4/0x=
-450
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.105253]  ?
-> > __pfx__raw_spin_lock_irqsave+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.105538]  ? __pfx_do_filp_open+=
-0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.105748]  ? __link_object+0x13d=
-/0x2b0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.105949]  ?
-> > __pfx__raw_spin_lock+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.106169]  ?
-> > __check_object_size+0x453/0x600
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.106428]  ? _raw_spin_unlock+0x=
-e/0x40
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.106635]  do_sys_openat2+0xe6/0=
-x180
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.106827]  ?
-> > __pfx_do_sys_openat2+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.107052]  __x64_sys_openat+0x10=
-8/0x240
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.107258]  ?
-> > __pfx___x64_sys_openat+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.107529]  ?
-> > __pfx___handle_mm_fault+0x10/0x10
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.107783]  x64_sys_call+0x134f/0=
-x2350
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.108007]  do_syscall_64+0x82/0x=
-d50
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.108201]  ?
-> > fpregs_assert_state_consistent+0x5c/0x100
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.108467]  ? do_syscall_64+0xba/=
-0xd50
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.108626]  ? __kasan_check_read+=
-0x11/0x20
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.108801]  ?
-> > count_memcg_events+0x25b/0x400
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.109013]  ? handle_mm_fault+0x3=
-8b/0x6a0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.109216]  ? __kasan_check_read+=
-0x11/0x20
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.109457]  ?
-> > fpregs_assert_state_consistent+0x5c/0x100
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.109724]  ?
-> > irqentry_exit_to_user_mode+0x2e/0x2a0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.109991]  ? irqentry_exit+0x43/=
-0x50
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.110180]  ? exc_page_fault+0x95=
-/0x100
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.110389]
-> > entry_SYSCALL_64_after_hwframe+0x76/0x7e
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.110638] RIP: 0033:0x74a85bf145=
-ab
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.110821] Code: 25 00 00 41 00 3=
-d 00 00
-> > 41 00 74 4b 64 8b 04 25 18 00 00 00 85 c0 75 67 44 89 e2 48 89 ee bf 9c=
- ff ff ff
-> > b8 01 01 00 00 0f 05 <48> 3d 00 f0 ff ff 0f 87 91 00 00 00 48 8b 54 24 =
-28 64 48
-> > 2b 14 25
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.111724] RSP: 002b:00007ffc77d3=
-16d0
-> > EFLAGS: 00000246 ORIG_RAX: 0000000000000101
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.112080] RAX: ffffffffffffffda =
-RBX:
-> > 0000000000000002 RCX: 000074a85bf145ab
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.112442] RDX: 0000000000000000 =
-RSI:
-> > 00007ffc77d32789 RDI: 00000000ffffff9c
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.112790] RBP: 00007ffc77d32789 =
-R08:
-> > 00007ffc77d31980 R09: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.113125] R10: 0000000000000000 =
-R11:
-> > 0000000000000246 R12: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.113502] R13: 00000000ffffffff =
-R14:
-> > 0000000000000180 R15: 0000000000000001
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.113838]  </TASK>
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.113957] Modules linked in:
-> > intel_rapl_msr intel_rapl_common intel_uncore_frequency_common intel_pm=
-c_core
-> > pmt_telemetry pmt_discovery pmt_class intel_pmc_ssram_telemetry intel_v=
-sec
-> > kvm_intel kvm joydev irqbypass polyval_clmulni ghash_clmulni_intel aesn=
-i_intel
-> > rapl floppy input_leds psmouse i2c_piix4 vga16fb mac_hid i2c_smbus vgas=
-tate
-> > serio_raw bochs qemu_fw_cfg pata_acpi sch_fq_codel rbd msr parport_pc p=
-pdev lp
-> > parport efi_pstore
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.116339] CR2: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.116574] ---[ end trace 0000000=
-000000000
-> > ]---
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.116826] RIP: 0010:strcmp+0x1c/=
-0x40
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.117058] Code: 90 90 90 90 90 9=
-0 90 90
-> > 90 90 90 90 90 90 31 c0 eb 14 66 66 2e 0f 1f 84 00 00 00 00 00 90 48 83=
- c0 01 84
-> > d2 74 19 0f b6 14 07 <3a> 14 06 74 ef 19 c0 83 c8 01 31 d2 31 f6 31 ff =
-c3 cc cc
-> > cc cc 31
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.118070] RSP: 0018:ffff88815368=
-75c0
-> > EFLAGS: 00010246
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.118362] RAX: 0000000000000000 =
-RBX:
-> > ffff888116003200 RCX: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.118748] RDX: 0000000000000063 =
-RSI:
-> > 0000000000000000 RDI: ffff88810126c900
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.119116] RBP: ffff8881536876a8 =
-R08:
-> > 0000000000000000 R09: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.119492] R10: 0000000000000000 =
-R11:
-> > 0000000000000000 R12: dffffc0000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.119865] R13: ffff8881061d0000 =
-R14:
-> > 0000000000000000 R15: 0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.120242] FS:  000074a85c082840(=
-0000)
-> > GS:ffff8882401a4000(0000) knlGS:0000000000000000
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.120704] CS:  0010 DS: 0000 ES:=
- 0000
-> > CR0: 0000000080050033
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.121008] CR2: 0000000000000000 =
-CR3:
-> > 0000000110ebd001 CR4: 0000000000772ef0
-> > Nov 14 11:48:11 ceph-0005 kernel: [  155.121409] PKRU: 55555554
-> >
-> > We have issue here [1] if fs_name =3D=3D NULL:
-> >
-> > const char fs_name =3D mdsc->fsc->mount_options->mds_namespace;
-> >     ...
-> >     if (auth->match.fs_name && strcmp(auth->match.fs_name, fs_name)) {
-> >             / fsname mismatch, try next one */
-> >             return 0;
-> >     }
-> >
-> > v2
-> > Patrick Donnelly suggested that: In summary, we should definitely start
-> > decoding `fs_name` from the MDSMap and do strict authorizations checks
-> > against it. Note that the `--mds_namespace` should only be used for
-> > selecting the file system to mount and nothing else. It's possible
-> > no mds_namespace is specified but the kernel will mount the only
-> > file system that exists which may have name "foo".
-> >
-> > v3
-> > The namespace_equals() logic has been generalized into
-> > __namespace_equals() with the goal of using it in
-> > ceph_mdsc_handle_fsmap() and ceph_mds_auth_match().
-> > The misspelling of CEPH_NAMESPACE_WILDCARD has been corrected.
-> >
-> > v4
-> > The __namespace_equals() now supports wildcard check.
-> >
-> > v5
-> > Patrick Donnelly suggested to add the sanity check of
-> > kstrdup() returned pointer in ceph_mdsmap_decode()
-> > added logic. Also, he suggested much simpler logic of
-> > namespace strings comparison in the form of
-> > ceph_namespace_match() logic.
-> >
-> > This patch reworks ceph_mdsmap_decode() and namespace_equals() with
-> > the goal of supporting the suggested concept. Now struct ceph_mdsmap
-> > contains m_fs_name field that receives copy of extracted FS name
-> > by ceph_extract_encoded_string(). For the case of "old" CephFS file sys=
-tems,
-> > it is used "cephfs" name. Also, namespace_equals() method has been
-> > reworked with the goal of proper names comparison.
-> >
-> > [1] https://elixir.bootlin.com/linux/v6.18-rc4/source/fs/ceph/mds_clien=
-t.c#L5666
-> > [2] https://tracker.ceph.com/issues/73886
-> >
-> > Fixes: 22c73d52a6d0 ("ceph: fix multifs mds auth caps issue")
-> > Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-> > cc: Kotresh Hiremath Ravishankar <khiremat@redhat.com>
-> > cc: Alex Markuze <amarkuze@redhat.com>
-> > cc: Ilya Dryomov <idryomov@gmail.com>
-> > cc: Patrick Donnelly <pdonnell@redhat.com>
-> > cc: Ceph Development <ceph-devel@vger.kernel.org>
-> > ---
-> >  fs/ceph/mds_client.c         | 11 +++++------
-> >  fs/ceph/mdsmap.c             | 24 ++++++++++++++++++------
-> >  fs/ceph/mdsmap.h             |  1 +
-> >  fs/ceph/super.h              | 24 +++++++++++++++++++-----
-> >  include/linux/ceph/ceph_fs.h |  6 ++++++
-> >  5 files changed, 49 insertions(+), 17 deletions(-)
-> >
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index 7e4eab824dae..703c14bc3c95 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -5671,7 +5671,7 @@ static int ceph_mds_auth_match(struct ceph_mds_cl=
-ient *mdsc,
-> >         u32 caller_uid =3D from_kuid(&init_user_ns, cred->fsuid);
-> >         u32 caller_gid =3D from_kgid(&init_user_ns, cred->fsgid);
-> >         struct ceph_client *cl =3D mdsc->fsc->client;
-> > -       const char *fs_name =3D mdsc->fsc->mount_options->mds_namespace=
-;
-> > +       const char *fs_name =3D mdsc->mdsmap->m_fs_name;
-> >         const char *spath =3D mdsc->fsc->mount_options->server_path;
-> >         bool gid_matched =3D false;
-> >         u32 gid, tlen, len;
-> > @@ -5679,7 +5679,8 @@ static int ceph_mds_auth_match(struct ceph_mds_cl=
-ient *mdsc,
-> >
-> >         doutc(cl, "fsname check fs_name=3D%s  match.fs_name=3D%s\n",
-> >               fs_name, auth->match.fs_name ? auth->match.fs_name : "");
-> > -       if (auth->match.fs_name && strcmp(auth->match.fs_name, fs_name)=
-) {
-> > +
-> > +       if (!ceph_namespace_match(auth->match.fs_name, fs_name, NAME_MA=
-X)) {
-> >                 /* fsname mismatch, try next one */
-> >                 return 0;
-> >         }
-> > @@ -6122,7 +6123,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_clien=
-t *mdsc, struct ceph_msg *msg)
-> >  {
-> >         struct ceph_fs_client *fsc =3D mdsc->fsc;
-> >         struct ceph_client *cl =3D fsc->client;
-> > -       const char *mds_namespace =3D fsc->mount_options->mds_namespace=
-;
-> >         void *p =3D msg->front.iov_base;
-> >         void *end =3D p + msg->front.iov_len;
-> >         u32 epoch;
-> > @@ -6157,9 +6157,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_clien=
-t *mdsc, struct ceph_msg *msg)
-> >                 namelen =3D ceph_decode_32(&info_p);
-> >                 ceph_decode_need(&info_p, info_end, namelen, bad);
-> >
-> > -               if (mds_namespace &&
-> > -                   strlen(mds_namespace) =3D=3D namelen &&
-> > -                   !strncmp(mds_namespace, (char *)info_p, namelen)) {
-> > +               if (namespace_equals(fsc->mount_options,
-> > +                                    (char *)info_p, namelen)) {
-> >                         mount_fscid =3D fscid;
-> >                         break;
-> >                 }
-> > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
-> > index 2c7b151a7c95..f0c0ed202184 100644
-> > --- a/fs/ceph/mdsmap.c
-> > +++ b/fs/ceph/mdsmap.c
-> > @@ -353,22 +353,33 @@ struct ceph_mdsmap *ceph_mdsmap_decode(struct cep=
-h_mds_client *mdsc, void **p,
-> >                 __decode_and_drop_type(p, end, u8, bad_ext);
-> >         }
-> >         if (mdsmap_ev >=3D 8) {
-> > -               u32 fsname_len;
-> > +               size_t fsname_len;
-> > +
-> >                 /* enabled */
-> >                 ceph_decode_8_safe(p, end, m->m_enabled, bad_ext);
-> > +
-> >                 /* fs_name */
-> > -               ceph_decode_32_safe(p, end, fsname_len, bad_ext);
-> > +               m->m_fs_name =3D ceph_extract_encoded_string(p, end,
-> > +                                                          &fsname_len,
-> > +                                                          GFP_NOFS);
-> > +               if (IS_ERR(m->m_fs_name)) {
-> > +                       m->m_fs_name =3D NULL;
-> > +                       goto nomem;
-> > +               }
-> >
-> >                 /* validate fsname against mds_namespace */
-> > -               if (!namespace_equals(mdsc->fsc->mount_options, *p,
-> > +               if (!namespace_equals(mdsc->fsc->mount_options, m->m_fs=
-_name,
-> >                                       fsname_len)) {
-> >                         pr_warn_client(cl, "fsname %*pE doesn't match m=
-ds_namespace %s\n",
-> > -                                      (int)fsname_len, (char *)*p,
-> > +                                      (int)fsname_len, m->m_fs_name,
-> >                                        mdsc->fsc->mount_options->mds_na=
-mespace);
-> >                         goto bad;
-> >                 }
-> > -               /* skip fsname after validation */
-> > -               ceph_decode_skip_n(p, end, fsname_len, bad);
-> > +       } else {
-> > +               m->m_enabled =3D false;
-> > +               m->m_fs_name =3D kstrdup(CEPH_OLD_FS_NAME, GFP_NOFS);
-> > +               if (!m->m_fs_name)
-> > +                       goto nomem;
-> >         }
-> >         /* damaged */
-> >         if (mdsmap_ev >=3D 9) {
-> > @@ -430,6 +441,7 @@ void ceph_mdsmap_destroy(struct ceph_mdsmap *m)
-> >                 kfree(m->m_info);
-> >         }
-> >         kfree(m->m_data_pg_pools);
-> > +       kfree(m->m_fs_name);
-> >         kfree(m);
-> >  }
-> >
-> > diff --git a/fs/ceph/mdsmap.h b/fs/ceph/mdsmap.h
-> > index 1f2171dd01bf..d48d07c3516d 100644
-> > --- a/fs/ceph/mdsmap.h
-> > +++ b/fs/ceph/mdsmap.h
-> > @@ -45,6 +45,7 @@ struct ceph_mdsmap {
-> >         bool m_enabled;
-> >         bool m_damaged;
-> >         int m_num_laggy;
-> > +       char *m_fs_name;
-> >  };
-> >
-> >  static inline struct ceph_entity_addr *
-> > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> > index a1f781c46b41..c8def96a129f 100644
-> > --- a/fs/ceph/super.h
-> > +++ b/fs/ceph/super.h
-> > @@ -104,18 +104,32 @@ struct ceph_mount_options {
-> >         struct fscrypt_dummy_policy dummy_enc_policy;
-> >  };
-> >
-> > +#define CEPH_NAMESPACE_WILDCARD                "*"
-> > +
-> > +static inline bool ceph_namespace_match(const char *pattern,
-> > +                                       const char *target,
-> > +                                       size_t target_len)
-> > +{
-> > +       if (!pattern || !pattern[0] ||
-> > +           !strcmp(pattern, CEPH_NAMESPACE_WILDCARD))
-> > +               return true;
-> > +
-> > +       if (strlen(pattern) !=3D target_len)
-> > +               return false;
-> > +
-> > +       return !strncmp(pattern, target, target_len);
-> > +}
-> > +
-> >  /*
-> >   * Check if the mds namespace in ceph_mount_options matches
-> >   * the passed in namespace string. First time match (when
-> >   * ->mds_namespace is NULL) is treated specially, since
-> >   * ->mds_namespace needs to be initialized by the caller.
-> >   */
-> > -static inline int namespace_equals(struct ceph_mount_options *fsopt,
-> > -                                  const char *namespace, size_t len)
-> > +static inline bool namespace_equals(struct ceph_mount_options *fsopt,
-> > +                                   const char *namespace, size_t len)
-> >  {
-> > -       return !(fsopt->mds_namespace &&
-> > -                (strlen(fsopt->mds_namespace) !=3D len ||
-> > -                 strncmp(fsopt->mds_namespace, namespace, len)));
-> > +       return ceph_namespace_match(fsopt->mds_namespace, namespace, le=
-n);
+Similar to commit 870611e4877e ("rbd: get snapshot context after
+exclusive lock is ensured to be held"), move the "beyond EOD" check
+into the image request state machine so that it's performed after
+exclusive lock is ensured to be held.  This avoids various race
+conditions which can arise when the image is shrunk under I/O (in
+practice, mostly readahead).  In one such scenario
 
-Hi Patrick,
+    rbd_assert(objno < rbd_dev->object_map_size);
 
-Has your
+can be triggered if a close-to-EOD read gets queued right before the
+shrink is initiated and the EOD check is performed against an outdated
+mapping_size.  After the resize is done on the server side and exclusive
+lock is (re)acquired bringing along the new (now shrunk) object map, the
+read starts going through the state machine and rbd_obj_may_exist() gets
+invoked on an object that is out of bounds of rbd_dev->object_map array.
 
-    > > I think we agreed that the "*" wildcard should have _no_ special
-    > > meaning as a glob for fsopt->mds_namespace?
-    >
-    > Frankly speaking, I don't quite follow to your point. What do
-you mean here? :)
+Cc: stable@vger.kernel.org
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 28 +++++++++++++++++-----------
+ 1 file changed, 17 insertions(+), 11 deletions(-)
 
-    --mds_namespace=3D* is invalid.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index af0e21149dbc..44f4dd6e98d9 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3490,16 +3490,31 @@ static void rbd_img_object_requests(struct rbd_img_request *img_req)
+ {
+ 	struct rbd_device *rbd_dev = img_req->rbd_dev;
+ 	struct rbd_obj_request *obj_req;
++	u64 mapping_size;
+ 
+ 	rbd_assert(!img_req->pending.result && !img_req->pending.num_pending);
+ 	rbd_assert(!need_exclusive_lock(img_req) ||
+ 		   __rbd_is_lock_owner(rbd_dev));
+ 
++	down_read(&rbd_dev->header_rwsem);
++	mapping_size = rbd_dev->mapping.size;
+ 	if (rbd_img_is_write(img_req)) {
+ 		rbd_assert(!img_req->snapc);
+-		down_read(&rbd_dev->header_rwsem);
+ 		img_req->snapc = ceph_get_snap_context(rbd_dev->header.snapc);
+-		up_read(&rbd_dev->header_rwsem);
++	}
++	up_read(&rbd_dev->header_rwsem);
++
++	if (!test_bit(IMG_REQ_CHILD, &img_req->flags)) {
++		struct request *rq = blk_mq_rq_from_pdu(img_req);
++		u64 off = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
++		u64 len = blk_rq_bytes(rq);
++
++		if (unlikely(off + len > mapping_size)) {
++			rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)",
++				 off, len, mapping_size);
++			img_req->pending.result = -EIO;
++			return;
++		}
+ 	}
+ 
+ 	for_each_obj_request(img_req, obj_req) {
+@@ -4725,7 +4740,6 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 	struct request *rq = blk_mq_rq_from_pdu(img_request);
+ 	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
+ 	u64 length = blk_rq_bytes(rq);
+-	u64 mapping_size;
+ 	int result;
+ 
+ 	/* Ignore/skip any zero-length requests */
+@@ -4738,17 +4752,9 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 	blk_mq_start_request(rq);
+ 
+ 	down_read(&rbd_dev->header_rwsem);
+-	mapping_size = rbd_dev->mapping.size;
+ 	rbd_img_capture_header(img_request);
+ 	up_read(&rbd_dev->header_rwsem);
+ 
+-	if (offset + length > mapping_size) {
+-		rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)", offset,
+-			 length, mapping_size);
+-		result = -EIO;
+-		goto err_img_request;
+-	}
+-
+ 	dout("%s rbd_dev %p img_req %p %s %llu~%llu\n", __func__, rbd_dev,
+ 	     img_request, obj_op_name(op_type), offset, length);
+ 
+-- 
+2.49.0
 
-    vs.
-
-    And mds auth cap: mds 'allow rw fsname=3D*'  IS valid.
-
-stance [1] changed?  I want to double check because I see your
-Reviewed-by, but this patch _does_ apply the special meaning to "*" for
-fsopt->mds_namespace by virtue of having namespace_equals() just
-forward to ceph_namespace_match() which is used for the MDS auth cap.
-As a result, all checks (including the one in ceph_mdsc_handle_fsmap()
-which is responsible for filtering filesystems on mount) do the MDS
-auth cap thing and "-o mds_namespace=3D*" would mount the filesystem that
-happens to be first on the list instead of failing with ENOENT.
-
-[1] https://lore.kernel.org/ceph-devel/CA+2bHPYqT8iMJrSDiO=3Dm-dAvmWd3j+co6=
-Sq0gZ+421p8KYMEnQ@mail.gmail.com/
-
-Thanks,
-
-                Ilya
