@@ -1,70 +1,70 @@
-Received: from mail-qt1-f194.google.com (mail-qt1-f194.google.com [209.85.160.194])
+Received: from mail-qt1-f195.google.com (mail-qt1-f195.google.com [209.85.160.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25FF42F7AAC
-	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 10:33:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.194
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90CB8313535
+	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 10:33:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769596432; cv=none; b=m0hPFhxQiWPj5k4y9170o0zrL+6/PAd3ZSxXHVrMONKPfRX58XUvpPyqr9JyC6wLKYYpOztUxcX46n+NZriZnwr3eCMHFFRw1xHl+OdfTZ1fQyF4sz4okTGbTZcpbXNpaFvOiKxjP4TEmEhfdDDRZGfwbzXe4UfdCtvS3FbyEFM=
+	t=1769596434; cv=none; b=tpA8L3vajqxfb/4R/xRYmVFYWhmxa/be+dAl6IoD7xhAzZnPoKWJ2W82ArG99Oochc+zJNM34DyxZrBxLSzQr7XlZRmCwZy9PaR6Z1NUVJz4XQw87AeRXZ9uOFYlsCcoBPHs02IMlfJw5qQ+IVshOqTjsz04WHEESz9Ip7bTAmI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769596432; c=relaxed/simple;
-	bh=g6IWWygJgnvMzh5FDiPUaZKXzHAVdMWkdK/OOt1fIC0=;
+	s=arc-20240116; t=1769596434; c=relaxed/simple;
+	bh=2HfmF3Ovy9N8fXzDm/pmcbRtYcMe3e6JkwGhFEGlibw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KXvlLn6/mcPCRgxcqeO81nrKpGNvc+HD4TpVh68Fa5WI9WOjs3zTHrEMuosDdywgj/gKASnvSkXE9OXhSbNN1GPQ9aUUXoKY78okj/fmHNLhmKCiLIIzGi+JUvDE6mgoLbnwsinBmXcZDpWd/AbAEEQgrqRXaQo/P/ETcqnhVvk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nBDCzd7i; arc=none smtp.client-ip=209.85.160.194
+	 MIME-Version; b=pa6+sBfXAvwkSwRd5gB1rCqi/85JRzPujfKCwp/nIpXye0wyuleaag4j/qqNof8oq6iHQOrcAF1x9twdmXkGSqVj9DVCPmhC9Z8wE+ZTWK1/mEMGVd+vhYqRKzPwCvQBRSiM4CiUCW6bG2VIUBtGf+iHj1kWTb9ZJxKt5/cljss=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FrxOnDh1; arc=none smtp.client-ip=209.85.160.195
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nBDCzd7i"
-Received: by mail-qt1-f194.google.com with SMTP id d75a77b69052e-5032e951106so16193181cf.0
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 02:33:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FrxOnDh1"
+Received: by mail-qt1-f195.google.com with SMTP id d75a77b69052e-5014f383df6so56548181cf.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 02:33:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1769596430; x=1770201230; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1769596431; x=1770201231; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=cImMB0WndtBqi33Dg1bL0lrLmPlMdNoMp9/sKjnxXHE=;
-        b=nBDCzd7ipgLK7Sye59tzWIpOeLVlSpcG+UxLBZ6LLM4jMWfZxkBwW6Ia5TbkfQcjUw
-         dN+QiXB/Hw/QV8iHF2nJm3/GmaewevvmwzKuYlE2XyQ7kawrB7v2kHVUOsVYkRze4+en
-         PckD0amNSFFrSUL3a/+liXP09aoYYyuMVhedqKujju74d0hI9Usjz2hC/n4E4aFmN19p
-         I/vubiHe22ISGcIQ628En1aN6MfAcrfYi4tATrLy0gObQDDfiP7Y3ghEWovUr1wu83rx
-         ctpZRU3Petme8u54VWwo+7G7h2ptUCt+h7qJHYJgko1wsVOvocVaCcXenHlUFnUQ2ZGq
-         oMag==
+        bh=L1HgsTXbdyKjSqzNOssrGMSH6n/agYWunVSDNYW2aGU=;
+        b=FrxOnDh1SVMQNrMXLGtOkQOZhzXvmctIxLxqcePMZ99YxSAGj/O8IXG/il/3rpRpNQ
+         t6La0PECsVJKDqHn3h2UlrQ87vaduq0T8lpyfZTnXPMIcmR9SKa7s3paFI+mzScViAcO
+         RiNV5YUn4piri5vOpvIho/W9yalktdnK0uG8pihH5udnrPV7PAp7+tjkKxGKHUEcDwrM
+         HHuK1vdWwlfjp5w4hXlXwK0v9RwiFlk7LmG1l2POfkYbFbtqaEtEQ1AJDC14DhraLwKq
+         ynUqASdnl6M2XE2BhcIR/IT79wuiYFXXgdbL7mqbARcOGFgcSl8Odl8Hy0U1nb4jBE++
+         9LAw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769596430; x=1770201230;
+        d=1e100.net; s=20230601; t=1769596431; x=1770201231;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=cImMB0WndtBqi33Dg1bL0lrLmPlMdNoMp9/sKjnxXHE=;
-        b=QsDGgE/H64ESeVDrRULYIJSvzqL7DPesT37pFUZLoSwNRp72h+rccm3HHFzykdODVB
-         TuLLuGWdUDXSzvijHOsXFOfdP3ywYH+WAnK73zxKouYtVg5HH6p+sBthNtlWaRD7b5Bf
-         MygMIG+5Mw6Vmn2Tl/bYHm9ygOhvX8aUkxkchb9F39pLw5oFMCfRdYafMvTfdE0Z1Xii
-         XiDFxYTjGoIFrylzB1tkVgDZiUFUrrdxnRenmqsvL3h/ZN4MQvSkTurGvCcIRhOuw1Ng
-         nA7GmfdIdXeTzwtH7VS94jq8WGvpYVUNXpWQBfDCztjq+Pbv6G7nFE0p0XY45ni5pSSi
-         Uy5w==
-X-Gm-Message-State: AOJu0YyL2aNNpiA3HgKe45EGeCJWKNrkJ3LFjGyh8XV877Yx2IUjD6dh
-	zK/hCFEUuHnpSje16hrLYQ7Bvosw1ctaeNwdrcafgpTiinJ1vLJu7GLv79mVheuH
-X-Gm-Gg: AZuq6aI6VXNpyosDNNJI/XpbkH0LaN+mBg/htzggyCWw0zjjngnoklVOKcV6Fh50+CR
-	2LVUqNo/fPBbcitg/NG+ZwZ52XM9RuqKDnOEuXwMdL4Jvni55/crhphZiLov3qDuwxmaTd45enf
-	bcE9ekDPRbkMe+7trYPLIG8Q8dfyY93t8ZyTtB7KA4DYnABbl5PWPhNWaIM+LzVs/95rie8Lug0
-	HmOHapYnEEz1l8z1VjG+PdlTqPLS9bZ6KEJ+lWx+oCvz9ANOoaTX7uLwZyQ07Lg+ZdNuo9GJTtk
-	sJ/HUkSXe+ChDr/GuZ9rB+cXr2ofhPghpXDtNNpp6eMsk19UFTtsWd88q+bPWr13hOjOmJ8Tzrw
-	xsjObQso1B5jD9ZuX/NoZ7ht1lk5/3Tw7qB51hmXi4ABcrHp1Csjg7xAVguUkM+VzZ4bUv/uXfz
-	8IOtFFSnivN1hOlrGOssVQ0M8wFUzslACixgCw4J1IDvA6bzjP5xT4aQ==
-X-Received: by 2002:a05:622a:19a3:b0:501:5260:51d6 with SMTP id d75a77b69052e-5032f77059emr54285961cf.10.1769596429986;
-        Wed, 28 Jan 2026 02:33:49 -0800 (PST)
+        bh=L1HgsTXbdyKjSqzNOssrGMSH6n/agYWunVSDNYW2aGU=;
+        b=hhTur7lZ5TzuoPwAoBIwvsfPLVCICYBMntIVToL7SCJ9RftE4uNqySwDJ10Ta8xiCK
+         QsU9WxRbrvxR2AR8ONpeCTvsEWREBj6e3fGQiP2s9B2O8+kMMwn6gaHK6bOvC8HTZydK
+         +wrBdPOxCtgUY+ySIfebf8/JdpTVAwQSqi7hRCSBR0EK//XLzBvHsDRGLZE8HQiwbe/q
+         gFrtmr6wN7iymgrDNPeRxgkyFX7Y5haExfdQCiYNLMvaVWnnjUDrTMyQ1D1amVPQdUGL
+         UnoJRF9tsVDjGx8w9QyLvyaad60O8k3w/nYOFbPjDXhDLyOYOsFcjU7vUYGBGCSSnGPC
+         4BMQ==
+X-Gm-Message-State: AOJu0Yxxf60+IWjm27MihDb7NUbkctC1WUEk9QoESz9N3NwIS433x8Y2
+	4TsBYo27944KIuymvwZoy9wRwdsnFfgcWGvwULkb5jxJ+vo++6ftdtxniRNwm1wu
+X-Gm-Gg: AZuq6aKFDwwImqGwwtZ06wcd/HZ1rTf/lJe+Z5E+BcaBdskR8pTgypGISeZq7GJpxi1
+	bLd+xaW5/v1BanQqVJwfPxqor7Qb/heOTB9EnUNJvWs+Wzf+/RwPOqiu/s0FaE+IJkPJyQB5923
+	oFfc7nlN/Wupr5aR6O2G21Ft9idyljASSyypaAARlLj5usXLiUyOQlixJF1I+BKcohb3zBbYJNo
+	uaRREYqLWAysGJ1Q5gi7n1zp9PRvYGcWlAzSFkh8E+yGAlllbbeWlw6JEheugmIXBW1C7d9m/QP
+	ct1EN7+FXtGaFgUWpkgqqQxJSdabLTvMN7mKxu6urxM/PIVR/XA229cArbGc2YDC+E3AlC6kdF1
+	KhZYzK+Pn5RTJp2OTLEZMGBBp99sTbHiJpg/kC3pQcnTjVuP4PjvEMrahaSE5pioVwdOIz3rUuT
+	1AwC+X+2IRgrLgamGGpDzWmnBaTPZXN8GWNxIjO/zdMQQKMZRXrGIqeKiuC9P/ONzC
+X-Received: by 2002:ac8:5844:0:b0:4ee:26bd:13f2 with SMTP id d75a77b69052e-5032fc1d6c3mr58659091cf.72.1769596431448;
+        Wed, 28 Jan 2026 02:33:51 -0800 (PST)
 Received: from localhost.localdomain (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50337bbb66dsm12383451cf.29.2026.01.28.02.33.48
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50337bbb66dsm12383451cf.29.2026.01.28.02.33.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Jan 2026 02:33:49 -0800 (PST)
+        Wed, 28 Jan 2026 02:33:51 -0800 (PST)
 From: Ilya Dryomov <idryomov@gmail.com>
 To: ceph-devel@vger.kernel.org
 Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
 	Alex Markuze <amarkuze@redhat.com>,
 	Patrick Donnelly <pdonnell@redhat.com>
-Subject: [PATCH 2/5] libceph: generalize ceph_x_encrypt_offset() and ceph_x_encrypt_buflen()
-Date: Wed, 28 Jan 2026 11:33:24 +0100
-Message-ID: <20260128103329.964466-3-idryomov@gmail.com>
+Subject: [PATCH 3/5] libceph: introduce ceph_crypto_key_prepare()
+Date: Wed, 28 Jan 2026 11:33:25 +0100
+Message-ID: <20260128103329.964466-4-idryomov@gmail.com>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20260128103329.964466-1-idryomov@gmail.com>
 References: <20260128103329.964466-1-idryomov@gmail.com>
@@ -76,215 +76,225 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-- introduce the notion of a data offset for ceph_x_encrypt_offset()
-  to allow for e.g. confounder to be prepended before the encryption
-  header in the future.  For CEPH_CRYPTO_AES, the data offset is 0
-  (i.e. nothing is prepended).
-
-- adjust ceph_x_encrypt_buflen() accordingly and make it account for
-  PKCS#7 padding that is used by CEPH_CRYPTO_AES precisely instead of
-  just always adding 16.
+In preparation for bringing in a new encryption scheme/key type,
+decouple decoding or cloning the key from allocating required crypto
+API objects and setting them up.  The rationale is that a) in some
+cases a shallow clone is sufficient and b) ceph_crypto_key_prepare()
+may grow additional parameters that would be inconvenient to provide
+at the point the key is originally decoded.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- net/ceph/auth_x.c | 44 +++++++++++++++++++++++++++++---------------
- net/ceph/crypto.c | 25 +++++++++++++++++++++++++
- net/ceph/crypto.h |  2 ++
- 3 files changed, 56 insertions(+), 15 deletions(-)
+ net/ceph/auth_x.c | 26 +++++++++++++----
+ net/ceph/crypto.c | 71 +++++++++++++++++++++++------------------------
+ net/ceph/crypto.h |  1 +
+ 3 files changed, 56 insertions(+), 42 deletions(-)
 
 diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index a21c157daf7d..5d7245884f95 100644
+index 5d7245884f95..abdd35be263a 100644
 --- a/net/ceph/auth_x.c
 +++ b/net/ceph/auth_x.c
-@@ -44,23 +44,35 @@ static int ceph_x_should_authenticate(struct ceph_auth_client *ac)
- 	return !!need;
- }
- 
--static int ceph_x_encrypt_offset(void)
-+static int __ceph_x_encrypt_offset(const struct ceph_crypto_key *key)
- {
--	return sizeof(u32) + sizeof(struct ceph_x_encrypt_header);
-+	return ceph_crypt_data_offset(key) +
-+	       sizeof(struct ceph_x_encrypt_header);
- }
- 
--static int ceph_x_encrypt_buflen(int ilen)
-+static int ceph_x_encrypt_offset(const struct ceph_crypto_key *key)
- {
--	return ceph_x_encrypt_offset() + ilen + 16;
-+	return sizeof(u32) + __ceph_x_encrypt_offset(key);
-+}
-+
-+/*
-+ * AES: ciphertext_len | hdr | data... | padding
-+ */
-+static int ceph_x_encrypt_buflen(const struct ceph_crypto_key *key,
-+				 int data_len)
-+{
-+	int encrypt_len = sizeof(struct ceph_x_encrypt_header) + data_len;
-+	return sizeof(u32) + ceph_crypt_buflen(key, encrypt_len);
- }
- 
- static int ceph_x_encrypt(struct ceph_crypto_key *secret, void *buf,
- 			  int buf_len, int plaintext_len)
- {
--	struct ceph_x_encrypt_header *hdr = buf + sizeof(u32);
-+	struct ceph_x_encrypt_header *hdr;
- 	int ciphertext_len;
- 	int ret;
- 
-+	hdr = buf + sizeof(u32) + ceph_crypt_data_offset(secret);
- 	hdr->struct_v = 1;
- 	hdr->magic = cpu_to_le64(CEPHX_ENC_MAGIC);
- 
-@@ -77,7 +89,7 @@ static int ceph_x_encrypt(struct ceph_crypto_key *secret, void *buf,
- static int __ceph_x_decrypt(struct ceph_crypto_key *secret, void *p,
- 			    int ciphertext_len)
- {
--	struct ceph_x_encrypt_header *hdr = p;
-+	struct ceph_x_encrypt_header *hdr;
- 	int plaintext_len;
- 	int ret;
- 
-@@ -86,6 +98,7 @@ static int __ceph_x_decrypt(struct ceph_crypto_key *secret, void *p,
+@@ -221,6 +221,10 @@ static int process_one_ticket(struct ceph_auth_client *ac,
  	if (ret)
- 		return ret;
- 
-+	hdr = p + ceph_crypt_data_offset(secret);
- 	if (le64_to_cpu(hdr->magic) != CEPHX_ENC_MAGIC) {
- 		pr_err("%s bad magic\n", __func__);
- 		return -EINVAL;
-@@ -193,7 +206,7 @@ static int process_one_ticket(struct ceph_auth_client *ac,
- 	}
- 
- 	/* blob for me */
--	dp = *p + ceph_x_encrypt_offset();
-+	dp = *p + ceph_x_encrypt_offset(secret);
- 	ret = ceph_x_decrypt(secret, p, end);
- 	if (ret < 0)
  		goto out;
-@@ -220,7 +233,7 @@ static int process_one_ticket(struct ceph_auth_client *ac,
- 	ceph_decode_8_safe(p, end, is_enc, bad);
- 	if (is_enc) {
- 		/* encrypted */
--		tp = *p + ceph_x_encrypt_offset();
-+		tp = *p + ceph_x_encrypt_offset(&th->session_key);
- 		ret = ceph_x_decrypt(&th->session_key, p, end);
- 		if (ret < 0)
- 			goto out;
-@@ -312,7 +325,7 @@ static int encrypt_authorizer(struct ceph_x_authorizer *au,
- 	p = (void *)(msg_a + 1) + le32_to_cpu(msg_a->ticket_blob.blob_len);
- 	end = au->buf->vec.iov_base + au->buf->vec.iov_len;
  
--	msg_b = p + ceph_x_encrypt_offset();
-+	msg_b = p + ceph_x_encrypt_offset(&au->session_key);
- 	msg_b->struct_v = 2;
- 	msg_b->nonce = cpu_to_le64(au->nonce);
- 	if (server_challenge) {
-@@ -368,7 +381,7 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
++	ret = ceph_crypto_key_prepare(&new_session_key);
++	if (ret)
++		goto out;
++
+ 	ceph_decode_need(&dp, dend, sizeof(struct ceph_timespec), bad);
+ 	ceph_decode_timespec64(&validity, dp);
+ 	dp += sizeof(struct ceph_timespec);
+@@ -380,6 +384,10 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
+ 	if (ret)
  		goto out_au;
  
++	ret = ceph_crypto_key_prepare(&au->session_key);
++	if (ret)
++		goto out_au;
++
  	maxlen = sizeof(*msg_a) + ticket_blob_len +
--		ceph_x_encrypt_buflen(sizeof(*msg_b));
-+		ceph_x_encrypt_buflen(&au->session_key, sizeof(*msg_b));
+ 		ceph_x_encrypt_buflen(&au->session_key, sizeof(*msg_b));
  	dout("  need len %d\n", maxlen);
- 	if (au->buf && au->buf->alloc_len < maxlen) {
- 		ceph_buffer_put(au->buf);
-@@ -507,7 +520,7 @@ static int ceph_x_build_request(struct ceph_auth_client *ac,
- 		struct ceph_x_authenticate *auth = (void *)(head + 1);
- 		void *enc_buf = xi->auth_authorizer.enc_buf;
- 		struct ceph_x_challenge_blob *blob = enc_buf +
--							ceph_x_encrypt_offset();
-+					     ceph_x_encrypt_offset(&xi->secret);
- 		u64 *u;
- 
- 		p = auth + 1;
-@@ -634,7 +647,7 @@ static int handle_auth_session_key(struct ceph_auth_client *ac, u64 global_id,
- 	ceph_decode_need(p, end, len, e_inval);
- 	dout("%s connection secret blob len %d\n", __func__, len);
- 	if (len > 0) {
--		dp = *p + ceph_x_encrypt_offset();
-+		dp = *p + ceph_x_encrypt_offset(&th->session_key);
- 		ret = ceph_x_decrypt(&th->session_key, p, *p + len);
- 		if (ret < 0)
- 			return ret;
-@@ -804,7 +817,7 @@ static int decrypt_authorizer_challenge(struct ceph_crypto_key *secret,
- 		return ret;
- 
- 	dout("%s decrypted %d bytes\n", __func__, ret);
--	dp = challenge + sizeof(struct ceph_x_encrypt_header);
-+	dp = challenge + __ceph_x_encrypt_offset(secret);
- 	dend = dp + ret;
- 
- 	ceph_decode_skip_8(&dp, dend, e_inval);  /* struct_v */
-@@ -851,7 +864,7 @@ static int decrypt_authorizer_reply(struct ceph_crypto_key *secret,
- 	u8 struct_v;
+@@ -1106,21 +1114,26 @@ int ceph_x_init(struct ceph_auth_client *ac)
  	int ret;
  
--	dp = *p + ceph_x_encrypt_offset();
-+	dp = *p + ceph_x_encrypt_offset(secret);
- 	ret = ceph_x_decrypt(secret, p, end);
- 	if (ret < 0)
- 		return ret;
-@@ -974,7 +987,8 @@ static int calc_signature(struct ceph_x_authorizer *au, struct ceph_msg *msg,
- 			__le32 front_crc;
- 			__le32 middle_crc;
- 			__le32 data_crc;
--		} __packed *sigblock = enc_buf + ceph_x_encrypt_offset();
-+		} __packed *sigblock = enc_buf +
-+				       ceph_x_encrypt_offset(&au->session_key);
+ 	dout("ceph_x_init %p\n", ac);
+-	ret = -ENOMEM;
+ 	xi = kzalloc(sizeof(*xi), GFP_NOFS);
+ 	if (!xi)
+-		goto out;
++		return -ENOMEM;
  
- 		sigblock->len = cpu_to_le32(4*sizeof(u32));
- 		sigblock->header_crc = msg->hdr.crc;
+ 	ret = -EINVAL;
+ 	if (!ac->key) {
+ 		pr_err("no secret set (for auth_x protocol)\n");
+-		goto out_nomem;
++		goto err_xi;
+ 	}
+ 
+ 	ret = ceph_crypto_key_clone(&xi->secret, ac->key);
+ 	if (ret < 0) {
+ 		pr_err("cannot clone key: %d\n", ret);
+-		goto out_nomem;
++		goto err_xi;
++	}
++
++	ret = ceph_crypto_key_prepare(&xi->secret);
++	if (ret) {
++		pr_err("cannot prepare key: %d\n", ret);
++		goto err_secret;
+ 	}
+ 
+ 	xi->starting = true;
+@@ -1131,8 +1144,9 @@ int ceph_x_init(struct ceph_auth_client *ac)
+ 	ac->ops = &ceph_x_ops;
+ 	return 0;
+ 
+-out_nomem:
++err_secret:
++	ceph_crypto_key_destroy(&xi->secret);
++err_xi:
+ 	kfree(xi);
+-out:
+ 	return ret;
+ }
 diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-index 5601732cf4fa..2b98daffe9af 100644
+index 2b98daffe9af..3453dc303315 100644
 --- a/net/ceph/crypto.c
 +++ b/net/ceph/crypto.c
-@@ -285,6 +285,31 @@ int ceph_crypt(const struct ceph_crypto_key *key, bool encrypt,
+@@ -16,65 +16,61 @@
+ #include <linux/ceph/decode.h>
+ #include "crypto.h"
+ 
+-/*
+- * Set ->key and ->tfm.  The rest of the key should be filled in before
+- * this function is called.
+- */
+-static int set_secret(struct ceph_crypto_key *key, void *buf)
++static int set_aes_tfm(struct ceph_crypto_key *key)
+ {
+ 	unsigned int noio_flag;
+ 	int ret;
+ 
+-	key->key = NULL;
+-	key->tfm = NULL;
+-
+-	switch (key->type) {
+-	case CEPH_CRYPTO_NONE:
+-		return 0; /* nothing to do */
+-	case CEPH_CRYPTO_AES:
+-		break;
+-	default:
+-		return -ENOTSUPP;
+-	}
+-
+-	key->key = kmemdup(buf, key->len, GFP_NOIO);
+-	if (!key->key) {
+-		ret = -ENOMEM;
+-		goto fail;
+-	}
+-
+-	/* crypto_alloc_sync_skcipher() allocates with GFP_KERNEL */
+ 	noio_flag = memalloc_noio_save();
+ 	key->tfm = crypto_alloc_sync_skcipher("cbc(aes)", 0, 0);
+ 	memalloc_noio_restore(noio_flag);
+ 	if (IS_ERR(key->tfm)) {
+ 		ret = PTR_ERR(key->tfm);
+ 		key->tfm = NULL;
+-		goto fail;
++		return ret;
  	}
+ 
+ 	ret = crypto_sync_skcipher_setkey(key->tfm, key->key, key->len);
+ 	if (ret)
+-		goto fail;
++		return ret;
+ 
+ 	return 0;
++}
+ 
+-fail:
+-	ceph_crypto_key_destroy(key);
+-	return ret;
++int ceph_crypto_key_prepare(struct ceph_crypto_key *key)
++{
++	switch (key->type) {
++	case CEPH_CRYPTO_NONE:
++		return 0; /* nothing to do */
++	case CEPH_CRYPTO_AES:
++		return set_aes_tfm(key);
++	default:
++		return -ENOTSUPP;
++	}
  }
  
-+int ceph_crypt_data_offset(const struct ceph_crypto_key *key)
-+{
-+	switch (key->type) {
-+	case CEPH_CRYPTO_NONE:
-+	case CEPH_CRYPTO_AES:
-+		return 0;
-+	default:
-+		BUG();
-+	}
-+}
-+
-+int ceph_crypt_buflen(const struct ceph_crypto_key *key, int data_len)
-+{
-+	switch (key->type) {
-+	case CEPH_CRYPTO_NONE:
-+		return data_len;
-+	case CEPH_CRYPTO_AES:
-+		/* PKCS#7 padding at the end */
-+		return data_len + AES_BLOCK_SIZE -
-+		       (data_len & (AES_BLOCK_SIZE - 1));
-+	default:
-+		BUG();
-+	}
-+}
-+
- static int ceph_key_preparse(struct key_preparsed_payload *prep)
++/*
++ * @dst should be zeroed before this function is called.
++ */
+ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
+ 			  const struct ceph_crypto_key *src)
  {
- 	struct ceph_crypto_key *ckey;
+-	memcpy(dst, src, sizeof(struct ceph_crypto_key));
+-	return set_secret(dst, src->key);
++	dst->type = src->type;
++	dst->created = src->created;
++	dst->len = src->len;
++
++	dst->key = kmemdup(src->key, src->len, GFP_NOIO);
++	if (!dst->key)
++		return -ENOMEM;
++
++	return 0;
+ }
+ 
++/*
++ * @key should be zeroed before this function is called.
++ */
+ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end)
+ {
+-	int ret;
+-
+ 	ceph_decode_need(p, end, 2*sizeof(u16) + sizeof(key->created), bad);
+ 	key->type = ceph_decode_16(p);
+ 	ceph_decode_copy(p, &key->created, sizeof(key->created));
+@@ -85,10 +81,13 @@ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end)
+ 		return -EINVAL;
+ 	}
+ 
+-	ret = set_secret(key, *p);
++	key->key = kmemdup(*p, key->len, GFP_NOIO);
++	if (!key->key)
++		return -ENOMEM;
++
+ 	memzero_explicit(*p, key->len);
+ 	*p += key->len;
+-	return ret;
++	return 0;
+ 
+ bad:
+ 	dout("failed to decode crypto key\n");
+@@ -322,7 +321,7 @@ static int ceph_key_preparse(struct key_preparsed_payload *prep)
+ 		goto err;
+ 
+ 	ret = -ENOMEM;
+-	ckey = kmalloc(sizeof(*ckey), GFP_KERNEL);
++	ckey = kzalloc(sizeof(*ckey), GFP_KERNEL);
+ 	if (!ckey)
+ 		goto err;
+ 
 diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
-index a20bad6d1e96..736ec6d2fbcb 100644
+index 736ec6d2fbcb..2b8f8f68ff7a 100644
 --- a/net/ceph/crypto.h
 +++ b/net/ceph/crypto.h
-@@ -28,6 +28,8 @@ void ceph_crypto_key_destroy(struct ceph_crypto_key *key);
- /* crypto.c */
- int ceph_crypt(const struct ceph_crypto_key *key, bool encrypt,
- 	       void *buf, int buf_len, int in_len, int *pout_len);
-+int ceph_crypt_data_offset(const struct ceph_crypto_key *key);
-+int ceph_crypt_buflen(const struct ceph_crypto_key *key, int data_len);
- int ceph_crypto_init(void);
- void ceph_crypto_shutdown(void);
+@@ -19,6 +19,7 @@ struct ceph_crypto_key {
+ 	struct crypto_sync_skcipher *tfm;
+ };
  
++int ceph_crypto_key_prepare(struct ceph_crypto_key *key);
+ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
+ 			  const struct ceph_crypto_key *src);
+ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end);
 -- 
 2.49.0
 
