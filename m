@@ -1,157 +1,174 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f50.google.com (mail-dl1-f50.google.com [74.125.82.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E44B63242BA
-	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 17:17:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E018E1B4257
+	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 18:12:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.50
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769620625; cv=pass; b=ThLeN7I9zHah1a8VJrgT6zrsIlbxznJ97nMV0z1jZRrMiXXfF+RIurQ/D8+0l0BaDjQE/U2MyKgwpLCdc0gE6YBmbJIv5CEYZteKyimZzwgMc/fX5kfD/QTLPT2bpjqpWEQZXistb4NqcTUPTHPpg0yIS9Ea1hwlhHKJ64IvzRQ=
+	t=1769623976; cv=pass; b=egxtlokovYFGSazm3j3+Zkrffxz+BDDeGZ9TmlWzLA8Wm0Reyt63v7ti8ynIUrfNBg0pBF83e6qnefSYesgES6wAR6TrsD0osUeH3FcLxT6bAhD6LllxtohJ6beU7JqeBeENJJLYFbTYfQMgxyr+gKkqyfC+H29H0LCV07bummU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769620625; c=relaxed/simple;
-	bh=+IiWs5X+1vdZhz1rpr1SW3QzXxMw0rt6UdXQMw0zzVY=;
+	s=arc-20240116; t=1769623976; c=relaxed/simple;
+	bh=8S13+mwGrDe+fCW6wWPUOH5CZEl5aAEYbS5ftjBONh8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=KeZOaW7LSm9JP/mACX1STgkyO1Qb9djg4wJ0Z28KcONCaS434sL7eNk7Des0zGNQrLaltCZkQBW9m6bl5Hb+taSc0si5SUZFmNLQGAWZy3wef/8Vj2Cffh4uJbSimHFUn3pVL9HVf08wFgZAO981PGiqUJS63Q7EI5OM+PObvQY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ViuoqMBM; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=rRgZcidK; arc=pass smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 To:Cc:Content-Type; b=AliyXn0h7T11zgm2G8sph2yhKB9aX0BJHQWHznvv3QaNBvUOPdxXf77b5cPdiR0sELFNhprP9oSD3EpBACnoPuUr+wrWgLSU2Je06Uv++BBvFj7R+wMpt9hxk4o2Dc6AU35ScT5PpgC2zOAzZyOXLYXJ4fTwsm7sm3xSyui+1+s=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bqaRYaxF; arc=pass smtp.client-ip=74.125.82.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ViuoqMBM";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="rRgZcidK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1769620622;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=MbfrzMkcR+UNo9AHIJTdeDBLR3pjra3jZ2ltU2ToXps=;
-	b=ViuoqMBM1Eimlxmhsx0daNyWkF4lBb/oz8TKG8uOdyFXNuwNGY2znHR/IOZFr+kqstf7aG
-	G7ZYnV9hSjq4ED/LvcPPk27Sq57bHdCywTHoYn60Qpk9VnOfT5eNxazJc+xU7+3mI/CMr9
-	0PNx68VWbX7YMJcOQqJSjjItWmfI2us=
-Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
- [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-355-NazcOKVlOnyNkX2V42U9Nw-1; Wed, 28 Jan 2026 12:17:01 -0500
-X-MC-Unique: NazcOKVlOnyNkX2V42U9Nw-1
-X-Mimecast-MFC-AGG-ID: NazcOKVlOnyNkX2V42U9Nw_1769620621
-Received: by mail-qt1-f200.google.com with SMTP id d75a77b69052e-50146d98660so280101cf.2
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 09:17:01 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769620621; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bqaRYaxF"
+Received: by mail-dl1-f50.google.com with SMTP id a92af1059eb24-12336c0a8b6so89237c88.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 10:12:54 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769623974; cv=none;
         d=google.com; s=arc-20240605;
-        b=Dv46Ty7yQnF8m9RQAeXRkHOItRoWzftL/poUuf+RDm9Dc8WDtF6sglkYs+IfYjxIVb
-         UE/Aa+54RyDh6pXZ3LQfk+uqptVG37qTie/65l5fDBePLPr/2oCN1rMrIOz59M4u+sGs
-         yEkroUlupG3CglQqsZOVZjcJ6N6iBwEKC24irA9BtaBLLPbsRx6PhqjxeJ1lFiKCcdqI
-         qiDRvx68h05ga3QMyPkGOA6RT2eIB87q5+5BXw2iASSD6iGlceymrvdbLO5owgmsTeYz
-         zAfz0CYw61XnB2gLWBVASUWLSBFyWewZLOv4qgJUYbtA3xP3/cnO77y027tSE3ZH1MAu
-         g4HA==
+        b=Eaazf35gXkMjjHE1ttWY+5Rf6T8kKU4p7R+ovZLjl+Kn4Y5mESfNBP5yCdT8LpEw/c
+         8ifAD3TAynLSvHFlUjv0lL7QLuSxmgE9f1RmArHCCe7ix3A8AmFuG7Y/DQA+wRBcwkWb
+         mGa0XtThaNjUrLEUIl05E6hDf1Q4h4EZMIWFnfaBvuwktSJvLBOXUhUXbJSdgpxycx/T
+         GiAbelFmxry6lXY/cVl+4FyC8uJCKirxqSNW1NUeW3naBhP8eMdBgrrkI/Rd+0LgtC+8
+         vkbZROLs1Ap+ADmrL9e8VP0PZNAJ6gfrH2v+pelVmZAP8wSjNAOaus9wkFMySX6j6V/D
+         z9kA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=MbfrzMkcR+UNo9AHIJTdeDBLR3pjra3jZ2ltU2ToXps=;
-        fh=KMBTIieebarBF5rgGRquLKsSLK6Agt8CHcsAJrP7aFo=;
-        b=IIdb+RdicH7iwVPM4hnGVCWp4EGitK09obc3VZmbk+CBRODXlxMvgtPPDJbDjCTMyY
-         yRT6Z1umfoEdp41Qd1B8ACej9jZuCLcNaVaVreF1o4mEkWz5hs4WYrQODMPiR6UMTnyt
-         pJJkBhAuABwxybZcJfiY75pjbZ45SVTmdLJHN5nALpfcVy1eBZM49rxBLaaWwMqNkfxB
-         Y28/+tn1bZMCx0Tc6KuTVt7A6IJyXKcHOinYKF9tpb0Yahas0qFgTAz4L/3ed4ySCjLc
-         6Oi8jjc5ayUeJJkRouB5R6tw/xeCUX6tXgzsR4oYiYcmkTBOyM6MuEWA/X9LCCd1ImSa
-         NdBQ==;
+        bh=9L31Qce2Ptj5HlLtAZVlYxI8OUdc6kse7tfrJsT+/pw=;
+        fh=0DA4ZGUZIs5Aof9qvL73iu21fhe2WbWo4OB0ReJjVXE=;
+        b=Ptv8JOq/XER3LYgCKEvSvSo7i87sit9dlQM8suydUTtlua9eqXO9nvJmMM769ARi/A
+         0yVPA9fUxi62M1IgqTXqvPm6ppnQ7oS0PnIdmoA9e2fHwH74htGDRV7pFB7Cd+wQHXfR
+         wJA66ifjdr0g2izat0+etNJ3vCfLn3vKFnxBH7UWylyaXMZoT1LrhE79INCUIgfmDQGH
+         Iol523PbjGCX2aNTHkdD0S/v85eKOa35wz93vFpA9+WlknZGv13iDU/b8ZjDwo/3M5V/
+         4Sa1bpdLUkEzdrL1DUlzgGbJ28CR0DNH7g1Jr+GAWzZ4szd8o2YkCUSz632xfEHTC3qV
+         6bsw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1769620621; x=1770225421; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1769623974; x=1770228774; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=MbfrzMkcR+UNo9AHIJTdeDBLR3pjra3jZ2ltU2ToXps=;
-        b=rRgZcidKtfaPRAoWdKu53gCV2Lxh3XRijcVdMVgRIktmErJZ8QLvaKRSityiKP00rH
-         9YuS7VoDCwKjc908v1LYyqWhYrwOTeCFBE7X3axlTe8ItzJvbi/B2lihfUy5YduSfmQH
-         U43oXLUwJuqS031+7NA+MK9ySPIZPGSRRey8O2MXWdE0a0uckULZ+WzmN0iPkxEa120j
-         LxDFc70z23dxZftFB0jKX321Ji4cDLJMtIMlvkL+Q4ATu2p+KhGl/I8u7JSxxIC7PGEL
-         izqLfCZZKc0zj4m2kk3nUtCBtTmTxaAK8iwbET3biD6QB5dnRyYCDy7E12EfismtBQwN
-         scLQ==
+        bh=9L31Qce2Ptj5HlLtAZVlYxI8OUdc6kse7tfrJsT+/pw=;
+        b=bqaRYaxFPoEMdHoG+fbsx+vIpxGWxWCAj55MBUj8u3sscKLHWM1t96d+ZUV9Tfpe+9
+         0nf3x3/4p+0zORl0BlG6EoLHK4gxhPrvbEdv+k2qCcwySpzjMZkRAnDTIXsfZITcWqYm
+         kPdo9TA0hZlxwAPQO5lrKJIdoDv5cCz8+4BmDeeeCgiIE9BwBIEv1uhRo5mz9MYnR9b8
+         k8mSPw0WTrjFvU81BeBx3a88B8+G6AbeO9VnExKiwW8wY58VYsIyMNdfE7jgWsnzp02y
+         HW0igZQuXgoAe7onDIwK1Oc99YxujyKC5FWptm2aYSnIiBzLTya2R4SDL6+RzldQUOic
+         BvXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769620621; x=1770225421;
+        d=1e100.net; s=20230601; t=1769623974; x=1770228774;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=MbfrzMkcR+UNo9AHIJTdeDBLR3pjra3jZ2ltU2ToXps=;
-        b=X+lNat4OABK4FBxLyvUfNl5L9xvE6bsbk2UPAB1l0pKbl9YF4WgC7/GBUO7RqAF/pm
-         DSZhZzl2iffosfMlI0k84FjKmwSbk7a5U7mkqnx8Zk3DiHgGetJG8yEPugPWKmqH/jje
-         24L/bIl9hztzhmfpEmsg+9/HiHKMlc0uGWh9T4B+urSrKhGn++wvCLCNERqGwg8/JBLo
-         ftPegHr31Ft2UWuvZg80cnobdAY1eS12Kk50J3vMSPS1bj486KWqLVX8D/hXrZy7MytI
-         k8qJ0S36BX/6ci74wZuRxfor2c/8OHfdhIpI3FdHVfuEsuyFUmXRO+PHUbqAQDVkj5B9
-         b6Hw==
-X-Forwarded-Encrypted: i=1; AJvYcCWo3m7ubki/hu+IRbMiFcF1RejdXMlxZFzQBtl0vjuY8qP8p1Armh4+RVxOkVyY76O4r9nwucPjSAsH@vger.kernel.org
-X-Gm-Message-State: AOJu0YwNF+gg8tw7PMKrbgMvQLAiVi/96uMvGehcOWYExC22Fj/cQup4
-	T/HF+3ZM8lQo0rLAn5ZVlXEgkrGOxbpiDqXQGJ3AVYKA8Ejmuck6LhxiADx/iobHSD8PJEcMz7/
-	SDEgCkEFT0noEUDnshAAnHgcldOgFD/NkA5wTVHaLIXVzJAFEwI+6KCEs20gklMc1Ycxua173jT
-	Ez4iLhnGz7wxV8RpCQsxu3ebGHIeso3oQKmqnBRw==
-X-Gm-Gg: AZuq6aI8eeRuCIvsrCm5eUxw46EjqBnRL3e9hQRpZlXCks7QD9eft9boqA5H31AOmnP
-	DlT+pDE5BVAFhJAwfVLmAkSnaHMgauOPhseIjCVbUa5+qkgfrwlbWVlc2H+0hQ5HOpZrQEKsWdS
-	HJkOPv153l1ZaK4Di2revx7eYYcM+xvzWbhGywFhq6CSs8ezNOik63DKzjCV9vzHEsOLV80mVx+
-	1U2gSsVuxm0mWeDlSNB2cLSew==
-X-Received: by 2002:a05:622a:1116:b0:501:4e87:70a3 with SMTP id d75a77b69052e-5032fa1a7f1mr75723261cf.68.1769620620789;
-        Wed, 28 Jan 2026 09:17:00 -0800 (PST)
-X-Received: by 2002:a05:622a:1116:b0:501:4e87:70a3 with SMTP id
- d75a77b69052e-5032fa1a7f1mr75722801cf.68.1769620620320; Wed, 28 Jan 2026
- 09:17:00 -0800 (PST)
+        bh=9L31Qce2Ptj5HlLtAZVlYxI8OUdc6kse7tfrJsT+/pw=;
+        b=v+z/nNYtvQ5yP5F83K++aLkntF8cjpo0fiHBpXU5VSvlzNB/hX2DFV2CnMJvQSOKdq
+         zmAPbIK1mhKSyD9ofaYv2aJDkGC4q4e9+M7fSTX/KOdXUdU29jsRiTYpDSKcANr+yjZ1
+         vxa/0Ev90UvL+1rAYIyYqKuvrrSsDGrzXFWevg9ypDA9WeglBSzGOholIyC4h+lxAWNA
+         ahonSdfY2qkRyWnqe/RPSg+lb7qM3BvULldaxDOLJsxu8f8Fit/e+ltFyBOWHVxMSgDP
+         KXsLQrEF4mQaDAiMdO5Xyg6LHgjjjLK1FjOqWNWOjVMruWG5t4YWpFpkrR70rgP1j0XM
+         i8ng==
+X-Forwarded-Encrypted: i=1; AJvYcCU6Y2/UVt8f7Q4Q3YFFV4SgFLunGifAXHf7b6ahwsoR6LeKeUItUcOsifv9N3YD79cTmfFdMNqrT8Ve@vger.kernel.org
+X-Gm-Message-State: AOJu0YzWaiEbyQp11SiVhSvYBv6zXwykvqwlB+xFoIqmLJKzRNGnar6w
+	n3pNDe4pMnbYd9xlaTc+bWdliqag2CJ7++6fGUE1rEedaRxKruQ6x8j8i0O0E2eWjD3gWY9ezFT
+	wqbILnwiB7kEzBuql2N3GCp/zLfj3Fbg=
+X-Gm-Gg: AZuq6aI+32PoGpXWLnX0bh8BzZ/tbhYulmqx/3IqLo2+wA1jjaWJ1TxVK7l1PcuGisT
+	HVh2SfhbSKqdkYiHoD4a5AI31sATDDO/8zQkcu0cJUzhtZCBhcpA/rlVLDoOCI32uFDJkuK4I+y
+	LxRcDsteaTZ8Ehfq+XzpCliiXv5qppjIj4UGTkTj0lK/ZUE2tHjBFK4pIZ+ViKzjo3XlinNnYpC
+	vROB9IUwr58kvijlUdwc1LiFeRqO/XeAfnLBT7EgfH46iESokNMBUAcbWJBK2MJJ73lYZM=
+X-Received: by 2002:a05:7022:910:b0:11b:88a7:e1b0 with SMTP id
+ a92af1059eb24-124a00b9151mr3453147c88.26.1769623973962; Wed, 28 Jan 2026
+ 10:12:53 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260114195524.1025067-2-slava@dubeyko.com> <CA+2bHPb66HKDZ2DX7TvzvfjW_Ym1TBeVNcPn9w_tnwytje85Nw@mail.gmail.com>
- <CAOi1vP-G_0vPyMOyx6HvJX7VwN8_9FCe9V4Vg9zvg8gbbJNNHw@mail.gmail.com>
-In-Reply-To: <CAOi1vP-G_0vPyMOyx6HvJX7VwN8_9FCe9V4Vg9zvg8gbbJNNHw@mail.gmail.com>
-From: Patrick Donnelly <pdonnell@redhat.com>
-Date: Wed, 28 Jan 2026 12:16:33 -0500
-X-Gm-Features: AZwV_QgYxRhrIHrM75G39qUToqwLkdG2j3zCs0ZghqydpwcTesEEeCkzdejbaLg
-Message-ID: <CA+2bHPapiqj4xEobqcxmW6b1YChMLBBKaVzxdbEMw+DDZEG1NQ@mail.gmail.com>
+References: <20260114195524.1025067-2-slava@dubeyko.com> <CAOi1vP8CwX5T_R4gdZ0egg2oxCwFGAvoi6Us2k4=QFKmtqHmjQ@mail.gmail.com>
+ <CA+2bHPa+NK1eBo56ryJ-_4=FK-xRRcbyGsEUOE09wb6U8muVRQ@mail.gmail.com>
+In-Reply-To: <CA+2bHPa+NK1eBo56ryJ-_4=FK-xRRcbyGsEUOE09wb6U8muVRQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Wed, 28 Jan 2026 19:12:42 +0100
+X-Gm-Features: AZwV_Qg--eDgI3HAIGUqozTx6HLUMnHXncn-L46tWgP6Y4_IUBt5ZMyJU5pEpEE
+Message-ID: <CAOi1vP8dtzUesBa0h8wLhh+gz66dgD2LRDhuhQP_28+X3Y7a9Q@mail.gmail.com>
 Subject: Re: [PATCH v5] ceph: fix kernel crash in ceph_open()
-To: Ilya Dryomov <idryomov@gmail.com>
+To: Patrick Donnelly <pdonnell@redhat.com>
 Cc: Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
 	linux-fsdevel@vger.kernel.org, amarkuze@redhat.com, Slava.Dubeyko@ibm.com, 
 	vdubeyko@redhat.com, khiremat@redhat.com, Pavan.Rallabhandi@ibm.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jan 26, 2026 at 8:02=E2=80=AFAM Ilya Dryomov <idryomov@gmail.com> w=
-rote:
-> Hi Patrick,
+On Wed, Jan 28, 2026 at 6:15=E2=80=AFPM Patrick Donnelly <pdonnell@redhat.c=
+om> wrote:
 >
-> Has your
+> On Mon, Jan 26, 2026 at 7:36=E2=80=AFAM Ilya Dryomov <idryomov@gmail.com>=
+ wrote:
+> > Hi Slava,
+> >
+> > How was this tested?  In particular, do you have a test case covering
+> > an MDS auth cap that specifies a particular fs_name (i.e. one where
+> > auth->match.fs_name wouldn't be NULL or CEPH_NAMESPACE_WILDCARD)?
+> >
+> > I'm asking because it looks like ceph_namespace_match() would always
+> > declare a mismatch in that scenario due to the fact that NAME_MAX is
+> > passed for target_len and
+> >
+> >     if (strlen(pattern) !=3D target_len)
+> >             return false;
+> >
+> > condition inside of ceph_namespace_match().
 >
->     > > I think we agreed that the "*" wildcard should have _no_ special
->     > > meaning as a glob for fsopt->mds_namespace?
->     >
->     > Frankly speaking, I don't quite follow to your point. What do
-> you mean here? :)
->
->     --mds_namespace=3D* is invalid.
->
->     vs.
->
->     And mds auth cap: mds 'allow rw fsname=3D*'  IS valid.
->
-> stance [1] changed?  I want to double check because I see your
-> Reviewed-by, but this patch _does_ apply the special meaning to "*" for
-> fsopt->mds_namespace by virtue of having namespace_equals() just
-> forward to ceph_namespace_match() which is used for the MDS auth cap.
-> As a result, all checks (including the one in ceph_mdsc_handle_fsmap()
-> which is responsible for filtering filesystems on mount) do the MDS
-> auth cap thing and "-o mds_namespace=3D*" would mount the filesystem that
-> happens to be first on the list instead of failing with ENOENT.
->
-> [1] https://lore.kernel.org/ceph-devel/CA+2bHPYqT8iMJrSDiO=3Dm-dAvmWd3j+c=
-o6Sq0gZ+421p8KYMEnQ@mail.gmail.com/
+> Yes, passing NAME_MAX looks like a bug. Is this parameter even useful?
+> Why not just rely on string comparisons without any length
+> restrictions?
 
-Sigh, yes this is still a problem. Slava, `--mds_namespace=3D*` should
-not be treated as a glob.
+I think this parameter came about because ceph_namespace_match() is
+being forwarded to from namespace_equals() which needs it -- but this
+forwarding is actually harmful and results in undesired behavior as
+discussed in the adjacent sub-thread.  Once the forwarding goes away,
+the parameter would become obviously redundant.
 
---=20
-Patrick Donnelly, Ph.D.
-He / Him / His
-Red Hat Partner Engineer
-IBM, Inc.
-GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
+>
+> >This in turn means that
+> > ceph_mds_check_access() would disregard the respective cap and might
+> > allow access where it's supposed to be denied.
+>
+> From what I can tell, it will always consider the cap invalid for the
+> fsname. So it's the reverse?
 
+Yes, the cap wouldn't be used but it appears that if no other cap
+matches/gets used ceph_mds_check_access() would allow access:
+
+    struct ceph_mds_cap_auth *rw_perms_s =3D NULL;
+    bool root_squash_perms =3D true;
+    ...
+    for (i =3D 0; i < mdsc->s_cap_auths_num; i++) {
+            struct ceph_mds_cap_auth *s =3D &mdsc->s_cap_auths[i];
+
+            err =3D ceph_mds_auth_match(mdsc, s, cred, tpath);
+            if (err < 0) {
+                    put_cred(cred);
+                    return err;
+            } else if (err > 0) {
+                    /* always follow the last auth caps' permission */
+                    root_squash_perms =3D true;
+                    rw_perms_s =3D NULL;
+                    if ((mask & MAY_WRITE) && s->writeable &&
+                        s->match.root_squash && (!caller_uid || !caller_gid=
+))
+                            root_squash_perms =3D false;
+
+                    if (((mask & MAY_WRITE) && !s->writeable) ||
+                        ((mask & MAY_READ) && !s->readable))
+                            rw_perms_s =3D s;
+            }
+    }
+    ...
+    if (root_squash_perms && rw_perms_s =3D=3D NULL) {
+            doutc(cl, "access allowed\n");
+            return 0;
+    }
+    ...
+    doutc(cl, "access denied\n");
+    return -EACCES;
+
+Thanks,
+
+                Ilya
