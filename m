@@ -1,151 +1,104 @@
-Received: from out-188.mta1.migadu.com (out-188.mta1.migadu.com [95.215.58.188])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com [209.85.222.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5065307494
-	for <ceph-devel@vger.kernel.org>; Tue, 27 Jan 2026 11:52:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.188
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1774423D7E6
+	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 10:33:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769514747; cv=none; b=IiOWR3FEt6id8NdFJ1EfC42JZBR2yBfti2zB10mk+gRLDvTMabtgZO01C3HNYvxaGdXDl1UpQVuTXKhrq15LpKn4S6WNN/kzwJHJXU89YFJ+iFStRYYJkOP4Pg17WEwKUuVQjWONMMPJpXS9UW3BBaY2UXup4R6iK2MGawbeq9o=
+	t=1769596429; cv=none; b=nl92dWW/0Iu2enYd4Kd7k0q1aGM/ZMjdHAT1xejT7J1q++eABoKrJbfm+8yLnCxdcD3hTdeSQH4/5wHTRG2vNCJElGiWiXazp10r5xxRIrkyL3goPiXFUI75hwvnADadwhiZg+3zlrwhfiOM0Xxasp2sVc2V9bktKC2NQRuk/yk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769514747; c=relaxed/simple;
-	bh=XZj1tU/HgIUx2cjR84Q5AjOepYO5OkR/SeQNZGuHZ3I=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=AwWivbGgWa0vVf0zs0D22GpIQzSChOKx35nNqmtK1YNUtuoJJ3jAzdkaJhCYTx1bXfPG4FCH9UzhHDXEA0EcXIy9aQ/KZCeg2NEcoU9j679rEC2/mhRq+tVXNy8x1G+SIgWQbdzWTOGxF4AWPVV2QQRKWnBVYvoBxaWHFLU1IIs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=pLOCbqlc; arc=none smtp.client-ip=95.215.58.188
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1769596429; c=relaxed/simple;
+	bh=OHUQBaO+ox1ay02V8LUA7OCuxLKH71mm2gulWrvp9g4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=dV0fN8AgPbGc39uzi+BzEm7GEJBH8uZa25uX3j5Z+j5jnGy9bxuciwIN7KoRIeaQJI18I2pmvZogO6UTOKO/Ov6749JjnFqRSo8J/LokeFqpJDXJgmHWbyXKQdCI5rWgvtA41ewalJBV4kJPzJQp/XsvVztX+WG4Gmn6xD9CL3I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Fn4k25es; arc=none smtp.client-ip=209.85.222.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="pLOCbqlc"
-Message-ID: <69115424-f57c-4e27-847f-67f0c8b8ef02@linux.dev>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1769514744;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=pyOCJxaJ6IIh/4ZJhxeiVWTYdNJ2cu7hVP0LXzH44eM=;
-	b=pLOCbqlcPuW0//uvh5g322z9w7FzfMbXvowlFhMgsSEA2zJfWw4GGGXelNvF5kxbvtjf/q
-	S8X6DUE1G4tCO5BdOnBxtxUBKc/A+96ejutmabtOJZP/inVvuSsjm1A4KHMpG4LN9fQRtp
-	j8QbbIiI1BpbrblxCLdB7drvKLlNofY=
-Date: Tue, 27 Jan 2026 19:52:11 +0800
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Fn4k25es"
+Received: by mail-qk1-f172.google.com with SMTP id af79cd13be357-8c70b5594f4so83762185a.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 02:33:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1769596427; x=1770201227; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Td1EECa0viKqF6vhXW4aLtInPIApH/uVptLDKp0COyo=;
+        b=Fn4k25esV4x+G3mIYcM0YGxbPim0f5nE1+WgZo6fdfWpLJ7pyjSSbvmLMv2VNZSpRX
+         T6uNgJj9vA/zryLMh5I1kxRYHuQSm9yisCyAgdbc41KYouz78ppzfuvxobDODl18V+w0
+         KTLaZI+oPw+AsPcWkQKLmZMvDDS/vTS5J2MaIIfNk5W2y5xNyFBXaywFtFAobxj7H7Rv
+         O96Ghlc6lyvQCh1/hLWWPTZ5GQuu2VFrjrcUAa+uJ7Xp9Jp9GGNbziFGQ+MqBlry5sqW
+         IFs7W3lIkFDg23gr+fwlh7cZcRaaVH+Afu91sv3ZMN/CskI9ZwZ38lO10H908G1bXfAf
+         7s/A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769596427; x=1770201227;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Td1EECa0viKqF6vhXW4aLtInPIApH/uVptLDKp0COyo=;
+        b=HVhA9D3LiPotCTXXBmQhcpTWx1ZxEX7bb1XUr3Qu3O2zvJkedY1BmIU+EpGKvfFY6f
+         Ix205Se5pvH8geo7qlFwSEzhZHnK/uV70O+REMw35qpjChxXDxFXHf0McAz3WEKxks4t
+         N9nLQmYb490gq8Y++2uzUVH4IN62KSpKYTJI8+WgmkLqGSbrTSemltLfqduxvqeca2QR
+         4HcTiN/hfPEEv6JMvk4FIWkO44zIHd90BkeyEhHLMVoLYW25cm8EqSbXEvepnC/tKcP6
+         c9uSbPoY9+LLiVnBj02fMerXYMJ6egtYnoGyv4qIaLhH8JZERqHponJcjgcg736DU+7c
+         UdOA==
+X-Gm-Message-State: AOJu0YyQUWmDrGRndn0VhWvaFsVfCwrAMJdU2W4TmIKJ30sASUIuQnxD
+	+4kc0hC1SqXWCkVOUe4d1z/bOWBodwq0P30kbatrlAY6iapljZvbNTU1ZRbB9Q==
+X-Gm-Gg: AZuq6aI2bbHnDrZnIHiA8uq1INJbSyENtjsDRWRxtjOZ6cb5/w7EuieMx/q3Be8Qj+X
+	hW7HDLJY1MFAI5Zs5cfXft9L0hgvapk4h15bVf0xz9bl/+tKAi9lLVTKEl8atSVPHTdMGd8t+kr
+	9aVsquRnvdYWH9xGKBsTrXydWy2Dk2RggJNIZi4wD09ncotp1kgMpomgVYUJolbYoyqA+9riOUS
+	l9TXTqU7Hs4zypgs0Gyon26x8aaN8+/seYuo9KM+97UrYWHQVGRGGss8BzcHye3FzqmHpMcAmcn
+	EedhyJR+xzOxtF0wN3I/+nIcTpFCOOf+SMP7QU3rY4BG8jKuRZ+QbRViqSJFwvOtrFpXtthEoYb
+	6n9xUTj+UqDGKTWR36L5uQh5wQgkN17VCYhtg8CHM4SDorSD1J4D+2eXhO7Mr6Pf7ZmXsFD47pt
+	/iOc4yNlkCMgWYu+cvVgZF9Ns5rPdFLBS0hu+s9A8HngMC/nkspgBNDw==
+X-Received: by 2002:a05:620a:19a5:b0:8b2:e3c1:24b7 with SMTP id af79cd13be357-8c70c221f4amr536996585a.29.1769596426983;
+        Wed, 28 Jan 2026 02:33:46 -0800 (PST)
+Received: from localhost.localdomain (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50337bbb66dsm12383451cf.29.2026.01.28.02.33.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Jan 2026 02:33:46 -0800 (PST)
+From: Ilya Dryomov <idryomov@gmail.com>
+To: ceph-devel@vger.kernel.org
+Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Patrick Donnelly <pdonnell@redhat.com>
+Subject: [PATCH 0/5] libceph: CEPH_CRYPTO_AES256KRB5 (--key-type aes256k) support
+Date: Wed, 28 Jan 2026 11:33:22 +0100
+Message-ID: <20260128103329.964466-1-idryomov@gmail.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH] rbd: check for EOD after exclusive lock is ensured to be
- held
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-References: <20260126133729.867488-1-idryomov@gmail.com>
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Dongsheng Yang <dongsheng.yang@linux.dev>
-In-Reply-To: <20260126133729.867488-1-idryomov@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+
+Hello,
+
+This series adds support for the upcoming CephX key type that is based
+on Kerberos 5.
+
+Thanks,
+
+                Ilya
 
 
-在 1/26/2026 9:37 PM, Ilya Dryomov 写道:
-> Similar to commit 870611e4877e ("rbd: get snapshot context after
-> exclusive lock is ensured to be held"), move the "beyond EOD" check
-> into the image request state machine so that it's performed after
-> exclusive lock is ensured to be held.  This avoids various race
-> conditions which can arise when the image is shrunk under I/O (in
-> practice, mostly readahead).  In one such scenario
->
->      rbd_assert(objno < rbd_dev->object_map_size);
->
-> can be triggered if a close-to-EOD read gets queued right before the
-> shrink is initiated and the EOD check is performed against an outdated
-> mapping_size.  After the resize is done on the server side and exclusive
-> lock is (re)acquired bringing along the new (now shrunk) object map, the
-> read starts going through the state machine and rbd_obj_may_exist() gets
-> invoked on an object that is out of bounds of rbd_dev->object_map array.
->
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->   drivers/block/rbd.c | 28 +++++++++++++++++-----------
->   1 file changed, 17 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index af0e21149dbc..44f4dd6e98d9 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3490,16 +3490,31 @@ static void rbd_img_object_requests(struct rbd_img_request *img_req)
->   {
->   	struct rbd_device *rbd_dev = img_req->rbd_dev;
->   	struct rbd_obj_request *obj_req;
-> +	u64 mapping_size;
->   
->   	rbd_assert(!img_req->pending.result && !img_req->pending.num_pending);
->   	rbd_assert(!need_exclusive_lock(img_req) ||
->   		   __rbd_is_lock_owner(rbd_dev));
->   
-> +	down_read(&rbd_dev->header_rwsem);
-> +	mapping_size = rbd_dev->mapping.size;
->   	if (rbd_img_is_write(img_req)) {
->   		rbd_assert(!img_req->snapc);
-> -		down_read(&rbd_dev->header_rwsem);
->   		img_req->snapc = ceph_get_snap_context(rbd_dev->header.snapc);
-> -		up_read(&rbd_dev->header_rwsem);
-> +	}
-> +	up_read(&rbd_dev->header_rwsem);
-> +
-> +	if (!test_bit(IMG_REQ_CHILD, &img_req->flags)) {
-> +		struct request *rq = blk_mq_rq_from_pdu(img_req);
-> +		u64 off = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
-> +		u64 len = blk_rq_bytes(rq);
-> +
-> +		if (unlikely(off + len > mapping_size)) {
-> +			rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)",
-> +				 off, len, mapping_size);
-> +			img_req->pending.result = -EIO;
-> +			return;
-> +	
-> 	}
+Ilya Dryomov (5):
+  libceph: define and enforce CEPH_MAX_KEY_LEN
+  libceph: generalize ceph_x_encrypt_offset() and
+    ceph_x_encrypt_buflen()
+  libceph: introduce ceph_crypto_key_prepare()
+  libceph: add support for CEPH_CRYPTO_AES256KRB5
+  libceph: adapt ceph_x_challenge_blob hashing and msgr1 message signing
 
+ include/linux/ceph/ceph_fs.h |   5 +-
+ net/ceph/Kconfig             |   1 +
+ net/ceph/auth_x.c            | 195 ++++++++++++++++++-------
+ net/ceph/auth_x_protocol.h   |  38 +++++
+ net/ceph/crypto.c            | 275 ++++++++++++++++++++++++++++-------
+ net/ceph/crypto.h            |  21 ++-
+ net/ceph/messenger_v2.c      |  16 +-
+ 7 files changed, 433 insertions(+), 118 deletions(-)
 
-Hi Ilya,
+-- 
+2.49.0
 
-
-Fix looks good in logic. But one potential concern is that with this 
-change all child read requests will also acquire |header_rwsem| for 
-reading.
-
-In principle this could be avoided, since child read requests do not 
-need to fetch |snapc| and do not need to perform the beyond-EOD check.
-
-
-Dongsheng
-
->   	}
->   
->   	for_each_obj_request(img_req, obj_req) {
-> @@ -4725,7 +4740,6 @@ static void rbd_queue_workfn(struct work_struct *work)
->   	struct request *rq = blk_mq_rq_from_pdu(img_request);
->   	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
->   	u64 length = blk_rq_bytes(rq);
-> -	u64 mapping_size;
->   	int result;
->   
->   	/* Ignore/skip any zero-length requests */
-> @@ -4738,17 +4752,9 @@ static void rbd_queue_workfn(struct work_struct *work)
->   	blk_mq_start_request(rq);
->   
->   	down_read(&rbd_dev->header_rwsem);
-> -	mapping_size = rbd_dev->mapping.size;
->   	rbd_img_capture_header(img_request);
->   	up_read(&rbd_dev->header_rwsem);
->   
-> -	if (offset + length > mapping_size) {
-> -		rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)", offset,
-> -			 length, mapping_size);
-> -		result = -EIO;
-> -		goto err_img_request;
-> -	}
-> -
->   	dout("%s rbd_dev %p img_req %p %s %llu~%llu\n", __func__, rbd_dev,
->   	     img_request, obj_op_name(op_type), offset, length);
->   
