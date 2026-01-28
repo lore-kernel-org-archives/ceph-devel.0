@@ -1,311 +1,183 @@
-Received: from mail-qt1-f175.google.com (mail-qt1-f175.google.com [209.85.160.175])
+Received: from mail-dl1-f52.google.com (mail-dl1-f52.google.com [74.125.82.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 073FB2FE59A
-	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 10:33:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.175
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769596437; cv=none; b=U1pA7i8ay1Wwr707g9HJMcoZpCU+d6ucIR/QcN3bCQkwGD8E4AjR+1AUPySd99SqQf4uoGjsVJOSroHH4PgkpVe4DwGl6dzeEuPssfLmE+aedDpDU7RT/k3J4rWRBrfcKoZj235jTo4K4oM4wtqUHP8X8/qDGMkAt4x0hRl6GJg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769596437; c=relaxed/simple;
-	bh=rGcNGhXYkNIVMqvu1H0i9qomST1kq5Z1xvItbebvwc0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=mYijthJaK9aa+13bLPI3ga0KVvm3CBkeeOcGbfWSD2B9hNIpnGQnuOiimlkQ83fMmL6+5Z+eKc3bM9Dun/7BfnEq8bpmzMyNpq4oIArBSfi1P1P6GumVgmFlZzt4ArOKGAIjDtuwTk9x8ef1bXqMTSdzHl7MNz/Nhr7WttO/R9Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kfO4j193; arc=none smtp.client-ip=209.85.160.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D7FB336EC2
+	for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 10:54:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.52
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769597651; cv=pass; b=kvd78/G8vH+uiAeuy/1+0aMuA0AlpSzWG3oO/CdibCMC/v2yiKbsy4m8n45ODuShIZM8ZvoIgJ3gw5gD+IrksBklD2zyHxx+hlGkN0o3VG6DTIrVVC/O8118cXoZTPCxuYvqAj/VAmVQl1lCdaYvVqQcS1yReDiFlJ5nOKcRpzI=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769597651; c=relaxed/simple;
+	bh=+i/QvqiNf1SgnIt1SO4Aohco9SwuioLlCwN42QKAE9k=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=f2QTA7NsBI5T8hvxqteldGM7IeAQrDp0K69BoZzI6vmUkMTvHSuKhYLskZ9kzXN8Zj9hnnE2KxslUxE9xwUwHaq64bK5h4UDqAHm+E4OtDh9vtcSdR5U2RKKQ5vrcahbhlpMFOjvYcze0pWuqF4zpkZetQyRI4a6z0oQsXJKHis=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WNnKyuK0; arc=pass smtp.client-ip=74.125.82.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kfO4j193"
-Received: by mail-qt1-f175.google.com with SMTP id d75a77b69052e-50334dd44d2so12467021cf.1
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 02:33:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WNnKyuK0"
+Received: by mail-dl1-f52.google.com with SMTP id a92af1059eb24-12336c0a8b6so2329640c88.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 02:54:09 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769597649; cv=none;
+        d=google.com; s=arc-20240605;
+        b=SSt+H+Wa4GY3S5MisUYMYxmHIUx99qdgFZG4aGv6+Q/BlijjiiBd+Li6efyuDKrZaK
+         sRczcri5X4v7Ss9TbscSpHCSrE1WJ94xnEmkYPA82EsnfEh6XTiOW/Wt79pJDr7+Rbfc
+         t7kf1XGGopC/xAfltqKcvid0ZZ95tJLBo5DkrMyiS3rBPVDW9U4ybtZVGANfeBO3Fqhw
+         oTa1mxcvF4gCzjri6+0SiBHN/nKwd9gyxix7OFavgW0p5Ja+eKFs63f29g+fTxsev5WV
+         9o6o9mPvYES04ph/pfRMNIOVBHtn6+InDqK/YIZRpIuGllM2SI0sCF709L/j2Na6O1Lw
+         yeOg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=c2p5whNgg7Wi8/XagA899J06zyXCnxO8sVAOOz9pC00=;
+        fh=qRHVn4YWLV5ka8wlyBXVswyhP5ChimidqL60uAjCDMQ=;
+        b=BMwlCH7M79rFk3sholzR7TuvOWw/2T3bHpUR9o1ri7+x+Vua0AH32YU9PuV/jQUuWb
+         3FnyduaS/w2othZFkpMlQFVnfBEuJW7TzRWvmjrzBywq5cmMxbSIcWNIkMSj0jZpU3b+
+         0xKdI4QApgK+p7q0nClG9NffJhsEk6Qt9NCsOs9Rj2bs5Q8/DNdO1WQMM29m69jrSYjq
+         ySkTx9X4fWFQg0nQFfln1aFns6rCaULsvFabtQyo/PWECBbwE/MVgpJq/Tth1EbLuIbM
+         AAwne0DbLqJbKZcp8dw6oUy5KmmJuV16kOBrXqKqrw8t0KfwU1+gFTwOetZvY9osyDd7
+         w3mg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1769596435; x=1770201235; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1769597649; x=1770202449; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bMw9xAdXODkqj8AQHfXKcoxjv+UUlm+/4QggtShkXTQ=;
-        b=kfO4j193IJuRZO68xVJ0OMg3GkNr9VlLPIlxkc5g//lnZh99Ds7I7uaMZJ8On2n9hz
-         asBcCQPScPChynlG6s/evPoQf4MzeFN4czqIXLs8iTuXzvm+RQldmGZCUiGtAtitM81A
-         p7NTwGAjdmxLF18icrtVJR6tXGic6gPiu1FF+anXl4aLloF5SvSq8slXtsEY3nq0NCMO
-         r3GwsV0OU9hNQItw0bIrUiVLiKtZ76PifYrhJJtn4A1lklNfSG7I1MjOEm+zP2ZZTQm5
-         Yf01A2HzdiKMB2mq26h5FSMHhPR1JnHi9tjVH+UTV+uYZOkVCbSrTLtLX5s1iHGP5O87
-         J43g==
+        bh=c2p5whNgg7Wi8/XagA899J06zyXCnxO8sVAOOz9pC00=;
+        b=WNnKyuK0yzkqUM20zStUzM/Hkk2ZVSvkSrsfw7ZHgA5E2+lcekQy9uy4Wk8JH9RyUG
+         O85UoQ/b+q21BAVgfbFVIWgfIstabv7XlqffEQxXYVxJLENftt1zqQn5kuO5kqp7X0oo
+         oWxVBvQFxnuoNL6LrZ+MgnQ+z55PI9QR0LNbR7xo66PogGYHSFbooyWGMltel1k4KrDX
+         WSFyFQHlsBczLZmwCzOwsgCpIrNsW/pGXBBsRKOmIuUlY5bnkg/5K0kbMgnauinuqrYx
+         UofvhTfaObuoan+dWF89AeN1XCMAGVXBpmjCwGMYHuuJdFXu/+qfvpfMDqQCkmM+QqpB
+         wopA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769596435; x=1770201235;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20230601; t=1769597649; x=1770202449;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=bMw9xAdXODkqj8AQHfXKcoxjv+UUlm+/4QggtShkXTQ=;
-        b=SVvjAhMuvcDmkQvgtcsgsqg6VjSh2eOk0w9kG+NstIiDkOleG0VhK8vvH1WUmonoRA
-         6OPlUYmb0vj5zvvJc8Y3thPubLAEHeGy7vGqMbHRDlLwsBrBoM8FaD0ubrs56nS84Wjp
-         0YyabK5tKsDs95VaIfkBz8wMgwGHquTTXVCqhhTigOFFvAXnpWcSMw9FCr9SXIjNdpWq
-         gdNY5Y1M4l2fLvGR6mKOeXxYnLdzhqbyPBzSiDO2Uwqicqx9Pm3dWg6n7+hN/Li4QDby
-         OzS1+7LNAPFK71w/kvcFumtvSEL+9qYY2IhpbAYEpXc8V81Ikf+w2UI7wn81Urlimdwh
-         c4rQ==
-X-Gm-Message-State: AOJu0YyiS28Ae94vo0cidB+SuMrH2a6b0HA912+WcWsfjSNlpzDmLCH4
-	A0ZacL6nkCnOvvIir4By6rue8yd8VpAy2gc976cZOxlpufIm/2nuO94ClYeSHw==
-X-Gm-Gg: AZuq6aLJU6On3hskr2qjx1rwbYwcBAI4vfAarUVm7HpANcoSIZvB8t37k9YJTbSrSG+
-	u0JDccrFfd6eSL0xTBHYpMjLvlZFb+psizvhl80Gqd8iXSYXn1RFcmYk1oSvdGYTTwxyB44xDl+
-	WqE/qx74EHMP8LyYL7KIIoHvVD2/rBzE3tJuyAdoEjfnXoywxU7QfDt+JngXJBN9NlcfH+YUOXQ
-	K9sPlVbbiiv/1tHjl6uznAQumtmHKgH23liaFv7IWBsKq4CslGF4NvhdphKidrNVbDgvpWqcX7a
-	xiAW7IAXWXHN9HrYs9L5EX1JfwhDhyJbdzgP1a/k0fGCp3TNU+LBpjQ462h05OFjx03par0fDqZ
-	nJuPb+Oh8mc7hGp7LMJKs5vxWYcsHZGqOMPFV7X5zxTz/jCjZNGrZoJsfBd2IkyDQEV4veWrpXw
-	RzNcM/EJSq1f56vb63iJjhUdH9zFokSBsH/61kYAtHL6qUZ8SHlfFQAw==
-X-Received: by 2002:ac8:5a85:0:b0:503:2f49:6f81 with SMTP id d75a77b69052e-5032fc262a9mr64718581cf.74.1769596434840;
-        Wed, 28 Jan 2026 02:33:54 -0800 (PST)
-Received: from localhost.localdomain (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50337bbb66dsm12383451cf.29.2026.01.28.02.33.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Jan 2026 02:33:54 -0800 (PST)
-From: Ilya Dryomov <idryomov@gmail.com>
-To: ceph-devel@vger.kernel.org
-Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Patrick Donnelly <pdonnell@redhat.com>
-Subject: [PATCH 5/5] libceph: adapt ceph_x_challenge_blob hashing and msgr1 message signing
-Date: Wed, 28 Jan 2026 11:33:27 +0100
-Message-ID: <20260128103329.964466-6-idryomov@gmail.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20260128103329.964466-1-idryomov@gmail.com>
-References: <20260128103329.964466-1-idryomov@gmail.com>
+        bh=c2p5whNgg7Wi8/XagA899J06zyXCnxO8sVAOOz9pC00=;
+        b=e/xFJroNZtbxMujCVz/MucLm9TwXBeq9rGEey92GEv/me+KfLomAtrOzLtWTpUTJoj
+         yAONLSIHvgPsQjVdfxrHMZn6LfX0XDGm6JnpWm059DkGREWGEvC5i5tdDlJkPdlz2NLv
+         bcq3Vp4ZrBOiv2Dn4sYxseohbthARYT+OBDEjiXtSAYrzwr4MHZb0P/dEVp0gF25beAb
+         VpHM9N/aFVFpruTSefQ7yIFgDY2e799egDufSdG6Qpui0nav3KetYJTgIr983vZA4tgw
+         /3xr9a4RdTkQFR+TXn5Y6+rGbqQm09EGbUwer6kngP2aAoJLDJMI/O04A2F46jvqhcNP
+         vWuA==
+X-Gm-Message-State: AOJu0YwaOP77gOr/t133ZTLF7IOUqsox5Qh310Lnud/G1AvN5vhWDfHM
+	30COcFuARIAoPJTVg4pLewi4S65r5hGs/xbU8fpE/2+oTo7P91II87G7p2Skvo/f2v4kY3Wy1K3
+	J6XALGug9s8f7pPbyswrLTKnRZPrlELRYuvTs
+X-Gm-Gg: AZuq6aIdK8tFGIS+eG68N9gym/KRm5OC5yMMnXaGeRFCMMnV/TyIjCn+ZLQLzJkDcaJ
+	xCWaFn0bpoH1k0NhgE9+T3s9ouRi/cNgMa7Ou9xstbFg7g1uE2JLAOgKnZ6UIOt6yoOXlDZrkAB
+	8rDENDdBbQQB9bXtujXnaMACadnNYhHxvA1ffQ8xU4QxOVwR41ajFhyNq20ehYYOanOg80GaXqv
+	T6bvyuOkcKM3DTl9gber5OA1QpAJ9rjNpmNnCaZEhywIYtoddqDZj0VsqitvO15B+IKQbI=
+X-Received: by 2002:a05:7022:4389:b0:119:e569:fb9b with SMTP id
+ a92af1059eb24-124a0060880mr2909737c88.10.1769597649073; Wed, 28 Jan 2026
+ 02:54:09 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260126133729.867488-1-idryomov@gmail.com> <69115424-f57c-4e27-847f-67f0c8b8ef02@linux.dev>
+In-Reply-To: <69115424-f57c-4e27-847f-67f0c8b8ef02@linux.dev>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Wed, 28 Jan 2026 11:53:57 +0100
+X-Gm-Features: AZwV_QjF0z9ys-8b5QtweeTQlkI9Bf1-4WBpr7a7YqdTfvveqZ4-Luu_aRz4kqI
+Message-ID: <CAOi1vP_yj8YpsCEx8NjpQwhncpw+O9Niwh6wceoTHvXXckmuyQ@mail.gmail.com>
+Subject: Re: [PATCH] rbd: check for EOD after exclusive lock is ensured to be held
+To: Dongsheng Yang <dongsheng.yang@linux.dev>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-The existing approach where ceph_x_challenge_blob is encrypted with the
-client's secret key and then the digest derived from the ciphertext is
-used for the test doesn't work with CEPH_CRYPTO_AES256KRB5 because the
-confounder randomizes the ciphertext: the client and the server get two
-different ciphertexts and therefore two different digests.
+On Tue, Jan 27, 2026 at 12:52=E2=80=AFPM Dongsheng Yang
+<dongsheng.yang@linux.dev> wrote:
+>
+>
+> =E5=9C=A8 1/26/2026 9:37 PM, Ilya Dryomov =E5=86=99=E9=81=93:
+> > Similar to commit 870611e4877e ("rbd: get snapshot context after
+> > exclusive lock is ensured to be held"), move the "beyond EOD" check
+> > into the image request state machine so that it's performed after
+> > exclusive lock is ensured to be held.  This avoids various race
+> > conditions which can arise when the image is shrunk under I/O (in
+> > practice, mostly readahead).  In one such scenario
+> >
+> >      rbd_assert(objno < rbd_dev->object_map_size);
+> >
+> > can be triggered if a close-to-EOD read gets queued right before the
+> > shrink is initiated and the EOD check is performed against an outdated
+> > mapping_size.  After the resize is done on the server side and exclusiv=
+e
+> > lock is (re)acquired bringing along the new (now shrunk) object map, th=
+e
+> > read starts going through the state machine and rbd_obj_may_exist() get=
+s
+> > invoked on an object that is out of bounds of rbd_dev->object_map array=
+.
+> >
+> > Cc: stable@vger.kernel.org
+> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> > ---
+> >   drivers/block/rbd.c | 28 +++++++++++++++++-----------
+> >   1 file changed, 17 insertions(+), 11 deletions(-)
+> >
+> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> > index af0e21149dbc..44f4dd6e98d9 100644
+> > --- a/drivers/block/rbd.c
+> > +++ b/drivers/block/rbd.c
+> > @@ -3490,16 +3490,31 @@ static void rbd_img_object_requests(struct rbd_=
+img_request *img_req)
+> >   {
+> >       struct rbd_device *rbd_dev =3D img_req->rbd_dev;
+> >       struct rbd_obj_request *obj_req;
+> > +     u64 mapping_size;
+> >
+> >       rbd_assert(!img_req->pending.result && !img_req->pending.num_pend=
+ing);
+> >       rbd_assert(!need_exclusive_lock(img_req) ||
+> >                  __rbd_is_lock_owner(rbd_dev));
+> >
+> > +     down_read(&rbd_dev->header_rwsem);
+> > +     mapping_size =3D rbd_dev->mapping.size;
+> >       if (rbd_img_is_write(img_req)) {
+> >               rbd_assert(!img_req->snapc);
+> > -             down_read(&rbd_dev->header_rwsem);
+> >               img_req->snapc =3D ceph_get_snap_context(rbd_dev->header.=
+snapc);
+> > -             up_read(&rbd_dev->header_rwsem);
+> > +     }
+> > +     up_read(&rbd_dev->header_rwsem);
+> > +
+> > +     if (!test_bit(IMG_REQ_CHILD, &img_req->flags)) {
+> > +             struct request *rq =3D blk_mq_rq_from_pdu(img_req);
+> > +             u64 off =3D (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
+> > +             u64 len =3D blk_rq_bytes(rq);
+> > +
+> > +             if (unlikely(off + len > mapping_size)) {
+> > +                     rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)"=
+,
+> > +                              off, len, mapping_size);
+> > +                     img_req->pending.result =3D -EIO;
+> > +                     return;
+> > +
+> >       }
+>
+>
+> Hi Ilya,
+>
+>
+> Fix looks good in logic. But one potential concern is that with this
+> change all child read requests will also acquire |header_rwsem| for
+> reading.
+>
+> In principle this could be avoided, since child read requests do not
+> need to fetch |snapc| and do not need to perform the beyond-EOD check.
 
-msgr1 signatures are affected the same way: a digest derived from the
-ciphertext for the message's "sigblock" is what becomes a signature and
-the two sides disagree on the expected value.
+Hi Dongsheng,
 
-For CEPH_CRYPTO_AES256KRB5 (and potential future encryption schemes),
-switch to HMAC-SHA256 function keyed in the same way as the existing
-encryption.  For CEPH_CRYPTO_AES, everything is preserved as is.
+Good catch, I'll refactor appropriately and post v2 shortly.
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/auth_x.c       | 59 ++++++++++++++++++++++++++++++-----------
- net/ceph/crypto.c       | 18 +++++++++++++
- net/ceph/crypto.h       |  4 +++
- net/ceph/messenger_v2.c | 14 +++++-----
- 4 files changed, 72 insertions(+), 23 deletions(-)
+Thanks,
 
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index decd2867f8f1..13b3df9af0ac 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -553,8 +553,7 @@ static int ceph_x_build_request(struct ceph_auth_client *ac,
- 	if (need & CEPH_ENTITY_TYPE_AUTH) {
- 		struct ceph_x_authenticate *auth = (void *)(head + 1);
- 		void *enc_buf = xi->auth_authorizer.enc_buf;
--		struct ceph_x_challenge_blob *blob = enc_buf +
--					     ceph_x_encrypt_offset(&xi->secret);
-+		struct ceph_x_challenge_blob *blob;
- 		u64 *u;
- 
- 		p = auth + 1;
-@@ -564,15 +563,29 @@ static int ceph_x_build_request(struct ceph_auth_client *ac,
- 		dout(" get_auth_session_key\n");
- 		head->op = cpu_to_le16(CEPHX_GET_AUTH_SESSION_KEY);
- 
--		/* encrypt and hash */
-+		if (xi->secret.type == CEPH_CRYPTO_AES) {
-+			blob = enc_buf + ceph_x_encrypt_offset(&xi->secret);
-+		} else {
-+			BUILD_BUG_ON(SHA256_DIGEST_SIZE + sizeof(*blob) >
-+				     CEPHX_AU_ENC_BUF_LEN);
-+			blob = enc_buf + SHA256_DIGEST_SIZE;
-+		}
-+
- 		get_random_bytes(&auth->client_challenge, sizeof(u64));
- 		blob->client_challenge = auth->client_challenge;
- 		blob->server_challenge = cpu_to_le64(xi->server_challenge);
--		ret = ceph_x_encrypt(&xi->secret, 0 /* dummy */,
--				     enc_buf, CEPHX_AU_ENC_BUF_LEN,
--				     sizeof(*blob));
--		if (ret < 0)
--			return ret;
-+
-+		if (xi->secret.type == CEPH_CRYPTO_AES) {
-+			ret = ceph_x_encrypt(&xi->secret, 0 /* dummy */,
-+					     enc_buf, CEPHX_AU_ENC_BUF_LEN,
-+					     sizeof(*blob));
-+			if (ret < 0)
-+				return ret;
-+		} else {
-+			ceph_hmac_sha256(&xi->secret, blob, sizeof(*blob),
-+					 enc_buf);
-+			ret = SHA256_DIGEST_SIZE;
-+		}
- 
- 		auth->struct_v = 3;  /* nautilus+ */
- 		auth->key = 0;
-@@ -1053,11 +1066,19 @@ static int calc_signature(struct ceph_x_authorizer *au, struct ceph_msg *msg,
- 			__le32 data_crc;
- 			__le32 data_len;
- 			__le32 seq_lower_word;
--		} __packed *sigblock = enc_buf;
-+		} __packed *sigblock;
- 		struct {
- 			__le64 a, b, c, d;
- 		} __packed *penc = enc_buf;
--		int ciphertext_len;
-+
-+		if (au->session_key.type == CEPH_CRYPTO_AES) {
-+			/* no leading len, no ceph_x_encrypt_header */
-+			sigblock = enc_buf;
-+		} else {
-+			BUILD_BUG_ON(SHA256_DIGEST_SIZE + sizeof(*sigblock) >
-+				     CEPHX_AU_ENC_BUF_LEN);
-+			sigblock = enc_buf + SHA256_DIGEST_SIZE;
-+		}
- 
- 		sigblock->header_crc = msg->hdr.crc;
- 		sigblock->front_crc = msg->footer.front_crc;
-@@ -1068,12 +1089,18 @@ static int calc_signature(struct ceph_x_authorizer *au, struct ceph_msg *msg,
- 		sigblock->data_len = msg->hdr.data_len;
- 		sigblock->seq_lower_word = *(__le32 *)&msg->hdr.seq;
- 
--		/* no leading len, no ceph_x_encrypt_header */
--		ret = ceph_crypt(&au->session_key, 0 /* dummy */,
--				 true, enc_buf, CEPHX_AU_ENC_BUF_LEN,
--				 sizeof(*sigblock), &ciphertext_len);
--		if (ret)
--			return ret;
-+		if (au->session_key.type == CEPH_CRYPTO_AES) {
-+			int ciphertext_len; /* unused */
-+
-+			ret = ceph_crypt(&au->session_key, 0 /* dummy */,
-+					 true, enc_buf, CEPHX_AU_ENC_BUF_LEN,
-+					 sizeof(*sigblock), &ciphertext_len);
-+			if (ret)
-+				return ret;
-+		} else {
-+			ceph_hmac_sha256(&au->session_key, sigblock,
-+					 sizeof(*sigblock), enc_buf);
-+		}
- 
- 		*psig = penc->a ^ penc->b ^ penc->c ^ penc->d;
- 	}
-diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-index b54085d8d5f0..b2067ea6c38a 100644
---- a/net/ceph/crypto.c
-+++ b/net/ceph/crypto.c
-@@ -84,6 +84,7 @@ int ceph_crypto_key_prepare(struct ceph_crypto_key *key,
- 	case CEPH_CRYPTO_AES:
- 		return set_aes_tfm(key);
- 	case CEPH_CRYPTO_AES256KRB5:
-+		hmac_sha256_preparekey(&key->hmac_key, key->key, key->len);
- 		return set_krb5_tfms(key, key_usages, key_usage_cnt);
- 	default:
- 		return -ENOTSUPP;
-@@ -178,6 +179,7 @@ void ceph_crypto_key_destroy(struct ceph_crypto_key *key)
- 			key->aes_tfm = NULL;
- 		}
- 	} else if (key->type == CEPH_CRYPTO_AES256KRB5) {
-+		memzero_explicit(&key->hmac_key, sizeof(key->hmac_key));
- 		for (i = 0; i < ARRAY_SIZE(key->krb5_tfms); i++) {
- 			if (key->krb5_tfms[i]) {
- 				crypto_free_aead(key->krb5_tfms[i]);
-@@ -436,6 +438,22 @@ int ceph_crypt_buflen(const struct ceph_crypto_key *key, int data_len)
- 	}
- }
- 
-+void ceph_hmac_sha256(const struct ceph_crypto_key *key, const void *buf,
-+		      int buf_len, u8 hmac[SHA256_DIGEST_SIZE])
-+{
-+	switch (key->type) {
-+	case CEPH_CRYPTO_NONE:
-+	case CEPH_CRYPTO_AES:
-+		memset(hmac, 0, SHA256_DIGEST_SIZE);
-+		return;
-+	case CEPH_CRYPTO_AES256KRB5:
-+		hmac_sha256(&key->hmac_key, buf, buf_len, hmac);
-+		return;
-+	default:
-+		BUG();
-+	}
-+}
-+
- static int ceph_key_preparse(struct key_preparsed_payload *prep)
- {
- 	struct ceph_crypto_key *ckey;
-diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
-index 2c37c54d0f56..3a2ade15abbc 100644
---- a/net/ceph/crypto.h
-+++ b/net/ceph/crypto.h
-@@ -2,6 +2,7 @@
- #ifndef _FS_CEPH_CRYPTO_H
- #define _FS_CEPH_CRYPTO_H
- 
-+#include <crypto/sha2.h>
- #include <linux/ceph/types.h>
- #include <linux/ceph/buffer.h>
- 
-@@ -20,6 +21,7 @@ struct ceph_crypto_key {
- 	union {
- 		struct crypto_sync_skcipher *aes_tfm;
- 		struct {
-+			struct hmac_sha256_key hmac_key;
- 			const struct krb5_enctype *krb5_type;
- 			struct crypto_aead *krb5_tfms[3];
- 		};
-@@ -39,6 +41,8 @@ int ceph_crypt(const struct ceph_crypto_key *key, int usage_slot, bool encrypt,
- 	       void *buf, int buf_len, int in_len, int *pout_len);
- int ceph_crypt_data_offset(const struct ceph_crypto_key *key);
- int ceph_crypt_buflen(const struct ceph_crypto_key *key, int data_len);
-+void ceph_hmac_sha256(const struct ceph_crypto_key *key, const void *buf,
-+		      int buf_len, u8 hmac[SHA256_DIGEST_SIZE]);
- int ceph_crypto_init(void);
- void ceph_crypto_shutdown(void);
- 
-diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
-index 31e042dc1b3f..5ec3272cd2dd 100644
---- a/net/ceph/messenger_v2.c
-+++ b/net/ceph/messenger_v2.c
-@@ -779,9 +779,9 @@ static int setup_crypto(struct ceph_connection *con,
- 	return 0;  /* auth_x, secure mode */
- }
- 
--static void ceph_hmac_sha256(struct ceph_connection *con,
--			     const struct kvec *kvecs, int kvec_cnt,
--			     u8 hmac[SHA256_DIGEST_SIZE])
-+static void con_hmac_sha256(struct ceph_connection *con,
-+			    const struct kvec *kvecs, int kvec_cnt,
-+			    u8 hmac[SHA256_DIGEST_SIZE])
- {
- 	struct hmac_sha256_ctx ctx;
- 	int i;
-@@ -1438,8 +1438,8 @@ static int prepare_auth_signature(struct ceph_connection *con)
- 	if (!buf)
- 		return -ENOMEM;
- 
--	ceph_hmac_sha256(con, con->v2.in_sign_kvecs, con->v2.in_sign_kvec_cnt,
--			 CTRL_BODY(buf));
-+	con_hmac_sha256(con, con->v2.in_sign_kvecs, con->v2.in_sign_kvec_cnt,
-+			CTRL_BODY(buf));
- 
- 	return prepare_control(con, FRAME_TAG_AUTH_SIGNATURE, buf,
- 			       SHA256_DIGEST_SIZE);
-@@ -2436,8 +2436,8 @@ static int process_auth_signature(struct ceph_connection *con,
- 		return -EINVAL;
- 	}
- 
--	ceph_hmac_sha256(con, con->v2.out_sign_kvecs, con->v2.out_sign_kvec_cnt,
--			 hmac);
-+	con_hmac_sha256(con, con->v2.out_sign_kvecs, con->v2.out_sign_kvec_cnt,
-+			hmac);
- 
- 	ceph_decode_need(&p, end, SHA256_DIGEST_SIZE, bad);
- 	if (crypto_memneq(p, hmac, SHA256_DIGEST_SIZE)) {
--- 
-2.49.0
-
+                Ilya
