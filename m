@@ -1,219 +1,194 @@
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+Received: from mail-dl1-f46.google.com (mail-dl1-f46.google.com [74.125.82.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF21D238C0A
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2026 00:30:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB05D372B3D
+	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2026 08:18:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.46
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769646608; cv=pass; b=JPPcpDtHOwf9O5iAudUMBIW7DEoVtl5J8EK8USzZZ8AMyUuEQ2+PaDfAvyZD9l+uHKczEolYg6/caD2+jtlE7yZvYrYpMHGiQ4KhxnXoNxoPz9I3EED1m/UsvLwdlmiSSDLYaeOUmBrvZg137KDXxikRQ88R3RP4WR5oheAubqM=
+	t=1769674687; cv=pass; b=JVZAoAaJceNqbw52LYu4pd4XvetuC+SMxTmXFcgkaLbma/5vymnraKqfq+jgX19QOJEKvJei17wa8kYhKF/tixXgFBF1ydiKvU/GnMboJ1r7La8ahT6JfPnzYMdUIDRlP0Pa3QZf9Hrzj9xYKpObDg4xrdgRmMXOOuslRB6n4I0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769646608; c=relaxed/simple;
-	bh=1eMMISMtKdMZAxC48pNaHXm/nhvjqEEtGqWuDZGKc/8=;
+	s=arc-20240116; t=1769674687; c=relaxed/simple;
+	bh=6CMMHMAm83swb1A52YcIzcwxVobyR/2gao7M5xyE1Sc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UeAG/lpVJvvJ7OXW5kzF/hSIdMdGZ+7bvbLwN0ZHu9ymsy8hF32xy8qDIvjP6rwEbdr24kvm9chAa+VnjLT+DxiBwkJpX9QSOcmGJ/krTILpdHrR3NGlXzoU0uxB8go3h8tvgC9K4NwXnptha8D9+HQSfd/tikLkIvyNoMQljZM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JCh1chNg; arc=pass smtp.client-ip=209.85.128.42
+	 To:Cc:Content-Type; b=b1BA+qcbRe3arkQ2G5uLYVjnV/E2xXg7IVWnt4KZe+p8BvFraeoF0oA86RLprZgJrAKjrPoNqzP0Fv9W07QymzALHZ6zDAsEy7S9oslajU7LT88ilKR61ju1Z5X6whS3JZihA3e3rSD8I5gCFaC6v+QPXlaM4mWVpIpr95Rr2p4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TvCAzh8N; arc=pass smtp.client-ip=74.125.82.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JCh1chNg"
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4801bc32725so2871835e9.0
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2026 16:30:06 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769646605; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TvCAzh8N"
+Received: by mail-dl1-f46.google.com with SMTP id a92af1059eb24-12339e2e2c1so445608c88.1
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2026 00:18:05 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769674685; cv=none;
         d=google.com; s=arc-20240605;
-        b=TudiUj0pN30Wal9NNwcKv/J9LZAa72vomShGQTjp0LZTbFnN06P5ehYvEYMlJKCHmV
-         KC+PdEsD80nIFtpQfRlGWhTD4U+Res0WSNPqDmtsuHrr+YWXIeQBDJqPpcYKmw+Lzwma
-         SDAfC/krEZ7Lz+yIFFQCDfFlRpEW1tAJtWNvJxhDZLgdw8h/XyPLfWyajsau/cDKw5nV
-         mbvTO93+6BKf/7WIYV9/kMOkp8JSA28mo+PpnR/fFLT+VmZvACF4HIqOzZ11ixK0roPs
-         vlP3nImvjk5o+sxy/3mvbaEFZHvEkT0s1jKQWqtBw4y+ifv/5WCxxurp5Vos0clc5Gtw
-         XnmQ==
+        b=ZBhrTRIyfto1HlXoMKhrzPrr4he9nQLY7Ghk6Hzs+nmgOG+zqjLA4/wkWZ0MRyRBNl
+         y3PnJIxnyQU8w828SgJ2P/6miRGGfilXeChlz54ieCf+PGqo5hb5/xetpf4I4ez2mAoi
+         FvLonwUUSpYW6+jfQIrQ7Mu4ZqnO4evXqG4SqAH71DNtTYygGKpjEPyWA73qIXoPZkfK
+         0rHdbyLAlM7A9ePbV9++pIB12xGnOTmJQnDR9Jk1wmb9lyS19tTu6eF1+Ec63bo/hjCa
+         j2EUB33gVH9ZR08oFlsfus9455rCjSsJgZB+9P0tpvk7PznmtyRQKxpyZIMe9K7ssNiR
+         Ksew==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=n4WVV+4ephNgyhPHk8ZRQ/OrpzAMbrme6jhlWNbvFVE=;
-        fh=u9DnAkFIpsHIWMo+B/CgaKHWYZN6oe85/rZ6U1kvV2o=;
-        b=lCV6xIrd0xplBD2qysBoscOlvLqusBlecJOnErjJgdsX329nbPGKITlBSj6jEe6RAs
-         B4jEmBGzWrO+U03Z//CNlr7BrfRsdZBdW8ac6mxG4uh9RMLq8FYjP9ppyPv/6TH4HRKk
-         N2b2DNs+iQy7L6MglV5u8RCP6OgYg2PBUdj9Cwp5sFQjZ33G9SIsZ/zlCQlRF1AE4ibh
-         CfV9mcSGjBG9txoI5OB1dcKwAwOWD3H8jrImQL+gv5sxH3vMsfiPManSOGKSQoYzyLRz
-         aOySHXqTyKQ7XhQIBvQ0UcvBidyd0riDYV9Ccvu5gJnGwtVHiUwO00iKeNlgNHeH25Q2
-         tZGA==;
+        bh=7wAk+BDVMPKCwcuryA0cv8GSRpwUD085xIMaymIZssQ=;
+        fh=D1e4OHpRyrDipzsfYikirxIIWWvtZiwEJENyMeAbPDU=;
+        b=agveELEjH5uBTaYUHUgDjLhcCRtq2IBPkjEB3QnVu/s/5tbdvBPCbeeFjWwBwDOH4H
+         wr3uXevK5ESF781c7YYgFQ1jJNc7UIQavfInNL0jULbSU6W+eThPEkzAbFGQOybMtVil
+         Qg1k5f7uJoTlaETViFm1w7FYbblR6O6/AtXSYLccPF0GPV00P7bHevh8KBuGdWpMxetA
+         hLpfN3+P3FYENzUajmkNbeiD8HqZE7hAGTkiJ/EEm1k2oajBa3G0mQRHjEQqK3OOg2co
+         1OPcRyUIPX44mKmGkbWWZwpFu7CdTXOlnIAOkZBSS7IYgk/3EqvCP4K4vTHMHYKAeDCA
+         j+NA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1769646605; x=1770251405; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1769674685; x=1770279485; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=n4WVV+4ephNgyhPHk8ZRQ/OrpzAMbrme6jhlWNbvFVE=;
-        b=JCh1chNgJna7XodwbrOcPMUO8U/ZCnmdXY3WSmUAEQuARHEbQfU8cEExbOARuYV6kN
-         Ovmz9dofyUu4rcQX/wVD5KGOQg2yRMlPcWmtuuZMippVIJwm+pRqoyM/w8oqJJw8Hx/n
-         eKmixxA0hCMN1+yTO8c4s3l8Mdd+wXRgVaQjSWc1gtgFnbZSzBbQmKBAfopnYW9l9c4O
-         srpKxu5e1OICX5DQGfMVaHZkK0Xgpsbc/fd2Zlxfmk0k5185sEqtKZo+Ps9oxq16Uz1A
-         wACWFqySmjGEm28zODMf0nIocHGST7SqBpU1TOQecgJgXTdH4xJ/5HWAhIVxyFibpnpw
-         aFQQ==
+        bh=7wAk+BDVMPKCwcuryA0cv8GSRpwUD085xIMaymIZssQ=;
+        b=TvCAzh8NUFFgJKWfIzYQz8dEkk+TjVMAvyz5WGL+/bQyVBpTTyulqtITn6Ot2Cq8X8
+         hcz2F/UySICL6SSyJxx9JymKPb2waDLC+GDOfKACcXW+Dd8YFg1PxOTf3Y83AKswz5tm
+         m6ck3neTWzq/jJFemGV+/I+80J0Ck67WvPv/EA//DV7T4KLFcKEAMllDZD4c8QGQ6lGc
+         iUZJwRUYwP3Uve0R8CYOn6+eC/9B67YrrA/dH7IDV4abg4GgEX7+Hu/Rx6ZuFEXrn/56
+         2PvnITsQ48rKLk0eXqOR1AtYhlkmqWQq6ASpg+TFkLjwaHG6IezIbiQmWhrRF/m0i5ay
+         nODw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769646605; x=1770251405;
+        d=1e100.net; s=20230601; t=1769674685; x=1770279485;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=n4WVV+4ephNgyhPHk8ZRQ/OrpzAMbrme6jhlWNbvFVE=;
-        b=Lyrkz1dkrVGNLHcEWRfye2hig4vh7PAoRUufAzDoZ1MORgEGcFxrZU4bX2Noys3pq+
-         WxZFR2xec+6dMjevOpF5TtpgU3OMBxz+2nN5U4Cb9zPErobeTZrNnqppr+Lkvc8EYUC2
-         s+OY5JbUimogrURTgEar+EwszcBixSxQlvOmgS7DFVfFUZISSqr21h1TsKRE0geva7V3
-         XskQOg5ZHacRTTkwnmv/1eoEofvJVgC0zm4p1gjcyZtVO02LFi3gHsyhrem51v6PgR0X
-         wsy4CrOeGc2JaZiekHpOFqu+DF09SB2W6NN51YoiM9e1Q91hsmyKQyPV6jVWAroxo7oX
-         mKvQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVcW5Vq6qoHtiue+ObauGVoZqJOqzGqFPJ0H0KWg1GF+2CMAwoIQzlH4aQHgdh+7vi9NoAO+hZFHVzj@vger.kernel.org
-X-Gm-Message-State: AOJu0YwS987yLnVS96wnwjzjBc1K9w5q1nZ7DBBl9gj5F2d1LU0cJo1a
-	v7y8BfYYkIJvx2F3qrHUERjqTBwuj7wyNmZ6+1eokKnj6/Lu5bb+TIiaZUZ0cpCIvWp1CFkAZ6O
-	ecvTbLDui6wnRXaeJqcXSc3pSHKh0iBYjat966RE=
-X-Gm-Gg: AZuq6aJ1ckn95JdToONWBYHEyd7dSbTvkpA6S+Eu2LgjWXy4pdruBJUcjyNQkUvOWdO
-	Lj7+swsk31Gfj8tsn71IgNphwN8UzDAKyr0lm9WmS2Mrm5k/X+7paBf1fNedcmaU+jU9ffSNnH2
-	YnkJsTvlyIHI/x5K8NxyK25uuGWn+FSlSDfwDyNk85DRKehThazyyNrhhEE9NNIcBho0EwLRGIC
-	mZ9R1jkTJeXrxbOgDEIXB6JLb0UqwuksTwvRLBfd29OeNj74CvNRI0azQ4BhEpzDWFv80TnEADi
-	zlBsXLbneqVF0PDihWMs4O6sfUbyNDNj5UKZlQ==
-X-Received: by 2002:a5d:5f54:0:b0:435:a647:a3b8 with SMTP id
- ffacd0b85a97d-435dd1bd807mr9067401f8f.36.1769646605054; Wed, 28 Jan 2026
- 16:30:05 -0800 (PST)
+        bh=7wAk+BDVMPKCwcuryA0cv8GSRpwUD085xIMaymIZssQ=;
+        b=Haj8vfb8m8zB3qRdlQzxyMdCb7vMKIcYJUgw96zwcyebgLVlv5chQXW/xpuPmgfvlN
+         Qs2TGoQSnUDtBKavjGlYWXxyYwa9pX6PGd9qjOvybZsP1sq2+EIfYHYhqno9kWnbPfba
+         4Xzl1RR+/CnGPNemzAtrkV2bWFTRh25DNPYfYrgiALnPW7kYd5WMHWpqjdQ3hgxBageA
+         IwRZaV8U6Q+gnXWU0wJl20VGCswOg7EoAzon/D1x96lFAjyuk15QqVOenOfYBcZv7TUW
+         vIakGtDwOp3GBuE0S7iWQoCXdC5BdVv8owpsq3F0RzAw8X6PQ6SdzU0l5Kc3nngmzCBA
+         oQWg==
+X-Gm-Message-State: AOJu0YxE9CbtCwejSzNirVtQCbzc5Zbm4fOqcdLSOK8vVIS3+6AaQFsk
+	ectZYKT4wxaredjTCWDZtXINu6S8dQ1JZiFldQ99yDcKx0xF7HTh7H04VoomGSAAEyVVF4BmhuR
+	xsemSYJYKQ30vYYbb4GF53uESJRvxTGA=
+X-Gm-Gg: AZuq6aL7RHaR3rF15KlKIoibZO2GPcyvdT5fL+yschNmfy+APTVoVI0zdQa22OThZzH
+	IJroQ1JZN5IWo1UnchPhqbK4W1JUP4BQ4A4iFCrNkuWGRRST4LJBg+XlqDPl91QZhLBL05N0RGC
+	GHzRG0Ty60QOLiy7ZzC1S/zYdtu4kLesIMr+gAEd5i+bVe+vloMARChfOTQfq0vB1m2t/WndVUc
+	iNmN7tVMkpjOCmJp+26r8rWBBE27XQll9PZGlOMEhMYCo1kMghbvbJgBgT7WgzgVCb01TZPRHhJ
+	CgbkBg==
+X-Received: by 2002:a05:7022:ea28:b0:11d:fbf1:1e27 with SMTP id
+ a92af1059eb24-124b105e89cmr874117c88.19.1769674684881; Thu, 29 Jan 2026
+ 00:18:04 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260126023055.405401-1-CFSworks@gmail.com> <20260126023055.405401-4-CFSworks@gmail.com>
- <65d1b29527a7ea8b06fd18854a25e0d1f60a24c0.camel@ibm.com>
-In-Reply-To: <65d1b29527a7ea8b06fd18854a25e0d1f60a24c0.camel@ibm.com>
-From: Sam Edwards <cfsworks@gmail.com>
-Date: Wed, 28 Jan 2026 16:29:53 -0800
-X-Gm-Features: AZwV_Qi8JXNGuDRSBsWJ6m148wG9oid0uSjuqlP3a0RRZZ_8I1yroXpwkz14Qdg
-Message-ID: <CAH5Ym4gTE_ueXXuDngBHWdUd=LU0SFQEB20vs0rSYL_BB4O-Tw@mail.gmail.com>
-Subject: Re: [PATCH v3 3/4] ceph: remove error return from ceph_process_folio_batch()
+References: <20260128103329.964466-1-idryomov@gmail.com> <20260128103329.964466-2-idryomov@gmail.com>
+ <a70727fde6f4030181481f82f5c0c292cfd266bb.camel@ibm.com>
+In-Reply-To: <a70727fde6f4030181481f82f5c0c292cfd266bb.camel@ibm.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Thu, 29 Jan 2026 09:17:53 +0100
+X-Gm-Features: AZwV_QgR5sSdDjZxzP0wFKgK8_hxcztu--lebV5pH-_ZASs0lpb-rCIYf7cMTl8
+Message-ID: <CAOi1vP8ggM1eZFz0KodZ79rERke5Ue60-sEwow1enWOdnzwaEw@mail.gmail.com>
+Subject: Re: [PATCH 1/5] libceph: define and enforce CEPH_MAX_KEY_LEN
 To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: Xiubo Li <xiubli@redhat.com>, "idryomov@gmail.com" <idryomov@gmail.com>, 
-	Milind Changire <mchangir@redhat.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "brauner@kernel.org" <brauner@kernel.org>, 
-	"jlayton@kernel.org" <jlayton@kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alex Markuze <amarkuze@redhat.com>, 
+	Patrick Donnelly <pdonnell@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jan 26, 2026 at 2:55=E2=80=AFPM Viacheslav Dubeyko
+On Wed, Jan 28, 2026 at 9:37=E2=80=AFPM Viacheslav Dubeyko
 <Slava.Dubeyko@ibm.com> wrote:
 >
-> On Sun, 2026-01-25 at 18:30 -0800, Sam Edwards wrote:
-> > Following an earlier commit, ceph_process_folio_batch() no longer
-> > returns errors because the writeback loop cannot handle them.
+> On Wed, 2026-01-28 at 11:33 +0100, Ilya Dryomov wrote:
+> > When decoding the key, verify that the key material would fit into
+> > a fixed-size buffer in process_auth_done() and generally has a sane
+> > length.
 > >
-> > Since this function already indicates failure to lock any pages by
-> > leaving `ceph_wbc.locked_pages =3D=3D 0`, and the writeback loop has no=
- way
-> > to handle abandonment of a locked batch, change the return type of
-> > ceph_process_folio_batch() to `void` and remove the pathological goto i=
-n
-> > the writeback loop. The lack of a return code emphasizes that
-> > ceph_process_folio_batch() is designed to be abort-free: that is, once
-> > it commits a folio for writeback, it will not later abandon it or
-> > propagate an error for that folio. Any future changes requiring "abort"
-> > logic should follow this invariant by cleaning up its array and
-> > resetting ceph_wbc.locked_pages appropriately.
+> > The new CEPH_MAX_KEY_LEN check replaces the existing check for a key
+> > with no key material which is a) not universal since CEPH_CRYPTO_NONE
+> > has to be excluded and b) doesn't provide much value since a smaller
+> > than needed key is just as invalid as no key -- this has to be handled
+> > elsewhere anyway.
 > >
-> > Signed-off-by: Sam Edwards <CFSworks@gmail.com>
+> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 > > ---
-> >  fs/ceph/addr.c | 17 +++++------------
-> >  1 file changed, 5 insertions(+), 12 deletions(-)
+> >  net/ceph/crypto.c       | 8 +++++---
+> >  net/ceph/crypto.h       | 2 +-
+> >  net/ceph/messenger_v2.c | 2 +-
+> >  3 files changed, 7 insertions(+), 5 deletions(-)
 > >
-> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> > index 39064893f35b..cdf11288d6b7 100644
-> > --- a/fs/ceph/addr.c
-> > +++ b/fs/ceph/addr.c
-> > @@ -1284,16 +1284,16 @@ static inline int move_dirty_folio_in_page_arra=
-y(struct address_space *mapping,
-> >  }
+> > diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+> > index 01b2ce1e8fc0..5601732cf4fa 100644
+> > --- a/net/ceph/crypto.c
+> > +++ b/net/ceph/crypto.c
+> > @@ -37,9 +37,6 @@ static int set_secret(struct ceph_crypto_key *key, vo=
+id *buf)
+> >               return -ENOTSUPP;
+> >       }
 > >
-> >  static
-> > -int ceph_process_folio_batch(struct address_space *mapping,
-> > -                          struct writeback_control *wbc,
-> > -                          struct ceph_writeback_ctl *ceph_wbc)
+> > -     if (!key->len)
+> > -             return -EINVAL;
 >
-> I still prefer to return the error code from the function.
+> Are you sure that this check is not necessary? What is the motivation tha=
+t we
+> can remove this check?
 
 Hi Slava,
 
-Since the objection to this patch is mere preference at this point, we
-need to seek broader consensus before either of us unilaterally
-decides whether this style is appropriate for the CephFS subsystem.
-I'm willing to follow the preferences of the group, we just need a
-"group" first. :)
+The motivation is explained in the patch description:
 
-Christian: Since you committed the patch introducing the
-ceph_process_folio_batch() function, would you like to weigh in?
+  The new CEPH_MAX_KEY_LEN check replaces the existing check for a key
+  with no key material which is a) not universal since CEPH_CRYPTO_NONE
+  has to be excluded and b) doesn't provide much value since a smaller
+  than needed key is just as invalid as no key -- this has to be handled
+  elsewhere anyway.
+
+The important point is (b): I don't see much sense in explicitly
+denying 0-byte keys but accepting e.g. 1-byte keys.  Both will be
+rejected by crypto_sync_skcipher_setkey() later anyway.
+
+>
+> Could be key->len bigger than CEPH_MAX_KEY_LEN?
+
+Not if everything is working as expected.  But in theory anything is
+possible because the key that we start with is essentially user input
+and therefore can easily be malformed -- hence this change.
+
+>
+> > -
+> >       key->key =3D kmemdup(buf, key->len, GFP_NOIO);
+> >       if (!key->key) {
+> >               ret =3D -ENOMEM;
+> > @@ -83,6 +80,11 @@ int ceph_crypto_key_decode(struct ceph_crypto_key *k=
+ey, void **p, void *end)
+> >       ceph_decode_copy(p, &key->created, sizeof(key->created));
+> >       key->len =3D ceph_decode_16(p);
+> >       ceph_decode_need(p, end, key->len, bad);
+> > +     if (key->len > CEPH_MAX_KEY_LEN) {
+> > +             pr_err("secret too big %d\n", key->len);
+> > +             return -EINVAL;
+> > +     }
+> > +
+> >       ret =3D set_secret(key, *p);
+> >       memzero_explicit(*p, key->len);
+> >       *p +=3D key->len;
+> > diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
+> > index 23de29fc613c..a20bad6d1e96 100644
+> > --- a/net/ceph/crypto.h
+> > +++ b/net/ceph/crypto.h
+> > @@ -5,7 +5,7 @@
+> >  #include <linux/ceph/types.h>
+> >  #include <linux/ceph/buffer.h>
+> >
+> > -#define CEPH_KEY_LEN                 16
+> > +#define CEPH_MAX_KEY_LEN             16
+>
+> Frankly speaking, I don't quite follow what was the point to change the c=
+onstant
+> name?
+
+CEPH_CRYPTO_AES256KRB5 is going to operate on 32-byte keys.  And,
+irrespective of that, having MAX in the name communicates the intended
+usage better.
 
 Thanks,
-Sam
 
->
-> Thanks,
-> Slava.
->
-> > +void ceph_process_folio_batch(struct address_space *mapping,
-> > +                           struct writeback_control *wbc,
-> > +                           struct ceph_writeback_ctl *ceph_wbc)
-> >  {
-> >       struct inode *inode =3D mapping->host;
-> >       struct ceph_fs_client *fsc =3D ceph_inode_to_fs_client(inode);
-> >       struct ceph_client *cl =3D fsc->client;
-> >       struct folio *folio =3D NULL;
-> >       unsigned i;
-> > -     int rc =3D 0;
-> > +     int rc;
-> >
-> >       for (i =3D 0; can_next_page_be_processed(ceph_wbc, i); i++) {
-> >               folio =3D ceph_wbc->fbatch.folios[i];
-> > @@ -1323,12 +1323,10 @@ int ceph_process_folio_batch(struct address_spa=
-ce *mapping,
-> >               rc =3D ceph_check_page_before_write(mapping, wbc,
-> >                                                 ceph_wbc, folio);
-> >               if (rc =3D=3D -ENODATA) {
-> > -                     rc =3D 0;
-> >                       folio_unlock(folio);
-> >                       ceph_wbc->fbatch.folios[i] =3D NULL;
-> >                       continue;
-> >               } else if (rc =3D=3D -E2BIG) {
-> > -                     rc =3D 0;
-> >                       folio_unlock(folio);
-> >                       ceph_wbc->fbatch.folios[i] =3D NULL;
-> >                       break;
-> > @@ -1370,7 +1368,6 @@ int ceph_process_folio_batch(struct address_space=
- *mapping,
-> >               rc =3D move_dirty_folio_in_page_array(mapping, wbc, ceph_=
-wbc,
-> >                               folio);
-> >               if (rc) {
-> > -                     rc =3D 0;
-> >                       folio_redirty_for_writepage(wbc, folio);
-> >                       folio_unlock(folio);
-> >                       break;
-> > @@ -1381,8 +1378,6 @@ int ceph_process_folio_batch(struct address_space=
- *mapping,
-> >       }
-> >
-> >       ceph_wbc->processed_in_fbatch =3D i;
-> > -
-> > -     return rc;
-> >  }
-> >
-> >  static inline
-> > @@ -1686,10 +1681,8 @@ static int ceph_writepages_start(struct address_=
-space *mapping,
-> >                       break;
-> >
-> >  process_folio_batch:
-> > -             rc =3D ceph_process_folio_batch(mapping, wbc, &ceph_wbc);
-> > +             ceph_process_folio_batch(mapping, wbc, &ceph_wbc);
-> >               ceph_shift_unused_folios_left(&ceph_wbc.fbatch);
-> > -             if (rc)
-> > -                     goto release_folios;
-> >
-> >               /* did we get anything? */
-> >               if (!ceph_wbc.locked_pages)
+                Ilya
