@@ -1,393 +1,487 @@
-Received: from mail-dl1-f47.google.com (mail-dl1-f47.google.com [74.125.82.47])
+Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 377AF369983
-	for <ceph-devel@vger.kernel.org>; Tue,  3 Feb 2026 20:22:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.47
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770150157; cv=pass; b=CZOe+M8YNCHygEBtehnaWikfqIlidAkgBqhdW8hkut224T8PL6qUtcAcg4UHNmgAZmrcsJZxzjYgmnwVHyYmnnUCLIBSwZax5v6TCuzD2xnUAk4vPcVcAiCcjIKcLMIu+Lw7ne5YrHNsnx5HY8hnoj2riatV1zhpeWRygwP5who=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770150157; c=relaxed/simple;
-	bh=hoeG6ezJG46G81Ldus6BbKECSApV/mBK585rYAMKW8k=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JyrhBFHApDJNqHiiNZi4bEHSgi3QXBcO+oNEi5zKY1HXpeEzhvSLCkBDnsJxGmDBe5yMyB74Zv9VnKHpK87jQxSv8HnCmJIv9ibYdnF/vtuYdXwRlL40YC2OcYbabeOZLUvYusfQUBBBNCIcls+EIObAqWXFjZQvSdcxcW8eF7Y=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JYbAfb2W; arc=pass smtp.client-ip=74.125.82.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9116C35EDAA
+	for <ceph-devel@vger.kernel.org>; Tue,  3 Feb 2026 22:55:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770159331; cv=none; b=cvuAy2gYkirxUaBmSucZQGgyR/k+TC6muwg7DZHpYNM0jgbONwxK0Y/JHIEx4gabBa9Fu4h1Ps2mRCnevUpqWb3Yt36qIpEEv8CNPhf64HKTXwRvDo8xXo2Zq5pYIU0LEYChKQjKdV8HcYFkmTMGb7rHPxxHEIgMXCTmyIkJMz0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770159331; c=relaxed/simple;
+	bh=hkBB3/AMO6f0jwvLmKTpwoWH/MchTnA6izpXGg2a94U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CDl8NysdpzrxXVxpkTRfl+D/mLFjBH0KQs/FP4PGrwDP6h37eMHbWVNaq3wDPnTGYYDYAmn7d0X2GgdWMpBlG3HbecQt28vCAtMuEmJgjQip5pM2jK2tUYfHqRIDkpoXRUEhAQLxEQzWEtKl32t0JN+OZf+tJ4N/kSuU9s5cMyE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b=nQ/6Icxh; arc=none smtp.client-ip=209.85.128.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JYbAfb2W"
-Received: by mail-dl1-f47.google.com with SMTP id a92af1059eb24-1248d27f2b9so7538549c88.0
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2026 12:22:36 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770150155; cv=none;
-        d=google.com; s=arc-20240605;
-        b=BWCiHDfPDIq+KSVghiD+Uuu6dqeMrtzZG9w2uwKaodb/TUtj1p7OSGz4bSZOf3ekqC
-         tKBWrkaiqm4XM0SD0N/RnvqulBspksEcVxknfJgSOhU0Em8Q0q9CycJ70GCnlcjpWrRB
-         rZYEUqTeuaeff2i4U/MF/XmAjJNVV6pyzJ0Xp8DmpXnnB7q1SkCjCcPHXq8yTWEXDo2k
-         b0ByK1BzIFaPM/oL/Ish5UkYv8KkxHRQJMCOTs09zvfwX4QZ6wbzbPKcLviH/DYojZcu
-         kGePyIWl9+ZFQOMgzUMTt63Fcg8UfHZk1g4b/UAC+O4F+qvj7i/q2QCPdxEZMzeq4PlF
-         W5pw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=Fua09KTV6B350HMjEeoRZq4bAjib2n4gOjsZyPHGzjI=;
-        fh=JeSAR9Dz0PTVaX+hNev/583BEAUyRGyXn/G1wWwm3+M=;
-        b=VJx0WUiBNn6Mipx4OCnLr65DM3f67FEFlL3/QRUxYQaugJq9jt20PDT9dpyaB4TuBh
-         sW0KhYgmt96xPwMCx4HbywfR7gZI6ifQnpJFJK+R0JYGM5M5xP4O/Ye45au6Dbkyyh4s
-         9D1pSWCiDehxPGblC9uqZ+zs3JdczyGdpeyFdbbmJHsu4ikbihmlseeLIoXOO1aQ/41P
-         QGKzyPtcjyDykYk9O4unlY26Vq+d+6TwQn3pR3wPWgghkc++UqdedpTOK00DbgDfH9sD
-         MckJ084xZrYpdKma1Wa+6TP8uTqlZ+SaBs6niMlg3qa3zNi0UOEwUlJkr7GWeVBeRm5b
-         /zvw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b="nQ/6Icxh"
+Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-7927b1620ddso5549547b3.0
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2026 14:55:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1770150155; x=1770754955; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Fua09KTV6B350HMjEeoRZq4bAjib2n4gOjsZyPHGzjI=;
-        b=JYbAfb2WKuRW4KyScM00NfDdPC45aCNX8vUp+bfx6OxB7CO3vXLxbcR6Psk73bUV5y
-         pIyZFnEaMLvYGr6IvXa94lD1e8Ara/plwqksZXU+nsyXYX5Ci9vtSBDcFNELpJdce0xa
-         cLu2On7DA/RwN4tkahak32+N+Po0z4+5H/owpZNtWBqzjGpo76JukgvUmVkpj42rDO5c
-         nuKWNZXZKBkf5je6IC53KastjQ2Xg2jKlMYI2065oDUGpLF+CHEXvhOXAwv0/vtAHSu8
-         440Fq10fSVXMq4hxk0Yv4pS2OAinqF3Dhll15khWdZndtfwt+RzENt9lWEwelkhuxrvD
-         07eQ==
+        d=dubeyko-com.20230601.gappssmtp.com; s=20230601; t=1770159328; x=1770764128; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+FqB+x5365XOOSCsL2HgHORYCs5McF3HyxxRlmI/SZ0=;
+        b=nQ/6IcxhrJlkQYzMS1qhVTClLMPeQmEsU6oqfM07JDLG2eGEkHBjvbmtzLNepEO5F3
+         gLMGce8ar7TqaY51erPPPBCbLnOHciMWX9j7pkyiSSjOcg0c35NVBNm3yVF4gpMk3nDF
+         rvscKoPNjPmiEDwNCwSt9Uy5BdhAPaU4e6S70sLr+vgqz4qK8d5ob1XUF3j5Th4tmzyy
+         oHDJQ7SNNIQtD+j7lOgg7+tdNz70iQNWhFD8gpy2X0e5qqEf+MGVZ7S/GeKa/cfx4r/r
+         AKAba+XypKuVBU3XlzA8dP5OxIxleleRNeRy52LQlXnvb3ShneNGXrd6moiz9zblofEv
+         ySmw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770150155; x=1770754955;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=Fua09KTV6B350HMjEeoRZq4bAjib2n4gOjsZyPHGzjI=;
-        b=NoAGp+EQf7L1R4AlmaBRoiWUbUoemzXIVd+aOG5eUEHw7gzt7mhRqGoESnoEaVD8i7
-         4WJptpouNOhIQhtOXkNqhlkhyJmcw7mXt/UQWUraZ+HoKhpkj0U7aXP3No6NVgVoxhWm
-         eEN9t30vYYw/ecmtukF5Yl4TtiG1gAFZo/yOoQ92WBJ7F12f3R4QfUaPcyUAJ9PmRQp0
-         4mtvihfCEFsCX9TN3co/5CrpsXuHdM0p7zOtixlpROtbpOMgqOdnM7aDY7MKAtGvbum8
-         TvME5MQBLibsZXlJje/ZMY0HdSlzPL24z9J5dRfO4l510JMHXp6s3V7v8XiVH5NfAvxN
-         iugg==
-X-Forwarded-Encrypted: i=1; AJvYcCUNkll2U+pFHzVLui1j5ZfQaw0S3wNs0/kJsICgqWN356DrNPOmeC2B+79Usd0xJnEMio3dxOLR2BHg@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz829ibY6OVf0QdgyP67MTZNOsZayfLh7LcC06aHN95g/S2K1lF
-	nDQ2Ma3FfH+D+YRuaiWxXTq6WsSrS3t+Ob62RsKUyqC4gP/NhvQipJB6mZPsNc3Gunc/Leoor7N
-	yAZ8f1IRUD+BgWUmaP7mYrk5tIPcvnME=
-X-Gm-Gg: AZuq6aIj3DG96oycTdpxGqEqy54FQmA8XM0+IWU2lGvXJpntffeZjF9dFwG59A69Y6D
-	ln7TTHdDlGZHdubJXtDqOpg6H1bc0JkzvvMilw69yODEsmX8Jm1dLfM/h8U8589GDjBEuDenQav
-	PHhHlVcLwy4QslUeDw81pG91Gwd5A4jK9sTtZEaDMFHQXTfgAdLWZv0YTmSbexLWwjPXoQtbtKf
-	t+ILZWfxoR1/5XFC++qIKrW05gx6U+GyUhdRuSb5noMf5ttIh0vT7La8U9dcHf3vdIuhvw=
-X-Received: by 2002:a05:7022:4396:b0:123:3461:99a4 with SMTP id
- a92af1059eb24-126f477dfb6mr330170c88.17.1770150155063; Tue, 03 Feb 2026
- 12:22:35 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770159328; x=1770764128;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+FqB+x5365XOOSCsL2HgHORYCs5McF3HyxxRlmI/SZ0=;
+        b=PzcrXHm/wS1xYB5KVAXPGVDA/uhlKcWfVLI/GR+D0X9lBiERtAdGdcCG1rc25ED1kT
+         qjTNvb2nhr5OkL4K1H7I0q9rmdOmkIRVTOhw+7LlixDs0e74Jm8doY2XyfEAeznp2O3r
+         bru4lwOO6xfeL2EtXo2notQZyOOQiD3SNx2BCPvvk9Dx1FkDjU+qh9edUfWGdzh3w9CT
+         W57trE/CHbJAabBRBtA4OxliQXILZ3PL1u15FtcLZ1p3syNfDOHXyu660x9n3BgMkDfp
+         LokWs1qOLvjPCXJ1mv3+uX82xVg/Hf3N+pF/0NdEuPmpCAAFjLB0ymstueDB3CjEWpCy
+         jOJw==
+X-Gm-Message-State: AOJu0YzFK+d8PSbpJCPTqD6vJkQO+TzMHEtrnmNuNqTgWgko+A/1Pnw3
+	jLjyVPGgkNk50H9p2WZFy8C637pxP7/CrAvnZZJPo+otxAKc/+4sOEd9m9dYKduEvdcOpDVXWnc
+	7Umcpo+U=
+X-Gm-Gg: AZuq6aJvVpkm4nS0oTvTaZzPF4mxIH/+aNFsVwaSuhkD+vDx3UvDQSXsx1LzgXqcPdT
+	cjos1SQi7IlmlgRNGwLQ1B45/CwJ/1ydo/YPFww8o+3icrzbzvELvsfNzZxqCHFcptud+Gy/LqK
+	0c2VAj1yOWMrYbSjPeeC/Ce3me073lWCPIK30j8NXROss3pZnTkHLFgGU3fa70Z6/bqubdTX9WK
+	gmu75ERJ/3eSzlepDwwKFMRsQHFFcXgf2zHfr07kVf2/ljO9UAEXakSz9Di7SchVdz/luK2mMiw
+	IsQG8qXlQkPTzJhtOlKZ8f/h/7RFLghDf7HmEulChWqempiBfMGibKHjhBr4qcOU0EUYwNDrUDc
+	coSitVGAk9mvQX/rYbArw7eO0S4LnGht/WdEdgLYJfzTaxUg74xkfr5o8VuZ5ZnA9Ztc2z3phHD
+	SwT0JMXMmdW8HBHzrkksLaeAo30shj3KSOwwvI6Y1i/UqTVlsCep3oSv04nvu40Yj4bcNrMV2ka
+	Szsa7rHiShdW5HeoiE=
+X-Received: by 2002:a05:690c:c4fa:b0:794:a407:c01f with SMTP id 00721157ae682-794fecf1c75mr10465737b3.20.1770159328079;
+        Tue, 03 Feb 2026 14:55:28 -0800 (PST)
+Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:bfac:d24f:fbb0:2be6])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-794fee85606sm7552427b3.5.2026.02.03.14.55.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Feb 2026 14:55:27 -0800 (PST)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: ceph-devel@vger.kernel.org,
+	pdonnell@redhat.com
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	amarkuze@redhat.com,
+	Slava.Dubeyko@ibm.com,
+	slava@dubeyko.com,
+	vdubeyko@redhat.com,
+	khiremat@redhat.com,
+	Pavan.Rallabhandi@ibm.com
+Subject: [PATCH v6] ceph: fix kernel crash in ceph_open()
+Date: Tue,  3 Feb 2026 14:54:46 -0800
+Message-ID: <20260203225445.1515933-2-slava@dubeyko.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251220140153.1523907-1-daniel@chaospixel.com>
- <20260203194039.2098776-1-daniel@chaospixel.com> <b02a0595c9a84ee2abdf9d0d9d05c8cfeaa92180.camel@ibm.com>
-In-Reply-To: <b02a0595c9a84ee2abdf9d0d9d05c8cfeaa92180.camel@ibm.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Tue, 3 Feb 2026 21:22:23 +0100
-X-Gm-Features: AZwV_QixaEAheyJ4KtGxO3emuD05FsOkt59szMExg_tcoH0zglHGo17G8vWrBp0
-Message-ID: <CAOi1vP8w1si2kdL7jY3LOh35k6H9JQU6ck0B81OQFJt6eFV6qQ@mail.gmail.com>
-Subject: Re: [PATCH v3] fs/ceph: Fix kernel oops due invalid pointer for
- kfree() in parse_longname()
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "daniel@chaospixel.com" <daniel@chaospixel.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Xiubo Li <xiubli@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Tue, Feb 3, 2026 at 9:16=E2=80=AFPM Viacheslav Dubeyko <Slava.Dubeyko@ib=
-m.com> wrote:
->
-> On Tue, 2026-02-03 at 20:40 +0100, Daniel Vogelbacher wrote:
-> > This fixes a kernel oops when reading ceph snapshot directories (.snap)=
-,
-> > for example by simply run `ls /mnt/my_ceph/.snap`.
-> >
-> > The bug was introduced in commit:
-> >
-> > bb80f7618832 - parse_longname(): strrchr() expects NUL-terminated strin=
-g
-> >
-> > The variable str is guarded by __free(kfree), but advanced by one for
-> > skipping the initial '_' in snapshot names. Thus, kfree() is called
-> > with an invalid pointer.
-> > This patch removes the need for advancing the pointer so kfree()
-> > is called with correct memory pointer.
-> >
-> > Steps to reproduce:
-> >
-> > 1. Create snapshots on a cephfs volume (I've 63 snaps in my testcase)
-> >
-> > 2. Add cephfs mount to fstab
-> > $ echo "samba-fileserver@.files=3D/volumes/datapool/stuff/3461082b-ecc9=
--4e82-8549-3fd2590d3fb6      /mnt/test/stuff   ceph     acl,noatime,_netdev=
-    0       0" >> /etc/fstab
-> >
-> > 3. Reboot the system
-> > $ systemctl reboot
-> >
-> > 4. Check if it's really mounted
-> > $ mount | grep stuff
-> >
-> > 5. List snapshots (expected 63 snapshots on my system)
-> > $ ls /mnt/test/stuff/.snap
-> >
-> > Now ls hangs forever and the kernel log shows the oops.
-> >
-> > The full trace is:
-> >
-> > [   53.703013] Oops: general protection fault, probably for non-canonic=
-al address 0xd0c22857c0000000: 0000 [#1] SMP PTI
-> > [   53.703201] CPU: 11 UID: 0 PID: 360 Comm: kworker/11:2 Not tainted 6=
-.18.0-rc7 #41 PREEMPT(voluntary)
-> > [   53.703281] Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS=
- 1.16.2-debian-1.16.2-1 04/01/2014
-> > [   53.703317] Workqueue: ceph-msgr ceph_con_workfn [libceph]
-> > [   53.703424] RIP: 0010:rb_insert_color (/usr/src/linux/lib/rbtree.c:1=
-85 (discriminator 1) /usr/src/linux/lib/rbtree.c:436 (discriminator 1))
-> > [   53.704503] Code: 76 17 48 83 e1 fc 48 3b 51 10 0f 84 b7 00 00 00 48=
- 89 41 08 c3 cc cc cc cc 48 89 06 c3 cc cc cc cc 48 8b 4a 10 48 85 c9 74 05=
- <f6> 01 01 74 1b 48 8b 48 10 48 39 f9 74 68 48 89 c7 48 89 4a 08 48
-> > All code
-> > =3D=3D=3D=3D=3D=3D=3D=3D
-> >    0: 76 17                   jbe    0x19
-> >    2: 48 83 e1 fc             and    $0xfffffffffffffffc,%rcx
-> >    6: 48 3b 51 10             cmp    0x10(%rcx),%rdx
-> >    a: 0f 84 b7 00 00 00       je     0xc7
-> >   10: 48 89 41 08             mov    %rax,0x8(%rcx)
-> >   14: c3                      ret
-> >   15: cc                      int3
-> >   16: cc                      int3
-> >   17: cc                      int3
-> >   18: cc                      int3
-> >   19: 48 89 06                mov    %rax,(%rsi)
-> >   1c: c3                      ret
-> >   1d: cc                      int3
-> >   1e: cc                      int3
-> >   1f: cc                      int3
-> >   20: cc                      int3
-> >   21: 48 8b 4a 10             mov    0x10(%rdx),%rcx
-> >   25: 48 85 c9                test   %rcx,%rcx
-> >   28: 74 05                   je     0x2f
-> >   2a:*        f6 01 01                testb  $0x1,(%rcx)              <=
--- trapping instruction
-> >   2d: 74 1b                   je     0x4a
-> >   2f: 48 8b 48 10             mov    0x10(%rax),%rcx
-> >   33: 48 39 f9                cmp    %rdi,%rcx
-> >   36: 74 68                   je     0xa0
-> >   38: 48 89 c7                mov    %rax,%rdi
-> >   3b: 48 89 4a 08             mov    %rcx,0x8(%rdx)
-> >   3f: 48                      rex.W
-> >
-> > Code starting with the faulting instruction
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >    0: f6 01 01                testb  $0x1,(%rcx)
-> >    3: 74 1b                   je     0x20
-> >    5: 48 8b 48 10             mov    0x10(%rax),%rcx
-> >    9: 48 39 f9                cmp    %rdi,%rcx
-> >    c: 74 68                   je     0x76
-> >    e: 48 89 c7                mov    %rax,%rdi
-> >   11: 48 89 4a 08             mov    %rcx,0x8(%rdx)
-> >   15: 48                      rex.W
-> > [   53.704559] RSP: 0018:ffff9ab7c07579e0 EFLAGS: 00010286
-> > [   53.704591] RAX: ffff8bd0c2285b40 RBX: ffff8bd0c2285240 RCX: d0c2285=
-7c0000000
-> > [   53.704616] RDX: ffff8bd0c2285910 RSI: ffff8bd0c3e695c0 RDI: ffff8bd=
-0c22855c0
-> > [   53.704645] RBP: 0000000000002139 R08: 0000000000000000 R09: 0000000=
-000000000
-> > [   53.704668] R10: 0000000000000000 R11: ffff8bd0c16244e0 R12: ffff8bd=
-0c3e695b8
-> > [   53.704691] R13: ffff8bd0c3b62000 R14: ffff8bd0c22857c0 R15: ffff8bd=
-0c3e695c0
-> > [   53.704714] FS:  0000000000000000(0000) GS:ffff8bd1815ca000(0000) kn=
-lGS:0000000000000000
-> > [   53.704741] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > [   53.704762] CR2: 000055667ef28e10 CR3: 0000000106cc2005 CR4: 0000000=
-000772ef0
-> > [   53.704790] PKRU: 55555554
-> > [   53.704803] Call Trace:
-> > [   53.704844]  <TASK>
-> > [   53.704862] ceph_get_snapid_map (/usr/src/linux/./include/linux/spin=
-lock.h:391 /usr/src/linux/fs/ceph/snap.c:1255) ceph
-> > [   53.704957] ceph_fill_inode (/usr/src/linux/fs/ceph/inode.c:1062 (di=
-scriminator 2)) ceph
-> > [   53.705019]  ? __pfx_ceph_set_ino_cb (/usr/src/linux/fs/ceph/inode.c=
-:46) ceph
-> > [   53.705074]  ? __pfx_ceph_ino_compare (/usr/src/linux/fs/ceph/super.=
-h:595) ceph
-> > [   53.705132] ceph_readdir_prepopulate (/usr/src/linux/fs/ceph/inode.c=
-:2113) ceph
-> > [   53.705191] mds_dispatch (/usr/src/linux/fs/ceph/mds_client.c:3993 /=
-usr/src/linux/fs/ceph/mds_client.c:6299) ceph
-> > [   53.705253]  ? sock_recvmsg (/usr/src/linux/net/socket.c:1078 (discr=
-iminator 1) /usr/src/linux/net/socket.c:1100 (discriminator 1))
-> > [   53.705279] ceph_con_process_message (/usr/src/linux/net/ceph/messen=
-ger.c:1427) libceph
-> > [   53.705347] process_message (/usr/src/linux/net/ceph/messenger_v2.c:=
-2879) libceph
-> > [   53.705406] ceph_con_v2_try_read (/usr/src/linux/net/ceph/messenger_=
-v2.c:3043 /usr/src/linux/net/ceph/messenger_v2.c:3099 /usr/src/linux/net/ce=
-ph/messenger_v2.c:3148) libceph
-> > [   53.705467]  ? psi_group_change (/usr/src/linux/kernel/sched/psi.c:8=
-76)
-> > [   53.705488]  ? sched_balance_newidle (/usr/src/linux/kernel/sched/fa=
-ir.c:12902 (discriminator 2))
-> > [   53.705512]  ? psi_task_switch (/usr/src/linux/kernel/sched/psi.c:98=
-4 (discriminator 2))
-> > [   53.705532]  ? _raw_spin_unlock (/usr/src/linux/./arch/x86/include/a=
-sm/paravirt.h:562 /usr/src/linux/./arch/x86/include/asm/qspinlock.h:57 /usr=
-/src/linux/./include/linux/spinlock.h:204 /usr/src/linux/./include/linux/sp=
-inlock_api_smp.h:142 /usr/src/linux/kernel/locking/spinlock.c:186)
-> > [   53.705550]  ? finish_task_switch.isra.0 (/usr/src/linux/./arch/x86/=
-include/asm/paravirt.h:671 /usr/src/linux/kernel/sched/sched.h:1559 /usr/sr=
-c/linux/kernel/sched/core.c:5073 /usr/src/linux/kernel/sched/core.c:5191)
-> > [   53.705575] ceph_con_workfn (/usr/src/linux/net/ceph/messenger.c:157=
-8) libceph
-> > [   53.705627]  process_one_work (/usr/src/linux/./arch/x86/include/asm=
-/jump_label.h:36 /usr/src/linux/./include/trace/events/workqueue.h:110 /usr=
-/src/linux/kernel/workqueue.c:3268)
-> > [   53.705657]  worker_thread (/usr/src/linux/kernel/workqueue.c:3340 (=
-discriminator 2) /usr/src/linux/kernel/workqueue.c:3427 (discriminator 2))
-> > [   53.705679]  ? __pfx_worker_thread (/usr/src/linux/kernel/workqueue.=
-c:3373)
-> > [   53.705700]  kthread (/usr/src/linux/kernel/kthread.c:463)
-> > [   53.705717]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
-> > [   53.705734]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
-> > [   53.705752]  ret_from_fork (/usr/src/linux/arch/x86/kernel/process.c=
-:164)
-> > [   53.705776]  ? __pfx_kthread (/usr/src/linux/kernel/kthread.c:412)
-> > [   53.705793]  ret_from_fork_asm (/usr/src/linux/arch/x86/entry/entry_=
-64.S:255)
-> > [   53.705826]  </TASK>
-> > [   53.705842] Modules linked in: ceph netfs libceph cfg80211 rfkill 80=
-21q garp stp mrp llc binfmt_misc intel_rapl_msr intel_rapl_common intel_unc=
-ore_frequency_common kvm_intel virtio_gpu joydev kvm drm_client_lib virtio_=
-dma_buf evdev drm_shmem_helper sg drm_kms_helper virtio_balloon button irqb=
-ypass ghash_clmulni_intel aesni_intel rapl pcspkr drm configfs efi_pstore n=
-fnetlink vsock_loopback vmw_vsock_virtio_transport_common vmw_vsock_vmci_tr=
-ansport vmw_vmci vsock qemu_fw_cfg virtio_rng autofs4 ext4 crc16 mbcache jb=
-d2 hid_generic usbhid hid sr_mod cdrom dm_mod ahci libahci libata xhci_pci =
-iTCO_wdt intel_pmc_bxt xhci_hcd iTCO_vendor_support scsi_mod psmouse virtio=
-_net i2c_i801 watchdog serio_raw i2c_smbus lpc_ich scsi_common usbcore net_=
-failover failover virtio_blk usb_common
-> > [   53.708740] ---[ end trace 0000000000000000 ]---
-> > [   53.709462] RIP: 0010:rb_insert_color (/usr/src/linux/lib/rbtree.c:1=
-85 (discriminator 1) /usr/src/linux/lib/rbtree.c:436 (discriminator 1))
-> > [   53.710118] Code: 76 17 48 83 e1 fc 48 3b 51 10 0f 84 b7 00 00 00 48=
- 89 41 08 c3 cc cc cc cc 48 89 06 c3 cc cc cc cc 48 8b 4a 10 48 85 c9 74 05=
- <f6> 01 01 74 1b 48 8b 48 10 48 39 f9 74 68 48 89 c7 48 89 4a 08 48
-> > All code
-> > =3D=3D=3D=3D=3D=3D=3D=3D
-> >    0: 76 17                   jbe    0x19
-> >    2: 48 83 e1 fc             and    $0xfffffffffffffffc,%rcx
-> >    6: 48 3b 51 10             cmp    0x10(%rcx),%rdx
-> >    a: 0f 84 b7 00 00 00       je     0xc7
-> >   10: 48 89 41 08             mov    %rax,0x8(%rcx)
-> >   14: c3                      ret
-> >   15: cc                      int3
-> >   16: cc                      int3
-> >   17: cc                      int3
-> >   18: cc                      int3
-> >   19: 48 89 06                mov    %rax,(%rsi)
-> >   1c: c3                      ret
-> >   1d: cc                      int3
-> >   1e: cc                      int3
-> >   1f: cc                      int3
-> >   20: cc                      int3
-> >   21: 48 8b 4a 10             mov    0x10(%rdx),%rcx
-> >   25: 48 85 c9                test   %rcx,%rcx
-> >   28: 74 05                   je     0x2f
-> >   2a:*        f6 01 01                testb  $0x1,(%rcx)              <=
--- trapping instruction
-> >   2d: 74 1b                   je     0x4a
-> >   2f: 48 8b 48 10             mov    0x10(%rax),%rcx
-> >   33: 48 39 f9                cmp    %rdi,%rcx
-> >   36: 74 68                   je     0xa0
-> >   38: 48 89 c7                mov    %rax,%rdi
-> >   3b: 48 89 4a 08             mov    %rcx,0x8(%rdx)
-> >   3f: 48                      rex.W
-> >
-> > Code starting with the faulting instruction
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >    0: f6 01 01                testb  $0x1,(%rcx)
-> >    3: 74 1b                   je     0x20
-> >    5: 48 8b 48 10             mov    0x10(%rax),%rcx
-> >    9: 48 39 f9                cmp    %rdi,%rcx
-> >    c: 74 68                   je     0x76
-> >    e: 48 89 c7                mov    %rax,%rdi
-> >   11: 48 89 4a 08             mov    %rcx,0x8(%rdx)
-> >   15: 48                      rex.W
-> > [   53.711453] RSP: 0018:ffff9ab7c07579e0 EFLAGS: 00010286
-> > [   53.712112] RAX: ffff8bd0c2285b40 RBX: ffff8bd0c2285240 RCX: d0c2285=
-7c0000000
-> > [   53.712798] RDX: ffff8bd0c2285910 RSI: ffff8bd0c3e695c0 RDI: ffff8bd=
-0c22855c0
-> > [   53.713423] RBP: 0000000000002139 R08: 0000000000000000 R09: 0000000=
-000000000
-> > [   53.714061] R10: 0000000000000000 R11: ffff8bd0c16244e0 R12: ffff8bd=
-0c3e695b8
-> > [   53.714696] R13: ffff8bd0c3b62000 R14: ffff8bd0c22857c0 R15: ffff8bd=
-0c3e695c0
-> > [   53.715321] FS:  0000000000000000(0000) GS:ffff8bd1815ca000(0000) kn=
-lGS:0000000000000000
-> > [   53.715956] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > [   53.716651] CR2: 000055667ef28e10 CR3: 0000000106cc2005 CR4: 0000000=
-000772ef0
-> > [   53.717295] PKRU: 55555554
-> > [   53.717918] note: kworker/11:2[360] exited with preempt_count 1
-> >
-> >
-> > Closes: https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__bugzilla=
-.kernel.org_show-5Fbug.cgi-3Fid-3D220807&d=3DDwIDAg&c=3DBSDicqBQBDjDI9RkVyT=
-cHQ&r=3Dq5bIm4AXMzc8NJu1_RGmnQ2fMWKq4Y4RAkElvUgSs00&m=3D9uYAi-tacLykatKmRl3=
-LQ-OSQx74kkNg-1jsH1vnLekoVAt2IW2alYrd5HYGhsZK&s=3DmH4zSOBAE-0mk_Os9bf16JcPk=
-k0k2BmY82O8_DfbZw0&e=3D
-> > Fixes: bb80f7618832 - parse_longname(): strrchr() expects NUL-terminate=
-d string
-> >
-> > Cc: stable@vger.kernel.org
-> > Suggested-by: Helge Deller <deller@gmx.de>
-> > Signed-off-by: Daniel Vogelbacher <daniel@chaospixel.com>
-> > ---
-> >  fs/ceph/crypto.c | 9 +++++----
-> >  1 file changed, 5 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-> > index 0ea4db650f85..9a115282f67d 100644
-> > --- a/fs/ceph/crypto.c
-> > +++ b/fs/ceph/crypto.c
-> > @@ -166,12 +166,13 @@ static struct inode *parse_longname(const struct =
-inode *parent,
-> >       struct ceph_vino vino =3D { .snap =3D CEPH_NOSNAP };
-> >       char *name_end, *inode_number;
-> >       int ret =3D -EIO;
-> > -     /* NUL-terminate */
-> > -     char *str __free(kfree) =3D kmemdup_nul(name, *name_len, GFP_KERN=
-EL);
-> > +     /* Snapshot name must start with an underscore */
-> > +     if (*name_len <=3D 0 || name[0] !=3D '_')
-> > +             return ERR_PTR(-EIO);
-> > +     /* Skip initial '_' and NUL-terminate */
-> > +     char *str __free(kfree) =3D kmemdup_nul(name + 1, *name_len - 1, =
-GFP_KERNEL);
-> >       if (!str)
-> >               return ERR_PTR(-ENOMEM);
-> > -     /* Skip initial '_' */
-> > -     str++;
-> >       name_end =3D strrchr(str, '_');
-> >       if (!name_end) {
-> >               doutc(cl, "failed to parse long snapshot name: %s\n", str=
-);
->
-> Looks good.
->
-> Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
-Applied.
+The CephFS kernel client has regression starting from 6.18-rc1.
 
-Thanks,
+sudo ./check -g quick
+FSTYP         -- ceph
+PLATFORM      -- Linux/x86_64 ceph-0005 6.18.0-rc5+ #52 SMP PREEMPT_DYNAMIC Fri
+Nov 14 11:26:14 PST 2025
+MKFS_OPTIONS  -- 192.168.1.213:3300:/scratch
+MOUNT_OPTIONS -- -o name=admin,ms_mode=secure 192.168.1.213:3300:/scratch
+/mnt/cephfs/scratch
 
-                Ilya
+Killed
+
+Nov 14 11:48:10 ceph-0005 kernel: [  154.723902] libceph: mon0
+(2)192.168.1.213:3300 session established
+Nov 14 11:48:10 ceph-0005 kernel: [  154.727225] libceph: client167616
+Nov 14 11:48:11 ceph-0005 kernel: [  155.087260] BUG: kernel NULL pointer
+dereference, address: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.087756] #PF: supervisor read access in
+kernel mode
+Nov 14 11:48:11 ceph-0005 kernel: [  155.088043] #PF: error_code(0x0000) - not-
+present page
+Nov 14 11:48:11 ceph-0005 kernel: [  155.088302] PGD 0 P4D 0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.088688] Oops: Oops: 0000 [#1] SMP KASAN
+NOPTI
+Nov 14 11:48:11 ceph-0005 kernel: [  155.090080] CPU: 4 UID: 0 PID: 3453 Comm:
+xfs_io Not tainted 6.18.0-rc5+ #52 PREEMPT(voluntary)
+Nov 14 11:48:11 ceph-0005 kernel: [  155.091245] Hardware name: QEMU Standard PC
+(i440FX + PIIX, 1996), BIOS 1.17.0-5.fc42 04/01/2014
+Nov 14 11:48:11 ceph-0005 kernel: [  155.092103] RIP: 0010:strcmp+0x1c/0x40
+Nov 14 11:48:11 ceph-0005 kernel: [  155.092493] Code: 90 90 90 90 90 90 90 90
+90 90 90 90 90 90 31 c0 eb 14 66 66 2e 0f 1f 84 00 00 00 00 00 90 48 83 c0 01 84
+d2 74 19 0f b6 14 07 <3a> 14 06 74 ef 19 c0 83 c8 01 31 d2 31 f6 31 ff c3 cc cc
+cc cc 31
+Nov 14 11:48:11 ceph-0005 kernel: [  155.094057] RSP: 0018:ffff8881536875c0
+EFLAGS: 00010246
+Nov 14 11:48:11 ceph-0005 kernel: [  155.094522] RAX: 0000000000000000 RBX:
+ffff888116003200 RCX: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.095114] RDX: 0000000000000063 RSI:
+0000000000000000 RDI: ffff88810126c900
+Nov 14 11:48:11 ceph-0005 kernel: [  155.095714] RBP: ffff8881536876a8 R08:
+0000000000000000 R09: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.096297] R10: 0000000000000000 R11:
+0000000000000000 R12: dffffc0000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.096889] R13: ffff8881061d0000 R14:
+0000000000000000 R15: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.097490] FS:  000074a85c082840(0000)
+GS:ffff8882401a4000(0000) knlGS:0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.098146] CS:  0010 DS: 0000 ES: 0000
+CR0: 0000000080050033
+Nov 14 11:48:11 ceph-0005 kernel: [  155.098630] CR2: 0000000000000000 CR3:
+0000000110ebd001 CR4: 0000000000772ef0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.099219] PKRU: 55555554
+Nov 14 11:48:11 ceph-0005 kernel: [  155.099476] Call Trace:
+Nov 14 11:48:11 ceph-0005 kernel: [  155.099686]  <TASK>
+Nov 14 11:48:11 ceph-0005 kernel: [  155.099873]  ?
+ceph_mds_check_access+0x348/0x1760
+Nov 14 11:48:11 ceph-0005 kernel: [  155.100267]  ?
+__kasan_check_write+0x14/0x30
+Nov 14 11:48:11 ceph-0005 kernel: [  155.100671]  ? lockref_get+0xb1/0x170
+Nov 14 11:48:11 ceph-0005 kernel: [  155.100979]  ?
+__pfx__raw_spin_lock+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.101372]  ceph_open+0x322/0xef0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.101669]  ? __pfx_ceph_open+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.101996]  ?
+__pfx_apparmor_file_open+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.102434]  ?
+__ceph_caps_issued_mask_metric+0xd6/0x180
+Nov 14 11:48:11 ceph-0005 kernel: [  155.102911]  do_dentry_open+0x7bf/0x10e0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.103249]  ? __pfx_ceph_open+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.103508]  vfs_open+0x6d/0x450
+Nov 14 11:48:11 ceph-0005 kernel: [  155.103697]  ? may_open+0xec/0x370
+Nov 14 11:48:11 ceph-0005 kernel: [  155.103893]  path_openat+0x2017/0x50a0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.104110]  ? __pfx_path_openat+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.104345]  ?
+__pfx_stack_trace_save+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.104599]  ?
+stack_depot_save_flags+0x28/0x8f0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.104865]  ? stack_depot_save+0xe/0x20
+Nov 14 11:48:11 ceph-0005 kernel: [  155.105063]  do_filp_open+0x1b4/0x450
+Nov 14 11:48:11 ceph-0005 kernel: [  155.105253]  ?
+__pfx__raw_spin_lock_irqsave+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.105538]  ? __pfx_do_filp_open+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.105748]  ? __link_object+0x13d/0x2b0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.105949]  ?
+__pfx__raw_spin_lock+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.106169]  ?
+__check_object_size+0x453/0x600
+Nov 14 11:48:11 ceph-0005 kernel: [  155.106428]  ? _raw_spin_unlock+0xe/0x40
+Nov 14 11:48:11 ceph-0005 kernel: [  155.106635]  do_sys_openat2+0xe6/0x180
+Nov 14 11:48:11 ceph-0005 kernel: [  155.106827]  ?
+__pfx_do_sys_openat2+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.107052]  __x64_sys_openat+0x108/0x240
+Nov 14 11:48:11 ceph-0005 kernel: [  155.107258]  ?
+__pfx___x64_sys_openat+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.107529]  ?
+__pfx___handle_mm_fault+0x10/0x10
+Nov 14 11:48:11 ceph-0005 kernel: [  155.107783]  x64_sys_call+0x134f/0x2350
+Nov 14 11:48:11 ceph-0005 kernel: [  155.108007]  do_syscall_64+0x82/0xd50
+Nov 14 11:48:11 ceph-0005 kernel: [  155.108201]  ?
+fpregs_assert_state_consistent+0x5c/0x100
+Nov 14 11:48:11 ceph-0005 kernel: [  155.108467]  ? do_syscall_64+0xba/0xd50
+Nov 14 11:48:11 ceph-0005 kernel: [  155.108626]  ? __kasan_check_read+0x11/0x20
+Nov 14 11:48:11 ceph-0005 kernel: [  155.108801]  ?
+count_memcg_events+0x25b/0x400
+Nov 14 11:48:11 ceph-0005 kernel: [  155.109013]  ? handle_mm_fault+0x38b/0x6a0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.109216]  ? __kasan_check_read+0x11/0x20
+Nov 14 11:48:11 ceph-0005 kernel: [  155.109457]  ?
+fpregs_assert_state_consistent+0x5c/0x100
+Nov 14 11:48:11 ceph-0005 kernel: [  155.109724]  ?
+irqentry_exit_to_user_mode+0x2e/0x2a0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.109991]  ? irqentry_exit+0x43/0x50
+Nov 14 11:48:11 ceph-0005 kernel: [  155.110180]  ? exc_page_fault+0x95/0x100
+Nov 14 11:48:11 ceph-0005 kernel: [  155.110389]
+entry_SYSCALL_64_after_hwframe+0x76/0x7e
+Nov 14 11:48:11 ceph-0005 kernel: [  155.110638] RIP: 0033:0x74a85bf145ab
+Nov 14 11:48:11 ceph-0005 kernel: [  155.110821] Code: 25 00 00 41 00 3d 00 00
+41 00 74 4b 64 8b 04 25 18 00 00 00 85 c0 75 67 44 89 e2 48 89 ee bf 9c ff ff ff
+b8 01 01 00 00 0f 05 <48> 3d 00 f0 ff ff 0f 87 91 00 00 00 48 8b 54 24 28 64 48
+2b 14 25
+Nov 14 11:48:11 ceph-0005 kernel: [  155.111724] RSP: 002b:00007ffc77d316d0
+EFLAGS: 00000246 ORIG_RAX: 0000000000000101
+Nov 14 11:48:11 ceph-0005 kernel: [  155.112080] RAX: ffffffffffffffda RBX:
+0000000000000002 RCX: 000074a85bf145ab
+Nov 14 11:48:11 ceph-0005 kernel: [  155.112442] RDX: 0000000000000000 RSI:
+00007ffc77d32789 RDI: 00000000ffffff9c
+Nov 14 11:48:11 ceph-0005 kernel: [  155.112790] RBP: 00007ffc77d32789 R08:
+00007ffc77d31980 R09: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.113125] R10: 0000000000000000 R11:
+0000000000000246 R12: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.113502] R13: 00000000ffffffff R14:
+0000000000000180 R15: 0000000000000001
+Nov 14 11:48:11 ceph-0005 kernel: [  155.113838]  </TASK>
+Nov 14 11:48:11 ceph-0005 kernel: [  155.113957] Modules linked in:
+intel_rapl_msr intel_rapl_common intel_uncore_frequency_common intel_pmc_core
+pmt_telemetry pmt_discovery pmt_class intel_pmc_ssram_telemetry intel_vsec
+kvm_intel kvm joydev irqbypass polyval_clmulni ghash_clmulni_intel aesni_intel
+rapl floppy input_leds psmouse i2c_piix4 vga16fb mac_hid i2c_smbus vgastate
+serio_raw bochs qemu_fw_cfg pata_acpi sch_fq_codel rbd msr parport_pc ppdev lp
+parport efi_pstore
+Nov 14 11:48:11 ceph-0005 kernel: [  155.116339] CR2: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.116574] ---[ end trace 0000000000000000
+]---
+Nov 14 11:48:11 ceph-0005 kernel: [  155.116826] RIP: 0010:strcmp+0x1c/0x40
+Nov 14 11:48:11 ceph-0005 kernel: [  155.117058] Code: 90 90 90 90 90 90 90 90
+90 90 90 90 90 90 31 c0 eb 14 66 66 2e 0f 1f 84 00 00 00 00 00 90 48 83 c0 01 84
+d2 74 19 0f b6 14 07 <3a> 14 06 74 ef 19 c0 83 c8 01 31 d2 31 f6 31 ff c3 cc cc
+cc cc 31
+Nov 14 11:48:11 ceph-0005 kernel: [  155.118070] RSP: 0018:ffff8881536875c0
+EFLAGS: 00010246
+Nov 14 11:48:11 ceph-0005 kernel: [  155.118362] RAX: 0000000000000000 RBX:
+ffff888116003200 RCX: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.118748] RDX: 0000000000000063 RSI:
+0000000000000000 RDI: ffff88810126c900
+Nov 14 11:48:11 ceph-0005 kernel: [  155.119116] RBP: ffff8881536876a8 R08:
+0000000000000000 R09: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.119492] R10: 0000000000000000 R11:
+0000000000000000 R12: dffffc0000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.119865] R13: ffff8881061d0000 R14:
+0000000000000000 R15: 0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.120242] FS:  000074a85c082840(0000)
+GS:ffff8882401a4000(0000) knlGS:0000000000000000
+Nov 14 11:48:11 ceph-0005 kernel: [  155.120704] CS:  0010 DS: 0000 ES: 0000
+CR0: 0000000080050033
+Nov 14 11:48:11 ceph-0005 kernel: [  155.121008] CR2: 0000000000000000 CR3:
+0000000110ebd001 CR4: 0000000000772ef0
+Nov 14 11:48:11 ceph-0005 kernel: [  155.121409] PKRU: 55555554
+
+We have issue here [1] if fs_name == NULL:
+
+const char fs_name = mdsc->fsc->mount_options->mds_namespace;
+    ...
+    if (auth->match.fs_name && strcmp(auth->match.fs_name, fs_name)) {
+            / fsname mismatch, try next one */
+            return 0;
+    }
+
+v2
+Patrick Donnelly suggested that: In summary, we should definitely start
+decoding `fs_name` from the MDSMap and do strict authorizations checks
+against it. Note that the `--mds_namespace` should only be used for
+selecting the file system to mount and nothing else. It's possible
+no mds_namespace is specified but the kernel will mount the only
+file system that exists which may have name "foo".
+
+v3
+The namespace_equals() logic has been generalized into
+__namespace_equals() with the goal of using it in
+ceph_mdsc_handle_fsmap() and ceph_mds_auth_match().
+The misspelling of CEPH_NAMESPACE_WILDCARD has been corrected.
+
+v4
+The __namespace_equals() now supports wildcard check.
+
+v5
+Patrick Donnelly suggested to add the sanity check of
+kstrdup() returned pointer in ceph_mdsmap_decode()
+added logic. Also, he suggested much simpler logic of
+namespace strings comparison in the form of
+ceph_namespace_match() logic.
+
+v6
+Only ceph_namespace_match() compares the names
+with CEPH_NAMESPACE_WILDCARD.
+
+This patch reworks ceph_mdsmap_decode() and namespace_equals() with
+the goal of supporting the suggested concept. Now struct ceph_mdsmap
+contains m_fs_name field that receives copy of extracted FS name
+by ceph_extract_encoded_string(). For the case of "old" CephFS file systems,
+it is used "cephfs" name. Also, namespace_equals() method has been
+reworked with the goal of proper names comparison.
+
+[1] https://elixir.bootlin.com/linux/v6.18-rc4/source/fs/ceph/mds_client.c#L5666
+[2] https://tracker.ceph.com/issues/73886
+
+Fixes: 22c73d52a6d0 ("ceph: fix multifs mds auth caps issue")
+Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+cc: Kotresh Hiremath Ravishankar <khiremat@redhat.com>
+cc: Alex Markuze <amarkuze@redhat.com>
+cc: Ilya Dryomov <idryomov@gmail.com>
+cc: Patrick Donnelly <pdonnell@redhat.com>
+cc: Ceph Development <ceph-devel@vger.kernel.org>
+---
+ fs/ceph/mds_client.c         | 11 +++++------
+ fs/ceph/mdsmap.c             | 24 ++++++++++++++++++------
+ fs/ceph/mdsmap.h             |  1 +
+ fs/ceph/super.h              | 29 ++++++++++++++++++++++++-----
+ include/linux/ceph/ceph_fs.h |  6 ++++++
+ 5 files changed, 54 insertions(+), 17 deletions(-)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 7e4eab824dae..a4b9254b74a5 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -5671,7 +5671,7 @@ static int ceph_mds_auth_match(struct ceph_mds_client *mdsc,
+ 	u32 caller_uid = from_kuid(&init_user_ns, cred->fsuid);
+ 	u32 caller_gid = from_kgid(&init_user_ns, cred->fsgid);
+ 	struct ceph_client *cl = mdsc->fsc->client;
+-	const char *fs_name = mdsc->fsc->mount_options->mds_namespace;
++	const char *fs_name = mdsc->mdsmap->m_fs_name;
+ 	const char *spath = mdsc->fsc->mount_options->server_path;
+ 	bool gid_matched = false;
+ 	u32 gid, tlen, len;
+@@ -5679,7 +5679,8 @@ static int ceph_mds_auth_match(struct ceph_mds_client *mdsc,
+ 
+ 	doutc(cl, "fsname check fs_name=%s  match.fs_name=%s\n",
+ 	      fs_name, auth->match.fs_name ? auth->match.fs_name : "");
+-	if (auth->match.fs_name && strcmp(auth->match.fs_name, fs_name)) {
++
++	if (!ceph_namespace_match(auth->match.fs_name, fs_name)) {
+ 		/* fsname mismatch, try next one */
+ 		return 0;
+ 	}
+@@ -6122,7 +6123,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+ {
+ 	struct ceph_fs_client *fsc = mdsc->fsc;
+ 	struct ceph_client *cl = fsc->client;
+-	const char *mds_namespace = fsc->mount_options->mds_namespace;
+ 	void *p = msg->front.iov_base;
+ 	void *end = p + msg->front.iov_len;
+ 	u32 epoch;
+@@ -6157,9 +6157,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+ 		namelen = ceph_decode_32(&info_p);
+ 		ceph_decode_need(&info_p, info_end, namelen, bad);
+ 
+-		if (mds_namespace &&
+-		    strlen(mds_namespace) == namelen &&
+-		    !strncmp(mds_namespace, (char *)info_p, namelen)) {
++		if (namespace_equals(fsc->mount_options,
++				     (char *)info_p, namelen)) {
+ 			mount_fscid = fscid;
+ 			break;
+ 		}
+diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+index 2c7b151a7c95..f0c0ed202184 100644
+--- a/fs/ceph/mdsmap.c
++++ b/fs/ceph/mdsmap.c
+@@ -353,22 +353,33 @@ struct ceph_mdsmap *ceph_mdsmap_decode(struct ceph_mds_client *mdsc, void **p,
+ 		__decode_and_drop_type(p, end, u8, bad_ext);
+ 	}
+ 	if (mdsmap_ev >= 8) {
+-		u32 fsname_len;
++		size_t fsname_len;
++
+ 		/* enabled */
+ 		ceph_decode_8_safe(p, end, m->m_enabled, bad_ext);
++
+ 		/* fs_name */
+-		ceph_decode_32_safe(p, end, fsname_len, bad_ext);
++		m->m_fs_name = ceph_extract_encoded_string(p, end,
++							   &fsname_len,
++							   GFP_NOFS);
++		if (IS_ERR(m->m_fs_name)) {
++			m->m_fs_name = NULL;
++			goto nomem;
++		}
+ 
+ 		/* validate fsname against mds_namespace */
+-		if (!namespace_equals(mdsc->fsc->mount_options, *p,
++		if (!namespace_equals(mdsc->fsc->mount_options, m->m_fs_name,
+ 				      fsname_len)) {
+ 			pr_warn_client(cl, "fsname %*pE doesn't match mds_namespace %s\n",
+-				       (int)fsname_len, (char *)*p,
++				       (int)fsname_len, m->m_fs_name,
+ 				       mdsc->fsc->mount_options->mds_namespace);
+ 			goto bad;
+ 		}
+-		/* skip fsname after validation */
+-		ceph_decode_skip_n(p, end, fsname_len, bad);
++	} else {
++		m->m_enabled = false;
++		m->m_fs_name = kstrdup(CEPH_OLD_FS_NAME, GFP_NOFS);
++		if (!m->m_fs_name)
++			goto nomem;
+ 	}
+ 	/* damaged */
+ 	if (mdsmap_ev >= 9) {
+@@ -430,6 +441,7 @@ void ceph_mdsmap_destroy(struct ceph_mdsmap *m)
+ 		kfree(m->m_info);
+ 	}
+ 	kfree(m->m_data_pg_pools);
++	kfree(m->m_fs_name);
+ 	kfree(m);
+ }
+ 
+diff --git a/fs/ceph/mdsmap.h b/fs/ceph/mdsmap.h
+index 1f2171dd01bf..d48d07c3516d 100644
+--- a/fs/ceph/mdsmap.h
++++ b/fs/ceph/mdsmap.h
+@@ -45,6 +45,7 @@ struct ceph_mdsmap {
+ 	bool m_enabled;
+ 	bool m_damaged;
+ 	int m_num_laggy;
++	char *m_fs_name;
+ };
+ 
+ static inline struct ceph_entity_addr *
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index a1f781c46b41..d2a586794226 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -104,18 +104,37 @@ struct ceph_mount_options {
+ 	struct fscrypt_dummy_policy dummy_enc_policy;
+ };
+ 
++#define CEPH_NAMESPACE_WILDCARD		"*"
++
++static inline bool ceph_namespace_match(const char *pattern,
++					const char *target)
++{
++	if (!pattern || !pattern[0] ||
++	    !strcmp(pattern, CEPH_NAMESPACE_WILDCARD))
++		return true;
++
++	if (strlen(pattern) != strlen(target))
++		return false;
++
++	return !strncmp(pattern, target, strlen(pattern));
++}
++
+ /*
+  * Check if the mds namespace in ceph_mount_options matches
+  * the passed in namespace string. First time match (when
+  * ->mds_namespace is NULL) is treated specially, since
+  * ->mds_namespace needs to be initialized by the caller.
+  */
+-static inline int namespace_equals(struct ceph_mount_options *fsopt,
+-				   const char *namespace, size_t len)
++static inline bool namespace_equals(struct ceph_mount_options *fsopt,
++				    const char *namespace, size_t len)
+ {
+-	return !(fsopt->mds_namespace &&
+-		 (strlen(fsopt->mds_namespace) != len ||
+-		  strncmp(fsopt->mds_namespace, namespace, len)));
++	if (!fsopt->mds_namespace || !fsopt->mds_namespace[0])
++		return true;
++
++	if (strlen(fsopt->mds_namespace) != len)
++		return false;
++
++	return !strncmp(fsopt->mds_namespace, namespace, len);
+ }
+ 
+ /* mount state */
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index c7f2c63b3bc3..08e5dbe15ca4 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -31,6 +31,12 @@
+ #define CEPH_INO_CEPH   2            /* hidden .ceph dir */
+ #define CEPH_INO_GLOBAL_SNAPREALM  3 /* global dummy snaprealm */
+ 
++/*
++ * name for "old" CephFS file systems,
++ * see ceph.git e2b151d009640114b2565c901d6f41f6cd5ec652
++ */
++#define CEPH_OLD_FS_NAME	"cephfs"
++
+ /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
+ #define CEPH_MAX_MON   31
+ 
+-- 
+2.52.0
+
