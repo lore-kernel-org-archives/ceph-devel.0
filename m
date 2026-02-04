@@ -1,98 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f46.google.com (mail-dl1-f46.google.com [74.125.82.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF35C37106D
-	for <ceph-devel@vger.kernel.org>; Tue,  3 Feb 2026 22:57:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E51833ED13D
+	for <ceph-devel@vger.kernel.org>; Wed,  4 Feb 2026 13:54:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.46
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770159470; cv=pass; b=d2+s90e3tG8czJ4t93U+/iS4Ye+6FClsjAFIavQPc7LAFpfZ7sGTaCibGIved6RFg1NWfaTSwuC/v0UpBrrTex4QFXr2Bm5hehJNyoQtygyhGRQEYiRIM05dPZOlxmD1FoQibp5VcUbraspwGoIKo7kGpoOrrw8uyMMwF0HDgWQ=
+	t=1770213254; cv=pass; b=kZHk2HOwNLES+Cq3LZwOtONCb+aQY6OBwxJoLd/DQjTxVTb6V+Hn4uFvF87SAwt2TIIgU2IxMXeNPky77NMooHKMbAAGhWWGfTv27hcEkNjxMcgPu0w+wt+dm5/qseM9FQjQxBZwObNT/vzeSP/PbI9blAEMKZzkF2QWeKvQ7fM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770159470; c=relaxed/simple;
-	bh=90gHrRJjFzBRKuDUGQi6rDSEIq2oFFXAyceJbpON+/s=;
+	s=arc-20240116; t=1770213254; c=relaxed/simple;
+	bh=6V82VrzFwjKNEeqChOCzfwAotKEaU1lhNC6kBsX8dHg=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=SKNMEG2mZN7cI5Ije3OC0zHhU7VOLYSEf0PVs2uSocHDB2B66dKe0RfoU7zdppG6+vYdFT9vsF2syMTr9nQg+A7mS361SOg7iWDn6iphRKp76w46qjgDOTaOBS6cyYkiEj0xxxWHxl+83QpEPij1fB0i9geW7lJq+qAtLm0kdwI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=g+odSLgf; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=dvqrxqc6; arc=pass smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 To:Cc:Content-Type; b=W59imuIjl6DYUMNfJ+PqV6BqjrZfaTYK0632KN5oIwDm6Dq1QH0ZgB9DHeuw8Y+G5VMY/aLVfzeFK8uJIZc7sLaRE+PWF4hfaxz6GsoQkRrRmLMoT5jriY1uJ3MGLxqRjIxQetQlXizOcGEeB/CzQRcmvkbUyA0tZJIJ4f34qOc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Xs6tC8d8; arc=pass smtp.client-ip=74.125.82.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="g+odSLgf";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="dvqrxqc6"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1770159466;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=yLIewwKrZqCrsNtp5DDGZF4Aucf3VKHSe7nnaoeGzC0=;
-	b=g+odSLgfPYSmLw5n0Nn5xlAl8w80FwHp5U3KnqdEzh4EWucuaLWHP4cmPLqb9yom/NxQva
-	MIemL2iJdgw1zXzw1Q1DpEsYRMO6UIpKNxT5td2zLEjYkqk+fTCXVFG29c+ni2DziEWYTJ
-	de9ooMhMNzsqC7XMSmbtg38CGbjDJcs=
-Received: from mail-lf1-f69.google.com (mail-lf1-f69.google.com
- [209.85.167.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-157-XlQcPgueNgukAVhUcrJBzA-1; Tue, 03 Feb 2026 17:57:45 -0500
-X-MC-Unique: XlQcPgueNgukAVhUcrJBzA-1
-X-Mimecast-MFC-AGG-ID: XlQcPgueNgukAVhUcrJBzA_1770159464
-Received: by mail-lf1-f69.google.com with SMTP id 2adb3069b0e04-59e376fefb8so474711e87.2
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2026 14:57:44 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770159463; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Xs6tC8d8"
+Received: by mail-dl1-f46.google.com with SMTP id a92af1059eb24-1233b953bebso2939570c88.1
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Feb 2026 05:54:13 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770213253; cv=none;
         d=google.com; s=arc-20240605;
-        b=A0eptfy1fg0Ed8lX2voVvS0hyliYeA7KdABBYZo1it5wCA46mM4VKKCFPE9X6o7la0
-         63F//8Cfd0I0ePX4gD05ptNZZz9MqZQjpklLOsKpToV/Ygm1cM/utCtTnxX4XldXh8OL
-         v8KxdoAKdmmQj2rkNm8By6HE8XXfkRLIz5pqpA6OYQM23qPtag7S+/elacyVTQhCfBGI
-         F9pUH65UhK11SX4ASGdK2rZ5MYG+ir+NAT2lDdlTSUA4koDiTxbypae4m7DKg1e5oQgP
-         u1u9nVk0t4nVqSG4kn4sd2fOJpI8nB67yKkrOZ/BiTyDM3RPQmNTXO0PSmjPR9DFdYOO
-         Zmyg==
+        b=F8oh5pJomwaCMm36f89z76lVPwUGo8o1fYLABr0zpW+HIM64lNXaFKQjn7miHkr+ce
+         u1iZ0KuaPdmzS0hemXqYqjs5gQDjUJbh69NKPWlTjmvopf25AVeakJGbyoj4UwVRkULO
+         cZp3SqelbfJojSyG/cPlnN5YeUqtKQOp9pn80LndHnY+ljSOhaCTFwlO/KZeADm3cXB8
+         LwTefbGrZAKaS0jzKMuVOiXtzmmOY2NDl/WttaZuG6BvGyqZXK2Y/yY5uYc5tencIdQk
+         UZa1J3FEoerPWnWKPNSQIoZlQgNWk30COW+VDBMV1PjmoSgLpRlagjgWVv1MmxNApRiE
+         SNmQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=yLIewwKrZqCrsNtp5DDGZF4Aucf3VKHSe7nnaoeGzC0=;
-        fh=BksIzc8g0bWNl7kQyW0BQH18omTJmkun7o/O79kjop8=;
-        b=P5Q6u36nAGfJuILeUfdMnYiGrAQxyUQ0es3/PXBqgXCw4KjLwiXofU8VSBN1h8wLLH
-         5FKhgy9hSMySIVG5xZwYsXDWC1gj7QD3Gd9uanUiCPWwnPng8+HzNcjjs50xGa0krUrS
-         okh2WZpJ3jlyU/5UusoEj45TYD/d4AGZJcn12QfPndSj3N8J3ou9zPghlZescmtReTem
-         nsvdwJVWZ2/l4XMwJGzO5iGKE2pqgxhaQDpZnQcw7IPFxN5w/7iffqkk771IUl7mvrIy
-         w/dk+r0abe/JctXTyDWrOLtEAqoIIDaDGasIQ5/pGKa9gvFv2lkFyxZC6Tua95aYHr8b
-         2e1g==;
+        bh=vFryNxMWllXAMMgqiOC1YUhVdpIQDnxBeKsb0WnRdxE=;
+        fh=X4Kv9zVXNL0kYZwnzI1rGY3gjOGAhevgZaJ7j1+L5Wg=;
+        b=HxRNJOpMVT8n7UNGOaIIZk04YOPSA8rZHsSnB3Up3Uydd8wEIWQGFI9jrgKEYPHS3/
+         QpPpIgVAkR8Vdo8Wb3Va4W0NvIvSdDlkd+Gu70BBG8Yb/jmzGLk5dbNqr/sSPMK7WYoZ
+         9eXCrJ2Vgb7EZ6+6P/aI2OsTWk4bW7GGt4Ja50j4GpORpegX08IrekFhCXGVwGSnnpHL
+         b0JnSWHV4YW6djOUABMu2wXcQCL3N/Cg9PfdIzKsiioDxjBGT/xMlOk5Cjh0yYlx592M
+         cPQ9VMOYB1Ej604cWw3W2NKpx2sKi7VXLmn56lzfzDfAyYHzcniKqYn77lg0vU4ZSgKM
+         77kA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1770159463; x=1770764263; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1770213253; x=1770818053; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=yLIewwKrZqCrsNtp5DDGZF4Aucf3VKHSe7nnaoeGzC0=;
-        b=dvqrxqc6wfDUNChy6XFhpAZcPoMqM3iHMyJVBYBD7HF4vHgjgHCWD61keAy7srzzLu
-         M2D6VWf3l0zP1civfejhnagpPAyH/VvPhO+96M29oj0LDYm7xztf9XExeEzFo6QplyrX
-         9g3qLpcE/oq9ZAnFTTKmL71lwRGqKHx1stfr/eXI+z9Az+ymMcF6N7Q/rnQe/Ex4Y9Wy
-         +InHmZ3Xr5iSqgDOYd/O/D8jISnBcsc/k1DOwgh8mUM+YF9iKM/tsWmbEOuuZMBV510t
-         JtWbOTyJrW1zER/ye37qh00RvHXQyDqfXKYMD4OMHhBGOj6cGwgQA5i8nTPQuemXu52H
-         miuQ==
+        bh=vFryNxMWllXAMMgqiOC1YUhVdpIQDnxBeKsb0WnRdxE=;
+        b=Xs6tC8d8cmvxG+ZeTd79FXf+H/VfOWF/JfTIrZLCfHAQmF61fpAfPhH9Qlf0wwxXHv
+         JBUPWlrlcLHx/c934r6X6V3/O/HDg+hxv1F1tfH1FSd2v3RzQvsOJcquENVuV8w7fVyL
+         En0i1yfi0f/M1q4ljjARqOZEu1Gt9azORddrCskd84eA+w7bHdxVxAHtAmSIC51gtc+p
+         k1x4DQFFgYvdvyLSk8ZgAvp03qH31CsJpBFNQvZMH417zPswOXicldX2YHqPCnerQY67
+         hwdbRsY7jEIqzh5l6+iyDjKe04IatAPrwpGDFdM5W1rYF/4XFThl33aDu2hEjNoMrnOA
+         PPnQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770159463; x=1770764263;
+        d=1e100.net; s=20230601; t=1770213253; x=1770818053;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=yLIewwKrZqCrsNtp5DDGZF4Aucf3VKHSe7nnaoeGzC0=;
-        b=bsNpu8tPvP3q2JsFCRtlZD9JegGDYJWz5AQyA3VbX+Qa6tWWQoPko4xA1OcSWPzf7N
-         qgEo4YaYyxMycl5JyJNUywd/8QYL26hgSfS2XZgq7F4rutWG656eMKMSTT7KYQfIVEAE
-         P0RAFJPVw1PnIAJ2FkbY0/0PVMS2eEOotaQz9wwSff6O7uayzj4OeEytZ3vU0qy3G4Qh
-         hiAHshUi112skDicIY/ccPx0HZDM7eClgGpy/C4S6aLCnXws6JF3/A3v2OgU+mkQbzc4
-         h9zvX28czV9L/r2ZXOUM9K4GSyW4ScK+B0X5CNltU5Rt0VzU8ntvTPTCdOTsTWZq5nk2
-         WtCA==
-X-Gm-Message-State: AOJu0YyoiEnX9QA9KRQEwy+mK+aqVpoJxGbFprwPOKZdhKGWOc9CJfxg
-	BVHD91D62In8Y8Z0Shml+mlTbym/3DdHJAoXgnlFE/bcYdmL7lCc66rsG99Mz9wtJXoth/6ouGX
-	sT9b65YyhWHp44Lgr+zPvIKWecKDcR/jxFHN49BVWqUlrAx8uBhGyhIxsm5e/GJQ4EbLIc4fHOL
-	kVP7OaitGVOUDS7rD3Pm/8dUdvYviFkQGebimWGQ==
-X-Gm-Gg: AZuq6aIZBGYudytMW5w1gdWtrV1m/s3XujHMr++BEewiFYIU4I5t+G2LA0NlfMem0eS
-	4MLsi3/wTrNmVE9NsJixkZX0ErDsmIYgN1R3ulIk05ScL9MWy56rfxTJH6AaJ1qFA7uY/E5nzJY
-	CgbWBgY7tUvO0X5ySk7Yd3OtuswtPKQTFRvB4+zlI04SHIcQNrpD2z+TB9ilJsbqep1ghnQJCEe
-	VjoyfK8mgp8WQdRoHipjztR5w==
-X-Received: by 2002:a05:6512:2512:b0:59e:708:d15d with SMTP id 2adb3069b0e04-59e38c581f6mr319319e87.47.1770159463389;
-        Tue, 03 Feb 2026 14:57:43 -0800 (PST)
-X-Received: by 2002:a05:6512:2512:b0:59e:708:d15d with SMTP id
- 2adb3069b0e04-59e38c581f6mr319310e87.47.1770159462915; Tue, 03 Feb 2026
- 14:57:42 -0800 (PST)
+        bh=vFryNxMWllXAMMgqiOC1YUhVdpIQDnxBeKsb0WnRdxE=;
+        b=lO/7RIhrQ0h2yZ7cYUOKEDJgz0Hvy0f9hdjdL8ZcK8iPZRKbdt+txdusNKV1amKght
+         IigG9xo35YL6UanqFvBaAbyoMQYGrnAsqQDHG9bGjOJGM7pmD5f2qKkFCOvmpVxB13Nz
+         At3IqUjwmAJDsG+anm2ewm0MOaLz6XJETW95Fx6D0MNonnWBEFY0NB+NgyCh+PRofFc0
+         yiyZXu9LOVr2lYIKuXOtsHIRvs4kSu5JXLBgIb9RfdipLTKB9fDlAIPPU6gunUDBHc4t
+         sIUuMiRA+r39zvYS0QAT1ixn+0fZQvoNN/MUaRnoo1agY5/X84TIba23zIaM7AijmTKM
+         Wqcw==
+X-Gm-Message-State: AOJu0YyXsgUk/f9lWqZzQkGF4YF+i0moDyaQiUPe9vsXVBZL2cGqvwym
+	TYPhabzTvV5upeZN25F8xj3dEVDjBQ0GvLb1h/Pfh36HeDlL3UVqLEUO6cmurNoFNNzwUS9Pe+U
+	uGxM3phVfTzLf36+LGsDPJcFVW7Nia/c=
+X-Gm-Gg: AZuq6aJKIcMHPJQO5a/4gfZrzlNxi6aelOrwRWJtllwjPntresnNhQ+ikfIb/q+VxSE
+	PmOjEGkVeZJzHePNTKtwyoAqEJxNMNsy/PyIFxcQlV0ymt6PJoyDgZCgAOg5t87DHO1qLVlVwry
+	yDFa+kjJpeYW22me8iXqB4KlpxbWRIwlgGjsvR93nuGFqO7munyX42Hedriqi92MpjkBRlbOTlY
+	VnGtaUmfh1fHh3Szu57uVYu/WDVF6MiHUU62mWT1awrwjPG77kCidXc0iQnKNGleiUSDZ4=
+X-Received: by 2002:a05:7022:426:b0:11d:c86c:652e with SMTP id
+ a92af1059eb24-126f4770a81mr1469098c88.5.1770213252762; Wed, 04 Feb 2026
+ 05:54:12 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -101,23 +81,20 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20260203225445.1515933-2-slava@dubeyko.com>
 In-Reply-To: <20260203225445.1515933-2-slava@dubeyko.com>
-From: Patrick Donnelly <pdonnell@redhat.com>
-Date: Tue, 3 Feb 2026 17:57:16 -0500
-X-Gm-Features: AZwV_QgzetLaHgdBcRKeStMpe0ybq-8jwJa8dhIDEjrLEiArgakfdAFhcKlx7Ew
-Message-ID: <CA+2bHPaKEAfDfMkjCqpFC1PPgn4MxYrfXKRWxnOd0VV59D_oOA@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Wed, 4 Feb 2026 14:54:01 +0100
+X-Gm-Features: AZwV_Qhz8fEqVkxBz6ksBBCUWz0WtStkYnfInZl7af1L726VV3NF9d318QlYUaQ
+Message-ID: <CAOi1vP-xCUKhTqkEcy2-Hm586CJY=5eCE7gV8S34pO0R9ODYPQ@mail.gmail.com>
 Subject: Re: [PATCH v6] ceph: fix kernel crash in ceph_open()
 To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, idryomov@gmail.com, 
+Cc: ceph-devel@vger.kernel.org, pdonnell@redhat.com, 
 	linux-fsdevel@vger.kernel.org, amarkuze@redhat.com, Slava.Dubeyko@ibm.com, 
 	vdubeyko@redhat.com, khiremat@redhat.com, Pavan.Rallabhandi@ibm.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Reviewed-by: Patrick Donnelly <pdonnell@ibm.com>
-Tested-by: Patrick Donnelly <pdonnell@ibm.com>
-
-On Tue, Feb 3, 2026 at 5:55=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyko.co=
-m> wrote:
+On Tue, Feb 3, 2026 at 11:55=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyko.c=
+om> wrote:
 >
 > From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 >
@@ -503,6 +480,14 @@ ame,
 _namespace %s\n",
 > -                                      (int)fsname_len, (char *)*p,
 > +                                      (int)fsname_len, m->m_fs_name,
+
+Hi Slava,
+
+Being returned from ceph_extract_encoded_string(), m->m_fs_name is
+guaranteed to be NULL-terminated, so it can be printed with %s just
+like mdsc->fsc->mount_options->mds_namespace.  The %*pE thing is
+redundant now.
+
 >                                        mdsc->fsc->mount_options->mds_name=
 space);
 >                         goto bad;
@@ -558,6 +543,25 @@ space);
 > +               return false;
 > +
 > +       return !strncmp(pattern, target, strlen(pattern));
+
+What is the point of explicitly making sure that lengths match and then
+doing strncmp with the same/matching length (and on top of that running
+strlen the third time)?  Given that this is executed on every file open
+as well as in some other cases the overhead from these three strlen
+invocations, however negligible in isolation, may accumulate and become
+noticeable.  Can
+
+    if (strlen(pattern) !=3D strlen(target))
+            return false;
+
+    return !strncmp(pattern, target, strlen(pattern));
+
+be replaced with
+
+    return !strcmp(pattern, target);
+
+?
+
 > +}
 > +
 >  /*
@@ -581,35 +585,30 @@ space);
 > +               return false;
 > +
 > +       return !strncmp(fsopt->mds_namespace, namespace, len);
->  }
->
->  /* mount state */
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index c7f2c63b3bc3..08e5dbe15ca4 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -31,6 +31,12 @@
->  #define CEPH_INO_CEPH   2            /* hidden .ceph dir */
->  #define CEPH_INO_GLOBAL_SNAPREALM  3 /* global dummy snaprealm */
->
-> +/*
-> + * name for "old" CephFS file systems,
-> + * see ceph.git e2b151d009640114b2565c901d6f41f6cd5ec652
-> + */
-> +#define CEPH_OLD_FS_NAME       "cephfs"
-> +
->  /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
->  #define CEPH_MAX_MON   31
->
-> --
-> 2.52.0
->
 
+What is the rationale for changing the body of namespace_equals()?
+The existing code
 
---=20
-Patrick Donnelly, Ph.D.
-He / Him / His
-Red Hat Partner Engineer
-IBM, Inc.
-GPG: 19F28A586F808C2402351B93C3301A3E258DD79D
+    return !(fsopt->mds_namespace &&
+             (strlen(fsopt->mds_namespace) !=3D len ||
+              strncmp(fsopt->mds_namespace, namespace, len)));
 
+doesn't treat any value specially -- the special provision is made only
+for the case of no value at all (i.e. mds_namespace =3D=3D NULL) as noted
+in the comment.
+
+This revision
+
+    if (!fsopt->mds_namespace || !fsopt->mds_namespace[0])
+            return true;
+
+treats the empty string value specially.  This changes the behavior of
+mount command when an empty string is passed for MDS namespace/fsname:
+previously it failed with ENOENT whereas now it would succeed and mount
+the filesystem that happens to be first on the list (similar to what was
+discussed for "mds_namespace=3D*" on the previous revisions).  Patrick
+should chime in, but I don't think this behavior is desired.
+
+Thanks,
+
+                Ilya
