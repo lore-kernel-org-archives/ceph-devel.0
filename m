@@ -1,300 +1,111 @@
-Received: from mail-wr1-f68.google.com (mail-wr1-f68.google.com [209.85.221.68])
+Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35192367F56
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Feb 2026 13:39:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.68
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72FEF2417D1
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Feb 2026 15:46:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770385152; cv=none; b=nup+dj8IMat6RI2W3tuu4869VeVq7182soTLRN3KiYIXqHvqkaKyLbHroTr25LWxcTFIhqwaM8J/cOydz5tUGAE8lfxLmKYFqN1pUHKnYl/WqWCinxYmL6RjphkrtsNivJjQMNSShUpPEoZCgNBB0gl+lPBmTji9cM8SUE1Lb+w=
+	t=1770392780; cv=none; b=dTI2fwST0uu1RfbAlMasPPX9t7EMzOcmoyyhMhQ0hIxSHPt0ADutgIPT2nRn5d0yP7VKmtuiIgSJA3CqAYIOyNfOIkT4W4oHrcAl/YdAFbg7PMtmzQ8GiAR9CyaYx+9MMJ+lXLDtCETebWYW+N9yh1ovA8dyOZntSM36iWI9D+w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770385152; c=relaxed/simple;
-	bh=7jqm8TFBXjPCT0+qMbh5So+0/cmSb5NyAanWOsqG4NQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=HkYPuGJJ9NZ9rGbAIv8C5aeXEs454hSTveV+SQmcNBajVNQwQl+ZZQoUyIpXaX1H1aAwTs5Z1+j/pF8aRj2DAADBYszg9y9sIHEc8z4M7rKsbSInY+w/y9nTNK1KYF5phXTxhgR512tCJStq/QUKPT1VXrX8v/qfeCB7OJiHNYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kaj8YjNh; arc=none smtp.client-ip=209.85.221.68
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1770392780; c=relaxed/simple;
+	bh=b0+Bte4dgAh7ipXKn2qxNAR4SPWavmbHCLyixVr33Sg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kslpShnJpmy1KQwzD4QiMGcSBwMNGve2ZJ/Aj5x5O3dut9Qd+2shao0z9w8Y0Z+v7169EaXO5WSJgMoj6UyvPbwFkPK+YlMwAnCQ9r4+uvlSGgKVw7yvrIxYo57kKkNTMJXUGOWolf00FYv5Cp5IbcP/Vh+i6q24VJDOI1cCZjw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RNEnEdQU; arc=none smtp.client-ip=209.85.219.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kaj8YjNh"
-Received: by mail-wr1-f68.google.com with SMTP id ffacd0b85a97d-4362507f0feso907009f8f.0
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Feb 2026 05:39:11 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RNEnEdQU"
+Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-895071c5527so10740436d6.1
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Feb 2026 07:46:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770385150; x=1770989950; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
-         :to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ItjnUDBTrDRkRz4IDFBU65KXxTOZL40uI9DIWKAkmz0=;
-        b=kaj8YjNhgQl7ezhxFzuYWM9LAFdYKtuOcZcT6d4wOtUsURwBE2eCkN+eCn7Ypfl3aW
-         MU20x1sGa0KtuE8xdr7WrefRkuK7+OnBgs3XlK1CetGvoImT8fT9QBY8n1pNe7ZPsosi
-         +rk/9p6ZSyvUiGTAqlhK5fKfh2cIbuC1F/JG1ZgS9yWrkqQ1mHUIkS7YENz9OQFrPTue
-         Lm3oDAj+ocBMQcxKVcSaut4HrzOyyz9jplad9sLYnbANkslbiy1Zo/I1xtBrXAvKLmIA
-         EOjInyNNCdfvXyBJ3iCFF37XhihVDlIjGUXXS+t1T5KuQshE1XLTqjwOiu0UGljchKdi
-         vlcw==
+        d=gmail.com; s=20230601; t=1770392779; x=1770997579; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=bZSSxMdqjzfXmMX6nrA4gIO4ApZ7Z16X71f8CeQJJaE=;
+        b=RNEnEdQUFeHxhkiiOs56L4B7Lt7t1ummlNu0TELVk3agfGZT/vnZQqkiquMNsSnCmJ
+         q2nkSzHXtKjg7pmOCcPZiKYi93IjW1W/2h0gFHgs8GOrkDBfBrJqEx68orPX75VeYfej
+         G2wSbplcV56/4HxF0p2rgYZFj9+2x2YsszDFbtku9SJFii1Ip7/oAr5oF7DboDv7fcBz
+         dPCwHRX2UbMk/fgbG3aDgFY83R09C90E2X2/1YLt1roLrLRYsJtnrd6Ct9qht98uoJ5j
+         Jqjt+yXg2wl9tB+hKBDXjhxJZl4Eml2ErOHdJGC3WYZeFtYW2OumpLs03n4eNNOYCJda
+         lHxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770385150; x=1770989950;
-        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
-         :to:from:date:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20230601; t=1770392779; x=1770997579;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ItjnUDBTrDRkRz4IDFBU65KXxTOZL40uI9DIWKAkmz0=;
-        b=ZvuLQOC9ALbV2K7/nlhQJoVz9h2vPi6tLiZ8iUJQwJY04QmZytU1HqnLZ+VzgXYOYG
-         EWMwIOyC/zk29NwgwPdh7hpse1txCU2LfgW8OM8F8ROKdybKmaKNpfz5E+73wbzezlWa
-         Kz3fT4ooHdXbNtp4QNfAOcAM+LcE//FUacYKZbmhP7pZSoANPjDngQ7eq594GsIh8WI8
-         C4jv6/zlTsSuvZyYXeBw/HGD+s9gr9qgb1MRmXfXY0XQVG2jx5MAa609hFXrH8uY/CDt
-         IvT4KgvDbbg8+tI1cz6Ipsf4lHWc3asnwMhNIQhkd2BsgF5Oo9yLgLYOwZNH/+zZcADs
-         /41A==
-X-Forwarded-Encrypted: i=1; AJvYcCXLZLk/9FW61C5tJf9rJGO7lHb61yN6Kuk1RWCFpjbkDmL26LJrotBybXRTczZ5jn3sPmpEFVUAhF5U@vger.kernel.org
-X-Gm-Message-State: AOJu0YyQmndUBryPS45TN9Gnw/5pczWAEtXfvK/v/XpN9WWidgz9j7G5
-	0mc4NP8CjB+gqZ4ZnthyuSezgBFq92k3r52lBVrb2SHRZVQ89zAdfd/S8wFcAj4owrE=
-X-Gm-Gg: AZuq6aJlA5Iss7/6KXt+vth3BZfC+CBSaZl7HjxDBkuGsSIswzNuQdHPiCavjOxrYT1
-	KgZnOG7cvxfWup99FfaOOFBNEOi3ZaovH8UoYwLICi7KeVTbdVvbgwNa0evY0qFk6Rfk9wZU11h
-	lzEn2dfkNRRmBC/PCX8VcTLXHSL4YnKZ4K/RllsH7MtZmbU77A+RnYLGBz0hp0GR8w48/oXCiDT
-	ZfeAOjfIdwVB0xcMvS40BSbvzl+cNVLZo3wRjVbkeR5hSJ3kZk6BRfEudbjgXwTlCzEBgHQBEhn
-	M6mDGBsAR8NKDLN4UNqNu0mjI99mhTiLfMKYgPAhL+uyyEtHoSfePgRiiVt75fPdSwKjufXx4c2
-	n87RNplXXxAYVnYn26DYm8uA6x6bc5qjjxwUX83pWeSgRKXbxqrP+rW5GzZhrdQer+zmRaMK2Qf
-	3TlVxFtm1SAN9egQoj
-X-Received: by 2002:a05:6000:603:b0:436:1934:d234 with SMTP id ffacd0b85a97d-4362933cbe2mr4730033f8f.3.1770385150336;
-        Fri, 06 Feb 2026 05:39:10 -0800 (PST)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-436296bd211sm5892619f8f.13.2026.02.06.05.39.09
+        bh=bZSSxMdqjzfXmMX6nrA4gIO4ApZ7Z16X71f8CeQJJaE=;
+        b=ipdsk1sJetZi7EDoqikLxKhollUIKE9+faatC2ADfCulLQFQ4ijkUtd8icW1YthTP9
+         PfKmcTSZK29L8gTzV4S0Sq9dTDoirsH6m2+PyzghQsfJXUzA0kb+lqf/pLqUyom8jFYB
+         wS8Ysou+HhXzJcE39x/+4TMmxaZf8qPEtl5t7FmUgmyPHS3oZwEPrPFXxhutKRmtlx4I
+         gSxHruDt0B1+vw5vxeHW26My1tF5io777Tk1UXBLwaatsAJo/U4aK9tXKMBxLuPDP9HD
+         bhKIwG/sOTlmU1n+FrRXMlJvxNNujkWbaTHMkGePUlG/uaUKqttwkootlF0l8zL4a0cT
+         OMog==
+X-Gm-Message-State: AOJu0YxgwRyAWZPwni0wJlgdl8rMMvNe5GYZi7TwYVAqLVTYRv5WBrbo
+	S9mH9Lu5Twuf7fFkyzVWBWl5Sm66gbQ1o2upy7ncT8ZlY7tXJ7HJ/gEd
+X-Gm-Gg: AZuq6aLW/3G696LTlhbXoO+XX6G3c9EyEeWatU7ANxRotunfA+bkOrMQLw/ej63FZQN
+	554IjKuAzBZQ6s6UVfxGLxsGJKwrHWL2tKnIYKql0qY7kqg4f+k3XiO9ZriS+vPRduJDhbICoFe
+	o1FwXnWN+3nJF0/wOyWuKeaqhQBe4WpeyHZGI47xtg1gY3DvPcFGsXEyOzbcO/M7xIixduHXI4g
+	iMwRu5aiJPB8fXsxfUyAXaJ2o+sllADFBL8NZMdaC2DNw6h+LV8sPCcnEBD54aZrmTPFSkreusR
+	RqF2gcmiw0aVCJnNDIwvdoum+5UBbpRLbKlCuFMQa2wA7uy6vkAeVupSnGIDOViM9JBP7L9yHDb
+	ygaHY2FFa1hR3u+X+ooSrbmrMomqF4Gq86+byz2oEyy1iAMvutbkmkV1ggqB18o2UyGgF/cT2z7
+	ChSbZcMG33wYu4a5o0bsF+8dCK/Yqn9BMbBkc9vNTtRvqjzdKsk00NWLgdgJtvbek=
+X-Received: by 2002:a05:6214:21cc:b0:890:6331:7e7e with SMTP id 6a1803df08f44-8953cd97fbfmr43164176d6.60.1770392779066;
+        Fri, 06 Feb 2026 07:46:19 -0800 (PST)
+Received: from zambezi.front.sepia.ceph.com (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8953bf5b2ddsm19206376d6.18.2026.02.06.07.46.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Feb 2026 05:39:09 -0800 (PST)
-Date: Fri, 6 Feb 2026 16:39:07 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org,
-	linux-kernel <linux-kernel@vger.kernel.org>
-Subject: [bug report] crush: remove forcefeed functionality
-Message-ID: <aYXu-_GsMPJpbv8m@stanley.mountain>
+        Fri, 06 Feb 2026 07:46:18 -0800 (PST)
+From: Ilya Dryomov <idryomov@gmail.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [GIT PULL] Ceph fixes for 6.19-rc9
+Date: Fri,  6 Feb 2026 16:45:32 +0100
+Message-ID: <20260206154605.1369203-1-idryomov@gmail.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <caa37f28-a2e8-4e0a-a9ce-a365ce805e4b@stanley.mountain>
+Content-Transfer-Encoding: 8bit
 
-[ Smatch checking is paused while we raise funding.  #SadFace
-  https://lore.kernel.org/all/aTaiGSbWZ9DJaGo7@stanley.mountain/ -dan ]
+Hi Linus,
 
-Hello Ceph Maintainers,
+The following changes since commit 18f7fcd5e69a04df57b563360b88be72471d6b62:
 
-Commit 41ebcc0907c5 ("crush: remove forcefeed functionality") from
-May 7, 2012 (linux-next), leads to the following Smatch static
-checker warning:
+  Linux 6.19-rc8 (2026-02-01 14:01:13 -0800)
 
-	net/ceph/crush/mapper.c:1015 crush_do_rule()
-	warn: iterator 'j' not incremented
+are available in the Git repository at:
 
-net/ceph/crush/mapper.c
-    897 int crush_do_rule(const struct crush_map *map,
-    898                   int ruleno, int x, int *result, int result_max,
-    899                   const __u32 *weight, int weight_max,
-    900                   void *cwin, const struct crush_choose_arg *choose_args)
-    901 {
-    902         int result_len;
-    903         struct crush_work *cw = cwin;
-    904         int *a = cwin + map->working_size;
-    905         int *b = a + result_max;
-    906         int *c = b + result_max;
-    907         int *w = a;
-    908         int *o = b;
-    909         int recurse_to_leaf;
-    910         int wsize = 0;
-    911         int osize;
-    912         const struct crush_rule *rule;
-    913         __u32 step;
-    914         int i, j;
-    915         int numrep;
-    916         int out_size;
-    917         /*
-    918          * the original choose_total_tries value was off by one (it
-    919          * counted "retries" and not "tries").  add one.
-    920          */
-    921         int choose_tries = map->choose_total_tries + 1;
-    922         int choose_leaf_tries = 0;
-    923         /*
-    924          * the local tries values were counted as "retries", though,
-    925          * and need no adjustment
-    926          */
-    927         int choose_local_retries = map->choose_local_tries;
-    928         int choose_local_fallback_retries = map->choose_local_fallback_tries;
-    929 
-    930         int vary_r = map->chooseleaf_vary_r;
-    931         int stable = map->chooseleaf_stable;
-    932 
-    933         if ((__u32)ruleno >= map->max_rules) {
-    934                 dprintk(" bad ruleno %d\n", ruleno);
-    935                 return 0;
-    936         }
-    937 
-    938         rule = map->rules[ruleno];
-    939         result_len = 0;
-    940 
-    941         for (step = 0; step < rule->len; step++) {
-    942                 int firstn = 0;
-    943                 const struct crush_rule_step *curstep = &rule->steps[step];
-    944 
-    945                 switch (curstep->op) {
-    946                 case CRUSH_RULE_TAKE:
-    947                         if ((curstep->arg1 >= 0 &&
-    948                              curstep->arg1 < map->max_devices) ||
-    949                             (-1-curstep->arg1 >= 0 &&
-    950                              -1-curstep->arg1 < map->max_buckets &&
-    951                              map->buckets[-1-curstep->arg1])) {
-    952                                 w[0] = curstep->arg1;
-    953                                 wsize = 1;
-    954                         } else {
-    955                                 dprintk(" bad take value %d\n", curstep->arg1);
-    956                         }
-    957                         break;
-    958 
-    959                 case CRUSH_RULE_SET_CHOOSE_TRIES:
-    960                         if (curstep->arg1 > 0)
-    961                                 choose_tries = curstep->arg1;
-    962                         break;
-    963 
-    964                 case CRUSH_RULE_SET_CHOOSELEAF_TRIES:
-    965                         if (curstep->arg1 > 0)
-    966                                 choose_leaf_tries = curstep->arg1;
-    967                         break;
-    968 
-    969                 case CRUSH_RULE_SET_CHOOSE_LOCAL_TRIES:
-    970                         if (curstep->arg1 >= 0)
-    971                                 choose_local_retries = curstep->arg1;
-    972                         break;
-    973 
-    974                 case CRUSH_RULE_SET_CHOOSE_LOCAL_FALLBACK_TRIES:
-    975                         if (curstep->arg1 >= 0)
-    976                                 choose_local_fallback_retries = curstep->arg1;
-    977                         break;
-    978 
-    979                 case CRUSH_RULE_SET_CHOOSELEAF_VARY_R:
-    980                         if (curstep->arg1 >= 0)
-    981                                 vary_r = curstep->arg1;
-    982                         break;
-    983 
-    984                 case CRUSH_RULE_SET_CHOOSELEAF_STABLE:
-    985                         if (curstep->arg1 >= 0)
-    986                                 stable = curstep->arg1;
-    987                         break;
-    988 
-    989                 case CRUSH_RULE_CHOOSELEAF_FIRSTN:
-    990                 case CRUSH_RULE_CHOOSE_FIRSTN:
-    991                         firstn = 1;
-    992                         fallthrough;
-    993                 case CRUSH_RULE_CHOOSELEAF_INDEP:
-    994                 case CRUSH_RULE_CHOOSE_INDEP:
-    995                         if (wsize == 0)
-    996                                 break;
-    997 
-    998                         recurse_to_leaf =
-    999                                 curstep->op ==
-    1000                                  CRUSH_RULE_CHOOSELEAF_FIRSTN ||
-    1001                                 curstep->op ==
-    1002                                 CRUSH_RULE_CHOOSELEAF_INDEP;
-    1003 
-    1004                         /* reset output */
-    1005                         osize = 0;
-    1006 
-    1007                         for (i = 0; i < wsize; i++) {
-    1008                                 int bno;
-    1009                                 numrep = curstep->arg1;
-    1010                                 if (numrep <= 0) {
-    1011                                         numrep += result_max;
-    1012                                         if (numrep <= 0)
-    1013                                                 continue;
-    1014                                 }
---> 1015                                 j = 0;
-                                         ^^^^^
+  https://github.com/ceph/ceph-client.git tags/ceph-for-6.19-rc9
 
-    1016                                 /* make sure bucket id is valid */
-    1017                                 bno = -1 - w[i];
-    1018                                 if (bno < 0 || bno >= map->max_buckets) {
-    1019                                         /* w[i] is probably CRUSH_ITEM_NONE */
-    1020                                         dprintk("  bad w[i] %d\n", w[i]);
-    1021                                         continue;
-    1022                                 }
-    1023                                 if (firstn) {
-    1024                                         int recurse_tries;
-    1025                                         if (choose_leaf_tries)
-    1026                                                 recurse_tries =
-    1027                                                         choose_leaf_tries;
-    1028                                         else if (map->chooseleaf_descend_once)
-    1029                                                 recurse_tries = 1;
-    1030                                         else
-    1031                                                 recurse_tries = choose_tries;
-    1032                                         osize += crush_choose_firstn(
-    1033                                                 map,
-    1034                                                 cw,
-    1035                                                 map->buckets[bno],
-    1036                                                 weight, weight_max,
-    1037                                                 x, numrep,
-    1038                                                 curstep->arg2,
-    1039                                                 o+osize, j,
-    1040                                                 result_max-osize,
-    1041                                                 choose_tries,
-    1042                                                 recurse_tries,
-    1043                                                 choose_local_retries,
-    1044                                                 choose_local_fallback_retries,
-    1045                                                 recurse_to_leaf,
-    1046                                                 vary_r,
-    1047                                                 stable,
-    1048                                                 c+osize,
-    1049                                                 0,
-    1050                                                 choose_args);
-    1051                                 } else {
-    1052                                         out_size = ((numrep < (result_max-osize)) ?
-    1053                                                     numrep : (result_max-osize));
-    1054                                         crush_choose_indep(
-    1055                                                 map,
-    1056                                                 cw,
-    1057                                                 map->buckets[bno],
-    1058                                                 weight, weight_max,
-    1059                                                 x, out_size, numrep,
-    1060                                                 curstep->arg2,
-    1061                                                 o+osize, j,
-    1062                                                 choose_tries,
-    1063                                                 choose_leaf_tries ?
-    1064                                                    choose_leaf_tries : 1,
-    1065                                                 recurse_to_leaf,
-    1066                                                 c+osize,
-    1067                                                 0,
-    1068                                                 choose_args);
-    1069                                         osize += out_size;
-    1070                                 }
+for you to fetch changes up to 7987cce375ac8ce98e170a77aa2399f2cf6eb99f:
 
-There used to be a j++ around here but it was deleted.
+  ceph: fix NULL pointer dereference in ceph_mds_auth_match() (2026-02-04 22:00:42 +0100)
 
-    1071                         }
-    1072 
-    1073                         if (recurse_to_leaf)
-    1074                                 /* copy final _leaf_ values to output set */
-    1075                                 memcpy(o, c, osize*sizeof(*o));
-    1076 
-    1077                         /* swap o and w arrays */
-    1078                         swap(o, w);
-    1079                         wsize = osize;
-    1080                         break;
-    1081 
-    1082 
-    1083                 case CRUSH_RULE_EMIT:
-    1084                         for (i = 0; i < wsize && result_len < result_max; i++) {
-    1085                                 result[result_len] = w[i];
-    1086                                 result_len++;
-    1087                         }
-    1088                         wsize = 0;
-    1089                         break;
-    1090 
-    1091                 default:
-    1092                         dprintk(" unknown op %d at step %d\n",
-    1093                                 curstep->op, step);
-    1094                         break;
-    1095                 }
-    1096         }
-    1097 
-    1098         return result_len;
-    1099 }
+----------------------------------------------------------------
+One RBD and two CephFS fixes which address potential oopses.  The RBD
+thing is more of a rare edge case that pops up in our CI, while the two
+CephFS scenarios are regressions that were reported by users and can be
+triggered trivially in normal operation.  All marked for stable.
 
-regards,
-dan carpenter
+----------------------------------------------------------------
+Daniel Vogelbacher (1):
+      ceph: fix oops due to invalid pointer for kfree() in parse_longname()
+
+Ilya Dryomov (1):
+      rbd: check for EOD after exclusive lock is ensured to be held
+
+Viacheslav Dubeyko (1):
+      ceph: fix NULL pointer dereference in ceph_mds_auth_match()
+
+ drivers/block/rbd.c          | 33 +++++++++++++++++++++------------
+ fs/ceph/crypto.c             |  9 +++++----
+ fs/ceph/mds_client.c         |  5 +++--
+ fs/ceph/mdsmap.c             | 26 +++++++++++++++++++-------
+ fs/ceph/mdsmap.h             |  1 +
+ fs/ceph/super.h              | 16 ++++++++++++++--
+ include/linux/ceph/ceph_fs.h |  6 ++++++
+ 7 files changed, 69 insertions(+), 27 deletions(-)
