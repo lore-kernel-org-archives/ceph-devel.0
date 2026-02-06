@@ -1,68 +1,74 @@
-Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72FEF2417D1
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Feb 2026 15:46:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B85EA30C36C
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Feb 2026 20:28:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770392780; cv=none; b=dTI2fwST0uu1RfbAlMasPPX9t7EMzOcmoyyhMhQ0hIxSHPt0ADutgIPT2nRn5d0yP7VKmtuiIgSJA3CqAYIOyNfOIkT4W4oHrcAl/YdAFbg7PMtmzQ8GiAR9CyaYx+9MMJ+lXLDtCETebWYW+N9yh1ovA8dyOZntSM36iWI9D+w=
+	t=1770409693; cv=none; b=tTMfdNzB1igodKjfxMq73n3zdJAjKm+WDC+2Bcdhqj4YsbY5Xx1TabqssvCzHnlUquma+8vmCekRJEWEGyMekI/o2JeLusfX/kW+kiq8ihJ2JcYNxPQeyJoHG5tyhQqUnv/cievsw2Es5V7SoqT2oMxkHAOb91/pkvleUYlzk8I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770392780; c=relaxed/simple;
-	bh=b0+Bte4dgAh7ipXKn2qxNAR4SPWavmbHCLyixVr33Sg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kslpShnJpmy1KQwzD4QiMGcSBwMNGve2ZJ/Aj5x5O3dut9Qd+2shao0z9w8Y0Z+v7169EaXO5WSJgMoj6UyvPbwFkPK+YlMwAnCQ9r4+uvlSGgKVw7yvrIxYo57kKkNTMJXUGOWolf00FYv5Cp5IbcP/Vh+i6q24VJDOI1cCZjw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RNEnEdQU; arc=none smtp.client-ip=209.85.219.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1770409693; c=relaxed/simple;
+	bh=Z5aaRmSOHMFDbg6CPFROQyFYr03jewWVqkDMdJPuzkA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=iUCFAl2JwxCH/CUv3LvJgX1C0R+32aYSxineyDWZnDWp9NMCEoqVC3W/T51mpJjGW+D61yg6bzR3vNoY3uC5XuhwAySZDziBw8vAz7Y1LvtOmX5xuyzLspu4TbOqpDI3mLIHGtmYJVbj/9kpCGciR1qTSBQC85n6ia/sDglQFdM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b=PBvyIfw2; arc=none smtp.client-ip=209.85.128.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RNEnEdQU"
-Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-895071c5527so10740436d6.1
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Feb 2026 07:46:20 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b="PBvyIfw2"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-79430ef54c3so11301497b3.2
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Feb 2026 12:28:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1770392779; x=1770997579; darn=vger.kernel.org;
+        d=dubeyko-com.20230601.gappssmtp.com; s=20230601; t=1770409691; x=1771014491; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=bZSSxMdqjzfXmMX6nrA4gIO4ApZ7Z16X71f8CeQJJaE=;
-        b=RNEnEdQUFeHxhkiiOs56L4B7Lt7t1ummlNu0TELVk3agfGZT/vnZQqkiquMNsSnCmJ
-         q2nkSzHXtKjg7pmOCcPZiKYi93IjW1W/2h0gFHgs8GOrkDBfBrJqEx68orPX75VeYfej
-         G2wSbplcV56/4HxF0p2rgYZFj9+2x2YsszDFbtku9SJFii1Ip7/oAr5oF7DboDv7fcBz
-         dPCwHRX2UbMk/fgbG3aDgFY83R09C90E2X2/1YLt1roLrLRYsJtnrd6Ct9qht98uoJ5j
-         Jqjt+yXg2wl9tB+hKBDXjhxJZl4Eml2ErOHdJGC3WYZeFtYW2OumpLs03n4eNNOYCJda
-         lHxg==
+        bh=0qkRyjYepm1vL8YsOB5hZZCuF7RL4gTgPwCwUHAKKtc=;
+        b=PBvyIfw2kN1mJt1xHQCqZY3uauH58zenIDVzpd6QT274FAcRRyX6HYzvxYfXEvSqUZ
+         OZ+WLYr6a0npnw5YDoKZ7oQhqUQG40I9FqhxfbR+fG4IPyV+wnUgeV97pFmawfBWCvPB
+         SLEr7LvKhhav3s0zZ0wReXaOYTqTGBJsXxNWTX187L/mtYpgSS+hpe4dG9mcZMOWlr7I
+         Ef2D7vHnZ+JyZu/TKMYGN0XhfYKRuzAIePDDtEzb04AIb75Y5jHC189V0FxPzcztUj90
+         XKJjt5IKamj4KA/LPMhYyLC0lpYOLXtgGaAPl2abtQrrPLIOdEBAXUOijfWgNdgtiBPf
+         MGTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770392779; x=1770997579;
+        d=1e100.net; s=20230601; t=1770409691; x=1771014491;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bZSSxMdqjzfXmMX6nrA4gIO4ApZ7Z16X71f8CeQJJaE=;
-        b=ipdsk1sJetZi7EDoqikLxKhollUIKE9+faatC2ADfCulLQFQ4ijkUtd8icW1YthTP9
-         PfKmcTSZK29L8gTzV4S0Sq9dTDoirsH6m2+PyzghQsfJXUzA0kb+lqf/pLqUyom8jFYB
-         wS8Ysou+HhXzJcE39x/+4TMmxaZf8qPEtl5t7FmUgmyPHS3oZwEPrPFXxhutKRmtlx4I
-         gSxHruDt0B1+vw5vxeHW26My1tF5io777Tk1UXBLwaatsAJo/U4aK9tXKMBxLuPDP9HD
-         bhKIwG/sOTlmU1n+FrRXMlJvxNNujkWbaTHMkGePUlG/uaUKqttwkootlF0l8zL4a0cT
-         OMog==
-X-Gm-Message-State: AOJu0YxgwRyAWZPwni0wJlgdl8rMMvNe5GYZi7TwYVAqLVTYRv5WBrbo
-	S9mH9Lu5Twuf7fFkyzVWBWl5Sm66gbQ1o2upy7ncT8ZlY7tXJ7HJ/gEd
-X-Gm-Gg: AZuq6aLW/3G696LTlhbXoO+XX6G3c9EyEeWatU7ANxRotunfA+bkOrMQLw/ej63FZQN
-	554IjKuAzBZQ6s6UVfxGLxsGJKwrHWL2tKnIYKql0qY7kqg4f+k3XiO9ZriS+vPRduJDhbICoFe
-	o1FwXnWN+3nJF0/wOyWuKeaqhQBe4WpeyHZGI47xtg1gY3DvPcFGsXEyOzbcO/M7xIixduHXI4g
-	iMwRu5aiJPB8fXsxfUyAXaJ2o+sllADFBL8NZMdaC2DNw6h+LV8sPCcnEBD54aZrmTPFSkreusR
-	RqF2gcmiw0aVCJnNDIwvdoum+5UBbpRLbKlCuFMQa2wA7uy6vkAeVupSnGIDOViM9JBP7L9yHDb
-	ygaHY2FFa1hR3u+X+ooSrbmrMomqF4Gq86+byz2oEyy1iAMvutbkmkV1ggqB18o2UyGgF/cT2z7
-	ChSbZcMG33wYu4a5o0bsF+8dCK/Yqn9BMbBkc9vNTtRvqjzdKsk00NWLgdgJtvbek=
-X-Received: by 2002:a05:6214:21cc:b0:890:6331:7e7e with SMTP id 6a1803df08f44-8953cd97fbfmr43164176d6.60.1770392779066;
-        Fri, 06 Feb 2026 07:46:19 -0800 (PST)
-Received: from zambezi.front.sepia.ceph.com (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8953bf5b2ddsm19206376d6.18.2026.02.06.07.46.17
+        bh=0qkRyjYepm1vL8YsOB5hZZCuF7RL4gTgPwCwUHAKKtc=;
+        b=WagSgj/bqDUetKdECR/wppRuyv0KSHOpoHnvsaOP/cYTISXebe5u6Xahf966gf06w3
+         KfLVuUhEiXCduOQkHQOtNR88j41k4Y2NiF2+iLshF2gzKkrMt7HcDAoz6QqytyuVsudb
+         8Iz4lLEteS2YKxPqpyJAjCYqA/oFf96E7aGKJWaIkEHgYVfgIMQAXCEJ+ZMB2jMJDSPF
+         CgZR3w9gcC5w/0SVQWxjfEFzfVLAGZ0XloY5XF9fhc1PGZEaeQa3UiJgquA9Fupwxni0
+         FqWZ/xjTm/WRYxMCppRayCqywxVMSVUL1b32u1ry3G5ueL9klTF5JYa/u5L3CIGPDqlj
+         qJ6A==
+X-Gm-Message-State: AOJu0Yy8+THc6VoeEeaK00NU/iktdYMZuVIKXdKeO1HwOD5xdXVb62KK
+	+0Uz2S9z7xM4xVRJ3bwV3Tn2OI8OIGShia7XDtOBxFEiN4DuylaMgPqAtRFlfuywPvvVps5nwW0
+	PyFqgGvM=
+X-Gm-Gg: AZuq6aLnpAr3BKNbVpWenGwxQB0VEMXmZ9D+r9+njHP4/QmRKdG0jaImzTJlx5+6fcx
+	pWx4tzmr5vWI5w7HzKyx4IbCQUH8SvNNfFXSTv1OnDjzJybUkYIey3uQLiPun5l3L0lRd3IXf2l
+	W2OEVOlK6B9iJNVrqdj57C1tuklXbGuR22EWfjIiy+9RsnFUQcnQnlITyVY3D2xcbD5fmFVkrfG
+	6wTneANT/BD1uPS5Mb+sWf/lkiQ9yp6EmkSZGX34XFwTZpYQVEQmC9QVFwu3t3t7JLPdpf28Kwa
+	uWGJQS1eELpGxOr8lCgIoinxBNHgNCxAKFokOsIpar3u49HsGHB7MR2UlBJJ4oFwTj8Q7Y3TT1s
+	WM6MlDQneof9RrmZ1XXy4Tv8jOq5sXovjOri0Kq6CXoTUjENVeSND+b0fuSPxl7G1flhFSs3DAJ
+	r8owYEZhsT4L0aqnFPMAZ3oqG/0zDCsaDudT4DPpYrgEAO37q2KkN8L43OWXoPUPHMbc6IOvNG2
+	kDM0NMQl5yN65mt4u0=
+X-Received: by 2002:a05:690c:91:b0:795:795:d8e3 with SMTP id 00721157ae682-7952ababb6cmr40484477b3.70.1770409691543;
+        Fri, 06 Feb 2026 12:28:11 -0800 (PST)
+Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:a0a1:736b:295e:2ad8])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7952a2348c1sm31069507b3.38.2026.02.06.12.28.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Feb 2026 07:46:18 -0800 (PST)
-From: Ilya Dryomov <idryomov@gmail.com>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [GIT PULL] Ceph fixes for 6.19-rc9
-Date: Fri,  6 Feb 2026 16:45:32 +0100
-Message-ID: <20260206154605.1369203-1-idryomov@gmail.com>
-X-Mailer: git-send-email 2.49.0
+        Fri, 06 Feb 2026 12:28:10 -0800 (PST)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	pdonnell@redhat.com,
+	amarkuze@redhat.com,
+	Slava.Dubeyko@ibm.com,
+	slava@dubeyko.com
+Subject: [PATCH] ceph: fix generic/639 xfstests failure
+Date: Fri,  6 Feb 2026 12:27:58 -0800
+Message-ID: <20260206202757.1535351-2-slava@dubeyko.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -71,41 +77,125 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Hi Linus,
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
-The following changes since commit 18f7fcd5e69a04df57b563360b88be72471d6b62:
+The generic/639 xfstest fails for Ceph msgr2 protocol:
 
-  Linux 6.19-rc8 (2026-02-01 14:01:13 -0800)
+Ubuntu 22.04.5 LTS (GNU/Linux 6.17.0-rc7+ x86_64)
 
-are available in the Git repository at:
+sudo mount -t ceph :/ /mnt/cephfs/ -o name=admin,fs=cephfs,ms_mode=secure
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-6.19-rc9
+sudo ./check generic/639
+FSTYP -- ceph
+PLATFORM -- Linux/x86_64 ceph-0005 6.17.0-rc7+ #16 SMP PREEMPT_DYNAMIC Wed Nov 12 11:01:48 PST 2025
+MKFS_OPTIONS -- 192.168.1.213:3300:/scratch
+MOUNT_OPTIONS -- -o name=admin,ms_mode=secure 192.168.1.213:3300:/scratch /mnt/cephfs/scratch
 
-for you to fetch changes up to 7987cce375ac8ce98e170a77aa2399f2cf6eb99f:
+generic/639 - output mismatch (see /home/slavad/XFSTESTS-2/xfstests-dev/results//generic/639.out.bad)
 
-  ceph: fix NULL pointer dereference in ceph_mds_auth_match() (2026-02-04 22:00:42 +0100)
+The simple way to reproduce the issue simply running these steps:
 
-----------------------------------------------------------------
-One RBD and two CephFS fixes which address potential oopses.  The RBD
-thing is more of a rare edge case that pops up in our CI, while the two
-CephFS scenarios are regressions that were reported by users and can be
-triggered trivially in normal operation.  All marked for stable.
+mount -t ceph :/ /mnt/cephfs/ -o name=admin,fs=cephfs,ms_mode=secure
+xfs_io -f -c "pwrite -q 0 32" ./testfile251125-0004
+umount /mnt/cephfs/
+mount -t ceph :/ /mnt/cephfs/ -o name=admin,fs=cephfs,ms_mode=secure
+xfs_io -c "pwrite -q 32 32" ./testfile251125-0004
 
-----------------------------------------------------------------
-Daniel Vogelbacher (1):
-      ceph: fix oops due to invalid pointer for kfree() in parse_longname()
+Finally, we have the unexpected content of the file:
 
-Ilya Dryomov (1):
-      rbd: check for EOD after exclusive lock is ensured to be held
+hexdump ./testfile251125-0004
+0000000 0000 0000 0000 0000 0000 0000 0000 0000
+*
+0000020 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+*
+0000040
 
-Viacheslav Dubeyko (1):
-      ceph: fix NULL pointer dereference in ceph_mds_auth_match()
+Initial analysis has shown that if we try to write out of
+end of file, then ceph_write_begin() is responsible for
+the issue because it calls netfs_write_begin() and we have
+such logic:
 
- drivers/block/rbd.c          | 33 +++++++++++++++++++++------------
- fs/ceph/crypto.c             |  9 +++++----
- fs/ceph/mds_client.c         |  5 +++--
- fs/ceph/mdsmap.c             | 26 +++++++++++++++++++-------
- fs/ceph/mdsmap.h             |  1 +
- fs/ceph/super.h              | 16 ++++++++++++++--
- include/linux/ceph/ceph_fs.h |  6 ++++++
- 7 files changed, 69 insertions(+), 27 deletions(-)
+int netfs_write_begin(struct netfs_inode *ctx,
+              struct file *file, struct address_space *mapping,
+              loff_t pos, unsigned int len, struct folio **_folio,
+              void **_fsdata)
+{
+<skipped>
+
+    folio = __filemap_get_folio(mapping, index, FGP_WRITEBEGIN,
+                    mapping_gfp_mask(mapping));
+
+<skipped>
+
+    if (folio_test_uptodate(folio))
+        goto have_folio;
+
+<skipped>
+}
+
+The reason of the issue that somehow we have folio in uptodate
+state and netfs_write_begin() simply skips the logic of
+reading existing file's content.
+
+Futher analysis revealed that we call ceph_fill_inode() and
+ceph_fill_inline_data() before ceph_write_begin().
+
+void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+               char    *data, size_t len)
+{
+<skipped>
+
+    if (page != locked_page) {
+        if (len < PAGE_SIZE)
+            zero_user_segment(page, len, PAGE_SIZE);
+        else
+            flush_dcache_page(page);
+
+        SetPageUptodate(page); <--- We set page uptodate if len == 0!!!!
+        unlock_page(page);
+        put_page(page);
+    }
+}
+
+This patch fixes the issue by checking the len argument and
+setting memory page uptodate only if len > 0.
+
+sudo ./check generic/639
+FSTYP         -- ceph
+PLATFORM      -- Linux/x86_64 ceph-0005 6.19.0-rc5+ #2 SMP PREEMPT_DYNAMIC Thu Feb  5 15:43:51 PST 2026
+MKFS_OPTIONS  -- 192.168.1.213:3300:/scratch
+MOUNT_OPTIONS -- -o name=admin,ms_mode=secure 192.168.1.213:3300:/scratch /mnt/cephfs/scratch
+
+generic/639 6s ...  6s
+Ran: generic/639
+Passed all 1 tests
+
+[1] https://tracker.ceph.com/issues/73829
+
+Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+cc: Alex Markuze <amarkuze@redhat.com>
+cc: Ilya Dryomov <idryomov@gmail.com>
+cc: Patrick Donnelly <pdonnell@redhat.com>
+cc: Ceph Development <ceph-devel@vger.kernel.org>
+---
+ fs/ceph/addr.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 63b75d214210..436a287fd311 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -2184,7 +2184,9 @@ void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+ 		else
+ 			flush_dcache_page(page);
+ 
+-		SetPageUptodate(page);
++		if (len > 0)
++			SetPageUptodate(page);
++
+ 		unlock_page(page);
+ 		put_page(page);
+ 	}
+-- 
+2.53.0
+
