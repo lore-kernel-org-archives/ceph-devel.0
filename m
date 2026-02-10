@@ -1,228 +1,217 @@
-Received: from mail-dl1-f46.google.com (mail-dl1-f46.google.com [74.125.82.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8294C8F0
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 12:25:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.46
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770726335; cv=pass; b=MdDHlo+yf7cJ//RfvxzDdYRpbZN6iWQt+GGAstrI9PoWFITLYiuj5icSgxqnatdMwHi4GVXnZlFjExHAqCRqT3bnMBeSF/JSZ9RPAtQRIW0/kZZRhJOor+EirB7KUV/2iJ9yIQ4wAgxmRX5H5ajpTNv3AefW0h7v0ri4dS+Yjs0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770726335; c=relaxed/simple;
-	bh=jb3QxqqEthIDSleH58vWDEdSIpokZJFfaIlRJ/kKfQk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QJWnPG8/DOrywolwEeM6fO74z7je9meSTq6d/6YQauHNfFkYUpScQk8DAQaXn9JWGKyywyHMbXnUobnZzBUsaPJKejUgMLw8kA7sYZ/o47rEVf1FLIdDX9ZhOh0qKB9iR/8e9pa2kZWy9Ri+Jtivxyh7NXx6HGlihYsq48Ho6oY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QZJtoV+E; arc=pass smtp.client-ip=74.125.82.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32F3132E68F
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 19:11:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770750675; cv=none; b=RDxGU16rLM51QD4YviZSm4zphRKGM3W8sjFaCIe4LO5OISzhD5awy5i7+Q/YCOtVBYmbtDxzHMA6KdEGBmr2mGAIM6JXouo+iTgLH3rQsSuFfyEnNYnDeoH6tf+Ob8fWABLzYtv98FMdN/4nKtbW8ChoD0rgasUQ3NJmYjwuep8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770750675; c=relaxed/simple;
+	bh=LNepzJNE9SpWEJXOZCqzpCs5MJEzTXNt49WjAzgCuY0=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=ZecS92YzaqFaOQkoXN3vNy/Qy6zrnV2kA0BhlBKA6uofqWYZs2nhEGkJvpAdcFHZkWdRFIKvMoI1b2FH/3tPiwkMOZPc6XI7WRl6lIO+97Pi6H5PEzKCRc4BPo32nxDAMAJkVyaHRgxiMccwSYoWVGQQj1USUjH2/dBd2ihZNqY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Lr1Q7RGF; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=UPGKDW4l; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QZJtoV+E"
-Received: by mail-dl1-f46.google.com with SMTP id a92af1059eb24-126ea4e9694so5033641c88.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 04:25:34 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770726334; cv=none;
-        d=google.com; s=arc-20240605;
-        b=OXUNdgsH0nuHqK6xs9kHVQa9FvFCiKRV0/Ud0FfQxNx17JjQWQIVXyoPgkA7hOmPJV
-         1rWX7UVhvXS1WGDNT0Ynzt8m229gFSSbV6mUHjlivYLmUiTfeRf9fCihRgoeehWgvHN1
-         sSKkWFrNxWowCxCXS+XUxl8dEigVD4hU0uVkYq0reuoJzkRAw9zNt6lDHWRrTZ7OOW5I
-         oIG/49pMaT8CjQWvy44eZgndl/6b+G+rnnKFLYhP/EJXxkXOLbsmk28Dcnm+nHgZmpmA
-         vR/G5oVagKB4FakIk+zltvqFP3lpVzKsXioqbirX3O89Oh59SXjAW8BYQcxEGf3oFQlB
-         S+Dg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=lviK+3J/qBKUnpjJJ7UIbk90vVi/aBRhlSNNHXg7jFs=;
-        fh=8/Cp8DkQm5Fn2sVDcz4JNplHSARDkJLMlYGhsHJi7Oc=;
-        b=iHtNHLzwlewykV0+7jUTRdKuZfjQ0tw0Lq2lLsxDEqgF5ZrNQ7zOydfWCpNidkbS8N
-         UkzvIKpm8AzhR7PCC3lgNQgy1bKUHEjNFl93vjZLAPpCUzYfKT/eZwAkBScxcQcoHVNn
-         s770Bz/5bv281wCnMNAafy4jm4MrR9kbqU8HS2+FQXPtnMVA6SfdFomL/887b+cjWwUt
-         pJ8hpcH1ImYpMG60fu6iP9MpC5sTWkIP8r3pfoX81KFF3FFyfRsx8Tv+K62x8HdUdUzw
-         vV0mCLXBcSfXPcH9rsQcleW1XshHtew2Fe8aMx2BwmpCFxEIhm5h4eCXPEPCjo23PL0I
-         +kVQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Lr1Q7RGF";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="UPGKDW4l"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1770750672;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=r2Xf2m5pmbcGyim1nBI0IEwxlrJ12JH3NSxVXcGIlWo=;
+	b=Lr1Q7RGFPVzzZWKdrFp178tWqMAznbhiUglllM5FBOTOjw3NNQKV2DXB4MLcndDuxKLTL/
+	7aqeYDwrIgFHEHxWcd7Sk/nZlS389Tmn0LAz7ga2/ZBDlwpMzK6onNcRb2bSfkUBsDU/F4
+	AYhnH081rTeLXQnljYTJLxH9uEtbj50=
+Received: from mail-yw1-f197.google.com (mail-yw1-f197.google.com
+ [209.85.128.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-237-a9X-83INMhqSAl67-ylIGQ-1; Tue, 10 Feb 2026 14:11:10 -0500
+X-MC-Unique: a9X-83INMhqSAl67-ylIGQ-1
+X-Mimecast-MFC-AGG-ID: a9X-83INMhqSAl67-ylIGQ_1770750670
+Received: by mail-yw1-f197.google.com with SMTP id 00721157ae682-7943aea6515so71021817b3.1
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 11:11:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1770726334; x=1771331134; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=lviK+3J/qBKUnpjJJ7UIbk90vVi/aBRhlSNNHXg7jFs=;
-        b=QZJtoV+Eh4/kPGucGa7gvwGwhR5V9BR16k2L9iMRUI3XLM1qX14RtVuAS0RqqXjBSJ
-         v0A7EoCSDRn0BLh6SmhZ1Lux8nOQULLRjgG0CNM6UTnc+LxCRzBlxCMXmV4fNvBvKihJ
-         W++V8QGshfqPH0nwssdBMii+tah9AhkW9rafsXOBo8pq6HrpZCnJRjfbgEhZY4W4mLjW
-         ij62ClE4wkKSpg/RnbkFVO+gyUZFTgbwFpchd7mpcv++o3xU+gBLGT7ms0CID+mdjZgl
-         0aXWsZ9Lwkqc7HNl+vjHOJbd/RvUG4dIZ74deIZQiwjqspnH4qVdWuz4dYrw5ly+stt3
-         DUFg==
+        d=redhat.com; s=google; t=1770750670; x=1771355470; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=r2Xf2m5pmbcGyim1nBI0IEwxlrJ12JH3NSxVXcGIlWo=;
+        b=UPGKDW4lokmgUNo99h0u9T4B4Hro1Zm3oGixpj/t+I65Vrsdb+4JgzO9ghhHp9YzIw
+         f9cxQvm6mIj+yDqCR+jCtgW2xEsVM3L3/t6laSaOLTqFtbFSBHv177mQm+uPrWYBvd21
+         x6fs/zNsCdkAfpbVUB6JaOqt1ZScpyGwF7oopV2yJ9XN9zh0TDd1YNZ2y7wr6hWIYTxX
+         IkKGAgiUG94CBktEK/vbPFXCgmdkMlAueITXhIEwJscU3GX1z53uLQK0J+jKGo7eF8Rx
+         as8kmJPAEl3J2jPv8vUc4CO7o3+GlTPjDWUemj5qUT5yXvtkxQIviDpvjwodk3xzUY5S
+         pFgQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770726334; x=1771331134;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=lviK+3J/qBKUnpjJJ7UIbk90vVi/aBRhlSNNHXg7jFs=;
-        b=ub9acXxDHHlGsRKCwAzMFSVmsu4BcSH5Ee99hlp9aLJXlzFR8P5coqkzRTO+2CULHj
-         eU3k2/jMiO50hgKosy6VLjNevkl4wVqHHBU0EhTNRn7WWr+4zqs2pFZOY8bcYQXgdM+L
-         +jTjjcZN4HW0LPsKh8id8pIxGz6U0ynyhSblm687pg4QYCQjmEsznvazoAqFx+QBxPP5
-         cgRt42RVitV7VlW0AKQnuh45EhHCD5qvWQpvmF6ETnJ8WFQnGjU508lzsZmNPalW+5+k
-         nqmBfxdbr4MLbqY5J9XSWgBelpx5lYxpYwzTjoWyKSCMV6MGQlGFdYR97lh8WOuZzROY
-         BstA==
-X-Forwarded-Encrypted: i=1; AJvYcCUbePPmQNTfJMHEouRs5hnMmEYOu00XtWmkIDmG/znYOmOD+3cuOLSyNp1SJP/ylxiRtKg9wADZhTW4@vger.kernel.org
-X-Gm-Message-State: AOJu0YyAN80Fj57zmExDPDWTu8V5mtX72TyVaiJ9NogtXEWapOtQ57Si
-	K1Zug2AoYXbRjrU35oMbElTu4QjIm7PgJ3DLCICsuw1yeexdslkd5OD79a091FVQZFheorJWZnP
-	q7fQDkaG9xUunEgLGARfUIpDcQzJcZxY=
-X-Gm-Gg: AZuq6aJimF+2ae6ZIhd/SfjNQJeP/3kqFmdFOIC7Lmgs6WKhdCKndGCjW5j74ppeoH0
-	6p1ks/CqYj9KM0NTaci5rNRpKPoMVYoy04k+dfc+u0kss2GtRIHrWftsr1SXfoYC7rzSREeHeh/
-	AbNeV2QK31KQ4rXAcSLxcAo4KX8D5+ZpRr86vb3pk2iNsgHvRVaIThp463u0BWUelXFUwH0S7u3
-	HWtrE/BNc8jcKtst44crFcuYOTASWfXNZOfd0cb47OBGm3HiPMfUBpbj9X2I3M+dSkr62nMtSnD
-	CLO3BkI=
-X-Received: by 2002:a05:7022:224:b0:119:e56b:958c with SMTP id
- a92af1059eb24-1272431f95amr858651c88.17.1770726333597; Tue, 10 Feb 2026
- 04:25:33 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770750670; x=1771355470;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=r2Xf2m5pmbcGyim1nBI0IEwxlrJ12JH3NSxVXcGIlWo=;
+        b=Jy1t7Wrjke5XLpNkqMurJKHIm6ZsQ5Tdx0Ni+eUziIAGCDOWsMlAFYtTOYrJndH551
+         3PvIBrwe9JIBcTtixukctncV2md17v7d0zKsNgYACqFJW6Zu51yztqwkfKBb1EyHRBOB
+         IAOzvBNt2pSNOSQvGaqvTT68PGxX8yVadC5ho2sbLjz4tBQghV4LR9hj2cKYWxtMgDn3
+         ZYkxlV1175CCnC93WoUYaASlx83Ahn5yL9N73F922CElFJSpMZv47kVCOYuNIGtK9tPH
+         lgH2mQS9d6dxwuXICWyR4dikF3sY5A5Ys9jpiXf94VMrTObtxbFz11HduxPbFCbtySqG
+         Ji+g==
+X-Forwarded-Encrypted: i=1; AJvYcCUDtLI/AdoYS1ie2YTbwysgPpTLinGmQ7QJreuaKxNbuldQgrODDYKa6GFvjbK25w0si1GeYQjO8/V8@vger.kernel.org
+X-Gm-Message-State: AOJu0YyOVOlDCkt0mWhb/kdDU1aTy4/6SS1KTG9AwFM+PakJHF4xOb+0
+	zqzM7VGg74w+KugJ5H4PuOAy/Ui77jwfgEfx/okxU61V7f9gvIXR7AsZJLYL3nK2XAZsb9i9S/y
+	WuS38k4yWj1C2vsTWO58B00OLESx2Fmo8p0KA4sxKew6X45BX5QsW1yFSNkuHmpA=
+X-Gm-Gg: AZuq6aKeyUuZw+JI+uuclpc7GcJmbVN6g+264QFQVJJhM/Jf7vMO3LbkMVjYqKUCpmt
+	CMa25Rip6UlwxcJQM6IVfFecP4jchwsuBZsTFchw4+TufppDz4Vca14HpthdoVTIyXJ/dUrdSjq
+	ZouD7Za/463NrY2o5YYi8WLPcRXOv45eEyAC/YydJA1kNjNYp5/KQWC/3867oC/IUjvJDo8DEs6
+	VwzZglQMS27zD7D7oou0QESmfXlm6xIysf8xIXhsnpYPHaM6DAia8FUwqtYQCZaPbAG0kZgCBDf
+	HFKQCnsbXTheaqrt4j5umOE2AFTCZA3pf34RIL8YhslrIdwVA3dpZls5ek7R1KkpPFCTU/UxaA0
+	6EoPkmeJ6AoePRh0xnjLIDQbNNY+Y/PbVwNLtZqsfTOXyajAnMjyd
+X-Received: by 2002:a05:690c:b18:b0:796:3515:3aa8 with SMTP id 00721157ae682-7966aa83f07mr78467b3.43.1770750670182;
+        Tue, 10 Feb 2026 11:11:10 -0800 (PST)
+X-Received: by 2002:a05:690c:b18:b0:796:3515:3aa8 with SMTP id 00721157ae682-7966aa83f07mr78187b3.43.1770750669655;
+        Tue, 10 Feb 2026 11:11:09 -0800 (PST)
+Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::41])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-796211d1b81sm114096987b3.16.2026.02.10.11.11.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Feb 2026 11:11:09 -0800 (PST)
+Message-ID: <3ed63c65a6f6910ece96a88b71f37ff1547b68c0.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v6 0/3] ceph: add subvolume metrics reporting
+ support
+From: Viacheslav Dubeyko <vdubeyko@redhat.com>
+To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com, linux-fsdevel@vger.kernel.org
+Date: Tue, 10 Feb 2026 11:11:07 -0800
+In-Reply-To: <20260210090626.1835644-1-amarkuze@redhat.com>
+References: <20260210090626.1835644-1-amarkuze@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.58.2 (3.58.2-1.fc43) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAOi1vP9fvjfu-WsfL4RUw8mAK01rcbU94VvVxfacnskW6JRMNA@mail.gmail.com>
- <20260210071929.15602-1-ionut.nechita@windriver.com>
-In-Reply-To: <20260210071929.15602-1-ionut.nechita@windriver.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Tue, 10 Feb 2026 13:25:22 +0100
-X-Gm-Features: AZwV_Qgh3WVc2qo4eqJSbtl9thpMXsvcFZWidI0_bdYXe-7IhGbPjDprxBTST1E
-Message-ID: <CAOi1vP8WVkwy85VechMGzbROEB6AFzey3Uquz-sYRrJ2uLm6wQ@mail.gmail.com>
-Subject: Re: [PATCH] libceph: handle EADDRNOTAVAIL more gracefully
-To: "Ionut Nechita (Wind River)" <ionut.nechita@windriver.com>
-Cc: amarkuze@redhat.com, bigeasy@linutronix.de, ceph-devel@vger.kernel.org, 
-	clrkwllms@kernel.org, ionut_n2001@yahoo.com, jkosina@suse.com, 
-	jlayton@kernel.org, linux-kernel@vger.kernel.org, 
-	linux-rt-devel@lists.linux.dev, rostedt@goodmis.org, sage@newdream.net, 
-	slava@dubeyko.com, superm1@kernel.org, xiubli@redhat.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 10, 2026 at 8:19=E2=80=AFAM Ionut Nechita (Wind River)
-<ionut.nechita@windriver.com> wrote:
->
-> Hi Ilya,
->
-> Thank you for the thorough review and the good questions. You're right
-> to challenge the "1-2 seconds" claim -- looking at the dmesg data more
-> carefully, that was misleading in the commit message.
->
-> > I'm missing how an error that is typically transient and goes away in
-> > 1-2s can cause a delay of 15+ seconds against a 250ms, 500ms, 1s, 2s,
-> > 4s, 8s, 15s backoff loop.
->
-> You're absolutely right that if the address became valid in 1-2s, the
-> third or fourth attempt would succeed. The problem is that in our
-> environment, EADDRNOTAVAIL does NOT resolve in 1-2 seconds. That was
-> an incorrect generalization from simple DAD scenarios.
->
-> From the production dmesg (6.12.0-1-rt-amd64, StarlingX on Dell
-> PowerEdge R720, IPv6-only Ceph cluster), the EADDRNOTAVAIL condition
-> persists for much longer:
->
->   13:20:52 - mon0 session lost, hunting begins, first error -99
->   13:57:03 - mon0 session finally re-established
->
-> That's approximately 36 minutes of continuous EADDRNOTAVAIL on all
-> source addresses. This happens during a StarlingX rolling upgrade,
-> where the platform reconfigures the network stack extensively (interface
-> teardown/rebuild, address reassignment, routing changes).
+On Tue, 2026-02-10 at 09:06 +0000, Alex Markuze wrote:
+> This patch series adds support for per-subvolume I/O metrics collection
+> and reporting to the MDS. This enables administrators to monitor I/O
+> patterns at the subvolume granularity, which is useful for multi-tenant
+> CephFS deployments where different subvolumes may be allocated to
+> different users or applications.
+>=20
+> The implementation requires protocol changes to receive the subvolume_id
+> from the MDS (InodeStat v9), and introduces a new metrics type
+> (CLIENT_METRIC_TYPE_SUBVOLUME_METRICS) for reporting aggregated I/O
+> statistics back to the MDS.
+>=20
+> Patch 1 adds forward-compatible handling for InodeStat v8, which
+> introduces the versioned optmetadata field. The kernel client doesn't
+> use this field but must skip it properly to parse subsequent fields.
+>=20
+> Patch 2 adds support for parsing the subvolume_id field from InodeStat
+> v9 and storing it in the inode structure for later use. This patch also
+> introduces CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset
+> state and enforces subvolume_id immutability with WARN_ON_ONCE if
+> attempting to change an already-set subvolume_id.
+>=20
+> Patch 3 adds the complete subvolume metrics infrastructure:
+> - CEPHFS_FEATURE_SUBVOLUME_METRICS feature flag for MDS negotiation
+> - Red-black tree based metrics tracker for efficient per-subvolume
+>   aggregation with kmem_cache for entry allocations
+> - Wire format encoding matching the MDS C++ AggregatedIOMetrics struct
+> - Integration with the existing CLIENT_METRICS message
+> - Recording of I/O operations from file read/write and writeback paths
+> - Debugfs interfaces for monitoring
+>=20
+> Metrics tracked per subvolume include:
+> - Read/write operation counts
+> - Read/write byte counts
+> - Read/write latency sums (for average calculation)
+>=20
+> The metrics are periodically sent to the MDS as part of the existing
+> metrics reporting infrastructure when the MDS advertises support for
+> the SUBVOLUME_METRICS feature.
+>=20
+> Debugfs additions in Patch 3:
+> - metrics/subvolumes: displays last sent and pending subvolume metrics
+> - metrics/metric_features: displays MDS session feature negotiation
+>   status, showing which metric-related features are enabled (including
+>   METRIC_COLLECT and SUBVOLUME_METRICS)
+>=20
+> Changes since v5:
+> - Rebased onto latest kernel (resolved conflict with inode_state_read_onc=
+e()
+>   accessor change in fs/ceph/inode.c)
+> - Re-added InodeStat v8 handling patch (patch 1) as it was not actually
+>   in the base tree, making this a 3-patch series again
+>=20
+> Changes since v4:
+> - Merged CEPH_SUBVOLUME_ID_NONE and WARN_ON_ONCE immutability check
+>   into patch 1 (previously split across patches 2 and 3)
+> - Removed unused 'cl' variable from parse_reply_info_in() that would
+>   cause compiler warning
+> - Added read I/O recording in finish_netfs_read() for netfs read path
+> - Simplified subvolume_metrics_dump() to use direct rb-tree iteration
+>   instead of intermediate snapshot allocation
+> - InodeStat v8 patch now in base tree, reducing series from 3 to 2
+>   patches
+>=20
+> Changes since v3:
+> - merged CEPH_SUBVOLUME_ID_NONE patch into its predecessor
+>=20
+> Changes since v2:
+> - Add CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset state
+> - Add WARN_ON_ONCE if attempting to change already-set subvolume_id
+> - Add documentation for struct ceph_session_feature_desc ('bit' field)
+> - Change pr_err() to pr_info() for "metrics disabled" message
+> - Use pr_warn_ratelimited() instead of manual __ratelimit()
+> - Add documentation comments to ceph_subvol_metric_snapshot and
+>   ceph_subvolume_metrics_tracker structs
+> - Use kmemdup_array() instead of kmemdup() for overflow checking
+> - Add comments explaining ret > 0 checks for read metrics (EOF handling)
+> - Use kmem_cache for struct ceph_subvol_metric_rb_entry allocations
+> - Add comment explaining seq_file error handling in dump function
+>=20
+> Changes since v1:
+> - Fixed unused variable warnings (v8_struct_v, v8_struct_compat) by
+>   using ceph_decode_skip_8() instead of ceph_decode_8_safe()
+> - Added detailed comment explaining InodeStat encoding versions v1-v9
+> - Clarified that "optmetadata" is the actual field name in MDS C++ code
+> - Aligned subvolume_id handling with FUSE client convention (0 =3D unknow=
+n)
+>=20
+> Alex Markuze (3):
+>   ceph: handle InodeStat v8 versioned field in reply parsing
+>   ceph: parse subvolume_id from InodeStat v9 and store in inode
+>   ceph: add subvolume metrics collection and reporting
+>=20
+>  fs/ceph/Makefile            |   2 +-
+>  fs/ceph/addr.c              |  14 ++
+>  fs/ceph/debugfs.c           | 157 ++++++++++++++
+>  fs/ceph/file.c              |  68 +++++-
+>  fs/ceph/inode.c             |  41 ++++
+>  fs/ceph/mds_client.c        |  92 ++++++--
+>  fs/ceph/mds_client.h        |  14 +-
+>  fs/ceph/metric.c            | 183 +++++++++++++++-
+>  fs/ceph/metric.h            |  39 +++-
+>  fs/ceph/subvolume_metrics.c | 416 ++++++++++++++++++++++++++++++++++++
+>  fs/ceph/subvolume_metrics.h |  97 +++++++++
+>  fs/ceph/super.c             |   8 +
+>  fs/ceph/super.h             |  11 +
+>  13 files changed, 1114 insertions(+), 28 deletions(-)
+>  create mode 100644 fs/ceph/subvolume_metrics.c
+>  create mode 100644 fs/ceph/subvolume_metrics.h
+>=20
+> --
+> 2.34.1
+>=20
 
-Hi Ionut,
-
-For how long of those 36 minutes EADDRNOTAVAIL was actually being
-returned from kernel_connect()?  I'm trying to separate the time for
-which the external condition persisted from the time that it took the
-client to reestablish the session after the resolution.  The
-"approximately 36 minutes of continuous EADDRNOTAVAIL on all source
-addresses" makes it sound like kernel_connect() was returning
-EADDRNOTAVAIL all that time.  If so, it would mean that the client
-managed to reestablish the monitor session in 13:57:03 - 13:20:52
-=3D 0:36:11 (i.e. just some double-digit seconds on top of the error
-disappearing), which would seem acceptable.
-
->
-> The reason the delays compound beyond the simple backoff sequence is
-> that there are two independent backoff mechanisms stacking:
->
-> 1) Connection-level backoff (con_fault in messenger.c):
->    250ms -> 500ms -> 1s -> 2s -> 4s -> 8s -> 15s (MAX_DELAY_INTERVAL)
->
-> 2) Monitor hunt-level backoff (mon_client.c delayed_work):
->    3s * hunt_mult, where hunt_mult doubles each cycle up to 10x max,
->    so the hunt interval grows: 3s -> 6s -> 12s -> 24s -> 30s (capped)
->
-> At steady state, each monitor gets ~30 seconds of attempts before
-> the hunt timer switches to the next one. Within those 30 seconds,
-> the connection goes through the full exponential backoff (several
-> attempts up to the 15s max delay). The round-trip through both
-> monitors takes ~60 seconds at max backoff.
-
-What is meant by both monitors?  IIRC the client only tries to connect
-to a single monitor at a time.  How many monitors does this cluster have
-configured?
-
->
-> > How many attempts do you see per session and in total for the event
-> > before and after this patch?
->
-> Before the patch (from the dmesg):
-> - Total error-99 messages: ~470 connect attempts over 36 minutes
-> - Per monitor session (one hunt cycle at steady state): ~8 attempts
->   (immediate x3, +1s, +2s, +3s, +5s, +8s before hunt switches)
-> - The sync task was blocked for 983+ seconds (over 16 minutes),
->   triggering repeated hung task warnings:
->     12:52:11 - "task sync blocked for more than 122 seconds"
->     13:31:05 - "task sync blocked for more than 122 seconds" (new sync)
->     13:33:08 - 245 seconds
->     13:35:11 - 368 seconds
->     ...continued up to 983+ seconds at 13:45:26
->
-> After the patch:
-> - The ADDRNOTAVAIL_DELAY (HZ/10 =3D 100ms) replaces the exponential
->   backoff for EADDRNOTAVAIL failures specifically, so retries happen
->   at a fixed 100ms interval instead of growing to 15s
-> - In testing with the same rolling upgrade scenario, the total
->   reconnection time dropped from 36 minutes to under 3 seconds once
->   the address became available, because the client was retrying every
->   100ms rather than waiting 15s between attempts at the connection
->   level
-
-This is where I'm getting lost again.  It's stated above that in this
-environment EADDRNOTAVAIL doesn't resolve in 1-2 seconds.  If it takes
-minutes for the underlying error to disappear in this scenario, how
-could the patch result in total reconnection time dropping to under
-3 seconds?
-
-> - Total attempts per event: similar count, but compressed into a
->   much shorter window with faster recovery once the address is valid
->
-> I should correct the commit message -- the "1-2 seconds" claim was
-> wrong. The accurate description is that the duration of EADDRNOTAVAIL
-> varies widely depending on the environment: it can be brief (simple
-> DAD) or very long (complex network reconfiguration during rolling
-> upgrades). The patch helps in both cases by keeping the retry interval
-> short so that recovery happens as soon as the address becomes
-> available, rather than potentially waiting up to 15 seconds for the
-> next connection attempt.
-
-Is this setup experiencing the brief or the very long case?  Or is it
-both, heavily intermixed?  Speaking generally, if the address doesn't
-become available for tens of minutes, waiting for up to 30 seconds on
-top of that isn't a problem IMO.
-
->
-> I will also note that the connection-level backoff delay does NOT
-> reset when the monitor client switches monitors via reopen_session(),
-> because ceph_con_open() sets con->delay =3D 0 but the new connection
-> immediately hits EADDRNOTAVAIL and con_fault() sets it right back
-> into exponential backoff.
-
-... but when the new connection goes back into backoff, it starts at
-250ms, right?  I'd call that a reset since the new connection doesn't
-inherit e.g. 15s delay from the old connection.  Are you observing
-something different there?
+Let me run xfstests for the patchset. I'll be back with the result ASAP.
 
 Thanks,
+Slava.
 
-                Ilya
