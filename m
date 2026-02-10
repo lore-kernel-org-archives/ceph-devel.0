@@ -1,182 +1,204 @@
-Received: from mail-dl1-f48.google.com (mail-dl1-f48.google.com [74.125.82.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE2A1B665
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 08:15:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.48
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770711328; cv=pass; b=KCwdKg12nrYSec0NFneTncf3tzoX7xfJWgtFfSaxVaYWpiErJXbC4NDgChMU+p/Agkf2DlCt2Q8zbGP+mzXX8nAPGKZwJ1PX8DkpdzQYXJO78kc157WSGG5//S8RnVGkNZlVIgg1XgAsU0PfExP2bYGzo1ghKYOy+gkOr9YUa60=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770711328; c=relaxed/simple;
-	bh=7zUUa260y7Lreyi4GWgMkRztf3n7bjNj/UDE7A6snAc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fo4mgc4pQuPkTTv9j5g/YwCr/xRqbaFwJ5xUAEeQK5xB0hUzTinBCpJHAoB8lx86tkgfPFgpkPhrTJGCKhbEYswClgwRr4E7U+IredEDhFVoouBt7hCxvz+1cqhTvgpKsElwgHte4u81CSWnoc06qMfxEVysBrW3vs77Tn6uiIA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=A1/rR+42; arc=pass smtp.client-ip=74.125.82.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53BF133DEE9
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 09:06:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770714395; cv=none; b=JqY4Ydaf1sO1Bt58CVpDHzxxwz9adOgd3FgHKfMXdhXkZiGpeHeEnZjR8yeOYVFg1hzTtDnbpx53weLJ5cbuTks+G8kMXcgziBHBSuWvl66ztHOXH2vJ8MgKGmmxKwCYx6cikrqz2odD/kGPYj3KFkeEaRkx7BjLBgmG5XGop7Q=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770714395; c=relaxed/simple;
+	bh=jEtPD7lEnKueCK3nWUUFtqX+R3ZXhj/ui/f2Y34tw2Y=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=ZZUTw8ubPtu00rQRtg1ey/lp2uJxC+pUsibXZYabyFQX5nyFhSyRXeVzo/Fwcg08i0Xbn0XDo2aV1sr63bxY8o8xPhxk5k6GCefWUw3CyzvCybY2D2RCpqYdsHQSyhrm9MG3pDgQQvGUEK452yJYbbssolwyAne1vU4n+zYf0MI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZT/zzA2v; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=F5mKwODy; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="A1/rR+42"
-Received: by mail-dl1-f48.google.com with SMTP id a92af1059eb24-12721cd256bso1694371c88.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 00:15:27 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770711327; cv=none;
-        d=google.com; s=arc-20240605;
-        b=i+ABoI+j+6kR27jgW7BKLwQ3Pc4TzUgjRHOObZBIoIai+mKo9ti+LK/KuARPPxD5Vd
-         AhxltzMuP6Rtb55Pn83glOUEns0jrTSLN1BqTTpiozzUaPPqMfCTGu9V83+J6HYJtej3
-         xXnsYR+9dJPdcl9y8kPsLx9i/yYUqc2kex5aFRt+LipHgsRU3VvY2bC8gIzGM8cjnOYH
-         NiYrnwFN7Q9N6veu4d2d3O4RLTPs+0fZeSlNGnay99Hrh4Ygis4Gi+P1FPevCuLCH5mg
-         H4WbWV0tdJqCKyhXxvHQCaH/CiJ2/bWEuHWzK3Mi+6Ga9g0n5bwTqjsI8hhUbfiHAOxg
-         UV7w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=inVHyqBzWFkNK/NR/mqYzuWdR2fxBPksyqke2wUosQY=;
-        fh=POBX4LJhNwdVIOtw/5M6KxM9feCdg7OqXaLY00Fi7CE=;
-        b=IbgeiQONC3ngGX608s7/O6GOyH0LVbIMVgyWKcmAtGl+/Y+P4GXJo9xY81nqwp1Mqe
-         Jj2MW4+GWbU968ZJoKbB5MU8Xo1jtzF9EqhKUaOBHDVriWyMKWvVBTxUZA40NyJ1uGr2
-         0PJYEhOIVR0TmrVSYTwiCaTm52+yZ52bhxokeQihuLj64oT/Z/tPxHMHwxH3PeHrN4Zl
-         VOFcqqIbKzkFLdff1Ix6KM6eqxWjl80HG0s5D8cZDJ4LGJsqR2oaiWASe+Q3nVtGOIzs
-         Pje0a6bYKUUwFMqtkzjiTlZFmkJ8RtwP9ILltXeVdPP5+ln0UHgjKoXrZ66n6e4FsrJW
-         HH8Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZT/zzA2v";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="F5mKwODy"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1770714393;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=1yS0XvdNLyxbdctac2U/Q3VqlV341oNKdWppclXcS7c=;
+	b=ZT/zzA2vki1FCjhufvZpSz+2dYvAxMYlpC9yLKz8KWMRV1SSzfn6tyzFJiTcDLH5C8Mzu8
+	wzOHdHfcDiot6DiyiQfr00W2hqb9nszv7omli/0XObKxnwV+uBaIdyRMcV5luU+Hzua6wx
+	a2g7YNLidPHO8PlUrICW99x3CfQYSMw=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-16-Rzmf4yhwNUOwcrtmUEfYpA-1; Tue, 10 Feb 2026 04:06:32 -0500
+X-MC-Unique: Rzmf4yhwNUOwcrtmUEfYpA-1
+X-Mimecast-MFC-AGG-ID: Rzmf4yhwNUOwcrtmUEfYpA_1770714392
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-8c5e166fb75so1637473285a.0
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2026 01:06:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1770711327; x=1771316127; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=inVHyqBzWFkNK/NR/mqYzuWdR2fxBPksyqke2wUosQY=;
-        b=A1/rR+42zaUh8XdzZHKOc1S2mw15fenU4CQ12L5M/VOXWpaVbnDGwTRcLQ2gaOWu79
-         BOSoCngvZIW18KSSGOesiTJ75I0ACXkcaOeOQRt50VAFuZPk71+To47TtVQfgjwxF9dV
-         SyGYlcG8NI63zIFYNwiqGMzBPtd+N6+QWTQ7Whl8JB68UWqKNwd+ihtVfI0icsc5hkJl
-         7KuvsC/T+mHA0WlHZFPUWT5LOUs1STrKpxYnCLimDNIvvyso8cOvLJnIIHOjpanigIG7
-         VPTkVRq3pVZica0+jg29xbhy0eDI7uR3gPUNXvgZP7aHK3G2HeieGb3YEIL8jFndXod/
-         aoWA==
+        d=redhat.com; s=google; t=1770714392; x=1771319192; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=1yS0XvdNLyxbdctac2U/Q3VqlV341oNKdWppclXcS7c=;
+        b=F5mKwODyZVlv2NhgcpmBSWfyWa0GwGAli2zfDMw0Q2+5VlxY+7idcmXWmeNvUFZBVa
+         5+0RAud3YVXloEpqhna18qyj20OErAAZqDVJ5426G1Od11kPBMjrCUqO0ca0K3wnZ+S3
+         t17DtMUa985Ysnszax0HQZj9lvrgUVeS2X4mPUFDXmVHsbcdB9kRf+SMtJDvicvyM6UR
+         y4YEvHufPuG0e0lojYO9CEfDsAoJ3Ke+ovZUtCBCGmazKOh6mDvgzhAyRc1WHiUiDJLl
+         2ovux2rnE9XYEwYS+nzmBP9nEVOMo0dBXFVWsL6Min5YTkEr7CXLxrGaimi8VNxj7Yc3
+         e3gw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770711327; x=1771316127;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=inVHyqBzWFkNK/NR/mqYzuWdR2fxBPksyqke2wUosQY=;
-        b=bKt+PBQcQKjSYCiGtwFKfoWOuSW+2/jRAkNjU/tarPPjHno1k1RYKvdB+IvUDocObH
-         yFgO65D6OmXhYe3CJZBiYozEN5WAs7NlfvdByoyELYuB8XMIVCdxQS7hUpfmKQVvPvSZ
-         iF7lGL+CBZCuZwFbRiVuhovJzmw/0fXuEGaxw16zGaG/5HGjS9vihxI9j0ZlPYj8CGsW
-         rkOyhtHvE1E9eMGWx8yRrARtpd0FteWqTujeHCeEu1BIgeHyOo15Wg2YTiVMLBpEZuUQ
-         k0ka8DEdSgz59qLwk9LIQe45c86GjWG+wBnEEDV4BGlFQnG+UeUwmmwIrEbwj+cEVC2s
-         8Vcg==
-X-Forwarded-Encrypted: i=1; AJvYcCV5tcXo/hQ1fcpFT7Y6S8JISdjkXvWrWVEDFS8lUJWhL0MoJcvAKn89CTyrPoCpz7GWHo5EyiLfq2Sw@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxk8xd4dHsuS1PeVVnn8OlXLBKedMs0jEfn+UznL7Yh9q+pVXCd
-	WXlRT2UWvzqbJKyVXHuMjVKs0sffEAaZ2i/3neGEhloqUoVomw1g5RbBRvV4JRIdUdmk6HT3y1X
-	/g+yAmvbRtIUaJoVtHHX15mY9pZwpSlk=
-X-Gm-Gg: AZuq6aJZtRaMmcyqQvdiTPzE0dyM87p/YmJERWKYCyyY94crZFuoXhHRUsDh/JxRivL
-	o3/PQJ+XYatr1LQceIDHsR3dyWE8eyYC3F0U2AWmH+EK28ROo9LRttain9RaLu8/vUnyrJf23Ed
-	lLeZ+q5BbvvxfRRXH9RjN3xsFl2p70oouRQVRhFWzVkyO1TuB67yh36wDcqYbaHdVHkbZ1xv2D2
-	mN2hgdk4Pl6VXkG7egFD3ucS19buS5WA18qrsXxD5imHmsCxcGnbFnSCAvizo+s4SQFSTHrqCgF
-	hFdLrn0=
-X-Received: by 2002:a05:7022:a86:b0:123:330b:398 with SMTP id
- a92af1059eb24-12703f51b55mr5824225c88.19.1770711326559; Tue, 10 Feb 2026
- 00:15:26 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770714392; x=1771319192;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1yS0XvdNLyxbdctac2U/Q3VqlV341oNKdWppclXcS7c=;
+        b=X+5eXhwHkWfTTd2nOPX3/Akxg0zgf+v7WTeuVrXDrXreeXpR0bWvSTmEAVr/VGrc2O
+         B2NzVSwKUh2TMBGYNGiSJglM2c8oknlEyBkFQFrnZCZxz/mtdeaMZTjAkqoARHQ5YwtZ
+         uLa4fAu3r1qUmHN5/RLvj/45LfwrlAS6Ud58GP7975bOt6TF2CC/60xS17ekRnlY1czC
+         hP0dXh7E+tCHRkj0xRcXn6eUWbrKo4J+FEi7Y6iv63jh0Vd/fAv0y0vxxTYsT8s02KGM
+         4+GQQ+L38snbL9ek+kMqax+QV0Bxd56GCI3bJ8prJzaO1l2/NTFys5LTCm3OeBnfqVI1
+         8v3g==
+X-Gm-Message-State: AOJu0YzVAXgi0UeY9iBK2oQ3vw9f9BDK1qoxlJiSXRtwUjZLNBRkBLbF
+	C3uOK1Kos9v2ej4KHvr6LgAHmsPQufgvXAoJQ1rmEC+xuR3b0zkaRtwBObiOTpwzLzdUk0VHNbQ
+	N8B3prPkvrJVKLgi5ViCYNzFMev1mOaQNHc8wNqodowd0sujh95UJjBuzJ8ciNbb7VzlPPMj+1k
+	4ym32zGSIYMlHohU34NNIwsPEz307JEBRe+tc2NYY1sFxI7ZkP7gyK
+X-Gm-Gg: AZuq6aLIYzAA5V4WFr9HzJSnK/lYFV1gzxWw4JDaZiZqIH+1B7Y2pIOwOZpAOl8Ykxb
+	xEyk28R4NUu9Z/mrdZPY718/Cbtzd7dS/FdiKm8KWoFTS87uxDQJgxWtGEjyjcpUP/80hwxVCwg
+	DPTWfVp0YeD9mmxVp4KZdm+wvjdoid44J6MO6TVXjTYHAiL0KIO3Y9GqY/vhd5+Q2C+edgZNoRe
+	BQmLsfLz6qoK+i7Y3JYZpsj3ZD08G8UcZ6z9vSiYFHU4DJZLNwbrx+mCWXGJ9RG7XKnXbp6oxuV
+	nPmzH7CnM75ef+yCi64XiCxitd1XOSwA/urGfcVzk0z7a5g0JyILzBvxAmp8fZaeAL1CJtWaM3V
+	whaAIFUQvoI7m7XSBu2R/mHwErnck7eLLVtwYOiTP04hdMSugXh8CUXg=
+X-Received: by 2002:a05:620a:44cc:b0:8ca:4288:b178 with SMTP id af79cd13be357-8cb1f74d6c1mr137811385a.56.1770714391614;
+        Tue, 10 Feb 2026 01:06:31 -0800 (PST)
+X-Received: by 2002:a05:620a:44cc:b0:8ca:4288:b178 with SMTP id af79cd13be357-8cb1f74d6c1mr137808385a.56.1770714391019;
+        Tue, 10 Feb 2026 01:06:31 -0800 (PST)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8953c068292sm108053326d6.45.2026.02.10.01.06.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Feb 2026 01:06:30 -0800 (PST)
+From: Alex Markuze <amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	amarkuze@redhat.com,
+	vdubeyko@redhat.com
+Subject: [PATCH v6 0/3] ceph: add subvolume metrics reporting support
+Date: Tue, 10 Feb 2026 09:06:23 +0000
+Message-Id: <20260210090626.1835644-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <aYN-TBrwARmBBuHM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <d0325ea755f153558ac2c8e8501a3cd9980b4ea8.camel@ibm.com> <CAJ4mKGb1KZ75-j3ZZcqiUD+r_dwQ-zhxOi43Ub6qqHruOat0=g@mail.gmail.com>
-In-Reply-To: <CAJ4mKGb1KZ75-j3ZZcqiUD+r_dwQ-zhxOi43Ub6qqHruOat0=g@mail.gmail.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Tue, 10 Feb 2026 09:15:14 +0100
-X-Gm-Features: AZwV_QhXLV2Z2GetrLLCScB5gNCS6eh2iGKRdJrcWHcO53mw6C5WYKoG0HA9ObY
-Message-ID: <CAOi1vP9dgO-CFUpUdJ_w2OcAYq+YDKwJFk+R2uQXw_jyy3DTxw@mail.gmail.com>
-Subject: Re: Exploring supporting fallocate() in ceph
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, "ojaswin@linux.ibm.com" <ojaswin@linux.ibm.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@ibm.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Mon, Feb 9, 2026 at 8:31=E2=80=AFPM Gregory Farnum <gfarnum@redhat.com> =
-wrote:
->
-> On Thu, Feb 5, 2026 at 3:06=E2=80=AFPM Viacheslav Dubeyko <Slava.Dubeyko@=
-ibm.com> wrote:
-> >
-> > cc Patrick Donnelly and Greg Greg Farnum
-> >
-> > On Wed, 2026-02-04 at 22:43 +0530, Ojaswin Mujoo wrote:
-> > > Hi team,
-> > >
-> > > So I've been trying to understand ceph and cephFS and as a part
-> > > of that I tried running xfstests on ceph. One thing that stood out im=
-mediately
-> > > is the amount of tests (~150) that we skip just because we don't supp=
-ort
-> > > fallocate() and fallocate(FALLOC_FL_ZERO_RANGE).
-> > >
-> > > Thinking in the direction of what would it take to enable this in cep=
-h,
-> > > I came across [1] which suggests that we disabled fallocate because
-> > > it was not trivial to make the space reservations known to ceph.
->
-> Right. It's hard to even sensibly define what the various fallocate
-> options should mean or do on Ceph, and then making them do those
-> things is another challenge.
-> But to be clear, we *do* support the FALLOC_FL_PUNCH_HOLE and
-> FALLOC_FL_KEEP_SIZE flags.
->
-> > > Seeing how fallocate is an operation commonly used by applications fo=
-r various
-> > > tasks, I'm just wondering that would it make sense to explore the pos=
-siblity of
-> > > enabling fallocate() and FALLOC_FL_ZERO_RANGE again in ceph. A few ap=
-proaches
-> > > that I can think of are:
-> > >
-> > > 1. Explicitly write zeroes to reserve space. This is not ideal or per=
-formant
-> > > but maybe with more and more hardware supporting optimized zeroing li=
-ke
-> > > nvme WRITE_ZERO or scsi WRITE_SAME commands, this might not be that b=
-ad.
-> > > Also, it can be argued that this might be better than not having anyt=
-hing at
-> > > all?
-> > >
-> >
-> > I think it is not good idea. :) Because, storing zeros and keeping zero=
-s in
-> > storage device is not very good approach. Especially, it is not good fo=
-r SSDs.
->
-> Everything in Ceph works hard to be sparsely-allocated on-demand. And
-> unlike a local filesystem, which can handle fallocate by updating the
-> allocation table but otherwise not touching the disk, Ceph doesn't
-> have a central allocation state =E2=80=94 every OSD handles its own data.=
- So
-> even though the RADOS wire protocol supports a "zero" op, all it
-> actually does is truncate an existing object down. To actually
-> zero-fill in response to fallocate, we'd need to transmit all those
-> zeros out over the wire. For a small fallocate of 1MB or something,
-> this is fine =E2=80=94 but a common pattern we've observed is that if usi=
-ng eg
-> a disk-on-file image, the software would fallocate the entire size of
-> the disk image before writing. If we get an fallocate call for 4GB,
-> that's (by default) 1000 objects we need to zero-fill, by transmitting
-> 4GB of data, for an operation that most programs will assume is
-> handled in constant time with bit-twiddling.
+This patch series adds support for per-subvolume I/O metrics collection
+and reporting to the MDS. This enables administrators to monitor I/O
+patterns at the subvolume granularity, which is useful for multi-tenant
+CephFS deployments where different subvolumes may be allocated to
+different users or applications.
 
-RADOS also has a "writesame" op -- if used, zeros wouldn't need to be
-transmitted over the wire.  The operation would still be linear in the
-number of objects that need to be zero-filled instead of being constant
-time, but the constant factor would be a bit lower.
+The implementation requires protocol changes to receive the subvolume_id
+from the MDS (InodeStat v9), and introduces a new metrics type
+(CLIENT_METRIC_TYPE_SUBVOLUME_METRICS) for reporting aggregated I/O
+statistics back to the MDS.
 
-Perhaps RADOS could grow an "allocate" op to also spare the actual
-zero-filling and a counterpart "deallocate" op?  Currently the "zero"
-op has implicit deallocate semantics which e.g. RBD relies on and it
-would be great to make that explicit.  (The "zero" op doesn't
-necessarily truncate the object -- that happens only if the specified
-range happens to overlap the end of the object.)
+Patch 1 adds forward-compatible handling for InodeStat v8, which
+introduces the versioned optmetadata field. The kernel client doesn't
+use this field but must skip it properly to parse subsequent fields.
 
-Thanks,
+Patch 2 adds support for parsing the subvolume_id field from InodeStat
+v9 and storing it in the inode structure for later use. This patch also
+introduces CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset
+state and enforces subvolume_id immutability with WARN_ON_ONCE if
+attempting to change an already-set subvolume_id.
 
-                Ilya
+Patch 3 adds the complete subvolume metrics infrastructure:
+- CEPHFS_FEATURE_SUBVOLUME_METRICS feature flag for MDS negotiation
+- Red-black tree based metrics tracker for efficient per-subvolume
+  aggregation with kmem_cache for entry allocations
+- Wire format encoding matching the MDS C++ AggregatedIOMetrics struct
+- Integration with the existing CLIENT_METRICS message
+- Recording of I/O operations from file read/write and writeback paths
+- Debugfs interfaces for monitoring
+
+Metrics tracked per subvolume include:
+- Read/write operation counts
+- Read/write byte counts
+- Read/write latency sums (for average calculation)
+
+The metrics are periodically sent to the MDS as part of the existing
+metrics reporting infrastructure when the MDS advertises support for
+the SUBVOLUME_METRICS feature.
+
+Debugfs additions in Patch 3:
+- metrics/subvolumes: displays last sent and pending subvolume metrics
+- metrics/metric_features: displays MDS session feature negotiation
+  status, showing which metric-related features are enabled (including
+  METRIC_COLLECT and SUBVOLUME_METRICS)
+
+Changes since v5:
+- Rebased onto latest kernel (resolved conflict with inode_state_read_once()
+  accessor change in fs/ceph/inode.c)
+- Re-added InodeStat v8 handling patch (patch 1) as it was not actually
+  in the base tree, making this a 3-patch series again
+
+Changes since v4:
+- Merged CEPH_SUBVOLUME_ID_NONE and WARN_ON_ONCE immutability check
+  into patch 1 (previously split across patches 2 and 3)
+- Removed unused 'cl' variable from parse_reply_info_in() that would
+  cause compiler warning
+- Added read I/O recording in finish_netfs_read() for netfs read path
+- Simplified subvolume_metrics_dump() to use direct rb-tree iteration
+  instead of intermediate snapshot allocation
+- InodeStat v8 patch now in base tree, reducing series from 3 to 2
+  patches
+
+Changes since v3:
+- merged CEPH_SUBVOLUME_ID_NONE patch into its predecessor
+
+Changes since v2:
+- Add CEPH_SUBVOLUME_ID_NONE constant (value 0) for unknown/unset state
+- Add WARN_ON_ONCE if attempting to change already-set subvolume_id
+- Add documentation for struct ceph_session_feature_desc ('bit' field)
+- Change pr_err() to pr_info() for "metrics disabled" message
+- Use pr_warn_ratelimited() instead of manual __ratelimit()
+- Add documentation comments to ceph_subvol_metric_snapshot and
+  ceph_subvolume_metrics_tracker structs
+- Use kmemdup_array() instead of kmemdup() for overflow checking
+- Add comments explaining ret > 0 checks for read metrics (EOF handling)
+- Use kmem_cache for struct ceph_subvol_metric_rb_entry allocations
+- Add comment explaining seq_file error handling in dump function
+
+Changes since v1:
+- Fixed unused variable warnings (v8_struct_v, v8_struct_compat) by
+  using ceph_decode_skip_8() instead of ceph_decode_8_safe()
+- Added detailed comment explaining InodeStat encoding versions v1-v9
+- Clarified that "optmetadata" is the actual field name in MDS C++ code
+- Aligned subvolume_id handling with FUSE client convention (0 = unknown)
+
+Alex Markuze (3):
+  ceph: handle InodeStat v8 versioned field in reply parsing
+  ceph: parse subvolume_id from InodeStat v9 and store in inode
+  ceph: add subvolume metrics collection and reporting
+
+ fs/ceph/Makefile            |   2 +-
+ fs/ceph/addr.c              |  14 ++
+ fs/ceph/debugfs.c           | 157 ++++++++++++++
+ fs/ceph/file.c              |  68 +++++-
+ fs/ceph/inode.c             |  41 ++++
+ fs/ceph/mds_client.c        |  92 ++++++--
+ fs/ceph/mds_client.h        |  14 +-
+ fs/ceph/metric.c            | 183 +++++++++++++++-
+ fs/ceph/metric.h            |  39 +++-
+ fs/ceph/subvolume_metrics.c | 416 ++++++++++++++++++++++++++++++++++++
+ fs/ceph/subvolume_metrics.h |  97 +++++++++
+ fs/ceph/super.c             |   8 +
+ fs/ceph/super.h             |  11 +
+ 13 files changed, 1114 insertions(+), 28 deletions(-)
+ create mode 100644 fs/ceph/subvolume_metrics.c
+ create mode 100644 fs/ceph/subvolume_metrics.h
+
+--
+2.34.1
+
