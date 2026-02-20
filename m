@@ -1,43 +1,48 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52A3229B79B;
-	Fri, 20 Feb 2026 12:38:08 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEA0F34405B;
+	Fri, 20 Feb 2026 12:38:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771591088; cv=none; b=Fqj78PKeSYBFas0SI+QHL8ggPj/AZTpk91KeSEMWxRrouRXMhpgL3tnfj37mjFtDkv/bINq6bXaXsSnJfAngRrSqUP9UyvGW7Km51wzZa5M2TGdJhSpmhUQOhxtZKAz/XvG1/MJpPirwZ/qksAq9xlHAfIROKoeZ4oF0PYxfvb0=
+	t=1771591098; cv=none; b=ok3pz67S2fp6QOpL8S/R/wqNMhOBb8ZgXjn6K/lMS02rGAQ0JeVehm0bMKgf0lRD9fZcVh3OjsGvyK1UN+eKjMldwvsi1BBdwV868o3a8aAhlNbCQSjnmCw9AuIN2/t+WqmTky5jayZ1oftpW2iysCWF3rHHOh0vOLRoxkWxoao=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771591088; c=relaxed/simple;
-	bh=PcXHPkPK8Tu8BLTVlD50Lp9knCyg3f3SAsJ8fwwB/UA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=jXZ83N+KTDP4xd69/RQPwrLQtMFA0MTZjmWupp/a9A6VBfmAfJaGPoe7gU+fOwNUi/GeCPDDS4bol8xNrs4neRl3RupQ6H+fnjNZFhxeYiFtYvzYZP1PJEXHyPYJ9V8OfiHYUkoBp/qUh+zIZz9f+e1ulyqfeuOFtWyZaMb7Vvc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rzc807DJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771591098; c=relaxed/simple;
+	bh=pRO9IN213oQrBu+VLwnbbinX8CLsfnTtiFHne3ap5TI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=I8he8z3GjJU3BYIdzkxecX7B3Z59w4l+MgIffKxJWkzNf6g0qfpNThBrBUZvT4ZfugOcGGNfwckWrHCHoOtHOeDT5WMYcETsMaJbFglGn0PbOZaRhl3TxTB6S3/9O3Geo+6M+agBscDztbdVpTmcT6HZOlQzKx/+J1RvkZxjmYQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pjAhWy00; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rzc807DJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 08CE8C116C6;
-	Fri, 20 Feb 2026 12:38:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pjAhWy00"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8387FC116C6;
+	Fri, 20 Feb 2026 12:38:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771591087;
-	bh=PcXHPkPK8Tu8BLTVlD50Lp9knCyg3f3SAsJ8fwwB/UA=;
-	h=From:To:Cc:Subject:Date:From;
-	b=rzc807DJlNxrul32rjTNYOxCgSSWlvY3WaB9zvH1JBlH3lzPGiKv7G0Xl1ZLQpBJl
-	 Qc5PUtN50OUL+gDw3IpxfRiaUKuuZerC5FsrppogPZscpOnaIWXRBKwycXDhMi4z94
-	 KdBktkJ1L3UjBLwNBsf6CXVI6wLkFKfAKdByDUPsFRjh5w7NMYB9T/cIY0bAUPuA9e
-	 rZIZi5ZgWoKJyFC1/Sj0BCKqZH1EOiEjssPixLKZfTdZZNbVeGM2HQICGVkClW/JE+
-	 4JyOtbO0mFuh5YmhBdVNU81NwCrmSWkRb9wSNOMXFBxRgPZ99/w/GBgCYt+Wfkh3Hx
-	 erpsz1HjlgVxw==
+	s=k20201202; t=1771591097;
+	bh=pRO9IN213oQrBu+VLwnbbinX8CLsfnTtiFHne3ap5TI=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=pjAhWy006rSSRGnBMng8YkaA6wu/3gYxwbQ64V9xXsIHkYSYh/o6sfPJQdDGGGKGl
+	 lJCdUUf0z9QySmD3dkMPwaXoVbl2gP9c5zR63Nvub36Y7pgSaIVJ+gif3+38QTjOJQ
+	 u7vziAw5qvg2eARLvyD8924HNM5fo1vCfYbnmJCLurNNVFRnVWH4XpFCC9H5ZReknB
+	 Jr60B6VzttGvv1DrzOkwiz4uN8sC6hNkfBi7uCm0GZK0/3PhE0eiJnT+u+FriT/LsG
+	 TlRbBUO1ojqnF+eNI3uMwXQDQNDzSVGwU8LDFH6E9zS8uNgmP1GH6NTZ7L+mZr34Ea
+	 k2RX884dRkH0Q==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>,
+Cc: ethanwu <ethanwu@synology.com>,
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+	Ilya Dryomov <idryomov@gmail.com>,
 	Sasha Levin <sashal@kernel.org>,
 	amarkuze@redhat.com,
 	slava@dubeyko.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.19-5.15] libceph: define and enforce CEPH_MAX_KEY_LEN
-Date: Fri, 20 Feb 2026 07:37:50 -0500
-Message-ID: <20260220123805.3371698-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.19-6.1] ceph: supply snapshot context in ceph_uninline_data()
+Date: Fri, 20 Feb 2026 07:37:56 -0500
+Message-ID: <20260220123805.3371698-7-sashal@kernel.org>
 X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260220123805.3371698-1-sashal@kernel.org>
+References: <20260220123805.3371698-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -50,192 +55,257 @@ X-stable-base: Linux 6.19.3
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Ilya Dryomov <idryomov@gmail.com>
+From: ethanwu <ethanwu@synology.com>
 
-[ Upstream commit ac431d597a9bdfc2ba6b314813f29a6ef2b4a3bf ]
+[ Upstream commit 305ff6b3a03c230d3c07b61457e961406d979693 ]
 
-When decoding the key, verify that the key material would fit into
-a fixed-size buffer in process_auth_done() and generally has a sane
-length.
+The ceph_uninline_data function was missing proper snapshot context
+handling for its OSD write operations. Both CEPH_OSD_OP_CREATE and
+CEPH_OSD_OP_WRITE requests were passing NULL instead of the appropriate
+snapshot context, which could lead to unnecessary object clone.
 
-The new CEPH_MAX_KEY_LEN check replaces the existing check for a key
-with no key material which is a) not universal since CEPH_CRYPTO_NONE
-has to be excluded and b) doesn't provide much value since a smaller
-than needed key is just as invalid as no key -- this has to be handled
-elsewhere anyway.
+Reproducer:
+../src/vstart.sh --new -x --localhost --bluestore
+// turn on cephfs inline data
+./bin/ceph fs set a inline_data true --yes-i-really-really-mean-it
+// allow fs_a client to take snapshot
+./bin/ceph auth caps client.fs_a mds 'allow rwps fsname=a' mon 'allow r fsname=a' osd 'allow rw tag cephfs data=a'
+// mount cephfs with fuse, since kernel cephfs doesn't support inline write
+ceph-fuse --id fs_a -m 127.0.0.1:40318 --conf ceph.conf -d /mnt/mycephfs/
+// bump snapshot seq
+mkdir /mnt/mycephfs/.snap/snap1
+echo "foo" > /mnt/mycephfs/test
+// umount and mount it again using kernel cephfs client
+umount /mnt/mycephfs
+mount -t ceph fs_a@.a=/ /mnt/mycephfs/ -o conf=./ceph.conf
+echo "bar" >> /mnt/mycephfs/test
+./bin/rados listsnaps -p cephfs.a.data $(printf "%x\n" $(stat -c %i /mnt/mycephfs/test)).00000000
 
+will see this object does unnecessary clone
+1000000000a.00000000 (seq:2):
+cloneid snaps   size    overlap
+2       2       4       []
+head    -       8
+
+but it's expected to see
+10000000000.00000000 (seq:2):
+cloneid snaps   size    overlap
+head    -       8
+
+since there's no snapshot between these 2 writes
+
+clone happened because the first osd request CEPH_OSD_OP_CREATE doesn't
+pass snap context so object is created with snap seq 0, but later data
+writeback is equipped with snapshot context.
+snap.seq(1) > object snap seq(0), so osd does object clone.
+
+This fix properly acquiring the snapshot context before performing
+write operations.
+
+Signed-off-by: ethanwu <ethanwu@synology.com>
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Tested-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
 
 LLM Generated explanations, may be completely bogus:
 
-This confirms the vulnerability. Now let me provide my complete
-analysis.
+Now I have a comprehensive understanding. Let me also check the
+`__ceph_mark_dirty_caps` function which is where `i_head_snapc` normally
+gets populated:
+
+The pattern at `caps.c:1813-1817` shows the standard way `i_head_snapc`
+gets populated:
+```c
+if (!ci->i_head_snapc) {
+    WARN_ON_ONCE(!rwsem_is_locked(&mdsc->snap_rwsem));
+    ci->i_head_snapc = ceph_get_snap_context(
+        ci->i_snap_realm->cached_context);
+}
+```
+
+The fix in `ceph_uninline_data()` uses the same pattern, which confirms
+it's correct.
+
+Now let me assess the overall analysis:
 
 ## Analysis
 
-### What the commit does
+### 1. COMMIT MESSAGE ANALYSIS
 
-This commit makes three changes to the libceph subsystem:
+The commit message clearly explains:
+- **What**: `ceph_uninline_data()` passes NULL instead of proper
+  snapshot context to OSD write operations
+- **Why**: This causes unnecessary RADOS object clones when inline data
+  is uninlined in the presence of snapshots
+- **Reproducer**: A detailed step-by-step reproducer is provided
+- **Impact**: Unnecessary object clones (storage waste, incorrect
+  snapshot state)
 
-1. **Renames `CEPH_KEY_LEN` to `CEPH_MAX_KEY_LEN`** (value remains 16)
-   in `net/ceph/crypto.h` to clarify the constant's purpose as a maximum
-   bound.
+The commit is reviewed and tested by Viacheslav Dubeyko (IBM) and signed
+off by Ilya Dryomov (CephFS maintainer).
 
-2. **Adds a bounds check** in `ceph_crypto_key_decode()`
-   (`net/ceph/crypto.c:83-86`) that validates `key->len <=
-   CEPH_MAX_KEY_LEN` before the key material is used. The old
-   `!key->len` check in `set_secret()` is removed as it's superseded by
-   this.
+### 2. CODE CHANGE ANALYSIS
 
-3. **Updates the buffer reference** in `process_auth_done()`
-   (`net/ceph/messenger_v2.c:2363`) to use the renamed constant.
+The fix:
+1. Adds snapshot context acquisition before OSD write operations
+   (following the established pattern from `__ceph_mark_dirty_caps` and
+   `ceph_write_begin`)
+2. Passes `snapc` instead of NULL to both `CEPH_OSD_OP_CREATE` and
+   `CEPH_OSD_OP_WRITE` requests
+3. Properly releases the snapshot context reference with
+   `ceph_put_snap_context(snapc)` in the cleanup path
 
-### The vulnerability: Stack buffer overflow from network data
+The pattern of snapshot context acquisition is identical to what's used
+in other CephFS write paths (caps.c:1813-1817, caps.c:2779-2783).
 
-This is a **security fix** preventing a potential stack buffer overflow:
+### 3. CLASSIFICATION
 
-1. `process_auth_done()` allocates a fixed-size stack buffer: `u8
-   session_key_buf[CEPH_KEY_LEN + 16]` (32 bytes, of which 16 are usable
-   after alignment).
+This is a **bug fix** - it fixes incorrect behavior where OSD objects
+are created with snap_seq=0 instead of the proper snapshot sequence
+number, causing unnecessary clones.
 
-2. This buffer is passed to `handle_auth_done()` →
-   `ceph_auth_handle_reply_done()` → `handle_auth_session_key()` in
-   `auth_x.c:627-629`, which does:
-  ```c
-  memcpy(session_key, th->session_key.key, th->session_key.len);
-  ```
+### 4. SCOPE AND RISK ASSESSMENT
 
-3. `th->session_key` is populated by `ceph_crypto_key_decode()` in
-   `process_one_ticket()` (`auth_x.c:207`), where `key->len` is decoded
-   directly from the network as a 16-bit integer with **no upper bounds
-   validation**.
+- **Lines changed**: ~20 lines added (very small)
+- **Files touched**: 1 (fs/ceph/addr.c)
+- **Pattern**: Well-established, used identically in multiple other
+  write paths
+- **Risk**: Low - the snap context acquisition pattern is battle-tested
+  in the CephFS codebase
+- **Self-contained**: Yes, no dependencies on other patches
 
-4. A malicious or compromised Ceph server (or MITM attacker) could send
-   a key length > 16, causing a stack buffer overflow when the key
-   material is `memcpy`'d into the 16-byte `session_key_buf`.
+### 5. USER IMPACT
 
-### Stable kernel criteria assessment
+- Affects CephFS users with inline data enabled and snapshots
+- The bug causes unnecessary RADOS object clones, leading to:
+  - Wasted storage space
+  - Incorrect/unexpected snapshot state
+  - Could confuse backup/recovery tools that rely on snapshot state
 
-- **Fixes a real bug**: Yes - a security vulnerability (stack buffer
-  overflow from network input)
-- **Obviously correct**: Yes - adding a bounds check on network-decoded
-  length against a buffer size constant is straightforward
-- **Small and contained**: Yes - only ~10 lines of meaningful change
-  across 3 files
-- **No new features**: Correct - this only adds input validation
-- **Tested**: The author is Ilya Dryomov, the Ceph subsystem maintainer
-  himself
+### 6. STABILITY INDICATORS
 
-### Risk assessment
+- Reviewed-by and Tested-by from Viacheslav Dubeyko (IBM)
+- Signed-off by CephFS maintainer Ilya Dryomov
+- Detailed reproducer provided and verified
 
-- **Very low risk**: The only behavioral change is rejecting keys with
-  length > 16 bytes. AES-128 keys are 16 bytes, so valid Ceph keys will
-  never be larger. There's no possibility of breaking existing working
-  setups.
-- **High benefit**: Prevents a remotely triggerable stack buffer
-  overflow in the kernel.
+### 7. HISTORICAL CONTEXT
 
-### Related commits
+The bug was introduced in 2016 by commit `34b759b4a22b0` ("ceph: kill
+ceph_empty_snapc") which replaced `ceph_empty_snapc` with NULL, claiming
+equivalence. While this was true for message sizing, it meant the
+snap_seq sent to OSD became 0 instead of the proper value, causing the
+clone issue.
 
-Commit `818156caffbf5` ("libceph: prevent potential out-of-bounds reads
-in handle_auth_done()") was a related security fix with explicit `Cc:
-stable@vger.kernel.org`, showing the Ceph maintainer considers these
-auth handling bounds checks to be stable-worthy.
+### Concerns
+
+- The bug requires a specific (but documented) configuration: CephFS
+  inline data + snapshots
+- Inline data is a deprecated feature in CephFS, but still supported and
+  used
+- The unnecessary clones are a data correctness issue (wrong snapshot
+  state) rather than a crash/security issue
+- The fix is small, well-tested, and follows established patterns
 
 ### Verification
 
-- **Verified call chain**: `process_auth_done()` (messenger_v2.c:2361) →
-  `handle_auth_done` callback → `handle_auth_session_key()`
-  (auth_x.c:627-629) copies `th->session_key.key` with length
-  `th->session_key.len` into the fixed-size `session_key` buffer via
-  `memcpy`.
-- **Verified network origin of key->len**: `ceph_crypto_key_decode()`
-  (crypto.c:82) reads `key->len = ceph_decode_16(p)` directly from
-  network-supplied data, with only `ceph_decode_need()` checking buffer
-  availability, not the value itself.
-- **Verified buffer size**: `session_key_buf` at messenger_v2.c:2363 is
-  `CEPH_KEY_LEN + 16 = 32` bytes, with usable session key portion being
-  only 16 bytes after `PTR_ALIGN`.
-- **Verified related commit**: `git show 818156caffbf5` confirmed it's
-  another auth bounds-check fix with explicit `Cc:
-  stable@vger.kernel.org` and review from the same maintainer (Ilya
-  Dryomov).
-- **Verified the process_one_ticket path**: auth_x.c:207 shows
-  `ceph_crypto_key_decode(&new_session_key, &dp, dend)` decoding the key
-  from encrypted ticket data received from the network.
-- **Verified the old check was insufficient**: The removed `if
-  (!key->len) return -EINVAL` in `set_secret()` only rejected zero-
-  length keys, not oversized ones.
+- Verified that commit `305ff6b3a03c2` exists and modifies only
+  `fs/ceph/addr.c`
+- Verified the snap context acquisition pattern matches
+  `caps.c:1813-1817` and `caps.c:2779-2783` (identical pattern)
+- Verified that NULL snapc causes `snap_seq=0` to be encoded in OSD
+  requests (osd_client.c:2198-2199)
+- Verified that `ceph_uninline_data()` is called from `ceph_open()` when
+  opening a file with inline data for writing (file.c:242-243)
+- Verified the historical context: commit `7b06a826e7c52` (2015) changed
+  to `ceph_empty_snapc`, then commit `34b759b4a22b0` (2016) changed to
+  NULL, introducing the bug
+- Verified the commit is reviewed by Viacheslav Dubeyko and signed off
+  by Ilya Dryomov (CephFS maintainer)
+- Verified the fix follows the standard lock ordering: `snap_rwsem`
+  (read) → `i_ceph_lock` (spin)
+- Could NOT verify whether inline_data feature is commonly used in
+  production stable kernel environments (unverified)
 
-### Conclusion
+### Decision
 
-This is a clear security fix that prevents a remotely triggerable stack
-buffer overflow in the Ceph authentication path. The fix is minimal,
-obviously correct, and has no risk of regression. The Ceph subsystem
-maintainer authored it himself, and a closely related commit was
-explicitly marked for stable. This meets all stable kernel criteria.
+This commit fixes a real bug in CephFS snapshot handling that causes
+incorrect RADOS object clones (data correctness issue). The fix is small
+(~20 lines), self-contained, follows well-established patterns used
+throughout the CephFS codebase, and has been reviewed and tested. The
+bug has existed since 2016 and affects all stable kernels. While the
+trigger requires inline data + snapshots (a somewhat niche
+configuration), the fix is low-risk and addresses incorrect behavior.
 
 **YES**
 
- net/ceph/crypto.c       | 8 +++++---
- net/ceph/crypto.h       | 2 +-
- net/ceph/messenger_v2.c | 2 +-
- 3 files changed, 7 insertions(+), 5 deletions(-)
+ fs/ceph/addr.c | 24 ++++++++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
 
-diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-index 01b2ce1e8fc06..5601732cf4faa 100644
---- a/net/ceph/crypto.c
-+++ b/net/ceph/crypto.c
-@@ -37,9 +37,6 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
- 		return -ENOTSUPP;
- 	}
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 63b75d2142102..faecd9025ee9c 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -2199,6 +2199,7 @@ int ceph_uninline_data(struct file *file)
+ 	struct ceph_osd_request *req = NULL;
+ 	struct ceph_cap_flush *prealloc_cf = NULL;
+ 	struct folio *folio = NULL;
++	struct ceph_snap_context *snapc = NULL;
+ 	u64 inline_version = CEPH_INLINE_NONE;
+ 	struct page *pages[1];
+ 	int err = 0;
+@@ -2226,6 +2227,24 @@ int ceph_uninline_data(struct file *file)
+ 	if (inline_version == 1) /* initial version, no data */
+ 		goto out_uninline;
  
--	if (!key->len)
--		return -EINVAL;
--
- 	key->key = kmemdup(buf, key->len, GFP_NOIO);
- 	if (!key->key) {
- 		ret = -ENOMEM;
-@@ -83,6 +80,11 @@ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end)
- 	ceph_decode_copy(p, &key->created, sizeof(key->created));
- 	key->len = ceph_decode_16(p);
- 	ceph_decode_need(p, end, key->len, bad);
-+	if (key->len > CEPH_MAX_KEY_LEN) {
-+		pr_err("secret too big %d\n", key->len);
-+		return -EINVAL;
++	down_read(&fsc->mdsc->snap_rwsem);
++	spin_lock(&ci->i_ceph_lock);
++	if (__ceph_have_pending_cap_snap(ci)) {
++		struct ceph_cap_snap *capsnap =
++				list_last_entry(&ci->i_cap_snaps,
++						struct ceph_cap_snap,
++						ci_item);
++		snapc = ceph_get_snap_context(capsnap->context);
++	} else {
++		if (!ci->i_head_snapc) {
++			ci->i_head_snapc = ceph_get_snap_context(
++				ci->i_snap_realm->cached_context);
++		}
++		snapc = ceph_get_snap_context(ci->i_head_snapc);
 +	}
++	spin_unlock(&ci->i_ceph_lock);
++	up_read(&fsc->mdsc->snap_rwsem);
 +
- 	ret = set_secret(key, *p);
- 	memzero_explicit(*p, key->len);
- 	*p += key->len;
-diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
-index 23de29fc613cf..a20bad6d1e964 100644
---- a/net/ceph/crypto.h
-+++ b/net/ceph/crypto.h
-@@ -5,7 +5,7 @@
- #include <linux/ceph/types.h>
- #include <linux/ceph/buffer.h>
- 
--#define CEPH_KEY_LEN			16
-+#define CEPH_MAX_KEY_LEN		16
- #define CEPH_MAX_CON_SECRET_LEN		64
- 
- /*
-diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
-index c9d50c0dcd33a..31e042dc1b3f2 100644
---- a/net/ceph/messenger_v2.c
-+++ b/net/ceph/messenger_v2.c
-@@ -2360,7 +2360,7 @@ static int process_auth_reply_more(struct ceph_connection *con,
-  */
- static int process_auth_done(struct ceph_connection *con, void *p, void *end)
- {
--	u8 session_key_buf[CEPH_KEY_LEN + 16];
-+	u8 session_key_buf[CEPH_MAX_KEY_LEN + 16];
- 	u8 con_secret_buf[CEPH_MAX_CON_SECRET_LEN + 16];
- 	u8 *session_key = PTR_ALIGN(&session_key_buf[0], 16);
- 	u8 *con_secret = PTR_ALIGN(&con_secret_buf[0], 16);
+ 	folio = read_mapping_folio(inode->i_mapping, 0, file);
+ 	if (IS_ERR(folio)) {
+ 		err = PTR_ERR(folio);
+@@ -2241,7 +2260,7 @@ int ceph_uninline_data(struct file *file)
+ 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+ 				    ceph_vino(inode), 0, &len, 0, 1,
+ 				    CEPH_OSD_OP_CREATE, CEPH_OSD_FLAG_WRITE,
+-				    NULL, 0, 0, false);
++				    snapc, 0, 0, false);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+ 		goto out_unlock;
+@@ -2257,7 +2276,7 @@ int ceph_uninline_data(struct file *file)
+ 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+ 				    ceph_vino(inode), 0, &len, 1, 3,
+ 				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE,
+-				    NULL, ci->i_truncate_seq,
++				    snapc, ci->i_truncate_seq,
+ 				    ci->i_truncate_size, false);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+@@ -2320,6 +2339,7 @@ int ceph_uninline_data(struct file *file)
+ 		folio_put(folio);
+ 	}
+ out:
++	ceph_put_snap_context(snapc);
+ 	ceph_free_cap_flush(prealloc_cf);
+ 	doutc(cl, "%llx.%llx inline_version %llu = %d\n",
+ 	      ceph_vinop(inode), inline_version, err);
 -- 
 2.51.0
 
