@@ -1,109 +1,141 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+Received: from mail-vk1-f171.google.com (mail-vk1-f171.google.com [209.85.221.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EDCE2494F0
-	for <ceph-devel@vger.kernel.org>; Sat, 21 Feb 2026 23:46:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771717567; cv=none; b=jFvU+MCot9B5tbpc0lPj1fsXKWH4xASRTjzYjHj0OqM/0guiP1Oc5JAgfXdFtQoBxvGWDAiXa+ypu2qtK01nVV7958b4Mi9jTQaWX/pT0jBrELqRWMoFC3WsZKFMOPlbjMCaqjn8R/x3L/M1jGqOz3pyn0L/RNDJWfUopTKFA0U=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771717567; c=relaxed/simple;
-	bh=D8wEA4P1R/wLC0WQ2gaxmvJV8Zid0j4uMfM8HtVxkhE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Txbe4BPIYiY4rEd06Io32cWgN/EVyCaGGpD2ehqwM4f2y2YBg7Etaw19yfLUeBIEkABybdgRNGURiHEwupLsNkUZ7liTPQih9sXzlRfs2/gGjFBFVLQ9xhCtxsFwhOkn2KMP4/bxuz05/9O+yH7moQkERCW7OsyK6kSDz96SDg4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hxWuCmMl; arc=none smtp.client-ip=209.85.128.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA67516DC28
+	for <ceph-devel@vger.kernel.org>; Sun, 22 Feb 2026 07:19:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.171
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771744796; cv=pass; b=EDod00mqc5ZkriECrYQJrirpZ4ygQkA9xEL6ARnJHdwCSpcg3yCeCM5s1RuNAKbvIgB3zrevzRNzT0DC8nRxqQqB7Ba98e+DnbvNuJvJZJQTbBoQrBdCQDpw42469dL+nWfwZmS0v9p+rmNBJca41Iw/JyJL0mYhC/h3SByprKo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771744796; c=relaxed/simple;
+	bh=0lDfK3AuaNxxPB1Mx5JPD44YULX91cix/sE9XtEee8o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=OdobE2f49SmPRRSGPjrUB2uGZU9+5EIYVxLPKfWcrPZtcBO93acWtv9mUcbr4owAudTUvK4e0utsD8lppXfDmsoMOYJk8xkQTgeVBxFnlFCruAj1e2aKIZkaXKX88sUUuJvANJjBuxguomLZbuwgoTGpWBdOFJ0/lKFdRqdHpSg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iwtvKFVx; arc=pass smtp.client-ip=209.85.221.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hxWuCmMl"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4806ce0f97bso25552625e9.0
-        for <ceph-devel@vger.kernel.org>; Sat, 21 Feb 2026 15:46:06 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iwtvKFVx"
+Received: by mail-vk1-f171.google.com with SMTP id 71dfb90a1353d-5663724e4daso3399091e0c.3
+        for <ceph-devel@vger.kernel.org>; Sat, 21 Feb 2026 23:19:54 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771744794; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Q9YFc6mAgcpoQqHnpTKFikAd/DdQXCUqUp4cGFFIS8ysjvKIkNp8ZYuyankMNzSj0e
+         nGUmk56yCz+FDs/M2uoW8lhfawK0jiUSgK40nEDzbmElYLtcwnm2rFUdxIdSnS3VsEqF
+         LNedDr/BSKTeSbPlmHxYrd4r16H1Z4Us9QO05tV2QOiz7ux/XiQjObK/Q9MovoqIFSUi
+         4mOYZK3rk7G5+RrooJjJb5I981X84tsYcYFK0POY7afD3rNDZPPa+49YzqYG2bB9ZGtZ
+         8vS+PiuXhumRwmpFmTyLp3ASO3/4vdEpA4tnD5fcVA4ZSEvKxjpPu1jM/rVcHKA2BmL8
+         Pkjw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=OILCq3HcP44ucOZfdh81GCluvZoTsk6wk990N+3C0dA=;
+        fh=rN4kPyTYcyrvuWH7eY6Hnz12E6UtvEZeKIifaXVIoEM=;
+        b=aRoDdeSxZXfPcXQ5cxL06oSy6mBeHFIWsupL2WH39lYr/MJhAhX2/0zxNVjg6pJYY4
+         JFjPfIXDNlwuoOid5GVmG0JLpYCsFLOArtIKiny5Wdix4CU7R09iJbRJLLgHtPG+6lIN
+         w8wQCb+RyQarYp/624EeaQuxwALwJlyulphxMbI/g7Rr+aadFi4rFuBM075qf0KfBNVk
+         XiPx2vPJcXsycCRnOSeq3JPzjpjt+LUoJc458kqUOocosHPioLPoUJzhpqHy2+TlA4EF
+         u00MlTPRsO9MGf3vJM2DVb+QtYyRl4YgfiSbF8z+hQdy+zdrzQ0TnBcznT0kY+81pUjv
+         DlTg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771717564; x=1772322364; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1771744794; x=1772349594; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=a6c+2c5A4IdcQR95bgfQZwtsMpRnSCzmv5kOunEAmnw=;
-        b=hxWuCmMlxuj3d20al60XWs0jh2KLvmk0/jpM7jG8sjLtUj+ARfwmScdZLER6DpfOAs
-         J8nWVO9IM04A+Qm71FNtsxpTM5ftoWYuG5CoE6iS+dCZ9RSZYYoP+pmhOyAgz70sC2iv
-         LDvuveFZpQZy2/IC/wLc5I7ZkcufMPCm48xDHV18rMz3EllbndGCICEYY+zKzP925M1P
-         L1j7TU5F2mxburUB6vGNMZfdQFHuZXWbh2ZEHD6D3l3MvO7SPXGiDAny7QDzYV1siVBQ
-         FXjjbYA1cLCF3c7I92iQNDo0U9X7Emu0pfWIOGTBeLkAV5YK+VPmQv02ynK/DYnajvGz
-         T9UA==
+        bh=OILCq3HcP44ucOZfdh81GCluvZoTsk6wk990N+3C0dA=;
+        b=iwtvKFVxJY411/9ogEeNuKuIL+swHngOLh4yrtBI6Td3Zvrhz9GAxS6djLXc2BeeOf
+         nwptn4OPwALolDkNO4yfUKWVGz6BTUQ/ZjsrhDkQelUcEp3u211ABAUwyaGfWUa3xyIl
+         8TncN5e/ul82aK3psRyH0mTUkoioWE7HxKEG5Tl+V4ZPPo1duell20yNXLiz/uGQbSYH
+         7yGlXL3++eZgdVawMupcKZlupPjYixQ8Rl23W+szYf64S6Jow0ieM/ciHxBMW07CFwOu
+         mPqgTy21kVuM+pHA2DPgrWsLpiGUpwbZYMi/pXNbvGHP1UIGZhLEeFn1TM96mjwZUN8t
+         bpvA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771717564; x=1772322364;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20230601; t=1771744794; x=1772349594;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=a6c+2c5A4IdcQR95bgfQZwtsMpRnSCzmv5kOunEAmnw=;
-        b=aXe4BrWiG5qFSysgkPEPJpItl9C6zCrmz3p/Wxzgwu8dcHsHjQz3uunr65WuNAdntr
-         2VR73yhwNpsd6ADPY8ISZ2rSiYwF9m+93LLBqOLV8dEB8ecVqVOq96X8ToWgUYbnPgp2
-         YyY+zmck5Vow/6rwu9A1Nndg+zqIgAdq2Ms2wOXLbWKdGQITG9DOk9boD7orF6RYWYM1
-         rvOdqT1sBhVQG4xzCEOmCpYJCzUDILPUfSePCX0sNRDHywRcwJ+RgjRZ4NBTxuFbx2r8
-         q1A/APHFvljSGhA2COARIm+9gBxcoxt0cqeuVXgbjgYIurcv1vKNuzyuzLCCOg/oUmVN
-         ldsQ==
-X-Gm-Message-State: AOJu0YxioETg36uDV4dT5G3h2UeVtRrZd6yFHzDeHSc+Gur6LMzqCrvH
-	Mg/dZdUO9SZ+FaFqwmLmiQ3PuryrPYHC8sR7DMfmFDyZ9Fn3Qi+BvDw2
-X-Gm-Gg: AZuq6aLv0RnVy65g4qMBWMIkPckYxYPJbm/pjnKFnWGkHAsVPP7QLPUwyzvAH8sakE1
-	/UQmHtulGTGY1W4NK+V0aHUS4zqZnmD5PabwJ0hC+YVk8AwT8C85OZOpcc/2hvlEXFJ0O7LTlof
-	6CbgdzPyIFHdpW539k2wUDGcwuX9TwnfCfTPMTiZdU+xlA7UCklo6/U36JPQpuX0KdIiwRnnFkF
-	aaLiYY7I9C9cGtMyCtXz5R0QoYK6cajkVGdSM7Q2RYw50jZ+9D1sexqbtXjYHeXnUw3frSjALAt
-	YzjBgTBaWr2NEHvtexBBDD0VOZg5vC0fapA7szpT4C2YUs04aMG90FrDRzR6Qd0M6yIsuxZ7HVM
-	SEaRaaHjcjEZ2yInXszktIUjre/s4WYzER6zvFqioJUmiYCriQQsjDAtJfb6VyO27MyJvOjWiVC
-	SWnl+Lwy1vhMRuL0pC2w7QGPFI5jim7Q==
-X-Received: by 2002:a05:600c:4749:b0:480:69b6:dfed with SMTP id 5b1f17b1804b1-483a95e5ab8mr72338125e9.24.1771717564334;
-        Sat, 21 Feb 2026 15:46:04 -0800 (PST)
-Received: from localhost ([212.73.77.104])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-483a31c56d8sm251620925e9.8.2026.02.21.15.46.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 21 Feb 2026 15:46:03 -0800 (PST)
-From: Askar Safin <safinaskar@gmail.com>
-To: dorjoychy111@gmail.com
-Cc: ceph-devel@vger.kernel.org,
-	gfs2@lists.linux.dev,
-	linux-cifs@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-kselftest@vger.kernel.org,
-	linux-nfs@vger.kernel.org,
-	v9fs@lists.linux.dev
-Subject: Re: [PATCH v4 0/4] OPENAT2_REGULAR flag support in openat2
-Date: Sun, 22 Feb 2026 02:45:53 +0300
-Message-ID: <20260221234553.2024832-1-safinaskar@gmail.com>
-X-Mailer: git-send-email 2.47.3
-In-Reply-To: <CAFfO_h7TJbB_170eoeobuanDKa2A+64o7-sb5Mpk3ts1oVUHtg@mail.gmail.com>
-References: <CAFfO_h7TJbB_170eoeobuanDKa2A+64o7-sb5Mpk3ts1oVUHtg@mail.gmail.com>
+        bh=OILCq3HcP44ucOZfdh81GCluvZoTsk6wk990N+3C0dA=;
+        b=UiH2eMCS5kfwcgZ+NP5zgIS8Sy+0PMbpQdltCieZu7tGhZtleWIzM/2JtwUwPL6Pzk
+         cuTUAaSKBzpd2Dev0giAPwmWCIuSf3NGDtdIBaDJkATGeDxGsxkh+s3BjkRQw7UDFLt6
+         PNFPyro9iOIWWdePCnDZ9G6NODhPJtzD//j5flkETlxazFAQOqxd4QDCrO+jAG+705hB
+         s5HTBWKn8AeTCiBJ8QQVNLgK/ARCp0nK2jdLyWLTDO0/xKl6J+DcMbCLDpS8Mmh15HbM
+         8vqpjGTo3KS6yeAZZeP3wOITTdfXHVHgRI44BSTvck1JqwRIdggiU1C7gpeygStz4pl0
+         Zo7g==
+X-Gm-Message-State: AOJu0YwAje35ZHUz19CXEMhZJkkVf1bfgLrDQEYXh4nI3XpAKdyhNENw
+	5vCIr9V5oMrpxh2ZSkqXk0j1InPKlpWE+7Jl0WuSv57WFRxo6k+VdisL4TtQO0aHLyesQB7VTme
+	nJPG6236/FV0FlsyuvHZGyUE6f1ZD6Zw=
+X-Gm-Gg: AZuq6aLtvhejrQKK/IoCQxK4m/FSS0UpiGNblEcREju0tuhHyws4RDNWnkh0taSuku9
+	iSBbX+yJ7ZAMirsXs9xlFTPjYNcjTmTDr9Y+PvynqB+LEcn4O7Uz2q9SWBV0Opbgn0kedhNfHgE
+	m8qWsc8secpJRa+siGsHRIZY5Ex2asWDcVgDzhV6taMQRTXrs6GJ+ZghzKUHcl89/2jtLEJyEvL
+	DcWHqsDcrNLGCwXX3eSJ3T1gF+HLUEfnfM9vbkgG0v2Z2bLjXGuxNIk4mpUSUUjPvdJAYn9Nyi5
+	SDEa0UsvVq/YDICtbgY0wl+vJ+JUANP9W4yg3KnAcNcbPSSz+G7ZoQ==
+X-Received: by 2002:a05:6123:2c6:b0:55a:ab0d:bf74 with SMTP id
+ 71dfb90a1353d-568e489e04bmr2702083e0c.13.1771744793575; Sat, 21 Feb 2026
+ 23:19:53 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <CAFfO_h7TJbB_170eoeobuanDKa2A+64o7-sb5Mpk3ts1oVUHtg@mail.gmail.com>
+ <20260221234553.2024832-1-safinaskar@gmail.com>
+In-Reply-To: <20260221234553.2024832-1-safinaskar@gmail.com>
+From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
+Date: Sun, 22 Feb 2026 13:19:42 +0600
+X-Gm-Features: AaiRm51yAd7WZH0JTtET-y37usKeLDtT6X5Vgs22uOg_jqenzkdmMaQOnOQPf2k
+Message-ID: <CAFfO_h4dNydbmKSTP8uD9X6ouEZTyJUGoTBXrEHWeHtD1B=p5w@mail.gmail.com>
+Subject: Re: [PATCH v4 0/4] OPENAT2_REGULAR flag support in openat2
+To: Askar Safin <safinaskar@gmail.com>
+Cc: ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
+	linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-kselftest@vger.kernel.org, 
+	linux-nfs@vger.kernel.org, v9fs@lists.linux.dev
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Dorjoy Chowdhury <dorjoychy111@gmail.com>:
-> I am not sure if my patch series made it properly to the mailing
-> lists. https://lore.kernel.org/linux-fsdevel/  is showing a broken
-> series, only the 2/4, 3/4, 4/4 and I don't see cover-letter or 1/4.
-> The patch series does have a big cc list (what I got from
-> get_maintainers.pl excluding commit-signers) and I used git send-email
-> to send to everyone. It's also showing properly in my gmail inbox. Is
-> it just the website that's not showing it properly? Should I prune the
-> cc list and resend? is there any limitations to sending patches to
-> mailing lists with many cc-s via gmail?
+On Sun, Feb 22, 2026 at 5:46=E2=80=AFAM Askar Safin <safinaskar@gmail.com> =
+wrote:
+>
+> Dorjoy Chowdhury <dorjoychy111@gmail.com>:
+> > I am not sure if my patch series made it properly to the mailing
+> > lists. https://lore.kernel.org/linux-fsdevel/  is showing a broken
+> > series, only the 2/4, 3/4, 4/4 and I don't see cover-letter or 1/4.
+> > The patch series does have a big cc list (what I got from
+> > get_maintainers.pl excluding commit-signers) and I used git send-email
+> > to send to everyone. It's also showing properly in my gmail inbox. Is
+> > it just the website that's not showing it properly? Should I prune the
+> > cc list and resend? is there any limitations to sending patches to
+> > mailing lists with many cc-s via gmail?
+>
+> I see all 5 emails on
+> https://lore.kernel.org/linux-fsdevel/CAFfO_h7TJbB_170eoeobuanDKa2A+64o7-=
+sb5Mpk3ts1oVUHtg@mail.gmail.com/T/#t .
+>
 
-I see all 5 emails on
-https://lore.kernel.org/linux-fsdevel/CAFfO_h7TJbB_170eoeobuanDKa2A+64o7-sb5Mpk3ts1oVUHtg@mail.gmail.com/T/#t .
+Yes, indeed. They showed up after a while.
 
-So this was some temporary problem on lore.kernel.org .
+> So this was some temporary problem on lore.kernel.org .
+>
+> Sometimes gmail indeed rejects mails if you try to send too many emails
+> to too many people. So I suggest adding "--batch-size=3D1 --relogin-delay=
+=3D20"
+> to your send-email invocation. I hope this will make probability of
+> rejection by gmail less. I usually add these flags.
+>
 
-Sometimes gmail indeed rejects mails if you try to send too many emails
-to too many people. So I suggest adding "--batch-size=1 --relogin-delay=20"
-to your send-email invocation. I hope this will make probability of
-rejection by gmail less. I usually add these flags.
+Understood. I did not know about these flags.
 
-If you still expirence some problems with gmail, then you may apply
-for linux.dev email (go to linux.dev). They are free for Linux contributors.
+> If you still expirence some problems with gmail, then you may apply
+> for linux.dev email (go to linux.dev). They are free for Linux contributo=
+rs.
+>
 
--- 
-Askar Safin
+Alright.
+
+Thank you!
+
+Regards,
+Dorjoy
