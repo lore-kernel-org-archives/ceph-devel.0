@@ -1,132 +1,160 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B3441E98E3
-	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 08:25:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 569D73ACEF9
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 12:59:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772007934; cv=none; b=QlGg6x/tSgU/w0EZQbtuT0dDZnXMm1pA11i++WDlIEKEAFQON9KMhDQyp1Gs/g2qsj+ivNBLZHeRBw3k386ynJs9bOVxOnT0LC1nlA99pSSKMpoI5x+jShTQSqiEKut6I5+bUeWifFG0WDiSXvoZPhbRlNtD962dtf3oW+1VbGA=
+	t=1772024357; cv=none; b=gnDFaUDffOE8pi4h/gjItw0+4YAsNUUVmG/CfuUHbplUEiWHN+YpiapjYnB6IpcBmXKPqbIS0Eh1TrI5w9q4rJQslUgu4BerKbF9UUK1JTTJcGKCEP52qtFS7omGSg7ukz6NEOLR+K2UXvHL0jgNQ9OvurZLdxRg9aFbZj4eNnE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772007934; c=relaxed/simple;
-	bh=jVrZyX2PKCWNKv3KEE5pktsf/STnqrR84Q4LjLnF++s=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=kar0uUg7KrWpfs5DVnn5kZomKBntNJJPzzgLa0ft8KszFD7+OfEvQV07hN1fSeoDZx6T6S484dDQP41PCzn5JmEJB2a3nHpQJTdf2ysVgbIgh1FEl4Slvi14XDsE76sG6mY8PEgil2WJrGKqdYs9Arbc34TH1tuz/kNSQ52t7f0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=zXugVyyM; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1772024357; c=relaxed/simple;
+	bh=ezBckF0lKaSLAxOrpzSdbBHvUo+vPXQ5KvwM+WUDQsg=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=ncyBKanr7eJYA9VryBFL9BUe/Gml2LwhNMjGzYQk/8BsYwfbgEgXi89KCxcsH+bdtL8jpAzRuuajBoF8SjcwriZYEXPNswzhPvjxRv/sYJcEhLsTQHsw1bgE4irJiBLvZvaApQKPUA2eEa89STvcCQwEAxj+vwSvSi2KiugZQKk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Cfw5ILS8; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JaVFhP8Q; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="zXugVyyM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1772007929; h=message-id
- : date : mime-version : to : cc : from : subject : content-type :
- content-transfer-encoding : from;
- bh=jVrZyX2PKCWNKv3KEE5pktsf/STnqrR84Q4LjLnF++s=;
- b=zXugVyyMa/npHhx1hEeUtEBO2LLi12ICNVB/k1OwhEE8Pvv8KA+dWZIAd209CS/KvTmGk
- KYpLbapAatjZ11uImm36HnjCskosHTVQwKlDzCoorTcoqqPUw8imH+YA+QgQtf+GQm/GZVQ
- ygh02TDfeeV2ltD6MsV0xPljikbgx1wl7KIF3l/b2QqrzHazi2wAlGNmVyLWEPMeNQGoYj2
- lGonPf48AE2oGZ1j+jMkQ2Yi+HwC9Pg3MVcfqpRXYIep6yXWTI4M5mdwvwlPv4x4WyyGGxG
- udkZDj7gLURlG8K+zy2RmGqlvFCmcfnY5S6mvo/x8L1TFzr5x7FvtVUIrfRQ==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 2FD0F5FCC5;
-	Wed, 25 Feb 2026 09:25:29 +0100 (CET)
-Received: from [141.24.212.106] (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 477D15FC87;
-	Wed, 25 Feb 2026 09:25:27 +0100 (CET)
-Message-ID: <4d5abe5c-2f93-4359-9aae-38f21ba0485b@tu-ilmenau.de>
-Date: Wed, 25 Feb 2026 09:25:27 +0100
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Cfw5ILS8";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JaVFhP8Q"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1772024354;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=aOw9INrgxnxy1CMgrkfGNK7kVX6hvwU+ErGcKC9BW4E=;
+	b=Cfw5ILS8IospIft5rtymaeJV3kkjTSEs7wdva/KOucir3+2zrBItiOtdQBi4L7k3RKxpah
+	9SkKP5cdVRbJ//ULppRCIfyGaFjEBurTTHVV2cJx5annwO7SQDgZowE7YKd6fcW4wnyZcR
+	VVatXYK01AdrsvoRP1c5CgN05mOfaEw=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-549-2VXSn1MmPQ6EgVP9GNsWig-1; Wed, 25 Feb 2026 07:59:13 -0500
+X-MC-Unique: 2VXSn1MmPQ6EgVP9GNsWig-1
+X-Mimecast-MFC-AGG-ID: 2VXSn1MmPQ6EgVP9GNsWig_1772024353
+Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-8966c2b187bso683307596d6.2
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 04:59:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1772024352; x=1772629152; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=aOw9INrgxnxy1CMgrkfGNK7kVX6hvwU+ErGcKC9BW4E=;
+        b=JaVFhP8QfU13GGFPMpEMJ9gLG9HpbGFLY9QO5uSssHoWYD5mfMt+0Ixv2n6Yij84TR
+         TtVlIjM3DCQGbXBCUqUsuJEi0oEd2jFw7vnX0Pabv7ZYEUybrXb+e1BnPI+WVcSqhg1R
+         2bwW0XF1z39ijwqER/vHefi1lHHnazCx1MzepC22W8a6LaN1KZa+sgn6N4xO/V3h3hwB
+         EKPfzC9CMm4GC746DGXtRqyg+LFAwkF004iXdxpV5Vv8gSfIRjrSOdF5PGWROQ2JYnZk
+         MRgCp/ZpC9poj7Du99teXgtO1yqwOJsMUlflOvVCBq3mQVkW7KhFJbymDa6Klk/MRbyD
+         25Og==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772024352; x=1772629152;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=aOw9INrgxnxy1CMgrkfGNK7kVX6hvwU+ErGcKC9BW4E=;
+        b=dFKNXF+FBUex8VpXJCji/PsxZGyevzczf9VxYtWPKHRoysxpkHz4BGVrUJC6SSqPSt
+         4ccH3niYYbkw4Q7w4qI/vIhdiQdjWW9KTEPwJdzeMDpL2n2jGhlhANEG/xmb4UjuliPX
+         q2LrZCUP3w4upy/bE6bFoFiDO1aoMSTOP9HQuSej2jmgjtSdaESHAfP3QzQ0IGmapIPD
+         EhZYTC9piUZGhZKrOqjhxM7QRNdmisoy9lhgi1rFXHdjy1URQC3Fs2bPIguNVo+G5WMN
+         KTuhNXn5Z/1Ebch5hlGd5QFYB7wclEPbmzdA6BG82eUrU9CI5l6Cq6JQZ9H2aV82z6h6
+         wyug==
+X-Gm-Message-State: AOJu0YyKJPU8pT/p2RCyVMgp7HSB+VUrQJA7vVG4UuOmQW3xdb6HACbd
+	zENzXl/dlwh98Y8Pd7XaKbjs919bngj62XFPkOKsLHN7/lv7WP6kKCPbNx1vDnriYXuDRPbisiJ
+	5BC+JIUquK2cZSDZZENaH7dofB/xS9BxH5b84WvfHIW9t8czeqfLLXbNGizBczM01Bplxt04+rg
+	EjbRsZXM0qZPAQL2dwqmnfkSIY6xUgcxyxib+gNnQ1JVUOPV14derx
+X-Gm-Gg: ATEYQzwdFBeeemuxBnz2tIph2qQOJBsHDEtiiQzbaSEr27PCs0qAL82DuHpl/sXyAQc
+	m8RL5JSLY4r67o78vXhmb6w9nzO0YiKRlgT7qutzU9Mc0PfNCq5gJr4XJB6mUeCf/+LtSWav4FI
+	A8rJ1OZmifJFxKeEd5zfLaRWea7SfTMS0GR6iLa7jJ6t8hfxcNyZh89pMBKzSt3xpVP5Ry/XlbL
+	LXbjReiUC8RIMU24AishMXfPyXKIRRkUlZ+wNCoOzsaF6u30PFCU9z0WkIN8588qRnwHRVh19YW
+	x7O9QsNt+O9VuFDFLQW5lSAkJv/f0n/YJZhD30S8Rt70Kdv5AGe6UoUfDIjwycGy0C9Bz23SRk7
+	BfdzutrIZUJkoIY9pmHm4UkP5LkkXC1dyUWqDCDIU0MG3cLi9ul9L9MM=
+X-Received: by 2002:a05:620a:28c8:b0:8b2:eae0:bbf4 with SMTP id af79cd13be357-8cb8c9f59f1mr1840183285a.19.1772024352420;
+        Wed, 25 Feb 2026 04:59:12 -0800 (PST)
+X-Received: by 2002:a05:620a:28c8:b0:8b2:eae0:bbf4 with SMTP id af79cd13be357-8cb8c9f59f1mr1840179485a.19.1772024351879;
+        Wed, 25 Feb 2026 04:59:11 -0800 (PST)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-8cb8d046055sm1514219685a.8.2026.02.25.04.59.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Feb 2026 04:59:11 -0800 (PST)
+From: Alex Markuze <amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	amarkuze@redhat.com,
+	vdubeyko@redhat.com
+Subject: [RFC PATCH v1 0/4] ceph: manual client session reset via debugfs
+Date: Wed, 25 Feb 2026 12:59:03 +0000
+Message-Id: <20260225125907.53851-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Content-Language: en-US
-To: Ilya Dryomov <idryomov@gmail.com>, amarkuze@redhat.com, slava@dubeyko.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH v2] libceph: Use u32 for non-negative values in
- ceph_monmap_decode()
-Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
- 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
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-This patch fixes unnecessary implicit conversions that change signedness 
-of blob_len and num_mon in ceph_monmap_decode().
-Currently blob_len and num_mon are (signed) int variables. They are used 
-to hold values that are always non-negative and get assigned in 
-ceph_decode_32_safe(), which is meant to assign u32 values. Both 
-variables are subsequently used as unsigned values, and the value of 
-num_mon is further assigned to monmap->num_mon, which is of type u32. 
-Therefore, both variables should be of type u32. This is especially 
-relevant for num_mon. If the value read from the incoming message is 
-very large, it is interpreted as a negative value, and the check for 
-num_mon > CEPH_MAX_MON in line 117 does not catch it. This leads to the 
-attempt to allocate a very large chunk of memory in line 120, which will 
-most likely fail. In this case, an unnecessary attempt to allocate 
-memory is performed, and -ENOMEM is returned instead of -EINVAL.
+In production CephFS deployments we regularly encounter situations
+where MDS sessions become stuck or hung, requiring a full unmount/
+remount cycle to recover.  This is disruptive for workloads that
+cannot tolerate the downtime or the loss of cached state that comes
+with unmounting.
 
-Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
----
-  net/ceph/mon_client.c | 6 +++---
-  1 file changed, 3 insertions(+), 3 deletions(-)
+This series adds a mechanism to manually trigger MDS session
+reconnection from the client side without unmounting, exposed via
+debugfs:
 
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index fa8dd2a20f7d..94a7a82ca475 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -72,8 +72,8 @@ static struct ceph_monmap *ceph_monmap_decode(void 
-**p, void *end, bool msgr2)
-         struct ceph_monmap *monmap = NULL;
-         struct ceph_fsid fsid;
-         u32 struct_len;
--       int blob_len;
--       int num_mon;
-+       u32 blob_len;
-+       u32 num_mon;
-         u8 struct_v;
-         u32 epoch;
-         int ret;
-@@ -112,7 +112,7 @@ static struct ceph_monmap *ceph_monmap_decode(void 
-**p, void *end, bool msgr2)
-         }
-         ceph_decode_32_safe(p, end, num_mon, e_inval);
+  echo "reason text" > /sys/kernel/debug/ceph/<fsid>/reset/trigger
+  cat /sys/kernel/debug/ceph/<fsid>/reset/status
 
--       dout("%s fsid %pU epoch %u num_mon %d\n", __func__, &fsid, epoch,
-+       dout("%s fsid %pU epoch %u num_mon %u\n", __func__, &fsid, epoch,
-              num_mon);
-         if (num_mon > CEPH_MAX_MON)
-                 goto e_inval;
+The reset lifecycle:
+  1. Operator writes to the trigger file
+  2. A work item collects all active sessions and initiates
+     reconnection on each (via send_mds_reconnect with from_reset=true)
+  3. New metadata requests and lock acquisitions are blocked until
+     the reset completes (120s timeout)
+  4. Session completions are tracked via a per-session generation
+     counter to handle stale completions from timed-out prior resets
+  5. Lock reclamation is always attempted during reset-initiated
+     reconnects, regardless of prior CEPH_I_ERROR_FILELOCK state
+
+Patch breakdown:
+  1. Convert CEPH_I_* flags to named bit positions so test_bit/
+     set_bit/clear_bit can be used in reconnect paths
+  2. Make wait_caps_flush() bounded with periodic diagnostic dumps
+     to aid debugging hung flush scenarios (independent improvement
+     that surfaced during development)
+  3. The core reset implementation: debugfs interface, reset work
+     function, request/lock blocking, tracepoints, and session
+     reconnect completion tracking
+  4. Rework mds_peer_reset() to properly handle all session states
+     and integrate with the reset completion tracking
+
+Open questions / areas for review:
+  - Is debugfs the right interface, or should this be a mount option
+    / sysfs attribute / netlink command?
+  - The request gating in ceph_mdsc_submit_request() is best-effort
+    (no lock serialization) to avoid penalizing the normal path.
+    Is this acceptable?
+  - Should the 60s reconnect timeout and 120s blocked-request timeout
+    be configurable (e.g. via mount options)?
+  - mds_peer_reset() rework (patch 4) is substantial -- would
+    reviewers prefer it split further?
+
+
+Alex Markuze (4):
+  ceph: convert inode flags to named bit positions
+  ceph: add bounded timeout and diagnostics to wait_caps_flush()
+  ceph: implement manual client session reset via debugfs
+  ceph: rework mds_peer_reset() for robust session recovery
+
+ fs/ceph/caps.c              |   7 +
+ fs/ceph/debugfs.c           | 171 ++++++++++-
+ fs/ceph/locks.c             |  24 +-
+ fs/ceph/mds_client.c        | 577 ++++++++++++++++++++++++++++++++++--
+ fs/ceph/mds_client.h        |  33 +++
+ fs/ceph/super.h             |  60 ++--
+ include/trace/events/ceph.h |  60 ++++
+ 7 files changed, 879 insertions(+), 53 deletions(-)
+
 -- 
-2.47.3
+2.34.1
 
