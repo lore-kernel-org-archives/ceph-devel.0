@@ -1,73 +1,73 @@
 Received: from mx0a-00364e01.pphosted.com (mx0a-00364e01.pphosted.com [148.163.135.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E29F3859C9
-	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 23:44:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CE89385537
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 23:44:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.135.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772063087; cv=none; b=C+PtT+jmhIkiqOhHmyJw/xgj7d4yrGw+OBR2A7zwtl0YB+VI2BQlPpyEzXPd0s/IuMV4ygjTa/NIyCRaGQ9FEnG9Ti8dMuHQAscwEBjtnyQ+qZS9mPE9EhULbE8jurChTOrCinWvDm3MS7GL4dMyyDuJgEkKUDK29Ys2AD9qIoA=
+	t=1772063089; cv=none; b=p2hgH3/ZKsZ3sFME0N1qn+H0cH3ucgMknkB9D23r1Unn234xRFDJ5/ENy5vL9YeJOcIk1EtuJCiPB2GmmH8oUDW2gkvMupHCI41GB4Wx3Ej/zNpzRYUFTvAB1Fy6j2Rogo4fS630DziSevuRzPXwri9wmeDwZRfLBNM8WCAzloU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772063087; c=relaxed/simple;
-	bh=86tTrdoOnAn/xo3cekp1XuyRqb4HRFNzoiKbv0I1ps4=;
+	s=arc-20240116; t=1772063089; c=relaxed/simple;
+	bh=gYLxuKpY2d3qKNQKxivfKoBOKiAm81D0oxjvJeYJzNU=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=sV2uDRCEZmp2gtsPMBpNFUSoPfYeAo8quhxvpUonHfpvQAmZiWBLuZchegfEHPsnRjdwPyWqmEL+JQ26RmRZeXWejDFuRTVWjEf9pcVmBrMntia8OMkpqONpyA9krDsFDwvrVXmvMWw0YREBmBOs4R7v68kIN3TmyS2KMeM5PdI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=k8p8qfY6; arc=none smtp.client-ip=148.163.135.74
+	 In-Reply-To:To:Cc; b=hF1jMcFEoOZlSbr6q5dI1eLqhTBjFW6+vvReOJt4qy/3F9TOWufS5tVeF2bl8qG+xtRJIhrNm2LybidPd0yUJxpORbt3MmixsiyTlIpP/R2zDYQwJE1mNzBN6koxKgLpfZguL40iKBk2cdh7p6ozgPwzDA/x8kSFz4KFVqUv7Po=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=U1PIVhaQ; arc=none smtp.client-ip=148.163.135.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="k8p8qfY6"
-Received: from pps.filterd (m0167068.ppops.net [127.0.0.1])
-	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61PNN9Z13928415
-	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 18:44:43 -0500
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="U1PIVhaQ"
+Received: from pps.filterd (m0167070.ppops.net [127.0.0.1])
+	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61PNN7LL030437
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 18:44:46 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pps01; bh=QbU8
-	qIjBMGeq/4CCh33jplvuFV4mV/Z7tLyPGzkrhRQ=; b=k8p8qfY6LKJTKzyyIu1T
-	MBHAySeSL2rGW18v7FXhhfE5FBzkAnsvzwwdn7GkjnE3GX/FS+1Labq+PlugfXXz
-	vOec7glehBd8/aUWG3kwI+2K7MIntwvnNxIlbXeb4MC2Iz8OIYCgGdmmdQomMWcR
-	jawfPFhJyFIek32736qXfJ1Zsf8PihQodtpVLS4wPMGxrg7MiHzMTOTAz5tsZHSw
-	kZ64SjLH0jiAaG/crVhQ9y25MdtNe8NaKVc7DRq0nHaElnWsMUg1K68u6t5fD41K
-	7efzQ1T71c41RoTR8AQXiabnd0+DiFVVEkIL0sRUwP2Sy7x2D3aUqGREmAiKw7yl
-	/g==
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com [209.85.222.200])
-	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4chn9y0ey2-1
+	:message-id:mime-version:references:subject:to; s=pps01; bh=Q1k2
+	aRLcgmydoMd1dEiHPTc9xxnOTAMtx9b+CM6PXh0=; b=U1PIVhaQRwd3nbrNnYtm
+	L1no1lMCV2YmzeST//Dp/v7B3/cqL4T65QQrGFeq4b08zK5Y2bNTbh+NZ0dvRq8L
+	fWxAXdfzylJQAflLxh8iC6HUOyaR7ki6/xPgiP+/NrizW4D7zaK1w0+W4ErGSFUd
+	W0ErFErP2OIoxqkEv58jTOIg5iLwKzU7KKkGTTglXZHlYByD0dZEd4gm2XRonTBf
+	IAwk64JaWJh5SI6PlHFHgjkB1xFbM72XAqyzdYvOCmP5fAPuCzBajwGH0E/vZsKp
+	WVFnR0ForMBT3YjkIm2sCMYMPztXn+cqf57JO1rCfMS6vvmcio9eEyqAYlqMbGkD
+	Vw==
+Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com [209.85.219.71])
+	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4cj35vct2a-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 18:44:43 -0500 (EST)
-Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-8cb3a2eb984so266940085a.0
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 15:44:43 -0800 (PST)
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 18:44:46 -0500 (EST)
+Received: by mail-qv1-f71.google.com with SMTP id 6a1803df08f44-896fa0fcf27so25571326d6.1
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2026 15:44:46 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772063083; x=1772667883;
+        d=1e100.net; s=20230601; t=1772063085; x=1772667885;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=QbU8qIjBMGeq/4CCh33jplvuFV4mV/Z7tLyPGzkrhRQ=;
-        b=d87yD+1kouFYzPVkxleSzUR9pHGjYbbL5S262viYuyJ3W03i0Py0TM9o1TQSPEUgG1
-         0ftfnMpGjWfx0y4vJQ3Fy8Qf8SOStIArBwO3e91vtLNUNxMOagjPQfo2H2T+JJ2YaIgo
-         WYer+u9v2SFWV7trk5eptsVmYcgF7sW2zTuff/AlanzWF2VTLp711OJNjIiUlZk288lO
-         WBsGkVRB9F8vrFWWE7s9Fd5W5L21BzsxzjpTDV/eqzDueWCMSqR1q7yvJW3uDNb5PwJ9
-         5qPel/E/x0h47hXQBmgYHmJzSHqbeUATBhtl3/ocEfOFyskimHMLJVUwGh8j8U768raw
-         9xZw==
-X-Forwarded-Encrypted: i=1; AJvYcCX3L5yfHfymuL+SjnWHO3t6ib+gm7GW+I+WYBXz/M1mWFtVWSyXkMSG51XtcjA0uEC01CSorC8XLgNm@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywl9mV3r7bQEHrWM3p2dF5Nuod0CqorHwkN1oNOlzpI/PIOqtCz
-	s7TNNjNd+CHGAIdBMTHh9AOp/lUHwwiDJKqFekRKNbQ5XRYXXUj+TQFcBEIk23a4DlloEvi1eLK
-	3sfGddI1qldE7tLAENv7yDJRrNX9Aem2W5rTBY1fNNK4BA301sDv7cvDljNk=
-X-Gm-Gg: ATEYQzwGLBOHoVVknDKuvUo9iQU9srUeCar/YOddonHzuRlOq98eSht7tkCbW8Eye9j
-	YyjHIMvTowjhO0WbEhgUa3gOmwHZoK9ArxQKb+pCst5czmgPxc6olS9l9AfC+AMA9xYm/0WrKiq
-	PlxcnJU6XFdC5RZh0kIT1KfG6d72NLb9ueNxf8Gr+qrWpCEbDTDQQfAtyGK5lAdhISVqUBkgaew
-	HLDD/LLAhuH49GF3u4hwWQLU9dcVdPtCsQq5fwWahaEXQT/v0veBZ3MBl1fEBrwU29MWA+FjFWf
-	7nzEvCNEFuK1bgFkwoBzSLjeDCOlyfdHadcsUlb6486jh2k67N36IYLOMbMcNMolnoJxfjDFqaY
-	H94F/76EixVMut0CXN0bCCd3Jb3TZgctm
-X-Received: by 2002:a05:620a:bc6:b0:8cb:50d6:18be with SMTP id af79cd13be357-8cbbcf5fcf3mr351656385a.18.1772063082595;
-        Wed, 25 Feb 2026 15:44:42 -0800 (PST)
-X-Received: by 2002:a05:620a:bc6:b0:8cb:50d6:18be with SMTP id af79cd13be357-8cbbcf5fcf3mr351647085a.18.1772063081985;
-        Wed, 25 Feb 2026 15:44:41 -0800 (PST)
+        bh=Q1k2aRLcgmydoMd1dEiHPTc9xxnOTAMtx9b+CM6PXh0=;
+        b=R0LYJlcfEvu5LJgjuwcBI3rendoGYMnG691OT8cZyhPO3yyhuqaJjbeALavykcLzKs
+         KWBt6TmwQ6O103dPB2eXKyFgisivc875gbSOMHU69XirEDjIYYIhm1mA/Cjs4WJm2zcK
+         HLeIkoosgKEN7eR6UhAragWazlOO/JX4MojfpiuQHiT/tGYXob71ng822K5fXrFlZRnh
+         HUmrK6ob7eFM6tUudEgTbiGFXWMLdaYQE14xaSjonDbVocDV7QJHifuxcudi9VaDKTso
+         CFLdbGXTMbGuG43N/1AmmtHKxGu69pKAcU8P/MDdm+YdYnX4XN+PI2eEtUvE683KhvZm
+         P7aQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXQ65NJSBnpMbD4qnIX3UPbzbj12lyW+kxot+6VtFrmay1t2zuHlP1+HKvxTAR7sl44vmRiu0CVguSV@vger.kernel.org
+X-Gm-Message-State: AOJu0YzAI6bz09k1fdNZrCLlO1M9JJ5AY7JHo8uo4XEMOp0RtmykJz99
+	BOtvGzmZBc+HV0ovdTZNw5wU+2dmW/kEDBWH1OmA0lxMfqJQruus05eT+944i1Wv0eqCzbWt/UX
+	Gfhxa2ixG5ArDxPbT/YF8F1L9a0NXI/sPceV8bmMkZS7QhaZil+YFXlgS5c8=
+X-Gm-Gg: ATEYQzwpf5FdpmeiIFXz+B5S+Ka+vs9yoWUDFLaZO5PNmyjRdoAgQ4C5AROJ0yyeZ2Y
+	Asf8OiQwGg4abuG+56bvpdawtsT2J/exXxrYeblmvIhgYAvWYbs7K5CDyRiKqbCWivpOSOplAD8
+	u7zWQt63rQanGU3APCMvuSavyzGLCEdHot5wl8YUyS5Auygygm4dpNOnmpCL3zOG29DlOzo+5Nu
+	bSyvPp71AUMeuyc7xkD1Ry1jqw5Do/EstZ02UtYquLRxHPXTqj0l7y8EBX8cRlsb2pVLYcWkktl
+	/L9OM0PuC+0Cd44dz9yWiiRWHiCu5Mt9tcT5VEVituiodq40LpkkQ7EuBI6Mozl7RDG4IiUap10
+	7gYRR0O+htYVDRksUk2YdgdKw5/Q948/9
+X-Received: by 2002:a05:6214:21ea:b0:895:7864:f69a with SMTP id 6a1803df08f44-89979eedb2amr279116786d6.46.1772063085050;
+        Wed, 25 Feb 2026 15:44:45 -0800 (PST)
+X-Received: by 2002:a05:6214:21ea:b0:895:7864:f69a with SMTP id 6a1803df08f44-89979eedb2amr279115656d6.46.1772063084415;
+        Wed, 25 Feb 2026 15:44:44 -0800 (PST)
 Received: from [127.0.1.1] ([216.158.158.246])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-899c738d80bsm3357606d6.41.2026.02.25.15.44.39
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-899c738d80bsm3357606d6.41.2026.02.25.15.44.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Feb 2026 15:44:41 -0800 (PST)
+        Wed, 25 Feb 2026 15:44:43 -0800 (PST)
 From: Tal Zussman <tz2294@columbia.edu>
-Date: Wed, 25 Feb 2026 18:44:25 -0500
-Subject: [PATCH v2 1/4] mm: Remove stray references to struct pagevec
+Date: Wed, 25 Feb 2026 18:44:26 -0500
+Subject: [PATCH v2 2/4] fs: Remove unncessary pagevec.h includes
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -76,7 +76,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260225-pagevec_cleanup-v2-1-716868cc2d11@columbia.edu>
+Message-Id: <20260225-pagevec_cleanup-v2-2-716868cc2d11@columbia.edu>
 References: <20260225-pagevec_cleanup-v2-0-716868cc2d11@columbia.edu>
 In-Reply-To: <20260225-pagevec_cleanup-v2-0-716868cc2d11@columbia.edu>
 To: David Howells <dhowells@redhat.com>,
@@ -145,104 +145,219 @@ Cc: Andreas Dilger <adilger.kernel@dilger.ca>,
         linux-nilfs@vger.kernel.org, linux-xfs@vger.kernel.org,
         cgroups@vger.kernel.org, Tal Zussman <tz2294@columbia.edu>
 X-Mailer: b4 0.14.3-dev-d7477
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1772063077; l=2123;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1772063077; l=5646;
  i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=86tTrdoOnAn/xo3cekp1XuyRqb4HRFNzoiKbv0I1ps4=;
- b=0ov9kj7XAzT78Flm+u7++Q86OOmjR2OlGmMBdpiKWPN48FTWijPSg85hjs6TZBPJjXCzDYWnL
- klFYhD+F1AcALAkegHF4EiMet5ndziKuMEd8gAJMsRTj0W6VnFL6fSO
+ bh=gYLxuKpY2d3qKNQKxivfKoBOKiAm81D0oxjvJeYJzNU=;
+ b=0+QFbVO+EVyu3LcoNlltI7+0YkfiOzPAREHRqHF+/vRJBoggqFw4V6DeYqoYE35EGaZ0z2yM5
+ xg7WRatCQDeAtdc5+Wn8weZAkk+lk9tyDOPYyXE2pnCtDyQNUNup7UV
 X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
  pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjI1MDIyNyBTYWx0ZWRfX8nhmjnZCcpfI
- 64iHCQ7Vwurtvx4A+LqsGSbosjkYnNAEbuH5tuoYh75m7qb/XILuV1awZa1hfTAfXNhtnu9ik5y
- 5tkLzMY+ZeINS+HdJpjw4rm+atvsncHqULD3BkPzV9kvXKmjSGQsJvJZU5w2WBVw+1pQ9NTsBwZ
- z1UdAa1/XH/N9BI07508hZZKU/D7R0R7Kttjq6oKrKd3AfcO1x606H2UqFxeccGDUAd3K2+pRti
- 3ykeV9Bnrma+u3GcHDZAd6ZUkBGv0nuNkDkW/v7nn1VKg358BFFPT4cZxAMkbMhRMVNNkp96VvI
- qWd5rVgOylqOzUxR8cFxiNwVqb6+bYc+OORFYZi2RFQHrBolMLWjk8Ubk2uK5CtJqlzTcikoV3D
- j9AWL+ucM0xkxKH3jS53zRlm2WplF7tufNxY97EY/+86cYSvZuFErcLdqsaSgKMT1rzBuiFEPRj
- 9PqBDaAb36vtbCf973A==
-X-Proofpoint-GUID: ShJTwj8j447pTLxhIM1Dl8kmP_QO56wo
-X-Authority-Analysis: v=2.4 cv=DvVbOW/+ c=1 sm=1 tr=0 ts=699f896b cx=c_pps
- a=hnmNkyzTK/kJ09Xio7VxxA==:117 a=mD05b5UW6KhLIDvowZ5dSQ==:17
+X-Proofpoint-ORIG-GUID: X6G4fzqhwe5L5DnWLw9sfHlR0103rspf
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjI1MDIyNyBTYWx0ZWRfX6gQLGjfSHpDN
+ vYlNuGWfpfYgOrUh9SU8aVZOHPQRgHh/Lj9YIw4WNwi5kmd59AMOyEwKnV5EiG0HzRJOXKIpKO0
+ BMtVBat70fB5sWR0ayiM1sK3T29Mwy2/fV/ReMf/90WTe8E2bavtj7ZTd9O60taGQ8l6LqKCdTL
+ E8vtdhkhJXFfwIpDoOYx9XGJy31ZW4p0gNXQsAH1bE6AHgijqI6LwQ9WGsAovsiGuXu9/ychy3N
+ EDLWJuv+m3Vxgg2v733bmHU+tOmjdLHuiy4fPQS30FLmOCGgFtee8+LWhBZq5/gh2Ix/1AwiP6r
+ XJLTC4geGLUBZmBJvq/kT9a2SPPGe2k0g81aWOZ0kEmvMHvloBYHmu4NnPtkkcbXw8lkQZY2BfD
+ mjAtuhaTykCjRK9pulwQXCFd7HM0JjQNgwyXOyhJlMRpyI+uJwG3RoAXN+pYseHm8D0QaW5wB1X
+ LuXVi260n2rhuGpwq7A==
+X-Proofpoint-GUID: X6G4fzqhwe5L5DnWLw9sfHlR0103rspf
+X-Authority-Analysis: v=2.4 cv=Q9DfIo2a c=1 sm=1 tr=0 ts=699f896e cx=c_pps
+ a=UgVkIMxJMSkC9lv97toC5g==:117 a=mD05b5UW6KhLIDvowZ5dSQ==:17
  a=IkcTkHD0fZMA:10 a=HzLeVaNsDn8A:10 a=x7bEGLp0ZPQA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=usPcmh10W0ubT8QP8_c3:22
- a=JfrnYn6hAAAA:8 a=VwQbUJbxAAAA:8 a=KlNbpEHeXbYZISPg4o8A:9 a=QEXdDO2ut3YA:10
- a=PEH46H7Ffwr30OY-TuGO:22 a=1CNFftbPRP8L7MoqJWF3:22
-X-Proofpoint-ORIG-GUID: ShJTwj8j447pTLxhIM1Dl8kmP_QO56wo
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=svvvyxlR1OQQkelhaPoB:22
+ a=_wBAnLaIECucki5onNwA:9 a=QEXdDO2ut3YA:10 a=1HOtulTD9v-eNWfpl4qZ:22
 X-Proofpoint-Virus-Version: vendor=nai engine=6800 definitions=11712
  signatures=596818
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 suspectscore=0 bulkscore=10 impostorscore=10
- malwarescore=0 adultscore=0 lowpriorityscore=10 phishscore=0 clxscore=1011
- spamscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.22.0-2602130000
- definitions=main-2602250227
+ lowpriorityscore=10 bulkscore=10 clxscore=1011 impostorscore=10 adultscore=0
+ priorityscore=1501 phishscore=0 malwarescore=0 suspectscore=0 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2602250227
 
-struct pagevec was removed in commit 1e0877d58b1e ("mm: remove struct
-pagevec"). Remove remaining forward declarations and change
-__folio_batch_release()'s declaration to match its definition.
+Remove unused pagevec.h includes from .c files. These were found with
+the following command:
 
-Reviewed-by: Matthew Wilcox (Oracle) <willy@infradead.org>
-Acked-by: David Hildenbrand (Arm) <david@kernel.org>
-Acked-by: Chris Li <chrisl@kernel.org>
+  grep -rl '#include.*pagevec\.h' --include='*.c' | while read f; do
+  	grep -qE 'PAGEVEC_SIZE|folio_batch' "$f" || echo "$f"
+  done
+
+There are probably more removal candidates in .h files, but those are
+more complex to analyze.
+
 Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 ---
- fs/afs/internal.h       | 1 -
- fs/f2fs/f2fs.h          | 2 --
- include/linux/pagevec.h | 2 +-
- include/linux/swap.h    | 2 --
- 4 files changed, 1 insertion(+), 6 deletions(-)
+ fs/afs/write.c                   | 1 -
+ fs/dax.c                         | 1 -
+ fs/ext4/file.c                   | 1 -
+ fs/ext4/page-io.c                | 1 -
+ fs/ext4/readpage.c               | 1 -
+ fs/f2fs/file.c                   | 1 -
+ fs/mpage.c                       | 1 -
+ fs/netfs/buffered_write.c        | 1 -
+ fs/nfs/blocklayout/blocklayout.c | 1 -
+ fs/nfs/dir.c                     | 1 -
+ fs/ocfs2/refcounttree.c          | 1 -
+ fs/smb/client/connect.c          | 1 -
+ fs/smb/client/file.c             | 1 -
+ 13 files changed, 13 deletions(-)
 
-diff --git a/fs/afs/internal.h b/fs/afs/internal.h
-index 009064b8d661..599353c33337 100644
---- a/fs/afs/internal.h
-+++ b/fs/afs/internal.h
+diff --git a/fs/afs/write.c b/fs/afs/write.c
+index 93ad86ff3345..fcfed9d24e0a 100644
+--- a/fs/afs/write.c
++++ b/fs/afs/write.c
+@@ -10,7 +10,6 @@
+ #include <linux/fs.h>
+ #include <linux/pagemap.h>
+ #include <linux/writeback.h>
+-#include <linux/pagevec.h>
+ #include <linux/netfs.h>
+ #include <trace/events/netfs.h>
+ #include "internal.h"
+diff --git a/fs/dax.c b/fs/dax.c
+index b78cff9c91b3..a5237169b467 100644
+--- a/fs/dax.c
++++ b/fs/dax.c
+@@ -15,7 +15,6 @@
+ #include <linux/memcontrol.h>
+ #include <linux/mm.h>
+ #include <linux/mutex.h>
+-#include <linux/pagevec.h>
+ #include <linux/sched.h>
+ #include <linux/sched/signal.h>
+ #include <linux/uio.h>
+diff --git a/fs/ext4/file.c b/fs/ext4/file.c
+index f1dc5ce791a7..5e02f6cf653e 100644
+--- a/fs/ext4/file.c
++++ b/fs/ext4/file.c
+@@ -27,7 +27,6 @@
+ #include <linux/dax.h>
+ #include <linux/filelock.h>
+ #include <linux/quotaops.h>
+-#include <linux/pagevec.h>
+ #include <linux/uio.h>
+ #include <linux/mman.h>
+ #include <linux/backing-dev.h>
+diff --git a/fs/ext4/page-io.c b/fs/ext4/page-io.c
+index a8c95eee91b7..98da200d11c8 100644
+--- a/fs/ext4/page-io.c
++++ b/fs/ext4/page-io.c
+@@ -16,7 +16,6 @@
+ #include <linux/string.h>
+ #include <linux/buffer_head.h>
+ #include <linux/writeback.h>
+-#include <linux/pagevec.h>
+ #include <linux/mpage.h>
+ #include <linux/namei.h>
+ #include <linux/uio.h>
+diff --git a/fs/ext4/readpage.c b/fs/ext4/readpage.c
+index 830f3b8a321f..3c7aabde719c 100644
+--- a/fs/ext4/readpage.c
++++ b/fs/ext4/readpage.c
+@@ -43,7 +43,6 @@
+ #include <linux/mpage.h>
+ #include <linux/writeback.h>
+ #include <linux/backing-dev.h>
+-#include <linux/pagevec.h>
+ 
+ #include "ext4.h"
+ #include <trace/events/ext4.h>
+diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
+index c8a2f17a8f11..c6b6a1465d08 100644
+--- a/fs/f2fs/file.c
++++ b/fs/f2fs/file.c
+@@ -17,7 +17,6 @@
+ #include <linux/compat.h>
+ #include <linux/uaccess.h>
+ #include <linux/mount.h>
+-#include <linux/pagevec.h>
+ #include <linux/uio.h>
+ #include <linux/uuid.h>
+ #include <linux/file.h>
+diff --git a/fs/mpage.c b/fs/mpage.c
+index 7dae5afc2b9e..e5285fbfcf09 100644
+--- a/fs/mpage.c
++++ b/fs/mpage.c
+@@ -28,7 +28,6 @@
+ #include <linux/mm_inline.h>
+ #include <linux/writeback.h>
+ #include <linux/backing-dev.h>
+-#include <linux/pagevec.h>
+ #include "internal.h"
+ 
+ /*
+diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
+index 22a4d61631c9..05ea5b0cc0e8 100644
+--- a/fs/netfs/buffered_write.c
++++ b/fs/netfs/buffered_write.c
+@@ -10,7 +10,6 @@
+ #include <linux/mm.h>
+ #include <linux/pagemap.h>
+ #include <linux/slab.h>
+-#include <linux/pagevec.h>
+ #include "internal.h"
+ 
+ static void __netfs_set_group(struct folio *folio, struct netfs_group *netfs_group)
+diff --git a/fs/nfs/blocklayout/blocklayout.c b/fs/nfs/blocklayout/blocklayout.c
+index cb0a645aeb50..11f9f69cde61 100644
+--- a/fs/nfs/blocklayout/blocklayout.c
++++ b/fs/nfs/blocklayout/blocklayout.c
+@@ -36,7 +36,6 @@
+ #include <linux/namei.h>
+ #include <linux/bio.h>		/* struct bio */
+ #include <linux/prefetch.h>
+-#include <linux/pagevec.h>
+ 
+ #include "../pnfs.h"
+ #include "../nfs4session.h"
+diff --git a/fs/nfs/dir.c b/fs/nfs/dir.c
+index 2402f57c8e7d..0d276441206b 100644
+--- a/fs/nfs/dir.c
++++ b/fs/nfs/dir.c
+@@ -32,7 +32,6 @@
+ #include <linux/nfs_fs.h>
+ #include <linux/nfs_mount.h>
+ #include <linux/pagemap.h>
+-#include <linux/pagevec.h>
+ #include <linux/namei.h>
+ #include <linux/mount.h>
+ #include <linux/swap.h>
+diff --git a/fs/ocfs2/refcounttree.c b/fs/ocfs2/refcounttree.c
+index c1cdececdfa4..b4acd081bbc4 100644
+--- a/fs/ocfs2/refcounttree.c
++++ b/fs/ocfs2/refcounttree.c
 @@ -31,7 +31,6 @@
- 
- #define AFS_CELL_MAX_ADDRS 15
- 
--struct pagevec;
- struct afs_call;
- struct afs_vnode;
- struct afs_server_probe;
-diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
-index bb34e864d0ef..d9e8531a5301 100644
---- a/fs/f2fs/f2fs.h
-+++ b/fs/f2fs/f2fs.h
-@@ -28,8 +28,6 @@
- #include <linux/fscrypt.h>
- #include <linux/fsverity.h>
- 
--struct pagevec;
--
- #ifdef CONFIG_F2FS_CHECK_FS
- #define f2fs_bug_on(sbi, condition)	BUG_ON(condition)
- #else
-diff --git a/include/linux/pagevec.h b/include/linux/pagevec.h
-index 63be5a451627..007affabf335 100644
---- a/include/linux/pagevec.h
-+++ b/include/linux/pagevec.h
-@@ -93,7 +93,7 @@ static inline struct folio *folio_batch_next(struct folio_batch *fbatch)
- 	return fbatch->folios[fbatch->i++];
- }
- 
--void __folio_batch_release(struct folio_batch *pvec);
-+void __folio_batch_release(struct folio_batch *fbatch);
- 
- static inline void folio_batch_release(struct folio_batch *fbatch)
- {
-diff --git a/include/linux/swap.h b/include/linux/swap.h
-index 0effe3cc50f5..4b1f13b5bbad 100644
---- a/include/linux/swap.h
-+++ b/include/linux/swap.h
-@@ -20,8 +20,6 @@ struct notifier_block;
- 
- struct bio;
- 
--struct pagevec;
--
- #define SWAP_FLAG_PREFER	0x8000	/* set if swap priority specified */
- #define SWAP_FLAG_PRIO_MASK	0x7fff
- #define SWAP_FLAG_DISCARD	0x10000 /* enable discard for swap */
+ #include <linux/blkdev.h>
+ #include <linux/slab.h>
+ #include <linux/writeback.h>
+-#include <linux/pagevec.h>
+ #include <linux/swap.h>
+ #include <linux/security.h>
+ #include <linux/string.h>
+diff --git a/fs/smb/client/connect.c b/fs/smb/client/connect.c
+index 33dfe116ca52..9e57812b7b95 100644
+--- a/fs/smb/client/connect.c
++++ b/fs/smb/client/connect.c
+@@ -20,7 +20,6 @@
+ #include <linux/delay.h>
+ #include <linux/completion.h>
+ #include <linux/kthread.h>
+-#include <linux/pagevec.h>
+ #include <linux/freezer.h>
+ #include <linux/namei.h>
+ #include <linux/uuid.h>
+diff --git a/fs/smb/client/file.c b/fs/smb/client/file.c
+index 18f31d4eb98d..853ce1817810 100644
+--- a/fs/smb/client/file.c
++++ b/fs/smb/client/file.c
+@@ -15,7 +15,6 @@
+ #include <linux/stat.h>
+ #include <linux/fcntl.h>
+ #include <linux/pagemap.h>
+-#include <linux/pagevec.h>
+ #include <linux/writeback.h>
+ #include <linux/task_io_accounting_ops.h>
+ #include <linux/delay.h>
 
 -- 
 2.39.5
