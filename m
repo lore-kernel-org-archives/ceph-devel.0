@@ -1,315 +1,179 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A6623AE6E5
-	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2026 13:56:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.133.124
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772114200; cv=pass; b=aC4ktcZb0C+EH0FN+sD+ILwAqRWbLIpSW31hoPT+e/XhfUCfuuq2R27fIuZs0wCA2VN+bdcobbsvuBYBVuGcIY48mhI9tQmcCFZbnfW3k9f0fcOOC+qmK2TB9rzIMoBwFF3HiSqaIQx9kan3VaZZIbIVj5aAVsRK1TM15OxTjz0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772114200; c=relaxed/simple;
-	bh=1y9G44eykZXCRMbqWo4Gbo0Fu3X9DE/FOzp00Uhpy6M=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VL1SdaO5b4fcOCqj84xKaWmiU1E4MYoUIYytlhtBygiW4VH87K/lRcazX3AwaFVrLBg+LdICwY+TyjTZ2vsg1ULOysBt6wK369CW8vXCQZpv62l0yHDk6shj9YE2MRvDbtI0uAGnVA7UmxfjS/2luyTvXrIJ2R9aK8lpAPkfrS4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SiToQ7vX; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=S6AMp2V5; arc=pass smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA9BC314D0F
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2026 14:44:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772117067; cv=none; b=Munm+OgWRo4NrxO7Bl9DByoKbEhhGoOAnIP/46/aGbqZ8sMLXOUeWV2D4IliNZvuvHfQjyGA1fU3uC/FyuzYQ+T+FiCoJhkpZ5EoyijHaehXktjd4Ij/V5B6RvqbP+giCbIfdWK20Imsr7HYf+WGPhtYd5KjDhZiYG+qDp5vOJU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772117067; c=relaxed/simple;
+	bh=IOkb870AzFXpUSPzOPIAyJn2XjVle4fInoqhUpwYLts=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=dNfQSDYwUtSX8k+7h09VPEojADWLLzdDeBHuWRxAGFeT1dbHEAjNMdAde/CI/soJficCKM73s5xaix2s/u4ivJN5u0sQwhxUtvSeOVl/5vznkInogRjRNcUIUNGvuPHx3Es30W2mJonLUXYCptmJQFNwBv6FSb2h0nm9W54Ukpk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=iVl87FWL; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SiToQ7vX";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="S6AMp2V5"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1772114193;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
-	b=SiToQ7vXGoBXC77t76Rjevwkqo6gKLxzJ3y2eS1Ji2V+qfvg4z4eiL3lnyDpRQtTTduWWM
-	xq7SGxPkK6f6w2Yx4E1s+Q+5hd6NKBdw+fNTRmsbivAETW5cK86tvoUhSjEkIr4gfga36T
-	C4uKaJlVArDObLcLXffWhy5bL6vAbv0=
-Received: from mail-vs1-f72.google.com (mail-vs1-f72.google.com
- [209.85.217.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-494-FC_9ezu0NAunEEsK5jG3Sw-1; Thu, 26 Feb 2026 08:56:32 -0500
-X-MC-Unique: FC_9ezu0NAunEEsK5jG3Sw-1
-X-Mimecast-MFC-AGG-ID: FC_9ezu0NAunEEsK5jG3Sw_1772114191
-Received: by mail-vs1-f72.google.com with SMTP id ada2fe7eead31-5ff0eb3ff4cso1008093137.3
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2026 05:56:31 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772114191; cv=none;
-        d=google.com; s=arc-20240605;
-        b=CtKeM4C9nF+J5vamaNRcZMkaWiJbZmS/j8jFaGm9kpQtMONJ3xfQqVIsZZT/v0Ew6j
-         RTHkvySxWP40bAEcGdJvEmtfVdXQbGdVT2RLuiqfqZEbYSnulkHL2jGfsguzZInNU14f
-         vvjIjmBIMdfqqR0xyHCxbSOMH/EbdfgHzaTc1tciVj7vVXnYJfQRrh/rMZT+tVtOLiNe
-         l4U/PiDKO6nPJYBTYaqQ+gsMM97e++JvHDS/mKiIaOSYdClDPoUDW9ONYHGVV3Nz4n8T
-         pXZX17tAC1hQujDU2rAY1Vh7o/IGNsMEhLzEW8O+TF1XYVslqTlztetg+5vSPA/CyxBL
-         51OA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
-        fh=8l0u/IMevTe27ybXs5OlkEsvMOknoS1EIIe0cqMmo1Y=;
-        b=OxS67En+JShBElKQYPayh6fJ7ASMvERWZl6KBf96GsYW//Zj7XNoA4qxitIloN5s8V
-         tOmrgfyLQxVPpKhKjAj+n8/IMHYlYkfmrQdA2p0Rjcmo/vO2xpmqPl/TY8ll2PZELxy+
-         HkBFV6tUHEcrqz+xHf9kGNln4YKbIbVALKZdA2EAfk8B0+PEQiyDxSxge0WsntWo9jLL
-         yU6xB0ByoOa8XsOtLfRRRkzOFrfudDyO0xRKBHxbaig2FhV/HQwyG2gpaQjvE/KX4exG
-         MF3J9HRGFkHzoaQkuxBS45DMYFOYuo906IlfTeTZmeYzax7xbIhLvSrG3s160chk4DFX
-         yqNQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1772114191; x=1772718991; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
-        b=S6AMp2V5pKKAKZtEwUynfZQ8zn3wFGhPrHl8vU68pmwPdpRDyzHREtQfB/t2jtuc41
-         mTUitO2wHhOkhN7Kqr4GA+Uk0plS1SskrbZNIemBsHrX3s9nXeKuP63ymmF6nxbgu7dj
-         Yly8inJ3mkwzagpvIA+bV+awnCzCjRz6dxXD1mywGjUrrfTlOmZtPfi7JOZhC95A9+lQ
-         CVFZY9XX6H6K4Ham0aS66SwZFdpJBiQMTn4U+XN9Iq1Gdf9my6EyTlu3YxjQDgUsvEfM
-         A/+H2ufomE7lFl5AxHHYvwzbS51Op85zKJKqN8IHfMho7x4IJbm6Mc7ovtyhm2tmCChG
-         X2GQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772114191; x=1772718991;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
-        b=wgGNk3rrt/8LxN/hphnRa72+d4i24fIlNRJHmdzh/Wzty8MPG0gogdgRbGuFINuCMG
-         dR2H295DW+3drOFppuoeflt+14bQDRRcXub9EnQDUX+rHzdfsfRkBgtAPhCdUIu4hwS7
-         beGVDk3vrMI90Dq+6kHzW4HpvK+9cFbKTYGfr+0uhRghF893sg2+P9nLyg9jc+dl+0ky
-         +hhZuopxj1zxwqfSMhKdYxGwhTlinuX9FRLPJFmfxAclnUuMEG7gEwMk1PVNMrLFcZND
-         4MGUIaavmfFLIpuAr2IxPh48E5l4tWQavwpPzAd0rBbXxuvCDFROpf29Hp5glyogesH0
-         yRdw==
-X-Gm-Message-State: AOJu0YxzA6cje9I5WVSJydqLfw7Rp0dGCuXW0zgLd7QDXrI7nEkwdGJO
-	lQmjZoflVhLkIDdETAr3DKSVrhxZGGlL1LD7uT1g5tHdYOjOsbX8mjKmvGp1dlPuKRhqOKsTBwY
-	IoawYhCY2zt+5HQ3C9Q0uKtgcjhEYH9vU7l06Bfgrp6yYw2kimzQQsgnqpbg8seCCACaxk8SPiV
-	MbDJ79A0gpQvyB1XK4PtDkEQdXFwcaXBwZwl044g==
-X-Gm-Gg: ATEYQzzBl22BCBsoVqyoMkibf5/akk9aSDiR8+hMQlrrq1hYCZ+wbJ9DyHjRSp0m8PT
-	dRL3gCvgx+A2RANuo7/yvVyBUEx/8h0BHbDl8D3kFrlkbMkfE4EB6pK7N2+zCrrrRrdOyJSeRQr
-	Xkp0xy41OVgAFWe1uxryplBne8kkm+h8ONOMq6HAAuUefMxtcG6o0wMnwczx1oqX5zBzSTN48/o
-	RFMvQT+DCLW3YtTfbTxbzti
-X-Received: by 2002:a05:6102:3a09:b0:5ff:20c5:cd6 with SMTP id ada2fe7eead31-5ff20c51797mr830109137.18.1772114191184;
-        Thu, 26 Feb 2026 05:56:31 -0800 (PST)
-X-Received: by 2002:a05:6102:3a09:b0:5ff:20c5:cd6 with SMTP id
- ada2fe7eead31-5ff20c51797mr830098137.18.1772114190749; Thu, 26 Feb 2026
- 05:56:30 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="iVl87FWL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1772117055; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=IOkb870AzFXpUSPzOPIAyJn2XjVle4fInoqhUpwYLts=;
+ b=iVl87FWL0eNO4r/XZiogZv47trKCn3U6U3uBq0rTGeeSU/r7bm4P0gukqTG3AJNXMV1Rr
+ j43S38IYRwin4U9gxF/3cKtatmeE3kz1+i9s8/sJ37TxZZ7fvbCnF109icsRJZtexQC0Vbr
+ lhgMRfY0Hna8gataM+0Mn4BRitpEVkz2j4ijD4vFMCcNiTXXzH8hP8WglEanXMC6BcRaEuf
+ B5kL/8R9p6yWaBP8xEs8NT290rdCyOA93AOS7/1oQ+vCTHhPhQODPn1k+pmdamscwZqYzJO
+ KXb7d84qUqQExrxjmRb4sRz3dXmE8DA8btITTvjqippmmv1zeJd6ddmc38NQ==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id C45835FB4D;
+	Thu, 26 Feb 2026 15:44:14 +0100 (CET)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 6A0EA5FB4E;
+	Thu, 26 Feb 2026 15:44:14 +0100 (CET)
+Message-ID: <06e8427f-b42f-405a-9f2e-26b73763d3be@tu-ilmenau.de>
+Date: Thu, 26 Feb 2026 15:44:14 +0100
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260225125907.53851-1-amarkuze@redhat.com> <20260225125907.53851-2-amarkuze@redhat.com>
- <9687495100c02050c09c503fad1b840ddbfa313c.camel@redhat.com>
-In-Reply-To: <9687495100c02050c09c503fad1b840ddbfa313c.camel@redhat.com>
-From: Alex Markuze <amarkuze@redhat.com>
-Date: Thu, 26 Feb 2026 15:56:20 +0200
-X-Gm-Features: AaiRm50aLyjCETwKDojvUJBPiNoCYBibDGxffgYMF-j2AYy83taMK9QDUr26TaE
-Message-ID: <CAO8a2SinY_+Ysn4Sx30x_mntLOCTLot0x3psU=DdEJCJ=VNJug@mail.gmail.com>
-Subject: Re: [EXTERNAL] [RFC PATCH v1 1/4] ceph: convert inode flags to named
- bit positions
-To: Viacheslav Dubeyko <vdubeyko@redhat.com>
-Cc: ceph-devel@vger.kernel.org, idryomov@gmail.com, 
-	linux-fsdevel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] libceph: Use u32 for non-negative values in
+ ceph_monmap_decode()
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+ "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze
+ <amarkuze@redhat.com>, "slava@dubeyko.com" <slava@dubeyko.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+References: <4d5abe5c-2f93-4359-9aae-38f21ba0485b@tu-ilmenau.de>
+ <297c11fa7f42e2487266ec3c29e581f4ffda022b.camel@ibm.com>
+ <0b58a78f9703e9683ea56a6c2867f95c839d79ba.camel@ibm.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <0b58a78f9703e9683ea56a6c2867f95c839d79ba.camel@ibm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-I think I remember reviewing it, now that you mention it.
-Let's discuss offline, I'll set up a 1x1.
-
-On Wed, Feb 25, 2026 at 10:56=E2=80=AFPM Viacheslav Dubeyko <vdubeyko@redha=
-t.com> wrote:
->
-> On Wed, 2026-02-25 at 12:59 +0000, Alex Markuze wrote:
-> > Define all CEPH_I_* flags as named bit positions with derived
-> > bitmask values, making them usable with test_bit/set_bit/clear_bit.
-> > Previously only CEPH_I_ODIRECT_BIT and CEPH_ASYNC_CREATE_BIT had
-> > named bit positions; the rest were bare bitmask constants.
-> >
->
-> As I remember, I've reworked all constants for having name for every bit.
-> Probably, this patch has ignored and it has never been sent to upstream. =
-And I
-> converted pretty everything for using test_bit/set_bit/clear_bit. :) You =
-did
-> this work again. :)
->
+On 25.02.26 8:56 PM, Viacheslav Dubeyko wrote:
+> On Wed, 2026-02-25 at 19:35 +0000, Viacheslav Dubeyko wrote:
+>> On Wed, 2026-02-25 at 09:25 +0100, Raphael Zimmer wrote:
+>>> This patch fixes unnecessary implicit conversions that change signedness 
+>>> of blob_len and num_mon in ceph_monmap_decode().
+>>> Currently blob_len and num_mon are (signed) int variables. They are used 
+>>> to hold values that are always non-negative and get assigned in 
+>>> ceph_decode_32_safe(), which is meant to assign u32 values. Both 
+>>> variables are subsequently used as unsigned values, and the value of 
+>>> num_mon is further assigned to monmap->num_mon, which is of type u32. 
+>>> Therefore, both variables should be of type u32. This is especially 
+>>> relevant for num_mon. If the value read from the incoming message is 
+>>> very large, it is interpreted as a negative value, and the check for 
+>>> num_mon > CEPH_MAX_MON in line 117 does not catch it. This leads to the 
+>>> attempt to allocate a very large chunk of memory in line 120, which will 
+>>
+>> After some time, nobody will be able to follow which line 117 and line 120 you
+>> mean here. :)
+>>
+>>> most likely fail. In this case, an unnecessary attempt to allocate 
+>>> memory is performed, and -ENOMEM is returned instead of -EINVAL.
+>>>
+>>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+>>> ---
+>>>   net/ceph/mon_client.c | 6 +++---
+>>>   1 file changed, 3 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>>> index fa8dd2a20f7d..94a7a82ca475 100644
+>>> --- a/net/ceph/mon_client.c
+>>> +++ b/net/ceph/mon_client.c
+>>> @@ -72,8 +72,8 @@ static struct ceph_monmap *ceph_monmap_decode(void 
+>>> **p, void *end, bool msgr2)
+>>>          struct ceph_monmap *monmap = NULL;
+>>>          struct ceph_fsid fsid;
+>>>          u32 struct_len;
+>>> -       int blob_len;
+>>> -       int num_mon;
+>>> +       u32 blob_len;
+>>> +       u32 num_mon;
+>>>          u8 struct_v;
+>>>          u32 epoch;
+>>>          int ret;
+>>> @@ -112,7 +112,7 @@ static struct ceph_monmap *ceph_monmap_decode(void 
+>>> **p, void *end, bool msgr2)
+>>>          }
+>>>          ceph_decode_32_safe(p, end, num_mon, e_inval);
+>>>
+>>> -       dout("%s fsid %pU epoch %u num_mon %d\n", __func__, &fsid, epoch,
+>>> +       dout("%s fsid %pU epoch %u num_mon %u\n", __func__, &fsid, epoch,
+>>>               num_mon);
+>>>          if (num_mon > CEPH_MAX_MON)
+>>>                  goto e_inval;
+>>
+>> Looks good.
+>>
+>> Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+>>
+>>
+> 
+> I have troubles to apply your patch on 6.19 kernel version:
+> 
+> git am 
+> ./v2_20260225_raphael_zimmer_libceph_use_u32_for_non_negative_values_in_ceph_mon
+> map_decode.mbx
+> Applying: libceph: Use u32 for non-negative values in ceph_monmap_decode()
+> error: corrupt patch at line 10
+> Patch failed at 0001 libceph: Use u32 for non-negative values in
+> ceph_monmap_decode()
+> hint: Use 'git am --show-current-patch=diff' to see the failed patch
+> hint: When you have resolved this problem, run "git am --continue".
+> hint: If you prefer to skip this patch, run "git am --skip" instead.
+> hint: To restore the original branch and stop patching, run "git am --abort".
+> hint: Disable this message with "git config set advice.mergeConflict false"
+> 
+> Which kernel version do you have? Maybe, your email server corrupted the patch?
+> 
 > Thanks,
 > Slava.
->
-> > Convert CEPH_I_ERROR_WRITE and CEPH_I_ERROR_FILELOCK usage sites
-> > to use atomic bit operations (test_bit, set_bit, clear_bit) via
-> > the new _BIT constants.
-> >
-> > This is preparation for the client reset feature which needs
-> > test_bit() on CEPH_I_ERROR_FILELOCK_BIT in reconnect paths.
-> >
-> > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
-> > ---
-> >  fs/ceph/locks.c      |  8 +++----
-> >  fs/ceph/mds_client.c |  3 ++-
-> >  fs/ceph/super.h      | 54 +++++++++++++++++++++++++++-----------------
-> >  3 files changed, 38 insertions(+), 27 deletions(-)
-> >
-> > diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-> > index dd764f9c64b9..2f21574dfb99 100644
-> > --- a/fs/ceph/locks.c
-> > +++ b/fs/ceph/locks.c
-> > @@ -58,7 +58,7 @@ static void ceph_fl_release_lock(struct file_lock *fl=
-)
-> >       if (atomic_dec_and_test(&ci->i_filelock_ref)) {
-> >               /* clear error when all locks are released */
-> >               spin_lock(&ci->i_ceph_lock);
-> > -             ci->i_ceph_flags &=3D ~CEPH_I_ERROR_FILELOCK;
-> > +             clear_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
-> >               spin_unlock(&ci->i_ceph_lock);
-> >       }
-> >       fl->fl_u.ceph.inode =3D NULL;
-> > @@ -272,9 +272,8 @@ int ceph_lock(struct file *file, int cmd, struct fi=
-le_lock *fl)
-> >               wait =3D 1;
-> >
-> >       spin_lock(&ci->i_ceph_lock);
-> > -     if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
-> > +     if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags))
-> >               err =3D -EIO;
-> > -     }
-> >       spin_unlock(&ci->i_ceph_lock);
-> >       if (err < 0) {
-> >               if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(f=
-l))
-> > @@ -332,9 +331,8 @@ int ceph_flock(struct file *file, int cmd, struct f=
-ile_lock *fl)
-> >       doutc(cl, "fl_file: %p\n", fl->c.flc_file);
-> >
-> >       spin_lock(&ci->i_ceph_lock);
-> > -     if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
-> > +     if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags))
-> >               err =3D -EIO;
-> > -     }
-> >       spin_unlock(&ci->i_ceph_lock);
-> >       if (err < 0) {
-> >               if (lock_is_unlock(fl))
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index 23b6d00643c9..28bb27b09b40 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -3610,7 +3610,8 @@ static void __do_request(struct ceph_mds_client *=
-mdsc,
-> >
-> >               spin_lock(&ci->i_ceph_lock);
-> >               cap =3D ci->i_auth_cap;
-> > -             if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE && mds !=3D ca=
-p->mds) {
-> > +             if (test_bit(CEPH_ASYNC_CREATE_BIT, &ci->i_ceph_flags) &&
-> > +                 mds !=3D cap->mds) {
-> >                       doutc(cl, "session changed for auth cap %d -> %d\=
-n",
-> >                             cap->session->s_mds, session->s_mds);
-> >
-> > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> > index 29a980e22dc2..69a71848240f 100644
-> > --- a/fs/ceph/super.h
-> > +++ b/fs/ceph/super.h
-> > @@ -655,23 +655,35 @@ static inline struct inode *ceph_find_inode(struc=
-t super_block *sb,
-> >  /*
-> >   * Ceph inode.
-> >   */
-> > -#define CEPH_I_DIR_ORDERED   (1 << 0)  /* dentries in dir are ordered =
-*/
-> > -#define CEPH_I_FLUSH         (1 << 2)  /* do not delay flush of dirty =
-metadata */
-> > -#define CEPH_I_POOL_PERM     (1 << 3)  /* pool rd/wr bits are valid */
-> > -#define CEPH_I_POOL_RD               (1 << 4)  /* can read from pool *=
-/
-> > -#define CEPH_I_POOL_WR               (1 << 5)  /* can write to pool */
-> > -#define CEPH_I_SEC_INITED    (1 << 6)  /* security initialized */
-> > -#define CEPH_I_KICK_FLUSH    (1 << 7)  /* kick flushing caps */
-> > -#define CEPH_I_FLUSH_SNAPS   (1 << 8)  /* need flush snapss */
-> > -#define CEPH_I_ERROR_WRITE   (1 << 9) /* have seen write errors */
-> > -#define CEPH_I_ERROR_FILELOCK        (1 << 10) /* have seen file lock =
-errors */
-> > -#define CEPH_I_ODIRECT_BIT   (11) /* inode in direct I/O mode */
-> > -#define CEPH_I_ODIRECT               (1 << CEPH_I_ODIRECT_BIT)
-> > -#define CEPH_ASYNC_CREATE_BIT        (12)      /* async create in flig=
-ht for this */
-> > -#define CEPH_I_ASYNC_CREATE  (1 << CEPH_ASYNC_CREATE_BIT)
-> > -#define CEPH_I_SHUTDOWN              (1 << 13) /* inode is no longer u=
-sable */
-> > -#define CEPH_I_ASYNC_CHECK_CAPS      (1 << 14) /* check caps immediate=
-ly after async
-> > -                                          creating finishes */
-> > +#define CEPH_I_DIR_ORDERED_BIT               (0)  /* dentries in dir a=
-re ordered */
-> > +#define CEPH_I_FLUSH_BIT             (2)  /* do not delay flush of dir=
-ty metadata */
-> > +#define CEPH_I_POOL_PERM_BIT         (3)  /* pool rd/wr bits are valid=
- */
-> > +#define CEPH_I_POOL_RD_BIT           (4)  /* can read from pool */
-> > +#define CEPH_I_POOL_WR_BIT           (5)  /* can write to pool */
-> > +#define CEPH_I_SEC_INITED_BIT                (6)  /* security initiali=
-zed */
-> > +#define CEPH_I_KICK_FLUSH_BIT                (7)  /* kick flushing cap=
-s */
-> > +#define CEPH_I_FLUSH_SNAPS_BIT               (8)  /* need flush snapss=
- */
-> > +#define CEPH_I_ERROR_WRITE_BIT               (9)  /* have seen write e=
-rrors */
-> > +#define CEPH_I_ERROR_FILELOCK_BIT    (10) /* have seen file lock error=
-s */
-> > +#define CEPH_I_ODIRECT_BIT           (11) /* inode in direct I/O mode =
-*/
-> > +#define CEPH_ASYNC_CREATE_BIT                (12) /* async create in f=
-light for this */
-> > +#define CEPH_I_SHUTDOWN_BIT          (13) /* inode is no longer usable=
- */
-> > +#define CEPH_I_ASYNC_CHECK_CAPS_BIT  (14) /* check caps after async cr=
-eating finishes */
-> > +
-> > +#define CEPH_I_DIR_ORDERED           (1 << CEPH_I_DIR_ORDERED_BIT)
-> > +#define CEPH_I_FLUSH                 (1 << CEPH_I_FLUSH_BIT)
-> > +#define CEPH_I_POOL_PERM             (1 << CEPH_I_POOL_PERM_BIT)
-> > +#define CEPH_I_POOL_RD                       (1 << CEPH_I_POOL_RD_BIT)
-> > +#define CEPH_I_POOL_WR                       (1 << CEPH_I_POOL_WR_BIT)
-> > +#define CEPH_I_SEC_INITED            (1 << CEPH_I_SEC_INITED_BIT)
-> > +#define CEPH_I_KICK_FLUSH            (1 << CEPH_I_KICK_FLUSH_BIT)
-> > +#define CEPH_I_FLUSH_SNAPS           (1 << CEPH_I_FLUSH_SNAPS_BIT)
-> > +#define CEPH_I_ERROR_WRITE           (1 << CEPH_I_ERROR_WRITE_BIT)
-> > +#define CEPH_I_ERROR_FILELOCK                (1 << CEPH_I_ERROR_FILELO=
-CK_BIT)
-> > +#define CEPH_I_ODIRECT                       (1 << CEPH_I_ODIRECT_BIT)
-> > +#define CEPH_I_ASYNC_CREATE          (1 << CEPH_ASYNC_CREATE_BIT)
-> > +#define CEPH_I_SHUTDOWN                      (1 << CEPH_I_SHUTDOWN_BIT=
-)
-> > +#define CEPH_I_ASYNC_CHECK_CAPS              (1 << CEPH_I_ASYNC_CHECK_=
-CAPS_BIT)
-> >
-> >  /*
-> >   * Masks of ceph inode work.
-> > @@ -691,18 +703,18 @@ static inline struct inode *ceph_find_inode(struc=
-t super_block *sb,
-> >   */
-> >  static inline void ceph_set_error_write(struct ceph_inode_info *ci)
-> >  {
-> > -     if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
-> > +     if (!test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
-> >               spin_lock(&ci->i_ceph_lock);
-> > -             ci->i_ceph_flags |=3D CEPH_I_ERROR_WRITE;
-> > +             set_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
-> >               spin_unlock(&ci->i_ceph_lock);
-> >       }
-> >  }
-> >
-> >  static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
-> >  {
-> > -     if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
-> > +     if (test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
-> >               spin_lock(&ci->i_ceph_lock);
-> > -             ci->i_ceph_flags &=3D ~CEPH_I_ERROR_WRITE;
-> > +             clear_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
-> >               spin_unlock(&ci->i_ceph_lock);
-> >       }
-> >  }
->
+
+I used the current master branch of https://github.com/ceph/ceph-client.
+However, I was able to reproduce your error on it. Apparently, something
+has been corrupted in the email. I will resend another version of it,
+and when doing this, also remove the absolute line numbers from the
+commit description.
+
+Best regards,
+Raphael
 
