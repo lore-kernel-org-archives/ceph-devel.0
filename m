@@ -1,158 +1,315 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 833B43242B8;
-	Thu, 26 Feb 2026 13:20:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772112048; cv=none; b=CgsAKbDnMrCHSeh2c/Fysfd1YF5YSzuowK4Mbzeapmdxe1HnCHgeCN4Xvlccn5M2yQpuofqnUteE6DhfrF16py9T2hs9hImGlUMRXIHM+BEwOzTMBmzUiv14m6N78n5sLmh7jbsDcSezG6DMb7t6Cq3Zx/FeRDgAdPzjCTBynKg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772112048; c=relaxed/simple;
-	bh=kX30qZnPYCqfXb/76euKMO+o8GK+nW5VkIoRhP2qqC8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mPN4K46V0PV7iecIax/bYYig7b+rbGQ94485p+71PmOv509ErU0YXjfugOC39Icymf6wD1YRxNV6FTYoFJvxiGHtTY6rxjVJK/r/AhbmM1JmpY8mecrk7UfRz7/60XgmWfGCVFTwDWyWFdd79v3Q51n0J7joCB6Yd9m5/6pmOBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=N4DCZVGH; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A6623AE6E5
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2026 13:56:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.133.124
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772114200; cv=pass; b=aC4ktcZb0C+EH0FN+sD+ILwAqRWbLIpSW31hoPT+e/XhfUCfuuq2R27fIuZs0wCA2VN+bdcobbsvuBYBVuGcIY48mhI9tQmcCFZbnfW3k9f0fcOOC+qmK2TB9rzIMoBwFF3HiSqaIQx9kan3VaZZIbIVj5aAVsRK1TM15OxTjz0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772114200; c=relaxed/simple;
+	bh=1y9G44eykZXCRMbqWo4Gbo0Fu3X9DE/FOzp00Uhpy6M=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=VL1SdaO5b4fcOCqj84xKaWmiU1E4MYoUIYytlhtBygiW4VH87K/lRcazX3AwaFVrLBg+LdICwY+TyjTZ2vsg1ULOysBt6wK369CW8vXCQZpv62l0yHDk6shj9YE2MRvDbtI0uAGnVA7UmxfjS/2luyTvXrIJ2R9aK8lpAPkfrS4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SiToQ7vX; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=S6AMp2V5; arc=pass smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="N4DCZVGH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AEDABC19422;
-	Thu, 26 Feb 2026 13:20:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772112048;
-	bh=kX30qZnPYCqfXb/76euKMO+o8GK+nW5VkIoRhP2qqC8=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=N4DCZVGHLhr0eBVQJieC3pRRNOvI49z81D2VdJU7sBWh4T/dHMdDAX5hzZ4PpRBNW
-	 BRAq078+anBNSSCiijh5OkpiqIYJfpx4294YGpYpgaRQbbP8SGLtoBU6rh9a1FWmwg
-	 SMHRRRvB40cIlPOpE5aMdYx0zO6bkUuB7JQPjuU0GcV+U39Xp9CP5szIB0aKctpq2g
-	 d+u7N0JiuNZ5PHI+yjzmsfgj+ZfpuRK4a85OFXXDp51NNqss2+suPBeMMB8LBAYrbd
-	 ueLNudkPWiaIkRW48GLkCxgdEUdzQySHZm0VcoWcIPqzcKgaOeXkBDt5p+PnSlggiO
-	 a+Pn9fTs5JkzA==
-Message-ID: <d8d35cd9-464d-46e5-8da6-cb0e45b1e582@kernel.org>
-Date: Thu, 26 Feb 2026 14:20:25 +0100
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SiToQ7vX";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="S6AMp2V5"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1772114193;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
+	b=SiToQ7vXGoBXC77t76Rjevwkqo6gKLxzJ3y2eS1Ji2V+qfvg4z4eiL3lnyDpRQtTTduWWM
+	xq7SGxPkK6f6w2Yx4E1s+Q+5hd6NKBdw+fNTRmsbivAETW5cK86tvoUhSjEkIr4gfga36T
+	C4uKaJlVArDObLcLXffWhy5bL6vAbv0=
+Received: from mail-vs1-f72.google.com (mail-vs1-f72.google.com
+ [209.85.217.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-494-FC_9ezu0NAunEEsK5jG3Sw-1; Thu, 26 Feb 2026 08:56:32 -0500
+X-MC-Unique: FC_9ezu0NAunEEsK5jG3Sw-1
+X-Mimecast-MFC-AGG-ID: FC_9ezu0NAunEEsK5jG3Sw_1772114191
+Received: by mail-vs1-f72.google.com with SMTP id ada2fe7eead31-5ff0eb3ff4cso1008093137.3
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2026 05:56:31 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1772114191; cv=none;
+        d=google.com; s=arc-20240605;
+        b=CtKeM4C9nF+J5vamaNRcZMkaWiJbZmS/j8jFaGm9kpQtMONJ3xfQqVIsZZT/v0Ew6j
+         RTHkvySxWP40bAEcGdJvEmtfVdXQbGdVT2RLuiqfqZEbYSnulkHL2jGfsguzZInNU14f
+         vvjIjmBIMdfqqR0xyHCxbSOMH/EbdfgHzaTc1tciVj7vVXnYJfQRrh/rMZT+tVtOLiNe
+         l4U/PiDKO6nPJYBTYaqQ+gsMM97e++JvHDS/mKiIaOSYdClDPoUDW9ONYHGVV3Nz4n8T
+         pXZX17tAC1hQujDU2rAY1Vh7o/IGNsMEhLzEW8O+TF1XYVslqTlztetg+5vSPA/CyxBL
+         51OA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
+        fh=8l0u/IMevTe27ybXs5OlkEsvMOknoS1EIIe0cqMmo1Y=;
+        b=OxS67En+JShBElKQYPayh6fJ7ASMvERWZl6KBf96GsYW//Zj7XNoA4qxitIloN5s8V
+         tOmrgfyLQxVPpKhKjAj+n8/IMHYlYkfmrQdA2p0Rjcmo/vO2xpmqPl/TY8ll2PZELxy+
+         HkBFV6tUHEcrqz+xHf9kGNln4YKbIbVALKZdA2EAfk8B0+PEQiyDxSxge0WsntWo9jLL
+         yU6xB0ByoOa8XsOtLfRRRkzOFrfudDyO0xRKBHxbaig2FhV/HQwyG2gpaQjvE/KX4exG
+         MF3J9HRGFkHzoaQkuxBS45DMYFOYuo906IlfTeTZmeYzax7xbIhLvSrG3s160chk4DFX
+         yqNQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1772114191; x=1772718991; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
+        b=S6AMp2V5pKKAKZtEwUynfZQ8zn3wFGhPrHl8vU68pmwPdpRDyzHREtQfB/t2jtuc41
+         mTUitO2wHhOkhN7Kqr4GA+Uk0plS1SskrbZNIemBsHrX3s9nXeKuP63ymmF6nxbgu7dj
+         Yly8inJ3mkwzagpvIA+bV+awnCzCjRz6dxXD1mywGjUrrfTlOmZtPfi7JOZhC95A9+lQ
+         CVFZY9XX6H6K4Ham0aS66SwZFdpJBiQMTn4U+XN9Iq1Gdf9my6EyTlu3YxjQDgUsvEfM
+         A/+H2ufomE7lFl5AxHHYvwzbS51Op85zKJKqN8IHfMho7x4IJbm6Mc7ovtyhm2tmCChG
+         X2GQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772114191; x=1772718991;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=pa40UGOtLEf+lUXJi+W2eAsZrpePRgbKwxqj2/6a6JM=;
+        b=wgGNk3rrt/8LxN/hphnRa72+d4i24fIlNRJHmdzh/Wzty8MPG0gogdgRbGuFINuCMG
+         dR2H295DW+3drOFppuoeflt+14bQDRRcXub9EnQDUX+rHzdfsfRkBgtAPhCdUIu4hwS7
+         beGVDk3vrMI90Dq+6kHzW4HpvK+9cFbKTYGfr+0uhRghF893sg2+P9nLyg9jc+dl+0ky
+         +hhZuopxj1zxwqfSMhKdYxGwhTlinuX9FRLPJFmfxAclnUuMEG7gEwMk1PVNMrLFcZND
+         4MGUIaavmfFLIpuAr2IxPh48E5l4tWQavwpPzAd0rBbXxuvCDFROpf29Hp5glyogesH0
+         yRdw==
+X-Gm-Message-State: AOJu0YxzA6cje9I5WVSJydqLfw7Rp0dGCuXW0zgLd7QDXrI7nEkwdGJO
+	lQmjZoflVhLkIDdETAr3DKSVrhxZGGlL1LD7uT1g5tHdYOjOsbX8mjKmvGp1dlPuKRhqOKsTBwY
+	IoawYhCY2zt+5HQ3C9Q0uKtgcjhEYH9vU7l06Bfgrp6yYw2kimzQQsgnqpbg8seCCACaxk8SPiV
+	MbDJ79A0gpQvyB1XK4PtDkEQdXFwcaXBwZwl044g==
+X-Gm-Gg: ATEYQzzBl22BCBsoVqyoMkibf5/akk9aSDiR8+hMQlrrq1hYCZ+wbJ9DyHjRSp0m8PT
+	dRL3gCvgx+A2RANuo7/yvVyBUEx/8h0BHbDl8D3kFrlkbMkfE4EB6pK7N2+zCrrrRrdOyJSeRQr
+	Xkp0xy41OVgAFWe1uxryplBne8kkm+h8ONOMq6HAAuUefMxtcG6o0wMnwczx1oqX5zBzSTN48/o
+	RFMvQT+DCLW3YtTfbTxbzti
+X-Received: by 2002:a05:6102:3a09:b0:5ff:20c5:cd6 with SMTP id ada2fe7eead31-5ff20c51797mr830109137.18.1772114191184;
+        Thu, 26 Feb 2026 05:56:31 -0800 (PST)
+X-Received: by 2002:a05:6102:3a09:b0:5ff:20c5:cd6 with SMTP id
+ ada2fe7eead31-5ff20c51797mr830098137.18.1772114190749; Thu, 26 Feb 2026
+ 05:56:30 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 4/4] folio_batch: Rename PAGEVEC_SIZE to
- FOLIO_BATCH_SIZE
-To: Tal Zussman <tz2294@columbia.edu>, David Howells <dhowells@redhat.com>,
- Marc Dionne <marc.dionne@auristor.com>, Jaegeuk Kim <jaegeuk@kernel.org>,
- Chao Yu <chao@kernel.org>, Andrew Morton <akpm@linux-foundation.org>,
- Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
- "Liam R. Howlett" <Liam.Howlett@oracle.com>,
- Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>,
- Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>,
- Chris Li <chrisl@kernel.org>, Kairui Song <kasong@tencent.com>,
- Kemeng Shi <shikemeng@huaweicloud.com>, Nhat Pham <nphamcs@gmail.com>,
- Baoquan He <bhe@redhat.com>, Barry Song <baohua@kernel.org>,
- Matthew Wilcox <willy@infradead.org>, Dan Williams
- <dan.j.williams@intel.com>, Jan Kara <jack@suse.cz>,
- Alexander Viro <viro@zeniv.linux.org.uk>,
- Christian Brauner <brauner@kernel.org>, Theodore Ts'o <tytso@mit.edu>
-Cc: Andreas Dilger <adilger.kernel@dilger.ca>,
- Paulo Alcantara <pc@manguebit.org>, Trond Myklebust <trondmy@kernel.org>,
- Anna Schumaker <anna@kernel.org>, Mark Fasheh <mark@fasheh.com>,
- Joel Becker <jlbec@evilplan.org>, Joseph Qi <joseph.qi@linux.alibaba.com>,
- Steve French <sfrench@samba.org>, Ronnie Sahlberg
- <ronniesahlberg@gmail.com>, Shyam Prasad N <sprasad@microsoft.com>,
- Tom Talpey <tom@talpey.com>, Bharath SM <bharathsm@microsoft.com>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Jani Nikula <jani.nikula@linux.intel.com>,
- Joonas Lahtinen <joonas.lahtinen@linux.intel.com>,
- Rodrigo Vivi <rodrigo.vivi@intel.com>, Tvrtko Ursulin
- <tursulin@ursulin.net>, Chris Mason <clm@fb.com>,
- David Sterba <dsterba@suse.com>, Ilya Dryomov <idryomov@gmail.com>,
- Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>,
- Andreas Gruenbacher <agruenba@redhat.com>,
- Muchun Song <muchun.song@linux.dev>, Oscar Salvador <osalvador@suse.de>,
- Ryusuke Konishi <konishi.ryusuke@gmail.com>,
- "Darrick J. Wong" <djwong@kernel.org>, Chuck Lever <chuck.lever@oracle.com>,
- Jeff Layton <jlayton@kernel.org>, NeilBrown <neil@brown.name>,
- Olga Kornievskaia <okorniev@redhat.com>, Dai Ngo <Dai.Ngo@oracle.com>,
- Jason Gunthorpe <jgg@ziepe.ca>, John Hubbard <jhubbard@nvidia.com>,
- Peter Xu <peterx@redhat.com>, Johannes Weiner <hannes@cmpxchg.org>,
- Roman Gushchin <roman.gushchin@linux.dev>,
- Shakeel Butt <shakeel.butt@linux.dev>, Jann Horn <jannh@google.com>,
- Pedro Falcato <pfalcato@suse.de>, Brendan Jackman <jackmanb@google.com>,
- Zi Yan <ziy@nvidia.com>, Hugh Dickins <hughd@google.com>,
- Baolin Wang <baolin.wang@linux.alibaba.com>,
- Axel Rasmussen <axelrasmussen@google.com>, Yuanchu Xie <yuanchu@google.com>,
- Wei Xu <weixugc@google.com>, Qi Zheng <zhengqi.arch@bytedance.com>,
- linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-f2fs-devel@lists.sourceforge.net, linux-mm@kvack.org,
- linux-fsdevel@vger.kernel.org, nvdimm@lists.linux.dev,
- linux-ext4@vger.kernel.org, netfs@lists.linux.dev,
- linux-nfs@vger.kernel.org, ocfs2-devel@lists.linux.dev,
- linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
- dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
- linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
- gfs2@lists.linux.dev, linux-nilfs@vger.kernel.org,
- linux-xfs@vger.kernel.org, cgroups@vger.kernel.org
-References: <20260225-pagevec_cleanup-v2-0-716868cc2d11@columbia.edu>
- <20260225-pagevec_cleanup-v2-4-716868cc2d11@columbia.edu>
-From: "David Hildenbrand (Arm)" <david@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=david@kernel.org; keydata=
- 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
- qIws/H2t
-In-Reply-To: <20260225-pagevec_cleanup-v2-4-716868cc2d11@columbia.edu>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20260225125907.53851-1-amarkuze@redhat.com> <20260225125907.53851-2-amarkuze@redhat.com>
+ <9687495100c02050c09c503fad1b840ddbfa313c.camel@redhat.com>
+In-Reply-To: <9687495100c02050c09c503fad1b840ddbfa313c.camel@redhat.com>
+From: Alex Markuze <amarkuze@redhat.com>
+Date: Thu, 26 Feb 2026 15:56:20 +0200
+X-Gm-Features: AaiRm50aLyjCETwKDojvUJBPiNoCYBibDGxffgYMF-j2AYy83taMK9QDUr26TaE
+Message-ID: <CAO8a2SinY_+Ysn4Sx30x_mntLOCTLot0x3psU=DdEJCJ=VNJug@mail.gmail.com>
+Subject: Re: [EXTERNAL] [RFC PATCH v1 1/4] ceph: convert inode flags to named
+ bit positions
+To: Viacheslav Dubeyko <vdubeyko@redhat.com>
+Cc: ceph-devel@vger.kernel.org, idryomov@gmail.com, 
+	linux-fsdevel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 2/26/26 00:44, Tal Zussman wrote:
-> struct pagevec no longer exists. Rename the macro appropriately.
-> 
-> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
-> ---
+I think I remember reviewing it, now that you mention it.
+Let's discuss offline, I'll set up a 1x1.
 
-Acked-by: David Hildenbrand (Arm) <david@kernel.org>
+On Wed, Feb 25, 2026 at 10:56=E2=80=AFPM Viacheslav Dubeyko <vdubeyko@redha=
+t.com> wrote:
+>
+> On Wed, 2026-02-25 at 12:59 +0000, Alex Markuze wrote:
+> > Define all CEPH_I_* flags as named bit positions with derived
+> > bitmask values, making them usable with test_bit/set_bit/clear_bit.
+> > Previously only CEPH_I_ODIRECT_BIT and CEPH_ASYNC_CREATE_BIT had
+> > named bit positions; the rest were bare bitmask constants.
+> >
+>
+> As I remember, I've reworked all constants for having name for every bit.
+> Probably, this patch has ignored and it has never been sent to upstream. =
+And I
+> converted pretty everything for using test_bit/set_bit/clear_bit. :) You =
+did
+> this work again. :)
+>
+> Thanks,
+> Slava.
+>
+> > Convert CEPH_I_ERROR_WRITE and CEPH_I_ERROR_FILELOCK usage sites
+> > to use atomic bit operations (test_bit, set_bit, clear_bit) via
+> > the new _BIT constants.
+> >
+> > This is preparation for the client reset feature which needs
+> > test_bit() on CEPH_I_ERROR_FILELOCK_BIT in reconnect paths.
+> >
+> > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+> > ---
+> >  fs/ceph/locks.c      |  8 +++----
+> >  fs/ceph/mds_client.c |  3 ++-
+> >  fs/ceph/super.h      | 54 +++++++++++++++++++++++++++-----------------
+> >  3 files changed, 38 insertions(+), 27 deletions(-)
+> >
+> > diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+> > index dd764f9c64b9..2f21574dfb99 100644
+> > --- a/fs/ceph/locks.c
+> > +++ b/fs/ceph/locks.c
+> > @@ -58,7 +58,7 @@ static void ceph_fl_release_lock(struct file_lock *fl=
+)
+> >       if (atomic_dec_and_test(&ci->i_filelock_ref)) {
+> >               /* clear error when all locks are released */
+> >               spin_lock(&ci->i_ceph_lock);
+> > -             ci->i_ceph_flags &=3D ~CEPH_I_ERROR_FILELOCK;
+> > +             clear_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
+> >               spin_unlock(&ci->i_ceph_lock);
+> >       }
+> >       fl->fl_u.ceph.inode =3D NULL;
+> > @@ -272,9 +272,8 @@ int ceph_lock(struct file *file, int cmd, struct fi=
+le_lock *fl)
+> >               wait =3D 1;
+> >
+> >       spin_lock(&ci->i_ceph_lock);
+> > -     if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
+> > +     if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags))
+> >               err =3D -EIO;
+> > -     }
+> >       spin_unlock(&ci->i_ceph_lock);
+> >       if (err < 0) {
+> >               if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(f=
+l))
+> > @@ -332,9 +331,8 @@ int ceph_flock(struct file *file, int cmd, struct f=
+ile_lock *fl)
+> >       doutc(cl, "fl_file: %p\n", fl->c.flc_file);
+> >
+> >       spin_lock(&ci->i_ceph_lock);
+> > -     if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
+> > +     if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags))
+> >               err =3D -EIO;
+> > -     }
+> >       spin_unlock(&ci->i_ceph_lock);
+> >       if (err < 0) {
+> >               if (lock_is_unlock(fl))
+> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > index 23b6d00643c9..28bb27b09b40 100644
+> > --- a/fs/ceph/mds_client.c
+> > +++ b/fs/ceph/mds_client.c
+> > @@ -3610,7 +3610,8 @@ static void __do_request(struct ceph_mds_client *=
+mdsc,
+> >
+> >               spin_lock(&ci->i_ceph_lock);
+> >               cap =3D ci->i_auth_cap;
+> > -             if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE && mds !=3D ca=
+p->mds) {
+> > +             if (test_bit(CEPH_ASYNC_CREATE_BIT, &ci->i_ceph_flags) &&
+> > +                 mds !=3D cap->mds) {
+> >                       doutc(cl, "session changed for auth cap %d -> %d\=
+n",
+> >                             cap->session->s_mds, session->s_mds);
+> >
+> > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> > index 29a980e22dc2..69a71848240f 100644
+> > --- a/fs/ceph/super.h
+> > +++ b/fs/ceph/super.h
+> > @@ -655,23 +655,35 @@ static inline struct inode *ceph_find_inode(struc=
+t super_block *sb,
+> >  /*
+> >   * Ceph inode.
+> >   */
+> > -#define CEPH_I_DIR_ORDERED   (1 << 0)  /* dentries in dir are ordered =
+*/
+> > -#define CEPH_I_FLUSH         (1 << 2)  /* do not delay flush of dirty =
+metadata */
+> > -#define CEPH_I_POOL_PERM     (1 << 3)  /* pool rd/wr bits are valid */
+> > -#define CEPH_I_POOL_RD               (1 << 4)  /* can read from pool *=
+/
+> > -#define CEPH_I_POOL_WR               (1 << 5)  /* can write to pool */
+> > -#define CEPH_I_SEC_INITED    (1 << 6)  /* security initialized */
+> > -#define CEPH_I_KICK_FLUSH    (1 << 7)  /* kick flushing caps */
+> > -#define CEPH_I_FLUSH_SNAPS   (1 << 8)  /* need flush snapss */
+> > -#define CEPH_I_ERROR_WRITE   (1 << 9) /* have seen write errors */
+> > -#define CEPH_I_ERROR_FILELOCK        (1 << 10) /* have seen file lock =
+errors */
+> > -#define CEPH_I_ODIRECT_BIT   (11) /* inode in direct I/O mode */
+> > -#define CEPH_I_ODIRECT               (1 << CEPH_I_ODIRECT_BIT)
+> > -#define CEPH_ASYNC_CREATE_BIT        (12)      /* async create in flig=
+ht for this */
+> > -#define CEPH_I_ASYNC_CREATE  (1 << CEPH_ASYNC_CREATE_BIT)
+> > -#define CEPH_I_SHUTDOWN              (1 << 13) /* inode is no longer u=
+sable */
+> > -#define CEPH_I_ASYNC_CHECK_CAPS      (1 << 14) /* check caps immediate=
+ly after async
+> > -                                          creating finishes */
+> > +#define CEPH_I_DIR_ORDERED_BIT               (0)  /* dentries in dir a=
+re ordered */
+> > +#define CEPH_I_FLUSH_BIT             (2)  /* do not delay flush of dir=
+ty metadata */
+> > +#define CEPH_I_POOL_PERM_BIT         (3)  /* pool rd/wr bits are valid=
+ */
+> > +#define CEPH_I_POOL_RD_BIT           (4)  /* can read from pool */
+> > +#define CEPH_I_POOL_WR_BIT           (5)  /* can write to pool */
+> > +#define CEPH_I_SEC_INITED_BIT                (6)  /* security initiali=
+zed */
+> > +#define CEPH_I_KICK_FLUSH_BIT                (7)  /* kick flushing cap=
+s */
+> > +#define CEPH_I_FLUSH_SNAPS_BIT               (8)  /* need flush snapss=
+ */
+> > +#define CEPH_I_ERROR_WRITE_BIT               (9)  /* have seen write e=
+rrors */
+> > +#define CEPH_I_ERROR_FILELOCK_BIT    (10) /* have seen file lock error=
+s */
+> > +#define CEPH_I_ODIRECT_BIT           (11) /* inode in direct I/O mode =
+*/
+> > +#define CEPH_ASYNC_CREATE_BIT                (12) /* async create in f=
+light for this */
+> > +#define CEPH_I_SHUTDOWN_BIT          (13) /* inode is no longer usable=
+ */
+> > +#define CEPH_I_ASYNC_CHECK_CAPS_BIT  (14) /* check caps after async cr=
+eating finishes */
+> > +
+> > +#define CEPH_I_DIR_ORDERED           (1 << CEPH_I_DIR_ORDERED_BIT)
+> > +#define CEPH_I_FLUSH                 (1 << CEPH_I_FLUSH_BIT)
+> > +#define CEPH_I_POOL_PERM             (1 << CEPH_I_POOL_PERM_BIT)
+> > +#define CEPH_I_POOL_RD                       (1 << CEPH_I_POOL_RD_BIT)
+> > +#define CEPH_I_POOL_WR                       (1 << CEPH_I_POOL_WR_BIT)
+> > +#define CEPH_I_SEC_INITED            (1 << CEPH_I_SEC_INITED_BIT)
+> > +#define CEPH_I_KICK_FLUSH            (1 << CEPH_I_KICK_FLUSH_BIT)
+> > +#define CEPH_I_FLUSH_SNAPS           (1 << CEPH_I_FLUSH_SNAPS_BIT)
+> > +#define CEPH_I_ERROR_WRITE           (1 << CEPH_I_ERROR_WRITE_BIT)
+> > +#define CEPH_I_ERROR_FILELOCK                (1 << CEPH_I_ERROR_FILELO=
+CK_BIT)
+> > +#define CEPH_I_ODIRECT                       (1 << CEPH_I_ODIRECT_BIT)
+> > +#define CEPH_I_ASYNC_CREATE          (1 << CEPH_ASYNC_CREATE_BIT)
+> > +#define CEPH_I_SHUTDOWN                      (1 << CEPH_I_SHUTDOWN_BIT=
+)
+> > +#define CEPH_I_ASYNC_CHECK_CAPS              (1 << CEPH_I_ASYNC_CHECK_=
+CAPS_BIT)
+> >
+> >  /*
+> >   * Masks of ceph inode work.
+> > @@ -691,18 +703,18 @@ static inline struct inode *ceph_find_inode(struc=
+t super_block *sb,
+> >   */
+> >  static inline void ceph_set_error_write(struct ceph_inode_info *ci)
+> >  {
+> > -     if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
+> > +     if (!test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
+> >               spin_lock(&ci->i_ceph_lock);
+> > -             ci->i_ceph_flags |=3D CEPH_I_ERROR_WRITE;
+> > +             set_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
+> >               spin_unlock(&ci->i_ceph_lock);
+> >       }
+> >  }
+> >
+> >  static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
+> >  {
+> > -     if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
+> > +     if (test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
+> >               spin_lock(&ci->i_ceph_lock);
+> > -             ci->i_ceph_flags &=3D ~CEPH_I_ERROR_WRITE;
+> > +             clear_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
+> >               spin_unlock(&ci->i_ceph_lock);
+> >       }
+> >  }
+>
 
--- 
-Cheers,
-
-David
