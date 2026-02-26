@@ -1,145 +1,355 @@
-Received: from flow-b7-smtp.messagingengine.com (flow-b7-smtp.messagingengine.com [202.12.124.142])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49AAB2D060D;
-	Thu, 26 Feb 2026 01:34:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.142
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D60131A564
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2026 13:12:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772069661; cv=none; b=Sc88sOZ/tASe6LRjOJbWwRYOcyfUKGmLhozvf56lciKIvrp12SQNvc5QvoEYzrA8IFPP56dvjE1mOmryed1gKf0F8K2S72OsFmpTHhpIStei4yFBBZboIL5MhscaxJ9dlSNBqgWSqG8LYEcUAol2En+J8kyJBGH+Xs9ZLAEyFpg=
+	t=1772111581; cv=none; b=tEMvU3IcT5K/kuLei5Pt0TX3mdcD9NdbZJneZ2sU72bMLZBpNG/XbqbMzEe9J49Sp1prYAIiMkJ+u62L12h698fYGL6qHuqR26T9bU7GsGKBT4zpJNl+sd8b2AUIuQgjbR2R1u+kMylASBIcFj9y8TepAkeoJsER+HoUqm8MEoQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772069661; c=relaxed/simple;
-	bh=s0GI5iI3wRZDhofWKjF/FkmAMYAMF4AS6inKjugXtHI=;
-	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
-	 References:Date:Message-id; b=tsB1oEd6BCOKX9TPmUubX5rybg/RijfIlGeTBfiweZ0/80qHKoxtZeajQDixfJYsgtKMXM+yytbk8+p/yn5EsEK6GCur0lfqAjjWeHulEnw9yRrl/9vDeAlp7PflImfxqT/5qVSdRBq3Ay3eLsMbluJH+IJOOZGsQnHCHCTXrz8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=TyFPTUuN; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=Ib+fb/df; arc=none smtp.client-ip=202.12.124.142
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+	s=arc-20240116; t=1772111581; c=relaxed/simple;
+	bh=vegVhIJhcUiP5X8JHJRDRq8HeUl3UwDpwhcfSI9tT2k=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DBeAtD6Bt60B/dkgQkYkwhsY5DcP3Gr1aFdTXPKvVqb0ebh6Zro0l68lHp1nABxw1prv2VlsAM1CzjV9mNvcUdEP0BRLCAU4j3pHvtgTHOgsvdqYQCNuyNfD6srjOfpNQvHTbfs/3PWk4333mtX3rWOo/nb7p8EDcxdqYl55lW0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=VGr+5vEt; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=69XqZjby; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=F9/qrZcg; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=uMdyIKIf; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="TyFPTUuN";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="Ib+fb/df"
-Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
-	by mailflow.stl.internal (Postfix) with ESMTP id 770D01301436;
-	Wed, 25 Feb 2026 20:34:18 -0500 (EST)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-02.internal (MEProxy); Wed, 25 Feb 2026 20:34:19 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to; s=fm3; t=
-	1772069658; x=1772076858; bh=xFBd+sgdAigxjeaFROdJjStbv2bZWH9W94w
-	m4HgXADY=; b=TyFPTUuNpFO4HIfohypp+ntLH4SQw2KPz+k2oQocgPVXp9IMTnX
-	YTwXn0B0NRR1FYYXcaTtalmso1CAnAtpqQXesgp6NXUx9quUYAHLB9YpC7bcAFIk
-	TvZwg0C4FEHSiJIWxgFCFZeZtQNbnePdiIhVa5xxbKLS4C0AAupb2KhOapT87xq6
-	/3dFNWglRa3+Asvjf363pYv350SKI+bTeFGj0Ke0oZ/HCmva0nyqttckU6ALPSJC
-	tKc9PZzn6EA/vn9yNXu2DyW0UREtAZ/UTz1GA6V09Li6HeUdi6bLRfdCD5cAE4/8
-	WK60qtisykmi10YVhcXga6K3ltYHqs7v/qg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1772069658; x=
-	1772076858; bh=xFBd+sgdAigxjeaFROdJjStbv2bZWH9W94wm4HgXADY=; b=I
-	b+fb/dfhFB2brFsDKPdocEWfgR6l5L1tGXqcmDEUm3dOayVudiX+HaadK36d/22y
-	X+hujziwNR1hhTLDE2AI+F4JYwsusV2edxzfklPwQ2qZG64OmPoEcH5DheOy4vAg
-	yZobw4gbMhMooYzr+mwhaa5gBqWaBtLl4E4sefLwDLQNuUzHEvbFUl+50coVVzRQ
-	uUSfLvsYvt4ZHYuBH0TtNmKmiN2iTjqr/WfXIN4vsdjnHDbYjLnhZrQP2i/uHaKd
-	hi1uQRctV8MB4SMWSP8frR1+kHQsrbBVM9bNFci7X5iHcoMOp5CM90AYY1GGHLla
-	lsHXTe1M7Jgjucp7xuAqA==
-X-ME-Sender: <xms:GaOfaZdxVZrAzznSHl1LN0ciatDBWLW_4Ro8DTat2U9_lQfv7c3xVg>
-    <xme:GaOfaU3CQnGhH_qC9WVaUqiJ_NCnEVlJXvoCDEyQujfqIEFNjcJ-KobsK6_w0bXRA
-    1o46wyvYNXYHRmuB2DKHe8Qk8RpFZRs_31jtFSaYRrHAyZ0>
-X-ME-Received: <xmr:GaOfaZ56MuiAcHw3-TwPARtUbYmsMUpCo2Tgrqvdk_rKhN1qr8rZK8mNn6nhWrEZy_AkfhXlZTsDqCDkE90mmkyGUJoOWVM0jUxttdORdGVn>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgddvgeegjeduucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
-    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurheptgfgggfhvfevufgjfhffkfhrsehtjeertddttdejnecuhfhrohhmpefpvghilheu
-    rhhofihnuceonhgvihhlsgesohifnhhmrghilhdrnhgvtheqnecuggftrfgrthhtvghrnh
-    epudetfefhudevhedvfeeufedvffekveekgfdtfefggfekheejgefhteeihffggfelnecu
-    vehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepnhgvihhlsg
-    esohifnhhmrghilhdrnhgvthdpnhgspghrtghpthhtohepfedupdhmohguvgepshhmthhp
-    ohhuthdprhgtphhtthhopehvihhrohesiigvnhhivhdrlhhinhhugidrohhrghdruhhkpd
-    hrtghpthhtoheplhhinhhugidqgihfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgt
-    phhtthhopehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpd
-    hrtghpthhtoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgt
-    phhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprh
-    gtphhtthhopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-    pdhrtghpthhtoheplhhinhhugidqtghifhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpd
-    hrtghpthhtohepvggtrhihphhtfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghp
-    thhtoheptggvphhhqdguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:GaOfabL1dxc7_aM4UDs5Mnpgjmz6nRiprNnIb1cnNlkCnzS-DCI01w>
-    <xmx:GaOfadZA0aqqd6hc81DmwuMDHkptr7xfpw9R6OlYEqEEXQp_JHd2Tg>
-    <xmx:GaOfaQ1gMPhOOVjW9cB40OYojuSXNA5JDysMhyGtEuX2KAF1dKYb1w>
-    <xmx:GaOfaXPevv-IvnTNjJUThP9sr3Z22JJ883VL2eHqz1vQzs-Pzf2nZA>
-    <xmx:GqOfaQqK_qAYvtHo1ixO-4yAHtdC6htK7kcrEBnPb9SzuKAO8kARg5HQ>
-Feedback-ID: i9d664b8f:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 25 Feb 2026 20:34:09 -0500 (EST)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="VGr+5vEt";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="69XqZjby";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="F9/qrZcg";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="uMdyIKIf"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id DA9EC1FA54;
+	Thu, 26 Feb 2026 13:12:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1772111576; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t9pIdsXl9YcbrN7MEcIZiwr5nHNouAJ8lo4fxykwpls=;
+	b=VGr+5vEttV5KSq8KiEHuA26h/lUE7LlTpKXuEPlZT6DHY8M0THqc8Wu4WiiN1rMKTDa6OR
+	5Zwq7W2zP5J9H2ZZtsgp7HFYiY7A5pTLtjNy0TniXfJ1K1ZfjtmltW1AfqY66XIH5dEDdF
+	VeWG6x2cAMoVE/5vHhJrUfeSClIjrGI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1772111576;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t9pIdsXl9YcbrN7MEcIZiwr5nHNouAJ8lo4fxykwpls=;
+	b=69XqZjby1BkpPQKJs37ti4jhyJiLv1OPj8pDlz96Ez+SqXyH4PTF7HJvtJR1jjG+ILIaff
+	xw7ztXeG0NlBlDCA==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1772111575; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t9pIdsXl9YcbrN7MEcIZiwr5nHNouAJ8lo4fxykwpls=;
+	b=F9/qrZcgGN/hgxgLb3qI//qiHnxBKsB5Ntd3IGQuMTlxZWdr2ZN0mP/0xmZRIkCuKafDWW
+	+xk6zJK7T/iYLhGjEM5isA7Eem1B8k1QXrKcyY15lvatrlOTH99iXwpZ6R10io+b8DM7zy
+	RLtfnL1PTllGjvJOTHiKeaQnegihWz4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1772111575;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t9pIdsXl9YcbrN7MEcIZiwr5nHNouAJ8lo4fxykwpls=;
+	b=uMdyIKIfyG5+TXpjkra12NBuPmWqX7KgZp3+we3ktt8NePQQXrpbFT4ToI2DhSA7MGpiSM
+	FOl4NQaT3QPKQJDQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id CA6F53EA62;
+	Thu, 26 Feb 2026 13:12:55 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 1O9nMddGoGkmSAAAD6G6ig
+	(envelope-from <jack@suse.cz>); Thu, 26 Feb 2026 13:12:55 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 8CCF6A0A27; Thu, 26 Feb 2026 14:12:51 +0100 (CET)
+Date: Thu, 26 Feb 2026 14:12:51 +0100
+From: Jan Kara <jack@suse.cz>
+To: Tal Zussman <tz2294@columbia.edu>
+Cc: David Howells <dhowells@redhat.com>, 
+	Marc Dionne <marc.dionne@auristor.com>, Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>, 
+	Andrew Morton <akpm@linux-foundation.org>, David Hildenbrand <david@kernel.org>, 
+	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>, "Liam R. Howlett" <Liam.Howlett@oracle.com>, 
+	Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>, 
+	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, Chris Li <chrisl@kernel.org>, 
+	Kairui Song <kasong@tencent.com>, Kemeng Shi <shikemeng@huaweicloud.com>, 
+	Nhat Pham <nphamcs@gmail.com>, Baoquan He <bhe@redhat.com>, Barry Song <baohua@kernel.org>, 
+	Matthew Wilcox <willy@infradead.org>, Dan Williams <dan.j.williams@intel.com>, Jan Kara <jack@suse.cz>, 
+	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, 
+	Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, 
+	Paulo Alcantara <pc@manguebit.org>, Trond Myklebust <trondmy@kernel.org>, 
+	Anna Schumaker <anna@kernel.org>, Mark Fasheh <mark@fasheh.com>, Joel Becker <jlbec@evilplan.org>, 
+	Joseph Qi <joseph.qi@linux.alibaba.com>, Steve French <sfrench@samba.org>, 
+	Ronnie Sahlberg <ronniesahlberg@gmail.com>, Shyam Prasad N <sprasad@microsoft.com>, 
+	Tom Talpey <tom@talpey.com>, Bharath SM <bharathsm@microsoft.com>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Jani Nikula <jani.nikula@linux.intel.com>, 
+	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, 
+	Tvrtko Ursulin <tursulin@ursulin.net>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>, 
+	Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	Viacheslav Dubeyko <slava@dubeyko.com>, Andreas Gruenbacher <agruenba@redhat.com>, 
+	Muchun Song <muchun.song@linux.dev>, Oscar Salvador <osalvador@suse.de>, 
+	Ryusuke Konishi <konishi.ryusuke@gmail.com>, "Darrick J. Wong" <djwong@kernel.org>, 
+	Chuck Lever <chuck.lever@oracle.com>, Jeff Layton <jlayton@kernel.org>, NeilBrown <neil@brown.name>, 
+	Olga Kornievskaia <okorniev@redhat.com>, Dai Ngo <Dai.Ngo@oracle.com>, Jason Gunthorpe <jgg@ziepe.ca>, 
+	John Hubbard <jhubbard@nvidia.com>, Peter Xu <peterx@redhat.com>, 
+	Johannes Weiner <hannes@cmpxchg.org>, Roman Gushchin <roman.gushchin@linux.dev>, 
+	Shakeel Butt <shakeel.butt@linux.dev>, Jann Horn <jannh@google.com>, Pedro Falcato <pfalcato@suse.de>, 
+	Brendan Jackman <jackmanb@google.com>, Zi Yan <ziy@nvidia.com>, Hugh Dickins <hughd@google.com>, 
+	Baolin Wang <baolin.wang@linux.alibaba.com>, Axel Rasmussen <axelrasmussen@google.com>, 
+	Yuanchu Xie <yuanchu@google.com>, Wei Xu <weixugc@google.com>, 
+	Qi Zheng <zhengqi.arch@bytedance.com>, linux-afs@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-f2fs-devel@lists.sourceforge.net, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, 
+	nvdimm@lists.linux.dev, linux-ext4@vger.kernel.org, netfs@lists.linux.dev, 
+	linux-nfs@vger.kernel.org, ocfs2-devel@lists.linux.dev, linux-cifs@vger.kernel.org, 
+	samba-technical@lists.samba.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, 
+	linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
+	linux-nilfs@vger.kernel.org, linux-xfs@vger.kernel.org, cgroups@vger.kernel.org
+Subject: Re: [PATCH v2 2/4] fs: Remove unncessary pagevec.h includes
+Message-ID: <hulhfdnrv4bbm6nvy3x4xbuxmc5ypmhpwdpt3jurfkibq5t2pu@6dcvs2uzzr46>
+References: <20260225-pagevec_cleanup-v2-0-716868cc2d11@columbia.edu>
+ <20260225-pagevec_cleanup-v2-2-716868cc2d11@columbia.edu>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: NeilBrown <neilb@ownmail.net>
-To: "Al Viro" <viro@zeniv.linux.org.uk>
-Cc: "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
- "David Howells" <dhowells@redhat.com>,
- "Marc Dionne" <marc.dionne@auristor.com>, "Xiubo Li" <xiubli@redhat.com>,
- "Ilya Dryomov" <idryomov@gmail.com>, "Tyler Hicks" <code@tyhicks.com>,
- "Miklos Szeredi" <miklos@szeredi.hu>,
- "Richard Weinberger" <richard@nod.at>,
- "Anton Ivanov" <anton.ivanov@cambridgegreys.com>,
- "Johannes Berg" <johannes@sipsolutions.net>,
- "Trond Myklebust" <trondmy@kernel.org>,
- "Anna Schumaker" <anna@kernel.org>,
- "Chuck Lever" <chuck.lever@oracle.com>,
- "Jeff Layton" <jlayton@kernel.org>,
- "Amir Goldstein" <amir73il@gmail.com>,
- "Steve French" <sfrench@samba.org>,
- "Namjae Jeon" <linkinjeon@kernel.org>,
- "Carlos Maiolino" <cem@kernel.org>, linux-fsdevel@vger.kernel.org,
- linux-afs@lists.infradead.org, netfs@lists.linux.dev,
- ceph-devel@vger.kernel.org, ecryptfs@vger.kernel.org,
- linux-um@lists.infradead.org, linux-nfs@vger.kernel.org,
- linux-unionfs@vger.kernel.org, linux-cifs@vger.kernel.org,
- linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 08/11] VFS: allow d_splice_alias() and d_add() to work on
- hashed dentries.
-In-reply-to: <177206761798.7472.8904569543245678825@noble.neil.brown.name>
-References: <20250812235228.3072318-1-neil@brown.name>, <>,
- <20250812235228.3072318-9-neil@brown.name>, <>,
- <20250813050717.GD222315@ZenIV>,
- <177206761798.7472.8904569543245678825@noble.neil.brown.name>
-Date: Thu, 26 Feb 2026 12:34:06 +1100
-Message-id: <177206964635.7472.10143856965392266372@noble.neil.brown.name>
-Reply-To: NeilBrown <neil@brown.name>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260225-pagevec_cleanup-v2-2-716868cc2d11@columbia.edu>
+X-Spamd-Result: default: False [-2.30 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_DN_SOME(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	MISSING_XM_UA(0.00)[];
+	TAGGED_RCPT(0.00)[];
+	FREEMAIL_CC(0.00)[redhat.com,auristor.com,kernel.org,linux-foundation.org,oracle.com,google.com,suse.com,tencent.com,huaweicloud.com,gmail.com,infradead.org,intel.com,suse.cz,zeniv.linux.org.uk,mit.edu,dilger.ca,manguebit.org,fasheh.com,evilplan.org,linux.alibaba.com,samba.org,microsoft.com,talpey.com,linux.intel.com,suse.de,ffwll.ch,ursulin.net,fb.com,dubeyko.com,linux.dev,brown.name,ziepe.ca,nvidia.com,cmpxchg.org,bytedance.com,lists.infradead.org,vger.kernel.org,lists.sourceforge.net,kvack.org,lists.linux.dev,lists.samba.org,lists.freedesktop.org];
+	RCVD_COUNT_THREE(0.00)[3];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	R_RATELIMIT(0.00)[to_ip_from(RL3r69cimucwc5kbfiftdz1c5n)];
+	TO_MATCH_ENVRCPT_SOME(0.00)[];
+	RCPT_COUNT_GT_50(0.00)[97];
+	RCVD_TLS_LAST(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.cz:email]
+X-Spam-Flag: NO
+X-Spam-Score: -2.30
+X-Spam-Level: 
 
-On Thu, 26 Feb 2026, NeilBrown wrote:
+On Wed 25-02-26 18:44:26, Tal Zussman wrote:
+> Remove unused pagevec.h includes from .c files. These were found with
+> the following command:
 > 
-> d_add_hashed() would be much the same as d_instantiate(), and that
-> could be used for d_splice_alias() when the dentry is hashed.
-> There aren't any cases where d_splice_alias() is called with a directory
-> inode and a hashed dentry.
+>   grep -rl '#include.*pagevec\.h' --include='*.c' | while read f; do
+>   	grep -qE 'PAGEVEC_SIZE|folio_batch' "$f" || echo "$f"
+>   done
+> 
+> There are probably more removal candidates in .h files, but those are
+> more complex to analyze.
+> 
+> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 
-There are of course... mkdir() is given a hashed negative dentry and may
-need to use d_splice_alias() if there is any chance the inode was
-accessible (e.g. by fhandle) before the splice can happen.
+If it compiles than it's nice to get rid of. Feel free to add:
 
-Maybe we could always give mkdir a d_in_lookup() alias?
+Reviewed-by: Jan Kara <jack@suse.cz>
 
-As it is, generic "create object" code inside a filesystem may need to
-handle three cases:
+								Honza
 
- d_in_lookup() - use d_splice_alias()
- otherwise if non-dir: - use d_instantiate
- otherwise - use some new d_add_or_obtain (name taken from NFS) which 
-     does the right thing with directories.
-
-Currently most d_drop() and use d_splice_alias() but I need to avoid the
-d_drop().
-
-Thanks,
-NeilBrown
+> ---
+>  fs/afs/write.c                   | 1 -
+>  fs/dax.c                         | 1 -
+>  fs/ext4/file.c                   | 1 -
+>  fs/ext4/page-io.c                | 1 -
+>  fs/ext4/readpage.c               | 1 -
+>  fs/f2fs/file.c                   | 1 -
+>  fs/mpage.c                       | 1 -
+>  fs/netfs/buffered_write.c        | 1 -
+>  fs/nfs/blocklayout/blocklayout.c | 1 -
+>  fs/nfs/dir.c                     | 1 -
+>  fs/ocfs2/refcounttree.c          | 1 -
+>  fs/smb/client/connect.c          | 1 -
+>  fs/smb/client/file.c             | 1 -
+>  13 files changed, 13 deletions(-)
+> 
+> diff --git a/fs/afs/write.c b/fs/afs/write.c
+> index 93ad86ff3345..fcfed9d24e0a 100644
+> --- a/fs/afs/write.c
+> +++ b/fs/afs/write.c
+> @@ -10,7 +10,6 @@
+>  #include <linux/fs.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/writeback.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/netfs.h>
+>  #include <trace/events/netfs.h>
+>  #include "internal.h"
+> diff --git a/fs/dax.c b/fs/dax.c
+> index b78cff9c91b3..a5237169b467 100644
+> --- a/fs/dax.c
+> +++ b/fs/dax.c
+> @@ -15,7 +15,6 @@
+>  #include <linux/memcontrol.h>
+>  #include <linux/mm.h>
+>  #include <linux/mutex.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/sched.h>
+>  #include <linux/sched/signal.h>
+>  #include <linux/uio.h>
+> diff --git a/fs/ext4/file.c b/fs/ext4/file.c
+> index f1dc5ce791a7..5e02f6cf653e 100644
+> --- a/fs/ext4/file.c
+> +++ b/fs/ext4/file.c
+> @@ -27,7 +27,6 @@
+>  #include <linux/dax.h>
+>  #include <linux/filelock.h>
+>  #include <linux/quotaops.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/uio.h>
+>  #include <linux/mman.h>
+>  #include <linux/backing-dev.h>
+> diff --git a/fs/ext4/page-io.c b/fs/ext4/page-io.c
+> index a8c95eee91b7..98da200d11c8 100644
+> --- a/fs/ext4/page-io.c
+> +++ b/fs/ext4/page-io.c
+> @@ -16,7 +16,6 @@
+>  #include <linux/string.h>
+>  #include <linux/buffer_head.h>
+>  #include <linux/writeback.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/mpage.h>
+>  #include <linux/namei.h>
+>  #include <linux/uio.h>
+> diff --git a/fs/ext4/readpage.c b/fs/ext4/readpage.c
+> index 830f3b8a321f..3c7aabde719c 100644
+> --- a/fs/ext4/readpage.c
+> +++ b/fs/ext4/readpage.c
+> @@ -43,7 +43,6 @@
+>  #include <linux/mpage.h>
+>  #include <linux/writeback.h>
+>  #include <linux/backing-dev.h>
+> -#include <linux/pagevec.h>
+>  
+>  #include "ext4.h"
+>  #include <trace/events/ext4.h>
+> diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
+> index c8a2f17a8f11..c6b6a1465d08 100644
+> --- a/fs/f2fs/file.c
+> +++ b/fs/f2fs/file.c
+> @@ -17,7 +17,6 @@
+>  #include <linux/compat.h>
+>  #include <linux/uaccess.h>
+>  #include <linux/mount.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/uio.h>
+>  #include <linux/uuid.h>
+>  #include <linux/file.h>
+> diff --git a/fs/mpage.c b/fs/mpage.c
+> index 7dae5afc2b9e..e5285fbfcf09 100644
+> --- a/fs/mpage.c
+> +++ b/fs/mpage.c
+> @@ -28,7 +28,6 @@
+>  #include <linux/mm_inline.h>
+>  #include <linux/writeback.h>
+>  #include <linux/backing-dev.h>
+> -#include <linux/pagevec.h>
+>  #include "internal.h"
+>  
+>  /*
+> diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
+> index 22a4d61631c9..05ea5b0cc0e8 100644
+> --- a/fs/netfs/buffered_write.c
+> +++ b/fs/netfs/buffered_write.c
+> @@ -10,7 +10,6 @@
+>  #include <linux/mm.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/slab.h>
+> -#include <linux/pagevec.h>
+>  #include "internal.h"
+>  
+>  static void __netfs_set_group(struct folio *folio, struct netfs_group *netfs_group)
+> diff --git a/fs/nfs/blocklayout/blocklayout.c b/fs/nfs/blocklayout/blocklayout.c
+> index cb0a645aeb50..11f9f69cde61 100644
+> --- a/fs/nfs/blocklayout/blocklayout.c
+> +++ b/fs/nfs/blocklayout/blocklayout.c
+> @@ -36,7 +36,6 @@
+>  #include <linux/namei.h>
+>  #include <linux/bio.h>		/* struct bio */
+>  #include <linux/prefetch.h>
+> -#include <linux/pagevec.h>
+>  
+>  #include "../pnfs.h"
+>  #include "../nfs4session.h"
+> diff --git a/fs/nfs/dir.c b/fs/nfs/dir.c
+> index 2402f57c8e7d..0d276441206b 100644
+> --- a/fs/nfs/dir.c
+> +++ b/fs/nfs/dir.c
+> @@ -32,7 +32,6 @@
+>  #include <linux/nfs_fs.h>
+>  #include <linux/nfs_mount.h>
+>  #include <linux/pagemap.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/namei.h>
+>  #include <linux/mount.h>
+>  #include <linux/swap.h>
+> diff --git a/fs/ocfs2/refcounttree.c b/fs/ocfs2/refcounttree.c
+> index c1cdececdfa4..b4acd081bbc4 100644
+> --- a/fs/ocfs2/refcounttree.c
+> +++ b/fs/ocfs2/refcounttree.c
+> @@ -31,7 +31,6 @@
+>  #include <linux/blkdev.h>
+>  #include <linux/slab.h>
+>  #include <linux/writeback.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/swap.h>
+>  #include <linux/security.h>
+>  #include <linux/string.h>
+> diff --git a/fs/smb/client/connect.c b/fs/smb/client/connect.c
+> index 33dfe116ca52..9e57812b7b95 100644
+> --- a/fs/smb/client/connect.c
+> +++ b/fs/smb/client/connect.c
+> @@ -20,7 +20,6 @@
+>  #include <linux/delay.h>
+>  #include <linux/completion.h>
+>  #include <linux/kthread.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/freezer.h>
+>  #include <linux/namei.h>
+>  #include <linux/uuid.h>
+> diff --git a/fs/smb/client/file.c b/fs/smb/client/file.c
+> index 18f31d4eb98d..853ce1817810 100644
+> --- a/fs/smb/client/file.c
+> +++ b/fs/smb/client/file.c
+> @@ -15,7 +15,6 @@
+>  #include <linux/stat.h>
+>  #include <linux/fcntl.h>
+>  #include <linux/pagemap.h>
+> -#include <linux/pagevec.h>
+>  #include <linux/writeback.h>
+>  #include <linux/task_io_accounting_ops.h>
+>  #include <linux/delay.h>
+> 
+> -- 
+> 2.39.5
+> 
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
