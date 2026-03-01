@@ -1,39 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 364CB2D0C63;
-	Sun,  1 Mar 2026 01:47:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7351B2E54A2;
+	Sun,  1 Mar 2026 01:55:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772329625; cv=none; b=GApzQj+2p22ijl5J+z2ewSBpWVmhzwIoN6UG82y44r6Adtnmzm7UDH+gFkECcRgMw4FlUBgZnkPFJnhDsDxXWpma33cpbX+gFBapBx/i+ZBwiAAo01T5FqFkD4iFclXtwjvYZVyishCmNTxLe4y0uP/5+2bgMfQ6igciD/7G6tY=
+	t=1772330118; cv=none; b=GkLPHVdCLy+mKgCpQdc0f5hXvviH/cUqGCktRL4LvCGKrIwX0HSvMnaEZ7TeoDSErWVF+twUEyFQuEaGlrwdMsJqjigTgEdLE43DnSsYXZw4Psb3lBI/THtulbHhk1bYRLxnBqNBFsOcF/aPzmw9g2Em/xjAojmvBgu+kUqATj4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772329625; c=relaxed/simple;
-	bh=rdIHemizDPreSeo418nvu6DYCw/I+lpqEnIC4RmRwa4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JdIG2OIzUdZY1v1KjXH8QpVyZAIoXq0y+cpbAASJlgBChNbzIgBAmrhpDkHIAVnrFF4oLhC/61VfeHjd//zyD7KPJqPdgcS2v94OO/ey+OMqlFzpS6NcvNTeXxMAbcWhlGIAsq20qkNrm2wpgtnbhtuobS9pXERBwVwqBYt4JzE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TYOzViSM; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772330118; c=relaxed/simple;
+	bh=77NvPrtCl+OSMd8rz2msW/Z24AvO1ImBkDPqGF2X/gI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=nbA8nTiY7rOBQJbkT3pOZBVjXS/DWToImSSazk+E4RMURO+sRUOlH46GxkcwkhyC8TvQfAY75Hg5DuD/eGC65X8C/0KmPCjiHuXNIvzJZcP6PZ53IxB07XPu8t2G+63dQMRgi2Q1EgwAcmOuwTlBXrBAGbxC3/dlYzLq5b6IfFw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YfoqrOip; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TYOzViSM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 74A6FC19421;
-	Sun,  1 Mar 2026 01:47:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YfoqrOip"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91578C19421;
+	Sun,  1 Mar 2026 01:55:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772329625;
-	bh=rdIHemizDPreSeo418nvu6DYCw/I+lpqEnIC4RmRwa4=;
+	s=k20201202; t=1772330118;
+	bh=77NvPrtCl+OSMd8rz2msW/Z24AvO1ImBkDPqGF2X/gI=;
 	h=From:To:Cc:Subject:Date:From;
-	b=TYOzViSMwYz5utGtnnj1FLPG2JDkLl6unLkJnU8sF2qGa41KxepsQFNF791JMnlQB
-	 qmA7xEPdMPT6eSjOL/fS+b5Cy/RMaXG1eGBbcMp/G+LanCjk9LiTjwzxheh8WOatxF
-	 czmvKJ6aNUbFuAI6gm7W4MjD6xw4VTXXmVoxchyaiFu39P2IbNas2Xc53jXaT59EoR
-	 7uT++ELWY34J42oWDkfMGlqjQVFO28/PlOZTbZfwrPKIK+6zF6Izot2wGYh4TA/kGh
-	 gC1MtbTxC+n0ASMehTPCl9tszE/ICwguGgQrm9v8r5dbmwcLzaVS0VLmsi4eOnvlqY
-	 WG0ZZDcM/utxg==
+	b=YfoqrOipgTESMNdvdwA7xI2JhebEIyIBqE4dKwLQ7Zp3Or2UzeYrZCz12mUm/5bHp
+	 KlfSoJ6wuYLwNcq+mzUZADhvmkgVUYKoT6cxphfYoCd++WtGPNvFvGNFlTUyLtiXR4
+	 jI4MsERr0WpTBwvb72rIEJSG65CQKLvIOdXGpZVGDxcZr0lWO6W/auL0kAhDVkfDXn
+	 hH+dDXpKb3lzPi3FNnD5I0BPY0Rc3/hU9oDFWrbAtxRB+UMkL4+mHwmbPrXev83bOi
+	 kFAW0Aw9vRzOfQmfbvXqQHd384i/3nwrz+PTTS97BcfzgTmVmS+RBTeG3bqlDNzRIj
+	 RVk8Ka+gf/jMQ==
 From: Sasha Levin <sashal@kernel.org>
 To: stable@vger.kernel.org,
 	ethanwu@synology.com
 Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
 	Ilya Dryomov <idryomov@gmail.com>,
 	ceph-devel@vger.kernel.org
-Subject: FAILED: Patch "ceph: supply snapshot context in ceph_zero_partial_object()" failed to apply to 6.1-stable tree
-Date: Sat, 28 Feb 2026 20:47:03 -0500
-Message-ID: <20260301014703.1710243-1-sashal@kernel.org>
+Subject: FAILED: Patch "ceph: supply snapshot context in ceph_zero_partial_object()" failed to apply to 5.15-stable tree
+Date: Sat, 28 Feb 2026 20:55:16 -0500
+Message-ID: <20260301015516.1722446-1-sashal@kernel.org>
 X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -45,7 +45,7 @@ X-Patchwork-Hint: ignore
 X-stable: review
 Content-Transfer-Encoding: 8bit
 
-The patch below does not apply to the 6.1-stable tree.
+The patch below does not apply to the 5.15-stable tree.
 If someone wants it applied there, or to any other stable or longterm
 tree, then please email the backport, including the original git commit
 id to <stable@vger.kernel.org>.
